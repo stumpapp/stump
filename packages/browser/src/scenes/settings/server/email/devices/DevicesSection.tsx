@@ -22,7 +22,12 @@ export default function DevicesSection() {
 					</Text>
 				</div>
 
-				<Button variant="secondary" size="sm" onClick={() => setIsCreatingDevice(true)}>
+				<Button
+					className="shrink-0"
+					variant="secondary"
+					size="sm"
+					onClick={() => setIsCreatingDevice(true)}
+				>
 					{t('settingsScene.server/email.sections.devices.addDevice')}
 				</Button>
 			</div>

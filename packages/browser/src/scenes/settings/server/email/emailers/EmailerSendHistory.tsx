@@ -8,6 +8,8 @@ import React, { useState } from 'react'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
 
+import EmailerSendHistoryTable from './EmailerSendHistoryTable'
+
 dayjs.extend(localizedFormat)
 dayjs.extend(relativeTime)
 
@@ -20,6 +22,7 @@ export default function EmailerSendHistory({ emailerId, lastUsedAt }: Props) {
 	const { t } = useLocaleContext()
 	const { sendHistory } = useEmailerSendHistoryQuery({
 		emailerId,
+		params: { include_sent_by: true },
 		suspense: true,
 	})
 
@@ -36,8 +39,7 @@ export default function EmailerSendHistory({ emailerId, lastUsedAt }: Props) {
 				/>
 			)
 		} else {
-			// TODO: Implement the history drawer
-			return null
+			return <EmailerSendHistoryTable records={sendHistory} />
 		}
 	}
 
@@ -56,6 +58,7 @@ export default function EmailerSendHistory({ emailerId, lastUsedAt }: Props) {
 				</ToolTip>
 			</div>
 
+			{/* TODO: clear the history option */}
 			<Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} onOpenChange={setDrawerOpen}>
 				<Drawer.Content>
 					<div className="mx-auto w-full max-w-2xl">

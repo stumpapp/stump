@@ -6,8 +6,9 @@ use axum::{
 	routing::{get, post},
 	Json, Router,
 };
-use prisma_client_rust::Direction;
+use prisma_client_rust::{chrono::Utc, Direction};
 use serde::{Deserialize, Serialize};
+use serde_qs::axum::QsQuery;
 use specta::Type;
 use stump_core::{
 	db::entity::{
@@ -71,6 +72,12 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
+#[derive(Deserialize, ToSchema, Type)]
+pub struct EmailerIncludeParams {
+	#[serde(default)]
+	pub include_send_history: bool,
+}
+
 #[utoipa::path(
 	get,
 	path = "/api/v1/emailers",
@@ -84,15 +91,21 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 )]
 async fn get_emailers(
 	State(ctx): State<AppState>,
+	QsQuery(include_params): QsQuery<EmailerIncludeParams>,
 	session: Session,
 ) -> APIResult<Json<Vec<SMTPEmailer>>> {
 	enforce_session_permissions(&session, &[UserPermission::EmailerRead])?;
 
 	let client = &ctx.db;
 
-	let emailers = client
-		.emailer()
-		.find_many(vec![])
+	let mut query = client.emailer().find_many(vec![]);
+
+	// TODO: consider auto truncating?
+	if include_params.include_send_history {
+		query = query.with(emailer::send_history::fetch(vec![]))
+	}
+
+	let emailers = query
 		.exec()
 		.await?
 		.into_iter()
@@ -305,6 +318,12 @@ async fn delete_emailer(
 	Ok(Json(SMTPEmailer::try_from(deleted_emailer)?))
 }
 
+#[derive(Debug, Deserialize, ToSchema, Type)]
+pub struct EmailerSendRecordIncludeParams {
+	#[serde(default)]
+	include_sent_by: bool,
+}
+
 #[utoipa::path(
 	get,
 	path = "/api/v1/emailers/:id/send-history",
@@ -320,18 +339,25 @@ async fn delete_emailer(
 	)
 )]
 async fn get_emailer_send_history(
-	Path(emailer_id): Path<i32>,
 	State(ctx): State<AppState>,
+	Path(emailer_id): Path<i32>,
+	QsQuery(include_params): QsQuery<EmailerSendRecordIncludeParams>,
 	session: Session,
 ) -> APIResult<Json<Vec<EmailerSendRecord>>> {
-	tracing::trace!(?emailer_id, "get_emailer_send_history");
+	tracing::trace!(?emailer_id, ?include_params, "get_emailer_send_history");
 	enforce_session_permissions(&session, &[UserPermission::EmailerRead])?;
 
 	let client = &ctx.db;
 
-	let history = client
+	let mut query = client
 		.emailer_send_record()
-		.find_many(vec![emailer_send_record::emailer_id::equals(emailer_id)])
+		.find_many(vec![emailer_send_record::emailer_id::equals(emailer_id)]);
+
+	if include_params.include_sent_by {
+		query = query.with(emailer_send_record::sent_by::fetch());
+	}
+
+	let history = query
 		.order_by(emailer_send_record::sent_at::order(Direction::Desc))
 		.exec()
 		.await?;
@@ -573,6 +599,19 @@ async fn send_attachment_email(
 	if let Err(error) = audit_result {
 		tracing::error!(?error, "Failed to create emailer send records!");
 		errors.push(format!("Failed to create emailer send records: {}", error));
+	}
+
+	let updated_emailer_result = client
+		.emailer()
+		.update(
+			emailer::id::equals(emailer_id),
+			vec![emailer::last_used_at::set(Some(Utc::now().into()))],
+		)
+		.exec()
+		.await;
+	if let Err(error) = updated_emailer_result {
+		tracing::error!(?error, "Failed to update emailer last used at!");
+		errors.push(format!("Failed to update emailer last used at: {}", error));
 	}
 
 	Ok(Json(SendAttachmentEmailResponse {

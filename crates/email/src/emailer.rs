@@ -62,68 +62,8 @@ impl EmailerClient {
 		recipient: &str,
 		payload: AttachmentPayload,
 	) -> EmailResult<()> {
-		dbg!(
-			&subject,
-			&recipient,
-			&payload.name,
-			payload.content.len(),
-			&payload.content_type
-		);
-
-		let from = self
-			.config
-			.sender_email
-			.parse()
-			.map_err(|e: AddressError| EmailError::InvalidEmail(e.to_string()))?;
-
-		let to = recipient
-			.parse()
-			.map_err(|e: AddressError| EmailError::InvalidEmail(e.to_string()))?;
-
-		let html = render_template(
-			EmailTemplate::Attachment,
-			&json!({
-				"title": "Stump Attachment",
-			}),
-			self.template_dir.clone(),
-		)?;
-
-		let attachment =
-			Attachment::new(payload.name).body(payload.content, payload.content_type);
-		let email = Message::builder()
-			.from(from)
-			.to(to)
-			.subject(subject)
-			.multipart(
-				MultiPart::mixed()
-					.singlepart(
-						SinglePart::builder()
-							.header(header::ContentType::TEXT_HTML)
-							.body(String::from(html)),
-					)
-					.singlepart(attachment),
-			)?;
-
-		let creds =
-			Credentials::new(self.config.username.clone(), self.config.password.clone());
-
-		// https://github.com/lettre/lettre/issues/359
-
-		let transport = SmtpTransport::relay(&self.config.host)?
-			.port(self.config.port)
-			.credentials(creds)
-			.build();
-
-		match transport.send(&email) {
-			Ok(res) => {
-				tracing::trace!(?res, "Email with attachment was sent");
-				Ok(())
-			},
-			Err(e) => {
-				tracing::error!(error = ?e, "Failed to send email with attachment");
-				Err(e.into())
-			},
-		}
+		self.send_attachments(subject, recipient, vec![payload])
+			.await
 	}
 
 	pub async fn send_attachments(

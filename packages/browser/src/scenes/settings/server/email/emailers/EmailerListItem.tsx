@@ -25,7 +25,6 @@ export default function EmailerListItem({ emailer }: Props) {
 	)
 
 	const renderUsage = () => {
-		return <EmailerSendHistory emailerId={emailer.id} lastUsedAt={dayjs()} />
 		if (!last_used_at) {
 			return (
 				<Text size="sm" variant="muted">
@@ -40,7 +39,7 @@ export default function EmailerListItem({ emailer }: Props) {
 	return (
 		<Card
 			className="flex flex-col space-y-2 p-4"
-			onMouseEnter={() => prefetchEmailerSendHistory(emailer.id)}
+			onMouseEnter={() => prefetchEmailerSendHistory(emailer.id, { include_sent_by: true })}
 		>
 			<div className="flex items-center justify-between">
 				<Text size="md" className="font-medium">

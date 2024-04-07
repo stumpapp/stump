@@ -1,9 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { emailerQueryKeys } from '@stump/api'
+import { invalidateQueries, useCreateEmailDevice, useUpdateEmailDevice } from '@stump/client'
 import { Button, CheckBox, Dialog, Form, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { RegisteredEmailDevice } from '@stump/types'
 import React from 'react'
 import { useForm } from 'react-hook-form'
+import toast from 'react-hot-toast'
 import { z } from 'zod'
 
 type Props = {
@@ -15,6 +18,11 @@ type Props = {
 // TODO: unique constraint on name...
 export default function CreateOrUpdateDeviceModal({ isOpen, updatingDevice, onClose }: Props) {
 	const { t } = useLocaleContext()
+
+	const { createAsync } = useCreateEmailDevice()
+	const { updateAsync } = useUpdateEmailDevice({
+		id: updatingDevice?.id || -1,
+	})
 
 	const form = useForm({
 		defaultValues: updatingDevice
@@ -31,8 +39,16 @@ export default function CreateOrUpdateDeviceModal({ isOpen, updatingDevice, onCl
 		resolver: zodResolver(schema),
 	})
 
-	const handleSubmit = (values: z.infer<typeof schema>) => {
-		console.debug('submit', values)
+	const handleSubmit = async (values: z.infer<typeof schema>) => {
+		const handler = updatingDevice ? updateAsync : createAsync
+		try {
+			await handler(values)
+			await invalidateQueries({ keys: [emailerQueryKeys.getEmailDevices] })
+			onClose()
+		} catch (error) {
+			console.error(error)
+			toast.error('Failed to create/update device')
+		}
 	}
 
 	const onOpenChange = (nowOpen: boolean) => (nowOpen ? onClose() : null)
@@ -47,7 +63,7 @@ export default function CreateOrUpdateDeviceModal({ isOpen, updatingDevice, onCl
 					<Dialog.Close onClick={onClose} />
 				</Dialog.Header>
 				<div className="flex flex-col gap-y-2 py-2 scrollbar-hide">
-					<Form form={form} onSubmit={handleSubmit}>
+					<Form form={form} onSubmit={handleSubmit} id="create-or-update-device-form">
 						<Input
 							label={t(getKey('name.label'))}
 							description={t(getKey('name.description'))}
@@ -73,7 +89,7 @@ export default function CreateOrUpdateDeviceModal({ isOpen, updatingDevice, onCl
 					<Button variant="default" onClick={onClose}>
 						Cancel
 					</Button>
-					<Button variant="primary">
+					<Button variant="primary" type="submit" form="create-or-update-device-form">
 						{t(updatingDevice ? getKey('submit.update') : getKey('submit.create'))}
 					</Button>
 				</Dialog.Footer>

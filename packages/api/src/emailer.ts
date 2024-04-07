@@ -9,9 +9,14 @@ import {
 
 import { API } from './axios'
 import { APIResult } from './types'
+import { toUrlParams } from './utils'
 
-function getEmailers(): Promise<APIResult<SMTPEmailer[]>> {
-	return API.get('/emailers')
+function getEmailers(params?: Record<string, unknown>): Promise<APIResult<SMTPEmailer[]>> {
+	if (params) {
+		return API.get(`/emailers?${toUrlParams(params)}`)
+	} else {
+		return API.get('/emailers')
+	}
 }
 
 function getEmailerById(id: number): Promise<APIResult<SMTPEmailer>> {
@@ -41,8 +46,15 @@ function getEmailDeviceById(id: number): Promise<APIResult<RegisteredEmailDevice
 	return API.get(`/email-devices/${id}`)
 }
 
-function getEmailerSendHistory(emailerId: number): Promise<APIResult<EmailerSendRecord[]>> {
-	return API.get(`/emailers/${emailerId}/send-history`)
+function getEmailerSendHistory(
+	emailerId: number,
+	params?: Record<string, unknown>,
+): Promise<APIResult<EmailerSendRecord[]>> {
+	if (params) {
+		return API.get(`/emailers/${emailerId}/send-history?${toUrlParams(params)}`)
+	} else {
+		return API.get(`/emailers/${emailerId}/send-history`)
+	}
 }
 
 function createEmailDevice(

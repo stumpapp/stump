@@ -69,6 +69,12 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<DeleteUser>()?).as_bytes())?;
 
 		file.write_all(
+			format!("{}\n\n", ts_export::<EmailerIncludeParams>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<EmailerSendRecordIncludeParams>()?).as_bytes(),
+		)?;
+		file.write_all(
 			format!("{}\n\n", ts_export::<SendAttachmentEmailsPayload>()?).as_bytes(),
 		)?;
 		file.write_all(

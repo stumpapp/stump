@@ -274,6 +274,10 @@ export type UpdateUserPreferences = { id: string; locale: string; preferred_layo
 
 export type DeleteUser = { hard_delete: boolean | null }
 
+export type EmailerIncludeParams = { include_send_history?: boolean }
+
+export type EmailerSendRecordIncludeParams = { include_sent_by?: boolean }
+
 export type SendAttachmentEmailsPayload = { media_ids: string[]; send_to: EmailerSendTo[] }
 
 export type SendAttachmentEmailResponse = { sent_emails_count: number; errors: string[] }

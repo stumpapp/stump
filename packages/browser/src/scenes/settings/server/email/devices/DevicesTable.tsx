@@ -1,5 +1,4 @@
-import { emailerApi, emailerQueryKeys } from '@stump/api'
-import { useQuery } from '@stump/client'
+import { useEmailDevicesQuery } from '@stump/client'
 import { Badge, Card, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { RegisteredEmailDevice } from '@stump/types'
@@ -52,17 +51,7 @@ type Props = {
 
 export default function DevicesTable({ onSelectForUpdate }: Props) {
 	const { t } = useLocaleContext()
-	const { data } = useQuery(
-		[emailerQueryKeys.getEmailDevices],
-		async () => {
-			const { data } = await emailerApi.getEmailDevices()
-			return data
-		},
-		{
-			suspense: true,
-		},
-	)
-	const devices = data || []
+	const { devices } = useEmailDevicesQuery()
 
 	const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
 

@@ -10,8 +10,11 @@ export {
 } from './bookClub'
 export {
 	prefetchEmailerSendHistory,
+	useCreateEmailDevice,
+	useEmailDevicesQuery,
 	useEmailerSendHistoryQuery,
 	useEmailersQuery,
+	useUpdateEmailDevice,
 } from './emailers'
 export { type EpubActions, useEpub, useEpubLazy, type UseEpubReturn } from './epub'
 export {

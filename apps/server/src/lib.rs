@@ -1,8 +1,8 @@
-mod config;
+pub mod config;
 mod errors;
 mod filter;
 mod http_server;
-mod middleware;
+pub mod middleware;
 mod routers;
 mod utils;
 

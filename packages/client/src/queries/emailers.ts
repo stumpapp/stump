@@ -1,6 +1,7 @@
 import { emailerApi, emailerQueryKeys } from '@stump/api'
 import {
 	CreateOrUpdateEmailDevice,
+	CreateOrUpdateEmailer,
 	EmailerIncludeParams,
 	EmailerSendRecord,
 	EmailerSendRecordIncludeParams,
@@ -26,6 +27,46 @@ export function useEmailersQuery({ params, ...options }: UseEmailersQueryOptions
 
 	return {
 		emailers,
+		...restReturn,
+	}
+}
+
+type UseEmailerQueryOptions = { id: number } & QueryOptions<SMTPEmailer>
+export function useEmailerQuery({ id, ...options }: UseEmailerQueryOptions) {
+	const { data: emailer, ...restReturn } = useQuery(
+		[emailerQueryKeys.getEmailerById, id],
+		async () => {
+			const { data } = await emailerApi.getEmailerById(id)
+			return data
+		},
+		options,
+	)
+
+	return {
+		emailer,
+		...restReturn,
+	}
+}
+
+type UseCreateEmailerOptions = { id: number } & MutationOptions<
+	SMTPEmailer,
+	AxiosError,
+	CreateOrUpdateEmailer
+>
+export function useUpdateEmailer({ id, ...options }: UseCreateEmailerOptions) {
+	const {
+		mutate: update,
+		mutateAsync: updateAsync,
+		...restReturn
+	} = useMutation(
+		[emailerQueryKeys.updateEmailer],
+		(params) => emailerApi.updateEmailer(id, params).then((res) => res.data),
+		options,
+	)
+
+	return {
+		update,
+		updateAsync,
 		...restReturn,
 	}
 }
@@ -60,7 +101,7 @@ export const prefetchEmailerSendHistory = async (
 	queryClient.prefetchQuery(
 		[emailerQueryKeys.getEmailerSendHistory, emailerId, params],
 		async () => {
-			const { data } = await emailerApi.getEmailerSendHistory(emailerId)
+			const { data } = await emailerApi.getEmailerSendHistory(emailerId, params)
 			return data
 		},
 	)
@@ -121,6 +162,22 @@ export function useUpdateEmailDevice({ id, ...options }: UseUpdateEmailDeviceOpt
 	return {
 		update,
 		updateAsync,
+		...restReturn,
+	}
+}
+
+export function useDeleteEmailDevice() {
+	const {
+		mutate: remove,
+		mutateAsync: removeAsync,
+		isLoading: isDeleting,
+		...restReturn
+	} = useMutation([emailerQueryKeys.deleteEmailDevice], emailerApi.deleteEmailDevice)
+
+	return {
+		isDeleting,
+		remove,
+		removeAsync,
 		...restReturn,
 	}
 }

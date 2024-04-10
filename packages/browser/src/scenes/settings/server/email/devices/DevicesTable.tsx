@@ -8,6 +8,10 @@ import React, { useMemo, useState } from 'react'
 
 import { Table } from '@/components/table'
 
+import { useEmailerSettingsContext } from '../context'
+import DeleteDeviceConfirmation from './DeleteDeviceConfirmation'
+import DeviceActionMenu from './DeviceActionMenu'
+
 const columnHelper = createColumnHelper<RegisteredEmailDevice>()
 const baseColumns = [
 	columnHelper.accessor('name', {
@@ -51,7 +55,10 @@ type Props = {
 
 export default function DevicesTable({ onSelectForUpdate }: Props) {
 	const { t } = useLocaleContext()
+	const { canEditEmailer } = useEmailerSettingsContext()
 	const { devices } = useEmailDevicesQuery()
+
+	const [deletingDevice, setDeletingDevice] = useState<RegisteredEmailDevice | null>(null)
 
 	const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
 
@@ -59,40 +66,53 @@ export default function DevicesTable({ onSelectForUpdate }: Props) {
 		() => [
 			...baseColumns,
 			columnHelper.display({
-				cell: () => null,
+				cell: ({ row: { original: device } }) =>
+					canEditEmailer ? (
+						<DeviceActionMenu
+							onEdit={() => onSelectForUpdate(device)}
+							onDelete={() => setDeletingDevice(device)}
+						/>
+					) : null,
 				id: 'actions',
+				size: 0,
 			}),
 		],
-		[onSelectForUpdate, t],
+		[onSelectForUpdate, canEditEmailer],
 	)
 
 	return (
-		<Card className="bg-background-200 p-1">
-			<Table
-				sortable
-				columns={columns}
-				options={{
-					onPaginationChange: setPagination,
-					state: {
-						pagination,
-					},
-				}}
-				data={devices}
-				fullWidth
-				emptyRenderer={() => (
-					<div className="flex min-h-[150px] flex-col items-center justify-center gap-2">
-						<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-muted" />
-						<div className="text-center">
-							<Heading size="sm">{t(`${LOCALE_BASE}.emptyHeading`)}</Heading>
-							<Text size="sm" variant="muted">
-								{t(`${LOCALE_BASE}.emptySubtitle`)}
-							</Text>
+		<>
+			{canEditEmailer && (
+				<DeleteDeviceConfirmation device={deletingDevice} onClose={() => setDeletingDevice(null)} />
+			)}
+
+			<Card className="bg-background-200 p-1">
+				<Table
+					sortable
+					columns={columns}
+					options={{
+						onPaginationChange: setPagination,
+						state: {
+							pagination,
+						},
+					}}
+					data={devices}
+					fullWidth
+					emptyRenderer={() => (
+						<div className="flex min-h-[150px] flex-col items-center justify-center gap-2">
+							<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-muted" />
+							<div className="text-center">
+								<Heading size="sm">{t(`${LOCALE_BASE}.emptyHeading`)}</Heading>
+								<Text size="sm" variant="muted">
+									{t(`${LOCALE_BASE}.emptySubtitle`)}
+								</Text>
+							</div>
 						</div>
-					</div>
-				)}
-				isZeroBasedPagination
-			/>
-		</Card>
+					)}
+					isZeroBasedPagination
+				/>
+			</Card>
+		</>
 	)
 }
 

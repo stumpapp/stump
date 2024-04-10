@@ -28,7 +28,7 @@ function createEmailer(payload: CreateOrUpdateEmailer): Promise<APIResult<SMTPEm
 }
 
 function updateEmailer(
-	id: string,
+	id: number,
 	payload: CreateOrUpdateEmailer,
 ): Promise<APIResult<SMTPEmailer>> {
 	return API.put(`/emailers/${id}`, payload)

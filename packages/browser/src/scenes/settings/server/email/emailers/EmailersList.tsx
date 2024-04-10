@@ -4,19 +4,17 @@ import { useLocaleContext } from '@stump/i18n'
 import { CircleSlash2 } from 'lucide-react'
 import React from 'react'
 
-import { useAppContext } from '@/context'
 import paths from '@/paths'
 
+import { useEmailerSettingsContext } from '../context'
 import EmailerListItem from './EmailerListItem'
 
 export default function EmailersList() {
 	const { t } = useLocaleContext()
-	const { checkPermission } = useAppContext()
+	const { canCreateEmailer } = useEmailerSettingsContext()
 	const { emailers } = useEmailersQuery({
 		suspense: true,
 	})
-
-	const canCreate = checkPermission('emailer:create')
 
 	if (!emailers?.length) {
 		return (
@@ -24,7 +22,7 @@ export default function EmailersList() {
 				<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-muted" />
 				<div className="text-center">
 					<Heading size="xs">{t(`${LOCALE_BASE}.emptyHeading`)}</Heading>
-					{canCreate && (
+					{canCreateEmailer && (
 						<ButtonOrLink href={paths.createEmailer()} className="mt-2">
 							Create an emailer
 						</ButtonOrLink>

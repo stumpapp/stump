@@ -134,7 +134,7 @@ export const routeGroups: RouteGroup[] = [
 				icon: Mail,
 				label: 'Email',
 				localeKey: 'server/email',
-				permission: 'emailer:manage',
+				permission: 'emailer:read',
 				subItems: [
 					{
 						backlink: {
@@ -143,6 +143,17 @@ export const routeGroups: RouteGroup[] = [
 						},
 						localeKey: 'server/email.createEmailer',
 						matcher: (path: string) => path.startsWith('/settings/server/email/new'),
+					},
+					{
+						backlink: {
+							localeKey: 'server/email.title',
+							to: '/settings/server/email',
+						},
+						localeKey: 'server/email.updateEmailer',
+						matcher: (path: string) => {
+							const match = path.match(/\/settings\/server\/email\/[0-9]+\/edit/)
+							return !!match && match.length > 0
+						},
 					},
 				],
 				to: '/settings/server/email',

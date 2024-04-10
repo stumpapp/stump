@@ -3,14 +3,18 @@ import { useLocaleContext } from '@stump/i18n'
 import { RegisteredEmailDevice } from '@stump/types'
 import React, { Suspense, useState } from 'react'
 
+import { useEmailerSettingsContext } from '../context'
 import CreateOrUpdateDeviceModal from './CreateOrUpdateDeviceModal'
 import DevicesTable from './DevicesTable'
 
 export default function DevicesSection() {
 	const { t } = useLocaleContext()
+	const { canEditEmailer, canCreateEmailer } = useEmailerSettingsContext()
 
 	const [isCreatingDevice, setIsCreatingDevice] = useState(false)
 	const [updatingDevice, setUpdatingDevice] = useState<RegisteredEmailDevice | null>(null)
+
+	const canCreateOrUpdate = canCreateEmailer || canEditEmailer
 
 	return (
 		<div className="flex flex-col gap-4">
@@ -22,27 +26,31 @@ export default function DevicesSection() {
 					</Text>
 				</div>
 
-				<Button
-					className="shrink-0"
-					variant="secondary"
-					size="sm"
-					onClick={() => setIsCreatingDevice(true)}
-				>
-					{t('settingsScene.server/email.sections.devices.addDevice')}
-				</Button>
+				{canCreateEmailer && (
+					<Button
+						className="shrink-0"
+						variant="secondary"
+						size="sm"
+						onClick={() => setIsCreatingDevice(true)}
+					>
+						{t('settingsScene.server/email.sections.devices.addDevice')}
+					</Button>
+				)}
 			</div>
 
 			<Suspense fallback={null}>
 				<DevicesTable onSelectForUpdate={setUpdatingDevice} />
 
-				<CreateOrUpdateDeviceModal
-					isOpen={isCreatingDevice || !!updatingDevice}
-					updatingDevice={updatingDevice}
-					onClose={() => {
-						setIsCreatingDevice(false)
-						setUpdatingDevice(null)
-					}}
-				/>
+				{canCreateOrUpdate && (
+					<CreateOrUpdateDeviceModal
+						isOpen={isCreatingDevice || !!updatingDevice}
+						updatingDevice={canEditEmailer ? updatingDevice : null}
+						onClose={() => {
+							setIsCreatingDevice(false)
+							setUpdatingDevice(null)
+						}}
+					/>
+				)}
 			</Suspense>
 		</div>
 	)

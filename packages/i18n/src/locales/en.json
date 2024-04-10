@@ -728,6 +728,11 @@
 				"helmet": "Create emailer",
 				"title": "Create emailer",
 				"description": "Create a new SMTP emailer for your Stump server instance"
+			},
+			"updateEmailer": {
+				"helmet": "Update emailer",
+				"title": "Update emailer",
+				"description": "Update the details of this SMTP emailer"
 			}
 		}
 	},

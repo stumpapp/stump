@@ -4,7 +4,12 @@ import { SMTPEmailer } from '@stump/types'
 import dayjs from 'dayjs'
 import { Sparkles } from 'lucide-react'
 import React, { Suspense, useMemo } from 'react'
+import { useNavigate } from 'react-router'
 
+import paths from '@/paths'
+
+import { useEmailerSettingsContext } from '../context'
+import EmailerActionMenu from './EmailerActionMenu'
 import EmailerSendHistory from './EmailerSendHistory'
 import { getCommonHost } from './utils'
 
@@ -12,6 +17,8 @@ type Props = {
 	emailer: SMTPEmailer
 }
 export default function EmailerListItem({ emailer }: Props) {
+	const navigate = useNavigate()
+	const { canEditEmailer } = useEmailerSettingsContext()
 	const {
 		name,
 		is_primary,
@@ -45,11 +52,20 @@ export default function EmailerListItem({ emailer }: Props) {
 				<Text size="md" className="font-medium">
 					{name}
 				</Text>
-				{is_primary && (
-					<ToolTip content="Primary emailer" align="end" size="xs">
-						<Sparkles className="text-primary h-4 w-4" strokeWidth={1} />
-					</ToolTip>
-				)}
+				<div className="flex items-center space-x-2">
+					{is_primary && (
+						<ToolTip content="Primary emailer" align="end" size="xs">
+							<Sparkles className="text-primary h-4 w-4" strokeWidth={1} />
+						</ToolTip>
+					)}
+					{canEditEmailer && (
+						<EmailerActionMenu
+							onEdit={() => navigate(paths.editEmailer(emailer.id))}
+							// TODO: implement delete
+							onDelete={() => {}}
+						/>
+					)}
+				</div>
 			</div>
 
 			<div>
@@ -62,6 +78,7 @@ export default function EmailerListItem({ emailer }: Props) {
 
 			<div className="h-6" />
 
+			{/* TODO: separate permission for viewing usage history? */}
 			<div>
 				<Suspense fallback={null}>{renderUsage()}</Suspense>
 			</div>

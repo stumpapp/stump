@@ -4,7 +4,7 @@ import { invalidateQueries, useCreateEmailDevice, useUpdateEmailDevice } from '@
 import { Button, CheckBox, Dialog, Form, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { RegisteredEmailDevice } from '@stump/types'
-import React from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { z } from 'zod'
@@ -24,20 +24,26 @@ export default function CreateOrUpdateDeviceModal({ isOpen, updatingDevice, onCl
 		id: updatingDevice?.id || -1,
 	})
 
+	const defaultValues = useMemo(
+		() => ({
+			email: updatingDevice?.email || '',
+			forbidden: updatingDevice?.forbidden || false,
+			name: updatingDevice?.name || '',
+		}),
+		[updatingDevice],
+	)
+
 	const form = useForm({
-		defaultValues: updatingDevice
-			? {
-					email: updatingDevice.email,
-					forbidden: updatingDevice.forbidden,
-					name: updatingDevice.name,
-				}
-			: {
-					email: '',
-					forbidden: false,
-					name: '',
-				},
+		defaultValues,
 		resolver: zodResolver(schema),
 	})
+	const { reset } = form
+
+	const isForbidden = form.watch('forbidden')
+
+	useEffect(() => {
+		reset(defaultValues)
+	}, [defaultValues, reset, updatingDevice])
 
 	const handleSubmit = async (values: z.infer<typeof schema>) => {
 		const handler = updatingDevice ? updateAsync : createAsync
@@ -80,7 +86,8 @@ export default function CreateOrUpdateDeviceModal({ isOpen, updatingDevice, onCl
 							label={t(getKey('forbidden.label'))}
 							description={t(getKey('forbidden.description'))}
 							variant="primary"
-							{...form.register('forbidden')}
+							checked={isForbidden}
+							onClick={() => form.setValue('forbidden', !isForbidden)}
 						/>
 					</Form>
 				</div>

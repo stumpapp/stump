@@ -1,16 +1,18 @@
 import { emailerApi } from '@stump/api'
 import { useEmailersQuery, useMutation } from '@stump/client'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router'
 
 import { ContentContainer, SceneContainer } from '@/components/container'
 import paths from '@/paths'
 
+import { useEmailerSettingsContext } from './context'
 import { CreateOrUpdateEmailerForm, FormValues } from './emailers'
 
 export default function CreateEmailerScene() {
 	const navigate = useNavigate()
 
+	const { canCreateEmailer } = useEmailerSettingsContext()
 	const { emailers } = useEmailersQuery({
 		suspense: true,
 	})
@@ -32,6 +34,16 @@ export default function CreateEmailerScene() {
 			console.error(error)
 			// TODO:toast
 		}
+	}
+
+	useEffect(() => {
+		if (!canCreateEmailer) {
+			navigate('..', { replace: true })
+		}
+	}, [canCreateEmailer, navigate])
+
+	if (!canCreateEmailer) {
+		return null
 	}
 
 	return (

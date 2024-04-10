@@ -11,10 +11,13 @@ export {
 export {
 	prefetchEmailerSendHistory,
 	useCreateEmailDevice,
+	useDeleteEmailDevice,
 	useEmailDevicesQuery,
+	useEmailerQuery,
 	useEmailerSendHistoryQuery,
 	useEmailersQuery,
 	useUpdateEmailDevice,
+	useUpdateEmailer,
 } from './emailers'
 export { type EpubActions, useEpub, useEpubLazy, type UseEpubReturn } from './epub'
 export {

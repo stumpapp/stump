@@ -236,6 +236,7 @@ impl StumpCore {
 mod tests {
 	use std::{fs::File, io::Write, path::PathBuf};
 
+	use email::EmailerClientConfig;
 	use specta::{
 		ts::{export, BigIntExportBehavior, ExportConfiguration, TsExportError},
 		NamedType,
@@ -314,7 +315,12 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<UserPreferences>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LoginActivity>()?).as_bytes())?;
 
+		file.write_all(format!("{}\n\n", ts_export::<EmailerSendTo>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<EmailerConfig>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<EmailerClientConfig>()?).as_bytes(),
+		)?;
+
 		file.write_all(format!("{}\n\n", ts_export::<SMTPEmailer>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<RegisteredEmailDevice>()?).as_bytes(),

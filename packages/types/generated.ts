@@ -68,10 +68,14 @@ export type UserPreferences = { id: string; locale: string; app_theme: string; s
 
 export type LoginActivity = { id: string; ip_address: string; user_agent: string; authentication_successful: boolean; timestamp: string; user?: User | null }
 
+export type EmailerSendTo = { device_id: number } | { email: string }
+
 /**
  * The config for an SMTP emailer
  */
 export type EmailerConfig = { sender_email: string; sender_display_name: string; username: string; smtp_host: string; smtp_port: number; max_attachment_size_bytes: number | null; max_num_attachments: number | null }
+
+export type EmailerClientConfig = { sender_email: string; sender_display_name: string; username: string; password: string; host: string; port: number; max_attachment_size_bytes: number | null; max_num_attachments: number | null }
 
 /**
  * An SMTP emailer entity, which stores SMTP configuration data to be used for sending emails.
@@ -86,7 +90,7 @@ export type RegisteredEmailDevice = { id: number; name: string; email: string; f
  * A record of an email that was sent, used to keep track of emails that
  * were sent by specific emailer(s)
  */
-export type EmailerSendRecord = { id: number; emailer_id: number; recipient_email: string; attachment_meta: AttachmentMeta | null; sent_at: string; sent_by_user_id: string | null; sent_by?: User | null }
+export type EmailerSendRecord = { id: number; emailer_id: number; recipient_email: string; attachment_meta: AttachmentMeta[] | null; sent_at: string; sent_by_user_id: string | null; sent_by?: User | null }
 
 /**
  * The metadata of an attachment that was sent with an email

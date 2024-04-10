@@ -229,7 +229,7 @@ impl From<String> for PermissionSet {
 		let permissions = s
 			.split(',')
 			.map(|s| s.trim())
-			.map(|s| UserPermission::from(s))
+			.map(UserPermission::from)
 			.collect();
 		PermissionSet(permissions)
 	}

@@ -16,6 +16,7 @@ export {
 	useEmailerQuery,
 	useEmailerSendHistoryQuery,
 	useEmailersQuery,
+	useSendAttachmentEmail,
 	useUpdateEmailDevice,
 	useUpdateEmailer,
 } from './emailers'

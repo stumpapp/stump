@@ -36,6 +36,7 @@ export default function EditEmailerScene() {
 	const onSubmit = async ({ name, is_primary, ...config }: FormValues) => {
 		try {
 			await updateEmailer({
+				// @ts-expect-error: fixme
 				config: {
 					...config,
 					host: config.smtp_host,

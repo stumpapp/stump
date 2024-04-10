@@ -93,7 +93,7 @@ impl EmailerClient {
 		let mut multipart_builder = MultiPart::mixed().singlepart(
 			SinglePart::builder()
 				.header(header::ContentType::TEXT_HTML)
-				.body(String::from(html)),
+				.body(html),
 		);
 
 		for payload in payloads {

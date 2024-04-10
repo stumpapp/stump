@@ -68,8 +68,7 @@ export default function EmailerSendHistoryTable({ records }: Props) {
 								<tr key={row.id + 'expanded'}>
 									<td colSpan={columns.length}>
 										<EmailerSendRecordAttachmentTable
-											// FIXME: type error for sure
-											attachments={[row.original.attachment_meta!]}
+											attachments={row.original.attachment_meta || []}
 										/>
 									</td>
 								</tr>

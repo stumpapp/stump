@@ -4,6 +4,8 @@ import {
 	EmailerSendRecord,
 	PatchEmailDevice,
 	RegisteredEmailDevice,
+	SendAttachmentEmailResponse,
+	SendAttachmentEmailsPayload,
 	SMTPEmailer,
 } from '@stump/types'
 
@@ -81,6 +83,12 @@ function deleteEmailDevice(id: number): Promise<APIResult<RegisteredEmailDevice>
 	return API.delete(`/email-devices/${id}`)
 }
 
+function sendAttachmentEmail(
+	payload: SendAttachmentEmailsPayload,
+): Promise<APIResult<SendAttachmentEmailResponse>> {
+	return API.post('/emailers/send-attachment', payload)
+}
+
 export const emailerApi = {
 	createEmailDevice,
 	createEmailer,
@@ -92,6 +100,7 @@ export const emailerApi = {
 	getEmailerSendHistory,
 	getEmailers,
 	patchEmailDevice,
+	sendAttachmentEmail,
 	updateEmailDevice,
 	updateEmailer,
 }
@@ -107,6 +116,7 @@ export const emailerQueryKeys: Record<keyof typeof emailerApi, string> = {
 	getEmailerSendHistory: 'emailer.sendHistory',
 	getEmailers: 'emailer.get',
 	patchEmailDevice: 'emailDevice.patch',
+	sendAttachmentEmail: 'emailer.sendAttachment',
 	updateEmailDevice: 'emailDevice.update',
 	updateEmailer: 'emailer.update',
 }

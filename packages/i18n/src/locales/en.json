@@ -43,6 +43,22 @@
 				"fileChecksum": "Checksum"
 			}
 		},
+		"emailBook": {
+			"heading": "Email book",
+			"description": "Send this book to device or email address",
+			"form": {
+				"email": {
+					"label": "Email",
+					"placeholder": "Email address",
+					"description": "An email address to send the book to. Click add to finalize each input"
+				},
+				"devices": {
+					"label": "Devices",
+					"placeholder": "Select devices",
+					"noFilterMatch": "No devices match the filter"
+				}
+			}
+		},
 		"nextInSeries": "Next in Series"
 	},
 	"createBookClubScene": {
@@ -842,9 +858,11 @@
 		}
 	},
 	"common": {
+		"add": "Add",
 		"cancel": "Cancel",
 		"confirm": "Confirm",
 		"save": "Save",
+		"send": "Send",
 		"saveChanges": "Save changes",
 		"create": "Create",
 		"edit": "Edit",

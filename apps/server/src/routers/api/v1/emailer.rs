@@ -443,7 +443,7 @@ async fn send_attachment_email(
 				.send_to
 				.iter()
 				.any(|to| matches!(to, EmailerSendTo::Anonymous { .. }))
-				.then(|| UserPermission::EmailArbitrarySend)],
+				.then_some(UserPermission::EmailArbitrarySend)],
 		),
 	)?;
 
@@ -549,7 +549,7 @@ async fn send_attachment_email(
 			let send_result = emailer_client
 				.send_attachment(
 					"Attachment from Stump",
-					&recipient,
+					recipient,
 					AttachmentPayload {
 						name: file_name.clone(),
 						content: content.clone(),
@@ -819,15 +819,11 @@ async fn patch_email_device(
 			chain_optional_iter(
 				[],
 				[
+					payload.name.map(registered_email_device::name::set),
+					payload.email.map(registered_email_device::email::set),
 					payload
-						.name
-						.map(|name| registered_email_device::name::set(name)),
-					payload
-						.email
-						.map(|email| registered_email_device::email::set(email)),
-					payload.forbidden.map(|forbidden| {
-						registered_email_device::forbidden::set(forbidden)
-					}),
+						.forbidden
+						.map(registered_email_device::forbidden::set),
 				],
 			),
 		)

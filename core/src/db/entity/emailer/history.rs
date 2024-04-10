@@ -26,8 +26,11 @@ impl AttachmentMeta {
 		}
 	}
 
+	// TODO: This is a little awkward, and will have to change once emails properly send
+	// multiple attachments at once
+	/// Convert the attachment meta into a byte array, wrapped in a vec
 	pub fn into_data(&self) -> CoreResult<Vec<u8>> {
-		serde_json::to_vec(self).map_err(CoreError::from)
+		serde_json::to_vec(&vec![self]).map_err(CoreError::from)
 	}
 }
 
@@ -42,7 +45,7 @@ pub struct EmailerSendRecord {
 	/// The email of the recipient of this email
 	recipient_email: String,
 	/// The metadata of the attachment, if there is one
-	attachment_meta: Option<AttachmentMeta>,
+	attachment_meta: Option<Vec<AttachmentMeta>>,
 	/// The timestamp of when this email was sent
 	sent_at: String,
 	/// The user ID of the user that sent this email

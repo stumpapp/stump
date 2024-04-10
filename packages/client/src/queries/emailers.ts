@@ -6,6 +6,7 @@ import {
 	EmailerSendRecord,
 	EmailerSendRecordIncludeParams,
 	RegisteredEmailDevice,
+	SendAttachmentEmailsPayload,
 	SMTPEmailer,
 } from '@stump/types'
 import { AxiosError } from 'axios'
@@ -123,6 +124,24 @@ export function useEmailDevicesQuery(options: UseEmailDevicesQueryOptions = {}) 
 
 	return {
 		devices,
+		...restReturn,
+	}
+}
+
+export function useSendAttachmentEmail() {
+	const {
+		mutate: send,
+		mutateAsync: sendAsync,
+		isLoading: isSending,
+		...restReturn
+	} = useMutation([emailerQueryKeys.sendAttachmentEmail], (payload: SendAttachmentEmailsPayload) =>
+		emailerApi.sendAttachmentEmail(payload).then((res) => res.data),
+	)
+
+	return {
+		isSending,
+		send,
+		sendAsync,
 		...restReturn,
 	}
 }

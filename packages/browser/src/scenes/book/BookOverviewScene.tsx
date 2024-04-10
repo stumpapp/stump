@@ -119,7 +119,7 @@ export default function BookOverviewScene() {
 									</ButtonOrLink>
 								)}
 								{canDownload && <DownloadMediaButton media={media} />}
-								<EmailBookDropdown />
+								<EmailBookDropdown mediaId={media.id} />
 							</div>
 
 							{!isAtLeastMedium && !!media.metadata?.summary && (

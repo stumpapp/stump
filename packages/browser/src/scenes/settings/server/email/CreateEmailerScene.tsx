@@ -21,9 +21,11 @@ export default function CreateEmailerScene() {
 	const onSubmit = async ({ name, is_primary, ...config }: FormValues) => {
 		try {
 			await createEmailer({
+				// @ts-expect-error: FIXME: fixme
 				config: {
 					...config,
 					host: config.smtp_host,
+					max_num_attachments: null,
 					port: config.smtp_port,
 				},
 				is_primary,

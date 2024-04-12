@@ -696,7 +696,7 @@
 					"description": "The SMTP-specific settings for this emailer"
 				},
 				"smtpProvider": {
-					"label": "SMTP provider",
+					"label": "SMTP provider preset",
 					"description": "The provider of the SMTP server. This is used to prefill some common settings, but doesn't capture all providers"
 				},
 				"smtpHost": {
@@ -706,6 +706,10 @@
 				"smtpPort": {
 					"label": "SMTP port",
 					"description": "The port of the SMTP server"
+				},
+				"tlsEnabled": {
+					"label": "TLS enabled",
+					"description": "If enabled, the connection to the SMTP server will be encrypted"
 				},
 				"username": {
 					"label": "Username",

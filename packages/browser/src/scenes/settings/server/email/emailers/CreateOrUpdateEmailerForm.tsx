@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
 	Button,
+	CheckBox,
 	Form,
 	Heading,
 	Input,
@@ -46,6 +47,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 					sender_email: emailer.config.sender_email,
 					smtp_host: emailer.config.smtp_host,
 					smtp_port: emailer.config.smtp_port,
+					tls_enabled: emailer.config.tls_enabled,
 					username: emailer.config.username,
 				}
 			: undefined,
@@ -54,7 +56,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 
 	const errors = useMemo(() => form.formState.errors, [form.formState.errors])
 
-	const currentHost = form.watch('smtp_host')
+	const [currentHost, tlsEnabled] = form.watch(['smtp_host', 'tls_enabled'])
 	const presetValue = useMemo(() => getCommonHost(currentHost)?.name.toLowerCase(), [currentHost])
 
 	const numericChangeHandler =
@@ -124,36 +126,51 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 					</Text>
 				</div>
 
-				<Input
-					label={t(`${LOCALE_BASE}.smtpHost.label`)}
-					description={t(`${LOCALE_BASE}.smtpHost.description`)}
-					variant="primary"
-					{...form.register('smtp_host')}
-					errorMessage={errors.smtp_host?.message}
-				/>
+				<div className="flex flex-col gap-4 md:flex-row md:items-start">
+					<Input
+						label={t(`${LOCALE_BASE}.smtpHost.label`)}
+						description={t(`${LOCALE_BASE}.smtpHost.description`)}
+						variant="primary"
+						fullWidth
+						{...form.register('smtp_host')}
+						errorMessage={errors.smtp_host?.message}
+					/>
 
-				<Input
-					label={t(`${LOCALE_BASE}.smtpPort.label`)}
-					description={t(`${LOCALE_BASE}.smtpPort.description`)}
-					variant="primary"
-					{...numericRegister('smtp_port')}
-					errorMessage={errors.smtp_port?.message}
-				/>
+					<Input
+						label={t(`${LOCALE_BASE}.smtpPort.label`)}
+						description={t(`${LOCALE_BASE}.smtpPort.description`)}
+						variant="primary"
+						className="max-w-[185px]"
+						{...numericRegister('smtp_port')}
+						errorMessage={errors.smtp_port?.message}
+					/>
+				</div>
 
-				<Input
-					label={t(`${LOCALE_BASE}.username.label`)}
-					description={t(`${LOCALE_BASE}.username.description`)}
-					variant="primary"
-					{...form.register('username')}
-					errorMessage={errors.username?.message}
-				/>
+				<div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+					<Input
+						label={t(`${LOCALE_BASE}.username.label`)}
+						description={t(`${LOCALE_BASE}.username.description`)}
+						variant="primary"
+						{...form.register('username')}
+						errorMessage={errors.username?.message}
+					/>
 
-				<PasswordInput
-					label={t(`${LOCALE_BASE}.password.label`)}
-					description={t(`${LOCALE_BASE}.password.description`)}
+					<PasswordInput
+						label={t(`${LOCALE_BASE}.password.label`)}
+						description={t(`${LOCALE_BASE}.password.description`)}
+						variant="primary"
+						{...form.register('password')}
+						errorMessage={errors.password?.message}
+					/>
+				</div>
+
+				<CheckBox
 					variant="primary"
-					{...form.register('password')}
-					errorMessage={errors.password?.message}
+					label={t(`${LOCALE_BASE}.tlsEnabled.label`)}
+					description={t(`${LOCALE_BASE}.tlsEnabled.description`)}
+					{...form.register('tls_enabled')}
+					checked={tlsEnabled}
+					onClick={() => form.setValue('tls_enabled', !tlsEnabled)}
 				/>
 			</div>
 
@@ -236,6 +253,7 @@ const createSchema = (existingNames: string[], _t: (key: string) => string, isCr
 		sender_email: z.string().email(),
 		smtp_host: z.string(),
 		smtp_port: z.number(),
+		tls_enabled: z.boolean().default(false),
 		username: z.string(),
 	})
 export type FormValues = z.infer<ReturnType<typeof createSchema>>

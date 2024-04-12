@@ -29,6 +29,8 @@ pub struct EmailerClientConfig {
 	pub host: String,
 	/// The SMTP port to use
 	pub port: u16,
+	/// Whether to use TLS for the SMTP connection
+	pub tls_enabled: bool,
 	/// The maximum size of an attachment in bytes
 	pub max_attachment_size_bytes: Option<i32>,
 	/// The maximum number of attachments that can be sent in a single email
@@ -111,10 +113,18 @@ impl EmailerClient {
 		let creds =
 			Credentials::new(self.config.username.clone(), self.config.password.clone());
 
-		let transport = SmtpTransport::relay(&self.config.host)?
-			.port(self.config.port)
-			.credentials(creds)
-			.build();
+		// Note this issue: https://github.com/lettre/lettre/issues/359
+		let transport = if self.config.tls_enabled {
+			SmtpTransport::starttls_relay(&self.config.host)
+				.unwrap()
+				.credentials(creds)
+				.build()
+		} else {
+			SmtpTransport::relay(&self.config.host)?
+				.port(self.config.port)
+				.credentials(creds)
+				.build()
+		};
 
 		match transport.send(&email) {
 			Ok(res) => {

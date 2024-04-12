@@ -750,7 +750,7 @@ model Emailer {
   encrypted_password        String
   smtp_host                 String
   smtp_port                 Int
-  // smtp_secure         Boolean
+  tls_enabled               Boolean @default(false)
   max_attachment_size_bytes Int? // null = unlimited
   max_num_attachments       Int? // null = unlimited
 

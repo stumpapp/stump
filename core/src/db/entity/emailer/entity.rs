@@ -25,6 +25,8 @@ pub struct EmailerConfig {
 	pub smtp_host: String,
 	/// The SMTP port to use
 	pub smtp_port: u16,
+	/// Whether to use TLS for the SMTP connection
+	pub tls_enabled: bool,
 	/// The maximum size of an attachment in bytes
 	pub max_attachment_size_bytes: Option<i32>,
 	/// The maximum number of attachments that can be sent in a single email
@@ -42,6 +44,7 @@ impl EmailerConfig {
 			password,
 			host: self.smtp_host,
 			port: self.smtp_port,
+			tls_enabled: self.tls_enabled,
 			max_attachment_size_bytes: self.max_attachment_size_bytes,
 			max_num_attachments: self.max_num_attachments,
 		})
@@ -59,6 +62,7 @@ impl EmailerConfig {
 			encrypted_password,
 			smtp_host: config.host,
 			smtp_port: config.port,
+			tls_enabled: config.tls_enabled,
 			max_attachment_size_bytes: config.max_attachment_size_bytes,
 			max_num_attachments: config.max_num_attachments,
 		})
@@ -114,6 +118,7 @@ impl TryFrom<emailer::Data> for SMTPEmailer {
 				encrypted_password: data.encrypted_password,
 				smtp_host: data.smtp_host,
 				smtp_port: data.smtp_port as u16,
+				tls_enabled: data.tls_enabled,
 				max_attachment_size_bytes: data.max_attachment_size_bytes,
 				max_num_attachments: data.max_num_attachments,
 			},

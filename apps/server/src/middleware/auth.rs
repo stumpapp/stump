@@ -171,18 +171,18 @@ async fn handle_basic_auth(
 /// use axum::{Router, middleware::{from_extractor, from_extractor_with_state}};
 /// use stump_core::{Ctx, config::StumpConfig};
 /// use stump_server::{
-/// 	middleware::auth::{Auth, ServerOwnerGuard},
-/// 	config::state::AppState
+///     middleware::auth::{Auth, ServerOwnerGuard},
+///     config::state::AppState
 /// };
 ///
 /// #[tokio::main]
 /// async fn main() {
-/// 	let config = StumpConfig::debug();
-/// 	let ctx = Ctx::new(config).await.arced();
+///     let config = StumpConfig::debug();
+///     let ctx = Ctx::new(config).await.arced();
 ///
-/// 	let router: Router<AppState> = Router::new()
-/// 		.layer(from_extractor::<ServerOwnerGuard>())
-/// 		.layer(from_extractor_with_state::<Auth, AppState>(ctx));
+///     let router: Router<AppState> = Router::new()
+///         .layer(from_extractor::<ServerOwnerGuard>())
+///         .layer(from_extractor_with_state::<Auth, AppState>(ctx));
 /// }
 /// ```
 pub struct ServerOwnerGuard;

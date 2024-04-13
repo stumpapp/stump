@@ -285,6 +285,7 @@
 			"application": {
 				"account": "Account",
 				"appearance": "Apparence",
+				"reader": "Reader",
 				"desktop": "Bureau",
 				"label": "Application"
 			},
@@ -539,6 +540,10 @@
 							"label": "Explorateur de Fichiers",
 							"description": "Permet à l'utilisateur d'accéder à l'explorateur de fichiers des bibliothèques.\nLa restriction de contenu n'est pas prise en charge lorsque cette fonctionnalité est accordée"
 						},
+						"download": {
+							"label": "Download files",
+							"description": "Allows the user to download files from the server"
+						},
 						"upload": {
 							"label": "Envoyer des fichiers",
 							"description": "Permet à l'utilisateur d'envoyer des fichiers sur le serveur"
@@ -576,6 +581,10 @@
 					},
 					"user": {
 						"label": "Gestion des Utilisateurs",
+						"read": {
+							"label": "Read users",
+							"description": "Allows the user to query other users on the server. This is required for some other features, e.g. excluding users from accessing a library"
+						},
 						"manage": {
 							"label": "Gérer les utilisateurs",
 							"description": "Permet à l'utilisateur de gérer d'autres utilisateurs sur le serveur.\nInclut les permissions pour créer et mettre à jour"
@@ -708,6 +717,8 @@
 		"save": "Sauvegarder",
 		"saveChanges": "Enregistrer les modifications",
 		"create": "Créer",
-		"edit": "Éditer"
+		"edit": "Éditer",
+		"unimplemented": "This functionality is not yet implemented! Check back later",
+		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later"
 	}
 }

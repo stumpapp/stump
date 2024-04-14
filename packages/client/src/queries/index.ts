@@ -8,6 +8,18 @@ export {
 	useCreateBookClub,
 	useUpdateBookClub,
 } from './bookClub'
+export {
+	prefetchEmailerSendHistory,
+	useCreateEmailDevice,
+	useDeleteEmailDevice,
+	useEmailDevicesQuery,
+	useEmailerQuery,
+	useEmailerSendHistoryQuery,
+	useEmailersQuery,
+	useSendAttachmentEmail,
+	useUpdateEmailDevice,
+	useUpdateEmailer,
+} from './emailers'
 export { type EpubActions, useEpub, useEpubLazy, type UseEpubReturn } from './epub'
 export {
 	type DirectoryListingQueryParams,

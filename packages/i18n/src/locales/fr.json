@@ -47,63 +47,63 @@
 	},
 	"createBookClubScene": {
 		"heading": "Créer un nouveau Club de Lecture",
-		"subtitle": "You can create a private book club a select few, or make it public for anyone on the server to join",
+		"subtitle": "Vous pouvez créer un club de lecture privé en sélectionnant des membres, ou le rendre public pour tous sur le serveur",
 		"form": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My book club",
-				"description": "The name of your book club"
+				"label": "Nom",
+				"placeholder": "Mon club de lecture",
+				"description": "Le nom de votre club de lecture"
 			},
 			"description": {
 				"label": "Description",
-				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
-				"description": "An optional, short description of your book club"
+				"placeholder": "Un club de fans sur \"Notre Drapeau signifie la Mort\". Nous lisons des fictions sur la piraterie au gré de nos envies",
+				"description": "Une courte description facultative de votre club de lecture"
 			},
 			"is_private": {
-				"label": "Private club",
-				"description": "If enabled, only users you invite will be able to join your book club"
+				"label": "Club privé",
+				"description": "Si activée, seuls les utilisateurs que vous invitez pourront rejoindre votre club de lecture"
 			},
 			"member_role_spec": {
-				"heading": "Custom role mapping",
+				"heading": "Mappage des rôles personnalisé",
 				"subtitle": [
 					"You can create custom names for the roles in your book club. For example, you could rename the 'Member' role to 'Crewmate', or 'Creator' to 'Captain'. If you don't want to use custom names, you can leave these fields blank and the default names will be used instead. For more information about roles, refer to the",
 					"documentation"
 				],
 				"member": {
-					"label": "Member",
-					"placeholder": "Member",
-					"description": "The name of the default role for your book club"
+					"label": "Membre",
+					"placeholder": "Membre",
+					"description": "Le nom du rôle par défaut pour votre club de lecture"
 				},
 				"moderator": {
-					"label": "Moderator",
-					"placeholder": "Moderator",
-					"description": "The name of the moderator role for your book club"
+					"label": "Modérateur",
+					"placeholder": "Modérateur",
+					"description": "Le nom du rôle de modérateur pour votre club de lecture"
 				},
 				"admin": {
-					"label": "Admin",
-					"placeholder": "Admin",
-					"description": "The name of the admin role for your book club"
+					"label": "Administrateur",
+					"placeholder": "Administrateur",
+					"description": "Le nom du rôle d'administrateur de votre club de lecture"
 				},
 				"creator": {
-					"label": "Creator",
-					"placeholder": "Creator",
-					"description": "The name of the creator role for your book club. This is you!"
+					"label": "Créateur",
+					"placeholder": "Créateur",
+					"description": "Le nom du rôle de créateur de votre club de lecture. C'est vous !"
 				}
 			},
 			"creator_preferences": {
 				"heading": "Your membership preferences",
 				"subtitle": "Some preferences for your membership in the book club. These can be changed at any time from the book club settings page",
 				"creator_display_name": {
-					"label": "Display Name",
+					"label": "Nom affiché",
 					"placeholder": "oromei",
-					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+					"description": "Un nom affiché facultatif pour votre adhésion au club de lecture. Si défini, celui-ci prend la priorité sur votre nom d'utilisateur"
 				},
 				"creator_hide_progress": {
-					"label": "Hide Progress",
-					"description": "If enabled, your read progress will be hidden from other members of the book club"
+					"label": "Masquer la progression",
+					"description": "Si activée, votre progression de lecture sera cachée aux autres membres du club"
 				}
 			},
-			"submit": "Create Book Club"
+			"submit": "Créer un Club de Lecture"
 		}
 	},
 	"createLibraryScene": {
@@ -275,7 +275,7 @@
 	"settingsScene": {
 		"navigation": {
 			"general": "Général",
-			"logs": "Logs",
+			"logs": "Journaux",
 			"server": "Serveur",
 			"jobs": "Tâches et Configuration",
 			"users": "Gestion des Utilisateurs",
@@ -283,25 +283,26 @@
 		},
 		"sidebar": {
 			"application": {
-				"account": "Account",
+				"account": "Compte",
 				"appearance": "Apparence",
+				"reader": "Lecteur",
 				"desktop": "Bureau",
 				"label": "Application"
 			},
 			"server": {
-				"general": "General",
-				"logs": "Logs",
-				"users": "Users",
-				"jobs": "Jobs",
-				"access": "Access",
+				"general": "Général",
+				"logs": "Journaux",
+				"users": "Utilisateurs",
+				"jobs": "Tâches",
+				"access": "Accéder",
 				"notifications": "Notifications",
-				"label": "Server"
+				"label": "Serveur"
 			}
 		},
 		"app/account": {
-			"helmet": "Account settings",
-			"title": "Account settings",
-			"description": "Settings related to your account",
+			"helmet": "Paramètres du compte",
+			"title": "Paramètres du compte",
+			"description": "Paramètres liés à votre compte",
 			"sections": {
 				"account": {
 					"validation": {
@@ -370,21 +371,21 @@
 			}
 		},
 		"app/reader": {
-			"helmet": "Reader settings",
-			"title": "Reader settings",
-			"description": "Default options for the Stump readers. These are bound to your current device only",
+			"helmet": "Paramètres du lecteur",
+			"title": "Paramètres du lecteur",
+			"description": "Options par défaut pour les lecteurs. Elles sont liées à votre appareil actuel uniquement",
 			"sections": {
 				"imageBasedBooks": {
-					"label": "Image-based books",
-					"description": "Comic books, manga, and other image-based books",
+					"label": "Livres illustrés",
+					"description": "Bandes dessinées, mangas, et autres livres illustrés",
 					"sections": {
 						"preloadAheadCount": {
-							"label": "Preload ahead count",
-							"description": "The number of pages to preload ahead of the current page"
+							"label": "Nombre de préchargements avant la page actuelle",
+							"description": "Le nombre de pages à précharger avant la page actuelle"
 						},
 						"preloadBehindCount": {
-							"label": "Preload behind count",
-							"description": "The number of pages to preload behind the current page"
+							"label": "Nombre de préchargements après la page actuelle",
+							"description": "Le nombre de pages à précharger après la page actuelle"
 						}
 					}
 				}
@@ -411,41 +412,41 @@
 					"message": "Votre serveur n'est pas à jour. Veuillez le mettre à jour vers la dernière version !"
 				},
 				"serverInfo": {
-					"title": "Server information",
-					"description": "Basic details about your Stump server instance",
+					"title": "Informations du serveur",
+					"description": "Détails de base sur l'instance de votre serveur Stump",
 					"build": {
-						"label": "Build",
-						"description": "Details about the version and build",
+						"label": "Version",
+						"description": "Détails à propos de la version",
 						"version": {
 							"semver": "Version",
-							"commitHash": "Exact commit",
-							"date": "Build date"
+							"commitHash": "Commit exact",
+							"date": "Date de compilation"
 						}
 					}
 				}
 			}
 		},
 		"server/logs": {
-			"helmet": "Logs",
-			"title": "Logs",
-			"description": "The logs generated by your Stump server instance",
+			"helmet": "Journaux",
+			"title": "Journaux",
+			"description": "Les journaux générés par votre instance de serveur Stump",
 			"sections": {
 				"persistedLogs": {
-					"title": "Persisted logs",
-					"description": "These logs have been manually persisted to the database, typically associated with a specific job or event",
+					"title": "Journaux persistants",
+					"description": "Ces journaux ont été enregistrés manuellement dans la base de données et sont généralement associés à un travail ou à un événement spécifique",
 					"table": {
 						"columns": {
-							"level": "Level",
+							"level": "Niveau",
 							"message": "Message",
-							"timestamp": "Timestamp"
+							"timestamp": "Horodatage"
 						},
-						"emptyHeading": "No logs to display",
-						"emptySubtitle": "Your server is either very healthy or very unhealthy"
+						"emptyHeading": "Aucun journal à afficher",
+						"emptySubtitle": "Votre serveur est soit très sain, soit en très mauvais état"
 					}
 				},
 				"liveLogs": {
-					"title": "Live logs feed",
-					"description": "Streamed directly from your Stump server instance in real-time"
+					"title": "Flux des journaux en direct",
+					"description": "Diffusion directe depuis votre instance de serveur Stump en temps réel"
 				}
 			}
 		},
@@ -536,8 +537,12 @@
 					"file": {
 						"label": "Gestion des fichiers",
 						"explorer": {
-							"label": "Explorateur de Fichiers",
-							"description": "Permet à l'utilisateur d'accéder à l'explorateur de fichiers des bibliothèques.\nLa restriction de contenu n'est pas prise en charge lorsque cette fonctionnalité est accordée"
+							"label": "File Explorer",
+							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+						},
+						"download": {
+							"label": "Télécharger les fichiers",
+							"description": "Permet à l'utilisateur de télécharger des fichiers à partir du serveur"
 						},
 						"upload": {
 							"label": "Envoyer des fichiers",
@@ -576,16 +581,20 @@
 					},
 					"user": {
 						"label": "Gestion des Utilisateurs",
+						"read": {
+							"label": "Lire des utilisateurs",
+							"description": "Permet à l'utilisateur de rechercher d'autres utilisateurs sur le serveur. Cette fonction est nécessaire pour certaines fonctionnalités, par exemple pour réduire l'accès à une bibliothèque pour des utilisateurs"
+						},
 						"manage": {
 							"label": "Gérer les utilisateurs",
-							"description": "Permet à l'utilisateur de gérer d'autres utilisateurs sur le serveur.\nInclut les permissions pour créer et mettre à jour"
+							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
 						}
 					},
 					"smartlist": {
 						"label": "Listes intelligentes",
 						"read": {
 							"label": "Accéder à la fonctionnalité Liste Intelligente",
-							"description": "Permet à l'utilisateur d'accéder aux fonctionnalités des listes intelligentes"
+							"description": "Allows the user to access smart lists features"
 						}
 					}
 				},
@@ -631,7 +640,7 @@
 			"home": "Accueil",
 			"libraries": "Bibliothèques",
 			"books": "Explorer",
-			"bookClubs": "Club de lecture",
+			"bookClubs": "Clubs de lecture",
 			"createLibrary": "Créer une bibliothèque",
 			"noLibraries": "Aucune bibliothèque",
 			"createBookClub": "Créer un Club de Lecture",
@@ -647,7 +656,7 @@
 		"libraryOptions": {
 			"scanLibrary": "Scanner",
 			"fileExplorer": "Explorateur de fichiers",
-			"manageLibrary": "Gérer",
+			"manageLibrary": "Manage",
 			"deleteLibrary": "Supprimer"
 		},
 		"versionInformation": {
@@ -668,7 +677,7 @@
 		"web": {
 			"message": "Une erreur de réseau s'est produite indiquant que votre serveur Stump est actuellement indisponible. Veuillez vous assurer qu'il est en cours d'exécution et accessible depuis cet appareil"
 		},
-		"reconnected": "Reconnecté au serveur ! Redirection...",
+		"reconnected": "Reconnecté au serveur! Redirection...",
 		"reconnectionFailed": "Quelque chose s'est mal passé!"
 	},
 	"serverStatusOverlay": {
@@ -691,7 +700,7 @@
 		"placeholderNoTags": "Aucune étiquette disponible"
 	},
 	"thumbnailDropdown": {
-		"label": "Éditer l'image de couverture",
+		"label": "Edit thumbnail",
 		"options": {
 			"selectFromBooks": "Sélectionner à partir des livres",
 			"uploadImage": "Importer une image"
@@ -708,6 +717,8 @@
 		"save": "Sauvegarder",
 		"saveChanges": "Enregistrer les modifications",
 		"create": "Créer",
-		"edit": "Éditer"
+		"edit": "Éditer",
+		"unimplemented": "Cette fonctionnalité n'est pas encore implémentée ! Revenez plus tard",
+		"limitedFunctionality": "Ceci n'est pas encore totalement implémenté et manque de certaines fonctionnalités. Revenez plus tard"
 	}
 }

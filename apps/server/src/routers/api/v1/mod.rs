@@ -15,6 +15,7 @@ use crate::{
 
 pub(crate) mod auth;
 pub(crate) mod book_club;
+pub(crate) mod emailer;
 pub(crate) mod epub;
 pub(crate) mod filesystem;
 pub(crate) mod job;
@@ -33,6 +34,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.merge(auth::mount())
 		.merge(epub::mount(app_state.clone()))
+		.merge(emailer::mount(app_state.clone()))
 		.merge(library::mount(app_state.clone()))
 		.merge(media::mount(app_state.clone()))
 		.merge(metadata::mount(app_state.clone()))

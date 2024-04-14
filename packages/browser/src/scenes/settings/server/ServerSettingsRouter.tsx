@@ -3,6 +3,7 @@ import { Route, Routes, useNavigate } from 'react-router'
 
 import { useAppContext } from '@/context'
 
+import { EmailSettingsRouter } from './email'
 import { UsersRouter } from './users'
 
 const GeneralServerSettingsScene = lazy(() => import('./general/GeneralServerSettingsScene.tsx'))
@@ -16,8 +17,9 @@ export default function ServerSettingsRouter() {
 
 	const canManageServer = useMemo(() => checkPermission('server:manage'), [checkPermission])
 	const canManageUsers = useMemo(() => checkPermission('user:manage'), [checkPermission])
+	const canManageEmail = useMemo(() => checkPermission('emailer:manage'), [checkPermission])
 
-	const hasAtLeastOnePermission = canManageServer || canManageUsers
+	const hasAtLeastOnePermission = canManageServer || canManageUsers || canManageEmail
 	useEffect(() => {
 		if (!hasAtLeastOnePermission) {
 			navigate('/settings', { replace: true })
@@ -34,6 +36,7 @@ export default function ServerSettingsRouter() {
 			{canManageServer && <Route path="logs" element={<ServerLogsScene />} />}
 			{canManageServer && <Route path="jobs" element={<JobSettingsScene />} />}
 			{canManageUsers && <Route path="users/*" element={<UsersRouter />} />}
+			{canManageEmail && <Route path="email/*" element={<EmailSettingsRouter />} />}
 		</Routes>
 	)
 }

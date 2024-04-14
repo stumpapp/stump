@@ -91,7 +91,7 @@ function SeriesOverviewScene() {
 				orderBy
 			/>
 
-			<div className="flex w-full flex-col gap-y-6">
+			<div className="flex w-full flex-col gap-y-6 pb-[64px] md:pb-0">
 				{hasStuff && (
 					<Pagination pages={total_pages} currentPage={current_page} onChangePage={setPage} />
 				)}

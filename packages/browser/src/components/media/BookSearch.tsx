@@ -68,7 +68,7 @@ export default function BookSearch({ page, page_size, setPage, onBookSelect, sho
 				{...(showFilters ? { entity: 'media', orderBy: true } : {})}
 			/>
 
-			<div className="flex w-full flex-col space-y-6 pt-4">
+			<div className="flex w-full flex-col space-y-6 pb-[64px] pt-4 md:pb-0">
 				{hasStuff && (
 					<Pagination
 						pages={total_pages}

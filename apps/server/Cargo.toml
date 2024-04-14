@@ -17,7 +17,7 @@ axum-extra = { version = "0.5.0", features = [
   "spa",
   "query"
 ] }
-base64 = "0.21.5"
+base64 = "0.22.0"
 bcrypt = { workspace = true }
 cli = { path = "../../crates/cli" }
 futures-util = { workspace = true }
@@ -41,7 +41,7 @@ tower-http = { version = "0.4.4", features = [
   "trace"
 ] }
 thiserror = { workspace = true }
-time = "0.3.30"
+time = "0.3.36"
 tokio = { workspace = true }
 tokio-util = "0.7.10"
 tower = "0.4.13"
@@ -52,7 +52,7 @@ utoipa = { version = "3.5.0", features = ["axum_extras"] }
 utoipa-swagger-ui = { version = "3.1.5", features = ["axum"] }
 
 [build-dependencies]
-chrono = "0.4.31"
+chrono = "0.4.37"
 
 [target.aarch64-unknown-linux-musl.dependencies]
 openssl = { version = "0.10.61", features = ["vendored"] }

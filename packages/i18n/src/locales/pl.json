@@ -114,7 +114,7 @@
 			"labels": {
 				"libraryName": "Nazwa",
 				"libraryPath": "Ścieżka",
-				"libraryPathDescription": "The path to the library as it exists on your server",
+				"libraryPathDescription": "Ścieżka do biblioteki w takiej formie jak na Twoim serwerze",
 				"libraryDescription": "Opis",
 				"libraryTags": "Etykiety"
 			},
@@ -126,7 +126,7 @@
 	"librarySettingsScene": {
 		"heading": "Manage Library",
 		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"subtitleLink": "stosowna dokumentacja",
 		"form": {
 			"labels": {
 				"libraryName": "Nazwa",
@@ -187,9 +187,9 @@
 		},
 		"list": {
 			"emptyState": {
-				"heading": "No smart lists to display",
-				"noListsMessage": "Create a smart list to get started",
-				"noMatchesMessage": "Try changing your search query"
+				"heading": "Brak inteligentnych list do wyświetlenia",
+				"noListsMessage": "Utwórz inteligentną listę aby rozpocząć",
+				"noMatchesMessage": "Spróbuj zmienić kryteria wyszukiwania"
 			},
 			"card": {
 				"meta": {
@@ -209,7 +209,7 @@
 			"settings": "Ustawienia"
 		},
 		"layout": {
-			"missingIdError": "This scene requires an ID in the URL",
+			"missingIdError": "Ta scena wymaga identyfikatora w odnośniku",
 			"smartListNotFound": "Smart list not found",
 			"viewCreateError": "Nie udało się utworzyć widoku",
 			"viewSaveError": "Nie udało się zapisać widoku"
@@ -306,7 +306,7 @@
 			"sections": {
 				"account": {
 					"validation": {
-						"invalidUrl": "Wprowadź prawidłowy adres",
+						"invalidUrl": "Wprowadź prawidłowy odnośnik",
 						"missingUsername": "Nazwa użytkownika jest wymagana"
 					},
 					"labels": {
@@ -365,7 +365,7 @@
 					"options": {
 						"light": "Jasny",
 						"dark": "Ciemny",
-						"bronze": "Bronze light"
+						"bronze": "Jasnobrązowy"
 					}
 				}
 			}
@@ -404,12 +404,12 @@
 			}
 		},
 		"server/general": {
-			"helmet": "General server settings",
+			"helmet": "Ustawienia ogólne serwera",
 			"title": "Ustawienia ogólne",
 			"description": "General settings related to your Stump server instance",
 			"sections": {
 				"updateAvailable": {
-					"message": "Your server is not up to date. Please update to the latest version!"
+					"message": "Twój serwer jest nieaktualny. Zaktualizuj go do najnowszej wersji!"
 				},
 				"serverInfo": {
 					"title": "Informacja o serwerze",
@@ -432,7 +432,7 @@
 			"description": "Logi generowane przez tą instancję serwera Stump",
 			"sections": {
 				"persistedLogs": {
-					"title": "Persisted logs",
+					"title": "Trwałe logi",
 					"description": "These logs have been manually persisted to the database, typically associated with a specific job or event",
 					"table": {
 						"columns": {
@@ -441,12 +441,12 @@
 							"timestamp": "Sygnatura czasowa"
 						},
 						"emptyHeading": "Brak pozycji do wyświetlenia",
-						"emptySubtitle": "Your server is either very healthy or very unhealthy"
+						"emptySubtitle": "Twój serwer jest bardzo zdrowy lub bardzo niezdrowy"
 					}
 				},
 				"liveLogs": {
-					"title": "Live logs feed",
-					"description": "Streamed directly from your Stump server instance in real-time"
+					"title": "Kanał logów na żywo",
+					"description": "Strumieniowany w czasie rzeczywistym bezpośrednio z instancji serwera Stump"
 				}
 			}
 		},
@@ -685,7 +685,7 @@
 		"message": [
 			"Sprawdź swoje połączenie z internetem",
 			"Kliknij tutaj",
-			"aby zmienić adres serwera"
+			"aby zmienić odnośnik serwera"
 		]
 	},
 	"slidingList": {

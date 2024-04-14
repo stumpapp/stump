@@ -27,7 +27,7 @@ impl AsRef<str> for EmailTemplate {
 /// use std::path::PathBuf;
 ///
 /// let data = json!({
-/// 	"title": "Stump Attachment",
+///     "title": "Stump Attachment",
 /// });
 ///
 /// let rendered = render_template(EmailTemplate::Attachment, &data, PathBuf::from("templates")).unwrap();

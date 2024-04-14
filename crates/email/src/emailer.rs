@@ -67,15 +67,15 @@ impl EmailerClient {
 	/// use std::path::PathBuf;
 	///
 	/// let config = EmailerClientConfig {
-	/// 	sender_email: "aaron@stumpapp.dev".to_string(),
-	/// 	sender_display_name: "Aaron's Stump Instance".to_string(),
-	/// 	username: "aaron@stumpapp.dev".to_string(),
-	/// 	password: "decrypted_password".to_string(),
-	/// 	host: "smtp.stumpapp.dev".to_string(),
-	/// 	port: 587,
-	/// 	tls_enabled: true,
-	/// 	max_attachment_size_bytes: Some(10_000_000),
-	/// 	max_num_attachments: Some(5),
+	///     sender_email: "aaron@stumpapp.dev".to_string(),
+	///     sender_display_name: "Aaron's Stump Instance".to_string(),
+	///     username: "aaron@stumpapp.dev".to_string(),
+	///     password: "decrypted_password".to_string(),
+	///     host: "smtp.stumpapp.dev".to_string(),
+	///     port: 587,
+	///     tls_enabled: true,
+	///     max_attachment_size_bytes: Some(10_000_000),
+	///     max_num_attachments: Some(5),
 	/// };
 	/// let template_dir = PathBuf::from("/templates");
 	/// let emailer = EmailerClient::new(config, template_dir);
@@ -97,30 +97,30 @@ impl EmailerClient {
 	/// use lettre::message::header::ContentType;
 	///
 	/// async fn test() {
-	/// 	let config = EmailerClientConfig {
-	/// 		sender_email: "aaron@stumpapp.dev".to_string(),
-	/// 		sender_display_name: "Aaron's Stump Instance".to_string(),
-	/// 		username: "aaron@stumpapp.dev".to_string(),
-	/// 		password: "decrypted_password".to_string(),
-	/// 		host: "smtp.stumpapp.dev".to_string(),
-	/// 		port: 587,
-	/// 		tls_enabled: true,
-	/// 		max_attachment_size_bytes: Some(10_000_000),
-	/// 		max_num_attachments: Some(5),
-	/// 	};
-	/// 	let template_dir = PathBuf::from("/templates");
-	/// 	let emailer = EmailerClient::new(config, template_dir);
+	///     let config = EmailerClientConfig {
+	///         sender_email: "aaron@stumpapp.dev".to_string(),
+	///         sender_display_name: "Aaron's Stump Instance".to_string(),
+	///         username: "aaron@stumpapp.dev".to_string(),
+	///         password: "decrypted_password".to_string(),
+	///         host: "smtp.stumpapp.dev".to_string(),
+	///         port: 587,
+	///         tls_enabled: true,
+	///         max_attachment_size_bytes: Some(10_000_000),
+	///         max_num_attachments: Some(5),
+	///     };
+	///     let template_dir = PathBuf::from("/templates");
+	///     let emailer = EmailerClient::new(config, template_dir);
 	///
-	/// 	let result = emailer.send_attachment(
-	/// 		"Attachment Test",
-	/// 		"aaron@stumpapp.dev",
-	/// 		AttachmentPayload {
-	/// 			name: "test.txt".to_string(),
-	/// 			content: b"Hello, world!".to_vec(),
-	/// 			content_type: "text/plain".parse().unwrap(),
-	/// 		},
-	/// 	).await;
-	/// 	assert!(result.is_err()); // This will fail because the SMTP server is not real
+	///     let result = emailer.send_attachment(
+	///         "Attachment Test",
+	///         "aaron@stumpapp.dev",
+	///         AttachmentPayload {
+	///             name: "test.txt".to_string(),
+	///             content: b"Hello, world!".to_vec(),
+	///             content_type: "text/plain".parse().unwrap(),
+	///         },
+	///     ).await;
+	///     assert!(result.is_err()); // This will fail because the SMTP server is not real
 	/// }
 	/// ```
 	pub async fn send_attachment(
@@ -143,37 +143,37 @@ impl EmailerClient {
 	/// use lettre::message::header::ContentType;
 	///
 	/// async fn test() {
-	/// 	let config = EmailerClientConfig {
-	/// 		sender_email: "aaron@stumpapp.dev".to_string(),
-	/// 		sender_display_name: "Aaron's Stump Instance".to_string(),
-	/// 		username: "aaron@stumpapp.dev".to_string(),
-	/// 		password: "decrypted_password".to_string(),
-	/// 		host: "smtp.stumpapp.dev".to_string(),
-	/// 		port: 587,
-	/// 		tls_enabled: true,
-	/// 		max_attachment_size_bytes: Some(10_000_000),
-	/// 		max_num_attachments: Some(5),
-	/// 	};
-	/// 	let template_dir = PathBuf::from("/templates");
-	/// 	let emailer = EmailerClient::new(config, template_dir);
+	///     let config = EmailerClientConfig {
+	///         sender_email: "aaron@stumpapp.dev".to_string(),
+	///         sender_display_name: "Aaron's Stump Instance".to_string(),
+	///         username: "aaron@stumpapp.dev".to_string(),
+	///         password: "decrypted_password".to_string(),
+	///         host: "smtp.stumpapp.dev".to_string(),
+	///         port: 587,
+	///         tls_enabled: true,
+	///         max_attachment_size_bytes: Some(10_000_000),
+	///         max_num_attachments: Some(5),
+	///     };
+	///     let template_dir = PathBuf::from("/templates");
+	///     let emailer = EmailerClient::new(config, template_dir);
 	///
-	/// 	let result = emailer.send_attachments(
-	/// 		"Attachment Test",
-	/// 		"aaron@stumpapp.dev",
-	/// 		vec![
-	/// 			AttachmentPayload {
-	/// 				name: "test.txt".to_string(),
-	/// 				content: b"Hello, world!".to_vec(),
-	/// 				content_type: "text/plain".parse().unwrap(),
-	/// 			},
-	/// 			AttachmentPayload {
-	/// 				name: "test2.txt".to_string(),
-	/// 				content: b"Hello, world again!".to_vec(),
-	/// 				content_type: "text/plain".parse().unwrap(),
-	/// 			},
-	/// 		],
-	/// 	).await;
-	/// 	assert!(result.is_err()); // This will fail because the SMTP server is not real
+	///     let result = emailer.send_attachments(
+	///         "Attachment Test",
+	///         "aaron@stumpapp.dev",
+	///         vec![
+	///             AttachmentPayload {
+	///                 name: "test.txt".to_string(),
+	///                 content: b"Hello, world!".to_vec(),
+	///                 content_type: "text/plain".parse().unwrap(),
+	///             },
+	///             AttachmentPayload {
+	///                 name: "test2.txt".to_string(),
+	///                 content: b"Hello, world again!".to_vec(),
+	///                 content_type: "text/plain".parse().unwrap(),
+	///             },
+	///         ],
+	///     ).await;
+	///     assert!(result.is_err()); // This will fail because the SMTP server is not real
 	/// }
 	/// ```
 	pub async fn send_attachments(

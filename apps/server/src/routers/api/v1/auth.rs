@@ -342,9 +342,10 @@ pub async fn register(
 	// supported on the prisma client. Until then, this ugly mess is necessary.
 	let _user_preferences = db
 		.user_preferences()
-		.create(vec![user_preferences::user::connect(user::id::equals(
-			created_user.id.clone(),
-		))])
+		.create(vec![
+			user_preferences::user::connect(user::id::equals(created_user.id.clone())),
+			user_preferences::user_id::set(Some(created_user.id.clone())),
+		])
 		.exec()
 		.await?;
 

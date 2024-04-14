@@ -4,6 +4,108 @@ use utoipa::ToSchema;
 
 use crate::prisma;
 
+#[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+pub enum NavigationMode {
+	#[default]
+	#[serde(rename = "SIDEBAR")]
+	SideBar,
+	#[serde(rename = "TOPBAR")]
+	TopBar,
+}
+
+// TODO: support order_by for some options with actions
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+#[serde(tag = "type")]
+pub enum NavigationItem {
+	Home,
+	Explore,
+	Libraries { show_create_action: bool },
+	SmartLists { show_create_action: bool },
+	BookClubs { show_create_action: bool },
+}
+
+// TODO: support order_by in some options (e.g. Library)
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+#[serde(tag = "type")]
+pub enum HomeItem {
+	ContinueReading,
+	RecentlyAddedBooks,
+	RecentlyAddedSeries,
+	Library { library_id: String },
+	SmartList { smart_list_id: String },
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+pub struct ArrangementItem<I> {
+	item: I,
+	#[serde(default = "default_true")]
+	visible: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+pub struct Arrangement<I> {
+	locked: bool,
+	items: Vec<ArrangementItem<I>>,
+}
+
+impl<I> Arrangement<I> {
+	pub fn default_navigation() -> Arrangement<NavigationItem> {
+		Arrangement {
+			locked: true,
+			items: vec![
+				ArrangementItem {
+					item: NavigationItem::Home,
+					visible: true,
+				},
+				ArrangementItem {
+					item: NavigationItem::Explore,
+					visible: true,
+				},
+				ArrangementItem {
+					item: NavigationItem::Libraries {
+						show_create_action: true,
+					},
+					visible: true,
+				},
+				ArrangementItem {
+					item: NavigationItem::SmartLists {
+						show_create_action: true,
+					},
+					visible: true,
+				},
+				ArrangementItem {
+					item: NavigationItem::BookClubs {
+						show_create_action: true,
+					},
+					visible: true,
+				},
+			],
+		}
+	}
+
+	pub fn default_home() -> Arrangement<HomeItem> {
+		Arrangement {
+			locked: true,
+			items: vec![
+				ArrangementItem {
+					item: HomeItem::ContinueReading,
+					visible: true,
+				},
+				ArrangementItem {
+					item: HomeItem::RecentlyAddedBooks,
+					visible: true,
+				},
+				ArrangementItem {
+					item: HomeItem::RecentlyAddedSeries,
+					visible: true,
+				},
+			],
+		}
+	}
+}
+
 fn default_navigation_mode() -> String {
 	"SIDEBAR".to_string()
 }
@@ -48,6 +150,11 @@ pub struct UserPreferences {
 	pub prefer_accent_color: bool,
 	#[serde(default)]
 	pub show_thumbnails_in_headers: bool,
+
+	#[serde(default = "Arrangement::<NavigationItem>::default_navigation")]
+	pub navigation_arrangement: Arrangement<NavigationItem>,
+	#[serde(default = "Arrangement::<HomeItem>::default_home")]
+	pub home_arrangement: Arrangement<HomeItem>,
 }
 
 impl Default for UserPreferences {
@@ -68,6 +175,8 @@ impl Default for UserPreferences {
 			enable_hide_scrollbar: false,
 			prefer_accent_color: true,
 			show_thumbnails_in_headers: false,
+			navigation_arrangement: Arrangement::<NavigationItem>::default_navigation(),
+			home_arrangement: Arrangement::<HomeItem>::default_home(),
 		}
 	}
 }
@@ -78,6 +187,35 @@ impl Default for UserPreferences {
 
 impl From<prisma::user_preferences::Data> for UserPreferences {
 	fn from(data: prisma::user_preferences::Data) -> UserPreferences {
+		let navigation_arrangement = data
+			.navigation_arrangement
+			.map(|bytes| {
+				serde_json::from_slice(&bytes).map_or_else(
+					|error| {
+						tracing::error!(
+							?error,
+							"Failed to deserialize navigation arrangement"
+						);
+						Arrangement::<NavigationItem>::default_navigation()
+					},
+					|v| v,
+				)
+			})
+			.unwrap_or_else(|| Arrangement::<NavigationItem>::default_navigation());
+
+		let home_arrangement = data
+			.home_arrangement
+			.map(|bytes| {
+				serde_json::from_slice(&bytes).map_or_else(
+					|error| {
+						tracing::error!(?error, "Failed to deserialize home arrangement");
+						Arrangement::<HomeItem>::default_home()
+					},
+					|v| v,
+				)
+			})
+			.unwrap_or_else(|| Arrangement::<HomeItem>::default_home());
+
 		UserPreferences {
 			id: data.id,
 			locale: data.locale,
@@ -94,6 +232,8 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 			enable_hide_scrollbar: data.enable_hide_scrollbar,
 			prefer_accent_color: data.prefer_accent_color,
 			show_thumbnails_in_headers: data.show_thumbnails_in_headers,
+			navigation_arrangement,
+			home_arrangement,
 		}
 	}
 }

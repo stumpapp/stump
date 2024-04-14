@@ -1,3 +1,4 @@
+pub mod analyze_media_job;
 mod builder;
 mod common;
 pub(crate) mod epub;

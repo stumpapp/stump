@@ -3,13 +3,13 @@ use std::path::PathBuf;
 use axum::{
 	extract::{DefaultBodyLimit, Multipart, Path, State},
 	middleware::from_extractor_with_state,
-	routing::{get, put},
+	routing::{get, post, put},
 	Json, Router,
 };
 use axum_extra::extract::Query;
 use prisma_client_rust::{
 	and,
-	chrono::{Duration, Utc},
+	chrono::{DateTime, Duration, Utc},
 	operator::{self, or},
 	or, raw, Direction, PrismaValue,
 };
@@ -23,6 +23,7 @@ use stump_core::{
 		CountQueryReturn,
 	},
 	filesystem::{
+		analyze_media_job::AnalyzeMediaJob,
 		get_unknown_thumnail,
 		image::{
 			generate_thumbnail, place_thumbnail, remove_thumbnails, ImageFormat,
@@ -81,6 +82,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						// TODO: configurable max file size
 						.layer(DefaultBodyLimit::max(20 * 1024 * 1024)), // 20MB
 				)
+				.route("/analyze", post(start_media_analysis))
 				.route("/page/:page", get(get_media_page))
 				.route(
 					"/progress",
@@ -1193,6 +1195,7 @@ async fn replace_media_thumbnail(
 
 	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 	// user testing I'd like to see if this becomes a problem. We'll see!
+	// TODO - What was the outcome of this testing?
 	remove_thumbnails(&[book_id.clone()], ctx.config.get_thumbnails_dir())
 		.unwrap_or_else(|e| {
 			tracing::error!(
@@ -1207,6 +1210,43 @@ async fn replace_media_thumbnail(
 		content_type,
 		read_entire_file(path_buf)?,
 	)))
+}
+
+#[derive(Default, Deserialize, Serialize)]
+pub struct MediaAnalysisStarted {
+	started_at: Option<String>,
+}
+
+#[utoipa::path(
+	post,
+	path = "/api/v1/media/:id/analyze",
+	tag = "media",
+	params(
+		("id" = String, Path, description = "The ID of the media to analyze")
+	),
+	responses(
+		(status = 200, description = "Successfully started media analysis"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Media not found"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn start_media_analysis(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> APIResult<Json<MediaAnalysisStarted>> {
+	tracing::warn!("Recieved start_media_analysis request for id: {}", id);
+	// TODO enforce permissions
+
+	// Start analysis job
+	ctx.enqueue_job(AnalyzeMediaJob::new(id)).unwrap();
+
+	APIResult::Ok(Json(MediaAnalysisStarted {
+		// TODO fix this
+		started_at: Some("Now".to_string()),
+	}))
 }
 
 #[utoipa::path(

@@ -98,6 +98,15 @@ export function putMediaCompletion(
 	return API.put(`/media/${id}/progress/complete`, payload)
 }
 
+/**
+ * Start the analysis of an individual media item by id.
+ *
+ * @param id The id for the media item to analyze
+ */
+export function startMediaAnalysis(id: string) {
+	API.post(`/media/${id}/analyze`)
+}
+
 export const mediaApi = {
 	getInProgressMedia,
 	getMedia,
@@ -110,6 +119,7 @@ export const mediaApi = {
 	getRecentlyAddedMedia,
 	patchMediaThumbnail,
 	putMediaCompletion,
+	startMediaAnalysis,
 	updateMediaProgress,
 	uploadMediaThumbnail,
 }
@@ -126,6 +136,7 @@ export const mediaQueryKeys: Record<keyof typeof mediaApi, string> = {
 	getRecentlyAddedMedia: 'media.getRecentlyAdded',
 	patchMediaThumbnail: 'media.patchThumbnail',
 	putMediaCompletion: 'media.putCompletion',
+	startMediaAnalysis: 'media.startAnalysis',
 	updateMediaProgress: 'media.updateProgress',
 	uploadMediaThumbnail: 'media.uploadThumbnail',
 }

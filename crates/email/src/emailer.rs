@@ -15,6 +15,8 @@ use specta::Type;
 use utoipa::ToSchema;
 
 use crate::{render_template, EmailError, EmailResult, EmailTemplate};
+
+/// The configuration for an [EmailerClient]
 #[derive(Serialize, Deserialize, ToSchema, Type)]
 pub struct EmailerClientConfig {
 	/// The email address to send from
@@ -37,20 +39,47 @@ pub struct EmailerClientConfig {
 	pub max_num_attachments: Option<i32>,
 }
 
+/// Information about an attachment to be sent in an email, including the actual content
 #[derive(Debug)]
 pub struct AttachmentPayload {
+	/// The name of the attachment
 	pub name: String,
+	/// The bytes of the attachment
 	pub content: Vec<u8>,
+	/// The content type of the attachment, e.g. "text/plain"
 	pub content_type: ContentType,
 }
 
 /// A client for sending emails
 pub struct EmailerClient {
+	/// The configuration for the email client
 	config: EmailerClientConfig,
+	/// The directory where email templates are stored
 	template_dir: PathBuf,
 }
 
 impl EmailerClient {
+	/// Create a new [EmailerClient] instance with the given configuration and template directory.
+	///
+	/// # Example
+	/// ```rust
+	/// use email::{EmailerClient, EmailerClientConfig};
+	/// use std::path::PathBuf;
+	///
+	/// let config = EmailerClientConfig {
+	/// 	sender_email: "aaron@stumpapp.dev".to_string(),
+	/// 	sender_display_name: "Aaron's Stump Instance".to_string(),
+	/// 	username: "aaron@stumpapp.dev".to_string(),
+	/// 	password: "decrypted_password".to_string(),
+	/// 	host: "smtp.stumpapp.dev".to_string(),
+	/// 	port: 587,
+	/// 	tls_enabled: true,
+	/// 	max_attachment_size_bytes: Some(10_000_000),
+	/// 	max_num_attachments: Some(5),
+	/// };
+	/// let template_dir = PathBuf::from("/templates");
+	/// let emailer = EmailerClient::new(config, template_dir);
+	/// ```
 	pub fn new(config: EmailerClientConfig, template_dir: PathBuf) -> Self {
 		Self {
 			config,
@@ -58,6 +87,42 @@ impl EmailerClient {
 		}
 	}
 
+	/// Send an email with the given subject and attachment to the given recipient.
+	/// Internally, this will just call [EmailerClient::send_attachments] with a single attachment.
+	///
+	/// # Example
+	/// ```rust
+	/// use email::{AttachmentPayload, EmailerClient, EmailerClientConfig};
+	/// use std::path::PathBuf;
+	/// use lettre::message::header::ContentType;
+	///
+	/// async fn test() {
+	/// 	let config = EmailerClientConfig {
+	/// 		sender_email: "aaron@stumpapp.dev".to_string(),
+	/// 		sender_display_name: "Aaron's Stump Instance".to_string(),
+	/// 		username: "aaron@stumpapp.dev".to_string(),
+	/// 		password: "decrypted_password".to_string(),
+	/// 		host: "smtp.stumpapp.dev".to_string(),
+	/// 		port: 587,
+	/// 		tls_enabled: true,
+	/// 		max_attachment_size_bytes: Some(10_000_000),
+	/// 		max_num_attachments: Some(5),
+	/// 	};
+	/// 	let template_dir = PathBuf::from("/templates");
+	/// 	let emailer = EmailerClient::new(config, template_dir);
+	///
+	/// 	let result = emailer.send_attachment(
+	/// 		"Attachment Test",
+	/// 		"aaron@stumpapp.dev",
+	/// 		AttachmentPayload {
+	/// 			name: "test.txt".to_string(),
+	/// 			content: b"Hello, world!".to_vec(),
+	/// 			content_type: "text/plain".parse().unwrap(),
+	/// 		},
+	/// 	).await;
+	/// 	assert!(result.is_err()); // This will fail because the SMTP server is not real
+	/// }
+	/// ```
 	pub async fn send_attachment(
 		&self,
 		subject: &str,
@@ -68,6 +133,49 @@ impl EmailerClient {
 			.await
 	}
 
+	/// Send an email with the given subject and attachments to the given recipient.
+	/// The attachments are sent as a multipart email, with the first attachment being the email body.
+	///
+	/// # Example
+	/// ```rust
+	/// use email::{AttachmentPayload, EmailerClient, EmailerClientConfig};
+	/// use std::path::PathBuf;
+	/// use lettre::message::header::ContentType;
+	///
+	/// async fn test() {
+	/// 	let config = EmailerClientConfig {
+	/// 		sender_email: "aaron@stumpapp.dev".to_string(),
+	/// 		sender_display_name: "Aaron's Stump Instance".to_string(),
+	/// 		username: "aaron@stumpapp.dev".to_string(),
+	/// 		password: "decrypted_password".to_string(),
+	/// 		host: "smtp.stumpapp.dev".to_string(),
+	/// 		port: 587,
+	/// 		tls_enabled: true,
+	/// 		max_attachment_size_bytes: Some(10_000_000),
+	/// 		max_num_attachments: Some(5),
+	/// 	};
+	/// 	let template_dir = PathBuf::from("/templates");
+	/// 	let emailer = EmailerClient::new(config, template_dir);
+	///
+	/// 	let result = emailer.send_attachments(
+	/// 		"Attachment Test",
+	/// 		"aaron@stumpapp.dev",
+	/// 		vec![
+	/// 			AttachmentPayload {
+	/// 				name: "test.txt".to_string(),
+	/// 				content: b"Hello, world!".to_vec(),
+	/// 				content_type: "text/plain".parse().unwrap(),
+	/// 			},
+	/// 			AttachmentPayload {
+	/// 				name: "test2.txt".to_string(),
+	/// 				content: b"Hello, world again!".to_vec(),
+	/// 				content_type: "text/plain".parse().unwrap(),
+	/// 			},
+	/// 		],
+	/// 	).await;
+	/// 	assert!(result.is_err()); // This will fail because the SMTP server is not real
+	/// }
+	/// ```
 	pub async fn send_attachments(
 		&self,
 		subject: &str,
@@ -138,3 +246,5 @@ impl EmailerClient {
 		}
 	}
 }
+
+// TODO: write meaningful tests

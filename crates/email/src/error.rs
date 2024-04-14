@@ -2,6 +2,8 @@ use lettre::transport::smtp;
 
 pub type EmailResult<T> = Result<T, EmailError>;
 
+/// An error type that represents what can go wrong when sending an email
+/// using the `email` crate.
 #[derive(Debug, thiserror::Error)]
 pub enum EmailError {
 	#[error("Invalid email: {0}")]

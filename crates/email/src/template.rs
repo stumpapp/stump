@@ -3,11 +3,14 @@ use std::path::PathBuf;
 use crate::EmailResult;
 use handlebars::Handlebars;
 
-pub enum Template {
+// TODO: expose this enumeration to the public API somehow, so that users can define their own template overrides
+
+pub enum EmailTemplate {
+	/// A template for an email which includes attachment(s), e.g. a book on the server
 	Attachment,
 }
 
-impl AsRef<str> for Template {
+impl AsRef<str> for EmailTemplate {
 	fn as_ref(&self) -> &str {
 		match self {
 			Self::Attachment => "attachment",
@@ -15,8 +18,23 @@ impl AsRef<str> for Template {
 	}
 }
 
+/// Render a template to a string using the given data and templates directory.
+///
+/// # Example
+/// ```rust
+/// use email::{render_template, EmailTemplate};
+/// use serde_json::json;
+/// use std::path::PathBuf;
+///
+/// let data = json!({
+/// 	"title": "Stump Attachment",
+/// });
+///
+/// let rendered = render_template(EmailTemplate::Attachment, &data, PathBuf::from("templates")).unwrap();
+/// assert!(rendered.contains("Stump Attachment"));
+/// ```
 pub fn render_template(
-	template: Template,
+	template: EmailTemplate,
 	data: &serde_json::Value,
 	templates_dir: PathBuf,
 ) -> EmailResult<String> {
@@ -29,7 +47,8 @@ pub fn render_template(
 	Ok(handlebars.render(template.as_ref(), data)?)
 }
 
-// TODO: tests
+// TODO: Write meaningful tests
+
 #[cfg(test)]
 mod tests {
 	use super::*;
@@ -45,9 +64,11 @@ mod tests {
 		});
 
 		let rendered =
-			render_template(Template::Attachment, &data, default_templates_dir())
+			render_template(EmailTemplate::Attachment, &data, default_templates_dir())
 				.unwrap();
 
-		println!("{}", rendered);
+		dbg!(&rendered);
+
+		assert!(rendered.contains("Stump Attachment"));
 	}
 }

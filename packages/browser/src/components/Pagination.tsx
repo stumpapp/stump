@@ -1,18 +1,19 @@
 import { cn, cx } from '@stump/components'
 import { ArrowLeft, ArrowRight, MoreHorizontal } from 'lucide-react'
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useWindowSize } from 'rooks'
 
 import { usePagination } from '../hooks/usePagination'
 import PagePopoverForm from './PagePopoverForm'
 
-interface PaginationArrowProps {
+type PaginationArrowProps = {
 	kind: 'previous' | 'next'
 	isDisabled?: boolean
 	onClick: () => void
+	onMouseEnter?: () => void
 }
 
-function PaginationArrow({ kind, isDisabled, onClick }: PaginationArrowProps) {
+function PaginationArrow({ kind, isDisabled, onClick, onMouseEnter }: PaginationArrowProps) {
 	const ArrowIcon = kind === 'previous' ? ArrowLeft : ArrowRight
 
 	// NOTE: notice I am wrapping the link (which will have pointer-events-none when
@@ -23,6 +24,7 @@ function PaginationArrow({ kind, isDisabled, onClick }: PaginationArrowProps) {
 			className={cx('items-center', kind === 'next' ? 'justify-end text-right' : 'justify-start', {
 				'cursor-not-allowed': isDisabled,
 			})}
+			onMouseEnter={!isDisabled ? onMouseEnter : undefined}
 		>
 			<button
 				onClick={onClick}
@@ -56,16 +58,18 @@ function PaginationArrow({ kind, isDisabled, onClick }: PaginationArrowProps) {
 	)
 }
 
-interface PaginationLinkProps {
+type PaginationLinkProps = {
 	onClick?: () => void
 	value: number
 	isActive: boolean
+	onMouseEnter?: () => void
 }
 
-function PaginationLink({ value, onClick, isActive }: PaginationLinkProps) {
+function PaginationLink({ value, onClick, isActive, onMouseEnter }: PaginationLinkProps) {
 	return (
 		<span
 			onClick={onClick}
+			onMouseEnter={onMouseEnter}
 			className={cn(
 				'inline-flex cursor-pointer items-center border-t-2 px-4 pt-4 text-xs font-medium text-muted md:text-sm',
 				{
@@ -81,11 +85,12 @@ function PaginationLink({ value, onClick, isActive }: PaginationLinkProps) {
 	)
 }
 
-export interface PaginationProps {
+export type PaginationProps = {
 	position?: 'top' | 'bottom'
 	pages: number
 	currentPage: number
 	onChangePage: (page: number) => void
+	onPrefetchPage?: (page: number) => void
 }
 
 export default function Pagination({
@@ -93,6 +98,7 @@ export default function Pagination({
 	pages,
 	currentPage,
 	onChangePage,
+	onPrefetchPage,
 }: PaginationProps) {
 	const { innerWidth: screenWidth } = useWindowSize()
 
@@ -112,9 +118,15 @@ export default function Pagination({
 
 	const { pageRange } = usePagination({ currentPage, numbersToShow, totalPages: pages })
 
-	function handleEllipsisNavigate(page: number) {
-		onChangePage(page)
-	}
+	const handleEllipsisNavigate = useCallback(
+		(page: number) => {
+			onPrefetchPage?.(page)
+			onChangePage(page)
+		},
+		[onChangePage, onPrefetchPage],
+	)
+
+	const handlePrefetchPage = useCallback((page: number) => onPrefetchPage?.(page), [onPrefetchPage])
 
 	return (
 		<nav className="w-full">
@@ -128,6 +140,7 @@ export default function Pagination({
 						kind="previous"
 						onClick={() => onChangePage(currentPage - 1)}
 						isDisabled={currentPage === 1}
+						onMouseEnter={() => handlePrefetchPage(currentPage - 1)}
 					/>
 
 					<div className="flex items-center">
@@ -137,6 +150,7 @@ export default function Pagination({
 									<PaginationLink
 										key={`${i}, pagination-${page}`}
 										onClick={() => onChangePage(page)}
+										onMouseEnter={() => handlePrefetchPage(page)}
 										isActive={page === currentPage}
 										value={page}
 									/>
@@ -165,6 +179,7 @@ export default function Pagination({
 					<PaginationArrow
 						kind="next"
 						onClick={() => onChangePage(currentPage + 1)}
+						onMouseEnter={() => handlePrefetchPage(currentPage + 1)}
 						isDisabled={currentPage >= pages}
 					/>
 				</div>

@@ -1,6 +1,11 @@
-import { useLibraryByIdQuery, usePagedSeriesQuery, useVisitLibrary } from '@stump/client'
+import {
+	prefetchPagedSeries,
+	useLibraryByIdQuery,
+	usePagedSeriesQuery,
+	useVisitLibrary,
+} from '@stump/client'
 import { usePreviousIsDifferent } from '@stump/components'
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
@@ -11,6 +16,14 @@ import SeriesGrid from '@/components/series/SeriesGrid'
 import SeriesList from '@/components/series/SeriesList'
 import { useLayoutMode, usePageParam } from '@/hooks'
 import useIsInView from '@/hooks/useIsInView'
+
+export default function LibrarySeriesSceneWrapper() {
+	return (
+		<FilterProvider>
+			<LibrarySeriesScene />
+		</FilterProvider>
+	)
+}
 
 function LibrarySeriesScene() {
 	const is3XLScreenOrBigger = useMediaMatch('(min-width: 1600px)')
@@ -32,22 +45,27 @@ function LibrarySeriesScene() {
 	const { isLoading, library } = useLibraryByIdQuery(id)
 
 	const { filters } = useFilterContext()
+
+	const params = useMemo(
+		() => ({
+			page,
+			page_size: is3XLScreenOrBigger ? 40 : 20,
+			params: {
+				...filters,
+				count_media: true,
+				library: {
+					id,
+				},
+			},
+		}),
+		[page, is3XLScreenOrBigger, filters, id],
+	)
 	const {
 		isLoading: isLoadingSeries,
 		isRefetching: isRefetchingSeries,
 		series,
 		pageData,
-	} = usePagedSeriesQuery({
-		page,
-		page_size: is3XLScreenOrBigger ? 40 : 20,
-		params: {
-			...filters,
-			count_media: true,
-			library: {
-				id,
-			},
-		},
-	})
+	} = usePagedSeriesQuery(params)
 
 	const differentSearch = usePreviousIsDifferent(filters?.search as string)
 	useEffect(() => {
@@ -61,6 +79,16 @@ function LibrarySeriesScene() {
 	const isOnFirstPage = current_page === 1
 	const hasFilters = Object.keys(filters || {}).length > 0
 	const hasStuff = total_pages !== undefined && current_page !== undefined
+
+	const handlePrefetchPage = useCallback(
+		(page: number) => {
+			prefetchPagedSeries({
+				...params,
+				page,
+			})
+		},
+		[params],
+	)
 
 	// TODO: detect if going from page > 1 to page = 1 and scroll to top
 	useEffect(
@@ -119,7 +147,8 @@ function LibrarySeriesScene() {
 					<Pagination
 						pages={total_pages}
 						currentPage={current_page}
-						onChangePage={(page) => setPage(page)}
+						onChangePage={setPage}
+						onPrefetchPage={handlePrefetchPage}
 					/>
 				)}
 				<div className="px-4">{renderContent()}</div>
@@ -128,18 +157,11 @@ function LibrarySeriesScene() {
 						position="bottom"
 						pages={total_pages}
 						currentPage={current_page}
-						onChangePage={(page) => setPage(page)}
+						onChangePage={setPage}
+						onPrefetchPage={handlePrefetchPage}
 					/>
 				)}
 			</div>
 		</>
-	)
-}
-
-export default function LibrarySeriesSceneWrapper() {
-	return (
-		<FilterProvider>
-			<LibrarySeriesScene />
-		</FilterProvider>
 	)
 }

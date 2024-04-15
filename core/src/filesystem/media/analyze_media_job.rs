@@ -3,9 +3,13 @@ use std::collections::VecDeque;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
-use crate::job::{
-	error::JobError, Executor, JobExt, JobOutputExt, JobTaskOutput, WorkerCtx,
-	WorkingState, WrappedJob,
+use crate::{
+	filesystem::media::process::get_page_count,
+	job::{
+		error::JobError, Executor, JobExt, JobOutputExt, JobTaskOutput, WorkerCtx,
+		WorkingState, WrappedJob,
+	},
+	prisma::media,
 };
 
 /// A job that analyzes a media item and updates the database
@@ -80,17 +84,42 @@ impl JobExt for AnalyzeMediaJob {
 
 		match task {
 			AnalyzeMediaTask::AnalyzeImage(id) => {
-				tracing::warn!(
-					"Need to implement the AnalyzeImage branch of execute_task"
-				);
+				// Get media by id from the database
+				let media = ctx
+					.db
+					.media()
+					.find_unique(media::id::equals(id.clone()))
+					.exec()
+					.await
+					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
 
-				Ok(JobTaskOutput {
-					output,
-					subtasks: vec![],
-					logs: vec![],
-				})
+				// Error if media item unavailable
+				if media.is_none() {
+					return Err(JobError::TaskFailed(format!(
+						"Unable to find media item with id: {}",
+						id
+					)));
+				}
+
+				// Get page count using file processing
+				let path = media.unwrap().path;
+				let page_count = get_page_count(&path, &ctx.config)?;
+
+				// Update media item in database
+				let _ = ctx
+					.db
+					.media()
+					.update(media::id::equals(id), vec![media::pages::set(page_count)])
+					.exec()
+					.await?;
 			},
 		}
+
+		Ok(JobTaskOutput {
+			output,
+			subtasks: vec![],
+			logs: vec![],
+		})
 	}
 
 	// TODO

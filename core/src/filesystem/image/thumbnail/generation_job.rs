@@ -137,6 +137,7 @@ impl JobExt for ThumbnailGenerationJob {
 			ThumbnailGenerationJobVariant::MediaGroup(media_ids) => media_ids.clone(),
 		};
 
+		// TODO Should find a way to keep  the same ThumbnailManager around for the whole job execution
 		let manager = ThumbnailManager::new(ctx.config.clone())
 			.map_err(|e| JobError::TaskFailed(e.to_string()))?;
 

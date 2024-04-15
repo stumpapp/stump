@@ -208,6 +208,30 @@ impl FileProcessor for RarProcessor {
 		Ok((content_type, bytes.ok_or(FileError::NoImageError)?))
 	}
 
+	fn get_page_count(path: &str, _: &StumpConfig) -> Result<i32, FileError> {
+		let archive = RarProcessor::open_for_listing(path)?;
+
+		// Get all valid page entries
+		let valid_entries = archive
+			.into_iter()
+			.filter_map(|entry| entry.ok())
+			.filter(|entry| {
+				if entry.is_file() {
+					let filename =
+						entry.filename.as_path().to_string_lossy().to_lowercase();
+					filename.ends_with(".jpg")
+						|| filename.ends_with(".jpeg")
+						|| filename.ends_with(".png")
+				} else {
+					false
+				}
+			})
+			.collect::<Vec<_>>();
+
+		// Return the count of them
+		Ok(valid_entries.len() as i32)
+	}
+
 	fn get_page_content_types(
 		path: &str,
 		pages: Vec<i32>,

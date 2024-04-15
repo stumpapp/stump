@@ -97,6 +97,11 @@ impl FileProcessor for EpubProcessor {
 		}
 	}
 
+	fn get_page_count(path: &str, _: &StumpConfig) -> Result<i32, FileError> {
+		let epub_file = Self::open(path)?;
+		Ok(epub_file.get_num_pages() as i32)
+	}
+
 	fn get_page_content_types(
 		path: &str,
 		pages: Vec<i32>,

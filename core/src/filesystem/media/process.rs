@@ -69,6 +69,9 @@ pub trait FileProcessor {
 		config: &StumpConfig,
 	) -> Result<(ContentType, Vec<u8>), FileError>;
 
+	/// Get the number of pages in the file.
+	fn get_page_count(path: &str, config: &StumpConfig) -> Result<i32, FileError>;
+
 	/// Get the content types of a list of pages of the file. This should determine content
 	/// types by actually testing the bytes for each page.
 	fn get_page_content_types(
@@ -156,6 +159,22 @@ pub fn get_page(
 		},
 		"application/epub+zip" => EpubProcessor::get_page(path, page, config),
 		"application/pdf" => PdfProcessor::get_page(path, page, config),
+		_ => Err(FileError::UnsupportedFileType(path.to_string())),
+	}
+}
+
+pub fn get_page_count(path: &str, config: &StumpConfig) -> Result<i32, FileError> {
+	let mime = ContentType::from_file(path).mime_type();
+
+	match mime.as_str() {
+		"application/zip" | "application/vnd.comicbook+zip" => {
+			ZipProcessor::get_page_count(path, config)
+		},
+		"application/vnd.rar" | "application/vnd.comicbook-rar" => {
+			RarProcessor::get_page_count(path, config)
+		},
+		"application/epub+zip" => EpubProcessor::get_page_count(path, config),
+		"application/pdf" => PdfProcessor::get_page_count(path, config),
 		_ => Err(FileError::UnsupportedFileType(path.to_string())),
 	}
 }

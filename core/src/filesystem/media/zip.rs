@@ -139,6 +139,33 @@ impl FileProcessor for ZipProcessor {
 		Err(FileError::NoImageError)
 	}
 
+	fn get_page_count(path: &str, _: &StumpConfig) -> Result<i32, FileError> {
+		let zip_file = File::open(path)?;
+
+		let mut archive = zip::ZipArchive::new(&zip_file)?;
+		let file_names_archive = archive.clone();
+
+		if archive.is_empty() {
+			error!(path, "Empty zip file");
+			return Err(FileError::ArchiveEmptyError);
+		}
+
+		let mut file_names = file_names_archive.file_names().collect::<Vec<_>>();
+		sort_file_names(&mut file_names);
+
+		let mut pages = 0;
+		for name in file_names {
+			let mut file = archive.by_name(name)?;
+			let (content_type, _) = get_zip_entry_content_type(&mut file)?;
+
+			if content_type.is_image() {
+				pages += 1;
+			}
+		}
+
+		Ok(pages)
+	}
+
 	fn get_page_content_types(
 		path: &str,
 		pages: Vec<i32>,

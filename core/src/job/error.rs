@@ -1,6 +1,6 @@
 use tokio::sync::oneshot;
 
-use crate::CoreError;
+use crate::{filesystem::error::FileError, CoreError};
 
 #[derive(Debug, thiserror::Error)]
 pub enum JobError {
@@ -16,6 +16,8 @@ pub enum JobError {
 	TaskFailed(String),
 	#[error("A query error occurred: {0}")]
 	QueryError(#[from] prisma_client_rust::QueryError),
+	#[error("A file error occurred: {0}")]
+	FileError(#[from] FileError),
 	#[error("An unknown error occurred: {0}")]
 	Unknown(String),
 }

@@ -1,6 +1,10 @@
+use std::path::{Path, PathBuf};
+
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
+
+use crate::filesystem::PathUtils;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct DirectoryListingInput {
@@ -25,23 +29,31 @@ pub struct DirectoryListing {
 pub struct DirectoryListingFile {
 	pub is_directory: bool,
 	pub name: String,
-	pub path: String,
+	pub path: PathBuf,
 }
 
 impl DirectoryListingFile {
-	pub fn new(is_directory: bool, name: &str, path: &str) -> DirectoryListingFile {
-		DirectoryListingFile {
+	pub fn new(is_directory: bool, name: &str, path: &str) -> Self {
+		Self {
 			is_directory,
 			name: name.to_string(),
-			path: path.to_string(),
+			path: Path::new(path).into(),
 		}
 	}
 
-	pub fn file(name: &str, path: &str) -> DirectoryListingFile {
-		DirectoryListingFile::new(false, name, path)
+	pub fn from_pathbuf(path: PathBuf) -> Self {
+		Self {
+			name: path.file_parts().file_name,
+			is_directory: path.is_dir(),
+			path,
+		}
 	}
 
-	pub fn directory(name: &str, path: &str) -> DirectoryListingFile {
-		DirectoryListingFile::new(true, name, path)
+	pub fn file(name: &str, path: &str) -> Self {
+		Self::new(false, name, path)
+	}
+
+	pub fn directory(name: &str, path: &str) -> Self {
+		Self::new(true, name, path)
 	}
 }

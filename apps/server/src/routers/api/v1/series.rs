@@ -758,13 +758,13 @@ async fn replace_series_thumbnail(
 
 	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 	// user testing I'd like to see if this becomes a problem. We'll see!
-	remove_thumbnails(&[series_id.clone()], ctx.config.get_thumbnails_dir())
-		.unwrap_or_else(|e| {
-			tracing::error!(
-				?e,
-				"Failed to remove existing series thumbnail before replacing!"
-			);
-		});
+	match remove_thumbnails(&[series_id.clone()], ctx.config.get_thumbnails_dir()) {
+		Ok(count) => tracing::info!("Removed {} thumbnails!", count),
+		Err(e) => tracing::error!(
+			?e,
+			"Failed to remove existing series thumbnail before replacing!"
+		),
+	}
 
 	let path_buf = place_thumbnail(&series_id, ext, &bytes, &ctx.config)?;
 

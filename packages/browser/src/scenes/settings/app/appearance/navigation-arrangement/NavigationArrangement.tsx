@@ -24,6 +24,7 @@ import { usePreferences } from '@/hooks'
 
 import NavigationArrangementItem from './NavigationArrangementItem'
 
+// TODO: feature permissions (e.g. not allowed to access smart lists)
 export default function NavigationArrangement() {
 	const {
 		preferences: { primary_navigation_mode },

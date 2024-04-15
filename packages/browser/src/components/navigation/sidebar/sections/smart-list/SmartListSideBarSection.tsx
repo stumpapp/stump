@@ -39,7 +39,7 @@ export default function SmartListSideBarSection() {
 	}
 
 	return (
-		<Accordion type="single" collapsible className="w-full" defaultValue="smartlists">
+		<Accordion type="single" collapsible className="w-full py-2" defaultValue="smartlists">
 			<Accordion.Item value="smartlists" className="border-none">
 				<Accordion.Trigger noUnderline asLabel className="px-1 py-0 pb-2">
 					{t('sidebar.buttons.smartlists')}

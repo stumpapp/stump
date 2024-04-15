@@ -222,7 +222,13 @@ export function useLoginActivityQuery({ userId, ...options }: UseLoginActivityQu
 	}
 }
 
-export function useNavigationArrangement() {
+type UseNavigationArrangementOptions = {
+	defaultArrangement?: Arrangement<NavigationItem>
+} & QueryOptions<Arrangement<NavigationItem>>
+export function useNavigationArrangement({
+	defaultArrangement = defaultNavigationArrangement,
+	...options
+}: UseNavigationArrangementOptions = {}) {
 	const { data } = useQuery(
 		[userQueryKeys.getPreferredNavigationArrangement],
 		async () => {
@@ -231,6 +237,7 @@ export function useNavigationArrangement() {
 		},
 		{
 			suspense: true,
+			...options,
 		},
 	)
 
@@ -265,7 +272,7 @@ export function useNavigationArrangement() {
 		},
 	)
 
-	const arrangement = useMemo(() => data ?? defaultNavigationArrangement, [data])
+	const arrangement = useMemo(() => data ?? defaultArrangement, [data, defaultArrangement])
 
 	return {
 		arrangement,

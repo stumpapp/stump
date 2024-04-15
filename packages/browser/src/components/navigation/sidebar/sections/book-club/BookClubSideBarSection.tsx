@@ -65,7 +65,7 @@ export default function BookClubSideBarSection({ isMobile }: Props) {
 	const canCreateBookClub = checkPermission('bookclub:create')
 
 	return (
-		<Accordion type="single" collapsible className="w-full">
+		<Accordion type="single" collapsible className="w-full py-2">
 			<Accordion.Item value="bookClubs" className="border-none">
 				<Accordion.Trigger noUnderline asLabel className="px-1 py-0 pb-2">
 					{t('sidebar.buttons.bookClubs')}

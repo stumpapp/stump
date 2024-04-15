@@ -1,11 +1,16 @@
+import { useNavigationArrangement } from '@stump/client'
 import { Spacer } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
+import { NavigationItem } from '@stump/types'
 import { motion } from 'framer-motion'
 import { Book, Home } from 'lucide-react'
-import React from 'react'
+import React, { useCallback, useMemo } from 'react'
+import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
+import { match } from 'ts-pattern'
 
 import { useAppContext } from '@/context'
+import { usePreferences } from '@/hooks'
 import paths from '@/paths'
 import { useAppStore } from '@/stores'
 
@@ -15,21 +20,25 @@ import { BookClubSideBarSection, LibrarySideBarSection, SmartListSideBarSection 
 import SideBarButtonLink from './SideBarButtonLink'
 import SideBarFooter from './SideBarFooter'
 
-const IS_DEVELOPMENT = import.meta.env.MODE === 'development'
-
 type Props = {
 	asChild?: boolean
 	hidden?: boolean
 }
 
 export default function SideBar({ asChild, hidden }: Props) {
+	const location = useLocation()
 	const platform = useAppStore((store) => store.platform)
 
 	const { t } = useLocaleContext()
 
 	const { checkPermission } = useAppContext()
-	const showBookClubs = IS_DEVELOPMENT && checkPermission('bookclub:read')
-	const showSmartLists = checkPermission('smartlist:read')
+	const {
+		preferences: { navigation_arrangement },
+	} = usePreferences()
+	const { arrangement } = useNavigationArrangement({
+		defaultArrangement: navigation_arrangement,
+		suspense: false,
+	})
 
 	const isBrowser = platform === 'browser'
 	const isMobile = useMediaMatch('(max-width: 768px)')
@@ -47,32 +56,57 @@ export default function SideBar({ asChild, hidden }: Props) {
 		return null
 	}
 
+	const checkSectionPermission = useCallback(
+		(section: NavigationItem['type']) => {
+			if (section === 'BookClubs') {
+				return checkPermission('bookclub:read')
+			} else if (section === 'SmartLists') {
+				return checkPermission('smartlist:read')
+			} else {
+				return true
+			}
+		},
+		[checkPermission],
+	)
+
+	const sections = useMemo(
+		() =>
+			arrangement.items
+				.filter(({ item: { type }, visible }) => checkSectionPermission(type) && visible)
+				.map(({ item }) =>
+					match(item.type)
+						.with('Home', () => (
+							<SideBarButtonLink to={paths.home()} isActive={location.pathname === '/'}>
+								<Home className="mr-2 h-4 w-4 shrink-0" />
+								{t('sidebar.buttons.home')}
+							</SideBarButtonLink>
+						))
+						.with('Explore', () => (
+							<SideBarButtonLink
+								to={paths.bookSearch()}
+								isActive={location.pathname === paths.bookSearch()}
+							>
+								<Book className="mr-2 h-4 w-4 shrink-0" />
+								{t('sidebar.buttons.books')}
+							</SideBarButtonLink>
+						))
+						.with('Libraries', () => <LibrarySideBarSection isMobile={isMobile} />)
+						.with('SmartLists', () => <SmartListSideBarSection />)
+						.with('BookClubs', () => <BookClubSideBarSection isMobile={isMobile} />)
+						.otherwise(() => null),
+				)
+				.filter(Boolean),
+		[arrangement, checkSectionPermission, location, t, isMobile],
+	)
+
 	const renderContent = () => {
 		return (
 			<>
 				{renderHeader()}
 
-				<div className="flex max-h-full grow flex-col gap-4 overflow-y-auto p-1 scrollbar-hide">
+				<div className="flex max-h-full grow flex-col gap-2 overflow-y-auto p-1 scrollbar-hide">
 					{!isMobile && isBrowser && <UserMenu />}
-
-					<div className="flex flex-col gap-2">
-						<SideBarButtonLink to={paths.home()} isActive={location.pathname === '/'}>
-							<Home className="mr-2 h-4 w-4" />
-							{t('sidebar.buttons.home')}
-						</SideBarButtonLink>
-
-						<SideBarButtonLink
-							to={paths.bookSearch()}
-							isActive={location.pathname === paths.bookSearch()}
-						>
-							<Book className="mr-2 h-4 w-4" />
-							Explore
-						</SideBarButtonLink>
-					</div>
-
-					<LibrarySideBarSection isMobile={isMobile} />
-					{showSmartLists && <SmartListSideBarSection />}
-					{showBookClubs && <BookClubSideBarSection isMobile={isMobile} />}
+					{sections}
 				</div>
 				<Spacer />
 

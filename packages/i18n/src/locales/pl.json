@@ -96,7 +96,7 @@
 				"creator_display_name": {
 					"label": "Nazwa wyświetlana",
 					"placeholder": "oromei",
-					"description": "Opcjonalna wyświetlana nazwa dla Twojego członkostwa w klubie książki. Jeśli ustawiona, ma ona pierwszeństwo przed Twoją nazwą użytkownika"
+					"description": "Opcjonalna wyświetlana nazwa dla Twojego członkostwa w klubie książki. Ustawiona ma pierwszeństwo przed Twoją nazwą użytkownika"
 				},
 				"creator_hide_progress": {
 					"label": "Ukryj postęp",
@@ -344,7 +344,7 @@
 					"heading": "Język i ustawienia regionalne",
 					"subtitle": [
 						"Stump obsługuje wiele języków i ustawień regionalnych, ustaw swoje preferencje poniżej. Proszę rozważ pomoc w poprawie jakości",
-						"Tłumaczenia Stump",
+						"Tłumaczeń Stump",
 						"jeśli jesteś w stanie!"
 					]
 				}

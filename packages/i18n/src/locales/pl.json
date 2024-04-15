@@ -87,20 +87,20 @@
 				"creator": {
 					"label": "Twórca",
 					"placeholder": "Twórca",
-					"description": "The name of the creator role for your book club. This is you!"
+					"description": "Nazwa roli twórcy dla Twojego klubu książki. To Ty!"
 				}
 			},
 			"creator_preferences": {
 				"heading": "Your membership preferences",
 				"subtitle": "Some preferences for your membership in the book club. These can be changed at any time from the book club settings page",
 				"creator_display_name": {
-					"label": "Display Name",
+					"label": "Nazwa wyświetlana",
 					"placeholder": "oromei",
-					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+					"description": "Opcjonalna wyświetlana nazwa dla Twojego członkostwa w klubie książki. Jeśli ustawiona, ma ona pierwszeństwo przed Twoją nazwą użytkownika"
 				},
 				"creator_hide_progress": {
 					"label": "Ukryj postęp",
-					"description": "If enabled, your read progress will be hidden from other members of the book club"
+					"description": "Jeśli opcja jest włączona, Twój postęp przeczytania zostanie ukryty przed innymi członkami klubu książki"
 				}
 			},
 			"submit": "Stwórz klub książki"
@@ -131,7 +131,7 @@
 			"labels": {
 				"libraryName": "Nazwa",
 				"libraryPath": "Ścieżka",
-				"libraryPathDescription": "The path to the library as it exists on your server",
+				"libraryPathDescription": "Ścieżka do biblioteki w takiej formie jak na Twoim serwerze",
 				"libraryDescription": "Opis",
 				"libraryTags": "Etykiety"
 			},
@@ -141,7 +141,7 @@
 		}
 	},
 	"errorScene": {
-		"heading": "lol, oops",
+		"heading": "lol, ups",
 		"message": "Wystąpił błąd:",
 		"buttons": {
 			"report": "Zgłoś błąd (po angielsku)",
@@ -154,21 +154,21 @@
 			"title": "Wznów czytanie",
 			"emptyState": {
 				"heading": "Brak pozycji do wyświetlenia",
-				"message": "Any books you're currently reading will show up here"
+				"message": "Wszystkie książki, które obecnie czytasz, pojawią się tutaj"
 			}
 		},
 		"recentlyAddedSeries": {
 			"title": "Ostatnio dodane serie",
 			"emptyState": {
 				"heading": "Brak serii do wyświetlenia",
-				"message": "Każda seria, którą dodasz do swoich bibliotek pojawi się tutaj"
+				"message": "Każda seria, którą dodasz do swoich bibliotek, pojawi się tutaj"
 			}
 		},
 		"recentlyAddedBooks": {
 			"title": "Ostatnio dodane książki",
 			"emptyState": {
 				"heading": "Brak książek do wyświetlenia",
-				"message": "Any books you add to your libraries will show up here"
+				"message": "Każda książka, którą dodasz do swoich bibliotek, pojawi się tutaj"
 			}
 		}
 	},
@@ -181,9 +181,9 @@
 	"userSmartListsScene": {
 		"heading": "Inteligentne listy",
 		"subtitle": "Twoje ulubione wyszukiwania i filtry zapisane w celu łatwego dostępu",
-		"searchPlaceholder": "Filter smart lists",
+		"searchPlaceholder": "Filtruj inteligentne listy",
 		"buttons": {
-			"createSmartList": "Create smart list"
+			"createSmartList": "Utwórz inteligentną listę"
 		},
 		"list": {
 			"emptyState": {
@@ -210,7 +210,7 @@
 		},
 		"layout": {
 			"missingIdError": "Ta scena wymaga identyfikatora w odnośniku",
-			"smartListNotFound": "Smart list not found",
+			"smartListNotFound": "Nie znaleziono inteligentnej listy",
 			"viewCreateError": "Nie udało się utworzyć widoku",
 			"viewSaveError": "Nie udało się zapisać widoku"
 		},
@@ -227,11 +227,11 @@
 					"selectView": "Wybierz zapisany widok"
 				},
 				"filterDrawer": {
-					"heading": "Smart list filters",
-					"description": "Change the filters for this viewing session",
+					"heading": "Filtry inteligentnych list",
+					"description": "Zmień filtry dla tej sesji przeglądania",
 					"rawData": {
-						"heading": "Raw filter data",
-						"description": "This is how Stump will process the filters"
+						"heading": "Nieprzetworzone dane filtru",
+						"description": "Stump będzie przetwarzać filtry w następujący sposób"
 					},
 					"buttons": {
 						"save": "Zapisz",
@@ -250,14 +250,14 @@
 							"update": "Aktualizuj widok"
 						},
 						"description": {
-							"create": "Create a new view for this smart list",
+							"create": "Utwórz nowy widok dla tej inteligentnej listy",
 							"update": "Aktualizuj widok"
 						},
 						"createForm": {
 							"name": {
 								"label": "Nazwa",
 								"placeholder": "Mój widok",
-								"description": "A friendly name to uniquely identify this view"
+								"description": "Przyjazna nazwa umożliwiająca unikalną identyfikację tego widoku"
 							}
 						},
 						"updateForm": {
@@ -344,8 +344,8 @@
 					"heading": "Język i ustawienia regionalne",
 					"subtitle": [
 						"Stump obsługuje wiele języków i ustawień regionalnych, ustaw swoje preferencje poniżej. Proszę rozważ pomoc w poprawie jakości",
-						"Stump's translations",
-						"if you're able to!"
+						"Tłumaczenia Stump",
+						"jeśli jesteś w stanie!"
 					]
 				}
 			}
@@ -353,13 +353,13 @@
 		"app/appearance": {
 			"helmet": "Wygląd",
 			"title": "Wygląd",
-			"description": "Customize the look and feel of the application",
+			"description": "Dostosuj wygląd aplikacji",
 			"sections": {
 				"themeSelect": {
 					"label": "Motyw",
 					"description": "Domyślnie Stump posiada jasny i ciemny motyw",
 					"customTheme": [
-						"If you're interested in creating your own custom theme, check out the",
+						"Jeśli chcesz stworzyć swój własny motyw, sprawdź",
 						"dokumentacja"
 					],
 					"options": {
@@ -373,7 +373,7 @@
 		"app/reader": {
 			"helmet": "Ustawienia czytnika",
 			"title": "Ustawienia czytnika",
-			"description": "Default options for the Stump readers. These are bound to your current device only",
+			"description": "Domyślne opcje dla czytników Stump. Są one powiązane jedynie z bieżącym urządzeniem",
 			"sections": {
 				"imageBasedBooks": {
 					"label": "Image-based books",

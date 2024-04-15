@@ -14,9 +14,11 @@ import {
 	verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { useNavigationArrangement } from '@stump/client'
-import { Card, cn, Heading, IconButton, Label, Text, ToolTip } from '@stump/components'
+import { Card, cn, IconButton, Label, Text, ToolTip } from '@stump/components'
+import isEqual from 'lodash.isequal'
 import { Lock, Unlock } from 'lucide-react'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import toast from 'react-hot-toast'
 
 import { usePreferences } from '@/hooks'
 
@@ -26,41 +28,68 @@ export default function NavigationArrangement() {
 	const {
 		preferences: { primary_navigation_mode },
 	} = usePreferences()
-	const {
-		arrangement: { items, locked },
-		updateArrangement,
-	} = useNavigationArrangement()
+	const { arrangement, updateArrangement } = useNavigationArrangement()
 
 	const sensors = useSensors(
-		useSensor(PointerSensor),
+		useSensor(PointerSensor, {
+			activationConstraint: {
+				// Require pointer to move by 5 pixels before activating draggable
+				// Allows nested onClicks/buttons/interactions to be accessed
+				distance: 5,
+			},
+		}),
 		useSensor(KeyboardSensor, {
 			coordinateGetter: sortableKeyboardCoordinates,
 		}),
 	)
 
-	const handleDragEnd = useCallback(
-		async (event: DragEndEvent) => {
-			const { active, over } = event
+	const [localArragement, setLocalArrangement] = useState(() => arrangement)
 
-			if (!!over?.id && active.id !== over.id) {
+	const handleUpdateArrangement = useCallback(
+		async (updates: typeof localArragement) => {
+			try {
+				const result = await updateArrangement(updates)
+				if (!isEqual(result, localArragement)) {
+					setLocalArrangement(result)
+				}
+			} catch (error) {
+				console.error(error)
+				toast.error('Failed to update navigation arrangement')
+			}
+		},
+		[updateArrangement, localArragement],
+	)
+
+	const isDifferent = useMemo(
+		() => !isEqual(localArragement, arrangement),
+		[localArragement, arrangement],
+	)
+	useEffect(() => {
+		if (isDifferent) {
+			handleUpdateArrangement(localArragement)
+		}
+	}, [isDifferent, handleUpdateArrangement, localArragement])
+
+	const handleDragEnd = (event: DragEndEvent) => {
+		const { active, over } = event
+
+		if (!!over?.id && active.id !== over.id) {
+			setLocalArrangement(({ items, ...curr }) => {
 				const oldIndex = items.findIndex(({ item }) => item.type === active.id)
 				const newIndex = items.findIndex(({ item }) => item.type === over.id)
 
-				await updateArrangement({
+				return {
 					items: arrayMove(items, oldIndex, newIndex),
-					locked,
-				})
-			}
-		},
-		[items, locked, updateArrangement],
-	)
+					...curr,
+				}
+			})
+		}
+	}
 
-	const setLocked = useCallback(
-		async (isLocked: boolean) => {
-			await updateArrangement({ items, locked: isLocked })
-		},
-		[items, updateArrangement],
-	)
+	const setLocked = (isLocked: boolean) =>
+		setLocalArrangement((curr) => ({ ...curr, locked: isLocked }))
+
+	const { items, locked } = localArragement
 
 	const setItemVisibility = useCallback(
 		async (index: number, visible: boolean) => {
@@ -69,13 +98,13 @@ export default function NavigationArrangement() {
 			const targetItem = items[index]
 
 			if (!!targetItem && targetItem.visible !== visible) {
-				await updateArrangement({
-					items: items.map((item, i) => (i === index ? { ...item, visible } : item)),
-					locked,
-				})
+				setLocalArrangement(({ items, ...curr }) => ({
+					items: items.map((item, idx) => (idx === index ? { ...item, visible } : item)),
+					...curr,
+				}))
 			}
 		},
-		[items, locked, updateArrangement],
+		[items, locked],
 	)
 
 	const renderLockedButton = () => {
@@ -110,18 +139,19 @@ export default function NavigationArrangement() {
 			</div>
 
 			<Card
-				className={cn('flex flex-col space-y-4 bg-background-200 p-4', {
+				className={cn('relative flex flex-col space-y-4 bg-background-200 p-4', {
 					'cursor-not-allowed opacity-60': locked,
 				})}
+				title={locked ? 'Arrangement is locked' : undefined}
 			>
 				<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
 					<SortableContext items={identifiers} strategy={verticalListSortingStrategy}>
 						{items.map(({ item, visible }, idx) => (
 							<NavigationArrangementItem
+								key={item.type}
 								item={item}
 								active={visible ?? true}
 								toggleActive={() => setItemVisibility(idx, !visible)}
-								key={item.type}
 								disabled={locked}
 							/>
 						))}

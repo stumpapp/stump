@@ -6,24 +6,18 @@ use specta::Type;
 use crate::{
 	filesystem::media::process::get_page_count,
 	job::{
-		error::JobError, Executor, JobExt, JobOutputExt, JobTaskOutput, WorkerCtx,
+		error::JobError, JobExecuteLog, JobExt, JobOutputExt, JobTaskOutput, WorkerCtx,
 		WorkingState, WrappedJob,
 	},
-	prisma::media,
+	prisma::{media, series},
 };
 
-/// A job that analyzes a media item and updates the database
-/// with information from the analysis.
 #[derive(Clone)]
-pub struct AnalyzeMediaJob {
-	pub id: String,
-}
-
-impl AnalyzeMediaJob {
-	/// Create a new [AnalyzeMediaJob] for the media specified by `id`.
-	pub fn new(id: String) -> Box<WrappedJob<AnalyzeMediaJob>> {
-		WrappedJob::new(Self { id })
-	}
+pub enum AnalyzeMediaJobVariant {
+	AnalyzeSingleItem(String),
+	AnalyzeLibrary(String),
+	AnalyzeSeries(String),
+	AnalyzeMediaGroup(Vec<String>),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -43,6 +37,20 @@ impl JobOutputExt for AnalyzeMediaOutput {
 	}
 }
 
+/// A job that analyzes a media item and updates the database
+/// with information from the analysis.
+#[derive(Clone)]
+pub struct AnalyzeMediaJob {
+	pub variant: AnalyzeMediaJobVariant,
+}
+
+impl AnalyzeMediaJob {
+	/// Create a new [AnalyzeMediaJob] for the media specified by `id`.
+	pub fn new(variant: AnalyzeMediaJobVariant) -> Box<WrappedJob<AnalyzeMediaJob>> {
+		WrappedJob::new(Self { variant })
+	}
+}
+
 #[async_trait::async_trait]
 impl JobExt for AnalyzeMediaJob {
 	const NAME: &'static str = "analyze_media";
@@ -51,10 +59,22 @@ impl JobExt for AnalyzeMediaJob {
 	type Task = AnalyzeMediaTask;
 
 	fn description(&self) -> Option<String> {
-		Some(format!("Scanning media with id: {}", self.id))
+		match &self.variant {
+			AnalyzeMediaJobVariant::AnalyzeSingleItem(id) => {
+				Some(format!("Analyze media item with id: {}", id))
+			},
+			AnalyzeMediaJobVariant::AnalyzeLibrary(id) => {
+				Some(format!("Analyze library with id: {}", id))
+			},
+			AnalyzeMediaJobVariant::AnalyzeSeries(id) => {
+				Some(format!("Analyze series with id: {}", id))
+			},
+			AnalyzeMediaJobVariant::AnalyzeMediaGroup(ids) => {
+				Some(format!("Analyze media group with ids: {:?}", ids))
+			},
+		}
 	}
 
-	// TODO
 	async fn init(
 		&mut self,
 		ctx: &WorkerCtx,
@@ -62,8 +82,50 @@ impl JobExt for AnalyzeMediaJob {
 		tracing::warn!("In AnalyzeMediaJob init()");
 		let output = Self::Output::default();
 
+		// We match over the job variant to build a list of tasks to process
 		let mut tasks = VecDeque::new();
-		tasks.push_front(AnalyzeMediaTask::AnalyzeImage(self.id.clone()));
+		match &self.variant {
+			// Single item is easy
+			AnalyzeMediaJobVariant::AnalyzeSingleItem(id) => {
+				tasks.push_front(AnalyzeMediaTask::AnalyzeImage(id.clone()))
+			},
+			// For libraries we need a list of ids
+			AnalyzeMediaJobVariant::AnalyzeLibrary(id) => {
+				let library_media = ctx
+					.db
+					.media()
+					.find_many(vec![media::series::is(vec![series::library_id::equals(
+						Some(id.clone()),
+					)])])
+					.exec()
+					.await
+					.map_err(|e| JobError::InitFailed(e.to_string()))?;
+
+				for media in library_media {
+					tasks.push_front(AnalyzeMediaTask::AnalyzeImage(media.id))
+				}
+			},
+			// We also need a list for series
+			AnalyzeMediaJobVariant::AnalyzeSeries(id) => {
+				let series_media = ctx
+					.db
+					.media()
+					.find_many(vec![media::series_id::equals(Some(id.clone()))])
+					.exec()
+					.await
+					.map_err(|e| JobError::InitFailed(e.to_string()))?;
+
+				for media in series_media {
+					tasks.push_front(AnalyzeMediaTask::AnalyzeImage(media.id))
+				}
+			},
+			// Media groups already include a vector of ids
+			AnalyzeMediaJobVariant::AnalyzeMediaGroup(ids) => {
+				for id in ids {
+					tasks.push_front(AnalyzeMediaTask::AnalyzeImage(id.clone()))
+				}
+			},
+		};
 
 		Ok(WorkingState {
 			output: Some(output),
@@ -73,13 +135,11 @@ impl JobExt for AnalyzeMediaJob {
 		})
 	}
 
-	// TODO
 	async fn execute_task(
 		&self,
 		ctx: &WorkerCtx,
 		task: Self::Task,
 	) -> Result<JobTaskOutput<Self>, JobError> {
-		tracing::warn!("In AnalyzeMediaJob execute_task() with task: {:?}", task);
 		let output = Self::Output::default();
 
 		match task {
@@ -106,7 +166,7 @@ impl JobExt for AnalyzeMediaJob {
 				let page_count = get_page_count(&path, &ctx.config)?;
 
 				// Update media item in database
-				let _ = ctx
+				let media = ctx
 					.db
 					.media()
 					.update(media::id::equals(id), vec![media::pages::set(page_count)])
@@ -120,16 +180,5 @@ impl JobExt for AnalyzeMediaJob {
 			subtasks: vec![],
 			logs: vec![],
 		})
-	}
-
-	// TODO
-	async fn cleanup(
-		&self,
-		ctx: &WorkerCtx,
-		output: &Self::Output,
-	) -> Result<Option<Box<dyn Executor>>, JobError> {
-		tracing::warn!("In AnalyzeMediaJob cleanup()");
-
-		Ok(None)
 	}
 }

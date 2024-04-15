@@ -23,7 +23,7 @@ use stump_core::{
 		CountQueryReturn,
 	},
 	filesystem::{
-		analyze_media_job::AnalyzeMediaJob,
+		analyze_media_job::{AnalyzeMediaJob, AnalyzeMediaJobVariant},
 		get_unknown_thumnail,
 		image::{
 			generate_thumbnail, place_thumbnail, remove_thumbnails, ImageFormat,
@@ -1241,7 +1241,10 @@ async fn start_media_analysis(
 	// TODO enforce permissions
 
 	// Start analysis job
-	ctx.enqueue_job(AnalyzeMediaJob::new(id)).unwrap();
+	ctx.enqueue_job(AnalyzeMediaJob::new(
+		AnalyzeMediaJobVariant::AnalyzeSingleItem(id),
+	))
+	.unwrap();
 
 	APIResult::Ok(Json(MediaAnalysisStarted {
 		// TODO fix this

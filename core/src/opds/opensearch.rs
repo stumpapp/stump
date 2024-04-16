@@ -1,12 +1,17 @@
+//! This module defines the [OpdsOpenSearch] struct for representing OpenSearch SearchDescription
+//! data as specified at https://developer.mozilla.org/en-US/docs/Web/OpenSearch
+
 use xml::{writer::XmlEvent, EventWriter};
 
 use crate::error::CoreResult;
 
 use super::{
 	link::OpdsLinkType,
-	util::{self, OpdsEnumStr},
+	util::{write_xml_element, OpdsEnumStr},
 };
 
+/// A struct for building an OpenSearch SearchDescription XML string as
+/// specified at https://developer.mozilla.org/en-US/docs/Web/OpenSearch
 pub struct OpdsOpenSearch {}
 
 impl OpdsOpenSearch {
@@ -17,10 +22,10 @@ impl OpdsOpenSearch {
 
 		writer.write(XmlEvent::start_element("OpenSearchDescription"))?;
 
-		util::write_xml_element("ShortName", "Search", &mut writer)?;
-		util::write_xml_element("Description", "Search by keyword", &mut writer)?;
-		util::write_xml_element("InputEncoding", "UTF-8", &mut writer)?;
-		util::write_xml_element("OutputEncoding", "UTF-8", &mut writer)?;
+		write_xml_element("ShortName", "Search", &mut writer)?;
+		write_xml_element("Description", "Search by keyword", &mut writer)?;
+		write_xml_element("InputEncoding", "UTF-8", &mut writer)?;
+		write_xml_element("OutputEncoding", "UTF-8", &mut writer)?;
 
 		let series_example = "/opds/v1.2/series?search={searchTerms}";
 		let library_example = "/opds/v1.2/libraries?search={searchTerms}";

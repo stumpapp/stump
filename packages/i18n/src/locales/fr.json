@@ -544,6 +544,10 @@
 							"label": "Télécharger les fichiers",
 							"description": "Permet à l'utilisateur de télécharger des fichiers à partir du serveur"
 						},
+						"download": {
+							"label": "Download files",
+							"description": "Allows the user to download files from the server"
+						},
 						"upload": {
 							"label": "Envoyer des fichiers",
 							"description": "Permet à l'utilisateur d'envoyer des fichiers sur le serveur"

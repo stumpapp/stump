@@ -6,8 +6,8 @@ use specta::Type;
 use crate::{
 	filesystem::media::process::get_page_count,
 	job::{
-		error::JobError, JobExecuteLog, JobExt, JobOutputExt, JobTaskOutput, WorkerCtx,
-		WorkingState, WrappedJob,
+		error::JobError, JobExt, JobOutputExt, JobTaskOutput, WorkerCtx, WorkingState,
+		WrappedJob,
 	},
 	prisma::{media, series},
 };
@@ -166,7 +166,7 @@ impl JobExt for AnalyzeMediaJob {
 				let page_count = get_page_count(&path, &ctx.config)?;
 
 				// Update media item in database
-				let media = ctx
+				let _ = ctx
 					.db
 					.media()
 					.update(media::id::equals(id), vec![media::pages::set(page_count)])

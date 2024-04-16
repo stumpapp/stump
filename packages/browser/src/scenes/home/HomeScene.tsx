@@ -38,6 +38,7 @@ export default function HomeScene() {
 			<ContinueReadingMedia />
 			<RecentlyAddedMedia />
 			<RecentlyAddedSeries />
+			<div className="pb-5 sm:pb-0" />
 		</SceneContainer>
 	)
 }

@@ -32,8 +32,14 @@ pub use context::Ctx;
 pub use error::{CoreError, CoreResult};
 pub use event::CoreEvent;
 
+pub use email::{
+	AttachmentPayload, EmailContentType, EmailerClient, EmailerClientConfig,
+};
+
 /// A type alias strictly for explicitness in the return type of `init_journal_mode`.
 type JournalModeChanged = bool;
+/// A type alias strictly for explicitness in the return type of `init_encryption`.
+type EncryptionKeySet = bool;
 
 /// The [StumpCore] struct is the main entry point for any server-side Stump
 /// applications. It is responsible for managing incoming tasks ([InternalCoreTask]),
@@ -138,6 +144,40 @@ impl StumpCore {
 		Ok(())
 	}
 
+	// TODO: This is insecure for obvious reasons, and should be removed in the future. This was added
+	// to reduce friction of setting up the server for folks who might not understand encryption keys.
+	/// Initializes the encryption key for the database. This will only set the encryption key
+	/// if one does not already exist.
+	pub async fn init_encryption(&self) -> Result<EncryptionKeySet, CoreError> {
+		let client = self.ctx.db.clone();
+
+		let encryption_key_set = client
+			.server_config()
+			.find_first(vec![server_config::encryption_key::not(None)])
+			.exec()
+			.await?
+			.is_some();
+
+		if encryption_key_set {
+			Ok(false)
+		} else {
+			let encryption_key = utils::create_encryption_key()?;
+			let affected_rows = client
+				.server_config()
+				.update_many(
+					vec![],
+					vec![server_config::encryption_key::set(Some(encryption_key))],
+				)
+				.exec()
+				.await?;
+			tracing::trace!(affected_rows, "Updated encryption key");
+			if affected_rows > 1 {
+				tracing::warn!("More than one encryption key was updated? This is definitely not expected");
+			}
+			Ok(affected_rows > 0)
+		}
+	}
+
 	/// Initializes the journal mode for the database. This will only set the journal mode to WAL
 	/// provided a few conditions are met:
 	///
@@ -196,6 +236,7 @@ impl StumpCore {
 mod tests {
 	use std::{fs::File, io::Write, path::PathBuf};
 
+	use email::EmailerClientConfig;
 	use specta::{
 		ts::{export, BigIntExportBehavior, ExportConfiguration, TsExportError},
 		NamedType,
@@ -249,7 +290,7 @@ mod tests {
 
 		file.write_all(format!("{}\n\n", ts_export::<PersistedJob>()?).as_bytes())?;
 		// file.write_all(format!("{}\n\n", ts_export::<CoreJobOutput>()?).as_bytes())?;
-		// TODO: Fix this... Must move all job defs to the core...
+		// TODO: Fix this... Must move all job defs to the core... Otherwise, the `unknown` type swallows the others in the union
 		file.write_all(
 			"export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput\n\n".to_string()
 			.as_bytes(),
@@ -273,6 +314,19 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<AgeRestriction>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UserPreferences>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LoginActivity>()?).as_bytes())?;
+
+		file.write_all(format!("{}\n\n", ts_export::<EmailerSendTo>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<EmailerConfig>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<EmailerClientConfig>()?).as_bytes(),
+		)?;
+
+		file.write_all(format!("{}\n\n", ts_export::<SMTPEmailer>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<RegisteredEmailDevice>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<EmailerSendRecord>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<AttachmentMeta>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<FileStatus>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<Library>()?).as_bytes())?;

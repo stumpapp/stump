@@ -7,7 +7,7 @@ use axum::{
 use serde::Deserialize;
 use specta::Type;
 use stump_core::{
-	db::entity::{Notifier, NotifierConfig, NotifierType, UserPermission},
+	db::entity::{Notifier, NotifierConfigInput, NotifierType, UserPermission},
 	prisma::notifier,
 };
 use tower_sessions::Session;
@@ -108,7 +108,7 @@ async fn get_notifier_by_id(
 pub struct CreateOrUpdateNotifier {
 	#[serde(rename = "type")]
 	_type: NotifierType,
-	config: NotifierConfig,
+	config: NotifierConfigInput,
 }
 
 #[utoipa::path(
@@ -132,14 +132,10 @@ async fn create_notifier(
 	enforce_session_permissions(&session, &[UserPermission::CreateNotifier])?;
 
 	let client = &ctx.db;
-
+	let config = payload.config.into_config(&ctx).await?.into_bytes()?;
 	let notifier = client
 		.notifier()
-		.create(
-			payload._type.to_string(),
-			payload.config.into_bytes()?,
-			vec![],
-		)
+		.create(payload._type.to_string(), config, vec![])
 		.exec()
 		.await?;
 
@@ -172,13 +168,14 @@ async fn update_notifier(
 	enforce_session_permissions(&session, &[UserPermission::ManageNotifier])?;
 
 	let client = &ctx.db;
+	let config = payload.config.into_config(&ctx).await?.into_bytes()?;
 	let notifier = client
 		.notifier()
 		.update(
 			notifier::id::equals(id),
 			vec![
 				notifier::r#type::set(payload._type.to_string()),
-				notifier::config::set(payload.config.into_bytes()?),
+				notifier::config::set(config),
 			],
 		)
 		.exec()
@@ -191,7 +188,7 @@ async fn update_notifier(
 pub struct PatchNotifier {
 	#[serde(rename = "type")]
 	_type: Option<NotifierType>,
-	config: Option<NotifierConfig>,
+	config: Option<NotifierConfigInput>,
 }
 
 #[utoipa::path(
@@ -219,10 +216,11 @@ async fn patch_notifier(
 
 	let client = &ctx.db;
 
-	let config = payload
-		.config
-		.map(|config| config.into_bytes())
-		.transpose()?;
+	let config = if let Some(config) = payload.config {
+		Some(config.into_config(&ctx).await?.into_bytes()?)
+	} else {
+		None
+	};
 
 	let patched_notifier = client
 		.notifier()

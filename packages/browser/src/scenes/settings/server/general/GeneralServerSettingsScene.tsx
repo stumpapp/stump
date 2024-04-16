@@ -8,6 +8,7 @@ import { ContentContainer } from '@/components/container'
 import { SceneContainer } from '@/components/container'
 
 import ServerInfoSection from './ServerInfoSection'
+import ServerPublicURL from './ServerPublicURL'
 
 export default function GeneralServerSettingsScene() {
 	const { t } = useLocaleContext()
@@ -31,6 +32,7 @@ export default function GeneralServerSettingsScene() {
 					)}
 
 					<ServerInfoSection />
+					<ServerPublicURL />
 				</div>
 			</ContentContainer>
 		</SceneContainer>

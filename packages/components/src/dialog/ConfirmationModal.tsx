@@ -1,3 +1,5 @@
+import { useCallback } from 'react'
+
 import { Button } from '../button'
 import { PickSelect } from '../utils'
 import { Dialog } from './primitives'
@@ -36,21 +38,26 @@ export function ConfirmationModal({
 	onConfirm,
 	onClose,
 }: ConfirmationModalProps) {
-	const handleOpenChange = (nowOpen: boolean) => {
-		if (!nowOpen && !confirmIsLoading) {
-			onClose()
-		}
-	}
+	const handleOpenChange = useCallback(
+		(nowOpen: boolean) => {
+			if (!nowOpen && !confirmIsLoading) {
+				onClose()
+			}
+		},
+		[confirmIsLoading, onClose],
+	)
 
 	return (
 		<Dialog open={isOpen} onOpenChange={handleOpenChange}>
-			<Dialog.Trigger asChild={!!trigger && typeof trigger !== 'string'}>
-				{typeof trigger === 'string' ? (
-					<Button variant={triggerVariant}>{trigger}</Button>
-				) : (
-					trigger
-				)}
-			</Dialog.Trigger>
+			{trigger !== null && (
+				<Dialog.Trigger asChild={!!trigger && typeof trigger !== 'string'}>
+					{typeof trigger === 'string' ? (
+						<Button variant={triggerVariant}>{trigger}</Button>
+					) : (
+						trigger
+					)}
+				</Dialog.Trigger>
+			)}
 			<Dialog.Content size="sm">
 				<Dialog.Header>
 					<Dialog.Title>{title}</Dialog.Title>

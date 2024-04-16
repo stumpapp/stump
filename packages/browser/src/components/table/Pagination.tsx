@@ -37,7 +37,7 @@ export default function TablePagination({
 	return (
 		<div className="flex items-center gap-1">
 			<IconButton disabled={currentPage <= 1} onClick={() => onChangePage(currentPage - 1)}>
-				<ArrowLeft />
+				<ArrowLeft className="h-4 w-4" />
 			</IconButton>
 
 			{pageRange.map((page, i) => {
@@ -61,7 +61,7 @@ export default function TablePagination({
 						onPageChange={onChangePage}
 						trigger={
 							<Button>
-								<MoreHorizontal />
+								<MoreHorizontal className="h-4 w-4" />
 							</Button>
 						}
 					/>
@@ -69,7 +69,7 @@ export default function TablePagination({
 			})}
 
 			<IconButton disabled={currentPage >= pages} onClick={() => onChangePage(currentPage + 1)}>
-				<ArrowRight />
+				<ArrowRight className="h-4 w-4" />
 			</IconButton>
 		</div>
 	)

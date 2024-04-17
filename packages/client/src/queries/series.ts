@@ -81,6 +81,11 @@ export function usePagedSeriesQuery(options: PageQueryOptions<Series> = {}) {
 	}
 }
 
+export const prefetchPagedSeries = (options: PageQueryOptions<Series>) =>
+	queryClient.prefetchQuery([seriesQueryKeys.getSeries, options], () =>
+		seriesApi.getSeries(options),
+	)
+
 // TODO: fix this query!
 export function useSeriesCursorQuery({ queryKey, ...options }: CursorQueryOptions<Series>) {
 	const { data, ...restReturn } = useCursorQuery(

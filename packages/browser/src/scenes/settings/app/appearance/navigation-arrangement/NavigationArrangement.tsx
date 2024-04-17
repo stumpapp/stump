@@ -15,6 +15,7 @@ import {
 } from '@dnd-kit/sortable'
 import { useNavigationArrangement } from '@stump/client'
 import { Card, cn, IconButton, Label, Text, ToolTip } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import isEqual from 'lodash.isequal'
 import { Lock, Unlock } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
@@ -23,9 +24,11 @@ import toast from 'react-hot-toast'
 import { usePreferences } from '@/hooks'
 
 import NavigationArrangementItem from './NavigationArrangementItem'
+import { IEntityOptions, isNavigationItemWithEntityOptions } from './types'
 
 // TODO: feature permissions (e.g. not allowed to access smart lists)
 export default function NavigationArrangement() {
+	const { t } = useLocaleContext()
 	const {
 		preferences: { primary_navigation_mode },
 	} = usePreferences()
@@ -108,6 +111,25 @@ export default function NavigationArrangement() {
 		[items, locked],
 	)
 
+	const setEntityOptions = useCallback(
+		async (idx: number, options: IEntityOptions) => {
+			if (locked) return
+
+			const targetItem = items[idx]
+
+			if (!!targetItem && isNavigationItemWithEntityOptions(targetItem.item)) {
+				const newInternalItem = { ...targetItem.item, ...options }
+				setLocalArrangement(({ items, ...curr }) => ({
+					items: items.map((item, index) =>
+						index === idx ? { item: newInternalItem, visible: item.visible } : item,
+					),
+					...curr,
+				}))
+			}
+		},
+		[items, locked],
+	)
+
 	const renderLockedButton = () => {
 		const Icon = locked ? Lock : Unlock
 		const help = locked ? 'Unlock arrangement' : 'Lock arrangement'
@@ -129,10 +151,9 @@ export default function NavigationArrangement() {
 		<div className="flex w-full flex-col space-y-4">
 			<div className="flex items-center justify-between">
 				<div>
-					<Label>Navigation arrangement</Label>
+					<Label>{t(getKey('label'))}</Label>
 					<Text size="sm" variant="muted" className="mt-1.5">
-						Arrange and customize the navigation items in the{' '}
-						{primary_navigation_mode === 'SIDEBAR' ? 'sidebar' : 'topbar'}
+						{t(getKey(`description.${primary_navigation_mode?.toLowerCase() || 'sidebar'}`))}
 					</Text>
 				</div>
 
@@ -140,10 +161,10 @@ export default function NavigationArrangement() {
 			</div>
 
 			<Card
-				className={cn('relative flex flex-col space-y-4 bg-background-200 p-4', {
+				className={cn('relative flex flex-col space-y-4 bg-background-200 p-4 md:max-w-xl', {
 					'cursor-not-allowed opacity-60': locked,
 				})}
-				title={locked ? 'Arrangement is locked' : undefined}
+				title={locked ? t(getKey('isLocked')) : undefined}
 			>
 				<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
 					<SortableContext items={identifiers} strategy={verticalListSortingStrategy}>
@@ -153,6 +174,7 @@ export default function NavigationArrangement() {
 								item={item}
 								active={visible ?? true}
 								toggleActive={() => setItemVisibility(idx, !visible)}
+								onChangeOptions={(options) => setEntityOptions(idx, options)}
 								disabled={locked}
 							/>
 						))}
@@ -162,3 +184,6 @@ export default function NavigationArrangement() {
 		</div>
 	)
 }
+
+const LOCALE_BASE = 'settingsScene.app/appearance.sections.navigationArrangement'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

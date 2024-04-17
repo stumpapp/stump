@@ -16,13 +16,30 @@ pub enum NavigationMode {
 // TODO: support order_by for some options with actions
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+pub struct NaviationItemDisplayOptions {
+	#[serde(default = "default_true")]
+	pub show_create_action: bool,
+	#[serde(default)]
+	pub show_link_to_all: bool,
+}
+
+impl Default for NaviationItemDisplayOptions {
+	fn default() -> Self {
+		Self {
+			show_create_action: true,
+			show_link_to_all: false,
+		}
+	}
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 #[serde(tag = "type")]
 pub enum NavigationItem {
 	Home,
 	Explore,
-	Libraries { show_create_action: bool },
-	SmartLists { show_create_action: bool },
-	BookClubs { show_create_action: bool },
+	Libraries(NaviationItemDisplayOptions),
+	SmartLists(NaviationItemDisplayOptions),
+	BookClubs(NaviationItemDisplayOptions),
 }
 
 // TODO: support order_by in some options (e.g. Library)
@@ -64,21 +81,21 @@ impl<I> Arrangement<I> {
 					visible: true,
 				},
 				ArrangementItem {
-					item: NavigationItem::Libraries {
-						show_create_action: true,
-					},
+					item: NavigationItem::Libraries(
+						NaviationItemDisplayOptions::default(),
+					),
 					visible: true,
 				},
 				ArrangementItem {
-					item: NavigationItem::SmartLists {
-						show_create_action: true,
-					},
+					item: NavigationItem::SmartLists(
+						NaviationItemDisplayOptions::default(),
+					),
 					visible: true,
 				},
 				ArrangementItem {
-					item: NavigationItem::BookClubs {
-						show_create_action: true,
-					},
+					item: NavigationItem::BookClubs(
+						NaviationItemDisplayOptions::default(),
+					),
 					visible: true,
 				},
 			],

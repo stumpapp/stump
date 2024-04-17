@@ -11755,6 +11755,11 @@ lucide-react@^0.288.0:
   resolved "https://registry.yarnpkg.com/lucide-react/-/lucide-react-0.288.0.tgz#cc9fda209fe4ec6e572efca38f7d3e3cde7422eb"
   integrity sha512-ikhb/9LOkq9orPoLV9lLC4UYyoXQycBhIgH7H59ahOkk0mkcAqkD52m84RXedE/qVqZHW8rEJquInT4xGmsNqw==
 
+lucide-react@^0.368.0:
+  version "0.368.0"
+  resolved "https://registry.yarnpkg.com/lucide-react/-/lucide-react-0.368.0.tgz#3c0ee63f4f7d30ae63b621b2b8f04f9e409ee6e7"
+  integrity sha512-soryVrCjheZs8rbXKdINw9B8iPi5OajBJZMJ1HORig89ljcOcEokKKAgGbg3QWxSXel7JwHOfDFUdDHAKyUAMw==
+
 lusca@1.6.1:
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/lusca/-/lusca-1.6.1.tgz#f7445e50c720030f5ee53d1336e9e53d1786c34f"

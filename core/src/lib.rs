@@ -274,6 +274,9 @@ mod tests {
 
 		file.write_all(format!("{}\n\n", ts_export::<NavigationMode>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<HomeItem>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<NaviationItemDisplayOptions>()?).as_bytes(),
+		)?;
 		file.write_all(format!("{}\n\n", ts_export::<NavigationItem>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<ArrangementItem<()>>()?).as_bytes(),

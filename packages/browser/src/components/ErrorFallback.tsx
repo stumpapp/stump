@@ -22,6 +22,11 @@ export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 			data-tauri-drag-region
 			className="flex h-full w-full flex-col items-center justify-center overflow-hidden"
 		>
+			<img
+				src="/assets/svg/bomb.svg"
+				alt="Construction illustration"
+				className="mx-auto hidden max-h-64 w-1/2 shrink-0 object-scale-down sm:inline-block"
+			/>
 			<div className="max-w-sm sm:max-w-md md:max-w-xl">
 				<div className="text-left">
 					<h1 className="text-4xl font-semibold text-contrast">A critical error occurred</h1>

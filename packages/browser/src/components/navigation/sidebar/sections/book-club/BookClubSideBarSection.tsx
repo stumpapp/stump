@@ -8,13 +8,18 @@ import { useLocation } from 'react-router'
 import { useAppContext } from '../../../../../context'
 import paths from '../../../../../paths'
 import SideBarButtonLink from '../../SideBarButtonLink'
+import { EntityOptionProps } from '../../../types'
 import BookClubEmoji from './BookClubEmoji'
 
 type Props = {
 	isMobile?: boolean
-}
+} & EntityOptionProps
 
-export default function BookClubSideBarSection({ isMobile }: Props) {
+export default function BookClubSideBarSection({
+	isMobile,
+	showCreate = true,
+	showLinkToAll = false,
+}: Props) {
 	const location = useLocation()
 	const { user, isServerOwner, checkPermission } = useAppContext()
 
@@ -63,6 +68,7 @@ export default function BookClubSideBarSection({ isMobile }: Props) {
 	}
 
 	const canCreateBookClub = checkPermission('bookclub:create')
+	const showCreateLink = canCreateBookClub && showCreate
 
 	return (
 		<Accordion type="single" collapsible className="w-full py-2">
@@ -71,8 +77,17 @@ export default function BookClubSideBarSection({ isMobile }: Props) {
 					{t('sidebar.buttons.bookClubs')}
 				</Accordion.Trigger>
 				<Accordion.Content containerClassName="flex flex-col gap-y-1.5">
+					{showLinkToAll && (
+						<SideBarButtonLink
+							to={paths.bookClubs()}
+							isActive={location.pathname === paths.bookClubs()}
+							variant="action"
+						>
+							{t('sidebar.buttons.seeAll')}
+						</SideBarButtonLink>
+					)}
 					{renderBookClubs()}
-					{canCreateBookClub && (
+					{showCreateLink && (
 						<SideBarButtonLink
 							to={paths.bookClubCreate()}
 							isActive={location.pathname === paths.bookClubCreate()}

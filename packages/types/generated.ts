@@ -68,7 +68,9 @@ export type NavigationMode = "SIDEBAR" | "TOPBAR"
 
 export type HomeItem = { type: "ContinueReading" } | { type: "RecentlyAddedBooks" } | { type: "RecentlyAddedSeries" } | { type: "Library"; library_id: string } | { type: "SmartList"; smart_list_id: string }
 
-export type NavigationItem = { type: "Home" } | { type: "Explore" } | { type: "Libraries"; show_create_action: boolean } | { type: "SmartLists"; show_create_action: boolean } | { type: "BookClubs"; show_create_action: boolean }
+export type NaviationItemDisplayOptions = { show_create_action?: boolean; show_link_to_all?: boolean }
+
+export type NavigationItem = { type: "Home" } | { type: "Explore" } | ({ type: "Libraries" } & NaviationItemDisplayOptions) | ({ type: "SmartLists" } & NaviationItemDisplayOptions) | ({ type: "BookClubs" } & NaviationItemDisplayOptions)
 
 export type ArrangementItem<I> = { item: I; visible?: boolean }
 

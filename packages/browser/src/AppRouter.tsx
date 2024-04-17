@@ -20,8 +20,6 @@ const ServerConnectionErrorScene = lazy(
 )
 const LoginOrClaimScene = lazy(() => import('./scenes/auth/LoginOrClaimScene.tsx'))
 
-const IS_DEVELOPMENT = import.meta.env.MODE === 'development'
-
 export function AppRouter() {
 	const locale = useUserStore((store) => store.userPreferences?.locale)
 
@@ -46,7 +44,7 @@ export function AppRouter() {
 					<Route path="libraries/*" element={<LibraryRouter />} />
 					<Route path="series/*" element={<SeriesRouter />} />
 					<Route path="books/*" element={<BookRouter />} />
-					{IS_DEVELOPMENT && <Route path="book-clubs/*" element={<BookClubRouter />} />}
+					<Route path="book-clubs/*" element={<BookClubRouter />} />
 					<Route path="/smart-lists/*" element={<SmartListRouter />} />
 					<Route path="settings/*" element={<SettingsRouter />} />
 				</Route>

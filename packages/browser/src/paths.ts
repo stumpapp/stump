@@ -81,6 +81,7 @@ const paths = {
 	docs: (topic?: DocTopic, section?: string) =>
 		`https://www.stumpapp.dev/guides/${topic || ''}${section ? `#${section}` : ''}`,
 	home: () => '/',
+	libraries: () => '/libraries',
 	libraryBooks: (id: string, page?: number) => {
 		if (page !== undefined) {
 			return `/libraries/${id}/books?page=${page}`

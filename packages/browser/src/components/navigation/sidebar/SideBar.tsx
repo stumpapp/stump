@@ -74,15 +74,20 @@ export default function SideBar({ asChild, hidden }: Props) {
 			arrangement.items
 				.filter(({ item: { type }, visible }) => checkSectionPermission(type) && visible)
 				.map(({ item }) =>
-					match(item.type)
-						.with('Home', () => (
-							<SideBarButtonLink to={paths.home()} isActive={location.pathname === '/'}>
+					match(item)
+						.with({ type: 'Home' }, () => (
+							<SideBarButtonLink
+								key="home-sidebar-navlink"
+								to={paths.home()}
+								isActive={location.pathname === '/'}
+							>
 								<Home className="mr-2 h-4 w-4 shrink-0" />
 								{t('sidebar.buttons.home')}
 							</SideBarButtonLink>
 						))
-						.with('Explore', () => (
+						.with({ type: 'Explore' }, () => (
 							<SideBarButtonLink
+								key="explore-sidebar-navlink"
 								to={paths.bookSearch()}
 								isActive={location.pathname === paths.bookSearch()}
 							>
@@ -90,9 +95,29 @@ export default function SideBar({ asChild, hidden }: Props) {
 								{t('sidebar.buttons.books')}
 							</SideBarButtonLink>
 						))
-						.with('Libraries', () => <LibrarySideBarSection isMobile={isMobile} />)
-						.with('SmartLists', () => <SmartListSideBarSection />)
-						.with('BookClubs', () => <BookClubSideBarSection isMobile={isMobile} />)
+						.with({ type: 'Libraries' }, (ctx) => (
+							<LibrarySideBarSection
+								key="libraries-sidebar-navlink"
+								isMobile={isMobile}
+								showCreate={ctx.show_create_action}
+								showLinkToAll={ctx.show_link_to_all}
+							/>
+						))
+						.with({ type: 'SmartLists' }, (ctx) => (
+							<SmartListSideBarSection
+								key="smartlists-sidebar-navlink"
+								showCreate={ctx.show_create_action}
+								showLinkToAll={ctx.show_link_to_all}
+							/>
+						))
+						.with({ type: 'BookClubs' }, (ctx) => (
+							<BookClubSideBarSection
+								key="book-clubs-sidebar-navlink"
+								isMobile={isMobile}
+								showCreate={ctx.show_create_action}
+								showLinkToAll={ctx.show_link_to_all}
+							/>
+						))
 						.otherwise(() => null),
 				)
 				.filter(Boolean),

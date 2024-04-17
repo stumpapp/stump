@@ -31,7 +31,7 @@
 		"immer": "^10.0.3",
 		"lodash.isequal": "^4.5.0",
 		"lodash.uniqby": "^4.7.0",
-		"lucide-react": "^0.288.0",
+		"lucide-react": "^0.368.0",
 		"nprogress": "^0.2.0",
 		"pluralize": "^8.0.0",
 		"react": "^18.2.0",

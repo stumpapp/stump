@@ -637,12 +637,14 @@ async fn get_navigation_arrangement(
 
 	let user_preferences = db
 		.user_preferences()
-		.find_unique(user_preferences::user_id::equals(user.id.clone()))
+		.find_first(vec![user_preferences::user::is(vec![user::id::equals(
+			user.id.clone(),
+		)])])
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound(format!(
-			"User preferences with id {} not found",
-			user.id
+			"User preferences for {} not found",
+			user.username
 		)))?;
 	let user_preferences = UserPreferences::from(user_preferences);
 
@@ -672,12 +674,16 @@ async fn update_navigation_arrangement(
 
 	let user_preferences = db
 		.user_preferences()
-		.find_unique(user_preferences::user_id::equals(user.id.clone()))
+		// TODO: Really old accounts potentially have users with preferences missing a `user_id`
+		// assignment. This should be more properly fixed in the future, e.g. by a migration.
+		.find_first(vec![user_preferences::user::is(vec![user::id::equals(
+			user.id.clone(),
+		)])])
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound(format!(
-			"User preferences with id {} not found",
-			user.id
+			"User preferences for {} not found",
+			user.username
 		)))?;
 	let user_preferences = UserPreferences::from(user_preferences);
 

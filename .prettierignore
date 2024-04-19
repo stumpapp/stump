@@ -8,6 +8,6 @@ build
 .next
 .expo
 
-packages/browser/src/i18n/locales/*.json
+packages/i18n/src/locales/*.json
 
 CHANGELOG.md

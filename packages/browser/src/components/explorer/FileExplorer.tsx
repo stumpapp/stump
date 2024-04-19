@@ -4,6 +4,9 @@ import { useFileExplorerContext } from './context'
 import { FileGrid } from './grid'
 import { FileTable } from './table'
 
+// TODO: each item within the grid or table makes an API call to get the media and then the associated thumbnail
+// This is not optimal, and should be refactored to issue one query and match on the client
+
 export default function FileExplorer() {
 	const { files, layout } = useFileExplorerContext()
 

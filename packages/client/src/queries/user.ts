@@ -8,18 +8,22 @@ import {
 	userQueryKeys,
 } from '@stump/api'
 import type {
+	Arrangement,
 	CreateUser,
 	LoginActivity,
+	NavigationItem,
 	UpdateUser,
 	UpdateUserPreferences,
 	User,
 	UserPreferences,
 } from '@stump/types'
 import { AxiosError } from 'axios'
+import { useMemo } from 'react'
 
 import {
 	MutationOptions,
 	PageQueryOptions,
+	queryClient,
 	QueryOptions,
 	useMutation,
 	usePageQuery,
@@ -216,4 +220,75 @@ export function useLoginActivityQuery({ userId, ...options }: UseLoginActivityQu
 		loginActivity,
 		...restReturn,
 	}
+}
+
+type UseNavigationArrangementOptions = {
+	defaultArrangement?: Arrangement<NavigationItem>
+} & QueryOptions<Arrangement<NavigationItem>>
+export function useNavigationArrangement({
+	defaultArrangement = defaultNavigationArrangement,
+	...options
+}: UseNavigationArrangementOptions = {}) {
+	const { data } = useQuery(
+		[userQueryKeys.getPreferredNavigationArrangement],
+		async () => {
+			const response = await userApi.getPreferredNavigationArrangement()
+			return response.data
+		},
+		{
+			suspense: true,
+			...options,
+		},
+	)
+
+	const {
+		mutateAsync: updateArrangement,
+		error: updateError,
+		isLoading: isUpdating,
+	} = useMutation(
+		[userQueryKeys.setPreferredNavigationArrangement],
+		async (arrangement: Arrangement<NavigationItem>) => {
+			const response = await userApi.setPreferredNavigationArrangement(arrangement)
+			return response.data
+		},
+		{
+			onError: (_, newArrangement, ctx) => {
+				console.warn('Failed to update navigation arrangement', newArrangement)
+				queryClient.setQueryData(
+					[userQueryKeys.getPreferredNavigationArrangement],
+					ctx?.previousArrangement,
+				)
+			},
+			onMutate: async (arrangement: Arrangement<NavigationItem>) => {
+				await queryClient.cancelQueries([userQueryKeys.getPreferredNavigationArrangement])
+				const previousArrangement = queryClient.getQueryData<Arrangement<NavigationItem>>([
+					userQueryKeys.getPreferredNavigationArrangement,
+				])
+				queryClient.setQueryData([userQueryKeys.getPreferredNavigationArrangement], arrangement)
+				return { previousArrangement }
+			},
+			onSettled: () =>
+				queryClient.invalidateQueries([userQueryKeys.getPreferredNavigationArrangement]),
+		},
+	)
+
+	const arrangement = useMemo(() => data ?? defaultArrangement, [data, defaultArrangement])
+
+	return {
+		arrangement,
+		isUpdating,
+		updateArrangement,
+		updateError,
+	}
+}
+
+const defaultNavigationArrangement: Arrangement<NavigationItem> = {
+	items: [
+		{ item: { type: 'Home' }, visible: true },
+		{ item: { type: 'Explore' }, visible: true },
+		{ item: { show_create_action: true, type: 'Libraries' }, visible: true },
+		{ item: { show_create_action: true, type: 'SmartLists' }, visible: true },
+		{ item: { show_create_action: true, type: 'BookClubs' }, visible: true },
+	],
+	locked: true,
 }

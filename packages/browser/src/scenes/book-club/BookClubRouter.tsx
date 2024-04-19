@@ -1,6 +1,8 @@
 import React, { lazy, useEffect } from 'react'
 import { Navigate, Route, Routes, useNavigate } from 'react-router'
 
+import { UnderConstruction } from '@/components/unimplemented'
+
 import { useAppContext } from '../../context.ts'
 import BookClubHomeLayout from './home/BookClubHomeLayout.tsx'
 
@@ -17,6 +19,8 @@ const BookClubSchedulerScene = lazy(
 	() => import('./home/tabs/settings/scheduler/BookClubSchedulerScene.tsx'),
 )
 
+const IS_DEVELOPMENT = import.meta.env.DEV
+
 export default function BookClubRouter() {
 	const { checkPermission } = useAppContext()
 
@@ -30,6 +34,14 @@ export default function BookClubRouter() {
 
 	if (!canAccess) {
 		return null
+	}
+
+	if (!IS_DEVELOPMENT) {
+		return (
+			<Routes>
+				<Route path="*" element={<UnderConstruction issue={120} />} />
+			</Routes>
+		)
 	}
 
 	return (

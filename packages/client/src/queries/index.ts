@@ -69,6 +69,7 @@ export {
 	useCreateUser,
 	useDeleteUser,
 	useLoginActivityQuery,
+	useNavigationArrangement,
 	useUpdatePreferences,
 	useUpdateUser,
 	useUserPreferences,

@@ -41,19 +41,21 @@ impl DirectoryListingFile {
 		}
 	}
 
-	pub fn from_pathbuf(path: PathBuf) -> Self {
-		Self {
-			name: path.file_parts().file_name,
-			is_directory: path.is_dir(),
-			path,
-		}
-	}
-
 	pub fn file(name: &str, path: &str) -> Self {
 		Self::new(false, name, path)
 	}
 
 	pub fn directory(name: &str, path: &str) -> Self {
 		Self::new(true, name, path)
+	}
+}
+
+impl From<PathBuf> for DirectoryListingFile {
+	fn from(path: PathBuf) -> Self {
+		Self {
+			name: path.file_parts().file_name,
+			is_directory: path.is_dir(),
+			path,
+		}
 	}
 }

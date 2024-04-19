@@ -59,10 +59,10 @@ pub async fn list_directory(
 	enforce_session_permission(&session, UserPermission::FileExplorer)?;
 	let input = input.unwrap_or_default();
 
-	let start_path = match input.path {
-		Some(path) => PathBuf::from(path),
-		None => get_os_start_path(),
-	};
+	let start_path = input
+		.path
+		.map(PathBuf::from)
+		.unwrap_or_else(get_os_start_path);
 
 	if !start_path.exists() {
 		return Err(APIError::NotFound(format!(
@@ -119,7 +119,7 @@ fn read_and_filter_directory(
 	let files = listing
 		.filter_map(|res| res.ok())
 		.filter_map(filter_if_hidden)
-		.map(|entry| DirectoryListingFile::from_pathbuf(entry.path()))
+		.map(|entry| DirectoryListingFile::from(entry.path()))
 		.collect();
 
 	Ok(files)

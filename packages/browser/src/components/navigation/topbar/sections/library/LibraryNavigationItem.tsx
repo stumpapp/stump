@@ -6,18 +6,23 @@ import { useLocation } from 'react-router-dom'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { LastVisitedLibrary } from '@/components/library'
+import { EntityOptionProps } from '@/components/navigation/types'
 import { useAppContext } from '@/context'
 import paths from '@/paths'
 
 import TopBarLinkListItem from '../../TopBarLinkListItem'
 
-export default function LibraryNavigationItem() {
+type Props = EntityOptionProps
+
+export default function LibraryNavigationItem({ showCreate = true, showLinkToAll = false }: Props) {
 	const { libraries } = useLibraries()
 
 	const location = useLocation()
 
 	const { checkPermission } = useAppContext()
+
 	const canCreateLibrary = useMemo(() => checkPermission('library:create'), [checkPermission])
+	const showCreateLink = canCreateLibrary && showCreate
 
 	const renderLibraries = () => {
 		if (!libraries?.length) {
@@ -87,15 +92,27 @@ export default function LibraryNavigationItem() {
 						<div className={cx('flex w-full flex-1', { 'flex-col gap-y-2': !libraries?.length })}>
 							{renderLibraries()}
 
-							{canCreateLibrary && (
-								<TopBarLinkListItem
-									to={paths.libraryCreate()}
-									isActive={location.pathname.startsWith(paths.libraryCreate())}
-									className="shrink-0 justify-center self-end border border-dashed border-edge-200 py-2.5"
-								>
-									<span className="line-clamp-1 font-medium">Create library</span>
-								</TopBarLinkListItem>
-							)}
+							<div className="flex w-full items-center gap-2">
+								{showCreateLink && (
+									<TopBarLinkListItem
+										to={paths.libraryCreate()}
+										isActive={location.pathname.startsWith(paths.libraryCreate())}
+										className="shrink-0 justify-center self-end border border-dashed border-edge-200 py-2.5"
+									>
+										<span className="line-clamp-1 font-medium">Create library</span>
+									</TopBarLinkListItem>
+								)}
+
+								{showLinkToAll && (
+									<TopBarLinkListItem
+										to={paths.libraries()}
+										isActive={location.pathname.startsWith(paths.libraries())}
+										className="shrink-0 justify-center self-end border border-dashed border-edge-200 py-2.5"
+									>
+										<span className="line-clamp-1 font-medium">See all</span>
+									</TopBarLinkListItem>
+								)}
+							</div>
 						</div>
 					</div>
 				</div>

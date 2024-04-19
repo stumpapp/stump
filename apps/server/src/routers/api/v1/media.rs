@@ -787,7 +787,7 @@ async fn get_media_file(
 ) -> APIResult<NamedFile> {
 	let db = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = enforce_session_permissions(&session, &[UserPermission::DownloadFile])?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -836,6 +836,7 @@ async fn convert_media(
 ) -> Result<(), APIError> {
 	let db = &ctx.db;
 
+	// TODO: if keeping, enforce permission
 	let user = get_session_user(&session)?;
 	let age_restrictions = user
 		.age_restriction

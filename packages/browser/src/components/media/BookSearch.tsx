@@ -1,7 +1,7 @@
-import { usePagedMediaQuery } from '@stump/client'
+import { prefetchPagedMedia, usePagedMediaQuery } from '@stump/client'
 import { usePreviousIsDifferent } from '@stump/components'
 import { Media } from '@stump/types'
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 
 import useIsInView from '@/hooks/useIsInView'
 
@@ -23,16 +23,21 @@ type Props = {
  */
 export default function BookSearch({ page, page_size, setPage, onBookSelect, showFilters }: Props) {
 	const { filters } = useFilterContext()
+
+	const params = useMemo(
+		() => ({
+			page,
+			page_size,
+			params: filters,
+		}),
+		[page, page_size, filters],
+	)
 	const {
 		isLoading,
 		isRefetching,
 		media,
 		pageData: { current_page, total_pages } = {},
-	} = usePagedMediaQuery({
-		page,
-		page_size,
-		params: filters,
-	})
+	} = usePagedMediaQuery(params)
 
 	const differentSearch = usePreviousIsDifferent(filters?.search as string)
 	useEffect(() => {
@@ -58,6 +63,16 @@ export default function BookSearch({ page, page_size, setPage, onBookSelect, sho
 	const hasStuff = total_pages !== undefined && current_page !== undefined && total_pages > 0
 	const hasFilters = Object.keys(filters || {}).length > 0
 
+	const handlePrefetchPage = useCallback(
+		(page: number) => {
+			prefetchPagedMedia({
+				...params,
+				page,
+			})
+		},
+		[params],
+	)
+
 	return (
 		<>
 			<section ref={containerRef} id="grid-top-indicator" className="h-1" />
@@ -68,12 +83,13 @@ export default function BookSearch({ page, page_size, setPage, onBookSelect, sho
 				{...(showFilters ? { entity: 'media', orderBy: true } : {})}
 			/>
 
-			<div className="flex w-full flex-col space-y-6 pt-4">
+			<div className="flex w-full flex-col space-y-6 pb-[64px] pt-4 md:pb-0">
 				{hasStuff && (
 					<Pagination
 						pages={total_pages}
 						currentPage={current_page}
 						onChangePage={(page) => setPage(page)}
+						onPrefetchPage={handlePrefetchPage}
 					/>
 				)}
 				<MediaGrid
@@ -88,6 +104,7 @@ export default function BookSearch({ page, page_size, setPage, onBookSelect, sho
 						pages={total_pages}
 						currentPage={current_page}
 						onChangePage={(page) => setPage(page)}
+						onPrefetchPage={handlePrefetchPage}
 					/>
 				)}
 			</div>

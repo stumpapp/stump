@@ -616,6 +616,18 @@ async fn update_current_user_preferences(
 	Ok(Json(updated_preferences))
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/users/me/navigation-arrangement",
+	tag = "user",
+	responses(
+		(status = 200, description = "Successfully fetched user navigation arrangement"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "User preferences not found"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
 async fn get_navigation_arrangement(
 	session: Session,
 	State(ctx): State<AppState>,
@@ -637,6 +649,19 @@ async fn get_navigation_arrangement(
 	Ok(Json(user_preferences.navigation_arrangement))
 }
 
+#[utoipa::path(
+	put,
+	path = "/api/v1/users/me/navigation-arrangement",
+	tag = "user",
+	request_body = Arrangement<NavigationItem>,
+	responses(
+		(status = 200, description = "Successfully updated user navigation arrangement", body = Arrangement<NavigationItem>),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "User preferences not found"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
 async fn update_navigation_arrangement(
 	session: Session,
 	State(ctx): State<AppState>,

@@ -218,7 +218,7 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 					|v| v,
 				)
 			})
-			.unwrap_or_else(|| Arrangement::<NavigationItem>::default_navigation());
+			.unwrap_or_else(Arrangement::<NavigationItem>::default_navigation);
 
 		let home_arrangement = data
 			.home_arrangement
@@ -231,7 +231,7 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 					|v| v,
 				)
 			})
-			.unwrap_or_else(|| Arrangement::<HomeItem>::default_home());
+			.unwrap_or_else(Arrangement::<HomeItem>::default_home);
 
 		UserPreferences {
 			id: data.id,

@@ -5,8 +5,8 @@ import { useLocation } from 'react-router'
 
 import paths from '@/paths'
 
-import SideBarButtonLink from '../../SideBarButtonLink'
 import { EntityOptionProps } from '../../../types'
+import SideBarButtonLink from '../../SideBarButtonLink'
 
 type Props = EntityOptionProps
 

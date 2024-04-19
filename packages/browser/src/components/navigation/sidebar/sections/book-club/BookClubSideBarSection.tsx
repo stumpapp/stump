@@ -7,8 +7,8 @@ import { useLocation } from 'react-router'
 
 import { useAppContext } from '../../../../../context'
 import paths from '../../../../../paths'
-import SideBarButtonLink from '../../SideBarButtonLink'
 import { EntityOptionProps } from '../../../types'
+import SideBarButtonLink from '../../SideBarButtonLink'
 import BookClubEmoji from './BookClubEmoji'
 
 type Props = {

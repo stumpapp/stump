@@ -16,19 +16,21 @@ import {
 import { useNavigationArrangement } from '@stump/client'
 import { Card, cn, IconButton, Label, Text, ToolTip } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
+import { NavigationItem } from '@stump/types'
 import isEqual from 'lodash.isequal'
 import { Lock, Unlock } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 
+import { useAppContext } from '@/context'
 import { usePreferences } from '@/hooks'
 
 import NavigationArrangementItem from './NavigationArrangementItem'
 import { IEntityOptions, isNavigationItemWithEntityOptions } from './types'
 
-// TODO: feature permissions (e.g. not allowed to access smart lists)
 export default function NavigationArrangement() {
 	const { t } = useLocaleContext()
+	const { checkPermission } = useAppContext()
 	const {
 		preferences: { primary_navigation_mode },
 	} = usePreferences()
@@ -47,8 +49,29 @@ export default function NavigationArrangement() {
 		}),
 	)
 
+	/**
+	 * A callback to check if the current user has permission to access a specific item.
+	 * There is no point in allowing a user to configure an item which is for a feature
+	 * they do not have access to.
+	 */
+	const checkItemPermission = useCallback(
+		(type: NavigationItem['type']) => {
+			if (type === 'SmartLists') {
+				return checkPermission('smartlist:read')
+			} else if (type === 'BookClubs') {
+				return checkPermission('bookclub:read')
+			} else {
+				return true
+			}
+		},
+		[checkPermission],
+	)
+
 	const [localArragement, setLocalArrangement] = useState(() => arrangement)
 
+	/**
+	 * A callback to actually update the arrangement on the server.
+	 */
 	const handleUpdateArrangement = useCallback(
 		async (updates: typeof localArragement) => {
 			try {
@@ -68,12 +91,20 @@ export default function NavigationArrangement() {
 		() => !isEqual(localArragement, arrangement),
 		[localArragement, arrangement],
 	)
+	/**
+	 * An effect which will update the arrangement whenever the local arrangement is different
+	 * from the current arrangement which has been fetched from the server.
+	 */
 	useEffect(() => {
 		if (isDifferent) {
 			handleUpdateArrangement(localArragement)
 		}
 	}, [isDifferent, handleUpdateArrangement, localArragement])
 
+	/**
+	 * A callback to handle the end of a drag event. This will update the arrangement
+	 * based on the new order of the items.
+	 */
 	const handleDragEnd = (event: DragEndEvent) => {
 		const { active, over } = event
 
@@ -95,6 +126,12 @@ export default function NavigationArrangement() {
 
 	const { items, locked } = localArragement
 
+	/**
+	 * A callback to set the visibility of an item in the arrangement.
+	 *
+	 * @param index The index of the item in the arrangement
+	 * @param visible The visibility of the item
+	 */
 	const setItemVisibility = useCallback(
 		async (index: number, visible: boolean) => {
 			if (locked) return
@@ -111,6 +148,13 @@ export default function NavigationArrangement() {
 		[items, locked],
 	)
 
+	/**
+	 * A callback to set the options of an entity, provided the entity is an entity with options
+	 * and exists in the current arrangement.
+	 *
+	 * @param idx The index of the item in the arrangement
+	 * @param options The options to set
+	 */
 	const setEntityOptions = useCallback(
 		async (idx: number, options: IEntityOptions) => {
 			if (locked) return
@@ -143,9 +187,10 @@ export default function NavigationArrangement() {
 		)
 	}
 
+	/**
+	 * IDs used in the SortableContext, used to properly sort and drag items
+	 */
 	const identifiers = useMemo<string[]>(() => items.map(({ item }) => item.type), [items])
-
-	// TODO: not smooth animation at all...
 
 	return (
 		<div className="flex w-full flex-col space-y-4">
@@ -162,7 +207,7 @@ export default function NavigationArrangement() {
 
 			<Card
 				className={cn('relative flex flex-col space-y-4 bg-background-200 p-4 md:max-w-xl', {
-					'cursor-not-allowed opacity-60': locked,
+					'cursor-not-allowed select-none opacity-60': locked,
 				})}
 				title={locked ? t(getKey('isLocked')) : undefined}
 			>
@@ -176,6 +221,7 @@ export default function NavigationArrangement() {
 								toggleActive={() => setItemVisibility(idx, !visible)}
 								onChangeOptions={(options) => setEntityOptions(idx, options)}
 								disabled={locked}
+								hidden={!checkItemPermission(item.type)}
 							/>
 						))}
 					</SortableContext>

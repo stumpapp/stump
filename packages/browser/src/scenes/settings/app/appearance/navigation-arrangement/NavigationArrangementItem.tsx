@@ -10,11 +10,32 @@ import EntityOptions from './EntityOptions'
 import { IEntityOptions, isNavigationItemWithEntityOptions } from './types'
 
 type Props = {
+	/**
+	 * The navigation item to render
+	 */
 	item: NavigationItem
+	/**
+	 * Whether the item is currently visible in the navigation
+	 */
 	active: boolean
+	/**
+	 * A callback to toggle the visibility of the item
+	 */
 	toggleActive: () => void
+	/**
+	 * A callback to change the options of an entity item
+	 */
 	onChangeOptions: (options: IEntityOptions) => void
+	/**
+	 * Whether the item is disabled, and cannot be interacted with. This is used to
+	 * lock items in place and prevent accidental reordering.
+	 */
 	disabled?: boolean
+	/**
+	 * Whether the item is hidden from view. This is used to hide items that are not
+	 * accessible to the user due to permissions.
+	 */
+	hidden?: boolean
 }
 
 export default function NavigationArrangementItem({
@@ -23,6 +44,7 @@ export default function NavigationArrangementItem({
 	toggleActive,
 	onChangeOptions,
 	disabled,
+	hidden,
 }: Props) {
 	const { t } = useLocaleContext()
 	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -46,6 +68,10 @@ export default function NavigationArrangementItem({
 	const [entityOptionsOpen, setEntityOptionsOpen] = useState(false)
 
 	const VisibilityIcon = active ? Eye : EyeOff
+
+	if (hidden) {
+		return null
+	}
 
 	return (
 		<div

@@ -1,3 +1,7 @@
+// https://github.com/rust-lang/rust-clippy/issues/12281
+// ^ There is a bug in clippy after updating the toolchain. I am subscribed to the issue,
+// and will remove this once it is resolved.
+#![allow(clippy::blocks_in_conditions)]
 // This job module would not be possible without other awesome projects in the Rust ecosystem! They
 // taught me a lot, and I don't think I could have done this without them. Taking bits and pieces from
 // each of them, I was able to create a job system that is both flexible and powerful:
@@ -9,7 +13,6 @@
 // - https://github.com/geofmureithi/apalis
 // - https://github.com/SabrinaJewson/work-queue.rs
 // - https://github.com/Nukesor/pueue
-
 use std::{collections::VecDeque, fmt::Debug, sync::Arc, time::Duration};
 
 use prisma_client_rust::chrono::{DateTime, Utc};

@@ -39,7 +39,7 @@ impl PrismaCountTrait for PrismaClient {
 			.exec()
 			.await?;
 
-		Ok(match count_res.get(0) {
+		Ok(match count_res.first() {
 			Some(val) => val.count,
 			None => 0,
 		})
@@ -54,7 +54,7 @@ impl PrismaCountTrait for PrismaClient {
 			.exec()
 			.await?;
 
-		Ok(match count_res.get(0) {
+		Ok(match count_res.first() {
 			Some(val) => val.count,
 			None => 0,
 		})
@@ -66,7 +66,7 @@ impl PrismaCountTrait for PrismaClient {
 			.exec()
 			.await?;
 
-		Ok(match count_res.get(0) {
+		Ok(match count_res.first() {
 			Some(val) => val.count,
 			None => 0,
 		})
@@ -81,7 +81,7 @@ impl PrismaCountTrait for PrismaClient {
 			.exec()
 			.await?;
 
-		Ok(match count_res.get(0) {
+		Ok(match count_res.first() {
 			Some(val) => val.count,
 			None => 0,
 		})

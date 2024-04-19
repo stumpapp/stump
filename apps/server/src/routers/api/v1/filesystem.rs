@@ -114,11 +114,11 @@ fn get_os_start_path() -> PathBuf {
 fn read_and_filter_directory(
 	start_path: &Path,
 ) -> Result<Vec<DirectoryListingFile>, std::io::Error> {
-	let listing = std::fs::read_dir(&start_path)?;
+	let listing = std::fs::read_dir(start_path)?;
 
 	let files = listing
 		.filter_map(|res| res.ok())
-		.filter_map(|entry| filter_if_hidden(entry))
+		.filter_map(filter_if_hidden)
 		.map(|entry| DirectoryListingFile::from_pathbuf(entry.path()))
 		.collect();
 

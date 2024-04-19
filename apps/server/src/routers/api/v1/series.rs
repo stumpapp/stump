@@ -969,7 +969,7 @@ async fn get_next_in_series(
 					} else {
 						// Note: this should never really exceed len == 1, but :shrug:
 						progress_list
-							.get(0)
+							.first()
 							.map(|rp| {
 								!rp.is_completed
 									|| rp
@@ -984,7 +984,7 @@ async fn get_next_in_series(
 					true
 				}
 			})
-			.or_else(|| media.get(0));
+			.or_else(|| media.first());
 
 		Ok(Json(next_book.map(|data| Media::from(data.to_owned()))))
 	} else {
@@ -1044,7 +1044,7 @@ async fn get_series_is_complete(
 	let is_complete = rp.len() == media_count as usize;
 	let completed_at = is_complete
 		.then(|| {
-			rp.get(0)
+			rp.first()
 				.and_then(|rp| rp.completed_at.map(|ca| ca.to_rfc3339()))
 		})
 		.flatten();

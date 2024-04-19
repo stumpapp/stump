@@ -17,7 +17,7 @@ RUN yarn install; \
 # Cargo Build Stage
 # ------------------------------------------------------------------------------
 
-FROM rust:1.72.1-slim-buster AS builder
+FROM rust:1.77.2-slim-buster AS builder
 
 ARG GIT_REV
 ENV GIT_REV=${GIT_REV}

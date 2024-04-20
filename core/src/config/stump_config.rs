@@ -716,6 +716,7 @@ mod tests {
 			session_ttl: DEFAULT_SESSION_TTL,
 			expired_session_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
 			scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
+			custom_templates_dir: None,
 		};
 
 		assert_eq!(generated, expected);

@@ -1,4 +1,10 @@
 {
+	"underConstruction": {
+		"heading": "This is awkward",
+		"message": "You've stumbled upon a page that's still being developed. I'd love to show it to you, but it isn't quite ready yet.",
+		"homeLink": "Go Home",
+		"githubLink": "View the GitHub issue"
+	},
 	"authScene": {
 		"claimHeading": "Inicialice su servidor",
 		"claimText": "Este servidor Stump no está inicializado. Usa el formulario de abajo para crear tu cuenta. Una vez creada, tendrás acceso completo a todas las funciones del servidor.",
@@ -367,6 +373,33 @@
 						"dark": "Oscuro",
 						"bronze": "Claro Bronce"
 					}
+				},
+				"navigationArrangement": {
+					"label": "Navigation arrangement",
+					"description": {
+						"sidebar": "Arrange and customize the navigation items in the sidebar",
+						"topbar": "Arrange and customize the navigation items in the topbar"
+					},
+					"isLocked": "Arrangement is locked",
+					"lock": "Lock arrangement",
+					"unlock": "Unlock arrangement",
+					"options": {
+						"Home": "Home",
+						"Explore": "Explore",
+						"Libraries": "Libraries",
+						"BookClubs": "Book clubs",
+						"SmartLists": "Smart lists"
+					},
+					"entityOptions": {
+						"createAction": {
+							"label": "Show create action",
+							"help": "Show the create action in the navigation"
+						},
+						"linkToAll": {
+							"label": "See all link",
+							"help": "A link to a page dedicated to viewing all items of this type"
+						}
+					}
 				}
 			}
 		},
@@ -651,7 +684,8 @@
 			"goBack": "Ir Atrás",
 			"smartlists": "Smart lists",
 			"noSmartlists": "No smart lists",
-			"createSmartlist": "Create smart list"
+			"createSmartlist": "Create smart list",
+			"seeAll": "See all"
 		},
 		"libraryOptions": {
 			"scanLibrary": "Escanear",

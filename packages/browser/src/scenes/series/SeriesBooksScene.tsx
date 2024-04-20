@@ -17,6 +17,7 @@ import MediaList from '@/components/media/MediaList'
 import Pagination from '@/components/Pagination'
 import { useLayoutMode, usePageParam } from '@/hooks'
 import useIsInView from '@/hooks/useIsInView'
+import { useBooksLayout } from '@/stores/layout'
 
 import { useSeriesContext } from './context'
 import MediaGrid from './MediaGrid'
@@ -29,7 +30,7 @@ function SeriesOverviewScene() {
 	const { page, setPage } = usePageParam()
 	const { series } = useSeriesContext()
 
-	const { layoutMode } = useLayoutMode()
+	const { layoutMode } = useBooksLayout((state) => ({ layoutMode: state.layout }))
 	const { filters } = useFilterContext()
 
 	const params = useMemo(
@@ -84,30 +85,41 @@ function SeriesOverviewScene() {
 	const renderContent = () => {
 		if (layoutMode === 'GRID') {
 			return (
-				<MediaGrid
-					isLoading={isLoadingMedia}
-					media={media}
-					hasFilters={Object.keys(filters || {}).length > 0}
-				/>
+				<BookTableURLFilterContainer
+					currentPage={current_page || 1}
+					pages={total_pages || 1}
+					onChangePage={setPage}
+					onPrefetchPage={handlePrefetchPage}
+				>
+					<div className="p-4">
+						<MediaGrid
+							isLoading={isLoadingMedia}
+							media={media}
+							hasFilters={Object.keys(filters || {}).length > 0}
+						/>
+					</div>
+				</BookTableURLFilterContainer>
 			)
 		} else {
 			return (
-				<MediaList
-					isLoading={isLoadingMedia}
-					media={media}
-					hasFilters={Object.keys(filters || {}).length > 0}
+				<BookTable
+					books={media || []}
+					render={(props) => (
+						<BookTableURLFilterContainer
+							currentPage={current_page || 1}
+							pages={total_pages || 1}
+							onChangePage={setPage}
+							onPrefetchPage={handlePrefetchPage}
+							{...props}
+						/>
+					)}
 				/>
 			)
 		}
 	}
 
 	return (
-		<SceneContainer
-			className={cn(
-				// { 'p-0 py-4': layout === 'table' }
-				'p-0 md:pb-0',
-			)}
-		>
+		<>
 			<Helmet>
 				<title>Stump | {series.name || ''}</title>
 			</Helmet>
@@ -119,6 +131,8 @@ function SeriesOverviewScene() {
 				orderControls={<BookURLOrdering />}
 				filterControls={<BookURLFilterDrawer />}
 			/>
+
+			{renderContent()}
 			{/* <FilterToolBar
 				isRefetching={isRefetchingMedia}
 				searchPlaceholder="Search media in series by name or description."
@@ -146,20 +160,7 @@ function SeriesOverviewScene() {
 					/>
 				)}
 			</div> */}
-
-			<BookTable
-				books={media || []}
-				render={(props) => (
-					<BookTableURLFilterContainer
-						currentPage={current_page || 1}
-						pages={total_pages || 1}
-						onChangePage={setPage}
-						onPrefetchPage={handlePrefetchPage}
-						{...props}
-					/>
-				)}
-			/>
-		</SceneContainer>
+		</>
 	)
 }
 

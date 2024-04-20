@@ -87,6 +87,9 @@ export type EmailerSendTo = { device_id: number } | { email: string }
  */
 export type EmailerConfig = { sender_email: string; sender_display_name: string; username: string; smtp_host: string; smtp_port: number; tls_enabled: boolean; max_attachment_size_bytes: number | null; max_num_attachments: number | null }
 
+/**
+ * The configuration for an [EmailerClient]
+ */
 export type EmailerClientConfig = { sender_email: string; sender_display_name: string; username: string; password: string; host: string; port: number; tls_enabled: boolean; max_attachment_size_bytes: number | null; max_num_attachments: number | null }
 
 /**
@@ -143,6 +146,16 @@ export type MediaAnnotation = { id: string; highlighted_text: string | null; pag
 export type ReadProgress = { id: string; page: number; epubcfi: string | null; percentage_completed: number | null; is_completed: boolean; completed_at: string | null; media_id: string; media: Media | null; user_id: string; user: User | null }
 
 /**
+ * A struct representing a sort order for a column using react-table (tanstack)
+ */
+export type ReactTableColumnSort = { id: string; position: number }
+
+/**
+ * A struct representing a global sort order for a table using react-table (tanstack)
+ */
+export type ReactTableGlobalSort = { desc: boolean; id: string }
+
+/**
  * A filter for a single value, e.g. `name = "test"`
  */
 export type Filter<T> = T | { not: T } | { contains: T } | { excludes: T } | { any: T[] } | { none: T[] } | NumericFilter<T>
@@ -178,11 +191,7 @@ export type SeriesSmartFilter = { name: Filter<string> } | { path: Filter<string
 
 export type LibrarySmartFilter = { name: Filter<string> } | { path: Filter<string> }
 
-export type SmartListView = ({ book_columns: SmartListTableColumnSelection[]; group_columns: SmartListTableColumnSelection[]; book_sorting: SmartListTableSortingState[] | null; group_sorting: SmartListTableSortingState[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string; list_id: string }
-
-export type SmartListTableSortingState = { desc: boolean; id: string }
-
-export type SmartListTableColumnSelection = { id: string; position: number }
+export type SmartListView = ({ book_columns: ReactTableColumnSort[]; group_columns: ReactTableColumnSort[]; book_sorting: ReactTableGlobalSort[] | null; group_sorting: ReactTableGlobalSort[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string; list_id: string }
 
 export type BookClub = { id: string; name: string; description: string | null; emoji: string | null; is_private: boolean; created_at: string; member_role_spec: BookClubMemberRoleSpec; members?: BookClubMember[] | null; schedule?: BookClubSchedule | null }
 
@@ -206,7 +215,7 @@ export type BookClubInvitation = { id: string; user?: User | null; book_club?: B
 
 export type Tag = { id: string; name: string }
 
-export type LayoutMode = "GRID" | "LIST"
+export type LayoutMode = "GRID" | "TABLE"
 
 export type Epub = { media_entity: Media; spine: string[]; resources: { [key: string]: [string, string] }; toc: EpubContent[]; metadata: { [key: string]: string[] }; annotations: MediaAnnotation[] | null; root_base: string; root_file: string; extra_css: string[] }
 
@@ -379,5 +388,5 @@ export type SmartListRelationOptions = { load_views?: boolean }
 
 export type SmartListMeta = { matched_books: BigInt; matched_series: BigInt; matched_libraries: BigInt }
 
-export type CreateOrUpdateSmartListView = ({ book_columns: SmartListTableColumnSelection[]; group_columns: SmartListTableColumnSelection[]; book_sorting: SmartListTableSortingState[] | null; group_sorting: SmartListTableSortingState[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string }
+export type CreateOrUpdateSmartListView = ({ book_columns: ReactTableColumnSort[]; group_columns: ReactTableColumnSort[]; book_sorting: ReactTableGlobalSort[] | null; group_sorting: ReactTableGlobalSort[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string }
 

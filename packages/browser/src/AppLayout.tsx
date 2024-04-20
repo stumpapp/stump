@@ -1,6 +1,6 @@
 import { isAxiosError } from '@stump/api'
 import { useAuthQuery, useCoreEventHandler } from '@stump/client'
-import { cx } from '@stump/components'
+import { cn, cx } from '@stump/components'
 import { UserPermission, UserPreferences } from '@stump/types'
 import { Suspense, useCallback, useMemo } from 'react'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
@@ -128,7 +128,14 @@ export function AppLayout() {
 					<Suspense fallback={null}>
 						{!hideSidebar && <SideBar hidden={softHideSidebar} />}
 					</Suspense>
-					<main className="min-h-full w-full overflow-y-auto overflow-x-hidden bg-background">
+					<main
+						className={cn(
+							'min-h-full w-full flex-1 flex-grow overflow-y-auto overflow-x-hidden bg-background',
+							{
+								'scrollbar-hide': storeUser.user_preferences?.enable_hide_scrollbar,
+							},
+						)}
+					>
 						<div className="relative flex h-full w-full flex-col">
 							{!!storeUser.user_preferences?.show_query_indicator && <BackgroundFetchIndicator />}
 							<Suspense fallback={<RouteLoadingIndicator />}>

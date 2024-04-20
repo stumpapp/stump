@@ -2,7 +2,14 @@ import { IconButton, ToolTip } from '@stump/components'
 import { LayoutGrid, Table } from 'lucide-react'
 import React from 'react'
 
+import { useBooksLayout } from '@/stores/layout'
+
 export default function BookExplorationLayout() {
+	const { layout, setLayout } = useBooksLayout((state) => ({
+		layout: state.layout,
+		setLayout: state.setLayout,
+	}))
+
 	return (
 		<div className="flex shrink-0 items-center gap-1">
 			<ToolTip content="Grid" size="sm">
@@ -11,8 +18,8 @@ export default function BookExplorationLayout() {
 					size="xs"
 					className="hover:bg-background-300"
 					pressEffect={false}
-					// onClick={() => setLayout('grid')}
-					// disabled={layout === 'grid'}
+					onClick={() => setLayout('GRID')}
+					disabled={layout === 'GRID'}
 				>
 					<LayoutGrid className="h-4 w-4" />
 				</IconButton>
@@ -24,8 +31,8 @@ export default function BookExplorationLayout() {
 					size="xs"
 					className="hover:bg-background-300"
 					pressEffect={false}
-					// onClick={() => setLayout('table')}
-					// disabled={layout === 'table'}
+					onClick={() => setLayout('TABLE')}
+					disabled={layout === 'TABLE'}
 				>
 					<Table className="h-4 w-4" />
 				</IconButton>

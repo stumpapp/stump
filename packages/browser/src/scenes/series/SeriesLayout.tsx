@@ -40,18 +40,20 @@ export default function SeriesLayout() {
 
 	return (
 		<SeriesContext.Provider value={{ series }}>
-			<SeriesHeader />
-			<SeriesNavigation />
+			<div className="relative w-full flex-1">
+				<SeriesHeader />
+				<SeriesNavigation />
 
-			<SceneContainer
-				className={cn('relative flex flex-col gap-4 p-0 md:h-full md:pb-0', {
-					'md:hide-scrollbar': !!enable_hide_scrollbar,
-				})}
-			>
-				<Suspense fallback={null}>
-					<Outlet />
-				</Suspense>
-			</SceneContainer>
+				<SceneContainer
+					className={cn('relative flex flex-col gap-4 p-0 md:pb-0', {
+						'md:hide-scrollbar': !!enable_hide_scrollbar,
+					})}
+				>
+					<Suspense fallback={null}>
+						<Outlet />
+					</Suspense>
+				</SceneContainer>
+			</div>
 		</SeriesContext.Provider>
 	)
 }

@@ -15,6 +15,19 @@ export default function BookTableURLFilterContainer({ children, ...paginationPro
 		preferences: { enable_hide_scrollbar },
 	} = usePreferences()
 
+	// return children
+
+	return (
+		<div className="flex h-full w-full flex-col pb-10">
+			{children}
+
+			<div className="fixed bottom-0 flex h-12 w-full items-center justify-between border-t border-edge bg-background px-4 md:h-10">
+				<BookTableColumnConfiguration />
+				<BookTablePagination {...paginationProps} />
+			</div>
+		</div>
+	)
+
 	return (
 		<div className="flex h-full w-full flex-col">
 			<div className="flex-1 overflow-hidden">
@@ -34,7 +47,7 @@ export default function BookTableURLFilterContainer({ children, ...paginationPro
 					)}
 				</AutoSizer>
 			</div>
-			<div className="flex h-10 w-full items-center justify-between border-t border-edge px-4">
+			<div className="fixed bottom-0 flex h-10 w-full items-center justify-between border-t border-edge px-4">
 				<BookTableColumnConfiguration />
 				<BookTablePagination {...paginationProps} />
 			</div>

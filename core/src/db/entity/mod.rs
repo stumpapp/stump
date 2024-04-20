@@ -32,7 +32,10 @@ pub use smart_list::*;
 pub use tag::*;
 pub use user::*;
 
-pub use common::{AccessRole, Cursor, EntityVisibility, FileStatus, LayoutMode};
+pub use common::{
+	AccessRole, Cursor, EntityVisibility, FileStatus, LayoutMode, ReactTableColumnSort,
+	ReactTableGlobalSort,
+};
 
 pub mod macros {
 	pub use super::book_club::prisma_macros::*;

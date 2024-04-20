@@ -16,6 +16,7 @@ export const RAW_INPUT_SIZE_VARIANTS = {
 	sm: 'h-8 p-2',
 }
 export const RAW_INPUT_VARIANT = {
+	activeGhost: 'enabled:border-opacity-100 dark:enabled:border-opacity-100',
 	default: 'focus:ring-background-400 dark:focus:ring-background-400',
 	ghost:
 		'border-opacity-0 enabled:hover:border-opacity-70 focus:border-opacity-100 dark:enabled:hover:border-opacity-70 dark:focus:border-opacity-100 dark:border-opacity-0 dark:focus:bg-transparent',

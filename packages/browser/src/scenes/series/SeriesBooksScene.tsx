@@ -1,9 +1,18 @@
 import { prefetchPagedMedia, usePagedMediaQuery } from '@stump/client'
+import { cn } from '@stump/components'
 import { useCallback, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 import { useMediaMatch } from 'rooks'
 
-import { FilterProvider, FilterToolBar, useFilterContext } from '@/components/filters'
+import {
+	BookExplorationLayout,
+	BookTable,
+	BookTableURLFilterContainer,
+	BookURLFilterDrawer,
+	BookURLOrdering,
+} from '@/components/book'
+import { SceneContainer } from '@/components/container'
+import { FilterHeader, FilterProvider, FilterToolBar, useFilterContext } from '@/components/filters'
 import MediaList from '@/components/media/MediaList'
 import Pagination from '@/components/Pagination'
 import { useLayoutMode, usePageParam } from '@/hooks'
@@ -93,14 +102,24 @@ function SeriesOverviewScene() {
 	}
 
 	return (
-		<>
+		<SceneContainer
+			className={cn(
+				// { 'p-0 py-4': layout === 'table' }
+				'p-0 md:pb-0',
+			)}
+		>
 			<Helmet>
 				<title>Stump | {series.name || ''}</title>
 			</Helmet>
 
-			<section ref={containerRef} id="grid-top-indicator" className="h-1" />
+			<section ref={containerRef} id="grid-top-indicator" className="hidden h-1" />
 
-			<FilterToolBar
+			<FilterHeader
+				layoutControls={<BookExplorationLayout />}
+				orderControls={<BookURLOrdering />}
+				filterControls={<BookURLFilterDrawer />}
+			/>
+			{/* <FilterToolBar
 				isRefetching={isRefetchingMedia}
 				searchPlaceholder="Search media in series by name or description."
 				entity="media"
@@ -126,8 +145,21 @@ function SeriesOverviewScene() {
 						onPrefetchPage={handlePrefetchPage}
 					/>
 				)}
-			</div>
-		</>
+			</div> */}
+
+			<BookTable
+				books={media || []}
+				render={(props) => (
+					<BookTableURLFilterContainer
+						currentPage={current_page || 1}
+						pages={total_pages || 1}
+						onChangePage={setPage}
+						onPrefetchPage={handlePrefetchPage}
+						{...props}
+					/>
+				)}
+			/>
+		</SceneContainer>
 	)
 }
 

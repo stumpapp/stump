@@ -2,4 +2,4 @@ mod basic_filter;
 mod common;
 
 pub use basic_filter::*;
-pub use common::{chain_optional_iter, decode_path_filter, string_or_seq_string};
+pub use common::{chain_optional_iter, decode_path_filter};

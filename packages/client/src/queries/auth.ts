@@ -38,8 +38,8 @@ export function useLoginOrRegister({ onSuccess, onError }: UseLoginOrRegisterOpt
 	)
 
 	useEffect(() => {
-		if (claimCheck?.data && !claimCheck.data.is_claimed) {
-			setIsClaimed(false)
+		if (claimCheck?.data) {
+			setIsClaimed(claimCheck.data.is_claimed)
 		}
 	}, [claimCheck])
 

@@ -37,12 +37,12 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
   - [Core](#core)
   - [Crates](#crates)
   - [Docs](#docs)
-  - [Interface](#interface)
   - [Packages](#packages)
 - [Similar Projects 👯](#similar-projects-)
+- [License 📝](#license-)
 </details>
 
-> **🚧 Disclaimer 🚧**: Stump is under active development and is an ongoing **WIP**. Anyone is welcome to try it out, but **DO NOT** expect a fully featured or bug-free experience. I will likely flatten the migrations immediately prior to the `0.1.0` release, which will break existing Stump databases. If you'd like to contribute and help expedite Stump's first release, please review the [developer guide](#developer-guide-).
+> **🚧 Disclaimer 🚧**: Stump is under active development and is an ongoing **WIP**. Anyone is welcome to try it out, but **DO NOT** expect a fully featured or bug-free experience. If you'd like to contribute and help expedite Stump's first release, please review the [developer guide](#developer-guide-).
 
 ## Roadmap 🗺
 
@@ -51,7 +51,7 @@ The following items are the major targets for Stump's first release:
 - 📃 Full OPDS + OPDS Page Streaming support
 - 📕 EPUB, PDF, and CBZ/CBR support
 - 📚 Organize libraries with collections and reading lists
-- 🔐 Role-based access-control with managed user accounts
+- 🔐 Granular access-control with managed user accounts
 - 🚀 Easy setup and deployment using Docker or bare metal
 - 👀 Fully responsive, built-in UI with a dark mode
 - 🏃 Low resource utilization with excellent performance
@@ -71,7 +71,7 @@ Feel free to reach out if you have anything else you'd like to see!
 
 ## Getting Started 🚀
 
-Stump isn't ready for normal usage yet. To give it a spin, it is reccommended to try the nightly [Docker image](https://hub.docker.com/r/aaronleopold/stump). If you're interested in development, or trying it from source, you can follow the [developer guide](#developer-guide-).
+Stump isn't ready for normal usage yet. To give it a spin, it is recommended to try the nightly [Docker image](https://hub.docker.com/r/aaronleopold/stump). If you're interested in development, or trying it from source, you can follow the [developer guide](#developer-guide-).
 
 For more information about getting started, check out the [guides](https://stumpapp.dev/guides) available on the Stump website.
 
@@ -81,7 +81,7 @@ Contributions are very **welcome**! Please review the [CONTRIBUTING.md](https://
 
 A quick summary of the steps required to get going:
 
-1. Install [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/).
+1. Install [yarn](https://yarnpkg.com/), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/).
    - If you're running Windows, you will need [Visual C++](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170)
    - If you're running macOS on Apple Silicon, you'll need to install [Rosetta](https://support.apple.com/en-us/HT211861)
 2. Install [cargo-watch](https://crates.io/crates/cargo-watch)
@@ -94,14 +94,14 @@ A quick summary of the steps required to get going:
    This isn't strictly necessary, and is mostly beneficial for Linux users (it installs some system dependencies). Feel free to skip this step if you'd like, and instead just run:
 
    ```bash
-   pnpm run setup
+   yarn run setup
    ```
 
    This will build the React app, generate the Prisma client, and generate the Rust-TypeScript types. To do any of these individually, you can run:
 
    ```bash
     # build the React app
-    pnpm web build
+    yarn web build
     # generate the Prisma client and Rust-TypeScript types
     cargo codegen # or cargo prisma generate --schema=./core/prisma/schema.prisma for just the Prisma client
    ```
@@ -112,11 +112,11 @@ A quick summary of the steps required to get going:
 
    ```bash
    # run the webapp + server
-   pnpm dev:web
+   yarn dev:web
    # run the desktop app + server
-   pnpm start:desktop
+   yarn start:desktop
    # run the docs website
-   pnpm docs dev
+   yarn docs dev
    ```
 
    Or just `cargo` for the server (and other Rust apps):
@@ -129,14 +129,14 @@ And that's it!
 
 #### Where to start?
 
-If you aren't sure where to start, I recommend taking a look at [open issues](https://github.com/stumpapp/stump/issues). You can also check out the [milestones](https://github.com/stumpapp/stump/milestones) page for a more curated list of issues that need to be addressed.
+If you aren't sure where to start, I recommend taking a look at [open issues](https://github.com/stumpapp/stump/issues). You can also check out the [current project board](https://github.com/orgs/stumpapp/projects/4) to see what's actively being worked on or planned.
 
 In general, the following areas are good places to start:
 
 - Translation, so Stump is accessible to as many people as possible
-  - [Crowdin](https://crowdin.com/project/stump) is being used for translations
+  - [Crowdin](https://crowdin.com/project/stump) is used for translations
 - Writing comprehensive tests
-- Designing UI elements/sections or improving the existing UI/UX
+- Designing and/improving UI/UX
 - Docker build optimizations, caching, etc
 - CI pipelines, automated releases and release notes, etc
 - And lots more!
@@ -148,16 +148,18 @@ In general, the following areas are good places to start:
 <details>
   <summary><b>Click to expand</b></summary>
   
-Stump has a monorepo structure managed by [pnpm workspaces](https://pnpm.io/workspaces) and [cargo workspaces](https://doc.rust-lang.org/cargo/reference/workspaces.html). The project is split into a number of different packages and crates, each with their own purpose:
+Stump has a monorepo structure managed by [yarn workspaces](https://yarnpkg.com/features/workspaces) and [cargo workspaces](https://doc.rust-lang.org/cargo/reference/workspaces.html). The project is split into a number of different packages and crates, each with their own purpose:
 
 ### Apps
 
 Stand-alone applications that can be run independently, at `/apps` in the root of the project:
 
 - `desktop`: A React + Tauri desktop application
-- `mobile`: A React Native application ([#125](https://github.com/stumpapp/stump/issues/125))
+- `expo`: A React Native application ([#125](https://github.com/stumpapp/stump/issues/125))
 - `server`: An [Axum](https://github.com/tokio-rs/axum) HTTP server
 - `web`: A React application, the primary UI for both the built-in web app the server serves and the desktop app
+
+The only exception to this is the `docs` app, which is a NextJS application and is located at `/docs` in the root of the project.
 
 ### Core
 
@@ -176,10 +178,6 @@ Various Rust crates, at `/crates` in the root of the project:
 
 A NextJS application for the Stump documentation site at `/docs` in the root of the project
 
-### Interface
-
-A React component that is essentially the "main" UI for Stump, at `/interface` in the root of the project. It is used in both the `web` and `desktop` apps
-
 ### Packages
 
 Various TypeScript packages, at `/packages` in the root of the project:
@@ -187,6 +185,7 @@ Various TypeScript packages, at `/packages` in the root of the project:
 - `api`: All of the API functions used by the `client` package
 - `client`: React-query config, hooks, and other client-side utilities
 - `components`: Shared React components for the web and desktop applications
+- `browser`: A React component that is essentially the "main" UI for Stump on browser-based platforms. It is isolated in order to be re-used in the two browser-based apps: `web` and `desktop`
 - `types`: Shared TypeScript types for interfacing with Stump's core and API
 
 </details>
@@ -201,3 +200,7 @@ There are a number of other projects that are similar to Stump, it certainly isn
 - [Komga](https://github.com/gotson/komga)
 - [Librum](https://github.com/Librum-Reader/Librum)
 - [oqurum](https://github.com/oqurum) (✨*Rust*✨)
+
+## License 📝
+
+Stump is licensed under the [MIT License](https://www.tldrlegal.com/license/mit-license). This applies to the entire repository except for subfolders/packages which contain their own license file(s). In such cases, the license file(s) in the subfolder/package take precedence.

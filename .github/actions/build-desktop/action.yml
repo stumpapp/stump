@@ -21,10 +21,7 @@ runs:
     #     fi
 
     - name: Setup rust
-      uses: ./.github/actions/setup-cargo
-
-    - name: Generate Prisma client
-      uses: ./.github/actions/setup-prisma
+      uses: ./.github/actions/setup-rust
 
     - name: Copy bundled web app
       uses: actions/download-artifact@v3

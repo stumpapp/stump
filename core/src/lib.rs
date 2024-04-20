@@ -2,18 +2,19 @@
 // I am not entirely sure why this issue cropped up all of the sudden, but
 // this seems to resolve it in a musl environment.
 #![recursion_limit = "256"]
+#![warn(clippy::dbg_macro)]
 
 use std::sync::Arc;
 
-// TODO: for these crates, some should NOT hoist entire crate, I need to restrict it
-// to only what is necessary... UGH.
+// TODO: cleanup hoisted crates to only what is needed
 
 pub mod config;
 pub mod db;
-pub mod event;
+mod event;
 pub mod filesystem;
 pub mod job;
 pub mod opds;
+mod utils;
 
 mod context;
 pub mod error;
@@ -24,13 +25,12 @@ pub mod prisma;
 use config::logging::STUMP_SHADOW_TEXT;
 use config::StumpConfig;
 use db::{DBPragma, JournalMode};
-use event::{event_manager::EventManager, InternalCoreTask};
-use job::JobScheduler;
+use job::{JobController, JobScheduler};
 use prisma::server_config;
-use tokio::sync::mpsc::unbounded_channel;
 
 pub use context::Ctx;
 pub use error::{CoreError, CoreResult};
+pub use event::CoreEvent;
 
 /// A type alias strictly for explicitness in the return type of `init_journal_mode`.
 type JournalModeChanged = bool;
@@ -59,21 +59,13 @@ type JournalModeChanged = bool;
 /// ```
 pub struct StumpCore {
 	ctx: Ctx,
-	event_manager: Arc<EventManager>,
 }
 
 impl StumpCore {
-	/// Creates a new instance of [`StumpCore`] and returns it wrapped in an [`Arc`].
+	/// Creates a new instance of [StumpCore] and returns it wrapped in an [std::sync::Arc].
 	pub async fn new(config: StumpConfig) -> StumpCore {
-		let internal_channel = unbounded_channel::<InternalCoreTask>();
-
-		let core_ctx = Ctx::new(config, internal_channel.0).await;
-		let event_manager = EventManager::new(core_ctx.get_ctx(), internal_channel.1);
-
-		StumpCore {
-			ctx: core_ctx,
-			event_manager,
-		}
+		let core_ctx = Ctx::new(config).await;
+		StumpCore { ctx: core_ctx }
 	}
 
 	/// A three-step configuration initialization function.
@@ -109,11 +101,11 @@ impl StumpCore {
 	/// Returns a new instance of [`Ctx`]. This is the main context struct for the core,
 	/// prividing access to the database and internal channels.
 	pub fn get_context(&self) -> Ctx {
-		self.ctx.get_ctx()
+		self.ctx.clone()
 	}
 
-	pub fn get_job_manager(&self) -> Arc<job::JobManager> {
-		self.event_manager.get_job_manager()
+	pub fn get_job_controller(&self) -> Arc<JobController> {
+		self.ctx.job_controller.clone()
 	}
 
 	/// Returns the shadow text for the core. This is just the fun ascii art that
@@ -152,7 +144,7 @@ impl StumpCore {
 	/// 1. The initial WAL setup has not already been completed on first run
 	/// 2. The journal mode is not already set to WAL
 	pub async fn init_journal_mode(&self) -> Result<JournalModeChanged, CoreError> {
-		let client = self.ctx.get_db();
+		let client = self.ctx.db.clone();
 
 		let wal_mode_setup_completed = client
 			.server_config()
@@ -215,9 +207,9 @@ mod tests {
 			filter::*,
 			query::{ordering::*, pagination::*},
 		},
-		event::*,
-		filesystem::{image::*, *},
+		filesystem::{image::*, scanner::*, *},
 		job::*,
+		CoreEvent,
 	};
 
 	#[allow(dead_code)]
@@ -246,13 +238,52 @@ mod tests {
 
 		file.write_all(b"// CORE TYPE GENERATION\n\n")?;
 
+		file.write_all(format!("{}\n\n", ts_export::<CoreEvent>()?).as_bytes())?;
+
 		file.write_all(format!("{}\n\n", ts_export::<EntityVisibility>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<AccessRole>()?).as_bytes())?;
+
+		file.write_all(format!("{}\n\n", ts_export::<Log>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LogMetadata>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LogLevel>()?).as_bytes())?;
+
+		file.write_all(format!("{}\n\n", ts_export::<PersistedJob>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<CoreJobOutput>()?).as_bytes())?;
+		// TODO: Fix this... Must move all job defs to the core...
+		file.write_all(
+			"export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput\n\n".to_string()
+			.as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<JobUpdate>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<JobProgress>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LibraryScanOutput>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<SeriesScanOutput>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<ThumbnailGenerationJobVariant>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<ThumbnailGenerationJobParams>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<ThumbnailGenerationOutput>()?).as_bytes(),
+		)?;
 
 		file.write_all(format!("{}\n\n", ts_export::<User>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UserPermission>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<AgeRestriction>()?).as_bytes())?;
+
+		file.write_all(format!("{}\n\n", ts_export::<NavigationMode>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<HomeItem>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<NaviationItemDisplayOptions>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<NavigationItem>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<ArrangementItem<()>>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<Arrangement<()>>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UserPreferences>()?).as_bytes())?;
+
 		file.write_all(format!("{}\n\n", ts_export::<LoginActivity>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<FileStatus>()?).as_bytes())?;
@@ -260,7 +291,7 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<LibraryPattern>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryScanMode>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryOptions>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LibrariesStats>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LibraryStats>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<SeriesMetadata>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<Series>()?).as_bytes())?;
@@ -334,11 +365,7 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<EpubContent>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<JobStatus>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<JobUpdate>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<JobDetail>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<JobSchedulerConfig>()?).as_bytes())?;
-
-		file.write_all(format!("{}\n\n", ts_export::<CoreEvent>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<ReadingListItem>()?).as_bytes())?;
 		file.write_all(
@@ -361,10 +388,6 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<DirectoryListingInput>()?).as_bytes(),
 		)?;
-
-		file.write_all(format!("{}\n\n", ts_export::<Log>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LogMetadata>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LogLevel>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<Direction>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<PageParams>()?).as_bytes())?;

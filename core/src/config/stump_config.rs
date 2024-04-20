@@ -1,8 +1,14 @@
+//! Contains the [StumpConfig] struct and related functions for loading and saving configuration
+//! values for a Stump application.
+//!
+//! Note: [StumpConfig] is constructed _before_ tracing is initializing. This is because the
+//! configuration is used to determine the log file path and verbosity level. This means that any
+//! logging that occurs during the construction of the [StumpConfig] should be done using the
+//! standard `println!` or `eprintln!` macros.
 use std::{env, path::PathBuf};
 
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use tracing::debug;
 
 use crate::error::{CoreError, CoreResult};
 
@@ -12,6 +18,7 @@ pub mod env_keys {
 	pub const PROFILE_KEY: &str = "STUMP_PROFILE";
 	pub const PORT_KEY: &str = "STUMP_PORT";
 	pub const VERBOSITY_KEY: &str = "STUMP_VERBOSITY";
+	pub const PRETTY_LOGS_KEY: &str = "STUMP_PRETTY_LOGS";
 	pub const DB_PATH_KEY: &str = "STUMP_DB_PATH";
 	pub const CLIENT_KEY: &str = "STUMP_CLIENT_DIR";
 	pub const ORIGINS_KEY: &str = "STUMP_ALLOWED_ORIGINS";
@@ -20,6 +27,9 @@ pub mod env_keys {
 	pub const HASH_COST_KEY: &str = "HASH_COST";
 	pub const SESSION_TTL_KEY: &str = "SESSION_TTL";
 	pub const SESSION_EXPIRY_INTERVAL_KEY: &str = "SESSION_EXPIRY_CLEANUP_INTERVAL";
+	pub const SCANNER_CHUNK_SIZE_KEY: &str = "STUMP_SCANNER_CHUNK_SIZE";
+	pub const ENABLE_EXPERIMENTAL_CONCURRENCY_KEY: &str =
+		"ENABLE_EXPERIMENTAL_CONCURRENCY";
 }
 use env_keys::*;
 
@@ -27,6 +37,7 @@ pub mod defaults {
 	pub const DEFAULT_PASSWORD_HASH_COST: u32 = 12;
 	pub const DEFAULT_SESSION_TTL: i64 = 3600 * 24 * 3; // 3 days
 	pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
+	pub const DEFAULT_SCANNER_CHUNK_SIZE: usize = 100;
 }
 use defaults::*;
 
@@ -64,6 +75,8 @@ pub struct StumpConfig {
 	pub port: u16,
 	/// The verbosity with which to log errors (default: 0).
 	pub verbosity: u64,
+	/// Whether or not to pretty print logs.
+	pub pretty_logs: bool,
 	/// An optional custom path for the database.
 	pub db_path: Option<String>,
 	/// The client directory.
@@ -82,6 +95,10 @@ pub struct StumpConfig {
 	pub session_ttl: i64,
 	/// The interval at which automatic deleted session cleanup is performed.
 	pub expired_session_cleanup_interval: u64,
+	/// The size of chunks to use throughout scanning the filesystem. This is used to
+	/// limit the number of files that are processed at once. Realistically, you are bound
+	/// by I/O constraints, but perhaps you can squeeze out some performance by tweaking this.
+	pub scanner_chunk_size: usize,
 }
 
 impl StumpConfig {
@@ -92,6 +109,7 @@ impl StumpConfig {
 			profile: String::from("debug"),
 			port: 10801,
 			verbosity: 0,
+			pretty_logs: true,
 			db_path: None,
 			client_dir: String::from("./dist"),
 			config_dir,
@@ -101,6 +119,7 @@ impl StumpConfig {
 			password_hash_cost: DEFAULT_PASSWORD_HASH_COST,
 			session_ttl: DEFAULT_SESSION_TTL,
 			expired_session_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
+			scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
 		}
 	}
 
@@ -112,6 +131,7 @@ impl StumpConfig {
 			profile: String::from("debug"),
 			port: 10801,
 			verbosity: 0,
+			pretty_logs: true,
 			db_path: None,
 			client_dir: env!("CARGO_MANIFEST_DIR").to_string() + "/../web/dist",
 			config_dir: super::get_default_config_dir(),
@@ -121,6 +141,7 @@ impl StumpConfig {
 			password_hash_cost: DEFAULT_PASSWORD_HASH_COST,
 			session_ttl: DEFAULT_SESSION_TTL,
 			expired_session_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
+			scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
 		}
 	}
 
@@ -139,7 +160,7 @@ impl StumpConfig {
 		let toml_content_str = std::fs::read_to_string(stump_toml)?;
 		let toml_configs = toml::from_str::<PartialStumpConfig>(&toml_content_str)
 			.map_err(|e| {
-				tracing::error!(error = ?e, "Failed to parse Stump.toml");
+				eprintln!("Failed to parse Stump.toml: {}", e);
 				CoreError::InitializationError(e.to_string())
 			})?;
 
@@ -156,13 +177,13 @@ impl StumpConfig {
 			if profile == "release" || profile == "debug" {
 				env_configs.profile = Some(profile);
 			} else {
-				debug!("Invalid PROFILE value: {}", profile);
+				eprintln!("Invalid PROFILE value: {}", profile);
 			}
 		}
 
 		if let Ok(port) = env::var(PORT_KEY) {
 			let port_u16 = port.parse::<u16>().map_err(|e| {
-				tracing::error!(error = ?e, port, "Failed to parse provided STUMP_PORT");
+				eprintln!("Failed to parse provided STUMP_PORT: {}", e);
 				CoreError::InitializationError(e.to_string())
 			})?;
 			env_configs.port = Some(port_u16);
@@ -170,14 +191,18 @@ impl StumpConfig {
 
 		if let Ok(verbosity) = env::var(VERBOSITY_KEY) {
 			let verbosity_u64 = verbosity.parse::<u64>().map_err(|e| {
-				tracing::error!(
-					error = ?e,
-					verbosity,
-					"Failed to parse provided STUMP_VERBOSITY"
-				);
+				eprintln!("Failed to parse provided STUMP_VERBOSITY: {}", e);
 				CoreError::InitializationError(e.to_string())
 			})?;
 			env_configs.verbosity = Some(verbosity_u64);
+		}
+
+		if let Ok(pretty_logs) = env::var(PRETTY_LOGS_KEY) {
+			let pretty_logs_bool = pretty_logs.parse::<bool>().map_err(|e| {
+				eprintln!("Failed to parse provided STUMP_PRETTY_LOGS: {}", e);
+				CoreError::InitializationError(e.to_string())
+			})?;
+			self.pretty_logs = pretty_logs_bool;
 		}
 
 		if let Ok(db_path) = env::var(DB_PATH_KEY) {
@@ -222,17 +247,24 @@ impl StumpConfig {
 		if let Ok(session_ttl) = env::var(SESSION_TTL_KEY) {
 			match session_ttl.parse() {
 				Ok(val) => env_configs.session_ttl = Some(val),
-				Err(e) => tracing::error!(?e, "Failed to parse provided SESSION_TTL"),
+				Err(e) => eprintln!("Failed to parse provided SESSION_TTL: {}", e),
 			}
 		}
 
 		if let Ok(session_expiry_interval) = env::var(SESSION_EXPIRY_INTERVAL_KEY) {
 			match session_expiry_interval.parse() {
 				Ok(val) => env_configs.expired_session_cleanup_interval = Some(val),
-				Err(e) => tracing::error!(
-					?e,
-					"Failed to parse provided SESSION_EXPIRY_CLEANUP_INTERVAL"
+				Err(e) => eprintln!(
+					"Failed to parse provided SESSION_EXPIRY_CLEANUP_INTERVAL: {}",
+					e
 				),
+			}
+		}
+
+		if let Ok(scanner_chunk_size) = env::var(SCANNER_CHUNK_SIZE_KEY) {
+			match scanner_chunk_size.parse() {
+				Ok(val) => self.scanner_chunk_size = val,
+				Err(e) => eprintln!("Failed to parse provided SCANNER_CHUNK_SIZE: {}", e),
 			}
 		}
 
@@ -291,7 +323,7 @@ impl StumpConfig {
 		std::fs::write(
 			stump_toml.as_path(),
 			toml::to_string(&self).map_err(|e| {
-				tracing::error!(error = ?e, "Failed to serialize StumpConfig to toml");
+				eprintln!("Failed to serialize StumpConfig to toml: {}", e);
 				CoreError::InitializationError(e.to_string())
 			})?,
 		)?;
@@ -335,6 +367,7 @@ pub struct PartialStumpConfig {
 	pub profile: Option<String>,
 	pub port: Option<u16>,
 	pub verbosity: Option<u64>,
+	pub pretty_logs: Option<bool>,
 	pub db_path: Option<String>,
 	pub client_dir: Option<String>,
 	pub config_dir: Option<String>,
@@ -344,6 +377,7 @@ pub struct PartialStumpConfig {
 	pub password_hash_cost: Option<u32>,
 	pub session_ttl: Option<i64>,
 	pub expired_session_cleanup_interval: Option<u64>,
+	pub scanner_chunk_size: Option<usize>,
 }
 
 impl PartialStumpConfig {
@@ -352,6 +386,7 @@ impl PartialStumpConfig {
 			profile: None,
 			port: None,
 			verbosity: None,
+			pretty_logs: None,
 			db_path: None,
 			client_dir: None,
 			config_dir: None,
@@ -361,6 +396,7 @@ impl PartialStumpConfig {
 			password_hash_cost: None,
 			session_ttl: None,
 			expired_session_cleanup_interval: None,
+			scanner_chunk_size: None,
 		}
 	}
 
@@ -371,6 +407,9 @@ impl PartialStumpConfig {
 		if let Some(verbosity) = self.verbosity {
 			config.verbosity = verbosity;
 		}
+		if let Some(pretty_logs) = self.pretty_logs {
+			config.pretty_logs = pretty_logs;
+		}
 		if let Some(db_path) = self.db_path {
 			config.db_path = Some(db_path);
 		}
@@ -380,13 +419,25 @@ impl PartialStumpConfig {
 		if let Some(config_dir) = self.config_dir {
 			config.config_dir = config_dir;
 		}
+		if let Some(disable_swagger) = self.disable_swagger {
+			config.disable_swagger = disable_swagger;
+		}
+		if let Some(hash_cost) = self.password_hash_cost {
+			config.password_hash_cost = hash_cost;
+		}
+		if let Some(session_ttl) = self.session_ttl {
+			config.session_ttl = session_ttl;
+		}
+		if let Some(cleanup_interval) = self.expired_session_cleanup_interval {
+			config.expired_session_cleanup_interval = cleanup_interval;
+		}
 
 		// Profile - validate profile selection
 		if let Some(profile) = self.profile {
 			if profile == "release" || profile == "debug" {
 				config.profile = profile;
 			} else {
-				debug!("Invalid PROFILE value: {}", profile);
+				eprintln!("Invalid PROFILE value: {}", profile);
 			}
 		}
 
@@ -402,21 +453,9 @@ impl PartialStumpConfig {
 		if let Some(pdfium_path) = self.pdfium_path {
 			config.pdfium_path = Some(pdfium_path);
 		}
-		// Disable Swagger - Merge if not None
-		if let Some(disable_swagger) = self.disable_swagger {
-			config.disable_swagger = disable_swagger;
-		}
-		// Password Hash Cost - Merge if not None
-		if let Some(hash_cost) = self.password_hash_cost {
-			config.password_hash_cost = hash_cost;
-		}
-		// Session TTL - Merge if not None
-		if let Some(session_ttl) = self.session_ttl {
-			config.session_ttl = session_ttl;
-		}
-		// Session Expiry Cleanup Interval - Merge if not None
-		if let Some(cleanup_interval) = self.expired_session_cleanup_interval {
-			config.expired_session_cleanup_interval = cleanup_interval;
+
+		if let Some(scanner_chunk_size) = self.scanner_chunk_size {
+			config.scanner_chunk_size = scanner_chunk_size;
 		}
 	}
 }
@@ -438,6 +477,7 @@ mod tests {
 			profile: Some("release".to_string()),
 			port: Some(1337),
 			verbosity: Some(3),
+			pretty_logs: Some(true),
 			db_path: Some("not_a_real_path".to_string()),
 			client_dir: Some("not_a_real_dir".to_string()),
 			config_dir: Some("also_not_a_real_dir".to_string()),
@@ -451,6 +491,7 @@ mod tests {
 			password_hash_cost: Some(24),
 			session_ttl: Some(3600 * 24),
 			expired_session_cleanup_interval: Some(60 * 60 * 8),
+			scanner_chunk_size: Some(300),
 		};
 
 		// Apply the partial configuration
@@ -463,6 +504,7 @@ mod tests {
 				profile: "release".to_string(),
 				port: 1337,
 				verbosity: 3,
+				pretty_logs: true,
 				db_path: Some("not_a_real_path".to_string()),
 				client_dir: "not_a_real_dir".to_string(),
 				config_dir: "also_not_a_real_dir".to_string(),
@@ -476,6 +518,7 @@ mod tests {
 				password_hash_cost: 24,
 				session_ttl: 3600 * 24,
 				expired_session_cleanup_interval: 60 * 60 * 8,
+				scanner_chunk_size: 300,
 			}
 		);
 	}
@@ -506,6 +549,7 @@ mod tests {
 				profile: "release".to_string(),
 				port: 1337,
 				verbosity: 3,
+				pretty_logs: true,
 				db_path: Some("not_a_real_path".to_string()),
 				client_dir: "not_a_real_dir".to_string(),
 				config_dir: "also_not_a_real_dir".to_string(),
@@ -515,6 +559,7 @@ mod tests {
 				password_hash_cost: 24,
 				session_ttl: 3600 * 24,
 				expired_session_cleanup_interval: 60 * 60 * 8,
+				scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
 			}
 		);
 	}
@@ -538,6 +583,7 @@ mod tests {
 				profile: "release".to_string(),
 				port: 1337,
 				verbosity: 3,
+				pretty_logs: true,
 				db_path: Some("not_a_real_path".to_string()),
 				client_dir: "not_a_real_dir".to_string(),
 				config_dir: "also_not_a_real_dir".to_string(),
@@ -547,6 +593,7 @@ mod tests {
 				password_hash_cost: DEFAULT_PASSWORD_HASH_COST,
 				session_ttl: DEFAULT_SESSION_TTL,
 				expired_session_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
+				scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
 			}
 		);
 
@@ -569,6 +616,7 @@ mod tests {
 			profile: Some("release".to_string()),
 			port: Some(1337),
 			verbosity: Some(3),
+			pretty_logs: Some(true),
 			db_path: Some("not_a_real_path".to_string()),
 			client_dir: Some("not_a_real_dir".to_string()),
 			config_dir: None,
@@ -578,6 +626,7 @@ mod tests {
 			password_hash_cost: None,
 			session_ttl: None,
 			expired_session_cleanup_interval: None,
+			scanner_chunk_size: None,
 		};
 		partial_config.apply_to_config(&mut config);
 
@@ -597,6 +646,7 @@ mod tests {
 				profile: Some("release".to_string()),
 				port: Some(1337),
 				verbosity: Some(3),
+				pretty_logs: Some(true),
 				db_path: Some("not_a_real_path".to_string()),
 				client_dir: Some("not_a_real_dir".to_string()),
 				config_dir: Some(config_dir),
@@ -608,6 +658,7 @@ mod tests {
 				expired_session_cleanup_interval: Some(
 					DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL
 				),
+				scanner_chunk_size: Some(DEFAULT_SCANNER_CHUNK_SIZE),
 			}
 		);
 
@@ -615,6 +666,42 @@ mod tests {
 		tempdir
 			.close()
 			.expect("Failed to delete temporary directory");
+	}
+
+	#[test]
+	fn test_simulate_first_boot() {
+		env::set_var(PORT_KEY, "1337");
+		env::set_var(VERBOSITY_KEY, "2");
+		env::set_var(DISABLE_SWAGGER_KEY, "true");
+		env::set_var(HASH_COST_KEY, "1");
+
+		let tempdir = tempfile::tempdir().expect("Failed to create temporary directory");
+		// Now we can create a StumpConfig rooted at the temporary directory
+		let config_dir = tempdir.path().to_string_lossy().to_string();
+		let generated = StumpConfig::new(config_dir.clone())
+			.with_config_file()
+			.expect("Failed to generate StumpConfig from Stump.toml")
+			.with_environment()
+			.expect("Failed to generate StumpConfig from environment");
+
+		let expected = StumpConfig {
+			profile: "debug".to_string(),
+			port: 1337,
+			verbosity: 2,
+			pretty_logs: true,
+			db_path: None,
+			client_dir: "./dist".to_string(),
+			config_dir,
+			allowed_origins: vec![],
+			pdfium_path: None,
+			disable_swagger: true,
+			password_hash_cost: 1,
+			session_ttl: DEFAULT_SESSION_TTL,
+			expired_session_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
+			scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
+		};
+
+		assert_eq!(generated, expected);
 	}
 
 	fn get_mock_config_file() -> String {

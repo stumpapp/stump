@@ -10,16 +10,13 @@ jobs:
   check-rust:
     if: "!contains(github.event.pull_request.head.ref, 'release/v')"
     name: Rust checks
-    runs-on: [self-hosted]
+    runs-on: [ubuntu-22.04]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup cargo
-        uses: ./.github/actions/setup-cargo
-
-      - name: Setup prisma
-        uses: ./.github/actions/setup-prisma
+      - name: Setup rust
+        uses: ./.github/actions/setup-rust
 
       - name: Run cargo checks
         run: |
@@ -33,13 +30,26 @@ jobs:
   check-typescript:
     if: "!contains(github.event.pull_request.head.ref, 'release/v')"
     name: TypeScript checks
-    runs-on: [self-hosted]
+    runs-on: [ubuntu-22.04]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup PNPM and TypeScript
-        uses: ./.github/actions/setup-pnpm
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.0.0'
+
+      - name: Install yarn
+        shell: bash
+        run: npm install -g yarn
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.0.0'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install
 
       - name: Run TypeScript lints
-        run: pnpm lint
+        run: yarn lint

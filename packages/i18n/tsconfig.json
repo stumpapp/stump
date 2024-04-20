@@ -1,0 +1,12 @@
+{
+	"extends": "../../tsconfig.options.json",
+	"include": ["src", "src/**/*.json"],
+	"references": [],
+	"compilerOptions": {
+		"jsx": "preserve",
+		"esModuleInterop": true,
+		"module": "es2022",
+		"moduleResolution": "Node",
+		"resolveJsonModule": true
+	}
+}

@@ -20,7 +20,6 @@ import {
 import { AxiosError, isAxiosError } from 'axios'
 
 import { QueryClientContext, useClientContext } from './context'
-import { useUserStore } from './stores/useUserStore'
 
 export { QueryClientProvider } from '@tanstack/react-query'
 
@@ -37,6 +36,10 @@ export const queryClient = new QueryClient({
 export function useIsFetching(filters?: QueryFilters) {
 	return useReactIsFetching(filters, { context: QueryClientContext })
 }
+
+// TODO: it is a bit annoying, but the onError callback will be removed in the next
+// major version of react-query. I believe it just means I need to create an effect to invoke
+// the appropriate callbacks. Not the biggest deal, but will need to sort that
 
 // NOTE for future onlookers of this file: react-query has LOTS of generics. It can
 // be hard to keep track of things if you're just starting, so refer to these few big
@@ -59,12 +62,9 @@ export function useQuery<TQueryFnData = unknown, TError = unknown, TData = TQuer
 	queryFn: QueryFunction<TQueryFnData, QueryKey>,
 	options?: QueryOptions<TQueryFnData, TError, TData>,
 ) {
-	const { onRedirect } = useClientContext() || {}
-	const { setUser } = useUserStore((store) => ({
-		setUser: store.setUser,
-	}))
-	const { onError, ...restOptions } = options || {}
+	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
 	return useReactQuery(queryKey, queryFn, {
+		...options,
 		context: QueryClientContext,
 		onError: (err) => {
 			const axiosError = isAxiosError(err)
@@ -72,14 +72,11 @@ export function useQuery<TQueryFnData = unknown, TError = unknown, TData = TQuer
 			const isAuthError = axiosError && err.response?.status === 401
 
 			if (isAuthError) {
-				setUser(null)
-				onRedirect?.('/auth')
+				onUnauthenticatedResponse?.('/auth')
 			} else if (isNetworkError) {
-				onRedirect?.('/server-connection-error')
+				onConnectionWithServerChanged?.(false)
 			}
-			onError?.(err)
 		},
-		...restOptions,
 	})
 }
 
@@ -149,21 +146,15 @@ export function useInfiniteQuery<TQueryFnData = unknown, TError = unknown, TData
 	queryFn: QueryFunction<TQueryFnData, QueryKey>,
 	options?: InfiniteQueryOptions<TQueryFnData, TError, TData>,
 ) {
-	const { onRedirect } = useClientContext() || {}
-	const { setUser } = useUserStore((store) => ({
-		setUser: store.setUser,
-	}))
-	const { onError, ...restOptions } = options || {}
+	const { onUnauthenticatedResponse } = useClientContext()
 	return useReactInfiniteQuery(queryKey, queryFn, {
+		...options,
 		context: QueryClientContext,
 		onError: (err) => {
 			if (isAxiosError(err) && err.response?.status === 401) {
-				setUser(null)
-				onRedirect?.('/auth')
+				onUnauthenticatedResponse?.('/auth')
 			}
-			onError?.(err)
 		},
-		...restOptions,
 	})
 }
 
@@ -261,18 +252,14 @@ export function useMutation<
 	mutationFn?: MutationFunction<TData, TVariables>,
 	options?: MutationOptions<TData, TError, TVariables, TContext>,
 ) {
-	const { onRedirect } = useClientContext() || {}
-	const { setUser } = useUserStore((store) => ({
-		setUser: store.setUser,
-	}))
+	const { onUnauthenticatedResponse } = useClientContext()
 	const { onError, ...restOptions } = options || {}
 
 	return useReactMutation(mutationKey, mutationFn, {
 		context: QueryClientContext,
 		onError: (err, variables, context) => {
 			if (isAxiosError(err) && err.response?.status === 401) {
-				setUser(null)
-				onRedirect?.('/auth')
+				onUnauthenticatedResponse?.('/auth')
 			}
 			onError?.(err, variables, context)
 		},

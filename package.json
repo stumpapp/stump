@@ -4,26 +4,35 @@
 	"repository": "https://github.com/stumpapp/stump.git",
 	"author": "Aaron Leopold <aaronleopold1221@gmail.com>",
 	"license": "MIT",
+	"private": true,
+	"workspaces": [
+		"apps/*",
+		"core",
+		"docs",
+		"packages/*"
+	],
 	"scripts": {
 		"prepare": "husky install",
-		"setup": "pnpm i && pnpm web build && cargo codegen",
+		"setup": "yarn && yarn web build && cargo codegen",
 		"lint": "eslint --ext .ts,.tsx,.cts,.mts,.js,.jsx,.cjs,.mjs --fix --report-unused-disable-directives --no-error-on-unmatched-pattern --exit-on-fatal-error --ignore-path .gitignore .",
-		"client": "pnpm --filter @stump/client --",
-		"desktop": "pnpm --filter @stump/desktop --",
-		"interface": "pnpm --filter @stump/interface --",
-		"web": "pnpm --filter @stump/web --",
-		"docs": "pnpm --filter @stump/docs --",
-		"server": "pnpm --filter @stump/server --",
-		"start:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"pnpm run server start\" \"pnpm desktop start\"",
-		"dev:web": "concurrently -n server,web -c green.bold,blue.bold \"pnpm run server dev\" \"pnpm web dev\"",
-		"core": "pnpm --filter @stump/core --",
-		"prisma": "pnpm core prisma",
+		"client": "yarn workspace @stump/client",
+		"desktop": "yarn workspace @stump/desktop",
+		"expo": "yarn workspace @stump/expo",
+		"browser": "yarn workspace @stump/browser",
+		"web": "yarn workspace @stump/web",
+		"docs": "yarn workspace @stump/docs",
+		"server": "yarn workspace @stump/server",
+		"start:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"yarn run server start\" \"yarn desktop start\"",
+		"dev:web": "concurrently -n server,web -c green.bold,blue.bold \"yarn run server dev\" \"yarn web dev\"",
+		"dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"yarn run server dev\" \"yarn expo dev\"",
+		"core": "yarn workspace @stump/core",
+		"prisma": "yarn core prisma",
 		"codegen": "cargo run --package codegen",
-		"build:server": "pnpm run server build",
-		"build:web": "pnpm web build && pnpm build:server",
-		"build:desktop": "pnpm desktop build",
+		"build:server": "yarn run server build",
+		"build:web": "yarn web build && yarn build:server",
+		"build:desktop": "yarn desktop build",
 		"prettify": "prettier --config prettier.config.js --ignore-path .prettierignore --write .",
-		"nuke": "cargo clean && cargo codegen && pnpm -r nuke && pnpm i"
+		"nuke": "yarn -r nuke && yarn"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.2",
@@ -58,8 +67,15 @@
 			"cargo fmt --check --manifest-path=apps/desktop/src-tauri/Cargo.toml --"
 		]
 	},
-	"packageManager": "pnpm@8.6.1",
 	"engines": {
-		"node": "20.0.0"
+		"node": "^20.0.0"
+	},
+	"packageManager": "yarn@1.22.21",
+	"yarn": {
+		"peerDependencyRules": {
+			"ignoreMissing": [
+				"@babel/core"
+			]
+		}
 	}
 }

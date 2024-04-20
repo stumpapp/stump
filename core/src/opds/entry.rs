@@ -1,3 +1,6 @@
+//! This module defines the [OpdsEntry] struct for representing an OPDS catalogue entry
+//! as specified at https://specs.opds.io/opds-1.2#5-opds-catalog-entry-documents
+
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::vec;
@@ -22,6 +25,8 @@ use super::{
 };
 
 #[derive(Debug)]
+/// A struct for representing an OPDS catalogue entry as specified at
+/// https://specs.opds.io/opds-1.2#5-opds-catalog-entry-documents
 pub struct OpdsEntry {
 	id: String,
 	updated: DateTime<FixedOffset>,
@@ -216,6 +221,12 @@ impl From<media::Data> for OpdsEntry {
 			OpdsLinkType::ImageJpeg
 		});
 
+		let entry_file_acquisition_link_type =
+			OpdsLinkType::from_extension(&value.extension).unwrap_or_else(|| {
+				tracing::error!(?value.extension, "Failed to convert file extension to OPDS link type");
+				OpdsLinkType::Zip
+			});
+
 		let links = vec![
 			OpdsLink::new(
 				thumbnail_opds_link_type,
@@ -228,7 +239,7 @@ impl From<media::Data> for OpdsEntry {
 				format!("{}/pages/1", base_url),
 			),
 			OpdsLink::new(
-				OpdsLinkType::Zip,
+				entry_file_acquisition_link_type,
 				OpdsLinkRel::Acquisition,
 				format!("{}/file/{}", base_url, file_name_encoded),
 			),
@@ -271,5 +282,82 @@ impl From<media::Data> for OpdsEntry {
 			authors: None,
 			stream_link: Some(stream_link),
 		}
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use std::str::FromStr;
+
+	use super::*;
+	use crate::opds::tests::normalize_xml;
+
+	#[test]
+	fn test_opds_entry() {
+		let links = vec![
+			OpdsLink::new(
+				OpdsLinkType::ImagePng,
+				OpdsLinkRel::Image,
+				"/covers/4561.lrg.png".to_string(),
+			),
+			OpdsLink::new(
+				OpdsLinkType::ImageGif,
+				OpdsLinkRel::Thumbnail,
+				"/covers/4561.thmb.gif".to_string(),
+			),
+		];
+
+		let stream_link = OpdsStreamLink::new(
+			"123".to_string(),
+			"35".to_string(),
+			"image/jpeg".to_string(),
+			Some("10".to_string()),
+			Some("2010-01-10T10:01:11Z".to_string()),
+		);
+
+		let updated = DateTime::from_str("2010-01-10T10:01:11Z").unwrap();
+		let entry = OpdsEntry::new(
+			"urn:uuid:6409a00b-7bf2-405e-826c-3fdff0fd0734".to_string(),
+			updated,
+			"Modern Online Philately".to_string(),
+			Some("The definitive reference for the web-curious philatelist.".to_string()),
+			Some(vec!["Harold McGee".to_string()]),
+			Some(links),
+			Some(stream_link),
+		);
+
+		let mut writer = EventWriter::new(Vec::new());
+		entry.write(&mut writer).unwrap();
+
+		let result = String::from_utf8(writer.into_inner()).unwrap();
+		let expected_result = normalize_xml(
+			r#"
+			<?xml version="1.0" encoding="utf-8"?>
+			<entry>
+				<title>Modern Online Philately</title>
+				<id>urn:uuid:6409a00b-7bf2-405e-826c-3fdff0fd0734</id>
+				<updated>2010-01-10T10:01:11+00:00</updated>
+				<content>The definitive reference for the web-curious philatelist.</content>
+				<author>
+					<name>Harold McGee</name>
+				</author>
+				<link type="image/png" 
+							rel="http://opds-spec.org/image"     
+							href="/covers/4561.lrg.png" />
+				<link type="image/gif"
+							rel="http://opds-spec.org/image/thumbnail"
+							href="/covers/4561.thmb.gif" />
+				<link href="/opds/v1.2/books/123/pages/{pageNumber}?zero_based=true"
+							type="image/jpeg"
+							rel="http://vaemendis.net/opds-pse/stream"
+							pse:count="35"
+							pse:lastRead="10"
+							pse:lastReadDate="2010-01-10T10:01:11Z"
+				/>
+			</entry>
+			"#,
+		);
+
+		assert_eq!(result, expected_result);
 	}
 }

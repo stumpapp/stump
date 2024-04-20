@@ -18,8 +18,9 @@ env:
 
 jobs:
   nightly-docker-build:
+    if: "!contains(github.event.pull_request.head.ref, 'release/v')"
     name: Build docker image
-    runs-on: [self-hosted]
+    runs-on: [ubuntu-22.04]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3

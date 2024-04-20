@@ -15,7 +15,7 @@ use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
-	errors::{ApiError, ApiResult},
+	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
 	middleware::auth::Auth,
 	utils::enforce_session_permissions,
@@ -55,9 +55,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 async fn get_notifiers(
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<Vec<Notifier>>> {
+) -> APIResult<Json<Vec<Notifier>>> {
 	enforce_session_permissions(&session, &[UserPermission::ReadNotifier])?;
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let notifiers = client
 		.notifier()
@@ -90,16 +90,16 @@ async fn get_notifier_by_id(
 	State(ctx): State<AppState>,
 	Path(id): Path<i32>,
 	session: Session,
-) -> ApiResult<Json<Notifier>> {
+) -> APIResult<Json<Notifier>> {
 	enforce_session_permissions(&session, &[UserPermission::ReadNotifier])?;
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let notifier = client
 		.notifier()
 		.find_first(vec![notifier::id::equals(id)])
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound("Notifier not found".to_string()))?;
+		.ok_or(APIError::NotFound("Notifier not found".to_string()))?;
 
 	Ok(Json(Notifier::try_from(notifier)?))
 }
@@ -128,10 +128,10 @@ async fn create_notifier(
 	State(ctx): State<AppState>,
 	session: Session,
 	Json(payload): Json<CreateOrUpdateNotifier>,
-) -> ApiResult<Json<Notifier>> {
+) -> APIResult<Json<Notifier>> {
 	enforce_session_permissions(&session, &[UserPermission::CreateNotifier])?;
 
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let notifier = client
 		.notifier()
@@ -168,10 +168,10 @@ async fn update_notifier(
 	Path(id): Path<i32>,
 	session: Session,
 	Json(payload): Json<CreateOrUpdateNotifier>,
-) -> ApiResult<Json<Notifier>> {
+) -> APIResult<Json<Notifier>> {
 	enforce_session_permissions(&session, &[UserPermission::ManageNotifier])?;
 
-	let client = ctx.get_db();
+	let client = &ctx.db;
 	let notifier = client
 		.notifier()
 		.update(
@@ -214,10 +214,10 @@ async fn patch_notifier(
 	Path(id): Path<i32>,
 	session: Session,
 	Json(payload): Json<PatchNotifier>,
-) -> ApiResult<Json<Notifier>> {
+) -> APIResult<Json<Notifier>> {
 	enforce_session_permissions(&session, &[UserPermission::ManageNotifier])?;
 
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let config = payload
 		.config
@@ -262,10 +262,10 @@ async fn delete_notifier(
 	State(ctx): State<AppState>,
 	Path(id): Path<i32>,
 	session: Session,
-) -> ApiResult<Json<Notifier>> {
+) -> APIResult<Json<Notifier>> {
 	enforce_session_permissions(&session, &[UserPermission::DeleteNotifier])?;
 
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let deleted_notifier = client
 		.notifier()

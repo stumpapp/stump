@@ -1,7 +1,7 @@
 use axum::extract::Multipart;
 use stump_core::filesystem::ContentType;
 
-use crate::errors::{ApiError, ApiResult};
+use crate::errors::{APIError, APIResult};
 
 // TODO: it would be a great enhancement to allow hookup of a malware scanner here, e.g. clamav
 // TODO: Allow configuration of maximum file size
@@ -9,9 +9,9 @@ use crate::errors::{ApiError, ApiResult};
 /// uploaded image if it is valid.
 pub async fn validate_image_upload(
 	upload: &mut Multipart,
-) -> ApiResult<(ContentType, Vec<u8>)> {
+) -> APIResult<(ContentType, Vec<u8>)> {
 	let field = upload.next_field().await?.ok_or_else(|| {
-		ApiError::BadRequest(String::from("No file provided in multipart"))
+		APIError::BadRequest(String::from("No file provided in multipart"))
 	})?;
 
 	let raw_content_type = field.content_type().map(ContentType::from);
@@ -20,7 +20,7 @@ pub async fn validate_image_upload(
 	let file_size = bytes.len();
 
 	if bytes.is_empty() || bytes.len() < 5 {
-		return Err(ApiError::BadRequest("Uploaded file is empty".to_string()));
+		return Err(APIError::BadRequest("Uploaded file is empty".to_string()));
 	}
 
 	let mut magic_bytes = vec![0; 5];
@@ -30,7 +30,7 @@ pub async fn validate_image_upload(
 
 	let content_type = match (raw_content_type, inferred_content_type) {
 		(Some(provided), inferred) if !provided.is_image() && !inferred.is_image() => {
-			Err(ApiError::BadRequest(
+			Err(APIError::BadRequest(
 				"Uploaded file is not an image".to_string(),
 			))
 		},
@@ -42,12 +42,12 @@ pub async fn validate_image_upload(
 				.then_some(inferred)
 				.or_else(|| provided.is_image().then_some(provided))
 				.ok_or_else(|| {
-					ApiError::BadRequest("Uploaded file is not an image".to_string())
+					APIError::BadRequest("Uploaded file is not an image".to_string())
 				})?;
 			Ok(content_type)
 		},
 		(None, inferred) => (inferred.is_image()).then_some(inferred).ok_or_else(|| {
-			ApiError::BadRequest("Uploaded file is not an image".to_string())
+			APIError::BadRequest("Uploaded file is not an image".to_string())
 		}),
 	}?;
 

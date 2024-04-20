@@ -1,15 +1,13 @@
-# Files
 generated.ts
 *-lock.*
 
-# Directories
 node_modules
 target
 dist
 build
 .next
+.expo
 
-# locale files
-interface/src/i18n/locales/*.json
+packages/i18n/src/locales/*.json
 
 CHANGELOG.md

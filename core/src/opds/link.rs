@@ -1,3 +1,9 @@
+//! This module defines the [OpdsLink] struct for representing an OPDS `atom:link` element as
+//! specified at https://specs.opds.io/opds-1.2#the-atomlink-element
+//!
+//! It also defines the [OpdsStreamLink] struct for representing an OPDS page steaming extension
+//! link element as specified at https://github.com/anansi-project/opds-pse/blob/master/v1.2.md
+
 use xml::{writer::XmlEvent, EventWriter};
 
 use crate::{error::CoreResult, filesystem::ContentType};
@@ -5,6 +11,8 @@ use crate::{error::CoreResult, filesystem::ContentType};
 use super::util::OpdsEnumStr;
 
 #[derive(Debug, Clone, Copy)]
+/// A struct for representing an OPDS `atom:link` element as specified at
+/// https://specs.opds.io/opds-1.2#the-atomlink-element
 pub enum OpdsLinkType {
 	Acquisition, // "application/atom+xml;profile=opds-catalog;kind=acquisition",
 	ImageJpeg,   // "image/jpeg",
@@ -15,6 +23,20 @@ pub enum OpdsLinkType {
 	Zip,         // "application/zip"
 	Epub,        // "application/epub+zip"
 	Search,      // "application/opensearchdescription+xml"
+}
+
+impl OpdsLinkType {
+	pub fn from_extension(extension: &str) -> Option<Self> {
+		match extension {
+			"jpeg" | "jpg" => Some(OpdsLinkType::ImageJpeg),
+			"png" => Some(OpdsLinkType::ImagePng),
+			"gif" => Some(OpdsLinkType::ImageGif),
+			"epub" => Some(OpdsLinkType::Epub),
+			// TODO: RARs as ZIP??? Obviously for content type it's different, but does OPDS concern itself with that?
+			"zip" | "cbz" | "rar" | "cbr" => Some(OpdsLinkType::Zip),
+			_ => None,
+		}
+	}
 }
 
 impl TryFrom<ContentType> for OpdsLinkType {
@@ -164,5 +186,66 @@ impl OpdsStreamLink {
 		writer.write(link)?;
 		writer.write(XmlEvent::end_element())?; // end of link
 		Ok(())
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::opds::tests::normalize_xml;
+
+	#[test]
+	fn test_opds_link() {
+		let link = OpdsLink::new(
+			OpdsLinkType::ImageJpeg,
+			OpdsLinkRel::Image,
+			"https://www.example.com/thumbnail/image.jpg".to_string(),
+		);
+
+		let mut writer = EventWriter::new(Vec::new());
+		link.write(&mut writer).unwrap();
+
+		let result = String::from_utf8(writer.into_inner()).unwrap();
+		let expected_result = normalize_xml(
+			r#"
+			<?xml version="1.0" encoding="utf-8"?>
+			<link type="image/jpeg"
+						rel="http://opds-spec.org/image"
+						href="https://www.example.com/thumbnail/image.jpg"
+			/>
+			"#,
+		);
+
+		assert_eq!(result, expected_result);
+	}
+
+	#[test]
+	fn test_opds_stream_link() {
+		let link = OpdsStreamLink::new(
+			"123".to_string(),
+			"35".to_string(),
+			"image/jpeg".to_string(),
+			Some("10".to_string()),
+			Some("2010-01-10T10:01:11Z".to_string()),
+		);
+
+		let mut writer = EventWriter::new(Vec::new());
+		link.write(&mut writer).unwrap();
+
+		let result = String::from_utf8(writer.into_inner()).unwrap();
+		let expected_result = normalize_xml(
+			r#"
+			<?xml version="1.0" encoding="utf-8"?>
+			<link href="/opds/v1.2/books/123/pages/{pageNumber}?zero_based=true"
+						type="image/jpeg"
+						rel="http://vaemendis.net/opds-pse/stream"
+						pse:count="35"
+						pse:lastRead="10"
+						pse:lastReadDate="2010-01-10T10:01:11Z"
+			/>
+			"#,
+		);
+
+		assert_eq!(result, expected_result);
 	}
 }

@@ -1,29 +1,125 @@
 import { Callout } from 'nextra-theme-docs'
+import { Steps } from 'nextra/components'
+import { Tabs } from 'nextra/components'
 
 # Executable
 
 <Callout emoji="☢️">
-	Any present tense information in this section is not accurate. Once a release is made, the
-	following information will apply shortly thereafter.
+	Native executables are not yet available. The corresponding GitHub issue for tracking is
+	[#310](https://github.com/stumpapp/stump/issues/310). For now, you can install Stump using
+	[Docker](/installation/docker) or directly from [source](/installation/source).
 </Callout>
 
-Pre-built binaries will be generally available on [GitHub](https://github.com/stumpapp/stump/releases), once a release schedule starts. Supported platforms will include: Linux, macOS, and Windows.
+## Platform-specific instructions
 
-## Linux
+Select your platform to view the installation instructions
 
-Coming Soon!
+<Tabs items={['🍎 macOS', '🐧 Linux', ' 🪟 Windows']}>
+{/* macOS */}
+<Tabs.Tab>
 
-## macOS
+<Steps>
+### Download the latest release
 
-Coming Soon!
+Visit the [GitHub releases page](https://github.com/stumpapp/stump/releases) and download the latest release for macOS. It will be a `.zip` file containing the executable and the webapp files named `stump-<version>-macos.zip`.
 
-## Windows
+### Unzip the file
 
-Coming Soon!
+Unzip the downloaded file using your preferred method. The expected contents are:
 
-Example Windows service file provided by [@KrautByte](https://github.com/KrautByte):
+- `stump` (the binary executable file)
+- `webapp` (a folder containing all of the webapp files)
 
+These can live wherever you'd like, so long as they are adjacent to each other. For example, if you wanted them in your home directory, you could run:
+
+```bash
+unzip ~/Downloads/stump-<version>-macos.zip -d ~
 ```
+
+### Make the binary executable
+
+Open a terminal and navigate to the folder containing the `stump` binary. Run the following command to make the binary executable:
+
+```sh
+# Navigate to the folder containing the stump binary, e.g. ~/Stump
+sudo chmod +x stump
+```
+
+### Run the binary
+
+You can now run the `stump` binary from the terminal:
+
+```bash
+# Navigate to the folder containing the stump binary, e.g. ~/Stump, or be sure to include the full path to the binary
+./stump
+```
+
+</Steps>
+
+</Tabs.Tab>
+
+{/* Linux */}
+
+<Tabs.Tab>
+
+<Steps>
+### Download the latest release
+
+Visit the [GitHub releases page](https://github.com/stumpapp/stump/releases) and download the latest release for Linux. It will be a `.tar.gz` file containing the executable and the webapp files named `stump-<version>-linux.tar.gz`.
+
+### Unzip the file
+
+Unzip the downloaded file using your preferred method. The expected contents are:
+
+- `stump` (the binary executable file)
+- `webapp` (a folder containing all of the webapp files)
+
+These can live wherever you'd like, so long as they are adjacent to each other. For example, if you wanted them in your home directory, you could run:
+
+```bash
+tar -xvf ~/Downloads/stump-<version>-linux.tar.gz -C ~
+```
+
+### Make the binary executable
+
+Open a terminal and navigate to the folder containing the `stump` binary. Run the following command to make the binary executable:
+
+```bash
+# Navigate to the folder containing the stump binary, e.g. ~/Stump
+sudo chmod +x stump
+```
+
+### Run the binary
+
+You can now run the `stump` binary from the terminal:
+
+```bash
+# Navigate to the folder containing the stump binary, e.g. ~/Stump, or be sure to include the full path to the binary
+./stump
+```
+
+</Steps>
+
+</Tabs.Tab>
+
+{/* Windows */}
+
+<Tabs.Tab>
+
+<Steps>
+### Download the latest release
+
+Visit the [GitHub releases page](https://github.com/stumpapp/stump/releases) and download the latest release for Windows. It will be a `.zip` file containing the executable and the webapp files named `stump-<version>-win.zip`.
+
+### Coming soon!
+
+Check back soon for instructions on how to install Stump on Windows.
+
+### Optional: Setup a Windows service
+
+You can optionally setup a Windows service to run Stump in the background. Here's an example of a Windows service file (provided by [@KrautByte](https://github.com/KrautByte)):
+
+```ini
 [Unit]
 Description=Stump Book Server
 After=network.target
@@ -34,8 +130,14 @@ Restart=always
 RestartSec=1
 User=stump
 WorkingDirectory=/opt/stump
-ExecStart=pnpm start core
+ExecStart=cargo run -p stump_server --release
 
 [Install]
 WantedBy=multi-user.target
 ```
+
+</Steps>
+
+</Tabs.Tab>
+
+</Tabs>

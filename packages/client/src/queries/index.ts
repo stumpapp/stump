@@ -9,7 +9,12 @@ export {
 	useUpdateBookClub,
 } from './bookClub'
 export { type EpubActions, useEpub, useEpubLazy, type UseEpubReturn } from './epub'
-export { type DirectoryListingQueryParams, useDirectoryListing } from './filesystem'
+export {
+	type DirectoryListingQueryParams,
+	prefetchFiles,
+	prefetchLibraryFiles,
+	useDirectoryListing,
+} from './filesystem'
 export { useJobSchedulerConfig, useJobsQuery } from './job'
 export {
 	refreshUseLibrary,
@@ -18,13 +23,18 @@ export {
 	useEditLibraryMutation,
 	useLibraries,
 	useLibraryByIdQuery,
+	useLibraryExclusionsMutation,
+	useLibraryExclusionsQuery,
 	useLibraryQuery,
 	useLibraryStats,
 	useScanLibrary,
+	useTotalLibraryStats,
 	useVisitLibrary,
 } from './library'
+export { useLogsQuery } from './log'
 export {
 	prefetchMedia,
+	prefetchPagedMedia,
 	useContinueReading,
 	useMediaByIdQuery,
 	useMediaCursorQuery,
@@ -33,6 +43,8 @@ export {
 	useUpdateMediaProgress,
 } from './media'
 export {
+	prefetchLibrarySeries,
+	prefetchPagedSeries,
 	prefetchSeries,
 	usePagedSeriesQuery,
 	useSeriesByIdQuery,
@@ -57,6 +69,7 @@ export {
 	useCreateUser,
 	useDeleteUser,
 	useLoginActivityQuery,
+	useNavigationArrangement,
 	useUpdatePreferences,
 	useUpdateUser,
 	useUserPreferences,

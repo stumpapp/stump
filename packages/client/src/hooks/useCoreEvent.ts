@@ -1,60 +1,116 @@
-import type { CoreEvent } from '@stump/types'
+import { jobQueryKeys, libraryQueryKeys, mediaQueryKeys, seriesQueryKeys } from '@stump/api'
+import type { CoreEvent, CoreJobOutput, LibraryScanOutput } from '@stump/types'
 
-import { useJobContext } from '../context'
-import { core_event_triggers, invalidateQueries } from '../invalidate'
+import { invalidateQueries } from '../invalidate'
+import { useJobStore } from '../stores/job'
 import { useStumpWs } from './useStumpWs'
 
-interface UseCoreEventHandlerParams {
-	onJobComplete?: (jobId: string) => void
-	onJobFailed?: (err: { job_id: string; message: string }) => void
+// TODO: Test how the updates affect the client without requerying data
+// TODO: If above works well, test how the client/scanner bench changes if sending the data
+// e.g. if we created 300 books, send them... I imagine this will bog things down a little...
+
+type Params = {
+	liveRefetch?: boolean
 }
 
-export function useCoreEventHandler({
-	onJobComplete,
-	onJobFailed,
-}: UseCoreEventHandlerParams = {}) {
-	const context = useJobContext()
+export function useCoreEventHandler({ liveRefetch }: Params = {}) {
+	const { addJob, upsertJob, removeJob } = useJobStore((state) => ({
+		addJob: state.addJob,
+		removeJob: state.removeJob,
+		upsertJob: state.upsertJob,
+	}))
 
-	if (!context) {
-		throw new Error('useCoreEventHandler must be used within a JobContext')
-	}
-
-	const { addJob, updateJob, removeJob } = context
-
-	async function handleCoreEvent(event: CoreEvent) {
-		const { key, data } = event
-
-		switch (key) {
-			case 'JobStarted':
-				addJob(data)
-				break
-			case 'JobProgress':
-				updateJob(data)
-				break
-			case 'JobComplete':
-				removeJob(data)
-				await new Promise((resolve) => setTimeout(resolve, 300))
-				await invalidateQueries({ keys: core_event_triggers[key].keys })
-				onJobComplete?.(data)
-				break
-			case 'JobFailed':
-				onJobFailed?.(data)
-				removeJob(data.job_id)
-				await invalidateQueries({ keys: core_event_triggers[key].keys })
-				break
-			default:
-				// eslint-disable-next-line no-case-declarations
-				const result = core_event_triggers[key]
-				if (result?.keys) {
-					await new Promise((resolve) => setTimeout(resolve, 300))
-					await invalidateQueries({ exact: false, keys: result.keys })
-				} else {
-					console.warn(`Unhandled core event: ${key}`, event)
-				}
-				break
+	const handleInvalidate = async (keys: string[]) => {
+		try {
+			await invalidateQueries({ keys })
+		} catch (e) {
+			console.error('Failed to invalidate queries', e)
 		}
 	}
 
-	// useStumpSse({ onEvent: handleCoreEvent })
+	async function handleCoreEvent(event: CoreEvent) {
+		const { __typename } = event
+
+		switch (__typename) {
+			case 'JobStarted':
+				await handleInvalidate([jobQueryKeys.getJobs])
+				addJob(event)
+				break
+			case 'JobUpdate':
+				if (!!event.status && event.status !== 'RUNNING') {
+					await new Promise((resolve) => setTimeout(resolve, 1000))
+					removeJob(event.id)
+					await handleInvalidate([jobQueryKeys.getJobs])
+				} else {
+					upsertJob(event)
+				}
+				break
+			case 'JobOutput':
+				await handleJobOutput(event.output)
+				break
+			case 'DiscoveredMissingLibrary':
+				await handleInvalidate(['library', 'series', 'media'])
+				break
+			case 'CreatedManySeries':
+				if (liveRefetch) {
+					await handleInvalidate([libraryQueryKeys.getLibraryStats, 'series', 'media'])
+				}
+				break
+			case 'CreatedOrUpdatedManyMedia':
+				if (liveRefetch) {
+					await handleInvalidate([
+						'series',
+						'media',
+						libraryQueryKeys.getLibraryStats,
+						libraryQueryKeys.getLibraryById,
+					])
+				}
+				break
+			default:
+				console.warn('Unhandled core event', event)
+		}
+	}
+
 	useStumpWs({ onEvent: handleCoreEvent })
+}
+
+// const patchRecentlyAddedBooks = (books: Media[]) => {
+// 	const cache = queryClient.getQueryData<Media[]>([mediaQueryKeys.getRecentlyAddedMedia])
+// 	// Add the new books to the front of the list
+// 	queryClient.setQueryData([mediaQueryKeys.getRecentlyAddedMedia], [...books, ...(cache ?? [])])
+// }
+
+const handleJobOutput = async (output: CoreJobOutput) => {
+	if (isLibraryScanOutput(output)) {
+		const requeryBooks = output.created_media.valueOf() + output.updated_media.valueOf() > 0
+		const requerySeries = output.created_series.valueOf() + output.updated_series.valueOf() > 0
+
+		const keys = []
+
+		if (requeryBooks) {
+			keys.push(mediaQueryKeys.getRecentlyAddedMedia, mediaQueryKeys.getMedia)
+		}
+
+		if (requerySeries) {
+			keys.push(...[seriesQueryKeys.getRecentlyAddedSeries, libraryQueryKeys.getLibrarySeries])
+		}
+
+		if (keys.length > 0) {
+			keys.push(...[libraryQueryKeys.getLibraryStats])
+			try {
+				await invalidateQueries({ keys })
+			} catch (e) {
+				console.error('Failed to invalidate queries', e)
+			}
+		} else {
+			console.debug('No keys to invalidate')
+		}
+	} else {
+		console.warn('Unhandled job output', output)
+	}
+}
+
+const isLibraryScanOutput = (output: CoreJobOutput): output is LibraryScanOutput => {
+	const requiredKeys = ['created_media', 'updated_media', 'created_series', 'updated_series']
+	return requiredKeys.every((key) => key in output)
 }

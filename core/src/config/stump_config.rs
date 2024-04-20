@@ -160,7 +160,7 @@ impl StumpConfig {
 		let toml_content_str = std::fs::read_to_string(stump_toml)?;
 		let toml_configs = toml::from_str::<PartialStumpConfig>(&toml_content_str)
 			.map_err(|e| {
-				eprintln!("Failed to parse Stump.toml: {}", e.to_string());
+				eprintln!("Failed to parse Stump.toml: {}", e);
 				CoreError::InitializationError(e.to_string())
 			})?;
 
@@ -183,7 +183,7 @@ impl StumpConfig {
 
 		if let Ok(port) = env::var(PORT_KEY) {
 			let port_u16 = port.parse::<u16>().map_err(|e| {
-				eprintln!("Failed to parse provided STUMP_PORT: {}", e.to_string());
+				eprintln!("Failed to parse provided STUMP_PORT: {}", e);
 				CoreError::InitializationError(e.to_string())
 			})?;
 			env_configs.port = Some(port_u16);
@@ -191,10 +191,7 @@ impl StumpConfig {
 
 		if let Ok(verbosity) = env::var(VERBOSITY_KEY) {
 			let verbosity_u64 = verbosity.parse::<u64>().map_err(|e| {
-				eprintln!(
-					"Failed to parse provided STUMP_VERBOSITY: {}",
-					e.to_string()
-				);
+				eprintln!("Failed to parse provided STUMP_VERBOSITY: {}", e);
 				CoreError::InitializationError(e.to_string())
 			})?;
 			env_configs.verbosity = Some(verbosity_u64);
@@ -202,10 +199,7 @@ impl StumpConfig {
 
 		if let Ok(pretty_logs) = env::var(PRETTY_LOGS_KEY) {
 			let pretty_logs_bool = pretty_logs.parse::<bool>().map_err(|e| {
-				eprintln!(
-					"Failed to parse provided STUMP_PRETTY_LOGS: {}",
-					e.to_string()
-				);
+				eprintln!("Failed to parse provided STUMP_PRETTY_LOGS: {}", e);
 				CoreError::InitializationError(e.to_string())
 			})?;
 			self.pretty_logs = pretty_logs_bool;
@@ -329,7 +323,7 @@ impl StumpConfig {
 		std::fs::write(
 			stump_toml.as_path(),
 			toml::to_string(&self).map_err(|e| {
-				eprintln!("Failed to serialize StumpConfig to toml: {}", e.to_string());
+				eprintln!("Failed to serialize StumpConfig to toml: {}", e);
 				CoreError::InitializationError(e.to_string())
 			})?,
 		)?;

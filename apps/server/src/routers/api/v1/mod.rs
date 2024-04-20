@@ -3,7 +3,7 @@ use axum::{
 	routing::{get, post},
 	Json, Router,
 };
-use hyper::header::USER_AGENT;
+use reqwest::header::USER_AGENT;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;

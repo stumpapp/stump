@@ -1,6 +1,8 @@
 import type {
+	Arrangement,
 	CreateUser,
 	LoginActivity,
+	NavigationItem,
 	UpdateUser,
 	UpdateUserPreferences,
 	User,
@@ -94,6 +96,18 @@ export function deleteUserSessions(userId: string): Promise<APIResult<void>> {
 	return API.delete(`/users/${userId}/sessions`)
 }
 
+export function getPreferredNavigationArrangement(): Promise<
+	APIResult<Arrangement<NavigationItem>>
+> {
+	return API.get('/users/me/navigation-arrangement')
+}
+
+export function setPreferredNavigationArrangement(
+	arrangement: Arrangement<NavigationItem>,
+): Promise<APIResult<Arrangement<NavigationItem>>> {
+	return API.put('/users/me/navigation-arrangement', arrangement)
+}
+
 export const userApi = {
 	createUser,
 	deleteAllLoginActivity,
@@ -101,10 +115,12 @@ export const userApi = {
 	deleteUserSessions,
 	getLoginActivity,
 	getLoginActivityForUser,
+	getPreferredNavigationArrangement,
 	getUserById,
 	getUserPreferences,
 	getUsers,
 	setLockStatus,
+	setPreferredNavigationArrangement,
 	updatePreferences,
 	updateUser,
 	updateUserPreferences,
@@ -118,10 +134,12 @@ export const userQueryKeys: Record<keyof typeof userApi, string> = {
 	deleteUserSessions: 'user.deleteUserSessions',
 	getLoginActivity: 'user.getLoginActivity',
 	getLoginActivityForUser: 'user.getLoginActivityForUser',
+	getPreferredNavigationArrangement: 'user.getPreferredNavigationArrangement',
 	getUserById: 'user.getUserById',
 	getUserPreferences: 'user.getUserPreferences',
 	getUsers: 'user.getUsers',
 	setLockStatus: 'user.setLockStatus',
+	setPreferredNavigationArrangement: 'user.setPreferredNavigationArrangement',
 	updatePreferences: 'user.updatePreferences',
 	updateUser: 'user.updateUser',
 	updateUserPreferences: 'user.updateUserPreferences',

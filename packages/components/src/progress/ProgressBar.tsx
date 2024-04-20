@@ -48,11 +48,17 @@ export type ProgressBarProps = {
 	value?: number | null
 } & BaseProps
 
+const safeValue = (value: number | null) => {
+	if (value === null) return null
+
+	return isNaN(value) ? null : Math.min(100, Math.max(0, value))
+}
+
 export const ProgressBar = React.forwardRef<
 	React.ElementRef<typeof ProgressPrimitive.Root>,
 	ProgressBarProps
 >(({ className, value, variant, size, rounded, ...props }, ref) => {
-	const adjustedValue = useMemo(() => (!!value && isNaN(value) ? null : value ?? null), [value])
+	const adjustedValue = useMemo(() => safeValue(value ?? null), [value])
 
 	return (
 		<ProgressPrimitive.Root

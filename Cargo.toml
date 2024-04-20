@@ -9,12 +9,12 @@ members = [
 
 [workspace.package]
 version = "0.0.1"
-rust-version = "1.72.1"
+rust-version = "1.77.2"
 
 [workspace.dependencies]
-async-trait = "0.1.74"
+async-trait = "0.1.80"
 async-stream = "0.3.5"
-bcrypt = "0.15.0"
+bcrypt = "0.15.1"
 futures = "0.3.30"
 futures-util = "0.3.30"
 lettre = { version = "0.11.4", default-features = false, features = [
@@ -37,14 +37,14 @@ prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-
   "mocking"
 ], default-features = false }
 rand = "0.8.5"
-reqwest = { version = "0.11.22", default-features = false, features = [ "json", "rustls-tls" ] }
-serde = { version = "1.0.193", features = ["derive"] }
-serde_json = "1.0.108"
+reqwest = { version = "0.12.3", default-features = false, features = [ "json", "rustls-tls" ] }
+serde = { version = "1.0.197", features = ["derive"] }
+serde_json = "1.0.115"
 simple_crypt = "0.2.3"
 specta = "1.0.5"
-tempfile = "3.8.1"
-thiserror = "1.0.51"
-tokio = { version = "1.35.0", features = [
+tempfile = "3.10.1"
+thiserror = "1.0.58"
+tokio = { version = "1.37.0", features = [
   # Provides sender/reciever channels
   "sync", 
   # Tells the Tokio runtime to use the multi-thread scheduler.

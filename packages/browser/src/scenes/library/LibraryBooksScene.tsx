@@ -1,5 +1,5 @@
-import { usePagedMediaQuery } from '@stump/client'
-import { useEffect } from 'react'
+import { prefetchPagedMedia, usePagedMediaQuery } from '@stump/client'
+import { useCallback, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 import { useMediaMatch } from 'rooks'
 
@@ -31,27 +31,43 @@ function LibraryBooksScene() {
 
 	const { layoutMode } = useLayoutMode()
 	const { filters } = useFilterContext()
+
+	const params = useMemo(
+		() => ({
+			page,
+			page_size: is3XLScreenOrBigger ? 40 : 20,
+			params: {
+				...filters,
+				series: {
+					library: {
+						id: library.id,
+					},
+				},
+			},
+		}),
+		[page, is3XLScreenOrBigger, filters, library.id],
+	)
 	const {
 		isLoading: isLoadingMedia,
 		isRefetching: isRefetchingMedia,
 		media,
 		pageData,
-	} = usePagedMediaQuery({
-		page,
-		page_size: is3XLScreenOrBigger ? 40 : 20,
-		params: {
-			...filters,
-			series: {
-				library: {
-					id: library.id,
-				},
-			},
-		},
-	})
+	} = usePagedMediaQuery(params)
 
 	const { current_page, total_pages } = pageData || {}
+
 	const isOnFirstPage = current_page === 1
 	const hasStuff = total_pages !== undefined && current_page !== undefined
+
+	const handlePrefetchPage = useCallback(
+		(page: number) => {
+			prefetchPagedMedia({
+				...params,
+				page,
+			})
+		},
+		[params],
+	)
 
 	// TODO: detect if going from page > 1 to page = 1 and scroll to top
 	useEffect(
@@ -106,7 +122,12 @@ function LibraryBooksScene() {
 
 			<div className="flex w-full flex-col gap-y-6">
 				{hasStuff && (
-					<Pagination pages={total_pages} currentPage={current_page} onChangePage={setPage} />
+					<Pagination
+						pages={total_pages}
+						currentPage={current_page}
+						onChangePage={setPage}
+						onPrefetchPage={handlePrefetchPage}
+					/>
 				)}
 				<div className="px-4">{renderContent()}</div>
 				{hasStuff && (
@@ -115,6 +136,7 @@ function LibraryBooksScene() {
 						pages={total_pages}
 						currentPage={current_page}
 						onChangePage={setPage}
+						onPrefetchPage={handlePrefetchPage}
 					/>
 				)}
 			</div>

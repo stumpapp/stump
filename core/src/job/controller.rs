@@ -26,9 +26,9 @@ pub enum JobControllerCommand {
 	/// Cancel a job by its ID
 	CancelJob(AcknowledgeableCommand),
 	/// Pause a job by its ID
-	PauseJob(String), // TODO: AcknowledgeableCommand
+	PauseJob(AcknowledgeableCommand),
 	/// Resume a job by its ID
-	ResumeJob(String), // TODO: AcknowledgeableCommand
+	ResumeJob(AcknowledgeableCommand),
 	/// Shutdown the job controller. This will cancel all running jobs and clear the queue
 	Shutdown(oneshot::Sender<()>),
 }
@@ -85,31 +85,39 @@ impl JobController {
 					JobControllerCommand::CompleteJob(id) => {
 						self.manager.clone().complete(id).await;
 					},
-					JobControllerCommand::CancelJob(AcknowledgeableCommand {
-						id,
-						ack,
-					}) => {
-						let result = self.manager.clone().cancel(id).await;
-						ack.send(result).map_or_else(
-							|error| {
-								tracing::error!(
-									?error,
-									"Error while sending cancel confirmation"
-								);
-							},
-							|_| tracing::trace!("Cancel confirmation sent"),
+					JobControllerCommand::CancelJob(cmd) => {
+						let result = self.manager.clone().cancel(cmd.id).await;
+						acknowledge_command_trace(
+							cmd.ack,
+							result,
+							"Cancel confirmation sent",
+							"Error while sending cancel confirmation",
 						);
 					},
-					JobControllerCommand::PauseJob(id) => {
-						self.manager.clone().pause(id).await.map_or_else(
+					JobControllerCommand::PauseJob(cmd) => {
+						self.manager.clone().pause(cmd.id).await.map_or_else(
 							|error| tracing::error!(?error, "Failed to pause job!"),
-							|_| tracing::info!("Successfully issued pause request"),
+							|_| {
+								acknowledge_command_info(
+									cmd.ack,
+									Ok(()),
+									"Successfully issued pause request",
+									"Error while sending pause confirmation",
+								)
+							},
 						);
 					},
-					JobControllerCommand::ResumeJob(id) => {
-						self.manager.clone().resume(id).await.map_or_else(
+					JobControllerCommand::ResumeJob(cmd) => {
+						self.manager.clone().resume(cmd.id).await.map_or_else(
 							|error| tracing::error!(?error, "Failed to resume job!"),
-							|_| tracing::info!("Successfully issued resume request"),
+							|_| {
+								acknowledge_command_info(
+									cmd.ack,
+									Ok(()),
+									"Successfully issued resume request",
+									"Error while sending resume confirmation",
+								)
+							},
 						);
 					},
 					JobControllerCommand::Shutdown(return_sender) => {
@@ -136,4 +144,38 @@ impl JobController {
 	) -> Result<(), SendError<JobControllerCommand>> {
 		self.commands_tx.send(event)
 	}
+}
+
+/// A helper function to send a [JobManagerResult] back along a job's [oneshot::Sender]
+/// and log a [tracing::trace!] `msg`. If sending fails then `err_msg`is logged as an
+/// error instead.
+fn acknowledge_command_trace(
+	ack: oneshot::Sender<JobManagerResult<()>>,
+	res: JobManagerResult<()>,
+	msg: &str,
+	err_msg: &str,
+) {
+	ack.send(res).map_or_else(
+		|error| {
+			tracing::error!(?error, err_msg);
+		},
+		|_| tracing::trace!(msg),
+	)
+}
+
+/// A helper function to send a [JobManagerResult] back along a job's [oneshot::Sender]
+/// and log a [tracing::info!] `msg`. If sending fails then `err_msg`is logged as an
+/// error instead.
+fn acknowledge_command_info(
+	ack: oneshot::Sender<JobManagerResult<()>>,
+	res: JobManagerResult<()>,
+	msg: &str,
+	err_msg: &str,
+) {
+	ack.send(res).map_or_else(
+		|error| {
+			tracing::error!(?error, err_msg);
+		},
+		|_| tracing::info!(msg),
+	)
 }

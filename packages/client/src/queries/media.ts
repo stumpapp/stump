@@ -78,6 +78,12 @@ export function usePagedMediaQuery(options: PageQueryOptions<Media> = {}) {
 	}
 }
 
+export const prefetchPagedMedia = async (options: PageQueryOptions<Media>) =>
+	queryClient.prefetchQuery([mediaQueryKeys.getMedia, options], async () => {
+		const { data } = await mediaApi.getMedia(options)
+		return data
+	})
+
 export function useMediaCursorQuery(options: CursorQueryOptions<Media>) {
 	const { data, ...restReturn } = useCursorQuery(
 		[mediaQueryKeys.getMedia],

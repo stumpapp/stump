@@ -312,7 +312,19 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<User>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UserPermission>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<AgeRestriction>()?).as_bytes())?;
+
+		file.write_all(format!("{}\n\n", ts_export::<NavigationMode>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<HomeItem>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<NaviationItemDisplayOptions>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<NavigationItem>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<ArrangementItem<()>>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<Arrangement<()>>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UserPreferences>()?).as_bytes())?;
+
 		file.write_all(format!("{}\n\n", ts_export::<LoginActivity>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<EmailerSendTo>()?).as_bytes())?;

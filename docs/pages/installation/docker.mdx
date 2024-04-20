@@ -26,6 +26,13 @@ echo -e "PUID=$(id -u)\nPGID=$(id -g)"
 
 <Tabs.Tab>
 
+<Callout emoji="☢️">
+	This tutorial uses the newer `docker compose` CLI. If you find this command does not exist for
+	you, you might be on V1, which uses `docker-compose`. Please review [Docker's
+	documentation](https://docs.docker.com/compose/install/) for more information and/or
+	platform-specific installation.
+</Callout>
+
 <Steps>
 
 ### Create a `docker-compose.yml` file
@@ -36,12 +43,12 @@ Below is an example of a Docker Compose file you can use to bootstrap your Stump
 version: '3.3'
 services:
   stump:
-    image: aaronleopold/stump:nightly
+    image: aaronleopold/stump:latest
     container_name: stump
     # Replace my paths (prior to the colons) with your own
     volumes:
-      - /Users/aaronleopold/.stump:/config
-      - /Users/aaronleopold/Documents/Stump:/data
+      - /home/aaronleopold/.stump:/config
+      - /media/books:/data
     ports:
       - 10801:10801
     environment:
@@ -70,13 +77,6 @@ docker compose up -d
 
 </Steps>
 
-<Callout emoji="☢️">
-	This tutorial uses the newer `docker compose` CLI. If you find this command does not exist for
-	you, you might be on V1, which uses `docker-compose`. Please review [Docker's
-	documentation](https://docs.docker.com/compose/install/) for more information and/or
-	platform-specific installation.
-</Callout>
-
 </Tabs.Tab>
 
 <Tabs.Tab>
@@ -92,17 +92,17 @@ docker create \
   -e "PUID=1000" \
   -e "PGID=1000" \
   -p 10801:10801 \
-  --volume "/Users/aaronleopold/.stump:/config" \
-  --volume "/Users/aaronleopold/Documents/Stump:/data" \
+  --volume "/home/aaronleopold/.stump:/config" \
+  --volume "/media/books:/data" \
   --restart unless-stopped \
-  aaronleopold/stump:nightly
+  aaronleopold/stump:latest
 ```
 
 If you prefer bind mounts, you can swap out the two `--volume` lines with:
 
 ```bash
---mount type=volume,source=/Users/aaronleopold/.stump,target=/config \
---mount type=volume,source=/Users/aaronleopold/Documents/Stump,target=/data \
+--mount type=volume,source=/home/aaronleopold/.stump,target=/config \
+--mount type=volume,source=/media/books,target=/data \
 ```
 
 ### Start the container
@@ -116,7 +116,7 @@ docker start stump
 When a new image is available, you can update your container using these commands:
 
 ```bash
-docker pull aaronleopold/stump:nightly
+docker pull aaronleopold/stump:latest
 docker restart stump
 ```
 

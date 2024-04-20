@@ -46,6 +46,7 @@ export {
 export { useLogsQuery } from './log'
 export {
 	prefetchMedia,
+	prefetchPagedMedia,
 	useContinueReading,
 	useMediaByIdQuery,
 	useMediaCursorQuery,
@@ -55,6 +56,7 @@ export {
 } from './media'
 export {
 	prefetchLibrarySeries,
+	prefetchPagedSeries,
 	prefetchSeries,
 	usePagedSeriesQuery,
 	useSeriesByIdQuery,
@@ -79,6 +81,7 @@ export {
 	useCreateUser,
 	useDeleteUser,
 	useLoginActivityQuery,
+	useNavigationArrangement,
 	useUpdatePreferences,
 	useUpdateUser,
 	useUserPreferences,

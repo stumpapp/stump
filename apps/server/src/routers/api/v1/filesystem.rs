@@ -4,16 +4,16 @@ use axum::{
 	routing::post,
 	Json, Router,
 };
-use std::path::Path;
+use std::{
+	fs::DirEntry,
+	path::{Path, PathBuf},
+};
 use stump_core::{
 	db::{
 		entity::UserPermission,
 		query::pagination::{PageQuery, Pageable},
 	},
-	filesystem::{
-		DirectoryListing, DirectoryListingFile, DirectoryListingInput, FileParts,
-		PathUtils,
-	},
+	filesystem::{DirectoryListing, DirectoryListingFile, DirectoryListingInput},
 };
 use tower_sessions::Session;
 use tracing::trace;
@@ -48,23 +48,21 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		(status = 404, description = "Directory does not exist."),
 	)
 )]
+
 /// List the contents of a directory on the file system at a given (optional) path. If no path
 /// is provided, the file system root directory contents is returned.
 pub async fn list_directory(
 	session: Session,
 	pagination: Query<PageQuery>,
-	input: Json<Option<DirectoryListingInput>>,
+	Json(input): Json<Option<DirectoryListingInput>>,
 ) -> APIResult<Json<Pageable<DirectoryListing>>> {
 	enforce_session_permission(&session, UserPermission::FileExplorer)?;
-	let input = input.0.unwrap_or_default();
+	let input = input.unwrap_or_default();
 
-	let start_path = input.path.unwrap_or_else(|| {
-		#[cfg(target_os = "windows")]
-		return "C:\\".to_string();
-		#[cfg(target_family = "unix")]
-		return "/".to_string();
-	});
-	let start_path = Path::new(&start_path);
+	let start_path = input
+		.path
+		.map(PathBuf::from)
+		.unwrap_or_else(get_os_start_path);
 
 	if !start_path.exists() {
 		return Err(APIError::NotFound(format!(
@@ -78,39 +76,11 @@ pub async fn list_directory(
 		)));
 	}
 
-	let listing = std::fs::read_dir(start_path)?;
+	// Set defaults for paging
 	let page = pagination.page.unwrap_or(1);
 	let page_size = pagination.page_size.unwrap_or(100);
 
-	// TODO: I haven't touched this logic in a year, it needs a bit of a refatctor (lets see how long it takes me to get to it lol)
-	let mut files = listing
-		.filter_map(|e| e.ok())
-		.filter_map(|f| {
-			let path = f.path();
-			let stem = path.file_stem().unwrap_or_default();
-
-			if stem.to_str().unwrap_or_default().starts_with('.') {
-				return None;
-			}
-
-			Some(f)
-		})
-		.map(|entry| {
-			let entry = entry;
-
-			let path = entry.path();
-
-			let FileParts { file_name, .. } = path.file_parts();
-			let is_directory = path.is_dir();
-			let path = path.to_string_lossy().to_string();
-
-			DirectoryListingFile {
-				name: file_name,
-				is_directory,
-				path,
-			}
-		})
-		.collect::<Vec<DirectoryListingFile>>();
+	let mut files = read_and_filter_directory(&start_path)?;
 
 	// Sort the files by name, ignore case
 	files.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
@@ -132,4 +102,37 @@ pub async fn list_directory(
 		page,
 		page_size,
 	))))
+}
+
+fn get_os_start_path() -> PathBuf {
+	#[cfg(target_os = "windows")]
+	return Path::new("C:\\").into();
+	#[cfg(target_family = "unix")]
+	return Path::new("/").into();
+}
+
+fn read_and_filter_directory(
+	start_path: &Path,
+) -> Result<Vec<DirectoryListingFile>, std::io::Error> {
+	let listing = std::fs::read_dir(start_path)?;
+
+	let files = listing
+		.filter_map(|res| res.ok())
+		.filter_map(filter_if_hidden)
+		.map(|entry| DirectoryListingFile::from(entry.path()))
+		.collect();
+
+	Ok(files)
+}
+
+fn filter_if_hidden(entry: DirEntry) -> Option<DirEntry> {
+	let path = entry.path();
+	let stem = path.file_stem().unwrap_or_default();
+
+	// Remove hidden files starting with period
+	if stem.to_str().unwrap_or_default().starts_with('.') {
+		return None;
+	}
+
+	Some(entry)
 }

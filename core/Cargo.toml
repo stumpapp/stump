@@ -16,7 +16,7 @@ futures = { workspace = true }
 globset = "0.4.14"
 image = "0.24.7"
 infer = "0.15.0"
-itertools = "0.12.0"
+itertools = "0.12.1"
 prisma-client-rust = { workspace = true }
 rand = { workspace = true }
 serde = { workspace = true }
@@ -31,8 +31,8 @@ trash = "3.1.2"
 pdf = { git = "https://github.com/pdf-rs/pdf", rev = "3bc9e636d31b1846e51b58c7429914e640866f53" } # TODO: revert back to crates.io once fix(es) release
 pdfium-render = "0.8.16"
 rayon = "1.8.0"
-regex = "1.10.2"
-ring = "0.17.7"
+regex = "1.10.4"
+ring = "0.17.8"
 thiserror = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
@@ -40,10 +40,10 @@ tracing-appender = "0.2.3"
 unrar = { version = "0.5.2" }
 urlencoding = { workspace = true }
 utoipa = { version = "3.5.0" }
-uuid = "1.6.1"
+uuid = "1.8.0"
 walkdir = "2.4.0"
 webp = "0.2.6"
-xml-rs = "0.8.19" # XML reader/writer
+xml-rs = "0.8.20" # XML reader/writer
 zip = "0.6.6"
 
 [dev-dependencies]
@@ -51,7 +51,7 @@ tempfile = { workspace = true }
 criterion = { version = "0.5.1", features = ["html_reports", "async_tokio"] }
 
 [build-dependencies]
-chrono = "0.4.31"
+chrono = "0.4.37"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 libc = "0.2.152"

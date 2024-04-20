@@ -3,9 +3,8 @@ import { Callout } from 'nextra-theme-docs'
 # Age Restrictions
 
 <Callout emoji="🚧">
-	This functionality is experimental. Please ensure you properly test any configured age
-	restrictions to ensure they work as expected with your library **before** you give the restricted
-	user access to their account.
+	Please ensure you properly test any configured age restrictions to ensure they work as expected
+	with your library **before** you give the restricted user access to their account.
 </Callout>
 
 Age restrictions are set on a per-user basis, and are used to determine whether or not a user can access a book. For more information on users and user management, see the dedicated [users](/guides/access-control/users) page.
@@ -40,6 +39,13 @@ The age restriction is located directly within the metadata for a book itself, o
 
 This means that **without metadata, Stump cannot determine whether or not a book is age-allowed**. There are fallback options described below.
 
+#### EPUB
+
+Stump will attempt to parse one of the following from an EPUB file's metadata:
+
+- `typicalAgeRange`: Generally in the format of `[number]-[number]`
+- `contentRating`: Subject to the publisher, but generally similar to that you'd find on a movie or TV show
+
 ### How does Stump determine whether or not a book is age-allowed?
 
 If a book or a book's series has an age restriction set, Stump will use that age restriction to determine whether or not a user can access it. The comparison done internally is `less than or equal to X number`, meaning that if a user has an age restriction set to `13` and a book is rated to `17`, the user will not be able to access the book. If a user has an age restriction set to `17` and a book is rated to `13`, the user will be able to access the book. In other words, **the age restriction set on the user must be greater than or equal to the age restriction number set on the book or series in order to have access**.
@@ -53,7 +59,8 @@ Stump doesn't currently support editing metadata directly, but it is planned for
 
 ### Other considerations
 
-- Stump doesn't currently support dynamic thumbnails for libraries containing age-restricted books or series. This means that if it happens to be the case that the first book in the first series of a library is age-restricted, the thumbnail for the library **will still be displayed** so long as a user has access to the library. This is planned to be fixed in the future by one of two ways:
-  1. Settings will be made available to override the thumbnail for a library or series
-  2. Server owners will be able to associate libraries and series with tags and then set restrictions on a user that would prevent access to specific tags. See the [Tag-based restrictions](#tag-based-restrictions) section for more information.
-  3. Server owners can exclude users from seeing certain libraries entirely
+#### Library thumbnails
+
+If you generated a library thumbnail for a library which coincidentally contains an age-restricted book that is ordered first, the thumbnail will still be displayed so long as a user has access to the library.
+
+You can get around this by setting a the thumbnail to source from a different book, or uploading a custom thumbnail.

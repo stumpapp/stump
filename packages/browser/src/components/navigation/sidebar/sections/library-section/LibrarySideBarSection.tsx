@@ -8,15 +8,20 @@ import { useLocation } from 'react-router'
 import { useAppContext } from '@/context'
 import paths from '@/paths'
 
+import { EntityOptionProps } from '../../../types'
 import SideBarButtonLink from '../../SideBarButtonLink'
 import LibraryEmoji from './LibraryEmoji'
 import LibraryOptionsMenu from './LibraryOptionsMenu'
 
 type Props = {
 	isMobile?: boolean
-}
+} & EntityOptionProps
 
-export default function LibrarySideBarSection({ isMobile }: Props) {
+export default function LibrarySideBarSection({
+	isMobile,
+	showCreate = true,
+	showLinkToAll = false,
+}: Props) {
 	const location = useLocation()
 
 	const { t } = useLocaleContext()
@@ -26,6 +31,7 @@ export default function LibrarySideBarSection({ isMobile }: Props) {
 	const isCurrentLibrary = (id: string) => location.pathname.startsWith(paths.librarySeries(id))
 
 	const canCreateLibrary = useMemo(() => checkPermission('library:create'), [checkPermission])
+	const showCreateLink = canCreateLibrary && showCreate
 
 	const renderLibraries = () => {
 		if (!libraries || !libraries.length) {
@@ -64,14 +70,23 @@ export default function LibrarySideBarSection({ isMobile }: Props) {
 	}
 
 	return (
-		<Accordion type="single" collapsible className="w-full" defaultValue="libraries">
+		<Accordion type="single" collapsible className="w-full py-2" defaultValue="libraries">
 			<Accordion.Item value="libraries" className="border-none">
 				<Accordion.Trigger noUnderline asLabel className="px-1 py-0 pb-2">
 					{t('sidebar.buttons.libraries')}
 				</Accordion.Trigger>
 				<Accordion.Content containerClassName="flex flex-col gap-y-1.5">
+					{showLinkToAll && (
+						<SideBarButtonLink
+							to={paths.libraries()}
+							isActive={location.pathname === paths.libraries()}
+							variant="action"
+						>
+							{t('sidebar.buttons.seeAll')}
+						</SideBarButtonLink>
+					)}
 					{renderLibraries()}
-					{canCreateLibrary && (
+					{showCreateLink && (
 						<SideBarButtonLink
 							to={paths.libraryCreate()}
 							isActive={location.pathname === paths.libraryCreate()}

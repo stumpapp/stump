@@ -10,7 +10,7 @@ use time::Duration;
 
 use tower_sessions::{cookie::SameSite, SessionManagerLayer};
 
-use super::store::PrismaSessionStore;
+use super::PrismaSessionStore;
 
 pub const SESSION_USER_KEY: &str = "user";
 pub const SESSION_NAME: &str = "stump_session";

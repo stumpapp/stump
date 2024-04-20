@@ -19,6 +19,7 @@ impl From<prisma::age_restriction::Data> for AgeRestriction {
 	}
 }
 
+// TODO: consider separating some of the `manage` permissions into more granular permissions
 // TODO: consider adding self:update permission, useful for child accounts
 /// Permissions that can be granted to a user. Some permissions are implied by others,
 /// and will be automatically granted if the "parent" permission is granted.
@@ -58,7 +59,6 @@ pub enum UserPermission {
 	/// Grant access to delete the library (manage library)
 	#[serde(rename = "library:delete")]
 	DeleteLibrary,
-	// TODO: ReadUsers, CreateUsers, ManageUsers
 	/// Grant access to read users.
 	///
 	/// Note that this is explicitly for querying users via user-specific endpoints.
@@ -143,6 +143,7 @@ impl ToString for UserPermission {
 	}
 }
 
+// TODO: refactor to remove panic :grimace:
 impl From<&str> for UserPermission {
 	fn from(s: &str) -> UserPermission {
 		match s {

@@ -16492,6 +16492,11 @@ react-router@6.22.3, react-router@^6.22.3:
   dependencies:
     "@remix-run/router" "1.15.3"
 
+react-scrollbar-size@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/react-scrollbar-size/-/react-scrollbar-size-5.0.0.tgz#29892779dfcb9077ce18e2483d1dba6400c58fb0"
+  integrity sha512-Ly3OuRMz4yDFViTh+ANH6TrG8EqrgjC1uxxm2a/95+2Ijy3XT+bWtzm4QmgZUcUVg+8BCKzmPMM7z39ZtucDIQ==
+
 react-shallow-renderer@^16.15.0:
   version "16.15.0"
   resolved "https://registry.yarnpkg.com/react-shallow-renderer/-/react-shallow-renderer-16.15.0.tgz#48fb2cf9b23d23cde96708fe5273a7d3446f4457"

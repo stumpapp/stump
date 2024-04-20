@@ -13,7 +13,7 @@ export default function FilterHeader({ layoutControls, orderControls, filterCont
 	const { filters, setFilter, removeFilter } = useFilterContext()
 
 	return (
-		<header className="sticky top-0 z-10 flex h-12 w-full shrink-0 justify-between gap-2 border-b border-edge bg-background px-4">
+		<header className="sticky top-[46px] z-10 flex h-12 w-full shrink-0 justify-between gap-2 border-b border-edge bg-background px-4 md:top-0">
 			<Search
 				initialValue={filters?.search as string}
 				// placeholder={searchPlaceholder}

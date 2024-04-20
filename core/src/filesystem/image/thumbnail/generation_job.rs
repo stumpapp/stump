@@ -100,9 +100,21 @@ impl JobExt for ThumbnailGenerationJob {
 	type Output = ThumbnailGenerationOutput;
 	type Task = ThumbnailGenerationTask;
 
-	// TODO: description based on params
 	fn description(&self) -> Option<String> {
-		None
+		match self.params.variant.clone() {
+			ThumbnailGenerationJobVariant::SingleLibrary(id) => Some(format!(
+				"Thumbnail generation job, SingleLibrary({}), force_regenerate: {}",
+				id, self.params.force_regenerate
+			)),
+			ThumbnailGenerationJobVariant::SingleSeries(id) => Some(format!(
+				"Thumbnail generation job, SingleSeries({}), force_regenerate: {}",
+				id, self.params.force_regenerate
+			)),
+			ThumbnailGenerationJobVariant::MediaGroup(id) => Some(format!(
+				"Thumbnail generation job, MediaGroup({:?}), force_regenerate: {}",
+				id, self.params.force_regenerate
+			)),
+		}
 	}
 
 	async fn init(

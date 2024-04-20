@@ -92,17 +92,10 @@ For convenience, there are a few preset options you may select from the dropdown
 
 > In the future, this section of the UI will change to include scheduling options for more than just scans. However, for now, it is only for scans.
 
-## Ignore Files
+## Ignoring files
 
-Stump has minimal support for a custom `.stumpignore` file, which allows you to ignore certain files and directories from being scanned. This is useful for files which are organized with your media, but you don't want to be included in the library.
-
-Some examples you can achieve with this:
-
-```bash
-# Ignore all files in the "extras" directory
-extras/
-# Ignore all files in the "extras" directory, except for "extras/include-me.cbz"
-!extras/include-me.cbz
-```
-
-Please note, that in the above example, if you exclude an entire directory and explicitly include a file in that directory, a series will still potentially be created for that directory depending on which [library pattern](/guides/libraries#library-patterns) you have configured. If it does get created, `include-me.cbz` will be the only file in the series.
+<Callout emoji="❗">
+	Stump has removed support for `.stumpignore` files in favor of a more robust configuration system.
+	The corresponding GitHub issue for tracking is
+	[#284](https://github.com/stumpapp/stump/issues/284)
+</Callout>

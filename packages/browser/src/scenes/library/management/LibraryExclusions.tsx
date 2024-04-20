@@ -69,6 +69,7 @@ export default function LibraryExclusions() {
 		return null
 	}
 
+	// TODO: disabled state if no options
 	return (
 		<div className="flex flex-col gap-4">
 			<div>

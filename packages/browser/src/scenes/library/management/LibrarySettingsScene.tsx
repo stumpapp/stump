@@ -8,6 +8,8 @@ import { CreateOrUpdateLibraryForm } from './form'
 import LibraryExclusions from './LibraryExclusions'
 import QuickActions from './QuickActions'
 
+// TODO: redesign this page, it is ugly.
+
 export default function LibrarySettingsScene() {
 	const { library } = useLibraryContext()
 	const { libraries } = useLibraries()

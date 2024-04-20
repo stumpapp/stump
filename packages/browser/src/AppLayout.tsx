@@ -125,7 +125,9 @@ export function AppLayout() {
 				{!hideAllNavigation && <MobileTopBar />}
 				{!hideTopBar && <TopBar />}
 				<div className={cx('flex h-full flex-1', { 'pb-12': preferTopBar && !hideTopBar })}>
-					{!hideSidebar && <SideBar hidden={softHideSidebar} />}
+					<Suspense fallback={null}>
+						{!hideSidebar && <SideBar hidden={softHideSidebar} />}
+					</Suspense>
 					<main className="min-h-full w-full overflow-y-auto overflow-x-hidden bg-background">
 						<div className="relative flex h-full w-full flex-col">
 							{!!storeUser.user_preferences?.show_query_indicator && <BackgroundFetchIndicator />}

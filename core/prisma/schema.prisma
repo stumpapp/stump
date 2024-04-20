@@ -683,6 +683,9 @@ model UserPreferences {
   prefer_accent_color            Boolean @default(true)
   show_thumbnails_in_headers     Boolean @default(false)
 
+  navigation_arrangement Bytes?
+  home_arrangement       Bytes?
+
   user    User?
   user_id String? @unique
 

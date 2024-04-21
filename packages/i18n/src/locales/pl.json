@@ -325,7 +325,7 @@
 					},
 					"avatarPicker": {
 						"heading": "Ustaw swój awatar",
-						"subtitle": "Stump wspiera niestandardowe awatary które można ustawić poprzez podanie odnośnika do obrazu. Wgrywanie obrazów nie jest obsługiwane w celu zmniejszenia ilości danych przechowywanych przez serwer.",
+						"subtitle": "Stump wspiera niestandardowe awatary które można ustawić poprzez podanie odnośnika do obrazu. Wgrywanie obrazów jest nieobsługiwane z racji zmniejszenia ilości danych przechowywanych na serwerze.",
 						"preview": "Podgląd pojawi się tutaj po wprowadzeniu odnośnika.",
 						"labels": {
 							"imageUrl": "Adres obrazka",
@@ -413,11 +413,11 @@
 					"description": "Komiksy, manga i inne książki obrazkowe",
 					"sections": {
 						"preloadAheadCount": {
-							"label": "Ilość do wstępnego zastosowania w przód",
+							"label": "Ilość do wstępnego załadowania w przód",
 							"description": "Ilość stron do wstępnego załadowania w przód względem aktualnej strony"
 						},
 						"preloadBehindCount": {
-							"label": "Ilość do wstępnego zastosowania do tyłu",
+							"label": "Ilość do wstępnego załadowania do tyłu",
 							"description": "Ilość stron do wstępnego załadowania do tyłu względem aktualnej strony"
 						}
 					}

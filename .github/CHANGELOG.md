@@ -1,5 +1,58 @@
 # Changelog
 
+<a name="0.0.2"></a>
+## 0.0.2 (2024-04-21)
+
+### Added
+
+- 🔊 Improve logging during config init [[f1382d4](https://github.com/stumpapp/stump/commit/f1382d4bc3d015658f2d970d69aea2cad886c1be)]
+- ✨ Arrangeable sidebar and topbar ([#308](https://github.com/stumpapp/stump/issues/308)) [[09b280f](https://github.com/stumpapp/stump/commit/09b280fefd4b9f7b3a862c2e0d6a141f3b92e6c5)]
+- ✅ Add OPDS tests to &#x60;core&#x60; ([#301](https://github.com/stumpapp/stump/issues/301)) [[f130c8b](https://github.com/stumpapp/stump/commit/f130c8beaeb03211a2daf481576ed1bdf8d06fdf)]
+- ✅ Update failing tests ([#295](https://github.com/stumpapp/stump/issues/295)) [[7b3d4d9](https://github.com/stumpapp/stump/commit/7b3d4d99fad5877f5eb1c729a56971983408ae0c)]
+- ✨ Extract age rating meta for EPUB files ([#291](https://github.com/stumpapp/stump/issues/291)) [[46e34f2](https://github.com/stumpapp/stump/commit/46e34f294255d211cbd22f53c8e29beed5c4840b)]
+- ✨ Search entire EPUB text and vertical scroll reader ([#278](https://github.com/stumpapp/stump/issues/278)) [[3108cb7](https://github.com/stumpapp/stump/commit/3108cb76d513e241f08a6881fd10645f9f8a1da9)]
+- ✨ Hide libraries from target user(s) ([#271](https://github.com/stumpapp/stump/issues/271)) [[b3f7d16](https://github.com/stumpapp/stump/commit/b3f7d16bddaa43b16cad3a303e89425067c76cc2)]
+
+### Changed
+
+- ⬇️ Downgrade &#x60;react-hook-form&#x60; to &#x60;7.47.0&#x60; ([#316](https://github.com/stumpapp/stump/issues/316)) ([#317](https://github.com/stumpapp/stump/issues/317)) [[1d1c396](https://github.com/stumpapp/stump/commit/1d1c396985800104df4029a37da6eb7a0f4d6803)]
+- 🚨 Fix clippy lints [[f82ee09](https://github.com/stumpapp/stump/commit/f82ee0991f1e816102c0f6ab38429ad214b036e8)]
+- ⬆️ Pre-0.0.2 housekeeping ([#305](https://github.com/stumpapp/stump/issues/305)) [[724f7e0](https://github.com/stumpapp/stump/commit/724f7e017ea2901829affef81c5e4164c466c8cf)]
+- 🚨 Fix React warning for invalid progress prop [[c826678](https://github.com/stumpapp/stump/commit/c8266789bd8ce747a5ff55ce2a747a0529cbd1a5)]
+- 🚸 Add prefetching to book/series grid pagination [[2f06b7c](https://github.com/stumpapp/stump/commit/2f06b7cb5a2301784e4296405b3b183682241f1f)]
+- 🎨 Isolate &#x60;i18n&#x60; to separate package  ([#272](https://github.com/stumpapp/stump/issues/272)) [[42d97c0](https://github.com/stumpapp/stump/commit/42d97c0d13bf600709efa15f2617e5703e059d6a)]
+- 💄 Redesign file explorer and isolate to shared component(s) ([#286](https://github.com/stumpapp/stump/issues/286)) [[1d30084](https://github.com/stumpapp/stump/commit/1d30084d4b6095047c4e8f0d50ad4e35dc4209d0)]
+- ♻️ Refactor image readers with more shared logic ([#285](https://github.com/stumpapp/stump/issues/285)) [[a2a49b7](https://github.com/stumpapp/stump/commit/a2a49b73cf3d381f0ad1921cece5c5a4840a8838)]
+- ♻️ Scanner and background task rewrite ([#265](https://github.com/stumpapp/stump/issues/265)) [[b589d48](https://github.com/stumpapp/stump/commit/b589d487a4b15508ecf53366473835feabb2e15b)]
+
+### Fixed
+
+- 🐛 Fix query loading navigation arrangements [[b6e312d](https://github.com/stumpapp/stump/commit/b6e312d9327fd3ba4b450ce564e029a4139764d7)]
+- 🐛 Add missed permission check for &#x60;file:download&#x60; in &#x60;get_media_file&#x60; [[1bdc664](https://github.com/stumpapp/stump/commit/1bdc6641f833420e865e9ac01680d124f9b68d4e)]
+- 🐛 Fix top-bar flex sizing for mobile&quot; [[e03442b](https://github.com/stumpapp/stump/commit/e03442bf33601d326b2b894a4e020bf653f891db)]
+- ✏️ Fix typo in README.md ([#294](https://github.com/stumpapp/stump/issues/294)) [[17d8526](https://github.com/stumpapp/stump/commit/17d8526035616c4b2258a0ed9442a3d7a5f42ce3)]
+- 🐛 Fix typos from merge [[581110a](https://github.com/stumpapp/stump/commit/581110a1594952b4b1e4998fc2e365c8f81e460f)]
+
+### Miscellaneous
+
+-  Merge pull request [#298](https://github.com/stumpapp/stump/issues/298) from stumpapp/develop [[dfb6bb8](https://github.com/stumpapp/stump/commit/dfb6bb8cb3c87ac1f1517ba2c917277dde916515)]
+- 🌐 Update translations ([#306](https://github.com/stumpapp/stump/issues/306)) [[f9d467e](https://github.com/stumpapp/stump/commit/f9d467e56aaf91bc9274ce9465b3fc5e0e4e415c)]
+-  Merge pull request [#312](https://github.com/stumpapp/stump/issues/312) from stumpapp/al/0.0.2-fixes [[4beb7b3](https://github.com/stumpapp/stump/commit/4beb7b39474b8e549c9967d35c2fbbcee8c0ffd0)]
+- 📝 Update outdated docs pages [[79592dc](https://github.com/stumpapp/stump/commit/79592dc2bf4f80c52edbfb0908c4eaa69dd45d04)]
+- 📝 Update README and CONTRIBUTING [[9c89774](https://github.com/stumpapp/stump/commit/9c89774c3f567aaed5be89a2ccee27d2dbb45c90)]
+-  0.0.2 bug hunting ([#302](https://github.com/stumpapp/stump/issues/302)) [[cc376ec](https://github.com/stumpapp/stump/commit/cc376ec679bad3a0002d813b3066ac968c1a44fc)]
+- 🌐 Update translations ([#303](https://github.com/stumpapp/stump/issues/303)) [[b286339](https://github.com/stumpapp/stump/commit/b286339db45f7f03391d0d63b00894223aba209c)]
+- 🌐 Update translations ([#293](https://github.com/stumpapp/stump/issues/293)) [[ba5aaca](https://github.com/stumpapp/stump/commit/ba5aaca82a5faf86b41d2a5cfa140b5dfd5fc159)]
+-  Merge pull request [#290](https://github.com/stumpapp/stump/issues/290) from stumpapp/experimental [[65bd3e8](https://github.com/stumpapp/stump/commit/65bd3e8cc9765e7f7d826d272e424cf74fece0be)]
+- 🍻 POC EpubJS RN reader ([#289](https://github.com/stumpapp/stump/issues/289)) [[aec4118](https://github.com/stumpapp/stump/commit/aec4118d466ff0d20967232090c49509c3da36e2)]
+- 🚧 Mobile App Foundations ([#282](https://github.com/stumpapp/stump/issues/282)) [[d61ab76](https://github.com/stumpapp/stump/commit/d61ab767bb10c4be692521b4cc73be753a5a301d)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[1a5e0d4](https://github.com/stumpapp/stump/commit/1a5e0d4af70c6ae729cf7d7ef198448ce284b993)]
+-  👷 Adjust CI workflows ([#275](https://github.com/stumpapp/stump/issues/275)) [[d8e9e4c](https://github.com/stumpapp/stump/commit/d8e9e4c7e4117c9a6dd0c94c52f66370b93a4286)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[7024792](https://github.com/stumpapp/stump/commit/7024792448a60f2cde6cceb336f74724beefc41e)]
+- 🩹 Fix dockerfile for yarn ([#267](https://github.com/stumpapp/stump/issues/267)) [[fd3396a](https://github.com/stumpapp/stump/commit/fd3396af4b2ccb857c86fede0773c068c23f009d)]
+- 🧑‍💻 Migrate to Yarn ([#266](https://github.com/stumpapp/stump/issues/266)) [[1128556](https://github.com/stumpapp/stump/commit/11285567cd7c631d3abd37824bfd3ce972508e46)]
+
+
 <a name="0.0.1"></a>
 ## 0.0.1 (2024-02-17)
 

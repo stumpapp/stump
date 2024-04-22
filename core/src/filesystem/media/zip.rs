@@ -150,10 +150,8 @@ impl FileProcessor for ZipProcessor {
 			return Err(FileError::ArchiveEmptyError);
 		}
 
-		let mut file_names = file_names_archive.file_names().collect::<Vec<_>>();
-		sort_file_names(&mut file_names);
-
 		let mut pages = 0;
+		let file_names = file_names_archive.file_names().collect::<Vec<_>>();
 		for name in file_names {
 			let mut file = archive.by_name(name)?;
 			let (content_type, _) = get_zip_entry_content_type(&mut file)?;

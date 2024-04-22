@@ -156,18 +156,18 @@ impl JobExt for AnalyzeMediaJob {
 					.find_unique(media::id::equals(id.clone()))
 					.exec()
 					.await
-					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
-
-				// Error if media item unavailable
-				if media.is_none() {
-					return Err(JobError::TaskFailed(format!(
-						"Unable to find media item with id: {}",
-						id
-					)));
-				}
+					.map_err(|e: prisma_client_rust::QueryError| {
+						JobError::TaskFailed(e.to_string())
+					})?
+					.ok_or_else(|| {
+						JobError::TaskFailed(format!(
+							"Unable to find media item with id: {}",
+							id
+						))
+					})?;
 
 				// Get page count using file processing
-				let path = media.unwrap().path;
+				let path = media.path;
 				let page_count = get_page_count(&path, &ctx.config)?;
 
 				// Update media item in database

@@ -160,17 +160,7 @@ impl FileProcessor for RarProcessor {
 		let mut valid_entries = archive
 			.into_iter()
 			.filter_map(|entry| entry.ok())
-			.filter(|entry| {
-				if entry.is_file() {
-					let filename =
-						entry.filename.as_path().to_string_lossy().to_lowercase();
-					filename.ends_with(".jpg")
-						|| filename.ends_with(".jpeg")
-						|| filename.ends_with(".png")
-				} else {
-					false
-				}
-			})
+			.filter(|entry| entry.filename.is_img())
 			.collect::<Vec<_>>();
 		valid_entries
 			.sort_by(|a, b| alphanumeric_sort::compare_path(&a.filename, &b.filename));
@@ -215,17 +205,7 @@ impl FileProcessor for RarProcessor {
 		let valid_entries = archive
 			.into_iter()
 			.filter_map(|entry| entry.ok())
-			.filter(|entry| {
-				if entry.is_file() {
-					let filename =
-						entry.filename.as_path().to_string_lossy().to_lowercase();
-					filename.ends_with(".jpg")
-						|| filename.ends_with(".jpeg")
-						|| filename.ends_with(".png")
-				} else {
-					false
-				}
-			})
+			.filter(|entry| entry.filename.is_img())
 			.collect::<Vec<_>>();
 
 		// Return the count of them
@@ -241,17 +221,7 @@ impl FileProcessor for RarProcessor {
 		let entries = archive
 			.into_iter()
 			.filter_map(|entry| entry.ok())
-			.filter(|entry| {
-				if entry.is_file() {
-					let filename =
-						entry.filename.as_path().to_string_lossy().to_lowercase();
-					filename.ends_with(".jpg")
-						|| filename.ends_with(".jpeg")
-						|| filename.ends_with(".png")
-				} else {
-					false
-				}
-			})
+			.filter(|entry| entry.filename.is_img())
 			.sorted_by(|a, b| alphanumeric_sort::compare_path(&a.filename, &b.filename))
 			.enumerate()
 			.map(|(idx, header)| (PathBuf::from(header.filename.as_os_str()), idx))

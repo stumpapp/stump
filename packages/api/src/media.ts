@@ -99,12 +99,30 @@ export function putMediaCompletion(
 }
 
 /**
- * Start the analysis of an individual media item by id.
+ * Start the analysis of a book by media id.
  *
- * @param id The id for the media item to analyze
+ * @param id The id for the book to analyze
  */
-export function startMediaAnalysis(id: string) {
+export function startMediaAnalysisForBook(id: string) {
 	API.post(`/media/${id}/analyze`)
+}
+
+/**
+ * Start the analysis of a library by library id.
+ *
+ * @param id The id for the library to analyze
+ */
+export function startMediaAnalysisForLibrary(id: string) {
+	API.post(`/libraries/${id}/analyze`)
+}
+
+/**
+ * Start the analysis of a series by series id.
+ *
+ * @param id The id for the series to analyze
+ */
+export function startMediaAnalysisForSeries(id: string) {
+	API.post(`/series/${id}/analyze`)
 }
 
 export const mediaApi = {
@@ -119,7 +137,9 @@ export const mediaApi = {
 	getRecentlyAddedMedia,
 	patchMediaThumbnail,
 	putMediaCompletion,
-	startMediaAnalysis,
+	startMediaAnalysisForBook,
+	startMediaAnalysisForLibrary,
+	startMediaAnalysisForSeries,
 	updateMediaProgress,
 	uploadMediaThumbnail,
 }
@@ -136,7 +156,9 @@ export const mediaQueryKeys: Record<keyof typeof mediaApi, string> = {
 	getRecentlyAddedMedia: 'media.getRecentlyAdded',
 	patchMediaThumbnail: 'media.patchThumbnail',
 	putMediaCompletion: 'media.putCompletion',
-	startMediaAnalysis: 'media.startAnalysis',
+	startMediaAnalysisForBook: 'media.startAnalysisForBook',
+	startMediaAnalysisForLibrary: 'media.startAnalysisForLibrary',
+	startMediaAnalysisForSeries: 'media.startAnalysisForSeries',
 	updateMediaProgress: 'media.updateProgress',
 	uploadMediaThumbnail: 'media.uploadThumbnail',
 }

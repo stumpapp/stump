@@ -56,7 +56,7 @@ export default function BookManagementScene() {
 
 	function handleAnalyze() {
 		if (id != undefined) {
-			mediaApi.startMediaAnalysis(id)
+			mediaApi.startMediaAnalysisForBook(id)
 		}
 
 		// TODO Remove testing visualizations

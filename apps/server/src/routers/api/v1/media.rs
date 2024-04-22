@@ -39,6 +39,7 @@ use stump_core::{
 	},
 };
 use tower_sessions::Session;
+use tracing::error;
 use utoipa::ToSchema;
 
 use crate::{
@@ -1218,38 +1219,6 @@ pub struct MediaAnalysisStarted {
 }
 
 #[utoipa::path(
-	post,
-	path = "/api/v1/media/:id/analyze",
-	tag = "media",
-	params(
-		("id" = String, Path, description = "The ID of the media to analyze")
-	),
-	responses(
-		(status = 200, description = "Successfully started media analysis"),
-		(status = 401, description = "Unauthorized"),
-		(status = 403, description = "Forbidden"),
-		(status = 404, description = "Media not found"),
-		(status = 500, description = "Internal server error"),
-	)
-)]
-async fn start_media_analysis(
-	Path(id): Path<String>,
-	State(ctx): State<AppState>,
-	session: Session,
-) -> APIResult<()> {
-	tracing::warn!("Recieved start_media_analysis request for id: {}", id);
-	// TODO enforce permissions
-
-	// Start analysis job
-	ctx.enqueue_job(AnalyzeMediaJob::new(
-		AnalyzeMediaJobVariant::AnalyzeSingleItem(id),
-	))
-	.unwrap();
-
-	APIResult::Ok(())
-}
-
-#[utoipa::path(
 	put,
 	path = "/api/v1/media/:id/progress/:page",
 	tag = "media",
@@ -1588,4 +1557,39 @@ async fn put_media_complete_status(
 		is_completed: updated_or_created_rp.is_completed,
 		completed_at: updated_or_created_rp.completed_at.map(|ca| ca.to_rfc3339()),
 	}))
+}
+
+#[utoipa::path(
+	post,
+	path = "/api/v1/media/:id/analyze",
+	tag = "media",
+	params(
+		("id" = String, Path, description = "The ID of the media to analyze")
+	),
+	responses(
+		(status = 200, description = "Successfully started media analysis"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Media not found"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn start_media_analysis(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> APIResult<()> {
+	// TODO enforce permissions
+
+	// Start analysis job
+	ctx.enqueue_job(AnalyzeMediaJob::new(
+		AnalyzeMediaJobVariant::AnalyzeSingleItem(id),
+	))
+	.map_err(|e| {
+		let err = "Failed to enqueue analyze media job";
+		error!(?e, err);
+		APIError::InternalServerError(err.to_string())
+	})?;
+
+	APIResult::Ok(())
 }

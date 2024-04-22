@@ -19,6 +19,7 @@ use stump_core::{
 		PrismaCountTrait, SeriesDAO, DAO,
 	},
 	filesystem::{
+		analyze_media_job::{AnalyzeMediaJob, AnalyzeMediaJobVariant},
 		get_unknown_thumnail,
 		image::{
 			generate_thumbnail, place_thumbnail, remove_thumbnails, ImageFormat,
@@ -74,6 +75,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/", get(get_series_by_id))
 				.route("/scan", post(scan_series))
 				.route("/media", get(get_series_media))
+				.route("/analyze", post(start_media_analysis))
 				.route("/media/next", get(get_next_in_series))
 				.route(
 					"/thumbnail",
@@ -1058,4 +1060,39 @@ async fn get_series_is_complete(
 // TODO: implement
 async fn put_series_is_complete() -> APIResult<Json<SeriesIsComplete>> {
 	Err(APIError::NotImplemented)
+}
+
+#[utoipa::path(
+	post,
+	path = "/api/v1/series/:id/analyze",
+	tag = "series",
+	params(
+		("id" = String, Path, description = "The ID of the series to analyze")
+	),
+	responses(
+		(status = 200, description = "Successfully started series media analysis"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Media not found"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn start_media_analysis(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> APIResult<()> {
+	// TODO enforce permissions
+
+	// Start analysis job
+	ctx.enqueue_job(AnalyzeMediaJob::new(AnalyzeMediaJobVariant::AnalyzeSeries(
+		id,
+	)))
+	.map_err(|e| {
+		let err = "Failed to enqueue analyze series media job";
+		error!(?e, err);
+		APIError::InternalServerError(err.to_string())
+	})?;
+
+	APIResult::Ok(())
 }

@@ -84,7 +84,6 @@ impl JobExt for AnalyzeMediaJob {
 		&mut self,
 		ctx: &WorkerCtx,
 	) -> Result<WorkingState<Self::Output, Self::Task>, JobError> {
-		tracing::warn!("In AnalyzeMediaJob init()");
 		let output = Self::Output::default();
 
 		// We match over the job variant to build a list of tasks to process

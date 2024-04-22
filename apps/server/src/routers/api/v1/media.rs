@@ -9,7 +9,7 @@ use axum::{
 use axum_extra::extract::Query;
 use prisma_client_rust::{
 	and,
-	chrono::{DateTime, Duration, Utc},
+	chrono::{Duration, Utc},
 	operator::{self, or},
 	or, raw, Direction, PrismaValue,
 };
@@ -1236,7 +1236,7 @@ async fn start_media_analysis(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> APIResult<Json<MediaAnalysisStarted>> {
+) -> APIResult<()> {
 	tracing::warn!("Recieved start_media_analysis request for id: {}", id);
 	// TODO enforce permissions
 
@@ -1246,10 +1246,7 @@ async fn start_media_analysis(
 	))
 	.unwrap();
 
-	APIResult::Ok(Json(MediaAnalysisStarted {
-		// TODO fix this
-		started_at: Some("Now".to_string()),
-	}))
+	APIResult::Ok(())
 }
 
 #[utoipa::path(

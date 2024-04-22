@@ -1,5 +1,3 @@
-use std::collections::VecDeque;
-
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
@@ -12,17 +10,24 @@ use crate::{
 	prisma::{media, series},
 };
 
+type MediaID = String;
+
 #[derive(Clone)]
 pub enum AnalyzeMediaJobVariant {
-	AnalyzeSingleItem(String),
-	AnalyzeLibrary(String),
-	AnalyzeSeries(String),
-	AnalyzeMediaGroup(Vec<String>),
+	/// Analyze an individual media item, specified by ID.
+	AnalyzeSingleItem(MediaID),
+	/// Analyze all media in a library, specified by library ID.
+	AnalyzeLibrary(MediaID),
+	/// Analyze all media in a series, specified by series ID.
+	AnalyzeSeries(MediaID),
+	/// Analyze all media in a media group, specified with a list of media IDs.
+	AnalyzeMediaGroup(Vec<MediaID>),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum AnalyzeMediaTask {
-	AnalyzeImage(String),
+	/// Analyze the image for an individual media item, specified by ID.
+	AnalyzeImage(MediaID),
 }
 
 #[derive(Clone, Serialize, Deserialize, Default, Debug, Type)]
@@ -83,11 +88,10 @@ impl JobExt for AnalyzeMediaJob {
 		let output = Self::Output::default();
 
 		// We match over the job variant to build a list of tasks to process
-		let mut tasks = VecDeque::new();
-		match &self.variant {
+		let tasks = match &self.variant {
 			// Single item is easy
 			AnalyzeMediaJobVariant::AnalyzeSingleItem(id) => {
-				tasks.push_front(AnalyzeMediaTask::AnalyzeImage(id.clone()))
+				vec![AnalyzeMediaTask::AnalyzeImage(id.clone())]
 			},
 			// For libraries we need a list of ids
 			AnalyzeMediaJobVariant::AnalyzeLibrary(id) => {
@@ -101,9 +105,10 @@ impl JobExt for AnalyzeMediaJob {
 					.await
 					.map_err(|e| JobError::InitFailed(e.to_string()))?;
 
-				for media in library_media {
-					tasks.push_front(AnalyzeMediaTask::AnalyzeImage(media.id))
-				}
+				library_media
+					.into_iter()
+					.map(|media| AnalyzeMediaTask::AnalyzeImage(media.id))
+					.collect()
 			},
 			// We also need a list for series
 			AnalyzeMediaJobVariant::AnalyzeSeries(id) => {
@@ -115,21 +120,21 @@ impl JobExt for AnalyzeMediaJob {
 					.await
 					.map_err(|e| JobError::InitFailed(e.to_string()))?;
 
-				for media in series_media {
-					tasks.push_front(AnalyzeMediaTask::AnalyzeImage(media.id))
-				}
+				series_media
+					.into_iter()
+					.map(|media| AnalyzeMediaTask::AnalyzeImage(media.id))
+					.collect()
 			},
 			// Media groups already include a vector of ids
-			AnalyzeMediaJobVariant::AnalyzeMediaGroup(ids) => {
-				for id in ids {
-					tasks.push_front(AnalyzeMediaTask::AnalyzeImage(id.clone()))
-				}
-			},
+			AnalyzeMediaJobVariant::AnalyzeMediaGroup(ids) => ids
+				.iter()
+				.map(|id| AnalyzeMediaTask::AnalyzeImage(id.clone()))
+				.collect(),
 		};
 
 		Ok(WorkingState {
 			output: Some(output),
-			tasks,
+			tasks: tasks.into(),
 			completed_tasks: 0,
 			logs: vec![],
 		})

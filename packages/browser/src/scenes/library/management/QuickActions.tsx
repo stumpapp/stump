@@ -1,6 +1,6 @@
 import { libraryApi, libraryQueryKeys } from '@stump/api'
 import { useMutation } from '@stump/client'
-import { Heading, Text } from '@stump/components'
+import { Button, Heading, Text } from '@stump/components'
 import React from 'react'
 
 import { useLibraryContext } from '../context'
@@ -16,6 +16,10 @@ export default function QuickActions() {
 	)
 
 	const hasThumbnailConfig = !!library.library_options.thumbnail_config
+
+	function handleAnalyze() {
+		libraryApi.startMediaAnalysis(library.id)
+	}
 
 	const handleRegenerateThumbnails = (force: boolean) => {
 		if (!hasThumbnailConfig) {
@@ -35,6 +39,9 @@ export default function QuickActions() {
 
 			<LibraryThumbnailSelector />
 			<RegenerateThumbnails onRegenerate={handleRegenerateThumbnails} />
+			<Button size="md" variant="primary" onClick={handleAnalyze}>
+				Analyze Media
+			</Button>
 		</div>
 	)
 }

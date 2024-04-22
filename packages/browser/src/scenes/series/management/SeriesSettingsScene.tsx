@@ -1,7 +1,6 @@
-import { mediaApi } from '@stump/api'
+import { seriesApi } from '@stump/api'
 import { Alert, Button } from '@stump/components'
 import { Construction } from 'lucide-react'
-import { toast } from 'react-hot-toast'
 
 import { SceneContainer } from '@/components/container'
 
@@ -12,10 +11,7 @@ export default function SeriesSettingsScene() {
 	const { series } = useSeriesContext()
 
 	function handleAnalyze() {
-		mediaApi.startMediaAnalysisForSeries(series.id)
-
-		// TODO Remove testing visualizations
-		toast.success('Starting analysis')
+		seriesApi.startMediaAnalysis(series.id)
 	}
 
 	return (

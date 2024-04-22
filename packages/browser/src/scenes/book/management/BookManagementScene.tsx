@@ -3,7 +3,6 @@ import { useMediaByIdQuery } from '@stump/client'
 import { Alert, Breadcrumbs, Button, Heading, Text } from '@stump/components'
 import { Construction } from 'lucide-react'
 import React, { useMemo } from 'react'
-import { toast } from 'react-hot-toast'
 import { Navigate, useParams } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
@@ -56,11 +55,8 @@ export default function BookManagementScene() {
 
 	function handleAnalyze() {
 		if (id != undefined) {
-			mediaApi.startMediaAnalysisForBook(id)
+			mediaApi.startMediaAnalysis(id)
 		}
-
-		// TODO Remove testing visualizations
-		toast.success('Starting analysis')
 	}
 
 	return (

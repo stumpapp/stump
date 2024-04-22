@@ -144,7 +144,7 @@ impl JobExt for AnalyzeMediaJob {
 		ctx: &WorkerCtx,
 		task: Self::Task,
 	) -> Result<JobTaskOutput<Self>, JobError> {
-		let output = Self::Output::default();
+		let mut output = Self::Output::default();
 
 		match task {
 			AnalyzeMediaTask::AnalyzeImage(id) => {
@@ -168,6 +168,7 @@ impl JobExt for AnalyzeMediaJob {
 				// Get page count using file processing
 				let path = media.path;
 				let page_count = get_page_count(&path, &ctx.config)?;
+				output.images_analyzed += 1;
 
 				// Update media item in database
 				let _ = ctx

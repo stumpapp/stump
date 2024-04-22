@@ -1,5 +1,5 @@
 import { prefetchPagedMedia, usePagedMediaQuery } from '@stump/client'
-import { cn } from '@stump/components'
+import { usePrevious } from '@stump/components'
 import { useCallback, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 import { useMediaMatch } from 'rooks'
@@ -11,16 +11,13 @@ import {
 	BookURLFilterDrawer,
 	BookURLOrdering,
 } from '@/components/book'
-import { SceneContainer } from '@/components/container'
-import { FilterHeader, FilterProvider, FilterToolBar, useFilterContext } from '@/components/filters'
-import MediaList from '@/components/media/MediaList'
-import Pagination from '@/components/Pagination'
-import { useLayoutMode, usePageParam } from '@/hooks'
+import { FilterHeader, FilterProvider, useFilterContext } from '@/components/filters'
+import { usePageParam } from '@/hooks'
 import useIsInView from '@/hooks/useIsInView'
 import { useBooksLayout } from '@/stores/layout'
 
-import { useSeriesContext } from './context'
-import MediaGrid from './MediaGrid'
+import { useSeriesContext } from '../../context'
+import MediaGrid from '../../MediaGrid'
 
 function SeriesOverviewScene() {
 	const is3XLScreenOrBigger = useMediaMatch('(min-width: 1600px)')
@@ -48,15 +45,14 @@ function SeriesOverviewScene() {
 	)
 	const {
 		isLoading: isLoadingMedia,
-		isRefetching: isRefetchingMedia,
+		// isRefetching: isRefetchingMedia,
 		media,
 		pageData,
 	} = usePagedMediaQuery(params)
 
 	const { current_page, total_pages } = pageData || {}
 
-	const isOnFirstPage = current_page === 1
-	const hasStuff = total_pages !== undefined && current_page !== undefined
+	const previousPage = usePrevious(current_page)
 
 	const handlePrefetchPage = useCallback(
 		(page: number) => {
@@ -68,18 +64,19 @@ function SeriesOverviewScene() {
 		[params],
 	)
 
-	// TODO: detect if going from page > 1 to page = 1 and scroll to top
+	const shouldScroll = !!previousPage && previousPage !== current_page
 	useEffect(
 		() => {
-			if (!isInView && !isOnFirstPage) {
+			if (!isInView && shouldScroll) {
 				containerRef.current?.scrollIntoView({
+					behavior: 'smooth',
 					block: 'nearest',
 					inline: 'start',
 				})
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[current_page, isOnFirstPage],
+		[shouldScroll],
 	)
 
 	const renderContent = () => {
@@ -119,12 +116,12 @@ function SeriesOverviewScene() {
 	}
 
 	return (
-		<>
+		<div>
 			<Helmet>
 				<title>Stump | {series.name || ''}</title>
 			</Helmet>
 
-			<section ref={containerRef} id="grid-top-indicator" className="hidden h-1" />
+			<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 
 			<FilterHeader
 				layoutControls={<BookExplorationLayout />}
@@ -160,7 +157,7 @@ function SeriesOverviewScene() {
 					/>
 				)}
 			</div> */}
-		</>
+		</div>
 	)
 }
 

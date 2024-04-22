@@ -6,9 +6,9 @@ import { useAppContext } from '@/context'
 
 import SeriesLayout from './SeriesLayout.tsx'
 
-const SeriesBooksScene = lazy(() => import('./SeriesBooksScene.tsx'))
-const SeriesSettingsScene = lazy(() => import('./management/SeriesSettingsScene.tsx'))
-const SeriesExplorerScene = lazy(() => import('./SeriesExplorerScene.tsx'))
+const SeriesBooksScene = lazy(() => import('./tabs/books/SeriesBooksScene.tsx'))
+const SeriesSettingsScene = lazy(() => import('./tabs/settings/SeriesSettingsScene.tsx'))
+const SeriesExplorerScene = lazy(() => import('./tabs/files/SeriesExplorerScene.tsx'))
 
 export default function SeriesRouter() {
 	const { checkPermission } = useAppContext()

@@ -1,5 +1,5 @@
 import { cn } from '@stump/components'
-import React, { PropsWithChildren } from 'react'
+import React, { forwardRef, PropsWithChildren } from 'react'
 import useScrollbarSize from 'react-scrollbar-size'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { useMediaMatch } from 'rooks'
@@ -13,60 +13,65 @@ import BookTablePagination from './BookTablePagination'
 
 type Props = PropsWithChildren<TablePaginationProps>
 
-export default function BookTableURLFilterContainer({ children, ...paginationProps }: Props) {
-	const {
-		preferences: { enable_hide_scrollbar, primary_navigation_mode },
-	} = usePreferences()
-	const { width } = useScrollbarSize()
+const BookTableURLFilterContainer = forwardRef<HTMLDivElement, Props>(
+	({ children, ...paginationProps }, ref) => {
+		const {
+			preferences: { enable_hide_scrollbar, primary_navigation_mode },
+		} = usePreferences()
+		const { width } = useScrollbarSize()
 
-	const isMobile = useMediaMatch('(max-width: 768px)')
-	const scrollbarWidth = enable_hide_scrollbar ? 0 : width
+		const isMobile = useMediaMatch('(max-width: 768px)')
+		const scrollbarWidth = enable_hide_scrollbar ? 0 : width
 
-	// FIXME: stutter when changing layout, useScrollbarSize returns 0 as a blip
-	return (
-		<div className="flex h-full w-full flex-col pb-24 md:pb-10">
-			{children}
+		// FIXME: stutter when changing layout, useScrollbarSize returns 0 as a blip
+		return (
+			<div ref={ref} className="flex h-full w-full flex-col pb-24 md:pb-10" id="urlFilterContainer">
+				{children}
 
-			<div
-				// className="sticky bottom-0 flex h-12 items-center justify-between border-t border-edge bg-background px-4 md:h-10"
-				className="fixed bottom-0 flex h-12 items-center justify-between border-t border-edge bg-background px-4 md:h-10"
-				style={{
-					right: scrollbarWidth,
-					width:
-						isMobile || primary_navigation_mode === 'TOPBAR'
-							? '100%'
-							: `calc(100% - ${SIDEBAR_WIDTH}px - ${scrollbarWidth}px)`,
-				}}
-			>
-				<BookTableColumnConfiguration />
-				<BookTablePagination {...paginationProps} />
+				<div
+					// className="sticky bottom-0 flex h-12 items-center justify-between border-t border-edge bg-background px-4 md:h-10"
+					className="fixed bottom-0 flex h-12 items-center justify-between border-t border-edge bg-background px-4 md:h-10"
+					style={{
+						right: scrollbarWidth,
+						width:
+							isMobile || primary_navigation_mode === 'TOPBAR'
+								? '100%'
+								: `calc(100% - ${SIDEBAR_WIDTH}px - ${scrollbarWidth}px)`,
+					}}
+				>
+					<BookTableColumnConfiguration />
+					<BookTablePagination {...paginationProps} />
+				</div>
 			</div>
-		</div>
-	)
+		)
 
-	return (
-		<div className="flex h-full w-full flex-col">
-			<div className="flex-1 overflow-hidden">
-				<AutoSizer>
-					{({ height, width }) => (
-						<div
-							className={cn('h-full w-full overflow-auto', {
-								'scrollbar-hide': enable_hide_scrollbar,
-							})}
-							style={{
-								height,
-								width,
-							}}
-						>
-							{children}
-						</div>
-					)}
-				</AutoSizer>
+		return (
+			<div className="flex h-full w-full flex-col">
+				<div className="flex-1 overflow-hidden">
+					<AutoSizer>
+						{({ height, width }) => (
+							<div
+								className={cn('h-full w-full overflow-auto', {
+									'scrollbar-hide': enable_hide_scrollbar,
+								})}
+								style={{
+									height,
+									width,
+								}}
+							>
+								{children}
+							</div>
+						)}
+					</AutoSizer>
+				</div>
+				<div className="fixed bottom-0 flex h-10 w-full items-center justify-between border-t border-edge px-4">
+					<BookTableColumnConfiguration />
+					<BookTablePagination {...paginationProps} />
+				</div>
 			</div>
-			<div className="fixed bottom-0 flex h-10 w-full items-center justify-between border-t border-edge px-4">
-				<BookTableColumnConfiguration />
-				<BookTablePagination {...paginationProps} />
-			</div>
-		</div>
-	)
-}
+		)
+	},
+)
+BookTableURLFilterContainer.displayName = 'BookTableURLFilterContainer'
+
+export default BookTableURLFilterContainer

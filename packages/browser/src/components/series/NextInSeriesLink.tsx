@@ -9,7 +9,7 @@ type Props = {
 	title?: string
 }
 
-export default function UpNextInSeriesButton({ seriesId, title, ...props }: Props) {
+export default function NextInSeriesLink({ seriesId, title, ...props }: Props) {
 	const { media, isLoading } = useUpNextInSeries(seriesId)
 
 	if (!media) {

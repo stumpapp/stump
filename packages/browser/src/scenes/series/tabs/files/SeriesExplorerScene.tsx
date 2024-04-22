@@ -2,7 +2,7 @@ import React from 'react'
 
 import { FileExplorer } from '@/components/explorer'
 
-import { useSeriesContext } from './context'
+import { useSeriesContext } from '../../context'
 
 export default function SeriesExplorerScene() {
 	const {

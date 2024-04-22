@@ -3,7 +3,7 @@ import { Construction } from 'lucide-react'
 
 import { SceneContainer } from '@/components/container'
 
-import { useSeriesContext } from '../context'
+import { useSeriesContext } from '../../context'
 import SeriesThumbnailSelector from './SeriesThumbnailSelector'
 
 export default function SeriesSettingsScene() {

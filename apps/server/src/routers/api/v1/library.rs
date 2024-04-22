@@ -945,7 +945,13 @@ async fn generate_library_thumbnails(
 	let options = input.image_options.or(existing_options).unwrap_or_default();
 	let config =
 		ThumbnailGenerationJobParams::single_library(library.id, input.force_regenerate);
-	ctx.enqueue_job(ThumbnailGenerationJob::new(options, config));
+	ctx.enqueue_job(ThumbnailGenerationJob::new(options, config))
+		.map_err(|e| {
+			error!(?e, "Failed to enqueue thumbnail generation job");
+			APIError::InternalServerError(
+				"Failed to enqueue thumbnail generation job".to_string(),
+			)
+		})?;
 
 	Ok(Json(()))
 }

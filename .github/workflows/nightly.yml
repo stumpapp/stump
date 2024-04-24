@@ -46,5 +46,6 @@ jobs:
           tags: 'nightly'
           load: ${{ env.LOAD }}
           push: ${{ env.PUSH }}
-          platforms: ${{ env.PLATFORMS }}
+          # platforms: ${{ env.PLATFORMS }}
+          platforms: 'linux/amd64,linux/arm64/v8' # TODO: AARON REMOVE THIS
           discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}

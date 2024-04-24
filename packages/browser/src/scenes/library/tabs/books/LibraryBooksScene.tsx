@@ -1,5 +1,5 @@
 import { prefetchPagedMedia, usePagedMediaQuery } from '@stump/client'
-import { usePrevious, usePreviousIsDifferent } from '@stump/components'
+import { usePreviousIsDifferent } from '@stump/components'
 import { useCallback, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 
@@ -20,12 +20,12 @@ import {
 import useIsInView from '@/hooks/useIsInView'
 import { useBooksLayout } from '@/stores/layout'
 
-import { useSeriesContext } from '../../context'
+import { useLibraryContext } from '../../context'
 
-export default function SeriesOverviewScene() {
+export default function LibraryBooksScene() {
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
 
-	const { series } = useSeriesContext()
+	const { library } = useLibraryContext()
 	const { layoutMode } = useBooksLayout((state) => ({ layoutMode: state.layout }))
 	const {
 		filters,
@@ -34,7 +34,6 @@ export default function SeriesOverviewScene() {
 		setPage,
 		...rest
 	} = useFilterScene()
-
 	const params = useMemo(
 		() => ({
 			page,
@@ -43,11 +42,13 @@ export default function SeriesOverviewScene() {
 				...filters,
 				...ordering,
 				series: {
-					id: series.id,
+					library: {
+						id: library.id,
+					},
 				},
 			},
 		}),
-		[page, page_size, ordering, filters, series.id],
+		[page, page_size, ordering, filters, library.id],
 	)
 	const {
 		isLoading: isLoadingMedia,
@@ -74,8 +75,7 @@ export default function SeriesOverviewScene() {
 		[params],
 	)
 
-	const previousPage = usePrevious(current_page)
-	const shouldScroll = !!previousPage && previousPage !== current_page
+	const shouldScroll = usePreviousIsDifferent(current_page)
 	useEffect(
 		() => {
 			if (!isInView && shouldScroll) {
@@ -139,10 +139,10 @@ export default function SeriesOverviewScene() {
 		>
 			<div className="flex flex-1 flex-col pb-4 md:pb-0">
 				<Helmet>
-					<title>Stump | {series.name || ''}</title>
+					<title>Stump | {library.name || ''}</title>
 				</Helmet>
 
-				<section ref={containerRef} id="grid-top-indicator" className="h-0" />
+				<section ref={containerRef} id="grid-top-indicator" className="h-1" />
 
 				<FilterHeader
 					layoutControls={<BookExplorationLayout />}

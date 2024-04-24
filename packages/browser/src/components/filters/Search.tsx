@@ -67,17 +67,17 @@ export default function Search({
 			onFocus={() => setIsFocused(true)}
 			onBlur={() => setIsFocused(false)}
 			onChange={(e) => setValue(e.target.value)}
-			placeholder="Search"
+			placeholder={placeholder || 'Search'}
 			value={value}
-			fullWidth={isFocused}
+			fullWidth
 			size="sm"
 			variant="activeGhost"
 			leftDecoration={<SearchIcon className="h-4 w-4 text-muted" />}
 			rightDecoration={showLoader ? <ProgressSpinner size="sm" /> : null}
 			className={cn(
 				'flex-grow transition-[width] duration-200 ease-in-out',
-				{ 'w-full flex-grow': isFocused },
-				{ 'w-3/5 cursor-pointer pr-0': !isFocused },
+				{ 'w-full flex-grow sm:w-2/5': isFocused },
+				{ 'w-2/3 cursor-pointer pr-0 sm:w-3/5  md:w-1/5': !isFocused },
 			)}
 			disabled={isDisabled}
 		/>

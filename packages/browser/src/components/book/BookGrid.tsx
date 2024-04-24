@@ -1,22 +1,23 @@
-import { Card, CardGrid } from '@stump/components'
+import { CardGrid } from '@stump/components'
 import type { Media } from '@stump/types'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
-import MediaCard from '@/components/media/MediaCard'
+
+import BookCard from './BookCard'
 
 type Props = {
 	isLoading: boolean
-	media?: Media[]
+	books?: Media[]
 	hasFilters?: boolean
 	onSelect?: (media: Media) => void
 }
-
-export default function MediaGrid({ media, isLoading, hasFilters, onSelect }: Props) {
+// TODO: translate
+export default function BookGrid({ books, isLoading, hasFilters, onSelect }: Props) {
 	if (isLoading) {
 		return null
-	} else if (!media || !media.length) {
+	} else if (!books || !books.length) {
 		return (
-			<Card className="bg-background-200">
+			<div className="grid flex-1 place-self-center">
 				<GenericEmptyState
 					title={
 						hasFilters
@@ -29,14 +30,14 @@ export default function MediaGrid({ media, isLoading, hasFilters, onSelect }: Pr
 							: 'Do you have any books in your library?'
 					}
 				/>
-			</Card>
+			</div>
 		)
 	}
 
 	return (
 		<CardGrid>
-			{media.map((m) => (
-				<MediaCard key={m.id} media={m} onSelect={onSelect} />
+			{books.map((m) => (
+				<BookCard key={m.id} media={m} onSelect={onSelect} />
 			))}
 		</CardGrid>
 	)

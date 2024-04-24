@@ -5,11 +5,11 @@ import { FileStatus, Media } from '@stump/types'
 import pluralize from 'pluralize'
 import { useMemo } from 'react'
 
-import paths from '../../paths'
-import { formatBytes } from '../../utils/format'
-import { prefetchMediaPage } from '../../utils/prefetch'
+import paths from '@/paths'
+import { formatBytes } from '@/utils/format'
+import { prefetchMediaPage } from '@/utils/prefetch'
 
-export type MediaCardProps = {
+export type BookCardProps = {
 	media: Media
 	readingLink?: boolean
 	fullWidth?: boolean
@@ -19,13 +19,13 @@ export type MediaCardProps = {
 
 type EntityCardProps = React.ComponentPropsWithoutRef<typeof EntityCard>
 
-export default function MediaCard({
+export default function BookCard({
 	media,
 	readingLink,
 	fullWidth,
 	variant = 'default',
 	onSelect,
-}: MediaCardProps) {
+}: BookCardProps) {
 	const isCoverOnly = variant === 'cover'
 
 	const handleHover = () => {

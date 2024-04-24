@@ -4,7 +4,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { CircleSlash2 } from 'lucide-react'
 
 import HorizontalCardList from '@/components/HorizontalCardList'
-import MediaCard from '@/components/media/MediaCard'
+import MediaCard from '@/components/book/BookCard'
 
 export default function ContinueReadingMedia() {
 	const { t } = useLocaleContext()

@@ -40,12 +40,12 @@ export default function SeriesLayout() {
 
 	return (
 		<SeriesContext.Provider value={{ series }}>
-			<div className="relative w-full flex-1">
+			<div className="relative flex flex-1 flex-col">
 				<SeriesHeader />
 				<SeriesNavigation />
 
 				<SceneContainer
-					className={cn('relative flex flex-col gap-4 p-0 md:pb-0', {
+					className={cn('relative flex flex-1 flex-col gap-4 p-0 md:pb-0', {
 						'md:hide-scrollbar': !!enable_hide_scrollbar,
 					})}
 				>

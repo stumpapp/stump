@@ -8,7 +8,7 @@ import { useMediaMatch } from 'rooks'
 
 import { SceneContainer } from '@/components/container'
 import LinkBadge from '@/components/LinkBadge'
-import MediaCard from '@/components/media/MediaCard'
+import MediaCard from '@/components/book/BookCard'
 import ReadMore from '@/components/ReadMore'
 import TagList from '@/components/tags/TagList'
 

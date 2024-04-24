@@ -15,18 +15,20 @@ export default function SeriesGrid({ series, isLoading, hasFilters }: Props) {
 		return null
 	} else if (!series || !series.length) {
 		return (
-			<GenericEmptyState
-				title={
-					hasFilters
-						? 'No series match your search'
-						: "It doesn't look like there are any series here"
-				}
-				subtitle={
-					hasFilters
-						? 'Try removing some filters to see more series'
-						: 'Try adding some series to your library'
-				}
-			/>
+			<div className="grid flex-1 place-self-center">
+				<GenericEmptyState
+					title={
+						hasFilters
+							? 'No series match your search'
+							: "It doesn't look like there are any series here"
+					}
+					subtitle={
+						hasFilters
+							? 'Try removing some filters to see more series'
+							: 'Try adding some series to your library'
+					}
+				/>
+			</div>
 		)
 	}
 

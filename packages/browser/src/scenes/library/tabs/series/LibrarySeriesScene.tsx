@@ -1,32 +1,53 @@
-import { prefetchPagedMedia, usePagedMediaQuery } from '@stump/client'
-import { usePrevious, usePreviousIsDifferent } from '@stump/components'
-import { useCallback, useEffect, useMemo } from 'react'
-import { Helmet } from 'react-helmet'
-
 import {
-	BookExplorationLayout,
-	BookTable,
-	BookTableColumnConfiguration,
-	BookURLFilterDrawer,
-	BookURLOrdering,
-} from '@/components/book'
-import BookGrid from '@/components/book/BookGrid'
+	prefetchPagedSeries,
+	useLibraryByIdQuery,
+	usePagedSeriesQuery,
+	useVisitLibrary,
+} from '@stump/client'
+import { usePrevious, usePreviousIsDifferent } from '@stump/components'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { Helmet } from 'react-helmet'
+import { useParams } from 'react-router'
+
 import {
 	FilterContext,
 	FilterHeader,
+	FilterProvider,
 	URLFilterContainer,
 	useFilterScene,
 } from '@/components/filters'
+import { SeriesTable } from '@/components/series'
+import SeriesGrid from '@/components/series/SeriesGrid'
+import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
-import { useBooksLayout } from '@/stores/layout'
+import { useSeriesLayout } from '@/stores/layout'
 
-import { useSeriesContext } from '../../context'
+export default function LibrarySeriesSceneWrapper() {
+	return (
+		<FilterProvider>
+			<LibrarySeriesScene />
+		</FilterProvider>
+	)
+}
 
-export default function SeriesOverviewScene() {
+function LibrarySeriesScene() {
+	const alreadyVisited = useRef(false)
+
+	const { id } = useParams()
+
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
 
-	const { series } = useSeriesContext()
-	const { layoutMode } = useBooksLayout((state) => ({ layoutMode: state.layout }))
+	if (!id) {
+		throw new Error('Library id is required')
+	}
+
+	const { visitLibrary } = useVisitLibrary()
+
+	const { layoutMode, setLayout } = useSeriesLayout((state) => ({
+		layoutMode: state.layout,
+		setLayout: state.setLayout,
+	}))
+	const { isLoading, library } = useLibraryByIdQuery(id)
 	const {
 		filters,
 		ordering,
@@ -42,19 +63,20 @@ export default function SeriesOverviewScene() {
 			params: {
 				...filters,
 				...ordering,
-				series: {
-					id: series.id,
+				count_media: true,
+				library: {
+					id,
 				},
 			},
 		}),
-		[page, page_size, ordering, filters, series.id],
+		[page, page_size, filters, ordering, id],
 	)
 	const {
-		isLoading: isLoadingMedia,
-		// isRefetching: isRefetchingMedia,
-		media,
+		isLoading: isLoadingSeries,
+		// isRefetching: isRefetchingSeries,
+		series,
 		pageData,
-	} = usePagedMediaQuery(params)
+	} = usePagedSeriesQuery(params)
 	const { current_page, total_pages } = pageData || {}
 
 	const differentSearch = usePreviousIsDifferent(filters?.search as string)
@@ -66,7 +88,7 @@ export default function SeriesOverviewScene() {
 
 	const handlePrefetchPage = useCallback(
 		(page: number) => {
-			prefetchPagedMedia({
+			prefetchPagedSeries({
 				...params,
 				page,
 			})
@@ -90,6 +112,23 @@ export default function SeriesOverviewScene() {
 		[shouldScroll],
 	)
 
+	useEffect(
+		() => {
+			if (library?.id && !alreadyVisited.current) {
+				alreadyVisited.current = true
+				visitLibrary(library.id)
+			}
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[library?.id],
+	)
+
+	if (isLoading) {
+		return null
+	} else if (!library) {
+		throw new Error('Library not found')
+	}
+
 	const renderContent = () => {
 		if (layoutMode === 'GRID') {
 			return (
@@ -100,9 +139,9 @@ export default function SeriesOverviewScene() {
 					onPrefetchPage={handlePrefetchPage}
 				>
 					<div className="flex flex-1 px-4 pb-2 pt-4 md:pb-4">
-						<BookGrid
-							isLoading={isLoadingMedia}
-							books={media}
+						<SeriesGrid
+							isLoading={isLoadingSeries}
+							series={series}
 							hasFilters={Object.keys(filters || {}).length > 0}
 						/>
 					</div>
@@ -110,15 +149,15 @@ export default function SeriesOverviewScene() {
 			)
 		} else {
 			return (
-				<BookTable
-					books={media || []}
+				<SeriesTable
+					series={series || []}
 					render={(props) => (
 						<URLFilterContainer
 							currentPage={current_page || 1}
 							pages={total_pages || 1}
 							onChangePage={setPage}
 							onPrefetchPage={handlePrefetchPage}
-							tableControls={<BookTableColumnConfiguration />}
+							// tableControls={<BookTableColumnConfiguration />}
 							{...props}
 						/>
 					)}
@@ -139,15 +178,15 @@ export default function SeriesOverviewScene() {
 		>
 			<div className="flex flex-1 flex-col pb-4 md:pb-0">
 				<Helmet>
-					<title>Stump | {series.name || ''}</title>
+					<title>Stump | {library.name}</title>
 				</Helmet>
 
 				<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 
 				<FilterHeader
-					layoutControls={<BookExplorationLayout />}
-					orderControls={<BookURLOrdering />}
-					filterControls={<BookURLFilterDrawer />}
+					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
+					// orderControls={<BookURLOrdering />}
+					// filterControls={<BookURLFilterDrawer />}
 				/>
 
 				{renderContent()}

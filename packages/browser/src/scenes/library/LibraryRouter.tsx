@@ -4,13 +4,13 @@ import { Navigate, Route, Routes } from 'react-router'
 import { useAppContext } from '@/context'
 
 import LibraryLayout from './LibraryLayout.tsx'
-import LibraryAdminLayout from './management/LibraryAdminLayout.tsx'
+import LibraryAdminLayout from './tabs/settings/LibraryAdminLayout.tsx'
 
-const CreateLibraryScene = lazy(() => import('./management/CreateLibraryScene.tsx'))
-const LibrarySettingsScene = lazy(() => import('./management/LibrarySettingsScene.tsx'))
-const LibraryExplorerScene = lazy(() => import('./LibraryExplorerScene.tsx'))
-const LibrarySeriesScene = lazy(() => import('./LibrarySeriesScene.tsx'))
-const LibraryBooksScene = lazy(() => import('./LibraryBooksScene.tsx'))
+const CreateLibraryScene = lazy(() => import('./tabs/settings/CreateLibraryScene.tsx'))
+const LibrarySettingsScene = lazy(() => import('./tabs/settings/LibrarySettingsScene.tsx'))
+const LibraryExplorerScene = lazy(() => import('./tabs/files/LibraryExplorerScene.tsx'))
+const LibrarySeriesScene = lazy(() => import('./tabs/series/LibrarySeriesScene.tsx'))
+const LibraryBooksScene = lazy(() => import('./tabs/books/LibraryBooksScene.tsx'))
 const LibraryListScene = lazy(() => import('./LibraryListScene.tsx'))
 
 export default function LibraryRouter() {

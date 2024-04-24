@@ -1,7 +1,7 @@
 import { Library } from '@stump/types'
 import { createContext, useContext } from 'react'
 
-import { noop } from '../../../utils/misc'
+import { noop } from '../../../../utils/misc'
 
 export type LibraryAdminContextProps = {
 	libraryPreview: Partial<Library>

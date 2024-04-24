@@ -26,6 +26,58 @@ export const prefetchMedia = async (id: string) => {
 	)
 }
 
+export const prefetchLibraryMedia = (id: string) =>
+	queryClient.prefetchQuery(
+		[
+			mediaQueryKeys.getMedia,
+			1,
+			20,
+			{
+				series: {
+					library: {
+						id,
+					},
+				},
+			},
+		],
+		async () => {
+			const { data } = await mediaApi.getMedia({
+				page: 1,
+				page_size: 20,
+				series: {
+					library: {
+						id,
+					},
+				},
+			})
+			return data
+		},
+	)
+
+export const prefetchSeriesMedia = (id: string) =>
+	queryClient.prefetchQuery(
+		[
+			mediaQueryKeys.getMedia,
+			1,
+			20,
+			{
+				series: {
+					id,
+				},
+			},
+		],
+		async () => {
+			const { data } = await mediaApi.getMedia({
+				page: 1,
+				page_size: 20,
+				series: {
+					id,
+				},
+			})
+			return data
+		},
+	)
+
 type MediaQueryParams<TQueryFnData, TData = TQueryFnData> = QueryOptions<
 	TQueryFnData,
 	AxiosError,
@@ -57,7 +109,7 @@ export function useMediaByIdQuery(
 
 export function usePagedMediaQuery(options: PageQueryOptions<Media> = {}) {
 	const { data, ...restReturn } = usePageQuery(
-		[mediaQueryKeys.getMedia, options],
+		[mediaQueryKeys.getMedia],
 		async ({ page, page_size, params }) => {
 			const { data } = await mediaApi.getMedia({ page, page_size, ...(params ?? {}) })
 			return data

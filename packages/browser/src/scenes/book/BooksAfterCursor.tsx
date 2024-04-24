@@ -3,7 +3,7 @@ import { Media } from '@stump/types'
 import { useEffect } from 'react'
 
 import HorizontalCardList from '@/components/HorizontalCardList'
-import MediaCard from '@/components/media/MediaCard'
+import MediaCard from '@/components/book/BookCard'
 
 type Props = {
 	cursor: Media

@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { metadataApi, metadataQueryKeys } from '@stump/api'
 import { useQuery } from '@stump/client'
 import { CheckBox, Form } from '@stump/components'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import z from 'zod'
 
@@ -37,6 +37,7 @@ const schema = z.object({
 	read_status: z.array(z.enum(['completed', 'reading', 'unread'])).optional(),
 })
 export type MediaFilterFormSchema = z.infer<typeof schema>
+type ReadStatus = NonNullable<Pick<MediaFilterFormSchema, 'read_status'>['read_status']>[number]
 
 // TODO: detatch from series context to be re-used in library context
 
@@ -72,9 +73,22 @@ export default function MediaFilterForm() {
 				...((filters?.metadata as Record<string, string[]>) || {}),
 				age_rating: (filters?.metadata as Record<string, unknown>)?.age_rating ?? null,
 			},
+			read_status: filters?.read_status as ReadStatus[],
 		},
 		resolver: zodResolver(schema),
 	})
+	const { reset } = form
+
+	useEffect(() => {
+		reset({
+			extension: filters?.extension as string,
+			metadata: {
+				...((filters?.metadata as Record<string, string[]>) || {}),
+				age_rating: (filters?.metadata as Record<string, unknown>)?.age_rating ?? null,
+			},
+			read_status: filters?.read_status as ReadStatus[],
+		})
+	}, [reset, filters])
 
 	/**
 	 * A function that handles the form submission. This function merges the form

@@ -3,7 +3,7 @@ import { useMutation } from '@stump/client'
 import { Heading, Text } from '@stump/components'
 import React from 'react'
 
-import { useLibraryContext } from '../context'
+import { useLibraryContext } from '../../context'
 import LibraryThumbnailSelector from './LibraryThumbnailSelector'
 import RegenerateThumbnails from './RegenerateThumbnails'
 

@@ -1,4 +1,4 @@
-import { prefetchFiles } from '@stump/client'
+import { prefetchFiles, prefetchSeriesMedia } from '@stump/client'
 import { cn, Link } from '@stump/components'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
@@ -14,7 +14,7 @@ export default function SeriesNavigation() {
 		preferences: { primary_navigation_mode, layout_max_width_px },
 	} = usePreferences()
 	const {
-		series: { path },
+		series: { id, path },
 	} = useSeriesContext()
 	const { checkPermission } = useAppContext()
 
@@ -24,6 +24,7 @@ export default function SeriesNavigation() {
 			{
 				isActive: location.pathname.match(/\/series\/[^/]+\/books(\/.*)?$/),
 				label: 'Books',
+				onHover: () => prefetchSeriesMedia(id),
 				to: 'books',
 			},
 			...(canAccessFiles
@@ -42,16 +43,16 @@ export default function SeriesNavigation() {
 				to: 'settings',
 			},
 		],
-		[location, path, canAccessFiles],
+		[location, id, path, canAccessFiles],
 	)
 
 	const preferTopBar = primary_navigation_mode === 'TOPBAR'
 
 	return (
-		<div className="sticky top-0 z-10 w-full border-b border-gray-75 bg-white md:relative md:top-[unset] md:z-[unset] dark:border-gray-850 dark:bg-gray-975">
+		<div className="sticky top-0 z-10 h-12 w-full border-b border-gray-75 bg-white md:relative md:top-[unset] md:z-[unset] dark:border-gray-850 dark:bg-gray-975">
 			<nav
 				className={cn(
-					'-mb-px flex gap-x-6 overflow-x-scroll px-3 scrollbar-hide md:overflow-x-hidden',
+					'-mb-px flex h-12 gap-x-6 overflow-x-scroll px-3 scrollbar-hide md:overflow-x-hidden',
 					{
 						'mx-auto': preferTopBar && !!layout_max_width_px,
 					},

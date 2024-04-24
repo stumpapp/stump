@@ -5,9 +5,9 @@ import React, { useCallback, useEffect, useMemo } from 'react'
 
 import useIsInView from '@/hooks/useIsInView'
 
-import MediaGrid from '../../scenes/series/MediaGrid'
 import { FilterToolBar, useFilterContext } from '../filters'
 import Pagination from '../Pagination'
+import BookGrid from './BookGrid'
 
 type Props = {
 	page: number
@@ -92,9 +92,9 @@ export default function BookSearch({ page, page_size, setPage, onBookSelect, sho
 						onPrefetchPage={handlePrefetchPage}
 					/>
 				)}
-				<MediaGrid
+				<BookGrid
 					isLoading={isLoading}
-					media={media}
+					books={media}
 					hasFilters={hasFilters}
 					onSelect={onBookSelect}
 				/>

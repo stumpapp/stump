@@ -1,69 +1,76 @@
-import { Button, Drawer, IconButton, ToolTip } from '@stump/components'
+import { Button, IconButton, Sheet, ToolTip } from '@stump/components'
 import { Bolt } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
+import { useMediaMatch } from 'rooks'
+
+import { clearFilters, getActiveFilterCount, useFilterContext } from '../filters'
+import { MediaFilterForm } from '../filters/form'
 
 export default function BookURLFilterDrawer() {
+	const { filters, setFilters } = useFilterContext()
+
 	const [isOpen, setIsOpen] = useState(false)
 
-	// Note: this is a rather gross workaround to prevent height: auto from being set on the body
-	// github.com/emilkowalski/vaul/issues/324
-	useEffect(() => {
-		if (isOpen) {
-			setTimeout(() => {
-				document.body.style.height = '100%'
-			}, 200)
-		}
-	}, [isOpen])
+	const isMobile = useMediaMatch('(max-width: 768px)')
+	// We don't apply search within the slideover, so we want to exclude it from the count. If any
+	// other 'filters' are added outside the context of this component we need to account for them, as well.
+	const activeFilters = useMemo(() => getActiveFilterCount(filters || {}), [filters])
+
+	const handleClearFilters = useCallback(
+		() => setFilters(clearFilters(filters || {})),
+		[filters, setFilters],
+	)
 
 	return (
-		<Drawer open={isOpen} onOpenChange={setIsOpen}>
-			<ToolTip content="Configure filters" size="sm">
-				<Drawer.Trigger asChild>
-					<IconButton
-						variant="ghost"
-						size="xs"
-						className="hover:bg-background-300"
-						pressEffect={false}
+		<Sheet
+			open={isOpen}
+			onClose={() => setIsOpen(false)}
+			onOpen={() => setIsOpen(true)}
+			title="Configure URL filters"
+			description="Adjust the filters applied to the books displayed"
+			trigger={
+				<ToolTip content="Configure filters" size="sm">
+					<span className="relative inline-flex">
+						<IconButton
+							variant="ghost"
+							size="xs"
+							className="hover:bg-background-300"
+							pressEffect={false}
+							onClick={() => setIsOpen(true)}
+						>
+							<Bolt className="h-4 w-4" />
+						</IconButton>
+
+						{activeFilters > 0 && (
+							<span className="absolute right-0 top-0 -mr-1.5 -mt-1.5 flex h-4 w-4">
+								<span className="relative inline-flex h-4 w-4 items-center justify-center rounded-full bg-brand">
+									<span className="text-xxs font-semibold text-white">{activeFilters}</span>
+								</span>
+							</span>
+						)}
+					</span>
+				</ToolTip>
+			}
+			size={isMobile ? 'xl' : 'default'}
+			footer={
+				<div className="-mt-4 flex w-full items-center gap-x-4 py-2">
+					<Button
+						size="sm"
+						className="w-full"
+						type="button"
+						variant="danger"
+						onClick={handleClearFilters}
 					>
-						<Bolt className="h-4 w-4" />
-					</IconButton>
-				</Drawer.Trigger>
-			</ToolTip>
-			<Drawer.Content>
-				<div className="mx-auto w-full max-w-2xl">
-					<Drawer.Header>
-						<Drawer.Title>
-							{/* {t(withLocaleKey('heading'))} */}
-							Configure URL filters
-						</Drawer.Title>
-						<Drawer.Description>
-							{/* {t(withLocaleKey('description'))} */}
-							Adjust ordering, filtering, and pagination
-						</Drawer.Description>
-					</Drawer.Header>
-				</div>
+						Clear filters
+					</Button>
 
-				<div className="max-h-[70vh] w-full overflow-y-auto">
-					<div className="mx-auto w-full max-w-2xl">
-						<div className="flex flex-col gap-y-6 p-4 pb-0">Content!</div>
-					</div>
+					<Button size="sm" type="submit" form="filter-form" className="w-full">
+						Apply filters
+					</Button>
 				</div>
-
-				<div className="mx-auto w-full max-w-2xl">
-					<Drawer.Footer className="w-full flex-row">
-						<Button className="w-full">
-							{/* {t(withLocaleKey('buttons.save'))} */}
-							Save
-						</Button>
-						<Drawer.Close asChild>
-							<Button variant="outline" className="w-full">
-								{/* {t(withLocaleKey('buttons.cancel'))} */}
-								Cancel
-							</Button>
-						</Drawer.Close>
-					</Drawer.Footer>
-				</div>
-			</Drawer.Content>
-		</Drawer>
+			}
+		>
+			<MediaFilterForm />
+		</Sheet>
 	)
 }

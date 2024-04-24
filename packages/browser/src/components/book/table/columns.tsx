@@ -1,5 +1,5 @@
 import { Link, Text } from '@stump/components'
-import { Media, SmartListTableColumnSelection } from '@stump/types'
+import { Media, ReactTableColumnSort } from '@stump/types'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 
@@ -373,7 +373,7 @@ export const defaultColumns = [
  * A helper function to build the columns for the table based on the stored column selection. If
  * no columns are selected, or if the selection is empty, the default columns will be used.
  */
-export const buildColumns = (columns?: SmartListTableColumnSelection[]) => {
+export const buildColumns = (columns?: ReactTableColumnSort[]) => {
 	if (!columns || columns.length === 0) {
 		return defaultColumns
 	}

@@ -130,13 +130,13 @@ export function AppLayout() {
 					</Suspense>
 					<main
 						className={cn(
-							'min-h-full w-full flex-1 flex-grow overflow-y-auto overflow-x-hidden bg-background',
+							'flex w-full flex-1 flex-col overflow-y-auto overflow-x-hidden bg-background',
 							{
 								'scrollbar-hide': storeUser.user_preferences?.enable_hide_scrollbar,
 							},
 						)}
 					>
-						<div className="relative flex h-full w-full flex-col">
+						<div className="relative flex flex-1 flex-col">
 							{!!storeUser.user_preferences?.show_query_indicator && <BackgroundFetchIndicator />}
 							<Suspense fallback={<RouteLoadingIndicator />}>
 								<Outlet />

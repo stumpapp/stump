@@ -1,2 +1,2 @@
 export { default as BookTable } from './BookTable'
-export { default as BookTableURLFilterContainer } from './BookTableURLFilterContainer'
+export { default as BookTableColumnConfiguration } from './BookTableColumnConfiguration'

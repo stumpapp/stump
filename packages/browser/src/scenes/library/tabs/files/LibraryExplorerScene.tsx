@@ -1,6 +1,6 @@
 import { FileExplorer } from '@/components/explorer'
 
-import { useLibraryContext } from './context'
+import { useLibraryContext } from '../../context'
 
 export default function LibraryExplorerScene() {
 	const {

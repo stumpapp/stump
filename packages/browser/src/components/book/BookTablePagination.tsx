@@ -1,4 +1,4 @@
-import { IconButton, Text } from '@stump/components'
+import { IconButton, Text, ToolTip } from '@stump/components'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import React, { useCallback } from 'react'
 
@@ -9,6 +9,7 @@ type Props = {
 	onPrefetchPage?: (page: number) => void
 }
 
+// TODO: change name
 export default function BookTablePagination({
 	pages,
 	currentPage,
@@ -48,24 +49,29 @@ export default function BookTablePagination({
 				</Text>
 			</div>
 			<div className="flex items-center space-x-1">
-				<IconButton
-					size="xs"
-					variant="ghost"
-					disabled={currentPage <= 1}
-					onClick={handlePreviousPage}
-					onMouseEnter={handlePrefetchPreviousPage}
-				>
-					<ChevronLeft className="h-4 w-4" />
-				</IconButton>
-				<IconButton
-					size="xs"
-					variant="ghost"
-					disabled={currentPage >= pages}
-					onClick={handleNextPage}
-					onMouseEnter={handlePrefetchNextPage}
-				>
-					<ChevronRight className="h-4 w-4" />
-				</IconButton>
+				<ToolTip content="Previous page" size="sm" align="end">
+					<IconButton
+						size="xs"
+						variant="ghost"
+						disabled={currentPage <= 1}
+						onClick={handlePreviousPage}
+						onMouseEnter={handlePrefetchPreviousPage}
+					>
+						<ChevronLeft className="h-4 w-4" />
+					</IconButton>
+				</ToolTip>
+
+				<ToolTip content="Next page" size="sm" align="end">
+					<IconButton
+						size="xs"
+						variant="ghost"
+						disabled={currentPage >= pages}
+						onClick={handleNextPage}
+						onMouseEnter={handlePrefetchNextPage}
+					>
+						<ChevronRight className="h-4 w-4" />
+					</IconButton>
+				</ToolTip>
 			</div>
 		</div>
 	)

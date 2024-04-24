@@ -1,7 +1,7 @@
 import { Heading, Text } from '@stump/components'
 import React from 'react'
 
-import { useLibraryContext } from '../context'
+import { useLibraryContext } from '../../context'
 import CleanLibrary from './CleanLibrary'
 import DeleteLibraryThumbnails from './DeleteLibraryThumbnails'
 

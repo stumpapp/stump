@@ -2,7 +2,7 @@ import { useLibraries } from '@stump/client'
 
 import { Container, ContentContainer } from '@/components/container'
 
-import { useLibraryContext } from '../context'
+import { useLibraryContext } from '../../context'
 import DangerZone from './DangerZone'
 import { CreateOrUpdateLibraryForm } from './form'
 import LibraryExclusions from './LibraryExclusions'

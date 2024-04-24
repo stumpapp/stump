@@ -111,7 +111,7 @@ export default function SeriesOverviewScene() {
 		} else {
 			return (
 				<BookTable
-					books={media || []}
+					items={media || []}
 					render={(props) => (
 						<URLFilterContainer
 							currentPage={current_page || 1}

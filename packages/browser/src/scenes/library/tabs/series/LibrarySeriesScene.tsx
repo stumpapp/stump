@@ -150,7 +150,7 @@ function LibrarySeriesScene() {
 		} else {
 			return (
 				<SeriesTable
-					series={series || []}
+					items={series || []}
 					render={(props) => (
 						<URLFilterContainer
 							currentPage={current_page || 1}

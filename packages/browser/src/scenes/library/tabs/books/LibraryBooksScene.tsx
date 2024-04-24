@@ -111,7 +111,7 @@ export default function LibraryBooksScene() {
 		} else {
 			return (
 				<BookTable
-					books={media || []}
+					items={media || []}
 					render={(props) => (
 						<URLFilterContainer
 							currentPage={current_page || 1}
@@ -142,7 +142,7 @@ export default function LibraryBooksScene() {
 					<title>Stump | {library.name || ''}</title>
 				</Helmet>
 
-				<section ref={containerRef} id="grid-top-indicator" className="h-1" />
+				<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 
 				<FilterHeader
 					layoutControls={<BookExplorationLayout />}

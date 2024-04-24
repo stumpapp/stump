@@ -75,7 +75,7 @@ export default function BookSearch({ page, page_size, setPage, onBookSelect, sho
 
 	return (
 		<>
-			<section ref={containerRef} id="grid-top-indicator" className="h-1" />
+			<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 
 			<FilterToolBar
 				isRefetching={isRefetching}

@@ -43,7 +43,7 @@ jobs:
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
-          tags: 'nightly'
+          tags: '0.0.2,latest,nightly'
           # load: ${{ env.LOAD }}
           # push: ${{ env.PUSH }}
           load: false

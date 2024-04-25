@@ -44,8 +44,10 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
           tags: 'nightly'
-          load: ${{ env.LOAD }}
-          push: ${{ env.PUSH }}
+          # load: ${{ env.LOAD }}
+          # push: ${{ env.PUSH }}
+          load: false
+          push: true
           # platforms: ${{ env.PLATFORMS }}
-          platforms: 'linux/arm64/v8' # TODO: AARON REMOVE THIS
+          platforms: 'linux/amd64,linux/arm64/v8' # TODO: AARON REMOVE THIS
           discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}

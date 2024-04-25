@@ -19,6 +19,7 @@ export type IFilterContext = {
 	setPage: (page: number) => void
 	setFilters: (filters: Record<string, unknown>) => void
 	setFilter: (key: string, value: unknown) => void
+	setOrdering: (ordering: Ordering) => void
 	removeFilter: (key: string) => void
 }
 
@@ -29,6 +30,7 @@ export const FilterContext = createContext<IFilterContext>({
 	removeFilter: noop,
 	setFilter: noop,
 	setFilters: noop,
+	setOrdering: noop,
 	setPage: noop,
 })
 export const useFilterContext = () => useContext(FilterContext)

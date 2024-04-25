@@ -5,4 +5,10 @@ export { default as FilterToolBar } from './FilterToolBar'
 export { default as Search } from './Search'
 export { default as URLFilterContainer } from './URLFilterContainer'
 export { useFilterScene } from './useFilterScene'
-export { clearFilters, EXCLUDED_FILTER_KEYS, getActiveFilterCount } from './utils'
+export {
+	clearFilters,
+	EXCLUDED_FILTER_KEYS,
+	getActiveFilterCount,
+	orderingToTableSort,
+	tableSortToOrdering,
+} from './utils'

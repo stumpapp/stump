@@ -3,7 +3,7 @@ import { useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useMediaMatch } from 'rooks'
 
-import { IFilterContext } from './context'
+import { IFilterContext, Ordering } from './context'
 import { EXCLUDED_FILTER_KEYS } from './utils'
 
 type Return = IFilterContext
@@ -50,6 +50,23 @@ export function useFilterScene(): Return {
 				: defaultPageSize,
 		}),
 		[searchParams, defaultPageSize],
+	)
+
+	const setOrdering = useCallback(
+		(newOrdering: Ordering) => {
+			setSearchParams(
+				toUrlParams(
+					{
+						...pagination,
+						...filters,
+						...newOrdering,
+					},
+					undefined,
+					{ removeEmpty: true },
+				),
+			)
+		},
+		[setSearchParams, pagination, filters],
 	)
 
 	const setPage = useCallback(
@@ -117,6 +134,7 @@ export function useFilterScene(): Return {
 		removeFilter,
 		setFilter: handleSetFilter,
 		setFilters: handleSetFilters,
+		setOrdering,
 		setPage,
 	}
 }

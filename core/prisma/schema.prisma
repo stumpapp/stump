@@ -208,7 +208,7 @@ model Media {
 
 // TODO: determine what is optional and what is safe to make required
 model MediaMetadata {
-  // TODO: remove this once nested create is supported, just use media_id
+  // TODO(prisma 0.7.0): Nested create
   id String @id @default(cuid())
 
   title      String?

@@ -56,13 +56,14 @@ const booksCountColumn = columnHelper.accessor((series) => series.media_count?.t
 		</Text>
 	),
 	enableGlobalFilter: true,
-	enableSorting: true,
+	// TODO(prisma 0.7.0): Support order by relation
+	enableSorting: false,
 	header: () => (
 		<Text size="sm" variant="muted">
 			Books
 		</Text>
 	),
-	id: 'booksCount',
+	id: 'media_count',
 	minSize: 60,
 })
 

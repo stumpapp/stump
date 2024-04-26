@@ -9,9 +9,12 @@ WORKDIR /app
 
 COPY . .
 
-RUN yarn install; \
-    yarn web build; \
-    mv ./apps/web/dist build
+# https://github.com/nodejs/docker-node/issues/1335
+RUN yarn config set network-timeout 300000 && \
+    yarn install --frozen-lockfile && \
+    yarn web build && \
+    mv ./apps/web/dist/ ./build && \
+    if [ ! -d "./build" ] || [ ! "$(ls -A ./build)" ]; then exit 1; fi
 
 # ------------------------------------------------------------------------------
 # Cargo Build Stage
@@ -78,7 +81,8 @@ COPY --from=frontend /app/build /app/client
 COPY docker/entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh; \
-    ln -s /opt/pdfium/lib/libpdfium.so /lib/libpdfium.so
+    ln -s /opt/pdfium/lib/libpdfium.so /lib/libpdfium.so; \
+    if [ ! -d "/app/client" ] || [ ! "$(ls -A /app/client)" ]; then exit 1; fi
 
 # Default Stump environment variables
 ENV STUMP_CONFIG_DIR=/config \

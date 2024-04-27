@@ -1,29 +1,41 @@
-import { ButtonOrLink, Card, Heading, Text } from '@stump/components'
-import { CircleSlash2 } from 'lucide-react'
+import { ButtonOrLink, Heading, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 
 import { useAppContext } from '../../context'
 import paths from '../../paths'
 
 export default function NoLibraries() {
-	const { isServerOwner } = useAppContext()
+	const { t } = useLocaleContext()
+	const { checkPermission } = useAppContext()
+
+	const canCreateLibrary = checkPermission('library:create')
 
 	return (
-		<div className="flex flex-1 items-center justify-center">
-			<Card className="flex flex-col items-center justify-center gap-2 border-edge-200 bg-background-200 p-4 text-center">
-				<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-muted" />
-				<Heading size="sm">
-					{isServerOwner ? "You don't have" : 'There are no'} libraries configured
-				</Heading>
-				<Text size="sm" variant="muted">
-					Once {isServerOwner ? 'you create a library' : 'a library has been created'}, this page
-					will be more useful
+		<div className="flex flex-1 flex-col items-center justify-center">
+			<img
+				src="/assets/svg/mountain.svg"
+				alt="Construction illustration"
+				className="mx-auto h-72 w-1/2 shrink-0 object-scale-down sm:h-96"
+			/>
+
+			<div className="mx-auto flex max-w-lg flex-col space-y-2 text-center">
+				<Heading className="text-3xl font-extrabold md:text-4xl">{t(getKey('heading'))}</Heading>
+				<Text size="lg">
+					{t(getKey('messagePrefix'))}.{' '}
+					{t(getKey(`message.${canCreateLibrary ? 'create' : 'wait'}`))}
 				</Text>
-				{isServerOwner && (
-					<ButtonOrLink className="mt-2" href={paths.libraryCreate()} variant="secondary">
-						Create a library
-					</ButtonOrLink>
+
+				{canCreateLibrary && (
+					<div className="flex items-center justify-center space-x-2">
+						<ButtonOrLink href={paths.libraryCreate()} variant="primary" className="mt-4">
+							{t(getKey('links.create'))}
+						</ButtonOrLink>
+					</div>
 				)}
-			</Card>
+			</div>
 		</div>
 	)
 }
+
+const LOCALE_BASE_KEY = 'noLibraries'
+const getKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`

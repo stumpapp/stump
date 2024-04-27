@@ -6,7 +6,8 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import z from 'zod'
 
-import { useSeriesContext } from '../../../scenes/series/context'
+import { useSeriesContextSafe } from '@/scenes/series'
+
 import { useFilterContext } from '..'
 import AgeRatingFilter from './AgeRatingFilter'
 import ExtensionSelect from './ExtensionSelect'
@@ -39,28 +40,24 @@ const schema = z.object({
 export type MediaFilterFormSchema = z.infer<typeof schema>
 type ReadStatus = NonNullable<Pick<MediaFilterFormSchema, 'read_status'>['read_status']>[number]
 
-// TODO: detatch from series context to be re-used in library context
-
 export default function MediaFilterForm() {
 	const { filters, setFilters } = useFilterContext()
-	const {
-		series: { id },
-	} = useSeriesContext()
 
+	const seriesContext = useSeriesContextSafe()
 	const [onlyFromSeries, setOnlyFromSeries] = useState(false)
 
 	const params = useMemo(() => {
-		if (onlyFromSeries && !!id) {
+		if (onlyFromSeries && !!seriesContext?.series.id) {
 			return {
 				media: {
 					series: {
-						id,
+						id: seriesContext.series.id,
 					},
 				},
 			}
 		}
 		return {}
-	}, [onlyFromSeries, id])
+	}, [onlyFromSeries, seriesContext])
 
 	const { data } = useQuery([metadataQueryKeys.getMediaMetadataOverview, params], () =>
 		metadataApi.getMediaMetadataOverview(params).then((res) => res.data),
@@ -112,7 +109,7 @@ export default function MediaFilterForm() {
 			form={form}
 			onSubmit={handleSubmit}
 		>
-			{!!id && (
+			{!!seriesContext && (
 				<CheckBox
 					label="Only show options available from series"
 					checked={onlyFromSeries}

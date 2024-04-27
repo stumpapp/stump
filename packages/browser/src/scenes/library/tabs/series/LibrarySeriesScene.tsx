@@ -14,6 +14,8 @@ import {
 	FilterHeader,
 	FilterProvider,
 	URLFilterContainer,
+	URLFilterDrawer,
+	URLOrdering,
 	useFilterScene,
 } from '@/components/filters'
 import { SeriesTable } from '@/components/series'
@@ -73,7 +75,7 @@ function LibrarySeriesScene() {
 	)
 	const {
 		isLoading: isLoadingSeries,
-		// isRefetching: isRefetchingSeries,
+		isRefetching: isRefetchingSeries,
 		series,
 		pageData,
 	} = usePagedSeriesQuery(params)
@@ -184,9 +186,10 @@ function LibrarySeriesScene() {
 				<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 
 				<FilterHeader
+					isSearching={isRefetchingSeries}
 					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
-					// orderControls={<BookURLOrdering />}
-					// filterControls={<BookURLFilterDrawer />}
+					orderControls={<URLOrdering entity="series" />}
+					filterControls={<URLFilterDrawer entity="series" />}
 				/>
 
 				{renderContent()}

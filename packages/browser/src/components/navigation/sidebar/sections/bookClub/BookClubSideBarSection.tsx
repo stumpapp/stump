@@ -5,9 +5,10 @@ import { Club } from 'lucide-react'
 import React from 'react'
 import { useLocation } from 'react-router'
 
-import { useAppContext } from '../../../../../context'
-import paths from '../../../../../paths'
-import { EntityOptionProps } from '../../../types'
+import { EntityOptionProps } from '@/components/navigation/types'
+import { useAppContext } from '@/context'
+import paths from '@/paths'
+
 import SideBarButtonLink from '../../SideBarButtonLink'
 import BookClubEmoji from './BookClubEmoji'
 

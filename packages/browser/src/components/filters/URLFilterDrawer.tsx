@@ -3,10 +3,14 @@ import { Bolt } from 'lucide-react'
 import React, { useCallback, useMemo, useState } from 'react'
 import { useMediaMatch } from 'rooks'
 
-import { clearFilters, getActiveFilterCount, useFilterContext } from '../filters'
-import { MediaFilterForm } from '../filters/form'
+import { clearFilters, getActiveFilterCount, useFilterContext } from '.'
+import { FilterableEntity, MediaFilterForm, SeriesFilterForm } from './form'
 
-export default function BookURLFilterDrawer() {
+type Props = {
+	entity: FilterableEntity
+}
+
+export default function URLFilterDrawer({ entity }: Props) {
 	const { filters, setFilters } = useFilterContext()
 
 	const [isOpen, setIsOpen] = useState(false)
@@ -21,13 +25,24 @@ export default function BookURLFilterDrawer() {
 		[filters, setFilters],
 	)
 
+	const renderForm = () => {
+		if (entity === 'media') {
+			return <MediaFilterForm />
+		} else if (entity === 'series') {
+			return <SeriesFilterForm />
+		} else {
+			console.debug('Not implemented yet')
+			return null
+		}
+	}
+
 	return (
 		<Sheet
 			open={isOpen}
 			onClose={() => setIsOpen(false)}
 			onOpen={() => setIsOpen(true)}
 			title="Configure URL filters"
-			description="Adjust the filters applied to the books displayed"
+			description="Adjust the filters applied to the current view"
 			trigger={
 				<ToolTip content="Configure filters" size="sm">
 					<span className="relative inline-flex">
@@ -70,7 +85,7 @@ export default function BookURLFilterDrawer() {
 				</div>
 			}
 		>
-			<MediaFilterForm />
+			{renderForm()}
 		</Sheet>
 	)
 }

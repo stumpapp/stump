@@ -3,10 +3,14 @@ import { ArrowUpDown } from 'lucide-react'
 import React, { useCallback, useState } from 'react'
 import { useMediaMatch } from 'rooks'
 
-import { useFilterContext } from '../filters'
-import { OrderByDirection, OrderBySelect } from '../filters/form'
+import { useFilterContext } from './context'
+import { FilterableEntity, OrderByDirection, OrderBySelect } from './form'
 
-export default function BookURLOrdering() {
+type Props = {
+	entity: FilterableEntity
+}
+
+export default function URLOrdering({ entity }: Props) {
 	const [isOpen, setIsOpen] = useState(false)
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
@@ -46,7 +50,7 @@ export default function BookURLOrdering() {
 				align={isMobile ? 'start' : 'end'}
 			>
 				<OrderBySelect
-					entity="media"
+					entity={entity}
 					value={ordering.order_by || 'name'}
 					onChange={handleChangeOrderBy}
 				/>

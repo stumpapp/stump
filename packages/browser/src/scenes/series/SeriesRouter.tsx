@@ -9,6 +9,7 @@ import SeriesLayout from './SeriesLayout.tsx'
 const SeriesBooksScene = lazy(() => import('./tabs/books/SeriesBooksScene.tsx'))
 const SeriesSettingsScene = lazy(() => import('./tabs/settings/SeriesSettingsScene.tsx'))
 const SeriesExplorerScene = lazy(() => import('./tabs/files/SeriesExplorerScene.tsx'))
+const SeriesSearchScene = lazy(() => import('@/scenes/seriesSearch'))
 
 export default function SeriesRouter() {
 	const { checkPermission } = useAppContext()
@@ -17,6 +18,7 @@ export default function SeriesRouter() {
 
 	return (
 		<Routes>
+			<Route path="" element={<SeriesSearchScene />} />
 			<Route path=":id/*" element={<SeriesLayout />}>
 				<Route path="" element={<Navigate to="books" replace />} />
 				<Route path="books" element={<SeriesBooksScene />} />

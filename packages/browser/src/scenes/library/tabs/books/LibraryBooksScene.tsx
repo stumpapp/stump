@@ -3,20 +3,17 @@ import { usePreviousIsDifferent } from '@stump/components'
 import { useCallback, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 
-import {
-	BookExplorationLayout,
-	BookTable,
-	BookTableColumnConfiguration,
-	BookURLFilterDrawer,
-	BookURLOrdering,
-} from '@/components/book'
+import { BookTable, BookTableColumnConfiguration } from '@/components/book'
 import BookGrid from '@/components/book/BookGrid'
 import {
 	FilterContext,
 	FilterHeader,
 	URLFilterContainer,
+	URLFilterDrawer,
+	URLOrdering,
 	useFilterScene,
 } from '@/components/filters'
+import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
 import { useBooksLayout } from '@/stores/layout'
 
@@ -26,7 +23,10 @@ export default function LibraryBooksScene() {
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
 
 	const { library } = useLibraryContext()
-	const { layoutMode } = useBooksLayout((state) => ({ layoutMode: state.layout }))
+	const { layoutMode, setLayout } = useBooksLayout((state) => ({
+		layoutMode: state.layout,
+		setLayout: state.setLayout,
+	}))
 	const {
 		filters,
 		ordering,
@@ -52,7 +52,7 @@ export default function LibraryBooksScene() {
 	)
 	const {
 		isLoading: isLoadingMedia,
-		// isRefetching: isRefetchingMedia,
+		isRefetching: isRefetchingMedia,
 		media,
 		pageData,
 	} = usePagedMediaQuery(params)
@@ -145,9 +145,10 @@ export default function LibraryBooksScene() {
 				<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 
 				<FilterHeader
-					layoutControls={<BookExplorationLayout />}
-					orderControls={<BookURLOrdering />}
-					filterControls={<BookURLFilterDrawer />}
+					isSearching={isRefetchingMedia}
+					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
+					orderControls={<URLOrdering entity="media" />}
+					filterControls={<URLFilterDrawer entity="media" />}
 				/>
 
 				{renderContent()}

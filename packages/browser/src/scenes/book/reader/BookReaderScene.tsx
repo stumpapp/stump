@@ -7,7 +7,7 @@ import { ImageBasedReader } from '@/components/readers/image-based'
 import paths from '@/paths'
 import { useReaderStore } from '@/stores'
 
-import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION } from '../../utils/patterns'
+import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION } from '../../../utils/patterns'
 
 export default function BookReaderScene() {
 	const [search] = useSearchParams()

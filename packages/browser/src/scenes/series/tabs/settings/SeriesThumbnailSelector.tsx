@@ -6,7 +6,7 @@ import toast from 'react-hot-toast'
 
 import EditThumbnailDropdown from '@/components/thumbnail/EditThumbnailDropdown'
 
-import BookPageGrid from '../../../book/management/BookPageGrid'
+import BookPageGrid from '../../../book/settings/BookPageGrid'
 import SeriesBookGrid from './SeriesBookGrid'
 
 type Props = {

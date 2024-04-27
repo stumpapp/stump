@@ -1,2 +1,2 @@
 export { useSeriesContext, useSeriesContextSafe } from './context'
-export { default } from './SeriesRouter'
+export { default as SeriesRouter } from './SeriesRouter'

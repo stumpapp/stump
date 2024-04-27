@@ -100,6 +100,7 @@ impl JobExt for AnalyzeMediaJob {
 					.find_many(vec![media::series::is(vec![series::library_id::equals(
 						Some(id.clone()),
 					)])])
+					.select(media::select!({ id }))
 					.exec()
 					.await
 					.map_err(|e| JobError::InitFailed(e.to_string()))?;
@@ -115,6 +116,7 @@ impl JobExt for AnalyzeMediaJob {
 					.db
 					.media()
 					.find_many(vec![media::series_id::equals(Some(id.clone()))])
+					.select(media::select!({ id }))
 					.exec()
 					.await
 					.map_err(|e| JobError::InitFailed(e.to_string()))?;

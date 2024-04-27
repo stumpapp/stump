@@ -5,6 +5,9 @@
 	"license": "MIT",
 	"private": true,
 	"main": "src/index.ts",
+	"scripts": {
+		"lint": "eslint --ext .ts,.tsx,.cts,.mts,.js,.jsx,.cjs,.mjs --fix --report-unused-disable-directives --no-error-on-unmatched-pattern --exit-on-fatal-error --ignore-path ../../.gitignore ."
+	},
 	"exports": {
 		".": "./src/index.ts",
 		"./assets/*": "./src/assets/*"

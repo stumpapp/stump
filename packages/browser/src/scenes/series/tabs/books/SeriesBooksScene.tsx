@@ -120,7 +120,6 @@ export default function SeriesOverviewScene() {
 							onChangePage={setPage}
 							onPrefetchPage={handlePrefetchPage}
 							tableControls={<BookTableColumnConfiguration />}
-							rootRef={rootRef.current}
 							{...props}
 						/>
 					)}

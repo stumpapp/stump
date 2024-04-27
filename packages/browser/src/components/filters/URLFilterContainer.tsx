@@ -15,6 +15,9 @@ type Props = {
 } & TablePaginationProps &
 	Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'children'>
 
+// FIXME: Looks awkward with TopBar layout because the constrained width... I think this just means the top-level
+// container should be moved lower in the tree for any explore-like routes...
+// However, this is also dependent on the width limit imposed by the user preference
 const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 	({ children, className, tableControls, ...paginationProps }, ref) => {
 		const {

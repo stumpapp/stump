@@ -3,8 +3,8 @@ import { Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { CircleSlash2 } from 'lucide-react'
 
-import HorizontalCardList from '@/components/HorizontalCardList'
 import MediaCard from '@/components/book/BookCard'
+import HorizontalCardList from '@/components/HorizontalCardList'
 
 export default function ContinueReadingMedia() {
 	const { t } = useLocaleContext()

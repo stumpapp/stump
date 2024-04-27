@@ -129,6 +129,7 @@ export function AppLayout() {
 						{!hideSidebar && <SideBar hidden={softHideSidebar} />}
 					</Suspense>
 					<main
+						id="main"
 						className={cn(
 							'flex w-full flex-1 flex-col overflow-y-auto overflow-x-hidden bg-background',
 							{

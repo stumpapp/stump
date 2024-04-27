@@ -1,20 +1,19 @@
 import { cn } from '@stump/components'
-import React, { forwardRef } from 'react'
+import React, { forwardRef, useEffect, useMemo } from 'react'
 import useScrollbarSize from 'react-scrollbar-size'
 import { useMediaMatch } from 'rooks'
+import { create } from 'zustand'
 
 import { SIDEBAR_WIDTH } from '@/components/navigation/sidebar'
 import { TablePaginationProps } from '@/components/table'
 import { usePreferences } from '@/hooks'
 
-import BookTablePagination from '../book/BookTablePagination'
+import URLPagination from './URLPagination'
 
 type Props = {
 	tableControls?: React.ReactNode
 } & TablePaginationProps &
 	Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'children'>
-
-// TODO: change name
 
 const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 	({ children, className, tableControls, ...paginationProps }, ref) => {
@@ -22,9 +21,42 @@ const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 			preferences: { enable_hide_scrollbar, primary_navigation_mode },
 		} = usePreferences()
 		const { width } = useScrollbarSize()
+		const { storedWidth, storeWidth } = useWidthStore((state) => ({
+			storeWidth: state.setWidth,
+			storedWidth: state.width,
+		}))
+
+		/**
+		 * An effect to update the stored width with any *non-zero* width value.
+		 * This is necessary because the scrollbar width flickers between 0 and the
+		 * actual width. A bit annoying
+		 */
+		useEffect(() => {
+			if (width && storedWidth !== width) {
+				storeWidth(width)
+			}
+		}, [storedWidth, storeWidth, width])
+
+		/**
+		 * A computed width which factors the actual scroll state of the main content.
+		 * If the main content has a scroll height greater than the client height, we
+		 * can safely assume that the scrollbar is visible and we should account for it.
+		 */
+		const adjustedWidth = useMemo(() => {
+			const scrollRoot = document.getElementById('main')
+			const scrollRootScrollHeight = scrollRoot?.scrollHeight ?? 0
+			const scrollRootClientHeight = scrollRoot?.clientHeight ?? 0
+			const hasScroll = scrollRootScrollHeight > scrollRootClientHeight
+
+			return hasScroll ? width || storedWidth : 0
+		}, [width, storedWidth])
 
 		const isMobile = useMediaMatch('(max-width: 768px)')
-		const scrollbarWidth = enable_hide_scrollbar ? 0 : width
+		/**
+		 * The value used for computing the right position of the pagination controls.
+		 * If the scrollbar is hidden, we don't need to account for it.
+		 */
+		const scrollbarWidth = enable_hide_scrollbar ? 0 : adjustedWidth
 
 		return (
 			<div
@@ -45,7 +77,7 @@ const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 					}}
 				>
 					{tableControls ?? <div />}
-					<BookTablePagination {...paginationProps} />
+					<URLPagination {...paginationProps} />
 				</div>
 			</div>
 		)
@@ -54,3 +86,12 @@ const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 URLFilterContainer.displayName = 'URLFilterContainer'
 
 export default URLFilterContainer
+
+type WidthStore = {
+	width: number
+	setWidth: (width: number) => void
+}
+const useWidthStore = create<WidthStore>((set) => ({
+	setWidth: (width) => set({ width }),
+	width: 0,
+}))

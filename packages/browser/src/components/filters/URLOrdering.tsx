@@ -14,20 +14,24 @@ export default function URLOrdering({ entity }: Props) {
 	const [isOpen, setIsOpen] = useState(false)
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
-	const { filters, ordering, setFilters, setFilter } = useFilterContext()
+	const { ordering, setFilter } = useFilterContext()
 
+	/**
+	 * A callback to handle the change of the ordering field.
+	 */
 	const handleChangeOrderBy = useCallback(
 		(value: string) => setFilter('order_by', value),
 		[setFilter],
 	)
 
+	/**
+	 * A callback to handle the change of the ordering direction.
+	 *
+	 * @param value The new ordering direction.
+	 */
 	const handleChangeDirection = useCallback(
-		(value: 'asc' | 'desc') =>
-			setFilters({
-				...filters,
-				direction: value,
-			}),
-		[filters, setFilters],
+		(value: 'asc' | 'desc') => setFilter('direction', value),
+		[setFilter],
 	)
 
 	return (

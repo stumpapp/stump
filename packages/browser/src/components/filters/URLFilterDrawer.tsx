@@ -20,6 +20,10 @@ export default function URLFilterDrawer({ entity }: Props) {
 	// other 'filters' are added outside the context of this component we need to account for them, as well.
 	const activeFilters = useMemo(() => getActiveFilterCount(filters || {}), [filters])
 
+	/**
+	 * A callback to clear all filters. Certain filters are excluded from this operation,
+	 * such as the search filter. See clearFilters for more information.
+	 */
 	const handleClearFilters = useCallback(
 		() => setFilters(clearFilters(filters || {})),
 		[filters, setFilters],

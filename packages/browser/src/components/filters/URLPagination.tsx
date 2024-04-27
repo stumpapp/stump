@@ -9,13 +9,7 @@ type Props = {
 	onPrefetchPage?: (page: number) => void
 }
 
-// TODO: change name
-export default function BookTablePagination({
-	pages,
-	currentPage,
-	onChangePage,
-	onPrefetchPage,
-}: Props) {
+export default function URLPagination({ pages, currentPage, onChangePage, onPrefetchPage }: Props) {
 	const handleNextPage = useCallback(() => {
 		if (currentPage < pages) {
 			onChangePage(currentPage + 1)

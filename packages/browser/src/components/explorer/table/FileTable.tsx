@@ -27,7 +27,7 @@ const baseColumns = [
 			},
 		}) => <FileThumbnail path={path} isDirectory={is_directory} />,
 		header: () => (
-			<Text size="sm" variant="muted">
+			<Text size="sm" variant="secondary">
 				Cover
 			</Text>
 		),
@@ -47,17 +47,12 @@ export default function FileTable() {
 			...baseColumns.slice(0, 1),
 			columnHelper.accessor('name', {
 				cell: ({ row: { original: file }, getValue }) => (
-					<Text
-						size="sm"
-						variant="muted"
-						className="cursor-pointer hover:underline"
-						onClick={() => onSelect(file)}
-					>
+					<Text size="sm" className="cursor-pointer hover:underline" onClick={() => onSelect(file)}>
 						{getValue()}
 					</Text>
 				),
 				header: () => (
-					<Text size="sm" variant="muted">
+					<Text size="sm" variant="secondary">
 						Name
 					</Text>
 				),

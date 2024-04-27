@@ -16,7 +16,7 @@ const coverColumn = columnHelper.display({
 	}) => <CoverImageCell id={id} title={metadata?.title || name} />,
 	enableGlobalFilter: true,
 	header: () => (
-		<Text size="sm" variant="muted">
+		<Text size="sm" variant="secondary">
 			Cover
 		</Text>
 	),
@@ -41,7 +41,7 @@ const nameColumn = columnHelper.accessor(({ name, metadata }) => metadata?.title
 	enableGlobalFilter: true,
 	enableSorting: true,
 	header: () => (
-		<Text size="sm" variant="muted">
+		<Text size="sm" variant="secondary">
 			Name
 		</Text>
 	),
@@ -59,7 +59,7 @@ const booksCountColumn = columnHelper.accessor((series) => series.media_count?.t
 	// TODO(prisma 0.7.0): Support order by relation
 	enableSorting: false,
 	header: () => (
-		<Text size="sm" variant="muted">
+		<Text size="sm" variant="secondary">
 			Books
 		</Text>
 	),

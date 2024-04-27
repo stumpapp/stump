@@ -18,7 +18,7 @@ const coverColumn = columnHelper.display({
 	}) => <CoverImageCell id={id} title={metadata?.title || name} />,
 	enableGlobalFilter: true,
 	header: () => (
-		<Text size="sm" variant="muted">
+		<Text size="sm" variant="secondary">
 			Cover
 		</Text>
 	),
@@ -43,7 +43,7 @@ const nameColumn = columnHelper.accessor(({ name, metadata }) => metadata?.title
 	enableGlobalFilter: true,
 	enableSorting: true,
 	header: () => (
-		<Text size="sm" variant="muted">
+		<Text size="sm" variant="secondary">
 			Name
 		</Text>
 	),
@@ -60,7 +60,7 @@ const pagesColumn = columnHelper.accessor('pages', {
 	enableGlobalFilter: true,
 	enableSorting: true,
 	header: () => (
-		<Text size="sm" variant="muted">
+		<Text size="sm" variant="secondary">
 			Pages
 		</Text>
 	),
@@ -93,7 +93,7 @@ const publishedColumn = columnHelper.accessor(
 		// TODO(prisma 0.7.0): Support order by relation
 		enableSorting: false,
 		header: () => (
-			<Text size="sm" variant="muted">
+			<Text size="sm" variant="secondary">
 				Published
 			</Text>
 		),
@@ -112,7 +112,7 @@ const addedColumn = columnHelper.accessor(
 		enableGlobalFilter: true,
 		enableSorting: true,
 		header: () => (
-			<Text size="sm" variant="muted">
+			<Text size="sm" variant="secondary">
 				Added
 			</Text>
 		),
@@ -130,7 +130,7 @@ const publisherColumn = columnHelper.accessor(({ metadata }) => metadata?.publis
 	// TODO(prisma 0.7.0): Support order by relation
 	enableSorting: false,
 	header: () => (
-		<Text size="sm" variant="muted">
+		<Text size="sm" variant="secondary">
 			Publisher
 		</Text>
 	),
@@ -147,7 +147,7 @@ const ageRatingColumn = columnHelper.accessor(({ metadata }) => metadata?.age_ra
 	// TODO(prisma 0.7.0): Support order by relation
 	enableSorting: false,
 	header: () => (
-		<Text size="sm" variant="muted">
+		<Text size="sm" variant="secondary">
 			Age Rating
 		</Text>
 	),
@@ -164,7 +164,7 @@ const genresColumn = columnHelper.accessor(({ metadata }) => metadata?.genre?.jo
 	// TODO(prisma 0.7.0): Support order by relation
 	enableSorting: false,
 	header: () => (
-		<Text size="sm" variant="muted">
+		<Text size="sm" variant="secondary">
 			Genres
 		</Text>
 	),
@@ -181,7 +181,7 @@ const volumeColumn = columnHelper.accessor(({ metadata }) => metadata?.volume, {
 	// TODO(prisma 0.7.0): Support order by relation
 	enableSorting: false,
 	header: () => (
-		<Text size="sm" variant="muted">
+		<Text size="sm" variant="secondary">
 			Volume
 		</Text>
 	),
@@ -198,7 +198,7 @@ const inkersColumn = columnHelper.accessor(({ metadata }) => metadata?.inkers?.j
 	// TODO(prisma 0.7.0): Support order by relation
 	enableSorting: false,
 	header: () => (
-		<Text size="sm" variant="muted">
+		<Text size="sm" variant="secondary">
 			Inkers
 		</Text>
 	),
@@ -215,7 +215,7 @@ const writersColumn = columnHelper.accessor(({ metadata }) => metadata?.writers?
 	// TODO(prisma 0.7.0): Support order by relation
 	enableSorting: false,
 	header: () => (
-		<Text size="sm" variant="muted">
+		<Text size="sm" variant="secondary">
 			Writers
 		</Text>
 	),
@@ -232,7 +232,7 @@ const pencillersColumn = columnHelper.accessor(({ metadata }) => metadata?.penci
 	// TODO(prisma 0.7.0): Support order by relation
 	enableSorting: false,
 	header: () => (
-		<Text size="sm" variant="muted">
+		<Text size="sm" variant="secondary">
 			Pencillers
 		</Text>
 	),
@@ -249,7 +249,7 @@ const coloristsColumn = columnHelper.accessor(({ metadata }) => metadata?.colori
 	// TODO(prisma 0.7.0): Support order by relation
 	enableSorting: false,
 	header: () => (
-		<Text size="sm" variant="muted">
+		<Text size="sm" variant="secondary">
 			Colorists
 		</Text>
 	),
@@ -267,7 +267,7 @@ const letterersColumn = columnHelper.accessor(({ metadata }) => metadata?.letter
 	// TODO(prisma 0.7.0): Support order by relation
 	enableSorting: false,
 	header: () => (
-		<Text size="sm" variant="muted">
+		<Text size="sm" variant="secondary">
 			Letterers
 		</Text>
 	),
@@ -285,7 +285,7 @@ const artistsColumn = columnHelper.accessor(({ metadata }) => metadata?.cover_ar
 	// TODO(prisma 0.7.0): Support order by relation
 	enableSorting: false,
 	header: () => (
-		<Text size="sm" variant="muted">
+		<Text size="sm" variant="secondary">
 			Artists
 		</Text>
 	),
@@ -303,7 +303,7 @@ const charactersColumn = columnHelper.accessor(({ metadata }) => metadata?.chara
 	// TODO(prisma 0.7.0): Support order by relation
 	enableSorting: false,
 	header: () => (
-		<Text size="sm" variant="muted">
+		<Text size="sm" variant="secondary">
 			Characters
 		</Text>
 	),
@@ -321,7 +321,7 @@ const linksColumn = columnHelper.accessor(({ metadata }) => metadata?.links?.joi
 	// TODO(prisma 0.7.0): Support order by relation
 	enableSorting: false,
 	header: () => (
-		<Text size="sm" variant="muted">
+		<Text size="sm" variant="secondary">
 			Links
 		</Text>
 	),

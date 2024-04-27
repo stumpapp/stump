@@ -1,6 +1,6 @@
 import { prefetchPagedMedia, usePagedMediaQuery } from '@stump/client'
 import { usePrevious, usePreviousIsDifferent } from '@stump/components'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Helmet } from 'react-helmet'
 
 import { BookTable, BookTableColumnConfiguration } from '@/components/book'
@@ -20,6 +20,7 @@ import { useBooksLayout } from '@/stores/layout'
 import { useSeriesContext } from '../../context'
 
 export default function SeriesOverviewScene() {
+	const rootRef = useRef<HTMLDivElement>(null)
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
 
 	const { series } = useSeriesContext()
@@ -119,6 +120,7 @@ export default function SeriesOverviewScene() {
 							onChangePage={setPage}
 							onPrefetchPage={handlePrefetchPage}
 							tableControls={<BookTableColumnConfiguration />}
+							rootRef={rootRef.current}
 							{...props}
 						/>
 					)}
@@ -137,7 +139,7 @@ export default function SeriesOverviewScene() {
 				...rest,
 			}}
 		>
-			<div className="flex flex-1 flex-col pb-4 md:pb-0">
+			<div className="flex flex-1 flex-col pb-4 md:pb-0" ref={rootRef}>
 				<Helmet>
 					<title>Stump | {series.name || ''}</title>
 				</Helmet>

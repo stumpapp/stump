@@ -98,12 +98,12 @@ impl FileProcessor for EpubProcessor {
 	}
 
 	fn get_page_count(path: &str, _: &StumpConfig) -> Result<i32, FileError> {
-		// TODO determine a better solution here - epubs intrinsically have no page count,
-		// so for now I am returning an error, preventing the eventual updating of page count
-		// in the analysis job.
-		Err(FileError::UnsupportedFileType(
-			"Counting pages of epubs is not implemented".to_string(),
-		))
+		// TODO At present, this likely does not return the correct count of
+		// pages. It should be updated when a better method is determined.
+		let epub_file = Self::open(path)?;
+		let pages = epub_file.get_num_pages() as i32;
+
+		Ok(pages)
 	}
 
 	fn get_page_content_types(

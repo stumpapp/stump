@@ -34,6 +34,8 @@ pub enum AnalyzeMediaTask {
 pub struct AnalyzeMediaOutput {
 	/// The number of images analyzed
 	images_analyzed: u64,
+	/// The number of media items updated
+	media_updated: u64,
 }
 
 impl JobOutputExt for AnalyzeMediaOutput {
@@ -151,7 +153,7 @@ impl JobExt for AnalyzeMediaJob {
 		match task {
 			AnalyzeMediaTask::AnalyzeImage(id) => {
 				// Get media by id from the database
-				let media = ctx
+				let media_item = ctx
 					.db
 					.media()
 					.find_unique(media::id::equals(id.clone()))
@@ -167,8 +169,7 @@ impl JobExt for AnalyzeMediaJob {
 						))
 					})?;
 
-				// Get page count using file processing
-				let path = media.path;
+				let path = media_item.path;
 				let page_count = get_page_count(&path, &ctx.config)?;
 				output.images_analyzed += 1;
 
@@ -179,6 +180,7 @@ impl JobExt for AnalyzeMediaJob {
 					.update(media::id::equals(id), vec![media::pages::set(page_count)])
 					.exec()
 					.await?;
+				output.media_updated += 1;
 			},
 		}
 

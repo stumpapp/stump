@@ -38,6 +38,7 @@ type Props = {
 	isDisabled?: boolean
 }
 
+// TODO: Remove
 /**
  * A component that renders a set of filter-related components within a header.
  */

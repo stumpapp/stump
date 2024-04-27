@@ -1,6 +1,6 @@
-import { IconButton, Text, ToolTip } from '@stump/components'
+import { IconButton, Input, Text, ToolTip } from '@stump/components'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 type Props = {
 	pages: number
@@ -10,6 +10,8 @@ type Props = {
 }
 
 export default function URLPagination({ pages, currentPage, onChangePage, onPrefetchPage }: Props) {
+	const [inputPage, setInputPage] = useState<number | undefined>(currentPage)
+
 	const handleNextPage = useCallback(() => {
 		if (currentPage < pages) {
 			onChangePage(currentPage + 1)
@@ -34,14 +36,50 @@ export default function URLPagination({ pages, currentPage, onChangePage, onPref
 		}
 	}, [currentPage, onPrefetchPage])
 
+	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const parsed = parseInt(e.target.value)
+		setInputPage(isNaN(parsed) ? undefined : parsed)
+	}
+
+	const handleInputBlur = useCallback(() => {
+		if (inputPage === undefined || inputPage < 1 || inputPage > pages) {
+			setInputPage(currentPage)
+		}
+	}, [inputPage, currentPage, pages])
+
+	const handleInputSubmit = useCallback(
+		(e: React.FormEvent<HTMLFormElement>) => {
+			e.preventDefault()
+			if (inputPage !== undefined && inputPage > 0 && inputPage <= pages) {
+				onChangePage(inputPage)
+			}
+		},
+		[inputPage, onChangePage, pages],
+	)
+
+	useEffect(() => {
+		setInputPage(currentPage)
+	}, [currentPage])
+
 	return (
 		<div className="flex items-center space-x-4">
-			{/* TODO: page selector */}
-			<div>
-				<Text size="sm" variant="muted">
-					{currentPage} of {pages}
+			<form className="flex shrink-0 items-center space-x-2" onSubmit={handleInputSubmit}>
+				<Input
+					type="number"
+					variant="activeGhost"
+					size="sm"
+					className="h-7 w-7 p-0 text-center text-xs [appearance:textfield] sm:h-6 sm:w-6"
+					disabled={pages <= 1}
+					value={inputPage || currentPage}
+					onChange={handleInputChange}
+					onBlur={handleInputBlur}
+					max={pages}
+					min={1}
+				/>
+				<Text size="sm" variant="muted" className="inline-flex shrink-0">
+					of {pages}
 				</Text>
-			</div>
+			</form>
 			<div className="flex items-center space-x-1">
 				<ToolTip content="Previous page" size="sm" align="end">
 					<IconButton

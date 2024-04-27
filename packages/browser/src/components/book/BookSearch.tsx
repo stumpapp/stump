@@ -17,6 +17,7 @@ type Props = {
 	showFilters?: boolean
 }
 
+// TODO: Remove / refactor
 /**
  *  A component that renders a paginated grid of books with a search bar and (optionally)
  *  a filter slide over. Must be used within a `FilterProvider`.

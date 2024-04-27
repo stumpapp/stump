@@ -1,9 +1,9 @@
 {
 	"underConstruction": {
-		"heading": "This is awkward",
-		"message": "You've stumbled upon a page that's still being developed. I'd love to show it to you, but it isn't quite ready yet.",
-		"homeLink": "Go Home",
-		"githubLink": "View the GitHub issue"
+		"heading": "To trochę niezręczne",
+		"message": "Natrafiono na stronę która jest wciąż w fazie rozwojowej. Z racji iż nie jest ona skończona, nie mogę Ci jej jeszcze pokazać.",
+		"homeLink": "Wróć do ekranu głównego",
+		"githubLink": "Zobacz problem na serwisie GitHub"
 	},
 	"authScene": {
 		"claimHeading": "Inicjalizuj serwer",
@@ -72,7 +72,7 @@
 			"member_role_spec": {
 				"heading": "Własne mapowanie ról",
 				"subtitle": [
-					"You can create custom names for the roles in your book club. For example, you could rename the 'Member' role to 'Crewmate', or 'Creator' to 'Captain'. If you don't want to use custom names, you can leave these fields blank and the default names will be used instead. For more information about roles, refer to the",
+					"Możesz stworzyć własne nazwy dla poszczególnych ról w Twoim klubie książki. Dla zasięgnięcia dalszych informacji sprawdź",
 					"dokumentację"
 				],
 				"member": {
@@ -97,8 +97,8 @@
 				}
 			},
 			"creator_preferences": {
-				"heading": "Your membership preferences",
-				"subtitle": "Some preferences for your membership in the book club. These can be changed at any time from the book club settings page",
+				"heading": "Członkowstwo",
+				"subtitle": "Ustawienia Twojego członkowstwa w klubie książki",
 				"creator_display_name": {
 					"label": "Nazwa wyświetlana",
 					"placeholder": "oromei",
@@ -113,8 +113,8 @@
 		}
 	},
 	"createLibraryScene": {
-		"heading": "Create New Library",
-		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on libraries and how they work, check out the",
+		"heading": "Utwórz bibliotekę",
+		"subtitle": "Biblioteki służą do grupowania książek. Jeśli chcesz odświeżyć sobie metodykę ich działania, sprawdź",
 		"subtitleLink": "stosowna dokumentacja",
 		"form": {
 			"labels": {
@@ -130,8 +130,8 @@
 		}
 	},
 	"librarySettingsScene": {
-		"heading": "Manage Library",
-		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
+		"heading": "Ustawienia",
+		"subtitle": "Zarządzaj tutaj swoją biblioteką. Jeśli chcesz odświeżyć sobie działanie tych ustawień, sprawdź",
 		"subtitleLink": "stosowna dokumentacja",
 		"form": {
 			"labels": {
@@ -325,7 +325,7 @@
 					},
 					"avatarPicker": {
 						"heading": "Ustaw swój awatar",
-						"subtitle": "Stump wspiera niestandardowe awatary które można ustawić poprzez podanie odnośnika do obrazu. Wgrywanie obrazów nie jest obsługiwane w celu zmniejszenia ilości danych przechowywanych przez serwer.",
+						"subtitle": "Stump wspiera niestandardowe awatary które można ustawić poprzez podanie odnośnika do obrazu. Wgrywanie obrazów jest nieobsługiwane z racji zmniejszenia ilości danych przechowywanych na serwerze.",
 						"preview": "Podgląd pojawi się tutaj po wprowadzeniu odnośnika.",
 						"labels": {
 							"imageUrl": "Adres obrazka",
@@ -375,29 +375,29 @@
 					}
 				},
 				"navigationArrangement": {
-					"label": "Navigation arrangement",
+					"label": "Układ nawigacji",
 					"description": {
-						"sidebar": "Arrange and customize the navigation items in the sidebar",
-						"topbar": "Arrange and customize the navigation items in the topbar"
+						"sidebar": "Uporządkuj i dostosuj elementy nawigacji na pasku bocznym",
+						"topbar": "Uporządkuj i dostosuj elementy nawigacji na górnym pasku"
 					},
-					"isLocked": "Arrangement is locked",
-					"lock": "Lock arrangement",
-					"unlock": "Unlock arrangement",
+					"isLocked": "Układ jest zablokowany",
+					"lock": "Zablokuj układ",
+					"unlock": "Odblokuj układ",
 					"options": {
-						"Home": "Home",
-						"Explore": "Explore",
-						"Libraries": "Libraries",
-						"BookClubs": "Book clubs",
-						"SmartLists": "Smart lists"
+						"Home": "Strona główna",
+						"Explore": "Odkrywaj",
+						"Libraries": "Biblioteki",
+						"BookClubs": "Kluby książki",
+						"SmartLists": "Inteligentne listy"
 					},
 					"entityOptions": {
 						"createAction": {
-							"label": "Show create action",
-							"help": "Show the create action in the navigation"
+							"label": "Pokaż akcję tworzenia",
+							"help": "Pokaż akcję tworzenia w menu nawigacji"
 						},
 						"linkToAll": {
-							"label": "See all link",
-							"help": "A link to a page dedicated to viewing all items of this type"
+							"label": "Odnośnik do ukazania wszystkiego",
+							"help": "Odnośnik do strony przeznaczonej do przeglądania wszystkich elementów tego typu"
 						}
 					}
 				}
@@ -413,11 +413,11 @@
 					"description": "Komiksy, manga i inne książki obrazkowe",
 					"sections": {
 						"preloadAheadCount": {
-							"label": "Ilość do wstępnego zastosowania w przód",
+							"label": "Ilość do wstępnego załadowania w przód",
 							"description": "Ilość stron do wstępnego załadowania w przód względem aktualnej strony"
 						},
 						"preloadBehindCount": {
-							"label": "Ilość do wstępnego zastosowania do tyłu",
+							"label": "Ilość do wstępnego załadowania do tyłu",
 							"description": "Ilość stron do wstępnego załadowania do tyłu względem aktualnej strony"
 						}
 					}
@@ -430,9 +430,9 @@
 			"description": "Ustawienia związane z aplikacją dekstopową Stump",
 			"sections": {
 				"discordPresence": {
-					"label": "Status aktywności Discorda",
+					"label": "Status aktywności Discord",
 					"description": "Wyświetl swoją aktywność Stump na Discordzie za pomocą statusu aktywności Discorda",
-					"reconnect": "Połącz ponownie z Discordem"
+					"reconnect": "Połącz ponownie z Discord"
 				}
 			}
 		},
@@ -559,75 +559,75 @@
 					"bookclub": {
 						"label": "Kluby książki",
 						"read": {
-							"label": "Dostęp do funkcji klub książki",
-							"description": "Zezwala użytkownikowi na dostęp do funkcji klubu książki, w tym do przeglądania i dołączania do klubów książki"
+							"label": "Dostęp do funkcji klubu książki",
+							"description": "Pozwala użytkownikowi na dostęp do funkcji klubu książki, w tym do przeglądania i dołączania do klubów książki"
 						},
 						"create": {
 							"label": "Stwórz klub książki",
-							"description": "Zezwala użytkownikowi na tworzenie nowego klubu książki"
+							"description": "Pozwala użytkownikowi na tworzenie nowego klubu książki"
 						}
 					},
 					"file": {
 						"label": "Zarządzanie plikami",
 						"explorer": {
-							"label": "File Explorer",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+							"label": "Eksplorator plików",
+							"description": "Pozwala użytkownikowi na dostęp do różnych eksploratorów plików. Ograniczenie zawartości nie może być zagwarantowane, gdy to uprawnienie jest nadane"
 						},
 						"download": {
-							"label": "Pobierz pliki",
-							"description": "Zezwala użytkownikowi na pobieranie plików z serwera"
+							"label": "Pobieranie plików",
+							"description": "Pozwala użytkownikowi na pobieranie plików z serwera"
 						},
 						"upload": {
-							"label": "Prześlij pliki",
+							"label": "Przesyłanie plików",
 							"description": "Pozwala użytkownikowi na przesyłanie plików na serwer"
 						}
 					},
 					"library": {
-						"label": "Zarządzanie biblioteką",
+						"label": "Zarządzanie bibliotekami",
 						"create": {
-							"label": "Utwórz biblioteki",
-							"description": "Zezwala użytkownikowi na tworzenie nowych bilbliotek. Zawiera zezwolenia na edycje i skanowanie"
+							"label": "Tworzenie bibliotek",
+							"description": "Pozwala użytkownikowi na tworzenie nowych bilbliotek. Zawiera zezwolenia na edycje i skanowanie"
 						},
 						"scan": {
-							"label": "Skanuj biblioteki",
+							"label": "Skanowanie bibliotek",
 							"description": "Pozwól użytkownikom na rozpoczęcie skanowania dla istniejących bibliotek"
 						},
 						"edit": {
-							"label": "Edytuj biblioteki",
-							"description": "Zezwala użytkownikowi na zmianę podstawowych danych istniejących bibliotek"
+							"label": "Edytowanie bibliotek",
+							"description": "Pozwala użytkownikowi na zmianę podstawowych danych istniejących bibliotek"
 						},
 						"manage": {
-							"label": "Zarządzaj bibliotekami",
-							"description": "Zezwala użytkownikowi na zmianę zaawansowanych ustawień istniejących bibliotek. Zawiera zezwolenia na edycje i skanowanie"
+							"label": "Zarządzanie biblioteką",
+							"description": "Pozwala użytkownikowi na zmianę zaawansowanych ustawień istniejących bibliotek. Zawiera zezwolenia na edycje i skanowanie"
 						},
 						"delete": {
-							"label": "Usuń biblioteki",
-							"description": "Zezwala użytkownikowi na usuwanie istniejących bilbliotek. Zawiera zezwolenia na edycje, zarządzanie i skanowanie"
+							"label": "Usuwanie bibliotek",
+							"description": "Pozwala użytkownikowi na usuwanie istniejących bilbliotek. Zawiera zezwolenia na edycje, zarządzanie i skanowanie"
 						}
 					},
 					"server": {
 						"label": "Zarządzanie serwerem",
 						"manage": {
-							"label": "Zarządzaj serwerem",
+							"label": "Zarządzanie serwerem",
 							"description": "Pozwala użytkownikowi zarządzać serwerem.\nZawiera *wiele* innych uprawnień"
 						}
 					},
 					"user": {
 						"label": "Zarządzanie użytkownikami",
 						"read": {
-							"label": "Przeglądaj użytkowników",
+							"label": "Przeglądanie użytkowników",
 							"description": "Pozwala użytkownikowi na przeglądanie innych użytkowników na serwerze. Jest to wymagane w przypadku niektórych innych funkcji, np. do wyłączenia użytkowników z dostępu do biblioteki"
 						},
 						"manage": {
-							"label": "Zarządzaj użytkownikami",
-							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
+							"label": "Zarządzanie użytkownikami",
+							"description": "Pozwala użytkownikowi na dostęp do zarządzania innymi użytkownikami na serwerze. Zawiera zezwolenie na czytanie, tworzenie i aktualizowanie"
 						}
 					},
 					"smartlist": {
 						"label": "Inteligentne listy",
 						"read": {
 							"label": "Dostęp do funkcji inteligentnej listy",
-							"description": "Allows the user to access smart lists features"
+							"description": "Pozwala użytkownikowi na dostęp do funkcji inteligentnych list. Szczegółowe uprawnienia nie są jeszcze zaimplementowane, pozycja ta zawiera więc uprawnienia do czytania, tworzenia i aktualizowania własnych list"
 						}
 					}
 				},
@@ -685,12 +685,12 @@
 			"smartlists": "Inteligentne listy",
 			"noSmartlists": "Brak inteligentnych list",
 			"createSmartlist": "Utwórz inteligentną listę",
-			"seeAll": "See all"
+			"seeAll": "Pokaż wszystko"
 		},
 		"libraryOptions": {
 			"scanLibrary": "Skanuj",
 			"fileExplorer": "Przeglądarka plików",
-			"manageLibrary": "Manage",
+			"manageLibrary": "Zarządzaj",
 			"deleteLibrary": "Usuń"
 		},
 		"versionInformation": {
@@ -734,7 +734,7 @@
 		"placeholderNoTags": "Brak etykiet"
 	},
 	"thumbnailDropdown": {
-		"label": "Edit thumbnail",
+		"label": "Edytuj miniaturkę",
 		"options": {
 			"selectFromBooks": "Wybierz z książek",
 			"uploadImage": "Wrzuć zdjęcie"

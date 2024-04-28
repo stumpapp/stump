@@ -355,6 +355,13 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<MediaAnnotation>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<ReadProgress>()?).as_bytes())?;
 
+		file.write_all(
+			format!("{}\n\n", ts_export::<ReactTableColumnSort>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<ReactTableGlobalSort>()?).as_bytes(),
+		)?;
+
 		file.write_all(format!("{}\n\n", ts_export::<Filter<()>>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<NumericFilter<()>>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<NumericRange<()>>()?).as_bytes())?;
@@ -379,12 +386,6 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<SeriesSmartFilter>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibrarySmartFilter>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<SmartListView>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<SmartListTableSortingState>()?).as_bytes(),
-		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<SmartListTableColumnSelection>()?).as_bytes(),
-		)?;
 
 		file.write_all(format!("{}\n\n", ts_export::<BookClub>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<BookClubMember>()?).as_bytes())?;

@@ -1,6 +1,9 @@
 import { usePrevious } from './usePrevious'
 
 type Params = {
+	/**
+	 * If true, there is no initial check for nullish values.
+	 */
 	ignoreNullish?: boolean
 }
 /**

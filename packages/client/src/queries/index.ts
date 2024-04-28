@@ -45,8 +45,10 @@ export {
 } from './library'
 export { useLogsQuery } from './log'
 export {
+	prefetchLibraryMedia,
 	prefetchMedia,
 	prefetchPagedMedia,
+	prefetchSeriesMedia,
 	useContinueReading,
 	useMediaByIdQuery,
 	useMediaCursorQuery,

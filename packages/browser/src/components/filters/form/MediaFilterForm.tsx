@@ -2,11 +2,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { metadataApi, metadataQueryKeys } from '@stump/api'
 import { useQuery } from '@stump/client'
 import { CheckBox, Form } from '@stump/components'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import z from 'zod'
 
-import { useSeriesContext } from '../../../scenes/series/context'
+import { useSeriesContextSafe } from '@/scenes/series'
+
 import { useFilterContext } from '..'
 import AgeRatingFilter from './AgeRatingFilter'
 import ExtensionSelect from './ExtensionSelect'
@@ -37,29 +38,26 @@ const schema = z.object({
 	read_status: z.array(z.enum(['completed', 'reading', 'unread'])).optional(),
 })
 export type MediaFilterFormSchema = z.infer<typeof schema>
-
-// TODO: detatch from series context to be re-used in library context
+type ReadStatus = NonNullable<Pick<MediaFilterFormSchema, 'read_status'>['read_status']>[number]
 
 export default function MediaFilterForm() {
 	const { filters, setFilters } = useFilterContext()
-	const {
-		series: { id },
-	} = useSeriesContext()
 
+	const seriesContext = useSeriesContextSafe()
 	const [onlyFromSeries, setOnlyFromSeries] = useState(false)
 
 	const params = useMemo(() => {
-		if (onlyFromSeries && !!id) {
+		if (onlyFromSeries && !!seriesContext?.series.id) {
 			return {
 				media: {
 					series: {
-						id,
+						id: seriesContext.series.id,
 					},
 				},
 			}
 		}
 		return {}
-	}, [onlyFromSeries, id])
+	}, [onlyFromSeries, seriesContext])
 
 	const { data } = useQuery([metadataQueryKeys.getMediaMetadataOverview, params], () =>
 		metadataApi.getMediaMetadataOverview(params).then((res) => res.data),
@@ -72,9 +70,22 @@ export default function MediaFilterForm() {
 				...((filters?.metadata as Record<string, string[]>) || {}),
 				age_rating: (filters?.metadata as Record<string, unknown>)?.age_rating ?? null,
 			},
+			read_status: filters?.read_status as ReadStatus[],
 		},
 		resolver: zodResolver(schema),
 	})
+	const { reset } = form
+
+	useEffect(() => {
+		reset({
+			extension: filters?.extension as string,
+			metadata: {
+				...((filters?.metadata as Record<string, string[]>) || {}),
+				age_rating: (filters?.metadata as Record<string, unknown>)?.age_rating ?? null,
+			},
+			read_status: filters?.read_status as ReadStatus[],
+		})
+	}, [reset, filters])
 
 	/**
 	 * A function that handles the form submission. This function merges the form
@@ -98,7 +109,7 @@ export default function MediaFilterForm() {
 			form={form}
 			onSubmit={handleSubmit}
 		>
-			{!!id && (
+			{!!seriesContext && (
 				<CheckBox
 					label="Only show options available from series"
 					checked={onlyFromSeries}

@@ -797,6 +797,17 @@
 		"bookCount": "Total Books",
 		"diskUsage": "Disk Usage"
 	},
+	"noLibraries": {
+		"heading": "Nothing to see here",
+		"messagePrefix": "You can't see what you don't have",
+		"message": {
+			"create": "Create a library to get started",
+			"wait": "Once libraries are created, they'll be displayed here"
+		},
+		"links": {
+			"create": "Create library"
+		}
+	},
 	"pagination": {
 		"buttons": {
 			"next": "Next",

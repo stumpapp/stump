@@ -4,11 +4,16 @@ import {
 	createColumnHelper,
 	flexRender,
 	getCoreRowModel,
+	getSortedRowModel,
+	SortDirection,
+	SortingState,
 	useReactTable,
 } from '@tanstack/react-table'
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { useWindowSize } from 'rooks'
+
+import { SortIcon } from '@/components/table'
 
 import { useFileExplorerContext } from '../context'
 import FileThumbnail from '../FileThumbnail'
@@ -22,7 +27,7 @@ const baseColumns = [
 			},
 		}) => <FileThumbnail path={path} isDirectory={is_directory} />,
 		header: () => (
-			<Text size="sm" variant="muted">
+			<Text size="sm" variant="secondary">
 				Cover
 			</Text>
 		),
@@ -35,22 +40,19 @@ export default function FileTable() {
 	const { files, onSelect } = useFileExplorerContext()
 	const { innerWidth } = useWindowSize()
 
+	const [sorting, setSorting] = useState<SortingState>([])
+
 	const columns = useMemo(
 		() => [
 			...baseColumns.slice(0, 1),
 			columnHelper.accessor('name', {
 				cell: ({ row: { original: file }, getValue }) => (
-					<Text
-						size="sm"
-						variant="muted"
-						className="cursor-pointer hover:underline"
-						onClick={() => onSelect(file)}
-					>
+					<Text size="sm" className="cursor-pointer hover:underline" onClick={() => onSelect(file)}>
 						{getValue()}
 					</Text>
 				),
 				header: () => (
-					<Text size="sm" variant="muted">
+					<Text size="sm" variant="secondary">
 						Name
 					</Text>
 				),
@@ -67,6 +69,11 @@ export default function FileTable() {
 			size: 40,
 		},
 		getCoreRowModel: getCoreRowModel(),
+		getSortedRowModel: getSortedRowModel(),
+		onSortingChange: setSorting,
+		state: {
+			sorting,
+		},
 	})
 
 	const { rows } = table.getRowModel()
@@ -111,6 +118,12 @@ export default function FileTable() {
 													}}
 												>
 													{flexRender(header.column.columnDef.header, header.getContext())}
+
+													{isSortable && (
+														<SortIcon
+															direction={(header.column.getIsSorted() as SortDirection) ?? null}
+														/>
+													)}
 												</div>
 											</th>
 										)

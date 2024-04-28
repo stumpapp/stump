@@ -3,12 +3,12 @@ import { Navigate, Route, Routes } from 'react-router'
 
 import ServerOwnerRouteWrapper from '@/components/ServerOwnerRouteWrapper.tsx'
 
-const BookSearchScene = lazy(() => import('./BookSearchScene.tsx'))
+const BookSearchScene = lazy(() => import('../bookSearch/BookSearchScene.tsx'))
 const BookOverviewScene = lazy(() => import('./BookOverviewScene.tsx'))
-const BookReaderScene = lazy(() => import('./BookReaderScene.tsx'))
-const EpubReaderScene = lazy(() => import('./EpubReaderScene.tsx'))
-const PDFReaderScene = lazy(() => import('./PDFReaderScene.tsx'))
-const BookManagementScene = lazy(() => import('./management/BookManagementScene.tsx'))
+const BookReaderScene = lazy(() => import('./reader/BookReaderScene.tsx'))
+const EpubReaderScene = lazy(() => import('./reader/EpubReaderScene.tsx'))
+const PDFReaderScene = lazy(() => import('./reader/PDFReaderScene.tsx'))
+const BookManagementScene = lazy(() => import('./settings/BookManagementScene.tsx'))
 
 export default function BookRouter() {
 	return (

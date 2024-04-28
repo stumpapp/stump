@@ -11,7 +11,7 @@ export const TEXT_VARIANTS = {
 		'font-medium leading-none text-contrast-200 peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
 	muted: 'text-muted',
 	primary: 'text-brand',
-	secondary: 'text-gray-700 dark:text-gray-300',
+	secondary: 'text-contrast-400',
 }
 
 const textVariants = cva('', {

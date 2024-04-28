@@ -338,8 +338,7 @@ pub async fn register(
 		.exec()
 		.await?;
 
-	// FIXME: these next two queries will be removed once nested create statements are
-	// supported on the prisma client. Until then, this ugly mess is necessary.
+	// TODO(prisma 0.7.0): Nested create
 	let _user_preferences = db
 		.user_preferences()
 		.create(vec![

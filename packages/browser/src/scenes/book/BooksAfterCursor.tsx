@@ -2,8 +2,8 @@ import { useMediaCursorQuery } from '@stump/client'
 import { Media } from '@stump/types'
 import { useEffect } from 'react'
 
+import MediaCard from '@/components/book/BookCard'
 import HorizontalCardList from '@/components/HorizontalCardList'
-import MediaCard from '@/components/media/MediaCard'
 
 type Props = {
 	cursor: Media

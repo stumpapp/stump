@@ -1,4 +1,4 @@
-import { NativeSelect } from '@stump/components'
+import { Label, NativeSelect } from '@stump/components'
 import React, { useMemo } from 'react'
 
 import { FilterableEntity } from '.'
@@ -10,6 +10,7 @@ const options: Record<FilterableEntity, string[]> = {
 	series: [...commonOptions, 'description', 'library_id'],
 }
 
+// TODO: accept a default value which, if value equals, do an onChange with an empty string
 type Props = {
 	entity: FilterableEntity
 	value?: string
@@ -22,12 +23,17 @@ export default function OrderBySelect({ entity, value, onChange }: Props) {
 	)
 
 	return (
-		<NativeSelect
-			options={entityOptions}
-			emptyOption={{ label: 'Select an option', value: '' }}
-			value={value}
-			onChange={(e) => onChange?.(e.target.value)}
-			size="sm"
-		/>
+		<div>
+			<Label htmlFor="order_by" className="mb-1.5">
+				Order by
+			</Label>
+			<NativeSelect
+				options={entityOptions}
+				emptyOption={{ label: 'Select an option', value: '' }}
+				value={value}
+				onChange={(e) => onChange?.(e.target.value)}
+				size="sm"
+			/>
+		</div>
 	)
 }

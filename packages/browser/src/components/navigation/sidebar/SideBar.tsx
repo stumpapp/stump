@@ -164,3 +164,5 @@ export default function SideBar({ asChild, hidden }: Props) {
 		</motion.aside>
 	)
 }
+
+export const SIDEBAR_WIDTH = 208

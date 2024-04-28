@@ -67,9 +67,8 @@ export default function SeriesNavigation() {
 						className={cn(
 							'whitespace-nowrap border-b-2 px-1 py-3 text-sm font-medium',
 							{
-								'border-brand-500 text-brand-600 dark:text-brand-400': tab.isActive,
-								'border-transparent text-gray-800 hover:border-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:text-gray-200':
-									!tab.isActive,
+								'border-brand-500 text-brand-500': tab.isActive,
+								'border-transparent text-muted hover:border-edge': !tab.isActive,
 							},
 							// {
 							// 	'pointer-events-none !text-opacity-40': tab.disabled,

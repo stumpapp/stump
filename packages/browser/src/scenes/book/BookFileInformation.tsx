@@ -38,7 +38,7 @@ export default function BookFileInformation({ media }: Props) {
 			<Heading size="xs">File Information</Heading>
 			<div className="flex space-x-4">
 				<Text size="sm" variant="muted">
-					Size: {formatBytes(media.size)}
+					Size: {formatBytes(media.size.valueOf())}
 				</Text>
 				<Text size="sm" variant="muted">
 					Kind: {media.extension?.toUpperCase()}

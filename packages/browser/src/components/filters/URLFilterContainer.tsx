@@ -8,6 +8,7 @@ import { SIDEBAR_WIDTH } from '@/components/navigation/sidebar'
 import { TablePaginationProps } from '@/components/table'
 import { usePreferences } from '@/hooks'
 
+import URLPageSize from './URLPageSize'
 import URLPagination from './URLPagination'
 
 type Props = {
@@ -64,7 +65,7 @@ const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 		return (
 			<div
 				ref={ref}
-				className={cn('flex flex-1 flex-col pb-24 md:pb-10', className)}
+				className={cn('flex flex-1 flex-col overflow-x-auto pb-24 md:pb-10', className)}
 				id="urlFilterContainer"
 			>
 				{children}
@@ -79,7 +80,10 @@ const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 								: `calc(100% - ${SIDEBAR_WIDTH}px - ${scrollbarWidth}px)`,
 					}}
 				>
-					{tableControls ?? <div />}
+					<div className="flex shrink-0 items-center gap-x-2">
+						{tableControls}
+						<URLPageSize />
+					</div>
 					<URLPagination {...paginationProps} />
 				</div>
 			</div>

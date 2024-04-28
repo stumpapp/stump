@@ -382,6 +382,11 @@ export const defaultColumns = [
 	addedColumn,
 ] as ColumnDef<Media>[]
 
+export const defaultColumnSort: ReactTableColumnSort[] = defaultColumns.map((column, idx) => ({
+	id: column.id || '',
+	position: idx,
+}))
+
 /**
  * A helper function to build the columns for the table based on the stored column selection. If
  * no columns are selected, or if the selection is empty, the default columns will be used.

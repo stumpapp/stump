@@ -135,7 +135,7 @@ export default function EntityTable<Entity>({
 						<tr key={row.id} className="odd:bg-background-200">
 							{row.getVisibleCells().map((cell) => (
 								<td
-									className="pl-1.5 pr-1.5 first:pl-4 last:pr-4"
+									className="h-14 pl-1.5 pr-1.5 first:pl-4 last:pr-4"
 									key={cell.id}
 									style={{
 										width: cell.column.getSize(),

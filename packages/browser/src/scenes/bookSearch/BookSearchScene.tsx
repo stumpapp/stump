@@ -3,8 +3,9 @@ import { usePrevious, usePreviousIsDifferent } from '@stump/components'
 import React, { useCallback, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 
-import { BookTable, BookTableColumnConfiguration } from '@/components/book'
+import { BookTable } from '@/components/book'
 import BookGrid from '@/components/book/BookGrid'
+import { defaultBookColumnSort } from '@/components/book/table'
 import {
 	FilterContext,
 	FilterHeader,
@@ -13,6 +14,7 @@ import {
 	URLOrdering,
 	useFilterScene,
 } from '@/components/filters'
+import { EntityTableColumnConfiguration } from '@/components/table'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
 import { useBooksLayout } from '@/stores/layout'
@@ -20,8 +22,10 @@ import { useBooksLayout } from '@/stores/layout'
 export default function BookSearchScene() {
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
 
-	const { layoutMode, setLayout } = useBooksLayout((state) => ({
+	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout((state) => ({
+		columns: state.columns,
 		layoutMode: state.layout,
+		setColumns: state.setColumns,
 		setLayout: state.setLayout,
 	}))
 	const {
@@ -112,7 +116,13 @@ export default function BookSearchScene() {
 							pages={total_pages || 1}
 							onChangePage={setPage}
 							onPrefetchPage={handlePrefetchPage}
-							tableControls={<BookTableColumnConfiguration />}
+							tableControls={
+								<EntityTableColumnConfiguration
+									entity="media"
+									configuration={columns || defaultBookColumnSort}
+									onSave={setColumns}
+								/>
+							}
 							{...props}
 						/>
 					)}

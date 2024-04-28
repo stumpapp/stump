@@ -1,2 +1,7 @@
 export { default as BookTable } from './BookTable'
-export { default as BookTableColumnConfiguration } from './BookTableColumnConfiguration'
+export {
+	columnOptionMap as bookTableColumnMap,
+	buildColumns as buildBookColumns,
+	defaultColumns as defaultBookColumns,
+	defaultColumnSort as defaultBookColumnSort,
+} from './columns'

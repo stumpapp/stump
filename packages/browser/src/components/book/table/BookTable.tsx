@@ -6,6 +6,7 @@ import { orderingToTableSort, tableSortToOrdering, useFilterContext } from '@/co
 import { EntityTable, EntityTableProps } from '@/components/table'
 import { useBooksLayout } from '@/stores/layout'
 
+import { buildBookColumns } from '.'
 import { defaultColumns } from './columns'
 
 type Props = Omit<EntityTableProps<Media>, 'columns'>
@@ -17,7 +18,8 @@ export default function BookTable(props: Props) {
 	const { ordering, setOrdering } = useFilterContext()
 
 	const columns = useMemo(
-		() => (configuration.columns?.length ? configuration.columns : defaultColumns),
+		() =>
+			configuration.columns?.length ? buildBookColumns(configuration.columns) : defaultColumns,
 		[configuration.columns],
 	)
 

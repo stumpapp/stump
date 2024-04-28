@@ -17,6 +17,7 @@ type Props = {
 	sheetProps?: SheetProps
 }
 
+// TODO(bookclub): Refactor this component
 export default function BookSearchOverlay({ onBookSelect, sheetProps }: Props) {
 	const [isOpen, setIsOpen] = useState(false)
 	const [page, setPage] = useState(1)

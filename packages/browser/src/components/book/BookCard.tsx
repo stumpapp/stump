@@ -75,7 +75,7 @@ export default function BookCard({
 		return (
 			<div className="flex items-center justify-between">
 				<Text size="xs" variant="muted">
-					{formatBytes(media.size)}
+					{formatBytes(media.size.valueOf())}
 				</Text>
 			</div>
 		)

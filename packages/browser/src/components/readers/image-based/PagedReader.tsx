@@ -2,8 +2,10 @@ import { mediaQueryKeys } from '@stump/api'
 import { queryClient } from '@stump/client'
 import type { Media } from '@stump/types'
 import clsx from 'clsx'
-import React, { memo, useEffect } from 'react'
+import React, { memo, useEffect, useMemo } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
+import { useSwipeable } from 'react-swipeable'
+import { useMediaMatch, useWindowSize } from 'rooks'
 
 import { useReaderStore } from '@/stores'
 
@@ -32,6 +34,20 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 		setShowToolBar: state.setShowToolBar,
 		showToolBar: state.showToolBar,
 	}))
+	const { innerWidth } = useWindowSize()
+
+	const isMobile = useMediaMatch('(max-width: 768px)')
+	const [imageWidth, setImageWidth] = React.useState<number | null>(null)
+	/**
+	 * If the image width is >= 80% of the screen width, we want to fix the side navigation
+	 */
+	const fixSideNavigation = useMemo(() => {
+		if (imageWidth && innerWidth) {
+			return imageWidth >= innerWidth * 0.8
+		} else {
+			return isMobile
+		}
+	}, [imageWidth, innerWidth, isMobile])
 
 	/**
 	 * This effect is responsible for updating the current page ref when the current page changes. This was
@@ -94,20 +110,41 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 		}
 	})
 
+	const swipeHandlers = useSwipeable({
+		onSwipedLeft: () => handlePageChange(currentPage + 1),
+		onSwipedRight: () => handlePageChange(currentPage - 1),
+		preventScrollOnSwipe: true,
+	})
+
 	return (
-		<div className="relative flex h-full w-full items-center justify-center">
-			<SideBarControl position="left" onClick={() => handlePageChange(currentPage - 1)} />
+		<div
+			className="relative flex h-full w-full items-center justify-center"
+			{...(isMobile ? swipeHandlers : {})}
+		>
+			<SideBarControl
+				fixed={fixSideNavigation}
+				position="left"
+				onClick={() => handlePageChange(currentPage - 1)}
+			/>
 			{/* TODO: better error handling for the loaded image */}
 			<img
 				className="z-30 max-h-full w-full select-none md:w-auto"
 				src={getPageUrl(currentPage)}
+				onLoad={(e) => {
+					const img = e.target as HTMLImageElement
+					setImageWidth(img.width)
+				}}
 				onError={(err) => {
 					// @ts-expect-error: is oke
 					err.target.src = '/favicon.png'
 				}}
 				onClick={() => setShowToolBar(!showToolBar)}
 			/>
-			<SideBarControl position="right" onClick={() => handlePageChange(currentPage + 1)} />
+			<SideBarControl
+				fixed={fixSideNavigation}
+				position="right"
+				onClick={() => handlePageChange(currentPage + 1)}
+			/>
 		</div>
 	)
 }
@@ -117,6 +154,8 @@ type SideBarControlProps = {
 	onClick: () => void
 	/** The position of the sidebar control */
 	position: 'left' | 'right'
+	/** Whether the sidebar should be fixed to the screen */
+	fixed: boolean
 }
 
 /**
@@ -124,13 +163,12 @@ type SideBarControlProps = {
  * clicked, will call the onClick callback. This is used in the `PagedReader` component for
  * navigating to the next/previous page.
  */
-function SideBarControl({ onClick, position }: SideBarControlProps) {
+function SideBarControl({ onClick, position, fixed }: SideBarControlProps) {
 	return (
 		<div
 			className={clsx(
-				'z-50 h-full border border-transparent transition-all duration-300',
-				'fixed w-[10%] active:border-edge-200 active:bg-background-200  active:bg-opacity-50',
-				'sm:relative sm:flex sm:w-full sm:flex-shrink',
+				'z-50 h-full shrink-0 border border-transparent transition-all duration-300 active:border-edge-200 active:bg-background-200 active:bg-opacity-50',
+				fixed ? 'fixed w-[10%]' : 'relative flex flex-1 flex-grow',
 				{ 'right-0': position === 'right' },
 				{ 'left-0': position === 'left' },
 			)}

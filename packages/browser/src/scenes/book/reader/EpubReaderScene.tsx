@@ -8,6 +8,11 @@ import paths from '../../../paths'
 
 //! NOTE: Only the epub.js reader is supported for now :sob:
 export default function EpubReaderScene() {
+	const { id } = useParams()
+	if (!id) {
+		throw new Error('Media id is required')
+	}
+
 	const [search, setSearch] = useSearchParams()
 
 	const [initialCfi] = useState(() => decodeURIComponent(search.get('cfi') || ''))
@@ -27,11 +32,6 @@ export default function EpubReaderScene() {
 			setSearch(search)
 		}
 	}, [initialCfi, startOver, search, setSearch])
-
-	const { id } = useParams()
-	if (!id) {
-		throw new Error('Media id is required')
-	}
 
 	const { isLoading: fetchingBook, media } = useMediaByIdQuery(id)
 

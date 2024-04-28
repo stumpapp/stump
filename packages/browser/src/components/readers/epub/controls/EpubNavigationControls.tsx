@@ -11,8 +11,6 @@ type Props = {
 	children: React.ReactNode
 }
 
-// TODO: allow config to hide the icons, this will allow for a less intrusive reading experience IMO without
-// sacrificing accessibility for those who want the icon always visible
 export default function EpubNavigationControls({ children }: Props) {
 	const { visible, onPaginateBackward, onPaginateForward, setVisible } = useEpubReaderControls()
 
@@ -22,7 +20,14 @@ export default function EpubNavigationControls({ children }: Props) {
 
 	const invertControls = readingDirection === 'rtl'
 
-	const onLeftNavigate = useCallback(() => {
+	/**
+	 * A callback to navigate backward in the book, wrt the natural reading
+	 * progression direction.
+	 *
+	 * If the reading direction is RTL, then the backward navigation is actually
+	 * forward in the book.
+	 */
+	const onBackwardNavigation = useCallback(() => {
 		if (invertControls) {
 			onPaginateForward()
 		} else {
@@ -30,7 +35,14 @@ export default function EpubNavigationControls({ children }: Props) {
 		}
 	}, [invertControls, onPaginateBackward, onPaginateForward])
 
-	const onRightNavigate = useCallback(() => {
+	/**
+	 * A callback to navigate forward in the book, wrt the natural reading
+	 * progression direction.
+	 *
+	 * If the reading direction is RTL, then the forward navigation is actually
+	 * backwards in the book.
+	 */
+	const onForwardNavigation = useCallback(() => {
 		if (invertControls) {
 			onPaginateBackward()
 		} else {
@@ -38,16 +50,21 @@ export default function EpubNavigationControls({ children }: Props) {
 		}
 	}, [invertControls, onPaginateBackward, onPaginateForward])
 
+	/**
+	 * A swipe handler to navigate forward or backward in the book.
+	 *
+	 * Note that the swip handler function semantics are inverted wrt the reading direction.
+	 */
 	const swipeHandlers = useSwipeable({
-		onSwipedLeft: onLeftNavigate,
-		onSwipedRight: onRightNavigate,
+		onSwipedLeft: onForwardNavigation,
+		onSwipedRight: onBackwardNavigation,
 		preventScrollOnSwipe: true,
 	})
 
 	return (
 		<div className="relative flex h-full w-full flex-1 items-center gap-1" aria-hidden="true">
 			<div className="fixed left-2 z-[100] hidden h-1/2 w-12 items-center md:flex">
-				<ControlButton className={cx({ hidden: !visible })} onClick={onLeftNavigate}>
+				<ControlButton className={cx({ hidden: !visible })} onClick={onBackwardNavigation}>
 					<ChevronLeft className="h-5 w-5" />
 				</ControlButton>
 			</div>
@@ -58,7 +75,7 @@ export default function EpubNavigationControls({ children }: Props) {
 			/>
 			{children}
 			<div className="fixed right-2 z-[100] hidden h-1/2 w-12 items-center justify-end md:flex">
-				<ControlButton className={cx({ hidden: !visible })} onClick={onRightNavigate}>
+				<ControlButton className={cx({ hidden: !visible })} onClick={onForwardNavigation}>
 					<ChevronRight className="h-5 w-5" />
 				</ControlButton>
 			</div>

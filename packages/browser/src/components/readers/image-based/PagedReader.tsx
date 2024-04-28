@@ -7,6 +7,7 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import { useSwipeable } from 'react-swipeable'
 import { useMediaMatch, useWindowSize } from 'rooks'
 
+import { useDetectZoom } from '@/hooks/useDetectZoom'
 import { useReaderStore } from '@/stores'
 
 export type PagedReaderProps = {
@@ -35,6 +36,7 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 		showToolBar: state.showToolBar,
 	}))
 	const { innerWidth } = useWindowSize()
+	const { isZoomed } = useDetectZoom()
 
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const [imageWidth, setImageWidth] = React.useState<number | null>(null)
@@ -111,15 +113,20 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	})
 
 	const swipeHandlers = useSwipeable({
+		delta: 150,
 		onSwipedLeft: () => handlePageChange(currentPage + 1),
 		onSwipedRight: () => handlePageChange(currentPage - 1),
 		preventScrollOnSwipe: true,
 	})
+	const swipeEnabled = useMemo(
+		() => !isZoomed && !showToolBar && isMobile,
+		[isZoomed, showToolBar, isMobile],
+	)
 
 	return (
 		<div
 			className="relative flex h-full w-full items-center justify-center"
-			{...(isMobile ? swipeHandlers : {})}
+			{...(swipeEnabled ? swipeHandlers : {})}
 		>
 			<SideBarControl
 				fixed={fixSideNavigation}

@@ -1749,7 +1749,7 @@ async fn start_media_analysis(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<()> {
-	// TODO enforce permissions
+	let _ = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
 
 	// Start analysis job
 	ctx.enqueue_job(AnalyzeMediaJob::new(

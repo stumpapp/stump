@@ -1073,7 +1073,7 @@ async fn put_series_is_complete() -> APIResult<Json<SeriesIsComplete>> {
 		(status = 200, description = "Successfully started series media analysis"),
 		(status = 401, description = "Unauthorized"),
 		(status = 403, description = "Forbidden"),
-		(status = 404, description = "Media not found"),
+		(status = 404, description = "Series not found"),
 		(status = 500, description = "Internal server error"),
 	)
 )]

@@ -1740,7 +1740,7 @@ async fn get_library_stats(
 		(status = 200, description = "Successfully started library media analysis"),
 		(status = 401, description = "Unauthorized"),
 		(status = 403, description = "Forbidden"),
-		(status = 404, description = "Media not found"),
+		(status = 404, description = "Library not found"),
 		(status = 500, description = "Internal server error"),
 	)
 )]

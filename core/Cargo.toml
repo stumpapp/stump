@@ -52,6 +52,7 @@ regex = "1.10.4"
 alphanumeric-sort = "1.5.3"
 
 [dev-dependencies]
+temp-env = "0.3.6"
 tempfile = { workspace = true }
 criterion = { version = "0.5.1", features = ["html_reports", "async_tokio"] }
 

@@ -129,8 +129,10 @@ impl FileProcessor for RarProcessor {
 				metadata_buf = Some(data);
 				archive = rest;
 			} else {
-				// TODO: check for valid page type before incrementing
-				pages += 1;
+				// If the entry is not an image then it cannot be a valid page
+				if entry.filename.is_img() {
+					pages += 1;
+				}
 				archive = header.skip()?;
 			}
 		}
@@ -201,15 +203,26 @@ impl FileProcessor for RarProcessor {
 	fn get_page_count(path: &str, _: &StumpConfig) -> Result<i32, FileError> {
 		let archive = RarProcessor::open_for_listing(path)?;
 
-		// Get all valid page entries
-		let valid_entries = archive
-			.into_iter()
-			.filter_map(|entry| entry.ok())
-			.filter(|entry| entry.filename.is_img())
-			.collect::<Vec<_>>();
+		// Get count of valid page entries
+		let mut pages = 0;
+		for entry in archive {
+			if entry.is_err() {
+				continue;
+			}
 
-		// Return the count of them
-		Ok(valid_entries.len() as i32)
+			// Make sure it's an image
+			let entry = entry.unwrap();
+			if entry.filename.as_os_str() == "ComicInfo.xml" {
+				continue;
+			} else {
+				// If the entry is not an image then it cannot be a valid page
+				if entry.filename.is_img() {
+					pages += 1;
+				}
+			}
+		}
+
+		Ok(pages)
 	}
 
 	fn get_page_content_types(

@@ -61,6 +61,8 @@ mod tests {
 		let chat_id = std::env::var("DUMMY_TG_CHAT_ID").expect("Failed to load chat ID");
 		TelegramClient::new(token, chat_id)
 	}
+
+	#[ignore = "No token"]
 	#[tokio::test]
 	async fn test_send_message() {
 		let client = get_debug_client();

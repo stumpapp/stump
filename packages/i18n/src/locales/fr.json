@@ -1,9 +1,9 @@
 {
 	"underConstruction": {
-		"heading": "This is awkward",
-		"message": "You've stumbled upon a page that's still being developed. I'd love to show it to you, but it isn't quite ready yet.",
-		"homeLink": "Go Home",
-		"githubLink": "View the GitHub issue"
+		"heading": "C'est embarrassant",
+		"message": "Vous êtes tombé sur une page qui est encore en cours de développement. J'aimerais vous la montrer, mais elle n'est pas encore tout à fait prête.",
+		"homeLink": "Aller à l'accueil",
+		"githubLink": "Voir le ticket GitHub"
 	},
 	"authScene": {
 		"claimHeading": "Initialisez votre serveur",
@@ -53,54 +53,54 @@
 	},
 	"createBookClubScene": {
 		"heading": "Créer un nouveau Club de Lecture",
-		"subtitle": "You can create a private book club a select few, or make it public for anyone on the server to join",
+		"subtitle": "Vous pouvez créer un club de lecture privé en sélectionnant des membres, ou le rendre public pour tous sur le serveur",
 		"form": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My book club",
-				"description": "The name of your book club"
+				"label": "Nom",
+				"placeholder": "Mon club de lecture",
+				"description": "Le nom de votre club de lecture"
 			},
 			"description": {
 				"label": "Description",
-				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
-				"description": "An optional, short description of your book club"
+				"placeholder": "Un club de fans sur \"Notre Drapeau signifie la Mort\". Nous lisons des fictions sur la piraterie au gré de nos envies",
+				"description": "Une courte description facultative de votre club de lecture"
 			},
 			"is_private": {
-				"label": "Private club",
-				"description": "If enabled, only users you invite will be able to join your book club"
+				"label": "Club privé",
+				"description": "Si activée, seuls les utilisateurs que vous invitez pourront rejoindre votre club de lecture"
 			},
 			"member_role_spec": {
-				"heading": "Custom role mapping",
+				"heading": "Mappage des rôles personnalisé",
 				"subtitle": [
 					"You can create custom names for the roles in your book club. For example, you could rename the 'Member' role to 'Crewmate', or 'Creator' to 'Captain'. If you don't want to use custom names, you can leave these fields blank and the default names will be used instead. For more information about roles, refer to the",
 					"documentation"
 				],
 				"member": {
-					"label": "Member",
-					"placeholder": "Member",
-					"description": "The name of the default role for your book club"
+					"label": "Membre",
+					"placeholder": "Membre",
+					"description": "Le nom du rôle par défaut pour votre club de lecture"
 				},
 				"moderator": {
-					"label": "Moderator",
-					"placeholder": "Moderator",
-					"description": "The name of the moderator role for your book club"
+					"label": "Modérateur",
+					"placeholder": "Modérateur",
+					"description": "Le nom du rôle de modérateur pour votre club de lecture"
 				},
 				"admin": {
-					"label": "Admin",
-					"placeholder": "Admin",
-					"description": "The name of the admin role for your book club"
+					"label": "Administrateur",
+					"placeholder": "Administrateur",
+					"description": "Le nom du rôle d'administrateur de votre club de lecture"
 				},
 				"creator": {
-					"label": "Creator",
-					"placeholder": "Creator",
-					"description": "The name of the creator role for your book club. This is you!"
+					"label": "Créateur",
+					"placeholder": "Créateur",
+					"description": "Le nom du rôle de créateur de votre club de lecture. C'est vous !"
 				}
 			},
 			"creator_preferences": {
 				"heading": "Your membership preferences",
 				"subtitle": "Some preferences for your membership in the book club. These can be changed at any time from the book club settings page",
 				"creator_display_name": {
-					"label": "Display Name",
+					"label": "Nom affiché",
 					"placeholder": "oromei",
 					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
 				},

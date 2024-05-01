@@ -1,0 +1,41 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Setup",
+			"type": "shell",
+			"command": "yarn setup",
+			"group": "build",
+			"problemMatcher": [],
+			"presentation": {
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			}
+		},
+		{
+			"label": "Run tests",
+			"type": "shell",
+			"command": "cargo test",
+			"group": "test",
+			"problemMatcher": ["$rustc"],
+			"presentation": {
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			}
+		},
+		{
+			"label": "Generate coverage",
+			"type": "shell",
+			"command": "cargo llvm-cov --lcov --output-path lcov.info",
+			"group": "test",
+			"problemMatcher": ["$rustc"],
+			"presentation": {
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			}
+		}
+	]
+}

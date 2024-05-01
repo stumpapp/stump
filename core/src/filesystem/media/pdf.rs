@@ -251,3 +251,39 @@ impl FileConverter for PdfProcessor {
 		Ok(zip_path)
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_process() {
+		let path = get_test_pdf_path();
+		let config = StumpConfig::debug();
+
+		let processed_file = PdfProcessor::process(
+			&path,
+			FileProcessorOptions {
+				convert_rar_to_zip: false,
+				delete_conversion_source: false,
+			},
+			&config,
+		);
+		assert!(processed_file.is_ok());
+	}
+
+	#[test]
+	fn test_get_page_content_types() {
+		let path = get_test_pdf_path();
+
+		let content_types = PdfProcessor::get_page_content_types(&path, vec![1]);
+		assert!(content_types.is_ok());
+	}
+
+	fn get_test_pdf_path() -> String {
+		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+			.join("integration-tests/data/rust_book.pdf")
+			.to_string_lossy()
+			.to_string()
+	}
+}

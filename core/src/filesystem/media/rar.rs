@@ -336,7 +336,7 @@ mod tests {
 		let tempdir = tempfile::tempdir().expect("Failed to create temporary directory");
 		let temp_rar_file_path = tempdir
 			.path()
-			.join("epub.rar")
+			.join("book.rar")
 			.to_string_lossy()
 			.to_string();
 		fs::write(&temp_rar_file_path, get_test_rar_file_data())
@@ -361,7 +361,7 @@ mod tests {
 		let tempdir = tempfile::tempdir().expect("Failed to create temporary directory");
 		let temp_rar_file_path = tempdir
 			.path()
-			.join("epub.rar")
+			.join("book.rar")
 			.to_string_lossy()
 			.to_string();
 		fs::write(&temp_rar_file_path, get_test_rar_file_data())
@@ -391,6 +391,6 @@ mod tests {
 	fn get_test_rar_file_data() -> Vec<u8> {
 		let test_rar_path = get_test_rar_path();
 
-		fs::read(test_rar_path).expect("Failed to fetch mock config file")
+		fs::read(test_rar_path).expect("Failed to fetch test rar file")
 	}
 }

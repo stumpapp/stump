@@ -23,7 +23,7 @@ export default function SideBarButtonLink({
 	return (
 		<div
 			className={cn(
-				'group inline-flex h-[2.35rem] w-full items-center justify-start rounded-md px-2 text-sm transition-all duration-150 hover:bg-sidebar-300',
+				'group inline-flex h-[2.35rem] w-full shrink-0 items-center justify-start rounded-md px-2 text-sm transition-all duration-150 hover:bg-sidebar-300',
 				{
 					'justify-center border border-dashed border-sidebar-300 bg-opacity-50 text-contrast text-opacity-90 hover:bg-sidebar-200 hover:text-opacity-100':
 						variant === 'action',

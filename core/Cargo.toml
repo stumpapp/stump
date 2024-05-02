@@ -47,6 +47,7 @@ xml-rs = "0.8.20" # XML reader/writer
 zip = "0.6.6"
 
 [dev-dependencies]
+temp-env = "0.3.6"
 tempfile = { workspace = true }
 criterion = { version = "0.5.1", features = ["html_reports", "async_tokio"] }
 

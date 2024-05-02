@@ -139,11 +139,15 @@ async fn check_for_updates() -> APIResult<Json<UpdateCheck>> {
 	if github_response.status().is_success() {
 		let github_json: serde_json::Value = github_response.json().await?;
 
-		let latest_semver = github_json["tag_name"].as_str().ok_or_else(|| {
+		let mut latest_semver = github_json["tag_name"].as_str().ok_or_else(|| {
 			APIError::InternalServerError(
 				"Failed to parse latest release tag name".to_string(),
 			)
 		})?;
+		if latest_semver.starts_with('v') && latest_semver.len() > 1 {
+			latest_semver = &latest_semver[1..];
+		}
+
 		let has_update_available = latest_semver != current_semver;
 
 		Ok(Json(UpdateCheck {

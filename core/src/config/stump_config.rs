@@ -540,43 +540,50 @@ mod tests {
 
 	#[test]
 	fn test_getting_config_from_environment() {
-		// Set environment variables
-		env::set_var(PROFILE_KEY, "release");
-		env::set_var(PORT_KEY, "1337");
-		env::set_var(VERBOSITY_KEY, "3");
-		env::set_var(DB_PATH_KEY, "not_a_real_path");
-		env::set_var(CLIENT_KEY, "not_a_real_dir");
-		env::set_var(CONFIG_DIR_KEY, "also_not_a_real_dir");
-		env::set_var(DISABLE_SWAGGER_KEY, "true");
-		env::set_var(HASH_COST_KEY, "24");
-		env::set_var(SESSION_TTL_KEY, (3600 * 24).to_string());
-		env::set_var(SESSION_EXPIRY_INTERVAL_KEY, (60 * 60 * 8).to_string());
+		temp_env::with_vars(
+			[
+				(PROFILE_KEY, Some("release")),
+				(PORT_KEY, Some("1337")),
+				(VERBOSITY_KEY, Some("2")),
+				(DB_PATH_KEY, Some("not_a_real_path")),
+				(CLIENT_KEY, Some("not_a_real_dir")),
+				(CONFIG_DIR_KEY, Some("also_not_a_real_dir")),
+				(DISABLE_SWAGGER_KEY, Some("true")),
+				(HASH_COST_KEY, Some("24")),
+				(SESSION_TTL_KEY, Some(&(3600 * 24).to_string())),
+				(
+					SESSION_EXPIRY_INTERVAL_KEY,
+					Some(&(60 * 60 * 8).to_string()),
+				),
+			],
+			|| {
+				// Create a new StumpConfig and load values from the environment.
+				let config = StumpConfig::new("not_a_dir".to_string())
+					.with_environment()
+					.unwrap();
 
-		// Create a new StumpConfig and load values from the environment.
-		let config = StumpConfig::new("not_a_dir".to_string())
-			.with_environment()
-			.unwrap();
-
-		// Confirm values are as expected
-		assert_eq!(
-			config,
-			StumpConfig {
-				profile: "release".to_string(),
-				port: 1337,
-				verbosity: 3,
-				pretty_logs: true,
-				db_path: Some("not_a_real_path".to_string()),
-				client_dir: "not_a_real_dir".to_string(),
-				config_dir: "also_not_a_real_dir".to_string(),
-				custom_templates_dir: None,
-				allowed_origins: vec![],
-				pdfium_path: None,
-				disable_swagger: true,
-				password_hash_cost: 24,
-				session_ttl: 3600 * 24,
-				expired_session_cleanup_interval: 60 * 60 * 8,
-				scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
-			}
+				// Confirm values are as expected
+				assert_eq!(
+					config,
+					StumpConfig {
+						profile: "release".to_string(),
+						port: 1337,
+						verbosity: 2,
+						pretty_logs: true,
+						db_path: Some("not_a_real_path".to_string()),
+						client_dir: "not_a_real_dir".to_string(),
+						config_dir: "also_not_a_real_dir".to_string(),
+						allowed_origins: vec![],
+						pdfium_path: None,
+						disable_swagger: true,
+						password_hash_cost: 24,
+						session_ttl: 3600 * 24,
+						expired_session_cleanup_interval: 60 * 60 * 8,
+						scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
+						custom_templates_dir: None,
+					}
+				);
+			},
 		);
 	}
 
@@ -687,39 +694,47 @@ mod tests {
 
 	#[test]
 	fn test_simulate_first_boot() {
-		env::set_var(PORT_KEY, "1337");
-		env::set_var(VERBOSITY_KEY, "2");
-		env::set_var(DISABLE_SWAGGER_KEY, "true");
-		env::set_var(HASH_COST_KEY, "1");
+		temp_env::with_vars(
+			[
+				(PORT_KEY, Some("1337")),
+				(VERBOSITY_KEY, Some("2")),
+				(DISABLE_SWAGGER_KEY, Some("true")),
+				(HASH_COST_KEY, Some("1")),
+			],
+			|| {
+				let tempdir =
+					tempfile::tempdir().expect("Failed to create temporary directory");
+				// Now we can create a StumpConfig rooted at the temporary directory
+				let config_dir = tempdir.path().to_string_lossy().to_string();
+				let generated = StumpConfig::new(config_dir.clone())
+					.with_config_file()
+					.expect("Failed to generate StumpConfig from Stump.toml")
+					.with_environment()
+					.expect("Failed to generate StumpConfig from environment");
 
-		let tempdir = tempfile::tempdir().expect("Failed to create temporary directory");
-		// Now we can create a StumpConfig rooted at the temporary directory
-		let config_dir = tempdir.path().to_string_lossy().to_string();
-		let generated = StumpConfig::new(config_dir.clone())
-			.with_config_file()
-			.expect("Failed to generate StumpConfig from Stump.toml")
-			.with_environment()
-			.expect("Failed to generate StumpConfig from environment");
-
-		let expected = StumpConfig {
-			profile: "debug".to_string(),
-			port: 1337,
-			verbosity: 2,
-			pretty_logs: true,
-			db_path: None,
-			client_dir: "./dist".to_string(),
-			config_dir,
-			allowed_origins: vec![],
-			pdfium_path: None,
-			disable_swagger: true,
-			password_hash_cost: 1,
-			session_ttl: DEFAULT_SESSION_TTL,
-			expired_session_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
-			scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
-			custom_templates_dir: None,
-		};
-
-		assert_eq!(generated, expected);
+				assert_eq!(
+					generated,
+					StumpConfig {
+						profile: "debug".to_string(),
+						port: 1337,
+						verbosity: 2,
+						pretty_logs: true,
+						db_path: None,
+						client_dir: "./dist".to_string(),
+						config_dir,
+						allowed_origins: vec![],
+						pdfium_path: None,
+						disable_swagger: true,
+						password_hash_cost: 1,
+						session_ttl: DEFAULT_SESSION_TTL,
+						expired_session_cleanup_interval:
+							DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
+						scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
+						custom_templates_dir: None,
+					}
+				);
+			},
+		);
 	}
 
 	fn get_mock_config_file() -> String {

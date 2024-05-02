@@ -13,7 +13,9 @@ use crate::{
 		},
 		filter::{FilterGroup, FilterJoin, MediaSmartFilter, SmartFilter},
 	},
-	prisma::{library, media, read_progress, series, smart_list, user, PrismaClient},
+	prisma::{
+		active_reading_session, library, media, series, smart_list, user, PrismaClient,
+	},
 	utils::chain_optional_iter,
 	CoreError, CoreResult,
 };
@@ -99,8 +101,8 @@ impl SmartList {
 					.media()
 					.find_many(params_for_user)
 					.with(media::metadata::fetch())
-					.with(media::read_progresses::fetch(vec![
-						read_progress::user_id::equals(for_user.id.clone()),
+					.with(media::active_user_reading_sessions::fetch(vec![
+						active_reading_session::user_id::equals(for_user.id.clone()),
 					]))
 					.exec()
 					.await?;
@@ -114,8 +116,8 @@ impl SmartList {
 					.media()
 					.find_many(params_for_user)
 					.with(media::metadata::fetch())
-					.with(media::read_progresses::fetch(vec![
-						read_progress::user_id::equals(for_user.id.clone()),
+					.with(media::active_user_reading_sessions::fetch(vec![
+						active_reading_session::user_id::equals(for_user.id.clone()),
 					]))
 					.exec()
 					.await?;
@@ -160,9 +162,7 @@ impl SmartList {
 				let books = client
 					.media()
 					.find_many(params_for_user)
-					.include(media_grouped_by_library::include(vec![
-						read_progress::user_id::equals(for_user.id.clone()),
-					]))
+					.include(media_grouped_by_library::include(for_user.id.clone()))
 					.exec()
 					.await?;
 

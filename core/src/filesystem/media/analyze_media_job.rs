@@ -196,6 +196,17 @@ impl JobExt for AnalyzeMediaJob {
 								.await?;
 							output.media_updated += 1;
 						}
+					} else {
+						// Page count was `None` so we update it.
+						ctx.db
+							.media_metadata()
+							.update(
+								media_metadata::id::equals(media_item.id),
+								vec![media_metadata::page_count::set(Some(page_count))],
+							)
+							.exec()
+							.await?;
+						output.media_updated += 1;
 					}
 				} else {
 					// Metadata doesn't exist, create it

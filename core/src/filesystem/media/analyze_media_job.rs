@@ -2,24 +2,27 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 
 use crate::{
+	db::entity::Media,
 	filesystem::media::process::get_page_count,
 	job::{
 		error::JobError, JobExt, JobOutputExt, JobTaskOutput, WorkerCtx, WorkingState,
 		WrappedJob,
 	},
-	prisma::{media, series},
+	prisma::{media, media_metadata, series},
 };
 
 type MediaID = String;
+type SeriesID = String;
+type LibraryID = String;
 
 #[derive(Clone)]
 pub enum AnalyzeMediaJobVariant {
 	/// Analyze an individual media item, specified by ID.
 	AnalyzeSingleItem(MediaID),
 	/// Analyze all media in a library, specified by library ID.
-	AnalyzeLibrary(MediaID),
+	AnalyzeLibrary(LibraryID),
 	/// Analyze all media in a series, specified by series ID.
-	AnalyzeSeries(MediaID),
+	AnalyzeSeries(SeriesID),
 	/// Analyze all media in a media group, specified with a list of media IDs.
 	AnalyzeMediaGroup(Vec<MediaID>),
 }
@@ -153,10 +156,11 @@ impl JobExt for AnalyzeMediaJob {
 		match task {
 			AnalyzeMediaTask::AnalyzeImage(id) => {
 				// Get media by id from the database
-				let media_item = ctx
+				let media_item: Media = ctx
 					.db
 					.media()
 					.find_unique(media::id::equals(id.clone()))
+					.with(media::metadata::fetch())
 					.exec()
 					.await
 					.map_err(|e: prisma_client_rust::QueryError| {
@@ -167,20 +171,57 @@ impl JobExt for AnalyzeMediaJob {
 							"Unable to find media item with id: {}",
 							id
 						))
-					})?;
+					})?
+					.into();
 
 				let path = media_item.path;
 				let page_count = get_page_count(&path, &ctx.config)?;
 				output.images_analyzed += 1;
 
-				// Update media item in database
-				let _ = ctx
-					.db
-					.media()
-					.update(media::id::equals(id), vec![media::pages::set(page_count)])
-					.exec()
-					.await?;
-				output.media_updated += 1;
+				// Check if a metadata update is neded
+				if let Some(metadata) = media_item.metadata {
+					// Great, there's already metadata!
+					// Check if the value matches the currently recorded one, update if not.
+					if let Some(meta_page_count) = metadata.page_count {
+						if meta_page_count != page_count {
+							ctx.db
+								.media_metadata()
+								.update(
+									media_metadata::id::equals(media_item.id),
+									vec![media_metadata::page_count::set(Some(
+										page_count,
+									))],
+								)
+								.exec()
+								.await?;
+							output.media_updated += 1;
+						}
+					}
+				} else {
+					// Metadata doesn't exist, create it
+					let new_metadata = ctx
+						.db
+						.media_metadata()
+						.create(vec![
+							media_metadata::id::set(media_item.id.clone()),
+							media_metadata::page_count::set(Some(page_count)),
+						])
+						.exec()
+						.await?;
+
+					// And link it to the media item
+					ctx.db
+						.media()
+						.update(
+							media::id::equals(media_item.id),
+							vec![media::metadata::connect(media_metadata::id::equals(
+								new_metadata.id,
+							))],
+						)
+						.exec()
+						.await?;
+					output.media_updated += 1;
+				}
 			},
 		}
 

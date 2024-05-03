@@ -1213,11 +1213,6 @@ async fn replace_media_thumbnail(
 	)))
 }
 
-#[derive(Default, Deserialize, Serialize)]
-pub struct MediaAnalysisStarted {
-	started_at: Option<String>,
-}
-
 #[utoipa::path(
 	put,
 	path = "/api/v1/media/:id/progress/:page",

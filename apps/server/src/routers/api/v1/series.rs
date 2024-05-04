@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use axum::{
 	extract::{DefaultBodyLimit, Multipart, Path, State},
 	middleware::from_extractor_with_state,
@@ -11,7 +13,10 @@ use serde_qs::axum::QsQuery;
 use stump_core::{
 	config::StumpConfig,
 	db::{
-		entity::{LibraryOptions, Media, Series, User, UserPermission},
+		entity::{
+			macros::finished_reading_session_series_complete, LibraryOptions, Media,
+			Series, User, UserPermission,
+		},
 		query::{
 			ordering::QueryOrder,
 			pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
@@ -30,9 +35,9 @@ use stump_core::{
 		ContentType, FileParts, PathUtils,
 	},
 	prisma::{
-		library,
+		active_reading_session, finished_reading_session, library,
 		media::{self, OrderByParam as MediaOrderByParam},
-		media_metadata, read_progress,
+		media_metadata,
 		series::{self, OrderByParam, WhereParam},
 		series_metadata,
 	},
@@ -271,11 +276,15 @@ async fn get_series(
 		.run(|client| async move {
 			let mut query = db.series().find_many(where_conditions.clone());
 			if load_media {
-				query = query.with(series::media::fetch(vec![]).with(
-					media::read_progresses::fetch(vec![read_progress::user_id::equals(
-						user_id,
-					)]),
-				));
+				query = query.with(
+					series::media::fetch(vec![])
+						.with(media::active_user_reading_sessions::fetch(vec![
+							active_reading_session::user_id::equals(user_id.clone()),
+						]))
+						.with(media::finished_user_reading_sessions::fetch(vec![
+							finished_reading_session::user_id::equals(user_id),
+						])),
+				);
 			}
 
 			if !is_unpaged {
@@ -382,8 +391,11 @@ async fn get_series_by_id(
 	if load_media {
 		query = query.with(
 			series::media::fetch(vec![])
-				.with(media::read_progresses::fetch(vec![
-					read_progress::user_id::equals(user_id),
+				.with(media::active_user_reading_sessions::fetch(vec![
+					active_reading_session::user_id::equals(user_id.clone()),
+				]))
+				.with(media::finished_user_reading_sessions::fetch(vec![
+					finished_reading_session::user_id::equals(user_id),
 				]))
 				.order_by(media::name::order(Direction::Asc)),
 		);
@@ -846,8 +858,11 @@ async fn get_series_media(
 			let mut query = client
 				.media()
 				.find_many(media_where_params.clone())
-				.with(media::read_progresses::fetch(vec![
-					read_progress::user_id::equals(user_id),
+				.with(media::active_user_reading_sessions::fetch(vec![
+					active_reading_session::user_id::equals(user_id.clone()),
+				]))
+				.with(media::finished_user_reading_sessions::fetch(vec![
+					finished_reading_session::user_id::equals(user_id),
 				]))
 				.order_by(order_by_param);
 
@@ -947,8 +962,11 @@ async fn get_next_in_series(
 		.find_first(where_params)
 		.with(
 			series::media::fetch(media_where_params)
-				.with(media::read_progresses::fetch(vec![
-					read_progress::user_id::equals(user_id),
+				.with(media::active_user_reading_sessions::fetch(vec![
+					active_reading_session::user_id::equals(user_id.clone()),
+				]))
+				.with(media::finished_user_reading_sessions::fetch(vec![
+					finished_reading_session::user_id::equals(user_id),
 				]))
 				.order_by(media::name::order(Direction::Asc)),
 		)
@@ -964,26 +982,22 @@ async fn get_next_in_series(
 		let next_book = media
 			.iter()
 			.find(|m| {
-				if let Some(progress_list) = m.read_progresses.as_ref() {
-					// No progress means it is up next (for this user)!
-					if progress_list.is_empty() {
-						true
-					} else {
-						// Note: this should never really exceed len == 1, but :shrug:
-						progress_list
-							.first()
-							.map(|rp| {
-								!rp.is_completed
-									|| rp
-										.percentage_completed
-										.map(|pc| pc <= 1.0)
-										.unwrap_or(false) || (rp.page < m.pages && rp.page > 0)
-							})
-							.unwrap_or(true)
-					}
-				} else {
-					// case unread should be first in queue
-					true
+				match m
+					.active_user_reading_sessions()
+					.ok()
+					.and_then(|sessions| sessions.first())
+				{
+					// If there is a percentage, and it is less than 1.0, then it is next!
+					Some(session) if session.epubcfi.is_some() => session
+						.percentage_completed
+						.map(|value| value < 1.0)
+						.unwrap_or(false),
+					// If there is a page, and it is less than the total pages, then it is next!
+					Some(session) if session.page.is_some() => {
+						session.page.unwrap_or(1) < m.pages
+					},
+					// No session means it is up next!
+					_ => true,
 				}
 			})
 			.or_else(|| media.first());
@@ -1022,34 +1036,54 @@ async fn get_series_is_complete(
 	session: Session,
 ) -> APIResult<Json<SeriesIsComplete>> {
 	let client = &ctx.db;
-	let user_id = get_session_user(&session)?.id;
 
-	// TODO: library access or age restriction!
+	let user = get_session_user(&session)?;
+	let user_id = user.id.clone();
+	let age_restrictions = user.age_restriction.as_ref().map(|ar| {
+		(
+			apply_series_age_restriction(ar.age, ar.restrict_on_unset),
+			apply_media_age_restriction(ar.age, ar.restrict_on_unset),
+		)
+	});
 
-	let media_count = client
-		.media()
-		.count(vec![media::series_id::equals(Some(id.clone()))])
-		.exec()
-		.await?;
+	let series_where_params = chain_optional_iter(
+		[series::id::equals(id.clone())]
+			.into_iter()
+			.chain(apply_series_library_not_hidden_for_user_filter(&user))
+			.collect::<Vec<WhereParam>>(),
+		[age_restrictions.as_ref().map(|(sr, _)| sr.clone())],
+	);
+	let media_where_params = chain_optional_iter(
+		[media::series::is(series_where_params)],
+		[age_restrictions.as_ref().map(|(_, mr)| mr.clone())],
+	);
 
-	let rp = client
-		.read_progress()
+	let media_count = client.media().count(media_where_params).exec().await?;
+
+	let finished_sessions = client
+		.finished_reading_session()
 		.find_many(vec![
-			read_progress::user_id::equals(user_id),
-			read_progress::media::is(vec![media::series_id::equals(Some(id))]),
-			read_progress::is_completed::equals(true),
+			finished_reading_session::user_id::equals(user_id),
+			finished_reading_session::media::is(vec![media::series_id::equals(Some(id))]),
 		])
-		.order_by(read_progress::completed_at::order(Direction::Desc))
+		.order_by(finished_reading_session::completed_at::order(
+			Direction::Desc,
+		))
+		.select(finished_reading_session_series_complete::select())
 		.exec()
 		.await?;
 
-	let is_complete = rp.len() == media_count as usize;
-	let completed_at = is_complete
-		.then(|| {
-			rp.first()
-				.and_then(|rp| rp.completed_at.map(|ca| ca.to_rfc3339()))
-		})
-		.flatten();
+	let completed_at = finished_sessions
+		.first()
+		.map(|s| s.completed_at.to_rfc3339());
+	// TODO(prisma): grouping/distinct not supported
+	let unique_sessions = finished_sessions
+		.into_iter()
+		.map(|s| s.media_id)
+		.collect::<HashSet<_>>();
+	// Note: I am performing >= in the event that a user lost access to book(s) in the series
+	// and the count is less than the total media count.
+	let is_complete = unique_sessions.len() >= media_count as usize;
 
 	Ok(Json(SeriesIsComplete {
 		is_complete,

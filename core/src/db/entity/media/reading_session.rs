@@ -6,6 +6,8 @@ use crate::prisma::{active_reading_session, finished_reading_session};
 
 use crate::db::entity::{Media, User};
 
+use super::prisma_macros::reading_session_with_book_pages;
+
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema, Default)]
 pub struct ActiveReadingSession {
 	pub id: String,
@@ -24,7 +26,7 @@ pub struct ActiveReadingSession {
 	/// The ID of the user who this progress belongs to.
 	pub user_id: String,
 	/// The user who this progress belongs to. Will be `None` if the relation is not loaded.
-	pub user: Option<User>,
+	pub user: Option<Box<User>>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema, Default)]
@@ -42,6 +44,13 @@ pub struct FinishedReadingSession {
 	pub user_id: String,
 	/// The user who this progress belongs to. Will be `None` if the relation is not loaded.
 	pub user: Option<User>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
+#[serde(untagged)]
+pub enum ProgressUpdateReturn {
+	Active(ActiveReadingSession),
+	Finished(FinishedReadingSession),
 }
 
 impl From<active_reading_session::Data> for ActiveReadingSession {
@@ -62,7 +71,23 @@ impl From<active_reading_session::Data> for ActiveReadingSession {
 			media_id: data.media_id,
 			media,
 			user_id: data.user_id,
-			user,
+			user: user.map(Box::new),
+		}
+	}
+}
+
+impl From<reading_session_with_book_pages::Data> for ActiveReadingSession {
+	fn from(value: reading_session_with_book_pages::Data) -> Self {
+		ActiveReadingSession {
+			id: value.id,
+			page: value.page,
+			epubcfi: value.epubcfi,
+			percentage_completed: value.percentage_completed,
+			started_at: value.started_at.to_rfc3339(),
+			media_id: value.media_id,
+			media: None,
+			user_id: value.user_id,
+			user: None,
 		}
 	}
 }

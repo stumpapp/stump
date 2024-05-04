@@ -151,7 +151,9 @@ async fn get_users(
 			let mut query = client.user().find_many(vec![]);
 
 			if include_user_read_progress {
-				query = query.with(user::read_progresses::fetch(vec![]));
+				query = query
+					.with(user::active_reading_sessions::fetch(vec![]))
+					.with(user::finished_reading_sessions::fetch(vec![]));
 			}
 
 			if include_session_count {

@@ -1,7 +1,7 @@
 import { Badge, Card, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { CoreJobOutput, JobStatus, PersistedJob } from '@stump/types'
-import { createColumnHelper } from '@tanstack/react-table'
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -32,108 +32,109 @@ export default function JobTable() {
 	const [inspectingData, setInspectingData] = useState<CoreJobOutput | null>()
 
 	const columns = useMemo(
-		() => [
-			columnHelper.accessor('name', {
-				cell: ({
-					row: {
-						original: { name },
-					},
-				}) => (
-					<Text size="sm" className="line-clamp-1">
-						{name}
-					</Text>
-				),
-				header: t(`${LOCALE_BASE}.columns.name`),
-			}),
-			columnHelper.accessor('description', {
-				cell: ({
-					row: {
-						original: { description },
-					},
-				}) => (
-					<Text size="sm" variant="muted" className="line-clamp-1">
-						{description}
-					</Text>
-				),
-				header: t(`${LOCALE_BASE}.columns.description`),
-			}),
-			columnHelper.accessor('created_at', {
-				cell: ({ row: { original: job } }) => {
-					if (job.created_at) {
-						return (
-							<Text size="sm" variant="muted" className="line-clamp-1">
-								{dayjs(job.created_at).format('YYYY-MM-DD HH:mm:ss')}
-							</Text>
-						)
-					}
-
-					return null
-				},
-				header: t(`${LOCALE_BASE}.columns.createdAt`),
-			}),
-			columnHelper.display({
-				cell: ({ row }) => {
-					const getBadgeVariant = (status: JobStatus) => {
-						if (status === 'COMPLETED') {
-							return 'success'
-						} else if (status === 'CANCELLED') {
-							return 'warning'
-						} else if (status === 'FAILED') {
-							return 'error'
-						} else {
-							return 'primary'
-						}
-					}
-
-					const job = row.original
-
-					return (
-						<Badge variant={getBadgeVariant(job.status)} size="xs">
-							{job.status.charAt(0).toUpperCase() + job.status.slice(1).toLowerCase()}
-						</Badge>
-					)
-				},
-				header: 'Status',
-				id: 'status',
-			}),
-			columnHelper.display({
-				cell: ({ row: { original: job } }) => {
-					const displayDuration = (duration: duration.Duration) => {
-						//? TODO(aaron): This might be funny to have two formats, I think I should
-						//? either just always show ms or just accept the 'rounding' of the duration
-						if (duration.asSeconds() < 1) {
-							return duration.format('HH:mm:ss:SSS')
+		() =>
+			[
+				columnHelper.accessor('name', {
+					cell: ({
+						row: {
+							original: { name },
+						},
+					}) => (
+						<Text size="sm" className="line-clamp-1">
+							{name}
+						</Text>
+					),
+					header: t(`${LOCALE_BASE}.columns.name`),
+				}),
+				columnHelper.accessor('description', {
+					cell: ({
+						row: {
+							original: { description },
+						},
+					}) => (
+						<Text size="sm" variant="muted" className="line-clamp-1">
+							{description}
+						</Text>
+					),
+					header: t(`${LOCALE_BASE}.columns.description`),
+				}),
+				columnHelper.accessor('created_at', {
+					cell: ({ row: { original: job } }) => {
+						if (job.created_at) {
+							return (
+								<Text size="sm" variant="muted" className="line-clamp-1">
+									{dayjs(job.created_at).format('YYYY-MM-DD HH:mm:ss')}
+								</Text>
+							)
 						}
 
-						return duration.format('HH:mm:ss')
-					}
+						return null
+					},
+					header: t(`${LOCALE_BASE}.columns.createdAt`),
+				}),
+				columnHelper.display({
+					cell: ({ row }) => {
+						const getBadgeVariant = (status: JobStatus) => {
+							if (status === 'COMPLETED') {
+								return 'success'
+							} else if (status === 'CANCELLED') {
+								return 'warning'
+							} else if (status === 'FAILED') {
+								return 'error'
+							} else {
+								return 'primary'
+							}
+						}
 
-					const isRunningOrQueued = job.status === 'RUNNING' || job.status === 'QUEUED'
+						const job = row.original
 
-					if (job.status === 'RUNNING') {
-						return <RunningJobElapsedTime job={job} formatDuration={displayDuration} />
-					} else if (!isRunningOrQueued && job.ms_elapsed !== null) {
 						return (
-							<Text size="sm" variant="muted" className="line-clamp-1">
-								{displayDuration(dayjs.duration(Number(job.ms_elapsed)))}
-							</Text>
+							<Badge variant={getBadgeVariant(job.status)} size="xs">
+								{job.status.charAt(0).toUpperCase() + job.status.slice(1).toLowerCase()}
+							</Badge>
 						)
-					}
+					},
+					header: 'Status',
+					id: 'status',
+				}),
+				columnHelper.display({
+					cell: ({ row: { original: job } }) => {
+						const displayDuration = (duration: duration.Duration) => {
+							//? TODO(aaron): This might be funny to have two formats, I think I should
+							//? either just always show ms or just accept the 'rounding' of the duration
+							if (duration.asSeconds() < 1) {
+								return duration.format('HH:mm:ss:SSS')
+							}
 
-					return null
-				},
-				header: t(`${LOCALE_BASE}.columns.elapsed`),
-				id: 'ms_elapsed',
-			}),
-			columnHelper.display({
-				cell: ({ row }) =>
-					isServerOwner ? (
-						<JobActionMenu job={row.original} onInspectData={setInspectingData} />
-					) : null,
-				id: 'actions',
-				size: 28,
-			}),
-		],
+							return duration.format('HH:mm:ss')
+						}
+
+						const isRunningOrQueued = job.status === 'RUNNING' || job.status === 'QUEUED'
+
+						if (job.status === 'RUNNING') {
+							return <RunningJobElapsedTime job={job} formatDuration={displayDuration} />
+						} else if (!isRunningOrQueued && job.ms_elapsed !== null) {
+							return (
+								<Text size="sm" variant="muted" className="line-clamp-1">
+									{displayDuration(dayjs.duration(Number(job.ms_elapsed)))}
+								</Text>
+							)
+						}
+
+						return null
+					},
+					header: t(`${LOCALE_BASE}.columns.elapsed`),
+					id: 'ms_elapsed',
+				}),
+				columnHelper.display({
+					cell: ({ row }) =>
+						isServerOwner ? (
+							<JobActionMenu job={row.original} onInspectData={setInspectingData} />
+						) : null,
+					id: 'actions',
+					size: 28,
+				}),
+			] as ColumnDef<PersistedJob>[],
 		[t, isServerOwner],
 	)
 

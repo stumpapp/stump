@@ -294,6 +294,7 @@ pub struct LibraryStatsParams {
 	all_users: bool,
 }
 
+// TODO(historical-read-session): refactor query
 #[utoipa::path(
 	get,
 	path = "/api/v1/libraries/stats",

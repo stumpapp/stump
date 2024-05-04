@@ -219,7 +219,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 					applyEpubPreferences(rendition_, epubPreferences)
 					setRendition(rendition_)
 
-					const targetCfi = epub?.media_entity.read_progresses?.at(0)?.epubcfi ?? initialCfi
+					const targetCfi = epub?.media_entity.active_reading_session?.epubcfi ?? initialCfi
 					if (targetCfi) {
 						rendition_.display(targetCfi)
 					} else if (defaultLoc) {
@@ -604,7 +604,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 					},
 					toc: epub.toc,
 				},
-				progress: epub.media_entity.read_progresses?.[0]?.percentage_completed || null,
+				progress: epub.media_entity.active_reading_session?.percentage_completed || null,
 			}}
 			controls={{
 				getCfiPreviewText,

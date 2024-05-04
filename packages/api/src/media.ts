@@ -2,8 +2,8 @@ import type {
 	Media,
 	MediaIsComplete,
 	PatchMediaThumbnail,
+	ProgressUpdateReturn,
 	PutMediaCompletionStatus,
-	ReadProgress,
 } from '@stump/types'
 
 import { API } from './axios'
@@ -73,7 +73,10 @@ export function getMediaPage(id: string, page: number): string {
 	return `${API.getUri()}/media/${id}/page/${page}`
 }
 
-export function updateMediaProgress(id: string, page: number): Promise<APIResult<ReadProgress>> {
+export function updateMediaProgress(
+	id: string,
+	page: number,
+): Promise<APIResult<ProgressUpdateReturn>> {
 	return API.put(`/media/${id}/progress/${page}`)
 }
 

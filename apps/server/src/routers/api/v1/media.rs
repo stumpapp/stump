@@ -839,6 +839,7 @@ async fn convert_media(
 ) -> Result<(), APIError> {
 	let db = &ctx.db;
 
+	// TODO: if keeping, enforce permission
 	let user = get_session_user(&session)?;
 	let age_restrictions = user
 		.age_restriction
@@ -1196,7 +1197,6 @@ async fn replace_media_thumbnail(
 
 	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 	// user testing I'd like to see if this becomes a problem. We'll see!
-	// TODO - What was the outcome of this testing?
 	remove_thumbnails(&[book_id.clone()], ctx.config.get_thumbnails_dir())
 		.unwrap_or_else(|e| {
 			tracing::error!(

@@ -9,15 +9,18 @@ WORKDIR /app
 
 COPY . .
 
-RUN yarn install; \
-    yarn web build; \
-    mv ./apps/web/dist build
+# https://github.com/nodejs/docker-node/issues/1335
+RUN yarn config set network-timeout 300000 && \
+    yarn install --frozen-lockfile && \
+    yarn web build && \
+    mv ./apps/web/dist/ ./build && \
+    if [ ! -d "./build" ] || [ ! "$(ls -A ./build)" ]; then exit 1; fi
 
 # ------------------------------------------------------------------------------
 # Cargo Build Stage
 # ------------------------------------------------------------------------------
 
-FROM rust:1.72.1-slim-buster AS builder
+FROM rust:1.77.2-slim-buster AS builder
 
 ARG GIT_REV
 ENV GIT_REV=${GIT_REV}
@@ -56,9 +59,9 @@ RUN apt-get update && apt-get install -y curl tar; \
     mkdir -p pdfium; \
     if [ "$TARGETARCH" = "amd64" ]; then \
         # NOTE: This was previously -x86, need to test more on amd64-compatible systems to ensure I have the right one
-        curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6002/pdfium-linux-x64.tgz; \
+        curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6406/pdfium-linux-x64.tgz; \
     elif [ "$TARGETARCH" = "arm64" ]; then \
-        curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6002/pdfium-linux-arm64.tgz; \
+        curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6406/pdfium-linux-arm64.tgz; \
     fi; \
     tar -xzvf pdfium.tgz -C ./pdfium; \
     rm pdfium.tgz
@@ -78,7 +81,8 @@ COPY --from=frontend /app/build /app/client
 COPY docker/entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh; \
-    ln -s /opt/pdfium/lib/libpdfium.so /lib/libpdfium.so
+    ln -s /opt/pdfium/lib/libpdfium.so /lib/libpdfium.so; \
+    if [ ! -d "/app/client" ] || [ ! "$(ls -A /app/client)" ]; then exit 1; fi
 
 # Default Stump environment variables
 ENV STUMP_CONFIG_DIR=/config \

@@ -64,7 +64,19 @@ export type UserPermission = "bookclub:read" | "bookclub:create" | "emailer:read
 
 export type AgeRestriction = { age: number; restrict_on_unset: boolean }
 
-export type UserPreferences = { id: string; locale: string; app_theme: string; show_query_indicator: boolean; enable_live_refetch?: boolean; preferred_layout_mode?: string; primary_navigation_mode?: string; layout_max_width_px?: number | null; enable_discord_presence?: boolean; enable_compact_display?: boolean; enable_double_sidebar?: boolean; enable_hide_scrollbar?: boolean; enable_replace_primary_sidebar?: boolean; prefer_accent_color?: boolean; show_thumbnails_in_headers?: boolean }
+export type NavigationMode = "SIDEBAR" | "TOPBAR"
+
+export type HomeItem = { type: "ContinueReading" } | { type: "RecentlyAddedBooks" } | { type: "RecentlyAddedSeries" } | { type: "Library"; library_id: string } | { type: "SmartList"; smart_list_id: string }
+
+export type NaviationItemDisplayOptions = { show_create_action?: boolean; show_link_to_all?: boolean }
+
+export type NavigationItem = { type: "Home" } | { type: "Explore" } | ({ type: "Libraries" } & NaviationItemDisplayOptions) | ({ type: "SmartLists" } & NaviationItemDisplayOptions) | ({ type: "BookClubs" } & NaviationItemDisplayOptions)
+
+export type ArrangementItem<I> = { item: I; visible?: boolean }
+
+export type Arrangement<I> = { locked: boolean; items: ArrangementItem<I>[] }
+
+export type UserPreferences = { id: string; locale: string; app_theme: string; show_query_indicator: boolean; enable_live_refetch?: boolean; preferred_layout_mode?: string; primary_navigation_mode?: string; layout_max_width_px?: number | null; enable_discord_presence?: boolean; enable_compact_display?: boolean; enable_double_sidebar?: boolean; enable_hide_scrollbar?: boolean; enable_replace_primary_sidebar?: boolean; prefer_accent_color?: boolean; show_thumbnails_in_headers?: boolean; navigation_arrangement?: Arrangement<NavigationItem>; home_arrangement?: Arrangement<HomeItem> }
 
 export type LoginActivity = { id: string; ip_address: string; user_agent: string; authentication_successful: boolean; timestamp: string; user?: User | null }
 
@@ -75,6 +87,9 @@ export type EmailerSendTo = { device_id: number } | { email: string }
  */
 export type EmailerConfig = { sender_email: string; sender_display_name: string; username: string; smtp_host: string; smtp_port: number; tls_enabled: boolean; max_attachment_size_bytes: number | null; max_num_attachments: number | null }
 
+/**
+ * The configuration for an [EmailerClient]
+ */
 export type EmailerClientConfig = { sender_email: string; sender_display_name: string; username: string; password: string; host: string; port: number; tls_enabled: boolean; max_attachment_size_bytes: number | null; max_num_attachments: number | null }
 
 /**
@@ -118,7 +133,7 @@ export type Series = { id: string; name: string; path: string; description: stri
  */
 export type MediaMetadata = { title: string | null; series: string | null; number: number | null; volume: number | null; summary: string | null; notes: string | null; age_rating?: number | null; genre?: string[] | null; year: number | null; month: number | null; day: number | null; writers?: string[] | null; pencillers?: string[] | null; inkers?: string[] | null; colorists?: string[] | null; letterers?: string[] | null; cover_artists?: string[] | null; editors?: string[] | null; publisher: string | null; links?: string[] | null; characters?: string[] | null; teams?: string[] | null; page_count: number | null }
 
-export type Media = { id: string; name: string; size: number; extension: string; pages: number; updated_at: string; created_at: string; modified_at: string | null; hash: string | null; path: string; status: FileStatus; series_id: string; metadata: MediaMetadata | null; series?: Series | null; read_progresses?: ReadProgress[] | null; current_page?: number | null; current_epubcfi?: string | null; is_completed?: boolean | null; tags?: Tag[] | null; bookmarks?: Bookmark[] | null }
+export type Media = { id: string; name: string; size: BigInt; extension: string; pages: number; updated_at: string; created_at: string; modified_at: string | null; hash: string | null; path: string; status: FileStatus; series_id: string; metadata: MediaMetadata | null; series?: Series | null; read_progresses?: ReadProgress[] | null; current_page?: number | null; current_epubcfi?: string | null; is_completed?: boolean | null; tags?: Tag[] | null; bookmarks?: Bookmark[] | null }
 
 /**
  * A model representing a bookmark in the database. Bookmarks are used to save specific locations
@@ -129,6 +144,16 @@ export type Bookmark = { id: string; preview_content: string | null; epubcfi: st
 export type MediaAnnotation = { id: string; highlighted_text: string | null; page: number | null; page_coordinates_x: number | null; page_coordinates_y: number | null; epubcfi: string | null; notes: string | null; media_id: string; media?: Media | null }
 
 export type ReadProgress = { id: string; page: number; epubcfi: string | null; percentage_completed: number | null; is_completed: boolean; completed_at: string | null; media_id: string; media: Media | null; user_id: string; user: User | null }
+
+/**
+ * A struct representing a sort order for a column using react-table (tanstack)
+ */
+export type ReactTableColumnSort = { id: string; position: number }
+
+/**
+ * A struct representing a global sort order for a table using react-table (tanstack)
+ */
+export type ReactTableGlobalSort = { desc: boolean; id: string }
 
 /**
  * A filter for a single value, e.g. `name = "test"`
@@ -166,11 +191,7 @@ export type SeriesSmartFilter = { name: Filter<string> } | { path: Filter<string
 
 export type LibrarySmartFilter = { name: Filter<string> } | { path: Filter<string> }
 
-export type SmartListView = ({ book_columns: SmartListTableColumnSelection[]; group_columns: SmartListTableColumnSelection[]; book_sorting: SmartListTableSortingState[] | null; group_sorting: SmartListTableSortingState[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string; list_id: string }
-
-export type SmartListTableSortingState = { desc: boolean; id: string }
-
-export type SmartListTableColumnSelection = { id: string; position: number }
+export type SmartListView = ({ book_columns: ReactTableColumnSort[]; group_columns: ReactTableColumnSort[]; book_sorting: ReactTableGlobalSort[] | null; group_sorting: ReactTableGlobalSort[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string; list_id: string }
 
 export type BookClub = { id: string; name: string; description: string | null; emoji: string | null; is_private: boolean; created_at: string; member_role_spec: BookClubMemberRoleSpec; members?: BookClubMember[] | null; schedule?: BookClubSchedule | null }
 
@@ -194,7 +215,7 @@ export type BookClubInvitation = { id: string; user?: User | null; book_club?: B
 
 export type Tag = { id: string; name: string }
 
-export type LayoutMode = "GRID" | "LIST"
+export type LayoutMode = "GRID" | "TABLE"
 
 export type Epub = { media_entity: Media; spine: string[]; resources: { [key: string]: [string, string] }; toc: EpubContent[]; metadata: { [key: string]: string[] }; annotations: MediaAnnotation[] | null; root_base: string; root_file: string; extra_css: string[] }
 
@@ -367,5 +388,5 @@ export type SmartListRelationOptions = { load_views?: boolean }
 
 export type SmartListMeta = { matched_books: BigInt; matched_series: BigInt; matched_libraries: BigInt }
 
-export type CreateOrUpdateSmartListView = ({ book_columns: SmartListTableColumnSelection[]; group_columns: SmartListTableColumnSelection[]; book_sorting: SmartListTableSortingState[] | null; group_sorting: SmartListTableSortingState[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string }
+export type CreateOrUpdateSmartListView = ({ book_columns: ReactTableColumnSort[]; group_columns: ReactTableColumnSort[]; book_sorting: ReactTableGlobalSort[] | null; group_sorting: ReactTableGlobalSort[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string }
 

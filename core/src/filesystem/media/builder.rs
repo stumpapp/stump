@@ -65,7 +65,7 @@ impl MediaBuilder {
 			(m.len(), last_modified_at)
 		})?;
 		let size = raw_size.try_into().unwrap_or_else(|_| {
-			tracing::error!(?raw_size, "Failed to convert file size to i32");
+			tracing::error!(?raw_size, ?path, "Failed to convert file size to i64");
 			0
 		});
 

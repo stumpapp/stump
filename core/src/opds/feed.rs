@@ -11,6 +11,7 @@ use tracing::warn;
 use xml::{writer::XmlEvent, EventWriter};
 
 use super::{
+	author::StumpAuthor,
 	entry::OpdsEntry,
 	link::{OpdsLinkRel, OpdsLinkType},
 	util,
@@ -85,6 +86,9 @@ impl OpdsFeed {
 		util::write_xml_element("id", &self.id, &mut writer)?;
 		util::write_xml_element("title", &self.title, &mut writer)?;
 		util::write_xml_element("updated", &updated.to_rfc3339(), &mut writer)?;
+
+		let author = StumpAuthor::default();
+		author.write(&mut writer)?;
 
 		if let Some(links) = &self.links {
 			for link in links {
@@ -318,6 +322,10 @@ mod tests {
 				<id>feed_id</id>
 				<title>Feed Title</title>
 				<updated>{{{INSERT}}}</updated>
+				<author>
+					<name>Stump</name>
+					<uri>https://github.com/stumpapp/stump</uri>
+				</author>
 				<entry>
 					<title>Modern Online Philately</title>
 					<id>urn:uuid:6409a00b-7bf2-405e-826c-3fdff0fd0734</id>

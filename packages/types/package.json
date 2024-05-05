@@ -1,6 +1,6 @@
 {
 	"name": "@stump/types",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "",
 	"main": "index.ts",
 	"exports": {
@@ -9,6 +9,6 @@
 	},
 	"license": "MIT",
 	"devDependencies": {
-		"typescript": "^5.3.3"
+		"typescript": "^5.4.5"
 	}
 }

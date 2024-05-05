@@ -113,7 +113,7 @@ function RouterContainer(props: StumpClientProps) {
 			setDiscordPresence={setDiscordPresence}
 			setUseDiscordPresence={setUseDiscordPresence}
 		>
-			{IS_DEVELOPMENT && <ReactQueryDevtools position="bottom-right" context={defaultContext} />}
+			{IS_DEVELOPMENT && <ReactQueryDevtools position="bottom-left" context={defaultContext} />}
 			<Helmet defaultTitle="Stump">
 				<title>Stump</title>
 			</Helmet>

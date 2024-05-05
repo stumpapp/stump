@@ -179,7 +179,7 @@ model Media {
   id String @id @default(uuid())
 
   name        String // derived from filename
-  size        Int // in bytes
+  size        BigInt // in bytes
   extension   String
   pages       Int
   updated_at  DateTime  @updatedAt
@@ -208,7 +208,7 @@ model Media {
 
 // TODO: determine what is optional and what is safe to make required
 model MediaMetadata {
-  // TODO: remove this once nested create is supported, just use media_id
+  // TODO(prisma 0.7.0): Nested create
   id String @id @default(cuid())
 
   title      String?
@@ -683,6 +683,9 @@ model UserPreferences {
   enable_hide_scrollbar          Boolean @default(false)
   prefer_accent_color            Boolean @default(true)
   show_thumbnails_in_headers     Boolean @default(false)
+
+  navigation_arrangement Bytes?
+  home_arrangement       Bytes?
 
   user    User?
   user_id String? @unique

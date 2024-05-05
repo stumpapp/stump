@@ -8,7 +8,7 @@ import { usePagination } from '@/hooks/usePagination'
 import PagePopoverForm from '../PagePopoverForm'
 import { PaginationProps } from '../Pagination'
 
-type TablePaginationProps = Omit<PaginationProps, 'position'>
+export type TablePaginationProps = Omit<PaginationProps, 'position'>
 
 export default function TablePagination({
 	pages,

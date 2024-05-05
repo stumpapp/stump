@@ -6,9 +6,9 @@ import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
+import MediaCard from '@/components/book/BookCard'
 import { SceneContainer } from '@/components/container'
 import LinkBadge from '@/components/LinkBadge'
-import MediaCard from '@/components/media/MediaCard'
 import ReadMore from '@/components/ReadMore'
 import TagList from '@/components/tags/TagList'
 

@@ -13,7 +13,10 @@ use specta::Type;
 use stump_core::{
 	config::StumpConfig,
 	db::{
-		entity::{AgeRestriction, LoginActivity, User, UserPermission, UserPreferences},
+		entity::{
+			AgeRestriction, Arrangement, LoginActivity, NavigationItem, User,
+			UserPermission, UserPreferences,
+		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 	},
 	filesystem::{
@@ -50,7 +53,11 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			"/users/me",
 			Router::new()
 				.route("/", put(update_current_user))
-				.route("/preferences", put(update_current_user_preferences)),
+				.route("/preferences", put(update_current_user_preferences))
+				.route(
+					"/navigation-arrangement",
+					get(get_navigation_arrangement).put(update_navigation_arrangement),
+				),
 		)
 		.nest(
 			"/users/:id",
@@ -607,6 +614,96 @@ async fn update_current_user_preferences(
 		})?;
 
 	Ok(Json(updated_preferences))
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/users/me/navigation-arrangement",
+	tag = "user",
+	responses(
+		(status = 200, description = "Successfully fetched user navigation arrangement"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "User preferences not found"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn get_navigation_arrangement(
+	session: Session,
+	State(ctx): State<AppState>,
+) -> APIResult<Json<Arrangement<NavigationItem>>> {
+	let user = get_session_user(&session)?;
+	let db = &ctx.db;
+
+	let user_preferences = db
+		.user_preferences()
+		.find_first(vec![user_preferences::user::is(vec![user::id::equals(
+			user.id.clone(),
+		)])])
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound(format!(
+			"User preferences for {} not found",
+			user.username
+		)))?;
+	let user_preferences = UserPreferences::from(user_preferences);
+
+	Ok(Json(user_preferences.navigation_arrangement))
+}
+
+#[utoipa::path(
+	put,
+	path = "/api/v1/users/me/navigation-arrangement",
+	tag = "user",
+	request_body = Arrangement<NavigationItem>,
+	responses(
+		(status = 200, description = "Successfully updated user navigation arrangement", body = Arrangement<NavigationItem>),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "User preferences not found"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn update_navigation_arrangement(
+	session: Session,
+	State(ctx): State<AppState>,
+	Json(input): Json<Arrangement<NavigationItem>>,
+) -> APIResult<Json<Arrangement<NavigationItem>>> {
+	let user = get_session_user(&session)?;
+	let db = &ctx.db;
+
+	let user_preferences = db
+		.user_preferences()
+		// TODO: Really old accounts potentially have users with preferences missing a `user_id`
+		// assignment. This should be more properly fixed in the future, e.g. by a migration.
+		.find_first(vec![user_preferences::user::is(vec![user::id::equals(
+			user.id.clone(),
+		)])])
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound(format!(
+			"User preferences for {} not found",
+			user.username
+		)))?;
+	let user_preferences = UserPreferences::from(user_preferences);
+
+	let _updated_preferences = db
+		.user_preferences()
+		.update(
+			user_preferences::id::equals(user_preferences.id.clone()),
+			vec![user_preferences::navigation_arrangement::set(Some(
+				serde_json::to_vec(&input).map_err(|e| {
+					APIError::InternalServerError(format!(
+						"Failed to serialize navigation arrangement: {}",
+						e
+					))
+				})?,
+			))],
+		)
+		.exec()
+		.await?;
+
+	Ok(Json(input))
 }
 
 #[derive(Deserialize, Type, ToSchema)]

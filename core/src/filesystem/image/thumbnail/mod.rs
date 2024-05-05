@@ -111,11 +111,12 @@ pub fn generate_thumbnails(
 
 pub const THUMBNAIL_CHUNK_SIZE: usize = 5;
 
-// TODO: return deleted count
+/// Deletes thumbnails and returns the number deleted if successful, returns
+/// [FileError] otherwise.
 pub fn remove_thumbnails(
 	id_list: &[String],
 	thumbnails_dir: PathBuf,
-) -> Result<(), FileError> {
+) -> Result<u64, FileError> {
 	let found_thumbnails = thumbnails_dir
 		.read_dir()
 		.ok()
@@ -140,18 +141,24 @@ pub fn remove_thumbnails(
 	let found_thumbnails_count = found_thumbnails.len();
 	tracing::debug!(found_thumbnails_count, "Found thumbnails to remove");
 
+	let mut deleted_thumbnails_count = 0;
 	for path in found_thumbnails {
 		std::fs::remove_file(path)?;
+		deleted_thumbnails_count += 1;
 	}
 
-	Ok(())
+	Ok(deleted_thumbnails_count)
 }
 
+/// Deletes thumbnails with a particular `extension`, returns the number of thumbnails
+/// removed on success and [FileError] if an error is encountered.
 pub fn remove_thumbnails_of_type(
 	ids: &[String],
 	extension: &str,
 	thumbnails_dir: PathBuf,
-) -> Result<(), FileError> {
+) -> Result<u64, FileError> {
+	let mut deleted_thumbnails_count = 0;
+
 	for (idx, chunk) in ids.chunks(THUMBNAIL_CHUNK_SIZE).enumerate() {
 		trace!(chunk = idx + 1, "Processing chunk for thumbnail removal");
 		let results = chunk
@@ -174,9 +181,10 @@ pub fn remove_thumbnails_of_type(
 			.collect::<Vec<()>>();
 
 		debug!(deleted_count = results.len(), "Deleted thumbnail batch");
+		deleted_thumbnails_count += results.len() as u64;
 	}
 
 	debug!("Finished deleting thumbnails");
 
-	Ok(())
+	Ok(deleted_thumbnails_count)
 }

@@ -1,5 +1,5 @@
 import { ComboBox } from '@stump/components'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 type Props = {
@@ -24,12 +24,14 @@ type Props = {
  * update the form context.
  */
 export default function GenericFilterMultiselect({ name, label, options }: Props) {
-	const form = useFormContext()
-	const [value, setValue] = useState<string[] | undefined>(() => form.getValues(name))
+	const { watch, setValue } = useFormContext()
 
-	useEffect(() => {
-		form.setValue(name, value)
-	}, [name, form, value])
+	const formValue = watch(name)
+
+	const handleChange = useCallback(
+		(value: string[] | undefined) => setValue(name, value),
+		[name, setValue],
+	)
 
 	return (
 		<ComboBox
@@ -37,10 +39,8 @@ export default function GenericFilterMultiselect({ name, label, options }: Props
 			options={options}
 			isMultiSelect
 			filterable
-			value={value}
-			onChange={(selected) => {
-				setValue(selected)
-			}}
+			value={formValue}
+			onChange={handleChange}
 			size="full"
 		/>
 	)

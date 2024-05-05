@@ -16,6 +16,7 @@ export const light: ThemeDefintion = {
 		100: '#000000',
 		200: '#161719',
 		300: '#1F2123',
+		400: '#2E3033',
 		DEFAULT: '#000000',
 	},
 	edge: {

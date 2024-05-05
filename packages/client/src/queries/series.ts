@@ -11,9 +11,16 @@ import {
 	usePageQuery,
 	useQuery,
 } from '../client'
+import { prefetchSeriesMedia } from './media'
 
-export const prefetchSeries = async (id: string) => {
-	await queryClient.prefetchQuery(
+type PrefetchSeriesOptions = {
+	prefetchBooks?: boolean
+}
+export const prefetchSeries = async (
+	id: string,
+	{ prefetchBooks = true }: PrefetchSeriesOptions = {},
+) => {
+	const seriesPromise = queryClient.prefetchQuery(
 		[seriesQueryKeys.getSeriesById, id],
 		async () => {
 			const { data } = await seriesApi.getSeriesById(id)
@@ -23,6 +30,12 @@ export const prefetchSeries = async (id: string) => {
 			staleTime: 10 * 1000,
 		},
 	)
+
+	if (prefetchBooks) {
+		await Promise.all([seriesPromise, prefetchSeriesMedia(id)])
+	} else {
+		await seriesPromise
+	}
 }
 
 export const prefetchLibrarySeries = (id: string) =>
@@ -80,6 +93,11 @@ export function usePagedSeriesQuery(options: PageQueryOptions<Series> = {}) {
 		...restReturn,
 	}
 }
+
+export const prefetchPagedSeries = (options: PageQueryOptions<Series>) =>
+	queryClient.prefetchQuery([seriesQueryKeys.getSeries, options], () =>
+		seriesApi.getSeries(options),
+	)
 
 // TODO: fix this query!
 export function useSeriesCursorQuery({ queryKey, ...options }: CursorQueryOptions<Series>) {

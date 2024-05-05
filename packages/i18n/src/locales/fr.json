@@ -1,4 +1,10 @@
 {
+	"underConstruction": {
+		"heading": "C'est embarrassant",
+		"message": "Vous êtes tombé sur une page qui est encore en cours de développement. J'aimerais vous la montrer, mais elle n'est pas encore tout à fait prête.",
+		"homeLink": "Aller à l'accueil",
+		"githubLink": "Voir le ticket GitHub"
+	},
 	"authScene": {
 		"claimHeading": "Initialisez votre serveur",
 		"claimText": "Ce serveur Stump n'est pas initialisé. Utilisez le formulaire ci-dessous pour créer votre compte. Une fois créé, vous aurez un accès complet à toutes les fonctionnalités du serveur.",
@@ -367,6 +373,33 @@
 						"dark": "Sombre",
 						"bronze": "Bronze léger"
 					}
+				},
+				"navigationArrangement": {
+					"label": "Disposition de la navigation",
+					"description": {
+						"sidebar": "Organiser et personnaliser les éléments de navigation dans la barre latérale",
+						"topbar": "Organiser et personnaliser les éléments de navigation dans la barre supérieure"
+					},
+					"isLocked": "L'organisation est verrouillée",
+					"lock": "Verrouiller la disposition",
+					"unlock": "Déverrouiller la disposition",
+					"options": {
+						"Home": "Accueil",
+						"Explore": "Explorer",
+						"Libraries": "Bibliothèques",
+						"BookClubs": "Clubs de lecture",
+						"SmartLists": "Listes intelligentes"
+					},
+					"entityOptions": {
+						"createAction": {
+							"label": "Afficher l'action Créer",
+							"help": "Afficher l'action Créer dans la navigation"
+						},
+						"linkToAll": {
+							"label": "Voir tous les liens",
+							"help": "Un lien vers une page dédiée à la visualisation de tous les éléments de ce type"
+						}
+					}
 				}
 			}
 		},
@@ -376,7 +409,7 @@
 			"description": "Options par défaut pour les lecteurs. Elles sont liées à votre appareil actuel uniquement",
 			"sections": {
 				"imageBasedBooks": {
-					"label": "Livres illustrés",
+					"label": "Livres à base d'images",
 					"description": "Bandes dessinées, mangas, et autres livres illustrés",
 					"sections": {
 						"preloadAheadCount": {
@@ -545,8 +578,8 @@
 							"description": "Permet à l'utilisateur de télécharger des fichiers à partir du serveur"
 						},
 						"download": {
-							"label": "Download files",
-							"description": "Allows the user to download files from the server"
+							"label": "Télécharger les fichiers",
+							"description": "Permet à l'utilisateur de télécharger des fichiers à partir du serveur"
 						},
 						"upload": {
 							"label": "Envoyer des fichiers",
@@ -655,7 +688,8 @@
 			"goBack": "Aller en arrière",
 			"smartlists": "Listes intelligentes",
 			"noSmartlists": "Aucune liste intelligente",
-			"createSmartlist": "Créer une liste intelligente"
+			"createSmartlist": "Créer une liste intelligente",
+			"seeAll": "Afficher tout"
 		},
 		"libraryOptions": {
 			"scanLibrary": "Scanner",

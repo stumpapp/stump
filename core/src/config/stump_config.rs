@@ -1,8 +1,14 @@
+//! Contains the [StumpConfig] struct and related functions for loading and saving configuration
+//! values for a Stump application.
+//!
+//! Note: [StumpConfig] is constructed _before_ tracing is initializing. This is because the
+//! configuration is used to determine the log file path and verbosity level. This means that any
+//! logging that occurs during the construction of the [StumpConfig] should be done using the
+//! standard `println!` or `eprintln!` macros.
 use std::{env, path::PathBuf};
 
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use tracing::debug;
 
 use crate::error::{CoreError, CoreResult};
 
@@ -156,7 +162,7 @@ impl StumpConfig {
 		let toml_content_str = std::fs::read_to_string(stump_toml)?;
 		let toml_configs = toml::from_str::<PartialStumpConfig>(&toml_content_str)
 			.map_err(|e| {
-				tracing::error!(error = ?e, "Failed to parse Stump.toml");
+				eprintln!("Failed to parse Stump.toml: {}", e);
 				CoreError::InitializationError(e.to_string())
 			})?;
 
@@ -173,13 +179,13 @@ impl StumpConfig {
 			if profile == "release" || profile == "debug" {
 				env_configs.profile = Some(profile);
 			} else {
-				debug!("Invalid PROFILE value: {}", profile);
+				eprintln!("Invalid PROFILE value: {}", profile);
 			}
 		}
 
 		if let Ok(port) = env::var(PORT_KEY) {
 			let port_u16 = port.parse::<u16>().map_err(|e| {
-				tracing::error!(error = ?e, port, "Failed to parse provided STUMP_PORT");
+				eprintln!("Failed to parse provided STUMP_PORT: {}", e);
 				CoreError::InitializationError(e.to_string())
 			})?;
 			env_configs.port = Some(port_u16);
@@ -187,11 +193,7 @@ impl StumpConfig {
 
 		if let Ok(verbosity) = env::var(VERBOSITY_KEY) {
 			let verbosity_u64 = verbosity.parse::<u64>().map_err(|e| {
-				tracing::error!(
-					error = ?e,
-					verbosity,
-					"Failed to parse provided STUMP_VERBOSITY"
-				);
+				eprintln!("Failed to parse provided STUMP_VERBOSITY: {}", e);
 				CoreError::InitializationError(e.to_string())
 			})?;
 			env_configs.verbosity = Some(verbosity_u64);
@@ -199,11 +201,7 @@ impl StumpConfig {
 
 		if let Ok(pretty_logs) = env::var(PRETTY_LOGS_KEY) {
 			let pretty_logs_bool = pretty_logs.parse::<bool>().map_err(|e| {
-				tracing::error!(
-					error = ?e,
-					pretty_logs,
-					"Failed to parse provided STUMP_PRETTY_LOGS"
-				);
+				eprintln!("Failed to parse provided STUMP_PRETTY_LOGS: {}", e);
 				CoreError::InitializationError(e.to_string())
 			})?;
 			self.pretty_logs = pretty_logs_bool;
@@ -255,16 +253,16 @@ impl StumpConfig {
 		if let Ok(session_ttl) = env::var(SESSION_TTL_KEY) {
 			match session_ttl.parse() {
 				Ok(val) => env_configs.session_ttl = Some(val),
-				Err(e) => tracing::error!(?e, "Failed to parse provided SESSION_TTL"),
+				Err(e) => eprintln!("Failed to parse provided SESSION_TTL: {}", e),
 			}
 		}
 
 		if let Ok(session_expiry_interval) = env::var(SESSION_EXPIRY_INTERVAL_KEY) {
 			match session_expiry_interval.parse() {
 				Ok(val) => env_configs.expired_session_cleanup_interval = Some(val),
-				Err(e) => tracing::error!(
-					?e,
-					"Failed to parse provided SESSION_EXPIRY_CLEANUP_INTERVAL"
+				Err(e) => eprintln!(
+					"Failed to parse provided SESSION_EXPIRY_CLEANUP_INTERVAL: {}",
+					e
 				),
 			}
 		}
@@ -272,9 +270,7 @@ impl StumpConfig {
 		if let Ok(scanner_chunk_size) = env::var(SCANNER_CHUNK_SIZE_KEY) {
 			match scanner_chunk_size.parse() {
 				Ok(val) => self.scanner_chunk_size = val,
-				Err(e) => {
-					tracing::error!(?e, "Failed to parse provided SCANNER_CHUNK_SIZE")
-				},
+				Err(e) => eprintln!("Failed to parse provided SCANNER_CHUNK_SIZE: {}", e),
 			}
 		}
 
@@ -333,7 +329,7 @@ impl StumpConfig {
 		std::fs::write(
 			stump_toml.as_path(),
 			toml::to_string(&self).map_err(|e| {
-				tracing::error!(error = ?e, "Failed to serialize StumpConfig to toml");
+				eprintln!("Failed to serialize StumpConfig to toml: {}", e);
 				CoreError::InitializationError(e.to_string())
 			})?,
 		)?;
@@ -455,7 +451,7 @@ impl PartialStumpConfig {
 			if profile == "release" || profile == "debug" {
 				config.profile = profile;
 			} else {
-				debug!("Invalid PROFILE value: {}", profile);
+				eprintln!("Invalid PROFILE value: {}", profile);
 			}
 		}
 
@@ -544,43 +540,50 @@ mod tests {
 
 	#[test]
 	fn test_getting_config_from_environment() {
-		// Set environment variables
-		env::set_var(PROFILE_KEY, "release");
-		env::set_var(PORT_KEY, "1337");
-		env::set_var(VERBOSITY_KEY, "3");
-		env::set_var(DB_PATH_KEY, "not_a_real_path");
-		env::set_var(CLIENT_KEY, "not_a_real_dir");
-		env::set_var(CONFIG_DIR_KEY, "also_not_a_real_dir");
-		env::set_var(DISABLE_SWAGGER_KEY, "true");
-		env::set_var(HASH_COST_KEY, "24");
-		env::set_var(SESSION_TTL_KEY, (3600 * 24).to_string());
-		env::set_var(SESSION_EXPIRY_INTERVAL_KEY, (60 * 60 * 8).to_string());
+		temp_env::with_vars(
+			[
+				(PROFILE_KEY, Some("release")),
+				(PORT_KEY, Some("1337")),
+				(VERBOSITY_KEY, Some("2")),
+				(DB_PATH_KEY, Some("not_a_real_path")),
+				(CLIENT_KEY, Some("not_a_real_dir")),
+				(CONFIG_DIR_KEY, Some("also_not_a_real_dir")),
+				(DISABLE_SWAGGER_KEY, Some("true")),
+				(HASH_COST_KEY, Some("24")),
+				(SESSION_TTL_KEY, Some(&(3600 * 24).to_string())),
+				(
+					SESSION_EXPIRY_INTERVAL_KEY,
+					Some(&(60 * 60 * 8).to_string()),
+				),
+			],
+			|| {
+				// Create a new StumpConfig and load values from the environment.
+				let config = StumpConfig::new("not_a_dir".to_string())
+					.with_environment()
+					.unwrap();
 
-		// Create a new StumpConfig and load values from the environment.
-		let config = StumpConfig::new("not_a_dir".to_string())
-			.with_environment()
-			.unwrap();
-
-		// Confirm values are as expected
-		assert_eq!(
-			config,
-			StumpConfig {
-				profile: "release".to_string(),
-				port: 1337,
-				verbosity: 3,
-				pretty_logs: true,
-				db_path: Some("not_a_real_path".to_string()),
-				client_dir: "not_a_real_dir".to_string(),
-				config_dir: "also_not_a_real_dir".to_string(),
-				custom_templates_dir: None,
-				allowed_origins: vec![],
-				pdfium_path: None,
-				disable_swagger: true,
-				password_hash_cost: 24,
-				session_ttl: 3600 * 24,
-				expired_session_cleanup_interval: 60 * 60 * 8,
-				scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
-			}
+				// Confirm values are as expected
+				assert_eq!(
+					config,
+					StumpConfig {
+						profile: "release".to_string(),
+						port: 1337,
+						verbosity: 2,
+						pretty_logs: true,
+						db_path: Some("not_a_real_path".to_string()),
+						client_dir: "not_a_real_dir".to_string(),
+						config_dir: "also_not_a_real_dir".to_string(),
+						allowed_origins: vec![],
+						pdfium_path: None,
+						disable_swagger: true,
+						password_hash_cost: 24,
+						session_ttl: 3600 * 24,
+						expired_session_cleanup_interval: 60 * 60 * 8,
+						scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
+						custom_templates_dir: None,
+					}
+				);
+			},
 		);
 	}
 
@@ -687,6 +690,51 @@ mod tests {
 		tempdir
 			.close()
 			.expect("Failed to delete temporary directory");
+	}
+
+	#[test]
+	fn test_simulate_first_boot() {
+		temp_env::with_vars(
+			[
+				(PORT_KEY, Some("1337")),
+				(VERBOSITY_KEY, Some("2")),
+				(DISABLE_SWAGGER_KEY, Some("true")),
+				(HASH_COST_KEY, Some("1")),
+			],
+			|| {
+				let tempdir =
+					tempfile::tempdir().expect("Failed to create temporary directory");
+				// Now we can create a StumpConfig rooted at the temporary directory
+				let config_dir = tempdir.path().to_string_lossy().to_string();
+				let generated = StumpConfig::new(config_dir.clone())
+					.with_config_file()
+					.expect("Failed to generate StumpConfig from Stump.toml")
+					.with_environment()
+					.expect("Failed to generate StumpConfig from environment");
+
+				assert_eq!(
+					generated,
+					StumpConfig {
+						profile: "debug".to_string(),
+						port: 1337,
+						verbosity: 2,
+						pretty_logs: true,
+						db_path: None,
+						client_dir: "./dist".to_string(),
+						config_dir,
+						allowed_origins: vec![],
+						pdfium_path: None,
+						disable_swagger: true,
+						password_hash_cost: 1,
+						session_ttl: DEFAULT_SESSION_TTL,
+						expired_session_cleanup_interval:
+							DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
+						scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
+						custom_templates_dir: None,
+					}
+				);
+			},
+		);
 	}
 
 	fn get_mock_config_file() -> String {

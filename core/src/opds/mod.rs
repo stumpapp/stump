@@ -30,7 +30,7 @@ mod tests {
 		// First we replace all \n and \t characters with spaces
 		let normalized_xml = re_tags
 			.replace_all(xml, |caps: &regex::Captures| {
-				caps[0].replace('\n', " ").replace('\t', " ")
+				caps[0].replace(['\n', '\t'], " ")
 			})
 			.to_string();
 		let partially_cleaned = normalized_xml.trim();

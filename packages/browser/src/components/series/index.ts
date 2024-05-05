@@ -1,0 +1,1 @@
+export { SeriesTable } from './table'

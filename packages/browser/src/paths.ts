@@ -85,6 +85,7 @@ const paths = {
 		`https://www.stumpapp.dev/guides/${topic || ''}${section ? `#${section}` : ''}`,
 	editEmailer: (id: number) => paths.settings('server/email') + `/${id}/edit`,
 	home: () => '/',
+	libraries: () => '/libraries',
 	libraryBooks: (id: string, page?: number) => {
 		if (page !== undefined) {
 			return `/libraries/${id}/books?page=${page}`

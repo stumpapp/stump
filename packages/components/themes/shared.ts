@@ -34,6 +34,7 @@ export type ThemeDefintion = {
 		100: string
 		200: string
 		300: string
+		400: string
 		DEFAULT: string
 	}
 	edge: {

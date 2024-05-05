@@ -1,3 +1,5 @@
+export { useCurrentOrPrevious } from './useCurrentOrPrevious'
+export { useDetectZoom } from './useDetectZoom'
 export { useLayoutMode } from './useLayoutMode'
 export { usePageParam } from './usePageParam'
 export { usePreferences } from './usePreferences'

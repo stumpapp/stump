@@ -818,13 +818,13 @@ async fn replace_library_thumbnail(
 
 	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 	// user testing I'd like to see if this becomes a problem. We'll see!
-	remove_thumbnails(&[library_id.clone()], ctx.config.get_thumbnails_dir())
-		.unwrap_or_else(|e| {
-			tracing::error!(
-				?e,
-				"Failed to remove existing library thumbnail before replacing!"
-			);
-		});
+	match remove_thumbnails(&[library_id.clone()], ctx.config.get_thumbnails_dir()) {
+		Ok(count) => tracing::info!("Removed {} thumbnails!", count),
+		Err(e) => tracing::error!(
+			?e,
+			"Failed to remove existing library thumbnail before replacing!"
+		),
+	}
 
 	let path_buf = place_thumbnail(&library_id, ext, &bytes, &ctx.config)?;
 
@@ -1337,7 +1337,7 @@ async fn create_library(
 		)));
 	}
 
-	// TODO: refactor once nested create is supported
+	// TODO(prisma 0.7.0): Nested create
 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
 	let library_options_arg = input.library_options.unwrap_or_default();
 	let transaction_result: Result<Library, APIError> = db

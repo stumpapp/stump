@@ -321,6 +321,8 @@ impl FileConverter for RarProcessor {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use crate::filesystem::media::tests::{get_test_rar_file_data, get_test_rar_path};
+
 	use std::fs;
 
 	#[test]
@@ -372,18 +374,5 @@ mod tests {
 
 		let content_types = RarProcessor::get_page_content_types(&path, vec![1]);
 		assert!(content_types.is_ok());
-	}
-
-	fn get_test_rar_path() -> String {
-		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests/data/book.rar")
-			.to_string_lossy()
-			.to_string()
-	}
-
-	fn get_test_rar_file_data() -> Vec<u8> {
-		let test_rar_path = get_test_rar_path();
-
-		fs::read(test_rar_path).expect("Failed to fetch test rar file")
 	}
 }

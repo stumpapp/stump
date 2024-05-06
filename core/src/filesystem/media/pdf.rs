@@ -255,6 +255,7 @@ impl FileConverter for PdfProcessor {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use crate::filesystem::media::tests::get_test_pdf_path;
 
 	#[test]
 	fn test_process() {
@@ -278,12 +279,5 @@ mod tests {
 
 		let content_types = PdfProcessor::get_page_content_types(&path, vec![1]);
 		assert!(content_types.is_ok());
-	}
-
-	fn get_test_pdf_path() -> String {
-		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests/data/rust_book.pdf")
-			.to_string_lossy()
-			.to_string()
 	}
 }

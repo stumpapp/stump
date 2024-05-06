@@ -370,6 +370,7 @@ pub(crate) fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use crate::filesystem::media::tests::get_test_epub_path;
 
 	#[test]
 	fn test_process() {
@@ -409,12 +410,5 @@ mod tests {
 
 		let chapter = EpubProcessor::get_chapter(&path, 1);
 		assert!(chapter.is_ok());
-	}
-
-	fn get_test_epub_path() -> String {
-		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests/data/book.epub")
-			.to_string_lossy()
-			.to_string()
 	}
 }

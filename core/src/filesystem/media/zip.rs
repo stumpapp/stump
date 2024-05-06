@@ -230,6 +230,7 @@ fn get_zip_entry_content_type(
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use crate::filesystem::media::tests::{get_test_cbz_path, get_test_zip_path};
 
 	#[test]
 	fn test_process() {
@@ -288,19 +289,5 @@ mod tests {
 		let content_types =
 			ZipProcessor::get_page_content_types(&path, vec![1, 2, 3, 4, 5]);
 		assert!(content_types.is_ok());
-	}
-
-	fn get_test_zip_path() -> String {
-		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests/data/book.zip")
-			.to_string_lossy()
-			.to_string()
-	}
-
-	fn get_test_cbz_path() -> String {
-		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests/data/science_comics_001.cbz")
-			.to_string_lossy()
-			.to_string()
 	}
 }

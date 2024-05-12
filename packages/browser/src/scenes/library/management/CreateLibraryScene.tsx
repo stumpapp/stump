@@ -17,7 +17,7 @@ export default function CreateLibraryScene() {
 				</Heading>
 				<Text size="sm" variant="muted" className="mt-1.5">
 					{t('createLibraryScene.subtitle')}{' '}
-					<Link href="https://stumpapp.dev/guides/libraries">
+					<Link href="https://stumpapp.dev/guides/basics/libraries">
 						{t('createLibraryScene.subtitleLink')}.
 					</Link>
 				</Text>

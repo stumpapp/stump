@@ -15,7 +15,7 @@
 // - https://github.com/Nukesor/pueue
 use std::{collections::VecDeque, fmt::Debug, sync::Arc, time::Duration};
 
-use prisma_client_rust::chrono::{DateTime, Utc};
+use prisma_client_rust::chrono::{self, DateTime, Utc};
 use serde::{de, Deserialize, Serialize};
 
 mod controller;
@@ -502,23 +502,31 @@ pub trait Executor: Send + Sync {
 		let output_data = serde_json::to_vec(&output.output)
 			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
 
+		let tx_timeout = chrono::Duration::seconds(60).num_milliseconds() as u64;
 		let persisted_job_with_data = db
-			.job()
-			.update(
-				job::id::equals(job_id.to_string()),
-				vec![
-					job::save_state::set(None),
-					job::output_data::set(Some(output_data)),
-					job::status::set(JobStatus::Completed.to_string()),
-					job::ms_elapsed::set(
-						elapsed.as_millis().try_into().unwrap_or_else(|e| {
-							tracing::error!(error = ?e, "Wow! You defied logic and overflowed an i64 during the attempt to convert job duration to milliseconds. It must have been a long 292_471_208 years!");
-							i64::MAX
-						}),
-					),
-				],
-			)
-			.exec()
+			._transaction()
+			.with_max_wait(tx_timeout)
+			.with_timeout(tx_timeout)
+			.run(|client| async move {
+				client
+					.job()
+					.update(
+						job::id::equals(job_id.to_string()),
+						vec![
+							job::save_state::set(None),
+							job::output_data::set(Some(output_data)),
+							job::status::set(JobStatus::Completed.to_string()),
+							job::ms_elapsed::set(
+								elapsed.as_millis().try_into().unwrap_or_else(|e| {
+									tracing::error!(error = ?e, "Wow! You defied logic and overflowed an i64 during the attempt to convert job duration to milliseconds. It must have been a long 292_471_208 years!");
+									i64::MAX
+								}),
+							),
+						],
+					)
+					.exec()
+					.await
+			})
 			.await
 			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
 		tracing::trace!(?persisted_job_with_data, "Persisted completed job to DB");
@@ -546,21 +554,29 @@ pub trait Executor: Send + Sync {
 			));
 		}
 
+		let tx_timeout = chrono::Duration::seconds(60).num_milliseconds() as u64;
 		let _persisted_job = db
-			.job()
-			.update(
-				job::id::equals(job_id.to_string()),
-				vec![
-					job::status::set(status.to_string()),
-					job::ms_elapsed::set(
-						elapsed.as_millis().try_into().unwrap_or_else(|e| {
-							tracing::error!(error = ?e, "Wow! You defied logic and overflowed an i64 during the attempt to convert job duration to milliseconds. It must have been a long 292_471_208 years!");
-							i64::MAX
-						}),
-					),
-				],
-			)
-			.exec()
+			._transaction()
+			.with_max_wait(tx_timeout)
+			.with_timeout(tx_timeout)
+			.run(|client| async move {
+				client
+					.job()
+					.update(
+						job::id::equals(job_id.to_string()),
+						vec![
+							job::status::set(status.to_string()),
+							job::ms_elapsed::set(
+								elapsed.as_millis().try_into().unwrap_or_else(|e| {
+									tracing::error!(error = ?e, "Wow! You defied logic and overflowed an i64 during the attempt to convert job duration to milliseconds. It must have been a long 292_471_208 years!");
+									i64::MAX
+								}),
+							),
+						],
+					)
+					.exec()
+					.await
+			})
 			.await
 			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
 
@@ -794,6 +810,8 @@ impl<J: JobExt> Executor for WrappedJob<J> {
 		self.initial_state = Some(WorkingState::default());
 		// Put the inner job back into the WrappedJob
 		self.inner_job = Some(inner_job);
+
+		tracing::info!(?job_id, ?job_name, "Job execution complete");
 
 		Ok(ExecutorOutput {
 			output: working_output.into_json(),

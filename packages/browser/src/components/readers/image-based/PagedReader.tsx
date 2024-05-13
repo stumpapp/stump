@@ -60,18 +60,20 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	}, [currentPage])
 
 	/**
-	 * This effect is responsibe for invalidating the in-progress media query when the component unmounts.
-	 * This is done to ensure that when the user navigates away from the reader, the in-progress media is
-	 * accurately reflected with the latest reading session.
+	 * This effect is primarily responsible for two cleanup tasks:
 	 *
-	 * Note: This honestly isn't needed, as the cache time is not long enough to warrant this. However, I
-	 * like being cautious.
+	 * 1. Hiding the toolbar when the component unmounts. This is done to ensure that the toolbar is not
+	 *    visible when the user navigates *back* to a reader again at some point.
+	 * 2. Invalidating the in-progress media query when the component unmounts. This is done to ensure that
+	 *    when the user navigates away from the reader, the in-progress media is accurately reflected with
+	 *    the latest reading session.
 	 */
 	useEffect(() => {
 		return () => {
-			queryClient.invalidateQueries([mediaQueryKeys.getInProgressMedia])
+			setShowToolBar(false)
+			queryClient.invalidateQueries([mediaQueryKeys.getInProgressMedia], { exact: false })
 		}
-	}, [])
+	}, [setShowToolBar])
 
 	/**
 	 * A simple function that does a little bit of validation before calling the onPageChange callback.
@@ -123,6 +125,7 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 		[isZoomed, showToolBar, isMobile],
 	)
 
+	// TODO: when preloading images, cache the dimensions of the images to better support dynamic resizing
 	return (
 		<div
 			className="relative flex h-full w-full items-center justify-center"
@@ -135,7 +138,7 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 			/>
 			{/* TODO: better error handling for the loaded image */}
 			<img
-				className="z-30 max-h-full w-full select-none md:w-auto"
+				className="z-30 max-h-screen w-full select-none md:w-auto"
 				src={getPageUrl(currentPage)}
 				onLoad={(e) => {
 					const img = e.target as HTMLImageElement

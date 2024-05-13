@@ -47,6 +47,8 @@ pub enum JobManagerError {
 	JobMissingId,
 	#[error("Job failed to be persisted: {0}")]
 	JobPersistFailed(String),
+	#[error("A job was found which was in a deeply invalid state")]
+	JobLostError,
 	#[error("A query error occurred {0}")]
 	QueryError(#[from] prisma_client_rust::QueryError),
 	#[error("An unknown error occurred {0}")]

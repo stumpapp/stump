@@ -178,7 +178,23 @@ impl JobManager {
                 },
 			);
 		} else {
-			return Err(JobManagerError::JobNotFound(job_id));
+			let islanded_job = self
+				.client
+				.job()
+				.find_first(vec![
+					job::id::equals(job_id.clone()),
+					job::status::equals(JobStatus::Running.to_string()),
+				])
+				.exec()
+				.await?
+				.ok_or_else(|| JobManagerError::JobNotFound(job_id.clone()))?;
+			tracing::warn!(
+				?islanded_job,
+				"Job was found in an invalid state, attempting to cancel"
+			);
+			handle_do_cancel(job_id.clone(), &self.client, Duration::from_secs(0))
+				.await?;
+			return Err(JobManagerError::JobLostError);
 		}
 
 		Ok(())

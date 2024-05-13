@@ -48,7 +48,7 @@ export default function LibraryPatternRadioGroup() {
 
 			<Text size="xs" variant="muted">
 				{'Not sure which to choose? '}
-				<Link href="https://stumpapp.dev/guides/libraries#library-patterns">
+				<Link href="https://stumpapp.dev/guides/basics/libraries#supported-patterns">
 					{t('Click here to learn more.')}
 				</Link>
 				{<i> You cannot change this setting later</i>}

@@ -25,6 +25,7 @@ use stump_core::{
 		PrismaCountTrait,
 	},
 	filesystem::{
+		analyze_media_job::{AnalyzeMediaJob, AnalyzeMediaJobVariant},
 		get_unknown_thumnail,
 		image::{
 			self, generate_thumbnail, place_thumbnail, remove_thumbnails,
@@ -96,6 +97,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/clean", put(clean_library))
 				.route("/series", get(get_library_series))
 				.route("/media", get(get_library_media))
+				.route("/analyze", post(start_media_analysis))
 				.nest(
 					"/thumbnail",
 					Router::new()
@@ -1725,4 +1727,39 @@ async fn get_library_stats(
 		))?;
 
 	Ok(Json(stats))
+}
+
+#[utoipa::path(
+	post,
+	path = "/api/v1/libraries/:id/analyze",
+	tag = "library",
+	params(
+		("id" = String, Path, description = "The ID of the library to analyze")
+	),
+	responses(
+		(status = 200, description = "Successfully started library media analysis"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Library not found"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn start_media_analysis(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> APIResult<()> {
+	let _ = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
+
+	// Start analysis job
+	ctx.enqueue_job(AnalyzeMediaJob::new(
+		AnalyzeMediaJobVariant::AnalyzeLibrary(id),
+	))
+	.map_err(|e| {
+		let err = "Failed to enqueue analyze library media job";
+		error!(?e, err);
+		APIError::InternalServerError(err.to_string())
+	})?;
+
+	APIResult::Ok(())
 }

@@ -117,6 +117,15 @@ export function updateExcludedUsers(id: string, user_ids: string[]) {
 	return API.post(`/libraries/${id}/excluded-users`, { user_ids })
 }
 
+/**
+ * Start the analysis of a library by library id.
+ *
+ * @param id The id for the library to analyze
+ */
+export function startMediaAnalysis(id: string) {
+	API.post(`/libraries/${id}/analyze`)
+}
+
 export const libraryApi = {
 	cleanLibrary,
 	createLibrary,
@@ -133,6 +142,7 @@ export const libraryApi = {
 	patchLibraryThumbnail,
 	regenerateThumbnails,
 	scanLibary,
+	startMediaAnalysis,
 	updateExcludedUsers,
 	uploadLibraryThumbnail,
 	visitLibrary,
@@ -154,6 +164,7 @@ export const libraryQueryKeys: Record<keyof typeof libraryApi, string> = {
 	patchLibraryThumbnail: 'library.patchLibraryThumbnail',
 	regenerateThumbnails: 'library.regenerateThumbnails',
 	scanLibary: 'library.scanLibary',
+	startMediaAnalysis: 'library.startAnalysis',
 	updateExcludedUsers: 'library.updateExcludedUsers',
 	uploadLibraryThumbnail: 'library.uploadLibraryThumbnail',
 	visitLibrary: 'library.visitLibrary',

@@ -4,7 +4,7 @@ pub mod archive;
 mod common;
 mod content_type;
 mod directory_listing;
-mod error;
+pub(crate) mod error;
 mod hash;
 pub mod image;
 pub mod media;

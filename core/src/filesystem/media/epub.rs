@@ -97,6 +97,15 @@ impl FileProcessor for EpubProcessor {
 		}
 	}
 
+	fn get_page_count(path: &str, _: &StumpConfig) -> Result<i32, FileError> {
+		// TODO At present, this likely does not return the correct count of
+		// pages. It should be updated when a better method is determined.
+		let epub_file = Self::open(path)?;
+		let pages = epub_file.get_num_pages() as i32;
+
+		Ok(pages)
+	}
+
 	fn get_page_content_types(
 		path: &str,
 		pages: Vec<i32>,

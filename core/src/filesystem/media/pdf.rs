@@ -118,6 +118,13 @@ impl FileProcessor for PdfProcessor {
 		}
 	}
 
+	fn get_page_count(path: &str, config: &StumpConfig) -> Result<i32, FileError> {
+		let pdfium = PdfProcessor::renderer(&config.pdfium_path)?;
+		let document = pdfium.load_pdf_from_file(path, None)?;
+
+		Ok(document.pages().len() as i32)
+	}
+
 	fn get_page_content_types(
 		_: &str,
 		pages: Vec<i32>,

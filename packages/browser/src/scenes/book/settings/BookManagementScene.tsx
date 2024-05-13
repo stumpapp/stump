@@ -1,5 +1,6 @@
+import { mediaApi } from '@stump/api'
 import { useMediaByIdQuery } from '@stump/client'
-import { Alert, Breadcrumbs, Heading, Text } from '@stump/components'
+import { Alert, Breadcrumbs, Button, Heading, Text } from '@stump/components'
 import { Construction } from 'lucide-react'
 import React, { useMemo } from 'react'
 import { Navigate, useParams } from 'react-router'
@@ -52,6 +53,12 @@ export default function BookManagementScene() {
 		return <Navigate to={paths.notFound()} />
 	}
 
+	function handleAnalyze() {
+		if (id != undefined) {
+			mediaApi.startMediaAnalysis(id)
+		}
+	}
+
 	return (
 		<SceneContainer>
 			<div className="flex flex-col items-start gap-y-6 text-left">
@@ -71,6 +78,10 @@ export default function BookManagementScene() {
 						Book management is currently under development and has very limited functionality
 					</Alert.Content>
 				</Alert>
+
+				<Button size="md" variant="primary" onClick={handleAnalyze}>
+					Analyze Media
+				</Button>
 
 				<BookThumbnailSelector book={media} />
 			</div>

@@ -68,7 +68,6 @@ pub fn generate_thumbnail(
 	Ok(thumbnail_path)
 }
 
-// TODO: does this need to return a result?
 pub fn generate_thumbnails(
 	media: &[Media],
 	options: ImageProcessorOptions,

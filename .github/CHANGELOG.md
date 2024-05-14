@@ -1,5 +1,32 @@
 # Changelog
 
+<a name="0.0.3"></a>
+## 0.0.3 (2024-05-13)
+
+### Added
+
+- ✅ Fix stump_config tests ([#331](https://github.com/stumpapp/stump/issues/331)) [[a98f86f](https://github.com/stumpapp/stump/commit/a98f86f31fd8ce9c7b55ed26b6f5068dfe33c8e1)]
+
+### Fixed
+
+- ✏️ Fix dead links ([#337](https://github.com/stumpapp/stump/issues/337)) [[a46fca4](https://github.com/stumpapp/stump/commit/a46fca42a246f9eef78ef1409581e4b4d56a234f)]
+- 🐛 Allow canceling islanded jobs [[dcedea4](https://github.com/stumpapp/stump/commit/dcedea47210488c5fa3ca2de493e5228ecb3d664)]
+- 🐛 Fix paged reader oversized height [[de86463](https://github.com/stumpapp/stump/commit/de864637956f1b7d30ab80d648769785361a4f3e)]
+- 🐛 Fix &#x60;check-for-update&#x60; false positive ([#333](https://github.com/stumpapp/stump/issues/333)) [[316cd09](https://github.com/stumpapp/stump/commit/316cd091b8c829c4acf4df00af4e47f86f428db2)]
+- 🐛 Fix cast error for file size calculation ([#330](https://github.com/stumpapp/stump/issues/330)) [[5ac5aec](https://github.com/stumpapp/stump/commit/5ac5aec97934bf8dc7760c90ab042c4c9c8d0f38)]
+- 🐛 Fix image reader navigation (tablet) ([#329](https://github.com/stumpapp/stump/issues/329)) [[abb00de](https://github.com/stumpapp/stump/commit/abb00de4f43f16ba1cf7d1f2d7858fffcf6e751e)]
+- 🐛 Fix inverted swipe handlers in EPUB reader ([#324](https://github.com/stumpapp/stump/issues/324)) [[7be6eda](https://github.com/stumpapp/stump/commit/7be6eda9c649e02b57bfc6a0f8b150124212fff7)]
+- 💚 Fix &#x60;yarn&#x60; timeout issues during install step ([#319](https://github.com/stumpapp/stump/issues/319)) [[a71fbe1](https://github.com/stumpapp/stump/commit/a71fbe158ef2ebb7b4404e3dae8cc041988ef09f)]
+
+### Miscellaneous
+
+-  Merge pull request [#335](https://github.com/stumpapp/stump/issues/335) from stumpapp/al/misc-fixes [[a3e8c7b](https://github.com/stumpapp/stump/commit/a3e8c7b268f63f9ef9a13ca04f07fe6fc087b961)]
+-  Merge branch &#x27;develop&#x27; into al/misc-fixes [[93c2290](https://github.com/stumpapp/stump/commit/93c2290fb5a9553293fd1d090e6f5434a139d6a1)]
+- 🌐 Update translations ([#332](https://github.com/stumpapp/stump/issues/332)) [[bf82e01](https://github.com/stumpapp/stump/commit/bf82e01cc69b7749dd17152905f875c302d45ef9)]
+- 🩹 Fix dark styles in light theme ([#326](https://github.com/stumpapp/stump/issues/326)) [[61e6fb4](https://github.com/stumpapp/stump/commit/61e6fb4f1753a4b92f861893301999a181ee0759)]
+- 🌐 Update translations ([#318](https://github.com/stumpapp/stump/issues/318)) [[58c168d](https://github.com/stumpapp/stump/commit/58c168dca3c706cf5f835312f968caec391bab4d)]
+
+
 <a name="0.0.2"></a>
 ## 0.0.2 (2024-04-21)
 

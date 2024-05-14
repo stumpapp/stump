@@ -913,7 +913,7 @@ dependencies = [
 
 [[package]]
 name = "codegen"
-version = "0.0.2"
+version = "0.0.3"
 
 [[package]]
 name = "codespan-reporting"
@@ -2976,7 +2976,7 @@ dependencies = [
 
 [[package]]
 name = "integrations"
-version = "0.0.1"
+version = "0.0.3"
 dependencies = [
  "async-trait",
  "dotenv",
@@ -6396,7 +6396,7 @@ dependencies = [
 
 [[package]]
 name = "stump_core"
-version = "0.0.2"
+version = "0.0.3"
 dependencies = [
  "alphanumeric-sort",
  "async-channel",
@@ -6457,7 +6457,7 @@ dependencies = [
 
 [[package]]
 name = "stump_server"
-version = "0.0.2"
+version = "0.0.3"
 dependencies = [
  "async-stream",
  "async-trait",

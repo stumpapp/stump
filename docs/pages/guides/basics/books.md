@@ -3,7 +3,7 @@
 The backbone of Stump! There are a couple key concepts to go over regarding how Stump represents books:
 
 - Books (also internally referred to as `media`) primarily refer to files on disk
-- Books are grouped into [`series`](/guides/series), which are then grouped into [`libraries`](/guides/libraries)
+- Books are grouped into [`series`](/guides/basics/series), which are then grouped into [`libraries`](/guides/basics/libraries)
 - [Metadata](#metadata) is an associated set of information _about_ a book, such as its title, author, etc.
 
 ## Supported formats

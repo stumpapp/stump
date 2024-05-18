@@ -178,7 +178,7 @@ model Media {
   id String @id @default(uuid())
 
   name        String // derived from filename
-  size        Int // in bytes
+  size        BigInt // in bytes
   extension   String
   pages       Int
   updated_at  DateTime  @updatedAt

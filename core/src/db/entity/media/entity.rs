@@ -21,7 +21,7 @@ pub struct Media {
 	/// The name of the media. ex: "The Amazing Spider-Man (2018) #69"
 	pub name: String,
 	/// The size of the media in bytes.
-	pub size: i32,
+	pub size: i64,
 	/// The file extension of the media. ex: "cbz"
 	pub extension: String,
 	/// The number of pages in the media. ex: "69"

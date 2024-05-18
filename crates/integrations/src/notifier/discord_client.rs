@@ -76,6 +76,7 @@ mod tests {
 		DiscordClient::new(webhook_url)
 	}
 
+	#[ignore = "No token"]
 	#[tokio::test]
 	async fn test_send_message() {
 		let client = get_debug_client();

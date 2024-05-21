@@ -79,9 +79,11 @@ export default function BookManagementScene() {
 					</Alert.Content>
 				</Alert>
 
-				<Button size="md" variant="primary" onClick={handleAnalyze}>
-					Analyze Media
-				</Button>
+				<div>
+					<Button size="md" variant="primary" onClick={handleAnalyze}>
+						Analyze Media
+					</Button>
+				</div>
 
 				<BookThumbnailSelector book={media} />
 			</div>

@@ -39,9 +39,11 @@ export default function QuickActions() {
 
 			<LibraryThumbnailSelector />
 			<RegenerateThumbnails onRegenerate={handleRegenerateThumbnails} />
-			<Button size="md" variant="primary" onClick={handleAnalyze}>
-				Analyze Media
-			</Button>
+			<div>
+				<Button size="md" variant="primary" onClick={handleAnalyze}>
+					Analyze Media
+				</Button>
+			</div>
 		</div>
 	)
 }

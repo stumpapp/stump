@@ -570,8 +570,12 @@
 					"file": {
 						"label": "Gestion des fichiers",
 						"explorer": {
-							"label": "Explorateur de Fichiers",
-							"description": "Permet à l'utilisateur d'accéder à l'explorateur de fichiers des bibliothèques.\nLa restriction de contenu n'est pas prise en charge lorsque cette fonctionnalité est accordée"
+							"label": "File Explorer",
+							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+						},
+						"download": {
+							"label": "Télécharger les fichiers",
+							"description": "Permet à l'utilisateur de télécharger des fichiers à partir du serveur"
 						},
 						"download": {
 							"label": "Télécharger les fichiers",
@@ -620,14 +624,14 @@
 						},
 						"manage": {
 							"label": "Gérer les utilisateurs",
-							"description": "Permet à l'utilisateur de gérer d'autres utilisateurs sur le serveur.\nInclut les permissions pour créer et mettre à jour"
+							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
 						}
 					},
 					"smartlist": {
 						"label": "Listes intelligentes",
 						"read": {
 							"label": "Accéder à la fonctionnalité Liste Intelligente",
-							"description": "Permet à l'utilisateur d'accéder aux fonctionnalités des listes intelligentes"
+							"description": "Allows the user to access smart lists features"
 						}
 					}
 				},
@@ -673,7 +677,7 @@
 			"home": "Accueil",
 			"libraries": "Bibliothèques",
 			"books": "Explorer",
-			"bookClubs": "Club de lecture",
+			"bookClubs": "Clubs de lecture",
 			"createLibrary": "Créer une bibliothèque",
 			"noLibraries": "Aucune bibliothèque",
 			"createBookClub": "Créer un Club de Lecture",
@@ -690,7 +694,7 @@
 		"libraryOptions": {
 			"scanLibrary": "Scanner",
 			"fileExplorer": "Explorateur de fichiers",
-			"manageLibrary": "Gérer",
+			"manageLibrary": "Manage",
 			"deleteLibrary": "Supprimer"
 		},
 		"versionInformation": {
@@ -711,7 +715,7 @@
 		"web": {
 			"message": "Une erreur de réseau s'est produite indiquant que votre serveur Stump est actuellement indisponible. Veuillez vous assurer qu'il est en cours d'exécution et accessible depuis cet appareil"
 		},
-		"reconnected": "Reconnecté au serveur ! Redirection...",
+		"reconnected": "Reconnecté au serveur! Redirection...",
 		"reconnectionFailed": "Quelque chose s'est mal passé!"
 	},
 	"serverStatusOverlay": {
@@ -734,7 +738,7 @@
 		"placeholderNoTags": "Aucune étiquette disponible"
 	},
 	"thumbnailDropdown": {
-		"label": "Éditer l'image de couverture",
+		"label": "Edit thumbnail",
 		"options": {
 			"selectFromBooks": "Sélectionner à partir des livres",
 			"uploadImage": "Importer une image"

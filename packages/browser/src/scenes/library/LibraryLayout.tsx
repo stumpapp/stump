@@ -35,23 +35,20 @@ export default function LibraryLayout() {
 
 	return (
 		<LibraryContext.Provider value={{ library, stats }}>
-			<LibraryHeader />
-			<LibraryNavigation />
+			<div className="relative flex flex-1 flex-col">
+				<LibraryHeader />
+				<LibraryNavigation />
 
-			<SceneContainer
-				className={cn(
-					'relative flex flex-col gap-4 p-0 md:h-full md:pb-0',
-					// {
-					// 	'md:overflow-hidden': isOnOverview,
-					// },
-					// { 'md:h-full md:overflow-y-auto': !isOnOverview },
-					{ 'md:hide-scrollbar': !!enable_hide_scrollbar },
-				)}
-			>
-				<Suspense fallback={null}>
-					<Outlet />
-				</Suspense>
-			</SceneContainer>
+				<SceneContainer
+					className={cn('relative flex flex-1 flex-col gap-4 p-0 md:pb-0', {
+						'md:hide-scrollbar': !!enable_hide_scrollbar,
+					})}
+				>
+					<Suspense fallback={null}>
+						<Outlet />
+					</Suspense>
+				</SceneContainer>
+			</div>
 		</LibraryContext.Provider>
 	)
 }

@@ -129,8 +129,10 @@ impl FileProcessor for RarProcessor {
 				metadata_buf = Some(data);
 				archive = rest;
 			} else {
-				// TODO: check for valid page type before incrementing
-				pages += 1;
+				// If the entry is not an image then it cannot be a valid page
+				if entry.filename.is_img() {
+					pages += 1;
+				}
 				archive = header.skip()?;
 			}
 		}
@@ -160,17 +162,7 @@ impl FileProcessor for RarProcessor {
 		let mut valid_entries = archive
 			.into_iter()
 			.filter_map(|entry| entry.ok())
-			.filter(|entry| {
-				if entry.is_file() {
-					let filename =
-						entry.filename.as_path().to_string_lossy().to_lowercase();
-					filename.ends_with(".jpg")
-						|| filename.ends_with(".jpeg")
-						|| filename.ends_with(".png")
-				} else {
-					false
-				}
-			})
+			.filter(|entry| entry.filename.is_img())
 			.collect::<Vec<_>>();
 		valid_entries
 			.sort_by(|a, b| alphanumeric_sort::compare_path(&a.filename, &b.filename));
@@ -208,6 +200,31 @@ impl FileProcessor for RarProcessor {
 		Ok((content_type, bytes.ok_or(FileError::NoImageError)?))
 	}
 
+	fn get_page_count(path: &str, _: &StumpConfig) -> Result<i32, FileError> {
+		let archive = RarProcessor::open_for_listing(path)?;
+
+		// Get count of valid page entries
+		let mut pages = 0;
+		for entry in archive {
+			if entry.is_err() {
+				continue;
+			}
+
+			// Make sure it's an image
+			let entry = entry.unwrap();
+			if entry.filename.as_os_str() == "ComicInfo.xml" {
+				continue;
+			} else {
+				// If the entry is not an image then it cannot be a valid page
+				if entry.filename.is_img() {
+					pages += 1;
+				}
+			}
+		}
+
+		Ok(pages)
+	}
+
 	fn get_page_content_types(
 		path: &str,
 		pages: Vec<i32>,
@@ -217,17 +234,7 @@ impl FileProcessor for RarProcessor {
 		let entries = archive
 			.into_iter()
 			.filter_map(|entry| entry.ok())
-			.filter(|entry| {
-				if entry.is_file() {
-					let filename =
-						entry.filename.as_path().to_string_lossy().to_lowercase();
-					filename.ends_with(".jpg")
-						|| filename.ends_with(".jpeg")
-						|| filename.ends_with(".png")
-				} else {
-					false
-				}
-			})
+			.filter(|entry| entry.filename.is_img())
 			.sorted_by(|a, b| alphanumeric_sort::compare_path(&a.filename, &b.filename))
 			.enumerate()
 			.map(|(idx, header)| (PathBuf::from(header.filename.as_os_str()), idx))

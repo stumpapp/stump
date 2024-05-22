@@ -43,6 +43,7 @@ model User {
   library_visits          LastLibraryVisit[]
   smart_lists             SmartList[]
   smart_list_access_rules SmartListAccessRule[]
+  email_usage_history     EmailerSendRecord[]
 
   @@map("users")
 }
@@ -207,7 +208,7 @@ model Media {
 
 // TODO: determine what is optional and what is safe to make required
 model MediaMetadata {
-  // TODO: remove this once nested create is supported, just use media_id
+  // TODO(prisma 0.7.0): Nested create
   id String @id @default(cuid())
 
   title      String?
@@ -694,7 +695,7 @@ model UserPreferences {
 
 model JobScheduleConfig {
   id            String @id @default(cuid())
-  // The interval (in seconds) in which to run the scheduled confu
+  // The interval (in seconds) in which to run the scheduled configuration
   interval_secs Int    @default(86400)
 
   // The libraries to exclude from scheduled scans, if any
@@ -708,13 +709,61 @@ model JobScheduleConfig {
 model Notifier {
   id Int @id @default(autoincrement())
 
-  type   String //DISCORD | TELEGRAM
-  config Bytes //too many variants to support concrete type
+  type   String // DISCORD | TELEGRAM
+  config Bytes // There will be too many variants to support concrete type(s)
 
   @@map("notifiers")
 }
 
-// TODO: notifier support
+model RegisteredEmailDevice {
+  id Int @id @default(autoincrement())
+
+  name      String  @unique
+  email     String
+  forbidden Boolean @default(false)
+
+  @@map("registered_email_devices")
+}
+
+model EmailerSendRecord {
+  id Int @id @default(autoincrement())
+
+  emailer_id Int
+  emailer    Emailer @relation(fields: [emailer_id], references: [id], onDelete: Cascade)
+
+  recipient_email String
+  attachment_meta Bytes? // { name: "...", size: ... }
+  sent_at         DateTime @default(now())
+
+  sent_by_user_id String?
+  sent_by         User?   @relation(fields: [sent_by_user_id], references: [id], onDelete: Cascade)
+
+  @@map("emailer_send_records")
+}
+
+model Emailer {
+  id Int @id @default(autoincrement())
+
+  name       String  @unique
+  is_primary Boolean @default(false)
+
+  sender_email              String
+  sender_display_name       String
+  username                  String
+  encrypted_password        String
+  smtp_host                 String
+  smtp_port                 Int
+  tls_enabled               Boolean @default(false)
+  max_attachment_size_bytes Int? // null = unlimited
+  max_num_attachments       Int? // null = unlimited
+
+  last_used_at DateTime?
+
+  send_history EmailerSendRecord[]
+
+  @@map("emailers")
+}
+
 // An external invitation sent to a provided email for the user to join the server
 model ServerInvitation {
   id String @id @default(cuid())
@@ -725,8 +774,6 @@ model ServerInvitation {
   created_at          DateTime @default(now())
   expires_at          DateTime
 
-  // notifier            Notifier? @relation(fields: [notifier_id], references: [id])
-
   @@map("server_invitations")
 }
 
@@ -736,6 +783,10 @@ model ServerConfig {
   public_url String? // The public URL of the server, if any
 
   initial_wal_setup_complete Boolean @default(false) // Whether the initial WAL setup has been completed
+  // TODO: For obvious reasons, this is severely insecure lol i.e. don't store an encryption key in the database...
+  // However, I don't have a better solution at the moment. This, at best, provides a small barrier to entry I guess 
+  // for bad actors. I am not overly knowledgeable in cryptography, so I'm not sure what the best solution is here.
+  encryption_key             String? // The encryption key used to encrypt sensitive data
 
   // TODO: make this an array, so we can support multiple job types and not assume it will only ever be scheduled scan
   // The schedule configuration. If not set, no scheduled scans will be run.

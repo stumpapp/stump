@@ -31,6 +31,7 @@ export {
 	CheckBox,
 	type CheckBoxProps,
 	Input,
+	PasswordInput,
 	RawSwitch,
 	Switch,
 	type SwitchProps,

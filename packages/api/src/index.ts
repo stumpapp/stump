@@ -1,6 +1,7 @@
 export { authApi, authQueryKeys } from './auth'
 export { API, apiIsInitialized, checkUrl, initializeApi, isUrl } from './axios'
 export { bookClubApi, bookClubQueryKeys } from './bookClub'
+export { emailerApi, emailerQueryKeys } from './emailer'
 export { epubApi, epubQueryKeys, getEpubResource, updateEpubProgress } from './epub'
 export { filesystemApi, filesystemQueryKeys } from './filesystem'
 export * from './job'

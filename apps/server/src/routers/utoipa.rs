@@ -145,7 +145,7 @@ use super::api::{
             CreateTags, CleanLibraryResponse, MediaIsComplete, SeriesIsComplete, PutMediaCompletionStatus,
             SmartList, SmartListMeta, SmartListItems, SmartListView, CreateOrUpdateSmartList,
             CreateOrUpdateSmartListView, SmartListItemGrouping, SmartFilter, FilterJoin, EntityVisibility,
-            SmartListViewConfig, SmartListTableColumnSelection, SmartListTableSortingState,
+            SmartListViewConfig, ReactTableColumnSort, ReactTableGlobalSort,
             MediaSmartFilter, MediaMetadataSmartFilter, SeriesSmartFilter, SeriesMetadataSmartFilter,
             LibrarySmartFilter, Notifier, CreateOrUpdateNotifier, PatchNotifier
         )

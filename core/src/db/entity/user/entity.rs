@@ -7,7 +7,9 @@ use crate::{
 	prisma,
 };
 
-use super::{AgeRestriction, LoginActivity, UserPermission, UserPreferences};
+use super::{
+	AgeRestriction, LoginActivity, PermissionSet, UserPermission, UserPreferences,
+};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub struct User {
@@ -71,19 +73,14 @@ impl From<prisma::user::Data> for User {
 		let login_sessions_count =
 			data.sessions().map(|sessions| sessions.len() as i32).ok();
 
+		let permission_set = data.permissions.map(PermissionSet::from);
+
 		User {
 			id: data.id,
 			username: data.username,
 			is_server_owner: data.is_server_owner,
-			permissions: data
-				.permissions
-				.map(|p| {
-					p.split(',')
-						.map(|p| p.trim())
-						.filter(|p| !p.is_empty())
-						.map(|p| p.into())
-						.collect()
-				})
+			permissions: permission_set
+				.map(|ps| ps.resolve_into_vec())
 				.unwrap_or_default(),
 			max_sessions_allowed: data.max_sessions_allowed,
 			user_preferences,

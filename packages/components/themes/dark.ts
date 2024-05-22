@@ -16,6 +16,7 @@ export const dark: ThemeDefintion = {
 		100: '#FFFFFF',
 		200: '#FBFAF9',
 		300: '#F6F6F7',
+		400: '#E9EAEB',
 		DEFAULT: '#FFFFFF',
 	},
 	edge: {

@@ -55,8 +55,8 @@ export default function AppWrapper() {
 	// TODO: remove, just debugging stuff
 	useEffect(() => {
 		// setBaseUrl('https://demo.stumpapp.dev')
-		// setBaseUrl('http://localhost:10801')
-		setBaseUrl('http://192.168.0.202:10801')
+		setBaseUrl('http://localhost:10801')
+		// setBaseUrl('http://192.168.0.202:10801')
 	}, [setBaseUrl])
 
 	useEffect(() => {
@@ -64,8 +64,6 @@ export default function AppWrapper() {
 			SplashScreen.hideAsync()
 		}
 	}, [isReady])
-
-	// console.log({ baseUrl, isConnectedToServer, isReady, storeUser })
 
 	/**
 	 * An effect that will verify the baseUrl is accessible to the app.

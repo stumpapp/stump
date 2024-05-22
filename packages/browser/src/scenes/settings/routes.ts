@@ -1,3 +1,4 @@
+import { UserPermission } from '@stump/types'
 import {
 	AlarmClock,
 	Bell,
@@ -5,6 +6,7 @@ import {
 	Brush,
 	Cog,
 	LucideIcon,
+	Mail,
 	PcCase,
 	ScrollText,
 	ShieldCheck,
@@ -14,13 +16,17 @@ import {
 type SubItem = {
 	localeKey: string
 	matcher: (path: string) => boolean
+	backlink?: {
+		localeKey: string
+		to: string
+	}
 }
 
 type Route = {
 	icon: LucideIcon
 	label: string
 	localeKey: string
-	permission?: string
+	permission?: UserPermission
 	to: string
 	subItems?: SubItem[]
 	disabled?: boolean
@@ -95,10 +101,18 @@ export const routeGroups: RouteGroup[] = [
 				permission: 'user:manage',
 				subItems: [
 					{
+						backlink: {
+							localeKey: 'server/users.title',
+							to: '/settings/server/users',
+						},
 						localeKey: 'server/users.createUser',
 						matcher: (path: string) => path.startsWith('/settings/server/users/create'),
 					},
 					{
+						backlink: {
+							localeKey: 'server/users.title',
+							to: '/settings/server/users',
+						},
 						localeKey: 'server/users.updateUser',
 						matcher: (path: string) => {
 							const match = path.match(/\/settings\/server\/users\/[a-zA-Z0-9]+\/manage/)
@@ -115,6 +129,34 @@ export const routeGroups: RouteGroup[] = [
 				localeKey: 'server/access',
 				permission: 'server:manage',
 				to: '/settings/server/access',
+			},
+			{
+				icon: Mail,
+				label: 'Email',
+				localeKey: 'server/email',
+				permission: 'emailer:read',
+				subItems: [
+					{
+						backlink: {
+							localeKey: 'server/email.title',
+							to: '/settings/server/email',
+						},
+						localeKey: 'server/email.createEmailer',
+						matcher: (path: string) => path.startsWith('/settings/server/email/new'),
+					},
+					{
+						backlink: {
+							localeKey: 'server/email.title',
+							to: '/settings/server/email',
+						},
+						localeKey: 'server/email.updateEmailer',
+						matcher: (path: string) => {
+							const match = path.match(/\/settings\/server\/email\/[0-9]+\/edit/)
+							return !!match && match.length > 0
+						},
+					},
+				],
+				to: '/settings/server/email',
 			},
 			{
 				disabled: true,

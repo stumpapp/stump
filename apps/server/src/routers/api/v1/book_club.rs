@@ -231,7 +231,7 @@ async fn create_book_club(
 	let viewer =
 		get_user_and_enforce_permission(&session, UserPermission::CreateBookClub)?;
 
-	// TODO: refactor when nested create is supported
+	// TODO(prisma 0.7.0): Nested create
 	let (book_club, _) = db
 		._transaction()
 		.run(|client| async move {

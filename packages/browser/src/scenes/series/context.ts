@@ -13,3 +13,4 @@ export const useSeriesContext = () => {
 	}
 	return context
 }
+export const useSeriesContextSafe = () => useContext(SeriesContext)

@@ -10,46 +10,62 @@
 		"claimText": "This Stump server is not intialized. Use the form below to create your account. Once created, you will have full access to all server features.",
 		"form": {
 			"validation": {
-				"missingUsername": "O nome de usuário é necessário",
-				"missingPassword": "A senha é necessária"
+				"missingUsername": "Username is required",
+				"missingPassword": "Password is required"
 			},
 			"labels": {
-				"username": "Nome de usuário",
-				"password": "Senha"
+				"username": "Username",
+				"password": "Password"
 			},
 			"buttons": {
-				"createAccount": "Criar Conta",
+				"createAccount": "Create Account",
 				"login": "Log in"
 			}
 		},
 		"toasts": {
-			"loggingIn": "Entrando...",
+			"loggingIn": "Logging in...",
 			"loggedIn": "Welcome back!",
 			"loggedInFirstTime": "Welcome!",
-			"registering": "Registrando...",
-			"registered": "Registrado!",
-			"loginFailed": "Falha no login. Tente novamente",
-			"registrationFailed": "Falha ao registrar. Por favor, tente novamente"
+			"registering": "Registering...",
+			"registered": "Registered!",
+			"loginFailed": "Login failed. Please try again",
+			"registrationFailed": "Registration failed. Please try again"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "Configuração da Biblioteca",
-			"subtitleCreating": "Uma prévia da sua nova biblioteca será exibida abaixo",
-			"subtitleEditing": "Uma prévia das edições da sua biblioteca será exibida abaixo"
+			"heading": "Library Configuration",
+			"subtitleCreating": "A preview of your new library will be shown below",
+			"subtitleEditing": "A preview of your library edits will be shown below"
 		}
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "Informações do Arquivo",
+			"heading": "File Information",
 			"labels": {
-				"fileSize": "Tamanho do arquivo",
-				"fileType": "Tipo de arquivo",
-				"fileLocation": "Localização do Arquivo",
+				"fileSize": "File Size",
+				"fileType": "File Type",
+				"fileLocation": "File Location",
 				"fileChecksum": "Checksum"
 			}
 		},
-		"nextInSeries": "Seguinte na série"
+		"emailBook": {
+			"heading": "Email book",
+			"description": "Send this book to device or email address",
+			"form": {
+				"email": {
+					"label": "Email",
+					"placeholder": "Email address",
+					"description": "An email address to send the book to. Click add to finalize each input"
+				},
+				"devices": {
+					"label": "Devices",
+					"placeholder": "Select devices",
+					"noFilterMatch": "No devices match the filter"
+				}
+			}
+		},
+		"nextInSeries": "Next in Series"
 	},
 	"createBookClubScene": {
 		"heading": "Create a new book club",
@@ -72,7 +88,7 @@
 			"member_role_spec": {
 				"heading": "Custom role mapping",
 				"subtitle": [
-					"You can create custom names for the roles in your book club. For example, you could rename the 'Member' role to 'Crewmate', or 'Creator' to 'Captain'. If you don't want to use custom names, you can leave these fields blank and the default names will be used instead. For more information about roles, refer to the",
+					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
 					"documentation"
 				],
 				"member": {
@@ -97,8 +113,8 @@
 				}
 			},
 			"creator_preferences": {
-				"heading": "Your membership preferences",
-				"subtitle": "Some preferences for your membership in the book club. These can be changed at any time from the book club settings page",
+				"heading": "Membership",
+				"subtitle": "Preferences for your own membership in the book club",
 				"creator_display_name": {
 					"label": "Display Name",
 					"placeholder": "oromei",
@@ -113,65 +129,65 @@
 		}
 	},
 	"createLibraryScene": {
-		"heading": "Criar nova biblioteca",
-		"subtitle": "As bibliotecas são usadas para agrupar seus livros. Se você quer uma atualização sobre as bibliotecas e como elas funcionam, confira",
-		"subtitleLink": "documentação relevante",
+		"heading": "Create library",
+		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on how they work, check out the",
+		"subtitleLink": "relevant documentation",
 		"form": {
 			"labels": {
-				"libraryName": "Nome",
-				"libraryPath": "Caminho",
-				"libraryPathDescription": "O caminho para a biblioteca como ela existe em seu servidor",
-				"libraryDescription": "Descrição",
-				"libraryTags": "Etiquetas"
+				"libraryName": "Name",
+				"libraryPath": "Path",
+				"libraryPathDescription": "The path to the library as it exists on your server",
+				"libraryDescription": "Description",
+				"libraryTags": "Tags"
 			},
 			"buttons": {
-				"confirm": "Criar Biblioteca"
+				"confirm": "Create Library"
 			}
 		}
 	},
 	"librarySettingsScene": {
-		"heading": "Gerenciar Biblioteca",
-		"subtitle": "Atualize os detalhes ou a configuração da sua biblioteca, altere as regras de acesso de controle ou arquivos de verificação. Se você está querendo uma atualização das bibliotecas e como elas funcionam, confira a",
-		"subtitleLink": "documentação relevante",
+		"heading": "Settings",
+		"subtitle": "Manage your library here. If you're wanting a refresh on these settings, check out the",
+		"subtitleLink": "relevant documentation",
 		"form": {
 			"labels": {
-				"libraryName": "Nome",
-				"libraryPath": "Caminho",
-				"libraryPathDescription": "O caminho para a biblioteca como ela existe em seu servidor",
-				"libraryDescription": "Descrição",
-				"libraryTags": "Marcadores"
+				"libraryName": "Name",
+				"libraryPath": "Path",
+				"libraryPathDescription": "The path to the library as it exists on your server",
+				"libraryDescription": "Description",
+				"libraryTags": "Tags"
 			},
 			"buttons": {
-				"confirm": "Salvar Alterações"
+				"confirm": "Save Changes"
 			}
 		}
 	},
 	"errorScene": {
 		"heading": "lol, oops",
-		"message": "Ocorreu um erro:",
+		"message": "An error occurred:",
 		"buttons": {
-			"report": "Reportar Bug",
-			"copy": "Copiar os detalhes do erro",
-			"goHome": "Ir ao Início"
+			"report": "Report Bug",
+			"copy": "Copy Error Details",
+			"goHome": "Go Home"
 		}
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "Continuar Lendo",
+			"title": "Continue Reading",
 			"emptyState": {
 				"heading": "No books to display",
 				"message": "Any books you're currently reading will show up here"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Séries adicionadas recentemente",
+			"title": "Recently Added Series",
 			"emptyState": {
 				"heading": "No series to display",
 				"message": "Any series you add to your libraries will show up here"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Livros adicionados recentemente",
+			"title": "Recently Added Books",
 			"emptyState": {
 				"heading": "No books to display",
 				"message": "Any books you add to your libraries will show up here"
@@ -180,8 +196,8 @@
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "Continuar Lendo",
-			"downloadSeries": "Baixar Séries"
+			"continueReading": "Continue Reading",
+			"downloadSeries": "Download Series"
 		}
 	},
 	"userSmartListsScene": {
@@ -280,11 +296,11 @@
 	},
 	"settingsScene": {
 		"navigation": {
-			"general": "Geral",
+			"general": "General",
 			"logs": "Logs",
-			"server": "Servidor",
-			"jobs": "Ações e configurações",
-			"users": "Gerenciamento de usuários",
+			"server": "Server",
+			"jobs": "Jobs and Configuration",
+			"users": "User Management",
 			"desktop": "Desktop"
 		},
 		"sidebar": {
@@ -301,6 +317,7 @@
 				"users": "Users",
 				"jobs": "Jobs",
 				"access": "Access",
+				"email": "Email",
 				"notifications": "Notifications",
 				"label": "Server"
 			}
@@ -456,6 +473,10 @@
 							"date": "Build date"
 						}
 					}
+				},
+				"serverPublicUrl": {
+					"label": "Public URL",
+					"description": "The URL that your server is accessible from outside your network, if applicable. This will enable invite links and other features"
 				}
 			}
 		},
@@ -570,8 +591,8 @@
 					"file": {
 						"label": "File Management",
 						"explorer": {
-							"label": "File Explorer",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+							"label": "File explorer",
+							"description": "Allows the user to access the various file explorers.\nContent restriction cannot be guaranteed when this feature is granted"
 						},
 						"download": {
 							"label": "Download files",
@@ -620,14 +641,14 @@
 						},
 						"manage": {
 							"label": "Manage users",
-							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
+							"description": "Allows the user to manage other users on the server.\nIncludes permissions to read, create, and update"
 						}
 					},
 					"smartlist": {
 						"label": "Smart Lists",
 						"read": {
 							"label": "Access smart list feature",
-							"description": "Allows the user to access smart lists features"
+							"description": "Allows the user to access smart lists features. Granular permissions are not yet implemented, so this\nincludes permissions to read, create, and update their own lists"
 						}
 					}
 				},
@@ -637,51 +658,191 @@
 				"createSubmitButton": "Create user",
 				"updateSubmitButton": "Update user"
 			}
+		},
+		"server/email": {
+			"helmet": "Email settings",
+			"title": "Email",
+			"description": "Settings related to the configuring an SMTP emailer for your Stump server instance",
+			"sections": {
+				"emailers": {
+					"title": "SMTP emailers",
+					"description": "The clients you have configured for sending emails from your Stump server instance",
+					"singleInstanceDisclaimer": "While Stump supports multiple SMTP configurations in the backend, only one can be configured on the UI. This will be improved in the future",
+					"list": {
+						"emptyHeading": "No SMTP emailers configured",
+						"primaryEmailer": "Primary emailer",
+						"sendHistory": {
+							"heading": "Send history",
+							"description": "A record of emails sent from this emailer",
+							"table": {
+								"columns": {
+									"to": "To",
+									"subject": "Subject",
+									"status": "Status",
+									"createdAt": "Sent at"
+								}
+							},
+							"emptyHeading": "No history",
+							"emptySubtitle": "The history of this emailer is empty. It has either not been used or the history has been cleared"
+						}
+					}
+				},
+				"devices": {
+					"title": "Email devices",
+					"description": "The device aliases you have configured for recieving emails from your Stump server instance",
+					"addDevice": "Add device alias",
+					"addOrUpdateDevice": {
+						"title": {
+							"create": "Create device alias",
+							"update": "Update device alias"
+						},
+						"name": {
+							"label": "Name",
+							"description": "A friendly name to uniquely identify this device alias"
+						},
+						"email": {
+							"label": "Email",
+							"description": "The email address this alias will be associated with"
+						},
+						"forbidden": {
+							"label": "Forbidden",
+							"description": "When enabled, no user may send emails to the address associated with this alias"
+						},
+						"submit": {
+							"create": "Create device alias",
+							"update": "Update device alias"
+						}
+					},
+					"table": {
+						"emptyHeading": "No devices registered",
+						"emptySubtitle": "Create a new device alias for future use"
+					}
+				}
+			},
+			"createOrUpdateForm": {
+				"name": {
+					"label": "Name",
+					"description": "A friendly name to uniquely identify this emailer"
+				},
+				"smtpSettings": {
+					"heading": "SMTP settings",
+					"description": "The SMTP-specific settings for this emailer"
+				},
+				"smtpProvider": {
+					"label": "SMTP provider preset",
+					"description": "The provider of the SMTP server. This is used to prefill some common settings, but doesn't capture all providers"
+				},
+				"smtpHost": {
+					"label": "SMTP host",
+					"description": "The hostname of the SMTP server"
+				},
+				"smtpPort": {
+					"label": "SMTP port",
+					"description": "The port of the SMTP server"
+				},
+				"tlsEnabled": {
+					"label": "TLS enabled",
+					"description": "If enabled, the connection to the SMTP server will be encrypted"
+				},
+				"username": {
+					"label": "Username",
+					"description": "The username for authenticating with the SMTP server. This is typically the email address"
+				},
+				"password": {
+					"label": "Password",
+					"description": "The password for authenticating with the SMTP server. If you're using Gmail, you may need to generate an app-specific password"
+				},
+				"senderSettings": {
+					"heading": "Sender settings",
+					"description": "The settings for the sender of the email"
+				},
+				"senderDisplayName": {
+					"label": "Sender display name",
+					"description": "The name that will be displayed to recipients"
+				},
+				"senderEmail": {
+					"label": "Sender email address",
+					"description": "The email address that will be displayed to recipients"
+				},
+				"additionalSettings": {
+					"heading": "Additional settings",
+					"description": "Additional settings for the emailer"
+				},
+				"maxAttachmentSize": {
+					"label": "Max attachment size",
+					"description": "The maximum size, in bytes, that an attachment can be"
+				},
+				"submit": {
+					"create": "Create emailer",
+					"update": "Update emailer"
+				}
+			},
+			"createEmailer": {
+				"helmet": "Create emailer",
+				"title": "Create emailer",
+				"description": "Create a new SMTP emailer for your Stump server instance"
+			},
+			"updateEmailer": {
+				"helmet": "Update emailer",
+				"title": "Update emailer",
+				"description": "Update the details of this SMTP emailer"
+			}
 		}
 	},
 	"jobOverlay": {
-		"backupHeading": "Trabalho em Progresso"
+		"backupHeading": "Job in Progress"
 	},
 	"libraryStats": {
-		"seriesCount": "Total de Séries",
-		"bookCount": "Número Total de Livros",
-		"diskUsage": "Uso de disco"
+		"seriesCount": "Total Series",
+		"bookCount": "Total Books",
+		"diskUsage": "Disk Usage"
+	},
+	"noLibraries": {
+		"heading": "Nothing to see here",
+		"messagePrefix": "You can't see what you don't have",
+		"message": {
+			"create": "Create a library to get started",
+			"wait": "Once libraries are created, they'll be displayed here"
+		},
+		"links": {
+			"create": "Create library"
+		}
 	},
 	"pagination": {
 		"buttons": {
-			"next": "Próxima",
-			"previous": "Anterior"
+			"next": "Next",
+			"previous": "Previous"
 		},
 		"popover": {
-			"heading": "Ir para a página",
+			"heading": "Go to page",
 			"buttons": {
-				"confirm": "Ir",
-				"cancel": "Cancelar"
+				"confirm": "Go",
+				"cancel": "Cancel"
 			}
 		}
 	},
 	"signOutModal": {
-		"title": "Terminar Sessão",
-		"message": "Você tem certeza que deseja sair?",
+		"title": "Sign out",
+		"message": "Are you sure you want to sign out?",
 		"buttons": {
-			"cancel": "Cancelar",
-			"signOut": "Terminar Sessão"
+			"cancel": "Cancel",
+			"signOut": "Sign out"
 		}
 	},
 	"sidebar": {
 		"buttons": {
-			"home": "Início",
-			"libraries": "Bibliotecas",
+			"home": "Home",
+			"libraries": "Libraries",
 			"books": "Explore",
 			"bookClubs": "Book clubs",
 			"createLibrary": "Create library",
 			"noLibraries": "No libraries",
 			"createBookClub": "Create book club",
 			"noBookClubs": "No book clubs",
-			"settings": "Configurações",
-			"themeToggle": "Alternar tema",
-			"goForward": "Ir adiante",
-			"goBack": "Retornar",
+			"settings": "Settings",
+			"themeToggle": "Toggle Theme",
+			"goForward": "Go Forward",
+			"goBack": "Go Back",
 			"smartlists": "Smart lists",
 			"noSmartlists": "No smart lists",
 			"createSmartlist": "Create smart list",
@@ -689,52 +850,52 @@
 		},
 		"libraryOptions": {
 			"scanLibrary": "Scan",
-			"fileExplorer": "Explorador de Arquivos",
-			"manageLibrary": "Manage",
+			"fileExplorer": "File Explorer",
+			"manageLibrary": "Settings",
 			"deleteLibrary": "Delete"
 		},
 		"versionInformation": {
-			"heading": "Informações da versão",
-			"semVer": "Versionamento Semântico",
-			"commitHash": "Hash do Commit",
-			"buildDate": "Data da Compilação"
+			"heading": "Version Information",
+			"semVer": "Semantic Version",
+			"commitHash": "Commit Hash",
+			"buildDate": "Build Date"
 		}
 	},
 	"search": {
-		"placeholder": "Pesquisar"
+		"placeholder": "Search"
 	},
 	"serverSOS": {
-		"heading": "Servidor indisponível",
+		"heading": "Server Unavailable",
 		"desktop": {
-			"message": "Ocorreu um erro de rede que sugere que seu servidor Stump está indisponível. Por favor, verifique se ele está sendo executado e acessível a partir deste dispositivo.\nSe a URL do seu servidor mudou, você pode atualizá-la usando o formulário abaixo"
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
 		},
 		"web": {
-			"message": "Ocorreu um erro de rede que sugere que seu servidor Stump está indisponível no momento. Por favor, verifique se ele está sendo executado e acessível a partir deste dispositivo"
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
 		},
-		"reconnected": "Reconectado ao servidor! Redirecionando...",
-		"reconnectionFailed": "Algo deu errado!"
+		"reconnected": "Reconnected to server! Redirecting...",
+		"reconnectionFailed": "Something went wrong!"
 	},
 	"serverStatusOverlay": {
-		"heading": "Servidor não está conectado",
+		"heading": "Server isn't connected",
 		"message": [
-			"Por favor, verifique sua conexão com a internet",
-			"Clique aqui",
-			"para mudar a URL de seu servidor"
+			"Please check your internet connection",
+			"Click here",
+			"to change your server URL"
 		]
 	},
 	"slidingList": {
-		"empty": "Nenhum item para exibir",
+		"empty": "No items to display",
 		"buttons": {
-			"next": "Buscar à frente",
-			"previous": "Procurar Anterior"
+			"next": "Seek Ahead",
+			"previous": "Seek Backwards"
 		}
 	},
 	"tagSelect": {
-		"placholder": "Selecionar ou criar etiqueta",
-		"placeholderNoTags": "Não há tags disponíveis"
+		"placholder": "Select or create tag",
+		"placeholderNoTags": "No tags available"
 	},
 	"thumbnailDropdown": {
-		"label": "Edit thumbnail",
+		"label": "Select thumbnail",
 		"options": {
 			"selectFromBooks": "Select from books",
 			"uploadImage": "Upload image"
@@ -746,12 +907,15 @@
 		}
 	},
 	"common": {
+		"add": "Add",
 		"cancel": "Cancel",
 		"confirm": "Confirm",
 		"save": "Save",
+		"send": "Send",
 		"saveChanges": "Save changes",
 		"create": "Create",
 		"edit": "Edit",
+		"update": "Update",
 		"unimplemented": "This functionality is not yet implemented! Check back later",
 		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later"
 	}

@@ -13,6 +13,15 @@ export function getLogs(params?: Record<string, unknown>): Promise<PageableAPIRe
 	}
 }
 
+export function clearPersistedLogs(params?: Record<string, unknown>): Promise<APIResult<void>> {
+	if (params) {
+		const searchParams = toUrlParams(params)
+		return API.delete(`/logs?${searchParams.toString()}`)
+	} else {
+		return API.delete('/logs')
+	}
+}
+
 export function getLogFileMeta(): Promise<APIResult<LogMetadata>> {
 	return API.get('/logs/file/info')
 }
@@ -23,12 +32,14 @@ export function clearLogFile() {
 
 export const logApi = {
 	clearLogFile,
+	clearPersistedLogs,
 	getLogFileMeta,
 	getLogs,
 }
 
 export const logQueryKeys: Record<keyof typeof logApi, string> = {
 	clearLogFile: 'log.clearLogFile',
+	clearPersistedLogs: 'log.clearPersistedLogs',
 	getLogFileMeta: 'log.getLogFileMeta',
 	getLogs: 'log.getLogs',
 }

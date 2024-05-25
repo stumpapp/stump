@@ -50,18 +50,18 @@
 			}
 		},
 		"emailBook": {
-			"heading": "Email book",
-			"description": "Send this book to device or email address",
+			"heading": "Wyślij książkę przez e-mail",
+			"description": "Wyślij tę książkę na urządzenie lub adres e-mail",
 			"form": {
 				"email": {
-					"label": "Email",
-					"placeholder": "Email address",
-					"description": "An email address to send the book to. Click add to finalize each input"
+					"label": "Adres e-mail",
+					"placeholder": "Adres e-mail",
+					"description": "Adres e-mail, na który książka zostanie wysłana. Kliknij przycisk Dodaj, aby zatwierdzić każdy wpis"
 				},
 				"devices": {
-					"label": "Devices",
-					"placeholder": "Select devices",
-					"noFilterMatch": "No devices match the filter"
+					"label": "Urządzenia",
+					"placeholder": "Wybierz urządzenia",
+					"noFilterMatch": "Żadne urządzenia nie pasują do filtru"
 				}
 			}
 		},
@@ -317,7 +317,7 @@
 				"users": "Użytkownicy",
 				"jobs": "Zadania",
 				"access": "Dostęp",
-				"email": "Email",
+				"email": "Adres e-mail",
 				"notifications": "Powiadomienia",
 				"label": "Serwer"
 			}
@@ -475,8 +475,8 @@
 					}
 				},
 				"serverPublicUrl": {
-					"label": "Public URL",
-					"description": "The URL that your server is accessible from outside your network, if applicable. This will enable invite links and other features"
+					"label": "Adres publiczny",
+					"description": "Adres, pod którym serwer dostępny jest spoza Twojej sieci. Zezwala to na odnośniki z zaproszeniami i inne funkcje"
 				}
 			}
 		},
@@ -660,8 +660,8 @@
 			}
 		},
 		"server/email": {
-			"helmet": "Email settings",
-			"title": "Email",
+			"helmet": "Ustawienia e-mail",
+			"title": "Adres e-mail",
 			"description": "Settings related to the configuring an SMTP emailer for your Stump server instance",
 			"sections": {
 				"emailers": {
@@ -672,7 +672,7 @@
 						"emptyHeading": "No SMTP emailers configured",
 						"primaryEmailer": "Primary emailer",
 						"sendHistory": {
-							"heading": "Send history",
+							"heading": "Historia wysyłki",
 							"description": "A record of emails sent from this emailer",
 							"table": {
 								"columns": {
@@ -690,11 +690,11 @@
 				"devices": {
 					"title": "Email devices",
 					"description": "The device aliases you have configured for recieving emails from your Stump server instance",
-					"addDevice": "Add device alias",
+					"addDevice": "Dodaj alias urządzenia",
 					"addOrUpdateDevice": {
 						"title": {
-							"create": "Create device alias",
-							"update": "Update device alias"
+							"create": "Utwórz alias urządzenia",
+							"update": "Aktualizuj alias urządzenia"
 						},
 						"name": {
 							"label": "Nazwa",
@@ -802,7 +802,7 @@
 		"messagePrefix": "Nie możesz zobaczyć tego, czego nie masz",
 		"message": {
 			"create": "Utwórz bibliotekę, aby rozpocząć",
-			"wait": "Once libraries are created, they'll be displayed here"
+			"wait": "Po utworzeniu bibliotek będą one wyświetlane tutaj"
 		},
 		"links": {
 			"create": "Utwórz bibliotekę"

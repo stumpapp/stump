@@ -210,7 +210,7 @@
 		"list": {
 			"emptyState": {
 				"heading": "Brak inteligentnych list do wyświetlenia",
-				"noListsMessage": "Utwórz inteligentną listę aby rozpocząć",
+				"noListsMessage": "Utwórz inteligentną listę, aby rozpocząć",
 				"noMatchesMessage": "Spróbuj zmienić kryteria wyszukiwania"
 			},
 			"card": {
@@ -676,13 +676,13 @@
 							"description": "A record of emails sent from this emailer",
 							"table": {
 								"columns": {
-									"to": "To",
-									"subject": "Subject",
+									"to": "Do",
+									"subject": "Temat",
 									"status": "Status",
-									"createdAt": "Sent at"
+									"createdAt": "Wysłane o"
 								}
 							},
-							"emptyHeading": "No history",
+							"emptyHeading": "Bez historii",
 							"emptySubtitle": "The history of this emailer is empty. It has either not been used or the history has been cleared"
 						}
 					}
@@ -697,35 +697,35 @@
 							"update": "Update device alias"
 						},
 						"name": {
-							"label": "Name",
+							"label": "Nazwa",
 							"description": "A friendly name to uniquely identify this device alias"
 						},
 						"email": {
-							"label": "Email",
+							"label": "Adres e-mail",
 							"description": "The email address this alias will be associated with"
 						},
 						"forbidden": {
-							"label": "Forbidden",
-							"description": "When enabled, no user may send emails to the address associated with this alias"
+							"label": "Zabronione",
+							"description": "Gdy włączone, żaden użytkownik nie może wysyłać wiadomości e-mail na adres powiązany z tym aliasem"
 						},
 						"submit": {
-							"create": "Create device alias",
-							"update": "Update device alias"
+							"create": "Utwórz alias urządzenia",
+							"update": "Aktualizuj alias urządzenia"
 						}
 					},
 					"table": {
-						"emptyHeading": "No devices registered",
-						"emptySubtitle": "Create a new device alias for future use"
+						"emptyHeading": "Brak zarejestrowanych urządzeń",
+						"emptySubtitle": "Utwórz nowy alias urządzenia do przyszłego użytku"
 					}
 				}
 			},
 			"createOrUpdateForm": {
 				"name": {
-					"label": "Name",
+					"label": "Nazwa",
 					"description": "A friendly name to uniquely identify this emailer"
 				},
 				"smtpSettings": {
-					"heading": "SMTP settings",
+					"heading": "Ustawienia SMTP",
 					"description": "The SMTP-specific settings for this emailer"
 				},
 				"smtpProvider": {
@@ -733,44 +733,44 @@
 					"description": "The provider of the SMTP server. This is used to prefill some common settings, but doesn't capture all providers"
 				},
 				"smtpHost": {
-					"label": "SMTP host",
-					"description": "The hostname of the SMTP server"
+					"label": "Host SMTP",
+					"description": "Nazwa hosta serwera SMTP"
 				},
 				"smtpPort": {
-					"label": "SMTP port",
-					"description": "The port of the SMTP server"
+					"label": "Port SMTP",
+					"description": "Numer portu serwera SMTP"
 				},
 				"tlsEnabled": {
-					"label": "TLS enabled",
-					"description": "If enabled, the connection to the SMTP server will be encrypted"
+					"label": "TLS włączony",
+					"description": "Jeśli włączone, połączenie z serwerem SMTP będzie szyfrowane"
 				},
 				"username": {
-					"label": "Username",
-					"description": "The username for authenticating with the SMTP server. This is typically the email address"
+					"label": "Nazwa użytkownika",
+					"description": "Nazwa użytkownika do uwierzytelniania z serwerem SMTP. Zazwyczaj jest to adres e-mail"
 				},
 				"password": {
-					"label": "Password",
-					"description": "The password for authenticating with the SMTP server. If you're using Gmail, you may need to generate an app-specific password"
+					"label": "Hasło",
+					"description": "Hasło do uwierzytelniania z serwerem SMTP. Jeśli używasz serwisu Gmail, może być konieczne wygenerowanie hasła do aplikacji"
 				},
 				"senderSettings": {
-					"heading": "Sender settings",
-					"description": "The settings for the sender of the email"
+					"heading": "Ustawienia wysyłania",
+					"description": "Ustawienia nadawcy wiadomości e-mail"
 				},
 				"senderDisplayName": {
-					"label": "Sender display name",
-					"description": "The name that will be displayed to recipients"
+					"label": "Wyświetlana nazwa nadawcy",
+					"description": "Nazwa, która będzie wyświetlana odbiorcom"
 				},
 				"senderEmail": {
-					"label": "Sender email address",
-					"description": "The email address that will be displayed to recipients"
+					"label": "Adres e-mail nadawcy",
+					"description": "Adres e-mail, który będzie wyświetlany odbiorcom"
 				},
 				"additionalSettings": {
-					"heading": "Additional settings",
-					"description": "Additional settings for the emailer"
+					"heading": "Ustawienia dodatkowe",
+					"description": "Ustawienia dodatkowe do wysyłki poczty"
 				},
 				"maxAttachmentSize": {
-					"label": "Max attachment size",
-					"description": "The maximum size, in bytes, that an attachment can be"
+					"label": "Maksymalny rozmiar załącznika",
+					"description": "Maksymalny rozmiar załącznika w bajtach"
 				},
 				"submit": {
 					"create": "Create emailer",
@@ -798,14 +798,14 @@
 		"diskUsage": "Użycie dysku"
 	},
 	"noLibraries": {
-		"heading": "Nothing to see here",
-		"messagePrefix": "You can't see what you don't have",
+		"heading": "Nic tu nie ma",
+		"messagePrefix": "Nie możesz zobaczyć tego, czego nie masz",
 		"message": {
-			"create": "Create a library to get started",
+			"create": "Utwórz bibliotekę, aby rozpocząć",
 			"wait": "Once libraries are created, they'll be displayed here"
 		},
 		"links": {
-			"create": "Create library"
+			"create": "Utwórz bibliotekę"
 		}
 	},
 	"pagination": {
@@ -907,15 +907,15 @@
 		}
 	},
 	"common": {
-		"add": "Add",
+		"add": "Dodaj",
 		"cancel": "Anuluj",
 		"confirm": "Potwierdź",
 		"save": "Zapisz",
-		"send": "Send",
+		"send": "Wyślij",
 		"saveChanges": "Zapisz zmiany",
 		"create": "Utwórz",
 		"edit": "Edytuj",
-		"update": "Update",
+		"update": "Aktualizuj",
 		"unimplemented": "Ta funkcjonalność nie jest jeszcze zaimplementowana! Sprawdź ponownie później",
 		"limitedFunctionality": "Funkcjonalność ta nie jest jeszcze w pełni zaimplementowana. Sprawdź później"
 	}

@@ -54,7 +54,7 @@ export default function BookCard({
 		}
 
 		const progressString = getProgress()
-		if (progressString) {
+		if (progressString != null) {
 			const isEpubProgress = !!media.current_epubcfi
 			const pagesLeft = media.pages - (media.current_page || 0)
 
@@ -95,7 +95,7 @@ export default function BookCard({
 				const pages = media.pages
 
 				const percent = Math.round((page / pages) * 100)
-				return Math.min(percent, 100)
+				return Math.min(Math.max(percent, 0), 100) // Clamp between 0 and 100
 			}
 		} else if (finished_reading_sessions?.length) {
 			return 100

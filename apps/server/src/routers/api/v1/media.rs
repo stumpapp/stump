@@ -629,7 +629,10 @@ async fn get_recently_added_media(
 				.media()
 				.find_many(where_conditions.clone())
 				.with(media::active_user_reading_sessions::fetch(vec![
-					active_reading_session::user_id::equals(user_id),
+					active_reading_session::user_id::equals(user_id.clone()),
+				]))
+				.with(media::finished_user_reading_sessions::fetch(vec![
+					finished_reading_session::user_id::equals(user_id),
 				]))
 				.with(media::metadata::fetch())
 				.order_by(media::created_at::order(Direction::Desc));

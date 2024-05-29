@@ -12,7 +12,7 @@ use stump_core::{
 		media::get_page,
 		ContentType,
 	},
-	opds::{
+	opds::v1_2::{
 		entry::OpdsEntry,
 		feed::OpdsFeed,
 		link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
@@ -33,7 +33,7 @@ use crate::{
 	},
 };
 
-use super::api::v1::{
+use crate::routers::api::v1::{
 	media::{apply_in_progress_filter_for_user, apply_media_age_restriction},
 	series::apply_series_age_restriction,
 };
@@ -41,7 +41,7 @@ use super::api::v1::{
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.nest(
-			"/opds/v1.2",
+			"/v1.2",
 			Router::new()
 				.route("/catalog", get(catalog))
 				.route("/keep-reading", get(keep_reading))

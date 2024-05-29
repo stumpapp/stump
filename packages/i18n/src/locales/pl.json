@@ -49,6 +49,22 @@
 				"fileChecksum": "Suma kontrolna"
 			}
 		},
+		"emailBook": {
+			"heading": "Wyślij książkę przez e-mail",
+			"description": "Wyślij tę książkę na urządzenie lub adres e-mail",
+			"form": {
+				"email": {
+					"label": "Adres e-mail",
+					"placeholder": "Adres e-mail",
+					"description": "Adres e-mail, na który książka zostanie wysłana. Kliknij przycisk Dodaj, aby zatwierdzić każdy wpis"
+				},
+				"devices": {
+					"label": "Urządzenia",
+					"placeholder": "Wybierz urządzenia",
+					"noFilterMatch": "Żadne urządzenia nie pasują do filtru"
+				}
+			}
+		},
 		"nextInSeries": "Następny w serii"
 	},
 	"createBookClubScene": {
@@ -194,7 +210,7 @@
 		"list": {
 			"emptyState": {
 				"heading": "Brak inteligentnych list do wyświetlenia",
-				"noListsMessage": "Utwórz inteligentną listę aby rozpocząć",
+				"noListsMessage": "Utwórz inteligentną listę, aby rozpocząć",
 				"noMatchesMessage": "Spróbuj zmienić kryteria wyszukiwania"
 			},
 			"card": {
@@ -301,6 +317,7 @@
 				"users": "Użytkownicy",
 				"jobs": "Zadania",
 				"access": "Dostęp",
+				"email": "Adres e-mail",
 				"notifications": "Powiadomienia",
 				"label": "Serwer"
 			}
@@ -456,6 +473,10 @@
 							"date": "Data kompilacji"
 						}
 					}
+				},
+				"serverPublicUrl": {
+					"label": "Adres publiczny",
+					"description": "Adres, pod którym serwer dostępny jest spoza Twojej sieci. Zezwala to na odnośniki z zaproszeniami i inne funkcje"
 				}
 			}
 		},
@@ -637,6 +658,135 @@
 				"createSubmitButton": "Dodaj użytkownika",
 				"updateSubmitButton": "Aktualizuj użytkownika"
 			}
+		},
+		"server/email": {
+			"helmet": "Ustawienia e-mail",
+			"title": "Adres e-mail",
+			"description": "Settings related to the configuring an SMTP emailer for your Stump server instance",
+			"sections": {
+				"emailers": {
+					"title": "SMTP emailers",
+					"description": "The clients you have configured for sending emails from your Stump server instance",
+					"singleInstanceDisclaimer": "While Stump supports multiple SMTP configurations in the backend, only one can be configured on the UI. This will be improved in the future",
+					"list": {
+						"emptyHeading": "No SMTP emailers configured",
+						"primaryEmailer": "Primary emailer",
+						"sendHistory": {
+							"heading": "Historia wysyłki",
+							"description": "A record of emails sent from this emailer",
+							"table": {
+								"columns": {
+									"to": "Do",
+									"subject": "Temat",
+									"status": "Status",
+									"createdAt": "Wysłane o"
+								}
+							},
+							"emptyHeading": "Bez historii",
+							"emptySubtitle": "The history of this emailer is empty. It has either not been used or the history has been cleared"
+						}
+					}
+				},
+				"devices": {
+					"title": "Email devices",
+					"description": "The device aliases you have configured for recieving emails from your Stump server instance",
+					"addDevice": "Dodaj alias urządzenia",
+					"addOrUpdateDevice": {
+						"title": {
+							"create": "Utwórz alias urządzenia",
+							"update": "Aktualizuj alias urządzenia"
+						},
+						"name": {
+							"label": "Nazwa",
+							"description": "A friendly name to uniquely identify this device alias"
+						},
+						"email": {
+							"label": "Adres e-mail",
+							"description": "The email address this alias will be associated with"
+						},
+						"forbidden": {
+							"label": "Zabronione",
+							"description": "Gdy włączone, żaden użytkownik nie może wysyłać wiadomości e-mail na adres powiązany z tym aliasem"
+						},
+						"submit": {
+							"create": "Utwórz alias urządzenia",
+							"update": "Aktualizuj alias urządzenia"
+						}
+					},
+					"table": {
+						"emptyHeading": "Brak zarejestrowanych urządzeń",
+						"emptySubtitle": "Utwórz nowy alias urządzenia do przyszłego użytku"
+					}
+				}
+			},
+			"createOrUpdateForm": {
+				"name": {
+					"label": "Nazwa",
+					"description": "A friendly name to uniquely identify this emailer"
+				},
+				"smtpSettings": {
+					"heading": "Ustawienia SMTP",
+					"description": "The SMTP-specific settings for this emailer"
+				},
+				"smtpProvider": {
+					"label": "SMTP provider preset",
+					"description": "The provider of the SMTP server. This is used to prefill some common settings, but doesn't capture all providers"
+				},
+				"smtpHost": {
+					"label": "Host SMTP",
+					"description": "Nazwa hosta serwera SMTP"
+				},
+				"smtpPort": {
+					"label": "Port SMTP",
+					"description": "Numer portu serwera SMTP"
+				},
+				"tlsEnabled": {
+					"label": "TLS włączony",
+					"description": "Jeśli włączone, połączenie z serwerem SMTP będzie szyfrowane"
+				},
+				"username": {
+					"label": "Nazwa użytkownika",
+					"description": "Nazwa użytkownika do uwierzytelniania z serwerem SMTP. Zazwyczaj jest to adres e-mail"
+				},
+				"password": {
+					"label": "Hasło",
+					"description": "Hasło do uwierzytelniania z serwerem SMTP. Jeśli używasz serwisu Gmail, może być konieczne wygenerowanie hasła do aplikacji"
+				},
+				"senderSettings": {
+					"heading": "Ustawienia wysyłania",
+					"description": "Ustawienia nadawcy wiadomości e-mail"
+				},
+				"senderDisplayName": {
+					"label": "Wyświetlana nazwa nadawcy",
+					"description": "Nazwa, która będzie wyświetlana odbiorcom"
+				},
+				"senderEmail": {
+					"label": "Adres e-mail nadawcy",
+					"description": "Adres e-mail, który będzie wyświetlany odbiorcom"
+				},
+				"additionalSettings": {
+					"heading": "Ustawienia dodatkowe",
+					"description": "Ustawienia dodatkowe do wysyłki poczty"
+				},
+				"maxAttachmentSize": {
+					"label": "Maksymalny rozmiar załącznika",
+					"description": "Maksymalny rozmiar załącznika w bajtach"
+				},
+				"submit": {
+					"create": "Create emailer",
+					"update": "Update emailer"
+				}
+			},
+			"createEmailer": {
+				"helmet": "Create emailer",
+				"title": "Create emailer",
+				"description": "Create a new SMTP emailer for your Stump server instance"
+			},
+			"updateEmailer": {
+				"helmet": "Update emailer",
+				"title": "Update emailer",
+				"description": "Update the details of this SMTP emailer"
+			}
 		}
 	},
 	"jobOverlay": {
@@ -646,6 +796,17 @@
 		"seriesCount": "Wszystkie serie",
 		"bookCount": "Wszystkie książki",
 		"diskUsage": "Użycie dysku"
+	},
+	"noLibraries": {
+		"heading": "Nic tu nie ma",
+		"messagePrefix": "Nie możesz zobaczyć tego, czego nie masz",
+		"message": {
+			"create": "Utwórz bibliotekę, aby rozpocząć",
+			"wait": "Po utworzeniu bibliotek będą one wyświetlane tutaj"
+		},
+		"links": {
+			"create": "Utwórz bibliotekę"
+		}
 	},
 	"pagination": {
 		"buttons": {
@@ -746,12 +907,15 @@
 		}
 	},
 	"common": {
+		"add": "Dodaj",
 		"cancel": "Anuluj",
 		"confirm": "Potwierdź",
 		"save": "Zapisz",
+		"send": "Wyślij",
 		"saveChanges": "Zapisz zmiany",
 		"create": "Utwórz",
 		"edit": "Edytuj",
+		"update": "Aktualizuj",
 		"unimplemented": "Ta funkcjonalność nie jest jeszcze zaimplementowana! Sprawdź ponownie później",
 		"limitedFunctionality": "Funkcjonalność ta nie jest jeszcze w pełni zaimplementowana. Sprawdź później"
 	}

@@ -31,7 +31,7 @@ export default function JobTable() {
 
 	const [inspectingData, setInspectingData] = useState<CoreJobOutput | null>()
 
-	const columns = useMemo(
+	const columns = useMemo<ColumnDef<PersistedJob>[]>(
 		() =>
 			[
 				columnHelper.accessor('name', {
@@ -152,6 +152,7 @@ export default function JobTable() {
 					onPaginationChange: setPagination,
 					pageCount,
 					state: {
+						// columnPinning: { right: ['actions'] },
 						pagination,
 					},
 				}}

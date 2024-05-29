@@ -3,8 +3,8 @@ use specta::Type;
 
 use crate::{
 	job::{
-		error::JobError, JobExecuteLog, JobExt, JobOutputExt, JobTaskOutput, WorkerCtx,
-		WorkingState, WrappedJob,
+		error::JobError, JobExecuteLog, JobExt, JobOutputExt, JobProgress, JobTaskOutput,
+		WorkerCtx, WorkingState, WrappedJob,
 	},
 	prisma::{media, series},
 };
@@ -203,6 +203,10 @@ impl JobExt for ThumbnailGenerationJob {
 						.filter(|m| manager.has_thumbnail(m.id.as_str()))
 						.map(|m| m.id.clone())
 						.collect::<Vec<String>>();
+					ctx.report_progress(JobProgress::msg(
+						format!("Removing {} thumbnails", media_ids_to_remove.len())
+							.as_str(),
+					));
 					let JobTaskOutput {
 						output: sub_output,
 						logs: sub_logs,
@@ -221,6 +225,13 @@ impl JobExt for ThumbnailGenerationJob {
 						.collect::<Vec<_>>()
 				};
 
+				ctx.report_progress(JobProgress::msg(
+					format!(
+						"Generating {} thumbnails",
+						media_to_generate_thumbnails.len()
+					)
+					.as_str(),
+				));
 				let JobTaskOutput {
 					output: sub_output,
 					logs: sub_logs,

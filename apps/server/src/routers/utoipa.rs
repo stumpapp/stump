@@ -62,6 +62,8 @@ use super::api::{
         api::v1::library::create_library,
         api::v1::library::update_library,
         api::v1::library::delete_library,
+        api::v1::log::get_logs,
+        api::v1::log::delete_logs,
         api::v1::media::get_media,
         api::v1::media::get_duplicate_media,
         api::v1::media::get_in_progress_media,

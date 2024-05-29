@@ -15,7 +15,7 @@ use crate::error::CoreResult;
 use crate::filesystem::media::get_content_types_for_pages;
 use crate::filesystem::{ContentType, FileParts, PathUtils};
 use crate::{
-	opds::link::OpdsStreamLink,
+	opds::v1_2::link::OpdsStreamLink,
 	prisma::{library, media, series},
 };
 
@@ -290,7 +290,7 @@ mod tests {
 	use std::str::FromStr;
 
 	use super::*;
-	use crate::opds::tests::normalize_xml;
+	use crate::opds::v1_2::tests::normalize_xml;
 
 	#[test]
 	fn test_opds_entry() {

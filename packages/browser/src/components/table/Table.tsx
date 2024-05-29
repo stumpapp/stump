@@ -1,5 +1,6 @@
 import { Heading, NativeSelect, Text } from '@stump/components'
 import {
+	Column,
 	ColumnDef,
 	ColumnFiltersState,
 	flexRender,
@@ -14,7 +15,7 @@ import {
 } from '@tanstack/react-table'
 import clsx from 'clsx'
 import { ArrowDown, ArrowUp } from 'lucide-react'
-import { useMemo, useRef, useState } from 'react'
+import { CSSProperties, useMemo, useRef, useState } from 'react'
 
 import TablePagination from './Pagination'
 import TableFilterInput from './TableFilterInput'
@@ -31,6 +32,7 @@ export interface TableProps<T = unknown, V = unknown> {
 	isZeroBasedPagination?: boolean
 }
 
+// TODO: properly support pinned columns, which means I likely need to break out components (TableCell, TableHeaderCell, etc)
 // TODO: move into components package!
 // TODO: loading state
 // TODO: total count for pagination...
@@ -121,7 +123,14 @@ export default function Table<T, V>({
 							<tr key={headerGroup.id}>
 								{headerGroup.headers.map((header) => {
 									return (
-										<th key={header.id} colSpan={header.colSpan} className="py-2.5">
+										<th
+											key={header.id}
+											colSpan={header.colSpan}
+											className="py-2.5"
+											style={{
+												...getCommonPinningStyles(header.column),
+											}}
+										>
 											<div
 												className={clsx('flex items-center', {
 													'cursor-pointer select-none': header.column.getCanSort() && sortable,
@@ -152,7 +161,14 @@ export default function Table<T, V>({
 								<tr key={row.id}>
 									{row.getVisibleCells().map((cell) => {
 										return (
-											<td key={cell.id} className="py-2">
+											<td
+												key={cell.id}
+												className="py-2"
+												style={{
+													width: cell.column.getSize(),
+													...getCommonPinningStyles(cell.column),
+												}}
+											>
 												{flexRender(cell.column.columnDef.cell, cell.getContext())}
 											</td>
 										)
@@ -253,3 +269,16 @@ export const getTableModels = ({
 	...(expanded ? { getExpandedRowModel: getExpandedRowModel(), getRowCanExpand: () => true } : {}),
 	...(sorted ? { getSortedRowModel: getSortedRowModel() } : {}),
 })
+
+export function getCommonPinningStyles<T>(column: Column<T>) {
+	const isPinned = column.getIsPinned()
+
+	const styles: CSSProperties = {
+		left: isPinned === 'left' ? `${column.getStart('left')}px` : undefined,
+		position: isPinned ? 'sticky' : undefined,
+		right: isPinned === 'right' ? `${column.getAfter('right')}px` : undefined,
+		zIndex: isPinned ? 1 : undefined,
+	}
+
+	return styles
+}

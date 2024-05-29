@@ -1,8 +1,8 @@
-import { jobApi, jobQueryKeys } from '@stump/api'
+import { jobApi, jobQueryKeys, logApi } from '@stump/api'
 import { invalidateQueries } from '@stump/client'
 import { DropdownMenu, IconButton } from '@stump/components'
 import { CoreJobOutput, PersistedJob } from '@stump/types'
-import { Ban, Database, FileClock, MoreVertical, Trash2 } from 'lucide-react'
+import { Ban, Database, FileClock, ListX, MoreVertical, Trash2 } from 'lucide-react'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router'
@@ -71,6 +71,15 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 		}
 	}, [job.id, isDeletable])
 
+	const handleClearLogs = useCallback(async () => {
+		try {
+			await logApi.clearPersistedLogs({ job: { id: job.id } })
+			await invalidateQueries({ queryKey: [jobQueryKeys.getJobs] })
+		} catch (error) {
+			handleError(error)
+		}
+	}, [job.id])
+
 	const jobId = job.id
 	const jobData = job.output_data
 	const associatedLogs = useMemo(() => job.logs ?? [], [job.logs])
@@ -101,6 +110,11 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 							leftIcon: <FileClock className="mr-2 h-4 w-4" />,
 							onClick: () => navigate(paths.serverLogs(jobId)),
 						},
+						{
+							label: 'Clear logs',
+							leftIcon: <ListX className="mr-2 h-4 w-4" />,
+							onClick: handleClearLogs,
+						},
 					]
 				: []),
 
@@ -124,6 +138,7 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 			onInspectData,
 			handleCancel,
 			handleDelete,
+			handleClearLogs,
 		],
 	)
 

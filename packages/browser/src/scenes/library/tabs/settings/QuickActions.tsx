@@ -31,7 +31,7 @@ export default function QuickActions() {
 	return (
 		<div className="flex flex-col space-y-6">
 			<div>
-				<Heading size="sm">Quick actions</Heading>
+				<Heading size="sm">Thumbnails and analysis</Heading>
 				<Text size="sm" variant="muted" className="mt-1">
 					Some quick actions you can take on this library
 				</Text>

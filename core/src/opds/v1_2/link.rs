@@ -192,7 +192,7 @@ impl OpdsStreamLink {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::opds::tests::normalize_xml;
+	use crate::opds::v1_2::tests::normalize_xml;
 
 	#[test]
 	fn test_opds_link() {

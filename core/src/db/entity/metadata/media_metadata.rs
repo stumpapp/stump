@@ -16,6 +16,7 @@ use super::{
 		age_rating_deserializer, comma_separated_list_to_vec, string_list_deserializer,
 	},
 	parse_age_restriction,
+	resolution::Resolution,
 };
 
 const NAIVE_DATE_FORMATS: [&str; 2] = ["%Y-%m-%d", "%m-%d-%Y"];
@@ -151,6 +152,8 @@ pub struct MediaMetadata {
 	/// the number of pages detected by the file processor.
 	#[serde(alias = "PageCount")]
 	pub page_count: Option<i32>,
+	//#[serde(alias = "Resolutions", default = "Option::default")]
+	//pub resolutions: Option<Vec<Resolution>>,
 	// TODO: pages, e.g. <Pages><Page Image="0" Type="FrontCover" ImageSize="741291" /></Pages>
 }
 

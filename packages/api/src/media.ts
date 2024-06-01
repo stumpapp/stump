@@ -2,8 +2,8 @@ import type {
 	Media,
 	MediaIsComplete,
 	PatchMediaThumbnail,
+	ProgressUpdateReturn,
 	PutMediaCompletionStatus,
-	ReadProgress,
 } from '@stump/types'
 
 import { API } from './axios'
@@ -73,7 +73,10 @@ export function getMediaPage(id: string, page: number): string {
 	return `${API.getUri()}/media/${id}/page/${page}`
 }
 
-export function updateMediaProgress(id: string, page: number): Promise<APIResult<ReadProgress>> {
+export function updateMediaProgress(
+	id: string,
+	page: number,
+): Promise<APIResult<ProgressUpdateReturn>> {
 	return API.put(`/media/${id}/progress/${page}`)
 }
 
@@ -98,6 +101,10 @@ export function putMediaCompletion(
 	return API.put(`/media/${id}/progress/complete`, payload)
 }
 
+export function deleteActiveReadingSession(bookId: string) {
+	return API.delete(`/media/${bookId}/progress`)
+}
+
 /**
  * Start the analysis of a book by media id.
  *
@@ -108,6 +115,7 @@ export function startMediaAnalysis(id: string) {
 }
 
 export const mediaApi = {
+	deleteActiveReadingSession,
 	getInProgressMedia,
 	getMedia,
 	getMediaById,
@@ -129,6 +137,7 @@ export const mediaQueryKeys: Record<keyof typeof mediaApi, string> = {
 	getMedia: 'media.get',
 	getMediaById: 'media.getById',
 	getMediaByPath: 'media.getByPath',
+	deleteActiveReadingSession: 'media.deleteActiveReadingSession',
 	getMediaPage: 'media.getPage',
 	getMediaThumbnail: 'media.getThumbnail',
 	getMediaWithCursor: 'media.getWithCursor',

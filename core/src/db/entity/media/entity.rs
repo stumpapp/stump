@@ -10,10 +10,12 @@ use crate::{
 		FileStatus,
 	},
 	error::CoreError,
-	prisma::{media, read_progress},
+	prisma::{active_reading_session, media},
 };
 
-use super::{Bookmark, ReadProgress};
+use super::{ActiveReadingSession, Bookmark, FinishedReadingSession};
+
+// TODO: Now that we have a single ActiveReadingSession, reevaluate if we need root-level fields for current_page, current_epubcfi, etc.
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type, Default, ToSchema)]
 pub struct Media {
@@ -30,7 +32,6 @@ pub struct Media {
 	pub updated_at: String,
 	/// The timestamp when the media was created.
 	pub created_at: String,
-	// TODO: rename file_modified_at
 	/// The timestamp when the file was last modified on disk.
 	pub modified_at: Option<String>,
 	/// The hash of the file contents. Used to ensure only one instance of a file in the database.
@@ -47,14 +48,21 @@ pub struct Media {
 	// The series this media belongs to. Will be `None` only if the relation is not loaded.
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub series: Option<Series>,
-	/// The read progresses of the media. Will be `None` only if the relation is not loaded.
+	/// The active reading sessions for the media. Will be `None` only if the relation is not loaded.
+	///
+	/// Note: This is scoped to the current user, only.
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub read_progresses: Option<Vec<ReadProgress>>,
-	/// The current page of the media, computed from `read_progresses`. Will be `None` only
-	/// if the `read_progresses` relation is not loaded.
+	pub active_reading_session: Option<ActiveReadingSession>,
+	/// The finished reading sessions for the media. Will be `None` only if the relation is not loaded.
+	///
+	/// Note: This is scoped to the current user, only.
+	pub finished_reading_sessions: Option<Vec<FinishedReadingSession>>,
+	/// The current page of the media, computed from `active_reading_sessions`. Will be `None` only
+	/// if the `read_progresses` relation is not loaded or there is no progress.
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub current_page: Option<i32>,
-	/// The current progress in terms of epubcfi
+	/// The current progress in terms of epubcfi, computed from `active_reading_sessions`. Will be
+	/// `None` only if the `read_progresses` relation is not loaded or there is no progress.
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub current_epubcfi: Option<String>,
 	/// Whether or not the media is completed. Only None if the relation is not loaded.
@@ -74,23 +82,22 @@ impl Cursor for Media {
 	}
 }
 
-impl TryFrom<read_progress::Data> for Media {
+impl TryFrom<active_reading_session::Data> for Media {
 	type Error = CoreError;
 
 	/// Creates a [Media] instance from the loaded relation of a [media::Data] on
-	/// a [read_progress::Data] instance. If the relation is not loaded, it will
+	/// a [active_reading_session::Data] instance. If the relation is not loaded, it will
 	/// return an error.
-	fn try_from(data: read_progress::Data) -> Result<Self, Self::Error> {
-		let relation = data.media();
-
-		if relation.is_err() {
+	fn try_from(data: active_reading_session::Data) -> Result<Self, Self::Error> {
+		let Ok(media) = data.media() else {
 			return Err(CoreError::InvalidQuery(
 				"Failed to load media for read progress".to_string(),
 			));
-		}
+		};
 
-		let mut media = Media::from(relation.unwrap().to_owned());
-		media.current_page = Some(data.page);
+		let mut media = Media::from(media.to_owned());
+		media.current_page = data.page;
+		media.current_epubcfi = data.epubcfi;
 
 		Ok(media)
 	}
@@ -109,28 +116,28 @@ impl From<media::Data> for Media {
 			Err(_e) => None,
 		};
 
-		let (read_progresses, current_page, is_completed, epubcfi) =
-			match data.read_progresses() {
-				Ok(read_progresses) => {
-					let progress = read_progresses
-						.iter()
-						.map(|rp| rp.to_owned().into())
-						.collect::<Vec<ReadProgress>>();
+		let active_reading_session = match data.active_user_reading_sessions() {
+			Ok(sessions) => sessions.first().cloned().map(ActiveReadingSession::from),
+			Err(_e) => None,
+		};
+		let (current_page, current_epubcfi) = active_reading_session
+			.as_ref()
+			.map(|session| (session.page, session.epubcfi.clone()))
+			.unwrap_or((None, None));
 
-					// Note: ugh.
-					if let Some(p) = progress.first().cloned() {
-						(
-							Some(progress),
-							Some(p.page),
-							Some(p.is_completed),
-							p.epubcfi,
-						)
-					} else {
-						(Some(progress), None, None, None)
-					}
-				},
-				Err(_e) => (None, None, None, None),
-			};
+		let finished_reading_sessions = match data.finished_user_reading_sessions() {
+			Ok(sessions) => Some(
+				sessions
+					.iter()
+					.map(|data| FinishedReadingSession::from(data.to_owned()))
+					.collect::<Vec<FinishedReadingSession>>(),
+			),
+			Err(_e) => None,
+		};
+		let is_completed = finished_reading_sessions
+			.as_ref()
+			.map(Vec::is_empty)
+			.map(|b| !b);
 
 		let tags = match data.tags() {
 			Ok(tags) => Some(tags.iter().map(|tag| tag.to_owned().into()).collect()),
@@ -164,9 +171,10 @@ impl From<media::Data> for Media {
 			series_id: data.series_id.unwrap(),
 			metadata,
 			series,
-			read_progresses,
+			active_reading_session,
+			finished_reading_sessions,
 			current_page,
-			current_epubcfi: epubcfi,
+			current_epubcfi,
 			is_completed,
 			tags,
 			bookmarks,

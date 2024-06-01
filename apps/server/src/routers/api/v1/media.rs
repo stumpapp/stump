@@ -9,7 +9,7 @@ use axum::{
 use axum_extra::extract::Query;
 use prisma_client_rust::{
 	and,
-	chrono::{Duration, Utc},
+	chrono::Duration,
 	operator::{self, or},
 	or, raw, Direction, PrismaValue,
 };
@@ -18,7 +18,13 @@ use serde_qs::axum::QsQuery;
 use stump_core::{
 	config::StumpConfig,
 	db::{
-		entity::{LibraryOptions, Media, ReadProgress, User, UserPermission},
+		entity::{
+			macros::{
+				finished_reading_session_with_book_pages, reading_session_with_book_pages,
+			},
+			ActiveReadingSession, FinishedReadingSession, LibraryOptions, Media,
+			ProgressUpdateReturn, User, UserPermission,
+		},
 		query::pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
 		CountQueryReturn,
 	},
@@ -33,9 +39,9 @@ use stump_core::{
 		read_entire_file, ContentType, FileParts, PathUtils,
 	},
 	prisma::{
-		library, library_options,
+		active_reading_session, finished_reading_session, library, library_options,
 		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
-		media_metadata, read_progress, series, series_metadata, tag, user, PrismaClient,
+		media_metadata, series, series_metadata, tag, user, PrismaClient,
 	},
 };
 use tower_sessions::Session;
@@ -108,17 +114,28 @@ pub(crate) fn apply_media_read_status_filter(
 			or(read_status
 				.into_iter()
 				.map(|rs| match rs {
-					ReadStatus::Reading => media::read_progresses::some(vec![and![
-						read_progress::user_id::equals(user_id.clone()),
-						read_progress::is_completed::equals(false)
-					]]),
-					ReadStatus::Completed => media::read_progresses::some(vec![and![
-						read_progress::user_id::equals(user_id.clone()),
-						read_progress::is_completed::equals(true)
-					]]),
-					ReadStatus::Unread => media::read_progresses::none(vec![
-						read_progress::user_id::equals(user_id.clone()),
-					]),
+					ReadStatus::Reading => {
+						media::active_user_reading_sessions::some(vec![and![
+							active_reading_session::user_id::equals(user_id.clone()),
+						]])
+					},
+					ReadStatus::Completed => {
+						media::finished_user_reading_sessions::some(vec![and![
+							finished_reading_session::user_id::equals(user_id.clone()),
+						]])
+					},
+					ReadStatus::Unread => {
+						and![
+							media::active_user_reading_sessions::none(vec![
+								active_reading_session::user_id::equals(user_id.clone()),
+							]),
+							media::finished_user_reading_sessions::none(vec![
+								finished_reading_session::user_id::equals(
+									user_id.clone()
+								),
+							])
+						]
+					},
 				})
 				.collect())
 		})],
@@ -244,13 +261,12 @@ pub(crate) fn apply_media_pagination<'a>(
 /// is currently in progress
 pub(crate) fn apply_in_progress_filter_for_user(
 	user_id: String,
-) -> read_progress::WhereParam {
+) -> active_reading_session::WhereParam {
 	and![
-		read_progress::user_id::equals(user_id),
+		active_reading_session::user_id::equals(user_id),
 		or![
-			read_progress::page::gt(0),
-			read_progress::epubcfi::not(None),
-			read_progress::is_completed::equals(false)
+			active_reading_session::page::gt(0),
+			active_reading_session::epubcfi::not(None),
 		]
 	]
 }
@@ -352,8 +368,11 @@ async fn get_media(
 			let mut query = client
 				.media()
 				.find_many(where_conditions.clone())
-				.with(media::read_progresses::fetch(vec![
-					read_progress::user_id::equals(user_id),
+				.with(media::active_user_reading_sessions::fetch(vec![
+					active_reading_session::user_id::equals(user_id.clone()),
+				]))
+				.with(media::finished_user_reading_sessions::fetch(vec![
+					finished_reading_session::user_id::equals(user_id),
 				]))
 				.with(media::metadata::fetch())
 				.order_by(order_by_param);
@@ -510,13 +529,9 @@ async fn get_in_progress_media(
 	let pagination_cloned = pagination.clone();
 	let is_unpaged = pagination.is_unpaged();
 
-	let read_progress_filter = and![
-		read_progress::user_id::equals(user_id.clone()),
-		read_progress::is_completed::equals(false)
-	];
-
-	let where_conditions = vec![media::read_progresses::some(vec![
-		read_progress_filter.clone()
+	let read_progress_filter = active_reading_session::user_id::equals(user_id.clone());
+	let where_conditions = vec![media::active_user_reading_sessions::some(vec![
+		read_progress_filter.clone(),
 	])]
 	.into_iter()
 	.chain(apply_media_library_not_hidden_for_user_filter(&user))
@@ -530,7 +545,9 @@ async fn get_in_progress_media(
 			let mut query = client
 				.media()
 				.find_many(where_conditions.clone())
-				.with(media::read_progresses::fetch(vec![read_progress_filter]))
+				.with(media::active_user_reading_sessions::fetch(vec![
+					read_progress_filter,
+				]))
 				.with(media::metadata::fetch())
 				// TODO: check back in -> https://github.com/prisma/prisma/issues/18188
 				// FIXME: not the proper ordering, BUT I cannot order based on a relation...
@@ -611,8 +628,11 @@ async fn get_recently_added_media(
 			let mut query = client
 				.media()
 				.find_many(where_conditions.clone())
-				.with(media::read_progresses::fetch(vec![
-					read_progress::user_id::equals(user_id),
+				.with(media::active_user_reading_sessions::fetch(vec![
+					active_reading_session::user_id::equals(user_id.clone()),
+				]))
+				.with(media::finished_user_reading_sessions::fetch(vec![
+					finished_reading_session::user_id::equals(user_id),
 				]))
 				.with(media::metadata::fetch())
 				.order_by(media::created_at::order(Direction::Desc));
@@ -742,8 +762,11 @@ async fn get_media_by_id(
 	let mut query = db
 		.media()
 		.find_first(where_params)
-		.with(media::read_progresses::fetch(vec![
-			read_progress::user_id::equals(user_id),
+		.with(media::active_user_reading_sessions::fetch(vec![
+			active_reading_session::user_id::equals(user_id.clone()),
+		]))
+		.with(media::finished_user_reading_sessions::fetch(vec![
+			finished_reading_session::user_id::equals(user_id),
 		]))
 		.with(media::metadata::fetch());
 
@@ -911,8 +934,8 @@ async fn get_media_page(
 	let media = db
 		.media()
 		.find_first(where_params)
-		.with(media::read_progresses::fetch(vec![
-			read_progress::user_id::equals(user_id),
+		.with(media::active_user_reading_sessions::fetch(vec![
+			active_reading_session::user_id::equals(user_id),
 		]))
 		.exec()
 		.await?
@@ -1234,94 +1257,68 @@ async fn update_media_progress(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> APIResult<Json<ReadProgress>> {
+) -> APIResult<Json<ProgressUpdateReturn>> {
 	let user = get_session_user(&session)?;
 	let user_id = user.id.clone();
 
-	let db = &ctx.db;
+	let client = &ctx.db;
 	// TODO: check library access? They don't gain access to the book here, so perhaps
 	// it is acceptable to not check library access here?
 
-	// let client = &ctx.db;
-	// let read_progress = client
-	// 	.read_progress()
-	// 	.upsert(
-	// 		read_progress::user_id_media_id(user_id.clone(), id.clone()),
-	// 		(
-	// 			page,
-	// 			media::id::equals(id.clone()),
-	// 			user::id::equals(user_id.clone()),
-	// 			vec![],
-	// 		),
-	// 		vec![read_progress::page::set(page)],
-	// 	)
-	// 	.with(read_progress::media::fetch())
-	// 	.exec()
-	// 	.await?;
+	let active_session = client
+		.active_reading_session()
+		.upsert(
+			active_reading_session::user_id_media_id(user_id.clone(), id.clone()),
+			(
+				media::id::equals(id.clone()),
+				user::id::equals(user_id.clone()),
+				vec![active_reading_session::page::set(Some(page))],
+			),
+			vec![active_reading_session::page::set(Some(page))],
+		)
+		.include(reading_session_with_book_pages::include())
+		.exec()
+		.await?;
+	let is_completed = active_session.media.pages == page;
 
-	// let is_completed = read_progress
-	// 	.media
-	// 	.as_ref()
-	// 	.map(|media| media.pages == page)
-	// 	.unwrap_or_default();
+	if is_completed {
+		let timeout = Duration::seconds(10).num_milliseconds() as u64;
+		let finished_session = client
+			._transaction()
+			.with_max_wait(timeout)
+			.with_timeout(timeout)
+			.run(|tx| async move {
+				let deleted_session = tx
+					.active_reading_session()
+					.delete(active_reading_session::user_id_media_id(
+						user_id.clone(),
+						id.clone(),
+					))
+					.exec()
+					.await
+					.ok();
+				tracing::trace!(?deleted_session, "Deleted active reading session");
 
-	// let read_progress = if is_completed {
-	// 	client
-	// 		.read_progress()
-	// 		.update(
-	// 			read_progress::id::equals(read_progress.id.clone()),
-	// 			vec![read_progress::is_completed::set(true)],
-	// 		)
-	// 		.exec()
-	// 		.await?
-	// } else {
-	// 	read_progress
-	// };
-
-	let timeout = Duration::seconds(10).num_milliseconds() as u64;
-	let read_progress = db
-		._transaction()
-		.with_max_wait(timeout)
-		.with_timeout(timeout)
-		.run(|client| async move {
-			let read_progress = client
-				.read_progress()
-				.upsert(
-					read_progress::user_id_media_id(user_id.clone(), id.clone()),
-					(
-						page,
+				tx.finished_reading_session()
+					.create(
+						deleted_session.map(|s| s.started_at).unwrap_or_default(),
 						media::id::equals(id.clone()),
 						user::id::equals(user_id.clone()),
 						vec![],
-					),
-					vec![read_progress::page::set(page)],
-				)
-				.with(read_progress::media::fetch())
-				.exec()
-				.await?;
-
-			let is_completed = read_progress
-				.media
-				.as_ref()
-				.map(|media| media.pages == page)
-				.unwrap_or_default();
-
-			if is_completed {
-				client
-					.read_progress()
-					.update(
-						read_progress::id::equals(read_progress.id.clone()),
-						vec![read_progress::is_completed::set(true)],
 					)
 					.exec()
 					.await
-			} else {
-				Ok(read_progress)
-			}
-		})
-		.await?;
-
-	Ok(Json(ReadProgress::from(read_progress)))
+			})
+			.await?;
+		tracing::trace!(?finished_session, "Created finished reading session");
+		Ok(Json(ProgressUpdateReturn::Finished(
+			FinishedReadingSession::from(finished_session),
+		)))
+	} else {
+		Ok(Json(ProgressUpdateReturn::Active(
+			ActiveReadingSession::from(active_session),
+		)))
+	}
 }
 
 #[utoipa::path(
@@ -1341,7 +1338,7 @@ async fn get_media_progress(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> APIResult<Json<Option<ReadProgress>>> {
+) -> APIResult<Json<Option<ActiveReadingSession>>> {
 	let db = &ctx.db;
 	let user = get_session_user(&session)?;
 	let user_id = user.id.clone();
@@ -1358,17 +1355,19 @@ async fn get_media_progress(
 	);
 
 	let result = db
-		.read_progress()
+		.active_reading_session()
 		.find_first(vec![
-			read_progress::user_id::equals(user_id.clone()),
-			read_progress::media_id::equals(id.clone()),
-			read_progress::media::is(media_where_params),
+			active_reading_session::user_id::equals(user_id.clone()),
+			active_reading_session::media_id::equals(id.clone()),
+			active_reading_session::media::is(media_where_params),
 		])
 		.exec()
 		.await?;
 
-	Ok(Json(result.map(ReadProgress::from)))
+	Ok(Json(result.map(ActiveReadingSession::from)))
 }
+
+// TODO: new API for managing finished sessions
 
 #[utoipa::path(
 	delete,
@@ -1391,13 +1390,13 @@ async fn delete_media_progress(
 	let client = &ctx.db;
 	let user_id = get_session_user(&session)?.id;
 
-	let deleted_rp = client
-		.read_progress()
-		.delete(read_progress::user_id_media_id(user_id, id))
+	let deleted_session = client
+		.active_reading_session()
+		.delete(active_reading_session::user_id_media_id(user_id, id))
 		.exec()
 		.await?;
 
-	tracing::trace!(?deleted_rp, "Deleted read progress");
+	tracing::trace!(?deleted_session, "Deleted reading session");
 
 	Ok(Json(MediaIsComplete::default()))
 }
@@ -1405,7 +1404,7 @@ async fn delete_media_progress(
 #[derive(Default, Deserialize, Serialize, ToSchema, specta::Type)]
 pub struct MediaIsComplete {
 	is_completed: bool,
-	completed_at: Option<String>,
+	last_completed_at: Option<String>,
 }
 
 #[utoipa::path(
@@ -1442,17 +1441,21 @@ async fn get_is_media_completed(
 	);
 
 	let result = client
-		.read_progress()
+		.finished_reading_session()
 		.find_first(vec![
-			read_progress::user_id::equals(user_id.clone()),
-			read_progress::media_id::equals(id.clone()),
-			read_progress::media::is(media_where_params),
+			finished_reading_session::user_id::equals(user_id.clone()),
+			finished_reading_session::media_id::equals(id.clone()),
+			finished_reading_session::media::is(media_where_params),
 		])
+		.order_by(finished_reading_session::completed_at::order(
+			Direction::Desc,
+		))
+		.include(finished_reading_session_with_book_pages::include())
 		.exec()
 		.await?
-		.map(|rp| MediaIsComplete {
-			is_completed: rp.is_completed,
-			completed_at: rp.completed_at.map(|ca| ca.to_rfc3339()),
+		.map(|ars| MediaIsComplete {
+			is_completed: true,
+			last_completed_at: Some(ars.completed_at.to_rfc3339()),
 		})
 		.unwrap_or_default();
 
@@ -1500,58 +1503,75 @@ async fn put_media_complete_status(
 		[age_restrictions],
 	);
 
-	let result: Result<read_progress::Data, APIError> = client
-		._transaction()
-		.run(|tx| async move {
-			let media = tx
-				.media()
-				.find_first(media_where_params)
-				.exec()
-				.await?
-				.ok_or(APIError::NotFound(String::from("Media not found")))?;
+	let book = client
+		.media()
+		.find_first(media_where_params.clone())
+		.with(media::metadata::fetch())
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound(String::from("Media not found")))?;
 
-			let is_completed = payload.is_complete;
-			let (pages, completed_at) = if is_completed {
-				(payload.page.or(Some(media.pages)), Some(Utc::now().into()))
-			} else {
-				(payload.page, None)
-			};
+	let extension = book.extension.to_lowercase();
 
-			let extension = media.extension.to_lowercase();
-			let fallback_page = if extension.contains("epub") { -1 } else { 0 };
+	let is_completed = payload.is_complete;
 
-			let updated_or_created_rp = tx
-				.read_progress()
-				.upsert(
-					read_progress::user_id_media_id(user_id.clone(), id.clone()),
-					(
-						pages.unwrap_or(fallback_page),
+	if is_completed {
+		let finished_session = client
+			._transaction()
+			.run(|tx| async move {
+				let deleted_session = tx
+					.active_reading_session()
+					.delete(active_reading_session::user_id_media_id(
+						user_id.clone(),
+						id.clone(),
+					))
+					.exec()
+					.await
+					.ok();
+				tracing::trace!(?deleted_session, "Deleted active reading session");
+
+				tx.finished_reading_session()
+					.create(
+						deleted_session.map(|s| s.started_at).unwrap_or_default(),
 						media::id::equals(id.clone()),
 						user::id::equals(user_id.clone()),
-						vec![
-							read_progress::is_completed::set(is_completed),
-							read_progress::completed_at::set(completed_at),
-						],
-					),
-					chain_optional_iter(
-						[
-							read_progress::is_completed::set(is_completed),
-							read_progress::completed_at::set(completed_at),
-						],
-						[pages.map(read_progress::page::set)],
-					),
-				)
-				.exec()
-				.await?;
-			Ok(updated_or_created_rp)
-		})
-		.await;
-	let updated_or_created_rp = result?;
+						vec![],
+					)
+					.exec()
+					.await
+			})
+			.await?;
+		tracing::trace!(?finished_session, "Created finished reading session");
 
-	Ok(Json(MediaIsComplete {
-		is_completed: updated_or_created_rp.is_completed,
-		completed_at: updated_or_created_rp.completed_at.map(|ca| ca.to_rfc3339()),
-	}))
+		Ok(Json(MediaIsComplete {
+			is_completed: true,
+			last_completed_at: Some(finished_session.completed_at.to_rfc3339()),
+		}))
+	} else {
+		let page = match extension.as_str() {
+			"epub" => -1,
+			_ => payload.page.unwrap_or(book.pages),
+		};
+		let updated_or_created_session = client
+			.active_reading_session()
+			.upsert(
+				active_reading_session::user_id_media_id(user_id.clone(), id.clone()),
+				(
+					media::id::equals(id.clone()),
+					user::id::equals(user_id.clone()),
+					vec![active_reading_session::page::set(Some(page))],
+				),
+				vec![active_reading_session::page::set(Some(page))],
+			)
+			.exec()
+			.await?;
+		tracing::trace!(
+			?updated_or_created_session,
+			"Updated or created active reading session"
+		);
+
+		Ok(Json(MediaIsComplete::default()))
+	}
 }
 
 #[utoipa::path(

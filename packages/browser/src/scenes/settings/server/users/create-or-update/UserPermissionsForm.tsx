@@ -12,6 +12,11 @@ import { Schema } from './CreateOrUpdateUserForm'
 export const allPermissions = [
 	'bookclub:read',
 	'bookclub:create',
+	'email:arbitrary_send',
+	'email:send',
+	'emailer:create',
+	'emailer:manage',
+	'emailer:read',
 	'file:explorer',
 	'file:upload',
 	'file:download',
@@ -34,6 +39,11 @@ export const userPermissionSchema = z.enum(allPermissions)
 const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	'bookclub:create': ['bookclub:read'],
 	'bookclub:read': [],
+	'email:arbitrary_send': ['email:send'],
+	'email:send': ['emailer:read'],
+	'emailer:create': ['emailer:read', 'emailer:manage', 'email:send'],
+	'emailer:manage': ['emailer:read'],
+	'emailer:read': [],
 	'file:download': [],
 	'file:explorer': [],
 	'file:upload': [],

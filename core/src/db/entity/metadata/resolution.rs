@@ -1,4 +1,4 @@
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::{Deserialize, Serialize};
 
 use std::str::FromStr;
 use std::string::ToString;
@@ -25,7 +25,13 @@ pub struct PageResolutions {
 
 impl From<page_resolutions::Data> for PageResolutions {
 	fn from(value: page_resolutions::Data) -> Self {
-		let resolutions = resolution_vec_from_str(&value.resolutions).unwrap_or(vec![]);
+		let resolutions = match resolution_vec_from_str(&value.resolutions) {
+			Ok(res) => res,
+			Err(e) => {
+				tracing::error!("Failed to deserialize page resolution: {}", e);
+				vec![]
+			},
+		};
 
 		Self {
 			id: value.id,

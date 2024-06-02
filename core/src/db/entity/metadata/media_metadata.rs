@@ -9,14 +9,15 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::{db::entity::resolution::resolution_vec_from_str, prisma::media_metadata};
-
-use super::{
-	common::{
-		age_rating_deserializer, comma_separated_list_to_vec, string_list_deserializer,
+use crate::{
+	db::entity::{
+		metadata::common::{
+			age_rating_deserializer, comma_separated_list_to_vec, parse_age_restriction,
+			string_list_deserializer,
+		},
+		resolution::PageResolutions,
 	},
-	parse_age_restriction,
-	resolution::{PageResolutions, Resolution},
+	prisma::media_metadata,
 };
 
 const NAIVE_DATE_FORMATS: [&str; 2] = ["%Y-%m-%d", "%m-%d-%Y"];

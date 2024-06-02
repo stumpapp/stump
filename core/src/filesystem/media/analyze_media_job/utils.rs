@@ -1,5 +1,5 @@
 use crate::{
-	db::entity::{resolution::Resolution, Media},
+	db::entity::Media,
 	filesystem::{analyze_media_job::MediaID, ContentType},
 	job::{error::JobError, WorkerCtx},
 	prisma::{media, media_metadata},

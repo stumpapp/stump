@@ -6,4 +6,5 @@ mod series_metadata;
 
 pub use common::{age_rating_deserializer, parse_age_restriction};
 pub use media_metadata::*;
+pub use resolution::{PageResolutions, Resolution};
 pub use series_metadata::*;

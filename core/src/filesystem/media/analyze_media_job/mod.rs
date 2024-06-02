@@ -35,6 +35,9 @@ pub enum AnalyzeMediaTask {
 	UpdatePageCount(MediaID),
 	/// Analyze and store dimensions for each page ofa  media item specified by an ID.
 	AnalyzePageDimensions(MediaID),
+	/// Performs both [UpdatePageCount] and then [AnalyzePageDimensions] in sequence for
+	/// the media item specified by an ID.
+	FullAnalysis(MediaID),
 }
 
 #[derive(Clone, Serialize, Deserialize, Default, Debug, Type)]
@@ -120,7 +123,7 @@ impl JobExt for AnalyzeMediaJob {
 
 				library_media
 					.into_iter()
-					.map(|media| AnalyzeMediaTask::UpdatePageCount(media.id))
+					.map(|media| AnalyzeMediaTask::FullAnalysis(media.id))
 					.collect()
 			},
 			// We also need a list for series
@@ -136,13 +139,13 @@ impl JobExt for AnalyzeMediaJob {
 
 				series_media
 					.into_iter()
-					.map(|media| AnalyzeMediaTask::UpdatePageCount(media.id))
+					.map(|media| AnalyzeMediaTask::FullAnalysis(media.id))
 					.collect()
 			},
 			// Media groups already include a vector of ids
 			AnalyzeMediaJobVariant::AnalyzeMediaGroup(ids) => ids
 				.iter()
-				.map(|id| AnalyzeMediaTask::UpdatePageCount(id.clone()))
+				.map(|id| AnalyzeMediaTask::FullAnalysis(id.clone()))
 				.collect(),
 		};
 
@@ -160,6 +163,7 @@ impl JobExt for AnalyzeMediaJob {
 		task: Self::Task,
 	) -> Result<JobTaskOutput<Self>, JobError> {
 		let mut output = Self::Output::default();
+		let mut subtasks = Vec::new();
 
 		match task {
 			AnalyzeMediaTask::UpdatePageCount(id) => {
@@ -168,11 +172,17 @@ impl JobExt for AnalyzeMediaJob {
 			AnalyzeMediaTask::AnalyzePageDimensions(id) => {
 				task_page_count::execute(id, ctx, &mut output).await?
 			},
+			AnalyzeMediaTask::FullAnalysis(id) => {
+				// First page count needs to be updated
+				task_analyze_dimensions::execute(id.clone(), ctx, &mut output).await?;
+				// Then we can queue a dimensions analysis job
+				subtasks.push(AnalyzeMediaTask::AnalyzePageDimensions(id));
+			},
 		}
 
 		Ok(JobTaskOutput {
 			output,
-			subtasks: vec![],
+			subtasks,
 			logs: vec![],
 		})
 	}

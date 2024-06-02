@@ -163,10 +163,10 @@ impl JobExt for AnalyzeMediaJob {
 
 		match task {
 			AnalyzeMediaTask::UpdatePageCount(id) => {
-				task_analyze_dimensions::do_task(id, ctx, &mut output).await?
+				task_analyze_dimensions::execute(id, ctx, &mut output).await?
 			},
 			AnalyzeMediaTask::AnalyzePageDimensions(id) => {
-				task_page_count::do_task(id, ctx, &mut output).await?
+				task_page_count::execute(id, ctx, &mut output).await?
 			},
 		}
 

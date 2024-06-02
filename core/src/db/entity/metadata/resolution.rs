@@ -6,14 +6,33 @@ use std::string::ToString;
 use specta::Type;
 use thiserror::Error;
 
+use crate::prisma::page_resolutions;
+
 #[derive(Error, Debug)]
 pub enum ResolutionError {
-	#[error("Error parsing {0}, expected value enclosed in ( and )")]
-	InvalidParenthesis(String),
 	#[error("Error parsing {0}, expected height and width")]
 	ExpectedHeightWidth(String),
 	#[error("Failed to parse number: {0}")]
 	ErrorParsingInt(#[from] std::num::ParseIntError),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Type)]
+pub struct PageResolutions {
+	pub id: String,
+	pub resolutions: Vec<Resolution>,
+	pub metadata_id: String,
+}
+
+impl From<page_resolutions::Data> for PageResolutions {
+	fn from(value: page_resolutions::Data) -> Self {
+		let resolutions = resolution_vec_from_str(&value.resolutions).unwrap_or(vec![]);
+
+		Self {
+			id: value.id,
+			resolutions,
+			metadata_id: value.metadata_id,
+		}
+	}
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Type, PartialEq)]
@@ -55,14 +74,14 @@ impl FromStr for Resolution {
 	}
 }
 
-pub fn resolution_list_to_string(list: Vec<Resolution>) -> String {
+pub fn resolution_vec_to_string(list: Vec<Resolution>) -> String {
 	list.into_iter()
 		.map(|res| res.to_string())
 		.collect::<Vec<String>>()
 		.join(";")
 }
 
-pub fn resolution_list_from_str(s: &str) -> Result<Vec<Resolution>, ResolutionError> {
+pub fn resolution_vec_from_str(s: &str) -> Result<Vec<Resolution>, ResolutionError> {
 	// Trim leading/trailing whitespace
 	let s = s.trim();
 
@@ -123,18 +142,18 @@ mod tests {
 			},
 		];
 
-		let list_string = resolution_list_to_string(list);
+		let list_string = resolution_vec_to_string(list);
 		assert_eq!(list_string, "800,600;800,600;1920,1080;800,600");
 
 		let list = vec![Resolution {
 			height: 800,
 			width: 600,
 		}];
-		let list_string = resolution_list_to_string(list);
+		let list_string = resolution_vec_to_string(list);
 		assert_eq!(list_string, "800,600");
 
 		let list = vec![];
-		let list_string = resolution_list_to_string(list);
+		let list_string = resolution_vec_to_string(list);
 		assert_eq!(list_string, "");
 	}
 
@@ -159,7 +178,7 @@ mod tests {
 			},
 		];
 
-		let list = resolution_list_from_str("1920,1080;1920,1080;800,600;1920,1080");
+		let list = resolution_vec_from_str("1920,1080;1920,1080;800,600;1920,1080");
 		assert!(list.is_ok());
 		assert_eq!(list.unwrap(), expected_list);
 	}

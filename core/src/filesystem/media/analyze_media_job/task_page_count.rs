@@ -11,9 +11,14 @@ use crate::{
 ///
 /// Determines the page count for media using media processor [get_page_count] function, then
 /// performs one of:
-/// 1. Updating metadata if it already exists and does not match the determined page count.
-/// 2. Creates metadata if it doesn't exist and writes the determined page count.
-pub(crate) async fn do_task(
+/// 1. Updating metadata if it already exists and does not match the determined page count, or
+/// 2. Creating metadata if it doesn't exist and writes the determined page count.
+///
+/// # Arguments
+/// * `id` - The id for the media item being analyzed
+/// * `ctx` - A reference to the [WorkerCtx] for the job
+/// * `output` - A mutable reference to the job output
+pub(crate) async fn execute(
 	id: String,
 	ctx: &WorkerCtx,
 	output: &mut AnalyzeMediaOutput,

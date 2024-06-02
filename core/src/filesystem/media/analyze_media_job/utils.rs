@@ -5,21 +5,6 @@ use crate::{
 	prisma::{media, media_metadata},
 };
 
-/// A helper function to get page count, assuming the input [Media] has metadata and page_count is not [None].
-pub fn maybe_get_page_count(media_item: &Media) -> Option<i32> {
-	match &media_item.metadata {
-		None => None,
-		Some(meta) => meta.page_count,
-	}
-}
-
-///
-pub fn maybe_get_resolutions(media_item: &Media) -> Option<Vec<Resolution>> {
-	let test = media_item.metadata.as_ref().unwrap();
-
-	todo!()
-}
-
 /// A helper function to fetch a media item by its [MediaID], including fetching the metadata
 /// for the media item.
 pub async fn fetch_media_with_metadata(

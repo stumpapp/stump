@@ -12,6 +12,8 @@ use crate::prisma::page_resolutions;
 pub enum ResolutionError {
 	#[error("Error parsing {0}, expected height and width")]
 	ExpectedHeightWidth(String),
+	#[error("Error parsing {0}, malformed run syntax")]
+	MalformedRunSyntax(String),
 	#[error("Failed to parse number: {0}")]
 	ErrorParsingInt(#[from] std::num::ParseIntError),
 }
@@ -81,23 +83,84 @@ impl FromStr for Resolution {
 }
 
 pub fn resolution_vec_to_string(list: Vec<Resolution>) -> String {
-	list.into_iter()
-		.map(|res| res.to_string())
-		.collect::<Vec<String>>()
-		.join(";")
+	let mut encoded_strings = Vec::new();
+	let mut run_count = 0;
+	let mut run_resolution: Option<Resolution> = None;
+
+	// Loop over each of the items in the list to be encoded
+	for next_res in list.into_iter() {
+		match run_resolution {
+			// If there's already a run going and it matches the next, increment the counter
+			Some(ref run_res) if *run_res == next_res => run_count += 1,
+			// If there's either a run going and it doesn't match, or no run...
+			_ => {
+				// This branch handles writeout if a run is going and it didn't match
+				if let Some(run_res) = run_resolution {
+					if run_count > 1 {
+						encoded_strings.push(format!(
+							"{}>{}",
+							run_count,
+							run_res.to_string()
+						));
+					} else {
+						encoded_strings.push(run_res.to_string());
+					}
+				}
+
+				// In either case, we need to set the run and reset the count
+				run_resolution = Some(next_res);
+				run_count = 1;
+			},
+		}
+	}
+
+	// This handles writeout for the final item
+	if let Some(run_res) = run_resolution {
+		if run_count > 1 {
+			encoded_strings.push(format!("{}>{}", run_count, run_res.to_string()));
+		} else {
+			encoded_strings.push(run_res.to_string());
+		}
+	}
+
+	encoded_strings.join(";")
 }
 
 pub fn resolution_vec_from_str(s: &str) -> Result<Vec<Resolution>, ResolutionError> {
 	// Trim leading/trailing whitespace
 	let s = s.trim();
 
-	let each_res = s.split(";").collect::<Vec<_>>();
-	let mut list = Vec::with_capacity(each_res.len());
-	for res_str in each_res {
-		list.push(Resolution::from_str(res_str)?);
+	let chunks = s.split(";").collect::<Vec<_>>();
+	// This will be under-capacity unless every resolution differs, but that's fine
+	let mut out_list = Vec::with_capacity(chunks.len());
+
+	// Loop over each encoded chunk
+	for encoded_str in chunks {
+		match encoded_str.find('>') {
+			// Handle case where there's multiple of something
+			Some(_) => {
+				// Split out the number and the encoded item
+				let items = encoded_str.split('>').collect::<Vec<_>>();
+
+				// Sanity check
+				if items.len() != 2 {
+					return Err(ResolutionError::MalformedRunSyntax(
+						encoded_str.to_string(),
+					));
+				}
+
+				// Parse number
+				let num_repeated: usize = items.get(0).unwrap().parse()?;
+				// Parse resolution
+				let resolution = Resolution::from_str(items.get(1).unwrap())?;
+				// Push as many as we need
+				out_list.extend(vec![resolution; num_repeated]);
+			},
+			None => out_list.push(Resolution::from_str(encoded_str)?),
+		}
 	}
 
-	Ok(list)
+	Ok(out_list)
 }
 
 #[cfg(test)]
@@ -143,13 +206,17 @@ mod tests {
 				width: 1080,
 			},
 			Resolution {
+				height: 1920,
+				width: 1080,
+			},
+			Resolution {
 				height: 800,
 				width: 600,
 			},
 		];
 
 		let list_string = resolution_vec_to_string(list);
-		assert_eq!(list_string, "800,600;800,600;1920,1080;800,600");
+		assert_eq!(list_string, "2>800,600;2>1920,1080;800,600");
 
 		let list = vec![Resolution {
 			height: 800,
@@ -165,6 +232,7 @@ mod tests {
 
 	#[test]
 	fn test_resolution_list_from_str() {
+		let list = resolution_vec_from_str("2>1920,1080;800,600;1920,1080");
 		let expected_list = vec![
 			Resolution {
 				height: 1920,
@@ -184,7 +252,6 @@ mod tests {
 			},
 		];
 
-		let list = resolution_vec_from_str("1920,1080;1920,1080;800,600;1920,1080");
 		assert!(list.is_ok());
 		assert_eq!(list.unwrap(), expected_list);
 	}

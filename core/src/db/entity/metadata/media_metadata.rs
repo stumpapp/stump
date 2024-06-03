@@ -28,7 +28,8 @@ const NAIVE_DATE_FORMATS: [&str; 2] = ["%Y-%m-%d", "%m-%d-%Y"];
 /// Struct representing the metadata for a processed file.
 #[derive(Debug, Clone, Serialize, Deserialize, Type, Default, ToSchema)]
 pub struct MediaMetadata {
-	/// The metadata of the media, is [Some] when loaded from the database
+	/// The metadata of the media.
+	#[serde(skip_deserializing, skip_serializing)]
 	pub id: String,
 	/// The title of the media.
 	#[serde(alias = "Title")]

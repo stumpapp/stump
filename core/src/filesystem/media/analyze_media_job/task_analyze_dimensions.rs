@@ -37,6 +37,7 @@ pub(crate) async fn execute(
 			media_item.id
 		))
 	})?;
+
 	// Get page count if present
 	let page_count = metadata.page_count.ok_or_else(|| {
 		JobError::TaskFailed(format!(
@@ -47,7 +48,7 @@ pub(crate) async fn execute(
 
 	// Iterate over each page, checking the image's dimensions
 	let mut image_dimensions: Vec<Resolution> = Vec::with_capacity(page_count as usize);
-	for page_num in 0..page_count {
+	for page_num in 1..=page_count {
 		let (content_type, page_data) =
 			get_page(&media_item.path, page_num, &ctx.config)?;
 		// Confirm that content_type is compatible with the image crate
@@ -82,7 +83,6 @@ pub(crate) async fn execute(
 				.exec()
 				.await?;
 		}
-		todo!()
 	} else {
 		// There is no resolution data, we need to create a new database object for them
 		// Serialize collected resolutions
@@ -94,7 +94,7 @@ pub(crate) async fn execute(
 			.page_resolutions()
 			.create(
 				resolutions_str,
-				media_metadata::media_id::equals(metadata.id.clone()),
+				media_metadata::id::equals(metadata.id.clone()),
 				vec![],
 			)
 			.exec()

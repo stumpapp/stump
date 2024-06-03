@@ -49,6 +49,12 @@ pub struct Resolution {
 	pub width: u32,
 }
 
+impl Resolution {
+	pub fn new(height: u32, width: u32) -> Self {
+		Self { height, width }
+	}
+}
+
 impl ToString for Resolution {
 	fn to_string(&self) -> String {
 		format!("{},{}", self.height, self.width)
@@ -169,10 +175,7 @@ mod tests {
 
 	#[test]
 	fn test_resolution_to_string() {
-		let res = Resolution {
-			height: 800,
-			width: 600,
-		};
+		let res = Resolution::new(800, 600);
 
 		let res_string = res.to_string();
 		assert_eq!("800,600", res_string);
@@ -180,10 +183,7 @@ mod tests {
 
 	#[test]
 	fn test_resolution_from_str() {
-		let expected_res = Resolution {
-			height: 1920,
-			width: 1080,
-		};
+		let expected_res = Resolution::new(1920, 1080);
 
 		let res = Resolution::from_str("1920,1080");
 		assert!(res.is_ok());
@@ -193,35 +193,17 @@ mod tests {
 	#[test]
 	fn test_resolution_list_to_string() {
 		let list = vec![
-			Resolution {
-				height: 800,
-				width: 600,
-			},
-			Resolution {
-				height: 800,
-				width: 600,
-			},
-			Resolution {
-				height: 1920,
-				width: 1080,
-			},
-			Resolution {
-				height: 1920,
-				width: 1080,
-			},
-			Resolution {
-				height: 800,
-				width: 600,
-			},
+			Resolution::new(800, 600),
+			Resolution::new(800, 600),
+			Resolution::new(1920, 1080),
+			Resolution::new(1920, 1080),
+			Resolution::new(800, 600),
 		];
 
 		let list_string = resolution_vec_to_string(list);
 		assert_eq!(list_string, "2>800,600;2>1920,1080;800,600");
 
-		let list = vec![Resolution {
-			height: 800,
-			width: 600,
-		}];
+		let list = vec![Resolution::new(800, 600)];
 		let list_string = resolution_vec_to_string(list);
 		assert_eq!(list_string, "800,600");
 
@@ -234,22 +216,10 @@ mod tests {
 	fn test_resolution_list_from_str() {
 		let list = resolution_vec_from_str("2>1920,1080;800,600;1920,1080");
 		let expected_list = vec![
-			Resolution {
-				height: 1920,
-				width: 1080,
-			},
-			Resolution {
-				height: 1920,
-				width: 1080,
-			},
-			Resolution {
-				height: 800,
-				width: 600,
-			},
-			Resolution {
-				height: 1920,
-				width: 1080,
-			},
+			Resolution::new(1920, 1080),
+			Resolution::new(1920, 1080),
+			Resolution::new(800, 600),
+			Resolution::new(1920, 1080),
 		];
 
 		assert!(list.is_ok());

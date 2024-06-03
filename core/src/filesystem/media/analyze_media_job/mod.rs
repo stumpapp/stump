@@ -106,7 +106,7 @@ impl JobExt for AnalyzeMediaJob {
 		let tasks = match &self.variant {
 			// Single item is easy
 			AnalyzeMediaJobVariant::AnalyzeSingleItem(id) => {
-				vec![AnalyzeMediaTask::UpdatePageCount(id.clone())]
+				vec![AnalyzeMediaTask::FullAnalysis(id.clone())]
 			},
 			// For libraries we need a list of ids
 			AnalyzeMediaJobVariant::AnalyzeLibrary(id) => {
@@ -167,14 +167,14 @@ impl JobExt for AnalyzeMediaJob {
 
 		match task {
 			AnalyzeMediaTask::UpdatePageCount(id) => {
-				task_analyze_dimensions::execute(id, ctx, &mut output).await?
+				task_page_count::execute(id, ctx, &mut output).await?
 			},
 			AnalyzeMediaTask::AnalyzePageDimensions(id) => {
-				task_page_count::execute(id, ctx, &mut output).await?
+				task_analyze_dimensions::execute(id, ctx, &mut output).await?
 			},
 			AnalyzeMediaTask::FullAnalysis(id) => {
 				// First page count needs to be updated
-				task_analyze_dimensions::execute(id.clone(), ctx, &mut output).await?;
+				task_page_count::execute(id.clone(), ctx, &mut output).await?;
 				// Then we can queue a dimensions analysis job
 				subtasks.push(AnalyzeMediaTask::AnalyzePageDimensions(id));
 			},

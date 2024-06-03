@@ -19,8 +19,8 @@ use stump_core::{
 	config::StumpConfig,
 	db::{
 		entity::{
-			LibraryOptions, Media, PageResolutions, ReadProgress, Resolution, User,
-			UserPermission,
+			LibraryOptions, Media, PageDimension, PageDimensionsEntity, ReadProgress,
+			User, UserPermission,
 		},
 		query::pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
 		CountQueryReturn,
@@ -1614,12 +1614,12 @@ async fn get_media_dimensions(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> APIResult<Json<Vec<Resolution>>> {
+) -> APIResult<Json<Vec<PageDimension>>> {
 	// Fetch the media item in question from the database while enforcing permissions
-	let page_resolutions =
-		fetch_media_page_resolutions_with_permissions(&ctx, &session, id).await?;
+	let dimensions_entity =
+		fetch_media_page_dimensions_with_permissions(&ctx, &session, id).await?;
 
-	Ok(Json(page_resolutions.resolutions))
+	Ok(Json(dimensions_entity.dimensions))
 }
 
 #[utoipa::path(
@@ -1642,29 +1642,29 @@ async fn get_media_page_dimensions(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> APIResult<Json<Resolution>> {
+) -> APIResult<Json<PageDimension>> {
 	// Fetch the media item in question from the database while enforcing permissions
-	let resolutions =
-		fetch_media_page_resolutions_with_permissions(&ctx, &session, id).await?;
+	let dimensions_entity =
+		fetch_media_page_dimensions_with_permissions(&ctx, &session, id).await?;
 
 	// Get the specific page or 404
-	let page_resolution =
-		resolutions
-			.resolutions
+	let dimensions_entity =
+		dimensions_entity
+			.dimensions
 			.get(page as usize)
 			.ok_or(APIError::NotFound(format!(
-				"No page resolutions for page: {}",
+				"No page dimensions for page: {}",
 				page
 			)))?;
 
-	Ok(Json(page_resolution.to_owned()))
+	Ok(Json(dimensions_entity.to_owned()))
 }
 
-async fn fetch_media_page_resolutions_with_permissions(
+async fn fetch_media_page_dimensions_with_permissions(
 	ctx: &Arc<Ctx>,
 	session: &Session,
 	id: String,
-) -> APIResult<PageResolutions> {
+) -> APIResult<PageDimensionsEntity> {
 	// First get user permissions/age restrictions
 	let user = enforce_session_permissions(session, &[UserPermission::ManageLibrary])?;
 	let age_restrictions = user
@@ -1686,22 +1686,22 @@ async fn fetch_media_page_resolutions_with_permissions(
 		.db
 		.media()
 		.find_first(where_params)
-		.with(media::metadata::fetch().with(media_metadata::page_resolutions::fetch()))
+		.with(media::metadata::fetch().with(media_metadata::page_dimensions::fetch()))
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound(String::from("Media not found")))?
 		.into();
 
-	// Then pull off the page resolutions if available
-	let page_resolutions = media
+	// Then pull off the page dimensions if available
+	let dimensions_entity = media
 		.metadata
 		.ok_or(APIError::NotFound(
 			"Media did not have metadata".to_string(),
 		))?
-		.page_resolutions
+		.page_dimensions
 		.ok_or(APIError::NotFound(
 			"Media metadata did not page resolutions".to_string(),
 		))?;
 
-	Ok(page_resolutions)
+	Ok(dimensions_entity)
 }

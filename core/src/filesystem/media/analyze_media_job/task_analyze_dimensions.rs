@@ -1,16 +1,16 @@
 use image::GenericImageView;
 
 use crate::{
-	db::entity::resolution::{resolution_vec_to_string, Resolution},
+	db::entity::page_dimension::{dimension_vec_to_string, PageDimension},
 	filesystem::{
 		analyze_media_job::{
-			utils::{fetch_media_with_resolutions, into_image_format},
+			utils::{fetch_media_with_dimensions, into_image_format},
 			AnalyzeMediaOutput,
 		},
 		media::process::get_page,
 	},
 	job::{error::JobError, WorkerCtx},
-	prisma::{media_metadata, page_resolutions},
+	prisma::{media_metadata, page_dimensions},
 };
 
 /// The logic for [AnalyzeMediaTask::AnalyzePageDimensions].
@@ -28,7 +28,7 @@ pub(crate) async fn execute(
 	output: &mut AnalyzeMediaOutput,
 ) -> Result<(), JobError> {
 	// Get media by id from the database
-	let media_item = fetch_media_with_resolutions(&id, ctx).await?;
+	let media_item = fetch_media_with_dimensions(&id, ctx).await?;
 
 	// Get metadata if present
 	let metadata = media_item.metadata.ok_or_else(|| {
@@ -47,7 +47,8 @@ pub(crate) async fn execute(
 	})?;
 
 	// Iterate over each page, checking the image's dimensions
-	let mut image_dimensions: Vec<Resolution> = Vec::with_capacity(page_count as usize);
+	let mut image_dimensions: Vec<PageDimension> =
+		Vec::with_capacity(page_count as usize);
 	for page_num in 1..=page_count {
 		let (content_type, page_data) =
 			get_page(&media_item.path, page_num, &ctx.config)?;
@@ -62,38 +63,38 @@ pub(crate) async fn execute(
 				})?
 				.dimensions();
 
-		image_dimensions.push(Resolution { height, width });
+		image_dimensions.push(PageDimension { height, width });
 		output.image_dimensions_analyzed += 1;
 	}
 
 	// Update stored page count
-	// Check if resolutions are stored already or not yet stored
-	if let Some(current_resolutions) = metadata.page_resolutions {
-		// There are already resolutions, we only need to update them if there's a mismatch
-		if current_resolutions.resolutions != image_dimensions {
-			// Serialize collected resolutions
-			let resolutions_str = resolution_vec_to_string(image_dimensions);
+	// Check if dimensions are stored already or not yet stored
+	if let Some(current_dimensions) = metadata.page_dimensions {
+		// There are already dimensions, we only need to update them if there's a mismatch
+		if current_dimensions.dimensions != image_dimensions {
+			// Serialize collected dimensions
+			let dimensions_str = dimension_vec_to_string(image_dimensions);
 
 			ctx.db
-				.page_resolutions()
+				.page_dimensions()
 				.update(
-					page_resolutions::id::equals(current_resolutions.id),
-					vec![page_resolutions::resolutions::set(resolutions_str)],
+					page_dimensions::id::equals(current_dimensions.id),
+					vec![page_dimensions::dimensions::set(dimensions_str)],
 				)
 				.exec()
 				.await?;
 		}
 	} else {
-		// There is no resolution data, we need to create a new database object for them
-		// Serialize collected resolutions
-		let resolutions_str = resolution_vec_to_string(image_dimensions);
+		// There is no dimensions data, we need to create a new database object for them
+		// Serialize collected dimensions
+		let dimensions_str = dimension_vec_to_string(image_dimensions);
 
-		// Create a new resolution database object
-		let resolutions_entity = ctx
+		// Create a new dimensions database object
+		let dimensions_entity = ctx
 			.db
-			.page_resolutions()
+			.page_dimensions()
 			.create(
-				resolutions_str,
+				dimensions_str,
 				media_metadata::id::equals(metadata.id.clone()),
 				vec![],
 			)
@@ -105,8 +106,8 @@ pub(crate) async fn execute(
 			.media_metadata()
 			.update(
 				media_metadata::id::equals(metadata.id),
-				vec![media_metadata::page_resolutions::connect(
-					page_resolutions::id::equals(resolutions_entity.id),
+				vec![media_metadata::page_dimensions::connect(
+					page_dimensions::id::equals(dimensions_entity.id),
 				)],
 			)
 			.exec()

@@ -5,8 +5,7 @@ use crate::{
 	prisma::{media, media_metadata},
 };
 
-/// A helper function to fetch a media item by its [MediaID], including fetching the metadata
-/// for the media item.
+/// A utility function for fetching media by its [MediaID] with metadata (but not page dimensions) loaded.
 pub async fn fetch_media_with_metadata(
 	id: &MediaID,
 	ctx: &WorkerCtx,
@@ -27,7 +26,8 @@ pub async fn fetch_media_with_metadata(
 	Ok(media_item)
 }
 
-pub async fn fetch_media_with_resolutions(
+/// A utility function for fetching media by its [MediaID] with metadata and page dimensions loaded.
+pub async fn fetch_media_with_dimensions(
 	id: &MediaID,
 	ctx: &WorkerCtx,
 ) -> Result<Media, JobError> {
@@ -35,7 +35,7 @@ pub async fn fetch_media_with_resolutions(
 		.db
 		.media()
 		.find_unique(media::id::equals(id.clone()))
-		.with(media::metadata::fetch().with(media_metadata::page_resolutions::fetch()))
+		.with(media::metadata::fetch().with(media_metadata::page_dimensions::fetch()))
 		.exec()
 		.await
 		.map_err(|e: prisma_client_rust::QueryError| JobError::TaskFailed(e.to_string()))?

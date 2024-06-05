@@ -1,3 +1,13 @@
+//! This module defines structures for storing and retrieving page dimensions data. The
+//! two primary stuctures defined here are [PageDimension], which represents a pair of
+//! page dimensions (height, width), and [PageDimensionsEntity], which is the rust
+//! representation of a database row in the `page_dimensions` table.
+//!
+//! In addition to defining data structures, this module includes a simple compression
+//! algorithm for storing and retrieving [Vec]<[PageDimension]s. The [dimension_vec_to_string]
+//! and [dimension_vec_from_str] methods can be used for serializing and deserializing this
+//! structure
+
 use serde::{Deserialize, Serialize};
 
 use std::str::FromStr;

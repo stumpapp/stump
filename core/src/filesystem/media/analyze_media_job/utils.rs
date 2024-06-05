@@ -1,6 +1,6 @@
 use crate::{
 	db::entity::Media,
-	filesystem::{analyze_media_job::MediaID, ContentType},
+	filesystem::analyze_media_job::MediaID,
 	job::{error::JobError, WorkerCtx},
 	prisma::{media, media_metadata},
 };
@@ -45,21 +45,4 @@ pub async fn fetch_media_with_dimensions(
 		.into();
 
 	Ok(media_item)
-}
-
-/// Convert a ContentType into an [image::ImageFormat], returning an error if the type
-/// isn't compatible with the [image] crate.
-pub fn into_image_format(
-	content_type: ContentType,
-) -> Result<image::ImageFormat, JobError> {
-	match content_type {
-		ContentType::PNG => Ok(image::ImageFormat::Png),
-		ContentType::JPEG => Ok(image::ImageFormat::Jpeg),
-		ContentType::WEBP => Ok(image::ImageFormat::WebP),
-		ContentType::GIF => Ok(image::ImageFormat::Gif),
-		_ => Err(JobError::TaskFailed(format!(
-			"Unsupported image format: {}",
-			content_type
-		))),
-	}
 }

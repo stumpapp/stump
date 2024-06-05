@@ -3,10 +3,7 @@ use image::GenericImageView;
 use crate::{
 	db::entity::page_dimension::{dimension_vec_to_string, PageDimension},
 	filesystem::{
-		analyze_media_job::{
-			utils::{fetch_media_with_dimensions, into_image_format},
-			AnalyzeMediaOutput,
-		},
+		analyze_media_job::{utils::fetch_media_with_dimensions, AnalyzeMediaOutput},
 		media::process::get_page,
 	},
 	job::{error::JobError, WorkerCtx},
@@ -53,7 +50,7 @@ pub(crate) async fn execute(
 		let (content_type, page_data) =
 			get_page(&media_item.path, page_num, &ctx.config)?;
 		// Confirm that content_type is compatible with the image crate
-		let image_format = into_image_format(content_type)?;
+		let image_format = content_type.try_into()?;
 
 		// Open image with image crate and extract dimensions
 		let (height, width) =

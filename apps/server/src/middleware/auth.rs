@@ -159,7 +159,7 @@ async fn handle_basic_auth(
 			username = &user.username,
 			"Basic authentication sucessful. Creating session for user"
 		);
-		enforce_max_sessions(&user, &client).await.map_err(|e| {
+		enforce_max_sessions(&user, client).await.map_err(|e| {
 			tracing::error!("Failed to enforce max sessions: {}", e);
 			(StatusCode::INTERNAL_SERVER_ERROR).into_response()
 		})?;

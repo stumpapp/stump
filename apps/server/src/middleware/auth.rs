@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use axum::{
 	body::BoxBody,
-	extract::{FromRef, FromRequestParts},
+	extract::{FromRef, FromRequestParts, OriginalUri},
 	http::{header, request::Parts, Method, StatusCode},
 	response::{IntoResponse, Redirect, Response},
 };
@@ -18,6 +18,7 @@ use tower_sessions::Session;
 
 use crate::{
 	config::{session::SESSION_USER_KEY, state::AppState},
+	routers::enforce_max_sessions,
 	utils::{decode_base64_credentials, verify_password},
 };
 
@@ -63,17 +64,24 @@ where
 				return Ok(Self);
 			}
 		} else {
-			tracing::trace!("No session found, checking for auth header");
+			tracing::trace!("No existing session found");
 		}
+
+		let request_uri =
+			if let Ok(path) = OriginalUri::from_request_parts(parts, &state).await {
+				path.0.path().to_owned()
+			} else {
+				parts.uri.path().to_owned()
+			};
+		let is_opds = request_uri.starts_with("/opds");
+		let is_swagger = request_uri.starts_with("/swagger-ui");
 
 		let auth_header = parts
 			.headers
 			.get(header::AUTHORIZATION)
 			.and_then(|value| value.to_str().ok());
-
-		let is_opds = parts.uri.path().starts_with("/opds");
-		let is_swagger = parts.uri.path().starts_with("/swagger-ui");
 		let has_auth_header = auth_header.is_some();
+
 		tracing::trace!(is_opds, has_auth_header, uri = ?parts.uri, "Checking auth header");
 
 		let Some(auth_header) = auth_header else {
@@ -139,6 +147,7 @@ async fn handle_basic_auth(
 	let is_match = verify_password(&user.hashed_password, &decoded_credentials.password)
 		.map_err(|e| e.into_response())?;
 
+	// TODO: restrict session count here
 	if is_match && user.is_locked {
 		tracing::error!(
 			username = &user.username,
@@ -150,6 +159,10 @@ async fn handle_basic_auth(
 			username = &user.username,
 			"Basic authentication sucessful. Creating session for user"
 		);
+		enforce_max_sessions(&user, client).await.map_err(|e| {
+			tracing::error!("Failed to enforce max sessions: {}", e);
+			(StatusCode::INTERNAL_SERVER_ERROR).into_response()
+		})?;
 		let user = User::from(user);
 		session.insert(SESSION_USER_KEY, user).map_err(|e| {
 			tracing::error!("Failed to insert user into session: {}", e);

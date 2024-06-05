@@ -66,14 +66,14 @@ pub struct AnalyzeMediaJob {
 }
 
 impl AnalyzeMediaJob {
-	/// Create a new [AnalyzeMediaJob] for the media specified by `id`.
+	/// Create a new [AnalyzeMediaJob] for the media specified by `media_id`.
 	pub fn analyze_media_item(media_id: String) -> Box<WrappedJob<AnalyzeMediaJob>> {
 		WrappedJob::new(Self {
 			variant: AnalyzeMediaJobVariant::AnalyzeSingleItem(media_id),
 		})
 	}
 
-	/// Create a new [AnalyzeMediaJob] for the group of `id`s specified.
+	/// Create a new [AnalyzeMediaJob] for the `group_ids`s specified.
 	pub fn analyze_media_group(
 		group_ids: Vec<String>,
 	) -> Box<WrappedJob<AnalyzeMediaJob>> {
@@ -82,14 +82,14 @@ impl AnalyzeMediaJob {
 		})
 	}
 
-	/// Create a new [AnalyzeMediaJob] for the library specified by `id`.
+	/// Create a new [AnalyzeMediaJob] for the library specified by `library_id`.
 	pub fn analyze_library(library_id: String) -> Box<WrappedJob<AnalyzeMediaJob>> {
 		WrappedJob::new(Self {
 			variant: AnalyzeMediaJobVariant::AnalyzeLibrary(library_id),
 		})
 	}
 
-	/// Create a new [AnalyzeMediaJob] for the series specified by `id`.
+	/// Create a new [AnalyzeMediaJob] for the series specified by `series_id`.
 	pub fn analyze_series(series_id: String) -> Box<WrappedJob<AnalyzeMediaJob>> {
 		WrappedJob::new(Self {
 			variant: AnalyzeMediaJobVariant::AnalyzeSeries(series_id),

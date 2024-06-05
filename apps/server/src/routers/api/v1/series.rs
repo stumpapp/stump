@@ -19,7 +19,7 @@ use stump_core::{
 		PrismaCountTrait, SeriesDAO, DAO,
 	},
 	filesystem::{
-		analyze_media_job::{AnalyzeMediaJob, AnalyzeMediaJobVariant},
+		analyze_media_job::AnalyzeMediaJob,
 		get_unknown_thumnail,
 		image::{
 			generate_thumbnail, place_thumbnail, remove_thumbnails, ImageFormat,
@@ -1085,14 +1085,12 @@ async fn start_media_analysis(
 	let _ = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
 
 	// Start analysis job
-	ctx.enqueue_job(AnalyzeMediaJob::new(AnalyzeMediaJobVariant::AnalyzeSeries(
-		id,
-	)))
-	.map_err(|e| {
-		let err = "Failed to enqueue analyze series media job";
-		error!(?e, err);
-		APIError::InternalServerError(err.to_string())
-	})?;
+	ctx.enqueue_job(AnalyzeMediaJob::analyze_series(id))
+		.map_err(|e| {
+			let err = "Failed to enqueue analyze series media job";
+			error!(?e, err);
+			APIError::InternalServerError(err.to_string())
+		})?;
 
 	APIResult::Ok(())
 }

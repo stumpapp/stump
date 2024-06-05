@@ -67,8 +67,33 @@ pub struct AnalyzeMediaJob {
 
 impl AnalyzeMediaJob {
 	/// Create a new [AnalyzeMediaJob] for the media specified by `id`.
-	pub fn new(variant: AnalyzeMediaJobVariant) -> Box<WrappedJob<AnalyzeMediaJob>> {
-		WrappedJob::new(Self { variant })
+	pub fn analyze_media_item(media_id: String) -> Box<WrappedJob<AnalyzeMediaJob>> {
+		WrappedJob::new(Self {
+			variant: AnalyzeMediaJobVariant::AnalyzeSingleItem(media_id),
+		})
+	}
+
+	/// Create a new [AnalyzeMediaJob] for the group of `id`s specified.
+	pub fn analyze_media_group(
+		group_ids: Vec<String>,
+	) -> Box<WrappedJob<AnalyzeMediaJob>> {
+		WrappedJob::new(Self {
+			variant: AnalyzeMediaJobVariant::AnalyzeMediaGroup(group_ids),
+		})
+	}
+
+	/// Create a new [AnalyzeMediaJob] for the library specified by `id`.
+	pub fn analyze_library(library_id: String) -> Box<WrappedJob<AnalyzeMediaJob>> {
+		WrappedJob::new(Self {
+			variant: AnalyzeMediaJobVariant::AnalyzeLibrary(library_id),
+		})
+	}
+
+	/// Create a new [AnalyzeMediaJob] for the series specified by `id`.
+	pub fn analyze_series(series_id: String) -> Box<WrappedJob<AnalyzeMediaJob>> {
+		WrappedJob::new(Self {
+			variant: AnalyzeMediaJobVariant::AnalyzeSeries(series_id),
+		})
 	}
 }
 
@@ -163,7 +188,6 @@ impl JobExt for AnalyzeMediaJob {
 		task: Self::Task,
 	) -> Result<JobTaskOutput<Self>, JobError> {
 		let mut output = Self::Output::default();
-		let mut subtasks = Vec::new();
 
 		match task {
 			AnalyzeMediaTask::UpdatePageCount(id) => {
@@ -175,14 +199,14 @@ impl JobExt for AnalyzeMediaJob {
 			AnalyzeMediaTask::FullAnalysis(id) => {
 				// First page count needs to be updated
 				task_page_count::execute(id.clone(), ctx, &mut output).await?;
-				// Then we can queue a dimensions analysis job
-				subtasks.push(AnalyzeMediaTask::AnalyzePageDimensions(id));
+				// Then we can do the dimensions analysis
+				task_analyze_dimensions::execute(id, ctx, &mut output).await?
 			},
 		}
 
 		Ok(JobTaskOutput {
 			output,
-			subtasks,
+			subtasks: vec![],
 			logs: vec![],
 		})
 	}

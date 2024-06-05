@@ -26,7 +26,7 @@ use stump_core::{
 		CountQueryReturn,
 	},
 	filesystem::{
-		analyze_media_job::{AnalyzeMediaJob, AnalyzeMediaJobVariant},
+		analyze_media_job::AnalyzeMediaJob,
 		get_unknown_thumnail,
 		image::{
 			generate_thumbnail, place_thumbnail, remove_thumbnails, ImageFormat,
@@ -1583,14 +1583,12 @@ async fn start_media_analysis(
 	let _ = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
 
 	// Start analysis job
-	ctx.enqueue_job(AnalyzeMediaJob::new(
-		AnalyzeMediaJobVariant::AnalyzeSingleItem(id),
-	))
-	.map_err(|e| {
-		let err = "Failed to enqueue analyze media job";
-		error!(?e, err);
-		APIError::InternalServerError(err.to_string())
-	})?;
+	ctx.enqueue_job(AnalyzeMediaJob::analyze_media_item(id))
+		.map_err(|e| {
+			let err = "Failed to enqueue analyze media job";
+			error!(?e, err);
+			APIError::InternalServerError(err.to_string())
+		})?;
 
 	APIResult::Ok(())
 }

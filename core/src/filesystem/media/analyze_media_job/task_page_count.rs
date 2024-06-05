@@ -7,7 +7,7 @@ use crate::{
 	prisma::{media, media_metadata},
 };
 
-/// The logic for [AnalyzeMediaTask::UpdatePageCount].
+/// The logic for [super::AnalyzeMediaTask::UpdatePageCount].
 ///
 /// Determines the page count for media using media processor [get_page_count] function, then
 /// performs one of:

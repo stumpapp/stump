@@ -13,7 +13,7 @@ use crate::{
 	prisma::{media_metadata, page_dimensions},
 };
 
-/// The logic for [AnalyzeMediaTask::AnalyzePageDimensions].
+/// The logic for [super::AnalyzeMediaTask::AnalyzePageDimensions].
 ///
 /// Reads each page of the media item and determines its dimensions then writes them to
 /// the database.

@@ -9,6 +9,8 @@ mod sse;
 mod utoipa;
 mod ws;
 
+pub(crate) use api::v1::auth::enforce_max_sessions;
+
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	let mut app_router = Router::new();
 

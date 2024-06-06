@@ -15,6 +15,7 @@ rust-version = "1.77.2"
 async-trait = "0.1.80"
 async-stream = "0.3.5"
 bcrypt = "0.15.1"
+derive_builder = "0.20.0"
 futures = "0.3.30"
 futures-util = "0.3.30"
 lettre = { version = "0.11.4", default-features = false, features = [

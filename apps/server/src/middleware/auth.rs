@@ -25,6 +25,7 @@ use crate::{
 pub struct Auth;
 
 // TODO: Change Response to APIResultResponse
+// TODO: create a new extractor like UserExtractor which supports both session auth and future alternative auth methods (e.g. JWT)
 
 #[async_trait]
 impl<S> FromRequestParts<S> for Auth

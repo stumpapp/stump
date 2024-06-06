@@ -21,8 +21,8 @@ pub struct OPDSPaginationMetadata {
 }
 
 /// Metadata for an OPDS 2.0 feed or collection
-#[skip_serializing_none]
 #[derive(Debug, Clone, Builder, Serialize, Deserialize)]
+#[skip_serializing_none]
 #[builder(build_fn(error = "crate::CoreError"), default, setter(into))]
 #[serde(rename_all = "camelCase")]
 pub struct OPDSMetadata {

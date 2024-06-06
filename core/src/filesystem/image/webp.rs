@@ -1,6 +1,6 @@
 use std::fs;
 
-use image::{imageops, io::Reader, DynamicImage, EncodableLayout, GenericImageView};
+use image::{imageops, DynamicImage, EncodableLayout, GenericImageView};
 use webp::Encoder;
 
 use crate::filesystem::{error::FileError, image::process::resized_dimensions};
@@ -60,7 +60,7 @@ impl WebpProcessor {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::filesystem::image::ImageFormat;
+	use crate::filesystem::image::{ImageFormat, ImageProcessorOptions, ImageResizeMode};
 	use std::{fs, path::PathBuf};
 
 	#[test]
@@ -73,8 +73,7 @@ mod tests {
 			page: None,
 		};
 
-		let image_processor = WebpProcessor::generate(&bytes, options);
-		assert!(image_processor.is_ok());
+		WebpProcessor::generate(&bytes, options).unwrap();
 	}
 
 	#[test]
@@ -87,8 +86,24 @@ mod tests {
 			page: None,
 		};
 
-		let image_processor =
-			WebpProcessor::generate_from_path(&webp_path, options).unwrap();
+		WebpProcessor::generate_from_path(&webp_path, options).unwrap();
+	}
+
+	#[test]
+	fn test_resize_webp() {
+		let webp_path = get_test_webp_path();
+		let options = ImageProcessorOptions {
+			resize_options: Some(ImageResizeOptions {
+				mode: ImageResizeMode::Scaled,
+				height: 2.0,
+				width: 2.0,
+			}),
+			format: ImageFormat::Webp,
+			quality: None,
+			page: None,
+		};
+
+		WebpProcessor::generate_from_path(&webp_path, options).unwrap();
 	}
 
 	fn get_test_webp_path() -> String {

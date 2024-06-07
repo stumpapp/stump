@@ -6,6 +6,7 @@ pub mod feed;
 pub mod group;
 pub mod link;
 pub mod metadata;
+pub mod properties;
 mod utils;
 
 pub use utils::ArrayOrItem;

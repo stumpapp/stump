@@ -27,6 +27,8 @@ pub enum OPDSLinkRel {
 	Previous,
 	First,
 	Last,
+	Help,
+	Logo,
 }
 
 impl OPDSLinkRel {
@@ -47,7 +49,7 @@ impl OPDSLinkRel {
 pub enum OPDSLinkType {
 	#[serde(rename = "application/opds+json")]
 	OpdsJson,
-	#[serde(rename = "application/opds-publication+json")]
+	#[serde(rename = "http://opds-spec.org/auth/document")]
 	OpdsAuth,
 	#[serde(rename = "image/jpeg")]
 	ImageJpeg,
@@ -136,6 +138,25 @@ pub enum OPDSLink {
 	Link(OPDSBaseLink),
 	Navigation(OPDSNavigationLink),
 	Image(OPDSImageLink),
+}
+
+impl OPDSLink {
+	pub fn help() -> Self {
+		Self::Link(OPDSBaseLink {
+			href: String::from("https://stumpapp.dev"),
+			rel: OPDSLinkRel::Help.item(),
+			..Default::default()
+		})
+	}
+
+	pub fn logo() -> Self {
+		// TODO: determine if relative paths work...
+		Self::Link(OPDSBaseLink {
+			href: String::from("/favicon.ico"),
+			rel: OPDSLinkRel::Logo.item(),
+			..Default::default()
+		})
+	}
 }
 
 impl From<library::Data> for OPDSNavigationLink {

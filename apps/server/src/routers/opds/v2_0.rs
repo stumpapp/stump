@@ -2,6 +2,10 @@ use axum::{
 	extract::State, middleware::from_extractor_with_state, routing::get, Json, Router,
 };
 use stump_core::opds::v2_0::{
+	authentication::{
+		OPDSAuthenticationDocument, OPDSAuthenticationDocumentBuilder,
+		OPDSSupportedAuthFlow,
+	},
 	feed::{OPDSFeed, OPDSFeedBuilder},
 	group::OPDSFeedGroupBuilder,
 	link::{
@@ -47,8 +51,21 @@ const DEFAULT_LIMIT: i64 = 10;
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
-		.nest("/v2.0", Router::new().route("/catalog", get(catalog)))
+		.nest(
+			"/v2.0",
+			Router::new()
+				.route("/auth", get(auth))
+				.route("/catalog", get(catalog)),
+		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+}
+
+async fn auth() -> APIResult<Json<OPDSAuthenticationDocument>> {
+	Ok(Json(
+		OPDSAuthenticationDocumentBuilder::default()
+			.description(OPDSSupportedAuthFlow::Basic.description().to_string())
+			.build()?,
+	))
 }
 
 async fn catalog(

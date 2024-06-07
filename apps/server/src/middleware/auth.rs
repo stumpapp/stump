@@ -4,6 +4,7 @@ use axum::{
 	extract::{FromRef, FromRequestParts, OriginalUri},
 	http::{header, request::Parts, Method, StatusCode},
 	response::{IntoResponse, Redirect, Response},
+	Json,
 };
 use base64::{engine::general_purpose::STANDARD, Engine};
 use prisma_client_rust::{
@@ -12,6 +13,10 @@ use prisma_client_rust::{
 };
 use stump_core::{
 	db::entity::{User, UserPermission},
+	opds::v2_0::authentication::{
+		OPDSAuthenticationDocumentBuilder, OPDSSupportedAuthFlow,
+		OPDS_AUTHENTICATION_DOCUMENT_REL, OPDS_AUTHENTICATION_DOCUMENT_TYPE,
+	},
 	prisma::{user, PrismaClient},
 };
 use tower_sessions::Session;
@@ -87,8 +92,12 @@ where
 
 		let Some(auth_header) = auth_header else {
 			if is_opds {
-				// Prompt for basic auth on OPDS routes
-				return Err(BasicAuth.into_response());
+				let opds_version = request_uri
+					.split('/')
+					.nth(2)
+					.map(|v| v.replace("v", ""))
+					.unwrap_or("1.2".to_string());
+				return Err(OPDSBasicAuth::new(opds_version).into_response());
 			} else if is_swagger {
 				// Sign in via React app and then redirect to server-side swagger-ui
 				return Err(Redirect::to("/auth?redirect=%2Fswagger-ui/").into_response());
@@ -234,6 +243,72 @@ where
 		}
 
 		return Err(StatusCode::UNAUTHORIZED);
+	}
+}
+
+pub struct OPDSBasicAuth {
+	version: String,
+}
+
+impl OPDSBasicAuth {
+	pub fn new(version: String) -> Self {
+		Self { version }
+	}
+}
+
+impl IntoResponse for OPDSBasicAuth {
+	fn into_response(self) -> Response {
+		if self.version == "2.0" {
+			// TODO: investigate whether there is a better way to do this than
+			// piggybacking off of the IntoResponse impl of Json...
+			let json_repsonse = Json(
+				OPDSAuthenticationDocumentBuilder::default()
+					.description(OPDSSupportedAuthFlow::Basic.description().to_string())
+					.build()
+					.unwrap(),
+			)
+			.into_response();
+			let body = json_repsonse.into_body();
+			let body = BoxBody::from(body);
+
+			// TODO: determine if relative paths work...
+			Response::builder()
+				.status(StatusCode::UNAUTHORIZED)
+				.header("Authorization", "Basic")
+				.header(
+					"WWW-Authenticate",
+					format!("Basic realm=\"stump OPDS v{}\"", self.version),
+				)
+				.header(
+					"Content-Type",
+					format!("{OPDS_AUTHENTICATION_DOCUMENT_TYPE}; charset=utf-8"),
+				)
+				.header(
+					"Link",
+					format!(
+						"<{}>; rel=\"{OPDS_AUTHENTICATION_DOCUMENT_REL}\"; type=\"{OPDS_AUTHENTICATION_DOCUMENT_TYPE}\"",
+						"/opds/v2.0/auth"
+					),
+				)
+				.body(body)
+				.unwrap_or_else(|e| {
+					tracing::error!(error = ?e, "Failed to build response");
+					StatusCode::INTERNAL_SERVER_ERROR.into_response()
+				})
+		} else {
+			Response::builder()
+				.status(StatusCode::UNAUTHORIZED)
+				.header("Authorization", "Basic")
+				.header(
+					"WWW-Authenticate",
+					format!("Basic realm=\"stump OPDS v{}\"", self.version),
+				)
+				.body(BoxBody::default())
+				.unwrap_or_else(|e| {
+					tracing::error!(error = ?e, "Failed to build response");
+					StatusCode::INTERNAL_SERVER_ERROR.into_response()
+				})
+		}
 	}
 }
 

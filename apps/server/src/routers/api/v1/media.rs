@@ -1646,7 +1646,7 @@ async fn get_media_page_dimensions(
 		fetch_media_page_dimensions_with_permissions(&ctx, &session, id).await?;
 
 	// Get the specific page or 404
-	let dimensions_entity =
+	let page_dimension =
 		dimensions_entity
 			.dimensions
 			.get(page as usize)
@@ -1655,7 +1655,7 @@ async fn get_media_page_dimensions(
 				page
 			)))?;
 
-	Ok(Json(dimensions_entity.to_owned()))
+	Ok(Json(page_dimension.to_owned()))
 }
 
 async fn fetch_media_page_dimensions_with_permissions(

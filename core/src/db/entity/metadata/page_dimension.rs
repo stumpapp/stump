@@ -19,7 +19,7 @@ use thiserror::Error;
 use crate::prisma::page_dimensions;
 
 #[derive(Error, Debug)]
-pub enum PageDimensionError {
+pub enum PageDimensionParserError {
 	#[error("Error parsing {0}, expected height and width")]
 	ExpectedHeightWidth(String),
 	#[error("Error parsing {0}, malformed run syntax")]
@@ -78,7 +78,7 @@ impl ToString for PageDimension {
 }
 
 impl FromStr for PageDimension {
-	type Err = PageDimensionError;
+	type Err = PageDimensionParserError;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		// Trim leading/trailing whitespace
@@ -87,18 +87,12 @@ impl FromStr for PageDimension {
 		// Check for correct layout
 		let dims = s.split(",").collect::<Vec<_>>();
 		if dims.len() != 2 {
-			return Err(PageDimensionError::ExpectedHeightWidth(s.to_string()));
+			return Err(PageDimensionParserError::ExpectedHeightWidth(s.to_string()));
 		}
 
 		// Parse values
-		let height = dims[0]
-			.trim()
-			.parse::<u32>()
-			.map_err(PageDimensionError::ErrorParsingInt)?;
-		let width = dims[1]
-			.trim()
-			.parse::<u32>()
-			.map_err(PageDimensionError::ErrorParsingInt)?;
+		let height = dims[0].trim().parse::<u32>()?;
+		let width = dims[1].trim().parse::<u32>()?;
 
 		Ok(PageDimension { height, width })
 	}
@@ -158,7 +152,9 @@ pub fn dimension_vec_to_string(list: Vec<PageDimension>) -> String {
 /// The serialization uses comma-separation for height and width in [PageDimension], and semicolon-separation
 /// for each [PageDimension] object. Additionally, it uses a form of deduplication that encodes a run of n > 1
 /// [PageDimension]s as `"n>height,width"`. An empty vector serializes to `""`.
-pub fn dimension_vec_from_str(s: &str) -> Result<Vec<PageDimension>, PageDimensionError> {
+pub fn dimension_vec_from_str(
+	s: &str,
+) -> Result<Vec<PageDimension>, PageDimensionParserError> {
 	// Early return for an empty string
 	if s == "" {
 		return Ok(Vec::new());
@@ -181,7 +177,7 @@ pub fn dimension_vec_from_str(s: &str) -> Result<Vec<PageDimension>, PageDimensi
 
 				// Sanity check
 				if items.len() != 2 {
-					return Err(PageDimensionError::MalformedRunSyntax(
+					return Err(PageDimensionParserError::MalformedRunSyntax(
 						encoded_str.to_string(),
 					));
 				}

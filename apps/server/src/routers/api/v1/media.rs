@@ -1664,7 +1664,7 @@ async fn fetch_media_page_dimensions_with_permissions(
 	id: String,
 ) -> APIResult<PageDimensionsEntity> {
 	// First get user permissions/age restrictions
-	let user = enforce_session_permissions(session, &[UserPermission::ManageLibrary])?;
+	let user = get_session_user(&session)?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()

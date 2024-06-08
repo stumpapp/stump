@@ -197,6 +197,7 @@ impl JobExt for AnalyzeMediaJob {
 				task_analyze_dimensions::execute(id, ctx, &mut output).await?
 			},
 			AnalyzeMediaTask::FullAnalysis(id) => {
+				// TODO This is suboptimal because it buffers the file twice, this should be improved later.
 				// First page count needs to be updated
 				task_page_count::execute(id.clone(), ctx, &mut output).await?;
 				// Then we can do the dimensions analysis

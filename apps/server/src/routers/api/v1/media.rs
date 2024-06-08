@@ -1698,7 +1698,7 @@ async fn fetch_media_page_dimensions_with_permissions(
 		))?
 		.page_dimensions
 		.ok_or(APIError::NotFound(
-			"Media metadata did not page resolutions".to_string(),
+			"Media metadata does not have generated page dimensions. Run analysis to generate them.".to_string(),
 		))?;
 
 	Ok(dimensions_entity)

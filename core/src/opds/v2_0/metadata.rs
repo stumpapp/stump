@@ -3,7 +3,7 @@ use prisma_client_rust::chrono::Utc;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use super::link::OPDSLink;
+use super::{books_as_publications, link::OPDSLink};
 
 /// Pagination-specific metadata fields for an OPDS collection
 ///
@@ -21,20 +21,21 @@ pub struct OPDSPaginationMetadata {
 	current_page: Option<i64>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Builder, Serialize, Deserialize)]
+#[builder(build_fn(error = "crate::CoreError"), setter(into))]
 pub struct OPDSEntryBelongsToEntity {
 	/// The name of the entity the entry belongs to
 	name: String,
-	// TODO: This will require a custom SQL query, most likely using RANK?
 	/// The position of the entry within the entity, **1-indexed**.
 	///
 	/// For example, if the entry is the first book in a series, this field would be `1`.
-	position: i64,
+	position: Option<i64>,
 	/// A list of links to the entity, if available. This **should** include a link to the entity itself
 	/// within the catalog.
 	links: Vec<OPDSLink>,
 }
 
+// TODO: should this be ArrayOrItem<OPDSEntryBelongsToEntity> ?
 /// An enum representing the supported types of entities that an OPDS entry can belong to
 /// in Stump. All variants will use the same [`OPDSEntryBelongsToEntity`] struct - this
 /// is primarily a (de)serialization convenience to enforce allowed keys.
@@ -43,6 +44,23 @@ pub struct OPDSEntryBelongsToEntity {
 pub enum OPDSEntryBelongsTo {
 	Series(OPDSEntryBelongsToEntity),
 }
+
+impl From<(books_as_publications::series::Data, Option<i64>)> for OPDSEntryBelongsTo {
+	fn from(
+		(series, position): (books_as_publications::series::Data, Option<i64>),
+	) -> Self {
+		Self::Series(OPDSEntryBelongsToEntity {
+			name: series.name,
+			position,
+			// TODO: relative links might not work here which means traits will be largely annoying to work with
+			// I might just need to create a separate pattern for this
+			links: vec![],
+		})
+	}
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OPDSDynamicMetadata(pub serde_json::Value);
 
 /// Metadata for an OPDS 2.0 feed or collection
 #[derive(Debug, Clone, Builder, Serialize, Deserialize)]
@@ -56,8 +74,12 @@ pub struct OPDSMetadata {
 	modified: Option<String>,
 	/// A human-readable description, if available
 	description: Option<String>,
+	/// The entity that the feed or collection belongs to, if applicable
+	belongs_to: Option<OPDSEntryBelongsTo>,
 	#[serde(flatten)]
 	pagination: Option<OPDSPaginationMetadata>,
+	#[serde(flatten)]
+	dynamic_metadata: Option<OPDSDynamicMetadata>,
 }
 
 impl OPDSMetadata {
@@ -73,7 +95,9 @@ impl Default for OPDSMetadata {
 			title: String::new(),
 			modified: Some(Utc::now().to_rfc3339()),
 			description: None,
+			belongs_to: None,
 			pagination: None,
+			dynamic_metadata: None,
 		}
 	}
 }

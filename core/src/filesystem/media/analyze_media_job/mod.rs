@@ -33,7 +33,7 @@ pub enum AnalyzeMediaJobVariant {
 pub enum AnalyzeMediaTask {
 	/// Count the pages of a media item specified by an ID.
 	UpdatePageCount(MediaID),
-	/// Analyze and store dimensions for each page ofa  media item specified by an ID.
+	/// Analyze and store dimensions for each page of a media item specified by an ID.
 	AnalyzePageDimensions(MediaID),
 	/// Performs both [UpdatePageCount] and then [AnalyzePageDimensions] in sequence for
 	/// the media item specified by an ID.

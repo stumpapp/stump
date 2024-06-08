@@ -131,7 +131,7 @@ export type Series = { id: string; name: string; path: string; description: stri
 /**
  * Struct representing the metadata for a processed file.
  */
-export type MediaMetadata = { title: string | null; series: string | null; number: number | null; volume: number | null; summary: string | null; notes: string | null; age_rating?: number | null; genre?: string[] | null; year: number | null; month: number | null; day: number | null; writers?: string[] | null; pencillers?: string[] | null; inkers?: string[] | null; colorists?: string[] | null; letterers?: string[] | null; cover_artists?: string[] | null; editors?: string[] | null; publisher: string | null; links?: string[] | null; characters?: string[] | null; teams?: string[] | null; page_count: number | null }
+export type MediaMetadata = { title: string | null; series: string | null; number: number | null; volume: number | null; summary: string | null; notes: string | null; age_rating?: number | null; genre?: string[] | null; year: number | null; month: number | null; day: number | null; writers?: string[] | null; pencillers?: string[] | null; inkers?: string[] | null; colorists?: string[] | null; letterers?: string[] | null; cover_artists?: string[] | null; editors?: string[] | null; publisher: string | null; links?: string[] | null; characters?: string[] | null; teams?: string[] | null; page_count: number | null; page_dimensions?: PageDimensionsEntity | null }
 
 export type Media = { id: string; name: string; size: BigInt; extension: string; pages: number; updated_at: string; created_at: string; modified_at: string | null; hash: string | null; path: string; status: FileStatus; series_id: string; metadata: MediaMetadata | null; series?: Series | null; read_progresses?: ReadProgress[] | null; current_page?: number | null; current_epubcfi?: string | null; is_completed?: boolean | null; tags?: Tag[] | null; bookmarks?: Bookmark[] | null }
 
@@ -144,6 +144,20 @@ export type Bookmark = { id: string; preview_content: string | null; epubcfi: st
 export type MediaAnnotation = { id: string; highlighted_text: string | null; page: number | null; page_coordinates_x: number | null; page_coordinates_y: number | null; epubcfi: string | null; notes: string | null; media_id: string; media?: Media | null }
 
 export type ReadProgress = { id: string; page: number; epubcfi: string | null; percentage_completed: number | null; is_completed: boolean; completed_at: string | null; media_id: string; media: Media | null; user_id: string; user: User | null }
+
+/**
+ * Represents a page dimension for a page of a Stump media item. It consists of a
+ * height and a width.
+ */
+export type PageDimension = { height: number; width: number }
+
+/**
+ * Represents a database [page_dimensions::Data] object.
+ * 
+ * The `dimensions` member contains a [Vec]<[PageDimension]> containing the height and width
+ * of each page for the media attached to the metadata for this entity.
+ */
+export type PageDimensionsEntity = { id: string; dimensions: PageDimension[]; metadata_id: string }
 
 /**
  * A struct representing a sort order for a column using react-table (tanstack)

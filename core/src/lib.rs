@@ -354,6 +354,10 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<Bookmark>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<MediaAnnotation>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<ReadProgress>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<PageDimension>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<PageDimensionsEntity>()?).as_bytes(),
+		)?;
 
 		file.write_all(
 			format!("{}\n\n", ts_export::<ReactTableColumnSort>()?).as_bytes(),

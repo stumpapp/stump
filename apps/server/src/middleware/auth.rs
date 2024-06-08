@@ -8,24 +8,30 @@ use axum::{
 };
 use base64::{engine::general_purpose::STANDARD, Engine};
 use prisma_client_rust::{
+	chrono::Utc,
 	prisma_errors::query_engine::{RecordNotFound, UniqueKeyViolation},
 	QueryError,
 };
 use stump_core::{
 	db::entity::{User, UserPermission},
-	opds::v2_0::authentication::{
-		OPDSAuthenticationDocumentBuilder, OPDSSupportedAuthFlow,
-		OPDS_AUTHENTICATION_DOCUMENT_REL, OPDS_AUTHENTICATION_DOCUMENT_TYPE,
+	opds::v2_0::{
+		authentication::{
+			OPDSAuthenticationDocumentBuilder, OPDSSupportedAuthFlow,
+			OPDS_AUTHENTICATION_DOCUMENT_REL, OPDS_AUTHENTICATION_DOCUMENT_TYPE,
+		},
+		link::OPDSLink,
 	},
-	prisma::{user, PrismaClient},
+	prisma::{session, user, PrismaClient},
 };
 use tower_sessions::Session;
 
 use crate::{
 	config::{session::SESSION_USER_KEY, state::AppState},
-	routers::enforce_max_sessions,
+	routers::{enforce_max_sessions, relative_favicon_path},
 	utils::{decode_base64_credentials, verify_password},
 };
+
+use super::host::HostExtractor;
 
 pub struct Auth;
 
@@ -49,6 +55,14 @@ where
 		if parts.method == Method::OPTIONS {
 			return Ok(Self);
 		}
+
+		let host_details = HostExtractor::from_request_parts(parts, state)
+			.await
+			.map_err(|e| {
+				tracing::error!("Failed to extract host: {}", e);
+				(StatusCode::INTERNAL_SERVER_ERROR).into_response()
+			})?
+			.0;
 
 		let state = AppState::from_ref(state);
 
@@ -95,9 +109,12 @@ where
 				let opds_version = request_uri
 					.split('/')
 					.nth(2)
-					.map(|v| v.replace("v", ""))
+					.map(|v| v.replace('v', ""))
 					.unwrap_or("1.2".to_string());
-				return Err(OPDSBasicAuth::new(opds_version).into_response());
+
+				return Err(
+					OPDSBasicAuth::new(opds_version, host_details.url()).into_response()
+				);
 			} else if is_swagger {
 				// Sign in via React app and then redirect to server-side swagger-ui
 				return Err(Redirect::to("/auth?redirect=%2Fswagger-ui/").into_response());
@@ -142,6 +159,9 @@ async fn handle_basic_auth(
 		.find_unique(user::username::equals(decoded_credentials.username.clone()))
 		.with(user::user_preferences::fetch())
 		.with(user::age_restriction::fetch())
+		.with(user::sessions::fetch(vec![session::expires_at::gt(
+			Utc::now().into(),
+		)]))
 		.exec()
 		.await
 		.map_err(|e| map_prisma_error(e).into_response())?;
@@ -248,11 +268,15 @@ where
 
 pub struct OPDSBasicAuth {
 	version: String,
+	service_url: String,
 }
 
 impl OPDSBasicAuth {
-	pub fn new(version: String) -> Self {
-		Self { version }
+	pub fn new(version: String, service_url: String) -> Self {
+		Self {
+			version,
+			service_url,
+		}
 	}
 }
 
@@ -264,6 +288,14 @@ impl IntoResponse for OPDSBasicAuth {
 			let json_repsonse = Json(
 				OPDSAuthenticationDocumentBuilder::default()
 					.description(OPDSSupportedAuthFlow::Basic.description().to_string())
+					.links(vec![
+						OPDSLink::help(),
+						OPDSLink::logo(format!(
+							"{}{}",
+							self.service_url,
+							relative_favicon_path()
+						)),
+					])
 					.build()
 					.unwrap(),
 			)
@@ -286,7 +318,8 @@ impl IntoResponse for OPDSBasicAuth {
 				.header(
 					"Link",
 					format!(
-						"<{}>; rel=\"{OPDS_AUTHENTICATION_DOCUMENT_REL}\"; type=\"{OPDS_AUTHENTICATION_DOCUMENT_TYPE}\"",
+						"<{}{}>; rel=\"{OPDS_AUTHENTICATION_DOCUMENT_REL}\"; type=\"{OPDS_AUTHENTICATION_DOCUMENT_TYPE}\"",
+						self.service_url,
 						"/opds/v2.0/auth"
 					),
 				)

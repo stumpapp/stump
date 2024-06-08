@@ -28,6 +28,10 @@ pub struct OPDSAuthenticationDocument {
 	links: Option<Vec<OPDSLink>>,
 }
 
+// Note: The default implementation of OPDSAuthenticationDocument only contains
+// basic authentication. This is simply because Stump doesn't support any alternatives.
+// This should be revisited once Stump supports more authentication methods.
+
 impl Default for OPDSAuthenticationDocument {
 	fn default() -> Self {
 		Self {
@@ -35,7 +39,19 @@ impl Default for OPDSAuthenticationDocument {
 			authentication: vec![OPDSAuthenticationFlow::default()],
 			title: String::from("Stump OPDS V2 Auth"),
 			description: None,
-			links: Some(vec![OPDSLink::help(), OPDSLink::logo()]),
+			links: Some(vec![OPDSLink::help()]),
+		}
+	}
+}
+
+impl OPDSAuthenticationDocument {
+	/// A utility method for adding a logo link to the authentication document
+	pub fn with_logo(&self, href: String) -> Self {
+		let mut links = self.links.clone().unwrap_or_default();
+		links.push(OPDSLink::logo(href));
+		Self {
+			links: Some(links),
+			..self.clone()
 		}
 	}
 }
@@ -48,8 +64,6 @@ pub struct OPDSAuthenticationFlow {
 	/// A URI that identifies the nature of an Authentication Flow.
 	#[serde(rename = "type")]
 	_type: OPDSSupportedAuthFlow,
-	// /// The URI of the authentication flow
-	// uri: String,
 	/// A list of labels that can be used to provide alternate labels for fields that the client will display to the user.
 	labels: Option<OPDSAuthenticationLabels>,
 }
@@ -73,10 +87,13 @@ impl Default for OPDSAuthenticationFlow {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[skip_serializing_none]
 pub struct OPDSAuthenticationLabels {
+	/// A label for the login (username) field.
 	login: Option<String>,
+	/// A label for the password field.
 	password: Option<String>,
 }
 
+/// An enum representing the URI that identifies the nature of an Authentication Flow.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum OPDSSupportedAuthFlow {
 	#[serde(rename = "http://opds-spec.org/auth/basic")]

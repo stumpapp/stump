@@ -13,7 +13,9 @@ use super::{
 #[derive(Debug, Clone, Builder, Serialize, Deserialize)]
 #[builder(build_fn(error = "crate::CoreError"))]
 pub struct OPDSFeedGroup {
+	/// A list of links for the feed group
 	pub links: Vec<OPDSLink>,
+	/// A list of navigation links for the feed group
 	pub navigation: Vec<OPDSNavigationLink>,
 	// publications: Vec<Publication>,
 	pub metadata: OPDSMetadata,

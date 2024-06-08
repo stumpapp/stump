@@ -17,8 +17,12 @@ use stump_core::opds::v2_0::{
 use tower_sessions::Session;
 
 use crate::{
-	config::state::AppState, errors::APIResult, middleware::auth::Auth,
-	routers::api::v1::library::library_not_hidden_from_user_filter,
+	config::state::AppState,
+	errors::APIResult,
+	middleware::{auth::Auth, host::HostExtractor},
+	routers::{
+		api::v1::library::library_not_hidden_from_user_filter, relative_favicon_path,
+	},
 	utils::get_session_user,
 };
 
@@ -60,10 +64,16 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
-async fn auth() -> APIResult<Json<OPDSAuthenticationDocument>> {
+async fn auth(
+	HostExtractor(host): HostExtractor,
+) -> APIResult<Json<OPDSAuthenticationDocument>> {
 	Ok(Json(
 		OPDSAuthenticationDocumentBuilder::default()
 			.description(OPDSSupportedAuthFlow::Basic.description().to_string())
+			.links(vec![
+				OPDSLink::help(),
+				OPDSLink::logo(format!("{}{}", host.url(), relative_favicon_path())),
+			])
 			.build()?,
 	))
 }

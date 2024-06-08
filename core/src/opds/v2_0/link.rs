@@ -51,6 +51,8 @@ pub enum OPDSLinkType {
 	OpdsJson,
 	#[serde(rename = "http://opds-spec.org/auth/document")]
 	OpdsAuth,
+	#[serde(rename = "application/opds-publication+json")]
+	OpdsPublication,
 	#[serde(rename = "image/jpeg")]
 	ImageJpeg,
 	#[serde(rename = "image/png")]
@@ -149,10 +151,9 @@ impl OPDSLink {
 		})
 	}
 
-	pub fn logo() -> Self {
-		// TODO: determine if relative paths work...
+	pub fn logo(href: String) -> Self {
 		Self::Link(OPDSBaseLink {
-			href: String::from("/favicon.ico"),
+			href,
 			rel: OPDSLinkRel::Logo.item(),
 			..Default::default()
 		})

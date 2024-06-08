@@ -7,6 +7,7 @@ use super::link::OPDSLinkType;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OPDSDynamicProperties(serde_json::Value);
 
+/// A struct for representing properties of an OPDS feed or collection
 #[derive(Debug, Default, Builder, Clone, Serialize, Deserialize)]
 #[builder(build_fn(error = "crate::CoreError"), default, setter(into))]
 #[skip_serializing_none]

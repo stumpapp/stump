@@ -662,18 +662,18 @@
 		"server/email": {
 			"helmet": "Ustawienia e-mail",
 			"title": "Adres e-mail",
-			"description": "Settings related to the configuring an SMTP emailer for your Stump server instance",
+			"description": "Ustawienia powiązane z konfiguracją wysyłki SMTP tego serwera Stump",
 			"sections": {
 				"emailers": {
-					"title": "SMTP emailers",
+					"title": "Wysyłka SMTP",
 					"description": "Klienci, którzy zostali utworzeni w celu wysyłki wiadomości e-mail z Twojego serwera Stump",
 					"singleInstanceDisclaimer": "Na ten moment Stump wspiera ustawienie tylko jednego serwera SMTP z poziomu interfejsu użytkownika. Funkcjonalność ta zostanie rozwinięta w przyszłości",
 					"list": {
-						"emptyHeading": "No SMTP emailers configured",
-						"primaryEmailer": "Primary emailer",
+						"emptyHeading": "Brak skonfigurowanych ustawień wysyłki SMTP",
+						"primaryEmailer": "Domyślna wysyłka",
 						"sendHistory": {
 							"heading": "Historia wysyłki",
-							"description": "A record of emails sent from this emailer",
+							"description": "Histora e-maili wychodzących z tej wysyłki",
 							"table": {
 								"columns": {
 									"to": "Do",
@@ -683,7 +683,7 @@
 								}
 							},
 							"emptyHeading": "Bez historii",
-							"emptySubtitle": "The history of this emailer is empty. It has either not been used or the history has been cleared"
+							"emptySubtitle": "Historia tej wysyłki jest pusta. Została ona wyczyszczona bądź jeszcze z niej nie skorzystano"
 						}
 					}
 				},
@@ -698,7 +698,7 @@
 						},
 						"name": {
 							"label": "Nazwa",
-							"description": "Unikalna, przyjazna nazwa w celach identyfikacyjnych"
+							"description": "Przyjazna nazwa umożliwiająca unikalną identyfikację tego aliasu"
 						},
 						"email": {
 							"label": "Adres e-mail",
@@ -722,11 +722,11 @@
 			"createOrUpdateForm": {
 				"name": {
 					"label": "Nazwa",
-					"description": "A friendly name to uniquely identify this emailer"
+					"description": "Przyjazna nazwa umożliwiająca unikalną identyfikację tej wysyłki"
 				},
 				"smtpSettings": {
 					"heading": "Ustawienia SMTP",
-					"description": "The SMTP-specific settings for this emailer"
+					"description": "Ustawienia SMTP dla tej wysyłki"
 				},
 				"smtpProvider": {
 					"label": "Ustawienia dostawcy SMTP",
@@ -773,19 +773,19 @@
 					"description": "Maksymalny rozmiar załącznika w bajtach"
 				},
 				"submit": {
-					"create": "Create emailer",
-					"update": "Update emailer"
+					"create": "Utwórz nową wysyłkę",
+					"update": "Aktualizuj wysyłkę"
 				}
 			},
 			"createEmailer": {
-				"helmet": "Create emailer",
-				"title": "Create emailer",
-				"description": "Create a new SMTP emailer for your Stump server instance"
+				"helmet": "Utwórz nową wysyłkę",
+				"title": "Utwórz nową wysyłkę",
+				"description": "Stwórz nową wysyłkę SMTP tego serwera Stump"
 			},
 			"updateEmailer": {
-				"helmet": "Update emailer",
-				"title": "Update emailer",
-				"description": "Update the details of this SMTP emailer"
+				"helmet": "Aktualizuj wysyłkę",
+				"title": "Aktualizuj wysyłkę",
+				"description": "Aktualizuj delta tej wysyłki SMTP"
 			}
 		}
 	},

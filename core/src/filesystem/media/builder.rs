@@ -141,3 +141,58 @@ impl SeriesBuilder {
 		})
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::filesystem::media::tests::{
+		get_test_cbz_path, get_test_epub_path, get_test_pdf_path, get_test_rar_path,
+		get_test_zip_path,
+	};
+
+	#[test]
+	fn test_build_media() {
+		// Test with zip
+		let media = build_media_test_helper(get_test_zip_path());
+		assert!(media.is_ok());
+		let media = media.unwrap();
+		assert_eq!(media.extension, "zip");
+
+		// Test with cbz
+		let media = build_media_test_helper(get_test_cbz_path());
+		assert!(media.is_ok());
+		let media = media.unwrap();
+		assert_eq!(media.extension, "cbz");
+
+		// Test with rar
+		let media = build_media_test_helper(get_test_rar_path());
+		assert!(media.is_ok());
+		let media = media.unwrap();
+		assert_eq!(media.extension, "rar");
+
+		// Test with epub
+		let media = build_media_test_helper(get_test_epub_path());
+		assert!(media.is_ok());
+		let media = media.unwrap();
+		assert_eq!(media.extension, "epub");
+
+		// Test with pdf
+		let media = build_media_test_helper(get_test_pdf_path());
+		assert!(media.is_ok());
+		let media = media.unwrap();
+		assert_eq!(media.extension, "pdf");
+	}
+
+	fn build_media_test_helper(path: String) -> Result<Media, CoreError> {
+		let path = Path::new(&path);
+		let library_options = LibraryOptions {
+			convert_rar_to_zip: false,
+			hard_delete_conversions: false,
+			..Default::default()
+		};
+		let series_id = "series_id";
+		let config = Arc::new(StumpConfig::debug());
+
+		MediaBuilder::new(&path, series_id, library_options, &config).build()
+	}
+}

@@ -324,3 +324,69 @@ impl FileConverter for RarProcessor {
 		Ok(zip_path)
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::filesystem::media::tests::{get_test_rar_file_data, get_test_rar_path};
+
+	use std::fs;
+
+	#[test]
+	fn test_process() {
+		// Create temporary directory and place a copy of our mock book.rar in it
+		let tempdir = tempfile::tempdir().expect("Failed to create temporary directory");
+		let temp_rar_file_path = tempdir
+			.path()
+			.join("book.rar")
+			.to_string_lossy()
+			.to_string();
+		fs::write(&temp_rar_file_path, get_test_rar_file_data())
+			.expect("Failed to write temporary book.rar");
+		let config = StumpConfig::debug();
+
+		// We can test deletion since it's a temporary file
+		let processed_file = RarProcessor::process(
+			&temp_rar_file_path,
+			FileProcessorOptions {
+				convert_rar_to_zip: true,
+				delete_conversion_source: true,
+			},
+			&config,
+		);
+
+		// Assert that the operation succeeded
+		assert!(processed_file.is_ok());
+		// And that the original file was deleted
+		assert!(!Path::new(&temp_rar_file_path).exists())
+	}
+
+	#[test]
+	fn test_rar_to_zip() {
+		// Create temporary directory and place a copy of our mock book.rar in it
+		let tempdir = tempfile::tempdir().expect("Failed to create temporary directory");
+		let temp_rar_file_path = tempdir
+			.path()
+			.join("book.rar")
+			.to_string_lossy()
+			.to_string();
+		fs::write(&temp_rar_file_path, get_test_rar_file_data())
+			.expect("Failed to write temporary book.rar");
+		let config = StumpConfig::debug();
+
+		// We have a temporary file, so we may as well test deletion also
+		let zip_result = RarProcessor::to_zip(&temp_rar_file_path, true, None, &config);
+		// Assert that operation succeeded
+		assert!(zip_result.is_ok());
+		// And that the original file was deleted
+		assert!(!Path::new(&temp_rar_file_path).exists())
+	}
+
+	#[test]
+	fn test_get_page_content_types() {
+		let path = get_test_rar_path();
+
+		let content_types = RarProcessor::get_page_content_types(&path, vec![1]);
+		assert!(content_types.is_ok());
+	}
+}

@@ -226,3 +226,68 @@ fn get_zip_entry_content_type(
 
 	Ok((content_type, buf))
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::filesystem::media::tests::{get_test_cbz_path, get_test_zip_path};
+
+	#[test]
+	fn test_process() {
+		let path = get_test_zip_path();
+		let config = StumpConfig::debug();
+
+		let processed_file = ZipProcessor::process(
+			&path,
+			FileProcessorOptions {
+				convert_rar_to_zip: false,
+				delete_conversion_source: false,
+			},
+			&config,
+		);
+		assert!(processed_file.is_ok());
+	}
+
+	#[test]
+	fn test_process_cbz() {
+		let path = get_test_cbz_path();
+		let config = StumpConfig::debug();
+
+		let processed_file = ZipProcessor::process(
+			&path,
+			FileProcessorOptions {
+				convert_rar_to_zip: false,
+				delete_conversion_source: false,
+			},
+			&config,
+		);
+		assert!(processed_file.is_ok());
+	}
+
+	#[test]
+	fn test_get_page_cbz() {
+		// Note: This doesn't work with the other test book, because it has no pages.
+		let path = get_test_cbz_path();
+		let config = StumpConfig::debug();
+
+		let page = ZipProcessor::get_page(&path, 1, &config);
+		assert!(page.is_ok());
+	}
+
+	#[test]
+	fn test_get_page_content_types() {
+		let path = get_test_zip_path();
+
+		let content_types = ZipProcessor::get_page_content_types(&path, vec![1]);
+		assert!(content_types.is_ok());
+	}
+
+	#[test]
+	fn test_get_page_content_types_cbz() {
+		let path = get_test_cbz_path();
+
+		let content_types =
+			ZipProcessor::get_page_content_types(&path, vec![1, 2, 3, 4, 5]);
+		assert!(content_types.is_ok());
+	}
+}

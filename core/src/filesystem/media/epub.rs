@@ -366,3 +366,49 @@ pub(crate) fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {
 
 	PathBuf::from(adjusted_str)
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::filesystem::media::tests::get_test_epub_path;
+
+	#[test]
+	fn test_process() {
+		let path = get_test_epub_path();
+		let config = StumpConfig::debug();
+
+		let processed_file = EpubProcessor::process(
+			&path,
+			FileProcessorOptions {
+				convert_rar_to_zip: false,
+				delete_conversion_source: false,
+			},
+			&config,
+		);
+		assert!(processed_file.is_ok());
+	}
+
+	#[test]
+	fn test_get_page_content_types() {
+		let path = get_test_epub_path();
+
+		let cover = EpubProcessor::get_page_content_types(&path, vec![1]);
+		assert!(cover.is_ok());
+	}
+
+	#[test]
+	fn test_get_cover() {
+		let path = get_test_epub_path();
+
+		let cover = EpubProcessor::get_cover(&path);
+		assert!(cover.is_ok());
+	}
+
+	#[test]
+	fn test_get_chapter() {
+		let path = get_test_epub_path();
+
+		let chapter = EpubProcessor::get_chapter(&path, 1);
+		assert!(chapter.is_ok());
+	}
+}

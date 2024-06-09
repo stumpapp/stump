@@ -666,8 +666,8 @@
 			"sections": {
 				"emailers": {
 					"title": "SMTP emailers",
-					"description": "The clients you have configured for sending emails from your Stump server instance",
-					"singleInstanceDisclaimer": "While Stump supports multiple SMTP configurations in the backend, only one can be configured on the UI. This will be improved in the future",
+					"description": "Klienci, którzy zostali utworzeni w celu wysyłki wiadomości e-mail z Twojego serwera Stump",
+					"singleInstanceDisclaimer": "Na ten moment Stump wspiera ustawienie tylko jednego serwera SMTP z poziomu interfejsu użytkownika. Funkcjonalność ta zostanie rozwinięta w przyszłości",
 					"list": {
 						"emptyHeading": "No SMTP emailers configured",
 						"primaryEmailer": "Primary emailer",
@@ -688,8 +688,8 @@
 					}
 				},
 				"devices": {
-					"title": "Email devices",
-					"description": "The device aliases you have configured for recieving emails from your Stump server instance",
+					"title": "Urządzenia odbiorcze e-mail",
+					"description": "Aliasy urządzeń skonfigurowanych do otrzymywania wiadomości e-mail z Twojej instancji serwera Stump",
 					"addDevice": "Dodaj alias urządzenia",
 					"addOrUpdateDevice": {
 						"title": {
@@ -698,11 +698,11 @@
 						},
 						"name": {
 							"label": "Nazwa",
-							"description": "A friendly name to uniquely identify this device alias"
+							"description": "Unikalna, przyjazna nazwa w celach identyfikacyjnych"
 						},
 						"email": {
 							"label": "Adres e-mail",
-							"description": "The email address this alias will be associated with"
+							"description": "Adres e-mail powiązany z tym aliasem"
 						},
 						"forbidden": {
 							"label": "Zabronione",
@@ -729,8 +729,8 @@
 					"description": "The SMTP-specific settings for this emailer"
 				},
 				"smtpProvider": {
-					"label": "SMTP provider preset",
-					"description": "The provider of the SMTP server. This is used to prefill some common settings, but doesn't capture all providers"
+					"label": "Ustawienia dostawcy SMTP",
+					"description": "Dostawca serwera SMTP. Używane w celu uzupełnienia predefiniowanych ustawień niektórych dostawców"
 				},
 				"smtpHost": {
 					"label": "Host SMTP",

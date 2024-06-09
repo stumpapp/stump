@@ -354,7 +354,11 @@ mod tests {
 			},
 			&config,
 		);
+
+		// Assert that the operation succeeded
 		assert!(processed_file.is_ok());
+		// And that the original file was deleted
+		assert!(!Path::new(&temp_rar_file_path).exists())
 	}
 
 	#[test]
@@ -372,7 +376,10 @@ mod tests {
 
 		// We have a temporary file, so we may as well test deletion also
 		let zip_result = RarProcessor::to_zip(&temp_rar_file_path, true, None, &config);
+		// Assert that operation succeeded
 		assert!(zip_result.is_ok());
+		// And that the original file was deleted
+		assert!(!Path::new(&temp_rar_file_path).exists())
 	}
 
 	#[test]

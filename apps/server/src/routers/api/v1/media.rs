@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, sync::Arc};
 
 use axum::{
 	extract::{DefaultBodyLimit, Multipart, Path, State},
@@ -23,13 +23,14 @@ use stump_core::{
 				finished_reading_session_with_book_pages, reading_session_with_book_pages,
 			},
 			ActiveReadingSession, FinishedReadingSession, LibraryOptions, Media,
-			ProgressUpdateReturn, User, UserPermission,
+			PageDimension, PageDimensionsEntity, ProgressUpdateReturn, User,
+			UserPermission,
 		},
 		query::pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
 		CountQueryReturn,
 	},
 	filesystem::{
-		analyze_media_job::{AnalyzeMediaJob, AnalyzeMediaJobVariant},
+		analyze_media_job::AnalyzeMediaJob,
 		get_unknown_thumnail,
 		image::{
 			generate_thumbnail, place_thumbnail, remove_thumbnails, ImageFormat,
@@ -43,6 +44,7 @@ use stump_core::{
 		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
 		media_metadata, series, series_metadata, tag, user, PrismaClient,
 	},
+	Ctx,
 };
 use tower_sessions::Session;
 use tracing::error;
@@ -99,7 +101,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route(
 					"/progress/complete",
 					get(get_is_media_completed).put(put_media_complete_status),
-				),
+				)
+				.route("/dimensions", get(get_media_dimensions))
+				.route("/page/:page/dimensions", get(get_media_page_dimensions)),
 		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
@@ -1611,14 +1615,129 @@ async fn start_media_analysis(
 	let _ = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
 
 	// Start analysis job
-	ctx.enqueue_job(AnalyzeMediaJob::new(
-		AnalyzeMediaJobVariant::AnalyzeSingleItem(id),
-	))
-	.map_err(|e| {
-		let err = "Failed to enqueue analyze media job";
-		error!(?e, err);
-		APIError::InternalServerError(err.to_string())
-	})?;
+	ctx.enqueue_job(AnalyzeMediaJob::analyze_media_item(id))
+		.map_err(|e| {
+			let err = "Failed to enqueue analyze media job";
+			error!(?e, err);
+			APIError::InternalServerError(err.to_string())
+		})?;
 
 	APIResult::Ok(())
+}
+
+#[utoipa::path(
+	post,
+	path = "/api/v1/media/:id/dimensions",
+	tag = "media",
+	params(
+		("id" = String, Path, description = "The ID of the media to get dimensions for")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched media dimensions"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Media dimensions not available"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn get_media_dimensions(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> APIResult<Json<Vec<PageDimension>>> {
+	// Fetch the media item in question from the database while enforcing permissions
+	let dimensions_entity =
+		fetch_media_page_dimensions_with_permissions(&ctx, &session, id).await?;
+
+	Ok(Json(dimensions_entity.dimensions))
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/media/:id/page/:page/dimensions",
+	tag = "media",
+	params(
+		("id" = String, Path, description = "The ID of the media to get dimensions for"),
+		("page" = i32, Path, description = "The page to get dimensions for (indexed from 1)")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched media page dimensions"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Media dimensions not available"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn get_media_page_dimensions(
+	Path((id, page)): Path<(String, i32)>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> APIResult<Json<PageDimension>> {
+	// Fetch the media item in question from the database while enforcing permissions
+	let dimensions_entity =
+		fetch_media_page_dimensions_with_permissions(&ctx, &session, id).await?;
+
+	if page <= 0 {
+		return Err(APIError::BadRequest(format!(
+			"Cannot fetch page dimensions for page {}, expected a number > 0",
+			page
+		)));
+	}
+
+	// Get the specific page or 404
+	let page_dimension = dimensions_entity
+		.dimensions
+		.get((page - 1) as usize)
+		.ok_or(APIError::NotFound(format!(
+			"No page dimensions for page: {}",
+			page
+		)))?;
+
+	Ok(Json(page_dimension.to_owned()))
+}
+
+async fn fetch_media_page_dimensions_with_permissions(
+	ctx: &Arc<Ctx>,
+	session: &Session,
+	id: String,
+) -> APIResult<PageDimensionsEntity> {
+	// First get user permissions/age restrictions
+	let user = get_session_user(session)?;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+
+	// Build where parameters to fetch the appropriate media
+	let where_params = chain_optional_iter(
+		[media::id::equals(id.clone())]
+			.into_iter()
+			.chain(apply_media_library_not_hidden_for_user_filter(&user))
+			.collect::<Vec<WhereParam>>(),
+		[age_restrictions],
+	);
+
+	// Get the media from the database
+	let media: Media = ctx
+		.db
+		.media()
+		.find_first(where_params)
+		.with(media::metadata::fetch().with(media_metadata::page_dimensions::fetch()))
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound(String::from("Media not found")))?
+		.into();
+
+	// Then pull off the page dimensions if available
+	let dimensions_entity = media
+		.metadata
+		.ok_or(APIError::NotFound(
+			"Media did not have metadata".to_string(),
+		))?
+		.page_dimensions
+		.ok_or(APIError::NotFound(
+			"Media metadata does not have generated page dimensions. Run analysis to generate them.".to_string(),
+		))?;
+
+	Ok(dimensions_entity)
 }

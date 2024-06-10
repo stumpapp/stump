@@ -362,6 +362,10 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<ProgressUpdateReturn>()?).as_bytes(),
 		)?;
+		file.write_all(format!("{}\n\n", ts_export::<PageDimension>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<PageDimensionsEntity>()?).as_bytes(),
+		)?;
 
 		file.write_all(
 			format!("{}\n\n", ts_export::<ReactTableColumnSort>()?).as_bytes(),

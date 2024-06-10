@@ -85,7 +85,7 @@ impl FromStr for PageDimension {
 		let s = s.trim();
 
 		// Check for correct layout
-		let dims = s.split(",").collect::<Vec<_>>();
+		let dims = s.split(',').collect::<Vec<_>>();
 		if dims.len() != 2 {
 			return Err(PageDimensionParserError::ExpectedHeightWidth(s.to_string()));
 		}
@@ -156,14 +156,14 @@ pub fn dimension_vec_from_str(
 	s: &str,
 ) -> Result<Vec<PageDimension>, PageDimensionParserError> {
 	// Early return for an empty string
-	if s == "" {
+	if s.is_empty() {
 		return Ok(Vec::new());
 	}
 
 	// Trim leading/trailing whitespace
 	let s = s.trim();
 
-	let chunks = s.split(";").collect::<Vec<_>>();
+	let chunks = s.split(';').collect::<Vec<_>>();
 	// This will be under-capacity unless every dimension pair differs, but that's fine
 	let mut out_list = Vec::with_capacity(chunks.len());
 
@@ -183,7 +183,7 @@ pub fn dimension_vec_from_str(
 				}
 
 				// Parse number
-				let num_repeated: usize = items.get(0).unwrap().parse()?;
+				let num_repeated: usize = items.first().unwrap().parse()?;
 				// Parse dimension
 				let dimension = PageDimension::from_str(items.get(1).unwrap())?;
 				// Push as many as we need

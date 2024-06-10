@@ -1664,10 +1664,10 @@ async fn get_media_page_dimensions(
 		fetch_media_page_dimensions_with_permissions(&ctx, &session, id).await?;
 
 	if page <= 0 {
-		return APIError::BadRequest(format!(
+		return Err(APIError::BadRequest(format!(
 			"Cannot fetch page dimensions for page {}, expected a number > 0",
 			page
-		));
+		)));
 	}
 
 	// Get the specific page or 404
@@ -1688,7 +1688,7 @@ async fn fetch_media_page_dimensions_with_permissions(
 	id: String,
 ) -> APIResult<PageDimensionsEntity> {
 	// First get user permissions/age restrictions
-	let user = get_session_user(&session)?;
+	let user = get_session_user(session)?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()

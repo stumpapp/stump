@@ -6,18 +6,18 @@ use axum::{
 };
 use prisma_client_rust::{chrono, Direction};
 use stump_core::{
-	db::query::pagination::PageQuery,
+	db::{entity::UserPermission, query::pagination::PageQuery},
 	filesystem::{
 		image::{GenericImageProcessor, ImageProcessor, ImageProcessorOptions},
 		media::get_page,
 		ContentType,
 	},
-	opds::{
+	opds::v1_2::{
 		entry::OpdsEntry,
 		feed::OpdsFeed,
 		link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
 	},
-	prisma::{library, media, read_progress, series, user},
+	prisma::{active_reading_session, library, media, series, user},
 };
 use tower_sessions::Session;
 use tracing::{debug, trace, warn};
@@ -28,12 +28,12 @@ use crate::{
 	filter::chain_optional_iter,
 	middleware::auth::Auth,
 	utils::{
-		get_session_user,
+		enforce_session_permissions, get_session_user,
 		http::{ImageResponse, NamedFile, Xml},
 	},
 };
 
-use super::api::v1::{
+use crate::routers::api::v1::{
 	media::{apply_in_progress_filter_for_user, apply_media_age_restriction},
 	series::apply_series_age_restriction,
 };
@@ -41,7 +41,7 @@ use super::api::v1::{
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.nest(
-			"/opds/v1.2",
+			"/v1.2",
 			Router::new()
 				.route("/catalog", get(catalog))
 				.route("/keep-reading", get(keep_reading))
@@ -191,43 +191,38 @@ async fn keep_reading(State(ctx): State<AppState>, session: Session) -> APIResul
 	let db = &ctx.db;
 
 	let user_id = get_session_user(&session)?.id;
-	let read_progress_conditions = vec![apply_in_progress_filter_for_user(user_id)];
+	let in_progress_filter = vec![apply_in_progress_filter_for_user(user_id)];
 
 	let media = db
 		.media()
-		.find_many(vec![media::read_progresses::some(
-			read_progress_conditions.clone(),
+		.find_many(vec![media::active_user_reading_sessions::some(
+			in_progress_filter.clone(),
 		)])
-		.with(media::read_progresses::fetch(read_progress_conditions))
+		.with(media::active_user_reading_sessions::fetch(
+			in_progress_filter,
+		))
 		.order_by(media::name::order(Direction::Asc))
 		.exec()
-		.await?
-		.into_iter()
-		.filter(|m| match m.read_progresses() {
-			// Read progresses relation on media is one to many, there is a dual key
-			// on read_progresses table linking a user and media. Therefore, there should
-			// only be 1 item in this vec for each media resulting from the query.
-			Ok(progresses) => {
-				if progresses.len() != 1 {
-					return false;
-				}
+		.await?;
 
-				let progress = &progresses[0];
-				if let Some(_epubcfi) = progress.epubcfi.as_ref() {
-					// TODO: check/test this logic
-					!progress.is_completed
-						|| progress
-							.percentage_completed
-							.map(|value| value < 1.0)
-							.unwrap_or(false)
-				} else {
-					progress.page < m.pages
-				}
+	let books_in_progress = media.into_iter().filter(|m| {
+		match m
+			.active_user_reading_sessions()
+			.ok()
+			.and_then(|sessions| sessions.first())
+		{
+			Some(session) if session.epubcfi.is_some() => session
+				.percentage_completed
+				.map(|value| value < 1.0)
+				.unwrap_or(false),
+			Some(session) if session.page.is_some() => {
+				session.page.unwrap_or(1) < m.pages
 			},
 			_ => false,
-		});
+		}
+	});
 
-	let entries: Vec<OpdsEntry> = media.into_iter().map(OpdsEntry::from).collect();
+	let entries = books_in_progress.into_iter().map(OpdsEntry::from).collect();
 
 	let feed = OpdsFeed::new(
 		"keepReading".to_string(),
@@ -573,7 +568,7 @@ async fn get_book_page(
 	pagination: Query<PageQuery>,
 	session: Session,
 ) -> APIResult<ImageResponse> {
-	let db = &ctx.db;
+	let client = &ctx.db;
 
 	let user = get_session_user(&session)?;
 	let user_id = user.id;
@@ -590,44 +585,56 @@ async fn get_book_page(
 		correct_page = page + 1;
 	}
 
-	let result: Result<(media::Data, read_progress::Data), APIError> = db
-		._transaction()
-		.run(|client| async move {
-			let book = db
-				.media()
-				.find_first(chain_optional_iter(
-					[media::id::equals(id.clone())],
-					[age_restrictions],
-				))
-				.exec()
-				.await?
-				.ok_or(APIError::NotFound(String::from("Book not found")))?;
+	let book = client
+		.media()
+		.find_first(chain_optional_iter(
+			[media::id::equals(id.clone())],
+			[age_restrictions],
+		))
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound(String::from("Book not found")))?;
+	let is_completed = book.pages == correct_page;
 
-			let is_completed = book.pages == correct_page;
+	if is_completed {
+		let deleted_session = client
+			.active_reading_session()
+			.delete(active_reading_session::user_id_media_id(
+				user_id.clone(),
+				id.clone(),
+			))
+			.exec()
+			.await
+			.ok();
+		tracing::trace!(?deleted_session, "Deleted active reading session");
 
-			let read_progress = client
-				.read_progress()
-				.upsert(
-					read_progress::user_id_media_id(user_id.clone(), id.clone()),
-					(
-						correct_page,
-						media::id::equals(id.clone()),
-						user::id::equals(user_id.clone()),
-						vec![read_progress::is_completed::set(is_completed)],
-					),
-					vec![
-						read_progress::page::set(correct_page),
-						read_progress::is_completed::set(is_completed),
-					],
-				)
-				.exec()
-				.await?;
+		let finished_session = client
+			.finished_reading_session()
+			.create(
+				deleted_session.map(|s| s.started_at).unwrap_or_default(),
+				media::id::equals(id.clone()),
+				user::id::equals(user_id.clone()),
+				vec![],
+			)
+			.exec()
+			.await?;
+		tracing::trace!(?finished_session, "Created finished reading session");
+	} else {
+		client
+			.active_reading_session()
+			.upsert(
+				active_reading_session::user_id_media_id(user_id.clone(), id.clone()),
+				(
+					media::id::equals(id.clone()),
+					user::id::equals(user_id.clone()),
+					vec![active_reading_session::page::set(Some(correct_page))],
+				),
+				vec![active_reading_session::page::set(Some(correct_page))],
+			)
+			.exec()
+			.await?;
+	}
 
-			Ok((book, read_progress))
-		})
-		.await;
-
-	let (book, _) = result?;
 	let (content_type, image_buffer) =
 		get_page(book.path.as_str(), correct_page, &ctx.config)?;
 	handle_opds_image_response(content_type, image_buffer)
@@ -640,7 +647,7 @@ async fn download_book(
 	session: Session,
 ) -> APIResult<NamedFile> {
 	let db = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = enforce_session_permissions(&session, &[UserPermission::DownloadFile])?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()

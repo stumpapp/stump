@@ -353,7 +353,15 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<Media>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<Bookmark>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<MediaAnnotation>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<ReadProgress>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<ActiveReadingSession>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<FinishedReadingSession>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<ProgressUpdateReturn>()?).as_bytes(),
+		)?;
 		file.write_all(format!("{}\n\n", ts_export::<PageDimension>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<PageDimensionsEntity>()?).as_bytes(),

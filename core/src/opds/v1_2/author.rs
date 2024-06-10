@@ -32,7 +32,7 @@ impl StumpAuthor {
 	///
 	/// ## Example
 	/// ```rust
-	/// use stump_core::opds::author::StumpAuthor;
+	/// use stump_core::opds::v1_2::author::StumpAuthor;
 	/// use xml::EventWriter;
 	///
 	/// let author = StumpAuthor::new("Aaron Leopold".to_string(), None);
@@ -61,7 +61,7 @@ impl StumpAuthor {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::opds::tests::normalize_xml;
+	use crate::opds::v1_2::tests::normalize_xml;
 
 	#[test]
 	fn test_author_with_only_name() {

@@ -3,7 +3,7 @@
 
 use crate::{
 	error::CoreError,
-	opds::link::OpdsLink,
+	opds::v1_2::link::OpdsLink,
 	prisma::{library, series},
 };
 use prisma_client_rust::chrono::{self, DateTime, Utc};
@@ -286,7 +286,7 @@ mod tests {
 	use std::str::FromStr;
 
 	use super::*;
-	use crate::opds::tests::normalize_xml;
+	use crate::opds::v1_2::tests::normalize_xml;
 
 	#[test]
 	fn test_opds_feed() {

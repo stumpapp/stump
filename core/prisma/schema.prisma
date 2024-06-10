@@ -22,9 +22,10 @@ model User {
   max_sessions_allowed Int? // null = unlimited
   permissions          String? // comma separated list, e.g. "book_club:create, file:upload, file:download"
 
-  reviews         Review[]
-  read_progresses ReadProgress[]
-  reading_lists   ReadingList[]
+  reviews                   Review[]
+  active_reading_sessions   ActiveReadingSession[]
+  finished_reading_sessions FinishedReadingSession[]
+  reading_lists             ReadingList[]
 
   book_club_memberships BookClubMember[]
   book_club_invitations BookClubInvitation[]
@@ -193,7 +194,8 @@ model Media {
   series    Series?        @relation(fields: [series_id], references: [id], onDelete: Cascade)
   series_id String?
 
-  read_progresses                ReadProgress[]
+  active_user_reading_sessions   ActiveReadingSession[]
+  finished_user_reading_sessions FinishedReadingSession[]
   tags                           Tag[]
   reading_list_items             ReadingListItem[]
   annotations                    MediaAnnotation[]
@@ -276,15 +278,13 @@ model Review {
   @@map("reviews")
 }
 
-model ReadProgress {
-  id String @id @default(uuid())
+model FinishedReadingSession {
+  id String @id @default(cuid())
 
-  page                 Int
-  percentage_completed Float? // 0.0 - 1.0
-  epubcfi              String?
-  is_completed         Boolean   @default(false)
-  completed_at         DateTime?
-  updated_at           DateTime  @updatedAt
+  started_at   DateTime
+  completed_at DateTime @default(now())
+
+  // TODO: Support reading duration in the future
 
   media_id String
   media    Media  @relation(fields: [media_id], references: [id], onDelete: Cascade)
@@ -292,9 +292,29 @@ model ReadProgress {
   user_id String
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  // literally cant stand this name lol read_progresses
+  @@map("finished_reading_sessions")
+}
+
+model ActiveReadingSession {
+  id String @id @default(uuid())
+
+  // TODO: Support reading duration in the future
+
+  page                 Int?
+  percentage_completed Float? // 0.0 - 1.0
+  epubcfi              String?
+
+  started_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  media_id String
+  media    Media  @relation(fields: [media_id], references: [id], onDelete: Cascade)
+
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
   @@unique([user_id, media_id])
-  @@map("read_progresses")
+  @@map("reading_sessions")
 }
 
 model Bookmark {

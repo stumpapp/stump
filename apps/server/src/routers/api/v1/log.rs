@@ -33,7 +33,7 @@ use crate::{
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
-		.route("/logs", get(get_logs))
+		.route("/logs", get(get_logs).delete(delete_logs))
 		.nest(
 			"/logs/file",
 			Router::new()
@@ -139,6 +139,32 @@ async fn get_logs(
 	}
 
 	Ok(Json(Pageable::from(logs)))
+}
+
+#[utoipa::path(
+	delete,
+	path = "/api/v1/logs",
+	tag = "log",
+	responses(
+		(status = 200, description = "Successfully deleted logs."),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+async fn delete_logs(
+	State(ctx): State<AppState>,
+	filters: QsQuery<LogFilter>,
+	session: Session,
+) -> APIResult<()> {
+	enforce_session_permissions(&session, &[UserPermission::ManageServer])?;
+
+	let where_params = apply_log_filters(filters.0);
+
+	let affected_records = ctx.db.log().delete_many(where_params).exec().await?;
+	tracing::debug!(affected_records, "Deleted logs");
+
+	Ok(())
 }
 
 async fn tail_log_file(

@@ -1,6 +1,7 @@
 import { useMediaByIdQuery } from '@stump/client'
 import { Badge, ButtonOrLink, Heading, Spacer, Text } from '@stump/components'
 import dayjs from 'dayjs'
+import sortBy from 'lodash.sortby'
 import { Suspense, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
@@ -76,7 +77,11 @@ export default function BookOverviewScene() {
 			</div>
 		)
 	}
-	const completedAt = media.read_progresses?.find((p) => !!p.completed_at)?.completed_at
+
+	// TODO(historical-read-session): double check default order
+	const completedAt = sortBy(media.finished_reading_sessions, ({ completed_at }) =>
+		dayjs(completed_at).toDate(),
+	).at(-1)?.completed_at
 	const genres = media.metadata?.genre?.filter((g) => !!g) ?? []
 	const links = media.metadata?.links?.filter((l) => !!l) ?? []
 

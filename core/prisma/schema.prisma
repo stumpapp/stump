@@ -244,11 +244,21 @@ model MediaMetadata {
   // *** End of group ***
 
   page_count Int?
+  page_dimensions PageDimensions?
 
   media    Media?  @relation(fields: [media_id], references: [id], onDelete: Cascade)
   media_id String? @unique
 
   @@map("media_metadata")
+}
+
+model PageDimensions {
+  id String @id @default(cuid())
+  dimensions String
+  metadata MediaMetadata @relation(fields: [metadata_id], references: [id], onDelete: Cascade)
+  metadata_id String @unique
+
+  @@map("page_dimensions")
 }
 
 model Review {

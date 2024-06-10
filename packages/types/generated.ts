@@ -150,6 +150,20 @@ export type FinishedReadingSession = { id: string; started_at: string; completed
 export type ProgressUpdateReturn = ActiveReadingSession | FinishedReadingSession
 
 /**
+ * Represents a page dimension for a page of a Stump media item. It consists of a
+ * height and a width.
+ */
+export type PageDimension = { height: number; width: number }
+
+/**
+ * Represents a database [page_dimensions::Data] object.
+ * 
+ * The `dimensions` member contains a [Vec]<[PageDimension]> containing the height and width
+ * of each page for the media attached to the metadata for this entity.
+ */
+export type PageDimensionsEntity = { id: string; dimensions: PageDimension[]; metadata_id: string }
+
+/**
  * A struct representing a sort order for a column using react-table (tanstack)
  */
 export type ReactTableColumnSort = { id: string; position: number }

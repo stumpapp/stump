@@ -1644,7 +1644,7 @@ async fn get_media_dimensions(
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media to get dimensions for"),
-		("page" = i32, Path, description = "The page to get dimensions for")
+		("page" = i32, Path, description = "The page to get dimensions for (indexed from 1)")
 	),
 	responses(
 		(status = 200, description = "Successfully fetched media page dimensions"),
@@ -1663,15 +1663,21 @@ async fn get_media_page_dimensions(
 	let dimensions_entity =
 		fetch_media_page_dimensions_with_permissions(&ctx, &session, id).await?;
 
+	if page <= 0 {
+		return APIError::BadRequest(format!(
+			"Cannot fetch page dimensions for page {}, expected a number > 0",
+			page
+		));
+	}
+
 	// Get the specific page or 404
-	let page_dimension =
-		dimensions_entity
-			.dimensions
-			.get(page as usize)
-			.ok_or(APIError::NotFound(format!(
-				"No page dimensions for page: {}",
-				page
-			)))?;
+	let page_dimension = dimensions_entity
+		.dimensions
+		.get((page - 1) as usize)
+		.ok_or(APIError::NotFound(format!(
+			"No page dimensions for page: {}",
+			page
+		)))?;
 
 	Ok(Json(page_dimension.to_owned()))
 }

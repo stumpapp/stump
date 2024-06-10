@@ -59,12 +59,13 @@ impl From<(books_as_publications::series::Data, Option<i64>)> for OPDSEntryBelon
 	}
 }
 
+#[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OPDSDynamicMetadata(pub serde_json::Value);
 
 /// Metadata for an OPDS 2.0 feed or collection
-#[derive(Debug, Clone, Builder, Serialize, Deserialize)]
 #[skip_serializing_none]
+#[derive(Debug, Clone, Builder, Serialize, Deserialize)]
 #[builder(build_fn(error = "crate::CoreError"), default, setter(into))]
 #[serde(rename_all = "camelCase")]
 pub struct OPDSMetadata {

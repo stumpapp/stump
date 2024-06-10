@@ -1,18 +1,24 @@
 use axum::{
 	extract::State, middleware::from_extractor_with_state, routing::get, Json, Router,
 };
-use stump_core::opds::v2_0::{
-	authentication::{
-		OPDSAuthenticationDocument, OPDSAuthenticationDocumentBuilder,
-		OPDSSupportedAuthFlow,
+use prisma_client_rust::Direction;
+use stump_core::{
+	opds::v2_0::{
+		authentication::{
+			OPDSAuthenticationDocument, OPDSAuthenticationDocumentBuilder,
+			OPDSSupportedAuthFlow,
+		},
+		books_as_publications,
+		feed::{OPDSFeed, OPDSFeedBuilder},
+		group::OPDSFeedGroupBuilder,
+		link::{
+			OPDSBaseLinkBuilder, OPDSLink, OPDSLinkRel, OPDSNavigationLink,
+			OPDSNavigationLinkBuilder,
+		},
+		metadata::{OPDSMetadata, OPDSMetadataBuilder, OPDSPaginationMetadataBuilder},
+		publication::OPDSPublication,
 	},
-	feed::{OPDSFeed, OPDSFeedBuilder},
-	group::OPDSFeedGroupBuilder,
-	link::{
-		OPDSBaseLinkBuilder, OPDSLink, OPDSLinkRel, OPDSNavigationLink,
-		OPDSNavigationLinkBuilder,
-	},
-	metadata::{OPDSMetadata, OPDSMetadataBuilder, OPDSPaginationMetadataBuilder},
+	prisma::media,
 };
 use tower_sessions::Session;
 
@@ -21,7 +27,11 @@ use crate::{
 	errors::APIResult,
 	middleware::{auth::Auth, host::HostExtractor},
 	routers::{
-		api::v1::library::library_not_hidden_from_user_filter, relative_favicon_path,
+		api::v1::{
+			library::library_not_hidden_from_user_filter,
+			media::apply_media_restrictions_for_user,
+		},
+		relative_favicon_path,
 	},
 	utils::get_session_user,
 };
@@ -121,6 +131,39 @@ async fn catalog(
 		)
 		.build()?;
 
+	let latest_books_conditions = apply_media_restrictions_for_user(&user);
+	let latest_books = client
+		.media()
+		.find_many(latest_books_conditions.clone())
+		.take(DEFAULT_LIMIT)
+		.order_by(media::created_at::order(Direction::Desc))
+		.include(books_as_publications::include())
+		.exec()
+		.await?;
+	let latest_books_count = client.media().count(latest_books_conditions).exec().await?;
+	let publications = OPDSPublication::vec_from_books(&ctx, latest_books).await?;
+	let latest_books_group = OPDSFeedGroupBuilder::default()
+		.metadata(
+			OPDSMetadataBuilder::default()
+				.title("Latest Books".to_string())
+				.pagination(Some(
+					OPDSPaginationMetadataBuilder::default()
+						.number_of_items(latest_books_count)
+						.items_per_page(DEFAULT_LIMIT)
+						.current_page(1)
+						.build()?,
+				))
+				.build()?,
+		)
+		.links(vec![OPDSLink::Link(
+			OPDSBaseLinkBuilder::default()
+				.href("/opds/v2.0/books/latest".to_string())
+				.rel(OPDSLinkRel::SelfLink.item())
+				.build()?,
+		)])
+		.publications(publications)
+		.build()?;
+
 	Ok(Json(
 		OPDSFeedBuilder::default()
 			.metadata(
@@ -143,7 +186,7 @@ async fn catalog(
 						.build()?,
 				)
 				.build()?])
-			.groups(vec![library_group])
+			.groups(vec![library_group, latest_books_group])
 			.build()?,
 	))
 }

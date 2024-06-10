@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
@@ -20,10 +22,10 @@ use super::{
 /// - Should contain a self link
 ///
 /// See https://drafts.opds.io/opds-2.0#51-opds-publication
+#[skip_serializing_none]
 #[derive(Debug, Default, Clone, Builder, Serialize, Deserialize)]
 #[builder(build_fn(error = "crate::CoreError"), default, setter(into))]
 #[serde(rename_all = "camelCase")]
-#[skip_serializing_none]
 pub struct OPDSPublication {
 	/// The metadata for the publication
 	pub metadata: OPDSMetadata,
@@ -36,49 +38,81 @@ pub struct OPDSPublication {
 }
 
 impl OPDSPublication {
-	pub async fn from_book(
+	pub async fn vec_from_books(
 		ctx: &Ctx,
-		book: books_as_publications::Data,
-	) -> CoreResult<Self> {
+		books: Vec<books_as_publications::Data>,
+	) -> CoreResult<Vec<Self>> {
 		let client = &ctx.db;
 
-		let series = book.series.ok_or_else(|| {
-			CoreError::InternalError("Book is not part of a series".to_string())
-		})?;
-		let position = client
-			.book_positions_in_series(vec![book.id.clone()], series.id.clone())
-			.await?
-			.get(&book.id)
-			.cloned();
+		let mut series_to_books_map = HashMap::new();
+		let mut series_id_to_series_map = HashMap::new();
 
-		let metadata = book
-			.metadata
-			.clone()
-			.map(MediaMetadata::from)
-			.unwrap_or_default();
-		let title = metadata.title.clone().unwrap_or(book.name);
-		let description = metadata.summary.clone();
+		for book in books {
+			if let Some(series) = &book.series {
+				series_to_books_map
+					.entry(series.id.clone())
+					.or_insert_with(Vec::new)
+					.push(book.clone());
+				series_id_to_series_map.insert(series.id.to_string(), series.clone());
+			} else {
+				tracing::warn!(book_id = ?book.id, "Book has no series ID!");
+			}
+		}
 
-		// Unset the title and summary so they don't get serialized twice
-		let metadata = MediaMetadata {
-			title: None,
-			summary: None,
-			..metadata
-		};
+		let mut publications = vec![];
 
-		// TODO: consolidate this into a TryFrom trait?
-		let metadata = OPDSMetadataBuilder::default()
-			.title(title)
-			.modified(OPDSMetadata::generate_modified())
-			.description(description)
-			.belongs_to(OPDSEntryBelongsTo::from((series, position)))
-			.dynamic_metadata(OPDSDynamicMetadata(serde_json::to_value(metadata)?))
-			.build()?;
+		for (series_id, books) in series_to_books_map {
+			let series = series_id_to_series_map
+				.get(&series_id)
+				.ok_or_else(|| {
+					CoreError::InternalError("Series not found in series map".to_string())
+				})?
+				.clone();
 
-		Ok(Self {
-			metadata,
-			images: vec![],
-			reading_order: None,
-		})
+			let positions = client
+				.book_positions_in_series(
+					books.iter().map(|book| book.id.clone()).collect(),
+					series.id.clone(),
+				)
+				.await?;
+
+			for book in books {
+				let position = positions.get(&book.id).cloned();
+
+				let metadata = book
+					.metadata
+					.clone()
+					.map(MediaMetadata::from)
+					.unwrap_or_default();
+				let title = metadata.title.clone().unwrap_or(book.name);
+				let description = metadata.summary.clone();
+
+				// Unset the title and summary so they don't get serialized twice
+				let media_metadata = MediaMetadata {
+					title: None,
+					summary: None,
+					..metadata
+				};
+
+				// serde_json::to
+
+				let metadata = OPDSMetadataBuilder::default()
+					.title(title)
+					.modified(OPDSMetadata::generate_modified())
+					.description(description)
+					.belongs_to(OPDSEntryBelongsTo::from((series.clone(), position)))
+					.dynamic_metadata(OPDSDynamicMetadata(serde_json::to_value(
+						media_metadata,
+					)?))
+					.build()?;
+
+				publications.push(Self {
+					metadata,
+					..Default::default()
+				});
+			}
+		}
+
+		Ok(publications)
 	}
 }

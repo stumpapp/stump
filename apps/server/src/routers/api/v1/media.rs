@@ -323,6 +323,20 @@ pub(crate) fn apply_media_age_restriction(
 	}
 }
 
+pub fn apply_media_restrictions_for_user(user: &User) -> Vec<WhereParam> {
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+
+	chain_optional_iter(
+		[media::series::is(vec![series::library::is(vec![
+			library_not_hidden_from_user_filter(user),
+		])])],
+		[age_restrictions],
+	)
+}
+
 #[utoipa::path(
 	get,
 	path = "/api/v1/media",

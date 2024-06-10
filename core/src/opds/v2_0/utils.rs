@@ -58,16 +58,21 @@ impl OPDSV2PrismaExt for PrismaClient {
 				)
 				SELECT id, position
 				FROM ranked
-				WHERE id IN ({})
 				"#,
-				PrismaValue::String(series_id),
-				PrismaValue::List(
-					book_ids.into_iter().map(PrismaValue::String).collect()
-				)
+				PrismaValue::String(series_id)
 			))
+			// FIXME: pcr: does not support PrismaValue::List
+			// WHERE id IN ({})
+			// PrismaValue::List(
+			// 	book_ids.into_iter().map(PrismaValue::String).collect()
+			// )
 			.exec()
 			.await?;
 
-		Ok(ranked.into_iter().map(|ep| (ep.id, ep.position)).collect())
+		Ok(ranked
+			.into_iter()
+			.filter(|ep| book_ids.contains(&ep.id)) // FIXME: pcr: same as above
+			.map(|ep| (ep.id, ep.position))
+			.collect())
 	}
 }

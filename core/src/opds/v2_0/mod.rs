@@ -2,6 +2,7 @@
 //! https://drafts.opds.io/opds-2.0
 
 pub mod authentication;
+mod error;
 pub mod feed;
 pub mod group;
 pub mod link;
@@ -11,6 +12,7 @@ pub mod properties;
 pub mod publication;
 mod utils;
 
+pub use error::OPDSV2Error;
 pub use prisma_macros::books_as_publications;
 pub use utils::{ArrayOrItem, OPDSV2PrismaExt};
 

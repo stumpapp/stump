@@ -50,29 +50,29 @@ impl OPDSV2PrismaExt for PrismaClient {
 		// but it doesn't work as expected. We need to figure out how to do this properly.
 		let ranked: Vec<EntityPosition> = self
 			._query_raw(raw!(
-				r#"
-				WITH ranked AS (
-					SELECT id, RANK() OVER (ORDER BY name ASC) AS position
-					FROM media
-					WHERE series_id = {}
-				)
-				SELECT id, position
-				FROM ranked
-				"#,
+				&format!(
+					r#"
+					WITH ranked AS (
+						SELECT id, RANK() OVER (ORDER BY name ASC) AS position
+						FROM media
+						WHERE series_id = {{}}
+					)
+					SELECT id, position
+					FROM ranked
+					WHERE id IN ({})
+					"#,
+					// Note: Prisma doesn't support PrismaValue::List, so we need to manually format this
+					book_ids
+						.iter()
+						.map(|id| format!("'{}'", id))
+						.collect::<Vec<_>>()
+						.join(",")
+				),
 				PrismaValue::String(series_id)
 			))
-			// FIXME: pcr: does not support PrismaValue::List
-			// WHERE id IN ({})
-			// PrismaValue::List(
-			// 	book_ids.into_iter().map(PrismaValue::String).collect()
-			// )
 			.exec()
 			.await?;
 
-		Ok(ranked
-			.into_iter()
-			.filter(|ep| book_ids.contains(&ep.id)) // FIXME: pcr: same as above
-			.map(|ep| (ep.id, ep.position))
-			.collect())
+		Ok(ranked.into_iter().map(|ep| (ep.id, ep.position)).collect())
 	}
 }

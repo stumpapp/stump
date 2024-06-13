@@ -1,99 +1,99 @@
 {
 	"underConstruction": {
-		"heading": "This is awkward",
-		"message": "You've stumbled upon a page that's still being developed. I'd love to show it to you, but it isn't quite ready yet.",
-		"homeLink": "Go Home",
-		"githubLink": "View the GitHub issue"
+		"heading": "Dit is ongemakkelijk",
+		"message": "Je stuitte op een pagina die nog wordt ontwikkeld. Ik zou het graag aan je laten zien, maar het is nog niet helemaal klaar.",
+		"homeLink": "Ga naar start",
+		"githubLink": "Bekijk de GitHub issue"
 	},
 	"authScene": {
-		"claimHeading": "Initialize your server",
-		"claimText": "This Stump server is not intialized. Use the form below to create your account. Once created, you will have full access to all server features.",
+		"claimHeading": "Initialiseer je server",
+		"claimText": "Deze Stump server is niet geïnitialiseerd. Gebruik het formulier hieronder om uw account aan te maken. Eenmaal aangemaakt, heeft u volledige toegang tot alle serverfuncties.",
 		"form": {
 			"validation": {
-				"missingUsername": "Username is required",
-				"missingPassword": "Password is required"
+				"missingUsername": "Gebruikersnaam is vereist",
+				"missingPassword": "Wachtwoord is vereist"
 			},
 			"labels": {
-				"username": "Username",
-				"password": "Password"
+				"username": "Gebruikersnaam",
+				"password": "Wachtwoord"
 			},
 			"buttons": {
-				"createAccount": "Create Account",
+				"createAccount": "Account aanmaken",
 				"login": "Log in"
 			}
 		},
 		"toasts": {
-			"loggingIn": "Logging in...",
-			"loggedIn": "Welcome back!",
-			"loggedInFirstTime": "Welcome!",
-			"registering": "Registering...",
-			"registered": "Registered!",
-			"loginFailed": "Login failed. Please try again",
-			"registrationFailed": "Registration failed. Please try again"
+			"loggingIn": "Inloggen...",
+			"loggedIn": "Welkom terug!",
+			"loggedInFirstTime": "Welkom!",
+			"registering": "Registreren...",
+			"registered": "Geregistreerd!",
+			"loginFailed": "Inloggen mislukt. Probeer het nog een keer",
+			"registrationFailed": "Registratie mislukt. Probeer het nog een keer"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "Library Configuration",
-			"subtitleCreating": "A preview of your new library will be shown below",
-			"subtitleEditing": "A preview of your library edits will be shown below"
+			"heading": "Bibliotheek instellingen",
+			"subtitleCreating": "Een voorbeeld van uw nieuwe bibliotheek wordt hieronder weergegeven",
+			"subtitleEditing": "Een voorbeeld van uw wijzigingen aan de bibliotheek worden hieronder weergegeven"
 		}
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "File Information",
+			"heading": "Bestand informatie",
 			"labels": {
-				"fileSize": "File Size",
-				"fileType": "File Type",
-				"fileLocation": "File Location",
+				"fileSize": "Bestandsgrootte",
+				"fileType": "Bestandstype",
+				"fileLocation": "Bestandslocatie",
 				"fileChecksum": "Checksum"
 			}
 		},
 		"emailBook": {
-			"heading": "Email book",
-			"description": "Send this book to device or email address",
+			"heading": "E-mail dit boek",
+			"description": "Stuur dit boek naar een apparaat of e-mailadres",
 			"form": {
 				"email": {
-					"label": "Email",
-					"placeholder": "Email address",
-					"description": "An email address to send the book to. Click add to finalize each input"
+					"label": "E-mail",
+					"placeholder": "E-mail adres",
+					"description": "Een e-mailadres om het boek naar te verzenden. Klik op toevoegen om elke invoer af te ronden"
 				},
 				"devices": {
-					"label": "Devices",
-					"placeholder": "Select devices",
-					"noFilterMatch": "No devices match the filter"
+					"label": "Apparaten",
+					"placeholder": "Selecteer apparaten",
+					"noFilterMatch": "Geen apparaten die overeenkomen met de filter"
 				}
 			}
 		},
-		"nextInSeries": "Next in Series"
+		"nextInSeries": "Volgende in serie"
 	},
 	"createBookClubScene": {
-		"heading": "Create a new book club",
-		"subtitle": "You can create a private book club a select few, or make it public for anyone on the server to join",
+		"heading": "Maak een nieuwe boekenclub",
+		"subtitle": "U kunt een privéboekenclub maken met bepaalde personen, of deze openbaar maken zodat iedereen op de server eraan kan deelnemen",
 		"form": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My book club",
-				"description": "The name of your book club"
+				"label": "Naam",
+				"placeholder": "Mijn boekenclub",
+				"description": "De naam van je boekenclub"
 			},
 			"description": {
-				"label": "Description",
-				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
-				"description": "An optional, short description of your book club"
+				"label": "Beschrijving",
+				"placeholder": "Een 'Onze Vlag Betekent De Dood' fan club. We lezen piratenfictie naar ons hart",
+				"description": "Een optionele, korte beschrijving van je boekenclub"
 			},
 			"is_private": {
-				"label": "Private club",
-				"description": "If enabled, only users you invite will be able to join your book club"
+				"label": "Privéclub",
+				"description": "Als dit is ingeschakeld, kunnen alleen gebruikers die je uitnodigt lid worden van je boekenclub"
 			},
 			"member_role_spec": {
-				"heading": "Custom role mapping",
+				"heading": "Aangepaste rol toewijzing",
 				"subtitle": [
 					"You can create custom names for the roles in your book club. For example, you could rename the 'Member' role to 'Crewmate', or 'Creator' to 'Captain'. If you don't want to use custom names, you can leave these fields blank and the default names will be used instead. For more information about roles, refer to the",
-					"documentation"
+					"documentatie"
 				],
 				"member": {
-					"label": "Member",
-					"placeholder": "Member",
+					"label": "Lid",
+					"placeholder": "Gebruiker",
 					"description": "The name of the default role for your book club"
 				},
 				"moderator": {
@@ -220,7 +220,7 @@
 						"series": "series",
 						"library": "library"
 					},
-					"matches": "Matches"
+					"matches": "Overeenkomsten"
 				}
 			}
 		}
@@ -228,28 +228,28 @@
 	"userSmartListScene": {
 		"navigation": {
 			"items": "Items",
-			"settings": "Settings"
+			"settings": "Instellingen"
 		},
 		"layout": {
-			"missingIdError": "This scene requires an ID in the URL",
-			"smartListNotFound": "Smart list not found",
-			"viewCreateError": "Failed to create view",
-			"viewSaveError": "Failed to save view"
+			"missingIdError": "Deze scène vereist een ID in de URL",
+			"smartListNotFound": "Slimme lijst niet gevonden",
+			"viewCreateError": "Aanmaken weergave mislukt",
+			"viewSaveError": "Opslaan weergave mislukt"
 		},
 		"header": {
-			"backLink": "Lists"
+			"backLink": "Lijsten"
 		},
 		"itemsScene": {
-			"smartListNotFound": "Smart list not found",
+			"smartListNotFound": "Slimme lijst niet gevonden",
 			"actionHeader": {
 				"viewSelector": {
-					"customView": "Custom view",
-					"defaultView": "Default view",
-					"noViewsSaved": "No views saved",
-					"selectView": "Select a saved view"
+					"customView": "Aangepaste weergave",
+					"defaultView": "Standaard weergave",
+					"noViewsSaved": "Geen weergaves opgeslagen",
+					"selectView": "Kies een opgeslagen weergave"
 				},
 				"filterDrawer": {
-					"heading": "Smart list filters",
+					"heading": "Slimme lijst filters",
 					"description": "Change the filters for this viewing session",
 					"rawData": {
 						"heading": "Raw filter data",

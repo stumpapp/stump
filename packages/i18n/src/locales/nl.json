@@ -94,22 +94,22 @@
 				"member": {
 					"label": "Lid",
 					"placeholder": "Gebruiker",
-					"description": "The name of the default role for your book club"
+					"description": "De naam van de standaardrol van je boekenclub"
 				},
 				"moderator": {
 					"label": "Moderator",
 					"placeholder": "Moderator",
-					"description": "The name of the moderator role for your book club"
+					"description": "De naam van de moderator rol van je boekenclub"
 				},
 				"admin": {
-					"label": "Admin",
-					"placeholder": "Admin",
-					"description": "The name of the admin role for your book club"
+					"label": "Beheerder",
+					"placeholder": "Beheerder",
+					"description": "De naam van de beheerdersrol van uw boek club"
 				},
 				"creator": {
-					"label": "Creator",
-					"placeholder": "Creator",
-					"description": "The name of the creator role for your book club. This is you!"
+					"label": "Maker",
+					"placeholder": "Maker",
+					"description": "De naam van de maker rol van je boek club. Dit ben jij!"
 				}
 			},
 			"creator_preferences": {
@@ -121,21 +121,21 @@
 					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
 				},
 				"creator_hide_progress": {
-					"label": "Hide Progress",
-					"description": "If enabled, your read progress will be hidden from other members of the book club"
+					"label": "Verberg voortgang",
+					"description": "Indien ingeschakeld, wordt je leesvoortgang verborgen voor andere leden van de boekenclub"
 				}
 			},
-			"submit": "Create Book Club"
+			"submit": "Maak een boekenclub"
 		}
 	},
 	"createLibraryScene": {
 		"heading": "Create New Library",
 		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on libraries and how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"subtitleLink": "relevante documentatie",
 		"form": {
 			"labels": {
 				"libraryName": "Naam",
-				"libraryPath": "Path",
+				"libraryPath": "Locatie",
 				"libraryPathDescription": "The path to the library as it exists on your server",
 				"libraryDescription": "Description",
 				"libraryTags": "Tags"

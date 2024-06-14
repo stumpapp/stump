@@ -745,7 +745,7 @@
 					"description": "If enabled, the connection to the SMTP server will be encrypted"
 				},
 				"username": {
-					"label": "Username",
+					"label": "Nome utente",
 					"description": "The username for authenticating with the SMTP server. This is typically the email address"
 				},
 				"password": {
@@ -765,7 +765,7 @@
 					"description": "The email address that will be displayed to recipients"
 				},
 				"additionalSettings": {
-					"heading": "Additional settings",
+					"heading": "Impostazioni aggiuntive",
 					"description": "Additional settings for the emailer"
 				},
 				"maxAttachmentSize": {
@@ -907,14 +907,14 @@
 		}
 	},
 	"common": {
-		"add": "Add",
-		"cancel": "Cancel",
-		"confirm": "Confirm",
-		"save": "Save",
-		"send": "Send",
-		"saveChanges": "Save changes",
-		"create": "Create",
-		"edit": "Edit",
+		"add": "Aggiungi",
+		"cancel": "Annulla",
+		"confirm": "Conferma",
+		"save": "Salva",
+		"send": "Invia",
+		"saveChanges": "Salve le modifiche",
+		"create": "Crea",
+		"edit": "Modifica",
 		"update": "Aggiorna",
 		"unimplemented": "Questa funzionalità non è stata ancora implementata! Riprova più tardi",
 		"limitedFunctionality": "Questo non è stato ancora implementato completamente e mancano alcune funzionalità. Riprova più tardi"

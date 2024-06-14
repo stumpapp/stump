@@ -88,7 +88,7 @@
 			"member_role_spec": {
 				"heading": "Custom role mapping",
 				"subtitle": [
-					"You can create custom names for the roles in your book club. For example, you could rename the 'Member' role to 'Crewmate', or 'Creator' to 'Captain'. If you don't want to use custom names, you can leave these fields blank and the default names will be used instead. For more information about roles, refer to the",
+					"Puoi creare nomi personalizzati per i ruoli nel tuo club di libri, se vuoi. Per ulteriori informazioni, fai riferimento al",
 					"documentation"
 				],
 				"member": {
@@ -114,7 +114,7 @@
 			},
 			"creator_preferences": {
 				"heading": "Your membership preferences",
-				"subtitle": "Some preferences for your membership in the book club. These can be changed at any time from the book club settings page",
+				"subtitle": "Preferenze per la propria iscrizione al club del libro",
 				"creator_display_name": {
 					"label": "Display Name",
 					"placeholder": "oromei",
@@ -129,8 +129,8 @@
 		}
 	},
 	"createLibraryScene": {
-		"heading": "Crea nuova biblioteca",
-		"subtitle": "Le biblioteche sono usate per raggruppare i tuoi libri insieme. Se vuoi un ripasso sulle biblioteche e su come funzionano, dai un'occhiata alla",
+		"heading": "Crea nuova libreria",
+		"subtitle": "Le librerie sono usate per raggruppare i tuoi libri insieme. Se vuoi un ripasso su come funzionano, dai un'occhiata alla",
 		"subtitleLink": "documentazione correlata",
 		"form": {
 			"labels": {
@@ -141,13 +141,13 @@
 				"libraryTags": "Tag"
 			},
 			"buttons": {
-				"confirm": "Crea biblioteca"
+				"confirm": "Crea libreria"
 			}
 		}
 	},
 	"librarySettingsScene": {
-		"heading": "Manage Library",
-		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
+		"heading": "Impostazioni libreria",
+		"subtitle": "Gestisci qui la tua libreria. Se desideri aggiornare queste impostazioni, controlla il",
 		"subtitleLink": "relevant documentation",
 		"form": {
 			"labels": {
@@ -591,8 +591,8 @@
 					"file": {
 						"label": "File Management",
 						"explorer": {
-							"label": "File Explorer",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+							"label": "Esplora file",
+							"description": "Consente all'utente di accedere ai vari esplora file. La restrizione dei contenuti non può essere garantita quando questa funzione viene abilitata"
 						},
 						"download": {
 							"label": "Download files",
@@ -641,14 +641,14 @@
 						},
 						"manage": {
 							"label": "Manage users",
-							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
+							"description": "Consente all'utente di gestire altri utenti sul server.\nInclude i permessi per leggere, creare e aggiornare"
 						}
 					},
 					"smartlist": {
 						"label": "Smart Lists",
 						"read": {
 							"label": "Access smart list feature",
-							"description": "Allows the user to access smart lists features"
+							"description": "Consente all'utente di accedere alle funzionalità delle smart list. Le autorizzazioni granulari non sono ancora implementate, quindi questa include i permessi per leggere, creare e aggiornare le proprie liste"
 						}
 					}
 				},
@@ -798,14 +798,14 @@
 		"diskUsage": "Utilizzo del disco"
 	},
 	"noLibraries": {
-		"heading": "Nothing to see here",
+		"heading": "Niente da vedere qui",
 		"messagePrefix": "You can't see what you don't have",
 		"message": {
-			"create": "Create a library to get started",
-			"wait": "Once libraries are created, they'll be displayed here"
+			"create": "Crea una libreria per iniziare",
+			"wait": "Una volta create le librerie, verranno visualizzate qui"
 		},
 		"links": {
-			"create": "Create library"
+			"create": "Crea libreria"
 		}
 	},
 	"pagination": {
@@ -832,27 +832,27 @@
 	"sidebar": {
 		"buttons": {
 			"home": "Casa",
-			"libraries": "Biblioteche",
-			"books": "Explore",
-			"bookClubs": "Book clubs",
-			"createLibrary": "Create library",
-			"noLibraries": "No libraries",
-			"createBookClub": "Create book club",
-			"noBookClubs": "No book clubs",
+			"libraries": "Librerie",
+			"books": "Esplora",
+			"bookClubs": "Club del libro",
+			"createLibrary": "Crea libreria",
+			"noLibraries": "Nessuna libreria",
+			"createBookClub": "Crea club del libro",
+			"noBookClubs": "Nessun club del libro",
 			"settings": "Impostazioni",
 			"themeToggle": "Cambia Tema",
 			"goForward": "Vai Avanti",
 			"goBack": "Torna Indietro",
-			"smartlists": "Smart lists",
-			"noSmartlists": "No smart lists",
-			"createSmartlist": "Create smart list",
-			"seeAll": "See all"
+			"smartlists": "Smart list",
+			"noSmartlists": "Nessuna smart list",
+			"createSmartlist": "Crea smart list",
+			"seeAll": "Mostra tutti"
 		},
 		"libraryOptions": {
-			"scanLibrary": "Scan",
+			"scanLibrary": "Analizza",
 			"fileExplorer": "Esplora File",
 			"manageLibrary": "Manage",
-			"deleteLibrary": "Delete"
+			"deleteLibrary": "Cancella"
 		},
 		"versionInformation": {
 			"heading": "Informazioni sulla versione",
@@ -867,20 +867,20 @@
 	"serverSOS": {
 		"heading": "Server non disponibile",
 		"desktop": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
+			"message": "Si è verificato un errore di rete, sembra che il tuo server Stump non è al momento disponibile. Assicurati che sia in funzione e accessibile da questo dispositivo.\nSe l'URL del tuo server è cambiato, puoi aggiornarlo utilizzando il modulo sottostante"
 		},
 		"web": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
+			"message": "Si è verificato un errore di rete, sembra che il tuo server Stump non è al momento disponibile. Assicurati che sia in funzione e accessibile da questo dispositivo"
 		},
 		"reconnected": "Riconnesso al server! Redirezione in corso...",
 		"reconnectionFailed": "Qualcosa è andato storto!"
 	},
 	"serverStatusOverlay": {
-		"heading": "Server isn't connected",
+		"heading": "Il server non è connesso",
 		"message": [
-			"Please check your internet connection",
+			"Controlla la tua connessione internet",
 			"Fai clic qui",
-			"to change your server URL"
+			"per cambiare l'URL del tuo server"
 		]
 	},
 	"slidingList": {
@@ -897,13 +897,13 @@
 	"thumbnailDropdown": {
 		"label": "Edit thumbnail",
 		"options": {
-			"selectFromBooks": "Select from books",
-			"uploadImage": "Upload image"
+			"selectFromBooks": "Seleziona dai libri",
+			"uploadImage": "Carica immagine"
 		},
 		"uploadImage": {
-			"emptyState": "A preview of your image will appear here",
-			"prompt": "Drop image here or click to select",
-			"remove": "Remove image"
+			"emptyState": "Un'anteprima della tua immagine apparirà qui",
+			"prompt": "Trascina qui l'immagine o fai clic per selezionare",
+			"remove": "Rimuovi immagine"
 		}
 	},
 	"common": {
@@ -915,8 +915,8 @@
 		"saveChanges": "Save changes",
 		"create": "Create",
 		"edit": "Edit",
-		"update": "Update",
-		"unimplemented": "This functionality is not yet implemented! Check back later",
-		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later"
+		"update": "Aggiorna",
+		"unimplemented": "Questa funzionalità non è stata ancora implementata! Riprova più tardi",
+		"limitedFunctionality": "Questo non è stato ancora implementato completamente e mancano alcune funzionalità. Riprova più tardi"
 	}
 }

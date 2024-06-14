@@ -116,9 +116,9 @@
 				"heading": "Your membership preferences",
 				"subtitle": "Some preferences for your membership in the book club. These can be changed at any time from the book club settings page",
 				"creator_display_name": {
-					"label": "Display Name",
+					"label": "Gebruikersnaam",
 					"placeholder": "oromei",
-					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+					"description": "Een optionele gebruikersnaam voor je lidmaatschap in de boekenclub. Als dit is ingesteld heeft dit voorrang op je gebruikersnaam"
 				},
 				"creator_hide_progress": {
 					"label": "Verberg voortgang",
@@ -135,10 +135,10 @@
 		"form": {
 			"labels": {
 				"libraryName": "Naam",
-				"libraryPath": "Locatie",
-				"libraryPathDescription": "The path to the library as it exists on your server",
-				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+				"libraryPath": "Map locatie",
+				"libraryPathDescription": "Het pad naar de bibliotheek zoals deze bestaat op je server",
+				"libraryDescription": "Beschrijving",
+				"libraryTags": "Labels"
 			},
 			"buttons": {
 				"confirm": "Bibliotheek creëren"
@@ -148,17 +148,17 @@
 	"librarySettingsScene": {
 		"heading": "Manage Library",
 		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"subtitleLink": "relevante documentatie",
 		"form": {
 			"labels": {
 				"libraryName": "Naam",
 				"libraryPath": "Locatie",
-				"libraryPathDescription": "The path to the library as it exists on your server",
+				"libraryPathDescription": "Het pad naar de bibliotheek zoals deze bestaat op je server",
 				"libraryDescription": "Beschrijving",
-				"libraryTags": "Tags"
+				"libraryTags": "Labels"
 			},
 			"buttons": {
-				"confirm": "Save Changes"
+				"confirm": "Wijzigingen opslaan"
 			}
 		}
 	},
@@ -166,59 +166,59 @@
 		"heading": "lol, oops",
 		"message": "Er is een fout opgetreden:",
 		"buttons": {
-			"report": "Report Bug",
-			"copy": "Copy Error Details",
-			"goHome": "Go Home"
+			"report": "Fout melden",
+			"copy": "Kopieer foutgegevens",
+			"goHome": "Ga naar start"
 		}
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "Continue Reading",
+			"title": "Verder lezen",
 			"emptyState": {
-				"heading": "No books to display",
-				"message": "Any books you're currently reading will show up here"
+				"heading": "Geen boeken om weer te geven",
+				"message": "Alle boeken die je momenteel leest worden hier weergegeven"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Recently Added Series",
+			"title": "Recent toegevoegde series",
 			"emptyState": {
-				"heading": "No series to display",
-				"message": "Any series you add to your libraries will show up here"
+				"heading": "Geen series om weer te geven",
+				"message": "Alle series die je toevoegt aan je bibliotheken worden hier weergegeven"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Recently Added Books",
+			"title": "Onlangs toegevoegde boeken",
 			"emptyState": {
-				"heading": "No books to display",
-				"message": "Any books you add to your libraries will show up here"
+				"heading": "Geen boeken om weer te geven",
+				"message": "Alle boeken die je toevoegt aan je bibliotheken verschijnen hier"
 			}
 		}
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "Continue Reading",
-			"downloadSeries": "Download Series"
+			"continueReading": "Verder lezen",
+			"downloadSeries": "Download serie"
 		}
 	},
 	"userSmartListsScene": {
-		"heading": "Smart lists",
-		"subtitle": "Your favorite searches and filters saved for easy access",
-		"searchPlaceholder": "Filter smart lists",
+		"heading": "Slimme lijsten",
+		"subtitle": "Uw favoriete zoekopdrachten en filters opgeslagen voor eenvoudige toegang",
+		"searchPlaceholder": "Filter slimme lijsten",
 		"buttons": {
-			"createSmartList": "Create smart list"
+			"createSmartList": "Maak slimme lijst"
 		},
 		"list": {
 			"emptyState": {
-				"heading": "No smart lists to display",
-				"noListsMessage": "Create a smart list to get started",
-				"noMatchesMessage": "Try changing your search query"
+				"heading": "Geen slimme lijsten om weer te geven",
+				"noListsMessage": "Maak een slimme lijst om te beginnen",
+				"noMatchesMessage": "Probeer je zoekopdracht te veranderen"
 			},
 			"card": {
 				"meta": {
 					"figures": {
-						"books": "book",
+						"books": "boek",
 						"series": "series",
-						"library": "library"
+						"library": "bibliotheek"
 					},
 					"matches": "Overeenkomsten"
 				}
@@ -250,43 +250,43 @@
 				},
 				"filterDrawer": {
 					"heading": "Slimme lijst filters",
-					"description": "Change the filters for this viewing session",
+					"description": "Wijzig de filters voor deze kijksessie",
 					"rawData": {
-						"heading": "Raw filter data",
-						"description": "This is how Stump will process the filters"
+						"heading": "Onbewerkte filtergegevens",
+						"description": "Zo worden de filters verwerkt door Stump"
 					},
 					"buttons": {
-						"save": "Save",
-						"cancel": "Cancel"
+						"save": "Opslaan",
+						"cancel": "Annuleer"
 					}
 				},
 				"search": {
-					"placeholder": "Quick filter"
+					"placeholder": "Snelle filter"
 				},
 				"viewManager": {
-					"updateSelected": "Update selected",
-					"create": "Create new view",
+					"updateSelected": "Selectie bijwerken",
+					"create": "Nieuwe weergave aanmaken",
 					"modal": {
 						"heading": {
-							"create": "Create view",
-							"update": "Update view"
+							"create": "Weergave maken",
+							"update": "Weergave bijwerken"
 						},
 						"description": {
-							"create": "Create a new view for this smart list",
-							"update": "Update the view"
+							"create": "Maak een nieuwe weergave voor deze slimme lijst",
+							"update": "Weergave bijwerken"
 						},
 						"createForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "A friendly name to uniquely identify this view"
+								"label": "Naam",
+								"placeholder": "Mijn weergave",
+								"description": "Een vriendelijke naam om deze weergave te identificeren"
 							}
 						},
 						"updateForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "The updated name for this view, if desired"
+								"label": "Naam",
+								"placeholder": "Mijn weergave",
+								"description": "De bijgewerkte naam voor deze weergave, indien gewenst"
 							}
 						}
 					}
@@ -296,18 +296,18 @@
 	},
 	"settingsScene": {
 		"navigation": {
-			"general": "General",
-			"logs": "Logs",
+			"general": "Algemeen",
+			"logs": "Logboeken",
 			"server": "Server",
-			"jobs": "Jobs and Configuration",
-			"users": "User Management",
+			"jobs": "Taken en instellingen",
+			"users": "Gebruikersbeheer",
 			"desktop": "Desktop"
 		},
 		"sidebar": {
 			"application": {
 				"account": "Account",
-				"appearance": "Appearance",
-				"reader": "Reader",
+				"appearance": "Weergave",
+				"reader": "Lezer",
 				"desktop": "Desktop",
 				"label": "Application"
 			},
@@ -401,81 +401,81 @@
 					"lock": "Lock arrangement",
 					"unlock": "Unlock arrangement",
 					"options": {
-						"Home": "Home",
-						"Explore": "Explore",
-						"Libraries": "Libraries",
-						"BookClubs": "Book clubs",
-						"SmartLists": "Smart lists"
+						"Home": "Thuis",
+						"Explore": "Ontdekken",
+						"Libraries": "Bibliotheken",
+						"BookClubs": "Boekenclubs",
+						"SmartLists": "Slimme lijsten"
 					},
 					"entityOptions": {
 						"createAction": {
-							"label": "Show create action",
-							"help": "Show the create action in the navigation"
+							"label": "Toon aanmaak actie",
+							"help": "Toon de aanmaak actie in de navigatie"
 						},
 						"linkToAll": {
-							"label": "See all link",
-							"help": "A link to a page dedicated to viewing all items of this type"
+							"label": "Laat \"bekijk alle\" knop zien",
+							"help": "Een link naar een pagina gewijd aan het bekijken van alle items van dit type"
 						}
 					}
 				}
 			}
 		},
 		"app/reader": {
-			"helmet": "Reader settings",
-			"title": "Reader settings",
-			"description": "Default options for the Stump readers. These are bound to your current device only",
+			"helmet": "Lezer instellingen",
+			"title": "Lezer instellingen",
+			"description": "Standaard instellingen voor Stump lezers. Deze zijn alleen gebonden aan je huidige apparaat",
 			"sections": {
 				"imageBasedBooks": {
-					"label": "Image-based books",
-					"description": "Comic books, manga, and other image-based books",
+					"label": "Op afbeelding gebaseerde boeken",
+					"description": "Strips, manga en andere op afbeeldingen gebaseerde boeken",
 					"sections": {
 						"preloadAheadCount": {
-							"label": "Preload ahead count",
-							"description": "The number of pages to preload ahead of the current page"
+							"label": "Vooruit laden aantal",
+							"description": "Het aantal vooraf te laden pagina's vanaf de huidige pagina"
 						},
 						"preloadBehindCount": {
-							"label": "Preload behind count",
-							"description": "The number of pages to preload behind the current page"
+							"label": "Achter vooruit laden aantal",
+							"description": "Het aantal vooraf te laden pagina's voor de huidige pagina"
 						}
 					}
 				}
 			}
 		},
 		"app/desktop": {
-			"helmet": "Desktop settings",
-			"title": "Desktop settings",
-			"description": "Settings related to the Stump desktop application",
+			"helmet": "Desktop instellingen",
+			"title": "Desktop instellingen",
+			"description": "Instellingen gerelateerd aan de Stump desktop applicatie",
 			"sections": {
 				"discordPresence": {
-					"label": "Discord Presence",
-					"description": "Display your Stump activity in Discord using Discord Rich Presence",
-					"reconnect": "Reconnect to Discord"
+					"label": "Discord status",
+					"description": "Toon je Stump activiteit in Discord met behulp van Discord Rich Presence",
+					"reconnect": "Opnieuw verbinden met Discord"
 				}
 			}
 		},
 		"server/general": {
-			"helmet": "General server settings",
-			"title": "General settings",
-			"description": "General settings related to your Stump server instance",
+			"helmet": "Algemene serverinstellingen",
+			"title": "Algemene instellingen",
+			"description": "Algemene instellingen gerelateerd aan je Stump server",
 			"sections": {
 				"updateAvailable": {
-					"message": "Your server is not up to date. Please update to the latest version!"
+					"message": "Uw server is niet up-to-date. Update alsjeblieft naar de nieuwste versie!"
 				},
 				"serverInfo": {
-					"title": "Server information",
-					"description": "Basic details about your Stump server instance",
+					"title": "Serverinformatie",
+					"description": "Basisgegevens over uw Stump server instantie",
 					"build": {
-						"label": "Build",
-						"description": "Details about the version and build",
+						"label": "Bouwversie",
+						"description": "Details over de versie en bouwversie",
 						"version": {
-							"semver": "Version",
-							"commitHash": "Exact commit",
-							"date": "Build date"
+							"semver": "Versie",
+							"commitHash": "Exacte commit",
+							"date": "Build-datum"
 						}
 					}
 				},
 				"serverPublicUrl": {
-					"label": "Public URL",
+					"label": "Openbare URL",
 					"description": "The URL that your server is accessible from outside your network, if applicable. This will enable invite links and other features"
 				}
 			}

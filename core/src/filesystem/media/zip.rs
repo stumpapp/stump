@@ -1,11 +1,5 @@
-use std::{
-	collections::HashMap,
-	fs::File,
-	io::Read,
-	path::{Path, PathBuf},
-};
+use std::{collections::HashMap, fs::File, io::Read, path::PathBuf};
 use tracing::{debug, error, trace};
-use zip::read::ZipFile;
 
 use crate::{
 	config::StumpConfig,
@@ -14,6 +8,7 @@ use crate::{
 		error::FileError,
 		hash,
 		media::common::{metadata_from_buf, sort_file_names},
+		FileParts, PathUtils,
 	},
 };
 
@@ -76,11 +71,25 @@ impl FileProcessor for ZipProcessor {
 
 		for i in 0..archive.len() {
 			let mut file = archive.by_index(i)?;
-			let (content_type, buf) = get_zip_entry_content_type(&mut file)?;
-			if file.name() == "ComicInfo.xml" {
+
+			let path_buf = file.enclosed_name().unwrap_or_else(|| {
+				tracing::warn!("Failed to get enclosed name for zip entry");
+				PathBuf::from(file.name())
+			});
+			let path = path_buf.as_path();
+
+			if path.is_hidden_file() {
+				trace!(path = ?path, "Skipping hidden file");
+				continue;
+			}
+
+			let content_type = path.naive_content_type();
+			let FileParts { file_name, .. } = path.file_parts();
+
+			if file_name == "ComicInfo.xml" {
 				trace!("Found ComicInfo.xml");
 				// we have the first few bytes of the file in buf, so we need to read the rest and make it a string
-				let mut contents = buf.to_vec();
+				let mut contents = Vec::new();
 				file.read_to_end(&mut contents)?;
 				let contents = String::from_utf8_lossy(&contents).to_string();
 				trace!(contents_len = contents.len(), "Read ComicInfo.xml");
@@ -119,14 +128,26 @@ impl FileProcessor for ZipProcessor {
 		let mut images_seen = 0;
 		for name in file_names {
 			let mut file = archive.by_name(name)?;
-			let (content_type, buf) = get_zip_entry_content_type(&mut file)?;
+
+			let path_buf = file.enclosed_name().unwrap_or_else(|| {
+				tracing::warn!("Failed to get enclosed name for zip entry");
+				PathBuf::from(name)
+			});
+			let path = path_buf.as_path();
+
+			if path.is_hidden_file() {
+				tracing::trace!(path = ?path_buf, "Skipping hidden file");
+				continue;
+			}
+
+			let content_type = path.naive_content_type();
 
 			if images_seen + 1 == page && content_type.is_image() {
-				trace!(?name, page, ?content_type, "found target zip entry");
-				// read_to_end maintains the current cursor, so we want to start
-				// with what we already read
-				let mut contents = buf.to_vec();
+				trace!(?name, page, ?content_type, "Found targeted zip entry");
+
+				let mut contents = Vec::new();
 				file.read_to_end(&mut contents)?;
+				trace!(contents_len = contents.len(), "Read zip entry");
 
 				return Ok((content_type, contents));
 			} else if content_type.is_image() {
@@ -134,7 +155,7 @@ impl FileProcessor for ZipProcessor {
 			}
 		}
 
-		error!(page, path, "Failed to find valid image");
+		error!(page, path, "Failed to find valid image in zip file");
 
 		Err(FileError::NoImageError)
 	}
@@ -153,10 +174,15 @@ impl FileProcessor for ZipProcessor {
 		let mut pages = 0;
 		let file_names = file_names_archive.file_names().collect::<Vec<_>>();
 		for name in file_names {
-			let mut file = archive.by_name(name)?;
-			let (content_type, _) = get_zip_entry_content_type(&mut file)?;
+			let file = archive.by_name(name)?;
+			let path_buf = file.enclosed_name().unwrap_or_else(|| {
+				tracing::warn!("Failed to get enclosed name for zip entry");
+				PathBuf::from(name)
+			});
+			let content_type = path_buf.as_path().naive_content_type();
+			let is_hidden = path_buf.as_path().is_hidden_file();
 
-			if content_type.is_image() {
+			if content_type.is_image() && !is_hidden {
 				pages += 1;
 			}
 		}
@@ -183,8 +209,19 @@ impl FileProcessor for ZipProcessor {
 
 		let mut images_seen = 0;
 		for name in file_names {
-			let mut file = archive.by_name(name)?;
-			let (content_type, _) = get_zip_entry_content_type(&mut file)?;
+			let file = archive.by_name(name)?;
+			let path_buf = file.enclosed_name().unwrap_or_else(|| {
+				tracing::warn!("Failed to get enclosed name for zip entry");
+				PathBuf::from(name)
+			});
+			let path = path_buf.as_path();
+
+			if path.is_hidden_file() {
+				trace!(path = ?path_buf, "Skipping hidden file");
+				continue;
+			}
+
+			let content_type = path.naive_content_type();
 			let is_page_in_target = pages.contains(&(images_seen + 1));
 
 			if is_page_in_target && content_type.is_image() {
@@ -204,33 +241,12 @@ impl FileProcessor for ZipProcessor {
 	}
 }
 
-fn get_zip_entry_content_type(
-	zipfile: &mut ZipFile,
-) -> Result<(ContentType, Vec<u8>), FileError> {
-	let file_size = zipfile.size();
-	let file_name = zipfile.name().to_string();
-	let buf_size = if file_size < 5 { file_size } else { 5 };
-
-	if buf_size < 5 {
-		trace!(?buf_size, "Found small zip entry");
-	}
-
-	let extension = Path::new(&file_name)
-		.extension()
-		.and_then(|e| e.to_str())
-		.unwrap_or_default();
-
-	let mut buf = vec![0; buf_size as usize];
-	zipfile.read_exact(&mut buf)?;
-	let content_type = ContentType::from_bytes_with_fallback(&buf, extension);
-
-	Ok((content_type, buf))
-}
-
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::filesystem::media::tests::{get_test_cbz_path, get_test_zip_path};
+	use crate::filesystem::media::tests::{
+		get_nested_macos_compressed_cbz_path, get_test_cbz_path, get_test_zip_path,
+	};
 
 	#[test]
 	fn test_process() {
@@ -265,6 +281,23 @@ mod tests {
 	}
 
 	#[test]
+	fn test_process_nested_cbz() {
+		let path = get_nested_macos_compressed_cbz_path();
+		let config = StumpConfig::debug();
+
+		let processed_file = ZipProcessor::process(
+			&path,
+			FileProcessorOptions {
+				convert_rar_to_zip: false,
+				delete_conversion_source: false,
+			},
+			&config,
+		);
+		assert!(processed_file.is_ok());
+		assert_eq!(processed_file.unwrap().pages, 3);
+	}
+
+	#[test]
 	fn test_get_page_cbz() {
 		// Note: This doesn't work with the other test book, because it has no pages.
 		let path = get_test_cbz_path();
@@ -272,6 +305,17 @@ mod tests {
 
 		let page = ZipProcessor::get_page(&path, 1, &config);
 		assert!(page.is_ok());
+	}
+
+	#[test]
+	fn test_get_page_nested_cbz() {
+		let path = get_nested_macos_compressed_cbz_path();
+
+		let (content_type, buf) = ZipProcessor::get_page(&path, 1, &StumpConfig::debug())
+			.expect("Failed to get page");
+		assert_eq!(content_type.mime_type(), "image/jpeg");
+		// Note: this is known and expected to be 96623 bytes.
+		assert_eq!(buf.len(), 96623);
 	}
 
 	#[test]
@@ -289,5 +333,17 @@ mod tests {
 		let content_types =
 			ZipProcessor::get_page_content_types(&path, vec![1, 2, 3, 4, 5]);
 		assert!(content_types.is_ok());
+	}
+
+	#[test]
+	fn test_get_page_content_types_nested_cbz() {
+		let path = get_nested_macos_compressed_cbz_path();
+
+		let content_types = ZipProcessor::get_page_content_types(&path, vec![1, 2, 3])
+			.expect("Failed to get page content types");
+		assert_eq!(content_types.len(), 3);
+		assert!(content_types
+			.values()
+			.all(|ct| ct.mime_type() == "image/jpeg"));
 	}
 }

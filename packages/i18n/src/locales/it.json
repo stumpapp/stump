@@ -72,9 +72,9 @@
 		"subtitle": "You can create a private book club a select few, or make it public for anyone on the server to join",
 		"form": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My book club",
-				"description": "The name of your book club"
+				"label": "Nome",
+				"placeholder": "Il mio club del libro",
+				"description": "Il nome del tuo club del libro"
 			},
 			"description": {
 				"label": "Description",
@@ -94,22 +94,22 @@
 				"member": {
 					"label": "Member",
 					"placeholder": "Member",
-					"description": "The name of the default role for your book club"
+					"description": "Il nome del ruolo predefinito per il tuo club del libro"
 				},
 				"moderator": {
 					"label": "Moderator",
 					"placeholder": "Moderator",
-					"description": "The name of the moderator role for your book club"
+					"description": "Il nome del ruolo di moderatore per il tuo club del libro"
 				},
 				"admin": {
 					"label": "Admin",
 					"placeholder": "Admin",
-					"description": "The name of the admin role for your book club"
+					"description": "Il nome del ruolo di amministratore per il tuo club del libro"
 				},
 				"creator": {
 					"label": "Creator",
 					"placeholder": "Creator",
-					"description": "The name of the creator role for your book club. This is you!"
+					"description": "Il nome del ruolo di creatore per il tuo club del libro. Questo sei tu!"
 				}
 			},
 			"creator_preferences": {
@@ -151,7 +151,7 @@
 		"subtitleLink": "relevant documentation",
 		"form": {
 			"labels": {
-				"libraryName": "Name",
+				"libraryName": "Nome",
 				"libraryPath": "Path",
 				"libraryPathDescription": "The path to the library as it exists on your server",
 				"libraryDescription": "Description",
@@ -277,14 +277,14 @@
 						},
 						"createForm": {
 							"name": {
-								"label": "Name",
+								"label": "Nome",
 								"placeholder": "My view",
 								"description": "A friendly name to uniquely identify this view"
 							}
 						},
 						"updateForm": {
 							"name": {
-								"label": "Name",
+								"label": "Nome",
 								"placeholder": "My view",
 								"description": "The updated name for this view, if desired"
 							}
@@ -600,47 +600,47 @@
 						},
 						"upload": {
 							"label": "Upload files",
-							"description": "Allows the user to upload files to the server"
+							"description": "Consente all'utente di caricare file sul server"
 						}
 					},
 					"library": {
-						"label": "Library Management",
+						"label": "Gestione Libreria",
 						"create": {
-							"label": "Create libraries",
-							"description": "Allows the user to create new libraries.\nIncludes permissions to edit and scan"
+							"label": "Creare librerie",
+							"description": "Consente all'utente di creare nuove librerie.\nInclude le autorizzazioni per modificare ed eseguire la scansione"
 						},
 						"scan": {
-							"label": "Scan libraries",
-							"description": "Allows the user to initiate scans for existing libraries"
+							"label": "Scansionare librerie",
+							"description": "Consente all'utente di avviare scansioni per le librerie esistenti"
 						},
 						"edit": {
-							"label": "Edit libraries",
-							"description": "Allows the user to edit basic details for existing libraries"
+							"label": "Modificare librerie",
+							"description": "Consente all'utente di modificare i dettagli di base per le librerie esistenti"
 						},
 						"manage": {
-							"label": "Manage libraries",
-							"description": "Allows the user to manage advanced settings for existing libraries.\nIncludes permissions to edit and scan"
+							"label": "Gestire librerie",
+							"description": "Consente all'utente di gestire le impostazioni avanzate per le librerie esistenti.\nInclude le autorizzazioni per modificare ed eseguire la scansione"
 						},
 						"delete": {
-							"label": "Delete libraries",
-							"description": "Allows the user to delete existing libraries.\nIncludes permissions to edit, manage, and scan"
+							"label": "Eliminare librerie",
+							"description": "Consente all'utente di eliminare le librerie esistenti.\nInclude le autorizzazioni per modificare, gestire ed eseguire scansioni"
 						}
 					},
 					"server": {
-						"label": "Server Management",
+						"label": "Gestione Server",
 						"manage": {
-							"label": "Manage server",
-							"description": "Allows the user to manage the server.\nIncludes *many* other permissions"
+							"label": "Gestire server",
+							"description": "Consente all'utente di gestire il server.\nInclude *molte* altre autorizzazioni"
 						}
 					},
 					"user": {
-						"label": "User Management",
+						"label": "Gestione utenti",
 						"read": {
-							"label": "Read users",
-							"description": "Allows the user to query other users on the server. This is required for some other features, e.g. excluding users from accessing a library"
+							"label": "Leggere utenti",
+							"description": "Consente all'utente d'interrogare altri utenti sul server. Richiesto per altre funzionalità, ad esempio escludere gli utenti dall'accesso a una libreria"
 						},
 						"manage": {
-							"label": "Manage users",
+							"label": "Gestire utenti",
 							"description": "Consente all'utente di gestire altri utenti sul server.\nInclude i permessi per leggere, creare e aggiornare"
 						}
 					},
@@ -653,14 +653,14 @@
 					}
 				},
 				"validation": {
-					"ageRestrictionTooLow": "Age restriction cannot be less than 0"
+					"ageRestrictionTooLow": "La limitazione dell'età non può essere inferiore a 0"
 				},
-				"createSubmitButton": "Create user",
-				"updateSubmitButton": "Update user"
+				"createSubmitButton": "Crea utente",
+				"updateSubmitButton": "Aggiorna utente"
 			}
 		},
 		"server/email": {
-			"helmet": "Email settings",
+			"helmet": "Impostazioni email",
 			"title": "Email",
 			"description": "Settings related to the configuring an SMTP emailer for your Stump server instance",
 			"sections": {
@@ -697,7 +697,7 @@
 							"update": "Update device alias"
 						},
 						"name": {
-							"label": "Name",
+							"label": "Nome",
 							"description": "A friendly name to uniquely identify this device alias"
 						},
 						"email": {
@@ -705,7 +705,7 @@
 							"description": "The email address this alias will be associated with"
 						},
 						"forbidden": {
-							"label": "Forbidden",
+							"label": "Vietato",
 							"description": "When enabled, no user may send emails to the address associated with this alias"
 						},
 						"submit": {
@@ -721,7 +721,7 @@
 			},
 			"createOrUpdateForm": {
 				"name": {
-					"label": "Name",
+					"label": "Nome",
 					"description": "A friendly name to uniquely identify this emailer"
 				},
 				"smtpSettings": {
@@ -757,7 +757,7 @@
 					"description": "The settings for the sender of the email"
 				},
 				"senderDisplayName": {
-					"label": "Sender display name",
+					"label": "Nome visualizzato del mittente",
 					"description": "The name that will be displayed to recipients"
 				},
 				"senderEmail": {

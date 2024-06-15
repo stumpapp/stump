@@ -1,8 +1,8 @@
 {
 	"underConstruction": {
-		"heading": "This is awkward",
-		"message": "You've stumbled upon a page that's still being developed. I'd love to show it to you, but it isn't quite ready yet.",
-		"homeLink": "Go Home",
+		"heading": "Questo è strano",
+		"message": "Sei incappato su una pagina ancora in fase di sviluppo. Mi piacerebbe mostrarla, ma non è ancora abbastanza pronta.",
+		"homeLink": "Torna alla home",
 		"githubLink": "View the GitHub issue"
 	},
 	"authScene": {
@@ -118,7 +118,7 @@
 				"creator_display_name": {
 					"label": "Display Name",
 					"placeholder": "oromei",
-					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+					"description": "Un nome opzionale per la tua iscrizione nel club del libro. Se impostato, ha la precedenza sul tuo nome utente"
 				},
 				"creator_hide_progress": {
 					"label": "Hide Progress",
@@ -330,10 +330,10 @@
 				"account": {
 					"validation": {
 						"invalidUrl": "Please enter a valid URL",
-						"missingUsername": "Username is required"
+						"missingUsername": "Il nome utente è obbligatorio"
 					},
 					"labels": {
-						"username": "Username",
+						"username": "Nome utente",
 						"password": "Password",
 						"activeChangesPrompt": "You have unsaved changes"
 					},
@@ -746,7 +746,7 @@
 				},
 				"username": {
 					"label": "Nome utente",
-					"description": "The username for authenticating with the SMTP server. This is typically the email address"
+					"description": "Il nome utente per l'autenticazione con il server SMTP. Tipicamente è l'indirizzo email"
 				},
 				"password": {
 					"label": "Password",

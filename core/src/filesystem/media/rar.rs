@@ -124,6 +124,12 @@ impl FileProcessor for RarProcessor {
 
 		while let Ok(Some(header)) = archive.read_header() {
 			let entry = header.entry();
+
+			if entry.filename.is_hidden_file() {
+				archive = header.skip()?;
+				continue;
+			}
+
 			if entry.filename.as_os_str() == "ComicInfo.xml" {
 				let (data, rest) = header.read()?;
 				metadata_buf = Some(data);
@@ -186,43 +192,30 @@ impl FileProcessor for RarProcessor {
 			}
 		}
 
-		let content_type = if let Some(bytes) = &bytes {
-			if bytes.len() < 5 {
-				return Err(FileError::NoImageError);
-			}
-			let mut magic_header = [0; 5];
-			magic_header.copy_from_slice(&bytes[0..5]);
-			ContentType::from_bytes(&magic_header)
-		} else {
-			ContentType::UNKNOWN
+		let Some(bytes) = bytes else {
+			return Err(FileError::NoImageError);
 		};
 
-		Ok((content_type, bytes.ok_or(FileError::NoImageError)?))
+		if bytes.len() < 5 {
+			return Err(FileError::NoImageError);
+		}
+		let mut magic_header = [0; 5];
+		magic_header.copy_from_slice(&bytes[0..5]);
+		let content_type = ContentType::from_bytes(&magic_header);
+
+		Ok((content_type, bytes))
 	}
 
 	fn get_page_count(path: &str, _: &StumpConfig) -> Result<i32, FileError> {
 		let archive = RarProcessor::open_for_listing(path)?;
 
-		// Get count of valid page entries
-		let mut pages = 0;
-		for entry in archive {
-			if entry.is_err() {
-				continue;
-			}
+		let page_count = archive
+			.into_iter()
+			.filter_map(|entry| entry.ok())
+			.filter(|entry| entry.filename.is_img())
+			.count();
 
-			// Make sure it's an image
-			let entry = entry.unwrap();
-			if entry.filename.as_os_str() == "ComicInfo.xml" {
-				continue;
-			} else {
-				// If the entry is not an image then it cannot be a valid page
-				if entry.filename.is_img() {
-					pages += 1;
-				}
-			}
-		}
-
-		Ok(pages)
+		Ok(page_count as i32)
 	}
 
 	fn get_page_content_types(
@@ -241,6 +234,7 @@ impl FileProcessor for RarProcessor {
 			.collect::<HashMap<_, _>>();
 
 		let mut content_types = HashMap::new();
+		// TODO(327): Remove the file reads, open for listing, use extensions for naive content type
 		let mut archive = RarProcessor::open_for_processing(path)?;
 		while let Ok(Some(header)) = archive.read_header() {
 			archive = if let Some(tuple) =

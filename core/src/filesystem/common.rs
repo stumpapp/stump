@@ -189,19 +189,9 @@ impl PathUtils for Path {
 		!self.is_supported()
 	}
 
-	// TODO(327): Remove infer usage
-	/// Returns true if the file is an image. This is a strict check when infer
-	/// can determine the file type, and a loose extension-based check when infer cannot.
+	/// Returns true if the file is an image. This is a naive check based on the extension.
 	fn is_img(&self) -> bool {
-		if let Ok(Some(file_type)) = infer::get_from_path(self) {
-			return file_type.mime_type().starts_with("image/");
-		}
-
-		let FileParts { extension, .. } = self.file_parts();
-
-		extension.eq_ignore_ascii_case("jpg")
-			|| extension.eq_ignore_ascii_case("png")
-			|| extension.eq_ignore_ascii_case("jpeg")
+		self.naive_content_type().is_image()
 	}
 
 	fn is_thumbnail_img(&self) -> bool {

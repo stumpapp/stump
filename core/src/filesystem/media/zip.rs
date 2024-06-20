@@ -207,7 +207,7 @@ impl FileProcessor for ZipProcessor {
 
 		let mut content_types = HashMap::new();
 
-		let mut images_seen = 0;
+		let mut pages_found = 0;
 		for name in file_names {
 			let file = archive.by_name(name)?;
 			let path_buf = file.enclosed_name().unwrap_or_else(|| {
@@ -222,17 +222,16 @@ impl FileProcessor for ZipProcessor {
 			}
 
 			let content_type = path.naive_content_type();
-			let is_page_in_target = pages.contains(&(images_seen + 1));
+			let is_page_in_target = pages.contains(&(pages_found + 1));
 
 			if is_page_in_target && content_type.is_image() {
 				trace!(?name, ?content_type, "found a targeted zip entry");
-				content_types.insert(images_seen + 1, content_type);
-				images_seen += 1;
-			} else if content_type.is_image() {
-				images_seen += 1;
+				content_types.insert(pages_found + 1, content_type);
+				pages_found += 1;
 			}
 
-			if images_seen == pages.len() as i32 {
+			// If we've found all the pages we need, we can stop
+			if pages_found == pages.len() as i32 {
 				break;
 			}
 		}

@@ -71,14 +71,35 @@ pub struct FileParts {
 }
 
 pub trait PathUtils {
+	/// Returns the file name, file stem, and extension of the file.
 	fn file_parts(&self) -> FileParts;
+	/// Returns the result of `infer::get_from_path`.
 	fn infer_kind(&self) -> std::io::Result<Option<infer::Type>>;
+	/// Returns the content type of the file based on the extension.
+	fn naive_content_type(&self) -> ContentType;
+	/// Returns true if the file is hidden (i.e. starts with a dot). Also checks for
+	/// files within a __MACOSX directory.
 	fn is_hidden_file(&self) -> bool;
+	/// Returns true if the file is supported by Stump.
 	fn should_ignore(&self) -> bool;
+	/// Returns true if the file is an image.
 	fn is_supported(&self) -> bool;
+	/// Returns true if the file is an image.
 	fn is_img(&self) -> bool;
+	/// Returns true if the file is a thumbnail image. This calls the `is_img` function
+	/// from the same trait, and then checks if the file name is one of the following:
+	/// - cover
+	/// - thumbnail
+	/// - folder
+	///
+	/// These will *potentially* be reserved filenames in the future... Not sure
+	/// if this functionality will be kept.
 	fn is_thumbnail_img(&self) -> bool;
+	/// Returns true if the directory has any media files in it. This is a shallow
+	/// check, and will not check subdirectories.
 	fn dir_has_media(&self) -> bool;
+	/// Returns true if the directory has any media files in it. This is a deep
+	/// check, and will check *all* subdirectories.
 	fn dir_has_media_deep(&self) -> bool;
 }
 
@@ -120,13 +141,33 @@ impl PathUtils for Path {
 		infer::get_from_path(self)
 	}
 
+	fn naive_content_type(&self) -> ContentType {
+		let extension = self
+			.extension()
+			.and_then(|e| e.to_str())
+			.unwrap_or_default();
+
+		if extension.is_empty() {
+			return ContentType::UNKNOWN;
+		}
+
+		ContentType::from_extension(extension)
+	}
+
 	/// Returns true if the file is hidden (i.e. starts with a dot).
 	fn is_hidden_file(&self) -> bool {
+		// If the file is contained inside of a __MACOSX directory, assume it is hidden.
+		// We don't want to deal with these files.
+		if self.starts_with("__MACOSX") {
+			return true;
+		}
+
 		let FileParts { file_name, .. } = self.file_parts();
 
 		file_name.starts_with('.')
 	}
 
+	// TODO(327): Remove infer usage
 	/// Returns true if the file is a supported media file. This is a strict check when
 	/// infer can determine the file type, and a loose extension-based check when infer cannot.
 	fn is_supported(&self) -> bool {
@@ -148,28 +189,11 @@ impl PathUtils for Path {
 		!self.is_supported()
 	}
 
-	/// Returns true if the file is an image. This is a strict check when infer
-	/// can determine the file type, and a loose extension-based check when infer cannot.
+	/// Returns true if the file is an image. This is a naive check based on the extension.
 	fn is_img(&self) -> bool {
-		if let Ok(Some(file_type)) = infer::get_from_path(self) {
-			return file_type.mime_type().starts_with("image/");
-		}
-
-		let FileParts { extension, .. } = self.file_parts();
-
-		extension.eq_ignore_ascii_case("jpg")
-			|| extension.eq_ignore_ascii_case("png")
-			|| extension.eq_ignore_ascii_case("jpeg")
+		self.naive_content_type().is_image()
 	}
 
-	/// Returns true if the file is a thumbnail image. This calls the `is_img` function
-	/// from the same trait, and then checks if the file name is one of the following:
-	/// - cover
-	/// - thumbnail
-	/// - folder
-	///
-	/// These will *potentially* be reserved filenames in the future... Not sure
-	/// if this functionality will be kept.
 	fn is_thumbnail_img(&self) -> bool {
 		if !self.is_img() {
 			return false;
@@ -180,8 +204,6 @@ impl PathUtils for Path {
 		is_accepted_cover_name(&file_stem)
 	}
 
-	/// Returns true if the directory has any media files in it. This is a shallow
-	/// check, and will not check subdirectories.
 	fn dir_has_media(&self) -> bool {
 		if !self.is_dir() {
 			return false;
@@ -205,8 +227,6 @@ impl PathUtils for Path {
 		}
 	}
 
-	/// Returns true if the directory has any media files in it. This is a deep
-	/// check, and will check *all* subdirectories.
 	fn dir_has_media_deep(&self) -> bool {
 		if !self.is_dir() {
 			return false;

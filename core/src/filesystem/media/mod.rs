@@ -59,4 +59,13 @@ mod tests {
 			.to_string_lossy()
 			.to_string()
 	}
+
+	// Note: each page should be 96623 bytes. The macOS metadata files should be 220 bytes, but
+	// ignored by the processor. Commenting the sizes for posterity.
+	pub fn get_nested_macos_compressed_cbz_path() -> String {
+		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+			.join("integration-tests/data/nested-macos-compressed.cbz")
+			.to_string_lossy()
+			.to_string()
+	}
 }

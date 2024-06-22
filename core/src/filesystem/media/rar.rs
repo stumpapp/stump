@@ -213,7 +213,7 @@ impl FileProcessor for RarProcessor {
 		let page_count = archive
 			.into_iter()
 			.filter_map(|entry| entry.ok())
-			.filter(|entry| entry.filename.is_img())
+			.filter(|entry| entry.filename.is_img() && !entry.filename.is_hidden_file())
 			.count();
 
 		Ok(page_count as i32)

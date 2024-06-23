@@ -94,8 +94,6 @@ impl OPDSPublication {
 					..metadata
 				};
 
-				// serde_json::to
-
 				let metadata = OPDSMetadataBuilder::default()
 					.title(title)
 					.modified(OPDSMetadata::generate_modified())

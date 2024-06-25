@@ -201,7 +201,7 @@ impl JobExt for AnalyzeMediaJob {
 						ctx.db
 							.media_metadata()
 							.update(
-								media_metadata::id::equals(media_item.id),
+								media_metadata::media_id::equals(media_item.id),
 								vec![media_metadata::page_count::set(Some(page_count))],
 							)
 							.exec()

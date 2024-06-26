@@ -1,5 +1,5 @@
 import { authApi, authQueryKeys, checkIsClaimed, serverQueryKeys } from '@stump/api'
-import type { User } from '@stump/types'
+import { isUser, type User } from '@stump/types'
 import { useEffect, useState } from 'react'
 
 import { queryClient, QueryOptions, useMutation, useQuery } from '../client'
@@ -9,6 +9,10 @@ export function useAuthQuery(options: QueryOptions<User> = {}) {
 		[authQueryKeys.me],
 		async () => {
 			const { data } = await authApi.me()
+			if (!isUser(data)) {
+				console.debug('Malformed response recieved from server', data)
+				throw new Error('Malformed response recieved from server')
+			}
 			return data
 		},
 		{

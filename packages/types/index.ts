@@ -1,4 +1,9 @@
-import { CursorInfo, Library, Media, PageInfo, Series } from './generated'
+import { CursorInfo, Library, Media, PageInfo, Series, User } from './generated'
+
+export const isUser = (data: unknown): data is User => {
+	const casted = data as User
+	return casted?.id !== undefined && casted?.is_server_owner !== undefined
+}
 
 export enum FileStatus {
 	Unknown = 'UNKNOWN',

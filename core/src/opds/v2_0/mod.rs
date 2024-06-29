@@ -16,9 +16,6 @@ pub use error::OPDSV2Error;
 pub use prisma_macros::books_as_publications;
 pub use utils::{ArrayOrItem, OPDSV2PrismaExt};
 
-// TODO: publication
 // TODO: facet (kinda confused on this one still)
 
 // TODO: lots of (de)serialization testing!
-
-// TODO: custom OPDSV2Error?

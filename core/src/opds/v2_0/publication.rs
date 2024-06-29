@@ -4,7 +4,7 @@ use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use crate::{db::entity::MediaMetadata, CoreError, CoreResult, Ctx};
+use crate::{db::entity::MediaMetadata, prisma::PrismaClient, CoreError, CoreResult};
 
 use super::{
 	books_as_publications,
@@ -29,7 +29,7 @@ use super::{
 pub struct OPDSPublication {
 	/// The metadata for the publication
 	pub metadata: OPDSMetadata,
-	#[serde(default)]
+	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub images: Vec<OPDSImageLink>,
 	// TODO: this is literally mentioned once in the spec and that's it... Likely need to check
 	// the Readium Web Publication spec for more information? From once example, it looks like links
@@ -39,11 +39,9 @@ pub struct OPDSPublication {
 
 impl OPDSPublication {
 	pub async fn vec_from_books(
-		ctx: &Ctx,
+		client: &PrismaClient,
 		books: Vec<books_as_publications::Data>,
 	) -> CoreResult<Vec<Self>> {
-		let client = &ctx.db;
-
 		let mut series_to_books_map = HashMap::new();
 		let mut series_id_to_series_map = HashMap::new();
 
@@ -112,5 +110,78 @@ impl OPDSPublication {
 		}
 
 		Ok(publications)
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use prisma_client_rust::chrono::Utc;
+
+	use crate::{
+		db::FileStatus,
+		opds::v2_0::utils::{book_positions_in_series_raw_query, EntityPosition},
+	};
+
+	use super::*;
+
+	fn mock_book() -> books_as_publications::Data {
+		books_as_publications::Data {
+			id: "1".to_string(),
+			name: "Book 1".to_string(),
+			metadata: None,
+			series: Some(books_as_publications::series::Data {
+				id: "1".to_string(),
+				name: "Series 1".to_string(),
+				metadata: None,
+			}),
+			created_at: Utc::now().into(),
+			updated_at: Utc::now().into(),
+			extension: String::from("epub"),
+			path: String::from("path"),
+			status: FileStatus::Ready.to_string(),
+			hash: Some(String::from("hash")),
+			series_id: Some("1".to_string()),
+			pages: 0,
+			modified_at: None,
+			size: 2000,
+		}
+	}
+
+	#[tokio::test]
+	async fn test_vec_from_books() {
+		let books = vec![
+			mock_book(),
+			books_as_publications::Data {
+				id: "2".to_string(),
+				name: "Book 2".to_string(),
+				..mock_book()
+			},
+		];
+
+		let (client, mock) = PrismaClient::_mock();
+
+		mock.expect(
+			client._query_raw(book_positions_in_series_raw_query(
+				vec!["1".to_string(), "2".to_string()],
+				"1".to_string(),
+			)),
+			vec![
+				EntityPosition {
+					id: "1".to_string(),
+					position: 1,
+				},
+				EntityPosition {
+					id: "2".to_string(),
+					position: 2,
+				},
+			],
+		)
+		.await;
+
+		let publications = OPDSPublication::vec_from_books(&client, books)
+			.await
+			.expect("Failed to generate publications");
+
+		assert_eq!(publications.len(), 2);
 	}
 }

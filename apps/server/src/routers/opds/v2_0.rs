@@ -139,7 +139,7 @@ async fn catalog(
 			libraries
 				.into_iter()
 				.map(OPDSNavigationLink::from)
-				.collect(),
+				.collect::<Vec<OPDSNavigationLink>>(),
 		)
 		.build()?;
 
@@ -153,7 +153,7 @@ async fn catalog(
 		.exec()
 		.await?;
 	let latest_books_count = client.media().count(latest_books_conditions).exec().await?;
-	let publications = OPDSPublication::vec_from_books(&ctx, latest_books).await?;
+	let publications = OPDSPublication::vec_from_books(&ctx.db, latest_books).await?;
 	let latest_books_group = OPDSFeedGroupBuilder::default()
 		.metadata(
 			OPDSMetadataBuilder::default()
@@ -235,7 +235,7 @@ async fn fetch_books_and_generate_feed(
 		.exec()
 		.await?;
 	let books_count = client.media().count(where_params).exec().await?;
-	let publications = OPDSPublication::vec_from_books(ctx, books).await?;
+	let publications = OPDSPublication::vec_from_books(&client, books).await?;
 
 	let next_page = pagination.get_next_page();
 	let previous_link = if let Some(page) = pagination.page {

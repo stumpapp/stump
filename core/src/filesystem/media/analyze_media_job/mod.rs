@@ -1,14 +1,16 @@
+mod task_analyze_dimensions;
+mod task_page_count;
+mod utils;
+
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
 use crate::{
-	db::entity::Media,
-	filesystem::media::process::get_page_count,
 	job::{
 		error::JobError, JobExt, JobOutputExt, JobTaskOutput, WorkerCtx, WorkingState,
 		WrappedJob,
 	},
-	prisma::{media, media_metadata, series},
+	prisma::{media, series},
 };
 
 type MediaID = String;
@@ -29,21 +31,30 @@ pub enum AnalyzeMediaJobVariant {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum AnalyzeMediaTask {
-	/// Analyze the image for an individual media item, specified by ID.
-	AnalyzeImage(MediaID),
+	/// Count the pages of a media item specified by an ID.
+	UpdatePageCount(MediaID),
+	/// Analyze and store dimensions for each page of a media item specified by an ID.
+	AnalyzePageDimensions(MediaID),
+	/// Performs both [UpdatePageCount] and then [AnalyzePageDimensions] in sequence for
+	/// the media item specified by an ID.
+	FullAnalysis(MediaID),
 }
 
 #[derive(Clone, Serialize, Deserialize, Default, Debug, Type)]
 pub struct AnalyzeMediaOutput {
-	/// The number of images analyzed
-	images_analyzed: u64,
-	/// The number of media items updated
+	/// The number of page counts analyzed.
+	page_counts_analyzed: u64,
+	/// The number of images whose dimensions were analyzed.
+	image_dimensions_analyzed: u64,
+	/// The number of media item updates performed.
 	media_updated: u64,
 }
 
 impl JobOutputExt for AnalyzeMediaOutput {
 	fn update(&mut self, updated: Self) {
-		self.images_analyzed += updated.images_analyzed;
+		self.page_counts_analyzed += updated.page_counts_analyzed;
+		self.image_dimensions_analyzed += updated.image_dimensions_analyzed;
+		self.media_updated += updated.media_updated;
 	}
 }
 
@@ -55,9 +66,34 @@ pub struct AnalyzeMediaJob {
 }
 
 impl AnalyzeMediaJob {
-	/// Create a new [AnalyzeMediaJob] for the media specified by `id`.
-	pub fn new(variant: AnalyzeMediaJobVariant) -> Box<WrappedJob<AnalyzeMediaJob>> {
-		WrappedJob::new(Self { variant })
+	/// Create a new [AnalyzeMediaJob] for the media specified by `media_id`.
+	pub fn analyze_media_item(media_id: String) -> Box<WrappedJob<AnalyzeMediaJob>> {
+		WrappedJob::new(Self {
+			variant: AnalyzeMediaJobVariant::AnalyzeSingleItem(media_id),
+		})
+	}
+
+	/// Create a new [AnalyzeMediaJob] for the `group_ids`s specified.
+	pub fn analyze_media_group(
+		group_ids: Vec<String>,
+	) -> Box<WrappedJob<AnalyzeMediaJob>> {
+		WrappedJob::new(Self {
+			variant: AnalyzeMediaJobVariant::AnalyzeMediaGroup(group_ids),
+		})
+	}
+
+	/// Create a new [AnalyzeMediaJob] for the library specified by `library_id`.
+	pub fn analyze_library(library_id: String) -> Box<WrappedJob<AnalyzeMediaJob>> {
+		WrappedJob::new(Self {
+			variant: AnalyzeMediaJobVariant::AnalyzeLibrary(library_id),
+		})
+	}
+
+	/// Create a new [AnalyzeMediaJob] for the series specified by `series_id`.
+	pub fn analyze_series(series_id: String) -> Box<WrappedJob<AnalyzeMediaJob>> {
+		WrappedJob::new(Self {
+			variant: AnalyzeMediaJobVariant::AnalyzeSeries(series_id),
+		})
 	}
 }
 
@@ -95,7 +131,7 @@ impl JobExt for AnalyzeMediaJob {
 		let tasks = match &self.variant {
 			// Single item is easy
 			AnalyzeMediaJobVariant::AnalyzeSingleItem(id) => {
-				vec![AnalyzeMediaTask::AnalyzeImage(id.clone())]
+				vec![AnalyzeMediaTask::FullAnalysis(id.clone())]
 			},
 			// For libraries we need a list of ids
 			AnalyzeMediaJobVariant::AnalyzeLibrary(id) => {
@@ -112,7 +148,7 @@ impl JobExt for AnalyzeMediaJob {
 
 				library_media
 					.into_iter()
-					.map(|media| AnalyzeMediaTask::AnalyzeImage(media.id))
+					.map(|media| AnalyzeMediaTask::FullAnalysis(media.id))
 					.collect()
 			},
 			// We also need a list for series
@@ -128,13 +164,13 @@ impl JobExt for AnalyzeMediaJob {
 
 				series_media
 					.into_iter()
-					.map(|media| AnalyzeMediaTask::AnalyzeImage(media.id))
+					.map(|media| AnalyzeMediaTask::FullAnalysis(media.id))
 					.collect()
 			},
 			// Media groups already include a vector of ids
 			AnalyzeMediaJobVariant::AnalyzeMediaGroup(ids) => ids
 				.iter()
-				.map(|id| AnalyzeMediaTask::AnalyzeImage(id.clone()))
+				.map(|id| AnalyzeMediaTask::FullAnalysis(id.clone()))
 				.collect(),
 		};
 
@@ -154,85 +190,18 @@ impl JobExt for AnalyzeMediaJob {
 		let mut output = Self::Output::default();
 
 		match task {
-			AnalyzeMediaTask::AnalyzeImage(id) => {
-				// Get media by id from the database
-				let media_item: Media = ctx
-					.db
-					.media()
-					.find_unique(media::id::equals(id.clone()))
-					.with(media::metadata::fetch())
-					.exec()
-					.await
-					.map_err(|e: prisma_client_rust::QueryError| {
-						JobError::TaskFailed(e.to_string())
-					})?
-					.ok_or_else(|| {
-						JobError::TaskFailed(format!(
-							"Unable to find media item with id: {}",
-							id
-						))
-					})?
-					.into();
-
-				let path = media_item.path;
-				let page_count = get_page_count(&path, &ctx.config)?;
-				output.images_analyzed += 1;
-
-				// Check if a metadata update is neded
-				if let Some(metadata) = media_item.metadata {
-					// Great, there's already metadata!
-					// Check if the value matches the currently recorded one, update if not.
-					if let Some(meta_page_count) = metadata.page_count {
-						if meta_page_count != page_count {
-							ctx.db
-								.media_metadata()
-								.update(
-									media_metadata::media_id::equals(media_item.id),
-									vec![media_metadata::page_count::set(Some(
-										page_count,
-									))],
-								)
-								.exec()
-								.await?;
-							output.media_updated += 1;
-						}
-					} else {
-						// Page count was `None` so we update it.
-						ctx.db
-							.media_metadata()
-							.update(
-								media_metadata::media_id::equals(media_item.id),
-								vec![media_metadata::page_count::set(Some(page_count))],
-							)
-							.exec()
-							.await?;
-						output.media_updated += 1;
-					}
-				} else {
-					// Metadata doesn't exist, create it
-					let new_metadata = ctx
-						.db
-						.media_metadata()
-						.create(vec![
-							media_metadata::id::set(media_item.id.clone()),
-							media_metadata::page_count::set(Some(page_count)),
-						])
-						.exec()
-						.await?;
-
-					// And link it to the media item
-					ctx.db
-						.media()
-						.update(
-							media::id::equals(media_item.id),
-							vec![media::metadata::connect(media_metadata::id::equals(
-								new_metadata.id,
-							))],
-						)
-						.exec()
-						.await?;
-					output.media_updated += 1;
-				}
+			AnalyzeMediaTask::UpdatePageCount(id) => {
+				task_page_count::execute(id, ctx, &mut output).await?
+			},
+			AnalyzeMediaTask::AnalyzePageDimensions(id) => {
+				task_analyze_dimensions::execute(id, ctx, &mut output).await?
+			},
+			AnalyzeMediaTask::FullAnalysis(id) => {
+				// TODO This is suboptimal because it buffers the file twice, this should be improved later.
+				// First page count needs to be updated
+				task_page_count::execute(id.clone(), ctx, &mut output).await?;
+				// Then we can do the dimensions analysis
+				task_analyze_dimensions::execute(id, ctx, &mut output).await?
 			},
 		}
 

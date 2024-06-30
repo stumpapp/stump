@@ -2,6 +2,8 @@ use std::path::Path;
 
 use serde::Serialize;
 
+use crate::CoreError;
+
 use super::image::ImageFormat;
 
 /// [`ContentType`] is an enum that represents the HTTP content type. This is a smaller
@@ -324,6 +326,40 @@ impl From<ImageFormat> for ContentType {
 			ImageFormat::JpegXl => ContentType::JPEG,
 			ImageFormat::Png => ContentType::PNG,
 			ImageFormat::Webp => ContentType::WEBP,
+		}
+	}
+}
+
+impl TryFrom<ContentType> for image::ImageFormat {
+	type Error = CoreError;
+
+	fn try_from(value: ContentType) -> Result<Self, Self::Error> {
+		/// Internal helper function to reduce code duplication
+		fn unsupported_error(unsupported_type: &str) -> CoreError {
+			CoreError::InternalError(format!(
+				"Cannot convert {} into image::ImageFormat, not supported.",
+				unsupported_type
+			))
+		}
+
+		// Match values that are compatible with the image crate. Other values should return
+		// an error.
+		match value {
+			ContentType::PNG => Ok(image::ImageFormat::Png),
+			ContentType::JPEG => Ok(image::ImageFormat::Jpeg),
+			ContentType::WEBP => Ok(image::ImageFormat::WebP),
+			ContentType::GIF => Ok(image::ImageFormat::Gif),
+			ContentType::XHTML => Err(unsupported_error("ContentType::XHTML")),
+			ContentType::XML => Err(unsupported_error("ContentType::XML")),
+			ContentType::HTML => Err(unsupported_error("ContentType::HTML")),
+			ContentType::PDF => Err(unsupported_error("ContentType::PDF")),
+			ContentType::EPUB_ZIP => Err(unsupported_error("ContentType::EPUB_ZIP")),
+			ContentType::ZIP => Err(unsupported_error("ContentType::ZIP")),
+			ContentType::COMIC_ZIP => Err(unsupported_error("ContentType::COMIC_ZIP")),
+			ContentType::RAR => Err(unsupported_error("ContentType::RAR")),
+			ContentType::COMIC_RAR => Err(unsupported_error("ContentType::COMIC_RAR")),
+			ContentType::TXT => Err(unsupported_error("ContentType::TXT")),
+			ContentType::UNKNOWN => Err(unsupported_error("ContentType::UNKNOWN")),
 		}
 	}
 }

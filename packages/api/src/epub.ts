@@ -3,7 +3,7 @@ import type {
 	CreateOrUpdateBookmark,
 	DeleteBookmark,
 	Epub,
-	ReadProgress,
+	ProgressUpdateReturn,
 	UpdateEpubProgress,
 } from '@stump/types'
 
@@ -20,7 +20,7 @@ export function getEpubById(id: string): Promise<APIResult<Epub>> {
 
 export function updateEpubProgress(
 	payload: UpdateEpubProgress & { id: string },
-): Promise<APIResult<ReadProgress>> {
+): Promise<APIResult<ProgressUpdateReturn>> {
 	return API.put(`/epub/${payload.id}/progress`, payload)
 }
 

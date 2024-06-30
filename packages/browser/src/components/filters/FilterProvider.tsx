@@ -4,6 +4,8 @@ import { useSearchParams } from 'react-router-dom'
 
 import { FilterContext } from './context'
 
+// TODO: clean up this file!
+
 type Props = {
 	children: React.ReactNode
 }

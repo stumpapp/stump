@@ -3,7 +3,7 @@ import { prefetchMedia } from '@stump/client'
 import { EntityCard, Text } from '@stump/components'
 import { FileStatus, Media } from '@stump/types'
 import pluralize from 'pluralize'
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import paths from '@/paths'
 import { formatBytes } from '@/utils/format'
@@ -54,10 +54,10 @@ export default function BookCard({
 		}
 
 		const progressString = getProgress()
-		if (progressString) {
+		if (progressString != null) {
 			const isEpubProgress = !!media.current_epubcfi
-
 			const pagesLeft = media.pages - (media.current_page || 0)
+
 			return (
 				<div className="flex items-center justify-between">
 					<Text size="xs" variant="muted">
@@ -81,30 +81,28 @@ export default function BookCard({
 		)
 	}
 
-	function getProgress() {
-		if (isCoverOnly || !media.current_page) {
+	const getProgress = useCallback(() => {
+		const { active_reading_session, finished_reading_sessions } = media
+
+		if (isCoverOnly || (!active_reading_session && !finished_reading_sessions)) {
 			return null
-		}
+		} else if (active_reading_session) {
+			const { epubcfi, percentage_completed, page } = active_reading_session
 
-		if (media.current_epubcfi) {
-			const firstWithPercent = media.read_progresses?.find((rp) => !!rp.percentage_completed)
-			if (firstWithPercent) {
-				return Math.round(firstWithPercent.percentage_completed! * 100)
+			if (epubcfi && percentage_completed) {
+				return Math.round(percentage_completed * 100)
+			} else if (page) {
+				const pages = media.pages
+
+				const percent = Math.round((page / pages) * 100)
+				return Math.min(Math.max(percent, 0), 100) // Clamp between 0 and 100
 			}
-		} else {
-			const page = media.current_page
-			const pages = media.pages
-
-			const percent = Math.round((page / pages) * 100)
-			if (percent > 100) {
-				return 100
-			}
-
-			return percent
+		} else if (finished_reading_sessions?.length) {
+			return 100
 		}
 
 		return null
-	}
+	}, [isCoverOnly, media])
 
 	const href = useMemo(() => {
 		if (onSelect) {

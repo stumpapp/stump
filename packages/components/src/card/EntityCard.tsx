@@ -101,7 +101,7 @@ export function EntityCard({
 	 * is to offset the progress bar from the bottom of the image
 	 */
 	const renderProgress = () => {
-		if (progress) {
+		if (progress != null) {
 			return <ProgressBar value={progress} variant="primary-dark" size="sm" className="!-mt-1" />
 		}
 

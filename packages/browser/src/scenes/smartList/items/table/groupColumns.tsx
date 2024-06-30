@@ -1,5 +1,5 @@
 import { cn, Text } from '@stump/components'
-import { Library, Series, SmartListItemGroup, SmartListTableColumnSelection } from '@stump/types'
+import { Library, ReactTableColumnSort, Series, SmartListItemGroup } from '@stump/types'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { ChevronDown } from 'lucide-react'
 
@@ -119,10 +119,7 @@ export const defaultLibraryColumns = [
 export const buildDefaultColumns = (isGroupedBySeries: boolean) =>
 	isGroupedBySeries ? defaultSeriesColumns : defaultLibraryColumns
 
-export const buildColumns = (
-	isGroupedBySeries: boolean,
-	columns?: SmartListTableColumnSelection[],
-) => {
+export const buildColumns = (isGroupedBySeries: boolean, columns?: ReactTableColumnSort[]) => {
 	if (!columns?.length) {
 		return buildDefaultColumns(isGroupedBySeries)
 	}

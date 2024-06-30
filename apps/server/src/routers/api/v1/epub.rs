@@ -6,13 +6,18 @@ use axum::{
 	routing::{get, put},
 	Json, Router,
 };
-use prisma_client_rust::chrono::Utc;
 use serde::Deserialize;
 use specta::Type;
 use stump_core::{
-	db::entity::{Bookmark, Epub, ReadProgress, UpdateEpubProgress},
+	db::entity::{
+		ActiveReadingSession, Bookmark, Epub, FinishedReadingSession,
+		ProgressUpdateReturn, UpdateEpubProgress,
+	},
 	filesystem::media::EpubProcessor,
-	prisma::{bookmark, media, media_annotation, read_progress, user},
+	prisma::{
+		active_reading_session, bookmark, finished_reading_session, media,
+		media_annotation, user,
+	},
 };
 use tower_sessions::Session;
 use utoipa::ToSchema;
@@ -43,7 +48,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
-/// Get an Epub by ID. The `read_progress` relation is loaded.
+/// Get an Epub by ID
 async fn get_epub_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -55,8 +60,11 @@ async fn get_epub_by_id(
 		.db
 		.media()
 		.find_unique(media::id::equals(id.clone()))
-		.with(media::read_progresses::fetch(vec![
-			read_progress::user_id::equals(user_id.clone()),
+		.with(media::active_user_reading_sessions::fetch(vec![
+			active_reading_session::user_id::equals(user_id.clone()),
+		]))
+		.with(media::finished_user_reading_sessions::fetch(vec![
+			finished_reading_session::user_id::equals(user_id.clone()),
 		]))
 		.with(media::annotations::fetch(vec![
 			media_annotation::user_id::equals(user_id),
@@ -82,68 +90,72 @@ async fn update_epub_progress(
 	State(ctx): State<AppState>,
 	session: Session,
 	Json(input): Json<UpdateEpubProgress>,
-) -> APIResult<Json<ReadProgress>> {
-	let db = &ctx.db;
+) -> APIResult<Json<ProgressUpdateReturn>> {
+	let client = &ctx.db;
 	let user_id = get_session_user(&session)?.id;
 
-	let input_is_complete = input.is_complete.unwrap_or(input.percentage >= 1.0);
-	let input_completed_at = input_is_complete.then(|| Utc::now().into());
+	let is_complete = input.is_complete.unwrap_or(input.percentage >= 1.0);
 
-	// NOTE: I am running this in a transaction with 2 queries because I don't want to update the
-	// is_complete and completed_at unless a book is *newly* completed.
-	// TODO: I will eventually add a way to set a book as uncompleted
-	let progress = db
-		._transaction()
-		.run(|client| async move {
-			let existing_progress = client
-				.read_progress()
-				.find_unique(read_progress::user_id_media_id(user_id.clone(), id.clone()))
-				.exec()
-				.await?;
-
-			if let Some(progress) = existing_progress {
-				let already_completed = progress.is_completed;
-				let is_completed = already_completed || input_is_complete;
-				let completed_at = progress.completed_at.or(input_completed_at);
-
-				client
-					.read_progress()
-					.update(
-						read_progress::user_id_media_id(user_id.clone(), id.clone()),
-						vec![
-							read_progress::epubcfi::set(Some(input.epubcfi)),
-							read_progress::is_completed::set(is_completed),
-							read_progress::percentage_completed::set(Some(
-								input.percentage,
-							)),
-							read_progress::completed_at::set(completed_at),
-						],
-					)
+	if is_complete {
+		let finished_session = client
+			._transaction()
+			.run(|tx| async move {
+				let deleted_session = tx
+					.active_reading_session()
+					.delete(active_reading_session::user_id_media_id(
+						user_id.clone(),
+						id.clone(),
+					))
 					.exec()
 					.await
-			} else {
-				client
-					.read_progress()
+					.ok();
+				tracing::trace!(?deleted_session, "Deleted active reading session");
+
+				tx.finished_reading_session()
 					.create(
-						-1,
-						media::id::equals(id),
-						user::id::equals(user_id),
-						vec![
-							read_progress::epubcfi::set(Some(input.epubcfi)),
-							read_progress::is_completed::set(input_is_complete),
-							read_progress::percentage_completed::set(Some(
-								input.percentage,
-							)),
-							read_progress::completed_at::set(input_completed_at),
-						],
+						deleted_session.map(|s| s.started_at).unwrap_or_default(),
+						media::id::equals(id.clone()),
+						user::id::equals(user_id.clone()),
+						vec![],
 					)
 					.exec()
 					.await
-			}
-		})
-		.await?;
+			})
+			.await?;
+		tracing::trace!(?finished_session, "Created finished reading session");
 
-	Ok(Json(ReadProgress::from(progress)))
+		Ok(Json(ProgressUpdateReturn::Finished(
+			FinishedReadingSession::from(finished_session),
+		)))
+	} else {
+		let active_session = client
+			.active_reading_session()
+			.upsert(
+				active_reading_session::user_id_media_id(user_id.clone(), id.clone()),
+				(
+					media::id::equals(id.clone()),
+					user::id::equals(user_id.clone()),
+					vec![
+						active_reading_session::epubcfi::set(Some(input.epubcfi.clone())),
+						active_reading_session::percentage_completed::set(Some(
+							input.percentage,
+						)),
+					],
+				),
+				vec![
+					active_reading_session::epubcfi::set(Some(input.epubcfi)),
+					active_reading_session::percentage_completed::set(Some(
+						input.percentage,
+					)),
+				],
+			)
+			.exec()
+			.await?;
+
+		Ok(Json(ProgressUpdateReturn::Active(
+			ActiveReadingSession::from(active_session),
+		)))
+	}
 }
 
 async fn get_bookmarks(

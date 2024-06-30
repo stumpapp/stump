@@ -1,12 +1,23 @@
 use axum::{
-	extract::{Query, State},
+	extract::{Path, Query, State},
 	middleware::from_extractor_with_state,
 	routing::get,
 	Json, Router,
 };
 use prisma_client_rust::{and, operator, Direction};
 use stump_core::{
-	db::{entity::User, query::pagination::PageQuery},
+	db::{
+		entity::{
+			macros::media_path_select,
+			utils::{
+				apply_media_age_restriction,
+				apply_media_library_not_hidden_for_user_filter,
+			},
+			User, UserPermission,
+		},
+		query::pagination::PageQuery,
+	},
+	filesystem::media::get_page,
 	opds::v2_0::{
 		authentication::{
 			OPDSAuthenticationDocument, OPDSAuthenticationDocumentBuilder,
@@ -29,7 +40,7 @@ use tower_sessions::Session;
 
 use crate::{
 	config::state::AppState,
-	errors::APIResult,
+	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
 	middleware::{auth::Auth, host::HostExtractor},
 	routers::{
@@ -39,7 +50,10 @@ use crate::{
 		},
 		relative_favicon_path,
 	},
-	utils::get_session_user,
+	utils::{
+		enforce_session_permissions, get_session_user,
+		http::{ImageResponse, NamedFile},
+	},
 };
 
 // .route("/keep-reading", get(keep_reading))
@@ -56,13 +70,6 @@ use crate::{
 // 		.route("/latest", get(get_latest_series))
 // 		.route("/:id", get(get_series_by_id)),
 // )
-// .nest(
-// 	"/books/:id",
-// 	Router::new()
-// 		.route("/thumbnail", get(get_book_thumbnail))
-// 		.route("/pages/:page", get(get_book_page))
-// 		.route("/file/:filename", get(download_book)),
-// ),
 
 // TODO: determine if all of these links can still be relative. If not, that's
 // a little tricky...
@@ -80,7 +87,15 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 					"/books",
 					Router::new()
 						.route("/browse", get(browse_books))
-						.route("/latest", get(latest_books)),
+						.route("/latest", get(latest_books))
+						// .route("/keep-reading", get(keep_reading))
+						.nest(
+							"/:id",
+							Router::new()
+								.route("/thumbnail", get(get_book_thumbnail))
+								.route("/pages/:page", get(get_book_page))
+								.route("/file/:filename", get(download_book)),
+						),
 				),
 		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
@@ -235,7 +250,7 @@ async fn fetch_books_and_generate_feed(
 		.exec()
 		.await?;
 	let books_count = client.media().count(where_params).exec().await?;
-	let publications = OPDSPublication::vec_from_books(&client, books).await?;
+	let publications = OPDSPublication::vec_from_books(client, books).await?;
 
 	let next_page = pagination.get_next_page();
 	let previous_link = if let Some(page) = pagination.page {
@@ -293,6 +308,7 @@ async fn fetch_books_and_generate_feed(
 	))
 }
 
+/// A route handler which returns a feed of books for a user.
 async fn browse_books(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
@@ -312,6 +328,7 @@ async fn browse_books(
 	.await
 }
 
+/// A route handler which returns the latest books for a user as an OPDS feed.
 async fn latest_books(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
@@ -329,4 +346,94 @@ async fn latest_books(
 		"/opds/v2.0/books/latest",
 	)
 	.await
+}
+
+/// A helper function to fetch a book page for a user. This is not a route handler.
+async fn fetch_book_page_for_user(
+	ctx: &Ctx,
+	user: &User,
+	book_id: String,
+	page: i32,
+) -> APIResult<ImageResponse> {
+	let client = &ctx.db;
+
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+	// Combined conditions which assert:
+	// - The book is the one we're looking for
+	// - The book is not hidden from the user via the library
+	// - The book is not restricted by age
+	let where_params = chain_optional_iter(
+		[media::id::equals(book_id)]
+			.into_iter()
+			.chain(apply_media_library_not_hidden_for_user_filter(user))
+			.collect::<Vec<media::WhereParam>>(),
+		[age_restrictions],
+	);
+
+	let book = client
+		.media()
+		.find_first(where_params)
+		// Only select the path, since we're going to read the file directly and do
+		// absolutely nothing else with the media record
+		.select(media_path_select::select())
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound(String::from("Book not found")))?;
+
+	let (content_type, image_buffer) = get_page(book.path.as_str(), page, &ctx.config)?;
+	Ok(ImageResponse::new(content_type, image_buffer))
+}
+
+/// A route handler which returns a book thumbnail for a user as a valid image response.
+async fn get_book_thumbnail(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> APIResult<ImageResponse> {
+	fetch_book_page_for_user(&ctx, &get_session_user(&session)?, id, 1).await
+}
+
+/// A route handler which returns a single page of a book for a user as a valid image
+/// response.
+async fn get_book_page(
+	Path((id, page)): Path<(String, i32)>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> APIResult<ImageResponse> {
+	fetch_book_page_for_user(&ctx, &get_session_user(&session)?, id, page).await
+}
+
+/// A route handler which downloads a book for a user.
+async fn download_book(
+	Path((id, _)): Path<(String, String)>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> APIResult<NamedFile> {
+	let db = &ctx.db;
+
+	let user = enforce_session_permissions(&session, &[UserPermission::DownloadFile])?;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+	let where_params = chain_optional_iter(
+		[media::id::equals(id)]
+			.into_iter()
+			.chain(apply_media_library_not_hidden_for_user_filter(&user))
+			.collect::<Vec<media::WhereParam>>(),
+		[age_restrictions],
+	);
+
+	let book = db
+		.media()
+		.find_first(where_params)
+		.select(media_path_select::select())
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound(String::from("Book not found")))?;
+
+	Ok(NamedFile::open(book.path.clone()).await?)
 }

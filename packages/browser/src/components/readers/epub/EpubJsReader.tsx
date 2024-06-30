@@ -124,6 +124,19 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	const { epub, isLoading } = useEpubLazy(id)
 
 	/**
+	 * A function for focusing the iframe in the epub reader. This will be used to ensure
+	 * the iframe is focused whenever the reader is loaded and/or the location changes.
+	 */
+	const focusIframe = () => {
+		const iframe = ref.current?.querySelector('iframe')
+		if (iframe) {
+			iframe.focus()
+		} else {
+			console.debug('Failed to find iframe in epub reader')
+		}
+	}
+
+	/**
 	 * Syncs the current location with local state whenever epubjs internal location
 	 * changes. It will also try and determine the current chapter information.
 	 *
@@ -139,6 +152,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		}
 
 		setCurrentLocation(changeState)
+		focusIframe()
 	}
 
 	/**

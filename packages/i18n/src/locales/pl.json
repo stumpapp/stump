@@ -662,18 +662,18 @@
 		"server/email": {
 			"helmet": "Ustawienia e-mail",
 			"title": "Adres e-mail",
-			"description": "Settings related to the configuring an SMTP emailer for your Stump server instance",
+			"description": "Ustawienia powiązane z konfiguracją wysyłki SMTP tego serwera Stump",
 			"sections": {
 				"emailers": {
-					"title": "SMTP emailers",
-					"description": "The clients you have configured for sending emails from your Stump server instance",
-					"singleInstanceDisclaimer": "While Stump supports multiple SMTP configurations in the backend, only one can be configured on the UI. This will be improved in the future",
+					"title": "Wysyłka SMTP",
+					"description": "Klienci, którzy zostali utworzeni w celu wysyłki wiadomości e-mail z Twojego serwera Stump",
+					"singleInstanceDisclaimer": "Na ten moment Stump wspiera ustawienie tylko jednego serwera SMTP z poziomu interfejsu użytkownika. Funkcjonalność ta zostanie rozwinięta w przyszłości",
 					"list": {
-						"emptyHeading": "No SMTP emailers configured",
-						"primaryEmailer": "Primary emailer",
+						"emptyHeading": "Brak skonfigurowanych ustawień wysyłki SMTP",
+						"primaryEmailer": "Domyślna wysyłka",
 						"sendHistory": {
 							"heading": "Historia wysyłki",
-							"description": "A record of emails sent from this emailer",
+							"description": "Histora e-maili wychodzących z tej wysyłki",
 							"table": {
 								"columns": {
 									"to": "Do",
@@ -683,13 +683,13 @@
 								}
 							},
 							"emptyHeading": "Bez historii",
-							"emptySubtitle": "The history of this emailer is empty. It has either not been used or the history has been cleared"
+							"emptySubtitle": "Historia tej wysyłki jest pusta. Została ona wyczyszczona bądź jeszcze z niej nie skorzystano"
 						}
 					}
 				},
 				"devices": {
-					"title": "Email devices",
-					"description": "The device aliases you have configured for recieving emails from your Stump server instance",
+					"title": "Urządzenia odbiorcze e-mail",
+					"description": "Aliasy urządzeń skonfigurowanych do otrzymywania wiadomości e-mail z Twojej instancji serwera Stump",
 					"addDevice": "Dodaj alias urządzenia",
 					"addOrUpdateDevice": {
 						"title": {
@@ -698,11 +698,11 @@
 						},
 						"name": {
 							"label": "Nazwa",
-							"description": "A friendly name to uniquely identify this device alias"
+							"description": "Przyjazna nazwa umożliwiająca unikalną identyfikację tego aliasu"
 						},
 						"email": {
 							"label": "Adres e-mail",
-							"description": "The email address this alias will be associated with"
+							"description": "Adres e-mail powiązany z tym aliasem"
 						},
 						"forbidden": {
 							"label": "Zabronione",
@@ -722,15 +722,15 @@
 			"createOrUpdateForm": {
 				"name": {
 					"label": "Nazwa",
-					"description": "A friendly name to uniquely identify this emailer"
+					"description": "Przyjazna nazwa umożliwiająca unikalną identyfikację tej wysyłki"
 				},
 				"smtpSettings": {
 					"heading": "Ustawienia SMTP",
-					"description": "The SMTP-specific settings for this emailer"
+					"description": "Ustawienia SMTP dla tej wysyłki"
 				},
 				"smtpProvider": {
-					"label": "SMTP provider preset",
-					"description": "The provider of the SMTP server. This is used to prefill some common settings, but doesn't capture all providers"
+					"label": "Ustawienia dostawcy SMTP",
+					"description": "Dostawca serwera SMTP. Używane w celu uzupełnienia predefiniowanych ustawień niektórych dostawców"
 				},
 				"smtpHost": {
 					"label": "Host SMTP",
@@ -773,19 +773,19 @@
 					"description": "Maksymalny rozmiar załącznika w bajtach"
 				},
 				"submit": {
-					"create": "Create emailer",
-					"update": "Update emailer"
+					"create": "Utwórz nową wysyłkę",
+					"update": "Aktualizuj wysyłkę"
 				}
 			},
 			"createEmailer": {
-				"helmet": "Create emailer",
-				"title": "Create emailer",
-				"description": "Create a new SMTP emailer for your Stump server instance"
+				"helmet": "Utwórz nową wysyłkę",
+				"title": "Utwórz nową wysyłkę",
+				"description": "Stwórz nową wysyłkę SMTP tego serwera Stump"
 			},
 			"updateEmailer": {
-				"helmet": "Update emailer",
-				"title": "Update emailer",
-				"description": "Update the details of this SMTP emailer"
+				"helmet": "Aktualizuj wysyłkę",
+				"title": "Aktualizuj wysyłkę",
+				"description": "Aktualizuj delta tej wysyłki SMTP"
 			}
 		}
 	},

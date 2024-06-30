@@ -1,4 +1,6 @@
-use image::{imageops, io::Reader, DynamicImage, EncodableLayout, GenericImageView};
+use std::fs;
+
+use image::{imageops, DynamicImage, EncodableLayout, GenericImageView};
 use webp::Encoder;
 
 use crate::filesystem::{error::FileError, image::process::resized_dimensions};
@@ -12,7 +14,8 @@ impl ImageProcessor for WebpProcessor {
 		buffer: &[u8],
 		options: ImageProcessorOptions,
 	) -> Result<Vec<u8>, FileError> {
-		let mut image = image::load_from_memory(buffer)?;
+		let mut image =
+			image::load_from_memory_with_format(buffer, image::ImageFormat::WebP)?;
 
 		if let Some(resize_options) = options.resize_options {
 			let resized_image = WebpProcessor::resize_image(image, resize_options);
@@ -30,8 +33,8 @@ impl ImageProcessor for WebpProcessor {
 		path: &str,
 		options: ImageProcessorOptions,
 	) -> Result<Vec<u8>, FileError> {
-		let image = Reader::open(path)?.with_guessed_format()?.decode()?;
-		Self::generate(image.as_bytes(), options)
+		let bytes = fs::read(path)?;
+		Self::generate(&bytes, options)
 	}
 }
 
@@ -51,5 +54,67 @@ impl WebpProcessor {
 			// TODO: determine best filter
 			imageops::FilterType::Triangle,
 		))
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::filesystem::image::{ImageFormat, ImageProcessorOptions, ImageResizeMode};
+	use std::{fs, path::PathBuf};
+
+	#[test]
+	fn test_generate_webp_from_data() {
+		let bytes = get_test_webp_data();
+		let options = ImageProcessorOptions {
+			resize_options: None,
+			format: ImageFormat::Webp,
+			quality: None,
+			page: None,
+		};
+
+		WebpProcessor::generate(&bytes, options).unwrap();
+	}
+
+	#[test]
+	fn test_generate_webp_from_path() {
+		let webp_path = get_test_webp_path();
+		let options = ImageProcessorOptions {
+			resize_options: None,
+			format: ImageFormat::Webp,
+			quality: None,
+			page: None,
+		};
+
+		WebpProcessor::generate_from_path(&webp_path, options).unwrap();
+	}
+
+	#[test]
+	fn test_resize_webp() {
+		let webp_path = get_test_webp_path();
+		let options = ImageProcessorOptions {
+			resize_options: Some(ImageResizeOptions {
+				mode: ImageResizeMode::Scaled,
+				height: 2.0,
+				width: 2.0,
+			}),
+			format: ImageFormat::Webp,
+			quality: None,
+			page: None,
+		};
+
+		WebpProcessor::generate_from_path(&webp_path, options).unwrap();
+	}
+
+	fn get_test_webp_path() -> String {
+		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+			.join("integration-tests/data/example.webp")
+			.to_string_lossy()
+			.to_string()
+	}
+
+	fn get_test_webp_data() -> Vec<u8> {
+		let path = get_test_webp_path();
+		fs::read(path).expect("Failed to fetch example webp image")
 	}
 }

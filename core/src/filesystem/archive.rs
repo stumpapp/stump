@@ -5,7 +5,7 @@ use std::{
 };
 use tracing::{trace, warn};
 use walkdir::WalkDir;
-use zip::write::FileOptions;
+use zip::{write::FileOptions, CompressionMethod};
 
 /// Creates a new zip file at `destination` from the contents of the folder `unpacked_path`.
 pub(crate) fn zip_dir(
@@ -17,8 +17,8 @@ pub(crate) fn zip_dir(
 
 	let mut zip_writer = zip::ZipWriter::new(zip_file);
 
-	let options = FileOptions::default()
-		.compression_method(zip::CompressionMethod::Stored)
+	let options: FileOptions<'_, ()> = FileOptions::default()
+		.compression_method(CompressionMethod::Stored)
 		.unix_permissions(0o755);
 
 	trace!("Creating zip file at {:?}", destination);
@@ -35,7 +35,6 @@ pub(crate) fn zip_dir(
 		// Some unzip tools unzip files with directory paths correctly, some do not!
 		if path.is_file() {
 			trace!("Adding file to zip file: {:?} as {:?}", path, name);
-			#[allow(deprecated)]
 			zip_writer.start_file_from_path(name, options)?;
 			let mut f = File::open(path)?;
 

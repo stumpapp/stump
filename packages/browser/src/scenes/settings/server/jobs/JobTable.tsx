@@ -8,7 +8,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { CircleSlash2 } from 'lucide-react'
 import React, { useMemo, useState } from 'react'
 
-import { Table } from '@/components/table'
+import { ColumnDef, Table } from '@/components/table'
 import { useAppContext } from '@/context'
 
 import { useJobSettingsContext } from './context.ts'
@@ -31,7 +31,7 @@ export default function JobTable() {
 
 	const [inspectingData, setInspectingData] = useState<CoreJobOutput | null>()
 
-	const columns = useMemo(
+	const columns = useMemo<ColumnDef<PersistedJob>[]>(
 		() => [
 			columnHelper.accessor('name', {
 				cell: ({
@@ -151,6 +151,7 @@ export default function JobTable() {
 					onPaginationChange: setPagination,
 					pageCount,
 					state: {
+						// columnPinning: { right: ['actions'] },
 						pagination,
 					},
 				}}

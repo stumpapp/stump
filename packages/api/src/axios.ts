@@ -25,6 +25,11 @@ export function initializeApi(baseUrl: string, version: string) {
 
 	API = axios.create({
 		baseURL: correctedUrl,
+		// FIXME: react-native seems to ignore this option, causing brackets to be encoded which
+		// the backend doesn't support
+		// paramsSerializer: {
+		// 	encode: (params) => qs.stringify(params, { arrayFormat: 'repeat' }),
+		// },
 		withCredentials: true,
 	})
 }

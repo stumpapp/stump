@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use prisma_client_rust::not;
 use tokio::sync::{
 	broadcast::{channel, Receiver, Sender},
 	mpsc::error::SendError,
@@ -10,7 +11,8 @@ use crate::{
 	db,
 	event::CoreEvent,
 	job::{Executor, JobController, JobControllerCommand},
-	prisma,
+	prisma::{self, server_config},
+	CoreError, CoreResult,
 };
 
 type EventChannel = (Sender<CoreEvent>, Receiver<CoreEvent>);
@@ -172,5 +174,20 @@ impl Ctx {
 		} else {
 			tracing::trace!("Sent core event");
 		}
+	}
+
+	pub async fn get_encryption_key(&self) -> CoreResult<String> {
+		let server_config = self
+			.db
+			.server_config()
+			.find_first(vec![not![server_config::encryption_key::equals(None)]])
+			.exec()
+			.await?;
+
+		let encryption_key = server_config
+			.and_then(|config| config.encryption_key)
+			.ok_or(CoreError::EncryptionKeyNotSet)?;
+
+		Ok(encryption_key)
 	}
 }

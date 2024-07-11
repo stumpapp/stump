@@ -1,4 +1,4 @@
-import { Input, ProgressSpinner, usePreviousIsDifferent } from '@stump/components'
+import { cn, Input, ProgressSpinner, usePreviousIsDifferent } from '@stump/components'
 import { SearchIcon } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useDebouncedValue } from 'rooks'
@@ -42,6 +42,7 @@ export default function Search({
 	isLoading,
 	isDisabled,
 }: Props) {
+	const [isFocused, setIsFocused] = useState(false)
 	// we need to debounce the onChange function so we only update once the user has stopped typing
 	// this is a common pattern for search inputs
 	const [value, setValue] = useState<string | undefined>(initialValue)
@@ -63,14 +64,21 @@ export default function Search({
 		<Input
 			title={isDisabled ? "This functionality isn't available right now" : undefined}
 			label={label}
-			placeholder={placeholder || 'Search'}
-			fullWidth
+			onFocus={() => setIsFocused(true)}
+			onBlur={() => setIsFocused(false)}
 			onChange={(e) => setValue(e.target.value)}
+			placeholder={placeholder || 'Search'}
 			value={value}
+			fullWidth
+			size="sm"
+			variant="activeGhost"
 			leftDecoration={<SearchIcon className="h-4 w-4 text-muted" />}
 			rightDecoration={showLoader ? <ProgressSpinner size="sm" /> : null}
-			variant="ghost"
-			className="flex-grow"
+			className={cn(
+				'flex-grow transition-[width] duration-200 ease-in-out',
+				{ 'w-full flex-grow sm:w-2/5': isFocused },
+				{ 'w-2/3 cursor-pointer pr-0 sm:w-3/5  md:w-1/5': !isFocused },
+			)}
 			disabled={isDisabled}
 		/>
 	)

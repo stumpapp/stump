@@ -44,6 +44,8 @@ impl Default for QueryOrder {
 	}
 }
 
+// TODO(prisma 0.7.0): Support order by relation
+
 impl TryInto<media::OrderByParam> for QueryOrder {
 	type Error = CoreError;
 
@@ -70,6 +72,8 @@ impl TryInto<media::OrderByParam> for QueryOrder {
 	}
 }
 
+// TODO(prisma 0.7.0): Support order by relation
+
 impl TryInto<library::OrderByParam> for QueryOrder {
 	type Error = CoreError;
 
@@ -91,6 +95,8 @@ impl TryInto<library::OrderByParam> for QueryOrder {
 		})
 	}
 }
+
+// TODO(prisma 0.7.0): Support order by relation
 
 impl TryInto<series::OrderByParam> for QueryOrder {
 	type Error = CoreError;

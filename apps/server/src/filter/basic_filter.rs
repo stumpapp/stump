@@ -318,6 +318,18 @@ pub struct MediaFilter {
 	pub relation_filter: MediaRelationFilter,
 }
 
+impl MediaFilter {
+	pub fn ids(ids: Vec<String>) -> Self {
+		Self {
+			base_filter: MediaBaseFilter {
+				id: ids,
+				..Default::default()
+			},
+			..Default::default()
+		}
+	}
+}
+
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
 pub struct LogFilter {
 	pub level: Option<LogLevel>,

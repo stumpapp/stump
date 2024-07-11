@@ -13,8 +13,27 @@ pub trait Cursor {
 pub enum LayoutMode {
 	#[serde(rename = "GRID")]
 	Grid,
-	#[serde(rename = "LIST")]
-	List,
+	#[serde(rename = "TABLE")]
+	TABLE,
+}
+
+/// A struct representing a sort order for a column using react-table (tanstack)
+#[derive(Default, Clone, Debug, Deserialize, Serialize, Type, ToSchema)]
+pub struct ReactTableColumnSort {
+	/// The ID of the column
+	id: String,
+	/// The position of the column in the table
+	position: u32,
+}
+
+/// A struct representing a global sort order for a table using react-table (tanstack)
+#[derive(Default, Clone, Debug, Deserialize, Serialize, Type, ToSchema)]
+pub struct ReactTableGlobalSort {
+	/// Whether the sorting is descending
+	desc: bool,
+	/// The ID of the column that is sorted
+	#[serde(rename = "id")]
+	column_id: String,
 }
 
 #[derive(Debug, Deserialize, Serialize, Type, ToSchema, Clone, Copy, PartialEq, Eq)]

@@ -2,7 +2,11 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::{prisma::smart_list_view, CoreError};
+use crate::{
+	db::entity::common::{ReactTableColumnSort, ReactTableGlobalSort},
+	prisma::smart_list_view,
+	CoreError,
+};
 
 #[derive(Default, Clone, Debug, Deserialize, Serialize, Type, ToSchema)]
 pub struct SmartListView {
@@ -19,15 +23,15 @@ pub struct SmartListView {
 
 pub struct SmartListViewConfig {
 	/// The columns present in the book table(s)
-	book_columns: Vec<SmartListTableColumnSelection>,
+	book_columns: Vec<ReactTableColumnSort>,
 	/// The columns present in the grouping entity table
-	group_columns: Vec<SmartListTableColumnSelection>,
+	group_columns: Vec<ReactTableColumnSort>,
 	/// The sorting state of the book table(s)
 	#[serde(rename = "book_sorting")]
-	book_sorting_state: Option<Vec<SmartListTableSortingState>>,
+	book_sorting_state: Option<Vec<ReactTableGlobalSort>>,
 	/// The sorting state of the grouping entity table view
 	#[serde(rename = "group_sorting")]
-	group_sorting_state: Option<Vec<SmartListTableSortingState>>,
+	group_sorting_state: Option<Vec<ReactTableGlobalSort>>,
 	/// Whether the table view allows multi-sorting
 	#[serde(default)]
 	#[specta(optional)]
@@ -36,24 +40,6 @@ pub struct SmartListViewConfig {
 	#[serde(default)]
 	#[specta(optional)]
 	search: Option<String>,
-}
-
-#[derive(Default, Clone, Debug, Deserialize, Serialize, Type, ToSchema)]
-
-pub struct SmartListTableSortingState {
-	/// Whether the sorting is descending
-	desc: bool,
-	/// The ID of the column that is sorted
-	#[serde(rename = "id")]
-	column_id: String,
-}
-
-#[derive(Default, Clone, Debug, Deserialize, Serialize, Type, ToSchema)]
-pub struct SmartListTableColumnSelection {
-	/// The ID of the column
-	id: String,
-	/// The position of the column in the table
-	position: u32,
 }
 
 impl TryFrom<smart_list_view::Data> for SmartListView {

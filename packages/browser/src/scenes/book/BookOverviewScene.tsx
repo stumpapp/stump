@@ -6,9 +6,9 @@ import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
+import MediaCard from '@/components/book/BookCard'
 import { SceneContainer } from '@/components/container'
 import LinkBadge from '@/components/LinkBadge'
-import MediaCard from '@/components/media/MediaCard'
 import ReadMore from '@/components/ReadMore'
 import TagList from '@/components/tags/TagList'
 
@@ -21,6 +21,7 @@ import BookLibrarySeriesLinks from './BookLibrarySeriesLinks'
 import BookReaderDropdown from './BookReaderDropdown'
 import BooksAfterCursor from './BooksAfterCursor'
 import DownloadMediaButton from './DownloadMediaButton'
+import EmailBookDropdown from './EmailBookDropdown'
 
 // TODO: redesign page?
 // TODO: with metadata being collected now, there is a lot more information to display:
@@ -118,6 +119,7 @@ export default function BookOverviewScene() {
 									</ButtonOrLink>
 								)}
 								{canDownload && <DownloadMediaButton media={media} />}
+								<EmailBookDropdown mediaId={media.id} />
 							</div>
 
 							{!isAtLeastMedium && !!media.metadata?.summary && (

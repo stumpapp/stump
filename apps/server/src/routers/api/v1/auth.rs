@@ -36,6 +36,35 @@ pub(crate) fn mount() -> Router<AppState> {
 	)
 }
 
+pub async fn enforce_max_sessions(
+	for_user: &user::Data,
+	db: &PrismaClient,
+) -> APIResult<()> {
+	let existing_sessions = for_user
+		.sessions()
+		.cloned()
+		.unwrap_or_else(|error| {
+			tracing::error!(?error, "Failed to load user's existing session(s)");
+			Vec::default()
+		})
+		.to_owned();
+	let existing_login_sessions_count = existing_sessions.len() as i32;
+
+	match (for_user.max_sessions_allowed, existing_login_sessions_count) {
+		(Some(max_login_sessions), count) if count >= max_login_sessions => {
+			let oldest_session_id = existing_sessions
+				.iter()
+				.min_by_key(|session| session.expires_at)
+				.map(|session| session.id.clone());
+			handle_remove_earliest_session(db, for_user.id.clone(), oldest_session_id)
+				.await?;
+		},
+		_ => (),
+	}
+
+	Ok(())
+}
+
 #[derive(Deserialize, Type, ToSchema)]
 pub struct LoginOrRegisterArgs {
 	pub username: String,
@@ -88,11 +117,12 @@ async fn handle_remove_earliest_session(
 	session_id: Option<String>,
 ) -> APIResult<i32> {
 	if let Some(oldest_session_id) = session_id {
-		let _deleted_session = client
+		let deleted_session = client
 			.session()
 			.delete(session::id::equals(oldest_session_id))
 			.exec()
 			.await?;
+		tracing::trace!(?deleted_session, "Removed oldest session for user");
 		Ok(1)
 	} else {
 		tracing::warn!("No existing session ID was provided for enforcing the maximum number of sessions. Deleting all sessions for user instead.");
@@ -204,23 +234,7 @@ async fn login(
 				return Err(APIError::Unauthorized);
 			}
 
-			let existing_sessions = db_user
-				.sessions()
-				.cloned()
-				.unwrap_or_else(|error| {
-					tracing::error!(?error, "Failed to load user's existing session(s)");
-					Vec::default()
-				})
-				.to_owned();
-			let existing_login_sessions_count = existing_sessions.len() as i32;
-
-			match (db_user.max_sessions_allowed, existing_login_sessions_count) {
-				(Some(max_login_sessions), count) if count >= max_login_sessions => {
-					let oldest_session_id = existing_sessions.iter().min_by_key(|session| session.expires_at).map(|session| session.id.clone());
-					handle_remove_earliest_session(&state.db, db_user.id.clone(), oldest_session_id).await?;
-				},
-				_ => (),
-			}
+			enforce_max_sessions(&db_user, &client).await?;
 
 			let updated_user = state
 				.db
@@ -338,8 +352,7 @@ pub async fn register(
 		.exec()
 		.await?;
 
-	// FIXME: these next two queries will be removed once nested create statements are
-	// supported on the prisma client. Until then, this ugly mess is necessary.
+	// TODO(prisma 0.7.0): Nested create
 	let _user_preferences = db
 		.user_preferences()
 		.create(vec![

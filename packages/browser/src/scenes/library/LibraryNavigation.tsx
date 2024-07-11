@@ -1,4 +1,4 @@
-import { prefetchLibraryFiles, prefetchLibrarySeries } from '@stump/client'
+import { prefetchLibraryFiles, prefetchLibraryMedia, prefetchLibrarySeries } from '@stump/client'
 import { cn, Link } from '@stump/components'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
@@ -30,6 +30,7 @@ export default function LibraryNavigation() {
 			{
 				isActive: location.pathname.match(/\/libraries\/[^/]+\/books(\/.*)?$/),
 				label: 'Books',
+				onHover: () => prefetchLibraryMedia(id),
 				to: 'books',
 			},
 			...(canAccessFiles
@@ -54,10 +55,10 @@ export default function LibraryNavigation() {
 	const preferTopBar = primary_navigation_mode === 'TOPBAR'
 
 	return (
-		<div className="sticky top-0 z-10 w-full border-b border-edge bg-background md:relative md:top-[unset] md:z-[unset]">
+		<div className="sticky top-0 z-10 h-12 w-full border-b border-edge bg-background md:relative md:top-[unset] md:z-[unset]">
 			<nav
 				className={cn(
-					'-mb-px flex gap-x-6 overflow-x-scroll px-3 scrollbar-hide md:overflow-x-hidden',
+					'-mb-px flex h-12 gap-x-6 overflow-x-scroll px-3 scrollbar-hide md:overflow-x-hidden',
 					{
 						'mx-auto': preferTopBar && !!layout_max_width_px,
 					},

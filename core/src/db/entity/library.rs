@@ -115,7 +115,7 @@ pub struct LibraryOptions {
 	pub hard_delete_conversions: bool,
 	pub library_pattern: LibraryPattern,
 	pub thumbnail_config: Option<ImageProcessorOptions>,
-	// TODO: don't make Option after pcr supports nested create
+	// TODO(prisma 0.7.0): Nested create
 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
 	pub library_id: Option<String>,
 }

@@ -67,7 +67,7 @@ impl Series {
 		self.media_count = Some(count);
 	}
 
-	// TODO: change once nested creates are supported
+	// TODO(prisma 0.7.0): Nested created
 	pub fn create_action(
 		self,
 	) -> (

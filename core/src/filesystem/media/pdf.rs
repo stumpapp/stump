@@ -118,6 +118,13 @@ impl FileProcessor for PdfProcessor {
 		}
 	}
 
+	fn get_page_count(path: &str, config: &StumpConfig) -> Result<i32, FileError> {
+		let pdfium = PdfProcessor::renderer(&config.pdfium_path)?;
+		let document = pdfium.load_pdf_from_file(path, None)?;
+
+		Ok(document.pages().len() as i32)
+	}
+
 	fn get_page_content_types(
 		_: &str,
 		pages: Vec<i32>,
@@ -249,5 +256,35 @@ impl FileConverter for PdfProcessor {
 		}
 
 		Ok(zip_path)
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::filesystem::media::tests::get_test_pdf_path;
+
+	#[test]
+	fn test_process() {
+		let path = get_test_pdf_path();
+		let config = StumpConfig::debug();
+
+		let processed_file = PdfProcessor::process(
+			&path,
+			FileProcessorOptions {
+				convert_rar_to_zip: false,
+				delete_conversion_source: false,
+			},
+			&config,
+		);
+		assert!(processed_file.is_ok());
+	}
+
+	#[test]
+	fn test_get_page_content_types() {
+		let path = get_test_pdf_path();
+
+		let content_types = PdfProcessor::get_page_content_types(&path, vec![1]);
+		assert!(content_types.is_ok());
 	}
 }

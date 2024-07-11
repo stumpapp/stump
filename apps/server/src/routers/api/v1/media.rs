@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use axum::{
 	extract::{DefaultBodyLimit, Multipart, Path, State},
 	middleware::from_extractor_with_state,
-	routing::{get, put},
+	routing::{get, post, put},
 	Json, Router,
 };
 use axum_extra::extract::Query;
@@ -23,6 +23,7 @@ use stump_core::{
 		CountQueryReturn,
 	},
 	filesystem::{
+		analyze_media_job::{AnalyzeMediaJob, AnalyzeMediaJobVariant},
 		get_unknown_thumnail,
 		image::{
 			generate_thumbnail, place_thumbnail, remove_thumbnails, ImageFormat,
@@ -38,6 +39,7 @@ use stump_core::{
 	},
 };
 use tower_sessions::Session;
+use tracing::error;
 use utoipa::ToSchema;
 
 use crate::{
@@ -81,6 +83,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						// TODO: configurable max file size
 						.layer(DefaultBodyLimit::max(20 * 1024 * 1024)), // 20MB
 				)
+				.route("/analyze", post(start_media_analysis))
 				.route("/page/:page", get(get_media_page))
 				.route(
 					"/progress",
@@ -1194,12 +1197,12 @@ async fn replace_media_thumbnail(
 
 	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 	// user testing I'd like to see if this becomes a problem. We'll see!
-	match remove_thumbnails(&[book_id.clone()], ctx.config.get_thumbnails_dir()) {
-		Ok(count) => tracing::info!("Removed {} thumbnails!", count),
-		Err(e) => tracing::error!(
+	if let Err(e) = remove_thumbnails(&[book_id.clone()], ctx.config.get_thumbnails_dir())
+	{
+		tracing::error!(
 			?e,
 			"Failed to remove existing media thumbnail before replacing!"
-		),
+		);
 	}
 
 	let path_buf = place_thumbnail(&book_id, ext, &bytes, &ctx.config)?;
@@ -1549,4 +1552,39 @@ async fn put_media_complete_status(
 		is_completed: updated_or_created_rp.is_completed,
 		completed_at: updated_or_created_rp.completed_at.map(|ca| ca.to_rfc3339()),
 	}))
+}
+
+#[utoipa::path(
+	post,
+	path = "/api/v1/media/:id/analyze",
+	tag = "media",
+	params(
+		("id" = String, Path, description = "The ID of the media to analyze")
+	),
+	responses(
+		(status = 200, description = "Successfully started media analysis"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Media not found"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn start_media_analysis(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> APIResult<()> {
+	let _ = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
+
+	// Start analysis job
+	ctx.enqueue_job(AnalyzeMediaJob::new(
+		AnalyzeMediaJobVariant::AnalyzeSingleItem(id),
+	))
+	.map_err(|e| {
+		let err = "Failed to enqueue analyze media job";
+		error!(?e, err);
+		APIError::InternalServerError(err.to_string())
+	})?;
+
+	APIResult::Ok(())
 }

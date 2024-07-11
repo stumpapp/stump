@@ -17,6 +17,8 @@ type Props = {
 	rootPath: string
 }
 
+// TODO: fix scrolling issues after adjusting scene container...
+
 export default function FileExplorerProvider({ rootPath }: Props) {
 	const navigate = useNavigate()
 	const isMobile = useMediaMatch('(max-width: 768px)')

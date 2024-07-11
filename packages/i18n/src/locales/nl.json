@@ -1,128 +1,144 @@
 {
 	"underConstruction": {
-		"heading": "This is awkward",
-		"message": "You've stumbled upon a page that's still being developed. I'd love to show it to you, but it isn't quite ready yet.",
-		"homeLink": "Go Home",
-		"githubLink": "View the GitHub issue"
+		"heading": "Dit is ongemakkelijk",
+		"message": "Je stuitte op een pagina die nog wordt ontwikkeld. Ik zou het graag aan je laten zien, maar het is nog niet helemaal klaar.",
+		"homeLink": "Ga naar start",
+		"githubLink": "Bekijk de GitHub issue"
 	},
 	"authScene": {
-		"claimHeading": "Initialize your server",
-		"claimText": "This Stump server is not intialized. Use the form below to create your account. Once created, you will have full access to all server features.",
+		"claimHeading": "Initialiseer je server",
+		"claimText": "Deze Stump server is niet geïnitialiseerd. Gebruik het formulier hieronder om uw account aan te maken. Eenmaal aangemaakt, heeft u volledige toegang tot alle serverfuncties.",
 		"form": {
 			"validation": {
-				"missingUsername": "Username is required",
-				"missingPassword": "Password is required"
+				"missingUsername": "Gebruikersnaam is vereist",
+				"missingPassword": "Wachtwoord is vereist"
 			},
 			"labels": {
-				"username": "Username",
-				"password": "Password"
+				"username": "Gebruikersnaam",
+				"password": "Wachtwoord"
 			},
 			"buttons": {
-				"createAccount": "Create Account",
+				"createAccount": "Account aanmaken",
 				"login": "Log in"
 			}
 		},
 		"toasts": {
-			"loggingIn": "Logging in...",
-			"loggedIn": "Welcome back!",
-			"loggedInFirstTime": "Welcome!",
-			"registering": "Registering...",
-			"registered": "Registered!",
-			"loginFailed": "Login failed. Please try again",
-			"registrationFailed": "Registration failed. Please try again"
+			"loggingIn": "Inloggen...",
+			"loggedIn": "Welkom terug!",
+			"loggedInFirstTime": "Welkom!",
+			"registering": "Registreren...",
+			"registered": "Geregistreerd!",
+			"loginFailed": "Inloggen mislukt. Probeer het nog een keer",
+			"registrationFailed": "Registratie mislukt. Probeer het nog een keer"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "Library Configuration",
-			"subtitleCreating": "A preview of your new library will be shown below",
-			"subtitleEditing": "A preview of your library edits will be shown below"
+			"heading": "Bibliotheek instellingen",
+			"subtitleCreating": "Een voorbeeld van uw nieuwe bibliotheek wordt hieronder weergegeven",
+			"subtitleEditing": "Een voorbeeld van uw wijzigingen aan de bibliotheek worden hieronder weergegeven"
 		}
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "File Information",
+			"heading": "Bestand informatie",
 			"labels": {
-				"fileSize": "File Size",
-				"fileType": "File Type",
-				"fileLocation": "File Location",
+				"fileSize": "Bestandsgrootte",
+				"fileType": "Bestandstype",
+				"fileLocation": "Bestandslocatie",
 				"fileChecksum": "Checksum"
 			}
 		},
-		"nextInSeries": "Next in Series"
+		"emailBook": {
+			"heading": "E-mail dit boek",
+			"description": "Stuur dit boek naar een apparaat of e-mailadres",
+			"form": {
+				"email": {
+					"label": "E-mail",
+					"placeholder": "E-mail adres",
+					"description": "Een e-mailadres om het boek naar te verzenden. Klik op toevoegen om elke invoer af te ronden"
+				},
+				"devices": {
+					"label": "Apparaten",
+					"placeholder": "Selecteer apparaten",
+					"noFilterMatch": "Geen apparaten die overeenkomen met de filter"
+				}
+			}
+		},
+		"nextInSeries": "Volgende in serie"
 	},
 	"createBookClubScene": {
-		"heading": "Create a new book club",
-		"subtitle": "You can create a private book club a select few, or make it public for anyone on the server to join",
+		"heading": "Maak een nieuwe boekenclub",
+		"subtitle": "U kunt een privéboekenclub maken met bepaalde personen, of deze openbaar maken zodat iedereen op de server eraan kan deelnemen",
 		"form": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My book club",
-				"description": "The name of your book club"
+				"label": "Naam",
+				"placeholder": "Mijn boekenclub",
+				"description": "De naam van je boekenclub"
 			},
 			"description": {
-				"label": "Description",
-				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
-				"description": "An optional, short description of your book club"
+				"label": "Beschrijving",
+				"placeholder": "Een 'Onze Vlag Betekent De Dood' fan club. We lezen piratenfictie naar ons hart",
+				"description": "Een optionele, korte beschrijving van je boekenclub"
 			},
 			"is_private": {
-				"label": "Private club",
-				"description": "If enabled, only users you invite will be able to join your book club"
+				"label": "Privéclub",
+				"description": "Als dit is ingeschakeld, kunnen alleen gebruikers die je uitnodigt lid worden van je boekenclub"
 			},
 			"member_role_spec": {
-				"heading": "Custom role mapping",
+				"heading": "Aangepaste rol toewijzing",
 				"subtitle": [
 					"You can create custom names for the roles in your book club. For example, you could rename the 'Member' role to 'Crewmate', or 'Creator' to 'Captain'. If you don't want to use custom names, you can leave these fields blank and the default names will be used instead. For more information about roles, refer to the",
-					"documentation"
+					"documentatie"
 				],
 				"member": {
-					"label": "Member",
-					"placeholder": "Member",
-					"description": "The name of the default role for your book club"
+					"label": "Lid",
+					"placeholder": "Gebruiker",
+					"description": "De naam van de standaardrol van je boekenclub"
 				},
 				"moderator": {
 					"label": "Moderator",
 					"placeholder": "Moderator",
-					"description": "The name of the moderator role for your book club"
+					"description": "De naam van de moderator rol van je boekenclub"
 				},
 				"admin": {
-					"label": "Admin",
-					"placeholder": "Admin",
-					"description": "The name of the admin role for your book club"
+					"label": "Beheerder",
+					"placeholder": "Beheerder",
+					"description": "De naam van de beheerdersrol van uw boek club"
 				},
 				"creator": {
-					"label": "Creator",
-					"placeholder": "Creator",
-					"description": "The name of the creator role for your book club. This is you!"
+					"label": "Maker",
+					"placeholder": "Maker",
+					"description": "De naam van de maker rol van je boek club. Dit ben jij!"
 				}
 			},
 			"creator_preferences": {
 				"heading": "Your membership preferences",
 				"subtitle": "Some preferences for your membership in the book club. These can be changed at any time from the book club settings page",
 				"creator_display_name": {
-					"label": "Display Name",
+					"label": "Gebruikersnaam",
 					"placeholder": "oromei",
-					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+					"description": "Een optionele gebruikersnaam voor je lidmaatschap in de boekenclub. Als dit is ingesteld heeft dit voorrang op je gebruikersnaam"
 				},
 				"creator_hide_progress": {
-					"label": "Hide Progress",
-					"description": "If enabled, your read progress will be hidden from other members of the book club"
+					"label": "Verberg voortgang",
+					"description": "Indien ingeschakeld, wordt je leesvoortgang verborgen voor andere leden van de boekenclub"
 				}
 			},
-			"submit": "Create Book Club"
+			"submit": "Maak een boekenclub"
 		}
 	},
 	"createLibraryScene": {
 		"heading": "Create New Library",
 		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on libraries and how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"subtitleLink": "relevante documentatie",
 		"form": {
 			"labels": {
 				"libraryName": "Naam",
-				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server",
-				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+				"libraryPath": "Map locatie",
+				"libraryPathDescription": "Het pad naar de bibliotheek zoals deze bestaat op je server",
+				"libraryDescription": "Beschrijving",
+				"libraryTags": "Labels"
 			},
 			"buttons": {
 				"confirm": "Bibliotheek creëren"
@@ -132,17 +148,17 @@
 	"librarySettingsScene": {
 		"heading": "Manage Library",
 		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"subtitleLink": "relevante documentatie",
 		"form": {
 			"labels": {
 				"libraryName": "Naam",
 				"libraryPath": "Locatie",
-				"libraryPathDescription": "The path to the library as it exists on your server",
+				"libraryPathDescription": "Het pad naar de bibliotheek zoals deze bestaat op je server",
 				"libraryDescription": "Beschrijving",
-				"libraryTags": "Tags"
+				"libraryTags": "Labels"
 			},
 			"buttons": {
-				"confirm": "Save Changes"
+				"confirm": "Wijzigingen opslaan"
 			}
 		}
 	},
@@ -150,61 +166,61 @@
 		"heading": "lol, oops",
 		"message": "Er is een fout opgetreden:",
 		"buttons": {
-			"report": "Report Bug",
-			"copy": "Copy Error Details",
-			"goHome": "Go Home"
+			"report": "Fout melden",
+			"copy": "Kopieer foutgegevens",
+			"goHome": "Ga naar start"
 		}
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "Continue Reading",
+			"title": "Verder lezen",
 			"emptyState": {
-				"heading": "No books to display",
-				"message": "Any books you're currently reading will show up here"
+				"heading": "Geen boeken om weer te geven",
+				"message": "Alle boeken die je momenteel leest worden hier weergegeven"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Recently Added Series",
+			"title": "Recent toegevoegde series",
 			"emptyState": {
-				"heading": "No series to display",
-				"message": "Any series you add to your libraries will show up here"
+				"heading": "Geen series om weer te geven",
+				"message": "Alle series die je toevoegt aan je bibliotheken worden hier weergegeven"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Recently Added Books",
+			"title": "Onlangs toegevoegde boeken",
 			"emptyState": {
-				"heading": "No books to display",
-				"message": "Any books you add to your libraries will show up here"
+				"heading": "Geen boeken om weer te geven",
+				"message": "Alle boeken die je toevoegt aan je bibliotheken verschijnen hier"
 			}
 		}
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "Continue Reading",
-			"downloadSeries": "Download Series"
+			"continueReading": "Verder lezen",
+			"downloadSeries": "Download serie"
 		}
 	},
 	"userSmartListsScene": {
-		"heading": "Smart lists",
-		"subtitle": "Your favorite searches and filters saved for easy access",
-		"searchPlaceholder": "Filter smart lists",
+		"heading": "Slimme lijsten",
+		"subtitle": "Uw favoriete zoekopdrachten en filters opgeslagen voor eenvoudige toegang",
+		"searchPlaceholder": "Filter slimme lijsten",
 		"buttons": {
-			"createSmartList": "Create smart list"
+			"createSmartList": "Maak slimme lijst"
 		},
 		"list": {
 			"emptyState": {
-				"heading": "No smart lists to display",
-				"noListsMessage": "Create a smart list to get started",
-				"noMatchesMessage": "Try changing your search query"
+				"heading": "Geen slimme lijsten om weer te geven",
+				"noListsMessage": "Maak een slimme lijst om te beginnen",
+				"noMatchesMessage": "Probeer je zoekopdracht te veranderen"
 			},
 			"card": {
 				"meta": {
 					"figures": {
-						"books": "book",
+						"books": "boek",
 						"series": "series",
-						"library": "library"
+						"library": "bibliotheek"
 					},
-					"matches": "Matches"
+					"matches": "Overeenkomsten"
 				}
 			}
 		}
@@ -212,65 +228,65 @@
 	"userSmartListScene": {
 		"navigation": {
 			"items": "Items",
-			"settings": "Settings"
+			"settings": "Instellingen"
 		},
 		"layout": {
-			"missingIdError": "This scene requires an ID in the URL",
-			"smartListNotFound": "Smart list not found",
-			"viewCreateError": "Failed to create view",
-			"viewSaveError": "Failed to save view"
+			"missingIdError": "Deze scène vereist een ID in de URL",
+			"smartListNotFound": "Slimme lijst niet gevonden",
+			"viewCreateError": "Aanmaken weergave mislukt",
+			"viewSaveError": "Opslaan weergave mislukt"
 		},
 		"header": {
-			"backLink": "Lists"
+			"backLink": "Lijsten"
 		},
 		"itemsScene": {
-			"smartListNotFound": "Smart list not found",
+			"smartListNotFound": "Slimme lijst niet gevonden",
 			"actionHeader": {
 				"viewSelector": {
-					"customView": "Custom view",
-					"defaultView": "Default view",
-					"noViewsSaved": "No views saved",
-					"selectView": "Select a saved view"
+					"customView": "Aangepaste weergave",
+					"defaultView": "Standaard weergave",
+					"noViewsSaved": "Geen weergaves opgeslagen",
+					"selectView": "Kies een opgeslagen weergave"
 				},
 				"filterDrawer": {
-					"heading": "Smart list filters",
-					"description": "Change the filters for this viewing session",
+					"heading": "Slimme lijst filters",
+					"description": "Wijzig de filters voor deze kijksessie",
 					"rawData": {
-						"heading": "Raw filter data",
-						"description": "This is how Stump will process the filters"
+						"heading": "Onbewerkte filtergegevens",
+						"description": "Zo worden de filters verwerkt door Stump"
 					},
 					"buttons": {
-						"save": "Save",
-						"cancel": "Cancel"
+						"save": "Opslaan",
+						"cancel": "Annuleer"
 					}
 				},
 				"search": {
-					"placeholder": "Quick filter"
+					"placeholder": "Snelle filter"
 				},
 				"viewManager": {
-					"updateSelected": "Update selected",
-					"create": "Create new view",
+					"updateSelected": "Selectie bijwerken",
+					"create": "Nieuwe weergave aanmaken",
 					"modal": {
 						"heading": {
-							"create": "Create view",
-							"update": "Update view"
+							"create": "Weergave maken",
+							"update": "Weergave bijwerken"
 						},
 						"description": {
-							"create": "Create a new view for this smart list",
-							"update": "Update the view"
+							"create": "Maak een nieuwe weergave voor deze slimme lijst",
+							"update": "Weergave bijwerken"
 						},
 						"createForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "A friendly name to uniquely identify this view"
+								"label": "Naam",
+								"placeholder": "Mijn weergave",
+								"description": "Een vriendelijke naam om deze weergave te identificeren"
 							}
 						},
 						"updateForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "The updated name for this view, if desired"
+								"label": "Naam",
+								"placeholder": "Mijn weergave",
+								"description": "De bijgewerkte naam voor deze weergave, indien gewenst"
 							}
 						}
 					}
@@ -280,18 +296,18 @@
 	},
 	"settingsScene": {
 		"navigation": {
-			"general": "General",
-			"logs": "Logs",
+			"general": "Algemeen",
+			"logs": "Logboeken",
 			"server": "Server",
-			"jobs": "Jobs and Configuration",
-			"users": "User Management",
+			"jobs": "Taken en instellingen",
+			"users": "Gebruikersbeheer",
 			"desktop": "Desktop"
 		},
 		"sidebar": {
 			"application": {
 				"account": "Account",
-				"appearance": "Appearance",
-				"reader": "Reader",
+				"appearance": "Weergave",
+				"reader": "Lezer",
 				"desktop": "Desktop",
 				"label": "Application"
 			},
@@ -301,6 +317,7 @@
 				"users": "Users",
 				"jobs": "Jobs",
 				"access": "Access",
+				"email": "Email",
 				"notifications": "Notifications",
 				"label": "Server"
 			}
@@ -384,78 +401,82 @@
 					"lock": "Lock arrangement",
 					"unlock": "Unlock arrangement",
 					"options": {
-						"Home": "Home",
-						"Explore": "Explore",
-						"Libraries": "Libraries",
-						"BookClubs": "Book clubs",
-						"SmartLists": "Smart lists"
+						"Home": "Thuis",
+						"Explore": "Ontdekken",
+						"Libraries": "Bibliotheken",
+						"BookClubs": "Boekenclubs",
+						"SmartLists": "Slimme lijsten"
 					},
 					"entityOptions": {
 						"createAction": {
-							"label": "Show create action",
-							"help": "Show the create action in the navigation"
+							"label": "Toon aanmaak actie",
+							"help": "Toon de aanmaak actie in de navigatie"
 						},
 						"linkToAll": {
-							"label": "See all link",
-							"help": "A link to a page dedicated to viewing all items of this type"
+							"label": "Laat \"bekijk alle\" knop zien",
+							"help": "Een link naar een pagina gewijd aan het bekijken van alle items van dit type"
 						}
 					}
 				}
 			}
 		},
 		"app/reader": {
-			"helmet": "Reader settings",
-			"title": "Reader settings",
-			"description": "Default options for the Stump readers. These are bound to your current device only",
+			"helmet": "Lezer instellingen",
+			"title": "Lezer instellingen",
+			"description": "Standaard instellingen voor Stump lezers. Deze zijn alleen gebonden aan je huidige apparaat",
 			"sections": {
 				"imageBasedBooks": {
-					"label": "Image-based books",
-					"description": "Comic books, manga, and other image-based books",
+					"label": "Op afbeelding gebaseerde boeken",
+					"description": "Strips, manga en andere op afbeeldingen gebaseerde boeken",
 					"sections": {
 						"preloadAheadCount": {
-							"label": "Preload ahead count",
-							"description": "The number of pages to preload ahead of the current page"
+							"label": "Vooruit laden aantal",
+							"description": "Het aantal vooraf te laden pagina's vanaf de huidige pagina"
 						},
 						"preloadBehindCount": {
-							"label": "Preload behind count",
-							"description": "The number of pages to preload behind the current page"
+							"label": "Achter vooruit laden aantal",
+							"description": "Het aantal vooraf te laden pagina's voor de huidige pagina"
 						}
 					}
 				}
 			}
 		},
 		"app/desktop": {
-			"helmet": "Desktop settings",
-			"title": "Desktop settings",
-			"description": "Settings related to the Stump desktop application",
+			"helmet": "Desktop instellingen",
+			"title": "Desktop instellingen",
+			"description": "Instellingen gerelateerd aan de Stump desktop applicatie",
 			"sections": {
 				"discordPresence": {
-					"label": "Discord Presence",
-					"description": "Display your Stump activity in Discord using Discord Rich Presence",
-					"reconnect": "Reconnect to Discord"
+					"label": "Discord status",
+					"description": "Toon je Stump activiteit in Discord met behulp van Discord Rich Presence",
+					"reconnect": "Opnieuw verbinden met Discord"
 				}
 			}
 		},
 		"server/general": {
-			"helmet": "General server settings",
-			"title": "General settings",
-			"description": "General settings related to your Stump server instance",
+			"helmet": "Algemene serverinstellingen",
+			"title": "Algemene instellingen",
+			"description": "Algemene instellingen gerelateerd aan je Stump server",
 			"sections": {
 				"updateAvailable": {
-					"message": "Your server is not up to date. Please update to the latest version!"
+					"message": "Uw server is niet up-to-date. Update alsjeblieft naar de nieuwste versie!"
 				},
 				"serverInfo": {
-					"title": "Server information",
-					"description": "Basic details about your Stump server instance",
+					"title": "Serverinformatie",
+					"description": "Basisgegevens over uw Stump server instantie",
 					"build": {
-						"label": "Build",
-						"description": "Details about the version and build",
+						"label": "Bouwversie",
+						"description": "Details over de versie en bouwversie",
 						"version": {
-							"semver": "Version",
-							"commitHash": "Exact commit",
-							"date": "Build date"
+							"semver": "Versie",
+							"commitHash": "Exacte commit",
+							"date": "Build-datum"
 						}
 					}
+				},
+				"serverPublicUrl": {
+					"label": "Openbare URL",
+					"description": "The URL that your server is accessible from outside your network, if applicable. This will enable invite links and other features"
 				}
 			}
 		},
@@ -637,6 +658,135 @@
 				"createSubmitButton": "Create user",
 				"updateSubmitButton": "Update user"
 			}
+		},
+		"server/email": {
+			"helmet": "Email settings",
+			"title": "Email",
+			"description": "Settings related to the configuring an SMTP emailer for your Stump server instance",
+			"sections": {
+				"emailers": {
+					"title": "SMTP emailers",
+					"description": "The clients you have configured for sending emails from your Stump server instance",
+					"singleInstanceDisclaimer": "While Stump supports multiple SMTP configurations in the backend, only one can be configured on the UI. This will be improved in the future",
+					"list": {
+						"emptyHeading": "No SMTP emailers configured",
+						"primaryEmailer": "Primary emailer",
+						"sendHistory": {
+							"heading": "Send history",
+							"description": "A record of emails sent from this emailer",
+							"table": {
+								"columns": {
+									"to": "To",
+									"subject": "Subject",
+									"status": "Status",
+									"createdAt": "Sent at"
+								}
+							},
+							"emptyHeading": "No history",
+							"emptySubtitle": "The history of this emailer is empty. It has either not been used or the history has been cleared"
+						}
+					}
+				},
+				"devices": {
+					"title": "Email devices",
+					"description": "The device aliases you have configured for recieving emails from your Stump server instance",
+					"addDevice": "Add device alias",
+					"addOrUpdateDevice": {
+						"title": {
+							"create": "Create device alias",
+							"update": "Update device alias"
+						},
+						"name": {
+							"label": "Name",
+							"description": "A friendly name to uniquely identify this device alias"
+						},
+						"email": {
+							"label": "Email",
+							"description": "The email address this alias will be associated with"
+						},
+						"forbidden": {
+							"label": "Forbidden",
+							"description": "When enabled, no user may send emails to the address associated with this alias"
+						},
+						"submit": {
+							"create": "Create device alias",
+							"update": "Update device alias"
+						}
+					},
+					"table": {
+						"emptyHeading": "No devices registered",
+						"emptySubtitle": "Create a new device alias for future use"
+					}
+				}
+			},
+			"createOrUpdateForm": {
+				"name": {
+					"label": "Name",
+					"description": "A friendly name to uniquely identify this emailer"
+				},
+				"smtpSettings": {
+					"heading": "SMTP settings",
+					"description": "The SMTP-specific settings for this emailer"
+				},
+				"smtpProvider": {
+					"label": "SMTP provider preset",
+					"description": "The provider of the SMTP server. This is used to prefill some common settings, but doesn't capture all providers"
+				},
+				"smtpHost": {
+					"label": "SMTP host",
+					"description": "The hostname of the SMTP server"
+				},
+				"smtpPort": {
+					"label": "SMTP port",
+					"description": "The port of the SMTP server"
+				},
+				"tlsEnabled": {
+					"label": "TLS enabled",
+					"description": "If enabled, the connection to the SMTP server will be encrypted"
+				},
+				"username": {
+					"label": "Username",
+					"description": "The username for authenticating with the SMTP server. This is typically the email address"
+				},
+				"password": {
+					"label": "Password",
+					"description": "The password for authenticating with the SMTP server. If you're using Gmail, you may need to generate an app-specific password"
+				},
+				"senderSettings": {
+					"heading": "Sender settings",
+					"description": "The settings for the sender of the email"
+				},
+				"senderDisplayName": {
+					"label": "Sender display name",
+					"description": "The name that will be displayed to recipients"
+				},
+				"senderEmail": {
+					"label": "Sender email address",
+					"description": "The email address that will be displayed to recipients"
+				},
+				"additionalSettings": {
+					"heading": "Additional settings",
+					"description": "Additional settings for the emailer"
+				},
+				"maxAttachmentSize": {
+					"label": "Max attachment size",
+					"description": "The maximum size, in bytes, that an attachment can be"
+				},
+				"submit": {
+					"create": "Create emailer",
+					"update": "Update emailer"
+				}
+			},
+			"createEmailer": {
+				"helmet": "Create emailer",
+				"title": "Create emailer",
+				"description": "Create a new SMTP emailer for your Stump server instance"
+			},
+			"updateEmailer": {
+				"helmet": "Update emailer",
+				"title": "Update emailer",
+				"description": "Update the details of this SMTP emailer"
+			}
 		}
 	},
 	"jobOverlay": {
@@ -646,6 +796,17 @@
 		"seriesCount": "Total Series",
 		"bookCount": "Total Books",
 		"diskUsage": "Disk Usage"
+	},
+	"noLibraries": {
+		"heading": "Nothing to see here",
+		"messagePrefix": "You can't see what you don't have",
+		"message": {
+			"create": "Create a library to get started",
+			"wait": "Once libraries are created, they'll be displayed here"
+		},
+		"links": {
+			"create": "Create library"
+		}
 	},
 	"pagination": {
 		"buttons": {
@@ -746,12 +907,15 @@
 		}
 	},
 	"common": {
+		"add": "Add",
 		"cancel": "Cancel",
 		"confirm": "Confirm",
 		"save": "Save",
+		"send": "Send",
 		"saveChanges": "Save changes",
 		"create": "Create",
 		"edit": "Edit",
+		"update": "Update",
 		"unimplemented": "This functionality is not yet implemented! Check back later",
 		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later"
 	}

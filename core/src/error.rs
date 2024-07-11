@@ -7,12 +7,18 @@ pub type CoreResult<T> = Result<T, CoreError>;
 
 #[derive(Error, Debug)]
 pub enum CoreError {
-	#[error("Failed to initialize Stump core: {0}")]
-	InitializationError(String),
 	#[error(
 		"Attempted to initialize StumpCore with a config dir that does not exist: {0}"
 	)]
 	ConfigDirDoesNotExist(String),
+	#[error("Encryption key must be set")]
+	EncryptionKeyNotSet,
+	#[error("Failed to encrypt: {0}")]
+	EncryptionFailed(String),
+	#[error("Failed to decrypt: {0}")]
+	DecryptionFailed(String),
+	#[error("Failed to initialize Stump core: {0}")]
+	InitializationError(String),
 	#[error("Query error: {0}")]
 	QueryError(#[from] prisma_client_rust::queries::QueryError),
 	#[error("Invalid query error: {0}")]

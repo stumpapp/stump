@@ -12,6 +12,6 @@
 		["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
 		["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
 	],
-	"tailwindCSS.classAttributes": ["class", "className", ".*CLASSES", ".*VARIANTS"],
+	"tailwindCSS.classAttributes": ["class", "className", ".*ClassName", ".*CLASSES", ".*VARIANTS"],
 	"typescript.tsdk": "node_modules/typescript/lib"
 }

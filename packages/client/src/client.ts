@@ -28,6 +28,7 @@ export const queryClient = new QueryClient({
 		queries: {
 			refetchOnWindowFocus: false,
 			retry: false,
+			// TODO: change this and start using suspense, big big refactor...
 			suspense: false,
 		},
 	},

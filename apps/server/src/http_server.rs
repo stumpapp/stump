@@ -35,6 +35,11 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 
+	// Initialize the encryption key, if it doesn't exist
+	core.init_encryption()
+		.await
+		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
+
 	core.init_journal_mode()
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;

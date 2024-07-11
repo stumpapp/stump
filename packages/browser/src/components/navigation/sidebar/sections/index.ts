@@ -1,3 +1,3 @@
-export { default as BookClubSideBarSection } from './book-club/BookClubSideBarSection'
-export { default as LibrarySideBarSection } from './library-section/LibrarySideBarSection'
-export { default as SmartListSideBarSection } from './smart-list/SmartListSideBarSection'
+export { default as BookClubSideBarSection } from './bookClub/BookClubSideBarSection'
+export { default as LibrarySideBarSection } from './library/LibrarySideBarSection'
+export { default as SmartListSideBarSection } from './smartList/SmartListSideBarSection'

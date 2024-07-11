@@ -18,7 +18,7 @@ export {
 export { Calendar, DatePicker } from './calendar'
 export { Card, CardGrid, type CardProps, EntityCard, HoverCard, type HoverCardProps } from './card'
 export { Command, type CommandProps } from './command'
-export { Divider, Layout, Spacer, type SpacerProps } from './container'
+export { Divider, Layout, Spacer, type SpacerProps, SplitContainer } from './container'
 export { ContextMenu, type ContextMenuProps } from './context-menu'
 export { ConfirmationModal, type ConfirmationModalProps, Dialog } from './dialog'
 export { Drawer } from './drawer'
@@ -31,6 +31,7 @@ export {
 	CheckBox,
 	type CheckBoxProps,
 	Input,
+	PasswordInput,
 	RawSwitch,
 	Switch,
 	type SwitchProps,

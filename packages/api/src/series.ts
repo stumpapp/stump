@@ -81,6 +81,15 @@ export function uploadSeriesThumbnail(id: string, file: File) {
 	})
 }
 
+/**
+ * Start the analysis of a series by series id.
+ *
+ * @param id The id for the series to analyze
+ */
+export function startMediaAnalysis(id: string) {
+	API.post(`/series/${id}/analyze`)
+}
+
 export const seriesApi = {
 	getNextInSeries,
 	getNextMediaInSeries,
@@ -91,6 +100,7 @@ export const seriesApi = {
 	getSeriesThumbnail,
 	getSeriesWithCursor,
 	patchSeriesThumbnail,
+	startMediaAnalysis,
 	uploadSeriesThumbnail,
 }
 
@@ -104,5 +114,6 @@ export const seriesQueryKeys: Record<keyof typeof seriesApi, string> = {
 	getSeriesThumbnail: 'series.getSeriesThumbnail',
 	getSeriesWithCursor: 'series.getSeriesWithCursor',
 	patchSeriesThumbnail: 'series.patchSeriesThumbnail',
+	startMediaAnalysis: 'series.Analysis',
 	uploadSeriesThumbnail: 'series.uploadSeriesThumbnail',
 }

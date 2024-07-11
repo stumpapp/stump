@@ -36,7 +36,7 @@ use super::{
 	walk_library, walk_series, WalkedLibrary, WalkedSeries, WalkerCtx,
 };
 
-/// The taks variants that are used to scan a library
+/// The task variants that are used to scan a library
 #[derive(Serialize, Deserialize)]
 pub enum LibraryScanTask {
 	Init(InitTaskInput),

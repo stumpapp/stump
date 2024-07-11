@@ -10,6 +10,7 @@ logs/
 .vscode/**/*
 !.vscode/settings.json
 !.vscode/extensions.json
+!.vscode/tasks.json
 !.vscode/*.todo
 
 build/
@@ -47,3 +48,6 @@ apps/server/client/*
 # nix
 .envrc
 .direnv
+
+#Code coverage
+lcov.info

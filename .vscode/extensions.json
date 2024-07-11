@@ -6,6 +6,7 @@
 		"bradlc.vscode-tailwindcss",
 		"Gruntfuggly.todo-tree",
 		"mike-co.import-sorter",
-		"aaron-bond.better-comments"
+		"aaron-bond.better-comments",
+		"ryanluker.vscode-coverage-gutters"
 	]
 }

@@ -46,7 +46,7 @@ uuid = "1.8.0"
 walkdir = "2.4.0"
 webp = "0.2.6"
 xml-rs = "0.8.20" # XML reader/writer
-zip = "0.6.6"
+zip = "2.1.3"
 
 [dev-dependencies]
 temp-env = "0.3.6"

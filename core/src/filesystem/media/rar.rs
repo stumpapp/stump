@@ -124,6 +124,12 @@ impl FileProcessor for RarProcessor {
 
 		while let Ok(Some(header)) = archive.read_header() {
 			let entry = header.entry();
+
+			if entry.filename.is_hidden_file() {
+				archive = header.skip()?;
+				continue;
+			}
+
 			if entry.filename.as_os_str() == "ComicInfo.xml" {
 				let (data, rest) = header.read()?;
 				metadata_buf = Some(data);
@@ -159,24 +165,23 @@ impl FileProcessor for RarProcessor {
 	) -> Result<(ContentType, Vec<u8>), FileError> {
 		let archive = RarProcessor::open_for_listing(file)?;
 
-		let mut valid_entries = archive
+		let sorted_entries = archive
 			.into_iter()
 			.filter_map(|entry| entry.ok())
-			.filter(|entry| entry.filename.is_img())
+			.filter(|entry| entry.filename.is_img() && !entry.filename.is_hidden_file())
+			.sorted_by(|a, b| alphanumeric_sort::compare_path(&a.filename, &b.filename))
 			.collect::<Vec<_>>();
-		valid_entries
-			.sort_by(|a, b| alphanumeric_sort::compare_path(&a.filename, &b.filename));
 
-		let target_entry = valid_entries
+		let target_entry = sorted_entries
 			.into_iter()
 			.nth((page - 1) as usize)
 			.ok_or(FileError::RarReadError)?;
+		let FileParts { extension, .. } = target_entry.filename.as_path().file_parts();
 
 		let mut bytes = None;
 		let mut archive = RarProcessor::open_for_processing(file)?;
 		while let Ok(Some(header)) = archive.read_header() {
-			let is_target =
-				header.entry().filename.as_os_str() == target_entry.filename.as_os_str();
+			let is_target = header.entry().filename == target_entry.filename;
 			if is_target {
 				let (data, _) = header.read()?;
 				bytes = Some(data);
@@ -186,43 +191,32 @@ impl FileProcessor for RarProcessor {
 			}
 		}
 
-		let content_type = if let Some(bytes) = &bytes {
-			if bytes.len() < 5 {
-				return Err(FileError::NoImageError);
-			}
-			let mut magic_header = [0; 5];
-			magic_header.copy_from_slice(&bytes[0..5]);
-			ContentType::from_bytes(&magic_header)
-		} else {
-			ContentType::UNKNOWN
+		let Some(bytes) = bytes else {
+			return Err(FileError::NoImageError);
 		};
 
-		Ok((content_type, bytes.ok_or(FileError::NoImageError)?))
+		if bytes.len() < 5 {
+			debug!(path = ?file, ?bytes, "File is too small to determine content type");
+			return Err(FileError::NoImageError);
+		}
+		let mut magic_header = [0; 5];
+		magic_header.copy_from_slice(&bytes[0..5]);
+		let content_type =
+			ContentType::from_bytes_with_fallback(&magic_header, &extension);
+
+		Ok((content_type, bytes))
 	}
 
 	fn get_page_count(path: &str, _: &StumpConfig) -> Result<i32, FileError> {
 		let archive = RarProcessor::open_for_listing(path)?;
 
-		// Get count of valid page entries
-		let mut pages = 0;
-		for entry in archive {
-			if entry.is_err() {
-				continue;
-			}
+		let page_count = archive
+			.into_iter()
+			.filter_map(|entry| entry.ok())
+			.filter(|entry| entry.filename.is_img() && !entry.filename.is_hidden_file())
+			.count();
 
-			// Make sure it's an image
-			let entry = entry.unwrap();
-			if entry.filename.as_os_str() == "ComicInfo.xml" {
-				continue;
-			} else {
-				// If the entry is not an image then it cannot be a valid page
-				if entry.filename.is_img() {
-					pages += 1;
-				}
-			}
-		}
-
-		Ok(pages)
+		Ok(page_count as i32)
 	}
 
 	fn get_page_content_types(
@@ -231,40 +225,36 @@ impl FileProcessor for RarProcessor {
 	) -> Result<HashMap<i32, ContentType>, FileError> {
 		let archive = RarProcessor::open_for_listing(path)?;
 
-		let entries = archive
+		let sorted_entries = archive
 			.into_iter()
 			.filter_map(|entry| entry.ok())
 			.filter(|entry| entry.filename.is_img())
 			.sorted_by(|a, b| alphanumeric_sort::compare_path(&a.filename, &b.filename))
-			.enumerate()
-			.map(|(idx, header)| (PathBuf::from(header.filename.as_os_str()), idx))
-			.collect::<HashMap<_, _>>();
+			.collect::<Vec<_>>();
 
 		let mut content_types = HashMap::new();
-		let mut archive = RarProcessor::open_for_processing(path)?;
-		while let Ok(Some(header)) = archive.read_header() {
-			archive = if let Some(tuple) =
-				entries.get_key_value(&PathBuf::from(header.entry().filename.as_os_str()))
-			{
-				let page = *tuple.1 as i32;
-				if pages.contains(&page) {
-					let (data, rest) = header.read()?;
-					let path = Path::new(tuple.0);
-					let extension = path
-						.extension()
-						.and_then(|s| s.to_str())
-						.unwrap_or_default();
 
-					content_types.insert(
-						page,
-						ContentType::from_bytes_with_fallback(&data, extension),
-					);
-					rest
-				} else {
-					header.skip()?
-				}
-			} else {
-				header.skip()?
+		let mut pages_found = 0;
+		for entry in sorted_entries {
+			let path = entry.filename;
+
+			if path.is_hidden_file() {
+				trace!(path = ?path, "Skipping hidden file");
+				continue;
+			}
+
+			let content_type = path.naive_content_type();
+			let is_page_in_target = pages.contains(&(pages_found + 1));
+
+			if is_page_in_target && content_type.is_image() {
+				trace!(?path, ?content_type, "found a targeted rar entry");
+				content_types.insert(pages_found + 1, content_type);
+				pages_found += 1;
+			}
+
+			// If we've found all the pages we need, we can stop
+			if pages_found == pages.len() as i32 {
+				break;
 			}
 		}
 
@@ -293,7 +283,7 @@ impl FileConverter for RarProcessor {
 		let cache_dir = config.get_cache_dir();
 		let unpacked_path = cache_dir.join(file_stem);
 
-		trace!(?unpacked_path, "Extracting RAR to cache");
+		trace!(?unpacked_path, "Extracting RAR to disk");
 
 		let mut archive = RarProcessor::open_for_processing(path)?;
 		while let Ok(Some(header)) = archive.read_header() {
@@ -310,17 +300,83 @@ impl FileConverter for RarProcessor {
 		// TODO: won't work in docker
 		if delete_source {
 			if let Err(err) = trash::delete(path) {
-				warn!(error = ?err, path,"Failed to delete converted RAR file");
+				warn!(error = ?err, path, "Failed to delete converted RAR file");
 			}
 		}
 
 		// TODO: maybe check that this path isn't in a pre-defined list of important paths?
 		if let Err(err) = std::fs::remove_dir_all(&unpacked_path) {
 			error!(
-				error = ?err, ?cache_dir, ?unpacked_path, "Failed to delete unpacked RAR contents in cache",
+				error = ?err, ?cache_dir, ?unpacked_path, "Failed to delete unpacked RAR contents after conversion",
 			);
 		}
 
 		Ok(zip_path)
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::filesystem::media::tests::{get_test_rar_file_data, get_test_rar_path};
+
+	use std::fs;
+
+	#[test]
+	fn test_process() {
+		// Create temporary directory and place a copy of our mock book.rar in it
+		let tempdir = tempfile::tempdir().expect("Failed to create temporary directory");
+		let temp_rar_file_path = tempdir
+			.path()
+			.join("book.rar")
+			.to_string_lossy()
+			.to_string();
+		fs::write(&temp_rar_file_path, get_test_rar_file_data())
+			.expect("Failed to write temporary book.rar");
+		let config = StumpConfig::debug();
+
+		// We can test deletion since it's a temporary file
+		let processed_file = RarProcessor::process(
+			&temp_rar_file_path,
+			FileProcessorOptions {
+				convert_rar_to_zip: true,
+				delete_conversion_source: true,
+			},
+			&config,
+		);
+
+		// Assert that the operation succeeded
+		assert!(processed_file.is_ok());
+		// And that the original file was deleted
+		assert!(!Path::new(&temp_rar_file_path).exists())
+	}
+
+	#[test]
+	fn test_rar_to_zip() {
+		// Create temporary directory and place a copy of our mock book.rar in it
+		let tempdir = tempfile::tempdir().expect("Failed to create temporary directory");
+		let temp_rar_file_path = tempdir
+			.path()
+			.join("book.rar")
+			.to_string_lossy()
+			.to_string();
+		fs::write(&temp_rar_file_path, get_test_rar_file_data())
+			.expect("Failed to write temporary book.rar");
+		let config = StumpConfig::debug();
+
+		// We have a temporary file, so we may as well test deletion also
+		let zip_result = RarProcessor::to_zip(&temp_rar_file_path, true, None, &config);
+		// Assert that operation succeeded
+		assert!(zip_result.is_ok());
+		// And that the original file was deleted
+		assert!(!Path::new(&temp_rar_file_path).exists())
+	}
+
+	#[test]
+	fn test_get_page_content_types() {
+		let path = get_test_rar_path();
+
+		let content_types = RarProcessor::get_page_content_types(&path, vec![1]);
+		assert!(content_types.is_ok());
 	}
 }

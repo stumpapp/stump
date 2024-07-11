@@ -117,8 +117,8 @@ impl FileProcessor for EpubProcessor {
 		for chapter in pages {
 			if chapter == 1 {
 				// Assume this is the cover page
-				// FIXME: This is wrong. I just don't want to deal with it right now...
-				content_types.insert(chapter, ContentType::JPEG);
+				let (content_type, _) = Self::get_cover_internal(&mut epub_file)?;
+				content_types.insert(chapter, content_type);
 				continue;
 			}
 
@@ -153,20 +153,9 @@ impl EpubProcessor {
 		EpubDoc::new(path).map_err(|e| FileError::EpubOpenError(e.to_string()))
 	}
 
-	/// Returns the cover image for the epub file. If a cover image cannot be extracted via the
-	/// metadata, it will go through two rounds of fallback methods:
-	///
-	/// 1. Attempt to find a resource with the default ID of "cover"
-	/// 2. Attempt to find a resource with a mime type of "image/jpeg" or "image/png", and weight the
-	/// results based on how likely they are to be the cover. For example, if the cover is named
-	/// "cover.jpg", it's probably the cover. The entry with the heighest weight, if any, will be
-	/// returned.
-	pub fn get_cover(path: &str) -> Result<(ContentType, Vec<u8>), FileError> {
-		let mut epub_file = EpubDoc::new(path).map_err(|e| {
-			tracing::error!("Failed to open epub file: {}", e);
-			FileError::EpubOpenError(e.to_string())
-		})?;
-
+	fn get_cover_internal(
+		epub_file: &mut EpubDoc<BufReader<File>>,
+	) -> Result<(ContentType, Vec<u8>), FileError> {
 		let cover_id = epub_file.get_cover_id().unwrap_or_else(|| {
 			tracing::debug!("Epub file does not contain cover metadata");
 			DEFAULT_EPUB_COVER_ID.to_string()
@@ -212,6 +201,23 @@ impl EpubProcessor {
 		Err(FileError::EpubReadError(
 			"Failed to find cover for epub file".to_string(),
 		))
+	}
+
+	/// Returns the cover image for the epub file. If a cover image cannot be extracted via the
+	/// metadata, it will go through two rounds of fallback methods:
+	///
+	/// 1. Attempt to find a resource with the default ID of "cover"
+	/// 2. Attempt to find a resource with a mime type of "image/jpeg" or "image/png", and weight the
+	/// results based on how likely they are to be the cover. For example, if the cover is named
+	/// "cover.jpg", it's probably the cover. The entry with the heighest weight, if any, will be
+	/// returned.
+	pub fn get_cover(path: &str) -> Result<(ContentType, Vec<u8>), FileError> {
+		let mut epub_file = EpubDoc::new(path).map_err(|e| {
+			tracing::error!("Failed to open epub file: {}", e);
+			FileError::EpubOpenError(e.to_string())
+		})?;
+
+		EpubProcessor::get_cover_internal(&mut epub_file)
 	}
 
 	pub fn get_chapter(
@@ -365,4 +371,50 @@ pub(crate) fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {
 	// std::path::absolute(adjusted_path);
 
 	PathBuf::from(adjusted_str)
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::filesystem::media::tests::get_test_epub_path;
+
+	#[test]
+	fn test_process() {
+		let path = get_test_epub_path();
+		let config = StumpConfig::debug();
+
+		let processed_file = EpubProcessor::process(
+			&path,
+			FileProcessorOptions {
+				convert_rar_to_zip: false,
+				delete_conversion_source: false,
+			},
+			&config,
+		);
+		assert!(processed_file.is_ok());
+	}
+
+	#[test]
+	fn test_get_page_content_types() {
+		let path = get_test_epub_path();
+
+		let cover = EpubProcessor::get_page_content_types(&path, vec![1]);
+		assert!(cover.is_ok());
+	}
+
+	#[test]
+	fn test_get_cover() {
+		let path = get_test_epub_path();
+
+		let cover = EpubProcessor::get_cover(&path);
+		assert!(cover.is_ok());
+	}
+
+	#[test]
+	fn test_get_chapter() {
+		let path = get_test_epub_path();
+
+		let chapter = EpubProcessor::get_chapter(&path, 1);
+		assert!(chapter.is_ok());
+	}
 }

@@ -447,7 +447,7 @@ async fn browse_library_by_id(
 		OPDSFeedBuilder::default()
 			.metadata(
 				OPDSMetadataBuilder::default()
-					.title(format!("{}", library.name))
+					.title(library.name.to_string())
 					.build()?,
 			)
 			.links(vec![OPDSLink::Link(

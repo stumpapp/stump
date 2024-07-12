@@ -72,7 +72,7 @@ pub enum OPDSLinkType {
 /// A struct for representing the common elements of an OPDS link. Other link types can be derived from this struct,
 /// such as [OPDSImageLink] and [OPDSNavigationLink], and flattened for serialization into a unfied JSON object.
 #[skip_serializing_none]
-#[derive(Debug, Clone, Builder, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Builder, Serialize, Deserialize)]
 #[builder(build_fn(error = "crate::CoreError"), default, setter(into))]
 pub struct OPDSBaseLink {
 	/// The title of the linked resource, if available
@@ -95,19 +95,6 @@ pub struct OPDSBaseLink {
 	pub templated: Option<bool>,
 	// pub children: Option<Vec<Link>>,
 	pub properties: Option<OPDSDynamicProperties>,
-}
-
-impl Default for OPDSBaseLink {
-	fn default() -> Self {
-		Self {
-			title: None,
-			rel: None,
-			href: String::new(),
-			_type: None,
-			templated: None,
-			properties: None,
-		}
-	}
 }
 
 /// A struct for representing an image link, which is a special type of link that points to an image resource.

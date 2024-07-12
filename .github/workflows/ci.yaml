@@ -12,17 +12,31 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
       - name: Setup rust
         uses: ./.github/actions/setup-rust
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: >-
+            ${{ runner.os }}-cargo-
+            ${{ github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork && 'non-fork-' || 'fork-' }}-
+            ${{ hashFiles('**/Cargo.lock') }}
+
       - name: Run cargo checks
         run: |
           cargo fmt --all -- --check
           cargo clippy -- -D warnings
+
       - name: Run tests
         run: cargo test
-
-      - name: Generate and upload code coverage
-        uses: ./.github/actions/generate-coverage
 
       - name: Install cargo-llvm-cov
         if: github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork
@@ -47,17 +61,24 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - uses: actions/setup-node@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
         with:
           node-version: '20.0.0'
+
       - name: Install yarn
         shell: bash
         run: npm install -g yarn
-      - uses: actions/setup-node@v4
+
+      - name: Setup node (yarn cache)
+        uses: actions/setup-node@v4
         with:
           node-version: '20.0.0'
           cache: 'yarn'
+
       - name: Install dependencies
         run: yarn install
+
       - name: Run TypeScript lints
         run: yarn lint

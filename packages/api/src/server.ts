@@ -7,7 +7,7 @@ export function getStumpVersion(): Promise<APIResult<StumpVersion>> {
 	return API.post('/version')
 }
 
-export function checkForServerUpdate(): Promise<ApiResult<UpdateCheck>> {
+export function checkForServerUpdate(): Promise<APIResult<UpdateCheck>> {
 	return API.get('/check-for-update')
 }
 

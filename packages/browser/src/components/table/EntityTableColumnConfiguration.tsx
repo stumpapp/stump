@@ -138,7 +138,14 @@ export default function EntityTableColumnConfiguration({ entity, configuration, 
 					<Button className="w-full" onClick={handleSave}>
 						{t('common.save')}
 					</Button>
-					<Button variant="outline" className="w-full">
+					<Button
+						variant="outline"
+						className="w-full"
+						onClick={() => {
+							setFullConfiguration(resolveConfiguration(configuration, columnMap))
+							setIsOpen(false)
+						}}
+					>
 						{t('common.cancel')}
 					</Button>
 				</div>

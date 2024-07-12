@@ -25,7 +25,7 @@ use stump_core::{
 		PrismaCountTrait,
 	},
 	filesystem::{
-		analyze_media_job::{AnalyzeMediaJob, AnalyzeMediaJobVariant},
+		analyze_media_job::AnalyzeMediaJob,
 		get_unknown_thumnail,
 		image::{
 			self, generate_thumbnail, place_thumbnail, remove_thumbnails,
@@ -294,6 +294,7 @@ pub struct LibraryStatsParams {
 	all_users: bool,
 }
 
+// TODO(historical-read-session): refactor query
 #[utoipa::path(
 	get,
 	path = "/api/v1/libraries/stats",
@@ -1752,14 +1753,12 @@ async fn start_media_analysis(
 	let _ = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
 
 	// Start analysis job
-	ctx.enqueue_job(AnalyzeMediaJob::new(
-		AnalyzeMediaJobVariant::AnalyzeLibrary(id),
-	))
-	.map_err(|e| {
-		let err = "Failed to enqueue analyze library media job";
-		error!(?e, err);
-		APIError::InternalServerError(err.to_string())
-	})?;
+	ctx.enqueue_job(AnalyzeMediaJob::analyze_library(id))
+		.map_err(|e| {
+			let err = "Failed to enqueue analyze library media job";
+			error!(?e, err);
+			APIError::InternalServerError(err.to_string())
+		})?;
 
 	APIResult::Ok(())
 }

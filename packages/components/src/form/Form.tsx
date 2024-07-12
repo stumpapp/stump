@@ -3,7 +3,7 @@ import { FieldValues, FormProvider, SubmitHandler, UseFormReturn } from 'react-h
 
 import { cn } from '../utils'
 
-type FormProps<T extends FieldValues> = {
+export type FormProps<T extends FieldValues> = {
 	form: UseFormReturn<T>
 	onSubmit: SubmitHandler<T>
 	fieldsetClassName?: string

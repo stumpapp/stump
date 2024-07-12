@@ -37,7 +37,7 @@ export interface Pageable<T> {
 // Note: I am separating these options / exclusions in case I want to use either independently.
 export type MediaOrderByExclusions = Extract<
 	keyof Media,
-	'currentPage' | 'series' | 'readProgresses' | 'tags' | 'id'
+	'current_page' | 'series' | 'tags' | 'id' | 'active_reading_session' | 'finished_reading_sessions'
 >
 export type MediaOrderByOptions = Partial<Omit<Media, MediaOrderByExclusions>>
 // TODO: I HATE THIS

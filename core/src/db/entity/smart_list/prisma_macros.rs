@@ -2,10 +2,10 @@ use std::str::FromStr;
 
 use crate::{
 	db::{
-		entity::{Media, MediaMetadata, ReadProgress},
+		entity::{ActiveReadingSession, FinishedReadingSession, Media, MediaMetadata},
 		FileStatus,
 	},
-	prisma::{media, read_progress},
+	prisma::{active_reading_session, finished_reading_session, media},
 };
 
 media::select!(media_only_series_id { series_id });
@@ -14,33 +14,31 @@ media::include!(media_grouped_by_series {
 	series: include { metadata }
 });
 
-media::include!((progress_filters: Vec<read_progress::WhereParam>) => media_grouped_by_library {
-	read_progresses(progress_filters)
+media::include!((user_id: String) => media_grouped_by_library {
+	active_user_reading_sessions(vec![active_reading_session::user_id::equals(user_id.clone())])
+	finished_user_reading_sessions(vec![finished_reading_session::user_id::equals(user_id.clone())])
 	metadata
 	series: select { library_id }
 });
 
 impl From<media_grouped_by_library::Data> for Media {
 	fn from(data: media_grouped_by_library::Data) -> Self {
-		let (read_progresses, current_page, is_completed, epubcfi) = {
-			let progress = data
-				.read_progresses
-				.iter()
-				.map(|rp| rp.to_owned().into())
-				.collect::<Vec<ReadProgress>>();
+		let active_reading_session = data
+			.active_user_reading_sessions
+			.first()
+			.cloned()
+			.map(ActiveReadingSession::from);
+		let (current_page, current_epubcfi) = active_reading_session
+			.as_ref()
+			.map(|session| (session.page, session.epubcfi.clone()))
+			.unwrap_or((None, None));
 
-			// Note: ugh.
-			if let Some(p) = progress.first().cloned() {
-				(
-					Some(progress),
-					Some(p.page),
-					Some(p.is_completed),
-					p.epubcfi,
-				)
-			} else {
-				(Some(progress), None, None, None)
-			}
-		};
+		let finished_reading_sessions = data
+			.finished_user_reading_sessions
+			.iter()
+			.map(|data| FinishedReadingSession::from(data.to_owned()))
+			.collect::<Vec<FinishedReadingSession>>();
+		let is_completed = !finished_reading_sessions.is_empty();
 
 		Media {
 			id: data.id,
@@ -56,10 +54,11 @@ impl From<media_grouped_by_library::Data> for Media {
 			status: FileStatus::from_str(&data.status).unwrap_or(FileStatus::Error),
 			series_id: data.series_id.unwrap_or_default(),
 			metadata: data.metadata.map(|m| MediaMetadata::from(m.to_owned())),
-			read_progresses,
+			active_reading_session,
+			finished_reading_sessions: Some(finished_reading_sessions),
 			current_page,
-			current_epubcfi: epubcfi,
-			is_completed,
+			current_epubcfi,
+			is_completed: Some(is_completed),
 			..Default::default()
 		}
 	}

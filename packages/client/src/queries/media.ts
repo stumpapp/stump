@@ -1,5 +1,5 @@
 import { mediaApi, mediaQueryKeys } from '@stump/api'
-import type { Media, ReadProgress } from '@stump/types'
+import type { Media, ProgressUpdateReturn } from '@stump/types'
 import { AxiosError } from 'axios'
 
 import {
@@ -159,7 +159,7 @@ export function useMediaCursorQuery(options: CursorQueryOptions<Media>) {
 // progress, since this is focused around page numbers.
 export function useUpdateMediaProgress(
 	mediaId: string,
-	options?: MutationOptions<ReadProgress, AxiosError, number>,
+	options?: MutationOptions<ProgressUpdateReturn, AxiosError, number>,
 ) {
 	const {
 		mutate: updateReadProgress,

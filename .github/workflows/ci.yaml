@@ -25,10 +25,7 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: >-
-            ${{ runner.os }}-cargo-
-            ${{ github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork && 'non-fork-' || 'fork-' }}-
-            ${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-${{ github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork && 'non-fork-' || 'fork-' }}${{ hashFiles('**/Cargo.lock') }}
 
       - name: Run cargo checks
         run: |

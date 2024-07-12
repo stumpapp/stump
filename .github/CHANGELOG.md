@@ -1,5 +1,46 @@
 # Changelog
 
+<a name="next"></a>
+## next
+
+### Added
+
+- ✅ Improve coverage testing and filesystem coverage ([#351](https://github.com/stumpapp/stump/issues/351)) [[efbae49](https://github.com/stumpapp/stump/commit/efbae490993ca691b3e960612b513cec6e646efb)]
+- ✨ Delete job-associated logs and small QOL changes ([#348](https://github.com/stumpapp/stump/issues/348)) [[5d00c20](https://github.com/stumpapp/stump/commit/5d00c207ea819fd6ef5f06f7752f691c8dbcc419)]
+- ✨ Image analysis job ([#307](https://github.com/stumpapp/stump/issues/307)) [[8a8bd86](https://github.com/stumpapp/stump/commit/8a8bd867e740640745ec464d848d9ff9b0c312fb)]
+- ✨ Support grid and table layouts ([#322](https://github.com/stumpapp/stump/issues/322)) [[2f1b085](https://github.com/stumpapp/stump/commit/2f1b085cad3cedec30d421b11b4d2b7ac9d0d1dd)]
+- ✨ Email to device ([#296](https://github.com/stumpapp/stump/issues/296)) [[f5e5a09](https://github.com/stumpapp/stump/commit/f5e5a09a5e7be2e32ad725ba81efc8ef41fc14a8)]
+
+### Changed
+
+- 💄 Fix large button [[32532c0](https://github.com/stumpapp/stump/commit/32532c0bd181652a76f8fca9c8fd95723c7434e5)]
+- 🚨 Fix type mismatch [[b049668](https://github.com/stumpapp/stump/commit/b049668af549af5a3190b78c8553a6d697ae7f8d)]
+- 🚨 Fix compilation error in test [[71a4cd0](https://github.com/stumpapp/stump/commit/71a4cd065d61537f2837ab0e79188ae100aa501a)]
+
+### Fixed
+
+- 🐛 Focus EPUB.js iframe each location change ([#359](https://github.com/stumpapp/stump/issues/359)) [[1ce33e8](https://github.com/stumpapp/stump/commit/1ce33e8f1754005c2a3f4c5157e3b438b8a426a8)]
+- 🐛 Fix first visit API URL determination ([#358](https://github.com/stumpapp/stump/issues/358)) [[d2b8ed4](https://github.com/stumpapp/stump/commit/d2b8ed47992de88dd1267478e0adf1f85d5d6aba)]
+- 🐛 Fix DB error during media analysis ([#354](https://github.com/stumpapp/stump/issues/354)) [[73efc83](https://github.com/stumpapp/stump/commit/73efc8308f3ce14a390f35233a8aed0dec462ea5)]
+- 🐛 Fix nested file structure support for ZIP/RAR format ([#353](https://github.com/stumpapp/stump/issues/353)) [[3aa02a7](https://github.com/stumpapp/stump/commit/3aa02a7ae51f521bcfde0e46aa76353432ed79af)]
+- 🐛 Fix OPDS path detection regression ([#350](https://github.com/stumpapp/stump/issues/350)) [[52092c6](https://github.com/stumpapp/stump/commit/52092c636619719f9168e0989faeb52783ffd384)]
+
+### Miscellaneous
+
+- 🌐 Update translations ([#352](https://github.com/stumpapp/stump/issues/352)) [[09cae5b](https://github.com/stumpapp/stump/commit/09cae5b875a00ce00d64354dcae04c0e093100de)]
+- 🌐 Update translations ([#345](https://github.com/stumpapp/stump/issues/345)) [[755403e](https://github.com/stumpapp/stump/commit/755403e01113c54a09aee9a9b514d7261d31eec8)]
+-  Merge pull request [#342](https://github.com/stumpapp/stump/issues/342) from stumpapp/experimental [[2d5fac5](https://github.com/stumpapp/stump/commit/2d5fac55be4d82fe56d1ea99c98471d9b98771c4)]
+-  Merge branch &#x27;develop&#x27; into experimental [[3c0f2d4](https://github.com/stumpapp/stump/commit/3c0f2d4d87f2249d05fb23b308f63e138f3f3d3d)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[8c48560](https://github.com/stumpapp/stump/commit/8c485602a97d2c2f996dba455d2e83b07100b34f)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[707b9d0](https://github.com/stumpapp/stump/commit/707b9d0c0e6e62463369834e519a45d1ac3311cd)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[1108406](https://github.com/stumpapp/stump/commit/1108406c92a97e823ffbca4f4d263033bc3ec033)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[6c52759](https://github.com/stumpapp/stump/commit/6c52759da9a9f2d7ad05608dcdbe7747eafd236b)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[8b4ffaf](https://github.com/stumpapp/stump/commit/8b4ffaf75d2a00d1727f61ad8324f378af47495c)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[8c431e8](https://github.com/stumpapp/stump/commit/8c431e8dfdc9292e37ae072d7045627c6be460c8)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[aada56e](https://github.com/stumpapp/stump/commit/aada56e6f942125d46decac3c04d1fc2e2b8dc21)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[ddb5e16](https://github.com/stumpapp/stump/commit/ddb5e16473c1de8d7149abe4e4a959980c049373)]
+
+
 <a name="0.0.3"></a>
 ## 0.0.3 (2024-05-13)
 

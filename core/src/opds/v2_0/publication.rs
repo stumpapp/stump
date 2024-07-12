@@ -1,3 +1,6 @@
+//! A module for representing OPDS 2.0 publications, as defined by the OPDS 2.0 spec at
+//! https://drafts.opds.io/opds-2.0#51-opds-publication
+
 use std::collections::HashMap;
 
 use derive_builder::Builder;
@@ -17,6 +20,7 @@ use super::{
 
 /// An OPDS Publication is essentially a Readium Web Publication without the requirement
 /// to include a readingOrder collection. An OPDS Publication:
+///
 /// - Must be identified by the following media type: application/opds-publication+json
 /// - Must contain at least one [Acquisition Link](https://drafts.opds.io/opds-2.0#53-acquisition-link)
 /// - Should contain a self link
@@ -119,7 +123,10 @@ mod tests {
 
 	use crate::{
 		db::FileStatus,
-		opds::v2_0::utils::{book_positions_in_series_raw_query, EntityPosition},
+		opds::v2_0::{
+			metadata::OPDSEntryBelongsToEntityBuilder,
+			utils::{book_positions_in_series_raw_query, EntityPosition},
+		},
 	};
 
 	use super::*;
@@ -145,6 +152,36 @@ mod tests {
 			modified_at: None,
 			size: 2000,
 		}
+	}
+
+	#[test]
+	fn test_publication_serialization() {
+		let publication = OPDSPublication {
+			metadata: OPDSMetadataBuilder::default()
+				.title("Book".to_string())
+				.modified("2021-08-01T00:00:00Z".to_string())
+				.description(Some("A cool book".to_string()))
+				.belongs_to(OPDSEntryBelongsTo::Series(
+					OPDSEntryBelongsToEntityBuilder::default()
+						.name("Test Series".to_string())
+						.position(Some(1))
+						.build()
+						.expect("Failed to build belongs_to"),
+				))
+				.dynamic_metadata(OPDSDynamicMetadata(serde_json::json!({
+					"test": "value"
+				})))
+				.build()
+				.expect("Failed to build metadata"),
+			images: vec![],
+			reading_order: None,
+		};
+
+		let json = serde_json::to_string(&publication).unwrap();
+		assert_eq!(
+			json,
+			r#"{"metadata":{"title":"Book","modified":"2021-08-01T00:00:00Z","description":"A cool book","belongsTo":{"series":{"name":"Test Series","position":1}},"test":"value"}}"#
+		);
 	}
 
 	#[tokio::test]

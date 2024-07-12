@@ -109,3 +109,34 @@ impl OPDSSupportedAuthFlow {
 		}
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_opds_authentication_document_default() {
+		let auth_doc = OPDSAuthenticationDocument::default();
+		assert_eq!(auth_doc.id, "/opds/v2.0/auth");
+		assert_eq!(auth_doc.authentication.len(), 1);
+		assert_eq!(auth_doc.title, "Stump OPDS V2 Auth");
+		assert_eq!(auth_doc.description, None);
+		assert_eq!(auth_doc.links.unwrap().len(), 1);
+	}
+
+	#[test]
+	fn test_opds_authentication_document_with_logo() {
+		let auth_doc = OPDSAuthenticationDocument::default()
+			.with_logo("https://example.com/logo.png".to_string());
+		assert_eq!(auth_doc.links.unwrap().len(), 2);
+	}
+
+	#[test]
+	fn test_opds_supported_auth_flow_description() {
+		let basic = OPDSSupportedAuthFlow::Basic;
+		assert_eq!(
+			basic.description(),
+			"Enter your username and password to authenticate."
+		);
+	}
+}

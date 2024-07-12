@@ -73,7 +73,7 @@ pub(crate) fn book_positions_in_series_raw_query(
 			FROM ranked
 			WHERE id IN ({})
 			"#,
-			// Note: Prisma doesn't support PrismaValue::List, so we need to manually format this
+			// Note: Prisma (SQLite) doesn't support PrismaValue::List, so we need to manually format this
 			book_ids
 				.iter()
 				.map(|id| format!("'{}'", id))

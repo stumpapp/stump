@@ -21,6 +21,11 @@ pub struct OPDSPaginationMetadata {
 	current_page: Option<i64>,
 }
 
+/// This is used to provide additional context for an entry, such as its position within a series.
+///
+/// Note that the spec does not explicitly define this, and the only example of it is in the
+/// metadata section of the spec: https://drafts.opds.io/opds-2.0#52-metadata
+#[skip_serializing_none]
 #[derive(Debug, Clone, Builder, Serialize, Deserialize)]
 #[builder(build_fn(error = "crate::CoreError"), setter(into))]
 pub struct OPDSEntryBelongsToEntity {
@@ -32,10 +37,12 @@ pub struct OPDSEntryBelongsToEntity {
 	position: Option<i64>,
 	/// A list of links to the entity, if available. This **should** include a link to the entity itself
 	/// within the catalog.
+	#[builder(default)]
+	#[serde(skip_serializing_if = "Vec::is_empty")]
 	links: Vec<OPDSLink>,
 }
 
-// TODO: should this be ArrayOrItem<OPDSEntryBelongsToEntity> ?
+// TODO(311): should each variant be ArrayOrItem<OPDSEntryBelongsToEntity> ?
 /// An enum representing the supported types of entities that an OPDS entry can belong to
 /// in Stump. All variants will use the same [`OPDSEntryBelongsToEntity`] struct - this
 /// is primarily a (de)serialization convenience to enforce allowed keys.
@@ -52,7 +59,7 @@ impl From<(books_as_publications::series::Data, Option<i64>)> for OPDSEntryBelon
 		Self::Series(OPDSEntryBelongsToEntity {
 			name: series.name,
 			position,
-			// TODO: relative links might not work here which means traits will be largely annoying to work with
+			// TODO(311): relative links might not work here which means traits will be largely annoying to work with
 			// I might just need to create a separate pattern for this
 			links: vec![],
 		})
@@ -100,5 +107,38 @@ impl Default for OPDSMetadata {
 			pagination: None,
 			dynamic_metadata: None,
 		}
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_opds_metadata_serialization() {
+		let metadata = OPDSMetadata {
+			title: String::from("Book"),
+			modified: Some(String::from("2021-08-01T00:00:00Z")),
+			description: Some(String::from("A cool book")),
+			belongs_to: Some(OPDSEntryBelongsTo::Series(OPDSEntryBelongsToEntity {
+				name: String::from("Test Series"),
+				position: Some(1),
+				links: vec![],
+			})),
+			pagination: Some(OPDSPaginationMetadata {
+				number_of_items: Some(10),
+				items_per_page: Some(5),
+				current_page: Some(1),
+			}),
+			dynamic_metadata: Some(OPDSDynamicMetadata(serde_json::json!({
+				"test": "value"
+			}))),
+		};
+
+		let json = serde_json::to_string(&metadata).unwrap();
+		assert_eq!(
+			json,
+			r#"{"title":"Book","modified":"2021-08-01T00:00:00Z","description":"A cool book","belongsTo":{"series":{"name":"Test Series","position":1}},"numberOfItems":10,"itemsPerPage":5,"currentPage":1,"test":"value"}"#
+		);
 	}
 }

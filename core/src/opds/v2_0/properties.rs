@@ -1,3 +1,7 @@
+//! A module for representing properties in an OPDS 2.0 feed. OPDS 2.0 properties do not have an explicit
+//! section in the spec, but are used throughout. This module is an interpretation of the examples given
+//! in the spec.
+
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
@@ -5,7 +9,7 @@ use serde_with::skip_serializing_none;
 use super::link::OPDSLinkType;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct OPDSDynamicProperties(serde_json::Value);
+pub struct OPDSDynamicProperties(pub serde_json::Value);
 
 /// A struct for representing properties of an OPDS feed or collection
 #[derive(Debug, Default, Builder, Clone, Serialize, Deserialize)]

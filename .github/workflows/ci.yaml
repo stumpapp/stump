@@ -46,7 +46,6 @@ jobs:
         if: github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork
         uses: codecov/codecov-action@v3
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           files: lcov.info
           fail_ci_if_error: true
 

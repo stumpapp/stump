@@ -1,8 +1,8 @@
 {
 	"underConstruction": {
-		"heading": "This is awkward",
+		"heading": "Das ist unangenehm",
 		"message": "You've stumbled upon a page that's still being developed. I'd love to show it to you, but it isn't quite ready yet.",
-		"homeLink": "Go Home",
+		"homeLink": "Zur Startseite",
 		"githubLink": "View the GitHub issue"
 	},
 	"authScene": {
@@ -55,7 +55,7 @@
 			"form": {
 				"email": {
 					"label": "Email",
-					"placeholder": "Email address",
+					"placeholder": "E-Mail Adresse",
 					"description": "An email address to send the book to. Click add to finalize each input"
 				},
 				"devices": {
@@ -334,7 +334,7 @@
 					},
 					"labels": {
 						"username": "Username",
-						"password": "Password",
+						"password": "Passwort",
 						"activeChangesPrompt": "You have unsaved changes"
 					},
 					"errors": {
@@ -442,8 +442,8 @@
 			}
 		},
 		"app/desktop": {
-			"helmet": "Desktop settings",
-			"title": "Desktop settings",
+			"helmet": "Desktop Einstellungen",
+			"title": "Desktop Einstellungen",
 			"description": "Settings related to the Stump desktop application",
 			"sections": {
 				"discordPresence": {
@@ -455,8 +455,8 @@
 		},
 		"server/general": {
 			"helmet": "General server settings",
-			"title": "General settings",
-			"description": "General settings related to your Stump server instance",
+			"title": "Allgemeine Einstellungen",
+			"description": "Allgemeine Einstellungen von Ihrer Stumpf-Server-Instanz",
 			"sections": {
 				"updateAvailable": {
 					"message": "Your server is not up to date. Please update to the latest version!"
@@ -475,7 +475,7 @@
 					}
 				},
 				"serverPublicUrl": {
-					"label": "Public URL",
+					"label": "Öffentliche URL",
 					"description": "The URL that your server is accessible from outside your network, if applicable. This will enable invite links and other features"
 				}
 			}

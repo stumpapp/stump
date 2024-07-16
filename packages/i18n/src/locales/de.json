@@ -54,7 +54,7 @@
 			"description": "Send this book to device or email address",
 			"form": {
 				"email": {
-					"label": "Email",
+					"label": "E-Mail",
 					"placeholder": "E-Mail Adresse",
 					"description": "An email address to send the book to. Click add to finalize each input"
 				},
@@ -333,7 +333,7 @@
 						"missingUsername": "Benutzername ist erforderlich"
 					},
 					"labels": {
-						"username": "Username",
+						"username": "Benutzername",
 						"password": "Passwort",
 						"activeChangesPrompt": "You have unsaved changes"
 					},
@@ -345,24 +345,24 @@
 						"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
 						"preview": "A preview will appear here once you have entered a URL.",
 						"labels": {
-							"imageUrl": "Image URL",
+							"imageUrl": "Bild URL",
 							"customAvatar": "Custom Avatar"
 						},
 						"buttons": {
-							"confirm": "Confirm Image",
-							"cancel": "Cancel",
-							"edit": "Edit",
-							"changeImage": "Change Image",
-							"removeImage": "Remove Image"
+							"confirm": "Bild bestätigen",
+							"cancel": "Abbrechen",
+							"edit": "Bearbeiten",
+							"changeImage": "Bild ändern",
+							"removeImage": "Bild entfernen"
 						}
 					},
 					"buttons": {
-						"confirm": "Save Changes"
+						"confirm": "Änderungen speichern"
 					}
 				},
 				"locale": {
 					"localeSelector": {
-						"label": "Language"
+						"label": "Sprache"
 					},
 					"heading": "Language and locale",
 					"subtitle": [
@@ -401,7 +401,7 @@
 					"lock": "Lock arrangement",
 					"unlock": "Unlock arrangement",
 					"options": {
-						"Home": "Home",
+						"Home": "Startseite",
 						"Explore": "Explore",
 						"Libraries": "Libraries",
 						"BookClubs": "Book clubs",
@@ -492,7 +492,7 @@
 						"columns": {
 							"level": "Level",
 							"message": "Message",
-							"timestamp": "Timestamp"
+							"timestamp": "Zeitstempel"
 						},
 						"emptyHeading": "No logs to display",
 						"emptySubtitle": "Your server is either very healthy or very unhealthy"
@@ -536,12 +536,12 @@
 			}
 		},
 		"server/users": {
-			"helmet": "User management",
-			"title": "Users",
+			"helmet": "Benutzerverwaltung",
+			"title": "Benutzer",
 			"description": "Manage the users on this server",
 			"createUser": {
-				"helmet": "Create user",
-				"title": "Create user",
+				"helmet": "Benutzer erstellen",
+				"title": "Benutzer erstellen",
 				"description": "Create a new user on this server"
 			},
 			"updateUser": {
@@ -557,7 +557,7 @@
 						"documentation"
 					],
 					"ageRestriction": {
-						"label": "Age restriction",
+						"label": "Altersbeschränkung",
 						"description": "Restricts the user from accessing content above the set age rating threshold",
 						"placeholder": "13",
 						"enforceUnset": {
@@ -572,10 +572,10 @@
 					}
 				},
 				"permissions": {
-					"heading": "Permissions",
+					"heading": "Berechtigungen",
 					"subtitle": [
 						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
-						"documentation"
+						"Dokumentation"
 					],
 					"bookclub": {
 						"label": "Buchklubs",
@@ -595,8 +595,8 @@
 							"description": "Ermöglicht dem Benutzer den Zugang zu den verschiedenen Dateiexplorern.\nDie Inhaltsbeschränkung kann nicht garantiert werden, wenn diese Funktion gewährt wird"
 						},
 						"download": {
-							"label": "Download files",
-							"description": "Allows the user to download files from the server"
+							"label": "Dateien herunterladen",
+							"description": "Erlaubt dem Benutzer Dateien vom Server herunterzuladen"
 						},
 						"upload": {
 							"label": "Upload files",
@@ -618,7 +618,7 @@
 							"description": "Allows the user to edit basic details for existing libraries"
 						},
 						"manage": {
-							"label": "Manage libraries",
+							"label": "Bibliotheken verwalten",
 							"description": "Allows the user to manage advanced settings for existing libraries.\nIncludes permissions to edit and scan"
 						},
 						"delete": {

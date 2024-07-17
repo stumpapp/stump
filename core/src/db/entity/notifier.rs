@@ -65,7 +65,8 @@ impl NotifierConfigInput {
 		match self {
 			NotifierConfigInput::Discord(config) => Ok(NotifierConfig::Discord(config)),
 			NotifierConfigInput::Telegram(config) => {
-				let encrypted_token = encrypt_string(&config.token, ctx).await?;
+				let encryption_key = ctx.get_encryption_key().await?;
+				let encrypted_token = encrypt_string(&config.token, &encryption_key)?;
 				Ok(NotifierConfig::Telegram(TelegramConfig {
 					encrypted_token,
 					chat_id: config.chat_id,

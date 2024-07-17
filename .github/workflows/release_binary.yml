@@ -1,0 +1,94 @@
+name: 'Binary release'
+
+# Manual release with input version number
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Enter the release version (e.g., 0.1.0)'
+        required: true
+
+jobs:
+  # This job builds the binaries for each release
+  build-binary:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            artifact_name: 'linux-artifact'
+            artifact_filename: 'stump_server.o'
+          - os: windows-latest
+            artifact_name: 'windows-artifact'
+            artifact_filename: 'stump_server.exe'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Build web application
+        uses: ./.github/actions/build-web
+
+      - name: Build stump server
+        uses: ./.github/actions/build-server
+
+      - name: Upload server artifact
+        uses: ./.github/actions/upload-artifact
+        with:
+          upload-name: ${{ matrix.artifact_name }}
+          upload-path: target/release/${{ matrix.artifact_filename }}
+  # This job creates the release and organizes associated files
+  create-release:
+    needs: build-binary
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: Download artifact (Linux)
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-artifact
+          path: StumpServer-linux
+
+      - name: Download artifact (Windows)
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-artifact
+          path: StumpServer-windows
+
+      - name: Zip artifacts
+        run: |
+          sudo apt-get install -y zip
+          cd StumpServer-linux
+          zip -r ../linux-build-results.zip *
+          cd ../StumpServer-windows
+          zip -r ../windows-build-results.zip *
+          cd ..
+
+      - name: Create release
+        uses: actions/create-release@v1
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          draft: true
+          prerelease: false
+          release_name: Release ${{ github.event.inputs.version }}
+          tag_name: v${{ github.event.inputs.version }}
+          body_path: ./.github/CHANGELOG.md
+
+      - name: Upload release artifact (Linux)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: linux-build-results.zip
+          asset_name: StumpServer-${{ github.event.inputs.version }}-x64-Linux.zip
+          asset_content_type: application/zip
+
+      - name: Upload release artifact (Windows)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: windows-build-results.zip
+          asset_name: StumpServer-${{ github.event.inputs.version }}-x64-Windows.zip
+          asset_content_type: application/zip

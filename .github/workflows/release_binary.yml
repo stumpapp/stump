@@ -43,11 +43,20 @@ jobs:
       - name: Build stump server
         uses: ./.github/actions/build-server
 
+      - name: Copy bundled web app
+        uses: actions/download-artifact@v4
+        with:
+          name: webapp
+          path: ./staging/client
+
+      - name: Prepare artifact
+        run: mv target/release/${{ matrix.artifact_filename }} ./staging/${{ matrix.artifact_filename }}
+
       - name: Upload server artifact
         uses: ./.github/actions/upload-artifact
         with:
           upload-name: ${{ matrix.artifact_name }}
-          upload-path: target/release/${{ matrix.artifact_filename }}
+          upload-path: staging
   # This job creates the release and organizes associated files
   create-release:
     needs: build-binary

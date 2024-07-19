@@ -10,12 +10,6 @@ runs:
     - name: Setup rust
       uses: ./.github/actions/setup-rust
 
-    - name: Copy bundled web app
-      uses: actions/download-artifact@v4
-      with:
-        name: webapp
-        path: ./apps/server/dist
-
     # This action can be called to build in a Linux or Windows runner
     # This step only runs when using Linux
     - name: Compile server (Linux)

@@ -1,10 +1,5 @@
-name: 'Build Stump server'
-description: 'Compile the Stump Rust server'
-
-inputs:
-  platform:
-    description: 'The plaform of the runner'
-    required: true
+name: Build Stump server
+description: Compile the Stump Rust server
 
 runs:
   using: composite
@@ -16,11 +11,19 @@ runs:
       uses: ./.github/actions/setup-rust
 
     - name: Copy bundled web app
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: webapp
         path: ./apps/server/dist
 
-    - name: Compile server
+    # This action can be called to build in a Linux or Windows runner
+    # This step only runs when using Linux
+    - name: Compile server (Linux)
+      if: runner.os == 'Linux'
       shell: bash
+      run: cargo build --package stump_server --release
+    - name: Compile server (Windows)
+      # Alternatively, when running Windows
+      if: runner.os == 'Windows'
+      shell: powershell
       run: cargo build --package stump_server --release

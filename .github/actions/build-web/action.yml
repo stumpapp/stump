@@ -1,5 +1,5 @@
-name: 'Compile Web Application'
-description: 'Compile stump web'
+name: Compile Web Application
+description: Compile stump web
 
 runs:
   using: composite

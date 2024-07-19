@@ -1,8 +1,8 @@
-name: 'Setup system dependencies'
-description: 'Install system dependencies and setup cache'
+name: Setup system dependencies
+description: Install system dependencies and setup cache
 
 runs:
-  using: 'composite'
+  using: composite
   steps:
     - name: Install Rust
       uses: actions-rs/toolchain@v1

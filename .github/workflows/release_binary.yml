@@ -26,6 +26,9 @@ jobs:
             artifact_filename: stump_server.exe
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Build web application
         uses: ./.github/actions/build-web
 

@@ -53,6 +53,8 @@ jobs:
     needs: build-binary
     runs-on: ubuntu-latest
     permissions: write-all
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -82,7 +84,6 @@ jobs:
 
       - name: Create release and upload artifacts
         run: |
-          gh auth login --with-token ${{ github.token }}
           gh release create v${{ github.event.inputs.version || '0.0.test' }} \
             --draft \
             --target binary-release \

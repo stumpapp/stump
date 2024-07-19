@@ -12,8 +12,19 @@ on:
       - binary-release
 
 jobs:
+  # This job builds the common webapp HTML/JS/CSS used for all platforms
+  build-webapp:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build web application/upload artifact
+        uses: ./.github/actions/build-web
+
   # This job builds the binaries for each release
   build-binary:
+    needs: build-webapp
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
@@ -28,9 +39,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      - name: Build web application
-        uses: ./.github/actions/build-web
 
       - name: Build stump server
         uses: ./.github/actions/build-server

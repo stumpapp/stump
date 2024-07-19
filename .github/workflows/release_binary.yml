@@ -7,6 +7,9 @@ on:
       version:
         description: Enter the release version (e.g., 0.1.0)
         required: true
+  push:
+    branches:
+      - binary-release
 
 jobs:
   # This job builds the binaries for each release
@@ -17,7 +20,7 @@ jobs:
         include:
           - os: ubuntu-latest
             artifact_name: linux-artifact
-            artifact_filename: stump_server.o
+            artifact_filename: stump_server
           - os: windows-latest
             artifact_name: windows-artifact
             artifact_filename: stump_server.exe
@@ -69,10 +72,10 @@ jobs:
       - name: Create release and upload artifacts
         run: |
           gh auth login --with-token ${{ github.token }}
-          gh release create v${{github.event.inputs.version}} \
+          gh release create v${{ github.event.inputs.version || '0.0.test' }} \
             --draft \
-            --target main \
-            --title 'Release ${{ github.event.inputs.version }}' \
+            --target binary-release \
+            --title 'Release ${{ github.event.inputs.version || '0.0.test' }}' \
             --generate-notes \
-            linux-build-results.zip#StumpServer-${{ github.event.inputs.version }}-x64-Linux.zip \
-            windows-build-results.zip#StumpServer-${{ github.event.inputs.version }}-x64-Windows.zip
+            linux-build-results.zip#StumpServer-${{ github.event.inputs.version || '0.0.test' }}-x64-Linux.zip \
+            windows-build-results.zip#StumpServer-${{ github.event.inputs.version || '0.0.test' }}-x64-Windows.zip

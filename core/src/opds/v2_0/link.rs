@@ -201,7 +201,7 @@ impl OPDSLinkFinalizer {
 	}
 
 	fn format_link(&self, url: &str) -> String {
-		if url.starts_with("/") {
+		if url.starts_with('/') {
 			format!("{}/{}", self.base_url, url)
 		} else if url.starts_with("http") {
 			url.to_string()

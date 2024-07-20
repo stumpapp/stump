@@ -92,7 +92,7 @@ jobs:
         run: |
           gh release create v${{ github.event.inputs.version }} \
             --draft \
-            --target binary-release \
+            --target main \
             --title 'Release ${{ github.event.inputs.version }}' \
             --generate-notes \
             linux-build-results.zip#StumpServer-${{ github.event.inputs.version }}-x64-Linux.zip \

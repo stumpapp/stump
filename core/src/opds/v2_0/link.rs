@@ -191,6 +191,48 @@ impl OPDSLink {
 	}
 }
 
+pub struct OPDSLinkFinalizer {
+	base_url: String,
+}
+
+impl OPDSLinkFinalizer {
+	pub fn new(base_url: String) -> Self {
+		Self { base_url }
+	}
+
+	fn format_link(&self, url: &str) -> String {
+		if url.starts_with("/") {
+			format!("{}/{}", self.base_url, url)
+		} else if url.starts_with("http") {
+			url.to_string()
+		} else {
+			format!("{}/{}", self.base_url, url)
+		}
+	}
+
+	pub fn finalize(&self, link: OPDSLink) -> OPDSLink {
+		match link {
+			OPDSLink::Link(mut base_link) => {
+				base_link.href = self.format_link(&base_link.href);
+				OPDSLink::Link(base_link)
+			},
+			OPDSLink::Navigation(mut navigation_link) => {
+				navigation_link.base_link.href =
+					self.format_link(&navigation_link.base_link.href);
+				OPDSLink::Navigation(navigation_link)
+			},
+			OPDSLink::Image(mut image_link) => {
+				image_link.base_link.href = self.format_link(&image_link.base_link.href);
+				OPDSLink::Image(image_link)
+			},
+		}
+	}
+
+	pub fn finalize_all(self, links: Vec<OPDSLink>) -> Vec<OPDSLink> {
+		links.into_iter().map(|link| self.finalize(link)).collect()
+	}
+}
+
 // TODO(311): What should rel be?
 impl From<library::Data> for OPDSNavigationLink {
 	fn from(library: library::Data) -> Self {

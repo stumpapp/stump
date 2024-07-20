@@ -27,8 +27,8 @@ use stump_core::{
 		feed::{OPDSFeed, OPDSFeedBuilder},
 		group::OPDSFeedGroupBuilder,
 		link::{
-			OPDSBaseLinkBuilder, OPDSLink, OPDSLinkRel, OPDSNavigationLink,
-			OPDSNavigationLinkBuilder,
+			OPDSBaseLinkBuilder, OPDSLink, OPDSLinkFinalizer, OPDSLinkRel,
+			OPDSNavigationLink, OPDSNavigationLinkBuilder,
 		},
 		metadata::{OPDSMetadata, OPDSMetadataBuilder, OPDSPaginationMetadataBuilder},
 		publication::OPDSPublication,
@@ -107,6 +107,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
+#[tracing::instrument]
 async fn auth(
 	HostExtractor(host): HostExtractor,
 ) -> APIResult<Json<OPDSAuthenticationDocument>> {
@@ -121,8 +122,10 @@ async fn auth(
 	))
 }
 
+#[tracing::instrument(skip(ctx, session))]
 async fn catalog(
 	State(ctx): State<AppState>,
+	HostExtractor(host): HostExtractor,
 	session: Session,
 ) -> APIResult<Json<OPDSFeed>> {
 	let client = &ctx.db;
@@ -150,15 +153,18 @@ async fn catalog(
 				))
 				.build()?,
 		)
-		.links(vec![OPDSLink::Link(
-			OPDSBaseLinkBuilder::default()
-				.href("/opds/v2.0/libraries".to_string())
-				.rel(OPDSLinkRel::SelfLink.item())
-				.build()?,
-		)])
+		.links(
+			OPDSLinkFinalizer::new(host.url()).finalize_all(vec![OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href("/opds/v2.0/libraries".to_string())
+					.rel(OPDSLinkRel::SelfLink.item())
+					.build()?,
+			)]),
+		)
 		.navigation(
 			libraries
 				.into_iter()
+				// TODO(311): Fix this to use absolute links
 				.map(OPDSNavigationLink::from)
 				.collect::<Vec<OPDSNavigationLink>>(),
 		)
@@ -174,6 +180,7 @@ async fn catalog(
 		.exec()
 		.await?;
 	let latest_books_count = client.media().count(latest_books_conditions).exec().await?;
+	// TODO(311): Fix this to use absolute links
 	let publications = OPDSPublication::vec_from_books(&ctx.db, latest_books).await?;
 	let latest_books_group = OPDSFeedGroupBuilder::default()
 		.metadata(
@@ -188,6 +195,7 @@ async fn catalog(
 				))
 				.build()?,
 		)
+		// TODO(311): Fix this to use absolute links
 		.links(vec![OPDSLink::Link(
 			OPDSBaseLinkBuilder::default()
 				.href("/opds/v2.0/books/latest".to_string())
@@ -205,11 +213,13 @@ async fn catalog(
 					.modified(OPDSMetadata::generate_modified())
 					.build()?,
 			)
+			// TODO(311): Fix this to use absolute links
 			.links(vec![OPDSLink::Link(
 				OPDSBaseLinkBuilder::default()
 					.href("/opds/v2.0/catalog".to_string())
 					.build()?,
 			)])
+			// TODO(311): Fix this to use absolute links
 			.navigation(vec![OPDSNavigationLinkBuilder::default()
 				.title("Libraries".to_string())
 				.base_link(
@@ -226,6 +236,7 @@ async fn catalog(
 
 /// A route handler which returns a feed of libraries for a user. The feed includes groups for
 /// series and books in each library.
+#[tracing::instrument(skip(ctx, session))]
 async fn browse_libraries(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
@@ -268,12 +279,14 @@ async fn browse_libraries(
 				))
 				.build()?,
 		)
+		// TODO(311): Fix this to use absolute links
 		.links(vec![OPDSLink::Link(
 			OPDSBaseLinkBuilder::default()
 				.href("/opds/v2.0/series".to_string())
 				.rel(OPDSLinkRel::SelfLink.item())
 				.build()?,
 		)])
+		// TODO(311): Fix this to use absolute links
 		.navigation(
 			series
 				.into_iter()
@@ -296,12 +309,14 @@ async fn browse_libraries(
 					))
 					.build()?,
 			)
+			// TODO(311): Fix this to use absolute links
 			.links(vec![OPDSLink::Link(
 				OPDSBaseLinkBuilder::default()
 					.href("/opds/v2.0/libraries/browse".to_string())
 					.rel(OPDSLinkRel::SelfLink.item())
 					.build()?,
 			)])
+			// TODO(311): Fix this to use absolute links
 			.navigation(
 				libraries
 					.into_iter()
@@ -313,6 +328,7 @@ async fn browse_libraries(
 	))
 }
 
+#[tracing::instrument(skip(ctx, session))]
 async fn browse_library_by_id(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
@@ -363,12 +379,14 @@ async fn browse_library_by_id(
 				))
 				.build()?,
 		)
+		// TODO(311): Fix this to use absolute links
 		.links(vec![OPDSLink::Link(
 			OPDSBaseLinkBuilder::default()
 				.href(format!("/opds/v2.0/libraries/{id}/books"))
 				.rel(OPDSLinkRel::SelfLink.item())
 				.build()?,
 		)])
+		// TODO(311): Fix this to use absolute links
 		.publications(OPDSPublication::vec_from_books(&ctx.db, library_books).await?)
 		.build()?;
 
@@ -393,12 +411,14 @@ async fn browse_library_by_id(
 				))
 				.build()?,
 		)
+		// TODO(311): Fix this to use absolute links
 		.links(vec![OPDSLink::Link(
 			OPDSBaseLinkBuilder::default()
 				.href(format!("/opds/v2.0/libraries/{id}/books/latest"))
 				.rel(OPDSLinkRel::SelfLink.item())
 				.build()?,
 		)])
+		// TODO(311): Fix this to use absolute links
 		.publications(
 			OPDSPublication::vec_from_books(&ctx.db, latest_library_books).await?,
 		)
@@ -439,6 +459,7 @@ async fn browse_library_by_id(
 		// 		.rel(OPDSLinkRel::SelfLink.item()) // TODO(311): Not self
 		// 		.build()?,
 		// )])
+		// TODO(311): Fix this to use absolute links
 		.navigation(
 			library_series
 				.into_iter()
@@ -454,6 +475,7 @@ async fn browse_library_by_id(
 					.title(library.name.to_string())
 					.build()?,
 			)
+			// TODO(311): Fix this to use absolute links
 			.links(vec![OPDSLink::Link(
 				OPDSBaseLinkBuilder::default()
 					.href(format!("/opds/v2.0/libraries/{id}"))
@@ -498,6 +520,7 @@ async fn fetch_books_and_generate_feed(
 		.exec()
 		.await?;
 	let books_count = client.media().count(where_params).exec().await?;
+	// TODO(311): Fix this to use absolute links
 	let publications = OPDSPublication::vec_from_books(client, books).await?;
 
 	let next_page = pagination.get_next_page();
@@ -512,6 +535,7 @@ async fn fetch_books_and_generate_feed(
 		None
 	};
 
+	// TODO(311): Fix this to use absolute links
 	let links = chain_optional_iter(
 		[
 			OPDSLink::Link(
@@ -557,6 +581,7 @@ async fn fetch_books_and_generate_feed(
 }
 
 /// A route handler which returns a feed of books for a library.
+#[tracing::instrument(skip(ctx, session))]
 async fn browse_library_books(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
@@ -579,6 +604,7 @@ async fn browse_library_books(
 	.await
 }
 
+#[tracing::instrument(skip(ctx, session))]
 async fn latest_library_books(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
@@ -601,6 +627,7 @@ async fn latest_library_books(
 	.await
 }
 
+#[tracing::instrument(skip(ctx, session))]
 async fn browse_series(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
@@ -637,6 +664,7 @@ async fn browse_series(
 					))
 					.build()?,
 			)
+			// TODO(311): Fix this to use absolute links
 			.links(vec![
 				OPDSLink::Link(
 					OPDSBaseLinkBuilder::default()
@@ -651,6 +679,7 @@ async fn browse_series(
 						.build()?,
 				),
 			])
+			// TODO(311): Fix this to use absolute links
 			.navigation(
 				series
 					.into_iter()
@@ -661,6 +690,7 @@ async fn browse_series(
 	))
 }
 
+#[tracing::instrument(skip(ctx, session))]
 async fn browse_series_by_id(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
@@ -682,6 +712,7 @@ async fn browse_series_by_id(
 }
 
 /// A route handler which returns a feed of books for a user.
+#[tracing::instrument(skip(ctx, session))]
 async fn browse_books(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
@@ -702,6 +733,7 @@ async fn browse_books(
 }
 
 /// A route handler which returns the latest books for a user as an OPDS feed.
+#[tracing::instrument(skip(ctx, session))]
 async fn latest_books(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
@@ -725,6 +757,7 @@ async fn latest_books(
 /// a book if there exists an active reading session for the user.
 ///
 /// Completed books are not included in this feed.
+#[tracing::instrument(skip(ctx, session))]
 async fn keep_reading(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
@@ -785,15 +818,41 @@ async fn fetch_book_page_for_user(
 	Ok(ImageResponse::new(content_type, image_buffer))
 }
 
+#[tracing::instrument(skip(ctx, session))]
 async fn get_book_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Json<OPDSPublication>> {
-	unimplemented!()
+	tracing::debug!("Fetching book by ID");
+	let client = &ctx.db;
+
+	let user = get_session_user(&session)?;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+	let where_params = chain_optional_iter(
+		[media::id::equals(id)]
+			.into_iter()
+			.chain(apply_media_library_not_hidden_for_user_filter(&user))
+			.collect::<Vec<media::WhereParam>>(),
+		[age_restrictions],
+	);
+
+	let book = client
+		.media()
+		.find_first(where_params)
+		.include(books_as_publications::include())
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound(String::from("Book not found")))?;
+
+	Ok(Json(OPDSPublication::from_book(&ctx.db, book).await?))
 }
 
 /// A route handler which returns a book thumbnail for a user as a valid image response.
+#[tracing::instrument(skip(ctx, session))]
 async fn get_book_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -804,6 +863,7 @@ async fn get_book_thumbnail(
 
 /// A route handler which returns a single page of a book for a user as a valid image
 /// response.
+#[tracing::instrument(skip(ctx, session))]
 async fn get_book_page(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,
@@ -813,6 +873,7 @@ async fn get_book_page(
 }
 
 /// A route handler which downloads a book for a user.
+#[tracing::instrument(skip(ctx, session))]
 async fn download_book(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,

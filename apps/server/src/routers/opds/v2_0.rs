@@ -80,7 +80,12 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						),
 					),
 				)
-				// .nest("/series", Router::new())
+				.nest(
+					"/series",
+					Router::new()
+						.route("/", get(browse_series))
+						.nest("/:id", Router::new().route("/", get(browse_series_by_id))),
+				)
 				// TODO(311): Support smart list feeds
 				// .nest("/smart-lists", Router::new())
 				.nest(
@@ -92,9 +97,10 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.nest(
 							"/:id",
 							Router::new()
+								.route("/", get(get_book_by_id))
 								.route("/thumbnail", get(get_book_thumbnail))
 								.route("/pages/:page", get(get_book_page))
-								.route("/file/:filename", get(download_book)),
+								.route("/file", get(download_book)),
 						),
 				),
 		)
@@ -307,8 +313,6 @@ async fn browse_libraries(
 	))
 }
 
-// FIXME(311): A bunch of false positives clippy lints here?? No fucking clue lol
-/// A route handler for a specific library, by its ID.
 async fn browse_library_by_id(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
@@ -597,6 +601,86 @@ async fn latest_library_books(
 	.await
 }
 
+async fn browse_series(
+	State(ctx): State<AppState>,
+	pagination: Query<PageQuery>,
+	session: Session,
+) -> APIResult<Json<OPDSFeed>> {
+	let client = &ctx.db;
+	let user = get_session_user(&session)?;
+
+	let (skip, take) = pagination.get_skip_take();
+	let series_conditions = apply_series_restrictions_for_user(&user);
+	let series = client
+		.series()
+		.find_many(series_conditions.clone())
+		.take(take)
+		.skip(skip)
+		.order_by(series::name::order(Direction::Asc))
+		.exec()
+		.await?;
+	let series_count = client.series().count(series_conditions).exec().await?;
+
+	let current_page = (pagination.zero_indexed_page() + 1) as i64;
+
+	Ok(Json(
+		OPDSFeedBuilder::default()
+			.metadata(
+				OPDSMetadataBuilder::default()
+					.title("Browse Series".to_string())
+					.pagination(Some(
+						OPDSPaginationMetadataBuilder::default()
+							.number_of_items(series_count)
+							.items_per_page(take)
+							.current_page(current_page)
+							.build()?,
+					))
+					.build()?,
+			)
+			.links(vec![
+				OPDSLink::Link(
+					OPDSBaseLinkBuilder::default()
+						.href("/opds/v2.0/series".to_string())
+						.rel(OPDSLinkRel::SelfLink.item())
+						.build()?,
+				),
+				OPDSLink::Link(
+					OPDSBaseLinkBuilder::default()
+						.href("/opds/v2.0/catalog".to_string())
+						.rel(OPDSLinkRel::Start.item())
+						.build()?,
+				),
+			])
+			.navigation(
+				series
+					.into_iter()
+					.map(OPDSNavigationLink::from)
+					.collect::<Vec<OPDSNavigationLink>>(),
+			)
+			.build()?,
+	))
+}
+
+async fn browse_series_by_id(
+	State(ctx): State<AppState>,
+	pagination: Query<PageQuery>,
+	Path(id): Path<String>,
+	session: Session,
+) -> APIResult<Json<OPDSFeed>> {
+	let user = get_session_user(&session)?;
+
+	fetch_books_and_generate_feed(
+		&ctx,
+		&user,
+		vec![media::series_id::equals(Some(id.clone()))],
+		media::name::order(Direction::Asc),
+		pagination.0,
+		"All Series",
+		&format!("/opds/v2.0/series/{id}"),
+	)
+	.await
+}
+
 /// A route handler which returns a feed of books for a user.
 async fn browse_books(
 	State(ctx): State<AppState>,
@@ -701,6 +785,14 @@ async fn fetch_book_page_for_user(
 	Ok(ImageResponse::new(content_type, image_buffer))
 }
 
+async fn get_book_by_id(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> APIResult<Json<OPDSPublication>> {
+	unimplemented!()
+}
+
 /// A route handler which returns a book thumbnail for a user as a valid image response.
 async fn get_book_thumbnail(
 	Path(id): Path<String>,
@@ -722,7 +814,7 @@ async fn get_book_page(
 
 /// A route handler which downloads a book for a user.
 async fn download_book(
-	Path((id, _)): Path<(String, String)>,
+	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<NamedFile> {

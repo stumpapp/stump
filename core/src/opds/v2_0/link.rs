@@ -5,7 +5,10 @@ use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use crate::prisma::{library, series};
+use crate::{
+	filesystem::ContentType,
+	prisma::{library, series},
+};
 
 use super::{properties::OPDSDynamicProperties, utils::ArrayOrItem};
 
@@ -29,6 +32,7 @@ pub enum OPDSLinkRel {
 	Last,
 	Help,
 	Logo,
+	Acquisition,
 }
 
 impl OPDSLinkRel {
@@ -47,6 +51,8 @@ impl OPDSLinkRel {
 /// - https://drafts.opds.io/opds-2.0.html#23-images
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum OPDSLinkType {
+	#[serde(rename = "application/divina+json")]
+	DivinaJson,
 	#[serde(rename = "application/opds+json")]
 	OpdsJson,
 	#[serde(rename = "http://opds-spec.org/auth/document")]
@@ -61,12 +67,37 @@ pub enum OPDSLinkType {
 	ImageGif,
 	#[serde(rename = "image/avif")]
 	ImageAvif,
+	#[serde(rename = "application/vnd.comicbook-rar")]
+	Cbr,
+	#[serde(rename = "application/vnd.comicbook+zip")]
+	Cbz,
+	#[serde(rename = "application/vnd.rar")]
+	Rar,
 	#[serde(rename = "application/zip")]
 	Zip,
+	#[serde(rename = "application/pdf")]
+	Pdf,
 	#[serde(rename = "application/epub+zip")]
 	Epub,
 	#[serde(untagged)]
 	Custom(String),
+}
+
+impl From<ContentType> for OPDSLinkType {
+	fn from(content_type: ContentType) -> Self {
+		match content_type {
+			ContentType::COMIC_RAR => OPDSLinkType::Cbr,
+			ContentType::COMIC_ZIP => OPDSLinkType::Cbz,
+			ContentType::RAR => OPDSLinkType::Rar,
+			ContentType::ZIP => OPDSLinkType::Zip,
+			ContentType::PDF => OPDSLinkType::Pdf,
+			ContentType::EPUB_ZIP => OPDSLinkType::Epub,
+			ContentType::JPEG => OPDSLinkType::ImageJpeg,
+			ContentType::PNG => OPDSLinkType::ImagePng,
+			ContentType::GIF => OPDSLinkType::ImageGif,
+			_ => OPDSLinkType::Custom(content_type.mime_type().to_string()),
+		}
+	}
 }
 
 /// A struct for representing the common elements of an OPDS link. Other link types can be derived from this struct,
@@ -101,12 +132,13 @@ pub struct OPDSBaseLink {
 ///
 /// See https://drafts.opds.io/opds-2.0.html#23-images
 #[skip_serializing_none]
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Builder, Serialize, Deserialize)]
+#[builder(build_fn(error = "crate::CoreError"), default, setter(into))]
 pub struct OPDSImageLink {
 	/// The height of the image in pixels
-	height: Option<i32>,
+	height: Option<u32>,
 	/// The width of the image in pixels
-	width: Option<i32>,
+	width: Option<u32>,
 	#[serde(flatten)]
 	base_link: OPDSBaseLink,
 }

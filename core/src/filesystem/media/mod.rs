@@ -16,7 +16,7 @@ pub use process::{
 };
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
 	use std::{fs, path::PathBuf};
 
 	pub fn get_test_zip_path() -> String {

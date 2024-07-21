@@ -297,6 +297,7 @@ mod tests {
 
 	use crate::{
 		db::FileStatus,
+		filesystem::media::tests::get_test_epub_path,
 		opds::v2_0::{
 			metadata::OPDSEntryBelongsToEntityBuilder,
 			utils::{book_positions_in_series_raw_query, EntityPosition},
@@ -318,7 +319,7 @@ mod tests {
 			created_at: Utc::now().into(),
 			updated_at: Utc::now().into(),
 			extension: String::from("epub"),
-			path: String::from("path"),
+			path: get_test_epub_path(),
 			status: FileStatus::Ready.to_string(),
 			hash: Some(String::from("hash")),
 			series_id: Some("1".to_string()),
@@ -331,6 +332,7 @@ mod tests {
 	#[test]
 	fn test_publication_serialization() {
 		let publication = OPDSPublication {
+			context: OPDSPublication::default_context(),
 			metadata: OPDSMetadataBuilder::default()
 				.title("Book".to_string())
 				.modified("2021-08-01T00:00:00Z".to_string())
@@ -351,9 +353,10 @@ mod tests {
 		};
 
 		let json = serde_json::to_string(&publication).unwrap();
+		dbg!(&json);
 		assert_eq!(
 			json,
-			r#"{"metadata":{"title":"Book","modified":"2021-08-01T00:00:00Z","description":"A cool book","belongsTo":{"series":{"name":"Test Series","position":1}},"test":"value"}}"#
+			r#"{"context":"https://readium.org/webpub-manifest/context.jsonld","metadata":{"title":"Book","modified":"2021-08-01T00:00:00Z","description":"A cool book","belongsTo":{"series":{"name":"Test Series","position":1}},"test":"value"}}"#
 		);
 	}
 

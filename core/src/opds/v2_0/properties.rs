@@ -11,20 +11,32 @@ use super::link::OPDSLinkType;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OPDSDynamicProperties(pub serde_json::Value);
 
+pub const AUTH_ROUTE: &str = "/opds/v2.0/auth";
+
 /// A struct for representing properties of an OPDS feed or collection
+#[skip_serializing_none]
 #[derive(Debug, Default, Builder, Clone, Serialize, Deserialize)]
 #[builder(build_fn(error = "crate::CoreError"), default, setter(into))]
-#[skip_serializing_none]
 pub struct OPDSProperties {
-	authenticate: Option<OPDSAuthenticateProperties>,
+	/// The URI of the authentication document
+	pub authenticate: Option<OPDSAuthenticateProperties>,
 	#[serde(flatten)]
-	dynamic_properties: Option<OPDSDynamicProperties>,
+	pub dynamic_properties: Option<OPDSDynamicProperties>,
+}
+
+impl OPDSProperties {
+	pub fn with_auth(self, url: String) -> Self {
+		Self {
+			authenticate: Some(OPDSAuthenticateProperties::new(url)),
+			..self
+		}
+	}
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OPDSAuthenticateProperties {
 	/// The URI of the authentication document
-	href: String,
+	pub href: String,
 	/// The type of the link
 	#[serde(rename = "type")]
 	_type: OPDSLinkType,

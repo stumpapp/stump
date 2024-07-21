@@ -10,7 +10,10 @@ use crate::{
 	prisma::{library, series},
 };
 
-use super::{properties::OPDSDynamicProperties, utils::ArrayOrItem};
+use super::{
+	properties::{OPDSProperties, AUTH_ROUTE},
+	utils::ArrayOrItem,
+};
 
 /// The relationship between a link and the resource it points to, as defined by the OPDS 2.0 spec.
 ///
@@ -32,7 +35,10 @@ pub enum OPDSLinkRel {
 	Last,
 	Help,
 	Logo,
+	#[serde(rename = "http://opds-spec.org/acquisition")]
 	Acquisition,
+	#[serde(rename = "http://www.cantook.com/api/progression")]
+	Progression,
 }
 
 impl OPDSLinkRel {
@@ -79,6 +85,8 @@ pub enum OPDSLinkType {
 	Pdf,
 	#[serde(rename = "application/epub+zip")]
 	Epub,
+	#[serde(rename = "application/vnd.readium.progression+json")]
+	Progression,
 	#[serde(untagged)]
 	Custom(String),
 }
@@ -125,7 +133,23 @@ pub struct OPDSBaseLink {
 	/// Example: `https://example.com/search{?query}`
 	pub templated: Option<bool>,
 	// pub children: Option<Vec<Link>>,
-	pub properties: Option<OPDSDynamicProperties>,
+	pub properties: Option<OPDSProperties>,
+}
+
+impl OPDSBaseLink {
+	pub fn with_auth(self, service_url: String) -> Self {
+		if let Some(properties) = self.properties {
+			Self {
+				properties: Some(properties.with_auth(service_url)),
+				..self
+			}
+		} else {
+			Self {
+				properties: Some(OPDSProperties::default().with_auth(service_url)),
+				..self
+			}
+		}
+	}
 }
 
 /// A struct for representing an image link, which is a special type of link that points to an image resource.
@@ -189,46 +213,72 @@ impl OPDSLink {
 			..Default::default()
 		})
 	}
+
+	pub fn progression(book_id: String, finalizer: &OPDSLinkFinalizer) -> Self {
+		Self::Link(OPDSBaseLink {
+			href: finalizer
+				.format_link(format!("/opds/v2.0/books/{book_id}/progression",)),
+			rel: Some(OPDSLinkRel::Progression.item()),
+			_type: Some(OPDSLinkType::Progression),
+			properties: Some(
+				OPDSProperties::default().with_auth(finalizer.format_link(AUTH_ROUTE)),
+			),
+			..Default::default()
+		})
+	}
 }
 
+#[derive(Debug, Clone)]
 pub struct OPDSLinkFinalizer {
-	base_url: String,
+	service_url: String,
 }
 
 impl OPDSLinkFinalizer {
-	pub fn new(base_url: String) -> Self {
-		Self { base_url }
+	pub fn new(service_url: String) -> Self {
+		Self { service_url }
 	}
 
-	fn format_link(&self, url: &str) -> String {
-		if url.starts_with("/") {
-			format!("{}/{}", self.base_url, url)
+	pub fn format_link<A: AsRef<str>>(&self, url: A) -> String {
+		let url = url.as_ref();
+		if url.starts_with('/') {
+			format!("{}{}", self.service_url, url)
 		} else if url.starts_with("http") {
 			url.to_string()
 		} else {
-			format!("{}/{}", self.base_url, url)
+			format!("{}/{}", self.service_url, url)
 		}
+	}
+
+	fn finalize_base_link(&self, mut base_link: OPDSBaseLink) -> OPDSBaseLink {
+		base_link.href = self.format_link(&base_link.href);
+		if let Some(mut properties) = base_link.properties {
+			if let Some(mut authenticate) = properties.authenticate {
+				authenticate.href = self.format_link(&authenticate.href);
+				properties.authenticate = Some(authenticate);
+			}
+			base_link.properties = Some(properties);
+		}
+		base_link
 	}
 
 	pub fn finalize(&self, link: OPDSLink) -> OPDSLink {
 		match link {
-			OPDSLink::Link(mut base_link) => {
-				base_link.href = self.format_link(&base_link.href);
-				OPDSLink::Link(base_link)
+			OPDSLink::Link(base_link) => {
+				OPDSLink::Link(self.finalize_base_link(base_link))
 			},
 			OPDSLink::Navigation(mut navigation_link) => {
-				navigation_link.base_link.href =
-					self.format_link(&navigation_link.base_link.href);
+				navigation_link.base_link =
+					self.finalize_base_link(navigation_link.base_link);
 				OPDSLink::Navigation(navigation_link)
 			},
 			OPDSLink::Image(mut image_link) => {
-				image_link.base_link.href = self.format_link(&image_link.base_link.href);
+				image_link.base_link = self.finalize_base_link(image_link.base_link);
 				OPDSLink::Image(image_link)
 			},
 		}
 	}
 
-	pub fn finalize_all(self, links: Vec<OPDSLink>) -> Vec<OPDSLink> {
+	pub fn finalize_all(&self, links: Vec<OPDSLink>) -> Vec<OPDSLink> {
 		links.into_iter().map(|link| self.finalize(link)).collect()
 	}
 }
@@ -262,6 +312,8 @@ impl From<series::Data> for OPDSNavigationLink {
 
 #[cfg(test)]
 mod tests {
+	use crate::opds::v2_0::properties::{OPDSDynamicProperties, OPDSPropertiesBuilder};
+
 	use super::*;
 	use prisma_client_rust::chrono;
 
@@ -334,9 +386,14 @@ mod tests {
 			href: "https://example.com/search{?query}".to_string(),
 			_type: Some(OPDSLinkType::Custom("application/custom".to_string())),
 			templated: Some(true),
-			properties: Some(OPDSDynamicProperties(serde_json::json!({
-				"custom": "property"
-			}))),
+			properties: Some(
+				OPDSPropertiesBuilder::default()
+					.dynamic_properties(OPDSDynamicProperties(serde_json::json!({
+						"custom": "property"
+					})))
+					.build()
+					.unwrap(),
+			),
 		});
 
 		let json = serde_json::to_string(&link).unwrap();

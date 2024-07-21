@@ -3,6 +3,7 @@ use axum::{
 	extract::{FromRef, FromRequestParts, Host},
 	http::request::Parts,
 };
+use stump_core::opds::v2_0::link::OPDSLinkFinalizer;
 
 use crate::{config::state::AppState, errors::APIError};
 
@@ -15,6 +16,12 @@ pub struct HostDetails {
 impl HostDetails {
 	pub fn url(&self) -> String {
 		format!("{}://{}", self.scheme, self.host)
+	}
+}
+
+impl From<HostDetails> for OPDSLinkFinalizer {
+	fn from(details: HostDetails) -> Self {
+		OPDSLinkFinalizer::new(details.url())
 	}
 }
 

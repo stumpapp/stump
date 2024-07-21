@@ -17,12 +17,13 @@ use crate::{
 use super::{
 	books_as_publications,
 	link::{
-		OPDSBaseLinkBuilder, OPDSImageLink, OPDSImageLinkBuilder, OPDSLink, OPDSLinkRel,
-		OPDSLinkType,
+		OPDSBaseLinkBuilder, OPDSImageLink, OPDSImageLinkBuilder, OPDSLink,
+		OPDSLinkFinalizer, OPDSLinkRel, OPDSLinkType,
 	},
 	metadata::{
 		OPDSDynamicMetadata, OPDSEntryBelongsTo, OPDSMetadata, OPDSMetadataBuilder,
 	},
+	properties::{OPDSProperties, AUTH_ROUTE},
 	utils::OPDSV2PrismaExt,
 };
 
@@ -60,6 +61,7 @@ impl OPDSPublication {
 
 	pub async fn vec_from_books(
 		client: &PrismaClient,
+		finalizer: OPDSLinkFinalizer,
 		books: Vec<books_as_publications::Data>,
 	) -> CoreResult<Vec<Self>> {
 		let mut series_to_books_map = HashMap::new();
@@ -124,12 +126,15 @@ impl OPDSPublication {
 
 				let publication = OPDSPublicationBuilder::default()
 					.metadata(metadata)
-					.links(vec![
+					.links(finalizer.finalize_all(vec![
 						OPDSLink::Link(
 							OPDSBaseLinkBuilder::default()
 								.href(format!("/opds/v2.0/books/{}", book.id))
 								.rel(OPDSLinkRel::SelfLink.item())
 								._type(OPDSLinkType::DivinaJson)
+								.properties(OPDSProperties::default().with_auth(
+									finalizer.format_link(AUTH_ROUTE),
+								))
 								.build()?,
 						),
 						OPDSLink::Link(
@@ -139,17 +144,24 @@ impl OPDSPublication {
 								._type(OPDSLinkType::from(ContentType::from_extension(
 									&book.extension,
 								)))
+								.properties(OPDSProperties::default().with_auth(
+									finalizer.format_link(AUTH_ROUTE),
+								))
 								.build()?,
 						),
-					])
+					]))
 					.images(vec![OPDSImageLinkBuilder::default()
 						.base_link(
 							OPDSBaseLinkBuilder::default()
-								.href(format!("/opds/v2.0/books/{}/thumbnail", book.id))
+								.href(finalizer.format_link(format!(
+									"/opds/v2.0/books/{}/thumbnail",
+									book.id
+								)))
 								._type(OPDSLinkType::from(get_content_type_for_page(
 									&book.path, 1,
 								)?))
-								.build()?,
+								.build()?
+								.with_auth(finalizer.format_link(AUTH_ROUTE)),
 						)
 						.build()?])
 					.build()?;
@@ -163,6 +175,7 @@ impl OPDSPublication {
 
 	pub async fn from_book(
 		client: &PrismaClient,
+		finalizer: OPDSLinkFinalizer,
 		book: books_as_publications::Data,
 	) -> CoreResult<Self> {
 		let series = book
@@ -195,7 +208,11 @@ impl OPDSPublication {
 
 		for (idx, dim) in page_dimensions.unwrap_or_default().into_iter().enumerate() {
 			let base_link = OPDSBaseLinkBuilder::default()
-				.href(format!("/opds/v2.0/books/{}/page/{}", book.id, idx + 1))
+				.href(finalizer.format_link(format!(
+					"/opds/v2.0/books/{}/page/{}",
+					book.id,
+					idx + 1
+				)))
 				// FIXME(311): Don't make this assumption
 				._type(OPDSLinkType::ImageJpeg)
 				.build()?;
@@ -226,12 +243,15 @@ impl OPDSPublication {
 		let publication = OPDSPublicationBuilder::default()
 			.metadata(metadata)
 			.reading_order(reading_order)
-			.links(vec![
+			.links(finalizer.finalize_all(vec![
 				OPDSLink::Link(
 					OPDSBaseLinkBuilder::default()
 						.href(format!("/opds/v2.0/books/{}", book.id))
 						.rel(OPDSLinkRel::SelfLink.item())
 						._type(OPDSLinkType::DivinaJson)
+						.properties(OPDSProperties::default().with_auth(
+							finalizer.format_link(AUTH_ROUTE),
+						))
 						.build()?,
 				),
 				OPDSLink::Link(
@@ -241,17 +261,27 @@ impl OPDSPublication {
 						._type(OPDSLinkType::from(ContentType::from_extension(
 							&book.extension,
 						)))
+						.properties(OPDSProperties::default().with_auth(
+							finalizer.format_link(AUTH_ROUTE),
+						))
 						.build()?,
 				),
-			])
-			// TODO: extract this into a function, e.g. OPDSPublication::images_for_book
+			]))
+			// TODO(311): extract this into a function, e.g. OPDSPublication::images_for_book
 			.images(vec![OPDSImageLinkBuilder::default()
 				.base_link(
 					OPDSBaseLinkBuilder::default()
-						.href(format!("/opds/v2.0/books/{}/thumbnail", book.id))
+						.href(finalizer.format_link(format!(
+							"/opds/v2.0/books/{}/thumbnail",
+							book.id
+						)))
 						._type(OPDSLinkType::from(get_content_type_for_page(
 							&book.path, 1,
 						)?))
+						.properties(
+							OPDSProperties::default()
+								.with_auth(finalizer.format_link(AUTH_ROUTE)),
+						)
 						.build()?,
 				)
 				.build()?])
@@ -358,10 +388,16 @@ mod tests {
 		)
 		.await;
 
-		let publications = OPDSPublication::vec_from_books(&client, books)
-			.await
-			.expect("Failed to generate publications");
+		let publications = OPDSPublication::vec_from_books(
+			&client,
+			OPDSLinkFinalizer::new("https://my-stump-instance.cloud".to_string()),
+			books,
+		)
+		.await
+		.expect("Failed to generate publications");
 
 		assert_eq!(publications.len(), 2);
 	}
+
+	// TODO(311): Add tests for from_book
 }

@@ -9,6 +9,7 @@ pub mod group;
 pub mod link;
 pub mod metadata;
 mod prisma_macros;
+pub mod progression;
 pub mod properties;
 pub mod publication;
 mod utils;
@@ -18,4 +19,4 @@ pub use prisma_macros::books_as_publications;
 pub use utils::{ArrayOrItem, OPDSV2PrismaExt};
 
 // TODO(311): facet (kinda confused on this one still)
-// TODO(311): Replace relative links with absolute links :sob: search href("/opds/v2.0/ in project...
+// TODO(311): constants for the various OPDS 2.0 routes

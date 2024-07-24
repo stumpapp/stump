@@ -400,7 +400,50 @@ mod tests {
 		.expect("Failed to generate publications");
 
 		assert_eq!(publications.len(), 2);
+		assert!(matches!(publications[0].reading_order, None));
 	}
 
-	// TODO(311): Add tests for from_book
+	#[tokio::test]
+	async fn test_from_book() {
+		let book = mock_book();
+
+		let (client, mock) = PrismaClient::_mock();
+
+		mock.expect(
+			client._query_raw(book_positions_in_series_raw_query(
+				vec!["1".to_string()],
+				"1".to_string(),
+			)),
+			vec![EntityPosition {
+				id: "1".to_string(),
+				position: 1,
+			}],
+		)
+		.await;
+
+		mock.expect(
+			client
+				.page_dimensions()
+				// When metadata is not set, the metadata ID is an empty string. This will never load, but for
+				// the sake of the test it should be acceptable
+				.find_first(vec![page_dimensions::metadata_id::equals("".to_string())]),
+			Some(page_dimensions::Data {
+				id: "1".to_string(),
+				metadata_id: "1".to_string(),
+				dimensions: "1920,1080;800,600;1920,1080".to_string(),
+				metadata: None,
+			}),
+		)
+		.await;
+
+		let publication = OPDSPublication::from_book(
+			&client,
+			OPDSLinkFinalizer::new("https://my-stump-instance.cloud".to_string()),
+			book,
+		)
+		.await
+		.expect("Failed to generate publication");
+
+		assert!(matches!(publication.reading_order, Some(_)));
+	}
 }

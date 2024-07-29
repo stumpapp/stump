@@ -55,14 +55,16 @@ impl OPDSLinkRel {
 ///
 /// This struct was derived from multiple sources within the OPDS 2.0 spec, including:
 /// - https://drafts.opds.io/opds-2.0.html#23-images
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum OPDSLinkType {
 	#[serde(rename = "application/divina+json")]
 	DivinaJson,
 	#[serde(rename = "application/opds+json")]
 	OpdsJson,
 	#[serde(rename = "http://opds-spec.org/auth/document")]
-	OpdsAuth,
+	OpdsAuthDocument,
+	#[serde(rename = "application/opds-authentication+json")]
+	OpdsAuthJson,
 	#[serde(rename = "application/opds-publication+json")]
 	OpdsPublication,
 	#[serde(rename = "image/jpeg")]
@@ -187,6 +189,13 @@ impl OPDSNavigationLink {
 			..self
 		}
 	}
+
+	pub fn finalize(self, finalizer: &OPDSLinkFinalizer) -> Self {
+		Self {
+			base_link: finalizer.finalize_base_link(self.base_link),
+			..self
+		}
+	}
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -297,6 +306,7 @@ impl From<library::Data> for OPDSNavigationLink {
 	}
 }
 
+// TODO(311): What should rel be?
 impl From<series::Data> for OPDSNavigationLink {
 	fn from(series: series::Data) -> Self {
 		OPDSNavigationLink {

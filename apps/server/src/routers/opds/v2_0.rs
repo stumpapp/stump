@@ -165,8 +165,8 @@ async fn catalog(
 		.navigation(
 			libraries
 				.into_iter()
-				// TODO(311): Fix this to use absolute links
 				.map(OPDSNavigationLink::from)
+				.map(|link| link.finalize(&link_finalizer))
 				.collect::<Vec<OPDSNavigationLink>>(),
 		)
 		.build()?;
@@ -286,11 +286,11 @@ async fn browse_libraries(
 				.rel(OPDSLinkRel::SelfLink.item())
 				.build()?,
 		)]))
-		// TODO(311): Fix this to use absolute links
 		.navigation(
 			series
 				.into_iter()
 				.map(OPDSNavigationLink::from)
+				.map(|link| link.finalize(&link_finalizer))
 				.collect::<Vec<OPDSNavigationLink>>(),
 		)
 		.build()?;
@@ -315,11 +315,11 @@ async fn browse_libraries(
 					.rel(OPDSLinkRel::SelfLink.item())
 					.build()?,
 			)]))
-			// TODO(311): Fix this to use absolute links
 			.navigation(
 				libraries
 					.into_iter()
 					.map(OPDSNavigationLink::from)
+					.map(|link| link.finalize(&link_finalizer))
 					.collect::<Vec<OPDSNavigationLink>>(),
 			)
 			.groups(vec![series_group])
@@ -468,11 +468,11 @@ async fn browse_library_by_id(
 		// 		.rel(OPDSLinkRel::SelfLink.item()) // TODO(311): Not self
 		// 		.build()?,
 		// )])
-		// TODO(311): Fix this to use absolute links
 		.navigation(
 			library_series
 				.into_iter()
 				.map(OPDSNavigationLink::from)
+				.map(|link| link.finalize(&link_finalizer))
 				.collect::<Vec<OPDSNavigationLink>>(),
 		)
 		.build()?;
@@ -484,13 +484,12 @@ async fn browse_library_by_id(
 					.title(library.name.to_string())
 					.build()?,
 			)
-			// TODO(311): Fix this to use absolute links
-			.links(vec![OPDSLink::Link(
+			.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
 				OPDSBaseLinkBuilder::default()
 					.href(format!("/opds/v2.0/libraries/{id}"))
 					.rel(OPDSLinkRel::SelfLink.item())
 					.build()?,
-			)])
+			)]))
 			.groups(vec![books_group, latest_books_group, series_group])
 			.build()?,
 	))
@@ -696,11 +695,11 @@ async fn browse_series(
 						.build()?,
 				),
 			]))
-			// TODO(311): Fix this to use absolute links
 			.navigation(
 				series
 					.into_iter()
 					.map(OPDSNavigationLink::from)
+					.map(|link| link.finalize(&link_finalizer))
 					.collect::<Vec<OPDSNavigationLink>>(),
 			)
 			.build()?,

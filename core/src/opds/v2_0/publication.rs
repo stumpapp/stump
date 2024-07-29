@@ -35,6 +35,7 @@ use super::{
 /// - Should contain a self link
 ///
 /// See https://drafts.opds.io/opds-2.0#51-opds-publication
+/// See https://readium.org/webpub-manifest/context.jsonld
 #[skip_serializing_none]
 #[derive(Debug, Default, Clone, Builder, Serialize, Deserialize)]
 #[builder(build_fn(error = "crate::CoreError"), default, setter(into))]
@@ -52,6 +53,10 @@ pub struct OPDSPublication {
 	// the Readium Web Publication spec for more information? From once example, it looks like links
 	// are the eventual type, but need to confirm.
 	pub reading_order: Option<Vec<OPDSLink>>,
+	pub resources: Option<Vec<OPDSLink>>,
+	pub toc: Option<Vec<OPDSLink>>,
+	pub landmarks: Option<Vec<OPDSLink>>,
+	pub page_list: Option<Vec<OPDSLink>>,
 }
 
 impl OPDSPublication {
@@ -97,6 +102,9 @@ impl OPDSPublication {
 				.await?;
 
 			for book in books {
+				let links = OPDSPublication::links_for_book(&book, &finalizer)?;
+				let images = OPDSPublication::images_for_book(&book, &finalizer)?;
+
 				let position = positions.get(&book.id).cloned();
 
 				let metadata = book
@@ -126,44 +134,8 @@ impl OPDSPublication {
 
 				let publication = OPDSPublicationBuilder::default()
 					.metadata(metadata)
-					.links(finalizer.finalize_all(vec![
-						OPDSLink::Link(
-							OPDSBaseLinkBuilder::default()
-								.href(format!("/opds/v2.0/books/{}", book.id))
-								.rel(OPDSLinkRel::SelfLink.item())
-								._type(OPDSLinkType::DivinaJson)
-								.properties(OPDSProperties::default().with_auth(
-									finalizer.format_link(AUTH_ROUTE),
-								))
-								.build()?,
-						),
-						OPDSLink::Link(
-							OPDSBaseLinkBuilder::default()
-								.href(format!("/opds/v2.0/books/{}/file", book.id))
-								.rel(OPDSLinkRel::Acquisition.item())
-								._type(OPDSLinkType::from(ContentType::from_extension(
-									&book.extension,
-								)))
-								.properties(OPDSProperties::default().with_auth(
-									finalizer.format_link(AUTH_ROUTE),
-								))
-								.build()?,
-						),
-					]))
-					.images(vec![OPDSImageLinkBuilder::default()
-						.base_link(
-							OPDSBaseLinkBuilder::default()
-								.href(finalizer.format_link(format!(
-									"/opds/v2.0/books/{}/thumbnail",
-									book.id
-								)))
-								._type(OPDSLinkType::from(get_content_type_for_page(
-									&book.path, 1,
-								)?))
-								.build()?
-								.with_auth(finalizer.format_link(AUTH_ROUTE)),
-						)
-						.build()?])
+					.links(links)
+					.images(images)
 					.build()?;
 
 				publications.push(publication);
@@ -178,6 +150,9 @@ impl OPDSPublication {
 		finalizer: OPDSLinkFinalizer,
 		book: books_as_publications::Data,
 	) -> CoreResult<Self> {
+		let links = OPDSPublication::links_for_book(&book, &finalizer)?;
+		let images = OPDSPublication::images_for_book(&book, &finalizer)?;
+
 		let series = book
 			.series
 			.ok_or_else(|| CoreError::InternalError("Book has no series".to_string()))?;
@@ -239,55 +214,73 @@ impl OPDSPublication {
 			.dynamic_metadata(OPDSDynamicMetadata(serde_json::to_value(media_metadata)?))
 			.build()?;
 
-		// TODO: extract this into a function, e.g. OPDSPublication::links_for_book
 		let publication = OPDSPublicationBuilder::default()
 			.metadata(metadata)
 			.reading_order(reading_order)
-			.links(finalizer.finalize_all(vec![
-				OPDSLink::Link(
-					OPDSBaseLinkBuilder::default()
-						.href(format!("/opds/v2.0/books/{}", book.id))
-						.rel(OPDSLinkRel::SelfLink.item())
-						._type(OPDSLinkType::DivinaJson)
-						.properties(OPDSProperties::default().with_auth(
-							finalizer.format_link(AUTH_ROUTE),
-						))
-						.build()?,
-				),
-				OPDSLink::Link(
-					OPDSBaseLinkBuilder::default()
-						.href(format!("/opds/v2.0/books/{}/file", book.id))
-						.rel(OPDSLinkRel::Acquisition.item())
-						._type(OPDSLinkType::from(ContentType::from_extension(
-							&book.extension,
-						)))
-						.properties(OPDSProperties::default().with_auth(
-							finalizer.format_link(AUTH_ROUTE),
-						))
-						.build()?,
-				),
-			]))
-			// TODO(311): extract this into a function, e.g. OPDSPublication::images_for_book
-			.images(vec![OPDSImageLinkBuilder::default()
-				.base_link(
-					OPDSBaseLinkBuilder::default()
-						.href(finalizer.format_link(format!(
-							"/opds/v2.0/books/{}/thumbnail",
-							book.id
-						)))
-						._type(OPDSLinkType::from(get_content_type_for_page(
-							&book.path, 1,
-						)?))
-						.properties(
-							OPDSProperties::default()
-								.with_auth(finalizer.format_link(AUTH_ROUTE)),
-						)
-						.build()?,
-				)
-				.build()?])
+			.links(links)
+			.images(images)
+			.resources(vec![])
+			.toc(vec![])
+			.landmarks(vec![])
+			.page_list(vec![])
 			.build()?;
 
 		Ok(publication)
+	}
+
+	fn images_for_book(
+		book: &books_as_publications::Data,
+		finalizer: &OPDSLinkFinalizer,
+	) -> CoreResult<Vec<OPDSImageLink>> {
+		Ok(vec![OPDSImageLinkBuilder::default()
+			.base_link(
+				OPDSBaseLinkBuilder::default()
+					.href(
+						finalizer.format_link(format!(
+							"/opds/v2.0/books/{}/thumbnail",
+							book.id
+						)),
+					)
+					._type(OPDSLinkType::from(get_content_type_for_page(
+						&book.path, 1,
+					)?))
+					.build()?
+					.with_auth(finalizer.format_link(AUTH_ROUTE)),
+			)
+			.build()?])
+	}
+
+	fn links_for_book(
+		book: &books_as_publications::Data,
+		finalizer: &OPDSLinkFinalizer,
+	) -> CoreResult<Vec<OPDSLink>> {
+		Ok(finalizer.finalize_all(vec![
+			OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href(format!("/opds/v2.0/books/{}", book.id))
+					.rel(OPDSLinkRel::SelfLink.item())
+					._type(OPDSLinkType::DivinaJson)
+					.properties(
+						OPDSProperties::default()
+							.with_auth(finalizer.format_link(AUTH_ROUTE)),
+					)
+					.build()?,
+			),
+			OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href(format!("/opds/v2.0/books/{}/file", book.id))
+					.rel(OPDSLinkRel::Acquisition.item())
+					._type(OPDSLinkType::from(ContentType::from_extension(
+						&book.extension,
+					)))
+					.properties(
+						OPDSProperties::default()
+							.with_auth(finalizer.format_link(AUTH_ROUTE)),
+					)
+					.build()?,
+			),
+			OPDSLink::progression(book.id.clone(), finalizer),
+		]))
 	}
 }
 

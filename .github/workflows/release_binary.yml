@@ -24,10 +24,13 @@ jobs:
     needs: build-webapp
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         include:
           - os: ubuntu-latest
             artifact_name: linux-artifact
+            artifact_filename: stump_server
+          - os: macos-latest
+            artifact_name: macos-artifact
             artifact_filename: stump_server
           - os: windows-latest
             artifact_name: windows-artifact
@@ -71,6 +74,12 @@ jobs:
           name: linux-artifact
           path: StumpServer-linux
 
+      - name: Download artifact (macOS)
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-artifact
+          path: StumpServer-macos
+
       - name: Download artifact (Windows)
         uses: actions/download-artifact@v4
         with:
@@ -84,6 +93,8 @@ jobs:
         run: |
           cd StumpServer-linux
           zip -r ../linux-build-results.zip *
+          cd ../StumpServer-macos
+          zip -r ../macos-build-results.zip *
           cd ../StumpServer-windows
           zip -r ../windows-build-results.zip *
           cd ..
@@ -93,7 +104,8 @@ jobs:
           gh release create v${{ github.event.inputs.version }} \
             --draft \
             --target main \
-            --title 'Release ${{ github.event.inputs.version }}' \
+            --title 'v${{ github.event.inputs.version }}' \
             --generate-notes \
             linux-build-results.zip#StumpServer-${{ github.event.inputs.version }}-x64-Linux.zip \
+            macos-build-results.zip#StumpServer-${{ github.event.inputs.version }}-x64-macOS.zip \
             windows-build-results.zip#StumpServer-${{ github.event.inputs.version }}-x64-Windows.zip

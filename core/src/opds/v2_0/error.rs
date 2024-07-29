@@ -24,3 +24,16 @@ impl From<OPDSV2Error> for crate::CoreError {
 		}
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_opds_v2_error_from_core_error() {
+		let core_err = crate::CoreError::InternalError("test".to_string());
+		let opds_err: OPDSV2Error = core_err.into();
+
+		assert!(matches!(opds_err, OPDSV2Error::InternalError(_)));
+	}
+}

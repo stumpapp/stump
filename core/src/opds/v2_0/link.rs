@@ -461,4 +461,78 @@ mod tests {
 			r#"{"title":"A library","href":"/opds/v2.0/libraries/123","type":"application/opds+json"}"#
 		);
 	}
+
+	#[test]
+	fn test_finalizer_format_link() {
+		let finalizer = OPDSLinkFinalizer::new("https://example.com".to_string());
+
+		assert_eq!(
+			finalizer.format_link("/opds/v2.0/libraries"),
+			"https://example.com/opds/v2.0/libraries"
+		);
+		assert_eq!(
+			finalizer.format_link("https://example.com/opds/v2.0/libraries"),
+			"https://example.com/opds/v2.0/libraries"
+		);
+	}
+
+	#[test]
+	fn test_finalizer_finalize_base_link() {
+		let finalizer = OPDSLinkFinalizer::new("https://example.com".to_string());
+
+		let base_link = OPDSBaseLink {
+			title: Some("A link".to_string()),
+			rel: Some(OPDSLinkRel::SelfLink.item()),
+			href: "/opds/v2.0/libraries".to_string(),
+			_type: Some(OPDSLinkType::Custom("application/custom".to_string())),
+			templated: Some(true),
+			properties: Some(
+				OPDSPropertiesBuilder::default()
+					.dynamic_properties(OPDSDynamicProperties(serde_json::json!({
+						"custom": "property"
+					})))
+					.build()
+					.unwrap(),
+			),
+		};
+
+		let finalized_base_link = finalizer.finalize_base_link(base_link);
+
+		assert_eq!(
+			finalized_base_link.href,
+			"https://example.com/opds/v2.0/libraries"
+		);
+		assert_eq!(
+			finalized_base_link
+				.properties
+				.unwrap()
+				.dynamic_properties
+				.unwrap()
+				.0["custom"],
+			"property"
+		);
+	}
+
+	#[test]
+	fn test_finalizer_finalize_navigation_link() {
+		let finalizer = OPDSLinkFinalizer::new("https://example.com".to_string());
+
+		let navigation_link = OPDSNavigationLink {
+			title: "A library".to_string(),
+			base_link: OPDSBaseLink {
+				title: None,
+				rel: Some(OPDSLinkRel::Start.item()),
+				href: "/opds/v2.0/library/id".to_string(),
+				_type: Some(OPDSLinkType::OpdsJson),
+				..Default::default()
+			},
+		};
+
+		let finalized_navigation_link = navigation_link.finalize(&finalizer);
+
+		assert_eq!(
+			finalized_navigation_link.base_link.href,
+			"https://example.com/opds/v2.0/library/id"
+		);
+	}
 }

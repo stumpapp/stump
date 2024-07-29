@@ -17,8 +17,24 @@ env:
   DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
 
 jobs:
+  code-changes-check:
+    runs-on: [ubuntu-22.04]
+    outputs:
+      changes: ${{steps.filter.outputs.changes}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            apps: ./apps/**
+            crates: ./crates/**
+            docker: ./docker/**
+            packages: ./packages/**
+
   nightly-docker-build:
-    if: "!contains(github.event.pull_request.head.ref, 'release/v')"
+    needs: code-changes-check
+    if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.changes != '[]'"
     name: Build docker image
     runs-on: [ubuntu-22.04]
     steps:

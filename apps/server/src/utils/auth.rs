@@ -21,14 +21,19 @@ pub fn decode_base64_credentials(
 ) -> Result<DecodedCredentials, AuthError> {
 	let decoded = String::from_utf8(bytes).map_err(|_| AuthError::BadCredentials)?;
 
-	let username = decoded.split(':').next().unwrap_or("").to_string();
-	let password = decoded.split(':').nth(1).unwrap_or("").to_string();
-
-	if username.is_empty() || password.is_empty() {
-		return Err(AuthError::BadCredentials);
+	match decoded.split_once(':') {
+		Some((username, password)) => {
+			if username.is_empty() || password.is_empty() {
+				Err(AuthError::BadCredentials)
+			} else {
+				Ok(DecodedCredentials {
+					username: username.to_string(),
+					password: password.to_string(),
+				})
+			}
+		},
+		None => Err(AuthError::BadCredentials),
 	}
-
-	Ok(DecodedCredentials { username, password })
 }
 
 pub fn get_session_user(session: &Session) -> APIResult<User> {
@@ -153,5 +158,11 @@ mod tests {
 		];
 
 		assert!(user_has_all_permissions(&user, &expected_can_do));
+	}
+
+	#[test]
+	fn test_password_parsing() {
+		let testcreds = decode_base64_credentials("username:pass:$%^word".into());
+		assert_eq!(testcreds.unwrap().password, String::from("pass:$%^word"));
 	}
 }

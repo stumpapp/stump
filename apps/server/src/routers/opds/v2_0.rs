@@ -86,7 +86,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.route("/", get(browse_series))
 						.nest("/:id", Router::new().route("/", get(browse_series_by_id))),
 				)
-				// TODO(311): Support smart list feeds
+				// TODO(OPDS-V2): Support smart list feeds
 				// .nest("/smart-lists", Router::new())
 				.nest(
 					"/books",
@@ -100,7 +100,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 								.route("/", get(get_book_by_id))
 								.route("/thumbnail", get(get_book_thumbnail))
 								.route("/pages/:page", get(get_book_page))
-								// TODO(311): Support book progression (readium/cantook?)
+								// TODO(OPDS-V2): Support book progression (readium/cantook?)
 								// .route("/progression", get(get_book_progression).put(update_book_progression))
 								.route("/file", get(download_book)),
 						),
@@ -214,11 +214,16 @@ async fn catalog(
 					.modified(OPDSMetadata::generate_modified())
 					.build()?,
 			)
-			.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
+			.links(link_finalizer.finalize_all(vec![
 				OPDSBaseLinkBuilder::default()
 					.href("/opds/v2.0/catalog".to_string())
-					.build()?,
-			)]))
+					.rel(OPDSLinkRel::SelfLink.item())
+					.build()?.as_link(),
+				OPDSBaseLinkBuilder::default()
+					.href("/opds/v2.0/catalog".to_string())
+					.rel(OPDSLinkRel::Start.item())
+					.build()?.as_link(),
+			]))
 			.navigation(vec![OPDSNavigationLinkBuilder::default()
 				.title("Libraries".to_string())
 				.base_link(
@@ -465,7 +470,7 @@ async fn browse_library_by_id(
 		// .links(vec![OPDSLink::Link(
 		// 	OPDSBaseLinkBuilder::default()
 		// 		.href(format!("/opds/v2.0/libraries/{id}/series"))
-		// 		.rel(OPDSLinkRel::SelfLink.item()) // TODO(311): Not self
+		// 		.rel(OPDSLinkRel::SelfLink.item()) // TODO(OPDS-V2): Not self
 		// 		.build()?,
 		// )])
 		.navigation(

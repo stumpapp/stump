@@ -152,6 +152,10 @@ impl OPDSBaseLink {
 			}
 		}
 	}
+
+	pub fn as_link(self) -> OPDSLink {
+		OPDSLink::Link(self)
+	}
 }
 
 /// A struct for representing an image link, which is a special type of link that points to an image resource.
@@ -292,7 +296,7 @@ impl OPDSLinkFinalizer {
 	}
 }
 
-// TODO(311): What should rel be?
+// TODO(OPDS-V2): What should rel be?
 impl From<library::Data> for OPDSNavigationLink {
 	fn from(library: library::Data) -> Self {
 		OPDSNavigationLink {
@@ -300,13 +304,14 @@ impl From<library::Data> for OPDSNavigationLink {
 			base_link: OPDSBaseLink {
 				href: format!("/opds/v2.0/libraries/{}", library.id),
 				_type: Some(OPDSLinkType::OpdsJson),
+				rel: Some(OPDSLinkRel::Subsection.item()),
 				..Default::default()
 			},
 		}
 	}
 }
 
-// TODO(311): What should rel be?
+// TODO(OPDS-V2): What should rel be?
 impl From<series::Data> for OPDSNavigationLink {
 	fn from(series: series::Data) -> Self {
 		OPDSNavigationLink {
@@ -314,6 +319,7 @@ impl From<series::Data> for OPDSNavigationLink {
 			base_link: OPDSBaseLink {
 				href: format!("/opds/v2.0/series/{}", series.id),
 				_type: Some(OPDSLinkType::OpdsJson),
+				rel: Some(OPDSLinkRel::Subsection.item()),
 				..Default::default()
 			},
 		}
@@ -458,7 +464,7 @@ mod tests {
 		let json = serde_json::to_string(&link).unwrap();
 		assert_eq!(
 			json,
-			r#"{"title":"A library","href":"/opds/v2.0/libraries/123","type":"application/opds+json"}"#
+			r#"{"title":"A library","rel":"subsection","href":"/opds/v2.0/libraries/123","type":"application/opds+json"}"#,
 		);
 	}
 

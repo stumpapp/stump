@@ -219,6 +219,8 @@ impl OPDSPublication {
 			.reading_order(reading_order)
 			.links(links)
 			.images(images)
+			// Note: I'm not sure if this is necessary, but Cantook didn't seem to like when
+			// the below vectors were missing from the publication (even when otherwise empty)
 			.resources(vec![])
 			.toc(vec![])
 			.landmarks(vec![])

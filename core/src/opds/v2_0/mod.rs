@@ -18,5 +18,5 @@ pub use error::OPDSV2Error;
 pub use prisma_macros::books_as_publications;
 pub use utils::{ArrayOrItem, OPDSV2PrismaExt};
 
-// TODO(311): facet (kinda confused on this one still)
-// TODO(311): constants for the various OPDS 2.0 routes
+// TODO(OPDS-V2): facet (kinda confused on this one still)
+// TODO(OPDS-V2): constants for the various OPDS 2.0 routes

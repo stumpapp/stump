@@ -42,7 +42,7 @@ pub struct OPDSEntryBelongsToEntity {
 	links: Vec<OPDSLink>,
 }
 
-// TODO(311): should each variant be ArrayOrItem<OPDSEntryBelongsToEntity> ?
+// TODO(OPDS-V2): should each variant be ArrayOrItem<OPDSEntryBelongsToEntity> ?
 /// An enum representing the supported types of entities that an OPDS entry can belong to
 /// in Stump. All variants will use the same [`OPDSEntryBelongsToEntity`] struct - this
 /// is primarily a (de)serialization convenience to enforce allowed keys.
@@ -59,7 +59,7 @@ impl From<(books_as_publications::series::Data, Option<i64>)> for OPDSEntryBelon
 		Self::Series(OPDSEntryBelongsToEntity {
 			name: series.name,
 			position,
-			// TODO(311): relative links might not work here which means traits will be largely annoying to work with
+			// TODO(OPDS-V2): relative links might not work here which means traits will be largely annoying to work with
 			// I might just need to create a separate pattern for this
 			links: vec![],
 		})

@@ -193,6 +193,6 @@ mod tests {
 		let series_id = "series_id";
 		let config = Arc::new(StumpConfig::debug());
 
-		MediaBuilder::new(&path, series_id, library_options, &config).build()
+		MediaBuilder::new(path, series_id, library_options, &config).build()
 	}
 }

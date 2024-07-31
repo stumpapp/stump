@@ -24,14 +24,15 @@ pub fn decode_base64_credentials(
 	match decoded.split_once(':') {
 		Some((username, password)) => {
 			if username.is_empty() || password.is_empty() {
-				return Err(AuthError::BadCredentials);
+				Err(AuthError::BadCredentials)
 			} else {
-				Ok(DecodedCredentials { username: username.to_string(), password: password.to_string() })
+				Ok(DecodedCredentials {
+					username: username.to_string(),
+					password: password.to_string(),
+				})
 			}
-		}
-		None => {
-			return Err(AuthError::BadCredentials);
-		}
+		},
+		None => Err(AuthError::BadCredentials),
 	}
 }
 

@@ -1,3 +1,5 @@
+use std::fs;
+
 use image::{imageops, io::Reader, DynamicImage, EncodableLayout, GenericImageView};
 use webp::Encoder;
 
@@ -30,8 +32,8 @@ impl ImageProcessor for WebpProcessor {
 		path: &str,
 		options: ImageProcessorOptions,
 	) -> Result<Vec<u8>, FileError> {
-		let image = Reader::open(path)?.with_guessed_format()?.decode()?;
-		Self::generate(image.as_bytes(), options)
+		let bytes = fs::read(path)?;
+		Self::generate(&bytes, options)
 	}
 }
 
@@ -74,7 +76,6 @@ mod tests {
 	}
 
 	#[test]
-	#[ignore = "Test currently fails for unknown reason, but function is never used in Stump"]
 	fn test_generate_webp_from_path() {
 		let webp_path = get_test_webp_path();
 		let options = ImageProcessorOptions {

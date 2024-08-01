@@ -28,9 +28,8 @@ use stump_core::{
 		analyze_media_job::AnalyzeMediaJob,
 		get_unknown_thumnail,
 		image::{
-			self, generate_thumbnail, place_thumbnail, remove_thumbnails,
-			remove_thumbnails_of_type, ImageFormat, ImageProcessorOptions,
-			ThumbnailGenerationJob, ThumbnailGenerationJobParams,
+			self, generate_thumbnail, place_thumbnail, remove_thumbnails, ImageFormat,
+			ImageProcessorOptions, ThumbnailGenerationJob, ThumbnailGenerationJobParams,
 		},
 		read_entire_file,
 		scanner::LibraryScanJob,
@@ -872,25 +871,13 @@ async fn delete_library_thumbnails(
 		.await?
 		.ok_or(APIError::NotFound("Library not found".to_string()))?;
 
-	let thumbnail_config = result.library_options.thumbnail_config;
-	let extension = if let Some(config) = thumbnail_config {
-		ImageProcessorOptions::try_from(config).ok()
-	} else {
-		None
-	}
-	.map(|config| config.format.extension());
-
 	let media_ids = result
 		.series
 		.into_iter()
 		.flat_map(|s| s.media.into_iter().map(|m| m.id))
 		.collect::<Vec<String>>();
 
-	if let Some(ext) = extension {
-		remove_thumbnails_of_type(&media_ids, ext, thumbnails_dir)?;
-	} else {
-		remove_thumbnails(&media_ids, thumbnails_dir)?;
-	}
+	remove_thumbnails(&media_ids, thumbnails_dir)?;
 
 	Ok(Json(()))
 }
@@ -1428,7 +1415,6 @@ async fn create_library(
 
 #[derive(Deserialize, Debug, Type, ToSchema)]
 pub struct UpdateLibrary {
-	pub id: String,
 	/// The updated name of the library.
 	pub name: String,
 	/// The updated path of the library.

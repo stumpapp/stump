@@ -46,14 +46,19 @@ const resizeOptionsSchema = z
 				const isInCorrectRange = (num: number) => num > 0 && num <= 1
 				return isInCorrectRange(value.height) && isInCorrectRange(value.width)
 			} else {
-				return value.height > 0 && value.width > 0
+				return (
+					value.height >= 1 &&
+					value.width >= 1 &&
+					Number.isInteger(value.height) &&
+					Number.isInteger(value.width)
+				)
 			}
 		},
 		(value) => ({
 			message:
 				value.mode === 'Scaled'
 					? 'Height and width must be between 0 and 1'
-					: 'Height and width must be greater than 0',
+					: 'Height and width must be whole numbers greater than 0',
 		}),
 	)
 const buildScema = (existingLibraries: Library[], library?: Library) =>

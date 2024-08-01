@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{fmt::Display, str::FromStr};
 
 use prisma_client_rust::{and, not, or};
 use serde::{Deserialize, Serialize};
@@ -197,11 +197,11 @@ impl FromStr for FilterJoin {
 	}
 }
 
-impl ToString for FilterJoin {
-	fn to_string(&self) -> String {
+impl Display for FilterJoin {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			FilterJoin::And => "AND".to_string(),
-			FilterJoin::Or => "OR".to_string(),
+			Self::And => write!(f, "AND"),
+			Self::Or => write!(f, "OR"),
 		}
 	}
 }

@@ -4,6 +4,8 @@ use utoipa::ToSchema;
 
 use crate::filesystem::error::FileError;
 
+use super::ProcessorError;
+
 /// The resize mode to use when generating a thumbnail.
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub enum ImageResizeMode {
@@ -11,6 +13,16 @@ pub enum ImageResizeMode {
 	Sized,
 }
 
+// TODO: Refactor with a more robust enum:
+// enum ImageResizeOptions_ {
+// 	Sized {
+// 		height: u32,
+// 		width: u32,
+// 		maintain_aspect_ratio: bool,
+// 	},
+// 	ScaledExact(f32, f32),
+// 	ScaledByFactor(f32),
+// }
 /// The resize options to use when generating a thumbnail.
 /// When using `Scaled`, the height and width will be scaled by the given factor.
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
@@ -44,7 +56,7 @@ pub enum ImageFormat {
 	Webp,
 	#[default]
 	Jpeg,
-	JpegXl,
+	// JpegXl,
 	Png,
 }
 
@@ -54,23 +66,26 @@ impl ImageFormat {
 		match self {
 			ImageFormat::Webp => "webp",
 			ImageFormat::Jpeg => "jpeg",
-			ImageFormat::JpegXl => "jxl",
+			// TODO(339): Support JpegXl and Avif
+			// ImageFormat::JpegXl => "jxl",
+			// ImageFormat::Avif => "avif",
 			ImageFormat::Png => "png",
 		}
 	}
 }
 
-impl From<ImageFormat> for image::ImageOutputFormat {
+impl From<ImageFormat> for image::ImageFormat {
 	fn from(val: ImageFormat) -> Self {
 		match val {
-			ImageFormat::Webp => {
-				image::ImageOutputFormat::Unsupported(String::from("webp"))
-			},
-			ImageFormat::Jpeg => image::ImageOutputFormat::Jpeg(100),
-			ImageFormat::JpegXl => {
-				image::ImageOutputFormat::Unsupported(String::from("jxl"))
-			},
-			ImageFormat::Png => image::ImageOutputFormat::Png,
+			ImageFormat::Webp => image::ImageFormat::WebP,
+			ImageFormat::Jpeg => image::ImageFormat::Jpeg,
+			// See https://github.com/image-rs/image/issues/1765. Image removed the
+			// unsupported enum variant, which makes this awkward to support...
+			// See also https://github.com/image-rs/image/blob/main/CHANGES.md#version-0250
+			// ImageFormat::JpegXl => {
+			// 	unreachable!("JpegXl is not supported by the image crate")
+			// },
+			ImageFormat::Png => image::ImageFormat::Png,
 		}
 	}
 }
@@ -110,18 +125,51 @@ impl ImageProcessorOptions {
 			..self
 		}
 	}
-}
 
-impl TryFrom<Vec<u8>> for ImageProcessorOptions {
-	// TODO: not a file error really...
-	type Error = FileError;
+	pub fn validate(&self) -> Result<(), ProcessorError> {
+		if let Some(quality) = self.quality {
+			if !(0.0..=100.0).contains(&quality) {
+				return Err(ProcessorError::InvalidQuality);
+			}
+		}
 
-	fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
-		serde_json::from_slice(&value)
-			.map_err(|err| FileError::UnknownError(err.to_string()))
+		if let Some(resize_options) = &self.resize_options {
+			match resize_options.mode {
+				ImageResizeMode::Scaled => {
+					let invalid_height = !(0.0..=1.0).contains(&resize_options.height);
+					let invalid_width = !(0.0..=1.0).contains(&resize_options.width);
+
+					if invalid_height || invalid_width {
+						return Err(ProcessorError::InvalidSizedImage);
+					}
+				},
+				ImageResizeMode::Sized => {
+					let invalid_height = resize_options.height < 1.0
+						|| resize_options.height.fract() != 0.0;
+					let invalid_width =
+						resize_options.width < 1.0 || resize_options.width.fract() != 0.0;
+
+					if invalid_height || invalid_width {
+						return Err(ProcessorError::InvalidSizedImage);
+					}
+				},
+			}
+		}
+
+		Ok(())
 	}
 }
 
+impl TryFrom<Vec<u8>> for ImageProcessorOptions {
+	type Error = ProcessorError;
+
+	fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
+		serde_json::from_slice(&value)
+			.map_err(|err| ProcessorError::InvalidConfiguration(err.to_string()))
+	}
+}
+
+// TODO: replace error with ProcessorError
 /// Trait defining a standard API for processing images throughout Stump.
 pub trait ImageProcessor {
 	/// Generate an image from a buffer. If options are provided,
@@ -157,15 +205,102 @@ mod tests {
 	use super::*;
 
 	#[test]
-	fn test_resized_dimensions() {
+	fn test_image_format_extension() {
+		assert_eq!(ImageFormat::Webp.extension(), "webp");
+		assert_eq!(ImageFormat::Jpeg.extension(), "jpeg");
+		// assert_eq!(ImageFormat::JpegXl.extension(), "jxl");
+		assert_eq!(ImageFormat::Png.extension(), "png");
+	}
+
+	#[test]
+	fn test_image_format_into_image_output_format() {
+		assert_eq!(
+			image::ImageFormat::from(ImageFormat::Webp),
+			image::ImageFormat::WebP
+		);
+		assert_eq!(
+			image::ImageFormat::from(ImageFormat::Jpeg),
+			image::ImageFormat::Jpeg
+		);
+		assert_eq!(
+			image::ImageFormat::from(ImageFormat::Png),
+			image::ImageFormat::Png
+		);
+	}
+
+	#[test]
+	fn test_resized_dimensions_scaled() {
 		let (height, width) =
 			resized_dimensions(100, 100, ImageResizeOptions::scaled(0.75, 0.5));
 		assert_eq!(height, 75);
 		assert_eq!(width, 50);
+	}
 
+	#[test]
+	fn test_resized_dimensions_sized() {
 		let (height, width) =
 			resized_dimensions(100, 100, ImageResizeOptions::sized(50.0, 50.0));
 		assert_eq!(height, 50);
 		assert_eq!(width, 50);
+	}
+
+	#[test]
+	fn test_validate_good_quality() {
+		let options = ImageProcessorOptions {
+			quality: Some(50.0),
+			..Default::default()
+		};
+
+		assert!(options.validate().is_ok());
+	}
+
+	#[test]
+	fn test_validate_bad_quality() {
+		let options = ImageProcessorOptions {
+			quality: Some(101.0),
+			..Default::default()
+		};
+
+		assert!(options.validate().is_err());
+	}
+
+	#[test]
+	fn test_validate_good_resize() {
+		let options = ImageProcessorOptions {
+			resize_options: Some(ImageResizeOptions::sized(100.0, 100.0)),
+			..Default::default()
+		};
+
+		assert!(options.validate().is_ok());
+	}
+
+	#[test]
+	fn test_validate_bad_resize() {
+		let options = ImageProcessorOptions {
+			resize_options: Some(ImageResizeOptions::sized(0.5, 0.5)),
+			..Default::default()
+		};
+
+		assert!(options.validate().is_err());
+	}
+
+	#[test]
+	fn test_validate_good_scaled_resize() {
+		let options = ImageProcessorOptions {
+			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
+			..Default::default()
+		};
+
+		assert!(options.validate().is_ok());
+	}
+
+	#[test]
+	fn test_validate_bad_scaled_resize() {
+		let options = ImageProcessorOptions {
+			resize_options: Some(ImageResizeOptions::scaled(1.5, 1.5)),
+			..Default::default()
+		};
+
+		assert!(options.validate().is_err());
 	}
 }

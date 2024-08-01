@@ -44,7 +44,7 @@ fn infer_mime_from_bytes(bytes: &[u8]) -> Option<String> {
 fn infer_mime(path: &Path) -> Option<String> {
 	match infer::get_from_path(path) {
 		Ok(result) => {
-			tracing::trace!(?path, ?result, "infered mime");
+			tracing::trace!(?path, ?result, "inferred mime");
 			result.map(|infer_type| infer_type.mime_type().to_string())
 		},
 		Err(e) => {

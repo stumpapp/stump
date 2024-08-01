@@ -1,6 +1,6 @@
 use std::fs;
 
-use image::{imageops, io::Reader, DynamicImage, EncodableLayout, GenericImageView};
+use image::{imageops, DynamicImage, EncodableLayout, GenericImageView};
 use webp::Encoder;
 
 use crate::filesystem::{error::FileError, image::process::resized_dimensions};

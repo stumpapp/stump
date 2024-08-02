@@ -255,12 +255,8 @@ impl From<FileError> for APIError {
 impl From<ProcessorError> for APIError {
 	fn from(error: ProcessorError) -> APIError {
 		match error {
-			ProcessorError::InvalidQuality => {
-				APIError::BadRequest("Invalid quality".to_string())
-			},
-			ProcessorError::InvalidSizedImage => {
-				APIError::BadRequest("Invalid image size".to_string())
-			},
+			ProcessorError::InvalidQuality => APIError::BadRequest(error.to_string()),
+			ProcessorError::InvalidSizedImage => APIError::BadRequest(error.to_string()),
 			ProcessorError::InvalidConfiguration(err) => {
 				APIError::BadRequest(err.to_string())
 			},

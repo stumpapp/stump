@@ -27,6 +27,7 @@ use tower_sessions::Session;
 
 use crate::{
 	config::{session::SESSION_USER_KEY, state::AppState},
+	errors::APIError,
 	routers::{enforce_max_sessions, relative_favicon_path},
 	utils::{decode_base64_credentials, verify_password},
 };
@@ -283,23 +284,25 @@ impl OPDSBasicAuth {
 impl IntoResponse for OPDSBasicAuth {
 	fn into_response(self) -> Response {
 		if self.version == "2.0" {
-			// TODO: investigate whether there is a better way to do this than
-			// piggybacking off of the IntoResponse impl of Json...
-			let json_repsonse = Json(
-				OPDSAuthenticationDocumentBuilder::default()
-					.description(OPDSSupportedAuthFlow::Basic.description().to_string())
-					.links(vec![
-						OPDSLink::help(),
-						OPDSLink::logo(format!(
-							"{}{}",
-							self.service_url,
-							relative_favicon_path()
-						)),
-					])
-					.build()
-					.unwrap(),
-			)
-			.into_response();
+			let document = match OPDSAuthenticationDocumentBuilder::default()
+				.description(OPDSSupportedAuthFlow::Basic.description().to_string())
+				.links(vec![
+					OPDSLink::help(),
+					OPDSLink::logo(format!(
+						"{}{}",
+						self.service_url,
+						relative_favicon_path()
+					)),
+				])
+				.build()
+			{
+				Ok(document) => document,
+				Err(e) => {
+					tracing::error!(error = ?e, "Failed to build OPDS authentication document");
+					return APIError::InternalServerError(e.to_string()).into_response();
+				},
+			};
+			let json_repsonse = Json(document).into_response();
 			let body = json_repsonse.into_body();
 			let body = BoxBody::from(body);
 
@@ -339,7 +342,7 @@ impl IntoResponse for OPDSBasicAuth {
 				.body(BoxBody::default())
 				.unwrap_or_else(|e| {
 					tracing::error!(error = ?e, "Failed to build response");
-					StatusCode::INTERNAL_SERVER_ERROR.into_response()
+					APIError::InternalServerError(e.to_string()).into_response()
 				})
 		}
 	}
@@ -409,3 +412,5 @@ fn map_prisma_error(error: QueryError) -> impl IntoResponse {
 		(StatusCode::INTERNAL_SERVER_ERROR).into_response()
 	}
 }
+
+// TODO(281): Add tests for file

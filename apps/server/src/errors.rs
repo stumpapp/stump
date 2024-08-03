@@ -13,6 +13,7 @@ use stump_core::{
 	error::CoreError,
 	filesystem::{image::ProcessorError, FileError},
 	job::error::JobManagerError,
+	opds::v2_0::OPDSV2Error,
 	CoreEvent,
 };
 use tokio::sync::mpsc;
@@ -156,6 +157,12 @@ impl APIError {
 			APIError::Redirect(_) => StatusCode::TEMPORARY_REDIRECT,
 			_ => StatusCode::INTERNAL_SERVER_ERROR,
 		}
+	}
+}
+
+impl From<OPDSV2Error> for APIError {
+	fn from(error: OPDSV2Error) -> Self {
+		APIError::InternalServerError(error.to_string())
 	}
 }
 

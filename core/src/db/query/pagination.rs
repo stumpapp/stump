@@ -112,6 +112,34 @@ impl PageQuery {
 		(start, take)
 	}
 
+	pub fn zero_indexed_page(&self) -> u32 {
+		let zero_based = self.zero_based.unwrap_or(false);
+
+		if zero_based {
+			self.page.unwrap_or(0)
+		} else {
+			self.page.map(|p| p + 1).unwrap_or(1)
+		}
+	}
+
+	pub fn get_previous_page(&self) -> Option<u32> {
+		let zero_based = self.zero_based.unwrap_or(false);
+		let page = self.page.unwrap_or_else(|| u32::from(!zero_based));
+
+		if page == 0 {
+			None
+		} else {
+			Some(page - 1)
+		}
+	}
+
+	pub fn get_next_page(&self) -> u32 {
+		let zero_based = self.zero_based.unwrap_or(false);
+		let page = self.page.unwrap_or_else(|| u32::from(!zero_based));
+
+		page + 1
+	}
+
 	pub fn page_params(self) -> PageParams {
 		let zero_based = self.zero_based.unwrap_or(false);
 

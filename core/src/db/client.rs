@@ -14,6 +14,12 @@ pub async fn create_client(config: &StumpConfig) -> prisma::PrismaClient {
 		.to_str()
 		.expect("Error parsing config directory")
 		.to_string();
+	// NOTE: Prisma 5.16.0 will potentially have a few fixes related to SQLite, in particular fixes for timeouts
+	// during query execution. It seems the latest PCR is on 5.1.0 (with a custom patch for PCR-specific things).
+	// Hopefully once 5.16.0 is released, PCR will be updated shortly after to take advantage of the improvements.
+	// I also believe JOIN performance improvements are coming in 5.16.0, which is exciting too.
+	// See https://github.com/prisma/prisma/issues/9562#issuecomment-2162441695
+	// See also this note about WAL mode with these fixes: https://github.com/prisma/prisma-engines/pull/4907#issuecomment-2152943591
 	// TODO: experiment with this. I experienced some issues with concurrent writes still :/
 	// let postfix = "?socket_timeout=15000&busy_timeout=15000&connection_limit=1";
 

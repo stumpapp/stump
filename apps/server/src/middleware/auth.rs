@@ -4,27 +4,40 @@ use axum::{
 	extract::{FromRef, FromRequestParts, OriginalUri},
 	http::{header, request::Parts, Method, StatusCode},
 	response::{IntoResponse, Redirect, Response},
+	Json,
 };
 use base64::{engine::general_purpose::STANDARD, Engine};
 use prisma_client_rust::{
+	chrono::Utc,
 	prisma_errors::query_engine::{RecordNotFound, UniqueKeyViolation},
 	QueryError,
 };
 use stump_core::{
 	db::entity::{User, UserPermission},
-	prisma::{user, PrismaClient},
+	opds::v2_0::{
+		authentication::{
+			OPDSAuthenticationDocumentBuilder, OPDSSupportedAuthFlow,
+			OPDS_AUTHENTICATION_DOCUMENT_REL, OPDS_AUTHENTICATION_DOCUMENT_TYPE,
+		},
+		link::OPDSLink,
+	},
+	prisma::{session, user, PrismaClient},
 };
 use tower_sessions::Session;
 
 use crate::{
 	config::{session::SESSION_USER_KEY, state::AppState},
-	routers::enforce_max_sessions,
+	errors::APIError,
+	routers::{enforce_max_sessions, relative_favicon_path},
 	utils::{decode_base64_credentials, verify_password},
 };
+
+use super::host::HostExtractor;
 
 pub struct Auth;
 
 // TODO: Change Response to APIResultResponse
+// TODO: create a new extractor like UserExtractor which supports both session auth and future alternative auth methods (e.g. JWT)
 
 #[async_trait]
 impl<S> FromRequestParts<S> for Auth
@@ -43,6 +56,14 @@ where
 		if parts.method == Method::OPTIONS {
 			return Ok(Self);
 		}
+
+		let host_details = HostExtractor::from_request_parts(parts, state)
+			.await
+			.map_err(|e| {
+				tracing::error!("Failed to extract host: {}", e);
+				(StatusCode::INTERNAL_SERVER_ERROR).into_response()
+			})?
+			.0;
 
 		let state = AppState::from_ref(state);
 
@@ -86,8 +107,15 @@ where
 
 		let Some(auth_header) = auth_header else {
 			if is_opds {
-				// Prompt for basic auth on OPDS routes
-				return Err(BasicAuth.into_response());
+				let opds_version = request_uri
+					.split('/')
+					.nth(2)
+					.map(|v| v.replace('v', ""))
+					.unwrap_or("1.2".to_string());
+
+				return Err(
+					OPDSBasicAuth::new(opds_version, host_details.url()).into_response()
+				);
 			} else if is_swagger {
 				// Sign in via React app and then redirect to server-side swagger-ui
 				return Err(Redirect::to("/auth?redirect=%2Fswagger-ui/").into_response());
@@ -132,6 +160,9 @@ async fn handle_basic_auth(
 		.find_unique(user::username::equals(decoded_credentials.username.clone()))
 		.with(user::user_preferences::fetch())
 		.with(user::age_restriction::fetch())
+		.with(user::sessions::fetch(vec![session::expires_at::gt(
+			Utc::now().into(),
+		)]))
 		.exec()
 		.await
 		.map_err(|e| map_prisma_error(e).into_response())?;
@@ -236,6 +267,87 @@ where
 	}
 }
 
+pub struct OPDSBasicAuth {
+	version: String,
+	service_url: String,
+}
+
+impl OPDSBasicAuth {
+	pub fn new(version: String, service_url: String) -> Self {
+		Self {
+			version,
+			service_url,
+		}
+	}
+}
+
+impl IntoResponse for OPDSBasicAuth {
+	fn into_response(self) -> Response {
+		if self.version == "2.0" {
+			let document = match OPDSAuthenticationDocumentBuilder::default()
+				.description(OPDSSupportedAuthFlow::Basic.description().to_string())
+				.links(vec![
+					OPDSLink::help(),
+					OPDSLink::logo(format!(
+						"{}{}",
+						self.service_url,
+						relative_favicon_path()
+					)),
+				])
+				.build()
+			{
+				Ok(document) => document,
+				Err(e) => {
+					tracing::error!(error = ?e, "Failed to build OPDS authentication document");
+					return APIError::InternalServerError(e.to_string()).into_response();
+				},
+			};
+			let json_repsonse = Json(document).into_response();
+			let body = json_repsonse.into_body();
+			let body = BoxBody::from(body);
+
+			// TODO: determine if relative paths work...
+			Response::builder()
+				.status(StatusCode::UNAUTHORIZED)
+				.header("Authorization", "Basic")
+				.header(
+					"WWW-Authenticate",
+					format!("Basic realm=\"stump OPDS v{}\"", self.version),
+				)
+				.header(
+					"Content-Type",
+					format!("{OPDS_AUTHENTICATION_DOCUMENT_TYPE}; charset=utf-8"),
+				)
+				.header(
+					"Link",
+					format!(
+						"<{}{}>; rel=\"{OPDS_AUTHENTICATION_DOCUMENT_REL}\"; type=\"{OPDS_AUTHENTICATION_DOCUMENT_TYPE}\"",
+						self.service_url,
+						"/opds/v2.0/auth"
+					),
+				)
+				.body(body)
+				.unwrap_or_else(|e| {
+					tracing::error!(error = ?e, "Failed to build response");
+					StatusCode::INTERNAL_SERVER_ERROR.into_response()
+				})
+		} else {
+			Response::builder()
+				.status(StatusCode::UNAUTHORIZED)
+				.header("Authorization", "Basic")
+				.header(
+					"WWW-Authenticate",
+					format!("Basic realm=\"stump OPDS v{}\"", self.version),
+				)
+				.body(BoxBody::default())
+				.unwrap_or_else(|e| {
+					tracing::error!(error = ?e, "Failed to build response");
+					APIError::InternalServerError(e.to_string()).into_response()
+				})
+		}
+	}
+}
+
 pub struct BasicAuth;
 
 impl IntoResponse for BasicAuth {
@@ -300,3 +412,5 @@ fn map_prisma_error(error: QueryError) -> impl IntoResponse {
 		(StatusCode::INTERNAL_SERVER_ERROR).into_response()
 	}
 }
+
+// TODO(281): Add tests for file

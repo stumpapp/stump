@@ -1,5 +1,6 @@
 use std::io;
 
+use derive_builder::UninitializedFieldError;
 use prisma_client_rust::RelationNotFetchedError;
 use thiserror::Error;
 
@@ -11,6 +12,8 @@ pub enum CoreError {
 		"Attempted to initialize StumpCore with a config dir that does not exist: {0}"
 	)]
 	ConfigDirDoesNotExist(String),
+	#[error("Failed to build entity: {0}")]
+	EntityBuilderError(#[from] UninitializedFieldError),
 	#[error("Encryption key must be set")]
 	EncryptionKeyNotSet,
 	#[error("Failed to encrypt: {0}")]

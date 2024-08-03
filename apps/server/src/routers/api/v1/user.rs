@@ -786,19 +786,15 @@ async fn get_user_by_id(
 ) -> APIResult<Json<User>> {
 	get_session_server_owner_user(&session)?;
 	let db = &ctx.db;
-	let user_by_id = db
+	let fetched_user = db
 		.user()
 		.find_unique(user::id::equals(id.clone()))
 		.with(user::age_restriction::fetch())
 		.exec()
-		.await?;
-	debug!(id, ?user_by_id, "Result of fetching user by id");
+		.await?
+		.ok_or(APIError::NotFound(format!("User with id {} not found", id)))?;
 
-	if user_by_id.is_none() {
-		return Err(APIError::NotFound(format!("User with id {} not found", id)));
-	}
-
-	Ok(Json(User::from(user_by_id.unwrap())))
+	Ok(Json(User::from(fetched_user)))
 }
 
 // TODO: pagination!

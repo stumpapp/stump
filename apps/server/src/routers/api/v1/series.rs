@@ -67,6 +67,8 @@ use super::{
 	metadata::apply_series_metadata_filters,
 };
 
+// TODO: support downloading entire series as a zip file
+
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.route("/series", get(get_series))
@@ -200,6 +202,20 @@ pub(crate) fn apply_series_age_restriction(
 // 		.chain(apply_series_library_not_hidden_for_user_filter(user))
 // 		.collect()
 // }
+
+pub fn apply_series_restrictions_for_user(user: &User) -> Vec<WhereParam> {
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
+
+	chain_optional_iter(
+		[series::library::is(vec![
+			library_not_hidden_from_user_filter(user),
+		])],
+		[age_restrictions],
+	)
+}
 
 pub(crate) fn apply_series_filters_for_user(
 	filters: SeriesFilter,

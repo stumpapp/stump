@@ -5,11 +5,10 @@ use specta::Type;
 use utoipa::ToSchema;
 
 use crate::{
+	db::entity::{Cursor, Series, Tag},
 	filesystem::image::ImageProcessorOptions,
 	prisma::{self, library},
 };
-
-use super::{common::Cursor, series::Series, tag::Tag};
 
 //////////////////////////////////////////////
 //////////////// PRISMA MACROS ///////////////

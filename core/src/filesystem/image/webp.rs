@@ -14,8 +14,7 @@ impl ImageProcessor for WebpProcessor {
 		buffer: &[u8],
 		options: ImageProcessorOptions,
 	) -> Result<Vec<u8>, FileError> {
-		let mut image =
-			image::load_from_memory_with_format(buffer, image::ImageFormat::WebP)?;
+		let mut image = image::load_from_memory(buffer)?;
 
 		if let Some(resize_options) = options.resize_options {
 			let resized_image = WebpProcessor::resize_image(image, resize_options);

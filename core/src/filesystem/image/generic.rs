@@ -108,9 +108,6 @@ mod tests {
 			..Default::default()
 		};
 
-		let current_dimensions =
-			image::image_dimensions(&jpg_path).expect("Failed to get dimensions");
-
 		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
 			.expect("Failed to generate image buffer");
 

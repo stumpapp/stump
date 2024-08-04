@@ -7,9 +7,6 @@ on:
       version:
         description: Enter the release version (e.g., 0.1.0)
         required: true
-  push:
-    branches:
-      - al/macos-binary
 
 jobs:
   # This job builds the common webapp HTML/JS/CSS used for all platforms
@@ -118,12 +115,12 @@ jobs:
 
       - name: Create release and upload artifacts
         run: |
-          gh release create v${{ github.event.inputs.version || '0.0.test' }} \
+          gh release create v${{ github.event.inputs.version }} \
             --draft \
             --target main \
-            --title 'v${{ github.event.inputs.version || '0.0.test' }}' \
+            --title 'v${{ github.event.inputs.version }}' \
             --generate-notes \
-            linux-build-results.zip#StumpServer-${{ github.event.inputs.version || '0.0.test' }}-linux-x86_64.zip \
-            macos-intel-build-results.zip#StumpServer-${{ github.event.inputs.version || '0.0.test' }}-macos-intel.zip \
-            macos-arm-build-results.zip#StumpServer-${{ github.event.inputs.version || '0.0.test' }}-macos-arm.zip \
-            windows-build-results.zip#StumpServer-${{ github.event.inputs.version || '0.0.test' }}-windows-x86_64.zip
+            linux-build-results.zip#StumpServer-${{ github.event.inputs.version }}-linux-x86_64.zip \
+            macos-intel-build-results.zip#StumpServer-${{ github.event.inputs.version }}-macos-intel.zip \
+            macos-arm-build-results.zip#StumpServer-${{ github.event.inputs.version }}-macos-arm.zip \
+            windows-build-results.zip#StumpServer-${{ github.event.inputs.version }}-windows-x86_64.zip

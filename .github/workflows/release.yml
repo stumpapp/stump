@@ -1,4 +1,4 @@
-name: 'Release CI'
+name: Release CI
 
 # This workflow triggers when a PR is merged into `main`, but jobs have conditions to only run when:
 # - A PR is closed, merged into `main`, from a branch that matches the pattern `release/v*.*.*`
@@ -86,65 +86,3 @@ jobs:
           push: ${{ needs.push-or-load.outputs.push }}
           platforms: ${{ needs.push-or-load.outputs.platforms }}
           discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
-
-  # build-web-app:
-  #   name: Build web app
-  #   runs-on: [self-hosted]
-  #   if: false # TODO: Enable this once 0.1.0 is ready
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
-
-  #     - name: Build the app
-  #       uses: ./.github/actions/build-web
-
-  #     - name: Upload the build
-  #       uses: ./.github/actions/upload-artifact
-  #       with:
-  #         upload-name: webapp
-  #         upload-path: apps/web/dist
-
-  # build-server:
-  #   strategy:
-  #     fail-fast: true
-  #     matrix:
-  #       platform: [macos, windows]
-  #   name: Build server app
-  #   needs: build-web
-  #   runs-on: ${{ matrix.platform }}
-  #   if: false # TODO: Enable this once 0.1.0 is ready
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
-
-  #     - name: Build the server
-  #       uses: ./.github/actions/build-server
-  #       with:
-  #         platform: ${{ matrix.platform }}
-
-  #     - name: Upload the server binary
-  #       uses: ./.github/actions/upload-artifact
-  #       with:
-  #         upload-name: stump_server-${{ matrix.platform }}
-  #         upload-path: target/release/stump_server
-
-  # # TODO: Investigate if I can just merge this with the above
-  # build-linux-server:
-  #   name: Build server app (self-hosted runner)
-  #   needs: build-web
-  #   runs-on: [self-hosted]
-  #   if: false # TODO: Enable this once 0.1.0 is ready
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
-
-  #     - name: Build the server
-  #       uses: ./.github/actions/build-server
-  #       with:
-  #         platform: 'linux'
-
-  #     - name: Upload the server binary
-  #       uses: ./.github/actions/upload-artifact
-  #       with:
-  #         upload-name: stump_server-linux
-  #         upload-path: target/release/stump_server

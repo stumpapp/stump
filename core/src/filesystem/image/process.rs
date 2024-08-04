@@ -245,17 +245,14 @@ mod tests {
 	}
 
 	#[test]
-	fn test_validate_good_quality() {
+	fn test_validate_quality() {
 		let options = ImageProcessorOptions {
 			quality: Some(50.0),
 			..Default::default()
 		};
 
 		assert!(options.validate().is_ok());
-	}
 
-	#[test]
-	fn test_validate_bad_quality() {
 		let options = ImageProcessorOptions {
 			quality: Some(101.0),
 			..Default::default()

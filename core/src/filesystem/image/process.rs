@@ -262,17 +262,14 @@ mod tests {
 	}
 
 	#[test]
-	fn test_validate_good_resize() {
+	fn test_validate_resize() {
 		let options = ImageProcessorOptions {
 			resize_options: Some(ImageResizeOptions::sized(100.0, 100.0)),
 			..Default::default()
 		};
 
 		assert!(options.validate().is_ok());
-	}
 
-	#[test]
-	fn test_validate_bad_resize() {
 		let options = ImageProcessorOptions {
 			resize_options: Some(ImageResizeOptions::sized(0.5, 0.5)),
 			..Default::default()

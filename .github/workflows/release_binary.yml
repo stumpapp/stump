@@ -24,10 +24,18 @@ jobs:
     needs: build-webapp
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        # Note: macos-13 is intel-based, macos-latest is M1-based
+        # See https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
+        os: [ubuntu-latest, macos-13, macos-latest, windows-latest]
         include:
           - os: ubuntu-latest
             artifact_name: linux-artifact
+            artifact_filename: stump_server
+          - os: macos-13
+            artifact_name: macos-intel-artifact
+            artifact_filename: stump_server
+          - os: macos-latest
+            artifact_name: macos-arm-artifact
             artifact_filename: stump_server
           - os: windows-latest
             artifact_name: windows-artifact
@@ -54,6 +62,7 @@ jobs:
         with:
           upload-name: ${{ matrix.artifact_name }}
           upload-path: staging
+
   # This job creates the release and organizes associated files
   create-release:
     needs: build-binary
@@ -71,6 +80,18 @@ jobs:
           name: linux-artifact
           path: StumpServer-linux
 
+      - name: Download artifact (macOS Intel)
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-intel-artifact
+          path: StumpServer-macos-intel
+
+      - name: Download artifact (macOS ARM)
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-arm-artifact
+          path: StumpServer-macos-arm
+
       - name: Download artifact (Windows)
         uses: actions/download-artifact@v4
         with:
@@ -84,6 +105,10 @@ jobs:
         run: |
           cd StumpServer-linux
           zip -r ../linux-build-results.zip *
+          cd ../StumpServer-macos-intel
+          zip -r ../macos-intel-build-results.zip *
+          cd ../StumpServer-macos-arm
+          zip -r ../macos-arm-build-results.zip *
           cd ../StumpServer-windows
           zip -r ../windows-build-results.zip *
           cd ..
@@ -93,7 +118,9 @@ jobs:
           gh release create v${{ github.event.inputs.version }} \
             --draft \
             --target main \
-            --title 'Release ${{ github.event.inputs.version }}' \
+            --title 'v${{ github.event.inputs.version }}' \
             --generate-notes \
-            linux-build-results.zip#StumpServer-${{ github.event.inputs.version }}-x64-Linux.zip \
-            windows-build-results.zip#StumpServer-${{ github.event.inputs.version }}-x64-Windows.zip
+            linux-build-results.zip#StumpServer-${{ github.event.inputs.version }}-linux-x86_64.zip \
+            macos-intel-build-results.zip#StumpServer-${{ github.event.inputs.version }}-macos-intel.zip \
+            macos-arm-build-results.zip#StumpServer-${{ github.event.inputs.version }}-macos-arm.zip \
+            windows-build-results.zip#StumpServer-${{ github.event.inputs.version }}-windows-x86_64.zip

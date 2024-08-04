@@ -1,5 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useCreateLibraryMutation, useEditLibraryMutation, useTags } from '@stump/client'
+import { libraryQueryKeys } from '@stump/api'
+import {
+	invalidateQueries,
+	useCreateLibraryMutation,
+	useEditLibraryMutation,
+	useTags,
+} from '@stump/client'
 import { Button, Form } from '@stump/components'
 import type { Library, LibraryOptions, LibraryPattern, LibraryScanMode } from '@stump/types'
 import { useState } from 'react'
@@ -119,7 +125,8 @@ type Props = {
 	library?: Library
 	existingLibraries: Library[]
 }
-
+// TODO: refactor to accept an onSubmit callback, let the parent handle the mutation accordingly
+// rather than all of this conditional logic
 export default function CreateOrEditLibraryForm({ library, existingLibraries }: Props) {
 	const navigate = useNavigate()
 
@@ -160,8 +167,8 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 	})
 
 	const { editLibraryAsync } = useEditLibraryMutation({
-		onSuccess: () => {
-			form.reset()
+		onSuccess: async () => {
+			await invalidateQueries({ exact: false, keys: [libraryQueryKeys.getLibraryById] })
 			navigate(paths.home())
 		},
 	})

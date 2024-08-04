@@ -279,17 +279,14 @@ mod tests {
 	}
 
 	#[test]
-	fn test_validate_good_scaled_resize() {
+	fn test_validate_scaled_resize() {
 		let options = ImageProcessorOptions {
 			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
 			..Default::default()
 		};
 
 		assert!(options.validate().is_ok());
-	}
 
-	#[test]
-	fn test_validate_bad_scaled_resize() {
 		let options = ImageProcessorOptions {
 			resize_options: Some(ImageResizeOptions::scaled(1.5, 1.5)),
 			..Default::default()

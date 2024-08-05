@@ -98,7 +98,7 @@ impl FileProcessor for PdfProcessor {
 		if let Some(image) = dyn_image.as_rgba8() {
 			let mut buffer = Cursor::new(vec![]);
 			image
-				.write_to(&mut buffer, image::ImageOutputFormat::Png)
+				.write_to(&mut buffer, image::ImageFormat::Png)
 				.map_err(|e| {
 					tracing::error!(error = ?e, "Failed to write image to buffer");
 					FileError::PdfProcessingError(String::from(
@@ -175,8 +175,8 @@ impl FileConverter for PdfProcessor {
 
 		let output_format = format
 			.clone()
-			.map(image::ImageOutputFormat::from)
-			.unwrap_or(image::ImageOutputFormat::Png);
+			.map(image::ImageFormat::from)
+			.unwrap_or(image::ImageFormat::Png);
 		let converted_pages = iter
 			.enumerate()
 			.map(|(idx, page)| {
@@ -185,14 +185,12 @@ impl FileConverter for PdfProcessor {
 
 				if let Some(image) = dyn_image.as_rgba8() {
 					let mut buffer = Cursor::new(vec![]);
-					image
-						.write_to(&mut buffer, output_format.clone())
-						.map_err(|e| {
-							tracing::error!(error = ?e, "Failed to write image to buffer");
-							FileError::PdfProcessingError(String::from(
-								"An image could not be rendered from the PDF page",
-							))
-						})?;
+					image.write_to(&mut buffer, output_format).map_err(|e| {
+						tracing::error!(error = ?e, "Failed to write image to buffer");
+						FileError::PdfProcessingError(String::from(
+							"An image could not be rendered from the PDF page",
+						))
+					})?;
 					Ok(buffer.into_inner())
 				} else {
 					tracing::warn!(

@@ -50,7 +50,7 @@ impl WebpProcessor {
 			&image,
 			width,
 			height,
-			// TODO: determine best filter
+			// TODO: determine best filter or allow user to specify
 			imageops::FilterType::Triangle,
 		))
 	}
@@ -59,11 +59,14 @@ impl WebpProcessor {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::filesystem::image::{ImageFormat, ImageProcessorOptions, ImageResizeMode};
-	use std::{fs, path::PathBuf};
+	use crate::filesystem::image::{
+		tests::{get_test_jpg_path, get_test_png_path, get_test_webp_path},
+		ImageFormat, ImageProcessorOptions,
+	};
+	use std::fs;
 
 	#[test]
-	fn test_generate_webp_from_data() {
+	fn test_generate_webp_from_webp_data() {
 		let bytes = get_test_webp_data();
 		let options = ImageProcessorOptions {
 			resize_options: None,
@@ -72,11 +75,154 @@ mod tests {
 			page: None,
 		};
 
-		WebpProcessor::generate(&bytes, options).unwrap();
+		let result = WebpProcessor::generate(&bytes, options);
+		assert!(result.is_ok());
+
+		let webp_bytes = result.unwrap();
+		// should *still* be a valid webp image
+		assert!(image::load_from_memory_with_format(
+			&webp_bytes,
+			image::ImageFormat::WebP
+		)
+		.is_ok())
 	}
 
 	#[test]
-	fn test_generate_webp_from_path() {
+	fn test_generate_webp_from_jpg() {
+		let jpg_path = get_test_jpg_path();
+		let options = ImageProcessorOptions {
+			resize_options: None,
+			format: ImageFormat::Webp,
+			quality: None,
+			page: None,
+		};
+
+		let result = WebpProcessor::generate_from_path(&jpg_path, options);
+		assert!(result.is_ok());
+
+		let webp_bytes = result.unwrap();
+		// should be a valid webp image
+		assert!(image::load_from_memory_with_format(
+			&webp_bytes,
+			image::ImageFormat::WebP
+		)
+		.is_ok())
+	}
+
+	#[test]
+	fn test_generate_webp_from_jpg_with_rescale() {
+		let jpg_path = get_test_jpg_path();
+		let options = ImageProcessorOptions {
+			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
+			format: ImageFormat::Webp,
+			quality: None,
+			page: None,
+		};
+
+		let current_dimensions =
+			image::image_dimensions(&jpg_path).expect("Failed to get dimensions");
+
+		let buffer = WebpProcessor::generate_from_path(&jpg_path, options)
+			.expect("Failed to generate image buffer");
+
+		let dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
+
+		assert_eq!(dimensions.0, (current_dimensions.0 as f32 * 0.5) as u32);
+		assert_eq!(dimensions.1, (current_dimensions.1 as f32 * 0.5) as u32);
+	}
+
+	#[test]
+	fn test_generate_webp_from_jpg_with_resize() {
+		let jpg_path = get_test_jpg_path();
+		let options = ImageProcessorOptions {
+			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
+			format: ImageFormat::Webp,
+			quality: None,
+			page: None,
+		};
+
+		let buffer = WebpProcessor::generate_from_path(&jpg_path, options)
+			.expect("Failed to generate image buffer");
+
+		let dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
+
+		assert_eq!(dimensions.0, 100);
+		assert_eq!(dimensions.1, 100);
+	}
+
+	#[test]
+	fn test_generate_webp_from_png() {
+		let png_path = get_test_png_path();
+		let options = ImageProcessorOptions {
+			resize_options: None,
+			format: ImageFormat::Webp,
+			quality: None,
+			page: None,
+		};
+
+		let result = WebpProcessor::generate_from_path(&png_path, options);
+		assert!(result.is_ok());
+
+		let webp_bytes = result.unwrap();
+		// should be a valid webp image
+		assert!(image::load_from_memory_with_format(
+			&webp_bytes,
+			image::ImageFormat::WebP
+		)
+		.is_ok())
+	}
+
+	#[test]
+	fn test_generate_webp_from_png_with_rescale() {
+		let png_path = get_test_png_path();
+		let options = ImageProcessorOptions {
+			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
+			format: ImageFormat::Webp,
+			quality: None,
+			page: None,
+		};
+
+		let current_dimensions =
+			image::image_dimensions(&png_path).expect("Failed to get dimensions");
+
+		let buffer = WebpProcessor::generate_from_path(&png_path, options)
+			.expect("Failed to generate image buffer");
+
+		let dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
+
+		assert_eq!(dimensions.0, (current_dimensions.0 as f32 * 0.5) as u32);
+		assert_eq!(dimensions.1, (current_dimensions.1 as f32 * 0.5) as u32);
+	}
+
+	#[test]
+	fn test_generate_webp_from_png_with_resize() {
+		let png_path = get_test_png_path();
+		let options = ImageProcessorOptions {
+			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
+			format: ImageFormat::Webp,
+			quality: None,
+			page: None,
+		};
+
+		let buffer = WebpProcessor::generate_from_path(&png_path, options)
+			.expect("Failed to generate image buffer");
+
+		let dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
+
+		assert_eq!(dimensions.0, 100);
+		assert_eq!(dimensions.1, 100);
+	}
+
+	#[test]
+	fn test_generate_webp_from_webp() {
 		let webp_path = get_test_webp_path();
 		let options = ImageProcessorOptions {
 			resize_options: None,
@@ -89,27 +235,48 @@ mod tests {
 	}
 
 	#[test]
-	fn test_resize_webp() {
+	fn test_generate_webp_from_webp_with_rescale() {
 		let webp_path = get_test_webp_path();
 		let options = ImageProcessorOptions {
-			resize_options: Some(ImageResizeOptions {
-				mode: ImageResizeMode::Scaled,
-				height: 2.0,
-				width: 2.0,
-			}),
+			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
 			format: ImageFormat::Webp,
 			quality: None,
 			page: None,
 		};
 
-		WebpProcessor::generate_from_path(&webp_path, options).unwrap();
+		let current_dimensions =
+			image::image_dimensions(&webp_path).expect("Failed to get dimensions");
+
+		let buffer = WebpProcessor::generate_from_path(&webp_path, options)
+			.expect("Failed to generate image buffer");
+
+		let dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
+
+		assert_eq!(dimensions.0, (current_dimensions.0 as f32 * 0.5) as u32);
+		assert_eq!(dimensions.1, (current_dimensions.1 as f32 * 0.5) as u32);
 	}
 
-	fn get_test_webp_path() -> String {
-		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests/data/example.webp")
-			.to_string_lossy()
-			.to_string()
+	#[test]
+	fn test_generate_webp_from_webp_with_resize() {
+		let webp_path = get_test_webp_path();
+		let options = ImageProcessorOptions {
+			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
+			format: ImageFormat::Webp,
+			quality: None,
+			page: None,
+		};
+
+		let buffer = WebpProcessor::generate_from_path(&webp_path, options)
+			.expect("Failed to generate image buffer");
+
+		let dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
+
+		assert_eq!(dimensions.0, 100);
+		assert_eq!(dimensions.1, 100);
 	}
 
 	fn get_test_webp_data() -> Vec<u8> {

@@ -1,6 +1,7 @@
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use std::fmt;
 use utoipa::ToSchema;
 
 use crate::prisma;
@@ -142,32 +143,32 @@ impl UserPermission {
 	}
 }
 
-impl ToString for UserPermission {
-	fn to_string(&self) -> String {
+impl fmt::Display for UserPermission {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		match self {
-			UserPermission::AccessBookClub => "bookclub:read".to_string(),
-			UserPermission::CreateBookClub => "bookclub:create".to_string(),
-			UserPermission::EmailerRead => "emailer:read".to_string(),
-			UserPermission::EmailerCreate => "emailer:create".to_string(),
-			UserPermission::EmailerManage => "emailer:manage".to_string(),
-			UserPermission::EmailSend => "email:send".to_string(),
-			UserPermission::EmailArbitrarySend => "email:arbitrary_send".to_string(),
-			UserPermission::AccessSmartList => "smartlist:read".to_string(),
-			UserPermission::FileExplorer => "file:explorer".to_string(),
-			UserPermission::UploadFile => "file:upload".to_string(),
-			UserPermission::DownloadFile => "file:download".to_string(),
-			UserPermission::CreateLibrary => "library:create".to_string(),
-			UserPermission::EditLibrary => "library:edit".to_string(),
-			UserPermission::ScanLibrary => "library:scan".to_string(),
-			UserPermission::ManageLibrary => "library:manage".to_string(),
-			UserPermission::DeleteLibrary => "library:delete".to_string(),
-			UserPermission::ReadUsers => "user:read".to_string(),
-			UserPermission::ManageUsers => "user:manage".to_string(),
-			UserPermission::ReadNotifier => "notifier:read".to_string(),
-			UserPermission::CreateNotifier => "notifier:create".to_string(),
-			UserPermission::ManageNotifier => "notifier:manage".to_string(),
-			UserPermission::DeleteNotifier => "notifier:delete".to_string(),
-			UserPermission::ManageServer => "server:manage".to_string(),
+			UserPermission::AccessBookClub => write!(f, "bookclub:read"),
+			UserPermission::CreateBookClub => write!(f, "bookclub:create"),
+			UserPermission::EmailerRead => write!(f, "emailer:read"),
+			UserPermission::EmailerCreate => write!(f, "emailer:create"),
+			UserPermission::EmailerManage => write!(f, "emailer:manage"),
+			UserPermission::EmailSend => write!(f, "email:send"),
+			UserPermission::EmailArbitrarySend => write!(f, "email:arbitrary_send"),
+			UserPermission::AccessSmartList => write!(f, "smartlist:read"),
+			UserPermission::FileExplorer => write!(f, "file:explorer"),
+			UserPermission::UploadFile => write!(f, "file:upload"),
+			UserPermission::DownloadFile => write!(f, "file:download"),
+			UserPermission::CreateLibrary => write!(f, "library:create"),
+			UserPermission::EditLibrary => write!(f, "library:edit"),
+			UserPermission::ScanLibrary => write!(f, "library:scan"),
+			UserPermission::ManageLibrary => write!(f, "library:manage"),
+			UserPermission::DeleteLibrary => write!(f, "library:delete"),
+			UserPermission::ReadUsers => write!(f, "user:read"),
+			UserPermission::ManageUsers => write!(f, "user:manage"),
+			UserPermission::ReadNotifier => write!(f, "notifier:read"),
+			UserPermission::CreateNotifier => write!(f, "notifier:create"),
+			UserPermission::ManageNotifier => write!(f, "notifier:manage"),
+			UserPermission::DeleteNotifier => write!(f, "notifier:delete"),
+			UserPermission::ManageServer => write!(f, "server:manage"),
 		}
 	}
 }
@@ -233,5 +234,187 @@ impl From<String> for PermissionSet {
 			.map(UserPermission::from)
 			.collect();
 		PermissionSet(permissions)
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_permission_associated() {
+		assert_eq!(
+			UserPermission::CreateBookClub.associated(),
+			vec![UserPermission::AccessBookClub]
+		);
+		assert_eq!(
+			UserPermission::EmailerRead.associated(),
+			vec![UserPermission::EmailSend]
+		);
+		assert_eq!(
+			UserPermission::EmailerCreate.associated(),
+			vec![UserPermission::EmailerRead]
+		);
+		assert_eq!(
+			UserPermission::EmailerManage.associated(),
+			vec![UserPermission::EmailerCreate, UserPermission::EmailerRead]
+		);
+		assert_eq!(
+			UserPermission::EmailArbitrarySend.associated(),
+			vec![UserPermission::EmailSend]
+		);
+		assert_eq!(
+			UserPermission::CreateLibrary.associated(),
+			vec![UserPermission::EditLibrary, UserPermission::ScanLibrary]
+		);
+		assert_eq!(
+			UserPermission::ManageLibrary.associated(),
+			vec![
+				UserPermission::ScanLibrary,
+				UserPermission::DeleteLibrary,
+				UserPermission::EditLibrary,
+				UserPermission::ManageLibrary
+			]
+		);
+		assert_eq!(
+			UserPermission::DeleteLibrary.associated(),
+			vec![UserPermission::ManageLibrary, UserPermission::ScanLibrary]
+		);
+		assert_eq!(
+			UserPermission::CreateNotifier.associated(),
+			vec![UserPermission::ReadNotifier]
+		);
+		assert_eq!(
+			UserPermission::ManageNotifier.associated(),
+			vec![
+				UserPermission::DeleteNotifier,
+				UserPermission::ReadNotifier,
+				UserPermission::CreateNotifier
+			]
+		);
+		assert_eq!(
+			UserPermission::DeleteNotifier.associated(),
+			vec![UserPermission::ManageNotifier, UserPermission::ReadNotifier]
+		);
+		assert_eq!(
+			UserPermission::ManageUsers.associated(),
+			vec![UserPermission::ReadUsers]
+		);
+		assert_eq!(UserPermission::AccessBookClub.associated(), vec![]);
+	}
+
+	#[test]
+	fn test_permission_from_str() {
+		assert_eq!(
+			UserPermission::from("bookclub:read"),
+			UserPermission::AccessBookClub
+		);
+		assert_eq!(
+			UserPermission::from("bookclub:create"),
+			UserPermission::CreateBookClub
+		);
+		assert_eq!(
+			UserPermission::from("emailer:read"),
+			UserPermission::EmailerRead
+		);
+		assert_eq!(
+			UserPermission::from("emailer:create"),
+			UserPermission::EmailerCreate
+		);
+		assert_eq!(
+			UserPermission::from("emailer:manage"),
+			UserPermission::EmailerManage
+		);
+		assert_eq!(
+			UserPermission::from("email:send"),
+			UserPermission::EmailSend
+		);
+		assert_eq!(
+			UserPermission::from("email:arbitrary_send"),
+			UserPermission::EmailArbitrarySend
+		);
+		assert_eq!(
+			UserPermission::from("smartlist:read"),
+			UserPermission::AccessSmartList
+		);
+		assert_eq!(
+			UserPermission::from("file:explorer"),
+			UserPermission::FileExplorer
+		);
+		assert_eq!(
+			UserPermission::from("file:upload"),
+			UserPermission::UploadFile
+		);
+		assert_eq!(
+			UserPermission::from("file:download"),
+			UserPermission::DownloadFile
+		);
+		assert_eq!(
+			UserPermission::from("library:create"),
+			UserPermission::CreateLibrary
+		);
+		assert_eq!(
+			UserPermission::from("library:edit"),
+			UserPermission::EditLibrary
+		);
+		assert_eq!(
+			UserPermission::from("library:scan"),
+			UserPermission::ScanLibrary
+		);
+		assert_eq!(
+			UserPermission::from("library:manage"),
+			UserPermission::ManageLibrary
+		);
+		assert_eq!(
+			UserPermission::from("library:delete"),
+			UserPermission::DeleteLibrary
+		);
+		assert_eq!(UserPermission::from("user:read"), UserPermission::ReadUsers);
+		assert_eq!(
+			UserPermission::from("user:manage"),
+			UserPermission::ManageUsers
+		);
+		assert_eq!(
+			UserPermission::from("notifier:read"),
+			UserPermission::ReadNotifier
+		);
+		assert_eq!(
+			UserPermission::from("notifier:create"),
+			UserPermission::CreateNotifier
+		);
+		assert_eq!(
+			UserPermission::from("notifier:manage"),
+			UserPermission::ManageNotifier
+		);
+		assert_eq!(
+			UserPermission::from("notifier:delete"),
+			UserPermission::DeleteNotifier
+		);
+		assert_eq!(
+			UserPermission::from("server:manage"),
+			UserPermission::ManageServer
+		);
+	}
+
+	#[test]
+	fn test_permission_set_from_string() {
+		let permission_set =
+			PermissionSet::from("bookclub:read,bookclub:create".to_string());
+		assert_eq!(
+			permission_set.resolve_into_vec(),
+			vec![
+				UserPermission::AccessBookClub,
+				UserPermission::CreateBookClub
+			]
+		);
+	}
+
+	#[test]
+	fn test_permission_set_from_string_with_associated() {
+		let permission_set_vec =
+			PermissionSet::from("bookclub:create".to_string()).resolve_into_vec();
+		assert_eq!(permission_set_vec.len(), 2);
+		assert!(permission_set_vec.contains(&UserPermission::AccessBookClub));
+		assert!(permission_set_vec.contains(&UserPermission::CreateBookClub));
 	}
 }

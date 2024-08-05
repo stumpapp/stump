@@ -210,29 +210,23 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 		let navigation_arrangement = data
 			.navigation_arrangement
 			.map(|bytes| {
-				serde_json::from_slice(&bytes).map_or_else(
-					|error| {
-						tracing::error!(
-							?error,
-							"Failed to deserialize navigation arrangement"
-						);
-						Arrangement::<NavigationItem>::default_navigation()
-					},
-					|v| v,
-				)
+				serde_json::from_slice(&bytes).unwrap_or_else(|error| {
+					tracing::error!(
+						?error,
+						"Failed to deserialize navigation arrangement"
+					);
+					Arrangement::<NavigationItem>::default_navigation()
+				})
 			})
 			.unwrap_or_else(Arrangement::<NavigationItem>::default_navigation);
 
 		let home_arrangement = data
 			.home_arrangement
 			.map(|bytes| {
-				serde_json::from_slice(&bytes).map_or_else(
-					|error| {
-						tracing::error!(?error, "Failed to deserialize home arrangement");
-						Arrangement::<HomeItem>::default_home()
-					},
-					|v| v,
-				)
+				serde_json::from_slice(&bytes).unwrap_or_else(|error| {
+					tracing::error!(?error, "Failed to deserialize home arrangement");
+					Arrangement::<HomeItem>::default_home()
+				})
 			})
 			.unwrap_or_else(Arrangement::<HomeItem>::default_home);
 

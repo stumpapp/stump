@@ -25,6 +25,9 @@ jobs:
     if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.changes != '[]'"
     name: Rust checks
     runs-on: [ubuntu-22.04]
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-latest]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -50,13 +53,18 @@ jobs:
       - name: Run tests
         run: cargo test
 
+      # TODO: move coverage to a separate job instead of conditionally running it
+      # on the ubuntu-22.04 runner as a workaround for only running it once
       - name: Install cargo-llvm-cov
+        if: runner.os == 'ubuntu-22.04'
         run: cargo install cargo-llvm-cov
 
       - name: Generate code coverage data
+        if: runner.os == 'ubuntu-22.04'
         run: cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
 
       - name: Upload coverage to Codecov
+        if: runner.os == 'ubuntu-22.04'
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

@@ -20,7 +20,7 @@ RUN yarn config set network-timeout 300000 && \
 # Cargo Build Stage
 # ------------------------------------------------------------------------------
 
-FROM rust:1.77.2-slim-buster AS builder
+FROM rust:1.79.0-slim-buster AS builder
 
 ARG GIT_REV
 ENV GIT_REV=${GIT_REV}

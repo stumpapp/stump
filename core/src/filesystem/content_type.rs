@@ -323,7 +323,8 @@ impl From<ImageFormat> for ContentType {
 	fn from(format: ImageFormat) -> Self {
 		match format {
 			ImageFormat::Jpeg => ContentType::JPEG,
-			ImageFormat::JpegXl => ContentType::JPEG,
+			// TODO(339): Support JpegXl and Avif
+			// ImageFormat::JpegXl => ContentType::JPEG,
 			ImageFormat::Png => ContentType::PNG,
 			ImageFormat::Webp => ContentType::WEBP,
 		}

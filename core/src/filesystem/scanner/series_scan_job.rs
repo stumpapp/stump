@@ -314,13 +314,10 @@ async fn handle_missing_series(
 		)
 		.exec()
 		.await
-		.map_or_else(
-			|error| {
-				tracing::error!(error = ?error, "Failed to update missing series");
-				0
-			},
-			|count| count,
-		);
+		.unwrap_or_else(|error| {
+			tracing::error!(error = ?error, "Failed to update missing series");
+			0
+		});
 
 	if affected_rows > 1 {
 		tracing::warn!(
@@ -340,14 +337,11 @@ async fn handle_missing_series(
 		)
 		.exec()
 		.await
-		.map_or_else(
-			|error| {
-				tracing::error!(error = ?error, "Failed to update missing media");
+		.unwrap_or_else(|error| {
+			tracing::error!(error = ?error, "Failed to update missing media");
 
-				0
-			},
-			|count| count,
-		);
+			0
+		});
 
 	Ok(())
 }

@@ -1,6 +1,7 @@
 import { cx, Heading, Input, Label, NativeSelect, RadioGroup, Text } from '@stump/components'
 import { ImageResizeMode, ImageResizeOptions } from '@stump/types'
-import { useFormContext } from 'react-hook-form'
+import { useMemo } from 'react'
+import { useFormContext, useFormState } from 'react-hook-form'
 
 import { Schema } from '../CreateOrUpdateLibraryForm'
 
@@ -12,8 +13,9 @@ const formatOptions = [
 
 export default function ThumbnailConfigForm() {
 	const form = useFormContext<Schema>()
-
 	const resize_options = form.watch('thumbnail_config.resize_options')
+
+	const { errors } = useFormState({ control: form.control })
 
 	const handleSelection = (option: ImageResizeMode | 'disabled') => {
 		if (option === 'disabled' || option === resize_options?.mode) {
@@ -30,7 +32,16 @@ export default function ThumbnailConfigForm() {
 		}
 	}
 
-	const resizeOptionsError = form.formState.errors.thumbnail_config?.resize_options?.message
+	/**
+	 * This is an awkward way to get the error message for the resize options. Because of the the
+	 * intersection types in the zod schema, the error message is nested in a few different places.
+	 */
+	const resizeOptionsError = useMemo(
+		() =>
+			errors.thumbnail_config?.resize_options?.message ||
+			errors.thumbnail_config?.resize_options?.root?.message,
+		[errors],
+	)
 
 	return (
 		<div className="flex flex-grow flex-col gap-6">
@@ -89,6 +100,12 @@ export default function ThumbnailConfigForm() {
 									: {})}
 							/>
 						</fieldset>
+
+						{resizeOptionsError && resize_options?.mode === 'Sized' && (
+							<Text className="mt-2" size="xs" variant="danger">
+								{resizeOptionsError}
+							</Text>
+						)}
 					</RadioGroup.CardItem>
 
 					<RadioGroup.CardItem
@@ -127,14 +144,8 @@ export default function ThumbnailConfigForm() {
 							/>
 						</fieldset>
 
-						{resizeOptionsError && (
-							<Text
-								className={cx('mt-2', {
-									'opacity-50': resize_options?.mode === undefined,
-								})}
-								size="xs"
-								variant="danger"
-							>
+						{resizeOptionsError && resize_options?.mode === 'Scaled' && (
+							<Text className="mt-2" size="xs" variant="danger">
 								{resizeOptionsError}
 							</Text>
 						)}

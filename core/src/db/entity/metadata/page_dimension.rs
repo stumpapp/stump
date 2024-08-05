@@ -10,6 +10,7 @@
 
 use serde::{Deserialize, Serialize};
 
+use std::fmt;
 use std::str::FromStr;
 use std::string::ToString;
 
@@ -71,9 +72,9 @@ impl PageDimension {
 	}
 }
 
-impl ToString for PageDimension {
-	fn to_string(&self) -> String {
-		format!("{},{}", self.height, self.width)
+impl fmt::Display for PageDimension {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		write!(f, "{},{}", self.height, self.width)
 	}
 }
 
@@ -118,11 +119,7 @@ pub fn dimension_vec_to_string(list: Vec<PageDimension>) -> String {
 				// This branch handles writeout if a run is going and it didn't match
 				if let Some(run_dim) = run_dimension {
 					if run_count > 1 {
-						encoded_strings.push(format!(
-							"{}>{}",
-							run_count,
-							run_dim.to_string()
-						));
+						encoded_strings.push(format!("{run_count}>{run_dim}"));
 					} else {
 						encoded_strings.push(run_dim.to_string());
 					}
@@ -138,7 +135,7 @@ pub fn dimension_vec_to_string(list: Vec<PageDimension>) -> String {
 	// This handles writeout for the final item
 	if let Some(run_dim) = run_dimension {
 		if run_count > 1 {
-			encoded_strings.push(format!("{}>{}", run_count, run_dim.to_string()));
+			encoded_strings.push(format!("{run_count}>{run_dim}"));
 		} else {
 			encoded_strings.push(run_dim.to_string());
 		}

@@ -159,8 +159,11 @@ pub struct UserPreferences {
 	pub enable_compact_display: bool,
 	#[serde(default = "default_true")]
 	pub enable_double_sidebar: bool,
+	// TODO: refactor usage of enable_hide_scrollbar to function as local scrollbar hiding
 	#[serde(default)]
 	pub enable_hide_scrollbar: bool,
+	// TODO: support hiding global vs local scrollbars (e.g. tables)
+	// pub enable_hide_global_scrollbar: bool,
 	#[serde(default)]
 	pub enable_replace_primary_sidebar: bool,
 	#[serde(default = "default_true")]

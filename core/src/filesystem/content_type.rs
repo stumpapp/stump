@@ -23,6 +23,7 @@ pub enum ContentType {
 	PNG,
 	JPEG,
 	WEBP,
+	AVIF,
 	GIF,
 	TXT,
 	#[default]
@@ -79,6 +80,7 @@ impl ContentType {
 			"jpg" => ContentType::JPEG,
 			"jpeg" => ContentType::JPEG,
 			"webp" => ContentType::WEBP,
+			"avif" => ContentType::AVIF,
 			"gif" => ContentType::GIF,
 			"txt" => ContentType::TXT,
 			_ => temporary_content_workarounds(extension),
@@ -265,6 +267,7 @@ impl ContentType {
 			ContentType::PNG => "png",
 			ContentType::JPEG => "jpg",
 			ContentType::WEBP => "webp",
+			ContentType::AVIF => "avif",
 			ContentType::GIF => "gif",
 			ContentType::TXT => "txt",
 			ContentType::UNKNOWN => "",
@@ -291,6 +294,7 @@ impl From<&str> for ContentType {
 			"image/png" => ContentType::PNG,
 			"image/jpeg" => ContentType::JPEG,
 			"image/webp" => ContentType::WEBP,
+			"image/avif" => ContentType::AVIF,
 			"image/gif" => ContentType::GIF,
 			_ => ContentType::UNKNOWN,
 		}
@@ -312,6 +316,7 @@ impl std::fmt::Display for ContentType {
 			ContentType::PNG => write!(f, "image/png"),
 			ContentType::JPEG => write!(f, "image/jpeg"),
 			ContentType::WEBP => write!(f, "image/webp"),
+			ContentType::AVIF => write!(f, "image/avif"),
 			ContentType::GIF => write!(f, "image/gif"),
 			ContentType::TXT => write!(f, "text/plain"),
 			ContentType::UNKNOWN => write!(f, "unknown"),
@@ -327,6 +332,7 @@ impl From<ImageFormat> for ContentType {
 			// ImageFormat::JpegXl => ContentType::JPEG,
 			ImageFormat::Png => ContentType::PNG,
 			ImageFormat::Webp => ContentType::WEBP,
+			ImageFormat::Avif => ContentType::AVIF,
 		}
 	}
 }
@@ -349,6 +355,7 @@ impl TryFrom<ContentType> for image::ImageFormat {
 			ContentType::PNG => Ok(image::ImageFormat::Png),
 			ContentType::JPEG => Ok(image::ImageFormat::Jpeg),
 			ContentType::WEBP => Ok(image::ImageFormat::WebP),
+			ContentType::AVIF => Ok(image::ImageFormat::Avif),
 			ContentType::GIF => Ok(image::ImageFormat::Gif),
 			ContentType::XHTML => Err(unsupported_error("ContentType::XHTML")),
 			ContentType::XML => Err(unsupported_error("ContentType::XML")),

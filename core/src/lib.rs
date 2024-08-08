@@ -313,6 +313,8 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<UserPermission>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<AgeRestriction>()?).as_bytes())?;
 
+		file.write_all(format!("{}\n\n", ts_export::<SupportedFont>()?).as_bytes())?;
+
 		file.write_all(format!("{}\n\n", ts_export::<NavigationMode>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<HomeItem>()?).as_bytes())?;
 		file.write_all(

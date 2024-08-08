@@ -3,16 +3,12 @@
 @tailwind utilities;
 
 body {
-	@apply h-full font-sans antialiased;
+	@apply font-inter h-full bg-background antialiased;
 }
 
 #root,
 html {
 	@apply flex h-full flex-col overflow-hidden bg-background;
-}
-
-body {
-	@apply bg-background;
 }
 
 form {

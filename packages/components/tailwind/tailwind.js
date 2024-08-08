@@ -56,6 +56,11 @@ module.exports = function (relativeFromRoot) {
 			'../../packages/*/src/**/*.{js,ts,jsx,tsx,html}',
 			path.join(basePath, './src/**/*.(js|jsx|ts|tsx)'),
 		],
+		safelist: [
+			{
+				pattern: /font-.*/,
+			},
+		],
 		plugins: [
 			require('tailwind-scrollbar-hide'),
 			require('@tailwindcss/typography'),
@@ -78,7 +83,8 @@ module.exports = function (relativeFromRoot) {
 					'accordion-up': 'accordion-up 0.2s ease-out',
 				},
 				fontFamily: {
-					sans: ['Inter var', ...defaultTheme.fontFamily.sans],
+					inter: ['Inter var', ...defaultTheme.fontFamily.sans],
+					opendyslexic: ['OpenDyslexicRegular', ...defaultTheme.fontFamily.sans],
 				},
 				colors: {
 					brand: sharedColors.brand,

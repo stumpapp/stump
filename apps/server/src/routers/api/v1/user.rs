@@ -14,8 +14,8 @@ use stump_core::{
 	config::StumpConfig,
 	db::{
 		entity::{
-			AgeRestriction, Arrangement, LoginActivity, NavigationItem, User,
-			UserPermission, UserPreferences,
+			AgeRestriction, Arrangement, LoginActivity, NavigationItem, SupportedFont,
+			User, UserPermission, UserPreferences,
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 	},
@@ -382,6 +382,7 @@ async fn update_preferences(
 					input.preferred_layout_mode.to_owned(),
 				),
 				user_preferences::app_theme::set(input.app_theme.to_owned()),
+				user_preferences::app_font::set(input.app_font.to_string()),
 				user_preferences::primary_navigation_mode::set(
 					input.primary_navigation_mode.to_owned(),
 				),
@@ -564,6 +565,7 @@ pub struct UpdateUserPreferences {
 	pub primary_navigation_mode: String,
 	pub layout_max_width_px: Option<i32>,
 	pub app_theme: String,
+	pub app_font: SupportedFont,
 	pub show_query_indicator: bool,
 	pub enable_live_refetch: bool,
 	pub enable_discord_presence: bool,

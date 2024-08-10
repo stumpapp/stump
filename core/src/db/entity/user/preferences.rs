@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
@@ -123,6 +125,36 @@ impl<I> Arrangement<I> {
 	}
 }
 
+#[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+#[serde(rename_all = "lowercase")]
+pub enum SupportedFont {
+	#[default]
+	Inter,
+	OpenDyslexic,
+	// TODO(383): Support custom fonts
+	// Custom(String),
+}
+
+impl Display for SupportedFont {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			SupportedFont::Inter => write!(f, "inter"),
+			SupportedFont::OpenDyslexic => write!(f, "opendyslexic"),
+		}
+	}
+}
+
+impl From<String> for SupportedFont {
+	fn from(value: String) -> Self {
+		match value.to_lowercase().as_str() {
+			"opendyslexic" => SupportedFont::OpenDyslexic,
+			// Note: for now we just always default to Inter. This will be acceptable
+			// until we have custom font support.
+			_ => SupportedFont::Inter,
+		}
+	}
+}
+
 fn default_navigation_mode() -> String {
 	"SIDEBAR".to_string()
 }
@@ -144,6 +176,9 @@ pub struct UserPreferences {
 	pub id: String,
 	pub locale: String,
 	pub app_theme: String,
+	#[serde(default)]
+	pub app_font: SupportedFont,
+	#[serde(default)]
 	pub show_query_indicator: bool,
 	#[serde(default)]
 	pub enable_live_refetch: bool,
@@ -186,6 +221,7 @@ impl Default for UserPreferences {
 			primary_navigation_mode: "SIDEBAR".to_string(),
 			layout_max_width_px: Some(1280),
 			app_theme: "LIGHT".to_string(),
+			app_font: SupportedFont::Inter,
 			show_query_indicator: false,
 			enable_live_refetch: false,
 			enable_discord_presence: false,
@@ -237,6 +273,7 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 			primary_navigation_mode: data.primary_navigation_mode,
 			layout_max_width_px: data.layout_max_width_px,
 			app_theme: data.app_theme,
+			app_font: data.app_font.into(),
 			show_query_indicator: data.show_query_indicator,
 			enable_live_refetch: data.enable_live_refetch,
 			enable_discord_presence: data.enable_discord_presence,

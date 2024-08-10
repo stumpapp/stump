@@ -429,8 +429,24 @@ mod tests {
 	}
 
 	#[test]
+	fn test_permission_set_from_space_string() {
+		let permission_set = PermissionSet::from("        ".to_string());
+		assert_eq!(permission_set.resolve_into_vec().len(), 0);
+	}
+
+	#[test]
 	fn test_permission_set_with_nth_empty_string() {
 		let permission_set = PermissionSet::from("bookclub:read,".to_string());
+		assert_eq!(
+			permission_set.resolve_into_vec(),
+			vec![UserPermission::AccessBookClub]
+		);
+	}
+
+	#[test]
+	fn test_permission_set_with_nth_space_string() {
+		let permission_set =
+			PermissionSet::from("bookclub:read,  ,      ,     ,".to_string());
 		assert_eq!(
 			permission_set.resolve_into_vec(),
 			vec![UserPermission::AccessBookClub]

@@ -391,6 +391,10 @@
 						"bronze": "Jasnobrązowy"
 					}
 				},
+				"fontSelect": {
+					"label": "Font",
+					"description": "Customize the font used in the application"
+				},
 				"navigationArrangement": {
 					"label": "Układ nawigacji",
 					"description": {

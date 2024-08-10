@@ -5,6 +5,10 @@ import React, { useCallback } from 'react'
 
 import { usePreferences } from '@/hooks/usePreferences'
 
+/**
+ * A component that allows the user to select the font for the app from a list of
+ * supported fonts
+ */
 export default function FontSelect() {
 	const { t } = useLocaleContext()
 	const {
@@ -12,6 +16,12 @@ export default function FontSelect() {
 		update,
 	} = usePreferences()
 
+	/**
+	 * A callback that changes the font of the app to the provided font, if it is one of the
+	 * supported fonts
+	 *
+	 * TODO(383): support custom fonts
+	 */
 	const changeFont = useCallback(
 		async (font: string) => {
 			if (isSupportedFont(font)) {
@@ -36,6 +46,7 @@ export default function FontSelect() {
 			<Label htmlFor="extension" className="mb-1.5">
 				{t(`${localeKey}.label`)}
 			</Label>
+			{/* TODO: don't use a native select, instead some combobox which renders each option in the font */}
 			<NativeSelect
 				value={app_font || 'inter'}
 				options={[

@@ -14,7 +14,7 @@ import { ErrorFallback } from '@/components/ErrorFallback'
 import Notifications from '@/components/Notifications'
 
 import { AppRouter } from './AppRouter'
-import { useInitializeTheme } from './hooks'
+import { useApplyTheme } from './hooks'
 import { API_VERSION } from './index'
 import { useAppStore, useUserStore } from './stores'
 
@@ -66,7 +66,7 @@ function RouterContainer(props: StumpClientProps) {
 		setPlatform(props.platform)
 	}, [props.platform, setPlatform])
 
-	useInitializeTheme({ appFont: userPreferences?.app_font, appTheme: userPreferences?.app_theme })
+	useApplyTheme({ appFont: userPreferences?.app_font, appTheme: userPreferences?.app_theme })
 
 	const { setUseDiscordPresence, setDiscordPresence } = props
 	const discordPresenceEnabled = userPreferences?.enable_discord_presence ?? false

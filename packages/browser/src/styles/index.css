@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-	@apply font-inter h-full bg-background antialiased;
+	@apply h-full bg-background font-inter antialiased;
 }
 
 #root,

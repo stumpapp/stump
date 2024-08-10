@@ -1,6 +1,6 @@
+export { useApplyTheme } from './useApplyTheme'
 export { useCurrentOrPrevious } from './useCurrentOrPrevious'
 export { useDetectZoom } from './useDetectZoom'
-export { useInitializeTheme } from './useInitializeTheme'
 export { useLayoutMode } from './useLayoutMode'
 export { usePageParam } from './usePageParam'
 export { usePreferences } from './usePreferences'

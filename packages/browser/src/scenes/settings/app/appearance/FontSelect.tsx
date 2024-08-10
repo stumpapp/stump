@@ -25,12 +25,7 @@ export default function FontSelect() {
 	const changeFont = useCallback(
 		async (font: string) => {
 			if (isSupportedFont(font)) {
-				const body = document.querySelector('body')
-				// Find and then any font-related classes from the body
-				const fontClasses = Array.from(body?.classList ?? []).filter((c) => c.startsWith('font-'))
-				body?.classList.remove(...fontClasses)
-				// Add the target font class to the body
-				body?.classList.add(`font-${font}`)
+				// Note: useApplyTheme will apply the font to the body element after the preferences are updated
 				try {
 					await update({ app_font: font })
 				} catch (e) {

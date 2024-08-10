@@ -33,7 +33,7 @@ export function useApplyTheme({ appTheme, appFont = 'inter' }: Params) {
 		// to worry about removing other classes. If this changes, we'll need to update this logic and likely
 		// prefix the theme class with `theme-` to avoid conflicts
 		const htmlClasses = Array.from(html?.classList ?? [])
-		const resolvedTheme = appTheme || (prefersDarkMode.matches ? 'dark' : 'light')
+		const resolvedTheme = appTheme?.toLowerCase() || (prefersDarkMode.matches ? 'dark' : 'light')
 		// Only change the theme if we actually need to (i.e. the theme on the html is diff)
 		if (!htmlClasses.length || htmlClasses.some((c) => c !== resolvedTheme)) {
 			html?.classList.remove(...htmlClasses)

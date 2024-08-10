@@ -80,7 +80,7 @@ module.exports = {
 	theme: {
 		fontFamily: {
 			// ... other fonts
-			'my-font': ['MyFont', 'sans'],
+			'font-my-font': ['MyFont', 'sans'], // <- the `font-` prefix is important!
 		},
 	},
 	// ... other configurations

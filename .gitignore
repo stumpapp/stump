@@ -44,7 +44,6 @@ apps/server/client/*
 *.db*
 *.sqlite*
 *prisma.rs*
-core/prisma/dev
 
 # nix
 .envrc

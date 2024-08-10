@@ -1,6 +1,5 @@
 use std::{
 	fmt::{Display, Formatter},
-	fs,
 	path::PathBuf,
 	sync::Arc,
 	time::Instant,
@@ -113,9 +112,11 @@ async fn create_test_library(
 	series_count: usize,
 	books_per_series: usize,
 ) -> Result<(PrismaClient, Library, Vec<TempDir>), Box<dyn std::error::Error>> {
-	let dev_db_dir = format!("{}/prisma/dev", env!("CARGO_MANIFEST_DIR"));
-	fs::create_dir_all(&dev_db_dir)?;
-	let client = create_client_with_url(&format!("file:{}/dev.db", dev_db_dir)).await;
+	let client = create_client_with_url(&format!(
+		"file:{}/prisma/dev.db",
+		env!("CARGO_MANIFEST_DIR")
+	))
+	.await;
 
 	let deleted_libraries = client
 		.library()

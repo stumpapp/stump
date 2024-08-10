@@ -1,4 +1,4 @@
-use std::{fs, path::Path};
+use std::path::Path;
 
 use crate::{config::StumpConfig, prisma};
 
@@ -23,9 +23,7 @@ pub async fn create_client(config: &StumpConfig) -> prisma::PrismaClient {
 		tracing::trace!("ile:{}/stump.db", &config_dir);
 		format!("file:{}/stump.db", &config_dir)
 	} else {
-		let dev_db_dir = format!("{}/prisma/dev", env!("CARGO_MANIFEST_DIR"));
-		fs::create_dir_all(&dev_db_dir).expect("Failed to create directory /prisma/dev");
-		format!("file:{}/dev.db", dev_db_dir)
+		format!("file:{}/prisma/dev.db", &env!("CARGO_MANIFEST_DIR"))
 	};
 
 	tracing::trace!(?sqlite_url, "Creating Prisma client");

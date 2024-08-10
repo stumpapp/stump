@@ -391,6 +391,10 @@
 						"bronze": "青青铜光"
 					}
 				},
+				"fontSelect": {
+					"label": "Font",
+					"description": "Customize the font used in the application"
+				},
 				"navigationArrangement": {
 					"label": "Navigation arrangement",
 					"description": {

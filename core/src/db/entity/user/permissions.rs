@@ -228,9 +228,13 @@ impl PermissionSet {
 
 impl From<String> for PermissionSet {
 	fn from(s: String) -> PermissionSet {
+		if s.is_empty() {
+			return PermissionSet(vec![]);
+		}
 		let permissions = s
 			.split(',')
 			.map(|s| s.trim())
+			.filter(|s| !s.is_empty())
 			.map(UserPermission::from)
 			.collect();
 		PermissionSet(permissions)
@@ -416,5 +420,20 @@ mod tests {
 		assert_eq!(permission_set_vec.len(), 2);
 		assert!(permission_set_vec.contains(&UserPermission::AccessBookClub));
 		assert!(permission_set_vec.contains(&UserPermission::CreateBookClub));
+	}
+
+	#[test]
+	fn test_permission_set_from_empty_string() {
+		let permission_set = PermissionSet::from("".to_string());
+		assert_eq!(permission_set.resolve_into_vec().len(), 0);
+	}
+
+	#[test]
+	fn test_permission_set_with_nth_empty_string() {
+		let permission_set = PermissionSet::from("bookclub:read,".to_string());
+		assert_eq!(
+			permission_set.resolve_into_vec(),
+			vec![UserPermission::AccessBookClub]
+		);
 	}
 }

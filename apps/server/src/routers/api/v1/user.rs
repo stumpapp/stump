@@ -34,7 +34,7 @@ use utoipa::ToSchema;
 use crate::{
 	config::{session::SESSION_USER_KEY, state::AppState},
 	errors::{APIError, APIResult},
-	filter::UserQueryRelation,
+	filter::{chain_optional_iter, UserQueryRelation},
 	middleware::auth::Auth,
 	utils::{
 		enforce_session_permissions, get_session_server_owner_user, get_session_user,
@@ -454,14 +454,8 @@ async fn create_user(
 			let permissions = input
 				.permissions
 				.into_iter()
-				.filter_map(|p| {
-					let p_str = p.to_string();
-					if p_str.is_empty() {
-						None
-					} else {
-						Some(p_str)
-					}
-				})
+				.map(|p| p.to_string().trim().to_owned())
+				.filter(|p| !p.is_empty())
 				.collect::<Vec<String>>();
 
 			let created_user = client
@@ -469,11 +463,15 @@ async fn create_user(
 				.create(
 					input.username.to_owned(),
 					hashed_password,
-					vec![
-						user::is_server_owner::set(false),
-						user::permissions::set(Some(permissions.join(","))),
-						user::max_sessions_allowed::set(input.max_sessions_allowed),
-					],
+					chain_optional_iter(
+						vec![
+							user::is_server_owner::set(false),
+							user::max_sessions_allowed::set(input.max_sessions_allowed),
+						],
+						[(!permissions.is_empty()).then(|| {
+							user::permissions::set(Some(permissions.join(",")))
+						})],
+					),
 				)
 				.exec()
 				.await?;

@@ -391,6 +391,10 @@
 						"bronze": "Claro Bronce"
 					}
 				},
+				"fontSelect": {
+					"label": "Font",
+					"description": "Customize the font used in the application"
+				},
 				"navigationArrangement": {
 					"label": "Navigation arrangement",
 					"description": {

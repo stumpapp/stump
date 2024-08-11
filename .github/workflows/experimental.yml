@@ -26,6 +26,7 @@ jobs:
       - uses: dorny/paths-filter@v2
         id: filter
         with:
+          base: 'experimental'
           filters: |
             apps: ./apps/**
             crates: ./crates/**

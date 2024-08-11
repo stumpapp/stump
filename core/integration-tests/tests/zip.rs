@@ -11,7 +11,7 @@ use crate::utils::{init_test, TempLibrary};
 async fn digest_zips() -> CoreResult<()> {
 	init_test().await;
 
-	let ctx = Ctx::mock().await;
+	let ctx = Ctx::integration_test_mock().await;
 
 	let _ret = TempLibrary::create(
 		ctx.get_db(),

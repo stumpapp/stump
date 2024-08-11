@@ -8,7 +8,7 @@ use std::sync::Arc;
 use stump_core::Ctx;
 use time::Duration;
 
-use tower_sessions::{cookie::SameSite, SessionManagerLayer};
+use tower_sessions::{cookie::SameSite, SessionManagerLayer, SessionStore};
 
 use super::PrismaSessionStore;
 

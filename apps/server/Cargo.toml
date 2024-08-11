@@ -51,6 +51,10 @@ urlencoding = { workspace = true }
 utoipa = { version = "3.5.0", features = ["axum_extras"] }
 utoipa-swagger-ui = { version = "3.1.5", features = ["axum"] }
 
+[dev-dependencies]
+axum-test = "13.4.1" # TODO: Update once axum is updated
+
+
 [build-dependencies]
 chrono = "0.4.37"
 

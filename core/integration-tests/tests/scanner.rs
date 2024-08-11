@@ -45,7 +45,7 @@ async fn check_library_post_scan(
 async fn series_based_library_batch_scan() -> CoreResult<()> {
 	init_test().await;
 
-	let ctx = Ctx::mock().await;
+	let ctx = Ctx::integration_test_mock().await;
 	let client = &ctx.db;
 
 	let (library, _library_options, _tmp) =
@@ -72,7 +72,7 @@ async fn series_based_library_batch_scan() -> CoreResult<()> {
 async fn collection_based_library_batch_scan() -> CoreResult<()> {
 	init_test().await;
 
-	let ctx = Ctx::mock().await;
+	let ctx = Ctx::integration_test_mock().await;
 	let client = &ctx.db;
 
 	let (library, _library_options, _tmp) = TempLibrary::create(
@@ -106,7 +106,7 @@ async fn collection_based_library_batch_scan() -> CoreResult<()> {
 async fn massive_library_batch_scan() -> CoreResult<()> {
 	init_test().await;
 
-	let ctx = Ctx::mock().await;
+	let ctx = Ctx::integration_test_mock().await;
 	let client = &ctx.db;
 
 	let temp_library = TempLibrary::massive_library(10000, LibraryPattern::SeriesBased)?;

@@ -37,7 +37,7 @@ fn test_rar_to_zip() -> CoreResult<()> {
 async fn digest_rars_synchronous() -> CoreResult<()> {
 	init_test().await;
 
-	let ctx = Ctx::mock().await;
+	let ctx = Ctx::integration_test_mock().await;
 
 	let _ret = TempLibrary::create(
 		ctx.get_db(),

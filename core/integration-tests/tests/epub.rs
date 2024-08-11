@@ -15,7 +15,7 @@ use stump_core::{
 async fn can_make_epub_struct() -> CoreResult<()> {
 	init_test().await;
 
-	let ctx = Ctx::mock().await;
+	let ctx = Ctx::integration_test_mock().await;
 
 	let _ret = TempLibrary::epub_library(ctx.get_db()).await?;
 
@@ -40,7 +40,7 @@ async fn can_make_epub_struct() -> CoreResult<()> {
 async fn can_get_resource() -> CoreResult<()> {
 	init_test().await;
 
-	let ctx = Ctx::mock().await;
+	let ctx = Ctx::integration_test_mock().await;
 
 	let _ret = TempLibrary::epub_library(ctx.get_db()).await?;
 
@@ -89,7 +89,7 @@ fn canonical_correction() {
 async fn can_get_chapter() -> CoreResult<()> {
 	init_test().await;
 
-	let ctx = Ctx::mock().await;
+	let ctx = Ctx::integration_test_mock().await;
 	let _ret = TempLibrary::epub_library(ctx.get_db()).await?;
 
 	let fetch_epub = ctx

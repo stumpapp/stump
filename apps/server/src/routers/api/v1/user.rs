@@ -1199,3 +1199,53 @@ async fn upload_user_avatar(
 
 	Ok(ImageResponse::new(content_type, bytes))
 }
+
+#[cfg(test)]
+mod tests {
+	use prisma_client_rust::chrono::Utc;
+	use stump_core::db::entity::User;
+
+	use crate::routers::tests::{login_user, setup_test_app};
+
+	#[tokio::test]
+	async fn test_get_users_fails_without_auth() {
+		let (_, _, server) = setup_test_app();
+
+		server
+			.get("/api/v1/users")
+			.await
+			.assert_status_unauthorized()
+	}
+
+	// #[tokio::test]
+	// async fn test_get_users_fails_without_permission() {
+	// 	let (client, mock, server) = setup_test_app();
+	// 	todo!()
+	// }
+
+	#[tokio::test]
+	async fn test_get_users_for_owner() {
+		let (client, mock, server) = setup_test_app();
+		login_user(
+			&User {
+				username: "oromei".to_string(),
+				is_server_owner: true,
+				created_at: Utc::now().to_string(),
+				..Default::default()
+			},
+			&server,
+			&client,
+			&mock,
+		)
+		.await
+		.expect("Failed to login");
+
+		// TODO: mock the DB calls before issuing the request
+
+		let response = server.get("/api/v1/users").await;
+
+		response.assert_status_ok();
+
+		// TODO: assert the data structure is expected
+	}
+}

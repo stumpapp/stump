@@ -307,7 +307,7 @@
 			"application": {
 				"account": "Account",
 				"appearance": "Apariencia",
-				"reader": "Reader",
+				"reader": "Lector",
 				"desktop": "Ordenador",
 				"label": "Aplicación"
 			},
@@ -319,13 +319,13 @@
 				"access": "Acceso",
 				"email": "Email",
 				"notifications": "Notifications",
-				"label": "Server"
+				"label": "Servidor"
 			}
 		},
 		"app/account": {
 			"helmet": "Account settings",
-			"title": "Account settings",
-			"description": "Settings related to your account",
+			"title": "Configuración de la cuenta",
+			"description": "Configuración relacionada con tu cuenta",
 			"sections": {
 				"account": {
 					"validation": {
@@ -333,8 +333,8 @@
 						"missingUsername": "Username is required"
 					},
 					"labels": {
-						"username": "Username",
-						"password": "Password",
+						"username": "Nombre de usuario",
+						"password": "Contraseña",
 						"activeChangesPrompt": "You have unsaved changes"
 					},
 					"errors": {
@@ -346,29 +346,29 @@
 						"preview": "A preview will appear here once you have entered a URL.",
 						"labels": {
 							"imageUrl": "Image URL",
-							"customAvatar": "Custom Avatar"
+							"customAvatar": "Avatar personalizado"
 						},
 						"buttons": {
 							"confirm": "Confirm Image",
 							"cancel": "Cancel",
-							"edit": "Edit",
-							"changeImage": "Change Image",
-							"removeImage": "Remove Image"
+							"edit": "Editar",
+							"changeImage": "Cambiar imagen",
+							"removeImage": "Borrar imagen"
 						}
 					},
 					"buttons": {
-						"confirm": "Save Changes"
+						"confirm": "Guardar cambios"
 					}
 				},
 				"locale": {
 					"localeSelector": {
-						"label": "Language"
+						"label": "Idioma"
 					},
-					"heading": "Language and locale",
+					"heading": "Idioma y localización",
 					"subtitle": [
-						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-						"Stump's translations",
-						"if you're able to!"
+						"Stump soporta varios idiomas, establece tus preferencias a continuación. Por favor, considera ayudar a mejorar la calidad de",
+						"las traducciones de Stump",
+						"si puedes!"
 					]
 				}
 			}
@@ -425,13 +425,13 @@
 			}
 		},
 		"app/reader": {
-			"helmet": "Reader settings",
-			"title": "Reader settings",
-			"description": "Default options for the Stump readers. These are bound to your current device only",
+			"helmet": "Configuración del lector",
+			"title": "Configuración del lector",
+			"description": "Opciones predeterminadas para los lectores de Stump. Estas solo están vinculadas a tu dispositivo actual",
 			"sections": {
 				"imageBasedBooks": {
-					"label": "Image-based books",
-					"description": "Comic books, manga, and other image-based books",
+					"label": "Libros basados en imágenes",
+					"description": "Cómics, mangas y otros libros basados en imágenes",
 					"sections": {
 						"preloadAheadCount": {
 							"label": "Preload ahead count",
@@ -466,7 +466,7 @@
 					"message": "Your server is not up to date. Please update to the latest version!"
 				},
 				"serverInfo": {
-					"title": "Server information",
+					"title": "Información del servidor",
 					"description": "Basic details about your Stump server instance",
 					"build": {
 						"label": "Build",
@@ -916,7 +916,7 @@
 		"confirm": "Confirm",
 		"save": "Save",
 		"send": "Send",
-		"saveChanges": "Save changes",
+		"saveChanges": "Guardar cambios",
 		"create": "Create",
 		"edit": "Edit",
 		"update": "Update",

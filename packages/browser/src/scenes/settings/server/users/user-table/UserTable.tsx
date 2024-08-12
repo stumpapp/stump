@@ -120,6 +120,9 @@ export default function UserTable() {
 					onPaginationChange: setPagination,
 					pageCount,
 					state: {
+						columnPinning: {
+							right: ['actions'],
+						},
 						pagination,
 					},
 				}}

@@ -24,7 +24,7 @@ jobs:
 
   check-rust:
     needs: code-changes-check
-    if: "!contains(github.event.pull_request.head.ref, 'release/v')"
+    if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.changes != '[]'"
     name: Rust checks
     runs-on: [ubuntu-22.04]
     strategy:

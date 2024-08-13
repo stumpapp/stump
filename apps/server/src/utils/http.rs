@@ -187,3 +187,78 @@ impl IntoResponse for NamedFile {
 			.unwrap_or_else(|e| unexpected_error(e).into_response())
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use stump_core::filesystem::ContentType;
+
+	#[test]
+	fn test_buffer_response() {
+		let response = BufferResponse::new(ContentType::HTML, b"Hello, world!".to_vec());
+		let axum_response = response.into_response();
+
+		assert_eq!(
+			axum_response.headers().get(header::CONTENT_TYPE),
+			Some(&HeaderValue::from_static("text/html"))
+		);
+	}
+
+	#[test]
+	fn test_image_response() {
+		let response = ImageResponse::new(ContentType::JPEG, b"Hello, world!".to_vec());
+		let axum_response = response.into_response();
+
+		assert_eq!(
+			axum_response.headers().get(header::CONTENT_TYPE),
+			Some(&HeaderValue::from_static("image/jpeg"))
+		);
+	}
+
+	#[test]
+	fn test_xml_response() {
+		let response = Xml("<xml></xml>".to_string());
+		let axum_response = response.into_response();
+
+		assert_eq!(
+			axum_response.headers().get(header::CONTENT_TYPE),
+			Some(&HeaderValue::from_static("application/xml"))
+		);
+	}
+
+	#[test]
+	fn test_unknown_buffer_response() {
+		let response = UnknownBufferResponse {
+			content_type: "application/json".to_string(),
+			data: b"Hello, world!".to_vec(),
+		};
+		let axum_response = response.into_response();
+
+		assert_eq!(
+			axum_response.headers().get(header::CONTENT_TYPE),
+			Some(&HeaderValue::from_static("application/json"))
+		);
+	}
+
+	#[tokio::test]
+	async fn test_named_file_response() {
+		let response = NamedFile::open(
+			PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+				.join("../../core/integration-tests/data/example.jpeg"),
+		)
+		.await
+		.unwrap();
+		let axum_response = response.into_response();
+
+		assert_eq!(
+			axum_response.headers().get(header::CONTENT_TYPE),
+			Some(&HeaderValue::from_static("image/jpeg"))
+		);
+		assert_eq!(
+			axum_response.headers().get(header::CONTENT_DISPOSITION),
+			Some(&HeaderValue::from_static(
+				"attachment; filename=\"example.jpeg\""
+			))
+		);
+	}
+}

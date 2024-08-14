@@ -1,9 +1,9 @@
 use axum::{
 	extract::{ConnectInfo, State},
-	headers::UserAgent,
 	routing::{get, post},
-	Json, Router, TypedHeader,
+	Json, Router,
 };
+use axum_extra::{headers::UserAgent, TypedHeader};
 use prisma_client_rust::{
 	chrono::{DateTime, Duration, FixedOffset, Utc},
 	Direction,
@@ -14,7 +14,7 @@ use stump_core::{
 	db::entity::User,
 	prisma::{session, user, user_login_activity, user_preferences, PrismaClient},
 };
-use tower_sessions::{session::SessionDeletion, Session};
+use tower_sessions::Session;
 use tracing::error;
 use utoipa::ToSchema;
 
@@ -22,7 +22,7 @@ use crate::{
 	config::{session::SESSION_USER_KEY, state::AppState},
 	errors::{APIError, APIResult},
 	http_server::StumpRequestInfo,
-	utils::verify_password,
+	utils::{get_session_user, verify_password},
 };
 
 pub(crate) fn mount() -> Router<AppState> {
@@ -54,7 +54,7 @@ pub async fn enforce_max_sessions(
 		(Some(max_login_sessions), count) if count >= max_login_sessions => {
 			let oldest_session_id = existing_sessions
 				.iter()
-				.min_by_key(|session| session.expires_at)
+				.min_by_key(|session| session.expiry_time)
 				.map(|session| session.id.clone());
 			handle_remove_earliest_session(db, for_user.id.clone(), oldest_session_id)
 				.await?;
@@ -83,11 +83,7 @@ pub struct LoginOrRegisterArgs {
 /// Returns the currently logged in user from the session. If no user is logged in, returns an
 /// unauthorized error.
 async fn viewer(session: Session) -> APIResult<Json<User>> {
-	if let Some(user) = session.get::<User>(SESSION_USER_KEY)? {
-		Ok(Json(user))
-	} else {
-		Err(APIError::Unauthorized)
-	}
+	get_session_user(&session).await.map(Json)
 }
 
 async fn handle_login_attempt(
@@ -155,7 +151,7 @@ async fn login(
 	State(state): State<AppState>,
 	Json(input): Json<LoginOrRegisterArgs>,
 ) -> APIResult<Json<User>> {
-	if let Some(user) = session.get::<User>(SESSION_USER_KEY)? {
+	if let Ok(user) = get_session_user(&session).await {
 		if input.username == user.username {
 			return Ok(Json(user));
 		}
@@ -182,7 +178,7 @@ async fn login(
 			.order_by(user_login_activity::timestamp::order(Direction::Desc))
 			.take(10),
 		)
-		.with(user::sessions::fetch(vec![session::expires_at::gt(
+		.with(user::sessions::fetch(vec![session::expiry_time::gt(
 			Utc::now().into(),
 		)]))
 		.exec()
@@ -271,6 +267,8 @@ async fn login(
 			let user = User::from(updated_user);
 			session
 				.insert(SESSION_USER_KEY, user.clone())
+				.await
+				// TODO(axum-upgrade): Remove expect!
 				.expect("Failed to write user to session");
 
 			Ok(Json(user))
@@ -290,12 +288,7 @@ async fn login(
 )]
 /// Destroys the session and logs the user out.
 async fn logout(session: Session) -> APIResult<()> {
-	session.delete();
-	if !matches!(session.deleted(), Some(SessionDeletion::Deleted)) {
-		return Err(APIError::InternalServerError(
-			"Failed to destroy session".to_string(),
-		));
-	}
+	session.delete().await?;
 	Ok(())
 }
 
@@ -323,7 +316,7 @@ pub async fn register(
 
 	let mut is_server_owner = false;
 
-	let session_user = session.get::<User>(SESSION_USER_KEY)?;
+	let session_user = session.get::<User>(SESSION_USER_KEY).await?;
 
 	// TODO: move nested if to if let once stable
 	if let Some(user) = session_user {

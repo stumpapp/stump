@@ -56,7 +56,7 @@ async fn get_notifiers(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Json<Vec<Notifier>>> {
-	enforce_session_permissions(&session, &[UserPermission::ReadNotifier])?;
+	enforce_session_permissions(&session, &[UserPermission::ReadNotifier]).await?;
 	let client = &ctx.db;
 
 	let notifiers = client
@@ -91,7 +91,7 @@ async fn get_notifier_by_id(
 	Path(id): Path<i32>,
 	session: Session,
 ) -> APIResult<Json<Notifier>> {
-	enforce_session_permissions(&session, &[UserPermission::ReadNotifier])?;
+	enforce_session_permissions(&session, &[UserPermission::ReadNotifier]).await?;
 	let client = &ctx.db;
 
 	let notifier = client
@@ -129,7 +129,7 @@ async fn create_notifier(
 	session: Session,
 	Json(payload): Json<CreateOrUpdateNotifier>,
 ) -> APIResult<Json<Notifier>> {
-	enforce_session_permissions(&session, &[UserPermission::CreateNotifier])?;
+	enforce_session_permissions(&session, &[UserPermission::CreateNotifier]).await?;
 
 	let client = &ctx.db;
 	let config = payload.config.into_config(&ctx).await?.into_bytes()?;
@@ -165,7 +165,7 @@ async fn update_notifier(
 	session: Session,
 	Json(payload): Json<CreateOrUpdateNotifier>,
 ) -> APIResult<Json<Notifier>> {
-	enforce_session_permissions(&session, &[UserPermission::ManageNotifier])?;
+	enforce_session_permissions(&session, &[UserPermission::ManageNotifier]).await?;
 
 	let client = &ctx.db;
 	let config = payload.config.into_config(&ctx).await?.into_bytes()?;
@@ -212,7 +212,7 @@ async fn patch_notifier(
 	session: Session,
 	Json(payload): Json<PatchNotifier>,
 ) -> APIResult<Json<Notifier>> {
-	enforce_session_permissions(&session, &[UserPermission::ManageNotifier])?;
+	enforce_session_permissions(&session, &[UserPermission::ManageNotifier]).await?;
 
 	let client = &ctx.db;
 
@@ -261,7 +261,7 @@ async fn delete_notifier(
 	Path(id): Path<i32>,
 	session: Session,
 ) -> APIResult<Json<Notifier>> {
-	enforce_session_permissions(&session, &[UserPermission::DeleteNotifier])?;
+	enforce_session_permissions(&session, &[UserPermission::DeleteNotifier]).await?;
 
 	let client = &ctx.db;
 

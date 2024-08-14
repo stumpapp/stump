@@ -7,14 +7,13 @@ default-run = "stump_server"
 [dependencies]
 async-stream = { workspace = true }
 async-trait = { workspace = true }
-axum = { version = "0.6.20", features = [
+axum = { version = "0.7.5", features = [
   "ws", 
-  "headers",
   "multipart",
 ] }
-axum-macros = "0.4.0"
-axum-extra = { version = "0.5.0", features = [
-  "spa",
+axum-macros = "0.4.1"
+axum-extra = { version = "0.9.3", features = [
+  "typed-header",
   "query"
 ] }
 base64 = "0.22.0"
@@ -30,11 +29,11 @@ rand = "0.8.5"
 reqwest = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-serde_qs = { version = "0.12.0", features = ["axum"] }
+serde_qs = { version = "0.13.0", features = ["axum"] }
 serde-untagged = "0.1.2"
 specta = { workspace = true }
 stump_core = { path = "../../core" }
-tower-http = { version = "0.4.4", features = [
+tower-http = { version = "0.5.2", features = [
   "fs",
   "cors",
   "set-header",
@@ -45,11 +44,11 @@ time = "0.3.36"
 tokio = { workspace = true }
 tokio-util = "0.7.10"
 tower = "0.4.13"
-tower-sessions = "0.2.1"
+tower-sessions = "0.12.2"
 tracing = { workspace = true }
 urlencoding = { workspace = true }
-utoipa = { version = "3.5.0", features = ["axum_extras"] }
-utoipa-swagger-ui = { version = "3.1.5", features = ["axum"] }
+utoipa = { version = "4.2.3", features = ["axum_extras"] }
+utoipa-swagger-ui = { version = "7.1.0", features = ["axum"] }
 
 [build-dependencies]
 chrono = "0.4.37"

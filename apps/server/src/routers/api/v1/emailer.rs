@@ -94,7 +94,7 @@ async fn get_emailers(
 	QsQuery(include_params): QsQuery<EmailerIncludeParams>,
 	session: Session,
 ) -> APIResult<Json<Vec<SMTPEmailer>>> {
-	enforce_session_permissions(&session, &[UserPermission::EmailerRead])?;
+	enforce_session_permissions(&session, &[UserPermission::EmailerRead]).await?;
 
 	let client = &ctx.db;
 
@@ -135,7 +135,7 @@ async fn get_emailer_by_id(
 	Path(id): Path<i32>,
 	session: Session,
 ) -> APIResult<Json<SMTPEmailer>> {
-	enforce_session_permissions(&session, &[UserPermission::EmailerRead])?;
+	enforce_session_permissions(&session, &[UserPermission::EmailerRead]).await?;
 
 	let client = &ctx.db;
 
@@ -179,7 +179,7 @@ async fn create_emailer(
 	session: Session,
 	Json(payload): Json<CreateOrUpdateEmailer>,
 ) -> APIResult<Json<SMTPEmailer>> {
-	enforce_session_permissions(&session, &[UserPermission::EmailerCreate])?;
+	enforce_session_permissions(&session, &[UserPermission::EmailerCreate]).await?;
 
 	let client = &ctx.db;
 
@@ -228,7 +228,7 @@ async fn update_emailer(
 	session: Session,
 	Json(payload): Json<CreateOrUpdateEmailer>,
 ) -> APIResult<Json<SMTPEmailer>> {
-	enforce_session_permissions(&session, &[UserPermission::EmailerManage])?;
+	enforce_session_permissions(&session, &[UserPermission::EmailerManage]).await?;
 
 	let client = &ctx.db;
 	let config = EmailerConfig::from_client_config(payload.config, &ctx).await?;
@@ -305,7 +305,7 @@ async fn delete_emailer(
 	Path(id): Path<i32>,
 	session: Session,
 ) -> APIResult<Json<SMTPEmailer>> {
-	enforce_session_permissions(&session, &[UserPermission::EmailerManage])?;
+	enforce_session_permissions(&session, &[UserPermission::EmailerManage]).await?;
 
 	let client = &ctx.db;
 
@@ -345,7 +345,7 @@ async fn get_emailer_send_history(
 	session: Session,
 ) -> APIResult<Json<Vec<EmailerSendRecord>>> {
 	tracing::trace!(?emailer_id, ?include_params, "get_emailer_send_history");
-	enforce_session_permissions(&session, &[UserPermission::EmailerRead])?;
+	enforce_session_permissions(&session, &[UserPermission::EmailerRead]).await?;
 
 	let client = &ctx.db;
 
@@ -445,7 +445,8 @@ async fn send_attachment_email(
 				.any(|to| matches!(to, EmailerSendTo::Anonymous { .. }))
 				.then_some(UserPermission::EmailArbitrarySend)],
 		),
-	)?;
+	)
+	.await?;
 
 	let client = &ctx.db;
 
@@ -636,7 +637,7 @@ async fn get_email_devices(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Json<Vec<RegisteredEmailDevice>>> {
-	enforce_session_permissions(&session, &[UserPermission::EmailSend])?;
+	enforce_session_permissions(&session, &[UserPermission::EmailSend]).await?;
 
 	let client = &ctx.db;
 
@@ -675,7 +676,7 @@ async fn get_email_device_by_id(
 	Path(id): Path<i32>,
 	session: Session,
 ) -> APIResult<Json<RegisteredEmailDevice>> {
-	enforce_session_permissions(&session, &[UserPermission::EmailSend])?;
+	enforce_session_permissions(&session, &[UserPermission::EmailSend]).await?;
 
 	let client = &ctx.db;
 
@@ -717,7 +718,7 @@ async fn create_email_device(
 	session: Session,
 	Json(payload): Json<CreateOrUpdateEmailDevice>,
 ) -> APIResult<Json<RegisteredEmailDevice>> {
-	enforce_session_permissions(&session, &[UserPermission::EmailerManage])?;
+	enforce_session_permissions(&session, &[UserPermission::EmailerManage]).await?;
 
 	let client = &ctx.db;
 
@@ -756,7 +757,7 @@ async fn update_email_device(
 	session: Session,
 	Json(payload): Json<CreateOrUpdateEmailDevice>,
 ) -> APIResult<Json<RegisteredEmailDevice>> {
-	enforce_session_permissions(&session, &[UserPermission::EmailerManage])?;
+	enforce_session_permissions(&session, &[UserPermission::EmailerManage]).await?;
 
 	let client = &ctx.db;
 
@@ -808,7 +809,7 @@ async fn patch_email_device(
 	session: Session,
 	Json(payload): Json<PatchEmailDevice>,
 ) -> APIResult<Json<RegisteredEmailDevice>> {
-	enforce_session_permissions(&session, &[UserPermission::EmailerManage])?;
+	enforce_session_permissions(&session, &[UserPermission::EmailerManage]).await?;
 
 	let client = &ctx.db;
 
@@ -854,7 +855,7 @@ async fn delete_email_device(
 	Path(id): Path<i32>,
 	session: Session,
 ) -> APIResult<Json<RegisteredEmailDevice>> {
-	enforce_session_permissions(&session, &[UserPermission::EmailerManage])?;
+	enforce_session_permissions(&session, &[UserPermission::EmailerManage]).await?;
 
 	let client = &ctx.db;
 

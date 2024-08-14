@@ -56,7 +56,7 @@ pub async fn list_directory(
 	pagination: Query<PageQuery>,
 	Json(input): Json<Option<DirectoryListingInput>>,
 ) -> APIResult<Json<Pageable<DirectoryListing>>> {
-	enforce_session_permission(&session, UserPermission::FileExplorer)?;
+	enforce_session_permission(&session, UserPermission::FileExplorer).await?;
 	let input = input.unwrap_or_default();
 
 	let start_path = input

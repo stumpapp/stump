@@ -183,7 +183,7 @@ async fn get_libraries(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Json<Pageable<Vec<Library>>>> {
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let FilterableQuery { filters, ordering } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
 
@@ -240,7 +240,7 @@ async fn get_last_visited_library(
 	session: Session,
 ) -> APIResult<Json<Option<Library>>> {
 	let client = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 
 	let last_visited_library = client
 		.last_library_visit()
@@ -262,7 +262,7 @@ async fn update_last_visited_library(
 	session: Session,
 ) -> APIResult<Json<Library>> {
 	let client = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 
 	let last_library_visit = client
 		.last_library_visit()
@@ -311,7 +311,7 @@ async fn get_libraries_stats(
 	Query(params): Query<LibraryStatsParams>,
 	session: Session,
 ) -> APIResult<Json<LibraryStats>> {
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let db = &ctx.db;
 
 	let stats = db
@@ -394,7 +394,7 @@ async fn get_library_by_id(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Json<Library>> {
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let db = &ctx.db;
 
 	let library = db
@@ -446,7 +446,7 @@ async fn get_library_series(
 
 	let db = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -522,7 +522,7 @@ async fn get_library_media(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Json<Pageable<Vec<Media>>>> {
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 
 	let FilterableQuery { ordering, filters } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
@@ -636,7 +636,7 @@ async fn get_library_thumbnail_handler(
 ) -> APIResult<ImageResponse> {
 	let db = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let age_restriction = user.age_restriction.as_ref();
 
 	let first_series = db
@@ -722,8 +722,8 @@ async fn patch_library_thumbnail(
 	session: Session,
 	Json(body): Json<PatchLibraryThumbnail>,
 ) -> APIResult<ImageResponse> {
-	let user = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
-	get_session_server_owner_user(&session)?;
+	let user =
+		enforce_session_permissions(&session, &[UserPermission::ManageLibrary]).await?;
 
 	let client = &ctx.db;
 
@@ -797,7 +797,8 @@ async fn replace_library_thumbnail(
 	let user = enforce_session_permissions(
 		&session,
 		&[UserPermission::UploadFile, UserPermission::ManageLibrary],
-	)?;
+	)
+	.await?;
 	let client = &ctx.db;
 
 	tracing::trace!(?id, ?upload, "Replacing library thumbnail");
@@ -856,7 +857,8 @@ async fn delete_library_thumbnails(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Json<()>> {
-	let user = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
+	let user =
+		enforce_session_permissions(&session, &[UserPermission::ManageLibrary]).await?;
 
 	let db = &ctx.db;
 	let thumbnails_dir = ctx.config.get_thumbnails_dir();
@@ -923,7 +925,8 @@ async fn generate_library_thumbnails(
 	session: Session,
 	Json(input): Json<GenerateLibraryThumbnails>,
 ) -> APIResult<Json<()>> {
-	let user = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
+	let user =
+		enforce_session_permissions(&session, &[UserPermission::ManageLibrary]).await?;
 	let library = ctx
 		.db
 		.library()
@@ -980,7 +983,8 @@ async fn get_library_excluded_users(
 	enforce_session_permissions(
 		&session,
 		&[UserPermission::ReadUsers, UserPermission::ManageLibrary],
-	)?;
+	)
+	.await?;
 
 	let db = &ctx.db;
 
@@ -1027,7 +1031,8 @@ async fn update_library_excluded_users(
 	enforce_session_permissions(
 		&session,
 		&[UserPermission::ReadUsers, UserPermission::ManageLibrary],
-	)?;
+	)
+	.await?;
 
 	let db = &ctx.db;
 
@@ -1107,7 +1112,8 @@ async fn scan_library(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> Result<(), APIError> {
-	let user = get_user_and_enforce_permission(&session, UserPermission::ScanLibrary)?;
+	let user =
+		get_user_and_enforce_permission(&session, UserPermission::ScanLibrary).await?;
 	let db = &ctx.db;
 
 	let library = db
@@ -1162,7 +1168,8 @@ async fn clean_library(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Json<CleanLibraryResponse>> {
-	let user = get_user_and_enforce_permission(&session, UserPermission::ManageLibrary)?;
+	let user =
+		get_user_and_enforce_permission(&session, UserPermission::ManageLibrary).await?;
 
 	let db = &ctx.db;
 	let thumbnails_dir = ctx.config.get_thumbnails_dir();
@@ -1313,7 +1320,8 @@ async fn create_library(
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateLibrary>,
 ) -> APIResult<Json<Library>> {
-	let user = get_user_and_enforce_permission(&session, UserPermission::CreateLibrary)?;
+	let user =
+		get_user_and_enforce_permission(&session, UserPermission::CreateLibrary).await?;
 
 	let db = &ctx.db;
 
@@ -1473,7 +1481,8 @@ async fn update_library(
 	Path(id): Path<String>,
 	Json(input): Json<UpdateLibrary>,
 ) -> APIResult<Json<Library>> {
-	let user = get_user_and_enforce_permission(&session, UserPermission::EditLibrary)?;
+	let user =
+		get_user_and_enforce_permission(&session, UserPermission::EditLibrary).await?;
 	let db = &ctx.db;
 
 	if !path::Path::new(&input.path).exists() {
@@ -1605,7 +1614,7 @@ async fn delete_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<String>> {
-	let user = get_session_server_owner_user(&session)?;
+	let user = get_session_server_owner_user(&session).await?;
 	let db = &ctx.db;
 	let thumbnails_dir = ctx.config.get_thumbnails_dir();
 
@@ -1663,7 +1672,7 @@ async fn get_library_stats(
 	Query(params): Query<LibraryStatsParams>,
 	session: Session,
 ) -> APIResult<Json<LibraryStats>> {
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let db = &ctx.db;
 
 	let stats = db
@@ -1750,7 +1759,8 @@ async fn start_media_analysis(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<()> {
-	let _ = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
+	let _ =
+		enforce_session_permissions(&session, &[UserPermission::ManageLibrary]).await?;
 
 	// Start analysis job
 	ctx.enqueue_job(AnalyzeMediaJob::analyze_library(id))

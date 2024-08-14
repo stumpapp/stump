@@ -121,7 +121,7 @@ async fn get_reading_list(
 	pagination_query: Query<PaginationQuery>,
 	session: Session,
 ) -> APIResult<Json<Pageable<Vec<ReadingList>>>> {
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let user_id = user.id.clone();
 
 	let pagination = pagination_query.0.get();
@@ -190,7 +190,7 @@ async fn create_reading_list(
 	Json(input): Json<CreateReadingList>,
 ) -> APIResult<Json<ReadingList>> {
 	let db = &ctx.db;
-	let user_id = get_session_user(&session)?.id;
+	let user_id = get_session_user(&session).await?.id;
 
 	let created_reading_list = db
 		._transaction()
@@ -254,7 +254,7 @@ async fn get_reading_list_by_id(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Json<ReadingList>> {
-	let user_id = get_session_user(&session)?.id;
+	let user_id = get_session_user(&session).await?.id;
 	let db = &ctx.db;
 
 	let rbac_condition = reading_list_rbac_for_user(user_id, 1);
@@ -301,7 +301,7 @@ async fn update_reading_list(
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateReadingList>,
 ) -> APIResult<Json<ReadingList>> {
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let db = &ctx.db;
 
 	trace!(?input, "update_reading_list");
@@ -367,7 +367,7 @@ async fn delete_reading_list_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<ReadingList>> {
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let db = &ctx.db;
 
 	let reading_list = db

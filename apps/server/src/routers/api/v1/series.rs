@@ -256,7 +256,7 @@ async fn get_series(
 	trace!(?filters, ?ordering, ?pagination, "get_series");
 
 	let db = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let user_id = user.id.clone();
 
 	let is_unpaged = pagination.is_unpaged();
@@ -372,7 +372,7 @@ async fn get_series_by_id(
 ) -> APIResult<Json<Series>> {
 	let db = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let user_id = user.id.clone();
 	let age_restrictions = user
 		.age_restriction
@@ -443,7 +443,7 @@ async fn scan_series(
 	session: Session,
 ) -> Result<(), APIError> {
 	let db = &ctx.db;
-	get_user_and_enforce_permission(&session, UserPermission::ScanLibrary)?;
+	get_user_and_enforce_permission(&session, UserPermission::ScanLibrary).await?;
 
 	let series = db
 		.series()
@@ -487,7 +487,7 @@ async fn get_recently_added_series_handler(
 		));
 	}
 
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let user_id = user.id.clone();
 	// let age_restrictions = user
 	// 	.age_restriction
@@ -556,7 +556,7 @@ async fn get_series_thumbnail_handler(
 ) -> APIResult<ImageResponse> {
 	let db = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let age_restriction = user.age_restriction.as_ref();
 	let series_age_restriction = age_restriction
 		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
@@ -641,7 +641,8 @@ async fn patch_series_thumbnail(
 	session: Session,
 	Json(body): Json<PatchSeriesThumbnail>,
 ) -> APIResult<ImageResponse> {
-	let user = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
+	let user =
+		enforce_session_permissions(&session, &[UserPermission::ManageLibrary]).await?;
 	let series_age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -745,7 +746,8 @@ async fn replace_series_thumbnail(
 	let user = enforce_session_permissions(
 		&session,
 		&[UserPermission::UploadFile, UserPermission::ManageLibrary],
-	)?;
+	)
+	.await?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -816,7 +818,7 @@ async fn get_series_media(
 ) -> APIResult<Json<Pageable<Vec<Media>>>> {
 	let db = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let user_id = user.id.clone();
 	let age_restrictions = user.age_restriction.as_ref().map(|ar| {
 		(
@@ -938,7 +940,7 @@ async fn get_next_in_series(
 	session: Session,
 ) -> APIResult<Json<Option<Media>>> {
 	let db = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let user_id = user.id.clone();
 	let series_age_restrictions = user
 		.age_restriction
@@ -1037,7 +1039,7 @@ async fn get_series_is_complete(
 ) -> APIResult<Json<SeriesIsComplete>> {
 	let client = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let user_id = user.id.clone();
 	let age_restrictions = user.age_restriction.as_ref().map(|ar| {
 		(
@@ -1116,7 +1118,8 @@ async fn start_media_analysis(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<()> {
-	let _ = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
+	let _ =
+		enforce_session_permissions(&session, &[UserPermission::ManageLibrary]).await?;
 
 	// Start analysis job
 	ctx.enqueue_job(AnalyzeMediaJob::analyze_series(id))

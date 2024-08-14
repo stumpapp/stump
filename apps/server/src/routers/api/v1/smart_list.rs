@@ -129,8 +129,8 @@ async fn get_smart_lists(
 	session: Session,
 	QsQuery(params): QsQuery<GetSmartListsParams>,
 ) -> APIResult<Json<Vec<SmartList>>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)
+		.await?;
 	let client = &ctx.db;
 
 	let query_all = params.all.unwrap_or(false);
@@ -191,8 +191,8 @@ async fn create_smart_list(
 	session: Session,
 	Json(input): Json<CreateOrUpdateSmartList>,
 ) -> APIResult<Json<SmartList>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)
+		.await?;
 	let client = &ctx.db;
 
 	tracing::debug!(?input, "Creating smart list");
@@ -252,8 +252,8 @@ async fn get_smart_list_by_id(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Json<SmartList>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)
+		.await?;
 	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Reader.value());
@@ -291,8 +291,8 @@ async fn update_smart_list_by_id(
 	session: Session,
 	Json(input): Json<CreateOrUpdateSmartList>,
 ) -> APIResult<Json<SmartList>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)
+		.await?;
 	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Writer.value());
@@ -350,8 +350,8 @@ async fn delete_smart_list_by_id(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Json<SmartList>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)
+		.await?;
 	let client = &ctx.db;
 
 	let access_condition =
@@ -401,8 +401,8 @@ async fn get_smart_list_items(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Json<SmartListItems>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)
+		.await?;
 
 	let client = &ctx.db;
 
@@ -453,8 +453,8 @@ async fn get_smart_list_meta(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Json<SmartListMeta>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)
+		.await?;
 	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Reader.value());
@@ -523,8 +523,8 @@ async fn get_smart_list_views(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Json<Vec<SmartListView>>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)
+		.await?;
 	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Reader.value());
@@ -561,8 +561,8 @@ async fn get_smart_list_view(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Json<SmartListView>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)
+		.await?;
 	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Reader.value());
@@ -605,8 +605,8 @@ async fn create_smart_list_view(
 	session: Session,
 	Json(input): Json<CreateOrUpdateSmartListView>,
 ) -> APIResult<Json<SmartListView>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)
+		.await?;
 	let client = &ctx.db;
 
 	// NOTE: views are currently completely detatched from a user, rather they are tied
@@ -658,8 +658,8 @@ async fn update_smart_list_view(
 	session: Session,
 	Json(input): Json<CreateOrUpdateSmartListView>,
 ) -> APIResult<Json<SmartListView>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)
+		.await?;
 	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Writer.value());
@@ -706,8 +706,8 @@ async fn delete_smart_list_view(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Json<SmartListView>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)
+		.await?;
 	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Writer.value());

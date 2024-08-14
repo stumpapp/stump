@@ -1,5 +1,5 @@
 use axum::{
-	body::{BoxBody, StreamBody},
+	body::Body,
 	http::{header, HeaderValue, StatusCode},
 	response::{IntoResponse, Response},
 };
@@ -166,7 +166,7 @@ impl NamedFile {
 impl IntoResponse for NamedFile {
 	fn into_response(self) -> Response {
 		let stream = ReaderStream::new(self.file);
-		let body = StreamBody::new(stream);
+		let body = Body::from_stream(stream);
 
 		let filename = self
 			.path_buf
@@ -183,7 +183,7 @@ impl IntoResponse for NamedFile {
 				header::CONTENT_DISPOSITION,
 				format!("attachment; filename=\"{}\"", filename),
 			)
-			.body(BoxBody::new(body))
+			.body(body)
 			.unwrap_or_else(|e| unexpected_error(e).into_response())
 	}
 }

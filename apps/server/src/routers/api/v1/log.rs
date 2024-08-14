@@ -74,7 +74,7 @@ async fn get_logs(
 	pagination: QsQuery<PaginationQuery>,
 	session: Session,
 ) -> APIResult<Json<Pageable<Vec<Log>>>> {
-	enforce_session_permissions(&session, &[UserPermission::ManageServer])?;
+	enforce_session_permissions(&session, &[UserPermission::ManageServer]).await?;
 
 	let pagination = pagination.0.get();
 	let order = order.0;
@@ -157,7 +157,7 @@ async fn delete_logs(
 	filters: QsQuery<LogFilter>,
 	session: Session,
 ) -> APIResult<()> {
-	enforce_session_permissions(&session, &[UserPermission::ManageServer])?;
+	enforce_session_permissions(&session, &[UserPermission::ManageServer]).await?;
 
 	let where_params = apply_log_filters(filters.0);
 
@@ -171,7 +171,7 @@ async fn tail_log_file(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Sse<impl Stream<Item = Result<Event, APIError>>>> {
-	enforce_session_permissions(&session, &[UserPermission::ManageServer])?;
+	enforce_session_permissions(&session, &[UserPermission::ManageServer]).await?;
 
 	let stream = async_stream::stream! {
 		let log_file_path = ctx.config.get_log_file();
@@ -213,7 +213,7 @@ async fn get_logfile_info(
 	session: Session,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<LogMetadata>> {
-	enforce_session_permissions(&session, &[UserPermission::ManageServer])?;
+	enforce_session_permissions(&session, &[UserPermission::ManageServer]).await?;
 
 	let log_file_path = ctx.config.get_log_file();
 
@@ -247,7 +247,7 @@ async fn get_logfile_info(
 // this route *WILL* delete all of the file contents.
 // #[delete("/logs")]
 async fn delete_log_file(session: Session, State(ctx): State<AppState>) -> APIResult<()> {
-	enforce_session_permissions(&session, &[UserPermission::ManageServer])?;
+	enforce_session_permissions(&session, &[UserPermission::ManageServer]).await?;
 
 	let log_file_path = ctx.config.get_log_file();
 

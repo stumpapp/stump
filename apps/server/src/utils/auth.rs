@@ -31,16 +31,16 @@ pub fn decode_base64_credentials(
 	Ok(DecodedCredentials { username, password })
 }
 
-pub fn get_session_user(session: &Session) -> APIResult<User> {
-	if let Some(user) = session.get::<User>(SESSION_USER_KEY)? {
+pub async fn get_session_user(session: &Session) -> APIResult<User> {
+	if let Some(user) = session.get::<User>(SESSION_USER_KEY).await? {
 		Ok(user)
 	} else {
 		Err(APIError::Unauthorized)
 	}
 }
 
-pub fn get_session_server_owner_user(session: &Session) -> APIResult<User> {
-	let user = get_session_user(session)?;
+pub async fn get_session_server_owner_user(session: &Session) -> APIResult<User> {
+	let user = get_session_user(session).await?;
 
 	if user.is_server_owner {
 		Ok(user)
@@ -77,11 +77,11 @@ fn enforce_permission(user: &User, permission: UserPermission) -> APIResult<()> 
 
 /// Enforce that the user in the session has the given permission. If the user does not have the
 /// permission, an `APIError::Forbidden` is returned.
-pub fn enforce_session_permission(
+pub async fn enforce_session_permission(
 	session: &Session,
 	permission: UserPermission,
 ) -> APIResult<()> {
-	let user = get_session_user(session)?;
+	let user = get_session_user(session).await?;
 	enforce_permission(&user, permission)
 }
 
@@ -101,11 +101,11 @@ fn user_has_all_permissions(user: &User, permissions: &[UserPermission]) -> bool
 	missing_permissions.is_empty()
 }
 
-pub fn enforce_session_permissions(
+pub async fn enforce_session_permissions(
 	session: &Session,
 	permissions: &[UserPermission],
 ) -> APIResult<User> {
-	let user = get_session_user(session)?;
+	let user = get_session_user(session).await?;
 
 	let can_proceed = user_has_all_permissions(&user, permissions);
 
@@ -121,11 +121,11 @@ pub fn enforce_session_permissions(
 /// Enforce that the user in the session has the given permission. If the user does not have the
 /// permission, an `APIError::Forbidden` is returned. The user is returned if they have the
 /// permission.
-pub fn get_user_and_enforce_permission(
+pub async fn get_user_and_enforce_permission(
 	session: &Session,
 	permission: UserPermission,
 ) -> APIResult<User> {
-	let user = get_session_user(session)?;
+	let user = get_session_user(session).await?;
 	enforce_permission(&user, permission)?;
 	Ok(user)
 }

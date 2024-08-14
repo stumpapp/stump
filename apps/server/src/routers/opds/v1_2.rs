@@ -190,7 +190,7 @@ async fn catalog() -> APIResult<Xml> {
 async fn keep_reading(State(ctx): State<AppState>, session: Session) -> APIResult<Xml> {
 	let db = &ctx.db;
 
-	let user_id = get_session_user(&session)?.id;
+	let user_id = get_session_user(&session).await?.id;
 	let in_progress_filter = vec![apply_in_progress_filter_for_user(user_id)];
 
 	let media = db
@@ -285,7 +285,7 @@ async fn get_library_by_id(
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
 
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -360,7 +360,7 @@ async fn get_series(
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
 
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -407,7 +407,7 @@ async fn get_latest_series(
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
 
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -456,7 +456,7 @@ async fn get_series_by_id(
 	let series_id = id.clone();
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -541,7 +541,7 @@ async fn get_book_thumbnail(
 	session: Session,
 ) -> APIResult<ImageResponse> {
 	let db = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -570,7 +570,7 @@ async fn get_book_page(
 ) -> APIResult<ImageResponse> {
 	let client = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let user_id = user.id;
 	let age_restrictions = user
 		.age_restriction
@@ -647,7 +647,8 @@ async fn download_book(
 	session: Session,
 ) -> APIResult<NamedFile> {
 	let db = &ctx.db;
-	let user = enforce_session_permissions(&session, &[UserPermission::DownloadFile])?;
+	let user =
+		enforce_session_permissions(&session, &[UserPermission::DownloadFile]).await?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()

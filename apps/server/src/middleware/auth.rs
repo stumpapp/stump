@@ -1,8 +1,9 @@
 use async_trait::async_trait;
 use axum::{
-	body::BoxBody,
-	extract::{FromRef, FromRequestParts, OriginalUri},
+	body::Body,
+	extract::{FromRef, FromRequest, FromRequestParts, OriginalUri, Request, State},
 	http::{header, request::Parts, Method, StatusCode},
+	middleware::Next,
 	response::{IntoResponse, Redirect, Response},
 };
 use base64::{engine::general_purpose::STANDARD, Engine};
@@ -18,9 +19,47 @@ use tower_sessions::Session;
 
 use crate::{
 	config::{session::SESSION_USER_KEY, state::AppState},
+	errors::{APIError, APIResult},
 	routers::enforce_max_sessions,
 	utils::{decode_base64_credentials, verify_password},
 };
+
+#[derive(Clone)]
+pub struct CurrentUser(User);
+
+// async fn auth(
+// 	State(ctx): State<AppState>,
+// 	mut req: Request,
+// 	next: Next,
+// ) -> APIResult<Response> {
+// 	// let auth_header = req
+// 	// 	.headers()
+// 	// 	.get(header::AUTHORIZATION)
+// 	// 	.and_then(|header| header.to_str().ok());
+
+// 	// let auth_header = if let Some(auth_header) = auth_header {
+// 	// 	auth_header
+// 	// } else {
+// 	// 	return Err(APIError::Unauthorized);
+// 	// };
+
+// 	let session = req
+// 		.extensions_mut()
+// 		.get_mut::<Session>()
+// 		.ok_or(APIError::Unauthorized)?;
+
+// 	Ok(next.run(req).await)
+// 	// unimplemented!()
+
+// 	// if let Some(current_user) = authorize_current_user(auth_header).await {
+// 	// 	// insert the current user into a request extension so the handler can
+// 	// 	// extract it
+// 	// 	req.extensions_mut().insert(current_user);
+// 	// 	Ok(next.run(req).await)
+// 	// } else {
+// 	// 	Err(StatusCode::UNAUTHORIZED)
+// 	// }
+// }
 
 pub struct Auth;
 
@@ -53,7 +92,7 @@ where
 				(StatusCode::INTERNAL_SERVER_ERROR).into_response()
 			})?;
 
-		let session_user = session.get::<User>(SESSION_USER_KEY).map_err(|e| {
+		let session_user = session.get::<User>(SESSION_USER_KEY).await.map_err(|e| {
 			tracing::error!(error = ?e, "Failed to get user from session");
 			(StatusCode::INTERNAL_SERVER_ERROR).into_response()
 		})?;
@@ -164,7 +203,7 @@ async fn handle_basic_auth(
 			(StatusCode::INTERNAL_SERVER_ERROR).into_response()
 		})?;
 		let user = User::from(user);
-		session.insert(SESSION_USER_KEY, user).map_err(|e| {
+		session.insert(SESSION_USER_KEY, user).await.map_err(|e| {
 			tracing::error!("Failed to insert user into session: {}", e);
 			(StatusCode::INTERNAL_SERVER_ERROR).into_response()
 		})?;
@@ -220,7 +259,7 @@ where
 			.get::<Session>()
 			.expect("Failed to extract session");
 
-		let session_user = session.get::<User>(SESSION_USER_KEY).map_err(|e| {
+		let session_user = session.get::<User>(SESSION_USER_KEY).await.map_err(|e| {
 			tracing::error!(error = ?e, "Failed to get user from session");
 			StatusCode::INTERNAL_SERVER_ERROR
 		})?;
@@ -244,7 +283,7 @@ impl IntoResponse for BasicAuth {
 			.status(StatusCode::UNAUTHORIZED)
 			.header("Authorization", "Basic")
 			.header("WWW-Authenticate", "Basic realm=\"stump\"")
-			.body(BoxBody::default())
+			.body(Body::default())
 			.unwrap_or_else(|e| {
 				tracing::error!(error = ?e, "Failed to build response");
 				StatusCode::INTERNAL_SERVER_ERROR.into_response()
@@ -274,7 +313,7 @@ where
 			.get::<Session>()
 			.expect("Failed to extract session");
 
-		let session_user = session.get::<User>(SESSION_USER_KEY).map_err(|e| {
+		let session_user = session.get::<User>(SESSION_USER_KEY).await.map_err(|e| {
 			tracing::error!(error = ?e, "Failed to get user from session");
 			StatusCode::INTERNAL_SERVER_ERROR
 		})?;

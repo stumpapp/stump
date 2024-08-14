@@ -357,7 +357,7 @@ async fn get_media(
 	tracing::trace!(?filters, ?ordering, ?pagination, "get_media");
 
 	let db = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let user_id = user.id.clone();
 
 	let is_unpaged = pagination.is_unpaged();
@@ -521,7 +521,7 @@ async fn get_in_progress_media(
 	session: Session,
 	pagination_query: Query<PaginationQuery>,
 ) -> APIResult<Json<Pageable<Vec<Media>>>> {
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let user_id = user.id.clone();
 	let age_restrictions = user
 		.age_restriction
@@ -618,7 +618,7 @@ async fn get_recently_added_media(
 	tracing::trace!(?filters, ?pagination, "get_recently_added_media");
 
 	let db = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let user_id = user.id.clone();
 
 	let is_unpaged = pagination.is_unpaged();
@@ -694,7 +694,7 @@ async fn get_media_by_path(
 ) -> APIResult<Json<Media>> {
 	let client = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -749,7 +749,7 @@ async fn get_media_by_id(
 	session: Session,
 ) -> APIResult<Json<Media>> {
 	let db = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let user_id = user.id.clone();
 	let age_restrictions = user
 		.age_restriction
@@ -817,7 +817,8 @@ async fn get_media_file(
 ) -> APIResult<NamedFile> {
 	let db = &ctx.db;
 
-	let user = enforce_session_permissions(&session, &[UserPermission::DownloadFile])?;
+	let user =
+		enforce_session_permissions(&session, &[UserPermission::DownloadFile]).await?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -867,7 +868,7 @@ async fn convert_media(
 	let db = &ctx.db;
 
 	// TODO: if keeping, enforce permission
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -921,7 +922,7 @@ async fn get_media_page(
 ) -> APIResult<ImageResponse> {
 	let db = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let user_id = user.id.clone();
 	let age_restrictions = user
 		.age_restriction
@@ -961,7 +962,7 @@ pub(crate) async fn get_media_thumbnail_by_id(
 	session: &Session,
 	config: &StumpConfig,
 ) -> APIResult<(ContentType, Vec<u8>)> {
-	let user = get_session_user(session)?;
+	let user = get_session_user(session).await?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -1105,7 +1106,8 @@ async fn patch_media_thumbnail(
 	session: Session,
 	Json(body): Json<PatchMediaThumbnail>,
 ) -> APIResult<ImageResponse> {
-	let user = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
+	let user =
+		enforce_session_permissions(&session, &[UserPermission::ManageLibrary]).await?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -1197,7 +1199,8 @@ async fn replace_media_thumbnail(
 	let user = enforce_session_permissions(
 		&session,
 		&[UserPermission::UploadFile, UserPermission::ManageLibrary],
-	)?;
+	)
+	.await?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -1262,7 +1265,7 @@ async fn update_media_progress(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Json<ProgressUpdateReturn>> {
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let user_id = user.id.clone();
 
 	let client = &ctx.db;
@@ -1344,7 +1347,7 @@ async fn get_media_progress(
 	session: Session,
 ) -> APIResult<Json<Option<ActiveReadingSession>>> {
 	let db = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let user_id = user.id.clone();
 	let age_restrictions = user
 		.age_restriction
@@ -1392,7 +1395,7 @@ async fn delete_media_progress(
 	session: Session,
 ) -> APIResult<Json<MediaIsComplete>> {
 	let client = &ctx.db;
-	let user_id = get_session_user(&session)?.id;
+	let user_id = get_session_user(&session).await?.id;
 
 	let deleted_session = client
 		.active_reading_session()
@@ -1430,7 +1433,7 @@ async fn get_is_media_completed(
 	session: Session,
 ) -> APIResult<Json<MediaIsComplete>> {
 	let client = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let user_id = user.id.clone();
 	let age_restrictions = user
 		.age_restriction
@@ -1493,7 +1496,7 @@ async fn put_media_complete_status(
 	Json(payload): Json<PutMediaCompletionStatus>,
 ) -> APIResult<Json<MediaIsComplete>> {
 	let client = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let user_id = user.id.clone();
 	let age_restrictions = user
 		.age_restriction
@@ -1598,7 +1601,8 @@ async fn start_media_analysis(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<()> {
-	let _ = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
+	let _ =
+		enforce_session_permissions(&session, &[UserPermission::ManageLibrary]).await?;
 
 	// Start analysis job
 	ctx.enqueue_job(AnalyzeMediaJob::analyze_media_item(id))
@@ -1688,7 +1692,7 @@ async fn fetch_media_page_dimensions_with_permissions(
 	id: String,
 ) -> APIResult<PageDimensionsEntity> {
 	// First get user permissions/age restrictions
-	let user = get_session_user(session)?;
+	let user = get_session_user(session).await?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()

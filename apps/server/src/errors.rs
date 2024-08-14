@@ -13,7 +13,7 @@ use stump_core::{
 	error::CoreError, filesystem::FileError, job::error::JobManagerError, CoreEvent,
 };
 use tokio::sync::mpsc;
-use tower_sessions::session::SessionError;
+use tower_sessions::session::Error as SessionError;
 use utoipa::ToSchema;
 
 use std::{net, num::TryFromIntError};

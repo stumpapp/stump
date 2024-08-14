@@ -131,7 +131,7 @@ async fn get_users(
 	pagination_query: Query<PaginationQuery>,
 	session: Session,
 ) -> APIResult<Json<Pageable<Vec<User>>>> {
-	enforce_session_permissions(&session, &[UserPermission::ReadUsers])?;
+	enforce_session_permissions(&session, &[UserPermission::ReadUsers]).await?;
 
 	let pagination = pagination_query.0.get();
 	let is_unpaged = pagination.is_unpaged();
@@ -206,7 +206,7 @@ async fn get_user_login_activity(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Json<Vec<LoginActivity>>> {
-	get_session_server_owner_user(&session)?;
+	get_session_server_owner_user(&session).await?;
 
 	let client = &ctx.db;
 
@@ -238,7 +238,7 @@ async fn delete_user_login_activity(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Json<()>> {
-	get_session_server_owner_user(&session)?;
+	get_session_server_owner_user(&session).await?;
 
 	let client = &ctx.db;
 
@@ -440,7 +440,7 @@ async fn create_user(
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateUser>,
 ) -> APIResult<Json<User>> {
-	enforce_session_permissions(&session, &[UserPermission::ManageUsers])?;
+	enforce_session_permissions(&session, &[UserPermission::ManageUsers]).await?;
 
 	let db = &ctx.db;
 
@@ -541,7 +541,7 @@ async fn update_current_user(
 	Json(input): Json<UpdateUser>,
 ) -> APIResult<Json<User>> {
 	let db = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 
 	let updated_user =
 		update_user(&user, db, user.id.clone(), input, &ctx.config).await?;
@@ -549,9 +549,7 @@ async fn update_current_user(
 
 	session
 		.insert(SESSION_USER_KEY, updated_user.clone())
-		.map_err(|e| {
-			APIError::InternalServerError(format!("Failed to update session: {}", e))
-		})?;
+		.await?;
 
 	Ok(Json(updated_user))
 }
@@ -595,7 +593,7 @@ async fn update_current_user_preferences(
 ) -> APIResult<Json<UserPreferences>> {
 	let db = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let user_preferences = user.user_preferences.clone().unwrap_or_default();
 
 	trace!(user_id = ?user.id, ?user_preferences, updates = ?input, "Updating viewer's preferences");
@@ -611,9 +609,7 @@ async fn update_current_user_preferences(
 				..user
 			},
 		)
-		.map_err(|e| {
-			APIError::InternalServerError(format!("Failed to update session: {}", e))
-		})?;
+		.await?;
 
 	Ok(Json(updated_preferences))
 }
@@ -634,7 +630,7 @@ async fn get_navigation_arrangement(
 	session: Session,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<Arrangement<NavigationItem>>> {
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let db = &ctx.db;
 
 	let user_preferences = db
@@ -671,7 +667,7 @@ async fn update_navigation_arrangement(
 	State(ctx): State<AppState>,
 	Json(input): Json<Arrangement<NavigationItem>>,
 ) -> APIResult<Json<Arrangement<NavigationItem>>> {
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let db = &ctx.db;
 
 	let user_preferences = db
@@ -736,7 +732,7 @@ async fn delete_user_by_id(
 	Json(input): Json<DeleteUser>,
 ) -> APIResult<Json<User>> {
 	let db = &ctx.db;
-	let user = get_session_server_owner_user(&session)?;
+	let user = get_session_server_owner_user(&session).await?;
 
 	if user.id == id {
 		return Err(APIError::BadRequest(
@@ -784,7 +780,7 @@ async fn get_user_by_id(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Json<User>> {
-	get_session_server_owner_user(&session)?;
+	get_session_server_owner_user(&session).await?;
 	let db = &ctx.db;
 	let user_by_id = db
 		.user()
@@ -822,7 +818,7 @@ async fn get_user_login_activity_by_id(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<Json<Vec<LoginActivity>>> {
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 
 	let client = &ctx.db;
 
@@ -867,7 +863,7 @@ async fn update_user_handler(
 	Json(input): Json<UpdateUser>,
 ) -> APIResult<Json<User>> {
 	let db = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 
 	if user.id != id && !user.is_server_owner {
 		return Err(APIError::forbidden_discreet());
@@ -879,9 +875,7 @@ async fn update_user_handler(
 	if user.id == id {
 		session
 			.insert(SESSION_USER_KEY, updated_user.clone())
-			.map_err(|e| {
-				APIError::InternalServerError(format!("Failed to update session: {}", e))
-			})?;
+			.await?;
 	} else {
 		// When a server owner updates another user, we need to delete all sessions for that user
 		// because the user's permissions may have changed. This is a bit lazy but it works.
@@ -913,7 +907,7 @@ async fn delete_user_sessions(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> APIResult<()> {
-	get_session_server_owner_user(&session)?;
+	get_session_server_owner_user(&session).await?;
 
 	let client = &ctx.db;
 	let removed_sessions = client
@@ -953,7 +947,7 @@ async fn update_user_lock_status(
 	session: Session,
 	Json(input): Json<UpdateAccountLock>,
 ) -> APIResult<Json<User>> {
-	let user = get_session_server_owner_user(&session)?;
+	let user = get_session_server_owner_user(&session).await?;
 	if user.id == id {
 		return Err(APIError::BadRequest(
 			"You cannot lock your own account.".into(),
@@ -1005,7 +999,7 @@ async fn get_user_preferences(
 	session: Session,
 ) -> APIResult<Json<UserPreferences>> {
 	let db = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 
 	if id != user.id {
 		return Err(APIError::forbidden_discreet());
@@ -1054,7 +1048,7 @@ async fn update_user_preferences(
 	trace!(?id, ?input, "Updating user preferences");
 	let db = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = get_session_user(&session).await?;
 	let user_preferences = user.user_preferences.clone().unwrap_or_default();
 
 	if user_preferences.id != input.id {
@@ -1072,9 +1066,7 @@ async fn update_user_preferences(
 				..user
 			},
 		)
-		.map_err(|e| {
-			APIError::InternalServerError(format!("Failed to update session: {}", e))
-		})?;
+		.await?;
 
 	Ok(Json(updated_preferences))
 }
@@ -1151,7 +1143,8 @@ async fn upload_user_avatar(
 	session: Session,
 	mut upload: Multipart,
 ) -> APIResult<ImageResponse> {
-	let by_user = get_user_and_enforce_permission(&session, UserPermission::UploadFile)?;
+	let by_user =
+		get_user_and_enforce_permission(&session, UserPermission::UploadFile).await?;
 	let client = &ctx.db;
 
 	if by_user.id != id && !by_user.is_server_owner {

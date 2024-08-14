@@ -177,7 +177,7 @@ async fn get_book_clubs(
 	session: Session,
 ) -> APIResult<Json<Vec<BookClub>>> {
 	let client = &ctx.db;
-	let viewer = get_session_user(&session)?;
+	let viewer = get_session_user(&session).await?;
 
 	let where_params = if params.all {
 		vec![book_club::members::some(vec![
@@ -229,7 +229,7 @@ async fn create_book_club(
 	let db = &ctx.db;
 
 	let viewer =
-		get_user_and_enforce_permission(&session, UserPermission::CreateBookClub)?;
+		get_user_and_enforce_permission(&session, UserPermission::CreateBookClub).await?;
 
 	// TODO(prisma 0.7.0): Nested create
 	let (book_club, _) = db
@@ -286,7 +286,7 @@ async fn get_book_club(
 	session: Session,
 ) -> APIResult<Json<BookClub>> {
 	let client = &ctx.db;
-	let viewer = get_session_user(&session)?;
+	let viewer = get_session_user(&session).await?;
 
 	let where_params = book_club_access_for_user(&viewer)
 		.into_iter()
@@ -333,7 +333,7 @@ async fn update_book_club(
 ) -> APIResult<Json<BookClub>> {
 	let client = &ctx.db;
 
-	let viewer = get_session_user(&session)?;
+	let viewer = get_session_user(&session).await?;
 
 	// Query first for access control. Realistically, I could `update_many` with the
 	// access assertions, but I would have to requery for the book afterwards anyways
@@ -394,7 +394,7 @@ async fn create_book_club_invitation(
 	Json(payload): Json<CreateBookClubInvitation>,
 ) -> APIResult<Json<BookClubInvitation>> {
 	let client = &ctx.db;
-	let viewer = get_session_user(&session)?;
+	let viewer = get_session_user(&session).await?;
 
 	// I don't check for access control before the query because I am enforcing it when
 	// I query for the book club. This way, if the user doesn't have access, they will
@@ -461,7 +461,7 @@ async fn get_book_club_members(
 ) -> APIResult<Json<Vec<BookClubMember>>> {
 	let client = &ctx.db;
 
-	let viewer = get_session_user(&session)?;
+	let viewer = get_session_user(&session).await?;
 
 	let where_params = book_club_member_access_for_user(&viewer)
 		.into_iter()
@@ -535,7 +535,7 @@ async fn respond_to_book_club_invitation(
 ) -> APIResult<Json<Option<BookClubMember>>> {
 	let client = &ctx.db;
 
-	let viewer = get_session_user(&session)?;
+	let viewer = get_session_user(&session).await?;
 
 	let invitation = client
 		.book_club_invitation()
@@ -591,7 +591,7 @@ async fn create_book_club_member_handler(
 	session: Session,
 	Json(payload): Json<CreateBookClubMember>,
 ) -> APIResult<Json<BookClubMember>> {
-	get_session_server_owner_user(&session)?;
+	get_session_server_owner_user(&session).await?;
 	let client = &ctx.db;
 	let created_member = create_book_club_member(payload, id, client).await?;
 	Ok(Json(created_member))
@@ -614,7 +614,7 @@ async fn get_book_club_member(
 ) -> APIResult<Json<BookClubMember>> {
 	let client = &ctx.db;
 
-	let viewer = get_session_user(&session)?;
+	let viewer = get_session_user(&session).await?;
 
 	let where_params = book_club_member_access_for_user(&viewer)
 		.into_iter()
@@ -658,7 +658,7 @@ async fn update_book_club_member(
 ) -> APIResult<Json<BookClubMember>> {
 	let client = &ctx.db;
 
-	let viewer = get_session_user(&session)?;
+	let viewer = get_session_user(&session).await?;
 
 	if viewer.id != member_id && !viewer.is_server_owner {
 		return Err(APIError::Forbidden(
@@ -690,7 +690,7 @@ async fn delete_book_club_member(
 ) -> APIResult<Json<BookClubMember>> {
 	let client = &ctx.db;
 
-	let viewer = get_session_user(&session)?;
+	let viewer = get_session_user(&session).await?;
 	let viewer_membership = client
 		.book_club_member()
 		.find_first(vec![
@@ -789,7 +789,7 @@ async fn create_book_club_schedule(
 ) -> APIResult<Json<BookClubSchedule>> {
 	let client = &ctx.db;
 
-	let viewer = get_session_user(&session)?;
+	let viewer = get_session_user(&session).await?;
 
 	let book_club = client
 		.book_club()
@@ -893,7 +893,7 @@ async fn get_book_club_schedule(
 ) -> APIResult<Json<BookClubSchedule>> {
 	let client = &ctx.db;
 
-	let viewer = get_session_user(&session)?;
+	let viewer = get_session_user(&session).await?;
 
 	// TODO: not fully correct, not sure if non-members should be able to query for this when
 	// targeting public book clubs
@@ -931,7 +931,7 @@ async fn add_books_to_book_club_schedule(
 ) -> APIResult<Json<Vec<BookClubBook>>> {
 	let client = &ctx.db;
 
-	let viewer = get_session_user(&session)?;
+	let viewer = get_session_user(&session).await?;
 
 	let book_club = client
 		.book_club()
@@ -1059,7 +1059,7 @@ async fn get_book_club_current_book(
 ) -> APIResult<Json<BookClubBook>> {
 	let client = &ctx.db;
 
-	let viewer = get_session_user(&session)?;
+	let viewer = get_session_user(&session).await?;
 
 	let where_params = book_club_access_for_user(&viewer)
 		.into_iter()

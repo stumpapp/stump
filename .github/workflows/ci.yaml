@@ -37,16 +37,6 @@ jobs:
       - name: Setup rust
         uses: ./.github/actions/setup-rust
 
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-          key: ${{ runner.os }}-cargo-${{ github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork && 'non-fork-' || 'fork-' }}${{ hashFiles('**/Cargo.lock') }}
-
       - name: Run cargo checks
         run: |
           cargo fmt --all -- --check

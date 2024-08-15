@@ -32,7 +32,7 @@ pub(crate) mod user;
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
-		.merge(auth::mount())
+		.merge(auth::mount(app_state.clone()))
 		.merge(epub::mount(app_state.clone()))
 		.merge(emailer::mount(app_state.clone()))
 		.merge(library::mount(app_state.clone()))
@@ -45,8 +45,8 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.merge(series::mount(app_state.clone()))
 		.merge(tag::mount(app_state.clone()))
 		.merge(user::mount(app_state.clone()))
-		.merge(reading_list::mount())
-		.merge(smart_list::mount())
+		.merge(reading_list::mount(app_state.clone()))
+		.merge(smart_list::mount(app_state.clone()))
 		.merge(book_club::mount(app_state))
 		.route("/claim", get(claim))
 		.route("/ping", get(ping))

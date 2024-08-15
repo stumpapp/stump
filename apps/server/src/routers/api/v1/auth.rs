@@ -1,14 +1,13 @@
 use axum::{
-	extract::{ConnectInfo, State},
+	extract::{ConnectInfo, Query, State},
+	middleware,
 	routing::{get, post},
-	Json, Router,
+	Extension, Json, Router,
 };
 use axum_extra::{headers::UserAgent, TypedHeader};
-use prisma_client_rust::{
-	chrono::{DateTime, Duration, FixedOffset, Utc},
-	Direction,
-};
-use serde::Deserialize;
+use chrono::{DateTime, Duration, FixedOffset, Utc};
+use prisma_client_rust::Direction;
+use serde::{Deserialize, Serialize};
 use specta::Type;
 use stump_core::{
 	db::entity::User,
@@ -19,17 +18,26 @@ use tracing::error;
 use utoipa::ToSchema;
 
 use crate::{
-	config::{session::SESSION_USER_KEY, state::AppState},
-	errors::{APIError, APIResult},
+	config::{
+		jwt::{create_user_jwt, CreatedToken},
+		session::SESSION_USER_KEY,
+		state::AppState,
+	},
+	errors::{api_error_message, APIError, APIResult},
 	http_server::StumpRequestInfo,
-	utils::{get_session_user, verify_password},
+	middleware::auth::{auth_middleware, RequestContext},
+	utils::{default_true, get_session_user, verify_password},
 };
 
-pub(crate) fn mount() -> Router<AppState> {
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new().nest(
 		"/auth",
 		Router::new()
-			.route("/me", get(viewer))
+			.route(
+				"/me",
+				get(viewer)
+					.layer(middleware::from_fn_with_state(app_state, auth_middleware)),
+			)
 			.route("/login", post(login))
 			.route("/logout", post(logout))
 			.route("/register", post(register)),
@@ -71,6 +79,14 @@ pub struct LoginOrRegisterArgs {
 	pub password: String,
 }
 
+#[derive(Debug, Deserialize, Type, ToSchema)]
+pub struct AuthenticationOptions {
+	#[serde(default)]
+	generate_token: bool,
+	#[serde(default = "default_true")]
+	create_session: bool,
+}
+
 #[utoipa::path(
 	get,
 	path = "/api/v1/auth/me",
@@ -82,8 +98,8 @@ pub struct LoginOrRegisterArgs {
 )]
 /// Returns the currently logged in user from the session. If no user is logged in, returns an
 /// unauthorized error.
-async fn viewer(session: Session) -> APIResult<Json<User>> {
-	get_session_user(&session).await.map(Json)
+async fn viewer(Extension(req): Extension<RequestContext>) -> APIResult<Json<User>> {
+	Ok(Json(req.user().clone()))
 }
 
 async fn handle_login_attempt(
@@ -131,6 +147,17 @@ async fn handle_remove_earliest_session(
 	}
 }
 
+#[derive(Debug, Serialize, Type, ToSchema)]
+#[serde(untagged)]
+pub enum LoginResponse {
+	User(User),
+	AccessToken {
+		for_user: User,
+		#[serde(flatten)]
+		token: CreatedToken,
+	},
+}
+
 #[utoipa::path(
 	post,
 	path = "/api/v1/auth/login",
@@ -149,12 +176,27 @@ async fn login(
 	ConnectInfo(request_info): ConnectInfo<StumpRequestInfo>,
 	session: Session,
 	State(state): State<AppState>,
+	Query(AuthenticationOptions {
+		generate_token,
+		create_session,
+	}): Query<AuthenticationOptions>,
 	Json(input): Json<LoginOrRegisterArgs>,
-) -> APIResult<Json<User>> {
-	if let Ok(user) = get_session_user(&session).await {
-		if input.username == user.username {
-			return Ok(Json(user));
-		}
+) -> APIResult<Json<LoginResponse>> {
+	match get_session_user(&session).await? {
+		Some(user) if user.username == input.username => {
+			// TODO: should this be tracked?
+			// TODO: should this be permission gated?
+			if generate_token {
+				let token = create_user_jwt(&user.id, &state.config)?;
+				return Ok(Json(LoginResponse::AccessToken {
+					for_user: user,
+					token,
+				}));
+			}
+
+			return Ok(Json(LoginResponse::User(user)));
+		},
+		_ => {},
 	}
 
 	let client = state.db.clone();
@@ -190,8 +232,7 @@ async fn login(
 				&& verify_password(&db_user.hashed_password, &input.password)? =>
 		{
 			Err(APIError::Forbidden(
-				"Account is locked. Please contact an administrator to unlock your account."
-					.to_string(),
+				api_error_message::LOCKED_ACCOUNT.to_string(),
 			))
 		},
 		Some(db_user) if !db_user.is_locked => {
@@ -203,7 +244,12 @@ async fn login(
 					.login_activity
 					.as_ref()
 					// If there are 9 or more failed login attempts _in a row_, within a 24 hour period, lock the account
-					.map(|activity| !activity.iter().any(|activity| activity.authentication_successful) && activity.len() >= 9)
+					.map(|activity| {
+						!activity
+							.iter()
+							.any(|activity| activity.authentication_successful)
+							&& activity.len() >= 9
+					})
 					.unwrap_or(false);
 
 				handle_login_attempt(&client, db_user, user_agent, request_info, false)
@@ -224,7 +270,11 @@ async fn login(
 						.delete_many(vec![session::user_id::equals(user_id.clone())])
 						.exec()
 						.await?;
-					tracing::debug!(?removed_sessions_count, ?user_id, "Locked user account and removed all associated sessions")
+					tracing::debug!(
+						?removed_sessions_count,
+						?user_id,
+						"Locked user account and removed all associated sessions"
+					)
 				}
 
 				return Err(APIError::Unauthorized);
@@ -265,13 +315,21 @@ async fn login(
 			}
 
 			let user = User::from(updated_user);
-			session
-				.insert(SESSION_USER_KEY, user.clone())
-				.await
-				// TODO(axum-upgrade): Remove expect!
-				.expect("Failed to write user to session");
 
-			Ok(Json(user))
+			if create_session {
+				session.insert(SESSION_USER_KEY, user.clone()).await?;
+			}
+
+			// TODO: should this be permission gated?
+			if generate_token {
+				let token = create_user_jwt(&user.id, &state.config)?;
+				Ok(Json(LoginResponse::AccessToken {
+					for_user: user,
+					token,
+				}))
+			} else {
+				Ok(Json(LoginResponse::User(user)))
+			}
 		},
 		_ => Err(APIError::Unauthorized),
 	}
@@ -316,7 +374,7 @@ pub async fn register(
 
 	let mut is_server_owner = false;
 
-	let session_user = session.get::<User>(SESSION_USER_KEY).await?;
+	let session_user = get_session_user(&session).await?;
 
 	// TODO: move nested if to if let once stable
 	if let Some(user) = session_user {

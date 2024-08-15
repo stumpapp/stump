@@ -34,6 +34,7 @@ use env_keys::*;
 pub mod defaults {
 	pub const DEFAULT_PASSWORD_HASH_COST: u32 = 12;
 	pub const DEFAULT_SESSION_TTL: i64 = 3600 * 24 * 3; // 3 days
+	pub const DEFAULT_ACCESS_TOKEN_TTL: i64 = 3600 * 24 * 1; // 1 days
 	pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
 	pub const DEFAULT_SCANNER_CHUNK_SIZE: usize = 100;
 }
@@ -93,6 +94,8 @@ pub struct StumpConfig {
 	pub password_hash_cost: u32,
 	/// The time in seconds that a login session will be valid for.
 	pub session_ttl: i64,
+	/// The time in seconds that an access token will be valid for.
+	pub access_token_ttl: i64,
 	/// The interval at which automatic deleted session cleanup is performed.
 	pub expired_session_cleanup_interval: u64,
 	/// The size of chunks to use throughout scanning the filesystem. This is used to
@@ -119,6 +122,7 @@ impl StumpConfig {
 			disable_swagger: false,
 			password_hash_cost: DEFAULT_PASSWORD_HASH_COST,
 			session_ttl: DEFAULT_SESSION_TTL,
+			access_token_ttl: DEFAULT_ACCESS_TOKEN_TTL,
 			expired_session_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
 			scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
 		}
@@ -142,6 +146,7 @@ impl StumpConfig {
 			disable_swagger: false,
 			password_hash_cost: DEFAULT_PASSWORD_HASH_COST,
 			session_ttl: DEFAULT_SESSION_TTL,
+			access_token_ttl: DEFAULT_ACCESS_TOKEN_TTL,
 			expired_session_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
 			scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
 		}
@@ -532,6 +537,7 @@ mod tests {
 				disable_swagger: true,
 				password_hash_cost: 24,
 				session_ttl: 3600 * 24,
+				access_token_ttl: DEFAULT_ACCESS_TOKEN_TTL,
 				expired_session_cleanup_interval: 60 * 60 * 8,
 				scanner_chunk_size: 300,
 			}
@@ -578,6 +584,7 @@ mod tests {
 						disable_swagger: true,
 						password_hash_cost: 24,
 						session_ttl: 3600 * 24,
+						access_token_ttl: DEFAULT_ACCESS_TOKEN_TTL,
 						expired_session_cleanup_interval: 60 * 60 * 8,
 						scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
 						custom_templates_dir: None,
@@ -616,6 +623,7 @@ mod tests {
 				disable_swagger: false,
 				password_hash_cost: DEFAULT_PASSWORD_HASH_COST,
 				session_ttl: DEFAULT_SESSION_TTL,
+				access_token_ttl: DEFAULT_ACCESS_TOKEN_TTL,
 				expired_session_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
 				scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
 			}
@@ -727,6 +735,7 @@ mod tests {
 						disable_swagger: true,
 						password_hash_cost: 1,
 						session_ttl: DEFAULT_SESSION_TTL,
+						access_token_ttl: DEFAULT_ACCESS_TOKEN_TTL,
 						expired_session_cleanup_interval:
 							DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
 						scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,

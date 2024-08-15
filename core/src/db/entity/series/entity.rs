@@ -26,8 +26,10 @@ pub struct Series {
 	pub description: Option<String>,
 	/// The status of the series since last scan or access
 	pub status: FileStatus,
+	// TODO(specta): replace with DateTime<FixedOffset>
 	/// The timestamp of when the series was last updated
 	pub updated_at: String,
+	// TODO(specta): replace with DateTime<FixedOffset>
 	/// The timestamp of when the series was created
 	pub created_at: String,
 	/// The ID of the library this series belongs to.

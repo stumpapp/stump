@@ -46,6 +46,7 @@ pub struct Library {
 	/// The status of the library since last scan or access. ex: "READY" or "MISSING"
 	pub status: String,
 	// The date in which the library was last updated. This is usually after a scan. ex: "2022-04-20 04:20:69"
+	// TODO(specta): replace with DateTime<FixedOffset>
 	pub updated_at: String,
 	/// The series that are in this library. Will be `None` only if the relation is not loaded.
 	pub series: Option<Vec<Series>>,

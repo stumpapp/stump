@@ -1,9 +1,4 @@
-use axum::{
-	extract::Query,
-	middleware::{from_extractor, from_extractor_with_state},
-	routing::post,
-	Json, Router,
-};
+use axum::{extract::Query, middleware, routing::post, Extension, Json, Router};
 use std::{
 	fs::DirEntry,
 	path::{Path, PathBuf},
@@ -15,21 +10,18 @@ use stump_core::{
 	},
 	filesystem::{DirectoryListing, DirectoryListingFile, DirectoryListingInput},
 };
-use tower_sessions::Session;
 use tracing::trace;
 
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
-	middleware::auth::{Auth, ServerOwnerGuard},
-	utils::enforce_session_permission,
+	middleware::auth::{auth_middleware, RequestContext},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.route("/filesystem", post(list_directory))
-		.layer(from_extractor::<ServerOwnerGuard>())
-		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 #[utoipa::path(
@@ -52,11 +44,11 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 /// List the contents of a directory on the file system at a given (optional) path. If no path
 /// is provided, the file system root directory contents is returned.
 pub async fn list_directory(
-	session: Session,
 	pagination: Query<PageQuery>,
+	Extension(req): Extension<RequestContext>,
 	Json(input): Json<Option<DirectoryListingInput>>,
 ) -> APIResult<Json<Pageable<DirectoryListing>>> {
-	enforce_session_permission(&session, UserPermission::FileExplorer).await?;
+	req.enforce_permissions(&[UserPermission::FileExplorer])?;
 	let input = input.unwrap_or_default();
 
 	let start_path = input

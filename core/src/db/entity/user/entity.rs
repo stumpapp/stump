@@ -23,6 +23,7 @@ pub struct User {
 	pub is_server_owner: bool,
 	/// The URL of the user's avatar, if any
 	pub avatar_url: Option<String>,
+	// TODO(specta): replace with DateTime<FixedOffset>
 	/// A timestamp of when the user was created, in RFC3339 format
 	pub created_at: String,
 	/// A timestamp of when the user last logged in, in RFC3339 format

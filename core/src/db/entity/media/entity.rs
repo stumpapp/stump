@@ -28,8 +28,10 @@ pub struct Media {
 	pub extension: String,
 	/// The number of pages in the media. ex: "69"
 	pub pages: i32,
+	// TODO(specta): replace with DateTime<FixedOffset>
 	/// The timestamp when the media was last updated.
 	pub updated_at: String,
+	// TODO(specta): replace with DateTime<FixedOffset>
 	/// The timestamp when the media was created.
 	pub created_at: String,
 	/// The timestamp when the file was last modified on disk.

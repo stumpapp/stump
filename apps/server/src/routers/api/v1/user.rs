@@ -2,9 +2,9 @@ use std::{fs::File, io::Write};
 
 use axum::{
 	extract::{DefaultBodyLimit, Multipart, Path, State},
-	middleware::from_extractor_with_state,
+	middleware,
 	routing::{delete, get, put},
-	Json, Router,
+	Extension, Json, Router,
 };
 use axum_extra::extract::Query;
 use prisma_client_rust::{chrono::Utc, Direction};
@@ -35,11 +35,8 @@ use crate::{
 	config::{session::SESSION_USER_KEY, state::AppState},
 	errors::{APIError, APIResult},
 	filter::UserQueryRelation,
-	middleware::auth::Auth,
-	utils::{
-		enforce_session_permissions, get_session_server_owner_user, get_session_user,
-		get_user_and_enforce_permission, http::ImageResponse, validate_image_upload,
-	},
+	middleware::auth::{auth_middleware, RequestContext},
+	utils::{get_session_user, http::ImageResponse, validate_image_upload},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -82,7 +79,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.layer(DefaultBodyLimit::max(20 * 1024 * 1024)), // 20MB
 				),
 		)
-		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 pub(crate) fn apply_pagination<'a>(
@@ -129,9 +126,9 @@ async fn get_users(
 	State(ctx): State<AppState>,
 	relation_query: Query<UserQueryRelation>,
 	pagination_query: Query<PaginationQuery>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Pageable<Vec<User>>>> {
-	enforce_session_permissions(&session, &[UserPermission::ReadUsers]).await?;
+	req.enforce_permissions(&[UserPermission::ReadUsers])?;
 
 	let pagination = pagination_query.0.get();
 	let is_unpaged = pagination.is_unpaged();
@@ -204,9 +201,9 @@ async fn get_users(
 )]
 async fn get_user_login_activity(
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Vec<LoginActivity>>> {
-	get_session_server_owner_user(&session).await?;
+	req.enforce_server_owner()?;
 
 	let client = &ctx.db;
 
@@ -236,9 +233,9 @@ async fn get_user_login_activity(
 )]
 async fn delete_user_login_activity(
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<()>> {
-	get_session_server_owner_user(&session).await?;
+	req.enforce_server_owner()?;
 
 	let client = &ctx.db;
 
@@ -436,11 +433,11 @@ pub struct CreateUser {
 )]
 /// Creates a new user.
 async fn create_user(
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateUser>,
 ) -> APIResult<Json<User>> {
-	enforce_session_permissions(&session, &[UserPermission::ManageUsers]).await?;
+	req.enforce_permissions(&[UserPermission::ManageUsers])?;
 
 	let db = &ctx.db;
 
@@ -536,20 +533,23 @@ async fn create_user(
 )]
 /// Updates the session user
 async fn update_current_user(
+	Extension(req): Extension<RequestContext>,
 	session: Session,
 	State(ctx): State<AppState>,
 	Json(input): Json<UpdateUser>,
 ) -> APIResult<Json<User>> {
 	let db = &ctx.db;
-	let user = get_session_user(&session).await?;
+	let user = req.user();
 
 	let updated_user =
 		update_user(&user, db, user.id.clone(), input, &ctx.config).await?;
 	debug!(?updated_user, "Updated user");
 
-	session
-		.insert(SESSION_USER_KEY, updated_user.clone())
-		.await?;
+	if get_session_user(&session).await?.is_some() {
+		session
+			.insert(SESSION_USER_KEY, updated_user.clone())
+			.await?;
+	}
 
 	Ok(Json(updated_user))
 }
@@ -587,13 +587,14 @@ pub struct UpdateUserPreferences {
 )]
 /// Updates a user's preferences.
 async fn update_current_user_preferences(
+	Extension(req): Extension<RequestContext>,
 	session: Session,
 	State(ctx): State<AppState>,
 	Json(input): Json<UpdateUserPreferences>,
 ) -> APIResult<Json<UserPreferences>> {
 	let db = &ctx.db;
 
-	let user = get_session_user(&session).await?;
+	let user = req.user();
 	let user_preferences = user.user_preferences.clone().unwrap_or_default();
 
 	trace!(user_id = ?user.id, ?user_preferences, updates = ?input, "Updating viewer's preferences");
@@ -601,15 +602,17 @@ async fn update_current_user_preferences(
 	let updated_preferences = update_preferences(db, user_preferences.id, input).await?;
 	debug!(?updated_preferences, "Updated user preferences");
 
-	session
-		.insert(
-			"user",
-			User {
-				user_preferences: Some(updated_preferences.clone()),
-				..user
-			},
-		)
-		.await?;
+	if get_session_user(&session).await?.is_some() {
+		session
+			.insert(
+				SESSION_USER_KEY,
+				User {
+					user_preferences: Some(updated_preferences.clone()),
+					..user.clone()
+				},
+			)
+			.await?;
+	}
 
 	Ok(Json(updated_preferences))
 }
@@ -627,10 +630,10 @@ async fn update_current_user_preferences(
 	)
 )]
 async fn get_navigation_arrangement(
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<Arrangement<NavigationItem>>> {
-	let user = get_session_user(&session).await?;
+	let user = req.user();
 	let db = &ctx.db;
 
 	let user_preferences = db
@@ -663,11 +666,11 @@ async fn get_navigation_arrangement(
 	)
 )]
 async fn update_navigation_arrangement(
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	State(ctx): State<AppState>,
 	Json(input): Json<Arrangement<NavigationItem>>,
 ) -> APIResult<Json<Arrangement<NavigationItem>>> {
-	let user = get_session_user(&session).await?;
+	let user = req.user();
 	let db = &ctx.db;
 
 	let user_preferences = db
@@ -728,11 +731,11 @@ pub struct DeleteUser {
 async fn delete_user_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(input): Json<DeleteUser>,
 ) -> APIResult<Json<User>> {
 	let db = &ctx.db;
-	let user = get_session_server_owner_user(&session).await?;
+	let user = req.server_owner_user()?;
 
 	if user.id == id {
 		return Err(APIError::BadRequest(
@@ -778,9 +781,9 @@ async fn delete_user_by_id(
 async fn get_user_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<User>> {
-	get_session_server_owner_user(&session).await?;
+	req.enforce_server_owner()?;
 	let db = &ctx.db;
 	let user_by_id = db
 		.user()
@@ -816,9 +819,9 @@ async fn get_user_by_id(
 async fn get_user_login_activity_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Vec<LoginActivity>>> {
-	let user = get_session_user(&session).await?;
+	let user = req.user();
 
 	let client = &ctx.db;
 
@@ -857,13 +860,14 @@ async fn get_user_login_activity_by_id(
 )]
 /// Updates a user by ID.
 async fn update_user_handler(
+	Extension(req): Extension<RequestContext>,
 	session: Session,
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	Json(input): Json<UpdateUser>,
 ) -> APIResult<Json<User>> {
 	let db = &ctx.db;
-	let user = get_session_user(&session).await?;
+	let user = req.user();
 
 	if user.id != id && !user.is_server_owner {
 		return Err(APIError::forbidden_discreet());
@@ -872,7 +876,7 @@ async fn update_user_handler(
 	let updated_user = update_user(&user, db, id.clone(), input, &ctx.config).await?;
 	debug!(?updated_user, "Updated user");
 
-	if user.id == id {
+	if user.id == id && get_session_user(&session).await?.is_some() {
 		session
 			.insert(SESSION_USER_KEY, updated_user.clone())
 			.await?;
@@ -905,9 +909,9 @@ async fn update_user_handler(
 async fn delete_user_sessions(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<()> {
-	get_session_server_owner_user(&session).await?;
+	req.enforce_server_owner()?;
 
 	let client = &ctx.db;
 	let removed_sessions = client
@@ -944,10 +948,10 @@ pub struct UpdateAccountLock {
 async fn update_user_lock_status(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(input): Json<UpdateAccountLock>,
 ) -> APIResult<Json<User>> {
-	let user = get_session_server_owner_user(&session).await?;
+	let user = req.server_owner_user()?;
 	if user.id == id {
 		return Err(APIError::BadRequest(
 			"You cannot lock your own account.".into(),
@@ -996,10 +1000,10 @@ async fn update_user_lock_status(
 async fn get_user_preferences(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<UserPreferences>> {
 	let db = &ctx.db;
-	let user = get_session_user(&session).await?;
+	let user = req.user();
 
 	if id != user.id {
 		return Err(APIError::forbidden_discreet());
@@ -1040,6 +1044,7 @@ async fn get_user_preferences(
 )]
 /// Updates a user's preferences.
 async fn update_user_preferences(
+	Extension(req): Extension<RequestContext>,
 	session: Session,
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
@@ -1048,7 +1053,7 @@ async fn update_user_preferences(
 	trace!(?id, ?input, "Updating user preferences");
 	let db = &ctx.db;
 
-	let user = get_session_user(&session).await?;
+	let user = req.user();
 	let user_preferences = user.user_preferences.clone().unwrap_or_default();
 
 	if user_preferences.id != input.id {
@@ -1058,15 +1063,17 @@ async fn update_user_preferences(
 	let updated_preferences = update_preferences(db, user_preferences.id, input).await?;
 	debug!(?updated_preferences, "Updated user preferences");
 
-	session
-		.insert(
-			SESSION_USER_KEY,
-			User {
-				user_preferences: Some(updated_preferences.clone()),
-				..user
-			},
-		)
-		.await?;
+	if get_session_user(&session).await?.is_some() {
+		session
+			.insert(
+				SESSION_USER_KEY,
+				User {
+					user_preferences: Some(updated_preferences.clone()),
+					..user.clone()
+				},
+			)
+			.await?;
+	}
 
 	Ok(Json(updated_preferences))
 }
@@ -1140,11 +1147,10 @@ async fn get_user_avatar(
 async fn upload_user_avatar(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	mut upload: Multipart,
 ) -> APIResult<ImageResponse> {
-	let by_user =
-		get_user_and_enforce_permission(&session, UserPermission::UploadFile).await?;
+	let by_user = req.user_and_enforce_permissions(&[UserPermission::UploadFile])?;
 	let client = &ctx.db;
 
 	if by_user.id != id && !by_user.is_server_owner {

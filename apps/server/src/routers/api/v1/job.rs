@@ -1,6 +1,6 @@
 use axum::{
 	extract::{Path, Query, State},
-	middleware::{from_extractor, from_extractor_with_state},
+	middleware::{self, from_extractor},
 	routing::{delete, get},
 	Json, Router,
 };
@@ -28,7 +28,7 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
-	middleware::auth::{Auth, ServerOwnerGuard},
+	middleware::auth::{auth_middleware, ServerOwnerGuard},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -48,8 +48,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 					get(get_scheduler_config).post(update_scheduler_config),
 				),
 		)
+		// TODO: consider permissions around job management
 		.layer(from_extractor::<ServerOwnerGuard>())
-		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 #[derive(Deserialize, Serialize, ToSchema, Type)]

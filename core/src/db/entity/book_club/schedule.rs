@@ -21,7 +21,9 @@ pub struct BookClubSchedule {
 pub struct BookClubBook {
 	id: String,
 
+	// TODO(specta): replace with DateTime<FixedOffset>
 	start_at: String,
+	// TODO(specta): replace with DateTime<FixedOffset>
 	end_at: String,
 	discussion_duration_days: i32,
 

@@ -16,6 +16,7 @@ RUN yarn config set network-timeout 300000 && \
     mv ./apps/web/dist/ ./build && \
     if [ ! -d "./build" ] || [ ! "$(ls -A ./build)" ]; then exit 1; fi
 
+
 # ------------------------------------------------------------------------------
 # Cargo Build Stage
 # ------------------------------------------------------------------------------
@@ -28,15 +29,32 @@ ENV GIT_REV=${GIT_REV}
 ARG TAGS
 ENV TAGS=${TAGS}
 
-WORKDIR /app
-
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
     git \
     libssl-dev \
     pkg-config \
+    meson \
+    ninja-build \
+    nasm \
     libsqlite3-dev;
+
+#Building dav1d for AVIF Support
+RUN git clone https://github.com/videolan/dav1d.git
+
+WORKDIR /dav1d
+
+RUN mkdir build 
+
+WORKDIR /dav1d/build
+
+RUN meson setup ../; \ 
+    ninja; \
+    ninja install 
+
+#Cargo build for stump
+WORKDIR /app
 
 COPY . .
 

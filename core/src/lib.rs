@@ -77,12 +77,12 @@ impl StumpCore {
 	/// A three-step configuration initialization function.
 	///
 	/// 1. Loads configuration variables from Stump.toml, located at the input
-	/// config_dir, if such a file exists.
+	///    config_dir, if such a file exists.
 	///
 	/// 2. Overrides variables with those set in the environment.
 	///
 	/// 3. Creates the configuration directory (if it does not exist) and writes
-	/// to Stump.toml.
+	///    to Stump.toml.
 	///
 	/// Returns the configuration variables in a `StumpConfig` struct.
 	pub fn init_config(config_dir: String) -> CoreResult<StumpConfig> {
@@ -313,6 +313,8 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<UserPermission>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<AgeRestriction>()?).as_bytes())?;
 
+		file.write_all(format!("{}\n\n", ts_export::<SupportedFont>()?).as_bytes())?;
+
 		file.write_all(format!("{}\n\n", ts_export::<NavigationMode>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<HomeItem>()?).as_bytes())?;
 		file.write_all(
@@ -353,7 +355,19 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<Media>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<Bookmark>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<MediaAnnotation>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<ReadProgress>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<ActiveReadingSession>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<FinishedReadingSession>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<ProgressUpdateReturn>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<PageDimension>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<PageDimensionsEntity>()?).as_bytes(),
+		)?;
 
 		file.write_all(
 			format!("{}\n\n", ts_export::<ReactTableColumnSort>()?).as_bytes(),

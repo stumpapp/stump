@@ -1,0 +1,126 @@
+name: Binary release
+
+# Manual release with input version number
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Enter the release version (e.g., 0.1.0)
+        required: true
+
+jobs:
+  # This job builds the common webapp HTML/JS/CSS used for all platforms
+  build-webapp:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build web application/upload artifact
+        uses: ./.github/actions/build-web
+
+  # This job builds the binaries for each release
+  build-binary:
+    needs: build-webapp
+    strategy:
+      matrix:
+        # Note: macos-13 is intel-based, macos-latest is M1-based
+        # See https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
+        os: [ubuntu-latest, macos-13, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            artifact_name: linux-artifact
+            artifact_filename: stump_server
+          - os: macos-13
+            artifact_name: macos-intel-artifact
+            artifact_filename: stump_server
+          - os: macos-latest
+            artifact_name: macos-arm-artifact
+            artifact_filename: stump_server
+          - os: windows-latest
+            artifact_name: windows-artifact
+            artifact_filename: stump_server.exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build stump server
+        uses: ./.github/actions/build-server
+
+      - name: Copy bundled web app
+        uses: actions/download-artifact@v4
+        with:
+          name: webapp
+          path: ./staging/client
+
+      - name: Prepare artifact
+        run: mv target/release/${{ matrix.artifact_filename }} ./staging/${{ matrix.artifact_filename }}
+
+      - name: Upload server artifact
+        uses: ./.github/actions/upload-artifact
+        with:
+          upload-name: ${{ matrix.artifact_name }}
+          upload-path: staging
+
+  # This job creates the release and organizes associated files
+  create-release:
+    needs: build-binary
+    runs-on: ubuntu-latest
+    permissions: write-all
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Download artifact (Linux)
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-artifact
+          path: StumpServer-linux
+
+      - name: Download artifact (macOS Intel)
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-intel-artifact
+          path: StumpServer-macos-intel
+
+      - name: Download artifact (macOS ARM)
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-arm-artifact
+          path: StumpServer-macos-arm
+
+      - name: Download artifact (Windows)
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-artifact
+          path: StumpServer-windows
+
+      - name: Install dependencies
+        run: sudo apt-get install -y gh zip
+
+      - name: Zip artifacts
+        run: |
+          cd StumpServer-linux
+          zip -r ../linux-build-results.zip *
+          cd ../StumpServer-macos-intel
+          zip -r ../macos-intel-build-results.zip *
+          cd ../StumpServer-macos-arm
+          zip -r ../macos-arm-build-results.zip *
+          cd ../StumpServer-windows
+          zip -r ../windows-build-results.zip *
+          cd ..
+
+      - name: Create release and upload artifacts
+        run: |
+          gh release create v${{ github.event.inputs.version }} \
+            --draft \
+            --target main \
+            --title 'v${{ github.event.inputs.version }}' \
+            --generate-notes \
+            linux-build-results.zip#StumpServer-${{ github.event.inputs.version }}-linux-x86_64.zip \
+            macos-intel-build-results.zip#StumpServer-${{ github.event.inputs.version }}-macos-intel.zip \
+            macos-arm-build-results.zip#StumpServer-${{ github.event.inputs.version }}-macos-arm.zip \
+            windows-build-results.zip#StumpServer-${{ github.event.inputs.version }}-windows-x86_64.zip

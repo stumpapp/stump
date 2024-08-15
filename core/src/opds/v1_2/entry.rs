@@ -47,10 +47,7 @@ impl OpdsEntry {
 		links: Option<Vec<OpdsLink>>,
 		stream_link: Option<OpdsStreamLink>,
 	) -> Self {
-		let links = match links {
-			Some(links) => links,
-			None => vec![],
-		};
+		let links = links.unwrap_or_default();
 
 		Self {
 			id,
@@ -168,16 +165,13 @@ impl From<media::Data> for OpdsEntry {
 		let FileParts { file_name, .. } = path_buf.file_parts();
 		let file_name_encoded = encode(&file_name);
 
-		let progress_info = value
-			.read_progresses()
+		let active_reading_session = value
+			.active_user_reading_sessions()
 			.ok()
-			.and_then(|progresses| progresses.first());
-
-		let (current_page, last_read_at) = if let Some(progress) = progress_info {
-			(Some(progress.page), Some(progress.updated_at))
-		} else {
-			(None, None)
-		};
+			.and_then(|sessions| sessions.first().cloned());
+		let (current_page, last_read_at) = active_reading_session
+			.map(|session| (session.page, Some(session.updated_at)))
+			.unwrap_or((None, None));
 
 		let target_pages = if let Some(page) = current_page {
 			vec![1, page]

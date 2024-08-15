@@ -2,7 +2,78 @@ import { Callout } from 'nextra-theme-docs'
 
 # Thumbnails
 
-<Callout emoji="🚧">
-	The documentation for this functionality is not yet implemented. Check back soon for updated
-	information.
+Stump uses thumbnails to display images of your media throughout the app. By default, Stump will pull the first image from a media file to use as a thumbnail. However, you can customize this behavior per-library by configuring the thumbnail generation settings
+
+## Thumbnail Generation
+
+The generation of thumbnails is controlled by the configuration options for a library. These options include:
+
+- Explicitly sizing each thumbnail (height and width in pixels)
+- Scaling both dimensions of each thumbnail by a factor (e.g. 0.5)
+- The format to encode the thumbnail in (e.g. JPEG, PNG, WebP, AVIF)
+- The quality of the encoding (e.g. 0-1.0)
+
+Thumbnail generation is optional, and you can disable it entirely if you prefer to use the default image as a thumbnail.
+
+<Callout emoji="🛜" type="info">
+	The advantage of configuring thumbnail generation is that it allows you to minimize the size of
+	thumbnails being sent to the client, which greatly improves performance. Otherwise, the full-size
+	image would be sent to the client, which can be very large and slow to load.
 </Callout>
+
+### Image Candidacy
+
+When generating thumbnails, Stump will use the very first image it encounters in the media file as the thumbnail.
+
+## Supported Formats
+
+### Generation
+
+Stump supports generating thumbnails to and from the following formats:
+
+- JPEG
+- PNG
+- WebP
+- AVIF
+
+You should ensure that your browser supports the format you plan to use. You can visit the following links to check:
+
+- [WebP](https://caniuse.com/webp)
+- [AVIF](https://caniuse.com/avif)
+
+### Display
+
+Stump supports the following formats for displaying thumbnails, in addition to the above:
+
+- [GIF](https://caniuse.com/gif)
+
+The reason for this separation is that while Stump supports rendering these on the UI, there is no process to convert them.
+
+## Management
+
+Thumbnail management can be done in either the settings page associated with a particular entity or in the settings page for the library as a whole. For example:
+
+- `/books/:bookId/manage`
+- `/series/:seriesId/settings`
+- `/libraries/:libraryId/settings`
+
+### Thumbnail Selection
+
+You have the option to manually select an image as a thumbnail. This is useful when either the automatic selection is incorrect or when you want to use a special image. The selection is done on a media file, so if you are selecting for a:
+
+- `Library`: You will select a particular series, then a particular book, then a particular page
+- `Series`: You will select a particular book, then a particular page
+- `Book`: You will select a particular page
+
+You may also upload a custom image to use as a thumbnail.
+
+### Regeneration
+
+You have the ability to regenerate thumbnails in a given library's settings page. The options are:
+
+- Generate only missing thumbnails
+- Force regenerate all thumbnails
+
+### Deletion
+
+You can delete a thumbnail in a given library's settings page. This will remove all thumbnails associated with the library and its entities.

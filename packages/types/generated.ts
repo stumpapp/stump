@@ -54,7 +54,7 @@ export type ThumbnailGenerationJobParams = { variant: ThumbnailGenerationJobVari
 
 export type ThumbnailGenerationOutput = { visited_files: BigInt; generated_thumbnails: BigInt; removed_thumbnails: BigInt }
 
-export type User = { id: string; username: string; is_server_owner: boolean; avatar_url: string | null; created_at: string; last_login: string | null; is_locked: boolean; permissions: UserPermission[]; max_sessions_allowed?: number | null; login_sessions_count?: number | null; user_preferences?: UserPreferences | null; login_activity?: LoginActivity[] | null; age_restriction?: AgeRestriction | null; read_progresses?: ReadProgress[] | null }
+export type User = { id: string; username: string; is_server_owner: boolean; avatar_url: string | null; created_at: string; last_login: string | null; is_locked: boolean; permissions: UserPermission[]; max_sessions_allowed?: number | null; login_sessions_count?: number | null; user_preferences?: UserPreferences | null; login_activity?: LoginActivity[] | null; age_restriction?: AgeRestriction | null; active_reading_sessions?: ActiveReadingSession[] | null; finished_reading_sessions?: FinishedReadingSession[] | null }
 
 /**
  * Permissions that can be granted to a user. Some permissions are implied by others,
@@ -63,6 +63,8 @@ export type User = { id: string; username: string; is_server_owner: boolean; ava
 export type UserPermission = "bookclub:read" | "bookclub:create" | "emailer:read" | "emailer:create" | "emailer:manage" | "email:send" | "email:arbitrary_send" | "smartlist:read" | "file:explorer" | "file:upload" | "file:download" | "library:create" | "library:edit" | "library:scan" | "library:manage" | "library:delete" | "user:read" | "user:manage" | "notifier:read" | "notifier:create" | "notifier:manage" | "notifier:delete" | "server:manage"
 
 export type AgeRestriction = { age: number; restrict_on_unset: boolean }
+
+export type SupportedFont = "inter" | "opendyslexic"
 
 export type NavigationMode = "SIDEBAR" | "TOPBAR"
 
@@ -76,7 +78,7 @@ export type ArrangementItem<I> = { item: I; visible?: boolean }
 
 export type Arrangement<I> = { locked: boolean; items: ArrangementItem<I>[] }
 
-export type UserPreferences = { id: string; locale: string; app_theme: string; show_query_indicator: boolean; enable_live_refetch?: boolean; preferred_layout_mode?: string; primary_navigation_mode?: string; layout_max_width_px?: number | null; enable_discord_presence?: boolean; enable_compact_display?: boolean; enable_double_sidebar?: boolean; enable_hide_scrollbar?: boolean; enable_replace_primary_sidebar?: boolean; prefer_accent_color?: boolean; show_thumbnails_in_headers?: boolean; navigation_arrangement?: Arrangement<NavigationItem>; home_arrangement?: Arrangement<HomeItem> }
+export type UserPreferences = { id: string; locale: string; app_theme: string; app_font?: SupportedFont; show_query_indicator?: boolean; enable_live_refetch?: boolean; preferred_layout_mode?: string; primary_navigation_mode?: string; layout_max_width_px?: number | null; enable_discord_presence?: boolean; enable_compact_display?: boolean; enable_double_sidebar?: boolean; enable_hide_scrollbar?: boolean; enable_replace_primary_sidebar?: boolean; prefer_accent_color?: boolean; show_thumbnails_in_headers?: boolean; navigation_arrangement?: Arrangement<NavigationItem>; home_arrangement?: Arrangement<HomeItem> }
 
 export type LoginActivity = { id: string; ip_address: string; user_agent: string; authentication_successful: boolean; timestamp: string; user?: User | null }
 
@@ -133,7 +135,7 @@ export type Series = { id: string; name: string; path: string; description: stri
  */
 export type MediaMetadata = { title: string | null; series: string | null; number: number | null; volume: number | null; summary: string | null; notes: string | null; age_rating?: number | null; genre?: string[] | null; year: number | null; month: number | null; day: number | null; writers?: string[] | null; pencillers?: string[] | null; inkers?: string[] | null; colorists?: string[] | null; letterers?: string[] | null; cover_artists?: string[] | null; editors?: string[] | null; publisher: string | null; links?: string[] | null; characters?: string[] | null; teams?: string[] | null; page_count: number | null }
 
-export type Media = { id: string; name: string; size: BigInt; extension: string; pages: number; updated_at: string; created_at: string; modified_at: string | null; hash: string | null; path: string; status: FileStatus; series_id: string; metadata: MediaMetadata | null; series?: Series | null; read_progresses?: ReadProgress[] | null; current_page?: number | null; current_epubcfi?: string | null; is_completed?: boolean | null; tags?: Tag[] | null; bookmarks?: Bookmark[] | null }
+export type Media = { id: string; name: string; size: BigInt; extension: string; pages: number; updated_at: string; created_at: string; modified_at: string | null; hash: string | null; path: string; status: FileStatus; series_id: string; metadata: MediaMetadata | null; series?: Series | null; active_reading_session?: ActiveReadingSession | null; finished_reading_sessions: FinishedReadingSession[] | null; current_page?: number | null; current_epubcfi?: string | null; is_completed?: boolean | null; tags?: Tag[] | null; bookmarks?: Bookmark[] | null }
 
 /**
  * A model representing a bookmark in the database. Bookmarks are used to save specific locations
@@ -143,7 +145,25 @@ export type Bookmark = { id: string; preview_content: string | null; epubcfi: st
 
 export type MediaAnnotation = { id: string; highlighted_text: string | null; page: number | null; page_coordinates_x: number | null; page_coordinates_y: number | null; epubcfi: string | null; notes: string | null; media_id: string; media?: Media | null }
 
-export type ReadProgress = { id: string; page: number; epubcfi: string | null; percentage_completed: number | null; is_completed: boolean; completed_at: string | null; media_id: string; media: Media | null; user_id: string; user: User | null }
+export type ActiveReadingSession = { id: string; page: number | null; epubcfi: string | null; percentage_completed: number | null; started_at: string; media_id: string; media: Media | null; user_id: string; user: User | null }
+
+export type FinishedReadingSession = { id: string; started_at: string; completed_at: string; media_id: string; media: Media | null; user_id: string; user: User | null }
+
+export type ProgressUpdateReturn = ActiveReadingSession | FinishedReadingSession
+
+/**
+ * Represents a page dimension for a page of a Stump media item. It consists of a
+ * height and a width.
+ */
+export type PageDimension = { height: number; width: number }
+
+/**
+ * Represents a database [page_dimensions::Data] object.
+ * 
+ * The `dimensions` member contains a [Vec]<[PageDimension]> containing the height and width
+ * of each page for the media attached to the metadata for this entity.
+ */
+export type PageDimensionsEntity = { id: string; dimensions: PageDimension[]; metadata_id: string }
 
 /**
  * A struct representing a sort order for a column using react-table (tanstack)
@@ -249,7 +269,7 @@ export type ImageResizeOptions = { mode: ImageResizeMode; height: number; width:
 /**
  * Supported image formats for processing images throughout Stump.
  */
-export type ImageFormat = "Webp" | "Jpeg" | "JpegXl" | "Png"
+export type ImageFormat = "Webp" | "Jpeg" | "Png"
 
 /**
  * Options for processing images throughout Stump.
@@ -295,7 +315,7 @@ export type CreateUser = { username: string; password: string; permissions?: Use
 
 export type UpdateUser = { username: string; password: string | null; avatar_url: string | null; permissions?: UserPermission[]; age_restriction: AgeRestriction | null; max_sessions_allowed?: number | null }
 
-export type UpdateUserPreferences = { id: string; locale: string; preferred_layout_mode: string; primary_navigation_mode: string; layout_max_width_px: number | null; app_theme: string; show_query_indicator: boolean; enable_live_refetch: boolean; enable_discord_presence: boolean; enable_compact_display: boolean; enable_double_sidebar: boolean; enable_replace_primary_sidebar: boolean; enable_hide_scrollbar: boolean; prefer_accent_color: boolean; show_thumbnails_in_headers: boolean }
+export type UpdateUserPreferences = { id: string; locale: string; preferred_layout_mode: string; primary_navigation_mode: string; layout_max_width_px: number | null; app_theme: string; app_font: SupportedFont; show_query_indicator: boolean; enable_live_refetch: boolean; enable_discord_presence: boolean; enable_compact_display: boolean; enable_double_sidebar: boolean; enable_replace_primary_sidebar: boolean; enable_hide_scrollbar: boolean; prefer_accent_color: boolean; show_thumbnails_in_headers: boolean }
 
 export type DeleteUser = { hard_delete: boolean | null }
 
@@ -324,7 +344,7 @@ export type PatchEmailDevice = { name: string | null; email: string | null; forb
 
 export type CreateLibrary = { name: string; path: string; description: string | null; tags: Tag[] | null; scan_mode: LibraryScanMode | null; library_options: LibraryOptions | null }
 
-export type UpdateLibrary = { id: string; name: string; path: string; description: string | null; emoji: string | null; tags: Tag[] | null; removed_tags?: Tag[] | null; library_options: LibraryOptions; scan_mode?: LibraryScanMode | null }
+export type UpdateLibrary = { name: string; path: string; description: string | null; emoji: string | null; tags: Tag[] | null; removed_tags?: Tag[] | null; library_options: LibraryOptions; scan_mode?: LibraryScanMode | null }
 
 export type UpdateLibraryExcludedUsers = { user_ids: string[] }
 
@@ -334,7 +354,7 @@ export type LibraryStatsParams = { all_users?: boolean }
 
 export type PutMediaCompletionStatus = { is_complete: boolean; page?: number | null }
 
-export type MediaIsComplete = { is_completed: boolean; completed_at: string | null }
+export type MediaIsComplete = { is_completed: boolean; last_completed_at: string | null }
 
 export type MediaMetadataOverview = { genres: string[]; writers: string[]; pencillers: string[]; inkers: string[]; colorists: string[]; letterers: string[]; editors: string[]; publishers: string[]; characters: string[]; teams: string[] }
 

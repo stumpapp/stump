@@ -3,6 +3,7 @@
 	"include": ["src"],
 	"references": [],
 	"compilerOptions": {
+		"outDir": "./dist",
 		"jsx": "preserve",
 		"esModuleInterop": true,
 		"module": "es2022",

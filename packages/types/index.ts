@@ -1,8 +1,13 @@
-import { CursorInfo, Library, Media, PageInfo, Series, User } from './generated'
+import { CursorInfo, Library, Media, PageInfo, Series, SupportedFont, User } from './generated'
 
 export const isUser = (data: unknown): data is User => {
 	const casted = data as User
 	return casted?.id !== undefined && casted?.is_server_owner !== undefined
+}
+
+export const isSupportedFont = (data: unknown): data is SupportedFont => {
+	const casted = data as SupportedFont
+	return casted === 'inter' || casted === 'opendyslexic'
 }
 
 export enum FileStatus {
@@ -37,7 +42,7 @@ export interface Pageable<T> {
 // Note: I am separating these options / exclusions in case I want to use either independently.
 export type MediaOrderByExclusions = Extract<
 	keyof Media,
-	'currentPage' | 'series' | 'readProgresses' | 'tags' | 'id'
+	'current_page' | 'series' | 'tags' | 'id' | 'active_reading_session' | 'finished_reading_sessions'
 >
 export type MediaOrderByOptions = Partial<Omit<Media, MediaOrderByExclusions>>
 // TODO: I HATE THIS

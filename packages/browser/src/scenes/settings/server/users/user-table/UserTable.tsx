@@ -1,6 +1,6 @@
 import { Badge, Card, Text, ToolTip } from '@stump/components'
 import { User } from '@stump/types'
-import { createColumnHelper } from '@tanstack/react-table'
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import { HelpCircle } from 'lucide-react'
 import { useMemo, useState } from 'react'
@@ -83,7 +83,7 @@ const baseColumns = [
 		header: 'Status',
 		id: 'is_locked',
 	}),
-]
+] as ColumnDef<User>[]
 
 export default function UserTable() {
 	const [inspectingUser, setInspectingUser] = useState<User | null>(null)

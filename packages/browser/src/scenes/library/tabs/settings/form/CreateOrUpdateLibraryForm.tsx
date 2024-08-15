@@ -1,5 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useCreateLibraryMutation, useEditLibraryMutation, useTags } from '@stump/client'
+import { libraryQueryKeys } from '@stump/api'
+import {
+	invalidateQueries,
+	useCreateLibraryMutation,
+	useEditLibraryMutation,
+	useTags,
+} from '@stump/client'
 import { Button, Form } from '@stump/components'
 import type { Library, LibraryOptions, LibraryPattern, LibraryScanMode } from '@stump/types'
 import { useState } from 'react'
@@ -46,14 +52,19 @@ const resizeOptionsSchema = z
 				const isInCorrectRange = (num: number) => num > 0 && num <= 1
 				return isInCorrectRange(value.height) && isInCorrectRange(value.width)
 			} else {
-				return value.height > 0 && value.width > 0
+				return (
+					value.height >= 1 &&
+					value.width >= 1 &&
+					Number.isInteger(value.height) &&
+					Number.isInteger(value.width)
+				)
 			}
 		},
 		(value) => ({
 			message:
 				value.mode === 'Scaled'
 					? 'Height and width must be between 0 and 1'
-					: 'Height and width must be greater than 0',
+					: 'Height and width must be whole numbers greater than 0',
 		}),
 	)
 const buildScema = (existingLibraries: Library[], library?: Library) =>
@@ -114,7 +125,8 @@ type Props = {
 	library?: Library
 	existingLibraries: Library[]
 }
-
+// TODO: refactor to accept an onSubmit callback, let the parent handle the mutation accordingly
+// rather than all of this conditional logic
 export default function CreateOrEditLibraryForm({ library, existingLibraries }: Props) {
 	const navigate = useNavigate()
 
@@ -155,8 +167,8 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 	})
 
 	const { editLibraryAsync } = useEditLibraryMutation({
-		onSuccess: () => {
-			form.reset()
+		onSuccess: async () => {
+			await invalidateQueries({ exact: false, keys: [libraryQueryKeys.getLibraryById] })
 			navigate(paths.home())
 		},
 	})

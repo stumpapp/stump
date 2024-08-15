@@ -16,7 +16,7 @@ pub fn get_default_config_dir() -> String {
 }
 
 /// Returns the value of the `STUMP_CONFIG_DIR` environment variable if it is set,
-/// logs an error and returns and `~/.stump` otherwise.
+/// logs an error and returns `~/.stump` otherwise.
 pub fn bootstrap_config_dir() -> String {
 	match env::var(CONFIG_DIR_KEY) {
 		// Environment variable set

@@ -69,7 +69,7 @@
 	},
 	"createBookClubScene": {
 		"heading": "Stwórz nowy klub książki",
-		"subtitle": "Możesz utworzyć prywatny klub dla wybranch lub ustawić go jako publiczny dla każdego na serwerze",
+		"subtitle": "Możesz utworzyć prywatny klub dla wybranych lub ustawić go jako publiczny dla każdego na serwerze",
 		"form": {
 			"name": {
 				"label": "Nazwa",

@@ -25,7 +25,10 @@ impl ImageProcessor for GenericImageProcessor {
 		}
 
 		let format = match options.format {
-			process::ImageFormat::Jpeg => Ok(ImageFormat::Jpeg),
+			process::ImageFormat::Jpeg => {
+				image = image::DynamicImage::from(image.into_rgb8());
+				Ok(ImageFormat::Jpeg)
+			},
 			process::ImageFormat::Png => Ok(ImageFormat::Png),
 			process::ImageFormat::Avif => Ok(ImageFormat::Avif),
 			// TODO: change error kind
@@ -59,6 +62,8 @@ mod tests {
 		ImageFormat, ImageProcessorOptions,
 	};
 
+	//JPG -> other Tests
+	//JPG -> JPG
 	#[test]
 	fn test_generate_jpg_to_jpg() {
 		let jpg_path = get_test_jpg_path();
@@ -120,6 +125,212 @@ mod tests {
 		assert_eq!(dimensions.1, 100);
 	}
 
+	//JPG -> PNG
+	#[test]
+	fn test_generate_jpg_to_png() {
+		let jpg_path = get_test_jpg_path();
+		let options = ImageProcessorOptions {
+			format: ImageFormat::Png,
+			..Default::default()
+		};
+
+		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
+			.expect("Failed to generate image buffer");
+		assert!(!buffer.is_empty());
+		// should be a valid PNG
+		assert!(
+			image::load_from_memory_with_format(&buffer, image::ImageFormat::Png).is_ok()
+		);
+	}
+
+	#[test]
+	fn test_generate_jpg_to_png_with_rescale() {
+		let jpg_path = get_test_jpg_path();
+		let options = ImageProcessorOptions {
+			format: ImageFormat::Png,
+			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
+			..Default::default()
+		};
+
+		let current_dimensions =
+			image::image_dimensions(&jpg_path).expect("Failed to get dimensions");
+
+		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
+			.expect("Failed to generate image buffer");
+
+		let new_dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
+
+		assert_eq!(new_dimensions.0, (current_dimensions.0 as f32 * 0.5) as u32);
+		assert_eq!(new_dimensions.1, (current_dimensions.1 as f32 * 0.5) as u32);
+	}
+
+	#[test]
+	fn test_generate_jpg_to_png_with_resize() {
+		let jpg_path = get_test_jpg_path();
+		let options = ImageProcessorOptions {
+			format: ImageFormat::Png,
+			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
+			..Default::default()
+		};
+
+		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
+			.expect("Failed to generate image buffer");
+
+		let dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
+
+		assert_eq!(dimensions.0, 100);
+		assert_eq!(dimensions.1, 100);
+	}
+
+	//JPG -> webp
+	#[test]
+	fn test_generate_jpg_to_webp_fail() {
+		let jpg_path = get_test_jpg_path();
+		let options = ImageProcessorOptions {
+			format: ImageFormat::Webp,
+			..Default::default()
+		};
+
+		let result = GenericImageProcessor::generate_from_path(&jpg_path, options);
+		assert!(result.is_err());
+		assert_eq!(
+			result.unwrap_err().to_string(),
+			"An unknown error occurred: Incorrect image processor for requested format."
+		);
+	}
+
+	//JPG -> AVIF
+	#[test]
+	fn test_generate_jpg_to_avif() {
+		let jpg_path = get_test_jpg_path();
+		let options = ImageProcessorOptions {
+			format: ImageFormat::Avif,
+			..Default::default()
+		};
+
+		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
+			.expect("Failed to generate image buffer");
+
+		assert!(!buffer.is_empty());
+		// should be a valid Avif
+		assert!(
+			image::load_from_memory_with_format(&buffer, image::ImageFormat::Avif)
+				.is_ok()
+		);
+	}
+
+	#[test]
+	fn test_generate_jpg_to_avif_with_rescale() {
+		let jpg_path = get_test_jpg_path();
+		let options = ImageProcessorOptions {
+			format: ImageFormat::Avif,
+			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
+			..Default::default()
+		};
+
+		let current_dimensions =
+			image::image_dimensions(&jpg_path).expect("Failed to get dimensions");
+
+		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
+			.expect("Failed to generate image buffer");
+
+		let new_dimensions =
+			image::load_from_memory_with_format(&buffer, image::ImageFormat::Avif)
+				.expect("Failed to load image from buffer")
+				.dimensions();
+
+		assert_eq!(new_dimensions.0, (current_dimensions.0 as f32 * 0.5) as u32);
+		assert_eq!(new_dimensions.1, (current_dimensions.1 as f32 * 0.5) as u32);
+	}
+
+	#[test]
+	fn test_generate_jpg_to_avif_with_resize() {
+		let jpg_path = get_test_jpg_path();
+		let options = ImageProcessorOptions {
+			format: ImageFormat::Avif,
+			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
+			..Default::default()
+		};
+
+		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
+			.expect("Failed to generate image buffer");
+
+		let dimensions =
+			image::load_from_memory_with_format(&buffer, image::ImageFormat::Avif)
+				.expect("Failed to load image from buffer")
+				.dimensions();
+
+		assert_eq!(dimensions.0, 100);
+		assert_eq!(dimensions.1, 100);
+	}
+
+	// PNG -> other
+	// PNG -> PNG
+	#[test]
+	fn test_generate_png_to_png() {
+		let png_path = get_test_png_path();
+		let options = ImageProcessorOptions {
+			format: ImageFormat::Png,
+			..Default::default()
+		};
+
+		let buffer = GenericImageProcessor::generate_from_path(&png_path, options)
+			.expect("Failed to generate image buffer");
+		assert!(!buffer.is_empty());
+		// should *still* be a valid PNG
+		assert!(
+			image::load_from_memory_with_format(&buffer, image::ImageFormat::Png).is_ok()
+		);
+	}
+
+	#[test]
+	fn test_generate_png_to_png_with_rescale() {
+		let png_path = get_test_png_path();
+		let options = ImageProcessorOptions {
+			format: ImageFormat::Png,
+			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
+			..Default::default()
+		};
+
+		let current_dimensions =
+			image::image_dimensions(&png_path).expect("Failed to get dimensions");
+
+		let buffer = GenericImageProcessor::generate_from_path(&png_path, options)
+			.expect("Failed to generate image buffer");
+
+		let new_dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
+
+		assert_eq!(new_dimensions.0, (current_dimensions.0 as f32 * 0.5) as u32);
+		assert_eq!(new_dimensions.1, (current_dimensions.1 as f32 * 0.5) as u32);
+	}
+
+	#[test]
+	fn test_generate_png_to_png_with_resize() {
+		let png_path = get_test_png_path();
+		let options = ImageProcessorOptions {
+			format: ImageFormat::Png,
+			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
+			..Default::default()
+		};
+
+		let buffer = GenericImageProcessor::generate_from_path(&png_path, options)
+			.expect("Failed to generate image buffer");
+
+		let dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
+
+		assert_eq!(dimensions.0, 100);
+		assert_eq!(dimensions.1, 100);
+	}
+
+	//PNG -> JPG
 	#[test]
 	fn test_generate_png_to_jpg() {
 		let png_path = get_test_png_path();
@@ -181,88 +392,30 @@ mod tests {
 		assert_eq!(dimensions.1, 100);
 	}
 
+	//PNG -> AVIF
 	#[test]
-	fn test_generate_jpg_to_png() {
-		let jpg_path = get_test_jpg_path();
-		let options = ImageProcessorOptions {
-			format: ImageFormat::Png,
-			..Default::default()
-		};
-
-		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
-			.expect("Failed to generate image buffer");
-		assert!(!buffer.is_empty());
-		// should be a valid PNG
-		assert!(
-			image::load_from_memory_with_format(&buffer, image::ImageFormat::Png).is_ok()
-		);
-	}
-
-	#[test]
-	fn test_generate_jpg_to_png_with_rescale() {
-		let jpg_path = get_test_jpg_path();
-		let options = ImageProcessorOptions {
-			format: ImageFormat::Png,
-			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
-			..Default::default()
-		};
-
-		let current_dimensions =
-			image::image_dimensions(&jpg_path).expect("Failed to get dimensions");
-
-		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
-			.expect("Failed to generate image buffer");
-
-		let new_dimensions = image::load_from_memory(&buffer)
-			.expect("Failed to load image from buffer")
-			.dimensions();
-
-		assert_eq!(new_dimensions.0, (current_dimensions.0 as f32 * 0.5) as u32);
-		assert_eq!(new_dimensions.1, (current_dimensions.1 as f32 * 0.5) as u32);
-	}
-
-	#[test]
-	fn test_generate_jpg_to_png_with_resize() {
-		let jpg_path = get_test_jpg_path();
-		let options = ImageProcessorOptions {
-			format: ImageFormat::Png,
-			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
-			..Default::default()
-		};
-
-		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
-			.expect("Failed to generate image buffer");
-
-		let dimensions = image::load_from_memory(&buffer)
-			.expect("Failed to load image from buffer")
-			.dimensions();
-
-		assert_eq!(dimensions.0, 100);
-		assert_eq!(dimensions.1, 100);
-	}
-
-	#[test]
-	fn test_generate_png_to_png() {
+	fn test_generate_png_to_avif() {
 		let png_path = get_test_png_path();
 		let options = ImageProcessorOptions {
-			format: ImageFormat::Png,
+			format: ImageFormat::Avif,
 			..Default::default()
 		};
 
 		let buffer = GenericImageProcessor::generate_from_path(&png_path, options)
 			.expect("Failed to generate image buffer");
 		assert!(!buffer.is_empty());
-		// should *still* be a valid PNG
+		// should be a valid JPEG
 		assert!(
-			image::load_from_memory_with_format(&buffer, image::ImageFormat::Png).is_ok()
+			image::load_from_memory_with_format(&buffer, image::ImageFormat::Avif)
+				.is_ok()
 		);
 	}
 
 	#[test]
-	fn test_generate_png_to_png_with_rescale() {
+	fn test_generate_png_to_avif_with_rescale() {
 		let png_path = get_test_png_path();
 		let options = ImageProcessorOptions {
-			format: ImageFormat::Png,
+			format: ImageFormat::Avif,
 			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
 			..Default::default()
 		};
@@ -273,19 +426,20 @@ mod tests {
 		let buffer = GenericImageProcessor::generate_from_path(&png_path, options)
 			.expect("Failed to generate image buffer");
 
-		let new_dimensions = image::load_from_memory(&buffer)
-			.expect("Failed to load image from buffer")
-			.dimensions();
+		let new_dimensions =
+			image::load_from_memory_with_format(&buffer, image::ImageFormat::Avif)
+				.expect("Failed to load image from buffer")
+				.dimensions();
 
 		assert_eq!(new_dimensions.0, (current_dimensions.0 as f32 * 0.5) as u32);
 		assert_eq!(new_dimensions.1, (current_dimensions.1 as f32 * 0.5) as u32);
 	}
 
 	#[test]
-	fn test_generate_png_to_png_with_resize() {
+	fn test_generate_png_to_avif_with_resize() {
 		let png_path = get_test_png_path();
 		let options = ImageProcessorOptions {
-			format: ImageFormat::Png,
+			format: ImageFormat::Avif,
 			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
 			..Default::default()
 		};
@@ -293,30 +447,17 @@ mod tests {
 		let buffer = GenericImageProcessor::generate_from_path(&png_path, options)
 			.expect("Failed to generate image buffer");
 
-		let dimensions = image::load_from_memory(&buffer)
-			.expect("Failed to load image from buffer")
-			.dimensions();
+		let dimensions =
+			image::load_from_memory_with_format(&buffer, image::ImageFormat::Avif)
+				.expect("Failed to load image from buffer")
+				.dimensions();
 
 		assert_eq!(dimensions.0, 100);
 		assert_eq!(dimensions.1, 100);
 	}
 
-	#[test]
-	fn test_generate_jpg_to_webp_fail() {
-		let jpg_path = get_test_jpg_path();
-		let options = ImageProcessorOptions {
-			format: ImageFormat::Webp,
-			..Default::default()
-		};
-
-		let result = GenericImageProcessor::generate_from_path(&jpg_path, options);
-		assert!(result.is_err());
-		assert_eq!(
-			result.unwrap_err().to_string(),
-			"An unknown error occurred: Incorrect image processor for requested format."
-		);
-	}
-
+	//AVIF -> other
+	//AVIF -> AVIF
 	#[test]
 	fn test_generate_avif_to_avif() {
 		let avif_path = get_test_avif_path();
@@ -329,6 +470,7 @@ mod tests {
 		let buffer = GenericImageProcessor::generate_from_path(&avif_path, options)
 			.expect("Failed to generate image buffer");
 		assert!(!buffer.is_empty());
+
 		// should *still* be a valid AVIF
 		assert!(
 			image::load_from_memory_with_format(&buffer, image::ImageFormat::Avif)
@@ -351,9 +493,10 @@ mod tests {
 		let buffer = GenericImageProcessor::generate_from_path(&avif_path, options)
 			.expect("Failed to generate image buffer");
 
-		let new_dimensions = image::load_from_memory(&buffer)
-			.expect("Failed to load image from buffer")
-			.dimensions();
+		let new_dimensions =
+			image::load_from_memory_with_format(&buffer, image::ImageFormat::Avif)
+				.expect("Failed to load image from buffer")
+				.dimensions();
 
 		assert_eq!(new_dimensions.0, (current_dimensions.0 as f32 * 0.5) as u32);
 		assert_eq!(new_dimensions.1, (current_dimensions.1 as f32 * 0.5) as u32);
@@ -371,14 +514,16 @@ mod tests {
 		let buffer = GenericImageProcessor::generate_from_path(&avif_path, options)
 			.expect("Failed to generate image buffer");
 
-		let dimensions = image::load_from_memory(&buffer)
-			.expect("Failed to load image from buffer")
-			.dimensions();
+		let dimensions =
+			image::load_from_memory_with_format(&buffer, image::ImageFormat::Avif)
+				.expect("Failed to load image from buffer")
+				.dimensions();
 
 		assert_eq!(dimensions.0, 100);
 		assert_eq!(dimensions.1, 100);
 	}
 
+	//AVIF -> PNG
 	#[test]
 	fn test_generate_avif_to_png() {
 		let avif_path = get_test_avif_path();
@@ -424,6 +569,68 @@ mod tests {
 		let avif_path = get_test_avif_path();
 		let options = ImageProcessorOptions {
 			format: ImageFormat::Png,
+			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
+			..Default::default()
+		};
+
+		let buffer = GenericImageProcessor::generate_from_path(&avif_path, options)
+			.expect("Failed to generate image buffer");
+
+		let dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
+
+		assert_eq!(dimensions.0, 100);
+		assert_eq!(dimensions.1, 100);
+	}
+
+	//AVIF -> JPG
+	#[test]
+	fn test_generate_avif_to_jpg() {
+		let avif_path = get_test_avif_path();
+		let options = ImageProcessorOptions {
+			format: ImageFormat::Jpeg,
+			..Default::default()
+		};
+
+		let buffer = GenericImageProcessor::generate_from_path(&avif_path, options)
+			.expect("Failed to generate image buffer");
+		assert!(!buffer.is_empty());
+		// should be a valid PNG
+		assert!(
+			image::load_from_memory_with_format(&buffer, image::ImageFormat::Jpeg)
+				.is_ok()
+		);
+	}
+
+	#[test]
+	fn test_generate_avif_to_jpg_with_rescale() {
+		let avif_path = get_test_avif_path();
+		let options = ImageProcessorOptions {
+			format: ImageFormat::Jpeg,
+			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
+			..Default::default()
+		};
+
+		let current_dimensions =
+			image::image_dimensions(&avif_path).expect("Failed to get dimensions");
+
+		let buffer = GenericImageProcessor::generate_from_path(&avif_path, options)
+			.expect("Failed to generate image buffer");
+
+		let new_dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
+
+		assert_eq!(new_dimensions.0, (current_dimensions.0 as f32 * 0.5) as u32);
+		assert_eq!(new_dimensions.1, (current_dimensions.1 as f32 * 0.5) as u32);
+	}
+
+	#[test]
+	fn test_generate_avif_to_jpg_with_resize() {
+		let avif_path = get_test_avif_path();
+		let options = ImageProcessorOptions {
+			format: ImageFormat::Jpeg,
 			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
 			..Default::default()
 		};

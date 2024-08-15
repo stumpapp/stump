@@ -267,16 +267,12 @@ async fn get_reading_list_by_id(
 			rbac_condition.clone(),
 		]])
 		.exec()
-		.await?;
+		.await?
+		.ok_or_else(|| {
+			APIError::NotFound(format!("Reading list with ID {} not found", id))
+		})?;
 
-	if reading_list.is_none() {
-		return Err(APIError::NotFound(format!(
-			"Reading list with ID {} not found",
-			id
-		)));
-	}
-
-	Ok(Json(ReadingList::from(reading_list.unwrap())))
+	Ok(Json(ReadingList::from(reading_list)))
 }
 
 // TODO: fix this endpoint, way too naive of an update...
@@ -311,16 +307,11 @@ async fn update_reading_list(
 		.reading_list()
 		.find_unique(reading_list::id::equals(id.clone()))
 		.exec()
-		.await?;
+		.await?
+		.ok_or_else(|| {
+			APIError::NotFound(format!("Reading List with id {} not found", id))
+		})?;
 
-	if reading_list.is_none() {
-		return Err(APIError::NotFound(format!(
-			"Reading List with id {} not found",
-			id
-		)));
-	}
-
-	let reading_list = reading_list.unwrap();
 	if reading_list.creating_user_id != user.id {
 		// TODO: log bad access attempt to DB
 		return Err(APIError::Forbidden(String::from(
@@ -375,16 +366,11 @@ async fn delete_reading_list_by_id(
 		.reading_list()
 		.find_unique(reading_list::id::equals(id.clone()))
 		.exec()
-		.await?;
+		.await?
+		.ok_or_else(|| {
+			APIError::NotFound(format!("Reading List with id {} not found", id))
+		})?;
 
-	if reading_list.is_none() {
-		return Err(APIError::NotFound(format!(
-			"Reading List with id {} not found",
-			id
-		)));
-	}
-
-	let reading_list = reading_list.unwrap();
 	if reading_list.creating_user_id != user.id {
 		// TODO: log bad access attempt to DB
 		return Err(APIError::forbidden_discreet());

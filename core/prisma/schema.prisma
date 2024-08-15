@@ -700,6 +700,7 @@ model UserPreferences {
   preferred_layout_mode String @default("GRID")
   locale                String @default("en")
   app_theme             String @default("LIGHT")
+  app_font              String @default("inter")
 
   primary_navigation_mode String  @default("SIDEBAR")
   layout_max_width_px     Int?    @default(1280)

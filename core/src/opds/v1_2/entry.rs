@@ -47,10 +47,7 @@ impl OpdsEntry {
 		links: Option<Vec<OpdsLink>>,
 		stream_link: Option<OpdsStreamLink>,
 	) -> Self {
-		let links = match links {
-			Some(links) => links,
-			None => vec![],
-		};
+		let links = links.unwrap_or_default();
 
 		Self {
 			id,

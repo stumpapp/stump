@@ -1,16 +1,35 @@
 name: 'Stump Checks CI'
-
 on:
   pull_request:
   push:
     branches:
       - main
+      - develop
 
 jobs:
+  code-changes-check:
+    runs-on: [ubuntu-22.04]
+    outputs:
+      changes: ${{steps.filter.outputs.changes}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            apps: ./apps/**
+            crates: ./crates/**
+            docker: ./docker/**
+            packages: ./packages/**
+
   check-rust:
-    if: "!contains(github.event.pull_request.head.ref, 'release/v')"
+    needs: code-changes-check
+    if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.changes != '[]'"
     name: Rust checks
     runs-on: [ubuntu-22.04]
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-latest]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -22,20 +41,39 @@ jobs:
         run: |
           cargo fmt --all -- --check
           cargo clippy -- -D warnings
-      # TODO: fix the tests, then uncomment this
-      # - name: Run tests
-      #   run: |
-      #     cargo integration-tests
+
+      - name: Run tests
+        run: cargo test
+
+      # TODO: move coverage to a separate job instead of conditionally running it
+      # on the ubuntu-22.04 runner as a workaround for only running it once
+      - name: Install cargo-llvm-cov
+        if: matrix.os == 'ubuntu-22.04'
+        run: cargo install cargo-llvm-cov
+
+      - name: Generate code coverage data
+        if: matrix.os == 'ubuntu-22.04'
+        run: cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
+
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-22.04'
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: lcov.info
+          fail_ci_if_error: true
 
   check-typescript:
-    if: "!contains(github.event.pull_request.head.ref, 'release/v')"
+    needs: code-changes-check
+    if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.changes != '[]'"
     name: TypeScript checks
     runs-on: [ubuntu-22.04]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v4
+      - name: Setup node
+        uses: actions/setup-node@v4
         with:
           node-version: '20.0.0'
 
@@ -43,7 +81,8 @@ jobs:
         shell: bash
         run: npm install -g yarn
 
-      - uses: actions/setup-node@v4
+      - name: Setup node (yarn cache)
+        uses: actions/setup-node@v4
         with:
           node-version: '20.0.0'
           cache: 'yarn'

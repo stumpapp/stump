@@ -5,6 +5,7 @@ import { Helmet } from 'react-helmet'
 import { Container, ContentContainer } from '@/components/container'
 
 import DisplaySpacingPreference from './DisplaySpacingPreference'
+import FontSelect from './FontSelect'
 import HideScrollbarToggle from './HideScrollbarToggle'
 import LiveRefetchToggle from './LiveRefetchToggle'
 import MaxWidthPreference from './MaxWidthPreference'
@@ -26,7 +27,11 @@ export default function AppearanceSettingsScene() {
 			</Helmet>
 
 			<ContentContainer>
-				<ThemeSelect />
+				<div className="flex flex-col gap-y-8">
+					<ThemeSelect />
+					<FontSelect />
+				</div>
+
 				<PrimaryNavigationPreference />
 
 				<div className="flex flex-col gap-y-8">

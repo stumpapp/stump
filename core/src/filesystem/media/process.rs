@@ -196,3 +196,30 @@ pub fn get_content_types_for_pages(
 		_ => Err(FileError::UnsupportedFileType(path.to_string())),
 	}
 }
+
+/// Get the content type for a specific page of a file.
+///
+/// # Arguments
+/// * `path` - The path to the file
+/// * `page` - The page number to get the content type for, 1-indexed
+pub fn get_content_type_for_page(
+	path: &str,
+	page: i32,
+) -> Result<ContentType, FileError> {
+	let mime = ContentType::from_file(path).mime_type();
+
+	let result = match mime.as_str() {
+		"application/zip" | "application/vnd.comicbook+zip" => {
+			ZipProcessor::get_page_content_types(path, [page].to_vec())
+		},
+		"application/vnd.rar" | "application/vnd.comicbook-rar" => {
+			RarProcessor::get_page_content_types(path, [page].to_vec())
+		},
+		"application/epub+zip" => {
+			EpubProcessor::get_page_content_types(path, [page].to_vec())
+		},
+		_ => return Err(FileError::UnsupportedFileType(path.to_string())),
+	}?;
+
+	Ok(result.get(&page).cloned().unwrap_or(ContentType::UNKNOWN))
+}

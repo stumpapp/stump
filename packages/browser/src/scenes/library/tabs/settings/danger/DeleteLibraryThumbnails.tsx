@@ -55,7 +55,7 @@ export default function DeleteLibraryThumbnails({ libraryId }: Props) {
 				description="Are you sure you want to delete all thumbnails for this library? You will have to manually regenerate them."
 				confirmText="Delete thumbnails"
 				confirmVariant="danger"
-				isOpen={showConfirmation}
+				isOpen={showConfirmation && !justDeleted}
 				onClose={() => setShowConfirmation(false)}
 				onConfirm={handleDeleteThumbnails}
 				confirmIsLoading={isDeleting}

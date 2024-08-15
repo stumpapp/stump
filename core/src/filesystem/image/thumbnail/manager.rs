@@ -125,6 +125,7 @@ impl ThumbnailManager {
 	) -> ParThumbnailGenerationOutput {
 		let mut output = ParThumbnailGenerationOutput::default();
 
+		// TODO: make this chunk size configurable
 		for chunk in media.chunks(5) {
 			let results = chunk
 				.into_par_iter()

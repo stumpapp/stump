@@ -10,7 +10,11 @@ use prisma_client_rust::{
 	QueryError,
 };
 use stump_core::{
-	error::CoreError, filesystem::FileError, job::error::JobManagerError, CoreEvent,
+	error::CoreError,
+	filesystem::{image::ProcessorError, FileError},
+	job::error::JobManagerError,
+	opds::v2_0::OPDSV2Error,
+	CoreEvent,
 };
 use tokio::sync::mpsc;
 use tower_sessions::session::Error as SessionError;
@@ -156,6 +160,12 @@ impl APIError {
 	}
 }
 
+impl From<OPDSV2Error> for APIError {
+	fn from(error: OPDSV2Error) -> Self {
+		APIError::InternalServerError(error.to_string())
+	}
+}
+
 impl From<MultipartError> for APIError {
 	fn from(error: MultipartError) -> Self {
 		APIError::InternalServerError(error.to_string())
@@ -246,6 +256,19 @@ impl From<prisma_client_rust::RelationNotFetchedError> for APIError {
 impl From<FileError> for APIError {
 	fn from(error: FileError) -> APIError {
 		APIError::InternalServerError(error.to_string())
+	}
+}
+
+impl From<ProcessorError> for APIError {
+	fn from(error: ProcessorError) -> APIError {
+		match error {
+			ProcessorError::InvalidQuality => APIError::BadRequest(error.to_string()),
+			ProcessorError::InvalidSizedImage => APIError::BadRequest(error.to_string()),
+			ProcessorError::InvalidConfiguration(err) => {
+				APIError::BadRequest(err.to_string())
+			},
+			_ => APIError::InternalServerError(error.to_string()),
+		}
 	}
 }
 

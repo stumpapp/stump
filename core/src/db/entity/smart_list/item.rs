@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use std::fmt;
 use utoipa::ToSchema;
 
 use crate::db::entity::{Library, Media, Series};
@@ -34,12 +35,12 @@ impl FromStr for SmartListItemGrouping {
 	}
 }
 
-impl ToString for SmartListItemGrouping {
-	fn to_string(&self) -> String {
+impl fmt::Display for SmartListItemGrouping {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		match self {
-			SmartListItemGrouping::ByBooks => "BY_BOOKS".to_string(),
-			SmartListItemGrouping::BySeries => "BY_SERIES".to_string(),
-			SmartListItemGrouping::ByLibrary => "BY_LIBRARY".to_string(),
+			SmartListItemGrouping::ByBooks => write!(f, "BY_BOOKS"),
+			SmartListItemGrouping::BySeries => write!(f, "BY_SERIES"),
+			SmartListItemGrouping::ByLibrary => write!(f, "BY_LIBRARY"),
 		}
 	}
 }

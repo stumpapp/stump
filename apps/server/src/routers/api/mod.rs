@@ -48,10 +48,7 @@ mod tests {
 			"Please ensure to only generate types using `cargo run --package codegen`"
 		);
 
-		let mut file = std::fs::OpenOptions::new()
-			.write(true)
-			.append(true)
-			.open(path)?;
+		let mut file = std::fs::OpenOptions::new().append(true).open(path)?;
 
 		file.write_all(b"// SERVER TYPE GENERATION\n\n")?;
 

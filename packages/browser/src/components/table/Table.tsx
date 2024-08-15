@@ -1,4 +1,4 @@
-import { Heading, NativeSelect, Text } from '@stump/components'
+import { cn, Heading, NativeSelect, Text } from '@stump/components'
 import {
 	Column,
 	ColumnDef,
@@ -16,6 +16,8 @@ import {
 import clsx from 'clsx'
 import { ArrowDown, ArrowUp } from 'lucide-react'
 import { CSSProperties, useMemo, useRef, useState } from 'react'
+
+import { usePreferences } from '@/hooks/usePreferences'
 
 import TablePagination from './Pagination'
 import TableFilterInput from './TableFilterInput'
@@ -51,6 +53,10 @@ export default function Table<T, V>({
 	const filterColRef = useRef<HTMLSelectElement | null>(null)
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 	const [globalFilter, setGlobalFilter] = useState('')
+
+	const {
+		preferences: { enable_hide_scrollbar },
+	} = usePreferences()
 
 	const table = useReactTable({
 		onSortingChange: setSorting,
@@ -116,7 +122,11 @@ export default function Table<T, V>({
 
 	return (
 		<>
-			<div className="divide block max-w-full overflow-y-hidden overflow-x-scroll p-3 scrollbar-hide">
+			<div
+				className={cn('divide block max-w-full overflow-y-hidden overflow-x-scroll p-3', {
+					'scrollbar-hide': enable_hide_scrollbar,
+				})}
+			>
 				<table className={clsx('divide-y', { 'w-full': props.fullWidth })}>
 					<thead className="border-b border-edge text-left">
 						{table.getHeaderGroups().map((headerGroup) => (

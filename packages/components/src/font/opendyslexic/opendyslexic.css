@@ -1,0 +1,6 @@
+@font-face {
+	font-family: 'OpenDyslexicRegular';
+	src:
+		url('OpenDyslexic-Regular.woff') format('woff'),
+		url('svg/OpenDyslexic-Regular.svg#opendyslexicregular') format('svg');
+}

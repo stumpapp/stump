@@ -7,7 +7,7 @@ use tracing::{trace, warn};
 use walkdir::WalkDir;
 use zip::{write::FileOptions, CompressionMethod};
 
-/// Creates a new zip file at `destination` from the contents of the folder `unpacked_path`.
+/// Creates a new zip file at `destination` from the contents of the directory `unpacked_path`.
 pub(crate) fn zip_dir(
 	unpacked_path: &Path,
 	destination: &Path,
@@ -79,4 +79,58 @@ pub fn create_zip_archive(
 	zip_dir(unpacked_path, &zip_path, unpacked_path)?;
 
 	Ok(zip_path)
+}
+
+#[cfg(test)]
+mod tests {
+	use std::fs;
+
+	use tempfile::TempDir;
+
+	use super::*;
+
+	#[test]
+	fn test_zip_dir() {
+		let temp_dir = TempDir::new().unwrap();
+		let unpacked_path = temp_dir.path().join("unpacked");
+		let destination = temp_dir.path().join("archive.zip");
+
+		fs::create_dir(&unpacked_path).unwrap();
+		File::create(unpacked_path.join("file.txt"))
+			.unwrap()
+			.write_all(b"Test data")
+			.unwrap();
+
+		let res = zip_dir(&unpacked_path, &destination, &unpacked_path);
+		assert!(res.is_ok(), "Failed to create zip: {:?}", res.err());
+
+		// Assert the zip file contains the expected content.
+		let zip_file = File::open(&destination).unwrap();
+		let mut zip_archive = zip::ZipArchive::new(zip_file).unwrap();
+		assert_eq!(zip_archive.len(), 1);
+
+		let mut file = zip_archive.by_index(0).unwrap();
+		assert_eq!(file.name(), "file.txt");
+
+		let mut contents = String::new();
+		file.read_to_string(&mut contents).unwrap();
+		assert_eq!(contents, "Test data");
+	}
+
+	#[test]
+	fn test_create_zip_archive() {
+		let temp_dir = TempDir::new().unwrap();
+		let unpacked_path = temp_dir.path().join("unpacked");
+		let destination = temp_dir.path();
+
+		fs::create_dir(&unpacked_path).unwrap();
+
+		let res = create_zip_archive(&unpacked_path, "test_archive", "cbr", destination);
+		assert!(res.is_ok(), "Failed to create zip archive: {:?}", res.err());
+		assert_eq!(res.unwrap().extension().unwrap().to_str().unwrap(), "cbz");
+
+		let res = create_zip_archive(&unpacked_path, "test_archive", "txt", destination);
+		assert!(res.is_ok(), "Failed to create zip archive: {:?}", res.err());
+		assert_eq!(res.unwrap().extension().unwrap().to_str().unwrap(), "zip");
+	}
 }

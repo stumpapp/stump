@@ -14,8 +14,8 @@ use stump_core::{
 	config::StumpConfig,
 	db::{
 		entity::{
-			AgeRestriction, Arrangement, LoginActivity, NavigationItem, User,
-			UserPermission, UserPreferences,
+			AgeRestriction, Arrangement, LoginActivity, NavigationItem, SupportedFont,
+			User, UserPermission, UserPreferences,
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 	},
@@ -379,6 +379,7 @@ async fn update_preferences(
 					input.preferred_layout_mode.to_owned(),
 				),
 				user_preferences::app_theme::set(input.app_theme.to_owned()),
+				user_preferences::app_font::set(input.app_font.to_string()),
 				user_preferences::primary_navigation_mode::set(
 					input.primary_navigation_mode.to_owned(),
 				),
@@ -450,14 +451,8 @@ async fn create_user(
 			let permissions = input
 				.permissions
 				.into_iter()
-				.filter_map(|p| {
-					let p_str = p.to_string();
-					if p_str.is_empty() {
-						None
-					} else {
-						Some(p_str)
-					}
-				})
+				.map(|p| p.to_string().trim().to_owned())
+				.filter(|p| !p.is_empty())
 				.collect::<Vec<String>>();
 
 			let created_user = client
@@ -465,11 +460,15 @@ async fn create_user(
 				.create(
 					input.username.to_owned(),
 					hashed_password,
-					vec![
-						user::is_server_owner::set(false),
-						user::permissions::set(Some(permissions.join(","))),
-						user::max_sessions_allowed::set(input.max_sessions_allowed),
-					],
+					chain_optional_iter(
+						vec![
+							user::is_server_owner::set(false),
+							user::max_sessions_allowed::set(input.max_sessions_allowed),
+						],
+						[(!permissions.is_empty()).then(|| {
+							user::permissions::set(Some(permissions.join(",")))
+						})],
+					),
 				)
 				.exec()
 				.await?;
@@ -562,6 +561,7 @@ pub struct UpdateUserPreferences {
 	pub primary_navigation_mode: String,
 	pub layout_max_width_px: Option<i32>,
 	pub app_theme: String,
+	pub app_font: SupportedFont,
 	pub show_query_indicator: bool,
 	pub enable_live_refetch: bool,
 	pub enable_discord_presence: bool,
@@ -785,19 +785,15 @@ async fn get_user_by_id(
 ) -> APIResult<Json<User>> {
 	req.enforce_server_owner()?;
 	let db = &ctx.db;
-	let user_by_id = db
+	let fetched_user = db
 		.user()
 		.find_unique(user::id::equals(id.clone()))
 		.with(user::age_restriction::fetch())
 		.exec()
-		.await?;
-	debug!(id, ?user_by_id, "Result of fetching user by id");
+		.await?
+		.ok_or(APIError::NotFound(format!("User with id {} not found", id)))?;
 
-	if user_by_id.is_none() {
-		return Err(APIError::NotFound(format!("User with id {} not found", id)));
-	}
-
-	Ok(Json(User::from(user_by_id.unwrap())))
+	Ok(Json(User::from(fetched_user)))
 }
 
 // TODO: pagination!

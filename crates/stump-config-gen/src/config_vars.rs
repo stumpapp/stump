@@ -31,7 +31,7 @@ impl StumpConfigVariable {
 			self.variable_type
 				.to_string()
 				.trim_start_matches("Vec<")
-				.trim_end_matches(">")
+				.trim_end_matches('>')
 				.to_string()
 		} else {
 			self.variable_type.to_string()

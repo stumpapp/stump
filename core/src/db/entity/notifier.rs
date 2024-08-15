@@ -1,6 +1,7 @@
 use crate::{prisma::notifier, utils::encrypt_string, CoreError, CoreResult, Ctx};
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use std::fmt;
 use std::str::FromStr;
 use utoipa::ToSchema;
 
@@ -65,7 +66,8 @@ impl NotifierConfigInput {
 		match self {
 			NotifierConfigInput::Discord(config) => Ok(NotifierConfig::Discord(config)),
 			NotifierConfigInput::Telegram(config) => {
-				let encrypted_token = encrypt_string(&config.token, ctx).await?;
+				let encryption_key = ctx.get_encryption_key().await?;
+				let encrypted_token = encrypt_string(&config.token, &encryption_key)?;
 				Ok(NotifierConfig::Telegram(TelegramConfig {
 					encrypted_token,
 					chat_id: config.chat_id,
@@ -83,11 +85,11 @@ pub enum NotifierType {
 	Telegram,
 }
 
-impl ToString for NotifierType {
-	fn to_string(&self) -> String {
+impl fmt::Display for NotifierType {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		match self {
-			NotifierType::Discord => String::from("DISCORD"),
-			NotifierType::Telegram => String::from("TELEGRAM"),
+			NotifierType::Discord => write!(f, "DISCORD"),
+			NotifierType::Telegram => write!(f, "TELEGRAM"),
 		}
 	}
 }

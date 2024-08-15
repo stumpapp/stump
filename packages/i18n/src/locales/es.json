@@ -1,7 +1,7 @@
 {
 	"underConstruction": {
 		"heading": "This is awkward",
-		"message": "You've stumbled upon a page that's still being developed. I'd love to show it to you, but it isn't quite ready yet.",
+		"message": "Has tropezado con una página que todavía está en desarrollo. Me encantaría mostrártela, pero aún no está lista.",
 		"homeLink": "Go Home",
 		"githubLink": "View the GitHub issue"
 	},
@@ -51,17 +51,17 @@
 		},
 		"emailBook": {
 			"heading": "Email book",
-			"description": "Send this book to device or email address",
+			"description": "Enviar este libro a un dispositivo o dirección de correo electrónico",
 			"form": {
 				"email": {
-					"label": "Email",
-					"placeholder": "Email address",
+					"label": "Correo electrónico",
+					"placeholder": "Dirección de correo electrónico",
 					"description": "An email address to send the book to. Click add to finalize each input"
 				},
 				"devices": {
 					"label": "Devices",
 					"placeholder": "Select devices",
-					"noFilterMatch": "No devices match the filter"
+					"noFilterMatch": "Ningún dispositivo coincide con el filtro"
 				}
 			}
 		},
@@ -297,7 +297,7 @@
 	"settingsScene": {
 		"navigation": {
 			"general": "General",
-			"logs": "Logs",
+			"logs": "Registros",
 			"server": "Servidor",
 			"jobs": "Trabajos y Configuración",
 			"users": "Gestión de Usuarios",
@@ -305,70 +305,70 @@
 		},
 		"sidebar": {
 			"application": {
-				"account": "Account",
+				"account": "Cuenta",
 				"appearance": "Apariencia",
-				"reader": "Reader",
+				"reader": "Lector",
 				"desktop": "Ordenador",
 				"label": "Aplicación"
 			},
 			"server": {
 				"general": "General",
-				"logs": "Logs",
+				"logs": "Registros",
 				"users": "Usuarios",
 				"jobs": "Tareas",
 				"access": "Acceso",
-				"email": "Email",
-				"notifications": "Notifications",
-				"label": "Server"
+				"email": "Correo electrónico",
+				"notifications": "Notificaciones",
+				"label": "Servidor"
 			}
 		},
 		"app/account": {
-			"helmet": "Account settings",
-			"title": "Account settings",
-			"description": "Settings related to your account",
+			"helmet": "Configuración de la cuenta",
+			"title": "Configuración de la cuenta",
+			"description": "Configuración relacionada con tu cuenta",
 			"sections": {
 				"account": {
 					"validation": {
-						"invalidUrl": "Please enter a valid URL",
-						"missingUsername": "Username is required"
+						"invalidUrl": "Por favor, introduce una URL válida",
+						"missingUsername": "Nombre de usuario obligatorio"
 					},
 					"labels": {
-						"username": "Username",
-						"password": "Password",
-						"activeChangesPrompt": "You have unsaved changes"
+						"username": "Nombre de usuario",
+						"password": "Contraseña",
+						"activeChangesPrompt": "Tienes cambios sin guardar"
 					},
 					"errors": {
-						"updateFailed": "A server error occurred while updating your profile. Please try again."
+						"updateFailed": "Se ha producido un error en el servidor al actualizar tu perfil. Por favor, inténtalo de nuevo."
 					},
 					"avatarPicker": {
-						"heading": "Set your Avatar Image",
-						"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
-						"preview": "A preview will appear here once you have entered a URL.",
+						"heading": "Establece tu imagen de avatar",
+						"subtitle": "Stump admite avatares personalizados, que se pueden establecer proporcionando una URL a una imagen. La subida de imágenes no está soportada para reducir la cantidad de datos almacenados en el servidor.",
+						"preview": "Una vista previa aparecerá aquí una vez que haya introducido una URL.",
 						"labels": {
-							"imageUrl": "Image URL",
-							"customAvatar": "Custom Avatar"
+							"imageUrl": "URL de la imagen",
+							"customAvatar": "Avatar personalizado"
 						},
 						"buttons": {
-							"confirm": "Confirm Image",
-							"cancel": "Cancel",
-							"edit": "Edit",
-							"changeImage": "Change Image",
-							"removeImage": "Remove Image"
+							"confirm": "Confirmar imagen",
+							"cancel": "Cancelar",
+							"edit": "Editar",
+							"changeImage": "Cambiar imagen",
+							"removeImage": "Borrar imagen"
 						}
 					},
 					"buttons": {
-						"confirm": "Save Changes"
+						"confirm": "Guardar cambios"
 					}
 				},
 				"locale": {
 					"localeSelector": {
-						"label": "Language"
+						"label": "Idioma"
 					},
-					"heading": "Language and locale",
+					"heading": "Idioma y localización",
 					"subtitle": [
-						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-						"Stump's translations",
-						"if you're able to!"
+						"Stump soporta varios idiomas, establece tus preferencias a continuación. Por favor, considera ayudar a mejorar la calidad de",
+						"las traducciones de Stump",
+						"si puedes!"
 					]
 				}
 			}
@@ -391,6 +391,10 @@
 						"bronze": "Claro Bronce"
 					}
 				},
+				"fontSelect": {
+					"label": "Font",
+					"description": "Customize the font used in the application"
+				},
 				"navigationArrangement": {
 					"label": "Navigation arrangement",
 					"description": {
@@ -404,8 +408,8 @@
 						"Home": "Home",
 						"Explore": "Explore",
 						"Libraries": "Libraries",
-						"BookClubs": "Book clubs",
-						"SmartLists": "Smart lists"
+						"BookClubs": "Clubs de lectura",
+						"SmartLists": "Listas inteligentes"
 					},
 					"entityOptions": {
 						"createAction": {
@@ -421,13 +425,13 @@
 			}
 		},
 		"app/reader": {
-			"helmet": "Reader settings",
-			"title": "Reader settings",
-			"description": "Default options for the Stump readers. These are bound to your current device only",
+			"helmet": "Configuración del lector",
+			"title": "Configuración del lector",
+			"description": "Opciones predeterminadas para los lectores de Stump. Estas solo están vinculadas a tu dispositivo actual",
 			"sections": {
 				"imageBasedBooks": {
-					"label": "Image-based books",
-					"description": "Comic books, manga, and other image-based books",
+					"label": "Libros basados en imágenes",
+					"description": "Cómics, mangas y otros libros basados en imágenes",
 					"sections": {
 						"preloadAheadCount": {
 							"label": "Preload ahead count",
@@ -459,42 +463,42 @@
 			"description": "Ajustes generales relacionados con tu instancia de servidor Stump",
 			"sections": {
 				"updateAvailable": {
-					"message": "Your server is not up to date. Please update to the latest version!"
+					"message": "Tu servidor no está actualizado. ¡Por favor, actualiza a la última versión!"
 				},
 				"serverInfo": {
-					"title": "Server information",
-					"description": "Basic details about your Stump server instance",
+					"title": "Información del servidor",
+					"description": "Detalles básicos sobre tu instancia de Stump",
 					"build": {
 						"label": "Build",
 						"description": "Details about the version and build",
 						"version": {
-							"semver": "Version",
-							"commitHash": "Exact commit",
-							"date": "Build date"
+							"semver": "Versión",
+							"commitHash": "Commit exacto",
+							"date": "Fecha de compilación"
 						}
 					}
 				},
 				"serverPublicUrl": {
-					"label": "Public URL",
-					"description": "The URL that your server is accessible from outside your network, if applicable. This will enable invite links and other features"
+					"label": "URL pública",
+					"description": "La URL desde la que tu servidor es accesible fuera de tu red, si procede. Esto habilitará los enlaces de invitación y otras características"
 				}
 			}
 		},
 		"server/logs": {
-			"helmet": "Logs",
-			"title": "Logs",
-			"description": "The logs generated by your Stump server instance",
+			"helmet": "Registros",
+			"title": "Registros",
+			"description": "Los registros generados por tu instancia de Stump",
 			"sections": {
 				"persistedLogs": {
 					"title": "Persisted logs",
 					"description": "These logs have been manually persisted to the database, typically associated with a specific job or event",
 					"table": {
 						"columns": {
-							"level": "Level",
-							"message": "Message",
+							"level": "Nivel",
+							"message": "Mensaje",
 							"timestamp": "Timestamp"
 						},
-						"emptyHeading": "No logs to display",
+						"emptyHeading": "No hay registros para mostrar",
 						"emptySubtitle": "Your server is either very healthy or very unhealthy"
 					}
 				},
@@ -574,18 +578,18 @@
 				"permissions": {
 					"heading": "Permisos",
 					"subtitle": [
-						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
-						"documentation"
+						"Selecciona los permisos que quieres conceder a este usuario. Para más información sobre lo que hace cada permiso, consulta la ",
+						"documentación"
 					],
 					"bookclub": {
-						"label": "Book Clubs",
+						"label": "Clubs de lectura",
 						"read": {
 							"label": "Access book club features",
-							"description": "Allows the user to access book club features, including viewing and joining book clubs"
+							"description": "Permite al usuario acceder a las funciones de los clubs de lectura, incluyendo ver y unirse a los clubs de lectura"
 						},
 						"create": {
-							"label": "Create book clubs",
-							"description": "Allows the user to create new book clubs"
+							"label": "Crear clubs de lectura",
+							"description": "Permite al usuario crear nuevos clubs de lectura"
 						}
 					},
 					"file": {
@@ -595,11 +599,11 @@
 							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
 						},
 						"download": {
-							"label": "Download files",
-							"description": "Allows the user to download files from the server"
+							"label": "Descargar ficheros",
+							"description": "Permitir al usuario descargar ficheros del servidor"
 						},
 						"upload": {
-							"label": "Upload files",
+							"label": "Subir ficheros",
 							"description": "Allows the user to upload files to the server"
 						}
 					},
@@ -610,11 +614,11 @@
 							"description": "Allows the user to create new libraries.\nIncludes permissions to edit and scan"
 						},
 						"scan": {
-							"label": "Scan libraries",
+							"label": "Escanear bibliotecas",
 							"description": "Allows the user to initiate scans for existing libraries"
 						},
 						"edit": {
-							"label": "Edit libraries",
+							"label": "Editar bibliotecas",
 							"description": "Allows the user to edit basic details for existing libraries"
 						},
 						"manage": {
@@ -645,7 +649,7 @@
 						}
 					},
 					"smartlist": {
-						"label": "Smart Lists",
+						"label": "Listas inteligentes",
 						"read": {
 							"label": "Access smart list feature",
 							"description": "Allows the user to access smart lists features"
@@ -667,7 +671,7 @@
 				"emailers": {
 					"title": "SMTP emailers",
 					"description": "The clients you have configured for sending emails from your Stump server instance",
-					"singleInstanceDisclaimer": "While Stump supports multiple SMTP configurations in the backend, only one can be configured on the UI. This will be improved in the future",
+					"singleInstanceDisclaimer": "Aunque Stump soporta múltiples configuraciones de SMTP en el backend, solo una pueda ser configurada en la interfaz de usuario. Esto se mejorará en el futuro",
 					"list": {
 						"emptyHeading": "No SMTP emailers configured",
 						"primaryEmailer": "Primary emailer",
@@ -798,14 +802,14 @@
 		"diskUsage": "Uso de disco"
 	},
 	"noLibraries": {
-		"heading": "Nothing to see here",
-		"messagePrefix": "You can't see what you don't have",
+		"heading": "Nada que ver aquí",
+		"messagePrefix": "No puedes ver lo que no tienes",
 		"message": {
-			"create": "Create a library to get started",
+			"create": "Crea una biblioteca para empezar",
 			"wait": "Once libraries are created, they'll be displayed here"
 		},
 		"links": {
-			"create": "Create library"
+			"create": "Crear biblioteca"
 		}
 	},
 	"pagination": {
@@ -836,16 +840,16 @@
 			"books": "Explorar",
 			"bookClubs": "Clubes de libros",
 			"createLibrary": "Crear biblioteca",
-			"noLibraries": "No libraries",
+			"noLibraries": "Sin bibliotecas",
 			"createBookClub": "Crear club de libros",
-			"noBookClubs": "No book clubs",
+			"noBookClubs": "No hay clubs de lectura",
 			"settings": "Ajustes",
 			"themeToggle": "Alternar Tema",
 			"goForward": "Ir Adelante",
 			"goBack": "Ir Atrás",
-			"smartlists": "Smart lists",
-			"noSmartlists": "No smart lists",
-			"createSmartlist": "Create smart list",
+			"smartlists": "Listas inteligentes",
+			"noSmartlists": "Sin listas inteligentes",
+			"createSmartlist": "Crear lista inteligente",
 			"seeAll": "See all"
 		},
 		"libraryOptions": {
@@ -856,7 +860,7 @@
 		},
 		"versionInformation": {
 			"heading": "Información de la Versión",
-			"semVer": "Versión Semántica",
+			"semVer": "Versión semántica",
 			"commitHash": "Hash de Confirmación",
 			"buildDate": "Fecha de Construcción"
 		}
@@ -901,18 +905,18 @@
 			"uploadImage": "Upload image"
 		},
 		"uploadImage": {
-			"emptyState": "A preview of your image will appear here",
+			"emptyState": "Una vista previa de tu imagen aparecerá aquí",
 			"prompt": "Drop image here or click to select",
 			"remove": "Remove image"
 		}
 	},
 	"common": {
 		"add": "Add",
-		"cancel": "Cancel",
+		"cancel": "Cancelar",
 		"confirm": "Confirm",
 		"save": "Save",
 		"send": "Send",
-		"saveChanges": "Save changes",
+		"saveChanges": "Guardar cambios",
 		"create": "Create",
 		"edit": "Edit",
 		"update": "Update",

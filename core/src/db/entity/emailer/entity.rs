@@ -36,7 +36,8 @@ pub struct EmailerConfig {
 impl EmailerConfig {
 	/// Convert the config into a client config, which is used for the actual sending of emails
 	pub async fn into_client_config(self, ctx: &Ctx) -> CoreResult<EmailerClientConfig> {
-		let password = decrypt_string(&self.encrypted_password, ctx).await?;
+		let encryption_key = ctx.get_encryption_key().await?;
+		let password = decrypt_string(&self.encrypted_password, &encryption_key)?;
 		Ok(EmailerClientConfig {
 			sender_email: self.sender_email,
 			sender_display_name: self.sender_display_name,
@@ -54,7 +55,8 @@ impl EmailerConfig {
 		config: EmailerClientConfig,
 		ctx: &Ctx,
 	) -> CoreResult<Self> {
-		let encrypted_password = encrypt_string(&config.password, ctx).await?;
+		let encryption_key = ctx.get_encryption_key().await?;
+		let encrypted_password = encrypt_string(&config.password, &encryption_key)?;
 		Ok(EmailerConfig {
 			sender_email: config.sender_email,
 			sender_display_name: config.sender_display_name,

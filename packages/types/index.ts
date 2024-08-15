@@ -1,8 +1,13 @@
-import { CursorInfo, Library, Media, PageInfo, Series, User } from './generated'
+import { CursorInfo, Library, Media, PageInfo, Series, SupportedFont, User } from './generated'
 
 export const isUser = (data: unknown): data is User => {
 	const casted = data as User
 	return casted?.id !== undefined && casted?.is_server_owner !== undefined
+}
+
+export const isSupportedFont = (data: unknown): data is SupportedFont => {
+	const casted = data as SupportedFont
+	return casted === 'inter' || casted === 'opendyslexic'
 }
 
 export enum FileStatus {

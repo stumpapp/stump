@@ -4,12 +4,6 @@ import { Tabs } from 'nextra/components'
 
 # Docker
 
-<Callout type="info" emoji="ℹ">
-	Stump currently only has a [nightly build](https://hub.docker.com/r/aaronleopold/stump) available
-	for Docker. A `0.0.x` release will be available soon, which will provide a bit more stability when
-	updating your container.
-</Callout>
-
 You have two options for spinning up a container based on your preference:
 
 1. Docker CLI
@@ -40,7 +34,6 @@ echo -e "PUID=$(id -u)\nPGID=$(id -g)"
 Below is an example of a Docker Compose file you can use to bootstrap your Stump server:
 
 ```yaml
-version: '3.3'
 services:
   stump:
     image: aaronleopold/stump:latest

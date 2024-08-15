@@ -1,16 +1,16 @@
-name: 'Upload Local'
-description: 'Upload artifact to local action'
+name: Upload Local
+description: Upload artifact to local action
 
 inputs:
   upload-name:
     required: true
-    description: 'Name of the upload'
+    description: Name of the upload
   upload-path:
     required: true
-    description: 'Path to the upload data'
+    description: Path to the upload data
 
 runs:
-  using: 'composite'
+  using: composite
   steps:
     # https://github.com/actions/upload-artifact/issues/337
     - name: Normalize
@@ -22,7 +22,7 @@ runs:
         echo "normalized_path=$UPLOAD_PATH" >> $GITHUB_OUTPUT
 
     - name: Upload
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.upload-name }}
         path: ${{ env.normalized_path || inputs.upload-path }}

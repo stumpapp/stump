@@ -1,3 +1,4 @@
+export { useApplyTheme } from './useApplyTheme'
 export { useCurrentOrPrevious } from './useCurrentOrPrevious'
 export { useDetectZoom } from './useDetectZoom'
 export { useLayoutMode } from './useLayoutMode'

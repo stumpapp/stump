@@ -239,3 +239,33 @@ impl PathUtils for Path {
 			.any(|f| !f.path().should_ignore())
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use std::io::Write;
+
+	use tempfile::TempDir;
+
+	use super::*;
+
+	#[test]
+	fn test_read_entire_file() {
+		let temp_dir = TempDir::new().unwrap();
+		let temp_file = temp_dir.path().join("temp_file.txt");
+
+		File::create(&temp_file)
+			.unwrap()
+			.write_all(b"Test data")
+			.unwrap();
+
+		let data = read_entire_file(&temp_file).unwrap();
+		assert_eq!(data, b"Test data");
+	}
+
+	#[test]
+	fn test_read_entire_file_non_existent() {
+		let path = "non_existent_file.txt";
+		let result = read_entire_file(path);
+		assert!(result.is_err());
+	}
+}

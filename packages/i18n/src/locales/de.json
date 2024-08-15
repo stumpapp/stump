@@ -1,8 +1,8 @@
 {
 	"underConstruction": {
-		"heading": "This is awkward",
+		"heading": "Das ist unangenehm",
 		"message": "You've stumbled upon a page that's still being developed. I'd love to show it to you, but it isn't quite ready yet.",
-		"homeLink": "Go Home",
+		"homeLink": "Zur Startseite",
 		"githubLink": "View the GitHub issue"
 	},
 	"authScene": {
@@ -54,8 +54,8 @@
 			"description": "Send this book to device or email address",
 			"form": {
 				"email": {
-					"label": "Email",
-					"placeholder": "Email address",
+					"label": "E-Mail",
+					"placeholder": "E-Mail Adresse",
 					"description": "An email address to send the book to. Click add to finalize each input"
 				},
 				"devices": {
@@ -333,8 +333,8 @@
 						"missingUsername": "Benutzername ist erforderlich"
 					},
 					"labels": {
-						"username": "Username",
-						"password": "Password",
+						"username": "Benutzername",
+						"password": "Passwort",
 						"activeChangesPrompt": "You have unsaved changes"
 					},
 					"errors": {
@@ -345,24 +345,24 @@
 						"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
 						"preview": "A preview will appear here once you have entered a URL.",
 						"labels": {
-							"imageUrl": "Image URL",
+							"imageUrl": "Bild URL",
 							"customAvatar": "Custom Avatar"
 						},
 						"buttons": {
-							"confirm": "Confirm Image",
-							"cancel": "Cancel",
-							"edit": "Edit",
-							"changeImage": "Change Image",
-							"removeImage": "Remove Image"
+							"confirm": "Bild bestätigen",
+							"cancel": "Abbrechen",
+							"edit": "Bearbeiten",
+							"changeImage": "Bild ändern",
+							"removeImage": "Bild entfernen"
 						}
 					},
 					"buttons": {
-						"confirm": "Save Changes"
+						"confirm": "Änderungen speichern"
 					}
 				},
 				"locale": {
 					"localeSelector": {
-						"label": "Language"
+						"label": "Sprache"
 					},
 					"heading": "Language and locale",
 					"subtitle": [
@@ -391,6 +391,10 @@
 						"bronze": "Bronze light"
 					}
 				},
+				"fontSelect": {
+					"label": "Font",
+					"description": "Customize the font used in the application"
+				},
 				"navigationArrangement": {
 					"label": "Navigation arrangement",
 					"description": {
@@ -401,7 +405,7 @@
 					"lock": "Lock arrangement",
 					"unlock": "Unlock arrangement",
 					"options": {
-						"Home": "Home",
+						"Home": "Startseite",
 						"Explore": "Explore",
 						"Libraries": "Libraries",
 						"BookClubs": "Book clubs",
@@ -442,8 +446,8 @@
 			}
 		},
 		"app/desktop": {
-			"helmet": "Desktop settings",
-			"title": "Desktop settings",
+			"helmet": "Desktop Einstellungen",
+			"title": "Desktop Einstellungen",
 			"description": "Settings related to the Stump desktop application",
 			"sections": {
 				"discordPresence": {
@@ -455,8 +459,8 @@
 		},
 		"server/general": {
 			"helmet": "General server settings",
-			"title": "General settings",
-			"description": "General settings related to your Stump server instance",
+			"title": "Allgemeine Einstellungen",
+			"description": "Allgemeine Einstellungen von Ihrer Stumpf-Server-Instanz",
 			"sections": {
 				"updateAvailable": {
 					"message": "Your server is not up to date. Please update to the latest version!"
@@ -475,7 +479,7 @@
 					}
 				},
 				"serverPublicUrl": {
-					"label": "Public URL",
+					"label": "Öffentliche URL",
 					"description": "The URL that your server is accessible from outside your network, if applicable. This will enable invite links and other features"
 				}
 			}
@@ -492,7 +496,7 @@
 						"columns": {
 							"level": "Level",
 							"message": "Message",
-							"timestamp": "Timestamp"
+							"timestamp": "Zeitstempel"
 						},
 						"emptyHeading": "No logs to display",
 						"emptySubtitle": "Your server is either very healthy or very unhealthy"
@@ -536,12 +540,12 @@
 			}
 		},
 		"server/users": {
-			"helmet": "User management",
-			"title": "Users",
+			"helmet": "Benutzerverwaltung",
+			"title": "Benutzer",
 			"description": "Manage the users on this server",
 			"createUser": {
-				"helmet": "Create user",
-				"title": "Create user",
+				"helmet": "Benutzer erstellen",
+				"title": "Benutzer erstellen",
 				"description": "Create a new user on this server"
 			},
 			"updateUser": {
@@ -557,7 +561,7 @@
 						"documentation"
 					],
 					"ageRestriction": {
-						"label": "Age restriction",
+						"label": "Altersbeschränkung",
 						"description": "Restricts the user from accessing content above the set age rating threshold",
 						"placeholder": "13",
 						"enforceUnset": {
@@ -572,10 +576,10 @@
 					}
 				},
 				"permissions": {
-					"heading": "Permissions",
+					"heading": "Berechtigungen",
 					"subtitle": [
 						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
-						"documentation"
+						"Dokumentation"
 					],
 					"bookclub": {
 						"label": "Buchklubs",
@@ -595,8 +599,8 @@
 							"description": "Ermöglicht dem Benutzer den Zugang zu den verschiedenen Dateiexplorern.\nDie Inhaltsbeschränkung kann nicht garantiert werden, wenn diese Funktion gewährt wird"
 						},
 						"download": {
-							"label": "Download files",
-							"description": "Allows the user to download files from the server"
+							"label": "Dateien herunterladen",
+							"description": "Erlaubt dem Benutzer Dateien vom Server herunterzuladen"
 						},
 						"upload": {
 							"label": "Upload files",
@@ -618,7 +622,7 @@
 							"description": "Allows the user to edit basic details for existing libraries"
 						},
 						"manage": {
-							"label": "Manage libraries",
+							"label": "Bibliotheken verwalten",
 							"description": "Allows the user to manage advanced settings for existing libraries.\nIncludes permissions to edit and scan"
 						},
 						"delete": {

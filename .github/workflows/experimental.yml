@@ -17,9 +17,27 @@ env:
   DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
 
 jobs:
+  code-changes-check:
+    runs-on: [ubuntu-22.04]
+    outputs:
+      changes: ${{steps.filter.outputs.changes}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          base: 'experimental'
+          filters: |
+            apps: ./apps/**
+            crates: ./crates/**
+            docker: ./docker/**
+            packages: ./packages/**
+
   nightly-docker-build:
+    needs: code-changes-check
     name: Build docker image
     runs-on: [ubuntu-22.04]
+    if: ${{ needs.code-changes-check.outputs.changes != '[]' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3

@@ -342,7 +342,7 @@
 					},
 					"avatarPicker": {
 						"heading": "Ustaw swój awatar",
-						"subtitle": "Stump wspiera niestandardowe awatary które można ustawić poprzez podanie odnośnika do obrazu. Wgrywanie obrazów jest nieobsługiwane z racji zmniejszenia ilości danych przechowywanych na serwerze.",
+						"subtitle": "Stump wspiera niestandardowe awatary które można ustawić poprzez podanie odnośnika do obrazu. Wgrywanie obrazów jest nieobsługiwane w celu zmniejszenia ilości danych przechowywanych na serwerze.",
 						"preview": "Podgląd pojawi się tutaj po wprowadzeniu odnośnika.",
 						"labels": {
 							"imageUrl": "Adres obrazka",
@@ -367,7 +367,7 @@
 					"heading": "Język i ustawienia regionalne",
 					"subtitle": [
 						"Stump obsługuje wiele języków i ustawień regionalnych, ustaw swoje preferencje poniżej. Proszę rozważ pomoc w poprawie jakości",
-						"Tłumaczeń Stump",
+						"tłumaczeń Stump",
 						"jeśli jesteś w stanie!"
 					]
 				}
@@ -392,8 +392,8 @@
 					}
 				},
 				"fontSelect": {
-					"label": "Font",
-					"description": "Customize the font used in the application"
+					"label": "Czcionka",
+					"description": "Dostosuj czcionkę używaną w aplikacji"
 				},
 				"navigationArrangement": {
 					"label": "Układ nawigacji",
@@ -446,9 +446,9 @@
 			}
 		},
 		"app/desktop": {
-			"helmet": "Ustawienia aplikacji dektopowej",
-			"title": "Ustawienia aplikacji dektopowej",
-			"description": "Ustawienia związane z aplikacją dekstopową Stump",
+			"helmet": "Ustawienia aplikacji desktopowej",
+			"title": "Ustawienia aplikacji desktopowej",
+			"description": "Ustawienia związane z aplikacją desktopową Stump",
 			"sections": {
 				"discordPresence": {
 					"label": "Status aktywności Discord",
@@ -467,7 +467,7 @@
 				},
 				"serverInfo": {
 					"title": "Informacja o serwerze",
-					"description": "Podstawowe informacje o twojej instancji serwera Stump",
+					"description": "Podstawowe informacje o Twojej instancji serwera Stump",
 					"build": {
 						"label": "Kompilacja",
 						"description": "Szczegóły dotyczące wersji i kompilacji",
@@ -511,7 +511,7 @@
 		"server/jobs": {
 			"helmet": "Zadania",
 			"title": "Zadania",
-			"description": "Zadania w tle, które działają na twojej instancji serwera Stump",
+			"description": "Zadania w tle, które działają na Twojej instancji serwera Stump",
 			"sections": {
 				"scheduling": {
 					"title": "Harmonogram",
@@ -611,7 +611,7 @@
 						"label": "Zarządzanie bibliotekami",
 						"create": {
 							"label": "Tworzenie bibliotek",
-							"description": "Pozwala użytkownikowi na tworzenie nowych bilbliotek. Zawiera zezwolenia na edycje i skanowanie"
+							"description": "Pozwala użytkownikowi na tworzenie nowych bilbliotek. Zawiera zezwolenia na edycję i skanowanie"
 						},
 						"scan": {
 							"label": "Skanowanie bibliotek",
@@ -623,11 +623,11 @@
 						},
 						"manage": {
 							"label": "Zarządzanie biblioteką",
-							"description": "Pozwala użytkownikowi na zmianę zaawansowanych ustawień istniejących bibliotek. Zawiera zezwolenia na edycje i skanowanie"
+							"description": "Pozwala użytkownikowi na zmianę zaawansowanych ustawień istniejących bibliotek. Zawiera zezwolenia na edycję i skanowanie"
 						},
 						"delete": {
 							"label": "Usuwanie bibliotek",
-							"description": "Pozwala użytkownikowi na usuwanie istniejących bilbliotek. Zawiera zezwolenia na edycje, zarządzanie i skanowanie"
+							"description": "Pozwala użytkownikowi na usuwanie istniejących bilbliotek. Zawiera zezwolenia na edycję, zarządzanie i skanowanie"
 						}
 					},
 					"server": {
@@ -784,12 +784,12 @@
 			"createEmailer": {
 				"helmet": "Utwórz nową wysyłkę",
 				"title": "Utwórz nową wysyłkę",
-				"description": "Stwórz nową wysyłkę SMTP tego serwera Stump"
+				"description": "Stwórz nową wysyłkę SMTP dla tego serwera Stump"
 			},
 			"updateEmailer": {
 				"helmet": "Aktualizuj wysyłkę",
 				"title": "Aktualizuj wysyłkę",
-				"description": "Aktualizuj delta tej wysyłki SMTP"
+				"description": "Aktualizuj detale tej wysyłki SMTP"
 			}
 		}
 	},

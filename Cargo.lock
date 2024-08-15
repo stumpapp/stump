@@ -7042,6 +7042,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "stump-config-gen"
+version = "0.0.1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.58",
+]
+
+[[package]]
 name = "stump_core"
 version = "0.0.4"
 dependencies = [
@@ -7073,6 +7082,7 @@ dependencies = [
  "serde_json",
  "simple_crypt",
  "specta",
+ "stump-config-gen",
  "temp-env",
  "tempfile",
  "thiserror",

@@ -1,7 +1,7 @@
 {
 	"name": "@stump/server",
 	"private": true,
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"scripts": {
 		"lint": "cargo clippy --package stump_server -- -D warnings",
 		"format": "cargo fmt --package stump_server",

@@ -1,7 +1,49 @@
 # Changelog
 
-<a name="next"></a>
-## next
+<a name="0.0.5"></a>
+## 0.0.5 (2024-08-14)
+
+### Added
+
+- 👷‍♂️ Remote duplicate rust cache action in CI ([#396](https://github.com/stumpapp/stump/issues/396)) [[dddb298](https://github.com/stumpapp/stump/commit/dddb298bb794f0c6048e281af02c2a2c73f679d2)]
+- ✅ Add tests to improve coverage ([#394](https://github.com/stumpapp/stump/issues/394)) [[7d6c289](https://github.com/stumpapp/stump/commit/7d6c289220a2ad9cbd49605b2af81950e39e6ec5)]
+- 👷‍♂️ Fix codecov upload conditions in CI ([#395](https://github.com/stumpapp/stump/issues/395)) [[4b4dcb1](https://github.com/stumpapp/stump/commit/4b4dcb14ed420ab4adc25706b672cafff1d1e34b)]
+- ✨ Add &#x60;OpenDyslexic&#x60; font and pave way to support other fonts ([#386](https://github.com/stumpapp/stump/issues/386)) [[1a0b76d](https://github.com/stumpapp/stump/commit/1a0b76d8090084f98f904c1d51cd5c404e8c38bc)]
+- 👷‍♂️ Add &#x60;macOS&#x60; platform to binary release workflow ([#374](https://github.com/stumpapp/stump/issues/374)) [[7fc059f](https://github.com/stumpapp/stump/commit/7fc059fd3857015e3eded2bf8451520dd57e5c11)]
+- ✅ Add core tests to improve coverage ([#370](https://github.com/stumpapp/stump/issues/370)) [[c73dd31](https://github.com/stumpapp/stump/commit/c73dd31e39e968df394a4ecdf297696215b93c47)]
+- ✨ Page dimensions analysis task ([#349](https://github.com/stumpapp/stump/issues/349)) [[3f447d5](https://github.com/stumpapp/stump/commit/3f447d56a83a7652bdc2a9c602f80c227577dde2)]
+- ✨ Historical read progress tracking ([#340](https://github.com/stumpapp/stump/issues/340)) [[e355932](https://github.com/stumpapp/stump/commit/e355932d021670cc01b4a19de3e370326ad370c3)]
+
+### Fixed
+
+- 🐛 Fix 422 error relating to invalid user permission ([#389](https://github.com/stumpapp/stump/issues/389)) [[7c44eb9](https://github.com/stumpapp/stump/commit/7c44eb904bab1778481f67327d700c5c717a2c2f)]
+- 🐛 Fix missing scrollbar in table component ([#382](https://github.com/stumpapp/stump/issues/382)) [[1b5cc1b](https://github.com/stumpapp/stump/commit/1b5cc1bce975f8e1fbdc748987c1d5af528d997d)]
+- 🐛 Fix various thumbnail generation issues ([#381](https://github.com/stumpapp/stump/issues/381)) [[7f09503](https://github.com/stumpapp/stump/commit/7f0950390259478c23ffe015ba61e4018586a420)]
+- ✏️ Fix infered typo ([#379](https://github.com/stumpapp/stump/issues/379)) [[6f2b3d9](https://github.com/stumpapp/stump/commit/6f2b3d9516893acabd6db68167cc0cd020afa47f)]
+- 🐛 Fix bug in &#x60;WebpProcessor::generate&#x60; ([#380](https://github.com/stumpapp/stump/issues/380)) [[d59d547](https://github.com/stumpapp/stump/commit/d59d547d9bc87fe111c53c335f5cb9f6cc0d72ab)]
+- 🐛 Fix basic auth password parsing breaking on : character ([#375](https://github.com/stumpapp/stump/issues/375)) [[2f8d53a](https://github.com/stumpapp/stump/commit/2f8d53a9cfa76b0b3aa8fdbec0962926c1a144ab)]
+
+### Miscellaneous
+
+-  👷 Make codecov run on pushes to develop as well ([#392](https://github.com/stumpapp/stump/issues/392)) [[6161b49](https://github.com/stumpapp/stump/commit/6161b4970b4cbf6a08520bb63bb3ca20304c8262)]
+- 🌐 Update translations ([#390](https://github.com/stumpapp/stump/issues/390)) [[4b375bf](https://github.com/stumpapp/stump/commit/4b375bf341aa747a9db839fa7c8d11b06f1dc5d6)]
+- 🩹 Fix path filter on push ([#388](https://github.com/stumpapp/stump/issues/388)) [[cb837c5](https://github.com/stumpapp/stump/commit/cb837c55729228c9cc164de338f482328a1c0a8b)]
+- 🔨 Fix cargo watch tooling ([#387](https://github.com/stumpapp/stump/issues/387)) [[b7e5771](https://github.com/stumpapp/stump/commit/b7e5771fdf189ad77823ddc5f889d1a4ae2daec4)]
+- 🔨 Update docker-compose example to remove version ([#373](https://github.com/stumpapp/stump/issues/373)) [[6bba9f9](https://github.com/stumpapp/stump/commit/6bba9f92170f16fe735611edc5a2377612d7e25c)]
+-  👷 Release server binary ([#369](https://github.com/stumpapp/stump/issues/369)) [[ac0d723](https://github.com/stumpapp/stump/commit/ac0d723e4b519aa5680e36535877905521db78dd)]
+- 🌐 New translations ([#368](https://github.com/stumpapp/stump/issues/368)) [[d71fc24](https://github.com/stumpapp/stump/commit/d71fc240fd8d6e7a8823da15c26f824bf390c4a5)]
+-  👷 Add code coverage tracking ([#366](https://github.com/stumpapp/stump/issues/366)) [[5fa2695](https://github.com/stumpapp/stump/commit/5fa2695bc5f22e60a0a853c718c3ba90beca39ec)]
+-  Merge remote-tracking branch &#x27;origin/main&#x27; into develop [[f63a213](https://github.com/stumpapp/stump/commit/f63a21310766d05e732269f101833dd391be1d54)]
+-  Merge pull request [#360](https://github.com/stumpapp/stump/issues/360) from stumpapp/experimental [[f38ce38](https://github.com/stumpapp/stump/commit/f38ce385a3adfbcd31cbbd5daa240b0c516d3848)]
+-  Merge branch &#x27;develop&#x27; into experimental [[861eab6](https://github.com/stumpapp/stump/commit/861eab607d48efc7138f4b95343ae7f9415fdc09)]
+- 🌐 New Translations ([#363](https://github.com/stumpapp/stump/issues/363)) [[c29d18f](https://github.com/stumpapp/stump/commit/c29d18f7b54436c6dcc24af625057e969cca4317)]
+- 🍒 Port DB error fix during media analysis [[0177f06](https://github.com/stumpapp/stump/commit/0177f06b0cc1561faaa708a725118b28ad4f6ae2)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[4fdc5d3](https://github.com/stumpapp/stump/commit/4fdc5d3e7cc27bb59004a7f61b20b2c8dcae63f9)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[0bf0ec9](https://github.com/stumpapp/stump/commit/0bf0ec94f057462805d1e15ab1ab2b727f494e84)]
+
+
+<a name="0.0.4"></a>
+## 0.0.4 (2024-07-11)
 
 ### Added
 
@@ -27,6 +69,7 @@
 
 ### Miscellaneous
 
+-  Merge pull request [#365](https://github.com/stumpapp/stump/issues/365) from stumpapp/release/v0.0.4 [[c0c4267](https://github.com/stumpapp/stump/commit/c0c4267c987045b16ad16a49e355565463b22339)]
 - 🌐 Update translations ([#352](https://github.com/stumpapp/stump/issues/352)) [[09cae5b](https://github.com/stumpapp/stump/commit/09cae5b875a00ce00d64354dcae04c0e093100de)]
 - 🌐 Update translations ([#345](https://github.com/stumpapp/stump/issues/345)) [[755403e](https://github.com/stumpapp/stump/commit/755403e01113c54a09aee9a9b514d7261d31eec8)]
 -  Merge pull request [#342](https://github.com/stumpapp/stump/issues/342) from stumpapp/experimental [[2d5fac5](https://github.com/stumpapp/stump/commit/2d5fac55be4d82fe56d1ea99c98471d9b98771c4)]

@@ -1,0 +1,74 @@
+name: Dav1d
+description: Install dav1d
+
+jobs:
+  linux-setup:
+    if: ${{ runner.name != 'oromei-ubuntu' && runner.os != 'Windows' }}
+    steps:
+    - name: Install nasm
+      uses: ilammy/setup-nasm@v1
+
+    - name: Install Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install pip packages
+      run: |
+        pip install -U pip
+        pip install -U wheel setuptools
+        pip install -U meson ninja
+
+    - name: Build dav1d
+      env:
+        DAV1D_DIR: dav1d_dir
+        LIB_PATH: lib/x86_64-linux-gnu
+      run: |
+        git clone --branch 1.3.0 --depth 1 https://code.videolan.org/videolan/dav1d.git
+        cd dav1d
+        meson build -Dprefix=$HOME/$DAV1D_DIR -Denable_tools=false -Denable_examples=false --buildtype release
+        ninja -C build
+        ninja -C build install
+        echo "PKG_CONFIG_PATH=$HOME/$DAV1D_DIR/$LIB_PATH/pkgconfig" >> $GITHUB_ENV
+        echo "LD_LIBRARY_PATH=$HOME/$DAV1D_DIR/$LIB_PATH" >> $GITHUB_ENV
+
+  windows-setup:
+    if: ${{ runner.os = 'Windows' }}
+    steps:
+    - name: Install nasm
+      uses: ilammy/setup-nasm@v1
+
+    - name: Install Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install pip packages
+      run: |
+        pip install -U pip
+        pip install -U wheel setuptools
+        pip install -U meson ninja
+
+    - name: Setting up environment
+      shell: bash
+      run: |
+        echo "PKG_CONFIG=c:\build\bin\pkg-config.exe" >> $GITHUB_ENV
+        echo "PKG_CONFIG_PATH=C:\build\lib\pkgconfig" >> $GITHUB_ENV
+        echo "C:\build\bin" >> $GITHUB_PATH
+
+    - name: Build pkg-config
+      run: |
+        git clone --branch meson-glib-subproject --depth 1 https://gitlab.freedesktop.org/tpm/pkg-config.git
+        cd pkg-config
+        meson build -Dprefix=C:\build --buildtype release
+        ninja -C build
+        ninja -C build install
+
+    - name: Build dav1d
+      run: |
+        git clone --branch 1.3.0 --depth 1 https://code.videolan.org/videolan/dav1d.git
+        cd dav1d
+        meson build -Dprefix=C:\build -Denable_tools=false -Denable_examples=false --buildtype release
+        ninja -C build
+        ninja -C build install
+

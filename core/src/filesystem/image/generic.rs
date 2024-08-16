@@ -26,7 +26,13 @@ impl ImageProcessor for GenericImageProcessor {
 
 		let format = match options.format {
 			process::ImageFormat::Jpeg => {
-				image = image::DynamicImage::from(image.into_rgb8());
+				if image.color().has_alpha() {
+					if image.color().has_color() {
+						image = image::DynamicImage::from(image.into_rgb8());
+					} else {
+						image = image::DynamicImage::from(image.into_luma8());
+					}
+				}
 				Ok(ImageFormat::Jpeg)
 			},
 			process::ImageFormat::Png => Ok(ImageFormat::Png),

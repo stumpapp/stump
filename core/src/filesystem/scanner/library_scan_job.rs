@@ -29,9 +29,9 @@ use crate::{
 use super::{
 	series_scan_job::SeriesScanTask,
 	utils::{
-		generate_rule_set, handle_create_media, handle_missing_media,
-		handle_missing_series, handle_visit_media, MediaBuildOperationCtx,
-		MediaOperationOutput, MissingSeriesOutput,
+		handle_create_media, handle_missing_media, handle_missing_series,
+		handle_visit_media, MediaBuildOperationCtx, MediaOperationOutput,
+		MissingSeriesOutput,
 	},
 	walk_library, walk_series, WalkedLibrary, WalkedSeries, WalkerCtx,
 };
@@ -142,7 +142,7 @@ impl JobExt for LibraryScanJob {
 			.map(LibraryOptions::from)
 			.ok_or(JobError::InitFailed("Library not found".to_string()))?;
 		let is_collection_based = library_options.is_collection_based();
-		let ignore_rules = generate_rule_set(&[PathBuf::from(self.path.clone())]);
+		let ignore_rules = library_options.ignore_rules.build()?;
 
 		self.options = Some(library_options);
 
@@ -414,10 +414,15 @@ impl JobExt for LibraryScanJob {
 					.as_ref()
 					.and_then(|o| o.is_collection_based().then_some(1));
 
-				let ignore_rules = generate_rule_set(&[
-					path_buf.clone(),
-					PathBuf::from(self.path.clone()),
-				]);
+				let Some(Ok(ignore_rules)) =
+					self.options.as_ref().map(|o| o.ignore_rules.build())
+				else {
+					// Note: This failure will likely affect ALL other tasks, so we are halting the job here
+					return Err(JobError::TaskFailed(
+						"Failed to build ignore rules. Check that the rules are valid."
+							.to_string(),
+					));
+				};
 
 				let walk_result = walk_series(
 					path_buf.as_path(),

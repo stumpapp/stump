@@ -20,7 +20,7 @@ use crate::{
 
 use super::{
 	utils::{
-		generate_rule_set, handle_create_media, handle_missing_media, handle_visit_media,
+		handle_create_media, handle_missing_media, handle_visit_media,
 		MediaBuildOperationCtx, MediaOperationOutput,
 	},
 	walk_series, WalkedSeries, WalkerCtx,
@@ -109,7 +109,7 @@ impl JobExt for SeriesScanJob {
 			.ok_or(JobError::InitFailed(
 				"Associated library options not found".to_string(),
 			))?;
-		let ignore_rules = generate_rule_set(&[PathBuf::from(self.path.clone())]);
+		let ignore_rules = library_options.ignore_rules.build()?;
 		let max_depth = library_options.is_collection_based().then_some(1);
 
 		self.options = Some(library_options);

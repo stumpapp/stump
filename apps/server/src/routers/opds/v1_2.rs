@@ -600,7 +600,7 @@ async fn get_book_page(
 		.find_first(chain_optional_iter(
 			[media::id::equals(id.clone())]
 				.into_iter()
-				.chain(apply_media_library_not_hidden_for_user_filter(&user))
+				.chain(apply_media_library_not_hidden_for_user_filter(user))
 				.collect::<Vec<_>>(),
 			[age_restrictions],
 		))

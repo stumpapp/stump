@@ -27,8 +27,8 @@ struct Claims {
 
 #[derive(Debug, Serialize, Type)]
 pub struct CreatedToken {
-	access_token: String,
-	expires_at: DateTime<FixedOffset>,
+	pub access_token: String,
+	pub expires_at: DateTime<FixedOffset>,
 	// TODO(219): Support refresh tokens
 }
 

@@ -549,7 +549,7 @@ async fn get_in_progress_media(
 		read_progress_filter.clone(),
 	])]
 	.into_iter()
-	.chain(apply_media_library_not_hidden_for_user_filter(&user))
+	.chain(apply_media_library_not_hidden_for_user_filter(user))
 	.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_default())
 	.collect::<Vec<WhereParam>>();
 
@@ -635,7 +635,7 @@ async fn get_recently_added_media(
 	let is_unpaged = pagination.is_unpaged();
 
 	let pagination_cloned = pagination.clone();
-	let where_conditions = apply_media_filters_for_user(filters, &user);
+	let where_conditions = apply_media_filters_for_user(filters, user);
 
 	let (media, count) = db
 		._transaction()
@@ -713,7 +713,7 @@ async fn get_media_by_path(
 	let path_str = path.to_string_lossy().to_string();
 	let required_params = [media::path::equals(path_str.clone())]
 		.into_iter()
-		.chain(apply_media_library_not_hidden_for_user_filter(&user))
+		.chain(apply_media_library_not_hidden_for_user_filter(user))
 		.collect::<Vec<WhereParam>>();
 
 	let book = client
@@ -769,7 +769,7 @@ async fn get_media_by_id(
 	let where_params = chain_optional_iter(
 		[media::id::equals(id.clone())]
 			.into_iter()
-			.chain(apply_media_library_not_hidden_for_user_filter(&user))
+			.chain(apply_media_library_not_hidden_for_user_filter(user))
 			.collect::<Vec<WhereParam>>(),
 		[age_restrictions],
 	);
@@ -886,7 +886,7 @@ async fn convert_media(
 	let where_params = chain_optional_iter(
 		[media::id::equals(id.clone())]
 			.into_iter()
-			.chain(apply_media_library_not_hidden_for_user_filter(&user))
+			.chain(apply_media_library_not_hidden_for_user_filter(user))
 			.collect::<Vec<WhereParam>>(),
 		[age_restrictions],
 	);
@@ -941,7 +941,7 @@ async fn get_media_page(
 	let where_params = chain_optional_iter(
 		[media::id::equals(id.clone())]
 			.into_iter()
-			.chain(apply_media_library_not_hidden_for_user_filter(&user))
+			.chain(apply_media_library_not_hidden_for_user_filter(user))
 			.collect::<Vec<WhereParam>>(),
 		[age_restrictions],
 	);
@@ -979,7 +979,7 @@ pub(crate) async fn get_media_thumbnail_by_id(
 	let where_params = chain_optional_iter(
 		[media::id::equals(id.clone())]
 			.into_iter()
-			.chain(apply_media_library_not_hidden_for_user_filter(&user))
+			.chain(apply_media_library_not_hidden_for_user_filter(user))
 			.collect::<Vec<WhereParam>>(),
 		[age_restrictions],
 	);
@@ -1362,7 +1362,7 @@ async fn get_media_progress(
 	let media_where_params = chain_optional_iter(
 		[media::id::equals(id.clone())]
 			.into_iter()
-			.chain(apply_media_library_not_hidden_for_user_filter(&user))
+			.chain(apply_media_library_not_hidden_for_user_filter(user))
 			.collect::<Vec<WhereParam>>(),
 		[age_restrictions],
 	);
@@ -1448,7 +1448,7 @@ async fn get_is_media_completed(
 	let media_where_params = chain_optional_iter(
 		[media::id::equals(id.clone())]
 			.into_iter()
-			.chain(apply_media_library_not_hidden_for_user_filter(&user))
+			.chain(apply_media_library_not_hidden_for_user_filter(user))
 			.collect::<Vec<WhereParam>>(),
 		[age_restrictions],
 	);
@@ -1511,7 +1511,7 @@ async fn put_media_complete_status(
 	let media_where_params = chain_optional_iter(
 		[media::id::equals(id.clone())]
 			.into_iter()
-			.chain(apply_media_library_not_hidden_for_user_filter(&user))
+			.chain(apply_media_library_not_hidden_for_user_filter(user))
 			.collect::<Vec<WhereParam>>(),
 		[age_restrictions],
 	);
@@ -1705,7 +1705,7 @@ async fn fetch_media_page_dimensions_with_permissions(
 	let where_params = chain_optional_iter(
 		[media::id::equals(id.clone())]
 			.into_iter()
-			.chain(apply_media_library_not_hidden_for_user_filter(&user))
+			.chain(apply_media_library_not_hidden_for_user_filter(user))
 			.collect::<Vec<WhereParam>>(),
 		[age_restrictions],
 	);

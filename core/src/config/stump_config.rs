@@ -34,7 +34,7 @@ use env_keys::*;
 pub mod defaults {
 	pub const DEFAULT_PASSWORD_HASH_COST: u32 = 12;
 	pub const DEFAULT_SESSION_TTL: i64 = 3600 * 24 * 3; // 3 days
-	pub const DEFAULT_ACCESS_TOKEN_TTL: i64 = 3600 * 24 * 1; // 1 days
+	pub const DEFAULT_ACCESS_TOKEN_TTL: i64 = 3600 * 24; // 1 days
 	pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
 	pub const DEFAULT_SCANNER_CHUNK_SIZE: usize = 100;
 }

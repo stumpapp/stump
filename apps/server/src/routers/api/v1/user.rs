@@ -34,7 +34,7 @@ use utoipa::ToSchema;
 use crate::{
 	config::{session::SESSION_USER_KEY, state::AppState},
 	errors::{APIError, APIResult},
-	filter::UserQueryRelation,
+	filter::{chain_optional_iter, UserQueryRelation},
 	middleware::auth::{auth_middleware, RequestContext},
 	utils::{get_session_user, http::ImageResponse, validate_image_upload},
 };
@@ -540,8 +540,7 @@ async fn update_current_user(
 	let db = &ctx.db;
 	let user = req.user();
 
-	let updated_user =
-		update_user(&user, db, user.id.clone(), input, &ctx.config).await?;
+	let updated_user = update_user(user, db, user.id.clone(), input, &ctx.config).await?;
 	debug!(?updated_user, "Updated user");
 
 	if get_session_user(&session).await?.is_some() {
@@ -869,7 +868,7 @@ async fn update_user_handler(
 		return Err(APIError::forbidden_discreet());
 	}
 
-	let updated_user = update_user(&user, db, id.clone(), input, &ctx.config).await?;
+	let updated_user = update_user(user, db, id.clone(), input, &ctx.config).await?;
 	debug!(?updated_user, "Updated user");
 
 	if user.id == id && get_session_user(&session).await?.is_some() {

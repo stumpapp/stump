@@ -185,7 +185,7 @@ async fn get_libraries(
 	tracing::trace!(?filters, ?ordering, ?pagination, "get_libraries");
 
 	let is_unpaged = pagination.is_unpaged();
-	let where_conditions = apply_library_filters_for_user(filters, &user);
+	let where_conditions = apply_library_filters_for_user(filters, user);
 	let order_by = ordering.try_into()?;
 
 	let mut query = ctx
@@ -397,7 +397,7 @@ async fn get_library_by_id(
 		.find_first(
 			[library::id::equals(id.clone())]
 				.into_iter()
-				.chain([library_not_hidden_from_user_filter(&user)])
+				.chain([library_not_hidden_from_user_filter(user)])
 				.collect(),
 		)
 		.with(library::library_options::fetch())
@@ -455,7 +455,7 @@ async fn get_library_series(
 		.chain(chain_optional_iter(
 			[
 				series::library_id::equals(Some(id.clone())),
-				series::library::is(vec![library_not_hidden_from_user_filter(&user)]),
+				series::library::is(vec![library_not_hidden_from_user_filter(user)]),
 			],
 			[age_restrictions],
 		))
@@ -530,7 +530,7 @@ async fn get_library_media(
 		.into_iter()
 		.chain([media::series::is(vec![
 			series::library_id::equals(Some(id.clone())),
-			series::library::is(vec![library_not_hidden_from_user_filter(&user)]),
+			series::library::is(vec![library_not_hidden_from_user_filter(user)]),
 		])])
 		.collect::<Vec<media::WhereParam>>();
 
@@ -640,7 +640,7 @@ async fn get_library_thumbnail_handler(
 		.find_first(chain_optional_iter(
 			[
 				series::library_id::equals(Some(id.clone())),
-				series::library::is(vec![library_not_hidden_from_user_filter(&user)]),
+				series::library::is(vec![library_not_hidden_from_user_filter(user)]),
 			],
 			[age_restriction
 				.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset))],

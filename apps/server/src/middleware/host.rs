@@ -7,10 +7,19 @@ use stump_core::opds::v2_0::link::OPDSLinkFinalizer;
 
 use crate::{config::state::AppState, errors::APIError};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct HostDetails {
-	host: String,
-	scheme: String,
+	pub host: String,
+	pub scheme: String,
+}
+
+impl Default for HostDetails {
+	fn default() -> Self {
+		HostDetails {
+			host: "localhost".to_string(),
+			scheme: "http".to_string(),
+		}
+	}
 }
 
 impl HostDetails {
@@ -25,6 +34,7 @@ impl From<HostDetails> for OPDSLinkFinalizer {
 	}
 }
 
+#[derive(Debug, Clone)]
 pub struct HostExtractor(pub HostDetails);
 
 #[async_trait]

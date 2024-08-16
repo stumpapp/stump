@@ -26,7 +26,7 @@ use crate::{
 	errors::{api_error_message, APIError, APIResult},
 	http_server::StumpRequestInfo,
 	middleware::auth::{auth_middleware, RequestContext},
-	utils::{default_true, get_session_user, verify_password},
+	utils::{default_true, get_session_user, hash_password, verify_password},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -391,7 +391,7 @@ pub async fn register(
 		is_server_owner = true;
 	}
 
-	let hashed_password = bcrypt::hash(&input.password, ctx.config.password_hash_cost)?;
+	let hashed_password = hash_password(&input.password, &ctx.config)?;
 
 	let created_user = db
 		.user()

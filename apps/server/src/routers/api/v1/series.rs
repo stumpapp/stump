@@ -277,7 +277,7 @@ async fn get_series(
 	let load_media = relation_query.load_media.unwrap_or(false);
 	let count_media = relation_query.count_media.unwrap_or(false);
 
-	let where_conditions = apply_series_filters_for_user(filters, &user);
+	let where_conditions = apply_series_filters_for_user(filters, user);
 
 	// series, total series count
 	let (series, series_count) = db
@@ -389,7 +389,7 @@ async fn get_series_by_id(
 		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
 	let where_params = [series::id::equals(id.clone())]
 		.into_iter()
-		.chain(apply_series_library_not_hidden_for_user_filter(&user))
+		.chain(apply_series_library_not_hidden_for_user_filter(user))
 		.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_default())
 		.collect::<Vec<WhereParam>>();
 
@@ -572,7 +572,7 @@ async fn get_series_thumbnail_handler(
 	let where_params = chain_optional_iter(
 		[series::id::equals(id.clone())]
 			.into_iter()
-			.chain(apply_series_library_not_hidden_for_user_filter(&user))
+			.chain(apply_series_library_not_hidden_for_user_filter(user))
 			.collect::<Vec<WhereParam>>(),
 		[series_age_restriction],
 	);
@@ -837,7 +837,7 @@ async fn get_series_media(
 	let series_where_params = chain_optional_iter(
 		[series::id::equals(id.clone())]
 			.into_iter()
-			.chain(apply_series_library_not_hidden_for_user_filter(&user))
+			.chain(apply_series_library_not_hidden_for_user_filter(user))
 			.collect::<Vec<WhereParam>>(),
 		[age_restrictions.as_ref().map(|(sr, _)| sr.clone())],
 	);
@@ -960,7 +960,7 @@ async fn get_next_in_series(
 	let where_params = chain_optional_iter(
 		[series::id::equals(id.clone())]
 			.into_iter()
-			.chain(apply_series_library_not_hidden_for_user_filter(&user))
+			.chain(apply_series_library_not_hidden_for_user_filter(user))
 			.collect::<Vec<WhereParam>>(),
 		[series_age_restrictions],
 	);
@@ -1058,7 +1058,7 @@ async fn get_series_is_complete(
 	let series_where_params = chain_optional_iter(
 		[series::id::equals(id.clone())]
 			.into_iter()
-			.chain(apply_series_library_not_hidden_for_user_filter(&user))
+			.chain(apply_series_library_not_hidden_for_user_filter(user))
 			.collect::<Vec<WhereParam>>(),
 		[age_restrictions.as_ref().map(|(sr, _)| sr.clone())],
 	);

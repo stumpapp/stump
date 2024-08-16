@@ -1,7 +1,13 @@
 use std::path::Path;
 
-use axum::{extract::State, response::IntoResponse, routing::get, Router};
-use hyper::{Body, HeaderMap, Request};
+use axum::{
+	body::Body,
+	extract::State,
+	http::{HeaderMap, Request},
+	response::IntoResponse,
+	routing::get,
+	Router,
+};
 use tower_http::services::{ServeDir, ServeFile};
 
 use crate::{

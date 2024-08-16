@@ -1,3 +1,4 @@
+use prisma_client_rust::chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
@@ -23,11 +24,10 @@ pub struct User {
 	pub is_server_owner: bool,
 	/// The URL of the user's avatar, if any
 	pub avatar_url: Option<String>,
-	// TODO(specta): replace with DateTime<FixedOffset>
 	/// A timestamp of when the user was created, in RFC3339 format
-	pub created_at: String,
+	pub created_at: DateTime<FixedOffset>,
 	/// A timestamp of when the user last logged in, in RFC3339 format
-	pub last_login: Option<String>,
+	pub last_login: Option<DateTime<FixedOffset>>,
 	/// A boolean to indicate if the user is locked, which prevents them from logging in
 	pub is_locked: bool,
 	/// The permissions of the user, influences what actions throughout the app they can perform
@@ -56,6 +56,10 @@ pub struct User {
 }
 
 impl User {
+	pub fn is(&self, other: &User) -> bool {
+		self.id == other.id
+	}
+
 	pub fn has_permission(&self, permission: UserPermission) -> bool {
 		self.is_server_owner || self.permissions.contains(&permission)
 	}
@@ -119,8 +123,8 @@ impl From<user::Data> for User {
 			age_restriction,
 			active_reading_sessions,
 			finished_reading_sessions,
-			created_at: data.created_at.to_rfc3339(),
-			last_login: data.last_login.map(|dt| dt.to_rfc3339()),
+			created_at: data.created_at,
+			last_login: data.last_login,
 			login_activity,
 			is_locked: data.is_locked,
 			login_sessions_count,

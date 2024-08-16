@@ -1,6 +1,6 @@
 use axum::{
 	extract::{Path, State},
-	middleware::{self, from_extractor_with_state},
+	middleware,
 	routing::{get, post, put},
 	Extension, Json, Router,
 };
@@ -32,7 +32,7 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
-	middleware::auth::{auth_middleware, BookClubGuard, RequestContext},
+	middleware::auth::{auth_middleware, permission_middleware, RequestContext},
 	utils::{safe_string_to_date, string_to_date},
 };
 
@@ -87,8 +87,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.route("/add", post(add_books_to_book_club_schedule)),
 				),
 		)
-		.layer(from_extractor_with_state::<BookClubGuard, AppState>(
-			app_state.clone(),
+		.layer(middleware::from_fn_with_state(
+			vec![UserPermission::AccessBookClub],
+			permission_middleware,
 		))
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
@@ -180,14 +181,14 @@ async fn get_book_clubs(
 			book_club_member::user_id::equals(viewer.id.clone()),
 		])]
 	} else {
-		book_club_access_for_user(&viewer)
+		book_club_access_for_user(viewer)
 	};
 
 	let book_clubs = client
 		.book_club()
 		.find_many(where_params)
 		.include(book_club_member_and_schedule_include::include(
-			book_club_member_access_for_user(&viewer),
+			book_club_member_access_for_user(viewer),
 		))
 		.exec()
 		.await?;
@@ -283,7 +284,7 @@ async fn get_book_club(
 	let client = &ctx.db;
 	let viewer = req.user();
 
-	let where_params = book_club_access_for_user(&viewer)
+	let where_params = book_club_access_for_user(viewer)
 		.into_iter()
 		.chain([book_club::id::equals(id)])
 		.collect();
@@ -292,7 +293,7 @@ async fn get_book_club(
 		.book_club()
 		.find_first(where_params)
 		.include(book_club_with_books_include::include(
-			book_club_member_access_for_user(&viewer),
+			book_club_member_access_for_user(viewer),
 		))
 		.exec()
 		.await?
@@ -337,7 +338,7 @@ async fn update_book_club(
 		.find_first(vec![
 			book_club::id::equals(id),
 			book_club::members::some(book_club_member_permission_for_user(
-				&viewer,
+				viewer,
 				BookClubMemberRole::ADMIN,
 			)),
 		])
@@ -399,7 +400,7 @@ async fn create_book_club_invitation(
 		.find_first(vec![
 			book_club::id::equals(id),
 			book_club::members::some(book_club_member_permission_for_user(
-				&viewer,
+				viewer,
 				BookClubMemberRole::ADMIN,
 			)),
 		])
@@ -458,7 +459,7 @@ async fn get_book_club_members(
 
 	let viewer = req.user();
 
-	let where_params = book_club_member_access_for_user(&viewer)
+	let where_params = book_club_member_access_for_user(viewer)
 		.into_iter()
 		.chain([book_club_member::book_club::is(vec![
 			book_club::id::equals(id),
@@ -611,7 +612,7 @@ async fn get_book_club_member(
 
 	let viewer = req.user();
 
-	let where_params = book_club_member_access_for_user(&viewer)
+	let where_params = book_club_member_access_for_user(viewer)
 		.into_iter()
 		.chain([
 			book_club_member::book_club_id::equals(id),
@@ -791,7 +792,7 @@ async fn create_book_club_schedule(
 		.find_first(vec![
 			book_club::id::equals(id),
 			book_club::members::some(book_club_member_permission_for_user(
-				&viewer,
+				viewer,
 				BookClubMemberRole::ADMIN,
 			)),
 		])
@@ -892,7 +893,7 @@ async fn get_book_club_schedule(
 
 	// TODO: not fully correct, not sure if non-members should be able to query for this when
 	// targeting public book clubs
-	let where_params = book_club_access_for_user(&viewer)
+	let where_params = book_club_access_for_user(viewer)
 		.into_iter()
 		.chain([book_club::id::equals(id)])
 		.collect();
@@ -933,7 +934,7 @@ async fn add_books_to_book_club_schedule(
 		.find_first(vec![
 			book_club::id::equals(id),
 			book_club::members::some(book_club_member_permission_for_user(
-				&viewer,
+				viewer,
 				BookClubMemberRole::ADMIN,
 			)),
 		])
@@ -1056,7 +1057,7 @@ async fn get_book_club_current_book(
 
 	let viewer = req.user();
 
-	let where_params = book_club_access_for_user(&viewer)
+	let where_params = book_club_access_for_user(viewer)
 		.into_iter()
 		.chain([book_club::id::equals(id)])
 		.collect();

@@ -1,6 +1,6 @@
 use axum::{
 	extract::{Path, Query, State},
-	middleware::{self, from_extractor},
+	middleware,
 	routing::{delete, get},
 	Json, Router,
 };
@@ -28,7 +28,7 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
-	middleware::auth::{auth_middleware, ServerOwnerGuard},
+	middleware::auth::{auth_middleware, server_owner_middleware},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -49,7 +49,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				),
 		)
 		// TODO: consider permissions around job management
-		.layer(from_extractor::<ServerOwnerGuard>())
+		.layer(middleware::from_fn(server_owner_middleware))
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 

@@ -1,8 +1,8 @@
 use axum::{
 	extract::{Path, Query, State},
-	middleware::from_extractor_with_state,
+	middleware,
 	routing::get,
-	Json, Router,
+	Extension, Json, Router,
 };
 use prisma_client_rust::{and, operator, Direction};
 use stump_core::{
@@ -36,13 +36,15 @@ use stump_core::{
 	prisma::{library, media, series},
 	Ctx,
 };
-use tower_sessions::Session;
 
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
-	middleware::{auth::Auth, host::HostExtractor},
+	middleware::{
+		auth::{auth_middleware, RequestContext},
+		host::HostExtractor,
+	},
 	routers::{
 		api::v1::{
 			library::library_not_hidden_from_user_filter,
@@ -53,10 +55,7 @@ use crate::{
 		},
 		relative_favicon_path,
 	},
-	utils::{
-		enforce_session_permissions, get_session_user,
-		http::{ImageResponse, NamedFile},
-	},
+	utils::http::{ImageResponse, NamedFile},
 };
 
 const DEFAULT_LIMIT: i64 = 10;
@@ -106,7 +105,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						),
 				),
 		)
-		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 #[tracing::instrument]
@@ -124,18 +123,18 @@ async fn auth(
 	))
 }
 
-#[tracing::instrument(skip(ctx, session))]
+#[tracing::instrument(skip(ctx))]
 async fn catalog(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let client = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 
-	let library_conditions = vec![library_not_hidden_from_user_filter(&user)];
+	let library_conditions = vec![library_not_hidden_from_user_filter(user)];
 	let libraries = client
 		.library()
 		.find_many(library_conditions.clone())
@@ -171,7 +170,7 @@ async fn catalog(
 		)
 		.build()?;
 
-	let latest_books_conditions = apply_media_restrictions_for_user(&user);
+	let latest_books_conditions = apply_media_restrictions_for_user(user);
 	let latest_books = client
 		.media()
 		.find_many(latest_books_conditions.clone())
@@ -240,20 +239,20 @@ async fn catalog(
 
 /// A route handler which returns a feed of libraries for a user. The feed includes groups for
 /// series and books in each library.
-#[tracing::instrument(skip(ctx, session))]
+#[tracing::instrument(skip(ctx))]
 async fn browse_libraries(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
 	pagination: Query<PageQuery>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let client = &ctx.db;
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
 	let (skip, take) = pagination.get_skip_take();
-	let library_conditions = vec![library_not_hidden_from_user_filter(&user)];
+	let library_conditions = vec![library_not_hidden_from_user_filter(user)];
 	let libraries = client
 		.library()
 		.find_many(library_conditions.clone())
@@ -263,7 +262,7 @@ async fn browse_libraries(
 		.await?;
 	let library_count = client.library().count(library_conditions).exec().await?;
 
-	let series_conditions = apply_series_restrictions_for_user(&user);
+	let series_conditions = apply_series_restrictions_for_user(user);
 	let series = client
 		.series()
 		.find_many(series_conditions.clone())
@@ -332,20 +331,20 @@ async fn browse_libraries(
 	))
 }
 
-#[tracing::instrument(skip(ctx, session))]
+#[tracing::instrument(skip(ctx))]
 async fn browse_library_by_id(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
 	Path(id): Path<String>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let client = &ctx.db;
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
 	let library_conditions = vec![
-		library_not_hidden_from_user_filter(&user),
+		library_not_hidden_from_user_filter(user),
 		library::id::equals(id.clone()),
 	];
 	let library = client
@@ -356,7 +355,7 @@ async fn browse_library_by_id(
 		.ok_or(APIError::NotFound(String::from("Library not found")))?;
 
 	let library_books_conditions = vec![
-		operator::and(apply_media_restrictions_for_user(&user)),
+		operator::and(apply_media_restrictions_for_user(user)),
 		media::series::is(vec![series::library_id::equals(Some(id.clone()))]),
 	];
 	let library_books = client
@@ -439,7 +438,7 @@ async fn browse_library_by_id(
 		.build()?;
 
 	let library_series_conditions = vec![
-		operator::and(apply_series_restrictions_for_user(&user)),
+		operator::and(apply_series_restrictions_for_user(user)),
 		series::library_id::equals(Some(id.clone())),
 	];
 	let library_series = client
@@ -597,20 +596,20 @@ async fn fetch_books_and_generate_feed(
 }
 
 /// A route handler which returns a feed of books for a library.
-#[tracing::instrument(skip(ctx, session))]
+#[tracing::instrument(skip(ctx))]
 async fn browse_library_books(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
 	Path(id): Path<String>,
 	pagination: Query<PageQuery>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<OPDSFeed>> {
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
 	fetch_books_and_generate_feed(
 		&ctx,
 		OPDSLinkFinalizer::from(host),
-		&user,
+		user,
 		vec![media::series::is(vec![series::library_id::equals(Some(
 			id.clone(),
 		))])],
@@ -622,20 +621,20 @@ async fn browse_library_books(
 	.await
 }
 
-#[tracing::instrument(skip(ctx, session))]
+#[tracing::instrument(skip(ctx))]
 async fn latest_library_books(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
 	Path(id): Path<String>,
 	pagination: Query<PageQuery>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<OPDSFeed>> {
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
 	fetch_books_and_generate_feed(
 		&ctx,
 		OPDSLinkFinalizer::from(host),
-		&user,
+		user,
 		vec![media::series::is(vec![series::library_id::equals(Some(
 			id.clone(),
 		))])],
@@ -647,18 +646,18 @@ async fn latest_library_books(
 	.await
 }
 
-#[tracing::instrument(skip(ctx, session))]
+#[tracing::instrument(skip(ctx))]
 async fn browse_series(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
 	pagination: Query<PageQuery>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let client = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
 	let (skip, take) = pagination.get_skip_take();
-	let series_conditions = apply_series_restrictions_for_user(&user);
+	let series_conditions = apply_series_restrictions_for_user(user);
 	let series = client
 		.series()
 		.find_many(series_conditions.clone())
@@ -711,20 +710,20 @@ async fn browse_series(
 	))
 }
 
-#[tracing::instrument(skip(ctx, session))]
+#[tracing::instrument(skip(ctx))]
 async fn browse_series_by_id(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
 	pagination: Query<PageQuery>,
 	Path(id): Path<String>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<OPDSFeed>> {
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
 	fetch_books_and_generate_feed(
 		&ctx,
 		OPDSLinkFinalizer::from(host),
-		&user,
+		user,
 		vec![media::series_id::equals(Some(id.clone()))],
 		media::name::order(Direction::Asc),
 		pagination.0,
@@ -735,19 +734,19 @@ async fn browse_series_by_id(
 }
 
 /// A route handler which returns a feed of books for a user.
-#[tracing::instrument(skip(ctx, session))]
+#[tracing::instrument(skip(ctx))]
 async fn browse_books(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
 	pagination: Query<PageQuery>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<OPDSFeed>> {
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
 	fetch_books_and_generate_feed(
 		&ctx,
 		OPDSLinkFinalizer::from(host),
-		&user,
+		user,
 		vec![],
 		media::name::order(Direction::Asc),
 		pagination.0,
@@ -758,19 +757,19 @@ async fn browse_books(
 }
 
 /// A route handler which returns the latest books for a user as an OPDS feed.
-#[tracing::instrument(skip(ctx, session))]
+#[tracing::instrument(skip(ctx))]
 async fn latest_books(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
 	pagination: Query<PageQuery>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<OPDSFeed>> {
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
 	fetch_books_and_generate_feed(
 		&ctx,
 		OPDSLinkFinalizer::from(host),
-		&user,
+		user,
 		vec![],
 		media::created_at::order(Direction::Desc),
 		pagination.0,
@@ -784,19 +783,19 @@ async fn latest_books(
 /// a book if there exists an active reading session for the user.
 ///
 /// Completed books are not included in this feed.
-#[tracing::instrument(skip(ctx, session))]
+#[tracing::instrument(skip(ctx))]
 async fn keep_reading(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
 	pagination: Query<PageQuery>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<OPDSFeed>> {
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
 	fetch_books_and_generate_feed(
 		&ctx,
 		OPDSLinkFinalizer::from(host),
-		&user,
+		user,
 		vec![media::active_user_reading_sessions::some(vec![
 			apply_in_progress_filter_for_user(user.id.clone()),
 		])],
@@ -847,17 +846,17 @@ async fn fetch_book_page_for_user(
 	Ok(ImageResponse::new(content_type, image_buffer))
 }
 
-#[tracing::instrument(skip(ctx, session))]
+#[tracing::instrument(skip(ctx))]
 async fn get_book_by_id(
 	Path(id): Path<String>,
 	HostExtractor(host): HostExtractor,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<OPDSPublication>> {
 	tracing::debug!("Fetching book by ID");
 	let client = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -865,7 +864,7 @@ async fn get_book_by_id(
 	let where_params = chain_optional_iter(
 		[media::id::equals(id)]
 			.into_iter()
-			.chain(apply_media_library_not_hidden_for_user_filter(&user))
+			.chain(apply_media_library_not_hidden_for_user_filter(user))
 			.collect::<Vec<media::WhereParam>>(),
 		[age_restrictions],
 	);
@@ -884,36 +883,36 @@ async fn get_book_by_id(
 }
 
 /// A route handler which returns a book thumbnail for a user as a valid image response.
-#[tracing::instrument(skip(ctx, session))]
+#[tracing::instrument(skip(ctx))]
 async fn get_book_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<ImageResponse> {
-	fetch_book_page_for_user(&ctx, &get_session_user(&session)?, id, 1).await
+	fetch_book_page_for_user(&ctx, req.user(), id, 1).await
 }
 
 /// A route handler which returns a single page of a book for a user as a valid image
 /// response.
-#[tracing::instrument(skip(ctx, session))]
+#[tracing::instrument(skip(ctx))]
 async fn get_book_page(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<ImageResponse> {
-	fetch_book_page_for_user(&ctx, &get_session_user(&session)?, id, page).await
+	fetch_book_page_for_user(&ctx, req.user(), id, page).await
 }
 
 /// A route handler which downloads a book for a user.
-#[tracing::instrument(skip(ctx, session))]
+#[tracing::instrument(skip(ctx))]
 async fn download_book(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<NamedFile> {
 	let db = &ctx.db;
 
-	let user = enforce_session_permissions(&session, &[UserPermission::DownloadFile])?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::DownloadFile])?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()

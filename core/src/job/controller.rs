@@ -66,6 +66,10 @@ impl JobController {
 		this
 	}
 
+	pub async fn initialize(&self) -> JobManagerResult<()> {
+		self.manager.clone().initialize().await
+	}
+
 	/// Starts the watcher loop for the [JobController]. This function will listen for incoming
 	/// commands and execute them.
 	pub fn watch(

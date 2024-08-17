@@ -122,7 +122,9 @@ export type LibraryPattern = "SERIES_BASED" | "COLLECTION_BASED"
 
 export type LibraryScanMode = "DEFAULT" | "NONE"
 
-export type LibraryOptions = { id: string | null; convert_rar_to_zip: boolean; hard_delete_conversions: boolean; library_pattern: LibraryPattern; thumbnail_config: ImageProcessorOptions | null; library_id: string | null }
+export type IgnoreRules = string[]
+
+export type LibraryOptions = { id: string | null; convert_rar_to_zip: boolean; hard_delete_conversions: boolean; library_pattern: LibraryPattern; thumbnail_config: ImageProcessorOptions | null; ignore_rules?: IgnoreRules; library_id: string | null }
 
 export type LibraryStats = { series_count: BigInt; book_count: BigInt; total_bytes: BigInt; completed_books: BigInt; in_progress_books: BigInt }
 
@@ -133,7 +135,7 @@ export type Series = { id: string; name: string; path: string; description: stri
 /**
  * Struct representing the metadata for a processed file.
  */
-export type MediaMetadata = { title: string | null; series: string | null; number: number | null; volume: number | null; summary: string | null; notes: string | null; age_rating?: number | null; genre?: string[] | null; year: number | null; month: number | null; day: number | null; writers?: string[] | null; pencillers?: string[] | null; inkers?: string[] | null; colorists?: string[] | null; letterers?: string[] | null; cover_artists?: string[] | null; editors?: string[] | null; publisher: string | null; links?: string[] | null; characters?: string[] | null; teams?: string[] | null; page_count: number | null }
+export type MediaMetadata = { title?: string | null; series?: string | null; number?: number | null; volume?: number | null; summary?: string | null; notes?: string | null; age_rating?: number | null; genre?: string[] | null; year?: number | null; month?: number | null; day?: number | null; writers?: string[] | null; pencillers?: string[] | null; inkers?: string[] | null; colorists?: string[] | null; letterers?: string[] | null; cover_artists?: string[] | null; editors?: string[] | null; publisher?: string | null; links?: string[] | null; characters?: string[] | null; teams?: string[] | null; page_count?: number | null }
 
 export type Media = { id: string; name: string; size: BigInt; extension: string; pages: number; updated_at: string; created_at: string; modified_at: string | null; hash: string | null; path: string; status: FileStatus; series_id: string; metadata: MediaMetadata | null; series?: Series | null; active_reading_session?: ActiveReadingSession | null; finished_reading_sessions: FinishedReadingSession[] | null; current_page?: number | null; current_epubcfi?: string | null; is_completed?: boolean | null; tags?: Tag[] | null; bookmarks?: Bookmark[] | null }
 
@@ -308,6 +310,12 @@ export type ClaimResponse = { is_claimed: boolean }
 export type StumpVersion = { semver: string; rev: string; compile_time: string }
 
 export type UpdateCheck = { current_semver: string; latest_semver: string; has_update_available: boolean }
+
+export type AuthenticationOptions = { generate_token?: boolean; create_session?: boolean }
+
+export type CreatedToken = { access_token: string; expires_at: string }
+
+export type LoginResponse = User | { for_user: User; token: CreatedToken }
 
 export type LoginOrRegisterArgs = { username: string; password: string }
 

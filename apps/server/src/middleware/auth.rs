@@ -264,8 +264,6 @@ async fn handle_basic_auth(
 		.map_err(|e| APIError::InternalServerError(e.to_string()))?;
 	let decoded_credentials = decode_base64_credentials(decoded_bytes)?;
 
-	dbg!(&decoded_credentials);
-
 	let fetched_user = client
 		.user()
 		.find_unique(user::username::equals(decoded_credentials.username.clone()))
@@ -276,8 +274,6 @@ async fn handle_basic_auth(
 		)]))
 		.exec()
 		.await?;
-
-	dbg!(&fetched_user);
 
 	let Some(user) = fetched_user else {
 		tracing::error!(

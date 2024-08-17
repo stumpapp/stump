@@ -1,6 +1,8 @@
 //! Email module for sending emails using SMTP. This module uses the `lettre` crate to send emails,
 //! and the `handlebars` crate to render email templates.
 
+#![warn(clippy::dbg_macro)]
+
 /// A module containing the emailer client and its configuration, as well as the sending of emails
 mod emailer;
 /// A module containing the error type for this crate

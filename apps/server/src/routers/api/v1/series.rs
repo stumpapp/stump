@@ -907,7 +907,7 @@ async fn get_series_media(
 			// FIXME: PCR doesn't support relation counts yet!
 			let test_support_for_count =
 				client.media().count(media_where_params).exec().await?;
-			dbg!(test_support_for_count);
+			tracing::debug!(?test_support_for_count, "Test support for relation counts");
 
 			client
 				.media_in_series_count(id)

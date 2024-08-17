@@ -1,15 +1,14 @@
 use axum::{
 	extract::{DefaultBodyLimit, Multipart, Path, Query, State},
-	middleware::from_extractor_with_state,
+	middleware,
 	routing::{get, post, put},
-	Json, Router,
+	Extension, Json, Router,
 };
 use prisma_client_rust::{chrono::Utc, not, or, raw, Direction, PrismaValue};
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use specta::Type;
 use std::path;
-use tower_sessions::Session;
 use tracing::{debug, error, trace};
 use utoipa::ToSchema;
 
@@ -52,11 +51,8 @@ use crate::{
 		chain_optional_iter, decode_path_filter, FilterableQuery, LibraryBaseFilter,
 		LibraryFilter, LibraryRelationFilter, MediaFilter, SeriesFilter,
 	},
-	middleware::auth::Auth,
-	utils::{
-		enforce_session_permissions, get_session_server_owner_user, get_session_user,
-		get_user_and_enforce_permission, http::ImageResponse, validate_image_upload,
-	},
+	middleware::auth::{auth_middleware, RequestContext},
+	utils::{http::ImageResponse, validate_image_upload},
 };
 
 use super::{
@@ -112,7 +108,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.route("/generate", post(generate_library_thumbnails)),
 				),
 		)
-		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 pub(crate) fn apply_library_base_filters(filters: LibraryBaseFilter) -> Vec<WhereParam> {
@@ -180,16 +176,16 @@ async fn get_libraries(
 	filter_query: QsQuery<FilterableQuery<LibraryFilter>>,
 	pagination_query: Query<PaginationQuery>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Pageable<Vec<Library>>>> {
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let FilterableQuery { filters, ordering } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
 
 	tracing::trace!(?filters, ?ordering, ?pagination, "get_libraries");
 
 	let is_unpaged = pagination.is_unpaged();
-	let where_conditions = apply_library_filters_for_user(filters, &user);
+	let where_conditions = apply_library_filters_for_user(filters, user);
 	let order_by = ordering.try_into()?;
 
 	let mut query = ctx
@@ -236,14 +232,14 @@ async fn get_libraries(
 
 async fn get_last_visited_library(
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Option<Library>>> {
 	let client = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
 	let last_visited_library = client
 		.last_library_visit()
-		.find_first(vec![last_library_visit::user_id::equals(user.id)])
+		.find_first(vec![last_library_visit::user_id::equals(user.id.clone())])
 		.with(last_library_visit::library::fetch())
 		.exec()
 		.await?;
@@ -258,10 +254,10 @@ async fn get_last_visited_library(
 async fn update_last_visited_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Library>> {
 	let client = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
 	let last_library_visit = client
 		.last_library_visit()
@@ -307,9 +303,9 @@ pub struct LibraryStatsParams {
 async fn get_libraries_stats(
 	State(ctx): State<AppState>,
 	Query(params): Query<LibraryStatsParams>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<LibraryStats>> {
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let db = &ctx.db;
 
 	let stats = db
@@ -346,7 +342,7 @@ async fn get_libraries_stats(
 			"#,
 			PrismaValue::Boolean(params.all_users),
 			PrismaValue::String(user.id.clone()),
-			PrismaValue::String(user.id)
+			PrismaValue::String(user.id.clone())
 		))
 		.exec()
 		.await?
@@ -377,9 +373,9 @@ async fn get_libraries_stats(
 async fn get_library_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Library>> {
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let db = &ctx.db;
 
 	let library = db
@@ -387,7 +383,7 @@ async fn get_library_by_id(
 		.find_first(
 			[library::id::equals(id.clone())]
 				.into_iter()
-				.chain([library_not_hidden_from_user_filter(&user)])
+				.chain([library_not_hidden_from_user_filter(user)])
 				.collect(),
 		)
 		.with(library::library_options::fetch())
@@ -421,7 +417,7 @@ async fn get_library_series(
 	pagination_query: Query<PaginationQuery>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Pageable<Vec<Series>>>> {
 	let FilterableQuery {
 		ordering, filters, ..
@@ -431,7 +427,7 @@ async fn get_library_series(
 
 	let db = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -445,7 +441,7 @@ async fn get_library_series(
 		.chain(chain_optional_iter(
 			[
 				series::library_id::equals(Some(id.clone())),
-				series::library::is(vec![library_not_hidden_from_user_filter(&user)]),
+				series::library::is(vec![library_not_hidden_from_user_filter(user)]),
 			],
 			[age_restrictions],
 		))
@@ -505,9 +501,9 @@ async fn get_library_media(
 	pagination_query: Query<PaginationQuery>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Pageable<Vec<Media>>>> {
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
 	let FilterableQuery { ordering, filters } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
@@ -520,7 +516,7 @@ async fn get_library_media(
 		.into_iter()
 		.chain([media::series::is(vec![
 			series::library_id::equals(Some(id.clone())),
-			series::library::is(vec![library_not_hidden_from_user_filter(&user)]),
+			series::library::is(vec![library_not_hidden_from_user_filter(user)]),
 		])])
 		.collect::<Vec<media::WhereParam>>();
 
@@ -617,11 +613,11 @@ pub(crate) fn get_library_thumbnail(
 async fn get_library_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<ImageResponse> {
 	let db = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let age_restriction = user.age_restriction.as_ref();
 
 	let first_series = db
@@ -630,7 +626,7 @@ async fn get_library_thumbnail_handler(
 		.find_first(chain_optional_iter(
 			[
 				series::library_id::equals(Some(id.clone())),
-				series::library::is(vec![library_not_hidden_from_user_filter(&user)]),
+				series::library::is(vec![library_not_hidden_from_user_filter(user)]),
 			],
 			[age_restriction
 				.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset))],
@@ -704,11 +700,10 @@ pub struct PatchLibraryThumbnail {
 async fn patch_library_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(body): Json<PatchLibraryThumbnail>,
 ) -> APIResult<ImageResponse> {
-	let user = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
-	get_session_server_owner_user(&session)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::ManageLibrary])?;
 
 	let client = &ctx.db;
 
@@ -776,13 +771,13 @@ async fn patch_library_thumbnail(
 async fn replace_library_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	mut upload: Multipart,
 ) -> APIResult<ImageResponse> {
-	let user = enforce_session_permissions(
-		&session,
-		&[UserPermission::UploadFile, UserPermission::ManageLibrary],
-	)?;
+	let user = req.user_and_enforce_permissions(&[
+		UserPermission::UploadFile,
+		UserPermission::ManageLibrary,
+	])?;
 	let client = &ctx.db;
 
 	tracing::trace!(?id, ?upload, "Replacing library thumbnail");
@@ -839,9 +834,9 @@ async fn replace_library_thumbnail(
 async fn delete_library_thumbnails(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<()>> {
-	let user = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::ManageLibrary])?;
 
 	let db = &ctx.db;
 	let thumbnails_dir = ctx.config.get_thumbnails_dir();
@@ -893,10 +888,10 @@ pub struct GenerateLibraryThumbnails {
 async fn generate_library_thumbnails(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(input): Json<GenerateLibraryThumbnails>,
 ) -> APIResult<Json<()>> {
-	let user = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::ManageLibrary])?;
 	let library = ctx
 		.db
 		.library()
@@ -948,12 +943,9 @@ async fn generate_library_thumbnails(
 async fn get_library_excluded_users(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Vec<User>>> {
-	enforce_session_permissions(
-		&session,
-		&[UserPermission::ReadUsers, UserPermission::ManageLibrary],
-	)?;
+	req.enforce_permissions(&[UserPermission::ReadUsers, UserPermission::ManageLibrary])?;
 
 	let db = &ctx.db;
 
@@ -994,13 +986,10 @@ pub struct UpdateLibraryExcludedUsers {
 async fn update_library_excluded_users(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(input): Json<UpdateLibraryExcludedUsers>,
 ) -> APIResult<Json<Library>> {
-	enforce_session_permissions(
-		&session,
-		&[UserPermission::ReadUsers, UserPermission::ManageLibrary],
-	)?;
+	req.enforce_permissions(&[UserPermission::ReadUsers, UserPermission::ManageLibrary])?;
 
 	let db = &ctx.db;
 
@@ -1078,9 +1067,9 @@ async fn update_library_excluded_users(
 async fn scan_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> Result<(), APIError> {
-	let user = get_user_and_enforce_permission(&session, UserPermission::ScanLibrary)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::ScanLibrary])?;
 	let db = &ctx.db;
 
 	let library = db
@@ -1133,9 +1122,9 @@ pub struct CleanLibraryResponse {
 async fn clean_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<CleanLibraryResponse>> {
-	let user = get_user_and_enforce_permission(&session, UserPermission::ManageLibrary)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::ManageLibrary])?;
 
 	let db = &ctx.db;
 	let thumbnails_dir = ctx.config.get_thumbnails_dir();
@@ -1282,11 +1271,11 @@ pub struct CreateLibrary {
 )]
 /// Create a new library. Will queue a ScannerJob to scan the library, and return the library
 async fn create_library(
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateLibrary>,
 ) -> APIResult<Json<Library>> {
-	let user = get_user_and_enforce_permission(&session, UserPermission::CreateLibrary)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::CreateLibrary])?;
 
 	let db = &ctx.db;
 
@@ -1440,12 +1429,12 @@ pub struct UpdateLibrary {
 )]
 /// Update a library by id, if the current user is a SERVER_OWNER.
 async fn update_library(
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	Json(input): Json<UpdateLibrary>,
 ) -> APIResult<Json<Library>> {
-	let user = get_user_and_enforce_permission(&session, UserPermission::EditLibrary)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::EditLibrary])?;
 	let db = &ctx.db;
 
 	if !path::Path::new(&input.path).exists() {
@@ -1573,11 +1562,11 @@ async fn update_library(
 )]
 /// Delete a library by id
 async fn delete_library(
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<String>> {
-	let user = get_session_server_owner_user(&session)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::DeleteLibrary])?;
 	let db = &ctx.db;
 	let thumbnails_dir = ctx.config.get_thumbnails_dir();
 
@@ -1633,9 +1622,9 @@ async fn get_library_stats(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	Query(params): Query<LibraryStatsParams>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<LibraryStats>> {
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let db = &ctx.db;
 
 	let stats = db
@@ -1676,7 +1665,7 @@ async fn get_library_stats(
 			PrismaValue::String(id),
 			PrismaValue::Boolean(params.all_users),
 			PrismaValue::String(user.id.clone()),
-			PrismaValue::String(user.id)
+			PrismaValue::String(user.id.clone())
 		))
 		.exec()
 		.await?
@@ -1707,9 +1696,9 @@ async fn get_library_stats(
 async fn start_media_analysis(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<()> {
-	let _ = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
+	req.enforce_permissions(&[UserPermission::ManageLibrary])?;
 
 	// Start analysis job
 	ctx.enqueue_job(AnalyzeMediaJob::analyze_library(id))

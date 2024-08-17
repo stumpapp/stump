@@ -348,7 +348,6 @@ mod tests {
 		};
 
 		let json = serde_json::to_string(&publication).unwrap();
-		dbg!(&json);
 		assert_eq!(
 			json,
 			r#"{"context":"https://readium.org/webpub-manifest/context.jsonld","metadata":{"title":"Book","modified":"2021-08-01T00:00:00Z","description":"A cool book","belongsTo":{"series":{"name":"Test Series","position":1}},"test":"value"}}"#
@@ -395,7 +394,7 @@ mod tests {
 		.expect("Failed to generate publications");
 
 		assert_eq!(publications.len(), 2);
-		assert!(matches!(publications[0].reading_order, None));
+		assert!(publications[0].reading_order.is_none());
 	}
 
 	#[tokio::test]
@@ -439,6 +438,6 @@ mod tests {
 		.await
 		.expect("Failed to generate publication");
 
-		assert!(matches!(publication.reading_order, Some(_)));
+		assert!(publication.reading_order.is_some());
 	}
 }

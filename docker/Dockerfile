@@ -36,6 +36,8 @@ RUN apt-get update && apt-get install -y \
     git \
     libssl-dev \
     pkg-config \
+    # See https://github.com/juhaku/utoipa/issues/958#issuecomment-2165300584
+    curl \
     libsqlite3-dev;
 
 COPY . .

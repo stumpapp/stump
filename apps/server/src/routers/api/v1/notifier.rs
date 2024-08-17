@@ -1,8 +1,8 @@
 use axum::{
 	extract::{Path, State},
-	middleware::from_extractor_with_state,
+	middleware,
 	routing::get,
-	Json, Router,
+	Extension, Json, Router,
 };
 use serde::Deserialize;
 use specta::Type;
@@ -10,15 +10,13 @@ use stump_core::{
 	db::entity::{Notifier, NotifierConfigInput, NotifierType, UserPermission},
 	prisma::notifier,
 };
-use tower_sessions::Session;
 use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
-	middleware::auth::Auth,
-	utils::enforce_session_permissions,
+	middleware::auth::{auth_middleware, RequestContext},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -38,7 +36,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 					),
 				),
 		)
-		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 #[utoipa::path(
@@ -54,9 +52,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 )]
 async fn get_notifiers(
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Vec<Notifier>>> {
-	enforce_session_permissions(&session, &[UserPermission::ReadNotifier])?;
+	req.enforce_permissions(&[UserPermission::ReadNotifier])?;
 	let client = &ctx.db;
 
 	let notifiers = client
@@ -89,9 +87,9 @@ async fn get_notifiers(
 async fn get_notifier_by_id(
 	State(ctx): State<AppState>,
 	Path(id): Path<i32>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Notifier>> {
-	enforce_session_permissions(&session, &[UserPermission::ReadNotifier])?;
+	req.enforce_permissions(&[UserPermission::ReadNotifier])?;
 	let client = &ctx.db;
 
 	let notifier = client
@@ -126,10 +124,10 @@ pub struct CreateOrUpdateNotifier {
 )]
 async fn create_notifier(
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(payload): Json<CreateOrUpdateNotifier>,
 ) -> APIResult<Json<Notifier>> {
-	enforce_session_permissions(&session, &[UserPermission::CreateNotifier])?;
+	req.enforce_permissions(&[UserPermission::CreateNotifier])?;
 
 	let client = &ctx.db;
 	let config = payload.config.into_config(&ctx).await?.into_bytes()?;
@@ -162,10 +160,10 @@ async fn create_notifier(
 async fn update_notifier(
 	State(ctx): State<AppState>,
 	Path(id): Path<i32>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(payload): Json<CreateOrUpdateNotifier>,
 ) -> APIResult<Json<Notifier>> {
-	enforce_session_permissions(&session, &[UserPermission::ManageNotifier])?;
+	req.enforce_permissions(&[UserPermission::ManageNotifier])?;
 
 	let client = &ctx.db;
 	let config = payload.config.into_config(&ctx).await?.into_bytes()?;
@@ -209,10 +207,10 @@ pub struct PatchNotifier {
 async fn patch_notifier(
 	State(ctx): State<AppState>,
 	Path(id): Path<i32>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(payload): Json<PatchNotifier>,
 ) -> APIResult<Json<Notifier>> {
-	enforce_session_permissions(&session, &[UserPermission::ManageNotifier])?;
+	req.enforce_permissions(&[UserPermission::ManageNotifier])?;
 
 	let client = &ctx.db;
 
@@ -259,9 +257,9 @@ async fn patch_notifier(
 async fn delete_notifier(
 	State(ctx): State<AppState>,
 	Path(id): Path<i32>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Notifier>> {
-	enforce_session_permissions(&session, &[UserPermission::DeleteNotifier])?;
+	req.enforce_permissions(&[UserPermission::DeleteNotifier])?;
 
 	let client = &ctx.db;
 

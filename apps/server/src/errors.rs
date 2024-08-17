@@ -17,7 +17,7 @@ use stump_core::{
 	CoreEvent,
 };
 use tokio::sync::mpsc;
-use tower_sessions::session::SessionError;
+use tower_sessions::session::Error as SessionError;
 use utoipa::ToSchema;
 
 use std::{net, num::TryFromIntError};
@@ -317,4 +317,11 @@ impl IntoResponse for APIError {
 	fn into_response(self) -> Response {
 		APIErrorResponse::from(self).into_response()
 	}
+}
+
+pub mod api_error_message {
+	pub const LOCKED_ACCOUNT: &str =
+		"Your account is locked. Please contact an administrator to unlock your account.";
+	pub const FORBIDDEN_ACTION: &str =
+		"You do not have permission to perform this action.";
 }

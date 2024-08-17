@@ -41,7 +41,7 @@ tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 tracing-appender = "0.2.3"
 unrar = { version = "0.5.3" }
 urlencoding = { workspace = true }
-utoipa = { version = "3.5.0" }
+utoipa = { version = "4.2.3" }
 uuid = "1.8.0"
 walkdir = "2.4.0"
 webp = "0.3.0"
@@ -54,7 +54,7 @@ tempfile = { workspace = true }
 criterion = { version = "0.5.1", features = ["html_reports", "async_tokio"] }
 
 [build-dependencies]
-chrono = "0.4.37"
+chrono = { workspace = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 libc = "0.2.152"

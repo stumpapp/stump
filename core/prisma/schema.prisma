@@ -63,10 +63,10 @@ model UserLoginActivity {
 }
 
 model Session {
-  id         String   @id @default(uuid())
-  created_at DateTime @default(now())
-  expires_at DateTime
-  data       Bytes // User information (user and user preferences)
+  id          String   @id @default(uuid())
+  created_at  DateTime @default(now())
+  expiry_time DateTime
+  data        Bytes // User information (user and user preferences)
 
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id String

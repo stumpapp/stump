@@ -14,7 +14,7 @@ export default function MarkdownPreview({ children, className }: Props) {
 	return (
 		<ReactMarkdown
 			remarkPlugins={[remarkDirective, remarkDirectiveRehype]}
-			className={cn('text-contrast-200', className)}
+			className={cn('text-foreground-subtle', className)}
 			components={{
 				h1: ({ ref: _, ...props }) => (
 					<>

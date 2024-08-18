@@ -29,7 +29,7 @@ export default function LibraryNavigationItem({ showCreate = true, showLinkToAll
 			return (
 				<div className="flex w-full flex-1 items-center justify-start px-2">
 					<div className="flex flex-col items-start gap-y-2">
-						<CircleSlash2 className="h-7 w-7 text-muted" />
+						<CircleSlash2 className="h-7 w-7 text-foreground-muted" />
 						<div className="text-left">
 							<Label>No libraries</Label>
 							<Text size="sm" variant="muted">
@@ -72,7 +72,7 @@ export default function LibraryNavigationItem({ showCreate = true, showLinkToAll
 
 	return (
 		<NavigationMenu.Item>
-			<NavigationMenu.Trigger className="bg-sidebar text-contrast-300 hover:bg-sidebar-300">
+			<NavigationMenu.Trigger className="bg-sidebar text-foreground-subtle hover:bg-sidebar-surface-hover">
 				<Library className="mr-2 h-4 w-4" />
 				Libraries
 			</NavigationMenu.Trigger>
@@ -97,7 +97,7 @@ export default function LibraryNavigationItem({ showCreate = true, showLinkToAll
 									<TopBarLinkListItem
 										to={paths.libraryCreate()}
 										isActive={location.pathname.startsWith(paths.libraryCreate())}
-										className="shrink-0 justify-center self-end border border-dashed border-edge-200 py-2.5"
+										className="shrink-0 justify-center self-end border border-dashed border-edge-subtle py-2.5"
 									>
 										<span className="line-clamp-1 font-medium">Create library</span>
 									</TopBarLinkListItem>
@@ -107,7 +107,7 @@ export default function LibraryNavigationItem({ showCreate = true, showLinkToAll
 									<TopBarLinkListItem
 										to={paths.libraries()}
 										isActive={location.pathname.startsWith(paths.libraries())}
-										className="shrink-0 justify-center self-end border border-dashed border-edge-200 py-2.5"
+										className="shrink-0 justify-center self-end border border-dashed border-edge-subtle py-2.5"
 									>
 										<span className="line-clamp-1 font-medium">See all</span>
 									</TopBarLinkListItem>

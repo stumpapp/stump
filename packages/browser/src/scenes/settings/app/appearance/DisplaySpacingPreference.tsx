@@ -1,7 +1,7 @@
 import { cn, cx, Label, Text } from '@stump/components'
 import { Check } from 'lucide-react'
 
-import { usePreferences } from '@/hooks'
+import { usePreferences, useTheme } from '@/hooks'
 
 export default function DisplaySpacingPreference() {
 	const {
@@ -52,40 +52,56 @@ type AppearanceOptionProps = {
 	onSelect: () => void
 }
 function AppearanceOption({ label, isSelected, isDisabled, onSelect }: AppearanceOptionProps) {
+	const { isDarkVariant } = useTheme()
+
 	const isDefaultDisplay = label === 'Default'
+	const isLightVariant = !isDarkVariant
 
 	return (
 		<div className="w-1/2 text-center md:w-1/3 lg:w-1/4">
 			<div
 				className={cn(
-					'relative flex h-32 w-full flex-col rounded-md border border-edge bg-background-300 p-2 transition-all duration-200',
+					'relative flex h-32 w-full flex-col rounded-md border border-edge bg-background-surface p-2 opacity-80 transition-all duration-200',
 					isDefaultDisplay ? 'gap-y-4' : 'gap-y-2',
 					{
-						'border-edge-200': isSelected,
+						'border-edge-subtle': isSelected,
 					},
 					{
 						'cursor-not-allowed opacity-50': isDisabled,
 					},
-					{ ' hover:border-edge-200 hover:bg-background-300': !isDisabled },
+					{
+						'hover:border-edge-subtle hover:opacity-100': !isDisabled,
+					},
+					{
+						'bg-background/80': isLightVariant,
+					},
 				)}
 				onClick={isDisabled ? undefined : onSelect}
 			>
 				<div
 					className={cx(
-						'w-full rounded-md bg-background-400',
+						'w-full rounded-md bg-background-surface-secondary',
 						isDefaultDisplay ? 'h-1/4' : 'h-1/5',
 					)}
 				/>
 
 				<div
-					className={cx('w-2/3 rounded-md bg-background-400', isDefaultDisplay ? 'h-1/4' : 'h-1/5')}
+					className={cx(
+						'w-2/3 rounded-md bg-background-surface-secondary',
+						isDefaultDisplay ? 'h-1/4' : 'h-1/5',
+					)}
 				/>
 
 				<div
-					className={cx('w-5/6 rounded-md bg-background-400', isDefaultDisplay ? 'h-1/4' : 'h-1/5')}
+					className={cx(
+						'w-5/6 rounded-md bg-background-surface-secondary',
+						isDefaultDisplay ? 'h-1/4' : 'h-1/5',
+					)}
 				/>
 
-				{!isDefaultDisplay && <div className="h-1/5 w-full rounded-md bg-background-400" />}
+				{!isDefaultDisplay && (
+					<div className="h-1/5 w-full rounded-md bg-background-surface-secondary" />
+				)}
 
 				{isSelected && (
 					<div className="absolute bottom-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-brand">

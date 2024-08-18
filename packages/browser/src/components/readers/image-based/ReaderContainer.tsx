@@ -86,7 +86,7 @@ const ReaderContainer = ({
 				animate={showToolBar ? 'visible' : 'hidden'}
 				variants={variants('top')}
 				transition={{ duration: 0.2, ease: 'easeInOut' }}
-				className="fixed left-0 top-0 z-[100] w-full bg-sidebar/95 p-4 text-contrast"
+				className="fixed left-0 top-0 z-[100] w-full bg-sidebar/95 p-4 text-foreground"
 			>
 				<div className="flex w-full items-center justify-between">
 					<div className="flex items-center space-x-4">

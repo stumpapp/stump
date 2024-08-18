@@ -98,8 +98,8 @@ export default function DirectoryPickerModal({
 						{directoryList.map((directory, i) => (
 							<button
 								key={directory.path}
-								className={cx('justify-start px-2 py-1.5 text-left hover:bg-background-200', {
-									'bg-background-200/40': i % 2 === 0,
+								className={cx('justify-start px-2 py-1.5 text-left hover:bg-background-surface', {
+									'bg-background-surface/40': i % 2 === 0,
 								})}
 								onClick={() => setPath(directory.path)}
 							>

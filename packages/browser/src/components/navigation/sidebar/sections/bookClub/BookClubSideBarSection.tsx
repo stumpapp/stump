@@ -32,7 +32,7 @@ export default function BookClubSideBarSection({
 	const renderBookClubs = () => {
 		if (!bookClubs || !bookClubs.length) {
 			return (
-				<Text className="select-none px-1 py-2" variant="muted">
+				<Text className="select-none px-1 py-2" variant="muted" size="sm">
 					{t('sidebar.buttons.noBookClubs')}
 				</Text>
 			)

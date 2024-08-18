@@ -6,7 +6,7 @@ import { cn } from '../utils'
 import { ButtonContext } from './context'
 
 export const BUTTON_BASE_CLASSES = [
-	'transition-colors hover:bg-background-200',
+	'transition-colors hover:bg-background-surface',
 	'inline-flex items-center justify-center',
 	'text-sm font-medium',
 	'focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 focus:ring-offset-background',
@@ -18,17 +18,18 @@ export const BUTTON_BASE_CLASSES = [
 export const BUTTON_VARIANTS = {
 	danger:
 		'bg-red-500 text-white hover:bg-red-600 dark:hover:bg-red-600 focus:ring-red-400 dark:focus:ring-red-400',
-	default: 'bg-background-200 hover:bg-background-300 text-contrast focus:ring-brand-400',
+	default:
+		'bg-background-surface hover:bg-background-surface-hover text-foreground focus:ring-brand-400',
 	ghost:
-		'bg-transparent hover:bg-background-300 text-contrast-300 data-[state=open]:bg-transparent',
+		'bg-transparent hover:bg-background-surface-hover text-foreground-subtle data-[state=open]:bg-transparent',
 	link: 'bg-transparent dark:bg-transparent underline-offset-4 hover:underline text-gray-900 dark:text-gray-100 hover:bg-transparent dark:hover:bg-transparent',
-	outline: 'bg-transparent border border-edge-200 hover:bg-background-200 text-contrast',
+	outline: 'bg-transparent border border-edge-subtle hover:bg-background-surface text-foreground',
 	primary:
 		'bg-brand-500 text-white hover:bg-brand-600 dark:hover:bg-brand-600 focus:ring-brand-400 data-[state=open]:bg-brand-600',
-	secondary: 'bg-contrast text-background hover:bg-contrast-300 data-[state=open]:bg-contrast-300',
-	subtle: 'bg-background-300 hover:bg-background-400 text-contrast-300',
+	secondary: 'bg-inverse text-background hover:bg-inverse/90 data-[state=open]:bg-inverse/90',
+	subtle: 'bg-background-surface hover:bg-background-surface-hover text-foreground-subtle',
 	'subtle-dark':
-		'bg-white data-[state=open]:bg-gray-50 dark:bg-gray-975 text-gray-900 hover:bg-gray-50 dark:hover:bg-gray-950 dark:data-[state=open]:bg-gray-900 dark:text-gray-100',
+		'bg-background text-foreground-subtle hover:bg-background-surface data-[state=open]:bg-background-surface',
 }
 
 export const BUTTON_ROUNDED_VARIANTS = {

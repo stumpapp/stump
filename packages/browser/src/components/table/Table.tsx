@@ -15,9 +15,11 @@ import {
 } from '@tanstack/react-table'
 import clsx from 'clsx'
 import { ArrowDown, ArrowUp } from 'lucide-react'
-import { CSSProperties, useMemo, useRef, useState } from 'react'
+import { useOverlayScrollbars } from 'overlayscrollbars-react'
+import { CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
 
 import { usePreferences } from '@/hooks/usePreferences'
+import { useTheme } from '@/hooks/useTheme'
 
 import TablePagination from './Pagination'
 import TableFilterInput from './TableFilterInput'
@@ -32,12 +34,13 @@ export interface TableProps<T = unknown, V = unknown> {
 	sortable?: boolean
 	emptyRenderer?: () => React.ReactNode
 	isZeroBasedPagination?: boolean
+	cellClassName?: string
 }
 
-// TODO: properly support pinned columns, which means I likely need to break out components (TableCell, TableHeaderCell, etc)
 // TODO: move into components package!
 // TODO: loading state
 // TODO: total count for pagination...
+
 export default function Table<T, V>({
 	data,
 	columns,
@@ -46,8 +49,12 @@ export default function Table<T, V>({
 	sortable,
 	emptyRenderer,
 	isZeroBasedPagination,
+	cellClassName,
 	...props
 }: TableProps<T, V>) {
+	const rootRef = useRef<HTMLDivElement | null>(null)
+	const viewportRef = useRef<HTMLDivElement | null>(null)
+
 	const [sorting, setSorting] = useState<SortingState>([])
 
 	const filterColRef = useRef<HTMLSelectElement | null>(null)
@@ -57,6 +64,30 @@ export default function Table<T, V>({
 	const {
 		preferences: { enable_hide_scrollbar },
 	} = usePreferences()
+	const { isDarkVariant } = useTheme()
+
+	const [initialize] = useOverlayScrollbars({
+		defer: true,
+		options: {
+			scrollbars: {
+				theme: isDarkVariant ? 'os-theme-light' : 'os-theme-dark',
+			},
+		},
+	})
+
+	useEffect(() => {
+		const { current: root } = rootRef
+		const { current: viewport } = viewportRef
+
+		if (root && viewport && !enable_hide_scrollbar) {
+			initialize({
+				elements: {
+					viewport: viewport,
+				},
+				target: root,
+			})
+		}
+	}, [initialize, enable_hide_scrollbar])
 
 	const table = useReactTable({
 		onSortingChange: setSorting,
@@ -121,79 +152,83 @@ export default function Table<T, V>({
 	const tableRows = table.getRowModel().rows
 
 	return (
-		<>
-			<div
-				className={cn('divide block max-w-full overflow-y-hidden overflow-x-scroll p-3', {
-					'scrollbar-hide': enable_hide_scrollbar,
-				})}
-			>
-				<table className={clsx('divide-y', { 'w-full': props.fullWidth })}>
-					<thead className="border-b border-edge text-left">
-						{table.getHeaderGroups().map((headerGroup) => (
-							<tr key={headerGroup.id}>
-								{headerGroup.headers.map((header) => {
-									return (
-										<th
-											key={header.id}
-											colSpan={header.colSpan}
-											className="py-2.5"
-											style={{
-												...getCommonPinningStyles(header.column),
-											}}
-										>
-											<div
-												className={clsx('flex items-center', {
-													'cursor-pointer select-none': header.column.getCanSort() && sortable,
-												})}
-												onClick={sortable ? header.column.getToggleSortingHandler() : undefined}
-												style={{
-													width: header.getSize(),
-												}}
-											>
-												<Heading className="line-clamp-1 w-full text-sm font-medium">
-													{flexRender(header.column.columnDef.header, header.getContext())}
-												</Heading>
-												{sortable && (
-													<SortIcon
-														direction={(header.column.getIsSorted() as SortDirection) ?? null}
-													/>
-												)}
-											</div>
-										</th>
-									)
-								})}
-							</tr>
-						))}
-					</thead>
-					<tbody className="divide-y divide-edge">
-						{tableRows.map((row) => {
-							return (
-								<tr key={row.id}>
-									{row.getVisibleCells().map((cell) => {
+		<div className="flex flex-col space-y-2">
+			<div className="relative" ref={rootRef} data-overlayscrollbars-initialize>
+				<div
+					className={cn('divide block max-w-full overflow-y-hidden overflow-x-scroll', {
+						'scrollbar-hide': enable_hide_scrollbar,
+					})}
+					ref={viewportRef}
+				>
+					<table className={clsx('divide-y', { 'w-full': props.fullWidth })}>
+						<thead className="border-b border-edge text-left">
+							{table.getHeaderGroups().map((headerGroup) => (
+								<tr key={headerGroup.id}>
+									{headerGroup.headers.map((header) => {
 										return (
-											<td
-												key={cell.id}
-												className="py-2"
+											<th
+												key={header.id}
+												colSpan={header.colSpan}
+												className="py-2.5 first:pl-2.5"
 												style={{
-													width: cell.column.getSize(),
-													...getCommonPinningStyles(cell.column),
+													...getCommonPinningStyles(header.column),
 												}}
 											>
-												{flexRender(cell.column.columnDef.cell, cell.getContext())}
-											</td>
+												<div
+													className={clsx('flex items-center', {
+														'cursor-pointer select-none': header.column.getCanSort() && sortable,
+													})}
+													onClick={sortable ? header.column.getToggleSortingHandler() : undefined}
+													style={{
+														width: header.getSize(),
+													}}
+												>
+													<Heading className="line-clamp-1 w-full text-sm font-medium">
+														{flexRender(header.column.columnDef.header, header.getContext())}
+													</Heading>
+													{sortable && (
+														<SortIcon
+															direction={(header.column.getIsSorted() as SortDirection) ?? null}
+														/>
+													)}
+												</div>
+											</th>
 										)
 									})}
 								</tr>
-							)
-						})}
-						{tableRows.length === 0 && emptyRenderer && (
-							<tr>
-								<td colSpan={columns.length}>{emptyRenderer()}</td>
-							</tr>
-						)}
-					</tbody>
-				</table>
+							))}
+						</thead>
+						<tbody className="divide-y divide-edge">
+							{tableRows.map((row) => {
+								return (
+									<tr key={row.id}>
+										{row.getVisibleCells().map((cell) => {
+											return (
+												<td
+													key={cell.id}
+													className={cn('py-2 first:pl-2.5', cellClassName)}
+													style={{
+														width: cell.column.getSize(),
+														...getCommonPinningStyles(cell.column),
+													}}
+												>
+													{flexRender(cell.column.columnDef.cell, cell.getContext())}
+												</td>
+											)
+										})}
+									</tr>
+								)
+							})}
+							{tableRows.length === 0 && emptyRenderer && (
+								<tr>
+									<td colSpan={columns.length}>{emptyRenderer()}</td>
+								</tr>
+							)}
+						</tbody>
+					</table>
+				</div>
 			</div>
+
 			<div className="flex items-center justify-between px-3">
 				<div className="flex items-center gap-4">
 					<Text
@@ -245,7 +280,7 @@ export default function Table<T, V>({
 					onChangePage={handlePageChanged}
 				/>
 			</div>
-		</>
+		</div>
 	)
 }
 
@@ -257,9 +292,9 @@ function SortIcon({ direction }: { direction: 'asc' | 'desc' | null }) {
 	return (
 		<span className="ml-1.5 shrink-0">
 			{direction === 'asc' ? (
-				<ArrowUp className="h-3 w-3 text-muted" />
+				<ArrowUp className="h-3 w-3 text-foreground-muted" />
 			) : (
-				<ArrowDown className="h-3 w-3 text-muted" />
+				<ArrowDown className="h-3 w-3 text-foreground-muted" />
 			)}
 		</span>
 	)

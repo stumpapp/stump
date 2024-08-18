@@ -31,7 +31,7 @@ export default function ReadMore({ text }: Props) {
 			<MarkdownContainer {...markdownContainerProps}>
 				<Markdown>{showingAll ? resolvedText : resolvedText.slice(0, 250) + '...'}</Markdown>
 			</MarkdownContainer>
-			<button onClick={toggle} className="cursor-pointer font-semibold text-contrast">
+			<button onClick={toggle} className="cursor-pointer font-semibold text-foreground">
 				{showingAll ? ' Read less' : 'Read more'}
 			</button>
 		</div>

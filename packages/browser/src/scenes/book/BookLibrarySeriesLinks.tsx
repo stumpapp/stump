@@ -35,7 +35,7 @@ export default function BookLibrarySeriesLinks({
 
 		return (
 			<>
-				<span className="mx-2 text-muted">/</span>
+				<span className="mx-2 text-foreground-muted">/</span>
 				<Link to={paths.seriesOverview(resolvedSeries.id)} className="line-clamp-1">
 					{resolvedSeries.name}
 				</Link>
@@ -52,7 +52,7 @@ export default function BookLibrarySeriesLinks({
 
 				return (
 					<React.Fragment key={segment.label}>
-						<span className="mx-2 text-muted">/</span>
+						<span className="mx-2 text-foreground-muted">/</span>
 						<Component
 							className={cx('line-clamp-1', { 'shrink-0': segment.noShrink })}
 							{...(segment.to ? { to: segment.to } : {})}

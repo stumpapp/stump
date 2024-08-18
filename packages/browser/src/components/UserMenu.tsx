@@ -29,9 +29,9 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 						<Card
 							className={cn(
 								'flex h-[2.35rem] w-full cursor-pointer items-center border-transparent border-opacity-80 px-1 transition-all duration-150 hover:border-opacity-100',
-								{ 'border-edge-200 border-opacity-100': isOpen },
-								{ 'border-edge-200': isSidebar },
-								{ 'justify-center rounded-full hover:border-edge-200': !isSidebar },
+								{ 'border-edge-subtle border-opacity-100': isOpen },
+								{ 'border-edge-subtle': isSidebar },
+								{ 'justify-center rounded-full hover:border-edge-subtle': !isSidebar },
 							)}
 						>
 							<Avatar
@@ -56,7 +56,11 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 					>
 						<div className="flex w-full flex-col">
 							<Link
-								className="pointer-events-none flex h-[2.35rem] w-full items-center bg-background-200 px-2  text-sm text-muted transition-colors duration-150"
+								className={cn(
+									linkClasses(isSidebar),
+									'pointer-events-none select-none',
+									isSidebar ? 'bg-sidebar-overlay opacity-40' : '',
+								)}
 								to={paths.notifications()}
 								onClick={() => setIsOpen(false)}
 							>
@@ -65,7 +69,7 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 							</Link>
 
 							<Link
-								className="flex h-[2.35rem] w-full items-center px-2 text-sm text-contrast-200 transition-colors duration-150 hover:bg-background-200"
+								className={linkClasses(isSidebar)}
 								to={paths.settings('app/general')}
 								onClick={() => setIsOpen(false)}
 							>
@@ -83,3 +87,10 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 		</AutoSizer>
 	)
 }
+
+const linkClasses = (isSidebar: boolean) =>
+	cn(
+		'text-foreground-subtle flex h-[2.35rem] w-full items-center px-2 text-sm transition-colors duration-150',
+		{ 'bg-sidebar-overlay hover:bg-sidebar-overlay-hover': isSidebar },
+		{ 'hover:bg-background-surface': !isSidebar },
+	)

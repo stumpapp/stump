@@ -108,7 +108,7 @@ export default function PersistedLogsTable() {
 	const pageCount = pageData?.total_pages ?? 1
 
 	return (
-		<Card className="bg-background-200 p-1">
+		<Card className="bg-background-surface p-1">
 			<Table
 				sortable
 				columns={baseColumns}
@@ -131,7 +131,7 @@ export default function PersistedLogsTable() {
 				// TODO(aaron): loader
 				emptyRenderer={() => (
 					<div className="flex min-h-[150px] flex-col items-center justify-center gap-2">
-						<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-muted" />
+						<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-foreground-muted" />
 						<Heading size="sm">{t(`${LOCALE_BASE}.emptyHeading`)}</Heading>
 						<Text size="sm" variant="muted">
 							{t(`${LOCALE_BASE}.emptySubtitle`)}

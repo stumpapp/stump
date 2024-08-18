@@ -5,10 +5,10 @@ import { cn } from '../../utils'
 
 export const RAW_INPUT_BASE_CLASSES = [
 	'flex w-full items-center justify-between transition-all duration-150 ',
-	'enabled:hover:bg-background-200 bg-transparent focus:bg-transparent',
-	'border-edge-200 border outline-none',
+	'enabled:hover:bg-background-surface bg-transparent focus:bg-transparent',
+	'border-edge-subtle border outline-none',
 	'focus:ring-offset-background focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-2 focus:ring-offset-background',
-	'text-contrast-200 placeholder:text-muted text-sm',
+	'text-foreground-subtle placeholder:text-foreground-muted text-sm',
 	'disabled:cursor-not-allowed disabled:opacity-50',
 ]
 export const RAW_INPUT_SIZE_VARIANTS = {
@@ -26,7 +26,7 @@ export const RAW_INPUT_VARIANT = {
 }
 export const RAW_INPUT_VARIANTS = {
 	contrast: {
-		true: 'enabled:hover:bg-background-200 bg-background/40 focus:bg-background/80',
+		true: 'enabled:hover:bg-background-surface bg-background/40 focus:bg-background/80',
 	},
 	isInvalid: {
 		true: 'focus:ring-red-400 dark:focus:ring-red-400 border border-red-300 border-opacity-70 dark:border-red-400 dark:border-opacity-70',

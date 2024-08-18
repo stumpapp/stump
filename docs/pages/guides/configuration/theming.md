@@ -8,16 +8,10 @@ For example, the default dark theme for Stump can be found [here](https://github
 
 ```ts
 // themes/midnight.ts
-export const midnight: ThemeDefinition = {
+export const midnight: StumpTheme = {
 	background: {
-		100: '#000000',
-		200: '#111111',
-		300: '#222222',
-		400: '#333333',
-		500: '#444444',
 		DEFAULT: '#000000',
-		danger: '#491B1C',
-		warning: '#412E19',
+		// ... other background colors
 	},
 	// ... other theme definitions
 }

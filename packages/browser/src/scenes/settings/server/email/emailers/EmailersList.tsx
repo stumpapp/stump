@@ -19,7 +19,7 @@ export default function EmailersList() {
 	if (!emailers?.length) {
 		return (
 			<Card className="flex min-h-[150px] flex-col items-center justify-center gap-4">
-				<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-muted" />
+				<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-foreground-muted" />
 				<div className="text-center">
 					<Heading size="xs">{t(`${LOCALE_BASE}.emptyHeading`)}</Heading>
 					{canCreateEmailer && (

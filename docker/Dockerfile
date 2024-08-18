@@ -41,7 +41,7 @@ RUN apt-get update && apt-get install -y \
     libsqlite3-dev;
 
 #Building dav1d for AVIF Support
-RUN git clone https://github.com/videolan/dav1d.git
+RUN git clone https://github.com/stumpapp/dav1d.git
 
 WORKDIR /dav1d
 

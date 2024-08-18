@@ -6,6 +6,7 @@ source "${SCRIPTS_DIR}/lib"
 _DEV_SETUP=${DEV_SETUP:=1}
 _CHECK_CARGO=${CHECK_CARGO:=1}
 _CHECK_NODE=${CHECK_NODE:=1}
+_CHECK_DAV1D=${CHECK_DAV1D:=1}
 _FORCE_INSTALL_YARN=${INSTALL_YARN:=0}
 
 dev_setup() {
@@ -29,6 +30,8 @@ if [ ${_CHECK_CARGO} == 1 ]; then
       echo "Rust requirement met!"
     fi
 fi
+
+
 
 if [ ${_CHECK_NODE} == 1 ]; then
   which node &> /dev/null
@@ -111,10 +114,11 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       openssl \
       appmenu-gtk-module \
       gtk3 \
+      dav1d \
       libappindicator-gtk3 librsvg libvips
   elif which dnf &> /dev/null; then
     sudo dnf check-update
-    sudo dnf install openssl-devel webkit2gtk4.0-devel curl wget libappindicator-gtk3 librsvg2-devel
+    sudo dnf install openssl-devel webkit2gtk4.0-devel curl wget libappindicator-gtk3 librsvg2-devel dav1d
     sudo dnf group install "C Development Tools and Libraries"
   else
     log_error $UNSUPPORTED_DISTRO
@@ -134,3 +138,19 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
 else
   log_error "Your OS '$OSTYPE' is not supported by the pre-setup script. $CALL_TO_ACTION_LOL"
 fi
+
+if [ ${_CHECK_DAV1D} == 1 ]; then
+    which dav1d &> /dev/null
+    if [ $? -ne 0 ]; then
+        echo "Dav1d requirement is not met. Visit https://code.videolan.org/videolan/dav1d"
+    else 
+	curver="$(dav1d --version)"
+	reqver="1.3.0"
+ 	if [ "$(printf '%s\n' "$reqver" "$curver" | sort -V | head -n1)" = "$reqver" ]; then
+      	    echo "Dav1d requirement met!"
+ 	else
+		echo "Dav1d requirement is not met (version must be greater than 1.3.0). Visit https://code.videolan.org/videolan/dav1d"
+	fi
+    fi
+fi
+

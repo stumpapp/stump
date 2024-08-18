@@ -15,7 +15,6 @@ epub = { git = "https://github.com/stumpapp/epub-rs", rev = "38e091abe9687595255
 futures = { workspace = true }
 globset = "0.4.14"
 image = {version = "0.25.2", features = ["avif-native"]}
-system-deps = "7.0.1"
 infer = "0.16.0"
 itertools = "0.12.1"
 prisma-client-rust = { workspace = true }

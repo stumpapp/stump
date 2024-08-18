@@ -293,7 +293,6 @@ pub struct LibraryStatsParams {
 	all_users: bool,
 }
 
-// TODO(historical-read-session): refactor query
 #[utoipa::path(
 	get,
 	path = "/api/v1/libraries/stats",
@@ -331,27 +330,13 @@ async fn get_libraries_stats(
 			),
 			progress_counts AS (
 				SELECT
-					IFNULL(SUM(
-							CASE WHEN rp.is_completed THEN
-								1
-							ELSE
-								0
-							END),
-						0) AS completed_books,
-					IFNULL(SUM(
-							CASE WHEN rp.is_completed THEN
-								0
-							ELSE
-								1
-							END),
-						0) AS in_progress_books
+					COUNT(frs.id) AS completed_books,
+					COUNT(rs.id) AS in_progress_books
 				FROM
 					media m
-					INNER JOIN read_progresses rp ON rp.media_id = m.id
-				WHERE
-					rp.is_completed AND (
-						{} IS TRUE OR rp.user_id = {}
-					)
+					LEFT JOIN finished_reading_sessions frs ON frs.media_id = m.id
+					LEFT JOIN reading_sessions rs ON rs.media_id = m.id
+				WHERE {} IS TRUE OR (rs.user_id = {} OR frs.user_id = {})
 			)
 			SELECT
 				*
@@ -360,6 +345,7 @@ async fn get_libraries_stats(
 				INNER JOIN progress_counts;
 			"#,
 			PrismaValue::Boolean(params.all_users),
+			PrismaValue::String(user.id.clone()),
 			PrismaValue::String(user.id)
 		))
 		.exec()
@@ -1673,27 +1659,13 @@ async fn get_library_stats(
 			),
 			progress_counts AS (
 				SELECT
-					IFNULL(SUM(
-							CASE WHEN rp.is_completed THEN
-								1
-							ELSE
-								0
-							END),
-						0) AS completed_books,
-					IFNULL(SUM(
-							CASE WHEN rp.is_completed THEN
-								0
-							ELSE
-								1
-							END),
-						0) AS in_progress_books
+					COUNT(frs.id) AS completed_books,
+					COUNT(rs.id) AS in_progress_books
 				FROM
 					media m
-					INNER JOIN read_progresses rp ON rp.media_id = m.id
-				WHERE
-					rp.is_completed AND (
-						{} IS TRUE OR rp.user_id = {}
-					)
+					LEFT JOIN finished_reading_sessions frs ON frs.media_id = m.id
+					LEFT JOIN reading_sessions rs ON rs.media_id = m.id
+				WHERE {} IS TRUE OR (rs.user_id = {} OR frs.user_id = {})
 			)
 			SELECT
 				*
@@ -1703,6 +1675,7 @@ async fn get_library_stats(
 			"#,
 			PrismaValue::String(id),
 			PrismaValue::Boolean(params.all_users),
+			PrismaValue::String(user.id.clone()),
 			PrismaValue::String(user.id)
 		))
 		.exec()
@@ -1710,7 +1683,7 @@ async fn get_library_stats(
 		.into_iter()
 		.next()
 		.ok_or(APIError::InternalServerError(
-			"Failed to compute stats for libraries".to_string(),
+			"Failed to compute stats for library".to_string(),
 		))?;
 
 	Ok(Json(stats))

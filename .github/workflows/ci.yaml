@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+      - develop
+
 jobs:
   code-changes-check:
     runs-on: [ubuntu-22.04]
@@ -38,16 +40,6 @@ jobs:
       - name: Setup rust
         uses: ./.github/actions/setup-rust
 
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-          key: ${{ runner.os }}-cargo-${{ github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork && 'non-fork-' || 'fork-' }}${{ hashFiles('**/Cargo.lock') }}
-
       - name: Run cargo checks
         run: |
           cargo fmt --all -- --check
@@ -59,15 +51,15 @@ jobs:
       # TODO: move coverage to a separate job instead of conditionally running it
       # on the ubuntu-22.04 runner as a workaround for only running it once
       - name: Install cargo-llvm-cov
-        if: runner.os == 'ubuntu-22.04'
+        if: matrix.os == 'ubuntu-22.04'
         run: cargo install cargo-llvm-cov
 
       - name: Generate code coverage data
-        if: runner.os == 'ubuntu-22.04'
+        if: matrix.os == 'ubuntu-22.04'
         run: cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
 
       - name: Upload coverage to Codecov
-        if: runner.os == 'ubuntu-22.04'
+        if: matrix.os == 'ubuntu-22.04'
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

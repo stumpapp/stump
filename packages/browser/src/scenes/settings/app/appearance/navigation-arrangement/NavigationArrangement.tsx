@@ -181,7 +181,7 @@ export default function NavigationArrangement() {
 		return (
 			<ToolTip content={help} align="end" size="sm">
 				<IconButton aria-label={help} onClick={() => setLocked(!locked)} variant="ghost" size="sm">
-					<Icon className="h-4 w-4 text-muted" />
+					<Icon className="h-4 w-4 text-foreground-muted" />
 				</IconButton>
 			</ToolTip>
 		)
@@ -206,7 +206,7 @@ export default function NavigationArrangement() {
 			</div>
 
 			<Card
-				className={cn('relative flex flex-col space-y-4 bg-background-200 p-4 md:max-w-xl', {
+				className={cn('relative flex flex-col space-y-4 bg-background-surface p-4 md:max-w-xl', {
 					'cursor-not-allowed select-none opacity-60': locked,
 				})}
 				title={locked ? t(getKey('isLocked')) : undefined}

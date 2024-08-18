@@ -1,36 +1,72 @@
-import { brand, red, ThemeDefintion, yellow } from './shared'
+import { dark } from './dark'
+import { StumpTheme } from './types'
 
-export const light: ThemeDefintion = {
+export const light = {
 	background: {
-		100: '#FFFFFF',
-		200: '#F6F6F7',
-		300: '#E9EAEB',
-		400: '#D3D5D7',
-		500: '#BEC0C4',
 		DEFAULT: '#FFFFFF',
-		danger: red[50],
-		warning: yellow[50],
-	},
-	brand,
-	contrast: {
-		100: '#000000',
-		200: '#161719',
-		300: '#1F2123',
-		400: '#2E3033',
-		DEFAULT: '#000000',
+		inverse: dark.background.DEFAULT,
+		overlay: {
+			DEFAULT: '#F6F6F7',
+			hover: '#E9EAEB',
+		},
+		surface: {
+			DEFAULT: '#F7F7F8',
+			hover: '#ECECEE',
+			secondary: '#F2F2F3',
+		},
 	},
 	edge: {
-		200: '#D3D5D7',
 		DEFAULT: '#E9EAEB',
+		brand: '#CF9977',
+		danger: '#b02a29',
+		info: '#3F89CA',
+		strong: '#FFFFFF',
+		subtle: '#D3D5D7',
+		success: '#2E7D32',
+		warning: '#D8A219',
 	},
-	muted: {
-		100: '#7D828A',
-		200: '#93979D',
-		DEFAULT: '#7D828A',
+	fill: {
+		brand: {
+			DEFAULT: '#C48259',
+			secondary: '#C4825926',
+		},
+		danger: {
+			DEFAULT: '#E53935',
+			secondary: '#E5393526',
+		},
+		disabled: '#71757D',
+		info: {
+			DEFAULT: '#3F89CA',
+			secondary: '#3F89CA26',
+		},
+		success: {
+			DEFAULT: '#43A047',
+			secondary: '#43A04726',
+		},
+		warning: {
+			DEFAULT: '#F59E0B',
+			secondary: '#F59E0B26',
+		},
+	},
+	foreground: {
+		DEFAULT: '#000000',
+		disabled: '#93979D',
+		muted: '#414347',
+		// #5B5F65 OR #7D828A
+		'on-inverse': dark.foreground.DEFAULT,
+		subtle: '#26272A',
 	},
 	sidebar: {
-		200: '#E9EAEB',
-		300: '#D3D5D7',
-		DEFAULT: '#F6F6F7',
+		DEFAULT: '#F9F9F9',
+		inverse: '#000000',
+		overlay: {
+			DEFAULT: '#FFFFFF',
+			hover: '#F6F6F7',
+		},
+		surface: {
+			DEFAULT: '#F6F6F7',
+			hover: '#EBEBED',
+			secondary: '#F1F1F2',
+		},
 	},
-}
+} satisfies StumpTheme

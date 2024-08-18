@@ -56,8 +56,8 @@ export default function FilterConfiguration() {
 							</Text>
 						</div>
 					</Accordion.Trigger>
-					<Accordion.Content className="rounded-sm bg-background-200 p-4">
-						<pre className="text-xs text-contrast-200">{formattedFilters}</pre>
+					<Accordion.Content className="rounded-sm bg-background-surface p-4">
+						<pre className="text-xs text-foreground-subtle">{formattedFilters}</pre>
 					</Accordion.Content>
 				</Accordion.Item>
 			</Accordion>
@@ -160,7 +160,7 @@ function FilterGroup({ groupIndex, onRemove }: FilterGroupProps) {
 							className="group hover:bg-background"
 							onClick={() => onRemove()}
 						>
-							<MinusCircle className="h-4 w-4 text-muted text-opacity-80 transition-opacity duration-150 group-hover:text-opacity-100" />
+							<MinusCircle className="h-4 w-4 text-foreground-muted text-opacity-80 transition-opacity duration-150 group-hover:text-opacity-100" />
 						</IconButton>
 					</ToolTip>
 				</div>

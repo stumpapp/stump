@@ -243,7 +243,7 @@ model MediaMetadata {
   teams      String?
   // *** End of group ***
 
-  page_count Int?
+  page_count      Int?
   page_dimensions PageDimensions?
 
   media    Media?  @relation(fields: [media_id], references: [id], onDelete: Cascade)
@@ -253,10 +253,10 @@ model MediaMetadata {
 }
 
 model PageDimensions {
-  id String @id @default(cuid())
-  dimensions String
-  metadata MediaMetadata @relation(fields: [metadata_id], references: [id], onDelete: Cascade)
-  metadata_id String @unique
+  id          String        @id @default(cuid())
+  dimensions  String
+  metadata    MediaMetadata @relation(fields: [metadata_id], references: [id], onDelete: Cascade)
+  metadata_id String        @unique
 
   @@map("page_dimensions")
 }
@@ -700,6 +700,7 @@ model UserPreferences {
   preferred_layout_mode String @default("GRID")
   locale                String @default("en")
   app_theme             String @default("LIGHT")
+  app_font              String @default("inter")
 
   primary_navigation_mode String  @default("SIDEBAR")
   layout_max_width_px     Int?    @default(1280)

@@ -26,7 +26,7 @@ export default function TableOfContents({ onLocationChanged }: Props) {
 			{toc?.map((item) => (
 				<button
 					key={item.label}
-					className="justify-start px-1 py-1.5 text-left hover:bg-background-200"
+					className="justify-start px-1 py-1.5 text-left hover:bg-background-surface"
 					onClick={() => handleSelect(item.content)}
 				>
 					<Text className="line-clamp-1">{item.label}</Text>

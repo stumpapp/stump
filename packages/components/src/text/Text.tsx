@@ -6,12 +6,12 @@ import { cn } from '../utils'
 // TODO: common combination shortcuts, e.g. description, subtitle, etc.
 export const TEXT_VARIANTS = {
 	danger: 'text-red-600 dark:text-red-400',
-	default: 'text-contrast',
+	default: 'text-foreground',
 	label:
-		'font-medium leading-none text-contrast-200 peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
-	muted: 'text-muted',
+		'font-medium leading-none text-foreground-subtle peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+	muted: 'text-foreground-muted',
 	primary: 'text-brand',
-	secondary: 'text-contrast-400',
+	secondary: 'text-foreground-subtle',
 }
 
 const textVariants = cva('', {

@@ -37,7 +37,7 @@ export default function Bookmarks({ onLocationChanged }: Props) {
 			{bookmarksArray.map(({ preview_content, epubcfi }) => (
 				<button
 					key={epubcfi}
-					className="flex flex-col justify-start gap-1.5 p-2 px-1 py-1.5 text-left hover:bg-background-200"
+					className="flex flex-col justify-start gap-1.5 p-2 px-1 py-1.5 text-left hover:bg-background-surface"
 					onClick={() => handleSelect(epubcfi as string)}
 					disabled={!epubcfi?.length}
 				>

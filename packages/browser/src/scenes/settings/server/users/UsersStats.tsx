@@ -133,7 +133,7 @@ export default function UsersStats() {
 	console.debug(topBooks)
 
 	return (
-		<div className="flex items-center gap-4 divide-x divide-edge-200 overflow-x-scroll pb-8 scrollbar-hide">
+		<div className="flex items-center gap-4 divide-x divide-edge-subtle overflow-x-scroll pb-8 scrollbar-hide">
 			<Statistic className="shrink-0 pr-5 md:pr-10">
 				<Statistic.Label>Users</Statistic.Label>
 				<Statistic.CountUpNumber value={users.length} />

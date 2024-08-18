@@ -45,7 +45,7 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 						type="button"
 						onClick={() => onSetShowDirectoryPicker(true)}
 					>
-						<Folder className="h-4 w-4 text-muted" />
+						<Folder className="h-4 w-4 text-foreground-muted" />
 					</IconButton>
 				}
 				required

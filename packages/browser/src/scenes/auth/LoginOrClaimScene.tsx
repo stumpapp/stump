@@ -100,8 +100,8 @@ export default function LoginOrClaimScene() {
 		} else {
 			return (
 				<div className="text-left sm:max-w-md md:max-w-lg">
-					<h1 className="text-4xl font-semibold text-contrast">{t('authScene.claimHeading')}</h1>
-					<p className="mt-1.5 text-base text-contrast-300">{t('authScene.claimText')}</p>
+					<h1 className="text-4xl font-semibold text-foreground">{t('authScene.claimHeading')}</h1>
+					<p className="mt-1.5 text-base text-foreground-subtle">{t('authScene.claimText')}</p>
 				</div>
 			)
 		}

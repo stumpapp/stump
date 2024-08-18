@@ -132,7 +132,7 @@ export default function EntityTable<Entity>({
 
 				<tbody>
 					{rows.map((row) => (
-						<tr key={row.id} className="odd:bg-background-200">
+						<tr key={row.id} className="odd:bg-background-surface">
 							{row.getVisibleCells().map((cell) => (
 								<td
 									className="h-14 pl-1.5 pr-1.5 first:pl-4 last:pr-4"

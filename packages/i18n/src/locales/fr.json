@@ -391,6 +391,10 @@
 						"bronze": "Bronze léger"
 					}
 				},
+				"fontSelect": {
+					"label": "Font",
+					"description": "Customize the font used in the application"
+				},
 				"navigationArrangement": {
 					"label": "Disposition de la navigation",
 					"description": {

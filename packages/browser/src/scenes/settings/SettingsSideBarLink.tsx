@@ -17,10 +17,10 @@ export default function SettingsSideBarLink({ to, isActive, isDisabled, icon, ch
 		<Link to={to} className={cn({ 'pointer-events-none': isDisabled })}>
 			<li
 				className={cn(
-					'flex items-center rounded-md px-2 py-1.5 font-sans',
-					isDisabled ? 'text-muted-200' : 'hover:bg-background-300',
+					'flex items-center rounded-md px-2 py-1.5',
+					isDisabled ? 'text-foreground-muted opacity-50' : 'hover:bg-background-surface-hover',
 					{
-						'bg-background-300': isActive && !isDisabled,
+						'bg-background-surface': isActive && !isDisabled,
 					},
 				)}
 			>

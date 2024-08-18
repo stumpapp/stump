@@ -4,11 +4,7 @@ import { Tabs } from 'nextra/components'
 
 # Executable
 
-<Callout emoji="☢️">
-	Native executables are not yet available. The corresponding GitHub issue for tracking is
-	[#310](https://github.com/stumpapp/stump/issues/310). For now, you can install Stump using
-	[Docker](/installation/docker) or directly from [source](/installation/source).
-</Callout>
+Stump is available as a standalone executable for macOS, Linux, and Windows
 
 ## Platform-specific instructions
 
@@ -21,19 +17,22 @@ Select your platform to view the installation instructions
 <Steps>
 ### Download the latest release
 
-Visit the [GitHub releases page](https://github.com/stumpapp/stump/releases) and download the latest release for macOS. It will be a `.zip` file containing the executable and the webapp files named `stump-<version>-macos.zip`.
+Visit the [GitHub releases page](https://github.com/stumpapp/stump/releases) and download the latest release for macOS. It will be a single `.zip` file named according to your processor architecture:
+
+- `stump-<version>-macos-intel.zip`
+- `stump-<version>-macos-arm.zip`
 
 ### Unzip the file
 
 Unzip the downloaded file using your preferred method. The expected contents are:
 
-- `stump` (the binary executable file)
-- `webapp` (a folder containing all of the webapp files)
+- `stump_server` (the binary executable file)
+- `client` (a folder containing all of the webapp files)
 
 These can live wherever you'd like, so long as they are adjacent to each other. For example, if you wanted them in your home directory, you could run:
 
 ```bash
-unzip ~/Downloads/stump-<version>-macos.zip -d ~
+unzip ~/Downloads/stump-<version>-macos-arm.zip -d ~
 ```
 
 ### Make the binary executable
@@ -42,7 +41,7 @@ Open a terminal and navigate to the folder containing the `stump` binary. Run th
 
 ```sh
 # Navigate to the folder containing the stump binary, e.g. ~/Stump
-sudo chmod +x stump
+sudo chmod +x stump_server
 ```
 
 ### Run the binary
@@ -51,7 +50,7 @@ You can now run the `stump` binary from the terminal:
 
 ```bash
 # Navigate to the folder containing the stump binary, e.g. ~/Stump, or be sure to include the full path to the binary
-./stump
+./stump_server
 ```
 
 </Steps>
@@ -65,19 +64,19 @@ You can now run the `stump` binary from the terminal:
 <Steps>
 ### Download the latest release
 
-Visit the [GitHub releases page](https://github.com/stumpapp/stump/releases) and download the latest release for Linux. It will be a `.tar.gz` file containing the executable and the webapp files named `stump-<version>-linux.tar.gz`.
+Visit the [GitHub releases page](https://github.com/stumpapp/stump/releases) and download the latest release for Linux. It will be a `.zip` file containing the executable and the webapp files named `stump-<version>-linux.zip`.
 
 ### Unzip the file
 
 Unzip the downloaded file using your preferred method. The expected contents are:
 
-- `stump` (the binary executable file)
-- `webapp` (a folder containing all of the webapp files)
+- `stump_server` (the binary executable file)
+- `client` (a folder containing all of the webapp files)
 
 These can live wherever you'd like, so long as they are adjacent to each other. For example, if you wanted them in your home directory, you could run:
 
 ```bash
-tar -xvf ~/Downloads/stump-<version>-linux.tar.gz -C ~
+unzip ~/Downloads/stump-<version>-linux.zip -d ~
 ```
 
 ### Make the binary executable
@@ -86,7 +85,7 @@ Open a terminal and navigate to the folder containing the `stump` binary. Run th
 
 ```bash
 # Navigate to the folder containing the stump binary, e.g. ~/Stump
-sudo chmod +x stump
+sudo chmod +x stump_server
 ```
 
 ### Run the binary
@@ -95,7 +94,7 @@ You can now run the `stump` binary from the terminal:
 
 ```bash
 # Navigate to the folder containing the stump binary, e.g. ~/Stump, or be sure to include the full path to the binary
-./stump
+./stump_server
 ```
 
 </Steps>

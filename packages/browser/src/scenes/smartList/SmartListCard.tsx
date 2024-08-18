@@ -110,7 +110,7 @@ export default function SmartListCard({
 	return (
 		<Link to={paths.smartList(id)} className="block w-full">
 			<Card
-				className="flex h-32 w-full flex-col gap-y-4 rounded-none border-none bg-background-200 p-4 transition-colors duration-150 first:rounded-t-sm last:rounded-b-sm hover:bg-background-300/80"
+				className="flex h-32 w-full flex-col gap-y-4 rounded-none border-none bg-background-surface p-4 transition-colors duration-150 first:rounded-t-sm last:rounded-b-sm hover:bg-background-surface-hover/80"
 				onMouseEnter={() => prefetchSmartListItems(id)}
 			>
 				<div className="flex flex-col gap-y-1.5">

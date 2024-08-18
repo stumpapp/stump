@@ -32,9 +32,9 @@ export default function UserMenu() {
 	}
 
 	const classes = cn(
-		'rounded-full border border-transparent border-opacity-80 bg-sidebar text-contrast-300 hover:border-edge-200 hover:border-opacity-100 hover:bg-background-200/50 data-[state=open]:border-edge-200 data-[state=open]:border-opacity-100 data-[state=open]:bg-background-200/50',
+		'rounded-full border border-transparent border-opacity-80 bg-sidebar text-foreground-subtle hover:border-edge-subtle hover:border-opacity-100 hover:bg-background-surface/50 data-[state=open]:border-edge-subtle data-[state=open]:border-opacity-100 data-[state=open]:bg-background-surface/50',
 		// {
-		// 	'border-edge-200 border-opacity-100 bg-background-200/50': isInSettingsSomewhere,
+		// 	'border-edge-subtle border-opacity-100 bg-background-surface/50': isInSettingsSomewhere,
 		// },
 		// {
 		// 	'h-[2.35rem] w-[2.35rem] p-0 px-0 py-0': enable_double_sidebar,

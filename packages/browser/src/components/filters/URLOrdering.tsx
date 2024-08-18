@@ -41,7 +41,7 @@ export default function URLOrdering({ entity }: Props) {
 					<IconButton
 						variant="ghost"
 						size="xs"
-						className="hover:bg-background-300"
+						className="hover:bg-background-surface-hover"
 						pressEffect={false}
 					>
 						<ArrowUpDown className="h-4 w-4" />

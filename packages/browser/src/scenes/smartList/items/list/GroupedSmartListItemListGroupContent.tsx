@@ -71,7 +71,7 @@ export default function GroupedSmartListItemListGroupContent({ books }: Props) {
 								>
 									<Link
 										to={paths.bookOverview(book.id)}
-										className="flex h-full w-full items-center px-2 hover:bg-background-200"
+										className="flex h-full w-full items-center px-2 hover:bg-background-surface"
 									>
 										<img className="h-12 w-auto rounded-sm" src={getMediaThumbnail(book.id)} />
 										<div className="flex flex-1 flex-col space-y-1.5 self-start px-2 pt-2">

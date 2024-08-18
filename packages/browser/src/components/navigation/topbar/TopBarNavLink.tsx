@@ -20,7 +20,7 @@ export default function TopBarNavLink({
 				<NavigationMenu.Link
 					className={cn(
 						navigationMenuTriggerStyle({
-							className: cn('text-foreground-subtle hover:bg-sidebar-surface-hover bg-sidebar', {
+							className: cn('bg-sidebar text-foreground-subtle hover:bg-sidebar-surface-hover', {
 								'bg-sidebar-surface': isActive,
 							}),
 						}),

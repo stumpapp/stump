@@ -31,7 +31,7 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 								'flex h-[2.35rem] w-full cursor-pointer items-center border-transparent border-opacity-80 px-1 transition-all duration-150 hover:border-opacity-100',
 								{ 'border-edge-subtle border-opacity-100': isOpen },
 								{ 'border-edge-subtle': isSidebar },
-								{ 'hover:border-edge-subtle justify-center rounded-full': !isSidebar },
+								{ 'justify-center rounded-full hover:border-edge-subtle': !isSidebar },
 							)}
 						>
 							<Avatar

@@ -67,6 +67,7 @@ type Background = {
  * text or icons
  */
 type Foreground = {
+	// TODO: rename, kind of confusing alongside muted
 	/**
 	 * The color of foreground elements on the 'surface' layer which are emphasized but not
 	 * muted

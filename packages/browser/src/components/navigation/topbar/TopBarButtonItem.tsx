@@ -13,8 +13,8 @@ const TopBarButtonItem = forwardRef<HTMLDivElement, Props>(
 				ref={ref}
 				{...props}
 				className={cn(
-					'text-foreground-subtle hover:bg-sidebar-surface-hover focus:bg-sidebar-surface flex w-full cursor-pointer select-none items-center rounded-md px-3 py-2 leading-none no-underline outline-none transition-colors',
-					{ 'text-foreground-muted pointer-events-none': isDisabled },
+					'flex w-full cursor-pointer select-none items-center rounded-md px-3 py-2 leading-none text-foreground-subtle no-underline outline-none transition-colors hover:bg-sidebar-surface-hover focus:bg-sidebar-surface',
+					{ 'pointer-events-none text-foreground-muted': isDisabled },
 					className,
 				)}
 			/>

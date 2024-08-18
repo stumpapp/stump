@@ -1,42 +1,6 @@
-import { brand, ThemeDefintion } from './shared'
 import { StumpTheme } from './types'
 
-export const dark: ThemeDefintion = {
-	background: {
-		100: '#161719',
-		200: '#1B1C1D',
-		300: '#1F2123',
-		400: '#242628',
-		500: '#292C30',
-		DEFAULT: '#161719',
-		danger: '#491B1C',
-		warning: '#412E19',
-	},
-	brand,
-	contrast: {
-		100: '#FFFFFF',
-		200: '#FBFAF9',
-		300: '#F6F6F7',
-		400: '#E9EAEB',
-		DEFAULT: '#FFFFFF',
-	},
-	edge: {
-		200: '#292C30',
-		DEFAULT: '#1F2123',
-	},
-	muted: {
-		100: '#898D94',
-		200: '#71757D',
-		DEFAULT: '#898D94',
-	},
-	sidebar: {
-		200: '#161718',
-		300: '#1F2123',
-		DEFAULT: '#151517',
-	},
-}
-
-export const updatedDark = {
+export const dark = {
 	background: {
 		DEFAULT: '#161719',
 		inverse: '#FFFFFF',
@@ -95,7 +59,7 @@ export const updatedDark = {
 		inverse: '#FFFFFF',
 		overlay: {
 			DEFAULT: '#151517',
-			hover: '#17171A', // #1A1A1C?
+			hover: '#17171A',
 		},
 		surface: {
 			DEFAULT: '#19191B',
@@ -104,22 +68,3 @@ export const updatedDark = {
 		},
 	},
 } satisfies StumpTheme
-
-/*
-
-'woodsmoke': {
-  DEFAULT: '#151517',
-  50: '#2A2A2E',
-  100: '#28282C',
-  200: '#26262A',
-  300: '#242427',
-  400: '#212124',
-  500: '#1F1F22',
-  600: '#1C1C1F',
-  700: '#1A1A1C',
-  800: '#17171A',
-  900: '#151517',
-  950: '#080808'
-},
-
-*/

@@ -23,8 +23,8 @@ export default function FilterConfiguration() {
 					<Accordion.Trigger noUnderline asLabel>
 						Raw filters
 					</Accordion.Trigger>
-					<Accordion.Content className="bg-background-surface rounded-sm p-4">
-						<pre className="text-foreground-subtle text-xs">{JSON.stringify(filters, null, 2)}</pre>
+					<Accordion.Content className="rounded-sm bg-background-surface p-4">
+						<pre className="text-xs text-foreground-subtle">{JSON.stringify(filters, null, 2)}</pre>
 					</Accordion.Content>
 				</Accordion.Item>
 			</Accordion>

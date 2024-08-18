@@ -16,7 +16,7 @@ export default function SettingsButton() {
 			<IconButton
 				variant="ghost"
 				className={cn(
-					'text-foreground border border-transparent p-1.5',
+					'border border-transparent p-1.5 text-foreground',
 					isActive
 						? 'border-edge-subtle/50 bg-sidebar-surface hover:bg-sidebar-surface'
 						: 'hover:border-edge-subtle/50 hover:bg-sidebar-surface/70',

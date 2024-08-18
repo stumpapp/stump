@@ -13,12 +13,11 @@ export const ALERT_ICONS = {
 	warning: AlertTriangle,
 }
 
-// TODO: adjust colors
 export const ALERT_VARIANTS: Record<keyof typeof ALERT_ICONS, string> = {
 	error: 'bg-fill-danger-secondary text-foreground-subtle',
 	grayscale: 'bg-background-surface text-foreground',
-	info: 'bg-blue-50 text-blue-700',
-	success: 'bg-green-50 text-green-700',
+	info: 'bg-fill-info-secondary text-foreground-subtle',
+	success: 'bg-fill-success-secondary text-foreground-subtle',
 	warning: 'bg-fill-warning-secondary text-foreground-subtle',
 }
 

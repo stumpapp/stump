@@ -2,7 +2,7 @@ import React from 'react'
 
 export default function Spinner() {
 	return (
-		<svg className="h-6 w-6 animate-spin stroke-contrast" viewBox="0 0 256 256">
+		<svg className="stroke-contrast h-6 w-6 animate-spin" viewBox="0 0 256 256">
 			<line
 				x1="128"
 				y1="32"

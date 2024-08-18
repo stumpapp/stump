@@ -16,7 +16,7 @@ export default function BookClubNavigationItem(_: Props) {
 
 	return (
 		<NavigationMenu.Item>
-			<NavigationMenu.Trigger className="text-foreground-subtle hover:bg-sidebar-surface-hover bg-sidebar">
+			<NavigationMenu.Trigger className="bg-sidebar text-foreground-subtle hover:bg-sidebar-surface-hover">
 				Book clubs
 			</NavigationMenu.Trigger>
 			<NavigationMenu.Content>

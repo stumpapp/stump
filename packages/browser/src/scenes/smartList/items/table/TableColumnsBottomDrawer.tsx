@@ -172,7 +172,7 @@ export default function TableColumnsBottomDrawer() {
 			<ToolTip content="Adjust columns">
 				<Drawer.Trigger asChild onClick={() => setIsOpen(true)}>
 					<IconButton variant="ghost">
-						<TableProperties className="text-foreground-muted h-4 w-4" />
+						<TableProperties className="h-4 w-4 text-foreground-muted" />
 					</IconButton>
 				</Drawer.Trigger>
 			</ToolTip>

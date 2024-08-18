@@ -13013,15 +13013,10 @@ lucide-react-native@^0.330.0:
   resolved "https://registry.yarnpkg.com/lucide-react-native/-/lucide-react-native-0.330.0.tgz#d76d46ab452e6926d71ff6d7655ff8f43a88728e"
   integrity sha512-XHeCNGLIHNbk4oRTPZht8NxzUB+f9TLt2d4jWgawLmcwVae4nJiqOn3GJNpYvo5x5Z8rtxP1frVk8PnN/ICSnQ==
 
-lucide-react@^0.288.0:
-  version "0.288.0"
-  resolved "https://registry.yarnpkg.com/lucide-react/-/lucide-react-0.288.0.tgz#cc9fda209fe4ec6e572efca38f7d3e3cde7422eb"
-  integrity sha512-ikhb/9LOkq9orPoLV9lLC4UYyoXQycBhIgH7H59ahOkk0mkcAqkD52m84RXedE/qVqZHW8rEJquInT4xGmsNqw==
-
-lucide-react@^0.368.0:
-  version "0.368.0"
-  resolved "https://registry.yarnpkg.com/lucide-react/-/lucide-react-0.368.0.tgz#3c0ee63f4f7d30ae63b621b2b8f04f9e409ee6e7"
-  integrity sha512-soryVrCjheZs8rbXKdINw9B8iPi5OajBJZMJ1HORig89ljcOcEokKKAgGbg3QWxSXel7JwHOfDFUdDHAKyUAMw==
+lucide-react@=0.428.0:
+  version "0.428.0"
+  resolved "https://registry.yarnpkg.com/lucide-react/-/lucide-react-0.428.0.tgz#dfd96d682c74f78c2961040036d8c1265ccce039"
+  integrity sha512-rGrzslfEcgqwh+TLBC5qJ8wvVIXhLvAIXVFKNHndYyb1utSxxn9rXOC+1CNJLi6yNOooyPqIs6+3YCp6uSiEvg==
 
 lusca@1.6.1:
   version "1.6.1"

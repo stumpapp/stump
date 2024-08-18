@@ -19,7 +19,7 @@ export default function FilterBottomDrawer() {
 			<ToolTip content="Adjust filter">
 				<Drawer.Trigger asChild>
 					<IconButton variant="ghost">
-						<Filter className="text-foreground-muted h-4 w-4" />
+						<Filter className="h-4 w-4 text-foreground-muted" />
 					</IconButton>
 				</Drawer.Trigger>
 			</ToolTip>
@@ -43,8 +43,8 @@ export default function FilterBottomDrawer() {
 										<Text size="sm" variant="muted">
 											{t(withLocaleKey('rawData.description'))}
 										</Text>
-										<div className="bg-background-surface mt-1.5 rounded-sm p-4">
-											<pre className="text-foreground-subtle text-xs">
+										<div className="mt-1.5 rounded-sm bg-background-surface p-4">
+											<pre className="text-xs text-foreground-subtle">
 												{JSON.stringify(filters, null, 2)}
 											</pre>
 										</div>

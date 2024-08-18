@@ -129,7 +129,7 @@ export default function UserPermissionsForm() {
 					/>
 					<Text variant="muted" className="ml-6" size="sm">
 						{description}{' '}
-						{disclaimer && <span className="text-foreground-subtle font-medium">{disclaimer}</span>}
+						{disclaimer && <span className="font-medium text-foreground-subtle">{disclaimer}</span>}
 					</Text>
 				</div>
 			)

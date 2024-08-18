@@ -290,9 +290,9 @@ function SortIcon({ direction }: { direction: 'asc' | 'desc' | null }) {
 	return (
 		<span className="ml-1.5 shrink-0">
 			{direction === 'asc' ? (
-				<ArrowUp className="text-foreground-muted h-3 w-3" />
+				<ArrowUp className="h-3 w-3 text-foreground-muted" />
 			) : (
-				<ArrowDown className="text-foreground-muted h-3 w-3" />
+				<ArrowDown className="h-3 w-3 text-foreground-muted" />
 			)}
 		</span>
 	)

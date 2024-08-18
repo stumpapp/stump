@@ -34,12 +34,13 @@ export interface TableProps<T = unknown, V = unknown> {
 	sortable?: boolean
 	emptyRenderer?: () => React.ReactNode
 	isZeroBasedPagination?: boolean
+	cellClassName?: string
 }
 
-// TODO: properly support pinned columns, which means I likely need to break out components (TableCell, TableHeaderCell, etc)
 // TODO: move into components package!
 // TODO: loading state
 // TODO: total count for pagination...
+
 export default function Table<T, V>({
 	data,
 	columns,
@@ -48,6 +49,7 @@ export default function Table<T, V>({
 	sortable,
 	emptyRenderer,
 	isZeroBasedPagination,
+	cellClassName,
 	...props
 }: TableProps<T, V>) {
 	const rootRef = useRef<HTMLDivElement | null>(null)
@@ -204,7 +206,7 @@ export default function Table<T, V>({
 											return (
 												<td
 													key={cell.id}
-													className="py-2 first:pl-2.5"
+													className={cn('py-2 first:pl-2.5', cellClassName)}
 													style={{
 														width: cell.column.getSize(),
 														...getCommonPinningStyles(cell.column),

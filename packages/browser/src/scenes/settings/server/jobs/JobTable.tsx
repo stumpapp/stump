@@ -152,7 +152,7 @@ export default function JobTable() {
 					onPaginationChange: setPagination,
 					pageCount,
 					state: {
-						// columnPinning: { right: ['actions'] },
+						columnPinning: { right: ['actions'] },
 						pagination,
 					},
 				}}
@@ -169,6 +169,7 @@ export default function JobTable() {
 					</div>
 				)}
 				isZeroBasedPagination
+				cellClassName="bg-background-surface"
 			/>
 
 			<JobDataInspector data={inspectingData} onClose={() => setInspectingData(null)} />

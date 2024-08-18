@@ -93,6 +93,7 @@ export default function DevicesTable({ onSelectForUpdate }: Props) {
 					options={{
 						onPaginationChange: setPagination,
 						state: {
+							columnPinning: canEditEmailer ? { right: ['actions'] } : undefined,
 							pagination,
 						},
 					}}
@@ -110,6 +111,7 @@ export default function DevicesTable({ onSelectForUpdate }: Props) {
 						</div>
 					)}
 					isZeroBasedPagination
+					cellClassName="bg-background-surface"
 				/>
 			</Card>
 		</>

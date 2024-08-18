@@ -1,10 +1,11 @@
-use proc_macro2::TokenStream;
+use proc_macro2::{Span, TokenStream};
 use syn::{DataStruct, Expr, Field, Fields, Ident};
 
 use crate::type_utils;
 
 #[derive(Debug)]
 pub struct StumpConfigVariable {
+	pub span: Span,
 	pub variable_name: Ident,
 	pub variable_type: TokenStream,
 	pub is_optional: bool,
@@ -39,6 +40,10 @@ impl StumpConfigVariable {
 
 		parse_types.contains(&type_str.as_str())
 	}
+
+	pub fn error<T: std::fmt::Display>(&self, err: T) -> TokenStream {
+		syn::Error::new(self.span, err).into_compile_error()
+	}
 }
 
 /// Parses a struct, extracting a vec representing each of its fields
@@ -59,6 +64,7 @@ pub fn get_config_variables(data_struct: &DataStruct) -> Vec<StumpConfigVariable
 
 			// Then we add a new variable
 			output_vec.push(StumpConfigVariable {
+				span: variable_name.span(),
 				variable_name,
 				variable_type,
 				is_optional,
@@ -79,37 +85,55 @@ fn parse_config_var_attributes(field: &Field) -> StumpConfigVariableAttributes {
 	let mut required_by_new = false;
 	let mut env_key = None;
 	let mut validator = None;
+	let field_ident = field.ident.as_ref().unwrap();
 
 	for attr in &field.attrs {
 		// #[default_value(Expr)]
 		if attr.path().is_ident("default_value") {
-			let default_value_expr: Expr = attr
-				.parse_args()
-				.expect("Failed to parse default_value expression");
+			let default_value_expr: Expr = attr.parse_args().unwrap_or_else(|e| {
+				panic!(
+					"Failed to parse default_value expression for {}: {}",
+					field_ident, e
+				)
+			});
 			default_value = Some(default_value_expr);
 		}
+
 		// #[required_by_new]
 		if attr.path().is_ident("required_by_new") {
 			required_by_new = true;
 		}
+
 		// #[env_key(Expr)]
 		if attr.path().is_ident("env_key") {
-			let env_key_expr: Expr = attr
-				.parse_args()
-				.expect("Failed to parse env_key expression");
+			let env_key_expr: Expr = attr.parse_args().unwrap_or_else(|e| {
+				panic!(
+					"Failed to parse env_key expression for {}: {}",
+					field_ident, e
+				)
+			});
 			env_key = Some(env_key_expr);
 		}
+
 		// #[debug_value(Expr)]
 		if attr.path().is_ident("debug_value") {
-			let debug_value_expr: Expr = attr
-				.parse_args()
-				.expect("Failed to parse debug_value expression");
+			let debug_value_expr: Expr = attr.parse_args().unwrap_or_else(|e| {
+				panic!(
+					"Failed to parse debug_value expression for {}: {}",
+					field_ident, e
+				)
+			});
 			debug_value = Some(debug_value_expr);
 		}
+
 		// #[validator(fn)]
 		if attr.path().is_ident("validator") {
-			let validator_iden: Ident =
-				attr.parse_args().expect("Failed to parse validator");
+			let validator_iden: Ident = attr.parse_args().unwrap_or_else(|e| {
+				panic!(
+					"Failed to parse validator identity for {}: {}",
+					field_ident, e
+				)
+			});
 			validator = Some(validator_iden);
 		}
 	}

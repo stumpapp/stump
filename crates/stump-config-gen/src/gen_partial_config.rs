@@ -65,9 +65,9 @@ fn config_var_to_setter(var: &StumpConfigVariable) -> TokenStream {
 	let var_name = &var.variable_name;
 
 	let setter = match (var.is_vec, var.is_optional) {
-		(true, true) => unimplemented!(
-			"The StumpConfig macro doesn't support Option<Vec<T>> config variables."
-		),
+		(true, true) => {
+			var.error("The config macro doesn't support Option<Vec<T>> config variables.")
+		},
 		(true, false) => {
 			let orig_var_name = format_ident!("orig_{}", var_name);
 

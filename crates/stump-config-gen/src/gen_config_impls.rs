@@ -42,7 +42,10 @@ fn gen_new_impl(config_vars: &[StumpConfigVariable]) -> TokenStream {
 			setters.push(quote! {#name: #name})
 		} else {
 			if var.attributes.default_value.is_none() {
-				panic!("{} needs a default value", var.variable_name);
+				setters.push(
+					var.error(format!("{} needs a default value", var.variable_name)),
+				);
+				continue;
 			}
 
 			let default_expr = var.attributes.default_value.as_ref().unwrap();
@@ -69,7 +72,7 @@ fn gen_debug_impl(config_vars: &[StumpConfigVariable]) -> TokenStream {
 			(Some(debug), _) => quote! {#name: #debug},
 			(None, Some(default)) => quote! {#name: #default},
 			(None, None) => {
-				panic!("Set a debug or default value for {}", var.variable_name)
+				var.error("Must set a default_value or debug_value for each variable")
 			},
 		};
 		setters.push(setter);
@@ -155,9 +158,9 @@ fn gen_env_var_extractors(var: &StumpConfigVariable) -> TokenStream {
 
 		// Handle types that need to be parsed from String AND into Vec.
 		if is_parse_type && var.is_vec {
-			return quote! {
-				unimplemented!("The config generator macro doesn't implement Vec parsable types.")
-			};
+			return var.error(
+				"The config generator macro doesn't implement Vec parsable types.",
+			);
 		}
 
 		// Handle types that don't need to be parsed, but are Vec

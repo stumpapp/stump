@@ -19,10 +19,10 @@ use gen_partial_config::gen_partial_stump_config;
 ///
 /// ### `#[default_value(Expr)]`
 ///
-/// This attribute is applied to a member variable of the input struct to define a
-/// default value for the variable. Whichever expression is provided will be used in
-/// the `new(...)` function to set the value of the output. This value must be set
-/// unless you use the `required_by_new` attribute (described below).
+/// This attribute is applied to a field of the input struct to define a default value
+/// for the variable. Whichever expression is provided will be used in the `new(...)`
+/// function to set the value of the output. This value must be set unless you use the
+/// `required_by_new` attribute (described below).
 ///
 /// ### `#[debug_value(Expr)]`
 ///

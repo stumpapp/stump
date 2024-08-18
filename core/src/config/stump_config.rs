@@ -107,7 +107,7 @@ pub struct StumpConfig {
 	#[env_key("EMAIL_TEMPLATES_DIR")]
 	pub custom_templates_dir: Option<String>,
 
-	/// The configuration root for the Stump application, cotains thumbnails, cache, and logs.
+	/// The configuration root for the Stump application, contains thumbnails, cache, and logs.
 	#[debug_value(super::get_default_config_dir())]
 	#[env_key(CONFIG_DIR_KEY)]
 	#[required_by_new]

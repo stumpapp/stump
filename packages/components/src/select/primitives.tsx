@@ -16,7 +16,7 @@ const SelectPrimitiveTrigger = React.forwardRef<
 	<SelectRadix.Trigger
 		ref={ref}
 		className={cn(
-			'flex h-10 w-full items-center justify-between rounded-md border border-edge bg-transparent px-3 py-2 text-sm placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-background-400 focus:ring-offset-2 focus:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50',
+			'placeholder:text-foreground-muted flex h-10 w-full items-center justify-between rounded-md border border-edge bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-background-400 focus:ring-offset-2 focus:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50',
 			className,
 		)}
 		{...props}
@@ -35,7 +35,7 @@ const SelectPrimitiveContent = React.forwardRef<
 		<SelectRadix.Content
 			ref={ref}
 			className={cn(
-				'relative z-50 min-w-[8rem] overflow-hidden rounded-md border border-edge bg-background text-contrast-200 shadow-md animate-in fade-in-80',
+				'text-foreground-subtle relative z-50 min-w-[8rem] overflow-hidden rounded-md border border-edge bg-background shadow-md animate-in fade-in-80',
 				className,
 			)}
 			{...props}
@@ -52,7 +52,7 @@ const SelectPrimitiveLabel = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<SelectRadix.Label
 		ref={ref}
-		className={cn('py-1.5 pl-8 pr-2 text-sm font-semibold text-contrast', className)}
+		className={cn('text-foreground py-1.5 pl-8 pr-2 text-sm font-semibold', className)}
 		{...props}
 	/>
 ))

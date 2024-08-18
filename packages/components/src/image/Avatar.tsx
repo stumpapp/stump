@@ -72,7 +72,7 @@ export const Avatar = forwardRef<AvatarPrimitiveRef, AvatarProps>(
 							'bg-brand-400': fallbackColor === 'brand',
 						},
 						{
-							'bg-background-200': fallbackColor === 'gray',
+							'bg-background-surface': fallbackColor === 'gray',
 						},
 						roundedClassName,
 						fallbackWrapperClassName,

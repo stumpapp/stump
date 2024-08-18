@@ -42,7 +42,7 @@ export default function UserSmartListItemsScene() {
 		return layout === 'table' ? (
 			<SmartListBookTable books={items.items} />
 		) : (
-			<pre className="text-xs text-contrast-200">{JSON.stringify({ items }, null, 2)}</pre>
+			<pre className="text-foreground-subtle text-xs">{JSON.stringify({ items }, null, 2)}</pre>
 		)
 	}
 

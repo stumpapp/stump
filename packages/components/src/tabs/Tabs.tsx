@@ -6,8 +6,10 @@ import { cn } from '../utils'
 import { TabsContext, TabsVariant } from './context'
 
 const TABS_CONTENT_VARIANTS: Record<TabsVariant, string> = {
-	default: 'text-contrast-300 data-[state=active]:bg-background data-[state=active]:text-contrast',
-	primary: 'text-contrast-300 data-[state=active]:bg-brand-300 data-[state=active]:text-brand-800',
+	default:
+		'text-foreground-subtle data-[state=active]:bg-background data-[state=active]:text-foreground',
+	primary:
+		'text-foreground-subtle data-[state=active]:bg-brand-300 data-[state=active]:text-brand-800',
 }
 
 export type TabsProps = {
@@ -32,7 +34,7 @@ const TabsList = React.forwardRef<
 			<TabsPrimitive.List
 				ref={ref}
 				className={cn(
-					'inline-flex items-center justify-center rounded-md border border-edge-200/80 bg-transparent p-1',
+					'border-edge-subtle/80 inline-flex items-center justify-center rounded-md border bg-transparent p-1',
 					{ 'gap-1': activeOnHover },
 					className,
 				)}
@@ -74,7 +76,7 @@ const TabsContent = React.forwardRef<
 	React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
 >(({ className, ...props }, ref) => (
 	<TabsPrimitive.Content
-		className={cn('mt-2 rounded-md border border-edge-200 p-6', className)}
+		className={cn('border-edge-subtle mt-2 rounded-md border p-6', className)}
 		{...props}
 		ref={ref}
 	/>

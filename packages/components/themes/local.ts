@@ -31,7 +31,7 @@ export const local: ThemeDefintion = {
 		DEFAULT: 'var(--twc-contrast)',
 	},
 	edge: {
-		200: 'var(--twc-edge-200)',
+		200: 'var(--twc-edge-subtle)',
 		DEFAULT: 'var(--twc-edge)',
 	},
 	muted: {

@@ -26,10 +26,10 @@ export const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
 				ref={ref}
 				className={cn(
 					[
-						'bg-transparent focus:bg-transparent enabled:hover:bg-background-200',
-						'border border-edge-200',
+						'enabled:hover:bg-background-surface bg-transparent focus:bg-transparent',
+						'border-edge-subtle border',
 						'focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-2 focus:ring-offset-background',
-						'text-sm text-contrast-200 placeholder:text-muted',
+						'text-foreground-subtle placeholder:text-foreground-muted text-sm',
 						'disabled:cursor-not-allowed disabled:opacity-50',
 					],
 					'flex w-full items-center justify-between rounded-md bg-transparent px-3 pl-3 pr-10 transition-all duration-150',
@@ -37,7 +37,7 @@ export const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
 						[SELECT_SIZES[size ?? 'default']]: size,
 					},
 					{
-						'text-muted': !!emptyOption && props.value === emptyOption.value,
+						'text-foreground-muted': !!emptyOption && props.value === emptyOption.value,
 					},
 					className,
 				)}

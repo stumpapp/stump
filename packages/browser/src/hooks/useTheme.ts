@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+
 import { usePreferences } from './usePreferences'
 
 /**
@@ -14,7 +16,9 @@ export function useTheme() {
 			app_theme: theme,
 		})
 
-	const isDarkVariant = (app_theme || 'light').includes('dark')
+	const isDarkVariant = useMemo(() => DARK_THEMES.includes(app_theme || 'light'), [app_theme])
 
 	return { changeTheme, isDarkVariant, theme: app_theme || 'light' }
 }
+
+export const DARK_THEMES = ['dark']

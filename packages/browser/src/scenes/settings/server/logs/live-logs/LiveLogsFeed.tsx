@@ -64,10 +64,10 @@ export default function LiveLogsFeed() {
 
 	// TODO: Syntax highlighting for logs
 	return (
-		<div className="h-72 bg-background-200 p-4">
+		<div className="bg-background-surface h-72 p-4">
 			<div
 				ref={logContainerRef}
-				className="flex max-h-full flex-col gap-y-1.5 overflow-y-auto font-mono text-sm text-contrast-200"
+				className="text-foreground-subtle flex max-h-full flex-col gap-y-1.5 overflow-y-auto font-mono text-sm"
 			>
 				{logsBuffer.map((log, index) => (
 					<span key={index}>{log}</span>

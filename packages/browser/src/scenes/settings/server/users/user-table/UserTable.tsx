@@ -111,7 +111,7 @@ export default function UserTable() {
 	)
 
 	return (
-		<Card className="bg-background-200 p-1">
+		<Card className="bg-background-surface p-1">
 			<Table
 				sortable
 				columns={columns}

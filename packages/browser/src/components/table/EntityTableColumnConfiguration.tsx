@@ -213,7 +213,7 @@ function DraggableColumn({ column, toggleSelected }: DraggableColumnProps) {
 			style={style}
 			{...attributes}
 			{...listeners}
-			className="flex shrink-0 items-center justify-between rounded-md border border-edge bg-background-200 px-2 py-1"
+			className="bg-background-surface flex shrink-0 items-center justify-between rounded-md border border-edge px-2 py-1"
 		>
 			<Text size="sm">{column.label}</Text>
 			<IconButton

@@ -18,7 +18,7 @@ export default function ThemeControls() {
 			<Popover.Content
 				size="sm"
 				align="end"
-				className="z-[101] flex flex-col gap-4 bg-background-200"
+				className="bg-background-surface z-[101] flex flex-col gap-4"
 			>
 				<FontSizeControl />
 				<ReadingDirection />

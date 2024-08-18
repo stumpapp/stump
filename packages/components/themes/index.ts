@@ -1,5 +1,5 @@
 import { bronze } from './bronze'
-import { dark } from './dark'
+import { dark, updatedDark } from './dark'
 import { light } from './light'
 import { local } from './local'
 import { brand } from './shared'
@@ -13,6 +13,7 @@ export const themes = {
 	dark,
 	light,
 	local,
+	updatedDark,
 }
 
 export type Theme = keyof typeof themes

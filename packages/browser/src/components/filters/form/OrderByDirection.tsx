@@ -15,7 +15,7 @@ export default function OrderByDirection({ value, onChange }: Props) {
 			onClick={() => onChange(value === 'desc' ? 'asc' : 'desc')}
 		>
 			<SortAsc
-				className={cx('mr-1.5 h-4 w-4 text-muted transition-all', {
+				className={cx('text-foreground-muted mr-1.5 h-4 w-4 transition-all', {
 					'rotate-180': value === 'desc',
 				})}
 			/>

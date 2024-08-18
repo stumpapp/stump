@@ -153,7 +153,7 @@ const columns = [
 					onClick={row.getToggleExpandedHandler()}
 				>
 					<Text size="sm">{isAlreadyExpanded ? 'Hide' : 'Show'}</Text>
-					<span className="text-muted">
+					<span className="text-foreground-muted">
 						<ChevronDown
 							className={cn('h-4 w-4', {
 								'rotate-180': isAlreadyExpanded,

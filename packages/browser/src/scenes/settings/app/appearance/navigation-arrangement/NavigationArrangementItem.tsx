@@ -80,7 +80,7 @@ export default function NavigationArrangementItem({
 			{...attributes}
 			{...listeners}
 			className={cn(
-				'flex cursor-grab flex-col rounded-md bg-background-300 outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
+				'bg-background-surface flex cursor-grab flex-col rounded-md outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
 				{
 					'cursor-not-allowed': disabled,
 				},

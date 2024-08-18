@@ -36,7 +36,7 @@ export default function OrderBy({ entity }: Props) {
 						'!bg-background-300': isOpen,
 					})}
 				>
-					<SortAsc className="mr-1.5 h-4 w-4 text-contrast-300" />
+					<SortAsc className="text-foreground-subtle mr-1.5 h-4 w-4" />
 					Order By
 				</Button>
 			</Popover.Trigger>

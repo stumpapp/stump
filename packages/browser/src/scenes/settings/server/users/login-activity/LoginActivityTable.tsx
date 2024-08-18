@@ -85,7 +85,7 @@ export default function LoginActivityTable() {
 
 	// FIXME: doesn't scale well on mobile
 	return (
-		<Card className="bg-background-200 p-1">
+		<Card className="bg-background-surface p-1">
 			<Table
 				data={loginActivity || []}
 				columns={baseColumns}

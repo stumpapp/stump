@@ -357,7 +357,7 @@ mod tests {
 				assert_eq!(
 					generated,
 					StumpConfig {
-						profile: "debug".to_string(),
+						profile: "release".to_string(),
 						port: 1337,
 						verbosity: 2,
 						pretty_logs: true,

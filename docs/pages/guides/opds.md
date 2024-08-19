@@ -4,7 +4,7 @@ Open Publication Distribution System ([OPDS](https://opds.io/)) is a specificati
 
 So long as an OPDS client _properly_ implements the OPDS specification, you should be able to use it with Stump. Each OPDS client might have a different way of collecting this information during their onboarding steps. If you have any trouble using your preferred client, please open an issue on [GitHub](https://github.com/stumpapp/stump/issues/new/choose) or feel free to pop into the [Discord](https://discord.gg/63Ybb7J3as) for help. This page can be updated with your findings to help others in the future.
 
-## Supported OPDS versions
+## Supported OPDS Versions
 
 Stump fully supports OPDS 1.2 and has experimental support for 2.0. At the time of writing, there are few clients which actually support 2.0, so it is difficult to test. If you have any experiences with OPDS 2.0, please consider updating this page with your findings!
 

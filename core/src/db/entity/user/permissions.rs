@@ -107,6 +107,7 @@ impl UserPermission {
 	/// Return a list of permissions, if any, which are inherited by self
 	///
 	/// For example, UserPermission::CreateNotifier implies UserPermission::ReadNotifier
+	// TODO: revisit these. I am mixing patterns, e.g. manage vs explicit edit+create+delete. Pick one!
 	pub fn associated(&self) -> Vec<UserPermission> {
 		match self {
 			UserPermission::CreateBookClub => vec![UserPermission::AccessBookClub],

@@ -60,7 +60,9 @@ impl WebpProcessor {
 mod tests {
 	use super::*;
 	use crate::filesystem::image::{
-		tests::{get_test_jpg_path, get_test_png_path, get_test_webp_path},
+		tests::{
+			get_test_avif_path, get_test_jpg_path, get_test_png_path, get_test_webp_path,
+		},
 		ImageFormat, ImageProcessorOptions,
 	};
 	use std::fs;
@@ -211,6 +213,73 @@ mod tests {
 		};
 
 		let buffer = WebpProcessor::generate_from_path(&png_path, options)
+			.expect("Failed to generate image buffer");
+
+		let dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
+
+		assert_eq!(dimensions.0, 100);
+		assert_eq!(dimensions.1, 100);
+	}
+
+	#[test]
+	fn test_generate_webp_from_avif() {
+		let avif_path = get_test_avif_path();
+		let options = ImageProcessorOptions {
+			resize_options: None,
+			format: ImageFormat::Webp,
+			quality: None,
+			page: None,
+		};
+
+		let result = WebpProcessor::generate_from_path(&avif_path, options);
+		assert!(result.is_ok());
+
+		let webp_bytes = result.unwrap();
+		// should be a valid webp image
+		assert!(image::load_from_memory_with_format(
+			&webp_bytes,
+			image::ImageFormat::WebP
+		)
+		.is_ok())
+	}
+
+	#[test]
+	fn test_generate_webp_from_avif_with_rescale() {
+		let avif_path = get_test_avif_path();
+		let options = ImageProcessorOptions {
+			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
+			format: ImageFormat::Webp,
+			quality: None,
+			page: None,
+		};
+
+		let current_dimensions =
+			image::image_dimensions(&avif_path).expect("Failed to get dimensions");
+
+		let buffer = WebpProcessor::generate_from_path(&avif_path, options)
+			.expect("Failed to generate image buffer");
+
+		let dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
+
+		assert_eq!(dimensions.0, (current_dimensions.0 as f32 * 0.5) as u32);
+		assert_eq!(dimensions.1, (current_dimensions.1 as f32 * 0.5) as u32);
+	}
+
+	#[test]
+	fn test_generate_webp_from_avif_with_resize() {
+		let avif_path = get_test_avif_path();
+		let options = ImageProcessorOptions {
+			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
+			format: ImageFormat::Webp,
+			quality: None,
+			page: None,
+		};
+
+		let buffer = WebpProcessor::generate_from_path(&avif_path, options)
 			.expect("Failed to generate image buffer");
 
 		let dimensions = image::load_from_memory(&buffer)

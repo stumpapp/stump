@@ -14,7 +14,7 @@ email = { path = "../crates/email" }
 epub = { git = "https://github.com/stumpapp/epub-rs", rev = "38e091abe96875952556ab7dec195022d0230e14" }
 futures = { workspace = true }
 globset = "0.4.14"
-image = "0.25.2"
+image = {version = "0.25.2", features = ["avif-native"]}
 infer = "0.16.0"
 itertools = { workspace = true }
 prisma-client-rust = { workspace = true }
@@ -54,6 +54,7 @@ criterion = { version = "0.5.1", features = ["html_reports", "async_tokio"] }
 
 [build-dependencies]
 chrono = "0.4.37"
+system-deps = "7.0.1"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 libc = "0.2.152"

@@ -33,6 +33,9 @@ jobs:
             crates: ./crates/**
             docker: ./docker/**
             packages: ./packages/**
+            workflow:
+              - './.github/workflows/experimental.yml'
+              - './.github/actions/**'
 
   nightly-docker-build:
     needs: code-changes-check

@@ -23,12 +23,10 @@ if [ "$name" == "nix-shell" ]; then
 fi
 
 if [ ${_CHECK_CARGO} == 1 ]; then
-    which cargo &> /dev/null
-    if [ $? -ne 0 ]; then
-      log_error "Rust could not be found on your system. Visit https://www.rust-lang.org/tools/install"
-    else 
-      echo "Rust requirement met!"
-    fi
+  which cargo &> /dev/null
+  if [ $? -ne 0 ]; then
+    log_error "Rust could not be found on your system. Visit https://www.rust-lang.org/tools/install"
+  fi
 fi
 
 
@@ -37,17 +35,15 @@ if [ ${_CHECK_NODE} == 1 ]; then
   which node &> /dev/null
   if [ $? -eq 1 ]; then
     log_error "Node could not be found on your system. Visit https://nodejs.org/en/download/"
-  else 
-    echo "Node requirement met!"
   fi
 
   which yarn &> /dev/null
   if [ $? -eq 1 ]; then
     if [ ${_FORCE_INSTALL_YARN} == 1 ]; then
-      echo "Installing yarn..."
+      echo "Attempting to install 'yarn'..."
       npm install -g yarn
     else
-      echo "yarn could not be found on your system. Would you like for this script to attempt to install 'yarn'? (y/n)"
+      echo "Yarn could not be found on your system. Would you like for this script to attempt to install 'yarn'? (y/n)"
 
       can_continue=false
       until [ $can_continue = true ]; do
@@ -85,11 +81,11 @@ if [ ${_CHECK_NODE} == 1 ]; then
   fi
 fi
 
-CALL_TO_ACTION_LOL="Please consider helping to expand support for your system: https://github.com/stumpapp/stump/issues"
+ASK_FOR_CONTRIB="Please consider helping to expand support for your system: https://github.com/stumpapp/stump/issues"
 
 # https://tauri.app/v1/guides/getting-started/prerequisites/#1-system-dependencies
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  UNSUPPORTED_DISTRO="Your distro '$(lsb_release -s -d)' is not supported by this script. $CALL_TO_ACTION_LOL"
+  UNSUPPORTED_DISTRO="Your distro '$(lsb_release -s -d)' is not supported by this script. $ASK_FOR_CONTRIB"
 
   if which apt-get &> /dev/null; then
     sudo apt-get -y update
@@ -128,29 +124,36 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     dev_setup
   fi
 
-  echo "Setup completed! Run 'yarn dev:web' or 'yarn start:web' to get started."
 elif [[ "$OSTYPE" == "darwin"* ]]; then
+  if ! which brew &> /dev/null; then
+    log_error "Homebrew is not installed. Visit https://brew.sh/ to install Homebrew."
+  fi
+
+  HOMEBREW_NO_AUTO_UPDATE=1 brew install dav1d
+
   if [ {$_DEV_SETUP} == 1 ]; then
     dev_setup
-  fi
-        
-  echo "Setup completed! Run 'yarn dev:web' or 'yarn start:web' to get started."
+  fi 
 else
-  log_error "Your OS '$OSTYPE' is not supported by the pre-setup script. $CALL_TO_ACTION_LOL"
+  log_error "Your OS '$OSTYPE' is not supported by the system-setup script. $ASK_FOR_CONTRIB"
 fi
 
 if [ ${_CHECK_DAV1D} == 1 ]; then
-    which dav1d &> /dev/null
-    if [ $? -ne 0 ]; then
-        echo "Dav1d requirement is not met. Visit https://code.videolan.org/videolan/dav1d"
-    else 
-	curver="$(dav1d --version)"
-	reqver="1.3.0"
- 	if [ "$(printf '%s\n' "$reqver" "$curver" | sort -V | head -n1)" = "$reqver" ]; then
-      	    echo "Dav1d requirement met!"
- 	else
-		echo "Dav1d requirement is not met (version must be greater than 1.3.0). Visit https://code.videolan.org/videolan/dav1d"
-	fi
+  which dav1d &> /dev/null
+  if [ $? -ne 0 ]; then
+      echo "Dav1d requirement is not met. Visit https://code.videolan.org/videolan/dav1d"
+  else 
+    curver="$(dav1d --version)"
+    cutoffver="1.3.0"
+    # Note: We sort -V and take the first line to get the highest version, so we need to assert that the first
+    # _isn't_ the threshold version
+    if [ "$(printf '%s\n' "$cutoffver" "$curver" | sort -V | head -n1)" != "$cutoffver" ]; then
+      echo "Dav1d requirement met!"
+    else
+      echo "Dav1d requirement is not met (version must be greater than 1.3.0). Visit https://code.videolan.org/videolan/dav1d"
     fi
+  fi
 fi
+
+echo "Setup completed!"
 

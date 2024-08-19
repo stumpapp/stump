@@ -1,6 +1,12 @@
 name: Setup system dependencies
 description: Install system dependencies and setup cache
 
+inputs:
+  cache-dependencies:
+    description: 'Cache dependencies. This does not affect the Prisma client cache.'
+    required: false
+    default: 'true'
+
 runs:
   using: composite
   steps:
@@ -17,7 +23,9 @@ runs:
       shell: bash
       run: CHECK_NODE=0 CHECK_CARGO=0 DEV_SETUP=0 ./scripts/system-setup.sh
 
+    # See https://github.com/Swatinem/rust-cache/issues/194
     - name: Cache Rust Dependencies
+      if: ${{ inputs.cache-dependencies == 'true' }}
       uses: Swatinem/rust-cache@v2
       with:
         shared-key: stump-rust-cache

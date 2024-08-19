@@ -29,6 +29,7 @@ jobs:
           base: 'experimental'
           filters: |
             apps: ./apps/**
+            core: ./core/**
             crates: ./crates/**
             docker: ./docker/**
             packages: ./packages/**

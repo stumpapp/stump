@@ -362,7 +362,7 @@ mod tests {
 						verbosity: 2,
 						pretty_logs: true,
 						db_path: None,
-						client_dir: "./dist".to_string(),
+						client_dir: "./client".to_string(),
 						config_dir,
 						allowed_origins: vec![],
 						pdfium_path: None,

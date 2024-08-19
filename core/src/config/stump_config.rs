@@ -71,7 +71,8 @@ use defaults::*;
 #[config_file_location(self.get_config_dir().join("Stump.toml"))]
 pub struct StumpConfig {
 	/// The "release" | "debug" profile with which the application is running.
-	#[default_value("debug".to_string())]
+	#[default_value("release".to_string())]
+	#[debug_value("debug".to_string())]
 	#[env_key(PROFILE_KEY)]
 	#[validator(do_validate_profile)]
 	pub profile: String,
@@ -97,13 +98,14 @@ pub struct StumpConfig {
 	pub db_path: Option<String>,
 
 	/// The client directory.
-	#[default_value("./dist".to_string())]
+	#[default_value("./client".to_string())]
 	#[debug_value(env!("CARGO_MANIFEST_DIR").to_string() + "/../web/dist")]
 	#[env_key(CLIENT_KEY)]
 	pub client_dir: String,
 
 	/// An optional custom path for the templates directory.
 	#[default_value(None)]
+	#[debug_value(Some(env!("CARGO_MANIFEST_DIR").to_string() + "/../../crates/email/templates"))]
 	#[env_key("EMAIL_TEMPLATES_DIR")]
 	pub custom_templates_dir: Option<String>,
 

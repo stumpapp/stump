@@ -3,7 +3,6 @@ use syn::{DataStruct, Expr, Field, Fields, Ident};
 
 use crate::type_utils;
 
-#[derive(Debug)]
 pub struct StumpConfigVariable {
 	pub span: Span,
 	pub variable_name: Ident,
@@ -13,7 +12,6 @@ pub struct StumpConfigVariable {
 	pub attributes: StumpConfigVariableAttributes,
 }
 
-#[derive(Debug)]
 pub struct StumpConfigVariableAttributes {
 	pub default_value: Option<Expr>,
 	pub debug_value: Option<Expr>,

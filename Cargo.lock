@@ -7045,9 +7045,14 @@ dependencies = [
 name = "stump-config-gen"
 version = "0.0.1"
 dependencies = [
+ "itertools 0.12.1",
  "proc-macro2",
  "quote",
+ "serde",
  "syn 2.0.58",
+ "temp-env",
+ "thiserror",
+ "toml 0.8.12",
 ]
 
 [[package]]

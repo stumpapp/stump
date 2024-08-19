@@ -16,7 +16,7 @@ futures = { workspace = true }
 globset = "0.4.14"
 image = "0.25.2"
 infer = "0.16.0"
-itertools = "0.12.1"
+itertools = { workspace = true }
 prisma-client-rust = { workspace = true }
 rand = { workspace = true }
 serde = { workspace = true }
@@ -26,7 +26,7 @@ simple_crypt = { workspace = true }
 specta = { workspace = true }
 stump-config-gen = { path = "../crates/stump-config-gen"}
 tokio = { workspace = true }
-toml = "0.8.8"
+toml = { workspace = true }
 trash = "3.1.2"
 # pdf = "0.8.1"
 pdf = { git = "https://github.com/pdf-rs/pdf", rev = "3bc9e636d31b1846e51b58c7429914e640866f53" } # TODO: revert back to crates.io once fix(es) release

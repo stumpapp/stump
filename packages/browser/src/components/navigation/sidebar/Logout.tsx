@@ -45,7 +45,7 @@ export default function Logout({ trigger }: Props) {
 						trigger(on)
 					) : (
 						<IconButton
-							className="hover:text-contrast-500 text-contrast-300"
+							className="hover:text-foreground-500 text-foreground-subtle"
 							onClick={on}
 							aria-label="Sign Out"
 						>

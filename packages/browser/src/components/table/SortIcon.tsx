@@ -6,7 +6,7 @@ type Props = {
 	showIfNull?: boolean
 }
 export default function SortIcon({ direction, showIfNull }: Props) {
-	const classes = 'h-3.5 w-3.5 text-muted shrink-0'
+	const classes = 'h-3.5 w-3.5 text-foreground-muted shrink-0'
 
 	if (!direction) {
 		return showIfNull ? <ArrowUpDown className={classes} /> : null

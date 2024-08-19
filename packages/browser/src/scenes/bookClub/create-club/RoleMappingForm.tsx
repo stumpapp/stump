@@ -25,7 +25,7 @@ export default function RoleMappingForm() {
 				</Text>
 			</div>
 
-			<Card className="grid grid-cols-1 gap-6 bg-background-200 p-4 md:max-w-3xl md:grid-cols-2">
+			<Card className="grid grid-cols-1 gap-6 bg-background-surface p-4 md:max-w-3xl md:grid-cols-2">
 				<Input
 					variant="primary"
 					fullWidth

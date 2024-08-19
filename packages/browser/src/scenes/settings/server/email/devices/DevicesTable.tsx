@@ -86,13 +86,14 @@ export default function DevicesTable({ onSelectForUpdate }: Props) {
 				<DeleteDeviceConfirmation device={deletingDevice} onClose={() => setDeletingDevice(null)} />
 			)}
 
-			<Card className="bg-background-200 p-1">
+			<Card className="bg-background-surface p-1">
 				<Table
 					sortable
 					columns={columns}
 					options={{
 						onPaginationChange: setPagination,
 						state: {
+							columnPinning: canEditEmailer ? { right: ['actions'] } : undefined,
 							pagination,
 						},
 					}}
@@ -100,7 +101,7 @@ export default function DevicesTable({ onSelectForUpdate }: Props) {
 					fullWidth
 					emptyRenderer={() => (
 						<div className="flex min-h-[150px] flex-col items-center justify-center gap-2">
-							<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-muted" />
+							<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-foreground-muted" />
 							<div className="text-center">
 								<Heading size="sm">{t(`${LOCALE_BASE}.emptyHeading`)}</Heading>
 								<Text size="sm" variant="muted">
@@ -110,6 +111,7 @@ export default function DevicesTable({ onSelectForUpdate }: Props) {
 						</div>
 					)}
 					isZeroBasedPagination
+					cellClassName="bg-background-surface"
 				/>
 			</Card>
 		</>

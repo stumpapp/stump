@@ -37,7 +37,7 @@ export default function CoverImageCell({ id, title }: Props) {
 				className="flex aspect-[2/3] h-14 w-auto items-center justify-center rounded-sm border-[0.5px] border-edge bg-sidebar shadow-sm"
 				onClick={attemptReload}
 			>
-				<Book className="h-8 w-8 text-muted" />
+				<Book className="h-8 w-8 text-foreground-muted" />
 			</div>
 		)
 	}

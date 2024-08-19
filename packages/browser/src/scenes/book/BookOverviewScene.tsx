@@ -78,7 +78,6 @@ export default function BookOverviewScene() {
 		)
 	}
 
-	// TODO(historical-read-session): double check default order
 	const completedAt = sortBy(media.finished_reading_sessions, ({ completed_at }) =>
 		dayjs(completed_at).toDate(),
 	).at(-1)?.completed_at

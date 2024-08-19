@@ -13,8 +13,8 @@ const linkVariants = cva(
 		variants: {
 			variant: {
 				brand: 'text-brand',
-				default: 'text-contrast',
-				muted: 'text-muted',
+				default: 'text-foreground',
+				muted: 'text-foreground-muted',
 			},
 		},
 	},

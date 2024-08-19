@@ -10,6 +10,7 @@ type Props = {
 	leftContent?: React.ReactNode
 	rightContent?: React.ReactNode
 } & Omit<ComponentProps<'div'>, 'ref'>
+
 export default function SideBarButtonLink({
 	to,
 	variant = 'default',
@@ -23,14 +24,17 @@ export default function SideBarButtonLink({
 	return (
 		<div
 			className={cn(
-				'group inline-flex h-[2.35rem] w-full shrink-0 items-center justify-start rounded-md px-2 text-sm transition-all duration-150 hover:bg-sidebar-300',
+				'group inline-flex h-[2.35rem] w-full shrink-0 items-center justify-start rounded-md px-2 text-sm transition-all duration-150 hover:bg-sidebar-surface-hover',
 				{
-					'justify-center border border-dashed border-sidebar-300 bg-opacity-50 text-contrast text-opacity-90 hover:bg-sidebar-200 hover:text-opacity-100':
+					'justify-center border border-dashed border-edge-subtle bg-opacity-50 text-foreground text-opacity-90 hover:bg-sidebar-surface hover:text-opacity-100':
 						variant === 'action',
 				},
-				{ 'text-contrast': variant !== 'action' },
+				{ 'text-foreground': variant !== 'action' },
 				{
-					'bg-sidebar-300 hover:bg-sidebar-300/80': isActive,
+					'bg-sidebar-surface hover:bg-sidebar-surface-hover': isActive,
+				},
+				{
+					'bg-sidebar-surface-hover': isActive && variant === 'action',
 				},
 				className,
 			)}

@@ -139,7 +139,7 @@ export default function JobTable() {
 	)
 
 	return (
-		<Card className="bg-background-200 p-1">
+		<Card className="bg-background-surface p-1">
 			<Table
 				sortable
 				columns={columns}
@@ -152,7 +152,7 @@ export default function JobTable() {
 					onPaginationChange: setPagination,
 					pageCount,
 					state: {
-						// columnPinning: { right: ['actions'] },
+						columnPinning: { right: ['actions'] },
 						pagination,
 					},
 				}}
@@ -161,7 +161,7 @@ export default function JobTable() {
 				// TODO(aaron): loader
 				emptyRenderer={() => (
 					<div className="flex min-h-[150px] flex-col items-center justify-center gap-2">
-						<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-muted" />
+						<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-foreground-muted" />
 						<Heading size="sm">{t(`${LOCALE_BASE}.emptyHeading`)}</Heading>
 						<Text size="sm" variant="muted">
 							{t(`${LOCALE_BASE}.emptySubtitle`)}
@@ -169,6 +169,7 @@ export default function JobTable() {
 					</div>
 				)}
 				isZeroBasedPagination
+				cellClassName="bg-background-surface"
 			/>
 
 			<JobDataInspector data={inspectingData} onClose={() => setInspectingData(null)} />

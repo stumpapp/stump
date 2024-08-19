@@ -34,9 +34,9 @@ function PaginationArrow({ kind, isDisabled, onClick, onMouseEnter }: Pagination
 			>
 				<div
 					className={cx(
-						'inline-flex items-center border-t-2 border-transparent pt-4 text-xs font-medium hover:border-edge-200 md:text-sm',
-						!isDisabled && 'text-contrast-300',
-						isDisabled && 'pointer-events-none cursor-not-allowed text-muted',
+						'inline-flex items-center border-t-2 border-transparent pt-4 text-xs font-medium hover:border-edge-subtle md:text-sm',
+						!isDisabled && 'text-foreground-subtle',
+						isDisabled && 'pointer-events-none cursor-not-allowed text-foreground-muted',
 						{ 'pl-0 pr-1': kind === 'previous' },
 						{ 'pl-1 pr-0': kind === 'next' },
 					)}
@@ -47,7 +47,7 @@ function PaginationArrow({ kind, isDisabled, onClick, onMouseEnter }: Pagination
 							'h-4 w-4 md:h-5 md:w-5',
 							kind === 'previous' ? 'mr-3' : 'ml-3',
 							// TODO: dark different color?? idk, doesn't look THAT bad
-							isDisabled ? 'text-muted-200' : 'text-contrast-300',
+							isDisabled ? 'text-foreground-muted' : 'text-foreground-subtle',
 						)}
 						aria-hidden="true"
 					/>
@@ -71,12 +71,12 @@ function PaginationLink({ value, onClick, isActive, onMouseEnter }: PaginationLi
 			onClick={onClick}
 			onMouseEnter={onMouseEnter}
 			className={cn(
-				'inline-flex cursor-pointer items-center border-t-2 px-4 pt-4 text-xs font-medium text-muted md:text-sm',
+				'inline-flex cursor-pointer items-center border-t-2 px-4 pt-4 text-xs font-medium text-foreground-muted md:text-sm',
 				{
 					'border-brand text-brand hover:border-brand-600': isActive,
 				},
 				{
-					'border-transparent text-muted hover:border-edge-200': !isActive,
+					'border-transparent text-foreground-muted hover:border-edge-subtle': !isActive,
 				},
 			)}
 		>
@@ -131,7 +131,7 @@ export default function Pagination({
 	return (
 		<nav className="w-full">
 			<div
-				className={cx('w-full border-t border-edge-200', {
+				className={cx('w-full border-t border-edge-subtle', {
 					'mt-7': position === 'bottom',
 				})}
 			>
@@ -166,7 +166,7 @@ export default function Pagination({
 									onPageChange={handleEllipsisNavigate}
 									trigger={
 										<div className="-mt-1">
-											<button className="flex items-center border-t-2 border-transparent px-4 pt-4 text-xs font-medium text-muted hover:border-edge-200 focus:outline-none md:text-sm">
+											<button className="flex items-center border-t-2 border-transparent px-4 pt-4 text-xs font-medium text-foreground-muted hover:border-edge-subtle focus:outline-none md:text-sm">
 												<MoreHorizontal className="h-4 w-4" />
 											</button>
 										</div>

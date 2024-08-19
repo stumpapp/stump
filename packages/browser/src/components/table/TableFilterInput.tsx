@@ -10,7 +10,7 @@ export default function TableSearchInput({ onChange }: Props) {
 		<input
 			type="text"
 			placeholder="Filter data"
-			className="block w-full border-b border-edge bg-transparent py-1.5 pl-2 pr-20 text-sm leading-6 text-contrast outline-none placeholder:text-muted"
+			className="block w-full border-b border-edge bg-transparent py-1.5 pl-2 pr-20 text-sm leading-6 text-foreground outline-none placeholder:text-foreground-muted"
 			onChange={(e) => handleChange(e.target.value)}
 		/>
 	)

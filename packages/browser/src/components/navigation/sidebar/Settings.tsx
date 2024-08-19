@@ -16,10 +16,10 @@ export default function SettingsButton() {
 			<IconButton
 				variant="ghost"
 				className={cn(
-					'border border-transparent p-1.5 text-contrast',
+					'border border-transparent p-1.5 text-foreground',
 					isActive
-						? 'border-edge-200/50 bg-sidebar-200 hover:bg-sidebar-200'
-						: 'hover:border-edge-200/50 hover:bg-sidebar-200/70',
+						? 'border-edge-subtle/50 bg-sidebar-surface hover:bg-sidebar-surface'
+						: 'hover:border-edge-subtle/50 hover:bg-sidebar-surface/70',
 				)}
 				pressEffect={false}
 				onClick={() => navigate(paths.settings())}

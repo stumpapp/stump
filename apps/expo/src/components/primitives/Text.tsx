@@ -47,7 +47,7 @@ export const textVariants = cva('', {
 		// 	danger: 'text-red-600 dark:text-red-400',
 		// 	default: 'dark:text-white text-black',
 		// 	label:
-		// 		'font-medium leading-none text-contrast-200 peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+		// 		'font-medium leading-none text-foreground-subtle peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
 		// 	muted: 'text-gray-400 dark:text-gray-300',
 		// },
 	},

@@ -37,16 +37,6 @@ jobs:
     if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.rust-changed == 'true'"
     name: Rust checks
     runs-on: [self-hosted]
-    # TODO: investigate if this would work and if it would be worth...
-    # runs-on: ${{ matrix.os }}
-    # strategy:
-    #   matrix:
-    #     os: [self-hosted-linux, windows-latest]
-    #     include:
-    #       - os: self-hosted-linux
-    #         runner: self-hosted
-    #       - os: windows-latest
-    #         runner: windows-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3

@@ -63,15 +63,7 @@ WORKDIR /app
 
 COPY . .
 
-#Prisma generate makes running the Docker build locally/directly possible without extra config and shouldn't cause extra build time in CI because of caching
-#RUN cargo prisma generate --schema=./core/prisma/schema.prisma; \
-#    ./scripts/release/utils.sh -w; \
-#    set -ex; \
-#    ./scripts/release/utils.sh -p; \
-#    cargo build --package stump_server --bin stump_server --release; \
-#    cp ./target/release/stump_server ./stump_server
-
-RUN cargo codegen #cargo prisma generate --schema=./core/prisma/schema.prisma
+RUN cargo codegen
 RUN ./scripts/release/utils.sh -w 
 RUN set -ex
 RUN ./scripts/release/utils.sh -p

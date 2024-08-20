@@ -63,7 +63,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN cargo codegen
+RUN cargo prisma generate --schema ./core/prisma/schema.prisma
 RUN ./scripts/release/utils.sh -w 
 RUN set -ex
 RUN ./scripts/release/utils.sh -p

@@ -98,6 +98,8 @@ FROM debian:buster-slim
 RUN apt-get update && apt-get install -y locales-all && rm -rf /var/lib/apt/lists/*; \
     mkdir -p config && mkdir -p data && mkdir -p app
 
+COPY --from=builder /usr/local/lib /usr/local/lib
+COPY --from=builder /etc/ld.so.conf.d/mylibs.conf  /etc/ld.so.conf.d/mylibs.conf
 COPY --from=builder /app/stump_server /app/stump
 COPY --from=pdfium /pdfium /opt/pdfium
 COPY --from=frontend /app/build /app/client

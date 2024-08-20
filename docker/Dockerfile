@@ -63,12 +63,11 @@ WORKDIR /app
 
 COPY . .
 
-RUN cargo prisma generate --schema ./core/prisma/schema.prisma
-RUN ./scripts/release/utils.sh -w 
-RUN set -ex
-RUN ./scripts/release/utils.sh -p
-RUN cargo build --package stump_server --bin stump_server --release
-RUN cp ./target/release/stump_server ./stump_server
+RUN ./scripts/release/utils.sh -w; \
+    set -ex; \
+    ./scripts/release/utils.sh -p; \
+    cargo build --package stump_server --bin stump_server --release; \
+    cp ./target/release/stump_server ./stump_server
 
 # ------------------------------------------------------------------------------
 # PDFium Stage

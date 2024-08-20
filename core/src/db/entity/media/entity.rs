@@ -78,6 +78,17 @@ pub struct Media {
 	pub bookmarks: Option<Vec<Bookmark>>,
 }
 
+impl Media {
+	/// A convenience method to get the title of the media. If the metadata has a title, it will
+	/// return that. Otherwise, it will return the name of the media (which is the filename).
+	pub fn title(&self) -> String {
+		self.metadata
+			.as_ref()
+			.and_then(|m| m.title.clone())
+			.unwrap_or_else(|| self.name.clone())
+	}
+}
+
 impl Cursor for Media {
 	fn cursor(&self) -> String {
 		self.id.clone()

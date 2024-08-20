@@ -40,7 +40,7 @@ jobs:
   nightly-docker-build:
     needs: code-changes-check
     name: Build docker image
-    runs-on: [ubuntu-22.04]
+    runs-on: [self-hosted]
     if: ${{ needs.code-changes-check.outputs.changes != '[]' }}
     steps:
       - name: Checkout repository

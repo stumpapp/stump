@@ -1,4 +1,4 @@
-name: Release CI
+name: Docker Release CI
 
 # This workflow triggers when a PR is merged into `main`, but jobs have conditions to only run when:
 # - A PR is closed, merged into `main`, from a branch that matches the pattern `release/v*.*.*`
@@ -70,7 +70,7 @@ jobs:
   build-stable-docker:
     if: contains(github.event.pull_request.head.ref, 'release/v')
     name: Build docker image
-    runs-on: [ubuntu-22.04]
+    runs-on: [self-hosted]
     needs: [parse-semver, push-or-load]
     steps:
       - name: Checkout repository

@@ -7,27 +7,8 @@ runs:
     - name: Checkout project
       uses: actions/checkout@v3
 
-    - uses: actions/setup-node@v4
-      with:
-        node-version: '20.0.0'
-
-    - name: Install yarn
-      shell: bash
-      run: npm install -g yarn
-
-    - uses: actions/setup-node@v4
-      with:
-        node-version: '20.0.0'
-        cache: 'yarn'
-
-    - name: Install yarn
-      shell: bash
-      run: npm install -g yarn
-
-    - name: Install dependencies
-      shell: bash
-      run: yarn install
-      working-directory: apps/web
+    - name: Setup Node and Yarn
+      uses: ./.github/actions/setup-yarn
 
     - name: Build app
       shell: bash

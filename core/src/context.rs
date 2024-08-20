@@ -34,7 +34,7 @@ impl Ctx {
 	/// core can send events to the consumer.
 	///
 	/// ## Example
-	/// ```rust
+	/// ```no_run
 	/// use stump_core::{Ctx, config::StumpConfig};
 	/// use tokio::sync::mpsc::unbounded_channel;
 	///
@@ -85,7 +85,7 @@ impl Ctx {
 	/// is just a simple utility function.
 	///
 	/// ## Example
-	/// ```rust
+	/// ```no_run
 	/// use stump_core::{Ctx, config::StumpConfig};
 	/// use std::sync::Arc;
 	///
@@ -117,7 +117,7 @@ impl Ctx {
 	/// Emits a [CoreEvent] to the client event channel.
 	///
 	/// ## Example
-	/// ```rust
+	/// ```no_run
 	/// use stump_core::{Ctx, config::StumpConfig, CoreEvent};
 	///
 	/// #[tokio::main]

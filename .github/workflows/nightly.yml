@@ -29,9 +29,13 @@ jobs:
           base: 'develop'
           filters: |
             apps: ./apps/**
+            core: ./core/**
             crates: ./crates/**
             docker: ./docker/**
             packages: ./packages/**
+            workflow:
+              - './.github/workflows/nightly.yml'
+              - './.github/actions/**'
 
   nightly-docker-build:
     needs: code-changes-check

@@ -2,7 +2,7 @@
 # Frontend Build Stage
 # ------------------------------------------------------------------------------
 
-FROM node:20.0.0-alpine3.16 as frontend
+FROM node:20.0.0-alpine3.16 AS frontend
 ARG TARGETARCH
 
 WORKDIR /app
@@ -51,18 +51,32 @@ WORKDIR /dav1d/build
 
 RUN meson setup ../; \ 
     ninja; \
-    ninja install 
+    ninja install; \
+    ln -s /usr/local/lib/x86_64-linux-gnu/libdav1d.so.7.0.0 /usr/local/lib/libdav1d.so.7; \
+    ln -s /usr/local/lib/x86_64-linux-gnu/libdav1d.so.7.0.0 /usr/local/lib/libdav1d.so.7.0; \
+    ln -s /usr/local/lib/x86_64-linux-gnu/libdav1d.so.7.0.0 /usr/local/lib/libdav1d.so.7.0.0; \
+    echo "/usr/local/lib" >> /etc/ld.so.conf.d/mylibs.conf \
+    && ldconfig
 
 #Cargo build for stump
 WORKDIR /app
 
 COPY . .
 
-RUN ./scripts/release/utils.sh -w; \
-    set -ex; \
-    ./scripts/release/utils.sh -p; \
-    cargo build --package stump_server --bin stump_server --release; \
-    cp ./target/release/stump_server ./stump_server
+#Prisma generate makes running the Docker build locally/directly possible without extra config and shouldn't cause extra build time in CI because of caching
+#RUN cargo prisma generate --schema=./core/prisma/schema.prisma; \
+#    ./scripts/release/utils.sh -w; \
+#    set -ex; \
+#    ./scripts/release/utils.sh -p; \
+#    cargo build --package stump_server --bin stump_server --release; \
+#    cp ./target/release/stump_server ./stump_server
+
+RUN cargo codegen #cargo prisma generate --schema=./core/prisma/schema.prisma
+RUN ./scripts/release/utils.sh -w 
+RUN set -ex
+RUN ./scripts/release/utils.sh -p
+RUN cargo build --package stump_server --bin stump_server --release
+RUN cp ./target/release/stump_server ./stump_server
 
 # ------------------------------------------------------------------------------
 # PDFium Stage

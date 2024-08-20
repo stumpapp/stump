@@ -23,7 +23,9 @@ RUN yarn config set network-timeout 300000 && \
 
 FROM rust:1.79.0-slim-buster AS builder
 
+# ARG TARGETARCH
 ARG GIT_REV
+
 ENV GIT_REV=${GIT_REV}
 
 ARG TAGS
@@ -40,7 +42,7 @@ RUN apt-get update && apt-get install -y \
     nasm \
     libsqlite3-dev;
 
-#Building dav1d for AVIF Support
+# Building dav1d for AVIF Support
 RUN git clone https://github.com/stumpapp/dav1d.git
 
 WORKDIR /dav1d
@@ -51,14 +53,9 @@ WORKDIR /dav1d/build
 
 RUN meson setup ../; \ 
     ninja; \
-    ninja install; \
-    ln -s /usr/local/lib/x86_64-linux-gnu/libdav1d.so.7.0.0 /usr/local/lib/libdav1d.so.7; \
-    ln -s /usr/local/lib/x86_64-linux-gnu/libdav1d.so.7.0.0 /usr/local/lib/libdav1d.so.7.0; \
-    ln -s /usr/local/lib/x86_64-linux-gnu/libdav1d.so.7.0.0 /usr/local/lib/libdav1d.so.7.0.0; \
-    echo "/usr/local/lib" >> /etc/ld.so.conf.d/mylibs.conf \
-    && ldconfig
+    ninja install
 
-#Cargo build for stump
+# Cargo build for stump
 WORKDIR /app
 
 COPY . .
@@ -90,6 +87,22 @@ RUN apt-get update && apt-get install -y curl tar; \
     rm pdfium.tgz
 
 # ------------------------------------------------------------------------------
+# dav1d Copy Stage
+# ------------------------------------------------------------------------------
+
+FROM debian:buster-slim AS dav1d
+ARG TARGETARCH
+
+COPY --from=builder /usr/local/lib /usr/local/lib
+
+RUN set -ex; \
+    if [ "$TARGETARCH" = "amd64" ]; then \
+        cp -r /usr/local/lib/x86_64-linux-gnu/* /usr/local/lib; \
+    elif [ "$TARGETARCH" = "arm64" ]; then \
+        cp -r /usr/local/lib/aarch64-linux-gnu/* /usr/local/lib; \
+    fi
+
+# ------------------------------------------------------------------------------
 # Final Stage
 # ------------------------------------------------------------------------------
 
@@ -98,15 +111,17 @@ FROM debian:buster-slim
 RUN apt-get update && apt-get install -y locales-all && rm -rf /var/lib/apt/lists/*; \
     mkdir -p config && mkdir -p data && mkdir -p app
 
-COPY --from=builder /usr/local/lib /usr/local/lib
-COPY --from=builder /etc/ld.so.conf.d/mylibs.conf  /etc/ld.so.conf.d/mylibs.conf
 COPY --from=builder /app/stump_server /app/stump
 COPY --from=pdfium /pdfium /opt/pdfium
+COPY --from=dav1d /usr/local/lib/ /usr/local/lib/
 COPY --from=frontend /app/build /app/client
 COPY docker/entrypoint.sh /entrypoint.sh
 
+
 RUN chmod +x /entrypoint.sh; \
     ln -s /opt/pdfium/lib/libpdfium.so /lib/libpdfium.so; \
+    echo "/usr/local/lib" >> /etc/ld.so.conf.d/mylibs.conf \
+    && ldconfig; \
     if [ ! -d "/app/client" ] || [ ! "$(ls -A /app/client)" ]; then exit 1; fi
 
 # Default Stump environment variables

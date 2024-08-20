@@ -34,7 +34,7 @@ jobs:
 
   check-rust:
     needs: code-changes-check
-    if: "!contains(github.event.pull_request.head.ref, 'release/v')"
+    if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.rust-changed == 'true'"
     name: Rust checks
     runs-on: [self-hosted]
     # TODO: investigate if this would work and if it would be worth...
@@ -76,7 +76,7 @@ jobs:
             && exit 1)
 
   check-coverage:
-    if: "!contains(github.event.pull_request.head.ref, 'release/v')"
+    if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.rust-changed == 'true'"
     name: Coverage checks
     needs: [code-changes-check, check-rust]
     runs-on: [self-hosted]
@@ -92,7 +92,7 @@ jobs:
 
   check-typescript:
     needs: code-changes-check
-    if: "!contains(github.event.pull_request.head.ref, 'release/v')"
+    if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.frontend-changed == 'true'"
     name: TypeScript checks
     runs-on: [ubuntu-22.04]
     steps:

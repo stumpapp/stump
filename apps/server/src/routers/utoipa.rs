@@ -14,10 +14,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::config::state::AppState;
 use crate::errors::APIError;
-use crate::filter::{
-	FilterableLibraryQuery, FilterableMediaQuery, FilterableSeriesQuery, LibraryFilter,
-	MediaFilter, SeriesFilter, SeriesQueryRelation,
-};
+use crate::filter::*;
 use crate::middleware::auth::auth_middleware;
 
 use super::api::{
@@ -149,7 +146,9 @@ use super::api::{
             CreateOrUpdateSmartListView, SmartListItemGrouping, SmartFilter, FilterJoin, EntityVisibility,
             SmartListViewConfig, ReactTableColumnSort, ReactTableGlobalSort,
             MediaSmartFilter, MediaMetadataSmartFilter, SeriesSmartFilter, SeriesMetadataSmartFilter,
-            LibrarySmartFilter, Notifier, CreateOrUpdateNotifier, PatchNotifier
+            LibrarySmartFilter, Notifier, CreateOrUpdateNotifier, PatchNotifier, LibraryBaseFilter, LibraryRelationFilter,
+            MediaBaseFilter, MediaRelationFilter, SeriesBaseFilter, SeriesRelationFilter, NotifierConfig, NotifierType,
+            ReadingListItem, ReadingListVisibility, SeriesMedataFilter
         )
     ),
     tags(

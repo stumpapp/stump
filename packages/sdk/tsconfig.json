@@ -1,0 +1,18 @@
+{
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"outDir": "./dist",
+		"skipLibCheck": true,
+		"paths": {
+			"@stump/types": ["../types/index.ts"],
+			"@stump/types/*": ["../types/*"]
+		}
+	},
+	"include": ["src"],
+	"exclude": ["node_modules"],
+	"references": [
+		{
+			"path": "../types"
+		}
+	]
+}

@@ -18,7 +18,7 @@ use crate::prisma::{library, media, media_metadata, series, series_metadata};
 //    consolidate them into a single macro. I'm not sure if this is possible, but it's worth looking into. This will get exponentially
 //    worse as things like sorting and sorting on relations are added... :weary:
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, ToSchema, Type)]
 #[serde(untagged)]
 /// A filter for a single value, e.g. `name = "test"`
 pub enum Filter<T> {
@@ -48,7 +48,7 @@ pub struct NumericRange<T> {
 	pub inclusive: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, ToSchema, Type)]
 #[serde(untagged)]
 pub enum NumericFilter<T> {
 	Gt { gt: T },

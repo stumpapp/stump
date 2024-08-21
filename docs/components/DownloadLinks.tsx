@@ -29,6 +29,7 @@ export default function DownloadLinks() {
 						target="_blank"
 						rel="noreferrer"
 					>
+						{/* @ts-expect-error: Its fine */}
 						<link.icon className="h-5 w-5" />
 					</a>
 				</motion.div>

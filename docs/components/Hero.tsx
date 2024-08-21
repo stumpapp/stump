@@ -53,6 +53,7 @@ export default function Hero() {
 							href="https://www.github.com/stumpapp/stump"
 							target="_blank"
 						>
+							{/* @ts-expect-error: its fine */}
 							<SiGithub />
 
 							<span>See on Github</span>

@@ -23,13 +23,13 @@ RUN yarn config set network-timeout 300000 && \
 
 FROM rust:1.79.0-slim-buster AS builder
 
-# ARG TARGETARCH
 ARG GIT_REV
+ARG TAGS
+ARG RUN_PRISMA_GENERATE
 
 ENV GIT_REV=${GIT_REV}
-
-ARG TAGS
 ENV TAGS=${TAGS}
+ENV RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE}
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -37,9 +37,6 @@ RUN apt-get update && apt-get install -y \
     git \
     libssl-dev \
     pkg-config \
-    meson \
-    ninja-build \
-    nasm \
     libsqlite3-dev;
 
 # Cargo build for stump
@@ -47,10 +44,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN ./scripts/release/utils.sh -w; \
-    set -ex; \
-    ./scripts/release/utils.sh -p; \
-    cargo build --package stump_server --bin stump_server --release; \
+RUN RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE} ./docker/build_server.sh && \
     cp ./target/release/stump_server ./stump_server
 
 # ------------------------------------------------------------------------------

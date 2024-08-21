@@ -23,13 +23,13 @@ RUN yarn config set network-timeout 300000 && \
 
 FROM rust:1.79.0-slim-buster AS builder
 
-# ARG TARGETARCH
 ARG GIT_REV
+ARG TAGS
+ARG RUN_PRISMA_GENERATE
 
 ENV GIT_REV=${GIT_REV}
-
-ARG TAGS
 ENV TAGS=${TAGS}
+ENV RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE}
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -37,33 +37,14 @@ RUN apt-get update && apt-get install -y \
     git \
     libssl-dev \
     pkg-config \
-    meson \
-    ninja-build \
-    nasm \
     libsqlite3-dev;
-
-# Building dav1d for AVIF Support
-RUN git clone https://github.com/stumpapp/dav1d.git
-
-WORKDIR /dav1d
-
-RUN mkdir build 
-
-WORKDIR /dav1d/build
-
-RUN meson setup ../; \ 
-    ninja; \
-    ninja install
 
 # Cargo build for stump
 WORKDIR /app
 
 COPY . .
 
-RUN cargo prisma generate --schema ./core/prisma/schema.prisma; \
-    ./scripts/release/utils.sh -w; \
-    set -ex; \
-    cargo build --package stump_server --bin stump_server --release; \
+RUN RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE} ./docker/build_server.sh && \
     cp ./target/release/stump_server ./stump_server
 
 # ------------------------------------------------------------------------------
@@ -87,22 +68,6 @@ RUN apt-get update && apt-get install -y curl tar; \
     rm pdfium.tgz
 
 # ------------------------------------------------------------------------------
-# dav1d Copy Stage
-# ------------------------------------------------------------------------------
-
-FROM debian:buster-slim AS dav1d
-ARG TARGETARCH
-
-COPY --from=builder /usr/local/lib /usr/local/lib
-
-RUN set -ex; \
-    if [ "$TARGETARCH" = "amd64" ]; then \
-        cp -r /usr/local/lib/x86_64-linux-gnu/* /usr/local/lib; \
-    elif [ "$TARGETARCH" = "arm64" ]; then \
-        cp -r /usr/local/lib/aarch64-linux-gnu/* /usr/local/lib; \
-    fi
-
-# ------------------------------------------------------------------------------
 # Final Stage
 # ------------------------------------------------------------------------------
 
@@ -113,7 +78,6 @@ RUN apt-get update && apt-get install -y locales-all && rm -rf /var/lib/apt/list
 
 COPY --from=builder /app/stump_server /app/stump
 COPY --from=pdfium /pdfium /opt/pdfium
-COPY --from=dav1d /usr/local/lib/ /usr/local/lib/
 COPY --from=frontend /app/build /app/client
 COPY docker/entrypoint.sh /entrypoint.sh
 

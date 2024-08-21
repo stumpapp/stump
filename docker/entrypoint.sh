@@ -54,6 +54,9 @@ fi
 # Change current working directory
 cd /app
 
+# Make sure shared libraries are linked
+echo '/usr/local/lib' >> /etc/ld.so.conf.d/mylibs.conf && ldconfig
+
 if [[ "$PUID" -eq 0 ]]; then
     # Run as root
     /app/stump

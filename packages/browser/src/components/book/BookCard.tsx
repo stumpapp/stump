@@ -143,7 +143,7 @@ export default function BookCard({
 	return (
 		<EntityCard
 			key={media.id}
-			title={media.name}
+			title={media.metadata?.title || media.name}
 			href={href}
 			fullWidth={fullWidth}
 			imageUrl={getMediaThumbnail(media.id)}

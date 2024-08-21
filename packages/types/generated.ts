@@ -269,7 +269,7 @@ export type ImageResizeOptions = { mode: ImageResizeMode; height: number; width:
 /**
  * Supported image formats for processing images throughout Stump.
  */
-export type ImageFormat = "Webp" | "Jpeg" | "Png" | "Avif"
+export type ImageFormat = "Webp" | "Jpeg" | "Png"
 
 /**
  * Options for processing images throughout Stump.

@@ -13,9 +13,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Setup dav1d
-      uses: ./.github/actions/setup-dav1d
-
     - name: Setup rust
       uses: ./.github/actions/setup-rust
       with:

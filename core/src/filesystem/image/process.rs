@@ -58,7 +58,7 @@ pub enum ImageFormat {
 	Jpeg,
 	// JpegXl,
 	Png,
-	Avif,
+	// Avif,
 }
 
 impl ImageFormat {
@@ -69,7 +69,7 @@ impl ImageFormat {
 			ImageFormat::Jpeg => "jpeg",
 			// TODO(339): Support JpegXl and Avif
 			// ImageFormat::JpegXl => "jxl",
-			ImageFormat::Avif => "avif",
+			// ImageFormat::Avif => "avif",
 			ImageFormat::Png => "png",
 		}
 	}
@@ -79,7 +79,6 @@ impl From<ImageFormat> for image::ImageFormat {
 	fn from(val: ImageFormat) -> Self {
 		match val {
 			ImageFormat::Webp => image::ImageFormat::WebP,
-			ImageFormat::Avif => image::ImageFormat::Avif,
 			ImageFormat::Jpeg => image::ImageFormat::Jpeg,
 			// See https://github.com/image-rs/image/issues/1765. Image removed the
 			// unsupported enum variant, which makes this awkward to support...
@@ -209,7 +208,7 @@ mod tests {
 	#[test]
 	fn test_image_format_extension() {
 		assert_eq!(ImageFormat::Webp.extension(), "webp");
-		assert_eq!(ImageFormat::Avif.extension(), "avif");
+		// assert_eq!(ImageFormat::Avif.extension(), "avif");
 		assert_eq!(ImageFormat::Jpeg.extension(), "jpeg");
 		// assert_eq!(ImageFormat::JpegXl.extension(), "jxl");
 		assert_eq!(ImageFormat::Png.extension(), "png");
@@ -220,10 +219,6 @@ mod tests {
 		assert_eq!(
 			image::ImageFormat::from(ImageFormat::Webp),
 			image::ImageFormat::WebP
-		);
-		assert_eq!(
-			image::ImageFormat::from(ImageFormat::Avif),
-			image::ImageFormat::Avif
 		);
 		assert_eq!(
 			image::ImageFormat::from(ImageFormat::Jpeg),

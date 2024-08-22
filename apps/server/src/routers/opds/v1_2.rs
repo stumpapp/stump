@@ -518,19 +518,20 @@ fn handle_opds_image_response(
 	image_buffer: Vec<u8>,
 ) -> APIResult<ImageResponse> {
 	if content_type.is_opds_legacy_image() {
-		trace!("OPDS legacy image detected, returning as-is");
 		Ok(ImageResponse::new(content_type, image_buffer))
-	} else {
-		warn!(
-			?content_type,
-			"Unsupported image for OPDS detected, converting to JPEG"
-		);
-		// let jpeg_buffer = image::jpeg_from_bytes(&image_buffer)?;
+	} else if content_type.is_decodable_image() {
+		tracing::debug!("Converting image to JPEG for legacy OPDS compatibility");
 		let jpeg_buffer = GenericImageProcessor::generate(
 			&image_buffer,
 			ImageProcessorOptions::jpeg(),
 		)?;
 		Ok(ImageResponse::new(ContentType::JPEG, jpeg_buffer))
+	} else {
+		tracing::warn!(
+			?content_type,
+			"Encountered image which does not conform to legacy OPDS image requirements"
+		);
+		Ok(ImageResponse::new(content_type, image_buffer))
 	}
 }
 

@@ -44,7 +44,9 @@ WORKDIR /app
 
 COPY . .
 
-RUN RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE} ./docker/build_server.sh && \
+RUN --mount=type=cache,target=/root/.cargo/registry,id=${TARGETARCH} \
+    --mount=type=cache,target=/app/target,id=${TARGETARCH} \
+    RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE} ./docker/build_server.sh && \
     cp ./target/release/stump_server ./stump_server
 
 # ------------------------------------------------------------------------------

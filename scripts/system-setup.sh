@@ -89,7 +89,8 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 
   if which apt-get &> /dev/null; then
     sudo apt-get -y update
-    sudo apt-get -y install libwebkit2gtk-4.0-dev \
+    sudo apt-get -y install \
+      libwebkit2gtk-4.0-dev \
       pkg-config \
       build-essential \
       curl \

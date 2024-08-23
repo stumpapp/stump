@@ -23,6 +23,7 @@ pub enum ContentType {
 	PNG,
 	JPEG,
 	WEBP,
+	AVIF,
 	GIF,
 	TXT,
 	#[default]
@@ -79,6 +80,7 @@ impl ContentType {
 			"jpg" => ContentType::JPEG,
 			"jpeg" => ContentType::JPEG,
 			"webp" => ContentType::WEBP,
+			"avif" => ContentType::AVIF,
 			"gif" => ContentType::GIF,
 			"txt" => ContentType::TXT,
 			_ => temporary_content_workarounds(extension),
@@ -265,6 +267,7 @@ impl ContentType {
 			ContentType::PNG => "png",
 			ContentType::JPEG => "jpg",
 			ContentType::WEBP => "webp",
+			ContentType::AVIF => "avif",
 			ContentType::GIF => "gif",
 			ContentType::TXT => "txt",
 			ContentType::UNKNOWN => "",
@@ -291,6 +294,7 @@ impl From<&str> for ContentType {
 			"image/png" => ContentType::PNG,
 			"image/jpeg" => ContentType::JPEG,
 			"image/webp" => ContentType::WEBP,
+			"image/avif" => ContentType::AVIF,
 			"image/gif" => ContentType::GIF,
 			_ => ContentType::UNKNOWN,
 		}
@@ -312,6 +316,7 @@ impl std::fmt::Display for ContentType {
 			ContentType::PNG => write!(f, "image/png"),
 			ContentType::JPEG => write!(f, "image/jpeg"),
 			ContentType::WEBP => write!(f, "image/webp"),
+			ContentType::AVIF => write!(f, "image/avif"),
 			ContentType::GIF => write!(f, "image/gif"),
 			ContentType::TXT => write!(f, "text/plain"),
 			ContentType::UNKNOWN => write!(f, "unknown"),
@@ -327,6 +332,7 @@ impl From<ImageFormat> for ContentType {
 			// ImageFormat::JpegXl => ContentType::JPEG,
 			ImageFormat::Png => ContentType::PNG,
 			ImageFormat::Webp => ContentType::WEBP,
+			// ImageFormat::Avif => ContentType::AVIF,
 		}
 	}
 }
@@ -349,6 +355,7 @@ impl TryFrom<ContentType> for image::ImageFormat {
 			ContentType::PNG => Ok(image::ImageFormat::Png),
 			ContentType::JPEG => Ok(image::ImageFormat::Jpeg),
 			ContentType::WEBP => Ok(image::ImageFormat::WebP),
+			ContentType::AVIF => Ok(image::ImageFormat::Avif),
 			ContentType::GIF => Ok(image::ImageFormat::Gif),
 			ContentType::XHTML => Err(unsupported_error("ContentType::XHTML")),
 			ContentType::XML => Err(unsupported_error("ContentType::XML")),
@@ -384,6 +391,7 @@ mod tests {
 		assert_eq!(ContentType::from_extension("jpg"), ContentType::JPEG);
 		assert_eq!(ContentType::from_extension("jpeg"), ContentType::JPEG);
 		assert_eq!(ContentType::from_extension("webp"), ContentType::WEBP);
+		assert_eq!(ContentType::from_extension("avif"), ContentType::AVIF);
 		assert_eq!(ContentType::from_extension("gif"), ContentType::GIF);
 		assert_eq!(ContentType::from_extension("txt"), ContentType::TXT);
 		assert_eq!(ContentType::from_extension("opf"), ContentType::XML);
@@ -406,6 +414,7 @@ mod tests {
 		assert_eq!(ContentType::from_file("test.jpg"), ContentType::JPEG);
 		assert_eq!(ContentType::from_file("test.jpeg"), ContentType::JPEG);
 		assert_eq!(ContentType::from_file("test.webp"), ContentType::WEBP);
+		assert_eq!(ContentType::from_file("test.avif"), ContentType::AVIF);
 		assert_eq!(ContentType::from_file("test.gif"), ContentType::GIF);
 		assert_eq!(ContentType::from_file("test.txt"), ContentType::TXT);
 		assert_eq!(ContentType::from_file("test.unknown"), ContentType::UNKNOWN);
@@ -467,6 +476,9 @@ mod tests {
 		let path = Path::new("test.webp");
 		assert_eq!(ContentType::from_path(path), ContentType::WEBP);
 
+		let path = Path::new("test.avif");
+		assert_eq!(ContentType::from_path(path), ContentType::AVIF);
+
 		let path = Path::new("test.gif");
 		assert_eq!(ContentType::from_path(path), ContentType::GIF);
 
@@ -506,6 +518,7 @@ mod tests {
 		assert_eq!(ContentType::PNG.mime_type(), "image/png".to_string());
 		assert_eq!(ContentType::JPEG.mime_type(), "image/jpeg".to_string());
 		assert_eq!(ContentType::WEBP.mime_type(), "image/webp".to_string());
+		assert_eq!(ContentType::AVIF.mime_type(), "image/avif".to_string());
 		assert_eq!(ContentType::GIF.mime_type(), "image/gif".to_string());
 		assert_eq!(ContentType::TXT.mime_type(), "text/plain".to_string());
 		assert_eq!(ContentType::UNKNOWN.mime_type(), "unknown".to_string());
@@ -517,6 +530,7 @@ mod tests {
 		assert!(ContentType::PNG.is_image());
 		assert!(ContentType::JPEG.is_image());
 		assert!(ContentType::WEBP.is_image());
+		assert!(ContentType::AVIF.is_image());
 		assert!(ContentType::GIF.is_image());
 		assert!(!ContentType::XHTML.is_image());
 
@@ -543,6 +557,7 @@ mod tests {
 
 		// Not an OPDS 1.2 legacy image
 		assert!(!ContentType::WEBP.is_opds_legacy_image());
+		assert!(!ContentType::AVIF.is_opds_legacy_image());
 	}
 
 	#[test]

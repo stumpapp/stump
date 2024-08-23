@@ -9,7 +9,8 @@ use walkdir::WalkDir;
 
 use super::{media::is_accepted_cover_name, ContentType, FileError};
 
-pub const ACCEPTED_IMAGE_EXTENSIONS: [&str; 5] = ["jpg", "png", "jpeg", "webp", "gif"];
+pub const ACCEPTED_IMAGE_EXTENSIONS: [&str; 6] =
+	["jpg", "png", "jpeg", "webp", "gif", "avif"];
 
 pub fn read_entire_file<P: AsRef<Path>>(path: P) -> Result<Vec<u8>, FileError> {
 	let mut file = File::open(path)?;

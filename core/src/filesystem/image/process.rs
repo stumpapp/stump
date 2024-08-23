@@ -79,6 +79,7 @@ impl From<ImageFormat> for image::ImageFormat {
 	fn from(val: ImageFormat) -> Self {
 		match val {
 			ImageFormat::Webp => image::ImageFormat::WebP,
+			// ImageFormat::Avif => image::ImageFormat::Avif,
 			ImageFormat::Jpeg => image::ImageFormat::Jpeg,
 			// See https://github.com/image-rs/image/issues/1765. Image removed the
 			// unsupported enum variant, which makes this awkward to support...

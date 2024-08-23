@@ -1,4 +1,5 @@
 use image::GenericImageView;
+use imagesize;
 
 use crate::{
 	db::entity::page_dimension::{dimension_vec_to_string, PageDimension},
@@ -49,16 +50,18 @@ pub(crate) async fn execute(
 	for page_num in 1..=page_count {
 		let (content_type, page_data) =
 			get_page(&media_item.path, page_num, &ctx.config)?;
-		// Confirm that content_type is compatible with the image crate
-		let image_format = content_type.try_into()?;
-
-		// Open image with image crate and extract dimensions
-		let (height, width) =
-			image::load_from_memory_with_format(&page_data, image_format)
-				.map_err(|e| {
-					JobError::TaskFailed(format!("Error loading image data: {}", e))
-				})?
-				.dimensions();
+		// Open image with imagesize crate and extract dimensions
+		let (height, width): (u32, u32) = imagesize::blob_size(&page_data[..20])
+			.map(
+				|size| match (u32::try_from(size.height), u32::try_from(size.width)) {
+					(Ok(height), Ok(width)) => Ok((height, width)),
+					_ => Err("Image dimensions too large or misread"),
+				},
+			)
+			.map_err(|e| {
+				JobError::TaskFailed(format!("Error loading image data: {}", e))
+			})?
+			.unwrap();
 
 		image_dimensions.push(PageDimension { height, width });
 		output.image_dimensions_analyzed += 1;

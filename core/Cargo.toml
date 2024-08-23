@@ -15,6 +15,7 @@ epub = { git = "https://github.com/stumpapp/epub-rs", rev = "38e091abe9687595255
 futures = { workspace = true }
 globset = "0.4.14"
 image = { version = "0.25.2" }
+imagesize = "0.13.0"
 infer = "0.16.0"
 itertools = { workspace = true }
 prisma-client-rust = { workspace = true }
@@ -46,7 +47,7 @@ walkdir = "2.4.0"
 webp = "0.3.0"
 xml-rs = "0.8.20" # XML reader/writer
 zip = "2.1.6"
-imagesize = "0.13.0"
+
 
 [dev-dependencies]
 temp-env = "0.3.6"

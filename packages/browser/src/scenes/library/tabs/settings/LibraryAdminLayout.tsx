@@ -1,5 +1,5 @@
 import { cx } from 'class-variance-authority'
-import { useEffect, useMemo } from 'react'
+import { Suspense, useEffect, useMemo } from 'react'
 import { Outlet, useNavigate } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
@@ -37,7 +37,9 @@ export default function LibraryAdminLayout() {
 					'max-w-4xl': primary_navigation_mode === 'SIDEBAR',
 				})}
 			>
-				<Outlet />
+				<Suspense>
+					<Outlet />
+				</Suspense>
 			</SceneContainer>
 		</div>
 	)

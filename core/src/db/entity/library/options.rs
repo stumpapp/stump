@@ -8,7 +8,7 @@ use super::{IgnoreRules, LibraryPattern};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema, Default)]
 pub struct LibraryOptions {
-	// TODO: remove optionality
+	#[specta(optional)]
 	pub id: Option<String>,
 	pub convert_rar_to_zip: bool,
 	pub hard_delete_conversions: bool,
@@ -16,8 +16,9 @@ pub struct LibraryOptions {
 	pub thumbnail_config: Option<ImageProcessorOptions>,
 	#[serde(default)]
 	pub ignore_rules: IgnoreRules,
-	// TODO(prisma 0.7.0): Nested create
+	// TODO(prisma-nested-create): Refactor once nested create is supported
 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
+	#[specta(optional)]
 	pub library_id: Option<String>,
 }
 

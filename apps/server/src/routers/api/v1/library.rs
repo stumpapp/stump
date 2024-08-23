@@ -4,6 +4,7 @@ use axum::{
 	routing::{get, post, put},
 	Extension, Json, Router,
 };
+use chrono::Duration;
 use prisma_client_rust::{chrono::Utc, not, or, raw, Direction, PrismaValue};
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
@@ -17,8 +18,9 @@ use stump_core::{
 	db::{
 		entity::{
 			library_series_ids_media_ids_include, library_thumbnails_deletion_include,
-			FileStatus, Library, LibraryOptions, LibraryScanMode, LibraryStats, Media,
-			Series, Tag, User, UserPermission,
+			macros::library_tags_select, FileStatus, Library, LibraryOptions,
+			LibraryScanMode, LibraryStats, Media, Series, Tag, TagName, User,
+			UserPermission,
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 		PrismaCountTrait,
@@ -1247,12 +1249,16 @@ pub struct CreateLibrary {
 	/// The path to the library to create, i.e. where the directory is on the filesystem.
 	pub path: String,
 	/// Optional text description of the library.
+	#[specta(optional)]
 	pub description: Option<String>,
 	/// Optional tags to assign to the library.
-	pub tags: Option<Vec<Tag>>,
+	#[specta(optional)]
+	pub tags: Option<Vec<TagName>>,
 	/// Optional flag to indicate if the how the library should be scanned after creation. Default is `BATCHED`.
+	#[specta(optional)]
 	pub scan_mode: Option<LibraryScanMode>,
 	/// Optional options to apply to the library. When not provided, the default options will be used.
+	#[specta(optional)]
 	pub library_options: Option<LibraryOptions>,
 }
 
@@ -1300,11 +1306,12 @@ async fn create_library(
 		)));
 	}
 
-	// TODO(prisma 0.7.0): Nested create
+	// TODO(prisma-nested-create): Refactor once nested create is supported
 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
 	let library_options_arg = input.library_options.unwrap_or_default();
 	let transaction_result: Result<Library, APIError> = db
 		._transaction()
+		.with_timeout(Duration::seconds(30).num_milliseconds() as u64)
 		.run(|client| async move {
 			let library_options = client
 				.library_options()
@@ -1327,13 +1334,52 @@ async fn create_library(
 				.exec()
 				.await?;
 
+			let library_tags = match input.tags {
+				Some(tags) => {
+					let mut existing_tags = client
+						.tag()
+						.find_many(vec![tag::name::in_vec(tags.clone())])
+						.exec()
+						.await?;
+
+					let tags_to_create = tags
+						.into_iter()
+						.filter(|tag| !existing_tags.iter().any(|t| t.name == *tag))
+						.collect::<Vec<_>>();
+
+					if !tags_to_create.is_empty() {
+						let created_tags = client
+							._batch(
+								tags_to_create
+									.into_iter()
+									.map(|tag| client.tag().create(tag, vec![])),
+							)
+							.await?;
+						existing_tags.extend(created_tags);
+					}
+
+					existing_tags
+				},
+				None => vec![],
+			};
+
 			let library = client
 				.library()
 				.create(
 					input.name.to_owned(),
 					input.path.to_owned(),
 					library_options::id::equals(library_options.id.clone()),
-					vec![library::description::set(input.description.to_owned())],
+					chain_optional_iter(
+						[library::description::set(input.description.to_owned())],
+						[(!library_tags.is_empty()).then(|| {
+							library::tags::connect(
+								library_tags
+									.into_iter()
+									.map(|tag| tag::id::equals(tag.id))
+									.collect(),
+							)
+						})],
+					),
 				)
 				.exec()
 				.await?;
@@ -1351,20 +1397,6 @@ async fn create_library(
 				)
 				.exec()
 				.await?;
-
-			// FIXME: try and do multiple connects again soon, batching is WAY better than
-			// previous solution but still...
-			if let Some(tags) = input.tags.to_owned() {
-				let library_id = library.id.clone();
-				let tag_connect = tags.into_iter().map(|tag| {
-					client.library().update(
-						library::id::equals(library_id.clone()),
-						vec![library::tags::connect(vec![tag::id::equals(tag.id)])],
-					)
-				});
-
-				client._batch(tag_connect).await?;
-			}
 
 			Ok(Library::from((library, library_options)))
 		})
@@ -1395,14 +1427,14 @@ pub struct UpdateLibrary {
 	/// The updated path of the library.
 	pub path: String,
 	/// The updated description of the library.
+	#[specta(optional)]
 	pub description: Option<String>,
 	/// The updated emoji for the library.
+	#[specta(optional)]
 	pub emoji: Option<String>,
 	/// The updated tags of the library.
-	pub tags: Option<Vec<Tag>>,
-	/// The tags to remove from the library.
-	#[serde(default)]
-	pub removed_tags: Option<Vec<Tag>>,
+	#[specta(optional)]
+	pub tags: Option<Vec<TagName>>,
 	/// The updated options of the library.
 	pub library_options: LibraryOptions,
 	/// Optional flag to indicate how the library should be automatically scanned after update. Default is `BATCHED`.
@@ -1410,6 +1442,7 @@ pub struct UpdateLibrary {
 	pub scan_mode: Option<LibraryScanMode>,
 }
 
+// TODO(prisma-nested-create): Refactor once nested create is supported
 #[utoipa::path(
 	put,
 	path = "/api/v1/libraries/:id",
@@ -1444,86 +1477,126 @@ async fn update_library(
 		)));
 	}
 
-	let _can_access = db
+	let existing_library = db
 		.library()
 		.find_first(vec![
 			library::id::equals(id.clone()),
 			library_not_hidden_from_user_filter(&user),
 		])
+		.select(library_tags_select::select())
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound("Library not found".to_string()))?;
-
-	let library_options = input.library_options.to_owned();
-
-	db.library_options()
-		.update(
-			library_options::id::equals(library_options.id.unwrap_or_default()),
-			chain_optional_iter(
-				[
-					library_options::convert_rar_to_zip::set(
-						library_options.convert_rar_to_zip,
-					),
-					library_options::hard_delete_conversions::set(
-						library_options.hard_delete_conversions,
-					),
-				],
-				[library_options.thumbnail_config.map(|config| {
-					library_options::thumbnail_config::set(Some(
-						serde_json::to_vec(&config).unwrap_or_default(),
-					))
-				})],
-			),
-		)
-		.exec()
-		.await?;
-
-	let mut batches = vec![];
-
-	// FIXME: this is disgusting. I don't understand why the library::tag::connect doesn't
-	// work with multiple tags, nor why providing multiple library::tag::connect params
-	// doesn't work. Regardless, absolutely do NOT keep this. Correction required,
-	// highly inefficient queries.
-
-	if let Some(tags) = input.tags.to_owned() {
-		for tag in tags {
-			batches.push(db.library().update(
-				library::id::equals(id.clone()),
-				vec![library::tags::connect(vec![tag::id::equals(
-					tag.id.to_owned(),
-				)])],
-			));
-		}
-	}
-
-	if let Some(removed_tags) = input.removed_tags.to_owned() {
-		for tag in removed_tags {
-			batches.push(db.library().update(
-				library::id::equals(id.clone()),
-				vec![library::tags::disconnect(vec![tag::id::equals(
-					tag.id.to_owned(),
-				)])],
-			));
-		}
-	}
-
-	if !batches.is_empty() {
-		db._batch(batches).await?;
-	}
+	let existing_tags = existing_library.tags;
 
 	let updated_library = db
-		.library()
-		.update(
-			library::id::equals(id),
-			vec![
-				library::name::set(input.name),
-				library::path::set(input.path),
-				library::description::set(input.description),
-				library::emoji::set(input.emoji),
-			],
-		)
-		.with(library::tags::fetch(vec![]))
-		.exec()
+		._transaction()
+		.with_timeout(Duration::seconds(30).num_milliseconds() as u64)
+		.run(|client| async move {
+			let library_options = input.library_options.to_owned();
+			client
+				.library_options()
+				.update(
+					library_options::id::equals(library_options.id.unwrap_or_default()),
+					chain_optional_iter(
+						[
+							library_options::convert_rar_to_zip::set(
+								library_options.convert_rar_to_zip,
+							),
+							library_options::hard_delete_conversions::set(
+								library_options.hard_delete_conversions,
+							),
+						],
+						[library_options.thumbnail_config.map(|config| {
+							library_options::thumbnail_config::set(Some(
+								serde_json::to_vec(&config).unwrap_or_default(),
+							))
+						})],
+					),
+				)
+				.exec()
+				.await?;
+
+			let (tags_to_connect, tags_to_disconnect) = match input.tags {
+				Some(tag_names) => {
+					let tags_not_in_existing = tag_names
+						.clone()
+						.into_iter()
+						.filter(|name| !existing_tags.iter().any(|t| t.name == *name))
+						.collect::<Vec<_>>();
+
+					let tags_to_add_which_already_exist = client
+						.tag()
+						.find_many(vec![tag::name::in_vec(tags_not_in_existing.clone())])
+						.exec()
+						.await?;
+					let tags_to_create = tags_not_in_existing
+						.into_iter()
+						.filter(|name| {
+							!tags_to_add_which_already_exist
+								.iter()
+								.any(|t| t.name == *name)
+						})
+						.collect::<Vec<_>>();
+
+					let created_tags = client
+						._batch(
+							tags_to_create
+								.into_iter()
+								.map(|tag| client.tag().create(tag, vec![])),
+						)
+						.await?;
+
+					let tags_to_connect = tags_to_add_which_already_exist
+						.into_iter()
+						.chain(created_tags.into_iter())
+						.collect::<Vec<_>>();
+
+					let tags_to_disconnect = existing_tags
+						.into_iter()
+						.filter(|tag| !tag_names.contains(&tag.name))
+						.collect::<Vec<_>>();
+
+					(tags_to_connect, tags_to_disconnect)
+				},
+				None if !existing_tags.is_empty() => (vec![], existing_tags),
+				_ => (vec![], vec![]),
+			};
+
+			let set_params = chain_optional_iter(
+				[
+					library::name::set(input.name),
+					library::path::set(input.path),
+					library::description::set(input.description),
+					library::emoji::set(input.emoji),
+				],
+				[
+					(!tags_to_connect.is_empty()).then(|| {
+						library::tags::connect(
+							tags_to_connect
+								.into_iter()
+								.map(|tag| tag::id::equals(tag.id))
+								.collect(),
+						)
+					}),
+					(!tags_to_disconnect.is_empty()).then(|| {
+						library::tags::disconnect(
+							tags_to_disconnect
+								.into_iter()
+								.map(|tag| tag::id::equals(tag.id))
+								.collect(),
+						)
+					}),
+				],
+			);
+
+			client
+				.library()
+				.update(library::id::equals(id), set_params)
+				.with(library::tags::fetch(vec![]))
+				.exec()
+				.await
+		})
 		.await?;
 
 	let scan_mode = input.scan_mode.unwrap_or_default();

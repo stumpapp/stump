@@ -1,4 +1,3 @@
-use image::GenericImageView;
 use imagesize;
 
 use crate::{
@@ -48,7 +47,7 @@ pub(crate) async fn execute(
 	let mut image_dimensions: Vec<PageDimension> =
 		Vec::with_capacity(page_count as usize);
 	for page_num in 1..=page_count {
-		let (content_type, page_data) =
+		let (_content_type, page_data) =
 			get_page(&media_item.path, page_num, &ctx.config)?;
 		// Open image with imagesize crate and extract dimensions
 		let (height, width): (u32, u32) = imagesize::blob_size(&page_data[..20])

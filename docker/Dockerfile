@@ -9,6 +9,8 @@ WORKDIR /app
 
 COPY . .
 
+RUN ls
+
 RUN --mount=type=cache,target=/usr/local/yarn/.cache,id=${TARGETARCH} \ 
     # https://github.com/nodejs/docker-node/issues/1335
     yarn config set network-timeout 300000 && \

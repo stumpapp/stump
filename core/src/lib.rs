@@ -8,8 +8,6 @@ use std::sync::Arc;
 
 // TODO: cleanup hoisted crates to only what is needed
 
-// Undo me, this is a useless comment to test the docker caching...
-
 pub mod config;
 pub mod db;
 mod event;

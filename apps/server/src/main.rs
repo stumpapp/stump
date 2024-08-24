@@ -12,8 +12,6 @@ mod middleware;
 mod routers;
 mod utils;
 
-// Undo me, this is a useless comment to test the docker caching...
-
 #[cfg(debug_assertions)]
 fn debug_setup() {
 	std::env::set_var(

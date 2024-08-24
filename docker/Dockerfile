@@ -25,47 +25,33 @@ RUN --mount=type=cache,target=/usr/local/yarn/.cache,id=${TARGETARCH} \
 FROM rust:1.79.0-slim-buster AS builder
 
 ARG GIT_REV
-ARG TAGS
 ARG TARGETARCH
 ARG RUN_PRISMA_GENERATE
 
 ENV GIT_REV=${GIT_REV}
-ENV TAGS=${TAGS}
 ENV RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE}
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    cmake \
-    wget \
-    git \
-    libssl-dev \
-    pkg-config \
-    libsqlite3-dev;
-
-RUN wget -qO- https://sh.rustup.rs | sh -s -- -yq --profile minimal
-
-ENV PATH="/usr/local/cargo/bin:$PATH"
-
-# From: https://github.com/rust-lang/rust-analyzer/blob/master/.github/workflows/release.yaml#L13-L21
-ENV CARGO_NET_RETRY=10
-ENV CARGO_INCREMENTAL=0
-ENV RUSTUP_MAX_RETRIES=10
+RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
+    apt-get update && apt-get install -y \
+        build-essential \
+        cmake \
+        wget \
+        git \
+        libssl-dev \
+        pkg-config \
+        libsqlite3-dev;
 
 # Cargo build for stump
 WORKDIR /app
 
 COPY . .
 
-RUN --mount=type=cache,target=/usr/local/cargo,id=${TARGETARCH},source=/usr/local/cargo \
+RUN cargo --version
+
+RUN --mount=type=cache,target=/usr/local/cargo/registry,id=${TARGETARCH} \
     --mount=type=cache,target=/app/target,id=${TARGETARCH} \
-    # RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE} ./docker/build_server.sh && \
-    set -ex; \
-    ./scripts/release/utils.sh -w; \
-    ./scripts/release/utils.sh -p; \
-    cargo build --package stump_server --bin stump_server --release
+    RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE} ./docker/build_server.sh && \
     cp ./target/release/stump_server ./stump_server
-# RUN RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE} ./docker/build_server.sh && \
-#     cp ./target/release/stump_server ./stump_server
 
 # ------------------------------------------------------------------------------
 # PDFium Stage
@@ -74,18 +60,19 @@ RUN --mount=type=cache,target=/usr/local/cargo,id=${TARGETARCH},source=/usr/loca
 FROM debian:buster-slim AS pdfium
 ARG TARGETARCH
 
-RUN apt-get update && apt-get install -y curl tar; \
-    # Download and extract PDFium
-    set -ex; \
-    mkdir -p pdfium; \
-    if [ "$TARGETARCH" = "amd64" ]; then \
-        # NOTE: This was previously -x86, need to test more on amd64-compatible systems to ensure I have the right one
-        curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6406/pdfium-linux-x64.tgz; \
-    elif [ "$TARGETARCH" = "arm64" ]; then \
-        curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6406/pdfium-linux-arm64.tgz; \
-    fi; \
-    tar -xzvf pdfium.tgz -C ./pdfium; \
-    rm pdfium.tgz
+RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
+    apt-get update && apt-get install -y curl tar; \
+        # Download and extract PDFium
+        set -ex; \
+        mkdir -p pdfium; \
+        if [ "$TARGETARCH" = "amd64" ]; then \
+            # NOTE: This was previously -x86, need to test more on amd64-compatible systems to ensure I have the right one
+            curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6406/pdfium-linux-x64.tgz; \
+        elif [ "$TARGETARCH" = "arm64" ]; then \
+            curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6406/pdfium-linux-arm64.tgz; \
+        fi; \
+        tar -xzvf pdfium.tgz -C ./pdfium; \
+        rm pdfium.tgz
 
 # ------------------------------------------------------------------------------
 # Final Stage

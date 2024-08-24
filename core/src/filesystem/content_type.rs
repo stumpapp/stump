@@ -85,7 +85,6 @@ impl ContentType {
 			"jpeg" => ContentType::JPEG,
 			"jxl" => ContentType::JPEG_XL,
 			"webp" => ContentType::WEBP,
-			"avif" => ContentType::AVIF,
 			"gif" => ContentType::GIF,
 			"txt" => ContentType::TXT,
 			_ => temporary_content_workarounds(extension),

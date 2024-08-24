@@ -9,12 +9,13 @@ WORKDIR /app
 
 COPY . .
 
-# https://github.com/nodejs/docker-node/issues/1335
-RUN yarn config set network-timeout 300000 && \
-    yarn install --frozen-lockfile && \
-    yarn web build && \
-    mv ./apps/web/dist/ ./build && \
-    if [ ! -d "./build" ] || [ ! "$(ls -A ./build)" ]; then exit 1; fi
+RUN --mount=type=cache,target=/usr/local/yarn/.cache,id=${TARGETARCH} \ 
+    # https://github.com/nodejs/docker-node/issues/1335
+    yarn config set network-timeout 300000 && \
+        YARN_CACHE_FOLDER=/usr/local/yarn/.cache yarn install --frozen-lockfile && \
+        yarn web build && \
+        mv ./apps/web/dist/ ./build && \
+        if [ ! -d "./build" ] || [ ! "$(ls -A ./build)" ]; then exit 1; fi
 
 
 # ------------------------------------------------------------------------------
@@ -25,6 +26,7 @@ FROM rust:1.79.0-slim-buster AS builder
 
 ARG GIT_REV
 ARG TAGS
+ARG TARGETARCH
 ARG RUN_PRISMA_GENERATE
 
 ENV GIT_REV=${GIT_REV}
@@ -34,22 +36,36 @@ ENV RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE}
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
+    wget \
     git \
     libssl-dev \
     pkg-config \
     libsqlite3-dev;
+
+RUN wget -qO- https://sh.rustup.rs | sh -s -- -yq --profile minimal
+
+ENV PATH="/usr/local/cargo/bin:$PATH"
+
+# From: https://github.com/rust-lang/rust-analyzer/blob/master/.github/workflows/release.yaml#L13-L21
+ENV CARGO_NET_RETRY=10
+ENV CARGO_INCREMENTAL=0
+ENV RUSTUP_MAX_RETRIES=10
 
 # Cargo build for stump
 WORKDIR /app
 
 COPY . .
 
-# RUN --mount=type=cache,target=/root/.cargo/registry,id=${TARGETARCH} \
-#     --mount=type=cache,target=/app/target,id=${TARGETARCH} \
-#     RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE} ./docker/build_server.sh && \
-#     cp ./target/release/stump_server ./stump_server
-RUN RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE} ./docker/build_server.sh && \
+RUN --mount=type=cache,target=/usr/local/cargo,id=${TARGETARCH},source=/usr/local/cargo \
+    --mount=type=cache,target=/app/target,id=${TARGETARCH} \
+    # RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE} ./docker/build_server.sh && \
+    set -ex; \
+    ./scripts/release/utils.sh -w; \
+    ./scripts/release/utils.sh -p; \
+    cargo build --package stump_server --bin stump_server --release
     cp ./target/release/stump_server ./stump_server
+# RUN RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE} ./docker/build_server.sh && \
+#     cp ./target/release/stump_server ./stump_server
 
 # ------------------------------------------------------------------------------
 # PDFium Stage

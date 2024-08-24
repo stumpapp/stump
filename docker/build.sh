@@ -1,11 +1,13 @@
 #!/bin/bash
 
+_RUNTIME=${RUNTIME:-docker}
 _FORMAT=${FORMAT:-auto}
 _PLATFORMS=${PLATFORMS:-linux/amd64}
 _TAG=${TAG:-nightly}
 _RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE:=false}
 
-docker buildx build \
+set -ex; \
+${_RUNTIME} buildx build \
   -f ./docker/Dockerfile \
   --load \
   --progress=$_FORMAT \

@@ -17,7 +17,6 @@ RUN --mount=type=cache,target=/usr/local/yarn/.cache,id=${TARGETARCH} \
         mv ./apps/web/dist/ ./build && \
         if [ ! -d "./build" ] || [ ! "$(ls -A ./build)" ]; then exit 1; fi
 
-
 # ------------------------------------------------------------------------------
 # Cargo Build Stage
 # ------------------------------------------------------------------------------
@@ -46,7 +45,6 @@ WORKDIR /app
 
 COPY . .
 
-RUN cargo --version
 
 RUN --mount=type=cache,target=/usr/local/cargo/registry,id=${TARGETARCH} \
     --mount=type=cache,target=/app/target,id=${TARGETARCH} \

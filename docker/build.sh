@@ -1,6 +1,6 @@
 #!/bin/bash
 
-_RUNTIME=${RUNTIME:-docker}
+_ENGINE=${ENGINE:-docker}
 _FORMAT=${FORMAT:-auto}
 _PLATFORMS=${PLATFORMS:-linux/amd64}
 _TAGS=${TAGS:-"aaronleopold/stump:nightly"}
@@ -15,7 +15,7 @@ done
 echo "Building with tag arguments: $FORMATTED_TAGS"
 
 set -ex; \
-${_RUNTIME} buildx build \
+${_ENGINE} buildx build \
   -f ./docker/Dockerfile \
   --load \
   --progress=$_FORMAT \

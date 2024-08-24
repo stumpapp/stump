@@ -71,19 +71,23 @@ runs:
         username: ${{ inputs.username }}
         password: ${{ inputs.password }}
 
-    - name: Run buildx build
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        build-args: |
-          "GIT_REV=${{ env.GIT_REV }}"
-          "TAGS=${{ env.TAGS }}"
-          "RUN_PRISMA_GENERATE=false"
-        file: docker/Dockerfile
-        platforms: ${{ inputs.platforms }}
-        load: ${{ inputs.load }}
-        push: ${{ inputs.push }}
-        tags: ${{ env.TAGS }}
+    # - name: Run buildx build
+    #   uses: docker/build-push-action@v4
+    #   with:
+    #     context: .
+    #     build-args: |
+    #       "GIT_REV=${{ env.GIT_REV }}"
+    #       "RUN_PRISMA_GENERATE=false"
+    #     file: docker/Dockerfile
+    #     platforms: ${{ inputs.platforms }}
+    #     load: ${{ inputs.load }}
+    #     push: ${{ inputs.push }}
+    #     tags: ${{ env.TAGS }}
+
+    - name: Run podman buildx
+      run: |
+        RUNTIME=podman PLATFORMS="${{ inputs.platforms }}" TAGS="${{ env.TAGS }}" ./docker/build.sh
+      shell: bash
 
     - name: Discord notification
       if: ${{ success() && inputs.push == 'true' && inputs.discord-webhook != '' }}

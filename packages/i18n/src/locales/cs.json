@@ -217,76 +217,76 @@
 				"meta": {
 					"figures": {
 						"books": "kniha",
-						"series": "series",
-						"library": "library"
+						"series": "série",
+						"library": "knihovna"
 					},
-					"matches": "Matches"
+					"matches": "Shody"
 				}
 			}
 		}
 	},
 	"userSmartListScene": {
 		"navigation": {
-			"items": "Items",
-			"settings": "Settings"
+			"items": "Položky",
+			"settings": "Nastavení"
 		},
 		"layout": {
-			"missingIdError": "This scene requires an ID in the URL",
-			"smartListNotFound": "Smart list not found",
-			"viewCreateError": "Failed to create view",
-			"viewSaveError": "Failed to save view"
+			"missingIdError": "Tato scéna vyžaduje ID v URL",
+			"smartListNotFound": "Chytrý seznam nenalezen",
+			"viewCreateError": "Nepodařilo se vytvořit vlastní zobrazení",
+			"viewSaveError": "Nepodařilo se uložit vlastní zobrazení"
 		},
 		"header": {
-			"backLink": "Lists"
+			"backLink": "Seznamy"
 		},
 		"itemsScene": {
-			"smartListNotFound": "Smart list not found",
+			"smartListNotFound": "Chytrý seznam nenalezen",
 			"actionHeader": {
 				"viewSelector": {
-					"customView": "Custom view",
-					"defaultView": "Default view",
-					"noViewsSaved": "No views saved",
-					"selectView": "Select a saved view"
+					"customView": "Vlastní zobrazení",
+					"defaultView": "Výchozí zobrazení",
+					"noViewsSaved": "Žádná zobrazení nebyla uložena",
+					"selectView": "Vyberte uložené zobrazení"
 				},
 				"filterDrawer": {
-					"heading": "Smart list filters",
-					"description": "Change the filters for this viewing session",
+					"heading": "Chytré filtry",
+					"description": "Změnit filtry pro tuto relaci zobrazení",
 					"rawData": {
-						"heading": "Raw filter data",
-						"description": "This is how Stump will process the filters"
+						"heading": "Syrová data filtru",
+						"description": "Stump zpracuje filtry takto"
 					},
 					"buttons": {
-						"save": "Save",
-						"cancel": "Cancel"
+						"save": "Uložit",
+						"cancel": "Zrušit"
 					}
 				},
 				"search": {
-					"placeholder": "Quick filter"
+					"placeholder": "Rychlý filtr"
 				},
 				"viewManager": {
-					"updateSelected": "Update selected",
-					"create": "Create new view",
+					"updateSelected": "Aktualizovat vybrané",
+					"create": "Vytvořit nové zobrazení",
 					"modal": {
 						"heading": {
-							"create": "Create view",
-							"update": "Update view"
+							"create": "Vytvořit zobrazení",
+							"update": "Upravit zobrazení"
 						},
 						"description": {
-							"create": "Create a new view for this smart list",
-							"update": "Update the view"
+							"create": "Vytvořit nové zobrazení pro tento chytrý seznam",
+							"update": "Upravit zobrazení"
 						},
 						"createForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "A friendly name to uniquely identify this view"
+								"label": "Název",
+								"placeholder": "Moje zobrazení",
+								"description": "Přátelský název k jedinečné identifikaci tohoto zobrazení"
 							}
 						},
 						"updateForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "The updated name for this view, if desired"
+								"label": "Název",
+								"placeholder": "Moje zobrazení",
+								"description": "Aktualizovaný název pro toto zobrazení, pokud je to požadováno"
 							}
 						}
 					}
@@ -296,27 +296,27 @@
 	},
 	"settingsScene": {
 		"navigation": {
-			"general": "General",
-			"logs": "Logs",
+			"general": "Obecné",
+			"logs": "Logy",
 			"server": "Server",
-			"jobs": "Jobs and Configuration",
-			"users": "User Management",
-			"desktop": "Desktop"
+			"jobs": "Úlohy a konfigurace",
+			"users": "Správa uživatelů",
+			"desktop": "Domovská obrazovka"
 		},
 		"sidebar": {
 			"application": {
-				"account": "Account",
-				"appearance": "Appearance",
-				"reader": "Reader",
-				"desktop": "Desktop",
-				"label": "Application"
+				"account": "Účet",
+				"appearance": "Vzhled",
+				"reader": "Čtečka",
+				"desktop": "Domovská obrazovka",
+				"label": "Aplikace"
 			},
 			"server": {
-				"general": "General",
-				"logs": "Logs",
-				"users": "Users",
-				"jobs": "Jobs",
-				"access": "Access",
+				"general": "Obecné",
+				"logs": "Logy",
+				"users": "Uživatelé",
+				"jobs": "Úlohy",
+				"access": "Přístup",
 				"email": "E-mail",
 				"notifications": "Notifikace",
 				"label": "Server"
@@ -425,9 +425,9 @@
 			}
 		},
 		"app/reader": {
-			"helmet": "Reader settings",
-			"title": "Reader settings",
-			"description": "Default options for the Stump readers. These are bound to your current device only",
+			"helmet": "Nastavení čtečky",
+			"title": "Nastavení čtečky",
+			"description": "Výchozí možnosti pro čtečky Stump. Jsou vázány pouze na vaše aktuální zařízení",
 			"sections": {
 				"imageBasedBooks": {
 					"label": "Image-based books",

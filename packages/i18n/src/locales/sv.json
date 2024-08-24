@@ -1,8 +1,8 @@
 {
 	"underConstruction": {
-		"heading": "This is awkward",
-		"message": "You've stumbled upon a page that's still being developed. I'd love to show it to you, but it isn't quite ready yet.",
-		"homeLink": "Go Home",
+		"heading": "Det här är pinsamt",
+		"message": "Du har snubblat på en sida som är under utveckling. Jag skulle vilja visa den för dig, men den är inte riktigt klar än.",
+		"homeLink": "Gå Hem",
 		"githubLink": "View the GitHub issue"
 	},
 	"authScene": {

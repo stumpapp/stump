@@ -160,6 +160,60 @@ impl FileProcessor for ZipProcessor {
 		Err(FileError::NoImageError)
 	}
 
+	fn get_page_bytes(
+		path: &str,
+		page: i32,
+		amount: usize,
+		_: &StumpConfig,
+	) -> Result<Vec<u8>, FileError> {
+		let zip_file = File::open(path)?;
+
+		let mut archive = zip::ZipArchive::new(&zip_file)?;
+		let file_names_archive = archive.clone();
+
+		if archive.is_empty() {
+			error!(path, "Empty zip file");
+			return Err(FileError::ArchiveEmptyError);
+		}
+
+		let mut file_names = file_names_archive.file_names().collect::<Vec<_>>();
+		sort_file_names(&mut file_names);
+
+		let mut images_seen = 0;
+		for name in file_names {
+			let file = archive.by_name(name)?;
+
+			let path_buf = file.enclosed_name().unwrap_or_else(|| {
+				tracing::warn!("Failed to get enclosed name for zip entry");
+				PathBuf::from(name)
+			});
+			let path = path_buf.as_path();
+
+			if path.is_hidden_file() {
+				tracing::trace!(path = ?path_buf, "Skipping hidden file");
+				continue;
+			}
+
+			let content_type = path.naive_content_type();
+
+			if images_seen + 1 == page && content_type.is_image() {
+				trace!(?name, page, ?content_type, "Found targeted zip entry");
+
+				let mut contents = Vec::new();
+				file.take(amount as u64).read_to_end(&mut contents)?;
+				trace!(contents_len = contents.len(), "Read zip entry");
+
+				return Ok(contents);
+			} else if content_type.is_image() {
+				images_seen += 1;
+			}
+		}
+
+		error!(page, path, "Failed to find valid image in zip file");
+
+		Err(FileError::NoImageError)
+	}
+
 	fn get_page_count(path: &str, _: &StumpConfig) -> Result<i32, FileError> {
 		let zip_file = File::open(path)?;
 

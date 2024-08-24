@@ -118,6 +118,16 @@ impl FileProcessor for PdfProcessor {
 		}
 	}
 
+	// TODO: so this is an interesting case...
+	fn get_page_bytes(
+		path: &str,
+		page: i32,
+		amount: usize,
+		_: &StumpConfig,
+	) -> Result<Vec<u8>, FileError> {
+		unimplemented!()
+	}
+
 	fn get_page_count(path: &str, config: &StumpConfig) -> Result<i32, FileError> {
 		let pdfium = PdfProcessor::renderer(&config.pdfium_path)?;
 		let document = pdfium.load_pdf_from_file(path, None)?;

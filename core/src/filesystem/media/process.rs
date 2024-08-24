@@ -69,6 +69,14 @@ pub trait FileProcessor {
 		config: &StumpConfig,
 	) -> Result<(ContentType, Vec<u8>), FileError>;
 
+	///  Get a specific amount of bytes from a page of the file.
+	fn get_page_bytes(
+		path: &str,
+		page: i32,
+		amount: usize,
+		config: &StumpConfig,
+	) -> Result<Vec<u8>, FileError>;
+
 	/// Get the number of pages in the file.
 	fn get_page_count(path: &str, config: &StumpConfig) -> Result<i32, FileError>;
 
@@ -160,6 +168,32 @@ pub fn get_page(
 		"application/epub+zip" => EpubProcessor::get_page(path, page, config),
 		"application/pdf" => PdfProcessor::get_page(path, page, config),
 		_ => Err(FileError::UnsupportedFileType(path.to_string())),
+	}
+}
+
+/// A function to extract a specific amount of bytes from a page within a supported file type.
+pub fn get_page_bytes<P: AsRef<str>>(
+	path: P,
+	page: i32,
+	amount: usize,
+	config: &StumpConfig,
+) -> Result<Vec<u8>, FileError> {
+	let mime = ContentType::from_file(path.as_ref()).mime_type();
+
+	match mime.as_str() {
+		"application/zip" | "application/vnd.comicbook+zip" => {
+			ZipProcessor::get_page_bytes(path.as_ref(), page, amount, config)
+		},
+		"application/vnd.rar" | "application/vnd.comicbook-rar" => {
+			RarProcessor::get_page_bytes(path.as_ref(), page, amount, config)
+		},
+		"application/epub+zip" => {
+			EpubProcessor::get_page_bytes(path.as_ref(), page, amount, config)
+		},
+		"application/pdf" => {
+			PdfProcessor::get_page_bytes(path.as_ref(), page, amount, config)
+		},
+		_ => Err(FileError::UnsupportedFileType(path.as_ref().to_string())),
 	}
 }
 

@@ -1,14 +1,17 @@
-use imagesize;
+use imagesize::{self, ImageSize};
 
 use crate::{
 	db::entity::page_dimension::{dimension_vec_to_string, PageDimension},
 	filesystem::{
 		analyze_media_job::{utils::fetch_media_with_dimensions, AnalyzeMediaOutput},
-		media::process::get_page,
+		media::process::{get_page, get_page_bytes},
 	},
 	job::{error::JobError, WorkerCtx},
 	prisma::{media_metadata, page_dimensions},
 };
+
+// TODO: exclude EPUB (and potentially PDF) from this task. It isn't an error, per se, but it just doesn't make
+// much sense to calculate dimensions for these types of files.
 
 /// The logic for [super::AnalyzeMediaTask::AnalyzePageDimensions].
 ///
@@ -47,20 +50,28 @@ pub(crate) async fn execute(
 	let mut image_dimensions: Vec<PageDimension> =
 		Vec::with_capacity(page_count as usize);
 	for page_num in 1..=page_count {
-		let (_content_type, page_data) =
-			get_page(&media_item.path, page_num, &ctx.config)?;
-		// Open image with imagesize crate and extract dimensions
-		let (height, width): (u32, u32) = imagesize::blob_size(&page_data[..20])
-			.map(
-				|size| match (u32::try_from(size.height), u32::try_from(size.width)) {
-					(Ok(height), Ok(width)) => Ok((height, width)),
-					_ => Err("Image dimensions too large or misread"),
-				},
-			)
+		// let (_content_type, page_data) =
+		// 	get_page(&media_item.path, page_num, &ctx.config)?;
+		// // Open image with imagesize crate and extract dimensions
+		// let (height, width): (u32, u32) = imagesize::blob_size(&page_data[..20])
+		// 	.map(
+		// 		|size| match (u32::try_from(size.height), u32::try_from(size.width)) {
+		// 			(Ok(height), Ok(width)) => Ok((height, width)),
+		// 			_ => Err("Image dimensions too large or misread"),
+		// 		},
+		// 	)
+		// 	.map_err(|e| {
+		// 		JobError::TaskFailed(format!("Error loading image data: {}", e))
+		// 	})?
+		// 	.unwrap();
+		let bytes = get_page_bytes(&media_item.path, page_num, 30, &ctx.config)?;
+		let (height, width) = imagesize::blob_size(&bytes)
+			// TODO: safe cast
+			.map(|ImageSize { height, width }| (height as u32, width as u32))
 			.map_err(|e| {
+				tracing::error!(error = ?e, "Error loading image data");
 				JobError::TaskFailed(format!("Error loading image data: {}", e))
-			})?
-			.unwrap();
+			})?;
 
 		image_dimensions.push(PageDimension { height, width });
 		output.image_dimensions_analyzed += 1;

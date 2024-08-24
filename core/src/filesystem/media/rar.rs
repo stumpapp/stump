@@ -207,6 +207,16 @@ impl FileProcessor for RarProcessor {
 		Ok((content_type, bytes))
 	}
 
+	// NOTE: unrar doesn't have a way to read a specific amount of bytes from a file...
+	fn get_page_bytes(
+		path: &str,
+		page: i32,
+		_: usize,
+		config: &StumpConfig,
+	) -> Result<Vec<u8>, FileError> {
+		Self::get_page(path, page, config).map(|(_, bytes)| bytes)
+	}
+
 	fn get_page_count(path: &str, _: &StumpConfig) -> Result<i32, FileError> {
 		let archive = RarProcessor::open_for_listing(path)?;
 

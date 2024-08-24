@@ -97,6 +97,16 @@ impl FileProcessor for EpubProcessor {
 		}
 	}
 
+	// TODO: do me (just say not supported for epub)
+	fn get_page_bytes(
+		path: &str,
+		page: i32,
+		amount: usize,
+		_: &StumpConfig,
+	) -> Result<Vec<u8>, FileError> {
+		unimplemented!()
+	}
+
 	fn get_page_count(path: &str, _: &StumpConfig) -> Result<i32, FileError> {
 		// TODO At present, this likely does not return the correct count of
 		// pages. It should be updated when a better method is determined.

@@ -13,6 +13,7 @@ for tag in ${_TAGS//,/ }; do
 done
 
 echo "Building with tag arguments: $FORMATTED_TAGS"
+echo "Current working directory: $(pwd)"
 
 set -ex; \
 ${_RUNTIME} buildx build \

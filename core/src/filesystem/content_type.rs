@@ -85,6 +85,7 @@ impl ContentType {
 			"jpeg" => ContentType::JPEG,
 			"jxl" => ContentType::JPEG_XL,
 			"webp" => ContentType::WEBP,
+			"avif" => ContentType::AVIF,
 			"gif" => ContentType::GIF,
 			"txt" => ContentType::TXT,
 			_ => temporary_content_workarounds(extension),
@@ -289,12 +290,12 @@ impl ContentType {
 			ContentType::COMIC_ZIP => "cbz",
 			ContentType::RAR => "rar",
 			ContentType::COMIC_RAR => "cbr",
-			ContentType::AVIF => "avif",
 			ContentType::HEIF => "heif",
 			ContentType::PNG => "png",
 			ContentType::JPEG => "jpg",
 			ContentType::JPEG_XL => "jxl",
 			ContentType::WEBP => "webp",
+			ContentType::AVIF => "avif",
 			ContentType::GIF => "gif",
 			ContentType::TXT => "txt",
 			ContentType::UNKNOWN => "",
@@ -318,12 +319,12 @@ impl From<&str> for ContentType {
 			"application/vnd.comicbook+zip" => ContentType::COMIC_ZIP,
 			"application/vnd.rar" => ContentType::RAR,
 			"application/vnd.comicbook-rar" => ContentType::COMIC_RAR,
-			"image/avif" => ContentType::AVIF,
 			"image/heif" => ContentType::HEIF,
 			"image/png" => ContentType::PNG,
 			"image/jpeg" => ContentType::JPEG,
 			"image/jxl" => ContentType::JPEG_XL,
 			"image/webp" => ContentType::WEBP,
+			"image/avif" => ContentType::AVIF,
 			"image/gif" => ContentType::GIF,
 			_ => ContentType::UNKNOWN,
 		}
@@ -363,6 +364,7 @@ impl From<ImageFormat> for ContentType {
 			// ImageFormat::JpegXl => ContentType::JPEG,
 			ImageFormat::Png => ContentType::PNG,
 			ImageFormat::Webp => ContentType::WEBP,
+			// ImageFormat::Avif => ContentType::AVIF,
 		}
 	}
 }
@@ -423,6 +425,7 @@ mod tests {
 		assert_eq!(ContentType::from_extension("jpg"), ContentType::JPEG);
 		assert_eq!(ContentType::from_extension("jpeg"), ContentType::JPEG);
 		assert_eq!(ContentType::from_extension("webp"), ContentType::WEBP);
+		assert_eq!(ContentType::from_extension("avif"), ContentType::AVIF);
 		assert_eq!(ContentType::from_extension("gif"), ContentType::GIF);
 		assert_eq!(ContentType::from_extension("txt"), ContentType::TXT);
 		assert_eq!(ContentType::from_extension("opf"), ContentType::XML);
@@ -445,6 +448,7 @@ mod tests {
 		assert_eq!(ContentType::from_file("test.jpg"), ContentType::JPEG);
 		assert_eq!(ContentType::from_file("test.jpeg"), ContentType::JPEG);
 		assert_eq!(ContentType::from_file("test.webp"), ContentType::WEBP);
+		assert_eq!(ContentType::from_file("test.avif"), ContentType::AVIF);
 		assert_eq!(ContentType::from_file("test.gif"), ContentType::GIF);
 		assert_eq!(ContentType::from_file("test.txt"), ContentType::TXT);
 		assert_eq!(ContentType::from_file("test.unknown"), ContentType::UNKNOWN);
@@ -506,6 +510,9 @@ mod tests {
 		let path = Path::new("test.webp");
 		assert_eq!(ContentType::from_path(path), ContentType::WEBP);
 
+		let path = Path::new("test.avif");
+		assert_eq!(ContentType::from_path(path), ContentType::AVIF);
+
 		let path = Path::new("test.gif");
 		assert_eq!(ContentType::from_path(path), ContentType::GIF);
 
@@ -545,6 +552,7 @@ mod tests {
 		assert_eq!(ContentType::PNG.mime_type(), "image/png".to_string());
 		assert_eq!(ContentType::JPEG.mime_type(), "image/jpeg".to_string());
 		assert_eq!(ContentType::WEBP.mime_type(), "image/webp".to_string());
+		assert_eq!(ContentType::AVIF.mime_type(), "image/avif".to_string());
 		assert_eq!(ContentType::GIF.mime_type(), "image/gif".to_string());
 		assert_eq!(ContentType::TXT.mime_type(), "text/plain".to_string());
 		assert_eq!(ContentType::UNKNOWN.mime_type(), "unknown".to_string());
@@ -559,6 +567,7 @@ mod tests {
 		assert!(ContentType::JPEG.is_image());
 		assert!(ContentType::JPEG_XL.is_image());
 		assert!(ContentType::WEBP.is_image());
+		assert!(ContentType::AVIF.is_image());
 		assert!(ContentType::GIF.is_image());
 		assert!(!ContentType::XHTML.is_image());
 

@@ -87,6 +87,7 @@ ASK_FOR_CONTRIB="Please consider helping to expand support for your system: http
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   UNSUPPORTED_DISTRO="Your distro '$(lsb_release -s -d)' is not supported by this script. $ASK_FOR_CONTRIB"
 
+  # Note: If running ubuntu 24, see https://github.com/bambulab/BambuStudio/issues/3973#issuecomment-2085476683
   if which apt-get &> /dev/null; then
     sudo apt-get -y update
     sudo apt-get -y install \
@@ -100,6 +101,8 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       libssl-dev \
       libgtk-3-dev \
       libayatana-appindicator3-dev \
+      javascriptcoregtk-4.0 \
+      libwebkit2gtk-4.0-dev \
       librsvg2-dev \
       libvips42
   elif which pacman &> /dev/null; then

@@ -41,7 +41,7 @@ runs:
       with:
         # Note: until some sort of local caching is implemented, we don't want to cache dependencies
         # because the network overhead is too high and eats up lots of time
-        cache-dependencies: ${{ runner.name != 'oromei-ubuntu' }}
+        cache-dependencies: ${{ runner.environment != 'self-hosted' }}
 
     # We only need QEMU when an arm* platform is targeted
     - name: Check QEMU requirement

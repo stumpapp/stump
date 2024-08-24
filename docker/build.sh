@@ -3,7 +3,6 @@
 _RUNTIME=${RUNTIME:-docker}
 _FORMAT=${FORMAT:-auto}
 _PLATFORMS=${PLATFORMS:-linux/amd64}
-# _TAG=${TAG:-nightly}
 _TAGS=${TAGS:-"aaronleopold/stump:nightly"}
 _RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE:=false}
 _GIT_REV=${GIT_REV:-$(git rev-parse --short HEAD)}

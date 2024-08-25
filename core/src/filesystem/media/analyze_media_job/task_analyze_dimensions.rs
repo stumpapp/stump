@@ -1,10 +1,8 @@
-use imagesize::{self, ImageSize};
-
 use crate::{
 	db::entity::page_dimension::{dimension_vec_to_string, PageDimension},
 	filesystem::{
 		analyze_media_job::{utils::fetch_media_with_dimensions, AnalyzeMediaOutput},
-		media::process::{get_page, get_page_bytes},
+		media::process::get_page_dimensions,
 	},
 	job::{error::JobError, WorkerCtx},
 	prisma::{media_metadata, page_dimensions},
@@ -64,15 +62,8 @@ pub(crate) async fn execute(
 		// 		JobError::TaskFailed(format!("Error loading image data: {}", e))
 		// 	})?
 		// 	.unwrap();
-		let bytes = get_page_bytes(&media_item.path, page_num, 30, &ctx.config)?;
-		let (height, width) = imagesize::blob_size(&bytes)
-			// TODO: safe cast
-			.map(|ImageSize { height, width }| (height as u32, width as u32))
-			.map_err(|e| {
-				tracing::error!(error = ?e, "Error loading image data");
-				JobError::TaskFailed(format!("Error loading image data: {}", e))
-			})?;
-
+		let (height, width) =
+			get_page_dimensions(&media_item.path, page_num, &ctx.config)?;
 		image_dimensions.push(PageDimension { height, width });
 		output.image_dimensions_analyzed += 1;
 	}

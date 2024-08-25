@@ -46,6 +46,8 @@ pub enum FileError {
 	UnsupportedFileType(String),
 	#[error("{0}")]
 	ImageIoError(#[from] image::ImageError),
+	#[error("Error reading image header: {0}")]
+	ImageDimensionsError(#[from] imagesize::ImageError),
 	#[error("Failed to encode image to webp: {0}")]
 	WebpEncodeError(String),
 	#[error("An unknown error occurred: {0}")]

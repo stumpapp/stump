@@ -5,12 +5,16 @@ use std::{
 	path::{Path, PathBuf},
 };
 
+use imagesize::ImageSize;
 use serde::{Deserialize, Serialize};
 use tracing::debug;
 
 use crate::{
 	config::StumpConfig,
-	db::entity::{LibraryOptions, MediaMetadata, SeriesMetadata},
+	db::{
+		self,
+		entity::{LibraryOptions, MediaMetadata, SeriesMetadata},
+	},
 	filesystem::{
 		content_type::ContentType, epub::EpubProcessor, error::FileError,
 		image::ImageFormat, pdf::PdfProcessor,
@@ -171,16 +175,15 @@ pub fn get_page(
 	}
 }
 
-/// A function to extract a specific amount of bytes from a page within a supported file type.
-pub fn get_page_bytes<P: AsRef<str>>(
+pub fn get_page_dimensions<P: AsRef<str>>(
 	path: P,
 	page: i32,
-	amount: usize,
 	config: &StumpConfig,
-) -> Result<Vec<u8>, FileError> {
+) -> Result<(u32, u32), FileError> {
 	let mime = ContentType::from_file(path.as_ref()).mime_type();
+	let amount = 200;
 
-	match mime.as_str() {
+	let bytes = match mime.as_str() {
 		"application/zip" | "application/vnd.comicbook+zip" => {
 			ZipProcessor::get_page_bytes(path.as_ref(), page, amount, config)
 		},
@@ -194,7 +197,13 @@ pub fn get_page_bytes<P: AsRef<str>>(
 			PdfProcessor::get_page_bytes(path.as_ref(), page, amount, config)
 		},
 		_ => Err(FileError::UnsupportedFileType(path.as_ref().to_string())),
-	}
+	}?;
+
+	let (height, width) = imagesize::blob_size(&bytes)
+		// TODO: safe cast
+		.map(|ImageSize { height, width }| (height as u32, width as u32))?;
+
+	Ok((height, width))
 }
 
 pub fn get_page_count(path: &str, config: &StumpConfig) -> Result<i32, FileError> {
@@ -228,5 +237,31 @@ pub fn get_content_types_for_pages(
 		},
 		"application/epub+zip" => EpubProcessor::get_page_content_types(path, pages),
 		_ => Err(FileError::UnsupportedFileType(path.to_string())),
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use crate::filesystem::media::tests::get_test_cbz_path;
+
+	use super::*;
+
+	#[test]
+	fn test_get_page_dimensions() {
+		// let cbz = get_test_cbz_path();
+		// let (height, width) = get_page_dimensions(cbz, 1, &StumpConfig::debug()).unwrap();
+		// assert_eq!(height, 726);
+		// assert_eq!(width, 480);
+
+		let avif = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+			.join("integration-tests/data/example.avif")
+			.to_string_lossy()
+			.to_string();
+		let bytes = std::fs::read(avif).unwrap();
+		let truncated = &bytes[..30]; // failed to fill whole buffer unless 200+
+		let (height, width) = imagesize::blob_size(truncated)
+			.map(|ImageSize { height, width }| (height as u32, width as u32))
+			.unwrap();
+		dbg!(height, width);
 	}
 }

@@ -10,42 +10,42 @@
 		"claimText": "This Stump server is not intialized. Use the form below to create your account. Once created, you will have full access to all server features.",
 		"form": {
 			"validation": {
-				"missingUsername": "Username is required",
-				"missingPassword": "Password is required"
+				"missingUsername": "Användarnamn krävs",
+				"missingPassword": "Lösenord krävs"
 			},
 			"labels": {
-				"username": "Username",
-				"password": "Password"
+				"username": "Användarnamn",
+				"password": "Lösenord"
 			},
 			"buttons": {
-				"createAccount": "Create Account",
-				"login": "Log in"
+				"createAccount": "Skapa Konto",
+				"login": "Logga In"
 			}
 		},
 		"toasts": {
-			"loggingIn": "Logging in...",
-			"loggedIn": "Welcome back!",
-			"loggedInFirstTime": "Welcome!",
-			"registering": "Registering...",
-			"registered": "Registered!",
-			"loginFailed": "Login failed. Please try again",
-			"registrationFailed": "Registration failed. Please try again"
+			"loggingIn": "Loggar In...",
+			"loggedIn": "Välkommen tillbaka!",
+			"loggedInFirstTime": "Välkommen!",
+			"registering": "Registrerar...",
+			"registered": "Registrerad!",
+			"loginFailed": "Det gick inte att logga in. Försök igen",
+			"registrationFailed": "Det gick inte att registrera. Försök igen"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "Library Configuration",
-			"subtitleCreating": "A preview of your new library will be shown below",
-			"subtitleEditing": "A preview of your library edits will be shown below"
+			"heading": "Bibliotek Konfigurering",
+			"subtitleCreating": "En förhandsvisning av ditt nya bibliotek visas nedan",
+			"subtitleEditing": "En förhandsvisning av dina biblioteksändringar visas nedan"
 		}
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "File Information",
+			"heading": "Fil Information",
 			"labels": {
-				"fileSize": "File Size",
-				"fileType": "File Type",
-				"fileLocation": "File Location",
+				"fileSize": "Filstorlek",
+				"fileType": "Filtyp",
+				"fileLocation": "Filsökväg",
 				"fileChecksum": "Checksum"
 			}
 		},
@@ -54,30 +54,30 @@
 			"description": "Send this book to device or email address",
 			"form": {
 				"email": {
-					"label": "Email",
-					"placeholder": "Email address",
+					"label": "E-post",
+					"placeholder": "E-post adress",
 					"description": "An email address to send the book to. Click add to finalize each input"
 				},
 				"devices": {
-					"label": "Devices",
-					"placeholder": "Select devices",
-					"noFilterMatch": "No devices match the filter"
+					"label": "Enheter",
+					"placeholder": "Välj enheter",
+					"noFilterMatch": "Inga enheter matchar filtreringen"
 				}
 			}
 		},
-		"nextInSeries": "Next in Series"
+		"nextInSeries": "Nästa i Serien"
 	},
 	"createBookClubScene": {
-		"heading": "Create a new book club",
-		"subtitle": "You can create a private book club a select few, or make it public for anyone on the server to join",
+		"heading": "Skapa en ny bokklubb",
+		"subtitle": "Du kan skapa en privat bokklubb för några få personer, eller göra den offentlig så vem som helst kan gå med",
 		"form": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My book club",
-				"description": "The name of your book club"
+				"label": "Namn",
+				"placeholder": "Min bokklubb",
+				"description": "Namnet på sin bokklubb"
 			},
 			"description": {
-				"label": "Description",
+				"label": "Beskrivning",
 				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
 				"description": "An optional, short description of your book club"
 			},

@@ -325,62 +325,62 @@
 		"app/account": {
 			"helmet": "Nastavení účtu",
 			"title": "Nastavení účtu",
-			"description": "Settings related to your account",
+			"description": "Nastavení související s vaším účtem",
 			"sections": {
 				"account": {
 					"validation": {
-						"invalidUrl": "Please enter a valid URL",
-						"missingUsername": "Username is required"
+						"invalidUrl": "Zadejte platnou adresu URL",
+						"missingUsername": "Uživatelské jméno je vyžadováno"
 					},
 					"labels": {
-						"username": "Username",
-						"password": "Password",
-						"activeChangesPrompt": "You have unsaved changes"
+						"username": "Uživatelské jméno",
+						"password": "Heslo",
+						"activeChangesPrompt": "Máte neuložené změny"
 					},
 					"errors": {
-						"updateFailed": "A server error occurred while updating your profile. Please try again."
+						"updateFailed": "Při aktualizaci profilu došlo k chybě. Zkuste to prosím znovu."
 					},
 					"avatarPicker": {
-						"heading": "Set your Avatar Image",
-						"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
-						"preview": "A preview will appear here once you have entered a URL.",
+						"heading": "Nastavte obrázek avataru",
+						"subtitle": "Stump podporuje vlastní avatary, které lze nastavit zadáním adresy URL obrázku. Nahrávání obrázků není podporováno, aby se snížilo množství dat uložených na serveru.",
+						"preview": "Náhled se zobrazí zde, jakmile zadáte adresu URL.",
 						"labels": {
-							"imageUrl": "Image URL",
-							"customAvatar": "Custom Avatar"
+							"imageUrl": "URL obrázku",
+							"customAvatar": "Vlastní avatar"
 						},
 						"buttons": {
-							"confirm": "Confirm Image",
-							"cancel": "Cancel",
-							"edit": "Edit",
-							"changeImage": "Change Image",
-							"removeImage": "Remove Image"
+							"confirm": "Potvrdit obrázek",
+							"cancel": "Zrušit",
+							"edit": "Upravit",
+							"changeImage": "Změnit obrázek",
+							"removeImage": "Odstranit obrázek"
 						}
 					},
 					"buttons": {
-						"confirm": "Save Changes"
+						"confirm": "Uložit změny"
 					}
 				},
 				"locale": {
 					"localeSelector": {
-						"label": "Language"
+						"label": "Jazyk"
 					},
-					"heading": "Language and locale",
+					"heading": "Jazyk a lokalizace",
 					"subtitle": [
-						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-						"Stump's translations",
-						"if you're able to!"
+						"Stump podporuje více jazyků a místních jazykových mutací, nastavte si je níže. Prosím, zvažte pomoc při zlepšování kvality",
+						"Přeložte Stump",
+						"pokud můžete!"
 					]
 				}
 			}
 		},
 		"app/appearance": {
-			"helmet": "Appearance",
-			"title": "Appearance",
-			"description": "Customize the look and feel of the application",
+			"helmet": "Vzhled",
+			"title": "Vzhled",
+			"description": "Přizpůsobte si vzhled aplikace",
 			"sections": {
 				"themeSelect": {
-					"label": "Theme",
-					"description": "By default, Stump has a light and dark theme",
+					"label": "Motiv",
+					"description": "Ve výchozím nastavení má Stump světlý a tmavý motiv",
 					"customTheme": [
 						"If you're interested in creating your own custom theme, check out the",
 						"documentation"

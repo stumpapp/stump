@@ -41,7 +41,7 @@ jobs:
     needs: code-changes-check
     if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.changes != '[]'"
     name: Build docker image
-    runs-on: [self-hosted-small]
+    runs-on: [self-hosted]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -65,10 +65,7 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
           tags: 'nightly'
-          # load: ${{ env.LOAD }}
-          # push: ${{ env.PUSH }}
-          # platforms: ${{ env.PLATFORMS }}
-          load: true
-          push: false
-          platforms: "linux/amd64,linux/arm64/v8"
+          load: ${{ env.LOAD }}
+          push: ${{ env.PUSH }}
+          platforms: ${{ env.PLATFORMS }}
           discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}

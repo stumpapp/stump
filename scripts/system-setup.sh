@@ -102,7 +102,6 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       libgtk-3-dev \
       libayatana-appindicator3-dev \
       javascriptcoregtk-4.0 \
-      libwebkit2gtk-4.0-dev \
       librsvg2-dev \
       libvips42
   elif which pacman &> /dev/null; then

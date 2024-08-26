@@ -39,6 +39,7 @@ export type ComboBoxProps = {
 	descriptionPosition?: 'top' | 'bottom'
 	options: ComboBoxOption[]
 	size?: keyof typeof SIZE_VARIANTS | null
+	onAddOption?: (option: ComboBoxOption) => void
 	/** Classes applied to the trigger button for the combobox */
 	triggerClassName?: string
 	triggerRef?: React.RefObject<HTMLButtonElement>
@@ -76,6 +77,7 @@ export function ComboBox({
 	options,
 	value,
 	onChange,
+	onAddOption,
 	size = 'default',
 	triggerClassName,
 	triggerRef: triggerRefProps,
@@ -87,7 +89,9 @@ export function ComboBox({
 	filterEmptyMessage = 'No results found',
 }: ComboBoxProps) {
 	const triggerRef = useRef<HTMLButtonElement | null>(null)
+
 	const [open, setOpen] = useState(false)
+	const [filter, setFilter] = useState('')
 
 	const handleChange = (selected: string) => {
 		if (isMultiSelect) {
@@ -120,6 +124,27 @@ export function ComboBox({
 			)
 		} else {
 			return options.find((option) => option.value === value)?.label || placeholder
+		}
+	}
+
+	const renderEmptyState = () => {
+		if (onAddOption && filter) {
+			return (
+				<div className="overflow-hidden px-4">
+					<Button
+						className="h-[unset] shrink-0 text-ellipsis text-wrap break-all text-brand"
+						onClick={() => {
+							onAddOption({ label: filter, value: filter.toLowerCase() })
+							handleChange(filter.toLowerCase())
+							setFilter('')
+						}}
+					>
+						Add &quot;{filter}&quot;
+					</Button>
+				</div>
+			)
+		} else {
+			return filterEmptyMessage
 		}
 	}
 
@@ -179,8 +204,12 @@ export function ComboBox({
 					<Command>
 						{filterable && (
 							<>
-								<Command.Input placeholder={filterPlaceholder} />
-								<Command.Empty>{filterEmptyMessage}</Command.Empty>
+								<Command.Input
+									placeholder={filterPlaceholder}
+									value={filter}
+									onValueChange={setFilter}
+								/>
+								<Command.Empty>{renderEmptyState()}</Command.Empty>
 							</>
 						)}
 						<Command.Group>
@@ -190,6 +219,7 @@ export function ComboBox({
 								return (
 									<Command.Item
 										key={option.value}
+										// Note: For some reason, this transforms the `value` to lowercase...
 										onSelect={handleChange}
 										className={cn('transition-all duration-75', { 'text-brand': isSelected })}
 										value={option.value}

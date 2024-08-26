@@ -128,6 +128,7 @@ impl ImageProcessorOptions {
 		}
 	}
 
+	/// Validate the image processor options to ensure that they are valid.
 	pub fn validate(&self) -> Result<(), ProcessorError> {
 		if let Some(quality) = self.quality {
 			if !(0.0..=100.0).contains(&quality) {
@@ -159,6 +160,12 @@ impl ImageProcessorOptions {
 		}
 
 		Ok(())
+	}
+
+	/// Convert the image processor options into a byte array for storage.
+	pub fn as_bytes(&self) -> Result<Vec<u8>, ProcessorError> {
+		serde_json::to_vec(self)
+			.map_err(|err| ProcessorError::InvalidConfiguration(err.to_string()))
 	}
 }
 

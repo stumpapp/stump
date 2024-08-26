@@ -1,15 +1,25 @@
 import { Heading, IconButton, Input, Text, TextArea } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Folder } from 'lucide-react'
 import React, { useMemo } from 'react'
 import { useFormContext } from 'react-hook-form'
 
-import { Schema } from '../CreateOrUpdateLibraryForm'
+import TagSelect from '@/components/TagSelect'
+
+import { CreateOrUpdateLibrarySchema } from '../schema'
+
+const LOCALE_KEY = 'createOrUpdateLibraryForm'
+const getKey = (key: string) => `${LOCALE_KEY}.fields.${key}`
 
 type Props = {
 	onSetShowDirectoryPicker: (value: boolean) => void
 }
+
 export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Props) {
-	const form = useFormContext<Schema>()
+	const { t } = useLocaleContext()
+
+	const form = useFormContext<CreateOrUpdateLibrarySchema>()
+	const tags = form.watch('tags')
 
 	const errors = useMemo(() => {
 		return form.formState.errors
@@ -25,8 +35,9 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 			</div>
 			<Input
 				variant="primary"
-				label="Name"
-				placeholder="My library"
+				label={t(getKey('name.label'))}
+				description={t(getKey('name.description'))}
+				placeholder={t(getKey('name.placeholder'))}
 				containerClassName="max-w-full md:max-w-sm"
 				required
 				errorMessage={errors.name?.message}
@@ -35,8 +46,9 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 			/>
 			<Input
 				variant="primary"
-				label="Path"
-				placeholder="/path/to/library"
+				label={t(getKey('path.label'))}
+				description={t(getKey('path.description'))}
+				placeholder={t(getKey('path.placeholder'))}
 				containerClassName="max-w-full md:max-w-sm"
 				rightDecoration={
 					<IconButton
@@ -53,18 +65,19 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 				{...form.register('path')}
 			/>
 
-			{/* <TagSelect
-		isLoading={isLoadingTags}
-		options={tags.map((tag) => ({ label: tag.name, value: tag.name }))}
-		defaultValue={library?.tags?.map((tag) => ({ label: tag.name, value: tag.name }))}
-		onCreateTag={handleCreateTag}
-	/> */}
+			<TagSelect
+				label={t(getKey('tags.label'))}
+				description={t(getKey('tags.description'))}
+				selected={tags}
+				onChange={(value) => form.setValue('tags', value)}
+			/>
 
 			<TextArea
 				className="flex"
 				variant="primary"
-				label="Description"
-				placeholder="A short description of your library (optional)"
+				label={t(getKey('description.label'))}
+				description={t(getKey('description.description'))}
+				placeholder={t(getKey('description.placeholder'))}
 				containerClassName="max-w-full md:max-w-sm"
 				{...form.register('description')}
 			/>

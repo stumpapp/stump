@@ -60,7 +60,7 @@ export default function SmartListSideBarSection({
 							{t('sidebar.buttons.seeAll')}
 						</SideBarButtonLink>
 					)}
-					<div className="-secondary ml-2 border-l border-l-edge pl-1">{renderLists()}</div>
+					<div className="ml-2 space-y-1 border-l border-l-edge pl-1">{renderLists()}</div>
 					{showCreate && (
 						<SideBarButtonLink
 							to={paths.smartListCreate()}

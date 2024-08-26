@@ -48,75 +48,6 @@ export default function CreateOrEditLibraryForm({
 
 	const isCreatingLibrary = !library
 
-	// const { tags } = useTags()
-
-	// const { editLibraryAsync } = useEditLibraryMutation({
-	// 	onSuccess: async () => {
-	// 		await invalidateQueries({ exact: false, keys: [libraryQueryKeys.getLibraryById] })
-	// 		navigate(paths.home())
-	// 	},
-	// })
-
-	// const handleUpdateLibrary = async (values: Schema) => {
-	// 	if (!library) {
-	// 		return
-	// 	}
-
-	// 	const { name, path, description, tags: formTags, scan_mode, ignore_rules, ...rest } = values
-
-	// 	const library_options = {
-	// 		...library.library_options,
-	// 		...rest,
-	// 		ignore_rules: ignore_rules.map((rule) => rule.glob),
-	// 		thumbnail_config: {
-	// 			...(library.library_options.thumbnail_config || {}),
-	// 			...rest.thumbnail_config,
-	// 		},
-	// 	} as LibraryOptions
-
-	// 	const existingTags = tags.filter((tag) => formTags?.some((t) => t.value === tag.name))
-
-	// 	// const tagsToCreate = formTags
-	// 	// 	?.map((tag) => tag.value)
-	// 	// 	.filter((tagName: string) => !existingTags.some((t) => t.name === tagName))
-
-	// 	// let removedTags = getRemovedTags(formTags)
-
-	// 	// if (!removedTags?.length) {
-	// 	// 	removedTags = null
-	// 	// }
-
-	// 	// if (tagsToCreate.length) {
-	// 	// 	const res = await tryCreateTags(tagsToCreate)
-
-	// 	// 	if (res.status > 201) {
-	// 	// 		toast.error('Something went wrong when creating the tags.')
-	// 	// 		return
-	// 	// 	}
-
-	// 	// 	existingTags = existingTags.concat(res.data)
-	// 	// }
-
-	// 	toast.promise(
-	// 		editLibraryAsync({
-	// 			...library,
-	// 			description,
-	// 			library_options,
-	// 			name,
-	// 			path,
-	// 			// removed_tags: removedTags,
-	// 			removed_tags: [],
-	// 			scan_mode,
-	// 			tags: existingTags,
-	// 		}),
-	// 		{
-	// 			error: 'Something went wrong.',
-	// 			loading: 'Updating library...',
-	// 			success: 'Updates saved!',
-	// 		},
-	// 	)
-	// }
-
 	const [formPath] = form.watch(['path'])
 
 	return (
@@ -138,7 +69,7 @@ export default function CreateOrEditLibraryForm({
 					{isCreatingLibrary && <LibraryPatternSection />}
 					<FileConversionOptions />
 					<ThumbnailConfig />
-					<IgnoreRulesConfig />
+					<IgnoreRulesConfig isCreatingLibrary={isCreatingLibrary} />
 					<ScanMode isCreatingLibrary={isCreatingLibrary} />
 
 					<div className="mt-6 flex w-full md:max-w-sm">

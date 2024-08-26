@@ -37,7 +37,7 @@ export default function CreateLibraryScene() {
 				name,
 				path,
 				scan_mode,
-				tags: tags?.map(({ value }) => value) || ['Demo', 'Action'],
+				tags: tags?.map(({ value }) => value),
 			}
 
 			createLibrary(payload)

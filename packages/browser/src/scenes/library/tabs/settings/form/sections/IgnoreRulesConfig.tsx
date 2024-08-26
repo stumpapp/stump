@@ -1,24 +1,50 @@
-import { Button, Card, CheckBox, cn, Heading, IconButton, Input, Text } from '@stump/components'
+import {
+	Button,
+	Card,
+	CheckBox,
+	cn,
+	Heading,
+	IconButton,
+	Input,
+	Text,
+	ToolTip,
+} from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import isValidGlob from 'is-valid-glob'
-import { Check, Edit, Trash, X } from 'lucide-react'
+import { Check, Edit, Lock, Trash, Unlock, X } from 'lucide-react'
 import React, { useCallback, useState } from 'react'
-import { useFieldArray, useFormContext, useFormState } from 'react-hook-form'
+import { useFieldArray, useFormContext } from 'react-hook-form'
 
-import { Schema } from '../CreateOrUpdateLibraryForm'
+import { CreateOrUpdateLibrarySchema } from '../schema'
 
-export default function IgnoreRulesConfig() {
-	const form = useFormContext<Schema>()
+const LOCALE_KEY = 'createOrUpdateLibraryForm'
+const getKey = (key: string) => `${LOCALE_KEY}.fields.ignoreRules.${key}`
+
+type Props = {
+	isCreatingLibrary: boolean
+}
+
+export default function IgnoreRulesConfig({ isCreatingLibrary }: Props) {
+	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 	const {
 		fields: ignoreRules,
 		append,
-		update,
 		remove,
 	} = useFieldArray({ control: form.control, name: 'ignore_rules' })
-	const { errors: formErrors } = useFormState({ control: form.control })
+	const { t } = useLocaleContext()
 
-	console.log({ formErrors })
-
+	/**
+	 * A state to track whether the ignore rules are currently being edited. By default, we set this
+	 * to true if the library is being created
+	 */
+	const [isEditing, setIsEditing] = useState(() => isCreatingLibrary)
+	/**
+	 * A local state to track the value of the new ignore rule being added, if any
+	 */
 	const [newRule, setNewRule] = useState('')
+	/**
+	 * An error message to display if the new ignore rule is invalid (i.e. not a valid glob pattern)
+	 */
 	const [newRuleError, setNewRuleError] = useState<string>()
 
 	/**
@@ -26,7 +52,7 @@ export default function IgnoreRulesConfig() {
 	 */
 	const handleAddRule = useCallback(() => {
 		if (!isValidGlob(newRule)) {
-			setNewRuleError('Invalid glob pattern')
+			setNewRuleError(t(getKey('invalidGlob')))
 			return
 		} else {
 			setNewRuleError(undefined)
@@ -37,246 +63,225 @@ export default function IgnoreRulesConfig() {
 			})
 			setNewRule('')
 		}
-	}, [newRule, append])
+	}, [newRule, append, t])
 
-	// TODO: determine if I really need these for editing actions... If not, remove from schema
+	/**
+	 * A function to render the lock/unlock button, which disables/enables editing of ignore rules
+	 */
+	const renderLockedButton = () => {
+		const Icon = isEditing ? Unlock : Lock
+		const help = isEditing ? t(getKey('lockConfig.lock')) : t(getKey('lockConfig.unlock'))
 
-	const handleIgnoreParentsChange = useCallback(
-		(index: number, ignore: boolean) => {
-			if (ignoreRules[index]?.glob) {
-				let glob = ignoreRules[index].glob as string
-
-				if (ignore) {
-					glob = glob.startsWith('**/') ? glob.slice(3) : glob
-				} else {
-					glob = glob.startsWith('**/') ? glob : `**/${glob}`
-				}
-
-				update(index, {
-					...ignoreRules[index],
-					glob,
-					ignore_parents: glob.startsWith('**/'),
-				})
-			}
-		},
-		[ignoreRules, update],
-	)
-
-	const handleIgnoreSubDirsChange = useCallback(
-		(index: number, ignore: boolean) => {
-			if (ignoreRules[index]) {
-				let glob = ignoreRules[index].glob as string
-
-				if (ignore) {
-					glob = glob.endsWith('/**') ? glob.slice(0, -3) : glob
-				} else {
-					glob = glob.endsWith('/**') ? glob : `${glob}/**`
-				}
-
-				update(index, {
-					...ignoreRules[index],
-					glob,
-					ignore_subdirs: glob.endsWith('/**'),
-				})
-			}
-		},
-		[ignoreRules, update],
-	)
+		return (
+			<ToolTip content={help} align="end" size="sm">
+				<IconButton
+					aria-label={help}
+					onClick={() => setIsEditing(!isEditing)}
+					variant="ghost"
+					size="sm"
+				>
+					<Icon className="h-4 w-4 text-foreground-muted" />
+				</IconButton>
+			</ToolTip>
+		)
+	}
 
 	return (
-		<div className="flex flex-grow flex-col gap-6">
-			<div>
-				<Heading size="sm">Ignore rules</Heading>
-				<Text size="sm" variant="muted">
-					Define glob patterns to ignore certain files or directories during a scan
-				</Text>
+		<div className="flex max-w-2xl flex-grow flex-col gap-6">
+			<div className="flex items-center justify-between">
+				<div>
+					<Heading size="sm">{t(getKey('section.heading'))}</Heading>
+					<Text size="sm" variant="muted">
+						{t(getKey('section.description'))}
+					</Text>
+				</div>
+
+				{isCreatingLibrary && renderLockedButton()}
 			</div>
 
 			{!ignoreRules.length && (
-				<Text size="sm" variant="muted">
-					No ignore rules have been configured
-				</Text>
+				<div className="flex">
+					<Card className="border-dashed p-2">
+						<Text size="sm" variant="muted">
+							{t(getKey('noRules'))}
+						</Text>
+					</Card>
+				</div>
 			)}
 
 			{!!ignoreRules.length && (
-				<div className="flex flex-col gap-4">
+				<Card className="flex flex-col">
 					{ignoreRules.map((ignoreRule, index) => (
 						<ConfiguredIgnoreRule
 							key={`ignore_rule_${ignoreRule.id}`}
 							id={ignoreRule.id}
 							index={index}
 							ignoreRule={ignoreRule}
-							onToggleIgnoreParents={() =>
-								handleIgnoreParentsChange(index, !ignoreRule.ignore_parents)
-							}
-							onToggleIgnoreSubDirs={() =>
-								handleIgnoreSubDirsChange(index, !ignoreRule.ignore_subdirs)
-							}
+							isReadOnly={!isEditing}
 							onRemove={() => remove(index)}
 						/>
 					))}
-				</div>
+				</Card>
 			)}
 
-			<div className="flex flex-col space-y-4">
-				<div className="flex items-center space-x-4">
-					<Input
-						label="New rule"
-						value={newRule}
-						onChange={(e) => setNewRule(e.target.value)}
-						placeholder="**/ignore-me/**"
-						description="Glob pattern to ignore files or directories"
-						errorMessage={newRuleError}
-						variant="primary"
-					/>
+			{isEditing && (
+				<div className="flex flex-col space-y-4">
+					<div className="flex items-center space-x-4">
+						<Input
+							className="font-mono"
+							label={t(getKey('addRule.label'))}
+							value={newRule}
+							onChange={(e) => setNewRule(e.target.value)}
+							placeholder="**/ignore-me/**"
+							description={t(getKey('addRule.description'))}
+							errorMessage={newRuleError}
+							variant="primary"
+						/>
 
-					<Button type="button" disabled={!newRule} onClick={handleAddRule}>
-						Add rule
-					</Button>
-				</div>
+						<Button type="button" disabled={!newRule} onClick={handleAddRule}>
+							{t(getKey('addRule.addButton'))}
+						</Button>
+					</div>
 
-				<div className="flex items-center space-x-4">
-					<CheckBox
-						label="Ignore parents"
-						title="Ignore all parent directories"
-						checked={newRule.startsWith('**/')}
-						onClick={() =>
-							setNewRule(newRule.startsWith('**/') ? newRule.slice(3) : `**/${newRule}`)
-						}
-						variant="primary"
-					/>
-					<CheckBox
-						label="Ignore subdirectories"
-						title="Ignore all subdirectories"
-						checked={newRule.endsWith('/**')}
-						onClick={() =>
-							setNewRule(newRule.endsWith('/**') ? newRule.slice(0, -3) : `${newRule}/**`)
-						}
-						variant="primary"
-					/>
+					<div className="flex items-center space-x-4">
+						<CheckBox
+							label={t(getKey('addRule.ignoreParents.label'))}
+							title={t(getKey('addRule.ignoreParents.title'))}
+							checked={newRule.startsWith('**/')}
+							onClick={() =>
+								setNewRule(newRule.startsWith('**/') ? newRule.slice(3) : `**/${newRule}`)
+							}
+							variant="primary"
+						/>
+						<CheckBox
+							label={t(getKey('addRule.ignoreSubdirs.label'))}
+							title={t(getKey('addRule.ignoreSubdirs.title'))}
+							checked={newRule.endsWith('/**')}
+							onClick={() =>
+								setNewRule(newRule.endsWith('/**') ? newRule.slice(0, -3) : `${newRule}/**`)
+							}
+							variant="primary"
+						/>
+					</div>
 				</div>
-			</div>
+			)}
 		</div>
 	)
 }
 
-// TODO: write translation base
-// const LOCALE_KEY = 'library_settings.ignore_rules'
-
 type ConfiguredIgnoreRuleProps = {
 	index: number
 	id: string
-	ignoreRule: Schema['ignore_rules'][number]
-	onToggleIgnoreParents: () => void
-	onToggleIgnoreSubDirs: () => void
+	ignoreRule: CreateOrUpdateLibrarySchema['ignore_rules'][number]
+	isReadOnly?: boolean
 	onRemove: () => void
 }
 
 const ConfiguredIgnoreRule = ({
 	ignoreRule,
 	id,
-	onToggleIgnoreParents,
-	onToggleIgnoreSubDirs,
+	isReadOnly,
 	onRemove,
 	index,
 }: ConfiguredIgnoreRuleProps) => {
-	const form = useFormContext<Schema>()
+	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 
 	const [isEditing, setIsEditing] = useState(false)
-
 	const [originalIgnoreRule] = useState(() => ignoreRule)
+
+	const { t } = useLocaleContext()
 
 	const handleCancelEdit = useCallback(() => {
 		form.setValue(`ignore_rules.${index}`, originalIgnoreRule)
 		setIsEditing(false)
 	}, [form, index, originalIgnoreRule])
 
+	const handleChangeIsEditing = useCallback(
+		(value: boolean) => {
+			if (!isReadOnly) {
+				setIsEditing(value)
+			}
+		},
+		[isReadOnly],
+	)
+
+	const handleRemove = useCallback(() => {
+		if (!isReadOnly) {
+			onRemove()
+		}
+	}, [isReadOnly, onRemove])
+
 	const renderGlob = useCallback(() => {
 		if (isEditing)
 			return (
 				<Input
 					key={id}
-					className="mt-2"
+					className="font-mono"
 					placeholder="**/ignore-me/**"
 					variant="primary"
 					{...form.register(`ignore_rules.${index}.glob`)}
 				/>
 			)
 		else {
-			return <pre className="text-sm">{ignoreRule.glob}</pre>
+			return <pre className="px-3 py-2 text-sm">{ignoreRule.glob}</pre>
 		}
 	}, [form, ignoreRule, id, index, isEditing])
 
 	const renderActions = () => {
-		if (!isEditing) {
+		if (isReadOnly) {
+			return null
+		} else if (!isEditing) {
 			return (
 				<>
-					<IconButton size="xs" onClick={() => setIsEditing(!isEditing)} type="button">
-						<Edit className="h-4 w-4" />
-					</IconButton>
+					<ToolTip content={t(getKey('editRule'))} align="end" size="sm">
+						<IconButton size="xs" onClick={() => handleChangeIsEditing(!isEditing)} type="button">
+							<Edit className="h-4 w-4" />
+						</IconButton>
+					</ToolTip>
 
-					<IconButton size="xs" onClick={onRemove} type="button">
-						<Trash className="h-4 w-4" />
-					</IconButton>
+					<ToolTip content={t(getKey('deleteRule'))} align="end" size="sm">
+						<IconButton size="xs" onClick={handleRemove} type="button">
+							<Trash className="h-4 w-4" />
+						</IconButton>
+					</ToolTip>
 				</>
 			)
 		} else {
 			return (
 				<>
-					<IconButton size="xs" onClick={handleCancelEdit} type="button">
-						<X className="h-4 w-4" />
-					</IconButton>
+					<ToolTip content={t(getKey('cancelEdit'))} align="end" size="sm">
+						<IconButton size="xs" onClick={handleCancelEdit} type="button">
+							<X className="h-4 w-4" />
+						</IconButton>
+					</ToolTip>
 
-					<IconButton size="xs" onClick={() => setIsEditing(false)} type="button">
-						<Check className="h-4 w-4" />
-					</IconButton>
+					<ToolTip content={t(getKey('confirmEdit'))} align="end" size="sm">
+						<IconButton size="xs" onClick={() => handleChangeIsEditing(false)} type="button">
+							<Check className="h-4 w-4" />
+						</IconButton>
+					</ToolTip>
 				</>
 			)
 		}
 	}
 
 	return (
-		<Card className="group flex flex-col space-y-4 px-3 py-1">
+		<div className="group flex flex-col space-y-4 px-3 py-1 even:bg-background-surface/50">
 			<div
 				className={cn('flex items-center justify-between', {
-					'items-start': isEditing,
+					'items-center': isEditing,
 				})}
 			>
 				{renderGlob()}
 
 				<div
-					className={cn(
-						'transition-opacity-[opacity_0.3s] flex items-center space-x-2 opacity-0 group-hover:opacity-100',
-						{
-							'mt-2': isEditing,
-						},
-					)}
+					className={cn('transition-opacity-[opacity_0.3s] flex items-center space-x-2', {
+						'opacity-0 group-hover:opacity-100': !isEditing,
+					})}
 				>
 					{renderActions()}
 				</div>
 			</div>
-
-			<div
-				className={cn('hidden items-center space-x-4 pb-1 opacity-0 transition-[height_0.3s]', {
-					'flex opacity-100': isEditing,
-				})}
-			>
-				{/* FIXME: these don't work while editing... */}
-				<CheckBox
-					label="Ignore parents"
-					title="Ignore all parent directories"
-					checked={ignoreRule.ignore_parents}
-					onClick={onToggleIgnoreParents}
-					variant="primary"
-				/>
-				<CheckBox
-					label="Ignore subdirectories"
-					title="Ignore all subdirectories"
-					checked={ignoreRule.ignore_subdirs}
-					onClick={onToggleIgnoreSubDirs}
-					variant="primary"
-				/>
-			</div>
-		</Card>
+		</div>
 	)
 }

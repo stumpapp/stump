@@ -7,6 +7,9 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 
 // TODO: hone the progress messages, they are a little noisy and unhelpful (e.g. 'Starting task')
+// TODO: Refactor rayon usage to use tokio instead. I am trying to learn more about IO-bound operations in an
+// async context, and I believe tokio might be more appropriate for this use case (highly concurrent IO-bound tasks).
+// Also perhaps experiment with https://docs.rs/tokio-uring/latest/tokio_uring/index.html
 
 use crate::{
 	db::{
@@ -398,13 +401,13 @@ impl JobExt for LibraryScanJob {
 						total_subtask_count as i32,
 					));
 				} else {
-					tracing::debug!("No series to create");
+					tracing::trace!("No series to create");
 				}
 
 				ctx.report_progress(JobProgress::msg("Init task complete!"));
 			},
 			LibraryScanTask::WalkSeries(path_buf) => {
-				tracing::info!("Executing the walk series task for library scan");
+				tracing::debug!("Executing the walk series task for library scan");
 				ctx.report_progress(JobProgress::msg(
 					format!("Scanning series at {}", path_buf.display()).as_str(),
 				));

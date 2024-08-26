@@ -29,6 +29,16 @@ impl IgnoreRules {
 		Ok(Self(rules))
 	}
 
+	/// Get the number of ignore rules in the set
+	pub fn len(&self) -> usize {
+		self.0.len()
+	}
+
+	/// Check if the ignore rules set is empty
+	pub fn is_empty(&self) -> bool {
+		self.0.is_empty()
+	}
+
 	/// Get the underlying rules as a vector of glob patterns. If any of the
 	/// rules are invalid, this will return an error.
 	pub fn rules(&self) -> CoreResult<Vec<Glob>> {
@@ -36,6 +46,15 @@ impl IgnoreRules {
 			.iter()
 			.map(|rule| Glob::new(rule).map_err(CoreError::from))
 			.collect()
+	}
+
+	/// Serialize the ignore rules to a byte vector, which gets dumped into the
+	/// database.
+	pub fn as_bytes(&self) -> CoreResult<Vec<u8>> {
+		serde_json::to_vec(self).map_err(|error| {
+			tracing::error!(?error, "Failed to serialize scan rules");
+			error.into()
+		})
 	}
 
 	/// Convert the ignore rules into a glob set
@@ -165,5 +184,48 @@ mod tests {
 		assert!(!globset.is_match("path/to/another/file.txt"));
 		assert!(globset.is_match("path/to/___file.txt"));
 		assert!(!globset.is_match("path/to/another/___file.txt"));
+	}
+
+	#[test]
+	fn test_ignore_rules_serialization() {
+		let rules = IgnoreRules::new(vec![
+			"*.txt".to_string(),
+			"*.jpg".to_string(),
+			"*.png".to_string(),
+		])
+		.unwrap();
+
+		let bytes = rules.as_bytes().unwrap();
+		let deserialized = IgnoreRules::try_from(bytes).unwrap();
+
+		assert_eq!(rules.0[0], deserialized.0[0]);
+		assert_eq!(rules.0[1], deserialized.0[1]);
+		assert_eq!(rules.0[2], deserialized.0[2]);
+	}
+
+	#[test]
+	fn test_ignore_rules_len() {
+		let rules = IgnoreRules::new(vec![
+			"*.txt".to_string(),
+			"*.jpg".to_string(),
+			"*.png".to_string(),
+		])
+		.unwrap();
+
+		assert_eq!(rules.len(), 3);
+	}
+
+	#[test]
+	fn test_ignore_rules_is_empty() {
+		let rules = IgnoreRules::new(vec![]).unwrap();
+
+		assert!(rules.is_empty());
+	}
+
+	#[test]
+	fn test_ignore_rules_is_not_empty() {
+		let rules = IgnoreRules::new(vec!["*.txt".to_string()]).unwrap();
+
+		assert!(!rules.is_empty());
 	}
 }

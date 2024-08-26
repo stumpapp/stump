@@ -119,7 +119,7 @@ export const formDefaults = (library?: Library): CreateOrUpdateLibrarySchema => 
 	name: library?.name || '',
 	path: library?.path || '',
 	scan_mode: 'DEFAULT',
-	tags: library?.tags?.map((t) => ({ label: t.name, value: t.name })),
+	tags: library?.tags?.map((t) => ({ label: t.name, value: t.name.toLowerCase() })),
 	thumbnail_config: library?.library_options.thumbnail_config
 		? {
 				enabled: true,

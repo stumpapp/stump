@@ -19,8 +19,7 @@ use stump_core::{
 		entity::{
 			library_series_ids_media_ids_include, library_thumbnails_deletion_include,
 			macros::library_tags_select, FileStatus, Library, LibraryOptions,
-			LibraryScanMode, LibraryStats, Media, Series, Tag, TagName, User,
-			UserPermission,
+			LibraryScanMode, LibraryStats, Media, Series, TagName, User, UserPermission,
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 		PrismaCountTrait,
@@ -1276,16 +1275,14 @@ pub struct CreateLibrary {
 	)
 )]
 /// Create a new library. Will queue a ScannerJob to scan the library, and return the library
+#[tracing::instrument(skip(ctx))]
 async fn create_library(
 	Extension(req): Extension<RequestContext>,
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateLibrary>,
 ) -> APIResult<Json<Library>> {
-	let user = req.user_and_enforce_permissions(&[UserPermission::CreateLibrary])?;
-
+	req.enforce_permissions(&[UserPermission::CreateLibrary])?;
 	let db = &ctx.db;
-
-	debug!(user_id = user.id, ?input, "Creating library");
 
 	if !path::Path::new(&input.path).exists() {
 		return Err(APIError::BadRequest(format!(
@@ -1313,6 +1310,14 @@ async fn create_library(
 		._transaction()
 		.with_timeout(Duration::seconds(30).num_milliseconds() as u64)
 		.run(|client| async move {
+			let ignore_rules = (!library_options_arg.ignore_rules.is_empty())
+				.then(|| library_options_arg.ignore_rules.as_bytes())
+				.transpose()?;
+			let thumbnail_config = library_options_arg
+				.thumbnail_config
+				.map(|options| options.as_bytes())
+				.transpose()?;
+
 			let library_options = client
 				.library_options()
 				.create(vec![
@@ -1325,11 +1330,8 @@ async fn create_library(
 					library_options::library_pattern::set(
 						library_options_arg.library_pattern.to_string(),
 					),
-					library_options::thumbnail_config::set(
-						library_options_arg.thumbnail_config.map(|options| {
-							serde_json::to_vec(&options).unwrap_or_default()
-						}),
-					),
+					library_options::thumbnail_config::set(thumbnail_config),
+					library_options::ignore_rules::set(ignore_rules),
 				])
 				.exec()
 				.await?;
@@ -1489,11 +1491,19 @@ async fn update_library(
 		.ok_or(APIError::NotFound("Library not found".to_string()))?;
 	let existing_tags = existing_library.tags;
 
-	let updated_library = db
+	let update_result: Result<Library, APIError> = db
 		._transaction()
 		.with_timeout(Duration::seconds(30).num_milliseconds() as u64)
 		.run(|client| async move {
 			let library_options = input.library_options.to_owned();
+			let ignore_rules = (!library_options.ignore_rules.is_empty())
+				.then(|| library_options.ignore_rules.as_bytes())
+				.transpose()?;
+			let thumbnail_config = library_options
+				.thumbnail_config
+				.map(|options| options.as_bytes())
+				.transpose()?;
+
 			client
 				.library_options()
 				.update(
@@ -1506,11 +1516,11 @@ async fn update_library(
 							library_options::hard_delete_conversions::set(
 								library_options.hard_delete_conversions,
 							),
+							library_options::ignore_rules::set(ignore_rules),
 						],
-						[library_options.thumbnail_config.map(|config| {
-							library_options::thumbnail_config::set(Some(
-								serde_json::to_vec(&config).unwrap_or_default(),
-							))
+						// TODO: determine if this should be separate like this, I can't remember how I structure updates...
+						[thumbnail_config.map(|config| {
+							library_options::thumbnail_config::set(Some(config))
 						})],
 					),
 				)
@@ -1590,14 +1600,16 @@ async fn update_library(
 				],
 			);
 
-			client
+			Ok(client
 				.library()
 				.update(library::id::equals(id), set_params)
 				.with(library::tags::fetch(vec![]))
 				.exec()
 				.await
+				.map(Library::from)?)
 		})
-		.await?;
+		.await;
+	let updated_library = update_result?;
 
 	let scan_mode = input.scan_mode.unwrap_or_default();
 
@@ -1614,7 +1626,7 @@ async fn update_library(
 		})?;
 	}
 
-	Ok(Json(updated_library.into()))
+	Ok(Json(updated_library))
 }
 
 #[utoipa::path(

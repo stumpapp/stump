@@ -87,7 +87,7 @@ export default function BookClubSideBarSection({
 							{t('sidebar.buttons.seeAll')}
 						</SideBarButtonLink>
 					)}
-					<div className="-secondary ml-2 border-l border-l-edge pl-1">{renderBookClubs()}</div>
+					<div className="ml-2 space-y-1 border-l border-l-edge pl-1">{renderBookClubs()}</div>
 					{showCreateLink && (
 						<SideBarButtonLink
 							to={paths.bookClubCreate()}

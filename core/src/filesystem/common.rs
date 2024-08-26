@@ -204,6 +204,7 @@ impl PathUtils for Path {
 		is_accepted_cover_name(&file_stem)
 	}
 
+	// TODO(284): refactor to accept IgnoreRules to further filter out files
 	fn dir_has_media(&self) -> bool {
 		if !self.is_dir() {
 			return false;
@@ -227,6 +228,7 @@ impl PathUtils for Path {
 		}
 	}
 
+	// TODO(284): refactor to accept IgnoreRules to further filter out files
 	fn dir_has_media_deep(&self) -> bool {
 		if !self.is_dir() {
 			return false;

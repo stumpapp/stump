@@ -85,7 +85,7 @@ export default function LibrarySideBarSection({
 							{t('sidebar.buttons.seeAll')}
 						</SideBarButtonLink>
 					)}
-					<div className="-secondary ml-2 border-l border-l-edge pl-1">{renderLibraries()}</div>
+					<div className="ml-2 space-y-1 border-l border-l-edge pl-1">{renderLibraries()}</div>
 					{showCreateLink && (
 						<SideBarButtonLink
 							to={paths.libraryCreate()}

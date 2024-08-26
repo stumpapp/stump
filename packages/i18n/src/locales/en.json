@@ -128,6 +128,58 @@
 			"submit": "Create Book Club"
 		}
 	},
+	"createOrUpdateLibraryForm": {
+		"fields": {
+			"name": {
+				"label": "Name",
+				"description": "A friendly name for your library",
+				"placeholder": "My Library"
+			},
+			"path": {
+				"label": "Path",
+				"description": "The path to the library as it exists on your server",
+				"placeholder": "/path/to/library"
+			},
+			"description": {
+				"label": "Description",
+				"description": "A short description of your library",
+				"placeholder": "A library of all my favorite books"
+			},
+			"tags": {
+				"label": "Tags",
+				"description": "Used to categorize your library or enforce access rules"
+			},
+			"ignoreRules": {
+				"section": {
+					"heading": "Ignore Rules",
+					"description": "Define glob patterns to ignore certain files or directories during a scan"
+				},
+				"noRules": "No ignore rules have been configured",
+				"addRule": {
+					"label": "New rule",
+					"description": "Glob pattern to ignore files or directories",
+					"addButton": "Add rule",
+					"ignoreParents": {
+						"title": "Ignore all parent directories",
+						"label": "Ignore parents"
+					},
+					"ignoreSubdirs": {
+						"title": "Ignore all subdirectories",
+						"label": "Ignore subdirectories"
+					}
+				},
+				"invalidGlob": "Invalid glob pattern",
+				"lockConfig": {
+					"lock": "Lock configuration",
+					"unlock": "Unlock configuration"
+				},
+				"editRule": "Edit rule",
+				"deleteRule": "Delete rule",
+				"cancelEdit": "Cancel edit",
+				"confirmEdit": "Confirm edit"
+			}
+		}
+	},
 	"createLibraryScene": {
 		"heading": "Create library",
 		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on how they work, check out the",

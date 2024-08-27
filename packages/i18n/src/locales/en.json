@@ -212,6 +212,24 @@
 			"buttons": {
 				"confirm": "Save Changes"
 			}
+		},
+		"sidebar": {
+			"basics": "Basics",
+			"file-options": {
+				"general": "General",
+				"thumbnails": "Thumbnails",
+				"ignore-rules": "Ignore Rules"
+			},
+			"danger-zone": {
+				"access-control": "Access Control",
+				"delete": "Deletion"
+			}
+		},
+		"file-options": {
+			"label": "File Options"
+		},
+		"danger-zone": {
+			"label": "Danger Zone"
 		}
 	},
 	"errorScene": {

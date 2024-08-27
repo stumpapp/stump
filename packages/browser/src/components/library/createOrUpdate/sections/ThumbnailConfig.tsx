@@ -3,7 +3,7 @@ import { ImageResizeMode, ImageResizeOptions } from '@stump/types'
 import { useMemo } from 'react'
 import { useFormContext, useFormState } from 'react-hook-form'
 
-import { Schema } from '../CreateOrUpdateLibraryForm'
+import { CreateOrUpdateLibrarySchema } from '../schema'
 
 const formatOptions = [
 	{ label: 'WebP', value: 'Webp' },
@@ -12,7 +12,7 @@ const formatOptions = [
 ]
 
 export default function ThumbnailConfigForm() {
-	const form = useFormContext<Schema>()
+	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 	const resize_options = form.watch('thumbnail_config.resize_options')
 
 	const { errors } = useFormState({ control: form.control })

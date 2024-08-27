@@ -7,7 +7,7 @@ import LibraryLayout from './LibraryLayout.tsx'
 import LibraryAdminLayout from './tabs/settings/LibraryAdminLayout.tsx'
 
 const CreateLibraryScene = lazy(() => import('./tabs/settings/CreateLibraryScene.tsx'))
-const LibrarySettingsScene = lazy(() => import('./tabs/settings/LibrarySettingsScene.tsx'))
+const LibrarySettingsRouter = lazy(() => import('./tabs/settings'))
 const LibraryExplorerScene = lazy(() => import('./tabs/files/LibraryExplorerScene.tsx'))
 const LibrarySeriesScene = lazy(() => import('./tabs/series/LibrarySeriesScene.tsx'))
 const LibraryBooksScene = lazy(() => import('./tabs/books/LibraryBooksScene.tsx'))
@@ -27,7 +27,7 @@ export default function LibraryRouter() {
 				<Route path="books" element={<LibraryBooksScene />} />
 				{canAccessExplorer && <Route path="files" element={<LibraryExplorerScene />} />}
 				<Route element={<LibraryAdminLayout />}>
-					<Route path="settings" element={<LibrarySettingsScene />} />
+					<Route path="settings/*" element={<LibrarySettingsRouter />} />
 				</Route>
 			</Route>
 			<Route element={<LibraryAdminLayout />}>

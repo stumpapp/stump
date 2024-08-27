@@ -2,10 +2,10 @@ import { CheckBox, Heading, Text } from '@stump/components'
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 
-import { Schema } from '../CreateOrUpdateLibraryForm'
+import { CreateOrUpdateLibrarySchema } from '../schema'
 
 export default function FileConversionOptions() {
-	const form = useFormContext<Schema>()
+	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 
 	const [convertRarToZip, hardDeleteConversions] = form.watch([
 		'convert_rar_to_zip',

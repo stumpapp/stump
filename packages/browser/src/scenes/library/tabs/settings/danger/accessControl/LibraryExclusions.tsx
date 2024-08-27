@@ -10,9 +10,7 @@ import { useDebouncedValue } from 'rooks'
 
 import { useAppContext } from '@/context'
 
-import { useLibraryContext } from '../../context'
-
-// TODO: remove auto-submit! Annoying between libraries
+import { useLibraryContext } from '../../../../context'
 
 export default function LibraryExclusions() {
 	const { library } = useLibraryContext()

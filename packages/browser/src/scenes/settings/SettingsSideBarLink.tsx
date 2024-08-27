@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 
 type Props = {
 	to: string
-	isActive: boolean
+	isActive?: boolean
 	isDisabled?: boolean
 	icon: LucideIcon
 	children: React.ReactNode

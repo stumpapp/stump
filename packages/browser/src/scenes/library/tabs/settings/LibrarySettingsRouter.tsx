@@ -8,10 +8,13 @@ import { useLibraryContext } from '../../context'
 import { LibraryManagementContext } from './context'
 
 const BasicSettingsScene = React.lazy(() => import('./basics/BasicSettingsScene'))
-const ThumbnailSettingsScene = React.lazy(() => import('./options/ThumbnailSettingsScene'))
+const ThumbnailSettingsScene = React.lazy(
+	() => import('./options/thumbnails/ThumbnailSettingsScene'),
+)
 const ScannerBehaviorScene = React.lazy(() => import('./options/ScannerBehaviorScene'))
 
 const AccessControlScene = React.lazy(() => import('./danger/accessControl'))
+const DeletionScene = React.lazy(() => import('./danger/deletion'))
 
 export default function LibrarySettingsRouter() {
 	const { library } = useLibraryContext()
@@ -58,7 +61,7 @@ export default function LibrarySettingsRouter() {
 				<Route path="danger/*">
 					<Route path="" element={<Navigate to="access-control" replace />} />
 					<Route path="access-control" element={<AccessControlScene />} />
-					<Route path="delete" element={<div>Delete</div>} />
+					<Route path="delete" element={<DeletionScene />} />
 				</Route>
 			</Routes>
 		</LibraryManagementContext.Provider>

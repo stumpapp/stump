@@ -6,10 +6,10 @@ import toast from 'react-hot-toast'
 
 import EditThumbnailDropdown from '@/components/thumbnail/EditThumbnailDropdown'
 
-import BookPageGrid from '../../../book/settings/BookPageGrid'
-import SeriesBookGrid from '../../../series/tabs/settings/SeriesBookGrid'
-import { useLibraryContext } from '../../context'
-import LibrarySeriesGrid from './LibrarySeriesGrid'
+import BookPageGrid from '../../../../../book/settings/BookPageGrid'
+import SeriesBookGrid from '../../../../../series/tabs/settings/SeriesBookGrid'
+import { useLibraryContext } from '../../../../context'
+import LibrarySeriesGrid from '../../LibrarySeriesGrid'
 
 export default function LibraryThumbnailSelector() {
 	const [selectedSeries, setSelectedSeries] = useState<Series>()

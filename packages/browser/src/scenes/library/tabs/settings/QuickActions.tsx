@@ -4,7 +4,7 @@ import { Button, Heading, Text } from '@stump/components'
 import React from 'react'
 
 import { useLibraryContext } from '../../context'
-import LibraryThumbnailSelector from './LibraryThumbnailSelector'
+import LibraryThumbnailSelector from './options/thumbnails/LibraryThumbnailSelector'
 import RegenerateThumbnails from './RegenerateThumbnails'
 
 // TODO: this is ugly....

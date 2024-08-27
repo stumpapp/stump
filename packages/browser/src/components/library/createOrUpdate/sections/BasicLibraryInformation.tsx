@@ -12,10 +12,14 @@ const LOCALE_KEY = 'createOrUpdateLibraryForm'
 const getKey = (key: string) => `${LOCALE_KEY}.fields.${key}`
 
 type Props = {
+	isCreatingLibrary?: boolean
 	onSetShowDirectoryPicker: (value: boolean) => void
 }
 
-export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Props) {
+export default function BasicLibraryInformation({
+	isCreatingLibrary,
+	onSetShowDirectoryPicker,
+}: Props) {
 	const { t } = useLocaleContext()
 
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
@@ -27,12 +31,14 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 
 	return (
 		<div className="flex flex-grow flex-col gap-6">
-			<div>
-				<Heading size="sm">Basic information</Heading>
-				<Text size="sm" variant="muted">
-					This information will be used to identify your library and find its content
-				</Text>
-			</div>
+			{isCreatingLibrary && (
+				<div>
+					<Heading size="sm">Basic information</Heading>
+					<Text size="sm" variant="muted">
+						This information will be used to identify your library and find its content
+					</Text>
+				</div>
+			)}
 			<Input
 				variant="primary"
 				label={t(getKey('name.label'))}

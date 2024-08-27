@@ -44,40 +44,25 @@ export default function LibrarySettingsHeader() {
 		return matchedSubItemKey || activeRouteGroup?.localeKey
 	}, [activeRouteGroup, location.pathname])
 
-	// const backlink = useMemo(() => {
-	// 	const matchedSubItem = activeRouteGroup?.subItems?.find((subItem) =>
-	// 		subItem.matcher(location.pathname),
-	// 	)
-
-	// 	if (matchedSubItem?.backlink) {
-	// 		return matchedSubItem.backlink
-	// 	} else {
-	// 		return null
-	// 	}
-	// }, [activeRouteGroup?.subItems, location.pathname])
-
 	const translatedHeader = t(`librarySettingsScene.${activeRouteKey}.title`)
 	const translatedDescription = t(`librarySettingsScene.${activeRouteKey}.description`)
 
 	return (
 		<header
-			className={cn(
-				'flex w-full flex-col gap-4 border-b border-b-edge p-4 pl-52 md:flex-row md:items-start md:justify-between md:gap-0',
-				{
-					'mx-auto': preferTopBar && !!layout_max_width_px,
-				},
-			)}
+			className={cn('flex w-full flex-col border-b border-b-edge p-4 pl-52', {
+				'mx-auto': preferTopBar && !!layout_max_width_px,
+			})}
 			style={{
 				maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined,
 			}}
 		>
-			<div className="flex w-full flex-col items-center gap-2 md:mb-2 md:items-start">
-				<Heading size="lg">{translatedHeader}</Heading>
+			<Heading size="lg" className="font-bold">
+				{translatedHeader}
+			</Heading>
 
-				<Text size="sm" variant="muted">
-					{translatedDescription}
-				</Text>
-			</div>
+			<Text variant="muted" className="mt-1.5" size="sm">
+				{translatedDescription}
+			</Text>
 		</header>
 	)
 }

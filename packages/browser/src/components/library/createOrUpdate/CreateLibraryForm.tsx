@@ -24,7 +24,7 @@ type Props = {
 	isLoading?: boolean
 }
 
-export default function CreateOrEditLibraryForm({
+export default function CreateLibraryForm({
 	library,
 	existingLibraries,
 	onSubmit,

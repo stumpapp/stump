@@ -245,8 +245,26 @@
 			"description": "Control who can access the content in this library"
 		},
 		"danger-zone/delete": {
-			"title": "Delete Library",
-			"description": "Permanently delete this library and all of its contents"
+			"title": "Deletion Actions",
+			"description": "Permanently delete this library and all of its contents or certain resources",
+			"sections": {
+				"cleanLibrary": {
+					"heading": "Clean library",
+					"description": "Remove all media and series that cannot be located on disk",
+					"disclaimer": "While this action will not delete any files, it will permanently delete all records relating to media and series which have a missing status",
+					"confirmation": {
+						"label": "Clean library",
+						"text": "Are you sure you want to clean this library?"
+					}
+				},
+				"deleteLibrary": {
+					"heading": "Delete library",
+					"description": [
+						"Permanently delete this library and all its contents.",
+						"This action cannot be undone"
+					]
+				}
+			}
 		}
 	},
 	"errorScene": {

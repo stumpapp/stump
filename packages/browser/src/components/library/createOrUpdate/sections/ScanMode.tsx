@@ -2,13 +2,14 @@ import { Heading, RadioGroup, Text } from '@stump/components'
 import { LibraryScanMode } from '@stump/types'
 import { useFormContext } from 'react-hook-form'
 
-import { Schema } from '../CreateOrUpdateLibraryForm'
+import { CreateOrUpdateLibrarySchema } from '../schema'
 
 type Props = {
-	isCreatingLibrary: boolean
+	isCreatingLibrary?: boolean
 }
+
 export default function ScanModeForm({ isCreatingLibrary }: Props) {
-	const form = useFormContext<Schema>()
+	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 
 	const [scanMode] = form.watch(['scan_mode'])
 

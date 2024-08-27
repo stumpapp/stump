@@ -64,7 +64,10 @@ export default function BasicSettingsScene() {
 				}}
 			/>
 
-			<BasicLibraryInformation onSetShowDirectoryPicker={setShowDirectoryPicker} />
+			<BasicLibraryInformation
+				isCreatingLibrary={false}
+				onSetShowDirectoryPicker={setShowDirectoryPicker}
+			/>
 
 			<div>
 				<Button type="submit" disabled={!hasChanges}>

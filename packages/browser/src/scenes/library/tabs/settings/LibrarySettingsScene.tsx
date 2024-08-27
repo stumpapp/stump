@@ -8,7 +8,7 @@ import { Container, ContentContainer } from '@/components/container'
 
 import { useLibraryContext } from '../../context'
 import LibraryExclusions from './danger/accessControl/LibraryExclusions'
-import DangerZone from './danger/DangerZone'
+import DangerZone from './danger/deletion/DangerZone'
 import QuickActions from './QuickActions'
 
 // TODO: redesign this page, it is ugly!!!!!!!!!

@@ -7,10 +7,11 @@ import {
 	buildScema,
 	CreateOrUpdateLibrarySchema,
 	formDefaults,
+	ThumbnailConfig,
 } from '@/components/library/createOrUpdate'
-import { ThumbnailConfig } from '@/components/library/createOrUpdate/sections'
 
-import { useLibraryManagement } from '../context'
+import { useLibraryManagement } from '../../context'
+import LibraryThumbnailSelector from './LibraryThumbnailSelector'
 
 export default function ThumbnailSettingsScene() {
 	const { library, patch } = useLibraryManagement()
@@ -30,8 +31,9 @@ export default function ThumbnailSettingsScene() {
 	)
 
 	return (
-		<Form form={form} onSubmit={handleSubmit}>
+		<Form form={form} onSubmit={handleSubmit} fieldsetClassName="flex flex-col gap-12">
 			<ThumbnailConfig />
+			<LibraryThumbnailSelector />
 		</Form>
 	)
 }

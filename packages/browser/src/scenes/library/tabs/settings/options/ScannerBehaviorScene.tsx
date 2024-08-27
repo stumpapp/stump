@@ -6,10 +6,10 @@ import { useForm } from 'react-hook-form'
 import {
 	buildScema,
 	CreateOrUpdateLibrarySchema,
+	FileConversionOptions,
 	formDefaults,
+	IgnoreRulesConfig,
 } from '@/components/library/createOrUpdate'
-import { FileConversionOptions } from '@/components/library/createOrUpdate/sections'
-import IgnoreRulesConfig from '@/components/library/createOrUpdate/sections/IgnoreRulesConfig'
 
 import { useLibraryManagement } from '../context'
 
@@ -31,10 +31,9 @@ export default function GeneralFileOptionsScene() {
 	)
 
 	return (
-		<Form form={form} onSubmit={handleSubmit}>
-			<FileConversionOptions />
-
+		<Form form={form} onSubmit={handleSubmit} fieldsetClassName="flex flex-col gap-12">
 			<IgnoreRulesConfig />
+			<FileConversionOptions />
 		</Form>
 	)
 }

@@ -33,6 +33,8 @@ export default function IgnoreRulesConfig({ isCreatingLibrary }: Props) {
 	} = useFieldArray({ control: form.control, name: 'ignore_rules' })
 	const { t } = useLocaleContext()
 
+	// TODO(284): move the state up a level in order to make reactive patch requests
+	// for updates
 	/**
 	 * A state to track whether the ignore rules are currently being edited. By default, we set this
 	 * to true if the library is being created

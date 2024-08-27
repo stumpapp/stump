@@ -3,7 +3,7 @@ import {
 	useLibraryExclusionsQuery,
 	useUsersQuery,
 } from '@stump/client'
-import { ComboBox, Heading, Text, usePrevious } from '@stump/components'
+import { Alert, ComboBox, Heading, Text, usePrevious } from '@stump/components'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useDebouncedValue } from 'rooks'
@@ -49,6 +49,7 @@ export default function LibraryExclusions() {
 	const variablesLoaded = !!debouncedUserIds && !!excludedUsers
 	const shouldCall =
 		variablesLoaded && debouncedUserIds.length !== excludedUsers.length && isSameLibrary
+
 	useEffect(() => {
 		if (shouldCall) {
 			update(debouncedUserIds)
@@ -78,7 +79,16 @@ export default function LibraryExclusions() {
 				</Text>
 			</div>
 
+			{allUsers?.length === 1 && (
+				<Alert icon="info" level="info">
+					<Alert.Content>
+						There are no other registered users to exclude from this library
+					</Alert.Content>
+				</Alert>
+			)}
+
 			<ComboBox
+				// disabled={allUsers?.length === 1}
 				options={userOptions}
 				value={excludedUserIds}
 				isMultiSelect

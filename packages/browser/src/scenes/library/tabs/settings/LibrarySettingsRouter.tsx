@@ -8,8 +8,8 @@ import { useLibraryContext } from '../../context'
 import { LibraryManagementContext } from './context'
 
 const BasicSettingsScene = React.lazy(() => import('./basics/BasicSettingsScene'))
-const ThumbnailSettingsScene = React.lazy(() => import('./fileOptions/ThumbnailSettingsScene'))
-const GeneralFileOptionsScene = React.lazy(() => import('./fileOptions/GeneralFileOptionsScene'))
+const ThumbnailSettingsScene = React.lazy(() => import('./options/ThumbnailSettingsScene'))
+const ScannerBehaviorScene = React.lazy(() => import('./options/ScannerBehaviorScene'))
 
 const AccessControlScene = React.lazy(() => import('./danger/accessControl'))
 
@@ -49,9 +49,9 @@ export default function LibrarySettingsRouter() {
 				<Route path="" element={<Navigate to="basics" replace />} />
 				<Route path="basics" element={<BasicSettingsScene />} />
 
-				<Route path="file-options/*">
-					<Route path="" element={<Navigate to="general" replace />} />
-					<Route path="general" element={<GeneralFileOptionsScene />} />
+				<Route path="options/*">
+					<Route path="" element={<Navigate to="scanning" replace />} />
+					<Route path="scanning" element={<ScannerBehaviorScene />} />
 					<Route path="thumbnails" element={<ThumbnailSettingsScene />} />
 				</Route>
 

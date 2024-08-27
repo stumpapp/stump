@@ -1,4 +1,4 @@
-import { Button, ButtonOrLink, cn, IconButton, Label } from '@stump/components'
+import { ButtonOrLink, cn, IconButton, Label } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { ArrowLeft, Home } from 'lucide-react'
 import React from 'react'
@@ -7,7 +7,6 @@ import { useLocation, useNavigate } from 'react-router'
 import { usePreferences } from '@/hooks/usePreferences'
 import paths from '@/paths'
 import { SideBarLinkButton } from '@/scenes/settings'
-import { useAppStore } from '@/stores'
 
 import { useLibraryContext } from '../../context'
 import { formatLabel, useLibrarySettingsRoutes } from './useLibrarySettingsRoutes'
@@ -18,7 +17,6 @@ export default function LibrarySettingsSidebar() {
 
 	const { library } = useLibraryContext()
 	const { t } = useLocaleContext()
-	const platform = useAppStore((store) => store.platform)
 	const {
 		preferences: { enable_replace_primary_sidebar, primary_navigation_mode },
 	} = usePreferences()

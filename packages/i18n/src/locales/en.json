@@ -215,8 +215,9 @@
 		},
 		"sidebar": {
 			"basics": "Basics",
-			"file-options": {
+			"options": {
 				"general": "General",
+				"scanning": "Scanning",
 				"thumbnails": "Thumbnails",
 				"ignore-rules": "Ignore Rules",
 				"label": "File Options"
@@ -227,13 +228,25 @@
 				"label": "Danger Zone"
 			}
 		},
-		"file-options/general": {
-			"title": "File Options",
-			"description": "General file-related options for your library, e.g. ignore rules and conversion settings"
+		"basics": {
+			"title": "Basic Information",
+			"description": "The details of this library, including its name, path, and description"
 		},
-		"file-options/thumbnails": {
+		"options/scanning": {
+			"title": "Scanner Behavior",
+			"description": "Settings related to how Stump scans this library"
+		},
+		"options/thumbnails": {
 			"title": "Thumbnails",
-			"description": "Settings and management options for thumbnails in your library"
+			"description": "Settings and management options for thumbnails in this library"
+		},
+		"danger-zone/access-control": {
+			"title": "Access Control",
+			"description": "Control who can access the content in this library"
+		},
+		"danger-zone/delete": {
+			"title": "Delete Library",
+			"description": "Permanently delete this library and all of its contents"
 		}
 	},
 	"errorScene": {

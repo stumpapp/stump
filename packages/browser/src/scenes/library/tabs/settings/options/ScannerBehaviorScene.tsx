@@ -9,6 +9,7 @@ import {
 	formDefaults,
 } from '@/components/library/createOrUpdate'
 import { FileConversionOptions } from '@/components/library/createOrUpdate/sections'
+import IgnoreRulesConfig from '@/components/library/createOrUpdate/sections/IgnoreRulesConfig'
 
 import { useLibraryManagement } from '../context'
 
@@ -32,6 +33,8 @@ export default function GeneralFileOptionsScene() {
 	return (
 		<Form form={form} onSubmit={handleSubmit}>
 			<FileConversionOptions />
+
+			<IgnoreRulesConfig />
 		</Form>
 	)
 }

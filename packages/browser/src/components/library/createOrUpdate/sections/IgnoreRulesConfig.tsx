@@ -21,7 +21,7 @@ const LOCALE_KEY = 'createOrUpdateLibraryForm'
 const getKey = (key: string) => `${LOCALE_KEY}.fields.ignoreRules.${key}`
 
 type Props = {
-	isCreatingLibrary: boolean
+	isCreatingLibrary?: boolean
 }
 
 export default function IgnoreRulesConfig({ isCreatingLibrary }: Props) {
@@ -96,7 +96,7 @@ export default function IgnoreRulesConfig({ isCreatingLibrary }: Props) {
 					</Text>
 				</div>
 
-				{isCreatingLibrary && renderLockedButton()}
+				{renderLockedButton()}
 			</div>
 
 			{!ignoreRules.length && (

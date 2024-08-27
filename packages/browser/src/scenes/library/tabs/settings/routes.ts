@@ -1,21 +1,5 @@
 import { UserPermission } from '@stump/types'
-import {
-	AlarmClock,
-	Bell,
-	Book,
-	Box,
-	Brush,
-	Cog,
-	Image,
-	LucideIcon,
-	Mail,
-	NotebookTabs,
-	PackageX,
-	PcCase,
-	ScrollText,
-	ShieldCheck,
-	Users,
-} from 'lucide-react'
+import { Image, LucideIcon, NotebookTabs, PackageX, ScanSearch, ShieldCheck } from 'lucide-react'
 
 type SubItem = {
 	localeKey: string
@@ -55,24 +39,24 @@ export const routeGroups: RouteGroup[] = [
 		],
 	},
 	{
-		defaultRoute: 'settings/file-options',
+		defaultRoute: 'settings/options/scanning',
 		items: [
 			{
-				icon: Cog,
-				label: 'General',
-				localeKey: 'file-options/general',
+				icon: ScanSearch,
+				label: 'Scanning',
+				localeKey: 'options/scanning',
 				permission: 'library:manage',
-				to: 'settings/file-options/general',
+				to: 'settings/options/scanning',
 			},
 			{
 				icon: Image,
 				label: 'Thumbnails',
-				localeKey: 'file-options/thumbnails',
+				localeKey: 'options/thumbnails',
 				permission: 'library:manage',
-				to: 'settings/file-options/thumbnails',
+				to: 'settings/options/thumbnails',
 			},
 		],
-		label: 'File Options',
+		label: 'Options',
 	},
 	{
 		defaultRoute: 'settings/danger',

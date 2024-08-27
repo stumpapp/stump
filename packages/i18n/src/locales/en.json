@@ -218,18 +218,22 @@
 			"file-options": {
 				"general": "General",
 				"thumbnails": "Thumbnails",
-				"ignore-rules": "Ignore Rules"
+				"ignore-rules": "Ignore Rules",
+				"label": "File Options"
 			},
 			"danger-zone": {
 				"access-control": "Access Control",
-				"delete": "Deletion"
+				"delete": "Deletion",
+				"label": "Danger Zone"
 			}
 		},
-		"file-options": {
-			"label": "File Options"
+		"file-options/general": {
+			"title": "File Options",
+			"description": "General file-related options for your library, e.g. ignore rules and conversion settings"
 		},
-		"danger-zone": {
-			"label": "Danger Zone"
+		"file-options/thumbnails": {
+			"title": "Thumbnails",
+			"description": "Settings and management options for thumbnails in your library"
 		}
 	},
 	"errorScene": {

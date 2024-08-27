@@ -51,13 +51,16 @@ export default function LibrarySettingsSidebar() {
 
 				{groups
 					.map(({ label, items }) => {
-						const groupLabel = label ? t(`librarySettingsScene.${formatLabel(label)}.label`) : ''
+						// TODO: refactor the group shit
+						const groupLabel = label
+							? t(`librarySettingsScene.sidebar.${formatLabel(label)}.label`)
+							: ''
 
 						const withGroup = (key: string) =>
 							label
 								? t(`librarySettingsScene.sidebar.${formatLabel(label)}.${formatLabel(key)}`)
 								: t(`librarySettingsScene.sidebar.${formatLabel(key)}`)
-						// librarySettingsScene.sidebar.danger zone.access control
+
 						return (
 							<div key={groupLabel}>
 								{groupLabel && <Label>{groupLabel}</Label>}
@@ -67,18 +70,14 @@ export default function LibrarySettingsSidebar() {
 									})}
 								>
 									{items.map(({ to, icon, label, disabled }) => {
-										const isDisabled =
-											disabled || (platform === 'browser' && to.includes('desktop'))
-
 										return (
 											<SideBarLinkButton
 												key={to}
 												to={to}
 												isActive={location.pathname.includes(to)}
-												isDisabled={isDisabled}
+												isDisabled={disabled}
 												icon={icon}
 											>
-												{/* {t(withGroup(label.toLowerCase()))} */}
 												{withGroup(label)}
 											</SideBarLinkButton>
 										)

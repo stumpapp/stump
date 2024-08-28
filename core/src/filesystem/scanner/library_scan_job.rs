@@ -179,8 +179,8 @@ impl JobExt for LibraryScanJob {
 		if library_is_missing {
 			handle_missing_library(&ctx.db, self.id.as_str()).await?;
 			ctx.send_batch(vec![
-				JobProgress::msg("Failed to find library on disk").into_send(),
-				CoreEvent::DiscoveredMissingLibrary(self.id.clone()).into_send(),
+				JobProgress::msg("Failed to find library on disk").into_worker_send(),
+				CoreEvent::DiscoveredMissingLibrary(self.id.clone()).into_worker_send(),
 			]);
 			return Err(JobError::InitFailed(
 				"Library could not be found on disk".to_string(),
@@ -269,7 +269,7 @@ impl JobExt for LibraryScanJob {
 
 		match task {
 			LibraryScanTask::Init(input) => {
-				tracing::info!("Executing the init task for library scan");
+				tracing::debug!("Executing the init task for library scan");
 				ctx.report_progress(JobProgress::msg("Handling library scan init"));
 				let InitTaskInput {
 					series_to_create,
@@ -532,12 +532,12 @@ impl JobExt for LibraryScanJob {
 						..
 					} = handle_missing_media(ctx, &series_id, paths).await;
 					ctx.send_batch(vec![
-						JobProgress::msg("Handled missing media").into_send(),
+						JobProgress::msg("Handled missing media").into_worker_send(),
 						CoreEvent::CreatedOrUpdatedManyMedia {
 							count: updated_media,
 							series_id,
 						}
-						.into_send(),
+						.into_worker_send(),
 					]);
 					output.updated_media += updated_media;
 					logs.extend(new_logs);
@@ -561,12 +561,12 @@ impl JobExt for LibraryScanJob {
 					)
 					.await?;
 					ctx.send_batch(vec![
-						JobProgress::msg("Created new media").into_send(),
+						JobProgress::msg("Created new media").into_worker_send(),
 						CoreEvent::CreatedOrUpdatedManyMedia {
 							count: created_media,
 							series_id,
 						}
-						.into_send(),
+						.into_worker_send(),
 					]);
 					output.created_media += created_media;
 					logs.extend(new_logs);
@@ -591,12 +591,12 @@ impl JobExt for LibraryScanJob {
 					)
 					.await?;
 					ctx.send_batch(vec![
-						JobProgress::msg("Visited all media").into_send(),
+						JobProgress::msg("Visited all media").into_worker_send(),
 						CoreEvent::CreatedOrUpdatedManyMedia {
 							count: updated_media,
 							series_id,
 						}
-						.into_send(),
+						.into_worker_send(),
 					]);
 					output.updated_media += updated_media;
 					logs.extend(new_logs);

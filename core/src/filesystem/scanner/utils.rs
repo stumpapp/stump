@@ -339,12 +339,12 @@ pub(crate) async fn handle_create_media(
 						JobProgress::msg(
 							format!("Inserted {}", media_path.display()).as_str(),
 						)
-						.into_send(),
+						.into_worker_send(),
 						CoreEvent::CreatedMedia {
 							id: created_media.id,
 							series_id: series_id.clone(),
 						}
-						.into_send(),
+						.into_worker_send(),
 					]);
 				},
 				Err(e) => {

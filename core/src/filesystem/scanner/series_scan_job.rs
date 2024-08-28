@@ -224,12 +224,12 @@ impl JobExt for SeriesScanJob {
 					..
 				} = handle_missing_media(ctx, &self.id, paths).await;
 				ctx.send_batch(vec![
-					JobProgress::msg("Handled missing media").into_send(),
+					JobProgress::msg("Handled missing media").into_worker_send(),
 					CoreEvent::CreatedOrUpdatedManyMedia {
 						count: updated_media,
 						series_id: self.id.clone(),
 					}
-					.into_send(),
+					.into_worker_send(),
 				]);
 				output.updated_media += updated_media;
 				logs.extend(new_logs);
@@ -253,12 +253,12 @@ impl JobExt for SeriesScanJob {
 				)
 				.await?;
 				ctx.send_batch(vec![
-					JobProgress::msg("Created new media").into_send(),
+					JobProgress::msg("Created new media").into_worker_send(),
 					CoreEvent::CreatedOrUpdatedManyMedia {
 						count: created_media,
 						series_id: self.id.clone(),
 					}
-					.into_send(),
+					.into_worker_send(),
 				]);
 				output.created_media += created_media;
 				logs.extend(new_logs);
@@ -282,12 +282,12 @@ impl JobExt for SeriesScanJob {
 				)
 				.await?;
 				ctx.send_batch(vec![
-					JobProgress::msg("Visited all media").into_send(),
+					JobProgress::msg("Visited all media").into_worker_send(),
 					CoreEvent::CreatedOrUpdatedManyMedia {
 						count: updated_media,
 						series_id: self.id.clone(),
 					}
-					.into_send(),
+					.into_worker_send(),
 				]);
 				output.updated_media += updated_media;
 				logs.extend(new_logs);

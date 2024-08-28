@@ -37,12 +37,15 @@ export default function CreateLibraryScene() {
 				library_options: {
 					...options,
 					ignore_rules: ignore_rules.map(({ glob }) => glob),
+					thumbnail_config:
+						options.thumbnail_config.enabled && !!options.thumbnail_config.resize_options
+							? options.thumbnail_config
+							: null,
 				},
 				name,
 				path,
-				// TODO: take this in
-				scan_mode: 'NONE',
-				tags: tags?.map(({ value }) => value),
+				scan_mode,
+				tags: tags?.map(({ label }) => label),
 			}
 
 			createLibrary(payload)

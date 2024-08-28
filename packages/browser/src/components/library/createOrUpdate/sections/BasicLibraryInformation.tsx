@@ -10,6 +10,7 @@ import { CreateOrUpdateLibrarySchema } from '../schema'
 
 const LOCALE_KEY = 'createOrUpdateLibraryForm'
 const getKey = (key: string) => `${LOCALE_KEY}.fields.${key}`
+const getSectionKey = (key: string) => `${LOCALE_KEY}.sections.${key}`
 
 type Props = {
 	isCreatingLibrary?: boolean
@@ -33,9 +34,9 @@ export default function BasicLibraryInformation({
 		<div className="flex flex-grow flex-col gap-6">
 			{isCreatingLibrary && (
 				<div>
-					<Heading size="sm">Basic information</Heading>
+					<Heading size="sm">{t(getSectionKey('heading'))}</Heading>
 					<Text size="sm" variant="muted">
-						This information will be used to identify your library and find its content
+						{t(getSectionKey('description'))}
 					</Text>
 				</div>
 			)}

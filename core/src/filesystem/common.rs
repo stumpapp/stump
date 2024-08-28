@@ -1,3 +1,4 @@
+use globset::GlobSet;
 use std::{
 	ffi::OsStr,
 	fs::File,
@@ -81,7 +82,7 @@ pub trait PathUtils {
 	/// files within a __MACOSX directory.
 	fn is_hidden_file(&self) -> bool;
 	/// Returns true if the file is supported by Stump.
-	fn should_ignore(&self) -> bool;
+	fn is_default_ignored(&self) -> bool;
 	/// Returns true if the file is an image.
 	fn is_supported(&self) -> bool;
 	/// Returns true if the file is an image.
@@ -97,10 +98,10 @@ pub trait PathUtils {
 	fn is_thumbnail_img(&self) -> bool;
 	/// Returns true if the directory has any media files in it. This is a shallow
 	/// check, and will not check subdirectories.
-	fn dir_has_media(&self) -> bool;
+	fn dir_has_media(&self, ignore_rules: &GlobSet) -> bool;
 	/// Returns true if the directory has any media files in it. This is a deep
 	/// check, and will check *all* subdirectories.
-	fn dir_has_media_deep(&self) -> bool;
+	fn dir_has_media_deep(&self, ignore_rules: &GlobSet) -> bool;
 }
 
 impl PathUtils for Path {
@@ -122,12 +123,7 @@ impl PathUtils for Path {
 		let extension = self
 			.extension()
 			.and_then(|os_str| os_str.try_to_string())
-			.unwrap_or_else(|| {
-				if !self.is_dir() {
-					tracing::warn!(path = ?self, "Failed to get file extension");
-				}
-				String::default()
-			});
+			.unwrap_or_default();
 
 		FileParts {
 			file_name,
@@ -162,7 +158,13 @@ impl PathUtils for Path {
 			return true;
 		}
 
-		let FileParts { file_name, .. } = self.file_parts();
+		let file_name = self
+			.file_name()
+			.and_then(|os_str| os_str.try_to_string())
+			.unwrap_or_else(|| {
+				tracing::warn!(path = ?self, "Failed to get file name");
+				String::default()
+			});
 
 		file_name.starts_with('.')
 	}
@@ -178,10 +180,7 @@ impl PathUtils for Path {
 	/// Returns true when the scanner should not persist the file to the database.
 	/// First checks if the file is hidden (i.e. starts with a dot), then checks if
 	/// the file is supported by Stump.
-	//
-	// TODO: This will change in the future to allow for unsupported files to
-	// be added to the database with *minimal* functionality.
-	fn should_ignore(&self) -> bool {
+	fn is_default_ignored(&self) -> bool {
 		if self.is_hidden_file() {
 			return true;
 		}
@@ -204,8 +203,7 @@ impl PathUtils for Path {
 		is_accepted_cover_name(&file_stem)
 	}
 
-	// TODO(284): refactor to accept IgnoreRules to further filter out files
-	fn dir_has_media(&self) -> bool {
+	fn dir_has_media(&self, ignore_rules: &GlobSet) -> bool {
 		if !self.is_dir() {
 			return false;
 		}
@@ -216,7 +214,10 @@ impl PathUtils for Path {
 			Ok(items) => items
 				.filter_map(|item| item.ok())
 				.filter(|item| item.path() != self)
-				.any(|f| !f.path().should_ignore()),
+				.any(|f| {
+					let path = f.path();
+					!path.is_default_ignored() && !ignore_rules.is_match(path)
+				}),
 			Err(e) => {
 				error!(
 					error = ?e,
@@ -228,8 +229,7 @@ impl PathUtils for Path {
 		}
 	}
 
-	// TODO(284): refactor to accept IgnoreRules to further filter out files
-	fn dir_has_media_deep(&self) -> bool {
+	fn dir_has_media_deep(&self, ignore_rules: &GlobSet) -> bool {
 		if !self.is_dir() {
 			return false;
 		}
@@ -238,7 +238,10 @@ impl PathUtils for Path {
 			.into_iter()
 			.filter_map(|item| item.ok())
 			.filter(|item| item.path() != self)
-			.any(|f| !f.path().should_ignore())
+			.any(|f| {
+				let path = f.path();
+				!path.is_default_ignored() && !ignore_rules.is_match(path)
+			})
 	}
 }
 

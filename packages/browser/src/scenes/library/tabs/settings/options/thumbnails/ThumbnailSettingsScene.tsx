@@ -11,8 +11,7 @@ import {
 } from '@/components/library/createOrUpdate'
 
 import { useLibraryManagement } from '../../context'
-import DeleteLibraryThumbnails from './DeleteLibraryThumbnails'
-import LibraryThumbnailSelector from './LibraryThumbnailSelector'
+import ThumbnailManagementSection from './ThumbnailManagementSection'
 
 export default function ThumbnailSettingsScene() {
 	const { library, patch } = useLibraryManagement()
@@ -25,17 +24,25 @@ export default function ThumbnailSettingsScene() {
 	})
 
 	const handleSubmit = useCallback(
-		(values: CreateOrUpdateLibrarySchema) => {
-			patch({})
+		({ thumbnail_config }: Pick<CreateOrUpdateLibrarySchema, 'thumbnail_config'>) => {
+			patch({
+				library_options: {
+					...library.library_options,
+					thumbnail_config:
+						thumbnail_config.enabled && !!thumbnail_config.resize_options ? thumbnail_config : null,
+				},
+			})
 		},
-		[patch],
+		[patch, library.library_options],
 	)
 
 	return (
-		<Form form={form} onSubmit={handleSubmit} fieldsetClassName="flex flex-col gap-12">
-			<ThumbnailConfig />
-			<LibraryThumbnailSelector />
-			<DeleteLibraryThumbnails />
-		</Form>
+		<div className="flex flex-col gap-12">
+			<Form form={form} onSubmit={handleSubmit}>
+				<ThumbnailConfig />
+			</Form>
+
+			<ThumbnailManagementSection />
+		</div>
 	)
 }

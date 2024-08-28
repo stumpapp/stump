@@ -101,8 +101,8 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 			case 2:
 				return (
 					<>
-						<LibraryPatternSection isCreating />
-						<IgnoreRulesConfig isCreatingLibrary />
+						<LibraryPatternSection />
+						<IgnoreRulesConfig />
 						<FileConversionOptions />
 						<div className="mt-6 flex w-full md:max-w-sm">
 							<Button
@@ -118,7 +118,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 			case 3:
 				return (
 					<>
-						<ThumbnailConfig isCreating />
+						<ThumbnailConfig />
 						<div className="mt-6 flex w-full md:max-w-sm">
 							<Button
 								className="w-full md:w-auto"
@@ -135,6 +135,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 				return (
 					<>
 						<LibraryReview />
+						<ScanMode />
 					</>
 				)
 		}

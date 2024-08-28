@@ -177,13 +177,13 @@ mod tests {
 		assert!(globset.is_match("ignore-me/file.txt"));
 		assert!(globset.is_match("path/to/ignore-me/file.txt"));
 		assert!(globset.is_match("path/to/another/ignore-me/file.txt"));
+		assert!(globset.is_match("path/to/___file.txt"));
+		assert!(globset.is_match("path/to/another/_________file.txt"));
 
 		// These should not match
 		assert!(!globset.is_match("file.txt"));
 		assert!(!globset.is_match("path/to/file.txt"));
 		assert!(!globset.is_match("path/to/another/file.txt"));
-		assert!(globset.is_match("path/to/___file.txt"));
-		assert!(!globset.is_match("path/to/another/___file.txt"));
 	}
 
 	#[test]

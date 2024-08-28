@@ -26,7 +26,7 @@ export default function BasicSettingsScene() {
 	const [showDirectoryPicker, setShowDirectoryPicker] = useState(false)
 	const [path, name, description, tags] = form.watch(['path', 'name', 'description', 'tags'])
 
-	// FIXME: not correct, particularly the tags part
+	// FIXME(284): not correct, particularly the tags part
 	const hasChanges = useMemo(() => {
 		return (
 			library?.path !== path ||

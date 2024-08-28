@@ -40,7 +40,7 @@ export default function DeleteLibraryThumbnails() {
 		<>
 			<Alert level="error" rounded="sm" icon={AlertTriangle}>
 				<Alert.Content className="flex flex-col gap-3 md:flex-row">
-					Delete all generated thumbnails for this library
+					<span>Delete all generated thumbnails for this library</span>
 					<Button
 						variant="danger"
 						onClick={() => setShowConfirmation(true)}

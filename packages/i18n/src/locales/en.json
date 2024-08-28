@@ -129,6 +129,12 @@
 		}
 	},
 	"createOrUpdateLibraryForm": {
+		"sections": {
+			"basics": {
+				"heading": "Basic information",
+				"description": "The details of this library, including its name, path, and description"
+			}
+		},
 		"fields": {
 			"name": {
 				"label": "Name",
@@ -148,6 +154,47 @@
 			"tags": {
 				"label": "Tags",
 				"description": "Used to categorize your library or enforce access rules"
+			},
+			"thumbnailConfig": {
+				"section": {
+					"heading": {
+						"create": "Thumbnail configuration",
+						"update": "Generation"
+					},
+					"description": "Improve loading times while browsing your library by generating thumbnails for your books"
+				},
+				"enableSwitch": {
+					"label": "Enabled",
+					"description": "Generate thumbnail images for this library"
+				},
+				"scaled": {
+					"label": "Scaled",
+					"description": "Scale the image by a custom factor per dimension",
+					"width": {
+						"label": "Width scale"
+					},
+					"height": {
+						"label": "Height scale"
+					}
+				},
+				"sized": {
+					"label": "Explicitly Sized",
+					"description": "Set each dimension of the thumbnail (in pixels)",
+					"width": {
+						"label": "Width"
+					},
+					"height": {
+						"label": "Height"
+					}
+				},
+				"format": {
+					"label": "Image format",
+					"description": "The format of the generated thumbnail images"
+				},
+				"quality": {
+					"label": "Quality",
+					"description": "The quality of the generated thumbnail images, between 0 and 1.0"
+				}
 			},
 			"ignoreRules": {
 				"section": {
@@ -195,8 +242,8 @@
 			},
 			"libraryPattern": {
 				"section": {
-					"heading": "Library pattern",
-					"description": "The setting which determines how Stump will organize your library",
+					"heading": "Organization",
+					"description": "Identify which pattern most closely matches the organization of your library",
 					"docs": [
 						"Not sure which to choose? Click",
 						"here",
@@ -205,15 +252,26 @@
 					],
 					"disabled": "You cannot change this setting"
 				},
-				"collectionPriority": {
-					"label": "Collection priority",
-					"description": "Each folder at the top-most level of the library root is a single series"
-				},
-				"seriesPriority": {
-					"label": "Series priority",
-					"description": "Each folder at any level recursively is a single series"
+				"options": {
+					"label": "Library pattern",
+					"description": "The setting which determines how Stump will organize your library",
+					"collectionPriority": {
+						"label": "Collection priority",
+						"description": "Each folder at the top-most level of the library root is a single series"
+					},
+					"seriesPriority": {
+						"label": "Series priority",
+						"description": "Each folder at any level recursively is a single series"
+					}
 				}
 			}
+		},
+		"scan": {
+			"label": {
+				"create": "Scan after creation",
+				"update": "Scan after updates"
+			},
+			"description": "Index the library files to populate your database"
 		}
 	},
 	"createLibraryScene": {
@@ -221,13 +279,6 @@
 		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on how they work, check out the",
 		"subtitleLink": "relevant documentation",
 		"form": {
-			"labels": {
-				"libraryName": "Name",
-				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server",
-				"libraryDescription": "Description",
-				"libraryTags": "Tags"
-			},
 			"stepLabel": "Step",
 			"steps": [
 				{
@@ -251,6 +302,25 @@
 					"description": "Review your library settings before creating it"
 				}
 			],
+			"review": {
+				"yes": "Yes",
+				"no": "No",
+				"none": "None",
+				"labels": {
+					"generateThumbnails": "Generate thumbnails",
+					"mode": "Mode",
+					"format": "Format",
+					"quality": "Quality",
+					"name": "Name",
+					"path": "Path",
+					"description": "Description",
+					"tags": "Tags",
+					"pattern": "Pattern",
+					"ignoreRules": "Ignore rules",
+					"convertRar": "Convert RAR/CBR",
+					"deleteConversions": "Delete converted files"
+				}
+			},
 			"buttons": {
 				"confirm": "Create Library"
 			}
@@ -260,18 +330,6 @@
 		"heading": "Settings",
 		"subtitle": "Manage your library here. If you're wanting a refresh on these settings, check out the",
 		"subtitleLink": "relevant documentation",
-		"form": {
-			"labels": {
-				"libraryName": "Name",
-				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server",
-				"libraryDescription": "Description",
-				"libraryTags": "Tags"
-			},
-			"buttons": {
-				"confirm": "Save Changes"
-			}
-		},
 		"sidebar": {
 			"basics": "Basics",
 			"options": {
@@ -289,7 +347,10 @@
 		},
 		"basics": {
 			"title": "Basic Information",
-			"description": "The details of this library, including its name, path, and description"
+			"description": "The details of this library, including its name, path, and description",
+			"form": {
+				"submit": "Update library"
+			}
 		},
 		"options/scanning": {
 			"title": "Scanner Behavior",
@@ -297,7 +358,15 @@
 		},
 		"options/thumbnails": {
 			"title": "Thumbnails",
-			"description": "Settings and management options for thumbnails in this library"
+			"description": "Settings and management options for thumbnails in this library",
+			"sections": {
+				"management": {
+					"heading": "Management",
+					"description": "Manage the existing thumbnails for this library",
+					"thumbnailSelector": {},
+					"deleteThumbnails": {}
+				}
+			}
 		},
 		"danger-zone/access-control": {
 			"title": "Access Control",

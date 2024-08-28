@@ -16,9 +16,9 @@ export default function LibraryReview() {
 		if (!state.thumbnail_config.enabled || !state.thumbnail_config.resize_options) {
 			return (
 				<div>
-					<Label>Generate thumbnails</Label>
+					<Label>{t(getLabelKey('generateThumbnails'))}</Label>
 					<Text variant="muted" size="sm">
-						No
+						{t(getKey('no'))}
 					</Text>
 				</div>
 			)
@@ -28,14 +28,14 @@ export default function LibraryReview() {
 			return (
 				<>
 					<div>
-						<Label>Generate thumbnails</Label>
+						<Label>{t(getLabelKey('generateThumbnails'))}</Label>
 						<Text variant="muted" size="sm">
-							Yes
+							{t(getKey('yes'))}
 						</Text>
 					</div>
 
 					<div>
-						<Label>Mode</Label>
+						<Label>{t(getLabelKey('mode'))}</Label>
 						<Text variant="muted" size="sm">
 							{state.thumbnail_config.resize_options.mode} (
 							{`${state.thumbnail_config.resize_options.width}${dimensionUnit}:${state.thumbnail_config.resize_options.height}${dimensionUnit}`}
@@ -44,14 +44,14 @@ export default function LibraryReview() {
 					</div>
 
 					<div>
-						<Label>Format</Label>
+						<Label>{t(getLabelKey('format'))}</Label>
 						<Text variant="muted" size="sm">
 							{state.thumbnail_config.format}
 						</Text>
 					</div>
 
 					<div>
-						<Label>Quality</Label>
+						<Label>{t(getLabelKey('quality'))}</Label>
 						<Text variant="muted" size="sm">
 							{state.thumbnail_config.quality || 'Default'}
 						</Text>
@@ -68,32 +68,32 @@ export default function LibraryReview() {
 				description={t(getStepKey(1, 'description'))}
 			>
 				<div>
-					<Label>Name</Label>
+					<Label>{t(getLabelKey('name'))}</Label>
 					<Text variant="muted" size="sm">
 						{state.name}
 					</Text>
 				</div>
 
 				<div>
-					<Label>Path</Label>
+					<Label>{t(getLabelKey('path'))}</Label>
 					<Text variant="muted" size="sm">
 						{state.path}
 					</Text>
 				</div>
 
 				<div>
-					<Label>Description</Label>
+					<Label>{t(getLabelKey('description'))}</Label>
 					<Text variant="muted" size="sm">
 						{state.description || 'None'}
 					</Text>
 				</div>
 
 				<div>
-					<Label>Tags</Label>
+					<Label>{t(getLabelKey('tags'))}</Label>
 					<div className="flex flex-wrap gap-1">
 						{!state.tags?.length && (
 							<Text variant="muted" size="sm">
-								None
+								{t(getKey('none'))}
 							</Text>
 						)}
 						{state.tags?.map(({ label }, index) => (
@@ -110,7 +110,7 @@ export default function LibraryReview() {
 				description={t(getStepKey(2, 'description'))}
 			>
 				<div>
-					<Label>Pattern</Label>
+					<Label>{t(getLabelKey('pattern'))}</Label>
 					<Text variant="muted" size="sm">
 						{state.library_pattern === 'COLLECTION_BASED'
 							? t(getPatternKey('collectionPriority.label'))
@@ -119,11 +119,11 @@ export default function LibraryReview() {
 				</div>
 
 				<div>
-					<Label>Ignore rules</Label>
+					<Label>{t(getLabelKey('ignoreRules'))}</Label>
 					<div className="flex flex-wrap gap-1">
 						{!state.ignore_rules?.length && (
 							<Text variant="muted" size="sm">
-								None
+								{t(getKey('none'))}
 							</Text>
 						)}
 						{!!state.ignore_rules?.length && (
@@ -134,14 +134,14 @@ export default function LibraryReview() {
 					</div>
 
 					<div>
-						<Label>Convert RAR/CBR</Label>
+						<Label>{t(getLabelKey('convertRar'))}</Label>
 						<Text variant="muted" size="sm">
 							{state.convert_rar_to_zip ? 'Yes' : 'No'}
 						</Text>
 					</div>
 
 					<div>
-						<Label>Delete converted files</Label>
+						<Label>{t(getLabelKey('deleteConversions'))}</Label>
 						<Text variant="muted" size="sm">
 							{state.hard_delete_conversions ? 'Yes' : 'No'}
 						</Text>
@@ -160,8 +160,11 @@ export default function LibraryReview() {
 }
 
 const LOCALE_KEY = 'createLibraryScene.form'
-const getPatternKey = (key: string) => `createOrUpdateLibraryForm.fields.libraryPattern.${key}`
+const getPatternKey = (key: string) =>
+	`createOrUpdateLibraryForm.fields.libraryPattern.options.${key}`
 const getStepKey = (step: number, key: string) => `${LOCALE_KEY}.steps.${step - 1}.${key}`
+const getKey = (key: string) => `${LOCALE_KEY}.review.${key}`
+const getLabelKey = (key: string) => getKey(`labels.${key}`)
 
 type StepContainerProps = PropsWithChildren<{
 	label: string

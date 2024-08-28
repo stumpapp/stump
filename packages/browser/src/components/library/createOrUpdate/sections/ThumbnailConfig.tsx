@@ -25,12 +25,6 @@ const formatOptions = [
 	{ label: 'PNG', value: 'Png' },
 ]
 
-// TODO: render submit button if:
-// - isCreating is not true
-// and disable it if:
-// - form values are the same as the initial values
-// - form is submitting
-
 export default function ThumbnailConfigForm() {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 	const ctx = useLibraryContextSafe()
@@ -58,6 +52,10 @@ export default function ThumbnailConfigForm() {
 		[form, resize_options?.mode],
 	)
 
+	/**
+	 * A function to render the save button. This will only render if there are changes to the form
+	 * that have not been saved, and if we are editing an existing library
+	 */
 	const renderSaveButton = useCallback(() => {
 		if (!ctx?.library) {
 			return null
@@ -91,13 +89,14 @@ export default function ThumbnailConfigForm() {
 		[errors],
 	)
 
-	// TODO: The header looks awk
 	return (
 		<div className="flex flex-grow flex-col gap-6">
 			<div>
-				<Heading size="sm">{isCreating ? 'Thumbnail generation' : 'Generation'}</Heading>
+				<Heading size="sm">
+					{t(getKey(`section.heading.${isCreating ? 'create' : 'update'}`))}
+				</Heading>
 				<Text size="sm" variant="muted">
-					Optionally generate thumbnails for library content to improve image loading times
+					{t(getKey('section.description'))}
 				</Text>
 			</div>
 
@@ -125,8 +124,8 @@ export default function ThumbnailConfigForm() {
 							>
 								<RadioGroup.CardItem
 									isActive={resize_options?.mode === 'Scaled'}
-									label="Scaled"
-									description="A fixed scale that applies to each dimension"
+									label={t(getKey('scaled.label'))}
+									description={t(getKey('scaled.description'))}
 									value="Scaled"
 								>
 									<fieldset
@@ -136,7 +135,7 @@ export default function ThumbnailConfigForm() {
 										<Input
 											contrast
 											variant="primary"
-											label="Width Scale"
+											label={t(getKey('scaled.width.label'))}
 											placeholder="0.65"
 											{...(resize_options?.mode === 'Scaled'
 												? form.register('thumbnail_config.resize_options.width', {
@@ -154,7 +153,7 @@ export default function ThumbnailConfigForm() {
 										<Input
 											contrast
 											variant="primary"
-											label="Height Scale"
+											label={t(getKey('scaled.height.label'))}
 											placeholder="0.65"
 											{...(resize_options?.mode === 'Scaled'
 												? form.register('thumbnail_config.resize_options.height', {
@@ -173,8 +172,8 @@ export default function ThumbnailConfigForm() {
 
 								<RadioGroup.CardItem
 									isActive={resize_options?.mode === 'Sized'}
-									label="Explicitly Sized"
-									description="A fixed height and width (in pixels)"
+									label={t(getKey('sized.label'))}
+									description={t(getKey('sized.description'))}
 									value="Sized"
 								>
 									<fieldset
@@ -184,7 +183,7 @@ export default function ThumbnailConfigForm() {
 										<Input
 											contrast
 											variant="primary"
-											label="Width"
+											label={t(getKey('sized.width.label'))}
 											placeholder="200"
 											{...(resize_options?.mode === 'Sized'
 												? form.register('thumbnail_config.resize_options.width', {
@@ -202,7 +201,7 @@ export default function ThumbnailConfigForm() {
 										<Input
 											contrast
 											variant="primary"
-											label="Height"
+											label={t(getKey('sized.height.label'))}
 											placeholder="350"
 											{...(resize_options?.mode === 'Sized'
 												? form.register('thumbnail_config.resize_options.height', {
@@ -223,7 +222,7 @@ export default function ThumbnailConfigForm() {
 							<div className="flex flex-col gap-6 py-6">
 								<div className="flex flex-col gap-2">
 									<Label className={cx({ 'cursor-not-allowed text-opacity-50': !resize_options })}>
-										Image Format
+										{t(getKey('format.label'))}
 									</Label>
 									<NativeSelect
 										options={formatOptions}
@@ -235,17 +234,17 @@ export default function ThumbnailConfigForm() {
 										variant="muted"
 										className={cx({ 'cursor-not-allowed text-opacity-50': !resize_options })}
 									>
-										The format of the generated thumbnail
+										{t(getKey('format.description'))}
 									</Text>
 								</div>
 
 								<Input
 									contrast
 									variant="primary"
-									label="Image Quality"
+									label={t(getKey('quality.label'))}
 									disabled={!resize_options}
 									descriptionProps={{ className: 'text-xs' }}
-									description="The quality of the generated thumbnail, between 0 and 1.0"
+									description={t(getKey('quality.description'))}
 									errorMessage={form.formState.errors.thumbnail_config?.quality?.message}
 									placeholder="0.75"
 									{...form.register('thumbnail_config.quality', { valueAsNumber: true })}
@@ -260,3 +259,6 @@ export default function ThumbnailConfigForm() {
 		</div>
 	)
 }
+
+const LOCALE_KEY = 'createOrUpdateLibraryForm.fields.thumbnailConfig'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`

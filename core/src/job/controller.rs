@@ -34,7 +34,7 @@ pub enum JobControllerCommand {
 }
 
 impl WorkerSendExt for JobControllerCommand {
-	fn into_send(self) -> WorkerSend {
+	fn into_worker_send(self) -> WorkerSend {
 		WorkerSend::ManagerCommand(self)
 	}
 }

@@ -16,6 +16,7 @@ const ScannerBehaviorScene = React.lazy(() => import('./options/ScannerBehaviorS
 const AccessControlScene = React.lazy(() => import('./danger/accessControl'))
 const DeletionScene = React.lazy(() => import('./danger/deletion'))
 
+// Note: library:manage permission is enforced in the parent router
 export default function LibrarySettingsRouter() {
 	const { library } = useLibraryContext()
 
@@ -26,7 +27,8 @@ export default function LibrarySettingsRouter() {
 		},
 	})
 
-	// TODO: verify this works, I'm very skeptical removal of fields will fail
+	// TODO: This is particularly fallible. It would be a lot wiser to eventually just.. yknow, literally
+	// implement a patch endpoint lol. I'm being very lazy but I'll get to it. I'm tired!
 	const patch = useCallback(
 		(updates: Partial<UpdateLibrary>) => {
 			const payload: UpdateLibrary = {

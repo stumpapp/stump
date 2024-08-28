@@ -2,16 +2,30 @@ import { CheckBox, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
+import { useDebouncedValue } from 'rooks'
+
+import { useLibraryContextSafe } from '@/scenes/library/context'
 
 import { CreateOrUpdateLibrarySchema } from '../schema'
 
-export default function FileConversionOptions() {
+type Props = {
+	/**
+	 * A callback that is triggered when the form values change, debounced by 1 second.
+	 */
+	onDidChange?: (
+		values: Pick<CreateOrUpdateLibrarySchema, 'convert_rar_to_zip' | 'hard_delete_conversions'>,
+	) => void
+}
+
+export default function FileConversionOptions({ onDidChange }: Props) {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
+	const ctx = useLibraryContextSafe()
 
 	const [convertRarToZip, hardDeleteConversions] = form.watch([
 		'convert_rar_to_zip',
 		'hard_delete_conversions',
 	])
+	const [debouncedOptions] = useDebouncedValue({ convertRarToZip, hardDeleteConversions }, 1000)
 
 	const { t } = useLocaleContext()
 
@@ -25,6 +39,24 @@ export default function FileConversionOptions() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[convertRarToZip, hardDeleteConversions],
 	)
+
+	/***
+	 * An effect that triggers the `onDidChange` callback when the form values change.
+	 */
+	useEffect(() => {
+		if (!ctx?.library || !onDidChange) return
+
+		const existingConvertToZip = ctx.library.library_options.convert_rar_to_zip
+		const existingHardDelete = ctx.library.library_options.hard_delete_conversions
+		const { convertRarToZip, hardDeleteConversions } = debouncedOptions
+
+		if (convertRarToZip !== existingConvertToZip || hardDeleteConversions !== existingHardDelete) {
+			onDidChange({
+				convert_rar_to_zip: convertRarToZip,
+				hard_delete_conversions: hardDeleteConversions,
+			})
+		}
+	}, [ctx?.library, debouncedOptions, onDidChange])
 
 	return (
 		<div className="flex flex-col gap-y-6">

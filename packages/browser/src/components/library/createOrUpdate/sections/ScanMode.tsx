@@ -1,49 +1,34 @@
-import { Heading, RadioGroup, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { LibraryScanMode } from '@stump/types'
 import { useFormContext } from 'react-hook-form'
 
+import { useLibraryContextSafe } from '@/scenes/library/context'
+import { WideStyleSwitch } from '@/scenes/settings'
+
 import { CreateOrUpdateLibrarySchema } from '../schema'
 
-type Props = {
-	isCreatingLibrary?: boolean
-}
-
-export default function ScanModeForm({ isCreatingLibrary }: Props) {
+export default function ScanModeForm() {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
+	const ctx = useLibraryContextSafe()
 
-	const [scanMode] = form.watch(['scan_mode'])
+	const { t } = useLocaleContext()
+
+	const scanMode = form.watch('scan_mode')
+	const isCreatingLibrary = !ctx?.library
 
 	const handleChange = (newMode: LibraryScanMode) => {
 		form.setValue('scan_mode', newMode)
 	}
 
 	return (
-		<div className="flex flex-grow flex-col gap-6">
-			<div>
-				<Heading size="sm">Scan mode</Heading>
-				<Text size="sm" variant="muted">
-					Choose how you want to scan your library{' '}
-					{isCreatingLibrary ? 'after it is created' : 'once your updates are stored'}
-				</Text>
-			</div>
-
-			<RadioGroup value={scanMode} onValueChange={handleChange} className="max-w-2xl gap-4">
-				<RadioGroup.CardItem
-					label="Default scan"
-					description="A standard scan that indexes your library files one at a time"
-					innerContainerClassName="block sm:flex-col sm:items-start sm:gap-2"
-					isActive={scanMode === 'DEFAULT'}
-					value="DEFAULT"
-				/>
-
-				<RadioGroup.CardItem
-					label="Skip the scan"
-					description="You can perform a scan manually at a later time"
-					innerContainerClassName="block sm:flex-col sm:items-start sm:gap-2"
-					isActive={scanMode === 'NONE'}
-					value="NONE"
-				/>
-			</RadioGroup>
-		</div>
+		<WideStyleSwitch
+			label={t(getKey(`label.${isCreatingLibrary ? 'create' : 'update'}`))}
+			description={t(getKey('description'))}
+			isChecked={scanMode !== 'NONE'}
+			onToggle={() => handleChange(scanMode === 'NONE' ? 'DEFAULT' : 'NONE')}
+		/>
 	)
 }
+
+const LOCALE_KEY = 'createOrUpdateLibraryForm.scan'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`

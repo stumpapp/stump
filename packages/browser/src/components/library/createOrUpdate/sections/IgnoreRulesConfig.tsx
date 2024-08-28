@@ -16,17 +16,16 @@ import { Check, Edit, Lock, Trash, Unlock, X } from 'lucide-react'
 import React, { useCallback, useState } from 'react'
 import { useFieldArray, useFormContext } from 'react-hook-form'
 
+import { useLibraryContextSafe } from '@/scenes/library/context'
+
 import { CreateOrUpdateLibrarySchema } from '../schema'
 
 const LOCALE_KEY = 'createOrUpdateLibraryForm'
 const getKey = (key: string) => `${LOCALE_KEY}.fields.ignoreRules.${key}`
 
-type Props = {
-	isCreatingLibrary?: boolean
-}
-
-export default function IgnoreRulesConfig({ isCreatingLibrary }: Props) {
+export default function IgnoreRulesConfig() {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
+	const ctx = useLibraryContextSafe()
 	const {
 		fields: ignoreRules,
 		append,
@@ -34,8 +33,8 @@ export default function IgnoreRulesConfig({ isCreatingLibrary }: Props) {
 	} = useFieldArray({ control: form.control, name: 'ignore_rules' })
 	const { t } = useLocaleContext()
 
-	// TODO(284): move the state up a level in order to make reactive patch requests
-	// for updates
+	const isCreatingLibrary = !ctx?.library
+
 	/**
 	 * A state to track whether the ignore rules are currently being edited. By default, we set this
 	 * to true if the library is being created
@@ -88,6 +87,31 @@ export default function IgnoreRulesConfig({ isCreatingLibrary }: Props) {
 			</ToolTip>
 		)
 	}
+
+	const renderSaveButton = useCallback(() => {
+		if (!ctx?.library) {
+			return null
+		}
+
+		const existingRules = ctx.library.library_options.ignore_rules
+		const hasChanges = ignoreRules.some((rule) =>
+			existingRules?.every((glob) => glob !== rule.glob),
+		)
+
+		return (
+			<div>
+				<Button
+					title={hasChanges ? undefined : t('common.noChanges')}
+					type="submit"
+					disabled={!hasChanges}
+					variant="primary"
+					className="mt-4"
+				>
+					{t(getKey('save'))}
+				</Button>
+			</div>
+		)
+	}, [ctx, ignoreRules, t])
 
 	return (
 		<div className="flex max-w-2xl flex-grow flex-col gap-6">
@@ -178,6 +202,8 @@ export default function IgnoreRulesConfig({ isCreatingLibrary }: Props) {
 					</motion.div>
 				)}
 			</AnimatePresence>
+
+			{renderSaveButton()}
 		</div>
 	)
 }

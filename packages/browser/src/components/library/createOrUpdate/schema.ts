@@ -132,3 +132,8 @@ export const formDefaults = (library?: Library): CreateOrUpdateLibrarySchema => 
 				resize_options: undefined,
 			},
 })
+
+export const toLibraryPatchTags = (library: Library) => library.tags?.map((t) => t.name)
+export const libraryPatchDefaults = (library: Library) => ({
+	tags: toLibraryPatchTags(library),
+})

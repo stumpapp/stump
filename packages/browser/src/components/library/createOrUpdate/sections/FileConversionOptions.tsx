@@ -1,4 +1,5 @@
 import { CheckBox, Heading, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 
@@ -11,6 +12,8 @@ export default function FileConversionOptions() {
 		'convert_rar_to_zip',
 		'hard_delete_conversions',
 	])
+
+	const { t } = useLocaleContext()
 
 	useEffect(
 		() => {
@@ -26,30 +29,35 @@ export default function FileConversionOptions() {
 	return (
 		<div className="flex flex-col gap-y-6">
 			<div className="flex flex-col gap-y-1.5">
-				<Heading size="sm">Converting options</Heading>
+				<Heading size="sm">{t(getKey('section.heading'))}</Heading>
 				<Text size="sm" variant="muted">
-					Stump is capable of converting certain file formats to more compatible ones
+					{t(getKey('section.description'))}
 				</Text>
 			</div>
 
 			<CheckBox
+				id="convert_rar_to_zip"
 				variant="primary"
-				label="Convert RAR files to ZIP"
+				label={t(getKey('rarToZip.label'))}
+				description={t(getKey('rarToZip.description'))}
 				checked={convertRarToZip}
 				onClick={() => form.setValue('convert_rar_to_zip', !convertRarToZip)}
-				description="Any RAR files found in your library will be converted to ZIP files. Support is generally better for ZIP files"
 				{...form.register('convert_rar_to_zip')}
 			/>
 
 			<CheckBox
+				id="hard_delete_conversions"
 				variant="primary"
-				label="Delete RAR files after conversion"
+				label={t(getKey('deleteRarAfter.label'))}
+				description={t(getKey('deleteRarAfter.description'))}
 				checked={hardDeleteConversions}
 				disabled={!convertRarToZip}
 				onClick={() => form.setValue('hard_delete_conversions', !hardDeleteConversions)}
-				description="RAR files will be deleted after conversion. This is useful if you want to save space, but you will not be able to restore the originals"
 				{...form.register('hard_delete_conversions')}
 			/>
 		</div>
 	)
 }
+
+const LOCALE_KEY = 'createOrUpdateLibraryForm.fields.convertOptions'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`

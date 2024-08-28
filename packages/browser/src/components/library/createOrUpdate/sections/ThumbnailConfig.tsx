@@ -1,9 +1,20 @@
-import { cx, Heading, Input, Label, NativeSelect, RadioGroup, Text } from '@stump/components'
+import {
+	Button,
+	cx,
+	Heading,
+	Input,
+	Label,
+	NativeSelect,
+	RadioGroup,
+	Text,
+} from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { ImageResizeMode, ImageResizeOptions } from '@stump/types'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCallback, useMemo } from 'react'
 import { useFormContext, useFormState } from 'react-hook-form'
 
+import { useLibraryContextSafe } from '@/scenes/library/context'
 import { WideStyleSwitch } from '@/scenes/settings'
 
 import { CreateOrUpdateLibrarySchema } from '../schema'
@@ -19,15 +30,15 @@ const formatOptions = [
 // and disable it if:
 // - form values are the same as the initial values
 // - form is submitting
-type Props = {
-	isCreating?: boolean
-}
 
-export default function ThumbnailConfigForm({ isCreating }: Props) {
+export default function ThumbnailConfigForm() {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
-	const resize_options = form.watch('thumbnail_config.resize_options')
+	const ctx = useLibraryContextSafe()
+	const { errors, dirtyFields } = useFormState({ control: form.control })
+	const { t } = useLocaleContext()
 
-	const { errors } = useFormState({ control: form.control })
+	const isCreating = !ctx?.library
+	const resize_options = form.watch('thumbnail_config.resize_options')
 
 	const handleSelection = useCallback(
 		(option: ImageResizeMode | 'disabled') => {
@@ -46,6 +57,28 @@ export default function ThumbnailConfigForm({ isCreating }: Props) {
 		},
 		[form, resize_options?.mode],
 	)
+
+	const renderSaveButton = useCallback(() => {
+		if (!ctx?.library) {
+			return null
+		}
+
+		const hasChanges = Object.keys(dirtyFields).length > 0
+
+		return (
+			<div>
+				<Button
+					title={hasChanges ? undefined : t('common.noChanges')}
+					type="submit"
+					disabled={!hasChanges}
+					variant="primary"
+					className="mt-4"
+				>
+					{t('common.saveChanges')}
+				</Button>
+			</div>
+		)
+	}, [ctx, t, dirtyFields])
 
 	/**
 	 * This is an awkward way to get the error message for the resize options. Because of the the
@@ -221,6 +254,8 @@ export default function ThumbnailConfigForm({ isCreating }: Props) {
 						</motion.div>
 					)}
 				</AnimatePresence>
+
+				{renderSaveButton()}
 			</div>
 		</div>
 	)

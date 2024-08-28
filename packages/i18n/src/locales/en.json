@@ -155,6 +155,7 @@
 					"description": "Define glob patterns to ignore certain files or directories during a scan"
 				},
 				"noRules": "No ignore rules have been configured",
+				"save": "Save changes",
 				"addRule": {
 					"label": "New rule",
 					"description": "Glob pattern to ignore files or directories",
@@ -189,10 +190,7 @@
 				},
 				"deleteRarAfter": {
 					"label": "Delete RAR after conversion",
-					"description": [
-						"Delete the original RAR/CBR file after conversion.",
-						"This is irreversible"
-					]
+					"description": "Delete the original RAR/CBR file after conversion. This is irreversible"
 				}
 			},
 			"libraryPattern": {
@@ -1092,6 +1090,7 @@
 		"save": "Save",
 		"send": "Send",
 		"saveChanges": "Save changes",
+		"noChanges": "No changes",
 		"create": "Create",
 		"edit": "Edit",
 		"update": "Update",

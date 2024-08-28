@@ -67,7 +67,6 @@ export default function Table<T, V>({
 	const { isDarkVariant } = useTheme()
 
 	const [initialize] = useOverlayScrollbars({
-		defer: true,
 		options: {
 			scrollbars: {
 				theme: isDarkVariant ? 'os-theme-light' : 'os-theme-dark',

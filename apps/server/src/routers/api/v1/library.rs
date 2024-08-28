@@ -1275,7 +1275,7 @@ pub struct CreateLibrary {
 	)
 )]
 /// Create a new library. Will queue a ScannerJob to scan the library, and return the library
-#[tracing::instrument(skip(ctx))]
+#[tracing::instrument(skip(ctx, req))]
 async fn create_library(
 	Extension(req): Extension<RequestContext>,
 	State(ctx): State<AppState>,
@@ -1349,13 +1349,25 @@ async fn create_library(
 						.filter(|tag| !existing_tags.iter().any(|t| t.name == *tag))
 						.collect::<Vec<_>>();
 
+					tracing::trace!(?existing_tags, ?tags_to_create);
+
+					// Note: ._batch was erroring during the transaction
 					if !tags_to_create.is_empty() {
-						let created_tags = client
-							._batch(
+						let created_tags_len = client
+							.tag()
+							.create_many(
 								tags_to_create
-									.into_iter()
-									.map(|tag| client.tag().create(tag, vec![])),
+									.iter()
+									.map(|tag| (tag.clone(), vec![]))
+									.collect(),
 							)
+							.exec()
+							.await?;
+						tracing::trace!(?created_tags_len, "Created tags");
+						let created_tags = client
+							.tag()
+							.find_many(vec![tag::name::in_vec(tags_to_create)])
+							.exec()
 							.await?;
 						existing_tags.extend(created_tags);
 					}
@@ -1364,6 +1376,8 @@ async fn create_library(
 				},
 				None => vec![],
 			};
+
+			tracing::trace!(?library_tags, "Resolved tags");
 
 			let library = client
 				.library()
@@ -1549,13 +1563,26 @@ async fn update_library(
 						})
 						.collect::<Vec<_>>();
 
-					let created_tags = client
-						._batch(
-							tags_to_create
-								.into_iter()
-								.map(|tag| client.tag().create(tag, vec![])),
-						)
-						.await?;
+					// Note: ._batch caused the transaction to fail
+					let created_tags = {
+						let created_tags_len = client
+							.tag()
+							.create_many(
+								tags_to_create
+									.iter()
+									.map(|tag| (tag.clone(), vec![]))
+									.collect(),
+							)
+							.exec()
+							.await?;
+						tracing::trace!(?created_tags_len, "Created tags");
+
+						client
+							.tag()
+							.find_many(vec![tag::name::in_vec(tags_to_create)])
+							.exec()
+							.await
+					}?;
 
 					let tags_to_connect = tags_to_add_which_already_exist
 						.into_iter()

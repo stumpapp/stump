@@ -59,3 +59,6 @@ export {
 export { Toast } from './toast'
 export { ToolTip, type ToolTipProps } from './tooltip'
 export { cn, cx, type PickSelect, type Without, type XOR } from './utils'
+
+// TODO: Add charts! https://ui.shadcn.com/docs/components/chart yay
+// Cool data visualization stuff!

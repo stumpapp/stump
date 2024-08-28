@@ -151,7 +151,7 @@
 			},
 			"ignoreRules": {
 				"section": {
-					"heading": "Ignore Rules",
+					"heading": "Ignore rules",
 					"description": "Define glob patterns to ignore certain files or directories during a scan"
 				},
 				"noRules": "No ignore rules have been configured",
@@ -177,6 +177,44 @@
 				"deleteRule": "Delete rule",
 				"cancelEdit": "Cancel edit",
 				"confirmEdit": "Confirm edit"
+			},
+			"convertOptions": {
+				"section": {
+					"heading": "File conversion",
+					"description": "Stump is capable of converting certain file formats to more compatible ones"
+				},
+				"rarToZip": {
+					"label": "Convert RAR to ZIP",
+					"description": "Convert RAR/CBR files to ZIP/CBZ files during a scan"
+				},
+				"deleteRarAfter": {
+					"label": "Delete RAR after conversion",
+					"description": [
+						"Delete the original RAR/CBR file after conversion.",
+						"This is irreversible"
+					]
+				}
+			},
+			"libraryPattern": {
+				"section": {
+					"heading": "Library pattern",
+					"description": "The setting which determines how Stump will organize your library",
+					"docs": [
+						"Not sure which to choose? Click",
+						"here",
+						"for more information.",
+						"You cannot change this setting later"
+					],
+					"disabled": "You cannot change this setting"
+				},
+				"collectionPriority": {
+					"label": "Collection priority",
+					"description": "Each folder at the top-most level of the library root is a single series"
+				},
+				"seriesPriority": {
+					"label": "Series priority",
+					"description": "Each folder at any level recursively is a single series"
+				}
 			}
 		}
 	},
@@ -192,6 +230,29 @@
 				"libraryDescription": "Description",
 				"libraryTags": "Tags"
 			},
+			"stepLabel": "Step",
+			"steps": [
+				{
+					"label": "Basics",
+					"heading": "Basic Information",
+					"description": "The details of this library, including its name, path, and description"
+				},
+				{
+					"label": "Scanning",
+					"heading": "Scanner Behavior",
+					"description": "Settings related to how Stump scans this library"
+				},
+				{
+					"label": "Thumbnails",
+					"heading": "Thumbnails",
+					"description": "The options for if and how Stump generates thumbnails for this library"
+				},
+				{
+					"label": "Review",
+					"heading": "Review",
+					"description": "Review your library settings before creating it"
+				}
+			],
 			"buttons": {
 				"confirm": "Create Library"
 			}
@@ -242,7 +303,16 @@
 		},
 		"danger-zone/access-control": {
 			"title": "Access Control",
-			"description": "Control who can access the content in this library"
+			"description": "Control who can access the content in this library",
+			"sections": {
+				"libraryExclusions": {
+					"heading": "Exclude users",
+					"description": "Prevent certain users from accessing this library or its contents",
+					"noUsers": "There are no other registered users to exclude from this library",
+					"updated": "Exclusions updated",
+					"failure": "Failed to update exclusions"
+				}
+			}
 		},
 		"danger-zone/delete": {
 			"title": "Deletion Actions",

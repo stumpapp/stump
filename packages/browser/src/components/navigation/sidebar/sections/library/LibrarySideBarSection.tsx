@@ -61,6 +61,7 @@ export default function LibrarySideBarSection({
 					className="pl-2 pr-0"
 					leftContent={canChange ? leftContent : undefined}
 					rightContent={<LibraryOptionsMenu library={library} />}
+					// onMouseEnter={() => prefetchLibrarySeries(library.id)}
 				>
 					{!canChange && leftContent}
 					{library.name}

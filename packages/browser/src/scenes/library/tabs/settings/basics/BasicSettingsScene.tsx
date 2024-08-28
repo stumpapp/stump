@@ -52,7 +52,7 @@ export default function BasicSettingsScene() {
 	)
 
 	return (
-		<Form form={form} onSubmit={handleSubmit}>
+		<Form form={form} onSubmit={handleSubmit} fieldsetClassName="flex flex-col gap-12">
 			<DirectoryPickerModal
 				isOpen={showDirectoryPicker}
 				onClose={() => setShowDirectoryPicker(false)}

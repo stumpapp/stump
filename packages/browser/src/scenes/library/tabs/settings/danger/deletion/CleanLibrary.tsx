@@ -6,6 +6,8 @@ import { toast } from 'react-hot-toast'
 
 import { useLibraryManagement } from '../../context'
 
+// TODO: add query for whether a clean would do anything to disable this section
+
 export default function CleanLibrary() {
 	const {
 		library: { id },

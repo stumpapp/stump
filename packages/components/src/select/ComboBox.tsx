@@ -40,6 +40,7 @@ export type ComboBoxProps = {
 	options: ComboBoxOption[]
 	size?: keyof typeof SIZE_VARIANTS | null
 	onAddOption?: (option: ComboBoxOption) => void
+	disabled?: boolean
 	/** Classes applied to the trigger button for the combobox */
 	triggerClassName?: string
 	triggerRef?: React.RefObject<HTMLButtonElement>
@@ -76,6 +77,7 @@ export function ComboBox({
 	isMultiSelect,
 	options,
 	value,
+	disabled,
 	onChange,
 	onAddOption,
 	size = 'default',
@@ -175,7 +177,7 @@ export function ComboBox({
 				</Text>
 			)}
 			<Popover open={open} onOpenChange={setOpen}>
-				<Popover.Trigger asChild>
+				<Popover.Trigger asChild disabled={disabled}>
 					<Button
 						ref={mergeRefs(triggerRef, triggerRefProps)}
 						variant="outline"

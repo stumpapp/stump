@@ -1,6 +1,8 @@
 import { UserPermission } from '@stump/types'
 import { Image, LucideIcon, NotebookTabs, PackageX, ScanSearch, ShieldCheck } from 'lucide-react'
 
+// TODO(284): This is a copy of another hook, even the types. Generalize this instead!
+
 type SubItem = {
 	localeKey: string
 	matcher: (path: string) => boolean

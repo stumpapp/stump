@@ -2,9 +2,11 @@ import { cn, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
+import { useMediaMatch } from 'rooks'
 
 import { usePreferences } from '@/hooks/usePreferences'
 
+import LibrarySettingsSelectNavigation from './LibrarySettingsSelectNavigation'
 import { routeGroups } from './routes'
 
 export default function LibrarySettingsHeader() {
@@ -14,6 +16,7 @@ export default function LibrarySettingsHeader() {
 	} = usePreferences()
 	const { t } = useLocaleContext()
 
+	const isMobile = useMediaMatch('(max-width: 768px)')
 	const preferTopBar = primary_navigation_mode === 'TOPBAR'
 
 	/**
@@ -49,20 +52,24 @@ export default function LibrarySettingsHeader() {
 
 	return (
 		<header
-			className={cn('flex w-full flex-col border-b border-b-edge p-4 pl-52', {
+			className={cn('flex w-full flex-col space-y-4 border-b border-b-edge p-4 md:pl-52', {
 				'mx-auto': preferTopBar && !!layout_max_width_px,
 			})}
 			style={{
 				maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined,
 			}}
 		>
-			<Heading size="lg" className="font-bold">
-				{translatedHeader}
-			</Heading>
+			<div>
+				<Heading size="lg" className="font-bold">
+					{translatedHeader}
+				</Heading>
 
-			<Text variant="muted" className="mt-1.5" size="sm">
-				{translatedDescription}
-			</Text>
+				<Text variant="muted" className="mt-1.5" size="sm">
+					{translatedDescription}
+				</Text>
+			</div>
+
+			{isMobile && <LibrarySettingsSelectNavigation />}
 		</header>
 	)
 }

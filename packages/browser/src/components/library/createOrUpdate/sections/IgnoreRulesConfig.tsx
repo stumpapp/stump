@@ -10,6 +10,7 @@ import {
 	ToolTip,
 } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
+import { AnimatePresence, motion } from 'framer-motion'
 import isValidGlob from 'is-valid-glob'
 import { Check, Edit, Lock, Trash, Unlock, X } from 'lucide-react'
 import React, { useCallback, useState } from 'react'
@@ -126,47 +127,57 @@ export default function IgnoreRulesConfig({ isCreatingLibrary }: Props) {
 				</Card>
 			)}
 
-			{isEditing && (
-				<div className="flex flex-col space-y-4">
-					<div className="flex items-center space-x-4">
-						<Input
-							className="font-mono"
-							label={t(getKey('addRule.label'))}
-							value={newRule}
-							onChange={(e) => setNewRule(e.target.value)}
-							placeholder="**/ignore-me/**"
-							description={t(getKey('addRule.description'))}
-							errorMessage={newRuleError}
-							variant="primary"
-						/>
+			<AnimatePresence>
+				{isEditing && (
+					<motion.div
+						className="flex flex-col space-y-4"
+						initial={{ height: 0, opacity: 0 }}
+						animate={{ height: 'auto', opacity: 1 }}
+						exit={{ height: 0, opacity: 0 }}
+						transition={{ duration: 0.15 }}
+					>
+						<div className="flex items-center space-x-4">
+							<Input
+								className="font-mono"
+								label={t(getKey('addRule.label'))}
+								value={newRule}
+								onChange={(e) => setNewRule(e.target.value)}
+								placeholder="**/ignore-me/**"
+								description={t(getKey('addRule.description'))}
+								errorMessage={newRuleError}
+								variant="primary"
+							/>
 
-						<Button type="button" disabled={!newRule} onClick={handleAddRule}>
-							{t(getKey('addRule.addButton'))}
-						</Button>
-					</div>
+							<Button type="button" disabled={!newRule} onClick={handleAddRule}>
+								{t(getKey('addRule.addButton'))}
+							</Button>
+						</div>
 
-					<div className="flex items-center space-x-4">
-						<CheckBox
-							label={t(getKey('addRule.ignoreParents.label'))}
-							title={t(getKey('addRule.ignoreParents.title'))}
-							checked={newRule.startsWith('**/')}
-							onClick={() =>
-								setNewRule(newRule.startsWith('**/') ? newRule.slice(3) : `**/${newRule}`)
-							}
-							variant="primary"
-						/>
-						<CheckBox
-							label={t(getKey('addRule.ignoreSubdirs.label'))}
-							title={t(getKey('addRule.ignoreSubdirs.title'))}
-							checked={newRule.endsWith('/**')}
-							onClick={() =>
-								setNewRule(newRule.endsWith('/**') ? newRule.slice(0, -3) : `${newRule}/**`)
-							}
-							variant="primary"
-						/>
-					</div>
-				</div>
-			)}
+						<div className="flex items-center space-x-4">
+							<CheckBox
+								id="ignoreParents"
+								label={t(getKey('addRule.ignoreParents.label'))}
+								title={t(getKey('addRule.ignoreParents.title'))}
+								checked={newRule.startsWith('**/')}
+								onClick={() =>
+									setNewRule(newRule.startsWith('**/') ? newRule.slice(3) : `**/${newRule}`)
+								}
+								variant="primary"
+							/>
+							<CheckBox
+								id="ignoreSubdirs"
+								label={t(getKey('addRule.ignoreSubdirs.label'))}
+								title={t(getKey('addRule.ignoreSubdirs.title'))}
+								checked={newRule.endsWith('/**')}
+								onClick={() =>
+									setNewRule(newRule.endsWith('/**') ? newRule.slice(0, -3) : `${newRule}/**`)
+								}
+								variant="primary"
+							/>
+						</div>
+					</motion.div>
+				)}
+			</AnimatePresence>
 		</div>
 	)
 }

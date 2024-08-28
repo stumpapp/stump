@@ -11,6 +11,7 @@ import {
 } from '@/components/library/createOrUpdate'
 
 import { useLibraryManagement } from '../../context'
+import DeleteLibraryThumbnails from './DeleteLibraryThumbnails'
 import LibraryThumbnailSelector from './LibraryThumbnailSelector'
 
 export default function ThumbnailSettingsScene() {
@@ -34,6 +35,7 @@ export default function ThumbnailSettingsScene() {
 		<Form form={form} onSubmit={handleSubmit} fieldsetClassName="flex flex-col gap-12">
 			<ThumbnailConfig />
 			<LibraryThumbnailSelector />
+			<DeleteLibraryThumbnails />
 		</Form>
 	)
 }

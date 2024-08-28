@@ -26,13 +26,16 @@ export default function LibraryRouter() {
 				<Route path="series" element={<LibrarySeriesScene />} />
 				<Route path="books" element={<LibraryBooksScene />} />
 				{canAccessExplorer && <Route path="files" element={<LibraryExplorerScene />} />}
+
 				<Route element={<LibraryAdminLayout />}>
 					<Route path="settings/*" element={<LibrarySettingsRouter />} />
 				</Route>
 			</Route>
-			<Route element={<LibraryAdminLayout />}>
+
+			<Route element={<LibraryAdminLayout applySceneDefaults={false} />}>
 				<Route path="create" element={<CreateLibraryScene />} />
 			</Route>
+
 			<Route path="*" element={<Navigate to="/404" />} />
 		</Routes>
 	)

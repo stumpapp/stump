@@ -1,23 +1,26 @@
 import { libraryApi } from '@stump/api'
 import { Alert, Button, ConfirmationModal } from '@stump/components'
 import { AlertTriangle } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
-type Props = {
-	libraryId: string
-}
-export default function DeleteLibraryThumbnails({ libraryId }: Props) {
+import { useLibraryManagement } from '../../context'
+
+export default function DeleteLibraryThumbnails() {
+	const {
+		library: { id },
+	} = useLibraryManagement()
+
 	// This is a naive way to prevent the user from deleting the thumbnails multiple times
 	// in a row. I don't feel it would be worth it to implement a more robust solution.
 	const [justDeleted, setJustDeleted] = useState(false)
 	const [showConfirmation, setShowConfirmation] = useState(false)
 	const [isDeleting, setIsDeleting] = useState(false)
 
-	const handleDeleteThumbnails = async () => {
+	const handleDeleteThumbnails = useCallback(async () => {
 		try {
 			setIsDeleting(true)
-			await libraryApi.deleteLibraryThumbnails(libraryId)
+			await libraryApi.deleteLibraryThumbnails(id)
 			setJustDeleted(true)
 			toast.success('Library thumbnails deleted')
 		} catch (error) {
@@ -31,7 +34,7 @@ export default function DeleteLibraryThumbnails({ libraryId }: Props) {
 		} finally {
 			setIsDeleting(false)
 		}
-	}
+	}, [id])
 
 	return (
 		<>

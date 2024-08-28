@@ -9,6 +9,7 @@ import {
 	FileConversionOptions,
 	formDefaults,
 	IgnoreRulesConfig,
+	LibraryPattern,
 } from '@/components/library/createOrUpdate'
 
 import { useLibraryManagement } from '../context'
@@ -32,6 +33,7 @@ export default function GeneralFileOptionsScene() {
 
 	return (
 		<Form form={form} onSubmit={handleSubmit} fieldsetClassName="flex flex-col gap-12">
+			<LibraryPattern />
 			<IgnoreRulesConfig />
 			<FileConversionOptions />
 		</Form>

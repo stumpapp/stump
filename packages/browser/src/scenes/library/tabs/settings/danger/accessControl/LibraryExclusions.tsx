@@ -4,6 +4,7 @@ import {
 	useUsersQuery,
 } from '@stump/client'
 import { Alert, ComboBox, Heading, Text, usePrevious } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useDebouncedValue } from 'rooks'
@@ -15,6 +16,7 @@ import { useLibraryContext } from '../../../../context'
 export default function LibraryExclusions() {
 	const { library } = useLibraryContext()
 	const { user } = useAppContext()
+	const { t } = useLocaleContext()
 
 	const { users: allUsers, isLoading: isLoadingUsers } = useUsersQuery()
 	const { excludedUsers, isLoading: isLoadingExclusions } = useLibraryExclusionsQuery({
@@ -26,13 +28,13 @@ export default function LibraryExclusions() {
 		async (ids: string[]) => {
 			try {
 				await updateExcludedUsersAsync(ids)
-				toast.success('Excluded users updated')
+				toast.success(t(getKey('updated')))
 			} catch (e) {
 				console.error(e)
-				toast.error('Failed to update excluded users')
+				toast.error(t(getKey('failure')))
 			}
 		},
-		[updateExcludedUsersAsync],
+		[updateExcludedUsersAsync, t],
 	)
 
 	const [excludedUserIds, setExcludedUserIds] = useState<string[] | undefined>(() =>
@@ -72,23 +74,20 @@ export default function LibraryExclusions() {
 	return (
 		<div className="flex flex-col gap-4">
 			<div>
-				<Heading size="sm">Excluded users</Heading>
+				<Heading size="sm">{t(getKey('heading'))}</Heading>
 				<Text size="sm" variant="muted" className="mt-1">
-					These users will be excluded from accessing the library or any of its contents. Changes
-					will take effect immediately
+					{t(getKey('description'))}
 				</Text>
 			</div>
 
 			{allUsers?.length === 1 && (
 				<Alert icon="info" level="info">
-					<Alert.Content>
-						There are no other registered users to exclude from this library
-					</Alert.Content>
+					<Alert.Content>{t(getKey('noUsers'))}</Alert.Content>
 				</Alert>
 			)}
 
 			<ComboBox
-				// disabled={allUsers?.length === 1}
+				disabled={allUsers?.length === 1}
 				options={userOptions}
 				value={excludedUserIds}
 				isMultiSelect
@@ -99,3 +98,6 @@ export default function LibraryExclusions() {
 		</div>
 	)
 }
+
+const LOCALE_KEY = 'librarySettingsScene.danger-zone/access-control.sections.libraryExclusions'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`

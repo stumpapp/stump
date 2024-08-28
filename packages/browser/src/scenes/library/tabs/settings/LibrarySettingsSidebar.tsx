@@ -5,11 +5,12 @@ import React from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
 import { usePreferences } from '@/hooks/usePreferences'
+import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
 import paths from '@/paths'
 import { SideBarLinkButton } from '@/scenes/settings'
 
 import { useLibraryContext } from '../../context'
-import { formatLabel, useLibrarySettingsRoutes } from './useLibrarySettingsRoutes'
+import { routeGroups } from './routes'
 
 export default function LibrarySettingsSidebar() {
 	const location = useLocation()
@@ -20,8 +21,7 @@ export default function LibrarySettingsSidebar() {
 	const {
 		preferences: { enable_replace_primary_sidebar, primary_navigation_mode },
 	} = usePreferences()
-
-	const { groups } = useLibrarySettingsRoutes()
+	const { groups } = useRouteGroups({ routeGroups })
 
 	return (
 		<div
@@ -51,13 +51,13 @@ export default function LibrarySettingsSidebar() {
 					.map(({ label, items }) => {
 						// TODO: refactor the group shit
 						const groupLabel = label
-							? t(`librarySettingsScene.sidebar.${formatLabel(label)}.label`)
+							? t(`librarySettingsScene.sidebar.${formatRouteKey(label)}.label`)
 							: ''
 
 						const withGroup = (key: string) =>
 							label
-								? t(`librarySettingsScene.sidebar.${formatLabel(label)}.${formatLabel(key)}`)
-								: t(`librarySettingsScene.sidebar.${formatLabel(key)}`)
+								? t(`librarySettingsScene.sidebar.${formatRouteKey(label)}.${formatRouteKey(key)}`)
+								: t(`librarySettingsScene.sidebar.${formatRouteKey(key)}`)
 
 						return (
 							<div key={groupLabel}>

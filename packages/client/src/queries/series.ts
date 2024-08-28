@@ -38,6 +38,7 @@ export const prefetchSeries = async (
 	}
 }
 
+// FIXME: The query key is fucked and so not caching as expected
 export const prefetchLibrarySeries = (id: string) =>
 	queryClient.prefetchQuery(
 		[

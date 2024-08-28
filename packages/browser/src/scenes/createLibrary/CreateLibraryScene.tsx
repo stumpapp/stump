@@ -1,26 +1,32 @@
 import { handleApiError } from '@stump/api'
 import { useCreateLibraryMutation, useLibraries } from '@stump/client'
-import { Alert, Heading, Link, Text } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
+import { Alert } from '@stump/components'
 import { CreateLibrary } from '@stump/types'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 
+import { SceneContainer } from '@/components/container'
 import { CreateLibraryForm, CreateOrUpdateLibrarySchema } from '@/components/library/createOrUpdate'
+import { useConfetti } from '@/hooks/useConfetti'
 import paths from '@/paths'
+
+import { CreateLibraryContext } from './context'
+import CreateLibraryHeader from './CreateLibraryHeader'
 
 export default function CreateLibraryScene() {
 	const navigate = useNavigate()
+	const { start: startConfetti } = useConfetti({ duration: 5000 })
 
-	const { t } = useLocaleContext()
 	const { libraries } = useLibraries({ suspense: true })
-
 	const { createLibrary, isLoading, error } = useCreateLibraryMutation({
-		onSuccess: () => {
-			navigate(paths.home())
+		onSuccess: ({ id }) => {
+			navigate(paths.librarySeries(id))
+			startConfetti()
 		},
 	})
 	const createError = useMemo(() => (error ? handleApiError(error) : undefined), [error])
+
+	const [formStep, setFormStep] = useState(1)
 
 	const handleSubmit = useCallback(
 		(values: CreateOrUpdateLibrarySchema) => {
@@ -34,7 +40,8 @@ export default function CreateLibraryScene() {
 				},
 				name,
 				path,
-				scan_mode,
+				// TODO: take this in
+				scan_mode: 'NONE',
 				tags: tags?.map(({ value }) => value),
 			}
 
@@ -53,30 +60,31 @@ export default function CreateLibraryScene() {
 		}
 	}, [createError])
 
+	// TODO: this layout is likely incorrect...
 	return (
-		<>
-			<header>
-				<Heading size="lg" className="font-bold">
-					{t('createLibraryScene.heading')}
-				</Heading>
-				<Text size="sm" variant="muted" className="mt-1.5">
-					{t('createLibraryScene.subtitle')}{' '}
-					<Link href="https://stumpapp.dev/guides/basics/libraries">
-						{t('createLibraryScene.subtitleLink')}.
-					</Link>
-				</Text>
-			</header>
-			<div className="flex flex-col gap-12">
-				{createError && <Alert level="error">{createError}</Alert>}
+		<div className="relative flex flex-1 flex-col">
+			<CreateLibraryContext.Provider
+				value={{
+					formStep,
+					setStep: setFormStep,
+				}}
+			>
+				<CreateLibraryHeader />
 
-				{libraries && (
-					<CreateLibraryForm
-						existingLibraries={libraries}
-						onSubmit={handleSubmit}
-						isLoading={isLoading}
-					/>
-				)}
-			</div>
-		</>
+				<SceneContainer>
+					<div className="flex flex-col gap-12">
+						{createError && <Alert level="error">{createError}</Alert>}
+
+						{libraries && (
+							<CreateLibraryForm
+								existingLibraries={libraries}
+								onSubmit={handleSubmit}
+								isLoading={isLoading}
+							/>
+						)}
+					</div>
+				</SceneContainer>
+			</CreateLibraryContext.Provider>
+		</div>
 	)
 }

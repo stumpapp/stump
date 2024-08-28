@@ -39,44 +39,41 @@ export default function BasicLibraryInformation({
 					</Text>
 				</div>
 			)}
-			<Input
-				variant="primary"
-				label={t(getKey('name.label'))}
-				description={t(getKey('name.description'))}
-				placeholder={t(getKey('name.placeholder'))}
-				containerClassName="max-w-full md:max-w-sm"
-				required
-				errorMessage={errors.name?.message}
-				data-1p-ignore
-				{...form.register('name')}
-			/>
-			<Input
-				variant="primary"
-				label={t(getKey('path.label'))}
-				description={t(getKey('path.description'))}
-				placeholder={t(getKey('path.placeholder'))}
-				containerClassName="max-w-full md:max-w-sm"
-				rightDecoration={
-					<IconButton
-						size="xs"
-						variant="ghost"
-						type="button"
-						onClick={() => onSetShowDirectoryPicker(true)}
-					>
-						<Folder className="h-4 w-4 text-foreground-muted" />
-					</IconButton>
-				}
-				required
-				errorMessage={errors.path?.message}
-				{...form.register('path')}
-			/>
 
-			<TagSelect
-				label={t(getKey('tags.label'))}
-				description={t(getKey('tags.description'))}
-				selected={tags}
-				onChange={(value) => form.setValue('tags', value)}
-			/>
+			<div className="flex flex-col flex-wrap gap-y-6 md:flex-row md:gap-x-6 md:gap-y-0">
+				<Input
+					variant="primary"
+					label={t(getKey('name.label'))}
+					description={t(getKey('name.description'))}
+					placeholder={t(getKey('name.placeholder'))}
+					containerClassName="max-w-full md:max-w-sm"
+					required
+					errorMessage={errors.name?.message}
+					data-1p-ignore
+					{...form.register('name')}
+				/>
+
+				<Input
+					variant="primary"
+					label={t(getKey('path.label'))}
+					description={t(getKey('path.description'))}
+					placeholder={t(getKey('path.placeholder'))}
+					containerClassName="max-w-full md:max-w-sm"
+					rightDecoration={
+						<IconButton
+							size="xs"
+							variant="ghost"
+							type="button"
+							onClick={() => onSetShowDirectoryPicker(true)}
+						>
+							<Folder className="h-4 w-4 text-foreground-muted" />
+						</IconButton>
+					}
+					required
+					errorMessage={errors.path?.message}
+					{...form.register('path')}
+				/>
+			</div>
 
 			<TextArea
 				className="flex"
@@ -84,8 +81,15 @@ export default function BasicLibraryInformation({
 				label={t(getKey('description.label'))}
 				description={t(getKey('description.description'))}
 				placeholder={t(getKey('description.placeholder'))}
-				containerClassName="max-w-full md:max-w-sm"
+				containerClassName="max-w-full md:max-w-sm lg:max-w-lg"
 				{...form.register('description')}
+			/>
+
+			<TagSelect
+				label={t(getKey('tags.label'))}
+				description={t(getKey('tags.description'))}
+				selected={tags}
+				onChange={(value) => form.setValue('tags', value)}
 			/>
 		</div>
 	)

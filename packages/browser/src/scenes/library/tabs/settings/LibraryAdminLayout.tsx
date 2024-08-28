@@ -6,13 +6,14 @@ import { SceneContainer } from '@/components/container'
 import { useAppContext } from '@/context'
 import { usePreferences } from '@/hooks'
 
+type Props = {
+	applySceneDefaults?: boolean
+}
+
 /**
  *  Component that renders the layout for the library admin pages. This includes:
- *
- * - Creating a new library
- * - Updating an existing library
  */
-export default function LibraryAdminLayout() {
+export default function LibraryAdminLayout({ applySceneDefaults = true }: Props) {
 	const { checkPermission } = useAppContext()
 	const {
 		preferences: { primary_navigation_mode },
@@ -30,17 +31,27 @@ export default function LibraryAdminLayout() {
 		return null
 	}
 
-	return (
-		<div className="flex h-full w-full items-start justify-start">
-			<SceneContainer
-				className={cx('flex min-h-full w-full flex-grow flex-col space-y-6', {
-					'max-w-4xl': primary_navigation_mode === 'SIDEBAR',
-				})}
-			>
+	const renderInner = () => {
+		if (applySceneDefaults) {
+			return (
+				<SceneContainer
+					className={cx('flex min-h-full w-full flex-grow flex-col space-y-6', {
+						'max-w-4xl': primary_navigation_mode === 'SIDEBAR',
+					})}
+				>
+					<Suspense>
+						<Outlet />
+					</Suspense>
+				</SceneContainer>
+			)
+		} else {
+			return (
 				<Suspense>
 					<Outlet />
 				</Suspense>
-			</SceneContainer>
-		</div>
-	)
+			)
+		}
+	}
+
+	return <div className="flex h-full w-full items-start justify-start">{renderInner()}</div>
 }

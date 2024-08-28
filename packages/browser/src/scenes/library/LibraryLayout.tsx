@@ -3,6 +3,7 @@ import { cn } from '@stump/components'
 import React, { useMemo } from 'react'
 import { Suspense, useEffect } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router'
+import { useMediaMatch } from 'rooks'
 
 import { SceneContainer } from '@/components/container'
 import { usePreferences } from '@/hooks'
@@ -33,7 +34,9 @@ export default function LibraryLayout() {
 	} = usePreferences()
 
 	const isSettings = useMemo(() => location.pathname.includes('settings'), [location.pathname])
-	// const displaySideBar = !!enable_double_sidebar && isSettings
+	const isMobile = useMediaMatch('(max-width: 768px)')
+
+	const displaySideBar = !!enable_double_sidebar && !isMobile && isSettings
 
 	useEffect(() => {
 		if (!isLoading && !library) {
@@ -52,13 +55,12 @@ export default function LibraryLayout() {
 
 				{!isSettings && <LibraryNavigation />}
 
-				{/* TODO: animate this sidebar entering... */}
-				{isSettings && <LibrarySettingsSidebar />}
+				{displaySideBar && <LibrarySettingsSidebar />}
 
 				<SceneContainer
 					className={cn('relative flex flex-1 flex-col gap-4 p-0 md:pb-0', {
 						'md:hide-scrollbar': !!enable_hide_scrollbar,
-						'ml-48': isSettings,
+						'ml-48': displaySideBar,
 					})}
 				>
 					<Suspense fallback={null}>

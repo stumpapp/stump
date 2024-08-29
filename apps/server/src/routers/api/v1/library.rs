@@ -27,8 +27,9 @@ use stump_core::{
 		analyze_media_job::AnalyzeMediaJob,
 		get_unknown_thumnail,
 		image::{
-			self, generate_thumbnail, place_thumbnail, remove_thumbnails, ImageFormat,
-			ImageProcessorOptions, ThumbnailGenerationJob, ThumbnailGenerationJobParams,
+			self, generate_book_thumbnail, place_thumbnail, remove_thumbnails,
+			GenerateThumbnailOptions, ImageFormat, ImageProcessorOptions,
+			ThumbnailGenerationJob, ThumbnailGenerationJobParams,
 		},
 		read_entire_file,
 		scanner::LibraryScanJob,
@@ -746,7 +747,7 @@ async fn patch_library_thumbnail(
 		.ok_or(APIError::NotFound(String::from("Series relation missing")))?
 		.library()?
 		.ok_or(APIError::NotFound(String::from("Library relation missing")))?;
-	let thumbnail_options = library
+	let image_options = library
 		.library_options()?
 		.thumbnail_config
 		.to_owned()
@@ -760,8 +761,17 @@ async fn patch_library_thumbnail(
 		})
 		.with_page(target_page);
 
-	let format = thumbnail_options.format.clone();
-	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options, &ctx.config)?;
+	let format = image_options.format.clone();
+	let (_, path_buf, _) = generate_book_thumbnail(
+		&media,
+		GenerateThumbnailOptions {
+			image_options,
+			core_config: ctx.config.as_ref().clone(),
+			force_regen: true,
+		},
+	)
+	.await?;
+
 	Ok(ImageResponse::from((
 		ContentType::from(format),
 		read_entire_file(path_buf)?,
@@ -807,7 +817,7 @@ async fn replace_library_thumbnail(
 		),
 	}
 
-	let path_buf = place_thumbnail(&library_id, ext, &bytes, &ctx.config)?;
+	let path_buf = place_thumbnail(&library_id, ext, &bytes, &ctx.config).await?;
 
 	Ok(ImageResponse::from((
 		content_type,
@@ -830,7 +840,6 @@ async fn replace_library_thumbnail(
 		(status = 500, description = "Internal server error")
 	)
 )]
-// TODO: make this a queuable job
 async fn delete_library_thumbnails(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,

@@ -328,6 +328,8 @@ pub(crate) struct MediaBuildOperationCtx {
 	pub chunk_size: usize,
 }
 
+// TODO: explore spawn_blocking + semaphore(chunk_size) here instead of rayon
+
 pub(crate) async fn handle_create_media(
 	build_ctx: MediaBuildOperationCtx,
 	worker_ctx: &WorkerCtx,
@@ -408,6 +410,8 @@ pub(crate) async fn handle_create_media(
 
 	Ok(output)
 }
+
+// TODO: explore spawn_blocking + semaphore(chunk_size) here instead of rayon
 
 pub(crate) async fn handle_visit_media(
 	build_ctx: MediaBuildOperationCtx,

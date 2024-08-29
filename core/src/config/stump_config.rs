@@ -29,7 +29,7 @@ pub mod env_keys {
 	pub const HASH_COST_KEY: &str = "HASH_COST";
 	pub const SESSION_TTL_KEY: &str = "SESSION_TTL";
 	pub const SESSION_EXPIRY_INTERVAL_KEY: &str = "SESSION_EXPIRY_CLEANUP_INTERVAL";
-	pub const SCANNER_CHUNK_SIZE_KEY: &str = "STUMP_SCANNER_CHUNK_SIZE";
+	pub const SCANNER_CHUNK_SIZE_KEY: &str = "STUMP_SCANNER_CHUNK_SIZE"; // TODO: FILE_PROCESSING_MAX_CONCURRENCY_KEY
 }
 use env_keys::*;
 
@@ -38,7 +38,7 @@ pub mod defaults {
 	pub const DEFAULT_SESSION_TTL: i64 = 3600 * 24 * 3; // 3 days
 	pub const DEFAULT_ACCESS_TOKEN_TTL: i64 = 3600 * 24; // 1 days
 	pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
-	pub const DEFAULT_SCANNER_CHUNK_SIZE: usize = 100;
+	pub const DEFAULT_SCANNER_CHUNK_SIZE: usize = 100; // TODO: DEFAULT_FILE_PROCESSING_MAX_CONCURRENCY
 }
 use defaults::*;
 

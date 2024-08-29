@@ -37,7 +37,7 @@ pub struct JobProgress {
 	pub completed_subtasks: Option<i32>,
 	/// The number of subtasks that exist in the current task
 	#[specta(optional)]
-	pub remaining_subtasks: Option<i32>,
+	pub total_subtasks: Option<i32>,
 }
 
 impl JobProgress {
@@ -98,7 +98,7 @@ impl JobProgress {
 	pub fn subtask_position(index: i32, size: i32) -> Self {
 		Self {
 			completed_subtasks: Some(index),
-			remaining_subtasks: Some(size),
+			total_subtasks: Some(size),
 			..Default::default()
 		}
 	}

@@ -1,7 +1,18 @@
 import { useJobStore } from '@stump/client'
 import { ProgressBar, Text } from '@stump/components'
+import { JobUpdate } from '@stump/types'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo } from 'react'
+
+// TODO: refactor this component along with the entire reporting model. It's honestly super
+// confusing and poorly designed. For jobs with one task but operate primarily via subtasks,
+// we will see Tasks (0/1) and x/y subtasks. I've modified it for a little bit of improvement,
+// but the root issue is really the fact that we send different values:
+// over-arching task count: completed_tasks, remaining_tasks
+// sub-task count: completed_subtasks, total_subtasks
+// The ideal would be the latter for each. This would allow us to have a more consistent
+// experience and make the UI more predictable. Since internally, the task system uses a vecdeque,
+// we can't just get the length of the vecdeque, so it is more effort to change this than it seems.
 
 export default function JobOverlay() {
 	const storeJobs = useJobStore((state) => state.jobs)
@@ -12,29 +23,15 @@ export default function JobOverlay() {
 		[storeJobs],
 	)
 
-	const getSubTaskCounts = () => {
-		if (!firstRunningJob) return null
+	const subTaskCounts = useMemo(
+		() => (firstRunningJob ? calcSubTaskCounts(firstRunningJob) : null),
+		[firstRunningJob],
+	)
 
-		const { completed_subtasks, remaining_subtasks } = firstRunningJob
-		if (remaining_subtasks != null && remaining_subtasks > 0) {
-			return getCounts(completed_subtasks, remaining_subtasks)
-		} else {
-			return null
-		}
-	}
-	const subTaskCounts = useMemo(getSubTaskCounts, [firstRunningJob])
-
-	const getTaskCounts = () => {
-		if (!firstRunningJob) return null
-
-		const { completed_tasks, remaining_tasks } = firstRunningJob
-		if (remaining_tasks != null && remaining_tasks >= 0) {
-			return getCounts(completed_tasks, remaining_tasks)
-		} else {
-			return null
-		}
-	}
-	const taskCounts = useMemo(getTaskCounts, [firstRunningJob])
+	const taskCounts = useMemo(
+		() => (firstRunningJob ? calcTaskCounts(firstRunningJob) : null),
+		[firstRunningJob],
+	)
 
 	const progressValue = useMemo(() => {
 		if (subTaskCounts != null) {
@@ -48,8 +45,14 @@ export default function JobOverlay() {
 		return null
 	}, [subTaskCounts, taskCounts])
 
-	const renderTaskCounts = () => `${taskCounts?.completed ?? 0}/${taskCounts?.total ?? 0}`
-	const renderSubTaskCounts = () => `${subTaskCounts?.completed ?? 0}/${subTaskCounts?.total ?? 0}`
+	const taskCountString = useMemo(
+		() => (taskCounts?.total ? `Tasks (${taskCounts?.completed ?? 0}/${taskCounts.total})` : null),
+		[taskCounts],
+	)
+	const subTaskCountString = useMemo(
+		() => (subTaskCounts?.total ? `${subTaskCounts?.completed ?? 0}/${subTaskCounts.total}` : null),
+		[subTaskCounts],
+	)
 
 	return (
 		<AnimatePresence>
@@ -66,10 +69,15 @@ export default function JobOverlay() {
 
 					<div className="flex w-full flex-col gap-y-2">
 						<div className="flex w-full items-center justify-between">
-							<Text size="xs">Tasks ({renderTaskCounts()})</Text>
-							{subTaskCounts && <Text size="xs">{renderSubTaskCounts()}</Text>}
+							{taskCountString && <Text size="xs">{taskCountString}</Text>}
+							{subTaskCounts && <Text size="xs">{subTaskCountString}</Text>}
 						</div>
-						<ProgressBar value={progressValue} size="sm" variant="primary" />
+						<ProgressBar
+							value={progressValue}
+							size="sm"
+							variant="primary"
+							isIndeterminate={!subTaskCounts && !taskCounts}
+						/>
 					</div>
 				</motion.div>
 			)}
@@ -77,14 +85,20 @@ export default function JobOverlay() {
 	)
 }
 
-type TaskCount = {
-	completed: number
-	total: number
-}
-const getCounts = (completed: number | null, remaining: number | null): TaskCount => {
-	const total = (completed ?? 0) + (remaining ?? 0)
+const calcTaskCounts = ({ completed_tasks, remaining_tasks }: JobUpdate) => {
+	if (remaining_tasks == null || !completed_tasks) return null
+
+	const total = (completed_tasks ?? 0) + (remaining_tasks ?? 0)
 	return {
-		completed: completed ?? 0,
+		completed: completed_tasks ?? 0,
 		total,
+	}
+}
+
+const calcSubTaskCounts = ({ completed_subtasks, total_subtasks }: JobUpdate) => {
+	if (total_subtasks == null) return null
+	return {
+		completed: completed_subtasks ?? 0,
+		total: total_subtasks,
 	}
 }

@@ -32,14 +32,14 @@ export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGene
 /**
  * An update event that is emitted by a job
  */
-export type JobUpdate = ({ status?: JobStatus | null; message?: string | null; completed_tasks?: number | null; remaining_tasks?: number | null; completed_subtasks?: number | null; remaining_subtasks?: number | null }) & { id: string }
+export type JobUpdate = ({ status?: JobStatus | null; message?: string | null; completed_tasks?: number | null; remaining_tasks?: number | null; completed_subtasks?: number | null; total_subtasks?: number | null }) & { id: string }
 
 /**
  * A struct that represents a progress event that is emitted by a job. This behaves like a patch,
  * where the client will ignore any fields that are not present. This is done so all internal ops
  * can be done without needing to know the full state of the job.
  */
-export type JobProgress = { status?: JobStatus | null; message?: string | null; completed_tasks?: number | null; remaining_tasks?: number | null; completed_subtasks?: number | null; remaining_subtasks?: number | null }
+export type JobProgress = { status?: JobStatus | null; message?: string | null; completed_tasks?: number | null; remaining_tasks?: number | null; completed_subtasks?: number | null; total_subtasks?: number | null }
 
 /**
  * The data that is collected and updated during the execution of a library scan job
@@ -52,7 +52,7 @@ export type ThumbnailGenerationJobVariant = ({ type: "SingleLibrary" } & string)
 
 export type ThumbnailGenerationJobParams = { variant: ThumbnailGenerationJobVariant; force_regenerate: boolean }
 
-export type ThumbnailGenerationOutput = { visited_files: BigInt; generated_thumbnails: BigInt; removed_thumbnails: BigInt }
+export type ThumbnailGenerationOutput = { visited_files: BigInt; skipped_files: BigInt; generated_thumbnails: BigInt; removed_thumbnails: BigInt }
 
 export type User = { id: string; username: string; is_server_owner: boolean; avatar_url: string | null; created_at: string; last_login: string | null; is_locked: boolean; permissions: UserPermission[]; max_sessions_allowed?: number | null; login_sessions_count?: number | null; user_preferences?: UserPreferences | null; login_activity?: LoginActivity[] | null; age_restriction?: AgeRestriction | null; active_reading_sessions?: ActiveReadingSession[] | null; finished_reading_sessions?: FinishedReadingSession[] | null }
 
@@ -133,7 +133,7 @@ export type Series = { id: string; name: string; path: string; description: stri
 /**
  * Struct representing the metadata for a processed file.
  */
-export type MediaMetadata = { title: string | null; series: string | null; number: number | null; volume: number | null; summary: string | null; notes: string | null; age_rating?: number | null; genre?: string[] | null; year: number | null; month: number | null; day: number | null; writers?: string[] | null; pencillers?: string[] | null; inkers?: string[] | null; colorists?: string[] | null; letterers?: string[] | null; cover_artists?: string[] | null; editors?: string[] | null; publisher: string | null; links?: string[] | null; characters?: string[] | null; teams?: string[] | null; page_count: number | null }
+export type MediaMetadata = { title?: string | null; series?: string | null; number?: number | null; volume?: number | null; summary?: string | null; notes?: string | null; age_rating?: number | null; genre?: string[] | null; year?: number | null; month?: number | null; day?: number | null; writers?: string[] | null; pencillers?: string[] | null; inkers?: string[] | null; colorists?: string[] | null; letterers?: string[] | null; cover_artists?: string[] | null; editors?: string[] | null; publisher?: string | null; links?: string[] | null; characters?: string[] | null; teams?: string[] | null; page_count?: number | null }
 
 export type Media = { id: string; name: string; size: BigInt; extension: string; pages: number; updated_at: string; created_at: string; modified_at: string | null; hash: string | null; path: string; status: FileStatus; series_id: string; metadata: MediaMetadata | null; series?: Series | null; active_reading_session?: ActiveReadingSession | null; finished_reading_sessions: FinishedReadingSession[] | null; current_page?: number | null; current_epubcfi?: string | null; is_completed?: boolean | null; tags?: Tag[] | null; bookmarks?: Bookmark[] | null }
 

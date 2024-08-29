@@ -46,7 +46,7 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 					description={t(getKey('name.description'))}
 					placeholder={t(getKey('name.placeholder'))}
 					containerClassName="max-w-full md:max-w-sm"
-					required
+					required={isCreatingLibrary}
 					errorMessage={errors.name?.message}
 					data-1p-ignore
 					{...form.register('name')}
@@ -68,7 +68,7 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 							<Folder className="h-4 w-4 text-foreground-muted" />
 						</IconButton>
 					}
-					required
+					required={isCreatingLibrary}
 					errorMessage={errors.path?.message}
 					{...form.register('path')}
 				/>

@@ -1,10 +1,10 @@
 import { Heading, IconButton, Input, Text, TextArea } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Folder } from 'lucide-react'
-import React, { useMemo } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, useFormState } from 'react-hook-form'
 
 import TagSelect from '@/components/TagSelect'
+import { useLibraryContextSafe } from '@/scenes/library/context'
 
 import { CreateOrUpdateLibrarySchema } from '../schema'
 
@@ -13,22 +13,20 @@ const getKey = (key: string) => `${LOCALE_KEY}.fields.${key}`
 const getSectionKey = (key: string) => `${LOCALE_KEY}.sections.${key}`
 
 type Props = {
-	isCreatingLibrary?: boolean
 	onSetShowDirectoryPicker: (value: boolean) => void
 }
 
-export default function BasicLibraryInformation({
-	isCreatingLibrary,
-	onSetShowDirectoryPicker,
-}: Props) {
-	const { t } = useLocaleContext()
-
+export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Props) {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
+	const ctx = useLibraryContextSafe()
+
+	const isCreatingLibrary = !ctx?.library
 	const tags = form.watch('tags')
 
-	const errors = useMemo(() => {
-		return form.formState.errors
-	}, [form.formState.errors])
+	const { t } = useLocaleContext()
+	const { errors } = useFormState({
+		control: form.control,
+	})
 
 	return (
 		<div className="flex flex-grow flex-col gap-6">

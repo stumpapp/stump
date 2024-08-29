@@ -5,7 +5,10 @@ import React, { useCallback } from 'react'
 
 import { useCreateLibraryContext } from './context'
 
-const NUM_STEPS = 3
+/**
+ * The number of steps before the review step (so really the number of steps - 1)
+ */
+const NUM_STEPS_BEFORE_REVIEW = 3
 
 export default function CreateLibraryStepIndicators() {
 	const { formStep } = useCreateLibraryContext()
@@ -13,7 +16,7 @@ export default function CreateLibraryStepIndicators() {
 
 	return (
 		<div className="flex items-center">
-			{Array.from({ length: NUM_STEPS }, (_, i) => {
+			{Array.from({ length: NUM_STEPS_BEFORE_REVIEW }, (_, i) => {
 				const step = i + 1
 				const isComplete = step < formStep
 				return (
@@ -24,7 +27,7 @@ export default function CreateLibraryStepIndicators() {
 							isComplete={isComplete}
 							currentStep={formStep}
 						/>
-						{step < NUM_STEPS && <div className="h-0.5 w-12 bg-edge" />}
+						{step < NUM_STEPS_BEFORE_REVIEW && <div className="h-0.5 w-12 bg-edge" />}
 					</div>
 				)
 			})}
@@ -36,13 +39,23 @@ const LOCALE_KEY = 'createLibraryScene'
 const getStepKey = (step: number, key: string) => `${LOCALE_KEY}.form.steps.${step - 1}.${key}`
 
 type IndicatorProps = {
+	/**
+	 * The step for this indicator
+	 */
 	step: number
+	/**
+	 * The step which is currently active in the form
+	 */
 	currentStep: number
+	/**
+	 * The label for this step
+	 */
 	label: string
+	/**
+	 * Whether this step is complete
+	 */
 	isComplete: boolean
 }
-
-// TODO: disable state based on whether the current step is valid?
 
 const Indicator = ({ step, label, isComplete, currentStep }: IndicatorProps) => {
 	const { setStep } = useCreateLibraryContext()
@@ -63,6 +76,12 @@ const Indicator = ({ step, label, isComplete, currentStep }: IndicatorProps) => 
 		}
 	}
 
+	// TODO: consider making this component 'smart' and knowing the validity of the form
+	/**
+	 * A handler to set the step to this indicator's step. Note that this is only
+	 * allowed if the step is less than the current step, since we are unaware of the
+	 * validity of the form at this point.
+	 */
 	const handleClick = useCallback(() => {
 		if (currentStep > step) {
 			setStep(step)

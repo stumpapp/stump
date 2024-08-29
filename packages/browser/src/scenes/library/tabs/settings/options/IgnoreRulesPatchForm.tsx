@@ -4,7 +4,7 @@ import React, { useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
 import {
-	buildScema,
+	buildSchema,
 	CreateOrUpdateLibrarySchema,
 	formDefaults,
 	IgnoreRulesConfig,
@@ -16,7 +16,7 @@ import { useLibraryManagement } from '../context'
 export default function IgnoreRulesPatchForm() {
 	const { library, patch } = useLibraryManagement()
 
-	const schema = useMemo(() => buildScema([], library), [library])
+	const schema = useMemo(() => buildSchema([], library), [library])
 	const form = useForm<CreateOrUpdateLibrarySchema>({
 		defaultValues: formDefaults(library),
 		reValidateMode: 'onChange',

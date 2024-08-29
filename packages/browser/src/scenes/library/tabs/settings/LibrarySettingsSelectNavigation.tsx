@@ -14,16 +14,26 @@ export default function LibrarySettingsSelectNavigation() {
 	const { t } = useLocaleContext()
 	const { groups } = useRouteGroups({ routeGroups })
 
+	/**
+	 * The active group based on the current location
+	 */
 	const activeRouteGroup = useMemo(
 		() => groups.find((group) => group.items.some((page) => location.pathname.startsWith(page.to))),
 		[location.pathname, groups],
 	)
 
+	/**
+	 * The active sub-route based on the current location, if any
+	 */
 	const activeSubRoute = useMemo(
 		() => activeRouteGroup?.items.find((page) => location.pathname.startsWith(page.to))?.to,
 		[activeRouteGroup, location.pathname],
 	)
 
+	/**
+	 * The options for the select dropdown, which is effectively just a flattened list of all
+	 * available routes in all groups
+	 */
 	const selectOptions = useMemo(() => {
 		const allOptions = groups.flatMap(
 			(group) =>
@@ -40,6 +50,10 @@ export default function LibrarySettingsSelectNavigation() {
 
 		return allOptions
 	}, [t, groups])
+
+	if (!selectOptions.length) {
+		return null
+	}
 
 	return (
 		<NativeSelect

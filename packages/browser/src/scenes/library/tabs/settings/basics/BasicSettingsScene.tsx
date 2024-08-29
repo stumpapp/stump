@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 
 import DirectoryPickerModal from '@/components/DirectoryPickerModal'
 import {
-	buildScema,
+	buildSchema,
 	CreateOrUpdateLibrarySchema,
 	formDefaults,
 } from '@/components/library/createOrUpdate'
@@ -16,7 +16,7 @@ import { useLibraryManagement } from '../context'
 export default function BasicSettingsScene() {
 	const { library, patch } = useLibraryManagement()
 
-	const schema = useMemo(() => buildScema([], library), [library])
+	const schema = useMemo(() => buildSchema([], library), [library])
 	const form = useForm<CreateOrUpdateLibrarySchema>({
 		defaultValues: formDefaults(library),
 		reValidateMode: 'onChange',
@@ -64,10 +64,7 @@ export default function BasicSettingsScene() {
 				}}
 			/>
 
-			<BasicLibraryInformation
-				isCreatingLibrary={false}
-				onSetShowDirectoryPicker={setShowDirectoryPicker}
-			/>
+			<BasicLibraryInformation onSetShowDirectoryPicker={setShowDirectoryPicker} />
 
 			<div>
 				<Button type="submit" disabled={!hasChanges}>

@@ -53,7 +53,8 @@ export default function LibrarySettingsHeader() {
 	return (
 		<header
 			className={cn('flex w-full flex-col space-y-4 border-b border-b-edge p-4 md:pl-52', {
-				'mx-auto': preferTopBar && !!layout_max_width_px,
+				// Note: We make the border transparent because the width constraint when using a top bar
+				'mx-auto border-b-transparent': preferTopBar && !!layout_max_width_px,
 			})}
 			style={{
 				maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined,

@@ -3,14 +3,22 @@ import { IgnoreRules, Library, LibraryPattern, LibraryScanMode } from '@stump/ty
 import isValidGlob from 'is-valid-glob'
 import { z } from 'zod'
 
+/**
+ * A type guard to check if the input is a valid {@link LibraryScanMode}
+ */
 const isLibraryScanMode = (input: string): input is LibraryScanMode => {
 	return input === 'DEFAULT' || input === 'QUICK' || input === 'NONE' || !input
 }
 
+/**
+ * A type guard to check if the input is a valid {@link LibraryPattern}
+ */
 const isLibraryPattern = (input: string): input is LibraryPattern => {
 	return input === 'SERIES_BASED' || input === 'COLLECTION_BASED' || !input
 }
-
+/**
+ * A helper function to convert persisted ignore rules to the form format
+ */
 export const toFormIgnoreRules = (ignoreRules: IgnoreRules = []) =>
 	ignoreRules.map((rule) => ({
 		glob: rule,
@@ -47,7 +55,10 @@ const resizeOptionsSchema = z
 					: 'Height and width must be whole numbers greater than 0',
 		}),
 	)
-export const buildScema = (existingLibraries: Library[], library?: Library) =>
+/**
+ * A function which builds a schema used for validating form data when creating or updating a library
+ */
+export const buildSchema = (existingLibraries: Library[], library?: Library) =>
 	z.object({
 		convert_rar_to_zip: z.boolean().default(false),
 		description: z.string().nullable().optional(),
@@ -109,8 +120,12 @@ export const buildScema = (existingLibraries: Library[], library?: Library) =>
 			resize_options: resizeOptionsSchema.nullable().optional(),
 		}),
 	})
-export type CreateOrUpdateLibrarySchema = z.infer<ReturnType<typeof buildScema>>
+export type CreateOrUpdateLibrarySchema = z.infer<ReturnType<typeof buildSchema>>
 
+/**
+ * A function to create the default values for the form which creates or updates a library,
+ * provided an existing library (if editing)
+ */
 export const formDefaults = (library?: Library): CreateOrUpdateLibrarySchema => ({
 	convert_rar_to_zip: library?.library_options.convert_rar_to_zip ?? false,
 	description: library?.description,
@@ -134,10 +149,9 @@ export const formDefaults = (library?: Library): CreateOrUpdateLibrarySchema => 
 			},
 })
 
-export const toLibraryPatchTags = (library: Library) => library.tags?.map((t) => t.name)
-export const libraryPatchDefaults = (library: Library) => ({
-	tags: toLibraryPatchTags(library),
-})
+/**
+ * A function to ensure that the thumbnail config is valid before returning it
+ */
 export const ensureValidThumbnailConfig = (
 	thumbnail_config: PickSelect<CreateOrUpdateLibrarySchema, 'thumbnail_config'>,
 ) => {

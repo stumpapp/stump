@@ -15,8 +15,8 @@ import CreateLibraryHeader from './CreateLibraryHeader'
 
 export default function CreateLibraryScene() {
 	const navigate = useNavigate()
-	const { start: startConfetti } = useConfetti({ duration: 5000 })
 
+	const { start: startConfetti } = useConfetti({ duration: 5000 })
 	const { libraries } = useLibraries({ suspense: true })
 	const { createLibrary, isLoading, error } = useCreateLibraryMutation({
 		onSuccess: ({ id }) => {
@@ -27,7 +27,10 @@ export default function CreateLibraryScene() {
 	const createError = useMemo(() => (error ? handleApiError(error) : undefined), [error])
 
 	const [formStep, setFormStep] = useState(1)
-
+	/**
+	 * A function which will handle the submission of the form, creating a new library
+	 * provided the form values. Note the transformation of certain values.
+	 */
 	const handleSubmit = useCallback(
 		(values: CreateOrUpdateLibrarySchema) => {
 			const {
@@ -70,7 +73,6 @@ export default function CreateLibraryScene() {
 		}
 	}, [createError])
 
-	// TODO: this layout is likely incorrect...
 	return (
 		<div className="relative flex flex-1 flex-col">
 			<CreateLibraryContext.Provider

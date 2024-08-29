@@ -8,7 +8,7 @@ import { ContentContainer } from '@/components/container'
 import DirectoryPickerModal from '@/components/DirectoryPickerModal'
 
 import {
-	buildScema,
+	buildSchema,
 	CreateOrUpdateLibrarySchema,
 	formDefaults,
 } from '../../components/library/createOrUpdate/schema'
@@ -34,7 +34,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 
 	const [showDirectoryPicker, setShowDirectoryPicker] = useState(false)
 
-	const schema = useMemo(() => buildScema(existingLibraries), [existingLibraries])
+	const schema = useMemo(() => buildSchema(existingLibraries), [existingLibraries])
 	const form = useForm<CreateOrUpdateLibrarySchema>({
 		defaultValues: formDefaults(),
 		reValidateMode: 'onChange',
@@ -48,8 +48,15 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 		}
 	}, [reset])
 
+	/**
+	 * The current path value from the form
+	 */
 	const [formPath] = form.watch(['path'])
 
+	/**
+	 * A callback to handle changing the form step. This will validate the current step
+	 * before moving to the next step.
+	 */
 	const handleChangeStep = useCallback(
 		async (nextStep: number) => {
 			let isValid = false
@@ -81,6 +88,9 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 		[form, formStep, setStep],
 	)
 
+	/**
+	 * Render the current step of the form
+	 */
 	const renderStep = () => {
 		switch (formStep) {
 			case 1:
@@ -141,6 +151,8 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 		}
 	}
 
+	// Note: The submit button is always rendered because I noticed that conditional rendering
+	// causes the form to trigger a submit event. FYI
 	return (
 		<>
 			<DirectoryPickerModal

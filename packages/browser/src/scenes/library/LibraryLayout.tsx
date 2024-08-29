@@ -27,8 +27,8 @@ export default function LibraryLayout() {
 	const {
 		preferences: {
 			enable_double_sidebar,
-			// primary_navigation_mode,
-			// layout_max_width_px,
+			primary_navigation_mode,
+			layout_max_width_px,
 			enable_hide_scrollbar,
 		},
 	} = usePreferences()
@@ -37,6 +37,7 @@ export default function LibraryLayout() {
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
 	const displaySideBar = !!enable_double_sidebar && !isMobile && isSettings
+	const preferTopBar = primary_navigation_mode === 'TOPBAR'
 
 	useEffect(() => {
 		if (!isLoading && !library) {
@@ -50,7 +51,14 @@ export default function LibraryLayout() {
 
 	return (
 		<LibraryContext.Provider value={{ library, stats }}>
-			<div className="relative flex flex-1 flex-col">
+			<div
+				className={cn('relative flex flex-1 flex-col', {
+					'mx-auto w-full': preferTopBar && !!layout_max_width_px,
+				})}
+				style={{
+					maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined,
+				}}
+			>
 				{renderHeader()}
 
 				{!isSettings && <LibraryNavigation />}

@@ -29,6 +29,10 @@ export default function LibrarySettingsRouter() {
 
 	// TODO: This is particularly fallible. It would be a lot wiser to eventually just.. yknow, literally
 	// implement a patch endpoint lol. I'm being very lazy but I'll get to it. I'm tired!
+	/**
+	 * A pseudo-patch function which will update the library, mixing what is present in the cache
+	 * with the updates provided.
+	 */
 	const patch = useCallback(
 		(updates: Partial<UpdateLibrary>) => {
 			const payload: UpdateLibrary = {

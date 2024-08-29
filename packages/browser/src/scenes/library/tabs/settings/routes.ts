@@ -1,32 +1,6 @@
-import { UserPermission } from '@stump/types'
-import { Image, LucideIcon, NotebookTabs, PackageX, ScanSearch, ShieldCheck } from 'lucide-react'
+import { Image, NotebookTabs, PackageX, ScanSearch, ShieldCheck } from 'lucide-react'
 
-// TODO(284): This is a copy of another hook, even the types. Generalize this instead!
-
-type SubItem = {
-	localeKey: string
-	matcher: (path: string) => boolean
-	backlink?: {
-		localeKey: string
-		to: string
-	}
-}
-
-type Route = {
-	icon: LucideIcon
-	label: string
-	localeKey: string
-	permission?: UserPermission
-	to: string
-	subItems?: SubItem[]
-	disabled?: boolean
-}
-
-type RouteGroup = {
-	defaultRoute: string
-	items: Route[]
-	label?: string
-}
+import { RouteGroup } from '@/hooks/useRouteGroups'
 
 export const routeGroups: RouteGroup[] = [
 	{
@@ -36,6 +10,9 @@ export const routeGroups: RouteGroup[] = [
 				icon: NotebookTabs,
 				label: 'Basics',
 				localeKey: 'basics',
+				// TODO: I the parent pretty much asserts library:manage, so this will never actually
+				// allow a user with just library:edit to access this route. I should probably fix that.
+				permission: 'library:edit',
 				to: 'settings/basics',
 			},
 		],

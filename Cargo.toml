@@ -19,6 +19,7 @@ derive_builder = "0.20.0"
 chrono = { version = "0.4.38", features = ["serde"] }
 futures = "0.3.30"
 futures-util = "0.3.30"
+itertools = "0.12.1"
 lettre = { version = "0.11.4", default-features = false, features = [
   "builder",
   "hostname",
@@ -56,5 +57,6 @@ tokio = { version = "1.37.0", features = [
   # Allows handling shutdown signals (e.g., ctrl+c)
   "signal",
 ] }
+toml = "0.8.8"
 tracing = "0.1.40"
 urlencoding = "2.1.3"

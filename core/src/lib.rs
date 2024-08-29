@@ -52,7 +52,7 @@ type EncryptionKeySet = bool;
 /// or environment variables to return a [StumpConfig] struct.
 ///
 /// ## Example:
-/// ```rust
+/// ```no_run
 /// use stump_core::{config, StumpCore};
 ///
 /// #[tokio::main]

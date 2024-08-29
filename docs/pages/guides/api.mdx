@@ -1,4 +1,6 @@
-# Stump's REST API
+import { Callout } from 'nextra-theme-docs'
+
+# REST API
 
 Stump exposes a REST API that allows you to interact with your Stump server.
 
@@ -10,7 +12,21 @@ Stump uses server-side sessions to authenticate users. These sessions are stored
 
 ### Basic Authentication
 
+<Callout emoji="🔐">
+	This functionality is only available on OPDS endpoints. You cannot authenticate with Basic
+	Authentication on the REST API
+</Callout>
+
 Stump supports [Basic Authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication) in order to properly support OPDS clients. Authenticating using this method will still create a server-side session for you.
+
+### JWT Access Tokens
+
+<Callout emoji="🚧">
+	This functionality is not fully implemented and subject to change. You can track the progress on
+	this feature in [this issue](https://github.com/stumpapp/stump/issues/219)
+</Callout>
+
+Short-lived JWT access tokens are available for API access, aimed at better enabling third-party applications and extensions to interact with Stump. While you can generate these tokens and use them to authenticate API requests, the API is still in development and subject to change. Once the API is more stable, we will provide more relevant documentation on how to generate and use these tokens.
 
 ## Swagger UI
 

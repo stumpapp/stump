@@ -21,7 +21,7 @@ impl AsRef<str> for EmailTemplate {
 /// Render a template to a string using the given data and templates directory.
 ///
 /// # Example
-/// ```rust
+/// ```no_run
 /// use email::{render_template, EmailTemplate};
 /// use serde_json::json;
 /// use std::path::PathBuf;

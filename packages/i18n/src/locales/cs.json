@@ -1,222 +1,222 @@
 {
 	"underConstruction": {
-		"heading": "This is awkward",
-		"message": "You've stumbled upon a page that's still being developed. I'd love to show it to you, but it isn't quite ready yet.",
-		"homeLink": "Go Home",
-		"githubLink": "View the GitHub issue"
+		"heading": "To je nepříjemné",
+		"message": "Narazili jste na stránku, která je stále vyvíjena. Rád bych vám ji ukázal, ale ještě není připravena.",
+		"homeLink": "Návrat domů",
+		"githubLink": "Zobrazit problém na GitHubu"
 	},
 	"authScene": {
-		"claimHeading": "Initialize your server",
-		"claimText": "This Stump server is not intialized. Use the form below to create your account. Once created, you will have full access to all server features.",
+		"claimHeading": "Inicializovat váš server",
+		"claimText": "Tento server Stump není inicializovaný. Pro vytvoření účtu použijte níže uvedený formulář. Po vytvoření budete mít plný přístup ke všem funkcím serveru.",
 		"form": {
 			"validation": {
-				"missingUsername": "Username is required",
-				"missingPassword": "Password is required"
+				"missingUsername": "Jméno uživatele je vyžadováno",
+				"missingPassword": "Heslo je vyžadováno"
 			},
 			"labels": {
-				"username": "Username",
-				"password": "Password"
+				"username": "Uživatelské jméno",
+				"password": "Heslo"
 			},
 			"buttons": {
-				"createAccount": "Create Account",
-				"login": "Log in"
+				"createAccount": "Vytvořit účet",
+				"login": "Přihlásit se"
 			}
 		},
 		"toasts": {
-			"loggingIn": "Logging in...",
-			"loggedIn": "Welcome back!",
-			"loggedInFirstTime": "Welcome!",
-			"registering": "Registering...",
-			"registered": "Registered!",
-			"loginFailed": "Login failed. Please try again",
-			"registrationFailed": "Registration failed. Please try again"
+			"loggingIn": "Přihlašování...",
+			"loggedIn": "Vítejte zpět!",
+			"loggedInFirstTime": "Vítejte!",
+			"registering": "Registrace...",
+			"registered": "Registrováno!",
+			"loginFailed": "Přihlášení se nezdařilo. Zkuste to znovu",
+			"registrationFailed": "Registrace se nezdařila. Zkuste to prosím znovu"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "Library Configuration",
-			"subtitleCreating": "A preview of your new library will be shown below",
-			"subtitleEditing": "A preview of your library edits will be shown below"
+			"heading": "Nastavení knihovny",
+			"subtitleCreating": "Náhled nové knihovny bude zobrazen níže",
+			"subtitleEditing": "Náhled úprav knihovny bude zobrazen níže"
 		}
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "File Information",
+			"heading": "Informace o souboru",
 			"labels": {
-				"fileSize": "File Size",
-				"fileType": "File Type",
-				"fileLocation": "File Location",
-				"fileChecksum": "Checksum"
+				"fileSize": "Velikost souboru",
+				"fileType": "Formát souboru",
+				"fileLocation": "Umístění souboru",
+				"fileChecksum": "Kontrolní součet"
 			}
 		},
 		"emailBook": {
-			"heading": "Email book",
-			"description": "Send this book to device or email address",
+			"heading": "Odeslat knihu",
+			"description": "Odeslat tuto knihu na zařízení nebo e-mailovou adresu",
 			"form": {
 				"email": {
-					"label": "Email",
-					"placeholder": "Email address",
-					"description": "An email address to send the book to. Click add to finalize each input"
+					"label": "E-mail",
+					"placeholder": "E-mailová adresa",
+					"description": "E-mailová adresa pro odeslání knihy. Klepněte na tlačítko Přidat pro dokončení"
 				},
 				"devices": {
-					"label": "Devices",
-					"placeholder": "Select devices",
-					"noFilterMatch": "No devices match the filter"
+					"label": "Zařízení",
+					"placeholder": "Vybrat zařízení",
+					"noFilterMatch": "Filtru neodpovídá žádná zařízení"
 				}
 			}
 		},
-		"nextInSeries": "Next in Series"
+		"nextInSeries": "Další v řadě"
 	},
 	"createBookClubScene": {
-		"heading": "Create a new book club",
-		"subtitle": "You can create a private book club a select few, or make it public for anyone on the server to join",
+		"heading": "Vytvořit nový Knižní klub",
+		"subtitle": "Můžete vytvořit soukromý knižní klub pro pár vyvolených, nebo jej zveřejnit, aby se k němu mohl připojit kdokoli na serveru",
 		"form": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My book club",
-				"description": "The name of your book club"
+				"label": "Název",
+				"placeholder": "Můj knižní klub",
+				"description": "Název vašeho knižního klubu"
 			},
 			"description": {
-				"label": "Description",
-				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
-				"description": "An optional, short description of your book club"
+				"label": "Popis",
+				"placeholder": "Fanouškovský klub \"Naše vlajka znamená smrt\". Čteme pirátskou literaturu do sytosti",
+				"description": "Volitelný krátký popis vašeho knižního klubu"
 			},
 			"is_private": {
-				"label": "Private club",
-				"description": "If enabled, only users you invite will be able to join your book club"
+				"label": "Soukromý klub",
+				"description": "Pokud je povoleno, pouze uživatelé, které pozvete se budou moci připojit do tohoto knižního klubu"
 			},
 			"member_role_spec": {
-				"heading": "Custom role mapping",
+				"heading": "Určení rolí v klubu",
 				"subtitle": [
-					"You can create custom names for the roles in your book club. For example, you could rename the 'Member' role to 'Crewmate', or 'Creator' to 'Captain'. If you don't want to use custom names, you can leave these fields blank and the default names will be used instead. For more information about roles, refer to the",
-					"documentation"
+					"Pro role v knižním klubu si můžete vytvořit vlastní názvy. Například roli \"Člen\" můžete přejmenovat na \"Člen posádky\" nebo \"Tvůrce\" na \"Kapitán\". Pokud nechcete používat vlastní názvy, můžete tato pole nechat prázdná a místo nich se použijí výchozí názvy. Další informace o rolích naleznete v příručce",
+					"dokumentace"
 				],
 				"member": {
-					"label": "Member",
-					"placeholder": "Member",
-					"description": "The name of the default role for your book club"
+					"label": "Člen",
+					"placeholder": "Člen",
+					"description": "Název výchozí role pro váš knižní klub"
 				},
 				"moderator": {
-					"label": "Moderator",
-					"placeholder": "Moderator",
-					"description": "The name of the moderator role for your book club"
+					"label": "Moderátor",
+					"placeholder": "Moderátor",
+					"description": "Název role moderátora pro tvůj knižní klub"
 				},
 				"admin": {
 					"label": "Admin",
 					"placeholder": "Admin",
-					"description": "The name of the admin role for your book club"
+					"description": "Název administrátorské role pro váš knižní klub"
 				},
 				"creator": {
-					"label": "Creator",
-					"placeholder": "Creator",
-					"description": "The name of the creator role for your book club. This is you!"
+					"label": "Tvůrce",
+					"placeholder": "Tvůrce",
+					"description": "Název role tvůrce pro tvůj knižní klub. Tohle jste!"
 				}
 			},
 			"creator_preferences": {
-				"heading": "Your membership preferences",
-				"subtitle": "Some preferences for your membership in the book club. These can be changed at any time from the book club settings page",
+				"heading": "Vaše členské preference",
+				"subtitle": "Některé preference pro vaše členství v knižním klubu. Ty můžete kdykoli změnit na stránce nastavení knižního klubu",
 				"creator_display_name": {
-					"label": "Display Name",
+					"label": "Zobrazované jméno",
 					"placeholder": "oromei",
-					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+					"description": "Volitelné zobrazované jméno pro vaše členství v Knižním klubu. Je-li nastaveno, má přednost před vaším uživatelským jménem"
 				},
 				"creator_hide_progress": {
-					"label": "Hide Progress",
-					"description": "If enabled, your read progress will be hidden from other members of the book club"
+					"label": "Skrýt průběh",
+					"description": "Pokud je povoleno, průběh čtení bude skrytý pro ostatní členy Knižního klubu"
 				}
 			},
-			"submit": "Create Book Club"
+			"submit": "Vytvořit Knižní klub"
 		}
 	},
 	"createLibraryScene": {
-		"heading": "Create New Library",
-		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on libraries and how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"heading": "Vytvořit novou knihovnu",
+		"subtitle": "Knihovny slouží k seskupování knih. Pokud si chcete osvěžit informace o knihovnách a jejich fungování, podívejte se na stránku",
+		"subtitleLink": "příslušná dokumentace",
 		"form": {
 			"labels": {
-				"libraryName": "Name",
-				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server",
-				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+				"libraryName": "Název",
+				"libraryPath": "Umístění",
+				"libraryPathDescription": "Umístění knihovny, tak jak existuje na vašem serveru",
+				"libraryDescription": "Popis",
+				"libraryTags": "Tagy"
 			},
 			"buttons": {
-				"confirm": "Create Library"
+				"confirm": "Vytvořit knihovnu"
 			}
 		}
 	},
 	"librarySettingsScene": {
-		"heading": "Manage Library",
+		"heading": "Správa knihovny",
 		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"subtitleLink": "příslušná dokumentace",
 		"form": {
 			"labels": {
-				"libraryName": "Name",
-				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server",
-				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+				"libraryName": "Název",
+				"libraryPath": "Umístění",
+				"libraryPathDescription": "Umístění knihovny, tak jak existuje na vašem serveru",
+				"libraryDescription": "Popis",
+				"libraryTags": "Tagy"
 			},
 			"buttons": {
-				"confirm": "Save Changes"
+				"confirm": "Uložit změny"
 			}
 		}
 	},
 	"errorScene": {
 		"heading": "lol, oops",
-		"message": "An error occurred:",
+		"message": "Došlo k chybě:",
 		"buttons": {
-			"report": "Report Bug",
-			"copy": "Copy Error Details",
-			"goHome": "Go Home"
+			"report": "Nahlásit chybu",
+			"copy": "Kopírovat podrobnosti o chybě",
+			"goHome": "Návrat domů"
 		}
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "Continue Reading",
+			"title": "Pokračovat ve čtení",
 			"emptyState": {
-				"heading": "No books to display",
-				"message": "Any books you're currently reading will show up here"
+				"heading": "Žádné knihy k zobrazení",
+				"message": "Knihy, které právě čtete, se zobrazí zde"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Recently Added Series",
+			"title": "Nedávno přidané série",
 			"emptyState": {
-				"heading": "No series to display",
-				"message": "Any series you add to your libraries will show up here"
+				"heading": "Žádná série k zobrazení",
+				"message": "Všechny série, které přidáte do vašich knihoven, se zobrazí zde"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Recently Added Books",
+			"title": "Nedávno přidané knihy",
 			"emptyState": {
-				"heading": "No books to display",
-				"message": "Any books you add to your libraries will show up here"
+				"heading": "Žádné knihy k zobrazení",
+				"message": "Všechny knihy, které přidáte do vašich knihoven, se zobrazí zde"
 			}
 		}
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "Continue Reading",
-			"downloadSeries": "Download Series"
+			"continueReading": "Pokračovat ve čtení",
+			"downloadSeries": "Stáhnout série"
 		}
 	},
 	"userSmartListsScene": {
-		"heading": "Smart lists",
-		"subtitle": "Your favorite searches and filters saved for easy access",
-		"searchPlaceholder": "Filter smart lists",
+		"heading": "Chytré seznamy",
+		"subtitle": "Vaše oblíbené vyhledávání a filtry jsou uloženy pro snadný přístup",
+		"searchPlaceholder": "Filtrovat chytré seznamy",
 		"buttons": {
-			"createSmartList": "Create smart list"
+			"createSmartList": "Vytvořit chytrý seznam"
 		},
 		"list": {
 			"emptyState": {
-				"heading": "No smart lists to display",
-				"noListsMessage": "Create a smart list to get started",
-				"noMatchesMessage": "Try changing your search query"
+				"heading": "Žádné chytré seznamy k zobrazení",
+				"noListsMessage": "Vytvořte chytrý seznam pro začátek",
+				"noMatchesMessage": "Zkuste změnit váš vyhledávací dotaz"
 			},
 			"card": {
 				"meta": {
 					"figures": {
-						"books": "book",
+						"books": "kniha",
 						"series": "series",
 						"library": "library"
 					},
@@ -317,14 +317,14 @@
 				"users": "Users",
 				"jobs": "Jobs",
 				"access": "Access",
-				"email": "Email",
-				"notifications": "Notifications",
+				"email": "E-mail",
+				"notifications": "Notifikace",
 				"label": "Server"
 			}
 		},
 		"app/account": {
-			"helmet": "Account settings",
-			"title": "Account settings",
+			"helmet": "Nastavení účtu",
+			"title": "Nastavení účtu",
 			"description": "Settings related to your account",
 			"sections": {
 				"account": {
@@ -899,7 +899,7 @@
 		"placeholderNoTags": "No tags available"
 	},
 	"thumbnailDropdown": {
-		"label": "Edit thumbnail",
+		"label": "Upravit náhled",
 		"options": {
 			"selectFromBooks": "Select from books",
 			"uploadImage": "Upload image"

@@ -6,6 +6,7 @@ source "${SCRIPTS_DIR}/lib"
 _DEV_SETUP=${DEV_SETUP:=1}
 _CHECK_CARGO=${CHECK_CARGO:=1}
 _CHECK_NODE=${CHECK_NODE:=1}
+_CHECK_DAV1D=${CHECK_DAV1D:=0}
 _FORCE_INSTALL_YARN=${INSTALL_YARN:=0}
 
 dev_setup() {
@@ -22,29 +23,27 @@ if [ "$name" == "nix-shell" ]; then
 fi
 
 if [ ${_CHECK_CARGO} == 1 ]; then
-    which cargo &> /dev/null
-    if [ $? -ne 0 ]; then
-      log_error "Rust could not be found on your system. Visit https://www.rust-lang.org/tools/install"
-    else 
-      echo "Rust requirement met!"
-    fi
+  which cargo &> /dev/null
+  if [ $? -ne 0 ]; then
+    log_error "Rust could not be found on your system. Visit https://www.rust-lang.org/tools/install"
+  fi
 fi
+
+
 
 if [ ${_CHECK_NODE} == 1 ]; then
   which node &> /dev/null
   if [ $? -eq 1 ]; then
     log_error "Node could not be found on your system. Visit https://nodejs.org/en/download/"
-  else 
-    echo "Node requirement met!"
   fi
 
   which yarn &> /dev/null
   if [ $? -eq 1 ]; then
     if [ ${_FORCE_INSTALL_YARN} == 1 ]; then
-      echo "Installing yarn..."
+      echo "Attempting to install 'yarn'..."
       npm install -g yarn
     else
-      echo "yarn could not be found on your system. Would you like for this script to attempt to install 'yarn'? (y/n)"
+      echo "Yarn could not be found on your system. Would you like for this script to attempt to install 'yarn'? (y/n)"
 
       can_continue=false
       until [ $can_continue = true ]; do
@@ -82,15 +81,17 @@ if [ ${_CHECK_NODE} == 1 ]; then
   fi
 fi
 
-CALL_TO_ACTION_LOL="Please consider helping to expand support for your system: https://github.com/stumpapp/stump/issues"
+ASK_FOR_CONTRIB="Please consider helping to expand support for your system: https://github.com/stumpapp/stump/issues"
 
 # https://tauri.app/v1/guides/getting-started/prerequisites/#1-system-dependencies
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  UNSUPPORTED_DISTRO="Your distro '$(lsb_release -s -d)' is not supported by this script. $CALL_TO_ACTION_LOL"
+  UNSUPPORTED_DISTRO="Your distro '$(lsb_release -s -d)' is not supported by this script. $ASK_FOR_CONTRIB"
 
+  # Note: If running ubuntu 24, see https://github.com/bambulab/BambuStudio/issues/3973#issuecomment-2085476683
   if which apt-get &> /dev/null; then
     sudo apt-get -y update
-    sudo apt-get -y install libwebkit2gtk-4.0-dev \
+    sudo apt-get -y install \
+      libwebkit2gtk-4.0-dev \
       pkg-config \
       build-essential \
       curl \
@@ -100,6 +101,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       libssl-dev \
       libgtk-3-dev \
       libayatana-appindicator3-dev \
+      javascriptcoregtk-4.0 \
       librsvg2-dev \
       libvips42
   elif which pacman &> /dev/null; then
@@ -111,10 +113,11 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       openssl \
       appmenu-gtk-module \
       gtk3 \
+      dav1d \
       libappindicator-gtk3 librsvg libvips
   elif which dnf &> /dev/null; then
     sudo dnf check-update
-    sudo dnf install openssl-devel webkit2gtk4.0-devel curl wget libappindicator-gtk3 librsvg2-devel
+    sudo dnf install openssl-devel webkit2gtk4.0-devel curl wget libappindicator-gtk3 librsvg2-devel dav1d
     sudo dnf group install "C Development Tools and Libraries"
   else
     log_error $UNSUPPORTED_DISTRO
@@ -124,13 +127,36 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     dev_setup
   fi
 
-  echo "Setup completed! Run 'yarn dev:web' or 'yarn start:web' to get started."
 elif [[ "$OSTYPE" == "darwin"* ]]; then
+  if ! which brew &> /dev/null; then
+    log_error "Homebrew is not installed. Visit https://brew.sh/ to install Homebrew."
+  fi
+
+  HOMEBREW_NO_AUTO_UPDATE=1 brew install dav1d
+
   if [ {$_DEV_SETUP} == 1 ]; then
     dev_setup
-  fi
-        
-  echo "Setup completed! Run 'yarn dev:web' or 'yarn start:web' to get started."
+  fi 
 else
-  log_error "Your OS '$OSTYPE' is not supported by the pre-setup script. $CALL_TO_ACTION_LOL"
+  log_error "Your OS '$OSTYPE' is not supported by the system-setup script. $ASK_FOR_CONTRIB"
 fi
+
+if [ ${_CHECK_DAV1D} == 1 ]; then
+  which dav1d &> /dev/null
+  if [ $? -ne 0 ]; then
+      echo "Dav1d requirement is not met. Visit https://code.videolan.org/videolan/dav1d"
+  else 
+    curver="$(dav1d --version)"
+    cutoffver="1.3.0"
+    # Note: We sort -V and take the first line to get the highest version, so we need to assert that the first
+    # _isn't_ the threshold version
+    if [ "$(printf '%s\n' "$cutoffver" "$curver" | sort -V | head -n1)" != "$cutoffver" ]; then
+      echo "Dav1d requirement met!"
+    else
+      echo "Dav1d requirement is not met (version must be greater than 1.3.0). Visit https://code.videolan.org/videolan/dav1d"
+    fi
+  fi
+fi
+
+echo "Setup completed!"
+

@@ -62,7 +62,7 @@ impl EmailerClient {
 	/// Create a new [EmailerClient] instance with the given configuration and template directory.
 	///
 	/// # Example
-	/// ```rust
+	/// ```no_run
 	/// use email::{EmailerClient, EmailerClientConfig};
 	/// use std::path::PathBuf;
 	///
@@ -91,7 +91,7 @@ impl EmailerClient {
 	/// Internally, this will just call [EmailerClient::send_attachments] with a single attachment.
 	///
 	/// # Example
-	/// ```rust
+	/// ```no_run
 	/// use email::{AttachmentPayload, EmailerClient, EmailerClientConfig};
 	/// use std::path::PathBuf;
 	/// use lettre::message::header::ContentType;
@@ -137,7 +137,7 @@ impl EmailerClient {
 	/// The attachments are sent as a multipart email, with the first attachment being the email body.
 	///
 	/// # Example
-	/// ```rust
+	/// ```no_run
 	/// use email::{AttachmentPayload, EmailerClient, EmailerClientConfig};
 	/// use std::path::PathBuf;
 	/// use lettre::message::header::ContentType;

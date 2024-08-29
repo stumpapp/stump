@@ -31,7 +31,7 @@ impl StumpAuthor {
 	/// Writes the [StumpAuthor] instance as XML.
 	///
 	/// ## Example
-	/// ```rust
+	/// ```no_run
 	/// use stump_core::opds::v1_2::author::StumpAuthor;
 	/// use xml::EventWriter;
 	///

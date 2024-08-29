@@ -2757,10 +2757,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-2.0.2.tgz#d9fae00a2d5cb40f92cfe64b47ad749fbc38f917"
   integrity sha512-6EwiSjwWYP7pTckG6I5eyFANjPhmPjUX9JRLUSfNPC7FX7zK9gyZAfUEaECL6ALTpGX5AjnBq3C9XmVWPitNpw==
 
-"@icons-pack/react-simple-icons@^9.1.0":
-  version "9.3.0"
-  resolved "https://registry.yarnpkg.com/@icons-pack/react-simple-icons/-/react-simple-icons-9.3.0.tgz#a3901d7eb0f2f4109d8f2c584f537cea056aa238"
-  integrity sha512-e2VRDFrhI9rCkEdkuAUhf/Ool0cwusWnwKqMACbIRMLHXxnHp1SdnGlRaEEjDeF4R0pQaEkmVNs2x2vn1sl+7A==
+"@icons-pack/react-simple-icons@=9.1.0":
+  version "9.1.0"
+  resolved "https://registry.yarnpkg.com/@icons-pack/react-simple-icons/-/react-simple-icons-9.1.0.tgz#8267121647e979daf1f84ea9c7a87fb7a6a8ca0a"
+  integrity sha512-3v6W4SgkYX6bHfKrFvRZrxilv+4wXKYQ2DVRldqaZgcwGK5ajsW4PzLlqF9aw+uT/NeoMklunonoYwZlx9Kbwg==
 
 "@isaacs/cliui@^8.0.2":
   version "8.0.2"

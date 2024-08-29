@@ -1,3 +1,4 @@
+import { PickSelect } from '@stump/components'
 import { IgnoreRules, Library, LibraryPattern, LibraryScanMode } from '@stump/types'
 import isValidGlob from 'is-valid-glob'
 import { z } from 'zod'
@@ -137,3 +138,15 @@ export const toLibraryPatchTags = (library: Library) => library.tags?.map((t) =>
 export const libraryPatchDefaults = (library: Library) => ({
 	tags: toLibraryPatchTags(library),
 })
+export const ensureValidThumbnailConfig = (
+	thumbnail_config: PickSelect<CreateOrUpdateLibrarySchema, 'thumbnail_config'>,
+) => {
+	const invalidDimensions =
+		!thumbnail_config.resize_options?.height || !thumbnail_config.resize_options?.width
+
+	if (!thumbnail_config.enabled || invalidDimensions) {
+		return null
+	} else {
+		return thumbnail_config
+	}
+}

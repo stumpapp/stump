@@ -283,6 +283,7 @@ pub(crate) struct MediaBuildOperationCtx {
 	pub chunk_size: usize,
 }
 
+// TODO(perf): don't use rayon for this IO-bound task
 pub(crate) async fn handle_create_media(
 	build_ctx: MediaBuildOperationCtx,
 	worker_ctx: &WorkerCtx,

@@ -1522,21 +1522,16 @@ async fn update_library(
 				.library_options()
 				.update(
 					library_options::id::equals(library_options.id.unwrap_or_default()),
-					chain_optional_iter(
-						[
-							library_options::convert_rar_to_zip::set(
-								library_options.convert_rar_to_zip,
-							),
-							library_options::hard_delete_conversions::set(
-								library_options.hard_delete_conversions,
-							),
-							library_options::ignore_rules::set(ignore_rules),
-						],
-						// TODO: determine if this should be separate like this, I can't remember how I structure updates...
-						[thumbnail_config.map(|config| {
-							library_options::thumbnail_config::set(Some(config))
-						})],
-					),
+					vec![
+						library_options::convert_rar_to_zip::set(
+							library_options.convert_rar_to_zip,
+						),
+						library_options::hard_delete_conversions::set(
+							library_options.hard_delete_conversions,
+						),
+						library_options::ignore_rules::set(ignore_rules),
+						library_options::thumbnail_config::set(thumbnail_config),
+					],
 				)
 				.exec()
 				.await?;

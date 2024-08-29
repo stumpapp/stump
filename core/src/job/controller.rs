@@ -80,10 +80,11 @@ impl JobController {
 			while let Some(event) = commands_rx.recv().await {
 				match event {
 					JobControllerCommand::EnqueueJob(job) => {
-						tracing::trace!(job_id = ?job.id(), "Received enqueue job event");
+						let name = job.name();
+						tracing::trace!(name, job_id = ?job.id(), "Received enqueue job event");
 						self.manager.clone().enqueue(job).await.map_or_else(
 							|error| tracing::error!(?error, "Failed to enqueue job!"),
-							|_| tracing::info!("Successfully enqueued job"),
+							|_| tracing::info!(name, "Successfully enqueued job"),
 						);
 					},
 					JobControllerCommand::CompleteJob(id) => {

@@ -30,7 +30,16 @@ export default function CreateLibraryScene() {
 
 	const handleSubmit = useCallback(
 		(values: CreateOrUpdateLibrarySchema) => {
-			const { name, path, description, tags, scan_mode, ignore_rules, ...options } = values
+			const {
+				name,
+				path,
+				description,
+				tags,
+				scan_mode,
+				ignore_rules,
+				thumbnail_config,
+				...options
+			} = values
 
 			const payload: CreateLibrary = {
 				description,
@@ -38,9 +47,7 @@ export default function CreateLibraryScene() {
 					...options,
 					ignore_rules: ignore_rules.map(({ glob }) => glob),
 					thumbnail_config:
-						options.thumbnail_config.enabled && !!options.thumbnail_config.resize_options
-							? options.thumbnail_config
-							: null,
+						thumbnail_config.enabled && !!thumbnail_config.resize_options ? thumbnail_config : null,
 				},
 				name,
 				path,

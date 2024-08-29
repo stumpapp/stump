@@ -409,10 +409,12 @@ impl JobExt for LibraryScanJob {
 					format!("Scanning series at {}", path_buf.display()).as_str(),
 				));
 
+				let series_is_library_root = path_buf == PathBuf::from(&self.path);
 				let max_depth = self
 					.options
 					.as_ref()
-					.and_then(|o| o.is_collection_based().then_some(1));
+					.and_then(|o| o.is_collection_based().then_some(1))
+					.or_else(|| series_is_library_root.then_some(1));
 
 				let ignore_rules = generate_rule_set(&[
 					path_buf.clone(),

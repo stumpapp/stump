@@ -7,3 +7,8 @@ library::select!(library_tags_select {
 		name
 	}
 });
+
+library::select!(library_path_with_options_select {
+	path
+	library_options
+});

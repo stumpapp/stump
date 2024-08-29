@@ -5,7 +5,9 @@ use specta::Type;
 
 use crate::{
 	db::{
-		entity::{CoreJobOutput, LibraryOptions},
+		entity::{
+			macros::library_path_with_options_select, CoreJobOutput, LibraryOptions,
+		},
 		FileStatus,
 	},
 	filesystem::image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
@@ -13,7 +15,7 @@ use crate::{
 		error::JobError, Executor, JobExt, JobOutputExt, JobProgress, JobTaskOutput,
 		WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
-	prisma::{library, library_options, media, series, PrismaClient},
+	prisma::{library, media, series, PrismaClient},
 	utils::chain_optional_iter,
 	CoreEvent,
 };
@@ -94,23 +96,27 @@ impl JobExt for SeriesScanJob {
 		ctx: &WorkerCtx,
 	) -> Result<WorkingState<Self::Output, Self::Task>, JobError> {
 		let mut output = Self::Output::default();
-		let library_options = ctx
+		let library = ctx
 			.db
-			.library_options()
-			.find_first(vec![library_options::library::is(vec![
-				library::series::some(vec![
-					series::id::equals(self.id.clone()),
-					series::path::equals(self.path.clone()),
-				]),
+			.library()
+			.find_first(vec![library::series::some(vec![
+				series::id::equals(self.id.clone()),
+				series::path::equals(self.path.clone()),
 			])])
+			.select(library_path_with_options_select::select())
 			.exec()
 			.await?
-			.map(LibraryOptions::from)
 			.ok_or(JobError::InitFailed(
-				"Associated library options not found".to_string(),
+				"Associated library not found".to_string(),
 			))?;
+		let library_path = PathBuf::from(library.path);
+		let library_options = LibraryOptions::from(library.library_options);
+		let series_is_library_root = PathBuf::from(&self.path) == library_path;
 		let ignore_rules = library_options.ignore_rules.build()?;
-		let max_depth = library_options.is_collection_based().then_some(1);
+		let max_depth = library_options
+			.is_collection_based()
+			.then_some(1)
+			.or_else(|| series_is_library_root.then_some(1));
 
 		self.options = Some(library_options);
 

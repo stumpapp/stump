@@ -38,6 +38,10 @@ runs:
 
     - name: Setup rust
       uses: ./.github/actions/setup-rust
+      with:
+        # Note: until some sort of local caching is implemented, we don't want to cache dependencies
+        # because the network overhead is too high and eats up lots of time
+        cache-dependencies: ${{ runner.environment != 'self-hosted' }}
 
     # We only need QEMU when an arm* platform is targeted
     - name: Check QEMU requirement
@@ -53,6 +57,8 @@ runs:
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
       if: ${{ steps.check-qemu.outputs.SETUP_QEMU == '1' }}
+      with:
+        platforms: linux/arm64
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -65,18 +71,17 @@ runs:
         username: ${{ inputs.username }}
         password: ${{ inputs.password }}
 
-    - name: Run buildx build
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        build-args: |
-          "GIT_REV=${{ env.GIT_REV }}"
-          "TAGS=${{ env.TAGS }}"
-        file: docker/Dockerfile
-        platforms: ${{ inputs.platforms }}
-        load: ${{ inputs.load }}
-        push: ${{ inputs.push }}
-        tags: ${{ env.TAGS }}
+    - name: Install podman
+      if: runner.environment != 'self-hosted'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y podman
+      shell: bash
+
+    - name: Run podman buildx
+      run: |
+        ENGINE=podman PLATFORMS="${{ inputs.platforms }}" TAGS="${{ env.TAGS }}" GIT_REV="${{ env.GIT_REV }}" ./docker/build.sh
+      shell: bash
 
     - name: Discord notification
       if: ${{ success() && inputs.push == 'true' && inputs.discord-webhook != '' }}

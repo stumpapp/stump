@@ -1,0 +1,34 @@
+name: Coverage CI
+description: Run code coverage checks
+
+inputs:
+  token:
+    description: 'Codecov token'
+    required: true
+  cache-dependencies:
+    description: 'Whether to cache dependencies. This does not affect the Prisma client cache.'
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup rust
+      uses: ./.github/actions/setup-rust
+      with:
+        cache-dependencies: ${{ inputs.cache-dependencies }}
+
+    - name: Install cargo-llvm-cov
+      run: cargo install cargo-llvm-cov
+      shell: bash
+
+    - name: Generate code coverage data
+      shell: bash
+      run: cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ inputs.token }}
+        files: lcov.info
+        fail_ci_if_error: true

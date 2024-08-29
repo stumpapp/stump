@@ -1,0 +1,31 @@
+name: Setup Yarn
+description: Install Yarn and setup cache
+
+inputs:
+  cache-dependencies:
+    description: 'Cache dependencies. This does not affect the Prisma client cache.'
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.0.0'
+
+    - name: Install yarn
+      shell: bash
+      run: npm install -g yarn
+
+    - name: Setup node (yarn cache)
+      if: ${{ inputs.cache-dependencies == 'true' }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.0.0'
+        cache: 'yarn'
+
+    - name: Install dependencies
+      run: yarn install
+      shell: bash

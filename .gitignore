@@ -15,6 +15,7 @@ logs/
 
 build/
 coverage/
+!.github/actions/coverage
 cjs/
 **/*/dist/**/*
 !**/*/dist/.placeholder

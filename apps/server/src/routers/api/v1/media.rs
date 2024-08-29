@@ -202,8 +202,6 @@ pub(crate) fn apply_media_library_not_hidden_for_user_filter(
 	])])]
 }
 
-// FIXME: hidden libraries introduced a bug here, need to fix!
-
 pub(crate) fn apply_media_filters_for_user(
 	filters: MediaFilter,
 	user: &User,
@@ -966,6 +964,8 @@ async fn get_media_page(
 	}
 }
 
+// TODO: Refactor this transaction. I must have been very tired when I wrote it lol
+// No thoughts, head empty
 pub(crate) async fn get_media_thumbnail_by_id(
 	id: String,
 	db: &PrismaClient,

@@ -19,7 +19,7 @@ use stump_core::{
 	},
 	prisma::{active_reading_session, library, media, series, user},
 };
-use tracing::{debug, trace, warn};
+use tracing::{debug, trace};
 
 use crate::{
 	config::state::AppState,
@@ -28,7 +28,9 @@ use crate::{
 	middleware::auth::{auth_middleware, RequestContext},
 	routers::api::v1::{
 		library::library_not_hidden_from_user_filter,
-		media::apply_media_library_not_hidden_for_user_filter,
+		media::{
+			apply_media_library_not_hidden_for_user_filter, get_media_thumbnail_by_id,
+		},
 	},
 	utils::http::{ImageResponse, NamedFile, Xml},
 };
@@ -524,6 +526,7 @@ async fn get_series_by_id(
 	}
 }
 
+// TODO: support something like `STRICT_OPDS` to enforce OPDS compliance conditionally
 fn handle_opds_image_response(
 	content_type: ContentType,
 	image_buffer: Vec<u8>,
@@ -532,11 +535,10 @@ fn handle_opds_image_response(
 		trace!("OPDS legacy image detected, returning as-is");
 		Ok(ImageResponse::new(content_type, image_buffer))
 	} else {
-		warn!(
+		tracing::warn!(
 			?content_type,
 			"Unsupported image for OPDS detected, converting to JPEG"
 		);
-		// let jpeg_buffer = image::jpeg_from_bytes(&image_buffer)?;
 		let jpeg_buffer = GenericImageProcessor::generate(
 			&image_buffer,
 			ImageProcessorOptions::jpeg(),
@@ -551,24 +553,9 @@ async fn get_book_thumbnail(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
 ) -> APIResult<ImageResponse> {
-	let db = &ctx.db;
-	let user = req.user();
-	let age_restrictions = user
-		.age_restriction
-		.as_ref()
-		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+	let (content_type, image_buffer) =
+		get_media_thumbnail_by_id(id, &ctx.db, req.user(), &ctx.config).await?;
 
-	let book = db
-		.media()
-		.find_first(chain_optional_iter(
-			[media::id::equals(id.clone())],
-			[age_restrictions],
-		))
-		.exec()
-		.await?
-		.ok_or(APIError::NotFound(String::from("Book not found")))?;
-
-	let (content_type, image_buffer) = get_page(book.path.as_str(), 1, &ctx.config)?;
 	handle_opds_image_response(content_type, image_buffer)
 }
 

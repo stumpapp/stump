@@ -29,14 +29,18 @@ jobs:
           base: 'experimental'
           filters: |
             apps: ./apps/**
+            core: ./core/**
             crates: ./crates/**
             docker: ./docker/**
             packages: ./packages/**
+            workflow:
+              - './.github/workflows/experimental.yml'
+              - './.github/actions/**'
 
   nightly-docker-build:
     needs: code-changes-check
     name: Build docker image
-    runs-on: [ubuntu-22.04]
+    runs-on: [self-hosted]
     if: ${{ needs.code-changes-check.outputs.changes != '[]' }}
     steps:
       - name: Checkout repository

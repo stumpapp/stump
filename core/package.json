@@ -10,6 +10,7 @@
 		"studio": "yarn dlx prisma studio",
 		"build": "cargo build --release",
 		"format": "cargo fmt --package stump_core",
-		"integration-tests": "cargo integration-tests"
+		"integration-tests": "cargo integration-tests",
+		"nuke": "rimraf node_modules"
 	}
 }

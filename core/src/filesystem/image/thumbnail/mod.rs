@@ -3,9 +3,12 @@ use std::{fs::File, io::Write, path::PathBuf};
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 use tracing::{debug, error, trace};
 
-// TODO: I know this is super related to image processing, however I am debating whether it is
-// extensive enough to warrant its own module. I think it is, but I am not 100% sure. I would just
-// move thumbnail folder up one to the root of `filesystem` instead of `filesystem/image`
+// TODO(perf): This is too slow. A couple of notes:
+// - We need to spawn blocking threads for the image processing, currently using rayon which is ideal for CPU-bound tasks
+// - Stop chunking. Let the OS thread scheduler handle things for us
+// - I think we need to break from this struct and go back to functional, the lifetime constraints dealing with self are a pain when exploring
+//   threading options
+// See https://ryhl.io/blog/async-what-is-blocking/ -> Summary for good table
 
 mod generation_job;
 mod manager;

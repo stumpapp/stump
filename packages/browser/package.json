@@ -7,7 +7,8 @@
 	"main": "src/index.ts",
 	"scripts": {
 		"check-types": "tsc --build tsconfig.json",
-		"lint": "eslint --ext .ts,.tsx,.cts,.mts,.js,.jsx,.cjs,.mjs --fix --report-unused-disable-directives --no-error-on-unmatched-pattern --exit-on-fatal-error --ignore-path ../../.gitignore ."
+		"lint": "eslint --ext .ts,.tsx,.cts,.mts,.js,.jsx,.cjs,.mjs --fix --report-unused-disable-directives --no-error-on-unmatched-pattern --exit-on-fatal-error --ignore-path ../../.gitignore .",
+		"nuke": "rimraf node_modules"
 	},
 	"exports": {
 		".": "./src/index.ts",
@@ -33,6 +34,7 @@
 		"framer-motion": "^10.18.0",
 		"i18next": "^23.11.2",
 		"immer": "^10.0.4",
+		"is-valid-glob": "^1.0.0",
 		"lodash.groupby": "^4.6.0",
 		"lodash.isequal": "^4.5.0",
 		"lodash.sortby": "^4.7.0",
@@ -43,6 +45,7 @@
 		"overlayscrollbars-react": "^0.5.6",
 		"pluralize": "^8.0.0",
 		"react": "^18.2.0",
+		"react-confetti": "^6.1.0",
 		"react-dom": "^18.2.0",
 		"react-dropzone": "^14.2.3",
 		"react-error-boundary": "^4.0.13",
@@ -67,6 +70,7 @@
 		"zustand": "^4.5.2"
 	},
 	"devDependencies": {
+		"@types/is-valid-glob": "^1.0.3",
 		"@types/lodash.groupby": "^4.6.9",
 		"@types/lodash.isequal": "^4.5.8",
 		"@types/lodash.sortby": "^4.7.9",

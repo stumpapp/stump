@@ -1,6 +1,6 @@
 import { Steps, Callout } from 'nextra/components'
 
-# Scanner
+# File Discovery
 
 A scan is the process of indexing your filesystem to detect new media files and file changes/updates. Scans are essential for keeping your media libraries up-to-date in Stump. The _scanner_ is a queable process which will perform these scans for you.
 
@@ -92,10 +92,14 @@ For convenience, there are a few preset options you may select from the dropdown
 
 > In the future, this section of the UI will change to include scheduling options for more than just scans. However, for now, it is only for scans.
 
-## Ignoring files
+## Ignore Rules
 
-<Callout emoji="❗">
-	Stump has removed support for `.stumpignore` files in favor of a more robust configuration system.
-	The corresponding GitHub issue for tracking is
-	[#284](https://github.com/stumpapp/stump/issues/284)
+If you have files that you don't want Stump to scan, you can define a [glob pattern](<https://en.wikipedia.org/wiki/Glob_(programming)>) which will be used to filter **out** any candidate files which match the pattern.
+
+Stump no longer supports `.stumpignore` files. Instead, ignore rules can be set during library creation or in the `Scanning` section of the library settings. There is no limit to the number of ignore rules you can set, so long as each is a valid glob.
+
+<Callout emoji="🚨">
+	Please note that in some scenarios, updating the ignore rules may not take the desired effect. For
+	example, if you have a file which is already in the database but add an ignore rule for it, the
+	file will not be removed. This is planned to be addressed in the future.
 </Callout>

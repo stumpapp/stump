@@ -166,17 +166,198 @@
 			"submit": "Create Book Club"
 		}
 	},
+	"createOrUpdateLibraryForm": {
+		"sections": {
+			"basics": {
+				"heading": "Basic information",
+				"description": "The details of this library, including its name, path, and description"
+			}
+		},
+		"fields": {
+			"name": {
+				"label": "Name",
+				"description": "A friendly name for your library",
+				"placeholder": "My Library"
+			},
+			"path": {
+				"label": "Path",
+				"description": "The path to the library as it exists on your server",
+				"placeholder": "/path/to/library"
+			},
+			"description": {
+				"label": "Description",
+				"description": "A short description of your library",
+				"placeholder": "A library of all my favorite books"
+			},
+			"tags": {
+				"label": "Tags",
+				"description": "Used to categorize your library or enforce access rules"
+			},
+			"thumbnailConfig": {
+				"section": {
+					"heading": {
+						"create": "Thumbnail configuration",
+						"update": "Generation"
+					},
+					"description": "Improve loading times while browsing your library by generating thumbnails for your books"
+				},
+				"enableSwitch": {
+					"label": "Enabled",
+					"description": "Generate thumbnail images for this library"
+				},
+				"scaled": {
+					"label": "Scaled",
+					"description": "Scale the image by a custom factor per dimension",
+					"width": {
+						"label": "Width scale"
+					},
+					"height": {
+						"label": "Height scale"
+					}
+				},
+				"sized": {
+					"label": "Explicitly Sized",
+					"description": "Set each dimension of the thumbnail (in pixels)",
+					"width": {
+						"label": "Width"
+					},
+					"height": {
+						"label": "Height"
+					}
+				},
+				"format": {
+					"label": "Image format",
+					"description": "The format of the generated thumbnail images"
+				},
+				"quality": {
+					"label": "Quality",
+					"description": "The quality of the generated thumbnail images, between 0 and 1.0"
+				}
+			},
+			"ignoreRules": {
+				"section": {
+					"heading": "Ignore rules",
+					"description": "Define glob patterns to ignore certain files or directories during a scan"
+				},
+				"noRules": "No ignore rules have been configured",
+				"save": "Save changes",
+				"addRule": {
+					"label": "New rule",
+					"description": "Glob pattern to ignore files or directories",
+					"addButton": "Add rule",
+					"ignoreParents": {
+						"title": "Ignore all parent directories",
+						"label": "Ignore parents"
+					},
+					"ignoreSubdirs": {
+						"title": "Ignore all subdirectories",
+						"label": "Ignore subdirectories"
+					}
+				},
+				"invalidGlob": "Invalid glob pattern",
+				"lockConfig": {
+					"lock": "Lock configuration",
+					"unlock": "Unlock configuration"
+				},
+				"editRule": "Edit rule",
+				"deleteRule": "Delete rule",
+				"cancelEdit": "Cancel edit",
+				"confirmEdit": "Confirm edit"
+			},
+			"convertOptions": {
+				"section": {
+					"heading": "File conversion",
+					"description": "Stump is capable of converting certain file formats to more compatible ones"
+				},
+				"rarToZip": {
+					"label": "Convert RAR to ZIP",
+					"description": "Convert RAR/CBR files to ZIP/CBZ files during a scan"
+				},
+				"deleteRarAfter": {
+					"label": "Delete RAR after conversion",
+					"description": "Delete the original RAR/CBR file after conversion. This is irreversible"
+				}
+			},
+			"libraryPattern": {
+				"section": {
+					"heading": "Organization",
+					"description": "Identify which pattern most closely matches the organization of your library",
+					"docs": [
+						"Not sure which to choose? Click",
+						"here",
+						"for more information.",
+						"You cannot change this setting later"
+					],
+					"disabled": "You cannot change this setting"
+				},
+				"options": {
+					"label": "Library pattern",
+					"description": "The setting which determines how Stump will organize your library",
+					"collectionPriority": {
+						"label": "Collection priority",
+						"description": "Each folder at the top-most level of the library root is a single series"
+					},
+					"seriesPriority": {
+						"label": "Series priority",
+						"description": "Each folder at any level recursively is a single series"
+					}
+				}
+			}
+		},
+		"scan": {
+			"label": {
+				"create": "Scan after creation",
+				"update": "Scan after updates"
+			},
+			"description": "Index the library files to populate your database"
+		}
+	},
 	"createLibraryScene": {
 		"heading": "Create library",
 		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on how they work, check out the",
 		"subtitleLink": "relevant documentation",
 		"form": {
-			"labels": {
-				"libraryName": "Name",
-				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server",
-				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+			"stepLabel": "Step",
+			"steps": [
+				{
+					"label": "Basics",
+					"heading": "Basic Information",
+					"description": "The details of this library, including its name, path, and description"
+				},
+				{
+					"label": "Scanning",
+					"heading": "Scanner Behavior",
+					"description": "Settings related to how Stump scans this library"
+				},
+				{
+					"label": "Thumbnails",
+					"heading": "Thumbnails",
+					"description": "The options for if and how Stump generates thumbnails for this library"
+				},
+				{
+					"label": "Review",
+					"heading": "Review",
+					"description": "Review your library settings before creating it"
+				}
+			],
+			"review": {
+				"yes": "Yes",
+				"no": "No",
+				"none": "None",
+				"labels": {
+					"generateThumbnails": "Generate thumbnails",
+					"mode": "Mode",
+					"format": "Format",
+					"quality": "Quality",
+					"name": "Name",
+					"path": "Path",
+					"description": "Description",
+					"tags": "Tags",
+					"pattern": "Pattern",
+					"ignoreRules": "Ignore rules",
+					"convertRar": "Convert RAR/CBR",
+					"deleteConversions": "Delete converted files"
+				}
 			},
 			"buttons": {
 				"confirm": "Create Library"
@@ -187,16 +368,77 @@
 		"heading": "Settings",
 		"subtitle": "Manage your library here. If you're wanting a refresh on these settings, check out the",
 		"subtitleLink": "relevant documentation",
-		"form": {
-			"labels": {
-				"libraryName": "Name",
-				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server",
-				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+		"sidebar": {
+			"basics": "Basics",
+			"options": {
+				"general": "General",
+				"scanning": "Scanning",
+				"thumbnails": "Thumbnails",
+				"ignore-rules": "Ignore Rules",
+				"label": "File Options"
 			},
-			"buttons": {
-				"confirm": "Save Changes"
+			"danger-zone": {
+				"access-control": "Access Control",
+				"delete": "Deletion",
+				"label": "Danger Zone"
+			}
+		},
+		"basics": {
+			"title": "Basic Information",
+			"description": "The details of this library, including its name, path, and description",
+			"form": {
+				"submit": "Update library"
+			}
+		},
+		"options/scanning": {
+			"title": "Scanner Behavior",
+			"description": "Settings related to how Stump scans this library"
+		},
+		"options/thumbnails": {
+			"title": "Thumbnails",
+			"description": "Settings and management options for thumbnails in this library",
+			"sections": {
+				"management": {
+					"heading": "Management",
+					"description": "Manage the existing thumbnails for this library",
+					"thumbnailSelector": {},
+					"deleteThumbnails": {}
+				}
+			}
+		},
+		"danger-zone/access-control": {
+			"title": "Access Control",
+			"description": "Control who can access the content in this library",
+			"sections": {
+				"libraryExclusions": {
+					"heading": "Exclude users",
+					"description": "Prevent certain users from accessing this library or its contents",
+					"noUsers": "There are no other registered users to exclude from this library",
+					"updated": "Exclusions updated",
+					"failure": "Failed to update exclusions"
+				}
+			}
+		},
+		"danger-zone/delete": {
+			"title": "Deletion Actions",
+			"description": "Permanently delete this library and all of its contents or certain resources",
+			"sections": {
+				"cleanLibrary": {
+					"heading": "Clean library",
+					"description": "Remove all media and series that cannot be located on disk",
+					"disclaimer": "While this action will not delete any files, it will permanently delete all records relating to media and series which have a missing status",
+					"confirmation": {
+						"label": "Clean library",
+						"text": "Are you sure you want to clean this library?"
+					}
+				},
+				"deleteLibrary": {
+					"heading": "Delete library",
+					"description": [
+						"Permanently delete this library and all its contents.",
+						"This action cannot be undone"
+					]
+				}
 			}
 		}
 	},
@@ -955,6 +1197,7 @@
 		"save": "Save",
 		"send": "Send",
 		"saveChanges": "Save changes",
+		"noChanges": "No changes",
 		"create": "Create",
 		"edit": "Edit",
 		"update": "Update",

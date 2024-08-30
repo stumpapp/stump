@@ -72,6 +72,11 @@ impl FileProcessor for ZipProcessor {
 		for i in 0..archive.len() {
 			let mut file = archive.by_index(i)?;
 
+			if file.is_dir() {
+				trace!("Skipping directory");
+				continue;
+			}
+
 			let path_buf = file.enclosed_name().unwrap_or_else(|| {
 				tracing::warn!("Failed to get enclosed name for zip entry");
 				PathBuf::from(file.name())
@@ -128,6 +133,10 @@ impl FileProcessor for ZipProcessor {
 		let mut images_seen = 0;
 		for name in file_names {
 			let mut file = archive.by_name(name)?;
+
+			if file.is_dir() {
+				continue;
+			}
 
 			let path_buf = file.enclosed_name().unwrap_or_else(|| {
 				tracing::warn!("Failed to get enclosed name for zip entry");
@@ -210,6 +219,9 @@ impl FileProcessor for ZipProcessor {
 		let mut pages_found = 0;
 		for name in file_names {
 			let file = archive.by_name(name)?;
+			if file.is_dir() {
+				continue;
+			}
 			let path_buf = file.enclosed_name().unwrap_or_else(|| {
 				tracing::warn!("Failed to get enclosed name for zip entry");
 				PathBuf::from(name)

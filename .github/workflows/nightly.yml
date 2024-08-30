@@ -66,6 +66,6 @@ jobs:
           password: ${{ env.DOCKER_PASSWORD }}
           tags: 'nightly'
           load: ${{ env.LOAD }}
-          push: ${{ env.LOAD }}
+          push: ${{ env.PUSH }}
           platforms: ${{ env.PLATFORMS }}
           discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}

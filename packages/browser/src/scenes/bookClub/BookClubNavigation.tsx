@@ -3,9 +3,8 @@ import { cn, cx, Link } from '@stump/components'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
+import { useBookClubContext } from '@/components/bookClub'
 import { usePreferences } from '@/hooks'
-
-import { useBookClubContext } from './context'
 
 // TODO: when viewing a thread, only show something like "<-- Return to chat board"
 export default function BookClubNavigation() {

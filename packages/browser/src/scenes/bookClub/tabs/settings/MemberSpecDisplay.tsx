@@ -1,7 +1,7 @@
 import { Card, Heading, Text } from '@stump/components'
 import React from 'react'
 
-import { useBookClubContext } from '../../context'
+import { useBookClubContext } from '@/components/bookClub'
 
 const upperFirst = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
 

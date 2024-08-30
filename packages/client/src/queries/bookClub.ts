@@ -79,7 +79,7 @@ export function useChatBoardQuery({ bookClubId, chatId, ...options }: UseBookClu
 export function useCreateBookClub(
 	options: MutationOptions<BookClub, AxiosError, CreateBookClub> = {},
 ) {
-	const { mutateAsync: createBookClub, ...rest } = useMutation(
+	const { mutateAsync, mutate, ...rest } = useMutation(
 		[bookClubQueryKeys.createBookClub],
 		async (variables) => {
 			const { data } = await bookClubApi.createBookClub(variables)
@@ -96,7 +96,8 @@ export function useCreateBookClub(
 	)
 
 	return {
-		createBookClub,
+		create: mutate,
+		createAsync: mutateAsync,
 		...rest,
 	}
 }

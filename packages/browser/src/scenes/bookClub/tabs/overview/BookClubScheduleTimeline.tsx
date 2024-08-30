@@ -3,10 +3,10 @@ import React from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { useMediaMatch } from 'rooks'
 
+import { useBookClubContext } from '@/components/bookClub'
 import GenericEmptyState from '@/components/GenericEmptyState'
+import paths from '@/paths'
 
-import paths from '../../../../../paths'
-import { useBookClubContext } from '../../context'
 import BookClubScheduleTimelineItem from './BookClubScheduleTimelineItem'
 
 export default function BookClubScheduleTimeline() {

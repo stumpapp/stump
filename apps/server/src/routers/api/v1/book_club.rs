@@ -11,6 +11,7 @@ use prisma_client_rust::{
 };
 use serde::Deserialize;
 use serde_qs::axum::QsQuery;
+use serde_with::skip_serializing_none;
 use specta::Type;
 use stump_core::{
 	db::entity::{
@@ -197,14 +198,16 @@ async fn get_book_clubs(
 }
 
 #[derive(Deserialize, Type, ToSchema)]
+#[skip_serializing_none]
 pub struct CreateBookClub {
 	pub name: String,
 	#[serde(default)]
 	pub is_private: bool,
+	#[specta(optional)]
 	pub member_role_spec: Option<BookClubMemberRoleSpec>,
-
 	#[serde(default)]
 	pub creator_hide_progress: bool,
+	#[specta(optional)]
 	pub creator_display_name: Option<String>,
 }
 
@@ -303,6 +306,7 @@ async fn get_book_club(
 }
 
 #[derive(Deserialize, Type, ToSchema)]
+#[skip_serializing_none]
 pub struct UpdateBookClub {
 	pub name: Option<String>,
 	pub description: Option<String>,
@@ -378,6 +382,7 @@ async fn get_book_club_invitations() -> APIResult<Json<Vec<BookClubInvitation>>>
 }
 
 #[derive(Deserialize, Type, ToSchema)]
+#[skip_serializing_none]
 pub struct CreateBookClubInvitation {
 	pub user_id: String,
 	pub role: Option<BookClubMemberRole>,
@@ -631,6 +636,7 @@ async fn get_book_club_member(
 }
 
 #[derive(Deserialize, Type, ToSchema)]
+#[skip_serializing_none]
 pub struct UpdateBookClubMember {
 	pub display_name: Option<String>,
 	pub private_membership: Option<bool>,
@@ -750,6 +756,7 @@ impl CreateBookClubScheduleBookOption {
 }
 
 #[derive(Deserialize, Type, ToSchema)]
+#[skip_serializing_none]
 pub struct CreateBookClubScheduleBook {
 	pub book: CreateBookClubScheduleBookOption,
 	pub start_at: Option<String>,
@@ -758,6 +765,7 @@ pub struct CreateBookClubScheduleBook {
 }
 
 #[derive(Deserialize, Type, ToSchema)]
+#[skip_serializing_none]
 pub struct CreateBookClubSchedule {
 	pub default_interval_days: Option<i32>,
 	pub books: Vec<CreateBookClubScheduleBook>,

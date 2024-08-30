@@ -7,10 +7,9 @@ import pluralize from 'pluralize'
 import React from 'react'
 import { Link } from 'react-router-dom'
 
+import { useBookClubContext } from '@/components/bookClub'
 import Markdown from '@/components/markdown/MarkdownPreview'
-
-import paths from '../../../../../paths'
-import { useBookClubContext } from '../../context'
+import paths from '@/paths'
 
 type Props = {
 	message: BookClubChatMessage

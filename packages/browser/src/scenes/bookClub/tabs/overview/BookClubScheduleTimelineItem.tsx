@@ -5,9 +5,10 @@ import dayjs from 'dayjs'
 import { Book } from 'lucide-react'
 import pluralize from 'pluralize'
 import React, { useMemo } from 'react'
+import { match } from 'ts-pattern'
 
-import paths from '../../../../../paths'
-import { useBookClubContext } from '../../context'
+import { useBookClubContext } from '@/components/bookClub'
+import paths from '@/paths'
 
 type Props = {
 	book: BookClubBook
@@ -15,7 +16,9 @@ type Props = {
 export default function BookClubScheduleTimelineItem({ book }: Props) {
 	const { bookClub } = useBookClubContext()
 
-	const adjustedEnd = dayjs(book.end_at).add(book.discussion_duration_days, 'day')
+	const adjustedEnd = book.discussion_duration_days
+		? dayjs(book.end_at).add(book.discussion_duration_days, 'day')
+		: null
 	const isCurrent = dayjs().isBefore(adjustedEnd) && dayjs().isAfter(dayjs(book.start_at))
 	const isDiscussing = dayjs().isBefore(adjustedEnd) && dayjs().isAfter(dayjs(book.end_at))
 	const isFuture = dayjs().isBefore(dayjs(book.start_at))
@@ -86,19 +89,31 @@ export default function BookClubScheduleTimelineItem({ book }: Props) {
 	}
 
 	const renderBookInfo = () => {
-		const { book_entity, title, author, url } = book
+		// const { book_entity, title, author, url } = book
+		const details = match(book.book)
+			.with({ __type: 'stored' }, ({ id, name, metadata }) => ({
+				author: metadata?.writers?.join(', '),
+				imageUrl: getMediaThumbnail(id),
+				title: metadata?.title || name,
+				url: paths.bookOverview(id),
+			}))
+			.with({ __type: 'external' }, ({ image_url, ...ref }) => ({
+				...ref,
+				imageUrl: image_url,
+			}))
+			.otherwise(() => null)
 
-		const image = book_entity ? (
-			<img src={getMediaThumbnail(book_entity.id)} className="rounded-md object-cover" />
+		const image = details?.imageUrl ? (
+			<img src={details.imageUrl} className="rounded-md object-cover" />
 		) : (
-			<div className="flex h-full w-full items-center justify-center rounded-md border border-gray-75 bg-gray-50/80 dark:border-gray-950 dark:bg-gray-1000/30">
-				<Book className="h-10 w-10 text-gray-750 dark:text-gray-400" />
+			<div className="flex h-full w-full items-center justify-center rounded-md border border-edge/80 bg-background-surface/50">
+				<Book className="h-10 w-10 text-foreground-muted" />
 			</div>
 		)
-		const link = book_entity ? paths.bookOverview(book_entity.id) : url
-
-		const bookName = book_entity?.metadata?.title ?? book_entity?.name
-		const heading = bookName ?? title ?? 'Untitled'
+		const link = details?.url
+		const isExternal = book.book?.__type === 'external'
+		const heading = details?.title ?? 'Untitled'
+		const author = details?.author
 
 		return (
 			<div className="flex items-start justify-between">
@@ -110,8 +125,8 @@ export default function BookClubScheduleTimelineItem({ book }: Props) {
 					<Heading size="sm">{heading}</Heading>
 					{author && <Text size="xs">{author}</Text>}
 					{link && (
-						<Link {...(book_entity ? { to: link } : { href: link })} className="text-xs">
-							{book_entity ? 'Access book' : 'External link'}
+						<Link {...(isExternal ? { href: link } : { to: link })} className="text-xs">
+							{isExternal ? 'External link' : 'Access book'}
 						</Link>
 					)}
 				</div>
@@ -141,7 +156,7 @@ export default function BookClubScheduleTimelineItem({ book }: Props) {
 			return (
 				<Link
 					href={paths.bookClubChatBoard(bookClub.id, book.chat_board?.id)}
-					className="text-sm text-gray-600 dark:text-gray-450"
+					className="text-sm text-foreground-muted"
 				>
 					{chatBoardInfo.message}
 				</Link>
@@ -151,7 +166,8 @@ export default function BookClubScheduleTimelineItem({ book }: Props) {
 
 	return (
 		<li className="mb-10 ml-4 last:mb-2">
-			<div className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border border-white bg-gray-100 dark:border-gray-750 dark:bg-gray-900"></div>
+			{/*  border-white bg-gray-100 dark:border-gray-750 dark:bg-gray-900 */}
+			<div className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border border-edge bg-background-surface"></div>
 
 			<div className="flex items-start justify-between">
 				<Text variant="muted" className="mb-1" size="sm">

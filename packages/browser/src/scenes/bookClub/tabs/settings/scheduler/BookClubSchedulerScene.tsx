@@ -1,6 +1,7 @@
 import React from 'react'
 
-import { useBookClubContext } from '../../../context'
+import { useBookClubContext } from '@/components/bookClub'
+
 import CreateOrAddToScheduleForm from './CreateOrAddToScheduleForm'
 
 export default function BookClubSchedulerScene() {

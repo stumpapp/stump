@@ -4,10 +4,10 @@ import { BookClubChatMessage, User } from '@stump/types'
 import React from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
 
+import { useBookClubContext } from '@/components/bookClub'
 import GenericEmptyState from '@/components/GenericEmptyState'
 import paths from '@/paths'
 
-import { useBookClubContext } from '../../context'
 import ChatMessage from './ChatMessage'
 
 export default function BookClubChatBoardScene() {

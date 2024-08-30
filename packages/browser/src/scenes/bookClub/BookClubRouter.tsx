@@ -4,20 +4,18 @@ import { Navigate, Route, Routes, useNavigate } from 'react-router'
 import { UnderConstruction } from '@/components/unimplemented'
 
 import { useAppContext } from '../../context.ts'
-import BookClubHomeLayout from './home/BookClubHomeLayout.tsx'
+import BookClubHomeLayout from './BookClubLayout.tsx'
 
-const BookClubExplorerScene = lazy(() => import('./explore/BookClubExploreScene.tsx'))
-const BookClubOverviewScene = lazy(() => import('./home/tabs/overview/BookClubOverviewScene.tsx'))
+const CreateBookClubScene = lazy(() => import('./createClub'))
 const UserBookClubsScene = lazy(() => import('./UserBookClubsScene.tsx'))
-const CreateBookClubScene = lazy(() => import('./create-club/CreateBookClubScene.tsx'))
-const BookClubSettingsScene = lazy(() => import('./home/tabs/settings/BookClubSettingsScene.tsx'))
-const BookClubChatBoardScene = lazy(
-	() => import('./home/tabs/chat-board/BookClubChatBoardScene.tsx'),
-)
-const BookClubMembersScene = lazy(() => import('./home/tabs/members/BookClubMembersScene.tsx'))
-const BookClubSchedulerScene = lazy(
-	() => import('./home/tabs/settings/scheduler/BookClubSchedulerScene.tsx'),
-)
+const BookClubExplorerScene = lazy(() => import('./explore/BookClubExploreScene.tsx'))
+
+// club-specific routes
+const BookClubOverviewScene = lazy(() => import('./tabs/overview/index.ts'))
+const BookClubSettingsScene = lazy(() => import('./tabs/settings/index.ts'))
+const BookClubChatBoardScene = lazy(() => import('./tabs/chatBoard/index.ts'))
+const BookClubMembersScene = lazy(() => import('./tabs/members/index.ts'))
+const BookClubSchedulerScene = lazy(() => import('./tabs/settings/scheduler/index.ts'))
 
 const IS_DEVELOPMENT = import.meta.env.DEV
 
@@ -55,6 +53,7 @@ export default function BookClubRouter() {
 				<Route path="overview" element={<BookClubOverviewScene />} />
 				<Route path="chat-board" element={<BookClubChatBoardScene />} />
 				<Route path="members" element={<BookClubMembersScene />} />
+				{/* TODO: settings router */}
 				<Route path="settings" element={<BookClubSettingsScene />} />
 				<Route path="settings/scheduler" element={<BookClubSchedulerScene />} />
 			</Route>

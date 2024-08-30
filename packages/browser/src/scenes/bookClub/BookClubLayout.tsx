@@ -1,18 +1,20 @@
 import { useBookClubQuery } from '@stump/client'
-import { cx } from '@stump/components'
+import { cn } from '@stump/components'
 import { BookClub, Media, User } from '@stump/types'
 import React, { Suspense, useMemo } from 'react'
 import { Navigate, Outlet, useLocation, useParams } from 'react-router'
+import { useMediaMatch } from 'rooks'
 
+import { BookClubContext } from '@/components/bookClub'
 import { SceneContainer } from '@/components/container'
 import { usePreferences } from '@/hooks'
 import { useUserStore } from '@/stores'
 
 import BookClubHeader from './BookClubHeader'
 import BookClubNavigation from './BookClubNavigation'
-import { BookClubContext } from './context'
+import { BookClubSettingsSideBar } from './tabs/settings'
 
-export default function BookClubHomeLayout() {
+export default function BookClubLayout() {
 	const { id } = useParams<{ id: string }>()
 
 	const { bookClub, isLoading } = useBookClubQuery(id || '', {
@@ -22,8 +24,19 @@ export default function BookClubHomeLayout() {
 	const location = useLocation()
 	const user = useUserStore((store) => store.user)
 	const {
-		preferences: { enable_hide_scrollbar },
+		preferences: {
+			enable_double_sidebar,
+			primary_navigation_mode,
+			layout_max_width_px,
+			enable_hide_scrollbar,
+		},
 	} = usePreferences()
+
+	const isSettings = useMemo(() => location.pathname.includes('settings'), [location.pathname])
+	const isMobile = useMediaMatch('(max-width: 768px)')
+
+	const displaySideBar = !!enable_double_sidebar && !isMobile && isSettings
+	const preferTopBar = primary_navigation_mode === 'TOPBAR'
 
 	const viewerMember = useMemo(
 		() => mockBookClub.members?.find((member) => !!member.user?.id && member.user.id === user?.id),
@@ -32,7 +45,14 @@ export default function BookClubHomeLayout() {
 	const viewerCanManage =
 		user?.is_server_owner || viewerMember?.is_creator || viewerMember?.role === 'ADMIN'
 	const viewerIsMember = !!viewerMember || !!user?.is_server_owner
-	const isOnOverview = location.pathname.endsWith('/overview')
+
+	const renderHeader = () =>
+		isSettings ? null : (
+			<>
+				<BookClubHeader />
+				<BookClubNavigation />
+			</>
+		)
 
 	// Realistically this won't happen because of access control rules on the server,
 	// but doesn't hurt to have an additional check here
@@ -49,29 +69,37 @@ export default function BookClubHomeLayout() {
 	return (
 		<BookClubContext.Provider
 			value={{
-				// bookClub: mockBookClub,
-				bookClub,
+				bookClub: mockBookClub,
+				// bookClub,
 				viewerCanManage,
 				viewerIsMember,
 				viewerMember,
 			}}
 		>
-			<BookClubHeader />
-			<BookClubNavigation />
-			<SceneContainer
-				className={cx(
-					'flex flex-col gap-4 pb-[100px] md:h-full md:pb-0',
-					{
-						'md:overflow-hidden': isOnOverview,
-					},
-					{ 'md:h-full md:overflow-y-auto': !isOnOverview },
-					{ 'md:hide-scrollbar': !!enable_hide_scrollbar },
-				)}
+			<div
+				className={cn('relative flex flex-1 flex-col', {
+					'mx-auto w-full': preferTopBar && !!layout_max_width_px,
+				})}
+				style={{
+					maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined,
+				}}
 			>
-				<Suspense fallback={null}>
-					<Outlet />
-				</Suspense>
-			</SceneContainer>
+				{renderHeader()}
+
+				{displaySideBar && <BookClubSettingsSideBar />}
+
+				<SceneContainer
+					className={cn('relative flex flex-1 flex-col gap-4 md:pb-0', {
+						'md:hide-scrollbar': !!enable_hide_scrollbar,
+						// pl-48 is for the sidebar, plus pl-4 for the padding
+						'pl-52': displaySideBar,
+					})}
+				>
+					<Suspense fallback={null}>
+						<Outlet />
+					</Suspense>
+				</SceneContainer>
+			</div>
 		</BookClubContext.Provider>
 	)
 }
@@ -80,7 +108,7 @@ const mockBookClub: BookClub = {
 	created_at: '2020-12-01T00:00:00.000Z',
 	description: 'A book club for fans of the OFMD series. All you can read pirate fiction!',
 	emoji: null,
-	id: '1',
+	id: 'cm0h9dr5k008gs07bom52fwfi',
 	is_private: false,
 	member_role_spec: {
 		ADMIN: 'First Mate',
@@ -109,10 +137,13 @@ const mockBookClub: BookClub = {
 	schedule: {
 		books: [
 			{
-				book_entity: {
-					id: '00685bd0-70d4-4a0e-80d3-8f95cdd45e97',
-					name: 'The Kraken: Part 3',
-				} as Media,
+				book: {
+					__type: 'stored',
+					...({
+						id: '03741e4a-ef32-4fb9-8ca7-661b0953b5e0',
+						name: 'The Kraken: Part 3',
+					} as Media),
+				},
 				chat_board: {
 					id: '3',
 					messages: [],
@@ -123,7 +154,12 @@ const mockBookClub: BookClub = {
 				start_at: '2023-10-19T00:00:00.000Z',
 			},
 			{
-				author: 'Herman Melville',
+				book: {
+					__type: 'external',
+					author: 'Herman Melville',
+					title: 'Herman Melville',
+					url: 'https://www.gutenberg.org/files/2701/2701-h/2701-h.htm',
+				},
 				chat_board: {
 					id: '2',
 					messages: [],
@@ -132,14 +168,15 @@ const mockBookClub: BookClub = {
 				end_at: '2021-01-31T00:00:00.000Z',
 				id: '2',
 				start_at: '2021-01-01T00:00:00.000Z',
-				title: 'The Kraken: Part 2',
-				url: 'https://www.gutenberg.org/files/2701/2701-h/2701-h.htm',
 			},
 			{
-				book_entity: {
-					id: '040173d0-00c4-4031-a430-b280f54d92c0',
-					name: 'The Kraken',
-				} as Media,
+				book: {
+					__type: 'stored',
+					...({
+						id: '25e16406-c731-4209-8c44-5ea65a1a6212',
+						name: 'The Kraken',
+					} as Media),
+				},
 				chat_board: {
 					id: '1',
 					messages: [],

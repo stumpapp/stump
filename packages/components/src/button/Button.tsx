@@ -133,6 +133,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 						className,
 					)}
 					ref={ref}
+					type="button"
 					{...props}
 				>
 					{isLoading ? (

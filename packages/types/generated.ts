@@ -133,7 +133,7 @@ export type Series = { id: string; name: string; path: string; description: stri
 /**
  * Struct representing the metadata for a processed file.
  */
-export type MediaMetadata = { title: string | null; series: string | null; number: number | null; volume: number | null; summary: string | null; notes: string | null; age_rating?: number | null; genre?: string[] | null; year: number | null; month: number | null; day: number | null; writers?: string[] | null; pencillers?: string[] | null; inkers?: string[] | null; colorists?: string[] | null; letterers?: string[] | null; cover_artists?: string[] | null; editors?: string[] | null; publisher: string | null; links?: string[] | null; characters?: string[] | null; teams?: string[] | null; page_count: number | null }
+export type MediaMetadata = { title?: string | null; series?: string | null; number?: number | null; volume?: number | null; summary?: string | null; notes?: string | null; age_rating?: number | null; genre?: string[] | null; year?: number | null; month?: number | null; day?: number | null; writers?: string[] | null; pencillers?: string[] | null; inkers?: string[] | null; colorists?: string[] | null; letterers?: string[] | null; cover_artists?: string[] | null; editors?: string[] | null; publisher?: string | null; links?: string[] | null; characters?: string[] | null; teams?: string[] | null; page_count?: number | null }
 
 export type Media = { id: string; name: string; size: BigInt; extension: string; pages: number; updated_at: string; created_at: string; modified_at: string | null; hash: string | null; path: string; status: FileStatus; series_id: string; metadata: MediaMetadata | null; series?: Series | null; active_reading_session?: ActiveReadingSession | null; finished_reading_sessions: FinishedReadingSession[] | null; current_page?: number | null; current_epubcfi?: string | null; is_completed?: boolean | null; tags?: Tag[] | null; bookmarks?: Bookmark[] | null }
 
@@ -221,9 +221,13 @@ export type BookClubMemberRole = "MEMBER" | "MODERATOR" | "ADMIN" | "CREATOR"
 
 export type BookClubMemberRoleSpec = Record<BookClubMemberRole, string>
 
-export type BookClubSchedule = { default_interval_days: number | null; books?: BookClubBook[] | null }
+export type BookClubSchedule = { default_interval_days?: number | null; books?: BookClubBook[] | null }
 
-export type BookClubBook = { id: string; start_at: string; end_at: string; discussion_duration_days: number; title?: string | null; author?: string | null; url?: string | null; book_entity?: Media | null; chat_board?: BookClubChatBoard | null }
+export type BookClubExternalBook = { title: string; author: string; url?: string | null; image_url?: string | null }
+
+export type BookClubBookDetails = ({ __type: "stored" } & Media) | ({ __type: "external" } & BookClubExternalBook)
+
+export type BookClubBook = { id: string; start_at: string; end_at: string; discussion_duration_days?: number | null; book?: BookClubBookDetails | null; chat_board?: BookClubChatBoard | null }
 
 export type BookClubChatBoard = { id: string; messages: BookClubChatMessage[] | null }
 
@@ -368,7 +372,7 @@ export type UpdateSchedulerConfig = { interval_secs: number | null; excluded_lib
 
 export type GetBookClubsParams = { all?: boolean }
 
-export type CreateBookClub = { name: string; is_private?: boolean; member_role_spec: BookClubMemberRoleSpec | null; creator_hide_progress?: boolean; creator_display_name: string | null }
+export type CreateBookClub = { name: string; is_private?: boolean; member_role_spec?: BookClubMemberRoleSpec | null; creator_hide_progress?: boolean; creator_display_name?: string | null }
 
 export type UpdateBookClub = { name: string | null; description: string | null; is_private: boolean | null; member_role_spec: BookClubMemberRoleSpec | null; emoji: string | null }
 

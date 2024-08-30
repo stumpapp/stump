@@ -404,10 +404,11 @@ model BookClubMember {
 
   role Int // 0 - member, 1 - moderator, 2 - admin, 3 - creator
 
-  user_id                   String
-  user                      User                         @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  book_club_id              String
-  book_club                 BookClub                     @relation(fields: [book_club_id], references: [id], onDelete: Cascade)
+  user_id      String
+  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  book_club_id String
+  book_club    BookClub @relation(fields: [book_club_id], references: [id], onDelete: Cascade)
+
   discussion_messages       BookClubChatMessage[]
   liked_discussion_messages BookClubChatMessageLike[]
   book_suggestions          BookClubBookSuggestion[]
@@ -454,9 +455,10 @@ model BookClubBook {
   discussion_duration_days Int?     @default(1) // in days
 
   // The below group should only be set if the book is not already in the library
-  title  String?
-  author String?
-  url    String?
+  title     String?
+  author    String?
+  url       String?
+  image_url String?
 
   book_entity_id String?
   book_entity    Media?  @relation(fields: [book_entity_id], references: [id], onDelete: Cascade)

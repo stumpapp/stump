@@ -6,6 +6,9 @@
 	"exports": {
 		".": "./src/index.ts"
 	},
+	"scripts": {
+		"nuke": "yarn exec rimraf node_modules"
+	},
 	"dependencies": {
 		"@stump/api": "*",
 		"@stump/types": "*",

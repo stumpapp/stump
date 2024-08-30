@@ -51,6 +51,14 @@ jobs:
           cargo fmt --all -- --check
           cargo clippy -- -D warnings
 
+      - name: Generate typescript bindinds
+        run: cargo codegen -- --skip-prisma
+      - name: Verify typescript bindings
+        run: |
+          git diff --exit-code || \
+            (echo "Please generate updated typescript bindings with \`cargo codegen -- --skip-prisma\`" \
+            && exit 1)
+
       - name: Run tests
         run: cargo test
 

@@ -133,11 +133,11 @@ export const mediaApi = {
 }
 
 export const mediaQueryKeys: Record<keyof typeof mediaApi, string> = {
+	deleteActiveReadingSession: 'media.deleteActiveReadingSession',
 	getInProgressMedia: 'media.getInProgress',
 	getMedia: 'media.get',
 	getMediaById: 'media.getById',
 	getMediaByPath: 'media.getByPath',
-	deleteActiveReadingSession: 'media.deleteActiveReadingSession',
 	getMediaPage: 'media.getPage',
 	getMediaThumbnail: 'media.getThumbnail',
 	getMediaWithCursor: 'media.getWithCursor',

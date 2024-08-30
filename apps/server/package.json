@@ -9,6 +9,7 @@
 		"dev": "cargo watch --ignore core/prisma -x run",
 		"build": "cargo build --release --package stump_server",
 		"delete-webapp": "trash \"dist/*\" \"!dist/.placeholder\"",
-		"get-webapp": "cp -r ../web/dist ./dist"
+		"get-webapp": "cp -r ../web/dist ./dist",
+		"nuke": "rimraf node_modules"
 	}
 }

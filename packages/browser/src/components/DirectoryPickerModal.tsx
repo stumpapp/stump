@@ -66,7 +66,7 @@ export default function DirectoryPickerModal({
 					<Dialog.Close onClick={onClose} />
 				</Dialog.Header>
 
-				<div className="flex flex-col space-y-2">
+				<div className="flex flex-col space-y-2 overflow-hidden">
 					<div className="flex items-center space-x-2">
 						<Button
 							className="h-8 w-8 p-0 text-sm"
@@ -104,8 +104,8 @@ export default function DirectoryPickerModal({
 								onClick={() => setPath(directory.path)}
 							>
 								<Text className="line-clamp-1 inline-flex items-center gap-x-2">
-									<Folder size="1.25rem" />
-									<span>{directory.name}</span>
+									<Folder size="1.25rem" className="shrink-0" />
+									<span className="line-clamp-1">{directory.name}</span>
 								</Text>
 							</button>
 						))}

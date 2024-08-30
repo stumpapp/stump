@@ -1,0 +1,60 @@
+import { Image, NotebookTabs, PackageX, ScanSearch, ShieldCheck } from 'lucide-react'
+
+import { RouteGroup } from '@/hooks/useRouteGroups'
+
+export const routeGroups: RouteGroup[] = [
+	{
+		defaultRoute: 'settings/basics',
+		items: [
+			{
+				icon: NotebookTabs,
+				label: 'Basics',
+				localeKey: 'basics',
+				// TODO: I the parent pretty much asserts library:manage, so this will never actually
+				// allow a user with just library:edit to access this route. I should probably fix that.
+				permission: 'library:edit',
+				to: 'settings/basics',
+			},
+		],
+	},
+	{
+		defaultRoute: 'settings/options/scanning',
+		items: [
+			{
+				icon: ScanSearch,
+				label: 'Scanning',
+				localeKey: 'options/scanning',
+				permission: 'library:manage',
+				to: 'settings/options/scanning',
+			},
+			{
+				icon: Image,
+				label: 'Thumbnails',
+				localeKey: 'options/thumbnails',
+				permission: 'library:manage',
+				to: 'settings/options/thumbnails',
+			},
+		],
+		label: 'Options',
+	},
+	{
+		defaultRoute: 'settings/danger',
+		items: [
+			{
+				icon: ShieldCheck,
+				label: 'Access Control',
+				localeKey: 'danger-zone/access-control',
+				permission: 'library:manage',
+				to: 'settings/danger/access-control',
+			},
+			{
+				icon: PackageX,
+				label: 'Delete',
+				localeKey: 'danger-zone/delete',
+				permission: 'library:delete',
+				to: 'settings/danger/delete',
+			},
+		],
+		label: 'Danger Zone',
+	},
+]

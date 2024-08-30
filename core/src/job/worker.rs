@@ -24,7 +24,7 @@ pub enum WorkerSend {
 
 /// A trait for extending the `WorkerSend` enum with a method to convert it into a `WorkerSend`
 pub trait WorkerSendExt {
-	fn into_send(self) -> WorkerSend;
+	fn into_worker_send(self) -> WorkerSend;
 }
 
 // TODO: Add Finalizing state to inform clients that a job is not able to be paused

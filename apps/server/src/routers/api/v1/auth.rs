@@ -403,7 +403,7 @@ pub async fn register(
 		.exec()
 		.await?;
 
-	// TODO(prisma 0.7.0): Nested create
+	// TODO(prisma-nested-create): Refactor once nested create is supported
 	let _user_preferences = db
 		.user_preferences()
 		.create(vec![

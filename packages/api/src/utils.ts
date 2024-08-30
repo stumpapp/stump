@@ -1,3 +1,4 @@
+import { APIError } from '@stump/types'
 import axios, { AxiosError } from 'axios'
 import qs from 'qs'
 
@@ -111,4 +112,20 @@ export const mergePageParams = ({ page, page_size, params }: PagedQueryParams): 
 
 export const isAxiosError = (error: unknown): error is AxiosError => {
 	return axios.isAxiosError(error)
+}
+
+export const isAPIError = (data: unknown): data is APIError => {
+	return (data as APIError).code !== undefined && (data as APIError).details !== undefined
+}
+
+export const handleApiError = (error: unknown, fallback?: string): string => {
+	const fallbackMessage = fallback || 'Something went wrong.'
+
+	if (isAxiosError(error)) {
+		return isAPIError(error.response?.data) ? error.response?.data.details : fallbackMessage
+	} else if (error instanceof Error) {
+		return error.message || fallbackMessage
+	} else {
+		return fallbackMessage
+	}
 }

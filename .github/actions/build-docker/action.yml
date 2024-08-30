@@ -80,7 +80,7 @@ runs:
 
     - name: Run podman buildx
       run: |
-        ENGINE=podman PLATFORMS="${{ inputs.platforms }}" TAGS="${{ env.TAGS }}" GIT_REV="${{ env.GIT_REV }}" ./docker/build.sh
+        ENGINE=podman PLATFORMS="${{ inputs.platforms }}" TAGS="${{ env.TAGS }}" GIT_REV="${{ env.GIT_REV }}" PUSH="${{ inputs.push }}" ./docker/build.sh
       shell: bash
 
     - name: Discord notification

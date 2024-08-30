@@ -26,15 +26,16 @@ export default function BasicSettingsScene() {
 	const [showDirectoryPicker, setShowDirectoryPicker] = useState(false)
 	const [path, name, description, tags] = form.watch(['path', 'name', 'description', 'tags'])
 
-	// FIXME(284): not correct, particularly the tags part
 	const hasChanges = useMemo(() => {
+		const currentTagSet = new Set(tags?.map(({ label }) => label) || [])
+		const libraryTagSet = new Set(library?.tags?.map(({ name }) => name) || [])
+
 		return (
 			library?.path !== path ||
 			library?.name !== name ||
 			library?.description !== description ||
-			library?.tags
-				?.map(({ name }) => name)
-				.some((tag) => !tags?.find(({ label }) => label === tag))
+			[...currentTagSet].some((tag) => !libraryTagSet.has(tag)) ||
+			[...libraryTagSet].some((tag) => !currentTagSet.has(tag))
 		)
 	}, [library, path, name, description, tags])
 
@@ -45,7 +46,7 @@ export default function BasicSettingsScene() {
 				name: values.name,
 				path: values.path,
 				scan_mode: library.path !== values.path ? 'DEFAULT' : 'NONE',
-				tags: values.tags?.map(({ value }) => value),
+				tags: values.tags?.map(({ label }) => label),
 			})
 		},
 		[patch, library],

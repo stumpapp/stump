@@ -75,7 +75,7 @@ runs:
       shell: bash
 
     - name: Run buildah build
-      id: buildah-build
+      id: build
       uses: redhat-actions/buildah-build@v2
       with:
         image: aaronleopold/stump
@@ -91,8 +91,8 @@ runs:
       if: ${{ success() && inputs.push == 'true' }}
       uses: redhat-actions/push-to-registry@v2
       with:
-        image: ${{ steps.build_image.outputs.image }}
-        tags: ${{ steps.build_image.outputs.tags }}
+        image: ${{ steps.build.outputs.image }}
+        tags: ${{ steps.build.outputs.tags }}
         username: ${{ inputs.username }}
         password: ${{ inputs.password }}
         registry: docker.io

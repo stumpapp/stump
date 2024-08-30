@@ -103,4 +103,4 @@ runs:
         DISCORD_WEBHOOK: ${{ inputs.discord-webhook }}
       uses: 'Ilshidur/action-discord@0.3.2'
       with:
-        args: 'Successfully pushed the following image tags to registry: ${{ env.TAGS }}'
+        args: 'Successfully pushed the following image tags to registry: ${{ steps.build.outputs.tags }}'

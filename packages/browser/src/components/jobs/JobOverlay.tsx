@@ -4,51 +4,58 @@ import { JobUpdate } from '@stump/types'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo } from 'react'
 
-// TODO: refactor this component along with the entire reporting model. It's honestly super
-// confusing and poorly designed. For jobs with one task but operate primarily via subtasks,
-// we will see Tasks (0/1) and x/y subtasks. I've modified it for a little bit of improvement,
-// but the root issue is really the fact that we send different values:
-// over-arching task count: completed_tasks, remaining_tasks
-// sub-task count: completed_subtasks, total_subtasks
-// The ideal would be the latter for each. This would allow us to have a more consistent
-// experience and make the UI more predictable. Since internally, the task system uses a vecdeque,
-// we can't just get the length of the vecdeque, so it is more effort to change this than it seems.
-
 export default function JobOverlay() {
 	const storeJobs = useJobStore((state) => state.jobs)
 
-	// get the first job that is running from the activeJobs object
+	/**
+	 * The first running job in the store, which is used to determine the progress of the job.
+	 */
 	const firstRunningJob = useMemo(
 		() => Object.values(storeJobs).find((job) => job.status === 'RUNNING'),
 		[storeJobs],
 	)
-
+	/**
+	 * The subtask counts for the job, which describe the smaller units of work that are
+	 * being done within the job. This is more indicative of the actual work being done
+	 */
 	const subTaskCounts = useMemo(
 		() => (firstRunningJob ? calcSubTaskCounts(firstRunningJob) : null),
 		[firstRunningJob],
 	)
-
+	/**
+	 * The task counts for the job, which describe the overarching tasks for the main
+	 * job. This doesn't relate to smaller units of work, but rather the larger tasks
+	 * which encompass multiple subtasks.
+	 */
 	const taskCounts = useMemo(
 		() => (firstRunningJob ? calcTaskCounts(firstRunningJob) : null),
 		[firstRunningJob],
 	)
 
+	/**
+	 * The percentage value for the progress bar, calculated from the subtask counts.
+	 * Note that we don't care about the task counts here, as the subtask counts are more
+	 * indicative of actual work being done.
+	 */
 	const progressValue = useMemo(() => {
 		if (subTaskCounts != null) {
 			const { completed, total } = subTaskCounts
 			return (completed / total) * 100
-		} else if (taskCounts != null) {
-			const { completed, total } = taskCounts
-			return (completed / total) * 100
 		}
-
 		return null
-	}, [subTaskCounts, taskCounts])
-
+	}, [subTaskCounts])
+	/**
+	 * The string representation of the task counts, which is used to display the total, overarching
+	 * tasks that are being done in the job.
+	 */
 	const taskCountString = useMemo(
 		() => (taskCounts?.total ? `Tasks (${taskCounts?.completed ?? 0}/${taskCounts.total})` : null),
 		[taskCounts],
 	)
+	/**
+	 * The string representation of the subtask counts, which is used to display the total, smaller
+	 * units of work that are being done in the job.
+	 */
 	const subTaskCountString = useMemo(
 		() => (subTaskCounts?.total ? `${subTaskCounts?.completed ?? 0}/${subTaskCounts.total}` : null),
 		[subTaskCounts],
@@ -72,11 +79,12 @@ export default function JobOverlay() {
 							{taskCountString && <Text size="xs">{taskCountString}</Text>}
 							{subTaskCounts && <Text size="xs">{subTaskCountString}</Text>}
 						</div>
+
 						<ProgressBar
 							value={progressValue}
 							size="sm"
 							variant="primary"
-							isIndeterminate={!subTaskCounts && !taskCounts}
+							isIndeterminate={!subTaskCounts}
 						/>
 					</div>
 				</motion.div>

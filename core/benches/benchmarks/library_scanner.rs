@@ -40,7 +40,7 @@ impl Display for BenchmarkSize {
 }
 
 fn full_scan(c: &mut Criterion) {
-	static SIZES: [BenchmarkSize; 3] = [
+	static SIZES: [BenchmarkSize; 4] = [
 		BenchmarkSize {
 			series_count: 10,
 			media_per_series: 10,
@@ -54,10 +54,10 @@ fn full_scan(c: &mut Criterion) {
 			media_per_series: 100,
 		},
 		// Note: This benchmark is a time hog, so I have commented it out for now
-		// BenchmarkSize {
-		// 	series_count: 100,
-		// 	media_per_series: 1000,
-		// },
+		BenchmarkSize {
+			series_count: 100,
+			media_per_series: 1000,
+		},
 	];
 
 	let mut group = c.benchmark_group("full_scan");

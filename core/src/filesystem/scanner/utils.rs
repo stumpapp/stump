@@ -1,20 +1,34 @@
-use std::{collections::VecDeque, path::PathBuf};
+use std::{
+	collections::VecDeque,
+	path::{Path, PathBuf},
+	pin::pin,
+	sync::{
+		atomic::{AtomicUsize, Ordering},
+		Arc,
+	},
+	time::Instant,
+};
 
+use futures::{stream::FuturesUnordered, StreamExt};
 use globset::{GlobSet, GlobSetBuilder};
 use prisma_client_rust::{
 	chrono::{DateTime, Utc},
 	QueryError,
 };
-use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use tokio::{
+	sync::{oneshot, Semaphore},
+	task::spawn_blocking,
+};
 use walkdir::DirEntry;
 
 use crate::{
+	config::StumpConfig,
 	db::{
-		entity::{LibraryOptions, Media},
+		entity::{LibraryOptions, Media, Series},
 		FileStatus,
 	},
 	error::{CoreError, CoreResult},
-	filesystem::MediaBuilder,
+	filesystem::{MediaBuilder, SeriesBuilder},
 	job::{error::JobError, JobExecuteLog, JobProgress, WorkerCtx, WorkerSendExt},
 	prisma::{media, media_metadata, series, PrismaClient},
 	CoreEvent,
@@ -322,114 +336,298 @@ pub(crate) async fn handle_missing_media(
 	output
 }
 
-pub(crate) struct MediaBuildOperationCtx {
-	pub series_id: String,
-	pub library_options: LibraryOptions,
-	pub chunk_size: usize,
+async fn build_series(for_library: &str, path: &Path) -> CoreResult<Series> {
+	let (tx, rx) = oneshot::channel();
+
+	// Spawn a blocking task to handle the IO-intensive operations:
+	let handle = spawn_blocking({
+		let path = path.to_path_buf();
+		let for_library = for_library.to_string();
+
+		move || {
+			let send_result = tx.send(SeriesBuilder::new(&path, &for_library).build());
+			tracing::trace!(
+				is_err = send_result.is_err(),
+				"Sending build result to channel"
+			);
+		}
+	});
+
+	let build_result = if let Ok(recv) = rx.await {
+		recv?
+	} else {
+		handle
+			.await
+			.map_err(|e| CoreError::Unknown(e.to_string()))?;
+		return Err(CoreError::Unknown(
+			"Failed to receive build result".to_string(),
+		));
+	};
+
+	Ok(build_result)
 }
 
-// TODO: explore spawn_blocking + semaphore(chunk_size) here instead of rayon
+pub(crate) async fn safely_build_series(
+	for_library: &str,
+	paths: Vec<PathBuf>,
+	core_config: &StumpConfig,
+	reporter: impl Fn(usize),
+) -> (Vec<Series>, Vec<JobExecuteLog>) {
+	let mut logs = vec![];
+	let mut created_series = Vec::with_capacity(paths.len());
 
-pub(crate) async fn handle_create_media(
-	build_ctx: MediaBuildOperationCtx,
+	let max_concurrency = core_config.max_scanner_concurrency;
+	let semaphore = Arc::new(Semaphore::new(max_concurrency));
+	tracing::debug!(max_concurrency, "Semaphore created for series creation");
+
+	let start = Instant::now();
+
+	let futures = paths
+		.iter()
+		.map(|path| {
+			let semaphore = semaphore.clone();
+			let path = path.clone();
+			let library_id = for_library.to_string();
+
+			async move {
+				let _permit = semaphore
+					.acquire()
+					.await
+					.map_err(|e| (CoreError::Unknown(e.to_string()), path.clone()))?;
+				tracing::trace!(?path, "Acquired permit for series creation");
+				build_series(&library_id, &path)
+					.await
+					.map_err(|e| (e, path.clone()))
+			}
+		})
+		.collect::<FuturesUnordered<_>>();
+
+	// An atomic usize to keep track of the current position in the stream
+	// to report progress to the UI
+	let atomic_cursor = Arc::new(AtomicUsize::new(1));
+
+	let mut futures = pin!(futures);
+
+	while let Some(result) = futures.next().await {
+		match result {
+			Ok(series) => {
+				created_series.push(series);
+			},
+			Err((error, path)) => {
+				logs.push(
+					JobExecuteLog::error(format!(
+						"Failed to build series: {:?}",
+						error.to_string()
+					))
+					.with_ctx(format!("Path: {:?}", path)),
+				);
+			},
+		}
+		// We visit every file, regardless of success or failure
+		reporter(atomic_cursor.fetch_add(1, Ordering::SeqCst));
+	}
+
+	let success_count = created_series.len();
+	let error_count = logs.len();
+	tracing::debug!(elapsed = ?start.elapsed(), success_count, error_count, "Finished batch of series");
+
+	(created_series, logs)
+}
+
+pub(crate) struct MediaBuildOperation {
+	pub series_id: String,
+	pub library_options: LibraryOptions,
+	pub max_concurrency: usize,
+}
+
+async fn build_book(
+	path: &Path,
+	series_id: &str,
+	existing_book: Option<Media>,
+	library_options: LibraryOptions,
+	config: &StumpConfig,
+) -> CoreResult<Media> {
+	let (tx, rx) = oneshot::channel();
+
+	// Spawn a blocking task to handle the IO-intensive operations:
+	let handle = spawn_blocking({
+		let path = path.to_path_buf();
+		let series_id = series_id.to_string();
+		let library_options = library_options.clone();
+		let config = config.clone();
+
+		move || {
+			let builder = MediaBuilder::new(&path, &series_id, library_options, &config);
+			let send_result = tx.send(if let Some(existing_book) = existing_book {
+				builder.rebuild(&existing_book)
+			} else {
+				builder.build()
+			});
+			tracing::trace!(
+				is_err = send_result.is_err(),
+				"Sending build result to channel"
+			);
+		}
+	});
+
+	let build_result = if let Ok(recv) = rx.await {
+		recv?
+	} else {
+		handle
+			.await
+			.map_err(|e| CoreError::Unknown(e.to_string()))?;
+		return Err(CoreError::Unknown(
+			"Failed to receive build result".to_string(),
+		));
+	};
+
+	Ok(build_result)
+}
+
+pub(crate) async fn safely_build_and_insert_media(
+	MediaBuildOperation {
+		series_id,
+		library_options,
+		max_concurrency,
+	}: MediaBuildOperation,
 	worker_ctx: &WorkerCtx,
 	paths: Vec<PathBuf>,
 ) -> Result<MediaOperationOutput, JobError> {
 	if paths.is_empty() {
-		tracing::debug!("No media to create");
+		tracing::trace!("No media to create?");
 		return Ok(MediaOperationOutput::default());
 	}
 
 	let mut output = MediaOperationOutput::default();
-	let MediaBuildOperationCtx {
-		series_id,
-		library_options,
-		chunk_size,
-	} = build_ctx;
+	let mut logs = vec![];
 
-	let path_chunks = paths.chunks(chunk_size);
-	for (idx, chunk) in path_chunks.enumerate() {
-		tracing::trace!(chunk_idx = idx, chunk_len = chunk.len(), "Processing chunk");
-		let mut built_media = chunk
-			.par_iter()
-			.map(|path_buf| {
-				(
-					path_buf.to_owned(),
-					MediaBuilder::new(
-						path_buf,
-						&series_id,
-						library_options.clone(),
-						&worker_ctx.config,
-					)
-					.build(),
-				)
-			})
-			.collect::<VecDeque<(PathBuf, Result<Media, _>)>>();
+	let semaphore = Arc::new(Semaphore::new(max_concurrency));
+	tracing::debug!(max_concurrency, "Semaphore created for media creation");
 
-		while let Some((media_path, build_result)) = built_media.pop_front() {
-			let Ok(generated) = build_result else {
-				tracing::error!(?media_path, "Failed to build media");
-				output.logs.push(
-					JobExecuteLog::error(format!(
-						"Failed to build media: {:?}",
-						build_result.unwrap_err().to_string()
-					))
-					.with_ctx(media_path.to_string_lossy().to_string()),
-				);
-				continue;
-			};
+	worker_ctx.report_progress(JobProgress::msg("Building media from disk"));
+	let task_count = paths.len() as i32;
+	let start = Instant::now();
 
-			match create_media(&worker_ctx.db, generated).await {
-				Ok(created_media) => {
-					output.created_media += 1;
-					worker_ctx.send_batch(vec![
-						JobProgress::msg(
-							format!("Inserted {}", media_path.display()).as_str(),
-						)
-						.into_send(),
-						CoreEvent::CreatedMedia {
-							id: created_media.id,
-							series_id: series_id.clone(),
-						}
-						.into_send(),
-					]);
-				},
-				Err(e) => {
-					tracing::error!(error = ?e, ?media_path, "Failed to create media");
-					output.logs.push(
-						JobExecuteLog::error(format!(
-							"Failed to create media: {:?}",
-							e.to_string()
-						))
-						.with_ctx(media_path.to_string_lossy().to_string()),
-					);
-				},
+	let futures = paths
+		.iter()
+		.map(|path| {
+			let semaphore = semaphore.clone();
+			let series_id = series_id.clone();
+			let library_options = library_options.clone();
+			let path = path.clone();
+
+			async move {
+				let _permit = semaphore
+					.acquire()
+					.await
+					.map_err(|e| (CoreError::Unknown(e.to_string()), path.clone()))?;
+				tracing::trace!(?path, "Acquired permit for media creation");
+				build_book(&path, &series_id, None, library_options, &worker_ctx.config)
+					.await
+					.map_err(|e| (e, path.clone()))
 			}
+		})
+		.collect::<FuturesUnordered<_>>();
+
+	// An atomic usize to keep track of the current position in the stream
+	// to report progress to the UI
+	let atomic_cursor = Arc::new(AtomicUsize::new(1));
+
+	let mut futures = pin!(futures);
+	let mut books = VecDeque::with_capacity(paths.len());
+
+	while let Some(result) = futures.next().await {
+		match result {
+			Ok(book) => {
+				books.push_back(book);
+			},
+			Err((error, path)) => {
+				logs.push(
+					JobExecuteLog::error(format!(
+						"Failed to build book: {:?}",
+						error.to_string()
+					))
+					.with_ctx(format!("Path: {:?}", path)),
+				);
+			},
+		}
+		worker_ctx.report_progress(JobProgress::subtask_position(
+			atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
+			task_count,
+		));
+	}
+
+	let success_count = books.len();
+	let error_count = logs.len();
+	tracing::debug!(elapsed = ?start.elapsed(),
+		success_count, error_count,
+	 "Built books from disk");
+
+	worker_ctx.report_progress(JobProgress::msg("Inserting books into database"));
+	let task_count = books.len() as i32;
+	let start = Instant::now();
+
+	let atomic_cursor = Arc::new(AtomicUsize::new(1));
+
+	// TODO: consider small batches of _batch instead?
+	while let Some(book) = books.pop_front() {
+		let path = book.path.clone();
+		match create_media(&worker_ctx.db, book).await {
+			Ok(created_media) => {
+				output.created_media += 1;
+				worker_ctx.send_batch(vec![
+					JobProgress::subtask_position(
+						atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
+						task_count,
+					)
+					.into_send(),
+					CoreEvent::CreatedMedia {
+						id: created_media.id,
+						series_id: series_id.clone(),
+					}
+					.into_send(),
+				]);
+			},
+			Err(e) => {
+				worker_ctx.report_progress(JobProgress::subtask_position(
+					atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
+					task_count,
+				));
+				tracing::error!(error = ?e, ?path, "Failed to create media");
+				logs.push(
+					JobExecuteLog::error(format!(
+						"Failed to create media: {:?}",
+						e.to_string()
+					))
+					.with_ctx(path),
+				);
+			},
 		}
 	}
+
+	let success_count = output.created_media;
+	let error_count = logs.len() - error_count; // Subtract the errors from the previous step
+	tracing::debug!(success_count, error_count, elapsed = ?start.elapsed(), "Inserted books into database");
 
 	Ok(output)
 }
 
-// TODO: explore spawn_blocking + semaphore(chunk_size) here instead of rayon
-
-pub(crate) async fn handle_visit_media(
-	build_ctx: MediaBuildOperationCtx,
+pub(crate) async fn visit_and_update_media(
+	MediaBuildOperation {
+		series_id,
+		library_options,
+		max_concurrency,
+	}: MediaBuildOperation,
 	worker_ctx: &WorkerCtx,
 	paths: Vec<PathBuf>,
 ) -> Result<MediaOperationOutput, JobError> {
 	if paths.is_empty() {
-		tracing::debug!("No media to visit");
+		tracing::trace!("No media to visit?");
 		return Ok(MediaOperationOutput::default());
 	}
 
-	let mut output = MediaOperationOutput::default();
-	let MediaBuildOperationCtx {
-		series_id,
-		library_options,
-		chunk_size,
-	} = build_ctx;
 	let client = &worker_ctx.db;
+	let mut output = MediaOperationOutput::default();
 
 	let media = client
 		.media()
@@ -454,54 +652,106 @@ pub(crate) async fn handle_visit_media(
 		));
 	}
 
-	let chunks = media.chunks(chunk_size);
+	let semaphore = Arc::new(Semaphore::new(max_concurrency));
+	tracing::debug!(max_concurrency, "Semaphore created for media visit");
 
-	for (idx, chunk) in chunks.enumerate() {
-		tracing::trace!(chunk_idx = idx, chunk_len = chunk.len(), "Processing chunk");
-		let mut built_media = chunk
-			.par_iter()
-			.map(|m| {
-				MediaBuilder::new(
-					PathBuf::from(m.path.as_str()).as_path(),
+	worker_ctx.report_progress(JobProgress::msg("Visiting media on disk"));
+	let task_count = media.len() as i32;
+	let start = Instant::now();
+
+	let futures = media
+		.into_iter()
+		.map(|existing_book| {
+			let semaphore = semaphore.clone();
+			let series_id = series_id.clone();
+			let library_options = library_options.clone();
+			let path = PathBuf::from(existing_book.path.as_str());
+
+			async move {
+				let _permit = semaphore
+					.acquire()
+					.await
+					.map_err(|e| (CoreError::Unknown(e.to_string()), path.clone()))?;
+				tracing::trace!(?path, "Acquired permit for media visit");
+				build_book(
+					path.as_path(),
 					&series_id,
-					library_options.clone(),
+					Some(existing_book),
+					library_options,
 					&worker_ctx.config,
 				)
-				.rebuild(m)
-			})
-			.collect::<VecDeque<Result<Media, _>>>();
-
-		while let Some(build_result) = built_media.pop_front() {
-			match build_result {
-				Ok(generated) => {
-					tracing::warn!(
-						"Stump currently has minimal support for updating media",
-					);
-					match update_media(client, generated).await {
-						Ok(updated_media) => {
-							tracing::trace!(?updated_media, "Updated media");
-							// TODO: emit event
-							output.updated_media += 1;
-						},
-						Err(e) => {
-							tracing::error!(error = ?e, "Failed to update media");
-							output.logs.push(JobExecuteLog::error(format!(
-								"Failed to update media: {:?}",
-								e.to_string()
-							)));
-						},
-					}
-				},
-				Err(e) => {
-					tracing::error!(error = ?e, "Failed to build media");
-					output.logs.push(JobExecuteLog::error(format!(
-						"Failed to build media: {:?}",
-						e.to_string()
-					)));
-				},
+				.await
+				.map_err(|e| (e, path))
 			}
+		})
+		.collect::<FuturesUnordered<_>>();
+
+	// An atomic usize to keep track of the current position in the stream
+	// to report progress to the UI
+	let atomic_cursor = Arc::new(AtomicUsize::new(1));
+
+	let mut futures = pin!(futures);
+	let mut books = VecDeque::with_capacity(paths.len());
+
+	while let Some(result) = futures.next().await {
+		match result {
+			Ok(book) => {
+				books.push_back(book);
+			},
+			Err((error, path)) => {
+				output.logs.push(
+					JobExecuteLog::error(format!(
+						"Failed to build book: {:?}",
+						error.to_string()
+					))
+					.with_ctx(format!("Path: {:?}", path)),
+				);
+			},
 		}
+		worker_ctx.report_progress(JobProgress::subtask_position(
+			atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
+			task_count,
+		));
 	}
+
+	let success_count = books.len();
+	let error_count = output.logs.len();
+	tracing::debug!(elapsed = ?start.elapsed(), success_count, error_count, "Rebuilt books from disk");
+
+	worker_ctx.report_progress(JobProgress::msg("Updating media in database"));
+	let task_count = books.len() as i32;
+	let start = Instant::now();
+
+	let atomic_cursor = Arc::new(AtomicUsize::new(1));
+
+	// TODO: We don't use the updated book, so chunk these and update_many?
+	while let Some(book) = books.pop_front() {
+		let path = book.path.clone();
+		match update_media(&worker_ctx.db, book).await {
+			Ok(_) => {
+				output.updated_media += 1;
+			},
+			Err(e) => {
+				tracing::error!(error = ?e, ?path, "Failed to update media");
+				output.logs.push(
+					JobExecuteLog::error(format!(
+						"Failed to update media: {:?}",
+						e.to_string()
+					))
+					.with_ctx(path),
+				);
+			},
+		}
+
+		worker_ctx.report_progress(JobProgress::subtask_position(
+			atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
+			task_count,
+		));
+	}
+
+	let success_count = output.updated_media;
+	let error_count = output.logs.len() - error_count; // Subtract the errors from the previous step
+	tracing::debug!(elapsed = ?start.elapsed(), success_count, error_count, "Updated books in database");
 
 	Ok(output)
 }

@@ -238,7 +238,7 @@ pub async fn safely_generate_batch(
 	let mut output = ThumbnailGenerationOutput::default();
 	let mut logs = vec![];
 
-	let max_concurrency = options.core_config.scanner_chunk_size;
+	let max_concurrency = options.core_config.max_thumbnail_concurrency;
 	let semaphore = Arc::new(Semaphore::new(max_concurrency));
 	tracing::debug!(
 		max_concurrency,
@@ -256,6 +256,7 @@ pub async fn safely_generate_batch(
 				let _permit = semaphore.acquire().await.map_err(|e| {
 					(ThumbnailGenerateError::Unknown(e.to_string()), path.clone())
 				})?;
+				tracing::trace!(?path, "Acquired permit for thumbnail generation");
 				generate_book_thumbnail(book, options)
 					.await
 					.map_err(|e| (e, path))

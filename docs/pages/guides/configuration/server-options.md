@@ -109,6 +109,26 @@ The available verbosity levels are:
 | `2`    | `DEBUG`, `INFO`, `WARN`, `ERROR`          |
 | `3`    | `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR` |
 
+### STUMP_MAX_SCANNER_CONCURRENCY
+
+The maximum number of files which may be processed concurrently by the scanner. This is useful for limiting the number of files that are processed at once, which can help prevent the server from becoming overwhelmed on systems with limited resources.
+
+**Note:** The OS thread scheduler should prevent overload, however, you may want to set this value lower if you're running Stump on a system with limited resources.
+
+| Type    | Default Value |
+| ------- | ------------- |
+| Integer | `200`         |
+
+### STUMP_MAX_THUMBNAIL_CONCURRENCY
+
+The maximum number of images which may be generated concurrently by the thumbnailer. This is useful for limiting the number of thumbnails that are generated at once, which can help prevent the server from becoming overwhelmed on systems with limited resources.
+
+**Note:** Thumbnail generation is a CPU-intensive process, so you may want to set this value lower if you're running Stump on a system with limited resources.
+
+| Type    | Default Value |
+| ------- | ------------- |
+| Integer | `50`          |
+
 #### ENABLE_SWAGGER_UI
 
 Whether or not to enable Swagger UI. To learn more about what Swagger UI is, visit [swagger.io](https://swagger.io/).

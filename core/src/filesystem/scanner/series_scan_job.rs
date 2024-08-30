@@ -22,8 +22,8 @@ use crate::{
 
 use super::{
 	utils::{
-		generate_rule_set, handle_create_media, handle_missing_media, handle_visit_media,
-		MediaBuildOperationCtx, MediaOperationOutput,
+		generate_rule_set, handle_missing_media, safely_build_and_insert_media,
+		visit_and_update_media, MediaBuildOperation, MediaOperationOutput,
 	},
 	walk_series, WalkedSeries, WalkerCtx,
 };
@@ -219,7 +219,7 @@ impl JobExt for SeriesScanJob {
 		let mut output = Self::Output::default();
 		let mut logs = vec![];
 
-		let chunk_size = ctx.config.scanner_chunk_size;
+		let max_concurrency = ctx.config.max_scanner_concurrency;
 
 		match task {
 			SeriesScanTask::MarkMissingMedia(paths) => {
@@ -248,11 +248,11 @@ impl JobExt for SeriesScanJob {
 					created_media,
 					logs: new_logs,
 					..
-				} = handle_create_media(
-					MediaBuildOperationCtx {
+				} = safely_build_and_insert_media(
+					MediaBuildOperation {
 						series_id: self.id.clone(),
 						library_options: self.options.clone().unwrap_or_default(),
-						chunk_size,
+						max_concurrency,
 					},
 					ctx,
 					paths,
@@ -277,11 +277,11 @@ impl JobExt for SeriesScanJob {
 					updated_media,
 					logs: new_logs,
 					..
-				} = handle_visit_media(
-					MediaBuildOperationCtx {
+				} = visit_and_update_media(
+					MediaBuildOperation {
 						series_id: self.id.clone(),
 						library_options: self.options.clone().unwrap_or_default(),
-						chunk_size,
+						max_concurrency,
 					},
 					ctx,
 					paths,

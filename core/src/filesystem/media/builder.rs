@@ -1,7 +1,4 @@
-use std::{
-	path::{Path, PathBuf},
-	sync::Arc,
-};
+use std::path::{Path, PathBuf};
 
 use prisma_client_rust::chrono::{DateTime, FixedOffset, Utc};
 
@@ -16,7 +13,7 @@ pub struct MediaBuilder {
 	path: PathBuf,
 	series_id: String,
 	library_options: LibraryOptions,
-	config: Arc<StumpConfig>,
+	config: StumpConfig,
 }
 
 impl MediaBuilder {
@@ -24,7 +21,7 @@ impl MediaBuilder {
 		path: &Path,
 		series_id: &str,
 		library_options: LibraryOptions,
-		config: &Arc<StumpConfig>,
+		config: &StumpConfig,
 	) -> Self {
 		Self {
 			path: path.to_path_buf(),
@@ -191,8 +188,7 @@ mod tests {
 			..Default::default()
 		};
 		let series_id = "series_id";
-		let config = Arc::new(StumpConfig::debug());
 
-		MediaBuilder::new(path, series_id, library_options, &config).build()
+		MediaBuilder::new(path, series_id, library_options, &StumpConfig::debug()).build()
 	}
 }

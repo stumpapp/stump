@@ -81,6 +81,9 @@ runs:
         image: aaronleopold/stump
         tags: ${{ inputs.tags }}
         archs: ${{ inputs.archs }}
+        build-args: |
+          GIT_REV=${{ env.GIT_REV }}
+          RUN_PRISMA_GENERATE=false
         containerfiles: |
           ./docker/Dockerfile
 

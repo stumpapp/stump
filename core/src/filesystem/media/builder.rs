@@ -148,32 +148,40 @@ mod tests {
 	};
 
 	#[test]
-	fn test_build_media() {
+	fn test_build_media_zip() {
 		// Test with zip
 		let media = build_media_test_helper(get_test_zip_path());
 		assert!(media.is_ok());
 		let media = media.unwrap();
 		assert_eq!(media.extension, "zip");
+	}
 
-		// Test with cbz
+	#[test]
+	fn test_build_media_cbz() {
 		let media = build_media_test_helper(get_test_cbz_path());
 		assert!(media.is_ok());
 		let media = media.unwrap();
 		assert_eq!(media.extension, "cbz");
+	}
 
-		// Test with rar
+	#[test]
+	fn test_build_media_rar() {
 		let media = build_media_test_helper(get_test_rar_path());
 		assert!(media.is_ok());
 		let media = media.unwrap();
 		assert_eq!(media.extension, "rar");
+	}
 
-		// Test with epub
+	#[test]
+	fn test_build_media_epub() {
 		let media = build_media_test_helper(get_test_epub_path());
 		assert!(media.is_ok());
 		let media = media.unwrap();
 		assert_eq!(media.extension, "epub");
+	}
 
-		// Test with pdf
+	#[test]
+	fn test_build_media_pdf() {
 		let media = build_media_test_helper(get_test_pdf_path());
 		assert!(media.is_ok());
 		let media = media.unwrap();

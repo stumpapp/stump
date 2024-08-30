@@ -120,6 +120,7 @@ pub struct ProcessedFile {
 	pub pages: i32,
 }
 
+// TODO(perf): Async-ify this and use blocking threads in the processors?
 pub fn process(
 	path: &Path,
 	options: FileProcessorOptions,

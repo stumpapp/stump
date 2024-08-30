@@ -3,8 +3,9 @@ import { useAuthQuery, useCoreEventHandler } from '@stump/client'
 import { cn, cx } from '@stump/components'
 import { UserPermission, UserPreferences } from '@stump/types'
 import { Suspense, useCallback, useMemo } from 'react'
+import Confetti from 'react-confetti'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { useMediaMatch } from 'rooks'
+import { useMediaMatch, useWindowSize } from 'rooks'
 
 import BackgroundFetchIndicator from '@/components/BackgroundFetchIndicator'
 import JobOverlay from '@/components/jobs/JobOverlay'
@@ -16,11 +17,16 @@ import { AppContext, PermissionEnforcerOptions } from './context'
 import { useAppStore, useUserStore } from './stores'
 
 export function AppLayout() {
-	const platform = useAppStore((state) => state.platform)
 	const location = useLocation()
 	const navigate = useNavigate()
 	const isMobile = useMediaMatch('(max-width: 768px)')
+	const windowSize = useWindowSize()
 
+	const { platform, showConfetti, setShowConfetti } = useAppStore((state) => ({
+		platform: state.platform,
+		setShowConfetti: state.setShowConfetti,
+		showConfetti: state.showConfetti,
+	}))
 	const { storeUser, setUser, checkUserPermission } = useUserStore((state) => ({
 		checkUserPermission: state.checkUserPermission,
 		setUser: state.setUser,
@@ -122,6 +128,16 @@ export function AppLayout() {
 			}}
 		>
 			<Suspense fallback={<RouteLoadingIndicator />}>
+				{showConfetti && (
+					<Confetti
+						height={windowSize.innerHeight || undefined}
+						width={windowSize.innerWidth || undefined}
+						onConfettiComplete={() => setShowConfetti(false)}
+						style={{
+							zIndex: 1000,
+						}}
+					/>
+				)}
 				{!hideAllNavigation && <MobileTopBar />}
 				{!hideTopBar && <TopBar />}
 				<div className={cx('flex h-full flex-1', { 'pb-12': preferTopBar && !hideTopBar })}>

@@ -4,6 +4,9 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 
 // TODO: hone the progress messages, they are a little noisy and unhelpful (e.g. 'Starting task')
+// TODO: Refactor rayon usage to use tokio instead. I am trying to learn more about IO-bound operations in an
+// async context, and I believe tokio might be more appropriate for this use case (highly concurrent IO-bound tasks).
+// Also perhaps experiment with https://docs.rs/tokio-uring/latest/tokio_uring/index.html
 
 use crate::{
 	db::{
@@ -23,9 +26,9 @@ use crate::{
 use super::{
 	series_scan_job::SeriesScanTask,
 	utils::{
-		generate_rule_set, handle_missing_media, handle_missing_series,
-		safely_build_and_insert_media, safely_build_series, visit_and_update_media,
-		MediaBuildOperation, MediaOperationOutput, MissingSeriesOutput,
+		handle_missing_media, handle_missing_series, safely_build_and_insert_media,
+		safely_build_series, visit_and_update_media, MediaBuildOperation,
+		MediaOperationOutput, MissingSeriesOutput,
 	},
 	walk_library, walk_series, WalkedLibrary, WalkedSeries, WalkerCtx,
 };
@@ -136,7 +139,7 @@ impl JobExt for LibraryScanJob {
 			.map(LibraryOptions::from)
 			.ok_or(JobError::InitFailed("Library not found".to_string()))?;
 		let is_collection_based = library_options.is_collection_based();
-		let ignore_rules = generate_rule_set(&[PathBuf::from(self.path.clone())]);
+		let ignore_rules = library_options.ignore_rules.build()?;
 
 		self.options = Some(library_options);
 
@@ -170,8 +173,8 @@ impl JobExt for LibraryScanJob {
 		if library_is_missing {
 			handle_missing_library(&ctx.db, self.id.as_str()).await?;
 			ctx.send_batch(vec![
-				JobProgress::msg("Failed to find library on disk").into_send(),
-				CoreEvent::DiscoveredMissingLibrary(self.id.clone()).into_send(),
+				JobProgress::msg("Failed to find library on disk").into_worker_send(),
+				CoreEvent::DiscoveredMissingLibrary(self.id.clone()).into_worker_send(),
 			]);
 			return Err(JobError::InitFailed(
 				"Library could not be found on disk".to_string(),
@@ -260,7 +263,7 @@ impl JobExt for LibraryScanJob {
 
 		match task {
 			LibraryScanTask::Init(input) => {
-				tracing::info!("Executing the init task for library scan");
+				tracing::debug!("Executing the init task for library scan");
 				ctx.report_progress(JobProgress::msg("Handling library scan init"));
 				let InitTaskInput {
 					series_to_create,
@@ -377,13 +380,13 @@ impl JobExt for LibraryScanJob {
 						total_subtask_count as i32,
 					));
 				} else {
-					tracing::debug!("No series to create");
+					tracing::trace!("No series to create");
 				}
 
 				ctx.report_progress(JobProgress::msg("Init task complete!"));
 			},
 			LibraryScanTask::WalkSeries(path_buf) => {
-				tracing::info!("Executing the walk series task for library scan");
+				tracing::debug!("Executing the walk series task for library scan");
 				ctx.report_progress(JobProgress::msg(
 					format!("Scanning series at {}", path_buf.display()).as_str(),
 				));
@@ -395,10 +398,15 @@ impl JobExt for LibraryScanJob {
 					.and_then(|o| o.is_collection_based().then_some(1))
 					.or_else(|| series_is_library_root.then_some(1));
 
-				let ignore_rules = generate_rule_set(&[
-					path_buf.clone(),
-					PathBuf::from(self.path.clone()),
-				]);
+				let Some(Ok(ignore_rules)) =
+					self.options.as_ref().map(|o| o.ignore_rules.build())
+				else {
+					// Note: This failure will likely affect ALL other tasks, so we are halting the job here
+					return Err(JobError::TaskFailed(
+						"Failed to build ignore rules. Check that the rules are valid."
+							.to_string(),
+					));
+				};
 
 				let walk_result = walk_series(
 					path_buf.as_path(),
@@ -505,12 +513,12 @@ impl JobExt for LibraryScanJob {
 						..
 					} = handle_missing_media(ctx, &series_id, paths).await;
 					ctx.send_batch(vec![
-						JobProgress::msg("Handled missing media").into_send(),
+						JobProgress::msg("Handled missing media").into_worker_send(),
 						CoreEvent::CreatedOrUpdatedManyMedia {
 							count: updated_media,
 							series_id,
 						}
-						.into_send(),
+						.into_worker_send(),
 					]);
 					output.updated_media += updated_media;
 					logs.extend(new_logs);
@@ -534,12 +542,12 @@ impl JobExt for LibraryScanJob {
 					)
 					.await?;
 					ctx.send_batch(vec![
-						JobProgress::msg("Created new media").into_send(),
+						JobProgress::msg("Created new media").into_worker_send(),
 						CoreEvent::CreatedOrUpdatedManyMedia {
 							count: created_media,
 							series_id,
 						}
-						.into_send(),
+						.into_worker_send(),
 					]);
 					output.created_media += created_media;
 					logs.extend(new_logs);
@@ -564,12 +572,12 @@ impl JobExt for LibraryScanJob {
 					)
 					.await?;
 					ctx.send_batch(vec![
-						JobProgress::msg("Visited all media").into_send(),
+						JobProgress::msg("Visited all media").into_worker_send(),
 						CoreEvent::CreatedOrUpdatedManyMedia {
 							count: updated_media,
 							series_id,
 						}
-						.into_send(),
+						.into_worker_send(),
 					]);
 					output.updated_media += updated_media;
 					logs.extend(new_logs);

@@ -122,7 +122,9 @@ export type LibraryPattern = "SERIES_BASED" | "COLLECTION_BASED"
 
 export type LibraryScanMode = "DEFAULT" | "NONE"
 
-export type LibraryOptions = { id: string | null; convert_rar_to_zip: boolean; hard_delete_conversions: boolean; library_pattern: LibraryPattern; thumbnail_config: ImageProcessorOptions | null; library_id: string | null }
+export type IgnoreRules = string[]
+
+export type LibraryOptions = { id?: string | null; convert_rar_to_zip: boolean; hard_delete_conversions: boolean; library_pattern: LibraryPattern; thumbnail_config: ImageProcessorOptions | null; ignore_rules?: IgnoreRules; library_id?: string | null }
 
 export type LibraryStats = { series_count: BigInt; book_count: BigInt; total_bytes: BigInt; completed_books: BigInt; in_progress_books: BigInt }
 
@@ -274,7 +276,7 @@ export type ImageFormat = "Webp" | "Jpeg" | "Png"
 /**
  * Options for processing images throughout Stump.
  */
-export type ImageProcessorOptions = { resize_options: ImageResizeOptions | null; format: ImageFormat; quality: number | null; page?: number | null }
+export type ImageProcessorOptions = { resize_options?: ImageResizeOptions | null; format: ImageFormat; quality?: number | null; page?: number | null }
 
 export type DirectoryListing = { parent: string | null; files: DirectoryListingFile[] }
 
@@ -309,6 +311,12 @@ export type StumpVersion = { semver: string; rev: string; compile_time: string }
 
 export type UpdateCheck = { current_semver: string; latest_semver: string; has_update_available: boolean }
 
+export type AuthenticationOptions = { generate_token?: boolean; create_session?: boolean }
+
+export type CreatedToken = { access_token: string; expires_at: string }
+
+export type LoginResponse = User | { for_user: User; token: CreatedToken }
+
 export type LoginOrRegisterArgs = { username: string; password: string }
 
 export type CreateUser = { username: string; password: string; permissions?: UserPermission[]; age_restriction: AgeRestriction | null; max_sessions_allowed?: number | null }
@@ -342,9 +350,9 @@ export type CreateOrUpdateEmailDevice = { name: string; email: string; forbidden
  */
 export type PatchEmailDevice = { name: string | null; email: string | null; forbidden: boolean | null }
 
-export type CreateLibrary = { name: string; path: string; description: string | null; tags: Tag[] | null; scan_mode: LibraryScanMode | null; library_options: LibraryOptions | null }
+export type CreateLibrary = { name: string; path: string; description?: string | null; tags?: string[] | null; scan_mode?: LibraryScanMode | null; library_options?: LibraryOptions | null }
 
-export type UpdateLibrary = { name: string; path: string; description: string | null; emoji: string | null; tags: Tag[] | null; removed_tags?: Tag[] | null; library_options: LibraryOptions; scan_mode?: LibraryScanMode | null }
+export type UpdateLibrary = { name: string; path: string; description?: string | null; emoji?: string | null; tags?: string[] | null; library_options: LibraryOptions; scan_mode?: LibraryScanMode | null }
 
 export type UpdateLibraryExcludedUsers = { user_ids: string[] }
 

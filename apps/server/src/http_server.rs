@@ -25,6 +25,11 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 		return Err(ServerError::ServerStartError(err.to_string()));
 	}
 
+	core.get_job_controller()
+		.initialize()
+		.await
+		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
+
 	// Initialize the server configuration. If it already exists, nothing will happen.
 	core.init_server_config()
 		.await

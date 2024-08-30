@@ -13,7 +13,7 @@
 		"dev": "tauri dev",
 		"build": "vite build && tauri build",
 		"build:mac": "vite build && tauri build --target universal-apple-darwin",
-		"nuke": "yarn exec rimraf -rf node_modules"
+		"nuke": "yarn exec rimraf node_modules"
 	},
 	"dependencies": {
 		"@stump/client": "*",

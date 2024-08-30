@@ -20,7 +20,7 @@ pub enum CoreEvent {
 }
 
 impl WorkerSendExt for CoreEvent {
-	fn into_send(self) -> WorkerSend {
+	fn into_worker_send(self) -> WorkerSend {
 		WorkerSend::Event(self)
 	}
 }

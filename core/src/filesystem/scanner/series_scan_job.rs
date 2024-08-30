@@ -22,8 +22,8 @@ use crate::{
 
 use super::{
 	utils::{
-		generate_rule_set, handle_missing_media, safely_build_and_insert_media,
-		visit_and_update_media, MediaBuildOperation, MediaOperationOutput,
+		handle_missing_media, safely_build_and_insert_media, visit_and_update_media,
+		MediaBuildOperation, MediaOperationOutput,
 	},
 	walk_series, WalkedSeries, WalkerCtx,
 };
@@ -112,7 +112,7 @@ impl JobExt for SeriesScanJob {
 		let library_path = PathBuf::from(library.path);
 		let library_options = LibraryOptions::from(library.library_options);
 		let series_is_library_root = PathBuf::from(&self.path) == library_path;
-		let ignore_rules = generate_rule_set(&[PathBuf::from(self.path.clone())]);
+		let ignore_rules = library_options.ignore_rules.build()?;
 		let max_depth = library_options
 			.is_collection_based()
 			.then_some(1)
@@ -230,12 +230,12 @@ impl JobExt for SeriesScanJob {
 					..
 				} = handle_missing_media(ctx, &self.id, paths).await;
 				ctx.send_batch(vec![
-					JobProgress::msg("Handled missing media").into_send(),
+					JobProgress::msg("Handled missing media").into_worker_send(),
 					CoreEvent::CreatedOrUpdatedManyMedia {
 						count: updated_media,
 						series_id: self.id.clone(),
 					}
-					.into_send(),
+					.into_worker_send(),
 				]);
 				output.updated_media += updated_media;
 				logs.extend(new_logs);
@@ -259,12 +259,12 @@ impl JobExt for SeriesScanJob {
 				)
 				.await?;
 				ctx.send_batch(vec![
-					JobProgress::msg("Created new media").into_send(),
+					JobProgress::msg("Created new media").into_worker_send(),
 					CoreEvent::CreatedOrUpdatedManyMedia {
 						count: created_media,
 						series_id: self.id.clone(),
 					}
-					.into_send(),
+					.into_worker_send(),
 				]);
 				output.created_media += created_media;
 				logs.extend(new_logs);
@@ -288,12 +288,12 @@ impl JobExt for SeriesScanJob {
 				)
 				.await?;
 				ctx.send_batch(vec![
-					JobProgress::msg("Visited all media").into_send(),
+					JobProgress::msg("Visited all media").into_worker_send(),
 					CoreEvent::CreatedOrUpdatedManyMedia {
 						count: updated_media,
 						series_id: self.id.clone(),
 					}
-					.into_send(),
+					.into_worker_send(),
 				]);
 				output.updated_media += updated_media;
 				logs.extend(new_logs);

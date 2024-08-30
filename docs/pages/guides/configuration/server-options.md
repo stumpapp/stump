@@ -98,7 +98,7 @@ The verbosity level for Stump logs. Verbosity levels are integers that correspon
 
 For example, if you set the verbosity level to `1`, you will see `INFO`, `WARN`, and `ERROR` messages. If you set the verbosity level to `2`, you will see `DEBUG`, `INFO`, `WARN`, and `ERROR` messages, and so on. The default verbosity level is `1`.
 
-You may turn off logging entirely by setting the verbosity level to `0`. However, this is not recommended, as it will make it difficult to debug issues with Stump if they arise.
+You may turn off logging entirely by setting the verbosity level to `0`. However, this is not recommended, as it will make it difficult to debug issues with Stump if they arise. I generally recommend setting the verbosity to `1`, as it allows you to see info-level messages, warnings, and errors.
 
 The available verbosity levels are:
 

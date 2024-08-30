@@ -30,6 +30,8 @@ export const BUTTON_VARIANTS = {
 	subtle: 'bg-background-surface hover:bg-background-surface-hover text-foreground-subtle',
 	'subtle-dark':
 		'bg-background text-foreground-subtle hover:bg-background-surface data-[state=open]:bg-background-surface',
+	warning:
+		'bg-fill-warning text-foreground hover:bg-fill-warning/80 focus:ring-fill-warning-secondary',
 }
 
 export const BUTTON_ROUNDED_VARIANTS = {
@@ -133,6 +135,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 						className,
 					)}
 					ref={ref}
+					type="button"
 					{...props}
 				>
 					{isLoading ? (

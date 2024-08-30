@@ -17,6 +17,8 @@ mod tests {
 		NamedType,
 	};
 
+	use crate::config::jwt::CreatedToken;
+
 	use super::v1::{
 		auth::*, book_club::*, emailer::*, epub::*, job::*, library::*, media::*,
 		metadata::*, series::*, smart_list::*, user::*, ClaimResponse, StumpVersion,
@@ -55,6 +57,11 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<ClaimResponse>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<StumpVersion>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UpdateCheck>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<AuthenticationOptions>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<CreatedToken>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LoginResponse>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<LoginOrRegisterArgs>()?).as_bytes(),
 		)?;

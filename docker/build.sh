@@ -14,9 +14,10 @@ for tag in ${_TAGS//,/}; do
 done
 
 PUSH_OR_LOAD_ARG="--load"
-if [ "$_PUSH" = true ]; then
-  PUSH_OR_LOAD_ARG="--push"
-fi
+# Not supported? https://github.com/containers/buildah/issues/4671
+# if [ "$_PUSH" = true ]; then
+#   PUSH_OR_LOAD_ARG="--output=type=registry"
+# fi
 
 echo "Building with tag arguments: $FORMATTED_TAGS"
 

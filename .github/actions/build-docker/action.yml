@@ -36,6 +36,11 @@ runs:
         echo "TAGS=$(echo ${{ inputs.tags }} | sed -e 's/,/,aaronleopold\/stump:/g' | sed -e 's/^/aaronleopold\/stump:/')" >> $GITHUB_ENV
       shell: bash
 
+    - name: Format tags with registry
+      run: |
+        echo "IMAGES=$(echo ${{ inputs.tags }} | sed -e 's/,/,docker.io\/aaronleopold\/stump:/g' | sed -e 's/^/docker.io\/aaronleopold\/stump:/')" >> $GITHUB_ENV
+      shell: bash
+
     - name: Setup rust
       uses: ./.github/actions/setup-rust
       with:
@@ -63,14 +68,6 @@ runs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
-    - name: Login to Docker Hub
-      uses: docker/login-action@v2
-      # if both inputs are empty, we assume we're running on a fork and don't need to login
-      if: ${{ inputs.username != '' && inputs.password != '' }}
-      with:
-        username: ${{ inputs.username }}
-        password: ${{ inputs.password }}
-
     - name: Install podman
       if: runner.environment != 'self-hosted'
       run: |
@@ -82,6 +79,15 @@ runs:
       run: |
         ENGINE=podman PLATFORMS="${{ inputs.platforms }}" TAGS="${{ env.TAGS }}" GIT_REV="${{ env.GIT_REV }}" PUSH="${{ inputs.push }}" ./docker/build.sh
       shell: bash
+
+    - name: Push to registry
+      if: ${{ success() && inputs.push == 'true' }}
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        tags: ${{ env.IMAGES }}
+        username: ${{ inputs.username }}
+        password: ${{ inputs.password }}
+        registry: docker.io
 
     - name: Discord notification
       if: ${{ success() && inputs.push == 'true' && inputs.discord-webhook != '' }}

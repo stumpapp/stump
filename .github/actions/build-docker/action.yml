@@ -36,9 +36,10 @@ runs:
         echo "TAGS=$(echo ${{ inputs.tags }} | sed -e 's/,/,aaronleopold\/stump:/g' | sed -e 's/^/aaronleopold\/stump:/')" >> $GITHUB_ENV
       shell: bash
 
-    - name: Format tags with registry
+    - name: Sanity check
       run: |
-        echo "IMAGES=$(echo ${{ inputs.tags }} | sed -e 's/,/,docker.io\/aaronleopold\/stump:/g' | sed -e 's/^/docker.io\/aaronleopold\/stump:/')" >> $GITHUB_ENV
+        echo "TAGS=${{ env.TAGS }}"
+        echo "GIT_REV=${{ env.GIT_REV }}"
       shell: bash
 
     - name: Setup rust
@@ -84,7 +85,8 @@ runs:
       if: ${{ success() && inputs.push == 'true' }}
       uses: redhat-actions/push-to-registry@v2
       with:
-        tags: ${{ env.IMAGES }}
+        image: aaronleopold/stump
+        tags: ${{ env.TAGS }}
         username: ${{ inputs.username }}
         password: ${{ inputs.password }}
         registry: docker.io

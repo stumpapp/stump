@@ -41,7 +41,7 @@ jobs:
     needs: code-changes-check
     if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.changes != '[]'"
     name: Build docker image
-    runs-on: [self-hosted-large]
+    runs-on: [self-hosted-small]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3

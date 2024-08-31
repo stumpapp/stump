@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use specta::Type;
 use std::path;
+use tokio::fs;
 use tracing::{debug, error, trace};
 use utoipa::ToSchema;
 
@@ -26,15 +27,14 @@ use stump_core::{
 	},
 	filesystem::{
 		analyze_media_job::AnalyzeMediaJob,
-		get_unknown_thumnail,
+		get_thumbnail,
 		image::{
 			self, generate_book_thumbnail, place_thumbnail, remove_thumbnails,
 			GenerateThumbnailOptions, ImageFormat, ImageProcessorOptions,
 			ThumbnailGenerationJob, ThumbnailGenerationJobParams,
 		},
-		read_entire_file,
 		scanner::LibraryScanJob,
-		ContentType, FileParts, PathUtils,
+		ContentType,
 	},
 	prisma::{
 		last_library_visit,
@@ -562,7 +562,7 @@ async fn get_library_media(
 	Ok(Json(Pageable::from(media)))
 }
 
-pub(crate) fn get_library_thumbnail(
+pub(crate) async fn get_library_thumbnail(
 	library: &library::Data,
 	first_series: &series::Data,
 	first_book: &media::Data,
@@ -571,29 +571,18 @@ pub(crate) fn get_library_thumbnail(
 ) -> APIResult<(ContentType, Vec<u8>)> {
 	let library_id = library.id.clone();
 
-	if let Some(format) = image_format.clone() {
-		let extension = format.extension();
+	let generated_thumb = get_thumbnail(
+		config.get_thumbnails_dir(),
+		&library_id,
+		image_format.clone(),
+	)
+	.await?;
 
-		let path = config
-			.get_thumbnails_dir()
-			.join(format!("{}.{}", library_id, extension));
-
-		if path.exists() {
-			tracing::trace!(?path, library_id, "Found generated library thumbnail");
-			return Ok((ContentType::from(format), read_entire_file(path)?));
-		}
+	if let Some((content_type, bytes)) = generated_thumb {
+		Ok((content_type, bytes))
+	} else {
+		get_series_thumbnail(first_series, first_book, image_format, config).await
 	}
-
-	if let Some(path) = get_unknown_thumnail(&library_id, config.get_thumbnails_dir()) {
-		tracing::debug!(path = ?path, library_id, "Found library thumbnail that does not align with config");
-		let FileParts { extension, .. } = path.file_parts();
-		return Ok((
-			ContentType::from_extension(extension.as_str()),
-			read_entire_file(path)?,
-		));
-	}
-
-	get_series_thumbnail(first_series, first_book, image_format, config)
 }
 
 // TODO: ImageResponse for utoipa
@@ -670,6 +659,7 @@ async fn get_library_thumbnail_handler(
 		image_format,
 		&ctx.config,
 	)
+	.await
 	.map(ImageResponse::from)
 }
 
@@ -775,7 +765,7 @@ async fn patch_library_thumbnail(
 
 	Ok(ImageResponse::from((
 		ContentType::from(format),
-		read_entire_file(path_buf)?,
+		fs::read(path_buf).await?,
 	)))
 }
 
@@ -822,7 +812,7 @@ async fn replace_library_thumbnail(
 
 	Ok(ImageResponse::from((
 		content_type,
-		read_entire_file(path_buf)?,
+		fs::read(path_buf).await?,
 	)))
 }
 

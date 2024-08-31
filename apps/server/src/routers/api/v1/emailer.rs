@@ -15,10 +15,11 @@ use stump_core::{
 		AttachmentMeta, EmailerConfig, EmailerConfigInput, EmailerSendRecord,
 		EmailerSendTo, Media, RegisteredEmailDevice, SMTPEmailer, User, UserPermission,
 	},
-	filesystem::{read_entire_file, ContentType, FileParts, PathUtils},
+	filesystem::{ContentType, FileParts, PathUtils},
 	prisma::{emailer, emailer_send_record, registered_email_device, user, PrismaClient},
 	AttachmentPayload, EmailContentType,
 };
+use tokio::fs;
 use utoipa::ToSchema;
 
 use crate::{
@@ -501,7 +502,7 @@ async fn send_attachment_email(
 			extension,
 			..
 		} = PathBuf::from(&book.path).file_parts();
-		let content = read_entire_file(book.path)?;
+		let content = fs::read(book.path).await?;
 
 		// TODO: should error?
 		match (content.len(), max_attachment_size_bytes) {

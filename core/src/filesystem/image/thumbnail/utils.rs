@@ -18,7 +18,7 @@ pub async fn place_thumbnail(
 
 pub const THUMBNAIL_CHUNK_SIZE: usize = 500;
 
-// TODO: refactor this
+// TODO(perf): Async-ify
 /// Deletes thumbnails and returns the number deleted if successful, returns
 /// [FileError] otherwise.
 pub fn remove_thumbnails(

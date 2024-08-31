@@ -25,14 +25,13 @@ use stump_core::{
 	},
 	filesystem::{
 		analyze_media_job::AnalyzeMediaJob,
-		get_unknown_thumnail,
+		get_thumbnail,
 		image::{
 			generate_book_thumbnail, place_thumbnail, remove_thumbnails,
 			GenerateThumbnailOptions, ImageFormat, ImageProcessorOptions,
 		},
-		read_entire_file,
 		scanner::SeriesScanJob,
-		ContentType, FileParts, PathUtils,
+		ContentType,
 	},
 	prisma::{
 		active_reading_session, finished_reading_session, library,
@@ -42,6 +41,7 @@ use stump_core::{
 		series_metadata,
 	},
 };
+use tokio::fs;
 use tracing::{error, trace};
 use utoipa::ToSchema;
 
@@ -513,33 +513,26 @@ async fn get_recently_added_series_handler(
 	Ok(Json(recently_added_series))
 }
 
-pub(crate) fn get_series_thumbnail(
+pub(crate) async fn get_series_thumbnail(
 	series: &series::Data,
 	first_book: &media::Data,
 	image_format: Option<ImageFormat>,
 	config: &StumpConfig,
 ) -> APIResult<(ContentType, Vec<u8>)> {
-	let thumbnails_dir = config.get_thumbnails_dir();
 	let series_id = series.id.clone();
 
-	if let Some(format) = image_format.clone() {
-		let extension = format.extension();
-		let path = thumbnails_dir.join(format!("{}.{}", series_id, extension));
+	let generated_thumb = get_thumbnail(
+		config.get_thumbnails_dir(),
+		&series_id,
+		image_format.clone(),
+	)
+	.await?;
 
-		if path.exists() {
-			tracing::trace!(?path, series_id, "Found generated series thumbnail");
-			return Ok((ContentType::from(format), read_entire_file(path)?));
-		}
-	} else if let Some(path) = get_unknown_thumnail(&series_id, thumbnails_dir) {
-		tracing::debug!(path = ?path, series_id, "Found series thumbnail that does not align with config");
-		let FileParts { extension, .. } = path.file_parts();
-		return Ok((
-			ContentType::from_extension(extension.as_str()),
-			read_entire_file(path)?,
-		));
+	if let Some((content_type, bytes)) = generated_thumb {
+		Ok((content_type, bytes))
+	} else {
+		get_media_thumbnail(first_book, image_format, config).await
 	}
-
-	get_media_thumbnail(first_book, image_format, config)
 }
 
 // TODO: ImageResponse type for body
@@ -615,6 +608,7 @@ async fn get_series_thumbnail_handler(
 		.map(|config| config.format);
 
 	get_series_thumbnail(&series, first_book, image_format, &ctx.config)
+		.await
 		.map(ImageResponse::from)
 }
 
@@ -735,7 +729,7 @@ async fn patch_series_thumbnail(
 
 	Ok(ImageResponse::from((
 		ContentType::from(format),
-		read_entire_file(path_buf)?,
+		fs::read(path_buf).await?,
 	)))
 }
 
@@ -802,7 +796,7 @@ async fn replace_series_thumbnail(
 
 	Ok(ImageResponse::from((
 		content_type,
-		read_entire_file(path_buf)?,
+		fs::read(path_buf).await?,
 	)))
 }
 

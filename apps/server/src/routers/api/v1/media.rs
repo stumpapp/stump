@@ -31,13 +31,12 @@ use stump_core::{
 	},
 	filesystem::{
 		analyze_media_job::AnalyzeMediaJob,
-		get_unknown_thumnail,
+		get_page_async, get_thumbnail,
 		image::{
 			generate_book_thumbnail, place_thumbnail, remove_thumbnails,
 			GenerateThumbnailOptions, ImageFormat, ImageProcessorOptions,
 		},
-		media::get_page,
-		read_entire_file, ContentType, FileParts, PathUtils,
+		ContentType,
 	},
 	prisma::{
 		active_reading_session, finished_reading_session, library, library_options,
@@ -46,6 +45,7 @@ use stump_core::{
 	},
 	Ctx,
 };
+use tokio::fs;
 use tracing::error;
 use utoipa::ToSchema;
 
@@ -960,7 +960,7 @@ async fn get_media_page(
 			page, id
 		)))
 	} else {
-		Ok(get_page(&media.path, page, &ctx.config)?.into())
+		Ok(get_page_async(&media.path, page, &ctx.config).await?.into())
 	}
 }
 
@@ -1016,46 +1016,34 @@ pub(crate) async fn get_media_thumbnail_by_id(
 	tracing::trace!(?result, "get_media_thumbnail transaction completed");
 
 	match result {
-		(Some(book), Some(options)) => get_media_thumbnail(
-			&book,
-			options.thumbnail_config.map(|config| config.format),
-			config,
-		),
-		(Some(book), None) => get_media_thumbnail(&book, None, config),
+		(Some(book), Some(options)) => {
+			get_media_thumbnail(
+				&book,
+				options.thumbnail_config.map(|config| config.format),
+				config,
+			)
+			.await
+		},
+		(Some(book), None) => get_media_thumbnail(&book, None, config).await,
 		_ => Err(APIError::NotFound(String::from("Media not found"))),
 	}
 }
 
-pub(crate) fn get_media_thumbnail(
+pub(crate) async fn get_media_thumbnail(
 	media: &media::Data,
-	target_format: Option<ImageFormat>,
+	image_format: Option<ImageFormat>,
 	config: &StumpConfig,
 ) -> APIResult<(ContentType, Vec<u8>)> {
-	if let Some(format) = target_format {
-		let extension = format.extension();
-		let thumbnail_path = config
-			.get_thumbnails_dir()
-			.join(format!("{}.{}", media.id, extension));
+	let media_id = media.id.clone();
 
-		if thumbnail_path.exists() {
-			tracing::trace!(path = ?thumbnail_path, media_id = ?media.id, "Found generated media thumbnail");
-			return Ok((ContentType::from(format), read_entire_file(thumbnail_path)?));
-		}
-	} else if let Some(path) =
-		get_unknown_thumnail(&media.id, config.get_thumbnails_dir())
-	{
-		// If there exists a file that starts with the media id in the thumbnails dir,
-		// then return it. This might happen if a user manually regenerates thumbnails
-		// via the API without updating the thumbnail config...
-		tracing::debug!(path = ?path, media_id = ?media.id, "Found media thumbnail that does not align with config");
-		let FileParts { extension, .. } = path.file_parts();
-		return Ok((
-			ContentType::from_extension(extension.as_str()),
-			read_entire_file(path)?,
-		));
+	let generated_thumb =
+		get_thumbnail(config.get_thumbnails_dir(), &media_id, image_format).await?;
+
+	if let Some((content_type, bytes)) = generated_thumb {
+		Ok((content_type, bytes))
+	} else {
+		Ok(get_page_async(media.path.as_str(), 1, config).await?)
 	}
-
-	Ok(get_page(media.path.as_str(), 1, config)?)
 }
 
 // TODO: ImageResponse as body type
@@ -1187,7 +1175,7 @@ async fn patch_media_thumbnail(
 
 	Ok(ImageResponse::from((
 		ContentType::from(format),
-		read_entire_file(path_buf)?,
+		fs::read(path_buf).await?,
 	)))
 }
 
@@ -1254,7 +1242,7 @@ async fn replace_media_thumbnail(
 
 	Ok(ImageResponse::from((
 		content_type,
-		read_entire_file(path_buf)?,
+		fs::read(path_buf).await?,
 	)))
 }
 

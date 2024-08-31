@@ -8,8 +8,8 @@ use prisma_client_rust::{chrono, Direction};
 use stump_core::{
 	db::{entity::UserPermission, query::pagination::PageQuery},
 	filesystem::{
+		get_page_async,
 		image::{GenericImageProcessor, ImageProcessor, ImageProcessorOptions},
-		media::get_page,
 		ContentType,
 	},
 	opds::v1_2::{
@@ -636,7 +636,7 @@ async fn get_book_page(
 	}
 
 	let (content_type, image_buffer) =
-		get_page(book.path.as_str(), correct_page, &ctx.config)?;
+		get_page_async(book.path.as_str(), correct_page, &ctx.config).await?;
 	handle_opds_image_response(content_type, image_buffer)
 }
 

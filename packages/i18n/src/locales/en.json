@@ -167,12 +167,6 @@
 		}
 	},
 	"createOrUpdateLibraryForm": {
-		"sections": {
-			"basics": {
-				"heading": "Basic information",
-				"description": "The details of this library, including its name, path, and description"
-			}
-		},
 		"fields": {
 			"name": {
 				"label": "Name",

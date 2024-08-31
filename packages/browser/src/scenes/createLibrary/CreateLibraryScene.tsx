@@ -7,11 +7,10 @@ import { useNavigate } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
 import { CreateLibraryForm, CreateOrUpdateLibrarySchema } from '@/components/library/createOrUpdate'
+import { SteppedFormContext } from '@/components/steppedForm'
+import SteppedFormSceneHeader from '@/components/steppedForm/SteppedFormSceneHeader'
 import { useConfetti } from '@/hooks/useConfetti'
 import paths from '@/paths'
-
-import { CreateLibraryContext } from './context'
-import CreateLibraryHeader from './CreateLibraryHeader'
 
 export default function CreateLibraryScene() {
 	const navigate = useNavigate()
@@ -75,13 +74,16 @@ export default function CreateLibraryScene() {
 
 	return (
 		<div className="relative flex flex-1 flex-col">
-			<CreateLibraryContext.Provider
+			<SteppedFormContext.Provider
 				value={{
-					formStep,
+					currentStep: formStep,
+					localeBase: 'createLibraryScene',
 					setStep: setFormStep,
+					stepsBeforeReview: 3,
 				}}
 			>
-				<CreateLibraryHeader />
+				{/* <CreateLibraryHeader /> */}
+				<SteppedFormSceneHeader />
 
 				<SceneContainer>
 					<div className="flex flex-col gap-12">
@@ -96,7 +98,7 @@ export default function CreateLibraryScene() {
 						)}
 					</div>
 				</SceneContainer>
-			</CreateLibraryContext.Provider>
+			</SteppedFormContext.Provider>
 		</div>
 	)
 }

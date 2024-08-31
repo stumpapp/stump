@@ -6,6 +6,7 @@ import { useSteppedFormContext } from './context'
 import SteppedFormIndicators from './SteppedFormIndicators'
 import SteppedFormStepDetails from './SteppedFormStepDetails'
 
+// TODO: support docs link
 /**
  * A header for scenes which primarily consist of a stepped form. This component
  * requires the SteppedFormProvider to be present in the component tree.

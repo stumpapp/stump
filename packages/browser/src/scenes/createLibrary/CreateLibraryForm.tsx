@@ -6,21 +6,21 @@ import { useForm } from 'react-hook-form'
 
 import { ContentContainer } from '@/components/container'
 import DirectoryPickerModal from '@/components/DirectoryPickerModal'
-
 import {
 	buildSchema,
 	CreateOrUpdateLibrarySchema,
 	formDefaults,
-} from '../../components/library/createOrUpdate/schema'
+} from '@/components/library/createOrUpdate/schema'
 import {
 	BasicLibraryInformation,
 	FileConversionOptions,
 	LibraryPattern as LibraryPatternSection,
 	ScanMode,
 	ThumbnailConfig,
-} from '../../components/library/createOrUpdate/sections'
-import IgnoreRulesConfig from '../../components/library/createOrUpdate/sections/IgnoreRulesConfig'
-import { useCreateLibraryContext } from './context'
+} from '@/components/library/createOrUpdate/sections'
+import IgnoreRulesConfig from '@/components/library/createOrUpdate/sections/IgnoreRulesConfig'
+import { useSteppedFormContext } from '@/components/steppedForm'
+
 import LibraryReview from './LibraryReview'
 
 type Props = {
@@ -30,7 +30,7 @@ type Props = {
 }
 
 export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoading }: Props) {
-	const { formStep, setStep } = useCreateLibraryContext()
+	const { currentStep, setStep } = useSteppedFormContext()
 
 	const [showDirectoryPicker, setShowDirectoryPicker] = useState(false)
 
@@ -61,7 +61,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 		async (nextStep: number) => {
 			let isValid = false
 
-			switch (formStep) {
+			switch (currentStep) {
 				case 1:
 					isValid = await form.trigger(['name', 'description', 'path', 'tags'])
 					break
@@ -85,14 +85,14 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 				setStep(nextStep)
 			}
 		},
-		[form, formStep, setStep],
+		[form, currentStep, setStep],
 	)
 
 	/**
 	 * Render the current step of the form
 	 */
 	const renderStep = () => {
-		switch (formStep) {
+		switch (currentStep) {
 			case 1:
 				return (
 					<>
@@ -171,7 +171,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 
 					<div
 						className={cn('mt-6 flex w-full md:max-w-sm', {
-							'invisible hidden': formStep < 4,
+							'invisible hidden': currentStep < 4,
 						})}
 					>
 						<Button

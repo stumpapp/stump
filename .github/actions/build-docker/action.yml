@@ -106,6 +106,7 @@ runs:
     - name: Echo outputs
       run: |
         echo "${{ toJSON(steps.push.outputs) }}"
+      shell: bash
 
     - name: Discord notification
       if: ${{ success() && inputs.push == 'true' && inputs.discord-webhook != '' }}

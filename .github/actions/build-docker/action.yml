@@ -17,7 +17,7 @@ inputs:
   tags:
     description: 'List of tags to assigned to the image'
     default: 'nightly'
-  platforms:
+  archs:
     description: 'List of platforms to build'
     required: true
   discord-webhook:
@@ -33,12 +33,13 @@ runs:
 
     - name: Format tags
       run: |
-        echo "TAGS=$(echo ${{ inputs.tags }} | sed -e 's/,/,aaronleopold\/stump:/g' | sed -e 's/^/aaronleopold\/stump:/')" >> $GITHUB_ENV
+        echo "FORMATTED_TAGS=$(echo ${{ inputs.tags }} | sed -e 's/,/,aaronleopold\/stump:/g' | sed -e 's/^/aaronleopold\/stump:/')" >> $GITHUB_ENV
       shell: bash
 
     - name: Sanity check
       run: |
-        echo "TAGS=${{ env.TAGS }}"
+        echo "TAGS=${{ inputs.tags }}"
+        echo "FORMATTED_TAGS=${{ env.FORMATTED_TAGS }}"
         echo "GIT_REV=${{ env.GIT_REV }}"
       shell: bash
 
@@ -53,7 +54,7 @@ runs:
     - name: Check QEMU requirement
       id: check-qemu
       run: |
-        if [[ ${{ inputs.platforms }} == *"arm"* ]]; then
+        if [[ ${{ inputs.archs }} == *"arm"* ]]; then
           echo "SETUP_QEMU=1" >> $GITHUB_OUTPUT
         else
           echo "SETUP_QEMU=0" >> $GITHUB_OUTPUT
@@ -66,30 +67,46 @@ runs:
       with:
         platforms: linux/arm64
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Install podman
+    - name: Install podman and buildah
       if: runner.environment != 'self-hosted'
       run: |
         sudo apt-get update
-        sudo apt-get install -y podman
+        sudo apt-get install -y podman buildah
       shell: bash
 
-    - name: Run podman buildx
+    - name: Run buildah build
+      id: build
+      uses: redhat-actions/buildah-build@v2
+      with:
+        image: stump
+        tags: ${{ inputs.tags }}
+        archs: ${{ inputs.archs }}
+        build-args: |
+          GIT_REV=${{ env.GIT_REV }}
+          RUN_PRISMA_GENERATE=false
+        containerfiles: |
+          ./docker/Dockerfile
+
+    - name: Echo build outputs
       run: |
-        ENGINE=podman PLATFORMS="${{ inputs.platforms }}" TAGS="${{ env.TAGS }}" GIT_REV="${{ env.GIT_REV }}" PUSH="${{ inputs.push }}" ./docker/build.sh
+        echo "${{ toJSON(steps.build.outputs) }}"
       shell: bash
 
     - name: Push to registry
+      id: push
       if: ${{ success() && inputs.push == 'true' }}
       uses: redhat-actions/push-to-registry@v2
       with:
-        image: aaronleopold/stump
-        tags: ${{ env.TAGS }}
+        image: ${{ steps.build.outputs.image }}
+        tags: ${{ steps.build.outputs.tags }}
         username: ${{ inputs.username }}
         password: ${{ inputs.password }}
-        registry: docker.io
+        registry: docker.io/aaronleopold
+
+    - name: Echo push outputs
+      run: |
+        echo "${{ toJSON(steps.push.outputs) }}"
+      shell: bash
 
     - name: Discord notification
       if: ${{ success() && inputs.push == 'true' && inputs.discord-webhook != '' }}
@@ -97,4 +114,4 @@ runs:
         DISCORD_WEBHOOK: ${{ inputs.discord-webhook }}
       uses: 'Ilshidur/action-discord@0.3.2'
       with:
-        args: 'Successfully pushed the following image tags to registry: ${{ env.TAGS }}'
+        args: 'Successfully pushed the following image tags to registry: ${{ steps.build.outputs.tags }}'

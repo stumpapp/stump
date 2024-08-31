@@ -11,11 +11,11 @@ const UserBookClubsScene = lazy(() => import('./UserBookClubsScene.tsx'))
 const BookClubExplorerScene = lazy(() => import('./explore/BookClubExploreScene.tsx'))
 
 // club-specific routes
-const BookClubOverviewScene = lazy(() => import('./tabs/overview/index.ts'))
-const BookClubSettingsScene = lazy(() => import('./tabs/settings/index.ts'))
-const BookClubChatBoardScene = lazy(() => import('./tabs/chatBoard/index.ts'))
-const BookClubMembersScene = lazy(() => import('./tabs/members/index.ts'))
-const BookClubSchedulerScene = lazy(() => import('./tabs/settings/scheduler/index.ts'))
+const BookClubHomeScene = lazy(() => import('./tabs/home'))
+const BookClubSettingsScene = lazy(() => import('./tabs/settings'))
+const BookClubChatBoardScene = lazy(() => import('./tabs/chatBoard'))
+const BookClubMembersScene = lazy(() => import('./tabs/members'))
+const BookClubSchedulerScene = lazy(() => import('./tabs/settings/scheduler'))
 
 const IS_DEVELOPMENT = import.meta.env.DEV
 
@@ -49,8 +49,8 @@ export default function BookClubRouter() {
 			{/* TODO: router guard bookclub:create */}
 			<Route path="create" element={<CreateBookClubScene />} />
 			<Route path=":id/*" element={<BookClubHomeLayout />}>
-				<Route path="" element={<Navigate to="overview" replace />} />
-				<Route path="overview" element={<BookClubOverviewScene />} />
+				<Route path="" element={<BookClubHomeScene />} />
+				<Route path="home" element={<Navigate to=".." replace />} />
 				<Route path="chat-board" element={<BookClubChatBoardScene />} />
 				<Route path="members" element={<BookClubMembersScene />} />
 				{/* TODO: settings router */}

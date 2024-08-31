@@ -8,6 +8,8 @@ generator client {
   output   = "../src/prisma.rs"
 }
 
+// TODO: support reading goals
+
 model User {
   id String @id @default(cuid())
 
@@ -410,8 +412,8 @@ model BookClubMember {
   book_club_id String
   book_club    BookClub @relation(fields: [book_club_id], references: [id], onDelete: Cascade)
 
-  discussion_messages       BookClubChatMessage[]
-  liked_discussion_messages BookClubChatMessageLike[]
+  discussion_messages       BookClubDiscussionMessage[]
+  liked_discussion_messages BookClubDiscussionMessageLike[]
   book_suggestions          BookClubBookSuggestion[]
   liked_book_suggestions    BookClubBookSuggestionLike[]
   favorite_book             BookClubMemberFavoriteBook?
@@ -438,7 +440,6 @@ model BookClubMemberFavoriteBook {
 
 model BookClubSchedule {
   default_interval_days Int? @default(30) // in days
-  // auto_start_chat_board Boolean @default(false)
 
   books BookClubBook[]
 
@@ -453,7 +454,7 @@ model BookClubBook {
 
   start_at                 DateTime
   end_at                   DateTime
-  discussion_duration_days Int?     @default(1) // in days
+  discussion_duration_days Int?     @default(1) // in days // TODO: revist this, IDK if it's necessary or how to handle it
 
   // The below group should only be set if the book is not already in the library
   title     String?
@@ -467,7 +468,7 @@ model BookClubBook {
   book_club_schedule_book_club_id String?
   book_club_schedule              BookClubSchedule? @relation(fields: [book_club_schedule_book_club_id], references: [book_club_id], onDelete: Cascade)
 
-  chat_board BookClubChatBoard?
+  discussion BookClubDiscussion?
 
   @@map("book_club_books")
 }
@@ -502,50 +503,52 @@ model BookClubBookSuggestionLike {
   @@map("book_club_book_suggestion_likes")
 }
 
-model BookClubChatBoard {
-  id String @id @default(cuid())
+model BookClubDiscussion {
+  id        String  @id @default(cuid())
+  is_locked Boolean @default(false)
 
-  messages BookClubChatMessage[]
+  messages BookClubDiscussionMessage[]
 
   book_club_book_id String       @unique
   book_club_book    BookClubBook @relation(fields: [book_club_book_id], references: [id], onDelete: Cascade)
 
-  @@map("book_club_chat_boards")
+  @@map("book_club_discussions")
 }
 
-model BookClubChatMessage {
+model BookClubDiscussionMessage {
   id             String   @id @default(cuid())
   content        String
   timestamp      DateTime @default(now())
   is_top_message Boolean  @default(true)
 
-  parent_message_id String?
-  // TODO: cascade delete? Not sure... I don't necessarily want to delete the children if the parent is deleted. Maybe soft delete when a user 'deletes' a message? Then just hide content from deleted messages...
-  parent_message    BookClubChatMessage? @relation("ThreadMessage", fields: [parent_message_id], references: [id])
+  deleted_at DateTime?
 
-  chat_board    BookClubChatBoard @relation(fields: [chat_board_id], references: [id], onDelete: Cascade)
-  chat_board_id String
+  parent_message_id String?
+  parent_message    BookClubDiscussionMessage? @relation("ThreadMessage", fields: [parent_message_id], references: [id]) // TODO: soft delete pattern
+
+  discussion    BookClubDiscussion @relation(fields: [discussion_id], references: [id], onDelete: Cascade)
+  discussion_id String
 
   member    BookClubMember? @relation(fields: [member_id], references: [id], onDelete: Cascade)
   member_id String?
 
-  likes          BookClubChatMessageLike[]
-  child_messages BookClubChatMessage[]     @relation("ThreadMessage")
+  likes          BookClubDiscussionMessageLike[]
+  child_messages BookClubDiscussionMessage[]     @relation("ThreadMessage")
 
-  @@map("book_club_chat_messages")
+  @@map("book_club_discussion_messages")
 }
 
-model BookClubChatMessageLike {
+model BookClubDiscussionMessageLike {
   id        String   @id @default(cuid())
   timestamp DateTime @default(now())
 
   liked_by    BookClubMember @relation(fields: [liked_by_id], references: [id], onDelete: Cascade)
   liked_by_id String
 
-  message    BookClubChatMessage @relation(fields: [message_id], references: [id], onDelete: Cascade)
+  message    BookClubDiscussionMessage @relation(fields: [message_id], references: [id], onDelete: Cascade)
   message_id String
 
-  @@map("book_club_chat_message_likes")
+  @@map("book_club_discussion_message_likes")
 }
 
 model ReadingListRBAC {

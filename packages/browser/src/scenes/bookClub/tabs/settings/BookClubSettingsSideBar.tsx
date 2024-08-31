@@ -12,8 +12,6 @@ import { SideBarLinkButton } from '@/scenes/settings'
 
 import { routeGroups } from './routes'
 
-// TODO: fix once components are merged
-
 export default function BookClubSettingsSideBar() {
 	const location = useLocation()
 	const navigate = useNavigate()
@@ -37,7 +35,7 @@ export default function BookClubSettingsSideBar() {
 			<div className="flex h-full flex-grow flex-col gap-4">
 				<div className="flex items-center space-x-2">
 					<ButtonOrLink
-						href={paths.bookClub(bookClub.id)}
+						href="."
 						variant="ghost"
 						className="h-[unset] w-[unset] shrink-0 border border-transparent p-1 text-foreground hover:border-edge-subtle/50 hover:bg-sidebar-surface/70"
 						size="sm"
@@ -45,7 +43,6 @@ export default function BookClubSettingsSideBar() {
 						<ArrowLeft className="h-4 w-4 transform" />
 					</ButtonOrLink>
 
-					{/* TODO: handle wrapping... */}
 					<Label className="line-clamp-1 py-1">{bookClub.name}</Label>
 				</div>
 

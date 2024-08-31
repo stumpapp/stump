@@ -1,4 +1,4 @@
-import { CalendarCheck, NotebookTabs, PackageX, Sliders } from 'lucide-react'
+import { CalendarCheck, NotebookTabs, PackageX, Sliders, Tag, Users } from 'lucide-react'
 
 import { RouteGroup } from '@/hooks/useRouteGroups'
 
@@ -14,6 +14,26 @@ export const routeGroups: RouteGroup[] = [
 				to: 'settings/basics',
 			},
 		],
+	},
+	{
+		defaultRoute: 'members',
+		items: [
+			{
+				icon: Users,
+				label: 'Members',
+				localeKey: 'members',
+				// permission: 'bookclub:manage',
+				to: 'settings/members',
+			},
+			{
+				icon: Tag,
+				label: 'Roles',
+				localeKey: 'roles',
+				// permission: 'bookclub:manage',
+				to: 'settings/roles',
+			},
+		],
+		label: 'Members',
 	},
 	{
 		defaultRoute: 'settings/scheduling',
@@ -43,7 +63,7 @@ export const routeGroups: RouteGroup[] = [
 				label: 'Delete',
 				localeKey: 'danger-zone/delete',
 				// permission: 'bookclub:manage',
-				to: 'settings/danger/delete',
+				to: 'settings/delete',
 			},
 		],
 		label: 'Danger Zone',

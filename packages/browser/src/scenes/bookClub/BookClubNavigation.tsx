@@ -20,9 +20,9 @@ export default function BookClubNavigation() {
 	const tabs = useMemo(() => {
 		const base = [
 			{
-				isActive: location.pathname.match(/\/book-clubs\/[^/]+\/?(overview)?$/),
-				label: 'Overview',
-				to: 'overview',
+				isActive: location.pathname.match(/\/book-clubs\/[^/]+\/?(home)?$/),
+				label: 'Home',
+				to: '.',
 			},
 		]
 
@@ -52,6 +52,11 @@ export default function BookClubNavigation() {
 	}, [location, viewerIsMember, id])
 
 	const preferTopBar = primary_navigation_mode === 'TOPBAR'
+
+	// Don't bother rendering navigation if the user doesn't have access to any other tabs
+	if (tabs.length <= 1) {
+		return null
+	}
 
 	return (
 		<div className="sticky top-0 z-10 w-full border-b border-edge bg-background md:relative md:top-[unset] md:z-[unset]">

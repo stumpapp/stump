@@ -166,6 +166,20 @@
 			"submit": "Create Book Club"
 		}
 	},
+	"bookClubSettingsScene": {
+		"sidebar": {
+			"basics": "Basics",
+			"scheduling": {
+				"scheduler": "Scheduler",
+				"options": "Options",
+				"label": "Scheduling"
+			},
+			"danger-zone": {
+				"delete": "Deletion",
+				"label": "Danger Zone"
+			}
+		}
+	},
 	"createOrUpdateLibraryForm": {
 		"fields": {
 			"name": {

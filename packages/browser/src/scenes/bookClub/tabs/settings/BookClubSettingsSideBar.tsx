@@ -6,15 +6,15 @@ import { useLocation, useNavigate } from 'react-router'
 
 import { useBookClubContext } from '@/components/bookClub'
 import { usePreferences } from '@/hooks/usePreferences'
-// import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
+import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
 import paths from '@/paths'
-// import { SideBarLinkButton } from '@/scenes/settings'
+import { SideBarLinkButton } from '@/scenes/settings'
 
-// import { routeGroups } from './routes'
+import { routeGroups } from './routes'
 
 // TODO: fix once components are merged
 
-export default function LibrarySettingsSidebar() {
+export default function BookClubSettingsSideBar() {
 	const location = useLocation()
 	const navigate = useNavigate()
 
@@ -23,7 +23,7 @@ export default function LibrarySettingsSidebar() {
 	const {
 		preferences: { enable_replace_primary_sidebar, primary_navigation_mode },
 	} = usePreferences()
-	// const { groups } = useRouteGroups({ routeGroups })
+	const { groups } = useRouteGroups({ routeGroups })
 
 	return (
 		<div
@@ -49,17 +49,16 @@ export default function LibrarySettingsSidebar() {
 					<Label className="line-clamp-1 py-1">{bookClub.name}</Label>
 				</div>
 
-				{/* {groups
+				{groups
 					.map(({ label, items }) => {
-						// TODO: refactor the group shit
 						const groupLabel = label
-							? t(`librarySettingsScene.sidebar.${formatRouteKey(label)}.label`)
+							? t(`bookClubSettingsScene.sidebar.${formatRouteKey(label)}.label`)
 							: ''
 
 						const withGroup = (key: string) =>
 							label
-								? t(`librarySettingsScene.sidebar.${formatRouteKey(label)}.${formatRouteKey(key)}`)
-								: t(`librarySettingsScene.sidebar.${formatRouteKey(key)}`)
+								? t(`bookClubSettingsScene.sidebar.${formatRouteKey(label)}.${formatRouteKey(key)}`)
+								: t(`bookClubSettingsScene.sidebar.${formatRouteKey(key)}`)
 
 						return (
 							<div key={groupLabel}>
@@ -86,7 +85,7 @@ export default function LibrarySettingsSidebar() {
 							</div>
 						)
 					})
-					.filter(Boolean)} */}
+					.filter(Boolean)}
 				<div className="flex-1" />
 
 				{enable_replace_primary_sidebar && (

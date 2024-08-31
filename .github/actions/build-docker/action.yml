@@ -24,6 +24,11 @@ inputs:
     description: 'Discord webhook to send notifications to'
     required: true
 
+env:
+  IMAGE_NAME: stump
+  IMAGE_NAMESPACE: aaronleopold
+  IMAGE_REGISTRY: docker.io
+
 runs:
   using: composite
   steps:
@@ -78,7 +83,7 @@ runs:
       id: build
       uses: redhat-actions/buildah-build@v2
       with:
-        image: aaronleopold/stump
+        image: ${{ env.IMAGE_NAME }}
         tags: ${{ inputs.tags }}
         archs: ${{ inputs.archs }}
         build-args: |
@@ -88,6 +93,7 @@ runs:
           ./docker/Dockerfile
 
     - name: Push to registry
+      id: push
       if: ${{ success() && inputs.push == 'true' }}
       uses: redhat-actions/push-to-registry@v2
       with:
@@ -95,7 +101,11 @@ runs:
         tags: ${{ steps.build.outputs.tags }}
         username: ${{ inputs.username }}
         password: ${{ inputs.password }}
-        registry: docker.io
+        registry: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAMESPACE }}
+
+    - name: Echo outputs
+      run: |
+        echo "${{ toJSON(steps.push.outputs) }}"
 
     - name: Discord notification
       if: ${{ success() && inputs.push == 'true' && inputs.discord-webhook != '' }}

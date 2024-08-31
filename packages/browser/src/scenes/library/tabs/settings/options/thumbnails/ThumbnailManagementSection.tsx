@@ -4,6 +4,7 @@ import React from 'react'
 
 import DeleteLibraryThumbnails from './DeleteLibraryThumbnails'
 import LibraryThumbnailSelector from './LibraryThumbnailSelector'
+import RegenerateThumbnails from './RegenerateThumbnails'
 
 export default function ThumbnailManagementSection() {
 	const { t } = useLocaleContext()
@@ -18,6 +19,7 @@ export default function ThumbnailManagementSection() {
 			</div>
 
 			<LibraryThumbnailSelector />
+			<RegenerateThumbnails />
 			<DeleteLibraryThumbnails />
 		</div>
 	)

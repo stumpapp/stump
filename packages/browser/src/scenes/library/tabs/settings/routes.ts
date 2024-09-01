@@ -1,4 +1,4 @@
-import { Image, NotebookTabs, PackageX, ScanSearch, ShieldCheck } from 'lucide-react'
+import { FlaskRound, Image, NotebookTabs, PackageX, ScanSearch, ShieldCheck } from 'lucide-react'
 
 import { RouteGroup } from '@/hooks/useRouteGroups'
 
@@ -25,14 +25,21 @@ export const routeGroups: RouteGroup[] = [
 				label: 'Scanning',
 				localeKey: 'options/scanning',
 				permission: 'library:manage',
-				to: 'settings/options/scanning',
+				to: 'settings/scanning',
 			},
 			{
 				icon: Image,
 				label: 'Thumbnails',
 				localeKey: 'options/thumbnails',
 				permission: 'library:manage',
-				to: 'settings/options/thumbnails',
+				to: 'settings/thumbnails',
+			},
+			{
+				icon: FlaskRound,
+				label: 'Analysis',
+				localeKey: 'options/analysis',
+				permission: 'library:manage',
+				to: 'settings/analysis',
 			},
 		],
 		label: 'Options',
@@ -45,14 +52,14 @@ export const routeGroups: RouteGroup[] = [
 				label: 'Access Control',
 				localeKey: 'danger-zone/access-control',
 				permission: 'library:manage',
-				to: 'settings/danger/access-control',
+				to: 'settings/access-control',
 			},
 			{
 				icon: PackageX,
 				label: 'Delete',
 				localeKey: 'danger-zone/delete',
 				permission: 'library:delete',
-				to: 'settings/danger/delete',
+				to: 'settings/delete',
 			},
 		],
 		label: 'Danger Zone',

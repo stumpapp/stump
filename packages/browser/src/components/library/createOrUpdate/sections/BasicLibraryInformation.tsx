@@ -1,4 +1,4 @@
-import { Heading, IconButton, Input, Text, TextArea } from '@stump/components'
+import { IconButton, Input, TextArea } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Folder } from 'lucide-react'
 import { useFormContext, useFormState } from 'react-hook-form'
@@ -10,7 +10,6 @@ import { CreateOrUpdateLibrarySchema } from '../schema'
 
 const LOCALE_KEY = 'createOrUpdateLibraryForm'
 const getKey = (key: string) => `${LOCALE_KEY}.fields.${key}`
-const getSectionKey = (key: string) => `${LOCALE_KEY}.sections.${key}`
 
 type Props = {
 	onSetShowDirectoryPicker: (value: boolean) => void
@@ -30,15 +29,6 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 
 	return (
 		<div className="flex flex-grow flex-col gap-6">
-			{isCreatingLibrary && (
-				<div>
-					<Heading size="sm">{t(getSectionKey('heading'))}</Heading>
-					<Text size="sm" variant="muted">
-						{t(getSectionKey('description'))}
-					</Text>
-				</div>
-			)}
-
 			<div className="flex flex-col flex-wrap gap-y-6 md:flex-row md:gap-x-6 md:gap-y-0">
 				<Input
 					variant="primary"

@@ -73,9 +73,11 @@ describe('CreateOrUpdateEmailerSchema', () => {
 
 		it('should not require a password when updating', () => {
 			const schema = createSchema([], translateFn, false)
-			expect(schema.safeParse(createEmailer({ password: '' })).success).toBe(true)
 			expect(schema.safeParse(createEmailer({ password: undefined })).success).toBe(true)
 			expect(schema.safeParse(createEmailer()).success).toBe(true)
+
+			// Empty string is never allowed
+			expect(schema.safeParse(createEmailer({ password: '' })).success).toBe(false)
 		})
 
 		it('should require a valid email address for sender_email', () => {

@@ -13,18 +13,16 @@ export const createSchema = (
 	z.object({
 		is_primary: z.boolean().default(existingNames.length === 0),
 		max_attachment_size_bytes: z.number().optional().nullable(),
-		name: z.string().refine(
-			(name) => {
-				if (existingNames.includes(name)) {
-					return t(`${LOCALE_BASE}.nameAlreadyExists`)
-				} else if (FORBIDDEN_ENTITY_NAMES.includes(name)) {
-					return t(`${LOCALE_BASE}.nameIsForbidden`)
-				}
-				return true
-			},
-			{ message: t(`${LOCALE_BASE}.validation.nameAlreadyExists`) },
-		),
-		password: isCreating ? z.string().min(1) : z.string().optional(),
+		name: z
+			.string()
+			.min(1)
+			.refine((name) => !existingNames.includes(name), {
+				message: t(`${LOCALE_BASE}.nameAlreadyExists`),
+			})
+			.refine((name) => !FORBIDDEN_ENTITY_NAMES.includes(name), {
+				message: t(`${LOCALE_BASE}.nameIsForbidden`),
+			}),
+		password: isCreating ? z.string().min(1) : z.string().min(1).optional(),
 		sender_display_name: z.string().min(1),
 		sender_email: z.string().email(),
 		smtp_host: z.string().min(1),

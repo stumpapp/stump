@@ -1,6 +1,8 @@
 import '@/__mocks__/resizeObserver'
 
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { SMTPEmailer } from '@stump/types'
+import { act, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { ComponentProps } from 'react'
 
 import CreateOrUpdateEmailerForm from '../CreateOrUpdateEmailerForm'
@@ -24,27 +26,32 @@ const validEmailer: CreateOrUpdateEmailerSchema = {
 }
 
 const inputEmailer = async (overrides: Partial<CreateOrUpdateEmailerSchema> = {}) => {
+	const user = userEvent.setup()
+
 	const emailer = { ...validEmailer, ...overrides }
 
-	fireEvent.input(screen.getByTestId('name'), { target: { value: emailer.name } })
-	fireEvent.input(screen.getByTestId('password'), { target: { value: emailer.password } })
-	fireEvent.input(screen.getByTestId('sender_display_name'), {
-		target: { value: emailer.sender_display_name },
-	})
-	fireEvent.input(screen.getByTestId('sender_email'), { target: { value: emailer.sender_email } })
-	fireEvent.input(screen.getByTestId('smtp_host'), { target: { value: emailer.smtp_host } })
-	fireEvent.input(screen.getByTestId('smtp_port'), { target: { value: emailer.smtp_port } })
-	fireEvent.input(screen.getByTestId('username'), { target: { value: emailer.username } })
+	await user.type(screen.getByTestId('name'), emailer.name)
+	if (emailer.password) {
+		await user.type(screen.getByTestId('password'), emailer.password)
+	}
+	await user.type(screen.getByTestId('sender_display_name'), emailer.sender_display_name)
+	await user.type(screen.getByTestId('sender_email'), emailer.sender_email)
+	await user.type(screen.getByTestId('smtp_host'), emailer.smtp_host)
+	await user.type(screen.getByTestId('smtp_port'), emailer.smtp_port.toString())
+	await user.type(screen.getByTestId('username'), emailer.username)
 
 	if (emailer.tls_enabled) {
-		fireEvent.click(screen.getByTestId('tls_enabled'))
+		await user.click(screen.getByTestId('tls_enabled'))
 	}
 
 	if (emailer.max_attachment_size_bytes != null) {
-		fireEvent.input(screen.getByTestId('max_attachment_size_bytes'), {
-			target: { value: emailer.max_attachment_size_bytes },
-		})
+		await user.type(
+			screen.getByTestId('max_attachment_size_bytes'),
+			emailer.max_attachment_size_bytes.toString(),
+		)
 	}
+
+	return user
 }
 
 const onSubmit = jest.fn()
@@ -76,11 +83,9 @@ describe('CreateOrUpdateEmailerForm', () => {
 	test('should submit with valid data', async () => {
 		render(<Subject />)
 
-		inputEmailer()
+		const user = await inputEmailer()
 
-		await act(async () => {
-			fireEvent.click(screen.getByRole('button', { name: /submit/i }))
-		})
+		await act(() => user.click(screen.getByRole('button', { name: /submit/i })))
 
 		expect(onSubmit).toHaveBeenCalledWith(
 			validEmailer,
@@ -88,5 +93,107 @@ describe('CreateOrUpdateEmailerForm', () => {
 		)
 	})
 
-	// TODO: more tests
+	describe('validation', () => {
+		it('should allow optional max_attachment_size_bytes', async () => {
+			render(<Subject />)
+
+			const user = await inputEmailer({ max_attachment_size_bytes: undefined })
+
+			await act(() => user.click(screen.getByRole('button', { name: /submit/i })))
+
+			expect(onSubmit).toHaveBeenCalledWith(
+				expect.objectContaining({ max_attachment_size_bytes: null }),
+				expect.any(Object), // Submit event
+			)
+		})
+
+		it('should not allow duplicate names', async () => {
+			render(<Subject existingNames={['existingName']} />)
+
+			const user = await inputEmailer({ name: 'existingName' })
+
+			await act(() => user.click(screen.getByRole('button', { name: /submit/i })))
+
+			// Error message should be displayed
+			await waitFor(() => expect(screen.getByText(/nameAlreadyExists/i)).toBeInTheDocument())
+
+			expect(onSubmit).not.toHaveBeenCalled()
+		})
+
+		it('should not allow forbidden names', async () => {
+			render(<Subject />)
+
+			const user = await inputEmailer({ name: 'new' })
+
+			await act(() => user.click(screen.getByRole('button', { name: /submit/i })))
+
+			expect(onSubmit).not.toHaveBeenCalled()
+		})
+
+		it('should require a password when creating', async () => {
+			render(<Subject />)
+
+			const user = await inputEmailer({ password: undefined })
+
+			await act(() => user.click(screen.getByRole('button', { name: /submit/i })))
+
+			// Error message should be displayed
+			await waitFor(() => expect(screen.getByText(/password/i)).toBeInTheDocument())
+
+			expect(onSubmit).not.toHaveBeenCalled()
+		})
+
+		it('should not allow an empty password when creating', async () => {
+			render(<Subject />)
+
+			const user = await inputEmailer({ password: '' })
+
+			await act(() => user.click(screen.getByRole('button', { name: /submit/i })))
+
+			expect(onSubmit).not.toHaveBeenCalled()
+		})
+
+		it('should require a non-empty password when update includes password', async () => {
+			render(
+				<Subject
+					emailer={
+						{
+							...validEmailer,
+							config: {
+								...validEmailer,
+							},
+							id: 1,
+						} as unknown as SMTPEmailer
+					}
+				/>,
+			)
+
+			const user = await inputEmailer({ password: '' })
+
+			await act(() => user.click(screen.getByRole('button', { name: /submit/i })))
+
+			expect(onSubmit).not.toHaveBeenCalled()
+		})
+
+		it('should require a valid email address for sender_email', async () => {
+			render(<Subject />)
+
+			const user = await inputEmailer({ sender_email: 'invalid' })
+
+			await act(() => user.click(screen.getByRole('button', { name: /submit/i })))
+
+			expect(onSubmit).not.toHaveBeenCalled()
+		})
+
+		it('should require a number for smtp_port', async () => {
+			render(<Subject />)
+
+			// @ts-expect-error: smtp_port is a number
+			const user = await inputEmailer({ smtp_port: 'foo' })
+
+			await act(() => user.click(screen.getByRole('button', { name: /submit/i })))
+
+			expect(onSubmit).not.toHaveBeenCalled()
+		})
+	})
 })

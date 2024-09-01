@@ -33,11 +33,6 @@ while getopts "pwrdg:" opt; do
         echo "No corrections needed for multiple tags"
       fi
     ;;
-    d)
-      path="$OPTARG"
-      echo "The path provided is $OPTARG"
-      create_dummy_rust_file $path
-    ;;
     g)
       arch="$OPTARG"
       echo "The arch provided is $OPTARG"

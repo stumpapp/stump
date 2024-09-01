@@ -9,13 +9,13 @@ WORKDIR /app
 
 COPY . .
 
-# https://github.com/nodejs/docker-node/issues/1335
-RUN yarn config set network-timeout 300000 && \
-    yarn install --frozen-lockfile && \
-    yarn web build && \
-    mv ./apps/web/dist/ ./build && \
-    if [ ! -d "./build" ] || [ ! "$(ls -A ./build)" ]; then exit 1; fi
-
+RUN --mount=type=cache,target=/usr/local/yarn/.cache,id=${TARGETARCH} \ 
+    # https://github.com/nodejs/docker-node/issues/1335
+    yarn config set network-timeout 300000 && \
+        YARN_CACHE_FOLDER=/usr/local/yarn/.cache yarn install --frozen-lockfile && \
+        yarn web build && \
+        mv ./apps/web/dist/ ./build && \
+        if [ ! -d "./build" ] || [ ! "$(ls -A ./build)" ]; then exit 1; fi
 
 # ------------------------------------------------------------------------------
 # Cargo Build Stage
@@ -24,27 +24,31 @@ RUN yarn config set network-timeout 300000 && \
 FROM rust:1.79.0-slim-buster AS builder
 
 ARG GIT_REV
-ARG TAGS
+ARG TARGETARCH
 ARG RUN_PRISMA_GENERATE
 
 ENV GIT_REV=${GIT_REV}
-ENV TAGS=${TAGS}
 ENV RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE}
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    cmake \
-    git \
-    libssl-dev \
-    pkg-config \
-    libsqlite3-dev;
+RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
+    apt-get update && apt-get install -y \
+        build-essential \
+        cmake \
+        wget \
+        git \
+        libssl-dev \
+        pkg-config \
+        libsqlite3-dev;
 
 # Cargo build for stump
 WORKDIR /app
 
 COPY . .
 
-RUN RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE} ./docker/build_server.sh && \
+
+RUN --mount=type=cache,target=/usr/local/cargo/registry,id=${TARGETARCH} \
+    --mount=type=cache,target=/app/target,id=${TARGETARCH} \
+    RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE} ./docker/build_server.sh && \
     cp ./target/release/stump_server ./stump_server
 
 # ------------------------------------------------------------------------------
@@ -54,18 +58,19 @@ RUN RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE} ./docker/build_server.sh && \
 FROM debian:buster-slim AS pdfium
 ARG TARGETARCH
 
-RUN apt-get update && apt-get install -y curl tar; \
-    # Download and extract PDFium
-    set -ex; \
-    mkdir -p pdfium; \
-    if [ "$TARGETARCH" = "amd64" ]; then \
-        # NOTE: This was previously -x86, need to test more on amd64-compatible systems to ensure I have the right one
-        curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6406/pdfium-linux-x64.tgz; \
-    elif [ "$TARGETARCH" = "arm64" ]; then \
-        curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6406/pdfium-linux-arm64.tgz; \
-    fi; \
-    tar -xzvf pdfium.tgz -C ./pdfium; \
-    rm pdfium.tgz
+RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
+    apt-get update && apt-get install -y curl tar; \
+        # Download and extract PDFium
+        set -ex; \
+        mkdir -p pdfium; \
+        if [ "$TARGETARCH" = "amd64" ]; then \
+            # NOTE: This was previously -x86, need to test more on amd64-compatible systems to ensure I have the right one
+            curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6406/pdfium-linux-x64.tgz; \
+        elif [ "$TARGETARCH" = "arm64" ]; then \
+            curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6406/pdfium-linux-arm64.tgz; \
+        fi; \
+        tar -xzvf pdfium.tgz -C ./pdfium; \
+        rm pdfium.tgz
 
 # ------------------------------------------------------------------------------
 # Final Stage

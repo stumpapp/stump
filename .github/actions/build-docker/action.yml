@@ -17,7 +17,7 @@ inputs:
   tags:
     description: 'List of tags to assigned to the image'
     default: 'nightly'
-  platforms:
+  archs:
     description: 'List of platforms to build'
     required: true
   discord-webhook:
@@ -33,7 +33,14 @@ runs:
 
     - name: Format tags
       run: |
-        echo "TAGS=$(echo ${{ inputs.tags }} | sed -e 's/,/,aaronleopold\/stump:/g' | sed -e 's/^/aaronleopold\/stump:/')" >> $GITHUB_ENV
+        echo "FORMATTED_TAGS=$(echo ${{ inputs.tags }} | sed -e 's/,/,aaronleopold\/stump:/g' | sed -e 's/^/aaronleopold\/stump:/')" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Sanity check
+      run: |
+        echo "TAGS=${{ inputs.tags }}"
+        echo "FORMATTED_TAGS=${{ env.FORMATTED_TAGS }}"
+        echo "GIT_REV=${{ env.GIT_REV }}"
       shell: bash
 
     - name: Setup rust
@@ -41,13 +48,13 @@ runs:
       with:
         # Note: until some sort of local caching is implemented, we don't want to cache dependencies
         # because the network overhead is too high and eats up lots of time
-        cache-dependencies: ${{ runner.name != 'oromei-ubuntu' }}
+        cache-dependencies: ${{ runner.environment != 'self-hosted' }}
 
     # We only need QEMU when an arm* platform is targeted
     - name: Check QEMU requirement
       id: check-qemu
       run: |
-        if [[ ${{ inputs.platforms }} == *"arm"* ]]; then
+        if [[ ${{ inputs.archs }} == *"arm"* ]]; then
           echo "SETUP_QEMU=1" >> $GITHUB_OUTPUT
         else
           echo "SETUP_QEMU=0" >> $GITHUB_OUTPUT
@@ -57,31 +64,49 @@ runs:
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
       if: ${{ steps.check-qemu.outputs.SETUP_QEMU == '1' }}
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Login to Docker Hub
-      uses: docker/login-action@v2
-      # if both inputs are empty, we assume we're running on a fork and don't need to login
-      if: ${{ inputs.username != '' && inputs.password != '' }}
       with:
+        platforms: linux/arm64
+
+    - name: Install podman and buildah
+      if: runner.environment != 'self-hosted'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y podman buildah
+      shell: bash
+
+    - name: Run buildah build
+      id: build
+      uses: redhat-actions/buildah-build@v2
+      with:
+        image: stump
+        tags: ${{ inputs.tags }}
+        archs: ${{ inputs.archs }}
+        build-args: |
+          GIT_REV=${{ env.GIT_REV }}
+          RUN_PRISMA_GENERATE=false
+        containerfiles: |
+          ./docker/Dockerfile
+
+    - name: Echo build outputs
+      run: |
+        echo "${{ toJSON(steps.build.outputs) }}"
+      shell: bash
+
+    - name: Push to registry
+      id: push
+      if: ${{ success() && inputs.push == 'true' }}
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        image: ${{ steps.build.outputs.image }}
+        tags: ${{ steps.build.outputs.tags }}
         username: ${{ inputs.username }}
         password: ${{ inputs.password }}
+        registry: docker.io/aaronleopold
 
-    - name: Run buildx build
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        build-args: |
-          "GIT_REV=${{ env.GIT_REV }}"
-          "TAGS=${{ env.TAGS }}"
-          "RUN_PRISMA_GENERATE=false"
-        file: docker/Dockerfile
-        platforms: ${{ inputs.platforms }}
-        load: ${{ inputs.load }}
-        push: ${{ inputs.push }}
-        tags: ${{ env.TAGS }}
+    - name: Echo push outputs
+      run: |
+        echo "${{ toJSON(steps.push.outputs) }}"
+      shell: bash
 
     - name: Discord notification
       if: ${{ success() && inputs.push == 'true' && inputs.discord-webhook != '' }}
@@ -89,4 +114,4 @@ runs:
         DISCORD_WEBHOOK: ${{ inputs.discord-webhook }}
       uses: 'Ilshidur/action-discord@0.3.2'
       with:
-        args: 'Successfully pushed the following image tags to registry: ${{ env.TAGS }}'
+        args: 'Successfully pushed the following image tags to registry: ${{ steps.build.outputs.tags }}'

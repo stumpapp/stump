@@ -235,13 +235,19 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 	}
 
 	let WalkerCtx {
-		db, ignore_rules, ..
+		db,
+		ignore_rules,
+		max_depth,
 	} = ctx;
 
 	tracing::debug!("Walking series at {}", path.display());
 
+	let mut walker = WalkDir::new(path);
+	if let Some(num) = max_depth {
+		walker = walker.max_depth(num);
+	}
+
 	let walk_start = std::time::Instant::now();
-	let walker = WalkDir::new(path);
 	let (valid_entries, ignored_entries) = walker
 		.into_iter()
 		.filter_map(|e| e.ok())

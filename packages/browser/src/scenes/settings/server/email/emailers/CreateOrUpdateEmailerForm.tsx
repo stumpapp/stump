@@ -12,16 +12,16 @@ import {
 } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { SMTPEmailer } from '@stump/types'
-import React, { useMemo } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
+import React, { useCallback, useMemo } from 'react'
+import { useForm, useFormState } from 'react-hook-form'
 
+import { CreateOrUpdateEmailerSchema, createSchema, formDefaults } from './schema'
 import { commonHosts, getCommonHost } from './utils'
 
 type Props = {
 	emailer?: SMTPEmailer
 	existingNames: string[]
-	onSubmit: (values: FormValues) => void
+	onSubmit: (values: CreateOrUpdateEmailerSchema) => void
 }
 
 // TODO: Some of the descriptions are LONG. Use tooltips where necessary, instead of inline descriptions.
@@ -37,30 +37,18 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 			),
 		[t, emailer, existingNames],
 	)
-	const form = useForm<FormValues>({
-		defaultValues: emailer
-			? {
-					is_primary: emailer.is_primary,
-					max_attachment_size_bytes: emailer.config.max_attachment_size_bytes ?? undefined,
-					name: emailer.name,
-					sender_display_name: emailer.config.sender_display_name,
-					sender_email: emailer.config.sender_email,
-					smtp_host: emailer.config.smtp_host,
-					smtp_port: emailer.config.smtp_port,
-					tls_enabled: emailer.config.tls_enabled,
-					username: emailer.config.username,
-				}
-			: undefined,
+	const form = useForm<CreateOrUpdateEmailerSchema>({
+		defaultValues: formDefaults(emailer),
 		resolver: zodResolver(schema),
 	})
-
-	const errors = useMemo(() => form.formState.errors, [form.formState.errors])
+	const { errors } = useFormState({ control: form.control })
 
 	const [currentHost, tlsEnabled] = form.watch(['smtp_host', 'tls_enabled'])
+
 	const presetValue = useMemo(() => getCommonHost(currentHost)?.name.toLowerCase(), [currentHost])
 
-	const numericChangeHandler =
-		(key: keyof FormValues) => (e: React.ChangeEvent<HTMLInputElement>) => {
+	const numericChangeHandler = useCallback(
+		(key: keyof CreateOrUpdateEmailerSchema) => (e: React.ChangeEvent<HTMLInputElement>) => {
 			const { value } = e.target
 
 			if (value === '' || value == undefined) {
@@ -71,17 +59,29 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 					form.setValue(key, parsed)
 				}
 			}
-		}
-	const numericRegister = (key: keyof FormValues) => {
-		return {
-			...form.register(key),
-			onChange: numericChangeHandler(key),
-		}
-	}
+		},
+		[form],
+	)
+
+	const numericRegister = useCallback(
+		(key: keyof CreateOrUpdateEmailerSchema) => {
+			return {
+				...form.register(key, { valueAsNumber: true }),
+				onChange: numericChangeHandler(key),
+			}
+		},
+		[form, numericChangeHandler],
+	)
 
 	return (
-		<Form form={form} onSubmit={onSubmit} fieldsetClassName="space-y-8">
+		<Form
+			data-testid="createOrUpdateEmailerForm"
+			form={form}
+			onSubmit={onSubmit}
+			fieldsetClassName="space-y-8"
+		>
 			<Input
+				id="name"
 				label={t(`${LOCALE_BASE}.name.label`)}
 				description={t(`${LOCALE_BASE}.name.description`)}
 				variant="primary"
@@ -128,6 +128,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 
 				<div className="flex flex-col gap-4 md:flex-row md:items-start">
 					<Input
+						id="smtp_host"
 						label={t(`${LOCALE_BASE}.smtpHost.label`)}
 						description={t(`${LOCALE_BASE}.smtpHost.description`)}
 						variant="primary"
@@ -137,6 +138,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 					/>
 
 					<Input
+						id="smtp_port"
 						label={t(`${LOCALE_BASE}.smtpPort.label`)}
 						description={t(`${LOCALE_BASE}.smtpPort.description`)}
 						variant="primary"
@@ -148,6 +150,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 
 				<div className="flex flex-col gap-4 lg:flex-row lg:items-start">
 					<Input
+						id="username"
 						label={t(`${LOCALE_BASE}.username.label`)}
 						description={t(`${LOCALE_BASE}.username.description`)}
 						variant="primary"
@@ -156,6 +159,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 					/>
 
 					<PasswordInput
+						id="password"
 						label={t(`${LOCALE_BASE}.password.label`)}
 						description={t(`${LOCALE_BASE}.password.description`)}
 						variant="primary"
@@ -165,6 +169,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 				</div>
 
 				<CheckBox
+					id="tls_enabled"
 					variant="primary"
 					label={t(`${LOCALE_BASE}.tlsEnabled.label`)}
 					description={t(`${LOCALE_BASE}.tlsEnabled.description`)}
@@ -185,6 +190,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 					</Text>
 				</div>
 				<Input
+					id="sender_display_name"
 					label={t(`${LOCALE_BASE}.senderDisplayName.label`)}
 					description={t(`${LOCALE_BASE}.senderDisplayName.description`)}
 					variant="primary"
@@ -193,6 +199,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 				/>
 
 				<Input
+					id="sender_email"
 					label={t(`${LOCALE_BASE}.senderEmail.label`)}
 					description={t(`${LOCALE_BASE}.senderEmail.description`)}
 					variant="primary"
@@ -213,6 +220,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 				</div>
 
 				<Input
+					id="max_attachment_size_bytes"
 					label={t(`${LOCALE_BASE}.maxAttachmentSize.label`)}
 					description={t(`${LOCALE_BASE}.maxAttachmentSize.description`)}
 					variant="primary"
@@ -231,29 +239,3 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 }
 
 const LOCALE_BASE = 'settingsScene.server/email.createOrUpdateForm'
-const FORBIDDEN_NAMES = ['new']
-
-const createSchema = (existingNames: string[], _t: (key: string) => string, isCreating: boolean) =>
-	z.object({
-		is_primary: z.boolean().default(existingNames.length === 0),
-		max_attachment_size_bytes: z.number().optional(),
-		name: z.string().refine(
-			(name) => {
-				if (existingNames.includes(name)) {
-					return _t(`${LOCALE_BASE}.nameAlreadyExists`)
-				} else if (FORBIDDEN_NAMES.includes(name)) {
-					return _t(`${LOCALE_BASE}.nameIsForbidden`)
-				}
-				return true
-			},
-			{ message: _t(`${LOCALE_BASE}.validation.nameAlreadyExists`) },
-		),
-		password: isCreating ? z.string() : z.string().optional(),
-		sender_display_name: z.string(),
-		sender_email: z.string().email(),
-		smtp_host: z.string(),
-		smtp_port: z.number(),
-		tls_enabled: z.boolean().default(false),
-		username: z.string(),
-	})
-export type FormValues = z.infer<ReturnType<typeof createSchema>>

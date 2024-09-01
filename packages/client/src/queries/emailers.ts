@@ -72,6 +72,28 @@ export function useUpdateEmailer({ id, ...options }: UseCreateEmailerOptions) {
 	}
 }
 
+export function useDeleteEmailer() {
+	const {
+		mutate: deleteEmailer,
+		mutateAsync: deleteEmailerAsync,
+		...restReturn
+	} = useMutation([emailerQueryKeys.deleteEmailer], emailerApi.deleteEmailer, {
+		onSuccess: () =>
+			queryClient.invalidateQueries({
+				predicate: (query) =>
+					query.queryKey.some(
+						(key) => typeof key === 'string' && key.includes(emailerQueryKeys.getEmailers),
+					),
+			}),
+	})
+
+	return {
+		deleteEmailer,
+		deleteEmailerAsync,
+		...restReturn,
+	}
+}
+
 type UseEmailerSendHistoryQueryOptions = {
 	emailerId: number
 	params?: EmailerSendRecordIncludeParams

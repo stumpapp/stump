@@ -1,7 +1,7 @@
 {
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
-		"types": ["vite/client", "node"],
+		"types": ["vite/client", "node", "jest", "@testing-library/jest-dom"],
 		"skipLibCheck": true,
 		"allowImportingTsExtensions": true,
 		"jsx": "preserve",

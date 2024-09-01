@@ -45,8 +45,7 @@ runs:
     - name: Save Prisma client
       id: cache-prisma-save
       if: ${{ steps.cache-prisma-restore.outputs.cache-hit != 'true' }}
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       with:
         path: core/src/prisma.rs
         key: ${{ runner.os }}-prisma-${{ hashFiles('**/schema.prisma') }}
-        restore-keys: ${{ runner.os }}-prisma-${{ hashFiles('**/schema.prisma') }}

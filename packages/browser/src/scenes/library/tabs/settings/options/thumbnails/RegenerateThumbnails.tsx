@@ -1,11 +1,18 @@
+import { libraryApi, libraryQueryKeys } from '@stump/api'
+import { useMutation } from '@stump/client'
 import { Button, DropdownMenu, Label, Text } from '@stump/components'
 import { AlertTriangle, ChevronDown, ImagePlus } from 'lucide-react'
 import React from 'react'
 
-type Props = {
-	onRegenerate(force: boolean): void
-}
-export default function RegenerateThumbnails({ onRegenerate }: Props) {
+import { useLibraryContext } from '@/scenes/library/context'
+
+export default function RegenerateThumbnails() {
+	const { library } = useLibraryContext()
+	const { mutate } = useMutation(
+		[libraryQueryKeys.regenerateThumbnails, library.id],
+		(force: boolean) => libraryApi.regenerateThumbnails(library.id, force),
+	)
+
 	const iconStyle = 'mr-2 h-4 w-4'
 
 	return (
@@ -31,12 +38,12 @@ export default function RegenerateThumbnails({ onRegenerate }: Props) {
 								{
 									label: 'Create missing only',
 									leftIcon: <ImagePlus className={iconStyle} />,
-									onClick: () => onRegenerate(false),
+									onClick: () => mutate(false),
 								},
 								{
 									label: 'Force recreate all',
 									leftIcon: <AlertTriangle className={iconStyle} />,
-									onClick: () => onRegenerate(true),
+									onClick: () => mutate(true),
 								},
 							],
 						},

@@ -62,7 +62,16 @@ export function useUpdateEmailer({ id, ...options }: UseCreateEmailerOptions) {
 	} = useMutation(
 		[emailerQueryKeys.updateEmailer],
 		(params) => emailerApi.updateEmailer(id, params).then((res) => res.data),
-		options,
+		{
+			...options,
+			onSuccess: () =>
+				queryClient.invalidateQueries({
+					predicate: (query) =>
+						query.queryKey.some(
+							(key) => typeof key === 'string' && key.includes(emailerQueryKeys.getEmailers),
+						),
+				}),
+		},
 	)
 
 	return {

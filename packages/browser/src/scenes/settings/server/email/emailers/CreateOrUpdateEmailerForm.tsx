@@ -33,7 +33,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 			createSchema(
 				existingNames.filter((n) => n !== emailer?.name),
 				t,
-				!!emailer,
+				!emailer,
 			),
 		[t, emailer, existingNames],
 	)

@@ -22,7 +22,7 @@ export const createSchema = (
 			.refine((name) => !FORBIDDEN_ENTITY_NAMES.includes(name), {
 				message: t(`${LOCALE_BASE}.nameIsForbidden`),
 			}),
-		password: isCreating ? z.string().min(1) : z.string().min(1).optional(),
+		password: isCreating ? z.string().min(1) : z.string().optional(),
 		sender_display_name: z.string().min(1),
 		sender_email: z.string().email(),
 		smtp_host: z.string().min(1),
@@ -42,4 +42,5 @@ export const formDefaults = (emailer?: SMTPEmailer) => ({
 	smtp_port: emailer?.config.smtp_port,
 	tls_enabled: emailer?.config.tls_enabled || false,
 	username: emailer?.config.username,
+	password: undefined,
 })

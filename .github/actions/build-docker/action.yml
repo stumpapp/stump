@@ -34,12 +34,14 @@ runs:
     - name: Format tags
       run: |
         echo "FORMATTED_TAGS=$(echo ${{ inputs.tags }} | sed -e 's/,/,aaronleopold\/stump:/g' | sed -e 's/^/aaronleopold\/stump:/')" >> $GITHUB_ENV
+        echo "LOCAL_IMAGES=$(echo ${{ inputs.tags }} | sed -e 's/,/ /g' | sed -e 's/^/localhost\/stump:/')" >> $GITHUB_ENV
       shell: bash
 
     - name: Sanity check
       run: |
         echo "TAGS=${{ inputs.tags }}"
         echo "FORMATTED_TAGS=${{ env.FORMATTED_TAGS }}"
+        echo "LOCAL_IMAGES=${{ env.LOCAL_IMAGES }}"
         echo "GIT_REV=${{ env.GIT_REV }}"
       shell: bash
 
@@ -72,6 +74,11 @@ runs:
       run: |
         sudo apt-get update
         sudo apt-get install -y podman buildah
+      shell: bash
+
+    - name: Remove existing images
+      run: |
+        podman rmi ${{ env.LOCAL_IMAGES }} || true
       shell: bash
 
     - name: Run buildah build

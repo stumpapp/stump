@@ -45,6 +45,7 @@ export const RawCheckBox = React.forwardRef<RawCheckBoxRef, RawCheckBoxProps>(
 			ref={ref}
 			className={cn(checkboxVariants({ className, rounded, size, variant }))}
 			{...props}
+			data-testid={props.id}
 		>
 			<CheckboxPrimitive.Indicator className={cn('flex items-center justify-center')}>
 				<Check className={cn(RAW_CHECKBOX_SIZE_VARIANTS[size || 'default'], 'font-medium')} />

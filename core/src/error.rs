@@ -19,6 +19,8 @@ pub enum CoreError {
 	DecryptionFailed(String),
 	#[error("Failed to initialize Stump core: {0}")]
 	InitializationError(String),
+	#[error("{0}")]
+	EmailerError(#[from] email::EmailError),
 	#[error("Query error: {0}")]
 	QueryError(#[from] prisma_client_rust::queries::QueryError),
 	#[error("Invalid query error: {0}")]

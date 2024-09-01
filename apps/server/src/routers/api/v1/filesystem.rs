@@ -202,7 +202,7 @@ mod windows_fs {
 				};
 
 				let drive_text = match volume_name {
-					Some(name) => format!("{} - {}", drive_letter, name),
+					Some(name) => format!("{} ({})", drive_letter, name),
 					None => drive_letter.clone(),
 				};
 

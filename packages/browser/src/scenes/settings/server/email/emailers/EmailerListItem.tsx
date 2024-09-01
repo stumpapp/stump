@@ -49,7 +49,7 @@ export default function EmailerListItem({ emailer }: Props) {
 		if (canEditEmailer) {
 			deleteEmailer(emailer.id)
 		}
-	}, [canEditEmailer, deleteEmailer])
+	}, [canEditEmailer, deleteEmailer, emailer.id])
 
 	return (
 		<Card

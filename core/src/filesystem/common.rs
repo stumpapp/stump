@@ -21,7 +21,14 @@ pub async fn get_thumbnail(
 
 	let path = match format {
 		Some(format) => {
-			Some(thumbnails_dir.join(format!("{}.{}", name, format.extension())))
+			let file_path =
+				thumbnails_dir.join(format!("{}.{}", name, format.extension()));
+
+			if fs::metadata(&file_path).await.is_ok() {
+				Some(file_path)
+			} else {
+				find_thumbnail(&thumbnails_dir, name).await
+			}
 		},
 		_ => find_thumbnail(&thumbnails_dir, name).await,
 	};

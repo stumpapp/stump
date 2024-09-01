@@ -531,11 +531,14 @@ pub(crate) async fn get_series_thumbnail(
 	if let Some((content_type, bytes)) = generated_thumb {
 		Ok((content_type, bytes))
 	} else {
+		tracing::trace!(
+			"No generated thumbnail found, attempting to find from first book"
+		);
 		get_media_thumbnail(first_book, image_format, config).await
 	}
 }
 
-// TODO: ImageResponse type for body
+/// Returns the thumbnail image for a series
 #[utoipa::path(
 	get,
 	path = "/api/v1/series/:id/thumbnail",
@@ -550,7 +553,7 @@ pub(crate) async fn get_series_thumbnail(
 		(status = 500, description = "Internal server error."),
 	)
 )]
-/// Returns the thumbnail image for a series
+#[tracing::instrument(err, skip(ctx))]
 async fn get_series_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,

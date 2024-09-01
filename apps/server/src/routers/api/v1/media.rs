@@ -354,7 +354,7 @@ pub fn apply_media_restrictions_for_user(user: &User) -> Vec<WhereParam> {
 )]
 /// Get all media accessible to the requester. This is a paginated request, and
 /// has various pagination params available.
-#[tracing::instrument(skip(ctx))]
+#[tracing::instrument(err, ret, skip(ctx))]
 async fn get_media(
 	filter_query: QsQuery<FilterableQuery<MediaFilter>>,
 	pagination_query: Query<PaginationQuery>,

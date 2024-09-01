@@ -213,6 +213,7 @@ pub fn get_page(
 	}
 }
 
+#[tracing::instrument(err, fields(path = %path.as_ref().display()))]
 pub async fn get_page_async(
 	path: impl AsRef<Path>,
 	page: i32,

@@ -5,6 +5,16 @@ media::select!(media_path_modified_at_select {
    modified_at
 });
 
+media::select!(media_thumbnail {
+   id
+   path
+   series: select {
+	  library: select {
+		library_options
+	  }
+   }
+});
+
 active_reading_session::include!(reading_session_with_book_pages {
 	media: select { pages }
 });

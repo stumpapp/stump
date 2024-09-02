@@ -109,14 +109,15 @@ impl JobExt for SeriesScanJob {
 			.ok_or(JobError::InitFailed(
 				"Associated library not found".to_string(),
 			))?;
-		let library_path = PathBuf::from(library.path);
 		let library_options = LibraryOptions::from(library.library_options);
-		let series_is_library_root = PathBuf::from(&self.path) == library_path;
 		let ignore_rules = library_options.ignore_rules.build()?;
-		let max_depth = library_options
-			.is_collection_based()
-			.then_some(1)
-			.or_else(|| series_is_library_root.then_some(1));
+
+		// If the library is collection-priority, any child directories are 'ignored' and their
+		// files are part of / folded into the top-most folder (series).
+		// If the library is not collection-priority, each subdirectory is its own series.
+		// Therefore, we only scan one level deep when walking a series whose library is not
+		// collection-priority to avoid scanning duplicates which are part of other series
+		let max_depth = (!library_options.is_collection_based()).then_some(1);
 
 		self.options = Some(library_options);
 

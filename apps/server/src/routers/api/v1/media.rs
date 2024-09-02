@@ -20,7 +20,8 @@ use stump_core::{
 	db::{
 		entity::{
 			macros::{
-				finished_reading_session_with_book_pages, reading_session_with_book_pages,
+				finished_reading_session_with_book_pages, media_thumbnail,
+				reading_session_with_book_pages,
 			},
 			ActiveReadingSession, FinishedReadingSession, LibraryOptions, Media,
 			PageDimension, PageDimensionsEntity, ProgressUpdateReturn, User,
@@ -39,7 +40,7 @@ use stump_core::{
 		ContentType,
 	},
 	prisma::{
-		active_reading_session, finished_reading_session, library, library_options,
+		active_reading_session, finished_reading_session, library,
 		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
 		media_metadata, series, series_metadata, tag, user, PrismaClient,
 	},
@@ -964,8 +965,6 @@ async fn get_media_page(
 	}
 }
 
-// TODO: Refactor this transaction. I must have been very tired when I wrote it lol
-// No thoughts, head empty
 pub(crate) async fn get_media_thumbnail_by_id(
 	id: String,
 	db: &PrismaClient,
@@ -984,65 +983,36 @@ pub(crate) async fn get_media_thumbnail_by_id(
 		[age_restrictions],
 	);
 
-	let result = db
-		._transaction()
-		.run(|client| async move {
-			let book = client
-				.media()
-				.find_first(where_params)
-				.order_by(media::name::order(Direction::Asc))
-				.with(media::series::fetch())
-				.exec()
-				.await?;
+	let book = db
+		.media()
+		.find_first(where_params)
+		.select(media_thumbnail::select())
+		.exec()
+		.await?
+		.ok_or_else(|| APIError::NotFound("Book not found".to_string()))?;
 
-			if let Some(book) = book {
-				let library_id = match book.series() {
-					Ok(Some(series)) => Some(series.library_id.clone()),
-					_ => None,
-				}
-				.flatten();
+	let library_options = book
+		.series
+		.and_then(|s| s.library.map(|l| l.library_options))
+		.map(LibraryOptions::from);
+	let image_format = library_options.and_then(|o| o.thumbnail_config.map(|c| c.format));
 
-				client
-					.library_options()
-					.find_first(vec![library_options::library_id::equals(library_id)])
-					.exec()
-					.await
-					.map(|options| (Some(book), options.map(LibraryOptions::from)))
-			} else {
-				Ok((None, None))
-			}
-		})
-		.await?;
-	tracing::trace!(?result, "get_media_thumbnail transaction completed");
-
-	match result {
-		(Some(book), Some(options)) => {
-			get_media_thumbnail(
-				&book,
-				options.thumbnail_config.map(|config| config.format),
-				config,
-			)
-			.await
-		},
-		(Some(book), None) => get_media_thumbnail(&book, None, config).await,
-		_ => Err(APIError::NotFound(String::from("Media not found"))),
-	}
+	get_media_thumbnail(&book.id, &book.path, image_format, config).await
 }
 
 pub(crate) async fn get_media_thumbnail(
-	media: &media::Data,
+	id: &str,
+	path: &str,
 	image_format: Option<ImageFormat>,
 	config: &StumpConfig,
 ) -> APIResult<(ContentType, Vec<u8>)> {
-	let media_id = media.id.clone();
-
 	let generated_thumb =
-		get_thumbnail(config.get_thumbnails_dir(), &media_id, image_format).await?;
+		get_thumbnail(config.get_thumbnails_dir(), id, image_format).await?;
 
 	if let Some((content_type, bytes)) = generated_thumb {
 		Ok((content_type, bytes))
 	} else {
-		Ok(get_page_async(media.path.as_str(), 1, config).await?)
+		Ok(get_page_async(path, 1, config).await?)
 	}
 }
 

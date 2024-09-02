@@ -19,8 +19,9 @@ use stump_core::{
 	db::{
 		entity::{
 			library_series_ids_media_ids_include, library_thumbnails_deletion_include,
-			macros::library_tags_select, FileStatus, Library, LibraryOptions,
-			LibraryScanMode, LibraryStats, Media, Series, TagName, User, UserPermission,
+			macros::{library_tags_select, series_or_library_thumbnail},
+			FileStatus, Library, LibraryOptions, LibraryScanMode, LibraryStats, Media,
+			Series, TagName, User, UserPermission,
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 		PrismaCountTrait,
@@ -563,25 +564,19 @@ async fn get_library_media(
 }
 
 pub(crate) async fn get_library_thumbnail(
-	library: &library::Data,
-	first_series: &series::Data,
-	first_book: &media::Data,
+	id: &str,
+	first_series: series_or_library_thumbnail::Data,
+	first_book: Option<series_or_library_thumbnail::media::Data>,
 	image_format: Option<ImageFormat>,
 	config: &StumpConfig,
 ) -> APIResult<(ContentType, Vec<u8>)> {
-	let library_id = library.id.clone();
-
-	let generated_thumb = get_thumbnail(
-		config.get_thumbnails_dir(),
-		&library_id,
-		image_format.clone(),
-	)
-	.await?;
+	let generated_thumb =
+		get_thumbnail(config.get_thumbnails_dir(), id, image_format.clone()).await?;
 
 	if let Some((content_type, bytes)) = generated_thumb {
 		Ok((content_type, bytes))
 	} else {
-		get_series_thumbnail(first_series, first_book, image_format, config).await
+		get_series_thumbnail(&first_series.id, first_book, image_format, config).await
 	}
 }
 
@@ -611,56 +606,41 @@ async fn get_library_thumbnail_handler(
 	let user = req.user();
 	let age_restriction = user.age_restriction.as_ref();
 
+	let series_filters = chain_optional_iter(
+		[
+			series::library_id::equals(Some(id.clone())),
+			series::library::is(vec![library_not_hidden_from_user_filter(user)]),
+		],
+		[age_restriction
+			.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset))],
+	);
+	let book_filters = chain_optional_iter(
+		[],
+		[age_restriction
+			.as_ref()
+			.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset))],
+	);
+
 	let first_series = db
 		.series()
-		// Find the first series in the library which satisfies the age restriction
-		.find_first(chain_optional_iter(
-			[
-				series::library_id::equals(Some(id.clone())),
-				series::library::is(vec![library_not_hidden_from_user_filter(user)]),
-			],
-			[age_restriction
-				.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset))],
-		))
-		.with(
-			// Then load the first media in that series which satisfies the age restriction
-			series::media::fetch(chain_optional_iter(
-				[],
-				[age_restriction
-					.as_ref()
-					.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset))],
-			))
-			.take(1)
-			.order_by(media::name::order(Direction::Asc)),
-		)
-		.with(series::library::fetch().with(library::library_options::fetch()))
+		.find_first(series_filters)
 		.order_by(series::name::order(Direction::Asc))
+		.select(series_or_library_thumbnail::select(book_filters))
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound("Library has no series".to_string()))?;
+	let first_book = first_series.media.first().cloned();
 
-	let library = first_series
-		.library()?
-		.ok_or(APIError::Unknown(String::from("Failed to load library")))?;
-	let image_format = library
-		.library_options()
-		.map(LibraryOptions::from)?
-		.thumbnail_config
-		.map(|config| config.format);
+	let library_options = first_series
+		.library
+		.as_ref()
+		.map(|l| l.library_options.clone())
+		.map(LibraryOptions::from);
+	let image_format = library_options.and_then(|o| o.thumbnail_config.map(|c| c.format));
 
-	let first_book = first_series.media()?.first().ok_or(APIError::NotFound(
-		"Library has no media to get thumbnail from".to_string(),
-	))?;
-
-	get_library_thumbnail(
-		library,
-		&first_series,
-		first_book,
-		image_format,
-		&ctx.config,
-	)
-	.await
-	.map(ImageResponse::from)
+	get_library_thumbnail(&id, first_series, first_book, image_format, &ctx.config)
+		.await
+		.map(ImageResponse::from)
 }
 
 #[derive(Deserialize, ToSchema, specta::Type)]

@@ -56,6 +56,5 @@ jobs:
           # push: ${{ github.event_name == 'push' }}
           load: false
           push: true
-          platforms: 'linux/amd64'
-          # platforms: 'linux/arm64/v8,linux/arm/v7,linux/amd64'
+          archs: 'amd64'
           discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}

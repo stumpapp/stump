@@ -9,8 +9,8 @@ use walkdir::WalkDir;
 
 use super::{image::ImageFormat, media::is_accepted_cover_name, ContentType};
 
-pub const ACCEPTED_IMAGE_EXTENSIONS: [&str; 6] =
-	["jpg", "png", "jpeg", "webp", "gif", "avif"];
+pub const ACCEPTED_IMAGE_EXTENSIONS: [&str; 8] =
+	["jpg", "png", "jpeg", "jxl", "webp", "gif", "avif", "heif"];
 
 pub async fn get_thumbnail(
 	parent: impl AsRef<Path>,

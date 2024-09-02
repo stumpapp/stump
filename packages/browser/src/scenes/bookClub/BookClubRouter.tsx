@@ -13,7 +13,7 @@ const BookClubExplorerScene = lazy(() => import('./explore/BookClubExploreScene.
 
 // club-specific routes
 const BookClubHomeScene = lazy(() => import('./tabs/home'))
-const BookClubChatBoardScene = lazy(() => import('./tabs/chatBoard'))
+const BookClubDiscussionScene = lazy(() => import('./tabs/discussion/index.ts'))
 const BookClubMembersScene = lazy(() => import('./tabs/members'))
 
 const IS_DEVELOPMENT = import.meta.env.DEV
@@ -50,7 +50,7 @@ export default function BookClubRouter() {
 			<Route path=":id/*" element={<BookClubHomeLayout />}>
 				<Route path="" element={<BookClubHomeScene />} />
 				<Route path="home" element={<Navigate to=".." replace />} />
-				<Route path="chat-board" element={<BookClubChatBoardScene />} />
+				<Route path="discussion" element={<BookClubDiscussionScene />} />
 				<Route path="members" element={<BookClubMembersScene />} />
 				<Route path="settings/*" element={<BookClubSettingsRouter />} />
 			</Route>

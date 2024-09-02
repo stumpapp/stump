@@ -1,7 +1,7 @@
 import { bookClubApi, bookClubQueryKeys } from '@stump/api'
 import {
 	BookClub,
-	BookClubChatBoard,
+	BookClubDiscussion,
 	BookClubMember,
 	CreateBookClub,
 	GetBookClubsParams,
@@ -12,15 +12,15 @@ import { AxiosError } from 'axios'
 import { MutationOptions, queryClient, QueryOptions, useMutation, useQuery } from '../client'
 import { invalidateQueries } from '../invalidate'
 
-export const prefetchBookClubChat = async (bookClubId: string, id?: string) => {
+export const prefetchBookClubDiscussion = async (bookClubId: string, id?: string) => {
 	const queryKey = id
-		? [bookClubQueryKeys.getBookClubChatById, id]
-		: [bookClubQueryKeys.getBookClubCurrentChat]
+		? [bookClubQueryKeys.getBookClubDiscussionById, id]
+		: [bookClubQueryKeys.getBookClubCurrentDiscussion]
 
 	const handler = () =>
 		id
-			? bookClubApi.getBookClubChatById(bookClubId, id)
-			: bookClubApi.getBookClubCurrentChat(bookClubId)
+			? bookClubApi.getBookClubDiscussionById(bookClubId, id)
+			: bookClubApi.getBookClubCurrentDiscussion(bookClubId)
 
 	await queryClient.prefetchQuery(queryKey, () => handler(), {
 		staleTime: 10 * 1000,
@@ -29,8 +29,8 @@ export const prefetchBookClubChat = async (bookClubId: string, id?: string) => {
 
 export const prefetchThread = async (bookClubId: string, chatId: string, threadId: string) =>
 	await queryClient.prefetchQuery(
-		[bookClubQueryKeys.getBookClubChatThread, bookClubId, chatId, threadId],
-		() => bookClubApi.getBookClubChatThread(bookClubId, chatId, threadId),
+		[bookClubQueryKeys.getBookClubDiscussionThread, bookClubId, chatId, threadId],
+		() => bookClubApi.getBookClubDiscussionThread(bookClubId, chatId, threadId),
 		{
 			staleTime: 10 * 1000,
 		},
@@ -72,22 +72,26 @@ export function useBookClubMembersQuery({
 	return { members: data, ...rest }
 }
 
-type UseBookClubChatQueryOptions = QueryOptions<BookClubChatBoard> & {
+type UseBookClubDiscussionQueryOptions = QueryOptions<BookClubDiscussion> & {
 	bookClubId: string
-	chatId?: string
+	discussionId?: string
 }
-export function useChatBoardQuery({ bookClubId, chatId, ...options }: UseBookClubChatQueryOptions) {
-	const queryKey = chatId
-		? [bookClubQueryKeys.getBookClubChatById, chatId]
-		: [bookClubQueryKeys.getBookClubCurrentChat]
+export function useDiscussionQuery({
+	bookClubId,
+	discussionId,
+	...options
+}: UseBookClubDiscussionQueryOptions) {
+	const queryKey = discussionId
+		? [bookClubQueryKeys.getBookClubDiscussionById, discussionId]
+		: [bookClubQueryKeys.getBookClubCurrentDiscussion]
 
 	const handler = () =>
-		chatId
-			? bookClubApi.getBookClubChatById(bookClubId, chatId)
-			: bookClubApi.getBookClubCurrentChat(bookClubId)
+		discussionId
+			? bookClubApi.getBookClubDiscussionById(bookClubId, discussionId)
+			: bookClubApi.getBookClubCurrentDiscussion(bookClubId)
 
 	const { data, ...rest } = useQuery(queryKey, () => handler().then((res) => res.data), options)
-	return { chatBoard: data, ...rest }
+	return { discussion: data, ...rest }
 }
 
 export function useCreateBookClub(
@@ -116,10 +120,10 @@ export function useCreateBookClub(
 	}
 }
 
-type UseBookClubChatMutationOptions = {
+type UseBookClubDiscussionMutationOptions = {
 	id: string
 } & MutationOptions<BookClub, AxiosError, UpdateBookClub>
-export function useUpdateBookClub({ id, ...options }: UseBookClubChatMutationOptions) {
+export function useUpdateBookClub({ id, ...options }: UseBookClubDiscussionMutationOptions) {
 	const { mutateAsync: updateBookClub, ...rest } = useMutation(
 		[bookClubQueryKeys.updateBookClub],
 		async (variables) => {
@@ -129,7 +133,7 @@ export function useUpdateBookClub({ id, ...options }: UseBookClubChatMutationOpt
 		{
 			onSuccess: (bookClub, _, __) => {
 				invalidateQueries({
-					keys: [bookClubQueryKeys.getBookClubs, bookClubQueryKeys.getBookClubChatById],
+					keys: [bookClubQueryKeys.getBookClubs, bookClubQueryKeys.getBookClubDiscussionById],
 				})
 				options.onSuccess?.(bookClub, _, __)
 				return bookClub

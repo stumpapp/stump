@@ -148,7 +148,7 @@ const mockBookClub: BookClub = {
 						name: 'The Kraken: Part 3',
 					} as Media),
 				},
-				chat_board: {
+				discussion: {
 					id: '3',
 					messages: [],
 				},
@@ -164,7 +164,7 @@ const mockBookClub: BookClub = {
 					title: 'Herman Melville',
 					url: 'https://www.gutenberg.org/files/2701/2701-h/2701-h.htm',
 				},
-				chat_board: {
+				discussion: {
 					id: '2',
 					messages: [],
 				},
@@ -181,7 +181,7 @@ const mockBookClub: BookClub = {
 						name: 'The Kraken',
 					} as Media),
 				},
-				chat_board: {
+				discussion: {
 					id: '1',
 					messages: [],
 				},

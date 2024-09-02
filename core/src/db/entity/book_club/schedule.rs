@@ -9,7 +9,7 @@ use crate::{
 	prisma::{book_club_book, book_club_schedule},
 };
 
-use super::{prisma_macros::book_club_with_books_include, BookClubChatBoard};
+use super::{prisma_macros::book_club_with_books_include, BookClubDiscussion};
 
 #[skip_serializing_none]
 #[derive(Default, Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
@@ -59,7 +59,7 @@ pub struct BookClubBook {
 
 	// The chat board for the book, if any. If this is `None`, the book has no chat board or
 	// the chat board is not loaded.
-	pub chat_board: Option<BookClubChatBoard>,
+	pub discussion: Option<BookClubDiscussion>,
 }
 
 impl From<book_club_schedule::Data> for BookClubSchedule {
@@ -97,12 +97,12 @@ impl From<(book_club_schedule::Data, Vec<book_club_book::Data>)> for BookClubSch
 
 impl From<book_club_book::Data> for BookClubBook {
 	fn from(data: book_club_book::Data) -> BookClubBook {
-		let chat_board = data
-			.chat_board()
+		let discussion = data
+			.discussion()
 			.ok()
 			.flatten()
 			.cloned()
-			.map(BookClubChatBoard::from);
+			.map(BookClubDiscussion::from);
 
 		let book_entity = data.book_entity().ok().flatten().cloned().map(Media::from);
 		let book = match (book_entity, data.title, data.author) {
@@ -123,7 +123,7 @@ impl From<book_club_book::Data> for BookClubBook {
 			start_at: data.start_at,
 			end_at: data.end_at,
 			discussion_duration_days: data.discussion_duration_days,
-			chat_board,
+			discussion,
 			book,
 		}
 	}

@@ -20,27 +20,27 @@ type SettingsPage =
 	| 'server/email/new'
 	| 'server/notifications'
 type DocTopic = 'access-control' | 'book-club'
-type BookClubTab = 'overview' | 'members' | 'chat-board' | 'settings'
+type BookClubTab = 'overview' | 'members' | 'discussion' | 'settings'
 
 const IS_DEV = import.meta.env.DEV
 
 const paths = {
 	bookClub: (id: string, tab?: BookClubTab) => `/book-clubs/${id}${tab ? `/${tab}` : ''}`,
-	bookClubChatBoard: (id: string, chatBoardId?: string) => {
-		const url = paths.bookClub(id, 'chat-board')
-		if (chatBoardId?.length) {
-			return `${url}?archived_chat_id=${chatBoardId}`
-		}
-		return url
-	},
-	bookClubChatBoardMessage: (id: string, messageId: string, chatBoardId?: string) => {
-		const url = paths.bookClubChatBoard(id, chatBoardId) + '/thread/' + messageId
-		if (chatBoardId?.length) {
-			return `${url}?archived_chat_id=${chatBoardId}`
-		}
-		return url
-	},
 	bookClubCreate: () => '/book-clubs/create',
+	bookClubDiscussion: (id: string, discussionId?: string) => {
+		const url = paths.bookClub(id, 'discussion')
+		if (discussionId?.length) {
+			return `${url}?archived_chat_id=${discussionId}`
+		}
+		return url
+	},
+	bookClubDiscussionMessage: (id: string, messageId: string, discussionId?: string) => {
+		const url = paths.bookClubDiscussion(id, discussionId) + '/thread/' + messageId
+		if (discussionId?.length) {
+			return `${url}?archived_chat_id=${discussionId}`
+		}
+		return url
+	},
 	bookClubScheduler: (id: string) => paths.bookClub(id, 'settings') + '/scheduler',
 	bookClubSettings: (id: string) => paths.bookClub(id, 'settings'),
 	bookClubs: () => '/book-clubs',

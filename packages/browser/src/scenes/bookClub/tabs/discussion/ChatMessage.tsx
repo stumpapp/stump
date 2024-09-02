@@ -1,6 +1,6 @@
 import { prefetchThread } from '@stump/client'
 import { Avatar, Button, cx, IconButton, Text, ToolTip } from '@stump/components'
-import { BookClubChatMessage } from '@stump/types'
+import { BookClubDiscussionMessage } from '@stump/types'
 import dayjs from 'dayjs'
 import { MessageCircle, ThumbsUp } from 'lucide-react'
 import pluralize from 'pluralize'
@@ -12,7 +12,7 @@ import Markdown from '@/components/markdown/MarkdownPreview'
 import paths from '@/paths'
 
 type Props = {
-	message: BookClubChatMessage
+	message: BookClubDiscussionMessage
 	chatId: string
 	isArchived?: boolean
 }
@@ -61,7 +61,7 @@ export default function ChatMessage({ message, chatId, isArchived }: Props) {
 							onMouseEnter={() => prefetchThread(bookClub.id, chatId, message.id)}
 						>
 							<Link
-								to={paths.bookClubChatBoardMessage(
+								to={paths.bookClubDiscussionMessage(
 									bookClub.id,
 									message.id,
 									isArchived ? chatId : undefined,

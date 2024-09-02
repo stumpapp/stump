@@ -1,4 +1,4 @@
-import { prefetchBookClubChat } from '@stump/client'
+import { prefetchBookClubDiscussion } from '@stump/client'
 import { cn, cx, Link } from '@stump/components'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
@@ -33,10 +33,10 @@ export default function BookClubNavigation() {
 		return [
 			...base,
 			{
-				isActive: location.pathname.match(/\/book-clubs\/[^/]+\/chat-board(\/.*)?$/),
-				label: 'Chat Board',
-				onHover: () => prefetchBookClubChat(id),
-				to: 'chat-board',
+				isActive: location.pathname.match(/\/book-clubs\/[^/]+\/discussion(\/.*)?$/),
+				label: 'Discussion',
+				onHover: () => prefetchBookClubDiscussion(id),
+				to: 'discussion',
 			},
 			{
 				isActive: location.pathname.match(/\/book-clubs\/[^/]+\/members(\/.*)?$/),

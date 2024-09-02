@@ -426,15 +426,19 @@ model BookClubMember {
 model BookClubMemberFavoriteBook {
   id String @id @default(cuid())
 
-  title  String?
-  author String?
-  url    String?
-  notes  String?
+  // The book details below should only be set if the book is external (i.e. not in the library)
+  title     String?
+  author    String?
+  url       String?
+  image_url String?
+  notes     String?
+
+  // The book relation should only be set if the book is in the library
+  book_id String?
+  book    Media?  @relation(fields: [book_id], references: [id], onDelete: Cascade)
 
   member_id String         @unique
   member    BookClubMember @relation(fields: [member_id], references: [id], onDelete: Cascade)
-  book_id   String?
-  book      Media?         @relation(fields: [book_id], references: [id], onDelete: Cascade)
 
   @@map("book_club_member_favorite_books")
 }

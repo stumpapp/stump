@@ -48,7 +48,7 @@ export default function BookClubScheduleTimelineItem({ book }: Props) {
 		}
 	}, [book, isCurrent, isFuture, isDiscussing, adjustedEnd])
 
-	const chatBoardInfo = useMemo(() => {
+	const discussionInfo = useMemo(() => {
 		const archived = !isCurrent && !isDiscussing
 		let message = archived ? 'View archived discussion' : 'Join the discussion'
 		if (isFuture) {
@@ -134,31 +134,31 @@ export default function BookClubScheduleTimelineItem({ book }: Props) {
 		)
 	}
 
-	const renderChatBoardInfo = () => {
+	const renderDiscussionInfo = () => {
 		if (isFuture) {
 			return (
 				<Text size="sm" variant="muted">
-					{chatBoardInfo.message}
+					{discussionInfo.message}
 				</Text>
 			)
 		} else if (isCurrent || isDiscussing) {
 			return (
 				<ButtonOrLink
-					href={paths.bookClubChatBoard(bookClub.id)}
+					href={paths.bookClubDiscussion(bookClub.id)}
 					variant="secondary"
 					disabled={isFuture}
 					size="sm"
 				>
-					{chatBoardInfo.message}
+					{discussionInfo.message}
 				</ButtonOrLink>
 			)
 		} else {
 			return (
 				<Link
-					href={paths.bookClubChatBoard(bookClub.id, book.chat_board?.id)}
+					href={paths.bookClubDiscussion(bookClub.id, book.discussion?.id)}
 					className="text-sm text-foreground-muted"
 				>
-					{chatBoardInfo.message}
+					{discussionInfo.message}
 				</Link>
 			)
 		}
@@ -194,7 +194,7 @@ export default function BookClubScheduleTimelineItem({ book }: Props) {
 					>
 						{daysInfo.message}
 					</span>
-					{renderChatBoardInfo()}
+					{renderDiscussionInfo()}
 				</div>
 			</Card>
 		</li>

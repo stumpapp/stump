@@ -1,6 +1,6 @@
-import { useChatBoardQuery } from '@stump/client'
+import { useDiscussionQuery } from '@stump/client'
 import { ButtonOrLink, Card } from '@stump/components'
-import { BookClubChatMessage, User } from '@stump/types'
+import { BookClubDiscussionMessage, User } from '@stump/types'
 import React from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
 
@@ -10,30 +10,30 @@ import paths from '@/paths'
 
 import ChatMessage from './ChatMessage'
 
-export default function BookClubChatBoardScene() {
+export default function BookClubDiscussionScene() {
 	const { bookClub, viewerCanManage } = useBookClubContext()
 	const [search] = useSearchParams()
-	const archivedChatId = search.get('archived_chat_id') ?? undefined
+	const archivedDiscussionID = search.get('archived_discussion') ?? undefined
 
-	const { chatBoard, isLoading } = useChatBoardQuery({
+	const { discussion, isLoading } = useDiscussionQuery({
 		bookClubId: bookClub.id,
-		chatId: archivedChatId,
+		discussionId: archivedDiscussionID,
 	})
-	const chatId = (chatBoard || { id: 'oopsies' }).id ?? archivedChatId
+	const chatId = (discussion || { id: 'oopsies' }).id ?? archivedDiscussionID
 
 	if (isLoading) return null
-	if (!chatBoard && !archivedChatId) {
+	if (!discussion && !archivedDiscussionID) {
 		const canOpen = !!bookClub.schedule?.books?.length
 		// NOTE: ew, kms
 		const message = viewerCanManage
 			? canOpen
-				? 'You have not opened the chat board yet. Click the button below to open it'
-				: 'There are no books in the schedule. You must add books to the schedule before a chat board can be opened'
-			: 'The chat board has not been opened yet'
+				? 'You have not opened the discussion yet. Click the button below to open it'
+				: 'There are no books in the schedule. You must add books to the schedule before a discussion can be opened'
+			: 'The discussion has not been opened yet'
 
 		return (
 			<Card className="flex flex-col border-dashed px-4 pb-4">
-				<GenericEmptyState title="No chat board available" subtitle={message} />
+				<GenericEmptyState title="No discussion available" subtitle={message} />
 				<div className="self-center">
 					{/* FIXME: render right thing */}
 					{viewerCanManage && (
@@ -44,7 +44,7 @@ export default function BookClubChatBoardScene() {
 				</div>
 			</Card>
 		)
-	} else if (!chatBoard && archivedChatId) {
+	} else if (!discussion && archivedDiscussionID) {
 		return <Navigate to="/404" />
 	}
 
@@ -57,7 +57,7 @@ export default function BookClubChatBoardScene() {
 	)
 }
 
-const mockMessages: BookClubChatMessage[] = [
+const mockMessages: BookClubDiscussionMessage[] = [
 	{
 		child_messages: [
 			{

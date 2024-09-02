@@ -1,8 +1,8 @@
 import {
 	BookClub,
 	BookClubBook,
-	BookClubChatBoard,
-	BookClubChatMessage,
+	BookClubDiscussion,
+	BookClubDiscussionMessage,
 	BookClubInvitation,
 	BookClubInvitationAnswer,
 	BookClubMember,
@@ -118,24 +118,24 @@ export async function getBookClubCurrentBook(bookClubId: string): Promise<APIRes
 	return API.get(`/book-clubs/${bookClubId}/schedule/current-book`)
 }
 
-export async function getBookClubCurrentChat(
+export async function getBookClubCurrentDiscussion(
 	bookClubId: string,
-): Promise<APIResult<BookClubChatBoard>> {
+): Promise<APIResult<BookClubDiscussion>> {
 	return API.get(`/book-clubs/${bookClubId}/chats/current`)
 }
 
-export async function getBookClubChatById(
+export async function getBookClubDiscussionById(
 	bookClubId: string,
 	chatId: string,
-): Promise<APIResult<BookClubChatBoard>> {
+): Promise<APIResult<BookClubDiscussion>> {
 	return API.get(`/book-clubs/${bookClubId}/chats/${chatId}`)
 }
 
-export async function getBookClubChatThread(
+export async function getBookClubDiscussionThread(
 	bookClubId: string,
 	chatId: string,
 	threadId: string,
-): Promise<APIResult<BookClubChatMessage>> {
+): Promise<APIResult<BookClubDiscussionMessage>> {
 	return API.get(`/book-clubs/${bookClubId}/chats/${chatId}/threads/${threadId}`)
 }
 
@@ -147,10 +147,10 @@ export const bookClubApi = {
 	deleteBookClub,
 	deleteBookClubMember,
 	getBookClubById,
-	getBookClubChatById,
-	getBookClubChatThread,
+	getBookClubDiscussionById,
+	getBookClubDiscussionThread,
 	getBookClubCurrentBook,
-	getBookClubCurrentChat,
+	getBookClubCurrentDiscussion,
 	getBookClubInvitations,
 	getBookClubMember,
 	getBookClubMembers,
@@ -169,10 +169,10 @@ export const bookClubQueryKeys: Record<keyof typeof bookClubApi, string> = {
 	deleteBookClub: 'bookClub.delete',
 	deleteBookClubMember: 'bookClub.deleteMember',
 	getBookClubById: 'bookClub.getById',
-	getBookClubChatById: 'bookClub.getChatById',
-	getBookClubChatThread: 'bookClub.getChatThread',
+	getBookClubDiscussionById: 'bookClub.getChatById',
+	getBookClubDiscussionThread: 'bookClub.getChatThread',
 	getBookClubCurrentBook: 'bookClub.getCurrentBook',
-	getBookClubCurrentChat: 'bookClub.getCurrentChat',
+	getBookClubCurrentDiscussion: 'bookClub.getCurrentChat',
 	getBookClubInvitations: 'bookClub.getInvitations',
 	getBookClubMember: 'bookClub.getMember',
 	getBookClubMembers: 'bookClub.getMembers',

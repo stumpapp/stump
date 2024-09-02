@@ -6952,6 +6952,11 @@
   resolved "https://registry.yarnpkg.com/@types/http-errors/-/http-errors-2.0.4.tgz#7eb47726c391b7345a6ec35ad7f4de469cf5ba4f"
   integrity sha512-D0CFMMtydbJAegzOyHjtiKPLlvnm3iTZyZRSZoLq2mRhDdmLfIWOCYPfQJ4cu2erKghU++QvjcUjp/5h7hESpA==
 
+"@types/is-valid-glob@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@types/is-valid-glob/-/is-valid-glob-1.0.3.tgz#66b5c290c56908e43b97eea9f58174b546568ccd"
+  integrity sha512-8ovBwA8At13SfRefmy/AHMNfzQTTIjQV2+LPeeWuRtKyCbdvvlH7wC+dkx7LlMEgo2SRatgCxLyf/PJ14GTW2Q==
+
 "@types/istanbul-lib-coverage@*", "@types/istanbul-lib-coverage@^2.0.0", "@types/istanbul-lib-coverage@^2.0.1":
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/@types/istanbul-lib-coverage/-/istanbul-lib-coverage-2.0.6.tgz#7739c232a1fee9b4d3ce8985f314c0c6d33549d7"
@@ -7035,6 +7040,13 @@
   version "4.7.9"
   resolved "https://registry.yarnpkg.com/@types/lodash.uniqby/-/lodash.uniqby-4.7.9.tgz#10bacba9cf3263c6e07ae11d953de6ada6605104"
   integrity sha512-rjrXji/seS6BZJRgXrU2h6FqxRVufsbq/HE0Tx0SdgbtlWr2YmD/M64BlYEYYlaMcpZwy32IYVkMfUMYlPuv0w==
+  dependencies:
+    "@types/lodash" "*"
+
+"@types/lodash.upperfirst@^4.3.9":
+  version "4.3.9"
+  resolved "https://registry.yarnpkg.com/@types/lodash.upperfirst/-/lodash.upperfirst-4.3.9.tgz#66e150885a67866ed8bc4331c8c305ab682a198c"
+  integrity sha512-bYhT1QEsk9/ggrFjK86Pb5bnKJgTBbpVA77Ygbb1aW1oiWJNGRbVjSlQ9We/ihB9vVpX5WqDJvbISXlukGR+dQ==
   dependencies:
     "@types/lodash" "*"
 
@@ -14660,6 +14672,11 @@ lodash.uniqby@^4.7.0:
   version "4.7.0"
   resolved "https://registry.yarnpkg.com/lodash.uniqby/-/lodash.uniqby-4.7.0.tgz#d99c07a669e9e6d24e1362dfe266c67616af1302"
   integrity sha512-e/zcLx6CSbmaEgFHCA7BnoQKyCtKMxnuWrJygbwPs/AIn+IMKl66L8/s+wBUn5LRw2pZx3bUHibiV1b6aTWIww==
+
+lodash.upperfirst@^4.3.1:
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/lodash.upperfirst/-/lodash.upperfirst-4.3.1.tgz#1365edf431480481ef0d1c68957a5ed99d49f7ce"
+  integrity sha512-sReKOYJIJf74dhJONhU4e0/shzi1trVbSWDOhKYE5XV2O+H7Sb2Dihwuc7xWxVl+DgFPyTqIN3zMfT9cq5iWDg==
 
 lodash@4.17.11:
   version "4.17.11"

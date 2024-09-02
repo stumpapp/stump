@@ -183,6 +183,50 @@
 				"delete": "Deletion",
 				"label": "Danger Zone"
 			}
+		},
+		"basics": {
+			"title": "Basic Information",
+			"description": "The details of this book club, including its name and description",
+			"form": {
+				"submit": "Update club"
+			}
+		},
+		"members": {
+			"title": "Members",
+			"description": "Manage the members of this book club",
+			"sections": {}
+		},
+		"roles": {
+			"title": "Roles",
+			"description": "Customize the roles in this book club",
+			"sections": {
+				"roleMappings": {
+					"heading": "Existing role mappings",
+					"description": "The current role mappings for this book club"
+				}
+			}
+		},
+		"scheduling/scheduler": {
+			"title": "Scheduler",
+			"description": "Create and manage the schedule readings for this book club"
+		},
+		"scheduling/options": {
+			"title": "Options",
+			"description": "Additional options for this book club's scheduling"
+		},
+		"danger-zone/delete": {
+			"title": "Deletion Actions",
+			"description": "Permanently delete this book club and all of its contents or certain resources",
+			"sections": {
+				"deleteClub": {
+					"heading": "Delete club",
+					"description": [
+						"Permanently delete this book club and all its contents.",
+						"This action cannot be undone"
+					],
+					"trigger": "Delete club"
+				}
+			}
 		}
 	},
 	"createOrUpdateLibraryForm": {

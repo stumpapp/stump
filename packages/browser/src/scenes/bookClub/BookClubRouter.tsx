@@ -5,6 +5,7 @@ import { UnderConstruction } from '@/components/unimplemented'
 
 import { useAppContext } from '../../context.ts'
 import BookClubHomeLayout from './BookClubLayout.tsx'
+import BookClubSettingsRouter from './tabs/settings'
 
 const CreateBookClubScene = lazy(() => import('./createClub'))
 const UserBookClubsScene = lazy(() => import('./UserBookClubsScene.tsx'))
@@ -12,10 +13,8 @@ const BookClubExplorerScene = lazy(() => import('./explore/BookClubExploreScene.
 
 // club-specific routes
 const BookClubHomeScene = lazy(() => import('./tabs/home'))
-const BookClubSettingsScene = lazy(() => import('./tabs/settings'))
 const BookClubChatBoardScene = lazy(() => import('./tabs/chatBoard'))
 const BookClubMembersScene = lazy(() => import('./tabs/members'))
-const BookClubSchedulerScene = lazy(() => import('./tabs/settings/scheduler'))
 
 const IS_DEVELOPMENT = import.meta.env.DEV
 
@@ -53,9 +52,7 @@ export default function BookClubRouter() {
 				<Route path="home" element={<Navigate to=".." replace />} />
 				<Route path="chat-board" element={<BookClubChatBoardScene />} />
 				<Route path="members" element={<BookClubMembersScene />} />
-				{/* TODO: settings router */}
-				<Route path="settings" element={<BookClubSettingsScene />} />
-				<Route path="settings/scheduler" element={<BookClubSchedulerScene />} />
+				<Route path="settings/*" element={<BookClubSettingsRouter />} />
 			</Route>
 			<Route path="*" element={<Navigate to="/404" />} />
 		</Routes>

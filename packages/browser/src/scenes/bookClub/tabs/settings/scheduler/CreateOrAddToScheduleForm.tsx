@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form, Input } from '@stump/components'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -11,6 +11,7 @@ const bookEntityOption = z.object({
 })
 const externalBookOption = z.object({
 	author: z.string(),
+	image_url: z.string().url().optional(),
 	title: z.string(),
 	url: z.string().url().optional(),
 })
@@ -32,8 +33,6 @@ export const defaultBook = {
 } as BookSchema
 
 export default function CreateOrAddToScheduleForm() {
-	const [booksToAdd, setBooksToAdd] = useState(1)
-
 	const form = useForm<Schema>({
 		defaultValues: {
 			books: [defaultBook],
@@ -42,27 +41,30 @@ export default function CreateOrAddToScheduleForm() {
 	})
 
 	const books = form.watch('books')
-	const booksCount = books.length
-	useEffect(
-		() => {
-			// whenever the booksToAdd changes to be greater than the current number of books, add a new book
-			if (booksToAdd > booksCount) {
-				const currentValue = form.getValues('books')
-				form.setValue('books', [...currentValue, defaultBook])
-			} else if (booksToAdd < booksCount) {
-				// whenever the booksToAdd changes to be less than the current number of books, remove the last book
-				const currentValue = form.getValues('books')
-				form.setValue('books', currentValue.slice(0, booksToAdd))
-			}
-		},
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[booksToAdd, booksCount],
-	)
 
 	const handleSubmit = (data: Schema) => {
 		console.debug(data)
 	}
+
+	const handleChange = useCallback(
+		(e: React.ChangeEvent<HTMLInputElement>) => {
+			const value = parseInt(e.target.value)
+			if (isNaN(value) || value < 1) {
+				return
+			}
+
+			const currentValue = form.getValues('books')
+			const booksCount = currentValue.length
+
+			if (value > booksCount) {
+				form.setValue('books', [...currentValue, defaultBook])
+			} else if (value < booksCount) {
+				const currentValue = form.getValues('books')
+				form.setValue('books', currentValue.slice(0, value))
+			}
+		},
+		[form],
+	)
 
 	return (
 		<Form form={form} onSubmit={handleSubmit}>
@@ -70,13 +72,13 @@ export default function CreateOrAddToScheduleForm() {
 				variant="primary"
 				label="Books to add"
 				type="number"
-				value={booksToAdd}
-				onChange={(e) => setBooksToAdd(parseInt(e.target.value))}
+				value={books.length}
+				onChange={handleChange}
 				min={1}
 			/>
 
 			<div className="flex flex-col gap-6">
-				{Array.from({ length: booksToAdd }).map((_, index) => (
+				{Array.from({ length: books.length }).map((_, index) => (
 					<AddBookCard key={index} index={index} />
 				))}
 			</div>

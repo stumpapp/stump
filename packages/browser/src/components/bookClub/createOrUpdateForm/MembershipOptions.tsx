@@ -1,4 +1,4 @@
-import { CheckBox, Heading, Input, Text } from '@stump/components'
+import { CheckBox, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import React from 'react'
 import { useFormContext } from 'react-hook-form'
@@ -8,7 +8,7 @@ import { CreateOrUpdateBookClubSchema } from './schema'
 const LOCALE_KEY = 'createOrUpdateBookClubForm.fields.membershipOptions'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`
 
-export default function CreatorPreferences() {
+export default function MembershipOptions() {
 	const { t } = useLocaleContext()
 
 	const form = useFormContext<CreateOrUpdateBookClubSchema>()

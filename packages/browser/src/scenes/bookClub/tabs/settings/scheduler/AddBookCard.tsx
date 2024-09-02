@@ -1,7 +1,7 @@
 import { getMediaThumbnail } from '@stump/api'
 import { AspectRatio, Button, Card, DatePicker, Heading, Input, Text } from '@stump/components'
 import { Media } from '@stump/types'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import BookSearchOverlay from '@/components/book/BookSearchOverlay'
@@ -11,14 +11,28 @@ import { defaultBook, Schema } from './CreateOrAddToScheduleForm'
 type Props = {
 	index: number
 }
+
+// FIXME(clubs): this component is a MESS and desperately needs a rewrite
+
 export default function AddBookCard({ index }: Props) {
 	const [selectedBook, setSelectedBook] = useState<Media | null>(null)
 
 	const form = useFormContext<Schema>()
 
 	const bookOptions = form.watch(`books.${index}`) ?? defaultBook
-	const isEntityBook = 'id' in bookOptions.book && !!bookOptions.book.id
-	const isDefiningExternalBook = !isEntityBook && objectHasOneKeyWithLength(bookOptions.book)
+
+	const bookDetails = useMemo(() => bookOptions.book, [bookOptions])
+	const bookID = useMemo(() => ('id' in bookDetails ? bookDetails.id : undefined), [bookDetails])
+	const externalBook = useMemo(
+		() => (!('id' in bookDetails) ? bookDetails : undefined),
+		[bookDetails],
+	)
+
+	const isEntityBook = useMemo(() => !!bookID, [bookID])
+	const isDefiningExternalBook = useMemo(
+		() => !!externalBook && objectHasOneKeyWithLength(externalBook),
+		[externalBook],
+	)
 
 	useEffect(
 		() => {
@@ -35,12 +49,15 @@ export default function AddBookCard({ index }: Props) {
 		[isEntityBook, selectedBook],
 	)
 
-	const handleSelectBook = (book: Media) => {
-		form.setValue(`books.${index}.book.id`, book.id)
-		setSelectedBook(book)
-	}
+	const handleSelectBook = useCallback(
+		(book: Media) => {
+			form.setValue(`books.${index}.book.id`, book.id)
+			setSelectedBook(book)
+		},
+		[form, index],
+	)
 
-	const renderBookInfo = () => {
+	const renderBookInfo = useCallback(() => {
 		if (!selectedBook) return null
 
 		const bookName = selectedBook.metadata?.title || selectedBook.name
@@ -64,17 +81,17 @@ export default function AddBookCard({ index }: Props) {
 				</div>
 			</div>
 		)
-	}
+	}, [selectedBook])
 
-	const renderSelectedBookOptions = () => {
+	const renderSelectedBookOptions = useCallback(() => {
 		if (selectedBook) {
 			return null
 		} else {
 			return <BookSearchOverlay onBookSelect={handleSelectBook} />
 		}
-	}
+	}, [handleSelectBook, selectedBook])
 
-	const renderBookPickerOption = () => {
+	const renderBookPickerOption = useCallback(() => {
 		if (isDefiningExternalBook) return null
 
 		return (
@@ -92,7 +109,7 @@ export default function AddBookCard({ index }: Props) {
 				</div>
 			</>
 		)
-	}
+	}, [isDefiningExternalBook, renderBookInfo, renderSelectedBookOptions])
 
 	const renderExternalBookOption = () => {
 		if (isEntityBook) return null
@@ -180,4 +197,4 @@ const LeftAlignedDivider = ({ text }: { text: string }) => (
 )
 
 const objectHasOneKeyWithLength = (obj: Record<string, string>) =>
-	Object.values(obj).some((key) => !!key.length)
+	Object.values(obj).some((key) => !!key?.length && key.length > 0)

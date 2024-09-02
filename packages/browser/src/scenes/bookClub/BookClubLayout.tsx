@@ -7,12 +7,14 @@ import { useMediaMatch } from 'rooks'
 
 import { BookClubContext } from '@/components/bookClub'
 import { SceneContainer } from '@/components/container'
+import { GenericSettingsHeader } from '@/components/settings'
 import { usePreferences } from '@/hooks'
 import { useUserStore } from '@/stores'
 
 import BookClubHeader from './BookClubHeader'
 import BookClubNavigation from './BookClubNavigation'
 import { BookClubSettingsSideBar } from './tabs/settings'
+import { routeGroups } from './tabs/settings/routes'
 
 export default function BookClubLayout() {
 	const { id } = useParams<{ id: string }>()
@@ -47,7 +49,9 @@ export default function BookClubLayout() {
 	const viewerIsMember = !!viewerMember || !!user?.is_server_owner
 
 	const renderHeader = () =>
-		isSettings ? null : (
+		isSettings ? (
+			<GenericSettingsHeader localeBase="bookClubSettingsScene" routeGroups={routeGroups} />
+		) : (
 			<>
 				<BookClubHeader />
 				<BookClubNavigation />

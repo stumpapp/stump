@@ -6,11 +6,11 @@ import React, { useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
 import {
-	BasicInformation,
+	BasicBookClubInformation,
+	BookClubMembershipOptions,
+	BookClubRoleMappingForm,
 	buildSchema,
 	CreateOrUpdateBookClubSchema,
-	MembershipOptions,
-	RoleMappingForm,
 } from '@/components/bookClub/createOrUpdateForm'
 import { ContentContainer } from '@/components/container'
 import { useSteppedFormContext } from '@/components/steppedForm'
@@ -28,8 +28,9 @@ export default function CreateBookClubForm({ onSubmit }: Props) {
 	const { currentStep, setStep } = useSteppedFormContext()
 
 	const { bookClubs } = useBookClubsQuery({ params: { all: true }, suspense: true })
+	const existingNames = useMemo(() => (bookClubs ?? []).map(({ name }) => name), [bookClubs])
 
-	const schema = useMemo(() => buildSchema(t, bookClubs ?? []), [t, bookClubs])
+	const schema = useMemo(() => buildSchema(t, existingNames, true), [t, existingNames])
 	const form = useForm<CreateOrUpdateBookClubSchema>({
 		resolver: zodResolver(schema),
 	})
@@ -56,7 +57,7 @@ export default function CreateBookClubForm({ onSubmit }: Props) {
 				setStep(nextStep)
 			}
 		},
-		[form, currentStep, setStep],
+		[currentStep, setStep],
 	)
 
 	const renderNextButton = (nextStep: number) => (
@@ -79,21 +80,21 @@ export default function CreateBookClubForm({ onSubmit }: Props) {
 			case 1:
 				return (
 					<>
-						<BasicInformation />
+						<BasicBookClubInformation />
 						{renderNextButton(2)}
 					</>
 				)
 			case 2:
 				return (
 					<>
-						<RoleMappingForm />
+						<BookClubRoleMappingForm />
 						{renderNextButton(3)}
 					</>
 				)
 			case 3:
 				return (
 					<>
-						<MembershipOptions />
+						<BookClubMembershipOptions />
 						{renderNextButton(4)}
 					</>
 				)

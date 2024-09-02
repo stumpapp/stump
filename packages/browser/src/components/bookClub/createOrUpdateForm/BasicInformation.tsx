@@ -8,7 +8,7 @@ import { CreateOrUpdateBookClubSchema } from './schema'
 const LOCALE_KEY = 'createOrUpdateBookClubForm'
 const getKey = (key: string) => `${LOCALE_KEY}.fields.${key}`
 
-export default function BasicLibraryInformation() {
+export default function BasicBookClubInformation() {
 	const form = useFormContext<CreateOrUpdateBookClubSchema>()
 	const ctx = useBookClubContextSafe()
 

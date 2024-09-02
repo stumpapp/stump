@@ -1,8 +1,7 @@
-// import { useBookClubQuery } from '@stump/client'
 import React from 'react'
 
-import BookClubScheduleTimeline from './BookClubScheduleTimeline'
+import { BookClubSchedule } from '@/components/bookClub'
 
 export default function BookClubHomeScene() {
-	return <BookClubScheduleTimeline />
+	return <BookClubSchedule showPastBooks />
 }

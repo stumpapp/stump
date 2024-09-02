@@ -1,4 +1,4 @@
-export { default as BasicInformation } from './BasicInformation'
-export { default as MembershipOptions } from './MembershipOptions'
-export { default as RoleMappingForm } from './RoleMappingForm'
+export { default as BasicBookClubInformation } from './BasicInformation'
+export { default as BookClubMembershipOptions } from './MembershipOptions'
+export { default as BookClubRoleMappingForm } from './RoleMappingForm'
 export * from './schema'

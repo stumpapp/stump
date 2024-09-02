@@ -2,6 +2,7 @@ import { bookClubApi, bookClubQueryKeys } from '@stump/api'
 import {
 	BookClub,
 	BookClubChatBoard,
+	BookClubMember,
 	CreateBookClub,
 	GetBookClubsParams,
 	UpdateBookClub,
@@ -56,6 +57,19 @@ export function useBookClubQuery(id: string, options: QueryOptions<BookClub> = {
 	)
 
 	return { bookClub: data, ...rest }
+}
+
+export function useBookClubMembersQuery({
+	id,
+	...options
+}: { id: string } & QueryOptions<BookClubMember[]>) {
+	const { data, ...rest } = useQuery(
+		[bookClubQueryKeys.getBookClubMembers, id],
+		() => bookClubApi.getBookClubMembers(id).then((res) => res.data),
+		options,
+	)
+
+	return { members: data, ...rest }
 }
 
 type UseBookClubChatQueryOptions = QueryOptions<BookClubChatBoard> & {
@@ -126,6 +140,30 @@ export function useUpdateBookClub({ id, ...options }: UseBookClubChatMutationOpt
 
 	return {
 		updateBookClub,
+		...rest,
+	}
+}
+
+export function useDeleteBookClub({ id, ...options }: { id: string } & MutationOptions<void>) {
+	const { mutate, mutateAsync, ...rest } = useMutation(
+		[bookClubQueryKeys.deleteBookClub, id],
+		async () => {
+			await bookClubApi.deleteBookClub(id)
+		},
+		{
+			onSuccess: (_, __, ___) => {
+				invalidateQueries({
+					keys: [bookClubQueryKeys.getBookClubs, bookClubQueryKeys.getBookClubById],
+				})
+				options.onSuccess?.(_, __, ___)
+			},
+			...options,
+		},
+	)
+
+	return {
+		deleteClub: mutate,
+		deleteClubAsync: mutateAsync,
 		...rest,
 	}
 }

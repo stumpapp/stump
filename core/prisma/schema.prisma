@@ -382,6 +382,7 @@ model BookClub {
   @@map("book_clubs")
 }
 
+// TODO: support external invitations, i.e. not connected to a user
 model BookClubInvitation {
   id String @id @default(cuid())
 

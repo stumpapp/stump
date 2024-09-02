@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { useBookClubContext } from '@/components/bookClub'
+import { BookClubSchedule, useBookClubContext } from '@/components/bookClub'
 
 import CreateOrAddToScheduleForm from './CreateOrAddToScheduleForm'
 
@@ -19,8 +19,7 @@ export default function BookClubSchedulerScene() {
 
 	return (
 		<div>
-			TODO: write me! I need to support creating the initial schedule and update existing schedule
-			(not allowing updates for already passed books)
+			<BookClubSchedule />
 		</div>
 	)
 }

@@ -32,6 +32,10 @@ export async function createBookClub(payload: CreateBookClub): Promise<APIResult
 	return API.post('/book-clubs', payload)
 }
 
+export async function deleteBookClub(id: string): Promise<APIResult<void>> {
+	return API.delete(`/book-clubs/${id}`)
+}
+
 export async function getBookClubById(id: string): Promise<APIResult<BookClub>> {
 	return API.get(`/book-clubs/${id}`)
 }
@@ -64,7 +68,7 @@ export async function respondToBookClubInvitation(
 	return API.put(`/book-clubs/${bookClubId}/invitations/${invitationId}`, payload)
 }
 
-export async function getBookClubMembers(bookClubId: string): Promise<APIResult<BookClubMember>> {
+export async function getBookClubMembers(bookClubId: string): Promise<APIResult<BookClubMember[]>> {
 	return API.get(`/book-clubs/${bookClubId}/members`)
 }
 
@@ -140,6 +144,7 @@ export const bookClubApi = {
 	createBookClubInvitation,
 	createBookClubMember,
 	createBookClubSchedule,
+	deleteBookClub,
 	deleteBookClubMember,
 	getBookClubById,
 	getBookClubChatById,
@@ -161,6 +166,7 @@ export const bookClubQueryKeys: Record<keyof typeof bookClubApi, string> = {
 	createBookClubInvitation: 'bookClub.createInvitation',
 	createBookClubMember: 'bookClub.createMember',
 	createBookClubSchedule: 'bookClub.createSchedule',
+	deleteBookClub: 'bookClub.delete',
 	deleteBookClubMember: 'bookClub.deleteMember',
 	getBookClubById: 'bookClub.getById',
 	getBookClubChatById: 'bookClub.getChatById',

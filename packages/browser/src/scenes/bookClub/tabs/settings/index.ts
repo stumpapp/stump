@@ -1,2 +1,2 @@
-export { default } from './BookClubSettingsScene'
+export { default } from './BookClubSettingsRouter'
 export { default as BookClubSettingsSideBar } from './BookClubSettingsSideBar'

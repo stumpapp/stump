@@ -13,7 +13,7 @@ tokio = { workspace = true }
 prisma-client-rust = { workspace = true }
 bcrypt = { workspace = true }
 thiserror = { workspace = true }
-clap = { version = "4.5.4", features = ["derive"] }
+clap = { version = "4.5.16", features = ["derive"] }
 
 dialoguer = "0.11.0"
 indicatif = "0.17.8"

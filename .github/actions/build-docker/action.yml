@@ -34,7 +34,7 @@ runs:
     - name: Format tags
       run: |
         echo "FORMATTED_TAGS=$(echo ${{ inputs.tags }} | sed -e 's/,/,aaronleopold\/stump:/g' | sed -e 's/^/aaronleopold\/stump:/')" >> $GITHUB_ENV
-        echo "LOCAL_IMAGES=$(echo ${{ inputs.tags }} | sed -e 's/,/ /g' | sed -e 's/^/localhost\/stump:/')" >> $GITHUB_ENV
+        echo "LOCAL_IMAGES=$(echo ${{ inputs.tags }} | sed -e 's/,/,localhost\/stump:/g' | sed -e 's/^/localhost\/stump:/')" >> $GITHUB_ENV
       shell: bash
 
     - name: Sanity check

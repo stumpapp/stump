@@ -14,8 +14,10 @@ use stump_core::{
 	config::StumpConfig,
 	db::{
 		entity::{
-			macros::finished_reading_session_series_complete, LibraryOptions, Media,
-			Series, User, UserPermission,
+			macros::{
+				finished_reading_session_series_complete, series_or_library_thumbnail,
+			},
+			LibraryOptions, Media, Series, User, UserPermission,
 		},
 		query::{
 			ordering::QueryOrder,
@@ -514,24 +516,25 @@ async fn get_recently_added_series_handler(
 }
 
 pub(crate) fn get_series_thumbnail(
-	series: &series::Data,
-	first_book: &media::Data,
+	id: &str,
+	first_book: Option<series_or_library_thumbnail::media::Data>,
 	image_format: Option<ImageFormat>,
 	config: &StumpConfig,
 ) -> APIResult<(ContentType, Vec<u8>)> {
 	let thumbnails_dir = config.get_thumbnails_dir();
-	let series_id = series.id.clone();
 
 	if let Some(format) = image_format.clone() {
 		let extension = format.extension();
-		let path = thumbnails_dir.join(format!("{}.{}", series_id, extension));
+		let path = thumbnails_dir.join(format!("{}.{}", id, extension));
 
 		if path.exists() {
-			tracing::trace!(?path, series_id, "Found generated series thumbnail");
+			tracing::trace!(?path, id, "Found generated series thumbnail");
 			return Ok((ContentType::from(format), read_entire_file(path)?));
 		}
-	} else if let Some(path) = get_unknown_thumnail(&series_id, thumbnails_dir) {
-		tracing::debug!(path = ?path, series_id, "Found series thumbnail that does not align with config");
+	}
+
+	if let Some(path) = get_unknown_thumnail(id, thumbnails_dir) {
+		tracing::debug!(path = ?path, id, "Found series thumbnail that does not align with config");
 		let FileParts { extension, .. } = path.file_parts();
 		return Ok((
 			ContentType::from_extension(extension.as_str()),
@@ -539,7 +542,13 @@ pub(crate) fn get_series_thumbnail(
 		));
 	}
 
-	get_media_thumbnail(first_book, image_format, config)
+	if let Some(first_book) = first_book {
+		get_media_thumbnail(&first_book.id, &first_book.path, image_format, config)
+	} else {
+		Err(APIError::NotFound(
+			"Series does not have a thumbnail".to_string(),
+		))
+	}
 }
 
 // TODO: ImageResponse type for body
@@ -569,52 +578,36 @@ async fn get_series_thumbnail_handler(
 	let age_restriction = user.age_restriction.as_ref();
 	let series_age_restriction = age_restriction
 		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
-	let where_params = chain_optional_iter(
+	let series_filters = chain_optional_iter(
 		[series::id::equals(id.clone())]
 			.into_iter()
 			.chain(apply_series_library_not_hidden_for_user_filter(user))
 			.collect::<Vec<WhereParam>>(),
 		[series_age_restriction],
 	);
+	let book_filters = chain_optional_iter(
+		[],
+		[age_restriction
+			.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset))],
+	);
 
 	let series = db
 		.series()
-		// Find the first series in the library which satisfies the age restriction
-		.find_first(where_params)
-		.with(
-			// Then load the first media in that series which satisfies the age restriction
-			series::media::fetch(chain_optional_iter(
-				[],
-				[age_restriction
-					.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset))],
-			))
-			.take(1)
-			.order_by(media::name::order(Direction::Asc)),
-		)
-		.with(series::library::fetch().with(library::library_options::fetch()))
+		.find_first(series_filters)
 		.order_by(series::name::order(Direction::Asc))
+		.select(series_or_library_thumbnail::select(book_filters))
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound("Series not found".to_string()))?;
+	let first_book = series.media.into_iter().next();
 
-	let library = series
-		.library()?
-		.ok_or(APIError::NotFound(String::from("Library relation missing")))?;
+	let library_options = series
+		.library
+		.map(|l| l.library_options)
+		.map(LibraryOptions::from);
+	let image_format = library_options.and_then(|o| o.thumbnail_config.map(|c| c.format));
 
-	let first_book = series
-		.media()?
-		.first()
-		.ok_or(APIError::NotFound(String::from(
-			"Series does not have any media",
-		)))?;
-
-	let image_format = library
-		.library_options()
-		.map(LibraryOptions::from)?
-		.thumbnail_config
-		.map(|config| config.format);
-
-	get_series_thumbnail(&series, first_book, image_format, &ctx.config)
+	get_series_thumbnail(&id, first_book, image_format, &ctx.config)
 		.map(ImageResponse::from)
 }
 

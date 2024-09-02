@@ -388,7 +388,8 @@
 				"scanning": "Scanning",
 				"thumbnails": "Thumbnails",
 				"ignore-rules": "Ignore Rules",
-				"label": "File Options"
+				"analysis": "Analysis",
+				"label": "Options"
 			},
 			"danger-zone": {
 				"access-control": "Access Control",
@@ -416,6 +417,28 @@
 					"description": "Manage the existing thumbnails for this library",
 					"thumbnailSelector": {},
 					"deleteThumbnails": {}
+				}
+			}
+		},
+		"options/analysis": {
+			"title": "Analysis",
+			"description": "Analyze the contents of this library to identify potential issues or improvements",
+			"sections": {
+				"analyzeBooks": {
+					"heading": "Analyze books",
+					"description": "Analyze the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
+					"disclaimer": "This process is resource-intensive and may take a while to complete",
+					"analyzeButton": "Analyze books"
+				},
+				"missingFiles": {
+					"heading": "Missing files",
+					"description": "Files that are referenced in the database but cannot be located on disk",
+					"noMissingFiles": "There are no missing files in this library"
+				},
+				"duplicateFiles": {
+					"heading": "Duplicate files",
+					"description": "Files that are potentially duplicated on disk",
+					"noDuplicateFiles": "There are no duplicate files detected for this library"
 				}
 			}
 		},

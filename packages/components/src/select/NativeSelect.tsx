@@ -42,6 +42,7 @@ export const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
 					className,
 				)}
 				{...props}
+				data-testid={props.id}
 			>
 				{emptyOption && (
 					<option value={emptyOption.value} disabled selected key="native-select-empty-option">

@@ -4,7 +4,7 @@ import React from 'react'
 
 type Props = {
 	onEdit: () => void
-	onDelete: () => void
+	onDelete?: () => void
 }
 export default function EmailerActionMenu({ onEdit, onDelete }: Props) {
 	return (
@@ -17,11 +17,15 @@ export default function EmailerActionMenu({ onEdit, onDelete }: Props) {
 							leftIcon: <Edit className={iconStyle} />,
 							onClick: onEdit,
 						},
-						{
-							label: 'Delete',
-							leftIcon: <Trash2 className={iconStyle} />,
-							onClick: onDelete,
-						},
+						...(onDelete
+							? [
+									{
+										label: 'Delete',
+										leftIcon: <Trash2 className={iconStyle} />,
+										onClick: onDelete,
+									},
+								]
+							: []),
 					],
 				},
 			]}

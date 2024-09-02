@@ -12,6 +12,7 @@ const ThumbnailSettingsScene = React.lazy(
 	() => import('./options/thumbnails/ThumbnailSettingsScene'),
 )
 const ScannerBehaviorScene = React.lazy(() => import('./options/ScannerBehaviorScene'))
+const LibraryAnalysisScene = React.lazy(() => import('./options/analysis'))
 
 const AccessControlScene = React.lazy(() => import('./danger/accessControl'))
 const DeletionScene = React.lazy(() => import('./danger/deletion'))
@@ -58,17 +59,13 @@ export default function LibrarySettingsRouter() {
 				<Route path="" element={<Navigate to="basics" replace />} />
 				<Route path="basics" element={<BasicSettingsScene />} />
 
-				<Route path="options/*">
-					<Route path="" element={<Navigate to="scanning" replace />} />
-					<Route path="scanning" element={<ScannerBehaviorScene />} />
-					<Route path="thumbnails" element={<ThumbnailSettingsScene />} />
-				</Route>
+				<Route path="scanning" element={<ScannerBehaviorScene />} />
+				<Route path="thumbnails" element={<ThumbnailSettingsScene />} />
+				<Route path="analysis" element={<LibraryAnalysisScene />} />
 
-				<Route path="danger/*">
-					<Route path="" element={<Navigate to="access-control" replace />} />
-					<Route path="access-control" element={<AccessControlScene />} />
-					<Route path="delete" element={<DeletionScene />} />
-				</Route>
+				<Route path="" element={<Navigate to="access-control" replace />} />
+				<Route path="access-control" element={<AccessControlScene />} />
+				<Route path="delete" element={<DeletionScene />} />
 			</Routes>
 		</LibraryManagementContext.Provider>
 	)

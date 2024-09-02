@@ -12,6 +12,7 @@ export {
 	prefetchEmailerSendHistory,
 	useCreateEmailDevice,
 	useDeleteEmailDevice,
+	useDeleteEmailer,
 	useEmailDevicesQuery,
 	useEmailerQuery,
 	useEmailerSendHistoryQuery,

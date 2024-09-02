@@ -92,7 +92,7 @@ export type EmailerConfig = { sender_email: string; sender_display_name: string;
 /**
  * The configuration for an [EmailerClient]
  */
-export type EmailerClientConfig = { sender_email: string; sender_display_name: string; username: string; password: string; host: string; port: number; tls_enabled: boolean; max_attachment_size_bytes: number | null; max_num_attachments: number | null }
+export type EmailerClientConfig = { sender_email: string; sender_display_name: string; username: string; password: string | null; host: string; port: number; tls_enabled: boolean; max_attachment_size_bytes: number | null; max_num_attachments: number | null }
 
 /**
  * An SMTP emailer entity, which stores SMTP configuration data to be used for sending emails.

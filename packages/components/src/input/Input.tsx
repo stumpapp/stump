@@ -144,6 +144,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 							},
 							className,
 						)}
+						data-testid={props.id}
 					/>
 					{renderRightDecoration()}
 				</div>

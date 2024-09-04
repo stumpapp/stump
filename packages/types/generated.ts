@@ -116,7 +116,7 @@ export type AttachmentMeta = { filename: string; media_id: string | null; size: 
 
 export type FileStatus = "UNKNOWN" | "READY" | "UNSUPPORTED" | "ERROR" | "MISSING"
 
-export type Library = { id: string; name: string; description: string | null; emoji: string | null; path: string; status: string; updated_at: string; series: Series[] | null; tags: Tag[] | null; library_options: LibraryConfig }
+export type Library = { id: string; name: string; description: string | null; emoji: string | null; path: string; status: string; updated_at: string; series: Series[] | null; tags: Tag[] | null; config: LibraryConfig }
 
 export type LibraryPattern = "SERIES_BASED" | "COLLECTION_BASED"
 
@@ -124,7 +124,7 @@ export type LibraryScanMode = "DEFAULT" | "NONE"
 
 export type IgnoreRules = string[]
 
-export type LibraryConfig = { id?: string | null; convert_rar_to_zip: boolean; hard_delete_conversions: boolean; library_pattern: LibraryPattern; thumbnail_config: ImageProcessorOptions | null; ignore_rules?: IgnoreRules; library_id?: string | null }
+export type LibraryConfig = { id?: string | null; convert_rar_to_zip: boolean; hard_delete_conversions: boolean; generate_file_hashes: boolean; process_metadata: boolean; library_pattern: LibraryPattern; thumbnail_config: ImageProcessorOptions | null; ignore_rules?: IgnoreRules; library_id?: string | null }
 
 export type LibraryStats = { series_count: BigInt; book_count: BigInt; total_bytes: BigInt; completed_books: BigInt; in_progress_books: BigInt }
 
@@ -350,9 +350,9 @@ export type CreateOrUpdateEmailDevice = { name: string; email: string; forbidden
  */
 export type PatchEmailDevice = { name: string | null; email: string | null; forbidden: boolean | null }
 
-export type CreateLibrary = { name: string; path: string; description?: string | null; tags?: string[] | null; scan_mode?: LibraryScanMode | null; library_options?: LibraryConfig | null }
+export type CreateLibrary = { name: string; path: string; description?: string | null; tags?: string[] | null; scan_mode?: LibraryScanMode | null; config?: LibraryConfig | null }
 
-export type UpdateLibrary = { name: string; path: string; description?: string | null; emoji?: string | null; tags?: string[] | null; library_options: LibraryConfig; scan_mode?: LibraryScanMode | null }
+export type UpdateLibrary = { name: string; path: string; description?: string | null; emoji?: string | null; tags?: string[] | null; config: LibraryConfig; scan_mode?: LibraryScanMode | null }
 
 export type UpdateLibraryExcludedUsers = { user_ids: string[] }
 

@@ -12,7 +12,7 @@ use crate::{
 pub struct MediaBuilder {
 	path: PathBuf,
 	series_id: String,
-	library_options: LibraryConfig,
+	library_config: LibraryConfig,
 	config: StumpConfig,
 }
 
@@ -20,13 +20,13 @@ impl MediaBuilder {
 	pub fn new(
 		path: &Path,
 		series_id: &str,
-		library_options: LibraryConfig,
+		library_config: LibraryConfig,
 		config: &StumpConfig,
 	) -> Self {
 		Self {
 			path: path.to_path_buf(),
 			series_id: series_id.to_string(),
-			library_options,
+			library_config,
 			config: config.clone(),
 		}
 	}
@@ -41,7 +41,7 @@ impl MediaBuilder {
 
 	pub fn build(self) -> CoreResult<Media> {
 		let mut processed_entry =
-			process(&self.path, self.library_options.into(), &self.config)?;
+			process(&self.path, self.library_config.into(), &self.config)?;
 
 		tracing::trace!(?processed_entry, "Processed entry");
 
@@ -190,13 +190,13 @@ mod tests {
 
 	fn build_media_test_helper(path: String) -> Result<Media, CoreError> {
 		let path = Path::new(&path);
-		let library_options = LibraryConfig {
+		let library_config = LibraryConfig {
 			convert_rar_to_zip: false,
 			hard_delete_conversions: false,
 			..Default::default()
 		};
 		let series_id = "series_id";
 
-		MediaBuilder::new(path, series_id, library_options, &StumpConfig::debug()).build()
+		MediaBuilder::new(path, series_id, library_config, &StumpConfig::debug()).build()
 	}
 }

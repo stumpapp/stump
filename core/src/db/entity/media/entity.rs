@@ -119,7 +119,7 @@ impl TryFrom<active_reading_session::Data> for Media {
 #[derive(Default)]
 pub struct MediaBuilderOptions {
 	pub series_id: String,
-	pub library_options: LibraryConfig,
+	pub library_config: LibraryConfig,
 }
 
 impl From<media::Data> for Media {

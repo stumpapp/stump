@@ -123,7 +123,7 @@ model LibraryConfig {
   library_id String?
   library    Library?
 
-  @@map("library_options")
+  @@map("library_configs")
 }
 
 model LastLibraryVisit {

@@ -46,8 +46,8 @@ export default function FileConversionOptions({ onDidChange }: Props) {
 	useEffect(() => {
 		if (!ctx?.library || !onDidChange) return
 
-		const existingConvertToZip = ctx.library.library_options.convert_rar_to_zip
-		const existingHardDelete = ctx.library.library_options.hard_delete_conversions
+		const existingConvertToZip = ctx.library.config.convert_rar_to_zip
+		const existingHardDelete = ctx.library.config.hard_delete_conversions
 		const { convertRarToZip, hardDeleteConversions } = debouncedOptions
 
 		if (convertRarToZip !== existingConvertToZip || hardDeleteConversions !== existingHardDelete) {

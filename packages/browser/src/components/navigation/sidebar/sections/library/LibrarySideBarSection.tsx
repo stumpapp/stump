@@ -10,8 +10,8 @@ import paths from '@/paths'
 
 import { EntityOptionProps } from '../../../types'
 import SideBarButtonLink from '../../SideBarButtonLink'
-import LibraryEmoji from './LibraryEmoji'
 import LibraryConfigMenu from './LibraryConfigMenu'
+import LibraryEmoji from './LibraryEmoji'
 
 type Props = {
 	isMobile?: boolean

@@ -26,8 +26,8 @@ export default function IgnoreRulesPatchForm() {
 	const handleSubmit = useCallback(
 		({ ignore_rules }: CreateOrUpdateLibrarySchema) => {
 			patch({
-				library_options: {
-					...library.library_options,
+				config: {
+					...library.config,
 					ignore_rules: ignore_rules?.map(({ glob }) => glob),
 				},
 				scan_mode: 'NONE',

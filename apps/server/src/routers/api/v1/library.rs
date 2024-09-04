@@ -885,8 +885,8 @@ async fn generate_library_thumbnails(
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound("Library not found".to_string()))?;
-	let library_options = library.config()?.to_owned();
-	let existing_options = if let Some(config) = library_options.thumbnail_config {
+	let library_config = library.config()?.to_owned();
+	let existing_options = if let Some(config) = library_config.thumbnail_config {
 		// I hard error here so that we don't accidentally generate thumbnails in an invalid or
 		// otherwise undesired way per the existing (but not properly parsed) config
 		Some(ImageProcessorOptions::try_from(config)?)
@@ -1381,7 +1381,7 @@ async fn create_library(
 				.exec()
 				.await?;
 
-			let library_options = client
+			let library_config = client
 				.library_config()
 				.update(
 					library_config::id::equals(library_config.id),
@@ -1395,7 +1395,7 @@ async fn create_library(
 				.exec()
 				.await?;
 
-			Ok(Library::from((library, library_options)))
+			Ok(Library::from((library, library_config)))
 		})
 		.await;
 

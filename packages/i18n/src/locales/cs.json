@@ -382,39 +382,39 @@
 					"label": "Motiv",
 					"description": "Ve výchozím nastavení má Stump světlý a tmavý motiv",
 					"customTheme": [
-						"If you're interested in creating your own custom theme, check out the",
-						"documentation"
+						"Pokud máte zájem o vytvoření vlastního motivu, podívejte se na",
+						"dokumentaci"
 					],
 					"options": {
-						"light": "Light",
-						"dark": "Dark",
-						"bronze": "Bronze light"
+						"light": "Světlý",
+						"dark": "Tmavý",
+						"bronze": "Světle bronzový"
 					}
 				},
 				"fontSelect": {
-					"label": "Font",
-					"description": "Customize the font used in the application"
+					"label": "Písmo",
+					"description": "Přizpůsobte písmo použité v aplikaci"
 				},
 				"navigationArrangement": {
-					"label": "Navigation arrangement",
+					"label": "Uspořádání navigace",
 					"description": {
-						"sidebar": "Arrange and customize the navigation items in the sidebar",
-						"topbar": "Arrange and customize the navigation items in the topbar"
+						"sidebar": "Uspořádání a přizpůsobení navigačních položek v postranním panelu",
+						"topbar": "Uspořádání a přizpůsobení navigačních položek v horním panelu"
 					},
-					"isLocked": "Arrangement is locked",
-					"lock": "Lock arrangement",
-					"unlock": "Unlock arrangement",
+					"isLocked": "Uspořádání je uzamčené",
+					"lock": "Uzamknout uspořádání",
+					"unlock": "Odemknout uspořádání",
 					"options": {
-						"Home": "Home",
-						"Explore": "Explore",
-						"Libraries": "Libraries",
-						"BookClubs": "Book clubs",
-						"SmartLists": "Smart lists"
+						"Home": "Domů",
+						"Explore": "Procházet",
+						"Libraries": "Knihovny",
+						"BookClubs": "Knižní kluby",
+						"SmartLists": "Chytré seznamy"
 					},
 					"entityOptions": {
 						"createAction": {
-							"label": "Show create action",
-							"help": "Show the create action in the navigation"
+							"label": "Zobrazit akci vytvoření",
+							"help": "Zobrazení akce vytvořit v navigaci"
 						},
 						"linkToAll": {
 							"label": "See all link",

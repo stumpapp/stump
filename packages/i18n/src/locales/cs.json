@@ -504,32 +504,32 @@
 				},
 				"liveLogs": {
 					"title": "Kanál živých logů",
-					"description": "Streamed directly from your Stump server instance in real-time"
+					"description": "Streamováno přímo z instance vašeho serveru Stump v reálném čase"
 				}
 			}
 		},
 		"server/jobs": {
-			"helmet": "Jobs",
-			"title": "Jobs",
-			"description": "Background jobs that run on your Stump server instance",
+			"helmet": "Úlohy",
+			"title": "Úlohy",
+			"description": "Úlohy na pozadí, které běží na instanci vašeho serveru",
 			"sections": {
 				"scheduling": {
-					"title": "Scheduling",
-					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart"
+					"title": "Plánování",
+					"description": "Některé úlohy mohou být nakonfigurovány pro naplánované spuštění. Změny v této konfiguraci se projeví po restartu serveru"
 				},
 				"history": {
-					"title": "History",
-					"description": "A record of jobs that have been run on your Stump server instance",
+					"title": "Historie",
+					"description": "Záznam úloh, které byly spuštěny na instanci serveru Stump",
 					"table": {
 						"columns": {
-							"name": "Type",
-							"description": "Description",
-							"status": "Status",
-							"createdAt": "Started At",
-							"elapsed": "Elapsed",
-							"tasks": "Tasks"
+							"name": "Název",
+							"description": "Popis",
+							"status": "Stav",
+							"createdAt": "Spuštěno v",
+							"elapsed": "Uplynulo",
+							"tasks": "Úlohy"
 						},
-						"emptyHeading": "There are no jobs to display",
+						"emptyHeading": "Žádné úlohy k zobrazení",
 						"emptySubtitle": "You can't have a job if you don't have a job",
 						"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
 						"deleteAllConfirmButton": "Clear history",

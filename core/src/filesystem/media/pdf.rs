@@ -272,6 +272,7 @@ mod tests {
 			FileProcessorOptions {
 				convert_rar_to_zip: false,
 				delete_conversion_source: false,
+				..Default::default()
 			},
 			&config,
 		);

@@ -10,5 +10,17 @@ library::select!(library_tags_select {
 
 library::select!(library_path_with_options_select {
 	path
-	library_options
+	config
+});
+
+library::include!(library_series_ids_media_ids_include {
+	series: include {
+		media: select { id }
+	}
+});
+
+library::include!(library_thumbnails_deletion_include {
+	series: include {
+		media: select { id }
+	}
 });

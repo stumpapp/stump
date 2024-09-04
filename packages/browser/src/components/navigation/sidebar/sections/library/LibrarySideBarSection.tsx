@@ -11,7 +11,7 @@ import paths from '@/paths'
 import { EntityOptionProps } from '../../../types'
 import SideBarButtonLink from '../../SideBarButtonLink'
 import LibraryEmoji from './LibraryEmoji'
-import LibraryOptionsMenu from './LibraryOptionsMenu'
+import LibraryConfigMenu from './LibraryConfigMenu'
 
 type Props = {
 	isMobile?: boolean
@@ -60,7 +60,7 @@ export default function LibrarySideBarSection({
 					isActive={isCurrentLibrary(library.id)}
 					className="pl-2 pr-0"
 					leftContent={canChange ? leftContent : undefined}
-					rightContent={<LibraryOptionsMenu library={library} />}
+					rightContent={<LibraryConfigMenu library={library} />}
 					// onMouseEnter={() => prefetchLibrarySeries(library.id)}
 				>
 					{!canChange && leftContent}

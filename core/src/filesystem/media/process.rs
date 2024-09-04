@@ -11,7 +11,7 @@ use tracing::debug;
 
 use crate::{
 	config::StumpConfig,
-	db::entity::{LibraryOptions, MediaMetadata, SeriesMetadata},
+	db::entity::{LibraryConfig, MediaMetadata, SeriesMetadata},
 	filesystem::{
 		content_type::ContentType, epub::EpubProcessor, error::FileError,
 		image::ImageFormat, pdf::PdfProcessor,
@@ -20,26 +20,32 @@ use crate::{
 
 use super::{rar::RarProcessor, zip::ZipProcessor};
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct FileProcessorOptions {
 	pub convert_rar_to_zip: bool,
 	pub delete_conversion_source: bool,
+	pub generate_file_hashes: bool,
+	pub process_metadata: bool,
 }
 
-impl From<LibraryOptions> for FileProcessorOptions {
-	fn from(options: LibraryOptions) -> Self {
+impl From<LibraryConfig> for FileProcessorOptions {
+	fn from(options: LibraryConfig) -> Self {
 		Self {
 			convert_rar_to_zip: options.convert_rar_to_zip,
 			delete_conversion_source: options.hard_delete_conversions,
+			generate_file_hashes: options.generate_file_hashes,
+			process_metadata: options.process_metadata,
 		}
 	}
 }
 
-impl From<&LibraryOptions> for FileProcessorOptions {
-	fn from(options: &LibraryOptions) -> Self {
+impl From<&LibraryConfig> for FileProcessorOptions {
+	fn from(options: &LibraryConfig) -> Self {
 		Self {
 			convert_rar_to_zip: options.convert_rar_to_zip,
 			delete_conversion_source: options.hard_delete_conversions,
+			generate_file_hashes: options.generate_file_hashes,
+			process_metadata: options.process_metadata,
 		}
 	}
 }

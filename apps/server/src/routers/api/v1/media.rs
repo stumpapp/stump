@@ -23,7 +23,7 @@ use stump_core::{
 				finished_reading_session_with_book_pages, media_thumbnail,
 				reading_session_with_book_pages,
 			},
-			ActiveReadingSession, FinishedReadingSession, LibraryOptions, Media,
+			ActiveReadingSession, FinishedReadingSession, LibraryConfig, Media,
 			PageDimension, PageDimensionsEntity, ProgressUpdateReturn, User,
 			UserPermission,
 		},
@@ -991,11 +991,11 @@ pub(crate) async fn get_media_thumbnail_by_id(
 		.await?
 		.ok_or_else(|| APIError::NotFound("Book not found".to_string()))?;
 
-	let library_options = book
+	let library_config = book
 		.series
-		.and_then(|s| s.library.map(|l| l.library_options))
-		.map(LibraryOptions::from);
-	let image_format = library_options.and_then(|o| o.thumbnail_config.map(|c| c.format));
+		.and_then(|s| s.library.map(|l| l.config))
+		.map(LibraryConfig::from);
+	let image_format = library_config.and_then(|o| o.thumbnail_config.map(|c| c.format));
 
 	get_media_thumbnail(&book.id, &book.path, image_format, config).await
 }
@@ -1103,7 +1103,7 @@ async fn patch_media_thumbnail(
 		.find_first(where_params)
 		.with(
 			media::series::fetch()
-				.with(series::library::fetch().with(library::library_options::fetch())),
+				.with(series::library::fetch().with(library::config::fetch())),
 		)
 		.exec()
 		.await?
@@ -1119,7 +1119,7 @@ async fn patch_media_thumbnail(
 		.library()?
 		.ok_or(APIError::NotFound(String::from("Library relation missing")))?;
 	let image_options = library
-		.library_options()?
+		.config()?
 		.thumbnail_config
 		.to_owned()
 		.map(ImageProcessorOptions::try_from)

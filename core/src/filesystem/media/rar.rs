@@ -346,6 +346,7 @@ mod tests {
 			FileProcessorOptions {
 				convert_rar_to_zip: true,
 				delete_conversion_source: true,
+				..Default::default()
 			},
 			&config,
 		);

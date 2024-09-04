@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs::File, io::Read, path::PathBuf};
+use std::{collections::HashMap, fs::File, io::Read, path::PathBuf, time::Instant};
 use tracing::{debug, error, trace};
 
 use crate::{
@@ -57,17 +57,26 @@ impl FileProcessor for ZipProcessor {
 
 	fn process(
 		path: &str,
-		_: FileProcessorOptions,
+		FileProcessorOptions {
+			generate_file_hashes,
+			process_metadata,
+			..
+		}: FileProcessorOptions,
 		_: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
-		debug!(path, "Processing zip");
-
-		let hash = ZipProcessor::hash(path);
 		let zip_file = File::open(path)?;
 		let mut archive = zip::ZipArchive::new(zip_file)?;
 
 		let mut metadata = None;
 		let mut pages = 0;
+
+		let start = Instant::now();
+
+		let hash = if generate_file_hashes {
+			Self::hash(path)
+		} else {
+			None
+		};
 
 		for i in 0..archive.len() {
 			let mut file = archive.by_index(i)?;
@@ -91,9 +100,8 @@ impl FileProcessor for ZipProcessor {
 			let content_type = path.naive_content_type();
 			let FileParts { file_name, .. } = path.file_parts();
 
-			if file_name == "ComicInfo.xml" {
+			if file_name == "ComicInfo.xml" && process_metadata {
 				trace!("Found ComicInfo.xml");
-				// we have the first few bytes of the file in buf, so we need to read the rest and make it a string
 				let mut contents = Vec::new();
 				file.read_to_end(&mut contents)?;
 				let contents = String::from_utf8_lossy(&contents).to_string();
@@ -103,6 +111,8 @@ impl FileProcessor for ZipProcessor {
 				pages += 1;
 			}
 		}
+
+		tracing::debug!(elapsed = ?start.elapsed(), path, "Processed zip");
 
 		Ok(ProcessedFile {
 			path: PathBuf::from(path),
@@ -269,6 +279,7 @@ mod tests {
 			FileProcessorOptions {
 				convert_rar_to_zip: false,
 				delete_conversion_source: false,
+				..Default::default()
 			},
 			&config,
 		);
@@ -285,6 +296,7 @@ mod tests {
 			FileProcessorOptions {
 				convert_rar_to_zip: false,
 				delete_conversion_source: false,
+				..Default::default()
 			},
 			&config,
 		);
@@ -301,6 +313,7 @@ mod tests {
 			FileProcessorOptions {
 				convert_rar_to_zip: false,
 				delete_conversion_source: false,
+				..Default::default()
 			},
 			&config,
 		);

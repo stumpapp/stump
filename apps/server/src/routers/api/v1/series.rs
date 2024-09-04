@@ -17,7 +17,7 @@ use stump_core::{
 			macros::{
 				finished_reading_session_series_complete, series_or_library_thumbnail,
 			},
-			LibraryOptions, Media, Series, User, UserPermission,
+			LibraryConfig, Media, Series, User, UserPermission,
 		},
 		query::{
 			ordering::QueryOrder,
@@ -585,11 +585,8 @@ async fn get_series_thumbnail_handler(
 		.ok_or(APIError::NotFound("Series not found".to_string()))?;
 	let first_book = series.media.into_iter().next();
 
-	let library_options = series
-		.library
-		.map(|l| l.library_options)
-		.map(LibraryOptions::from);
-	let image_format = library_options.and_then(|o| o.thumbnail_config.map(|c| c.format));
+	let library_config = series.library.map(|l| l.config).map(LibraryConfig::from);
+	let image_format = library_config.and_then(|o| o.thumbnail_config.map(|c| c.format));
 
 	get_series_thumbnail(&id, first_book, image_format, &ctx.config)
 		.await
@@ -671,7 +668,7 @@ async fn patch_series_thumbnail(
 		.find_first(media_where_params)
 		.with(
 			media::series::fetch()
-				.with(series::library::fetch().with(library::library_options::fetch())),
+				.with(series::library::fetch().with(library::config::fetch())),
 		)
 		.exec()
 		.await?
@@ -687,7 +684,7 @@ async fn patch_series_thumbnail(
 		.library()?
 		.ok_or(APIError::NotFound(String::from("Library relation missing")))?;
 	let image_options = library
-		.library_options()?
+		.config()?
 		.thumbnail_config
 		.to_owned()
 		.map(ImageProcessorOptions::try_from)

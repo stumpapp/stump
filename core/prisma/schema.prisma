@@ -96,8 +96,8 @@ model Library {
 
   series Series[]
 
-  library_options    LibraryOptions @relation(fields: [library_options_id], references: [id])
-  library_options_id String         @unique
+  config    LibraryConfig @relation(fields: [config_id], references: [id])
+  config_id String        @unique
 
   tags              Tag[]
   hidden_from_users User[]
@@ -109,13 +109,16 @@ model Library {
   @@map("libraries")
 }
 
-model LibraryOptions {
+model LibraryConfig {
   id                      String  @id @default(uuid())
   convert_rar_to_zip      Boolean @default(false)
   hard_delete_conversions Boolean @default(false)
+  generate_file_hashes    Boolean @default(false)
+  process_metadata        Boolean @default(true)
   library_pattern         String  @default("SERIES_BASED") // SERIES_BASED or COLLECTION_BASED
-  thumbnail_config        Bytes? // { size_factor: "...", format: "...", quality: ... }
-  ignore_rules            Bytes? // ["glob1", "glob2", ...]
+
+  thumbnail_config Bytes? // { size_factor: "...", format: "...", quality: ... }
+  ignore_rules     Bytes? // ["glob1", "glob2", ...]
 
   library_id String?
   library    Library?

@@ -4,7 +4,7 @@ use prisma_client_rust::chrono::{DateTime, FixedOffset, Utc};
 
 use crate::{
 	config::StumpConfig,
-	db::entity::{LibraryOptions, Media, Series},
+	db::entity::{LibraryConfig, Media, Series},
 	filesystem::{process, FileParts, PathUtils, SeriesJson},
 	CoreError, CoreResult,
 };
@@ -12,7 +12,7 @@ use crate::{
 pub struct MediaBuilder {
 	path: PathBuf,
 	series_id: String,
-	library_options: LibraryOptions,
+	library_options: LibraryConfig,
 	config: StumpConfig,
 }
 
@@ -20,7 +20,7 @@ impl MediaBuilder {
 	pub fn new(
 		path: &Path,
 		series_id: &str,
-		library_options: LibraryOptions,
+		library_options: LibraryConfig,
 		config: &StumpConfig,
 	) -> Self {
 		Self {
@@ -190,7 +190,7 @@ mod tests {
 
 	fn build_media_test_helper(path: String) -> Result<Media, CoreError> {
 		let path = Path::new(&path);
-		let library_options = LibraryOptions {
+		let library_options = LibraryConfig {
 			convert_rar_to_zip: false,
 			hard_delete_conversions: false,
 			..Default::default()

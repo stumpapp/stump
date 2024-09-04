@@ -11,6 +11,6 @@ series::select!((book_filters: Vec<book::WhereParam>) => series_or_library_thumb
 		path
 	}
 	library: select {
-		library_options
+		config
 	}
 });

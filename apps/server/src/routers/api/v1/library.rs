@@ -18,9 +18,11 @@ use stump_core::{
 	config::StumpConfig,
 	db::{
 		entity::{
-			library_series_ids_media_ids_include, library_thumbnails_deletion_include,
-			macros::{library_tags_select, series_or_library_thumbnail},
-			FileStatus, Library, LibraryOptions, LibraryScanMode, LibraryStats, Media,
+			macros::{
+				library_series_ids_media_ids_include, library_tags_select,
+				library_thumbnails_deletion_include, series_or_library_thumbnail,
+			},
+			FileStatus, Library, LibraryConfig, LibraryScanMode, LibraryStats, Media,
 			Series, TagName, User, UserPermission,
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
@@ -40,7 +42,7 @@ use stump_core::{
 	prisma::{
 		last_library_visit,
 		library::{self, WhereParam},
-		library_options,
+		library_config,
 		media::{self, OrderByParam as MediaOrderByParam},
 		series::{self, OrderByParam as SeriesOrderByParam},
 		tag, user,
@@ -196,7 +198,7 @@ async fn get_libraries(
 		.library()
 		.find_many(where_conditions.clone())
 		.with(library::tags::fetch(vec![]))
-		.with(library::library_options::fetch())
+		.with(library::config::fetch())
 		.order_by(order_by);
 
 	if !is_unpaged {
@@ -389,7 +391,7 @@ async fn get_library_by_id(
 				.chain([library_not_hidden_from_user_filter(user)])
 				.collect(),
 		)
-		.with(library::library_options::fetch())
+		.with(library::config::fetch())
 		.with(library::tags::fetch(vec![]))
 		.exec()
 		.await?
@@ -631,12 +633,12 @@ async fn get_library_thumbnail_handler(
 		.ok_or(APIError::NotFound("Library has no series".to_string()))?;
 	let first_book = first_series.media.first().cloned();
 
-	let library_options = first_series
+	let library_config = first_series
 		.library
 		.as_ref()
-		.map(|l| l.library_options.clone())
-		.map(LibraryOptions::from);
-	let image_format = library_options.and_then(|o| o.thumbnail_config.map(|c| c.format));
+		.map(|l| l.config.clone())
+		.map(LibraryConfig::from);
+	let image_format = library_config.and_then(|o| o.thumbnail_config.map(|c| c.format));
 
 	get_library_thumbnail(&id, first_series, first_book, image_format, &ctx.config)
 		.await
@@ -701,7 +703,7 @@ async fn patch_library_thumbnail(
 		])
 		.with(
 			media::series::fetch()
-				.with(series::library::fetch().with(library::library_options::fetch())),
+				.with(series::library::fetch().with(library::config::fetch())),
 		)
 		.exec()
 		.await?
@@ -719,7 +721,7 @@ async fn patch_library_thumbnail(
 		.library()?
 		.ok_or(APIError::NotFound(String::from("Library relation missing")))?;
 	let image_options = library
-		.library_options()?
+		.config()?
 		.thumbnail_config
 		.to_owned()
 		.map(ImageProcessorOptions::try_from)
@@ -879,11 +881,11 @@ async fn generate_library_thumbnails(
 			library::id::equals(id.clone()),
 			library_not_hidden_from_user_filter(&user),
 		])
-		.with(library::library_options::fetch())
+		.with(library::config::fetch())
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound("Library not found".to_string()))?;
-	let library_options = library.library_options()?.to_owned();
+	let library_options = library.config()?.to_owned();
 	let existing_options = if let Some(config) = library_options.thumbnail_config {
 		// I hard error here so that we don't accidentally generate thumbnails in an invalid or
 		// otherwise undesired way per the existing (but not properly parsed) config
@@ -1237,7 +1239,7 @@ pub struct CreateLibrary {
 	pub scan_mode: Option<LibraryScanMode>,
 	/// Optional options to apply to the library. When not provided, the default options will be used.
 	#[specta(optional)]
-	pub library_options: Option<LibraryOptions>,
+	pub config: Option<LibraryConfig>,
 }
 
 #[utoipa::path(
@@ -1284,33 +1286,33 @@ async fn create_library(
 
 	// TODO(prisma-nested-create): Refactor once nested create is supported
 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
-	let library_options_arg = input.library_options.unwrap_or_default();
+	let library_config = input.config.unwrap_or_default();
 	let transaction_result: Result<Library, APIError> = db
 		._transaction()
 		.with_timeout(Duration::seconds(30).num_milliseconds() as u64)
 		.run(|client| async move {
-			let ignore_rules = (!library_options_arg.ignore_rules.is_empty())
-				.then(|| library_options_arg.ignore_rules.as_bytes())
+			let ignore_rules = (!library_config.ignore_rules.is_empty())
+				.then(|| library_config.ignore_rules.as_bytes())
 				.transpose()?;
-			let thumbnail_config = library_options_arg
+			let thumbnail_config = library_config
 				.thumbnail_config
 				.map(|options| options.as_bytes())
 				.transpose()?;
 
-			let library_options = client
-				.library_options()
+			let library_config = client
+				.library_config()
 				.create(vec![
-					library_options::convert_rar_to_zip::set(
-						library_options_arg.convert_rar_to_zip,
+					library_config::convert_rar_to_zip::set(
+						library_config.convert_rar_to_zip,
 					),
-					library_options::hard_delete_conversions::set(
-						library_options_arg.hard_delete_conversions,
+					library_config::hard_delete_conversions::set(
+						library_config.hard_delete_conversions,
 					),
-					library_options::library_pattern::set(
-						library_options_arg.library_pattern.to_string(),
+					library_config::library_pattern::set(
+						library_config.library_pattern.to_string(),
 					),
-					library_options::thumbnail_config::set(thumbnail_config),
-					library_options::ignore_rules::set(ignore_rules),
+					library_config::thumbnail_config::set(thumbnail_config),
+					library_config::ignore_rules::set(ignore_rules),
 				])
 				.exec()
 				.await?;
@@ -1363,7 +1365,7 @@ async fn create_library(
 				.create(
 					input.name.to_owned(),
 					input.path.to_owned(),
-					library_options::id::equals(library_options.id.clone()),
+					library_config::id::equals(library_config.id.clone()),
 					chain_optional_iter(
 						[library::description::set(input.description.to_owned())],
 						[(!library_tags.is_empty()).then(|| {
@@ -1380,14 +1382,14 @@ async fn create_library(
 				.await?;
 
 			let library_options = client
-				.library_options()
+				.library_config()
 				.update(
-					library_options::id::equals(library_options.id),
+					library_config::id::equals(library_config.id),
 					vec![
-						library_options::library::connect(library::id::equals(
+						library_config::library::connect(library::id::equals(
 							library.id.clone(),
 						)),
-						library_options::library_id::set(Some(library.id.clone())),
+						library_config::library_id::set(Some(library.id.clone())),
 					],
 				)
 				.exec()
@@ -1431,7 +1433,7 @@ pub struct UpdateLibrary {
 	#[specta(optional)]
 	pub tags: Option<Vec<TagName>>,
 	/// The updated options of the library.
-	pub library_options: LibraryOptions,
+	pub config: LibraryConfig,
 	/// Optional flag to indicate how the library should be automatically scanned after update. Default is `BATCHED`.
 	#[serde(default)]
 	pub scan_mode: Option<LibraryScanMode>,
@@ -1488,28 +1490,28 @@ async fn update_library(
 		._transaction()
 		.with_timeout(Duration::seconds(30).num_milliseconds() as u64)
 		.run(|client| async move {
-			let library_options = input.library_options.to_owned();
-			let ignore_rules = (!library_options.ignore_rules.is_empty())
-				.then(|| library_options.ignore_rules.as_bytes())
+			let library_config = input.config.to_owned();
+			let ignore_rules = (!library_config.ignore_rules.is_empty())
+				.then(|| library_config.ignore_rules.as_bytes())
 				.transpose()?;
-			let thumbnail_config = library_options
+			let thumbnail_config = library_config
 				.thumbnail_config
 				.map(|options| options.as_bytes())
 				.transpose()?;
 
 			client
-				.library_options()
+				.library_config()
 				.update(
-					library_options::id::equals(library_options.id.unwrap_or_default()),
+					library_config::id::equals(library_config.id.unwrap_or_default()),
 					vec![
-						library_options::convert_rar_to_zip::set(
-							library_options.convert_rar_to_zip,
+						library_config::convert_rar_to_zip::set(
+							library_config.convert_rar_to_zip,
 						),
-						library_options::hard_delete_conversions::set(
-							library_options.hard_delete_conversions,
+						library_config::hard_delete_conversions::set(
+							library_config.hard_delete_conversions,
 						),
-						library_options::ignore_rules::set(ignore_rules),
-						library_options::thumbnail_config::set(thumbnail_config),
+						library_config::ignore_rules::set(ignore_rules),
+						library_config::thumbnail_config::set(thumbnail_config),
 					],
 				)
 				.exec()

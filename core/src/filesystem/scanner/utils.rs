@@ -23,7 +23,7 @@ use walkdir::DirEntry;
 use crate::{
 	config::StumpConfig,
 	db::{
-		entity::{LibraryOptions, Media, Series},
+		entity::{LibraryConfig, Media, Series},
 		FileStatus,
 	},
 	error::{CoreError, CoreResult},
@@ -391,7 +391,7 @@ pub(crate) async fn safely_build_series(
 
 pub(crate) struct MediaBuildOperation {
 	pub series_id: String,
-	pub library_options: LibraryOptions,
+	pub library_config: LibraryConfig,
 	pub max_concurrency: usize,
 }
 
@@ -399,7 +399,7 @@ async fn build_book(
 	path: &Path,
 	series_id: &str,
 	existing_book: Option<Media>,
-	library_options: LibraryOptions,
+	library_config: LibraryConfig,
 	config: &StumpConfig,
 ) -> CoreResult<Media> {
 	let (tx, rx) = oneshot::channel();
@@ -408,11 +408,11 @@ async fn build_book(
 	let handle = spawn_blocking({
 		let path = path.to_path_buf();
 		let series_id = series_id.to_string();
-		let library_options = library_options.clone();
+		let library_config = library_config.clone();
 		let config = config.clone();
 
 		move || {
-			let builder = MediaBuilder::new(&path, &series_id, library_options, &config);
+			let builder = MediaBuilder::new(&path, &series_id, library_config, &config);
 			let send_result = tx.send(if let Some(existing_book) = existing_book {
 				builder.rebuild(&existing_book)
 			} else {
@@ -442,7 +442,7 @@ async fn build_book(
 pub(crate) async fn safely_build_and_insert_media(
 	MediaBuildOperation {
 		series_id,
-		library_options,
+		library_config,
 		max_concurrency,
 	}: MediaBuildOperation,
 	worker_ctx: &WorkerCtx,
@@ -468,7 +468,7 @@ pub(crate) async fn safely_build_and_insert_media(
 		.map(|path| {
 			let semaphore = semaphore.clone();
 			let series_id = series_id.clone();
-			let library_options = library_options.clone();
+			let library_config = library_config.clone();
 			let path = path.clone();
 
 			async move {
@@ -477,7 +477,7 @@ pub(crate) async fn safely_build_and_insert_media(
 					.await
 					.map_err(|e| (CoreError::Unknown(e.to_string()), path.clone()))?;
 				tracing::trace!(?path, "Acquired permit for media creation");
-				build_book(&path, &series_id, None, library_options, &worker_ctx.config)
+				build_book(&path, &series_id, None, library_config, &worker_ctx.config)
 					.await
 					.map_err(|e| (e, path.clone()))
 			}
@@ -570,7 +570,7 @@ pub(crate) async fn safely_build_and_insert_media(
 pub(crate) async fn visit_and_update_media(
 	MediaBuildOperation {
 		series_id,
-		library_options,
+		library_config,
 		max_concurrency,
 	}: MediaBuildOperation,
 	worker_ctx: &WorkerCtx,
@@ -619,7 +619,7 @@ pub(crate) async fn visit_and_update_media(
 		.map(|existing_book| {
 			let semaphore = semaphore.clone();
 			let series_id = series_id.clone();
-			let library_options = library_options.clone();
+			let library_config = library_config.clone();
 			let path = PathBuf::from(existing_book.path.as_str());
 
 			async move {
@@ -632,7 +632,7 @@ pub(crate) async fn visit_and_update_media(
 					path.as_path(),
 					&series_id,
 					Some(existing_book),
-					library_options,
+					library_config,
 					&worker_ctx.config,
 				)
 				.await

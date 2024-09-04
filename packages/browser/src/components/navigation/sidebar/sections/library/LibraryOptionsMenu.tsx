@@ -18,7 +18,7 @@ type Props = {
 const LOCALE_KEY = 'sidebar.libraryOptions'
 const getLocaleKey = (path: string) => `${LOCALE_KEY}.${path}`
 
-export default function LibraryOptionsMenu({ library }: Props) {
+export default function LibraryConfigMenu({ library }: Props) {
 	const [isDeleting, setIsDeleting] = useState(false)
 	const { scanAsync } = useScanLibrary()
 

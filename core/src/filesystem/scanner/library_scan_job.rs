@@ -10,7 +10,7 @@ use specta::Type;
 
 use crate::{
 	db::{
-		entity::{CoreJobOutput, LibraryOptions},
+		entity::{CoreJobOutput, LibraryConfig},
 		FileStatus, SeriesDAO, DAO,
 	},
 	filesystem::image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
@@ -18,7 +18,7 @@ use crate::{
 		error::JobError, Executor, JobExecuteLog, JobExt, JobOutputExt, JobProgress,
 		JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
-	prisma::{library, library_options, media, series, PrismaClient},
+	prisma::{library, library_config, media, series, PrismaClient},
 	utils::chain_optional_iter,
 	CoreEvent,
 };
@@ -57,7 +57,7 @@ pub struct InitTaskInput {
 pub struct LibraryScanJob {
 	pub id: String,
 	pub path: String,
-	pub options: Option<LibraryOptions>,
+	pub options: Option<LibraryConfig>,
 }
 
 impl LibraryScanJob {
@@ -127,21 +127,21 @@ impl JobExt for LibraryScanJob {
 		// Note: We ignore the potential self.options here in the event that it was
 		// updated since being queued. This is perhaps a bit overly cautious, but it's
 		// just one additional query.
-		let library_options = ctx
+		let library_config = ctx
 			.db
-			.library_options()
-			.find_first(vec![library_options::library::is(vec![
+			.library_config()
+			.find_first(vec![library_config::library::is(vec![
 				library::id::equals(self.id.clone()),
 				library::path::equals(self.path.clone()),
 			])])
 			.exec()
 			.await?
-			.map(LibraryOptions::from)
+			.map(LibraryConfig::from)
 			.ok_or(JobError::InitFailed("Library not found".to_string()))?;
-		let is_collection_based = library_options.is_collection_based();
-		let ignore_rules = library_options.ignore_rules.build()?;
+		let is_collection_based = library_config.is_collection_based();
+		let ignore_rules = library_config.ignore_rules.build()?;
 
-		self.options = Some(library_options);
+		self.options = Some(library_config);
 
 		ctx.report_progress(JobProgress::msg("Performing task discovery"));
 		let WalkedLibrary {
@@ -537,7 +537,7 @@ impl JobExt for LibraryScanJob {
 					} = safely_build_and_insert_media(
 						MediaBuildOperation {
 							series_id: series_id.clone(),
-							library_options: self.options.clone().unwrap_or_default(),
+							library_config: self.options.clone().unwrap_or_default(),
 							max_concurrency,
 						},
 						ctx,
@@ -567,7 +567,7 @@ impl JobExt for LibraryScanJob {
 					} = visit_and_update_media(
 						MediaBuildOperation {
 							series_id: series_id.clone(),
-							library_options: self.options.clone().unwrap_or_default(),
+							library_config: self.options.clone().unwrap_or_default(),
 							max_concurrency,
 						},
 						ctx,

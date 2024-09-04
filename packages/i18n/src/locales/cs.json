@@ -530,76 +530,76 @@
 							"tasks": "Úlohy"
 						},
 						"emptyHeading": "Žádné úlohy k zobrazení",
-						"emptySubtitle": "You can't have a job if you don't have a job",
-						"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
-						"deleteAllConfirmButton": "Clear history",
-						"deleteAllConfirmButtonTitle": "Clear all job history",
-						"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
+						"emptySubtitle": "Nemůžete mít úlohu, když nemáte úlohu",
+						"deleteAllMessage": "Historie úloh a statistiky mohou být z databáze kdykoli odstraněny. Tuto akci nelze vrátit zpět",
+						"deleteAllConfirmButton": "Smazat historii",
+						"deleteAllConfirmButtonTitle": "Vymazat historii všech úloh",
+						"deleteAllConfirmButtonTitleNoJobs": "Žádné úlohy k vymazání"
 					}
 				}
 			}
 		},
 		"server/users": {
-			"helmet": "User management",
-			"title": "Users",
-			"description": "Manage the users on this server",
+			"helmet": "Správa uživatelů",
+			"title": "Uživatelé",
+			"description": "Správa uživatelů na tomto serveru",
 			"createUser": {
-				"helmet": "Create user",
-				"title": "Create user",
-				"description": "Create a new user on this server"
+				"helmet": "Vytvořit uživatele",
+				"title": "Vytvořit uživatele",
+				"description": "Vytvořit nového uživatele na tomto serveru"
 			},
 			"updateUser": {
-				"helmet": "Update user",
-				"title": "Update user",
-				"description": "Update the details of this user"
+				"helmet": "Upravit uživatele",
+				"title": "Upravit uživatele",
+				"description": "Upravit detaily tohoto uživatele"
 			},
 			"createOrUpdateForm": {
 				"accessControl": {
-					"heading": "Access control and restrictions",
+					"heading": "Řízení přístupu a omezení",
 					"subtitle": [
-						"Configure any restrictions you want to apply to this user. For more information about access control, see the",
-						"documentation"
+						"Nakonfigurujte všechna omezení, která chcete použít pro tohoto uživatele. Další informace o kontrole přístupu naleznete v",
+						"dokumentaci"
 					],
 					"ageRestriction": {
-						"label": "Age restriction",
-						"description": "Restricts the user from accessing content above the set age rating threshold",
+						"label": "Věkové omezení",
+						"description": "Omezuje uživateli přístup k obsahu vyššímu než stanovený věkový práh",
 						"placeholder": "13",
 						"enforceUnset": {
-							"label": "Enforce on unset",
-							"description": "If enabled, users will be restricted from accessing content with no age rating available"
+							"label": "Vynutit při nenastavení",
+							"description": "Pokud je povoleno, uživatelé nebudou mít přístup k obsahu bez hodnocení věku"
 						}
 					},
 					"tagRestriction": {
-						"label": "Tag restrictions",
-						"description": "Restricts the user from accessing content with the selected tags",
-						"placeholder": "Adult, Gore"
+						"label": "Omezení tagů",
+						"description": "Omezuje uživateli přístup k obsahu s vybranými štítky",
+						"placeholder": "Pro dospělé"
 					}
 				},
 				"permissions": {
-					"heading": "Permissions",
+					"heading": "Oprávnění",
 					"subtitle": [
-						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
-						"documentation"
+						"Vyberte oprávnění, která chcete tomuto uživateli udělit. Další informace o tom, co každé oprávnění dělá, naleznete v",
+						"dokumentaci"
 					],
 					"bookclub": {
-						"label": "Book Clubs",
+						"label": "Knižní kluby",
 						"read": {
-							"label": "Access book club features",
-							"description": "Allows the user to access book club features, including viewing and joining book clubs"
+							"label": "Přístup k funkcím knižního klubu",
+							"description": "Umožňuje uživateli přístup k funkcím knižního klubu, včetně prohlížení a připojení se k nim"
 						},
 						"create": {
-							"label": "Create book clubs",
-							"description": "Allows the user to create new book clubs"
+							"label": "Vytvořit knižní klub",
+							"description": "Umožňuje uživateli vytvářet nové knižní kluby"
 						}
 					},
 					"file": {
-						"label": "File Management",
+						"label": "Správa souborů",
 						"explorer": {
 							"label": "File Explorer",
 							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
 						},
 						"download": {
-							"label": "Download files",
+							"label": "Stahování souborů",
 							"description": "Umožňuje uživateli stahovat soubory ze serveru"
 						},
 						"upload": {
@@ -706,90 +706,90 @@
 						},
 						"email": {
 							"label": "E-mail",
-							"description": "The email address this alias will be associated with"
+							"description": "E-mailová adresa tohoto aliasu bude přiřazena k"
 						},
 						"forbidden": {
-							"label": "Forbidden",
-							"description": "When enabled, no user may send emails to the address associated with this alias"
+							"label": "Zakázáno",
+							"description": "Pokud je povoleno, žádný uživatel nesmí odesílat e-maily na adresu přidruženou k tomuto aliasu"
 						},
 						"submit": {
-							"create": "Create device alias",
-							"update": "Update device alias"
+							"create": "Vytvořit alias zařízení",
+							"update": "Upravit alias zařízení"
 						}
 					},
 					"table": {
-						"emptyHeading": "No devices registered",
-						"emptySubtitle": "Create a new device alias for future use"
+						"emptyHeading": "Žádná zařízení nejsou registrována",
+						"emptySubtitle": "Vytvořit nový alias zařízení pro budoucí použití"
 					}
 				}
 			},
 			"createOrUpdateForm": {
 				"name": {
-					"label": "Name",
-					"description": "A friendly name to uniquely identify this emailer"
+					"label": "Název",
+					"description": "Přátelský název k jedinečné identifikaci tohoto e-maileru"
 				},
 				"smtpSettings": {
-					"heading": "SMTP settings",
-					"description": "The SMTP-specific settings for this emailer"
+					"heading": "Nastavení SMTP",
+					"description": "Specifické nastavení SMTP pro tento e-mailer"
 				},
 				"smtpProvider": {
-					"label": "SMTP provider preset",
-					"description": "The provider of the SMTP server. This is used to prefill some common settings, but doesn't capture all providers"
+					"label": "Nastavení poskytovatele SMTP",
+					"description": "Poskytovatel SMTP serveru. Používá se k předvyplnění některých běžných nastavení, ale nezachycuje všechny poskytovatele"
 				},
 				"smtpHost": {
 					"label": "SMTP host",
-					"description": "The hostname of the SMTP server"
+					"description": "Název hostitele SMTP serveru"
 				},
 				"smtpPort": {
-					"label": "SMTP port",
-					"description": "The port of the SMTP server"
+					"label": "Port SMTP",
+					"description": "Port SMTP serveru"
 				},
 				"tlsEnabled": {
-					"label": "TLS enabled",
-					"description": "If enabled, the connection to the SMTP server will be encrypted"
+					"label": "Zapnutí TLS",
+					"description": "Pokud je zapnuto, připojení k SMTP serveru bude šifrováno"
 				},
 				"username": {
-					"label": "Username",
-					"description": "The username for authenticating with the SMTP server. This is typically the email address"
+					"label": "Uživatelské jméno",
+					"description": "Uživatelské jméno pro autentizaci pomocí SMTP serveru. Obvykle je to e-mailová adresa"
 				},
 				"password": {
-					"label": "Password",
-					"description": "The password for authenticating with the SMTP server. If you're using Gmail, you may need to generate an app-specific password"
+					"label": "Heslo",
+					"description": "Heslo pro ověření pomocí SMTP serveru. Pokud používáte Gmail, možná budete muset vygenerovat specifické heslo pro aplikaci"
 				},
 				"senderSettings": {
-					"heading": "Sender settings",
-					"description": "The settings for the sender of the email"
+					"heading": "Nastavení odesílatele",
+					"description": "Nastavení odesílatele e-mailu"
 				},
 				"senderDisplayName": {
-					"label": "Sender display name",
-					"description": "The name that will be displayed to recipients"
+					"label": "Zobrazované jméno odesílatele",
+					"description": "Jméno, které se zobrazí příjemcům"
 				},
 				"senderEmail": {
-					"label": "Sender email address",
-					"description": "The email address that will be displayed to recipients"
+					"label": "E-mail odesílatele",
+					"description": "E-mailová adresa, která se zobrazí příjemcům"
 				},
 				"additionalSettings": {
-					"heading": "Additional settings",
-					"description": "Additional settings for the emailer"
+					"heading": "Další nastavení",
+					"description": "Další nastavení pro e-mailer"
 				},
 				"maxAttachmentSize": {
-					"label": "Max attachment size",
-					"description": "The maximum size, in bytes, that an attachment can be"
+					"label": "Maximální velikost přílohy",
+					"description": "Maximální velikost v bajtech, kterou může příloha mít"
 				},
 				"submit": {
-					"create": "Create emailer",
-					"update": "Update emailer"
+					"create": "Vytvořit e-mailer",
+					"update": "Upravit e-mailer"
 				}
 			},
 			"createEmailer": {
-				"helmet": "Create emailer",
-				"title": "Create emailer",
-				"description": "Create a new SMTP emailer for your Stump server instance"
+				"helmet": "Vytvořit e-mailer",
+				"title": "Vytvořit e-mailer",
+				"description": "Vytvořit nový SMTP e-mailer pro instanci vašeho serveru Stump"
 			},
 			"updateEmailer": {
-				"helmet": "Update emailer",
-				"title": "Update emailer",
-				"description": "Update the details of this SMTP emailer"
+				"helmet": "Upravit e-mailer",
+				"title": "Upravit e-mailer",
+				"description": "Upravit podrobnosti o tomto SMTP e-maileru"
 			}
 		}
 	},

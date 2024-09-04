@@ -794,22 +794,22 @@
 		}
 	},
 	"jobOverlay": {
-		"backupHeading": "Job in Progress"
+		"backupHeading": "Probíhá zpracování úlohy"
 	},
 	"libraryStats": {
-		"seriesCount": "Total Series",
-		"bookCount": "Total Books",
-		"diskUsage": "Disk Usage"
+		"seriesCount": "Celkem sérií",
+		"bookCount": "Celkem knih",
+		"diskUsage": "Využití disku"
 	},
 	"noLibraries": {
-		"heading": "Nothing to see here",
-		"messagePrefix": "You can't see what you don't have",
+		"heading": "Zde není nic k zobrazení",
+		"messagePrefix": "Nemůžete vidět, co nemáte",
 		"message": {
-			"create": "Create a library to get started",
-			"wait": "Once libraries are created, they'll be displayed here"
+			"create": "Vytvořte knihovnu pro začátek",
+			"wait": "Jakmile budou knihovny vytvořeny, zobrazí se zde"
 		},
 		"links": {
-			"create": "Create library"
+			"create": "Vytvořit knihovnu"
 		}
 	},
 	"pagination": {
@@ -871,56 +871,56 @@
 	"serverSOS": {
 		"heading": "Server není dostupný",
 		"desktop": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
+			"message": "Došlo k chybě sítě, která naznačuje, že server je momentálně nedostupný. Ujistěte se, že je spuštěn a přístupný z tohoto zařízení.\nPokud se URL adresa serveru změnila, můžete ji aktualizovat pomocí formuláře níže"
 		},
 		"web": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
+			"message": "Došlo k chybě sítě, která naznačuje, že server je momentálně nedostupný. Ujistěte se, že je spuštěn a přístupný z tohoto zařízení"
 		},
-		"reconnected": "Reconnected to server! Redirecting...",
-		"reconnectionFailed": "Something went wrong!"
+		"reconnected": "Znovu připojeno k serveru! Probíhá přesměrování...",
+		"reconnectionFailed": "Něco se pokazilo!"
 	},
 	"serverStatusOverlay": {
-		"heading": "Server isn't connected",
+		"heading": "Server není připojen",
 		"message": [
-			"Please check your internet connection",
-			"Click here",
-			"to change your server URL"
+			"Zkontrolujte prosím připojení k internetu",
+			"Klikněte zde",
+			"pro změnu URL adresy serveru"
 		]
 	},
 	"slidingList": {
-		"empty": "No items to display",
+		"empty": "Žádné položky k zobrazení",
 		"buttons": {
-			"next": "Seek Ahead",
-			"previous": "Seek Backwards"
+			"next": "Posunout vpřed",
+			"previous": "Posunout zpět"
 		}
 	},
 	"tagSelect": {
-		"placholder": "Select or create tag",
-		"placeholderNoTags": "No tags available"
+		"placholder": "Vyberte nebo vytvořte štítek",
+		"placeholderNoTags": "Nejsou k dispozici žádné štítky"
 	},
 	"thumbnailDropdown": {
 		"label": "Upravit náhled",
 		"options": {
-			"selectFromBooks": "Select from books",
-			"uploadImage": "Upload image"
+			"selectFromBooks": "Vybrat z knih",
+			"uploadImage": "Nahrát obrázek"
 		},
 		"uploadImage": {
-			"emptyState": "A preview of your image will appear here",
-			"prompt": "Drop image here or click to select",
-			"remove": "Remove image"
+			"emptyState": "Zde se zobrazí náhled vašeho obrázku",
+			"prompt": "Přetáhněte obrázek sem nebo klikněte pro výběr",
+			"remove": "Odstranit obrázek"
 		}
 	},
 	"common": {
-		"add": "Add",
-		"cancel": "Cancel",
-		"confirm": "Confirm",
-		"save": "Save",
-		"send": "Send",
-		"saveChanges": "Save changes",
-		"create": "Create",
-		"edit": "Edit",
-		"update": "Update",
-		"unimplemented": "This functionality is not yet implemented! Check back later",
-		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later"
+		"add": "Přidat",
+		"cancel": "Zrušit",
+		"confirm": "Potvrdit",
+		"save": "Uložit",
+		"send": "Odeslat",
+		"saveChanges": "Uložit změny",
+		"create": "Vytvořit",
+		"edit": "Upravit",
+		"update": "Aktualizovat",
+		"unimplemented": "Tato funkce ještě není implementována! Zkuste to později",
+		"limitedFunctionality": "Toto ještě není plně implementováno a chybí některé funkce. Zkuste to později"
 	}
 }

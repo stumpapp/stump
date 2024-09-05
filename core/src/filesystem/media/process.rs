@@ -50,6 +50,7 @@ impl From<&LibraryConfig> for FileProcessorOptions {
 	}
 }
 
+// TODO(perf): Implement generic hasher which just takes X bytes from the file (and async version)
 /// Trait defining a standard API for processing files throughout Stump. Every
 /// supported file type should implement this trait.
 pub trait FileProcessor {

@@ -1308,6 +1308,12 @@ async fn create_library(
 					library_config::hard_delete_conversions::set(
 						library_config.hard_delete_conversions,
 					),
+					library_config::process_metadata::set(
+						library_config.process_metadata,
+					),
+					library_config::generate_file_hashes::set(
+						library_config.generate_file_hashes,
+					),
 					library_config::library_pattern::set(
 						library_config.library_pattern.to_string(),
 					),
@@ -1509,6 +1515,12 @@ async fn update_library(
 						),
 						library_config::hard_delete_conversions::set(
 							library_config.hard_delete_conversions,
+						),
+						library_config::process_metadata::set(
+							library_config.process_metadata,
+						),
+						library_config::generate_file_hashes::set(
+							library_config.generate_file_hashes,
 						),
 						library_config::ignore_rules::set(ignore_rules),
 						library_config::thumbnail_config::set(thumbnail_config),

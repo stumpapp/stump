@@ -8,7 +8,6 @@ import {
 	CreateOrUpdateLibrarySchema,
 	formDefaults,
 	IgnoreRulesConfig,
-	LibraryPattern,
 } from '@/components/library/createOrUpdate'
 
 import { useLibraryManagement } from '../context'
@@ -37,10 +36,7 @@ export default function IgnoreRulesPatchForm() {
 	)
 
 	return (
-		<Form form={form} onSubmit={handleSubmit} fieldsetClassName="space-y-12">
-			{/* Note: This component doesn't really belong here, but I didn't want to wrap it in its own form when it is just for display */}
-			{/* Should probably create a separate, non-formy variant */}
-			<LibraryPattern />
+		<Form form={form} onSubmit={handleSubmit}>
 			<IgnoreRulesConfig />
 		</Form>
 	)

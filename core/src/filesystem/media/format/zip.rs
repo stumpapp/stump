@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs::File, io::Read, path::PathBuf, time::Instant};
+use std::{collections::HashMap, fs::File, io::Read, path::PathBuf};
 use tracing::{debug, error, trace};
 
 use crate::{
@@ -7,12 +7,13 @@ use crate::{
 		content_type::ContentType,
 		error::FileError,
 		hash,
-		media::common::{metadata_from_buf, sort_file_names},
+		media::{
+			process::{FileProcessor, FileProcessorOptions, ProcessedFile},
+			utils::{metadata_from_buf, sort_file_names},
+		},
 		FileParts, PathUtils,
 	},
 };
-
-use super::{FileProcessor, FileProcessorOptions, ProcessedFile};
 
 /// A file processor for ZIP files.
 pub struct ZipProcessor;
@@ -70,13 +71,7 @@ impl FileProcessor for ZipProcessor {
 		let mut metadata = None;
 		let mut pages = 0;
 
-		let start = Instant::now();
-
-		let hash = if generate_file_hashes {
-			Self::hash(path)
-		} else {
-			None
-		};
+		let hash = generate_file_hashes.then(|| Self::hash(path)).flatten();
 
 		for i in 0..archive.len() {
 			let mut file = archive.by_index(i)?;
@@ -111,8 +106,6 @@ impl FileProcessor for ZipProcessor {
 				pages += 1;
 			}
 		}
-
-		tracing::debug!(elapsed = ?start.elapsed(), path, "Processed zip");
 
 		Ok(ProcessedFile {
 			path: PathBuf::from(path),

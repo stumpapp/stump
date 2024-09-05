@@ -15,13 +15,16 @@ use crate::{
 		error::FileError,
 		hash::{self, HASH_SAMPLE_COUNT, HASH_SAMPLE_SIZE},
 		image::ImageFormat,
-		media::common::metadata_from_buf,
-		zip::ZipProcessor,
+		media::{
+			process::{
+				FileConverter, FileProcessor, FileProcessorOptions, ProcessedFile,
+			},
+			utils::metadata_from_buf,
+			zip::ZipProcessor,
+		},
 		FileParts, PathUtils,
 	},
 };
-
-use super::{process::FileConverter, FileProcessor, FileProcessorOptions, ProcessedFile};
 
 /// A file processor for RAR files.
 pub struct RarProcessor;
@@ -114,9 +117,10 @@ impl FileProcessor for RarProcessor {
 			return ZipProcessor::process(zip_path, options, config);
 		}
 
-		debug!(path, "Processing RAR");
-
-		let hash: Option<String> = RarProcessor::hash(path);
+		let hash = options
+			.generate_file_hashes
+			.then(|| RarProcessor::hash(path))
+			.flatten();
 
 		let mut archive = RarProcessor::open_for_processing(path)?;
 		let mut pages = 0;
@@ -135,7 +139,7 @@ impl FileProcessor for RarProcessor {
 				continue;
 			}
 
-			if entry.filename.as_os_str() == "ComicInfo.xml" {
+			if entry.filename.as_os_str() == "ComicInfo.xml" && options.process_metadata {
 				let (data, rest) = header.read()?;
 				metadata_buf = Some(data);
 				archive = rest;

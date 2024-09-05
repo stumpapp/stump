@@ -472,6 +472,9 @@ pub(crate) async fn safely_build_and_insert_media(
 			let path = path.clone();
 
 			async move {
+				if semaphore.available_permits() == 0 {
+					tracing::debug!(?path, "No permits available, waiting for one");
+				}
 				let _permit = semaphore
 					.acquire()
 					.await
@@ -514,9 +517,11 @@ pub(crate) async fn safely_build_and_insert_media(
 
 	let success_count = books.len();
 	let error_count = logs.len();
-	tracing::debug!(elapsed = ?start.elapsed(),
+	tracing::debug!(
+		elapsed = ?start.elapsed(),
 		success_count, error_count,
-	 "Built books from disk");
+		"Built books from disk"
+	);
 
 	worker_ctx.report_progress(JobProgress::msg("Inserting books into database"));
 	let task_count = books.len() as i32;

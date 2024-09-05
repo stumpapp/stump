@@ -78,22 +78,20 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
 # Final Stage
 # ------------------------------------------------------------------------------
 
-FROM debian:buster-slim
+# FROM debian:buster-slim
+FROM gcr.io/distroless/cc-debian12:debug
 
-RUN apt-get update && apt-get install -y locales-all && rm -rf /var/lib/apt/lists/*; \
-    mkdir -p config && mkdir -p data && mkdir -p app
+RUN [ "/busybox/ln", "-s", "/busybox/sh", "/bin/sh" ]
+RUN ln -s /busybox/env /usr/bin/env
+
+# RUN apt-get update && apt-get install -y locales-all && rm -rf /var/lib/apt/lists/*; \
+#     mkdir -p config && mkdir -p data && mkdir -p app
+# RUN mkdir -p config && mkdir -p data && mkdir -p app
 
 COPY --from=builder /app/stump_server /app/stump
 COPY --from=pdfium /pdfium /opt/pdfium
 COPY --from=frontend /app/build /app/client
-COPY docker/entrypoint.sh /entrypoint.sh
-
-
-RUN chmod +x /entrypoint.sh; \
-    ln -s /opt/pdfium/lib/libpdfium.so /lib/libpdfium.so; \
-    echo "/usr/local/lib" >> /etc/ld.so.conf.d/mylibs.conf \
-    && ldconfig; \
-    if [ ! -d "/app/client" ] || [ ! "$(ls -A /app/client)" ]; then exit 1; fi
+COPY --chmod=755 docker/entrypoint.sh /entrypoint.sh
 
 # Default Stump environment variables
 ENV STUMP_CONFIG_DIR=/config \
@@ -101,7 +99,7 @@ ENV STUMP_CONFIG_DIR=/config \
     STUMP_PROFILE=release \
     STUMP_PORT=10801 \
     STUMP_IN_DOCKER=true \
-    PDFIUM_PATH=/lib/libpdfium.so \
+    PDFIUM_PATH=/opt/pdfium/lib/libpdfium.so \
     API_VERSION=v1
 
 WORKDIR /app

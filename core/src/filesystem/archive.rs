@@ -17,7 +17,7 @@ pub(crate) fn zip_dir(
 
 	let mut zip_writer = zip::ZipWriter::new(zip_file);
 
-	let options: FileOptions<'_, ()> = FileOptions::default()
+	let options: FileOptions<()> = FileOptions::default()
 		.compression_method(CompressionMethod::Stored)
 		.unix_permissions(0o755);
 

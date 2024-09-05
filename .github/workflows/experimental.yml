@@ -52,7 +52,9 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
           tags: 'perf-experimental'
-          load: ${{ github.event_name == 'pull_request' }}
-          push: ${{ github.event_name == 'push' }}
+          # load: ${{ github.event_name == 'pull_request' }}
+          # push: ${{ github.event_name == 'push' }}
+          load: false
+          push: true
           archs: 'amd64'
           discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}

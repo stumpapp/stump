@@ -18,35 +18,15 @@ if [[ "$PUID" -lt 100 && "$PUID" -ne 0 ]]; then
 fi
 
 
+# TODO(distroless) ensure that the following checks don't cause issues after moving to distroless
+
 ## Add stump group if it doesn't already exist
-# if [[ -z "$(getent group "$PGID" | cut -d':' -f1)" ]]; then
-#     echo "Adding group $GROUP with gid $PGID"
-#     addgroup --gid "$PGID" "$GROUP"
-# else
-#     echo "Group gid $PGID already exists"
-#     # If the group name is not stump, we need to update GROUP as to avoid errors later
-#     if [[ "$(getent group "$PGID" | cut -d':' -f1)" != "$GROUP" ]]; then
-#         GROUP="$(getent group "$PGID" | cut -d':' -f1)"
-#         echo "Group name '$GROUP' does not match expected name 'stump'. Using '$GROUP' instead."
-#     fi
-# fi
 if ! grep -q "^${GROUP}:" /etc/group; then
     echo "Adding group $GROUP with gid $PGID"
     addgroup -g $PGID $GROUP
 fi
 
 ## Add stump user if it doesn't already exist
-# if [[ -z "$(getent passwd "$PUID" | cut -d':' -f1)" ]]; then
-#     echo "Adding user $USER with uid $PUID"
-#     adduser --system --shell /bin/bash --no-create-home --uid "$PUID" --gid "$PGID" "$USER"
-# else
-#     echo "User $USER with uid $PUID already exists"
-#     # If the user name is not stump, we need to update USER as to avoid errors later
-#     if [[ "$(getent passwd "$PUID" | cut -d':' -f1)" != "$USER" ]]; then
-#         USER="$(getent passwd "$PUID" | cut -d':' -f1)"
-#         echo "User name '$USER' does not match expected name 'stump'. Using '$USER' instead."
-#     fi
-# fi
 if ! grep -q "^${USER}:" /etc/passwd; then
     echo "Adding user $USER with uid $PUID"
     adduser -u $PUID -G $GROUP -D -H $USER
@@ -77,7 +57,5 @@ else
 
     # Run as non-root user
     # NOTE: Omit "-l" switch to keep env vars
-    # su "$USER" -c /app/stump
-    # exec su-exec $USER /app/stump
     exec su $USER -s /app/stump -- "$@"
 fi

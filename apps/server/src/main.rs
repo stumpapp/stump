@@ -25,23 +25,10 @@ fn debug_setup() {
 	std::env::set_var("STUMP_PROFILE", "debug");
 }
 
-// #[cfg(feature = "docker")]
-// use tikv_jemallocator::Jemalloc;
-
-// #[cfg(feature = "docker")]
-// #[global_allocator]
-// static GLOBAL: Jemalloc = Jemalloc;
-
 #[tokio::main(flavor = "multi_thread")]
 async fn main() -> Result<(), EntryError> {
 	#[cfg(debug_assertions)]
 	debug_setup();
-
-	if cfg!(feature = "docker") {
-		println!("Running in Docker mode");
-	} else {
-		println!("Running in non-Docker mode");
-	}
 
 	// Get STUMP_CONFIG_DIR to bootstrap startup
 	let config_dir = bootstrap_config_dir();

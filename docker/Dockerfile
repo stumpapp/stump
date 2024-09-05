@@ -84,9 +84,9 @@ FROM gcr.io/distroless/cc-debian12:debug
 RUN [ "/busybox/ln", "-s", "/busybox/sh", "/bin/sh" ]
 RUN ln -s /busybox/env /usr/bin/env
 
+# TODO(distroless): Ensure locales aren't messed up
 # RUN apt-get update && apt-get install -y locales-all && rm -rf /var/lib/apt/lists/*; \
 #     mkdir -p config && mkdir -p data && mkdir -p app
-# RUN mkdir -p config && mkdir -p data && mkdir -p app
 
 COPY --from=builder /app/stump_server /app/stump
 COPY --from=pdfium /pdfium /opt/pdfium

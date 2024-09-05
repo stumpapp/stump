@@ -25,7 +25,6 @@ hyper = "0.14.27"
 jsonwebtoken = "9.3.0"
 linemux = { git = "https://github.com/jmagnuson/linemux.git", rev = "acaafc602afac5d7a9cd3e087dafc937cac1e364" }
 local-ip-address = "0.6.1"
-tikv-jemallocator = { version = "0.5", optional = true }
 once_cell = { workspace = true }
 prisma-client-rust = { workspace = true }
 rand = "0.8.5"
@@ -67,6 +66,3 @@ openssl = { version = "0.10.61", features = ["vendored"] }
 
 [target.x86_64-unknown-linux-musl.dependencies]
 openssl = { version = "0.10.61", features = ["vendored"] }
-
-[features]
-docker = ["dep:tikv-jemallocator"]

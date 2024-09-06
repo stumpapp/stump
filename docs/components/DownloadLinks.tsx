@@ -1,4 +1,11 @@
-import { SiAndroid, SiApple, SiDocker, SiLinux, SiWindows10 } from '@icons-pack/react-simple-icons'
+import {
+	SiAndroid,
+	SiApple,
+	SiDocker,
+	SiIos,
+	SiLinux,
+	SiWindows10,
+} from '@icons-pack/react-simple-icons'
 import clsx from 'clsx'
 import { motion } from 'framer-motion'
 import React from 'react'
@@ -29,6 +36,7 @@ export default function DownloadLinks() {
 						target="_blank"
 						rel="noreferrer"
 					>
+						{/* @ts-expect-error: Its fine */}
 						<link.icon className="h-5 w-5" />
 					</a>
 				</motion.div>
@@ -39,20 +47,17 @@ export default function DownloadLinks() {
 
 const links = [
 	{
-		disabled: true,
-		href: '#',
+		href: 'https://github.com/stumpapp/stump/releases/latest',
 		icon: SiLinux,
 		title: 'Linux',
 	},
 	{
-		disabled: true,
-		href: '#',
+		href: 'https://github.com/stumpapp/stump/releases/latest',
 		icon: SiApple,
 		title: 'macOS',
 	},
 	{
-		disabled: true,
-		href: '#',
+		href: 'https://github.com/stumpapp/stump/releases/latest',
 		icon: SiWindows10,
 		title: 'Windows',
 	},
@@ -66,5 +71,11 @@ const links = [
 		href: '#',
 		icon: SiAndroid,
 		title: 'Android',
+	},
+	{
+		disabled: true,
+		href: '#',
+		icon: SiIos,
+		title: 'iOS',
 	},
 ]

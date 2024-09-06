@@ -29,8 +29,8 @@ export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 			/>
 			<div className="max-w-sm sm:max-w-md md:max-w-xl">
 				<div className="text-left">
-					<h1 className="text-4xl font-semibold text-contrast">A critical error occurred</h1>
-					<p className="mt-1.5 text-lg text-contrast-300">
+					<h1 className="text-4xl font-semibold text-foreground">A critical error occurred</h1>
+					<p className="mt-1.5 text-lg text-foreground-subtle">
 						{error.message || 'The error message was empty.'}
 					</p>
 				</div>

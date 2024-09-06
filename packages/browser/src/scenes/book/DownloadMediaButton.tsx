@@ -10,16 +10,18 @@ type Props = {
 export default function DownloadMediaButton({ media }: Props) {
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 
+	const bookTitle = media.metadata?.title || media.name
+
 	const renderButton = () => {
 		if (isAtLeastMedium) {
 			return (
-				<IconButton size="sm" variant="ghost" title={`Download ${media.name}`}>
+				<IconButton size="sm" variant="ghost" title={`Download ${bookTitle}`}>
 					<DownloadCloud size="1.25rem" />
 				</IconButton>
 			)
 		} else {
 			return (
-				<Button className="w-full" variant="ghost" title={`Download ${media.name}`}>
+				<Button className="w-full" variant="ghost" title={`Download ${bookTitle}`}>
 					<DownloadCloud size="1.25rem" className="mr-2" /> Download Book
 				</Button>
 			)

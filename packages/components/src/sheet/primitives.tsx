@@ -105,11 +105,11 @@ const sheetVariants = cva(
 		variants: {
 			position: {
 				bottom:
-					'inset-x-0 bottom-0 border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom border-edge-200/80',
-				left: 'inset-y-0 left-0 h-full border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left border-edge-200/80',
+					'inset-x-0 bottom-0 border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom border-edge-subtle/80',
+				left: 'inset-y-0 left-0 h-full border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left border-edge-subtle/80',
 				right:
-					'inset-y-0 right-0 h-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right border-edge-200/80',
-				top: 'inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top border-edge-200/80',
+					'inset-y-0 right-0 h-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right border-edge-subtle/80',
+				top: 'inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top border-edge-subtle/80',
 			},
 			size: {
 				content: '',
@@ -143,7 +143,7 @@ const SheetContent = React.forwardRef<
 			{children}
 			{closeIcon && (
 				<SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 focus:ring-offset-background disabled:pointer-events-none data-[state=open]:bg-background">
-					<X className="h-4 w-4 text-contrast-300" />
+					<X className="h-4 w-4 text-foreground-subtle" />
 					<span className="sr-only">Close</span>
 				</SheetPrimitive.Close>
 			)}
@@ -174,7 +174,7 @@ const SheetTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<SheetPrimitive.Title
 		ref={ref}
-		className={cn('text-lg font-semibold text-contrast', 'px-6', className)}
+		className={cn('text-lg font-semibold text-foreground', 'px-6', className)}
 		{...props}
 	/>
 ))
@@ -186,7 +186,7 @@ const SheetDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<SheetPrimitive.Description
 		ref={ref}
-		className={cn('px-6 text-sm text-muted', className)}
+		className={cn('px-6 text-sm text-foreground-muted', className)}
 		{...props}
 	/>
 ))

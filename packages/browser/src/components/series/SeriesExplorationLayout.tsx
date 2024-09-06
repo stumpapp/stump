@@ -16,7 +16,7 @@ export default function SeriesExplorationLayout() {
 				<IconButton
 					variant="ghost"
 					size="xs"
-					className="hover:bg-background-300"
+					className="hover:bg-background-surface-hover"
 					pressEffect={false}
 					onClick={() => setLayout('GRID')}
 					disabled={layout === 'GRID'}
@@ -29,7 +29,7 @@ export default function SeriesExplorationLayout() {
 				<IconButton
 					variant="ghost"
 					size="xs"
-					className="hover:bg-background-300"
+					className="hover:bg-background-surface-hover"
 					pressEffect={false}
 					onClick={() => setLayout('TABLE')}
 					disabled={layout === 'TABLE'}

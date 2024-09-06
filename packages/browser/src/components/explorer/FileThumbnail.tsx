@@ -86,7 +86,7 @@ export default function FileThumbnail({
 	if (isDirectory) {
 		return (
 			<div className={className}>
-				<Folder className={cn('text-muted', iconSizes)} />
+				<Folder className={cn('text-foreground-muted', iconSizes)} />
 			</div>
 		)
 	}
@@ -94,7 +94,7 @@ export default function FileThumbnail({
 	if (showFallback || !book) {
 		return (
 			<div className={className} onClick={attemptReload}>
-				<Book className={cn('text-muted', iconSizes)} />
+				<Book className={cn('text-foreground-muted', iconSizes)} />
 			</div>
 		)
 	}

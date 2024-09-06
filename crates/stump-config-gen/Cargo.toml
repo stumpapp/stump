@@ -1,0 +1,20 @@
+[package]
+name = "stump-config-gen"
+version = "0.0.6"
+description = "A procedural macro for generating the StumpConfig struct."
+edition = "2021"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0.86"
+quote = "1.0.36"
+syn = "2.0.75"
+
+[dev-dependencies]
+serde = { workspace = true }
+thiserror = { workspace = true }
+itertools = { workspace = true }
+toml = { workspace = true }
+temp-env = "0.3.6"

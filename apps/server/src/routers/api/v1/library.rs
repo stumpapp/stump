@@ -18,8 +18,8 @@ use stump_core::{
 	db::{
 		entity::{
 			library_series_ids_media_ids_include, library_thumbnails_deletion_include,
-			FileStatus, Library, LibraryOptions, LibraryScanMode, LibraryStats, Media,
-			Series, Tag, User, UserPermission,
+			macros::series_or_library_thumbnail, FileStatus, Library, LibraryOptions,
+			LibraryScanMode, LibraryStats, Media, Series, Tag, User, UserPermission,
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 		PrismaCountTrait,
@@ -293,7 +293,6 @@ pub struct LibraryStatsParams {
 	all_users: bool,
 }
 
-// TODO(historical-read-session): refactor query
 #[utoipa::path(
 	get,
 	path = "/api/v1/libraries/stats",
@@ -331,27 +330,13 @@ async fn get_libraries_stats(
 			),
 			progress_counts AS (
 				SELECT
-					IFNULL(SUM(
-							CASE WHEN rp.is_completed THEN
-								1
-							ELSE
-								0
-							END),
-						0) AS completed_books,
-					IFNULL(SUM(
-							CASE WHEN rp.is_completed THEN
-								0
-							ELSE
-								1
-							END),
-						0) AS in_progress_books
+					COUNT(frs.id) AS completed_books,
+					COUNT(rs.id) AS in_progress_books
 				FROM
 					media m
-					INNER JOIN read_progresses rp ON rp.media_id = m.id
-				WHERE
-					rp.is_completed AND (
-						{} IS TRUE OR rp.user_id = {}
-					)
+					LEFT JOIN finished_reading_sessions frs ON frs.media_id = m.id
+					LEFT JOIN reading_sessions rs ON rs.media_id = m.id
+				WHERE {} IS TRUE OR (rs.user_id = {} OR frs.user_id = {})
 			)
 			SELECT
 				*
@@ -360,6 +345,7 @@ async fn get_libraries_stats(
 				INNER JOIN progress_counts;
 			"#,
 			PrismaValue::Boolean(params.all_users),
+			PrismaValue::String(user.id.clone()),
 			PrismaValue::String(user.id)
 		))
 		.exec()
@@ -579,29 +565,27 @@ async fn get_library_media(
 }
 
 pub(crate) fn get_library_thumbnail(
-	library: &library::Data,
-	first_series: &series::Data,
-	first_book: &media::Data,
+	id: &str,
+	first_series: series_or_library_thumbnail::Data,
+	first_book: Option<series_or_library_thumbnail::media::Data>,
 	image_format: Option<ImageFormat>,
 	config: &StumpConfig,
 ) -> APIResult<(ContentType, Vec<u8>)> {
-	let library_id = library.id.clone();
-
 	if let Some(format) = image_format.clone() {
 		let extension = format.extension();
 
 		let path = config
 			.get_thumbnails_dir()
-			.join(format!("{}.{}", library_id, extension));
+			.join(format!("{}.{}", id, extension));
 
 		if path.exists() {
-			tracing::trace!(?path, library_id, "Found generated library thumbnail");
+			tracing::trace!(?path, id, "Found generated library thumbnail");
 			return Ok((ContentType::from(format), read_entire_file(path)?));
 		}
 	}
 
-	if let Some(path) = get_unknown_thumnail(&library_id, config.get_thumbnails_dir()) {
-		tracing::debug!(path = ?path, library_id, "Found library thumbnail that does not align with config");
+	if let Some(path) = get_unknown_thumnail(id, config.get_thumbnails_dir()) {
+		tracing::debug!(path = ?path, id, "Found library thumbnail that does not align with config");
 		let FileParts { extension, .. } = path.file_parts();
 		return Ok((
 			ContentType::from_extension(extension.as_str()),
@@ -609,7 +593,7 @@ pub(crate) fn get_library_thumbnail(
 		));
 	}
 
-	get_series_thumbnail(first_series, first_book, image_format, config)
+	get_series_thumbnail(&first_series.id, first_book, image_format, config)
 }
 
 // TODO: ImageResponse for utoipa
@@ -638,55 +622,40 @@ async fn get_library_thumbnail_handler(
 	let user = get_session_user(&session)?;
 	let age_restriction = user.age_restriction.as_ref();
 
+	let series_filters = chain_optional_iter(
+		[
+			series::library_id::equals(Some(id.clone())),
+			series::library::is(vec![library_not_hidden_from_user_filter(&user)]),
+		],
+		[age_restriction
+			.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset))],
+	);
+	let book_filters = chain_optional_iter(
+		[],
+		[age_restriction
+			.as_ref()
+			.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset))],
+	);
+
 	let first_series = db
 		.series()
-		// Find the first series in the library which satisfies the age restriction
-		.find_first(chain_optional_iter(
-			[
-				series::library_id::equals(Some(id.clone())),
-				series::library::is(vec![library_not_hidden_from_user_filter(&user)]),
-			],
-			[age_restriction
-				.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset))],
-		))
-		.with(
-			// Then load the first media in that series which satisfies the age restriction
-			series::media::fetch(chain_optional_iter(
-				[],
-				[age_restriction
-					.as_ref()
-					.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset))],
-			))
-			.take(1)
-			.order_by(media::name::order(Direction::Asc)),
-		)
-		.with(series::library::fetch().with(library::library_options::fetch()))
+		.find_first(series_filters)
 		.order_by(series::name::order(Direction::Asc))
+		.select(series_or_library_thumbnail::select(book_filters))
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound("Library has no series".to_string()))?;
+	let first_book = first_series.media.first().cloned();
 
-	let library = first_series
-		.library()?
-		.ok_or(APIError::Unknown(String::from("Failed to load library")))?;
-	let image_format = library
-		.library_options()
-		.map(LibraryOptions::from)?
-		.thumbnail_config
-		.map(|config| config.format);
+	let library_options = first_series
+		.library
+		.as_ref()
+		.map(|l| l.library_options.clone())
+		.map(LibraryOptions::from);
+	let image_format = library_options.and_then(|o| o.thumbnail_config.map(|c| c.format));
 
-	let first_book = first_series.media()?.first().ok_or(APIError::NotFound(
-		"Library has no media to get thumbnail from".to_string(),
-	))?;
-
-	get_library_thumbnail(
-		library,
-		&first_series,
-		first_book,
-		image_format,
-		&ctx.config,
-	)
-	.map(ImageResponse::from)
+	get_library_thumbnail(&id, first_series, first_book, image_format, &ctx.config)
+		.map(ImageResponse::from)
 }
 
 #[derive(Deserialize, ToSchema, specta::Type)]
@@ -1673,27 +1642,13 @@ async fn get_library_stats(
 			),
 			progress_counts AS (
 				SELECT
-					IFNULL(SUM(
-							CASE WHEN rp.is_completed THEN
-								1
-							ELSE
-								0
-							END),
-						0) AS completed_books,
-					IFNULL(SUM(
-							CASE WHEN rp.is_completed THEN
-								0
-							ELSE
-								1
-							END),
-						0) AS in_progress_books
+					COUNT(frs.id) AS completed_books,
+					COUNT(rs.id) AS in_progress_books
 				FROM
 					media m
-					INNER JOIN read_progresses rp ON rp.media_id = m.id
-				WHERE
-					rp.is_completed AND (
-						{} IS TRUE OR rp.user_id = {}
-					)
+					LEFT JOIN finished_reading_sessions frs ON frs.media_id = m.id
+					LEFT JOIN reading_sessions rs ON rs.media_id = m.id
+				WHERE {} IS TRUE OR (rs.user_id = {} OR frs.user_id = {})
 			)
 			SELECT
 				*
@@ -1703,6 +1658,7 @@ async fn get_library_stats(
 			"#,
 			PrismaValue::String(id),
 			PrismaValue::Boolean(params.all_users),
+			PrismaValue::String(user.id.clone()),
 			PrismaValue::String(user.id)
 		))
 		.exec()
@@ -1710,7 +1666,7 @@ async fn get_library_stats(
 		.into_iter()
 		.next()
 		.ok_or(APIError::InternalServerError(
-			"Failed to compute stats for libraries".to_string(),
+			"Failed to compute stats for library".to_string(),
 		))?;
 
 	Ok(Json(stats))

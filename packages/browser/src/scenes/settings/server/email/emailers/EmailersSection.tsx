@@ -16,7 +16,7 @@ export default function EmailersSection() {
 				</Text>
 			</div>
 
-			<Alert rounded="sm" level="grayscale">
+			<Alert rounded="sm" level="info">
 				<Alert.Content>
 					<Text variant="muted">
 						{t('settingsScene.server/email.sections.emailers.singleInstanceDisclaimer')}

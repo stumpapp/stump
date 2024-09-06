@@ -9,7 +9,7 @@ const ControlButton = forwardRef<HTMLButtonElement, ComponentProps<typeof IconBu
 			<IconButton
 				variant="ghost"
 				size="xs"
-				className="hover:bg-background-300"
+				className="hover:bg-background-surface-hover"
 				ref={ref}
 				pressEffect={false}
 				{...props}

@@ -24,7 +24,7 @@ export const BookListItem = React.memo(({ book, navigate }: BookListItemProps) =
 			style={{ height: 50, objectFit: 'scale-down', width: 50 / (3 / 2) }}
 		/>
 		<View className="flex-1">
-			<Text size="sm">{book.name}</Text>
+			<Text size="sm">{book.metadata?.title || book.name}</Text>
 		</View>
 	</TouchableOpacity>
 ))

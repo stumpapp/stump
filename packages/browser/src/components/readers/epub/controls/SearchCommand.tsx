@@ -144,11 +144,11 @@ export default function SearchCommand() {
 			</ControlButton>
 			<Command.Dialog open={open} onOpenChange={setOpen}>
 				<div className="flex items-center border-b border-b-edge px-4">
-					<Search className="mr-2 h-4 w-4 shrink-0 text-muted opacity-50" />
+					<Search className="mr-2 h-4 w-4 shrink-0 text-foreground-muted opacity-50" />
 					<input
 						placeholder="Enter a basic query to search for"
 						className={cn(
-							'flex h-11 w-full rounded-md bg-transparent py-3 text-sm text-contrast-200 outline-none placeholder:text-muted disabled:cursor-not-allowed disabled:opacity-50',
+							'flex h-11 w-full rounded-md bg-transparent py-3 text-sm text-foreground-subtle outline-none placeholder:text-foreground-muted disabled:cursor-not-allowed disabled:opacity-50',
 						)}
 						value={query}
 						onChange={(e) => setQuery(e.target.value)}

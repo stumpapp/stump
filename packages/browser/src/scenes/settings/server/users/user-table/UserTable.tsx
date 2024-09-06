@@ -66,13 +66,14 @@ const baseColumns = [
 		),
 		header: () => (
 			<div className="flex w-full items-center gap-2">
-				<span>Active sessions</span>
+				<span>Sessions</span>
 				<ToolTip content="The number of non-expired login sessions for this user">
 					<HelpCircle className="h-3 w-3" />
 				</ToolTip>
 			</div>
 		),
 		id: 'login_sessions_count',
+		size: 110,
 	}),
 	columnHelper.display({
 		cell: ({ row: { original } }) => (
@@ -82,6 +83,7 @@ const baseColumns = [
 		),
 		header: 'Status',
 		id: 'is_locked',
+		size: 100,
 	}),
 ] as ColumnDef<User>[]
 
@@ -111,7 +113,7 @@ export default function UserTable() {
 	)
 
 	return (
-		<Card className="bg-background-200 p-1">
+		<Card className="bg-background-surface p-1">
 			<Table
 				sortable
 				columns={columns}
@@ -120,11 +122,15 @@ export default function UserTable() {
 					onPaginationChange: setPagination,
 					pageCount,
 					state: {
+						columnPinning: {
+							right: ['actions'],
+						},
 						pagination,
 					},
 				}}
 				data={users}
 				fullWidth
+				cellClassName="bg-background-surface"
 			/>
 			<InspectUserSlideOver user={inspectingUser} onClose={() => setInspectingUser(null)} />
 		</Card>

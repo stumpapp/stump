@@ -25,7 +25,7 @@ export default function SettingsSideBar() {
 	return (
 		<div
 			className={cn(
-				'relative flex h-full w-48 shrink-0 flex-col border-edge bg-background px-2 py-4 text-contrast-200',
+				'relative flex h-full w-48 shrink-0 flex-col border-edge bg-background px-2 py-4 text-foreground-subtle',
 				primary_navigation_mode === 'TOPBAR'
 					? 'fixed top-12 z-50 h-screen border-x'
 					: 'fixed top-0 z-50 h-screen border-r',
@@ -70,7 +70,7 @@ export default function SettingsSideBar() {
 						<IconButton
 							title="Go home"
 							variant="ghost"
-							className="border border-transparent p-1.5 text-contrast hover:border-edge-200/50 hover:bg-sidebar-200/70"
+							className="border border-transparent p-1.5 text-foreground hover:border-edge-subtle/50 hover:bg-sidebar-surface/70"
 							onClick={() => navigate(paths.home())}
 						>
 							<Home className="h-4 w-4 -scale-x-[1] transform" />

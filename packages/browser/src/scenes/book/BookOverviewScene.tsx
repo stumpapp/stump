@@ -65,7 +65,7 @@ export default function BookOverviewScene() {
 	const renderHeader = () => {
 		return (
 			<div className="flex flex-col items-center text-center md:items-start md:text-left">
-				<Heading size="sm">{media.name}</Heading>
+				<Heading size="sm">{media.metadata?.title || media.name}</Heading>
 
 				<BookLibrarySeriesLinks
 					libraryId={media.series?.library_id}
@@ -78,7 +78,6 @@ export default function BookOverviewScene() {
 		)
 	}
 
-	// TODO(historical-read-session): double check default order
 	const completedAt = sortBy(media.finished_reading_sessions, ({ completed_at }) =>
 		dayjs(completed_at).toDate(),
 	).at(-1)?.completed_at
@@ -89,7 +88,7 @@ export default function BookOverviewScene() {
 		<SceneContainer>
 			<Suspense>
 				<Helmet>
-					<title>Stump | {media.name || ''}</title>
+					<title>Stump | {media.metadata?.title || media.name || ''}</title>
 				</Helmet>
 
 				<div className="flex h-full w-full flex-col gap-4">

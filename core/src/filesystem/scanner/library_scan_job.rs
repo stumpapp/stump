@@ -409,10 +409,15 @@ impl JobExt for LibraryScanJob {
 					format!("Scanning series at {}", path_buf.display()).as_str(),
 				));
 
+				// If the library is collection-priority, any child directories are 'ignored' and their
+				// files are part of / folded into the top-most folder (series).
+				// If the library is not collection-priority, each subdirectory is its own series.
+				// Therefore, we only scan one level deep when walking a series whose library is not
+				// collection-priority to avoid scanning duplicates which are part of other series
 				let max_depth = self
 					.options
 					.as_ref()
-					.and_then(|o| o.is_collection_based().then_some(1));
+					.and_then(|o| (!o.is_collection_based()).then_some(1));
 
 				let ignore_rules = generate_rule_set(&[
 					path_buf.clone(),

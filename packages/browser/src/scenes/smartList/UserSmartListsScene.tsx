@@ -112,7 +112,7 @@ export default function UserSmartListsScene() {
 						<Input
 							placeholder={t(withLocaleKey('searchPlaceholder'))}
 							variant="primary"
-							leftDecoration={<Search className="h-4 w-4 text-muted" />}
+							leftDecoration={<Search className="h-4 w-4 text-foreground-muted" />}
 							rightDecoration={isRefetching ? <ProgressSpinner size="sm" /> : null}
 							className="h-9"
 							fullWidth

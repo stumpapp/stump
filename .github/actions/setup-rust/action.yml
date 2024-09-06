@@ -1,6 +1,12 @@
 name: Setup system dependencies
 description: Install system dependencies and setup cache
 
+inputs:
+  cache-dependencies:
+    description: 'Cache dependencies. This does not affect the Prisma client cache.'
+    required: false
+    default: 'true'
+
 runs:
   using: composite
   steps:
@@ -13,11 +19,13 @@ runs:
         components: rustfmt, clippy
 
     - name: Configure environment
-      if: ${{ runner.name != 'oromei-ubuntu' && runner.os != 'Windows' }}
+      if: ${{ runner.environment != 'self-hosted' && runner.os != 'Windows' }}
       shell: bash
       run: CHECK_NODE=0 CHECK_CARGO=0 DEV_SETUP=0 ./scripts/system-setup.sh
 
+    # See https://github.com/Swatinem/rust-cache/issues/194
     - name: Cache Rust Dependencies
+      if: ${{ inputs.cache-dependencies == 'true' }}
       uses: Swatinem/rust-cache@v2
       with:
         shared-key: stump-rust-cache
@@ -37,8 +45,7 @@ runs:
     - name: Save Prisma client
       id: cache-prisma-save
       if: ${{ steps.cache-prisma-restore.outputs.cache-hit != 'true' }}
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       with:
         path: core/src/prisma.rs
         key: ${{ runner.os }}-prisma-${{ hashFiles('**/schema.prisma') }}
-        restore-keys: ${{ runner.os }}-prisma-${{ hashFiles('**/schema.prisma') }}

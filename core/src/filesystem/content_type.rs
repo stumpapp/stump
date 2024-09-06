@@ -20,8 +20,11 @@ pub enum ContentType {
 	COMIC_ZIP,
 	RAR,
 	COMIC_RAR,
+	AVIF,
+	HEIF,
 	PNG,
 	JPEG,
+	JPEG_XL,
 	WEBP,
 	GIF,
 	TXT,
@@ -58,7 +61,7 @@ impl ContentType {
 	/// Infer the MIME type of a file extension.
 	///
 	/// ### Example
-	/// ```rust
+	/// ```no_run
 	/// use stump_core::filesystem::ContentType;
 	///
 	/// let content_type = ContentType::from_extension("png");
@@ -75,9 +78,12 @@ impl ContentType {
 			"cbz" => ContentType::COMIC_ZIP,
 			"rar" => ContentType::RAR,
 			"cbr" => ContentType::COMIC_RAR,
+			"avif" => ContentType::AVIF,
+			"heif" => ContentType::HEIF,
 			"png" => ContentType::PNG,
 			"jpg" => ContentType::JPEG,
 			"jpeg" => ContentType::JPEG,
+			"jxl" => ContentType::JPEG_XL,
 			"webp" => ContentType::WEBP,
 			"gif" => ContentType::GIF,
 			"txt" => ContentType::TXT,
@@ -89,7 +95,7 @@ impl ContentType {
 	/// then the file extension is used to determine the content type.
 	///
 	/// ### Example
-	/// ```rust
+	/// ```no_run
 	/// use stump_core::filesystem::ContentType;
 	///
 	/// let content_type = ContentType::from_file("test.png");
@@ -104,7 +110,7 @@ impl ContentType {
 	/// inferred, then the content type is set to [ContentType::UNKNOWN].
 	///
 	/// ### Example
-	/// ```rust
+	/// ```no_run
 	/// use stump_core::filesystem::ContentType;
 	///
 	/// let buf = [0xFF, 0xD8, 0xFF, 0xAA];
@@ -121,7 +127,7 @@ impl ContentType {
 	/// inferred, then the extension is used to determine the content type.
 	///
 	/// ### Example
-	/// ```rust
+	/// ```no_run
 	/// use stump_core::filesystem::ContentType;
 	///
 	/// // This is NOT a valid PNG buff
@@ -148,7 +154,7 @@ impl ContentType {
 	/// then the extension of the path is used to determine the content type.
 	///
 	/// ### Example
-	/// ```rust
+	/// ```no_run
 	/// use stump_core::filesystem::ContentType;
 	/// use std::path::Path;
 	///
@@ -177,7 +183,7 @@ impl ContentType {
 	/// Returns true if the content type is an image.
 	///
 	/// ## Example
-	/// ```rust
+	/// ```no_run
 	/// use stump_core::filesystem::ContentType;
 	///
 	/// let content_type = ContentType::PNG;
@@ -195,23 +201,44 @@ impl ContentType {
 	///
 	/// ## Example
 	///
-	/// ```rust
+	/// ```no_run
 	/// use stump_core::filesystem::ContentType;
 	///
 	/// let content_type = ContentType::PNG;
 	/// assert!(content_type.is_opds_legacy_image());
 	/// ```
 	pub fn is_opds_legacy_image(&self) -> bool {
-		self == &ContentType::PNG
-			|| self == &ContentType::JPEG
-			|| self == &ContentType::GIF
+		matches!(
+			self,
+			ContentType::PNG | ContentType::JPEG | ContentType::GIF
+		)
+	}
+
+	/// Returns true if the content type is a decodable image. A decodable image is an image that
+	/// can be decoded by the `image` crate or by a custom image processor in Stump.
+	///
+	/// See https://github.com/image-rs/image?tab=readme-ov-file#supported-image-formats
+	///
+	/// ## Example
+	///
+	/// ```no_run
+	/// use stump_core::filesystem::ContentType;
+	///
+	/// let content_type = ContentType::PNG;
+	/// assert!(content_type.is_decodable_image());
+	/// ```
+	pub fn is_decodable_image(&self) -> bool {
+		matches!(
+			self,
+			ContentType::PNG | ContentType::JPEG | ContentType::WEBP | ContentType::GIF
+		)
 	}
 
 	/// Returns true if the content type is a ZIP archive.
 	///
 	/// ## Example
 	///
-	/// ```rust
+	/// ```no_run
 	/// use stump_core::filesystem::ContentType;
 	///
 	/// let content_type = ContentType::ZIP;
@@ -225,7 +252,7 @@ impl ContentType {
 	///
 	/// ## Example
 	///
-	/// ```rust
+	/// ```no_run
 	/// use stump_core::filesystem::ContentType;
 	///
 	/// let content_type = ContentType::RAR;
@@ -239,7 +266,7 @@ impl ContentType {
 	///
 	/// ## Example
 	///
-	/// ```rust
+	/// ```no_run
 	/// use stump_core::filesystem::ContentType;
 	///
 	/// let content_type = ContentType::EPUB_ZIP;
@@ -262,9 +289,12 @@ impl ContentType {
 			ContentType::COMIC_ZIP => "cbz",
 			ContentType::RAR => "rar",
 			ContentType::COMIC_RAR => "cbr",
+			ContentType::HEIF => "heif",
 			ContentType::PNG => "png",
 			ContentType::JPEG => "jpg",
+			ContentType::JPEG_XL => "jxl",
 			ContentType::WEBP => "webp",
+			ContentType::AVIF => "avif",
 			ContentType::GIF => "gif",
 			ContentType::TXT => "txt",
 			ContentType::UNKNOWN => "",
@@ -288,9 +318,12 @@ impl From<&str> for ContentType {
 			"application/vnd.comicbook+zip" => ContentType::COMIC_ZIP,
 			"application/vnd.rar" => ContentType::RAR,
 			"application/vnd.comicbook-rar" => ContentType::COMIC_RAR,
+			"image/heif" => ContentType::HEIF,
 			"image/png" => ContentType::PNG,
 			"image/jpeg" => ContentType::JPEG,
+			"image/jxl" => ContentType::JPEG_XL,
 			"image/webp" => ContentType::WEBP,
+			"image/avif" => ContentType::AVIF,
 			"image/gif" => ContentType::GIF,
 			_ => ContentType::UNKNOWN,
 		}
@@ -309,8 +342,11 @@ impl std::fmt::Display for ContentType {
 			ContentType::COMIC_ZIP => write!(f, "application/vnd.comicbook+zip"),
 			ContentType::RAR => write!(f, "application/vnd.rar"),
 			ContentType::COMIC_RAR => write!(f, "application/vnd.comicbook-rar"),
+			ContentType::AVIF => write!(f, "image/avif"),
+			ContentType::HEIF => write!(f, "image/heif"),
 			ContentType::PNG => write!(f, "image/png"),
 			ContentType::JPEG => write!(f, "image/jpeg"),
+			ContentType::JPEG_XL => write!(f, "image/jxl"),
 			ContentType::WEBP => write!(f, "image/webp"),
 			ContentType::GIF => write!(f, "image/gif"),
 			ContentType::TXT => write!(f, "text/plain"),
@@ -327,6 +363,7 @@ impl From<ImageFormat> for ContentType {
 			// ImageFormat::JpegXl => ContentType::JPEG,
 			ImageFormat::Png => ContentType::PNG,
 			ImageFormat::Webp => ContentType::WEBP,
+			// ImageFormat::Avif => ContentType::AVIF,
 		}
 	}
 }
@@ -346,8 +383,11 @@ impl TryFrom<ContentType> for image::ImageFormat {
 		// Match values that are compatible with the image crate. Other values should return
 		// an error.
 		match value {
+			ContentType::AVIF => Err(unsupported_error("ContentType::AVIF")),
+			ContentType::HEIF => Err(unsupported_error("ContentType::HEIF")),
 			ContentType::PNG => Ok(image::ImageFormat::Png),
 			ContentType::JPEG => Ok(image::ImageFormat::Jpeg),
+			ContentType::JPEG_XL => Err(unsupported_error("ContentType::JPEG_XL")),
 			ContentType::WEBP => Ok(image::ImageFormat::WebP),
 			ContentType::GIF => Ok(image::ImageFormat::Gif),
 			ContentType::XHTML => Err(unsupported_error("ContentType::XHTML")),
@@ -362,5 +402,227 @@ impl TryFrom<ContentType> for image::ImageFormat {
 			ContentType::TXT => Err(unsupported_error("ContentType::TXT")),
 			ContentType::UNKNOWN => Err(unsupported_error("ContentType::UNKNOWN")),
 		}
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_content_type_from_extension() {
+		assert_eq!(ContentType::from_extension("xhtml"), ContentType::XHTML);
+		assert_eq!(ContentType::from_extension("xml"), ContentType::XML);
+		assert_eq!(ContentType::from_extension("html"), ContentType::HTML);
+		assert_eq!(ContentType::from_extension("pdf"), ContentType::PDF);
+		assert_eq!(ContentType::from_extension("epub"), ContentType::EPUB_ZIP);
+		assert_eq!(ContentType::from_extension("zip"), ContentType::ZIP);
+		assert_eq!(ContentType::from_extension("cbz"), ContentType::COMIC_ZIP);
+		assert_eq!(ContentType::from_extension("rar"), ContentType::RAR);
+		assert_eq!(ContentType::from_extension("cbr"), ContentType::COMIC_RAR);
+		assert_eq!(ContentType::from_extension("png"), ContentType::PNG);
+		assert_eq!(ContentType::from_extension("jpg"), ContentType::JPEG);
+		assert_eq!(ContentType::from_extension("jpeg"), ContentType::JPEG);
+		assert_eq!(ContentType::from_extension("webp"), ContentType::WEBP);
+		assert_eq!(ContentType::from_extension("avif"), ContentType::AVIF);
+		assert_eq!(ContentType::from_extension("gif"), ContentType::GIF);
+		assert_eq!(ContentType::from_extension("txt"), ContentType::TXT);
+		assert_eq!(ContentType::from_extension("opf"), ContentType::XML);
+		assert_eq!(ContentType::from_extension("ncx"), ContentType::XML);
+		assert_eq!(ContentType::from_extension("unknown"), ContentType::UNKNOWN);
+	}
+
+	#[test]
+	fn test_content_type_from_file() {
+		assert_eq!(ContentType::from_file("test.xhtml"), ContentType::XHTML);
+		assert_eq!(ContentType::from_file("test.xml"), ContentType::XML);
+		assert_eq!(ContentType::from_file("test.html"), ContentType::HTML);
+		assert_eq!(ContentType::from_file("test.pdf"), ContentType::PDF);
+		assert_eq!(ContentType::from_file("test.epub"), ContentType::EPUB_ZIP);
+		assert_eq!(ContentType::from_file("test.zip"), ContentType::ZIP);
+		assert_eq!(ContentType::from_file("test.cbz"), ContentType::COMIC_ZIP);
+		assert_eq!(ContentType::from_file("test.rar"), ContentType::RAR);
+		assert_eq!(ContentType::from_file("test.cbr"), ContentType::COMIC_RAR);
+		assert_eq!(ContentType::from_file("test.png"), ContentType::PNG);
+		assert_eq!(ContentType::from_file("test.jpg"), ContentType::JPEG);
+		assert_eq!(ContentType::from_file("test.jpeg"), ContentType::JPEG);
+		assert_eq!(ContentType::from_file("test.webp"), ContentType::WEBP);
+		assert_eq!(ContentType::from_file("test.avif"), ContentType::AVIF);
+		assert_eq!(ContentType::from_file("test.gif"), ContentType::GIF);
+		assert_eq!(ContentType::from_file("test.txt"), ContentType::TXT);
+		assert_eq!(ContentType::from_file("test.unknown"), ContentType::UNKNOWN);
+	}
+
+	#[test]
+	fn test_content_type_from_bytes() {
+		let buf = [0xFF, 0xD8, 0xFF, 0xAA];
+		assert_eq!(ContentType::from_bytes(&buf), ContentType::JPEG);
+	}
+
+	#[test]
+	fn test_content_type_from_bytes_with_fallback() {
+		let buf = [0xFF, 0xD8, 0xBB, 0xBB]; // Not a valid PNG buffer
+		assert_eq!(
+			ContentType::from_bytes_with_fallback(&buf, "png"),
+			ContentType::PNG
+		);
+	}
+
+	#[test]
+	fn test_content_type_from_path() {
+		let path = Path::new("test.xhtml");
+		assert_eq!(ContentType::from_path(path), ContentType::XHTML);
+
+		let path = Path::new("test.xml");
+		assert_eq!(ContentType::from_path(path), ContentType::XML);
+
+		let path = Path::new("test.html");
+		assert_eq!(ContentType::from_path(path), ContentType::HTML);
+
+		let path = Path::new("test.pdf");
+		assert_eq!(ContentType::from_path(path), ContentType::PDF);
+
+		let path = Path::new("test.epub");
+		assert_eq!(ContentType::from_path(path), ContentType::EPUB_ZIP);
+
+		let path = Path::new("test.zip");
+		assert_eq!(ContentType::from_path(path), ContentType::ZIP);
+
+		let path = Path::new("test.cbz");
+		assert_eq!(ContentType::from_path(path), ContentType::COMIC_ZIP);
+
+		let path = Path::new("test.rar");
+		assert_eq!(ContentType::from_path(path), ContentType::RAR);
+
+		let path = Path::new("test.cbr");
+		assert_eq!(ContentType::from_path(path), ContentType::COMIC_RAR);
+
+		let path = Path::new("test.png");
+		assert_eq!(ContentType::from_path(path), ContentType::PNG);
+
+		let path = Path::new("test.jpg");
+		assert_eq!(ContentType::from_path(path), ContentType::JPEG);
+
+		let path = Path::new("test.jpeg");
+		assert_eq!(ContentType::from_path(path), ContentType::JPEG);
+
+		let path = Path::new("test.webp");
+		assert_eq!(ContentType::from_path(path), ContentType::WEBP);
+
+		let path = Path::new("test.avif");
+		assert_eq!(ContentType::from_path(path), ContentType::AVIF);
+
+		let path = Path::new("test.gif");
+		assert_eq!(ContentType::from_path(path), ContentType::GIF);
+
+		let path = Path::new("test.txt");
+		assert_eq!(ContentType::from_path(path), ContentType::TXT);
+
+		let path = Path::new("test.unknown");
+		assert_eq!(ContentType::from_path(path), ContentType::UNKNOWN);
+	}
+
+	#[test]
+	fn test_content_type_mime_type() {
+		assert_eq!(
+			ContentType::XHTML.mime_type(),
+			"application/xhtml+xml".to_string()
+		);
+		assert_eq!(ContentType::XML.mime_type(), "application/xml".to_string());
+		assert_eq!(ContentType::HTML.mime_type(), "text/html".to_string());
+		assert_eq!(ContentType::PDF.mime_type(), "application/pdf".to_string());
+		assert_eq!(
+			ContentType::EPUB_ZIP.mime_type(),
+			"application/epub+zip".to_string()
+		);
+		assert_eq!(ContentType::ZIP.mime_type(), "application/zip".to_string());
+		assert_eq!(
+			ContentType::COMIC_ZIP.mime_type(),
+			"application/vnd.comicbook+zip".to_string()
+		);
+		assert_eq!(
+			ContentType::RAR.mime_type(),
+			"application/vnd.rar".to_string()
+		);
+		assert_eq!(
+			ContentType::COMIC_RAR.mime_type(),
+			"application/vnd.comicbook-rar".to_string()
+		);
+		assert_eq!(ContentType::PNG.mime_type(), "image/png".to_string());
+		assert_eq!(ContentType::JPEG.mime_type(), "image/jpeg".to_string());
+		assert_eq!(ContentType::WEBP.mime_type(), "image/webp".to_string());
+		assert_eq!(ContentType::AVIF.mime_type(), "image/avif".to_string());
+		assert_eq!(ContentType::GIF.mime_type(), "image/gif".to_string());
+		assert_eq!(ContentType::TXT.mime_type(), "text/plain".to_string());
+		assert_eq!(ContentType::UNKNOWN.mime_type(), "unknown".to_string());
+	}
+
+	#[test]
+	fn test_content_type_is_image() {
+		// Images
+		assert!(ContentType::AVIF.is_image());
+		assert!(ContentType::HEIF.is_image());
+		assert!(ContentType::PNG.is_image());
+		assert!(ContentType::JPEG.is_image());
+		assert!(ContentType::JPEG_XL.is_image());
+		assert!(ContentType::WEBP.is_image());
+		assert!(ContentType::AVIF.is_image());
+		assert!(ContentType::GIF.is_image());
+		assert!(!ContentType::XHTML.is_image());
+
+		// Not images
+		assert!(!ContentType::XHTML.is_image());
+		assert!(!ContentType::XML.is_image());
+		assert!(!ContentType::HTML.is_image());
+		assert!(!ContentType::PDF.is_image());
+		assert!(!ContentType::EPUB_ZIP.is_image());
+		assert!(!ContentType::ZIP.is_image());
+		assert!(!ContentType::COMIC_ZIP.is_image());
+		assert!(!ContentType::RAR.is_image());
+		assert!(!ContentType::COMIC_RAR.is_image());
+		assert!(!ContentType::TXT.is_image());
+		assert!(!ContentType::UNKNOWN.is_image());
+	}
+
+	#[test]
+	fn test_content_type_is_opds_legacy_image() {
+		// Is an OPDS 1.2 legacy image
+		assert!(ContentType::PNG.is_opds_legacy_image());
+		assert!(ContentType::JPEG.is_opds_legacy_image());
+		assert!(ContentType::GIF.is_opds_legacy_image());
+
+		// Not an OPDS 1.2 legacy image
+		assert!(!ContentType::WEBP.is_opds_legacy_image());
+		assert!(!ContentType::JPEG_XL.is_opds_legacy_image());
+		assert!(!ContentType::AVIF.is_opds_legacy_image());
+	}
+
+	#[test]
+	fn test_content_type_is_zip() {
+		// ZIP archives
+		assert!(ContentType::ZIP.is_zip());
+		assert!(ContentType::COMIC_ZIP.is_zip());
+		// Not ZIP archives
+		assert!(!ContentType::RAR.is_zip());
+		assert!(!ContentType::COMIC_RAR.is_zip());
+	}
+
+	#[test]
+	fn test_content_type_is_rar() {
+		// RAR archives
+		assert!(ContentType::RAR.is_rar());
+		assert!(ContentType::COMIC_RAR.is_rar());
+		// Not RAR archives
+		assert!(!ContentType::ZIP.is_rar());
+		assert!(!ContentType::COMIC_ZIP.is_rar());
+	}
+
+	#[test]
+	fn test_content_type_is_epub() {
+		// EPUB archives
+		assert!(ContentType::EPUB_ZIP.is_epub());
+		// Not EPUB archives
+		assert!(!ContentType::ZIP.is_epub());
+		assert!(!ContentType::COMIC_ZIP.is_epub());
 	}
 }

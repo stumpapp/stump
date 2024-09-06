@@ -76,10 +76,10 @@ export default function SettingsHeader({ renderNavigation }: Props) {
 			style={{ maxWidth }}
 		>
 			{renderNavigation && <SettingsNavigation />}
-			<div className="text-muted">
+			<div className="text-foreground-muted">
 				{backlink && (
-					<span className="flex items-center gap-x-1 text-xs text-muted">
-						<Link to={backlink.to} className="text-muted no-underline hover:underline">
+					<span className="flex items-center gap-x-1 text-xs text-foreground-muted">
+						<Link to={backlink.to} className="text-foreground-muted no-underline hover:underline">
 							{t(`settingsScene.${backlink.localeKey}`) ?? 'Back'}
 						</Link>
 						{' /'}

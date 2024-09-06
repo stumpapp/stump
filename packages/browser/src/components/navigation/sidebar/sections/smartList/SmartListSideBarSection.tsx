@@ -24,7 +24,7 @@ export default function SmartListSideBarSection({
 	const renderLists = () => {
 		if (!lists || !lists.length) {
 			return (
-				<Text className="select-none px-1 py-2" variant="muted">
+				<Text className="select-none px-1 py-2" variant="muted" size="sm">
 					{t('sidebar.buttons.noSmartlists')}
 				</Text>
 			)

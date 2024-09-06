@@ -1,7 +1,7 @@
-import { cx, Label, Text } from '@stump/components'
+import { cn, cx, Label, Text } from '@stump/components'
 import { Check } from 'lucide-react'
 
-import { usePreferences } from '@/hooks'
+import { usePreferences, useTheme } from '@/hooks'
 
 export default function PrimaryNavigationPreference() {
 	const {
@@ -48,26 +48,33 @@ type AppearanceOptionProps = {
 	onSelect: () => void
 }
 function AppearanceOption({ label, isSelected, onSelect }: AppearanceOptionProps) {
+	const { isDarkVariant } = useTheme()
+
 	const isSidebar = label === 'Sidebar'
+	const isLightVariant = !isDarkVariant
 
 	return (
 		<div className="w-1/2 text-center md:w-1/3 lg:w-1/4">
 			<div
 				className={cx(
-					'relative flex h-32 w-full overflow-hidden rounded-md border border-edge bg-background-300 transition-all duration-200 hover:border-edge-200 hover:bg-background-300',
+					'relative flex h-32 w-full overflow-hidden rounded-md border border-edge bg-background-surface opacity-80 transition-all duration-200 hover:border-edge-subtle hover:opacity-100',
 					isSidebar ? 'flex-row' : 'flex-col gap-y-2',
 					{
-						'border-edge-200': isSelected,
+						'border-edge-subtle': isSelected,
 					},
 				)}
 				onClick={onSelect}
 			>
 				<div className={cx('bg-sidebar', isSidebar ? 'h-full w-1/4' : 'h-1/5 w-full')} />
 
-				<div className="flex h-full w-full flex-col gap-y-4 p-2">
-					<div className="h-1/5 w-2/3 shrink-0 rounded-md bg-background-400" />
-					<div className="h-1/5 w-full shrink-0 rounded-md bg-background-400" />
-					<div className="h-1/5 w-full shrink-0 rounded-md bg-background-400" />
+				<div
+					className={cn('flex h-full w-full flex-col gap-y-4 p-2', {
+						'bg-background/80': isLightVariant,
+					})}
+				>
+					<div className="h-1/5 w-2/3 shrink-0 rounded-md bg-background-surface-secondary" />
+					<div className="h-1/5 w-full shrink-0 rounded-md bg-background-surface-secondary" />
+					<div className="h-1/5 w-full shrink-0 rounded-md bg-background-surface-secondary" />
 				</div>
 
 				{isSelected && (

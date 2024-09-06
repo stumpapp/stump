@@ -25,8 +25,10 @@ pub struct EmailerClientConfig {
 	pub sender_display_name: String,
 	/// The username to use for the SMTP server, typically the same as the sender email
 	pub username: String,
-	/// The plaintext password to use for the SMTP server, which will be encrypted before being stored
-	pub password: String,
+	/// The plaintext password to use for the SMTP server, which will be encrypted before being stored.
+	/// This field is optional to support reusing the config for emailer config updates. If the password is not
+	/// set, it will error when trying to send an email.
+	pub password: Option<String>,
 	/// The SMTP host to use
 	pub host: String,
 	/// The SMTP port to use
@@ -62,7 +64,7 @@ impl EmailerClient {
 	/// Create a new [EmailerClient] instance with the given configuration and template directory.
 	///
 	/// # Example
-	/// ```rust
+	/// ```no_run
 	/// use email::{EmailerClient, EmailerClientConfig};
 	/// use std::path::PathBuf;
 	///
@@ -70,7 +72,7 @@ impl EmailerClient {
 	///     sender_email: "aaron@stumpapp.dev".to_string(),
 	///     sender_display_name: "Aaron's Stump Instance".to_string(),
 	///     username: "aaron@stumpapp.dev".to_string(),
-	///     password: "decrypted_password".to_string(),
+	///     password: Some("decrypted_password".to_string()),
 	///     host: "smtp.stumpapp.dev".to_string(),
 	///     port: 587,
 	///     tls_enabled: true,
@@ -91,7 +93,7 @@ impl EmailerClient {
 	/// Internally, this will just call [EmailerClient::send_attachments] with a single attachment.
 	///
 	/// # Example
-	/// ```rust
+	/// ```no_run
 	/// use email::{AttachmentPayload, EmailerClient, EmailerClientConfig};
 	/// use std::path::PathBuf;
 	/// use lettre::message::header::ContentType;
@@ -101,7 +103,7 @@ impl EmailerClient {
 	///         sender_email: "aaron@stumpapp.dev".to_string(),
 	///         sender_display_name: "Aaron's Stump Instance".to_string(),
 	///         username: "aaron@stumpapp.dev".to_string(),
-	///         password: "decrypted_password".to_string(),
+	///         password: Some("decrypted_password".to_string()),
 	///         host: "smtp.stumpapp.dev".to_string(),
 	///         port: 587,
 	///         tls_enabled: true,
@@ -137,7 +139,7 @@ impl EmailerClient {
 	/// The attachments are sent as a multipart email, with the first attachment being the email body.
 	///
 	/// # Example
-	/// ```rust
+	/// ```no_run
 	/// use email::{AttachmentPayload, EmailerClient, EmailerClientConfig};
 	/// use std::path::PathBuf;
 	/// use lettre::message::header::ContentType;
@@ -147,7 +149,7 @@ impl EmailerClient {
 	///         sender_email: "aaron@stumpapp.dev".to_string(),
 	///         sender_display_name: "Aaron's Stump Instance".to_string(),
 	///         username: "aaron@stumpapp.dev".to_string(),
-	///         password: "decrypted_password".to_string(),
+	///         password: Some("decrypted_password".to_string()),
 	///         host: "smtp.stumpapp.dev".to_string(),
 	///         port: 587,
 	///         tls_enabled: true,
@@ -218,8 +220,13 @@ impl EmailerClient {
 			.subject(subject)
 			.multipart(multipart_builder)?;
 
-		let creds =
-			Credentials::new(self.config.username.clone(), self.config.password.clone());
+		let password = self
+			.config
+			.password
+			.as_deref()
+			.ok_or(EmailError::NoPassword)?
+			.to_string();
+		let creds = Credentials::new(self.config.username.clone(), password);
 
 		// Note this issue: https://github.com/lettre/lettre/issues/359
 		let transport = if self.config.tls_enabled {

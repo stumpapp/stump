@@ -20,7 +20,8 @@ use stump_core::{
 	db::{
 		entity::{
 			macros::{
-				finished_reading_session_with_book_pages, reading_session_with_book_pages,
+				finished_reading_session_with_book_pages, media_thumbnail,
+				reading_session_with_book_pages,
 			},
 			ActiveReadingSession, FinishedReadingSession, LibraryOptions, Media,
 			PageDimension, PageDimensionsEntity, ProgressUpdateReturn, User,
@@ -40,7 +41,7 @@ use stump_core::{
 		read_entire_file, ContentType, FileParts, PathUtils,
 	},
 	prisma::{
-		active_reading_session, finished_reading_session, library, library_options,
+		active_reading_session, finished_reading_session, library,
 		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
 		media_metadata, series, series_metadata, tag, user, PrismaClient,
 	},
@@ -203,8 +204,6 @@ pub(crate) fn apply_media_library_not_hidden_for_user_filter(
 		library_not_hidden_from_user_filter(user),
 	])])]
 }
-
-// FIXME: hidden libraries introduced a bug here, need to fix!
 
 pub(crate) fn apply_media_filters_for_user(
 	filters: MediaFilter,
@@ -974,50 +973,26 @@ pub(crate) async fn get_media_thumbnail_by_id(
 		[age_restrictions],
 	);
 
-	let result = db
-		._transaction()
-		.run(|client| async move {
-			let book = client
-				.media()
-				.find_first(where_params)
-				.order_by(media::name::order(Direction::Asc))
-				.with(media::series::fetch())
-				.exec()
-				.await?;
+	let book = db
+		.media()
+		.find_first(where_params)
+		.select(media_thumbnail::select())
+		.exec()
+		.await?
+		.ok_or_else(|| APIError::NotFound("Book not found".to_string()))?;
 
-			if let Some(book) = book {
-				let library_id = match book.series() {
-					Ok(Some(series)) => Some(series.library_id.clone()),
-					_ => None,
-				}
-				.flatten();
+	let library_options = book
+		.series
+		.and_then(|s| s.library.map(|l| l.library_options))
+		.map(LibraryOptions::from);
+	let image_format = library_options.and_then(|o| o.thumbnail_config.map(|c| c.format));
 
-				client
-					.library_options()
-					.find_first(vec![library_options::library_id::equals(library_id)])
-					.exec()
-					.await
-					.map(|options| (Some(book), options.map(LibraryOptions::from)))
-			} else {
-				Ok((None, None))
-			}
-		})
-		.await?;
-	tracing::trace!(?result, "get_media_thumbnail transaction completed");
-
-	match result {
-		(Some(book), Some(options)) => get_media_thumbnail(
-			&book,
-			options.thumbnail_config.map(|config| config.format),
-			config,
-		),
-		(Some(book), None) => get_media_thumbnail(&book, None, config),
-		_ => Err(APIError::NotFound(String::from("Media not found"))),
-	}
+	get_media_thumbnail(&book.id, &book.path, image_format, config)
 }
 
 pub(crate) fn get_media_thumbnail(
-	media: &media::Data,
+	id: &str,
+	path: &str,
 	target_format: Option<ImageFormat>,
 	config: &StumpConfig,
 ) -> APIResult<(ContentType, Vec<u8>)> {
@@ -1025,19 +1000,19 @@ pub(crate) fn get_media_thumbnail(
 		let extension = format.extension();
 		let thumbnail_path = config
 			.get_thumbnails_dir()
-			.join(format!("{}.{}", media.id, extension));
+			.join(format!("{}.{}", id, extension));
 
 		if thumbnail_path.exists() {
-			tracing::trace!(path = ?thumbnail_path, media_id = ?media.id, "Found generated media thumbnail");
+			tracing::trace!(path = ?thumbnail_path, media_id = id, "Found generated media thumbnail");
 			return Ok((ContentType::from(format), read_entire_file(thumbnail_path)?));
 		}
-	} else if let Some(path) =
-		get_unknown_thumnail(&media.id, config.get_thumbnails_dir())
-	{
+	}
+
+	if let Some(path) = get_unknown_thumnail(id, config.get_thumbnails_dir()) {
 		// If there exists a file that starts with the media id in the thumbnails dir,
 		// then return it. This might happen if a user manually regenerates thumbnails
 		// via the API without updating the thumbnail config...
-		tracing::debug!(path = ?path, media_id = ?media.id, "Found media thumbnail that does not align with config");
+		tracing::debug!(path = ?path, media_id = id, "Found media thumbnail that does not align with config");
 		let FileParts { extension, .. } = path.file_parts();
 		return Ok((
 			ContentType::from_extension(extension.as_str()),
@@ -1045,7 +1020,7 @@ pub(crate) fn get_media_thumbnail(
 		));
 	}
 
-	Ok(get_page(media.path.as_str(), 1, config)?)
+	Ok(get_page(path, 1, config)?)
 }
 
 // TODO: ImageResponse as body type

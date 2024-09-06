@@ -42,7 +42,7 @@ export default function UserSmartListNavigation() {
 	const preferTopBar = primary_navigation_mode === 'TOPBAR'
 
 	return (
-		<div className="relative z-10 w-full border-b border-edge-200 bg-background">
+		<div className="relative z-10 w-full border-b border-edge-subtle bg-background">
 			<nav
 				className={cn(
 					'-mb-px flex gap-x-4 overflow-x-scroll px-3 transition-colors duration-150 scrollbar-hide md:overflow-x-hidden',
@@ -59,7 +59,7 @@ export default function UserSmartListNavigation() {
 						underline={false}
 						className={cn('whitespace-nowrap border-b-2 px-1 py-3 text-sm font-medium', {
 							'border-brand-500 text-brand-600': tab.isActive,
-							'border-transparent text-muted': !tab.isActive,
+							'border-transparent text-foreground-muted': !tab.isActive,
 						})}
 						onMouseEnter={tab.onHover}
 					>

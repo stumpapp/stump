@@ -31,7 +31,7 @@ export default function ServerStatusOverlay() {
 		<AnimatePresence>
 			{show && (
 				<motion.div
-					className="fixed bottom-[1rem] right-[1rem] flex w-64 flex-col items-center justify-center rounded-md bg-background-200 p-3 shadow"
+					className="fixed bottom-[1rem] right-[1rem] flex w-64 flex-col items-center justify-center rounded-md bg-background-surface p-3 shadow"
 					initial={{ opacity: 0, scale: 0.9, y: 100 }}
 					animate={{ opacity: 1, scale: 1, y: 0 }}
 					exit={{ opacity: 0, scale: 0.9, y: 100 }}

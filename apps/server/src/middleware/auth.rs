@@ -180,7 +180,7 @@ async fn handle_basic_auth(
 ///
 /// ## Example:
 ///
-/// ```rust
+/// ```no_run
 /// use axum::{Router, middleware::{from_extractor, from_extractor_with_state}};
 /// use stump_core::{Ctx, config::StumpConfig};
 /// use stump_server::{

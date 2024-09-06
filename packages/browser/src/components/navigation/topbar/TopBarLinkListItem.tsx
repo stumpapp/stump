@@ -21,9 +21,9 @@ export default function TopBarLinkListItem({
 			<Link
 				to={to}
 				className={cn(
-					'flex w-full select-none items-center rounded-md px-3 py-2 leading-none text-contrast-200 no-underline outline-none transition-colors hover:bg-sidebar-300 focus:bg-sidebar-300',
-					{ 'pointer-events-none text-muted': isDisabled },
-					{ 'bg-sidebar-300': isActive },
+					'flex w-full select-none items-center rounded-md px-3 py-2 leading-none text-foreground-subtle no-underline outline-none transition-colors hover:bg-sidebar-surface-hover focus:bg-sidebar-surface',
+					{ 'pointer-events-none text-foreground-muted': isDisabled },
+					{ 'bg-sidebar-surface': isActive },
 					className,
 				)}
 			>

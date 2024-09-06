@@ -133,7 +133,7 @@ export default function FileTable() {
 
 							<tbody>
 								{rows.map((row) => (
-									<tr key={row.id} className="odd:bg-background-200">
+									<tr key={row.id} className="odd:bg-background-surface">
 										{row.getVisibleCells().map((cell) => (
 											<td
 												className="py-1 pl-1.5 pr-1.5 first:pl-4 last:pr-4"

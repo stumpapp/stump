@@ -112,7 +112,7 @@ export default function LibrarySeriesGrid({ libraryId, onSelectSeries }: Props) 
 												}}
 											>
 												<div
-													className="relative flex w-[7rem] flex-1 flex-col space-y-1 overflow-hidden rounded-md border-[1.5px] border-edge-200 bg-background shadow-sm transition-colors duration-100 hover:border-brand sm:w-[7.666rem] md:w-[9rem]"
+													className="relative flex w-[7rem] flex-1 flex-col space-y-1 overflow-hidden rounded-md border-[1.5px] border-edge-subtle bg-background shadow-sm transition-colors duration-100 hover:border-brand sm:w-[7.666rem] md:w-[9rem]"
 													onClick={() => onSelectSeries(thisSeries!)}
 												>
 													<div

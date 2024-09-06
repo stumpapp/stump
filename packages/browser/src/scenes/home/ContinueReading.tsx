@@ -23,7 +23,7 @@ export default function ContinueReadingMedia() {
 			emptyMessage={() =>
 				isLoading ? null : (
 					<div className="flex min-h-[150px] flex-col items-start justify-center gap-2">
-						<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-muted" />
+						<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-foreground-muted" />
 						<Heading size="sm">{t('homeScene.continueReading.emptyState.heading')}</Heading>
 						<Text size="sm" variant="muted">
 							{t('homeScene.continueReading.emptyState.message')}

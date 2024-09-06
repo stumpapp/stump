@@ -2,13 +2,16 @@ import { mediaQueryKeys } from '@stump/api'
 import { queryClient } from '@stump/client'
 import type { Media } from '@stump/types'
 import clsx from 'clsx'
-import React, { memo, useEffect, useMemo } from 'react'
+import React, { memo, useCallback, useEffect, useMemo } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
+import { Hotkey } from 'react-hotkeys-hook/dist/types'
 import { useSwipeable } from 'react-swipeable'
 import { useMediaMatch, useWindowSize } from 'rooks'
 
 import { useDetectZoom } from '@/hooks/useDetectZoom'
-import { useReaderStore } from '@/stores'
+import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
+
+import { ImagePageDimensionRef, useImageBaseReaderContext } from './context'
 
 export type PagedReaderProps = {
 	/** The current page which the reader should render */
@@ -29,35 +32,52 @@ export type PagedReaderProps = {
  * will have animations between pages, but is currently a WIP
  */
 function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedReaderProps) {
-	const currentPageRef = React.useRef(currentPage)
+	const {
+		layout: { showToolBar, doubleSpread },
+		setLayout,
+		bookPreferences: { readingDirection },
+	} = useBookPreferences({ book: media })
 
-	const { showToolBar, setShowToolBar } = useReaderStore((state) => ({
-		setShowToolBar: state.setShowToolBar,
-		showToolBar: state.showToolBar,
-	}))
+	const { pageDimensions, setDimensions } = useImageBaseReaderContext()
+	/**
+	 * A memoized callback to get the dimensions of a given page
+	 */
+	const getDimensions = useCallback((page: number) => pageDimensions[page], [pageDimensions])
+	/**
+	 * A memoized callback to set the dimensions of a given page
+	 */
+	const upsertDimensions = useCallback(
+		(page: number, dimensions: ImagePageDimensionRef) => {
+			setDimensions((prev) => ({
+				...prev,
+				[page]: dimensions,
+			}))
+		},
+		[setDimensions],
+	)
+
 	const { innerWidth } = useWindowSize()
 	const { isZoomed } = useDetectZoom()
 
 	const isMobile = useMediaMatch('(max-width: 768px)')
-	const [imageWidth, setImageWidth] = React.useState<number | null>(null)
-	/**
-	 * If the image width is >= 80% of the screen width, we want to fix the side navigation
-	 */
-	const fixSideNavigation = useMemo(() => {
-		if (imageWidth && innerWidth) {
-			return imageWidth >= innerWidth * 0.8
-		} else {
-			return isMobile
-		}
-	}, [imageWidth, innerWidth, isMobile])
+
+	const displayedPages = useMemo(
+		() =>
+			doubleSpread ? [currentPage, currentPage + 1].filter((p) => p <= media.pages) : [currentPage],
+		[currentPage, doubleSpread, media.pages],
+	)
 
 	/**
-	 * This effect is responsible for updating the current page ref when the current page changes. This was
-	 * added primarily because of the useHotKeys hook below.
+	 * If the image parts are collective >= 80% of the screen width, we want to fix the side navigation
 	 */
-	useEffect(() => {
-		currentPageRef.current = currentPage
-	}, [currentPage])
+	const fixSideNavigation = useMemo(() => {
+		const dimensionSet = displayedPages
+			.map((page) => getDimensions(page))
+			.filter(Boolean) as ImagePageDimensionRef[]
+		const totalWidth = dimensionSet.reduce((acc, dimensions) => acc + dimensions.width, 0)
+
+		return (!!innerWidth && totalWidth >= innerWidth * 0.8) || isMobile
+	}, [displayedPages, getDimensions, innerWidth, isMobile])
 
 	/**
 	 * This effect is primarily responsible for two cleanup tasks:
@@ -70,60 +90,160 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	 */
 	useEffect(() => {
 		return () => {
-			setShowToolBar(false)
+			setLayout({
+				showToolBar: false,
+			})
 			queryClient.invalidateQueries([mediaQueryKeys.getInProgressMedia], { exact: false })
 		}
-	}, [setShowToolBar])
+	}, [setLayout])
 
 	/**
-	 * A simple function that does a little bit of validation before calling the onPageChange callback.
-	 * This is done to prevent the user from going to a page that doesn't exist.
+	 * A callback to actually change the page. This should not be called directly, but rather
+	 * through the `handleLeftwardPageChange` and `handleRightwardPageChange` callbacks to
+	 * ensure that the reading direction is respected.
 	 *
 	 * @param newPage The new page to navigate to (1-indexed)
 	 */
-	function handlePageChange(newPage: number) {
-		if (newPage <= media.pages && newPage > 0) {
-			onPageChange(newPage)
+	const doChangePage = useCallback(
+		(newPage: number) => {
+			if (newPage <= media.pages && newPage > 0) {
+				onPageChange(newPage)
+			}
+		},
+		[media.pages, onPageChange],
+	)
+	// TODO: docs
+	// TODO: these are kinda wrong, they need to be aware of if the doublespread is being overridden
+	// by orientation of image
+	const handleLeftwardPageChange = useCallback(() => {
+		const direction = readingDirection === 'ltr' ? -1 : 1
+		if (doubleSpread) {
+			const adjustedForBounds = currentPage + direction * 2 < 1 ? 1 : currentPage + direction * 2
+			doChangePage(adjustedForBounds)
+		} else {
+			doChangePage(currentPage + direction)
 		}
-	}
+	}, [readingDirection, doChangePage, currentPage, doubleSpread])
+	// TODO: docs
+	const handleRightwardPageChange = useCallback(() => {
+		const direction = readingDirection === 'ltr' ? 1 : -1
+		if (doubleSpread) {
+			const adjustedForBounds =
+				currentPage + direction * 2 > media.pages ? media.pages : currentPage + direction * 2
+			doChangePage(adjustedForBounds)
+		} else {
+			doChangePage(currentPage + direction)
+		}
+	}, [readingDirection, doChangePage, currentPage, doubleSpread, media.pages])
 
 	/**
-	 * This hook is responsible for handling the hotkeys for the reader. The hotkeys are as follows:
-	 * - right arrow: go to the next page
-	 * - left arrow: go to the previous page
-	 * - space: toggle the toolbar
-	 * - escape: hide the toolbar
+	 * A callback handler for changing the page or toggling the toolbar visibility via
+	 * keyboard shortcuts.
 	 */
-	useHotkeys('right, left, space, escape', (_, handler) => {
-		const targetKey = handler.keys?.at(0)
-		switch (targetKey) {
-			case 'right':
-				handlePageChange(currentPageRef.current + 1)
-				break
-			case 'left':
-				handlePageChange(currentPageRef.current - 1)
-				break
-			case 'space':
-				setShowToolBar(!showToolBar)
-				break
-			case 'escape':
-				setShowToolBar(false)
-				break
-			default:
-				break
-		}
-	})
+	const hotKeyHandler = useCallback(
+		(hotkey: Hotkey) => {
+			const targetKey = hotkey.keys?.at(0)
+			switch (targetKey) {
+				case 'right':
+					handleRightwardPageChange()
+					break
+				case 'left':
+					handleLeftwardPageChange()
+					break
+				case 'space':
+					setLayout({
+						showToolBar: !showToolBar,
+					})
+					break
+				case 'escape':
+					setLayout({
+						showToolBar: false,
+					})
+					break
+				default:
+					break
+			}
+		},
+		[setLayout, showToolBar, handleRightwardPageChange, handleLeftwardPageChange],
+	)
+	/**
+	 * Register the hotkeys for the reader component
+	 */
+	useHotkeys('right, left, space, escape', (_, handler) => hotKeyHandler(handler))
 
 	const swipeHandlers = useSwipeable({
 		delta: 150,
-		onSwipedLeft: () => handlePageChange(currentPage + 1),
-		onSwipedRight: () => handlePageChange(currentPage - 1),
+		onSwipedLeft: handleLeftwardPageChange,
+		onSwipedRight: handleRightwardPageChange,
 		preventScrollOnSwipe: true,
 	})
 	const swipeEnabled = useMemo(
 		() => !isZoomed && !showToolBar && isMobile,
 		[isZoomed, showToolBar, isMobile],
 	)
+
+	const renderPages = useCallback(() => {
+		const dimensionSet = displayedPages.map((page) => getDimensions(page))
+
+		const shouldDisplayDoubleSpread =
+			displayedPages.length > 1 &&
+			dimensionSet.every((dimensions) => !dimensions || dimensions.isPortrait)
+
+		if (shouldDisplayDoubleSpread) {
+			return (
+				<div className="flex h-full justify-center">
+					{displayedPages.map((page) => (
+						<img
+							key={`double-spread-${page}`}
+							className="z-30 max-h-screen w-full select-none md:w-auto"
+							src={getPageUrl(page)}
+							onLoad={(e) => {
+								const img = e.target as HTMLImageElement
+								upsertDimensions(page, {
+									height: img.height,
+									isPortrait: img.height > img.width,
+									width: img.width,
+								})
+							}}
+							onError={(err) => {
+								// @ts-expect-error: is oke
+								err.target.src = '/favicon.png'
+							}}
+							onClick={() =>
+								setLayout({
+									showToolBar: !showToolBar,
+								})
+							}
+						/>
+					))}
+				</div>
+			)
+		} else {
+			return (
+				<img
+					className="z-30 max-h-screen w-full select-none md:w-auto"
+					src={getPageUrl(currentPage)}
+					onLoad={(e) => {
+						const img = e.target as HTMLImageElement
+						upsertDimensions(currentPage, {
+							height: img.height,
+							isPortrait: img.height > img.width,
+							width: img.width,
+						})
+					}}
+					onError={(err) => {
+						// @ts-expect-error: is oke
+						err.target.src = '/favicon.png'
+					}}
+					onClick={() =>
+						setLayout({
+							showToolBar: !showToolBar,
+						})
+					}
+				/>
+			)
+		}
+	}, [displayedPages, currentPage, getPageUrl, setLayout, showToolBar])
 
 	// TODO: when preloading images, cache the dimensions of the images to better support dynamic resizing
 	return (
@@ -134,26 +254,15 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 			<SideBarControl
 				fixed={fixSideNavigation}
 				position="left"
-				onClick={() => handlePageChange(currentPage - 1)}
+				onClick={() => handleLeftwardPageChange()}
 			/>
-			{/* TODO: better error handling for the loaded image */}
-			<img
-				className="z-30 max-h-screen w-full select-none md:w-auto"
-				src={getPageUrl(currentPage)}
-				onLoad={(e) => {
-					const img = e.target as HTMLImageElement
-					setImageWidth(img.width)
-				}}
-				onError={(err) => {
-					// @ts-expect-error: is oke
-					err.target.src = '/favicon.png'
-				}}
-				onClick={() => setShowToolBar(!showToolBar)}
-			/>
+
+			{renderPages()}
+
 			<SideBarControl
 				fixed={fixSideNavigation}
 				position="right"
-				onClick={() => handlePageChange(currentPage + 1)}
+				onClick={() => handleRightwardPageChange()}
 			/>
 		</div>
 	)

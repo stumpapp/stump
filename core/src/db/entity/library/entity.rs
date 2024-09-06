@@ -5,7 +5,7 @@ use specta::Type;
 use utoipa::ToSchema;
 
 use crate::{
-	db::entity::{Cursor, Series, Tag},
+	db::entity::{common::ReadingDirection, Cursor, Series, Tag},
 	filesystem::image::ImageProcessorOptions,
 	prisma::{self, library},
 };
@@ -111,6 +111,8 @@ pub struct LibraryOptions {
 	pub id: Option<String>,
 	pub convert_rar_to_zip: bool,
 	pub hard_delete_conversions: bool,
+	#[serde(default)] // TODO: remove this after update with experimental
+	pub default_reading_dir: ReadingDirection,
 	pub library_pattern: LibraryPattern,
 	pub thumbnail_config: Option<ImageProcessorOptions>,
 	// TODO(prisma 0.7.0): Nested create
@@ -178,6 +180,10 @@ impl From<prisma::library_options::Data> for LibraryOptions {
 			id: Some(data.id),
 			convert_rar_to_zip: data.convert_rar_to_zip,
 			hard_delete_conversions: data.hard_delete_conversions,
+			default_reading_dir: ReadingDirection::from_str(
+				data.default_reading_dir.as_str(),
+			)
+			.unwrap_or_default(),
 			library_pattern: LibraryPattern::from(data.library_pattern),
 			thumbnail_config: data.thumbnail_config.map(|config| {
 				ImageProcessorOptions::try_from(config).unwrap_or_default()
@@ -193,6 +199,10 @@ impl From<&prisma::library_options::Data> for LibraryOptions {
 			id: Some(data.id.clone()),
 			convert_rar_to_zip: data.convert_rar_to_zip,
 			hard_delete_conversions: data.hard_delete_conversions,
+			default_reading_dir: ReadingDirection::from_str(
+				data.default_reading_dir.as_str(),
+			)
+			.unwrap_or_default(),
 			library_pattern: LibraryPattern::from(data.library_pattern.clone()),
 			thumbnail_config: data.thumbnail_config.clone().map(|config| {
 				ImageProcessorOptions::try_from(config).unwrap_or_default()

@@ -113,6 +113,7 @@ model LibraryOptions {
   id                      String  @id @default(uuid())
   convert_rar_to_zip      Boolean @default(false)
   hard_delete_conversions Boolean @default(false)
+  default_reading_dir     String  @default("ltr") // ltr or rtl
   library_pattern         String  @default("SERIES_BASED") // SERIES_BASED or COLLECTION_BASED
   thumbnail_config        Bytes? // { size_factor: "...", format: "...", quality: ... }
 

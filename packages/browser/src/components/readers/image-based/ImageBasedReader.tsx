@@ -6,9 +6,10 @@ import { useNavigate } from 'react-router'
 
 import { usePreloadPage } from '@/hooks/usePreloadPage'
 import paths from '@/paths'
-import { useReaderStore } from '@/stores'
+import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import AnimatedPagedReader from './AnimatedPagedReader'
+import { ImageBaseReaderContext, ImagePageDimensionRef } from './context'
 import ContinuousScrollReader from './ContinuousScrollReader'
 import PagedReader from './PagedReader'
 import ReaderContainer from './ReaderContainer'
@@ -47,14 +48,11 @@ export default function ImageBasedReader({
 	 * The current page of the reader
 	 */
 	const [currentPage, setCurrentPage] = useState(initialPage || 1)
+	const [pageDimensions, setPageDimensions] = useState<Record<number, ImagePageDimensionRef>>({})
 
-	const { readerMode, preloadCounts } = useReaderStore((state) => ({
-		preloadCounts: {
-			ahead: state.preloadAheadCount,
-			behind: state.preloadBehindCount,
-		},
-		readerMode: state.mode,
-	}))
+	const {
+		layout: { mode: readerMode, ...preloadCounts },
+	} = useBookPreferences({ book: media })
 
 	const { updateReadProgress } = useUpdateMediaProgress(media.id, {
 		onError(err) {
@@ -101,10 +99,10 @@ export default function ImageBasedReader({
 	 */
 	const pagesToPreload = useMemo(
 		() =>
-			[...Array(preloadCounts.behind).keys()]
+			[...Array(preloadCounts.preloadBehindCount).keys()]
 				.map((i) => currentPage - i - 1)
 				.reverse()
-				.concat([...Array(preloadCounts.ahead).keys()].map((i) => currentPage + i + 1))
+				.concat([...Array(preloadCounts.preloadAheadCount).keys()].map((i) => currentPage + i + 1))
 				.filter((i) => i > 0 && i <= lastPage),
 
 		[currentPage, preloadCounts, lastPage],
@@ -115,6 +113,8 @@ export default function ImageBasedReader({
 	 * prevent wait times for the next page to load.
 	 */
 	usePreloadPage({
+		onStoreDimensions: (page, dimensions) =>
+			setPageDimensions((prev) => ({ ...prev, [page]: dimensions })),
 		pages: pagesToPreload,
 		urlBuilder: getPageUrl,
 	})
@@ -145,8 +145,15 @@ export default function ImageBasedReader({
 	}
 
 	return (
-		<ReaderContainer media={media} currentPage={currentPage} onPageChange={handleChangePage}>
-			{renderReader()}
-		</ReaderContainer>
+		<ImageBaseReaderContext.Provider
+			value={{
+				pageDimensions,
+				setDimensions: setPageDimensions,
+			}}
+		>
+			<ReaderContainer media={media} currentPage={currentPage} onPageChange={handleChangePage}>
+				{renderReader()}
+			</ReaderContainer>
+		</ImageBaseReaderContext.Provider>
 	)
 }

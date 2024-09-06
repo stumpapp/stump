@@ -101,9 +101,11 @@ export function AppLayout() {
 	})
 
 	const axiosError = isAxiosError(error) ? error : null
+	const isUnauthorized = axiosError?.response?.status === 401
 	const isNetworkError = axiosError?.code === 'ERR_NETWORK'
-	if (isNetworkError) {
-		return <Navigate to="/server-connection-error" state={{ from: location }} />
+	if (isNetworkError || isUnauthorized) {
+		const to = isNetworkError ? '/server-connection-error' : '/auth'
+		return <Navigate to={to} state={{ from: location }} />
 	} else if (error && !storeUser) {
 		throw error
 	}

@@ -9,7 +9,7 @@ import React, { PropsWithChildren, useCallback, useEffect, useMemo, useRef } fro
 import { Link, useSearchParams } from 'react-router-dom'
 
 import paths from '@/paths'
-import { useReaderStore } from '@/stores'
+import { useNewReaderStore } from '@/stores'
 
 type Props = {
 	media: Media
@@ -28,10 +28,12 @@ const ReaderContainer = ({
 	const parentRef = useRef<HTMLDivElement>(null)
 	const rangeRef = useRef([0, 0])
 
-	const { readerMode, setReaderMode, showToolBar } = useReaderStore((state) => ({
-		readerMode: state.mode,
-		setReaderMode: state.setMode,
-		showToolBar: state.showToolBar,
+	const {
+		layout: { mode: readerMode, showToolBar, doubleSpread },
+		setLayout,
+	} = useNewReaderStore((state) => ({
+		layout: state.layout,
+		setLayout: state.setLayout,
 	}))
 
 	const columnVirtualizer = useVirtualizer({
@@ -70,11 +72,11 @@ const ReaderContainer = ({
 		if (readerMode === 'continuous') {
 			search.set('page', currentPage.toString())
 			setSearch(search)
-			setReaderMode('paged')
+			setLayout({ mode: 'paged' })
 		} else {
-			setReaderMode('continuous')
+			setLayout({ mode: 'continuous' })
 		}
-	}, [readerMode, setReaderMode, currentPage, search, setSearch])
+	}, [readerMode, setLayout, currentPage, search, setSearch])
 
 	const showBottomToolbar = readerMode !== 'continuous'
 	const title = metadata?.title || name
@@ -100,7 +102,7 @@ const ReaderContainer = ({
 
 						<Heading size="sm">{title}</Heading>
 					</div>
-					<div className="flex items-center">
+					<div className="flex items-center space-x-2">
 						<IconButton
 							size="sm"
 							title={
@@ -113,6 +115,14 @@ const ReaderContainer = ({
 							) : (
 								<BookOpen className="h-4 w-4" />
 							)}
+						</IconButton>
+
+						<IconButton
+							size="sm"
+							title="Toggle toolbar"
+							onClick={() => setLayout({ doubleSpread: !doubleSpread })}
+						>
+							test
 						</IconButton>
 					</div>
 				</div>

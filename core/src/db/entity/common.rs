@@ -17,6 +17,27 @@ pub enum LayoutMode {
 	TABLE,
 }
 
+#[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+pub enum ReadingDirection {
+	#[default]
+	#[serde(rename = "ltr")]
+	LeftToRight,
+	#[serde(rename = "rtl")]
+	RightToLeft,
+}
+
+impl FromStr for ReadingDirection {
+	type Err = String;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s {
+			"ltr" => Ok(ReadingDirection::LeftToRight),
+			"rtl" => Ok(ReadingDirection::RightToLeft),
+			_ => Err(format!("\"{s}\" is not a valid reading direction")),
+		}
+	}
+}
+
 /// A struct representing a sort order for a column using react-table (tanstack)
 #[derive(Default, Clone, Debug, Deserialize, Serialize, Type, ToSchema)]
 pub struct ReactTableColumnSort {

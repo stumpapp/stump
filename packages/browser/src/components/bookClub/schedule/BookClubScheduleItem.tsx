@@ -165,8 +165,7 @@ export default function BookClubScheduleTimelineItem({ book }: Props) {
 	}
 
 	return (
-		<li className="mb-10 ml-4 last:mb-2">
-			{/*  border-white bg-gray-100 dark:border-gray-750 dark:bg-gray-900 */}
+		<li className="ml-4">
 			<div className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border border-edge bg-background-surface"></div>
 
 			<div className="flex items-start justify-between">
@@ -181,15 +180,14 @@ export default function BookClubScheduleTimelineItem({ book }: Props) {
 
 				<div
 					className={cx('flex items-center justify-between rounded-md p-3 ', {
-						'bg-brand-100/75 text-yellow-700 dark:bg-yellow-700/30 dark:text-yellow-600':
-							isCurrent || isDiscussing,
-						'bg-gray-50 dark:bg-gray-950': !isCurrent && !isDiscussing,
+						'bg-background-surface': !isCurrent && !isDiscussing,
+						'bg-fill-brand-secondary': isCurrent || isDiscussing,
 					})}
 				>
 					<span
 						className={cx(
-							{ 'text-sm text-gray-500 dark:text-gray-400': !isCurrent && !isDiscussing },
-							{ 'text-sm text-yellow-700 dark:text-yellow-600': isCurrent || isDiscussing },
+							{ 'text-sm text-foreground-muted': !isCurrent && !isDiscussing },
+							{ 'text-sm text-fill-brand': isCurrent || isDiscussing },
 						)}
 					>
 						{daysInfo.message}

@@ -1,6 +1,7 @@
 import { useBookClubQuery } from '@stump/client'
 import { cn } from '@stump/components'
 import { BookClub, Media, User } from '@stump/types'
+import dayjs from 'dayjs'
 import React, { Suspense, useMemo } from 'react'
 import { Navigate, Outlet, useLocation, useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
@@ -112,7 +113,7 @@ const mockBookClub: BookClub = {
 	created_at: '2020-12-01T00:00:00.000Z',
 	description: 'A book club for fans of the OFMD series. All you can read pirate fiction!',
 	emoji: null,
-	id: 'cm0h9dr5k008gs07bom52fwfi',
+	id: 'cm0lr4uop0008s05pf41vxj8r',
 	is_private: false,
 	member_role_spec: {
 		ADMIN: 'First Mate',
@@ -153,9 +154,9 @@ const mockBookClub: BookClub = {
 					messages: [],
 				},
 				discussion_duration_days: 2,
-				end_at: '2023-11-18T00:00:00.000Z',
+				end_at: dayjs().add(1, 'month').toISOString(),
 				id: '3',
-				start_at: '2023-10-19T00:00:00.000Z',
+				start_at: dayjs().subtract(1, 'day').toISOString(),
 			},
 			{
 				book: {

@@ -65,19 +65,6 @@ fn do_generate_book_thumbnail(
 	.map(|buf| (buf, thumbnail_path, true))
 }
 
-// TODO: investigate resource usage: https://docs.rs/tokio/latest/tokio/runtime/struct.Builder.html#method.max_blocking_threads
-
-// TODO: determine whether my choice to move to blocking tasks from rayon-managed threadpool is correct. As I understand it:
-// 1. Loading the entire buffer to memory is synchronous IO (optimal for blocking task, NO for rayon)
-// 2. Generating the thumbnail is CPU-bound computation (suboptimal for blocking task, optimal for rayon)
-// Treating https://ryhl.io/blog/async-what-is-blocking/ as a source of truth, that would mean:
-// - Opting for blocking tasks leaves you with an optimal solution for the loading step but
-//   a suboptimal solution for the conversion step
-// - Opting for async tasks leaves you with a "no" solution for the loading step but an optimal
-//   solution for the conversion step, where the "no" is defined in the aforementioned blog
-// I think whatever the case, whichever is the most beneficial solution should be considered for
-// the scanner as well.
-
 /// Generate a thumbnail for a book, returning the thumbnail data, the path to the thumbnail file,
 /// and a boolean indicating whether the thumbnail was generated or not. If the thumbnail already
 /// exists and `force_regen` is false, the function will return the existing thumbnail data.

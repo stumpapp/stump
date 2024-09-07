@@ -253,6 +253,9 @@ pub async fn safely_generate_batch(
 			let path = book.path.clone();
 
 			async move {
+				if semaphore.available_permits() == 0 {
+					tracing::trace!(?path, "Waiting for permit for thumbnail generation");
+				}
 				let _permit = semaphore.acquire().await.map_err(|e| {
 					(ThumbnailGenerateError::Unknown(e.to_string()), path.clone())
 				})?;

@@ -10,42 +10,42 @@
 		"claimText": "This Stump server is not intialized. Use the form below to create your account. Once created, you will have full access to all server features.",
 		"form": {
 			"validation": {
-				"missingUsername": "O nome de usuário é necessário",
-				"missingPassword": "A senha é necessária"
+				"missingUsername": "Username is required",
+				"missingPassword": "Password is required"
 			},
 			"labels": {
-				"username": "Nome de usuário",
-				"password": "Senha"
+				"username": "Username",
+				"password": "Password"
 			},
 			"buttons": {
-				"createAccount": "Criar Conta",
+				"createAccount": "Create Account",
 				"login": "Log in"
 			}
 		},
 		"toasts": {
-			"loggingIn": "Entrando...",
+			"loggingIn": "Logging in...",
 			"loggedIn": "Welcome back!",
 			"loggedInFirstTime": "Welcome!",
-			"registering": "Registrando...",
-			"registered": "Registrado!",
-			"loginFailed": "Falha no login. Tente novamente",
-			"registrationFailed": "Falha ao registrar. Por favor, tente novamente"
+			"registering": "Registering...",
+			"registered": "Registered!",
+			"loginFailed": "Login failed. Please try again",
+			"registrationFailed": "Registration failed. Please try again"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "Configuração da Biblioteca",
-			"subtitleCreating": "Uma prévia da sua nova biblioteca será exibida abaixo",
-			"subtitleEditing": "Uma prévia das edições da sua biblioteca será exibida abaixo"
+			"heading": "Library Configuration",
+			"subtitleCreating": "A preview of your new library will be shown below",
+			"subtitleEditing": "A preview of your library edits will be shown below"
 		}
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "Informações do Arquivo",
+			"heading": "File Information",
 			"labels": {
-				"fileSize": "Tamanho do arquivo",
-				"fileType": "Tipo de arquivo",
-				"fileLocation": "Localização do Arquivo",
+				"fileSize": "File Size",
+				"fileType": "File Type",
+				"fileLocation": "File Location",
 				"fileChecksum": "Checksum"
 			}
 		},
@@ -65,7 +65,7 @@
 				}
 			}
 		},
-		"nextInSeries": "Seguinte na série"
+		"nextInSeries": "Next in Series"
 	},
 	"createBookClubScene": {
 		"heading": "Create a new book club",
@@ -88,7 +88,7 @@
 			"member_role_spec": {
 				"heading": "Custom role mapping",
 				"subtitle": [
-					"You can create custom names for the roles in your book club. For example, you could rename the 'Member' role to 'Crewmate', or 'Creator' to 'Captain'. If you don't want to use custom names, you can leave these fields blank and the default names will be used instead. For more information about roles, refer to the",
+					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
 					"documentation"
 				],
 				"member": {
@@ -113,8 +113,8 @@
 				}
 			},
 			"creator_preferences": {
-				"heading": "Your membership preferences",
-				"subtitle": "Some preferences for your membership in the book club. These can be changed at any time from the book club settings page",
+				"heading": "Membership",
+				"subtitle": "Preferences for your own membership in the book club",
 				"creator_display_name": {
 					"label": "Display Name",
 					"placeholder": "oromei",
@@ -128,66 +128,325 @@
 			"submit": "Create Book Club"
 		}
 	},
+	"createOrUpdateLibraryForm": {
+		"fields": {
+			"name": {
+				"label": "Name",
+				"description": "A friendly name for your library",
+				"placeholder": "My Library"
+			},
+			"path": {
+				"label": "Path",
+				"description": "The path to the library as it exists on your server",
+				"placeholder": "/path/to/library"
+			},
+			"description": {
+				"label": "Description",
+				"description": "A short description of your library",
+				"placeholder": "A library of all my favorite books"
+			},
+			"tags": {
+				"label": "Tags",
+				"description": "Used to categorize your library or enforce access rules"
+			},
+			"thumbnailConfig": {
+				"section": {
+					"heading": {
+						"create": "Thumbnail configuration",
+						"update": "Generation"
+					},
+					"description": "Improve loading times while browsing your library by generating thumbnails for your books"
+				},
+				"enableSwitch": {
+					"label": "Enabled",
+					"description": "Generate thumbnail images for this library"
+				},
+				"scaled": {
+					"label": "Scaled",
+					"description": "Scale the image by a custom factor per dimension",
+					"width": {
+						"label": "Width scale"
+					},
+					"height": {
+						"label": "Height scale"
+					}
+				},
+				"sized": {
+					"label": "Explicitly Sized",
+					"description": "Set each dimension of the thumbnail (in pixels)",
+					"width": {
+						"label": "Width"
+					},
+					"height": {
+						"label": "Height"
+					}
+				},
+				"format": {
+					"label": "Image format",
+					"description": "The format of the generated thumbnail images"
+				},
+				"quality": {
+					"label": "Quality",
+					"description": "The quality of the generated thumbnail images, between 0 and 1.0"
+				}
+			},
+			"ignoreRules": {
+				"section": {
+					"heading": "Ignore rules",
+					"description": "Define glob patterns to ignore certain files or directories during a scan"
+				},
+				"noRules": "No ignore rules have been configured",
+				"save": "Save changes",
+				"addRule": {
+					"label": "New rule",
+					"description": "Glob pattern to ignore files or directories",
+					"addButton": "Add rule",
+					"ignoreParents": {
+						"title": "Ignore all parent directories",
+						"label": "Ignore parents"
+					},
+					"ignoreSubdirs": {
+						"title": "Ignore all subdirectories",
+						"label": "Ignore subdirectories"
+					}
+				},
+				"invalidGlob": "Invalid glob pattern",
+				"lockConfig": {
+					"lock": "Lock configuration",
+					"unlock": "Unlock configuration"
+				},
+				"editRule": "Edit rule",
+				"deleteRule": "Delete rule",
+				"cancelEdit": "Cancel edit",
+				"confirmEdit": "Confirm edit"
+			},
+			"convertOptions": {
+				"section": {
+					"heading": "File conversion",
+					"description": "Stump is capable of converting certain file formats to more compatible ones"
+				},
+				"rarToZip": {
+					"label": "Convert RAR to ZIP",
+					"description": "Convert RAR/CBR files to ZIP/CBZ files during a scan"
+				},
+				"deleteRarAfter": {
+					"label": "Delete RAR after conversion",
+					"description": "Delete the original RAR/CBR file after conversion. This is irreversible"
+				}
+			},
+			"libraryPattern": {
+				"section": {
+					"heading": "Organization",
+					"description": "Identify which pattern most closely matches the organization of your library",
+					"docs": [
+						"Not sure which to choose? Click",
+						"here",
+						"for more information.",
+						"You cannot change this setting later"
+					],
+					"disabled": "You cannot change this setting"
+				},
+				"options": {
+					"label": "Library pattern",
+					"description": "The setting which determines how Stump will organize your library",
+					"collectionPriority": {
+						"label": "Collection priority",
+						"description": "Each folder at the top-most level of the library root is a single series"
+					},
+					"seriesPriority": {
+						"label": "Series priority",
+						"description": "Each folder at any level recursively is a single series"
+					}
+				}
+			}
+		},
+		"scan": {
+			"label": {
+				"create": "Scan after creation",
+				"update": "Scan after updates"
+			},
+			"description": "Index the library files to populate your database"
+		}
+	},
 	"createLibraryScene": {
-		"heading": "Criar nova biblioteca",
-		"subtitle": "As bibliotecas são usadas para agrupar seus livros. Se você quer uma atualização sobre as bibliotecas e como elas funcionam, confira",
-		"subtitleLink": "documentação relevante",
+		"heading": "Create library",
+		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on how they work, check out the",
+		"subtitleLink": "relevant documentation",
 		"form": {
-			"labels": {
-				"libraryName": "Nome",
-				"libraryPath": "Caminho",
-				"libraryPathDescription": "O caminho para a biblioteca como ela existe em seu servidor",
-				"libraryDescription": "Descrição",
-				"libraryTags": "Etiquetas"
+			"stepLabel": "Step",
+			"steps": [
+				{
+					"label": "Basics",
+					"heading": "Basic Information",
+					"description": "The details of this library, including its name, path, and description"
+				},
+				{
+					"label": "Scanning",
+					"heading": "Scanner Behavior",
+					"description": "Settings related to how Stump scans this library"
+				},
+				{
+					"label": "Thumbnails",
+					"heading": "Thumbnails",
+					"description": "The options for if and how Stump generates thumbnails for this library"
+				},
+				{
+					"label": "Review",
+					"heading": "Review",
+					"description": "Review your library settings before creating it"
+				}
+			],
+			"review": {
+				"yes": "Yes",
+				"no": "No",
+				"none": "None",
+				"labels": {
+					"generateThumbnails": "Generate thumbnails",
+					"mode": "Mode",
+					"format": "Format",
+					"quality": "Quality",
+					"name": "Name",
+					"path": "Path",
+					"description": "Description",
+					"tags": "Tags",
+					"pattern": "Pattern",
+					"ignoreRules": "Ignore rules",
+					"convertRar": "Convert RAR/CBR",
+					"deleteConversions": "Delete converted files"
+				}
 			},
 			"buttons": {
-				"confirm": "Criar Biblioteca"
+				"confirm": "Create Library"
 			}
 		}
 	},
 	"librarySettingsScene": {
-		"heading": "Gerenciar Biblioteca",
-		"subtitle": "Atualize os detalhes ou a configuração da sua biblioteca, altere as regras de acesso de controle ou arquivos de verificação. Se você está querendo uma atualização das bibliotecas e como elas funcionam, confira a",
-		"subtitleLink": "documentação relevante",
-		"form": {
-			"labels": {
-				"libraryName": "Nome",
-				"libraryPath": "Caminho",
-				"libraryPathDescription": "O caminho para a biblioteca como ela existe em seu servidor",
-				"libraryDescription": "Descrição",
-				"libraryTags": "Marcadores"
+		"heading": "Settings",
+		"subtitle": "Manage your library here. If you're wanting a refresh on these settings, check out the",
+		"subtitleLink": "relevant documentation",
+		"sidebar": {
+			"basics": "Basics",
+			"options": {
+				"general": "General",
+				"scanning": "Scanning",
+				"thumbnails": "Thumbnails",
+				"ignore-rules": "Ignore Rules",
+				"analysis": "Analysis",
+				"label": "Options"
 			},
-			"buttons": {
-				"confirm": "Salvar Alterações"
+			"danger-zone": {
+				"access-control": "Access Control",
+				"delete": "Deletion",
+				"label": "Danger Zone"
+			}
+		},
+		"basics": {
+			"title": "Basic Information",
+			"description": "The details of this library, including its name, path, and description",
+			"form": {
+				"submit": "Update library"
+			}
+		},
+		"options/scanning": {
+			"title": "Scanner Behavior",
+			"description": "Settings related to how Stump scans this library"
+		},
+		"options/thumbnails": {
+			"title": "Thumbnails",
+			"description": "Settings and management options for thumbnails in this library",
+			"sections": {
+				"management": {
+					"heading": "Management",
+					"description": "Manage the existing thumbnails for this library",
+					"thumbnailSelector": {},
+					"deleteThumbnails": {}
+				}
+			}
+		},
+		"options/analysis": {
+			"title": "Analysis",
+			"description": "Analyze the contents of this library to identify potential issues or improvements",
+			"sections": {
+				"analyzeBooks": {
+					"heading": "Analyze books",
+					"description": "Analyze the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
+					"disclaimer": "This process is resource-intensive and may take a while to complete",
+					"analyzeButton": "Analyze books"
+				},
+				"missingFiles": {
+					"heading": "Missing files",
+					"description": "Files that are referenced in the database but cannot be located on disk",
+					"noMissingFiles": "There are no missing files in this library"
+				},
+				"duplicateFiles": {
+					"heading": "Duplicate files",
+					"description": "Files that are potentially duplicated on disk",
+					"noDuplicateFiles": "There are no duplicate files detected for this library"
+				}
+			}
+		},
+		"danger-zone/access-control": {
+			"title": "Access Control",
+			"description": "Control who can access the content in this library",
+			"sections": {
+				"libraryExclusions": {
+					"heading": "Exclude users",
+					"description": "Prevent certain users from accessing this library or its contents",
+					"noUsers": "There are no other registered users to exclude from this library",
+					"updated": "Exclusions updated",
+					"failure": "Failed to update exclusions"
+				}
+			}
+		},
+		"danger-zone/delete": {
+			"title": "Deletion Actions",
+			"description": "Permanently delete this library and all of its contents or certain resources",
+			"sections": {
+				"cleanLibrary": {
+					"heading": "Clean library",
+					"description": "Remove all media and series that cannot be located on disk",
+					"disclaimer": "While this action will not delete any files, it will permanently delete all records relating to media and series which have a missing status",
+					"confirmation": {
+						"label": "Clean library",
+						"text": "Are you sure you want to clean this library?"
+					}
+				},
+				"deleteLibrary": {
+					"heading": "Delete library",
+					"description": [
+						"Permanently delete this library and all its contents.",
+						"This action cannot be undone"
+					]
+				}
 			}
 		}
 	},
 	"errorScene": {
 		"heading": "lol, oops",
-		"message": "Ocorreu um erro:",
+		"message": "An error occurred:",
 		"buttons": {
-			"report": "Reportar Bug",
-			"copy": "Copiar os detalhes do erro",
-			"goHome": "Ir ao Início"
+			"report": "Report Bug",
+			"copy": "Copy Error Details",
+			"goHome": "Go Home"
 		}
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "Continuar Lendo",
+			"title": "Continue Reading",
 			"emptyState": {
 				"heading": "No books to display",
 				"message": "Any books you're currently reading will show up here"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Séries adicionadas recentemente",
+			"title": "Recently Added Series",
 			"emptyState": {
 				"heading": "No series to display",
 				"message": "Any series you add to your libraries will show up here"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Livros adicionados recentemente",
+			"title": "Recently Added Books",
 			"emptyState": {
 				"heading": "No books to display",
 				"message": "Any books you add to your libraries will show up here"
@@ -196,8 +455,8 @@
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "Continuar Lendo",
-			"downloadSeries": "Baixar Séries"
+			"continueReading": "Continue Reading",
+			"downloadSeries": "Download Series"
 		}
 	},
 	"userSmartListsScene": {
@@ -296,11 +555,11 @@
 	},
 	"settingsScene": {
 		"navigation": {
-			"general": "Geral",
+			"general": "General",
 			"logs": "Logs",
-			"server": "Servidor",
-			"jobs": "Ações e configurações",
-			"users": "Gerenciamento de usuários",
+			"server": "Server",
+			"jobs": "Jobs and Configuration",
+			"users": "User Management",
 			"desktop": "Desktop"
 		},
 		"sidebar": {
@@ -595,8 +854,8 @@
 					"file": {
 						"label": "File Management",
 						"explorer": {
-							"label": "File Explorer",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+							"label": "File explorer",
+							"description": "Allows the user to access the various file explorers.\nContent restriction cannot be guaranteed when this feature is granted"
 						},
 						"download": {
 							"label": "Download files",
@@ -645,14 +904,14 @@
 						},
 						"manage": {
 							"label": "Manage users",
-							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
+							"description": "Allows the user to manage other users on the server.\nIncludes permissions to read, create, and update"
 						}
 					},
 					"smartlist": {
 						"label": "Smart Lists",
 						"read": {
 							"label": "Access smart list feature",
-							"description": "Allows the user to access smart lists features"
+							"description": "Allows the user to access smart lists features. Granular permissions are not yet implemented, so this\nincludes permissions to read, create, and update their own lists"
 						}
 					}
 				},
@@ -794,12 +1053,12 @@
 		}
 	},
 	"jobOverlay": {
-		"backupHeading": "Trabalho em Progresso"
+		"backupHeading": "Job in Progress"
 	},
 	"libraryStats": {
-		"seriesCount": "Total de Séries",
-		"bookCount": "Número Total de Livros",
-		"diskUsage": "Uso de disco"
+		"seriesCount": "Total Series",
+		"bookCount": "Total Books",
+		"diskUsage": "Disk Usage"
 	},
 	"noLibraries": {
 		"heading": "Nothing to see here",
@@ -814,39 +1073,39 @@
 	},
 	"pagination": {
 		"buttons": {
-			"next": "Próxima",
-			"previous": "Anterior"
+			"next": "Next",
+			"previous": "Previous"
 		},
 		"popover": {
-			"heading": "Ir para a página",
+			"heading": "Go to page",
 			"buttons": {
-				"confirm": "Ir",
-				"cancel": "Cancelar"
+				"confirm": "Go",
+				"cancel": "Cancel"
 			}
 		}
 	},
 	"signOutModal": {
-		"title": "Terminar Sessão",
-		"message": "Você tem certeza que deseja sair?",
+		"title": "Sign out",
+		"message": "Are you sure you want to sign out?",
 		"buttons": {
-			"cancel": "Cancelar",
-			"signOut": "Terminar Sessão"
+			"cancel": "Cancel",
+			"signOut": "Sign out"
 		}
 	},
 	"sidebar": {
 		"buttons": {
-			"home": "Início",
-			"libraries": "Bibliotecas",
+			"home": "Home",
+			"libraries": "Libraries",
 			"books": "Explore",
 			"bookClubs": "Book clubs",
 			"createLibrary": "Create library",
 			"noLibraries": "No libraries",
 			"createBookClub": "Create book club",
 			"noBookClubs": "No book clubs",
-			"settings": "Configurações",
-			"themeToggle": "Alternar tema",
-			"goForward": "Ir adiante",
-			"goBack": "Retornar",
+			"settings": "Settings",
+			"themeToggle": "Toggle Theme",
+			"goForward": "Go Forward",
+			"goBack": "Go Back",
 			"smartlists": "Smart lists",
 			"noSmartlists": "No smart lists",
 			"createSmartlist": "Create smart list",
@@ -854,52 +1113,52 @@
 		},
 		"libraryOptions": {
 			"scanLibrary": "Scan",
-			"fileExplorer": "Explorador de Arquivos",
-			"manageLibrary": "Manage",
+			"fileExplorer": "File Explorer",
+			"manageLibrary": "Settings",
 			"deleteLibrary": "Delete"
 		},
 		"versionInformation": {
-			"heading": "Informações da versão",
-			"semVer": "Versionamento Semântico",
-			"commitHash": "Hash do Commit",
-			"buildDate": "Data da Compilação"
+			"heading": "Version Information",
+			"semVer": "Semantic Version",
+			"commitHash": "Commit Hash",
+			"buildDate": "Build Date"
 		}
 	},
 	"search": {
-		"placeholder": "Pesquisar"
+		"placeholder": "Search"
 	},
 	"serverSOS": {
-		"heading": "Servidor indisponível",
+		"heading": "Server Unavailable",
 		"desktop": {
-			"message": "Ocorreu um erro de rede que sugere que seu servidor Stump está indisponível. Por favor, verifique se ele está sendo executado e acessível a partir deste dispositivo.\nSe a URL do seu servidor mudou, você pode atualizá-la usando o formulário abaixo"
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
 		},
 		"web": {
-			"message": "Ocorreu um erro de rede que sugere que seu servidor Stump está indisponível no momento. Por favor, verifique se ele está sendo executado e acessível a partir deste dispositivo"
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
 		},
-		"reconnected": "Reconectado ao servidor! Redirecionando...",
-		"reconnectionFailed": "Algo deu errado!"
+		"reconnected": "Reconnected to server! Redirecting...",
+		"reconnectionFailed": "Something went wrong!"
 	},
 	"serverStatusOverlay": {
-		"heading": "Servidor não está conectado",
+		"heading": "Server isn't connected",
 		"message": [
-			"Por favor, verifique sua conexão com a internet",
-			"Clique aqui",
-			"para mudar a URL de seu servidor"
+			"Please check your internet connection",
+			"Click here",
+			"to change your server URL"
 		]
 	},
 	"slidingList": {
-		"empty": "Nenhum item para exibir",
+		"empty": "No items to display",
 		"buttons": {
-			"next": "Buscar à frente",
-			"previous": "Procurar Anterior"
+			"next": "Seek Ahead",
+			"previous": "Seek Backwards"
 		}
 	},
 	"tagSelect": {
-		"placholder": "Selecionar ou criar etiqueta",
-		"placeholderNoTags": "Não há tags disponíveis"
+		"placholder": "Select or create tag",
+		"placeholderNoTags": "No tags available"
 	},
 	"thumbnailDropdown": {
-		"label": "Edit thumbnail",
+		"label": "Select thumbnail",
 		"options": {
 			"selectFromBooks": "Select from books",
 			"uploadImage": "Upload image"
@@ -917,6 +1176,7 @@
 		"save": "Save",
 		"send": "Send",
 		"saveChanges": "Save changes",
+		"noChanges": "No changes",
 		"create": "Create",
 		"edit": "Edit",
 		"update": "Update",

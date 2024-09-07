@@ -82,7 +82,7 @@ export default function DirectoryPickerModal({
 							className="line-clamp-1 h-[37px]"
 							containerClassName="max-w-full"
 							// isInvalid={!!errorMessage}
-							value={path ?? undefined}
+							value={path ?? ''}
 							readOnly
 							variant="primary"
 							// TODO: allow input to be editable

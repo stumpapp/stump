@@ -112,7 +112,7 @@ impl JobProgress {
 }
 
 impl WorkerSendExt for JobProgress {
-	fn into_send(self) -> WorkerSend {
+	fn into_worker_send(self) -> WorkerSend {
 		WorkerSend::Progress(self)
 	}
 }

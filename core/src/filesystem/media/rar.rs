@@ -125,6 +125,11 @@ impl FileProcessor for RarProcessor {
 		while let Ok(Some(header)) = archive.read_header() {
 			let entry = header.entry();
 
+			if entry.is_directory() {
+				archive = header.skip()?;
+				continue;
+			}
+
 			if entry.filename.is_hidden_file() {
 				archive = header.skip()?;
 				continue;

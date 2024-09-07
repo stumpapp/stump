@@ -6,9 +6,10 @@ use utoipa::ToSchema;
 
 use crate::{
 	db::entity::{Cursor, Series, Tag},
-	filesystem::image::ImageProcessorOptions,
 	prisma::{self, library},
 };
+
+use super::LibraryOptions;
 
 //////////////////////////////////////////////
 //////////////// PRISMA MACROS ///////////////
@@ -44,6 +45,7 @@ pub struct Library {
 	/// The status of the library since last scan or access. ex: "READY" or "MISSING"
 	pub status: String,
 	// The date in which the library was last updated. This is usually after a scan. ex: "2022-04-20 04:20:69"
+	// TODO(specta): replace with DateTime<FixedOffset>
 	pub updated_at: String,
 	/// The series that are in this library. Will be `None` only if the relation is not loaded.
 	pub series: Option<Vec<Series>>,
@@ -103,27 +105,6 @@ impl fmt::Display for LibraryPattern {
 	}
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema, Default)]
-pub struct LibraryOptions {
-	// Note: this isn't really an Option, but I felt it was a little verbose
-	// to create an entirely new struct Create/UpdateLibraryOptions for just one
-	// field... even though I ~kinda~ did that below lol for Create/UpdateLibraryArgs lol.
-	pub id: Option<String>,
-	pub convert_rar_to_zip: bool,
-	pub hard_delete_conversions: bool,
-	pub library_pattern: LibraryPattern,
-	pub thumbnail_config: Option<ImageProcessorOptions>,
-	// TODO(prisma 0.7.0): Nested create
-	// https://github.com/Brendonovich/prisma-client-rust/issues/44
-	pub library_id: Option<String>,
-}
-
-impl LibraryOptions {
-	pub fn is_collection_based(&self) -> bool {
-		self.library_pattern == LibraryPattern::CollectionBased
-	}
-}
-
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Copy, Clone, Type, ToSchema)]
 pub enum LibraryScanMode {
 	#[serde(rename = "DEFAULT")]
@@ -171,36 +152,6 @@ pub struct LibraryStats {
 ///////////////////////////////////////////////
 ////////////////// CONVERSIONS ////////////////
 ///////////////////////////////////////////////
-
-impl From<prisma::library_options::Data> for LibraryOptions {
-	fn from(data: prisma::library_options::Data) -> LibraryOptions {
-		LibraryOptions {
-			id: Some(data.id),
-			convert_rar_to_zip: data.convert_rar_to_zip,
-			hard_delete_conversions: data.hard_delete_conversions,
-			library_pattern: LibraryPattern::from(data.library_pattern),
-			thumbnail_config: data.thumbnail_config.map(|config| {
-				ImageProcessorOptions::try_from(config).unwrap_or_default()
-			}),
-			library_id: data.library_id,
-		}
-	}
-}
-
-impl From<&prisma::library_options::Data> for LibraryOptions {
-	fn from(data: &prisma::library_options::Data) -> LibraryOptions {
-		LibraryOptions {
-			id: Some(data.id.clone()),
-			convert_rar_to_zip: data.convert_rar_to_zip,
-			hard_delete_conversions: data.hard_delete_conversions,
-			library_pattern: LibraryPattern::from(data.library_pattern.clone()),
-			thumbnail_config: data.thumbnail_config.clone().map(|config| {
-				ImageProcessorOptions::try_from(config).unwrap_or_default()
-			}),
-			library_id: data.library_id.clone(),
-		}
-	}
-}
 
 impl From<prisma::library::Data> for Library {
 	fn from(data: prisma::library::Data) -> Library {

@@ -67,8 +67,6 @@ mod tests {
 			render_template(EmailTemplate::Attachment, &data, default_templates_dir())
 				.unwrap();
 
-		dbg!(&rendered);
-
 		assert!(rendered.contains("Stump Attachment"));
 	}
 }

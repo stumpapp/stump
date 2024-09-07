@@ -13,4 +13,4 @@ serde_json = { workspace = true }
 specta = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
-utoipa = { version = "3.5.0" }
+utoipa = { version = "4.2.3" }

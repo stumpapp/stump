@@ -1,9 +1,9 @@
 use axum::{
 	extract::State,
-	middleware::from_extractor_with_state,
+	middleware,
 	response::{sse::Event, Sse},
 	routing::get,
-	Json, Router,
+	Extension, Json, Router,
 };
 use futures_util::Stream;
 use linemux::MuxedLines;
@@ -20,15 +20,13 @@ use stump_core::{
 	},
 	prisma::log::{self, OrderByParam as LogOrderByParam, WhereParam},
 };
-use tower_sessions::Session;
 
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::{chain_optional_iter, LogFilter},
-	middleware::auth::Auth,
+	middleware::auth::{auth_middleware, RequestContext},
 	routers::sse::stream_shutdown_guard,
-	utils::enforce_session_permissions,
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -41,7 +39,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/info", get(get_logfile_info))
 				.route("/tail", get(tail_log_file)),
 		)
-		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 pub(crate) fn apply_log_filters(filters: LogFilter) -> Vec<WhereParam> {
@@ -72,9 +70,9 @@ async fn get_logs(
 	filters: QsQuery<LogFilter>,
 	order: QsQuery<QueryOrder>,
 	pagination: QsQuery<PaginationQuery>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Pageable<Vec<Log>>>> {
-	enforce_session_permissions(&session, &[UserPermission::ManageServer])?;
+	req.enforce_permissions(&[UserPermission::ManageServer])?;
 
 	let pagination = pagination.0.get();
 	let order = order.0;
@@ -155,9 +153,9 @@ async fn get_logs(
 async fn delete_logs(
 	State(ctx): State<AppState>,
 	filters: QsQuery<LogFilter>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<()> {
-	enforce_session_permissions(&session, &[UserPermission::ManageServer])?;
+	req.enforce_permissions(&[UserPermission::ManageServer])?;
 
 	let where_params = apply_log_filters(filters.0);
 
@@ -169,9 +167,9 @@ async fn delete_logs(
 
 async fn tail_log_file(
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Sse<impl Stream<Item = Result<Event, APIError>>>> {
-	enforce_session_permissions(&session, &[UserPermission::ManageServer])?;
+	req.enforce_permissions(&[UserPermission::ManageServer])?;
 
 	let stream = async_stream::stream! {
 		let log_file_path = ctx.config.get_log_file();
@@ -210,10 +208,10 @@ async fn tail_log_file(
 /// Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
 /// ~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
 async fn get_logfile_info(
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<LogMetadata>> {
-	enforce_session_permissions(&session, &[UserPermission::ManageServer])?;
+	req.enforce_permissions(&[UserPermission::ManageServer])?;
 
 	let log_file_path = ctx.config.get_log_file();
 
@@ -246,8 +244,11 @@ async fn get_logfile_info(
 // a resource. This is not semantically correct, but I want it to be clear that
 // this route *WILL* delete all of the file contents.
 // #[delete("/logs")]
-async fn delete_log_file(session: Session, State(ctx): State<AppState>) -> APIResult<()> {
-	enforce_session_permissions(&session, &[UserPermission::ManageServer])?;
+async fn delete_log_file(
+	Extension(req): Extension<RequestContext>,
+	State(ctx): State<AppState>,
+) -> APIResult<()> {
+	req.enforce_permissions(&[UserPermission::ManageServer])?;
 
 	let log_file_path = ctx.config.get_log_file();
 

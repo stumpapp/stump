@@ -47,6 +47,7 @@ pub struct EmailerSendRecord {
 	/// The metadata of the attachment, if there is one
 	attachment_meta: Option<Vec<AttachmentMeta>>,
 	/// The timestamp of when this email was sent
+	// TODO(specta): replace with DateTime<FixedOffset>
 	sent_at: String,
 	/// The user ID of the user that sent this email
 	sent_by_user_id: Option<String>,

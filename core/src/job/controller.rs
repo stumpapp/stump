@@ -34,7 +34,7 @@ pub enum JobControllerCommand {
 }
 
 impl WorkerSendExt for JobControllerCommand {
-	fn into_send(self) -> WorkerSend {
+	fn into_worker_send(self) -> WorkerSend {
 		WorkerSend::ManagerCommand(self)
 	}
 }
@@ -66,6 +66,10 @@ impl JobController {
 		this
 	}
 
+	pub async fn initialize(&self) -> JobManagerResult<()> {
+		self.manager.clone().initialize().await
+	}
+
 	/// Starts the watcher loop for the [JobController]. This function will listen for incoming
 	/// commands and execute them.
 	pub fn watch(
@@ -76,10 +80,11 @@ impl JobController {
 			while let Some(event) = commands_rx.recv().await {
 				match event {
 					JobControllerCommand::EnqueueJob(job) => {
-						tracing::trace!(job_id = ?job.id(), "Received enqueue job event");
+						let name = job.name();
+						tracing::trace!(name, job_id = ?job.id(), "Received enqueue job event");
 						self.manager.clone().enqueue(job).await.map_or_else(
 							|error| tracing::error!(?error, "Failed to enqueue job!"),
-							|_| tracing::info!("Successfully enqueued job"),
+							|_| tracing::info!(name, "Successfully enqueued job"),
 						);
 					},
 					JobControllerCommand::CompleteJob(id) => {

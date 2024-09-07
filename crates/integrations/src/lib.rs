@@ -1,3 +1,5 @@
+#![warn(clippy::dbg_macro)]
+
 mod google_books_client;
 mod notifier;
 

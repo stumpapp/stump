@@ -11,12 +11,12 @@ pub use crate::filesystem::media::epub::EpubProcessor;
 pub(crate) use builder::{MediaBuilder, SeriesBuilder};
 pub use common::is_accepted_cover_name;
 pub use process::{
-	get_content_types_for_pages, get_page, process, FileProcessor, FileProcessorOptions,
-	ProcessedFile, SeriesJson,
+	get_content_type_for_page, get_content_types_for_pages, get_page, process,
+	FileProcessor, FileProcessorOptions, ProcessedFile, SeriesJson,
 };
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
 	use std::{fs, path::PathBuf};
 
 	pub fn get_test_zip_path() -> String {

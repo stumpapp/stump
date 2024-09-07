@@ -36,6 +36,7 @@ use env_keys::*;
 pub mod defaults {
 	pub const DEFAULT_PASSWORD_HASH_COST: u32 = 12;
 	pub const DEFAULT_SESSION_TTL: i64 = 3600 * 24 * 3; // 3 days
+	pub const DEFAULT_ACCESS_TOKEN_TTL: i64 = 3600 * 24; // 1 days
 	pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
 	pub const DEFAULT_SCANNER_CHUNK_SIZE: usize = 100;
 }
@@ -139,7 +140,9 @@ pub struct StumpConfig {
 	#[default_value(DEFAULT_SESSION_TTL)]
 	#[env_key(SESSION_TTL_KEY)]
 	pub session_ttl: i64,
-
+	#[default_value(DEFAULT_ACCESS_TOKEN_TTL)]
+	#[env_key("ACCESS_TOKEN_TTL")]
+	pub access_token_ttl: i64,
 	/// The interval at which automatic deleted session cleanup is performed.
 	#[default_value(DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL)]
 	#[env_key(SESSION_EXPIRY_INTERVAL_KEY)]
@@ -290,6 +293,7 @@ mod tests {
 			disable_swagger: Some(false),
 			password_hash_cost: None,
 			session_ttl: None,
+			access_token_ttl: None,
 			expired_session_cleanup_interval: None,
 			scanner_chunk_size: None,
 		};
@@ -321,6 +325,7 @@ mod tests {
 				disable_swagger: Some(false),
 				password_hash_cost: Some(DEFAULT_PASSWORD_HASH_COST),
 				session_ttl: Some(DEFAULT_SESSION_TTL),
+				access_token_ttl: Some(DEFAULT_ACCESS_TOKEN_TTL),
 				expired_session_cleanup_interval: Some(
 					DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL
 				),
@@ -369,6 +374,7 @@ mod tests {
 						disable_swagger: true,
 						password_hash_cost: 1,
 						session_ttl: DEFAULT_SESSION_TTL,
+						access_token_ttl: DEFAULT_ACCESS_TOKEN_TTL,
 						expired_session_cleanup_interval:
 							DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
 						scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,

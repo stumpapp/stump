@@ -22,7 +22,7 @@ use crate::{
 
 use super::{
 	utils::{
-		generate_rule_set, handle_create_media, handle_missing_media, handle_visit_media,
+		handle_create_media, handle_missing_media, handle_visit_media,
 		MediaBuildOperationCtx, MediaOperationOutput,
 	},
 	walk_series, WalkedSeries, WalkerCtx,
@@ -110,7 +110,7 @@ impl JobExt for SeriesScanJob {
 				"Associated library not found".to_string(),
 			))?;
 		let library_options = LibraryOptions::from(library.library_options);
-		let ignore_rules = generate_rule_set(&[PathBuf::from(self.path.clone())]);
+		let ignore_rules = library_options.ignore_rules.build()?;
 
 		// If the library is collection-priority, any child directories are 'ignored' and their
 		// files are part of / folded into the top-most folder (series).
@@ -231,12 +231,12 @@ impl JobExt for SeriesScanJob {
 					..
 				} = handle_missing_media(ctx, &self.id, paths).await;
 				ctx.send_batch(vec![
-					JobProgress::msg("Handled missing media").into_send(),
+					JobProgress::msg("Handled missing media").into_worker_send(),
 					CoreEvent::CreatedOrUpdatedManyMedia {
 						count: updated_media,
 						series_id: self.id.clone(),
 					}
-					.into_send(),
+					.into_worker_send(),
 				]);
 				output.updated_media += updated_media;
 				logs.extend(new_logs);
@@ -260,12 +260,12 @@ impl JobExt for SeriesScanJob {
 				)
 				.await?;
 				ctx.send_batch(vec![
-					JobProgress::msg("Created new media").into_send(),
+					JobProgress::msg("Created new media").into_worker_send(),
 					CoreEvent::CreatedOrUpdatedManyMedia {
 						count: created_media,
 						series_id: self.id.clone(),
 					}
-					.into_send(),
+					.into_worker_send(),
 				]);
 				output.created_media += created_media;
 				logs.extend(new_logs);
@@ -289,12 +289,12 @@ impl JobExt for SeriesScanJob {
 				)
 				.await?;
 				ctx.send_batch(vec![
-					JobProgress::msg("Visited all media").into_send(),
+					JobProgress::msg("Visited all media").into_worker_send(),
 					CoreEvent::CreatedOrUpdatedManyMedia {
 						count: updated_media,
 						series_id: self.id.clone(),
 					}
-					.into_send(),
+					.into_worker_send(),
 				]);
 				output.updated_media += updated_media;
 				logs.extend(new_logs);

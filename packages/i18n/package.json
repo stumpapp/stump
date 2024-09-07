@@ -6,6 +6,9 @@
 	"exports": {
 		".": "./src/index.ts"
 	},
+	"scripts": {
+		"nuke": "rimraf node_modules"
+	},
 	"license": "MIT",
 	"devDependencies": {
 		"typescript": "^5.4.5"

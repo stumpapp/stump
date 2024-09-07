@@ -1,9 +1,9 @@
-import { prefetchEmailerSendHistory } from '@stump/client'
+import { prefetchEmailerSendHistory, useDeleteEmailer } from '@stump/client'
 import { Badge, Card, Text, ToolTip } from '@stump/components'
 import { SMTPEmailer } from '@stump/types'
 import dayjs from 'dayjs'
 import { Sparkles } from 'lucide-react'
-import React, { Suspense, useMemo } from 'react'
+import React, { Suspense, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 
 import paths from '@/paths'
@@ -26,6 +26,8 @@ export default function EmailerListItem({ emailer }: Props) {
 		last_used_at,
 	} = emailer
 
+	const { deleteEmailer } = useDeleteEmailer()
+
 	const displayedHost = useMemo(
 		() => getCommonHost(smtp_host) ?? { name: smtp_host, smtp_host: smtp_host },
 		[smtp_host],
@@ -42,6 +44,12 @@ export default function EmailerListItem({ emailer }: Props) {
 			return <EmailerSendHistory emailerId={emailer.id} lastUsedAt={dayjs(last_used_at)} />
 		}
 	}
+
+	const handleDeleteEmailer = useCallback(() => {
+		if (canEditEmailer) {
+			deleteEmailer(emailer.id)
+		}
+	}, [canEditEmailer, deleteEmailer, emailer.id])
 
 	return (
 		<Card
@@ -61,8 +69,7 @@ export default function EmailerListItem({ emailer }: Props) {
 					{canEditEmailer && (
 						<EmailerActionMenu
 							onEdit={() => navigate(paths.editEmailer(emailer.id))}
-							// TODO: implement delete
-							onDelete={() => {}}
+							onDelete={canEditEmailer ? handleDeleteEmailer : undefined}
 						/>
 					)}
 				</div>

@@ -1,15 +1,15 @@
 use axum::{
 	extract::{DefaultBodyLimit, Multipart, Path, Query, State},
-	middleware::from_extractor_with_state,
+	middleware,
 	routing::{get, post, put},
-	Json, Router,
+	Extension, Json, Router,
 };
+use chrono::Duration;
 use prisma_client_rust::{chrono::Utc, not, or, raw, Direction, PrismaValue};
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use specta::Type;
 use std::path;
-use tower_sessions::Session;
 use tracing::{debug, error, trace};
 use utoipa::ToSchema;
 
@@ -18,8 +18,9 @@ use stump_core::{
 	db::{
 		entity::{
 			library_series_ids_media_ids_include, library_thumbnails_deletion_include,
+			macros::{library_tags_select, series_or_library_thumbnail},
 			FileStatus, Library, LibraryOptions, LibraryScanMode, LibraryStats, Media,
-			Series, Tag, User, UserPermission,
+			Series, TagName, User, UserPermission,
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 		PrismaCountTrait,
@@ -52,11 +53,8 @@ use crate::{
 		chain_optional_iter, decode_path_filter, FilterableQuery, LibraryBaseFilter,
 		LibraryFilter, LibraryRelationFilter, MediaFilter, SeriesFilter,
 	},
-	middleware::auth::Auth,
-	utils::{
-		enforce_session_permissions, get_session_server_owner_user, get_session_user,
-		get_user_and_enforce_permission, http::ImageResponse, validate_image_upload,
-	},
+	middleware::auth::{auth_middleware, RequestContext},
+	utils::{http::ImageResponse, validate_image_upload},
 };
 
 use super::{
@@ -112,7 +110,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.route("/generate", post(generate_library_thumbnails)),
 				),
 		)
-		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 pub(crate) fn apply_library_base_filters(filters: LibraryBaseFilter) -> Vec<WhereParam> {
@@ -180,16 +178,16 @@ async fn get_libraries(
 	filter_query: QsQuery<FilterableQuery<LibraryFilter>>,
 	pagination_query: Query<PaginationQuery>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Pageable<Vec<Library>>>> {
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let FilterableQuery { filters, ordering } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
 
 	tracing::trace!(?filters, ?ordering, ?pagination, "get_libraries");
 
 	let is_unpaged = pagination.is_unpaged();
-	let where_conditions = apply_library_filters_for_user(filters, &user);
+	let where_conditions = apply_library_filters_for_user(filters, user);
 	let order_by = ordering.try_into()?;
 
 	let mut query = ctx
@@ -236,14 +234,14 @@ async fn get_libraries(
 
 async fn get_last_visited_library(
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Option<Library>>> {
 	let client = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
 	let last_visited_library = client
 		.last_library_visit()
-		.find_first(vec![last_library_visit::user_id::equals(user.id)])
+		.find_first(vec![last_library_visit::user_id::equals(user.id.clone())])
 		.with(last_library_visit::library::fetch())
 		.exec()
 		.await?;
@@ -258,10 +256,10 @@ async fn get_last_visited_library(
 async fn update_last_visited_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Library>> {
 	let client = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
 	let last_library_visit = client
 		.last_library_visit()
@@ -307,9 +305,9 @@ pub struct LibraryStatsParams {
 async fn get_libraries_stats(
 	State(ctx): State<AppState>,
 	Query(params): Query<LibraryStatsParams>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<LibraryStats>> {
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let db = &ctx.db;
 
 	let stats = db
@@ -346,7 +344,7 @@ async fn get_libraries_stats(
 			"#,
 			PrismaValue::Boolean(params.all_users),
 			PrismaValue::String(user.id.clone()),
-			PrismaValue::String(user.id)
+			PrismaValue::String(user.id.clone())
 		))
 		.exec()
 		.await?
@@ -377,9 +375,9 @@ async fn get_libraries_stats(
 async fn get_library_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Library>> {
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let db = &ctx.db;
 
 	let library = db
@@ -387,7 +385,7 @@ async fn get_library_by_id(
 		.find_first(
 			[library::id::equals(id.clone())]
 				.into_iter()
-				.chain([library_not_hidden_from_user_filter(&user)])
+				.chain([library_not_hidden_from_user_filter(user)])
 				.collect(),
 		)
 		.with(library::library_options::fetch())
@@ -421,7 +419,7 @@ async fn get_library_series(
 	pagination_query: Query<PaginationQuery>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Pageable<Vec<Series>>>> {
 	let FilterableQuery {
 		ordering, filters, ..
@@ -431,7 +429,7 @@ async fn get_library_series(
 
 	let db = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -445,7 +443,7 @@ async fn get_library_series(
 		.chain(chain_optional_iter(
 			[
 				series::library_id::equals(Some(id.clone())),
-				series::library::is(vec![library_not_hidden_from_user_filter(&user)]),
+				series::library::is(vec![library_not_hidden_from_user_filter(user)]),
 			],
 			[age_restrictions],
 		))
@@ -505,9 +503,9 @@ async fn get_library_media(
 	pagination_query: Query<PaginationQuery>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Pageable<Vec<Media>>>> {
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
 	let FilterableQuery { ordering, filters } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
@@ -520,7 +518,7 @@ async fn get_library_media(
 		.into_iter()
 		.chain([media::series::is(vec![
 			series::library_id::equals(Some(id.clone())),
-			series::library::is(vec![library_not_hidden_from_user_filter(&user)]),
+			series::library::is(vec![library_not_hidden_from_user_filter(user)]),
 		])])
 		.collect::<Vec<media::WhereParam>>();
 
@@ -565,29 +563,27 @@ async fn get_library_media(
 }
 
 pub(crate) fn get_library_thumbnail(
-	library: &library::Data,
-	first_series: &series::Data,
-	first_book: &media::Data,
+	id: &str,
+	first_series: series_or_library_thumbnail::Data,
+	first_book: Option<series_or_library_thumbnail::media::Data>,
 	image_format: Option<ImageFormat>,
 	config: &StumpConfig,
 ) -> APIResult<(ContentType, Vec<u8>)> {
-	let library_id = library.id.clone();
-
 	if let Some(format) = image_format.clone() {
 		let extension = format.extension();
 
 		let path = config
 			.get_thumbnails_dir()
-			.join(format!("{}.{}", library_id, extension));
+			.join(format!("{}.{}", id, extension));
 
 		if path.exists() {
-			tracing::trace!(?path, library_id, "Found generated library thumbnail");
+			tracing::trace!(?path, id, "Found generated library thumbnail");
 			return Ok((ContentType::from(format), read_entire_file(path)?));
 		}
 	}
 
-	if let Some(path) = get_unknown_thumnail(&library_id, config.get_thumbnails_dir()) {
-		tracing::debug!(path = ?path, library_id, "Found library thumbnail that does not align with config");
+	if let Some(path) = get_unknown_thumnail(id, config.get_thumbnails_dir()) {
+		tracing::debug!(path = ?path, id, "Found library thumbnail that does not align with config");
 		let FileParts { extension, .. } = path.file_parts();
 		return Ok((
 			ContentType::from_extension(extension.as_str()),
@@ -595,7 +591,7 @@ pub(crate) fn get_library_thumbnail(
 		));
 	}
 
-	get_series_thumbnail(first_series, first_book, image_format, config)
+	get_series_thumbnail(&first_series.id, first_book, image_format, config)
 }
 
 // TODO: ImageResponse for utoipa
@@ -617,62 +613,47 @@ pub(crate) fn get_library_thumbnail(
 async fn get_library_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<ImageResponse> {
 	let db = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let age_restriction = user.age_restriction.as_ref();
+
+	let series_filters = chain_optional_iter(
+		[
+			series::library_id::equals(Some(id.clone())),
+			series::library::is(vec![library_not_hidden_from_user_filter(user)]),
+		],
+		[age_restriction
+			.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset))],
+	);
+	let book_filters = chain_optional_iter(
+		[],
+		[age_restriction
+			.as_ref()
+			.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset))],
+	);
 
 	let first_series = db
 		.series()
-		// Find the first series in the library which satisfies the age restriction
-		.find_first(chain_optional_iter(
-			[
-				series::library_id::equals(Some(id.clone())),
-				series::library::is(vec![library_not_hidden_from_user_filter(&user)]),
-			],
-			[age_restriction
-				.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset))],
-		))
-		.with(
-			// Then load the first media in that series which satisfies the age restriction
-			series::media::fetch(chain_optional_iter(
-				[],
-				[age_restriction
-					.as_ref()
-					.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset))],
-			))
-			.take(1)
-			.order_by(media::name::order(Direction::Asc)),
-		)
-		.with(series::library::fetch().with(library::library_options::fetch()))
+		.find_first(series_filters)
 		.order_by(series::name::order(Direction::Asc))
+		.select(series_or_library_thumbnail::select(book_filters))
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound("Library has no series".to_string()))?;
+	let first_book = first_series.media.first().cloned();
 
-	let library = first_series
-		.library()?
-		.ok_or(APIError::Unknown(String::from("Failed to load library")))?;
-	let image_format = library
-		.library_options()
-		.map(LibraryOptions::from)?
-		.thumbnail_config
-		.map(|config| config.format);
+	let library_options = first_series
+		.library
+		.as_ref()
+		.map(|l| l.library_options.clone())
+		.map(LibraryOptions::from);
+	let image_format = library_options.and_then(|o| o.thumbnail_config.map(|c| c.format));
 
-	let first_book = first_series.media()?.first().ok_or(APIError::NotFound(
-		"Library has no media to get thumbnail from".to_string(),
-	))?;
-
-	get_library_thumbnail(
-		library,
-		&first_series,
-		first_book,
-		image_format,
-		&ctx.config,
-	)
-	.map(ImageResponse::from)
+	get_library_thumbnail(&id, first_series, first_book, image_format, &ctx.config)
+		.map(ImageResponse::from)
 }
 
 #[derive(Deserialize, ToSchema, specta::Type)]
@@ -704,11 +685,10 @@ pub struct PatchLibraryThumbnail {
 async fn patch_library_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(body): Json<PatchLibraryThumbnail>,
 ) -> APIResult<ImageResponse> {
-	let user = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
-	get_session_server_owner_user(&session)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::ManageLibrary])?;
 
 	let client = &ctx.db;
 
@@ -776,13 +756,13 @@ async fn patch_library_thumbnail(
 async fn replace_library_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	mut upload: Multipart,
 ) -> APIResult<ImageResponse> {
-	let user = enforce_session_permissions(
-		&session,
-		&[UserPermission::UploadFile, UserPermission::ManageLibrary],
-	)?;
+	let user = req.user_and_enforce_permissions(&[
+		UserPermission::UploadFile,
+		UserPermission::ManageLibrary,
+	])?;
 	let client = &ctx.db;
 
 	tracing::trace!(?id, ?upload, "Replacing library thumbnail");
@@ -839,9 +819,9 @@ async fn replace_library_thumbnail(
 async fn delete_library_thumbnails(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<()>> {
-	let user = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::ManageLibrary])?;
 
 	let db = &ctx.db;
 	let thumbnails_dir = ctx.config.get_thumbnails_dir();
@@ -893,10 +873,10 @@ pub struct GenerateLibraryThumbnails {
 async fn generate_library_thumbnails(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(input): Json<GenerateLibraryThumbnails>,
 ) -> APIResult<Json<()>> {
-	let user = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::ManageLibrary])?;
 	let library = ctx
 		.db
 		.library()
@@ -948,12 +928,9 @@ async fn generate_library_thumbnails(
 async fn get_library_excluded_users(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Vec<User>>> {
-	enforce_session_permissions(
-		&session,
-		&[UserPermission::ReadUsers, UserPermission::ManageLibrary],
-	)?;
+	req.enforce_permissions(&[UserPermission::ReadUsers, UserPermission::ManageLibrary])?;
 
 	let db = &ctx.db;
 
@@ -994,13 +971,10 @@ pub struct UpdateLibraryExcludedUsers {
 async fn update_library_excluded_users(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(input): Json<UpdateLibraryExcludedUsers>,
 ) -> APIResult<Json<Library>> {
-	enforce_session_permissions(
-		&session,
-		&[UserPermission::ReadUsers, UserPermission::ManageLibrary],
-	)?;
+	req.enforce_permissions(&[UserPermission::ReadUsers, UserPermission::ManageLibrary])?;
 
 	let db = &ctx.db;
 
@@ -1078,9 +1052,9 @@ async fn update_library_excluded_users(
 async fn scan_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> Result<(), APIError> {
-	let user = get_user_and_enforce_permission(&session, UserPermission::ScanLibrary)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::ScanLibrary])?;
 	let db = &ctx.db;
 
 	let library = db
@@ -1133,9 +1107,9 @@ pub struct CleanLibraryResponse {
 async fn clean_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<CleanLibraryResponse>> {
-	let user = get_user_and_enforce_permission(&session, UserPermission::ManageLibrary)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::ManageLibrary])?;
 
 	let db = &ctx.db;
 	let thumbnails_dir = ctx.config.get_thumbnails_dir();
@@ -1258,12 +1232,16 @@ pub struct CreateLibrary {
 	/// The path to the library to create, i.e. where the directory is on the filesystem.
 	pub path: String,
 	/// Optional text description of the library.
+	#[specta(optional)]
 	pub description: Option<String>,
 	/// Optional tags to assign to the library.
-	pub tags: Option<Vec<Tag>>,
+	#[specta(optional)]
+	pub tags: Option<Vec<TagName>>,
 	/// Optional flag to indicate if the how the library should be scanned after creation. Default is `BATCHED`.
+	#[specta(optional)]
 	pub scan_mode: Option<LibraryScanMode>,
 	/// Optional options to apply to the library. When not provided, the default options will be used.
+	#[specta(optional)]
 	pub library_options: Option<LibraryOptions>,
 }
 
@@ -1281,16 +1259,14 @@ pub struct CreateLibrary {
 	)
 )]
 /// Create a new library. Will queue a ScannerJob to scan the library, and return the library
+#[tracing::instrument(skip(ctx, req))]
 async fn create_library(
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateLibrary>,
 ) -> APIResult<Json<Library>> {
-	let user = get_user_and_enforce_permission(&session, UserPermission::CreateLibrary)?;
-
+	req.enforce_permissions(&[UserPermission::CreateLibrary])?;
 	let db = &ctx.db;
-
-	debug!(user_id = user.id, ?input, "Creating library");
 
 	if !path::Path::new(&input.path).exists() {
 		return Err(APIError::BadRequest(format!(
@@ -1311,12 +1287,21 @@ async fn create_library(
 		)));
 	}
 
-	// TODO(prisma 0.7.0): Nested create
+	// TODO(prisma-nested-create): Refactor once nested create is supported
 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
 	let library_options_arg = input.library_options.unwrap_or_default();
 	let transaction_result: Result<Library, APIError> = db
 		._transaction()
+		.with_timeout(Duration::seconds(30).num_milliseconds() as u64)
 		.run(|client| async move {
+			let ignore_rules = (!library_options_arg.ignore_rules.is_empty())
+				.then(|| library_options_arg.ignore_rules.as_bytes())
+				.transpose()?;
+			let thumbnail_config = library_options_arg
+				.thumbnail_config
+				.map(|options| options.as_bytes())
+				.transpose()?;
+
 			let library_options = client
 				.library_options()
 				.create(vec![
@@ -1329,14 +1314,54 @@ async fn create_library(
 					library_options::library_pattern::set(
 						library_options_arg.library_pattern.to_string(),
 					),
-					library_options::thumbnail_config::set(
-						library_options_arg.thumbnail_config.map(|options| {
-							serde_json::to_vec(&options).unwrap_or_default()
-						}),
-					),
+					library_options::thumbnail_config::set(thumbnail_config),
+					library_options::ignore_rules::set(ignore_rules),
 				])
 				.exec()
 				.await?;
+
+			let library_tags = match input.tags {
+				Some(tags) => {
+					let mut existing_tags = client
+						.tag()
+						.find_many(vec![tag::name::in_vec(tags.clone())])
+						.exec()
+						.await?;
+
+					let tags_to_create = tags
+						.into_iter()
+						.filter(|tag| !existing_tags.iter().any(|t| t.name == *tag))
+						.collect::<Vec<_>>();
+
+					tracing::trace!(?existing_tags, ?tags_to_create);
+
+					// Note: ._batch was erroring during the transaction
+					if !tags_to_create.is_empty() {
+						let created_tags_len = client
+							.tag()
+							.create_many(
+								tags_to_create
+									.iter()
+									.map(|tag| (tag.clone(), vec![]))
+									.collect(),
+							)
+							.exec()
+							.await?;
+						tracing::trace!(?created_tags_len, "Created tags");
+						let created_tags = client
+							.tag()
+							.find_many(vec![tag::name::in_vec(tags_to_create)])
+							.exec()
+							.await?;
+						existing_tags.extend(created_tags);
+					}
+
+					existing_tags
+				},
+				None => vec![],
+			};
+
+			tracing::trace!(?library_tags, "Resolved tags");
 
 			let library = client
 				.library()
@@ -1344,7 +1369,17 @@ async fn create_library(
 					input.name.to_owned(),
 					input.path.to_owned(),
 					library_options::id::equals(library_options.id.clone()),
-					vec![library::description::set(input.description.to_owned())],
+					chain_optional_iter(
+						[library::description::set(input.description.to_owned())],
+						[(!library_tags.is_empty()).then(|| {
+							library::tags::connect(
+								library_tags
+									.into_iter()
+									.map(|tag| tag::id::equals(tag.id))
+									.collect(),
+							)
+						})],
+					),
 				)
 				.exec()
 				.await?;
@@ -1362,20 +1397,6 @@ async fn create_library(
 				)
 				.exec()
 				.await?;
-
-			// FIXME: try and do multiple connects again soon, batching is WAY better than
-			// previous solution but still...
-			if let Some(tags) = input.tags.to_owned() {
-				let library_id = library.id.clone();
-				let tag_connect = tags.into_iter().map(|tag| {
-					client.library().update(
-						library::id::equals(library_id.clone()),
-						vec![library::tags::connect(vec![tag::id::equals(tag.id)])],
-					)
-				});
-
-				client._batch(tag_connect).await?;
-			}
 
 			Ok(Library::from((library, library_options)))
 		})
@@ -1406,14 +1427,14 @@ pub struct UpdateLibrary {
 	/// The updated path of the library.
 	pub path: String,
 	/// The updated description of the library.
+	#[specta(optional)]
 	pub description: Option<String>,
 	/// The updated emoji for the library.
+	#[specta(optional)]
 	pub emoji: Option<String>,
 	/// The updated tags of the library.
-	pub tags: Option<Vec<Tag>>,
-	/// The tags to remove from the library.
-	#[serde(default)]
-	pub removed_tags: Option<Vec<Tag>>,
+	#[specta(optional)]
+	pub tags: Option<Vec<TagName>>,
 	/// The updated options of the library.
 	pub library_options: LibraryOptions,
 	/// Optional flag to indicate how the library should be automatically scanned after update. Default is `BATCHED`.
@@ -1421,6 +1442,7 @@ pub struct UpdateLibrary {
 	pub scan_mode: Option<LibraryScanMode>,
 }
 
+// TODO(prisma-nested-create): Refactor once nested create is supported
 #[utoipa::path(
 	put,
 	path = "/api/v1/libraries/:id",
@@ -1440,12 +1462,12 @@ pub struct UpdateLibrary {
 )]
 /// Update a library by id, if the current user is a SERVER_OWNER.
 async fn update_library(
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	Json(input): Json<UpdateLibrary>,
 ) -> APIResult<Json<Library>> {
-	let user = get_user_and_enforce_permission(&session, UserPermission::EditLibrary)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::EditLibrary])?;
 	let db = &ctx.db;
 
 	if !path::Path::new(&input.path).exists() {
@@ -1455,87 +1477,145 @@ async fn update_library(
 		)));
 	}
 
-	let _can_access = db
+	let existing_library = db
 		.library()
 		.find_first(vec![
 			library::id::equals(id.clone()),
 			library_not_hidden_from_user_filter(&user),
 		])
+		.select(library_tags_select::select())
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound("Library not found".to_string()))?;
+	let existing_tags = existing_library.tags;
 
-	let library_options = input.library_options.to_owned();
+	let update_result: Result<Library, APIError> = db
+		._transaction()
+		.with_timeout(Duration::seconds(30).num_milliseconds() as u64)
+		.run(|client| async move {
+			let library_options = input.library_options.to_owned();
+			let ignore_rules = (!library_options.ignore_rules.is_empty())
+				.then(|| library_options.ignore_rules.as_bytes())
+				.transpose()?;
+			let thumbnail_config = library_options
+				.thumbnail_config
+				.map(|options| options.as_bytes())
+				.transpose()?;
 
-	db.library_options()
-		.update(
-			library_options::id::equals(library_options.id.unwrap_or_default()),
-			chain_optional_iter(
+			client
+				.library_options()
+				.update(
+					library_options::id::equals(library_options.id.unwrap_or_default()),
+					vec![
+						library_options::convert_rar_to_zip::set(
+							library_options.convert_rar_to_zip,
+						),
+						library_options::hard_delete_conversions::set(
+							library_options.hard_delete_conversions,
+						),
+						library_options::ignore_rules::set(ignore_rules),
+						library_options::thumbnail_config::set(thumbnail_config),
+					],
+				)
+				.exec()
+				.await?;
+
+			let (tags_to_connect, tags_to_disconnect) = match input.tags {
+				Some(tag_names) => {
+					let tags_not_in_existing = tag_names
+						.clone()
+						.into_iter()
+						.filter(|name| !existing_tags.iter().any(|t| t.name == *name))
+						.collect::<Vec<_>>();
+
+					let tags_to_add_which_already_exist = client
+						.tag()
+						.find_many(vec![tag::name::in_vec(tags_not_in_existing.clone())])
+						.exec()
+						.await?;
+					let tags_to_create = tags_not_in_existing
+						.into_iter()
+						.filter(|name| {
+							!tags_to_add_which_already_exist
+								.iter()
+								.any(|t| t.name == *name)
+						})
+						.collect::<Vec<_>>();
+
+					// Note: ._batch caused the transaction to fail
+					let created_tags = {
+						let created_tags_len = client
+							.tag()
+							.create_many(
+								tags_to_create
+									.iter()
+									.map(|tag| (tag.clone(), vec![]))
+									.collect(),
+							)
+							.exec()
+							.await?;
+						tracing::trace!(?created_tags_len, "Created tags");
+
+						client
+							.tag()
+							.find_many(vec![tag::name::in_vec(tags_to_create)])
+							.exec()
+							.await
+					}?;
+
+					let tags_to_connect = tags_to_add_which_already_exist
+						.into_iter()
+						.chain(created_tags.into_iter())
+						.collect::<Vec<_>>();
+
+					let tags_to_disconnect = existing_tags
+						.into_iter()
+						.filter(|tag| !tag_names.contains(&tag.name))
+						.collect::<Vec<_>>();
+
+					(tags_to_connect, tags_to_disconnect)
+				},
+				None if !existing_tags.is_empty() => (vec![], existing_tags),
+				_ => (vec![], vec![]),
+			};
+
+			let set_params = chain_optional_iter(
 				[
-					library_options::convert_rar_to_zip::set(
-						library_options.convert_rar_to_zip,
-					),
-					library_options::hard_delete_conversions::set(
-						library_options.hard_delete_conversions,
-					),
+					library::name::set(input.name),
+					library::path::set(input.path),
+					library::description::set(input.description),
+					library::emoji::set(input.emoji),
 				],
-				[library_options.thumbnail_config.map(|config| {
-					library_options::thumbnail_config::set(Some(
-						serde_json::to_vec(&config).unwrap_or_default(),
-					))
-				})],
-			),
-		)
-		.exec()
-		.await?;
+				[
+					(!tags_to_connect.is_empty()).then(|| {
+						library::tags::connect(
+							tags_to_connect
+								.into_iter()
+								.map(|tag| tag::id::equals(tag.id))
+								.collect(),
+						)
+					}),
+					(!tags_to_disconnect.is_empty()).then(|| {
+						library::tags::disconnect(
+							tags_to_disconnect
+								.into_iter()
+								.map(|tag| tag::id::equals(tag.id))
+								.collect(),
+						)
+					}),
+				],
+			);
 
-	let mut batches = vec![];
-
-	// FIXME: this is disgusting. I don't understand why the library::tag::connect doesn't
-	// work with multiple tags, nor why providing multiple library::tag::connect params
-	// doesn't work. Regardless, absolutely do NOT keep this. Correction required,
-	// highly inefficient queries.
-
-	if let Some(tags) = input.tags.to_owned() {
-		for tag in tags {
-			batches.push(db.library().update(
-				library::id::equals(id.clone()),
-				vec![library::tags::connect(vec![tag::id::equals(
-					tag.id.to_owned(),
-				)])],
-			));
-		}
-	}
-
-	if let Some(removed_tags) = input.removed_tags.to_owned() {
-		for tag in removed_tags {
-			batches.push(db.library().update(
-				library::id::equals(id.clone()),
-				vec![library::tags::disconnect(vec![tag::id::equals(
-					tag.id.to_owned(),
-				)])],
-			));
-		}
-	}
-
-	if !batches.is_empty() {
-		db._batch(batches).await?;
-	}
-
-	let updated_library = db
-		.library()
-		.update(
-			library::id::equals(id),
-			vec![
-				library::name::set(input.name),
-				library::path::set(input.path),
-				library::description::set(input.description),
-				library::emoji::set(input.emoji),
-			],
-		)
-		.with(library::tags::fetch(vec![]))
-		.exec()
-		.await?;
+			Ok(client
+				.library()
+				.update(library::id::equals(id), set_params)
+				.with(library::tags::fetch(vec![]))
+				.exec()
+				.await
+				.map(Library::from)?)
+		})
+		.await;
+	let updated_library = update_result?;
 
 	let scan_mode = input.scan_mode.unwrap_or_default();
 
@@ -1552,7 +1632,7 @@ async fn update_library(
 		})?;
 	}
 
-	Ok(Json(updated_library.into()))
+	Ok(Json(updated_library))
 }
 
 #[utoipa::path(
@@ -1573,11 +1653,11 @@ async fn update_library(
 )]
 /// Delete a library by id
 async fn delete_library(
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<String>> {
-	let user = get_session_server_owner_user(&session)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::DeleteLibrary])?;
 	let db = &ctx.db;
 	let thumbnails_dir = ctx.config.get_thumbnails_dir();
 
@@ -1633,9 +1713,9 @@ async fn get_library_stats(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	Query(params): Query<LibraryStatsParams>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<LibraryStats>> {
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let db = &ctx.db;
 
 	let stats = db
@@ -1676,7 +1756,7 @@ async fn get_library_stats(
 			PrismaValue::String(id),
 			PrismaValue::Boolean(params.all_users),
 			PrismaValue::String(user.id.clone()),
-			PrismaValue::String(user.id)
+			PrismaValue::String(user.id.clone())
 		))
 		.exec()
 		.await?
@@ -1707,9 +1787,9 @@ async fn get_library_stats(
 async fn start_media_analysis(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<()> {
-	let _ = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
+	req.enforce_permissions(&[UserPermission::ManageLibrary])?;
 
 	// Start analysis job
 	ctx.enqueue_job(AnalyzeMediaJob::analyze_library(id))

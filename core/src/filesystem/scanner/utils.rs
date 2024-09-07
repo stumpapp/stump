@@ -1,6 +1,5 @@
 use std::{collections::VecDeque, path::PathBuf};
 
-use globset::{GlobSet, GlobSetBuilder};
 use prisma_client_rust::{
 	chrono::{DateTime, Utc},
 	QueryError,
@@ -51,50 +50,6 @@ pub(crate) fn file_updated_since_scan(
 
 		Ok(true)
 	}
-}
-
-// TODO: refactor for https://github.com/stumpapp/stump/issues/284
-pub(crate) fn generate_rule_set(_: &[PathBuf]) -> GlobSet {
-	let builder = GlobSetBuilder::new();
-
-	// let adjusted_paths = paths
-	// 	.iter()
-	// 	// We have to remove duplicates here otherwise the glob will double some patterns.
-	// 	// An example would be when the library has media in root. Not the end of the world.
-	// 	.unique()
-	// 	.filter(|p| p.exists())
-	// 	.collect::<Vec<_>>();
-
-	// tracing::trace!(?adjusted_paths, "Adjusted paths");
-
-	// for path in adjusted_paths {
-	// 	let ignore_file = path.join(".stumpignore");
-	// 	let open_result = File::open(&ignore_file);
-	// 	if let Ok(file) = open_result {
-	// 		// read the lines of the file, and add each line as a glob pattern in the builder
-	// 		for line in BufReader::new(file).lines() {
-	// 			if let Err(e) = line {
-	// 				tracing::error!(
-	// 					?ignore_file,
-	// 					error = ?e,
-	// 					"Error occurred trying to read line from glob file",
-	// 				);
-	// 				continue;
-	// 			}
-
-	// 			// TODO: remove unwraps!
-	// 			builder.add(Glob::new(&line.unwrap()).unwrap());
-	// 		}
-	// 	} else {
-	// 		tracing::warn!(
-	// 			error = ?open_result.err(),
-	// 			?ignore_file,
-	// 			"Failed to open .stumpignore file (does it exist?)",
-	// 		);
-	// 	}
-	// }
-
-	builder.build().unwrap_or_default()
 }
 
 pub(crate) async fn create_media(
@@ -328,6 +283,7 @@ pub(crate) struct MediaBuildOperationCtx {
 	pub chunk_size: usize,
 }
 
+// TODO(perf): don't use rayon for this IO-bound task
 pub(crate) async fn handle_create_media(
 	build_ctx: MediaBuildOperationCtx,
 	worker_ctx: &WorkerCtx,
@@ -384,12 +340,12 @@ pub(crate) async fn handle_create_media(
 						JobProgress::msg(
 							format!("Inserted {}", media_path.display()).as_str(),
 						)
-						.into_send(),
+						.into_worker_send(),
 						CoreEvent::CreatedMedia {
 							id: created_media.id,
 							series_id: series_id.clone(),
 						}
-						.into_send(),
+						.into_worker_send(),
 					]);
 				},
 				Err(e) => {

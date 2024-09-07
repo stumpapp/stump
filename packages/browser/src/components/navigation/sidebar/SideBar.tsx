@@ -145,8 +145,8 @@ export default function SideBar({ asChild, hidden }: Props) {
 	}
 
 	const variants = {
-		hidden: { width: 0, x: '-13rem' },
-		visible: { width: '13rem', x: 0 },
+		hidden: { width: 0, x: -SIDEBAR_WIDTH },
+		visible: { width: SIDEBAR_WIDTH, x: 0 },
 	}
 
 	return (
@@ -158,11 +158,11 @@ export default function SideBar({ asChild, hidden }: Props) {
 			initial={false}
 			transition={{ duration: 0.2, ease: 'easeInOut' }}
 		>
-			<div className="relative z-10 flex h-full w-52 shrink-0 flex-col gap-4 border-r border-edge bg-sidebar px-2 py-4">
+			<div className="relative z-10 flex h-full w-56 shrink-0 flex-col gap-4 border-r border-edge bg-sidebar px-2 py-4">
 				{renderContent()}
 			</div>
 		</motion.aside>
 	)
 }
 
-export const SIDEBAR_WIDTH = 208
+export const SIDEBAR_WIDTH = 224

@@ -1,2 +1,2 @@
 pub mod auth;
-pub(crate) mod logging;
+pub(crate) mod host;

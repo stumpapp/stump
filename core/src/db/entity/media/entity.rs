@@ -28,8 +28,10 @@ pub struct Media {
 	pub extension: String,
 	/// The number of pages in the media. ex: "69"
 	pub pages: i32,
+	// TODO(specta): replace with DateTime<FixedOffset>
 	/// The timestamp when the media was last updated.
 	pub updated_at: String,
+	// TODO(specta): replace with DateTime<FixedOffset>
 	/// The timestamp when the media was created.
 	pub created_at: String,
 	/// The timestamp when the file was last modified on disk.
@@ -74,6 +76,17 @@ pub struct Media {
 	/// Bookmarks for the media. Will be `None` only if the relation is not loaded.
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub bookmarks: Option<Vec<Bookmark>>,
+}
+
+impl Media {
+	/// A convenience method to get the title of the media. If the metadata has a title, it will
+	/// return that. Otherwise, it will return the name of the media (which is the filename).
+	pub fn title(&self) -> String {
+		self.metadata
+			.as_ref()
+			.and_then(|m| m.title.clone())
+			.unwrap_or_else(|| self.name.clone())
+	}
 }
 
 impl Cursor for Media {

@@ -1,7 +1,7 @@
 {
 	"name": "@stump/server",
 	"private": true,
-	"version": "0.0.5",
+	"version": "0.0.6",
 	"scripts": {
 		"lint": "cargo clippy --package stump_server -- -D warnings",
 		"format": "cargo fmt --package stump_server",
@@ -9,6 +9,7 @@
 		"dev": "cargo watch --ignore core/prisma -x run",
 		"build": "cargo build --release --package stump_server",
 		"delete-webapp": "trash \"dist/*\" \"!dist/.placeholder\"",
-		"get-webapp": "cp -r ../web/dist ./dist"
+		"get-webapp": "cp -r ../web/dist ./dist",
+		"nuke": "rimraf node_modules"
 	}
 }

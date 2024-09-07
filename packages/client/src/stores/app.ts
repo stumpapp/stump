@@ -10,6 +10,8 @@ type AppStore = {
 	setBaseUrl: (baseUrl: string) => void
 	isConnectedWithServer: boolean
 	setIsConnectedWithServer: (isConnected: boolean) => void
+	showConfetti?: boolean
+	setShowConfetti: (show: boolean) => void
 }
 
 export const createAppStore = (storage?: StateStorage) =>
@@ -40,6 +42,10 @@ export const createAppStore = (storage?: StateStorage) =>
 					setPlatform(platform: Platform) {
 						set({ platform })
 					},
+					setShowConfetti(show) {
+						set({ showConfetti: show })
+					},
+					showConfetti: false,
 				}),
 				{
 					name: 'stump-main-store',

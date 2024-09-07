@@ -42,6 +42,7 @@ pub struct PersistedJob {
 	pub output_data: Option<CoreJobOutput>,
 	/// The duration of the job in milliseconds
 	pub ms_elapsed: i64,
+	// TODO(specta): replace with DateTime<FixedOffset>
 	/// The timestamp of when the job was created
 	pub created_at: String,
 	/// The timestamp of when the job was completed, if any

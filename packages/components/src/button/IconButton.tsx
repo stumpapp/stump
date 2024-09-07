@@ -46,6 +46,7 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
 					className,
 				)}
 				ref={ref}
+				type="button"
 				{...props}
 			/>
 		)

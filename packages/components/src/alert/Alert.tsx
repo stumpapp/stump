@@ -82,11 +82,17 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(
 					<div
 						className={cx(
 							'flex',
-							{ 'items-center': alignIcon === 'center' },
+							{ 'items-start md:items-center': alignIcon === 'center' },
 							{ 'items-start': alignIcon === 'start' },
 						)}
 					>
-						<div className="flex-shrink-0">{renderIcon()}</div>
+						<div
+							className={cn('flex-shrink-0', {
+								'mt-1 md:mt-0': alignIcon === 'center',
+							})}
+						>
+							{renderIcon()}
+						</div>
 						{children}
 					</div>
 				</div>

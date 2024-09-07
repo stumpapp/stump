@@ -2,9 +2,9 @@ use std::path::PathBuf;
 
 use axum::{
 	extract::{Path, State},
-	middleware::from_extractor_with_state,
+	middleware,
 	routing::{get, put},
-	Json, Router,
+	Extension, Json, Router,
 };
 use serde::Deserialize;
 use specta::Type;
@@ -19,14 +19,13 @@ use stump_core::{
 		media_annotation, user,
 	},
 };
-use tower_sessions::Session;
 use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
-	middleware::auth::Auth,
-	utils::{get_session_user, http::BufferResponse},
+	middleware::auth::{auth_middleware, RequestContext},
+	utils::http::BufferResponse,
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -45,16 +44,16 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/chapter/:chapter", get(get_epub_chapter))
 				.route("/:root/:resource", get(get_epub_meta)),
 		)
-		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 /// Get an Epub by ID
 async fn get_epub_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Epub>> {
-	let user_id = get_session_user(&session)?.id;
+	let user_id = req.id();
 
 	let result = ctx
 		.db
@@ -88,11 +87,11 @@ async fn get_epub_by_id(
 async fn update_epub_progress(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(input): Json<UpdateEpubProgress>,
 ) -> APIResult<Json<ProgressUpdateReturn>> {
 	let client = &ctx.db;
-	let user_id = get_session_user(&session)?.id;
+	let user_id = req.id();
 
 	let is_complete = input.is_complete.unwrap_or(input.percentage >= 1.0);
 
@@ -161,16 +160,16 @@ async fn update_epub_progress(
 async fn get_bookmarks(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Vec<Bookmark>>> {
 	let client = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
 	let bookmarks = client
 		.bookmark()
 		.find_many(vec![
-			bookmark::user_id::equals(user.id),
+			bookmark::user_id::equals(user.id.clone()),
 			bookmark::media_id::equals(id),
 		])
 		.exec()
@@ -196,12 +195,12 @@ pub struct CreateOrUpdateBookmark {
 async fn create_or_update_bookmark(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(input): Json<CreateOrUpdateBookmark>,
 ) -> APIResult<Json<Bookmark>> {
 	let client = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
 	let bookmark = client
 		.bookmark()
@@ -214,7 +213,7 @@ async fn create_or_update_bookmark(
 			),
 			(
 				media::id::equals(id),
-				user::id::equals(user.id),
+				user::id::equals(user.id.clone()),
 				vec![
 					bookmark::epubcfi::set(Some(input.epubcfi.clone())),
 					bookmark::preview_content::set(input.preview_content.clone()),
@@ -242,17 +241,17 @@ pub struct DeleteBookmark {
 async fn delete_bookmark(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(input): Json<DeleteBookmark>,
 ) -> APIResult<Json<Bookmark>> {
 	let client = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
 	let bookmark = client
 		.bookmark()
 		.delete(bookmark::user_id_media_id_epubcfi_page(
-			user.id,
+			user.id.clone(),
 			id,
 			input.epubcfi,
 			-1,

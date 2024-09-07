@@ -25,6 +25,20 @@ The following table outlines the supported formats for books in Stump:
   - Epub files are sort of an exception to this, as they are essentially an archive of HTML/CSS files. The HTML files for each chapter can currently be streamed individually, however the UI does not utilize this yet.
 - **OPDS**: OPDS support refers to the ability to serve a book according to OPDS. For more information, see the [OPDS](/guides/opds) guide.
 
+### Image formats
+
+Stump aims to have broad support for images within books. The following image formats are explicitly supported:
+
+- JPEG
+- [PNG](https://caniuse.com/png)
+- [WebP](https://caniuse.com/webp)
+- [GIF](https://caniuse.com/gif)
+- [JXL](https://caniuse.com/jxl)
+- [AVIF](https://caniuse.com/avif)
+- [HEIF](https://caniuse.com/heif)
+
+You should ensure that your browser supports the format you plan to use. You can visit the hyperlinked URLs to check.
+
 ## Metadata
 
 Metadata is an associated set of information _about_ a book, such as its title, author, etc. Different formats have different ways of storing and representing metadata. Stump will attempt to extract as much metadata as possible from a given book, however it is not always possible. For example, PDF files do not generally have very good metadata support, and comic book files (e.g. CBZ/CBR) often times have very malformed metadata.

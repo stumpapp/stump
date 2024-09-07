@@ -37,10 +37,16 @@ pub use common::{
 	ReactTableGlobalSort,
 };
 
+pub mod utils {
+	pub use super::library::utils::*;
+	pub use super::media::utils::*;
+}
+
 pub mod macros {
 	pub use super::book_club::prisma_macros::*;
 	pub use super::library::prisma_macros::*;
 	pub use super::media::prisma_macros::*;
 	pub use super::metadata::prisma_macros::*;
+	pub use super::series::prisma_macros::*;
 	pub use super::smart_list::prisma_macros::*;
 }

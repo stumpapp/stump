@@ -26,8 +26,10 @@ pub struct Series {
 	pub description: Option<String>,
 	/// The status of the series since last scan or access
 	pub status: FileStatus,
+	// TODO(specta): replace with DateTime<FixedOffset>
 	/// The timestamp of when the series was last updated
 	pub updated_at: String,
+	// TODO(specta): replace with DateTime<FixedOffset>
 	/// The timestamp of when the series was created
 	pub created_at: String,
 	/// The ID of the library this series belongs to.
@@ -67,7 +69,7 @@ impl Series {
 		self.media_count = Some(count);
 	}
 
-	// TODO(prisma 0.7.0): Nested created
+	// TODO(prisma-nested-create): Refactor once nested create is supportedd
 	pub fn create_action(
 		self,
 	) -> (

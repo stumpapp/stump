@@ -8,16 +8,18 @@ members = [
 ]
 
 [workspace.package]
-version = "0.0.5"
+version = "0.0.6"
 rust-version = "1.79.0"
 
 [workspace.dependencies]
-async-trait = "0.1.80"
+async-trait = "0.1.81"
 async-stream = "0.3.5"
 bcrypt = "0.15.1"
+derive_builder = "0.20.0"
+chrono = { version = "0.4.38", features = ["serde"] }
 futures = "0.3.30"
 futures-util = "0.3.30"
-itertools = "0.12.1"
+itertools = "0.13.0"
 lettre = { version = "0.11.4", default-features = false, features = [
   "builder",
   "hostname",
@@ -25,6 +27,7 @@ lettre = { version = "0.11.4", default-features = false, features = [
   "tracing",
   "tokio1-rustls-tls",
 ] }
+once_cell = "1.19.0"
 prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust.git", tag = "0.6.11", features = [
   "sqlite-create-many",
   "migrations",
@@ -38,14 +41,15 @@ prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-
   "mocking"
 ], default-features = false }
 rand = "0.8.5"
-reqwest = { version = "0.12.3", default-features = false, features = [ "json", "rustls-tls" ] }
-serde = { version = "1.0.197", features = ["derive"] }
-serde_json = "1.0.115"
+reqwest = { version = "0.12.7", default-features = false, features = [ "json", "rustls-tls" ] }
+serde = { version = "1.0.209", features = ["derive"] }
+serde_json = "1.0.127"
+serde_with = "3.8.1"
 simple_crypt = "0.2.3"
-specta = "1.0.5"
-tempfile = "3.10.1"
-thiserror = "1.0.58"
-tokio = { version = "1.37.0", features = [
+specta = { version = "1.0.5", features = ["chrono"] }
+tempfile = "3.12.0"
+thiserror = "1.0.63"
+tokio = { version = "1.40.0", features = [
   # Provides sender/reciever channels
   "sync", 
   # Tells the Tokio runtime to use the multi-thread scheduler.
@@ -53,6 +57,6 @@ tokio = { version = "1.37.0", features = [
   # Allows handling shutdown signals (e.g., ctrl+c)
   "signal",
 ] }
-toml = "0.8.8"
+toml = "0.8.19"
 tracing = "0.1.40"
 urlencoding = "2.1.3"

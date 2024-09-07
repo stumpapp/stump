@@ -213,6 +213,10 @@ impl From<&str> for UserPermission {
 pub struct PermissionSet(Vec<UserPermission>);
 
 impl PermissionSet {
+	pub fn new(permissions: Vec<UserPermission>) -> PermissionSet {
+		PermissionSet(permissions)
+	}
+
 	/// Unwrap the underlying Vec<UserPermission> and include any associated permissions
 	pub fn resolve_into_vec(self) -> Vec<UserPermission> {
 		self.0
@@ -224,6 +228,15 @@ impl PermissionSet {
 			})
 			.unique()
 			.collect()
+	}
+
+	pub fn resolve_into_string(self) -> Option<String> {
+		let resolved = self.resolve_into_vec();
+		if resolved.is_empty() {
+			None
+		} else {
+			Some(resolved.into_iter().join(","))
+		}
 	}
 }
 
@@ -451,6 +464,16 @@ mod tests {
 		assert_eq!(
 			permission_set.resolve_into_vec(),
 			vec![UserPermission::AccessBookClub]
+		);
+	}
+
+	#[test]
+	fn test_permission_set_resolve_into_string() {
+		let permission_set =
+			PermissionSet::from("bookclub:read,bookclub:create".to_string());
+		assert_eq!(
+			permission_set.resolve_into_string(),
+			Some("bookclub:read,bookclub:create".to_string())
 		);
 	}
 }

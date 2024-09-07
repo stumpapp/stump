@@ -1,5 +1,49 @@
 # Changelog
 
+<a name="0.0.6"></a>
+## 0.0.6 (2024-09-06)
+
+### Added
+
+- ✨ Broader image support for file serving ([#419](https://github.com/stumpapp/stump/issues/419)) [[38ffe05](https://github.com/stumpapp/stump/commit/38ffe0511e413eb7d8388a21ae3a49989287f3a8)]
+- 👷‍♂️ Use &#x60;buildah&#x60; in docker CI workflows ([#425](https://github.com/stumpapp/stump/issues/425)) [[afe389c](https://github.com/stumpapp/stump/commit/afe389ca8259d02fce7cb9415e2fe4de22aeae66)]
+- 👷‍♂️ Switch to &#x60;podman&#x60; and introduce better caching ([#416](https://github.com/stumpapp/stump/issues/416)) [[6a16235](https://github.com/stumpapp/stump/commit/6a16235bd4f1552d285c39e4b150c7b5a189ad32)]
+- ✨ Avif file serving support ([#417](https://github.com/stumpapp/stump/issues/417)) [[7df8738](https://github.com/stumpapp/stump/commit/7df8738a8c9e6bc60f25468ee29d39f9e4d53d69)]
+- 👷‍♂️ Restore self-hosted runner for certain CI tasks ([#405](https://github.com/stumpapp/stump/issues/405)) [[4cdf471](https://github.com/stumpapp/stump/commit/4cdf471f0672c1a2d71c7ed6543412e1fd6f6fcd)]
+- ✨ Support AVIF image format ([#385](https://github.com/stumpapp/stump/issues/385)) [[09ca1a9](https://github.com/stumpapp/stump/commit/09ca1a9a543789e3bf6abf2b8325c3ee2513be59)]
+
+### Changed
+
+- ⬇️ Downgrade &#x60;zip&#x60; crate to &#x60;1.1.3&#x60; ([#435](https://github.com/stumpapp/stump/issues/435)) [[fe35819](https://github.com/stumpapp/stump/commit/fe35819dc01208673dada3e485fca2acd2f65ba1)]
+- ⬆️ Update dependencies ([#433](https://github.com/stumpapp/stump/issues/433)) [[ebbb8e5](https://github.com/stumpapp/stump/commit/ebbb8e509237d4ed4aa5f0b83300dc8e77212da7)]
+- 📌 Pin &#x60;@icons-pack/react-simple-icons&#x60; to &#x60;9.1.0&#x60; ([#403](https://github.com/stumpapp/stump/issues/403)) [[6bc7792](https://github.com/stumpapp/stump/commit/6bc7792e9bbee9b55b34c961dda6dd59113e5d96)]
+- ⏪ Revert AVIF image support ([#409](https://github.com/stumpapp/stump/issues/409)) [[3ea2804](https://github.com/stumpapp/stump/commit/3ea2804ee822b641966e02ea72a4873238447ecb)]
+- ♻️ Implement a config macro to simplify &#x60;stump_config.rs&#x60; ([#397](https://github.com/stumpapp/stump/issues/397)) [[3a480f3](https://github.com/stumpapp/stump/commit/3a480f3441ed890aad9823f2e05cbaf5ca00a38a)]
+- 💄 Improve light theme palette and refactor design system ([#402](https://github.com/stumpapp/stump/issues/402)) [[8102321](https://github.com/stumpapp/stump/commit/8102321fd35c5b0145bd44d0f754da126d3b99ee)]
+
+### Fixed
+
+- 💚 Fix multi-tag docker builds [[d663f5c](https://github.com/stumpapp/stump/commit/d663f5c621ca2c252381459345890bfdabc01565)]
+- 🐛 Fix max-depth for collection-priority libraries ([#432](https://github.com/stumpapp/stump/issues/432)) [[558721a](https://github.com/stumpapp/stump/commit/558721a8f07739c38d8d828a4589442f8f148fad)]
+- 🐛 Fix emailer form validation and update endpoint ([#430](https://github.com/stumpapp/stump/issues/430)) [[ce173a2](https://github.com/stumpapp/stump/commit/ce173a21d83fbf4666097ae84373cad3442f5c46)]
+- 💚 Fix docker build push ([#424](https://github.com/stumpapp/stump/issues/424)) [[bef46c8](https://github.com/stumpapp/stump/commit/bef46c809a75fa3dd8559dbee763b9d4ec50804b)]
+- 🐛 Fix regression in scanner for root-level series ([#423](https://github.com/stumpapp/stump/issues/423)) [[03ff5e0](https://github.com/stumpapp/stump/commit/03ff5e0faf0e44e58714788cceeb92bb42458e19)]
+- 🐛 Fix OPDS thumbnail endpoint ([#414](https://github.com/stumpapp/stump/issues/414)) [[77b4635](https://github.com/stumpapp/stump/commit/77b4635c4ddb7fb1035929d4c0da86751a777f2f)]
+- 🐛 Fix book titles in entity cards ([#412](https://github.com/stumpapp/stump/issues/412)) [[96ea14f](https://github.com/stumpapp/stump/commit/96ea14f95b5ee0ecea4d3e9c796e5f063e4bc149)]
+- 💚 Fix &#x60;runs-on&#x60; for docker build workflows ([#407](https://github.com/stumpapp/stump/issues/407)) [[afd42e9](https://github.com/stumpapp/stump/commit/afd42e92dd6f4983ea76fdeb678413c07ccfdc6e)]
+- 🐛 Fix invalid SQL for library stats query ([#401](https://github.com/stumpapp/stump/issues/401)) [[362e85f](https://github.com/stumpapp/stump/commit/362e85f304704d6add7f06c55a6dbda8887d360f)]
+
+### Miscellaneous
+
+- 🌐 Update translations ([#434](https://github.com/stumpapp/stump/issues/434)) [[ceb2aa1](https://github.com/stumpapp/stump/commit/ceb2aa1621a46b7629c4decb829424f97ab480bf)]
+- 🌐 Update translations ([#418](https://github.com/stumpapp/stump/issues/418)) [[c1d20fe](https://github.com/stumpapp/stump/commit/c1d20feee75e42900bf7fe9acca2e42105460411)]
+- 📝 Update docs for broken demo ([#421](https://github.com/stumpapp/stump/issues/421)) [[a5fa8f5](https://github.com/stumpapp/stump/commit/a5fa8f53bd890a7ef488cc6c5b4e1e61108ea9f3)]
+- 🌐 New translations ([#411](https://github.com/stumpapp/stump/issues/411)) [[7d6b704](https://github.com/stumpapp/stump/commit/7d6b704c60f2bd6c6a444bb22df5e06e0c98717c)]
+- 📝 Add binary links to documentation site ([#404](https://github.com/stumpapp/stump/issues/404)) [[17ef33b](https://github.com/stumpapp/stump/commit/17ef33b6e5a517031d460d421e56ff80e73088df)]
+- 🔨 Fix docker &#x60;dav1d&#x60; shared library linking  ([#408](https://github.com/stumpapp/stump/issues/408)) [[a8ef2a4](https://github.com/stumpapp/stump/commit/a8ef2a48d895e3beb007d31c401a71d41e9f3977)]
+- 🌐 New translations ([#398](https://github.com/stumpapp/stump/issues/398)) [[862ff63](https://github.com/stumpapp/stump/commit/862ff63a8cdac700170d26ffc264591767954ae6)]
+
+
 <a name="0.0.5"></a>
 ## 0.0.5 (2024-08-14)
 

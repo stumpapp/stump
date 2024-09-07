@@ -6,7 +6,7 @@ use std::{
 };
 
 use pdf::file::FileOptions;
-use pdfium_render::{prelude::Pdfium, render_config::PdfRenderConfig};
+use pdfium_render::prelude::{PdfRenderConfig, Pdfium};
 
 use crate::{
 	config::StumpConfig,

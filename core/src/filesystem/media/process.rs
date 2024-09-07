@@ -20,11 +20,17 @@ use crate::{
 
 use super::{rar::RarProcessor, zip::ZipProcessor};
 
+/// A struct representing the options for processing a file. This is a subset of [LibraryConfig]
+/// and is used to pass options to the [FileProcessor] implementations.
 #[derive(Debug, Default)]
 pub struct FileProcessorOptions {
+	/// Whether to convert RAR files to ZIP files after processing
 	pub convert_rar_to_zip: bool,
+	/// Whether to delete the source file after converting it, if [FileProcessorOptions::convert_rar_to_zip] is true
 	pub delete_conversion_source: bool,
+	/// Whether to generate a file hash for the file
 	pub generate_file_hashes: bool,
+	/// Whether to process metadata for the file
 	pub process_metadata: bool,
 }
 
@@ -128,21 +134,9 @@ pub struct ProcessedFile {
 	pub pages: i32,
 }
 
-// TODO(perf): Async-ify this and use blocking threads in the processors? I really need to try
-// and deep dive into whether the entire filesystem crate here needs to be async. It's a bit hard to
-// understand. With the current changes in this feature branch, the scanner will spawn blocking threads
-// before processing the files. We can't get around using sync fs operations in the processors since they
-// use blocking crates like `image`, `zip`, etc.
-//
-// Since the scanner spawns the blocking threads before `process`, it doesn't necessarily need to be async.
-// However there are multiple contexts in the server app where we do IO operations which could be async.
-// I've created async versions of the functions here, but I still have questions.
-//
-// I want to avoid blocking the main thread as much as possible, e.g. if a request for a book page is made,
-// should we spawn a blocking thread to get the page so the main thread can continue processing requests? Is that even a concern?
-// As I currently understand, using tokio::fs does this for us re: spawning a blocking thread. So I am basically doing what tokio
-// does for us, since the processors use blocking crates
-
+/// A function to process a file in a blocking manner. This will call the appropriate
+/// [FileProcessor::process] implementation based on the file's mime type, or return an
+/// error if the file type is not supported.
 pub fn process(
 	path: &Path,
 	options: FileProcessorOptions,
@@ -166,6 +160,9 @@ pub fn process(
 	}
 }
 
+/// A function to process a file in the context of a spawned, blocking task. This will call the
+/// [process] function and send the result back out through a oneshot channel.
+#[tracing::instrument(err, fields(path = %path.as_ref().display()))]
 pub async fn process_async(
 	path: impl AsRef<Path>,
 	options: FileProcessorOptions,
@@ -200,6 +197,9 @@ pub async fn process_async(
 	Ok(processed_file)
 }
 
+/// A function to extract the bytes of a page from a file in a blocking manner. This will call the
+/// appropriate [FileProcessor::get_page] implementation based on the file's mime type, or return an
+/// error if the file type is not supported.
 pub fn get_page(
 	path: &str,
 	page: i32,
@@ -220,6 +220,8 @@ pub fn get_page(
 	}
 }
 
+/// A function to extract the bytes of a page from a file in the context of a spawned, blocking task.
+/// This will call the [get_page] function and send the result back out through a oneshot channel.
 #[tracing::instrument(err, fields(path = %path.as_ref().display()))]
 pub async fn get_page_async(
 	path: impl AsRef<Path>,
@@ -256,6 +258,8 @@ pub async fn get_page_async(
 	Ok(page_result)
 }
 
+/// Get the number of pages in a file. This will call the appropriate [FileProcessor::get_page_count]
+/// implementation based on the file's mime type, or return an error if the file type is not supported.
 pub fn get_page_count(path: &str, config: &StumpConfig) -> Result<i32, FileError> {
 	let mime = ContentType::from_file(path).mime_type();
 
@@ -272,6 +276,9 @@ pub fn get_page_count(path: &str, config: &StumpConfig) -> Result<i32, FileError
 	}
 }
 
+/// Get the number of pages in a file in the context of a spawned, blocking task. This will call the
+/// [get_page_count] function and send the result back out through a oneshot channel.
+#[tracing::instrument(err, fields(path = %path.as_ref().display()))]
 pub async fn get_page_count_async(
 	path: impl AsRef<Path>,
 	config: &StumpConfig,
@@ -306,6 +313,9 @@ pub async fn get_page_count_async(
 	Ok(page_count)
 }
 
+/// Get the content types of a list of pages of a file. This will call the appropriate
+/// [FileProcessor::get_page_content_types] implementation based on the file's mime type, or return an
+/// error if the file type is not supported.
 pub fn get_content_types_for_pages(
 	path: &str,
 	pages: Vec<i32>,
@@ -351,6 +361,10 @@ fn get_content_type_for_page_sync(
 	Ok(result.get(&page).cloned().unwrap_or(ContentType::UNKNOWN))
 }
 
+/// Get the content type for a specific page of a file in the context of a spawned, blocking task.
+/// This will call the [get_content_type_for_page_sync] function and send the result back out through
+/// a oneshot channel.
+#[tracing::instrument(err, fields(path = %path.as_ref().display()))]
 pub async fn get_content_type_for_page(
 	path: impl AsRef<Path>,
 	page: i32,

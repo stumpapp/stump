@@ -10,8 +10,6 @@ PGID=${PGID:-0}
 USER=stump
 GROUP=stump
 
-echo "Starting with UID : $PUID, GID : $PGID"
-
 # GUID between 1-99 are typically reserved for system use, so we warn the user
 if [[ "$PUID" -lt 100 && "$PUID" -ne 0 ]]; then
     echo "The provided PGID is below 100. This is typically reserved for system use and may cause unexpected behavior."
@@ -19,7 +17,6 @@ fi
 
 
 # TODO(distroless) ensure that the following checks don't cause issues after moving to distroless
-
 ## Add stump group if it doesn't already exist
 if ! grep -q "^${GROUP}:" /etc/group; then
     echo "Adding group $GROUP with gid $PGID"
@@ -33,7 +30,7 @@ if ! grep -q "^${USER}:" /etc/passwd; then
 fi
 
 # If a TZ is set, symlink /etc/localtime to it
-if [[ -n "$TZ" ]]; then
+if [ -n "${TZ:-}" ]; then
     echo "Setting timezone to $TZ"
     rm -f /etc/localtime # Remove existing symlink if present (shouldn't be)
     ln -snf "/usr/share/zoneinfo/$TZ" /etc/localtime

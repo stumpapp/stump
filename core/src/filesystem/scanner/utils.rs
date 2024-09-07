@@ -291,6 +291,11 @@ pub(crate) async fn handle_missing_media(
 	output
 }
 
+/// Builds a series from the given path
+///
+/// # Arguments
+/// * `for_library` - The library ID to associate the series with
+/// * `path` - The path to the series on disk
 async fn build_series(for_library: &str, path: &Path) -> CoreResult<Series> {
 	let (tx, rx) = oneshot::channel();
 
@@ -322,6 +327,14 @@ async fn build_series(for_library: &str, path: &Path) -> CoreResult<Series> {
 	Ok(build_result)
 }
 
+/// Safely builds a series from a list of paths concurrently, with a maximum concurrency limit
+/// as defined by the core configuration.
+///
+/// # Arguments
+/// * `for_library` - The library ID to associate the series with
+/// * `paths` - A list of paths to build series from
+/// * `core_config` - The core configuration
+/// * `reporter` - A function to report progress to the UI
 pub(crate) async fn safely_build_series(
 	for_library: &str,
 	paths: Vec<PathBuf>,
@@ -345,6 +358,9 @@ pub(crate) async fn safely_build_series(
 			let library_id = for_library.to_string();
 
 			async move {
+				if semaphore.available_permits() == 0 {
+					tracing::debug!(?path, "No permits available, waiting for one");
+				}
 				let _permit = semaphore
 					.acquire()
 					.await
@@ -395,6 +411,14 @@ pub(crate) struct MediaBuildOperation {
 	pub max_concurrency: usize,
 }
 
+/// Builds a media from the given path
+///
+/// # Arguments
+/// * `path` - The path to the media on disk
+/// * `series_id` - The series ID to associate the media with
+/// * `existing_book` - An optional existing media to rebuild
+/// * `library_config` - The library configuration
+/// * `config` - The core configuration
 async fn build_book(
 	path: &Path,
 	series_id: &str,
@@ -439,6 +463,13 @@ async fn build_book(
 	Ok(build_result)
 }
 
+/// Safely builds media from a list of paths concurrently, with a maximum concurrency limit
+/// as defined by the core configuration. The media is then inserted into the database.
+///
+/// # Arguments
+/// * `MediaBuildOperation` - The operation configuration for building media
+/// * `worker_ctx` - The worker context
+/// * `paths` - A list of paths to build media from
 pub(crate) async fn safely_build_and_insert_media(
 	MediaBuildOperation {
 		series_id,
@@ -572,6 +603,13 @@ pub(crate) async fn safely_build_and_insert_media(
 	Ok(output)
 }
 
+/// Visits the media on disk and updates the database with the latest information. This is done
+/// concurrently with a maximum concurrency limit as defined by the core configuration.
+///
+/// # Arguments
+/// * `MediaBuildOperation` - The operation configuration for visiting media
+/// * `worker_ctx` - The worker context
+/// * `paths` - A list of paths to visit media from
 pub(crate) async fn visit_and_update_media(
 	MediaBuildOperation {
 		series_id,
@@ -628,6 +666,9 @@ pub(crate) async fn visit_and_update_media(
 			let path = PathBuf::from(existing_book.path.as_str());
 
 			async move {
+				if semaphore.available_permits() == 0 {
+					tracing::debug!(?path, "No permits available, waiting for one");
+				}
 				let _permit = semaphore
 					.acquire()
 					.await

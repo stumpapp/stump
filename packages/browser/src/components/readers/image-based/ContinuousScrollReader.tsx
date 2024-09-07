@@ -1,10 +1,12 @@
 import { usePrevious } from '@stump/components'
 import { Media } from '@stump/types'
+import { useOverlayScrollbars } from 'overlayscrollbars-react'
 import React, { useEffect, useRef, useState } from 'react'
-import toast from 'react-hot-toast'
+import AutoSizer from 'react-virtualized-auto-sizer'
 import { Virtuoso } from 'react-virtuoso'
 
-import { useReaderStore } from '@/stores'
+import { useTheme } from '@/hooks/useTheme'
+import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 export type ContinuousReaderOrientation = 'horizontal' | 'vertical'
 type Props = {
@@ -16,8 +18,6 @@ type Props = {
 	 * The initial page to start on, if any
 	 */
 	initialPage?: number
-	// TODO: react-virtuoso doesn't support horizontal. I'd like to see how involved it would be to add it
-	// directly! https://github.com/petyosi/react-virtuoso/issues/62
 	/**
 	 * The orientation of the reader. Only vertical is supported at the moment.
 	 */
@@ -50,6 +50,8 @@ export default function ContinuousScrollReader({
 	onProgressUpdate,
 	onPageChanged,
 }: Props) {
+	const rootRef = useRef<HTMLDivElement | null>(null)
+	const [scroller, setScroller] = useState<HTMLElement | Window | null>(null)
 	/**
 	 * The currently visible range of index(es) on the page
 	 */
@@ -58,16 +60,10 @@ export default function ContinuousScrollReader({
 		startIndex: 0,
 	})
 
-	const { showToolBar, setShowToolBar, preloadCounts } = useReaderStore((state) => ({
-		preloadCounts: {
-			ahead: state.preloadAheadCount,
-			behind: state.preloadBehindCount,
-		},
-		setShowToolBar: state.setShowToolBar,
-		showToolBar: state.showToolBar,
-	}))
-
-	const reportedUnsupportedMode = useRef(false)
+	const {
+		settings: { showToolBar, preload },
+		setSettings,
+	} = useBookPreferences({ book: media })
 
 	const { startIndex: currentIndex } = visibleRange
 	const previousIndex = usePrevious(currentIndex)
@@ -83,41 +79,69 @@ export default function ContinuousScrollReader({
 			onPageChanged?.(page)
 		}
 	}, [currentIndex, onProgressUpdate, onPageChanged, pageDidChange])
+	const { isDarkVariant } = useTheme()
 
-	// TODO: support this and remove effect
+	const [initialize] = useOverlayScrollbars({
+		defer: true,
+		options: {
+			scrollbars: {
+				theme: isDarkVariant ? 'os-theme-light' : 'os-theme-dark',
+			},
+		},
+	})
+
 	useEffect(() => {
-		if (orientation === 'horizontal' && !reportedUnsupportedMode.current) {
-			reportedUnsupportedMode.current = true
-			toast.error('Horizontal scrolling is not supported yet!')
-		}
-	}, [orientation])
+		const { current: root } = rootRef
 
+		if (scroller && root) {
+			initialize({
+				elements: {
+					// @ts-expect-error: types are wrong
+					viewport: scroller,
+				},
+				target: root,
+			})
+		}
+	}, [initialize, scroller])
+
+	// TODO: use page dimensions to calculate the height of the page
 	return (
-		<React.Fragment>
-			<Virtuoso
-				style={{ height: '100%' }}
-				data={Array.from({ length: media.pages }).map((_, index) => getPageUrl(index + 1))}
-				itemContent={(_, url) => (
-					<div
-						key={url}
-						className="flex max-h-screen min-h-1 min-w-1 max-w-full items-center justify-center"
-					>
-						<img
-							className="max-h-screen min-h-1 min-w-1 max-w-full select-none object-scale-down md:w-auto"
-							src={url}
-							onClick={() => setShowToolBar(!showToolBar)}
-						/>
-					</div>
+		<div className="flex flex-1" data-overlayscrollbars-initialize ref={rootRef}>
+			<AutoSizer>
+				{({ height, width }) => (
+					<Virtuoso
+						scrollerRef={setScroller}
+						style={{ height, width }}
+						useWindowScroll={false}
+						horizontalDirection={orientation === 'horizontal'}
+						data={Array.from({ length: media.pages }).map((_, index) => getPageUrl(index + 1))}
+						itemContent={(_, url) => (
+							<div
+								key={url}
+								style={{
+									height,
+									width,
+								}}
+								className="flex justify-center"
+							>
+								<img
+									className="max-h-full select-none object-scale-down md:w-auto"
+									src={url}
+									onClick={() => setSettings({ showToolBar: !showToolBar })}
+								/>
+							</div>
+						)}
+						rangeChanged={setVisibleRange}
+						initialTopMostItemIndex={initialPage ? initialPage - 1 : undefined}
+						overscan={{ main: preload.ahead || 1, reverse: preload.behind || 1 }}
+					/>
 				)}
-				rangeChanged={setVisibleRange}
-				initialTopMostItemIndex={initialPage ? initialPage - 1 : undefined}
-				overscan={{ main: preloadCounts.ahead || 1, reverse: preloadCounts.behind || 1 }}
-			/>
+			</AutoSizer>
 
 			{/* TODO: config for showing/hiding this */}
 			<div className="fixed bottom-2 left-2 z-50 rounded-lg bg-black bg-opacity-75 px-2 py-1 text-white">
 				{visibleRange.startIndex + 1}
 			</div>
-		</React.Fragment>
+		</div>
 	)
 }

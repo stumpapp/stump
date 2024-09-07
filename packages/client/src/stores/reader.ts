@@ -1,10 +1,10 @@
-import type { ReadingDirection } from '@stump/types'
+import type { ReadingDirection, ReadingMode } from '@stump/types'
 import { create } from 'zustand'
 import { createJSONStorage, devtools, persist, StateStorage } from 'zustand/middleware'
 
 type ReaderMode = 'continuous' | 'paged'
 
-type ReaderStore = {
+type OldReaderStore = {
 	mode: ReaderMode
 	setMode: (mode: ReaderMode) => void
 	showToolBar: boolean
@@ -16,7 +16,7 @@ type ReaderStore = {
 }
 
 export const createReaderStore = (storage?: StateStorage) =>
-	create<ReaderStore>()(
+	create<OldReaderStore>()(
 		devtools(
 			persist(
 				(set) =>
@@ -43,13 +43,20 @@ export const createReaderStore = (storage?: StateStorage) =>
  * The preferences for a book, which represents an override of a user's default preferences for a
  * specific book
  */
-type BookPreferences = {
+export type BookPreferences = {
 	/**
-	 * The reading direction of the book. There are two possible values: `ltr` and `rtl`. However,
-	 * this value will be ignored if the reader mode is set to `continuous`. This will change once
-	 * the reader supports horizontal scrolling
+	 * The current reader mode
+	 */
+	readingMode: ReadingMode
+	/**
+	 * The reading direction of the book. There are two possible values: `ltr` and `rtl`.
 	 */
 	readingDirection: ReadingDirection
+	/**
+	 * Whether the reader should be in double spread mode. This will have no effect if the reader
+	 * mode is set to `continuous`
+	 */
+	doubleSpread?: boolean
 	/**
 	 * The font size to use for the book. This will have no effect if the book is image-based
 	 */
@@ -69,42 +76,47 @@ type BookPreferences = {
  */
 type BookID = string
 
-type ReaderLayout = {
-	/**
-	 * The current reader mode
-	 */
-	mode?: ReaderMode
-	/**
-	 * Whether the reader should be in double spread mode. This will have no effect if the reader
-	 * mode is set to `continuous`
-	 */
-	doubleSpread?: boolean
+/**
+ * The store for the reader itself, less specific to a single book and more about the reader
+ */
+type ReaderStore = {
 	/**
 	 * Whether the toolbar should be shown
 	 */
 	showToolBar: boolean
 	/**
-	 * The number of pages to preload ahead of the current page. This will have no effect if the book
-	 * is not an image-based book
+	 * The preferences for preloading pages
 	 */
-	preloadAheadCount: number
-	/**
-	 * The number of pages to preload behind the current page. This will have no effect if the book
-	 * is not an image-based book
-	 */
-	preloadBehindCount: number
+	preload: {
+		/**
+		 * The number of pages to preload ahead of the current page. This will have no effect if the book
+		 * is not an image-based book
+		 */
+		ahead: number
+		/**
+		 * The number of pages to preload behind the current page. This will have no effect if the book
+		 * is not an image-based book
+		 */
+		behind: number
+	}
 }
 
 export type NewReaderStore = {
 	/**
-	 * The layout preferences for the reader
+	 * The preferences for the reader
 	 */
-	layout: ReaderLayout
+	settings: ReaderStore
 	/**
 	 * A setter for the layout preferences
 	 */
-	setLayout: (layout: Partial<ReaderLayout>) => void
+	setSettings: (settings: Partial<ReaderStore>) => void
+	/**
+	 * The preferences for each book, if they have been overridden from the default preferences
+	 */
 	bookPreferences: Record<BookID, BookPreferences>
+	/**
+	 * A setter for a *specific* book's preferences
+	 */
 	setBookPreferences: (id: BookID, preferences: BookPreferences) => void
 }
 
@@ -115,13 +127,6 @@ export const createNewReaderStore = (storage?: StateStorage) =>
 				(set, get) =>
 					({
 						bookPreferences: {},
-						layout: {
-							doubleSpread: false,
-							mode: 'paged',
-							preloadAheadCount: 5,
-							preloadBehindCount: 3,
-							showToolBar: false,
-						},
 						setBookPreferences: (id, preferences) => {
 							const existingPreferences = get().bookPreferences[id]
 							set({
@@ -131,7 +136,14 @@ export const createNewReaderStore = (storage?: StateStorage) =>
 								},
 							})
 						},
-						setLayout: (layout) => set({ layout: { ...get().layout, ...layout } }),
+						setSettings: (settings) => set({ settings: { ...get().settings, ...settings } }),
+						settings: {
+							preload: {
+								ahead: 5,
+								behind: 3,
+							},
+							showToolBar: false,
+						},
 					}) as NewReaderStore,
 				{
 					name: 'stump-new-reader-store',

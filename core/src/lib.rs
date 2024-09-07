@@ -343,9 +343,11 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<EmailerSendRecord>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<AttachmentMeta>()?).as_bytes())?;
 
+		file.write_all(format!("{}\n\n", ts_export::<ReadingDirection>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<ReadingMode>()?).as_bytes())?;
+
 		file.write_all(format!("{}\n\n", ts_export::<FileStatus>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<Library>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<ReadingDirection>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryPattern>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryScanMode>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryOptions>()?).as_bytes())?;

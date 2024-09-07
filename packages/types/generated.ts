@@ -114,17 +114,19 @@ export type EmailerSendRecord = { id: number; emailer_id: number; recipient_emai
  */
 export type AttachmentMeta = { filename: string; media_id: string | null; size: number }
 
+export type ReadingDirection = "ltr" | "rtl"
+
+export type ReadingMode = "paged" | "continuous:vertical" | "continuous:horizontal"
+
 export type FileStatus = "UNKNOWN" | "READY" | "UNSUPPORTED" | "ERROR" | "MISSING"
 
 export type Library = { id: string; name: string; description: string | null; emoji: string | null; path: string; status: string; updated_at: string; series: Series[] | null; tags: Tag[] | null; library_options: LibraryOptions }
-
-export type ReadingDirection = "ltr" | "rtl"
 
 export type LibraryPattern = "SERIES_BASED" | "COLLECTION_BASED"
 
 export type LibraryScanMode = "DEFAULT" | "NONE"
 
-export type LibraryOptions = { id: string | null; convert_rar_to_zip: boolean; hard_delete_conversions: boolean; default_reading_dir: ReadingDirection; library_pattern: LibraryPattern; thumbnail_config: ImageProcessorOptions | null; library_id: string | null }
+export type LibraryOptions = { id: string | null; convert_rar_to_zip: boolean; hard_delete_conversions: boolean; default_reading_dir?: ReadingDirection; default_reading_mode?: ReadingMode; library_pattern: LibraryPattern; thumbnail_config: ImageProcessorOptions | null; library_id: string | null }
 
 export type LibraryStats = { series_count: BigInt; book_count: BigInt; total_bytes: BigInt; completed_books: BigInt; in_progress_books: BigInt }
 

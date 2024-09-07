@@ -9,7 +9,7 @@ import React, { PropsWithChildren, useCallback, useEffect, useMemo, useRef } fro
 import { Link, useSearchParams } from 'react-router-dom'
 
 import paths from '@/paths'
-import { useNewReaderStore } from '@/stores'
+import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 type Props = {
 	media: Media
@@ -18,7 +18,7 @@ type Props = {
 }
 
 const ReaderContainer = ({
-	media: { id, pages, name, metadata },
+	media,
 	currentPage,
 	onPageChange,
 	children,
@@ -28,13 +28,12 @@ const ReaderContainer = ({
 	const parentRef = useRef<HTMLDivElement>(null)
 	const rangeRef = useRef([0, 0])
 
+	const { id, name, metadata, pages } = media
 	const {
-		layout: { mode: readerMode, showToolBar, doubleSpread },
-		setLayout,
-	} = useNewReaderStore((state) => ({
-		layout: state.layout,
-		setLayout: state.setLayout,
-	}))
+		bookPreferences: { readingMode, doubleSpread },
+		settings: { showToolBar },
+		setBookPreferences,
+	} = useBookPreferences({ book: media })
 
 	const columnVirtualizer = useVirtualizer({
 		count: pages,
@@ -68,17 +67,17 @@ const ReaderContainer = ({
 		}
 	}, [showToolBar, currentPage, id, pages, totalSize])
 
-	const handleChangeReaderMode = useCallback(() => {
-		if (readerMode === 'continuous') {
+	const handleChangereadingMode = useCallback(() => {
+		if (readingMode.startsWith('continuous')) {
 			search.set('page', currentPage.toString())
 			setSearch(search)
-			setLayout({ mode: 'paged' })
+			setBookPreferences({ readingMode: 'paged' })
 		} else {
-			setLayout({ mode: 'continuous' })
+			setBookPreferences({ readingMode: 'continuous:horizontal' })
 		}
-	}, [readerMode, setLayout, currentPage, search, setSearch])
+	}, [readingMode, setBookPreferences, currentPage, search, setSearch])
 
-	const showBottomToolbar = readerMode !== 'continuous'
+	const showBottomToolbar = readingMode === 'paged'
 	const title = metadata?.title || name
 
 	return (
@@ -106,11 +105,13 @@ const ReaderContainer = ({
 						<IconButton
 							size="sm"
 							title={
-								readerMode === 'continuous' ? 'Switch to paged mode' : 'Switch to continuous mode'
+								readingMode.startsWith('continuous')
+									? 'Switch to paged mode'
+									: 'Switch to continuous mode'
 							}
-							onClick={handleChangeReaderMode}
+							onClick={handleChangereadingMode}
 						>
-							{readerMode === 'continuous' ? (
+							{readingMode.startsWith('continuous') ? (
 								<Scroll className="h-4 w-4" />
 							) : (
 								<BookOpen className="h-4 w-4" />
@@ -120,7 +121,7 @@ const ReaderContainer = ({
 						<IconButton
 							size="sm"
 							title="Toggle toolbar"
-							onClick={() => setLayout({ doubleSpread: !doubleSpread })}
+							onClick={() => setBookPreferences({ doubleSpread: !doubleSpread })}
 						>
 							test
 						</IconButton>

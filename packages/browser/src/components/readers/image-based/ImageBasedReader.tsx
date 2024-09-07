@@ -51,7 +51,8 @@ export default function ImageBasedReader({
 	const [pageDimensions, setPageDimensions] = useState<Record<number, ImagePageDimensionRef>>({})
 
 	const {
-		layout: { mode: readerMode, ...preloadCounts },
+		settings: { preload },
+		bookPreferences: { readingMode },
 	} = useBookPreferences({ book: media })
 
 	const { updateReadProgress } = useUpdateMediaProgress(media.id, {
@@ -77,14 +78,14 @@ export default function ImageBasedReader({
 	 */
 	const handleChangePage = useCallback(
 		(newPage: number) => {
-			if (readerMode === 'continuous') {
+			if (readingMode.startsWith('continuous')) {
 				setCurrentPage(newPage)
 			} else {
 				setCurrentPage(newPage)
 				navigate(paths.bookReader(media.id, { isAnimated, isIncognito, page: newPage }))
 			}
 		},
-		[media.id, isAnimated, isIncognito, navigate, readerMode],
+		[media.id, isAnimated, isIncognito, navigate, readingMode],
 	)
 
 	/**
@@ -99,13 +100,13 @@ export default function ImageBasedReader({
 	 */
 	const pagesToPreload = useMemo(
 		() =>
-			[...Array(preloadCounts.preloadBehindCount).keys()]
+			[...Array(preload.behind).keys()]
 				.map((i) => currentPage - i - 1)
 				.reverse()
-				.concat([...Array(preloadCounts.preloadAheadCount).keys()].map((i) => currentPage + i + 1))
+				.concat([...Array(preload.ahead).keys()].map((i) => currentPage + i + 1))
 				.filter((i) => i > 0 && i <= lastPage),
 
-		[currentPage, preloadCounts, lastPage],
+		[currentPage, preload, lastPage],
 	)
 
 	/**
@@ -120,15 +121,15 @@ export default function ImageBasedReader({
 	})
 
 	const renderReader = () => {
-		if (readerMode === 'continuous') {
+		if (readingMode.startsWith('continuous')) {
 			return (
 				<ContinuousScrollReader
 					media={media}
 					initialPage={currentPage}
 					getPageUrl={getPageUrl}
-					orientation="vertical"
 					onProgressUpdate={handleUpdateProgress}
 					onPageChanged={handleChangePage}
+					orientation={(readingMode.split(':')[1] as 'vertical' | 'horizontal') || 'vertical'}
 				/>
 			)
 		} else {

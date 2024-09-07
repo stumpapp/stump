@@ -48,7 +48,11 @@ export function usePreloadPage({ pages, urlBuilder, onStoreDimensions }: Params)
 				image.src = urlBuilder(page)
 				image.onload = () => {
 					if (image.width && image.height) {
-						onStoreDimensions?.(page, { height: image.height, width: image.width })
+						onStoreDimensions?.(page, {
+							height: image.height,
+							isPortrait: image.height > image.width,
+							width: image.width,
+						})
 					}
 					resolve(image)
 				}

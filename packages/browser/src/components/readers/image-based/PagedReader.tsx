@@ -33,9 +33,9 @@ export type PagedReaderProps = {
  */
 function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedReaderProps) {
 	const {
-		layout: { showToolBar, doubleSpread },
-		setLayout,
-		bookPreferences: { readingDirection },
+		settings: { showToolBar },
+		setSettings,
+		bookPreferences: { readingDirection, doubleSpread },
 	} = useBookPreferences({ book: media })
 
 	const { pageDimensions, setDimensions } = useImageBaseReaderContext()
@@ -90,12 +90,12 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	 */
 	useEffect(() => {
 		return () => {
-			setLayout({
+			setSettings({
 				showToolBar: false,
 			})
 			queryClient.invalidateQueries([mediaQueryKeys.getInProgressMedia], { exact: false })
 		}
-	}, [setLayout])
+	}, [setSettings])
 
 	/**
 	 * A callback to actually change the page. This should not be called directly, but rather
@@ -151,12 +151,12 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 					handleLeftwardPageChange()
 					break
 				case 'space':
-					setLayout({
+					setSettings({
 						showToolBar: !showToolBar,
 					})
 					break
 				case 'escape':
-					setLayout({
+					setSettings({
 						showToolBar: false,
 					})
 					break
@@ -164,7 +164,7 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 					break
 			}
 		},
-		[setLayout, showToolBar, handleRightwardPageChange, handleLeftwardPageChange],
+		[setSettings, showToolBar, handleRightwardPageChange, handleLeftwardPageChange],
 	)
 	/**
 	 * Register the hotkeys for the reader component
@@ -182,12 +182,19 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 		[isZoomed, showToolBar, isMobile],
 	)
 
+	// TODO: refactor this to a component, too complex at this point
 	const renderPages = useCallback(() => {
 		const dimensionSet = displayedPages.map((page) => getDimensions(page))
 
 		const shouldDisplayDoubleSpread =
 			displayedPages.length > 1 &&
 			dimensionSet.every((dimensions) => !dimensions || dimensions.isPortrait)
+
+		console.log({
+			dimensionSet,
+			displayedPages,
+			shouldDisplayDoubleSpread,
+		})
 
 		if (shouldDisplayDoubleSpread) {
 			return (
@@ -199,18 +206,20 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 							src={getPageUrl(page)}
 							onLoad={(e) => {
 								const img = e.target as HTMLImageElement
-								upsertDimensions(page, {
-									height: img.height,
-									isPortrait: img.height > img.width,
-									width: img.width,
-								})
+								if (img.height && img.width) {
+									upsertDimensions(page, {
+										height: img.height,
+										isPortrait: img.height > img.width,
+										width: img.width,
+									})
+								}
 							}}
 							onError={(err) => {
 								// @ts-expect-error: is oke
 								err.target.src = '/favicon.png'
 							}}
 							onClick={() =>
-								setLayout({
+								setSettings({
 									showToolBar: !showToolBar,
 								})
 							}
@@ -225,25 +234,35 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 					src={getPageUrl(currentPage)}
 					onLoad={(e) => {
 						const img = e.target as HTMLImageElement
-						upsertDimensions(currentPage, {
-							height: img.height,
-							isPortrait: img.height > img.width,
-							width: img.width,
-						})
+						if (img.height && img.width) {
+							upsertDimensions(currentPage, {
+								height: img.height,
+								isPortrait: img.height > img.width,
+								width: img.width,
+							})
+						}
 					}}
 					onError={(err) => {
 						// @ts-expect-error: is oke
 						err.target.src = '/favicon.png'
 					}}
 					onClick={() =>
-						setLayout({
+						setSettings({
 							showToolBar: !showToolBar,
 						})
 					}
 				/>
 			)
 		}
-	}, [displayedPages, currentPage, getPageUrl, setLayout, showToolBar])
+	}, [
+		displayedPages,
+		currentPage,
+		getPageUrl,
+		setSettings,
+		showToolBar,
+		getDimensions,
+		upsertDimensions,
+	])
 
 	// TODO: when preloading images, cache the dimensions of the images to better support dynamic resizing
 	return (

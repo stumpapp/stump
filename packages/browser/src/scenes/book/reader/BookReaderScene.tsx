@@ -50,7 +50,7 @@ function BookReaderScene({ book }: Props) {
 	})
 
 	const {
-		layout: { mode: readerMode },
+		bookPreferences: { readingMode },
 	} = useBookPreferences({ book })
 
 	/**
@@ -102,7 +102,7 @@ function BookReaderScene({ book }: Props) {
 	const initialPage = page ? parseInt(page, 10) : undefined
 
 	if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
-		if (!initialPage && readerMode !== 'continuous') {
+		if (!initialPage && readingMode === 'paged') {
 			return <Navigate to={paths.bookReader(book.id, { isAnimated, page: 1 })} />
 		} else if (!!initialPage && initialPage > book.pages) {
 			return <Navigate to={paths.bookReader(book.id, { isAnimated, page: book.pages })} />

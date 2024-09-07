@@ -38,6 +38,30 @@ impl FromStr for ReadingDirection {
 	}
 }
 
+#[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+pub enum ReadingMode {
+	#[default]
+	#[serde(rename = "paged")]
+	Paged,
+	#[serde(rename = "continuous:vertical")]
+	ContinuousVertical,
+	#[serde(rename = "continuous:horizontal")]
+	ContinuousHorizontal,
+}
+
+impl FromStr for ReadingMode {
+	type Err = String;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s {
+			"paged" => Ok(ReadingMode::Paged),
+			"continuous:vertical" => Ok(ReadingMode::ContinuousVertical),
+			"continuous:horizontal" => Ok(ReadingMode::ContinuousHorizontal),
+			_ => Err(format!("\"{s}\" is not a valid reader mode")),
+		}
+	}
+}
+
 /// A struct representing a sort order for a column using react-table (tanstack)
 #[derive(Default, Clone, Debug, Deserialize, Serialize, Type, ToSchema)]
 pub struct ReactTableColumnSort {

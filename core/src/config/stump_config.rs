@@ -29,7 +29,8 @@ pub mod env_keys {
 	pub const HASH_COST_KEY: &str = "HASH_COST";
 	pub const SESSION_TTL_KEY: &str = "SESSION_TTL";
 	pub const SESSION_EXPIRY_INTERVAL_KEY: &str = "SESSION_EXPIRY_CLEANUP_INTERVAL";
-	pub const SCANNER_CHUNK_SIZE_KEY: &str = "STUMP_SCANNER_CHUNK_SIZE";
+	pub const MAX_SCANNER_CONCURRENCY_KEY: &str = "STUMP_MAX_SCANNER_CONCURRENCY";
+	pub const MAX_THUMBNAIL_CONCURRENCY_KEY: &str = "STUMP_MAX_THUMBNAIL_CONCURRENCY";
 }
 use env_keys::*;
 
@@ -38,7 +39,8 @@ pub mod defaults {
 	pub const DEFAULT_SESSION_TTL: i64 = 3600 * 24 * 3; // 3 days
 	pub const DEFAULT_ACCESS_TOKEN_TTL: i64 = 3600 * 24; // 1 days
 	pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
-	pub const DEFAULT_SCANNER_CHUNK_SIZE: usize = 100;
+	pub const DEFAULT_MAX_SCANNER_CONCURRENCY: usize = 200;
+	pub const DEFAULT_MAX_THUMBNAIL_CONCURRENCY: usize = 50;
 }
 use defaults::*;
 
@@ -148,12 +150,20 @@ pub struct StumpConfig {
 	#[env_key(SESSION_EXPIRY_INTERVAL_KEY)]
 	pub expired_session_cleanup_interval: u64,
 
-	/// The size of chunks to use throughout scanning the filesystem. This is used to
-	/// limit the number of files that are processed at once. Realistically, you are bound
-	/// by I/O constraints, but perhaps you can squeeze out some performance by tweaking this.
-	#[default_value(DEFAULT_SCANNER_CHUNK_SIZE)]
-	#[env_key(SCANNER_CHUNK_SIZE_KEY)]
-	pub scanner_chunk_size: usize,
+	/// The maximum number of concurrent files which may be processed by a scanner. This is used
+	/// to limit/increase the number of files that are processed at once. This may be useful for those
+	/// with high or low performance systems to configure to their needs.
+	#[default_value(DEFAULT_MAX_SCANNER_CONCURRENCY)]
+	#[env_key(MAX_SCANNER_CONCURRENCY_KEY)]
+	pub max_scanner_concurrency: usize,
+
+	/// The maximum number of concurrent files which may be processed by a thumbnail generator. This is used
+	/// to limit/increase the number of images that are processed at once. Image generation can be
+	/// resource intensive, so this may be useful for those with high or low performance systems to
+	/// configure to their needs.
+	#[default_value(DEFAULT_MAX_THUMBNAIL_CONCURRENCY)]
+	#[env_key(MAX_THUMBNAIL_CONCURRENCY_KEY)]
+	pub max_thumbnail_concurrency: usize,
 }
 
 impl StumpConfig {
@@ -295,7 +305,8 @@ mod tests {
 			session_ttl: None,
 			access_token_ttl: None,
 			expired_session_cleanup_interval: None,
-			scanner_chunk_size: None,
+			max_scanner_concurrency: None,
+			max_thumbnail_concurrency: None,
 		};
 		partial_config.apply_to_config(&mut config);
 
@@ -329,7 +340,8 @@ mod tests {
 				expired_session_cleanup_interval: Some(
 					DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL
 				),
-				scanner_chunk_size: Some(DEFAULT_SCANNER_CHUNK_SIZE),
+				max_scanner_concurrency: Some(DEFAULT_MAX_SCANNER_CONCURRENCY),
+				max_thumbnail_concurrency: Some(DEFAULT_MAX_THUMBNAIL_CONCURRENCY),
 			}
 		);
 
@@ -377,8 +389,9 @@ mod tests {
 						access_token_ttl: DEFAULT_ACCESS_TOKEN_TTL,
 						expired_session_cleanup_interval:
 							DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
-						scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
 						custom_templates_dir: None,
+						max_scanner_concurrency: DEFAULT_MAX_SCANNER_CONCURRENCY,
+						max_thumbnail_concurrency: DEFAULT_MAX_THUMBNAIL_CONCURRENCY,
 					}
 				);
 			},

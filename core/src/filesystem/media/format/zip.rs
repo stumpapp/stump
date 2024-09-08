@@ -7,12 +7,13 @@ use crate::{
 		content_type::ContentType,
 		error::FileError,
 		hash,
-		media::common::{metadata_from_buf, sort_file_names},
+		media::{
+			process::{FileProcessor, FileProcessorOptions, ProcessedFile},
+			utils::{metadata_from_buf, sort_file_names},
+		},
 		FileParts, PathUtils,
 	},
 };
-
-use super::{FileProcessor, FileProcessorOptions, ProcessedFile};
 
 /// A file processor for ZIP files.
 pub struct ZipProcessor;
@@ -57,17 +58,20 @@ impl FileProcessor for ZipProcessor {
 
 	fn process(
 		path: &str,
-		_: FileProcessorOptions,
+		FileProcessorOptions {
+			generate_file_hashes,
+			process_metadata,
+			..
+		}: FileProcessorOptions,
 		_: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
-		debug!(path, "Processing zip");
-
-		let hash = ZipProcessor::hash(path);
 		let zip_file = File::open(path)?;
 		let mut archive = zip::ZipArchive::new(zip_file)?;
 
 		let mut metadata = None;
 		let mut pages = 0;
+
+		let hash = generate_file_hashes.then(|| Self::hash(path)).flatten();
 
 		for i in 0..archive.len() {
 			let mut file = archive.by_index(i)?;
@@ -91,9 +95,8 @@ impl FileProcessor for ZipProcessor {
 			let content_type = path.naive_content_type();
 			let FileParts { file_name, .. } = path.file_parts();
 
-			if file_name == "ComicInfo.xml" {
+			if file_name == "ComicInfo.xml" && process_metadata {
 				trace!("Found ComicInfo.xml");
-				// we have the first few bytes of the file in buf, so we need to read the rest and make it a string
 				let mut contents = Vec::new();
 				file.read_to_end(&mut contents)?;
 				let contents = String::from_utf8_lossy(&contents).to_string();
@@ -269,6 +272,7 @@ mod tests {
 			FileProcessorOptions {
 				convert_rar_to_zip: false,
 				delete_conversion_source: false,
+				..Default::default()
 			},
 			&config,
 		);
@@ -285,6 +289,7 @@ mod tests {
 			FileProcessorOptions {
 				convert_rar_to_zip: false,
 				delete_conversion_source: false,
+				..Default::default()
 			},
 			&config,
 		);
@@ -301,6 +306,7 @@ mod tests {
 			FileProcessorOptions {
 				convert_rar_to_zip: false,
 				delete_conversion_source: false,
+				..Default::default()
 			},
 			&config,
 		);

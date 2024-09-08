@@ -48,7 +48,7 @@ async fn series_based_library_batch_scan() -> CoreResult<()> {
 	let ctx = Ctx::mock().await;
 	let client = &ctx.db;
 
-	let (library, _library_options, _tmp) =
+	let (library, _library_config, _tmp) =
 		TempLibrary::create(client, LibraryPattern::SeriesBased, LibraryScanMode::None)
 			.await?;
 
@@ -75,7 +75,7 @@ async fn collection_based_library_batch_scan() -> CoreResult<()> {
 	let ctx = Ctx::mock().await;
 	let client = &ctx.db;
 
-	let (library, _library_options, _tmp) = TempLibrary::create(
+	let (library, _library_config, _tmp) = TempLibrary::create(
 		client,
 		LibraryPattern::CollectionBased,
 		LibraryScanMode::None,

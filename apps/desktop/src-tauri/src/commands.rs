@@ -1,7 +1,10 @@
 use serde::Serialize;
-use tauri::{Manager, State};
+use tauri::{Manager, State, Url};
 
-use crate::{state::WrappedState, utils::discord::DiscordIntegrationError};
+use crate::{
+	state::WrappedState, store::saved_server::SavedServer,
+	utils::discord::DiscordIntegrationError,
+};
 
 /// An error type for the desktop RPC commands.
 #[derive(Debug, Serialize, thiserror::Error)]

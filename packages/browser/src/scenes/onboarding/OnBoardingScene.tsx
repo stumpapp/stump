@@ -9,8 +9,7 @@ export default function OnBoardingScene() {
 			<div className="text-left sm:max-w-md md:max-w-lg">
 				<h1 className="text-4xl font-semibold text-foreground">Configure your connection</h1>
 				<p className="mt-1.5 text-base text-foreground-subtle">
-					To get started with the Stump desktop app, please enter the base URL of your Stump server
-					below
+					Please enter the base URL of your Stump server below. You can add other servers later
 				</p>
 
 				<div className="text-unset mt-3 w-full">

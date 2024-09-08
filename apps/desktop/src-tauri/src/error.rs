@@ -1,3 +1,5 @@
+#![allow(clippy::enum_variant_names)]
+
 use crate::{
 	commands::DeskopRPCError, store::StoreError, utils::discord::DiscordIntegrationError,
 };

@@ -6569,15 +6569,10 @@
   resolved "https://registry.yarnpkg.com/@tanstack/virtual-core/-/virtual-core-3.0.0-beta.18.tgz#d4b0738c1d0aada922063c899675ff4df9f696b2"
   integrity sha512-tcXutY05NpN9lp3+AXI9Sn85RxSPV0EJC0XMim9oeQj/E7bjXoL0qZ4Er4wwnvIbv/hZjC91EmbIQGjgdr6nZg==
 
-"@tauri-apps/api@^1.6.0":
+"@tauri-apps/api@1.6.0", "@tauri-apps/api@^1.6.0":
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/@tauri-apps/api/-/api-1.6.0.tgz#745b7e4e26782c3b2ad9510d558fa5bb2cf29186"
   integrity sha512-rqI++FWClU5I2UBp4HXFvl+sBWkdigBkxnpJDQUWttNyG7IZP4FwQGhTNL5EOw0vI8i6eSAJ5frLqO7n7jbJdg==
-
-"@tauri-apps/api@^2.0.0-rc.4":
-  version "2.0.0-rc.4"
-  resolved "https://registry.yarnpkg.com/@tauri-apps/api/-/api-2.0.0-rc.4.tgz#2b4c3493d86382981787c52006c6c9e5bf16bc08"
-  integrity sha512-UNiIhhKG08j4ooss2oEEVexffmWkgkYlC2M3GcX3VPtNsqFgVNL8Mcw/4Y7rO9M9S+ffAMnLOF5ypzyuyb8tyg==
 
 "@tauri-apps/cli-darwin-arm64@1.6.1":
   version "1.6.1"
@@ -6644,13 +6639,6 @@
     "@tauri-apps/cli-win32-arm64-msvc" "1.6.1"
     "@tauri-apps/cli-win32-ia32-msvc" "1.6.1"
     "@tauri-apps/cli-win32-x64-msvc" "1.6.1"
-
-"@tauri-apps/plugin-store@^2.0.0-rc.1":
-  version "2.0.0-rc.1"
-  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-store/-/plugin-store-2.0.0-rc.1.tgz#405403638b61f08eee09874dcc4e3afc84dd31fd"
-  integrity sha512-rW71Tkr7OifxoL8NkWgPy5Os4Gn3oJTbv/j/nJ03HDuYsq+F4+8kU8o4epRFJnr6VKmgB/2CtiacSC3dnSSRnA==
-  dependencies:
-    "@tauri-apps/api" "^2.0.0-rc.4"
 
 "@testing-library/dom@^9.0.0":
   version "9.3.4"
@@ -20222,6 +20210,12 @@ tar@^6.0.2, tar@^6.0.5, tar@^6.2.0:
     minizlib "^2.1.1"
     mkdirp "^1.0.3"
     yallist "^4.0.0"
+
+"tauri-plugin-store-api@https://github.com/tauri-apps/tauri-plugin-store#v1":
+  version "0.0.0"
+  resolved "https://github.com/tauri-apps/tauri-plugin-store#2352f0bda53b4725ef1d2f51cd5774e4396a20d1"
+  dependencies:
+    "@tauri-apps/api" "1.6.0"
 
 telejson@^7.2.0:
   version "7.2.0"

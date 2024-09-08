@@ -19,11 +19,12 @@
 	"dependencies": {
 		"@stump/browser": "*",
 		"@stump/client": "*",
+		"@stump/types": "*",
 		"@tanstack/react-query": "^4.28.0",
 		"@tauri-apps/api": "^1.6.0",
-		"@tauri-apps/plugin-store": "^2.0.0-rc.1",
 		"react": "^18.2.0",
-		"react-dom": "^18.2.0"
+		"react-dom": "^18.2.0",
+		"tauri-plugin-store-api": "https://github.com/tauri-apps/tauri-plugin-store#v1"
 	},
 	"devDependencies": {
 		"@tailwindcss/typography": "^0.5.10",

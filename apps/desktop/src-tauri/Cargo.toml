@@ -14,6 +14,7 @@ stump_server = { path = "../../server", optional = true }
 discord-rich-presence = "0.2.3"
 serde_json = { workspace = true }
 serde = { workspace = true }
+specta = { workspace = true }
 thiserror = { workspace = true }
 tauri = { version = "1.7.2", features = ["api-all", "devtools"] }
 tracing = { workspace = true }

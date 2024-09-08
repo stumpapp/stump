@@ -2,17 +2,18 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { checkUrl, isUrl } from '@stump/api'
 import { Button, Form, Input, ProgressSpinner, Text, useBoolean } from '@stump/components'
 import { Cloud, CloudOff } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDebounce } from 'rooks'
 import { z } from 'zod'
 
-import { useAppStore } from '@/stores'
+import { useAppStore, useTauriStore } from '@/stores'
 
-// TODO: retest this component. I blindly refactored it when migrating off chakra...
 export default function ServerUrlForm() {
 	const [isCheckingUrl, { on, off }] = useBoolean(false)
 	const [sucessfulConnection, setSuccessfulConnection] = useState(false)
+
+	const { addServer } = useTauriStore()
 	const setBaseURL = useAppStore((store) => store.setBaseUrl)
 
 	const schema = z.object({
@@ -75,16 +76,23 @@ export default function ServerUrlForm() {
 		[baseUrl],
 	)
 
-	async function handleSubmit(values: Schema) {
-		const { baseUrl } = values
+	/**
+	 * A handler to submit the form, which will add the server to the list of connected servers
+	 */
+	const handleSubmit = useCallback(
+		async ({ baseUrl }: Schema) => {
+			try {
+				const primaryServer = await addServer({ name: 'Primary', uri: baseUrl })
+				setBaseURL(primaryServer.uri)
+				window.location.href = '/'
+			} catch (error) {
+				console.error('Failed to add server', error)
+			}
+		},
+		[setBaseURL, addServer],
+	)
 
-		setBaseURL(baseUrl)
-
-		// FIXME: super cringe, big no
-		window.location.href = '/'
-	}
-
-	const InputDecoration = useMemo(() => {
+	const inputDecoration = useMemo(() => {
 		if (isCheckingUrl) {
 			return <ProgressSpinner size="sm" />
 		} else if (Object.keys(form.formState.errors).length > 0) {
@@ -103,10 +111,11 @@ export default function ServerUrlForm() {
 			<input className="hidden" {...form.register('baseUrl')} />
 			<Input
 				label="Server URL"
-				rightDecoration={InputDecoration}
+				rightDecoration={inputDecoration}
 				variant="primary"
 				errorMessage={form.formState.errors.baseUrl?.message}
 				onChange={(e) => setUrlDebounced(e.target.value)}
+				placeholder="http://127.0.0.1:10801"
 			/>
 
 			{sucessfulConnection && <Text className="-mt-3 text-green-400">Successfully connected!</Text>}

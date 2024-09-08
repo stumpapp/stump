@@ -709,10 +709,27 @@
 			"title": "Desktop settings",
 			"description": "Settings related to the Stump desktop application",
 			"sections": {
-				"discordPresence": {
-					"label": "Discord Presence",
-					"description": "Display your Stump activity in Discord using Discord Rich Presence",
-					"reconnect": "Reconnect to Discord"
+				"configuredServers": {
+					"label": "Configured servers",
+					"description": "The list of Stump servers you can connect to",
+					"editServer": {
+						"tooltip": "Edit server"
+					},
+					"deleteServer": {
+						"tooltip": "Delete server"
+					},
+					"switchToServer": {
+						"tooltip": "Switch to server"
+					}
+				},
+				"optionalFeatures": {
+					"label": "Optional features",
+					"description": "Enable or disable optional features unique to the desktop application",
+					"discordPresence": {
+						"label": "Discord Presence",
+						"description": "Display your Stump activity in Discord using Discord Rich Presence",
+						"reconnect": "Reconnect to Discord"
+					}
 				}
 			}
 		},

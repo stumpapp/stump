@@ -1,70 +1,48 @@
 import { StumpWebClient } from '@stump/browser'
 import { Platform } from '@stump/client'
-import { invoke, os } from '@tauri-apps/api'
-import { useEffect, useMemo, useState } from 'react'
+import { SavedServer } from '@stump/types'
+import { useEffect, useState } from 'react'
+import { Store } from 'tauri-plugin-store-api'
 
-const VITE_STUMP_SERVER_IS_BUNDLED = import.meta.env.VITE_STUMP_SERVER_IS_BUNDLED === 'true'
+import { useTauriRPC } from './utils'
+
+const store = new Store('settings.json')
 
 export default function App() {
-	function getPlatform(platform: string): Platform {
-		switch (platform) {
-			case 'darwin':
-				return 'macOS'
-			case 'win32':
-				return 'windows'
-			case 'linux':
-				return 'linux'
-			default:
-				return 'browser'
-		}
-	}
-
-	const setDiscordPresence = (status?: string, details?: string) =>
-		invoke<unknown>('set_discord_presence', { details, status })
-
-	const setUseDiscordPresence = (connect: boolean) =>
-		invoke<unknown>('set_use_discord_connection', { connect })
-
-	const hideSplashScreen = () => invoke<unknown>('close_splashscreen')
+	const { getNativePlatform, ...tauriRPC } = useTauriRPC()
 
 	const [platform, setPlatform] = useState<Platform>('unknown')
+	const [baseURL, setBaseURL] = useState<string>()
 	const [mounted, setMounted] = useState(false)
 
+	/**
+	 * An effect to initialize the application, setting the platform and base URL
+	 */
 	useEffect(() => {
 		async function init() {
-			const platform = await os.platform()
-			setPlatform(getPlatform(platform))
-			setMounted(true)
-			setTimeout(hideSplashScreen, 1000)
+			try {
+				const platform = await getNativePlatform()
+				const activeServer = await store.get<SavedServer>('active_server')
+				if (activeServer) {
+					setBaseURL(activeServer.uri)
+				}
+				setPlatform(platform)
+			} catch (error) {
+				console.error('Critical failure! Unable to initialize the application', error)
+			} finally {
+				setMounted(true)
+			}
 		}
 
-		init()
-	}, [])
-
-	const baseUrl = useMemo(() => {
-		if (!VITE_STUMP_SERVER_IS_BUNDLED) {
-			return undefined
+		if (!mounted) {
+			init()
 		}
-
-		// TODO: The port is configurable...
-		if (platform === 'windows') {
-			return 'https://tauri.localhost:10801'
-		} else {
-			return 'http://localhost:10801'
-		}
-	}, [platform])
+	}, [getNativePlatform, mounted])
 
 	// I want to wait until platform is properly set before rendering the app
 	if (!mounted) {
 		return null
 	}
 
-	return (
-		<StumpWebClient
-			platform={platform}
-			setUseDiscordPresence={setUseDiscordPresence}
-			setDiscordPresence={setDiscordPresence}
-			baseUrl={baseUrl}
-		/>
-	)
+	return <StumpWebClient platform={platform} baseUrl={baseURL} tauriRPC={tauriRPC} />
 }

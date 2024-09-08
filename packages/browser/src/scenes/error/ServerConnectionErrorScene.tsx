@@ -17,9 +17,9 @@ export default function ServerConnectionErrorScene() {
 		baseURL: store.baseUrl,
 		platform: store.platform,
 	}))
-	const showForm = platform !== 'browser'
+	const isDesktop = platform !== 'browser'
 
-	const localeKey = `serverSOS.${showForm ? 'desktop' : 'web'}.message`
+	const localeKey = `serverSOS.${isDesktop ? 'desktop' : 'web'}.message`
 	const { t } = useLocaleContext()
 
 	useEffect(() => {
@@ -84,7 +84,7 @@ export default function ServerConnectionErrorScene() {
 				<p className="mt-1.5 text-base text-foreground-subtle">{t(localeKey)}</p>
 			</div>
 
-			{showForm && (
+			{isDesktop && (
 				<div className="w-full">
 					<ServerUrlForm />
 				</div>

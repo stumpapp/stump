@@ -14,7 +14,6 @@ mod utils;
 
 use std::sync::{Arc, Mutex};
 use store::AppStore;
-use tauri_plugin_store::StoreBuilder;
 
 use state::AppState;
 
@@ -64,4 +63,51 @@ fn main() {
 		])
 		.run(tauri::generate_context!())
 		.expect("error while running tauri application");
+}
+
+#[allow(unused_imports)]
+mod tests {
+	use std::{fs::File, io::Write, path::PathBuf};
+
+	use specta::{
+		ts::{export, BigIntExportBehavior, ExportConfiguration, TsExportError},
+		NamedType,
+	};
+
+	use crate::store::{app_store::*, saved_server::*};
+
+	#[allow(dead_code)]
+	fn ts_export<T>() -> Result<String, TsExportError>
+	where
+		T: NamedType,
+	{
+		export::<T>(&ExportConfiguration::new().bigint(BigIntExportBehavior::BigInt))
+	}
+
+	#[test]
+	#[ignore]
+	fn codegen() -> Result<(), Box<dyn std::error::Error>> {
+		let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+			.join("../../../packages/types")
+			.join("generated.ts");
+
+		if !path.exists() {
+			panic!(
+				"Please run `cargo run --package codegen` first to generate the types"
+			);
+		}
+
+		println!(
+			"Please ensure to only generate types using `cargo run --package codegen`"
+		);
+
+		let mut file = std::fs::OpenOptions::new().append(true).open(path)?;
+
+		file.write_all(b"// DESKTOP TYPE GENERATION\n\n")?;
+
+		file.write_all(format!("{}\n\n", ts_export::<SavedServer>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<AppStore>()?).as_bytes())?;
+
+		Ok(())
+	}
 }

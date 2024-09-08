@@ -1,7 +1,9 @@
-use std::str::FromStr;
-
-use tauri::{http::Uri, App};
+use serde::Serialize;
+use specta::Type;
+use tauri::App;
 use tauri_plugin_store::StoreBuilder;
+
+use super::saved_server::SavedServer;
 
 #[derive(Debug, thiserror::Error)]
 pub enum StoreError {
@@ -11,9 +13,12 @@ pub enum StoreError {
 	StoreSaveError,
 }
 
+#[derive(Serialize, Type)]
+#[serde(rename = "DesktopAppStore")]
 pub struct AppStore {
-	active_server: Option<Uri>,
-	connected_servers: Vec<Uri>,
+	#[specta(optional)]
+	active_server: Option<SavedServer>,
+	connected_servers: Vec<SavedServer>,
 }
 
 impl AppStore {
@@ -33,25 +38,23 @@ impl AppStore {
 		let active_server = store
 			.get("active_server")
 			.cloned()
-			.and_then(|s| s.as_str().map(Uri::from_str))
+			.map(SavedServer::try_from)
 			.transpose()
-			.map_err(|_| StoreError::StoreLoadError)?;
-		let connected_servers: Vec<Uri> = store
+			.unwrap_or_else(|error| {
+				tracing::error!(?error, "Failed to parse active server");
+				None
+			});
+
+		let connected_servers = store
 			.get("connected_servers")
 			.cloned()
 			.and_then(|s| s.as_array().cloned())
-			.map(|a| {
-				a.iter()
-					.filter_map(|s| s.as_str().map(Uri::from_str))
-					.collect::<Result<Vec<_>, _>>()
-			})
-			.transpose()
-			.map_err(|_| StoreError::StoreLoadError)?
+			.map(SavedServer::from_vec)
 			.unwrap_or_default();
 
 		Ok(Self {
-			active_server: active_server.clone(),
-			connected_servers: connected_servers.clone(),
+			active_server,
+			connected_servers,
 		})
 	}
 }

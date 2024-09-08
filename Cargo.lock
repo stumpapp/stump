@@ -7490,6 +7490,7 @@ dependencies = [
  "serde_json",
  "specta-macros",
  "thiserror",
+ "url",
 ]
 
 [[package]]
@@ -7807,6 +7808,7 @@ dependencies = [
  "discord-rich-presence",
  "serde",
  "serde_json",
+ "specta",
  "stump_server",
  "tauri",
  "tauri-build",

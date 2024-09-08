@@ -7810,6 +7810,7 @@ dependencies = [
  "stump_server",
  "tauri",
  "tauri-build",
+ "tauri-plugin-store",
  "thiserror",
  "tracing",
 ]
@@ -8160,6 +8161,18 @@ dependencies = [
  "syn 1.0.107",
  "tauri-codegen",
  "tauri-utils",
+]
+
+[[package]]
+name = "tauri-plugin-store"
+version = "0.0.0"
+source = "git+https://github.com/tauri-apps/plugins-workspace?branch=v1#5c249a1a1076ac78cfc0ed4c2857cf7e2540b1cc"
+dependencies = [
+ "log",
+ "serde",
+ "serde_json",
+ "tauri",
+ "thiserror",
 ]
 
 [[package]]

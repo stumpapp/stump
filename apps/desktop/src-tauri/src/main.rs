@@ -9,9 +9,12 @@
 mod commands;
 mod error;
 mod state;
+mod store;
 mod utils;
 
 use std::sync::{Arc, Mutex};
+use store::AppStore;
+use tauri_plugin_store::StoreBuilder;
 
 use state::AppState;
 
@@ -44,6 +47,15 @@ fn main() {
 	let app_state = AppState::new().expect("Failed to initialize application state");
 
 	tauri::Builder::default()
+		.plugin(tauri_plugin_store::Builder::default().build())
+		.setup(|app| {
+			if let Err(error) = AppStore::init(app) {
+				tracing::error!(?error, "Failed to initialize store");
+				Err(error.to_string().into())
+			} else {
+				Ok(())
+			}
+		})
 		.manage(Arc::new(Mutex::new(app_state)))
 		.invoke_handler(tauri::generate_handler![
 			set_use_discord_connection,

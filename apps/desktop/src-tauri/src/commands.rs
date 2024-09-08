@@ -1,10 +1,7 @@
 use serde::Serialize;
 use tauri::{Manager, State};
 
-use crate::{
-	state::WrappedState,
-	utils::discord::{DiscordIntegrationError, StumpDiscordPresence},
-};
+use crate::{state::WrappedState, utils::discord::DiscordIntegrationError};
 
 /// An error type for the desktop RPC commands.
 #[derive(Debug, Serialize, thiserror::Error)]
@@ -29,7 +26,7 @@ pub fn set_use_discord_connection(
 
 	if connect {
 		discord_client.connect();
-		discord_client.set_defaults();
+		discord_client.set_defaults()?;
 	} else if !connect {
 		discord_client.shutdown()?;
 	}

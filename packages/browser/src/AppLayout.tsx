@@ -11,7 +11,6 @@ import BackgroundFetchIndicator from '@/components/BackgroundFetchIndicator'
 import JobOverlay from '@/components/jobs/JobOverlay'
 import { MobileTopBar, SideBar, TopBar } from '@/components/navigation'
 import RouteLoadingIndicator from '@/components/RouteLoadingIndicator'
-import ServerStatusOverlay from '@/components/ServerStatusOverlay'
 
 import { AppContext, PermissionEnforcerOptions } from './context'
 import { useAppStore, useUserStore } from './stores'
@@ -22,14 +21,12 @@ export function AppLayout() {
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const windowSize = useWindowSize()
 
-	const { platform, showConfetti, setShowConfetti, onConnectionWithServerChanged } = useAppStore(
-		(state) => ({
-			onConnectionWithServerChanged: state.setIsConnectedWithServer,
-			platform: state.platform,
-			setShowConfetti: state.setShowConfetti,
-			showConfetti: state.showConfetti,
-		}),
-	)
+	const { showConfetti, setShowConfetti, onConnectionWithServerChanged } = useAppStore((state) => ({
+		onConnectionWithServerChanged: state.setIsConnectedWithServer,
+		platform: state.platform,
+		setShowConfetti: state.setShowConfetti,
+		showConfetti: state.showConfetti,
+	}))
 	const { storeUser, setUser, checkUserPermission } = useUserStore((state) => ({
 		checkUserPermission: state.checkUserPermission,
 		setUser: state.setUser,
@@ -165,7 +162,7 @@ export function AppLayout() {
 					</main>
 				</div>
 
-				{platform !== 'browser' && <ServerStatusOverlay />}
+				{/* {platform !== 'browser' && <ServerStatusOverlay />} */}
 				{!location.pathname.match(/\/settings\/jobs/) && <JobOverlay />}
 			</Suspense>
 		</AppContext.Provider>

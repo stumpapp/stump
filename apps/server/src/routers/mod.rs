@@ -7,6 +7,7 @@ mod opds;
 mod spa;
 mod sse;
 mod utoipa;
+#[allow(dead_code)]
 mod ws;
 
 pub(crate) use api::v1::auth::enforce_max_sessions;

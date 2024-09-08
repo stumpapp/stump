@@ -39,8 +39,8 @@ impl StumpDiscordPresence {
 		})
 	}
 
-	pub fn set_defaults(&mut self) {
-		self.set_presence(None, None);
+	pub fn set_defaults(&mut self) -> Result<(), DiscordIntegrationError> {
+		self.set_presence(None, None)
 	}
 
 	pub fn connect(&mut self) {

@@ -1,4 +1,6 @@
-use crate::{commands::DeskopRPCError, utils::discord::DiscordIntegrationError};
+use crate::{
+	commands::DeskopRPCError, store::StoreError, utils::discord::DiscordIntegrationError,
+};
 
 #[derive(Debug, thiserror::Error)]
 pub enum DesktopError {
@@ -6,4 +8,6 @@ pub enum DesktopError {
 	RPCError(#[from] DeskopRPCError),
 	#[error("{0}")]
 	DiscordError(#[from] DiscordIntegrationError),
+	#[error("{0}")]
+	StoreError(#[from] StoreError),
 }

@@ -22,11 +22,14 @@ export function AppLayout() {
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const windowSize = useWindowSize()
 
-	const { platform, showConfetti, setShowConfetti } = useAppStore((state) => ({
-		platform: state.platform,
-		setShowConfetti: state.setShowConfetti,
-		showConfetti: state.showConfetti,
-	}))
+	const { platform, showConfetti, setShowConfetti, onConnectionWithServerChanged } = useAppStore(
+		(state) => ({
+			onConnectionWithServerChanged: state.setIsConnectedWithServer,
+			platform: state.platform,
+			setShowConfetti: state.setShowConfetti,
+			showConfetti: state.showConfetti,
+		}),
+	)
 	const { storeUser, setUser, checkUserPermission } = useUserStore((state) => ({
 		checkUserPermission: state.checkUserPermission,
 		setUser: state.setUser,
@@ -80,7 +83,7 @@ export function AppLayout() {
 	const hideSidebar = hideAllNavigation || preferTopBar
 	const hideTopBar = isMobile || hideAllNavigation || !preferTopBar
 
-	useCoreEventHandler({ liveRefetch })
+	useCoreEventHandler({ liveRefetch, onConnectionWithServerChanged })
 
 	/**
 	 * A callback to enforce a permission on the currently logged in user.

@@ -48,11 +48,9 @@ export default function DiscordPresenceSwitch() {
 	return (
 		<div className="flex max-w-2xl items-center justify-between py-6 ">
 			<div className="flex flex-grow flex-col gap-2 text-left">
-				<Label htmlFor="discord_presence_switch">
-					{t('settingsScene.desktop.discordPresence.label')}
-				</Label>
+				<Label htmlFor="discord_presence_switch">{t(getKey('label'))}</Label>
 				<Text size="xs" variant="muted">
-					{t('settingsScene.desktop.discordPresence.description')}
+					{t(getKey('description'))}
 				</Text>
 			</div>
 
@@ -67,10 +65,7 @@ export default function DiscordPresenceSwitch() {
 					primaryRing
 				/>
 
-				<ToolTip
-					content={t('settingsScene.desktop.discordPresence.reconnect')}
-					isDisabled={!isChecked || !handleReconnect}
-				>
+				<ToolTip content={t(getKey('reconnect'))} isDisabled={!isChecked || !handleReconnect}>
 					<IconButton variant="ghost" size="xs" disabled={!isChecked || !handleReconnect}>
 						<RefreshCcw className="h-4 w-4" />
 					</IconButton>
@@ -79,3 +74,6 @@ export default function DiscordPresenceSwitch() {
 		</div>
 	)
 }
+
+const LOCALE_KEY = 'settingsScene.app/desktop.sections.discordPresence'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`

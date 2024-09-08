@@ -7271,6 +7271,7 @@ dependencies = [
  "stump_server",
  "tauri",
  "tauri-build",
+ "thiserror",
  "tracing",
 ]
 

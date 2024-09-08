@@ -22,7 +22,7 @@
 		"web": "yarn workspace @stump/web",
 		"docs": "yarn workspace @stump/docs",
 		"server": "yarn workspace @stump/server",
-		"start:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"yarn run server start\" \"yarn desktop start\"",
+		"start:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"cargo run -p stump_server\" \"yarn desktop start\"",
 		"dev:web": "concurrently -n server,web -c green.bold,blue.bold \"yarn run server dev\" \"yarn web dev\"",
 		"dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"yarn run server dev\" \"yarn expo dev\"",
 		"core": "yarn workspace @stump/core",

@@ -5,13 +5,11 @@ import useWebSocket, { ReadyState } from 'react-use-websocket'
 
 interface Props {
 	onEvent(event: CoreEvent): void
+	onConnectionWithServerChanged?: (connected: boolean) => void
 }
 
-export function useStumpWs({ onEvent }: Props) {
+export function useStumpWs({ onEvent, onConnectionWithServerChanged }: Props) {
 	const URI = API?.getUri()
-
-	// TODO: different state for WS connection state...
-	// const { onConnectionWithServerChanged } = useClientContext()
 
 	const socketUrl = useMemo(() => {
 		let url = URI
@@ -38,12 +36,12 @@ export function useStumpWs({ onEvent }: Props) {
 
 	function handleOpen() {
 		console.debug('Websocket connected')
-		// onConnectionWithServerChanged?.(true)
+		onConnectionWithServerChanged?.(true)
 	}
 
 	function handleClose() {
 		console.debug('Websocket closed')
-		// onConnectionWithServerChanged?.(false)
+		onConnectionWithServerChanged?.(false)
 	}
 
 	const { readyState } = useWebSocket(socketUrl, {

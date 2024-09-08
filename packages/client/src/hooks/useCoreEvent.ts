@@ -11,9 +11,10 @@ import { useStumpWs } from './useStumpWs'
 
 type Params = {
 	liveRefetch?: boolean
+	onConnectionWithServerChanged?: (connected: boolean) => void
 }
 
-export function useCoreEventHandler({ liveRefetch }: Params = {}) {
+export function useCoreEventHandler({ liveRefetch, onConnectionWithServerChanged }: Params = {}) {
 	const { addJob, upsertJob, removeJob } = useJobStore((state) => ({
 		addJob: state.addJob,
 		removeJob: state.removeJob,
@@ -71,7 +72,7 @@ export function useCoreEventHandler({ liveRefetch }: Params = {}) {
 		}
 	}
 
-	useStumpWs({ onEvent: handleCoreEvent })
+	useStumpWs({ onConnectionWithServerChanged, onEvent: handleCoreEvent })
 }
 
 // const patchRecentlyAddedBooks = (books: Media[]) => {

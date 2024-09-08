@@ -7,11 +7,13 @@
 // TODO: https://tauri.app/v1/guides/features/menu
 
 mod commands;
+mod error;
+mod state;
 mod utils;
 
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
-use utils::discord::StumpDiscordPresence;
+use state::AppState;
 
 use commands::{close_splashscreen, set_discord_presence, set_use_discord_connection};
 
@@ -39,8 +41,10 @@ fn main() {
 		});
 	}
 
+	let app_state = AppState::new().expect("Failed to initialize application state");
+
 	tauri::Builder::default()
-		.manage(Mutex::new(StumpDiscordPresence::new()))
+		.manage(Arc::new(Mutex::new(app_state)))
 		.invoke_handler(tauri::generate_handler![
 			set_use_discord_connection,
 			set_discord_presence,

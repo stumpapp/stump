@@ -1,40 +1,43 @@
-const STUMP_ICON: &str = "https://raw.githubusercontent.com/aaronleopold/stump/develop/docs/public/favicon.png";
-
 use discord_rich_presence::{
 	activity::{self, Assets},
 	DiscordIpc, DiscordIpcClient,
 };
+use serde::Serialize;
 
-// TODO: error handling, don't want to panic application when discord presence fails...
+const STUMP_ICON: &str = "https://raw.githubusercontent.com/aaronleopold/stump/develop/docs/public/favicon.png";
+const IPC_ID: &str = "1022185766677389392";
+
+#[derive(Debug, Serialize, thiserror::Error)]
+pub enum DiscordIntegrationError {
+	#[error("Failed to initialize Discord IPC client: {0}")]
+	InitializationError(String),
+	#[error("Failed to shutdown Discord IPC client: {0}")]
+	ShutdownError(String),
+	#[error("Failed to update Discord presence")]
+	SetPresenceFailed,
+	#[error("Attempted an operation without an active connection")]
+	NotConnected,
+}
+
+/// A struct for managing Discord Rich Presence.
 pub struct StumpDiscordPresence {
+	/// Whether the Discord IPC client is connected.
 	is_connected: bool,
+	/// The Discord IPC client.
 	client: DiscordIpcClient,
 }
 
 impl StumpDiscordPresence {
-	pub fn new() -> Self {
-		let client = DiscordIpcClient::new("1022185766677389392")
-			.expect("Failed to create Discord IPC client");
+	pub fn new() -> Result<Self, DiscordIntegrationError> {
+		let client = DiscordIpcClient::new(IPC_ID).map_err(|err| {
+			DiscordIntegrationError::InitializationError(err.to_string())
+		})?;
 
-		Self {
+		Ok(Self {
 			client,
 			is_connected: false,
-		}
+		})
 	}
-
-	// pub fn init() -> Result<Self, String> {
-	// 	let mut client = DiscordIpcClient::new("1022185766677389392")
-	// 		.map_err(|e| format!("Failed to create Discord IPC client: {}", e))?;
-
-	// 	client
-	// 		.connect()
-	// 		.map_err(|e| format!("Failed to connect to Discord IPC client: {}", e))?;
-
-	// 	Ok(Self {
-	// 		client,
-	// 		is_connected: true,
-	// 	})
-	// }
 
 	pub fn set_defaults(&mut self) {
 		self.set_presence(None, None);
@@ -50,9 +53,13 @@ impl StumpDiscordPresence {
 		// .expect("Failed to connect to Discord IPC");
 	}
 
-	pub fn set_presence(&mut self, state: Option<&str>, details: Option<&str>) {
+	pub fn set_presence(
+		&mut self,
+		state: Option<&str>,
+		details: Option<&str>,
+	) -> Result<(), DiscordIntegrationError> {
 		if !self.is_connected {
-			return;
+			return Err(DiscordIntegrationError::NotConnected);
 		}
 
 		let mut activity =
@@ -68,7 +75,9 @@ impl StumpDiscordPresence {
 
 		self.client
 			.set_activity(activity)
-			.expect("Failed to set Discord presence");
+			.map_err(|_| DiscordIntegrationError::SetPresenceFailed)?;
+
+		Ok(())
 	}
 
 	// pub fn clear_presence(&mut self) {
@@ -81,16 +90,17 @@ impl StumpDiscordPresence {
 	// 		.expect("Failed to clear Discord presence");
 	// }
 
-	pub fn shutdown(&mut self) {
+	pub fn shutdown(&mut self) -> Result<(), DiscordIntegrationError> {
 		if !self.is_connected {
-			return;
+			return Ok(());
 		}
 
 		self.client
 			.close()
-			.expect("Failed to close Discord IPC client");
-
+			.map_err(|err| DiscordIntegrationError::ShutdownError(err.to_string()))?;
 		self.is_connected = false;
+
+		Ok(())
 	}
 
 	pub fn is_connected(&self) -> bool {

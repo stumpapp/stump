@@ -7,23 +7,16 @@ license = "MIT"
 edition = "2021"
 
 [build-dependencies]
-tauri-build = { version = "1.2.1", features = [] }
+tauri-build = { version = "1.5.4", features = [] }
 
 [dependencies]
 stump_server = { path = "../../server", optional = true }
-
-# https://github.com/tauri-apps/tauri/issues/5070 -> Once I upgrade Tauri, the workspace inheritance bug will be fixed
-# serde_json = { workspace = true }
-# serde = { workspace = true }
-serde = { version = "1.0.188", features = ["derive"] }
-serde_json = "1.0.107"
-thiserror = "1.0.63"
-
-tauri = { version = "1.2.5", features = ["api-all", "devtools"] }
-
-### MISC ###
 discord-rich-presence = "0.2.3"
-tracing = { version = "0.1.37", optional = true}
+serde_json = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+tauri = { version = "1.7.2", features = ["api-all", "devtools"] }
+tracing = { workspace = true }
 
 
 [features]
@@ -35,4 +28,4 @@ default = [ "custom-protocol" ]
 custom-protocol = [ "tauri/custom-protocol" ]
 # This feature will bundle the Stump server with the desktop app, allowing the user to use the desktop app
 # as their dedicated server instance.
-bundled-server = [ "dep:stump_server", "dep:tracing" ] 
+bundled-server = [ "dep:stump_server" ] 

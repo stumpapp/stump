@@ -1,9 +1,10 @@
-use std::sync::Mutex;
-
 use serde::Serialize;
-use tauri::Manager;
+use tauri::{Manager, State};
 
-use crate::utils::discord::StumpDiscordPresence;
+use crate::{
+	state::WrappedState,
+	utils::discord::{DiscordIntegrationError, StumpDiscordPresence},
+};
 
 /// An error type for the desktop RPC commands.
 #[derive(Debug, Serialize, thiserror::Error)]
@@ -14,20 +15,23 @@ pub enum DeskopRPCError {
 	WindowOperationFailed,
 	#[error("Window not found")]
 	WindowMissing,
+	#[error("{0}")]
+	DiscordError(#[from] DiscordIntegrationError),
 }
 
 #[tauri::command]
 pub fn set_use_discord_connection(
 	connect: bool,
-	state: tauri::State<Mutex<StumpDiscordPresence>>,
+	ctx: State<WrappedState>,
 ) -> Result<(), DeskopRPCError> {
-	let mut client = state.lock().map_err(|_| DeskopRPCError::MutexPoisoned)?;
+	let mut state = ctx.lock().map_err(|_| DeskopRPCError::MutexPoisoned)?;
+	let discord_client = &mut state.discord_client;
 
-	if connect && !client.is_connected() {
-		client.connect();
-		client.set_defaults();
-	} else if !connect && client.is_connected() {
-		client.shutdown();
+	if connect {
+		discord_client.connect();
+		discord_client.set_defaults();
+	} else if !connect {
+		discord_client.shutdown()?;
 	}
 
 	Ok(())
@@ -37,12 +41,13 @@ pub fn set_use_discord_connection(
 pub fn set_discord_presence(
 	status: Option<String>,
 	details: Option<String>,
-	state: tauri::State<Mutex<StumpDiscordPresence>>,
+	state: State<WrappedState>,
 ) -> Result<(), DeskopRPCError> {
-	let mut client = state.lock().map_err(|_| DeskopRPCError::MutexPoisoned)?;
+	let mut state = state.lock().map_err(|_| DeskopRPCError::MutexPoisoned)?;
+	let discord_client = &mut state.discord_client;
 
-	if client.is_connected() {
-		client.set_presence(status.as_deref(), details.as_deref());
+	if discord_client.is_connected() {
+		discord_client.set_presence(status.as_deref(), details.as_deref())?;
 	}
 
 	Ok(())

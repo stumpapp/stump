@@ -720,6 +720,16 @@
 					},
 					"switchToServer": {
 						"tooltip": "Switch to server"
+					},
+					"resetConfiguration": {
+						"label": "Delete all servers",
+						"description": [
+							"Delete all configured servers from the desktop application",
+							"This action cannot be undone"
+						],
+						"confirmation": {
+							"trigger": "Delete all servers"
+						}
 					}
 				},
 				"optionalFeatures": {

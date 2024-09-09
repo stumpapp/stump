@@ -6,10 +6,11 @@ import React, { useCallback, useState } from 'react'
 import { useTauriStore } from '@/stores'
 
 import ConfiguredServer from './ConfiguredServer'
+import ResetConfiguredServersSection from './ResetConfiguredServersSection'
 
 export default function ConfiguredServersSection() {
 	const { t } = useLocaleContext()
-	const { connected_servers, active_server, editServer, removeServer } = useTauriStore()
+	const { connected_servers, active_server, editServer, removeServer, resetStore } = useTauriStore()
 
 	const [editingServer, setEditingServer] = useState<SavedServer | null>(null)
 	const [deletingServer, setDeletingServer] = useState<SavedServer | null>(null)
@@ -36,9 +37,13 @@ export default function ConfiguredServersSection() {
 		}
 	}, [deletingServer, removeServer])
 
+	const onDeleteAllServers = useCallback(async () => {
+		await resetStore()
+	}, [resetStore])
+
 	// TODO(desktop): Implement server editing and deletion
 	return (
-		<div className="flex flex-col gap-y-4">
+		<div className="flex flex-col gap-y-6">
 			<div>
 				<Heading size="sm">{t(getKey('label'))}</Heading>
 				<Text variant="muted" size="sm">
@@ -57,6 +62,8 @@ export default function ConfiguredServersSection() {
 					/>
 				))}
 			</Card>
+
+			<ResetConfiguredServersSection onConfirmReset={onDeleteAllServers} />
 		</div>
 	)
 }

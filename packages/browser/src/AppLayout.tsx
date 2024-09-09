@@ -2,7 +2,8 @@ import { isAxiosError } from '@stump/api'
 import { useAuthQuery, useCoreEventHandler } from '@stump/client'
 import { cn, cx } from '@stump/components'
 import { UserPermission, UserPreferences } from '@stump/types'
-import { Suspense, useCallback, useMemo } from 'react'
+import { useOverlayScrollbars } from 'overlayscrollbars-react'
+import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
 import Confetti from 'react-confetti'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useMediaMatch, useWindowSize } from 'rooks'
@@ -13,11 +14,14 @@ import { MobileTopBar, SideBar, TopBar } from '@/components/navigation'
 import RouteLoadingIndicator from '@/components/RouteLoadingIndicator'
 
 import { AppContext, PermissionEnforcerOptions } from './context'
+import { useTheme } from './hooks'
 import { useAppStore, useUserStore } from './stores'
 
 export function AppLayout() {
 	const location = useLocation()
 	const navigate = useNavigate()
+
+	const mainRef = useRef<HTMLDivElement>(null)
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const windowSize = useWindowSize()
 
@@ -32,6 +36,27 @@ export function AppLayout() {
 		setUser: state.setUser,
 		storeUser: state.user,
 	}))
+
+	const { isDarkVariant } = useTheme()
+	const [initialize] = useOverlayScrollbars({
+		options: {
+			scrollbars: {
+				theme: isDarkVariant ? 'os-theme-light' : 'os-theme-dark',
+			},
+		},
+	})
+
+	// TODO: make this only on desktop?
+	const isRefSet = !!mainRef.current
+	/**
+	 * An effect to initialize the overlay scrollbars
+	 */
+	useEffect(() => {
+		const { current: scrollContainer } = mainRef
+		if (scrollContainer) {
+			initialize(scrollContainer)
+		}
+	}, [initialize, isRefSet])
 
 	/**
 	 * If the user prefers the top bar, we hide the sidebar
@@ -152,6 +177,7 @@ export function AppLayout() {
 								'scrollbar-hide': storeUser.user_preferences?.enable_hide_scrollbar,
 							},
 						)}
+						ref={mainRef}
 					>
 						<div className="relative flex flex-1 flex-col">
 							{!!storeUser.user_preferences?.show_query_indicator && <BackgroundFetchIndicator />}

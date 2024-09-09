@@ -38,6 +38,19 @@ export const useTauriStore = () => {
 	const store = useLocalStore()
 
 	/**
+	 * An effect to save the store to disk whenever it changes. This is a bit overly
+	 * cautious because of the following snippet from the docs:
+	 *
+	 * > As the store is only persisted to disk before the apps exit, changes might be lost in a crash.
+	 * > This method lets you persist the store to disk whenever you deem necessary.
+	 *
+	 * @see {@link Store.save}
+	 */
+	useEffect(() => {
+		STORE.save().catch((e) => console.error('Failed to save store', e))
+	}, [store])
+
+	/**
 	 * An effect to load the store from disk on mount and sync it with the local store
 	 */
 	useEffect(
@@ -127,6 +140,16 @@ export const useTauriStore = () => {
 	)
 
 	/**
+	 * Reset the store, deleting all connected servers and the active server.
+	 */
+	const resetStore = useCallback(async () => {
+		await STORE.clear()
+		store.set({
+			active_server: undefined,
+			connected_servers: [],
+		})
+	}, [store])
+	/**
 	 * Set the active server
 	 *
 	 * @param name The name of the server to set as active
@@ -146,6 +169,7 @@ export const useTauriStore = () => {
 		addServer,
 		editServer,
 		removeServer,
+		resetStore,
 		setActiveServer,
 	}
 }

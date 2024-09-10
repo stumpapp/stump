@@ -17,6 +17,7 @@ type LocalStore = DesktopAppStore & {
  */
 const useLocalStore = create<LocalStore>()((set) => ({
 	connected_servers: [],
+	run_bundled_server: true,
 	set: (partial) => set((state) => ({ ...state, ...partial })),
 }))
 
@@ -114,10 +115,12 @@ export const useTauriStore = () => {
 			if (!existingServer) {
 				return
 			}
+			const isActiveServer = store.active_server?.name === originalName
 			const newServers = store.connected_servers.map((s) => (s.name === originalName ? server : s))
 			await STORE.set('connected_servers', newServers)
 			store.set({
 				connected_servers: newServers,
+				...(isActiveServer ? { active_server: server } : {}),
 			})
 		},
 		[store],
@@ -163,6 +166,18 @@ export const useTauriStore = () => {
 		},
 		[store],
 	)
+	/**
+	 * Set whether to run the bundled server or not
+	 */
+	const setRunBundledServer = useCallback(
+		async (value: boolean) => {
+			await STORE.set('run_bundled_server', value)
+			store.set({
+				run_bundled_server: value,
+			})
+		},
+		[store],
+	)
 
 	return {
 		...store,
@@ -171,5 +186,6 @@ export const useTauriStore = () => {
 		removeServer,
 		resetStore,
 		setActiveServer,
+		setRunBundledServer,
 	}
 }

@@ -9,13 +9,12 @@ use super::saved_server::SavedServer;
 pub enum StoreError {
 	#[error("Failed to load store")]
 	StoreLoadError,
-	#[error("Failed to save store")]
-	StoreSaveError,
 }
 
 #[derive(Serialize, Type)]
 #[serde(rename = "DesktopAppStore")]
 pub struct AppStore {
+	pub run_bundled_server: bool,
 	#[specta(optional)]
 	active_server: Option<SavedServer>,
 	connected_servers: Vec<SavedServer>,
@@ -52,9 +51,16 @@ impl AppStore {
 			.map(SavedServer::from_vec)
 			.unwrap_or_default();
 
+		let run_bundled_server = store
+			.get("run_bundled_server")
+			.cloned()
+			.and_then(|s| s.as_bool())
+			.unwrap_or(true);
+
 		Ok(Self {
 			active_server,
 			connected_servers,
+			run_bundled_server,
 		})
 	}
 }

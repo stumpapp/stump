@@ -422,5 +422,5 @@ export type CreateOrUpdateSmartListView = ({ book_columns: ReactTableColumnSort[
 
 export type SavedServer = { name: string; uri: string }
 
-export type DesktopAppStore = { active_server?: SavedServer | null; connected_servers: SavedServer[] }
+export type DesktopAppStore = { run_bundled_server: boolean; active_server?: SavedServer | null; connected_servers: SavedServer[] }
 

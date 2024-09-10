@@ -781,7 +781,7 @@
 					"description": "Manage the optional features unique to the desktop application",
 					"bundledServer": {
 						"label": "Bundled server",
-						"description": "Run the bundled server in the background while the desktop application is running"
+						"description": "Run the bundled server in the background while the desktop application is running (requires restart)"
 					},
 					"discordPresence": {
 						"label": "Discord Presence",

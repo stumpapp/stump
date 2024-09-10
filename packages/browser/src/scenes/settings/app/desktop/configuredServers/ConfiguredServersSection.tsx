@@ -5,7 +5,7 @@ import { SavedServer } from '@stump/types'
 import React, { useCallback, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
-import { useTauriStore, useUserStore } from '@/stores'
+import { useAppStore, useTauriStore, useUserStore } from '@/stores'
 
 import AddServerModal from './AddServerModal'
 import ConfiguredServer from './ConfiguredServer'
@@ -29,6 +29,7 @@ export default function ConfiguredServersSection() {
 		resetStore,
 	} = useTauriStore()
 
+	const setBaseURL = useAppStore((state) => state.setBaseUrl)
 	const setUser = useUserStore((state) => state.setUser)
 	const { logout } = useLogout({
 		removeStoreUser: () => setUser(null),
@@ -56,11 +57,16 @@ export default function ConfiguredServersSection() {
 	const onEditServer = useCallback(
 		async (updates: SavedServer) => {
 			if (editingServer) {
+				const swapURL = editingServer.uri !== updates.uri
 				await editServer(editingServer.name, updates)
 				setEditingServer(null)
+				// TODO(desktop): check if re-auth is needed
+				if (swapURL) {
+					setBaseURL(updates.uri)
+				}
 			}
 		},
-		[editingServer, editServer],
+		[editingServer, editServer, setBaseURL],
 	)
 	/**
 	 * A callback to delete a server from the list of connected servers

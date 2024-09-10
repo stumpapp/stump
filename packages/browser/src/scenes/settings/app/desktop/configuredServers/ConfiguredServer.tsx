@@ -21,9 +21,13 @@ type Props = {
 	 * A callback to trigger the delete confirmation modal to render
 	 */
 	onDelete: () => void
+	/**
+	 * A callback to trigger the switch confirmation modal to render
+	 */
+	onSwitch: () => void
 }
 
-export default function ConfiguredServer({ server, isActive }: Props) {
+export default function ConfiguredServer({ server, isActive, onEdit, onDelete, onSwitch }: Props) {
 	const { t } = useLocaleContext()
 
 	return (
@@ -43,20 +47,20 @@ export default function ConfiguredServer({ server, isActive }: Props) {
 			<div className="flex items-center space-x-1.5 opacity-90 group-hover:opacity-100">
 				{!isActive && (
 					<ToolTip content={t(getKey('switchToServer.tooltip'))}>
-						<IconButton size="xs">
+						<IconButton size="xs" onClick={onSwitch}>
 							<Power className="h-4 w-4" />
 						</IconButton>
 					</ToolTip>
 				)}
 
 				<ToolTip content={t(getKey('editServer.tooltip'))} align="end">
-					<IconButton size="xs">
+					<IconButton size="xs" onClick={onEdit}>
 						<Settings2 className="h-4 w-4" />
 					</IconButton>
 				</ToolTip>
 
 				<ToolTip content={t(getKey('deleteServer.tooltip'))} align="end">
-					<IconButton size="xs">
+					<IconButton size="xs" onClick={onDelete}>
 						<Trash2 className="h-4 w-4" />
 					</IconButton>
 				</ToolTip>

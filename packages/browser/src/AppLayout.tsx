@@ -38,7 +38,7 @@ export function AppLayout() {
 	}))
 
 	const { isDarkVariant } = useTheme()
-	const [initialize] = useOverlayScrollbars({
+	const [initialize, instance] = useOverlayScrollbars({
 		options: {
 			scrollbars: {
 				theme: isDarkVariant ? 'os-theme-light' : 'os-theme-dark',
@@ -46,17 +46,34 @@ export function AppLayout() {
 		},
 	})
 
-	// TODO: make this only on desktop?
+	const hideScrollBar = storeUser?.user_preferences?.enable_hide_scrollbar ?? false
 	const isRefSet = !!mainRef.current
 	/**
 	 * An effect to initialize the overlay scrollbars
 	 */
 	useEffect(() => {
+		// TODO: make this only on desktop? or a setting for 'pretty' scrollbars
 		const { current: scrollContainer } = mainRef
-		if (scrollContainer) {
+		if (scrollContainer && !hideScrollBar) {
 			initialize(scrollContainer)
 		}
-	}, [initialize, isRefSet])
+	}, [initialize, isRefSet, hideScrollBar])
+	/**
+	 * An effect to find the added viewport element and add the necessary flexbox classes
+	 * in order to not break the layout of children elements. This is because overlayscrollbars
+	 * will append a new element to the DOM to handle the scrolling
+	 */
+	useEffect(() => {
+		const viewport = instance()?.elements().viewport
+		if (!viewport) {
+			return
+		}
+
+		const isFlexed = viewport.classList.contains('flex') && viewport.classList.contains('flex-1')
+		if (!isFlexed) {
+			viewport.classList.add('flex', 'flex-1')
+		}
+	}, [instance, isRefSet])
 
 	/**
 	 * If the user prefers the top bar, we hide the sidebar

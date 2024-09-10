@@ -85,3 +85,18 @@ export function useLoginOrRegister({ onSuccess, onError }: UseLoginOrRegisterOpt
 		registerUser,
 	}
 }
+
+type UseLogoutParams = {
+	removeStoreUser?: () => void
+}
+
+export function useLogout({ removeStoreUser }: UseLogoutParams = {}) {
+	const { mutateAsync: logout, isLoading } = useMutation([authQueryKeys.logout], authApi.logout, {
+		onSuccess: () => {
+			queryClient.clear()
+			removeStoreUser?.()
+		},
+	})
+
+	return { isLoggingOut: isLoading, logout }
+}

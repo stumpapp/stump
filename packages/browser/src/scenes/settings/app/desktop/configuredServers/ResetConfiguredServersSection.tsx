@@ -1,15 +1,14 @@
-import { Button, Heading, Text } from '@stump/components'
+import { Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React, { useState } from 'react'
+
+import ResetConfigurationConfirmation from './ResetConfigurationConfirmation'
 
 type Props = {
-	onConfirmReset: () => void
+	onConfirmReset: () => Promise<void>
 }
 
 export default function ResetConfiguredServersSection({ onConfirmReset }: Props) {
 	const { t } = useLocaleContext()
-
-	const [showConfirmation, setShowConfirmation] = useState(false)
 
 	return (
 		<div className="flex flex-col space-y-4">
@@ -20,18 +19,7 @@ export default function ResetConfiguredServersSection({ onConfirmReset }: Props)
 				</Text>
 			</div>
 
-			{/* TODO: confirmation modal */}
-			<div>
-				<Button
-					type="button"
-					variant="danger"
-					onClick={onConfirmReset}
-					className="flex-shrink-0"
-					size="md"
-				>
-					{t(getKey('confirmation.trigger'))}
-				</Button>
-			</div>
+			<ResetConfigurationConfirmation onConfirmReset={onConfirmReset} />
 		</div>
 	)
 }

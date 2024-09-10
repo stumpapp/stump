@@ -47,7 +47,7 @@ export default function DiscordPresenceSwitch() {
 	const isChecked = userPreferences?.enable_discord_presence ?? false
 
 	return (
-		<div className="flex max-w-2xl items-center justify-between py-6 ">
+		<div className="flex items-center justify-between">
 			<div className="flex flex-grow flex-col gap-2 text-left">
 				<Label htmlFor="discord_presence_switch">{t(getKey('label'))}</Label>
 				<Text size="xs" variant="muted">
@@ -58,18 +58,22 @@ export default function DiscordPresenceSwitch() {
 			<div className="w-6" />
 
 			<div className="flex items-center gap-3">
+				<ToolTip
+					content={t(getKey('reconnect'))}
+					isDisabled={!isChecked || !handleReconnect}
+					align="end"
+				>
+					<IconButton variant="ghost" size="xs" disabled={!isChecked || !handleReconnect}>
+						<RefreshCcw className="h-4 w-4" />
+					</IconButton>
+				</ToolTip>
+
 				<RawSwitch
 					id="discord_presence_switch"
 					checked={isChecked}
 					onClick={toggleDiscordPresence}
 					variant="primary"
 				/>
-
-				<ToolTip content={t(getKey('reconnect'))} isDisabled={!isChecked || !handleReconnect}>
-					<IconButton variant="ghost" size="xs" disabled={!isChecked || !handleReconnect}>
-						<RefreshCcw className="h-4 w-4" />
-					</IconButton>
-				</ToolTip>
 			</div>
 		</div>
 	)

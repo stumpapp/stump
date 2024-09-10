@@ -1,20 +1,55 @@
+import { useLogout } from '@stump/client'
 import { Card, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { SavedServer } from '@stump/types'
 import React, { useCallback, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router'
 
-import { useTauriStore } from '@/stores'
+import { useTauriStore, useUserStore } from '@/stores'
 
+import AddServerModal from './AddServerModal'
 import ConfiguredServer from './ConfiguredServer'
+import DeleteServerConfirmation from './DeleteServerConfirmation'
+import EditServerModal from './EditServerModal'
 import ResetConfiguredServersSection from './ResetConfiguredServersSection'
+import SwitchToServerConfirmation from './SwitchToServerConfirmation'
 
 export default function ConfiguredServersSection() {
+	const location = useLocation()
+	const navigate = useNavigate()
+
 	const { t } = useLocaleContext()
-	const { connected_servers, active_server, editServer, removeServer, resetStore } = useTauriStore()
+	const {
+		connected_servers,
+		active_server,
+		setActiveServer,
+		addServer,
+		editServer,
+		removeServer,
+		resetStore,
+	} = useTauriStore()
+
+	const setUser = useUserStore((state) => state.setUser)
+	const { logout } = useLogout({
+		removeStoreUser: () => setUser(null),
+	})
 
 	const [editingServer, setEditingServer] = useState<SavedServer | null>(null)
 	const [deletingServer, setDeletingServer] = useState<SavedServer | null>(null)
+	const [switchingServer, setSwitchingServer] = useState<SavedServer | null>(null)
 
+	/**
+	 * A callback to create a new server in the list of connected servers. Note that this
+	 * will not auto-connect to the server.
+	 *
+	 * @param server The server to create
+	 */
+	const onCreateServer = useCallback(
+		async (server: SavedServer) => {
+			await addServer(server)
+		},
+		[addServer],
+	)
 	/**
 	 * A callback to edit a server in the list of connected servers
 	 */
@@ -36,35 +71,79 @@ export default function ConfiguredServersSection() {
 			setDeletingServer(null)
 		}
 	}, [deletingServer, removeServer])
-
+	/**
+	 * A callback to delete all servers from the list of connected servers
+	 */
 	const onDeleteAllServers = useCallback(async () => {
 		await resetStore()
-	}, [resetStore])
+		await logout()
+		navigate('/auth')
+	}, [resetStore, logout, navigate])
+	/**
+	 * A callback to switch to a server in the list of connected servers, which will
+	 * logout the user and redirect them to the auth page to authenticate with the selected
+	 * server.
+	 */
+	const onSwitchToServer = useCallback(async () => {
+		if (switchingServer) {
+			const returnTo = location.pathname
+			await logout()
+			await setActiveServer(switchingServer.name)
+			navigate('/auth', { state: { from: returnTo } })
+		}
+	}, [switchingServer, setActiveServer, logout, location.pathname, navigate])
 
-	// TODO(desktop): Implement server editing and deletion
 	return (
-		<div className="flex flex-col gap-y-6">
-			<div>
-				<Heading size="sm">{t(getKey('label'))}</Heading>
-				<Text variant="muted" size="sm">
-					{t(getKey('description'))}
-				</Text>
+		<>
+			<SwitchToServerConfirmation
+				server={switchingServer}
+				onCancel={() => setSwitchingServer(null)}
+				onConfirm={onSwitchToServer}
+			/>
+
+			<EditServerModal
+				editingServer={editingServer}
+				existingServers={connected_servers}
+				onEditServer={onEditServer}
+				onCancel={() => setEditingServer(null)}
+			/>
+
+			<DeleteServerConfirmation
+				isOpen={!!deletingServer}
+				onClose={() => setDeletingServer(null)}
+				onConfirm={onDeleteServer}
+				isLastServer={connected_servers.length === 1}
+				isActiveServer={deletingServer?.name === active_server?.name}
+			/>
+
+			<div className="flex flex-col gap-y-6">
+				<div className="flex items-end justify-between">
+					<div>
+						<Heading size="sm">{t(getKey('label'))}</Heading>
+						<Text variant="muted" size="sm">
+							{t(getKey('description'))}
+						</Text>
+					</div>
+
+					<AddServerModal existingServers={connected_servers} onCreateServer={onCreateServer} />
+				</div>
+
+				<Card className="flex flex-col bg-background-surface p-4">
+					{connected_servers.map((server) => (
+						<ConfiguredServer
+							key={`configured-server-${server.name}_${server.uri}`}
+							server={server}
+							isActive={server.name === active_server?.name}
+							onEdit={() => setEditingServer(server)}
+							onDelete={() => setDeletingServer(server)}
+							onSwitch={() => setSwitchingServer(server)}
+						/>
+					))}
+				</Card>
+
+				<ResetConfiguredServersSection onConfirmReset={onDeleteAllServers} />
 			</div>
-
-			<Card className="flex flex-col bg-background-surface p-4">
-				{connected_servers.map((server) => (
-					<ConfiguredServer
-						key={`configured-server-${server.name}_${server.uri}`}
-						server={server}
-						isActive={server.name === active_server?.name}
-						onEdit={() => setEditingServer(server)}
-						onDelete={() => setDeletingServer(server)}
-					/>
-				))}
-			</Card>
-
-			<ResetConfiguredServersSection onConfirmReset={onDeleteAllServers} />
-		</div>
+		</>
 	)
 }
 

@@ -17,7 +17,7 @@ type Props = {
 	rootPath: string
 }
 
-// TODO: fix scrolling issues after adjusting scene container...
+// TODO: refactor to match other explore scenes, e.g. sticky header + fixed footer + window scrolling
 
 export default function FileExplorerProvider({ rootPath }: Props) {
 	const navigate = useNavigate()

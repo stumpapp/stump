@@ -9,6 +9,9 @@ WORKDIR /app
 
 COPY . .
 
+# We need to install git for yarn to work (we have git dependencies)
+RUN apk add --no-cache git
+
 RUN --mount=type=cache,target=/usr/local/yarn/.cache,id=${TARGETARCH} \ 
     # https://github.com/nodejs/docker-node/issues/1335
     yarn config set network-timeout 300000 && \

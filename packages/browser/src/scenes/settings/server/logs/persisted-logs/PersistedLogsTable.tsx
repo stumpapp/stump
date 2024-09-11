@@ -1,23 +1,23 @@
 import { useLogsQuery } from '@stump/client'
-import { Card, Heading, Text, ToolTip } from '@stump/components'
+import { Card, Heading, IconButton, Text, ToolTip } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Log } from '@stump/types'
-import { createColumnHelper, SortingState } from '@tanstack/react-table'
+import { ColumnDef, createColumnHelper, SortingState } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { CircleSlash2 } from 'lucide-react'
+import { CircleSlash2, ZoomIn } from 'lucide-react'
 import React, { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 import { Table } from '@/components/table'
 
 import LogLevelBadge from './LogLevelBadge'
+import PersistedLogInspector from './PersistedLogInspector'
 
 dayjs.extend(duration)
 dayjs.extend(relativeTime)
 
-const DEBUG = import.meta.env.DEV
 const LOCALE_BASE = 'settingsScene.server/logs.sections.persistedLogs.table'
 
 const columnHelper = createColumnHelper<Log>()
@@ -68,7 +68,7 @@ const baseColumns = [
 			},
 		}) =>
 			job_id ? (
-				<ToolTip content={<span className="font-mono">{job_id}</span>}>
+				<ToolTip content={<span className="font-mono">{job_id}</span>} align="end">
 					<Text size="xs" variant="muted" className="font-mono">
 						{job_id.slice(0, 5)}..{job_id.slice(-5)}
 					</Text>
@@ -77,7 +77,7 @@ const baseColumns = [
 		header: 'Job ID',
 		size: 150,
 	}),
-]
+] as ColumnDef<Log>[]
 
 export default function PersistedLogsTable() {
 	const { t } = useLocaleContext()
@@ -86,6 +86,7 @@ export default function PersistedLogsTable() {
 	const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
 	const [sortState, setSortState] = useState<SortingState>([])
 	const [jobId] = useState(() => search.get('job_id'))
+	const [inspectingJob, setInspectingJob] = useState<Log | null>(null)
 
 	const firstSort = useMemo(
 		() =>
@@ -107,21 +108,41 @@ export default function PersistedLogsTable() {
 	})
 	const pageCount = pageData?.total_pages ?? 1
 
+	const columns = useMemo(
+		() => [
+			...baseColumns,
+			columnHelper.display({
+				cell: ({ row: { original } }) => (
+					<div className="inline-flex items-end md:w-2">
+						<IconButton size="xs" onClick={() => setInspectingJob(original)}>
+							<ZoomIn className="h-4 w-4" />
+						</IconButton>
+					</div>
+				),
+				id: 'inspector',
+				size: 28,
+			}),
+		],
+		[],
+	)
+
 	return (
 		<Card className="bg-background-surface p-1">
+			<PersistedLogInspector persistedLog={inspectingJob} onClose={() => setInspectingJob(null)} />
+
 			<Table
 				sortable
-				columns={baseColumns}
+				columns={columns}
 				options={{
-					debugColumns: DEBUG,
-					debugHeaders: DEBUG,
-					debugTable: DEBUG,
 					manualPagination: true,
 					manualSorting: true,
 					onPaginationChange: setPagination,
 					onSortingChange: setSortState,
 					pageCount,
 					state: {
+						columnPinning: {
+							right: ['inspector'],
+						},
 						pagination,
 						sorting: sortState,
 					},
@@ -139,6 +160,7 @@ export default function PersistedLogsTable() {
 					</div>
 				)}
 				isZeroBasedPagination
+				cellClassName="bg-background-surface"
 			/>
 		</Card>
 	)

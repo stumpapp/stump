@@ -15,6 +15,7 @@ export default function InspectUserSlideOver({ user, onClose }: Props) {
 			onClose={onClose}
 			title="Inspect user"
 			description="Inspect a user's information and configuration"
+			trigger={null}
 		>
 			<div className="px-6 py-2">
 				<pre>{JSON.stringify(user, null, 2)}</pre>

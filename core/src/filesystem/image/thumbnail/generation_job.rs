@@ -290,7 +290,7 @@ pub async fn safely_generate_batch(
 						"Failed to generate thumbnail: {:?}",
 						error.to_string()
 					))
-					.with_ctx(format!("Media path: {}", path)),
+					.with_ctx(path),
 				);
 			},
 		}

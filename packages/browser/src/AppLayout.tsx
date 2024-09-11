@@ -69,11 +69,21 @@ export function AppLayout() {
 			return
 		}
 
-		const isFlexed = viewport.classList.contains('flex') && viewport.classList.contains('flex-1')
-		if (!isFlexed) {
-			viewport.classList.add('flex', 'flex-1')
+		const requiredClasses = 'relative flex flex-1 flex-col'.split(' ')
+		const missingClasses = requiredClasses.filter((c) => !viewport.classList.contains(c))
+		if (missingClasses.length) {
+			viewport.classList.add(...missingClasses)
 		}
 	}, [instance, isRefSet])
+	/**
+	 * An effect to destroy the overlay scrollbars instance when it exists but hideScrollBar is true
+	 */
+	useEffect(() => {
+		const instantiatedInstance = instance()
+		if (hideScrollBar && instantiatedInstance) {
+			instantiatedInstance.destroy()
+		}
+	}, [instance, isRefSet, hideScrollBar])
 
 	/**
 	 * If the user prefers the top bar, we hide the sidebar

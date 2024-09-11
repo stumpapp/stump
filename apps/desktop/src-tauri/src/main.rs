@@ -31,6 +31,10 @@ fn setup_app(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 	#[cfg(feature = "bundled-server")]
 	if _app_store.run_bundled_server {
 		tauri::async_runtime::spawn(async move {
+			// TODO: would setting the client path to tauri-managed resources work?
+			// - https://github.com/tauri-apps/tauri/issues/5225
+			// - https://tauri.app/v1/guides/building/resources/
+			// - https://github.com/tauri-apps/tauri/discussions/4998
 			let config_result = bootstrap_http_server_config().await;
 			match config_result {
 				Ok(config) => {

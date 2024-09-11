@@ -22,7 +22,7 @@ tracing = { workspace = true }
 tauri-plugin-store = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 # See https://github.com/dbus2/zbus/issues/667
 zbus_names = "=2.6.1"
-
+# TODO(?): https://github.com/Smithay/wayland-rs/pull/722
 
 [features]
 # by default Tauri runs in production mode

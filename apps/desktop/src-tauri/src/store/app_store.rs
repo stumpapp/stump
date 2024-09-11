@@ -55,7 +55,7 @@ impl AppStore {
 			.get("run_bundled_server")
 			.cloned()
 			.and_then(|s| s.as_bool())
-			.unwrap_or(true);
+			.unwrap_or(false);
 
 		Ok(Self {
 			active_server,

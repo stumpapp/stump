@@ -1,9 +1,9 @@
 import { usePrevious } from '@stump/components'
 import { Media } from '@stump/types'
 import { useOverlayScrollbars } from 'overlayscrollbars-react'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { forwardRef, useEffect, useRef, useState } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
-import { Virtuoso } from 'react-virtuoso'
+import { ScrollerProps, Virtuoso } from 'react-virtuoso'
 
 import { useTheme } from '@/hooks/useTheme'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
@@ -36,6 +36,7 @@ type Props = {
 	onPageChanged?(page: number): void
 }
 
+// TODO: support reading direction, a bit awkward to do with scroll
 /**
  * A reader component for **image-based** books that allows for continuous scrolling.
  *
@@ -94,13 +95,14 @@ export default function ContinuousScrollReader({
 		const { current: root } = rootRef
 
 		if (scroller && root) {
-			initialize({
-				elements: {
-					// @ts-expect-error: types are wrong
-					viewport: scroller,
-				},
-				target: root,
-			})
+			// TODO: this fucks up the virtualization...
+			// initialize({
+			// 	elements: {
+			// 		// @ts-expect-error: types are wrong
+			// 		viewport: scroller,
+			// 	},
+			// 	target: root,
+			// })
 		}
 	}, [initialize, scroller])
 
@@ -115,6 +117,9 @@ export default function ContinuousScrollReader({
 						useWindowScroll={false}
 						horizontalDirection={orientation === 'horizontal'}
 						data={Array.from({ length: media.pages }).map((_, index) => getPageUrl(index + 1))}
+						components={{
+							Scroller: orientation === 'horizontal' ? HorizontalScroller : undefined,
+						}}
 						itemContent={(_, url) => (
 							<div
 								key={url}
@@ -145,3 +150,14 @@ export default function ContinuousScrollReader({
 		</div>
 	)
 }
+
+const HorizontalScroller = forwardRef<HTMLDivElement, ScrollerProps>(
+	({ children, ...props }, ref) => {
+		return (
+			<div className="x-6 overflow-y-hidden" ref={ref} {...props}>
+				{children}
+			</div>
+		)
+	},
+)
+HorizontalScroller.displayName = 'HorizontalScroller'

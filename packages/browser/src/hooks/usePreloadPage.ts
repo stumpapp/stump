@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-import { ImagePageDimensionRef } from '@/components/readers/image-based/context'
+import { ImagePageDimensionRef } from '@/components/readers/imageBased/context'
 
 type Params = {
 	/**

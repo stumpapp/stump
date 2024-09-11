@@ -1,8 +1,6 @@
-import { mediaQueryKeys } from '@stump/api'
-import { queryClient } from '@stump/client'
 import type { Media } from '@stump/types'
 import clsx from 'clsx'
-import React, { memo, useCallback, useEffect, useMemo } from 'react'
+import React, { memo, useCallback, useMemo, useRef } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { Hotkey } from 'react-hotkeys-hook/dist/types'
 import { useSwipeable } from 'react-swipeable'
@@ -11,7 +9,8 @@ import { useMediaMatch, useWindowSize } from 'rooks'
 import { useDetectZoom } from '@/hooks/useDetectZoom'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
-import { ImagePageDimensionRef, useImageBaseReaderContext } from './context'
+import { ImagePageDimensionRef, useImageBaseReaderContext } from '../context'
+import PageSet from './PageSet'
 
 export type PagedReaderProps = {
 	/** The current page which the reader should render */
@@ -38,34 +37,33 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 		bookPreferences: { readingDirection, doubleSpread },
 	} = useBookPreferences({ book: media })
 
-	const { pageDimensions, setDimensions } = useImageBaseReaderContext()
+	const { pageDimensions } = useImageBaseReaderContext()
 	/**
 	 * A memoized callback to get the dimensions of a given page
 	 */
 	const getDimensions = useCallback((page: number) => pageDimensions[page], [pageDimensions])
-	/**
-	 * A memoized callback to set the dimensions of a given page
-	 */
-	const upsertDimensions = useCallback(
-		(page: number, dimensions: ImagePageDimensionRef) => {
-			setDimensions((prev) => ({
-				...prev,
-				[page]: dimensions,
-			}))
-		},
-		[setDimensions],
-	)
 
 	const { innerWidth } = useWindowSize()
 	const { isZoomed } = useDetectZoom()
 
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
+	const pageSetRef = useRef<HTMLDivElement | null>(null)
+
 	const displayedPages = useMemo(
 		() =>
 			doubleSpread ? [currentPage, currentPage + 1].filter((p) => p <= media.pages) : [currentPage],
 		[currentPage, doubleSpread, media.pages],
 	)
+
+	// const displayedPages = useMemo(() => {
+	// 	const tentativePages = doubleSpread
+	// 		? [currentPage, currentPage + 1].filter((p) => p <= media.pages)
+	// 		: [currentPage]
+	// 	const containerSize = pageSetRef.current?.getBoundingClientRect()
+	// 	const isTooWide = !!containerSize && !!innerWidth && containerSize.width >= innerWidth
+	// 	return isTooWide ? [currentPage] : tentativePages
+	// }, [currentPage, doubleSpread, media.pages, pageSetRef.current, innerWidth])
 
 	/**
 	 * If the image parts are collective >= 80% of the screen width, we want to fix the side navigation
@@ -78,24 +76,6 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 
 		return (!!innerWidth && totalWidth >= innerWidth * 0.8) || isMobile
 	}, [displayedPages, getDimensions, innerWidth, isMobile])
-
-	/**
-	 * This effect is primarily responsible for two cleanup tasks:
-	 *
-	 * 1. Hiding the toolbar when the component unmounts. This is done to ensure that the toolbar is not
-	 *    visible when the user navigates *back* to a reader again at some point.
-	 * 2. Invalidating the in-progress media query when the component unmounts. This is done to ensure that
-	 *    when the user navigates away from the reader, the in-progress media is accurately reflected with
-	 *    the latest reading session.
-	 */
-	useEffect(() => {
-		return () => {
-			setSettings({
-				showToolBar: false,
-			})
-			queryClient.invalidateQueries([mediaQueryKeys.getInProgressMedia], { exact: false })
-		}
-	}, [setSettings])
 
 	/**
 	 * A callback to actually change the page. This should not be called directly, but rather
@@ -182,88 +162,6 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 		[isZoomed, showToolBar, isMobile],
 	)
 
-	// TODO: refactor this to a component, too complex at this point
-	const renderPages = useCallback(() => {
-		const dimensionSet = displayedPages.map((page) => getDimensions(page))
-
-		const shouldDisplayDoubleSpread =
-			displayedPages.length > 1 &&
-			dimensionSet.every((dimensions) => !dimensions || dimensions.isPortrait)
-
-		console.log({
-			dimensionSet,
-			displayedPages,
-			shouldDisplayDoubleSpread,
-		})
-
-		if (shouldDisplayDoubleSpread) {
-			return (
-				<div className="flex h-full justify-center">
-					{displayedPages.map((page) => (
-						<img
-							key={`double-spread-${page}`}
-							className="z-30 max-h-screen w-full select-none md:w-auto"
-							src={getPageUrl(page)}
-							onLoad={(e) => {
-								const img = e.target as HTMLImageElement
-								if (img.height && img.width) {
-									upsertDimensions(page, {
-										height: img.height,
-										isPortrait: img.height > img.width,
-										width: img.width,
-									})
-								}
-							}}
-							onError={(err) => {
-								// @ts-expect-error: is oke
-								err.target.src = '/favicon.png'
-							}}
-							onClick={() =>
-								setSettings({
-									showToolBar: !showToolBar,
-								})
-							}
-						/>
-					))}
-				</div>
-			)
-		} else {
-			return (
-				<img
-					className="z-30 max-h-screen w-full select-none md:w-auto"
-					src={getPageUrl(currentPage)}
-					onLoad={(e) => {
-						const img = e.target as HTMLImageElement
-						if (img.height && img.width) {
-							upsertDimensions(currentPage, {
-								height: img.height,
-								isPortrait: img.height > img.width,
-								width: img.width,
-							})
-						}
-					}}
-					onError={(err) => {
-						// @ts-expect-error: is oke
-						err.target.src = '/favicon.png'
-					}}
-					onClick={() =>
-						setSettings({
-							showToolBar: !showToolBar,
-						})
-					}
-				/>
-			)
-		}
-	}, [
-		displayedPages,
-		currentPage,
-		getPageUrl,
-		setSettings,
-		showToolBar,
-		getDimensions,
-		upsertDimensions,
-	])
-
 	// TODO: when preloading images, cache the dimensions of the images to better support dynamic resizing
 	return (
 		<div
@@ -276,7 +174,13 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 				onClick={() => handleLeftwardPageChange()}
 			/>
 
-			{renderPages()}
+			<PageSet
+				ref={pageSetRef}
+				currentPage={currentPage}
+				displayedPages={displayedPages}
+				getPageUrl={getPageUrl}
+				onPageClick={() => setSettings({ showToolBar: !showToolBar })}
+			/>
 
 			<SideBarControl
 				fixed={fixSideNavigation}

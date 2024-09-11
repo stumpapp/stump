@@ -1,18 +1,17 @@
-import { getMediaPage } from '@stump/api'
-import { useUpdateMediaProgress } from '@stump/client'
+import { getMediaPage, mediaQueryKeys } from '@stump/api'
+import { queryClient, useUpdateMediaProgress } from '@stump/client'
 import { Media } from '@stump/types'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { usePreloadPage } from '@/hooks/usePreloadPage'
 import paths from '@/paths'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
-import AnimatedPagedReader from './AnimatedPagedReader'
+import ReaderContainer from './container'
 import { ImageBaseReaderContext, ImagePageDimensionRef } from './context'
-import ContinuousScrollReader from './ContinuousScrollReader'
-import PagedReader from './PagedReader'
-import ReaderContainer from './ReaderContainer'
+import { ContinuousScrollReader } from './continuous'
+import { AnimatedPagedReader, PagedReader } from './paged'
 
 type Props = {
 	/**
@@ -53,6 +52,7 @@ export default function ImageBasedReader({
 	const {
 		settings: { preload },
 		bookPreferences: { readingMode },
+		setSettings,
 	} = useBookPreferences({ book: media })
 
 	const { updateReadProgress } = useUpdateMediaProgress(media.id, {
@@ -120,6 +120,24 @@ export default function ImageBasedReader({
 		urlBuilder: getPageUrl,
 	})
 
+	/**
+	 * This effect is primarily responsible for two cleanup tasks:
+	 *
+	 * 1. Hiding the toolbar when the component unmounts. This is done to ensure that the toolbar is not
+	 *    visible when the user navigates *back* to a reader again at some point.
+	 * 2. Invalidating the in-progress media query when the component unmounts. This is done to ensure that
+	 *    when the user navigates away from the reader, the in-progress media is accurately reflected with
+	 *    the latest reading session.
+	 */
+	useEffect(() => {
+		return () => {
+			setSettings({
+				showToolBar: false,
+			})
+			queryClient.invalidateQueries([mediaQueryKeys.getInProgressMedia], { exact: false })
+		}
+	}, [setSettings])
+
 	const renderReader = () => {
 		if (readingMode.startsWith('continuous')) {
 			return (
@@ -148,13 +166,13 @@ export default function ImageBasedReader({
 	return (
 		<ImageBaseReaderContext.Provider
 			value={{
+				book: media,
+				currentPage,
 				pageDimensions,
 				setDimensions: setPageDimensions,
 			}}
 		>
-			<ReaderContainer media={media} currentPage={currentPage} onPageChange={handleChangePage}>
-				{renderReader()}
-			</ReaderContainer>
+			<ReaderContainer>{renderReader()}</ReaderContainer>
 		</ImageBaseReaderContext.Provider>
 	)
 }

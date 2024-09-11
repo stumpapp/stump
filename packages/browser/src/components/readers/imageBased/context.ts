@@ -1,3 +1,4 @@
+import { Media } from '@stump/types'
 import { createContext, useContext } from 'react'
 
 export type ImagePageDimensionRef = {
@@ -7,6 +8,14 @@ export type ImagePageDimensionRef = {
 }
 
 export type IImageBaseReaderContext = {
+	/**
+	 * The media entity associated with the reader
+	 */
+	book: Media
+	/**
+	 * The current page of the reader
+	 */
+	currentPage: number
 	/**
 	 * The dimensions of the pages in the book, as they are loaded
 	 */

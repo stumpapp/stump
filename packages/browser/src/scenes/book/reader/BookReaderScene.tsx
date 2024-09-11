@@ -4,7 +4,7 @@ import { Media } from '@stump/types'
 import { Suspense, useEffect } from 'react'
 import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 
-import { ImageBasedReader } from '@/components/readers/image-based'
+import { ImageBasedReader } from '@/components/readers/imageBased'
 import paths from '@/paths'
 
 import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION } from '../../../utils/patterns'

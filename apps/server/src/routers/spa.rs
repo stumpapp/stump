@@ -19,9 +19,6 @@ pub const FAVICON: &str = "/favicon.ico";
 const ASSETS: &str = "/assets";
 const DIST: &str = "/dist";
 
-// TODO(desktop): if there exists a resource_fetcher in the app_state, we need to use that with a custom
-// service instead. The resource_fetcher is used to fetch resources from the bundled react app
-// in the Tauri app, which kicks off the server (optionally)
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	let dist_path = Path::new(&app_state.config.client_dir);
 

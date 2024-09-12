@@ -10,7 +10,7 @@ edition = "2021"
 tauri-build = { version = "1.5.4", features = [] }
 
 [dependencies]
-stump_server = { path = "../../server", features = ["bundled-server"], optional = true }
+stump_server = { path = "../../server", optional = true }
 discord-rich-presence = "0.2.3"
 serde_json = { workspace = true }
 serde = { workspace = true }
@@ -18,9 +18,11 @@ specta = { workspace = true }
 thiserror = { workspace = true }
 tauri = { version = "1.7.2", features = ["api-all", "devtools"] }
 tracing = { workspace = true }
+# TODO: figure out which version of tauri-plugin-store to use
 tauri-plugin-store = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 # See https://github.com/dbus2/zbus/issues/667
 zbus_names = "=2.6.1"
+# TODO(?): https://github.com/Smithay/wayland-rs/pull/722
 
 [features]
 # by default Tauri runs in production mode

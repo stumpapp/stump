@@ -8,7 +8,4 @@ pub mod middleware;
 mod routers;
 mod utils;
 
-pub use http_server::run_http_server;
-
-#[cfg(feature = "bundled-server")]
-pub use http_server::bootstrap_http_server_config;
+pub use http_server::{bootstrap_http_server_config, run_http_server};

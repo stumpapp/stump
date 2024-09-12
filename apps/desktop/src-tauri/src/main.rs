@@ -20,23 +20,7 @@ use state::AppState;
 use commands::{close_splashscreen, set_discord_presence, set_use_discord_connection};
 
 #[cfg(feature = "bundled-server")]
-use stump_server::{bootstrap_http_server_config, run_http_server, AssetResolverExt};
-#[cfg(feature = "bundled-server")]
-use tauri::{AssetResolver, Wry};
-
-pub struct AssetResolverWrapper {
-	inner: Arc<AssetResolver<Wry>>,
-}
-
-#[cfg(feature = "bundled-server")]
-impl AssetResolverExt for AssetResolverWrapper {
-	fn get_embedded_asset(&self, path: &str) -> Option<(String, Vec<u8>)> {
-		self.inner
-			.as_ref()
-			.get(path.to_string())
-			.map(|r| (r.mime_type, r.bytes))
-	}
-}
+use stump_server::{bootstrap_http_server_config, run_http_server};
 
 // TODO: https://github.com/tauri-apps/tauri/issues/2663
 
@@ -46,35 +30,16 @@ fn setup_app(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 	// if bundled-server feature is enabled, start the server
 	#[cfg(feature = "bundled-server")]
 	if _app_store.run_bundled_server {
-		let asset_resolver = Arc::new(AssetResolverWrapper {
-			inner: Arc::new(app.asset_resolver()),
-		});
+		let asset_resolver = Arc::new(app.asset_resolver());
+		let resource_fetcher =
+			move |path: String| asset_resolver.get(path).map(|r| (r.mime_type, r.bytes));
 
 		tauri::async_runtime::spawn(async move {
-			let config_result = bootstrap_http_server_config().await;
-
-			tracing::info!(
-				"Test index.html: {:?}",
-				asset_resolver.get_embedded_asset("index.html")
-			);
-			tracing::info!(
-				"Test favicon.ico: {:?}",
-				asset_resolver.get_embedded_asset("favicon.ico")
-			);
-			tracing::info!(
-				"Test assets/index.html: {:?}",
-				asset_resolver.get_embedded_asset("assets/index.html")
-			);
-			tracing::info!(
-				"Test dist/index.html: {:?}",
-				asset_resolver.get_embedded_asset("dist/index.html")
-			);
-
+			let config_result =
+				bootstrap_http_server_config(Some(resource_fetcher)).await;
 			match config_result {
 				Ok(config) => {
-					if let Err(error) =
-						run_http_server(config, Some(asset_resolver)).await
-					{
+					if let Err(error) = run_http_server(config).await {
 						tracing::error!(?error, "Server exited!");
 					}
 				},

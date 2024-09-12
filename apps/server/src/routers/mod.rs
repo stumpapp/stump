@@ -1,8 +1,6 @@
-use std::sync::Arc;
-
 use axum::Router;
 
-use crate::{asset_resolver::AssetResolverExt, config::state::AppState};
+use crate::config::state::AppState;
 
 mod api;
 mod opds;
@@ -15,10 +13,7 @@ mod ws;
 pub(crate) use api::v1::auth::enforce_max_sessions;
 pub(crate) use spa::relative_favicon_path;
 
-pub(crate) fn mount(
-	app_state: AppState,
-	resource_fetcher: Option<Arc<impl AssetResolverExt>>,
-) -> Router<AppState> {
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	let mut app_router = Router::new();
 
 	if !app_state.config.disable_swagger || app_state.config.is_debug() {
@@ -26,7 +21,7 @@ pub(crate) fn mount(
 	}
 
 	app_router
-		.merge(spa::mount(app_state.clone(), resource_fetcher))
+		.merge(spa::mount(app_state.clone()))
 		// .merge(ws::mount(app_state.clone()))
 		.merge(sse::mount())
 		.merge(api::mount(app_state.clone()))

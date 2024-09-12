@@ -1,4 +1,4 @@
-use std::{net::SocketAddr, sync::Arc};
+use std::net::SocketAddr;
 
 use axum::{extract::connect_info::Connected, serve::IncomingStream, Router};
 use stump_core::{job::JobControllerCommand, StumpCore};
@@ -6,7 +6,6 @@ use tokio::sync::oneshot;
 use tower_http::trace::TraceLayer;
 
 use crate::{
-	asset_resolver::AssetResolverExt,
 	config::{cors, session::get_session_layer},
 	errors::{ServerError, ServerResult},
 	routers,
@@ -19,10 +18,7 @@ use crate::errors::EntryError;
 #[cfg(feature = "bundled-server")]
 use stump_core::config::{bootstrap_config_dir, logging::init_tracing};
 
-pub async fn run_http_server(
-	config: StumpConfig,
-	resource_fetcher: Option<Arc<impl AssetResolverExt>>,
-) -> ServerResult<()> {
+pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 	let core = StumpCore::new(config.clone()).await;
 
 	if let Err(err) = core.run_migrations().await {
@@ -61,7 +57,7 @@ pub async fn run_http_server(
 	tracing::info!("{}", core.get_shadow_text());
 
 	let app = Router::new()
-		.merge(routers::mount(app_state.clone(), resource_fetcher))
+		.merge(routers::mount(app_state.clone()))
 		.with_state(app_state.clone())
 		.layer(get_session_layer(app_state.clone()))
 		.layer(cors_layer)
@@ -104,7 +100,9 @@ pub async fn run_http_server(
 // which would be used in the spa router to serve the frontend assets from the
 // Tauri bundle.
 #[cfg(feature = "bundled-server")]
-pub async fn bootstrap_http_server_config() -> Result<StumpConfig, EntryError> {
+pub async fn bootstrap_http_server_config(
+	_resource_fetcher: Option<impl Fn(String) -> Option<(String, Vec<u8>)>>,
+) -> Result<StumpConfig, EntryError> {
 	// Get STUMP_CONFIG_DIR to bootstrap startup
 	let config_dir = bootstrap_config_dir();
 

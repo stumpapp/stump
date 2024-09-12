@@ -152,120 +152,120 @@
 			"thumbnailConfig": {
 				"section": {
 					"heading": {
-						"create": "Konfiguracja miniaturek",
+						"create": "Konfiguracja miniatur",
 						"update": "Generowanie"
 					},
 					"description": "Popraw czas ładowania podczas przeglądania biblioteki poprzez generowanie miniatur dla Twoich książek"
 				},
 				"enableSwitch": {
 					"label": "Aktywne",
-					"description": "Generuj miniaturki dla tej biblioteki"
+					"description": "Generuj miniatury dla tej biblioteki"
 				},
 				"scaled": {
 					"label": "Skalowane",
-					"description": "Scale the image by a custom factor per dimension",
+					"description": "Skaluj obraz przez niestandardowy współczynnik dla każdego z wymiarów",
 					"width": {
-						"label": "Width scale"
+						"label": "Skala szerokości"
 					},
 					"height": {
-						"label": "Height scale"
+						"label": "Skala wysokości"
 					}
 				},
 				"sized": {
-					"label": "Explicitly Sized",
-					"description": "Set each dimension of the thumbnail (in pixels)",
+					"label": "O stałych wymiarach",
+					"description": "Ustaw każdy wymiar miniaturki (w pikselach)",
 					"width": {
-						"label": "Width"
+						"label": "Szerokość"
 					},
 					"height": {
-						"label": "Height"
+						"label": "Wysokość"
 					}
 				},
 				"format": {
-					"label": "Image format",
-					"description": "The format of the generated thumbnail images"
+					"label": "Format obrazu",
+					"description": "Format wygenerowanych miniatur obrazów"
 				},
 				"quality": {
-					"label": "Quality",
-					"description": "The quality of the generated thumbnail images, between 0 and 1.0"
+					"label": "Jakość",
+					"description": "Jakość generowanych miniatur, od 0 do 1.0"
 				}
 			},
 			"ignoreRules": {
 				"section": {
-					"heading": "Ignore rules",
-					"description": "Define glob patterns to ignore certain files or directories during a scan"
+					"heading": "Reguły pomijania",
+					"description": "Zdefiniuj wzorce, które posłużą do pominięcia niektórych plików lub folderów podczas skanowania"
 				},
-				"noRules": "No ignore rules have been configured",
-				"save": "Save changes",
+				"noRules": "Brak zdefiniowanych reguł pomijania",
+				"save": "Zapisz zmiany",
 				"addRule": {
-					"label": "New rule",
-					"description": "Glob pattern to ignore files or directories",
-					"addButton": "Add rule",
+					"label": "Nowa reguła",
+					"description": "Wzorzec służący do pomijania plików lub folderów",
+					"addButton": "Dodaj regułę",
 					"ignoreParents": {
-						"title": "Ignore all parent directories",
-						"label": "Ignore parents"
+						"title": "Pomijaj wszystkie katalogi nadrzędne",
+						"label": "Wzorce pomijania"
 					},
 					"ignoreSubdirs": {
-						"title": "Ignore all subdirectories",
-						"label": "Ignore subdirectories"
+						"title": "Pomijaj wszystkie podkatalogi",
+						"label": "Pomijaj podkatalogi"
 					}
 				},
-				"invalidGlob": "Invalid glob pattern",
+				"invalidGlob": "Nieprawidłowy wzorzec",
 				"lockConfig": {
-					"lock": "Lock configuration",
-					"unlock": "Unlock configuration"
+					"lock": "Zablokuj konfigurację",
+					"unlock": "Odblokuj konfigurację"
 				},
-				"editRule": "Edit rule",
-				"deleteRule": "Delete rule",
-				"cancelEdit": "Cancel edit",
-				"confirmEdit": "Confirm edit"
+				"editRule": "Edytuj regułę",
+				"deleteRule": "Usuń regułę",
+				"cancelEdit": "Anuluj zmiany",
+				"confirmEdit": "Potwierdź zmiany"
 			},
 			"convertOptions": {
 				"section": {
-					"heading": "File conversion",
-					"description": "Stump is capable of converting certain file formats to more compatible ones"
+					"heading": "Konwersja pliku",
+					"description": "Stump jest w stanie przekonwertować niektóre formaty plików na bardziej kompatybilne"
 				},
 				"rarToZip": {
-					"label": "Convert RAR to ZIP",
-					"description": "Convert RAR/CBR files to ZIP/CBZ files during a scan"
+					"label": "Konwertuj RAR do ZIP",
+					"description": "Konwertuj pliki RAR/CBR do plików ZIP/CBZ podczas skanowania"
 				},
 				"deleteRarAfter": {
-					"label": "Delete RAR after conversion",
-					"description": "Delete the original RAR/CBR file after conversion. This is irreversible"
+					"label": "Usuń RAR po konwersji",
+					"description": "Usuń oryginalny plik RAR/CBR po konwersji. Czynność ta jest nieodwracalna"
 				}
 			},
 			"libraryPattern": {
 				"section": {
-					"heading": "Organization",
-					"description": "Identify which pattern most closely matches the organization of your library",
+					"heading": "Organizacja",
+					"description": "Określ który wzór najlepiej pasuje do struktury Twojej biblioteki",
 					"docs": [
-						"Not sure which to choose? Click",
-						"here",
-						"for more information.",
-						"You cannot change this setting later"
+						"Brak pewności, którą wybrać? Kliknij",
+						"tutaj",
+						"aby uzyskać więcej informacji.",
+						"Nie można później zmienić tego ustawienia"
 					],
-					"disabled": "You cannot change this setting"
+					"disabled": "Nie można zmienić tego ustawienia"
 				},
 				"options": {
-					"label": "Library pattern",
-					"description": "The setting which determines how Stump will organize your library",
+					"label": "Wzorzec biblioteki",
+					"description": "Ustawienie, które określa, jak Stump zorganizuje Twoją bibliotekę",
 					"collectionPriority": {
-						"label": "Collection priority",
-						"description": "Each folder at the top-most level of the library root is a single series"
+						"label": "Priorytet kolekcji",
+						"description": "Każdy folder na najwyższym poziomie katalogu głównego biblioteki jest pojedynczą serią"
 					},
 					"seriesPriority": {
-						"label": "Series priority",
-						"description": "Each folder at any level recursively is a single series"
+						"label": "Priorytet serii",
+						"description": "Każdy folder na dowolnym poziomie jest pojedynczą serią"
 					}
 				}
 			}
 		},
 		"scan": {
 			"label": {
-				"create": "Scan after creation",
-				"update": "Scan after updates"
+				"create": "Skanuj po utworzeniu",
+				"update": "Skanuj po aktualizacjach"
 			},
-			"description": "Index the library files to populate your database"
+			"description": "Indeksuj pliki biblioteki, aby wypełnić bazę danych"
 		}
 	},
 	"createLibraryScene": {
@@ -273,46 +273,46 @@
 		"subtitle": "Biblioteki służą do grupowania książek. Jeśli chcesz odświeżyć sobie metodykę ich działania, sprawdź",
 		"subtitleLink": "stosowną dokumentację",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "Krok",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this library, including its name, path, and description"
+					"label": "Podstawowe",
+					"heading": "Informacje podstawowe",
+					"description": "Szczegóły tej biblioteki wraz z jej nazwą, ścieżką i opisem"
 				},
 				{
-					"label": "Scanning",
-					"heading": "Scanner Behavior",
-					"description": "Settings related to how Stump scans this library"
+					"label": "Skanowanie",
+					"heading": "Zachowanie skanera",
+					"description": "Ustawienia związane z tym, jak Stump skanuje tę bibliotekę"
 				},
 				{
-					"label": "Thumbnails",
-					"heading": "Thumbnails",
-					"description": "The options for if and how Stump generates thumbnails for this library"
+					"label": "Miniatury",
+					"heading": "Miniatury",
+					"description": "Opcje czy i jak Stump generować będzie miniatury dla tej biblioteki"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your library settings before creating it"
+					"label": "Podsumowanie",
+					"heading": "Podsumowanie",
+					"description": "Przejrzyj ustawienia biblioteki przed jej utworzeniem"
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "Tak",
+				"no": "Nie",
+				"none": "Brak",
 				"labels": {
-					"generateThumbnails": "Generate thumbnails",
-					"mode": "Mode",
+					"generateThumbnails": "Generuj miniaturki",
+					"mode": "Tryb",
 					"format": "Format",
-					"quality": "Quality",
-					"name": "Name",
-					"path": "Path",
-					"description": "Description",
-					"tags": "Tags",
-					"pattern": "Pattern",
-					"ignoreRules": "Ignore rules",
-					"convertRar": "Convert RAR/CBR",
-					"deleteConversions": "Delete converted files"
+					"quality": "Jakość",
+					"name": "Nazwa",
+					"path": "Ścieżka",
+					"description": "Opis",
+					"tags": "Etykiety",
+					"pattern": "Wzór",
+					"ignoreRules": "Reguły pomijania",
+					"convertRar": "Konwertuj RAR/CBR",
+					"deleteConversions": "Usuń przekonwertowane pliki"
 				}
 			},
 			"buttons": {
@@ -325,97 +325,97 @@
 		"subtitle": "Zarządzaj tutaj swoją biblioteką. Jeśli chcesz odświeżyć sobie działanie tych ustawień, sprawdź",
 		"subtitleLink": "stosowną dokumentację",
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "Podstawowe",
 			"options": {
-				"general": "General",
-				"scanning": "Scanning",
-				"thumbnails": "Thumbnails",
-				"ignore-rules": "Ignore Rules",
-				"analysis": "Analysis",
-				"label": "Options"
+				"general": "Ogólne",
+				"scanning": "Skanowanie",
+				"thumbnails": "Miniatury",
+				"ignore-rules": "Reguły pomijania",
+				"analysis": "Analiza",
+				"label": "Ustawienia"
 			},
 			"danger-zone": {
-				"access-control": "Access Control",
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"access-control": "Kontrola dostępu",
+				"delete": "Usuwanie",
+				"label": "Niebezpieczna strefa"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this library, including its name, path, and description",
+			"title": "Informacje podstawowe",
+			"description": "Szczegóły tej biblioteki wraz z jej nazwą, ścieżką i opisem",
 			"form": {
-				"submit": "Update library"
+				"submit": "Aktualizuj bibliotekę"
 			}
 		},
 		"options/scanning": {
-			"title": "Scanner Behavior",
-			"description": "Settings related to how Stump scans this library"
+			"title": "Zachowanie skanera",
+			"description": "Ustawienia związane z tym, jak Stump skanuje tę bibliotekę"
 		},
 		"options/thumbnails": {
-			"title": "Thumbnails",
-			"description": "Settings and management options for thumbnails in this library",
+			"title": "Miniatury",
+			"description": "Ustawienia i opcje związane z miniaturami tej biblioteki",
 			"sections": {
 				"management": {
-					"heading": "Management",
-					"description": "Manage the existing thumbnails for this library",
+					"heading": "Zarządzanie",
+					"description": "Zarządzaj istniejącymi miniaturami tej biblioteki",
 					"thumbnailSelector": {},
 					"deleteThumbnails": {}
 				}
 			}
 		},
 		"options/analysis": {
-			"title": "Analysis",
-			"description": "Analyze the contents of this library to identify potential issues or improvements",
+			"title": "Analiza",
+			"description": "Analizuj zawartość tej biblioteki w celu zidentyfikowania potencjalnych problemów lub ulepszeń",
 			"sections": {
 				"analyzeBooks": {
-					"heading": "Analyze books",
-					"description": "Analyze the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
-					"disclaimer": "This process is resource-intensive and may take a while to complete",
-					"analyzeButton": "Analyze books"
+					"heading": "Analizuj książki",
+					"description": "Analizuj książki w tej bibliotece, aby dołączyć dodatkowe metadane w bazie danych, takie jak wymiary stron dla książek obrazkowych",
+					"disclaimer": "Ten proces jest zasobochłonny i może chwilę potrwać",
+					"analyzeButton": "Analizuj książki"
 				},
 				"missingFiles": {
-					"heading": "Missing files",
-					"description": "Files that are referenced in the database but cannot be located on disk",
-					"noMissingFiles": "There are no missing files in this library"
+					"heading": "Brakujące pliki",
+					"description": "Pliki których odwołania znajdują się w bazie danych ale nie mogą być zlokalizowane na dysku",
+					"noMissingFiles": "W tej bibliotece nie ma brakujących plików"
 				},
 				"duplicateFiles": {
-					"heading": "Duplicate files",
-					"description": "Files that are potentially duplicated on disk",
-					"noDuplicateFiles": "There are no duplicate files detected for this library"
+					"heading": "Powielone pliki",
+					"description": "Potencjalnie powielone na dysku pliki",
+					"noDuplicateFiles": "W tej bibliotece nie ma powielonych plików"
 				}
 			}
 		},
 		"danger-zone/access-control": {
-			"title": "Access Control",
-			"description": "Control who can access the content in this library",
+			"title": "Kontrola dostępu",
+			"description": "Kontrola dostępu użytkowników do zawartości tej biblioteki",
 			"sections": {
 				"libraryExclusions": {
-					"heading": "Exclude users",
-					"description": "Prevent certain users from accessing this library or its contents",
-					"noUsers": "There are no other registered users to exclude from this library",
-					"updated": "Exclusions updated",
-					"failure": "Failed to update exclusions"
+					"heading": "Wyklucz użytkowników",
+					"description": "Zabroń niektórym użytkownikom dostępu do tej biblioteki lub jej zawartości",
+					"noUsers": "Nie ma żadnych zarejestrowanych użytkowników do wykluczenia z tej biblioteki",
+					"updated": "Wykluczenia zostały zaktualizowane",
+					"failure": "Nie udało się zaktualizować wykluczeń"
 				}
 			}
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this library and all of its contents or certain resources",
+			"title": "Akcje usuwania",
+			"description": "Trwale usuń tę bibliotekę i całą jej zawartość lub niektóre zasoby",
 			"sections": {
 				"cleanLibrary": {
-					"heading": "Clean library",
-					"description": "Remove all media and series that cannot be located on disk",
-					"disclaimer": "While this action will not delete any files, it will permanently delete all records relating to media and series which have a missing status",
+					"heading": "Wyczyść bibliotekę",
+					"description": "Usuń wszystkie media i serie, których nie można zlokalizować na dysku",
+					"disclaimer": "Chociaż czynność ta nie usunie żadnych plików, usunięte zostaną wszystkie rekordy dotyczące mediów i serii posiadających status brakujących",
 					"confirmation": {
-						"label": "Clean library",
-						"text": "Are you sure you want to clean this library?"
+						"label": "Wyczyść bibliotekę",
+						"text": "Czy na pewno chcesz wyczyścić tę bibliotekę?"
 					}
 				},
 				"deleteLibrary": {
-					"heading": "Delete library",
+					"heading": "Usuń bibliotekę",
 					"description": [
-						"Permanently delete this library and all its contents.",
-						"This action cannot be undone"
+						"Trwale usuń tę bibliotekę i całą jej zawartość.",
+						"Tej czynności nie można cofnąć"
 					]
 				}
 			}
@@ -1176,7 +1176,7 @@
 		"save": "Zapisz",
 		"send": "Wyślij",
 		"saveChanges": "Zapisz zmiany",
-		"noChanges": "No changes",
+		"noChanges": "Brak zmian",
 		"create": "Utwórz",
 		"edit": "Edytuj",
 		"update": "Aktualizuj",

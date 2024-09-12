@@ -33,6 +33,11 @@ pub fn init_tracing(config: &StumpConfig) {
 				.expect("Error invalid tracing directive for stump_server!"),
 		)
 		.add_directive(
+			"stump_desktop=trace"
+				.parse()
+				.expect("Error invalid tracing directive for stump_desktop!"),
+		)
+		.add_directive(
 			"tower_http=debug"
 				.parse()
 				.expect("Error invalid tracing directive for tower_http!"),

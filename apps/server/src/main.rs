@@ -1,9 +1,12 @@
+use std::sync::Arc;
+
 use cli::{handle_command, Cli, Parser};
 use errors::EntryError;
 use stump_core::{
 	config::bootstrap_config_dir, config::logging::init_tracing, StumpCore,
 };
 
+mod asset_resolver;
 mod config;
 mod errors;
 mod filter;
@@ -11,6 +14,8 @@ mod http_server;
 mod middleware;
 mod routers;
 mod utils;
+
+use asset_resolver::AssetResolverExt;
 
 #[cfg(debug_assertions)]
 fn debug_setup() {
@@ -49,6 +54,6 @@ async fn main() -> Result<(), EntryError> {
 			tracing::trace!(?config, "App config");
 		}
 
-		Ok(http_server::run_http_server(config).await?)
+		Ok(http_server::run_http_server(config, None).await?)
 	}
 }

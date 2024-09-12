@@ -1,5 +1,6 @@
 #![warn(clippy::dbg_macro)]
 
+mod asset_resolver;
 pub mod config;
 mod errors;
 mod filter;
@@ -8,6 +9,7 @@ pub mod middleware;
 mod routers;
 mod utils;
 
+pub use asset_resolver::AssetResolverExt;
 pub use http_server::run_http_server;
 
 #[cfg(feature = "bundled-server")]

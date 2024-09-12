@@ -34,7 +34,9 @@ pub type APIResult<T> = Result<T, APIError>;
 /// Note: If there is an invalid configuration, neither of these can happen, so there is a
 /// separate error variant for that.
 #[derive(Debug, Error)]
+#[allow(dead_code)]
 pub enum EntryError {
+	// TODO: determine why this is showing as unused?
 	#[error("{0}")]
 	InvalidConfig(String),
 	#[error("{0}")]

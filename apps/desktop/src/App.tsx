@@ -8,6 +8,10 @@ import { useTauriRPC } from './utils'
 
 const store = new Store('settings.json')
 
+// TODO(desktop): We need an AppEntry which effectively either renders _this_ app or
+// the web app based on whether we are within a tauri runtime or not. Today, this app is
+// build to run _only_ within a tauri runtime, so things like useTauriRPC will throw
+// errors if we try to run this app in a web browser.
 export default function App() {
 	const { getNativePlatform, ...tauriRPC } = useTauriRPC()
 

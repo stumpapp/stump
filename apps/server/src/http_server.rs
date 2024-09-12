@@ -1,21 +1,22 @@
 use std::net::SocketAddr;
 
 use axum::{extract::connect_info::Connected, serve::IncomingStream, Router};
-use stump_core::{
-	config::{bootstrap_config_dir, logging::init_tracing},
-	job::JobControllerCommand,
-	StumpCore,
-};
+use stump_core::{job::JobControllerCommand, StumpCore};
 use tokio::sync::oneshot;
 use tower_http::trace::TraceLayer;
 
 use crate::{
 	config::{cors, session::get_session_layer},
-	errors::{EntryError, ServerError, ServerResult},
+	errors::{ServerError, ServerResult},
 	routers,
 	utils::shutdown_signal_with_cleanup,
 };
 use stump_core::config::StumpConfig;
+
+#[cfg(feature = "bundled-server")]
+use crate::errors::EntryError;
+#[cfg(feature = "bundled-server")]
+use stump_core::config::{bootstrap_config_dir, logging::init_tracing};
 
 pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 	let core = StumpCore::new(config.clone()).await;
@@ -95,8 +96,13 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 	Ok(())
 }
 
-#[allow(dead_code)]
-pub async fn bootstrap_http_server_config() -> Result<StumpConfig, EntryError> {
+// TODO(desktop): StumpConfig should accept an optional resource fetcher
+// which would be used in the spa router to serve the frontend assets from the
+// Tauri bundle.
+#[cfg(feature = "bundled-server")]
+pub async fn bootstrap_http_server_config(
+	_resource_fetcher: Option<impl Fn(String) -> Option<(String, Vec<u8>)>>,
+) -> Result<StumpConfig, EntryError> {
 	// Get STUMP_CONFIG_DIR to bootstrap startup
 	let config_dir = bootstrap_config_dir();
 

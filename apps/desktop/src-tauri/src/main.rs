@@ -30,12 +30,13 @@ fn setup_app(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 	// if bundled-server feature is enabled, start the server
 	#[cfg(feature = "bundled-server")]
 	if _app_store.run_bundled_server {
+		let asset_resolver = Arc::new(app.asset_resolver());
+		let resource_fetcher =
+			move |path: String| asset_resolver.get(path).map(|r| (r.mime_type, r.bytes));
+
 		tauri::async_runtime::spawn(async move {
-			// TODO: would setting the client path to tauri-managed resources work?
-			// - https://github.com/tauri-apps/tauri/issues/5225
-			// - https://tauri.app/v1/guides/building/resources/
-			// - https://github.com/tauri-apps/tauri/discussions/4998
-			let config_result = bootstrap_http_server_config().await;
+			let config_result =
+				bootstrap_http_server_config(Some(resource_fetcher)).await;
 			match config_result {
 				Ok(config) => {
 					if let Err(error) = run_http_server(config).await {

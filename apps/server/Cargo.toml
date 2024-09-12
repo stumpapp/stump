@@ -4,6 +4,9 @@ version = { workspace = true }
 edition = "2021"
 default-run = "stump_server"
 
+[features]
+bundled-server = []
+
 [dependencies]
 async-stream = { workspace = true }
 async-trait = { workspace = true }

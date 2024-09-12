@@ -155,6 +155,8 @@ pub struct StumpConfig {
 	#[env_key(SCANNER_CHUNK_SIZE_KEY)]
 	pub scanner_chunk_size: usize,
 }
+// #[default_value(None)]
+// pub test: Option<impl Fn(&str) -> Option<Vec<u8>> + Send + Sync>,
 
 impl StumpConfig {
 	/// Ensures that the configuration directory exists and saves the `StumpConfig`'s current values

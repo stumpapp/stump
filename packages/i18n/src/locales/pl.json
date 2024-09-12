@@ -131,38 +131,38 @@
 	"createOrUpdateLibraryForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
-				"description": "A friendly name for your library",
-				"placeholder": "My Library"
+				"label": "Nazwa",
+				"description": "Przyjazna nazwa biblioteki",
+				"placeholder": "Moja biblioteka"
 			},
 			"path": {
-				"label": "Path",
-				"description": "The path to the library as it exists on your server",
-				"placeholder": "/path/to/library"
+				"label": "Ścieżka",
+				"description": "Ścieżka do biblioteki w takiej formie jak na Twoim serwerze",
+				"placeholder": "/ścieżka/do/biblioteki"
 			},
 			"description": {
-				"label": "Description",
-				"description": "A short description of your library",
-				"placeholder": "A library of all my favorite books"
+				"label": "Opis",
+				"description": "Krótki opis Twojej biblioteki",
+				"placeholder": "Biblioteka wszystkich moich ulubionych książek"
 			},
 			"tags": {
-				"label": "Tags",
-				"description": "Used to categorize your library or enforce access rules"
+				"label": "Etykiety",
+				"description": "Używane do kategoryzowania biblioteki lub wymuszania reguł dostępu"
 			},
 			"thumbnailConfig": {
 				"section": {
 					"heading": {
-						"create": "Thumbnail configuration",
-						"update": "Generation"
+						"create": "Konfiguracja miniaturek",
+						"update": "Generowanie"
 					},
-					"description": "Improve loading times while browsing your library by generating thumbnails for your books"
+					"description": "Popraw czas ładowania podczas przeglądania biblioteki poprzez generowanie miniatur dla Twoich książek"
 				},
 				"enableSwitch": {
-					"label": "Enabled",
-					"description": "Generate thumbnail images for this library"
+					"label": "Aktywne",
+					"description": "Generuj miniaturki dla tej biblioteki"
 				},
 				"scaled": {
-					"label": "Scaled",
+					"label": "Skalowane",
 					"description": "Scale the image by a custom factor per dimension",
 					"width": {
 						"label": "Width scale"
@@ -271,7 +271,7 @@
 	"createLibraryScene": {
 		"heading": "Utwórz bibliotekę",
 		"subtitle": "Biblioteki służą do grupowania książek. Jeśli chcesz odświeżyć sobie metodykę ich działania, sprawdź",
-		"subtitleLink": "stosowna dokumentacja",
+		"subtitleLink": "stosowną dokumentację",
 		"form": {
 			"stepLabel": "Step",
 			"steps": [
@@ -323,7 +323,7 @@
 	"librarySettingsScene": {
 		"heading": "Ustawienia",
 		"subtitle": "Zarządzaj tutaj swoją biblioteką. Jeśli chcesz odświeżyć sobie działanie tych ustawień, sprawdź",
-		"subtitleLink": "stosowna dokumentacja",
+		"subtitleLink": "stosowną dokumentację",
 		"sidebar": {
 			"basics": "Basics",
 			"options": {

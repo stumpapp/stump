@@ -39,6 +39,23 @@ export const createReaderStore = (storage?: StateStorage) =>
 		),
 	)
 
+export type BookImageScalingMethod = 'auto' | 'fill' | 'none'
+export type BookImageScaling = {
+	/**
+	 * The method to use for scaling the height of the image
+	 */
+	height: BookImageScalingMethod
+	/**
+	 * The method to use for scaling the width of the image
+	 */
+	width: BookImageScalingMethod
+	/**
+	 * Whether these settings should override the mobile settings, or if Stump should
+	 * automatically determine the best settings for mobile
+	 */
+	overrideMobile: boolean
+}
+
 /**
  * The preferences for a book, which represents an override of a user's default preferences for a
  * specific book
@@ -69,6 +86,14 @@ export type BookPreferences = {
 	 * The theme to use for the book. This will have no effect if the book is image-based
 	 */
 	theme?: string
+	/**
+	 * TODO docs
+	 */
+	imageScaling: {
+		height: 'auto' | 'fill' | 'none'
+		width: 'auto' | 'fill' | 'none'
+		overrideMobile: boolean
+	}
 }
 
 /**
@@ -127,6 +152,11 @@ export const createNewReaderStore = (storage?: StateStorage) =>
 				(set, get) =>
 					({
 						bookPreferences: {},
+						imageScaling: {
+							height: 'auto',
+							overrideMobile: false,
+							width: 'auto',
+						},
 						setBookPreferences: (id, preferences) => {
 							const existingPreferences = get().bookPreferences[id]
 							set({
@@ -148,7 +178,7 @@ export const createNewReaderStore = (storage?: StateStorage) =>
 				{
 					name: 'stump-new-reader-store',
 					storage: storage ? createJSONStorage(() => storage) : undefined,
-					version: 1,
+					version: 2,
 				},
 			),
 		),

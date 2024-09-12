@@ -7,6 +7,7 @@ import paths from '@/paths'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useImageBaseReaderContext } from '../context'
+import ImageScalingMenu from './ImageScalingMenu'
 import LayoutMenu from './LayoutMenu'
 
 export default function ReaderHeader() {
@@ -40,7 +41,10 @@ export default function ReaderHeader() {
 
 				<Text>{title}</Text>
 
-				<LayoutMenu />
+				<div className="flex items-center space-x-2">
+					<ImageScalingMenu />
+					<LayoutMenu />
+				</div>
 			</div>
 		</motion.nav>
 	)

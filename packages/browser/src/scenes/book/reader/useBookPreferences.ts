@@ -56,7 +56,14 @@ export function useBookPreferences({ book }: Params): Return {
 	}
 }
 
-const defaultPreferences = (libraryConfig?: LibraryOptions): BookPreferences => ({
-	readingDirection: libraryConfig?.default_reading_dir || 'ltr',
-	readingMode: libraryConfig?.default_reading_mode || 'paged',
-})
+const defaultPreferences = (libraryConfig?: LibraryOptions): BookPreferences =>
+	({
+		// TODO: scaling defaults
+		imageScaling: {
+			height: 'auto',
+			overrideMobile: false,
+			width: 'auto',
+		},
+		readingDirection: libraryConfig?.default_reading_dir || 'ltr',
+		readingMode: libraryConfig?.default_reading_mode || 'paged',
+	}) as BookPreferences

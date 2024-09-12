@@ -23,11 +23,10 @@ export default function LayoutMenu() {
 		}
 	}
 
-	// TODO: open stutters, prolly just need an effect for when toolbar closes
 	return (
 		<Popover>
 			<ToolTip content="Layout preference" align="end">
-				<Popover.Trigger asChild>
+				<Popover.Trigger asChild data-testid="trigger">
 					<ControlButton>
 						<Settings2 className="h-4 w-4" />
 					</ControlButton>

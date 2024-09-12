@@ -1,4 +1,8 @@
-import React, { forwardRef, useCallback } from 'react'
+import { BookImageScaling } from '@stump/client'
+import { cn } from '@stump/components'
+import React, { forwardRef, useCallback, useMemo } from 'react'
+
+import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { ImagePageDimensionRef, useImageBaseReaderContext } from '../context'
 
@@ -11,7 +15,10 @@ type Props = {
 
 const PageSet = forwardRef<HTMLDivElement, Props>(
 	({ currentPage, displayedPages, getPageUrl, onPageClick }, ref) => {
-		const { pageDimensions, setDimensions } = useImageBaseReaderContext()
+		const { pageDimensions, setDimensions, book } = useImageBaseReaderContext()
+		const {
+			bookPreferences: { imageScaling },
+		} = useBookPreferences({ book })
 		/**
 		 * A memoized callback to get the dimensions of a given page
 		 */
@@ -29,13 +36,16 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 			[setDimensions],
 		)
 
-		const dimensionSet = displayedPages.map((page) => getDimensions(page))
-
-		const shouldDisplayDoubleSpread =
-			displayedPages.length > 1 &&
-			dimensionSet.every((dimensions) => !dimensions || dimensions.isPortrait)
+		const dimensionSet = useMemo(
+			() => displayedPages.map((page) => getDimensions(page)),
+			[displayedPages, getDimensions],
+		)
 
 		const renderSet = () => {
+			const shouldDisplayDoubleSpread =
+				displayedPages.length > 1 &&
+				dimensionSet.every((dimensions) => !dimensions || dimensions.isPortrait)
+
 			if (shouldDisplayDoubleSpread) {
 				return (
 					<>
@@ -46,6 +56,7 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 								getPageUrl={getPageUrl}
 								onPageClick={onPageClick}
 								upsertDimensions={upsertDimensions}
+								imageScaling={imageScaling}
 							/>
 						))}
 					</>
@@ -57,6 +68,7 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 						getPageUrl={getPageUrl}
 						onPageClick={onPageClick}
 						upsertDimensions={upsertDimensions}
+						imageScaling={imageScaling}
 					/>
 				)
 			}
@@ -76,12 +88,30 @@ export default PageSet
 type PageProps = Omit<Props, 'displayedPages' | 'currentPage'> & {
 	page: number
 	upsertDimensions: (page: number, dimensions: ImagePageDimensionRef) => void
+	imageScaling: BookImageScaling
 }
 
-const Page = ({ page, getPageUrl, onPageClick, upsertDimensions }: PageProps) => {
+const Page = ({
+	page,
+	getPageUrl,
+	onPageClick,
+	upsertDimensions,
+	imageScaling: { height, width, overrideMobile },
+}: PageProps) => {
+	// FIXME: scuffed
 	return (
 		<img
-			className="z-30 max-h-screen w-full select-none md:w-auto"
+			className={cn(
+				'z-30 select-none',
+				{
+					'max-h-screen': height === 'auto',
+				},
+				{ 'max-w-screen': width === 'auto' },
+				{ 'w-full md:w-auto': width === 'auto' && !overrideMobile },
+				{ 'w-full': width === 'fill' },
+				{ 'h-[unset]': height === 'none' },
+				{ 'w-[unset]': width === 'none' },
+			)}
 			src={getPageUrl(page)}
 			onLoad={(e) => {
 				const img = e.target as HTMLImageElement

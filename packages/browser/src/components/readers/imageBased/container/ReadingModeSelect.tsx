@@ -23,13 +23,16 @@ export default function ReadingModeSelect() {
 	 */
 	const doChange = useCallback(
 		(mode: ReadingMode) => {
-			if (currentMode.startsWith('continuous')) {
-				// We need to set the page in the URL for the paged reader
-				// to start at the correct page
-				search.set('page', currentPage.toString())
-				setSearch(search)
+			// We need to set the page in the URL for the paged reader to start at the correct
+			// page but remove the page from the URL for the continuous readers
+			const urlPage = currentMode.startsWith('continuous') ? currentPage.toString() : null
+			if (urlPage) {
+				search.set('page', urlPage)
+			} else {
+				search.delete('page')
 			}
 
+			setSearch(search)
 			setBookPreferences({ readingMode: mode })
 		},
 		[currentMode, currentPage, search, setSearch, setBookPreferences],

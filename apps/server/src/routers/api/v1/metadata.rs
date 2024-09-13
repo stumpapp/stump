@@ -1,8 +1,6 @@
 use std::collections::BTreeSet;
 
-use axum::{
-	extract::State, middleware::from_extractor_with_state, routing::get, Json, Router,
-};
+use axum::{extract::State, middleware, routing::get, Json, Router};
 use prisma_client_rust::{
 	operator::{and, or},
 	Direction,
@@ -31,7 +29,7 @@ use crate::{
 		MediaMetadataFilter, MediaMetadataRelationFilter, SeriesMedataFilter,
 		ValueOrRange,
 	},
-	middleware::auth::Auth,
+	middleware::auth::auth_middleware,
 };
 
 use super::media::apply_media_filters;
@@ -53,7 +51,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/characters", get(get_characters_handler))
 				.route("/teams", get(get_teams_handler)),
 		)
-		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 fn list_str_to_params<R: From<prisma_client_rust::Operator<R>>>(

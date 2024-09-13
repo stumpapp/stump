@@ -13,10 +13,11 @@ use stump_core::{
 	error::CoreError,
 	filesystem::{image::ProcessorError, FileError},
 	job::error::JobManagerError,
+	opds::v2_0::OPDSV2Error,
 	CoreEvent,
 };
 use tokio::sync::mpsc;
-use tower_sessions::session::SessionError;
+use tower_sessions::session::Error as SessionError;
 use utoipa::ToSchema;
 
 use std::{net, num::TryFromIntError};
@@ -156,6 +157,12 @@ impl APIError {
 			APIError::Redirect(_) => StatusCode::TEMPORARY_REDIRECT,
 			_ => StatusCode::INTERNAL_SERVER_ERROR,
 		}
+	}
+}
+
+impl From<OPDSV2Error> for APIError {
+	fn from(error: OPDSV2Error) -> Self {
+		APIError::InternalServerError(error.to_string())
 	}
 }
 
@@ -310,4 +317,11 @@ impl IntoResponse for APIError {
 	fn into_response(self) -> Response {
 		APIErrorResponse::from(self).into_response()
 	}
+}
+
+pub mod api_error_message {
+	pub const LOCKED_ACCOUNT: &str =
+		"Your account is locked. Please contact an administrator to unlock your account.";
+	pub const FORBIDDEN_ACTION: &str =
+		"You do not have permission to perform this action.";
 }

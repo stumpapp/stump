@@ -63,10 +63,10 @@ model UserLoginActivity {
 }
 
 model Session {
-  id         String   @id @default(uuid())
-  created_at DateTime @default(now())
-  expires_at DateTime
-  data       Bytes // User information (user and user preferences)
+  id          String   @id @default(uuid())
+  created_at  DateTime @default(now())
+  expiry_time DateTime
+  data        Bytes // User information (user and user preferences)
 
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id String
@@ -117,7 +117,9 @@ model LibraryOptions {
   default_reading_mode            String  @default("paged") // paged or continuous:(horizontal|vertical)
   default_reading_image_scale_fit String  @default("height") // height, width, none (original)
   library_pattern                 String  @default("SERIES_BASED") // SERIES_BASED or COLLECTION_BASED
-  thumbnail_config                Bytes? // { size_factor: "...", format: "...", quality: ... }
+
+  thumbnail_config Bytes? // { size_factor: "...", format: "...", quality: ... }
+  ignore_rules     Bytes? // ["glob1", "glob2", ...]
 
   library_id String?
   library    Library?
@@ -213,7 +215,7 @@ model Media {
 
 // TODO: determine what is optional and what is safe to make required
 model MediaMetadata {
-  // TODO(prisma 0.7.0): Nested create
+  // TODO(prisma-nested-create): Refactor once nested create is supported
   id String @id @default(cuid())
 
   title      String?

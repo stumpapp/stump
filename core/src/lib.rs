@@ -269,9 +269,7 @@ mod tests {
 			.join("../packages/types")
 			.join("generated.ts");
 
-		println!(
-			"Please ensure to only generate types using `cargo run --package codegen`"
-		);
+		println!("Please ensure to only generate types using `cargo codegen`");
 
 		let mut file = File::create(path)?;
 
@@ -353,6 +351,7 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<Library>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryPattern>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryScanMode>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<IgnoreRules>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryOptions>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryStats>()?).as_bytes())?;
 

@@ -24,6 +24,7 @@ type HoverVariant = {
 	hover: string
 }
 
+// TODO: hover variant..
 /**
  * A shorthand type for a color token which has a secondary variant. All secondary variants should
  * also have a default variant

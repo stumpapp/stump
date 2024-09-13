@@ -22,6 +22,7 @@ pub struct BookClub {
 	description: Option<String>,
 	emoji: Option<String>,
 	is_private: bool,
+	// TODO(specta): replace with DateTime<FixedOffset>
 	created_at: String,
 	member_role_spec: BookClubMemberRoleSpec,
 

@@ -17,6 +17,7 @@ pub struct ActiveReadingSession {
 	pub epubcfi: Option<String>,
 	// The percentage completed
 	pub percentage_completed: Option<f64>,
+	// TODO(specta): replace with DateTime<FixedOffset>
 	/// The timestamp when the reading session was started
 	pub started_at: String,
 	/// The ID of the media which has progress.
@@ -32,6 +33,7 @@ pub struct ActiveReadingSession {
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema, Default)]
 pub struct FinishedReadingSession {
 	pub id: String,
+	// TODO(specta): replace with DateTime<FixedOffset>
 	/// The timestamp when the reading session was started
 	pub started_at: String,
 	/// The timestamp when the reading session was completed

@@ -7,7 +7,7 @@
 		"dev": "vite --host",
 		"start": "vite preview",
 		"build": "vite build",
-		"nuke": "rimraf -rf node_modules"
+		"nuke": "rimraf node_modules"
 	},
 	"dependencies": {
 		"@stump/client": "*",

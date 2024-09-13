@@ -22,6 +22,16 @@ jest.mock('../DoubleSpreadToggle', () => ({
 	default: () => <div data-testid="DoubleSpreadToggle" />,
 }))
 
+jest.mock('../ImageScalingSelect', () => ({
+	__esModule: true,
+	default: () => <div data-testid="ImageScalingSelect" />,
+}))
+
+jest.mock('../BrightnessControl', () => ({
+	__esModule: true,
+	default: () => <div data-testid="BrightnessControl" />,
+}))
+
 jest.mock('@/scenes/book/reader/useBookPreferences', () => ({
 	useBookPreferences: jest.fn(),
 }))
@@ -66,6 +76,7 @@ describe('LayoutMenu', () => {
 		expect(screen.getByTestId('ReadingModeSelect')).toBeInTheDocument()
 		expect(screen.getByTestId('DoubleSpreadToggle')).toBeInTheDocument()
 		expect(screen.getByTestId('ReadingDirectionSelect')).toBeInTheDocument()
+		expect(screen.getByTestId('BrightnessControl')).toBeInTheDocument()
 	})
 
 	it('should not render reading direction select when reading mode is continuous:vertical', () => {

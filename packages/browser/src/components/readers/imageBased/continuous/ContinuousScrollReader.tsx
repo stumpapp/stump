@@ -154,7 +154,7 @@ export default function ContinuousScrollReader({
 const HorizontalScroller = forwardRef<HTMLDivElement, ScrollerProps>(
 	({ children, ...props }, ref) => {
 		return (
-			<div className="x-6 overflow-y-hidden" ref={ref} {...props}>
+			<div className="overflow-y-hidden" ref={ref} {...props}>
 				{children}
 			</div>
 		)

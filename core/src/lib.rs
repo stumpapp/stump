@@ -345,6 +345,9 @@ mod tests {
 
 		file.write_all(format!("{}\n\n", ts_export::<ReadingDirection>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<ReadingMode>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<ReadingImageScaleFit>()?).as_bytes(),
+		)?;
 
 		file.write_all(format!("{}\n\n", ts_export::<FileStatus>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<Library>()?).as_bytes())?;

@@ -58,11 +58,9 @@ export function useBookPreferences({ book }: Params): Return {
 
 const defaultPreferences = (libraryConfig?: LibraryOptions): BookPreferences =>
 	({
-		// TODO: scaling defaults
+		brightness: 1,
 		imageScaling: {
-			height: 'auto',
-			overrideMobile: false,
-			width: 'auto',
+			scaleToFit: libraryConfig?.default_reading_image_scale_fit || 'height',
 		},
 		readingDirection: libraryConfig?.default_reading_dir || 'ltr',
 		readingMode: libraryConfig?.default_reading_mode || 'paged',

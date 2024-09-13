@@ -17,7 +17,7 @@ import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 import { useImageBaseReaderContext } from '../context'
 
 export default function ReaderFooter() {
-	const { book, currentPage } = useImageBaseReaderContext()
+	const { book, currentPage, setCurrentPage } = useImageBaseReaderContext()
 	const {
 		settings: { showToolBar, preload },
 	} = useBookPreferences({ book })
@@ -70,6 +70,7 @@ export default function ReaderFooter() {
 				itemContent={(idx, url) => {
 					return (
 						<AspectRatio
+							onClick={() => setCurrentPage(idx + 1)}
 							ratio={2 / 3}
 							className={cn(
 								'flex cursor-pointer items-center overflow-hidden rounded-md border-2 border-solid border-transparent shadow-xl transition duration-300 hover:border-brand',

@@ -1,42 +1,58 @@
-import { BookImageScalingMethod } from '@stump/client'
+import { BookImageScalingFit } from '@stump/client'
 import { Label, NativeSelect } from '@stump/components'
 import React, { useCallback } from 'react'
 
-type Props = {
-	variant: 'height' | 'width'
-	onChange: (value: BookImageScalingMethod) => void
-	value: BookImageScalingMethod
-}
+import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
-export default function ImageScalingSelect({ onChange, variant, value }: Props) {
+import { useImageBaseReaderContext } from '../context'
+
+export default function ImageScalingSelect() {
+	const { book } = useImageBaseReaderContext()
+	const {
+		bookPreferences: {
+			imageScaling: { scaleToFit },
+		},
+		setBookPreferences,
+	} = useBookPreferences({ book })
+
+	const doChange = useCallback(
+		(value: BookImageScalingFit) =>
+			setBookPreferences({
+				imageScaling: {
+					scaleToFit: value,
+				},
+			}),
+		[setBookPreferences],
+	)
+
 	/**
 	 * A change handler for the image scaling select, asserting that the value
-	 * is a valid {@link BookImageScalingMethod} before setting the scaling method
-	 * in the book preferences (via the `onChange` callback).
+	 * is a valid {@link BookImageScalingFit} before setting the scaling method
+	 * in the book preferences (via the `doChange` callback).
 	 */
 	const handleChange = useCallback(
 		(e: React.ChangeEvent<HTMLSelectElement>) => {
-			if (isBookImageScalingMethod(e.target.value)) {
-				onChange(e.target.value)
+			if (isBookImageScalingFit(e.target.value)) {
+				doChange(e.target.value)
 			} else {
-				console.warn(`Invalid scaling method: ${e.target.value}`)
+				console.warn(`Invalid scaling fit: ${e.target.value}`)
 			}
 		},
-		[onChange],
+		[doChange],
 	)
 
 	return (
 		<div className="py-1.5">
-			<Label htmlFor={`${variant}-scaling`}>{variant}</Label>
+			<Label htmlFor="image-scaling-fit">Image scaling</Label>
 			<NativeSelect
-				id={`${variant}-scaling`}
+				id="image-scaling-fit"
 				size="sm"
 				options={[
-					{ label: 'Auto', value: 'auto' },
-					{ label: 'Fill', value: 'fill' },
-					{ label: 'None', value: 'none' },
+					{ label: 'Height', value: 'height' },
+					{ label: 'Width', value: 'width' },
+					{ label: 'Original', value: 'none' },
 				]}
-				value={value}
+				value={scaleToFit}
 				onChange={handleChange}
 				className="mt-1.5"
 			/>
@@ -44,5 +60,5 @@ export default function ImageScalingSelect({ onChange, variant, value }: Props) 
 	)
 }
 
-const isBookImageScalingMethod = (value: string): value is BookImageScalingMethod =>
-	['auto', 'fill', 'none'].includes(value)
+const isBookImageScalingFit = (value: string): value is BookImageScalingFit =>
+	['height', 'width', 'none'].includes(value)

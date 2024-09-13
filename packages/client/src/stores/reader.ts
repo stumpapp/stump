@@ -39,21 +39,9 @@ export const createReaderStore = (storage?: StateStorage) =>
 		),
 	)
 
-export type BookImageScalingMethod = 'auto' | 'fill' | 'none'
+export type BookImageScalingFit = 'width' | 'height' | 'none'
 export type BookImageScaling = {
-	/**
-	 * The method to use for scaling the height of the image
-	 */
-	height: BookImageScalingMethod
-	/**
-	 * The method to use for scaling the width of the image
-	 */
-	width: BookImageScalingMethod
-	/**
-	 * Whether these settings should override the mobile settings, or if Stump should
-	 * automatically determine the best settings for mobile
-	 */
-	overrideMobile: boolean
+	scaleToFit: BookImageScalingFit
 }
 
 /**
@@ -61,6 +49,12 @@ export type BookImageScaling = {
  * specific book
  */
 export type BookPreferences = {
+	// TODO: might be better in settings...
+	/**
+	 * A brightness value for the book, which will apply a filter to dim / brighten the page.
+	 * This must be a value between 0 and 1.
+	 */
+	brightness: number
 	/**
 	 * The current reader mode
 	 */
@@ -87,13 +81,9 @@ export type BookPreferences = {
 	 */
 	theme?: string
 	/**
-	 * TODO docs
+	 * The image scaling preferences for the book. This will have no effect if the book is not an image-based book
 	 */
-	imageScaling: {
-		height: 'auto' | 'fill' | 'none'
-		width: 'auto' | 'fill' | 'none'
-		overrideMobile: boolean
-	}
+	imageScaling: BookImageScaling
 }
 
 /**
@@ -152,11 +142,6 @@ export const createNewReaderStore = (storage?: StateStorage) =>
 				(set, get) =>
 					({
 						bookPreferences: {},
-						imageScaling: {
-							height: 'auto',
-							overrideMobile: false,
-							width: 'auto',
-						},
 						setBookPreferences: (id, preferences) => {
 							const existingPreferences = get().bookPreferences[id]
 							set({
@@ -178,7 +163,7 @@ export const createNewReaderStore = (storage?: StateStorage) =>
 				{
 					name: 'stump-new-reader-store',
 					storage: storage ? createJSONStorage(() => storage) : undefined,
-					version: 2,
+					version: 3,
 				},
 			),
 		),

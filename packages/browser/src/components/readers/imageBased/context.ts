@@ -17,6 +17,10 @@ export type IImageBaseReaderContext = {
 	 */
 	currentPage: number
 	/**
+	 * A function to set the current page
+	 */
+	setCurrentPage: (page: number) => void
+	/**
 	 * The dimensions of the pages in the book, as they are loaded
 	 */
 	pageDimensions: Record<number, ImagePageDimensionRef>

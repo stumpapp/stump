@@ -13,13 +13,15 @@ export default function DoubleSpreadToggle() {
 	} = useBookPreferences({ book })
 
 	return (
-		<CheckBox
-			id="double-spread"
-			label="Double spread"
-			description="Display two pages at once"
-			checked={doubleSpread}
-			onClick={() => setBookPreferences({ doubleSpread: !doubleSpread })}
-			variant="primary"
-		/>
+		<div className="pt-1.5">
+			<CheckBox
+				id="double-spread"
+				label="Double spread"
+				description="Display two pages at once"
+				checked={doubleSpread}
+				onClick={() => setBookPreferences({ doubleSpread: !doubleSpread })}
+				variant="primary"
+			/>
+		</div>
 	)
 }

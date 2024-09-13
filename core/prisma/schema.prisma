@@ -110,14 +110,14 @@ model Library {
 }
 
 model LibraryOptions {
-  id                                 String  @id @default(uuid())
-  convert_rar_to_zip                 Boolean @default(false)
-  hard_delete_conversions            Boolean @default(false)
-  default_reading_dir                String  @default("ltr") // ltr or rtl
-  default_reading_mode               String  @default("paged") // paged or continuous:(horizontal|vertical)
-  default_reading_image_scale_config Bytes? // { height: string, width: string, override_mobile: boolean }
-  library_pattern                    String  @default("SERIES_BASED") // SERIES_BASED or COLLECTION_BASED
-  thumbnail_config                   Bytes? // { size_factor: "...", format: "...", quality: ... }
+  id                              String  @id @default(uuid())
+  convert_rar_to_zip              Boolean @default(false)
+  hard_delete_conversions         Boolean @default(false)
+  default_reading_dir             String  @default("ltr") // ltr or rtl
+  default_reading_mode            String  @default("paged") // paged or continuous:(horizontal|vertical)
+  default_reading_image_scale_fit String  @default("height") // height, width, none (original)
+  library_pattern                 String  @default("SERIES_BASED") // SERIES_BASED or COLLECTION_BASED
+  thumbnail_config                Bytes? // { size_factor: "...", format: "...", quality: ... }
 
   library_id String?
   library    Library?

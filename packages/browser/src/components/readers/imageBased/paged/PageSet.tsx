@@ -17,7 +17,7 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 	({ currentPage, displayedPages, getPageUrl, onPageClick }, ref) => {
 		const { pageDimensions, setDimensions, book } = useImageBaseReaderContext()
 		const {
-			bookPreferences: { imageScaling },
+			bookPreferences: { imageScaling, brightness },
 		} = useBookPreferences({ book })
 		/**
 		 * A memoized callback to get the dimensions of a given page
@@ -75,7 +75,13 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 		}
 
 		return (
-			<div ref={ref} className="flex h-full justify-center">
+			<div
+				ref={ref}
+				className="flex h-full justify-center"
+				style={{
+					filter: `brightness(${brightness * 100}%)`,
+				}}
+			>
 				{renderSet()}
 			</div>
 		)
@@ -96,21 +102,21 @@ const Page = ({
 	getPageUrl,
 	onPageClick,
 	upsertDimensions,
-	imageScaling: { height, width, overrideMobile },
+	imageScaling: { scaleToFit },
 }: PageProps) => {
-	// FIXME: scuffed
 	return (
 		<img
 			className={cn(
 				'z-30 select-none',
 				{
-					'max-h-screen': height === 'auto',
+					'mx-auto my-0 w-auto self-center': scaleToFit === 'none',
 				},
-				{ 'max-w-screen': width === 'auto' },
-				{ 'w-full md:w-auto': width === 'auto' && !overrideMobile },
-				{ 'w-full': width === 'fill' },
-				{ 'h-[unset]': height === 'none' },
-				{ 'w-[unset]': width === 'none' },
+				{
+					'm-auto h-full max-h-screen w-auto object-cover': scaleToFit === 'height',
+				},
+				{
+					'mx-auto my-0 w-full object-contain': scaleToFit === 'width',
+				},
 			)}
 			src={getPageUrl(page)}
 			onLoad={(e) => {

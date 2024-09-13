@@ -4,8 +4,10 @@ import { Settings2 } from 'lucide-react'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useImageBaseReaderContext } from '../context'
+import BrightnessControl from './BrightnessControl'
 import ControlButton from './ControlButton'
 import DoubleSpreadToggle from './DoubleSpreadToggle'
+import ImageScalingSelect from './ImageScalingSelect'
 import ReadingDirectionSelect from './ReadingDirectionSelect'
 import ReadingModeSelect from './ReadingModeSelect'
 
@@ -38,9 +40,11 @@ export default function LayoutMenu() {
 				align="end"
 				className="z-[101] flex flex-col gap-1.5 bg-background-surface"
 			>
+				<ImageScalingSelect />
 				<DoubleSpreadToggle />
 				<ReadingModeSelect />
 				{renderDirectionalOptions()}
+				<BrightnessControl />
 			</Popover.Content>
 		</Popover>
 	)

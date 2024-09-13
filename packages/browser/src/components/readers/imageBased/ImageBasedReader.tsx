@@ -169,6 +169,7 @@ export default function ImageBasedReader({
 				book: media,
 				currentPage,
 				pageDimensions,
+				setCurrentPage: handleChangePage,
 				setDimensions: setPageDimensions,
 			}}
 		>

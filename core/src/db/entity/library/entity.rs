@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 
 use crate::{
 	db::entity::{
-		common::{ReadingDirection, ReadingMode},
+		common::{ReadingDirection, ReadingImageScaleFit, ReadingMode},
 		Cursor, Series, Tag,
 	},
 	filesystem::image::ImageProcessorOptions,
@@ -118,6 +118,8 @@ pub struct LibraryOptions {
 	pub default_reading_dir: ReadingDirection,
 	#[serde(default)] // TODO: remove this after update with experimental
 	pub default_reading_mode: ReadingMode,
+	#[serde(default)]
+	pub default_reading_image_scale_fit: ReadingImageScaleFit,
 	pub library_pattern: LibraryPattern,
 	pub thumbnail_config: Option<ImageProcessorOptions>,
 	// TODO(prisma 0.7.0): Nested create
@@ -193,6 +195,10 @@ impl From<prisma::library_options::Data> for LibraryOptions {
 				data.default_reading_mode.as_str(),
 			)
 			.unwrap_or_default(),
+			default_reading_image_scale_fit: ReadingImageScaleFit::from_str(
+				data.default_reading_image_scale_fit.as_str(),
+			)
+			.unwrap_or_default(),
 			library_pattern: LibraryPattern::from(data.library_pattern),
 			thumbnail_config: data.thumbnail_config.map(|config| {
 				ImageProcessorOptions::try_from(config).unwrap_or_default()
@@ -214,6 +220,10 @@ impl From<&prisma::library_options::Data> for LibraryOptions {
 			.unwrap_or_default(),
 			default_reading_mode: ReadingMode::from_str(
 				data.default_reading_mode.as_str(),
+			)
+			.unwrap_or_default(),
+			default_reading_image_scale_fit: ReadingImageScaleFit::from_str(
+				data.default_reading_image_scale_fit.as_str(),
 			)
 			.unwrap_or_default(),
 			library_pattern: LibraryPattern::from(data.library_pattern.clone()),

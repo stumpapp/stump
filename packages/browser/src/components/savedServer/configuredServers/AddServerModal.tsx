@@ -1,7 +1,7 @@
 import { Button, ConfirmationModal } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { SavedServer } from '@stump/types'
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 
 import {
 	CREATE_OR_UPDATE_SERVER_FORM_ID,
@@ -18,6 +18,14 @@ export default function AddServerModal({ existingServers, onCreateServer }: Prop
 
 	const [isCreatingServer, setIsCreatingServer] = useState(false)
 
+	const handleCreateServer = useCallback(
+		(server: SavedServer) => {
+			onCreateServer(server)
+			setIsCreatingServer(false)
+		},
+		[onCreateServer],
+	)
+
 	return (
 		<ConfirmationModal
 			isOpen={isCreatingServer}
@@ -32,7 +40,10 @@ export default function AddServerModal({ existingServers, onCreateServer }: Prop
 				</Button>
 			}
 		>
-			<CreateOrUpdateSavedServerForm existingServers={existingServers} onSubmit={onCreateServer} />
+			<CreateOrUpdateSavedServerForm
+				existingServers={existingServers}
+				onSubmit={handleCreateServer}
+			/>
 		</ConfirmationModal>
 	)
 }

@@ -38,6 +38,7 @@ export default function LoginOrClaimScene() {
 		loginError,
 	} = useLoginOrRegister({
 		onSuccess: setUser,
+		refetchClaimed: !showServers,
 	})
 
 	const schema = z.object({

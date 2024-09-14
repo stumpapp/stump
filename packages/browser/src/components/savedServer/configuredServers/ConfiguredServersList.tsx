@@ -41,9 +41,17 @@ export default function ConfiguredServersSection() {
 
 	const setBaseURL = useAppStore((state) => state.setBaseUrl)
 	const setUser = useUserStore((state) => state.setUser)
+
 	const { logout } = useLogout({
 		removeStoreUser: () => setUser(null),
 	})
+	const safelyLogout = useCallback(async () => {
+		try {
+			await logout()
+		} catch (error) {
+			console.error('Error logging out:', error)
+		}
+	}, [logout])
 
 	const [editingServer, setEditingServer] = useState<SavedServer | null>(null)
 	const [deletingServer, setDeletingServer] = useState<SavedServer | null>(null)
@@ -125,9 +133,9 @@ export default function ConfiguredServersSection() {
 	 */
 	const onDeleteAllServers = useCallback(async () => {
 		await resetStore()
-		await logout()
+		await safelyLogout()
 		navigate('/auth')
-	}, [resetStore, logout, navigate])
+	}, [resetStore, safelyLogout, navigate])
 	/**
 	 * A callback to switch to a server in the list of connected servers, which will
 	 * logout the user and redirect them to the auth page to authenticate with the selected
@@ -136,11 +144,11 @@ export default function ConfiguredServersSection() {
 	const onSwitchToServer = useCallback(async () => {
 		if (switchingServer) {
 			const returnTo = location.pathname
-			await logout()
+			await safelyLogout()
 			await setActiveServer(switchingServer.name)
 			navigate('/auth', { state: { from: returnTo } })
 		}
-	}, [switchingServer, setActiveServer, logout, location.pathname, navigate])
+	}, [switchingServer, setActiveServer, safelyLogout, location.pathname, navigate])
 
 	return (
 		<>

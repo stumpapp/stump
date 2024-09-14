@@ -12,8 +12,8 @@
 		"vite": "vite --",
 		"dev": "tauri dev",
 		"build": "vite build && tauri build",
-		"build:mac": "vite build && tauri build --target universal-apple-darwin",
-		"build:mac-bundled": "vite build && tauri build --target universal-apple-darwin -- --features bundled-server",
+		"build:mac-universal": "vite build && tauri build --target universal-apple-darwin -- --features bundled-server",
+		"build:mac-arm": "vite build && tauri build --target aarch64-apple-darwin -- --features bundled-server",
 		"nuke": "yarn exec rimraf node_modules"
 	},
 	"dependencies": {

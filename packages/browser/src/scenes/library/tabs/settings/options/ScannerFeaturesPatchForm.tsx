@@ -6,13 +6,14 @@ import { useForm } from 'react-hook-form'
 import {
 	buildSchema,
 	CreateOrUpdateLibrarySchema,
-	FileConversionOptions,
 	formDefaults,
+	LibraryPattern,
+	ScannerOptInFeatures,
 } from '@/components/library/createOrUpdate'
 
 import { useLibraryManagement } from '../context'
 
-export default function FileConversionOptionsPatchForm() {
+export default function ScannerFeaturesPatchForm() {
 	const { library, patch } = useLibraryManagement()
 
 	const schema = useMemo(() => buildSchema([], library), [library])
@@ -24,14 +25,14 @@ export default function FileConversionOptionsPatchForm() {
 
 	const handleSubmit = useCallback(
 		({
-			convert_rar_to_zip,
-			hard_delete_conversions,
-		}: Pick<CreateOrUpdateLibrarySchema, 'convert_rar_to_zip' | 'hard_delete_conversions'>) => {
+			process_metadata,
+			generate_file_hashes,
+		}: Pick<CreateOrUpdateLibrarySchema, 'process_metadata' | 'generate_file_hashes'>) => {
 			patch({
 				config: {
 					...library.config,
-					convert_rar_to_zip,
-					hard_delete_conversions,
+					generate_file_hashes,
+					process_metadata,
 				},
 				scan_mode: 'NONE',
 			})
@@ -42,8 +43,11 @@ export default function FileConversionOptionsPatchForm() {
 	// Note: The underlying sub-form requires a form in the context, so I am wrapping it in one. However, the submit
 	// won't ever trigger, which is why there is the `onDidChange` callback.
 	return (
-		<Form form={form} onSubmit={handleSubmit}>
-			<FileConversionOptions onDidChange={handleSubmit} />
+		<Form form={form} onSubmit={handleSubmit} fieldsetClassName="space-y-12">
+			{/* Note: This component doesn't really belong here, but I didn't want to wrap it in its own form when it is just for display */}
+			{/* Should probably create a separate, non-formy variant */}
+			<LibraryPattern />
+			<ScannerOptInFeatures onDidChange={handleSubmit} />
 		</Form>
 	)
 }

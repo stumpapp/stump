@@ -69,6 +69,9 @@ export function useCoreEventHandler({ liveRefetch, onConnectionWithServerChanged
 						])
 					}
 					break
+				case 'CreatedMedia':
+					// We don't really care, should honestly remove this...
+					break
 				default:
 					console.warn('Unhandled core event', event)
 			}

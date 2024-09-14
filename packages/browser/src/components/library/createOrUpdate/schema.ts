@@ -62,6 +62,7 @@ export const buildSchema = (existingLibraries: Library[], library?: Library) =>
 	z.object({
 		convert_rar_to_zip: z.boolean().default(false),
 		description: z.string().nullable().optional(),
+		generate_file_hashes: z.boolean().default(false),
 		hard_delete_conversions: z.boolean().default(false),
 		ignore_rules: z
 			.array(
@@ -95,6 +96,7 @@ export const buildSchema = (existingLibraries: Library[], library?: Library) =>
 					message: 'Invalid library, parent directory already exists as library.',
 				}),
 			),
+		process_metadata: z.boolean().default(true),
 		scan_mode: z.string().refine(isLibraryScanMode).default('DEFAULT'),
 		tags: z
 			.array(
@@ -127,23 +129,25 @@ export type CreateOrUpdateLibrarySchema = z.infer<ReturnType<typeof buildSchema>
  * provided an existing library (if editing)
  */
 export const formDefaults = (library?: Library): CreateOrUpdateLibrarySchema => ({
-	convert_rar_to_zip: library?.library_options.convert_rar_to_zip ?? false,
+	convert_rar_to_zip: library?.config.convert_rar_to_zip ?? false,
 	description: library?.description,
-	hard_delete_conversions: library?.library_options.hard_delete_conversions ?? false,
-	ignore_rules: toFormIgnoreRules(library?.library_options.ignore_rules),
-	library_pattern: library?.library_options.library_pattern || 'SERIES_BASED',
+	generate_file_hashes: library?.config.generate_file_hashes ?? false,
+	hard_delete_conversions: library?.config.hard_delete_conversions ?? false,
+	ignore_rules: toFormIgnoreRules(library?.config.ignore_rules),
+	library_pattern: library?.config.library_pattern || 'SERIES_BASED',
 	name: library?.name || '',
 	path: library?.path || '',
+	process_metadata: library?.config.process_metadata ?? true,
 	scan_mode: 'DEFAULT',
 	tags: library?.tags?.map((t) => ({ label: t.name, value: t.name.toLowerCase() })),
-	thumbnail_config: library?.library_options.thumbnail_config
+	thumbnail_config: library?.config.thumbnail_config
 		? {
 				enabled: true,
-				...library?.library_options.thumbnail_config,
+				...library?.config.thumbnail_config,
 			}
 		: {
 				enabled: false,
-				format: 'Png',
+				format: 'Webp',
 				quality: undefined,
 				resize_options: undefined,
 			},

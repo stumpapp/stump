@@ -30,7 +30,7 @@ fn read(file: &std::fs::File, offset: u64, size: u64) -> Result<Vec<u8>, io::Err
 }
 
 pub fn generate(path: &str, bytes: u64) -> Result<String, io::Error> {
-	let file = std::fs::File::open(path).unwrap();
+	let file = std::fs::File::open(path)?;
 
 	let mut ring_context = Context::new(&SHA256);
 

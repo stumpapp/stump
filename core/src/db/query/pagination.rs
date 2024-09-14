@@ -230,7 +230,7 @@ pub struct PageLinks {
 	pub next: Option<String>,
 }
 
-#[derive(Serialize, Type, ToSchema)]
+#[derive(Debug, Serialize, Type, ToSchema)]
 pub struct PageInfo {
 	/// The number of pages available.
 	pub total_pages: u32,
@@ -277,7 +277,7 @@ impl From<CursorQuery> for CursorInfo {
 	}
 }
 
-#[derive(Serialize, Type, ToSchema)]
+#[derive(Debug, Serialize, Type, ToSchema)]
 // OK, this is SO annoying...
 #[aliases(PageableDirectoryListing = Pageable<DirectoryListing>)]
 pub struct Pageable<T: Serialize> {

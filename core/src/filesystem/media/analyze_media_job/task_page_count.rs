@@ -1,7 +1,7 @@
 use crate::{
 	filesystem::{
 		analyze_media_job::{utils::fetch_media_with_metadata, AnalyzeMediaOutput},
-		media::process::get_page_count,
+		media::process::get_page_count_async,
 	},
 	job::{error::JobError, WorkerCtx},
 	prisma::{media, media_metadata},
@@ -27,7 +27,7 @@ pub(crate) async fn execute(
 	let media_item = fetch_media_with_metadata(&id, ctx).await?;
 
 	let path = media_item.path;
-	let page_count = get_page_count(&path, &ctx.config)?;
+	let page_count = get_page_count_async(&path, &ctx.config).await?;
 	output.page_counts_analyzed += 1;
 
 	// Check if a metadata update is neded

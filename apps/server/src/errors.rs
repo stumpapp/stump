@@ -11,7 +11,10 @@ use prisma_client_rust::{
 };
 use stump_core::{
 	error::CoreError,
-	filesystem::{image::ProcessorError, FileError},
+	filesystem::{
+		image::{ProcessorError, ThumbnailGenerateError},
+		FileError,
+	},
 	job::error::JobManagerError,
 	opds::v2_0::OPDSV2Error,
 	CoreEvent,
@@ -175,6 +178,12 @@ impl From<MultipartError> for APIError {
 impl From<reqwest::Error> for APIError {
 	fn from(error: reqwest::Error) -> Self {
 		APIError::InternalServerError(error.to_string())
+	}
+}
+
+impl From<ThumbnailGenerateError> for APIError {
+	fn from(value: ThumbnailGenerateError) -> Self {
+		APIError::InternalServerError(value.to_string())
 	}
 }
 

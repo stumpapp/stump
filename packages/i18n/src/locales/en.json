@@ -712,6 +712,12 @@
 				"configuredServers": {
 					"label": "Configured servers",
 					"description": "The list of Stump servers you can connect to",
+					"unreachableServer": {
+						"tooltip": "Server unreachable"
+					},
+					"activeServer": {
+						"tooltip": "Current server"
+					},
 					"addOrEditServer": {
 						"validation": {
 							"nameExists": "A server with this name already exists",

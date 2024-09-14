@@ -664,7 +664,10 @@
 					"options": {
 						"light": "Jasny",
 						"dark": "Ciemny",
-						"bronze": "Jasnobrązowy"
+						"bronze": "Jasnobrązowy",
+						"ocean": "Ocean",
+						"autumn": "Autumn",
+						"cosmic": "Cosmic"
 					}
 				},
 				"fontSelect": {

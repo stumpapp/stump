@@ -1,6 +1,9 @@
+import { autumn } from './autumn'
 import { bronze } from './bronze'
+import { cosmic } from './cosmic'
 import { dark } from './dark'
 import { light } from './light'
+import { ocean } from './ocean'
 
 const brand = {
 	100: '#EFDDD1',
@@ -48,9 +51,12 @@ export const sharedColors = {
 }
 
 export const themes = {
+	autumn,
 	bronze,
+	cosmic,
 	dark,
 	light,
+	ocean,
 }
 
 export type Theme = keyof typeof themes

@@ -664,7 +664,10 @@
 					"options": {
 						"light": "Claro",
 						"dark": "Oscuro",
-						"bronze": "Claro Bronce"
+						"bronze": "Claro Bronce",
+						"ocean": "Ocean",
+						"autumn": "Autumn",
+						"cosmic": "Cosmic"
 					}
 				},
 				"fontSelect": {

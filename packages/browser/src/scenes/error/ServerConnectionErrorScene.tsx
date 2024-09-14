@@ -97,7 +97,7 @@ export default function ServerConnectionErrorScene() {
 							onClick={() => setShowServers(true)}
 						>
 							<span className="text-sm font-semibold text-foreground-muted transition-colors duration-100 group-hover:text-foreground-subtle">
-								Go to servers
+								{t('common.goToServers')}
 							</span>
 
 							<ArrowRight className="h-5 w-5 text-foreground-muted group-hover:text-foreground-subtle" />

@@ -764,7 +764,9 @@
 						"confirmation": {
 							"title": "Switch to this server",
 							"description": "This will log you out of your current server",
-							"confirm": "Switch to server"
+							"confirm": "Switch to server",
+							"server": "Server",
+							"uri": "URL"
 						}
 					},
 					"resetConfiguration": {
@@ -1267,6 +1269,7 @@
 		"login": "Login",
 		"seeError": "See error",
 		"goBack": "Go back",
-		"goToServers": "Go to servers"
+		"goToServers": "Go to servers",
+		"notReady": "This feature is not ready"
 	}
 }

@@ -1,4 +1,4 @@
-import { ConfirmationModal } from '@stump/components'
+import { ConfirmationModal, Label, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { SavedServer } from '@stump/types'
 import React from 'react'
@@ -29,10 +29,17 @@ export default function SwitchToServerConfirmation({ server, onConfirm, onCancel
 			{displayedServer && (
 				<div className="flex flex-col gap-2">
 					<div>
-						<b>{t(getKey('server'))}:</b> {displayedServer.name}
+						<Label>{t(getKey('server'))}</Label>
+						<Text variant="muted" size="sm">
+							{displayedServer.name}
+						</Text>
 					</div>
+
 					<div>
-						<b>{t(getKey('uri'))}:</b> {displayedServer.uri}
+						<Label>{t(getKey('uri'))}</Label>
+						<Text variant="muted" size="sm">
+							{displayedServer.uri}
+						</Text>
 					</div>
 				</div>
 			)}
@@ -40,5 +47,6 @@ export default function SwitchToServerConfirmation({ server, onConfirm, onCancel
 	)
 }
 
-const LOCALE_KEY = 'settingsScene.app/desktop.sections.configuredServers.switchToServer'
+const LOCALE_KEY =
+	'settingsScene.app/desktop.sections.configuredServers.switchToServer.confirmation'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`

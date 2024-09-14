@@ -16,8 +16,13 @@ import EditServerModal from './EditServerModal'
 import ResetConfiguredServersSection from './ResetConfiguredServersSection'
 import SwitchToServerConfirmation from './SwitchToServerConfirmation'
 
-const PING_HEALTHY_INTERVAL_MS = 10000
+const PING_HEALTHY_INTERVAL_MS = 10_000
 const PING_UNHEALTHY_INTERVAL_MS = 2000
+
+type PingResult = {
+	name: string
+	status: boolean
+}
 
 export default function ConfiguredServersSection() {
 	const location = useLocation()
@@ -47,13 +52,16 @@ export default function ConfiguredServersSection() {
 	const serverStatuses = useQueries({
 		context: QueryClientContext,
 		queries: connected_servers.map((server) => ({
-			queryFn: async () => ({
-				name: server.name,
-				status: await checkUrl(formatServiceURL(server.uri), 'v1'),
-			}),
+			queryFn: async () =>
+				({
+					name: server.name,
+					status: await checkUrl(formatServiceURL(server.uri), 'v1'),
+				}) as PingResult,
 			queryKey: ['ping', server.uri, server.name],
-			// @ts-expect-error: not sure what is wrong here
-			refetchInterval: (status) => (status ? PING_HEALTHY_INTERVAL_MS : PING_UNHEALTHY_INTERVAL_MS),
+			refetchInterval: (result?: PingResult) => {
+				if (!result) return false
+				return result.status ? PING_HEALTHY_INTERVAL_MS : PING_UNHEALTHY_INTERVAL_MS
+			},
 		})),
 	})
 	/**

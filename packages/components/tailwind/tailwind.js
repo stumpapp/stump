@@ -5,7 +5,7 @@ const path = require('path')
 const defaultTheme = require('tailwindcss/defaultTheme')
 const { createThemes } = require('tw-colors')
 const {
-	themes: { bronze, dark, light },
+	themes: { bronze, dark, light, ocean, cosmic, autumn },
 	sharedColors,
 } = require('../themes')
 
@@ -46,6 +46,9 @@ module.exports = function (relativeFromRoot) {
 				dark,
 				light,
 				bronze,
+				ocean,
+				cosmic,
+				autumn,
 			}),
 		],
 		theme: {

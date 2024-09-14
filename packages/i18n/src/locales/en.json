@@ -1262,6 +1262,11 @@
 		"edit": "Edit",
 		"update": "Update",
 		"unimplemented": "This functionality is not yet implemented! Check back later",
-		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later"
+		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
+		"logIn": "Log in",
+		"login": "Login",
+		"seeError": "See error",
+		"goBack": "Go back",
+		"goToServers": "Go to servers"
 	}
 }

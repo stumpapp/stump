@@ -3,23 +3,29 @@ import { isAxiosError } from '@stump/api'
 import { queryClient, useLoginOrRegister } from '@stump/client'
 import { Alert, Button, cx, Form, Heading, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { ShieldAlert } from 'lucide-react'
+import { motion, Variants } from 'framer-motion'
+import { ArrowLeft, ArrowRight, ShieldAlert } from 'lucide-react'
+import { useState } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
 import { Navigate } from 'react-router'
 import { useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 
-import { useUserStore } from '@/stores'
+import { ConfiguredServersList } from '@/components/savedServer'
+import { useAppStore, useUserStore } from '@/stores'
 
 export default function LoginOrClaimScene() {
 	const [params] = useSearchParams()
 	const redirect = params.get('redirect') || '/'
 
+	const [showServers, setShowServers] = useState(false)
+
 	const { user, setUser } = useUserStore((store) => ({
 		setUser: store.setUser,
 		user: store.user,
 	}))
+	const isDesktop = useAppStore((store) => store.platform !== 'browser')
 
 	const { t } = useLocaleContext()
 	const {
@@ -127,50 +133,115 @@ export default function LoginOrClaimScene() {
 	}
 
 	return (
-		<div className="flex h-full w-full flex-col items-center justify-center gap-8 bg-background p-4">
-			{renderHeader()}
-			{renderError()}
-
-			<Form
-				form={form}
-				onSubmit={handleSubmit}
-				className={cx(
-					{ 'w-full sm:max-w-md md:max-w-lg': !isClaimed },
-					{ 'min-w-[20rem]': isClaimed },
-				)}
+		// <div className="flex h-full w-full flex-col items-center justify-center gap-8 bg-background p-4">
+		<div data-tauri-drag-region className="flex h-screen w-screen items-center bg-background">
+			<motion.div
+				className="w-screen shrink-0"
+				animate={showServers ? 'appearOut' : 'appearIn'}
+				variants={variants}
 			>
-				<Input
-					id="username"
-					label={t('authScene.form.labels.username')}
-					variant="primary"
-					autoComplete="username"
-					autoFocus
-					fullWidth
-					{...form.register('username')}
-				/>
+				<div className="flex h-full w-full flex-col items-center justify-center gap-8 bg-background p-4">
+					{renderHeader()}
+					{renderError()}
 
-				<Input
-					id="password"
-					label={t('authScene.form.labels.password')}
-					variant="primary"
-					type="password"
-					autoComplete="current-password"
-					fullWidth
-					{...form.register('password')}
-				/>
+					<Form
+						form={form}
+						onSubmit={handleSubmit}
+						className={cx(
+							{ 'w-full sm:max-w-md md:max-w-lg': !isClaimed },
+							{ 'min-w-[20rem]': isClaimed },
+						)}
+					>
+						<Input
+							id="username"
+							label={t('authScene.form.labels.username')}
+							variant="primary"
+							autoComplete="username"
+							autoFocus
+							fullWidth
+							{...form.register('username')}
+						/>
 
-				<Button
-					size="md"
-					type="submit"
-					variant={isClaimed ? 'primary' : 'secondary'}
-					isLoading={isLoggingIn || isRegistering}
-					className="mt-2"
+						<Input
+							id="password"
+							label={t('authScene.form.labels.password')}
+							variant="primary"
+							type="password"
+							autoComplete="current-password"
+							fullWidth
+							{...form.register('password')}
+						/>
+
+						<Button
+							size="md"
+							type="submit"
+							variant={isClaimed ? 'primary' : 'secondary'}
+							isLoading={isLoggingIn || isRegistering}
+							className="mt-2"
+						>
+							{isClaimed
+								? t('authScene.form.buttons.login')
+								: t('authScene.form.buttons.createAccount')}
+						</Button>
+
+						{isDesktop && (
+							<button
+								className="group flex w-full items-center justify-between border-l border-edge p-4 transition-colors duration-100 hover:border-edge-strong hover:border-opacity-70 hover:bg-background-surface/50"
+								type="button"
+								onClick={() => setShowServers(true)}
+							>
+								<span className="text-sm font-semibold text-foreground-muted transition-colors duration-100 group-hover:text-foreground-subtle">
+									{t('common.goToServers')}
+								</span>
+
+								<ArrowRight className="h-5 w-5 text-foreground-muted group-hover:text-foreground-subtle" />
+							</button>
+						)}
+					</Form>
+				</div>
+			</motion.div>
+
+			{isDesktop && (
+				<motion.div
+					className="w-screen shrink-0"
+					animate={showServers ? 'appearIn' : 'appearOut'}
+					variants={variants}
 				>
-					{isClaimed
-						? t('authScene.form.buttons.login')
-						: t('authScene.form.buttons.createAccount')}
-				</Button>
-			</Form>
+					<div className="mx-auto flex h-full w-full max-w-sm flex-col justify-start gap-6 sm:max-w-md md:max-w-xl">
+						<ConfiguredServersList />
+						<button
+							className="group flex w-full items-center space-x-4 border-l border-edge p-4 transition-colors duration-100 hover:border-edge-strong hover:border-opacity-70 hover:bg-background-surface/50"
+							type="button"
+							onClick={() => setShowServers(false)}
+						>
+							<ArrowLeft className="h-5 w-5 text-foreground-muted group-hover:text-foreground-subtle" />
+
+							<span className="text-sm font-semibold text-foreground-muted transition-colors duration-100 group-hover:text-foreground-subtle">
+								{t('common.logIn')}
+							</span>
+						</button>
+					</div>
+				</motion.div>
+			)}
 		</div>
 	)
+}
+
+const variants: Variants = {
+	appearIn: {
+		display: 'block',
+		opacity: 1,
+		scale: 1,
+		transition: {
+			damping: 20,
+			delayChildren: 0.3,
+			stiffness: 150,
+			type: 'spring',
+		},
+	},
+	appearOut: {
+		display: 'none',
+		opacity: 0,
+		scale: 0.8,
+	},
 }

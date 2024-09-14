@@ -122,7 +122,7 @@ export default function ServerConnectionErrorScene() {
 							<ArrowLeft className="h-5 w-5 text-foreground-muted group-hover:text-foreground-subtle" />
 
 							<span className="text-sm font-semibold text-foreground-muted transition-colors duration-100 group-hover:text-foreground-subtle">
-								See error
+								{t('common.seeError')}
 							</span>
 						</button>
 					</div>

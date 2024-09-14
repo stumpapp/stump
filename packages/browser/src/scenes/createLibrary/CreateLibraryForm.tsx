@@ -17,6 +17,7 @@ import {
 	FileConversionOptions,
 	LibraryPattern as LibraryPatternSection,
 	ScanMode,
+	ScannerOptInFeatures,
 	ThumbnailConfig,
 } from '../../components/library/createOrUpdate/sections'
 import IgnoreRulesConfig from '../../components/library/createOrUpdate/sections/IgnoreRulesConfig'
@@ -112,8 +113,9 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 				return (
 					<>
 						<LibraryPatternSection />
-						<IgnoreRulesConfig />
+						<ScannerOptInFeatures />
 						<FileConversionOptions />
+						<IgnoreRulesConfig />
 						<div className="mt-6 flex w-full md:max-w-sm">
 							<Button
 								className="w-full md:w-auto"

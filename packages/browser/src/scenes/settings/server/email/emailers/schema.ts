@@ -36,11 +36,11 @@ export const formDefaults = (emailer?: SMTPEmailer) => ({
 	is_primary: emailer?.is_primary || true,
 	max_attachment_size_bytes: emailer?.config.max_attachment_size_bytes ?? null,
 	name: emailer?.name,
+	password: undefined,
 	sender_display_name: emailer?.config.sender_display_name,
 	sender_email: emailer?.config.sender_email,
 	smtp_host: emailer?.config.smtp_host,
 	smtp_port: emailer?.config.smtp_port,
 	tls_enabled: emailer?.config.tls_enabled || false,
 	username: emailer?.config.username,
-	password: undefined,
 })

@@ -27,14 +27,14 @@ export default function ThumbnailSettingsScene() {
 	const handleSubmit = useCallback(
 		({ thumbnail_config }: Pick<CreateOrUpdateLibrarySchema, 'thumbnail_config'>) => {
 			patch({
-				library_options: {
-					...library.library_options,
+				config: {
+					...library.config,
 					thumbnail_config: ensureValidThumbnailConfig(thumbnail_config),
 				},
 				scan_mode: 'NONE',
 			})
 		},
-		[patch, library.library_options],
+		[patch, library.config],
 	)
 
 	return (

@@ -6,11 +6,14 @@ const DEFAULT_EPUB_COVER_ID: &str = "cover";
 use crate::{
 	config::StumpConfig,
 	db::entity::MediaMetadata,
-	filesystem::{content_type::ContentType, error::FileError, hash},
+	filesystem::{
+		content_type::ContentType,
+		error::FileError,
+		hash,
+		media::process::{FileProcessor, FileProcessorOptions, ProcessedFile},
+	},
 };
 use epub::doc::EpubDoc;
-
-use super::process::{FileProcessor, FileProcessorOptions, ProcessedFile};
 
 // TODO: lots of smells in this file, needs a touch up :)
 
@@ -64,7 +67,10 @@ impl FileProcessor for EpubProcessor {
 
 	fn process(
 		path: &str,
-		_: FileProcessorOptions,
+		FileProcessorOptions {
+			generate_file_hashes,
+			..
+		}: FileProcessorOptions,
 		_: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
 		tracing::debug!(?path, "processing epub");
@@ -72,13 +78,16 @@ impl FileProcessor for EpubProcessor {
 		let path_buf = PathBuf::from(path);
 		let epub_file = Self::open(path)?;
 
-		tracing::trace!(?epub_file.metadata, "Processing raw EPUB metadata");
 		let pages = epub_file.get_num_pages() as i32;
+		// Note: The metadata is already parsed by the EPUB library, so might as well use it
 		let metadata = MediaMetadata::from(epub_file.metadata);
+		let hash = generate_file_hashes
+			.then(|| EpubProcessor::hash(path))
+			.flatten();
 
 		Ok(ProcessedFile {
 			path: path_buf,
-			hash: EpubProcessor::hash(path),
+			hash,
 			metadata: Some(metadata),
 			pages,
 		})
@@ -388,6 +397,7 @@ mod tests {
 			FileProcessorOptions {
 				convert_rar_to_zip: false,
 				delete_conversion_source: false,
+				..Default::default()
 			},
 			&config,
 		);

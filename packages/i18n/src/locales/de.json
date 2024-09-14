@@ -664,7 +664,10 @@
 					"options": {
 						"light": "Hell",
 						"dark": "Dark",
-						"bronze": "Bronze light"
+						"bronze": "Bronze light",
+						"ocean": "Ocean",
+						"autumn": "Autumn",
+						"cosmic": "Cosmic"
 					}
 				},
 				"fontSelect": {

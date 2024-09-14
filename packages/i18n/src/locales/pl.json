@@ -234,6 +234,21 @@
 					"description": "Usuń oryginalny plik RAR/CBR po konwersji. Czynność ta jest nieodwracalna"
 				}
 			},
+			"scannerFeatures": {
+				"section": {
+					"heading": "Optional processing",
+					"description": "Opt-in processing features for the scanner",
+					"disclaimer": "These features involve additional file reads which may slow down the scan process"
+				},
+				"processMetadata": {
+					"label": "Process metadata",
+					"description": "Extract any metadata from library files and store the results in the database"
+				},
+				"generateFileHashes": {
+					"label": "Generate file hashes",
+					"description": "Generate a hash for each file in the library to detect duplicates"
+				}
+			},
 			"libraryPattern": {
 				"section": {
 					"heading": "Organizacja",
@@ -312,7 +327,9 @@
 					"pattern": "Wzór",
 					"ignoreRules": "Reguły pomijania",
 					"convertRar": "Konwertuj RAR/CBR",
-					"deleteConversions": "Usuń przekonwertowane pliki"
+					"deleteConversions": "Usuń przekonwertowane pliki",
+					"processMetadata": "Process metadata",
+					"generateFileHashes": "Generate file hashes"
 				}
 			},
 			"buttons": {

@@ -664,7 +664,10 @@
 					"options": {
 						"light": "Světlý",
 						"dark": "Tmavý",
-						"bronze": "Světle bronzový"
+						"bronze": "Světle bronzový",
+						"ocean": "Ocean",
+						"autumn": "Autumn",
+						"cosmic": "Cosmic"
 					}
 				},
 				"fontSelect": {

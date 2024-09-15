@@ -31,13 +31,18 @@ export function useAuthQuery(options: QueryOptions<User> = {}) {
 type UseLoginOrRegisterOptions = {
 	onSuccess?: (data?: User | null | undefined) => void
 	onError?: (data: unknown) => void
+	refetchClaimed?: boolean
 }
 
-export function useLoginOrRegister({ onSuccess, onError }: UseLoginOrRegisterOptions) {
+export function useLoginOrRegister({
+	onSuccess,
+	onError,
+	refetchClaimed,
+}: UseLoginOrRegisterOptions) {
 	const [isClaimed, setIsClaimed] = useState(true)
 
 	const { data: claimCheck, isLoading: isCheckingClaimed } = useQuery(
-		[serverQueryKeys.checkIsClaimed],
+		[serverQueryKeys.checkIsClaimed, refetchClaimed],
 		checkIsClaimed,
 	)
 
@@ -84,4 +89,19 @@ export function useLoginOrRegister({ onSuccess, onError }: UseLoginOrRegisterOpt
 		loginUser,
 		registerUser,
 	}
+}
+
+type UseLogoutParams = {
+	removeStoreUser?: () => void
+}
+
+export function useLogout({ removeStoreUser }: UseLogoutParams = {}) {
+	const { mutateAsync: logout, isLoading } = useMutation([authQueryKeys.logout], authApi.logout, {
+		onSuccess: () => {
+			queryClient.clear()
+			removeStoreUser?.()
+		},
+	})
+
+	return { isLoggingOut: isLoading, logout }
 }

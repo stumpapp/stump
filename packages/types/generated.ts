@@ -418,3 +418,9 @@ export type SmartListMeta = { matched_books: BigInt; matched_series: BigInt; mat
 
 export type CreateOrUpdateSmartListView = ({ book_columns: ReactTableColumnSort[]; group_columns: ReactTableColumnSort[]; book_sorting: ReactTableGlobalSort[] | null; group_sorting: ReactTableGlobalSort[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string }
 
+// DESKTOP TYPE GENERATION
+
+export type SavedServer = { name: string; uri: string }
+
+export type DesktopAppStore = { run_bundled_server: boolean; active_server?: SavedServer | null; connected_servers: SavedServer[] }
+

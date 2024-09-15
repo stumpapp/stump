@@ -74,6 +74,7 @@ export default function CleanLibrary() {
 							size="md"
 							disabled={justCleaned || isCleaning}
 							isLoading={isCleaning}
+							variant="danger"
 						>
 							{t(getKey('confirmation.label'))}
 						</Button>

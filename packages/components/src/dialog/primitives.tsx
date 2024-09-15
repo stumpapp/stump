@@ -35,6 +35,7 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 /* eslint-disable sort-keys-fix/sort-keys-fix */
 export const DIALOG_CONTENT_SIZES = {
 	sm: 'sm:max-w-[425px]',
+	// TODO: md is pretty large
 	md: 'sm:max-w-[600px]',
 	lg: 'sm:max-w-2xl',
 	xl: 'sm:max-w-3xl',

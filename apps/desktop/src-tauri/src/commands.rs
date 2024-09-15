@@ -1,43 +1,70 @@
-use std::sync::Mutex;
+use serde::Serialize;
+use tauri::{Manager, State};
 
-use tauri::Manager;
+use crate::{state::WrappedState, utils::discord::DiscordIntegrationError};
 
-use crate::utils::discord::StumpDiscordPresence;
-
-// TODO: error handling :D
+/// An error type for the desktop RPC commands.
+#[derive(Debug, Serialize, thiserror::Error)]
+pub enum DeskopRPCError {
+	#[error("Failed to get state in handler")]
+	MutexPoisoned,
+	#[error("Failed action on window")]
+	WindowOperationFailed,
+	#[error("Window not found")]
+	WindowMissing,
+	#[error("{0}")]
+	DiscordError(#[from] DiscordIntegrationError),
+}
 
 #[tauri::command]
 pub fn set_use_discord_connection(
 	connect: bool,
-	state: tauri::State<Mutex<StumpDiscordPresence>>,
-) {
-	let mut client = state.lock().unwrap();
+	ctx: State<WrappedState>,
+) -> Result<(), DeskopRPCError> {
+	let mut state = ctx.lock().map_err(|_| DeskopRPCError::MutexPoisoned)?;
+	let discord_client = &mut state.discord_client;
 
-	if connect && !client.is_connected() {
-		client.connect();
-		client.set_defaults();
-	} else if !connect && client.is_connected() {
-		client.shutdown();
+	if connect {
+		discord_client.connect();
+		discord_client.set_defaults()?;
+	} else if !connect {
+		discord_client.shutdown()?;
 	}
+
+	Ok(())
 }
 
 #[tauri::command]
 pub fn set_discord_presence(
 	status: Option<String>,
 	details: Option<String>,
-	state: tauri::State<Mutex<StumpDiscordPresence>>,
-) {
-	let mut client = state.lock().unwrap();
+	state: State<WrappedState>,
+) -> Result<(), DeskopRPCError> {
+	let mut state = state.lock().map_err(|_| DeskopRPCError::MutexPoisoned)?;
+	let discord_client = &mut state.discord_client;
 
-	if client.is_connected() {
-		client.set_presence(status.as_deref(), details.as_deref());
+	if discord_client.is_connected() {
+		discord_client.set_presence(status.as_deref(), details.as_deref())?;
 	}
+
+	Ok(())
 }
 
 #[tauri::command]
-pub async fn close_splashscreen(window: tauri::Window) {
+pub async fn close_splashscreen(window: tauri::Window) -> Result<(), DeskopRPCError> {
 	if let Some(splashscreen) = window.get_window("splashscreen") {
-		splashscreen.close().unwrap();
+		splashscreen
+			.close()
+			.map_err(|_| DeskopRPCError::WindowOperationFailed)?;
 	}
-	window.get_window("main").unwrap().show().unwrap();
+
+	let Some(main_window) = window.get_window("main") else {
+		return Err(DeskopRPCError::WindowMissing);
+	};
+
+	main_window
+		.show()
+		.map_err(|_| DeskopRPCError::WindowOperationFailed)?;
+
+	Ok(())
 }

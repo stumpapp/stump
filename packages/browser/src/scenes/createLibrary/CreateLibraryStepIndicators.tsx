@@ -69,7 +69,7 @@ const Indicator = ({ step, label, isComplete, currentStep }: IndicatorProps) => 
 			)
 		} else {
 			return (
-				<div className="flex h-4 w-4 items-center justify-center rounded-full border border-brand/70 text-xs text-foreground-muted">
+				<div className="flex h-4 w-4 items-center justify-center rounded-full border border-edge-brand/70 text-xs text-foreground-muted">
 					{step}
 				</div>
 			)
@@ -91,7 +91,7 @@ const Indicator = ({ step, label, isComplete, currentStep }: IndicatorProps) => 
 	return (
 		<button
 			className={cn('flex items-center space-x-2 rounded-full border border-edge px-2.5 py-1.5', {
-				'border-brand': currentStep === step,
+				'border-edge-brand': currentStep === step,
 			})}
 			onClick={handleClick}
 			type="button"

@@ -2,6 +2,7 @@ import { autumn } from './autumn'
 import { bronze } from './bronze'
 import { cosmic } from './cosmic'
 import { dark } from './dark'
+import { halloween } from './halloween'
 import { light } from './light'
 import { ocean } from './ocean'
 
@@ -55,6 +56,7 @@ export const themes = {
 	bronze,
 	cosmic,
 	dark,
+	halloween,
 	light,
 	ocean,
 }

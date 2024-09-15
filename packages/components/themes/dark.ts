@@ -49,6 +49,7 @@ export const dark = {
 	},
 	foreground: {
 		DEFAULT: '#F5F3EF',
+		brand: '#C48259',
 		disabled: '#898D94',
 		muted: '#898D94',
 		'on-inverse': '#161719',

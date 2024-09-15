@@ -87,9 +87,9 @@ export default function ReaderFooter() {
 							onClick={() => setCurrentPage(getRelativePage(idx))}
 							ratio={2 / 3}
 							className={cn(
-								'flex cursor-pointer items-center overflow-hidden rounded-md border-2 border-solid border-transparent shadow-xl transition duration-300 hover:border-brand',
+								'flex cursor-pointer items-center overflow-hidden rounded-md border-2 border-solid border-transparent shadow-xl transition duration-300 hover:border-edge-brand',
 								{
-									'border-brand': currentPage === getRelativePage(idx),
+									'border-edge-brand': currentPage === getRelativePage(idx),
 								},
 							)}
 						>

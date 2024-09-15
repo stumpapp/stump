@@ -50,7 +50,9 @@ export const light = {
 	},
 	foreground: {
 		DEFAULT: '#000000',
+		brand: '#C48259',
 		disabled: '#93979D',
+
 		muted: '#414347',
 		// #5B5F65 OR #7D828A
 		'on-inverse': dark.foreground.DEFAULT,

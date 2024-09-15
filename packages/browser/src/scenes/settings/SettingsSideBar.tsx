@@ -44,14 +44,16 @@ export default function SettingsSideBar() {
 
 								<ul className="flex flex-col gap-y-0.5 pt-2 text-sm">
 									{items.map(({ to, icon, label, disabled }) => {
-										const isDisabled =
-											disabled || (platform === 'browser' && to.includes('desktop'))
+										if (platform === 'browser' && to.includes('desktop')) {
+											return null
+										}
+
 										return (
 											<SettingsSideBarLink
 												key={to}
 												to={to}
 												isActive={location.pathname.startsWith(to)}
-												isDisabled={isDisabled}
+												isDisabled={disabled}
 												icon={icon}
 											>
 												{t(withGroup(label.toLowerCase()))}

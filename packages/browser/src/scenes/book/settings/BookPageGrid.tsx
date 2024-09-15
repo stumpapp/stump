@@ -93,8 +93,8 @@ export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage
 											>
 												<div
 													className={cx(
-														'relative flex w-[7rem] flex-1 flex-col space-y-1 overflow-hidden rounded-md border-[1.5px] border-edge bg-background shadow-sm transition-colors duration-100 hover:border-brand sm:w-[7.666rem] md:w-[9rem]',
-														{ 'border-brand': virtualPage === selectedPage },
+														'relative flex w-[7rem] flex-1 flex-col space-y-1 overflow-hidden rounded-md border-[1.5px] border-edge bg-background shadow-sm transition-colors duration-100 hover:border-edge-brand sm:w-[7.666rem] md:w-[9rem]',
+														{ 'border-edge-brand': virtualPage === selectedPage },
 													)}
 													onClick={() => onSelectPage(virtualPage)}
 												>

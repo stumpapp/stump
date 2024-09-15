@@ -80,6 +80,11 @@ type Foreground = {
 	 */
 	muted: string
 	/**
+	 * The color of foreground elements on the 'surface' layer which are emphasized with
+	 * the brand color
+	 */
+	brand: string
+	/**
 	 * The color of foreground elements on the 'surface' layer when placed on top
 	 * of an inverse background color
 	 */

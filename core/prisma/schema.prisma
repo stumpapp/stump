@@ -192,7 +192,8 @@ model Media {
   pages       Int
   updated_at  DateTime  @updatedAt
   created_at  DateTime  @default(now())
-  modified_at DateTime?
+  modified_at DateTime? // last modified date of the file
+  deleted_at  DateTime?
   hash        String? // This is **not** an integrity check(sum), and is not used to verify the file contents.
   path        String
   status      String    @default("READY") // UNKNOWN, READY, UNSUPPORTED, ERROR, MISSING

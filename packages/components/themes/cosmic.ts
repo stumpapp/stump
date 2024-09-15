@@ -49,22 +49,23 @@ export const cosmic = {
 	},
 	foreground: {
 		DEFAULT: '#F4F2FF',
+		brand: '#BB86FC',
 		disabled: '#A29BCC',
 		muted: '#A29BCC',
 		'on-inverse': '#1C0F45',
 		subtle: '#D1C5E5',
 	},
 	sidebar: {
-		DEFAULT: '#1C0F45',
+		DEFAULT: '#130A30',
 		inverse: '#F4F2FF',
 		overlay: {
 			DEFAULT: '#1C0F45',
 			hover: '#311E75',
 		},
 		surface: {
-			DEFAULT: '#28175E',
-			hover: '#311E75',
-			secondary: '#24135A',
+			DEFAULT: '#251556',
+			hover: '#28175E',
+			secondary: '#2A1969',
 		},
 	},
 } satisfies StumpTheme

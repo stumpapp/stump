@@ -50,20 +50,12 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 
 	const pageSetRef = useRef<HTMLDivElement | null>(null)
 
+	// TODO: this needs to be aware of overflow / if the page is too small to render double spread
 	const displayedPages = useMemo(
 		() =>
 			doubleSpread ? [currentPage, currentPage + 1].filter((p) => p <= media.pages) : [currentPage],
 		[currentPage, doubleSpread, media.pages],
 	)
-
-	// const displayedPages = useMemo(() => {
-	// 	const tentativePages = doubleSpread
-	// 		? [currentPage, currentPage + 1].filter((p) => p <= media.pages)
-	// 		: [currentPage]
-	// 	const containerSize = pageSetRef.current?.getBoundingClientRect()
-	// 	const isTooWide = !!containerSize && !!innerWidth && containerSize.width >= innerWidth
-	// 	return isTooWide ? [currentPage] : tentativePages
-	// }, [currentPage, doubleSpread, media.pages, pageSetRef.current, innerWidth])
 
 	/**
 	 * If the image parts are collective >= 80% of the screen width, we want to fix the side navigation
@@ -92,9 +84,11 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 		},
 		[media.pages, onPageChange],
 	)
-	// TODO: docs
-	// TODO: these are kinda wrong, they need to be aware of if the doublespread is being overridden
-	// by orientation of image
+	// TODO: once the UI here is 'smarter' and knows when a double spread isn't feasible, the math needs to be adjusted
+	/**
+	 * A callback to change the page to the left. This will respect the reading direction
+	 * and the double spread setting.
+	 */
 	const handleLeftwardPageChange = useCallback(() => {
 		const direction = readingDirection === 'ltr' ? -1 : 1
 		if (doubleSpread) {
@@ -104,7 +98,10 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 			doChangePage(currentPage + direction)
 		}
 	}, [readingDirection, doChangePage, currentPage, doubleSpread])
-	// TODO: docs
+	/**
+	 * A callback to change the page to the right. This will respect the reading direction
+	 * and the double spread setting.
+	 */
 	const handleRightwardPageChange = useCallback(() => {
 		const direction = readingDirection === 'ltr' ? 1 : -1
 		if (doubleSpread) {
@@ -162,7 +159,6 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 		[isZoomed, showToolBar, isMobile],
 	)
 
-	// TODO: when preloading images, cache the dimensions of the images to better support dynamic resizing
 	return (
 		<div
 			className="relative flex h-full w-full items-center justify-center"

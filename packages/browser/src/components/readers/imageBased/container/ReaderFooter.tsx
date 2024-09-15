@@ -2,7 +2,7 @@
 import { getMediaPage } from '@stump/api'
 import { AspectRatio, cn } from '@stump/components'
 import { motion } from 'framer-motion'
-import { forwardRef, useEffect, useRef, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
 	ItemProps,
 	ListProps,
@@ -20,21 +20,37 @@ export default function ReaderFooter() {
 	const { book, currentPage, setCurrentPage } = useImageBaseReaderContext()
 	const {
 		settings: { showToolBar, preload },
+		bookPreferences: { readingDirection },
 	} = useBookPreferences({ book })
 
-	const [range, setRange] = useState<ListRange>({ endIndex: 0, startIndex: 0 })
 	const virtuosoRef = useRef<VirtuosoHandle>(null)
+
+	const [range, setRange] = useState<ListRange>({ endIndex: 0, startIndex: 0 })
+
+	/**
+	 * A range of pages to display in the Virtuoso component, based on the current page
+	 * and the reading direction (since RTL means we want to scroll in reverse)
+	 */
+	const pageArray = useMemo(
+		() =>
+			Array.from({ length: book.pages }).map((_, index) =>
+				readingDirection === 'rtl' ? book.pages - index : index + 1,
+			),
+		[book.pages, readingDirection],
+	)
+
+	const getRelativePage = useCallback((idx: number) => pageArray[idx] ?? idx, [pageArray])
 
 	/**
 	 * An effect to scroll the Virtuoso component to the current page
 	 * is close to exiting the view.
 	 */
 	useEffect(() => {
-		const pageAsIndex = currentPage - 2
+		const pageAsIndex = getRelativePage(currentPage)
 		const { startIndex, endIndex } = range
 
-		const endThresholdMet = endIndex <= pageAsIndex + 2
-		const startThresholdMet = startIndex >= pageAsIndex - 2
+		const endThresholdMet = startIndex <= pageAsIndex
+		const startThresholdMet = endIndex >= pageAsIndex
 		const pageIsInView = startThresholdMet && endThresholdMet
 
 		if (!pageIsInView) {
@@ -44,7 +60,7 @@ export default function ReaderFooter() {
 				index: pageAsIndex,
 			})
 		}
-	}, [currentPage, range])
+	}, [currentPage, range, getRelativePage, pageArray])
 
 	return (
 		<motion.nav
@@ -58,9 +74,7 @@ export default function ReaderFooter() {
 				ref={virtuosoRef}
 				style={{ height: '100%' }}
 				horizontalDirection
-				data={Array.from({ length: book.pages }).map((_, index) =>
-					getMediaPage(book.id, index + 1),
-				)}
+				data={pageArray.map((page) => getMediaPage(book.id, page))}
 				components={{
 					Item,
 					List,
@@ -70,12 +84,12 @@ export default function ReaderFooter() {
 				itemContent={(idx, url) => {
 					return (
 						<AspectRatio
-							onClick={() => setCurrentPage(idx + 1)}
+							onClick={() => setCurrentPage(getRelativePage(idx))}
 							ratio={2 / 3}
 							className={cn(
 								'flex cursor-pointer items-center overflow-hidden rounded-md border-2 border-solid border-transparent shadow-xl transition duration-300 hover:border-brand',
 								{
-									'border-brand': currentPage === idx + 1,
+									'border-brand': currentPage === getRelativePage(idx),
 								},
 							)}
 						>
@@ -84,6 +98,9 @@ export default function ReaderFooter() {
 					)
 				}}
 				overscan={{ main: preload.ahead || 1, reverse: preload.behind || 1 }}
+				initialTopMostItemIndex={
+					readingDirection === 'rtl' ? book.pages - currentPage : currentPage
+				}
 			/>
 		</motion.nav>
 	)

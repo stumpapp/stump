@@ -7,6 +7,7 @@ import { formatBytes } from '../../utils/format'
 type Props = {
 	media: Media
 }
+// TODO: redesign!!
 export default function BookFileInformation({ media }: Props) {
 	const { library } = useLibraryQuery({
 		params: {
@@ -44,9 +45,11 @@ export default function BookFileInformation({ media }: Props) {
 					Kind: {media.extension?.toUpperCase()}
 				</Text>
 			</div>
-			<Text size="sm" variant="muted" title={media.hash || ''}>
-				Hash: {formatHash(media.hash || '')}
-			</Text>
+			{media.hash && (
+				<Text size="sm" variant="muted" title={media.hash || ''}>
+					Hash: {formatHash(media.hash || '')}
+				</Text>
+			)}
 			<Text size="sm" variant="muted" title={media.path}>
 				Relative path: {formatPath(media.path || '')}
 			</Text>

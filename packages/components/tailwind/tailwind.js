@@ -88,6 +88,7 @@ module.exports = function (relativeFromRoot) {
 					DEFAULT: sharedColors.brand['500'],
 				},
 				screens: {
+					tablet: '640px',
 					'3xl': '1600px',
 					'4xl': '1920px',
 				},

@@ -4,13 +4,15 @@ import { Media } from '@stump/types'
 import { DownloadCloud } from 'lucide-react'
 import { useMediaMatch } from 'rooks'
 
+import { formatBookName } from '@/utils/format'
+
 type Props = {
 	media: Media
 }
 export default function DownloadMediaButton({ media }: Props) {
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 
-	const bookTitle = media.metadata?.title || media.name
+	const bookTitle = formatBookName(media)
 
 	const renderButton = () => {
 		if (isAtLeastMedium) {

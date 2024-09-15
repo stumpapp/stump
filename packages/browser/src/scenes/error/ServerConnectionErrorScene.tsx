@@ -1,10 +1,12 @@
 import { queryClient } from '@stump/client'
 import { useLocaleContext } from '@stump/i18n'
+import { motion, Variants } from 'framer-motion'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { Navigate, useLocation } from 'react-router'
 
-import ServerUrlForm from '@/components/ServerUrlForm'
+import { ConfiguredServersList } from '@/components/savedServer'
 import { useAppStore } from '@/stores'
 
 export default function ServerConnectionErrorScene() {
@@ -12,14 +14,15 @@ export default function ServerConnectionErrorScene() {
 
 	const [backOnline, setBackOnline] = useState(false)
 	const [goHome, setGoHome] = useState(false)
+	const [showServers, setShowServers] = useState(false)
 
 	const { baseURL, platform } = useAppStore((store) => ({
 		baseURL: store.baseUrl,
 		platform: store.platform,
 	}))
-	const showForm = platform !== 'browser'
+	const isDesktop = platform !== 'browser'
 
-	const localeKey = `serverSOS.${showForm ? 'desktop' : 'web'}.message`
+	const localeKey = `serverSOS.${isDesktop ? 'desktop' : 'web'}.message`
 	const { t } = useLocaleContext()
 
 	useEffect(() => {
@@ -75,20 +78,75 @@ export default function ServerConnectionErrorScene() {
 	}
 
 	return (
-		<div
-			data-tauri-drag-region
-			className="mx-auto flex h-full w-full max-w-sm flex-col items-center justify-center gap-6 sm:max-w-md md:max-w-xl"
-		>
-			<div className="text-left">
-				<h1 className="text-4xl font-semibold text-foreground">{t('serverSOS.heading')}</h1>
-				<p className="mt-1.5 text-base text-foreground-subtle">{t(localeKey)}</p>
-			</div>
+		<div data-tauri-drag-region className="flex h-screen w-screen items-center bg-background">
+			<motion.div
+				className="w-screen shrink-0"
+				animate={showServers ? 'appearOut' : 'appearIn'}
+				variants={variants}
+			>
+				<div className="mx-auto flex h-full w-full max-w-sm flex-col items-start justify-center gap-6 sm:max-w-md md:max-w-xl">
+					<div className="text-left">
+						<h1 className="text-4xl font-semibold text-foreground">{t('serverSOS.heading')}</h1>
+						<p className="mt-1.5 text-base text-foreground-subtle">{t(localeKey)}</p>
+					</div>
 
-			{showForm && (
-				<div className="w-full">
-					<ServerUrlForm />
+					{isDesktop && (
+						<button
+							className="group flex w-full items-center justify-between border-l border-edge p-4 transition-colors duration-100 hover:border-edge-strong hover:border-opacity-70 hover:bg-background-surface/50"
+							type="button"
+							onClick={() => setShowServers(true)}
+						>
+							<span className="text-sm font-semibold text-foreground-muted transition-colors duration-100 group-hover:text-foreground-subtle">
+								{t('common.goToServers')}
+							</span>
+
+							<ArrowRight className="h-5 w-5 text-foreground-muted group-hover:text-foreground-subtle" />
+						</button>
+					)}
 				</div>
+			</motion.div>
+
+			{isDesktop && (
+				<motion.div
+					className="w-screen shrink-0"
+					animate={showServers ? 'appearIn' : 'appearOut'}
+					variants={variants}
+				>
+					<div className="mx-auto flex h-full w-full max-w-sm flex-col justify-start gap-6 sm:max-w-md md:max-w-xl">
+						<ConfiguredServersList />
+						<button
+							className="group flex w-full items-center space-x-4 border-l border-edge p-4 transition-colors duration-100 hover:border-edge-strong hover:border-opacity-70 hover:bg-background-surface/50"
+							type="button"
+							onClick={() => setShowServers(false)}
+						>
+							<ArrowLeft className="h-5 w-5 text-foreground-muted group-hover:text-foreground-subtle" />
+
+							<span className="text-sm font-semibold text-foreground-muted transition-colors duration-100 group-hover:text-foreground-subtle">
+								{t('common.seeError')}
+							</span>
+						</button>
+					</div>
+				</motion.div>
 			)}
 		</div>
 	)
+}
+
+const variants: Variants = {
+	appearIn: {
+		display: 'block',
+		opacity: 1,
+		scale: 1,
+		transition: {
+			damping: 20,
+			delayChildren: 0.3,
+			stiffness: 150,
+			type: 'spring',
+		},
+	},
+	appearOut: {
+		display: 'none',
+		opacity: 0,
+		scale: 0.8,
+	},
 }

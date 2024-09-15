@@ -8,7 +8,7 @@ export default function LibraryExplorerScene() {
 	} = useLibraryContext()
 
 	return (
-		<div className="h-full w-full">
+		<div className="flex flex-1">
 			<FileExplorer rootPath={path} />
 		</div>
 	)

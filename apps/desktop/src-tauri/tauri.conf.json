@@ -3,7 +3,8 @@
 	"build": {
 		"beforeDevCommand": "yarn vite --clearScreen=false",
 		"devPath": "http://localhost:3000",
-		"distDir": "../dist"
+		"distDir": "../dist",
+		"withGlobalTauri": true
 	},
 	"package": {
 		"productName": "Stump",

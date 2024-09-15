@@ -19,14 +19,13 @@ use stump_core::{
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 	},
-	filesystem::{
-		get_unknown_image, read_entire_file, ContentType, FileParts, PathUtils,
-	},
+	filesystem::{get_unknown_image, ContentType, FileParts, PathUtils},
 	prisma::{
 		age_restriction, session, user, user_login_activity, user_preferences,
 		PrismaClient,
 	},
 };
+use tokio::fs;
 use tower_sessions::Session;
 use tracing::{debug, trace};
 use utoipa::ToSchema;
@@ -1107,7 +1106,7 @@ async fn get_user_avatar(
 			if let Some(local_file) = get_unknown_image(base_path) {
 				let FileParts { extension, .. } = local_file.file_parts();
 				let content_type = ContentType::from_extension(extension.as_str());
-				let bytes = read_entire_file(local_file)?;
+				let bytes = fs::read(local_file).await?;
 				Ok(ImageResponse::new(content_type, bytes))
 			} else {
 				Err(APIError::NotFound("User avatar not found".to_string()))

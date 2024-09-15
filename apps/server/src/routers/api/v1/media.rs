@@ -23,7 +23,7 @@ use stump_core::{
 				finished_reading_session_with_book_pages, media_thumbnail,
 				reading_session_with_book_pages,
 			},
-			ActiveReadingSession, FinishedReadingSession, LibraryOptions, Media,
+			ActiveReadingSession, FinishedReadingSession, LibraryConfig, Media,
 			PageDimension, PageDimensionsEntity, ProgressUpdateReturn, User,
 			UserPermission,
 		},
@@ -32,13 +32,12 @@ use stump_core::{
 	},
 	filesystem::{
 		analyze_media_job::AnalyzeMediaJob,
-		get_unknown_thumnail,
+		get_page_async, get_thumbnail,
 		image::{
-			generate_thumbnail, place_thumbnail, remove_thumbnails, ImageFormat,
-			ImageProcessorOptions,
+			generate_book_thumbnail, place_thumbnail, remove_thumbnails,
+			GenerateThumbnailOptions, ImageFormat, ImageProcessorOptions,
 		},
-		media::get_page,
-		read_entire_file, ContentType, FileParts, PathUtils,
+		ContentType,
 	},
 	prisma::{
 		active_reading_session, finished_reading_session, library,
@@ -47,6 +46,7 @@ use stump_core::{
 	},
 	Ctx,
 };
+use tokio::fs;
 use tracing::error;
 use utoipa::ToSchema;
 
@@ -355,7 +355,7 @@ pub fn apply_media_restrictions_for_user(user: &User) -> Vec<WhereParam> {
 )]
 /// Get all media accessible to the requester. This is a paginated request, and
 /// has various pagination params available.
-#[tracing::instrument(skip(ctx))]
+#[tracing::instrument(err, ret, skip(ctx))]
 async fn get_media(
 	filter_query: QsQuery<FilterableQuery<MediaFilter>>,
 	pagination_query: Query<PaginationQuery>,
@@ -789,7 +789,7 @@ async fn get_media_by_id(
 		query = query.with(if params.load_library.unwrap_or_default() {
 			media::series::fetch()
 				.with(series::metadata::fetch())
-				.with(series::library::fetch().with(library::library_options::fetch()))
+				.with(series::library::fetch().with(library::config::fetch()))
 		} else {
 			media::series::fetch().with(series::metadata::fetch())
 		});
@@ -961,7 +961,7 @@ async fn get_media_page(
 			page, id
 		)))
 	} else {
-		Ok(get_page(&media.path, page, &ctx.config)?.into())
+		Ok(get_page_async(&media.path, page, &ctx.config).await?.into())
 	}
 }
 
@@ -991,46 +991,29 @@ pub(crate) async fn get_media_thumbnail_by_id(
 		.await?
 		.ok_or_else(|| APIError::NotFound("Book not found".to_string()))?;
 
-	let library_options = book
+	let library_config = book
 		.series
-		.and_then(|s| s.library.map(|l| l.library_options))
-		.map(LibraryOptions::from);
-	let image_format = library_options.and_then(|o| o.thumbnail_config.map(|c| c.format));
+		.and_then(|s| s.library.map(|l| l.config))
+		.map(LibraryConfig::from);
+	let image_format = library_config.and_then(|o| o.thumbnail_config.map(|c| c.format));
 
-	get_media_thumbnail(&book.id, &book.path, image_format, config)
+	get_media_thumbnail(&book.id, &book.path, image_format, config).await
 }
 
-pub(crate) fn get_media_thumbnail(
+pub(crate) async fn get_media_thumbnail(
 	id: &str,
 	path: &str,
-	target_format: Option<ImageFormat>,
+	image_format: Option<ImageFormat>,
 	config: &StumpConfig,
 ) -> APIResult<(ContentType, Vec<u8>)> {
-	if let Some(format) = target_format {
-		let extension = format.extension();
-		let thumbnail_path = config
-			.get_thumbnails_dir()
-			.join(format!("{}.{}", id, extension));
+	let generated_thumb =
+		get_thumbnail(config.get_thumbnails_dir(), id, image_format).await?;
 
-		if thumbnail_path.exists() {
-			tracing::trace!(path = ?thumbnail_path, media_id = id, "Found generated media thumbnail");
-			return Ok((ContentType::from(format), read_entire_file(thumbnail_path)?));
-		}
+	if let Some((content_type, bytes)) = generated_thumb {
+		Ok((content_type, bytes))
+	} else {
+		Ok(get_page_async(path, 1, config).await?)
 	}
-
-	if let Some(path) = get_unknown_thumnail(id, config.get_thumbnails_dir()) {
-		// If there exists a file that starts with the media id in the thumbnails dir,
-		// then return it. This might happen if a user manually regenerates thumbnails
-		// via the API without updating the thumbnail config...
-		tracing::debug!(path = ?path, media_id = id, "Found media thumbnail that does not align with config");
-		let FileParts { extension, .. } = path.file_parts();
-		return Ok((
-			ContentType::from_extension(extension.as_str()),
-			read_entire_file(path)?,
-		));
-	}
-
-	Ok(get_page(path, 1, config)?)
 }
 
 // TODO: ImageResponse as body type
@@ -1120,7 +1103,7 @@ async fn patch_media_thumbnail(
 		.find_first(where_params)
 		.with(
 			media::series::fetch()
-				.with(series::library::fetch().with(library::library_options::fetch())),
+				.with(series::library::fetch().with(library::config::fetch())),
 		)
 		.exec()
 		.await?
@@ -1135,8 +1118,8 @@ async fn patch_media_thumbnail(
 		.ok_or(APIError::NotFound(String::from("Series relation missing")))?
 		.library()?
 		.ok_or(APIError::NotFound(String::from("Library relation missing")))?;
-	let thumbnail_options = library
-		.library_options()?
+	let image_options = library
+		.config()?
 		.thumbnail_config
 		.to_owned()
 		.map(ImageProcessorOptions::try_from)
@@ -1149,11 +1132,20 @@ async fn patch_media_thumbnail(
 		})
 		.with_page(target_page);
 
-	let format = thumbnail_options.format.clone();
-	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options, &ctx.config)?;
+	let format = image_options.format.clone();
+	let (_, path_buf, _) = generate_book_thumbnail(
+		&media,
+		GenerateThumbnailOptions {
+			image_options,
+			core_config: ctx.config.as_ref().clone(),
+			force_regen: true,
+		},
+	)
+	.await?;
+
 	Ok(ImageResponse::from((
 		ContentType::from(format),
-		read_entire_file(path_buf)?,
+		fs::read(path_buf).await?,
 	)))
 }
 
@@ -1216,11 +1208,11 @@ async fn replace_media_thumbnail(
 		);
 	}
 
-	let path_buf = place_thumbnail(&book_id, ext, &bytes, &ctx.config)?;
+	let path_buf = place_thumbnail(&book_id, ext, &bytes, &ctx.config).await?;
 
 	Ok(ImageResponse::from((
 		content_type,
-		read_entire_file(path_buf)?,
+		fs::read(path_buf).await?,
 	)))
 }
 

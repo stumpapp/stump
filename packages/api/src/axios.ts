@@ -52,3 +52,17 @@ export async function checkUrl(url: string, version = 'v1') {
 
 	return res.status === 200
 }
+
+export const formatServiceURL = (url: string) => {
+	let adjustedUrl = url
+
+	if (adjustedUrl.endsWith('/')) {
+		adjustedUrl = url.slice(0, -1)
+	}
+
+	if (!url.endsWith('/api')) {
+		adjustedUrl += '/api'
+	}
+
+	return adjustedUrl
+}

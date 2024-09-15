@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use axum::{
 	extract::{Path, Query, State},
 	middleware,
@@ -17,7 +19,7 @@ use stump_core::{
 		},
 		query::pagination::PageQuery,
 	},
-	filesystem::media::get_page,
+	filesystem::get_page_async,
 	opds::v2_0::{
 		authentication::{
 			OPDSAuthenticationDocument, OPDSAuthenticationDocumentBuilder,
@@ -842,7 +844,8 @@ async fn fetch_book_page_for_user(
 		.await?
 		.ok_or(APIError::NotFound(String::from("Book not found")))?;
 
-	let (content_type, image_buffer) = get_page(book.path.as_str(), page, &ctx.config)?;
+	let (content_type, image_buffer) =
+		get_page_async(PathBuf::from(book.path), page, &ctx.config).await?;
 	Ok(ImageResponse::new(content_type, image_buffer))
 }
 

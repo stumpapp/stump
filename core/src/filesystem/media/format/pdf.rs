@@ -12,12 +12,16 @@ use crate::{
 	config::StumpConfig,
 	db::entity::MediaMetadata,
 	filesystem::{
-		archive::create_zip_archive, error::FileError, hash, image::ImageFormat,
+		archive::create_zip_archive,
+		error::FileError,
+		hash,
+		image::ImageFormat,
+		media::process::{
+			FileConverter, FileProcessor, FileProcessorOptions, ProcessedFile,
+		},
 		ContentType, FileParts, PathUtils,
 	},
 };
-
-use super::{process::FileConverter, FileProcessor, FileProcessorOptions, ProcessedFile};
 
 /// A file processor for PDF files.
 pub struct PdfProcessor;
@@ -60,17 +64,25 @@ impl FileProcessor for PdfProcessor {
 
 	fn process(
 		path: &str,
-		_: FileProcessorOptions,
+		FileProcessorOptions {
+			generate_file_hashes,
+			..
+		}: FileProcessorOptions,
 		_: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
 		let file = FileOptions::cached().open(path)?;
 
 		let pages = file.pages().count() as i32;
+		// Note: The metadata is already parsed by the PDF library, so might as well use it
+		// PDF metadata is generally poop though
 		let metadata = file.trailer.info_dict.map(MediaMetadata::from);
+		let hash = generate_file_hashes
+			.then(|| PdfProcessor::hash(path))
+			.flatten();
 
 		Ok(ProcessedFile {
 			path: PathBuf::from(path),
-			hash: PdfProcessor::hash(path),
+			hash,
 			metadata,
 			pages,
 		})
@@ -272,6 +284,7 @@ mod tests {
 			FileProcessorOptions {
 				convert_rar_to_zip: false,
 				delete_conversion_source: false,
+				..Default::default()
 			},
 			&config,
 		);

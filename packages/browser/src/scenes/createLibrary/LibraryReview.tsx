@@ -134,6 +134,20 @@ export default function LibraryReview() {
 					</div>
 
 					<div>
+						<Label>{t(getLabelKey('processMetadata'))}</Label>
+						<Text variant="muted" size="sm">
+							{state.process_metadata ? 'Yes' : 'No'}
+						</Text>
+					</div>
+
+					<div>
+						<Label>{t(getLabelKey('generateFileHashes'))}</Label>
+						<Text variant="muted" size="sm">
+							{state.generate_file_hashes ? 'Yes' : 'No'}
+						</Text>
+					</div>
+
+					<div>
 						<Label>{t(getLabelKey('convertRar'))}</Label>
 						<Text variant="muted" size="sm">
 							{state.convert_rar_to_zip ? 'Yes' : 'No'}

@@ -50,7 +50,7 @@ export const createAppStore = (storage?: StateStorage) =>
 				{
 					name: 'stump-main-store',
 					partialize(state) {
-						return { baseUrl: state.baseUrl, platform: state.platform }
+						return { platform: state.platform }
 					},
 					storage: storage ? createJSONStorage(() => storage) : undefined,
 				},

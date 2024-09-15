@@ -1,4 +1,4 @@
-export { useAuthQuery, useLoginOrRegister } from './auth'
+export * from './auth'
 export {
 	prefetchBookClubChat,
 	prefetchThread,

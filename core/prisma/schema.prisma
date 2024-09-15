@@ -96,8 +96,8 @@ model Library {
 
   series Series[]
 
-  library_options    LibraryOptions @relation(fields: [library_options_id], references: [id])
-  library_options_id String         @unique
+  config    LibraryConfig @relation(fields: [config_id], references: [id])
+  config_id String        @unique
 
   tags              Tag[]
   hidden_from_users User[]
@@ -109,13 +109,15 @@ model Library {
   @@map("libraries")
 }
 
-model LibraryOptions {
+model LibraryConfig {
   id                              String  @id @default(uuid())
   convert_rar_to_zip              Boolean @default(false)
   hard_delete_conversions         Boolean @default(false)
   default_reading_dir             String  @default("ltr") // ltr or rtl
   default_reading_mode            String  @default("paged") // paged or continuous:(horizontal|vertical)
   default_reading_image_scale_fit String  @default("height") // height, width, none (original)
+  generate_file_hashes            Boolean @default(false)
+  process_metadata                Boolean @default(true)
   library_pattern                 String  @default("SERIES_BASED") // SERIES_BASED or COLLECTION_BASED
 
   thumbnail_config Bytes? // { size_factor: "...", format: "...", quality: ... }
@@ -124,7 +126,7 @@ model LibraryOptions {
   library_id String?
   library    Library?
 
-  @@map("library_options")
+  @@map("library_configs")
 }
 
 model LastLibraryVisit {

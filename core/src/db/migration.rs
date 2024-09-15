@@ -20,14 +20,18 @@ pub async fn run_migrations(client: &prisma::PrismaClient) -> CoreResult<()> {
 			.await
 			.map_err(|e| CoreError::MigrationError(e.to_string()))?;
 
-		tracing::info!("Migrations complete!");
+		tracing::debug!("Database push completed!");
 	}
 
 	#[cfg(not(debug_assertions))]
-	client
-		._migrate_deploy()
-		.await
-		.map_err(|e| CoreError::MigrationError(e.to_string()))?;
+	{
+		client
+			._migrate_deploy()
+			.await
+			.map_err(|e| CoreError::MigrationError(e.to_string()))?;
+
+		tracing::info!("Database migration completed!");
+	}
 
 	Ok(())
 }

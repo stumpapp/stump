@@ -39,9 +39,7 @@ export default function LibrarySettingsRouter() {
 			const payload: UpdateLibrary = {
 				...library,
 				...updates,
-				library_options: updates.library_options
-					? { ...library.library_options, ...updates.library_options }
-					: library.library_options,
+				config: updates.config ? { ...library.config, ...updates.config } : library.config,
 				tags: updates.tags ? updates.tags : library?.tags?.map(({ name }) => name),
 			}
 			editLibrary(payload)

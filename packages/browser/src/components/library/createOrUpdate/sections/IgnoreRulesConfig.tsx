@@ -93,7 +93,7 @@ export default function IgnoreRulesConfig() {
 			return null
 		}
 
-		const existingRules = ctx.library.library_options.ignore_rules
+		const existingRules = ctx.library.config.ignore_rules
 		const hasChanges = ignoreRules.some((rule) =>
 			existingRules?.every((glob) => glob !== rule.glob),
 		)

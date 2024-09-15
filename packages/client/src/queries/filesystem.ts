@@ -96,8 +96,25 @@ export function useDirectoryListing({
 		[enforcedRoot],
 	)
 
+	const isWindowsDriveRoot = (path: string | null) => {
+		if (path == null) {
+			return false
+		}
+
+		// eslint-disable-next-line no-useless-escape
+		const windowsRootRegex = /^[A-Z]:[\/\\]{1,2}$/i
+		return windowsRootRegex.test(path)
+	}
+
 	const setPath = useCallback(
-		(directory: string, direction: 1 | -1 = 1) => {
+		(directory: string | null, direction: 1 | -1 = 1) => {
+			// Handle nulling the path
+			if (directory == null) {
+				setCurrentPath(directory)
+				setCurrentIndex(0)
+				return
+			}
+
 			let newIndex = currentIndex + direction
 			let newHistory: string[]
 			// A -1 indicates that we don't have previous history when we called setPath, so we
@@ -124,10 +141,17 @@ export function useDirectoryListing({
 	}, [currentIndex])
 
 	const canGoBack = useMemo(() => {
-		return hasBackHistory || isPathAllowed(parent || '')
-	}, [hasBackHistory, parent, isPathAllowed])
+		return hasBackHistory || isWindowsDriveRoot(currentPath) || isPathAllowed(parent || '')
+	}, [hasBackHistory, parent, currentPath, isPathAllowed])
 
 	const goBackInHistory = useCallback(() => {
+		if (directoryListing?.parent == null && isWindowsDriveRoot(currentPath)) {
+			onGoBack?.(null)
+			setCurrentPath(null)
+			setCurrentIndex(0)
+			return
+		}
+
 		const parent = directoryListing?.parent || ''
 		// If there is no parent, we are at the root directory, so we don't want to go back.
 		if (!parent) {
@@ -145,16 +169,16 @@ export function useDirectoryListing({
 			setCurrentPath(directoryListing.parent)
 			setCurrentIndex((prev) => prev - 1)
 		}
-	}, [enforcedRoot, directoryListing, onGoBack])
+	}, [enforcedRoot, directoryListing, currentPath, onGoBack])
 
 	const goBack = useCallback(() => {
 		if (!canGoBack) return
-		if (hasBackHistory) {
+		if (hasBackHistory || isWindowsDriveRoot(currentPath)) {
 			goBackInHistory()
 		} else {
-			setPath(parent || '', -1)
+			setPath(parent || null, -1)
 		}
-	}, [hasBackHistory, canGoBack, goBackInHistory, parent, setPath])
+	}, [hasBackHistory, canGoBack, goBackInHistory, parent, currentPath, setPath])
 
 	const canGoForward = useMemo(() => {
 		return history.length > currentIndex + 1

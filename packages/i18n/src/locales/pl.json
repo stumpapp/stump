@@ -128,17 +128,192 @@
 			"submit": "Stwórz klub książki"
 		}
 	},
+	"createOrUpdateLibraryForm": {
+		"fields": {
+			"name": {
+				"label": "Nazwa",
+				"description": "Przyjazna nazwa biblioteki",
+				"placeholder": "Moja biblioteka"
+			},
+			"path": {
+				"label": "Ścieżka",
+				"description": "Ścieżka do biblioteki w takiej formie jak na Twoim serwerze",
+				"placeholder": "/ścieżka/do/biblioteki"
+			},
+			"description": {
+				"label": "Opis",
+				"description": "Krótki opis Twojej biblioteki",
+				"placeholder": "Biblioteka wszystkich moich ulubionych książek"
+			},
+			"tags": {
+				"label": "Etykiety",
+				"description": "Używane do kategoryzowania biblioteki lub wymuszania reguł dostępu"
+			},
+			"thumbnailConfig": {
+				"section": {
+					"heading": {
+						"create": "Konfiguracja miniatur",
+						"update": "Generowanie"
+					},
+					"description": "Popraw czas ładowania podczas przeglądania biblioteki poprzez generowanie miniatur dla Twoich książek"
+				},
+				"enableSwitch": {
+					"label": "Aktywne",
+					"description": "Generuj miniatury dla tej biblioteki"
+				},
+				"scaled": {
+					"label": "Skalowane",
+					"description": "Skaluj obraz przez niestandardowy współczynnik dla każdego z wymiarów",
+					"width": {
+						"label": "Skala szerokości"
+					},
+					"height": {
+						"label": "Skala wysokości"
+					}
+				},
+				"sized": {
+					"label": "O stałych wymiarach",
+					"description": "Ustaw każdy wymiar miniaturki (w pikselach)",
+					"width": {
+						"label": "Szerokość"
+					},
+					"height": {
+						"label": "Wysokość"
+					}
+				},
+				"format": {
+					"label": "Format obrazu",
+					"description": "Format wygenerowanych miniatur obrazów"
+				},
+				"quality": {
+					"label": "Jakość",
+					"description": "Jakość generowanych miniatur, od 0 do 1.0"
+				}
+			},
+			"ignoreRules": {
+				"section": {
+					"heading": "Reguły pomijania",
+					"description": "Zdefiniuj wzorce, które posłużą do pominięcia niektórych plików lub folderów podczas skanowania"
+				},
+				"noRules": "Brak zdefiniowanych reguł pomijania",
+				"save": "Zapisz zmiany",
+				"addRule": {
+					"label": "Nowa reguła",
+					"description": "Wzorzec służący do pomijania plików lub folderów",
+					"addButton": "Dodaj regułę",
+					"ignoreParents": {
+						"title": "Pomijaj wszystkie katalogi nadrzędne",
+						"label": "Wzorce pomijania"
+					},
+					"ignoreSubdirs": {
+						"title": "Pomijaj wszystkie podkatalogi",
+						"label": "Pomijaj podkatalogi"
+					}
+				},
+				"invalidGlob": "Nieprawidłowy wzorzec",
+				"lockConfig": {
+					"lock": "Zablokuj konfigurację",
+					"unlock": "Odblokuj konfigurację"
+				},
+				"editRule": "Edytuj regułę",
+				"deleteRule": "Usuń regułę",
+				"cancelEdit": "Anuluj zmiany",
+				"confirmEdit": "Potwierdź zmiany"
+			},
+			"convertOptions": {
+				"section": {
+					"heading": "Konwersja pliku",
+					"description": "Stump jest w stanie przekonwertować niektóre formaty plików na bardziej kompatybilne"
+				},
+				"rarToZip": {
+					"label": "Konwertuj RAR do ZIP",
+					"description": "Konwertuj pliki RAR/CBR do plików ZIP/CBZ podczas skanowania"
+				},
+				"deleteRarAfter": {
+					"label": "Usuń RAR po konwersji",
+					"description": "Usuń oryginalny plik RAR/CBR po konwersji. Czynność ta jest nieodwracalna"
+				}
+			},
+			"libraryPattern": {
+				"section": {
+					"heading": "Organizacja",
+					"description": "Określ który wzór najlepiej pasuje do struktury Twojej biblioteki",
+					"docs": [
+						"Brak pewności, którą wybrać? Kliknij",
+						"tutaj",
+						"aby uzyskać więcej informacji.",
+						"Nie można później zmienić tego ustawienia"
+					],
+					"disabled": "Nie można zmienić tego ustawienia"
+				},
+				"options": {
+					"label": "Wzorzec biblioteki",
+					"description": "Ustawienie, które określa, jak Stump zorganizuje Twoją bibliotekę",
+					"collectionPriority": {
+						"label": "Priorytet kolekcji",
+						"description": "Każdy folder na najwyższym poziomie katalogu głównego biblioteki jest pojedynczą serią"
+					},
+					"seriesPriority": {
+						"label": "Priorytet serii",
+						"description": "Każdy folder na dowolnym poziomie jest pojedynczą serią"
+					}
+				}
+			}
+		},
+		"scan": {
+			"label": {
+				"create": "Skanuj po utworzeniu",
+				"update": "Skanuj po aktualizacjach"
+			},
+			"description": "Indeksuj pliki biblioteki, aby wypełnić bazę danych"
+		}
+	},
 	"createLibraryScene": {
 		"heading": "Utwórz bibliotekę",
 		"subtitle": "Biblioteki służą do grupowania książek. Jeśli chcesz odświeżyć sobie metodykę ich działania, sprawdź",
-		"subtitleLink": "stosowna dokumentacja",
+		"subtitleLink": "stosowną dokumentację",
 		"form": {
-			"labels": {
-				"libraryName": "Nazwa",
-				"libraryPath": "Ścieżka",
-				"libraryPathDescription": "Ścieżka do biblioteki w takiej formie jak na Twoim serwerze",
-				"libraryDescription": "Opis",
-				"libraryTags": "Etykiety"
+			"stepLabel": "Krok",
+			"steps": [
+				{
+					"label": "Podstawowe",
+					"heading": "Informacje podstawowe",
+					"description": "Szczegóły tej biblioteki wraz z jej nazwą, ścieżką i opisem"
+				},
+				{
+					"label": "Skanowanie",
+					"heading": "Zachowanie skanera",
+					"description": "Ustawienia związane z tym, jak Stump skanuje tę bibliotekę"
+				},
+				{
+					"label": "Miniatury",
+					"heading": "Miniatury",
+					"description": "Opcje czy i jak Stump generować będzie miniatury dla tej biblioteki"
+				},
+				{
+					"label": "Podsumowanie",
+					"heading": "Podsumowanie",
+					"description": "Przejrzyj ustawienia biblioteki przed jej utworzeniem"
+				}
+			],
+			"review": {
+				"yes": "Tak",
+				"no": "Nie",
+				"none": "Brak",
+				"labels": {
+					"generateThumbnails": "Generuj miniaturki",
+					"mode": "Tryb",
+					"format": "Format",
+					"quality": "Jakość",
+					"name": "Nazwa",
+					"path": "Ścieżka",
+					"description": "Opis",
+					"tags": "Etykiety",
+					"pattern": "Wzór",
+					"ignoreRules": "Reguły pomijania",
+					"convertRar": "Konwertuj RAR/CBR",
+					"deleteConversions": "Usuń przekonwertowane pliki"
+				}
 			},
 			"buttons": {
 				"confirm": "Utwórz bibliotekę"
@@ -148,17 +323,101 @@
 	"librarySettingsScene": {
 		"heading": "Ustawienia",
 		"subtitle": "Zarządzaj tutaj swoją biblioteką. Jeśli chcesz odświeżyć sobie działanie tych ustawień, sprawdź",
-		"subtitleLink": "stosowna dokumentacja",
-		"form": {
-			"labels": {
-				"libraryName": "Nazwa",
-				"libraryPath": "Ścieżka",
-				"libraryPathDescription": "Ścieżka do biblioteki w takiej formie jak na Twoim serwerze",
-				"libraryDescription": "Opis",
-				"libraryTags": "Etykiety"
+		"subtitleLink": "stosowną dokumentację",
+		"sidebar": {
+			"basics": "Podstawowe",
+			"options": {
+				"general": "Ogólne",
+				"scanning": "Skanowanie",
+				"thumbnails": "Miniatury",
+				"ignore-rules": "Reguły pomijania",
+				"analysis": "Analiza",
+				"label": "Ustawienia"
 			},
-			"buttons": {
-				"confirm": "Zapisz zmiany"
+			"danger-zone": {
+				"access-control": "Kontrola dostępu",
+				"delete": "Usuwanie",
+				"label": "Niebezpieczna strefa"
+			}
+		},
+		"basics": {
+			"title": "Informacje podstawowe",
+			"description": "Szczegóły tej biblioteki wraz z jej nazwą, ścieżką i opisem",
+			"form": {
+				"submit": "Aktualizuj bibliotekę"
+			}
+		},
+		"options/scanning": {
+			"title": "Zachowanie skanera",
+			"description": "Ustawienia związane z tym, jak Stump skanuje tę bibliotekę"
+		},
+		"options/thumbnails": {
+			"title": "Miniatury",
+			"description": "Ustawienia i opcje związane z miniaturami tej biblioteki",
+			"sections": {
+				"management": {
+					"heading": "Zarządzanie",
+					"description": "Zarządzaj istniejącymi miniaturami tej biblioteki",
+					"thumbnailSelector": {},
+					"deleteThumbnails": {}
+				}
+			}
+		},
+		"options/analysis": {
+			"title": "Analiza",
+			"description": "Analizuj zawartość tej biblioteki w celu zidentyfikowania potencjalnych problemów lub ulepszeń",
+			"sections": {
+				"analyzeBooks": {
+					"heading": "Analizuj książki",
+					"description": "Analizuj książki w tej bibliotece, aby dołączyć dodatkowe metadane w bazie danych, takie jak wymiary stron dla książek obrazkowych",
+					"disclaimer": "Ten proces jest zasobochłonny i może chwilę potrwać",
+					"analyzeButton": "Analizuj książki"
+				},
+				"missingFiles": {
+					"heading": "Brakujące pliki",
+					"description": "Pliki których odwołania znajdują się w bazie danych ale nie mogą być zlokalizowane na dysku",
+					"noMissingFiles": "W tej bibliotece nie ma brakujących plików"
+				},
+				"duplicateFiles": {
+					"heading": "Powielone pliki",
+					"description": "Potencjalnie powielone na dysku pliki",
+					"noDuplicateFiles": "W tej bibliotece nie ma powielonych plików"
+				}
+			}
+		},
+		"danger-zone/access-control": {
+			"title": "Kontrola dostępu",
+			"description": "Kontrola dostępu użytkowników do zawartości tej biblioteki",
+			"sections": {
+				"libraryExclusions": {
+					"heading": "Wyklucz użytkowników",
+					"description": "Zabroń niektórym użytkownikom dostępu do tej biblioteki lub jej zawartości",
+					"noUsers": "Nie ma żadnych zarejestrowanych użytkowników do wykluczenia z tej biblioteki",
+					"updated": "Wykluczenia zostały zaktualizowane",
+					"failure": "Nie udało się zaktualizować wykluczeń"
+				}
+			}
+		},
+		"danger-zone/delete": {
+			"title": "Akcje usuwania",
+			"description": "Trwale usuń tę bibliotekę i całą jej zawartość lub niektóre zasoby",
+			"sections": {
+				"cleanLibrary": {
+					"heading": "Wyczyść bibliotekę",
+					"description": "Usuń wszystkie media i serie, których nie można zlokalizować na dysku",
+					"disclaimer": "Chociaż czynność ta nie usunie żadnych plików, usunięte zostaną wszystkie rekordy dotyczące mediów i serii posiadających status brakujących",
+					"confirmation": {
+						"label": "Wyczyść bibliotekę",
+						"text": "Czy na pewno chcesz wyczyścić tę bibliotekę?"
+					}
+				},
+				"deleteLibrary": {
+					"heading": "Usuń bibliotekę",
+					"description": [
+						"Trwale usuń tę bibliotekę i całą jej zawartość.",
+						"Tej czynności nie można cofnąć"
+					]
+				}
 			}
 		}
 	},
@@ -917,6 +1176,7 @@
 		"save": "Zapisz",
 		"send": "Wyślij",
 		"saveChanges": "Zapisz zmiany",
+		"noChanges": "Brak zmian",
 		"create": "Utwórz",
 		"edit": "Edytuj",
 		"update": "Aktualizuj",

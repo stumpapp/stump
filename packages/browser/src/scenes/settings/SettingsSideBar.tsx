@@ -3,7 +3,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { Home } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router'
 
-import { usePreferences } from '@/hooks'
+import { usePreferences, useTheme } from '@/hooks'
 import paths from '@/paths'
 import { useAppStore } from '@/stores'
 
@@ -19,6 +19,7 @@ export default function SettingsSideBar() {
 	const {
 		preferences: { enable_replace_primary_sidebar, primary_navigation_mode },
 	} = usePreferences()
+	const { shouldUseGradient } = useTheme()
 
 	const { groups } = useSettingsRoutes()
 
@@ -29,6 +30,10 @@ export default function SettingsSideBar() {
 				primary_navigation_mode === 'TOPBAR'
 					? 'fixed top-12 z-50 h-screen border-x'
 					: 'fixed top-0 z-50 h-screen border-r',
+				{
+					'bg-gradient-to-l from-background-gradient-from to-background-gradient-to':
+						shouldUseGradient,
+				},
 			)}
 		>
 			<div className="flex h-full flex-grow flex-col gap-4">

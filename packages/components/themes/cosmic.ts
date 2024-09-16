@@ -3,6 +3,10 @@ import { StumpTheme } from './types'
 export const cosmic = {
 	background: {
 		DEFAULT: '#1C0F45',
+		gradient: {
+			from: '#300045',
+			to: '#1C0F45',
+		},
 		inverse: '#F4F2FF',
 		overlay: {
 			DEFAULT: '#28175E',
@@ -27,23 +31,28 @@ export const cosmic = {
 	fill: {
 		brand: {
 			DEFAULT: '#8E44AD',
+			hover: '#A15BBF',
 			secondary: '#8E44AD26',
 		},
 		danger: {
 			DEFAULT: '#FF4757',
+			hover: '#FF707C',
 			secondary: '#FF475726',
 		},
 		disabled: '#6C567B',
 		info: {
 			DEFAULT: '#3498DB',
+			hover: '#57AAE1',
 			secondary: '#3498DB26',
 		},
 		success: {
 			DEFAULT: '#2ECC71',
+			hover: '#4CD787',
 			secondary: '#2ECC7126',
 		},
 		warning: {
 			DEFAULT: '#F39C12',
+			hover: '#F5AC39',
 			secondary: '#F39C1226',
 		},
 	},
@@ -57,6 +66,10 @@ export const cosmic = {
 	},
 	sidebar: {
 		DEFAULT: '#130A30',
+		gradient: {
+			from: '#300045',
+			to: '#130A30',
+		},
 		inverse: '#F4F2FF',
 		overlay: {
 			DEFAULT: '#1C0F45',

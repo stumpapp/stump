@@ -656,8 +656,7 @@
 			"sections": {
 				"themeSelect": {
 					"label": "Theme",
-					"description": "By default, Stump has a light and dark theme",
-					"customTheme": [
+					"description": [
 						"If you're interested in creating your own custom theme, check out the",
 						"documentation"
 					],
@@ -668,7 +667,7 @@
 						"ocean": "Ocean",
 						"autumn": "Autumn",
 						"cosmic": "Cosmic",
-						"halloween": "Halloween",
+						"halloween": "Pumpkin",
 						"matrix": "Matrix"
 					}
 				},

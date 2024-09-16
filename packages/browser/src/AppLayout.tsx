@@ -37,7 +37,7 @@ export function AppLayout() {
 		storeUser: state.user,
 	}))
 
-	const { isDarkVariant } = useTheme()
+	const { isDarkVariant, shouldUseGradient } = useTheme()
 	const [initialize, instance] = useOverlayScrollbars({
 		options: {
 			scrollbars: {
@@ -204,6 +204,10 @@ export function AppLayout() {
 							'flex w-full flex-1 flex-col overflow-y-auto overflow-x-hidden bg-background',
 							{
 								'scrollbar-hide': storeUser.user_preferences?.enable_hide_scrollbar,
+							},
+							{
+								'bg-gradient-to-br from-background-gradient-from to-background-gradient-to':
+									shouldUseGradient,
 							},
 						)}
 						ref={mainRef}

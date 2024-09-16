@@ -716,6 +716,7 @@ model UserPreferences {
   enable_live_refetch     Boolean @default(false)
   enable_discord_presence Boolean @default(false)
   enable_compact_display  Boolean @default(false)
+  enable_gradients        Boolean @default(false) // Some themes have gradients, not all
 
   enable_double_sidebar          Boolean @default(true)
   enable_replace_primary_sidebar Boolean @default(false)

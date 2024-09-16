@@ -28,23 +28,28 @@ export const light = {
 	fill: {
 		brand: {
 			DEFAULT: '#C48259',
+			hover: '#A9663C',
 			secondary: '#C4825926',
 		},
 		danger: {
 			DEFAULT: '#E53935',
+			hover: '#C81E1A',
 			secondary: '#E5393526',
 		},
 		disabled: '#71757D',
 		info: {
 			DEFAULT: '#3F89CA',
+			hover: '#2D6CA4',
 			secondary: '#3F89CA26',
 		},
 		success: {
 			DEFAULT: '#43A047',
+			hover: '#327835',
 			secondary: '#43A04726',
 		},
 		warning: {
 			DEFAULT: '#F59E0B',
+			hover: '#C07C08',
 			secondary: '#F59E0B26',
 		},
 	},

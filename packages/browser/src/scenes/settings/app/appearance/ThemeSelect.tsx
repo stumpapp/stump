@@ -30,9 +30,9 @@ export default function ThemeSelect() {
 				onChange={(e) => changeTheme(e.target.value)}
 			/>
 			<Text variant="muted" size="xs">
-				{t(`${localeKey}.description`)}. {t(`${localeKey}.customTheme.0`)}{' '}
+				{t(`${localeKey}.description.0`)}{' '}
 				<Link href="https://stumpapp.dev/guides/configuration/theming">
-					{t(`${localeKey}.customTheme.1`)}
+					{t(`${localeKey}.description.1`)}
 				</Link>
 			</Text>
 		</div>

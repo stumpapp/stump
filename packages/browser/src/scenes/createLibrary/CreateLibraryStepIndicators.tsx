@@ -63,7 +63,7 @@ const Indicator = ({ step, label, isComplete, currentStep }: IndicatorProps) => 
 	const renderIcon = () => {
 		if (isComplete) {
 			return (
-				<div className="flex h-4 w-4 items-center justify-center rounded-full bg-brand text-white">
+				<div className="flex h-4 w-4 items-center justify-center rounded-full bg-fill-brand text-white">
 					<Check className="h-3 w-3" />
 				</div>
 			)

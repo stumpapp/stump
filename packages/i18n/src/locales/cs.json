@@ -131,34 +131,34 @@
 	"createOrUpdateLibraryForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
-				"description": "A friendly name for your library",
-				"placeholder": "My Library"
+				"label": "Název",
+				"description": "Přátelský název pro tvou knihovnu",
+				"placeholder": "Moje knihovna"
 			},
 			"path": {
-				"label": "Path",
-				"description": "The path to the library as it exists on your server",
-				"placeholder": "/path/to/library"
+				"label": "Umístění",
+				"description": "Umístění knihovny, tak jak existuje na vašem serveru",
+				"placeholder": "/složka/umístění/knihovny"
 			},
 			"description": {
-				"label": "Description",
-				"description": "A short description of your library",
-				"placeholder": "A library of all my favorite books"
+				"label": "Popis",
+				"description": "Krátký popis vaší knihovny",
+				"placeholder": "Knihovna mých oblíbených knih"
 			},
 			"tags": {
-				"label": "Tags",
-				"description": "Used to categorize your library or enforce access rules"
+				"label": "Tagy",
+				"description": "Slouží ke kategorizaci knihovny nebo k vynucování pravidel přístupu"
 			},
 			"thumbnailConfig": {
 				"section": {
 					"heading": {
-						"create": "Thumbnail configuration",
-						"update": "Generation"
+						"create": "Nastavení náhledů",
+						"update": "Generování"
 					},
-					"description": "Improve loading times while browsing your library by generating thumbnails for your books"
+					"description": "Zlepšení dobu načítání při procházení knihovny generováním náhledů knih"
 				},
 				"enableSwitch": {
-					"label": "Enabled",
+					"label": "Zapnuto",
 					"description": "Generate thumbnail images for this library"
 				},
 				"scaled": {

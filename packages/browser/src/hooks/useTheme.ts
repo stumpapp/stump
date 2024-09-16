@@ -21,4 +21,4 @@ export function useTheme() {
 	return { changeTheme, isDarkVariant, theme: app_theme || 'light' }
 }
 
-export const DARK_THEMES = ['dark']
+export const DARK_THEMES = ['dark', 'cosmic', 'halloween', 'autum']

@@ -667,7 +667,9 @@
 						"bronze": "Bronze light",
 						"ocean": "Ocean",
 						"autumn": "Autumn",
-						"cosmic": "Cosmic"
+						"cosmic": "Cosmic",
+						"halloween": "Halloween",
+						"matrix": "Matrix"
 					}
 				},
 				"fontSelect": {

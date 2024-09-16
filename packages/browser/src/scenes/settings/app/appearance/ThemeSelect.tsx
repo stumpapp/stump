@@ -6,6 +6,7 @@ import { useTheme } from '@/hooks'
 
 const localeKey = 'settingsScene.app/appearance.sections.themeSelect'
 
+// TODO: We officially have enough themes to warrant a filterable combobox IMO, so do that
 export default function ThemeSelect() {
 	const { t } = useLocaleContext()
 	const { theme, changeTheme } = useTheme()
@@ -24,6 +25,7 @@ export default function ThemeSelect() {
 					{ label: t(`${localeKey}.options.ocean`), value: 'ocean' },
 					{ label: t(`${localeKey}.options.autumn`), value: 'autumn' },
 					{ label: t(`${localeKey}.options.cosmic`), value: 'cosmic' },
+					{ label: t(`${localeKey}.options.halloween`), value: 'halloween' },
 				]}
 				onChange={(e) => changeTheme(e.target.value)}
 			/>

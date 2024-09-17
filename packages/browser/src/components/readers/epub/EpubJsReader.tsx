@@ -417,7 +417,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		[book, rendition],
 	)
 
-	// TODO: suppport icognito mode that doesn't sync progress...
+	// TODO: suppport incognito mode that doesn't sync progress...
 	const spineSize = epub?.spine.length
 	/**
 	 * This effect is responsible for syncing the current epub progress information to

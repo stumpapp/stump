@@ -23,4 +23,4 @@ const ReaderContainer = ({ children }: PropsWithChildren) => {
 	)
 }
 
-export default React.memo(ReaderContainer)
+export default ReaderContainer

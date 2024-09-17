@@ -74,6 +74,7 @@ export function AppLayout() {
 		if (missingClasses.length) {
 			viewport.classList.add(...missingClasses)
 		}
+		viewport.dataset.artificialScroll = 'true'
 	}, [instance, isRefSet])
 	/**
 	 * An effect to destroy the overlay scrollbars instance when it exists but hideScrollBar is true

@@ -42,7 +42,7 @@ export default function BookFileInformation({ media }: Props) {
 					Size: {formatBytes(media.size.valueOf())}
 				</Text>
 				<Text size="sm" variant="muted">
-					Kind: {media.extension?.toUpperCase()}
+					Format: {media.extension?.toUpperCase()}
 				</Text>
 			</div>
 			{media.hash && (

@@ -97,7 +97,7 @@ type PageProps = Omit<Props, 'displayedPages' | 'currentPage'> & {
 	imageScaling: BookImageScaling
 }
 
-const Page = ({
+const _Page = ({
 	page,
 	getPageUrl,
 	onPageClick,
@@ -106,6 +106,7 @@ const Page = ({
 }: PageProps) => {
 	return (
 		<img
+			key={`page-${page}-scaled-${scaleToFit}`}
 			className={cn(
 				'z-30 select-none',
 				{
@@ -137,3 +138,4 @@ const Page = ({
 		/>
 	)
 }
+const Page = React.memo(_Page)

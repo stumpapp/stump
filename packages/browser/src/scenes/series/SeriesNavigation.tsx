@@ -1,7 +1,8 @@
 import { prefetchFiles, prefetchSeriesMedia } from '@stump/client'
-import { cn, Link } from '@stump/components'
+import { cn, Link, useSticky } from '@stump/components'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
+import { useMediaMatch } from 'rooks'
 
 import { useAppContext } from '@/context'
 import { usePreferences } from '@/hooks'
@@ -9,6 +10,7 @@ import { usePreferences } from '@/hooks'
 import { useSeriesContext } from './context'
 
 export default function SeriesNavigation() {
+	const isMobile = useMediaMatch('(max-width: 768px)')
 	const location = useLocation()
 	const {
 		preferences: { primary_navigation_mode, layout_max_width_px },
@@ -17,6 +19,7 @@ export default function SeriesNavigation() {
 		series: { id, path },
 	} = useSeriesContext()
 	const { checkPermission } = useAppContext()
+	const { ref, isSticky } = useSticky<HTMLDivElement>({ extraOffset: isMobile ? 56 : 0 })
 
 	const canAccessFiles = checkPermission('file:explorer')
 	const tabs = useMemo(
@@ -49,7 +52,13 @@ export default function SeriesNavigation() {
 	const preferTopBar = primary_navigation_mode === 'TOPBAR'
 
 	return (
-		<div className="sticky top-0 z-10 h-12 w-full border-b border-edge bg-transparent md:relative md:top-[unset] md:z-[unset]">
+		<div
+			ref={ref}
+			className={cn(
+				'sticky top-0 z-10 h-12 w-full border-b border-edge bg-transparent md:relative md:top-[unset] md:z-[unset]',
+				{ 'bg-background': isSticky },
+			)}
+		>
 			<nav
 				className={cn(
 					'-mb-px flex h-12 gap-x-6 overflow-x-scroll px-3 scrollbar-hide md:overflow-x-hidden',

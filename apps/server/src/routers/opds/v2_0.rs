@@ -2,7 +2,9 @@ use std::path::PathBuf;
 
 use axum::{
 	extract::{Path, Query, State},
+	http::{header, HeaderValue},
 	middleware,
+	response::IntoResponse,
 	routing::get,
 	Extension, Json, Router,
 };
@@ -23,7 +25,7 @@ use stump_core::{
 	opds::v2_0::{
 		authentication::{
 			OPDSAuthenticationDocument, OPDSAuthenticationDocumentBuilder,
-			OPDSSupportedAuthFlow,
+			OPDSSupportedAuthFlow, OPDS_AUTHENTICATION_DOCUMENT_TYPE,
 		},
 		books_as_publications,
 		feed::{OPDSFeed, OPDSFeedBuilder},
@@ -110,11 +112,30 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
+/// A wrapper struct for an OPDS authentication document, which is used to set the
+/// appropriate content type header. The Json extractor would otherwise set it incorrectly
+struct OPDSAuthDocWrapper(OPDSAuthenticationDocument);
+
+impl IntoResponse for OPDSAuthDocWrapper {
+	fn into_response(self) -> axum::http::Response<axum::body::Body> {
+		let mut base_resp = Json(self.0).into_response();
+		let Ok(header_value) = HeaderValue::from_str(OPDS_AUTHENTICATION_DOCUMENT_TYPE)
+		else {
+			tracing::error!(
+				"Failed to convert OPDS_AUTHENTICATION_DOCUMENT_TYPE to HeaderValue"
+			);
+			return base_resp;
+		};
+		base_resp
+			.headers_mut()
+			.insert(header::CONTENT_TYPE, header_value);
+		base_resp
+	}
+}
+
 #[tracing::instrument]
-async fn auth(
-	HostExtractor(host): HostExtractor,
-) -> APIResult<Json<OPDSAuthenticationDocument>> {
-	Ok(Json(
+async fn auth(HostExtractor(host): HostExtractor) -> APIResult<OPDSAuthDocWrapper> {
+	Ok(OPDSAuthDocWrapper(
 		OPDSAuthenticationDocumentBuilder::default()
 			.description(OPDSSupportedAuthFlow::Basic.description().to_string())
 			.links(vec![
@@ -125,7 +146,7 @@ async fn auth(
 	))
 }
 
-#[tracing::instrument(skip(ctx))]
+#[tracing::instrument(err, skip(ctx))]
 async fn catalog(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,

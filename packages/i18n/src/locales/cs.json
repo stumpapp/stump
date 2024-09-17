@@ -425,14 +425,14 @@
 					"disclaimer": "Tato akce sice neodstraní žádné soubory, ale trvale smaže všechny záznamy týkající se médií a sérií, které nelze najít",
 					"confirmation": {
 						"label": "Vyčistit knihovnu",
-						"text": "Are you sure you want to clean this library?"
+						"text": "Opravdu chcete vyčistit tuto knihovnu?"
 					}
 				},
 				"deleteLibrary": {
-					"heading": "Delete library",
+					"heading": "Smazat knihovnu",
 					"description": [
-						"Permanently delete this library and all its contents.",
-						"This action cannot be undone"
+						"Trvale smazat tuto knihovnu a veškerý její obsah.",
+						"Tuto akci nelze vrátit zpět"
 					]
 				}
 			}
@@ -665,8 +665,8 @@
 						"light": "Světlý",
 						"dark": "Tmavý",
 						"bronze": "Světle bronzový",
-						"ocean": "Ocean",
-						"autumn": "Autumn",
+						"ocean": "Oceán",
+						"autumn": "Podzim",
 						"cosmic": "Cosmic"
 					}
 				},
@@ -730,17 +730,17 @@
 			"description": "Nastavení vztahující se k aplikaci Stump",
 			"sections": {
 				"configuredServers": {
-					"label": "Configured servers",
-					"description": "The list of Stump servers you can connect to",
+					"label": "Nastavené servery",
+					"description": "Seznam serverů Stump, ke kterým se můžete připojit",
 					"unreachableServer": {
-						"tooltip": "Server unreachable"
+						"tooltip": "Server je nedostupný"
 					},
 					"activeServer": {
-						"tooltip": "Current server"
+						"tooltip": "Aktuální server"
 					},
 					"addOrEditServer": {
 						"validation": {
-							"nameExists": "A server with this name already exists",
+							"nameExists": "Server s tímto názvem již existuje",
 							"nameForbidden": "Toto jméno nelze použít",
 							"urlExists": "Server s touto URL již existuje"
 						},
@@ -752,69 +752,69 @@
 							},
 							"uri": {
 								"label": "URI",
-								"description": "The URL of the Stump server",
+								"description": "URL serveru Stump",
 								"placeholder": "https://stump.example.com"
 							}
 						}
 					},
 					"addServer": {
-						"trigger": "Add server",
-						"title": "Add a new server",
-						"description": "Add a new Stump server to the desktop application",
-						"confirm": "Add server"
+						"trigger": "Přidat server",
+						"title": "Přidat nový server",
+						"description": "Přidat nový server Stump do aplikace",
+						"confirm": "Přidat server"
 					},
 					"editServer": {
-						"tooltip": "Edit server",
-						"title": "Edit server",
-						"description": "Edit the details of this server",
-						"confirm": "Save changes"
+						"tooltip": "Upravit server",
+						"title": "Upravit server",
+						"description": "Upravit detaily tohoto serveru",
+						"confirm": "Uložit změny"
 					},
 					"deleteServer": {
-						"tooltip": "Delete server",
+						"tooltip": "Smazat server",
 						"confirmation": {
-							"title": "Delete this server",
-							"description": "This will remove the server from the desktop application",
-							"disclaimerActiveServer": "This server is currently active. You will be logged out",
-							"disclaimerLastServer": "This is the last configured server. You will be logged out and have to reconfigure any servers in the initialization process",
-							"confirm": "Delete server"
+							"title": "Smazat tento server",
+							"description": "Tímto odstraníte server z desktopové aplikace",
+							"disclaimerActiveServer": "Tento server je aktuálně aktivní. Budete odhlášeni",
+							"disclaimerLastServer": "Toto je poslední nakonfigurovaný server. Budete odhlášeni a budete muset znovu nakonfigurovat všechny servery v procesu inicializace",
+							"confirm": "Smazat server"
 						}
 					},
 					"switchToServer": {
-						"tooltip": "Switch to server",
+						"tooltip": "Přepnout na server",
 						"confirmation": {
-							"title": "Switch to this server",
-							"description": "This will log you out of your current server",
-							"confirm": "Switch to server",
+							"title": "Přepnout na tento server",
+							"description": "Toto vás odhlásí z aktuálního serveru",
+							"confirm": "Přepnout na server",
 							"server": "Server",
 							"uri": "URL"
 						}
 					},
 					"resetConfiguration": {
-						"label": "Delete all servers",
+						"label": "Smazat všechny servery",
 						"description": [
-							"Delete all configured servers from the desktop application",
-							"This action cannot be undone"
+							"Odstranit všechny nastavené servery z aplikace",
+							"Tuto akci nelze vrátit zpět"
 						],
 						"confirmation": {
-							"trigger": "Delete all servers",
-							"title": "Delete all servers",
-							"description": "This will remove all servers from the desktop application",
-							"disclaimer": "You will be logged out and have to reconfigure any servers in the initialization process",
-							"confirm": "Delete all servers"
+							"trigger": "Smazat všechny servery",
+							"title": "Smazat všechny servery",
+							"description": "Tímto odstraníte všechny servery z desktopové aplikace",
+							"disclaimer": "Budete odhlášeni a budete muset znovu nakonfigurovat všechny servery v procesu inicializace",
+							"confirm": "Smazat všechny servery"
 						}
 					}
 				},
 				"optionalFeatures": {
-					"label": "Optional features",
-					"description": "Manage the optional features unique to the desktop application",
+					"label": "Volitelné funkce",
+					"description": "Správa volitelných funkcí unikátních pro desktopovou aplikaci",
 					"bundledServer": {
 						"label": "Bundled server",
-						"description": "Run the bundled server in the background while the desktop application is running (requires restart)"
+						"description": "Spustit připojený server na pozadí, zatímco je spuštěna desktopová aplikace (vyžaduje restart)"
 					},
 					"discordPresence": {
-						"label": "Discord Presence",
-						"description": "Display your Stump activity in Discord using Discord Rich Presence",
-						"reconnect": "Reconnect to Discord"
+						"label": "Status na Discordu",
+						"description": "Zobrazit tvou aktivitu v Discordu pomocí Discord Rich Presence",
+						"reconnect": "Znovu připojit k Discordu"
 					}
 				}
 			}
@@ -1279,17 +1279,17 @@
 		"save": "Uložit",
 		"send": "Odeslat",
 		"saveChanges": "Uložit změny",
-		"noChanges": "No changes",
+		"noChanges": "Žádné změny",
 		"create": "Vytvořit",
 		"edit": "Upravit",
 		"update": "Aktualizovat",
 		"unimplemented": "Tato funkce ještě není implementována! Zkuste to později",
 		"limitedFunctionality": "Toto ještě není plně implementováno a chybí některé funkce. Zkuste to později",
-		"logIn": "Log in",
-		"login": "Login",
-		"seeError": "See error",
-		"goBack": "Go back",
-		"goToServers": "Go to servers",
-		"notReady": "This feature is not ready"
+		"logIn": "Přihlásit se",
+		"login": "Přihlášení",
+		"seeError": "Zobrazit chybu",
+		"goBack": "Jít zpět",
+		"goToServers": "Jít na servery",
+		"notReady": "Tato funkce není připravena"
 	}
 }

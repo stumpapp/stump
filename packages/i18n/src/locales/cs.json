@@ -159,13 +159,13 @@
 				},
 				"enableSwitch": {
 					"label": "Zapnuto",
-					"description": "Generate thumbnail images for this library"
+					"description": "Generovat náhledové obrázky pro tuto knihovnu"
 				},
 				"scaled": {
-					"label": "Scaled",
-					"description": "Scale the image by a custom factor per dimension",
+					"label": "Škálování",
+					"description": "Měřítko obrázku pomocí vlastního faktoru podle rozměrů",
 					"width": {
-						"label": "Width scale"
+						"label": "Měřítko šířky"
 					},
 					"height": {
 						"label": "Height scale"

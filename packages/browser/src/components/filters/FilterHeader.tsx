@@ -30,6 +30,7 @@ type Props = {
 	layoutControls?: React.ReactNode
 }
 
+// TODO: transparent until sticky hits, then bg-background
 export default function FilterHeader({
 	isSearching,
 	isSearchDisabled,

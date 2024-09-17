@@ -104,6 +104,7 @@ type Foreground = {
 } & DefaultVariant &
 	DisabledVariant
 
+// TODO: add secondary fill variant
 /**
  * A type for enforcing the fill color of a specific element, such as a button, and loosely
  * follows the standard color variants of 'info', 'success', 'warning', 'danger', and 'brand'

@@ -2,7 +2,7 @@ import { dark } from './dark'
 import { StumpTheme } from './types'
 
 // TODO: fix before october, this is ass
-export const halloween: StumpTheme = {
+export const pumpkin: StumpTheme = {
 	background: {
 		DEFAULT: '#0C0C0C',
 		inverse: '#FFFFFF',
@@ -17,6 +17,7 @@ export const halloween: StumpTheme = {
 		},
 	},
 	edge: {
+		...dark.edge,
 		// DEFAULT: '#FF660030',
 		// brand: '#FF660080',
 		// subtle: '#FF660060',
@@ -30,6 +31,11 @@ export const halloween: StumpTheme = {
 			DEFAULT: '#481E14',
 			hover: '#34160E',
 			secondary: '#481E1480',
+		},
+		info: {
+			DEFAULT: '#FF6600',
+			hover: '#AC7FDC',
+			secondary: '#FF660040',
 		},
 	},
 	foreground: {
@@ -45,6 +51,10 @@ export const halloween: StumpTheme = {
 	sidebar: {
 		DEFAULT: '#090909',
 		inverse: '#FFFFFF',
+		overlay: {
+			DEFAULT: '#1A1A1A',
+			hover: '#333333',
+		},
 		surface: {
 			DEFAULT: '#131313',
 			hover: '#161616',

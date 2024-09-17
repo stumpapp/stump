@@ -25,7 +25,7 @@ export default function ThemeSelect() {
 					{ label: t(`${localeKey}.options.ocean`), value: 'ocean' },
 					{ label: t(`${localeKey}.options.autumn`), value: 'autumn' },
 					{ label: t(`${localeKey}.options.cosmic`), value: 'cosmic' },
-					{ label: t(`${localeKey}.options.halloween`), value: 'halloween' },
+					{ label: t(`${localeKey}.options.pumpkin`), value: 'pumpkin' },
 				]}
 				onChange={(e) => changeTheme(e.target.value)}
 			/>

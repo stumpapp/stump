@@ -2,9 +2,9 @@ import { autumn } from './autumn'
 import { bronze } from './bronze'
 import { cosmic } from './cosmic'
 import { dark } from './dark'
-import { halloween } from './halloween'
 import { light } from './light'
 import { ocean } from './ocean'
+import { pumpkin } from './pumpkin'
 
 const brand = {
 	100: '#EFDDD1',
@@ -56,9 +56,9 @@ export const themes = {
 	bronze,
 	cosmic,
 	dark,
-	halloween,
 	light,
 	ocean,
+	pumpkin,
 }
 
 export type Theme = keyof typeof themes

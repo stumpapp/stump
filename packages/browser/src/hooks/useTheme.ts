@@ -45,5 +45,5 @@ export function useTheme() {
 	}
 }
 
-export const DARK_THEMES = ['dark', 'cosmic', 'halloween', 'autum']
+export const DARK_THEMES = ['dark', 'cosmic', 'pumpkin', 'autum']
 export const THEMES_WITH_GRADIENTS = ['cosmic']

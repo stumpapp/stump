@@ -168,57 +168,57 @@
 						"label": "Měřítko šířky"
 					},
 					"height": {
-						"label": "Height scale"
+						"label": "Měřítko výšky"
 					}
 				},
 				"sized": {
-					"label": "Explicitly Sized",
-					"description": "Set each dimension of the thumbnail (in pixels)",
+					"label": "Explicitní velikost",
+					"description": "Nastavit každou velikost náhledu (v pixelech)",
 					"width": {
-						"label": "Width"
+						"label": "Šířka"
 					},
 					"height": {
-						"label": "Height"
+						"label": "Výška"
 					}
 				},
 				"format": {
-					"label": "Image format",
-					"description": "The format of the generated thumbnail images"
+					"label": "Formát obrázku",
+					"description": "Formát vygenerovaných obrázků náhledů"
 				},
 				"quality": {
-					"label": "Quality",
-					"description": "The quality of the generated thumbnail images, between 0 and 1.0"
+					"label": "Kvalita",
+					"description": "Kvalita vygenerovaných obrázků náhledů mezi 0 a 1.0"
 				}
 			},
 			"ignoreRules": {
 				"section": {
-					"heading": "Ignore rules",
-					"description": "Define glob patterns to ignore certain files or directories during a scan"
+					"heading": "Pravidla Ignorování",
+					"description": "Definujte globální vzory, podle kterých se budou ignorovat určité soubory nebo adresáře během skenu"
 				},
-				"noRules": "No ignore rules have been configured",
-				"save": "Save changes",
+				"noRules": "Nebyla nakonfigurována žádná pravidla pro ignorování",
+				"save": "Uložit změny",
 				"addRule": {
-					"label": "New rule",
-					"description": "Glob pattern to ignore files or directories",
-					"addButton": "Add rule",
+					"label": "Nové pravidlo",
+					"description": "Globální vzor pro ignorování souborů nebo složek",
+					"addButton": "Přidat pravidlo",
 					"ignoreParents": {
-						"title": "Ignore all parent directories",
-						"label": "Ignore parents"
+						"title": "Ignorovat všechny nadřazené adresáře",
+						"label": "Ignorovat nadřazené"
 					},
 					"ignoreSubdirs": {
-						"title": "Ignore all subdirectories",
-						"label": "Ignore subdirectories"
+						"title": "Ignorovat všechny podadresáře",
+						"label": "Ignorovat podadresáře"
 					}
 				},
-				"invalidGlob": "Invalid glob pattern",
+				"invalidGlob": "Neplatný globální vzor",
 				"lockConfig": {
-					"lock": "Lock configuration",
-					"unlock": "Unlock configuration"
+					"lock": "Uzamknout nastavení",
+					"unlock": "Odemknout nastavení"
 				},
-				"editRule": "Edit rule",
-				"deleteRule": "Delete rule",
-				"cancelEdit": "Cancel edit",
-				"confirmEdit": "Confirm edit"
+				"editRule": "Upravit pravidlo",
+				"deleteRule": "Smazat pravidlo",
+				"cancelEdit": "Zrušit úpravu",
+				"confirmEdit": "Potvrdit úpravu"
 			},
 			"convertOptions": {
 				"section": {

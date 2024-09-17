@@ -222,65 +222,65 @@
 			},
 			"convertOptions": {
 				"section": {
-					"heading": "File conversion",
-					"description": "Stump is capable of converting certain file formats to more compatible ones"
+					"heading": "Konverze souboru",
+					"description": "Stump je schopný převádět určité formáty souborů do více kompatibilních"
 				},
 				"rarToZip": {
-					"label": "Convert RAR to ZIP",
-					"description": "Convert RAR/CBR files to ZIP/CBZ files during a scan"
+					"label": "Převést RAR na ZIP",
+					"description": "Převést RAR/CBR soubory na ZIP/CBZ soubory během skenování"
 				},
 				"deleteRarAfter": {
-					"label": "Delete RAR after conversion",
-					"description": "Delete the original RAR/CBR file after conversion. This is irreversible"
+					"label": "Odstranit RAR po konverzi",
+					"description": "Smazat původní RAR/CBR soubor po konverzi. Toto je nevratné"
 				}
 			},
 			"scannerFeatures": {
 				"section": {
-					"heading": "Optional processing",
-					"description": "Opt-in processing features for the scanner",
-					"disclaimer": "These features involve additional file reads which may slow down the scan process"
+					"heading": "Volitelné zpracování",
+					"description": "Opt-in funkce zpracování pro skener",
+					"disclaimer": "Tyto funkce zahrnují další čtení souborů, které mohou zpomalit proces skenování"
 				},
 				"processMetadata": {
-					"label": "Process metadata",
-					"description": "Extract any metadata from library files and store the results in the database"
+					"label": "Zpracování metadat",
+					"description": "Extrahovat metadata ze souborů knihovny a ukládat výsledky v databázi"
 				},
 				"generateFileHashes": {
-					"label": "Generate file hashes",
-					"description": "Generate a hash for each file in the library to detect duplicates"
+					"label": "Generovat hash souborů",
+					"description": "Generovat hash pro každý soubor v knihovně pro detekci duplicit"
 				}
 			},
 			"libraryPattern": {
 				"section": {
-					"heading": "Organization",
-					"description": "Identify which pattern most closely matches the organization of your library",
+					"heading": "Organizace",
+					"description": "Určete, který vzor nejvíce odpovídá organizaci vaší knihovny",
 					"docs": [
-						"Not sure which to choose? Click",
-						"here",
-						"for more information.",
-						"You cannot change this setting later"
+						"Nejste si jisti, co vybrat? Klikněte",
+						"zde",
+						"pro více informací.",
+						"Toto nastavení nelze později změnit"
 					],
-					"disabled": "You cannot change this setting"
+					"disabled": "Toto nastavení nemůžete změnit"
 				},
 				"options": {
-					"label": "Library pattern",
-					"description": "The setting which determines how Stump will organize your library",
+					"label": "Vzor knihovny",
+					"description": "Nastavení, které určuje, jak bude Stump organizovat vaši knihovnu",
 					"collectionPriority": {
-						"label": "Collection priority",
-						"description": "Each folder at the top-most level of the library root is a single series"
+						"label": "Priorita sbírky",
+						"description": "Každá složka na nejvyšší úrovni kořene knihovny je jedna série"
 					},
 					"seriesPriority": {
-						"label": "Series priority",
-						"description": "Each folder at any level recursively is a single series"
+						"label": "Priorita série",
+						"description": "Každá složka na libovolné úrovni rekurzivně je jedna série"
 					}
 				}
 			}
 		},
 		"scan": {
 			"label": {
-				"create": "Scan after creation",
-				"update": "Scan after updates"
+				"create": "Naskenovat po vytvoření",
+				"update": "Skenovat po aktualizaci"
 			},
-			"description": "Index the library files to populate your database"
+			"description": "Indexovat soubory knihovny k naplnění databáze"
 		}
 	},
 	"createLibraryScene": {
@@ -288,48 +288,48 @@
 		"subtitle": "Knihovny slouží k seskupování knih. Pokud si chcete osvěžit informace o knihovnách a jejich fungování, podívejte se na stránku",
 		"subtitleLink": "příslušná dokumentace",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "Krok",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this library, including its name, path, and description"
+					"label": "Základní",
+					"heading": "Základní informace",
+					"description": "Podrobnosti o této knihovně, včetně jejího názvu, umístění a popisu"
 				},
 				{
-					"label": "Scanning",
-					"heading": "Scanner Behavior",
-					"description": "Settings related to how Stump scans this library"
+					"label": "Skenování",
+					"heading": "Chování skeneru",
+					"description": "Nastavení týkající se skenování této knihovny"
 				},
 				{
-					"label": "Thumbnails",
-					"heading": "Thumbnails",
-					"description": "The options for if and how Stump generates thumbnails for this library"
+					"label": "Náhledy",
+					"heading": "Náhledy",
+					"description": "Možnosti pro zobrazení a vygenerování náhledů pro tuto knihovnu"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your library settings before creating it"
+					"label": "Zkontrolovat",
+					"heading": "Zkontrolovat",
+					"description": "Zkontrolujte nastavení knihovny před jejím vytvořením"
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "Ano",
+				"no": "Ne",
+				"none": "Žádné",
 				"labels": {
-					"generateThumbnails": "Generate thumbnails",
-					"mode": "Mode",
-					"format": "Format",
-					"quality": "Quality",
-					"name": "Name",
-					"path": "Path",
-					"description": "Description",
-					"tags": "Tags",
-					"pattern": "Pattern",
-					"ignoreRules": "Ignore rules",
-					"convertRar": "Convert RAR/CBR",
-					"deleteConversions": "Delete converted files",
-					"processMetadata": "Process metadata",
-					"generateFileHashes": "Generate file hashes"
+					"generateThumbnails": "Generovat náhledy",
+					"mode": "Režim",
+					"format": "Formát",
+					"quality": "Kvalita",
+					"name": "Název",
+					"path": "Umístění",
+					"description": "Popis",
+					"tags": "Tagy",
+					"pattern": "Vzor",
+					"ignoreRules": "Pravidla Ignorování",
+					"convertRar": "Konverze RAR/CBR",
+					"deleteConversions": "Smazat převedené soubory",
+					"processMetadata": "Zpracování metadat",
+					"generateFileHashes": "Generovat hash souborů"
 				}
 			},
 			"buttons": {
@@ -342,89 +342,89 @@
 		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
 		"subtitleLink": "příslušná dokumentace",
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "Základní",
 			"options": {
-				"general": "General",
-				"scanning": "Scanning",
-				"thumbnails": "Thumbnails",
-				"ignore-rules": "Ignore Rules",
-				"analysis": "Analysis",
-				"label": "Options"
+				"general": "Obecné",
+				"scanning": "Skenování",
+				"thumbnails": "Náhledy",
+				"ignore-rules": "Pravidla Ignorování",
+				"analysis": "Analýza",
+				"label": "Volby"
 			},
 			"danger-zone": {
-				"access-control": "Access Control",
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"access-control": "Správa přístupu",
+				"delete": "Smazání",
+				"label": "Nebezpečná zóna"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this library, including its name, path, and description",
+			"title": "Základní informace",
+			"description": "Podrobnosti o této knihovně, včetně jejího názvu, umístění a popisu",
 			"form": {
-				"submit": "Update library"
+				"submit": "Aktualizace knihovny"
 			}
 		},
 		"options/scanning": {
-			"title": "Scanner Behavior",
-			"description": "Settings related to how Stump scans this library"
+			"title": "Chování skeneru",
+			"description": "Nastavení týkající se skenování této knihovny"
 		},
 		"options/thumbnails": {
-			"title": "Thumbnails",
-			"description": "Settings and management options for thumbnails in this library",
+			"title": "Náhledy",
+			"description": "Možnosti nastavení a správy náhledů v této knihovně",
 			"sections": {
 				"management": {
-					"heading": "Management",
-					"description": "Manage the existing thumbnails for this library",
+					"heading": "Správa",
+					"description": "Spravovat existující náhledy pro tuto knihovnu",
 					"thumbnailSelector": {},
 					"deleteThumbnails": {}
 				}
 			}
 		},
 		"options/analysis": {
-			"title": "Analysis",
-			"description": "Analyze the contents of this library to identify potential issues or improvements",
+			"title": "Analýza",
+			"description": "Analyzujte obsah této knihovny, abyste zjistili možné problémy nebo vylepšení",
 			"sections": {
 				"analyzeBooks": {
-					"heading": "Analyze books",
-					"description": "Analyze the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
-					"disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable",
-					"analyzeButton": "Analyze books"
+					"heading": "Analyzovat knihy",
+					"description": "Analyzujte knihy v této knihovně a připojte další metadata do databáze, například rozměry stránky pro knihy založené na obrázcích",
+					"disclaimer": "Tento proces je náročný na zdroje a může chvíli trvat. V budoucnu bude více konfigurovatelný",
+					"analyzeButton": "Analyzovat knihy"
 				},
 				"missingFiles": {
-					"heading": "Missing files",
-					"description": "Files that are referenced in the database but cannot be located on disk",
-					"noMissingFiles": "There are no missing files in this library"
+					"heading": "Chybějící soubory",
+					"description": "Soubory, na které je odkazováno v databázi, ale nelze je nalézt na disku",
+					"noMissingFiles": "V této knihovně nejsou žádné chybějící soubory"
 				},
 				"duplicateFiles": {
-					"heading": "Duplicate files",
-					"description": "Files that are potentially duplicated on disk",
-					"noDuplicateFiles": "There are no duplicate files detected for this library"
+					"heading": "Duplicitní soubory",
+					"description": "Soubory, které mohou být na disku duplicitní",
+					"noDuplicateFiles": "Nebyly zjištěny žádné duplicitní soubory pro tuto knihovnu"
 				}
 			}
 		},
 		"danger-zone/access-control": {
-			"title": "Access Control",
-			"description": "Control who can access the content in this library",
+			"title": "Správa přístupu",
+			"description": "Kontrolujte, kdo má přístup k obsahu v této knihovně",
 			"sections": {
 				"libraryExclusions": {
-					"heading": "Exclude users",
-					"description": "Prevent certain users from accessing this library or its contents",
-					"noUsers": "There are no other registered users to exclude from this library",
-					"updated": "Exclusions updated",
-					"failure": "Failed to update exclusions"
+					"heading": "Vyloučení uživatelé",
+					"description": "Zabránit některým uživatelům v přístupu k této knihovně nebo k jejímu obsahu",
+					"noUsers": "Neexistují žádní další registrovaní uživatelé k vyloučení přístupu k této knihovně",
+					"updated": "Vyloučení aktualizována",
+					"failure": "Aktualizace vyloučení se nezdařila"
 				}
 			}
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this library and all of its contents or certain resources",
+			"title": "Akce smazání",
+			"description": "Trvale smazat tuto knihovnu a veškerý její obsah nebo určité zdroje",
 			"sections": {
 				"cleanLibrary": {
-					"heading": "Clean library",
-					"description": "Remove all media and series that cannot be located on disk",
-					"disclaimer": "While this action will not delete any files, it will permanently delete all records relating to media and series which have a missing status",
+					"heading": "Vyčistit knihovnu",
+					"description": "Odstranit všechna média a série, které nelze najít na disku",
+					"disclaimer": "Tato akce sice neodstraní žádné soubory, ale trvale smaže všechny záznamy týkající se médií a sérií, které nelze najít",
 					"confirmation": {
-						"label": "Clean library",
+						"label": "Vyčistit knihovnu",
 						"text": "Are you sure you want to clean this library?"
 					}
 				},
@@ -741,14 +741,14 @@
 					"addOrEditServer": {
 						"validation": {
 							"nameExists": "A server with this name already exists",
-							"nameForbidden": "This name is reserved",
-							"urlExists": "A server with this URL already exists"
+							"nameForbidden": "Toto jméno nelze použít",
+							"urlExists": "Server s touto URL již existuje"
 						},
 						"fields": {
 							"name": {
-								"label": "Name",
-								"description": "A friendly name to identify this server",
-								"placeholder": "My server"
+								"label": "Název",
+								"description": "Přátelské jméno pro identifikaci tohoto serveru",
+								"placeholder": "Můj server"
 							},
 							"uri": {
 								"label": "URI",

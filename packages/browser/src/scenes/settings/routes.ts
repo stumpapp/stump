@@ -4,6 +4,7 @@ import {
 	Bell,
 	Book,
 	Brush,
+	ChartArea,
 	Cog,
 	LucideIcon,
 	Mail,
@@ -86,6 +87,13 @@ export const routeGroups: RouteGroup[] = [
 				localeKey: 'server/logs',
 				permission: 'server:manage',
 				to: '/settings/server/logs',
+			},
+			{
+				icon: ChartArea,
+				label: 'Stats',
+				localeKey: 'server/stats',
+				permission: 'server:manage',
+				to: '/settings/server/stats',
 			},
 			{
 				icon: AlarmClock,

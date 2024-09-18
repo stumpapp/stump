@@ -49,6 +49,7 @@ pub(crate) mod notifier;
 pub(crate) mod reading_list;
 pub(crate) mod series;
 pub(crate) mod smart_list;
+pub(crate) mod stats;
 pub(crate) mod tag;
 pub(crate) mod user;
 
@@ -69,7 +70,8 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.merge(user::mount(app_state.clone()))
 		.merge(reading_list::mount(app_state.clone()))
 		.merge(smart_list::mount(app_state.clone()))
-		.merge(book_club::mount(app_state))
+		.merge(book_club::mount(app_state.clone()))
+		.merge(stats::mount(app_state))
 		.route("/claim", get(claim))
 		.route("/ping", get(ping))
 		// TODO: should /version or /check-for-updates be behind any auth reqs?

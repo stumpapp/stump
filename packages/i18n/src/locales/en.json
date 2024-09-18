@@ -575,6 +575,7 @@
 			"general": "General",
 			"logs": "Logs",
 			"server": "Server",
+			"stats": "Statistics",
 			"jobs": "Jobs and Configuration",
 			"users": "User Management",
 			"desktop": "Desktop"
@@ -591,6 +592,7 @@
 				"general": "General",
 				"logs": "Logs",
 				"users": "Users",
+				"stats": "Statistics",
 				"jobs": "Jobs",
 				"access": "Access",
 				"email": "Email",
@@ -869,6 +871,12 @@
 					"description": "Streamed directly from your Stump server instance in real-time"
 				}
 			}
+		},
+		"server/stats": {
+			"helmet": "Statistics",
+			"title": "Statistics",
+			"description": "Statistics about your Stump server instance",
+			"sections": {}
 		},
 		"server/jobs": {
 			"helmet": "Jobs",

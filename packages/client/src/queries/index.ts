@@ -79,6 +79,7 @@ export {
 	useSmartListWithMetaQuery,
 	useUpdateSmartListMutation,
 } from './smartList'
+export * from './stats'
 export { type TagOption, useTags, type UseTagsConfig } from './tag'
 export {
 	useCreateUser,

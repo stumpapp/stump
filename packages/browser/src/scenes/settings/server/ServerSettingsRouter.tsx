@@ -9,6 +9,7 @@ import { UsersRouter } from './users'
 const GeneralServerSettingsScene = lazy(() => import('./general/GeneralServerSettingsScene.tsx'))
 const ServerLogsScene = lazy(() => import('./logs/ServerLogsScene.tsx'))
 const JobSettingsScene = lazy(() => import('./jobs/JobSettingsScene.tsx'))
+const ServerStatsScene = lazy(() => import('./stats'))
 
 export default function ServerSettingsRouter() {
 	const navigate = useNavigate()
@@ -37,6 +38,7 @@ export default function ServerSettingsRouter() {
 			{canManageServer && <Route path="jobs" element={<JobSettingsScene />} />}
 			{canManageUsers && <Route path="users/*" element={<UsersRouter />} />}
 			{canManageEmail && <Route path="email/*" element={<EmailSettingsRouter />} />}
+			{canManageServer && <Route path="stats" element={<ServerStatsScene />} />}
 		</Routes>
 	)
 }

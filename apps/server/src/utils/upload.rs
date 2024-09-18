@@ -149,3 +149,21 @@ fn max_size_err(max_size: usize, name: &str, actual_size: usize) -> APIError {
 }
 
 // TODO: validate_media_upload (books)
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[tokio::test]
+	async fn test_max_size_err() {
+		max_size_err(500, "file_name", 512);
+	}
+
+	#[tokio::test]
+	async fn test_validation_err() {
+		validation_err(Some("image"));
+		validation_err(Some("pdf"));
+		validation_err(Some(""));
+		validation_err(None);
+	}
+}

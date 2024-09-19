@@ -11,7 +11,8 @@
 		"form": {
 			"validation": {
 				"missingUsername": "Il nome utente è obbligatorio",
-				"missingPassword": "La password è obbligatoria"
+				"missingPassword": "La password è obbligatoria",
+				"usernameAlreadyExists": "Username already exists"
 			},
 			"labels": {
 				"username": "Nome utente",
@@ -967,6 +968,32 @@
 						"upload": {
 							"label": "Upload files",
 							"description": "Consente all'utente di caricare file sul server"
+						}
+					},
+					"emailer": {
+						"label": "Emailers",
+						"read": {
+							"label": "Access emailers",
+							"description": "Allows the user to view the configured emailers"
+						},
+						"create": {
+							"label": "Create emailers",
+							"description": "Allows the user to create new emailers"
+						},
+						"manage": {
+							"label": "Manage emailers",
+							"description": "Allows the user to manage existing emailers"
+						}
+					},
+					"email": {
+						"label": "Emailing",
+						"send": {
+							"label": "Send emails",
+							"description": "Allows the user to send emails from the server to any configured aliases"
+						},
+						"arbitrary_send": {
+							"label": "Send arbitrary emails",
+							"description": "Allows the user to send emails from the server to any email address"
 						}
 					},
 					"library": {

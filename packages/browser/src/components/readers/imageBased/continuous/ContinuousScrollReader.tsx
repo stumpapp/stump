@@ -1,7 +1,8 @@
-import { usePrevious } from '@stump/components'
+import { BookImageScaling } from '@stump/client'
+import { cn, usePrevious } from '@stump/components'
 import { Media } from '@stump/types'
 import { useOverlayScrollbars } from 'overlayscrollbars-react'
-import React, { forwardRef, useEffect, useRef, useState } from 'react'
+import React, { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { ScrollerProps, Virtuoso } from 'react-virtuoso'
 
@@ -62,6 +63,7 @@ export default function ContinuousScrollReader({
 	})
 
 	const {
+		bookPreferences: { imageScaling, brightness },
 		settings: { showToolBar, preload },
 		setSettings,
 	} = useBookPreferences({ book: media })
@@ -106,6 +108,12 @@ export default function ContinuousScrollReader({
 		}
 	}, [initialize, scroller])
 
+	const containerStyle = useCallback(
+		({ height, width }: { height: number; width: number }) =>
+			orientation === 'vertical' ? undefined : { height, width },
+		[orientation],
+	)
+
 	// TODO: use page dimensions to calculate the height of the page
 	return (
 		<div className="flex flex-1" data-overlayscrollbars-initialize ref={rootRef}>
@@ -124,15 +132,16 @@ export default function ContinuousScrollReader({
 							<div
 								key={url}
 								style={{
-									height,
-									width,
+									...containerStyle({ height, width }),
+									filter: `brightness(${brightness * 100}%)`,
 								}}
-								className="flex justify-center"
+								className="flex flex-1 justify-center"
 							>
-								<img
-									className="max-h-full select-none object-scale-down md:w-auto"
+								<Page
+									page={currentIndex + 1}
 									src={url}
-									onClick={() => setSettings({ showToolBar: !showToolBar })}
+									imageScaling={imageScaling}
+									onPageClick={() => setSettings({ showToolBar: !showToolBar })}
 								/>
 							</div>
 						)}
@@ -161,3 +170,33 @@ const HorizontalScroller = forwardRef<HTMLDivElement, ScrollerProps>(
 	},
 )
 HorizontalScroller.displayName = 'HorizontalScroller'
+
+type PageProps = {
+	page: number
+	src: string
+	imageScaling: BookImageScaling
+	onPageClick: () => void
+}
+const Page = ({ page, src, imageScaling: { scaleToFit }, onPageClick }: PageProps) => (
+	<img
+		key={`page-${page}-scaled-${scaleToFit}`}
+		className={cn(
+			'z-30 select-none',
+			{
+				'mx-auto my-0 w-auto self-center': scaleToFit === 'none',
+			},
+			{
+				'm-auto h-full max-h-screen w-auto object-cover': scaleToFit === 'height',
+			},
+			{
+				'mx-auto my-0 w-full object-contain': scaleToFit === 'width',
+			},
+		)}
+		src={src}
+		onError={(err) => {
+			// @ts-expect-error: is oke
+			err.target.src = '/favicon.png'
+		}}
+		onClick={onPageClick}
+	/>
+)

@@ -97,6 +97,7 @@ type PageProps = Omit<Props, 'displayedPages' | 'currentPage'> & {
 	imageScaling: BookImageScaling
 }
 
+// TODO(readers): consider exporting/relocating and sharing with the continuous reader(s)
 const _Page = ({
 	page,
 	getPageUrl,

@@ -40,7 +40,7 @@ const createBookPreferences = (
 	overrides: DeepPartial<ReturnType<typeof useBookPreferences>> = {},
 ): ReturnType<typeof useBookPreferences> =>
 	({
-		bookPreferences: { readingDirection: 'ltr' },
+		bookPreferences: { readingDirection: 'ltr', readingMode: 'paged' },
 		setBookPreferences,
 		...overrides,
 	}) as ReturnType<typeof useBookPreferences>
@@ -79,7 +79,7 @@ describe('LayoutMenu', () => {
 		expect(screen.getByTestId('BrightnessControl')).toBeInTheDocument()
 	})
 
-	it('should not render reading direction select when reading mode is continuous:vertical', () => {
+	it('should not render reading direction select or double spread when reading mode is continuous:vertical', () => {
 		jest
 			.mocked(useBookPreferences)
 			.mockReturnValue(
@@ -93,7 +93,8 @@ describe('LayoutMenu', () => {
 		fireEvent.click(screen.getByTestId('trigger'))
 
 		expect(screen.getByTestId('ReadingModeSelect')).toBeInTheDocument()
-		expect(screen.getByTestId('DoubleSpreadToggle')).toBeInTheDocument()
+
+		expect(screen.queryByTestId('DoubleSpreadToggle')).not.toBeInTheDocument()
 		expect(screen.queryByTestId('ReadingDirectionSelect')).not.toBeInTheDocument()
 	})
 })

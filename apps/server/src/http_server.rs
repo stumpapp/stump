@@ -51,7 +51,7 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 
 	let server_ctx = core.get_context();
 	let app_state = server_ctx.arced();
-	let cors_layer = cors::get_cors_layer(config.clone());
+	let cors_layer = cors::get_cors_layer(&config);
 
 	tracing::info!("{}", core.get_shadow_text());
 

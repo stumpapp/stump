@@ -93,7 +93,7 @@ mod tests {
 		// Create Axum app
 		let server_ctx = core.get_context();
 		let app_state: std::sync::Arc<stump_core::Ctx> = server_ctx.arced();
-		let cors_layer = config::cors::get_cors_layer(config.clone());
+		let cors_layer = config::cors::get_cors_layer(&config);
 
 		let app = Router::new()
 			.merge(routers::mount(app_state.clone()))
@@ -107,5 +107,20 @@ mod tests {
 		// Now that we have a TestServer, we can issue requests to it.
 		let _ = server.get("/").await.into_bytes();
 		let _ = server.get("/favicon.ico").await.into_bytes();
+	}
+
+	pub fn get_mock_server() -> TestServer {
+		let (server_ctx, _) = stump_core::Ctx::mock();
+		let app_state: std::sync::Arc<stump_core::Ctx> = server_ctx.arced();
+		let cors_layer = config::cors::get_cors_layer(&app_state.config);
+
+		let app = Router::new()
+			.merge(routers::mount(app_state.clone()))
+			.with_state(app_state.clone())
+			.layer(config::session::get_session_layer(app_state.clone()))
+			.layer(cors_layer)
+			.layer(TraceLayer::new_for_http());
+
+		TestServer::new(app).unwrap()
 	}
 }

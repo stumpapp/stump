@@ -25,11 +25,11 @@ fn merge_origins(origins: &[&str], local_origins: Vec<String>) -> Vec<HeaderValu
 		.collect::<Vec<HeaderValue>>()
 }
 
-pub fn get_cors_layer(config: StumpConfig) -> CorsLayer {
+pub fn get_cors_layer(config: &StumpConfig) -> CorsLayer {
 	let is_debug = config.is_debug();
 
 	let mut allowed_origins = Vec::new();
-	for origin in config.allowed_origins {
+	for origin in &config.allowed_origins {
 		match origin.parse::<HeaderValue>() {
 			Ok(val) => allowed_origins.push(val),
 			Err(_) => tracing::error!("Failed to parse allowed origin: {:?}", origin),

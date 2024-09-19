@@ -1,5 +1,5 @@
 import { Button, Form, Heading, Input, Text, TextArea } from '@stump/components'
-import { useForm } from 'react-hook-form'
+import { useForm, useFormState } from 'react-hook-form'
 import toast from 'react-hot-toast'
 
 import { ContentContainer, SceneContainer } from '@/components/container'
@@ -27,6 +27,7 @@ export default function UserSmartListSettingsScene() {
 			name,
 		},
 	})
+	const { isSubmitting } = useFormState({ control: form.control })
 
 	const handleSubmit = async (data: BasicDetailsForm) => {
 		try {
@@ -58,7 +59,7 @@ export default function UserSmartListSettingsScene() {
 						/>
 
 						<div>
-							<Button variant="primary" disabled={form.formState.isSubmitting}>
+							<Button type="submit" variant="primary" disabled={isSubmitting}>
 								Save changes
 							</Button>
 						</div>

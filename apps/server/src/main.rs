@@ -65,7 +65,7 @@ mod tests {
 	use super::*;
 
 	#[tokio::test]
-	async fn test_server() {
+	async fn test_server_initialization() {
 		let tempdir = tempfile::tempdir().expect("Failed to create temporary directory");
 
 		// Create Stump config with the config directory in a tempdir.
@@ -105,5 +105,7 @@ mod tests {
 		let server = TestServer::new(app).unwrap();
 
 		// Now that we have a TestServer, we can issue requests to it.
+		let _ = server.get("/").await.into_bytes();
+		let _ = server.get("/favicon.ico").await.into_bytes();
 	}
 }

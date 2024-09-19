@@ -31,6 +31,8 @@ pub mod env_keys {
 	pub const SESSION_EXPIRY_INTERVAL_KEY: &str = "SESSION_EXPIRY_CLEANUP_INTERVAL";
 	pub const MAX_SCANNER_CONCURRENCY_KEY: &str = "STUMP_MAX_SCANNER_CONCURRENCY";
 	pub const MAX_THUMBNAIL_CONCURRENCY_KEY: &str = "STUMP_MAX_THUMBNAIL_CONCURRENCY";
+	pub const EMAIL_TEMPLATES_DIR_KEY: &str = "EMAIL_TEMPLATES_DIR";
+	pub const ACCESS_TOKEN_TTL_KEY: &str = "ACCESS_TOKEN_TTL";
 }
 use env_keys::*;
 
@@ -109,7 +111,7 @@ pub struct StumpConfig {
 	/// An optional custom path for the templates directory.
 	#[default_value(None)]
 	#[debug_value(Some(env!("CARGO_MANIFEST_DIR").to_string() + "/../../crates/email/templates"))]
-	#[env_key("EMAIL_TEMPLATES_DIR")]
+	#[env_key(EMAIL_TEMPLATES_DIR_KEY)]
 	pub custom_templates_dir: Option<String>,
 
 	/// The configuration root for the Stump application, contains thumbnails, cache, and logs.
@@ -143,7 +145,7 @@ pub struct StumpConfig {
 	#[env_key(SESSION_TTL_KEY)]
 	pub session_ttl: i64,
 	#[default_value(DEFAULT_ACCESS_TOKEN_TTL)]
-	#[env_key("ACCESS_TOKEN_TTL")]
+	#[env_key(ACCESS_TOKEN_TTL_KEY)]
 	pub access_token_ttl: i64,
 	/// The interval at which automatic deleted session cleanup is performed.
 	#[default_value(DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL)]

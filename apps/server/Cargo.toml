@@ -54,6 +54,7 @@ utoipa-swagger-ui = { version = "7.1.0", features = ["axum"] }
 
 [dev-dependencies]
 axum-test = "15.3.1"
+tempfile = { workspace = true }
 
 [build-dependencies]
 chrono = { workspace = true }

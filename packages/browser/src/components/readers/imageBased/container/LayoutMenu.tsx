@@ -17,8 +17,18 @@ export default function LayoutMenu() {
 		bookPreferences: { readingMode },
 	} = useBookPreferences({ book })
 
+	const renderDoubleSpreadOption = () => {
+		// TODO(readers): Support double spread for horizontal scrolling
+		if (readingMode.startsWith('continuous')) {
+			return null
+		} else {
+			return <DoubleSpreadToggle />
+		}
+	}
+
 	const renderDirectionalOptions = () => {
-		if (readingMode === 'continuous:vertical') {
+		// TODO(readers): Support rtl reading direction for horizontal scrolling
+		if (readingMode.startsWith('continuous')) {
 			return null
 		} else {
 			return <ReadingDirectionSelect />
@@ -41,7 +51,7 @@ export default function LayoutMenu() {
 				className="z-[101] flex flex-col gap-1.5 bg-background-surface"
 			>
 				<ImageScalingSelect />
-				<DoubleSpreadToggle />
+				{renderDoubleSpreadOption()}
 				<ReadingModeSelect />
 				{renderDirectionalOptions()}
 				<BrightnessControl />

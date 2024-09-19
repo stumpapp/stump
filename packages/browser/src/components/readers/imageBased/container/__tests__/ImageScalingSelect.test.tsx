@@ -1,6 +1,3 @@
-import '@/__mocks__/resizeObserver'
-import '@/__mocks__/pointerCapture'
-
 import { Media } from '@stump/types'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { DeepPartial } from 'react-hook-form'
@@ -8,7 +5,7 @@ import { DeepPartial } from 'react-hook-form'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { IImageBaseReaderContext, useImageBaseReaderContext } from '../../context'
-import BrightnessControl from '../BrightnessControl'
+import ImageScalingSelect from '../ImageScalingSelect'
 
 jest.mock('@/scenes/book/reader/useBookPreferences', () => ({
 	useBookPreferences: jest.fn(),
@@ -19,7 +16,9 @@ const createBookPreferences = (
 ): ReturnType<typeof useBookPreferences> =>
 	({
 		bookPreferences: {
-			brightness: 1,
+			imageScaling: {
+				scaleToFit: 'height',
+			},
 		},
 		setBookPreferences,
 		...overrides,
@@ -39,12 +38,15 @@ const createReaderContext = (
 		...overrides,
 	}) as IImageBaseReaderContext
 
-window.HTMLElement.prototype.setPointerCapture = jest
-	.fn()
-	.mockImplementation(() => setBookPreferences())
+describe('ImageScalingSelect', () => {
+	const originalWarn = console.warn
+	beforeAll(() => {
+		console.warn = jest.fn()
+	})
+	afterAll(() => {
+		console.warn = originalWarn
+	})
 
-// Note: This is a bit funky to test
-describe('BrightnessControl', () => {
 	beforeEach(() => {
 		jest.clearAllMocks()
 
@@ -53,21 +55,26 @@ describe('BrightnessControl', () => {
 	})
 
 	it('should render', () => {
-		expect(render(<BrightnessControl />).container).not.toBeEmptyDOMElement()
+		expect(render(<ImageScalingSelect />).container).not.toBeEmptyDOMElement()
 	})
 
-	it('should properly change the brightness on drag', async () => {
-		render(<BrightnessControl />)
+	it('should change the image scaling properly', () => {
+		render(<ImageScalingSelect />)
 
-		const slider = screen.getByTestId('sliderThumb')
+		const validOptions = ['height', 'width', 'none']
+		for (const option of validOptions) {
+			fireEvent.change(screen.getByLabelText('Image scaling'), { target: { value: option } })
+			expect(setBookPreferences).toHaveBeenCalledWith({
+				imageScaling: {
+					scaleToFit: option,
+				},
+			})
+		}
+	})
 
-		fireEvent.pointerEnter(slider)
-		fireEvent.pointerDown(slider, { clientX: 0 })
-		fireEvent.pointerMove(slider, { clientX: 10 })
-		fireEvent.pointerUp(slider)
-
-		expect(window.HTMLElement.prototype.setPointerCapture).toHaveBeenCalledTimes(1)
-
-		expect(setBookPreferences).toHaveBeenCalledTimes(1)
+	it('should not allow invalid image scaling options', () => {
+		render(<ImageScalingSelect />)
+		fireEvent.change(screen.getByLabelText('Image scaling'), { target: { value: 'invalid' } })
+		expect(setBookPreferences).not.toHaveBeenCalled()
 	})
 })

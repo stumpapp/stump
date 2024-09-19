@@ -145,6 +145,8 @@ export const schema = z.object({
 	visibility: z.union([z.literal('PUBLIC'), z.literal('SHARED'), z.literal('PRIVATE')]),
 })
 
+// FIXME: I think this suffers from heavy recursive issues, zod has a guide for this:
+// https://github.com/colinhacks/zod?tab=readme-ov-file#recursive-types
 export type Schema = z.infer<typeof schema>
 
 // yikes

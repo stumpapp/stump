@@ -11,6 +11,8 @@ import { useUser } from '@/stores'
 
 import AvatarPicker from './AvatarPicker'
 
+// TODO(testing): extract schema and test components individually
+
 export default function ProfileForm() {
 	const { t } = useLocaleContext()
 	const { updateAsync } = useUpdateUser()

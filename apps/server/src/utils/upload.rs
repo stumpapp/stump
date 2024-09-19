@@ -119,19 +119,11 @@ async fn load_field_up_to_size(
 /// Formats the validation errors used elsewhere in this module when a type doesn't
 /// match the expected type (optionally specified as `expected_type_name`).
 fn validation_err(expected_type_name: Option<&str>) -> APIError {
-	if let Some(name) = expected_type_name {
-		if !name.is_empty() {
-			// This is a bit extra, should be guaranteed to succeed if name.len >= 1.
-			let first_char = name.chars().next().expect("name should not be empty");
-			let article = if ['a', 'e', 'i', 'o', 'u'].contains(&first_char) {
-				"an"
-			} else {
-				"a"
-			};
-
+	if let Some(type_name) = expected_type_name {
+		if !type_name.is_empty() {
 			return APIError::BadRequest(format!(
-				"Uploaded file is not {} {}",
-				article, name
+				"Uploaded file was expected to be {}",
+				type_name
 			));
 		}
 	}

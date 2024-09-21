@@ -18,7 +18,7 @@ export type CursorQueryParams = {
 
 export type ClassQueryKeys<T> = Omit<
 	{
-		[P in keyof T]: T[P] extends AnyFunction ? P : never
+		[P in keyof T]: T[P] extends AnyFunction ? string : never
 	},
-	'keys'
+	'keys' | 'thumbnailURL' | 'axios'
 >

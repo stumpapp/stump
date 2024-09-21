@@ -7846,6 +7846,7 @@ dependencies = [
  "serde-untagged",
  "serde_json",
  "serde_qs",
+ "serde_with",
  "specta",
  "stump_core",
  "thiserror",

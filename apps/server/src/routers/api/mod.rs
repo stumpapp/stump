@@ -65,9 +65,6 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<LoginOrRegisterArgs>()?).as_bytes(),
 		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<AuthenticationOptions>()?).as_bytes(),
-		)?;
 		file.write_all(format!("{}\n\n", ts_export::<CreateUser>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UpdateUser>()?).as_bytes())?;
 		file.write_all(
@@ -116,6 +113,9 @@ mod tests {
 		)?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<CleanLibraryResponse>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<GenerateLibraryThumbnails>()?).as_bytes(),
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryStatsParams>()?).as_bytes())?;
 

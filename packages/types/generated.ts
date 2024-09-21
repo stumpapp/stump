@@ -313,8 +313,6 @@ export type StumpVersion = { semver: string; rev: string; compile_time: string }
 
 export type UpdateCheck = { current_semver: string; latest_semver: string; has_update_available: boolean }
 
-export type AuthenticationOptions = { generate_token?: boolean; create_session?: boolean }
-
 export type CreatedToken = { access_token: string; expires_at: string }
 
 export type LoginResponse = User | { for_user: User; token: CreatedToken }
@@ -373,6 +371,8 @@ export type UpdateLibrary = { name: string; path: string; description?: string |
 export type UpdateLibraryExcludedUsers = { user_ids: string[] }
 
 export type CleanLibraryResponse = { deleted_media_count: number; deleted_series_count: number; is_empty: boolean }
+
+export type GenerateLibraryThumbnails = { image_options: ImageProcessorOptions | null; force_regenerate?: boolean }
 
 export type LibraryStatsParams = { all_users?: boolean }
 

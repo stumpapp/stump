@@ -6,4 +6,8 @@ export class APIBase {
 	constructor(api: Api) {
 		this.api = api
 	}
+
+	get axios() {
+		return this.api.axios
+	}
 }

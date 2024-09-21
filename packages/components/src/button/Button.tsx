@@ -26,10 +26,13 @@ export const BUTTON_VARIANTS = {
 	outline: 'bg-transparent border border-edge-subtle hover:bg-background-surface text-foreground',
 	primary:
 		'bg-brand-500 text-white hover:bg-brand-600 dark:hover:bg-brand-600 focus:ring-brand-400 data-[state=open]:bg-brand-600',
-	secondary: 'bg-inverse text-background hover:bg-inverse/90 data-[state=open]:bg-inverse/90',
+	secondary:
+		'bg-background-inverse text-foreground-on-inverse hover:bg-background-inverse/90 data-[state=open]:bg-background-inverse/90',
 	subtle: 'bg-background-surface hover:bg-background-surface-hover text-foreground-subtle',
 	'subtle-dark':
 		'bg-background text-foreground-subtle hover:bg-background-surface data-[state=open]:bg-background-surface',
+	warning:
+		'bg-fill-warning text-foreground hover:bg-fill-warning/80 focus:ring-fill-warning-secondary',
 }
 
 export const BUTTON_ROUNDED_VARIANTS = {
@@ -133,6 +136,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 						className,
 					)}
 					ref={ref}
+					type="button"
 					{...props}
 				>
 					{isLoading ? (

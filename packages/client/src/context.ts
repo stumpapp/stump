@@ -7,9 +7,17 @@ export type IStumpClientContext = {
 	onRedirect?: (url: string) => void
 	onUnauthenticatedResponse?: (redirectUrl?: string) => void
 	onConnectionWithServerChanged?: (isConnected: boolean) => void
-	setUseDiscordPresence?: (connect: boolean) => void
-	setDiscordPresence?: (status?: string, details?: string) => void
+	tauriRPC?: TauriRPC
 }
+
+export type TauriRPC = {
+	setDiscordPresence: (status?: string, details?: string) => Promise<void>
+	/**
+	 * Invoke the IPC command to set the use of Discord presence (on/off)
+	 */
+	setUseDiscordPresence: (connect: boolean) => Promise<void>
+}
+
 export const StumpClientContext = createContext<IStumpClientContext | undefined>(undefined)
 
 // TODO: 'android' | 'ios' --> https://reactnative.dev/docs/platform
@@ -21,11 +29,10 @@ export type Platform = 'browser' | 'macOS' | 'windows' | 'linux' | 'mobile' | 'u
 /**
  * The props that are passed to the root of the application
  */
-export interface StumpClientProps {
+export type StumpClientProps = {
 	platform: Platform
 	baseUrl?: string
-	setUseDiscordPresence?: (connect: boolean) => void
-	setDiscordPresence?: (status?: string, details?: string) => void
+	tauriRPC?: TauriRPC
 }
 
 export const useClientContext = () => {

@@ -32,14 +32,14 @@ export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGene
 /**
  * An update event that is emitted by a job
  */
-export type JobUpdate = ({ status?: JobStatus | null; message?: string | null; completed_tasks?: number | null; remaining_tasks?: number | null; completed_subtasks?: number | null; remaining_subtasks?: number | null }) & { id: string }
+export type JobUpdate = ({ status?: JobStatus | null; message?: string | null; completed_tasks?: number | null; remaining_tasks?: number | null; completed_subtasks?: number | null; total_subtasks?: number | null }) & { id: string }
 
 /**
  * A struct that represents a progress event that is emitted by a job. This behaves like a patch,
  * where the client will ignore any fields that are not present. This is done so all internal ops
  * can be done without needing to know the full state of the job.
  */
-export type JobProgress = { status?: JobStatus | null; message?: string | null; completed_tasks?: number | null; remaining_tasks?: number | null; completed_subtasks?: number | null; remaining_subtasks?: number | null }
+export type JobProgress = { status?: JobStatus | null; message?: string | null; completed_tasks?: number | null; remaining_tasks?: number | null; completed_subtasks?: number | null; total_subtasks?: number | null }
 
 /**
  * The data that is collected and updated during the execution of a library scan job
@@ -52,7 +52,7 @@ export type ThumbnailGenerationJobVariant = ({ type: "SingleLibrary" } & string)
 
 export type ThumbnailGenerationJobParams = { variant: ThumbnailGenerationJobVariant; force_regenerate: boolean }
 
-export type ThumbnailGenerationOutput = { visited_files: BigInt; generated_thumbnails: BigInt; removed_thumbnails: BigInt }
+export type ThumbnailGenerationOutput = { visited_files: BigInt; skipped_files: BigInt; generated_thumbnails: BigInt; removed_thumbnails: BigInt }
 
 export type User = { id: string; username: string; is_server_owner: boolean; avatar_url: string | null; created_at: string; last_login: string | null; is_locked: boolean; permissions: UserPermission[]; max_sessions_allowed?: number | null; login_sessions_count?: number | null; user_preferences?: UserPreferences | null; login_activity?: LoginActivity[] | null; age_restriction?: AgeRestriction | null; active_reading_sessions?: ActiveReadingSession[] | null; finished_reading_sessions?: FinishedReadingSession[] | null }
 
@@ -92,7 +92,7 @@ export type EmailerConfig = { sender_email: string; sender_display_name: string;
 /**
  * The configuration for an [EmailerClient]
  */
-export type EmailerClientConfig = { sender_email: string; sender_display_name: string; username: string; password: string; host: string; port: number; tls_enabled: boolean; max_attachment_size_bytes: number | null; max_num_attachments: number | null }
+export type EmailerClientConfig = { sender_email: string; sender_display_name: string; username: string; password: string | null; host: string; port: number; tls_enabled: boolean; max_attachment_size_bytes: number | null; max_num_attachments: number | null }
 
 /**
  * An SMTP emailer entity, which stores SMTP configuration data to be used for sending emails.
@@ -116,13 +116,15 @@ export type AttachmentMeta = { filename: string; media_id: string | null; size: 
 
 export type FileStatus = "UNKNOWN" | "READY" | "UNSUPPORTED" | "ERROR" | "MISSING"
 
-export type Library = { id: string; name: string; description: string | null; emoji: string | null; path: string; status: string; updated_at: string; series: Series[] | null; tags: Tag[] | null; library_options: LibraryOptions }
+export type Library = { id: string; name: string; description: string | null; emoji: string | null; path: string; status: string; updated_at: string; series: Series[] | null; tags: Tag[] | null; config: LibraryConfig }
 
 export type LibraryPattern = "SERIES_BASED" | "COLLECTION_BASED"
 
 export type LibraryScanMode = "DEFAULT" | "NONE"
 
-export type LibraryOptions = { id: string | null; convert_rar_to_zip: boolean; hard_delete_conversions: boolean; library_pattern: LibraryPattern; thumbnail_config: ImageProcessorOptions | null; library_id: string | null }
+export type IgnoreRules = string[]
+
+export type LibraryConfig = { id?: string | null; convert_rar_to_zip: boolean; hard_delete_conversions: boolean; generate_file_hashes: boolean; process_metadata: boolean; library_pattern: LibraryPattern; thumbnail_config: ImageProcessorOptions | null; ignore_rules?: IgnoreRules; library_id?: string | null }
 
 export type LibraryStats = { series_count: BigInt; book_count: BigInt; total_bytes: BigInt; completed_books: BigInt; in_progress_books: BigInt }
 
@@ -133,7 +135,7 @@ export type Series = { id: string; name: string; path: string; description: stri
 /**
  * Struct representing the metadata for a processed file.
  */
-export type MediaMetadata = { title: string | null; series: string | null; number: number | null; volume: number | null; summary: string | null; notes: string | null; age_rating?: number | null; genre?: string[] | null; year: number | null; month: number | null; day: number | null; writers?: string[] | null; pencillers?: string[] | null; inkers?: string[] | null; colorists?: string[] | null; letterers?: string[] | null; cover_artists?: string[] | null; editors?: string[] | null; publisher: string | null; links?: string[] | null; characters?: string[] | null; teams?: string[] | null; page_count: number | null }
+export type MediaMetadata = { title?: string | null; series?: string | null; number?: number | null; volume?: number | null; summary?: string | null; notes?: string | null; age_rating?: number | null; genre?: string[] | null; year?: number | null; month?: number | null; day?: number | null; writers?: string[] | null; pencillers?: string[] | null; inkers?: string[] | null; colorists?: string[] | null; letterers?: string[] | null; cover_artists?: string[] | null; editors?: string[] | null; publisher?: string | null; links?: string[] | null; characters?: string[] | null; teams?: string[] | null; page_count?: number | null }
 
 export type Media = { id: string; name: string; size: BigInt; extension: string; pages: number; updated_at: string; created_at: string; modified_at: string | null; hash: string | null; path: string; status: FileStatus; series_id: string; metadata: MediaMetadata | null; series?: Series | null; active_reading_session?: ActiveReadingSession | null; finished_reading_sessions: FinishedReadingSession[] | null; current_page?: number | null; current_epubcfi?: string | null; is_completed?: boolean | null; tags?: Tag[] | null; bookmarks?: Bookmark[] | null }
 
@@ -274,7 +276,7 @@ export type ImageFormat = "Webp" | "Jpeg" | "Png"
 /**
  * Options for processing images throughout Stump.
  */
-export type ImageProcessorOptions = { resize_options: ImageResizeOptions | null; format: ImageFormat; quality: number | null; page?: number | null }
+export type ImageProcessorOptions = { resize_options?: ImageResizeOptions | null; format: ImageFormat; quality?: number | null; page?: number | null }
 
 export type DirectoryListing = { parent: string | null; files: DirectoryListingFile[] }
 
@@ -309,6 +311,12 @@ export type StumpVersion = { semver: string; rev: string; compile_time: string }
 
 export type UpdateCheck = { current_semver: string; latest_semver: string; has_update_available: boolean }
 
+export type AuthenticationOptions = { generate_token?: boolean; create_session?: boolean }
+
+export type CreatedToken = { access_token: string; expires_at: string }
+
+export type LoginResponse = User | { for_user: User; token: CreatedToken }
+
 export type LoginOrRegisterArgs = { username: string; password: string }
 
 export type CreateUser = { username: string; password: string; permissions?: UserPermission[]; age_restriction: AgeRestriction | null; max_sessions_allowed?: number | null }
@@ -342,9 +350,9 @@ export type CreateOrUpdateEmailDevice = { name: string; email: string; forbidden
  */
 export type PatchEmailDevice = { name: string | null; email: string | null; forbidden: boolean | null }
 
-export type CreateLibrary = { name: string; path: string; description: string | null; tags: Tag[] | null; scan_mode: LibraryScanMode | null; library_options: LibraryOptions | null }
+export type CreateLibrary = { name: string; path: string; description?: string | null; tags?: string[] | null; scan_mode?: LibraryScanMode | null; config?: LibraryConfig | null }
 
-export type UpdateLibrary = { name: string; path: string; description: string | null; emoji: string | null; tags: Tag[] | null; removed_tags?: Tag[] | null; library_options: LibraryOptions; scan_mode?: LibraryScanMode | null }
+export type UpdateLibrary = { name: string; path: string; description?: string | null; emoji?: string | null; tags?: string[] | null; config: LibraryConfig; scan_mode?: LibraryScanMode | null }
 
 export type UpdateLibraryExcludedUsers = { user_ids: string[] }
 
@@ -409,4 +417,10 @@ export type SmartListRelationOptions = { load_views?: boolean }
 export type SmartListMeta = { matched_books: BigInt; matched_series: BigInt; matched_libraries: BigInt }
 
 export type CreateOrUpdateSmartListView = ({ book_columns: ReactTableColumnSort[]; group_columns: ReactTableColumnSort[]; book_sorting: ReactTableGlobalSort[] | null; group_sorting: ReactTableGlobalSort[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string }
+
+// DESKTOP TYPE GENERATION
+
+export type SavedServer = { name: string; uri: string }
+
+export type DesktopAppStore = { run_bundled_server: boolean; active_server?: SavedServer | null; connected_servers: SavedServer[] }
 

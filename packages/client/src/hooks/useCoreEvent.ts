@@ -1,9 +1,10 @@
 import { jobQueryKeys, libraryQueryKeys, mediaQueryKeys, seriesQueryKeys } from '@stump/api'
 import type { CoreEvent, CoreJobOutput, LibraryScanOutput } from '@stump/types'
+import { useCallback } from 'react'
 
 import { invalidateQueries } from '../invalidate'
 import { useJobStore } from '../stores/job'
-import { useStumpWs } from './useStumpWs'
+import { useStumpSse } from './useStumpSse'
 
 // TODO: Test how the updates affect the client without requerying data
 // TODO: If above works well, test how the client/scanner bench changes if sending the data
@@ -11,67 +12,74 @@ import { useStumpWs } from './useStumpWs'
 
 type Params = {
 	liveRefetch?: boolean
+	onConnectionWithServerChanged?: (connected: boolean) => void
 }
 
-export function useCoreEventHandler({ liveRefetch }: Params = {}) {
+export function useCoreEventHandler({ liveRefetch, onConnectionWithServerChanged }: Params = {}) {
 	const { addJob, upsertJob, removeJob } = useJobStore((state) => ({
 		addJob: state.addJob,
 		removeJob: state.removeJob,
 		upsertJob: state.upsertJob,
 	}))
 
-	const handleInvalidate = async (keys: string[]) => {
+	const handleInvalidate = useCallback(async (keys: string[]) => {
 		try {
 			await invalidateQueries({ keys })
 		} catch (e) {
 			console.error('Failed to invalidate queries', e)
 		}
-	}
+	}, [])
 
-	async function handleCoreEvent(event: CoreEvent) {
-		const { __typename } = event
+	const handleCoreEvent = useCallback(
+		async (event: CoreEvent) => {
+			const { __typename } = event
 
-		switch (__typename) {
-			case 'JobStarted':
-				await handleInvalidate([jobQueryKeys.getJobs])
-				addJob(event)
-				break
-			case 'JobUpdate':
-				if (!!event.status && event.status !== 'RUNNING') {
-					await new Promise((resolve) => setTimeout(resolve, 1000))
-					removeJob(event.id)
+			switch (__typename) {
+				case 'JobStarted':
 					await handleInvalidate([jobQueryKeys.getJobs])
-				} else {
-					upsertJob(event)
-				}
-				break
-			case 'JobOutput':
-				await handleJobOutput(event.output)
-				break
-			case 'DiscoveredMissingLibrary':
-				await handleInvalidate(['library', 'series', 'media'])
-				break
-			case 'CreatedManySeries':
-				if (liveRefetch) {
-					await handleInvalidate([libraryQueryKeys.getLibraryStats, 'series', 'media'])
-				}
-				break
-			case 'CreatedOrUpdatedManyMedia':
-				if (liveRefetch) {
-					await handleInvalidate([
-						'series',
-						'media',
-						libraryQueryKeys.getLibraryStats,
-						libraryQueryKeys.getLibraryById,
-					])
-				}
-				break
-			default:
-				console.warn('Unhandled core event', event)
-		}
-	}
+					addJob(event)
+					break
+				case 'JobUpdate':
+					if (!!event.status && event.status !== 'RUNNING') {
+						await new Promise((resolve) => setTimeout(resolve, 1000))
+						removeJob(event.id)
+						await handleInvalidate([jobQueryKeys.getJobs])
+					} else {
+						upsertJob(event)
+					}
+					break
+				case 'JobOutput':
+					await handleJobOutput(event.output)
+					break
+				case 'DiscoveredMissingLibrary':
+					await handleInvalidate(['library', 'series', 'media'])
+					break
+				case 'CreatedManySeries':
+					if (liveRefetch) {
+						await handleInvalidate([libraryQueryKeys.getLibraryStats, 'series', 'media'])
+					}
+					break
+				case 'CreatedOrUpdatedManyMedia':
+					if (liveRefetch) {
+						await handleInvalidate([
+							'series',
+							'media',
+							libraryQueryKeys.getLibraryStats,
+							libraryQueryKeys.getLibraryById,
+						])
+					}
+					break
+				case 'CreatedMedia':
+					// We don't really care, should honestly remove this...
+					break
+				default:
+					console.warn('Unhandled core event', event)
+			}
+		},
+		[addJob, handleInvalidate, liveRefetch, removeJob, upsertJob],
+	)
 
-	useStumpWs({ onEvent: handleCoreEvent })
+	useStumpSse({ onConnectionWithServerChanged, onEvent: handleCoreEvent })
 }
 
 // const patchRecentlyAddedBooks = (books: Media[]) => {

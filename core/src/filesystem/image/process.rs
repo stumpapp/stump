@@ -58,6 +58,7 @@ pub enum ImageFormat {
 	Jpeg,
 	// JpegXl,
 	Png,
+	// Avif,
 }
 
 impl ImageFormat {
@@ -78,6 +79,7 @@ impl From<ImageFormat> for image::ImageFormat {
 	fn from(val: ImageFormat) -> Self {
 		match val {
 			ImageFormat::Webp => image::ImageFormat::WebP,
+			// ImageFormat::Avif => image::ImageFormat::Avif,
 			ImageFormat::Jpeg => image::ImageFormat::Jpeg,
 			// See https://github.com/image-rs/image/issues/1765. Image removed the
 			// unsupported enum variant, which makes this awkward to support...
@@ -94,12 +96,14 @@ impl From<ImageFormat> for image::ImageFormat {
 #[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub struct ImageProcessorOptions {
 	/// The size factor to use when generating an image. See [`ImageResizeOptions`]
+	#[specta(optional)]
 	pub resize_options: Option<ImageResizeOptions>,
 	/// The format to use when generating an image. See [`ImageFormat`]
 	pub format: ImageFormat,
 	/// The quality to use when generating an image. This is a number between 0.0 and 100.0,
 	/// where 100.0 is the highest quality. Omitting this value will use the default quality
 	/// of 100.0.
+	#[specta(optional)]
 	pub quality: Option<f32>,
 	// TODO: this implementation is not overly ideal, and is really only here for one-off generation.
 	// I would like to iterate after the initial release to make this more robust so that these choices
@@ -126,6 +130,7 @@ impl ImageProcessorOptions {
 		}
 	}
 
+	/// Validate the image processor options to ensure that they are valid.
 	pub fn validate(&self) -> Result<(), ProcessorError> {
 		if let Some(quality) = self.quality {
 			if !(0.0..=100.0).contains(&quality) {
@@ -157,6 +162,12 @@ impl ImageProcessorOptions {
 		}
 
 		Ok(())
+	}
+
+	/// Convert the image processor options into a byte array for storage.
+	pub fn as_bytes(&self) -> Result<Vec<u8>, ProcessorError> {
+		serde_json::to_vec(self)
+			.map_err(|err| ProcessorError::InvalidConfiguration(err.to_string()))
 	}
 }
 
@@ -207,6 +218,7 @@ mod tests {
 	#[test]
 	fn test_image_format_extension() {
 		assert_eq!(ImageFormat::Webp.extension(), "webp");
+		// assert_eq!(ImageFormat::Avif.extension(), "avif");
 		assert_eq!(ImageFormat::Jpeg.extension(), "jpeg");
 		// assert_eq!(ImageFormat::JpegXl.extension(), "jxl");
 		assert_eq!(ImageFormat::Png.extension(), "png");

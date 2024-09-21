@@ -29,15 +29,19 @@ jobs:
           base: 'develop'
           filters: |
             apps: ./apps/**
+            core: ./core/**
             crates: ./crates/**
             docker: ./docker/**
             packages: ./packages/**
+            workflow:
+              - './.github/workflows/nightly.yml'
+              - './.github/actions/**'
 
   nightly-docker-build:
     needs: code-changes-check
     if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.changes != '[]'"
     name: Build docker image
-    runs-on: [ubuntu-22.04]
+    runs-on: [self-hosted]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -50,9 +54,9 @@ jobs:
           echo "PUSH=${{ github.event_name == 'push' }}" >> $GITHUB_ENV
 
           if [[ ${{ github.event_name }} == 'pull_request' ]]; then
-            echo "PLATFORMS=linux/amd64" >> $GITHUB_ENV
+            echo "ARCHS=amd64" >> $GITHUB_ENV
           else
-            echo "PLATFORMS=linux/arm64/v8,linux/amd64" >> $GITHUB_ENV
+            echo "ARCHS=arm64,amd64" >> $GITHUB_ENV
           fi
 
       - name: Setup and build docker image
@@ -63,5 +67,5 @@ jobs:
           tags: 'nightly'
           load: ${{ env.LOAD }}
           push: ${{ env.PUSH }}
-          platforms: ${{ env.PLATFORMS }}
+          archs: ${{ env.ARCHS }}
           discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}

@@ -1,0 +1,17 @@
+import { Callout } from 'nextra-theme-docs'
+
+# File Explorer
+
+Certain entities throughout Stump have a file explorer scoped to them, allowing you to traverse the files and directories within that entity. The entities that have a file explorer are:
+
+- **Libraries**
+- **Series**
+
+## Accessing a File Explorer
+
+<Callout emoji="🔐">
+	This functionality is gated behind the `file:explorer` user permission. To learn more about
+	permissions, see the [Permissions](/guides/access-control/permissions) guide.
+</Callout>
+
+Generally, you can access a file explorer by clicking on the `Files` tab in an entity's page. This will render the file explorer for that entity, which effectively is just sets the root directory of the file explorer to the entity's path.

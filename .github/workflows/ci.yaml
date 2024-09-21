@@ -10,85 +10,99 @@ jobs:
   code-changes-check:
     runs-on: [ubuntu-22.04]
     outputs:
-      changes: ${{steps.filter.outputs.changes}}
+      changes: ${{ steps.filter.outputs.changes }}
+      frontend-changed: ${{ steps.filter.outputs.frontend == 'true' }}
+      rust-changed: ${{ steps.filter.outputs.rust == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v2
         id: filter
         with:
           filters: |
-            apps: ./apps/**
-            crates: ./crates/**
+            frontend:
+              - './apps/web/**'
+              - './apps/desktop/src/**'
+              - './packages/**'
+            expo:
+              - './apps/expo/**'
+            rust:
+              - './apps/server/**'
+              - './apps/desktop/src-tauri/**'
+              - './core/**'
+              - './crates/**'
             docker: ./docker/**
-            packages: ./packages/**
 
   check-rust:
     needs: code-changes-check
-    if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.changes != '[]'"
+    if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.rust-changed == 'true'"
     name: Rust checks
-    runs-on: [ubuntu-22.04]
-    strategy:
-      matrix:
-        os: [ubuntu-22.04, windows-latest]
+    runs-on: [self-hosted]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Setup rust
         uses: ./.github/actions/setup-rust
+        with:
+          cache-dependencies: false
 
       - name: Run cargo checks
         run: |
           cargo fmt --all -- --check
           cargo clippy -- -D warnings
 
+      - name: Generate typescript bindings
+        run: cargo codegen -- --skip-prisma
+      - name: Verify typescript bindings
+        run: |
+          git diff --exit-code || \
+            (echo "Please generate updated typescript bindings with \`cargo codegen -- --skip-prisma\`" \
+            && exit 1)
+
       - name: Run tests
         run: cargo test
 
-      # TODO: move coverage to a separate job instead of conditionally running it
-      # on the ubuntu-22.04 runner as a workaround for only running it once
-      - name: Install cargo-llvm-cov
-        if: matrix.os == 'ubuntu-22.04'
-        run: cargo install cargo-llvm-cov
+      - name: Run codegen
+        run: cargo codegen -- --skip-prisma
+      - name: Verify up-to-date bindings
+        run: |
+          git diff --exit-code || \
+            (echo "Please generate updated bindings with \`cargo codegen -- --skip-prisma\`" \
+            && exit 1)
 
-      - name: Generate code coverage data
-        if: matrix.os == 'ubuntu-22.04'
-        run: cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
+  check-coverage:
+    if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.rust-changed == 'true'"
+    name: Coverage checks
+    needs: [code-changes-check, check-rust]
+    runs-on: [self-hosted]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Upload coverage to Codecov
-        if: matrix.os == 'ubuntu-22.04'
-        uses: codecov/codecov-action@v4
+      - name: Run coverage
+        uses: ./.github/actions/coverage
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: lcov.info
-          fail_ci_if_error: true
+          cache-dependencies: false
 
   check-typescript:
     needs: code-changes-check
-    if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.changes != '[]'"
+    if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.frontend-changed == 'true'"
     name: TypeScript checks
     runs-on: [ubuntu-22.04]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.0.0'
-
-      - name: Install yarn
-        shell: bash
-        run: npm install -g yarn
-
-      - name: Setup node (yarn cache)
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.0.0'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install
+      - name: Setup Node and Yarn
+        uses: ./.github/actions/setup-yarn
 
       - name: Run TypeScript lints
         run: yarn lint
+
+      # TODO: Figure out how to run tests in parallel, I don't really want to upgrade to berry which
+      # means perhaps lerna is the only option? It isn't a big deal now since there is really only one
+      # package that defines tests, but this will change over time
+      - name: Run TypeScript tests
+        run: yarn test
+        working-directory: ./packages/browser

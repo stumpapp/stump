@@ -7,6 +7,7 @@ mod opds;
 mod spa;
 mod sse;
 mod utoipa;
+#[allow(dead_code)]
 mod ws;
 
 pub(crate) use api::v1::auth::enforce_max_sessions;
@@ -21,7 +22,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 
 	app_router
 		.merge(spa::mount(app_state.clone()))
-		.merge(ws::mount(app_state.clone()))
+		// .merge(ws::mount(app_state.clone()))
 		.merge(sse::mount())
 		.merge(api::mount(app_state.clone()))
 		.merge(opds::mount(app_state))

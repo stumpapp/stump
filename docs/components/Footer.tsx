@@ -70,6 +70,7 @@ export default function Footer() {
 							className="text-gray-750 hover:text-gray-650 dark:text-gray-300 dark:hover:text-gray-100"
 						>
 							<span className="sr-only">{item.name}</span>
+							{/* @ts-expect-error: Its fine */}
 							<item.icon className="h-6 w-6" aria-hidden="true" />
 						</a>
 					))}

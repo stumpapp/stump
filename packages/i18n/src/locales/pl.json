@@ -128,17 +128,209 @@
 			"submit": "Stwórz klub książki"
 		}
 	},
+	"createOrUpdateLibraryForm": {
+		"fields": {
+			"name": {
+				"label": "Nazwa",
+				"description": "Przyjazna nazwa biblioteki",
+				"placeholder": "Moja biblioteka"
+			},
+			"path": {
+				"label": "Ścieżka",
+				"description": "Ścieżka do biblioteki w takiej formie jak na Twoim serwerze",
+				"placeholder": "/ścieżka/do/biblioteki"
+			},
+			"description": {
+				"label": "Opis",
+				"description": "Krótki opis Twojej biblioteki",
+				"placeholder": "Biblioteka wszystkich moich ulubionych książek"
+			},
+			"tags": {
+				"label": "Etykiety",
+				"description": "Używane do kategoryzowania biblioteki lub wymuszania reguł dostępu"
+			},
+			"thumbnailConfig": {
+				"section": {
+					"heading": {
+						"create": "Konfiguracja miniatur",
+						"update": "Generowanie"
+					},
+					"description": "Popraw czas ładowania podczas przeglądania biblioteki poprzez generowanie miniatur dla Twoich książek"
+				},
+				"enableSwitch": {
+					"label": "Aktywne",
+					"description": "Generuj miniatury dla tej biblioteki"
+				},
+				"scaled": {
+					"label": "Skalowane",
+					"description": "Skaluj obraz przez niestandardowy współczynnik dla każdego z wymiarów",
+					"width": {
+						"label": "Skala szerokości"
+					},
+					"height": {
+						"label": "Skala wysokości"
+					}
+				},
+				"sized": {
+					"label": "O stałych wymiarach",
+					"description": "Ustaw każdy wymiar miniaturki (w pikselach)",
+					"width": {
+						"label": "Szerokość"
+					},
+					"height": {
+						"label": "Wysokość"
+					}
+				},
+				"format": {
+					"label": "Format obrazu",
+					"description": "Format wygenerowanych miniatur obrazów"
+				},
+				"quality": {
+					"label": "Jakość",
+					"description": "Jakość generowanych miniatur, od 0 do 1.0"
+				}
+			},
+			"ignoreRules": {
+				"section": {
+					"heading": "Reguły pomijania",
+					"description": "Zdefiniuj wzorce, które posłużą do pominięcia niektórych plików lub folderów podczas skanowania"
+				},
+				"noRules": "Brak zdefiniowanych reguł pomijania",
+				"save": "Zapisz zmiany",
+				"addRule": {
+					"label": "Nowa reguła",
+					"description": "Wzorzec służący do pomijania plików lub folderów",
+					"addButton": "Dodaj regułę",
+					"ignoreParents": {
+						"title": "Pomijaj wszystkie katalogi nadrzędne",
+						"label": "Wzorce pomijania"
+					},
+					"ignoreSubdirs": {
+						"title": "Pomijaj wszystkie podkatalogi",
+						"label": "Pomijaj podkatalogi"
+					}
+				},
+				"invalidGlob": "Nieprawidłowy wzorzec",
+				"lockConfig": {
+					"lock": "Zablokuj konfigurację",
+					"unlock": "Odblokuj konfigurację"
+				},
+				"editRule": "Edytuj regułę",
+				"deleteRule": "Usuń regułę",
+				"cancelEdit": "Anuluj zmiany",
+				"confirmEdit": "Potwierdź zmiany"
+			},
+			"convertOptions": {
+				"section": {
+					"heading": "Konwersja pliku",
+					"description": "Stump jest w stanie przekonwertować niektóre formaty plików na bardziej kompatybilne"
+				},
+				"rarToZip": {
+					"label": "Konwertuj RAR do ZIP",
+					"description": "Konwertuj pliki RAR/CBR do plików ZIP/CBZ podczas skanowania"
+				},
+				"deleteRarAfter": {
+					"label": "Usuń RAR po konwersji",
+					"description": "Usuń oryginalny plik RAR/CBR po konwersji. Czynność ta jest nieodwracalna"
+				}
+			},
+			"scannerFeatures": {
+				"section": {
+					"heading": "Optional processing",
+					"description": "Opt-in processing features for the scanner",
+					"disclaimer": "These features involve additional file reads which may slow down the scan process"
+				},
+				"processMetadata": {
+					"label": "Process metadata",
+					"description": "Extract any metadata from library files and store the results in the database"
+				},
+				"generateFileHashes": {
+					"label": "Generate file hashes",
+					"description": "Generate a hash for each file in the library to detect duplicates"
+				}
+			},
+			"libraryPattern": {
+				"section": {
+					"heading": "Organizacja",
+					"description": "Określ który wzór najlepiej pasuje do struktury Twojej biblioteki",
+					"docs": [
+						"Brak pewności, którą wybrać? Kliknij",
+						"tutaj",
+						"aby uzyskać więcej informacji.",
+						"Nie można później zmienić tego ustawienia"
+					],
+					"disabled": "Nie można zmienić tego ustawienia"
+				},
+				"options": {
+					"label": "Wzorzec biblioteki",
+					"description": "Ustawienie, które określa, jak Stump zorganizuje Twoją bibliotekę",
+					"collectionPriority": {
+						"label": "Priorytet kolekcji",
+						"description": "Każdy folder na najwyższym poziomie katalogu głównego biblioteki jest pojedynczą serią"
+					},
+					"seriesPriority": {
+						"label": "Priorytet serii",
+						"description": "Każdy folder na dowolnym poziomie jest pojedynczą serią"
+					}
+				}
+			}
+		},
+		"scan": {
+			"label": {
+				"create": "Skanuj po utworzeniu",
+				"update": "Skanuj po aktualizacjach"
+			},
+			"description": "Indeksuj pliki biblioteki, aby wypełnić bazę danych"
+		}
+	},
 	"createLibraryScene": {
 		"heading": "Utwórz bibliotekę",
 		"subtitle": "Biblioteki służą do grupowania książek. Jeśli chcesz odświeżyć sobie metodykę ich działania, sprawdź",
-		"subtitleLink": "stosowna dokumentacja",
+		"subtitleLink": "stosowną dokumentację",
 		"form": {
-			"labels": {
-				"libraryName": "Nazwa",
-				"libraryPath": "Ścieżka",
-				"libraryPathDescription": "Ścieżka do biblioteki w takiej formie jak na Twoim serwerze",
-				"libraryDescription": "Opis",
-				"libraryTags": "Etykiety"
+			"stepLabel": "Krok",
+			"steps": [
+				{
+					"label": "Podstawowe",
+					"heading": "Informacje podstawowe",
+					"description": "Szczegóły tej biblioteki wraz z jej nazwą, ścieżką i opisem"
+				},
+				{
+					"label": "Skanowanie",
+					"heading": "Zachowanie skanera",
+					"description": "Ustawienia związane z tym, jak Stump skanuje tę bibliotekę"
+				},
+				{
+					"label": "Miniatury",
+					"heading": "Miniatury",
+					"description": "Opcje czy i jak Stump generować będzie miniatury dla tej biblioteki"
+				},
+				{
+					"label": "Podsumowanie",
+					"heading": "Podsumowanie",
+					"description": "Przejrzyj ustawienia biblioteki przed jej utworzeniem"
+				}
+			],
+			"review": {
+				"yes": "Tak",
+				"no": "Nie",
+				"none": "Brak",
+				"labels": {
+					"generateThumbnails": "Generuj miniaturki",
+					"mode": "Tryb",
+					"format": "Format",
+					"quality": "Jakość",
+					"name": "Nazwa",
+					"path": "Ścieżka",
+					"description": "Opis",
+					"tags": "Etykiety",
+					"pattern": "Wzór",
+					"ignoreRules": "Reguły pomijania",
+					"convertRar": "Konwertuj RAR/CBR",
+					"deleteConversions": "Usuń przekonwertowane pliki",
+					"processMetadata": "Process metadata",
+					"generateFileHashes": "Generate file hashes"
+				}
 			},
 			"buttons": {
 				"confirm": "Utwórz bibliotekę"
@@ -148,17 +340,101 @@
 	"librarySettingsScene": {
 		"heading": "Ustawienia",
 		"subtitle": "Zarządzaj tutaj swoją biblioteką. Jeśli chcesz odświeżyć sobie działanie tych ustawień, sprawdź",
-		"subtitleLink": "stosowna dokumentacja",
-		"form": {
-			"labels": {
-				"libraryName": "Nazwa",
-				"libraryPath": "Ścieżka",
-				"libraryPathDescription": "Ścieżka do biblioteki w takiej formie jak na Twoim serwerze",
-				"libraryDescription": "Opis",
-				"libraryTags": "Etykiety"
+		"subtitleLink": "stosowną dokumentację",
+		"sidebar": {
+			"basics": "Podstawowe",
+			"options": {
+				"general": "Ogólne",
+				"scanning": "Skanowanie",
+				"thumbnails": "Miniatury",
+				"ignore-rules": "Reguły pomijania",
+				"analysis": "Analiza",
+				"label": "Ustawienia"
 			},
-			"buttons": {
-				"confirm": "Zapisz zmiany"
+			"danger-zone": {
+				"access-control": "Kontrola dostępu",
+				"delete": "Usuwanie",
+				"label": "Niebezpieczna strefa"
+			}
+		},
+		"basics": {
+			"title": "Informacje podstawowe",
+			"description": "Szczegóły tej biblioteki wraz z jej nazwą, ścieżką i opisem",
+			"form": {
+				"submit": "Aktualizuj bibliotekę"
+			}
+		},
+		"options/scanning": {
+			"title": "Zachowanie skanera",
+			"description": "Ustawienia związane z tym, jak Stump skanuje tę bibliotekę"
+		},
+		"options/thumbnails": {
+			"title": "Miniatury",
+			"description": "Ustawienia i opcje związane z miniaturami tej biblioteki",
+			"sections": {
+				"management": {
+					"heading": "Zarządzanie",
+					"description": "Zarządzaj istniejącymi miniaturami tej biblioteki",
+					"thumbnailSelector": {},
+					"deleteThumbnails": {}
+				}
+			}
+		},
+		"options/analysis": {
+			"title": "Analiza",
+			"description": "Analizuj zawartość tej biblioteki w celu zidentyfikowania potencjalnych problemów lub ulepszeń",
+			"sections": {
+				"analyzeBooks": {
+					"heading": "Analizuj książki",
+					"description": "Analizuj książki w tej bibliotece, aby dołączyć dodatkowe metadane w bazie danych, takie jak wymiary stron dla książek obrazkowych",
+					"disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable",
+					"analyzeButton": "Analizuj książki"
+				},
+				"missingFiles": {
+					"heading": "Brakujące pliki",
+					"description": "Pliki których odwołania znajdują się w bazie danych ale nie mogą być zlokalizowane na dysku",
+					"noMissingFiles": "W tej bibliotece nie ma brakujących plików"
+				},
+				"duplicateFiles": {
+					"heading": "Powielone pliki",
+					"description": "Potencjalnie powielone na dysku pliki",
+					"noDuplicateFiles": "W tej bibliotece nie ma powielonych plików"
+				}
+			}
+		},
+		"danger-zone/access-control": {
+			"title": "Kontrola dostępu",
+			"description": "Kontrola dostępu użytkowników do zawartości tej biblioteki",
+			"sections": {
+				"libraryExclusions": {
+					"heading": "Wyklucz użytkowników",
+					"description": "Zabroń niektórym użytkownikom dostępu do tej biblioteki lub jej zawartości",
+					"noUsers": "Nie ma żadnych zarejestrowanych użytkowników do wykluczenia z tej biblioteki",
+					"updated": "Wykluczenia zostały zaktualizowane",
+					"failure": "Nie udało się zaktualizować wykluczeń"
+				}
+			}
+		},
+		"danger-zone/delete": {
+			"title": "Akcje usuwania",
+			"description": "Trwale usuń tę bibliotekę i całą jej zawartość lub niektóre zasoby",
+			"sections": {
+				"cleanLibrary": {
+					"heading": "Wyczyść bibliotekę",
+					"description": "Usuń wszystkie media i serie, których nie można zlokalizować na dysku",
+					"disclaimer": "Chociaż czynność ta nie usunie żadnych plików, usunięte zostaną wszystkie rekordy dotyczące mediów i serii posiadających status brakujących",
+					"confirmation": {
+						"label": "Wyczyść bibliotekę",
+						"text": "Czy na pewno chcesz wyczyścić tę bibliotekę?"
+					}
+				},
+				"deleteLibrary": {
+					"heading": "Usuń bibliotekę",
+					"description": [
+						"Trwale usuń tę bibliotekę i całą jej zawartość.",
+						"Tej czynności nie można cofnąć"
+					]
+				}
 			}
 		}
 	},
@@ -388,7 +664,10 @@
 					"options": {
 						"light": "Jasny",
 						"dark": "Ciemny",
-						"bronze": "Jasnobrązowy"
+						"bronze": "Jasnobrązowy",
+						"ocean": "Ocean",
+						"autumn": "Autumn",
+						"cosmic": "Cosmic"
 					}
 				},
 				"fontSelect": {
@@ -450,10 +729,93 @@
 			"title": "Ustawienia aplikacji desktopowej",
 			"description": "Ustawienia związane z aplikacją desktopową Stump",
 			"sections": {
-				"discordPresence": {
-					"label": "Status aktywności Discord",
-					"description": "Wyświetl swoją aktywność Stump na Discordzie za pomocą statusu aktywności Discorda",
-					"reconnect": "Połącz ponownie z Discord"
+				"configuredServers": {
+					"label": "Configured servers",
+					"description": "The list of Stump servers you can connect to",
+					"unreachableServer": {
+						"tooltip": "Server unreachable"
+					},
+					"activeServer": {
+						"tooltip": "Current server"
+					},
+					"addOrEditServer": {
+						"validation": {
+							"nameExists": "A server with this name already exists",
+							"nameForbidden": "This name is reserved",
+							"urlExists": "A server with this URL already exists"
+						},
+						"fields": {
+							"name": {
+								"label": "Name",
+								"description": "A friendly name to identify this server",
+								"placeholder": "My server"
+							},
+							"uri": {
+								"label": "URI",
+								"description": "The URL of the Stump server",
+								"placeholder": "https://stump.example.com"
+							}
+						}
+					},
+					"addServer": {
+						"trigger": "Add server",
+						"title": "Add a new server",
+						"description": "Add a new Stump server to the desktop application",
+						"confirm": "Add server"
+					},
+					"editServer": {
+						"tooltip": "Edit server",
+						"title": "Edit server",
+						"description": "Edit the details of this server",
+						"confirm": "Save changes"
+					},
+					"deleteServer": {
+						"tooltip": "Delete server",
+						"confirmation": {
+							"title": "Delete this server",
+							"description": "This will remove the server from the desktop application",
+							"disclaimerActiveServer": "This server is currently active. You will be logged out",
+							"disclaimerLastServer": "This is the last configured server. You will be logged out and have to reconfigure any servers in the initialization process",
+							"confirm": "Delete server"
+						}
+					},
+					"switchToServer": {
+						"tooltip": "Switch to server",
+						"confirmation": {
+							"title": "Switch to this server",
+							"description": "This will log you out of your current server",
+							"confirm": "Switch to server",
+							"server": "Server",
+							"uri": "URL"
+						}
+					},
+					"resetConfiguration": {
+						"label": "Delete all servers",
+						"description": [
+							"Delete all configured servers from the desktop application",
+							"This action cannot be undone"
+						],
+						"confirmation": {
+							"trigger": "Delete all servers",
+							"title": "Delete all servers",
+							"description": "This will remove all servers from the desktop application",
+							"disclaimer": "You will be logged out and have to reconfigure any servers in the initialization process",
+							"confirm": "Delete all servers"
+						}
+					}
+				},
+				"optionalFeatures": {
+					"label": "Optional features",
+					"description": "Manage the optional features unique to the desktop application",
+					"bundledServer": {
+						"label": "Bundled server",
+						"description": "Run the bundled server in the background while the desktop application is running (requires restart)"
+					},
+					"discordPresence": {
+						"label": "Discord Presence",
+						"description": "Display your Stump activity in Discord using Discord Rich Presence",
+						"reconnect": "Reconnect to Discord"
+					}
 				}
 			}
 		},
@@ -917,10 +1279,17 @@
 		"save": "Zapisz",
 		"send": "Wyślij",
 		"saveChanges": "Zapisz zmiany",
+		"noChanges": "Brak zmian",
 		"create": "Utwórz",
 		"edit": "Edytuj",
 		"update": "Aktualizuj",
 		"unimplemented": "Ta funkcjonalność nie jest jeszcze zaimplementowana! Sprawdź ponownie później",
-		"limitedFunctionality": "Funkcjonalność ta nie jest jeszcze w pełni zaimplementowana. Sprawdź później"
+		"limitedFunctionality": "Funkcjonalność ta nie jest jeszcze w pełni zaimplementowana. Sprawdź później",
+		"logIn": "Log in",
+		"login": "Login",
+		"seeError": "See error",
+		"goBack": "Go back",
+		"goToServers": "Go to servers",
+		"notReady": "This feature is not ready"
 	}
 }

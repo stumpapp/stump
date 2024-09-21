@@ -101,8 +101,8 @@ pub async fn walk_library(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedLibrar
 			// If we're doing a bottom up scan, we need to check that the path has
 			// media directly in it.
 			let is_valid = !should_ignore
-				&& (check_deep && entry_path.dir_has_media_deep()
-					|| (!check_deep && entry_path.dir_has_media()));
+				&& (check_deep && entry_path.dir_has_media_deep(&ignore_rules)
+					|| (!check_deep && entry_path.dir_has_media(&ignore_rules)));
 
 			tracing::trace!(?is_valid, ?entry_path_str);
 
@@ -235,13 +235,19 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 	}
 
 	let WalkerCtx {
-		db, ignore_rules, ..
+		db,
+		ignore_rules,
+		max_depth,
 	} = ctx;
 
 	tracing::debug!("Walking series at {}", path.display());
 
+	let mut walker = WalkDir::new(path);
+	if let Some(num) = max_depth {
+		walker = walker.max_depth(num);
+	}
+
 	let walk_start = std::time::Instant::now();
-	let walker = WalkDir::new(path);
 	let (valid_entries, ignored_entries) = walker
 		.into_iter()
 		.filter_map(|e| e.ok())
@@ -251,7 +257,7 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 			let entry_path = entry.path();
 			let matches_ignore_rule = ignore_rules.is_match(entry.path());
 
-			if matches_ignore_rule || entry_path.should_ignore() {
+			if matches_ignore_rule || entry_path.is_default_ignored() {
 				Either::Right(entry)
 			} else {
 				Either::Left(entry)

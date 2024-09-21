@@ -9,12 +9,12 @@ type ColorVariant = Record<ProgressBarColorVariants, string>
 
 export const PROGRESS_BAR_COLOR_VARIANTS: ColorVariant = {
 	default: 'bg-gray-200 dark:bg-gray-800',
-	primary: 'bg-brand-100 dark:bg-brand-300/80',
+	primary: 'bg-fill-brand-secondary',
 	'primary-dark': 'bg-brand-200 dark:bg-brand-250',
 }
 export const PROGRESS_BAR_INDICATOR_COLOR_VARIANTS: ColorVariant = {
 	default: 'bg-gray-800 dark:bg-gray-400',
-	primary: 'bg-brand-500 dark:bg-brand-400',
+	primary: 'bg-fill-brand/70',
 	'primary-dark': 'bg-brand-600 dark:bg-brand-500',
 }
 
@@ -46,6 +46,7 @@ type BaseProps = React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> &
 export type ProgressBarProps = {
 	className?: string
 	value?: number | null
+	isIndeterminate?: boolean
 } & BaseProps
 
 const safeValue = (value: number | null) => {
@@ -57,7 +58,7 @@ const safeValue = (value: number | null) => {
 export const ProgressBar = React.forwardRef<
 	React.ElementRef<typeof ProgressPrimitive.Root>,
 	ProgressBarProps
->(({ className, value, variant, size, rounded, ...props }, ref) => {
+>(({ className, value, variant, size, rounded, isIndeterminate, ...props }, ref) => {
 	const adjustedValue = useMemo(() => safeValue(value ?? null), [value])
 
 	return (
@@ -78,8 +79,13 @@ export const ProgressBar = React.forwardRef<
 				className={cx(
 					'h-full w-full flex-1 transition-all',
 					PROGRESS_BAR_INDICATOR_COLOR_VARIANTS[variant || 'default'],
+					{
+						'origin-left-to-right-indeterminate animate-indeterminate-progress': isIndeterminate,
+					},
 				)}
-				style={{ transform: `translateX(-${100 - (adjustedValue || 0)}%)` }}
+				style={
+					isIndeterminate ? undefined : { transform: `translateX(-${100 - (adjustedValue || 0)}%)` }
+				}
 			/>
 		</ProgressPrimitive.Root>
 	)

@@ -15,10 +15,11 @@ use stump_core::{
 		AttachmentMeta, EmailerConfig, EmailerConfigInput, EmailerSendRecord,
 		EmailerSendTo, Media, RegisteredEmailDevice, SMTPEmailer, User, UserPermission,
 	},
-	filesystem::{read_entire_file, ContentType, FileParts, PathUtils},
+	filesystem::{ContentType, FileParts, PathUtils},
 	prisma::{emailer, emailer_send_record, registered_email_device, user, PrismaClient},
 	AttachmentPayload, EmailContentType,
 };
+use tokio::fs;
 use utoipa::ToSchema;
 
 use crate::{
@@ -189,11 +190,16 @@ async fn create_emailer(
 			config.sender_email,
 			config.sender_display_name,
 			config.username,
-			config.encrypted_password,
+			config
+				.encrypted_password
+				.ok_or(APIError::InternalServerError(
+					"Encrypted password is missing".to_string(),
+				))?,
 			config.smtp_host.to_string(),
 			config.smtp_port.into(),
 			vec![
 				emailer::is_primary::set(payload.is_primary),
+				emailer::tls_enabled::set(config.tls_enabled),
 				emailer::max_attachment_size_bytes::set(config.max_attachment_size_bytes),
 			],
 		)
@@ -228,22 +234,33 @@ async fn update_emailer(
 ) -> APIResult<Json<SMTPEmailer>> {
 	req.enforce_permissions(&[UserPermission::EmailerManage])?;
 
+	if payload.config.password.is_some() {
+		tracing::warn!(?id, "The password for the emailer is being updated!");
+	}
+
 	let client = &ctx.db;
 	let config = EmailerConfig::from_client_config(payload.config, &ctx).await?;
 	let updated_emailer = client
 		.emailer()
 		.update(
 			emailer::id::equals(id),
-			vec![
-				emailer::name::set(payload.name),
-				emailer::sender_email::set(config.sender_email),
-				emailer::sender_display_name::set(config.sender_display_name),
-				emailer::username::set(config.username),
-				emailer::encrypted_password::set(config.encrypted_password),
-				emailer::smtp_host::set(config.smtp_host.to_string()),
-				emailer::smtp_port::set(config.smtp_port.into()),
-				emailer::max_attachment_size_bytes::set(config.max_attachment_size_bytes),
-			],
+			chain_optional_iter(
+				[
+					emailer::name::set(payload.name),
+					emailer::sender_email::set(config.sender_email),
+					emailer::sender_display_name::set(config.sender_display_name),
+					emailer::username::set(config.username),
+					emailer::smtp_host::set(config.smtp_host.to_string()),
+					emailer::smtp_port::set(config.smtp_port.into()),
+					emailer::tls_enabled::set(config.tls_enabled),
+					emailer::max_attachment_size_bytes::set(
+						config.max_attachment_size_bytes,
+					),
+				],
+				[config
+					.encrypted_password
+					.map(emailer::encrypted_password::set)],
+			),
 		)
 		.exec()
 		.await?;
@@ -501,7 +518,7 @@ async fn send_attachment_email(
 			extension,
 			..
 		} = PathBuf::from(&book.path).file_parts();
-		let content = read_entire_file(book.path)?;
+		let content = fs::read(book.path).await?;
 
 		// TODO: should error?
 		match (content.len(), max_attachment_size_bytes) {

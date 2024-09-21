@@ -132,7 +132,7 @@ use super::api::{
     ),
     components(
         schemas(
-            Library, LibraryOptions, Media, ReadingList, ActiveReadingSession, FinishedReadingSession, Series, Tag, User,
+            Library, LibraryConfig, Media, ReadingList, ActiveReadingSession, FinishedReadingSession, Series, Tag, User,
             UserPreferences, LibraryPattern, LibraryScanMode, LogLevel, ClaimResponse,
             StumpVersion, FileStatus, PageableDirectoryListing, DirectoryListing,
             DirectoryListingFile, CursorInfo, PageInfo, PageableLibraries,

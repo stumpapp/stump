@@ -18,7 +18,7 @@ export {
 export { Calendar, DatePicker } from './calendar'
 export { Card, CardGrid, type CardProps, EntityCard, HoverCard, type HoverCardProps } from './card'
 export { Command, type CommandProps } from './command'
-export { Divider, Layout, Spacer, type SpacerProps, SplitContainer } from './container'
+export { Divider, Spacer, type SpacerProps, SplitContainer } from './container'
 export { ContextMenu, type ContextMenuProps } from './context-menu'
 export { ConfirmationModal, type ConfirmationModalProps, Dialog } from './dialog'
 export { Drawer } from './drawer'
@@ -59,3 +59,6 @@ export {
 export { Toast } from './toast'
 export { ToolTip, type ToolTipProps } from './tooltip'
 export { cn, cx, type PickSelect, type Without, type XOR } from './utils'
+
+// TODO: Add charts! https://ui.shadcn.com/docs/components/chart yay
+// Cool data visualization stuff!

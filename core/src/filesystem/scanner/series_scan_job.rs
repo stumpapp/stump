@@ -5,7 +5,9 @@ use specta::Type;
 
 use crate::{
 	db::{
-		entity::{CoreJobOutput, LibraryOptions},
+		entity::{
+			macros::library_path_with_options_select, CoreJobOutput, LibraryConfig,
+		},
 		FileStatus,
 	},
 	filesystem::image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
@@ -13,15 +15,15 @@ use crate::{
 		error::JobError, Executor, JobExt, JobOutputExt, JobProgress, JobTaskOutput,
 		WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
-	prisma::{library, library_options, media, series, PrismaClient},
+	prisma::{library, media, series, PrismaClient},
 	utils::chain_optional_iter,
 	CoreEvent,
 };
 
 use super::{
 	utils::{
-		generate_rule_set, handle_create_media, handle_missing_media, handle_visit_media,
-		MediaBuildOperationCtx, MediaOperationOutput,
+		handle_missing_media, safely_build_and_insert_media, visit_and_update_media,
+		MediaBuildOperation, MediaOperationOutput,
 	},
 	walk_series, WalkedSeries, WalkerCtx,
 };
@@ -38,7 +40,7 @@ pub enum SeriesScanTask {
 pub struct SeriesScanJob {
 	pub id: String,
 	pub path: String,
-	pub options: Option<LibraryOptions>,
+	pub options: Option<LibraryConfig>,
 }
 
 impl SeriesScanJob {
@@ -94,25 +96,30 @@ impl JobExt for SeriesScanJob {
 		ctx: &WorkerCtx,
 	) -> Result<WorkingState<Self::Output, Self::Task>, JobError> {
 		let mut output = Self::Output::default();
-		let library_options = ctx
+		let library = ctx
 			.db
-			.library_options()
-			.find_first(vec![library_options::library::is(vec![
-				library::series::some(vec![
-					series::id::equals(self.id.clone()),
-					series::path::equals(self.path.clone()),
-				]),
+			.library()
+			.find_first(vec![library::series::some(vec![
+				series::id::equals(self.id.clone()),
+				series::path::equals(self.path.clone()),
 			])])
+			.select(library_path_with_options_select::select())
 			.exec()
 			.await?
-			.map(LibraryOptions::from)
 			.ok_or(JobError::InitFailed(
-				"Associated library options not found".to_string(),
+				"Associated library not found".to_string(),
 			))?;
-		let ignore_rules = generate_rule_set(&[PathBuf::from(self.path.clone())]);
-		let max_depth = library_options.is_collection_based().then_some(1);
+		let library_config = LibraryConfig::from(library.config);
+		let ignore_rules = library_config.ignore_rules.build()?;
 
-		self.options = Some(library_options);
+		// If the library is collection-priority, any child directories are 'ignored' and their
+		// files are part of / folded into the top-most folder (series).
+		// If the library is not collection-priority, each subdirectory is its own series.
+		// Therefore, we only scan one level deep when walking a series whose library is not
+		// collection-priority to avoid scanning duplicates which are part of other series
+		let max_depth = (!library_config.is_collection_based()).then_some(1);
+
+		self.options = Some(library_config);
 
 		let WalkedSeries {
 			series_is_missing,
@@ -213,7 +220,7 @@ impl JobExt for SeriesScanJob {
 		let mut output = Self::Output::default();
 		let mut logs = vec![];
 
-		let chunk_size = ctx.config.scanner_chunk_size;
+		let max_concurrency = ctx.config.max_scanner_concurrency;
 
 		match task {
 			SeriesScanTask::MarkMissingMedia(paths) => {
@@ -224,12 +231,12 @@ impl JobExt for SeriesScanJob {
 					..
 				} = handle_missing_media(ctx, &self.id, paths).await;
 				ctx.send_batch(vec![
-					JobProgress::msg("Handled missing media").into_send(),
+					JobProgress::msg("Handled missing media").into_worker_send(),
 					CoreEvent::CreatedOrUpdatedManyMedia {
 						count: updated_media,
 						series_id: self.id.clone(),
 					}
-					.into_send(),
+					.into_worker_send(),
 				]);
 				output.updated_media += updated_media;
 				logs.extend(new_logs);
@@ -242,23 +249,23 @@ impl JobExt for SeriesScanJob {
 					created_media,
 					logs: new_logs,
 					..
-				} = handle_create_media(
-					MediaBuildOperationCtx {
+				} = safely_build_and_insert_media(
+					MediaBuildOperation {
 						series_id: self.id.clone(),
-						library_options: self.options.clone().unwrap_or_default(),
-						chunk_size,
+						library_config: self.options.clone().unwrap_or_default(),
+						max_concurrency,
 					},
 					ctx,
 					paths,
 				)
 				.await?;
 				ctx.send_batch(vec![
-					JobProgress::msg("Created new media").into_send(),
+					JobProgress::msg("Created new media").into_worker_send(),
 					CoreEvent::CreatedOrUpdatedManyMedia {
 						count: created_media,
 						series_id: self.id.clone(),
 					}
-					.into_send(),
+					.into_worker_send(),
 				]);
 				output.created_media += created_media;
 				logs.extend(new_logs);
@@ -271,23 +278,23 @@ impl JobExt for SeriesScanJob {
 					updated_media,
 					logs: new_logs,
 					..
-				} = handle_visit_media(
-					MediaBuildOperationCtx {
+				} = visit_and_update_media(
+					MediaBuildOperation {
 						series_id: self.id.clone(),
-						library_options: self.options.clone().unwrap_or_default(),
-						chunk_size,
+						library_config: self.options.clone().unwrap_or_default(),
+						max_concurrency,
 					},
 					ctx,
 					paths,
 				)
 				.await?;
 				ctx.send_batch(vec![
-					JobProgress::msg("Visited all media").into_send(),
+					JobProgress::msg("Visited all media").into_worker_send(),
 					CoreEvent::CreatedOrUpdatedManyMedia {
 						count: updated_media,
 						series_id: self.id.clone(),
 					}
-					.into_send(),
+					.into_worker_send(),
 				]);
 				output.updated_media += updated_media;
 				logs.extend(new_logs);

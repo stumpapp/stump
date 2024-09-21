@@ -1,11 +1,14 @@
 {
 	"name": "@stump/types",
-	"version": "0.0.5",
+	"version": "0.0.6",
 	"description": "",
 	"main": "index.ts",
 	"exports": {
 		".": "./index.ts",
 		"./server": "./server.ts"
+	},
+	"scripts": {
+		"nuke": "rimraf node_modules"
 	},
 	"license": "MIT",
 	"devDependencies": {

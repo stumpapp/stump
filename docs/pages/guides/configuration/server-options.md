@@ -98,7 +98,7 @@ The verbosity level for Stump logs. Verbosity levels are integers that correspon
 
 For example, if you set the verbosity level to `1`, you will see `INFO`, `WARN`, and `ERROR` messages. If you set the verbosity level to `2`, you will see `DEBUG`, `INFO`, `WARN`, and `ERROR` messages, and so on. The default verbosity level is `1`.
 
-You may turn off logging entirely by setting the verbosity level to `0`. However, this is not recommended, as it will make it difficult to debug issues with Stump if they arise.
+You may turn off logging entirely by setting the verbosity level to `0`. However, this is not recommended, as it will make it difficult to debug issues with Stump if they arise. I generally recommend setting the verbosity to `1`, as it allows you to see info-level messages, warnings, and errors.
 
 The available verbosity levels are:
 
@@ -108,6 +108,26 @@ The available verbosity levels are:
 | `1`    | `INFO`, `WARN`, `ERROR`                   |
 | `2`    | `DEBUG`, `INFO`, `WARN`, `ERROR`          |
 | `3`    | `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR` |
+
+### STUMP_MAX_SCANNER_CONCURRENCY
+
+The maximum number of files which may be processed concurrently by the scanner. This is useful for limiting the number of files that are processed at once, which can help prevent the server from becoming overwhelmed on systems with limited resources.
+
+**Note:** The OS thread scheduler should prevent overload, however, you may want to set this value lower if you're running Stump on a system with limited resources.
+
+| Type    | Default Value |
+| ------- | ------------- |
+| Integer | `200`         |
+
+### STUMP_MAX_THUMBNAIL_CONCURRENCY
+
+The maximum number of images which may be generated concurrently by the thumbnailer. This is useful for limiting the number of thumbnails that are generated at once, which can help prevent the server from becoming overwhelmed on systems with limited resources.
+
+**Note:** Thumbnail generation is a CPU-intensive process, so you may want to set this value lower if you're running Stump on a system with limited resources.
+
+| Type    | Default Value |
+| ------- | ------------- |
+| Integer | `50`          |
 
 #### ENABLE_SWAGGER_UI
 

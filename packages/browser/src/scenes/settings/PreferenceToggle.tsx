@@ -1,6 +1,8 @@
 import { cx, Label, RawSwitch, Text } from '@stump/components'
 import React from 'react'
 
+// TODO: rename and relocate this component
+
 type Props = {
 	formId?: string
 	label: string
@@ -10,6 +12,7 @@ type Props = {
 	isDisabled?: boolean
 	title?: string
 }
+
 export default function PreferenceToggle({
 	formId,
 	label,

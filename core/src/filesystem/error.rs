@@ -25,7 +25,7 @@ pub enum FileError {
 	#[error("{0}")]
 	PdfError(#[from] pdf::error::PdfError),
 	#[error("{0}")]
-	PdfRendererError(#[from] pdfium_render::error::PdfiumError),
+	PdfRendererError(#[from] pdfium_render::prelude::PdfiumError),
 	#[error("Stump is not properly configured to render PDFs")]
 	PdfConfigurationError,
 	#[error("Failed to process PDF file: {0}")]

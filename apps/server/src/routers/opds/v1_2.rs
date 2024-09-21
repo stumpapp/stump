@@ -8,8 +8,8 @@ use prisma_client_rust::{chrono, Direction};
 use stump_core::{
 	db::{entity::UserPermission, query::pagination::PageQuery},
 	filesystem::{
+		get_page_async,
 		image::{GenericImageProcessor, ImageProcessor, ImageProcessorOptions},
-		media::get_page,
 		ContentType,
 	},
 	opds::v1_2::{
@@ -19,7 +19,7 @@ use stump_core::{
 	},
 	prisma::{active_reading_session, library, media, series, user},
 };
-use tracing::{debug, trace, warn};
+use tracing::{debug, trace};
 
 use crate::{
 	config::state::AppState,
@@ -28,7 +28,9 @@ use crate::{
 	middleware::auth::{auth_middleware, RequestContext},
 	routers::api::v1::{
 		library::library_not_hidden_from_user_filter,
-		media::apply_media_library_not_hidden_for_user_filter,
+		media::{
+			apply_media_library_not_hidden_for_user_filter, get_media_thumbnail_by_id,
+		},
 	},
 	utils::http::{ImageResponse, NamedFile, Xml},
 };
@@ -524,24 +526,26 @@ async fn get_series_by_id(
 	}
 }
 
+// TODO: support something like `STRICT_OPDS` to enforce OPDS compliance conditionally
 fn handle_opds_image_response(
 	content_type: ContentType,
 	image_buffer: Vec<u8>,
 ) -> APIResult<ImageResponse> {
 	if content_type.is_opds_legacy_image() {
-		trace!("OPDS legacy image detected, returning as-is");
 		Ok(ImageResponse::new(content_type, image_buffer))
-	} else {
-		warn!(
-			?content_type,
-			"Unsupported image for OPDS detected, converting to JPEG"
-		);
-		// let jpeg_buffer = image::jpeg_from_bytes(&image_buffer)?;
+	} else if content_type.is_decodable_image() {
+		tracing::debug!("Converting image to JPEG for legacy OPDS compatibility");
 		let jpeg_buffer = GenericImageProcessor::generate(
 			&image_buffer,
 			ImageProcessorOptions::jpeg(),
 		)?;
 		Ok(ImageResponse::new(ContentType::JPEG, jpeg_buffer))
+	} else {
+		tracing::warn!(
+			?content_type,
+			"Encountered image which does not conform to legacy OPDS image requirements"
+		);
+		Ok(ImageResponse::new(content_type, image_buffer))
 	}
 }
 
@@ -551,24 +555,9 @@ async fn get_book_thumbnail(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
 ) -> APIResult<ImageResponse> {
-	let db = &ctx.db;
-	let user = req.user();
-	let age_restrictions = user
-		.age_restriction
-		.as_ref()
-		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+	let (content_type, image_buffer) =
+		get_media_thumbnail_by_id(id, &ctx.db, req.user(), &ctx.config).await?;
 
-	let book = db
-		.media()
-		.find_first(chain_optional_iter(
-			[media::id::equals(id.clone())],
-			[age_restrictions],
-		))
-		.exec()
-		.await?
-		.ok_or(APIError::NotFound(String::from("Book not found")))?;
-
-	let (content_type, image_buffer) = get_page(book.path.as_str(), 1, &ctx.config)?;
 	handle_opds_image_response(content_type, image_buffer)
 }
 
@@ -649,7 +638,7 @@ async fn get_book_page(
 	}
 
 	let (content_type, image_buffer) =
-		get_page(book.path.as_str(), correct_page, &ctx.config)?;
+		get_page_async(book.path.as_str(), correct_page, &ctx.config).await?;
 	handle_opds_image_response(content_type, image_buffer)
 }
 

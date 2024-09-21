@@ -1,27 +1,24 @@
-use rayon::iter::{
-	Either, IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator,
-};
 use std::{collections::VecDeque, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
 // TODO: hone the progress messages, they are a little noisy and unhelpful (e.g. 'Starting task')
+// TODO: Refactor rayon usage to use tokio instead. I am trying to learn more about IO-bound operations in an
+// async context, and I believe tokio might be more appropriate for this use case (highly concurrent IO-bound tasks).
+// Also perhaps experiment with https://docs.rs/tokio-uring/latest/tokio_uring/index.html
 
 use crate::{
 	db::{
-		entity::{CoreJobOutput, LibraryOptions, Series},
+		entity::{CoreJobOutput, LibraryConfig},
 		FileStatus, SeriesDAO, DAO,
 	},
-	filesystem::{
-		image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
-		SeriesBuilder,
-	},
+	filesystem::image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
 	job::{
 		error::JobError, Executor, JobExecuteLog, JobExt, JobOutputExt, JobProgress,
 		JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
-	prisma::{library, library_options, media, series, PrismaClient},
+	prisma::{library, library_config, media, series, PrismaClient},
 	utils::chain_optional_iter,
 	CoreEvent,
 };
@@ -29,8 +26,8 @@ use crate::{
 use super::{
 	series_scan_job::SeriesScanTask,
 	utils::{
-		generate_rule_set, handle_create_media, handle_missing_media,
-		handle_missing_series, handle_visit_media, MediaBuildOperationCtx,
+		handle_missing_media, handle_missing_series, safely_build_and_insert_media,
+		safely_build_series, visit_and_update_media, MediaBuildOperation,
 		MediaOperationOutput, MissingSeriesOutput,
 	},
 	walk_library, walk_series, WalkedLibrary, WalkedSeries, WalkerCtx,
@@ -60,7 +57,7 @@ pub struct InitTaskInput {
 pub struct LibraryScanJob {
 	pub id: String,
 	pub path: String,
-	pub options: Option<LibraryOptions>,
+	pub options: Option<LibraryConfig>,
 }
 
 impl LibraryScanJob {
@@ -130,21 +127,21 @@ impl JobExt for LibraryScanJob {
 		// Note: We ignore the potential self.options here in the event that it was
 		// updated since being queued. This is perhaps a bit overly cautious, but it's
 		// just one additional query.
-		let library_options = ctx
+		let library_config = ctx
 			.db
-			.library_options()
-			.find_first(vec![library_options::library::is(vec![
+			.library_config()
+			.find_first(vec![library_config::library::is(vec![
 				library::id::equals(self.id.clone()),
 				library::path::equals(self.path.clone()),
 			])])
 			.exec()
 			.await?
-			.map(LibraryOptions::from)
+			.map(LibraryConfig::from)
 			.ok_or(JobError::InitFailed("Library not found".to_string()))?;
-		let is_collection_based = library_options.is_collection_based();
-		let ignore_rules = generate_rule_set(&[PathBuf::from(self.path.clone())]);
+		let is_collection_based = library_config.is_collection_based();
+		let ignore_rules = library_config.ignore_rules.build()?;
 
-		self.options = Some(library_options);
+		self.options = Some(library_config);
 
 		ctx.report_progress(JobProgress::msg("Performing task discovery"));
 		let WalkedLibrary {
@@ -176,8 +173,8 @@ impl JobExt for LibraryScanJob {
 		if library_is_missing {
 			handle_missing_library(&ctx.db, self.id.as_str()).await?;
 			ctx.send_batch(vec![
-				JobProgress::msg("Failed to find library on disk").into_send(),
-				CoreEvent::DiscoveredMissingLibrary(self.id.clone()).into_send(),
+				JobProgress::msg("Failed to find library on disk").into_worker_send(),
+				CoreEvent::DiscoveredMissingLibrary(self.id.clone()).into_worker_send(),
 			]);
 			return Err(JobError::InitFailed(
 				"Library could not be found on disk".to_string(),
@@ -262,11 +259,11 @@ impl JobExt for LibraryScanJob {
 		let mut logs = vec![];
 		let mut subtasks = vec![];
 
-		let chunk_size = ctx.config.scanner_chunk_size;
+		let max_concurrency = ctx.config.max_scanner_concurrency;
 
 		match task {
 			LibraryScanTask::Init(input) => {
-				tracing::info!("Executing the init task for library scan");
+				tracing::debug!("Executing the init task for library scan");
 				ctx.report_progress(JobProgress::msg("Handling library scan init"));
 				let InitTaskInput {
 					series_to_create,
@@ -324,53 +321,38 @@ impl JobExt for LibraryScanJob {
 				}
 
 				if !series_to_create.is_empty() {
-					ctx.report_progress(JobProgress::msg(&format!(
-						"Building {} series entities",
-						series_to_create.len()
-					)));
-					// TODO: remove this DAO!!
-					let series_dao = SeriesDAO::new(ctx.db.clone());
+					ctx.report_progress(JobProgress::msg("Building new series"));
 
-					let (built_series, failure_logs): (Vec<_>, Vec<_>) = series_to_create
-						.par_iter()
-						.enumerate()
-						.map(|(idx, path_buf)| {
-							ctx.report_progress(JobProgress::subtask_position_msg(
-								format!("Building series {}", path_buf.display())
-									.as_str(),
-								current_subtask_index + (idx as i32),
-								total_subtask_count as i32,
-							));
-							(
-								path_buf,
-								SeriesBuilder::new(path_buf.as_path(), &self.id).build(),
-							)
-						})
-						.partition_map::<_, _, _, Series, JobExecuteLog>(
-							|(path_buf, result)| match result {
-								Ok(s) => Either::Left(s),
-								Err(e) => Either::Right(
-									JobExecuteLog::error(e.to_string())
-										.with_ctx(path_buf.to_string_lossy().to_string()),
-								),
-							},
-						);
+					let task_count = series_to_create.len() as i32;
+					let (built_series, failure_logs) = safely_build_series(
+						&self.id,
+						series_to_create,
+						ctx.config.as_ref(),
+						|position| {
+							ctx.report_progress(JobProgress::subtask_position(
+								position as i32,
+								task_count,
+							))
+						},
+					)
+					.await;
+
 					current_subtask_index +=
 						(built_series.len() + failure_logs.len()) as i32;
 					logs.extend(failure_logs);
 
-					// TODO: make this configurable
-					let chunks = built_series.chunks(400);
+					// TODO: remove this DAO!!
+					let series_dao = SeriesDAO::new(ctx.db.clone());
+
+					let chunks = built_series.chunks(200);
 					let chunk_count = chunks.len();
-					tracing::debug!(chunk_count, "Batch inserting new series");
+					tracing::trace!(chunk_count, "Batch inserting new series");
+
 					for (idx, chunk) in chunks.enumerate() {
-						ctx.report_progress(JobProgress::msg(
-							format!(
-								"Processing series insertion chunk {} of {}",
-								idx + 1,
-								chunk_count
-							)
-							.as_str(),
+						ctx.report_progress(JobProgress::subtask_position_msg(
+							"Inserting built series in batches",
+							(idx + 1) as i32,
+							chunk_count as i32,
 						));
 						let result = series_dao.create_many(chunk.to_vec()).await;
 						match result {
@@ -398,26 +380,36 @@ impl JobExt for LibraryScanJob {
 						total_subtask_count as i32,
 					));
 				} else {
-					tracing::debug!("No series to create");
+					tracing::trace!("No series to create");
 				}
 
 				ctx.report_progress(JobProgress::msg("Init task complete!"));
 			},
 			LibraryScanTask::WalkSeries(path_buf) => {
-				tracing::info!("Executing the walk series task for library scan");
+				tracing::debug!("Executing the walk series task for library scan");
 				ctx.report_progress(JobProgress::msg(
 					format!("Scanning series at {}", path_buf.display()).as_str(),
 				));
 
+				// If the library is collection-priority, any child directories are 'ignored' and their
+				// files are part of / folded into the top-most folder (series).
+				// If the library is not collection-priority, each subdirectory is its own series.
+				// Therefore, we only scan one level deep when walking a series whose library is not
+				// collection-priority to avoid scanning duplicates which are part of other series
 				let max_depth = self
 					.options
 					.as_ref()
-					.and_then(|o| o.is_collection_based().then_some(1));
+					.and_then(|o| (!o.is_collection_based()).then_some(1));
 
-				let ignore_rules = generate_rule_set(&[
-					path_buf.clone(),
-					PathBuf::from(self.path.clone()),
-				]);
+				let Some(Ok(ignore_rules)) =
+					self.options.as_ref().map(|o| o.ignore_rules.build())
+				else {
+					// Note: This failure will likely affect ALL other tasks, so we are halting the job here
+					return Err(JobError::TaskFailed(
+						"Failed to build ignore rules. Check that the rules are valid."
+							.to_string(),
+					));
+				};
 
 				let walk_result = walk_series(
 					path_buf.as_path(),
@@ -524,12 +516,12 @@ impl JobExt for LibraryScanJob {
 						..
 					} = handle_missing_media(ctx, &series_id, paths).await;
 					ctx.send_batch(vec![
-						JobProgress::msg("Handled missing media").into_send(),
+						JobProgress::msg("Handled missing media").into_worker_send(),
 						CoreEvent::CreatedOrUpdatedManyMedia {
 							count: updated_media,
 							series_id,
 						}
-						.into_send(),
+						.into_worker_send(),
 					]);
 					output.updated_media += updated_media;
 					logs.extend(new_logs);
@@ -542,23 +534,23 @@ impl JobExt for LibraryScanJob {
 						created_media,
 						logs: new_logs,
 						..
-					} = handle_create_media(
-						MediaBuildOperationCtx {
+					} = safely_build_and_insert_media(
+						MediaBuildOperation {
 							series_id: series_id.clone(),
-							library_options: self.options.clone().unwrap_or_default(),
-							chunk_size,
+							library_config: self.options.clone().unwrap_or_default(),
+							max_concurrency,
 						},
 						ctx,
 						paths,
 					)
 					.await?;
 					ctx.send_batch(vec![
-						JobProgress::msg("Created new media").into_send(),
+						JobProgress::msg("Created new media").into_worker_send(),
 						CoreEvent::CreatedOrUpdatedManyMedia {
 							count: created_media,
 							series_id,
 						}
-						.into_send(),
+						.into_worker_send(),
 					]);
 					output.created_media += created_media;
 					logs.extend(new_logs);
@@ -572,23 +564,23 @@ impl JobExt for LibraryScanJob {
 						updated_media,
 						logs: new_logs,
 						..
-					} = handle_visit_media(
-						MediaBuildOperationCtx {
+					} = visit_and_update_media(
+						MediaBuildOperation {
 							series_id: series_id.clone(),
-							library_options: self.options.clone().unwrap_or_default(),
-							chunk_size,
+							library_config: self.options.clone().unwrap_or_default(),
+							max_concurrency,
 						},
 						ctx,
 						paths,
 					)
 					.await?;
 					ctx.send_batch(vec![
-						JobProgress::msg("Visited all media").into_send(),
+						JobProgress::msg("Visited all media").into_worker_send(),
 						CoreEvent::CreatedOrUpdatedManyMedia {
 							count: updated_media,
 							series_id,
 						}
-						.into_send(),
+						.into_worker_send(),
 					]);
 					output.updated_media += updated_media;
 					logs.extend(new_logs);

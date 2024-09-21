@@ -11,7 +11,10 @@ use prisma_client_rust::{
 };
 use stump_core::{
 	error::CoreError,
-	filesystem::{image::ProcessorError, FileError},
+	filesystem::{
+		image::{ProcessorError, ThumbnailGenerateError},
+		FileError,
+	},
 	job::error::JobManagerError,
 	opds::v2_0::OPDSV2Error,
 	CoreEvent,
@@ -22,6 +25,8 @@ use utoipa::ToSchema;
 
 use std::{net, num::TryFromIntError};
 use thiserror::Error;
+
+use crate::config::session::delete_cookie_header;
 
 /// A type alias for the result of a server operation
 pub type ServerResult<T> = Result<T, ServerError>;
@@ -178,6 +183,12 @@ impl From<reqwest::Error> for APIError {
 	}
 }
 
+impl From<ThumbnailGenerateError> for APIError {
+	fn from(value: ThumbnailGenerateError) -> Self {
+		APIError::InternalServerError(value.to_string())
+	}
+}
+
 impl APIError {
 	pub fn forbidden_discreet() -> APIError {
 		APIError::Forbidden(String::from(
@@ -302,9 +313,19 @@ impl IntoResponse for APIErrorResponse {
 		});
 
 		let base_response = Json(body).into_response();
-		Response::builder()
+
+		let mut builder = Response::builder()
 			.status(self.status)
-			.header("Content-Type", "application/json")
+			.header("Content-Type", "application/json");
+
+		// if the status is 401, we want to encourage the client to delete their
+		// session cookie
+		if self.status == StatusCode::UNAUTHORIZED {
+			let (name, value) = delete_cookie_header();
+			builder = builder.header(name, value);
+		}
+
+		builder
 			.body(base_response.into_body())
 			.unwrap_or_else(|error| {
 				tracing::error!(?error, "Failed to build response");

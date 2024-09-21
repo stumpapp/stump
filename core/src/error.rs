@@ -22,6 +22,8 @@ pub enum CoreError {
 	DecryptionFailed(String),
 	#[error("Failed to initialize Stump core: {0}")]
 	InitializationError(String),
+	#[error("{0}")]
+	EmailerError(#[from] email::EmailError),
 	#[error("Query error: {0}")]
 	QueryError(#[from] prisma_client_rust::queries::QueryError),
 	#[error("Invalid query error: {0}")]
@@ -30,8 +32,12 @@ pub enum CoreError {
 	RelationNotLoaded(#[from] RelationNotFetchedError),
 	#[error("Migration error: {0}")]
 	MigrationError(String),
+	#[error("Failed to parse regex patterns into globset: {0}")]
+	GlobSetError(#[from] globset::Error),
 	#[error("Requested resource could not be found: {0}")]
 	NotFound(String),
+	#[error("{0}")]
+	BadRequest(String),
 	#[error("Requested file could not be found: {0}")]
 	FileNotFound(String),
 	#[error("Failed to read file: {0}")]

@@ -20,10 +20,15 @@ use stump_core::config::StumpConfig;
 pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 	let core = StumpCore::new(config.clone()).await;
 
-	if let Err(err) = core.run_migrations().await {
-		tracing::error!("Failed to run migrations: {:?}", err);
-		return Err(ServerError::ServerStartError(err.to_string()));
+	if let Err(error) = core.run_migrations().await {
+		tracing::error!(?error, "Failed to run migrations");
+		return Err(ServerError::ServerStartError(error.to_string()));
 	}
+
+	core.get_job_controller()
+		.initialize()
+		.await
+		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 
 	// Initialize the server configuration. If it already exists, nothing will happen.
 	core.init_server_config()

@@ -1,41 +1,66 @@
+use globset::GlobSet;
 use std::{
 	ffi::OsStr,
-	fs::File,
-	io::Read,
 	path::{Path, PathBuf},
 };
+use tokio::{fs, io};
 use tracing::error;
 use walkdir::WalkDir;
 
-use super::{media::is_accepted_cover_name, ContentType, FileError};
+use super::{image::ImageFormat, media::is_accepted_cover_name, ContentType};
 
-pub const ACCEPTED_IMAGE_EXTENSIONS: [&str; 5] = ["jpg", "png", "jpeg", "webp", "gif"];
+pub const ACCEPTED_IMAGE_EXTENSIONS: [&str; 8] =
+	["jpg", "png", "jpeg", "jxl", "webp", "gif", "avif", "heif"];
 
-pub fn read_entire_file<P: AsRef<Path>>(path: P) -> Result<Vec<u8>, FileError> {
-	let mut file = File::open(path)?;
+pub async fn get_thumbnail(
+	parent: impl AsRef<Path>,
+	name: &str,
+	format: Option<ImageFormat>,
+) -> io::Result<Option<(ContentType, Vec<u8>)>> {
+	let thumbnails_dir = parent.as_ref().to_path_buf();
 
-	let mut buf = Vec::new();
-	file.read_to_end(&mut buf)?;
+	let path = match format {
+		Some(format) => {
+			let file_path =
+				thumbnails_dir.join(format!("{}.{}", name, format.extension()));
 
-	Ok(buf)
+			if fs::metadata(&file_path).await.is_ok() {
+				Some(file_path)
+			} else {
+				find_thumbnail(&thumbnails_dir, name).await
+			}
+		},
+		_ => find_thumbnail(&thumbnails_dir, name).await,
+	};
+
+	if let Some(path) = path {
+		let FileParts { extension, .. } = path.file_parts();
+		fs::read(path).await.map(|bytes| {
+			let content_type = ContentType::from_extension(&extension);
+			Some((content_type, bytes))
+		})
+	} else {
+		Ok(None)
+	}
 }
 
-/// A function that returns the path of a thumbnail image, if it exists.
-/// This should be used when the thumbnail extension is not known.
-pub fn get_unknown_thumnail(id: &str, mut thumbnails_dir: PathBuf) -> Option<PathBuf> {
-	for extension in ACCEPTED_IMAGE_EXTENSIONS.iter() {
-		thumbnails_dir.push(format!("{}.{}", id, extension));
+pub async fn find_thumbnail(parent: &Path, name: &str) -> Option<PathBuf> {
+	let mut thumbnails_dir = parent.to_path_buf();
 
-		if thumbnails_dir.exists() {
-			return Some(thumbnails_dir);
+	for extension in ACCEPTED_IMAGE_EXTENSIONS.iter() {
+		let path = parent.join(format!("{}.{}", name, extension));
+
+		if fs::metadata(&path).await.is_ok() {
+			return Some(path);
 		}
 
-		thumbnails_dir.pop();
+		thumbnails_dir.push(format!("{}.{}", name, extension));
 	}
 
 	None
 }
 
+// TODO(perf): Async-ify
 pub fn get_unknown_image(mut base_path: PathBuf) -> Option<PathBuf> {
 	for extension in ACCEPTED_IMAGE_EXTENSIONS.iter() {
 		base_path.set_extension(extension);
@@ -81,7 +106,7 @@ pub trait PathUtils {
 	/// files within a __MACOSX directory.
 	fn is_hidden_file(&self) -> bool;
 	/// Returns true if the file is supported by Stump.
-	fn should_ignore(&self) -> bool;
+	fn is_default_ignored(&self) -> bool;
 	/// Returns true if the file is an image.
 	fn is_supported(&self) -> bool;
 	/// Returns true if the file is an image.
@@ -97,10 +122,10 @@ pub trait PathUtils {
 	fn is_thumbnail_img(&self) -> bool;
 	/// Returns true if the directory has any media files in it. This is a shallow
 	/// check, and will not check subdirectories.
-	fn dir_has_media(&self) -> bool;
+	fn dir_has_media(&self, ignore_rules: &GlobSet) -> bool;
 	/// Returns true if the directory has any media files in it. This is a deep
 	/// check, and will check *all* subdirectories.
-	fn dir_has_media_deep(&self) -> bool;
+	fn dir_has_media_deep(&self, ignore_rules: &GlobSet) -> bool;
 }
 
 impl PathUtils for Path {
@@ -122,12 +147,7 @@ impl PathUtils for Path {
 		let extension = self
 			.extension()
 			.and_then(|os_str| os_str.try_to_string())
-			.unwrap_or_else(|| {
-				if !self.is_dir() {
-					tracing::warn!(path = ?self, "Failed to get file extension");
-				}
-				String::default()
-			});
+			.unwrap_or_default();
 
 		FileParts {
 			file_name,
@@ -162,7 +182,13 @@ impl PathUtils for Path {
 			return true;
 		}
 
-		let FileParts { file_name, .. } = self.file_parts();
+		let file_name = self
+			.file_name()
+			.and_then(|os_str| os_str.try_to_string())
+			.unwrap_or_else(|| {
+				tracing::warn!(path = ?self, "Failed to get file name");
+				String::default()
+			});
 
 		file_name.starts_with('.')
 	}
@@ -178,10 +204,7 @@ impl PathUtils for Path {
 	/// Returns true when the scanner should not persist the file to the database.
 	/// First checks if the file is hidden (i.e. starts with a dot), then checks if
 	/// the file is supported by Stump.
-	//
-	// TODO: This will change in the future to allow for unsupported files to
-	// be added to the database with *minimal* functionality.
-	fn should_ignore(&self) -> bool {
+	fn is_default_ignored(&self) -> bool {
 		if self.is_hidden_file() {
 			return true;
 		}
@@ -204,7 +227,7 @@ impl PathUtils for Path {
 		is_accepted_cover_name(&file_stem)
 	}
 
-	fn dir_has_media(&self) -> bool {
+	fn dir_has_media(&self, ignore_rules: &GlobSet) -> bool {
 		if !self.is_dir() {
 			return false;
 		}
@@ -215,7 +238,10 @@ impl PathUtils for Path {
 			Ok(items) => items
 				.filter_map(|item| item.ok())
 				.filter(|item| item.path() != self)
-				.any(|f| !f.path().should_ignore()),
+				.any(|f| {
+					let path = f.path();
+					!path.is_default_ignored() && !ignore_rules.is_match(path)
+				}),
 			Err(e) => {
 				error!(
 					error = ?e,
@@ -227,7 +253,7 @@ impl PathUtils for Path {
 		}
 	}
 
-	fn dir_has_media_deep(&self) -> bool {
+	fn dir_has_media_deep(&self, ignore_rules: &GlobSet) -> bool {
 		if !self.is_dir() {
 			return false;
 		}
@@ -236,36 +262,9 @@ impl PathUtils for Path {
 			.into_iter()
 			.filter_map(|item| item.ok())
 			.filter(|item| item.path() != self)
-			.any(|f| !f.path().should_ignore())
-	}
-}
-
-#[cfg(test)]
-mod tests {
-	use std::io::Write;
-
-	use tempfile::TempDir;
-
-	use super::*;
-
-	#[test]
-	fn test_read_entire_file() {
-		let temp_dir = TempDir::new().unwrap();
-		let temp_file = temp_dir.path().join("temp_file.txt");
-
-		File::create(&temp_file)
-			.unwrap()
-			.write_all(b"Test data")
-			.unwrap();
-
-		let data = read_entire_file(&temp_file).unwrap();
-		assert_eq!(data, b"Test data");
-	}
-
-	#[test]
-	fn test_read_entire_file_non_existent() {
-		let path = "non_existent_file.txt";
-		let result = read_entire_file(path);
-		assert!(result.is_err());
+			.any(|f| {
+				let path = f.path();
+				!path.is_default_ignored() && !ignore_rules.is_match(path)
+			})
 	}
 }

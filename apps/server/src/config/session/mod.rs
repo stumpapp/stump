@@ -4,4 +4,4 @@ mod utils;
 
 pub use cleanup::SessionCleanupJob;
 pub use store::PrismaSessionStore;
-pub use utils::{get_session_layer, SESSION_USER_KEY};
+pub use utils::{delete_cookie_header, get_session_layer, SESSION_USER_KEY};

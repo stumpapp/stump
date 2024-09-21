@@ -16,7 +16,7 @@ axum-extra = { version = "0.9.3", features = [
   "typed-header",
   "query"
 ] }
-base64 = "0.22.0"
+base64 = "0.22.1"
 bcrypt = { workspace = true }
 cli = { path = "../../crates/cli" }
 chrono = { workspace = true }
@@ -24,7 +24,7 @@ futures-util = { workspace = true }
 hyper = "0.14.27"
 jsonwebtoken = "9.3.0"
 linemux = { git = "https://github.com/jmagnuson/linemux.git", rev = "acaafc602afac5d7a9cd3e087dafc937cac1e364" }
-local-ip-address = "0.6.1"
+local-ip-address = "0.6.2"
 once_cell = { workspace = true }
 prisma-client-rust = { workspace = true }
 rand = "0.8.5"
@@ -67,3 +67,5 @@ openssl = { version = "0.10.61", features = ["vendored"] }
 [target.x86_64-unknown-linux-musl.dependencies]
 openssl = { version = "0.10.61", features = ["vendored"] }
 
+[target.'cfg(target_os = "windows")'.dependencies]
+windows = { version = "0.58.0", features = ["Win32_Storage_FileSystem"] }

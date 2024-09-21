@@ -1,2 +1,5 @@
 export * from './auth-api'
+export * from './bookclub-api'
+export * from './emailer-api'
+export * from './epub-api'
 export * from './library-api'

@@ -31,6 +31,7 @@ pub mod env_keys {
 	pub const SESSION_EXPIRY_INTERVAL_KEY: &str = "SESSION_EXPIRY_CLEANUP_INTERVAL";
 	pub const MAX_SCANNER_CONCURRENCY_KEY: &str = "STUMP_MAX_SCANNER_CONCURRENCY";
 	pub const MAX_THUMBNAIL_CONCURRENCY_KEY: &str = "STUMP_MAX_THUMBNAIL_CONCURRENCY";
+	pub const MAX_IMAGE_UPLOAD_SIZE_KEY: &str = "STUMP_MAX_IMAGE_UPLOAD_SIZE";
 }
 use env_keys::*;
 
@@ -41,10 +42,11 @@ pub mod defaults {
 	pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
 	pub const DEFAULT_MAX_SCANNER_CONCURRENCY: usize = 200;
 	pub const DEFAULT_MAX_THUMBNAIL_CONCURRENCY: usize = 50;
+	pub const DEFAULT_MAX_IMAGE_UPLOAD_SIZE: usize = 20 * 1024 * 1024; // 20 MB
 }
 use defaults::*;
 
-/// Represents the configuration of a Stump application. This file is generated at startup
+/// Represents the configuration of a Stump application. This struct is generated at startup
 /// using a TOML file, environment variables, or both and is input when creating a `StumpCore`
 /// instance.
 ///
@@ -164,6 +166,12 @@ pub struct StumpConfig {
 	#[default_value(DEFAULT_MAX_THUMBNAIL_CONCURRENCY)]
 	#[env_key(MAX_THUMBNAIL_CONCURRENCY_KEY)]
 	pub max_thumbnail_concurrency: usize,
+
+	/// The maxium file size, in bytes, of images that can be uploaded, e.g., as thumbnails for users,
+	/// libraries, series, or media.
+	#[default_value(DEFAULT_MAX_IMAGE_UPLOAD_SIZE)]
+	#[env_key(MAX_IMAGE_UPLOAD_SIZE_KEY)]
+	pub max_image_upload_size: usize,
 }
 
 impl StumpConfig {
@@ -307,6 +315,7 @@ mod tests {
 			expired_session_cleanup_interval: None,
 			max_scanner_concurrency: None,
 			max_thumbnail_concurrency: None,
+			max_image_upload_size: None,
 		};
 		partial_config.apply_to_config(&mut config);
 
@@ -342,6 +351,7 @@ mod tests {
 				),
 				max_scanner_concurrency: Some(DEFAULT_MAX_SCANNER_CONCURRENCY),
 				max_thumbnail_concurrency: Some(DEFAULT_MAX_THUMBNAIL_CONCURRENCY),
+				max_image_upload_size: Some(DEFAULT_MAX_IMAGE_UPLOAD_SIZE)
 			}
 		);
 
@@ -392,6 +402,7 @@ mod tests {
 						custom_templates_dir: None,
 						max_scanner_concurrency: DEFAULT_MAX_SCANNER_CONCURRENCY,
 						max_thumbnail_concurrency: DEFAULT_MAX_THUMBNAIL_CONCURRENCY,
+						max_image_upload_size: DEFAULT_MAX_IMAGE_UPLOAD_SIZE,
 					}
 				);
 			},

@@ -57,7 +57,7 @@ use crate::{
 		LibraryFilter, LibraryRelationFilter, MediaFilter, SeriesFilter,
 	},
 	middleware::auth::{auth_middleware, RequestContext},
-	utils::{http::ImageResponse, validate_image_upload},
+	utils::{http::ImageResponse, validate_and_load_image},
 };
 
 use super::{
@@ -107,7 +107,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 								.patch(patch_library_thumbnail)
 								.post(replace_library_thumbnail)
 								// TODO: configurable max file size
-								.layer(DefaultBodyLimit::max(20 * 1024 * 1024)) // 20MB
+								.layer(DefaultBodyLimit::max(
+									app_state.config.max_image_upload_size,
+								))
 								.delete(delete_library_thumbnails),
 						)
 						.route("/generate", post(generate_library_thumbnails)),
@@ -775,7 +777,9 @@ async fn replace_library_thumbnail(
 		.await?
 		.ok_or(APIError::NotFound(String::from("Library not found")))?;
 
-	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
+	let (content_type, bytes) =
+		validate_and_load_image(&mut upload, Some(ctx.config.max_image_upload_size))
+			.await?;
 
 	let ext = content_type.extension();
 	let library_id = library.id;

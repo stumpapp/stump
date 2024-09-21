@@ -35,7 +35,7 @@ use crate::{
 	errors::{APIError, APIResult},
 	filter::{chain_optional_iter, UserQueryRelation},
 	middleware::auth::{auth_middleware, RequestContext},
-	utils::{get_session_user, http::ImageResponse, validate_image_upload},
+	utils::{get_session_user, http::ImageResponse, validate_and_load_image},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -73,9 +73,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				)
 				.route(
 					"/avatar",
-					get(get_user_avatar)
-						.post(upload_user_avatar)
-						.layer(DefaultBodyLimit::max(20 * 1024 * 1024)), // 20MB
+					get(get_user_avatar).post(upload_user_avatar).layer(
+						DefaultBodyLimit::max(app_state.config.max_image_upload_size),
+					),
 				),
 		)
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
@@ -1162,7 +1162,9 @@ async fn upload_user_avatar(
 		.await?
 		.ok_or(APIError::NotFound("User not found".to_string()))?;
 
-	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
+	let (content_type, bytes) =
+		validate_and_load_image(&mut upload, Some(ctx.config.max_image_upload_size))
+			.await?;
 
 	let ext = content_type.extension();
 	let username = user.username.clone();

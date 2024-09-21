@@ -17,7 +17,7 @@ mod tests {
 		NamedType,
 	};
 
-	use crate::config::jwt::CreatedToken;
+	use crate::{config::jwt::CreatedToken, filter::*};
 
 	use super::v1::{
 		auth::*, book_club::*, emailer::*, epub::*, job::*, library::*, media::*,
@@ -95,6 +95,20 @@ mod tests {
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<PatchEmailDevice>()?).as_bytes())?;
 
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<FilterableQuery<()>>()?).as_bytes(),
+		// )?;
+
+		file.write_all(format!("{}\n\n", ts_export::<LibraryFilter>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<LibraryRelationFilter>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<SeriesBaseFilter>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<SeriesMedataFilter>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<ValueOrRange<String>>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<Range<String>>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<CreateLibrary>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UpdateLibrary>()?).as_bytes())?;
 		file.write_all(

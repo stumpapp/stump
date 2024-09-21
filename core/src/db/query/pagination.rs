@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use specta::Type;
 use tracing::trace;
 use utoipa::ToSchema;
@@ -29,6 +30,7 @@ pub struct CursorQuery {
 }
 
 #[derive(Default, Debug, Deserialize, Serialize, Type, ToSchema)]
+#[skip_serializing_none]
 pub struct PaginationQuery {
 	pub zero_based: Option<bool>,
 	pub page: Option<u32>,

@@ -1,4 +1,4 @@
-import { Library } from '@stump/types'
+import { Library, LibraryFilter, LibraryRelationFilter, PaginationQuery } from '@stump/types'
 
 import { APIBase } from '../base'
 import { ClassQueryKeys, PageableAPIResult } from './types'
@@ -12,7 +12,7 @@ export class LibraryAPI extends APIBase {
 	 * Fetch all libraries
 	 */
 	async get(
-		params: Record<string, unknown> = { unpaged: true },
+		params: LibraryFilter & LibraryRelationFilter & PaginationQuery,
 	): Promise<PageableAPIResult<Library[]>> {
 		const { data: libraries } = await this.api.axios.get<PageableAPIResult<Library[]>>(
 			libraryURL('', params),

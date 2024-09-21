@@ -3,6 +3,8 @@
 
 // CORE TYPE GENERATION
 
+export type PaginationQuery = { zero_based: boolean | null; page: number | null; page_size: number | null; cursor: string | null; limit: BigInt | null }
+
 /**
  * An event that is emitted by the core and consumed by a client
  */
@@ -319,6 +321,8 @@ export type LoginResponse = User | { for_user: User; token: CreatedToken }
 
 export type LoginOrRegisterArgs = { username: string; password: string }
 
+export type AuthenticationOptions = { generate_token?: boolean; create_session?: boolean }
+
 export type CreateUser = { username: string; password: string; permissions?: UserPermission[]; age_restriction: AgeRestriction | null; max_sessions_allowed?: number | null }
 
 export type UpdateUser = { username: string; password: string | null; avatar_url: string | null; permissions?: UserPermission[]; age_restriction: AgeRestriction | null; max_sessions_allowed?: number | null }
@@ -349,6 +353,18 @@ export type CreateOrUpdateEmailDevice = { name: string; email: string; forbidden
  * Patch an existing email device by its ID
  */
 export type PatchEmailDevice = { name: string | null; email: string | null; forbidden: boolean | null }
+
+export type LibraryFilter = ({ id?: string[]; name?: string[]; path?: string[]; search?: string | null }) & ({ series?: SeriesBaseFilter | null })
+
+export type LibraryRelationFilter = { series?: SeriesBaseFilter | null }
+
+export type SeriesBaseFilter = { id?: string[]; name?: string[]; path?: string[]; search?: string | null; metadata?: SeriesMedataFilter | null }
+
+export type SeriesMedataFilter = { meta_type?: string[]; publisher?: string[]; status?: string[]; age_rating?: number | null; volume?: ValueOrRange<number> | null }
+
+export type ValueOrRange<T> = T | Range<T>
+
+export type Range<T> = { from?: T | null; to?: T | null }
 
 export type CreateLibrary = { name: string; path: string; description?: string | null; tags?: string[] | null; scan_mode?: LibraryScanMode | null; config?: LibraryConfig | null }
 

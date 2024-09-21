@@ -277,6 +277,8 @@ mod tests {
 
 		file.write_all(b"// CORE TYPE GENERATION\n\n")?;
 
+		file.write_all(format!("{}\n\n", ts_export::<PaginationQuery>()?).as_bytes())?;
+
 		file.write_all(format!("{}\n\n", ts_export::<CoreEvent>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<EntityVisibility>()?).as_bytes())?;

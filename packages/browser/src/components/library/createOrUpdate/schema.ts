@@ -61,6 +61,15 @@ const resizeOptionsSchema = z
 export const buildSchema = (existingLibraries: Library[], library?: Library) =>
 	z.object({
 		convert_rar_to_zip: z.boolean().default(false),
+		default_reading_dir: z.enum(['ltr', 'rtl']).default('ltr').optional(),
+		default_reading_image_scale_fit: z
+			.enum(['height', 'width', 'none'])
+			.default('height')
+			.optional(),
+		default_reading_mode: z
+			.enum(['paged', 'continuous:vertical', 'continuous:horizontal'])
+			.default('paged')
+			.optional(),
 		description: z.string().nullable().optional(),
 		generate_file_hashes: z.boolean().default(false),
 		hard_delete_conversions: z.boolean().default(false),
@@ -130,6 +139,9 @@ export type CreateOrUpdateLibrarySchema = z.infer<ReturnType<typeof buildSchema>
  */
 export const formDefaults = (library?: Library): CreateOrUpdateLibrarySchema => ({
 	convert_rar_to_zip: library?.config.convert_rar_to_zip ?? false,
+	default_reading_dir: library?.config.default_reading_dir || 'ltr',
+	default_reading_image_scale_fit: library?.config.default_reading_image_scale_fit || 'height',
+	default_reading_mode: library?.config.default_reading_mode || 'paged',
 	description: library?.description,
 	generate_file_hashes: library?.config.generate_file_hashes ?? false,
 	hard_delete_conversions: library?.config.hard_delete_conversions ?? false,

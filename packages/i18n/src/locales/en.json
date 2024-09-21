@@ -150,6 +150,24 @@
 				"label": "Tags",
 				"description": "Used to categorize your library or enforce access rules"
 			},
+			"readingSettings": {
+				"section": {
+					"heading": "Reading settings",
+					"description": "Default reader settings to use for books"
+				},
+				"imageScaling": {
+					"label": "Image scaling",
+					"description": "How the image-based reader scales images to the page"
+				},
+				"readingMode": {
+					"label": "Default reader",
+					"description": "The default reader to use for image-based books"
+				},
+				"readingDirection": {
+					"label": "Reading direction",
+					"description": "Which direction the reader progresses through pages"
+				}
+			},
 			"thumbnailConfig": {
 				"section": {
 					"heading": {
@@ -346,6 +364,7 @@
 			"basics": "Basics",
 			"options": {
 				"general": "General",
+				"reading": "Reading",
 				"scanning": "Scanning",
 				"thumbnails": "Thumbnails",
 				"ignore-rules": "Ignore Rules",
@@ -364,6 +383,10 @@
 			"form": {
 				"submit": "Update library"
 			}
+		},
+		"options/reading": {
+			"title": "Reading",
+			"description": "The default reader settings to use for books in this library. Any book can override these settings"
 		},
 		"options/scanning": {
 			"title": "Scanner Behavior",

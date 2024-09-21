@@ -1,12 +1,11 @@
 import { BookImageScaling } from '@stump/client'
 import { cn, usePrevious } from '@stump/components'
 import { Media } from '@stump/types'
-import { useOverlayScrollbars } from 'overlayscrollbars-react'
 import React, { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { ScrollerProps, Virtuoso } from 'react-virtuoso'
 
-import { useTheme } from '@/hooks/useTheme'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 export type ContinuousReaderOrientation = 'horizontal' | 'vertical'
@@ -52,8 +51,8 @@ export default function ContinuousScrollReader({
 	onProgressUpdate,
 	onPageChanged,
 }: Props) {
+	const [search, setSearch] = useSearchParams()
 	const rootRef = useRef<HTMLDivElement | null>(null)
-	const [scroller, setScroller] = useState<HTMLElement | Window | null>(null)
 	/**
 	 * The currently visible range of index(es) on the page
 	 */
@@ -82,31 +81,6 @@ export default function ContinuousScrollReader({
 			onPageChanged?.(page)
 		}
 	}, [currentIndex, onProgressUpdate, onPageChanged, pageDidChange])
-	const { isDarkVariant } = useTheme()
-
-	const [initialize] = useOverlayScrollbars({
-		defer: true,
-		options: {
-			scrollbars: {
-				theme: isDarkVariant ? 'os-theme-light' : 'os-theme-dark',
-			},
-		},
-	})
-
-	useEffect(() => {
-		const { current: root } = rootRef
-
-		if (scroller && root) {
-			// TODO: this fucks up the virtualization...
-			// initialize({
-			// 	elements: {
-			// 		// @ts-expect-error: types are wrong
-			// 		viewport: scroller,
-			// 	},
-			// 	target: root,
-			// })
-		}
-	}, [initialize, scroller])
 
 	const containerStyle = useCallback(
 		({ height, width }: { height: number; width: number }) =>
@@ -114,13 +88,20 @@ export default function ContinuousScrollReader({
 		[orientation],
 	)
 
-	// TODO: use page dimensions to calculate the height of the page
+	useEffect(() => {
+		const hasPageURL = !!search.get('page')
+		if (hasPageURL) {
+			search.delete('page')
+			setSearch(search)
+		}
+	}, [search, setSearch])
+
+	// TODO: use page dimensions to calculate the height of the page (if horizontal supports double spread)
 	return (
 		<div className="flex flex-1" data-overlayscrollbars-initialize ref={rootRef}>
 			<AutoSizer>
 				{({ height, width }) => (
 					<Virtuoso
-						scrollerRef={setScroller}
 						style={{ height, width }}
 						useWindowScroll={false}
 						horizontalDirection={orientation === 'horizontal'}
@@ -152,10 +133,10 @@ export default function ContinuousScrollReader({
 				)}
 			</AutoSizer>
 
-			{/* TODO: config for showing/hiding this */}
-			<div className="fixed bottom-2 left-2 z-50 rounded-lg bg-black bg-opacity-75 px-2 py-1 text-white">
+			{/* TODO: this is actually incorrect, so lets just not display until it works right */}
+			{/* <div className="fixed bottom-2 left-2 z-50 rounded-lg bg-black bg-opacity-75 px-2 py-1 text-white">
 				{visibleRange.startIndex + 1}
-			</div>
+			</div> */}
 		</div>
 	)
 }

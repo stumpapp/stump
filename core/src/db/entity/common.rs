@@ -38,6 +38,15 @@ impl FromStr for ReadingDirection {
 	}
 }
 
+impl fmt::Display for ReadingDirection {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		match self {
+			ReadingDirection::LeftToRight => write!(f, "ltr"),
+			ReadingDirection::RightToLeft => write!(f, "rtl"),
+		}
+	}
+}
+
 #[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub enum ReadingMode {
 	#[default]
@@ -62,6 +71,16 @@ impl FromStr for ReadingMode {
 	}
 }
 
+impl fmt::Display for ReadingMode {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		match self {
+			ReadingMode::Paged => write!(f, "paged"),
+			ReadingMode::ContinuousVertical => write!(f, "continuous:vertical"),
+			ReadingMode::ContinuousHorizontal => write!(f, "continuous:horizontal"),
+		}
+	}
+}
+
 #[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub enum ReadingImageScaleFit {
 	#[default]
@@ -82,6 +101,16 @@ impl FromStr for ReadingImageScaleFit {
 			"width" => Ok(ReadingImageScaleFit::Width),
 			"none" | "original" => Ok(ReadingImageScaleFit::None),
 			_ => Err(format!("\"{s}\" is not a valid image scale fit")),
+		}
+	}
+}
+
+impl fmt::Display for ReadingImageScaleFit {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		match self {
+			ReadingImageScaleFit::Height => write!(f, "height"),
+			ReadingImageScaleFit::Width => write!(f, "width"),
+			ReadingImageScaleFit::None => write!(f, "none"),
 		}
 	}
 }

@@ -9,6 +9,7 @@
 	"license": "MIT",
 	"devDependencies": {
 		"@types/qs": "^6.9.14",
+		"ts-essentials": "^10.0.2",
 		"typescript": "^5.4.5"
 	},
 	"dependencies": {

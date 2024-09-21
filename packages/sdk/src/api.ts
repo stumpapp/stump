@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from 'axios'
 
 import { AuthenticationMethod, Configuration } from './configuration'
+import { AuthAPI, LibraryAPI } from './controllers'
 import { formatApiURL } from './utils'
 
 export type ApiVersion = 'v1'
@@ -12,7 +13,6 @@ export class Api {
 	private baseURL: string
 	private configuration: Configuration
 	private axiosInstance: AxiosInstance
-
 	private accessToken?: string
 
 	/**
@@ -28,20 +28,20 @@ export class Api {
 		})
 	}
 
-	/**
-	 * Get a new access token for the API
-	 * @param username The username to authenticate with
-	 * @param password The password to authenticate with
-	 * @returns A promise that resolves when the token is received
-	 * @throws An error if the token cannot be received
-	 */
-	async token(username: string, password: string): Promise<void> {
-		const response = await this.axiosInstance.post('/token', {
-			password,
-			username,
-		})
+	get isTokenAuth(): boolean {
+		return this.configuration.authenticationMethod === 'token'
+	}
 
-		this.accessToken = response.data.accessToken
+	get axios(): AxiosInstance {
+		return this.axiosInstance
+	}
+
+	get token(): string | undefined {
+		return this.accessToken
+	}
+
+	set token(token: string) {
+		this.accessToken = token
 	}
 
 	/**
@@ -50,6 +50,16 @@ export class Api {
 	get serviceURL(): string {
 		return formatApiURL(this.baseURL, this.configuration.apiVersion)
 	}
+	/**
+	 * Set the URL of the Stump service
+	 */
+	set serviceURL(url: string) {
+		this.baseURL = url
+		this.axiosInstance = axios.create({
+			baseURL: this.serviceURL,
+			withCredentials: this.configuration.authenticationMethod === 'session',
+		})
+	}
 
 	/**
 	 * Get the current access token for the API formatted as a Bearer token
@@ -57,4 +67,20 @@ export class Api {
 	get authorizationHeader(): string | undefined {
 		return this.accessToken ? `Bearer ${this.accessToken}` : undefined
 	}
+
+	/**
+	 * Get an instance for the AuthAPI
+	 */
+	get auth(): AuthAPI {
+		return new AuthAPI(this)
+	}
+
+	get library(): LibraryAPI {
+		return new LibraryAPI(this)
+	}
 }
+
+/*
+const [api] = useSDK()
+const {data} = useQuery([api.library.keys.get, {unpaged: true}], () => api.library.get())
+*/

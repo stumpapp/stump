@@ -222,3 +222,5 @@ export class Api {
 		return new UserAPI(this)
 	}
 }
+
+// TODO: look into https://github.com/TanStack/query/issues/3228#issuecomment-2088266007

@@ -13,6 +13,7 @@ import {
 } from '@stump/types'
 
 import { APIBase } from '../base'
+import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 
 /**
@@ -178,5 +179,26 @@ export class UserAPI extends APIBase {
 	 */
 	async deleteUserSessions(forUser: string): Promise<void> {
 		await this.axios.delete(userURL(`${forUser}/sessions`))
+	}
+
+	get keys(): ClassQueryKeys<InstanceType<typeof UserAPI>> {
+		return {
+			create: 'user.create',
+			delete: 'user.delete',
+			deleteLoginActivity: 'user.deleteLoginActivity',
+			deleteUserSessions: 'user.deleteUserSessions',
+			get: 'user.get',
+			getByID: 'user.getByID',
+			getUserPreferences: 'user.getUserPreferences',
+			lockUser: 'user.lockUser',
+			loginActivity: 'user.loginActivity',
+			navigationArrangement: 'user.navigationArrangement',
+			preferences: 'user.preferences',
+			update: 'user.update',
+			updateNavigationArrangement: 'user.updateNavigationArrangement',
+			updatePreferences: 'user.updatePreferences',
+			updateUserPreferences: 'user.updateUserPreferences',
+			updateViewer: 'user.updateViewer',
+		}
 	}
 }

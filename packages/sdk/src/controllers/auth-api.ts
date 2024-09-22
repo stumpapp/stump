@@ -1,4 +1,4 @@
-import { LoginResponse, User } from '@stump/types'
+import { LoginOrRegisterArgs, LoginResponse, User } from '@stump/types'
 
 import { APIBase } from '../base'
 import { ClassQueryKeys } from './types'
@@ -29,7 +29,7 @@ export class AuthAPI extends APIBase {
 	 * Authenticate a user with the given username and password. This will either rely on session-based
 	 * authentication or token-based authentication, depending on the API configuration.
 	 */
-	async login(username: string, password: string): Promise<User> {
+	async login({ username, password }: LoginOrRegisterArgs): Promise<User> {
 		const response = await this.api.axios.post<LoginResponse>(
 			authURL(
 				'/login',
@@ -57,6 +57,18 @@ export class AuthAPI extends APIBase {
 	}
 
 	/**
+	 * Register a new user with the given username and password
+	 */
+	async register({ username, password }: LoginOrRegisterArgs): Promise<User> {
+		const response = await this.api.axios.post<User>(authURL('/register'), {
+			password,
+			username,
+		})
+
+		return response.data
+	}
+
+	/**
 	 * Log out the currently authenticated user
 	 */
 	async logout(): Promise<void> {
@@ -71,6 +83,6 @@ export class AuthAPI extends APIBase {
 	 * The query keys for the auth API, used for query caching on a client (e.g. react-query)
 	 */
 	get keys(): ClassQueryKeys<InstanceType<typeof AuthAPI>> {
-		return { login: 'auth.login', logout: 'auth.logout', me: 'auth.me' }
+		return { login: 'auth.login', logout: 'auth.logout', me: 'auth.me', register: 'auth.register' }
 	}
 }

@@ -2,7 +2,7 @@ import './styles/index.css'
 import '@stump/components/styles/overrides.css'
 
 import { initializeApi } from '@stump/api'
-import { StumpClientContextProvider, StumpClientProps } from '@stump/client'
+import { SDKProvider, StumpClientContextProvider, StumpClientProps } from '@stump/client'
 import { defaultContext } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useEffect, useState } from 'react'
@@ -103,17 +103,19 @@ function RouterContainer(props: StumpClientProps) {
 	}
 
 	return (
-		<StumpClientContextProvider
-			onUnauthenticatedResponse={handleUnathenticatedResponse}
-			onConnectionWithServerChanged={handleConnectionWithServerChanged}
-			tauriRPC={props.tauriRPC}
-		>
-			{IS_DEVELOPMENT && <ReactQueryDevtools position="bottom-left" context={defaultContext} />}
-			<Helmet defaultTitle="Stump">
-				<title>Stump</title>
-			</Helmet>
-			<AppRouter />
-			<Notifications />
-		</StumpClientContextProvider>
+		<SDKProvider baseURL={baseUrl || ''} authMethod="session">
+			<StumpClientContextProvider
+				onUnauthenticatedResponse={handleUnathenticatedResponse}
+				onConnectionWithServerChanged={handleConnectionWithServerChanged}
+				tauriRPC={props.tauriRPC}
+			>
+				{IS_DEVELOPMENT && <ReactQueryDevtools position="bottom-left" context={defaultContext} />}
+				<Helmet defaultTitle="Stump">
+					<title>Stump</title>
+				</Helmet>
+				<AppRouter />
+				<Notifications />
+			</StumpClientContextProvider>
+		</SDKProvider>
 	)
 }

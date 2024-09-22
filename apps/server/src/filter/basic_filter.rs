@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use serde::{de, Deserialize, Serialize};
 use serde_untagged::UntaggedEnumVisitor;
+use serde_with::skip_serializing_none;
 use specta::Type;
 use stump_core::db::{
 	entity::{age_rating_deserializer, LogLevel},
@@ -148,14 +149,16 @@ pub struct LibraryFilter {
 	pub relation_filter: LibraryRelationFilter,
 }
 
-#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+#[skip_serializing_none]
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema, Type)]
 pub struct SeriesQueryRelation {
 	pub load_media: Option<bool>,
 	pub load_library: Option<bool>,
 	pub count_media: Option<bool>,
 }
 
-#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+#[skip_serializing_none]
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema, Type)]
 pub struct UserQueryRelation {
 	pub include_read_progresses: Option<bool>,
 	pub include_session_count: Option<bool>,

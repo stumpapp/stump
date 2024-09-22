@@ -386,6 +386,10 @@ export type ValueOrRange<T> = T | Range<T>
 
 export type Range<T> = { from?: T | null; to?: T | null }
 
+export type UserQueryRelation = { include_read_progresses?: boolean | null; include_session_count?: boolean | null; include_restrictions?: boolean | null }
+
+export type SeriesQueryRelation = { load_media?: boolean | null; load_library?: boolean | null; count_media?: boolean | null }
+
 export type CreateLibrary = { name: string; path: string; description?: string | null; tags?: string[] | null; scan_mode?: LibraryScanMode | null; config?: LibraryConfig | null }
 
 export type UpdateLibrary = { name: string; path: string; description?: string | null; emoji?: string | null; tags?: string[] | null; config: LibraryConfig; scan_mode?: LibraryScanMode | null }

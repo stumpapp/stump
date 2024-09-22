@@ -117,6 +117,10 @@ mod tests {
 			format!("{}\n\n", ts_export::<ValueOrRange<String>>()?).as_bytes(),
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<Range<String>>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<UserQueryRelation>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<SeriesQueryRelation>()?).as_bytes(),
+		)?;
 		file.write_all(format!("{}\n\n", ts_export::<CreateLibrary>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UpdateLibrary>()?).as_bytes())?;
 		file.write_all(

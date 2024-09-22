@@ -12,6 +12,7 @@ use crate::{
 // TODO: this entire file belongs in server app, not here. It is currently used by DAOs, which are
 // very much going BYE BYE
 
+#[skip_serializing_none]
 #[derive(
 	Clone, Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type, ToSchema,
 )]
@@ -21,6 +22,7 @@ pub struct PageQuery {
 	pub page_size: Option<u32>,
 }
 
+#[skip_serializing_none]
 #[derive(
 	Clone, Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type, ToSchema,
 )]
@@ -29,8 +31,8 @@ pub struct CursorQuery {
 	pub limit: Option<i64>,
 }
 
-#[derive(Default, Debug, Deserialize, Serialize, Type, ToSchema)]
 #[skip_serializing_none]
+#[derive(Default, Debug, Deserialize, Serialize, Type, ToSchema)]
 pub struct PaginationQuery {
 	pub zero_based: Option<bool>,
 	pub page: Option<u32>,

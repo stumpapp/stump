@@ -3,7 +3,7 @@
 
 // CORE TYPE GENERATION
 
-export type PaginationQuery = { zero_based: boolean | null; page: number | null; page_size: number | null; cursor: string | null; limit: BigInt | null }
+export type PaginationQuery = { zero_based?: boolean | null; page?: number | null; page_size?: number | null; cursor?: string | null; limit?: BigInt | null }
 
 /**
  * An event that is emitted by the core and consumed by a client
@@ -295,9 +295,9 @@ export type PageParams = { zero_based: boolean; page: number; page_size: number 
  */
 export type QueryOrder = { order_by: string; direction: Direction }
 
-export type PageQuery = { zero_based: boolean | null; page: number | null; page_size: number | null }
+export type PageQuery = { zero_based?: boolean | null; page?: number | null; page_size?: number | null }
 
-export type CursorQuery = { cursor: string | null; limit: BigInt | null }
+export type CursorQuery = { cursor?: string | null; limit?: BigInt | null }
 
 export type CursorInfo = { current_cursor: string | null; limit: BigInt | null; next_cursor: string | null }
 
@@ -313,13 +313,13 @@ export type StumpVersion = { semver: string; rev: string; compile_time: string }
 
 export type UpdateCheck = { current_semver: string; latest_semver: string; has_update_available: boolean }
 
+export type AuthenticationOptions = { generate_token?: boolean; create_session?: boolean }
+
 export type CreatedToken = { access_token: string; expires_at: string }
 
 export type LoginResponse = User | { for_user: User; token: CreatedToken }
 
 export type LoginOrRegisterArgs = { username: string; password: string }
-
-export type AuthenticationOptions = { generate_token?: boolean; create_session?: boolean }
 
 export type CreateUser = { username: string; password: string; permissions?: UserPermission[]; age_restriction: AgeRestriction | null; max_sessions_allowed?: number | null }
 
@@ -352,13 +352,35 @@ export type CreateOrUpdateEmailDevice = { name: string; email: string; forbidden
  */
 export type PatchEmailDevice = { name: string | null; email: string | null; forbidden: boolean | null }
 
-export type LibraryFilter = ({ id?: string[]; name?: string[]; path?: string[]; search?: string | null }) & ({ series?: SeriesBaseFilter | null })
+export type LogFilter = { level: LogLevel | null; job_id: string | null; timestamp?: ValueOrRange<string> | null }
+
+export type LibraryBaseFilter = { id?: string[]; name?: string[]; path?: string[]; search?: string | null }
 
 export type LibraryRelationFilter = { series?: SeriesBaseFilter | null }
+
+export type LibraryFilter = ({ id?: string[]; name?: string[]; path?: string[]; search?: string | null }) & ({ series?: SeriesBaseFilter | null })
+
+/**
+ * A user-friendly representation of a media's read_progress. This will map to
+ * a query condition that will be used to filter the media.
+ */
+export type ReadStatus = "Unread" | "Reading" | "Completed"
+
+export type MediaMetadataBaseFilter = { publisher?: string[]; genre?: string[]; character?: string[]; colorist?: string[]; writer?: string[]; penciller?: string[]; inker?: string[]; letterer?: string[]; editor?: string[]; age_rating?: number | null; year?: ValueOrRange<number> | null }
+
+export type MediaMetadataRelationFilter = { media?: MediaFilter | null }
+
+export type MediaMetadataFilter = ({ publisher?: string[]; genre?: string[]; character?: string[]; colorist?: string[]; writer?: string[]; penciller?: string[]; inker?: string[]; letterer?: string[]; editor?: string[]; age_rating?: number | null; year?: ValueOrRange<number> | null }) & ({ media?: MediaFilter | null })
+
+export type MediaBaseFilter = { id?: string[]; name?: string[]; extension?: string[]; path?: string[]; read_status?: ReadStatus[]; tags?: string[]; search?: string | null; metadata?: MediaMetadataBaseFilter | null }
+
+export type MediaFilter = ({ id?: string[]; name?: string[]; extension?: string[]; path?: string[]; read_status?: ReadStatus[]; tags?: string[]; search?: string | null; metadata?: MediaMetadataBaseFilter | null }) & ({ series?: SeriesFilter | null })
 
 export type SeriesBaseFilter = { id?: string[]; name?: string[]; path?: string[]; search?: string | null; metadata?: SeriesMedataFilter | null }
 
 export type SeriesMedataFilter = { meta_type?: string[]; publisher?: string[]; status?: string[]; age_rating?: number | null; volume?: ValueOrRange<number> | null }
+
+export type SeriesFilter = ({ id?: string[]; name?: string[]; path?: string[]; search?: string | null; metadata?: SeriesMedataFilter | null }) & ({ library?: LibraryBaseFilter | null; media?: MediaBaseFilter | null })
 
 export type ValueOrRange<T> = T | Range<T>
 

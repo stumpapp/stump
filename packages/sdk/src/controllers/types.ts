@@ -16,9 +16,10 @@ export type CursorQueryParams = {
 	params?: Record<string, unknown>
 }
 
+// TODO(types): figure out how to generalize the postfix URL ignore, e.g. MyType<T extends string> = `${T}URL`
 export type ClassQueryKeys<T> = Omit<
 	{
 		[P in keyof T]: T[P] extends AnyFunction ? string : never
 	},
-	'keys' | 'thumbnailURL' | 'axios'
+	'keys' | 'thumbnailURL' | 'downloadURL' | 'bookPageURL' | 'axios'
 >

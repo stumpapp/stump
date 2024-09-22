@@ -92,16 +92,27 @@ mod tests {
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<PatchEmailDevice>()?).as_bytes())?;
 
-		// file.write_all(
-		// 	format!("{}\n\n", ts_export::<FilterableQuery<()>>()?).as_bytes(),
-		// )?;
-
-		file.write_all(format!("{}\n\n", ts_export::<LibraryFilter>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LogFilter>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LibraryBaseFilter>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<LibraryRelationFilter>()?).as_bytes(),
 		)?;
+		file.write_all(format!("{}\n\n", ts_export::<LibraryFilter>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<ReadStatus>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<MediaMetadataBaseFilter>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<MediaMetadataRelationFilter>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<MediaMetadataFilter>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<MediaBaseFilter>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<MediaFilter>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<SeriesBaseFilter>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<SeriesMedataFilter>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<SeriesFilter>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<ValueOrRange<String>>()?).as_bytes(),
 		)?;

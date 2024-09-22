@@ -1,9 +1,23 @@
-import { ClaimResponse } from '@stump/types'
 import axios, { AxiosInstance } from 'axios'
 
 import { AuthenticationMethod, Configuration } from './configuration'
-import { AuthAPI, BookClubAPI, EmailerAPI, EpubAPI, LibraryAPI } from './controllers'
-import { APIResult } from './controllers/types'
+import {
+	AuthAPI,
+	BookClubAPI,
+	EmailerAPI,
+	EpubAPI,
+	FilesystemAPI,
+	JobAPI,
+	LibraryAPI,
+	LogAPI,
+	MediaAPI,
+	MetadataAPI,
+	SeriesAPI,
+	ServerAPI,
+	SmartListAPI,
+	TagAPI,
+	UserAPI,
+} from './controllers'
 import { formatApiURL } from './utils'
 
 export type ApiVersion = 'v1'
@@ -49,20 +63,6 @@ export class Api {
 			return config
 		})
 		this.axiosInstance = instance
-	}
-
-	/**
-	 * Ping the Stump service to check if it is available
-	 */
-	async ping(): Promise<APIResult<string>> {
-		return this.axios.get('/ping')
-	}
-
-	/**
-	 * Check if the Stump instance has been claimed (at least one user who is the owner)
-	 */
-	async claimedStatus(): Promise<APIResult<ClaimResponse>> {
-		return this.axios.get('/claim')
 	}
 
 	/**
@@ -146,14 +146,79 @@ export class Api {
 	}
 
 	/**
+	 * Get an instance for the FilesystemAPI
+	 */
+	get filesystem(): FilesystemAPI {
+		return new FilesystemAPI(this)
+	}
+
+	/**
+	 * Get an instance for the JobAPI
+	 */
+	get job(): JobAPI {
+		return new JobAPI(this)
+	}
+
+	/**
 	 * Get an instance for the LibraryAPI
 	 */
 	get library(): LibraryAPI {
 		return new LibraryAPI(this)
 	}
-}
 
-/*
-const [api] = useSDK()
-const {data} = useQuery([api.library.keys.get, {unpaged: true}], () => api.library.get())
-*/
+	/**
+	 * Get an instance for the LogAPI
+	 */
+	get log(): LogAPI {
+		return new LogAPI(this)
+	}
+
+	/**
+	 * Get an instance for the MediaAPI
+	 */
+	get media(): MediaAPI {
+		return new MediaAPI(this)
+	}
+
+	/**
+	 * Get an instance for the MetadataAPI
+	 */
+	get metadata(): MetadataAPI {
+		return new MetadataAPI(this)
+	}
+
+	/**
+	 * Get an instance for the SeriesAPI
+	 */
+	get series(): SeriesAPI {
+		return new SeriesAPI(this)
+	}
+
+	/**
+	 * Get an instance for the ServerAPI
+	 */
+	get server(): ServerAPI {
+		return new ServerAPI(this)
+	}
+
+	/**
+	 * Get an instance for the SmartListAPI
+	 */
+	get smartlist(): SmartListAPI {
+		return new SmartListAPI(this)
+	}
+
+	/**
+	 * Get an instance for the TagAPI
+	 */
+	get tag(): TagAPI {
+		return new TagAPI(this)
+	}
+
+	/**
+	 * Get an instance for the UserAPI
+	 */
+	get user(): UserAPI {
+		return new UserAPI(this)
+	}
+}

@@ -198,7 +198,7 @@ pub struct SeriesBaseFilter {
 	pub metadata: Option<SeriesMedataFilter>,
 }
 
-#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema, Type)]
 pub struct SeriesRelationFilter {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub library: Option<LibraryBaseFilter>,
@@ -206,7 +206,7 @@ pub struct SeriesRelationFilter {
 	pub media: Option<MediaBaseFilter>,
 }
 
-#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema, Type)]
 pub struct SeriesFilter {
 	#[serde(flatten)]
 	pub base_filter: SeriesBaseFilter,
@@ -214,7 +214,7 @@ pub struct SeriesFilter {
 	pub relation_filter: SeriesRelationFilter,
 }
 
-#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema, Type)]
 pub struct MediaMetadataBaseFilter {
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub publisher: Vec<String>,
@@ -244,13 +244,13 @@ pub struct MediaMetadataBaseFilter {
 	pub year: Option<ValueOrRange<i32>>,
 }
 
-#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema, Type)]
 pub struct MediaMetadataRelationFilter {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub media: Option<MediaFilter>,
 }
 
-#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema, Type)]
 pub struct MediaMetadataFilter {
 	#[serde(flatten)]
 	pub base_filter: MediaMetadataBaseFilter,
@@ -260,7 +260,7 @@ pub struct MediaMetadataFilter {
 
 /// A user-friendly representation of a media's read_progress. This will map to
 /// a query condition that will be used to filter the media.
-#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema, Type)]
 pub enum ReadStatus {
 	#[default]
 	#[serde(alias = "unread")]
@@ -284,7 +284,7 @@ impl FromStr for ReadStatus {
 	}
 }
 
-#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema, Type)]
 pub struct MediaBaseFilter {
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub id: Vec<String>,
@@ -305,13 +305,13 @@ pub struct MediaBaseFilter {
 	pub metadata: Option<MediaMetadataBaseFilter>,
 }
 
-#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema, Type)]
 pub struct MediaRelationFilter {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub series: Option<SeriesFilter>,
 }
 
-#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema, Type)]
 pub struct MediaFilter {
 	#[serde(flatten)]
 	pub base_filter: MediaBaseFilter,
@@ -331,7 +331,7 @@ impl MediaFilter {
 	}
 }
 
-#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema, Type)]
 pub struct LogFilter {
 	pub level: Option<LogLevel>,
 	pub job_id: Option<String>,

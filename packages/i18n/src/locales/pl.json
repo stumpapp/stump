@@ -12,7 +12,7 @@
 			"validation": {
 				"missingUsername": "Nazwa użytkownika jest wymagana",
 				"missingPassword": "Hasło jest wymagane",
-				"usernameAlreadyExists": "Username already exists"
+				"usernameAlreadyExists": "Użytkownik o takiej nazwie już istnieje"
 			},
 			"labels": {
 				"username": "Nazwa użytkownika",
@@ -237,7 +237,7 @@
 			},
 			"scannerFeatures": {
 				"section": {
-					"heading": "Optional processing",
+					"heading": "Opcjonalne przetwarzanie",
 					"description": "Opt-in processing features for the scanner",
 					"disclaimer": "These features involve additional file reads which may slow down the scan process"
 				},

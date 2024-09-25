@@ -1,6 +1,7 @@
-import { epubApi } from '@stump/api'
 import type { Epub, EpubContent } from '@stump/types'
 import { useMemo, useState } from 'react'
+
+import { useSDK } from '@/sdk'
 
 import { useQuery } from '../client'
 
@@ -34,11 +35,12 @@ export interface UseEpubReturn {
 // FIXME: use options
 
 export function useEpub(id: string, _options?: EpubOptions, enabled?: boolean) {
+	const { sdk } = useSDK()
 	const [chapter] = useState(2)
 
 	const { isLoading: isFetchingBook, data: epub } = useQuery(
-		['getEpubById', id],
-		() => epubApi.getEpubById(id).then((res) => res.data),
+		[sdk.epub.keys.getByID, id],
+		() => sdk.epub.getByID(id),
 		{
 			enabled,
 		},
@@ -75,7 +77,7 @@ export function useEpub(id: string, _options?: EpubOptions, enabled?: boolean) {
 		invalidSources?.forEach((entry) => {
 			const src = entry.replace(
 				'src="',
-				`src="${epubApi.getEpubBaseUrl(id)}/${epub?.root_base ?? ''}/`,
+				`src="${sdk.epub.epubServiceURL(id)}/${epub?.root_base ?? ''}/`,
 			)
 			corrected = corrected.replace(entry, src)
 		})
@@ -85,7 +87,7 @@ export function useEpub(id: string, _options?: EpubOptions, enabled?: boolean) {
 		invlalidHrefs?.forEach((entry) => {
 			const href = entry.replace(
 				'href="',
-				`href="${epubApi.getEpubBaseUrl(id)}/${epub?.root_base ?? ''}/`,
+				`href="${sdk.epub.epubServiceURL(id)}/${epub?.root_base ?? ''}/`,
 			)
 			corrected = corrected.replace(entry, href)
 		})
@@ -102,8 +104,9 @@ export function useEpub(id: string, _options?: EpubOptions, enabled?: boolean) {
 }
 
 export function useEpubLazy(id: string) {
-	const { data: epub, ...restReturn } = useQuery(['getEpubById', id], () =>
-		epubApi.getEpubById(id).then((res) => res.data),
+	const { sdk } = useSDK()
+	const { data: epub, ...restReturn } = useQuery([sdk.epub.keys.getByID, id], () =>
+		sdk.epub.getByID(id),
 	)
 
 	return {

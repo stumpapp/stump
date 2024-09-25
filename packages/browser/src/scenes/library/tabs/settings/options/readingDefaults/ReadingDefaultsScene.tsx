@@ -1,7 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Form } from '@stump/components'
-import React, { useCallback } from 'react'
+import { Button, Form } from '@stump/components'
+import React, { useCallback, useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
+import { useDebouncedValue } from 'rooks'
 
 import {
 	buildSchema,
@@ -40,9 +41,45 @@ export default function ReadingDefaultsScene() {
 		resolver: zodResolver(buildSchema([], library)),
 	})
 
+	const formValues = form.watch([
+		'default_reading_dir',
+		'default_reading_image_scale_fit',
+		'default_reading_mode',
+	])
+	const didChange = useMemo(() => {
+		const config = library.config
+		const [dir, scale, mode] = formValues
+		return (
+			config.default_reading_dir !== dir ||
+			config.default_reading_image_scale_fit !== scale ||
+			config.default_reading_mode !== mode
+		)
+	}, [formValues, library])
+	const [debouncedDidChange] = useDebouncedValue(didChange, 500)
+
+	useEffect(() => {
+		if (debouncedDidChange) {
+			const el = document.getElementById('save-changes')
+			if (el) {
+				el.click()
+			}
+		}
+	}, [debouncedDidChange])
+
 	return (
-		<Form fieldsetClassName="flex flex-col gap-12 md:max-w-xl" form={form} onSubmit={handleSubmit}>
+		<Form
+			id="reading-defaults"
+			fieldsetClassName="flex flex-col gap-12 md:max-w-xl"
+			form={form}
+			onSubmit={handleSubmit}
+		>
 			<DefaultReadingSettings />
+
+			<div className="invisible hidden">
+				<Button id="save-changes" type="submit">
+					Save changes
+				</Button>
+			</div>
 		</Form>
 	)
 }

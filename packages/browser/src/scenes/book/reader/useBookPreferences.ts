@@ -1,14 +1,14 @@
-import { BookPreferences, NewReaderStore } from '@stump/client'
-import type { LibraryOptions, Media } from '@stump/types'
+import { BookPreferences, ReaderStore } from '@stump/client'
+import type { LibraryConfig, Media } from '@stump/types'
 import { useCallback, useMemo } from 'react'
 
-import { useNewReaderStore } from '@/stores'
+import { useReaderStore } from '@/stores'
 
 type Params = {
 	book: Media
 }
 
-type Return = Omit<NewReaderStore, 'bookPreferences' | 'setBookPreferences'> & {
+type Return = Omit<ReaderStore, 'bookPreferences' | 'setBookPreferences'> & {
 	bookPreferences: BookPreferences
 	setBookPreferences: (preferences: Partial<BookPreferences>) => void
 }
@@ -20,7 +20,7 @@ export function useBookPreferences({ book }: Params): Return {
 		setBookPreferences: storedSetBookPreferences,
 		settings,
 		setSettings,
-	} = useNewReaderStore((state) => ({
+	} = useReaderStore((state) => ({
 		bookPreferences: state.bookPreferences[book.id],
 		setBookPreferences: state.setBookPreferences,
 		setSettings: state.setSettings,
@@ -31,7 +31,7 @@ export function useBookPreferences({ book }: Params): Return {
 	 * The library configuration, used for picking default reader settings. This realistically
 	 * should never be null once the query resolves
 	 */
-	const libraryConfig = useMemo(() => book?.series?.library?.library_options, [book])
+	const libraryConfig = useMemo(() => book?.series?.library?.config, [book])
 
 	const bookPreferences = useMemo(
 		() => storedBookPreferences ?? defaultPreferences(libraryConfig),
@@ -56,7 +56,7 @@ export function useBookPreferences({ book }: Params): Return {
 	}
 }
 
-const defaultPreferences = (libraryConfig?: LibraryOptions): BookPreferences =>
+const defaultPreferences = (libraryConfig?: LibraryConfig): BookPreferences =>
 	({
 		brightness: 1,
 		imageScaling: {

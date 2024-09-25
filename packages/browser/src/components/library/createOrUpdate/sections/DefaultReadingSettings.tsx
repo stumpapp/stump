@@ -35,7 +35,7 @@ export default function DefaultReadingSettings() {
 							{ label: 'Left to right', value: 'ltr' },
 							{ label: 'Right to left', value: 'rtl' },
 						]}
-						{...form.register('default_reading_mode')}
+						{...form.register('default_reading_dir')}
 					/>
 					<Text size="xs" variant="muted">
 						{t(getKey('readingDirection.description'))}

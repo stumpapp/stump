@@ -108,7 +108,7 @@ function RouterContainer(props: StumpClientProps) {
 			onConnectionWithServerChanged={handleConnectionWithServerChanged}
 			tauriRPC={props.tauriRPC}
 		>
-			{/* {IS_DEVELOPMENT && <ReactQueryDevtools position="bottom-left" context={defaultContext} />} */}
+			{IS_DEVELOPMENT && <ReactQueryDevtools position="bottom-right" context={defaultContext} />}
 			<Helmet defaultTitle="Stump">
 				<title>Stump</title>
 			</Helmet>

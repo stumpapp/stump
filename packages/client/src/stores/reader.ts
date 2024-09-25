@@ -2,43 +2,6 @@ import type { ReadingDirection, ReadingMode } from '@stump/types'
 import { create } from 'zustand'
 import { createJSONStorage, devtools, persist, StateStorage } from 'zustand/middleware'
 
-type ReaderMode = 'continuous' | 'paged'
-
-type OldReaderStore = {
-	mode: ReaderMode
-	setMode: (mode: ReaderMode) => void
-	showToolBar: boolean
-	setShowToolBar: (show: boolean) => void
-	preloadAheadCount: number
-	preloadBehindCount: number
-	setPreloadAheadCount: (count: number) => void
-	setPreloadBehindCount: (count: number) => void
-}
-
-export const createReaderStore = (storage?: StateStorage) =>
-	create<OldReaderStore>()(
-		devtools(
-			persist(
-				(set) =>
-					({
-						mode: 'paged',
-						preloadAheadCount: 5,
-						preloadBehindCount: 3,
-						setMode: (mode) => set({ mode }),
-						setPreloadAheadCount: (count) => set({ preloadAheadCount: count }),
-						setPreloadBehindCount: (count) => set({ preloadBehindCount: count }),
-						setShowToolBar: (show) => set({ showToolBar: show }),
-						showToolBar: false,
-					}) as ReaderStore,
-				{
-					name: 'stump-reader-store',
-					storage: storage ? createJSONStorage(() => storage) : undefined,
-					version: 1,
-				},
-			),
-		),
-	)
-
 export type BookImageScalingFit = 'width' | 'height' | 'none'
 export type BookImageScaling = {
 	scaleToFit: BookImageScalingFit
@@ -94,7 +57,7 @@ type BookID = string
 /**
  * The store for the reader itself, less specific to a single book and more about the reader
  */
-type ReaderStore = {
+type ReaderSettings = {
 	/**
 	 * Whether the toolbar should be shown
 	 */
@@ -116,15 +79,15 @@ type ReaderStore = {
 	}
 }
 
-export type NewReaderStore = {
+export type ReaderStore = {
 	/**
 	 * The preferences for the reader
 	 */
-	settings: ReaderStore
+	settings: ReaderSettings
 	/**
 	 * A setter for the layout preferences
 	 */
-	setSettings: (settings: Partial<ReaderStore>) => void
+	setSettings: (settings: Partial<ReaderSettings>) => void
 	/**
 	 * The preferences for each book, if they have been overridden from the default preferences
 	 */
@@ -135,8 +98,8 @@ export type NewReaderStore = {
 	setBookPreferences: (id: BookID, preferences: BookPreferences) => void
 }
 
-export const createNewReaderStore = (storage?: StateStorage) =>
-	create<NewReaderStore>()(
+export const createReaderStore = (storage?: StateStorage) =>
+	create<ReaderStore>()(
 		devtools(
 			persist(
 				(set, get) =>
@@ -159,7 +122,7 @@ export const createNewReaderStore = (storage?: StateStorage) =>
 							},
 							showToolBar: false,
 						},
-					}) as NewReaderStore,
+					}) as ReaderStore,
 				{
 					name: 'stump-new-reader-store',
 					storage: storage ? createJSONStorage(() => storage) : undefined,

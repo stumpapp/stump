@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { getMediaPage } from '@stump/api'
 import { AspectRatio, cn } from '@stump/components'
 import { motion } from 'framer-motion'

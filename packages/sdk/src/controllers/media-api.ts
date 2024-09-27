@@ -2,14 +2,13 @@ import {
 	Media,
 	MediaFilter,
 	Pageable,
-	PaginationQuery,
 	PatchMediaThumbnail,
+	ProgressUpdateReturn,
 	PutMediaCompletionStatus,
-	QueryOrder,
 } from '@stump/types'
 
 import { APIBase } from '../base'
-import { ClassQueryKeys, CursorQueryParams } from './types'
+import { ClassQueryKeys, CursorQueryParams, FullQueryParams } from './types'
 import { createRouteURLHandler } from './utils'
 
 /**
@@ -28,7 +27,7 @@ export class MediaAPI extends APIBase {
 	/**
 	 * Fetch all media
 	 */
-	async get(params?: MediaFilter & PaginationQuery & QueryOrder): Promise<Pageable<Media[]>> {
+	async get(params?: FullQueryParams<MediaFilter>): Promise<Pageable<Media[]>> {
 		const { data: media } = await this.axios.get<Pageable<Media[]>>(mediaURL('', params))
 		return media
 	}
@@ -44,8 +43,8 @@ export class MediaAPI extends APIBase {
 	/**
 	 * Fetch media by ID
 	 */
-	async getByID(id: string): Promise<Media> {
-		const { data: media } = await this.axios.get<Media>(mediaURL(id))
+	async getByID(id: string, params?: MediaFilter): Promise<Media> {
+		const { data: media } = await this.axios.get<Media>(mediaURL(id, params))
 		return media
 	}
 
@@ -103,8 +102,9 @@ export class MediaAPI extends APIBase {
 	/**
 	 * Update the progress of a media entity
 	 */
-	async updateProgress(mediaID: string, page: number): Promise<void> {
-		await this.axios.put(mediaURL(`${mediaID}/progress/${page}`))
+	async updateProgress(mediaID: string, page: number): Promise<ProgressUpdateReturn> {
+		const { data } = await this.axios.put(mediaURL(`${mediaID}/progress/${page}`))
+		return data
 	}
 
 	/**

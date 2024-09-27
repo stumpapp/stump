@@ -37,7 +37,7 @@ export class SmartListAPI extends APIBase {
 	/**
 	 * Fetch a smartlist by its ID
 	 */
-	async getByID(id: string, params: SmartListRelationOptions): Promise<SmartList> {
+	async getByID(id: string, params?: SmartListRelationOptions): Promise<SmartList> {
 		const { data: smartList } = await this.axios.get<SmartList>(smartListURL(id, params))
 		return smartList
 	}
@@ -79,8 +79,9 @@ export class SmartListAPI extends APIBase {
 	/**
 	 * Delete a smartlist
 	 */
-	async delete(id: string): Promise<void> {
-		await this.axios.delete(smartListURL(id))
+	async delete(id: string): Promise<SmartList> {
+		const { data: deletedList } = await this.axios.delete(smartListURL(id))
+		return deletedList
 	}
 
 	/**

@@ -1,4 +1,4 @@
-import { APIError, Pageable } from '@stump/types'
+import { APIError, Pageable, PaginationQuery, QueryOrder } from '@stump/types'
 import { AnyFunction } from 'ts-essentials'
 
 export type APIResult<T> = import('axios').AxiosResponse<T, import('axios').AxiosError<APIError>>
@@ -15,6 +15,10 @@ export type CursorQueryParams = {
 	limit?: number
 	params?: Record<string, unknown>
 }
+
+export type QueryOrderParams = Partial<QueryOrder>
+
+export type FullQueryParams<Filters> = Filters & PaginationQuery & QueryOrderParams
 
 // TODO(types): figure out how to generalize the postfix URL ignore, e.g. MyType<T extends string> = `${T}URL`
 export type ClassQueryKeys<T> = Omit<

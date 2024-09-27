@@ -1,7 +1,7 @@
-import { JobSchedulerConfig, PersistedJob } from '@stump/types'
+import { JobSchedulerConfig, Pageable, PersistedJob } from '@stump/types'
 
 import { APIBase } from '../base'
-import { ClassQueryKeys } from './types'
+import { ClassQueryKeys, PagedQueryParams } from './types'
 import { createRouteURLHandler } from './utils'
 
 /**
@@ -20,8 +20,8 @@ export class JobAPI extends APIBase {
 	/**
 	 * Fetch all jobs
 	 */
-	async get(): Promise<PersistedJob[]> {
-		const { data: jobs } = await this.axios.get<PersistedJob[]>(jobURL(''))
+	async get(params: PagedQueryParams): Promise<Pageable<PersistedJob[]>> {
+		const { data: jobs } = await this.axios.get<Pageable<PersistedJob[]>>(jobURL('', params))
 		return jobs
 	}
 

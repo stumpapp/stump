@@ -30,7 +30,7 @@ mod tests {
 	where
 		T: NamedType,
 	{
-		export::<T>(&ExportConfiguration::new().bigint(BigIntExportBehavior::BigInt))
+		export::<T>(&ExportConfiguration::new().bigint(BigIntExportBehavior::Number))
 	}
 
 	#[test]

@@ -1,6 +1,6 @@
 import {
 	prefetchPagedSeries,
-	useLibraryByIdQuery,
+	useLibraryByID,
 	usePagedSeriesQuery,
 	useVisitLibrary,
 } from '@stump/client'
@@ -49,7 +49,7 @@ function LibrarySeriesScene() {
 		layoutMode: state.layout,
 		setLayout: state.setLayout,
 	}))
-	const { isLoading, library } = useLibraryByIdQuery(id)
+	const { isLoading, library } = useLibraryByID(id)
 	const {
 		filters,
 		ordering,

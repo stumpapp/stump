@@ -1,16 +1,8 @@
-import {
-	Media,
-	Pageable,
-	PaginationQuery,
-	PatchSeriesThumbnail,
-	QueryOrder,
-	Series,
-	SeriesFilter,
-} from '@stump/types'
+import { Media, Pageable, PatchSeriesThumbnail, Series, SeriesFilter } from '@stump/types'
 
 import { APIBase } from '../base'
 import { MediaAPI } from './media-api'
-import { ClassQueryKeys, CursorQueryParams, PagedQueryParams } from './types'
+import { ClassQueryKeys, CursorQueryParams, FullQueryParams, PagedQueryParams } from './types'
 import { createRouteURLHandler } from './utils'
 
 /**
@@ -29,7 +21,7 @@ export class SeriesAPI extends APIBase {
 	/**
 	 * Fetch all series
 	 */
-	async get(params?: SeriesFilter & PaginationQuery & QueryOrder): Promise<Pageable<Series[]>> {
+	async get(params?: FullQueryParams<SeriesFilter>): Promise<Pageable<Series[]>> {
 		const { data: series } = await this.axios.get<Pageable<Series[]>>(seriesURL('', params))
 		return series
 	}
@@ -45,8 +37,8 @@ export class SeriesAPI extends APIBase {
 	/**
 	 * Fetch series by ID
 	 */
-	async getByID(id: string): Promise<Series> {
-		const { data: series } = await this.axios.get<Series>(seriesURL(id))
+	async getByID(id: string, params?: SeriesFilter): Promise<Series> {
+		const { data: series } = await this.axios.get<Series>(seriesURL(id, params))
 		return series
 	}
 

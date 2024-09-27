@@ -1,5 +1,5 @@
 import { libraryQueryKeys } from '@stump/api'
-import { invalidateQueries, useEditLibraryMutation } from '@stump/client'
+import { invalidateQueries, useUpdateLibrary } from '@stump/client'
 import { UpdateLibrary } from '@stump/types'
 import React, { useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
@@ -22,7 +22,7 @@ export default function LibrarySettingsRouter() {
 	const { library } = useLibraryContext()
 
 	// TODO: do something with error OR change to promise and return in patch
-	const { editLibrary } = useEditLibraryMutation({
+	const { editLibrary } = useUpdateLibrary({
 		onSuccess: async () => {
 			await invalidateQueries({ exact: false, keys: [libraryQueryKeys.getLibraryById] })
 		},

@@ -6,6 +6,7 @@ import {
 	LibraryFilter,
 	LibraryStats,
 	LibraryStatsParams,
+	Pageable,
 	PaginationQuery,
 	PatchLibraryThumbnail,
 	UpdateLibrary,
@@ -14,7 +15,7 @@ import {
 } from '@stump/types'
 
 import { APIBase } from '../base'
-import { ClassQueryKeys, PageableAPIResult } from './types'
+import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 
 /**
@@ -33,8 +34,8 @@ export class LibraryAPI extends APIBase {
 	/**
 	 * Fetch all libraries
 	 */
-	async get(params?: LibraryFilter & PaginationQuery): Promise<PageableAPIResult<Library[]>> {
-		const { data: libraries } = await this.api.axios.get<PageableAPIResult<Library[]>>(
+	async get(params?: LibraryFilter & PaginationQuery): Promise<Pageable<Library[]>> {
+		const { data: libraries } = await this.api.axios.get<Pageable<Library[]>>(
 			libraryURL('', params),
 		)
 		return libraries
@@ -116,7 +117,10 @@ export class LibraryAPI extends APIBase {
 	/**
 	 * Fetch the stats for either a specific library or all libraries if no ID is provided
 	 */
-	async getStats({ id, ...params }: LibraryStatsParams & { id?: string }): Promise<LibraryStats> {
+	async getStats({
+		id,
+		...params
+	}: LibraryStatsParams & { id?: string } = {}): Promise<LibraryStats> {
 		const { data: stats } = await this.api.axios.get<LibraryStats>(
 			libraryURL(id ? `/${id}/stats` : '/stats', params),
 		)
@@ -192,8 +196,9 @@ export class LibraryAPI extends APIBase {
 	/**
 	 * Delete a library by ID
 	 */
-	async delete(id: string): Promise<void> {
-		await this.api.axios.delete(libraryURL(id))
+	async delete(id: string): Promise<Library> {
+		const { data: deleteLibrary } = await this.api.axios.delete(libraryURL(id))
+		return deleteLibrary
 	}
 
 	/**

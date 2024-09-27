@@ -334,6 +334,7 @@ impl MediaFilter {
 	}
 }
 
+#[skip_serializing_none]
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema, Type)]
 pub struct LogFilter {
 	pub level: Option<LogLevel>,

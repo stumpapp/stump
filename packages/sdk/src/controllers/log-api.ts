@@ -20,7 +20,7 @@ export class LogAPI extends APIBase {
 	/**
 	 * Fetch all logs
 	 */
-	async get(params?: LogFilter & PaginationQuery & QueryOrder): Promise<Pageable<Log[]>> {
+	async get(params?: LogFilter & PaginationQuery & Partial<QueryOrder>): Promise<Pageable<Log[]>> {
 		const { data: logs } = await this.axios.get<Pageable<Log[]>>(logURL('', params))
 		return logs
 	}

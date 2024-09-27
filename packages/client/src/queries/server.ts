@@ -1,29 +1,21 @@
-import { serverApi, serverQueryKeys } from '@stump/api'
+import { useSDK } from '@/sdk'
 
 import { useQuery } from '../client'
 
 export function useStumpVersion() {
-	const { data: version } = useQuery(
-		['stumpVersion'],
-		async () => {
-			const { data } = await serverApi.getStumpVersion()
-			return data
+	const { sdk } = useSDK()
+	const { data: version } = useQuery([sdk.server.keys.version], sdk.server.version, {
+		onError(err) {
+			console.error('Failed to fetch Stump API version:', err)
 		},
-		{
-			onError(err) {
-				console.error('Failed to fetch Stump API version:', err)
-			},
-		},
-	)
+	})
 
 	return version
 }
 
 export function useCheckForServerUpdate() {
-	const { data, isLoading } = useQuery([serverQueryKeys.checkForServerUpdate], async () => {
-		const { data } = await serverApi.checkForServerUpdate()
-		return data
-	})
+	const { sdk } = useSDK()
+	const { data, isLoading } = useQuery([sdk.server.keys.checkUpdate], sdk.server.checkUpdate)
 
 	return {
 		isLoading,

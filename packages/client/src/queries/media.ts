@@ -1,82 +1,99 @@
-import { mediaApi, mediaQueryKeys } from '@stump/api'
-import type { Media, ProgressUpdateReturn } from '@stump/types'
+import { QueryOrderParams } from '@stump/sdk'
+import type { Media, MediaFilter, ProgressUpdateReturn } from '@stump/types'
 import { AxiosError } from 'axios'
+import { useCallback } from 'react'
+
+import { useSDK } from '@/sdk'
 
 import {
 	type CursorQueryOptions,
 	MutationOptions,
 	PageQueryOptions,
 	type QueryOptions,
+	TypedPageQueryOptions,
 	useCursorQuery,
 	useMutation,
 	usePageQuery,
 } from '../client'
 import { queryClient, useQuery } from '../client'
 
-export const prefetchMedia = async (id: string) => {
-	await queryClient.prefetchQuery(
-		[mediaQueryKeys.getMediaById, id],
-		async () => {
-			const { data } = await mediaApi.getMediaById(id)
-			return data
-		},
-		{
-			staleTime: 10 * 1000,
-		},
+export const usePrefetchMediaByID = async (id: string) => {
+	const { sdk } = useSDK()
+	const prefetch = useCallback(
+		() =>
+			queryClient.prefetchQuery([sdk.media.keys.getByID, id], async () => sdk.media.getByID(id), {
+				staleTime: 10 * 1000,
+			}),
+		[sdk.media, id],
 	)
+	return { prefetch }
 }
 
-export const prefetchLibraryMedia = (id: string) =>
-	queryClient.prefetchQuery(
-		[
-			mediaQueryKeys.getMedia,
-			1,
-			20,
-			{
-				series: {
-					library: {
-						id,
-					},
-				},
-			},
-		],
-		async () => {
-			const { data } = await mediaApi.getMedia({
-				page: 1,
-				page_size: 20,
-				series: {
-					library: {
-						id,
-					},
-				},
-			})
-			return data
-		},
+export const usePrefetchLibraryBooks = (libraryID: string) => {
+	const { sdk } = useSDK()
+
+	const prefetch = useCallback(
+		() =>
+			queryClient.prefetchQuery(
+				[
+					sdk.media.keys.get,
+					1,
+					20,
+					{
+						series: {
+							library: {
+								id: [libraryID],
+							},
+						},
+					} satisfies MediaFilter,
+				],
+				() =>
+					sdk.media.get({
+						page: 1,
+						page_size: 20,
+						series: {
+							library: {
+								id: [libraryID],
+							},
+						},
+					}),
+			),
+		[sdk.media, libraryID],
 	)
 
-export const prefetchSeriesMedia = (id: string) =>
-	queryClient.prefetchQuery(
-		[
-			mediaQueryKeys.getMedia,
-			1,
-			20,
-			{
-				series: {
-					id,
-				},
-			},
-		],
-		async () => {
-			const { data } = await mediaApi.getMedia({
-				page: 1,
-				page_size: 20,
-				series: {
-					id,
-				},
-			})
-			return data
-		},
+	return { prefetch }
+}
+
+export const usePrefetchSeriesBooks = (id: string) => {
+	const { sdk } = useSDK()
+
+	const prefetch = useCallback(
+		() =>
+			queryClient.prefetchQuery(
+				[
+					sdk.media.keys.get,
+					1,
+					20,
+					{
+						series: {
+							id: [id],
+						},
+					} satisfies MediaFilter,
+				],
+				() =>
+					sdk.media.get({
+						page: 1,
+						page_size: 20,
+						series: {
+							id: [id],
+						},
+					}),
+			),
+		[sdk.media, id],
 	)
+
+	return { prefetch }
+}
 
 type MediaQueryParams<TQueryFnData, TData = TQueryFnData> = QueryOptions<
 	TQueryFnData,
@@ -85,19 +102,17 @@ type MediaQueryParams<TQueryFnData, TData = TQueryFnData> = QueryOptions<
 >
 
 type UseMediaByIdQueryOptions = MediaQueryParams<Media> & {
-	params?: Record<string, unknown>
+	params?: MediaFilter
 }
 
 export function useMediaByIdQuery(
 	id: string,
 	{ params, ...options }: UseMediaByIdQueryOptions = {},
 ) {
+	const { sdk } = useSDK()
 	const { data, ...ret } = useQuery(
-		[mediaQueryKeys.getMediaById, id, params],
-		async () => {
-			const { data } = await mediaApi.getMediaById(id, params)
-			return data
-		},
+		[sdk.media.keys.getByID, id, params],
+		async () => sdk.media.getByID(id, params),
 		{
 			keepPreviousData: false,
 			...options,
@@ -107,13 +122,15 @@ export function useMediaByIdQuery(
 	return { media: data, ...ret }
 }
 
-export function usePagedMediaQuery(options: PageQueryOptions<Media> = {}) {
+type UsePagedMediaQueryParams = Omit<PageQueryOptions<Media>, 'params'> & {
+	params?: MediaFilter & QueryOrderParams
+}
+
+export function usePagedMediaQuery(options: UsePagedMediaQueryParams = {}) {
+	const { sdk } = useSDK()
 	const { data, ...restReturn } = usePageQuery(
-		[mediaQueryKeys.getMedia],
-		async ({ page, page_size, params }) => {
-			const { data } = await mediaApi.getMedia({ page, page_size, ...(params ?? {}) })
-			return data
-		},
+		[sdk.media.keys.get],
+		async ({ page, page_size, params }) => sdk.media.get({ page, page_size, ...params }),
 		{
 			keepPreviousData: true,
 			...options,
@@ -130,19 +147,30 @@ export function usePagedMediaQuery(options: PageQueryOptions<Media> = {}) {
 	}
 }
 
-export const prefetchPagedMedia = async (options: PageQueryOptions<Media>) =>
-	queryClient.prefetchQuery([mediaQueryKeys.getMedia, options], async () => {
-		const { data } = await mediaApi.getMedia(options)
-		return data
-	})
+export const usePrefetchMediaPaged = ({
+	params,
+	page = 1,
+	page_size = 20,
+	...options
+}: TypedPageQueryOptions<Media, MediaFilter>) => {
+	const { sdk } = useSDK()
+	const prefetch = useCallback(
+		() =>
+			queryClient.prefetchQuery(
+				[sdk.media.keys.get, params],
+				() => sdk.media.get({ page, page_size, ...params }),
+				options,
+			),
+		[sdk.media, page, page_size, params, options],
+	)
+	return { prefetch }
+}
 
 export function useMediaCursorQuery(options: CursorQueryOptions<Media>) {
+	const { sdk } = useSDK()
 	const { data, ...restReturn } = useCursorQuery(
-		[mediaQueryKeys.getMedia],
-		async (params) => {
-			const { data } = await mediaApi.getMediaWithCursor(params)
-			return data
-		},
+		[sdk.media.keys.getCursor],
+		async (params) => sdk.media.getCursor(params),
 		options,
 	)
 
@@ -161,16 +189,14 @@ export function useUpdateMediaProgress(
 	mediaId: string,
 	options?: MutationOptions<ProgressUpdateReturn, AxiosError, number>,
 ) {
+	const { sdk } = useSDK()
 	const {
 		mutate: updateReadProgress,
 		mutateAsync: updateReadProgressAsync,
 		isLoading,
 	} = useMutation(
-		[mediaQueryKeys.updateMediaProgress, mediaId],
-		async (page: number) => {
-			const { data } = await mediaApi.updateMediaProgress(mediaId, page)
-			return data
-		},
+		[sdk.media.keys.updateProgress, mediaId],
+		(page: number) => sdk.media.updateProgress(mediaId, page),
 		options,
 	)
 
@@ -178,12 +204,10 @@ export function useUpdateMediaProgress(
 }
 
 export function useRecentlyAddedMediaQuery(options: CursorQueryOptions<Media>) {
+	const { sdk } = useSDK()
 	const { data, ...restReturn } = useCursorQuery(
-		[mediaQueryKeys.getRecentlyAddedMedia],
-		async (params) => {
-			const { data } = await mediaApi.getRecentlyAddedMedia(params)
-			return data
-		},
+		[sdk.media.keys.recentlyAdded],
+		sdk.media.recentlyAdded,
 		options,
 	)
 
@@ -197,12 +221,10 @@ export function useRecentlyAddedMediaQuery(options: CursorQueryOptions<Media>) {
 }
 
 export function useContinueReading(options: CursorQueryOptions<Media>) {
+	const { sdk } = useSDK()
 	const { data, ...restReturn } = useCursorQuery(
-		[mediaQueryKeys.getInProgressMedia],
-		async (params) => {
-			const { data } = await mediaApi.getInProgressMedia(params)
-			return data
-		},
+		[sdk.media.keys.inProgress],
+		sdk.media.inProgress,
 		options,
 	)
 

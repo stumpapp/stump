@@ -1,13 +1,16 @@
-import { jobQueryKeys, libraryApi, libraryQueryKeys } from '@stump/api'
 import type {
 	CreateLibrary,
 	Library,
+	LibraryFilter,
 	LibraryStats,
 	LibraryStatsParams,
+	PaginationQuery,
 	UpdateLibrary,
 	User,
 } from '@stump/types'
 import { AxiosError } from 'axios'
+
+import { useSDK } from '@/sdk'
 
 import {
 	MutationOptions,
@@ -19,13 +22,21 @@ import {
 } from '../client'
 import { invalidateQueries } from '../invalidate'
 
-export const refreshUseLibrary = (id: string) =>
-	invalidateQueries({ exact: true, queryKey: [libraryQueryKeys.getLibraryById, id] })
+export const useRefreshLibrary = (id: string) => {
+	const { sdk } = useSDK()
 
-export function useLibraryByIdQuery(id: string, options?: QueryOptions<Library>) {
+	const refreshCache = invalidateQueries({
+		queryKey: [sdk.library.keys.getByID, id],
+	})
+
+	return { refreshCache }
+}
+
+export function useLibraryByID(id: string, options?: QueryOptions<Library>) {
+	const { sdk } = useSDK()
 	const { data, ...rest } = useQuery(
-		[libraryQueryKeys.getLibraryById, id],
-		() => libraryApi.getLibraryById(id).then((res) => res.data),
+		[sdk.library.keys.getByID, id],
+		() => sdk.library.getByID(id),
 		options,
 	)
 
@@ -33,14 +44,16 @@ export function useLibraryByIdQuery(id: string, options?: QueryOptions<Library>)
 }
 
 type UseLibraryQueryOptions = QueryOptions<Library | undefined> & {
-	params?: Record<string, unknown>
+	params?: LibraryFilter & PaginationQuery
 }
+
 export function useLibraryQuery({ params, ...options }: UseLibraryQueryOptions = {}) {
+	const { sdk } = useSDK()
 	const { data: library, ...restReturn } = useQuery(
-		[libraryQueryKeys.getLibraries, params],
+		[sdk.library.get, params],
 		async () => {
-			const { data } = await libraryApi.getLibraries(params)
-			return data?.data?.at(0)
+			const { data } = await sdk.library.get({ ...params, limit: 1 })
+			return data.at(0)
 		},
 		options,
 	)
@@ -49,19 +62,13 @@ export function useLibraryQuery({ params, ...options }: UseLibraryQueryOptions =
 }
 
 export function useLibraries(options: PageQueryOptions<Library> = {}) {
-	const { data, ...restReturn } = usePageQuery(
-		[libraryQueryKeys.getLibraries, options],
-		async () => {
-			const { data } = await libraryApi.getLibraries()
-			return data
-		},
-		{
-			keepPreviousData: true,
-			// Send all non-401 errors to the error page
-			useErrorBoundary: (err: AxiosError) => !err || (err.response?.status ?? 500) !== 401,
-			...options,
-		},
-	)
+	const { sdk } = useSDK()
+	const { data, ...restReturn } = usePageQuery([sdk.library.keys.get, options], sdk.library.get, {
+		keepPreviousData: true,
+		// Send all non-401 errors to the error page
+		useErrorBoundary: (err: AxiosError) => !err || (err.response?.status ?? 500) !== 401,
+		...options,
+	})
 
 	const libraries = data?.data
 	const pageData = data?._page
@@ -74,14 +81,13 @@ export function useLibraries(options: PageQueryOptions<Library> = {}) {
 }
 
 export function useTotalLibraryStats() {
+	const { sdk } = useSDK()
 	const {
 		data: libraryStats,
 		isLoading,
 		isRefetching,
 		isFetching,
-	} = useQuery([libraryQueryKeys.getLibraryStats], () =>
-		libraryApi.getTotalLibraryStats().then((data) => data.data),
-	)
+	} = useQuery([sdk.library.keys.getStats], () => sdk.library.getStats())
 
 	return { isLoading: isLoading || isRefetching || isFetching, libraryStats }
 }
@@ -91,12 +97,10 @@ export function useLibraryStats({
 	params,
 	...options
 }: QueryOptions<LibraryStats> & { id: string; params?: LibraryStatsParams }) {
+	const { sdk } = useSDK()
 	const { data: stats, ...rest } = useQuery(
-		[libraryQueryKeys.getLibraryStats, id, params],
-		async () => {
-			const { data } = await libraryApi.getLibraryStats(id, params)
-			return data
-		},
+		[sdk.library.keys.getStats, id, params],
+		async () => sdk.library.getStats({ id, ...params }),
 		options,
 	)
 
@@ -105,9 +109,10 @@ export function useLibraryStats({
 
 // TODO: fix type error :grimacing:
 export function useScanLibrary({ onError }: Pick<QueryOptions<unknown>, 'onError'> = {}) {
+	const { sdk } = useSDK()
 	const { mutate: scan, mutateAsync: scanAsync } = useMutation(
-		[libraryQueryKeys.scanLibary],
-		libraryApi.scanLibary,
+		[sdk.library.keys.scan],
+		sdk.library.scan,
 		{
 			onError,
 		},
@@ -119,152 +124,112 @@ export function useScanLibrary({ onError }: Pick<QueryOptions<unknown>, 'onError
 export function useCreateLibraryMutation(
 	options: MutationOptions<Library, AxiosError, CreateLibrary> = {},
 ) {
+	const { sdk } = useSDK()
 	const {
 		mutate: createLibrary,
 		mutateAsync: createLibraryAsync,
 		...rest
-	} = useMutation(
-		[libraryQueryKeys.createLibrary],
-		async (variables) => {
-			const { data } = await libraryApi.createLibrary(variables)
-			return data
+	} = useMutation([sdk.library.keys.create], sdk.library.create, {
+		...options,
+		onSuccess: async (library, _, __) => {
+			await invalidateQueries({
+				keys: [sdk.library.keys.get, sdk.library.keys.getStats, sdk.job.keys.get],
+			})
+			options.onSuccess?.(library, _, __)
 		},
-		{
-			...options,
-			onSuccess: async (library, _, __) => {
-				await invalidateQueries({
-					keys: [
-						libraryQueryKeys.getLibraries,
-						libraryQueryKeys.getLibraryStats,
-						jobQueryKeys.getJobs,
-					],
-				})
-				options.onSuccess?.(library, _, __)
-			},
-		},
-	)
+	})
 
 	return { createLibrary, createLibraryAsync, ...rest }
 }
 
-export function useEditLibraryMutation(
-	options: MutationOptions<Library, AxiosError, UpdateLibrary> = {},
-) {
+export function useUpdateLibrary({
+	id,
+	...options
+}: MutationOptions<Library, AxiosError, UpdateLibrary> & { id: string }) {
+	const { sdk } = useSDK()
 	const {
 		mutate: editLibrary,
 		mutateAsync: editLibraryAsync,
 		...rest
-	} = useMutation(
-		[libraryQueryKeys.editLibrary],
-		async (variables) => {
-			const { data } = await libraryApi.editLibrary(variables)
-			return data
+	} = useMutation([sdk.library.keys.update], (params) => sdk.library.update(id, params), {
+		...options,
+		onSuccess: async (library, _, __) => {
+			await invalidateQueries({
+				keys: [sdk.library.keys.get, sdk.library.keys.getStats, sdk.job.keys.get],
+			})
+			options.onSuccess?.(library, _, __)
 		},
-		{
-			...options,
-			onSuccess: async (library, _, __) => {
-				await invalidateQueries({
-					keys: [
-						libraryQueryKeys.getLibraries,
-						libraryQueryKeys.getLibraryStats,
-						jobQueryKeys.getJobs,
-					],
-				})
-				options.onSuccess?.(library, _, __)
-			},
-		},
-	)
+	})
 
 	return { editLibrary, editLibraryAsync, ...rest }
 }
 
-export function useDeleteLibraryMutation(
-	options: MutationOptions<Library, AxiosError, string> = {},
-) {
+export function useDeleteLibrary(options: MutationOptions<Library, AxiosError, string> = {}) {
+	const { sdk } = useSDK()
 	const {
 		mutate: deleteLibrary,
 		mutateAsync: deleteLibraryAsync,
 		...rest
-	} = useMutation(
-		[libraryQueryKeys.deleteLibrary],
-		async (id) => {
-			const { data } = await libraryApi.deleteLibrary(id)
-			return data
+	} = useMutation([sdk.library.keys.delete], sdk.library.delete, {
+		...options,
+		onSuccess: async (library, _, __) => {
+			await invalidateQueries({
+				keys: [sdk.library.keys.get, sdk.library.keys.getStats],
+			})
+			options.onSuccess?.(library, _, __)
 		},
-		{
-			...options,
-			onSuccess: async (library, _, __) => {
-				await invalidateQueries({
-					keys: [libraryQueryKeys.getLibraries, libraryQueryKeys.getLibraryStats],
-				})
-				options.onSuccess?.(library, _, __)
-			},
-		},
-	)
+	})
 
 	return { deleteLibrary, deleteLibraryAsync, ...rest }
 }
 
 export function useVisitLibrary(options: MutationOptions<Library, AxiosError, string> = {}) {
+	const { sdk } = useSDK()
 	const {
 		mutate: visitLibrary,
 		mutateAsync: visitLibraryAsync,
 		...rest
-	} = useMutation(
-		[libraryQueryKeys.visitLibrary],
-		async (id) => {
-			const { data } = await libraryApi.visitLibrary(id)
-			return data
+	} = useMutation([sdk.library.keys.visit], sdk.library.visit, {
+		...options,
+		onSuccess: async (library, _, __) => {
+			await invalidateQueries({
+				keys: [sdk.library.keys.getLastVisited],
+			})
+			options.onSuccess?.(library, _, __)
 		},
-		{
-			...options,
-			onSuccess: async (library, _, __) => {
-				await invalidateQueries({
-					keys: [libraryQueryKeys.getLastVisitedLibrary],
-				})
-				options.onSuccess?.(library, _, __)
-			},
-		},
-	)
+	})
 
 	return { visitLibrary, visitLibraryAsync, ...rest }
 }
 
-export function useLibraryExclusionsQuery({
-	id,
-	...options
-}: QueryOptions<User[]> & { id: string }) {
+export function useLibraryExclusions({ id, ...options }: QueryOptions<User[]> & { id: string }) {
+	const { sdk } = useSDK()
 	const { data: excludedUsers, ...rest } = useQuery(
-		[libraryQueryKeys.getExcludedUsers],
-		async () => {
-			const { data } = await libraryApi.getExcludedUsers(id)
-			return data
-		},
+		[sdk.library.keys.excludedUsers, id],
+		() => sdk.library.excludedUsers(id),
 		options,
 	)
 
 	return { excludedUsers, ...rest }
 }
 
-export function useLibraryExclusionsMutation({
+export function useUpdateLibraryExclusions({
 	id,
 	...options
-}: MutationOptions<User[], AxiosError, string[]> & { id: string }) {
+}: MutationOptions<Library, AxiosError, string[]> & { id: string }) {
+	const { sdk } = useSDK()
 	const {
 		mutate: updateExcludedUsers,
 		mutateAsync: updateExcludedUsersAsync,
 		...rest
 	} = useMutation(
-		[libraryQueryKeys.updateExcludedUsers],
-		async (userIds) => {
-			const { data } = await libraryApi.updateExcludedUsers(id, userIds)
-			return data
-		},
+		[sdk.library.keys.updateExcludedUsers],
+		async (userIds) => sdk.library.updateExcludedUsers(id, { user_ids: userIds }),
 		{
 			...options,
 			onSuccess: async (users, _, __) => {
 				await invalidateQueries({
-					keys: [libraryQueryKeys.getExcludedUsers],
+					keys: [sdk.library.keys.excludedUsers],
 				})
 				options.onSuccess?.(users, _, __)
 			},

@@ -1,5 +1,5 @@
 import { isAxiosError } from '@stump/api'
-import { useDeleteLibraryMutation } from '@stump/client'
+import { useDeleteLibrary } from '@stump/client'
 import { ConfirmationModal } from '@stump/components'
 import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router'
@@ -16,7 +16,7 @@ type Props = {
 export default function DeleteLibraryConfirmation({ isOpen, libraryId, onClose, trigger }: Props) {
 	const navigate = useNavigate()
 
-	const { deleteLibraryAsync, isLoading } = useDeleteLibraryMutation({
+	const { deleteLibraryAsync, isLoading } = useDeleteLibrary({
 		onSuccess: () => {
 			navigate(paths.home())
 		},

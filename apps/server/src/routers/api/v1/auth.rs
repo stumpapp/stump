@@ -6,7 +6,7 @@ use axum::{
 };
 use axum_extra::{headers::UserAgent, TypedHeader};
 use chrono::{DateTime, Duration, FixedOffset, Utc};
-use prisma_client_rust::Direction;
+use prisma_client_rust::SortOrder;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use stump_core::{
@@ -217,7 +217,7 @@ async fn login(
 				user_login_activity::timestamp::gte(twenty_four_hours_ago),
 				user_login_activity::timestamp::lte(today),
 			])
-			.order_by(user_login_activity::timestamp::order(Direction::Desc))
+			.order_by(user_login_activity::timestamp::order(SortOrder::Desc))
 			.take(10),
 		)
 		.with(user::sessions::fetch(vec![session::expiry_time::gt(

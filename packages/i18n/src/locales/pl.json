@@ -150,6 +150,24 @@
 				"label": "Etykiety",
 				"description": "Używane do kategoryzowania biblioteki lub wymuszania reguł dostępu"
 			},
+			"readingSettings": {
+				"section": {
+					"heading": "Ustawienia czytania",
+					"description": "Domyślne ustawienia czytnika dla książek"
+				},
+				"imageScaling": {
+					"label": "Skalowanie obrazu",
+					"description": "Sposób skalowania dla książek obrazkowych"
+				},
+				"readingMode": {
+					"label": "Domyślny czytnik",
+					"description": "Domyślny czytnik dla książek obrazkowych"
+				},
+				"readingDirection": {
+					"label": "Kierunek czytania",
+					"description": "Kierunek, w którym czytnik przechodzi przez strony"
+				}
+			},
 			"thumbnailConfig": {
 				"section": {
 					"heading": {
@@ -346,6 +364,7 @@
 			"basics": "Podstawowe",
 			"options": {
 				"general": "Ogólne",
+				"reading": "Czytanie",
 				"scanning": "Skanowanie",
 				"thumbnails": "Miniatury",
 				"ignore-rules": "Reguły pomijania",
@@ -364,6 +383,10 @@
 			"form": {
 				"submit": "Aktualizuj bibliotekę"
 			}
+		},
+		"options/reading": {
+			"title": "Czytanie",
+			"description": "Domyślne ustawienia czytnika dla książek w tej bibliotece. Każda książka może nadpisać te ustawienia"
 		},
 		"options/scanning": {
 			"title": "Zachowanie skanera",
@@ -657,8 +680,7 @@
 			"sections": {
 				"themeSelect": {
 					"label": "Motyw",
-					"description": "Domyślnie Stump posiada jasny i ciemny motyw",
-					"customTheme": [
+					"description": [
 						"Jeśli chcesz stworzyć swój własny motyw, sprawdź",
 						"dokumentację"
 					],
@@ -668,7 +690,9 @@
 						"bronze": "Jasnobrązowy",
 						"ocean": "Ocean",
 						"autumn": "Jesień",
-						"cosmic": "Kosmiczny"
+						"cosmic": "Kosmiczny",
+						"pumpkin": "Dynia",
+						"matrix": "Matrix"
 					}
 				},
 				"fontSelect": {

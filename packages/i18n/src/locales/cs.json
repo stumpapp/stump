@@ -150,6 +150,24 @@
 				"label": "Tagy",
 				"description": "Slouží ke kategorizaci knihovny nebo k vynucování pravidel přístupu"
 			},
+			"readingSettings": {
+				"section": {
+					"heading": "Reading settings",
+					"description": "Default reader settings to use for books"
+				},
+				"imageScaling": {
+					"label": "Image scaling",
+					"description": "How the image-based reader scales images to the page"
+				},
+				"readingMode": {
+					"label": "Default reader",
+					"description": "The default reader to use for image-based books"
+				},
+				"readingDirection": {
+					"label": "Reading direction",
+					"description": "Which direction the reader progresses through pages"
+				}
+			},
 			"thumbnailConfig": {
 				"section": {
 					"heading": {
@@ -346,6 +364,7 @@
 			"basics": "Základní",
 			"options": {
 				"general": "Obecné",
+				"reading": "Reading",
 				"scanning": "Skenování",
 				"thumbnails": "Náhledy",
 				"ignore-rules": "Pravidla Ignorování",
@@ -364,6 +383,10 @@
 			"form": {
 				"submit": "Aktualizace knihovny"
 			}
+		},
+		"options/reading": {
+			"title": "Reading",
+			"description": "The default reader settings to use for books in this library. Any book can override these settings"
 		},
 		"options/scanning": {
 			"title": "Chování skeneru",
@@ -657,10 +680,9 @@
 			"sections": {
 				"themeSelect": {
 					"label": "Motiv",
-					"description": "Ve výchozím nastavení má Stump světlý a tmavý motiv",
-					"customTheme": [
-						"Pokud máte zájem o vytvoření vlastního motivu, podívejte se na",
-						"dokumentaci"
+					"description": [
+						"If you're interested in creating your own custom theme, check out the",
+						"documentation"
 					],
 					"options": {
 						"light": "Světlý",
@@ -668,7 +690,9 @@
 						"bronze": "Světle bronzový",
 						"ocean": "Oceán",
 						"autumn": "Podzim",
-						"cosmic": "Cosmic"
+						"cosmic": "Cosmic",
+						"pumpkin": "Pumpkin",
+						"matrix": "Matrix"
 					}
 				},
 				"fontSelect": {

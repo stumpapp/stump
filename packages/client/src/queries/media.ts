@@ -3,8 +3,6 @@ import type { BookRelations, Media, MediaFilter, ProgressUpdateReturn } from '@s
 import { AxiosError } from 'axios'
 import { useCallback } from 'react'
 
-import { useSDK } from '@/sdk'
-
 import {
 	type CursorQueryOptions,
 	MutationOptions,
@@ -16,6 +14,7 @@ import {
 	usePageQuery,
 } from '../client'
 import { queryClient, useQuery } from '../client'
+import { useSDK } from '../sdk'
 
 export const usePrefetchMediaByID = (id: string) => {
 	const { sdk } = useSDK()

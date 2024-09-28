@@ -2,9 +2,8 @@ import { Api } from '@stump/sdk'
 import type { CoreEvent, CoreJobOutput, LibraryScanOutput } from '@stump/types'
 import { useCallback } from 'react'
 
-import { useSDK } from '@/sdk'
-
 import { invalidateQueries } from '../invalidate'
+import { useSDK } from '../sdk'
 import { useJobStore } from '../stores/job'
 import { useStumpSse } from './useStumpSse'
 

@@ -1,7 +1,7 @@
 import { AxiosError } from 'axios'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { useSDK } from '@/sdk'
+import { useSDK } from '../sdk'
 
 import { queryClient, useQuery } from '../client'
 

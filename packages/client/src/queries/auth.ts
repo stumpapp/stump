@@ -1,9 +1,8 @@
 import { isUser, LoginOrRegisterArgs, type User } from '@stump/types'
 import { useEffect, useState } from 'react'
 
-import { useSDK } from '@/sdk'
-
 import { queryClient, QueryOptions, useMutation, useQuery } from '../client'
+import { useSDK } from '../sdk'
 
 export function useAuthQuery(options: QueryOptions<User> = {}) {
 	const { sdk } = useSDK()

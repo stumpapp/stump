@@ -10,8 +10,6 @@ import type {
 } from '@stump/types'
 import { AxiosError } from 'axios'
 
-import { useSDK } from '@/sdk'
-
 import {
 	MutationOptions,
 	PageQueryOptions,
@@ -21,6 +19,7 @@ import {
 	useQuery,
 } from '../client'
 import { invalidateQueries } from '../invalidate'
+import { useSDK } from '../sdk'
 
 export const useRefreshLibrary = (id: string) => {
 	const { sdk } = useSDK()

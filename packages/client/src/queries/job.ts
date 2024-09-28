@@ -1,8 +1,7 @@
 import type { JobSchedulerConfig, PersistedJob } from '@stump/types'
 
-import { useSDK } from '@/sdk'
-
 import { PageQueryOptions, useMutation, usePageQuery, useQuery } from '../client'
+import { useSDK } from '../sdk'
 
 type UseJobsQueryParmas = PageQueryOptions<PersistedJob> & {
 	params?: Record<string, unknown>

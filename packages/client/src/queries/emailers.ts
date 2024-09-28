@@ -10,9 +10,8 @@ import {
 } from '@stump/types'
 import { AxiosError } from 'axios'
 
-import { useSDK } from '@/sdk'
-
 import { MutationOptions, queryClient, QueryOptions, useMutation, useQuery } from '../client'
+import { useSDK } from '../sdk'
 
 type UseEmailersQueryOptions = {
 	params?: EmailerIncludeParams

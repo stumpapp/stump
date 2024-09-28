@@ -207,7 +207,7 @@ export function AppLayout() {
 								'scrollbar-hide': storeUser.user_preferences?.enable_hide_scrollbar,
 							},
 							{
-								'from-background-gradient-from to-background-gradient-to bg-gradient-to-br':
+								'bg-gradient-to-br from-background-gradient-from to-background-gradient-to':
 									shouldUseGradient,
 							},
 						)}

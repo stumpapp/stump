@@ -1,6 +1,6 @@
 import { Log, LogFilter, QueryOrder } from '@stump/types'
 
-import { useSDK } from '@/sdk'
+import { useSDK } from '../sdk'
 
 import { PageQueryOptions, usePageQuery } from '../client'
 

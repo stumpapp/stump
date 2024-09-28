@@ -1,6 +1,5 @@
-import { useSDK } from '@/sdk'
-
 import { useQuery } from '../client'
+import { useSDK } from '../sdk'
 
 export function useStumpVersion() {
 	const { sdk } = useSDK()

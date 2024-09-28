@@ -1,7 +1,7 @@
 import type { Epub, EpubContent } from '@stump/types'
 import { useMemo, useState } from 'react'
 
-import { useSDK } from '@/sdk'
+import { useSDK } from '../sdk'
 
 import { useQuery } from '../client'
 

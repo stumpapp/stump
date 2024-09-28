@@ -11,10 +11,9 @@ import { useQueries, UseQueryResult } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import { useCallback } from 'react'
 
-import { useSDK } from '@/sdk'
-
 import { MutationOptions, queryClient, QueryOptions, useMutation, useQuery } from '../client'
 import { QueryClientContext } from '../context'
+import { useSDK } from '../sdk'
 
 type UseSmartListsQueryOptions = QueryOptions<SmartList[]> & {
 	params?: GetSmartListsParams

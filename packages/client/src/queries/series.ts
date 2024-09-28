@@ -2,8 +2,6 @@ import type { Media, Series, SeriesFilter } from '@stump/types'
 import { AxiosError } from 'axios'
 import { useCallback } from 'react'
 
-import { useSDK } from '@/sdk'
-
 import {
 	CursorQueryOptions,
 	PageQueryOptions,
@@ -14,6 +12,7 @@ import {
 	usePageQuery,
 	useQuery,
 } from '../client'
+import { useSDK } from '../sdk'
 import { usePrefetchSeriesBooks } from './media'
 
 type PrefetchSeriesOptions = {

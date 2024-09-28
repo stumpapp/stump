@@ -2,9 +2,8 @@ import type { Tag } from '@stump/types'
 import { AxiosError } from 'axios'
 import { useMemo } from 'react'
 
-import { useSDK } from '@/sdk'
-
 import { queryClient, useMutation, useQuery } from '../client'
+import { useSDK } from '../sdk'
 
 export interface UseTagsConfig {
 	onQuerySuccess?: (res: Tag[]) => void

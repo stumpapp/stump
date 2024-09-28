@@ -1,7 +1,7 @@
 import type { CoreEvent } from '@stump/types'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 
-import { useSDK } from '@/sdk'
+import { useSDK } from '../sdk'
 
 interface SseOptions {
 	onOpen?: (event: Event) => void

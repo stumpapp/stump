@@ -2,7 +2,7 @@ import type { CoreEvent } from '@stump/types'
 import { useMemo } from 'react'
 import useWebSocket, { ReadyState } from 'react-use-websocket'
 
-import { useSDK } from '@/sdk'
+import { useSDK } from '../sdk'
 
 interface Props {
 	onEvent(event: CoreEvent): void

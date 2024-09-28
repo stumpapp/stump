@@ -11,8 +11,6 @@ import type {
 import { AxiosError } from 'axios'
 import { useMemo } from 'react'
 
-import { useSDK } from '@/sdk'
-
 import {
 	MutationOptions,
 	PageQueryOptions,
@@ -22,6 +20,7 @@ import {
 	usePageQuery,
 	useQuery,
 } from '../client'
+import { useSDK } from '../sdk'
 
 type UseUsersQueryParams = PageQueryOptions<User> & {
 	params?: Record<string, unknown>

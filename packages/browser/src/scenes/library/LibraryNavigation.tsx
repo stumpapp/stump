@@ -80,7 +80,7 @@ export default function LibraryNavigation() {
 						onMouseEnter={tab.onHover}
 						className={cn('whitespace-nowrap border-b-2 px-1 py-3 text-sm font-medium', {
 							'border-transparent text-foreground-muted hover:border-edge': !tab.isActive,
-							'text-foreground-brand border-edge-brand': tab.isActive,
+							'border-edge-brand text-foreground-brand': tab.isActive,
 						})}
 					>
 						{tab.label}

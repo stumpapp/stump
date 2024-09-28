@@ -152,20 +152,20 @@
 			},
 			"readingSettings": {
 				"section": {
-					"heading": "Reading settings",
-					"description": "Default reader settings to use for books"
+					"heading": "Ustawienia czytania",
+					"description": "Domyślne ustawienia czytnika dla książek"
 				},
 				"imageScaling": {
-					"label": "Image scaling",
-					"description": "How the image-based reader scales images to the page"
+					"label": "Skalowanie obrazu",
+					"description": "Sposób skalowania dla książek obrazkowych"
 				},
 				"readingMode": {
-					"label": "Default reader",
-					"description": "The default reader to use for image-based books"
+					"label": "Domyślny czytnik",
+					"description": "Domyślny czytnik dla książek obrazkowych"
 				},
 				"readingDirection": {
-					"label": "Reading direction",
-					"description": "Which direction the reader progresses through pages"
+					"label": "Kierunek czytania",
+					"description": "Kierunek, w którym czytnik przechodzi przez strony"
 				}
 			},
 			"thumbnailConfig": {
@@ -364,7 +364,7 @@
 			"basics": "Podstawowe",
 			"options": {
 				"general": "Ogólne",
-				"reading": "Reading",
+				"reading": "Czytanie",
 				"scanning": "Skanowanie",
 				"thumbnails": "Miniatury",
 				"ignore-rules": "Reguły pomijania",
@@ -385,8 +385,8 @@
 			}
 		},
 		"options/reading": {
-			"title": "Reading",
-			"description": "The default reader settings to use for books in this library. Any book can override these settings"
+			"title": "Czytanie",
+			"description": "Domyślne ustawienia czytnika dla książek w tej bibliotece. Każda książka może nadpisać te ustawienia"
 		},
 		"options/scanning": {
 			"title": "Zachowanie skanera",
@@ -681,8 +681,8 @@
 				"themeSelect": {
 					"label": "Motyw",
 					"description": [
-						"If you're interested in creating your own custom theme, check out the",
-						"documentation"
+						"Jeśli chcesz stworzyć swój własny motyw, sprawdź",
+						"dokumentację"
 					],
 					"options": {
 						"light": "Jasny",
@@ -691,7 +691,7 @@
 						"ocean": "Ocean",
 						"autumn": "Jesień",
 						"cosmic": "Kosmiczny",
-						"pumpkin": "Pumpkin",
+						"pumpkin": "Dynia",
 						"matrix": "Matrix"
 					}
 				},

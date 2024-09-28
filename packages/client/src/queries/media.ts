@@ -207,7 +207,7 @@ export function useRecentlyAddedMediaQuery(options: CursorQueryOptions<Media>) {
 	const { sdk } = useSDK()
 	const { data, ...restReturn } = useCursorQuery(
 		[sdk.media.keys.recentlyAdded],
-		sdk.media.recentlyAdded,
+		(params) => sdk.media.recentlyAdded(params),
 		options,
 	)
 
@@ -224,7 +224,7 @@ export function useContinueReading(options: CursorQueryOptions<Media>) {
 	const { sdk } = useSDK()
 	const { data, ...restReturn } = useCursorQuery(
 		[sdk.media.keys.inProgress],
-		sdk.media.inProgress,
+		(params) => sdk.media.inProgress(params),
 		options,
 	)
 

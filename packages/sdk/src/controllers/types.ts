@@ -25,5 +25,11 @@ export type ClassQueryKeys<T> = Omit<
 	{
 		[P in keyof T]: T[P] extends AnyFunction ? string : never
 	},
-	'keys' | 'thumbnailURL' | 'downloadURL' | 'bookPageURL' | 'axios'
+	| 'keys'
+	| 'thumbnailURL'
+	| 'downloadURL'
+	| 'bookPageURL'
+	| 'axios'
+	| 'withServiceURL'
+	| 'serviceURL'
 >

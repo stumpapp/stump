@@ -30,7 +30,7 @@ export class SeriesAPI extends APIBase {
 	 * Fetch series and maintain a cursor
 	 */
 	async getCursor(params: CursorQueryParams): Promise<Pageable<Series[]>> {
-		const { data: series } = await this.axios.get<Pageable<Series[]>>(seriesURL('cursor', params))
+		const { data: series } = await this.axios.get<Pageable<Series[]>>(seriesURL('', params))
 		return series
 	}
 
@@ -105,7 +105,7 @@ export class SeriesAPI extends APIBase {
 	 * Fetch the URL for the thumbnail of a series
 	 */
 	thumbnailURL(id: string): string {
-		return seriesURL(`${id}/thumbnail`)
+		return this.withServiceURL(seriesURL(`${id}/thumbnail`))
 	}
 
 	/**

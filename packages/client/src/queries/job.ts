@@ -1,4 +1,4 @@
-import type { PersistedJob } from '@stump/types'
+import type { JobSchedulerConfig, PersistedJob } from '@stump/types'
 
 import { useSDK } from '@/sdk'
 
@@ -30,16 +30,17 @@ export function useJobsQuery({ params, ...options }: UseJobsQueryParmas = {}) {
 
 export function useJobSchedulerConfig() {
 	const { sdk } = useSDK()
-	const { data: config, ...restReturn } = useQuery(
-		[sdk.job.keys.getSchedulerConfig],
-		sdk.job.getSchedulerConfig,
+	const { data: config, ...restReturn } = useQuery([sdk.job.keys.getSchedulerConfig], () =>
+		sdk.job.getSchedulerConfig(),
 	)
 
 	const {
 		mutate: update,
 		isLoading: isUpdating,
 		isError: isUpdateError,
-	} = useMutation([sdk.job.keys.updateSchedulerConfig], sdk.job.updateSchedulerConfig)
+	} = useMutation([sdk.job.keys.updateSchedulerConfig], (payload: JobSchedulerConfig) =>
+		sdk.job.updateSchedulerConfig(payload),
+	)
 
 	return { config, isUpdateError, isUpdating, update, ...restReturn }
 }

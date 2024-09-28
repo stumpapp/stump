@@ -96,12 +96,16 @@ type UseLogoutParams = {
 
 export function useLogout({ removeStoreUser }: UseLogoutParams = {}) {
 	const { sdk } = useSDK()
-	const { mutateAsync: logout, isLoading } = useMutation([sdk.auth.keys.logout], sdk.auth.logout, {
-		onSuccess: () => {
-			queryClient.clear()
-			removeStoreUser?.()
+	const { mutateAsync: logout, isLoading } = useMutation(
+		[sdk.auth.keys.logout],
+		() => sdk.auth.logout(),
+		{
+			onSuccess: () => {
+				queryClient.clear()
+				removeStoreUser?.()
+			},
 		},
-	})
+	)
 
 	return { isLoggingOut: isLoading, logout }
 }

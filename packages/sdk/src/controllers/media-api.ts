@@ -82,21 +82,21 @@ export class MediaAPI extends APIBase {
 	 * The URL for fetching the thumbnail of a media entity
 	 */
 	thumbnailURL(id: string): string {
-		return mediaURL(`/${id}/thumbnail`)
+		return this.withServiceURL(mediaURL(`/${id}/thumbnail`))
 	}
 
 	/**
 	 * The URL for fetching the file of a media entity
 	 */
 	downloadURL(id: string): string {
-		return mediaURL(`/${id}/file`)
+		return this.withServiceURL(mediaURL(`/${id}/file`))
 	}
 
 	/**
 	 * The URL for fetching a page of a media entity
 	 */
 	bookPageURL(mediaID: string, page: number): string {
-		return mediaURL(`${mediaID}/pages/${page}`)
+		return this.withServiceURL(mediaURL(`${mediaID}/pages/${page}`))
 	}
 
 	/**

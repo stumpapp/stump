@@ -64,14 +64,7 @@ type UseBookClubsQueryOptions = QueryOptions<BookClub[]> & {
 
 export function useBookClubsQuery({ params, ...options }: UseBookClubsQueryOptions = {}) {
 	const { sdk } = useSDK()
-	const { data, ...rest } = useQuery(
-		[sdk.club.keys.get],
-		async () => {
-			const data = await sdk.club.get(params)
-			return data
-		},
-		options,
-	)
+	const { data, ...rest } = useQuery([sdk.club.keys.get], async () => sdk.club.get(params), options)
 
 	return { bookClubs: data, ...rest }
 }
@@ -80,10 +73,7 @@ export function useBookClubQuery(id: string, options: QueryOptions<BookClub> = {
 	const { sdk } = useSDK()
 	const { data, ...rest } = useQuery(
 		[sdk.club.getByID, id],
-		async () => {
-			const data = await sdk.club.getByID(id)
-			return data
-		},
+		async () => sdk.club.getByID(id),
 		options,
 	)
 

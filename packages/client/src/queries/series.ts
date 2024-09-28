@@ -142,7 +142,7 @@ export function useSeriesCursorQuery({ queryKey, ...options }: CursorQueryOption
 	const { sdk } = useSDK()
 	const { data, ...restReturn } = useCursorQuery(
 		queryKey ?? [sdk.series.keys.getCursor],
-		sdk.series.getCursor,
+		(params) => sdk.series.getCursor(params),
 		options,
 	)
 

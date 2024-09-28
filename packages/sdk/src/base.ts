@@ -10,4 +10,12 @@ export class APIBase {
 	get axios() {
 		return this.api.axios
 	}
+
+	get serviceURL() {
+		return this.api.serviceURL
+	}
+
+	withServiceURL(url: string) {
+		return `${this.serviceURL}${url}`.replace(/([^:]\/)\/+/g, '$1')
+	}
 }

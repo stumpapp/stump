@@ -63,7 +63,7 @@ export class LibraryAPI extends APIBase {
 	 * @param id The library ID
 	 */
 	thumbnailURL(id: string): string {
-		return libraryURL(`/${id}/thumbnail`)
+		return this.withServiceURL(libraryURL(`/${id}/thumbnail`))
 	}
 
 	// TODO: type image response

@@ -63,12 +63,16 @@ export function useLibraryQuery({ params, ...options }: UseLibraryQueryOptions =
 
 export function useLibraries(options: PageQueryOptions<Library> = {}) {
 	const { sdk } = useSDK()
-	const { data, ...restReturn } = usePageQuery([sdk.library.keys.get, options], sdk.library.get, {
-		keepPreviousData: true,
-		// Send all non-401 errors to the error page
-		useErrorBoundary: (err: AxiosError) => !err || (err.response?.status ?? 500) !== 401,
-		...options,
-	})
+	const { data, ...restReturn } = usePageQuery(
+		[sdk.library.keys.get, options],
+		(params) => sdk.library.get(params),
+		{
+			keepPreviousData: true,
+			// Send all non-401 errors to the error page
+			useErrorBoundary: (err: AxiosError) => !err || (err.response?.status ?? 500) !== 401,
+			...options,
+		},
+	)
 
 	const libraries = data?.data
 	const pageData = data?._page
@@ -107,15 +111,11 @@ export function useLibraryStats({
 	return { stats, ...rest }
 }
 
-// TODO: fix type error :grimacing:
-export function useScanLibrary({ onError }: Pick<QueryOptions<unknown>, 'onError'> = {}) {
+export function useScanLibrary() {
 	const { sdk } = useSDK()
 	const { mutate: scan, mutateAsync: scanAsync } = useMutation(
 		[sdk.library.keys.scan],
-		sdk.library.scan,
-		{
-			onError,
-		},
+		(id: string) => sdk.library.scan(id),
 	)
 
 	return { scan, scanAsync }
@@ -129,7 +129,7 @@ export function useCreateLibraryMutation(
 		mutate: createLibrary,
 		mutateAsync: createLibraryAsync,
 		...rest
-	} = useMutation([sdk.library.keys.create], sdk.library.create, {
+	} = useMutation([sdk.library.keys.create], (payload) => sdk.library.create(payload), {
 		...options,
 		onSuccess: async (library, _, __) => {
 			await invalidateQueries({
@@ -176,7 +176,7 @@ export function useDeleteLibrary(options: MutationOptions<Library, AxiosError, s
 		mutate: deleteLibrary,
 		mutateAsync: deleteLibraryAsync,
 		...rest
-	} = useMutation([sdk.library.keys.delete], sdk.library.delete, {
+	} = useMutation([sdk.library.keys.delete], (id) => sdk.library.delete(id), {
 		...options,
 		onSuccess: async (library, _, __) => {
 			await invalidateQueries({
@@ -195,7 +195,7 @@ export function useVisitLibrary(options: MutationOptions<Library, AxiosError, st
 		mutate: visitLibrary,
 		mutateAsync: visitLibraryAsync,
 		...rest
-	} = useMutation([sdk.library.keys.visit], sdk.library.visit, {
+	} = useMutation([sdk.library.keys.visit], (id) => sdk.library.visit(id), {
 		...options,
 		onSuccess: async (library, _, __) => {
 			await invalidateQueries({

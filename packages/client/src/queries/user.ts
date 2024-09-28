@@ -206,10 +206,14 @@ export function useNavigationArrangement({
 	...options
 }: UseNavigationArrangementOptions = {}) {
 	const { sdk } = useSDK()
-	const { data } = useQuery([sdk.user.keys.navigationArrangement], sdk.user.navigationArrangement, {
-		suspense: true,
-		...options,
-	})
+	const { data } = useQuery(
+		[sdk.user.keys.navigationArrangement],
+		() => sdk.user.navigationArrangement(),
+		{
+			suspense: true,
+			...options,
+		},
+	)
 
 	const {
 		mutateAsync: updateArrangement,

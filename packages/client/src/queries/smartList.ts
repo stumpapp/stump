@@ -162,7 +162,7 @@ export function useDeleteSmartListMutation({
 	const { sdk } = useSDK()
 	const { mutate, mutateAsync, isLoading, ...restReturn } = useMutation(
 		[sdk.smartlist.keys.delete],
-		sdk.smartlist.delete,
+		(id) => sdk.smartlist.delete(id),
 		{
 			onSuccess: async (...args) => {
 				await queryClient.invalidateQueries([sdk.smartlist.keys.get], {

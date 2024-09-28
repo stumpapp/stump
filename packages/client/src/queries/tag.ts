@@ -26,7 +26,7 @@ export function useTags({
 	onCreateError,
 }: UseTagsConfig = {}) {
 	const { sdk } = useSDK()
-	const { data, isLoading, refetch } = useQuery([sdk.tag.keys.get], sdk.tag.get, {
+	const { data, isLoading, refetch } = useQuery([sdk.tag.keys.get], () => sdk.tag.get(), {
 		onError: onQueryError,
 		onSuccess: onQuerySuccess,
 		suspense: false,
@@ -36,7 +36,7 @@ export function useTags({
 		mutate,
 		mutateAsync,
 		isLoading: isCreating,
-	} = useMutation([sdk.tag.keys.create], sdk.tag.create, {
+	} = useMutation([sdk.tag.keys.create], (payload: string[]) => sdk.tag.create(payload), {
 		onError: onCreateError,
 		onSuccess(res) {
 			onCreateSuccess?.(res)

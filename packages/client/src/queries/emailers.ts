@@ -5,6 +5,7 @@ import {
 	EmailerSendRecord,
 	EmailerSendRecordIncludeParams,
 	RegisteredEmailDevice,
+	SendAttachmentEmailsPayload,
 	SMTPEmailer,
 } from '@stump/types'
 import { AxiosError } from 'axios'
@@ -80,7 +81,7 @@ export function useDeleteEmailer() {
 		mutate: deleteEmailer,
 		mutateAsync: deleteEmailerAsync,
 		...restReturn
-	} = useMutation([sdk.emailer.keys.delete], sdk.emailer.delete, {
+	} = useMutation([sdk.emailer.keys.delete], (id: number) => sdk.emailer.delete(id), {
 		onSuccess: () =>
 			queryClient.invalidateQueries({
 				predicate: (query) =>
@@ -154,7 +155,9 @@ export function useSendAttachmentEmail() {
 		mutateAsync: sendAsync,
 		isLoading: isSending,
 		...restReturn
-	} = useMutation([sdk.emailer.keys.send], sdk.emailer.send)
+	} = useMutation([sdk.emailer.keys.send], (payload: SendAttachmentEmailsPayload) =>
+		sdk.emailer.send(payload),
+	)
 
 	return {
 		isSending,
@@ -170,7 +173,9 @@ export function useCreateEmailDevice() {
 		mutate: create,
 		mutateAsync: createAsync,
 		...restReturn
-	} = useMutation([sdk.emailer.keys.create], sdk.emailer.create)
+	} = useMutation([sdk.emailer.keys.create], (payload: CreateOrUpdateEmailer) =>
+		sdk.emailer.create(payload),
+	)
 
 	return {
 		create,
@@ -210,7 +215,7 @@ export function useDeleteEmailDevice() {
 		mutateAsync: removeAsync,
 		isLoading: isDeleting,
 		...restReturn
-	} = useMutation([sdk.emailer.keys.deleteDevice], sdk.emailer.deleteDevice)
+	} = useMutation([sdk.emailer.keys.deleteDevice], (id: number) => sdk.emailer.deleteDevice(id))
 
 	return {
 		isDeleting,

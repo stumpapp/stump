@@ -67,8 +67,10 @@ impl Notifier for DiscordClient {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use dotenv::dotenv;
 
 	fn get_debug_client() -> DiscordClient {
+		dotenv().ok();
 		let webhook_url = std::env::var("DUMMY_DISCORD_WEBHOOK_URL")
 			.expect("Failed to load webhook URL");
 		DiscordClient::new(webhook_url)

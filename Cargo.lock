@@ -3665,6 +3665,7 @@ name = "integrations"
 version = "0.0.5"
 dependencies = [
  "async-trait",
+ "dotenv",
  "lettre",
  "reqwest 0.12.7",
  "serde_json",

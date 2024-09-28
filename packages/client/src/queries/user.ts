@@ -1,12 +1,3 @@
-import {
-	getUserPreferences,
-	updatePreferences,
-	updateUser,
-	updateUserPreferences as updateUserPreferencesFn,
-	updateViewer,
-	userApi,
-	userQueryKeys,
-} from '@stump/api'
 import type {
 	Arrangement,
 	CreateUser,
@@ -19,6 +10,8 @@ import type {
 } from '@stump/types'
 import { AxiosError } from 'axios'
 import { useMemo } from 'react'
+
+import { useSDK } from '@/sdk'
 
 import {
 	MutationOptions,
@@ -34,12 +27,10 @@ type UseUsersQueryParams = PageQueryOptions<User> & {
 	params?: Record<string, unknown>
 }
 export function useUsersQuery({ params, ...options }: UseUsersQueryParams = {}) {
+	const { sdk } = useSDK()
 	const { data, ...restReturn } = usePageQuery(
-		[userQueryKeys.getUsers, params],
-		async ({ page = 1, page_size }) => {
-			const { data } = await userApi.getUsers({ page, page_size, ...params })
-			return data
-		},
+		[sdk.user.keys.get, params],
+		async ({ page = 1, page_size }) => sdk.user.get({ page, page_size, ...params }),
 		{
 			keepPreviousData: true,
 			...options,
@@ -60,12 +51,10 @@ type UseUserQuery = {
 	id: string
 } & QueryOptions<User>
 export function useUserQuery({ id, ...options }: UseUserQuery) {
+	const { sdk } = useSDK()
 	const { data, ...restReturn } = useQuery(
-		[userQueryKeys.getUserById, id],
-		async () => {
-			const { data } = await userApi.getUserById(id)
-			return data
-		},
+		[sdk.user.keys.getByID, id],
+		async () => sdk.user.getByID(id),
 		options,
 	)
 
@@ -83,23 +72,23 @@ export function useUserPreferences(
 	id?: string,
 	{ enableFetchPreferences, ...mutationOptions }: UseUserPreferencesParams = {},
 ) {
+	const { sdk } = useSDK()
 	const {
 		data: userPreferences,
 		isLoading,
 		isFetching,
 		isRefetching,
 	} = useQuery(
-		[userQueryKeys.getUserPreferences, id],
-		() => getUserPreferences(id!).then((res) => res.data),
+		[sdk.user.keys.getUserPreferences, id],
+		() => sdk.user.getUserPreferences(id || ''),
 		{
 			enabled: enableFetchPreferences && !!id,
 		},
 	)
 
 	const { mutateAsync: updateUserPreferences, isLoading: isUpdating } = useMutation(
-		[userQueryKeys.updateUserPreferences, id],
-		(preferences: UserPreferences) =>
-			updateUserPreferencesFn(id!, preferences).then((res) => res.data),
+		[sdk.user.keys.updateUserPreferences, id],
+		(preferences: UpdateUserPreferences) => sdk.user.updateUserPreferences(id || '', preferences),
 		mutationOptions,
 	)
 
@@ -113,14 +102,11 @@ export function useUserPreferences(
 
 type UseUpdateUserParams = MutationOptions<User, AxiosError, UpdateUser>
 export function useUpdateUser(id?: string, params: UseUpdateUserParams = {}) {
-	updateViewer
-
+	const { sdk } = useSDK()
 	const { mutateAsync, isLoading, error } = useMutation(
-		[userQueryKeys.updateUser, id],
-		async (params: UpdateUser) => {
-			const response = id ? await updateUser(id, params) : await updateViewer(params)
-			return response.data
-		},
+		[sdk.user.keys.update, id],
+		async (params: UpdateUser) =>
+			id ? await sdk.user.update(id, params) : await sdk.user.updateViewer(params),
 		params,
 	)
 
@@ -134,12 +120,10 @@ export function useUpdateUser(id?: string, params: UseUpdateUserParams = {}) {
 type UseUpdatePreferencesParams = MutationOptions<UserPreferences, AxiosError, UserPreferences>
 
 export function useUpdatePreferences(params: UseUpdatePreferencesParams = {}) {
+	const { sdk } = useSDK()
 	const { mutateAsync: update, isLoading } = useMutation(
-		[userQueryKeys.updateUserPreferences],
-		async (preferences: UpdateUserPreferences) => {
-			const response = await updatePreferences(preferences)
-			return response.data
-		},
+		[sdk.user.keys.updateUserPreferences],
+		async (preferences: UpdateUserPreferences) => sdk.user.updatePreferences(preferences),
 		params,
 	)
 
@@ -157,17 +141,15 @@ export function useUpdatePreferences(params: UseUpdatePreferencesParams = {}) {
 }
 
 export function useCreateUser(options?: MutationOptions<User, AxiosError, CreateUser>) {
+	const { sdk } = useSDK()
 	const {
 		mutateAsync: createAsync,
 		mutate: create,
 		isLoading,
 		...restReturn
 	} = useMutation(
-		[userQueryKeys.createUser],
-		async (params: CreateUser) => {
-			const { data } = await userApi.createUser(params)
-			return data
-		},
+		[sdk.user.keys.create],
+		async (params: CreateUser) => sdk.user.create(params),
 		options,
 	)
 
@@ -184,13 +166,11 @@ export type UseDeleteUserOptions = {
 	hardDelete?: boolean
 } & MutationOptions<User, AxiosError>
 export function useDeleteUser(options: UseDeleteUserOptions) {
+	const { sdk } = useSDK()
 	const { hardDelete, userId, ...mutationOptions } = options
 	const { mutateAsync: deleteAsync, ...restReturn } = useMutation(
-		[userQueryKeys.deleteUser, userId, hardDelete],
-		async () => {
-			const { data } = await userApi.deleteUser({ hardDelete, userId })
-			return data
-		},
+		[sdk.user.keys.delete, userId, hardDelete],
+		async () => sdk.user.delete(userId, { hardDelete }),
 		mutationOptions,
 	)
 
@@ -204,15 +184,11 @@ type UseLoginActivityQueryOptions = {
 	userId?: string
 } & QueryOptions<LoginActivity[]>
 export function useLoginActivityQuery({ userId, ...options }: UseLoginActivityQueryOptions) {
+	const { sdk } = useSDK()
 	const { data: loginActivity, ...restReturn } = useQuery(
 		// This is a bit pedantic and not strictly necessary, but w/e
-		[userId ? userQueryKeys.getLoginActivityForUser : userQueryKeys.getLoginActivity, userId],
-		async () => {
-			const response = userId
-				? await userApi.getLoginActivityForUser(userId)
-				: await userApi.getLoginActivity()
-			return response.data
-		},
+		[sdk.user.keys.loginActivity, userId],
+		async () => sdk.user.loginActivity(userId),
 		options,
 	)
 
@@ -229,46 +205,34 @@ export function useNavigationArrangement({
 	defaultArrangement = defaultNavigationArrangement,
 	...options
 }: UseNavigationArrangementOptions = {}) {
-	const { data } = useQuery(
-		[userQueryKeys.getPreferredNavigationArrangement],
-		async () => {
-			const response = await userApi.getPreferredNavigationArrangement()
-			return response.data
-		},
-		{
-			suspense: true,
-			...options,
-		},
-	)
+	const { sdk } = useSDK()
+	const { data } = useQuery([sdk.user.keys.navigationArrangement], sdk.user.navigationArrangement, {
+		suspense: true,
+		...options,
+	})
 
 	const {
 		mutateAsync: updateArrangement,
 		error: updateError,
 		isLoading: isUpdating,
 	} = useMutation(
-		[userQueryKeys.setPreferredNavigationArrangement],
-		async (arrangement: Arrangement<NavigationItem>) => {
-			const response = await userApi.setPreferredNavigationArrangement(arrangement)
-			return response.data
-		},
+		[sdk.user.keys.updateNavigationArrangement],
+		async (arrangement: Arrangement<NavigationItem>) =>
+			sdk.user.updateNavigationArrangement(arrangement),
 		{
 			onError: (_, newArrangement, ctx) => {
 				console.warn('Failed to update navigation arrangement', newArrangement)
-				queryClient.setQueryData(
-					[userQueryKeys.getPreferredNavigationArrangement],
-					ctx?.previousArrangement,
-				)
+				queryClient.setQueryData([sdk.user.keys.navigationArrangement], ctx?.previousArrangement)
 			},
 			onMutate: async (arrangement: Arrangement<NavigationItem>) => {
-				await queryClient.cancelQueries([userQueryKeys.getPreferredNavigationArrangement])
+				await queryClient.cancelQueries([sdk.user.keys.navigationArrangement])
 				const previousArrangement = queryClient.getQueryData<Arrangement<NavigationItem>>([
-					userQueryKeys.getPreferredNavigationArrangement,
+					sdk.user.keys.navigationArrangement,
 				])
-				queryClient.setQueryData([userQueryKeys.getPreferredNavigationArrangement], arrangement)
+				queryClient.setQueryData([sdk.user.keys.navigationArrangement], arrangement)
 				return { previousArrangement }
 			},
-			onSettled: () =>
-				queryClient.invalidateQueries([userQueryKeys.getPreferredNavigationArrangement]),
+			onSettled: () => queryClient.invalidateQueries([sdk.user.keys.navigationArrangement]),
 		},
 	)
 

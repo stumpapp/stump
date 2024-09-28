@@ -1,7 +1,7 @@
-import { checkUrl, formatServiceURL } from '@stump/api'
 import { QueryClientContext, useLogout } from '@stump/client'
 import { Card, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
+import { checkUrl, formatApiURL } from '@stump/sdk'
 import { SavedServer } from '@stump/types'
 import { useQueries } from '@tanstack/react-query'
 import React, { useCallback, useMemo, useState } from 'react'
@@ -63,7 +63,7 @@ export default function ConfiguredServersSection() {
 			queryFn: async () =>
 				({
 					name: server.name,
-					status: await checkUrl(formatServiceURL(server.uri), 'v1'),
+					status: await checkUrl(formatApiURL(server.uri, 'v1')),
 				}) as PingResult,
 			queryKey: ['ping', server.uri, server.name],
 			refetchInterval: (result?: PingResult) => {

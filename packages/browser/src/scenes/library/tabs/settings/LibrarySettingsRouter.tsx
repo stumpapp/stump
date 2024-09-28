@@ -1,5 +1,4 @@
-import { libraryQueryKeys } from '@stump/api'
-import { invalidateQueries, useEditLibraryMutation } from '@stump/client'
+import { useUpdateLibrary } from '@stump/client'
 import { UpdateLibrary } from '@stump/types'
 import React, { useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
@@ -22,11 +21,8 @@ const DeletionScene = React.lazy(() => import('./danger/deletion'))
 export default function LibrarySettingsRouter() {
 	const { library } = useLibraryContext()
 
-	// TODO: do something with error OR change to promise and return in patch
-	const { editLibrary } = useEditLibraryMutation({
-		onSuccess: async () => {
-			await invalidateQueries({ exact: false, keys: [libraryQueryKeys.getLibraryById] })
-		},
+	const { editLibrary } = useUpdateLibrary({
+		id: library.id,
 	})
 
 	// TODO: This is particularly fallible. It would be a lot wiser to eventually just.. yknow, literally

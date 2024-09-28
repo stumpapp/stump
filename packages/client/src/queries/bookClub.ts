@@ -1,4 +1,3 @@
-import { bookClubApi, bookClubQueryKeys } from '@stump/api'
 import {
 	BookClub,
 	BookClubChatBoard,
@@ -10,48 +9,70 @@ import { AxiosError } from 'axios'
 
 import { MutationOptions, queryClient, QueryOptions, useMutation, useQuery } from '../client'
 import { invalidateQueries } from '../invalidate'
+import { useSDK } from '../sdk'
 
-export const prefetchBookClubChat = async (bookClubId: string, id?: string) => {
-	const queryKey = id
-		? [bookClubQueryKeys.getBookClubChatById, id]
-		: [bookClubQueryKeys.getBookClubCurrentChat]
+export const usePrefetchClubChat = ({ id }: { id: string }) => {
+	const { sdk } = useSDK()
 
-	const handler = () =>
-		id
-			? bookClubApi.getBookClubChatById(bookClubId, id)
-			: bookClubApi.getBookClubCurrentChat(bookClubId)
+	const prefetch = async (chatID?: string) => {
+		const queryKey = chatID
+			? [sdk.club.keys.getDiscussionById, chatID]
+			: [sdk.club.keys.getCurrentDiscussion]
 
-	await queryClient.prefetchQuery(queryKey, () => handler(), {
-		staleTime: 10 * 1000,
-	})
+		queryClient.prefetchQuery(
+			queryKey,
+			() => {
+				if (chatID) {
+					return sdk.club.getDiscussionById(id, chatID)
+				} else {
+					return sdk.club.getCurrentDiscussion(id)
+				}
+			},
+			{
+				staleTime: 10 * 1000,
+			},
+		)
+	}
+
+	return { prefetch }
 }
 
-export const prefetchThread = async (bookClubId: string, chatId: string, threadId: string) =>
-	await queryClient.prefetchQuery(
-		[bookClubQueryKeys.getBookClubChatThread, bookClubId, chatId, threadId],
-		() => bookClubApi.getBookClubChatThread(bookClubId, chatId, threadId),
-		{
-			staleTime: 10 * 1000,
-		},
-	)
+type UsePrefetchClubThreadParams = {
+	bookClubId: string
+	chatId: string
+	threadId: string
+}
+export const usePrefetchClubThread = () => {
+	const { sdk } = useSDK()
+
+	const prefetch = async ({ bookClubId, chatId, threadId }: UsePrefetchClubThreadParams) =>
+		queryClient.prefetchQuery(
+			[sdk.club.keys.getDiscussionThread, bookClubId, chatId, threadId],
+			() => sdk.club.getDiscussionThread(bookClubId, chatId, threadId),
+			{
+				staleTime: 10 * 1000,
+			},
+		)
+
+	return { prefetch }
+}
 
 type UseBookClubsQueryOptions = QueryOptions<BookClub[]> & {
 	params?: GetBookClubsParams
 }
+
 export function useBookClubsQuery({ params, ...options }: UseBookClubsQueryOptions = {}) {
-	const { data, ...rest } = useQuery(
-		[bookClubQueryKeys.getBookClubs],
-		() => bookClubApi.getBookClubs(params).then((res) => res.data),
-		options,
-	)
+	const { sdk } = useSDK()
+	const { data, ...rest } = useQuery([sdk.club.keys.get], async () => sdk.club.get(params), options)
 
 	return { bookClubs: data, ...rest }
 }
 
 export function useBookClubQuery(id: string, options: QueryOptions<BookClub> = {}) {
+	const { sdk } = useSDK()
 	const { data, ...rest } = useQuery(
-		[bookClubQueryKeys.getBookClubById, id],
-		() => bookClubApi.getBookClubById(id).then((res) => res.data),
+		[sdk.club.getByID, id],
+		async () => sdk.club.getByID(id),
 		options,
 	)
 
@@ -63,31 +84,36 @@ type UseBookClubChatQueryOptions = QueryOptions<BookClubChatBoard> & {
 	chatId?: string
 }
 export function useChatBoardQuery({ bookClubId, chatId, ...options }: UseBookClubChatQueryOptions) {
+	const { sdk } = useSDK()
+
 	const queryKey = chatId
-		? [bookClubQueryKeys.getBookClubChatById, chatId]
-		: [bookClubQueryKeys.getBookClubCurrentChat]
+		? [sdk.club.keys.getDiscussionById, chatId]
+		: [sdk.club.keys.getCurrentDiscussion]
 
-	const handler = () =>
-		chatId
-			? bookClubApi.getBookClubChatById(bookClubId, chatId)
-			: bookClubApi.getBookClubCurrentChat(bookClubId)
-
-	const { data, ...rest } = useQuery(queryKey, () => handler().then((res) => res.data), options)
+	const { data, ...rest } = useQuery(
+		queryKey,
+		async () => {
+			if (chatId) {
+				return sdk.club.getDiscussionById(bookClubId, chatId)
+			} else {
+				return sdk.club.getCurrentDiscussion(bookClubId)
+			}
+		},
+		options,
+	)
 	return { chatBoard: data, ...rest }
 }
 
 export function useCreateBookClub(
 	options: MutationOptions<BookClub, AxiosError, CreateBookClub> = {},
 ) {
+	const { sdk } = useSDK()
 	const { mutateAsync: createBookClub, ...rest } = useMutation(
-		[bookClubQueryKeys.createBookClub],
-		async (variables) => {
-			const { data } = await bookClubApi.createBookClub(variables)
-			return data
-		},
+		[sdk.club.keys.create],
+		(variables) => sdk.club.create(variables),
 		{
 			onSuccess: (bookClub, _, __) => {
-				queryClient.setQueryData([bookClubQueryKeys.getBookClubById, bookClub.id], bookClub)
+				queryClient.setQueryData([sdk.club.keys.getByID, bookClub.id], bookClub)
 				options.onSuccess?.(bookClub, _, __)
 				return bookClub
 			},
@@ -105,16 +131,14 @@ type UseBookClubChatMutationOptions = {
 	id: string
 } & MutationOptions<BookClub, AxiosError, UpdateBookClub>
 export function useUpdateBookClub({ id, ...options }: UseBookClubChatMutationOptions) {
+	const { sdk } = useSDK()
 	const { mutateAsync: updateBookClub, ...rest } = useMutation(
-		[bookClubQueryKeys.updateBookClub],
-		async (variables) => {
-			const { data } = await bookClubApi.updateBookClub(id, variables)
-			return data
-		},
+		[sdk.club.keys.update, id],
+		async (variables) => sdk.club.update(id, variables),
 		{
 			onSuccess: (bookClub, _, __) => {
 				invalidateQueries({
-					keys: [bookClubQueryKeys.getBookClubs, bookClubQueryKeys.getBookClubChatById],
+					keys: [sdk.club.keys.get, sdk.club.keys.getDiscussionById],
 				})
 				options.onSuccess?.(bookClub, _, __)
 				return bookClub

@@ -1,5 +1,4 @@
-import { getSeriesThumbnail } from '@stump/api'
-import { useSeriesCursorQuery } from '@stump/client'
+import { useSDK, useSeriesCursorQuery } from '@stump/client'
 import { Series } from '@stump/types'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import React, { useCallback, useEffect } from 'react'
@@ -12,6 +11,7 @@ type Props = {
 }
 // TODO: Create generlized VirtualizedGrid component and trim the reused logic
 export default function LibrarySeriesGrid({ libraryId, onSelectSeries }: Props) {
+	const { sdk } = useSDK()
 	const { series, fetchNextPage, hasNextPage } = useSeriesCursorQuery({
 		limit: 50,
 		params: {
@@ -98,7 +98,7 @@ export default function LibrarySeriesGrid({ libraryId, onSelectSeries }: Props) 
 									{columnVirtualizer.getVirtualItems().map((virtualColumn) => {
 										const virtualPage = virtualRow.index * 4 + virtualColumn.index + 1
 										const thisSeries = series[virtualPage - 1]
-										const imageUrl = getSeriesThumbnail(thisSeries?.id || '')
+										const imageUrl = sdk.series.thumbnailURL(thisSeries?.id || '')
 										return (
 											<div
 												key={virtualColumn.index}

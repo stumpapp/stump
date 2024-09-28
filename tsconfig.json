@@ -18,6 +18,9 @@
 			"path": "packages/api"
 		},
 		{
+			"path": "packages/sdk"
+		},
+		{
 			"path": "packages/client"
 		},
 		{

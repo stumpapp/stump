@@ -1,8 +1,7 @@
 import './styles/index.css'
 import '@stump/components/styles/overrides.css'
 
-import { initializeApi } from '@stump/api'
-import { StumpClientContextProvider, StumpClientProps } from '@stump/client'
+import { SDKProvider, StumpClientContextProvider, StumpClientProps } from '@stump/client'
 import { defaultContext } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useEffect, useState } from 'react'
@@ -15,7 +14,6 @@ import Notifications from '@/components/Notifications'
 
 import { AppRouter } from './AppRouter'
 import { useApplyTheme } from './hooks'
-import { API_VERSION } from './index'
 import { useAppStore, useUserStore } from './stores'
 
 const IS_DEVELOPMENT = import.meta.env.MODE === 'development'
@@ -51,8 +49,6 @@ function RouterContainer(props: StumpClientProps) {
 		() => {
 			if (!baseUrl && props.baseUrl) {
 				setBaseUrl(props.baseUrl)
-			} else if (baseUrl) {
-				initializeApi(baseUrl, API_VERSION)
 			}
 
 			setMounted(true)
@@ -103,17 +99,19 @@ function RouterContainer(props: StumpClientProps) {
 	}
 
 	return (
-		<StumpClientContextProvider
-			onUnauthenticatedResponse={handleUnathenticatedResponse}
-			onConnectionWithServerChanged={handleConnectionWithServerChanged}
-			tauriRPC={props.tauriRPC}
-		>
-			{IS_DEVELOPMENT && <ReactQueryDevtools position="bottom-right" context={defaultContext} />}
-			<Helmet defaultTitle="Stump">
-				<title>Stump</title>
-			</Helmet>
-			<AppRouter />
-			<Notifications />
-		</StumpClientContextProvider>
+		<SDKProvider baseURL={baseUrl || ''} authMethod="session">
+			<StumpClientContextProvider
+				onUnauthenticatedResponse={handleUnathenticatedResponse}
+				onConnectionWithServerChanged={handleConnectionWithServerChanged}
+				tauriRPC={props.tauriRPC}
+			>
+				{IS_DEVELOPMENT && <ReactQueryDevtools position="bottom-right" context={defaultContext} />}
+				<Helmet defaultTitle="Stump">
+					<title>Stump</title>
+				</Helmet>
+				<AppRouter />
+				<Notifications />
+			</StumpClientContextProvider>
+		</SDKProvider>
 	)
 }

@@ -1,4 +1,3 @@
-import { mediaQueryKeys } from '@stump/api'
 import { invalidateQueries, useMediaByIdQuery, useUpdateMediaProgress } from '@stump/client'
 import { Media } from '@stump/types'
 import { Suspense, useEffect } from 'react'

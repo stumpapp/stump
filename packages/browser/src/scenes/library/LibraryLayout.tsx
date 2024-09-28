@@ -1,4 +1,4 @@
-import { useLibraryByIdQuery, useLibraryStats } from '@stump/client'
+import { useLibraryByID, useLibraryStats } from '@stump/client'
 import { cn } from '@stump/components'
 import React, { useMemo } from 'react'
 import { Suspense, useEffect } from 'react'
@@ -22,7 +22,7 @@ export default function LibraryLayout() {
 		throw new Error('Library id is required')
 	}
 
-	const { isLoading, library } = useLibraryByIdQuery(id)
+	const { isLoading, library } = useLibraryByID(id)
 	const { stats } = useLibraryStats({ cacheTime: 1000 * 60 * 5, id })
 	const {
 		preferences: {

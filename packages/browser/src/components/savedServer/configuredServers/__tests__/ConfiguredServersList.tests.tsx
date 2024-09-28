@@ -1,5 +1,5 @@
-import { checkUrl } from '@stump/api'
-import { queryClient, QueryClientContext, StumpClientContext } from '@stump/client'
+import { queryClient, QueryClientContext, SDKProvider, StumpClientContext } from '@stump/client'
+import { checkUrl } from '@stump/sdk'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { useLocation, useNavigate } from 'react-router'
 
@@ -59,17 +59,19 @@ jest.mock('@stump/client', () => ({
 }))
 const useClientContextRet = {} as any
 
-jest.mock('@stump/api', () => ({
-	...jest.requireActual('@stump/api'),
+jest.mock('@stump/sdk', () => ({
+	...jest.requireActual('@stump/sdk'),
 	checkUrl: jest.fn(),
 }))
 
 const Subject = () => (
-	<QueryClientContext.Provider value={queryClient}>
-		<StumpClientContext.Provider value={useClientContextRet}>
-			<ConfiguredServersList />
-		</StumpClientContext.Provider>
-	</QueryClientContext.Provider>
+	<SDKProvider baseURL="baseURL" authMethod="session">
+		<QueryClientContext.Provider value={queryClient}>
+			<StumpClientContext.Provider value={useClientContextRet}>
+				<ConfiguredServersList />
+			</StumpClientContext.Provider>
+		</QueryClientContext.Provider>
+	</SDKProvider>
 )
 
 describe('ConfiguredServersList', () => {

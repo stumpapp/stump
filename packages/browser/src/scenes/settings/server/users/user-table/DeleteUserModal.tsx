@@ -1,5 +1,4 @@
-import { userQueryKeys } from '@stump/api'
-import { invalidateQueries, useDeleteUser } from '@stump/client'
+import { invalidateQueries, useDeleteUser, useSDK } from '@stump/client'
 import { Button, CheckBox, Dialog } from '@stump/components'
 import { useState } from 'react'
 import { toast } from 'react-hot-toast'
@@ -9,6 +8,7 @@ import { useUser } from '@/stores'
 import { useUserManagementContext } from '../context'
 
 export default function DeleteUserModal() {
+	const { sdk } = useSDK()
 	const { user } = useUser()
 	const { deletingUser, setDeletingUser } = useUserManagementContext()
 
@@ -29,7 +29,7 @@ export default function DeleteUserModal() {
 		} else {
 			try {
 				await deleteAsync()
-				await invalidateQueries({ queryKey: [userQueryKeys.getUsers] })
+				await invalidateQueries({ exact: false, queryKey: [sdk.user.keys.get] })
 				setDeletingUser(null)
 			} catch (error) {
 				console.error(error)

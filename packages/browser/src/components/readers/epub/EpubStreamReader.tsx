@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 // FIXME: this file is a mess
-import { getEpubResource } from '@stump/api'
-import { UseEpubReturn } from '@stump/client'
+import { UseEpubReturn, useSDK } from '@stump/client'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -22,6 +21,7 @@ import { useNavigate } from 'react-router-dom'
 	Some of this has been started, but not finished.
 */
 export default function EpubStreamReader({ epub, actions, ...rest }: UseEpubReturn) {
+	const { sdk } = useSDK()
 	const navigate = useNavigate()
 
 	// const { isLoading: isFetchingResource, data: content } = useQuery(
@@ -35,16 +35,17 @@ export default function EpubStreamReader({ epub, actions, ...rest }: UseEpubRetu
 
 	useEffect(
 		() => {
-			getEpubResource({
-				id: epub.media_entity.id,
-				resourceId: actions.currentResource()?.content!,
-				root: epub.root_base,
-			}).then((res) => {
-				console.debug(res)
-
-				// FIXME: don't cast
-				setContent(rest.correctHtmlUrls(res.data as string))
-			})
+			sdk.epub
+				.fetchResource({
+					id: epub.media_entity.id,
+					resourceId: actions.currentResource()?.content!,
+					root: epub.root_base,
+				})
+				.then((res) => {
+					console.debug(res)
+					// FIXME: don't cast
+					setContent(rest.correctHtmlUrls(res as string))
+				})
 		},
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps

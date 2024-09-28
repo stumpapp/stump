@@ -1,6 +1,6 @@
-import { isAxiosError } from '@stump/api'
 import { useAuthQuery, useCoreEventHandler } from '@stump/client'
 import { cn, cx } from '@stump/components'
+import { isAxiosError } from '@stump/sdk'
 import { UserPermission, UserPreferences } from '@stump/types'
 import { useOverlayScrollbars } from 'overlayscrollbars-react'
 import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'

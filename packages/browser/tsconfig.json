@@ -9,8 +9,8 @@
 		"moduleResolution": "Node",
 		"outDir": "./dist",
 		"paths": {
-			"@stump/api": ["../api/src/index.ts"],
-			"@stump/api/*": ["../api/src/*"],
+			"@stump/sdk": ["../sdk/src/index.ts"],
+			"@stump/sdk/*": ["../sdk/src/*"],
 			"@stump/client": ["../client/src/index.ts"],
 			"@stump/client/*": ["../client/src/*"],
 			"@stump/components": ["../components/src/index.ts"],
@@ -31,7 +31,7 @@
 	"include": ["src", "src/**/*.json"],
 	"references": [
 		{
-			"path": "../api"
+			"path": "../sdk"
 		},
 		{
 			"path": "../client"

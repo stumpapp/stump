@@ -1,4 +1,4 @@
-import { prefetchBookClubChat } from '@stump/client'
+import { usePrefetchClubChat } from '@stump/client'
 import { cn, cx, Link } from '@stump/components'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
@@ -17,6 +17,7 @@ export default function BookClubNavigation() {
 		bookClub: { id },
 		viewerIsMember,
 	} = useBookClubContext()
+	const { prefetch } = usePrefetchClubChat({ id })
 
 	const tabs = useMemo(() => {
 		const base = [
@@ -36,7 +37,7 @@ export default function BookClubNavigation() {
 			{
 				isActive: location.pathname.match(/\/book-clubs\/[^/]+\/chat-board(\/.*)?$/),
 				label: 'Chat Board',
-				onHover: () => prefetchBookClubChat(id),
+				onHover: () => prefetch(),
 				to: 'chat-board',
 			},
 			{
@@ -50,7 +51,7 @@ export default function BookClubNavigation() {
 				to: 'settings',
 			},
 		]
-	}, [location, viewerIsMember, id])
+	}, [location, viewerIsMember, prefetch])
 
 	const preferTopBar = primary_navigation_mode === 'TOPBAR'
 

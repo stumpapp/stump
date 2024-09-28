@@ -1,4 +1,4 @@
-import { getMediaThumbnail } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { AspectRatio, Button, Card, DatePicker, Heading, Input, Text } from '@stump/components'
 import { Media } from '@stump/types'
 import React, { useEffect, useState } from 'react'
@@ -13,6 +13,7 @@ type Props = {
 	index: number
 }
 export default function AddBookCard({ index }: Props) {
+	const { sdk } = useSDK()
 	const [selectedBook, setSelectedBook] = useState<Media | null>(null)
 
 	const form = useFormContext<Schema>()
@@ -50,7 +51,10 @@ export default function AddBookCard({ index }: Props) {
 			<div className="flex">
 				<div className="max-h-[195px] w-[125px]">
 					<AspectRatio ratio={2 / 3}>
-						<img src={getMediaThumbnail(selectedBook.id)} className="rounded-md object-cover" />
+						<img
+							src={sdk.media.thumbnailURL(selectedBook.id)}
+							className="rounded-md object-cover"
+						/>
 					</AspectRatio>
 				</div>
 				<div className="ml-4 flex flex-col gap-1.5">

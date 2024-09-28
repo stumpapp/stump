@@ -5,8 +5,8 @@
 		"jsx": "preserve",
 		"module": "esnext",
 		"paths": {
-			"@stump/api": ["../../packages/api/src/index.ts"],
-			"@stump/api/*": ["../../packages/api/src/*"],
+			"@stump/sdk": ["../../packages/sdk/src/index.ts"],
+			"@stump/sdk/*": ["../../packages/sdk/src/*"],
 			"@stump/client": ["../../packages/client/src/index.ts"],
 			"@stump/client/*": ["../../packages/client/src/*"],
 			"@stump/types": ["../../packages/types/index.ts"],

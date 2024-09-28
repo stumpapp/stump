@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { isAxiosError } from '@stump/api'
+import { isAxiosError } from '@stump/sdk'
 import { queryClient, useLoginOrRegister } from '@stump/client'
 import { Alert, Button, cx, Form, Heading, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'

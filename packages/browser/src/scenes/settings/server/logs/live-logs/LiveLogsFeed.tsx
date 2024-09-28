@@ -1,4 +1,4 @@
-import { API } from '@stump/api'
+import { useSDK } from '@stump/client'
 import React, { useEffect, useRef, useState } from 'react'
 
 const MAX_BUFFER_SIZE = 1000
@@ -8,6 +8,7 @@ const MAX_BUFFER_SIZE = 1000
  * a SSE (Server-Sent Events) endpoint on the server.
  */
 export default function LiveLogsFeed() {
+	const { sdk } = useSDK()
 	const [source, setSource] = useState<EventSource | null>(null)
 
 	/**
@@ -22,7 +23,7 @@ export default function LiveLogsFeed() {
 
 	useEffect(() => {
 		if (!source) {
-			const URI = API?.getUri()
+			const URI = sdk.serviceURL
 
 			const newSource = new EventSource(`${URI}/logs/file/tail`, {
 				withCredentials: true,
@@ -52,7 +53,7 @@ export default function LiveLogsFeed() {
 		return () => {
 			source?.close()
 		}
-	}, [source])
+	}, [source, sdk.serviceURL])
 
 	// whenever a new log is added to the buffer, we want to scroll to the bottom of the logs
 	useEffect(() => {

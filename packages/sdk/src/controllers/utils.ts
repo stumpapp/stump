@@ -4,6 +4,24 @@ import qs from 'qs'
 
 import { CursorQueryParams, PagedQueryParams } from './types'
 
+export const createRouteURLHandler =
+	(baseURL: string) => (endpoint: string, params?: Record<string, unknown>) => {
+		let adjustedParams: Record<string, unknown> | undefined = undefined
+
+		if (!!params && 'params' in params && typeof params.params === 'object') {
+			const innerParams = params.params
+			delete params.params
+			adjustedParams = { ...params, ...innerParams }
+		} else {
+			adjustedParams = params
+		}
+
+		return urlWithParams(
+			`${baseURL}${!endpoint.length || endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`,
+			toUrlParams(adjustedParams),
+		)
+	}
+
 /** Formats a string with UrlSearchParams */
 export const urlWithParams = (url: string, params?: URLSearchParams) => {
 	// NOTE: it is important to decode the params because qs.stringify will encode them

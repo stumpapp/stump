@@ -114,7 +114,7 @@ impl SessionStore for PrismaSessionStore {
 			.session()
 			.upsert(
 				session::id::equals(session_id.clone()),
-				(
+				session::create(
 					expiry_time,
 					session_data.clone(),
 					user::id::equals(user.id.clone()),

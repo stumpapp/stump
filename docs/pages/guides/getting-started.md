@@ -10,7 +10,7 @@ This section contains various guides for using and configuring Stump. If you hav
 - [Configuration](/guides/configuration): The configuration guides for adjusting Stump to your needs
 - [Smart Lists](/guides/smart-lists): The smart list guide for creating and managing smart lists
 - [Reading Lists](/guides/reading-lists): The reading list guide for creating and managing reading lists
-- [Library Explorer](/guides/library-explorer): The library explorer guide for exploring and managing your libraries
+- [File Explorer](/guides/file-explorer): The library explorer guide for exploring and managing your libraries
 - [OPDS](/guides/opds): The OPDS guide for using the OPDS features in Stump
 - [API](/guides/api): The API guide for using the Stump API
 - [CLI](/guides/cli): The CLI guide for using the Stump CLI

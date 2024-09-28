@@ -110,13 +110,15 @@ model Library {
 }
 
 model LibraryConfig {
-  id                      String  @id @default(uuid())
-  library_pattern         String  @default("SERIES_BASED") // SERIES_BASED or COLLECTION_BASED
-  // Scanning opt-in settings
-  convert_rar_to_zip      Boolean @default(false)
-  hard_delete_conversions Boolean @default(false)
-  generate_file_hashes    Boolean @default(false)
-  process_metadata        Boolean @default(true)
+  id                              String  @id @default(uuid())
+  convert_rar_to_zip              Boolean @default(false)
+  hard_delete_conversions         Boolean @default(false)
+  default_reading_dir             String  @default("ltr") // ltr or rtl
+  default_reading_mode            String  @default("paged") // paged or continuous:(horizontal|vertical)
+  default_reading_image_scale_fit String  @default("height") // height, width, none (original)
+  generate_file_hashes            Boolean @default(false)
+  process_metadata                Boolean @default(true)
+  library_pattern                 String  @default("SERIES_BASED") // SERIES_BASED or COLLECTION_BASED
 
   thumbnail_config Bytes? // { size_factor: "...", format: "...", quality: ... }
   ignore_rules     Bytes? // ["glob1", "glob2", ...]
@@ -190,7 +192,8 @@ model Media {
   pages       Int
   updated_at  DateTime  @updatedAt
   created_at  DateTime  @default(now())
-  modified_at DateTime?
+  modified_at DateTime? // last modified date of the file
+  deleted_at  DateTime?
   hash        String? // This is **not** an integrity check(sum), and is not used to verify the file contents.
   path        String
   status      String    @default("READY") // UNKNOWN, READY, UNSUPPORTED, ERROR, MISSING
@@ -713,6 +716,7 @@ model UserPreferences {
   enable_live_refetch     Boolean @default(false)
   enable_discord_presence Boolean @default(false)
   enable_compact_display  Boolean @default(false)
+  enable_gradients        Boolean @default(false) // Some themes have gradients, not all
 
   enable_double_sidebar          Boolean @default(true)
   enable_replace_primary_sidebar Boolean @default(false)

@@ -25,7 +25,7 @@ export { Drawer } from './drawer'
 export { Dropdown, DropdownMenu, type DropdownMenuProps } from './dropdown'
 export { EmojiPicker } from './emoji'
 export { Form, type FormProps, Label, type LabelProps } from './form'
-export { useBodyLock, useBoolean, usePrevious, usePreviousIsDifferent } from './hooks'
+export { useBodyLock, useBoolean, usePrevious, usePreviousIsDifferent, useSticky } from './hooks'
 export { AspectRatio, Avatar, Image } from './image'
 export {
 	CheckBox,
@@ -46,6 +46,7 @@ export { RadioGroup } from './radio'
 export { ScrollArea, ScrollBar } from './scroll-area'
 export { ComboBox, type ComboBoxProps, NativeSelect, type NativeSelectProps } from './select'
 export { Sheet, SheetPrimitive } from './sheet'
+export { Slider } from './slider'
 export { Tabs } from './tabs'
 export {
 	Heading,

@@ -50,7 +50,7 @@ export default function ChatMessage({ message, chatId, isArchived }: Props) {
 					<IconButton variant="ghost" size="sm" className="flex items-center gap-2">
 						<ThumbsUp
 							className={cx('h-4 w-4', {
-								'text-brand dark:text-brand-600': isLikedByViewer,
+								'text-foreground-brand': isLikedByViewer,
 							})}
 						/>
 					</IconButton>

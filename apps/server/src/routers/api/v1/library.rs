@@ -1318,6 +1318,15 @@ async fn create_library(
 					library_config::generate_file_hashes::set(
 						library_config.generate_file_hashes,
 					),
+					library_config::default_reading_dir::set(
+						library_config.default_reading_dir.to_string(),
+					),
+					library_config::default_reading_image_scale_fit::set(
+						library_config.default_reading_image_scale_fit.to_string(),
+					),
+					library_config::default_reading_mode::set(
+						library_config.default_reading_mode.to_string(),
+					),
 					library_config::library_pattern::set(
 						library_config.library_pattern.to_string(),
 					),
@@ -1522,6 +1531,15 @@ async fn update_library(
 						),
 						library_config::process_metadata::set(
 							library_config.process_metadata,
+						),
+						library_config::default_reading_dir::set(
+							library_config.default_reading_dir.to_string(),
+						),
+						library_config::default_reading_image_scale_fit::set(
+							library_config.default_reading_image_scale_fit.to_string(),
+						),
+						library_config::default_reading_mode::set(
+							library_config.default_reading_mode.to_string(),
 						),
 						library_config::generate_file_hashes::set(
 							library_config.generate_file_hashes,

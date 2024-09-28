@@ -2,6 +2,8 @@ import { Text, ToolTip } from '@stump/components'
 import { DirectoryListingFile, Media } from '@stump/types'
 import React, { useEffect, useMemo, useState } from 'react'
 
+import { formatBookName } from '@/utils/format'
+
 import { useFileExplorerContext } from '../context'
 import FileThumbnail, { getBook } from '../FileThumbnail'
 
@@ -16,7 +18,7 @@ export default function FileGridItem({ file }: Props) {
 
 	const [book, setBook] = useState<Media>()
 
-	const tooltipName = useMemo(() => (book ? book.metadata?.title || book.name : name), [book, name])
+	const tooltipName = useMemo(() => (book ? formatBookName(book) : name), [book, name])
 
 	/**
 	 * An effect that attempts to fetch the book associated with the file, if any exists.

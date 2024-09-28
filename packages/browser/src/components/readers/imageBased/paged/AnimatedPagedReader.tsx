@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useWindowSize } from 'rooks'
 
-import { useReaderStore } from '@/stores'
+import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { PagedReaderProps } from './PagedReader'
 
@@ -105,10 +105,10 @@ export default function AnimatedPagedReader({
 	const nextControls = useAnimation()
 	const prevControls = useAnimation()
 
-	const { showToolBar, setShowToolBar } = useReaderStore((state) => ({
-		setShowToolBar: state.setShowToolBar,
-		showToolBar: state.showToolBar,
-	}))
+	const {
+		settings: { showToolBar },
+		setSettings,
+	} = useBookPreferences({ book: media })
 
 	// This is for the hotkeys
 	const currPageRef = useRef(currentPage)
@@ -189,10 +189,10 @@ export default function AnimatedPagedReader({
 				handleHotKeyPagination('prev')
 				break
 			case 'space':
-				setShowToolBar(!showToolBar)
+				setSettings({ showToolBar: !showToolBar })
 				break
 			case 'escape':
-				setShowToolBar(false)
+				setSettings({ showToolBar: false })
 				break
 			default:
 				break

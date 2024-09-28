@@ -1,17 +1,17 @@
-import { getMediaPage } from '@stump/api'
-import { useUpdateMediaProgress } from '@stump/client'
+import { getMediaPage, mediaQueryKeys } from '@stump/api'
+import { queryClient, useUpdateMediaProgress } from '@stump/client'
 import { Media } from '@stump/types'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { usePreloadPage } from '@/hooks/usePreloadPage'
 import paths from '@/paths'
-import { useReaderStore } from '@/stores'
+import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
-import AnimatedPagedReader from './AnimatedPagedReader'
-import ContinuousScrollReader from './ContinuousScrollReader'
-import PagedReader from './PagedReader'
-import ReaderContainer from './ReaderContainer'
+import ReaderContainer from './container'
+import { ImageBaseReaderContext, ImagePageDimensionRef } from './context'
+import { ContinuousScrollReader } from './continuous'
+import { AnimatedPagedReader, PagedReader } from './paged'
 
 type Props = {
 	/**
@@ -47,14 +47,13 @@ export default function ImageBasedReader({
 	 * The current page of the reader
 	 */
 	const [currentPage, setCurrentPage] = useState(initialPage || 1)
+	const [pageDimensions, setPageDimensions] = useState<Record<number, ImagePageDimensionRef>>({})
 
-	const { readerMode, preloadCounts } = useReaderStore((state) => ({
-		preloadCounts: {
-			ahead: state.preloadAheadCount,
-			behind: state.preloadBehindCount,
-		},
-		readerMode: state.mode,
-	}))
+	const {
+		settings: { preload },
+		bookPreferences: { readingMode },
+		setSettings,
+	} = useBookPreferences({ book: media })
 
 	const { updateReadProgress } = useUpdateMediaProgress(media.id, {
 		onError(err) {
@@ -79,14 +78,14 @@ export default function ImageBasedReader({
 	 */
 	const handleChangePage = useCallback(
 		(newPage: number) => {
-			if (readerMode === 'continuous') {
+			if (readingMode.startsWith('continuous')) {
 				setCurrentPage(newPage)
 			} else {
 				setCurrentPage(newPage)
 				navigate(paths.bookReader(media.id, { isAnimated, isIncognito, page: newPage }))
 			}
 		},
-		[media.id, isAnimated, isIncognito, navigate, readerMode],
+		[media.id, isAnimated, isIncognito, navigate, readingMode],
 	)
 
 	/**
@@ -101,13 +100,13 @@ export default function ImageBasedReader({
 	 */
 	const pagesToPreload = useMemo(
 		() =>
-			[...Array(preloadCounts.behind).keys()]
+			[...Array(preload.behind).keys()]
 				.map((i) => currentPage - i - 1)
 				.reverse()
-				.concat([...Array(preloadCounts.ahead).keys()].map((i) => currentPage + i + 1))
+				.concat([...Array(preload.ahead).keys()].map((i) => currentPage + i + 1))
 				.filter((i) => i > 0 && i <= lastPage),
 
-		[currentPage, preloadCounts, lastPage],
+		[currentPage, preload, lastPage],
 	)
 
 	/**
@@ -115,20 +114,40 @@ export default function ImageBasedReader({
 	 * prevent wait times for the next page to load.
 	 */
 	usePreloadPage({
+		onStoreDimensions: (page, dimensions) =>
+			setPageDimensions((prev) => ({ ...prev, [page]: dimensions })),
 		pages: pagesToPreload,
 		urlBuilder: getPageUrl,
 	})
 
+	/**
+	 * This effect is primarily responsible for two cleanup tasks:
+	 *
+	 * 1. Hiding the toolbar when the component unmounts. This is done to ensure that the toolbar is not
+	 *    visible when the user navigates *back* to a reader again at some point.
+	 * 2. Invalidating the in-progress media query when the component unmounts. This is done to ensure that
+	 *    when the user navigates away from the reader, the in-progress media is accurately reflected with
+	 *    the latest reading session.
+	 */
+	useEffect(() => {
+		return () => {
+			setSettings({
+				showToolBar: false,
+			})
+			queryClient.invalidateQueries([mediaQueryKeys.getInProgressMedia], { exact: false })
+		}
+	}, [setSettings])
+
 	const renderReader = () => {
-		if (readerMode === 'continuous') {
+		if (readingMode.startsWith('continuous')) {
 			return (
 				<ContinuousScrollReader
 					media={media}
 					initialPage={currentPage}
 					getPageUrl={getPageUrl}
-					orientation="vertical"
 					onProgressUpdate={handleUpdateProgress}
 					onPageChanged={handleChangePage}
+					orientation={(readingMode.split(':')[1] as 'vertical' | 'horizontal') || 'vertical'}
 				/>
 			)
 		} else {
@@ -145,8 +164,16 @@ export default function ImageBasedReader({
 	}
 
 	return (
-		<ReaderContainer media={media} currentPage={currentPage} onPageChange={handleChangePage}>
-			{renderReader()}
-		</ReaderContainer>
+		<ImageBaseReaderContext.Provider
+			value={{
+				book: media,
+				currentPage,
+				pageDimensions,
+				setCurrentPage: handleChangePage,
+				setDimensions: setPageDimensions,
+			}}
+		>
+			<ReaderContainer>{renderReader()}</ReaderContainer>
+		</ImageBaseReaderContext.Provider>
 	)
 }

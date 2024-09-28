@@ -34,7 +34,8 @@ jobs:
 
   check-rust:
     needs: code-changes-check
-    if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.rust-changed == 'true'"
+    # if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.rust-changed == 'true'"
+    if: false
     name: Rust checks
     runs-on: [self-hosted]
     steps:

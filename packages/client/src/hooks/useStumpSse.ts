@@ -1,6 +1,7 @@
-import { API } from '@stump/api'
 import type { CoreEvent } from '@stump/types'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
+
+import { useSDK } from '@/sdk'
 
 interface SseOptions {
 	onOpen?: (event: Event) => void
@@ -73,15 +74,9 @@ interface Props {
 }
 
 export function useStumpSse({ onEvent, onConnectionWithServerChanged }: Props) {
-	const URI = API?.getUri()
+	const { sdk } = useSDK()
 
-	const eventSourceUrl = useMemo(() => {
-		let url = URI
-		// remove /api(/) from end of url
-		url = url.replace(/\/api(\/v\d)?$/, '')
-
-		return `${url}/sse`
-	}, [URI])
+	const eventSourceUrl = useMemo(() => sdk.eventSourceURL, [sdk.eventSourceURL])
 
 	const handleMessage = useCallback(
 		(e: MessageEvent<unknown>) => {

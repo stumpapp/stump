@@ -99,6 +99,7 @@ export class Api {
 	get serviceURL(): string {
 		return formatApiURL(this.baseURL, this.configuration.apiVersion)
 	}
+
 	/**
 	 * Set the URL of the Stump service
 	 */
@@ -108,6 +109,10 @@ export class Api {
 			baseURL: this.serviceURL,
 			withCredentials: this.configuration.authenticationMethod === 'session',
 		})
+	}
+
+	get eventSourceURL(): string {
+		return `${this.baseURL.replace(/\/api(\/v\d)?$/, '')}/sse`
 	}
 
 	/**

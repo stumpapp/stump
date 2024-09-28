@@ -1,3 +1,5 @@
+import axios, { AxiosError } from 'axios'
+
 import { ApiVersion } from './api'
 
 export const formatApiURL = (url: string, version: ApiVersion) => {
@@ -21,4 +23,8 @@ export const formatApiURL = (url: string, version: ApiVersion) => {
 	correctedUrl = correctedUrl.replace(/([^:]\/)\/+/g, '$1')
 
 	return correctedUrl
+}
+
+export const isAxiosError = (error: unknown): error is AxiosError => {
+	return axios.isAxiosError(error)
 }

@@ -1,4 +1,4 @@
-import { Bookmark, CreateOrUpdateBookmark, Epub } from '@stump/types'
+import { Bookmark, CreateOrUpdateBookmark, Epub, UpdateEpubProgress } from '@stump/types'
 
 import { APIBase } from '../base'
 import { ClassQueryKeys } from './types'
@@ -48,6 +48,14 @@ export class EpubAPI extends APIBase {
 			epubURL(`${id}/${root}/${resourceId}`),
 		)
 		return resource
+	}
+
+	async updateProgress({ id, ...payload }: UpdateEpubProgress & { id: string }) {
+		const { data: updatedProgress } = await this.api.axios.put<UpdateEpubProgress>(
+			epubURL(`${id}/progress`),
+			payload,
+		)
+		return updatedProgress
 	}
 
 	/**
@@ -103,6 +111,7 @@ export class EpubAPI extends APIBase {
 			getBookmarks: 'epub.getBookmarks',
 			getByID: 'epub.getByID',
 			updateBookmark: 'epub.updateBookmark',
+			updateProgress: 'epub.updateProgress',
 		}
 	}
 }

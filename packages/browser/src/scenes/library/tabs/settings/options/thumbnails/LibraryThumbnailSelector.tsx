@@ -1,17 +1,18 @@
-import { libraryApi } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { Button, Dialog, Label, Text } from '@stump/components'
 import { Media, Series } from '@stump/types'
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
 import EditThumbnailDropdown from '@/components/thumbnail/EditThumbnailDropdown'
+import BookPageGrid from '@/scenes/book/settings/BookPageGrid'
+import { useLibraryContext } from '@/scenes/library/context'
+import SeriesBookGrid from '@/scenes/series/tabs/settings/SeriesBookGrid'
 
-import BookPageGrid from '../../../../../book/settings/BookPageGrid'
-import SeriesBookGrid from '../../../../../series/tabs/settings/SeriesBookGrid'
-import { useLibraryContext } from '../../../../context'
 import LibrarySeriesGrid from '../../LibrarySeriesGrid'
 
 export default function LibraryThumbnailSelector() {
+	const { sdk } = useSDK()
 	const [selectedSeries, setSelectedSeries] = useState<Series>()
 	const [selectedBook, setSelectedBook] = useState<Media>()
 	const [page, setPage] = useState<number>()
@@ -35,7 +36,7 @@ export default function LibraryThumbnailSelector() {
 
 	const handleUploadImage = async (file: File) => {
 		try {
-			await libraryApi.uploadLibraryThumbnail(library.id, file)
+			await sdk.library.uploadThumbnail(library.id, file)
 			setIsOpen(false)
 		} catch (error) {
 			console.error(error)
@@ -47,7 +48,7 @@ export default function LibraryThumbnailSelector() {
 		if (!selectedBook || !page) return
 
 		try {
-			await libraryApi.patchLibraryThumbnail(library.id, {
+			await sdk.library.updateThumbnail(library.id, {
 				media_id: selectedBook.id,
 				page,
 			})

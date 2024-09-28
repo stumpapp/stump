@@ -3651,7 +3651,6 @@ name = "integrations"
 version = "0.0.5"
 dependencies = [
  "async-trait",
- "dotenv",
  "lettre",
  "reqwest 0.12.7",
  "serde_json",
@@ -7803,6 +7802,7 @@ dependencies = [
  "serde-untagged",
  "serde_json",
  "serde_qs",
+ "serde_with",
  "specta",
  "stump_core",
  "thiserror",

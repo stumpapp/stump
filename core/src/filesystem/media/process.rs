@@ -330,6 +330,7 @@ pub fn get_content_types_for_pages(
 			RarProcessor::get_page_content_types(path, pages)
 		},
 		"application/epub+zip" => EpubProcessor::get_page_content_types(path, pages),
+		"application/pdf" => PdfProcessor::get_page_content_types(path, pages),
 		_ => Err(FileError::UnsupportedFileType(path.to_string())),
 	}
 }
@@ -355,6 +356,7 @@ fn get_content_type_for_page_sync(
 		"application/epub+zip" => {
 			EpubProcessor::get_page_content_types(path, [page].to_vec())
 		},
+		"application/pdf" => PdfProcessor::get_page_content_types(path, [page].to_vec()),
 		_ => return Err(FileError::UnsupportedFileType(path.to_string())),
 	}?;
 

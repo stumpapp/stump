@@ -1,8 +1,4 @@
-import {
-	useLibraryExclusionsMutation,
-	useLibraryExclusionsQuery,
-	useUsersQuery,
-} from '@stump/client'
+import { useLibraryExclusions, useUpdateLibraryExclusions, useUsersQuery } from '@stump/client'
 import { Alert, ComboBox, Heading, Text, usePrevious } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
@@ -19,11 +15,11 @@ export default function LibraryExclusions() {
 	const { t } = useLocaleContext()
 
 	const { users: allUsers, isLoading: isLoadingUsers } = useUsersQuery()
-	const { excludedUsers, isLoading: isLoadingExclusions } = useLibraryExclusionsQuery({
+	const { excludedUsers, isLoading: isLoadingExclusions } = useLibraryExclusions({
 		id: library.id,
 	})
 
-	const { updateExcludedUsersAsync } = useLibraryExclusionsMutation({ id: library.id })
+	const { updateExcludedUsersAsync } = useUpdateLibraryExclusions({ id: library.id })
 	const update = useCallback(
 		async (ids: string[]) => {
 			try {

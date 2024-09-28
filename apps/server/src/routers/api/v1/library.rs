@@ -8,6 +8,7 @@ use chrono::Duration;
 use prisma_client_rust::{chrono::Utc, not, or, raw, PrismaValue};
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
+use serde_with::skip_serializing_none;
 use specta::Type;
 use std::path;
 use tokio::fs;
@@ -57,7 +58,7 @@ use crate::{
 		LibraryFilter, LibraryRelationFilter, MediaFilter, SeriesFilter,
 	},
 	middleware::auth::{auth_middleware, RequestContext},
-	utils::{http::ImageResponse, validate_image_upload},
+	utils::{http::ImageResponse, validate_and_load_image},
 };
 
 use super::{
@@ -107,7 +108,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 								.patch(patch_library_thumbnail)
 								.post(replace_library_thumbnail)
 								// TODO: configurable max file size
-								.layer(DefaultBodyLimit::max(20 * 1024 * 1024)) // 20MB
+								.layer(DefaultBodyLimit::max(
+									app_state.config.max_image_upload_size,
+								))
 								.delete(delete_library_thumbnails),
 						)
 						.route("/generate", post(generate_library_thumbnails)),
@@ -400,6 +403,7 @@ async fn get_library_by_id(
 	Ok(Json(library.into()))
 }
 
+// TODO: remove? Not used on client
 #[utoipa::path(
 	get,
 	path = "/api/v1/libraries/:id/series",
@@ -501,6 +505,7 @@ async fn get_library_series(
 	Ok(Json((series, series_count, pagination).into()))
 }
 
+// TODO: remove? Not used on client
 async fn get_library_media(
 	filter_query: Query<FilterableQuery<MediaFilter>>,
 	pagination_query: Query<PaginationQuery>,
@@ -775,7 +780,9 @@ async fn replace_library_thumbnail(
 		.await?
 		.ok_or(APIError::NotFound(String::from("Library not found")))?;
 
-	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
+	let (content_type, bytes) =
+		validate_and_load_image(&mut upload, Some(ctx.config.max_image_upload_size))
+			.await?;
 
 	let ext = content_type.extension();
 	let library_id = library.id;
@@ -798,6 +805,7 @@ async fn replace_library_thumbnail(
 	)))
 }
 
+// TODO: support all vs just library thumb
 /// Deletes all media thumbnails in a library by id, if the current user has access to it.
 #[utoipa::path(
 	delete,
@@ -845,7 +853,8 @@ async fn delete_library_thumbnails(
 	Ok(Json(()))
 }
 
-#[derive(Debug, Deserialize, ToSchema)]
+#[skip_serializing_none]
+#[derive(Debug, Deserialize, ToSchema, Type)]
 pub struct GenerateLibraryThumbnails {
 	pub image_options: Option<ImageProcessorOptions>,
 	#[serde(default)]
@@ -1314,6 +1323,15 @@ async fn create_library(
 					library_config::generate_file_hashes::set(
 						library_config.generate_file_hashes,
 					),
+					library_config::default_reading_dir::set(
+						library_config.default_reading_dir.to_string(),
+					),
+					library_config::default_reading_image_scale_fit::set(
+						library_config.default_reading_image_scale_fit.to_string(),
+					),
+					library_config::default_reading_mode::set(
+						library_config.default_reading_mode.to_string(),
+					),
 					library_config::library_pattern::set(
 						library_config.library_pattern.to_string(),
 					),
@@ -1518,6 +1536,15 @@ async fn update_library(
 						),
 						library_config::process_metadata::set(
 							library_config.process_metadata,
+						),
+						library_config::default_reading_dir::set(
+							library_config.default_reading_dir.to_string(),
+						),
+						library_config::default_reading_image_scale_fit::set(
+							library_config.default_reading_image_scale_fit.to_string(),
+						),
+						library_config::default_reading_mode::set(
+							library_config.default_reading_mode.to_string(),
 						),
 						library_config::generate_file_hashes::set(
 							library_config.generate_file_hashes,

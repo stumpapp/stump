@@ -1,6 +1,6 @@
-import { handleApiError } from '@stump/api'
 import { useCreateLibraryMutation, useLibraries } from '@stump/client'
 import { Alert } from '@stump/components'
+import { handleApiError } from '@stump/sdk'
 import { CreateLibrary } from '@stump/types'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'

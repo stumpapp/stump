@@ -1,4 +1,4 @@
-import { libraryApi } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { Alert, Button, ConfirmationModal } from '@stump/components'
 import { AlertTriangle } from 'lucide-react'
 import React, { useCallback, useState } from 'react'
@@ -7,6 +7,7 @@ import { toast } from 'react-hot-toast'
 import { useLibraryManagement } from '../../context'
 
 export default function DeleteLibraryThumbnails() {
+	const { sdk } = useSDK()
 	const {
 		library: { id },
 	} = useLibraryManagement()
@@ -20,7 +21,7 @@ export default function DeleteLibraryThumbnails() {
 	const handleDeleteThumbnails = useCallback(async () => {
 		try {
 			setIsDeleting(true)
-			await libraryApi.deleteLibraryThumbnails(id)
+			await sdk.library.deleteThumbnails(id)
 			setJustDeleted(true)
 			toast.success('Library thumbnails deleted')
 		} catch (error) {
@@ -34,11 +35,11 @@ export default function DeleteLibraryThumbnails() {
 		} finally {
 			setIsDeleting(false)
 		}
-	}, [id])
+	}, [id, sdk.library])
 
 	return (
 		<>
-			<Alert level="error" rounded="sm" icon={AlertTriangle}>
+			<Alert level="error" icon={AlertTriangle}>
 				<Alert.Content className="flex flex-col gap-3 md:flex-row">
 					<span>Delete all generated thumbnails for this library</span>
 					<Button

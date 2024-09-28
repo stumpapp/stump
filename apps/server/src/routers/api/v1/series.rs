@@ -56,7 +56,7 @@ use crate::{
 	},
 	middleware::auth::{auth_middleware, RequestContext},
 	routers::api::v1::library::library_not_hidden_from_user_filter,
-	utils::{http::ImageResponse, validate_image_upload},
+	utils::{http::ImageResponse, validate_and_load_image},
 };
 
 use super::{
@@ -88,7 +88,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.patch(patch_series_thumbnail)
 						.post(replace_series_thumbnail)
 						// TODO: configurable max file size
-						.layer(DefaultBodyLimit::max(20 * 1024 * 1024)), // 20MB
+						.layer(DefaultBodyLimit::max(
+							app_state.config.max_image_upload_size,
+						)),
 				)
 				.route(
 					"/complete",
@@ -759,7 +761,9 @@ async fn replace_series_thumbnail(
 		.await?
 		.ok_or(APIError::NotFound(String::from("Series not found")))?;
 
-	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
+	let (content_type, bytes) =
+		validate_and_load_image(&mut upload, Some(ctx.config.max_image_upload_size))
+			.await?;
 	let ext = content_type.extension();
 	let series_id = series.id;
 

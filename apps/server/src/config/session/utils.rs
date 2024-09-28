@@ -38,3 +38,16 @@ pub fn get_session_layer(ctx: Arc<Ctx>) -> SessionManagerLayer<PrismaSessionStor
 		.with_same_site(SameSite::Lax)
 		.with_secure(false)
 }
+
+/// Returns a tuple with the Set-Cookie header name and value to delete the session cookie.
+/// To do this, we'll just set the cookie on the same name, path and domain, but with an
+/// Expires value in the past. This *should* hopefully trigger the client to delete the cookie.
+pub fn delete_cookie_header() -> (String, String) {
+	(
+		"Set-Cookie".to_string(),
+		format!(
+			"{}={}; Path={}; Domain={}; Expires={}; Max-Age=0",
+			SESSION_NAME, "", SESSION_PATH, "", "Thu, 01 Jan 1970 00:00:00 GMT"
+		),
+	)
+}

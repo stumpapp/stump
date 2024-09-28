@@ -1,14 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { userQueryKeys } from '@stump/api'
-import { invalidateQueries, useCreateUser, useUpdateUser } from '@stump/client'
+import { invalidateQueries, useCreateUser, useSDK, useUpdateUser } from '@stump/client'
 import { Alert, Button, Form, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { User } from '@stump/types'
 import React, { useMemo } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useFormState } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'
-import z from 'zod'
 
 import { ContentContainer } from '@/components/container'
 import paths from '@/paths'
@@ -16,47 +14,18 @@ import paths from '@/paths'
 import { useUserManagementContext } from '../context'
 import AccountDetails from './AccountDetails'
 import MaxSessionsAllowed from './MaxSessionsAllowed'
-import UserPermissionsForm, { userPermissionSchema } from './UserPermissionsForm'
+import { buildSchema, CreateOrUpdateUserSchema, formDefaults } from './schema'
+import UserPermissionsForm from './UserPermissionsForm'
 import UserRestrictionsForm from './UserRestrictionsForm'
-
-const buildSchema = (t: (key: string) => string, existingUsers: User[], updatingUser?: User) =>
-	z.object({
-		age_restriction: z
-			.number()
-			.optional()
-			.refine((value) => value == undefined || value >= 0, {
-				message: t('settingsScene.server/users.createOrUpdateForm.validation.ageRestrictionTooLow'),
-			}),
-		age_restriction_on_unset: z.boolean().optional(),
-		forbidden_tags: z.array(z.string()).optional(),
-		max_sessions_allowed: z.number().optional(),
-		password: z
-			.string()
-			// .min(1, { message: t('authScene.form.validation.missingPassword') })
-			.optional()
-			.refine(
-				// if we are updating a user, we don't need to validate the password
-				(value) => !!updatingUser || !!value,
-				() => ({ message: t('authScene.form.validation.missingPassword') }),
-			),
-		permissions: z.array(userPermissionSchema).optional(),
-		username: z
-			.string()
-			.min(1, { message: t('authScene.form.validation.missingUsername') })
-			.refine(
-				(value) =>
-					(!!updatingUser && value === updatingUser.username) ||
-					existingUsers.every((user) => user.username !== value),
-				(value) => ({ message: `${value} is already taken` }),
-			),
-	})
-export type Schema = z.infer<ReturnType<typeof buildSchema>>
 
 type Props = {
 	user?: User
 }
 
+// TODO(design): stepped form from bookclub feature branch
+
 export default function CreateOrUpdateUserForm({ user }: Props) {
+	const { sdk } = useSDK()
 	const navigate = useNavigate()
 
 	const { t } = useLocaleContext()
@@ -64,19 +33,15 @@ export default function CreateOrUpdateUserForm({ user }: Props) {
 
 	const isCreating = !user
 	const schema = useMemo(() => buildSchema(t, users, user), [t, users, user])
-	const form = useForm<Schema>({
-		defaultValues: {
-			age_restriction: user?.age_restriction?.age,
-			age_restriction_on_unset: user?.age_restriction?.restrict_on_unset,
-			max_sessions_allowed: user?.max_sessions_allowed ?? undefined,
-			permissions: user?.permissions,
-			username: user?.username,
-		},
+
+	const form = useForm<CreateOrUpdateUserSchema>({
+		defaultValues: formDefaults(user),
 		resolver: zodResolver(schema),
 	})
+	const { errors: formErrors } = useFormState({ control: form.control })
 	const formHasErrors = useMemo(() => {
-		return Object.keys(form.formState.errors).length > 0
-	}, [form.formState])
+		return Object.keys(formErrors).length > 0
+	}, [formErrors])
 
 	const { createAsync, error: createError } = useCreateUser()
 	const { updateAsync, error: updateError } = useUpdateUser(user?.id)
@@ -87,7 +52,7 @@ export default function CreateOrUpdateUserForm({ user }: Props) {
 		permissions,
 		max_sessions_allowed,
 		...ageRestrictions
-	}: Schema) => {
+	}: CreateOrUpdateUserSchema) => {
 		try {
 			const age_restriction = ageRestrictions.age_restriction
 				? {
@@ -106,7 +71,7 @@ export default function CreateOrUpdateUserForm({ user }: Props) {
 				})
 				console.debug('Created user', { result })
 				toast.success('User created successfully')
-				await invalidateQueries({ keys: [userQueryKeys.getUsers, userQueryKeys.getUserById] })
+				await invalidateQueries({ keys: [sdk.user.keys.get, sdk.user.keys.getByID] })
 				form.reset()
 			} else if (user) {
 				const result = await updateAsync({
@@ -119,7 +84,7 @@ export default function CreateOrUpdateUserForm({ user }: Props) {
 				})
 				console.debug('Updated user', { result })
 				toast.success('User updated successfully')
-				await invalidateQueries({ keys: [userQueryKeys.getUsers, userQueryKeys.getUserById] })
+				await invalidateQueries({ keys: [sdk.user.keys.get, sdk.user.keys.getByID] })
 				form.reset({
 					age_restriction: result.age_restriction?.age,
 					age_restriction_on_unset: result.age_restriction?.restrict_on_unset,
@@ -176,7 +141,12 @@ export default function CreateOrUpdateUserForm({ user }: Props) {
 				)}
 
 				<div className="mt-6 flex w-full md:max-w-sm">
-					<Button className="w-full md:max-w-sm" variant="primary" disabled={formHasErrors}>
+					<Button
+						type="submit"
+						className="w-full md:max-w-sm"
+						variant="primary"
+						disabled={formHasErrors}
+					>
 						{t(
 							isCreating
 								? 'settingsScene.server/users.createOrUpdateForm.createSubmitButton'

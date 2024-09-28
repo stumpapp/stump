@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import { checkUrl, initializeApi, isAxiosError, isUrl } from '@stump/api'
 import { useAuthQuery } from '@stump/client'
+import { checkUrl, initializeApi, isAxiosError, isUrl } from '@stump/sdk'
 import * as SplashScreen from 'expo-splash-screen'
 import { useEffect, useState } from 'react'
 import { SafeAreaProvider } from 'react-native-safe-area-context'

@@ -1,6 +1,6 @@
-import { isAxiosError } from '@stump/api'
 import { useAuthQuery, useCoreEventHandler } from '@stump/client'
 import { cn, cx } from '@stump/components'
+import { isAxiosError } from '@stump/sdk'
 import { UserPermission, UserPreferences } from '@stump/types'
 import { useOverlayScrollbars } from 'overlayscrollbars-react'
 import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
@@ -37,7 +37,7 @@ export function AppLayout() {
 		storeUser: state.user,
 	}))
 
-	const { isDarkVariant } = useTheme()
+	const { isDarkVariant, shouldUseGradient } = useTheme()
 	const [initialize, instance] = useOverlayScrollbars({
 		options: {
 			scrollbars: {
@@ -74,6 +74,7 @@ export function AppLayout() {
 		if (missingClasses.length) {
 			viewport.classList.add(...missingClasses)
 		}
+		viewport.dataset.artificialScroll = 'true'
 	}, [instance, isRefSet])
 	/**
 	 * An effect to destroy the overlay scrollbars instance when it exists but hideScrollBar is true
@@ -159,9 +160,11 @@ export function AppLayout() {
 	})
 
 	const axiosError = isAxiosError(error) ? error : null
+	const isUnauthorized = axiosError?.response?.status === 401
 	const isNetworkError = axiosError?.code === 'ERR_NETWORK'
-	if (isNetworkError) {
-		return <Navigate to="/server-connection-error" state={{ from: location }} />
+	if (isNetworkError || isUnauthorized) {
+		const to = isNetworkError ? '/server-connection-error' : '/auth'
+		return <Navigate to={to} state={{ from: location }} />
 	} else if (error && !storeUser) {
 		throw error
 	}
@@ -202,6 +205,10 @@ export function AppLayout() {
 							'flex w-full flex-1 flex-col overflow-y-auto overflow-x-hidden bg-background',
 							{
 								'scrollbar-hide': storeUser.user_preferences?.enable_hide_scrollbar,
+							},
+							{
+								'bg-gradient-to-br from-background-gradient-from to-background-gradient-to':
+									shouldUseGradient,
 							},
 						)}
 						ref={mainRef}

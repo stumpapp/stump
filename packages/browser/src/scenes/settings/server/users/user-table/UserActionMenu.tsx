@@ -1,5 +1,4 @@
-import { userApi, userQueryKeys } from '@stump/api'
-import { invalidateQueries } from '@stump/client'
+import { invalidateQueries, useSDK } from '@stump/client'
 import { DropdownMenu, IconButton } from '@stump/components'
 import { User } from '@stump/types'
 import { Database, Lock, MoreVertical, Pencil, Search, Trash, Unlock } from 'lucide-react'
@@ -18,6 +17,7 @@ type Props = {
 }
 
 export default function UserActionMenu({ user, onSelectForInspect }: Props) {
+	const { sdk } = useSDK()
 	const { isServerOwner, user: byUser } = useAppContext()
 	const { setDeletingUser, users } = useUserManagementContext()
 
@@ -28,8 +28,8 @@ export default function UserActionMenu({ user, onSelectForInspect }: Props) {
 
 	const handleSetLockStatus = async (lock: boolean) => {
 		try {
-			await userApi.setLockStatus(user.id, lock)
-			await invalidateQueries({ keys: [userQueryKeys.getUsers] })
+			await sdk.user.lockUser(user.id, lock)
+			await invalidateQueries({ keys: [sdk.user.keys.get] })
 		} catch (error) {
 			if (error instanceof Error) {
 				toast.error(error.message)
@@ -42,11 +42,11 @@ export default function UserActionMenu({ user, onSelectForInspect }: Props) {
 
 	const handleClearUserSessions = async () => {
 		try {
-			await userApi.deleteUserSessions(user.id)
+			await sdk.user.deleteUserSessions(user.id)
 			if (isSelf) {
 				navigate('/')
 			} else {
-				await invalidateQueries({ keys: [userQueryKeys.getUsers] })
+				await invalidateQueries({ keys: [sdk.user.keys.get] })
 			}
 		} catch (error) {
 			if (error instanceof Error) {

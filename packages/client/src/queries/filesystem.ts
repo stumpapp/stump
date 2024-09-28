@@ -1,20 +1,41 @@
-import { filesystemApi, filesystemQueryKeys } from '@stump/api'
 import { AxiosError } from 'axios'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { useSDK } from '../sdk'
+
 import { queryClient, useQuery } from '../client'
 
-export const prefetchLibraryFiles = (path: string) =>
-	queryClient.prefetchQuery([filesystemQueryKeys.listDirectory, path, 1], async () => {
-		const { data } = await filesystemApi.listDirectory({ page: 1, path })
-		return data
-	})
+type PrefetchFileParams = {
+	path: string
+}
 
-export const prefetchFiles = (path: string) =>
-	queryClient.prefetchQuery([filesystemQueryKeys.listDirectory, path, 1], async () => {
-		const { data } = await filesystemApi.listDirectory({ page: 1, path })
-		return data
-	})
+export const usePrefetchFiles = ({ path }: PrefetchFileParams) => {
+	const { sdk } = useSDK()
+
+	const prefetch = useCallback(
+		() =>
+			queryClient.prefetchQuery([sdk.filesystem.keys.listDirectory, path], () =>
+				sdk.filesystem.listDirectory(),
+			),
+		[sdk.filesystem, path],
+	)
+
+	return { prefetch }
+}
+
+export const usePrefetchLibraryFiles = ({ path }: PrefetchFileParams) => {
+	const { sdk } = useSDK()
+
+	const prefetch = useCallback(
+		() =>
+			queryClient.prefetchQuery([sdk.filesystem.keys.listDirectory, path], () =>
+				sdk.filesystem.listDirectory(),
+			),
+		[sdk.filesystem, path],
+	)
+
+	return { prefetch }
+}
 
 export type DirectoryListingQueryParams = {
 	enabled: boolean
@@ -50,16 +71,14 @@ export function useDirectoryListing({
 	onGoForward,
 	onGoBack,
 }: DirectoryListingQueryParams) {
+	const { sdk } = useSDK()
 	const [currentPath, setCurrentPath] = useState(initialPath || null)
 	const [history, setHistory] = useState(currentPath ? [currentPath] : [])
 	const [currentIndex, setCurrentIndex] = useState(0)
 
 	const { isLoading, error, data } = useQuery(
-		[filesystemQueryKeys.listDirectory, currentPath, page],
-		async () => {
-			const { data } = await filesystemApi.listDirectory({ page, path: currentPath })
-			return data
-		},
+		[sdk.filesystem.keys.listDirectory, currentPath, page],
+		async () => sdk.filesystem.listDirectory({ page, path: currentPath }),
 		{
 			// Do not run query until `enabled` aka modal is opened.
 			enabled,

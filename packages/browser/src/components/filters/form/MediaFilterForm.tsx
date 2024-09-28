@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { metadataApi, metadataQueryKeys } from '@stump/api'
-import { useQuery } from '@stump/client'
+import { useQuery, useSDK } from '@stump/client'
 import { CheckBox, Form } from '@stump/components'
+import { MediaMetadataFilter } from '@stump/types'
 import React, { useEffect, useMemo, useState } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import z from 'zod'
@@ -41,6 +41,7 @@ export type MediaFilterFormSchema = z.infer<typeof schema>
 type ReadStatus = NonNullable<Pick<MediaFilterFormSchema, 'read_status'>['read_status']>[number]
 
 export default function MediaFilterForm() {
+	const { sdk } = useSDK()
 	const { filters, setFilters } = useFilterContext()
 
 	const seriesContext = useSeriesContextSafe()
@@ -51,16 +52,16 @@ export default function MediaFilterForm() {
 			return {
 				media: {
 					series: {
-						id: seriesContext.series.id,
+						id: [seriesContext.series.id],
 					},
 				},
-			}
+			} satisfies MediaMetadataFilter
 		}
-		return {}
+		return undefined
 	}, [onlyFromSeries, seriesContext])
 
-	const { data } = useQuery([metadataQueryKeys.getMediaMetadataOverview, params], () =>
-		metadataApi.getMediaMetadataOverview(params).then((res) => res.data),
+	const { data } = useQuery([sdk.metadata.keys.overview, params], () =>
+		sdk.metadata.overview(params),
 	)
 
 	const form = useForm({

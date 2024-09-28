@@ -1,4 +1,4 @@
-import { isAxiosError } from '@stump/api'
+import { isAxiosError } from '@stump/sdk'
 import { useDeleteSmartListMutation } from '@stump/client'
 import { ConfirmationModal } from '@stump/components'
 import React from 'react'

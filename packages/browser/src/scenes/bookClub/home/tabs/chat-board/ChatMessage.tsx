@@ -1,4 +1,4 @@
-import { prefetchThread } from '@stump/client'
+import { usePrefetchClubThread } from '@stump/client'
 import { Avatar, Button, cx, IconButton, Text, ToolTip } from '@stump/components'
 import { BookClubChatMessage } from '@stump/types'
 import dayjs from 'dayjs'
@@ -18,6 +18,7 @@ type Props = {
 	isArchived?: boolean
 }
 export default function ChatMessage({ message, chatId, isArchived }: Props) {
+	const { prefetch } = usePrefetchClubThread()
 	const { bookClub, viewerMember } = useBookClubContext()
 
 	const displayName = message.member?.display_name ?? message.member?.user?.username ?? 'Unknown'
@@ -50,7 +51,7 @@ export default function ChatMessage({ message, chatId, isArchived }: Props) {
 					<IconButton variant="ghost" size="sm" className="flex items-center gap-2">
 						<ThumbsUp
 							className={cx('h-4 w-4', {
-								'text-brand dark:text-brand-600': isLikedByViewer,
+								'text-foreground-brand': isLikedByViewer,
 							})}
 						/>
 					</IconButton>
@@ -59,7 +60,13 @@ export default function ChatMessage({ message, chatId, isArchived }: Props) {
 						<Button
 							variant="ghost"
 							size="sm"
-							onMouseEnter={() => prefetchThread(bookClub.id, chatId, message.id)}
+							onMouseEnter={() =>
+								prefetch({
+									bookClubId: bookClub.id,
+									chatId,
+									threadId: message.id,
+								})
+							}
 						>
 							<Link
 								to={paths.bookClubChatBoardMessage(

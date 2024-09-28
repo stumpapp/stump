@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from 'react-router'
 
 import { usePreferences } from '@/hooks/usePreferences'
 import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
+import { useTheme } from '@/hooks/useTheme'
 import paths from '@/paths'
 import { SideBarLinkButton } from '@/scenes/settings'
 
@@ -21,6 +22,7 @@ export default function LibrarySettingsSidebar() {
 	const {
 		preferences: { enable_replace_primary_sidebar, primary_navigation_mode },
 	} = usePreferences()
+	const { shouldUseGradient } = useTheme()
 	const { groups } = useRouteGroups({ routeGroups })
 
 	return (
@@ -30,6 +32,10 @@ export default function LibrarySettingsSidebar() {
 				primary_navigation_mode === 'TOPBAR'
 					? 'fixed top-12 z-50 h-screen border-x'
 					: 'fixed top-0 z-50 h-screen border-r',
+				{
+					'bg-gradient-to-l from-background-gradient-from to-background-gradient-to':
+						shouldUseGradient,
+				},
 			)}
 		>
 			<div className="flex h-full flex-grow flex-col gap-4">

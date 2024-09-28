@@ -1,8 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { isUrl } from '@stump/api'
 import { useUpdateUser } from '@stump/client'
 import { Button, Form, Input, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
+import { isUrl } from '@stump/sdk'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
 import { z } from 'zod'
@@ -10,6 +10,8 @@ import { z } from 'zod'
 import { useUser } from '@/stores'
 
 import AvatarPicker from './AvatarPicker'
+
+// TODO(testing): extract schema and test components individually
 
 export default function ProfileForm() {
 	const { t } = useLocaleContext()

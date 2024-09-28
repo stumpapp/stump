@@ -52,6 +52,8 @@ impl TryInto<media::OrderByWithRelationParam> for QueryOrder {
 	fn try_into(self) -> Result<media::OrderByWithRelationParam, Self::Error> {
 		let dir: SortOrder = self.direction.into();
 
+		let order_by = self.order_by.to_lowercase();
+
 		Ok(match self.order_by.to_lowercase().as_str() {
 			"name" => media::name::order(dir),
 			"size" => media::size::order(dir),

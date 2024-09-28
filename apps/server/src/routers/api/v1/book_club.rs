@@ -7,7 +7,7 @@ use axum::{
 use prisma_client_rust::{
 	and,
 	chrono::{Duration, Utc},
-	or, Direction,
+	or,
 };
 use serde::Deserialize;
 use serde_qs::axum::QsQuery;
@@ -23,7 +23,7 @@ use stump_core::{
 	},
 	prisma::{
 		book_club, book_club_book, book_club_invitation, book_club_member,
-		book_club_schedule, media, user, PrismaClient,
+		book_club_schedule, media, user, PrismaClient, SortOrder,
 	},
 };
 use utoipa::ToSchema;
@@ -903,7 +903,7 @@ async fn get_book_club_schedule(
 		.find_first(vec![book_club_schedule::book_club::is(where_params)])
 		.with(
 			book_club_schedule::books::fetch(vec![])
-				.order_by(book_club_book::start_at::order(Direction::Asc)),
+				.order_by(book_club_book::start_at::order(SortOrder::Asc)),
 		)
 		.exec()
 		.await?
@@ -951,7 +951,7 @@ async fn add_books_to_book_club_schedule(
 		.find_many(vec![
 			book_club_book::book_club_schedule_book_club_id::equals(Some(book_club.id)),
 		])
-		.order_by(book_club_book::start_at::order(Direction::Asc))
+		.order_by(book_club_book::start_at::order(SortOrder::Asc))
 		.exec()
 		.await?;
 
@@ -1069,7 +1069,7 @@ async fn get_book_club_current_book(
 			book_club_schedule::books::fetch(vec![book_club_book::end_at::gte(
 				Utc::now().into(),
 			)])
-			.order_by(book_club_book::start_at::order(Direction::Asc)),
+			.order_by(book_club_book::start_at::order(SortOrder::Asc)),
 		)
 		.exec()
 		.await?

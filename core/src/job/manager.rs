@@ -113,7 +113,7 @@ impl JobManager {
 			.job()
 			.upsert(
 				job::id::equals(job.id().to_string()),
-				(
+				job::create(
 					job.id().to_string(),
 					job.name().to_string(),
 					vec![job::description::set(job.description())],

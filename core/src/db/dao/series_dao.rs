@@ -95,8 +95,8 @@ impl SeriesDAO {
 				PrismaValue::String(viewer_id.to_string()),
 				PrismaValue::String(viewer_id.to_string()),
 				PrismaValue::String(viewer_id.to_string()),
-				PrismaValue::Int(page_bounds.take),
-				PrismaValue::Int(page_bounds.skip)
+				PrismaValue::BigInt(page_bounds.take),
+				PrismaValue::BigInt(page_bounds.skip)
 			))
 			.exec()
 			.await?;

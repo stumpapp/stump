@@ -1,6 +1,9 @@
 use std::path::Path;
 
-use crate::{config::StumpConfig, prisma};
+use crate::{
+	config::StumpConfig,
+	prisma::{self, PrismaClient},
+};
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub(crate) struct JournalModeQueryResult {
@@ -37,7 +40,9 @@ pub async fn create_client(config: &StumpConfig) -> prisma::PrismaClient {
 }
 
 pub async fn create_client_with_url(url: &str) -> prisma::PrismaClient {
-	prisma::new_client_with_url(url)
+	PrismaClient::_builder()
+		.with_url(url.to_string())
+		.build()
 		.await
 		.expect("Failed to create Prisma client")
 }

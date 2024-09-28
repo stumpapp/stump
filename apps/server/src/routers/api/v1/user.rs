@@ -7,7 +7,7 @@ use axum::{
 	Extension, Json, Router,
 };
 use axum_extra::extract::Query;
-use prisma_client_rust::{chrono::Utc, Direction};
+use prisma_client_rust::chrono::Utc;
 use serde::Deserialize;
 use specta::Type;
 use stump_core::{
@@ -22,7 +22,7 @@ use stump_core::{
 	filesystem::{get_unknown_image, ContentType, FileParts, PathUtils},
 	prisma::{
 		age_restriction, session, user, user_login_activity, user_preferences,
-		PrismaClient,
+		PrismaClient, SortOrder,
 	},
 };
 use tokio::fs;
@@ -82,9 +82,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 }
 
 pub(crate) fn apply_pagination<'a>(
-	query: user::FindMany<'a>,
+	query: user::FindManyQuery<'a>,
 	pagination: &Pagination,
-) -> user::FindMany<'a> {
+) -> user::FindManyQuery<'a> {
 	match pagination {
 		Pagination::Page(page_query) => {
 			let (skip, take) = page_query.get_skip_take();
@@ -210,7 +210,7 @@ async fn get_user_login_activity(
 		.user_login_activity()
 		.find_many(vec![])
 		.with(user_login_activity::user::fetch())
-		.order_by(user_login_activity::timestamp::order(Direction::Desc))
+		.order_by(user_login_activity::timestamp::order(SortOrder::Desc))
 		.exec()
 		.await?;
 
@@ -317,7 +317,7 @@ async fn update_user(
 						.age_restriction()
 						.upsert(
 							age_restriction::user_id::equals(for_user_id.clone()),
-							(
+							age_restriction::create(
 								age_restriction.age,
 								user::id::equals(for_user_id.clone()),
 								vec![age_restriction::restrict_on_unset::set(
@@ -828,7 +828,7 @@ async fn get_user_login_activity_by_id(
 	let user_activity = client
 		.user_login_activity()
 		.find_many(vec![user_login_activity::user_id::equals(id)])
-		.order_by(user_login_activity::timestamp::order(Direction::Desc))
+		.order_by(user_login_activity::timestamp::order(SortOrder::Desc))
 		.exec()
 		.await?;
 

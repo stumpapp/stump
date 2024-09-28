@@ -1,10 +1,7 @@
 use std::collections::BTreeSet;
 
 use axum::{extract::State, middleware, routing::get, Json, Router};
-use prisma_client_rust::{
-	operator::{and, or},
-	Direction,
-};
+use prisma_client_rust::operator::{and, or};
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use specta::Type;
@@ -16,7 +13,7 @@ use stump_core::{
 		metadata_available_pencillers_select, metadata_available_publisher_select,
 		metadata_available_teams_select, metadata_available_writers_select,
 	},
-	prisma::{media_metadata, series_metadata, PrismaClient},
+	prisma::{media_metadata, series_metadata, PrismaClient, SortOrder},
 };
 use tracing::trace;
 use utoipa::ToSchema;
@@ -257,7 +254,7 @@ async fn get_genres(
 	let result = client
 		.media_metadata()
 		.find_many(where_conditions.to_vec())
-		.order_by(media_metadata::genre::order(Direction::Asc))
+		.order_by(media_metadata::genre::order(SortOrder::Asc))
 		.select(metadata_available_genre_select::select())
 		.exec()
 		.await?;
@@ -298,7 +295,7 @@ async fn get_writers(
 	let result = client
 		.media_metadata()
 		.find_many(where_conditions.to_vec())
-		.order_by(media_metadata::writers::order(Direction::Asc))
+		.order_by(media_metadata::writers::order(SortOrder::Asc))
 		.select(metadata_available_writers_select::select())
 		.exec()
 		.await?;
@@ -339,7 +336,7 @@ async fn get_pencllers(
 	let result = client
 		.media_metadata()
 		.find_many(where_conditions.to_vec())
-		.order_by(media_metadata::pencillers::order(Direction::Asc))
+		.order_by(media_metadata::pencillers::order(SortOrder::Asc))
 		.select(metadata_available_pencillers_select::select())
 		.exec()
 		.await?;
@@ -380,7 +377,7 @@ async fn get_inkers(
 	let result = client
 		.media_metadata()
 		.find_many(where_conditions.to_vec())
-		.order_by(media_metadata::inkers::order(Direction::Asc))
+		.order_by(media_metadata::inkers::order(SortOrder::Asc))
 		.select(metadata_available_inkers_select::select())
 		.exec()
 		.await?;
@@ -421,7 +418,7 @@ async fn get_colorists(
 	let result = client
 		.media_metadata()
 		.find_many(where_conditions.to_vec())
-		.order_by(media_metadata::colorists::order(Direction::Asc))
+		.order_by(media_metadata::colorists::order(SortOrder::Asc))
 		.select(metadata_available_colorists_select::select())
 		.exec()
 		.await?;
@@ -462,7 +459,7 @@ async fn get_letterers(
 	let result = client
 		.media_metadata()
 		.find_many(where_conditions.to_vec())
-		.order_by(media_metadata::letterers::order(Direction::Asc))
+		.order_by(media_metadata::letterers::order(SortOrder::Asc))
 		.select(metadata_available_letterers_select::select())
 		.exec()
 		.await?;
@@ -503,7 +500,7 @@ async fn get_editors(
 	let result = client
 		.media_metadata()
 		.find_many(where_conditions.to_vec())
-		.order_by(media_metadata::editors::order(Direction::Asc))
+		.order_by(media_metadata::editors::order(SortOrder::Asc))
 		.select(metadata_available_editors_select::select())
 		.exec()
 		.await?;
@@ -544,7 +541,7 @@ async fn get_publishers(
 	let result = client
 		.media_metadata()
 		.find_many(where_conditions.to_vec())
-		.order_by(media_metadata::publisher::order(Direction::Asc))
+		.order_by(media_metadata::publisher::order(SortOrder::Asc))
 		.select(metadata_available_publisher_select::select())
 		.exec()
 		.await?;
@@ -585,7 +582,7 @@ async fn get_characters(
 	let result = client
 		.media_metadata()
 		.find_many(where_conditions.to_vec())
-		.order_by(media_metadata::characters::order(Direction::Asc))
+		.order_by(media_metadata::characters::order(SortOrder::Asc))
 		.select(metadata_available_characters_select::select())
 		.exec()
 		.await?;
@@ -626,7 +623,7 @@ async fn get_teams(
 	let result = client
 		.media_metadata()
 		.find_many(where_conditions.to_vec())
-		.order_by(media_metadata::teams::order(Direction::Asc))
+		.order_by(media_metadata::teams::order(SortOrder::Asc))
 		.select(metadata_available_teams_select::select())
 		.exec()
 		.await?;

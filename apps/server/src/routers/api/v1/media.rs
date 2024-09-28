@@ -11,7 +11,7 @@ use prisma_client_rust::{
 	and,
 	chrono::Duration,
 	operator::{self, or},
-	or, raw, Direction, PrismaValue,
+	or, raw, PrismaValue,
 };
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
@@ -41,8 +41,8 @@ use stump_core::{
 	},
 	prisma::{
 		active_reading_session, finished_reading_session, library,
-		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
-		media_metadata, series, series_metadata, tag, user, PrismaClient,
+		media::{self, OrderByWithRelationParam as MediaOrderByParam, WhereParam},
+		media_metadata, series, series_metadata, tag, user, PrismaClient, SortOrder,
 	},
 	Ctx,
 };
@@ -234,9 +234,9 @@ pub(crate) fn apply_media_filters_for_user(
 }
 
 pub(crate) fn apply_media_pagination<'a>(
-	query: media::FindMany<'a>,
+	query: media::FindManyQuery<'a>,
 	pagination: &Pagination,
-) -> media::FindMany<'a> {
+) -> media::FindManyQuery<'a> {
 	match pagination {
 		Pagination::Page(page_query) => {
 			let (skip, take) = page_query.get_skip_take();
@@ -478,8 +478,8 @@ async fn get_duplicate_media(
 				SELECT hash FROM media GROUP BY hash HAVING COUNT(*) > 1
 			)
 			LIMIT {} OFFSET {}"#,
-			PrismaValue::Int(page_bounds.take),
-			PrismaValue::Int(page_bounds.skip)
+			PrismaValue::BigInt(page_bounds.take),
+			PrismaValue::BigInt(page_bounds.skip)
 		))
 		.exec()
 		.await?;
@@ -543,7 +543,8 @@ async fn get_in_progress_media(
 	let pagination_cloned = pagination.clone();
 	let is_unpaged = pagination.is_unpaged();
 
-	let read_progress_filter = active_reading_session::user_id::equals(user_id.clone());
+	let read_progress_filter: active_reading_session::WhereParam =
+		active_reading_session::user_id::equals(user_id.clone());
 	let where_conditions = vec![media::active_user_reading_sessions::some(vec![
 		read_progress_filter.clone(),
 	])]
@@ -567,7 +568,7 @@ async fn get_in_progress_media(
 				// FIXME: not the proper ordering, BUT I cannot order based on a relation...
 				// I think this just means whenever progress updates I should update the media
 				// updated_at field, but that's a bit annoying TBH...
-				.order_by(media::updated_at::order(Direction::Desc));
+				.order_by(media::updated_at::order(SortOrder::Desc));
 
 			if !is_unpaged {
 				query = apply_media_pagination(query, &pagination_cloned);
@@ -649,7 +650,7 @@ async fn get_recently_added_media(
 					finished_reading_session::user_id::equals(user_id),
 				]))
 				.with(media::metadata::fetch())
-				.order_by(media::created_at::order(Direction::Desc));
+				.order_by(media::created_at::order(SortOrder::Desc));
 
 			if !is_unpaged {
 				query = apply_media_pagination(query, &pagination_cloned);
@@ -1249,7 +1250,7 @@ async fn update_media_progress(
 		.active_reading_session()
 		.upsert(
 			active_reading_session::user_id_media_id(user_id.clone(), id.clone()),
-			(
+			active_reading_session::create(
 				media::id::equals(id.clone()),
 				user::id::equals(user_id.clone()),
 				vec![active_reading_session::page::set(Some(page))],
@@ -1428,7 +1429,7 @@ async fn get_is_media_completed(
 			finished_reading_session::media::is(media_where_params),
 		])
 		.order_by(finished_reading_session::completed_at::order(
-			Direction::Desc,
+			SortOrder::Desc,
 		))
 		.include(finished_reading_session_with_book_pages::include())
 		.exec()
@@ -1536,7 +1537,7 @@ async fn put_media_complete_status(
 			.active_reading_session()
 			.upsert(
 				active_reading_session::user_id_media_id(user_id.clone(), id.clone()),
-				(
+				active_reading_session::create(
 					media::id::equals(id.clone()),
 					user::id::equals(user_id.clone()),
 					vec![active_reading_session::page::set(Some(page))],

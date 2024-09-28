@@ -18,7 +18,7 @@ use stump_core::{
 			pagination::{Pageable, Pagination, PaginationQuery},
 		},
 	},
-	prisma::log::{self, OrderByParam as LogOrderByParam, WhereParam},
+	prisma::log::{self, OrderByWithRelationParam as LogOrderByParam, WhereParam},
 };
 
 use crate::{

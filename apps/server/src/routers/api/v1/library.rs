@@ -5,7 +5,7 @@ use axum::{
 	Extension, Json, Router,
 };
 use chrono::Duration;
-use prisma_client_rust::{chrono::Utc, not, or, raw, Direction, PrismaValue};
+use prisma_client_rust::{chrono::Utc, not, or, raw, PrismaValue};
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use specta::Type;
@@ -43,9 +43,9 @@ use stump_core::{
 		last_library_visit,
 		library::{self, WhereParam},
 		library_config,
-		media::{self, OrderByParam as MediaOrderByParam},
-		series::{self, OrderByParam as SeriesOrderByParam},
-		tag, user,
+		media::{self, OrderByWithRelationParam as MediaOrderByParam},
+		series::{self, OrderByWithRelationParam as SeriesOrderByParam},
+		tag, user, SortOrder,
 	},
 };
 
@@ -268,7 +268,7 @@ async fn update_last_visited_library(
 		.last_library_visit()
 		.upsert(
 			last_library_visit::user_id_library_id(user.id.clone(), id.clone()),
-			(
+			last_library_visit::create(
 				user::id::equals(user.id.clone()),
 				library::id::equals(id.clone()),
 				vec![last_library_visit::timestamp::set(Utc::now().into())],
@@ -626,7 +626,7 @@ async fn get_library_thumbnail_handler(
 	let first_series = db
 		.series()
 		.find_first(series_filters)
-		.order_by(series::name::order(Direction::Asc))
+		.order_by(series::name::order(SortOrder::Asc))
 		.select(series_or_library_thumbnail::select(book_filters))
 		.exec()
 		.await?
@@ -1345,7 +1345,7 @@ async fn create_library(
 							.create_many(
 								tags_to_create
 									.iter()
-									.map(|tag| (tag.clone(), vec![]))
+									.map(|tag| tag::create_unchecked(tag.clone(), vec![]))
 									.collect(),
 							)
 							.exec()
@@ -1558,7 +1558,7 @@ async fn update_library(
 							.create_many(
 								tags_to_create
 									.iter()
-									.map(|tag| (tag.clone(), vec![]))
+									.map(|tag| tag::create_unchecked(tag.clone(), vec![]))
 									.collect(),
 							)
 							.exec()

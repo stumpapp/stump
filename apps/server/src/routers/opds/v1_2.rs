@@ -4,7 +4,7 @@ use axum::{
 	routing::get,
 	Extension, Router,
 };
-use prisma_client_rust::{chrono, Direction};
+use prisma_client_rust::chrono;
 use stump_core::{
 	db::{entity::UserPermission, query::pagination::PageQuery},
 	filesystem::{
@@ -17,7 +17,7 @@ use stump_core::{
 		feed::OpdsFeed,
 		link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
 	},
-	prisma::{active_reading_session, library, media, series, user},
+	prisma::{active_reading_session, library, media, series, user, SortOrder},
 };
 use tracing::{debug, trace};
 
@@ -206,7 +206,7 @@ async fn keep_reading(
 		.with(media::active_user_reading_sessions::fetch(
 			in_progress_filter,
 		))
-		.order_by(media::name::order(Direction::Asc))
+		.order_by(media::name::order(SortOrder::Asc))
 		.exec()
 		.await?;
 
@@ -432,7 +432,7 @@ async fn get_latest_series(
 			let series = client
 				.series()
 				.find_many(chain_optional_iter([], [age_restrictions.clone()]))
-				.order_by(series::updated_at::order(Direction::Desc))
+				.order_by(series::updated_at::order(SortOrder::Desc))
 				.skip(skip)
 				.take(take)
 				.exec()
@@ -488,7 +488,7 @@ async fn get_series_by_id(
 					series::media::fetch(vec![])
 						.skip(skip)
 						.take(take)
-						.order_by(media::name::order(Direction::Asc)),
+						.order_by(media::name::order(SortOrder::Asc)),
 				)
 				.exec()
 				.await?;
@@ -626,7 +626,7 @@ async fn get_book_page(
 			.active_reading_session()
 			.upsert(
 				active_reading_session::user_id_media_id(user.id.clone(), id.clone()),
-				(
+				active_reading_session::create(
 					media::id::equals(id.clone()),
 					user::id::equals(user.id.clone()),
 					vec![active_reading_session::page::set(Some(correct_page))],

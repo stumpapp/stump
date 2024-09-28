@@ -17,7 +17,7 @@ use stump_core::{
 	},
 	job::{AcknowledgeableCommand, JobControllerCommand},
 	prisma::{
-		job::{self, OrderByParam as JobOrderByParam},
+		job::{self, OrderByWithRelationParam as JobOrderByParam},
 		job_schedule_config, library, server_config,
 	},
 };

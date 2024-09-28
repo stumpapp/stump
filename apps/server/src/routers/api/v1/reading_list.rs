@@ -11,7 +11,7 @@ use stump_core::{
 		entity::{CreateReadingList, ReadingList},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 	},
-	prisma::{reading_list, reading_list_rbac, user},
+	prisma::{media, reading_list, reading_list_item, reading_list_rbac, user},
 };
 use tracing::trace;
 
@@ -83,9 +83,9 @@ pub(crate) fn reading_list_rbac_for_user(
 }
 
 pub(crate) fn apply_pagination<'a>(
-	query: reading_list::FindMany<'a>,
+	query: reading_list::FindManyQuery<'a>,
 	pagination: &Pagination,
-) -> reading_list::FindMany<'a> {
+) -> reading_list::FindManyQuery<'a> {
 	match pagination {
 		Pagination::Page(page_query) => {
 			let (skip, take) = page_query.get_skip_take();
@@ -216,10 +216,10 @@ async fn create_reading_list(
 				.map(|(idx, media_id)| {
 					client.reading_list_item().create(
 						idx as i32,
-						media_id.to_owned(),
 						reading_list::id::equals(reading_list.id.clone()),
-						// TODO: determine if connect is still needed...
-						vec![],
+						vec![reading_list_item::media::connect(media::id::equals(
+							media_id.to_string(),
+						))],
 					)
 				})
 				//* Note: I had to collect because of a "higher-ranked lifetime error"

@@ -7,7 +7,7 @@ use axum::{
 	Extension, Json, Router,
 };
 use axum_extra::extract::Query;
-use prisma_client_rust::{and, operator, or, Direction};
+use prisma_client_rust::{and, operator, or};
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use stump_core::{
@@ -37,10 +37,10 @@ use stump_core::{
 	},
 	prisma::{
 		active_reading_session, finished_reading_session, library,
-		media::{self, OrderByParam as MediaOrderByParam},
+		media::{self, OrderByWithRelationParam as MediaOrderByParam},
 		media_metadata,
-		series::{self, OrderByParam, WhereParam},
-		series_metadata,
+		series::{self, OrderByWithRelationParam as SeriesOrderByParam, WhereParam},
+		series_metadata, SortOrder,
 	},
 };
 use tokio::fs;
@@ -274,7 +274,7 @@ async fn get_series(
 	let user_id = user.id.clone();
 
 	let is_unpaged = pagination.is_unpaged();
-	let order_by: OrderByParam = ordering.try_into()?;
+	let order_by: SeriesOrderByParam = ordering.try_into()?;
 
 	let load_media = relation_query.load_media.unwrap_or(false);
 	let count_media = relation_query.count_media.unwrap_or(false);
@@ -408,7 +408,7 @@ async fn get_series_by_id(
 				.with(media::finished_user_reading_sessions::fetch(vec![
 					finished_reading_session::user_id::equals(user_id),
 				]))
-				.order_by(media::name::order(Direction::Asc)),
+				.order_by(media::name::order(SortOrder::Asc)),
 		);
 	}
 
@@ -578,7 +578,7 @@ async fn get_series_thumbnail_handler(
 	let series = db
 		.series()
 		.find_first(series_filters)
-		.order_by(series::name::order(Direction::Asc))
+		.order_by(series::name::order(SortOrder::Asc))
 		.select(series_or_library_thumbnail::select(book_filters))
 		.exec()
 		.await?
@@ -961,7 +961,7 @@ async fn get_next_in_series(
 				.with(media::finished_user_reading_sessions::fetch(vec![
 					finished_reading_session::user_id::equals(user_id),
 				]))
-				.order_by(media::name::order(Direction::Asc)),
+				.order_by(media::name::order(SortOrder::Asc)),
 		)
 		.exec()
 		.await?;
@@ -1060,7 +1060,7 @@ async fn get_series_is_complete(
 			finished_reading_session::media::is(vec![media::series_id::equals(Some(id))]),
 		])
 		.order_by(finished_reading_session::completed_at::order(
-			Direction::Desc,
+			SortOrder::Desc,
 		))
 		.select(finished_reading_session_series_complete::select())
 		.exec()

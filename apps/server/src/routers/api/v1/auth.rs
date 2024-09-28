@@ -6,12 +6,14 @@ use axum::{
 };
 use axum_extra::{headers::UserAgent, TypedHeader};
 use chrono::{DateTime, Duration, FixedOffset, Utc};
-use prisma_client_rust::SortOrder;
+
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use stump_core::{
 	db::entity::User,
-	prisma::{session, user, user_login_activity, user_preferences, PrismaClient},
+	prisma::{
+		session, user, user_login_activity, user_preferences, PrismaClient, SortOrder,
+	},
 };
 use tower_sessions::Session;
 use tracing::error;

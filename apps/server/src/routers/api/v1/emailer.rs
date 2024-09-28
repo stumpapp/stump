@@ -6,7 +6,7 @@ use axum::{
 	routing::{get, post},
 	Extension, Json, Router,
 };
-use prisma_client_rust::{chrono::Utc, Direction};
+use prisma_client_rust::chrono::Utc;
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use specta::Type;
@@ -16,7 +16,10 @@ use stump_core::{
 		EmailerSendTo, Media, RegisteredEmailDevice, SMTPEmailer, User, UserPermission,
 	},
 	filesystem::{ContentType, FileParts, PathUtils},
-	prisma::{emailer, emailer_send_record, registered_email_device, user, PrismaClient},
+	prisma::{
+		emailer, emailer_send_record, registered_email_device, user, PrismaClient,
+		SortOrder,
+	},
 	AttachmentPayload, EmailContentType,
 };
 use tokio::fs;
@@ -373,7 +376,7 @@ async fn get_emailer_send_history(
 	}
 
 	let history = query
-		.order_by(emailer_send_record::sent_at::order(Direction::Desc))
+		.order_by(emailer_send_record::sent_at::order(SortOrder::Desc))
 		.exec()
 		.await?;
 

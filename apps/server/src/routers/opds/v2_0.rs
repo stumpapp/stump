@@ -6,7 +6,7 @@ use axum::{
 	routing::get,
 	Extension, Json, Router,
 };
-use prisma_client_rust::{and, operator, Direction};
+use prisma_client_rust::{and, operator};
 use stump_core::{
 	db::{
 		entity::{
@@ -35,7 +35,7 @@ use stump_core::{
 		metadata::{OPDSMetadata, OPDSMetadataBuilder, OPDSPaginationMetadataBuilder},
 		publication::OPDSPublication,
 	},
-	prisma::{library, media, series},
+	prisma::{library, media, series, SortOrder},
 	Ctx,
 };
 
@@ -177,7 +177,7 @@ async fn catalog(
 		.media()
 		.find_many(latest_books_conditions.clone())
 		.take(DEFAULT_LIMIT)
-		.order_by(media::created_at::order(Direction::Desc))
+		.order_by(media::created_at::order(SortOrder::Desc))
 		.include(books_as_publications::include())
 		.exec()
 		.await?;
@@ -269,7 +269,7 @@ async fn browse_libraries(
 		.series()
 		.find_many(series_conditions.clone())
 		.take(DEFAULT_LIMIT)
-		.order_by(series::name::order(Direction::Asc))
+		.order_by(series::name::order(SortOrder::Asc))
 		.exec()
 		.await?;
 	let series_count = client.series().count(series_conditions).exec().await?;
@@ -364,7 +364,7 @@ async fn browse_library_by_id(
 		.media()
 		.find_many(library_books_conditions.clone())
 		.take(DEFAULT_LIMIT)
-		.order_by(media::created_at::order(Direction::Desc))
+		.order_by(media::created_at::order(SortOrder::Desc))
 		.include(books_as_publications::include())
 		.exec()
 		.await?;
@@ -406,7 +406,7 @@ async fn browse_library_by_id(
 		.media()
 		.find_many(library_books_conditions.clone())
 		.take(DEFAULT_LIMIT)
-		.order_by(media::created_at::order(Direction::Desc))
+		.order_by(media::created_at::order(SortOrder::Desc))
 		.include(books_as_publications::include())
 		.exec()
 		.await?;
@@ -447,7 +447,7 @@ async fn browse_library_by_id(
 		.series()
 		.find_many(library_series_conditions.clone())
 		.take(DEFAULT_LIMIT)
-		.order_by(series::name::order(Direction::Asc))
+		.order_by(series::name::order(SortOrder::Asc))
 		.exec()
 		.await?;
 	let library_series_count = client
@@ -508,7 +508,7 @@ async fn fetch_books_and_generate_feed(
 	link_finalizer: OPDSLinkFinalizer,
 	for_user: &User,
 	where_params: Vec<media::WhereParam>,
-	order: media::OrderByParam,
+	order: media::OrderByWithRelationParam,
 	pagination: PageQuery,
 	title: &str,
 	base_url: &str,
@@ -615,7 +615,7 @@ async fn browse_library_books(
 		vec![media::series::is(vec![series::library_id::equals(Some(
 			id.clone(),
 		))])],
-		media::name::order(Direction::Asc),
+		media::name::order(SortOrder::Asc),
 		pagination.0,
 		"Library Books - All",
 		format!("/opds/v2.0/libraries/{id}/books").as_str(),
@@ -640,7 +640,7 @@ async fn latest_library_books(
 		vec![media::series::is(vec![series::library_id::equals(Some(
 			id.clone(),
 		))])],
-		media::created_at::order(Direction::Desc),
+		media::created_at::order(SortOrder::Desc),
 		pagination.0,
 		"Library Books - Latest",
 		format!("/opds/v2.0/libraries/{id}/books/latest").as_str(),
@@ -665,7 +665,7 @@ async fn browse_series(
 		.find_many(series_conditions.clone())
 		.take(take)
 		.skip(skip)
-		.order_by(series::name::order(Direction::Asc))
+		.order_by(series::name::order(SortOrder::Asc))
 		.exec()
 		.await?;
 	let series_count = client.series().count(series_conditions).exec().await?;
@@ -727,7 +727,7 @@ async fn browse_series_by_id(
 		OPDSLinkFinalizer::from(host),
 		user,
 		vec![media::series_id::equals(Some(id.clone()))],
-		media::name::order(Direction::Asc),
+		media::name::order(SortOrder::Asc),
 		pagination.0,
 		"All Series",
 		&format!("/opds/v2.0/series/{id}"),
@@ -750,7 +750,7 @@ async fn browse_books(
 		OPDSLinkFinalizer::from(host),
 		user,
 		vec![],
-		media::name::order(Direction::Asc),
+		media::name::order(SortOrder::Asc),
 		pagination.0,
 		"Browse All Books",
 		"/opds/v2.0/books/browse",
@@ -773,7 +773,7 @@ async fn latest_books(
 		OPDSLinkFinalizer::from(host),
 		user,
 		vec![],
-		media::created_at::order(Direction::Desc),
+		media::created_at::order(SortOrder::Desc),
 		pagination.0,
 		"Latest Books",
 		"/opds/v2.0/books/latest",
@@ -801,7 +801,7 @@ async fn keep_reading(
 		vec![media::active_user_reading_sessions::some(vec![
 			apply_in_progress_filter_for_user(user.id.clone()),
 		])],
-		media::created_at::order(Direction::Desc),
+		media::created_at::order(SortOrder::Desc),
 		pagination.0,
 		"Currently Reading",
 		"/opds/v2.0/books/keep-reading",

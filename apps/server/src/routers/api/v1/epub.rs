@@ -131,7 +131,7 @@ async fn update_epub_progress(
 			.active_reading_session()
 			.upsert(
 				active_reading_session::user_id_media_id(user_id.clone(), id.clone()),
-				(
+				active_reading_session::create(
 					media::id::equals(id.clone()),
 					user::id::equals(user_id.clone()),
 					vec![
@@ -211,7 +211,7 @@ async fn create_or_update_bookmark(
 				input.epubcfi.clone(),
 				-1,
 			),
-			(
+			bookmark::create(
 				media::id::equals(id),
 				user::id::equals(user.id.clone()),
 				vec![

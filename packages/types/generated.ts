@@ -382,6 +382,8 @@ export type MediaBaseFilter = { id?: string[]; name?: string[]; extension?: stri
 
 export type MediaFilter = ({ id?: string[]; name?: string[]; extension?: string[]; path?: string[]; read_status?: ReadStatus[]; tags?: string[]; search?: string | null; metadata?: MediaMetadataBaseFilter | null }) & ({ series?: SeriesFilter | null })
 
+export type BookRelations = { load_series?: boolean | null; load_library?: boolean | null }
+
 export type SeriesBaseFilter = { id?: string[]; name?: string[]; path?: string[]; search?: string | null; metadata?: SeriesMedataFilter | null }
 
 export type SeriesMedataFilter = { meta_type?: string[]; publisher?: string[]; status?: string[]; age_rating?: number | null; volume?: ValueOrRange<number> | null }
@@ -404,7 +406,7 @@ export type UpdateLibraryExcludedUsers = { user_ids: string[] }
 
 export type CleanLibraryResponse = { deleted_media_count: number; deleted_series_count: number; is_empty: boolean }
 
-export type GenerateLibraryThumbnails = { image_options: ImageProcessorOptions | null; force_regenerate?: boolean }
+export type GenerateLibraryThumbnails = { image_options?: ImageProcessorOptions | null; force_regenerate?: boolean }
 
 export type LibraryStatsParams = { all_users?: boolean }
 

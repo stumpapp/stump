@@ -1,6 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { emailerQueryKeys } from '@stump/api'
-import { invalidateQueries, useCreateEmailDevice, useUpdateEmailDevice } from '@stump/client'
+import {
+	invalidateQueries,
+	useCreateEmailDevice,
+	useSDK,
+	useUpdateEmailDevice,
+} from '@stump/client'
 import { Button, CheckBox, Dialog, Form, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { RegisteredEmailDevice } from '@stump/types'
@@ -16,7 +20,9 @@ type Props = {
 }
 
 // TODO: unique constraint on name...
+// TODO: fix types here
 export default function CreateOrUpdateDeviceModal({ isOpen, updatingDevice, onClose }: Props) {
+	const { sdk } = useSDK()
 	const { t } = useLocaleContext()
 
 	const { createAsync } = useCreateEmailDevice()
@@ -46,15 +52,18 @@ export default function CreateOrUpdateDeviceModal({ isOpen, updatingDevice, onCl
 	}, [defaultValues, reset, updatingDevice])
 
 	const handleSubmit = async (values: z.infer<typeof schema>) => {
-		const handler = updatingDevice ? updateAsync : createAsync
 		try {
-			await handler(values)
-			await invalidateQueries({ keys: [emailerQueryKeys.getEmailDevices] })
+			if (updatingDevice) {
+				await updateAsync(values)
+			} else {
+				await createAsync(values)
+			}
 			onClose()
 		} catch (error) {
 			console.error(error)
 			toast.error('Failed to create/update device')
 		}
+		await invalidateQueries({ keys: [sdk.emailer.keys.getDevices] })
 	}
 
 	const onOpenChange = (nowOpen: boolean) => (nowOpen ? onClose() : null)

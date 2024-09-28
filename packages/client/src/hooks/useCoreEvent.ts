@@ -1,6 +1,8 @@
-import { jobQueryKeys, libraryQueryKeys, mediaQueryKeys, seriesQueryKeys } from '@stump/api'
+import { Api } from '@stump/sdk'
 import type { CoreEvent, CoreJobOutput, LibraryScanOutput } from '@stump/types'
 import { useCallback } from 'react'
+
+import { useSDK } from '@/sdk'
 
 import { invalidateQueries } from '../invalidate'
 import { useJobStore } from '../stores/job'
@@ -16,6 +18,7 @@ type Params = {
 }
 
 export function useCoreEventHandler({ liveRefetch, onConnectionWithServerChanged }: Params = {}) {
+	const { sdk } = useSDK()
 	const { addJob, upsertJob, removeJob } = useJobStore((state) => ({
 		addJob: state.addJob,
 		removeJob: state.removeJob,
@@ -36,27 +39,27 @@ export function useCoreEventHandler({ liveRefetch, onConnectionWithServerChanged
 
 			switch (__typename) {
 				case 'JobStarted':
-					await handleInvalidate([jobQueryKeys.getJobs])
+					await handleInvalidate([sdk.job.keys.get])
 					addJob(event)
 					break
 				case 'JobUpdate':
 					if (!!event.status && event.status !== 'RUNNING') {
 						await new Promise((resolve) => setTimeout(resolve, 1000))
 						removeJob(event.id)
-						await handleInvalidate([jobQueryKeys.getJobs])
+						await handleInvalidate([sdk.job.keys.get])
 					} else {
 						upsertJob(event)
 					}
 					break
 				case 'JobOutput':
-					await handleJobOutput(event.output)
+					await handleJobOutput(event.output, sdk)
 					break
 				case 'DiscoveredMissingLibrary':
 					await handleInvalidate(['library', 'series', 'media'])
 					break
 				case 'CreatedManySeries':
 					if (liveRefetch) {
-						await handleInvalidate([libraryQueryKeys.getLibraryStats, 'series', 'media'])
+						await handleInvalidate([sdk.library.keys.getStats, 'series', 'media'])
 					}
 					break
 				case 'CreatedOrUpdatedManyMedia':
@@ -64,8 +67,8 @@ export function useCoreEventHandler({ liveRefetch, onConnectionWithServerChanged
 						await handleInvalidate([
 							'series',
 							'media',
-							libraryQueryKeys.getLibraryStats,
-							libraryQueryKeys.getLibraryById,
+							sdk.library.keys.getStats,
+							sdk.library.keys.getByID,
 						])
 					}
 					break
@@ -76,19 +79,19 @@ export function useCoreEventHandler({ liveRefetch, onConnectionWithServerChanged
 					console.warn('Unhandled core event', event)
 			}
 		},
-		[addJob, handleInvalidate, liveRefetch, removeJob, upsertJob],
+		[addJob, handleInvalidate, liveRefetch, removeJob, upsertJob, sdk],
 	)
 
 	useStumpSse({ onConnectionWithServerChanged, onEvent: handleCoreEvent })
 }
 
 // const patchRecentlyAddedBooks = (books: Media[]) => {
-// 	const cache = queryClient.getQueryData<Media[]>([mediaQueryKeys.getRecentlyAddedMedia])
+// 	const cache = queryClient.getQueryData<Media[]>([sdk.media.keys.recentlyAdded])
 // 	// Add the new books to the front of the list
-// 	queryClient.setQueryData([mediaQueryKeys.getRecentlyAddedMedia], [...books, ...(cache ?? [])])
+// 	queryClient.setQueryData([sdk.media.keys.recentlyAdded], [...books, ...(cache ?? [])])
 // }
 
-const handleJobOutput = async (output: CoreJobOutput) => {
+const handleJobOutput = async (output: CoreJobOutput, sdk: Api) => {
 	if (isLibraryScanOutput(output)) {
 		const requeryBooks = output.created_media.valueOf() + output.updated_media.valueOf() > 0
 		const requerySeries = output.created_series.valueOf() + output.updated_series.valueOf() > 0
@@ -96,15 +99,15 @@ const handleJobOutput = async (output: CoreJobOutput) => {
 		const keys = []
 
 		if (requeryBooks) {
-			keys.push(mediaQueryKeys.getRecentlyAddedMedia, mediaQueryKeys.getMedia)
+			keys.push(sdk.media.keys.recentlyAdded, sdk.media.keys.get)
 		}
 
 		if (requerySeries) {
-			keys.push(...[seriesQueryKeys.getRecentlyAddedSeries, libraryQueryKeys.getLibrarySeries])
+			keys.push(...[sdk.series.keys.recentlyAdded, sdk.series.keys.get])
 		}
 
 		if (keys.length > 0) {
-			keys.push(...[libraryQueryKeys.getLibraryStats])
+			keys.push(...[sdk.library.keys.getStats])
 			try {
 				await invalidateQueries({ keys })
 			} catch (e) {

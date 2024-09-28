@@ -155,7 +155,13 @@ export function useUpdateLibrary({
 		...options,
 		onSuccess: async (library, _, __) => {
 			await invalidateQueries({
-				keys: [sdk.library.keys.get, sdk.library.keys.getStats, sdk.job.keys.get],
+				exact: false,
+				keys: [
+					sdk.library.keys.get,
+					sdk.library.keys.getStats,
+					sdk.job.keys.get,
+					sdk.library.keys.getByID,
+				],
 			})
 			options.onSuccess?.(library, _, __)
 		},

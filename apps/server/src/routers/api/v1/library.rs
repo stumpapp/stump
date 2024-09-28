@@ -853,8 +853,8 @@ async fn delete_library_thumbnails(
 	Ok(Json(()))
 }
 
-#[derive(Debug, Deserialize, ToSchema, Type)]
 #[skip_serializing_none]
+#[derive(Debug, Deserialize, ToSchema, Type)]
 pub struct GenerateLibraryThumbnails {
 	pub image_options: Option<ImageProcessorOptions>,
 	#[serde(default)]

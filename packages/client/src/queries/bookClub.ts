@@ -12,33 +12,41 @@ import { useSDK } from '@/sdk'
 import { MutationOptions, queryClient, QueryOptions, useMutation, useQuery } from '../client'
 import { invalidateQueries } from '../invalidate'
 
-export const usePrefetchClubChat = (bookClubId: string, id?: string) => {
+export const usePrefetchClubChat = ({ id }: { id: string }) => {
 	const { sdk } = useSDK()
 
-	const queryKey = id ? [sdk.club.keys.getDiscussionById, id] : [sdk.club.keys.getCurrentDiscussion]
+	const prefetch = async (chatID?: string) => {
+		const queryKey = chatID
+			? [sdk.club.keys.getDiscussionById, chatID]
+			: [sdk.club.keys.getCurrentDiscussion]
 
-	const prefetch = async () =>
 		queryClient.prefetchQuery(
 			queryKey,
 			() => {
-				if (id) {
-					return sdk.club.getDiscussionById(bookClubId, id)
+				if (chatID) {
+					return sdk.club.getDiscussionById(id, chatID)
 				} else {
-					return sdk.club.getCurrentDiscussion(bookClubId)
+					return sdk.club.getCurrentDiscussion(id)
 				}
 			},
 			{
 				staleTime: 10 * 1000,
 			},
 		)
+	}
 
 	return { prefetch }
 }
 
-export const usePrefetchClubThread = (bookClubId: string, chatId: string, threadId: string) => {
+type UsePrefetchClubThreadParams = {
+	bookClubId: string
+	chatId: string
+	threadId: string
+}
+export const usePrefetchClubThread = () => {
 	const { sdk } = useSDK()
 
-	const prefetch = async () =>
+	const prefetch = async ({ bookClubId, chatId, threadId }: UsePrefetchClubThreadParams) =>
 		queryClient.prefetchQuery(
 			[sdk.club.keys.getDiscussionThread, bookClubId, chatId, threadId],
 			() => sdk.club.getDiscussionThread(bookClubId, chatId, threadId),

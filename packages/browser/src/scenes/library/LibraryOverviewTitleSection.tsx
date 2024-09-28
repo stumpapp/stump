@@ -1,4 +1,4 @@
-import { getLibraryThumbnail } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { EntityCard, Heading } from '@stump/components'
 import type { Library } from '@stump/types'
 import { useMediaMatch } from 'rooks'
@@ -10,6 +10,7 @@ type Props = {
 	library: Library
 }
 export default function LibraryOverviewTitleSection({ library }: Props) {
+	const { sdk } = useSDK()
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 
 	const summary = library.description
@@ -17,7 +18,7 @@ export default function LibraryOverviewTitleSection({ library }: Props) {
 	return (
 		<div className="flex flex-col items-center gap-4 md:mb-2 md:flex-row md:items-start">
 			<EntityCard
-				imageUrl={getLibraryThumbnail(library.id)}
+				imageUrl={sdk.library.thumbnailURL(library.id)}
 				isCover
 				className="flex-auto flex-shrink-0"
 				fullWidth={(imageFailed) => !imageFailed}

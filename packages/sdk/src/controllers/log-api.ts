@@ -28,8 +28,8 @@ export class LogAPI extends APIBase {
 	/**
 	 * Delete all **persisted** logs in the database
 	 */
-	async clear(): Promise<void> {
-		await this.axios.delete(logURL(''))
+	async clear(params?: LogFilter): Promise<void> {
+		await this.axios.delete(logURL('', params))
 	}
 
 	/**

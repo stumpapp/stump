@@ -1,5 +1,4 @@
-import { libraryApi, libraryQueryKeys } from '@stump/api'
-import { useMutation } from '@stump/client'
+import { useMutation, useSDK } from '@stump/client'
 import { Button, DropdownMenu, Label, Text } from '@stump/components'
 import { AlertTriangle, ChevronDown, ImagePlus } from 'lucide-react'
 import React from 'react'
@@ -7,10 +6,10 @@ import React from 'react'
 import { useLibraryContext } from '@/scenes/library/context'
 
 export default function RegenerateThumbnails() {
+	const { sdk } = useSDK()
 	const { library } = useLibraryContext()
-	const { mutate } = useMutation(
-		[libraryQueryKeys.regenerateThumbnails, library.id],
-		(force: boolean) => libraryApi.regenerateThumbnails(library.id, force),
+	const { mutate } = useMutation([sdk.library.generateThumbnails, library.id], (force: boolean) =>
+		sdk.library.generateThumbnails(library.id, { force_regenerate: force }),
 	)
 
 	const iconStyle = 'mr-2 h-4 w-4'

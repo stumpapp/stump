@@ -30,7 +30,7 @@ export function useSmartListsQuery({ params, ...options }: UseSmartListsQueryOpt
 	return { lists: data, ...rest }
 }
 
-export const usePrefetchSmartList = (id: string) => {
+export const usePrefetchSmartList = ({ id }: { id: string }) => {
 	const { sdk } = useSDK()
 	const prefetch = useCallback(
 		() =>
@@ -73,7 +73,7 @@ export function useSmartListMetaQuery({ id, ...options }: UseSmartListMetaQueryO
 	return { meta: data, ...rest }
 }
 
-export const usePrefetchListItems = (id: string) => {
+export const usePrefetchListItems = ({ id }: { id: string }) => {
 	const { sdk } = useSDK()
 
 	const prefetch = useCallback(

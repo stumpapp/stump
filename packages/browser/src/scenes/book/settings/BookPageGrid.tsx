@@ -1,4 +1,4 @@
-import { getMediaPage } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { cx } from '@stump/components'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import React, { useCallback, useEffect } from 'react'
@@ -13,6 +13,7 @@ type Props = {
 }
 // TODO: Create generlized VirtualizedGrid component and trim the reused logic
 export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage }: Props) {
+	const { sdk } = useSDK()
 	const parentRef = React.useRef<HTMLDivElement>(null)
 
 	const isAtLeastSmall = useMediaMatch('(min-width: 640px)')
@@ -78,7 +79,7 @@ export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage
 								<React.Fragment key={virtualRow.index}>
 									{columnVirtualizer.getVirtualItems().map((virtualColumn) => {
 										const virtualPage = virtualRow.index * 4 + virtualColumn.index + 1
-										const imageUrl = getMediaPage(bookId, virtualPage)
+										const imageUrl = sdk.media.bookPageURL(bookId, virtualPage)
 										return (
 											<div
 												key={virtualColumn.index}

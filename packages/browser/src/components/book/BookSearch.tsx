@@ -1,4 +1,4 @@
-import { prefetchPagedMedia, usePagedMediaQuery } from '@stump/client'
+import { usePagedMediaQuery, usePrefetchMediaPaged } from '@stump/client'
 import { usePreviousIsDifferent } from '@stump/components'
 import { Media } from '@stump/types'
 import React, { useCallback, useEffect, useMemo } from 'react'
@@ -40,6 +40,7 @@ export default function BookSearch({ page, page_size, setPage, onBookSelect, sho
 		media,
 		pageData: { current_page, total_pages } = {},
 	} = usePagedMediaQuery(params)
+	const { prefetch } = usePrefetchMediaPaged()
 
 	const differentSearch = usePreviousIsDifferent(filters?.search as string)
 	useEffect(() => {
@@ -67,12 +68,12 @@ export default function BookSearch({ page, page_size, setPage, onBookSelect, sho
 
 	const handlePrefetchPage = useCallback(
 		(page: number) => {
-			prefetchPagedMedia({
+			prefetch({
 				...params,
 				page,
 			})
 		},
-		[params],
+		[prefetch, params],
 	)
 
 	return (

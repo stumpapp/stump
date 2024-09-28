@@ -1,4 +1,4 @@
-import { getMediaThumbnail } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { Book } from 'lucide-react'
 import React, { useState } from 'react'
 
@@ -7,12 +7,13 @@ type Props = {
 	title?: string
 }
 export default function CoverImageCell({ id, title }: Props) {
+	const { sdk } = useSDK()
 	const [showFallback, setShowFallback] = useState(false)
 
 	const loadImage = () => {
 		const image = new Image()
 		return new Promise((resolve, reject) => {
-			image.src = getMediaThumbnail(id)
+			image.src = sdk.media.thumbnailURL(id)
 			image.onload = () => resolve(image)
 			image.onerror = (e) => {
 				console.error('Image failed to load:', e)
@@ -46,7 +47,7 @@ export default function CoverImageCell({ id, title }: Props) {
 		<img
 			title={title}
 			className="aspect-[2/3] h-14 w-auto rounded-sm object-cover"
-			src={getMediaThumbnail(id)}
+			src={sdk.media.thumbnailURL(id)}
 			onError={() => setShowFallback(true)}
 		/>
 	)

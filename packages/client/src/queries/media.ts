@@ -1,5 +1,5 @@
-import { QueryOrderParams } from '@stump/sdk'
-import type { Media, MediaFilter, ProgressUpdateReturn } from '@stump/types'
+import { FullQueryParams, QueryOrderParams } from '@stump/sdk'
+import type { BookRelations, Media, MediaFilter, ProgressUpdateReturn } from '@stump/types'
 import { AxiosError } from 'axios'
 import { useCallback } from 'react'
 
@@ -29,7 +29,7 @@ export const usePrefetchMediaByID = (id: string) => {
 	return { prefetch }
 }
 
-export const usePrefetchLibraryBooks = (libraryID: string) => {
+export const usePrefetchLibraryBooks = ({ id }: { id: string }) => {
 	const { sdk } = useSDK()
 
 	const prefetch = useCallback(
@@ -42,7 +42,7 @@ export const usePrefetchLibraryBooks = (libraryID: string) => {
 					{
 						series: {
 							library: {
-								id: [libraryID],
+								id: [id],
 							},
 						},
 					} satisfies MediaFilter,
@@ -53,18 +53,18 @@ export const usePrefetchLibraryBooks = (libraryID: string) => {
 						page_size: 20,
 						series: {
 							library: {
-								id: [libraryID],
+								id: [id],
 							},
 						},
 					}),
 			),
-		[sdk.media, libraryID],
+		[sdk.media, id],
 	)
 
 	return { prefetch }
 }
 
-export const usePrefetchSeriesBooks = (id: string) => {
+export const usePrefetchSeriesBooks = ({ id }: { id: string }) => {
 	const { sdk } = useSDK()
 
 	const prefetch = useCallback(
@@ -102,7 +102,7 @@ type MediaQueryParams<TQueryFnData, TData = TQueryFnData> = QueryOptions<
 >
 
 type UseMediaByIdQueryOptions = MediaQueryParams<Media> & {
-	params?: MediaFilter
+	params?: MediaFilter & BookRelations
 }
 
 export function useMediaByIdQuery(
@@ -147,21 +147,21 @@ export function usePagedMediaQuery(options: UsePagedMediaQueryParams = {}) {
 	}
 }
 
-export const usePrefetchMediaPaged = ({
-	params,
-	page = 1,
-	page_size = 20,
-	...options
-}: TypedPageQueryOptions<Media, MediaFilter>) => {
+export const usePrefetchMediaPaged = () => {
 	const { sdk } = useSDK()
 	const prefetch = useCallback(
-		() =>
+		({
+			params,
+			page = 1,
+			page_size = 20,
+			...options
+		}: TypedPageQueryOptions<Media, FullQueryParams<MediaFilter>>) =>
 			queryClient.prefetchQuery(
 				[sdk.media.keys.get, params],
 				() => sdk.media.get({ page, page_size, ...params }),
 				options,
 			),
-		[sdk.media, page, page_size, params, options],
+		[sdk.media],
 	)
 	return { prefetch }
 }

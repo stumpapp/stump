@@ -1,4 +1,4 @@
-import { seriesApi } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { Alert, Button } from '@stump/components'
 import { Construction } from 'lucide-react'
 
@@ -8,10 +8,11 @@ import { useSeriesContext } from '../../context'
 import SeriesThumbnailSelector from './SeriesThumbnailSelector'
 
 export default function SeriesSettingsScene() {
+	const { sdk } = useSDK()
 	const { series } = useSeriesContext()
 
 	function handleAnalyze() {
-		seriesApi.startMediaAnalysis(series.id)
+		sdk.series.analyze(series.id)
 	}
 
 	return (

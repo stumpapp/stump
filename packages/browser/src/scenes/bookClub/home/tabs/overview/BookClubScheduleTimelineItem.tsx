@@ -1,4 +1,4 @@
-import { getMediaThumbnail } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { AspectRatio, Badge, ButtonOrLink, Card, cx, Heading, Link, Text } from '@stump/components'
 import { BookClubBook } from '@stump/types'
 import dayjs from 'dayjs'
@@ -6,13 +6,15 @@ import { Book } from 'lucide-react'
 import pluralize from 'pluralize'
 import React, { useMemo } from 'react'
 
-import paths from '../../../../../paths'
+import paths from '@/paths'
+
 import { useBookClubContext } from '../../context'
 
 type Props = {
 	book: BookClubBook
 }
 export default function BookClubScheduleTimelineItem({ book }: Props) {
+	const { sdk } = useSDK()
 	const { bookClub } = useBookClubContext()
 
 	const adjustedEnd = dayjs(book.end_at).add(book.discussion_duration_days, 'day')
@@ -89,7 +91,7 @@ export default function BookClubScheduleTimelineItem({ book }: Props) {
 		const { book_entity, title, author, url } = book
 
 		const image = book_entity ? (
-			<img src={getMediaThumbnail(book_entity.id)} className="rounded-md object-cover" />
+			<img src={sdk.media.thumbnailURL(book_entity.id)} className="rounded-md object-cover" />
 		) : (
 			<div className="flex h-full w-full items-center justify-center rounded-md border border-gray-75 bg-gray-50/80 dark:border-gray-950 dark:bg-gray-1000/30">
 				<Book className="h-10 w-10 text-gray-750 dark:text-gray-400" />

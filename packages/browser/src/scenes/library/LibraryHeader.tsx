@@ -1,4 +1,4 @@
-import { getLibraryThumbnail } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { AspectRatio, cn, Heading, Text } from '@stump/components'
 import React from 'react'
 
@@ -9,6 +9,7 @@ import { usePreferences } from '@/hooks'
 import { useLibraryContext } from './context'
 
 export default function LibraryHeader() {
+	const { sdk } = useSDK()
 	const {
 		preferences: { primary_navigation_mode, layout_max_width_px, show_thumbnails_in_headers },
 	} = usePreferences()
@@ -58,7 +59,7 @@ export default function LibraryHeader() {
 				{show_thumbnails_in_headers && (
 					<div className="w-[200px]">
 						<AspectRatio ratio={2 / 3}>
-							<img src={getLibraryThumbnail(library.id)} className="rounded-md object-cover" />
+							<img src={sdk.library.thumbnailURL(library.id)} className="rounded-md object-cover" />
 						</AspectRatio>
 					</div>
 				)}

@@ -37,7 +37,7 @@ export default function BookCard({
 
 		const currentPage = media.current_page || -1
 		if (currentPage > 0) {
-			prefetchMediaPage(media.id, currentPage)
+			prefetchMediaPage(sdk, media.id, currentPage)
 		}
 	}
 

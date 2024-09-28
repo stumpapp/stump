@@ -118,12 +118,9 @@ export function useEmailerSendHistoryQuery({
 		...restReturn,
 	}
 }
-export const usePrefetchEmailerSendHistory = async (
-	emailerId: number,
-	params?: EmailerSendRecordIncludeParams,
-) => {
+export const usePrefetchEmailerSendHistory = ({ emailerId }: { emailerId: number }) => {
 	const { sdk } = useSDK()
-	const prefetch = () =>
+	const prefetch = (params?: EmailerSendRecordIncludeParams) =>
 		queryClient.prefetchQuery([sdk.emailer.keys.getSendHistory, emailerId, params], async () =>
 			sdk.emailer.getSendHistory(emailerId, params),
 		)

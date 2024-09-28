@@ -15,6 +15,7 @@ use prisma_client_rust::{
 };
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
+use specta::Type;
 use stump_core::{
 	config::StumpConfig,
 	db::{
@@ -728,8 +729,8 @@ async fn get_media_by_path(
 	Ok(Json(Media::from(book)))
 }
 
-#[derive(Deserialize)]
-struct BookRelations {
+#[derive(Deserialize, Type)]
+pub struct BookRelations {
 	#[serde(default)]
 	load_series: Option<bool>,
 	#[serde(default)]

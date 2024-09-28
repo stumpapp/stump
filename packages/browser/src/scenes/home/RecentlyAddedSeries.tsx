@@ -1,5 +1,4 @@
-import { seriesQueryKeys } from '@stump/api'
-import { useSeriesCursorQuery } from '@stump/client'
+import { useSDK, useSeriesCursorQuery } from '@stump/client'
 import { Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { CircleSlash2 } from 'lucide-react'
@@ -8,6 +7,7 @@ import HorizontalCardList from '@/components/HorizontalCardList'
 import SeriesCard from '@/components/series/SeriesCard'
 
 export default function RecentlyAddedSeries() {
+	const { sdk } = useSDK()
 	const { t } = useLocaleContext()
 	const { series, fetchNextPage, hasNextPage, isLoading } = useSeriesCursorQuery({
 		limit: 20,
@@ -16,7 +16,7 @@ export default function RecentlyAddedSeries() {
 			direction: 'desc',
 			order_by: 'created_at',
 		},
-		queryKey: [seriesQueryKeys.getRecentlyAddedSeries],
+		queryKey: [sdk.series.keys.recentlyAdded],
 	})
 
 	const cards = series.map((series) => (

@@ -24,7 +24,7 @@ type PrefetchSeriesOptions = {
 export const usePrefetchSeries = ({ id, fetchBooks = true }: PrefetchSeriesOptions) => {
 	const { sdk } = useSDK()
 
-	const { prefetch: prefetchBooks } = usePrefetchSeriesBooks(id)
+	const { prefetch: prefetchBooks } = usePrefetchSeriesBooks({ id })
 
 	const prefetchSeries = useCallback(
 		() =>
@@ -45,7 +45,7 @@ export const usePrefetchSeries = ({ id, fetchBooks = true }: PrefetchSeriesOptio
 	return { prefetch }
 }
 
-export const usePrefetchLibrarySeries = (id: string) => {
+export const usePrefetchLibrarySeries = ({ id }: { id: string }) => {
 	const { sdk } = useSDK()
 
 	const prefetch = useCallback(
@@ -114,15 +114,15 @@ export function usePagedSeriesQuery(options: PageQueryOptions<Series> = {}) {
 	}
 }
 
-export const usePrefetchPagedSeries = ({
-	page = 1,
-	page_size = 20,
-	params,
-	...options
-}: TypedPageQueryOptions<Series, SeriesFilter>) => {
+export const usePrefetchPagedSeries = () => {
 	const { sdk } = useSDK()
 	const prefetch = useCallback(
-		() =>
+		({
+			page = 1,
+			page_size = 20,
+			params,
+			...options
+		}: TypedPageQueryOptions<Series, SeriesFilter>) =>
 			queryClient.prefetchQuery(
 				[sdk.series.keys.get, params],
 				() =>
@@ -133,7 +133,7 @@ export const usePrefetchPagedSeries = ({
 					}),
 				options,
 			),
-		[options, sdk.series, page, page_size, params],
+		[sdk.series],
 	)
 	return { prefetch }
 }

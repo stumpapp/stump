@@ -1,10 +1,4 @@
-import {
-	queryClient,
-	QueryClientContext,
-	SDKProvider,
-	StumpClientContext,
-	useSDK,
-} from '@stump/client'
+import { queryClient, QueryClientContext, SDKProvider, StumpClientContext } from '@stump/client'
 import { checkUrl } from '@stump/sdk'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { useLocation, useNavigate } from 'react-router'

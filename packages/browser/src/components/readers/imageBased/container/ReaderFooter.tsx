@@ -1,5 +1,5 @@
 import { getMediaPage } from '@stump/api'
-import { AspectRatio, cn } from '@stump/components'
+import { AspectRatio, cn, usePrevious } from '@stump/components'
 import { motion } from 'framer-motion'
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
@@ -40,6 +40,7 @@ export default function ReaderFooter() {
 
 	const getRelativePage = useCallback((idx: number) => pageArray[idx] ?? idx, [pageArray])
 
+	const previousPage = usePrevious(currentPage)
 	/**
 	 * An effect to scroll the Virtuoso component to the current page
 	 * is close to exiting the view.
@@ -52,14 +53,14 @@ export default function ReaderFooter() {
 		const startThresholdMet = endIndex >= pageAsIndex
 		const pageIsInView = startThresholdMet && endThresholdMet
 
-		if (!pageIsInView) {
+		if (!pageIsInView && previousPage !== currentPage) {
 			virtuosoRef.current?.scrollIntoView({
 				align: 'center',
 				behavior: 'smooth',
 				index: pageAsIndex,
 			})
 		}
-	}, [currentPage, range, getRelativePage, pageArray])
+	}, [currentPage, previousPage, range, getRelativePage, pageArray])
 
 	return (
 		<motion.nav

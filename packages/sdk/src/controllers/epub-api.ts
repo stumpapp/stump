@@ -1,4 +1,10 @@
-import { Bookmark, CreateOrUpdateBookmark, Epub, UpdateEpubProgress } from '@stump/types'
+import {
+	Bookmark,
+	CreateOrUpdateBookmark,
+	DeleteBookmark,
+	Epub,
+	UpdateEpubProgress,
+} from '@stump/types'
 
 import { APIBase } from '../base'
 import { ClassQueryKeys } from './types'
@@ -95,8 +101,8 @@ export class EpubAPI extends APIBase {
 	/**
 	 * Delete a bookmark for an epub by its ID and bookmark ID
 	 */
-	async deleteBookmark(id: string, bookmarkID: string): Promise<void> {
-		await this.api.axios.delete(epubURL(`${id}/bookmarks/${bookmarkID}`))
+	async deleteBookmark(id: string, payload: DeleteBookmark): Promise<void> {
+		await this.api.axios.delete(epubURL(`${id}/bookmarks`), { data: payload })
 	}
 
 	/**

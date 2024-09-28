@@ -1,5 +1,4 @@
-import { getMediaPage, mediaQueryKeys } from '@stump/api'
-import { queryClient, useUpdateMediaProgress } from '@stump/client'
+import { queryClient, useSDK, useUpdateMediaProgress } from '@stump/client'
 import { Media } from '@stump/types'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -41,6 +40,7 @@ export default function ImageBasedReader({
 	isIncognito,
 	initialPage,
 }: Props) {
+	const { sdk } = useSDK()
 	const navigate = useNavigate()
 
 	/**
@@ -91,7 +91,7 @@ export default function ImageBasedReader({
 	/**
 	 * A callback to get the URL of a page. This is *not* 0-indexed, so the first page is 1.
 	 */
-	const getPageUrl = (pageNumber: number) => getMediaPage(media.id, pageNumber)
+	const getPageUrl = (pageNumber: number) => sdk.media.bookPageURL(media.id, pageNumber)
 
 	const lastPage = media.pages
 	/**
@@ -134,9 +134,9 @@ export default function ImageBasedReader({
 			setSettings({
 				showToolBar: false,
 			})
-			queryClient.invalidateQueries([mediaQueryKeys.getInProgressMedia], { exact: false })
+			queryClient.invalidateQueries([sdk.media.keys.inProgress], { exact: false })
 		}
-	}, [setSettings])
+	}, [setSettings, sdk.media])
 
 	const renderReader = () => {
 		if (readingMode.startsWith('continuous')) {
@@ -156,7 +156,7 @@ export default function ImageBasedReader({
 				<Component
 					media={media}
 					currentPage={initialPage || 1}
-					getPageUrl={(pageNumber) => getMediaPage(media.id, pageNumber)}
+					getPageUrl={(pageNumber) => sdk.media.bookPageURL(media.id, pageNumber)}
 					onPageChange={handleChangePage}
 				/>
 			)

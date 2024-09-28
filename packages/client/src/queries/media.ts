@@ -17,7 +17,7 @@ import {
 } from '../client'
 import { queryClient, useQuery } from '../client'
 
-export const usePrefetchMediaByID = async (id: string) => {
+export const usePrefetchMediaByID = (id: string) => {
 	const { sdk } = useSDK()
 	const prefetch = useCallback(
 		() =>

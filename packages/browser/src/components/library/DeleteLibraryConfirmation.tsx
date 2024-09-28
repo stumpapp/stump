@@ -1,6 +1,6 @@
-import { isAxiosError } from '@stump/api'
 import { useDeleteLibrary } from '@stump/client'
 import { ConfirmationModal } from '@stump/components'
+import { isAxiosError } from '@stump/sdk'
 import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router'
 

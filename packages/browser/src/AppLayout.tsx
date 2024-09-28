@@ -1,6 +1,6 @@
-import { isAxiosError } from '@stump/api'
 import { useAuthQuery, useCoreEventHandler } from '@stump/client'
 import { cn, cx } from '@stump/components'
+import { isAxiosError } from '@stump/sdk'
 import { UserPermission, UserPreferences } from '@stump/types'
 import { useOverlayScrollbars } from 'overlayscrollbars-react'
 import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
@@ -207,7 +207,7 @@ export function AppLayout() {
 								'scrollbar-hide': storeUser.user_preferences?.enable_hide_scrollbar,
 							},
 							{
-								'bg-gradient-to-br from-background-gradient-from to-background-gradient-to':
+								'from-background-gradient-from to-background-gradient-to bg-gradient-to-br':
 									shouldUseGradient,
 							},
 						)}

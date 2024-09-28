@@ -1,5 +1,3 @@
-import axios, { AxiosError } from 'axios'
-
 import { ApiVersion } from './api'
 
 export const formatApiURL = (url: string, version: ApiVersion) => {
@@ -25,6 +23,17 @@ export const formatApiURL = (url: string, version: ApiVersion) => {
 	return correctedUrl
 }
 
-export const isAxiosError = (error: unknown): error is AxiosError => {
-	return axios.isAxiosError(error)
+// TODO: make not bad
+export function isUrl(url: string) {
+	return url.startsWith('http://') || url.startsWith('https://')
+}
+
+export async function checkUrl(url: string) {
+	if (!isUrl(url)) {
+		return false
+	}
+
+	const res = await fetch(`${url}/ping`).catch((err) => err)
+
+	return res.status === 200
 }

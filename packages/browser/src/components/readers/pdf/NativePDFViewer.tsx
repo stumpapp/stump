@@ -1,4 +1,4 @@
-import { getMediaDownloadUrl } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { Link, Text } from '@stump/components'
 import { useEffect, useState } from 'react'
 
@@ -18,6 +18,8 @@ type Props = {
  * such as reading progress, bookmarks, and annotations.
  */
 export default function NativePDFViewer({ id }: Props) {
+	const { sdk } = useSDK()
+
 	const [pdfObjectUrl, setPdfObjectUrl] = useState<string>()
 
 	/**
@@ -27,7 +29,7 @@ export default function NativePDFViewer({ id }: Props) {
 	useEffect(
 		() => {
 			async function fetchPdf() {
-				const response = await fetch(getMediaDownloadUrl(id), {
+				const response = await fetch(sdk.media.downloadURL(id), {
 					credentials: 'include',
 				})
 				const blob = await response.blob()
@@ -54,7 +56,7 @@ export default function NativePDFViewer({ id }: Props) {
 	return (
 		<object data={pdfObjectUrl} type="application/pdf" width="100%" height="100%">
 			<Text>
-				PDF failed to load. <Link href={getMediaDownloadUrl(id)}>Click here</Link> attempt
+				PDF failed to load. <Link href={sdk.media.downloadURL(id)}>Click here</Link> attempt
 				downloading it directly.
 			</Text>
 		</object>

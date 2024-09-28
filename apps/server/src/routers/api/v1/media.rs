@@ -791,7 +791,7 @@ async fn get_media_by_id(
 		query = query.with(if params.load_library.unwrap_or_default() {
 			media::series::fetch()
 				.with(series::metadata::fetch())
-				.with(series::library::fetch())
+				.with(series::library::fetch().with(library::config::fetch()))
 		} else {
 			media::series::fetch().with(series::metadata::fetch())
 		});

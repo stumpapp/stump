@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import BookSearchOverlay from '@/components/book/BookSearchOverlay'
+import { formatBookName } from '@/utils/format'
 
 import { defaultBook, Schema } from './CreateOrAddToScheduleForm'
 
@@ -43,7 +44,7 @@ export default function AddBookCard({ index }: Props) {
 	const renderBookInfo = () => {
 		if (!selectedBook) return null
 
-		const bookName = selectedBook.metadata?.title || selectedBook.name
+		const bookName = formatBookName(selectedBook)
 
 		return (
 			<div className="flex">

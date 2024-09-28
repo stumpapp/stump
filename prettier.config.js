@@ -4,7 +4,7 @@ module.exports = {
 	semi: false,
 	singleQuote: true,
 	tabWidth: 2,
-	tailwindConfig: './packages/components/tailwind.config.js',
+	tailwindConfig: './packages/components/tailwind.config.ts',
 	trailingComma: 'all',
 	useTabs: true,
 }

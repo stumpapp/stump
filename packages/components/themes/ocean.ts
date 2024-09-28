@@ -9,9 +9,9 @@ export const ocean = {
 			hover: '#155A73',
 		},
 		surface: {
-			DEFAULT: '#1B6B7D',
-			hover: '#227E95',
-			secondary: '#165C72',
+			DEFAULT: '#165564',
+			hover: '#186070',
+			secondary: '#227E95',
 		},
 	},
 	edge: {
@@ -49,13 +49,14 @@ export const ocean = {
 	},
 	foreground: {
 		DEFAULT: '#EDF2F4',
+		brand: '#0A9396',
 		disabled: '#94A1AC',
 		muted: '#94A1AC',
 		'on-inverse': '#0B3D4D',
 		subtle: '#D9E4EA',
 	},
 	sidebar: {
-		DEFAULT: '#0B3D4D',
+		DEFAULT: '#0A3644', // or #093240?
 		inverse: '#E8F9FF',
 		overlay: {
 			DEFAULT: '#0B3D4D',
@@ -63,7 +64,7 @@ export const ocean = {
 		},
 		surface: {
 			DEFAULT: '#12455B',
-			hover: '#155A73',
+			hover: '#14576F',
 			secondary: '#1B6B7D',
 		},
 	},

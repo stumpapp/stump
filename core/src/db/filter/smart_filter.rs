@@ -587,6 +587,7 @@ mod tests {
 			book_club_suggestions: None,
 			bookmarks: None,
 			created_at: Utc::now().into(),
+			deleted_at: None,
 			extension: "CBZ".to_string(),
 			hash: None,
 			metadata: None,

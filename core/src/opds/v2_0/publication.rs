@@ -313,6 +313,7 @@ mod tests {
 			}),
 			created_at: Utc::now().into(),
 			updated_at: Utc::now().into(),
+			deleted_at: None,
 			extension: String::from("epub"),
 			path: get_test_epub_path(),
 			status: FileStatus::Ready.to_string(),

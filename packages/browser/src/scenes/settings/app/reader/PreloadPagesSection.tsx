@@ -7,13 +7,15 @@ import { useReaderStore } from '@/stores'
 export default function PreloadPagesSection() {
 	const { t } = useLocaleContext()
 
-	const { preloadAheadCount, preloadBehindCount, setPreloadAheadCount, setPreloadBehindCount } =
-		useReaderStore((state) => ({
-			preloadAheadCount: state.preloadAheadCount,
-			preloadBehindCount: state.preloadBehindCount,
-			setPreloadAheadCount: state.setPreloadAheadCount,
-			setPreloadBehindCount: state.setPreloadBehindCount,
-		}))
+	const {
+		settings: {
+			preload: { ahead, behind },
+		},
+		setSettings,
+	} = useReaderStore((state) => ({
+		setSettings: state.setSettings,
+		settings: state.settings,
+	}))
 
 	const createChangeHandler =
 		(updater: (n: number) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,8 +37,8 @@ export default function PreloadPagesSection() {
 				<Input
 					label={t(getKey('preloadAheadCount.label'))}
 					description={t(getKey('preloadAheadCount.description'))}
-					value={preloadAheadCount}
-					onChange={createChangeHandler(setPreloadAheadCount)}
+					value={ahead}
+					onChange={createChangeHandler((n) => setSettings({ preload: { ahead: n, behind } }))}
 					type="number"
 					min={0}
 					variant="primary"
@@ -47,8 +49,8 @@ export default function PreloadPagesSection() {
 				<Input
 					label={t(getKey('preloadBehindCount.label'))}
 					description={t(getKey('preloadBehindCount.description'))}
-					value={preloadBehindCount}
-					onChange={createChangeHandler(setPreloadBehindCount)}
+					value={behind}
+					onChange={createChangeHandler((n) => setSettings({ preload: { ahead, behind: n } }))}
 					type="number"
 					min={0}
 					variant="primary"

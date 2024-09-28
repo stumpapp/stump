@@ -13,6 +13,7 @@ const ThumbnailSettingsScene = React.lazy(
 )
 const ScannerBehaviorScene = React.lazy(() => import('./options/ScannerBehaviorScene'))
 const LibraryAnalysisScene = React.lazy(() => import('./options/analysis'))
+const LibraryReadingDefaultsScene = React.lazy(() => import('./options/readingDefaults'))
 
 const AccessControlScene = React.lazy(() => import('./danger/accessControl'))
 const DeletionScene = React.lazy(() => import('./danger/deletion'))
@@ -57,6 +58,7 @@ export default function LibrarySettingsRouter() {
 				<Route path="" element={<Navigate to="basics" replace />} />
 				<Route path="basics" element={<BasicSettingsScene />} />
 
+				<Route path="reading" element={<LibraryReadingDefaultsScene />} />
 				<Route path="scanning" element={<ScannerBehaviorScene />} />
 				<Route path="thumbnails" element={<ThumbnailSettingsScene />} />
 				<Route path="analysis" element={<LibraryAnalysisScene />} />

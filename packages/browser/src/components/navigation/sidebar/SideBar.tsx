@@ -1,5 +1,5 @@
 import { useNavigationArrangement } from '@stump/client'
-import { Spacer } from '@stump/components'
+import { cn, Spacer } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { NavigationItem } from '@stump/types'
 import { motion } from 'framer-motion'
@@ -10,7 +10,7 @@ import { useMediaMatch } from 'rooks'
 import { match } from 'ts-pattern'
 
 import { useAppContext } from '@/context'
-import { usePreferences } from '@/hooks'
+import { usePreferences, useTheme } from '@/hooks'
 import paths from '@/paths'
 import { useAppStore } from '@/stores'
 
@@ -39,6 +39,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 		defaultArrangement: navigation_arrangement,
 		suspense: false,
 	})
+	const { shouldUseGradient } = useTheme()
 
 	const isBrowser = platform === 'browser'
 	const isMobile = useMediaMatch('(max-width: 768px)')
@@ -158,7 +159,15 @@ export default function SideBar({ asChild, hidden }: Props) {
 			initial={false}
 			transition={{ duration: 0.2, ease: 'easeInOut' }}
 		>
-			<div className="relative z-10 flex h-full w-56 shrink-0 flex-col gap-4 border-r border-edge bg-sidebar px-2 py-4">
+			<div
+				className={cn(
+					'relative z-10 flex h-full w-56 shrink-0 flex-col gap-4 border-r border-edge bg-sidebar px-2 py-4',
+					{
+						'bg-gradient-to-tr from-sidebar-gradient-from to-sidebar-gradient-to':
+							shouldUseGradient,
+					},
+				)}
+			>
 				{renderContent()}
 			</div>
 		</motion.aside>

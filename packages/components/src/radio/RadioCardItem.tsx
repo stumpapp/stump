@@ -39,7 +39,7 @@ export function RadioCardItem({
 				'relative cursor-pointer rounded-lg border bg-background-surface px-6 py-4 font-normal shadow-sm transition-colors duration-150 focus:outline-none',
 				disabled ? 'cursor-not-allowed opacity-70' : 'hover:bg-background-surface-hover/70',
 				{
-					'border-brand-400 bg-background-surface/75 ring-2 ring-brand-400': isActive,
+					'border-edge-brand bg-background-surface/75 ring-2 ring-edge-brand': isActive,
 				},
 				{ 'hover:bg-background-surface-hover': isActive && !disabled },
 				{

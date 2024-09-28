@@ -62,7 +62,7 @@ export default function URLFilterDrawer({ entity }: Props) {
 
 						{activeFilters > 0 && (
 							<span className="absolute right-0 top-0 -mr-1.5 -mt-1.5 flex h-4 w-4">
-								<span className="relative inline-flex h-4 w-4 items-center justify-center rounded-full bg-brand">
+								<span className="relative inline-flex h-4 w-4 items-center justify-center rounded-full bg-fill-brand">
 									<span className="text-xxs font-semibold text-white">{activeFilters}</span>
 								</span>
 							</span>

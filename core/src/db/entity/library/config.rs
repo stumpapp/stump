@@ -1,8 +1,14 @@
+use std::str::FromStr;
+
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::{filesystem::image::ImageProcessorOptions, prisma::library_config};
+use crate::{
+	db::entity::common::{ReadingDirection, ReadingImageScaleFit, ReadingMode},
+	filesystem::image::ImageProcessorOptions,
+	prisma::library_config,
+};
 
 use super::{IgnoreRules, LibraryPattern};
 
@@ -16,6 +22,12 @@ pub struct LibraryConfig {
 	pub process_metadata: bool,
 	pub library_pattern: LibraryPattern,
 	pub thumbnail_config: Option<ImageProcessorOptions>,
+	#[serde(default)] // TODO: remove this after update with experimental
+	pub default_reading_dir: ReadingDirection,
+	#[serde(default)] // TODO: remove this after update with experimental
+	pub default_reading_mode: ReadingMode,
+	#[serde(default)]
+	pub default_reading_image_scale_fit: ReadingImageScaleFit,
 	#[serde(default)]
 	pub ignore_rules: IgnoreRules,
 	// TODO(prisma-nested-create): Refactor once nested create is supported
@@ -40,6 +52,18 @@ impl From<library_config::Data> for LibraryConfig {
 			generate_file_hashes: data.generate_file_hashes,
 			process_metadata: data.process_metadata,
 			library_pattern: LibraryPattern::from(data.library_pattern),
+			default_reading_dir: ReadingDirection::from_str(
+				data.default_reading_dir.as_str(),
+			)
+			.unwrap_or_default(),
+			default_reading_mode: ReadingMode::from_str(
+				data.default_reading_mode.as_str(),
+			)
+			.unwrap_or_default(),
+			default_reading_image_scale_fit: ReadingImageScaleFit::from_str(
+				data.default_reading_image_scale_fit.as_str(),
+			)
+			.unwrap_or_default(),
 			thumbnail_config: data.thumbnail_config.map(|config| {
 				ImageProcessorOptions::try_from(config).unwrap_or_default()
 			}),

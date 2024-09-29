@@ -1,11 +1,14 @@
 import {
+	CreateOrUpdateSmartList,
+	FilterGroup,
 	LibrarySmartFilter,
 	MediaMetadataSmartFilter,
 	MediaSmartFilter,
 	SeriesSmartFilter,
+	SmartList,
 } from '@stump/types'
 import getProperty from 'lodash/get'
-import { match } from 'ts-pattern'
+import { match, P } from 'ts-pattern'
 import { z } from 'zod'
 
 export const operation = z.enum([
@@ -205,6 +208,41 @@ export const filterGroup = z.object({
 	joiner: z.enum(['and', 'or', 'not']),
 })
 
+const intoFormGroup = (input: FilterGroup<MediaSmartFilter>): z.infer<typeof filterGroup> => {
+	const converted = match(input)
+		.with(
+			{ and: P.array() },
+			({ and }) =>
+				({
+					filters: and.map(intoFormFilter),
+					joiner: 'and',
+				}) satisfies z.infer<typeof filterGroup>,
+		)
+		.with(
+			{ or: P.array() },
+			({ or }) =>
+				({ filters: or.map(intoFormFilter), joiner: 'or' }) satisfies z.infer<typeof filterGroup>,
+		)
+		.with(
+			{ not: P.array() },
+			({ not }) =>
+				({ filters: not.map(intoFormFilter), joiner: 'not' }) satisfies z.infer<typeof filterGroup>,
+		)
+		.otherwise(
+			() =>
+				({
+					filters: [],
+					joiner: 'and',
+				}) satisfies z.infer<typeof filterGroup>,
+		)
+
+	return converted
+}
+
+const intoAPIGroup = (input: z.infer<typeof filterGroup>): FilterGroup<MediaSmartFilter> => {
+	// TODO: implement me
+}
+
 export const filterConfig = z.object({
 	groups: z.array(filterGroup),
 	joiner: z.enum(['and', 'or', 'not']),
@@ -215,4 +253,40 @@ export const schema = z.object({
 	filters: filterConfig,
 	name: z.string().min(1),
 	visibility: z.enum(['PRIVATE', 'PUBLIC', 'SHARED']),
+})
+export type SmartListFormSchema = z.infer<typeof schema>
+
+export const intoForm = ({
+	name,
+	description,
+	visibility,
+	filters,
+	joiner,
+	// default_grouping // TODO: implement this in form
+}: SmartList): SmartListFormSchema => ({
+	description: description || undefined,
+	filters: {
+		groups: filters.groups.map(intoFormGroup),
+		joiner: joiner.toLowerCase() as 'and' | 'or' | 'not',
+	},
+	name,
+	visibility,
+})
+
+export const intoAPI = ({
+	name,
+	description,
+	visibility,
+	filters,
+}: SmartListFormSchema): CreateOrUpdateSmartList => ({
+	description: description || null,
+	// default_grouping // TODO: implement this
+filters: {
+		groups: filters.groups.map(intoAPIGroup),
+		joiner: filters.joiner.toUpperCase() as 'AND' | 'OR' | 'NOT',
+	},
+	
+name,
+	
+	visibility,
 })

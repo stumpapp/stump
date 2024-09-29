@@ -172,15 +172,15 @@ describe('schema', () => {
 					source: 'book',
 					value: {
 						from: 42,
-						to: 69,
 						inclusive: true,
+						to: 69,
 					},
 				}),
 			).toEqual({
 				created_at: {
 					from: 42,
-					to: 69,
 					inclusive: true,
+					to: 69,
 				},
 			})
 		})
@@ -226,16 +226,16 @@ describe('schema', () => {
 					source: 'book_meta',
 					value: {
 						from: 42,
-						to: 69,
 						inclusive: true,
+						to: 69,
 					},
 				}),
 			).toEqual({
 				metadata: {
 					age_rating: {
 						from: 42,
-						to: 69,
 						inclusive: true,
+						to: 69,
 					},
 				},
 			})
@@ -282,16 +282,16 @@ describe('schema', () => {
 					source: 'series',
 					value: {
 						from: 42,
-						to: 69,
 						inclusive: true,
+						to: 69,
 					},
 				}),
 			).toEqual({
 				series: {
 					created_at: {
 						from: 42,
-						to: 69,
 						inclusive: true,
+						to: 69,
 					},
 				},
 			})
@@ -342,8 +342,8 @@ describe('schema', () => {
 					source: 'library',
 					value: {
 						from: 42,
-						to: 69,
 						inclusive: true,
+						to: 69,
 					},
 				}),
 			).toEqual({
@@ -351,8 +351,8 @@ describe('schema', () => {
 					library: {
 						created_at: {
 							from: 42,
-							to: 69,
 							inclusive: true,
+							to: 69,
 						},
 					},
 				},

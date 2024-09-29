@@ -4,6 +4,7 @@ import {
 	MediaSmartFilter,
 	SeriesSmartFilter,
 } from '@stump/types'
+import getProperty from 'lodash/get'
 import { match } from 'ts-pattern'
 import { z } from 'zod'
 
@@ -69,6 +70,7 @@ export const filter = z
 			message: 'String fields may not use gt, gte, lt, lte, from',
 		},
 	)
+export type FilterSchema = z.infer<typeof filter>
 
 export const intoAPIFilter = (input: z.infer<typeof filter>): MediaSmartFilter => {
 	const converted = match(input.source)
@@ -109,7 +111,8 @@ export const intoAPIFilter = (input: z.infer<typeof filter>): MediaSmartFilter =
 	return converted
 }
 
-const intoFormFilter = (input: MediaSmartFilter) => {
+// FIXME: this is SUPER unsafe wrt the types...
+export const intoFormFilter = (input: MediaSmartFilter): z.infer<typeof filter> => {
 	const source = match(input)
 		.when(
 			(x) => 'metadata' in x,
@@ -137,6 +140,68 @@ const intoFormFilter = (input: MediaSmartFilter) => {
 			() => Object.keys((input as { series: { library: LibrarySmartFilter } }).series.library)[0],
 		)
 		.exhaustive()
+
+	const conversion = match(source)
+		.with('book', () => {
+			const castedInput = input as MediaSmartFilter
+			const filterValue = getProperty(castedInput, field || '') // { [operation]: value }
+			const operation = 'from' in filterValue ? 'range' : Object.keys(filterValue || {})[0]
+			const value = match(operation)
+				.with('range', () => filterValue)
+				.otherwise(() => getProperty(filterValue, operation || ''))
+
+			return {
+				field,
+				operation,
+				source,
+				value,
+			}
+		})
+		.with('book_meta', () => {
+			const castedInput = input as { metadata: MediaMetadataSmartFilter } // { metadata: { [field]: { [operation]: value } } }
+			const filterValue = getProperty(castedInput.metadata, field || '') // { [operation]: value }
+			const operation = 'from' in filterValue ? 'range' : Object.keys(filterValue || {})[0]
+			const value = match(operation)
+				.with('range', () => filterValue)
+				.otherwise(() => getProperty(filterValue, operation || ''))
+
+			return {
+				field,
+				operation,
+				source,
+				value,
+			}
+		})
+		.with('series', () => {
+			const castedInput = input as { series: SeriesSmartFilter } // { series: { [field]: { [operation]: value } } }
+			const filterValue = getProperty(castedInput.series, field || '')
+			const operation = 'from' in filterValue ? 'range' : Object.keys(filterValue || {})[0]
+			const value = match(operation)
+				.with('range', () => filterValue)
+				.otherwise(() => getProperty(filterValue, operation || ''))
+
+			return {
+				field,
+				operation,
+				source,
+				value,
+			}
+		})
+		.with('library', () => {
+			const castedInput = input as { series: { library: LibrarySmartFilter } } // { series: { library: { [field]: { [operation]: value } } } }
+			const filterValue = getProperty(castedInput.series.library, field || '') // { [operation]: value }
+			const operation = 'from' in filterValue ? 'range' : Object.keys(filterValue || {})[0]
+			const value = operation === 'range' ? filterValue : getProperty(filterValue, operation || '')
+			return {
+				field,
+				operation,
+				source,
+				value,
+			}
+		})
+		.exhaustive()
+
+	return conversion as unknown as z.infer<typeof filter>
 }
 
 export const filterGroup = z.object({

@@ -107,18 +107,29 @@ export const mediaMetadataFilter = z.union([
 	}),
 ])
 
+export const mediaBaseFilter = z.object({
+	name: z.lazy(() => stringFilter),
+})
+export type MediaBaseFilterSchema = z.infer<typeof mediaBaseFilter>
+
 // export type MediaSmartFilter = { name: Filter<string> } | { metadata: MediaMetadataSmartFilter } | { series: SeriesSmartFilter }
-export const mediaFilter = z.union([
-	z.object({
-		name: stringFilter,
-	}),
-	z.object({
-		metadata: mediaMetadataFilter,
-	}),
-	z.object({
-		series: seriesFilter,
-	}),
-])
+export const mediaFilter = z
+	.union([
+		z.object({
+			name: z.lazy(() => stringFilter),
+		}),
+		z.object({
+			metadata: z.lazy(() => mediaMetadataFilter),
+		}),
+		z.object({
+			series: z.lazy(() => seriesFilter),
+		}),
+	])
+	.and(
+		z.object({
+			locked: z.boolean().optional(),
+		}),
+	)
 export type MediaFilterSchema = z.infer<typeof mediaFilter>
 
 export const defaultMediaFilter = mediaFilter.parse({
@@ -127,20 +138,22 @@ export const defaultMediaFilter = mediaFilter.parse({
 
 // export type FilterGroup<T> = { and: T[] } | { or: T[] } | { not: T[] }
 export const filterGroup = z.object({
-	filters: z.array(mediaFilter),
+	filters: z.lazy(() => mediaFilter.array()),
 	joiner: z.union([z.literal('and'), z.literal('or'), z.literal('not')]),
 })
 export type FilterGroupSchema = z.infer<typeof filterGroup>
 
 // export type SmartFilter<T> = { groups: FilterGroup<T>[]; joiner?: FilterJoin }
 export const filters = z.object({
-	groups: z.array(filterGroup),
+	// groups: z.array(filterGroup),
+	groups: z.lazy(() => filterGroup.array()),
 	joiner: z.union([z.literal('AND'), z.literal('OR')]),
 })
+export type FiltersSchema = z.infer<typeof filters>
 
 export const schema = z.object({
 	description: z.string().optional(),
-	filters: filters,
+	filters: z.lazy(() => filters),
 	name: z.string().min(1),
 	visibility: z.union([z.literal('PUBLIC'), z.literal('SHARED'), z.literal('PRIVATE')]),
 })

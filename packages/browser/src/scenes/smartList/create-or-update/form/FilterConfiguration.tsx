@@ -1,5 +1,4 @@
 import {
-	Accordion,
 	Button,
 	Card,
 	Heading,
@@ -10,10 +9,11 @@ import {
 	ToolTip,
 } from '@stump/components'
 import { MinusCircle } from 'lucide-react'
-import React, { useMemo } from 'react'
 import { useFieldArray, useFormContext } from 'react-hook-form'
 
-import { defaultMediaFilter, Schema, toAPIFilters } from './schema'
+import AddFilter from './AddFilter'
+import FilterConfigJSON from './FilterConfigJSON'
+import { defaultMediaFilter, Schema } from './schema'
 
 export default function FilterConfiguration() {
 	const form = useFormContext<Schema>()
@@ -22,15 +22,6 @@ export default function FilterConfiguration() {
 	})
 
 	const [formGroups, joiner] = form.watch(['filters.groups', 'filters.joiner'])
-	const apiFilters = useMemo(
-		() =>
-			toAPIFilters({
-				groups: formGroups ?? [],
-				joiner: joiner ?? 'AND',
-			}),
-		[formGroups, joiner],
-	)
-	const formattedFilters = useMemo(() => JSON.stringify(apiFilters, null, 2), [apiFilters])
 
 	const handleAddGroup = () => append({ filters: [], joiner: 'and' })
 	const handleRemoveGroup = (index: number) => remove(index)
@@ -46,21 +37,7 @@ export default function FilterConfiguration() {
 				</Text>
 			</div>
 
-			<Accordion type="single" collapsible>
-				<Accordion.Item value="raw_filters" className="border-none">
-					<Accordion.Trigger noUnderline asLabel>
-						<div className="flex flex-col items-start gap-y-1">
-							<span>Raw filters</span>
-							<Text variant="muted" size="sm">
-								A JSON representation of the filters
-							</Text>
-						</div>
-					</Accordion.Trigger>
-					<Accordion.Content className="rounded-sm bg-background-surface p-4">
-						<pre className="text-xs text-foreground-subtle">{formattedFilters}</pre>
-					</Accordion.Content>
-				</Accordion.Item>
-			</Accordion>
+			<FilterConfigJSON />
 
 			<div className="flex max-w-sm flex-col gap-y-1.5">
 				<Label>Top-level join method</Label>
@@ -81,7 +58,7 @@ export default function FilterConfiguration() {
 			<div>
 				<Label>Groups</Label>
 				<div className="mt-4 flex flex-col gap-y-6">
-					{form.getValues('filters.groups').map((_, index) => (
+					{formGroups.map((_, index) => (
 						<FilterGroup
 							key={index}
 							groupIndex={index}
@@ -108,7 +85,6 @@ function FilterGroup({ groupIndex, onRemove }: FilterGroupProps) {
 	const form = useFormContext<Schema>()
 
 	const { filters, joiner } = form.watch(`filters.groups.${groupIndex}`)
-
 	const { append } = useFieldArray<Schema>({
 		name: `filters.groups.${groupIndex}.filters` as const,
 	})
@@ -147,9 +123,10 @@ function FilterGroup({ groupIndex, onRemove }: FilterGroupProps) {
 			</div>
 
 			<div>
-				<Button variant="ghost" onClick={() => append(defaultMediaFilter)}>
+				{/* <Button variant="ghost" onClick={() => append(defaultMediaFilter)}>
 					Add filter
-				</Button>
+				</Button> */}
+				<AddFilter />
 			</div>
 
 			{onRemove && (

@@ -134,5 +134,229 @@ describe('schema', () => {
 		})
 	})
 
-	describe('intoAPIFilter', () => {})
+	describe('intoAPIFilter', () => {
+		it('should convert basic smart filter form into API filter', () => {
+			// String filter
+			expect(
+				intoAPIFilter({
+					field: 'name',
+					operation: 'any',
+					source: 'book',
+					value: ['foo', 'shmoo'],
+				}),
+			).toEqual({
+				name: {
+					any: ['foo', 'shmoo'],
+				},
+			})
+
+			// Numeric filter (basic)
+			expect(
+				intoAPIFilter({
+					field: 'created_at',
+					operation: 'gte',
+					source: 'book',
+					value: 42,
+				}),
+			).toEqual({
+				created_at: {
+					gte: 42,
+				},
+			})
+
+			// Numeric filter (complex)
+			expect(
+				intoAPIFilter({
+					field: 'created_at',
+					operation: 'range',
+					source: 'book',
+					value: {
+						from: 42,
+						to: 69,
+						inclusive: true,
+					},
+				}),
+			).toEqual({
+				created_at: {
+					from: 42,
+					to: 69,
+					inclusive: true,
+				},
+			})
+		})
+
+		it('should convert smart filter form with metadata into API filter', () => {
+			// String filter
+			expect(
+				intoAPIFilter({
+					field: 'genre',
+					operation: 'any',
+					source: 'book_meta',
+					value: ['foo', 'shmoo'],
+				}),
+			).toEqual({
+				metadata: {
+					genre: {
+						any: ['foo', 'shmoo'],
+					},
+				},
+			})
+
+			// Numeric filter (basic)
+			expect(
+				intoAPIFilter({
+					field: 'age_rating',
+					operation: 'gte',
+					source: 'book_meta',
+					value: 42,
+				}),
+			).toEqual({
+				metadata: {
+					age_rating: {
+						gte: 42,
+					},
+				},
+			})
+
+			// Numeric filter (complex)
+			expect(
+				intoAPIFilter({
+					field: 'age_rating',
+					operation: 'range',
+					source: 'book_meta',
+					value: {
+						from: 42,
+						to: 69,
+						inclusive: true,
+					},
+				}),
+			).toEqual({
+				metadata: {
+					age_rating: {
+						from: 42,
+						to: 69,
+						inclusive: true,
+					},
+				},
+			})
+		})
+
+		it('should convert smart filter form with series into API filter', () => {
+			// String filter
+			expect(
+				intoAPIFilter({
+					field: 'name',
+					operation: 'any',
+					source: 'series',
+					value: ['foo', 'shmoo'],
+				}),
+			).toEqual({
+				series: {
+					name: {
+						any: ['foo', 'shmoo'],
+					},
+				},
+			})
+
+			// Numeric filter (basic)
+			expect(
+				intoAPIFilter({
+					field: 'created_at',
+					operation: 'gte',
+					source: 'series',
+					value: 42,
+				}),
+			).toEqual({
+				series: {
+					created_at: {
+						gte: 42,
+					},
+				},
+			})
+
+			// Numeric filter (complex)
+			expect(
+				intoAPIFilter({
+					field: 'created_at',
+					operation: 'range',
+					source: 'series',
+					value: {
+						from: 42,
+						to: 69,
+						inclusive: true,
+					},
+				}),
+			).toEqual({
+				series: {
+					created_at: {
+						from: 42,
+						to: 69,
+						inclusive: true,
+					},
+				},
+			})
+		})
+
+		it('should convert smart filter form with library into API filter', () => {
+			// String filter
+			expect(
+				intoAPIFilter({
+					field: 'name',
+					operation: 'any',
+					source: 'library',
+					value: ['foo', 'shmoo'],
+				}),
+			).toEqual({
+				series: {
+					library: {
+						name: {
+							any: ['foo', 'shmoo'],
+						},
+					},
+				},
+			})
+
+			// Numeric filter (basic)
+			expect(
+				intoAPIFilter({
+					field: 'created_at',
+					operation: 'gte',
+					source: 'library',
+					value: 42,
+				}),
+			).toEqual({
+				series: {
+					library: {
+						created_at: {
+							gte: 42,
+						},
+					},
+				},
+			})
+
+			// Numeric filter (complex)
+			expect(
+				intoAPIFilter({
+					field: 'created_at',
+					operation: 'range',
+					source: 'library',
+					value: {
+						from: 42,
+						to: 69,
+						inclusive: true,
+					},
+				}),
+			).toEqual({
+				series: {
+					library: {
+						created_at: {
+							from: 42,
+							to: 69,
+							inclusive: true,
+						},
+					},
+				},
+			})
+		})
+	})
 })

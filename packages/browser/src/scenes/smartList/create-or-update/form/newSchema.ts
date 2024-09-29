@@ -18,7 +18,7 @@ export const operation = z.enum([
 	'excludes',
 	'any',
 	'none',
-	'from',
+	'range',
 ])
 
 export const fromOperation = z.object({
@@ -57,7 +57,7 @@ export const filter = z
 		field: z.string(),
 		operation,
 		source: z.enum(['book', 'book_meta', 'series', 'library']),
-		value: z.union([z.string(), z.number(), fromOperation]),
+		value: z.union([z.string(), z.string().array(), z.number(), z.number().array(), fromOperation]),
 	})
 	// strings may not use gt, gte, lt, lte, from
 	.refine(
@@ -73,36 +73,32 @@ export const filter = z
 export type FilterSchema = z.infer<typeof filter>
 
 export const intoAPIFilter = (input: z.infer<typeof filter>): MediaSmartFilter => {
+	const fieldValue = match(input.operation)
+		.with('range', () => input.value)
+		.otherwise(() => ({ [input.operation]: input.value }))
+
 	const converted = match(input.source)
 		.with(
 			'book',
 			() =>
 				({
-					[input.field]: {
-						[input.operation]: input.value,
-					},
+					[input.field]: fieldValue,
 				}) as MediaSmartFilter,
 		)
 		.with('book_meta', () => ({
 			metadata: {
-				[input.field]: {
-					[input.operation]: input.value,
-				},
+				[input.field]: fieldValue,
 			} as MediaMetadataSmartFilter,
 		}))
 		.with('series', () => ({
 			series: {
-				[input.field]: {
-					[input.operation]: input.value,
-				},
+				[input.field]: fieldValue,
 			} as SeriesSmartFilter,
 		}))
 		.with('library', () => ({
 			series: {
 				library: {
-					[input.field]: {
-						[input.operation]: input.value,
-					},
+					[input.field]: fieldValue,
 				},
 			} as SeriesSmartFilter,
 		}))

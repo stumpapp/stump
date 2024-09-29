@@ -174,6 +174,8 @@ pub struct CreateOrUpdateSmartList {
 	pub joiner: Option<FilterJoin>,
 	#[serde(default)]
 	pub default_grouping: Option<SmartListItemGrouping>,
+	#[serde(default)]
+	pub visibility: Option<EntityVisibility>,
 }
 
 #[utoipa::path(
@@ -216,6 +218,9 @@ async fn create_smart_list(
 						.map(|joiner| smart_list::joiner::set(joiner.to_string())),
 					input.default_grouping.map(|grouping| {
 						smart_list::default_grouping::set(grouping.to_string())
+					}),
+					input.visibility.map(|visibility| {
+						smart_list::visibility::set(visibility.to_string())
 					}),
 				],
 			),

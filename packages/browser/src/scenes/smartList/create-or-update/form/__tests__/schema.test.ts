@@ -359,4 +359,13 @@ describe('schema', () => {
 			})
 		})
 	})
+
+	// TODO: finish tests
+	describe('intoFormGroup', () => {})
+
+	describe('intoAPIGroup', () => {})
+
+	describe('intoForm', () => {})
+
+	describe('intoAPI', () => {})
 })

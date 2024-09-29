@@ -240,7 +240,22 @@ const intoFormGroup = (input: FilterGroup<MediaSmartFilter>): z.infer<typeof fil
 }
 
 const intoAPIGroup = (input: z.infer<typeof filterGroup>): FilterGroup<MediaSmartFilter> => {
-	// TODO: implement me
+	const converted = match(input)
+		.with(
+			{ filters: P.array(), joiner: 'and' },
+			({ filters }) => ({ and: filters.map(intoAPIFilter) }) as FilterGroup<MediaSmartFilter>,
+		)
+		.with(
+			{ filters: P.array(), joiner: 'or' },
+			({ filters }) => ({ or: filters.map(intoAPIFilter) }) as FilterGroup<MediaSmartFilter>,
+		)
+		.with(
+			{ filters: P.array(), joiner: 'not' },
+			({ filters }) => ({ not: filters.map(intoAPIFilter) }) as FilterGroup<MediaSmartFilter>,
+		)
+		.otherwise(() => ({ and: [] }) as FilterGroup<MediaSmartFilter>)
+
+	return converted
 }
 
 export const filterConfig = z.object({
@@ -281,12 +296,10 @@ export const intoAPI = ({
 }: SmartListFormSchema): CreateOrUpdateSmartList => ({
 	description: description || null,
 	// default_grouping // TODO: implement this
-filters: {
+	filters: {
 		groups: filters.groups.map(intoAPIGroup),
-		joiner: filters.joiner.toUpperCase() as 'AND' | 'OR' | 'NOT',
+		joiner: filters.joiner.toUpperCase() as 'AND' | 'OR',
 	},
-	
-name,
-	
+	name,
 	visibility,
 })

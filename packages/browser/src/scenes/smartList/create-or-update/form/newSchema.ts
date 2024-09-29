@@ -6,6 +6,7 @@ import {
 	MediaSmartFilter,
 	SeriesSmartFilter,
 	SmartList,
+	SmartListItemGrouping,
 } from '@stump/types'
 import getProperty from 'lodash/get'
 import { match, P } from 'ts-pattern'
@@ -263,9 +264,12 @@ export const filterConfig = z.object({
 	joiner: z.enum(['and', 'or', 'not']),
 })
 
+export const grouping = z.enum(['BY_BOOKS', 'BY_SERIES', 'BY_LIBRARY'])
+
 export const schema = z.object({
 	description: z.string().optional(),
 	filters: filterConfig,
+	grouping: grouping.optional(),
 	name: z.string().min(1),
 	visibility: z.enum(['PRIVATE', 'PUBLIC', 'SHARED']),
 })
@@ -277,13 +281,14 @@ export const intoForm = ({
 	visibility,
 	filters,
 	joiner,
-	// default_grouping // TODO: implement this in form
+	default_grouping,
 }: SmartList): SmartListFormSchema => ({
 	description: description || undefined,
 	filters: {
 		groups: filters.groups.map(intoFormGroup),
 		joiner: joiner.toLowerCase() as 'and' | 'or' | 'not',
 	},
+	grouping: default_grouping || undefined,
 	name,
 	visibility,
 })
@@ -293,10 +298,13 @@ export const intoAPI = ({
 	description,
 	visibility,
 	filters,
+	grouping,
 }: SmartListFormSchema): CreateOrUpdateSmartList => ({
+	default_grouping: grouping || null,
+	
 	description: description || null,
 	// default_grouping // TODO: implement this
-	filters: {
+filters: {
 		groups: filters.groups.map(intoAPIGroup),
 		joiner: filters.joiner.toUpperCase() as 'AND' | 'OR',
 	},

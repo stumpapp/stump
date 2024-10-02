@@ -1,13 +1,10 @@
-use std::{
-	path::{Path, PathBuf},
-	sync::Arc,
-};
+use std::path::{Path, PathBuf};
 
 use prisma_client_rust::chrono::{DateTime, FixedOffset, Utc};
 
 use crate::{
 	config::StumpConfig,
-	db::entity::{LibraryOptions, Media, Series},
+	db::entity::{LibraryConfig, Media, Series},
 	filesystem::{process, FileParts, PathUtils, SeriesJson},
 	CoreError, CoreResult,
 };
@@ -15,21 +12,21 @@ use crate::{
 pub struct MediaBuilder {
 	path: PathBuf,
 	series_id: String,
-	library_options: LibraryOptions,
-	config: Arc<StumpConfig>,
+	library_config: LibraryConfig,
+	config: StumpConfig,
 }
 
 impl MediaBuilder {
 	pub fn new(
 		path: &Path,
 		series_id: &str,
-		library_options: LibraryOptions,
-		config: &Arc<StumpConfig>,
+		library_config: LibraryConfig,
+		config: &StumpConfig,
 	) -> Self {
 		Self {
 			path: path.to_path_buf(),
 			series_id: series_id.to_string(),
-			library_options,
+			library_config,
 			config: config.clone(),
 		}
 	}
@@ -44,7 +41,7 @@ impl MediaBuilder {
 
 	pub fn build(self) -> CoreResult<Media> {
 		let mut processed_entry =
-			process(&self.path, self.library_options.into(), &self.config)?;
+			process(&self.path, self.library_config.into(), &self.config)?;
 
 		tracing::trace!(?processed_entry, "Processed entry");
 
@@ -193,14 +190,13 @@ mod tests {
 
 	fn build_media_test_helper(path: String) -> Result<Media, CoreError> {
 		let path = Path::new(&path);
-		let library_options = LibraryOptions {
+		let library_config = LibraryConfig {
 			convert_rar_to_zip: false,
 			hard_delete_conversions: false,
 			..Default::default()
 		};
 		let series_id = "series_id";
-		let config = Arc::new(StumpConfig::debug());
 
-		MediaBuilder::new(path, series_id, library_options, &config).build()
+		MediaBuilder::new(path, series_id, library_config, &StumpConfig::debug()).build()
 	}
 }

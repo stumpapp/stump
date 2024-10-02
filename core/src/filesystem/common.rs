@@ -1,43 +1,66 @@
 use globset::GlobSet;
 use std::{
 	ffi::OsStr,
-	fs::File,
-	io::Read,
 	path::{Path, PathBuf},
 };
+use tokio::{fs, io};
 use tracing::error;
 use walkdir::WalkDir;
 
-use super::{media::is_accepted_cover_name, ContentType, FileError};
+use super::{image::ImageFormat, media::is_accepted_cover_name, ContentType};
 
 pub const ACCEPTED_IMAGE_EXTENSIONS: [&str; 8] =
 	["jpg", "png", "jpeg", "jxl", "webp", "gif", "avif", "heif"];
 
-pub fn read_entire_file<P: AsRef<Path>>(path: P) -> Result<Vec<u8>, FileError> {
-	let mut file = File::open(path)?;
+pub async fn get_thumbnail(
+	parent: impl AsRef<Path>,
+	name: &str,
+	format: Option<ImageFormat>,
+) -> io::Result<Option<(ContentType, Vec<u8>)>> {
+	let thumbnails_dir = parent.as_ref().to_path_buf();
 
-	let mut buf = Vec::new();
-	file.read_to_end(&mut buf)?;
+	let path = match format {
+		Some(format) => {
+			let file_path =
+				thumbnails_dir.join(format!("{}.{}", name, format.extension()));
 
-	Ok(buf)
+			if fs::metadata(&file_path).await.is_ok() {
+				Some(file_path)
+			} else {
+				find_thumbnail(&thumbnails_dir, name).await
+			}
+		},
+		_ => find_thumbnail(&thumbnails_dir, name).await,
+	};
+
+	if let Some(path) = path {
+		let FileParts { extension, .. } = path.file_parts();
+		fs::read(path).await.map(|bytes| {
+			let content_type = ContentType::from_extension(&extension);
+			Some((content_type, bytes))
+		})
+	} else {
+		Ok(None)
+	}
 }
 
-/// A function that returns the path of a thumbnail image, if it exists.
-/// This should be used when the thumbnail extension is not known.
-pub fn get_unknown_thumnail(id: &str, mut thumbnails_dir: PathBuf) -> Option<PathBuf> {
-	for extension in ACCEPTED_IMAGE_EXTENSIONS.iter() {
-		thumbnails_dir.push(format!("{}.{}", id, extension));
+pub async fn find_thumbnail(parent: &Path, name: &str) -> Option<PathBuf> {
+	let mut thumbnails_dir = parent.to_path_buf();
 
-		if thumbnails_dir.exists() {
-			return Some(thumbnails_dir);
+	for extension in ACCEPTED_IMAGE_EXTENSIONS.iter() {
+		let path = parent.join(format!("{}.{}", name, extension));
+
+		if fs::metadata(&path).await.is_ok() {
+			return Some(path);
 		}
 
-		thumbnails_dir.pop();
+		thumbnails_dir.push(format!("{}.{}", name, extension));
 	}
 
 	None
 }
 
+// TODO(perf): Async-ify
 pub fn get_unknown_image(mut base_path: PathBuf) -> Option<PathBuf> {
 	for extension in ACCEPTED_IMAGE_EXTENSIONS.iter() {
 		base_path.set_extension(extension);
@@ -243,35 +266,5 @@ impl PathUtils for Path {
 				let path = f.path();
 				!path.is_default_ignored() && !ignore_rules.is_match(path)
 			})
-	}
-}
-
-#[cfg(test)]
-mod tests {
-	use std::io::Write;
-
-	use tempfile::TempDir;
-
-	use super::*;
-
-	#[test]
-	fn test_read_entire_file() {
-		let temp_dir = TempDir::new().unwrap();
-		let temp_file = temp_dir.path().join("temp_file.txt");
-
-		File::create(&temp_file)
-			.unwrap()
-			.write_all(b"Test data")
-			.unwrap();
-
-		let data = read_entire_file(&temp_file).unwrap();
-		assert_eq!(data, b"Test data");
-	}
-
-	#[test]
-	fn test_read_entire_file_non_existent() {
-		let path = "non_existent_file.txt";
-		let result = read_entire_file(path);
-		assert!(result.is_err());
 	}
 }

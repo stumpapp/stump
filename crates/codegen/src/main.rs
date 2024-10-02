@@ -55,6 +55,21 @@ fn main() -> Result<(), Box<dyn Error>> {
 	assert!(command.success());
 	println!("server types have been generated successfully!");
 
+	// cargo test --package stump_desktop -- tests::codegen --ignored
+	let command = Command::new("cargo")
+		.args([
+			"test",
+			"--package",
+			"stump_desktop",
+			"--",
+			"tests::codegen",
+			"--ignored",
+		])
+		.spawn()?
+		.wait()?;
+	assert!(command.success());
+	println!("desktop types have been generated successfully!");
+
 	println!("Code generation has been completed successfully!");
 
 	Ok(())

@@ -19,14 +19,13 @@ use stump_core::{
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 	},
-	filesystem::{
-		get_unknown_image, read_entire_file, ContentType, FileParts, PathUtils,
-	},
+	filesystem::{get_unknown_image, ContentType, FileParts, PathUtils},
 	prisma::{
 		age_restriction, session, user, user_login_activity, user_preferences,
 		PrismaClient,
 	},
 };
+use tokio::fs;
 use tower_sessions::Session;
 use tracing::{debug, trace};
 use utoipa::ToSchema;
@@ -36,7 +35,7 @@ use crate::{
 	errors::{APIError, APIResult},
 	filter::{chain_optional_iter, UserQueryRelation},
 	middleware::auth::{auth_middleware, RequestContext},
-	utils::{get_session_user, http::ImageResponse, validate_image_upload},
+	utils::{get_session_user, http::ImageResponse, validate_and_load_image},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -74,9 +73,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				)
 				.route(
 					"/avatar",
-					get(get_user_avatar)
-						.post(upload_user_avatar)
-						.layer(DefaultBodyLimit::max(20 * 1024 * 1024)), // 20MB
+					get(get_user_avatar).post(upload_user_avatar).layer(
+						DefaultBodyLimit::max(app_state.config.max_image_upload_size),
+					),
 				),
 		)
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
@@ -379,6 +378,7 @@ async fn update_preferences(
 					input.preferred_layout_mode.to_owned(),
 				),
 				user_preferences::app_theme::set(input.app_theme.to_owned()),
+				user_preferences::enable_gradients::set(input.enable_gradients),
 				user_preferences::app_font::set(input.app_font.to_string()),
 				user_preferences::primary_navigation_mode::set(
 					input.primary_navigation_mode.to_owned(),
@@ -560,6 +560,7 @@ pub struct UpdateUserPreferences {
 	pub primary_navigation_mode: String,
 	pub layout_max_width_px: Option<i32>,
 	pub app_theme: String,
+	pub enable_gradients: bool,
 	pub app_font: SupportedFont,
 	pub show_query_indicator: bool,
 	pub enable_live_refetch: bool,
@@ -1107,7 +1108,7 @@ async fn get_user_avatar(
 			if let Some(local_file) = get_unknown_image(base_path) {
 				let FileParts { extension, .. } = local_file.file_parts();
 				let content_type = ContentType::from_extension(extension.as_str());
-				let bytes = read_entire_file(local_file)?;
+				let bytes = fs::read(local_file).await?;
 				Ok(ImageResponse::new(content_type, bytes))
 			} else {
 				Err(APIError::NotFound("User avatar not found".to_string()))
@@ -1161,7 +1162,9 @@ async fn upload_user_avatar(
 		.await?
 		.ok_or(APIError::NotFound("User not found".to_string()))?;
 
-	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
+	let (content_type, bytes) =
+		validate_and_load_image(&mut upload, Some(ctx.config.max_image_upload_size))
+			.await?;
 
 	let ext = content_type.extension();
 	let username = user.username.clone();

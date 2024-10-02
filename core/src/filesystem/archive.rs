@@ -17,7 +17,7 @@ pub(crate) fn zip_dir(
 
 	let mut zip_writer = zip::ZipWriter::new(zip_file);
 
-	let options: FileOptions<'_, ()> = FileOptions::default()
+	let options: FileOptions<()> = FileOptions::default()
 		.compression_method(CompressionMethod::Stored)
 		.unix_permissions(0o755);
 
@@ -110,7 +110,7 @@ mod tests {
 		assert_eq!(zip_archive.len(), 1);
 
 		let mut file = zip_archive.by_index(0).unwrap();
-		assert_eq!(file.name(), "file.txt");
+		assert_eq!(file.name(), "/file.txt");
 
 		let mut contents = String::new();
 		file.read_to_string(&mut contents).unwrap();

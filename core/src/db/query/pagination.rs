@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use specta::Type;
 use tracing::trace;
 use utoipa::ToSchema;
@@ -11,6 +12,7 @@ use crate::{
 // TODO: this entire file belongs in server app, not here. It is currently used by DAOs, which are
 // very much going BYE BYE
 
+#[skip_serializing_none]
 #[derive(
 	Clone, Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type, ToSchema,
 )]
@@ -20,6 +22,7 @@ pub struct PageQuery {
 	pub page_size: Option<u32>,
 }
 
+#[skip_serializing_none]
 #[derive(
 	Clone, Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type, ToSchema,
 )]
@@ -28,6 +31,7 @@ pub struct CursorQuery {
 	pub limit: Option<i64>,
 }
 
+#[skip_serializing_none]
 #[derive(Default, Debug, Deserialize, Serialize, Type, ToSchema)]
 pub struct PaginationQuery {
 	pub zero_based: Option<bool>,
@@ -230,7 +234,7 @@ pub struct PageLinks {
 	pub next: Option<String>,
 }
 
-#[derive(Serialize, Type, ToSchema)]
+#[derive(Debug, Serialize, Type, ToSchema)]
 pub struct PageInfo {
 	/// The number of pages available.
 	pub total_pages: u32,
@@ -277,7 +281,7 @@ impl From<CursorQuery> for CursorInfo {
 	}
 }
 
-#[derive(Serialize, Type, ToSchema)]
+#[derive(Debug, Serialize, Type, ToSchema)]
 // OK, this is SO annoying...
 #[aliases(PageableDirectoryListing = Pageable<DirectoryListing>)]
 pub struct Pageable<T: Serialize> {

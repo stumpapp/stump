@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 
 use crate::{
 	db::{
-		entity::{common::Cursor, LibraryOptions, MediaMetadata, Series, Tag},
+		entity::{common::Cursor, LibraryConfig, MediaMetadata, Series, Tag},
 		FileStatus,
 	},
 	error::CoreError,
@@ -119,7 +119,7 @@ impl TryFrom<active_reading_session::Data> for Media {
 #[derive(Default)]
 pub struct MediaBuilderOptions {
 	pub series_id: String,
-	pub library_options: LibraryOptions,
+	pub library_config: LibraryConfig,
 }
 
 impl From<media::Data> for Media {

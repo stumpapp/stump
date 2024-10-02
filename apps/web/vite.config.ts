@@ -2,6 +2,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-plugin-tsconfig-paths'
 
+// https://www.npmjs.com/package/vite-plugin-node-polyfills
 import { name, version } from './package.json'
 
 // https://vitejs.dev/config/

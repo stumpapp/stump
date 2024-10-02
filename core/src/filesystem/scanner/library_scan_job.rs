@@ -1,6 +1,3 @@
-use rayon::iter::{
-	Either, IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator,
-};
 use std::{collections::VecDeque, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
@@ -13,18 +10,15 @@ use specta::Type;
 
 use crate::{
 	db::{
-		entity::{CoreJobOutput, LibraryOptions, Series},
+		entity::{CoreJobOutput, LibraryConfig},
 		FileStatus, SeriesDAO, DAO,
 	},
-	filesystem::{
-		image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
-		SeriesBuilder,
-	},
+	filesystem::image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
 	job::{
 		error::JobError, Executor, JobExecuteLog, JobExt, JobOutputExt, JobProgress,
 		JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
-	prisma::{library, library_options, media, series, PrismaClient},
+	prisma::{library, library_config, media, series, PrismaClient},
 	utils::chain_optional_iter,
 	CoreEvent,
 };
@@ -32,9 +26,9 @@ use crate::{
 use super::{
 	series_scan_job::SeriesScanTask,
 	utils::{
-		handle_create_media, handle_missing_media, handle_missing_series,
-		handle_visit_media, MediaBuildOperationCtx, MediaOperationOutput,
-		MissingSeriesOutput,
+		handle_missing_media, handle_missing_series, safely_build_and_insert_media,
+		safely_build_series, visit_and_update_media, MediaBuildOperation,
+		MediaOperationOutput, MissingSeriesOutput,
 	},
 	walk_library, walk_series, WalkedLibrary, WalkedSeries, WalkerCtx,
 };
@@ -63,7 +57,7 @@ pub struct InitTaskInput {
 pub struct LibraryScanJob {
 	pub id: String,
 	pub path: String,
-	pub options: Option<LibraryOptions>,
+	pub options: Option<LibraryConfig>,
 }
 
 impl LibraryScanJob {
@@ -133,21 +127,21 @@ impl JobExt for LibraryScanJob {
 		// Note: We ignore the potential self.options here in the event that it was
 		// updated since being queued. This is perhaps a bit overly cautious, but it's
 		// just one additional query.
-		let library_options = ctx
+		let library_config = ctx
 			.db
-			.library_options()
-			.find_first(vec![library_options::library::is(vec![
+			.library_config()
+			.find_first(vec![library_config::library::is(vec![
 				library::id::equals(self.id.clone()),
 				library::path::equals(self.path.clone()),
 			])])
 			.exec()
 			.await?
-			.map(LibraryOptions::from)
+			.map(LibraryConfig::from)
 			.ok_or(JobError::InitFailed("Library not found".to_string()))?;
-		let is_collection_based = library_options.is_collection_based();
-		let ignore_rules = library_options.ignore_rules.build()?;
+		let is_collection_based = library_config.is_collection_based();
+		let ignore_rules = library_config.ignore_rules.build()?;
 
-		self.options = Some(library_options);
+		self.options = Some(library_config);
 
 		ctx.report_progress(JobProgress::msg("Performing task discovery"));
 		let WalkedLibrary {
@@ -265,7 +259,7 @@ impl JobExt for LibraryScanJob {
 		let mut logs = vec![];
 		let mut subtasks = vec![];
 
-		let chunk_size = ctx.config.scanner_chunk_size;
+		let max_concurrency = ctx.config.max_scanner_concurrency;
 
 		match task {
 			LibraryScanTask::Init(input) => {
@@ -327,53 +321,38 @@ impl JobExt for LibraryScanJob {
 				}
 
 				if !series_to_create.is_empty() {
-					ctx.report_progress(JobProgress::msg(&format!(
-						"Building {} series entities",
-						series_to_create.len()
-					)));
-					// TODO: remove this DAO!!
-					let series_dao = SeriesDAO::new(ctx.db.clone());
+					ctx.report_progress(JobProgress::msg("Building new series"));
 
-					let (built_series, failure_logs): (Vec<_>, Vec<_>) = series_to_create
-						.par_iter()
-						.enumerate()
-						.map(|(idx, path_buf)| {
-							ctx.report_progress(JobProgress::subtask_position_msg(
-								format!("Building series {}", path_buf.display())
-									.as_str(),
-								current_subtask_index + (idx as i32),
-								total_subtask_count as i32,
-							));
-							(
-								path_buf,
-								SeriesBuilder::new(path_buf.as_path(), &self.id).build(),
-							)
-						})
-						.partition_map::<_, _, _, Series, JobExecuteLog>(
-							|(path_buf, result)| match result {
-								Ok(s) => Either::Left(s),
-								Err(e) => Either::Right(
-									JobExecuteLog::error(e.to_string())
-										.with_ctx(path_buf.to_string_lossy().to_string()),
-								),
-							},
-						);
+					let task_count = series_to_create.len() as i32;
+					let (built_series, failure_logs) = safely_build_series(
+						&self.id,
+						series_to_create,
+						ctx.config.as_ref(),
+						|position| {
+							ctx.report_progress(JobProgress::subtask_position(
+								position as i32,
+								task_count,
+							))
+						},
+					)
+					.await;
+
 					current_subtask_index +=
 						(built_series.len() + failure_logs.len()) as i32;
 					logs.extend(failure_logs);
 
-					// TODO: make this configurable
-					let chunks = built_series.chunks(400);
+					// TODO: remove this DAO!!
+					let series_dao = SeriesDAO::new(ctx.db.clone());
+
+					let chunks = built_series.chunks(200);
 					let chunk_count = chunks.len();
-					tracing::debug!(chunk_count, "Batch inserting new series");
+					tracing::trace!(chunk_count, "Batch inserting new series");
+
 					for (idx, chunk) in chunks.enumerate() {
-						ctx.report_progress(JobProgress::msg(
-							format!(
-								"Processing series insertion chunk {} of {}",
-								idx + 1,
-								chunk_count
-							)
-							.as_str(),
+						ctx.report_progress(JobProgress::subtask_position_msg(
+							"Inserting built series in batches",
+							(idx + 1) as i32,
+							chunk_count as i32,
 						));
 						let result = series_dao.create_many(chunk.to_vec()).await;
 						match result {
@@ -555,11 +534,11 @@ impl JobExt for LibraryScanJob {
 						created_media,
 						logs: new_logs,
 						..
-					} = handle_create_media(
-						MediaBuildOperationCtx {
+					} = safely_build_and_insert_media(
+						MediaBuildOperation {
 							series_id: series_id.clone(),
-							library_options: self.options.clone().unwrap_or_default(),
-							chunk_size,
+							library_config: self.options.clone().unwrap_or_default(),
+							max_concurrency,
 						},
 						ctx,
 						paths,
@@ -585,11 +564,11 @@ impl JobExt for LibraryScanJob {
 						updated_media,
 						logs: new_logs,
 						..
-					} = handle_visit_media(
-						MediaBuildOperationCtx {
+					} = visit_and_update_media(
+						MediaBuildOperation {
 							series_id: series_id.clone(),
-							library_options: self.options.clone().unwrap_or_default(),
-							chunk_size,
+							library_config: self.options.clone().unwrap_or_default(),
+							max_concurrency,
 						},
 						ctx,
 						paths,

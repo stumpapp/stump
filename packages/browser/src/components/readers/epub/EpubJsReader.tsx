@@ -1,10 +1,10 @@
-import { API, epubApi, epubQueryKeys, mediaQueryKeys, updateEpubProgress } from '@stump/api'
 import {
 	type EpubReaderPreferences,
 	queryClient,
 	useEpubLazy,
 	useEpubReader,
 	useQuery,
+	useSDK,
 } from '@stump/client'
 import { Bookmark, UpdateEpubProgress } from '@stump/types'
 import { Book, Rendition } from 'epubjs'
@@ -65,6 +65,7 @@ type EpubLocationState = {
  * epub reader as an additional option.
  */
 export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
+	const { sdk } = useSDK()
 	const { theme } = useTheme()
 
 	const ref = useRef<HTMLDivElement>(null)
@@ -78,15 +79,9 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		epubPreferences: state.preferences,
 	}))
 
-	const { data: bookmarks } = useQuery([epubQueryKeys.getBookmarks, id], async () => {
-		try {
-			const { data } = await epubApi.getBookmarks(id)
-			return data
-		} catch (error) {
-			console.error('Failed to fetch bookmarks', error)
-			return []
-		}
-	})
+	const { data: bookmarks } = useQuery([sdk.epub.keys.getBookmarks, id], () =>
+		sdk.epub.getBookmarks(id),
+	)
 	const existingBookmarks = useMemo(
 		() =>
 			(bookmarks ?? []).reduce(
@@ -167,14 +162,14 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	useEffect(() => {
 		if (!book) {
 			setBook(
-				new Book(`${API.getUri()}/media/${id}/file`, {
+				new Book(sdk.media.downloadURL(id), {
 					openAs: 'epub',
 					// @ts-expect-error: epubjs has incorrect types
 					requestCredentials: true,
 				}),
 			)
 		}
-	}, [book, epub, id])
+	}, [book, epub, id, sdk.media])
 
 	/**
 	 *	A function for applying the epub reader preferences to the epubjs rendition instance
@@ -308,9 +303,9 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	 */
 	useEffect(() => {
 		return () => {
-			queryClient.invalidateQueries([mediaQueryKeys.getInProgressMedia], { exact: false })
+			queryClient.invalidateQueries([sdk.media.keys.inProgress], { exact: false })
 		}
-	}, [])
+	}, [sdk.media])
 
 	/**
 	 * A callback for when the reader should paginate forward. This will only run if the
@@ -417,7 +412,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		[book, rendition],
 	)
 
-	// TODO: suppport icognito mode that doesn't sync progress...
+	// TODO: suppport incognito mode that doesn't sync progress...
 	const spineSize = epub?.spine.length
 	/**
 	 * This effect is responsible for syncing the current epub progress information to
@@ -442,7 +437,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			 */
 			const handleUpdateProgress = async (payload: UpdateEpubProgress) => {
 				try {
-					await updateEpubProgress({ ...payload, id: epub.media_entity.id })
+					await sdk.epub.updateProgress({ ...payload, id: epub.media_entity.id })
 				} catch (err) {
 					console.error(err)
 				}

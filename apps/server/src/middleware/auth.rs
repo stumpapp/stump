@@ -22,7 +22,11 @@ use stump_core::{
 use tower_sessions::Session;
 
 use crate::{
-	config::{jwt::verify_user_jwt, session::SESSION_USER_KEY, state::AppState},
+	config::{
+		jwt::verify_user_jwt,
+		session::{delete_cookie_header, SESSION_USER_KEY},
+		state::AppState,
+	},
 	errors::{api_error_message, APIError, APIResult},
 	routers::{enforce_max_sessions, relative_favicon_path},
 	utils::{
@@ -151,6 +155,11 @@ pub async fn auth_middleware(
 
 	let Some(auth_header) = auth_header else {
 		if is_opds {
+			// If we are access the OPDS auth document, we allow it
+			if request_uri.ends_with("/opds/v2.0/auth") {
+				return Ok(next.run(req).await);
+			}
+
 			let opds_version = request_uri
 				.split('/')
 				.nth(2)
@@ -326,6 +335,7 @@ impl IntoResponse for OPDSBasicAuth {
 	fn into_response(self) -> Response {
 		if self.version == "2.0" {
 			let document = match OPDSAuthenticationDocumentBuilder::default()
+				.id(format!("{}/opds/v2.0/auth", self.service_url))
 				.description(OPDSSupportedAuthFlow::Basic.description().to_string())
 				.links(vec![
 					OPDSLink::help(),
@@ -346,6 +356,10 @@ impl IntoResponse for OPDSBasicAuth {
 			let json_repsonse = Json(document).into_response();
 			let body = json_repsonse.into_body();
 
+			// We want to ecourage the client to delete any existing session cookies when the current
+			// is no longer valid
+			let delete_cookie = delete_cookie_header();
+
 			Response::builder()
 				.status(StatusCode::UNAUTHORIZED)
 				.header("Authorization", "Basic")
@@ -365,6 +379,7 @@ impl IntoResponse for OPDSBasicAuth {
 						"/opds/v2.0/auth"
 					),
 				)
+				.header(delete_cookie.0, delete_cookie.1)
 				.body(body)
 				.unwrap_or_else(|e| {
 					tracing::error!(error = ?e, "Failed to build response");

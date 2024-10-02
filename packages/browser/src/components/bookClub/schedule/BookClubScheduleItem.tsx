@@ -1,4 +1,4 @@
-import { getMediaThumbnail } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { AspectRatio, Badge, ButtonOrLink, Card, cx, Heading, Link, Text } from '@stump/components'
 import { BookClubBook } from '@stump/types'
 import dayjs from 'dayjs'
@@ -7,13 +7,15 @@ import pluralize from 'pluralize'
 import React, { useMemo } from 'react'
 import { match } from 'ts-pattern'
 
-import { useBookClubContext } from '@/components/bookClub'
 import paths from '@/paths'
+
+import { useBookClubContext } from '../context'
 
 type Props = {
 	book: BookClubBook
 }
 export default function BookClubScheduleTimelineItem({ book }: Props) {
+	const { sdk } = useSDK()
 	const { bookClub } = useBookClubContext()
 
 	const adjustedEnd = book.discussion_duration_days
@@ -93,7 +95,7 @@ export default function BookClubScheduleTimelineItem({ book }: Props) {
 		const details = match(book.book)
 			.with({ __type: 'stored' }, ({ id, name, metadata }) => ({
 				author: metadata?.writers?.join(', '),
-				imageUrl: getMediaThumbnail(id),
+				imageUrl: sdk.media.thumbnailURL(id),
 				title: metadata?.title || name,
 				url: paths.bookOverview(id),
 			}))

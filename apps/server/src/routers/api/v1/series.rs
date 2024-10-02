@@ -17,7 +17,7 @@ use stump_core::{
 			macros::{
 				finished_reading_session_series_complete, series_or_library_thumbnail,
 			},
-			LibraryOptions, Media, Series, User, UserPermission,
+			LibraryConfig, Media, Series, User, UserPermission,
 		},
 		query::{
 			ordering::QueryOrder,
@@ -27,14 +27,13 @@ use stump_core::{
 	},
 	filesystem::{
 		analyze_media_job::AnalyzeMediaJob,
-		get_unknown_thumnail,
+		get_thumbnail,
 		image::{
-			generate_thumbnail, place_thumbnail, remove_thumbnails, ImageFormat,
-			ImageProcessorOptions,
+			generate_book_thumbnail, place_thumbnail, remove_thumbnails,
+			GenerateThumbnailOptions, ImageFormat, ImageProcessorOptions,
 		},
-		read_entire_file,
 		scanner::SeriesScanJob,
-		ContentType, FileParts, PathUtils,
+		ContentType,
 	},
 	prisma::{
 		active_reading_session, finished_reading_session, library,
@@ -44,6 +43,7 @@ use stump_core::{
 		series_metadata,
 	},
 };
+use tokio::fs;
 use tracing::{error, trace};
 use utoipa::ToSchema;
 
@@ -56,7 +56,7 @@ use crate::{
 	},
 	middleware::auth::{auth_middleware, RequestContext},
 	routers::api::v1::library::library_not_hidden_from_user_filter,
-	utils::{http::ImageResponse, validate_image_upload},
+	utils::{http::ImageResponse, validate_and_load_image},
 };
 
 use super::{
@@ -88,7 +88,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.patch(patch_series_thumbnail)
 						.post(replace_series_thumbnail)
 						// TODO: configurable max file size
-						.layer(DefaultBodyLimit::max(20 * 1024 * 1024)), // 20MB
+						.layer(DefaultBodyLimit::max(
+							app_state.config.max_image_upload_size,
+						)),
 				)
 				.route(
 					"/complete",
@@ -515,35 +517,19 @@ async fn get_recently_added_series_handler(
 	Ok(Json(recently_added_series))
 }
 
-pub(crate) fn get_series_thumbnail(
+pub(crate) async fn get_series_thumbnail(
 	id: &str,
 	first_book: Option<series_or_library_thumbnail::media::Data>,
 	image_format: Option<ImageFormat>,
 	config: &StumpConfig,
 ) -> APIResult<(ContentType, Vec<u8>)> {
-	let thumbnails_dir = config.get_thumbnails_dir();
+	let generated_thumb =
+		get_thumbnail(config.get_thumbnails_dir(), id, image_format.clone()).await?;
 
-	if let Some(format) = image_format.clone() {
-		let extension = format.extension();
-		let path = thumbnails_dir.join(format!("{}.{}", id, extension));
-
-		if path.exists() {
-			tracing::trace!(?path, id, "Found generated series thumbnail");
-			return Ok((ContentType::from(format), read_entire_file(path)?));
-		}
-	}
-
-	if let Some(path) = get_unknown_thumnail(id, thumbnails_dir) {
-		tracing::debug!(path = ?path, id, "Found series thumbnail that does not align with config");
-		let FileParts { extension, .. } = path.file_parts();
-		return Ok((
-			ContentType::from_extension(extension.as_str()),
-			read_entire_file(path)?,
-		));
-	}
-
-	if let Some(first_book) = first_book {
-		get_media_thumbnail(&first_book.id, &first_book.path, image_format, config)
+	if let Some((content_type, bytes)) = generated_thumb {
+		Ok((content_type, bytes))
+	} else if let Some(first_book) = first_book {
+		get_media_thumbnail(&first_book.id, &first_book.path, image_format, config).await
 	} else {
 		Err(APIError::NotFound(
 			"Series does not have a thumbnail".to_string(),
@@ -551,7 +537,7 @@ pub(crate) fn get_series_thumbnail(
 	}
 }
 
-// TODO: ImageResponse type for body
+/// Returns the thumbnail image for a series
 #[utoipa::path(
 	get,
 	path = "/api/v1/series/:id/thumbnail",
@@ -566,7 +552,7 @@ pub(crate) fn get_series_thumbnail(
 		(status = 500, description = "Internal server error."),
 	)
 )]
-/// Returns the thumbnail image for a series
+#[tracing::instrument(err, skip(ctx))]
 async fn get_series_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -601,13 +587,11 @@ async fn get_series_thumbnail_handler(
 		.ok_or(APIError::NotFound("Series not found".to_string()))?;
 	let first_book = series.media.into_iter().next();
 
-	let library_options = series
-		.library
-		.map(|l| l.library_options)
-		.map(LibraryOptions::from);
-	let image_format = library_options.and_then(|o| o.thumbnail_config.map(|c| c.format));
+	let library_config = series.library.map(|l| l.config).map(LibraryConfig::from);
+	let image_format = library_config.and_then(|o| o.thumbnail_config.map(|c| c.format));
 
 	get_series_thumbnail(&id, first_book, image_format, &ctx.config)
+		.await
 		.map(ImageResponse::from)
 }
 
@@ -686,7 +670,7 @@ async fn patch_series_thumbnail(
 		.find_first(media_where_params)
 		.with(
 			media::series::fetch()
-				.with(series::library::fetch().with(library::library_options::fetch())),
+				.with(series::library::fetch().with(library::config::fetch())),
 		)
 		.exec()
 		.await?
@@ -701,8 +685,8 @@ async fn patch_series_thumbnail(
 		.ok_or(APIError::NotFound(String::from("Series relation missing")))?
 		.library()?
 		.ok_or(APIError::NotFound(String::from("Library relation missing")))?;
-	let thumbnail_options = library
-		.library_options()?
+	let image_options = library
+		.config()?
 		.thumbnail_config
 		.to_owned()
 		.map(ImageProcessorOptions::try_from)
@@ -715,11 +699,20 @@ async fn patch_series_thumbnail(
 		})
 		.with_page(target_page);
 
-	let format = thumbnail_options.format.clone();
-	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options, &ctx.config)?;
+	let format = image_options.format.clone();
+	let (_, path_buf, _) = generate_book_thumbnail(
+		&media,
+		GenerateThumbnailOptions {
+			image_options,
+			core_config: ctx.config.as_ref().clone(),
+			force_regen: true,
+		},
+	)
+	.await?;
+
 	Ok(ImageResponse::from((
 		ContentType::from(format),
-		read_entire_file(path_buf)?,
+		fs::read(path_buf).await?,
 	)))
 }
 
@@ -768,7 +761,9 @@ async fn replace_series_thumbnail(
 		.await?
 		.ok_or(APIError::NotFound(String::from("Series not found")))?;
 
-	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
+	let (content_type, bytes) =
+		validate_and_load_image(&mut upload, Some(ctx.config.max_image_upload_size))
+			.await?;
 	let ext = content_type.extension();
 	let series_id = series.id;
 
@@ -782,11 +777,11 @@ async fn replace_series_thumbnail(
 		),
 	}
 
-	let path_buf = place_thumbnail(&series_id, ext, &bytes, &ctx.config)?;
+	let path_buf = place_thumbnail(&series_id, ext, &bytes, &ctx.config).await?;
 
 	Ok(ImageResponse::from((
 		content_type,
-		read_entire_file(path_buf)?,
+		fs::read(path_buf).await?,
 	)))
 }
 

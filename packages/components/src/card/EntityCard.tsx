@@ -151,7 +151,7 @@ export function EntityCard({
 			{...containerProps}
 			className={cn(
 				'relative flex flex-1 flex-col space-y-1 overflow-hidden rounded-lg border-[1.5px] border-edge bg-background/80 shadow-sm transition-colors duration-100',
-				{ 'cursor-pointer hover:border-brand dark:hover:border-brand': hasClickAction },
+				{ 'cursor-pointer hover:border-edge-brand dark:hover:border-edge-brand': hasClickAction },
 				{ 'max-w-[16rem]': isCover },
 				{
 					'w-[10rem] sm:w-[10.666rem] md:w-[12rem]': !isFullWidth,

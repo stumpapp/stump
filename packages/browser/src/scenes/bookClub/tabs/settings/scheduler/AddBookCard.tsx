@@ -1,10 +1,11 @@
-import { getMediaThumbnail } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { AspectRatio, Button, Card, DatePicker, Heading, Input, Text } from '@stump/components'
 import { Media } from '@stump/types'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import BookSearchOverlay from '@/components/book/BookSearchOverlay'
+import { formatBookName } from '@/utils/format'
 
 import { defaultBook, Schema } from './CreateOrAddToScheduleForm'
 
@@ -15,6 +16,7 @@ type Props = {
 // FIXME(clubs): this component is a MESS and desperately needs a rewrite
 
 export default function AddBookCard({ index }: Props) {
+	const { sdk } = useSDK()
 	const [selectedBook, setSelectedBook] = useState<Media | null>(null)
 
 	const form = useFormContext<Schema>()
@@ -60,13 +62,16 @@ export default function AddBookCard({ index }: Props) {
 	const renderBookInfo = useCallback(() => {
 		if (!selectedBook) return null
 
-		const bookName = selectedBook.metadata?.title || selectedBook.name
+		const bookName = formatBookName(selectedBook)
 
 		return (
 			<div className="flex">
 				<div className="max-h-[195px] w-[125px]">
 					<AspectRatio ratio={2 / 3}>
-						<img src={getMediaThumbnail(selectedBook.id)} className="rounded-md object-cover" />
+						<img
+							src={sdk.media.thumbnailURL(selectedBook.id)}
+							className="rounded-md object-cover"
+						/>
 					</AspectRatio>
 				</div>
 				<div className="ml-4 flex flex-col gap-1.5">

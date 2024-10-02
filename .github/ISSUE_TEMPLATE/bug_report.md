@@ -6,10 +6,16 @@ labels: 'bug'
 assignees: ''
 ---
 
-**Describe the bug**
+## Description of the Bug
+
 A clear and concise description of what the bug is.
 
-**To Reproduce**
+## Expected Behavior
+
+A clear and concise description of what you expected to happen.
+
+## To Reproduce
+
 Steps to reproduce the behavior:
 
 1. Go to '...'
@@ -17,20 +23,24 @@ Steps to reproduce the behavior:
 3. Scroll down to '....'
 4. See error
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+## Screenshots
 
-**Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Desktop (please complete the following information):**
+## Debugging Information
+
+Please provide any relevant debugging information that you have, e.g. logs, error messages, etc, and any additional context in the following sections.
+
+**Environment:**
 
 - OS: [e.g. macOS, Windows, Linux, iOS, watchOS, Android]
-
-**Smartphone (please complete the following information):**
-
 - Device: [e.g. iPhone12, Samsung S10, etc.]
-- OS: [e.g. iOS15.4.1]
+
+**Build Details:**
+
+- Version: [e.g. 0.0.6, nightly, experimental, etc.]
+- Docker: [yes/no]
 
 **Additional context**
+
 Add any other context about the problem here.

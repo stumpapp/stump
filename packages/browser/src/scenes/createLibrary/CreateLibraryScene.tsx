@@ -1,6 +1,6 @@
-import { handleApiError } from '@stump/api'
 import { useCreateLibraryMutation, useLibraries } from '@stump/client'
 import { Alert } from '@stump/components'
+import { handleApiError } from '@stump/sdk'
 import { CreateLibrary } from '@stump/types'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -40,17 +40,17 @@ export default function CreateLibraryScene() {
 				scan_mode,
 				ignore_rules,
 				thumbnail_config,
-				...options
+				...config
 			} = values
 
 			const payload: CreateLibrary = {
-				description,
-				library_options: {
-					...options,
+				config: {
+					...config,
 					ignore_rules: ignore_rules.map(({ glob }) => glob),
 					thumbnail_config:
 						thumbnail_config.enabled && !!thumbnail_config.resize_options ? thumbnail_config : null,
 				},
+				description,
 				name,
 				path,
 				scan_mode,

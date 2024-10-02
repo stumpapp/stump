@@ -41,7 +41,7 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
 					{
 						'active:scale-95': pressEffect,
 						'cursor-not-allowed': props.disabled,
-						'focus:ring-brand-400 dark:focus:ring-brand-400': primaryFocus,
+						'focus:ring-edge-brand dark:focus:ring-edge-brand': primaryFocus,
 					},
 					className,
 				)}

@@ -1,6 +1,6 @@
 {
 	"name": "@stump/client",
-	"version": "0.0.5",
+	"version": "0.0.6",
 	"private": true,
 	"main": "src/index.ts",
 	"exports": {
@@ -10,7 +10,7 @@
 		"nuke": "yarn exec rimraf node_modules"
 	},
 	"dependencies": {
-		"@stump/api": "*",
+		"@stump/sdk": "*",
 		"@stump/types": "*",
 		"@tanstack/react-query": "^4.36.1",
 		"axios": "^1.6.8",

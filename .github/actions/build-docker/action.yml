@@ -33,7 +33,7 @@ runs:
 
     - name: Format tags
       run: |
-        echo "FORMATTED_TAGS=$(echo ${{ inputs.tags }} | sed -e 's/,/,aaronleopold\/stump:/g' | sed -e 's/^/aaronleopold\/stump:/')" >> $GITHUB_ENV
+        echo "FORMATTED_TAGS=$(echo ${{ inputs.tags }} | sed -e 's/,/ /g')" >> $GITHUB_ENV
         echo "LOCAL_IMAGES=$(echo ${{ inputs.tags }} | sed -e 's/,/,localhost\/stump:/g' | sed -e 's/^/localhost\/stump:/')" >> $GITHUB_ENV
       shell: bash
 
@@ -86,7 +86,7 @@ runs:
       uses: redhat-actions/buildah-build@v2
       with:
         image: stump
-        tags: ${{ inputs.tags }}
+        tags: ${{ env.FORMATTED_TAGS }}
         archs: ${{ inputs.archs }}
         build-args: |
           GIT_REV=${{ env.GIT_REV }}

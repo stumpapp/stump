@@ -177,6 +177,8 @@ pub struct UserPreferences {
 	pub locale: String,
 	pub app_theme: String,
 	#[serde(default)]
+	pub enable_gradients: bool,
+	#[serde(default)]
 	pub app_font: SupportedFont,
 	#[serde(default)]
 	pub show_query_indicator: bool,
@@ -221,6 +223,7 @@ impl Default for UserPreferences {
 			primary_navigation_mode: "SIDEBAR".to_string(),
 			layout_max_width_px: Some(1280),
 			app_theme: "LIGHT".to_string(),
+			enable_gradients: false,
 			app_font: SupportedFont::Inter,
 			show_query_indicator: false,
 			enable_live_refetch: false,
@@ -273,6 +276,7 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 			primary_navigation_mode: data.primary_navigation_mode,
 			layout_max_width_px: data.layout_max_width_px,
 			app_theme: data.app_theme,
+			enable_gradients: data.enable_gradients,
 			app_font: data.app_font.into(),
 			show_query_indicator: data.show_query_indicator,
 			enable_live_refetch: data.enable_live_refetch,

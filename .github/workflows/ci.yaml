@@ -51,7 +51,7 @@ jobs:
           cargo fmt --all -- --check
           cargo clippy -- -D warnings
 
-      - name: Generate typescript bindinds
+      - name: Generate typescript bindings
         run: cargo codegen -- --skip-prisma
       - name: Verify typescript bindings
         run: |
@@ -99,3 +99,10 @@ jobs:
 
       - name: Run TypeScript lints
         run: yarn lint
+
+      # TODO: Figure out how to run tests in parallel, I don't really want to upgrade to berry which
+      # means perhaps lerna is the only option? It isn't a big deal now since there is really only one
+      # package that defines tests, but this will change over time
+      - name: Run TypeScript tests
+        run: yarn test
+        working-directory: ./packages/browser

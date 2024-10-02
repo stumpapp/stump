@@ -14,10 +14,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::config::state::AppState;
 use crate::errors::APIError;
-use crate::filter::{
-	FilterableLibraryQuery, FilterableMediaQuery, FilterableSeriesQuery, LibraryFilter,
-	MediaFilter, SeriesFilter, SeriesQueryRelation,
-};
+use crate::filter::*;
 use crate::middleware::auth::auth_middleware;
 
 use super::api::{
@@ -135,7 +132,7 @@ use super::api::{
     ),
     components(
         schemas(
-            Library, LibraryOptions, Media, ReadingList, ActiveReadingSession, FinishedReadingSession, Series, Tag, User,
+            Library, LibraryConfig, Media, ReadingList, ActiveReadingSession, FinishedReadingSession, Series, Tag, User,
             UserPreferences, LibraryPattern, LibraryScanMode, LogLevel, ClaimResponse,
             StumpVersion, FileStatus, PageableDirectoryListing, DirectoryListing,
             DirectoryListingFile, CursorInfo, PageInfo, PageableLibraries,
@@ -149,7 +146,9 @@ use super::api::{
             CreateOrUpdateSmartListView, SmartListItemGrouping, SmartFilter, FilterJoin, EntityVisibility,
             SmartListViewConfig, ReactTableColumnSort, ReactTableGlobalSort,
             MediaSmartFilter, MediaMetadataSmartFilter, SeriesSmartFilter, SeriesMetadataSmartFilter,
-            LibrarySmartFilter, Notifier, CreateOrUpdateNotifier, PatchNotifier
+            LibrarySmartFilter, Notifier, CreateOrUpdateNotifier, PatchNotifier, LibraryBaseFilter, LibraryRelationFilter,
+            MediaBaseFilter, MediaRelationFilter, SeriesBaseFilter, SeriesRelationFilter, NotifierConfig, NotifierType,
+            ReadingListItem, ReadingListVisibility, SeriesMedataFilter
         )
     ),
     tags(

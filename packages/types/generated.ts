@@ -3,10 +3,12 @@
 
 // CORE TYPE GENERATION
 
+export type PaginationQuery = { zero_based?: boolean | null; page?: number | null; page_size?: number | null; cursor?: string | null; limit?: number | null }
+
 /**
  * An event that is emitted by the core and consumed by a client
  */
-export type CoreEvent = ({ __typename: "JobStarted" } & string) | ({ __typename: "JobUpdate" } & JobUpdate) | { __typename: "JobOutput"; id: string; output: CoreJobOutput } | ({ __typename: "DiscoveredMissingLibrary" } & string) | { __typename: "CreatedMedia"; id: string; series_id: string } | { __typename: "CreatedManySeries"; count: BigInt; library_id: string } | { __typename: "CreatedOrUpdatedManyMedia"; count: BigInt; series_id: string }
+export type CoreEvent = ({ __typename: "JobStarted" } & string) | ({ __typename: "JobUpdate" } & JobUpdate) | { __typename: "JobOutput"; id: string; output: CoreJobOutput } | ({ __typename: "DiscoveredMissingLibrary" } & string) | { __typename: "CreatedMedia"; id: string; series_id: string } | { __typename: "CreatedManySeries"; count: number; library_id: string } | { __typename: "CreatedOrUpdatedManyMedia"; count: number; series_id: string }
 
 export type EntityVisibility = "PUBLIC" | "SHARED" | "PRIVATE"
 
@@ -21,38 +23,38 @@ export type Log = { id: number; level: LogLevel; message: string; context: strin
  * Information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
  * ~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
  */
-export type LogMetadata = { path: string; size: BigInt; modified: string }
+export type LogMetadata = { path: string; size: number; modified: string }
 
 export type LogLevel = "ERROR" | "WARN" | "INFO" | "DEBUG"
 
-export type PersistedJob = { id: string; name: string; description: string | null; status: JobStatus; output_data: CoreJobOutput | null; ms_elapsed: BigInt; created_at: string; completed_at: string | null; logs?: Log[] | null }
+export type PersistedJob = { id: string; name: string; description: string | null; status: JobStatus; output_data: CoreJobOutput | null; ms_elapsed: number; created_at: string; completed_at: string | null; logs?: Log[] | null }
 
 export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput
 
 /**
  * An update event that is emitted by a job
  */
-export type JobUpdate = ({ status?: JobStatus | null; message?: string | null; completed_tasks?: number | null; remaining_tasks?: number | null; completed_subtasks?: number | null; remaining_subtasks?: number | null }) & { id: string }
+export type JobUpdate = ({ status?: JobStatus | null; message?: string | null; completed_tasks?: number | null; remaining_tasks?: number | null; completed_subtasks?: number | null; total_subtasks?: number | null }) & { id: string }
 
 /**
  * A struct that represents a progress event that is emitted by a job. This behaves like a patch,
  * where the client will ignore any fields that are not present. This is done so all internal ops
  * can be done without needing to know the full state of the job.
  */
-export type JobProgress = { status?: JobStatus | null; message?: string | null; completed_tasks?: number | null; remaining_tasks?: number | null; completed_subtasks?: number | null; remaining_subtasks?: number | null }
+export type JobProgress = { status?: JobStatus | null; message?: string | null; completed_tasks?: number | null; remaining_tasks?: number | null; completed_subtasks?: number | null; total_subtasks?: number | null }
 
 /**
  * The data that is collected and updated during the execution of a library scan job
  */
-export type LibraryScanOutput = { total_files: BigInt; total_directories: BigInt; ignored_files: BigInt; skipped_files: BigInt; ignored_directories: BigInt; created_media: BigInt; updated_media: BigInt; created_series: BigInt; updated_series: BigInt }
+export type LibraryScanOutput = { total_files: number; total_directories: number; ignored_files: number; skipped_files: number; ignored_directories: number; created_media: number; updated_media: number; created_series: number; updated_series: number }
 
-export type SeriesScanOutput = { total_files: BigInt; ignored_files: BigInt; skipped_files: BigInt; created_media: BigInt; updated_media: BigInt }
+export type SeriesScanOutput = { total_files: number; ignored_files: number; skipped_files: number; created_media: number; updated_media: number }
 
 export type ThumbnailGenerationJobVariant = ({ type: "SingleLibrary" } & string) | ({ type: "SingleSeries" } & string) | ({ type: "MediaGroup" } & string[])
 
 export type ThumbnailGenerationJobParams = { variant: ThumbnailGenerationJobVariant; force_regenerate: boolean }
 
-export type ThumbnailGenerationOutput = { visited_files: BigInt; generated_thumbnails: BigInt; removed_thumbnails: BigInt }
+export type ThumbnailGenerationOutput = { visited_files: number; skipped_files: number; generated_thumbnails: number; removed_thumbnails: number }
 
 export type User = { id: string; username: string; is_server_owner: boolean; avatar_url: string | null; created_at: string; last_login: string | null; is_locked: boolean; permissions: UserPermission[]; max_sessions_allowed?: number | null; login_sessions_count?: number | null; user_preferences?: UserPreferences | null; login_activity?: LoginActivity[] | null; age_restriction?: AgeRestriction | null; active_reading_sessions?: ActiveReadingSession[] | null; finished_reading_sessions?: FinishedReadingSession[] | null }
 
@@ -78,7 +80,7 @@ export type ArrangementItem<I> = { item: I; visible?: boolean }
 
 export type Arrangement<I> = { locked: boolean; items: ArrangementItem<I>[] }
 
-export type UserPreferences = { id: string; locale: string; app_theme: string; app_font?: SupportedFont; show_query_indicator?: boolean; enable_live_refetch?: boolean; preferred_layout_mode?: string; primary_navigation_mode?: string; layout_max_width_px?: number | null; enable_discord_presence?: boolean; enable_compact_display?: boolean; enable_double_sidebar?: boolean; enable_hide_scrollbar?: boolean; enable_replace_primary_sidebar?: boolean; prefer_accent_color?: boolean; show_thumbnails_in_headers?: boolean; navigation_arrangement?: Arrangement<NavigationItem>; home_arrangement?: Arrangement<HomeItem> }
+export type UserPreferences = { id: string; locale: string; app_theme: string; enable_gradients?: boolean; app_font?: SupportedFont; show_query_indicator?: boolean; enable_live_refetch?: boolean; preferred_layout_mode?: string; primary_navigation_mode?: string; layout_max_width_px?: number | null; enable_discord_presence?: boolean; enable_compact_display?: boolean; enable_double_sidebar?: boolean; enable_hide_scrollbar?: boolean; enable_replace_primary_sidebar?: boolean; prefer_accent_color?: boolean; show_thumbnails_in_headers?: boolean; navigation_arrangement?: Arrangement<NavigationItem>; home_arrangement?: Arrangement<HomeItem> }
 
 export type LoginActivity = { id: string; ip_address: string; user_agent: string; authentication_successful: boolean; timestamp: string; user?: User | null }
 
@@ -114,9 +116,15 @@ export type EmailerSendRecord = { id: number; emailer_id: number; recipient_emai
  */
 export type AttachmentMeta = { filename: string; media_id: string | null; size: number }
 
+export type ReadingDirection = "ltr" | "rtl"
+
+export type ReadingMode = "paged" | "continuous:vertical" | "continuous:horizontal"
+
+export type ReadingImageScaleFit = "height" | "width" | "none"
+
 export type FileStatus = "UNKNOWN" | "READY" | "UNSUPPORTED" | "ERROR" | "MISSING"
 
-export type Library = { id: string; name: string; description: string | null; emoji: string | null; path: string; status: string; updated_at: string; series: Series[] | null; tags: Tag[] | null; library_options: LibraryOptions }
+export type Library = { id: string; name: string; description: string | null; emoji: string | null; path: string; status: string; updated_at: string; series: Series[] | null; tags: Tag[] | null; config: LibraryConfig }
 
 export type LibraryPattern = "SERIES_BASED" | "COLLECTION_BASED"
 
@@ -124,20 +132,20 @@ export type LibraryScanMode = "DEFAULT" | "NONE"
 
 export type IgnoreRules = string[]
 
-export type LibraryOptions = { id?: string | null; convert_rar_to_zip: boolean; hard_delete_conversions: boolean; library_pattern: LibraryPattern; thumbnail_config: ImageProcessorOptions | null; ignore_rules?: IgnoreRules; library_id?: string | null }
+export type LibraryConfig = { id?: string | null; convert_rar_to_zip: boolean; hard_delete_conversions: boolean; generate_file_hashes: boolean; process_metadata: boolean; library_pattern: LibraryPattern; thumbnail_config: ImageProcessorOptions | null; default_reading_dir?: ReadingDirection; default_reading_mode?: ReadingMode; default_reading_image_scale_fit?: ReadingImageScaleFit; ignore_rules?: IgnoreRules; library_id?: string | null }
 
-export type LibraryStats = { series_count: BigInt; book_count: BigInt; total_bytes: BigInt; completed_books: BigInt; in_progress_books: BigInt }
+export type LibraryStats = { series_count: number; book_count: number; total_bytes: number; completed_books: number; in_progress_books: number }
 
 export type SeriesMetadata = { _type: string; title: string | null; summary: string | null; publisher: string | null; imprint: string | null; comicid: number | null; volume: number | null; booktype: string | null; age_rating: number | null; status: string | null }
 
-export type Series = { id: string; name: string; path: string; description: string | null; status: FileStatus; updated_at: string; created_at: string; library_id: string; library: Library | null; media: Media[] | null; metadata: SeriesMetadata | null; media_count?: BigInt | null; unread_media_count?: BigInt | null; tags?: Tag[] | null }
+export type Series = { id: string; name: string; path: string; description: string | null; status: FileStatus; updated_at: string; created_at: string; library_id: string; library: Library | null; media: Media[] | null; metadata: SeriesMetadata | null; media_count?: number | null; unread_media_count?: number | null; tags?: Tag[] | null }
 
 /**
  * Struct representing the metadata for a processed file.
  */
 export type MediaMetadata = { title?: string | null; series?: string | null; number?: number | null; volume?: number | null; summary?: string | null; notes?: string | null; age_rating?: number | null; genre?: string[] | null; year?: number | null; month?: number | null; day?: number | null; writers?: string[] | null; pencillers?: string[] | null; inkers?: string[] | null; colorists?: string[] | null; letterers?: string[] | null; cover_artists?: string[] | null; editors?: string[] | null; publisher?: string | null; links?: string[] | null; characters?: string[] | null; teams?: string[] | null; page_count?: number | null }
 
-export type Media = { id: string; name: string; size: BigInt; extension: string; pages: number; updated_at: string; created_at: string; modified_at: string | null; hash: string | null; path: string; status: FileStatus; series_id: string; metadata: MediaMetadata | null; series?: Series | null; active_reading_session?: ActiveReadingSession | null; finished_reading_sessions: FinishedReadingSession[] | null; current_page?: number | null; current_epubcfi?: string | null; is_completed?: boolean | null; tags?: Tag[] | null; bookmarks?: Bookmark[] | null }
+export type Media = { id: string; name: string; size: number; extension: string; pages: number; updated_at: string; created_at: string; modified_at: string | null; hash: string | null; path: string; status: FileStatus; series_id: string; metadata: MediaMetadata | null; series?: Series | null; active_reading_session?: ActiveReadingSession | null; finished_reading_sessions: FinishedReadingSession[] | null; current_page?: number | null; current_epubcfi?: string | null; is_completed?: boolean | null; tags?: Tag[] | null; bookmarks?: Bookmark[] | null }
 
 /**
  * A model representing a bookmark in the database. Bookmarks are used to save specific locations
@@ -297,11 +305,11 @@ export type PageParams = { zero_based: boolean; page: number; page_size: number 
  */
 export type QueryOrder = { order_by: string; direction: Direction }
 
-export type PageQuery = { zero_based: boolean | null; page: number | null; page_size: number | null }
+export type PageQuery = { zero_based?: boolean | null; page?: number | null; page_size?: number | null }
 
-export type CursorQuery = { cursor: string | null; limit: BigInt | null }
+export type CursorQuery = { cursor?: string | null; limit?: number | null }
 
-export type CursorInfo = { current_cursor: string | null; limit: BigInt | null; next_cursor: string | null }
+export type CursorInfo = { current_cursor: string | null; limit: number | null; next_cursor: string | null }
 
 export type PageInfo = { total_pages: number; current_page: number; page_size: number; page_offset: number; zero_based: boolean }
 
@@ -327,7 +335,7 @@ export type CreateUser = { username: string; password: string; permissions?: Use
 
 export type UpdateUser = { username: string; password: string | null; avatar_url: string | null; permissions?: UserPermission[]; age_restriction: AgeRestriction | null; max_sessions_allowed?: number | null }
 
-export type UpdateUserPreferences = { id: string; locale: string; preferred_layout_mode: string; primary_navigation_mode: string; layout_max_width_px: number | null; app_theme: string; app_font: SupportedFont; show_query_indicator: boolean; enable_live_refetch: boolean; enable_discord_presence: boolean; enable_compact_display: boolean; enable_double_sidebar: boolean; enable_replace_primary_sidebar: boolean; enable_hide_scrollbar: boolean; prefer_accent_color: boolean; show_thumbnails_in_headers: boolean }
+export type UpdateUserPreferences = { id: string; locale: string; preferred_layout_mode: string; primary_navigation_mode: string; layout_max_width_px: number | null; app_theme: string; enable_gradients: boolean; app_font: SupportedFont; show_query_indicator: boolean; enable_live_refetch: boolean; enable_discord_presence: boolean; enable_compact_display: boolean; enable_double_sidebar: boolean; enable_replace_primary_sidebar: boolean; enable_hide_scrollbar: boolean; prefer_accent_color: boolean; show_thumbnails_in_headers: boolean }
 
 export type DeleteUser = { hard_delete: boolean | null }
 
@@ -354,13 +362,55 @@ export type CreateOrUpdateEmailDevice = { name: string; email: string; forbidden
  */
 export type PatchEmailDevice = { name: string | null; email: string | null; forbidden: boolean | null }
 
-export type CreateLibrary = { name: string; path: string; description?: string | null; tags?: string[] | null; scan_mode?: LibraryScanMode | null; library_options?: LibraryOptions | null }
+export type LogFilter = { level?: LogLevel | null; job_id?: string | null; timestamp?: ValueOrRange<string> | null }
 
-export type UpdateLibrary = { name: string; path: string; description?: string | null; emoji?: string | null; tags?: string[] | null; library_options: LibraryOptions; scan_mode?: LibraryScanMode | null }
+export type LibraryBaseFilter = { id?: string[]; name?: string[]; path?: string[]; search?: string | null }
+
+export type LibraryRelationFilter = { series?: SeriesBaseFilter | null }
+
+export type LibraryFilter = ({ id?: string[]; name?: string[]; path?: string[]; search?: string | null }) & ({ series?: SeriesBaseFilter | null })
+
+/**
+ * A user-friendly representation of a media's read_progress. This will map to
+ * a query condition that will be used to filter the media.
+ */
+export type ReadStatus = "Unread" | "Reading" | "Completed"
+
+export type MediaMetadataBaseFilter = { publisher?: string[]; genre?: string[]; character?: string[]; colorist?: string[]; writer?: string[]; penciller?: string[]; inker?: string[]; letterer?: string[]; editor?: string[]; age_rating?: number | null; year?: ValueOrRange<number> | null }
+
+export type MediaMetadataRelationFilter = { media?: MediaFilter | null }
+
+export type MediaMetadataFilter = ({ publisher?: string[]; genre?: string[]; character?: string[]; colorist?: string[]; writer?: string[]; penciller?: string[]; inker?: string[]; letterer?: string[]; editor?: string[]; age_rating?: number | null; year?: ValueOrRange<number> | null }) & ({ media?: MediaFilter | null })
+
+export type MediaBaseFilter = { id?: string[]; name?: string[]; extension?: string[]; path?: string[]; read_status?: ReadStatus[]; tags?: string[]; search?: string | null; metadata?: MediaMetadataBaseFilter | null }
+
+export type MediaFilter = ({ id?: string[]; name?: string[]; extension?: string[]; path?: string[]; read_status?: ReadStatus[]; tags?: string[]; search?: string | null; metadata?: MediaMetadataBaseFilter | null }) & ({ series?: SeriesFilter | null })
+
+export type BookRelations = { load_series?: boolean | null; load_library?: boolean | null }
+
+export type SeriesBaseFilter = { id?: string[]; name?: string[]; path?: string[]; search?: string | null; metadata?: SeriesMedataFilter | null }
+
+export type SeriesMedataFilter = { meta_type?: string[]; publisher?: string[]; status?: string[]; age_rating?: number | null; volume?: ValueOrRange<number> | null }
+
+export type SeriesFilter = ({ id?: string[]; name?: string[]; path?: string[]; search?: string | null; metadata?: SeriesMedataFilter | null }) & ({ library?: LibraryBaseFilter | null; media?: MediaBaseFilter | null })
+
+export type ValueOrRange<T> = T | Range<T>
+
+export type Range<T> = { from?: T | null; to?: T | null }
+
+export type UserQueryRelation = { include_read_progresses?: boolean | null; include_session_count?: boolean | null; include_restrictions?: boolean | null }
+
+export type SeriesQueryRelation = { load_media?: boolean | null; load_library?: boolean | null; count_media?: boolean | null }
+
+export type CreateLibrary = { name: string; path: string; description?: string | null; tags?: string[] | null; scan_mode?: LibraryScanMode | null; config?: LibraryConfig | null }
+
+export type UpdateLibrary = { name: string; path: string; description?: string | null; emoji?: string | null; tags?: string[] | null; config: LibraryConfig; scan_mode?: LibraryScanMode | null }
 
 export type UpdateLibraryExcludedUsers = { user_ids: string[] }
 
 export type CleanLibraryResponse = { deleted_media_count: number; deleted_series_count: number; is_empty: boolean }
+
+export type GenerateLibraryThumbnails = { image_options?: ImageProcessorOptions | null; force_regenerate?: boolean }
 
 export type LibraryStatsParams = { all_users?: boolean }
 
@@ -418,7 +468,13 @@ export type GetSmartListsParams = { all?: boolean | null; search?: string | null
 
 export type SmartListRelationOptions = { load_views?: boolean }
 
-export type SmartListMeta = { matched_books: BigInt; matched_series: BigInt; matched_libraries: BigInt }
+export type SmartListMeta = { matched_books: number; matched_series: number; matched_libraries: number }
 
 export type CreateOrUpdateSmartListView = ({ book_columns: ReactTableColumnSort[]; group_columns: ReactTableColumnSort[]; book_sorting: ReactTableGlobalSort[] | null; group_sorting: ReactTableGlobalSort[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string }
+
+// DESKTOP TYPE GENERATION
+
+export type SavedServer = { name: string; uri: string }
+
+export type DesktopAppStore = { run_bundled_server: boolean; active_server?: SavedServer | null; connected_servers: SavedServer[] }
 

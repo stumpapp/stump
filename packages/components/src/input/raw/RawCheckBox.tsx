@@ -20,7 +20,7 @@ export const RAW_CHECKBOX_ROUND_VARIANTS = {
 }
 export const RAW_CHECKBOX_VARIANTS = {
 	default: 'focus:ring-gray-400  dark:text-gray-50 dark:focus:ring-gray-400',
-	primary: 'focus:ring-brand-400 text-brand-400',
+	primary: 'focus:ring-edge-brand text-foreground-brand',
 }
 export const checkboxVariants = cva(RAW_CHECKBOX_BASE_CLASSES, {
 	defaultVariants: {

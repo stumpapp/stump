@@ -22,8 +22,6 @@ type SettingsPage =
 type DocTopic = 'access-control' | 'book-club'
 type BookClubTab = 'overview' | 'members' | 'discussion' | 'settings'
 
-const IS_DEV = import.meta.env.DEV
-
 const paths = {
 	bookClub: (id: string, tab?: BookClubTab) => `/book-clubs/${id}${tab ? `/${tab}` : ''}`,
 	bookClubCreate: () => '/book-clubs/create',
@@ -113,8 +111,7 @@ const paths = {
 	serverLogs: (jobId?: string) => paths.settings('server/logs') + (jobId ? `?job_id=${jobId}` : ''),
 	settings: (subpath: SettingsPage = 'app/general') => `/settings/${subpath || ''}`,
 	smartList: (id: string) => `/smart-lists/${id}`,
-	smartListCreate: () =>
-		IS_DEV ? '/smart-lists/create' : 'https://stumpapp.dev/guides/smart-list#creating-a-smart-list',
+	smartListCreate: () => '/smart-lists/create',
 	smartLists: () => '/smart-lists',
 	updateUser: (id: string) => `${paths.settings('server/users')}/${id}/manage`,
 } as const

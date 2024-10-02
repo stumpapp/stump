@@ -103,7 +103,7 @@ impl OPDSPublication {
 
 			for book in books {
 				let links = OPDSPublication::links_for_book(&book, &finalizer)?;
-				let images = OPDSPublication::images_for_book(&book, &finalizer)?;
+				let images = OPDSPublication::images_for_book(&book, &finalizer).await?;
 
 				let position = positions.get(&book.id).cloned();
 
@@ -151,7 +151,7 @@ impl OPDSPublication {
 		book: books_as_publications::Data,
 	) -> CoreResult<Self> {
 		let links = OPDSPublication::links_for_book(&book, &finalizer)?;
-		let images = OPDSPublication::images_for_book(&book, &finalizer)?;
+		let images = OPDSPublication::images_for_book(&book, &finalizer).await?;
 
 		let series = book
 			.series
@@ -230,7 +230,7 @@ impl OPDSPublication {
 		Ok(publication)
 	}
 
-	fn images_for_book(
+	async fn images_for_book(
 		book: &books_as_publications::Data,
 		finalizer: &OPDSLinkFinalizer,
 	) -> CoreResult<Vec<OPDSImageLink>> {
@@ -243,9 +243,9 @@ impl OPDSPublication {
 							book.id
 						)),
 					)
-					._type(OPDSLinkType::from(get_content_type_for_page(
-						&book.path, 1,
-					)?))
+					._type(OPDSLinkType::from(
+						get_content_type_for_page(&book.path, 1).await?,
+					))
 					.build()?
 					.with_auth(finalizer.format_link(AUTH_ROUTE)),
 			)
@@ -313,6 +313,7 @@ mod tests {
 			}),
 			created_at: Utc::now().into(),
 			updated_at: Utc::now().into(),
+			deleted_at: None,
 			extension: String::from("epub"),
 			path: get_test_epub_path(),
 			status: FileStatus::Ready.to_string(),

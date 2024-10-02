@@ -1,15 +1,27 @@
 import { useEffect, useRef, useState } from 'react'
 
+import { ImagePageDimensionRef } from '@/components/readers/imageBased/context'
+
 type Params = {
+	/**
+	 * The pages to preload
+	 */
 	pages: number[]
+	/**
+	 * A function to build the url for a given page
+	 */
 	urlBuilder: (page: number) => string
+	/**
+	 * A callback to store the dimensions of a page after it has been preloaded
+	 */
+	onStoreDimensions?: (page: number, dimensions: ImagePageDimensionRef) => void
 }
 /**
  * A hook to preload a list of pages, provided a function to build the url for each page
  *
  * TODO: handle errors a bit better?
  */
-export function usePreloadPage({ pages, urlBuilder }: Params) {
+export function usePreloadPage({ pages, urlBuilder, onStoreDimensions }: Params) {
 	const [isPreloading, setIsPreloading] = useState(false)
 
 	const preloadRef = useRef<Record<number, boolean>>({})
@@ -34,7 +46,16 @@ export function usePreloadPage({ pages, urlBuilder }: Params) {
 			const image = new Image()
 			return new Promise((resolve, reject) => {
 				image.src = urlBuilder(page)
-				image.onload = () => resolve(`Page ${page} loaded`)
+				image.onload = () => {
+					if (image.width && image.height) {
+						onStoreDimensions?.(page, {
+							height: image.height,
+							isPortrait: image.height > image.width,
+							width: image.width,
+						})
+					}
+					resolve(image)
+				}
 				image.onerror = (error) => reject(error)
 			})
 		}
@@ -50,7 +71,7 @@ export function usePreloadPage({ pages, urlBuilder }: Params) {
 		}
 
 		preloadPages()
-	}, [pages, urlBuilder])
+	}, [pages, urlBuilder, onStoreDimensions])
 
 	return { isPreloading }
 }

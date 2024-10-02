@@ -1,5 +1,4 @@
-import { libraryQueryKeys } from '@stump/api'
-import { invalidateQueries, useEditLibraryMutation } from '@stump/client'
+import { useUpdateLibrary } from '@stump/client'
 import { UpdateLibrary } from '@stump/types'
 import React, { useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
@@ -13,6 +12,7 @@ const ThumbnailSettingsScene = React.lazy(
 )
 const ScannerBehaviorScene = React.lazy(() => import('./options/ScannerBehaviorScene'))
 const LibraryAnalysisScene = React.lazy(() => import('./options/analysis'))
+const LibraryReadingDefaultsScene = React.lazy(() => import('./options/readingDefaults'))
 
 const AccessControlScene = React.lazy(() => import('./danger/accessControl'))
 const DeletionScene = React.lazy(() => import('./danger/deletion'))
@@ -21,11 +21,8 @@ const DeletionScene = React.lazy(() => import('./danger/deletion'))
 export default function LibrarySettingsRouter() {
 	const { library } = useLibraryContext()
 
-	// TODO: do something with error OR change to promise and return in patch
-	const { editLibrary } = useEditLibraryMutation({
-		onSuccess: async () => {
-			await invalidateQueries({ exact: false, keys: [libraryQueryKeys.getLibraryById] })
-		},
+	const { editLibrary } = useUpdateLibrary({
+		id: library.id,
 	})
 
 	// TODO: This is particularly fallible. It would be a lot wiser to eventually just.. yknow, literally
@@ -39,9 +36,7 @@ export default function LibrarySettingsRouter() {
 			const payload: UpdateLibrary = {
 				...library,
 				...updates,
-				library_options: updates.library_options
-					? { ...library.library_options, ...updates.library_options }
-					: library.library_options,
+				config: updates.config ? { ...library.config, ...updates.config } : library.config,
 				tags: updates.tags ? updates.tags : library?.tags?.map(({ name }) => name),
 			}
 			editLibrary(payload)
@@ -59,6 +54,7 @@ export default function LibrarySettingsRouter() {
 				<Route path="" element={<Navigate to="basics" replace />} />
 				<Route path="basics" element={<BasicSettingsScene />} />
 
+				<Route path="reading" element={<LibraryReadingDefaultsScene />} />
 				<Route path="scanning" element={<ScannerBehaviorScene />} />
 				<Route path="thumbnails" element={<ThumbnailSettingsScene />} />
 				<Route path="analysis" element={<LibraryAnalysisScene />} />

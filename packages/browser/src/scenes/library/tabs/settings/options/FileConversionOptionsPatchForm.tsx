@@ -28,8 +28,8 @@ export default function FileConversionOptionsPatchForm() {
 			hard_delete_conversions,
 		}: Pick<CreateOrUpdateLibrarySchema, 'convert_rar_to_zip' | 'hard_delete_conversions'>) => {
 			patch({
-				library_options: {
-					...library.library_options,
+				config: {
+					...library.config,
 					convert_rar_to_zip,
 					hard_delete_conversions,
 				},

@@ -1,10 +1,11 @@
 {
 	"name": "@stump/components",
-	"version": "0.0.5",
+	"version": "0.0.6",
 	"exports": {
 		".": "./src/index.ts",
 		"./styles/overrides.css": "./src/styles/overrides.css",
 		"./tailwind/tailwind.js": "./tailwind/tailwind.js",
+		"./tailwind": "./tailwind/index.ts",
 		"./themes": "./themes/index.ts"
 	},
 	"scripts": {
@@ -32,6 +33,7 @@
 		"@radix-ui/react-scroll-area": "^1.0.5",
 		"@radix-ui/react-select": "^2.0.0",
 		"@radix-ui/react-separator": "^1.0.3",
+		"@radix-ui/react-slider": "^1.2.0",
 		"@radix-ui/react-switch": "^1.0.3",
 		"@radix-ui/react-tabs": "^1.0.4",
 		"@radix-ui/react-toast": "^1.1.5",

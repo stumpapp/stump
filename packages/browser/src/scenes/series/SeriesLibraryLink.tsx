@@ -1,4 +1,4 @@
-import { useLibraryByIdQuery } from '@stump/client'
+import { useLibraryByID } from '@stump/client'
 import { Link } from '@stump/components'
 import { Suspense } from 'react'
 
@@ -8,7 +8,7 @@ type Props = {
 	id: string
 }
 export default function SeriesLibraryLink({ id }: Props) {
-	const { library } = useLibraryByIdQuery(id)
+	const { library } = useLibraryByID(id)
 
 	return (
 		<Suspense>

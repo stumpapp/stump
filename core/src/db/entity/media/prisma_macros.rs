@@ -12,7 +12,7 @@ media::select!(media_thumbnail {
    path
    series: select {
 	  library: select {
-		library_options
+		config
 	  }
    }
 });

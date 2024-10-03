@@ -36,8 +36,6 @@ export default function CreateSmartListForm() {
 		console.debug('Create smart list', { data })
 	}
 
-	console.log('render')
-
 	return (
 		<Form form={form} onSubmit={handleSubmit}>
 			<ContentContainer>

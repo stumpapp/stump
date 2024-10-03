@@ -91,6 +91,7 @@ const buttonVariants = cva(BUTTON_BASE_CLASSES, {
 		variant: 'default',
 	},
 	variants: {
+		// TODO: remove this new york shit and just create better size variants
 		newYork: {
 			true: '',
 		},

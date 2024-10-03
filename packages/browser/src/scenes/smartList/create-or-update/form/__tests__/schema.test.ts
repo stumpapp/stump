@@ -1,6 +1,6 @@
 import { Filter, MediaSmartFilter, NumericFilter, SeriesSmartFilter } from '@stump/types'
 
-import { intoAPIFilter, intoFormFilter } from '../newSchema'
+import { intoAPIFilter, intoFormFilter, intoFormGroup } from '../newSchema'
 
 const stringFilters = [
 	{
@@ -360,8 +360,84 @@ describe('schema', () => {
 		})
 	})
 
-	// TODO: finish tests
-	describe('intoFormGroup', () => {})
+	describe('intoFormGroup', () => {
+		// String filter
+		expect(
+			intoFormGroup({
+				and: [
+					{
+						name: {
+							any: ['foo', 'shmoo'],
+						},
+					} satisfies MediaSmartFilter,
+					{
+						name: {
+							none: ['bar', 'baz'],
+						},
+					} satisfies MediaSmartFilter,
+				],
+			}),
+		).toEqual({
+			filters: [
+				{
+					field: 'name',
+					operation: 'any',
+					source: 'book',
+					value: ['foo', 'shmoo'],
+				},
+				{
+					field: 'name',
+					operation: 'none',
+					source: 'book',
+					value: ['bar', 'baz'],
+				},
+			],
+			joiner: 'and',
+		})
+
+		// Numeric filter
+		expect(
+			intoFormGroup({
+				or: [
+					{
+						metadata: {
+							age_rating: {
+								from: 42,
+								to: 69,
+								inclusive: true,
+							},
+						},
+					} satisfies MediaSmartFilter,
+					{
+						// @ts-expect-error: I will add this TODO(smart-list): add this
+						created_at: {
+							lt: 42,
+						},
+					} satisfies MediaSmartFilter,
+				],
+			}),
+		).toEqual({
+			filters: [
+				{
+					field: 'age_rating',
+					operation: 'range',
+					source: 'book_meta',
+					value: {
+						from: 42,
+						to: 69,
+						inclusive: true,
+					},
+				},
+				{
+					field: 'created_at',
+					operation: 'lt',
+					source: 'book',
+					value: 42,
+				},
+			],
+			joiner: 'or',
+		})
+	})
 
 	describe('intoAPIGroup', () => {})
 
@@ -369,3 +445,25 @@ describe('schema', () => {
 
 	describe('intoAPI', () => {})
 })
+
+// TODO(smart-list): finish tests
+
+// 	const createStringGroups = (field: string): FilterGroup<MediaSmartFilter>[] => {
+// 		const t = stringFilters
+// 			.map((filter) =>
+// 				(['and', 'or', 'not'] as const)
+// 					.map(
+// 						(type) =>
+// 							({
+// 								[type]: [
+// 									{
+// 										[field ]: filter,
+// 									},
+// 								],
+// 							}) satisfies FilterGroup<MediaSmartFilter>,
+// 					)
+// 					.flat(),
+// 			)
+// 			.flat()
+// 	}
+// })

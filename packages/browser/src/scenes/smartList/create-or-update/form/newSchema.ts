@@ -5,25 +5,37 @@ import {
 	MediaMetadataSmartFilter,
 	MediaSmartFilter,
 	SeriesSmartFilter,
+	SmartFilter,
 	SmartList,
-	SmartListItemGrouping,
 } from '@stump/types'
 import getProperty from 'lodash/get'
 import { match, P } from 'ts-pattern'
 import { z } from 'zod'
 
-export const operation = z.enum([
-	'gt',
-	'gte',
-	'lt',
-	'lte',
-	'not',
-	'contains',
-	'excludes',
-	'any',
-	'none',
-	'range',
-])
+// export const operation = z.enum([
+// 	'gt',
+// 	'gte',
+// 	'lt',
+// 	'lte',
+// 	'not',
+// 	'contains',
+// 	'excludes',
+// 	'any',
+// 	'none',
+// 	'range',
+// ])
+
+export const stringOperation = z.enum(['contains', 'excludes', 'not'])
+export type StringOperation = z.infer<typeof stringOperation>
+
+export const listOperation = z.enum(['any', 'none'])
+export type ListOperation = z.infer<typeof listOperation>
+
+export const numberOperation = z.enum(['gt', 'gte', 'lt', 'lte', 'not', 'range'])
+export type NumberOperation = z.infer<typeof numberOperation>
+
+export const operation = z.union([stringOperation, listOperation, numberOperation])
+export type Operation = z.infer<typeof operation>
 
 export const fromOperation = z.object({
 	from: z.number(),
@@ -53,8 +65,22 @@ export const stringField = z.enum([
 	'characters',
 	'teams',
 ])
+export type StringField = z.infer<typeof stringField>
+export const isStringField = (field: string): field is StringField =>
+	stringField.safeParse(field).success
 
-// const numberFields = z.enum(['age_rating', 'year', 'pages', 'page_count'])
+export const numberField = z.enum([
+	'age_rating',
+	'year',
+	'day',
+	'month',
+	'pages',
+	'page_count',
+	'size',
+])
+export type NumberField = z.infer<typeof numberField>
+export const isNumberField = (field: string): field is NumberField =>
+	numberField.safeParse(field).success
 
 export const filter = z
 	.object({
@@ -75,6 +101,7 @@ export const filter = z
 		},
 	)
 export type FilterSchema = z.infer<typeof filter>
+export type FilterSource = FilterSchema['source']
 
 export const intoAPIFilter = (input: z.infer<typeof filter>): MediaSmartFilter => {
 	const fieldValue = match(input.operation)
@@ -208,8 +235,11 @@ export const filterGroup = z.object({
 	filters: z.array(filter),
 	joiner: z.enum(['and', 'or', 'not']),
 })
+export type FilterGroupSchema = z.infer<typeof filterGroup>
 
-const intoFormGroup = (input: FilterGroup<MediaSmartFilter>): z.infer<typeof filterGroup> => {
+export const intoFormGroup = (
+	input: FilterGroup<MediaSmartFilter>,
+): z.infer<typeof filterGroup> => {
 	const converted = match(input)
 		.with(
 			{ and: P.array() },
@@ -301,13 +331,21 @@ export const intoAPI = ({
 	grouping,
 }: SmartListFormSchema): CreateOrUpdateSmartList => ({
 	default_grouping: grouping || null,
-	
+
 	description: description || null,
 	// default_grouping // TODO: implement this
-filters: {
+	filters: {
 		groups: filters.groups.map(intoAPIGroup),
 		joiner: filters.joiner.toUpperCase() as 'AND' | 'OR',
 	},
 	name,
 	visibility,
+})
+
+export const intoAPIFilters = ({
+	groups,
+	joiner,
+}: Pick<SmartListFormSchema, 'filters'>['filters']): SmartFilter<MediaSmartFilter> => ({
+	groups: groups.map(intoAPIGroup),
+	joiner: joiner.toUpperCase() as 'AND' | 'OR',
 })

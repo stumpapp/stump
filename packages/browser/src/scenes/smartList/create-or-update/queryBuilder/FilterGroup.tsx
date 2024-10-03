@@ -1,6 +1,5 @@
 import { Button, Card, IconButton, ToolTip } from '@stump/components'
 import { MinusCircle } from 'lucide-react'
-import React, { useCallback } from 'react'
 import { useFieldArray } from 'react-hook-form'
 
 import { FilterGroupSchema, FilterSchema, SmartListFormSchema } from '../form/newSchema'

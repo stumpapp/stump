@@ -151,6 +151,8 @@ export function FieldSelector({ groupIdx, idx }: Props) {
 	)
 }
 
+// TODO: translation key instead of hardcoded strings
+// TODO: sorted
 const sourceOptions: Record<FilterSource, { label: string; value: string }[]> = {
 	book: [
 		{ label: 'Filename', value: 'name' },
@@ -161,8 +163,35 @@ const sourceOptions: Record<FilterSource, { label: string; value: string }[]> = 
 		{ label: 'Status', value: 'status' },
 		{ label: 'Path', value: 'path' },
 		{ label: 'Pages', value: 'pages' },
+		{ label: 'Tags', value: 'tags' },
 	],
-	book_meta: [],
-	library: [],
-	series: [],
+	book_meta: [
+		{ label: 'Title', value: 'title' },
+		{ label: 'Summary', value: 'summary' },
+		{ label: 'Notes', value: 'notes' },
+		{ label: 'Genre', value: 'genre' },
+		{ label: 'Writers', value: 'writers' },
+		{ label: 'Pencillers', value: 'pencillers' },
+		{ label: 'Inkers', value: 'inkers' },
+		{ label: 'Colorists', value: 'colorists' },
+		{ label: 'Letterers', value: 'letterers' },
+		{ label: 'Editors', value: 'editors' },
+		{ label: 'Publisher', value: 'publisher' },
+		{ label: 'Colorists', value: 'colorists' },
+		{ label: 'Letterers', value: 'letterers' },
+		{ label: 'Cover Artists', value: 'cover_artists' },
+		{ label: 'Links', value: 'links' },
+		{ label: 'Characters', value: 'characters' },
+		{ label: 'Teams', value: 'teams' },
+	],
+	library: [
+		{ label: 'Name', value: 'name' },
+		{ label: 'Path', value: 'path' },
+	],
+	series: [
+		{ label: 'Name', value: 'name' },
+		{ label: 'Path', value: 'path' },
+	],
 }
+
+// TODO: series_meta: [meta_type, publisher, status, age_rating, volume]

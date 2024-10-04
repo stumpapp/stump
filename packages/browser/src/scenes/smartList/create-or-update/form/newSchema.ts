@@ -30,17 +30,21 @@ export type StringOperation = z.infer<typeof stringOperation>
 
 export const listOperation = z.enum(['any', 'none'])
 export type ListOperation = z.infer<typeof listOperation>
+export const isListOperator = (value: string): value is ListOperation =>
+	listOperation.safeParse(value).success
 
 export const numberOperation = z.enum(['gt', 'gte', 'lt', 'lte', 'not', 'range'])
 export type NumberOperation = z.infer<typeof numberOperation>
+export const isNumberOperator = (value: string): value is NumberOperation =>
+	numberOperation.safeParse(value).success
 
 export const operation = z.union([stringOperation, listOperation, numberOperation])
 export type Operation = z.infer<typeof operation>
 
 export const fromOperation = z.object({
-	from: z.number(),
+	from: z.union([z.date(), z.number()]),
 	inclusive: z.boolean().optional(),
-	to: z.number(),
+	to: z.union([z.date(), z.number()]),
 })
 
 export const stringField = z.enum([
@@ -82,12 +86,24 @@ export type NumberField = z.infer<typeof numberField>
 export const isNumberField = (field: string): field is NumberField =>
 	numberField.safeParse(field).success
 
+export const dateField = z.enum(['created_at', 'updated_at', 'completed_at'])
+export type DateField = z.infer<typeof dateField>
+export const isDateField = (field: string): field is DateField => dateField.safeParse(field).success
+
 export const filter = z
 	.object({
 		field: z.string(),
 		operation,
 		source: z.enum(['book', 'book_meta', 'series', 'library']),
-		value: z.union([z.string(), z.string().array(), z.number(), z.number().array(), fromOperation]),
+		value: z.union([
+			z.string(),
+			z.string().array(),
+			z.number(),
+			z.number().array(),
+			z.date().array(),
+			z.date(),
+			fromOperation,
+		]),
 	})
 	// strings may not use gt, gte, lt, lte, from
 	.refine(

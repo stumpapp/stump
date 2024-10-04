@@ -102,7 +102,7 @@ export function FieldSelector({ groupIdx, idx }: Props) {
 		if (source) {
 			return (
 				<button
-					className="flex h-8 w-full items-center space-x-2 text-sm"
+					className="flex w-full items-center space-x-2 text-sm"
 					onClick={() => setSource(null)}
 				>
 					<ArrowLeft className="ml-2 h-4 w-4 text-foreground-muted" />
@@ -140,7 +140,7 @@ export function FieldSelector({ groupIdx, idx }: Props) {
 					<Command.Group
 						heading={renderGroupHeader()}
 						className={cn({
-							'[&_[cmdk-group-heading]]:px-0 [&_[cmdk-group-heading]]:pb-0': !!source,
+							'[&_[cmdk-group-heading]]:px-0': !!source,
 						})}
 					>
 						{renderSource()}

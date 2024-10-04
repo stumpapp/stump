@@ -13,21 +13,36 @@ import Calendar from './Calendar'
 type DatePickerProps = {
 	label?: string
 	selected?: Date
+	placeholder?: string
+	className?: string
 	onChange: (date?: Date) => void
 	minDate?: Date
 	maxDate?: Date
+	popover?: Pick<React.ComponentProps<typeof PopoverContent>, 'align'>
 }
 
 // TODO: presets
 // TODO: width/sizes
-export function DatePicker({ label, selected, onChange, ...calendarProps }: DatePickerProps) {
+export function DatePicker({
+	label,
+	selected,
+	onChange,
+	className,
+	placeholder,
+	popover,
+	...calendarProps
+}: DatePickerProps) {
 	return (
 		<Popover>
 			<PopoverTrigger asChild>
 				<div
-					className={cn('w-[280px]', {
-						'flex flex-col gap-1.5': !!label,
-					})}
+					className={cn(
+						'w-[280px]',
+						{
+							'flex flex-col gap-1.5': !!label,
+						},
+						className,
+					)}
 				>
 					{label && <Label>{label}</Label>}
 					<Button
@@ -36,15 +51,15 @@ export function DatePicker({ label, selected, onChange, ...calendarProps }: Date
 						type="button"
 						className={cn(
 							'w-full justify-start text-left font-normal',
-							!selected && 'text-gray-500 dark:text-gray-450',
+							!selected && 'text-foreground-muted',
 						)}
 					>
 						<CalendarIcon className="mr-2 h-4 w-4" />
-						{selected ? format(selected, 'PPP') : <span>Pick a date</span>}
+						{selected ? format(selected, 'PPP') : <span>{placeholder || 'Pick a date'}</span>}
 					</Button>
 				</div>
 			</PopoverTrigger>
-			<PopoverContent className="w-auto p-0">
+			<PopoverContent className="w-auto p-0" align={popover?.align}>
 				<Calendar
 					mode="single"
 					selected={selected}

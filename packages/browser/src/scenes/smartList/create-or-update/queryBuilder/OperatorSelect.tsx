@@ -5,6 +5,7 @@ import { useFieldArray, useFormContext } from 'react-hook-form'
 import { match } from 'ts-pattern'
 
 import {
+	isDateField,
 	isNumberField,
 	isStringField,
 	ListOperation,
@@ -53,7 +54,7 @@ export default function OperatorSelect({ groupIdx, idx }: Props) {
 					() => ['contains', 'excludes', 'not'] as StringOperation[],
 				)
 				.when(
-					(field) => isNumberField(field),
+					(field) => isNumberField(field) || isDateField(field),
 					() => ['gt', 'gte', 'lt', 'lte', 'not', 'range'] as NumberOperation[],
 				)
 				.otherwise(() => [] as Operation[]),
@@ -105,7 +106,10 @@ export default function OperatorSelect({ groupIdx, idx }: Props) {
 			<Popover.Content className="mt-1 max-h-96 w-52 overflow-y-auto p-0" align="start">
 				<Command>
 					{selectGroups.map(({ label, operators }) => (
-						<Command.Group key={label} heading={label}>
+						<Command.Group
+							key={label}
+							heading={<span className="text-foreground-muted">{label}</span>}
+						>
 							{operators.map((operator) => (
 								<Command.Item
 									key={operator}

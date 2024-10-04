@@ -1,10 +1,11 @@
 import { Button, Card, IconButton, ToolTip } from '@stump/components'
-import { MinusCircle } from 'lucide-react'
+import { ArrowRight, MinusCircle } from 'lucide-react'
 import { useFieldArray } from 'react-hook-form'
 
 import { FilterGroupSchema, FilterSchema, SmartListFormSchema } from '../form/newSchema'
 import {} from '../form/schema'
 import { FieldSelector } from './FieldSelector'
+import { FilterValue } from './filterValue'
 import OperatorSelect from './OperatorSelect'
 
 type Props = {
@@ -31,12 +32,18 @@ export default function FilterGroup({ idx, group }: Props) {
 				{group.filters.map((filter, filterIndex) => {
 					return (
 						<div key={filterIndex} className="group/filter relative flex items-center p-4">
-							<div className="flex flex-1 flex-wrap items-center space-x-4">
+							<div className="flex flex-1 flex-wrap items-center gap-4">
 								<FieldSelector groupIdx={idx} idx={filterIndex} />
 								{filter.field && (
 									<>
 										<span className="text-foreground-muted">is</span>
 										<OperatorSelect groupIdx={idx} idx={filterIndex} />
+									</>
+								)}
+								{filter.operation && (
+									<>
+										<ArrowRight className="h-4 w-4 text-foreground-muted" />
+										<FilterValue groupIdx={idx} idx={filterIndex} />
 									</>
 								)}
 							</div>

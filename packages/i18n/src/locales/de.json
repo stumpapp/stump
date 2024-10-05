@@ -316,7 +316,7 @@
 				},
 				{
 					"label": "Scanning",
-					"heading": "Scanner Behavior",
+					"heading": "Verhalten beim Durchsuchen",
 					"description": "Settings related to how Stump scans this library"
 				},
 				{

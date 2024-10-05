@@ -379,7 +379,7 @@
 		},
 		"basics": {
 			"title": "Basic Information",
-			"description": "The details of this library, including its name, path, and description",
+			"description": "Die Details zu dieser Bibliothek, einschließlich Name, Pfad und Beschreibung",
 			"form": {
 				"submit": "Update library"
 			}

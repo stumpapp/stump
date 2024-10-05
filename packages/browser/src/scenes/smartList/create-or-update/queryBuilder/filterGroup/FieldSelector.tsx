@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, ChevronsUpDown } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFieldArray, useFormContext } from 'react-hook-form'
 
-import { FilterSource, SmartListFormSchema } from '../form/newSchema'
+import { FilterSource, SmartListFormSchema } from '../../form/schema'
 
 type Props = {
 	groupIdx: number

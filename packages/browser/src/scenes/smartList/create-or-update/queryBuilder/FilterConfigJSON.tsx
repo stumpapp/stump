@@ -2,7 +2,7 @@ import { Accordion, Text } from '@stump/components'
 import React, { useMemo } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
-import { FilterGroupSchema, intoAPIFilters, SmartListFormSchema } from '../form/newSchema'
+import { FilterGroupSchema, intoAPIFilters, SmartListFormSchema } from '../form/schema'
 
 export default function FilterConfigJSON() {
 	const form = useFormContext<SmartListFormSchema>()

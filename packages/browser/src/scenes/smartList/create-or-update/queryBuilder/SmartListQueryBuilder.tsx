@@ -1,32 +1,11 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, cx, Form, Tabs, Text } from '@stump/components'
-import { useForm, useWatch } from 'react-hook-form'
+import { Button, cx, Tabs, Text } from '@stump/components'
+import { useFormContext, useWatch } from 'react-hook-form'
 
-import { schema, SmartListFormSchema } from '../form/newSchema'
-import FilterGroup from './FilterGroup'
+import { SmartListFormSchema } from '../form/schema'
+import { FilterGroup } from './filterGroup'
 
 export default function SmartListQueryBuilder() {
-	const form = useForm<SmartListFormSchema>({
-		defaultValues: {
-			filters: {
-				groups: [
-					{
-						filters: [
-							{ field: 'name', operation: 'any', source: 'book', value: ['boo', 'biz'] },
-							// { field: 'name', operation: 'none', source: 'book', value: ['foo', 'bar'] },
-						],
-						joiner: 'or',
-					},
-					// {
-					// 	filters: [{ field: 'name', operation: 'contains', source: 'book', value: 'baz' }],
-					// 	joiner: 'not',
-					// },
-				],
-				joiner: 'and',
-			},
-		},
-		resolver: zodResolver(schema),
-	})
+	const form = useFormContext<SmartListFormSchema>()
 
 	const [joiner] = form.watch(['filters.joiner'])
 	const {
@@ -34,7 +13,7 @@ export default function SmartListQueryBuilder() {
 	} = useWatch({ control: form.control }) as SmartListFormSchema
 
 	return (
-		<Form form={form} onSubmit={() => {}}>
+		<>
 			<div className="flex flex-col space-y-4">
 				<div className="flex items-center space-x-3.5">
 					<Tabs variant="primary" activeOnHover value={joiner}>
@@ -42,7 +21,7 @@ export default function SmartListQueryBuilder() {
 							<Tabs.Trigger
 								value="and"
 								asChild
-								className="w-10 min-w-[unset] rounded-lg px-2"
+								className="w-8 min-w-[unset] rounded-lg px-1 text-xs"
 								onClick={() => form.setValue('filters.joiner', 'and')}
 							>
 								<Text className="cursor-pointer truncate">AND</Text>
@@ -51,7 +30,7 @@ export default function SmartListQueryBuilder() {
 							<Tabs.Trigger
 								value="or"
 								asChild
-								className="w-10 min-w-[unset] rounded-lg px-2"
+								className="w-8 min-w-[unset] rounded-lg px-1 text-xs"
 								onClick={() => form.setValue('filters.joiner', 'or')}
 							>
 								<Text className={cx('truncate', { 'cursor-pointer': true })}>OR</Text>
@@ -94,6 +73,6 @@ export default function SmartListQueryBuilder() {
 					</Button>
 				</div>
 			</div>
-		</Form>
+		</>
 	)
 }

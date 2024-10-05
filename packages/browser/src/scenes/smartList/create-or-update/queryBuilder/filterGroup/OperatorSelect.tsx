@@ -13,7 +13,7 @@ import {
 	Operation,
 	SmartListFormSchema,
 	StringOperation,
-} from '../form/newSchema'
+} from '../../form/schema'
 
 type Props = {
 	groupIdx: number
@@ -51,11 +51,11 @@ export default function OperatorSelect({ groupIdx, idx }: Props) {
 			match(fieldDef.field)
 				.when(
 					(field) => isStringField(field),
-					() => ['contains', 'excludes', 'not'] as StringOperation[],
+					() => ['contains', 'excludes', 'not', 'equals'] as StringOperation[],
 				)
 				.when(
 					(field) => isNumberField(field) || isDateField(field),
-					() => ['gt', 'gte', 'lt', 'lte', 'not', 'range'] as NumberOperation[],
+					() => ['gt', 'gte', 'lt', 'lte', 'not', 'equals', 'range'] as NumberOperation[],
 				)
 				.otherwise(() => [] as Operation[]),
 		[fieldDef],
@@ -132,13 +132,14 @@ export default function OperatorSelect({ groupIdx, idx }: Props) {
 
 const operatorGroups = {
 	list: ['any', 'none'] satisfies ListOperation[],
-	number: ['gt', 'gte', 'lt', 'lte', 'not', 'range'] satisfies NumberOperation[],
-	string: ['contains', 'excludes', 'not'] satisfies StringOperation[],
+	number: ['gt', 'gte', 'lt', 'lte', 'not', 'equals', 'range'] satisfies NumberOperation[],
+	string: ['contains', 'excludes', 'not', 'equals'] satisfies StringOperation[],
 }
 
 const operatorMap: Record<Operation, string> = {
 	any: 'any in list',
 	contains: 'contains string',
+	equals: 'equal to',
 	excludes: 'excludes string',
 	gt: 'greater than',
 	gte: 'greater than or equal to',

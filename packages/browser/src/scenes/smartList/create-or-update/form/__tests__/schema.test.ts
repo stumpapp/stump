@@ -1,6 +1,6 @@
 import { Filter, MediaSmartFilter, NumericFilter, SeriesSmartFilter } from '@stump/types'
 
-import { intoAPIFilter, intoFormFilter, intoFormGroup } from '../newSchema'
+import { intoAPIFilter, intoFormFilter, intoFormGroup } from '../schema'
 
 const stringFilters = [
 	{

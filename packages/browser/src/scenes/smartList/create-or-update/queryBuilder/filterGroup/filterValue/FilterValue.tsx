@@ -1,6 +1,6 @@
 import { cn, Input } from '@stump/components'
 import React, { useMemo } from 'react'
-import { useFieldArray, useFormContext } from 'react-hook-form'
+import { useFormContext } from 'react-hook-form'
 import { match } from 'ts-pattern'
 
 import {
@@ -8,9 +8,9 @@ import {
 	isNumberField,
 	isNumberOperator,
 	SmartListFormSchema,
-} from '../../form/newSchema'
+} from '../../../form/schema'
 import ListValue from './ListValue'
-import RangeValue from './RangeValue'
+import RangeValue, { RangeFilterDef } from './RangeValue'
 
 type Props = {
 	groupIdx: number
@@ -22,10 +22,6 @@ type FieldDef = SmartListFormSchema['filters']['groups'][number]['filters'][numb
 export default function FilterValue({ groupIdx, idx }: Props) {
 	const form = useFormContext<SmartListFormSchema>()
 
-	const { fields } = useFieldArray({
-		control: form.control,
-		name: `filters.groups.${groupIdx}.filters`,
-	})
 	const fieldDef = useMemo(
 		() => form.watch(`filters.groups.${groupIdx}.filters.${idx}`) || ({} as FieldDef),
 		[form, groupIdx, idx],
@@ -43,9 +39,9 @@ export default function FilterValue({ groupIdx, idx }: Props) {
 		.otherwise(() => 'string')
 
 	if (variant === 'list') {
-		return <ListValue />
+		return <ListValue idx={idx} />
 	} else if (variant === 'range') {
-		return <RangeValue def={fieldDef} />
+		return <RangeValue def={fieldDef as RangeFilterDef} idx={idx} />
 	}
 
 	const isNumber = isNumberField(fieldDef.field)

@@ -1,198 +1,367 @@
-// export type NumericFilter<T> = { gt: T } | { gte: T } | { lt: T } | { lte: T } | NumericRange<T>
-
-import { MediaSmartFilter, SmartFilter } from '@stump/types'
+import {
+	CreateOrUpdateSmartList,
+	FilterGroup,
+	LibrarySmartFilter,
+	MediaMetadataSmartFilter,
+	MediaSmartFilter,
+	SeriesSmartFilter,
+	SmartFilter,
+	SmartList,
+} from '@stump/types'
+import getProperty from 'lodash/get'
 import { match, P } from 'ts-pattern'
 import { z } from 'zod'
 
-// TODO: support friendly names for filter groups
+// export const operation = z.enum([
+// 	'gt',
+// 	'gte',
+// 	'lt',
+// 	'lte',
+// 	'not',
+// 	'contains',
+// 	'excludes',
+// 	'any',
+// 	'none',
+// 	'range',
+// ])
 
-// export type NumericRange<T> = { from: T; to: T; inclusive?: boolean }
-export const numericFilterSchema = z.union([
-	z.object({
-		gt: z.number(),
-	}),
-	z.object({
-		gte: z.number(),
-	}),
-	z.object({
-		lt: z.number(),
-	}),
-	z.object({
-		lte: z.number(),
-	}),
-	z.object({
-		from: z.number(),
-		inclusive: z.boolean().optional(),
-		to: z.number(),
-	}),
-])
+export const stringOperation = z.enum(['contains', 'excludes', 'not', 'equals'])
+export type StringOperation = z.infer<typeof stringOperation>
 
-// export type Filter<T> = T | { not: T } | { contains: T } | { excludes: T } | { any: T[] } | { none: T[] } | NumericFilter<T>
-export const buildFilterSchema = <T extends z.ZodTypeAny>(type: T) =>
-	z.union([
-		type,
-		z.object({
-			not: type,
-		}),
-		z.object({
-			contains: type,
-		}),
-		z.object({
-			excludes: type,
-		}),
-		z.object({
-			any: z.array(type),
-		}),
-		z.object({
-			none: z.array(type),
-		}),
-		...(type._def.typeName === 'number' ? [numericFilterSchema] : []),
-	])
+export const listOperation = z.enum(['any', 'none'])
+export type ListOperation = z.infer<typeof listOperation>
+export const isListOperator = (value: string): value is ListOperation =>
+	listOperation.safeParse(value).success
 
-export const stringFilter = buildFilterSchema(z.string())
+export const numberOperation = z.enum(['gt', 'gte', 'lt', 'lte', 'not', 'equals', 'range'])
+export type NumberOperation = z.infer<typeof numberOperation>
+export const isNumberOperator = (value: string): value is NumberOperation =>
+	numberOperation.safeParse(value).success
 
-// export type MediaSmartFilter = { name: Filter<string> } | { metadata: MediaMetadataSmartFilter } | { series: SeriesSmartFilter }
+export const operation = z.union([stringOperation, listOperation, numberOperation])
+export type Operation = z.infer<typeof operation>
 
-// export type LibrarySmartFilter = { name: Filter<string> } | { path: Filter<string> }
-export const libraryFilter = z.union([
-	z.object({
-		name: stringFilter,
-	}),
-	z.object({
-		path: stringFilter,
-	}),
-])
-
-// export type SeriesSmartFilter = { name: Filter<string> } | { library: LibrarySmartFilter }
-export const seriesFilter = z.union([
-	z.object({
-		name: stringFilter,
-	}),
-	z.object({
-		library: libraryFilter,
-	}),
-])
-
-// export type MediaMetadataSmartFilter = { publisher: Filter<string> } | { genre: Filter<string> } | { character: Filter<string> } | { colorist: Filter<string> } | { writer: Filter<string> } | { penciller: Filter<string> } | { letterer: Filter<string> } | { inker: Filter<string> } | { editor: Filter<string> } | { age_rating: Filter<number> }
-export const mediaMetadataFilter = z.union([
-	z.object({
-		publisher: stringFilter,
-	}),
-	z.object({
-		genre: stringFilter,
-	}),
-	z.object({
-		character: stringFilter,
-	}),
-	z.object({
-		colorist: stringFilter,
-	}),
-	z.object({
-		writer: stringFilter,
-	}),
-	z.object({
-		penciller: stringFilter,
-	}),
-	z.object({
-		letterer: stringFilter,
-	}),
-	z.object({
-		inker: stringFilter,
-	}),
-	z.object({
-		editor: stringFilter,
-	}),
-	z.object({
-		age_rating: numericFilterSchema,
-	}),
-])
-
-export const mediaBaseFilter = z.object({
-	name: z.lazy(() => stringFilter),
+export const fromOperation = z.object({
+	from: z.union([z.date(), z.number()]),
+	inclusive: z.boolean().optional(),
+	to: z.union([z.date(), z.number()]),
 })
-export type MediaBaseFilterSchema = z.infer<typeof mediaBaseFilter>
+export type FromOperation = z.infer<typeof fromOperation>
 
-// export type MediaSmartFilter = { name: Filter<string> } | { metadata: MediaMetadataSmartFilter } | { series: SeriesSmartFilter }
-export const mediaFilter = z
-	.union([
-		z.object({
-			name: z.lazy(() => stringFilter),
-		}),
-		z.object({
-			metadata: z.lazy(() => mediaMetadataFilter),
-		}),
-		z.object({
-			series: z.lazy(() => seriesFilter),
-		}),
-	])
-	.and(
-		z.object({
-			locked: z.boolean().optional(),
-		}),
+export const stringField = z.enum([
+	'name',
+	'title',
+	'path',
+	'description',
+	'summary',
+	'notes',
+	'genre',
+	'writers',
+	'pencillers',
+	'inkers',
+	'colorists',
+	'letterers',
+	'editors',
+	'publisher',
+	'colorists',
+	'letterers',
+	'cover_artists',
+	'links',
+	'characters',
+	'teams',
+])
+export type StringField = z.infer<typeof stringField>
+export const isStringField = (field: string): field is StringField =>
+	stringField.safeParse(field).success
+
+export const numberField = z.enum([
+	'age_rating',
+	'year',
+	'day',
+	'month',
+	'pages',
+	'page_count',
+	'size',
+])
+export type NumberField = z.infer<typeof numberField>
+export const isNumberField = (field: string): field is NumberField =>
+	numberField.safeParse(field).success
+
+export const dateField = z.enum(['created_at', 'updated_at', 'completed_at'])
+export type DateField = z.infer<typeof dateField>
+export const isDateField = (field: string): field is DateField => dateField.safeParse(field).success
+
+export const filter = z
+	.object({
+		field: z.string(),
+		operation,
+		source: z.enum(['book', 'book_meta', 'series', 'library']),
+		value: z.union([
+			z.string(),
+			z.string().array(),
+			z.number(),
+			z.number().array(),
+			z.date(),
+			fromOperation,
+		]),
+	})
+	// strings may not use gt, gte, lt, lte, from
+	.refine(
+		(input) =>
+			!(
+				stringField.safeParse(input.field).success &&
+				['gt', 'gte', 'lt', 'lte', 'from'].includes(input.operation)
+			),
+		{
+			message: 'String fields may not use gt, gte, lt, lte, from',
+		},
 	)
-export type MediaFilterSchema = z.infer<typeof mediaFilter>
+export type FilterSchema = z.infer<typeof filter>
+export type FilterSource = FilterSchema['source']
 
-export const defaultMediaFilter = mediaFilter.parse({
-	name: '',
-})
+export const intoAPIFilter = (input: z.infer<typeof filter>): MediaSmartFilter => {
+	const fieldValue = match(input.operation)
+		.with('range', () => input.value)
+		.otherwise(() => ({ [input.operation]: input.value }))
 
-// export type FilterGroup<T> = { and: T[] } | { or: T[] } | { not: T[] }
+	const converted = match(input.source)
+		.with(
+			'book',
+			() =>
+				({
+					[input.field]: fieldValue,
+				}) as MediaSmartFilter,
+		)
+		.with('book_meta', () => ({
+			metadata: {
+				[input.field]: fieldValue,
+			} as MediaMetadataSmartFilter,
+		}))
+		.with('series', () => ({
+			series: {
+				[input.field]: fieldValue,
+			} as SeriesSmartFilter,
+		}))
+		.with('library', () => ({
+			series: {
+				library: {
+					[input.field]: fieldValue,
+				},
+			} as SeriesSmartFilter,
+		}))
+		.exhaustive()
+
+	return converted
+}
+
+// FIXME: this is SUPER unsafe wrt the types...
+export const intoFormFilter = (input: MediaSmartFilter): z.infer<typeof filter> => {
+	const source = match(input)
+		.when(
+			(x) => 'metadata' in x,
+			() => 'book_meta' as const,
+		)
+		.when(
+			(x) => 'series' in x && 'library' in x.series,
+			() => 'library' as const,
+		)
+		.when(
+			(x) => 'series' in x,
+			() => 'series' as const,
+		)
+		.otherwise(() => 'book' as const)
+
+	const field = match(source)
+		.with('book', () => Object.keys(input)[0])
+		.with(
+			'book_meta',
+			() => Object.keys((input as { metadata: MediaMetadataSmartFilter }).metadata)[0],
+		)
+		.with('series', () => Object.keys((input as { series: SeriesSmartFilter }).series)[0])
+		.with(
+			'library',
+			() => Object.keys((input as { series: { library: LibrarySmartFilter } }).series.library)[0],
+		)
+		.exhaustive()
+
+	const conversion = match(source)
+		.with('book', () => {
+			const castedInput = input as MediaSmartFilter
+			const filterValue = getProperty(castedInput, field || '') // { [operation]: value }
+			const operation = 'from' in filterValue ? 'range' : Object.keys(filterValue || {})[0]
+			const value = match(operation)
+				.with('range', () => filterValue)
+				.otherwise(() => getProperty(filterValue, operation || ''))
+
+			return {
+				field,
+				operation,
+				source,
+				value,
+			}
+		})
+		.with('book_meta', () => {
+			const castedInput = input as { metadata: MediaMetadataSmartFilter } // { metadata: { [field]: { [operation]: value } } }
+			const filterValue = getProperty(castedInput.metadata, field || '') // { [operation]: value }
+			const operation = 'from' in filterValue ? 'range' : Object.keys(filterValue || {})[0]
+			const value = match(operation)
+				.with('range', () => filterValue)
+				.otherwise(() => getProperty(filterValue, operation || ''))
+
+			return {
+				field,
+				operation,
+				source,
+				value,
+			}
+		})
+		.with('series', () => {
+			const castedInput = input as { series: SeriesSmartFilter } // { series: { [field]: { [operation]: value } } }
+			const filterValue = getProperty(castedInput.series, field || '')
+			const operation = 'from' in filterValue ? 'range' : Object.keys(filterValue || {})[0]
+			const value = match(operation)
+				.with('range', () => filterValue)
+				.otherwise(() => getProperty(filterValue, operation || ''))
+
+			return {
+				field,
+				operation,
+				source,
+				value,
+			}
+		})
+		.with('library', () => {
+			const castedInput = input as { series: { library: LibrarySmartFilter } } // { series: { library: { [field]: { [operation]: value } } } }
+			const filterValue = getProperty(castedInput.series.library, field || '') // { [operation]: value }
+			const operation = 'from' in filterValue ? 'range' : Object.keys(filterValue || {})[0]
+			const value = operation === 'range' ? filterValue : getProperty(filterValue, operation || '')
+			return {
+				field,
+				operation,
+				source,
+				value,
+			}
+		})
+		.exhaustive()
+
+	return conversion as unknown as z.infer<typeof filter>
+}
+
 export const filterGroup = z.object({
-	filters: z.lazy(() => mediaFilter.array()),
-	joiner: z.union([z.literal('and'), z.literal('or'), z.literal('not')]),
+	filters: z.array(filter),
+	joiner: z.enum(['and', 'or', 'not']),
 })
 export type FilterGroupSchema = z.infer<typeof filterGroup>
 
-// export type SmartFilter<T> = { groups: FilterGroup<T>[]; joiner?: FilterJoin }
-export const filters = z.object({
-	// groups: z.array(filterGroup),
-	groups: z.lazy(() => filterGroup.array()),
-	joiner: z.union([z.literal('AND'), z.literal('OR')]),
+export const intoFormGroup = (
+	input: FilterGroup<MediaSmartFilter>,
+): z.infer<typeof filterGroup> => {
+	const converted = match(input)
+		.with(
+			{ and: P.array() },
+			({ and }) =>
+				({
+					filters: and.map(intoFormFilter),
+					joiner: 'and',
+				}) satisfies z.infer<typeof filterGroup>,
+		)
+		.with(
+			{ or: P.array() },
+			({ or }) =>
+				({ filters: or.map(intoFormFilter), joiner: 'or' }) satisfies z.infer<typeof filterGroup>,
+		)
+		.with(
+			{ not: P.array() },
+			({ not }) =>
+				({ filters: not.map(intoFormFilter), joiner: 'not' }) satisfies z.infer<typeof filterGroup>,
+		)
+		.otherwise(
+			() =>
+				({
+					filters: [],
+					joiner: 'and',
+				}) satisfies z.infer<typeof filterGroup>,
+		)
+
+	return converted
+}
+
+const intoAPIGroup = (input: z.infer<typeof filterGroup>): FilterGroup<MediaSmartFilter> => {
+	const converted = match(input)
+		.with(
+			{ filters: P.array(), joiner: 'and' },
+			({ filters }) => ({ and: filters.map(intoAPIFilter) }) as FilterGroup<MediaSmartFilter>,
+		)
+		.with(
+			{ filters: P.array(), joiner: 'or' },
+			({ filters }) => ({ or: filters.map(intoAPIFilter) }) as FilterGroup<MediaSmartFilter>,
+		)
+		.with(
+			{ filters: P.array(), joiner: 'not' },
+			({ filters }) => ({ not: filters.map(intoAPIFilter) }) as FilterGroup<MediaSmartFilter>,
+		)
+		.otherwise(() => ({ and: [] }) as FilterGroup<MediaSmartFilter>)
+
+	return converted
+}
+
+export const filterConfig = z.object({
+	groups: z.array(filterGroup),
+	joiner: z.enum(['and', 'or', 'not']),
 })
-export type FiltersSchema = z.infer<typeof filters>
+
+export const grouping = z.enum(['BY_BOOKS', 'BY_SERIES', 'BY_LIBRARY'])
 
 export const schema = z.object({
 	description: z.string().optional(),
-	filters: z.lazy(() => filters),
+	filters: filterConfig,
+	grouping: grouping.optional(),
 	name: z.string().min(1),
-	visibility: z.union([z.literal('PUBLIC'), z.literal('SHARED'), z.literal('PRIVATE')]),
+	visibility: z.enum(['PRIVATE', 'PUBLIC', 'SHARED']),
+})
+export type SmartListFormSchema = z.infer<typeof schema>
+
+export const intoForm = ({
+	name,
+	description,
+	visibility,
+	filters,
+	joiner,
+	default_grouping,
+}: SmartList): SmartListFormSchema => ({
+	description: description || undefined,
+	filters: {
+		groups: filters.groups.map(intoFormGroup),
+		joiner: joiner.toLowerCase() as 'and' | 'or' | 'not',
+	},
+	grouping: default_grouping || undefined,
+	name,
+	visibility,
 })
 
-// FIXME: I think this suffers from heavy recursive issues, zod has a guide for this:
-// https://github.com/colinhacks/zod?tab=readme-ov-file#recursive-types
-export type Schema = z.infer<typeof schema>
+export const intoAPI = ({
+	name,
+	description,
+	visibility,
+	filters,
+	grouping,
+}: SmartListFormSchema): CreateOrUpdateSmartList => ({
+	default_grouping: grouping || null,
 
-// yikes
-export const toAPIFilters = ({
-	joiner,
-	groups,
-}: Schema['filters']): SmartFilter<MediaSmartFilter> => ({
-	groups: groups.flatMap(({ filters, joiner }) => {
-		return {
-			[joiner]: filters,
-		} as Record<'and' | 'or' | 'not', MediaSmartFilter[]>
-	}),
-	joiner,
+	description: description || null,
+	// default_grouping // TODO: implement this
+	filters: {
+		groups: filters.groups.map(intoAPIGroup),
+		joiner: filters.joiner.toUpperCase() as 'AND' | 'OR',
+	},
+	name,
+	visibility,
 })
 
-// yikes
-export const fromAPIFilters = ({
+export const intoAPIFilters = ({
 	groups,
 	joiner,
-}: SmartFilter<MediaSmartFilter>): Schema['filters'] => {
-	return {
-		groups: groups.map(
-			(group) =>
-				match(group)
-					.with({ and: P.array() }, ({ and }) => ({ filters: and, joiner: 'and' }))
-					.with({ or: P.array() }, ({ or }) => ({ filters: or, joiner: 'or' }))
-					.with({ not: P.array() }, ({ not }) => ({ filters: not, joiner: 'not' }))
-					.otherwise(() => ({ filters: [], joiner: 'and' })) as {
-					filters: z.infer<typeof filters>['groups'][number]['filters']
-					joiner: 'and' | 'or' | 'not'
-				},
-		),
-
-		joiner: joiner ?? 'AND',
-	}
-}
+}: Pick<SmartListFormSchema, 'filters'>['filters']): SmartFilter<MediaSmartFilter> => ({
+	groups: groups.map(intoAPIGroup),
+	joiner: joiner.toUpperCase() as 'AND' | 'OR',
+})

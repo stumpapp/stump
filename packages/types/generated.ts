@@ -464,7 +464,7 @@ export type PatchLibraryThumbnail = { media_id: string; page: number; is_zero_ba
 
 export type CreateOrUpdateSmartList = { name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; joiner?: FilterJoin | null; default_grouping?: SmartListItemGrouping | null; visibility?: EntityVisibility | null }
 
-export type GetSmartListsParams = { all?: boolean | null; search?: string | null }
+export type GetSmartListsParams = { all?: boolean | null; mine?: boolean | null; search?: string | null }
 
 export type SmartListRelationOptions = { load_views?: boolean }
 

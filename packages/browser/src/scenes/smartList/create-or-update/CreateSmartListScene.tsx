@@ -1,7 +1,7 @@
 import { useCreateSmartList } from '@stump/client'
 import { Alert } from '@stump/components'
 import { handleApiError } from '@stump/sdk'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { Suspense, useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
@@ -52,7 +52,9 @@ export default function CreateSmartListScene() {
 					<div className="flex flex-col gap-12">
 						{createError && <Alert level="error">{createError}</Alert>}
 
-						<CreateSmartListForm onSubmit={handleSubmit} isLoading={isCreating} />
+						<Suspense>
+							<CreateSmartListForm onSubmit={handleSubmit} isLoading={isCreating} />
+						</Suspense>
 					</div>
 				</SceneContainer>
 			</SteppedFormContext.Provider>

@@ -274,7 +274,7 @@ export const intoFormGroup = (
 	return converted
 }
 
-const intoAPIGroup = (input: z.infer<typeof filterGroup>): FilterGroup<MediaSmartFilter> => {
+export const intoAPIGroup = (input: z.infer<typeof filterGroup>): FilterGroup<MediaSmartFilter> => {
 	const converted = match(input)
 		.with(
 			{ filters: P.array(), joiner: 'and' },
@@ -303,14 +303,26 @@ export type SmartListGroupBy = z.infer<typeof grouping>
 export const isGrouping = (value: string): value is SmartListGroupBy =>
 	grouping.safeParse(value).success
 
-export const schema = z.object({
-	description: z.string().optional(),
-	filters: filterConfig,
-	grouping: grouping.optional(),
-	name: z.string().min(1),
-	visibility: z.enum(['PRIVATE', 'PUBLIC', 'SHARED']),
-})
-export type SmartListFormSchema = z.infer<typeof schema>
+export const createSchema = (
+	existingNames: string[],
+	t: (key: string) => string,
+	updatingList?: SmartList,
+) => {
+	const forbiddenNames = existingNames.filter((name) => name !== updatingList?.name)
+	return z.object({
+		description: z.string().optional(),
+		filters: filterConfig,
+		grouping: grouping.optional(),
+		name: z
+			.string()
+			.min(1, t(validationKey('nameTooShort')))
+			.refine((name) => !forbiddenNames.includes(name), { message: t(validationKey('nameTaken')) }),
+		visibility: z.enum(['PRIVATE', 'PUBLIC', 'SHARED']),
+	})
+}
+const validationKey = (key: string) => `createOrUpdateSmartListForm.validation.${key}`
+
+export type SmartListFormSchema = z.infer<ReturnType<typeof createSchema>>
 
 export const intoForm = ({
 	name,

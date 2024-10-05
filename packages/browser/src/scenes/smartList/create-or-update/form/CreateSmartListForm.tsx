@@ -1,5 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useSmartListsQuery } from '@stump/client'
 import { Button, cn, Form } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import React, { useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -9,7 +11,7 @@ import { useSteppedFormContext } from '@/components/steppedForm'
 import { SmartListQueryBuilder } from '../queryBuilder'
 import AccessSettings from './AccessSettings'
 import BasicDetails from './BasicDetails'
-import { schema, SmartListFormSchema } from './schema'
+import { createSchema, SmartListFormSchema } from './schema'
 import SmartListReview from './SmartListReview'
 
 type Props = {
@@ -19,7 +21,15 @@ type Props = {
 }
 
 export default function CreateSmartListForm({ onSubmit, isLoading }: Props) {
+	const { t } = useLocaleContext()
 	const { currentStep, setStep } = useSteppedFormContext()
+
+	const { lists } = useSmartListsQuery({
+		params: {
+			mine: true,
+		},
+		suspense: true,
+	})
 
 	const form = useForm<SmartListFormSchema>({
 		defaultValues: {
@@ -29,7 +39,7 @@ export default function CreateSmartListForm({ onSubmit, isLoading }: Props) {
 			},
 			visibility: 'PRIVATE',
 		},
-		resolver: zodResolver(schema),
+		resolver: zodResolver(createSchema(lists?.map(({ name }) => name) ?? [], t)),
 	})
 
 	/**

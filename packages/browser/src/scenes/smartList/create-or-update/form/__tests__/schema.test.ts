@@ -1,6 +1,13 @@
-import { Filter, MediaSmartFilter, NumericFilter, SeriesSmartFilter } from '@stump/types'
+import { Filter, MediaSmartFilter, NumericFilter } from '@stump/types'
 
-import { intoAPIFilter, intoFormFilter, intoFormGroup } from '../schema'
+import {
+	intoAPI,
+	intoAPIFilter,
+	intoAPIGroup,
+	intoForm,
+	intoFormFilter,
+	intoFormGroup,
+} from '../schema'
 
 const stringFilters = [
 	{
@@ -361,109 +368,314 @@ describe('schema', () => {
 	})
 
 	describe('intoFormGroup', () => {
-		// String filter
-		expect(
-			intoFormGroup({
+		it('should convert basic smart filter into form group', () => {
+			// String filter
+			expect(
+				intoFormGroup({
+					and: [
+						{
+							name: {
+								any: ['foo', 'shmoo'],
+							},
+						} satisfies MediaSmartFilter,
+						{
+							name: {
+								none: ['bar', 'baz'],
+							},
+						} satisfies MediaSmartFilter,
+					],
+				}),
+			).toEqual({
+				filters: [
+					{
+						field: 'name',
+						operation: 'any',
+						source: 'book',
+						value: ['foo', 'shmoo'],
+					},
+					{
+						field: 'name',
+						operation: 'none',
+						source: 'book',
+						value: ['bar', 'baz'],
+					},
+				],
+				joiner: 'and',
+			})
+
+			// Numeric filter
+			expect(
+				intoFormGroup({
+					or: [
+						{
+							metadata: {
+								age_rating: {
+									from: 42,
+									inclusive: true,
+									to: 69,
+								},
+							},
+						} satisfies MediaSmartFilter,
+						{
+							// @ts-expect-error: I will add this TODO(smart-list): add this
+							created_at: {
+								lt: 42,
+							},
+						} satisfies MediaSmartFilter,
+					],
+				}),
+			).toEqual({
+				filters: [
+					{
+						field: 'age_rating',
+						operation: 'range',
+						source: 'book_meta',
+						value: {
+							from: 42,
+							inclusive: true,
+							to: 69,
+						},
+					},
+					{
+						field: 'created_at',
+						operation: 'lt',
+						source: 'book',
+						value: 42,
+					},
+				],
+				joiner: 'or',
+			})
+		})
+	})
+
+	describe('intoAPIGroup', () => {
+		it('should convert basic smart filter form group into API group', () => {
+			// String filter
+			expect(
+				intoAPIGroup({
+					filters: [
+						{
+							field: 'name',
+							operation: 'any',
+							source: 'book',
+							value: ['foo', 'shmoo'],
+						},
+						{
+							field: 'name',
+							operation: 'none',
+							source: 'book',
+							value: ['bar', 'baz'],
+						},
+					],
+					joiner: 'and',
+				}),
+			).toEqual({
 				and: [
 					{
 						name: {
 							any: ['foo', 'shmoo'],
 						},
-					} satisfies MediaSmartFilter,
+					},
 					{
 						name: {
 							none: ['bar', 'baz'],
 						},
-					} satisfies MediaSmartFilter,
+					},
 				],
-			}),
-		).toEqual({
-			filters: [
-				{
-					field: 'name',
-					operation: 'any',
-					source: 'book',
-					value: ['foo', 'shmoo'],
-				},
-				{
-					field: 'name',
-					operation: 'none',
-					source: 'book',
-					value: ['bar', 'baz'],
-				},
-			],
-			joiner: 'and',
-		})
+			})
 
-		// Numeric filter
-		expect(
-			intoFormGroup({
+			// Numeric filter
+			expect(
+				intoAPIGroup({
+					filters: [
+						{
+							field: 'age_rating',
+							operation: 'range',
+							source: 'book_meta',
+							value: {
+								from: 42,
+								inclusive: true,
+								to: 69,
+							},
+						},
+						{
+							field: 'created_at',
+							operation: 'lt',
+							source: 'book',
+							value: 42,
+						},
+					],
+					joiner: 'or',
+				}),
+			).toEqual({
 				or: [
 					{
 						metadata: {
 							age_rating: {
 								from: 42,
-								to: 69,
 								inclusive: true,
+								to: 69,
 							},
 						},
-					} satisfies MediaSmartFilter,
+					},
 					{
-						// @ts-expect-error: I will add this TODO(smart-list): add this
 						created_at: {
 							lt: 42,
 						},
-					} satisfies MediaSmartFilter,
-				],
-			}),
-		).toEqual({
-			filters: [
-				{
-					field: 'age_rating',
-					operation: 'range',
-					source: 'book_meta',
-					value: {
-						from: 42,
-						to: 69,
-						inclusive: true,
 					},
-				},
-				{
-					field: 'created_at',
-					operation: 'lt',
-					source: 'book',
-					value: 42,
-				},
-			],
-			joiner: 'or',
+				],
+			})
 		})
 	})
 
-	describe('intoAPIGroup', () => {})
+	describe('intoForm', () => {
+		it('should convert a smart filter into a form', () => {
+			expect(
+				intoForm({
+					default_grouping: 'BY_SERIES',
+					description: 'baz',
+					filters: {
+						groups: [
+							{
+								and: [
+									{
+										name: {
+											any: ['foo', 'shmoo'],
+										},
+									},
+									{
+										name: {
+											none: ['bar', 'baz'],
+										},
+									},
+								],
+							},
+							{
+								or: [
+									// @ts-expect-error: I will add this
+									{ created_at: { lt: 42 } },
+								],
+							},
+						],
+						joiner: 'OR',
+					},
+					id: 'foo',
+					joiner: 'AND',
+					name: 'bar',
+					visibility: 'PUBLIC',
+				}),
+			).toEqual({
+				description: 'baz',
+				filters: {
+					groups: [
+						{
+							filters: [
+								{
+									field: 'name',
+									operation: 'any',
+									source: 'book',
+									value: ['foo', 'shmoo'],
+								},
+								{
+									field: 'name',
+									operation: 'none',
+									source: 'book',
+									value: ['bar', 'baz'],
+								},
+							],
+							joiner: 'and',
+						},
+						{
+							filters: [
+								{
+									field: 'created_at',
+									operation: 'lt',
+									source: 'book',
+									value: 42,
+								},
+							],
+							joiner: 'or',
+						},
+					],
+					joiner: 'and',
+				},
+				grouping: 'BY_SERIES',
+				name: 'bar',
+				visibility: 'PUBLIC',
+			})
+		})
+	})
 
-	describe('intoForm', () => {})
-
-	describe('intoAPI', () => {})
+	describe('intoAPI', () => {
+		it('should convert a form representation into an API representation', () => {
+			expect(
+				intoAPI({
+					description: 'baz',
+					filters: {
+						groups: [
+							{
+								filters: [
+									{
+										field: 'name',
+										operation: 'any',
+										source: 'book',
+										value: ['foo', 'shmoo'],
+									},
+									{
+										field: 'name',
+										operation: 'none',
+										source: 'book',
+										value: ['bar', 'baz'],
+									},
+								],
+								joiner: 'and',
+							},
+							{
+								filters: [
+									{
+										field: 'created_at',
+										operation: 'lt',
+										source: 'book',
+										value: 42,
+									},
+								],
+								joiner: 'or',
+							},
+						],
+						joiner: 'and',
+					},
+					grouping: 'BY_SERIES',
+					name: 'bar',
+					visibility: 'PUBLIC',
+				}),
+			).toEqual({
+				default_grouping: 'BY_SERIES',
+				description: 'baz',
+				filters: {
+					groups: [
+						{
+							and: [
+								{
+									name: {
+										any: ['foo', 'shmoo'],
+									},
+								},
+								{
+									name: {
+										none: ['bar', 'baz'],
+									},
+								},
+							],
+						},
+						{
+							or: [{ created_at: { lt: 42 } }],
+						},
+					],
+					joiner: 'AND',
+				},
+				name: 'bar',
+				visibility: 'PUBLIC',
+			})
+		})
+	})
 })
-
-// TODO(smart-list): finish tests
-
-// 	const createStringGroups = (field: string): FilterGroup<MediaSmartFilter>[] => {
-// 		const t = stringFilters
-// 			.map((filter) =>
-// 				(['and', 'or', 'not'] as const)
-// 					.map(
-// 						(type) =>
-// 							({
-// 								[type]: [
-// 									{
-// 										[field ]: filter,
-// 									},
-// 								],
-// 							}) satisfies FilterGroup<MediaSmartFilter>,
-// 					)
-// 					.flat(),
-// 			)
-// 			.flat()
-// 	}
-// })

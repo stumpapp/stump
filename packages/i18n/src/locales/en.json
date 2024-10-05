@@ -602,6 +602,10 @@
 		}
 	},
 	"createOrUpdateSmartListForm": {
+		"validation": {
+			"nameTooShort": "Name must be at least 2 characters",
+			"nameTaken": "Cannot use this name"
+		},
 		"fields": {
 			"name": {
 				"label": "Name",

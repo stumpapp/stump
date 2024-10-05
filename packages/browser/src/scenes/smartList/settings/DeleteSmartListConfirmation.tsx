@@ -1,6 +1,6 @@
-import { isAxiosError } from '@stump/sdk'
 import { useDeleteSmartListMutation } from '@stump/client'
 import { ConfirmationModal } from '@stump/components'
+import { isAxiosError } from '@stump/sdk'
 import React from 'react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'

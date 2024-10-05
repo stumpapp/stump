@@ -49,4 +49,5 @@ pub mod macros {
 	pub use super::metadata::prisma_macros::*;
 	pub use super::series::prisma_macros::*;
 	pub use super::smart_list::prisma_macros::*;
+	pub use super::user::prisma_macros::*;
 }

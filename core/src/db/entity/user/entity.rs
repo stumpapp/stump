@@ -9,7 +9,8 @@ use crate::{
 };
 
 use super::{
-	AgeRestriction, LoginActivity, PermissionSet, UserPermission, UserPreferences,
+	prisma_macros::user_basic_profile_select, AgeRestriction, LoginActivity,
+	PermissionSet, UserPermission, UserPreferences,
 };
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
@@ -68,6 +69,67 @@ impl User {
 impl Cursor for User {
 	fn cursor(&self) -> String {
 		self.id.clone()
+	}
+}
+
+/// A partial representation of a user, which does not include all fields. This should be
+/// exposed to users within the system who do not have the necessary permissions to see
+/// all fields of a user.
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+pub struct PartialUser {
+	/// The ID of the user
+	pub id: String,
+	/// The username of the user.
+	pub username: String,
+	/// A boolean to indicate if the user is the server owner
+	pub is_server_owner: bool,
+	/// The URL of the user's avatar, if any
+	pub avatar_url: Option<String>,
+	/// A timestamp of when the user was created, in RFC3339 format
+	pub created_at: DateTime<FixedOffset>,
+	// TODO: other "public-facing" fields which are opt-in social features (e.g. currently reading, etc.)
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+#[serde(untagged)]
+pub enum UserProfile {
+	Full(User),
+	Partial(PartialUser),
+}
+
+impl From<User> for PartialUser {
+	fn from(user: User) -> PartialUser {
+		PartialUser {
+			id: user.id,
+			username: user.username,
+			is_server_owner: user.is_server_owner,
+			avatar_url: user.avatar_url,
+			created_at: user.created_at,
+		}
+	}
+}
+
+impl From<user::Data> for PartialUser {
+	fn from(data: user::Data) -> PartialUser {
+		PartialUser {
+			id: data.id,
+			username: data.username,
+			is_server_owner: data.is_server_owner,
+			avatar_url: data.avatar_url,
+			created_at: data.created_at,
+		}
+	}
+}
+
+impl From<user_basic_profile_select::Data> for PartialUser {
+	fn from(data: user_basic_profile_select::Data) -> PartialUser {
+		PartialUser {
+			id: data.id,
+			username: data.username,
+			is_server_owner: data.is_server_owner,
+			avatar_url: data.avatar_url,
+			created_at: data.created_at,
+		}
 	}
 }
 

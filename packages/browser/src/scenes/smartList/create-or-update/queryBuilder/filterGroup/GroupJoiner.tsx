@@ -60,4 +60,4 @@ export default function GroupJoiner() {
 const LOCALE_KEY = 'createOrUpdateSmartListForm.fields.queryBuilder.groupJoiner'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`
 const getJoinerKey = (joiner: FilterGroupJoiner, key: string) =>
-	getKey(`${joiner.toLowerCase()}.${key}`)
+	getKey(`${joiner?.toLowerCase()}.${key}`)

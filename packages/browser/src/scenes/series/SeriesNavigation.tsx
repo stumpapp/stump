@@ -79,8 +79,8 @@ export default function SeriesNavigation() {
 						className={cn(
 							'whitespace-nowrap border-b-2 px-1 py-3 text-sm font-medium',
 							{
-								'border-transparent text-foreground-muted hover:border-edge': !tab.isActive,
 								'border-edge-brand text-foreground-brand': tab.isActive,
+								'border-transparent text-foreground-muted hover:border-edge': !tab.isActive,
 							},
 							// {
 							// 	'pointer-events-none !text-opacity-40': tab.disabled,

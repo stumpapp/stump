@@ -1,6 +1,6 @@
-import { handleApiError } from '@stump/api'
 import { useDeleteBookClub } from '@stump/client'
 import { Alert, ConfirmationModal } from '@stump/components'
+import { handleApiError } from '@stump/sdk'
 import { useNavigate } from 'react-router'
 
 import paths from '../../paths'

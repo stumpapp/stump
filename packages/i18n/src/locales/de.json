@@ -260,7 +260,7 @@
 					"disclaimer": "These features involve additional file reads which may slow down the scan process"
 				},
 				"processMetadata": {
-					"label": "Process metadata",
+					"label": "Metadaten verarbeiten",
 					"description": "Extract any metadata from library files and store the results in the database"
 				},
 				"generateFileHashes": {
@@ -289,7 +289,7 @@
 					},
 					"seriesPriority": {
 						"label": "Series priority",
-						"description": "Each folder at any level recursively is a single series"
+						"description": "Jeder Ordner auf jeder Ebene enthält eine einzelne Serie"
 					}
 				}
 			}

@@ -3,12 +3,12 @@ use specta::Type;
 use std::collections::HashMap;
 use utoipa::ToSchema;
 
-use crate::db::entity::User;
+use crate::db::entity::PartialUser;
 
 use super::{
 	prisma_macros::{
-		book_club_member_and_schedule_include, book_club_member_user_username,
-		book_club_with_books_include,
+		book_club_include_member_with_user, book_club_member_and_schedule_include,
+		book_club_member_with_user, book_club_with_books_include,
 	},
 	BookClub,
 };
@@ -25,7 +25,7 @@ pub struct BookClubMember {
 	pub role: BookClubMemberRole,
 
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub user: Option<User>,
+	pub user: Option<PartialUser>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub user_id: Option<String>,
 	#[serde(skip_serializing_if = "Option::is_none")]
@@ -104,17 +104,46 @@ impl From<BookClubMemberRole> for i32 {
 	}
 }
 
-impl From<book_club_member_user_username::members::Data> for BookClubMember {
-	fn from(data: book_club_member_user_username::members::Data) -> BookClubMember {
+impl From<book_club_include_member_with_user::members::user::Data> for PartialUser {
+	fn from(
+		data: book_club_include_member_with_user::members::user::Data,
+	) -> PartialUser {
+		PartialUser {
+			id: data.id,
+			username: data.username,
+			is_server_owner: data.is_server_owner,
+			avatar_url: data.avatar_url,
+			created_at: data.created_at,
+		}
+	}
+}
+
+impl From<book_club_include_member_with_user::members::Data> for BookClubMember {
+	fn from(data: book_club_include_member_with_user::members::Data) -> BookClubMember {
 		BookClubMember {
 			id: data.id,
-			display_name: data.display_name.or(Some(data.user.username)),
+			display_name: data.display_name.or(Some(data.user.username.clone())),
 			is_creator: data.is_creator,
 			hide_progress: data.hide_progress,
 			private_membership: data.private_membership,
 			role: data.role.into(),
 			user_id: Some(data.user_id),
+			user: Some(PartialUser::from(data.user)),
 			..Default::default()
+		}
+	}
+}
+
+impl From<book_club_member_and_schedule_include::members::user::Data> for PartialUser {
+	fn from(
+		data: book_club_member_and_schedule_include::members::user::Data,
+	) -> PartialUser {
+		PartialUser {
+			id: data.id,
+			username: data.username,
+			is_server_owner: data.is_server_owner,
+			avatar_url: data.avatar_url,
+			created_at: data.created_at,
 		}
 	}
 }
@@ -125,13 +154,54 @@ impl From<book_club_member_and_schedule_include::members::Data> for BookClubMemb
 	) -> BookClubMember {
 		BookClubMember {
 			id: data.id,
-			display_name: data.display_name.or(Some(data.user.username)),
+			display_name: data.display_name.or(Some(data.user.username.clone())),
 			is_creator: data.is_creator,
 			hide_progress: data.hide_progress,
 			private_membership: data.private_membership,
 			role: data.role.into(),
 			user_id: Some(data.user_id),
+			user: Some(PartialUser::from(data.user)),
 			..Default::default()
+		}
+	}
+}
+
+impl From<book_club_member_with_user::user::Data> for PartialUser {
+	fn from(data: book_club_member_with_user::user::Data) -> PartialUser {
+		PartialUser {
+			id: data.id,
+			username: data.username,
+			is_server_owner: data.is_server_owner,
+			avatar_url: data.avatar_url,
+			created_at: data.created_at,
+		}
+	}
+}
+
+impl From<book_club_member_with_user::Data> for BookClubMember {
+	fn from(data: book_club_member_with_user::Data) -> BookClubMember {
+		BookClubMember {
+			id: data.id,
+			display_name: data.display_name.or(Some(data.user.username.clone())),
+			is_creator: data.is_creator,
+			hide_progress: data.hide_progress,
+			private_membership: data.private_membership,
+			role: data.role.into(),
+			user_id: Some(data.user_id),
+			user: Some(PartialUser::from(data.user)),
+			..Default::default()
+		}
+	}
+}
+
+impl From<book_club_with_books_include::members::user::Data> for PartialUser {
+	fn from(data: book_club_with_books_include::members::user::Data) -> PartialUser {
+		PartialUser {
+			id: data.id,
+			username: data.username,
+			is_server_owner: data.is_server_owner,
+			avatar_url: data.avatar_url,
+			created_at: data.created_at,
 		}
 	}
 }
@@ -140,12 +210,13 @@ impl From<book_club_with_books_include::members::Data> for BookClubMember {
 	fn from(data: book_club_with_books_include::members::Data) -> BookClubMember {
 		BookClubMember {
 			id: data.id,
-			display_name: data.display_name.or(Some(data.user.username)),
+			display_name: data.display_name.or(Some(data.user.username.clone())),
 			is_creator: data.is_creator,
 			hide_progress: data.hide_progress,
 			private_membership: data.private_membership,
 			role: data.role.into(),
 			user_id: Some(data.user_id),
+			user: Some(PartialUser::from(data.user)),
 			..Default::default()
 		}
 	}

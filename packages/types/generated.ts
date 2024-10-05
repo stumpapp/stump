@@ -225,21 +225,25 @@ export type SmartListView = ({ book_columns: ReactTableColumnSort[]; group_colum
 
 export type BookClub = { id: string; name: string; description: string | null; emoji: string | null; is_private: boolean; created_at: string; member_role_spec: BookClubMemberRoleSpec; members?: BookClubMember[] | null; schedule?: BookClubSchedule | null }
 
-export type BookClubMember = { id: string; display_name?: string | null; is_creator: boolean; hide_progress: boolean; private_membership: boolean; role: BookClubMemberRole; user?: User | null; user_id?: string | null; book_club?: BookClub | null }
+export type BookClubMember = { id: string; display_name?: string | null; is_creator: boolean; hide_progress: boolean; private_membership: boolean; role: BookClubMemberRole; user?: PartialUser | null; user_id?: string | null; book_club?: BookClub | null }
 
 export type BookClubMemberRole = "MEMBER" | "MODERATOR" | "ADMIN" | "CREATOR"
 
 export type BookClubMemberRoleSpec = Record<BookClubMemberRole, string>
 
-export type BookClubSchedule = { default_interval_days: number | null; books?: BookClubBook[] | null }
+export type BookClubSchedule = { default_interval_days?: number | null; books?: BookClubBook[] | null }
 
-export type BookClubBook = { id: string; start_at: string; end_at: string; discussion_duration_days: number; title?: string | null; author?: string | null; url?: string | null; book_entity?: Media | null; chat_board?: BookClubChatBoard | null }
+export type BookClubExternalBook = { title: string; author: string; url?: string | null; image_url?: string | null }
 
-export type BookClubChatBoard = { id: string; messages: BookClubChatMessage[] | null }
+export type BookClubBookDetails = ({ __type: "stored" } & Media) | ({ __type: "external" } & BookClubExternalBook)
 
-export type BookClubChatMessage = { id: string; content: string; timestamp: string; is_top_message: boolean; child_messages?: BookClubChatMessage[] | null; likes?: BookClubChatMessageLike[] | null; member?: BookClubMember | null }
+export type BookClubBook = { id: string; start_at: string; end_at: string; discussion_duration_days?: number | null; book?: BookClubBookDetails | null; discussion?: BookClubDiscussion | null }
 
-export type BookClubChatMessageLike = { id: string; timestamp: string; liked_by?: BookClubMember | null }
+export type BookClubDiscussion = { id: string; messages: BookClubDiscussionMessage[] | null }
+
+export type BookClubDiscussionMessage = { id: string; content: string; timestamp: string; is_top_message: boolean; child_messages?: BookClubDiscussionMessage[] | null; likes?: BookClubDiscussionMessageLike[] | null; member?: BookClubMember | null }
+
+export type BookClubDiscussionMessageLike = { id: string; timestamp: string; liked_by?: BookClubMember | null }
 
 export type BookClubInvitation = { id: string; user?: User | null; book_club?: BookClub | null }
 
@@ -426,11 +430,11 @@ export type UpdateSchedulerConfig = { interval_secs: number | null; excluded_lib
 
 export type GetBookClubsParams = { all?: boolean }
 
-export type CreateBookClub = { name: string; is_private?: boolean; member_role_spec: BookClubMemberRoleSpec | null; creator_hide_progress?: boolean; creator_display_name: string | null }
+export type CreateBookClub = { name: string; is_private?: boolean; member_role_spec?: BookClubMemberRoleSpec | null; creator_hide_progress?: boolean; creator_display_name?: string | null }
 
-export type UpdateBookClub = { name: string | null; description: string | null; is_private: boolean | null; member_role_spec: BookClubMemberRoleSpec | null; emoji: string | null }
+export type UpdateBookClub = { name?: string | null; description?: string | null; is_private?: boolean | null; member_role_spec?: BookClubMemberRoleSpec | null; emoji?: string | null }
 
-export type CreateBookClubInvitation = { user_id: string; role: BookClubMemberRole | null }
+export type CreateBookClubInvitation = { user_id: string; role?: BookClubMemberRole | null }
 
 export type BookClubInvitationAnswer = { accept: boolean; member_details: CreateBookClubMember | null }
 
@@ -446,11 +450,11 @@ export type UpdateBookClubMember = { display_name: string | null; private_member
  * 
  * This provides some flexibility for book clubs to add books that perhaps are not on the server
  */
-export type CreateBookClubScheduleBookOption = { id: string } | { title: string; author: string; url: string | null }
+export type CreateBookClubScheduleBookOption = { id: string } | BookClubExternalBook
 
-export type CreateBookClubScheduleBook = { book: CreateBookClubScheduleBookOption; start_at: string | null; end_at: string | null; discussion_duration_days: number | null }
+export type CreateBookClubScheduleBook = { book: CreateBookClubScheduleBookOption; start_at?: string | null; end_at?: string | null; discussion_duration_days?: number | null }
 
-export type CreateBookClubSchedule = { default_interval_days: number | null; books: CreateBookClubScheduleBook[] }
+export type CreateBookClubSchedule = { default_interval_days?: number | null; books: CreateBookClubScheduleBook[] }
 
 export type PatchMediaThumbnail = { page: number; is_zero_based?: boolean | null }
 

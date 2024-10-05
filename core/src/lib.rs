@@ -424,13 +424,19 @@ mod tests {
 			.as_bytes(),
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<BookClubSchedule>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<BookClubBook>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<BookClubChatBoard>()?).as_bytes())?;
 		file.write_all(
-			format!("{}\n\n", ts_export::<BookClubChatMessage>()?).as_bytes(),
+			format!("{}\n\n", ts_export::<BookClubExternalBook>()?).as_bytes(),
 		)?;
 		file.write_all(
-			format!("{}\n\n", ts_export::<BookClubChatMessageLike>()?).as_bytes(),
+			format!("{}\n\n", ts_export::<BookClubBookDetails>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<BookClubBook>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<BookClubDiscussion>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<BookClubDiscussionMessage>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<BookClubDiscussionMessageLike>()?).as_bytes(),
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<BookClubInvitation>()?).as_bytes())?;
 

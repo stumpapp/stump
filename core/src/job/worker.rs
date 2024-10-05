@@ -226,7 +226,8 @@ impl Worker {
 		config: Arc<StumpConfig>,
 		core_event_tx: broadcast::Sender<CoreEvent>,
 		job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
-	) -> Result<(Self, WorkerCtx, async_channel::Receiver<WorkerStatusEvent>), JobError> {
+	) -> Result<(Self, WorkerCtx, async_channel::Receiver<WorkerStatusEvent>), JobError>
+	{
 		let (commands_tx, commands_rx) = async_channel::unbounded::<WorkerCommand>();
 		let (status_tx, status_rx) = async_channel::unbounded::<WorkerStatusEvent>();
 

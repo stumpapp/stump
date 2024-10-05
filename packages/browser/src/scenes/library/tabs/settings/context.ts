@@ -1,7 +1,8 @@
 import { UpdateLibrary } from '@stump/types'
 import { createContext, useContext } from 'react'
 
-import { noop } from '../../../../utils/misc'
+import { noop } from '@/utils/misc'
+
 import { useLibraryContext } from '../../context'
 
 export type ILibraryManagementContext = {

@@ -1,3 +1,4 @@
+use prisma_client_rust::chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
@@ -9,7 +10,7 @@ use crate::{
 
 use super::{
 	prisma_macros::{
-		book_club_member_and_schedule_include, book_club_member_user_username,
+		book_club_include_member_with_user, book_club_member_and_schedule_include,
 		book_club_with_books_include,
 	},
 	BookClubMember, BookClubMemberRoleSpec, BookClubSchedule,
@@ -22,8 +23,7 @@ pub struct BookClub {
 	description: Option<String>,
 	emoji: Option<String>,
 	is_private: bool,
-	// TODO(specta): replace with DateTime<FixedOffset>
-	created_at: String,
+	created_at: DateTime<FixedOffset>,
 	member_role_spec: BookClubMemberRoleSpec,
 
 	#[serde(skip_serializing_if = "Option::is_none")]
@@ -70,7 +70,7 @@ impl From<book_club::Data> for BookClub {
 			description: data.description,
 			emoji: data.emoji,
 			is_private: data.is_private,
-			created_at: data.created_at.to_rfc3339(),
+			created_at: data.created_at,
 			members,
 			schedule,
 			member_role_spec,
@@ -78,8 +78,8 @@ impl From<book_club::Data> for BookClub {
 	}
 }
 
-impl From<book_club_member_user_username::Data> for BookClub {
-	fn from(data: book_club_member_user_username::Data) -> BookClub {
+impl From<book_club_include_member_with_user::Data> for BookClub {
+	fn from(data: book_club_include_member_with_user::Data) -> BookClub {
 		let members = data
 			.members
 			.into_iter()
@@ -96,7 +96,7 @@ impl From<book_club_member_user_username::Data> for BookClub {
 			description: data.description,
 			emoji: data.emoji,
 			is_private: data.is_private,
-			created_at: data.created_at.to_rfc3339(),
+			created_at: data.created_at,
 			members: Some(members),
 			member_role_spec,
 			..Default::default()
@@ -121,7 +121,7 @@ impl From<book_club_member_and_schedule_include::Data> for BookClub {
 			name: data.name,
 			description: data.description,
 			emoji: data.emoji,
-			created_at: data.created_at.to_rfc3339(),
+			created_at: data.created_at,
 			is_private: data.is_private,
 			members: Some(members),
 			member_role_spec,
@@ -150,7 +150,7 @@ impl From<book_club_with_books_include::Data> for BookClub {
 			description: data.description,
 			emoji: data.emoji,
 			is_private: data.is_private,
-			created_at: data.created_at.to_rfc3339(),
+			created_at: data.created_at,
 			members: Some(members),
 			schedule,
 			member_role_spec,

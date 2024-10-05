@@ -68,10 +68,8 @@
 		},
 		"nextInSeries": "Next in Series"
 	},
-	"createBookClubScene": {
-		"heading": "Create a new book club",
-		"subtitle": "You can create a private book club a select few, or make it public for anyone on the server to join",
-		"form": {
+	"createOrUpdateBookClubForm": {
+		"fields": {
 			"name": {
 				"label": "Name",
 				"placeholder": "My book club",
@@ -113,20 +111,123 @@
 					"description": "The name of the creator role for your book club. This is you!"
 				}
 			},
-			"creator_preferences": {
-				"heading": "Membership",
-				"subtitle": "Preferences for your own membership in the book club",
-				"creator_display_name": {
+			"membershipOptions": {
+				"displayName": {
 					"label": "Display Name",
 					"placeholder": "oromei",
 					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
 				},
-				"creator_hide_progress": {
+				"hideProgress": {
 					"label": "Hide Progress",
 					"description": "If enabled, your read progress will be hidden from other members of the book club"
 				}
+			}
+		},
+		"validation": {
+			"missingName": "Name is required",
+			"alreadyTaken": "is already taken"
+		}
+	},
+	"createBookClubScene": {
+		"heading": "Create a new book club",
+		"subtitle": "You can create a private book club a select few, or make it public for anyone on the server to join",
+		"form": {
+			"stepLabel": "Step",
+			"steps": [
+				{
+					"label": "Basics",
+					"heading": "Basic Information",
+					"description": "The details of the club, including its name and description"
+				},
+				{
+					"label": "Roles",
+					"heading": "Roles",
+					"description": "Customize the roles in your book club"
+				},
+				{
+					"label": "Membership",
+					"heading": "Membership Preferences",
+					"description": "Additional options for your book club"
+				},
+				{
+					"label": "Review",
+					"heading": "Review",
+					"description": "Review your club settings before creating it"
+				}
+			],
+			"review": {
+				"yes": "Yes",
+				"no": "No",
+				"none": "None",
+				"labels": {
+					"name": "Name",
+					"description": "Description"
+				}
 			},
 			"submit": "Create Book Club"
+		}
+	},
+	"bookClubSettingsScene": {
+		"sidebar": {
+			"basics": "Basics",
+			"members": {
+				"members": "Members",
+				"roles": "Roles",
+				"label": "Membership"
+			},
+			"scheduling": {
+				"scheduler": "Scheduler",
+				"options": "Options",
+				"label": "Scheduling"
+			},
+			"danger-zone": {
+				"delete": "Deletion",
+				"label": "Danger Zone"
+			}
+		},
+		"basics": {
+			"title": "Basic Information",
+			"description": "The details of this book club, including its name and description",
+			"form": {
+				"submit": "Update club"
+			}
+		},
+		"members": {
+			"title": "Members",
+			"description": "Manage the members of this book club",
+			"sections": {}
+		},
+		"roles": {
+			"title": "Roles",
+			"description": "Customize the roles in this book club",
+			"sections": {
+				"roleMappings": {
+					"heading": "Existing role mappings",
+					"description": "The current role mappings for this book club"
+				}
+			}
+		},
+		"scheduling/scheduler": {
+			"title": "Scheduler",
+			"description": "Create and manage the schedule readings for this book club"
+		},
+		"scheduling/options": {
+			"title": "Options",
+			"description": "Additional options for this book club's scheduling"
+		},
+		"danger-zone/delete": {
+			"title": "Deletion Actions",
+			"description": "Permanently delete this book club and all of its contents or certain resources",
+			"sections": {
+				"deleteClub": {
+					"heading": "Delete club",
+					"description": [
+						"Permanently delete this book club and all its contents.",
+						"This action cannot be undone"
+					],
+					"trigger": "Delete club"
+				}
+			}
 		}
 	},
 	"createOrUpdateLibraryForm": {

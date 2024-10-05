@@ -239,6 +239,7 @@ export const filterGroup = z.object({
 	joiner: z.enum(['and', 'or', 'not']),
 })
 export type FilterGroupSchema = z.infer<typeof filterGroup>
+export type FilterGroupJoiner = FilterGroupSchema['joiner']
 
 export const intoFormGroup = (
 	input: FilterGroup<MediaSmartFilter>,

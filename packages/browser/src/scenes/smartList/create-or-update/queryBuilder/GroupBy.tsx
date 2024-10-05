@@ -23,7 +23,7 @@ export default function GroupBy() {
 			<Label>Group by</Label>
 			<div>
 				<NativeSelect
-					className="w-[unset]"
+					className="h-8 w-[unset] py-0"
 					options={[
 						{
 							label: 'None',

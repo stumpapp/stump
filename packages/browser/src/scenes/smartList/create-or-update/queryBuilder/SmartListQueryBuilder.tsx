@@ -1,4 +1,5 @@
 import { Button, cx, Tabs, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useFormContext, useWatch } from 'react-hook-form'
 
 import { SmartListFormSchema } from '../form/schema'
@@ -13,6 +14,7 @@ export default function SmartListQueryBuilder() {
 	const {
 		filters: { groups },
 	} = useWatch({ control: form.control }) as SmartListFormSchema
+	const { t } = useLocaleContext()
 
 	return (
 		<>
@@ -28,7 +30,7 @@ export default function SmartListQueryBuilder() {
 								className="w-8 min-w-[unset] rounded-lg px-1 text-xs"
 								onClick={() => form.setValue('filters.joiner', 'and')}
 							>
-								<Text className="cursor-pointer truncate">AND</Text>
+								<Text className="cursor-pointer truncate">{t(getKey('rootJoiner.and.label'))}</Text>
 							</Tabs.Trigger>
 
 							<Tabs.Trigger
@@ -37,22 +39,22 @@ export default function SmartListQueryBuilder() {
 								className="w-8 min-w-[unset] rounded-lg px-1 text-xs"
 								onClick={() => form.setValue('filters.joiner', 'or')}
 							>
-								<Text className={cx('truncate', { 'cursor-pointer': true })}>OR</Text>
+								<Text className={cx('truncate', { 'cursor-pointer': true })}>
+									{t(getKey('rootJoiner.or.label'))}
+								</Text>
 							</Tabs.Trigger>
 						</Tabs.List>
 					</Tabs>
 
 					<Text variant="muted" size="sm">
-						{joiner === 'and'
-							? 'All filter groups must be true for a book to be matched'
-							: 'Any filter group must be true for a book to be matched'}
+						{t(getKey(`rootJoiner.${joiner.toLowerCase()}.description`))}
 					</Text>
 				</div>
 
 				<div className="relative ml-4 flex flex-col space-y-8 border-l border-l-edge px-2 pt-4">
 					{groups.length === 0 && (
 						<div className="ml-4 flex max-w-sm items-center justify-center rounded-lg border border-dashed border-edge p-4">
-							<Text variant="muted">Add a group to get started</Text>
+							<Text variant="muted">{t(getKey('filters.emptyState'))}</Text>
 						</div>
 					)}
 					{groups.map((group, index) => (
@@ -73,10 +75,13 @@ export default function SmartListQueryBuilder() {
 							])
 						}}
 					>
-						Add group
+						{t(getKey('filters.actions.addGroup'))}
 					</Button>
 				</div>
 			</div>
 		</>
 	)
 }
+
+const LOCALE_KEY = 'createOrUpdateSmartListForm.fields.queryBuilder'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`

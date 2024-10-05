@@ -67,7 +67,7 @@ export default function CreateSmartListForm({ onSubmit, isLoading }: Props) {
 				return (
 					<>
 						<BasicDetails />
-						<AccessSettings />
+						<AccessSettings isCreating />
 
 						<div className="mt-6 flex w-full md:max-w-sm">
 							<Button

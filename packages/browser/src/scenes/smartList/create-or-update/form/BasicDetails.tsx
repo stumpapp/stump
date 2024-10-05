@@ -1,4 +1,5 @@
 import { Input, TextArea } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import React from 'react'
 import { useFormContext } from 'react-hook-form'
 
@@ -6,25 +7,27 @@ import { SmartListFormSchema } from './schema'
 
 type SubSchema = Pick<SmartListFormSchema, 'name' | 'description'>
 
-type Props = {
-	isUpdate?: boolean
-}
-export default function BasicDetails({ isUpdate }: Props) {
+export default function BasicDetails() {
 	const form = useFormContext<SubSchema>()
+
+	const { t } = useLocaleContext()
 
 	return (
 		<div className="flex flex-col gap-y-6">
 			<Input
-				label="Name"
 				variant="primary"
-				description={!isUpdate ? 'Must be unique, but can be changed later' : undefined}
+				label={t(getKey('name.label'))}
+				description={t(getKey('name.description'))}
+				placeholder={t(getKey('name.placeholder'))}
 				errorMessage={form.formState.errors.name?.message}
 				{...form.register('name')}
 				data-1p-ignore
 			/>
 
 			<TextArea
-				label="Description"
+				label={t(getKey('description.label'))}
+				description={t(getKey('description.description'))}
+				placeholder={t(getKey('description.placeholder'))}
 				variant="primary"
 				className="md:w-3/5"
 				{...form.register('description')}
@@ -32,3 +35,6 @@ export default function BasicDetails({ isUpdate }: Props) {
 		</div>
 	)
 }
+
+const LOCALE_KEY = 'createOrUpdateSmartListForm.fields'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`

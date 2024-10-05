@@ -59,7 +59,11 @@ describe('createOrUpdateBookClubForm schema', () => {
 		})
 
 		it('should not allow existing names', () => {
-			const schema = buildSchema(translateFn, existingClubs, true)
+			const schema = buildSchema(
+				translateFn,
+				existingClubs.map(({ name }) => name),
+				true,
+			)
 			expect(schema.safeParse(createClub({ name: 'existingClubName' })).success).toBe(false)
 			expect(schema.safeParse(createClub({ name: 'newClubName' })).success).toBe(true)
 		})

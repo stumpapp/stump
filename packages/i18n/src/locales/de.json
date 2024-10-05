@@ -212,7 +212,7 @@
 			"ignoreRules": {
 				"section": {
 					"heading": "Ignore rules",
-					"description": "Define glob patterns to ignore certain files or directories during a scan"
+					"description": "Glob-Regeln definieren, um bestimmte Dateien oder Verzeichnisse während des Scans zu ignorieren"
 				},
 				"noRules": "No ignore rules have been configured",
 				"save": "Save changes",

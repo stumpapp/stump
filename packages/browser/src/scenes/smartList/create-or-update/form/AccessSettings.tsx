@@ -21,7 +21,7 @@ export default function AccessSettings({ isCreating }: Props) {
 	return (
 		<>
 			<div className="flex max-w-xs flex-col gap-y-1.5">
-				<Label>Visibility</Label>
+				<Label>{t(getKey('label'))}</Label>
 				<NativeSelect
 					options={[
 						{ label: t(getOptionKey('PUBLIC', 'label')), value: 'PUBLIC' },

@@ -12,19 +12,6 @@ import getProperty from 'lodash/get'
 import { match, P } from 'ts-pattern'
 import { z } from 'zod'
 
-// export const operation = z.enum([
-// 	'gt',
-// 	'gte',
-// 	'lt',
-// 	'lte',
-// 	'not',
-// 	'contains',
-// 	'excludes',
-// 	'any',
-// 	'none',
-// 	'range',
-// ])
-
 export const stringOperation = z.enum(['contains', 'excludes', 'not', 'equals'])
 export type StringOperation = z.infer<typeof stringOperation>
 
@@ -347,9 +334,7 @@ export const intoAPI = ({
 	grouping,
 }: SmartListFormSchema): CreateOrUpdateSmartList => ({
 	default_grouping: grouping || null,
-
 	description: description || null,
-	// default_grouping // TODO: implement this
 	filters: {
 		groups: filters.groups.map(intoAPIGroup),
 		joiner: filters.joiner.toUpperCase() as 'AND' | 'OR',

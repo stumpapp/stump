@@ -630,7 +630,8 @@
 				"labels": {
 					"name": "Name",
 					"description": "Description",
-					"visibility": "Visibility"
+					"visibility": "Visibility",
+					"grouping": "Group by"
 				}
 			},
 			"buttons": {

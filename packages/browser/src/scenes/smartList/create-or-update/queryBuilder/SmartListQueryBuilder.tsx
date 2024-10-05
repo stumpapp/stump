@@ -1,10 +1,11 @@
 import { Button, cx, Tabs, Text } from '@stump/components'
-import { useEffect } from 'react'
-import { useFormContext, useFormState, useWatch } from 'react-hook-form'
+import { useFormContext, useWatch } from 'react-hook-form'
 
 import { SmartListFormSchema } from '../form/schema'
 import { FilterGroup } from './filterGroup'
+import GroupBy from './GroupBy'
 
+// TODO: error states throughout form elems
 export default function SmartListQueryBuilder() {
 	const form = useFormContext<SmartListFormSchema>()
 
@@ -12,19 +13,12 @@ export default function SmartListQueryBuilder() {
 	const {
 		filters: { groups },
 	} = useWatch({ control: form.control }) as SmartListFormSchema
-	const { errors } = useFormState({ control: form.control })
-
-	useEffect(() => {
-		if (Object.keys(errors).length > 0) {
-			console.log(errors)
-		} else {
-			console.log(groups)
-		}
-	}, [errors, groups])
 
 	return (
 		<>
 			<div className="flex flex-col space-y-4">
+				<GroupBy />
+
 				<div className="flex items-center space-x-3.5">
 					<Tabs variant="primary" activeOnHover value={joiner}>
 						<Tabs.List className="rounded-lg">

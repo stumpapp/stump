@@ -45,8 +45,19 @@ export default function SmartListReview() {
 				label={t(getStepKey(2, 'heading'))}
 				description={t(getStepKey(2, 'description'))}
 			>
-				<FilterConfigJSON />
+				<div>
+					<Label>{t(getLabelKey('grouping'))}</Label>
+					<Text variant="muted" size="sm">
+						{state.grouping}
+					</Text>
+				</div>
 			</ReviewStepContainer>
+
+			<div className="grid grid-cols-9">
+				<div className="col-span-9 md:col-span-6">
+					<FilterConfigJSON />
+				</div>
+			</div>
 		</div>
 	)
 }

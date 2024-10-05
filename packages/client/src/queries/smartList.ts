@@ -29,14 +29,22 @@ export function useSmartListsQuery({ params, ...options }: UseSmartListsQueryOpt
 	return { lists: data, ...rest }
 }
 
-export const usePrefetchSmartList = ({ id }: { id: string }) => {
+export const usePrefetchSmartList = () => {
 	const { sdk } = useSDK()
 	const prefetch = useCallback(
-		() =>
-			queryClient.prefetchQuery([sdk.smartlist.keys.getByID, id], async () =>
-				sdk.smartlist.getByID(id),
-			),
-		[sdk.smartlist, id],
+		({ id }: { id: string }) =>
+			Promise.all([
+				queryClient.prefetchQuery([sdk.smartlist.keys.getByID, id], async () =>
+					sdk.smartlist.getByID(id),
+				),
+				queryClient.prefetchQuery([sdk.smartlist.keys.meta, id], async () =>
+					sdk.smartlist.meta(id),
+				),
+				queryClient.prefetchQuery([sdk.smartlist.keys.items, id], async () =>
+					sdk.smartlist.items(id),
+				),
+			]),
+		[sdk.smartlist],
 	)
 	return { prefetch }
 }
@@ -140,7 +148,15 @@ export function useCreateSmartList(
 	const { mutate, mutateAsync, isLoading, ...restReturn } = useMutation(
 		[sdk.smartlist.keys.create],
 		async (params: CreateOrUpdateSmartList) => sdk.smartlist.create(params),
-		options,
+		{
+			...options,
+			onSuccess: async (...args) => {
+				await queryClient.invalidateQueries([sdk.smartlist.keys.get], {
+					exact: false,
+				})
+				options.onSuccess?.(...args)
+			},
+		},
 	)
 
 	return {

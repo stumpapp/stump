@@ -298,6 +298,9 @@ export const filterConfig = z.object({
 })
 
 export const grouping = z.enum(['BY_BOOKS', 'BY_SERIES', 'BY_LIBRARY'])
+export type SmartListGroupBy = z.infer<typeof grouping>
+export const isGrouping = (value: string): value is SmartListGroupBy =>
+	grouping.safeParse(value).success
 
 export const schema = z.object({
 	description: z.string().optional(),

@@ -1,5 +1,6 @@
 import { Button, cx, Tabs, Text } from '@stump/components'
-import { useFormContext, useWatch } from 'react-hook-form'
+import { useEffect } from 'react'
+import { useFormContext, useFormState, useWatch } from 'react-hook-form'
 
 import { SmartListFormSchema } from '../form/schema'
 import { FilterGroup } from './filterGroup'
@@ -11,6 +12,15 @@ export default function SmartListQueryBuilder() {
 	const {
 		filters: { groups },
 	} = useWatch({ control: form.control }) as SmartListFormSchema
+	const { errors } = useFormState({ control: form.control })
+
+	useEffect(() => {
+		if (Object.keys(errors).length > 0) {
+			console.log(errors)
+		} else {
+			console.log(groups)
+		}
+	}, [errors, groups])
 
 	return (
 		<>

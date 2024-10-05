@@ -133,6 +133,24 @@ export function useSmartListWithMetaQuery({ id, params }: UseSmartListItemsWithM
 	}
 }
 
+export function useCreateSmartList(
+	options: MutationOptions<SmartList, AxiosError, CreateOrUpdateSmartList> = {},
+) {
+	const { sdk } = useSDK()
+	const { mutate, mutateAsync, isLoading, ...restReturn } = useMutation(
+		[sdk.smartlist.keys.create],
+		async (params: CreateOrUpdateSmartList) => sdk.smartlist.create(params),
+		options,
+	)
+
+	return {
+		create: mutate,
+		createAsync: mutateAsync,
+		isCreating: isLoading,
+		...restReturn,
+	}
+}
+
 // TODO: different types!
 type UseUpdateSmartListMutationOptions = {
 	id: string

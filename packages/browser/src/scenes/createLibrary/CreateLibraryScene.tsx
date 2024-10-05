@@ -82,7 +82,6 @@ export default function CreateLibraryScene() {
 					stepsBeforeReview: 3,
 				}}
 			>
-				{/* <CreateLibraryHeader /> */}
 				<SteppedFormSceneHeader />
 
 				<SceneContainer>

@@ -2,18 +2,19 @@ import { Accordion, Text } from '@stump/components'
 import React, { useMemo } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
-import { FilterGroupSchema, FiltersSchema, toAPIFilters } from './schema'
+import { FilterGroupSchema, intoAPIFilters, SmartListFormSchema } from './schema'
 
 export default function FilterConfigJSON() {
-	const form = useFormContext<{ filters: FiltersSchema }>()
+	const form = useFormContext<SmartListFormSchema>()
 	const { filters } = useWatch({ control: form.control })
 
 	const [joiner] = form.watch(['filters.joiner'])
 
 	const groups = useMemo(() => (filters?.groups ?? []) as FilterGroupSchema[], [filters?.groups])
+	// FIXME: this errors lol
 	const apiFilters = useMemo(
 		() =>
-			toAPIFilters({
+			intoAPIFilters({
 				groups,
 				joiner: joiner ?? 'AND',
 			}),

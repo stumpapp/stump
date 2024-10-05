@@ -51,6 +51,7 @@ export default function FilterValue({ groupIdx, idx }: Props) {
 			type={isNumber ? 'number' : 'text'}
 			placeholder="Value"
 			className={cn({ 'md:w-52': isNumber })}
+			{...form.register(`filters.groups.${groupIdx}.filters.${idx}.value`)}
 		/>
 	)
 }

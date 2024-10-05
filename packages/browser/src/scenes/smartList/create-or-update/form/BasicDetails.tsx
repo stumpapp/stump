@@ -1,10 +1,10 @@
-import { Heading, Input, Text, TextArea } from '@stump/components'
+import { Input, TextArea } from '@stump/components'
 import React from 'react'
 import { useFormContext } from 'react-hook-form'
 
-import { Schema } from './schema'
+import { SmartListFormSchema } from './schema'
 
-type SubSchema = Pick<Schema, 'name' | 'description'>
+type SubSchema = Pick<SmartListFormSchema, 'name' | 'description'>
 
 type Props = {
 	isUpdate?: boolean
@@ -14,21 +14,15 @@ export default function BasicDetails({ isUpdate }: Props) {
 
 	return (
 		<div className="flex flex-col gap-y-6">
-			<div>
-				<Heading size="md">Basic details</Heading>
-				<Text variant="muted" size="sm">
-					{isUpdate ? 'Change' : 'Enter'} the name, description, and other basic details for this
-					smart list
-				</Text>
-			</div>
-
 			<Input
 				label="Name"
 				variant="primary"
 				description={!isUpdate ? 'Must be unique, but can be changed later' : undefined}
 				errorMessage={form.formState.errors.name?.message}
 				{...form.register('name')}
+				data-1p-ignore
 			/>
+
 			<TextArea
 				label="Description"
 				variant="primary"

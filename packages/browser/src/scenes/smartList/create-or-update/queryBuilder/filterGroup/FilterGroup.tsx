@@ -1,4 +1,5 @@
 import { Button, Card, IconButton, ToolTip } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { ArrowRight, MinusCircle } from 'lucide-react'
 import { useFieldArray } from 'react-hook-form'
 
@@ -14,6 +15,8 @@ type Props = {
 	group: FilterGroupSchema
 }
 export default function FilterGroup({ idx, group }: Props) {
+	const { t } = useLocaleContext()
+
 	const { remove: removeGroup } = useFieldArray<SmartListFormSchema>({
 		name: 'filters.groups',
 	})
@@ -27,7 +30,7 @@ export default function FilterGroup({ idx, group }: Props) {
 				<div className=" flex flex-col">
 					{!group.filters.length && (
 						<div className="p-4">
-							<FieldSelector groupIdx={idx} idx={0} />
+							<FieldSelector idx={0} />
 						</div>
 					)}
 
@@ -38,23 +41,23 @@ export default function FilterGroup({ idx, group }: Props) {
 								className="group/filter relative flex items-start p-4 md:items-center"
 							>
 								<div className="flex flex-1 flex-wrap items-center gap-x-4 gap-y-2 md:gap-4">
-									<FieldSelector groupIdx={idx} idx={filterIndex} />
+									<FieldSelector idx={filterIndex} />
 									{filter.field && (
 										<>
-											<span className="text-foreground-muted">is</span>
-											<OperatorSelect groupIdx={idx} idx={filterIndex} />
+											<ArrowRight className="h-4 w-4 text-foreground-muted" />
+											<OperatorSelect idx={filterIndex} />
 										</>
 									)}
 									{filter.operation && (
 										<>
 											<ArrowRight className="h-4 w-4 text-foreground-muted" />
-											<FilterValue groupIdx={idx} idx={filterIndex} />
+											<FilterValue idx={filterIndex} />
 										</>
 									)}
 								</div>
 
 								<div className="flex h-full w-12 shrink-0 items-center justify-end transition-opacity duration-200 group-hover/filter:opacity-100 md:opacity-0">
-									<ToolTip content="Delete filter" align="end">
+									<ToolTip content={t(getKey('actions.deleteFilter'))} align="end">
 										<IconButton
 											size="xs"
 											className="text-foreground-muted transition-all duration-200 hover:text-fill-danger"
@@ -82,7 +85,7 @@ export default function FilterGroup({ idx, group }: Props) {
 						onClick={() => append({} as FilterSchema)}
 						className="shrink-0"
 					>
-						Add filter
+						{t(getKey('actions.addFilter'))}
 					</Button>
 
 					<Button
@@ -92,10 +95,13 @@ export default function FilterGroup({ idx, group }: Props) {
 						className="shrink-0 hover:bg-fill-danger-secondary"
 						onClick={() => removeGroup(idx)}
 					>
-						Delete group
+						{t(getKey('actions.deleteGroup'))}
 					</Button>
 				</div>
 			</Card>
 		</FilterGroupContext.Provider>
 	)
 }
+
+const LOCALE_KEY = 'createOrUpdateSmartListForm.fields.queryBuilder.filters'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`

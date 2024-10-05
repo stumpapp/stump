@@ -1,4 +1,5 @@
 import { ComboBox } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
 import { useFormContext } from 'react-hook-form'
 
@@ -10,10 +11,10 @@ type Props = {
 }
 
 export default function ListValue({ idx }: Props) {
-	const form = useFormContext<SmartListFormSchema>()
-
+	const { t } = useLocaleContext()
 	const { groupIdx } = useFilterGroupContext()
 
+	const form = useFormContext<SmartListFormSchema>()
 	const values = useMemo(
 		() =>
 			(form.watch(`filters.groups.${groupIdx}.filters.${idx}.value`) || []) as (string | number)[],
@@ -46,8 +47,8 @@ export default function ListValue({ idx }: Props) {
 		<ComboBox
 			options={values.map((value) => ({ label: String(value), value: String(value) }))}
 			value={values.map(String)}
-			placeholder="Add values"
-			filterEmptyMessage="No values"
+			placeholder={t(getKey('placeholder'))}
+			filterEmptyMessage={t(getKey('emptyState'))}
 			onChange={handleChange}
 			onAddOption={({ value }) => addValue(value)}
 			isMultiSelect
@@ -55,3 +56,6 @@ export default function ListValue({ idx }: Props) {
 		/>
 	)
 }
+
+const LOCALE_KEY = 'createOrUpdateSmartListForm.fields.queryBuilder.filters.listValue'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`

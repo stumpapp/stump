@@ -660,9 +660,15 @@
 					"label": "Group by",
 					"description": "How the books in this smart list should be grouped",
 					"options": {
-						"none": "None",
-						"by_series": "Series",
-						"by_library": "Library"
+						"by_books": {
+							"label": "None"
+						},
+						"by_series": {
+							"label": "Series"
+						},
+						"by_library": {
+							"label": "Library"
+						}
 					}
 				},
 				"filters": {
@@ -670,7 +676,92 @@
 					"actions": {
 						"addFilter": "Add filter",
 						"addGroup": "Add group",
+						"deleteFilter": "Delete filter",
 						"deleteGroup": "Delete group"
+					},
+					"is": "is",
+					"fieldSelect": {
+						"placeholder": "Attribute",
+						"source": {
+							"label": "Source",
+							"back": "Back",
+							"book": {
+								"label": "Book",
+								"attributes": {
+									"name": "Filename",
+									"size": "Size",
+									"extension": "Extension",
+									"created_at": "Created at",
+									"updated_at": "Updated at",
+									"status": "Status",
+									"path": "Path",
+									"pages": "Pages",
+									"tags": "Tags"
+								}
+							},
+							"book_meta": {
+								"label": "Book Meta",
+								"attributes": {
+									"title": "Title",
+									"summary": "Summary",
+									"notes": "Notes",
+									"genre": "Genre",
+									"writers": "Writers",
+									"pencillers": "Pencillers",
+									"inkers": "Inkers",
+									"letterers": "Letterers",
+									"editors": "Editors",
+									"publisher": "Publisher",
+									"colorists": "Colorist",
+									"cover_artists": "Cover artists",
+									"links": "Links",
+									"characters": "Characters",
+									"teams": "Teams"
+								}
+							},
+							"series": {
+								"label": "Series",
+								"attributes": {
+									"name": "Name",
+									"path": "Path"
+								}
+							},
+							"series_meta": {
+								"label": "Series Meta",
+								"attributes": {
+									"meta_type": "Type",
+									"publisher": "Publisher",
+									"status": "Status",
+									"age_rating": "Age rating",
+									"volume": "Volume"
+								}
+							},
+							"library": {
+								"label": "Library",
+								"attributes": {
+									"name": "Name",
+									"path": "Path"
+								}
+							}
+						}
+					},
+					"basicValue": {
+						"placeholder": "Value"
+					},
+					"rangeValue": {
+						"from": {
+							"date": "From date",
+							"number": "From"
+						},
+						"to": {
+							"date": "To date",
+							"number": "To"
+						},
+						"inclusive": "Inclusive"
+					},
+					"listValue": {
+						"placeholder": "Add values",
+						"emptyState": "No values to display"
 					}
 				}
 			}

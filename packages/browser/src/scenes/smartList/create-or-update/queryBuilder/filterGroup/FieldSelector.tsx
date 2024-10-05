@@ -1,21 +1,25 @@
 import { Button, cn, Command, Popover } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { ArrowLeft, ArrowRight, ChevronsUpDown } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFieldArray, useFormContext } from 'react-hook-form'
 
 import { FilterSource, SmartListFormSchema } from '../../form/schema'
+import { useFilterGroupContext } from './context'
 
 type Props = {
-	groupIdx: number
 	idx: number
 }
 
 type FieldDef = SmartListFormSchema['filters']['groups'][number]['filters'][number]
 
-export function FieldSelector({ groupIdx, idx }: Props) {
+export function FieldSelector({ idx }: Props) {
 	const [open, setOpen] = useState(false)
 
 	const [source, setSource] = useState<FilterSource | null>(null)
+
+	const { t } = useLocaleContext()
+	const { groupIdx } = useFilterGroupContext()
 
 	const form = useFormContext<SmartListFormSchema>()
 	const { fields, update } = useFieldArray({
@@ -47,28 +51,28 @@ export function FieldSelector({ groupIdx, idx }: Props) {
 						onSelect={() => setSource('book')}
 						className="flex items-center justify-between"
 					>
-						Book
+						{t(getSourceKey('book', 'label'))}
 						<ArrowRight className="ml-2 h-4 w-4 text-foreground-muted" />
 					</Command.Item>
 					<Command.Item
 						onSelect={() => setSource('book_meta')}
 						className="flex items-center justify-between"
 					>
-						Book Meta
+						{t(getSourceKey('book_meta', 'label'))}
 						<ArrowRight className="ml-2 h-4 w-4 text-foreground-muted" />
 					</Command.Item>
 					<Command.Item
 						onSelect={() => setSource('series')}
 						className="flex items-center justify-between"
 					>
-						Series
+						{t(getSourceKey('series', 'label'))}
 						<ArrowRight className="ml-2 h-4 w-4 text-foreground-muted" />
 					</Command.Item>
 					<Command.Item
 						onSelect={() => setSource('library')}
 						className="flex items-center justify-between"
 					>
-						Library
+						{t(getSourceKey('library', 'label'))}
 						<ArrowRight className="ml-2 h-4 w-4 text-foreground-muted" />
 					</Command.Item>
 				</>
@@ -81,7 +85,6 @@ export function FieldSelector({ groupIdx, idx }: Props) {
 						return (
 							<Command.Item
 								key={option.value}
-								// Note: For some reason, this transforms the `value` to lowercase...
 								onSelect={() => {
 									updateField({ field: option.value, source })
 									setOpen(false)
@@ -89,7 +92,7 @@ export function FieldSelector({ groupIdx, idx }: Props) {
 								className={cn('transition-all duration-75', { 'text-brand': false })}
 								value={option.value}
 							>
-								{option.label}
+								{t(getAttributeKey(source, option.value))}
 							</Command.Item>
 						)
 					})}
@@ -106,11 +109,11 @@ export function FieldSelector({ groupIdx, idx }: Props) {
 					onClick={() => setSource(null)}
 				>
 					<ArrowLeft className="ml-2 h-4 w-4 text-foreground-muted" />
-					<span className="text-foreground-muted">Back</span>
+					<span className="text-foreground-muted">{t(getKey('source.back'))}</span>
 				</button>
 			)
 		} else {
-			return <span className="text-foreground-muted">Source</span>
+			return <span className="text-foreground-muted">{t(getKey('source.label'))}</span>
 		}
 	}
 
@@ -118,7 +121,7 @@ export function FieldSelector({ groupIdx, idx }: Props) {
 		if (fieldDef?.field) {
 			return fieldDef.field
 		} else {
-			return <span className="text-foreground-muted">Attribute</span>
+			return <span className="text-foreground-muted">{t(getKey('placeholder'))}</span>
 		}
 	}
 
@@ -151,47 +154,43 @@ export function FieldSelector({ groupIdx, idx }: Props) {
 	)
 }
 
-// TODO: translation key instead of hardcoded strings
-// TODO: sorted
-const sourceOptions: Record<FilterSource, { label: string; value: string }[]> = {
+const sourceOptions: Record<FilterSource, { value: string }[]> = {
 	book: [
-		{ label: 'Filename', value: 'name' },
-		{ label: 'Size', value: 'size' },
-		{ label: 'Extension', value: 'extension' },
-		{ label: 'Created At', value: 'created_at' },
-		{ label: 'Updated At', value: 'updated_at' },
-		{ label: 'Status', value: 'status' },
-		{ label: 'Path', value: 'path' },
-		{ label: 'Pages', value: 'pages' },
-		{ label: 'Tags', value: 'tags' },
+		{ value: 'name' },
+		{ value: 'size' },
+		{ value: 'extension' },
+		{ value: 'created_at' },
+		{ value: 'updated_at' },
+		{ value: 'status' },
+		{ value: 'path' },
+		{ value: 'pages' },
+		{ value: 'tags' },
 	],
 	book_meta: [
-		{ label: 'Title', value: 'title' },
-		{ label: 'Summary', value: 'summary' },
-		{ label: 'Notes', value: 'notes' },
-		{ label: 'Genre', value: 'genre' },
-		{ label: 'Writers', value: 'writers' },
-		{ label: 'Pencillers', value: 'pencillers' },
-		{ label: 'Inkers', value: 'inkers' },
-		{ label: 'Colorists', value: 'colorists' },
-		{ label: 'Letterers', value: 'letterers' },
-		{ label: 'Editors', value: 'editors' },
-		{ label: 'Publisher', value: 'publisher' },
-		{ label: 'Colorists', value: 'colorists' },
-		{ label: 'Letterers', value: 'letterers' },
-		{ label: 'Cover Artists', value: 'cover_artists' },
-		{ label: 'Links', value: 'links' },
-		{ label: 'Characters', value: 'characters' },
-		{ label: 'Teams', value: 'teams' },
+		{ value: 'title' },
+		{ value: 'summary' },
+		{ value: 'notes' },
+		{ value: 'genre' },
+		{ value: 'writers' },
+		{ value: 'pencillers' },
+		{ value: 'inkers' },
+		{ value: 'colorists' },
+		{ value: 'letterers' },
+		{ value: 'editors' },
+		{ value: 'publisher' },
+		{ value: 'cover_artists' },
+		{ value: 'links' },
+		{ value: 'characters' },
+		{ value: 'teams' },
 	],
-	library: [
-		{ label: 'Name', value: 'name' },
-		{ label: 'Path', value: 'path' },
-	],
-	series: [
-		{ label: 'Name', value: 'name' },
-		{ label: 'Path', value: 'path' },
-	],
+	library: [{ value: 'name' }, { value: 'path' }],
+	series: [{ value: 'name' }, { value: 'path' }],
 }
 
 // TODO: series_meta: [meta_type, publisher, status, age_rating, volume]
+
+const LOCALE_KEY = 'createOrUpdateSmartListForm.fields.queryBuilder.filters.fieldSelect'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`
+const getSourceKey = (source: FilterSource, key: string) => `${LOCALE_KEY}.source.${source}.${key}`
+const getAttributeKey = (source: FilterSource, key: string) =>
+	getSourceKey(source, `attributes.${key}`)

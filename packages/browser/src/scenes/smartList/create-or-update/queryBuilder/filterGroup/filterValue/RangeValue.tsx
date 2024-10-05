@@ -1,4 +1,5 @@
 import { CheckBox, DatePicker, Input } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useFormContext } from 'react-hook-form'
 import { useMediaMatch } from 'rooks'
 import { match } from 'ts-pattern'
@@ -23,6 +24,7 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 	const form = useFormContext<SmartListFormSchema>()
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 
+	const { t } = useLocaleContext()
 	const { groupIdx } = useFilterGroupContext()
 
 	const changeHandler = (key: 'from' | 'to') => (value?: Date | number) => {
@@ -38,7 +40,7 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 			.when(isDateField, () => (
 				<>
 					<DatePicker
-						placeholder="From date"
+						placeholder={t(getKey('from.date'))}
 						selected={value?.from as Date}
 						onChange={changeHandler('from')}
 						className="md:w-52"
@@ -47,7 +49,7 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 						}}
 					/>
 					<DatePicker
-						placeholder="To date"
+						placeholder={t(getKey('to.date'))}
 						selected={value?.to as Date}
 						onChange={changeHandler('to')}
 						className="md:w-52"
@@ -59,8 +61,12 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 			))
 			.when(isNumberField, () => (
 				<>
-					<Input placeholder="From" type="number" containerClassName="md:w-52" />
-					<Input placeholder="To" type="number" containerClassName="md:w-52" />
+					<Input
+						placeholder={t(getKey('from.number'))}
+						type="number"
+						containerClassName="md:w-52"
+					/>
+					<Input placeholder={t(getKey('to.number'))} type="number" containerClassName="md:w-52" />
 				</>
 			))
 			.otherwise(() => null)
@@ -71,7 +77,7 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 			{renderValue()}
 			<CheckBox
 				id="inclusive"
-				label="Inclusive"
+				label={t(getKey('inclusive'))}
 				variant="primary"
 				checked={value?.inclusive}
 				onClick={() =>
@@ -84,3 +90,6 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 		</>
 	)
 }
+
+const LOCALE_KEY = 'createOrUpdateSmartListForm.fields.queryBuilder.filters.rangeValue'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`

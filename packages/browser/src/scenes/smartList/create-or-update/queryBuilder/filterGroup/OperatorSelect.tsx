@@ -14,15 +14,17 @@ import {
 	SmartListFormSchema,
 	StringOperation,
 } from '../../form/schema'
+import { useFilterGroupContext } from './context'
 
 type Props = {
-	groupIdx: number
 	idx: number
 }
 
 type FieldDef = SmartListFormSchema['filters']['groups'][number]['filters'][number]
 
-export default function OperatorSelect({ groupIdx, idx }: Props) {
+export default function OperatorSelect({ idx }: Props) {
+	const { groupIdx } = useFilterGroupContext()
+
 	const form = useFormContext<SmartListFormSchema>()
 
 	const [isOpen, setIsOpen] = useState(false)

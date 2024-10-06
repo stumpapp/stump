@@ -773,7 +773,7 @@
 							"name": {
 								"label": "Name",
 								"description": "A friendly name to identify this server",
-								"placeholder": "My server"
+								"placeholder": "Mein Server"
 							},
 							"uri": {
 								"label": "URI",
@@ -877,7 +877,7 @@
 			"description": "Die Logs generiert von deiner Stump-Server-Instanz",
 			"sections": {
 				"persistedLogs": {
-					"title": "Persisted logs",
+					"title": "Dauerhafte Protokolle",
 					"description": "These logs have been manually persisted to the database, typically associated with a specific job or event",
 					"table": {
 						"columns": {

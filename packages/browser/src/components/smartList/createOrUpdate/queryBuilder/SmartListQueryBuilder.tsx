@@ -1,4 +1,4 @@
-import { Button, cx, Tabs, Text } from '@stump/components'
+import { Button, cn, cx, Tabs, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useFormContext, useWatch } from 'react-hook-form'
 
@@ -7,7 +7,12 @@ import { FilterGroup } from './filterGroup'
 import GroupBy from './GroupBy'
 
 // TODO: error states throughout form elems
-export default function SmartListQueryBuilder() {
+
+type Props = {
+	disabled?: boolean
+}
+
+export default function SmartListQueryBuilder({ disabled }: Props) {
 	const form = useFormContext<SmartListFormSchema>()
 
 	const [joiner] = form.watch(['filters.joiner'])
@@ -18,10 +23,10 @@ export default function SmartListQueryBuilder() {
 
 	return (
 		<>
-			<div className="flex flex-col space-y-4">
-				<GroupBy />
+			<div className={cn('flex flex-col space-y-4', { 'cursor-not-allowed opacity-65': disabled })}>
+				<GroupBy disabled={disabled} />
 
-				<div className="flex items-center space-x-3.5">
+				<div className={cn('flex items-center space-x-3.5', { 'pointer-events-none': disabled })}>
 					<Tabs variant="primary" activeOnHover value={joiner}>
 						<Tabs.List className="rounded-lg">
 							<Tabs.Trigger
@@ -51,7 +56,11 @@ export default function SmartListQueryBuilder() {
 					</Text>
 				</div>
 
-				<div className="relative ml-4 flex flex-col space-y-8 border-l border-l-edge px-2 pt-4">
+				<div
+					className={cn('relative ml-4 flex flex-col space-y-8 border-l border-l-edge px-2 pt-4', {
+						'pointer-events-none': disabled,
+					})}
+				>
 					{groups.length === 0 && (
 						<div className="ml-4 flex max-w-sm items-center justify-center rounded-lg border border-dashed border-edge p-4">
 							<Text variant="muted">{t(getKey('filters.emptyState'))}</Text>
@@ -65,6 +74,7 @@ export default function SmartListQueryBuilder() {
 				<div>
 					<Button
 						variant="outline"
+						disabled={disabled}
 						onClick={() => {
 							form.setValue('filters.groups', [
 								...groups,

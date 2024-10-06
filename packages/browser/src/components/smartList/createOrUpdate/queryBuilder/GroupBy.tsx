@@ -5,7 +5,11 @@ import { useFormContext } from 'react-hook-form'
 
 import { isGrouping, SmartListFormSchema, SmartListGroupBy } from '../schema'
 
-export default function GroupBy() {
+type Props = {
+	disabled?: boolean
+}
+
+export default function GroupBy({ disabled }: Props) {
 	const form = useFormContext<SmartListFormSchema>()
 
 	const grouping = form.watch('grouping')
@@ -27,6 +31,7 @@ export default function GroupBy() {
 			<div>
 				<NativeSelect
 					className="h-8 w-[unset] py-0"
+					disabled={disabled}
 					options={[
 						{
 							label: t(getOptionKey('BY_BOOKS', 'label')),

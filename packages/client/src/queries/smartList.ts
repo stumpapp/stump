@@ -171,12 +171,20 @@ export function useCreateSmartList(
 type UseUpdateSmartListMutationOptions = {
 	id: string
 } & MutationOptions<SmartList, AxiosError, CreateOrUpdateSmartList>
-export function useUpdateSmartListMutation({ id, ...options }: UseUpdateSmartListMutationOptions) {
+export function useUpdateSmartList({ id, ...options }: UseUpdateSmartListMutationOptions) {
 	const { sdk } = useSDK()
 	const { mutate, mutateAsync, isLoading, ...restReturn } = useMutation(
 		[sdk.smartlist.keys.update, id],
 		async (updates: CreateOrUpdateSmartList) => sdk.smartlist.update(id, updates),
-		options,
+		{
+			...options,
+			onSuccess: async (...args) => {
+				await queryClient.invalidateQueries([sdk.smartlist.keys.getByID, id], {
+					exact: false,
+				})
+				options.onSuccess?.(...args)
+			},
+		},
 	)
 
 	return {
@@ -188,7 +196,7 @@ export function useUpdateSmartListMutation({ id, ...options }: UseUpdateSmartLis
 }
 
 type UseDeleteSmartListMutationOptions = MutationOptions<SmartList, AxiosError, string>
-export function useDeleteSmartListMutation({
+export function useDeleteSmartList({
 	onSuccess,
 	...options
 }: UseDeleteSmartListMutationOptions = {}) {

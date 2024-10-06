@@ -340,6 +340,9 @@ async fn update_smart_list_by_id(
 					input.default_grouping.map(|grouping| {
 						smart_list::default_grouping::set(grouping.to_string())
 					}),
+					input.visibility.map(|visibility| {
+						smart_list::visibility::set(visibility.to_string())
+					}),
 				],
 			),
 		)

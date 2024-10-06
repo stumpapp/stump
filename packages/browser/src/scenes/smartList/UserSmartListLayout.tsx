@@ -1,7 +1,7 @@
 import {
 	useSmartListViewsManager,
 	useSmartListWithMetaQuery,
-	useUpdateSmartListMutation,
+	useUpdateSmartList,
 } from '@stump/client'
 import { cn } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
@@ -76,7 +76,7 @@ export default function UserSmartListLayout() {
 			load_views: true,
 		},
 	})
-	const { updateAsync } = useUpdateSmartListMutation({ id })
+	const { updateAsync } = useUpdateSmartList({ id })
 	const { createView, updateView } = useSmartListViewsManager({ listId: id })
 	const { user } = useAppContext()
 

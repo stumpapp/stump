@@ -1,4 +1,4 @@
-import { useDeleteSmartListMutation } from '@stump/client'
+import { useDeleteSmartList } from '@stump/client'
 import { ConfirmationModal } from '@stump/components'
 import { isAxiosError } from '@stump/sdk'
 import React from 'react'
@@ -17,7 +17,7 @@ export default function DeleteSmartListConfirmation({ isOpen, onClose }: Props) 
 	const navigate = useNavigate()
 
 	const { list, viewerRole } = useSmartListContext()
-	const { deleteAsync, isDeleting } = useDeleteSmartListMutation({
+	const { deleteAsync, isDeleting } = useDeleteSmartList({
 		onSuccess: () => {
 			navigate(paths.smartLists())
 		},

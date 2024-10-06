@@ -10,7 +10,8 @@ import {
 	isDateField,
 	isNumberField,
 	SmartListFormSchema,
-} from '../../../form/schema'
+} from '@/components/smartList/createOrUpdate'
+
 import { useFilterGroupContext } from '../context'
 
 export type RangeFilterDef = FilterSchema & { value: FromOperation }

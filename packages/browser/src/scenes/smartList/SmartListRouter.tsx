@@ -7,7 +7,7 @@ import UserSmartListLayout from './UserSmartListLayout.tsx'
 import UserSmartListRouter from './UserSmartListRouter.tsx'
 
 const UserSmartListsScene = lazy(() => import('./UserSmartListsScene.tsx'))
-const CreateSmartListScene = lazy(() => import('./create-or-update/CreateSmartListScene.tsx'))
+const CreateSmartListScene = lazy(() => import('../createSmartList/CreateSmartListScene.tsx'))
 
 export default function SmartListRouter() {
 	const { checkPermission } = useAppContext()

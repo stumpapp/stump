@@ -23,7 +23,7 @@ use crate::prisma::{library, media, media_metadata, series, series_metadata};
 /// A filter for a single value, e.g. `name = "test"`
 pub enum Filter<T> {
 	/// A simple equals filter, e.g. `name = "test"`
-	Equals(T),
+	Equals { equals: T },
 	/// A simple not filter, e.g. `name != "test"`
 	Not { not: T },
 	/// A filter for a string that contains a substring, e.g. `name contains "test"`. This should
@@ -70,7 +70,7 @@ impl<T> Filter<T> {
 		WhereParam: From<prisma_client_rust::Operator<WhereParam>>,
 	{
 		match self {
-			Filter::Equals(value) => equals_fn(value),
+			Filter::Equals { equals } => equals_fn(equals),
 			Filter::Not { not } => not![equals_fn(not)],
 			Filter::Contains { contains } => contains_fn(contains),
 			Filter::Excludes { excludes } => not![contains_fn(excludes)],
@@ -92,7 +92,7 @@ impl<T> Filter<T> {
 		WhereParam: From<prisma_client_rust::Operator<WhereParam>>,
 	{
 		match self {
-			Filter::Equals(value) => equals_fn(Some(value)),
+			Filter::Equals { equals } => equals_fn(Some(equals)),
 			Filter::Not { not } => not![equals_fn(Some(not))],
 			Filter::Contains { contains } => contains_fn(contains),
 			Filter::Excludes { excludes } => not![contains_fn(excludes)],
@@ -116,7 +116,7 @@ impl Filter<i32> {
 		WhereParam: From<prisma_client_rust::Operator<WhereParam>>,
 	{
 		match self {
-			Filter::Equals(value) => equals_fn(value),
+			Filter::Equals { equals } => equals_fn(equals),
 			Filter::Not { not } => not![equals_fn(not)],
 			Filter::NumericFilter(numeric_filter) => match numeric_filter {
 				NumericFilter::Gt { gt } => gt_fn(gt),
@@ -147,7 +147,7 @@ impl Filter<i32> {
 		WhereParam: From<prisma_client_rust::Operator<WhereParam>>,
 	{
 		match self {
-			Filter::Equals(value) => equals_fn(Some(value)),
+			Filter::Equals { equals } => equals_fn(Some(equals)),
 			Filter::Not { not } => not![equals_fn(Some(not))],
 			Filter::NumericFilter(numeric_filter) => match numeric_filter {
 				NumericFilter::Gt { gt } => gt_fn(gt),

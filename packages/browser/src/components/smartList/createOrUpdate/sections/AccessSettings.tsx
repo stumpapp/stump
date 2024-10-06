@@ -4,7 +4,7 @@ import { EntityVisibility } from '@stump/types'
 import React from 'react'
 import { useFormContext } from 'react-hook-form'
 
-import { SmartListFormSchema } from './schema'
+import { SmartListFormSchema } from '../schema'
 
 type SubSchema = Pick<SmartListFormSchema, 'visibility'>
 

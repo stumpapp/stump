@@ -9,8 +9,8 @@ import { SteppedFormContext } from '@/components/steppedForm'
 import SteppedFormSceneHeader from '@/components/steppedForm/SteppedFormSceneHeader'
 import paths from '@/paths'
 
-import { CreateSmartListForm } from './form'
-import { intoAPI, SmartListFormSchema } from './form/schema'
+import { intoAPI, SmartListFormSchema } from '../../components/smartList/createOrUpdate/schema'
+import CreateSmartListForm from './CreateSmartListForm'
 
 export default function CreateSmartListScene() {
 	const navigate = useNavigate()

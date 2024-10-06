@@ -188,7 +188,7 @@ export type ReactTableGlobalSort = { desc: boolean; id: string }
 /**
  * A filter for a single value, e.g. `name = "test"`
  */
-export type Filter<T> = T | { not: T } | { contains: T } | { excludes: T } | { any: T[] } | { none: T[] } | NumericFilter<T>
+export type Filter<T> = { equals: T } | { not: T } | { contains: T } | { excludes: T } | { any: T[] } | { none: T[] } | NumericFilter<T>
 
 export type NumericFilter<T> = { gt: T } | { gte: T } | { lt: T } | { lte: T } | NumericRange<T>
 

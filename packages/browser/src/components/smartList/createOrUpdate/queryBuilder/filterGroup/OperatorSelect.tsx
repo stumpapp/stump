@@ -13,7 +13,7 @@ import {
 	Operation,
 	SmartListFormSchema,
 	StringOperation,
-} from '../../form/schema'
+} from '../../schema'
 import { useFilterGroupContext } from './context'
 
 type Props = {

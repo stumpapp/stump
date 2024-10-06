@@ -3,7 +3,7 @@ import { useLocaleContext } from '@stump/i18n'
 import React, { useCallback } from 'react'
 import { useFormContext } from 'react-hook-form'
 
-import { isGrouping, SmartListFormSchema, SmartListGroupBy } from '../form/schema'
+import { isGrouping, SmartListFormSchema, SmartListGroupBy } from '../schema'
 
 export default function GroupBy() {
 	const form = useFormContext<SmartListFormSchema>()

@@ -3,7 +3,7 @@ import { useLocaleContext } from '@stump/i18n'
 import React from 'react'
 import { useFormContext } from 'react-hook-form'
 
-import { FilterGroupJoiner, SmartListFormSchema } from '../../form/schema'
+import { FilterGroupJoiner, SmartListFormSchema } from '../../schema'
 import { useFilterGroupContext } from './context'
 
 export default function GroupJoiner() {

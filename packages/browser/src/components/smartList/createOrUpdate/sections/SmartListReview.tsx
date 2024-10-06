@@ -5,7 +5,7 @@ import { useFormContext } from 'react-hook-form'
 import { ReviewStepContainer } from '@/components/steppedForm'
 
 import FilterConfigJSON from './FilterConfigJSON'
-import { SmartListFormSchema } from './schema'
+import { SmartListFormSchema } from '../schema'
 
 export default function SmartListReview() {
 	const form = useFormContext<SmartListFormSchema>()

@@ -8,14 +8,13 @@ import { useForm } from 'react-hook-form'
 import { ContentContainer } from '@/components/container'
 import { useSteppedFormContext } from '@/components/steppedForm'
 
-import { SmartListQueryBuilder } from '../queryBuilder'
-import AccessSettings from './AccessSettings'
-import BasicDetails from './BasicDetails'
-import { createSchema, SmartListFormSchema } from './schema'
-import SmartListReview from './SmartListReview'
+import { SmartListQueryBuilder } from '../../components/smartList/createOrUpdate/queryBuilder'
+import { createSchema, SmartListFormSchema } from '../../components/smartList/createOrUpdate/schema'
+import AccessSettings from '../../components/smartList/createOrUpdate/sections/AccessSettings'
+import BasicDetails from '../../components/smartList/createOrUpdate/sections/BasicDetails'
+import SmartListReview from '../../components/smartList/createOrUpdate/sections/SmartListReview'
 
 type Props = {
-	// existingNames: string[]
 	onSubmit: (values: SmartListFormSchema) => void
 	isLoading?: boolean
 }

@@ -2,7 +2,7 @@ import { Button, cx, Tabs, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useFormContext, useWatch } from 'react-hook-form'
 
-import { SmartListFormSchema } from '../form/schema'
+import { SmartListFormSchema } from '../schema'
 import { FilterGroup } from './filterGroup'
 import GroupBy from './GroupBy'
 

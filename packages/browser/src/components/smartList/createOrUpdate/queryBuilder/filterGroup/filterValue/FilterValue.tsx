@@ -9,7 +9,8 @@ import {
 	isNumberField,
 	isNumberOperator,
 	SmartListFormSchema,
-} from '../../../form/schema'
+} from '@/components/smartList/createOrUpdate'
+
 import { useFilterGroupContext } from '../context'
 import ListValue from './ListValue'
 import RangeValue, { RangeFilterDef } from './RangeValue'

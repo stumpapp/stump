@@ -3,7 +3,7 @@ import { useForm, useFormState } from 'react-hook-form'
 import toast from 'react-hot-toast'
 
 import { useSmartListContext } from '../context'
-import { SmartListFormSchema } from '../create-or-update/form/schema'
+import { SmartListFormSchema } from '../../../components/smartList/createOrUpdate/schema'
 import AccessSettings from './AccessSettings'
 import DangerSection from './DangerSection'
 import FilterConfiguration from './FilterConfiguration'

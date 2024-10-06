@@ -3,7 +3,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { ArrowRight, MinusCircle } from 'lucide-react'
 import { useFieldArray } from 'react-hook-form'
 
-import { FilterGroupSchema, FilterSchema, SmartListFormSchema } from '../../form/schema'
+import { FilterGroupSchema, FilterSchema, SmartListFormSchema } from '../../schema'
 import { FilterGroupContext } from './context'
 import { FieldSelector } from './FieldSelector'
 import { FilterValue } from './filterValue'

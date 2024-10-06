@@ -3,7 +3,8 @@ import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
 import { useFormContext } from 'react-hook-form'
 
-import { SmartListFormSchema } from '../../../form/schema'
+import { SmartListFormSchema } from '@/components/smartList/createOrUpdate'
+
 import { useFilterGroupContext } from '../context'
 
 type Props = {

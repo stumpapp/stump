@@ -42,11 +42,11 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 - [License 📝](#license-)
 </details>
 
-> **🚧 Disclaimer 🚧**: Stump is under active development and is an ongoing **WIP**. Anyone is welcome to try it out, but **DO NOT** expect a fully featured or bug-free experience. If you'd like to contribute and help expedite Stump's first release, please review the [developer guide](#developer-guide-).
+> **🚧 Disclaimer 🚧**: Stump is under active development and is an ongoing **WIP**. Anyone is welcome to try it out, but **DO NOT** expect a fully featured or bug-free experience. If you'd like to contribute and help expedite feature development, please review the [developer guide](#developer-guide-).
 
 ## Roadmap 🗺
 
-The following items are the major targets for Stump's first release:
+The following items are the major targets for Stump's first stable release:
 
 - 📃 Full OPDS + OPDS Page Streaming support
 - 📕 EPUB, PDF, and CBZ/CBR support
@@ -59,7 +59,7 @@ The following items are the major targets for Stump's first release:
 - 🌏 Language support _(look [here](https://github.com/stumpapp/stump/issues/106))_
 - 🌈 And more!
 
-Things you can expect to see after the first release:
+Things you can expect to see afterwards:
 
 - 🖥️ Cross-platform desktop app _(Windows, Mac, Linux)_
 - 📖 [Tachiyomi](https://github.com/stumpapp/tachiyomi-extensions) support

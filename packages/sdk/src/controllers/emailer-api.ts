@@ -25,6 +25,15 @@ const EMAILER_ROUTE = '/emailer'
 const emailerURL = createRouteURLHandler(EMAILER_ROUTE)
 
 /**
+ * The root route for the email device API
+ */
+const EMAIL_DEVICE_ROUTE = '/email-devices'
+/**
+ * A helper function to format the URL for email device API routes with optional query parameters
+ */
+const emailDeviceURL = createRouteURLHandler(EMAIL_DEVICE_ROUTE)
+
+/**
  * The emailer API controller, used for interacting with the emailer endpoints of the Stump API
  */
 export class EmailerAPI extends APIBase {
@@ -104,9 +113,7 @@ export class EmailerAPI extends APIBase {
 	 * Fetch all email devices
 	 */
 	async getDevices(): Promise<RegisteredEmailDevice[]> {
-		const { data: devices } = await this.api.axios.get<RegisteredEmailDevice[]>(
-			emailerURL('/email-devices'),
-		)
+		const { data: devices } = await this.api.axios.get<RegisteredEmailDevice[]>(emailDeviceURL(''))
 		return devices
 	}
 
@@ -115,7 +122,7 @@ export class EmailerAPI extends APIBase {
 	 */
 	async getDeviceByID(id: number): Promise<RegisteredEmailDevice> {
 		const { data: device } = await this.api.axios.get<RegisteredEmailDevice>(
-			emailerURL(`/email-devices/${id}`),
+			emailDeviceURL(`${id}`),
 		)
 		return device
 	}
@@ -125,7 +132,7 @@ export class EmailerAPI extends APIBase {
 	 */
 	async createDevice(payload: CreateOrUpdateEmailDevice): Promise<RegisteredEmailDevice> {
 		const { data: createdDevice } = await this.api.axios.post<RegisteredEmailDevice>(
-			emailerURL('/email-devices'),
+			emailDeviceURL(''),
 			payload,
 		)
 		return createdDevice
@@ -139,7 +146,7 @@ export class EmailerAPI extends APIBase {
 		payload: CreateOrUpdateEmailDevice,
 	): Promise<RegisteredEmailDevice> {
 		const { data: updatedDevice } = await this.api.axios.put<RegisteredEmailDevice>(
-			emailerURL(`/email-devices/${id}`),
+			emailDeviceURL(`/${id}`),
 			payload,
 		)
 		return updatedDevice
@@ -150,7 +157,7 @@ export class EmailerAPI extends APIBase {
 	 */
 	async patchDevice(id: number, payload: PatchEmailDevice): Promise<RegisteredEmailDevice> {
 		const { data: patchedDevice } = await this.api.axios.patch<RegisteredEmailDevice>(
-			emailerURL(`/email-devices/${id}`),
+			emailDeviceURL(`/${id}`),
 			payload,
 		)
 		return patchedDevice
@@ -161,7 +168,7 @@ export class EmailerAPI extends APIBase {
 	 */
 	async deleteDevice(id: number): Promise<RegisteredEmailDevice> {
 		const { data: deletedDevice } = await this.api.axios.delete<RegisteredEmailDevice>(
-			emailerURL(`/email-devices/${id}`),
+			emailDeviceURL(`/${id}`),
 		)
 		return deletedDevice
 	}

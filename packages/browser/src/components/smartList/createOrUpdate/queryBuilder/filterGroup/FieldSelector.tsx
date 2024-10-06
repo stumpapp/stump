@@ -119,7 +119,11 @@ export function FieldSelector({ idx }: Props) {
 
 	const renderSelected = () => {
 		if (fieldDef?.field) {
-			return fieldDef.field
+			// return fieldDef.field
+			return source
+				? // ? `${t(getSourceKey(source, 'label'))}.${t(getAttributeKey(source, fieldDef.field))}`
+					`${source}.${fieldDef.field}`
+				: fieldDef.field
 		} else {
 			return <span className="text-foreground-muted">{t(getKey('placeholder'))}</span>
 		}

@@ -16,7 +16,7 @@ import { compareByKeys } from '@/utils/compare'
 
 import { useSmartListSettings } from '../context'
 
-type SubSchema = Pick<SmartListFormSchema, 'filters'>
+type SubSchema = Pick<SmartListFormSchema, 'filters' | 'grouping'>
 
 export default function FiltersSettingsScene() {
 	const { t } = useLocaleContext()
@@ -33,7 +33,7 @@ export default function FiltersSettingsScene() {
 	})
 
 	const isChanged = useMemo(
-		() => !compareByKeys(listAsForm as SubSchema, formValues, ['filters']),
+		() => !compareByKeys(listAsForm as SubSchema, formValues, ['filters', 'grouping']),
 		[listAsForm, formValues],
 	)
 
@@ -45,7 +45,7 @@ export default function FiltersSettingsScene() {
 						...listAsForm,
 						...values,
 					}),
-					['filters'],
+					['filters', 'grouping'],
 				),
 			),
 		[patch, listAsForm],

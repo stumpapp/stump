@@ -22,7 +22,7 @@ export class MetadataAPI extends APIBase {
 	 */
 	async overview(params?: MediaMetadataFilter): Promise<MediaMetadataOverview> {
 		const { data: overview } = await this.axios.get<MediaMetadataOverview>(
-			mediaMetadataURL('overview', params),
+			mediaMetadataURL('', params),
 		)
 		return overview
 	}

@@ -6,6 +6,7 @@ use specta::Type;
 use utoipa::ToSchema;
 
 use crate::prisma::{library, media, media_metadata, series, series_metadata};
+use smart_filter_gen::generate_smart_filter;
 
 // TODO: This rough implementation is not very great. It is very verbose and not very ergonomic. It _technically_
 // works, and while I don't think anyone using this feature will notice, from a DX/mainenance perspective, it needs
@@ -232,77 +233,39 @@ pub struct SmartFilter<T> {
 // TODO: figure out if perhaps macros can come in with the save here. Continuing down this path
 // will be INCREDIBLY verbose..
 
+#[generate_smart_filter]
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
 #[serde(untagged)]
+#[prisma_table("library")]
 pub enum LibrarySmartFilter {
-	Name { name: Filter<String> },
-	Path { path: Filter<String> },
+	Name { name: String },
+	Path { path: String },
 }
 
-impl LibrarySmartFilter {
-	pub fn into_params(self) -> library::WhereParam {
-		match self {
-			LibrarySmartFilter::Name { name } => name.into_params(
-				library::name::equals,
-				library::name::contains,
-				library::name::in_vec,
-			),
-			LibrarySmartFilter::Path { path } => path.into_params(
-				library::path::equals,
-				library::path::contains,
-				library::path::in_vec,
-			),
-		}
-	}
-}
-
+#[generate_smart_filter]
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
 #[serde(untagged)]
+#[prisma_table("series_metadata")]
 pub enum SeriesMetadataSmartFilter {
-	MetaType { meta_type: Filter<String> },
-	Publisher { publisher: Filter<String> },
-	Status { status: Filter<String> },
-	AgeRating { age_rating: Filter<i32> },
-	Volume { volume: Filter<i32> },
-}
-
-impl SeriesMetadataSmartFilter {
-	pub fn into_params(self) -> series_metadata::WhereParam {
-		match self {
-			SeriesMetadataSmartFilter::MetaType { meta_type } => meta_type.into_params(
-				series_metadata::meta_type::equals,
-				series_metadata::meta_type::contains,
-				series_metadata::meta_type::in_vec,
-			),
-			SeriesMetadataSmartFilter::Publisher { publisher } => publisher
-				.into_optional_params(
-					series_metadata::publisher::equals,
-					series_metadata::publisher::contains,
-					series_metadata::publisher::in_vec,
-				),
-			SeriesMetadataSmartFilter::Status { status } => status.into_optional_params(
-				series_metadata::status::equals,
-				series_metadata::status::contains,
-				series_metadata::status::in_vec,
-			),
-			SeriesMetadataSmartFilter::AgeRating { age_rating } => age_rating
-				.into_optional_numeric_params(
-					series_metadata::age_rating::equals,
-					series_metadata::age_rating::gt,
-					series_metadata::age_rating::gte,
-					series_metadata::age_rating::lt,
-					series_metadata::age_rating::lte,
-				),
-			SeriesMetadataSmartFilter::Volume { volume } => volume
-				.into_optional_numeric_params(
-					series_metadata::volume::equals,
-					series_metadata::volume::gt,
-					series_metadata::volume::gte,
-					series_metadata::volume::lt,
-					series_metadata::volume::lte,
-				),
-		}
-	}
+	MetaType {
+		meta_type: String,
+	},
+	#[is_optional]
+	Publisher {
+		publisher: String,
+	},
+	#[is_optional]
+	Status {
+		status: String,
+	},
+	#[is_optional]
+	AgeRating {
+		age_rating: i32,
+	},
+	#[is_optional]
+	Volume {
+		volume: i32,
+	},
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
@@ -349,150 +312,50 @@ impl SeriesSmartFilter {
 	}
 }
 
+#[generate_smart_filter]
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
 #[serde(untagged)]
+#[prisma_table("media_metadata")]
 pub enum MediaMetadataSmartFilter {
-	Publisher { publisher: Filter<String> },
-	Genre { genre: Filter<String> },
-	Characters { characters: Filter<String> },
-	Colorists { colorists: Filter<String> },
-	Writers { writers: Filter<String> },
-	Pencillers { pencillers: Filter<String> },
-	Letterers { letterers: Filter<String> },
-	Inkers { inkers: Filter<String> },
-	Editors { editors: Filter<String> },
+	#[is_optional]
+	Publisher { publisher: String },
+	#[is_optional]
+	Genre { genre: String },
+	#[is_optional]
+	Characters { characters: String },
+	#[is_optional]
+	Colorists { colorists: String },
+	#[is_optional]
+	Writers { writers: String },
+	#[is_optional]
+	Pencillers { pencillers: String },
+	#[is_optional]
+	Letterers { letterers: String },
+	#[is_optional]
+	Inkers { inkers: String },
+	#[is_optional]
+	Editors { editors: String },
 	// FIXME: Current implementationm makes it awkward to support numeric filters
-	AgeRating { age_rating: Filter<i32> },
-	Year { year: Filter<i32> },
-	Month { month: Filter<i32> },
-	Day { day: Filter<i32> },
+	#[is_optional]
+	AgeRating { age_rating: i32 },
+	#[is_optional]
+	Year { year: i32 },
+	#[is_optional]
+	Month { month: i32 },
+	#[is_optional]
+	Day { day: i32 },
 }
 
-impl MediaMetadataSmartFilter {
-	pub fn into_params(self) -> media_metadata::WhereParam {
-		match self {
-			MediaMetadataSmartFilter::Publisher { publisher } => publisher
-				.into_optional_params(
-					media_metadata::publisher::equals,
-					media_metadata::publisher::contains,
-					media_metadata::publisher::in_vec,
-				),
-			MediaMetadataSmartFilter::Genre { genre } => genre.into_optional_params(
-				media_metadata::genre::equals,
-				media_metadata::genre::contains,
-				media_metadata::genre::in_vec,
-			),
-			MediaMetadataSmartFilter::Characters { characters } => characters
-				.into_optional_params(
-					media_metadata::characters::equals,
-					media_metadata::characters::contains,
-					media_metadata::characters::in_vec,
-				),
-			MediaMetadataSmartFilter::Colorists { colorists } => colorists
-				.into_optional_params(
-					media_metadata::colorists::equals,
-					media_metadata::colorists::contains,
-					media_metadata::colorists::in_vec,
-				),
-			MediaMetadataSmartFilter::Writers { writers } => writers
-				.into_optional_params(
-					media_metadata::writers::equals,
-					media_metadata::writers::contains,
-					media_metadata::writers::in_vec,
-				),
-			MediaMetadataSmartFilter::Pencillers { pencillers } => pencillers
-				.into_optional_params(
-					media_metadata::pencillers::equals,
-					media_metadata::pencillers::contains,
-					media_metadata::pencillers::in_vec,
-				),
-			MediaMetadataSmartFilter::Letterers { letterers } => letterers
-				.into_optional_params(
-					media_metadata::letterers::equals,
-					media_metadata::letterers::contains,
-					media_metadata::letterers::in_vec,
-				),
-			MediaMetadataSmartFilter::Inkers { inkers } => inkers.into_optional_params(
-				media_metadata::inkers::equals,
-				media_metadata::inkers::contains,
-				media_metadata::inkers::in_vec,
-			),
-			MediaMetadataSmartFilter::Editors { editors } => editors
-				.into_optional_params(
-					media_metadata::editors::equals,
-					media_metadata::editors::contains,
-					media_metadata::editors::in_vec,
-				),
-			MediaMetadataSmartFilter::AgeRating { age_rating } => age_rating
-				.into_optional_numeric_params(
-					media_metadata::age_rating::equals,
-					media_metadata::age_rating::gt,
-					media_metadata::age_rating::gte,
-					media_metadata::age_rating::lt,
-					media_metadata::age_rating::lte,
-				),
-			MediaMetadataSmartFilter::Year { year } => year.into_optional_numeric_params(
-				media_metadata::year::equals,
-				media_metadata::year::gt,
-				media_metadata::year::gte,
-				media_metadata::year::lt,
-				media_metadata::year::lte,
-			),
-			MediaMetadataSmartFilter::Month { month } => month
-				.into_optional_numeric_params(
-					media_metadata::month::equals,
-					media_metadata::month::gt,
-					media_metadata::month::gte,
-					media_metadata::month::lt,
-					media_metadata::month::lte,
-				),
-			MediaMetadataSmartFilter::Day { day } => day.into_optional_numeric_params(
-				media_metadata::day::equals,
-				media_metadata::day::gt,
-				media_metadata::day::gte,
-				media_metadata::day::lt,
-				media_metadata::day::lte,
-			),
-		}
-	}
-}
-
+#[generate_smart_filter]
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
 #[serde(untagged)]
+#[prisma_table("media")]
 pub enum MediaSmartFilter {
-	Name { name: Filter<String> },
-	Extension { extension: Filter<String> },
-	Path { path: Filter<String> },
+	Name { name: String },
+	Extension { extension: String },
+	Path { path: String },
 	Metadata { metadata: MediaMetadataSmartFilter },
 	Series { series: SeriesSmartFilter },
-}
-
-impl MediaSmartFilter {
-	pub fn into_params(self) -> media::WhereParam {
-		match self {
-			MediaSmartFilter::Name { name } => name.into_params(
-				media::name::equals,
-				media::name::contains,
-				media::name::in_vec,
-			),
-			MediaSmartFilter::Extension { extension } => extension.into_params(
-				media::extension::equals,
-				media::extension::contains,
-				media::extension::in_vec,
-			),
-			MediaSmartFilter::Path { path } => path.into_params(
-				media::path::equals,
-				media::path::contains,
-				media::path::in_vec,
-			),
-			MediaSmartFilter::Metadata { metadata } => {
-				media::metadata::is(vec![metadata.into_params()])
-			},
-			MediaSmartFilter::Series { series } => {
-				media::series::is(vec![series.into_params()])
-			},
-		}
-	}
 }
 
 #[cfg(test)]

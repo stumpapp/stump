@@ -1,4 +1,4 @@
-import { Button, cn, cx, Tabs, Text } from '@stump/components'
+import { Alert, Button, cn, cx, Tabs, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useFormContext, useWatch } from 'react-hook-form'
 
@@ -24,6 +24,10 @@ export default function SmartListQueryBuilder({ disabled }: Props) {
 	return (
 		<>
 			<div className={cn('flex flex-col space-y-4', { 'cursor-not-allowed opacity-65': disabled })}>
+				<Alert level="info" icon="warning">
+					<Alert.Content>{t(getKey('uiPerformance'))}</Alert.Content>
+				</Alert>
+
 				<GroupBy disabled={disabled} />
 
 				<div className={cn('flex items-center space-x-3.5', { 'pointer-events-none': disabled })}>

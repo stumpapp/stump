@@ -636,6 +636,7 @@
 				}
 			},
 			"queryBuilder": {
+				"uiPerformance": "This feature is missing performance optimizations on the UI and may be slow with filters which produce large result sets. This will be improved in the future",
 				"rootJoiner": {
 					"and": {
 						"label": "AND",

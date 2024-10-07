@@ -62,7 +62,7 @@ fn extract_prisma_table(attrs: &mut Vec<Attribute>) -> Ident {
 }
 
 struct EnumVariant {
-	pub span: Span,
+	//pub span: Span,
 	pub variable_name: Ident,
 	pub variable_inner_name: Ident,
 	pub variable_type: Type,
@@ -95,7 +95,7 @@ fn destructure_enum(enum_data: &DataEnum) -> DestructedEnum {
 		};
 
 		variants.push(EnumVariant {
-			span: variant.span(),
+			//span: variant.span(),
 			variable_name: variable_name.clone(),
 			variable_inner_name,
 			variable_type: field.ty.clone(),

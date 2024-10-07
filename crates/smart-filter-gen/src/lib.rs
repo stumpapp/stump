@@ -198,7 +198,6 @@ fn generate_match_arm(
 	variant_data: &EnumVariant,
 	prisma_table: &Ident,
 ) -> proc_macro2::TokenStream {
-	let ty = variant_data.variable_type.clone();
 	match &variant_data.variable_type {
 		Type::Path(type_path) => {
 			if let Some(type_ident) = type_path.path.segments.last() {

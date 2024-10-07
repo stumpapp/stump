@@ -211,7 +211,7 @@ export type SmartList = { id: string; name: string; description: string | null; 
 
 export type SmartFilter<T> = { groups: FilterGroup<T>[]; joiner?: FilterJoin }
 
-export type MediaSmartFilter = { name: Filter<string> } | { extension: Filter<string> } | { path: Filter<string> } | { metadata: MediaMetadataSmartFilter } | { series: SeriesSmartFilter }
+export type MediaSmartFilter = { name: Filter<string> } | { size: Filter<number> } | { extension: Filter<string> } | { created_at: Filter<string> } | { updated_at: Filter<string> } | { status: Filter<string> } | { path: Filter<string> } | { pages: Filter<number> } | { metadata: MediaMetadataSmartFilter } | { series: SeriesSmartFilter }
 
 export type MediaMetadataSmartFilter = { publisher: Filter<string> } | { genre: Filter<string> } | { characters: Filter<string> } | { colorists: Filter<string> } | { writers: Filter<string> } | { pencillers: Filter<string> } | { letterers: Filter<string> } | { inkers: Filter<string> } | { editors: Filter<string> } | { age_rating: Filter<number> } | { year: Filter<number> } | { month: Filter<number> } | { day: Filter<number> }
 

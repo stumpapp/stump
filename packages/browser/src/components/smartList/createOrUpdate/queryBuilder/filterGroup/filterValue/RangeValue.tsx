@@ -1,6 +1,7 @@
 import { CheckBox, DatePicker, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { useFormContext } from 'react-hook-form'
+import { useMemo } from 'react'
+import { useFormContext, useFormState } from 'react-hook-form'
 import { useMediaMatch } from 'rooks'
 import { match } from 'ts-pattern'
 
@@ -27,6 +28,12 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 
 	const { t } = useLocaleContext()
 	const { groupIdx } = useFilterGroupContext()
+	const { errors } = useFormState({ control: form.control })
+
+	const formError = useMemo(
+		() => errors.filters?.groups?.[groupIdx]?.filters?.[idx],
+		[errors, groupIdx, idx],
+	)
 
 	const changeHandler = (key: 'from' | 'to') => (value?: Date | number) => {
 		if (value === undefined) {
@@ -37,40 +44,58 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 	}
 
 	const renderValue = () => {
-		return match(field)
-			.when(isDateField, () => (
-				<>
-					<DatePicker
-						placeholder={t(getKey('from.date'))}
-						selected={value?.from as Date}
-						onChange={changeHandler('from')}
-						className="md:w-52"
-						popover={{
-							align: isAtLeastMedium ? 'start' : 'center',
-						}}
-					/>
-					<DatePicker
-						placeholder={t(getKey('to.date'))}
-						selected={value?.to as Date}
-						onChange={changeHandler('to')}
-						className="md:w-52"
-						popover={{
-							align: isAtLeastMedium ? 'start' : 'center',
-						}}
-					/>
-				</>
-			))
-			.when(isNumberField, () => (
-				<>
-					<Input
-						placeholder={t(getKey('from.number'))}
-						type="number"
-						containerClassName="md:w-52"
-					/>
-					<Input placeholder={t(getKey('to.number'))} type="number" containerClassName="md:w-52" />
-				</>
-			))
-			.otherwise(() => null)
+		return (
+			match(field)
+				.when(isDateField, () => (
+					<>
+						<DatePicker
+							placeholder={t(getKey('from.date'))}
+							selected={value?.from as Date}
+							onChange={changeHandler('from')}
+							className="md:w-52"
+							popover={{
+								align: isAtLeastMedium ? 'start' : 'center',
+							}}
+						/>
+						<DatePicker
+							placeholder={t(getKey('to.date'))}
+							selected={value?.to as Date}
+							onChange={changeHandler('to')}
+							className="md:w-52"
+							popover={{
+								align: isAtLeastMedium ? 'start' : 'center',
+							}}
+						/>
+					</>
+				))
+				// TODO(ux): show the error somewhere. The input in error state with message will disalign the container, which is just
+				// a bit annoying. Ideally we can render the error message somewhere else without disrupting the layout.
+				.when(isNumberField, () => (
+					<>
+						<Input
+							placeholder={t(getKey('from.number'))}
+							type="number"
+							containerClassName="md:w-52"
+							isInvalid={!!formError?.value?.message}
+							{...form.register(`filters.groups.${groupIdx}.filters.${idx}.value.from`, {
+								valueAsNumber: true,
+							})}
+							// errorMessage={formError?.value?.message}
+						/>
+						<Input
+							placeholder={t(getKey('to.number'))}
+							type="number"
+							containerClassName="md:w-52"
+							isInvalid={!!formError?.value?.message}
+							{...form.register(`filters.groups.${groupIdx}.filters.${idx}.value.to`, {
+								valueAsNumber: true,
+							})}
+							// errorMessage={formError?.value?.message}
+						/>
+					</>
+				))
+				.otherwise(() => null)
+		)
 	}
 
 	return (

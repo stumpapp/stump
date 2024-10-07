@@ -23,6 +23,7 @@ type DatePickerProps = {
 
 // TODO: presets
 // TODO: width/sizes
+// TODO: error state
 export function DatePicker({
 	label,
 	selected,

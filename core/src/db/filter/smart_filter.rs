@@ -1,6 +1,10 @@
 use std::{fmt::Display, str::FromStr};
 
-use prisma_client_rust::{and, not, or};
+use prisma_client_rust::{
+	and,
+	chrono::{DateTime, FixedOffset},
+	not, or,
+};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
@@ -149,6 +153,103 @@ impl Filter<i32> {
 		match self {
 			Filter::Equals { equals } => equals_fn(Some(equals)),
 			Filter::Not { not } => not![equals_fn(Some(not))],
+			Filter::NumericFilter(numeric_filter) => match numeric_filter {
+				NumericFilter::Gt { gt } => gt_fn(gt),
+				NumericFilter::Gte { gte } => gte_fn(gte),
+				NumericFilter::Lt { lt } => lt_fn(lt),
+				NumericFilter::Lte { lte } => lte_fn(lte),
+				NumericFilter::Range(range) => {
+					if range.inclusive {
+						and![gte_fn(range.from), lte_fn(range.to)]
+					} else {
+						and![gt_fn(range.from), lt_fn(range.to)]
+					}
+				},
+			},
+			_ => unreachable!("Non-numeric filters should be handled elsewhere"),
+		}
+	}
+}
+
+impl Filter<i64> {
+	pub fn into_numeric_params<WhereParam>(
+		self,
+		equals_fn: fn(i64) -> WhereParam,
+		gt_fn: fn(i64) -> WhereParam,
+		gte_fn: fn(i64) -> WhereParam,
+		lt_fn: fn(i64) -> WhereParam,
+		lte_fn: fn(i64) -> WhereParam,
+	) -> WhereParam
+	where
+		WhereParam: From<prisma_client_rust::Operator<WhereParam>>,
+	{
+		match self {
+			Filter::Equals { equals } => equals_fn(equals),
+			Filter::Not { not } => not![equals_fn(not)],
+			Filter::NumericFilter(numeric_filter) => match numeric_filter {
+				NumericFilter::Gt { gt } => gt_fn(gt),
+				NumericFilter::Gte { gte } => gte_fn(gte),
+				NumericFilter::Lt { lt } => lt_fn(lt),
+				NumericFilter::Lte { lte } => lte_fn(lte),
+				NumericFilter::Range(range) => {
+					if range.inclusive {
+						and![gte_fn(range.from), lte_fn(range.to)]
+					} else {
+						and![gt_fn(range.from), lt_fn(range.to)]
+					}
+				},
+			},
+			_ => unreachable!("Non-numeric filters should be handled elsewhere"),
+		}
+	}
+
+	pub fn into_optional_numeric_params<WhereParam>(
+		self,
+		equals_fn: fn(Option<i64>) -> WhereParam,
+		gt_fn: fn(i64) -> WhereParam,
+		gte_fn: fn(i64) -> WhereParam,
+		lt_fn: fn(i64) -> WhereParam,
+		lte_fn: fn(i64) -> WhereParam,
+	) -> WhereParam
+	where
+		WhereParam: From<prisma_client_rust::Operator<WhereParam>>,
+	{
+		match self {
+			Filter::Equals { equals } => equals_fn(Some(equals)),
+			Filter::Not { not } => not![equals_fn(Some(not))],
+			Filter::NumericFilter(numeric_filter) => match numeric_filter {
+				NumericFilter::Gt { gt } => gt_fn(gt),
+				NumericFilter::Gte { gte } => gte_fn(gte),
+				NumericFilter::Lt { lt } => lt_fn(lt),
+				NumericFilter::Lte { lte } => lte_fn(lte),
+				NumericFilter::Range(range) => {
+					if range.inclusive {
+						and![gte_fn(range.from), lte_fn(range.to)]
+					} else {
+						and![gt_fn(range.from), lt_fn(range.to)]
+					}
+				},
+			},
+			_ => unreachable!("Non-numeric filters should be handled elsewhere"),
+		}
+	}
+}
+
+impl Filter<DateTime<FixedOffset>> {
+	pub fn into_numeric_params<WhereParam>(
+		self,
+		equals_fn: fn(DateTime<FixedOffset>) -> WhereParam,
+		gt_fn: fn(DateTime<FixedOffset>) -> WhereParam,
+		gte_fn: fn(DateTime<FixedOffset>) -> WhereParam,
+		lt_fn: fn(DateTime<FixedOffset>) -> WhereParam,
+		lte_fn: fn(DateTime<FixedOffset>) -> WhereParam,
+	) -> WhereParam
+	where
+		WhereParam: From<prisma_client_rust::Operator<WhereParam>>,
+	{
+		match self {
+			Filter::Equals { equals } => equals_fn(equals),
+			Filter::Not { not } => not![equals_fn(not)],
 			Filter::NumericFilter(numeric_filter) => match numeric_filter {
 				NumericFilter::Gt { gt } => gt_fn(gt),
 				NumericFilter::Gte { gte } => gte_fn(gte),
@@ -460,11 +561,37 @@ impl MediaMetadataSmartFilter {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
 #[serde(untagged)]
 pub enum MediaSmartFilter {
-	Name { name: Filter<String> },
-	Extension { extension: Filter<String> },
-	Path { path: Filter<String> },
-	Metadata { metadata: MediaMetadataSmartFilter },
-	Series { series: SeriesSmartFilter },
+	Name {
+		name: Filter<String>,
+	},
+	Size {
+		size: Filter<i64>,
+	},
+	Extension {
+		extension: Filter<String>,
+	},
+	CreatedAt {
+		created_at: Filter<DateTime<FixedOffset>>,
+	},
+	UpdatedAt {
+		updated_at: Filter<DateTime<FixedOffset>>,
+	},
+	Status {
+		status: Filter<String>,
+	},
+	Path {
+		path: Filter<String>,
+	},
+	Pages {
+		pages: Filter<i32>,
+	},
+	Metadata {
+		metadata: MediaMetadataSmartFilter,
+	},
+	// Tags
+	Series {
+		series: SeriesSmartFilter,
+	},
 }
 
 impl MediaSmartFilter {
@@ -484,6 +611,39 @@ impl MediaSmartFilter {
 				media::path::equals,
 				media::path::contains,
 				media::path::in_vec,
+			),
+			MediaSmartFilter::Size { size } => size.into_numeric_params(
+				media::size::equals,
+				media::size::gt,
+				media::size::gte,
+				media::size::lt,
+				media::size::lte,
+			),
+			MediaSmartFilter::CreatedAt { created_at } => created_at.into_numeric_params(
+				media::created_at::equals,
+				media::created_at::gt,
+				media::created_at::gte,
+				media::created_at::lt,
+				media::created_at::lte,
+			),
+			MediaSmartFilter::UpdatedAt { updated_at } => updated_at.into_numeric_params(
+				media::updated_at::equals,
+				media::updated_at::gt,
+				media::updated_at::gte,
+				media::updated_at::lt,
+				media::updated_at::lte,
+			),
+			MediaSmartFilter::Pages { pages } => pages.into_numeric_params(
+				media::pages::equals,
+				media::pages::gt,
+				media::pages::gte,
+				media::pages::lt,
+				media::pages::lte,
+			),
+			MediaSmartFilter::Status { status } => status.into_params(
+				media::status::equals,
+				media::status::contains,
+				media::status::in_vec,
 			),
 			MediaSmartFilter::Metadata { metadata } => {
 				media::metadata::is(vec![metadata.into_params()])
@@ -571,6 +731,30 @@ mod tests {
 					},
 				],
 			}
+		);
+	}
+
+	#[test]
+	fn it_serializes_range_correctly() {
+		let filter: FilterGroup<MediaSmartFilter> = FilterGroup::And {
+			and: vec![MediaSmartFilter::Metadata {
+				metadata: MediaMetadataSmartFilter::AgeRating {
+					age_rating: Filter::NumericFilter(NumericFilter::Range(
+						NumericRange {
+							from: 10,
+							to: 20,
+							inclusive: true,
+						},
+					)),
+				},
+			}],
+		};
+
+		let json = serde_json::to_string(&filter).unwrap();
+
+		assert_eq!(
+			json,
+			r#"{"and":[{"metadata":{"age_rating":{"from":10,"to":20,"inclusive":true}}}]}"#
 		);
 	}
 

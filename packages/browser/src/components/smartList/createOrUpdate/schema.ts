@@ -331,7 +331,7 @@ export const intoForm = ({
 	filters,
 	joiner,
 	default_grouping,
-}: SmartList): SmartListFormSchema => ({
+}: Omit<SmartList, 'saved_views'>): SmartListFormSchema => ({
 	description: description || undefined,
 	filters: {
 		groups: filters.groups.map(intoFormGroup),

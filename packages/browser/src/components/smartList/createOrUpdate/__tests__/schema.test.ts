@@ -417,9 +417,8 @@ describe('schema', () => {
 							},
 						} satisfies MediaSmartFilter,
 						{
-							// @ts-expect-error: I will add this TODO(smart-list): add this
 							created_at: {
-								lt: 42,
+								lt: new Date('2021-01-01').toISOString(),
 							},
 						} satisfies MediaSmartFilter,
 					],
@@ -440,7 +439,7 @@ describe('schema', () => {
 						field: 'created_at',
 						operation: 'lt',
 						source: 'book',
-						value: 42,
+						value: new Date('2021-01-01').toISOString(),
 					},
 				],
 				joiner: 'or',
@@ -551,10 +550,7 @@ describe('schema', () => {
 								],
 							},
 							{
-								or: [
-									// @ts-expect-error: I will add this
-									{ created_at: { lt: 42 } },
-								],
+								or: [{ created_at: { lt: new Date('2021-01-01').toISOString() } }],
 							},
 						],
 						joiner: 'OR',
@@ -591,7 +587,7 @@ describe('schema', () => {
 									field: 'created_at',
 									operation: 'lt',
 									source: 'book',
-									value: 42,
+									value: new Date('2021-01-01').toISOString(),
 								},
 							],
 							joiner: 'or',

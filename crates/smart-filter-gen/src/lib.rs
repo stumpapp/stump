@@ -1,9 +1,5 @@
-use proc_macro2::Span;
 use quote::{format_ident, quote};
-use syn::{
-	parse_macro_input, spanned::Spanned, Attribute, Data, DataEnum, DeriveInput, Ident,
-	Type,
-};
+use syn::{parse_macro_input, Attribute, Data, DataEnum, DeriveInput, Ident, Type};
 
 #[proc_macro_attribute]
 pub fn generate_smart_filter(

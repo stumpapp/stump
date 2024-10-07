@@ -6,6 +6,45 @@ use syn::{parse_macro_input, Attribute, Data, DeriveInput, Ident};
 
 use crate::{enum_data::DestructedEnum, gen_match_arms::generate_match_arm};
 
+/// Used to generate a smart filter from an enum definition.
+///
+/// This macro generates a new enum where each variant wraps the original type with
+/// a `Filter` type. It also implements a conversion method `into_params`, which
+/// transforms the enum into a Prisma filter parameter.
+///
+/// # Examples
+///
+/// To apply the macro to an enum `MyFilter`, apply the macro attribute to the top
+/// of the enum and define the `prisma_table` attribute:
+/// ```
+/// #[generate_smart_filter]
+/// #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
+/// #[serde(untagged)]
+/// #[prisma_table("my_table")]
+/// enum MyFilter {
+///   Age { age: u32 },
+///   Name { name: String },
+/// }
+/// ```
+///
+/// This will generate the following code:
+/// ```
+/// #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
+/// #[serde(untagged)]
+/// enum MyFilter {
+///   Age { age: Filter<u32> },
+///   Name { name: Filter<String> },
+/// }
+///
+/// impl MyFilter {
+///   pub fn into_params(self) -> prisma::WhereParam { ... }
+/// }
+/// ```
+///
+/// # Notes
+///
+/// This is an attribute macro and thus will _replace_ the entire definition that
+/// it is applied to with its own generated content.
 #[proc_macro_attribute]
 pub fn generate_smart_filter(
 	_attrs: proc_macro::TokenStream,
@@ -37,7 +76,7 @@ pub fn generate_smart_filter(
 	}
 }
 
-/// A helper function to extract the prisma_table attribute value.
+/// A helper function to extract the `#[prisma_table = "value"]` attribute value.
 fn extract_prisma_table(attrs: &mut Vec<Attribute>) -> Ident {
 	let mut prisma_table: Option<String> = None;
 
@@ -62,6 +101,12 @@ fn extract_prisma_table(attrs: &mut Vec<Attribute>) -> Ident {
 	format_ident!("{prisma_table}")
 }
 
+/// Generates the enum portion of the smart filter macro output.
+///
+/// This function automatically wraps inputs with `Filter` so that for a field having
+/// type `T` you'll end up with an enum being created with inner type `Filter<T>` This
+/// only applies to types `String` and number types (i.e., `u32`, `i32`, etc.), other
+/// types are assumed to be their own smart filters and are not wrapped.
 fn gen_smart_filter_enum(
 	ident: &Ident,
 	data: &DestructedEnum,
@@ -95,6 +140,18 @@ fn gen_smart_filter_enum(
 	tokens
 }
 
+/// Generates the `impl` block for the generated smart filter enum.
+///
+/// This will look like:
+/// ```
+/// impl [ENUM NAME] {
+///   pub fn into_params(self) -> [prisma_table]::WhereParam {
+///     match self {
+///       [GENERATED MATCH TOKENS]
+///     }
+///   }
+/// }
+/// ```
 fn gen_smart_filter_impls(
 	ident: &Ident,
 	data: &DestructedEnum,

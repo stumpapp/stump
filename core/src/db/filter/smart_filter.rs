@@ -735,6 +735,35 @@ mod tests {
 	}
 
 	#[test]
+	fn it_serializes_number_correctly() {
+		let filter: FilterGroup<MediaSmartFilter> = FilterGroup::And {
+			and: vec![MediaSmartFilter::Size {
+				size: Filter::NumericFilter(NumericFilter::Gte { gte: 3000 }),
+			}],
+		};
+
+		let json = serde_json::to_string(&filter).unwrap();
+
+		assert_eq!(json, r#"{"and":[{"size":{"gte":3000}}]}"#);
+	}
+
+	#[test]
+	fn it_deserializes_number_correctly() {
+		let json = r#"{"or":[{"size":{"gte":3000}}]}"#;
+
+		let filter: FilterGroup<MediaSmartFilter> = serde_json::from_str(json).unwrap();
+
+		assert_eq!(
+			filter,
+			FilterGroup::Or {
+				or: vec![MediaSmartFilter::Size {
+					size: Filter::NumericFilter(NumericFilter::Gte { gte: 3000 }),
+				}],
+			}
+		);
+	}
+
+	#[test]
 	fn it_serializes_range_correctly() {
 		let filter: FilterGroup<MediaSmartFilter> = FilterGroup::And {
 			and: vec![MediaSmartFilter::Metadata {
@@ -755,6 +784,30 @@ mod tests {
 		assert_eq!(
 			json,
 			r#"{"and":[{"metadata":{"age_rating":{"from":10,"to":20,"inclusive":true}}}]}"#
+		);
+	}
+
+	#[test]
+	fn it_deserializes_range_correctly() {
+		let json = r#"{"and":[{"metadata":{"age_rating":{"from":10,"to":20,"inclusive":true}}}]}"#;
+
+		let filter: FilterGroup<MediaSmartFilter> = serde_json::from_str(json).unwrap();
+
+		assert_eq!(
+			filter,
+			FilterGroup::And {
+				and: vec![MediaSmartFilter::Metadata {
+					metadata: MediaMetadataSmartFilter::AgeRating {
+						age_rating: Filter::NumericFilter(NumericFilter::Range(
+							NumericRange {
+								from: 10,
+								to: 20,
+								inclusive: true,
+							},
+						)),
+					},
+				}],
+			}
 		);
 	}
 

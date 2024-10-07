@@ -51,12 +51,16 @@ export default function FilterValue({ idx }: Props) {
 
 	const isNumber = isNumberField(fieldDef.field)
 
+	// TODO: isDateField -> render single picker
+
 	return (
 		<Input
 			type={isNumber ? 'number' : 'text'}
 			placeholder={t(getKey('placeholder'))}
 			className={cn({ 'md:w-52': isNumber })}
-			{...form.register(`filters.groups.${groupIdx}.filters.${idx}.value`)}
+			{...form.register(`filters.groups.${groupIdx}.filters.${idx}.value`, {
+				valueAsNumber: isNumber,
+			})}
 		/>
 	)
 }

@@ -80,7 +80,6 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 							{...form.register(`filters.groups.${groupIdx}.filters.${idx}.value.from`, {
 								valueAsNumber: true,
 							})}
-							// errorMessage={formError?.value?.message}
 						/>
 						<Input
 							placeholder={t(getKey('to.number'))}
@@ -90,7 +89,6 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 							{...form.register(`filters.groups.${groupIdx}.filters.${idx}.value.to`, {
 								valueAsNumber: true,
 							})}
-							// errorMessage={formError?.value?.message}
 						/>
 					</>
 				))

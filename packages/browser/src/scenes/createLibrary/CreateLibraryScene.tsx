@@ -6,11 +6,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
-import { CreateLibraryForm, CreateOrUpdateLibrarySchema } from '@/components/library/createOrUpdate'
+import { CreateOrUpdateLibrarySchema } from '@/components/library/createOrUpdate'
 import { SteppedFormContext } from '@/components/steppedForm'
 import SteppedFormSceneHeader from '@/components/steppedForm/SteppedFormSceneHeader'
 import { useConfetti } from '@/hooks/useConfetti'
 import paths from '@/paths'
+
+import CreateLibraryForm from './CreateLibraryForm'
 
 export default function CreateLibraryScene() {
 	const navigate = useNavigate()

@@ -22,7 +22,8 @@ pub(crate) fn generate_match_arm(
 						);
 					},
 					// Handle Number types
-					"u64" | "u32" | "u16" | "u8" | "i64" | "i32" | "i16" | "i8" => {
+					"u64" | "u32" | "u16" | "u8" | "i64" | "i32" | "i16" | "i8"
+					| "DateTime" => {
 						return generate_number_match_arm(
 							ident,
 							variant_data,

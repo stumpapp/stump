@@ -63,7 +63,7 @@ pub(crate) fn should_filter_type(ty: &Type) -> bool {
 				match ident_str.as_str() {
 					// If it's a String or numeric type, we want to add a Filter<T>
 					"String" | "u64" | "u32" | "u16" | "u8" | "i64" | "i32" | "i16"
-					| "i8" => {
+					| "i8" | "DateTime" => {
 						return true;
 					},
 					// Otherwise it's already a filter

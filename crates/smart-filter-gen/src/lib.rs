@@ -17,7 +17,7 @@ use crate::{enum_data::DestructedEnum, gen_match_arms::generate_match_arm};
 /// To apply the macro to an enum `MyFilter`, apply the macro attribute to the top
 /// of the enum and define the `prisma_table` attribute:
 ///
-/// ```no_run
+/// ```
 /// #[generate_smart_filter]
 /// #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
 /// #[serde(untagged)]
@@ -30,7 +30,7 @@ use crate::{enum_data::DestructedEnum, gen_match_arms::generate_match_arm};
 ///
 /// This will generate the following code:
 ///
-/// ```no_run
+/// ```
 /// #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
 /// #[serde(untagged)]
 /// enum MyFilter {

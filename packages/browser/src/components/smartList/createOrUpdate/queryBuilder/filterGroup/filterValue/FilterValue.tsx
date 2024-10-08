@@ -1,10 +1,11 @@
-import { cn, Input } from '@stump/components'
+import { cn, DatePicker, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import React, { useMemo } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { match } from 'ts-pattern'
 
 import {
+	isDateField,
 	isListOperator,
 	isNumberField,
 	isNumberOperator,
@@ -19,7 +20,7 @@ type Props = {
 	idx: number
 }
 
-type FieldDef = SmartListFormSchema['filters']['groups'][number]['filters'][number]
+export type FieldDef = SmartListFormSchema['filters']['groups'][number]['filters'][number]
 
 export default function FilterValue({ idx }: Props) {
 	const { t } = useLocaleContext()
@@ -49,9 +50,24 @@ export default function FilterValue({ idx }: Props) {
 		return <RangeValue def={fieldDef as RangeFilterDef} idx={idx} />
 	}
 
-	const isNumber = isNumberField(fieldDef.field)
+	if (isDateField(fieldDef.field)) {
+		return (
+			<DatePicker
+				placeholder={t(getKey('date'))}
+				selected={fieldDef.value as Date}
+				onChange={(value) => {
+					if (value) {
+						form.setValue(`filters.groups.${groupIdx}.filters.${idx}.value`, value)
+					} else {
+						form.resetField(`filters.groups.${groupIdx}.filters.${idx}.value`)
+					}
+				}}
+				className="md:w-52"
+			/>
+		)
+	}
 
-	// TODO: isDateField -> render single picker
+	const isNumber = isNumberField(fieldDef.field)
 
 	return (
 		<Input

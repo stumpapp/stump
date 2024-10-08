@@ -71,12 +71,16 @@ export default function OperatorSelect({ idx }: Props) {
 				label: 'Equality',
 				operators: operators,
 			},
-			{
-				label: 'List',
-				operators: arrayGroup,
-			},
+			...(!isDateField(fieldDef.field)
+				? [
+						{
+							label: 'List',
+							operators: arrayGroup,
+						},
+					]
+				: []),
 		]
-	}, [operators])
+	}, [operators, fieldDef])
 
 	useEffect(() => {
 		const allOperators = [...operators, ...operatorGroups.list]

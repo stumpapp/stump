@@ -21,8 +21,8 @@ mod tests {
 
 	use super::v1::{
 		auth::*, book_club::*, emailer::*, epub::*, job::*, library::*, media::*,
-		metadata::*, series::*, smart_list::*, user::*, ClaimResponse, StumpVersion,
-		UpdateCheck,
+		metadata::*, series::*, smart_list::*, stats::*, user::*, ClaimResponse,
+		StumpVersion, UpdateCheck,
 	};
 
 	#[allow(dead_code)]
@@ -170,6 +170,14 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<CreateOrUpdateSmartListView>()?).as_bytes(),
 		)?;
+
+		file.write_all(
+			format!("{}\n\n", ts_export::<CompletedBooksRawQueryData>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<TopBooksRawQueryData>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<TopBookFormatsData>()?).as_bytes())?;
 
 		Ok(())
 	}

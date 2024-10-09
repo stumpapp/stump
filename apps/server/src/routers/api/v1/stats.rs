@@ -7,6 +7,7 @@ use axum::{
 use chrono::{DateTime, FixedOffset};
 use prisma_client_rust::{raw, PrismaValue};
 use serde::{Deserialize, Serialize};
+use specta::Type;
 
 use crate::{
 	config::state::AppState, errors::APIResult, middleware::auth::auth_middleware,
@@ -18,7 +19,8 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			"/stats",
 			Router::new()
 				.route("/completed-books", get(completed_books))
-				.route("/top-books", get(top_books)),
+				.route("/top-books", get(top_books))
+				.route("/top-formats", get(top_book_formats)),
 		)
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
@@ -44,8 +46,8 @@ impl Default for DateRange {
 
 type BookID = String;
 
-#[derive(Deserialize, Serialize)]
-struct CompletedBooksRawQueryData {
+#[derive(Deserialize, Serialize, Type)]
+pub struct CompletedBooksRawQueryData {
 	book_id: BookID,
 	read_by: String,
 	started_at: DateTime<FixedOffset>,
@@ -77,8 +79,8 @@ async fn completed_books(
 	Ok(Json(raw_data))
 }
 
-#[derive(Deserialize, Serialize)]
-struct TopBooksRawQueryData {
+#[derive(Deserialize, Serialize, Type)]
+pub struct TopBooksRawQueryData {
 	book_id: BookID,
 	filename: String,
 	#[serde(skip_serializing_if = "Option::is_none")]
@@ -88,7 +90,7 @@ struct TopBooksRawQueryData {
 
 // TODO: validate limt (> 0)
 #[derive(Deserialize)]
-struct TopBooksQueryParams {
+pub struct TopBooksQueryParams {
 	/// The number of books to return
 	limit: i64,
 }
@@ -131,6 +133,39 @@ async fn top_books(
 	Ok(Json(raw_data))
 }
 
+// TODO: params for library / series scoped stats
+
+#[derive(Deserialize, Serialize, Type)]
+pub struct TopBookFormatsData {
+	extension: String,
+	count: i64,
+}
+
+async fn top_book_formats(
+	State(ctx): State<AppState>,
+) -> APIResult<Json<Vec<TopBookFormatsData>>> {
+	let client = &ctx.db;
+
+	let raw_data = client
+		._query_raw::<TopBookFormatsData>(raw!(
+			r#"
+			SELECT
+				extension,
+				COUNT(id) AS count
+			FROM
+				media
+			GROUP BY
+				extension
+			ORDER BY
+				count DESC
+			"#
+		))
+		.exec()
+		.await?;
+
+	Ok(Json(raw_data))
+}
+
 /*
 
 -- Top libraries
@@ -146,4 +181,5 @@ GROUP BY
 	l.name
 ORDER BY
 	read_count DESC
+
 */

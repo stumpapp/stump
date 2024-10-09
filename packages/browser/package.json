@@ -21,6 +21,7 @@
 		"@hookform/resolvers": "^3.3.4",
 		"@nivo/calendar": "^0.87.0",
 		"@nivo/core": "^0.87.0",
+		"@nivo/pie": "^0.87.0",
 		"@stump/api": "*",
 		"@stump/client": "*",
 		"@stump/components": "*",

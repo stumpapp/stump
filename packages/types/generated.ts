@@ -424,6 +424,12 @@ export type SmartListMeta = { matched_books: BigInt; matched_series: BigInt; mat
 
 export type CreateOrUpdateSmartListView = ({ book_columns: ReactTableColumnSort[]; group_columns: ReactTableColumnSort[]; book_sorting: ReactTableGlobalSort[] | null; group_sorting: ReactTableGlobalSort[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string }
 
+export type CompletedBooksRawQueryData = { book_id: string; read_by: string; started_at: string; completed_at: string }
+
+export type TopBooksRawQueryData = { book_id: string; filename: string; title?: string | null; read_count: BigInt }
+
+export type TopBookFormatsData = { extension: string; count: BigInt }
+
 // DESKTOP TYPE GENERATION
 
 export type SavedServer = { name: string; uri: string }

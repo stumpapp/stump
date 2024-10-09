@@ -88,19 +88,22 @@ fn config_var_to_setter(var: &StumpConfigVariable) -> TokenStream {
 
 	// This portion wraps the variable-specific setter in a check for Some() in the partial config
 	// and, if there is a validator set, only applies the variable if it passes, and then returns.
-	if let Some(validator) = &var.attributes.validator {
-		quote! {
-			if let Some(#var_name) = self.#var_name {
-				if #validator(&#var_name) {
-					#setter
+	var.attributes.validator.as_ref().map_or_else(
+		|| {
+			quote! {
+				if let Some(#var_name) = self.#var_name {
+				  #setter
 				}
 			}
-		}
-	} else {
-		quote! {
-			if let Some(#var_name) = self.#var_name {
-			  #setter
+		},
+		|validator| {
+			quote! {
+				if let Some(#var_name) = self.#var_name {
+					if #validator(&#var_name) {
+						#setter
+					}
+				}
 			}
-		}
-	}
+		},
+	)
 }

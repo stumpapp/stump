@@ -1,9 +1,9 @@
 use quote::{format_ident, quote};
 use syn::{Ident, Type};
 
-use crate::enum_data::EnumVariant;
+use crate::{enum_data::EnumVariant, macro_error};
 
-pub(crate) fn generate_match_arm(
+pub fn generate_match_arm(
 	ident: &Ident,
 	variant_data: &EnumVariant,
 	prisma_table: &Ident,
@@ -40,9 +40,9 @@ pub(crate) fn generate_match_arm(
 				}
 			}
 
-			panic!("Unsupported type");
+			macro_error(variant_data.span, "Unsupported type")
 		},
-		_ => panic!("Unsupported type"),
+		_ => macro_error(variant_data.span, "Unsupported type"),
 	}
 }
 
@@ -54,9 +54,10 @@ fn generate_string_match_arm(
 	let name = &variant_data.variable_name;
 	let inner_name = &variant_data.variable_inner_name;
 
-	let into_fn = match variant_data.is_optional {
-		true => format_ident!("into_optional_params"),
-		false => format_ident!("into_params"),
+	let into_fn = if variant_data.is_optional {
+		format_ident!("into_optional_params")
+	} else {
+		format_ident!("into_params")
 	};
 
 	quote! {
@@ -76,9 +77,10 @@ fn generate_number_match_arm(
 	let name = &variant_data.variable_name;
 	let inner_name = &variant_data.variable_inner_name;
 
-	let into_fn = match variant_data.is_optional {
-		true => format_ident!("into_optional_numeric_params"),
-		false => format_ident!("into_numeric_params"),
+	let into_fn = if variant_data.is_optional {
+		format_ident!("into_optional_numeric_params")
+	} else {
+		format_ident!("into_numeric_params")
 	};
 
 	quote! {
@@ -100,9 +102,10 @@ fn generate_filter_match_arm(
 	let name = &variant_data.variable_name;
 	let inner_name = &variant_data.variable_inner_name;
 
-	let into_fn = match variant_data.is_optional {
-		true => format_ident!("into_optional_params"),
-		false => format_ident!("into_params"),
+	let into_fn = if variant_data.is_optional {
+		format_ident!("into_optional_params")
+	} else {
+		format_ident!("into_params")
 	};
 
 	quote! {

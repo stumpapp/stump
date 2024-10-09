@@ -1,6 +1,9 @@
 mod enum_data;
 mod gen_match_arms;
 
+use std::fmt::Display;
+
+use proc_macro2::Span;
 use quote::{format_ident, quote};
 use syn::{parse_macro_input, Attribute, Data, DeriveInput, Ident};
 
@@ -58,7 +61,12 @@ pub fn generate_smart_filter(
 		let enum_ident = &ast.ident;
 		let mut enum_attrs = ast.attrs.clone();
 		let prisma_table = extract_prisma_table(&mut enum_attrs);
-		let destructured_enum = enum_data::destructure_enum(enum_data);
+
+		// Take apart the enum, returning an error if something prevents proper parsing
+		let destructured_enum = match enum_data::destructure_enum(enum_data) {
+			Ok(value) => value,
+			Err(e) => return e.into(),
+		};
 
 		let generated_enum_def =
 			gen_smart_filter_enum(enum_ident, &destructured_enum, &enum_attrs);
@@ -74,7 +82,7 @@ pub fn generate_smart_filter(
 
 		tokens.into()
 	} else {
-		panic!("generate_smart_filter expects an enum");
+		macro_error(ast.ident.span(), "generate_smart_filter expects an enum").into()
 	}
 }
 
@@ -174,4 +182,8 @@ fn gen_smart_filter_impls(
 	  }
 	  }
 	}
+}
+
+fn macro_error<T: Display>(span: Span, message: T) -> proc_macro2::TokenStream {
+	syn::Error::new(span, message).into_compile_error()
 }

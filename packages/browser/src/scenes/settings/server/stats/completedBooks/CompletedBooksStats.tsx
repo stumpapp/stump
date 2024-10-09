@@ -1,4 +1,4 @@
-import { Text } from '@stump/components'
+import { Heading, Text } from '@stump/components'
 import { ChevronDown } from 'lucide-react'
 import React, { Suspense } from 'react'
 
@@ -8,9 +8,18 @@ export default function CompletedBooksStatsContainer() {
 	// TODO: suspese query
 
 	return (
-		<Suspense>
-			<CompletedBooksStats />
-		</Suspense>
+		<div className="flex flex-col gap-4">
+			<div>
+				<Heading size="sm">Completed Books</Heading>
+				<Text size="sm" variant="muted" className="mt-1">
+					A count per day of books that have been completed
+				</Text>
+			</div>
+
+			<Suspense>
+				<CompletedBooksStats />
+			</Suspense>
+		</div>
 	)
 }
 

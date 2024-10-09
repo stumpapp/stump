@@ -308,10 +308,10 @@ async fn get_series(
 					},
 					Pagination::Cursor(cursor_query) => {
 						if let Some(cursor) = cursor_query.cursor {
-							query = query.cursor(series::id::equals(cursor)).skip(1)
+							query = query.cursor(series::id::equals(cursor)).skip(1);
 						}
 						if let Some(limit) = cursor_query.limit {
-							query = query.take(limit)
+							query = query.take(limit);
 						}
 					},
 					_ => unreachable!(),
@@ -654,16 +654,13 @@ async fn patch_series_thumbnail(
 
 	let client = &ctx.db;
 
-	let target_page = body
-		.is_zero_based
-		.map(|is_zero_based| {
-			if is_zero_based {
-				body.page + 1
-			} else {
-				body.page
-			}
-		})
-		.unwrap_or(body.page);
+	let target_page = body.is_zero_based.map_or(body.page, |is_zero_based| {
+		if is_zero_based {
+			body.page + 1
+		} else {
+			body.page
+		}
+	});
 
 	let media = client
 		.media()
@@ -688,7 +685,7 @@ async fn patch_series_thumbnail(
 	let image_options = library
 		.config()?
 		.thumbnail_config
-		.to_owned()
+		.clone()
 		.map(ImageProcessorOptions::try_from)
 		.transpose()?
 		.unwrap_or_else(|| {
@@ -769,7 +766,7 @@ async fn replace_series_thumbnail(
 
 	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 	// user testing I'd like to see if this becomes a problem. We'll see!
-	match remove_thumbnails(&[series_id.clone()], ctx.config.get_thumbnails_dir()) {
+	match remove_thumbnails(&[series_id.clone()], &ctx.config.get_thumbnails_dir()) {
 		Ok(count) => tracing::info!("Removed {} thumbnails!", count),
 		Err(e) => tracing::error!(
 			?e,
@@ -871,10 +868,10 @@ async fn get_series_media(
 					},
 					Pagination::Cursor(cursor_query) => {
 						if let Some(cursor) = cursor_query.cursor {
-							query = query.cursor(media::id::equals(cursor)).skip(1)
+							query = query.cursor(media::id::equals(cursor)).skip(1);
 						}
 						if let Some(limit) = cursor_query.limit {
-							query = query.take(limit)
+							query = query.take(limit);
 						}
 					},
 					_ => unreachable!(),
@@ -987,8 +984,7 @@ async fn get_next_in_series(
 					// If there is a percentage, and it is less than 1.0, then it is next!
 					Some(session) if session.epubcfi.is_some() => session
 						.percentage_completed
-						.map(|value| value < 1.0)
-						.unwrap_or(false),
+						.is_some_and(|value| value < 1.0),
 					// If there is a page, and it is less than the total pages, then it is next!
 					Some(session) if session.page.is_some() => {
 						session.page.unwrap_or(1) < m.pages
@@ -1001,10 +997,7 @@ async fn get_next_in_series(
 
 		Ok(Json(next_book.map(|data| Media::from(data.to_owned()))))
 	} else {
-		Err(APIError::NotFound(format!(
-			"Series with id {} no found.",
-			id
-		)))
+		Err(APIError::NotFound(format!("Series with id {id} no found.")))
 	}
 }
 

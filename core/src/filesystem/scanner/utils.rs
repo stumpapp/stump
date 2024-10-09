@@ -390,7 +390,7 @@ pub(crate) async fn safely_build_series(
 						"Failed to build series: {:?}",
 						error.to_string()
 					))
-					.with_ctx(format!("Path: {:?}", path)),
+					.with_ctx(format!("Path: {path:?}")),
 				);
 			},
 		}
@@ -536,7 +536,7 @@ pub(crate) async fn safely_build_and_insert_media(
 						"Failed to build book: {:?}",
 						error.to_string()
 					))
-					.with_ctx(format!("Path: {:?}", path)),
+					.with_ctx(format!("Path: {path:?}")),
 				);
 			},
 		}
@@ -705,7 +705,7 @@ pub(crate) async fn visit_and_update_media(
 						"Failed to build book: {:?}",
 						error.to_string()
 					))
-					.with_ctx(format!("Path: {:?}", path)),
+					.with_ctx(format!("Path: {path:?}")),
 				);
 			},
 		}

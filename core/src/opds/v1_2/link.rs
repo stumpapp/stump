@@ -1,7 +1,7 @@
-//! This module defines the [OpdsLink] struct for representing an OPDS `atom:link` element as
+//! This module defines the [`OpdsLink`] struct for representing an OPDS `atom:link` element as
 //! specified at https://specs.opds.io/opds-1.2#the-atomlink-element
 //!
-//! It also defines the [OpdsStreamLink] struct for representing an OPDS page steaming extension
+//! It also defines the [`OpdsStreamLink`] struct for representing an OPDS page steaming extension
 //! link element as specified at https://github.com/anansi-project/opds-pse/blob/master/v1.2.md
 
 use xml::{writer::XmlEvent, EventWriter};
@@ -47,7 +47,7 @@ impl TryFrom<ContentType> for OpdsLinkType {
 			ContentType::JPEG => Ok(OpdsLinkType::ImageJpeg),
 			ContentType::PNG => Ok(OpdsLinkType::ImagePng),
 			ContentType::GIF => Ok(OpdsLinkType::ImageGif),
-			_ => Err(format!("Unsupported content type: {}", content_type)),
+			_ => Err(format!("Unsupported content type: {content_type}")),
 		}
 	}
 }

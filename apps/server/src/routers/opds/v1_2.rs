@@ -218,8 +218,7 @@ async fn keep_reading(
 		{
 			Some(session) if session.epubcfi.is_some() => session
 				.percentage_completed
-				.map(|value| value < 1.0)
-				.unwrap_or(false),
+				.is_some_and(|value| value < 1.0),
 			Some(session) if session.page.is_some() => {
 				session.page.unwrap_or(1) < m.pages
 			},
@@ -355,8 +354,7 @@ async fn get_library_by_id(
 		.build()?))
 	} else {
 		Err(APIError::NotFound(format!(
-			"Library {} not found",
-			library_id
+			"Library {library_id} not found"
 		)))
 	}
 }
@@ -519,10 +517,7 @@ async fn get_series_by_id(
 		)
 		.build()?))
 	} else {
-		Err(APIError::NotFound(format!(
-			"Series {} not found",
-			series_id
-		)))
+		Err(APIError::NotFound(format!("Series {series_id} not found")))
 	}
 }
 

@@ -65,9 +65,9 @@ pub struct Epub {
 
 /// This struct is mainly used when the Stump client sends the inital request to grab information on an epub file.
 /// This will get cached on the client, which will use the metadata to make consecutive requests for various
-/// resources/chapters. This struct isn't really used after that first request, everything else is file IO using EpubDoc.
+/// resources/chapters. This struct isn't really used after that first request, everything else is file IO using [`EpubDoc`].
 impl Epub {
-	/// Creates an Epub from a media entity and an open EpubDoc
+	/// Creates an Epub from a media entity and an open [`EpubDoc`]
 	pub fn from(media: media::Data, epub: EpubDoc<BufReader<File>>) -> Epub {
 		let annotations = match media.annotations() {
 			Ok(annotations) => Some(
@@ -93,8 +93,8 @@ impl Epub {
 		}
 	}
 
-	/// Attempts to create an Epub from a media entity. Internally, this will attempt to open
-	/// an EpubDoc from the media's path. If this fails, it will return an EpubOpenError.
+	/// Attempts to create an Epub from a media entity. Internally, this will attempt to open an [`EpubDoc`]
+	/// from the media's path. If this fails, it will return a [`FileError::EpubOpenError`].
 	pub fn try_from(media: media::Data) -> Result<Epub, FileError> {
 		let epub_file = EpubDoc::new(media.path.as_str()).map_err(|e| {
 			error!("Failed to open epub {}: {}", &media.path, e);

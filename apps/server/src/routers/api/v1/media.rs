@@ -401,10 +401,10 @@ async fn get_media(
 					},
 					Pagination::Cursor(cursor_query) => {
 						if let Some(cursor) = cursor_query.cursor {
-							query = query.cursor(media::id::equals(cursor)).skip(1)
+							query = query.cursor(media::id::equals(cursor)).skip(1);
 						}
 						if let Some(limit) = cursor_query.limit {
-							query = query.take(limit)
+							query = query.take(limit);
 						}
 					},
 					_ => unreachable!(),
@@ -474,12 +474,12 @@ async fn get_duplicate_media(
 
 	let duplicated_media_page = client
 		._query_raw::<Media>(raw!(
-			r#"
+			r"
 			SELECT * FROM media
 			WHERE hash IN (
 				SELECT hash FROM media GROUP BY hash HAVING COUNT(*) > 1
 			)
-			LIMIT {} OFFSET {}"#,
+			LIMIT {} OFFSET {}",
 			PrismaValue::Int(page_bounds.take),
 			PrismaValue::Int(page_bounds.skip)
 		))
@@ -488,11 +488,11 @@ async fn get_duplicate_media(
 
 	let count_result = client
 		._query_raw::<CountQueryReturn>(raw!(
-			r#"
+			r"
 			SELECT COUNT(*) as count FROM media
 			WHERE hash IN (
 				SELECT hash FROM media GROUP BY hash HAVING COUNT(*) s> 1
-			)"#
+			)"
 		))
 		.exec()
 		.await?;
@@ -501,7 +501,7 @@ async fn get_duplicate_media(
 		Ok(Pageable::with_count(
 			duplicated_media_page,
 			db_total.count,
-			page_params,
+			&page_params,
 		))
 	} else {
 		Err(APIError::InternalServerError(
@@ -959,8 +959,7 @@ async fn get_media_page(
 
 	if page > media.pages {
 		Err(APIError::BadRequest(format!(
-			"Page {} is out of bounds for media {}",
-			page, id
+			"Page {page} is out of bounds for media {id}"
 		)))
 	} else {
 		Ok(get_page_async(&media.path, page, &ctx.config).await?.into())
@@ -1089,16 +1088,13 @@ async fn patch_media_thumbnail(
 
 	let client = &ctx.db;
 
-	let target_page = body
-		.is_zero_based
-		.map(|is_zero_based| {
-			if is_zero_based {
-				body.page + 1
-			} else {
-				body.page
-			}
-		})
-		.unwrap_or(body.page);
+	let target_page = body.is_zero_based.map_or(body.page, |is_zero_based| {
+		if is_zero_based {
+			body.page + 1
+		} else {
+			body.page
+		}
+	});
 
 	let media = client
 		.media()
@@ -1123,7 +1119,7 @@ async fn patch_media_thumbnail(
 	let image_options = library
 		.config()?
 		.thumbnail_config
-		.to_owned()
+		.clone()
 		.map(ImageProcessorOptions::try_from)
 		.transpose()?
 		.unwrap_or_else(|| {
@@ -1204,7 +1200,8 @@ async fn replace_media_thumbnail(
 
 	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 	// user testing I'd like to see if this becomes a problem. We'll see!
-	if let Err(e) = remove_thumbnails(&[book_id.clone()], ctx.config.get_thumbnails_dir())
+	if let Err(e) =
+		remove_thumbnails(&[book_id.clone()], &ctx.config.get_thumbnails_dir())
 	{
 		tracing::error!(
 			?e,
@@ -1645,8 +1642,7 @@ async fn get_media_page_dimensions(
 
 	if page <= 0 {
 		return Err(APIError::BadRequest(format!(
-			"Cannot fetch page dimensions for page {}, expected a number > 0",
-			page
+			"Cannot fetch page dimensions for page {page}, expected a number > 0"
 		)));
 	}
 
@@ -1655,8 +1651,7 @@ async fn get_media_page_dimensions(
 		.dimensions
 		.get((page - 1) as usize)
 		.ok_or(APIError::NotFound(format!(
-			"No page dimensions for page: {}",
-			page
+			"No page dimensions for page: {page}"
 		)))?;
 
 	Ok(Json(page_dimension.to_owned()))

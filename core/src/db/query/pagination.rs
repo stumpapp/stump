@@ -118,7 +118,7 @@ impl PageQuery {
 		if zero_based {
 			self.page.unwrap_or(0)
 		} else {
-			self.page.map(|p| p + 1).unwrap_or(1)
+			self.page.map_or(1, |p| p + 1)
 		}
 	}
 
@@ -207,9 +207,9 @@ impl From<Option<PageQuery>> for PageParams {
 				let page = params.page.unwrap_or(default_page);
 
 				PageParams {
+					zero_based,
 					page,
 					page_size,
-					zero_based,
 				}
 			},
 			None => PageParams::default(),
@@ -245,7 +245,7 @@ pub struct PageInfo {
 }
 
 impl PageInfo {
-	pub fn new(page_params: PageParams, total_pages: u32) -> Self {
+	pub fn new(page_params: &PageParams, total_pages: u32) -> Self {
 		let current_page = page_params.page;
 		let page_size = page_params.page_size;
 		let zero_based = page_params.zero_based;
@@ -333,7 +333,7 @@ impl<T: Serialize> Pageable<T> {
 	/// Generates a Pageable instance using an explicitly provided count and page params. This is useful for
 	/// when the data provided is not the full set available, but rather a subset of the data (e.g. a query with
 	/// a limit).
-	pub fn with_count(data: T, db_count: i64, page_params: PageParams) -> Self {
+	pub fn with_count(data: T, db_count: i64, page_params: &PageParams) -> Self {
 		let total_pages = (db_count as f32 / page_params.page_size as f32).ceil() as u32;
 
 		Pageable::page_paginated(data, PageInfo::new(page_params, total_pages))
@@ -385,7 +385,7 @@ where
 				.to_vec();
 		}
 
-		Pageable::page_paginated(data, PageInfo::new(page_params, total_pages))
+		Pageable::page_paginated(data, PageInfo::new(&page_params, total_pages))
 	}
 }
 
@@ -408,7 +408,7 @@ where
 
 		let total_pages = (db_total as f32 / page_params.page_size as f32).ceil() as u32;
 
-		Pageable::page_paginated(data, PageInfo::new(page_params, total_pages))
+		Pageable::page_paginated(data, PageInfo::new(&page_params, total_pages))
 	}
 }
 
@@ -425,7 +425,7 @@ where
 				let page_params = page_query.page_params();
 				let total_pages =
 					(db_total as f32 / page_params.page_size as f32).ceil() as u32;
-				Pageable::page_paginated(data, PageInfo::new(page_params, total_pages))
+				Pageable::page_paginated(data, PageInfo::new(&page_params, total_pages))
 			},
 			Pagination::Cursor(cursor_query) => {
 				let next_cursor = if data.len() == db_total as usize {

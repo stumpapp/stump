@@ -138,16 +138,15 @@ impl FileProcessor for EpubProcessor {
 				));
 			}
 
-			let content_type = match epub_file.get_current_mime() {
-				Some(mime) => ContentType::from(mime.as_str()),
-				None => {
-					tracing::error!(
-						chapter_path = ?path,
-						"Failed to get explicit resource mime for chapter. Returning XHTML",
-					);
+			let content_type = if let Some(mime) = epub_file.get_current_mime() {
+				ContentType::from(mime.as_str())
+			} else {
+				tracing::error!(
+					chapter_path = ?path,
+					"Failed to get explicit resource mime for chapter. Returning XHTML",
+				);
 
-					ContentType::XHTML
-				},
+				ContentType::XHTML
 			};
 
 			content_types.insert(chapter, content_type);
@@ -247,16 +246,15 @@ impl EpubProcessor {
 			FileError::EpubReadError(e.to_string())
 		})?;
 
-		let content_type = match epub_file.get_current_mime() {
-			Some(mime) => ContentType::from(mime.as_str()),
-			None => {
-				tracing::error!(
-					chapter_path = ?path,
-					"Failed to get explicit resource mime for chapter. Returning XHTML",
-				);
+		let content_type = if let Some(mime) = epub_file.get_current_mime() {
+			ContentType::from(mime.as_str())
+		} else {
+			tracing::error!(
+				chapter_path = ?path,
+				"Failed to get explicit resource mime for chapter. Returning XHTML",
+			);
 
-				ContentType::XHTML
-			},
+			ContentType::XHTML
 		};
 
 		Ok((content_type, content))
@@ -295,18 +293,18 @@ impl EpubProcessor {
 		// Note: If the resource does not have an entry in the `resources` map, then loading the content
 		// type will fail. This seems to only happen when loading the root file (e.g. container.xml,
 		// package.opf, etc.).
-		let content_type =
-			match epub_file.get_resource_mime_by_path(adjusted_path.as_path()) {
-				Some(mime) => ContentType::from(mime.as_str()),
-				None => {
-					tracing::warn!(
-						?adjusted_path,
-						"Failed to get explicit definition of resource mime",
-					);
+		let content_type = if let Some(mime) =
+			epub_file.get_resource_mime_by_path(adjusted_path.as_path())
+		{
+			ContentType::from(mime.as_str())
+		} else {
+			tracing::warn!(
+				?adjusted_path,
+				"Failed to get explicit definition of resource mime",
+			);
 
-					ContentType::from_path(adjusted_path.as_path())
-				},
-			};
+			ContentType::from_path(adjusted_path.as_path())
+		};
 
 		Ok((content_type, contents))
 	}

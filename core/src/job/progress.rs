@@ -41,7 +41,7 @@ pub struct JobProgress {
 }
 
 impl JobProgress {
-	/// Constructs a new JobProgress with the given message
+	/// Constructs a new [`JobProgress`] with the given message
 	pub fn msg(msg: &str) -> Self {
 		Self {
 			message: Some(msg.to_string()),
@@ -49,7 +49,7 @@ impl JobProgress {
 		}
 	}
 
-	/// Constructs a new JobProgress with the given status
+	/// Constructs a new [`JobProgress`] with the given status
 	pub fn status(status: JobStatus) -> Self {
 		Self {
 			status: Some(status),
@@ -57,7 +57,7 @@ impl JobProgress {
 		}
 	}
 
-	/// Constructs a new JobProgress with the given status and msg
+	/// Constructs a new [`JobProgress`] with the given status and msg
 	pub fn status_msg(status: JobStatus, msg: &str) -> Self {
 		Self {
 			status: Some(status),
@@ -66,12 +66,12 @@ impl JobProgress {
 		}
 	}
 
-	/// Constructs a new JobProgress with the status set to `JobStatus::Completed` and the message set to "Job finished"
+	/// Constructs a new [`JobProgress`] with the status set to `JobStatus::Completed` and the message set to "Job finished"
 	pub fn finished() -> Self {
 		Self::status_msg(JobStatus::Completed, "Job finished")
 	}
 
-	/// Constructs a new JobProgress with the given queue position and size
+	/// Constructs a new [`JobProgress`] with the given queue position and size
 	pub fn task_position(index: i32, size: i32) -> Self {
 		Self {
 			completed_tasks: Some(index),

@@ -261,7 +261,7 @@ async fn get_smart_list_by_id(
 		.find_first(vec![smart_list::id::equals(id.clone()), access_condition]);
 
 	if options.load_views {
-		query = query.with(smart_list::saved_views::fetch(vec![]))
+		query = query.with(smart_list::saved_views::fetch(vec![]));
 	}
 
 	let smart_list = query

@@ -21,7 +21,7 @@ fn merge_origins(origins: &[&str], local_origins: Vec<String>) -> Vec<HeaderValu
 		.map(|origin| origin.to_string())
 		.chain(local_origins)
 		.map(|origin| origin.parse())
-		.filter_map(|res| res.ok())
+		.filter_map(Result::ok)
 		.collect::<Vec<HeaderValue>>()
 }
 
@@ -30,9 +30,10 @@ pub fn get_cors_layer(config: StumpConfig) -> CorsLayer {
 
 	let mut allowed_origins = Vec::new();
 	for origin in config.allowed_origins {
-		match origin.parse::<HeaderValue>() {
-			Ok(val) => allowed_origins.push(val),
-			Err(_) => tracing::error!("Failed to parse allowed origin: {:?}", origin),
+		if let Ok(val) = origin.parse::<HeaderValue>() {
+			allowed_origins.push(val)
+		} else {
+			tracing::error!("Failed to parse allowed origin: {:?}", origin);
 		}
 	}
 
@@ -46,7 +47,9 @@ pub fn get_cors_layer(config: StumpConfig) -> CorsLayer {
 
 	// Format the local IP with both http and https, and the port. If is_debug is true,
 	// then also add port 3000.
-	let local_orgins = if !local_ip.is_empty() {
+	let local_orgins = if local_ip.is_empty() {
+		vec![]
+	} else {
 		let port = config.port;
 		let mut base = vec![
 			format!("http://{local_ip}:{port}"),
@@ -61,8 +64,6 @@ pub fn get_cors_layer(config: StumpConfig) -> CorsLayer {
 		}
 
 		base
-	} else {
-		vec![]
 	};
 
 	let mut cors_layer = CorsLayer::new();

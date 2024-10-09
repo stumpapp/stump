@@ -35,7 +35,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 }
 
 pub(crate) fn relative_favicon_path() -> String {
-	format!("{}{}", ASSETS, FAVICON)
+	format!("{ASSETS}{FAVICON}")
 }
 
 // https://github.com/tokio-rs/axum/discussions/608#discussioncomment-7772294

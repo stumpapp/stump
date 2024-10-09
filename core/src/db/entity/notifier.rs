@@ -103,7 +103,7 @@ impl FromStr for NotifierType {
 		match uppercase.as_str() {
 			"DISCORD" => Ok(NotifierType::Discord),
 			"TELEGRAM" => Ok(NotifierType::Telegram),
-			_ => Err(format!("Invalid NotifierType: {}", s)),
+			_ => Err(format!("Invalid NotifierType: {s}")),
 		}
 	}
 }

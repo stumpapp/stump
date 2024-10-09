@@ -42,14 +42,12 @@ impl OPDSFeedGroupBuilder {
 		let navigation_empty = self
 			.navigation
 			.as_ref()
-			.map(|nav| nav.is_empty())
-			.unwrap_or(true);
+			.map_or(true, std::vec::Vec::is_empty);
 
 		let publications_empty = self
 			.publications
 			.as_ref()
-			.map(|pubs| pubs.is_empty())
-			.unwrap_or(true);
+			.map_or(true, std::vec::Vec::is_empty);
 
 		if navigation_empty && publications_empty {
 			return Err(OPDSV2Error::FeedValidationFailed(
@@ -123,6 +121,6 @@ mod tests {
 
 		assert!(error.to_string().contains(
 			"OPDSFeedGroup missing at least one navigation link or publication"
-		))
+		));
 	}
 }

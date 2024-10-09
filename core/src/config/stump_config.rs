@@ -1,9 +1,9 @@
-//! Contains the [StumpConfig] struct and related functions for loading and saving configuration
+//! Contains the [`StumpConfig`] struct and related functions for loading and saving configuration
 //! values for a Stump application.
 //!
-//! Note: [StumpConfig] is constructed _before_ tracing is initializing. This is because the
+//! Note: [`StumpConfig`] is constructed _before_ tracing is initializing. This is because the
 //! configuration is used to determine the log file path and verbosity level. This means that any
-//! logging that occurs during the construction of the [StumpConfig] should be done using the
+//! logging that occurs during the construction of the [`StumpConfig`] should be done using the
 //! standard `println!` or `eprintln!` macros.
 
 use std::{env, path::PathBuf};
@@ -187,8 +187,7 @@ impl StumpConfig {
 		let config_dir = self.get_config_dir();
 		if config_dir.is_file() {
 			return Err(CoreError::InitializationError(format!(
-				"Error writing config directory: {:?} is a file",
-				config_dir
+				"Error writing config directory: {config_dir:?} is a file",
 			)));
 		}
 
@@ -226,7 +225,7 @@ impl StumpConfig {
 		std::fs::write(
 			stump_toml.as_path(),
 			toml::to_string(&self).map_err(|e| {
-				eprintln!("Failed to serialize StumpConfig to toml: {}", e);
+				eprintln!("Failed to serialize StumpConfig to toml: {e}");
 				CoreError::InitializationError(e.to_string())
 			})?,
 		)?;
@@ -278,7 +277,7 @@ fn do_validate_profile(profile: &String) -> bool {
 		return true;
 	}
 
-	eprintln!("Invalid profile value: {}", profile);
+	eprintln!("Invalid profile value: {profile}");
 	false
 }
 

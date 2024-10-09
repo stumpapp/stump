@@ -154,7 +154,7 @@ impl FileProcessor for RarProcessor {
 
 		let metadata = if let Some(buf) = metadata_buf {
 			let content_str = std::str::from_utf8(&buf)?;
-			metadata_from_buf(content_str.to_string())
+			metadata_from_buf(content_str)
 		} else {
 			None
 		};
@@ -176,7 +176,7 @@ impl FileProcessor for RarProcessor {
 
 		let sorted_entries = archive
 			.into_iter()
-			.filter_map(|entry| entry.ok())
+			.filter_map(Result::ok)
 			.filter(|entry| entry.filename.is_img() && !entry.filename.is_hidden_file())
 			.sorted_by(|a, b| alphanumeric_sort::compare_path(&a.filename, &b.filename))
 			.collect::<Vec<_>>();
@@ -195,9 +195,10 @@ impl FileProcessor for RarProcessor {
 				let (data, _) = header.read()?;
 				bytes = Some(data);
 				break;
-			} else {
-				archive = header.skip()?;
 			}
+
+			// Otherwise, skip
+			archive = header.skip()?;
 		}
 
 		let Some(bytes) = bytes else {
@@ -221,7 +222,7 @@ impl FileProcessor for RarProcessor {
 
 		let page_count = archive
 			.into_iter()
-			.filter_map(|entry| entry.ok())
+			.filter_map(Result::ok)
 			.filter(|entry| entry.filename.is_img() && !entry.filename.is_hidden_file())
 			.count();
 
@@ -236,7 +237,7 @@ impl FileProcessor for RarProcessor {
 
 		let sorted_entries = archive
 			.into_iter()
-			.filter_map(|entry| entry.ok())
+			.filter_map(Result::ok)
 			.filter(|entry| entry.filename.is_img())
 			.sorted_by(|a, b| alphanumeric_sort::compare_path(&a.filename, &b.filename))
 			.collect::<Vec<_>>();
@@ -358,7 +359,7 @@ mod tests {
 		// Assert that the operation succeeded
 		assert!(processed_file.is_ok());
 		// And that the original file was deleted
-		assert!(!Path::new(&temp_rar_file_path).exists())
+		assert!(!Path::new(&temp_rar_file_path).exists());
 	}
 
 	#[test]
@@ -379,7 +380,7 @@ mod tests {
 		// Assert that operation succeeded
 		assert!(zip_result.is_ok());
 		// And that the original file was deleted
-		assert!(!Path::new(&temp_rar_file_path).exists())
+		assert!(!Path::new(&temp_rar_file_path).exists());
 	}
 
 	#[test]

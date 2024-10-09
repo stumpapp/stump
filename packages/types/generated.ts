@@ -18,8 +18,8 @@ export type AccessRole = "Reader" | "Writer" | "CoCreator"
 export type Log = { id: number; level: LogLevel; message: string; context: string | null; timestamp: string; job_id?: string | null }
 
 /**
- * Information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
- * ~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
+ * Information about the Stump log file, located at `STUMP_CONFIG_DIR/Stump.log`, or
+ * `~/.stump/Stump.log` by default. Information such as the file size, last modified date, etc.
  */
 export type LogMetadata = { path: string; size: BigInt; modified: string }
 
@@ -166,9 +166,9 @@ export type ProgressUpdateReturn = ActiveReadingSession | FinishedReadingSession
 export type PageDimension = { height: number; width: number }
 
 /**
- * Represents a database [page_dimensions::Data] object.
+ * Represents a database [`page_dimensions::Data`] object.
  * 
- * The `dimensions` member contains a [Vec]<[PageDimension]> containing the height and width
+ * The `dimensions` member contains a [Vec]<[`PageDimension`]> containing the height and width
  * of each page for the media attached to the metadata for this entity.
  */
 export type PageDimensionsEntity = { id: string; dimensions: PageDimension[]; metadata_id: string }

@@ -8,8 +8,8 @@ use crate::prisma::log;
 
 use super::Cursor;
 
-/// Information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
-/// ~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
+/// Information about the Stump log file, located at `STUMP_CONFIG_DIR/Stump.log`, or
+/// `~/.stump/Stump.log` by default. Information such as the file size, last modified date, etc.
 #[derive(Serialize, Deserialize, Type, ToSchema)]
 pub struct LogMetadata {
 	pub path: PathBuf,

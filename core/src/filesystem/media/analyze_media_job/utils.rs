@@ -5,7 +5,7 @@ use crate::{
 	prisma::{media, media_metadata},
 };
 
-/// A utility function for fetching media by its [MediaID] with metadata (but not page dimensions) loaded.
+/// A utility function for fetching media by its [`MediaID`] with metadata (but not page dimensions) loaded.
 pub async fn fetch_media_with_metadata(
 	id: &MediaID,
 	ctx: &WorkerCtx,
@@ -19,14 +19,14 @@ pub async fn fetch_media_with_metadata(
 		.await
 		.map_err(|e: prisma_client_rust::QueryError| JobError::TaskFailed(e.to_string()))?
 		.ok_or_else(|| {
-			JobError::TaskFailed(format!("Unable to find media item with id: {}", id))
+			JobError::TaskFailed(format!("Unable to find media item with id: {id}"))
 		})?
 		.into();
 
 	Ok(media_item)
 }
 
-/// A utility function for fetching media by its [MediaID] with metadata and page dimensions loaded.
+/// A utility function for fetching media by its [`MediaID`] with metadata and page dimensions loaded.
 pub async fn fetch_media_with_dimensions(
 	id: &MediaID,
 	ctx: &WorkerCtx,
@@ -40,7 +40,7 @@ pub async fn fetch_media_with_dimensions(
 		.await
 		.map_err(|e: prisma_client_rust::QueryError| JobError::TaskFailed(e.to_string()))?
 		.ok_or_else(|| {
-			JobError::TaskFailed(format!("Unable to find media item with id: {}", id))
+			JobError::TaskFailed(format!("Unable to find media item with id: {id}"))
 		})?
 		.into();
 

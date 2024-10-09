@@ -163,8 +163,7 @@ pub async fn auth_middleware(
 			let opds_version = request_uri
 				.split('/')
 				.nth(2)
-				.map(|v| v.replace('v', ""))
-				.unwrap_or("1.2".to_string());
+				.map_or("1.2".to_string(), |v| v.replace('v', ""));
 
 			return Err(
 				OPDSBasicAuth::new(opds_version, host_details.url()).into_response()
@@ -664,7 +663,7 @@ mod tests {
 			.get("/test")
 			.add_header(
 				HeaderName::from_str("Authorization").expect("Failed to create header"),
-				HeaderValue::from_str(&format!("Bearer {}", access_token))
+				HeaderValue::from_str(&format!("Bearer {access_token}"))
 					.expect("Failed to create header"),
 			)
 			.await;
@@ -723,7 +722,7 @@ mod tests {
 			.get("/test")
 			.add_header(
 				HeaderName::from_str("Authorization").expect("Failed to create header"),
-				HeaderValue::from_str(&format!("Bearer {}", access_token))
+				HeaderValue::from_str(&format!("Bearer {access_token}"))
 					.expect("Failed to create header"),
 			)
 			.await;

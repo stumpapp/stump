@@ -105,7 +105,7 @@ async fn get_logs(
 							query = query.cursor(log::id::equals(cursor)).skip(1);
 						}
 						if let Some(limit) = cursor_query.limit {
-							query = query.take(limit)
+							query = query.take(limit);
 						}
 					},
 					_ => unreachable!(),
@@ -183,8 +183,6 @@ async fn tail_log_file(
 						.json_data(line.line())
 						.map_err(|e| APIError::InternalServerError(e.to_string()))?
 				);
-			} else {
-				continue;
 			}
 		}
 	};

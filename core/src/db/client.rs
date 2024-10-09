@@ -7,7 +7,7 @@ pub(crate) struct JournalModeQueryResult {
 	pub journal_mode: String,
 }
 
-/// Creates the PrismaClient. Will call `create_data_dir` as well
+/// Creates the [`prisma::PrismaClient`]. Will call `create_data_dir` as well
 pub async fn create_client(config: &StumpConfig) -> prisma::PrismaClient {
 	let config_dir = config
 		.get_config_dir()
@@ -24,12 +24,12 @@ pub async fn create_client(config: &StumpConfig) -> prisma::PrismaClient {
 	// let postfix = "?socket_timeout=15000&busy_timeout=15000&connection_limit=1";
 
 	let sqlite_url = if let Some(path) = config.db_path.clone() {
-		format!("file:{}/stump.db", &path)
+		format!("file:{path}/stump.db")
 	} else if config.profile == "release" {
-		tracing::trace!("ile:{}/stump.db", &config_dir);
-		format!("file:{}/stump.db", &config_dir)
+		tracing::trace!("file:{config_dir}/stump.db");
+		format!("file:{config_dir}/stump.db")
 	} else {
-		format!("file:{}/prisma/dev.db", &env!("CARGO_MANIFEST_DIR"))
+		format!("file:{}/prisma/dev.db", env!("CARGO_MANIFEST_DIR"))
 	};
 
 	tracing::trace!(?sqlite_url, "Creating Prisma client");

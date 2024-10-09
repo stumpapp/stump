@@ -1,4 +1,4 @@
-//! This module defines the [OpdsOpenSearch] struct for representing OpenSearch SearchDescription
+//! This module defines the [`OpdsOpenSearch`] struct for representing OpenSearch SearchDescription
 //! data as specified at https://developer.mozilla.org/en-US/docs/Web/OpenSearch
 
 use xml::{writer::XmlEvent, EventWriter};

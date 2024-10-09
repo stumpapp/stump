@@ -106,7 +106,7 @@ pub enum UserPermission {
 impl UserPermission {
 	/// Return a list of permissions, if any, which are inherited by self
 	///
-	/// For example, UserPermission::CreateNotifier implies UserPermission::ReadNotifier
+	/// For example, [`UserPermission::CreateNotifier`] implies [`UserPermission::ReadNotifier`]
 	// TODO: revisit these. I am mixing patterns, e.g. manage vs explicit edit+create+delete. Pick one!
 	pub fn associated(&self) -> Vec<UserPermission> {
 		match self {
@@ -202,7 +202,7 @@ impl From<&str> for UserPermission {
 			"notifier:delete" => UserPermission::DeleteNotifier,
 			"server:manage" => UserPermission::ManageServer,
 			// FIXME: Don't panic smh
-			_ => panic!("Invalid user permission: {}", s),
+			_ => panic!("Invalid user permission: {s}"),
 		}
 	}
 }
@@ -247,7 +247,7 @@ impl From<String> for PermissionSet {
 		}
 		let permissions = s
 			.split(',')
-			.map(|s| s.trim())
+			.map(str::trim)
 			.filter(|s| !s.is_empty())
 			.map(UserPermission::from)
 			.collect();
@@ -438,7 +438,7 @@ mod tests {
 
 	#[test]
 	fn test_permission_set_from_empty_string() {
-		let permission_set = PermissionSet::from("".to_string());
+		let permission_set = PermissionSet::from(String::new());
 		assert_eq!(permission_set.resolve_into_vec().len(), 0);
 	}
 

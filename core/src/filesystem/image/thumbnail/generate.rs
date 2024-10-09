@@ -44,14 +44,14 @@ pub type DidGenerate = bool;
 pub type GenerateOutput = (Vec<u8>, PathBuf, DidGenerate);
 
 /// The main function for generating a thumbnail for a book. This should be called from within the
-/// scope of a blocking task in the [generate_book_thumbnail] function.
+/// scope of a blocking task in the [`generate_book_thumbnail`] function.
 fn do_generate_book_thumbnail(
 	book_path: &str,
 	file_name: &str,
-	config: StumpConfig,
+	config: &StumpConfig,
 	options: ImageProcessorOptions,
 ) -> Result<GenerateOutput, FileError> {
-	let (_, page_data) = get_page(book_path, options.page.unwrap_or(1), &config)?;
+	let (_, page_data) = get_page(book_path, options.page.unwrap_or(1), config)?;
 	let ext = options.format.extension();
 
 	let thumbnail_path = config
@@ -113,14 +113,14 @@ pub async fn generate_book_thumbnail(
 		let file_name = file_name.clone();
 
 		move || {
-			let _send_result = tx.send(do_generate_book_thumbnail(
+			let send_result = tx.send(do_generate_book_thumbnail(
 				&book_path,
 				&file_name,
-				core_config,
+				&core_config,
 				image_options,
 			));
 			tracing::trace!(
-				is_err = _send_result.is_err(),
+				is_err = send_result.is_err(),
 				"Sending generate result to channel"
 			);
 		}

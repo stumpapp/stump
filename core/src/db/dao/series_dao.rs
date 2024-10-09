@@ -58,7 +58,7 @@ impl SeriesDAO {
 		let recently_added_series = self
 			.client
 			._query_raw::<Series>(raw!(
-				r#"
+				r"
 				SELECT
 					series.id AS id,
 					series.name AS name,
@@ -91,7 +91,7 @@ impl SeriesDAO {
 					series.id
 				ORDER BY
 					series.created_at DESC
-				LIMIT {} OFFSET {}"#,
+				LIMIT {} OFFSET {}",
 				PrismaValue::String(viewer_id.to_string()),
 				PrismaValue::String(viewer_id.to_string()),
 				PrismaValue::String(viewer_id.to_string()),
@@ -107,7 +107,7 @@ impl SeriesDAO {
 		let count_result = self
 		.client
 		._query_raw::<CountQueryReturn>(raw!(
-			r#"
+			r"
 			SELECT
 				COUNT(DISTINCT series.id) as count
 			FROM 
@@ -124,7 +124,7 @@ impl SeriesDAO {
 					(ar.restrict_on_unset = FALSE AND sm.age_rating IS NULL) OR sm.age_rating <= ar.age
 				)
 			ORDER BY
-				series.created_at DESC"#,
+				series.created_at DESC",
 			PrismaValue::String(viewer_id.to_string()),
 			PrismaValue::String(viewer_id.to_string())
 		))
@@ -143,7 +143,7 @@ impl SeriesDAO {
 			Ok(Pageable::with_count(
 				recently_added_series,
 				db_total.count,
-				page_params,
+				&page_params,
 			))
 		} else {
 			Err(CoreError::InternalError(

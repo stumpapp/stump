@@ -1,4 +1,4 @@
-//! This module defines [StumpAuthor] struct for representing the `atom:author` of an OPDS feed entry
+//! This module defines [`StumpAuthor`] struct for representing the `atom:author` of an OPDS feed entry
 //! as specified at https://specs.opds.io/opds-1.2#51-metadata
 
 use xml::EventWriter;
@@ -28,7 +28,7 @@ impl StumpAuthor {
 		StumpAuthor { name, uri }
 	}
 
-	/// Writes the [StumpAuthor] instance as XML.
+	/// Writes the [`StumpAuthor`] instance as XML.
 	///
 	/// ## Example
 	/// ```no_run

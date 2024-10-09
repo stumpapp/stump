@@ -30,8 +30,9 @@ impl From<media_grouped_by_library::Data> for Media {
 			.map(ActiveReadingSession::from);
 		let (current_page, current_epubcfi) = active_reading_session
 			.as_ref()
-			.map(|session| (session.page, session.epubcfi.clone()))
-			.unwrap_or((None, None));
+			.map_or((None, None), |session| {
+				(session.page, session.epubcfi.clone())
+			});
 
 		let finished_reading_sessions = data
 			.finished_user_reading_sessions
@@ -53,7 +54,7 @@ impl From<media_grouped_by_library::Data> for Media {
 			path: data.path,
 			status: FileStatus::from_str(&data.status).unwrap_or(FileStatus::Error),
 			series_id: data.series_id.unwrap_or_default(),
-			metadata: data.metadata.map(|m| MediaMetadata::from(m.to_owned())),
+			metadata: data.metadata.map(|m| MediaMetadata::from(m.clone())),
 			active_reading_session,
 			finished_reading_sessions: Some(finished_reading_sessions),
 			current_page,

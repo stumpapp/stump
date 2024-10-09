@@ -26,7 +26,7 @@ pub(crate) fn zip_dir(
 	let mut buffer = Vec::new();
 	for entry in WalkDir::new(unpacked_path)
 		.into_iter()
-		.filter_map(|e| e.ok())
+		.filter_map(std::result::Result::ok)
 	{
 		let path = entry.path();
 		let name = path.strip_prefix(Path::new(prefix)).unwrap();
@@ -74,7 +74,7 @@ pub fn create_zip_archive(
 
 	trace!("Calculated extension for zip file: {}", ext);
 
-	let zip_path = destination.join(format!("{}.{}", name, ext));
+	let zip_path = destination.join(format!("{name}.{ext}"));
 
 	zip_dir(unpacked_path, &zip_path, unpacked_path)?;
 

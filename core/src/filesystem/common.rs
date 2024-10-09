@@ -2,6 +2,7 @@ use globset::GlobSet;
 use std::{
 	ffi::OsStr,
 	path::{Path, PathBuf},
+	string::ToString,
 };
 use tokio::{fs, io};
 use tracing::error;
@@ -85,7 +86,7 @@ pub trait OsStrUtils {
 
 impl OsStrUtils for OsStr {
 	fn try_to_string(&self) -> Option<String> {
-		self.to_str().map(std::string::ToString::to_string)
+		self.to_str().map(ToString::to_string)
 	}
 }
 

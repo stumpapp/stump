@@ -86,7 +86,7 @@ pub async fn walk_library(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedLibrar
 		.min_depth(0)
 		.into_iter()
 		.filter_entry(|e| e.path().is_dir())
-		.filter_map(std::result::Result::ok)
+		.filter_map(Result::ok)
 		.par_bridge()
 		.partition_map::<Vec<DirEntry>, Vec<DirEntry>, _, _, _>(|entry| {
 			let entry_path = entry.path();
@@ -250,7 +250,7 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 	let walk_start = std::time::Instant::now();
 	let (valid_entries, ignored_entries) = walker
 		.into_iter()
-		.filter_map(std::result::Result::ok)
+		.filter_map(Result::ok)
 		.filter_map(|e| e.path().is_file().then_some(e))
 		.par_bridge()
 		.partition_map::<Vec<DirEntry>, Vec<DirEntry>, _, _, _>(|entry| {

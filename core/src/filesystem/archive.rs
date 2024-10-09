@@ -26,7 +26,7 @@ pub(crate) fn zip_dir(
 	let mut buffer = Vec::new();
 	for entry in WalkDir::new(unpacked_path)
 		.into_iter()
-		.filter_map(std::result::Result::ok)
+		.filter_map(Result::ok)
 	{
 		let path = entry.path();
 		let name = path.strip_prefix(Path::new(prefix)).unwrap();

@@ -354,7 +354,7 @@ impl From<Dictionary> for MediaMetadata {
 		let map = dict
 			.into_iter()
 			.map(|(k, v)| v.to_string().map(|v| (k, v)))
-			.filter_map(std::result::Result::ok)
+			.filter_map(Result::ok)
 			.map(|(k, v)| (k.to_lowercase(), vec![v]))
 			.collect::<HashMap<String, Vec<String>>>();
 		Self::from(map)

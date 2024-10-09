@@ -176,7 +176,7 @@ impl FileProcessor for RarProcessor {
 
 		let sorted_entries = archive
 			.into_iter()
-			.filter_map(std::result::Result::ok)
+			.filter_map(Result::ok)
 			.filter(|entry| entry.filename.is_img() && !entry.filename.is_hidden_file())
 			.sorted_by(|a, b| alphanumeric_sort::compare_path(&a.filename, &b.filename))
 			.collect::<Vec<_>>();
@@ -222,7 +222,7 @@ impl FileProcessor for RarProcessor {
 
 		let page_count = archive
 			.into_iter()
-			.filter_map(std::result::Result::ok)
+			.filter_map(Result::ok)
 			.filter(|entry| entry.filename.is_img() && !entry.filename.is_hidden_file())
 			.count();
 
@@ -237,7 +237,7 @@ impl FileProcessor for RarProcessor {
 
 		let sorted_entries = archive
 			.into_iter()
-			.filter_map(std::result::Result::ok)
+			.filter_map(Result::ok)
 			.filter(|entry| entry.filename.is_img())
 			.sorted_by(|a, b| alphanumeric_sort::compare_path(&a.filename, &b.filename))
 			.collect::<Vec<_>>();

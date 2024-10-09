@@ -236,7 +236,7 @@ impl PathUtils for Path {
 
 		match read_result {
 			Ok(items) => items
-				.filter_map(std::result::Result::ok)
+				.filter_map(Result::ok)
 				.filter(|item| item.path() != self)
 				.any(|f| {
 					let path = f.path();
@@ -260,7 +260,7 @@ impl PathUtils for Path {
 
 		WalkDir::new(self)
 			.into_iter()
-			.filter_map(std::result::Result::ok)
+			.filter_map(Result::ok)
 			.filter(|item| item.path() != self)
 			.any(|f| {
 				let path = f.path();

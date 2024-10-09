@@ -190,6 +190,7 @@ function LibrarySeriesScene() {
 					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
 					orderControls={<URLOrdering entity="series" />}
 					filterControls={<URLFilterDrawer entity="series" />}
+					navOffset
 				/>
 
 				{renderContent()}

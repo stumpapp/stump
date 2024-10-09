@@ -1,9 +1,9 @@
 {
 	"underConstruction": {
-		"heading": "This is awkward",
-		"message": "You've stumbled upon a page that's still being developed. I'd love to show it to you, but it isn't quite ready yet.",
-		"homeLink": "Go Home",
-		"githubLink": "View the GitHub issue"
+		"heading": "Это неловко",
+		"message": "Ты наткнулся на страницу, которая все еще разрабатывается. Я бы хотел показать ее тебе, но она еще не совсем готова.",
+		"homeLink": "На главную",
+		"githubLink": "Просмотреть проблему GitHub"
 	},
 	"authScene": {
 		"claimHeading": "Инициализируйте сервер",
@@ -12,7 +12,7 @@
 			"validation": {
 				"missingUsername": "Вы не ввели имя пользователя",
 				"missingPassword": "Пароль не может быть пустым",
-				"usernameAlreadyExists": "Username already exists"
+				"usernameAlreadyExists": "Это имя пользователя уже занято"
 			},
 			"labels": {
 				"username": "Логин",
@@ -51,12 +51,12 @@
 			}
 		},
 		"emailBook": {
-			"heading": "Email book",
-			"description": "Send this book to device or email address",
+			"heading": "Email книга",
+			"description": "Отправить эту книгу на устройство или email",
 			"form": {
 				"email": {
-					"label": "Email",
-					"placeholder": "Email address",
+					"label": "Электронная почта",
+					"placeholder": "Адрес эл. почты",
 					"description": "An email address to send the book to. Click add to finalize each input"
 				},
 				"devices": {
@@ -142,7 +142,7 @@
 				"placeholder": "/path/to/library"
 			},
 			"description": {
-				"label": "Description",
+				"label": "Описание",
 				"description": "A short description of your library",
 				"placeholder": "A library of all my favorite books"
 			},
@@ -164,7 +164,7 @@
 					"description": "The default reader to use for image-based books"
 				},
 				"readingDirection": {
-					"label": "Reading direction",
+					"label": "Направление чтения",
 					"description": "Which direction the reader progresses through pages"
 				}
 			},
@@ -219,7 +219,7 @@
 				"addRule": {
 					"label": "New rule",
 					"description": "Glob pattern to ignore files or directories",
-					"addButton": "Add rule",
+					"addButton": "Добавить правило",
 					"ignoreParents": {
 						"title": "Ignore all parent directories",
 						"label": "Ignore parents"

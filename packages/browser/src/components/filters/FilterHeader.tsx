@@ -29,6 +29,7 @@ type Props = {
 	 * The controls for adjusting the layout, i.e. GRID or TABLE
 	 */
 	layoutControls?: React.ReactNode
+	navOffset?: boolean
 }
 
 // TODO: transparent until sticky hits, then bg-background
@@ -39,6 +40,7 @@ export default function FilterHeader({
 	layoutControls,
 	orderControls,
 	filterControls,
+	navOffset,
 }: Props) {
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const { ref, isSticky } = useSticky({ extraOffset: isMobile ? 56 : 0 })
@@ -48,10 +50,11 @@ export default function FilterHeader({
 		<header
 			ref={ref}
 			className={cn(
-				'sticky top-12 z-10 flex h-12 w-full shrink-0 justify-between gap-2 border-b border-edge px-4 md:top-0',
+				'sticky z-10 flex h-12 w-full shrink-0 justify-between gap-2 border-b border-edge px-4 md:top-0',
 				{
 					'bg-background': isSticky,
 				},
+				navOffset ? 'top-12' : 'top-0',
 			)}
 		>
 			<Search

@@ -20,17 +20,16 @@ The general structure of the URL to connect to your Stump server is:
 
 The following clients have been tested with Stump:
 
-| OS      |                                      Application                                       | Page Streaming |               Issues/Notes                                                       |
-| ------- | :------------------------------------------------------------------------------------: | -------------: | -------------------------:                                                       |
-| iOS     |                             [Panels](https://panels.app/)                              |             ✅ |                         ✨                                                      |
+| OS      |                                      Application                                       | Page Streaming |                                                                     Issues/Notes |
+| ------- | :------------------------------------------------------------------------------------: | -------------: | -------------------------------------------------------------------------------: |
+| iOS     |                             [Panels](https://panels.app/)                              |             ✅ |                                                                               ✨ |
 | iOS     |     [Chunky Reader](https://apps.apple.com/us/app/chunky-comic-reader/id663567628)     |             ✅ |                                                                                  |
-| Android | [Moon+ Reader](https://play.google.com/store/apps/details?id=com.flyersoft.moonreader) |             ❌ | Users report OK experience                                                       |
-| Android |                         [KyBook 3](http://kybook-reader.com/)                          |             ❌ | No testing at this time                                                          |
-| Android | [Librera](https://play.google.com/store/apps/details?id=com.foobnix.pdf.reader)        |             ❌ | Supports covers, categories, and downloads, but shows file names not book titles |
-| Android | [Cantook by Aldiko](https://play.google.com/store/apps/details?id=com.aldiko.android)  |             ❌ | No auth support, does not work. Use 2.0                                          |
-| Linux   |                     [Foliate](https://johnfactotum.github.io/foliate/)                 |             ❌ | Loads cover previews, file names and categories                                  |
-| Windows |                     [Thorium 3](https://thorium.edrlab.org/en/)                        |             ❌ | Loads cover previews, file names and categories                                  |
-
+| Android | [Moon+ Reader](https://play.google.com/store/apps/details?id=com.flyersoft.moonreader) |             ❌ |                                                       Users report OK experience |
+| Android |                         [KyBook 3](http://kybook-reader.com/)                          |             ❌ |                                                          No testing at this time |
+| Android |    [Librera](https://play.google.com/store/apps/details?id=com.foobnix.pdf.reader)     |             ❌ | Supports covers, categories, and downloads, but shows file names not book titles |
+| Android | [Cantook by Aldiko](https://play.google.com/store/apps/details?id=com.aldiko.android)  |             ❌ |                                          No auth support, does not work. Use 2.0 |
+| Linux   |                   [Foliate](https://johnfactotum.github.io/foliate/)                   |             ❌ |                                  Loads cover previews, file names and categories |
+| Windows |                      [Thorium 3](https://thorium.edrlab.org/en/)                       |             ❌ |                                  Loads cover previews, file names and categories |
 
 If you have any experiences, good or bad, using any of these clients or another client not listed here, please consider updating this page with your findings.
 
@@ -44,10 +43,10 @@ The general structure of the URL to connect to your Stump server is:
 
 The following clients have been tested with Stump:
 
-| OS       |                                    Application                                        | Page Streaming |                                                                                                                         Issues/Notes |
-| ---      | :-----------------------------------------------------------------------------------: | -------------: | -----------------------------------------------------------------------------------------------------------------------------------: |
-| iOS      | [Cantook by Aldiko](https://apps.apple.com/us/app/cantook-by-aldiko/id1476410111)     |             ❓ | Supports catalog traversal and media downloads. Issues with rendering media covers, however this appears to be an issue on their end |
-| Android  | [Cantook by Aldiko](https://play.google.com/store/apps/details?id=com.aldiko.android) |             ❓ | Supports catalog traversal and media downloads. Issues with rendering media covers, however this appears to be an issue on their end |
-| Android  | [Librera](https://play.google.com/store/apps/details?id=com.foobnix.pdf.reader)       |             ❓ | Does not work. Likely lacking OPDS 2.0 support                                                                                       |
-| Linux    |                     [Foliate](https://johnfactotum.github.io/foliate/)                |            ❌ | Loads cover previews, book names, publisher and categories                                                                           |
-| Windows  |                     [Thorium 3](https://thorium.edrlab.org/en/)                       |            ❌ | Loads covers and their previews, book names, publisher and categories                                                                |
+| OS      |                                      Application                                      | Page Streaming |                                                                                                                         Issues/Notes |
+| ------- | :-----------------------------------------------------------------------------------: | -------------: | -----------------------------------------------------------------------------------------------------------------------------------: |
+| iOS     |   [Cantook by Aldiko](https://apps.apple.com/us/app/cantook-by-aldiko/id1476410111)   |             ❓ | Supports catalog traversal and media downloads. Issues with rendering media covers, however this appears to be an issue on their end |
+| Android | [Cantook by Aldiko](https://play.google.com/store/apps/details?id=com.aldiko.android) |             ❓ | Supports catalog traversal and media downloads. Issues with rendering media covers, however this appears to be an issue on their end |
+| Android |    [Librera](https://play.google.com/store/apps/details?id=com.foobnix.pdf.reader)    |             ❓ |                                                                                       Does not work. Likely lacking OPDS 2.0 support |
+| Linux   |                  [Foliate](https://johnfactotum.github.io/foliate/)                   |             ❌ |                                                                           Loads cover previews, book names, publisher and categories |
+| Windows |                      [Thorium 3](https://thorium.edrlab.org/en/)                      |             ❌ |                                                                Loads covers and their previews, book names, publisher and categories |

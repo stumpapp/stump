@@ -107,7 +107,7 @@ export default function JobScheduler() {
 
 	return (
 		<div className="my-2 flex flex-col gap-6">
-			<Alert level="warning" rounded="sm" icon={Construction}>
+			<Alert level="warning" icon={Construction}>
 				<Alert.Content>
 					Stump currently only supports scheduling scanner jobs. This will be extended to support
 					other job types in the future.

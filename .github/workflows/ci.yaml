@@ -51,7 +51,7 @@ jobs:
           cargo fmt --all -- --check
           cargo clippy -- -D warnings
 
-      - name: Generate typescript bindinds
+      - name: Generate typescript bindings
         run: cargo codegen -- --skip-prisma
       - name: Verify typescript bindings
         run: |

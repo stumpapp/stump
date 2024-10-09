@@ -10,7 +10,6 @@ import {
 	Mail,
 	PcCase,
 	ScrollText,
-	ShieldCheck,
 	Users,
 } from 'lucide-react'
 
@@ -130,14 +129,14 @@ export const routeGroups: RouteGroup[] = [
 				],
 				to: '/settings/server/users',
 			},
-			{
-				disabled: true,
-				icon: ShieldCheck,
-				label: 'Access',
-				localeKey: 'server/access',
-				permission: 'server:manage',
-				to: '/settings/server/access',
-			},
+			// {
+			// 	disabled: true,
+			// 	icon: ShieldCheck,
+			// 	label: 'Access',
+			// 	localeKey: 'server/access',
+			// 	permission: 'server:manage',
+			// 	to: '/settings/server/access',
+			// },
 			{
 				icon: Mail,
 				label: 'Email',

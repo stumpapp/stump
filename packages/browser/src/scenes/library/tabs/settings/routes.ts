@@ -1,4 +1,12 @@
-import { FlaskRound, Image, NotebookTabs, PackageX, ScanSearch, ShieldCheck } from 'lucide-react'
+import {
+	BookOpenText,
+	FlaskRound,
+	Image,
+	NotebookTabs,
+	PackageX,
+	ScanSearch,
+	ShieldCheck,
+} from 'lucide-react'
 
 import { RouteGroup } from '@/hooks/useRouteGroups'
 
@@ -20,6 +28,13 @@ export const routeGroups: RouteGroup[] = [
 	{
 		defaultRoute: 'settings/options/scanning',
 		items: [
+			{
+				icon: BookOpenText,
+				label: 'Reading',
+				localeKey: 'options/reading',
+				permission: 'library:edit',
+				to: 'settings/reading',
+			},
 			{
 				icon: ScanSearch,
 				label: 'Scanning',

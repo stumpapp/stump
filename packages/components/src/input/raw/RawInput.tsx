@@ -7,7 +7,7 @@ export const RAW_INPUT_BASE_CLASSES = [
 	'flex w-full items-center justify-between transition-all duration-150 ',
 	'enabled:hover:bg-background-surface bg-transparent focus:bg-transparent',
 	'border-edge-subtle border outline-none',
-	'focus:ring-offset-background focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-2 focus:ring-offset-background',
+	'focus:ring-offset-background focus:outline-none focus:ring-2 focus:ring-edge-brand focus:ring-offset-2 focus:ring-offset-background',
 	'text-foreground-subtle placeholder:text-foreground-muted text-sm',
 	'disabled:cursor-not-allowed disabled:opacity-50',
 ]
@@ -20,7 +20,7 @@ export const RAW_INPUT_VARIANT = {
 	default: 'focus:ring-background-400 dark:focus:ring-background-400',
 	ghost:
 		'border-opacity-0 enabled:hover:border-opacity-70 focus:border-opacity-100 dark:enabled:hover:border-opacity-70 dark:focus:border-opacity-100 dark:border-opacity-0 dark:focus:bg-transparent',
-	primary: 'focus:ring-brand-400 dark:focus:ring-brand-400',
+	primary: 'focus:ring-edge-brand dark:focus:ring-edge-brand',
 	underline:
 		'border-x-0 border-t-0 border-b-[1.5px] border-gray-300 border-opacity-70 dark:border-gray-700 dark:border-opacity-70 focus:ring-0 focus:ring-offset-0 outline-none focus:border-b-brand',
 }

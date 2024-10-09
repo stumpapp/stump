@@ -19,6 +19,7 @@ mod utils;
 mod context;
 pub mod error;
 
+#[rustfmt::skip]
 #[allow(warnings, unused)]
 pub mod prisma;
 
@@ -236,6 +237,7 @@ impl StumpCore {
 mod tests {
 	use std::{fs::File, io::Write, path::PathBuf};
 
+	use common::*;
 	use email::EmailerClientConfig;
 	use specta::{
 		ts::{export, BigIntExportBehavior, ExportConfiguration, TsExportError},
@@ -339,6 +341,12 @@ mod tests {
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<EmailerSendRecord>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<AttachmentMeta>()?).as_bytes())?;
+
+		file.write_all(format!("{}\n\n", ts_export::<ReadingDirection>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<ReadingMode>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<ReadingImageScaleFit>()?).as_bytes(),
+		)?;
 
 		file.write_all(format!("{}\n\n", ts_export::<FileStatus>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<Library>()?).as_bytes())?;

@@ -1,35 +1,57 @@
 import { mediaQueryKeys } from '@stump/api'
 import { invalidateQueries, useMediaByIdQuery, useUpdateMediaProgress } from '@stump/client'
-import { useEffect } from 'react'
+import { Media } from '@stump/types'
+import { Suspense, useEffect } from 'react'
 import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 
-import { ImageBasedReader } from '@/components/readers/image-based'
+import { ImageBasedReader } from '@/components/readers/imageBased'
 import paths from '@/paths'
-import { useReaderStore } from '@/stores'
 
 import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION } from '../../../utils/patterns'
+import { useBookPreferences } from './useBookPreferences'
 
-export default function BookReaderScene() {
-	const [search] = useSearchParams()
-
+export default function BookReaderSceneContainer() {
 	const { id } = useParams()
-	if (!id) {
-		throw new Error('You must provide a book ID for the reader.')
+
+	const { media } = useMediaByIdQuery(id || '', {
+		params: {
+			load_library: true,
+		},
+		suspense: true,
+	})
+
+	if (!media) {
+		return <Navigate to={paths.notFound()} />
 	}
+
+	return (
+		<Suspense>
+			<BookReaderScene book={media} />
+		</Suspense>
+	)
+}
+
+type Props = {
+	book: Media
+}
+
+function BookReaderScene({ book }: Props) {
+	const [search] = useSearchParams()
 
 	const page = search.get('page')
 	const isIncognito = search.get('incognito') === 'true'
 	const isAnimated = search.get('animated') === 'true'
 	const isStreaming = !search.get('stream') || search.get('stream') === 'true'
 
-	const readerMode = useReaderStore((state) => state.mode)
-
-	const { isLoading: fetchingBook, media } = useMediaByIdQuery(id)
-	const { updateReadProgress } = useUpdateMediaProgress(id, {
+	const { updateReadProgress } = useUpdateMediaProgress(book.id, {
 		onError(err) {
 			console.error(err)
 		},
 	})
+
+	const {
+		bookPreferences: { readingMode },
+	} = useBookPreferences({ book })
 
 	/**
 	 * An effect to invalidate the in progress media query when the component unmounts
@@ -48,34 +70,28 @@ export default function BookReaderScene() {
 		if (isIncognito) return
 
 		const parsedPage = parseInt(page || '', 10)
-		if (!parsedPage || isNaN(parsedPage) || !media) return
+		if (!parsedPage || isNaN(parsedPage) || !book) return
 
-		const maxPage = media.pages
+		const maxPage = book.pages
 		if (parsedPage <= 0 || parsedPage > maxPage) return
 
 		updateReadProgress(parsedPage)
-	}, [page, updateReadProgress, media, isIncognito])
+	}, [page, updateReadProgress, book, isIncognito])
 
-	if (fetchingBook) {
-		return null
-	} else if (!media) {
-		return <Navigate to={paths.notFound()} />
-	}
-
-	if (media.extension.match(EBOOK_EXTENSION)) {
+	if (book.extension.match(EBOOK_EXTENSION)) {
 		return (
 			<Navigate
-				to={paths.bookReader(id, {
-					epubcfi: media.current_epubcfi || null,
+				to={paths.bookReader(book.id, {
+					epubcfi: book.current_epubcfi || null,
 					isAnimated,
 					isEpub: true,
 				})}
 			/>
 		)
-	} else if (media.extension.match(PDF_EXTENSION) && !isStreaming) {
+	} else if (book.extension.match(PDF_EXTENSION) && !isStreaming) {
 		return (
 			<Navigate
-				to={paths.bookReader(id, {
+				to={paths.bookReader(book.id, {
 					isPdf: true,
 					isStreaming: false,
 				})}
@@ -85,15 +101,15 @@ export default function BookReaderScene() {
 
 	const initialPage = page ? parseInt(page, 10) : undefined
 
-	if (media.extension.match(ARCHIVE_EXTENSION) || media.extension.match(PDF_EXTENSION)) {
-		if (!initialPage && readerMode !== 'continuous') {
-			return <Navigate to={paths.bookReader(id, { isAnimated, page: 1 })} />
-		} else if (!!initialPage && initialPage > media.pages) {
-			return <Navigate to={paths.bookReader(id, { isAnimated, page: media.pages })} />
+	if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
+		if (!initialPage && readingMode === 'paged') {
+			return <Navigate to={paths.bookReader(book.id, { isAnimated, page: 1 })} />
+		} else if (!!initialPage && initialPage > book.pages) {
+			return <Navigate to={paths.bookReader(book.id, { isAnimated, page: book.pages })} />
 		} else {
 			return (
 				<ImageBasedReader
-					media={media}
+					media={book}
 					isAnimated={isAnimated}
 					isIncognito={isIncognito}
 					initialPage={initialPage}

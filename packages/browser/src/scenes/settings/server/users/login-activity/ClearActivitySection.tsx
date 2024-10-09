@@ -31,7 +31,7 @@ export default function ClearActivitySection() {
 	}
 
 	return (
-		<Alert level="error" rounded="sm" icon={AlertTriangle}>
+		<Alert level="error" icon={AlertTriangle}>
 			<Alert.Content className="flex flex-col gap-3 md:flex-row">
 				Login activity can be cleared and deleted from the database at any time.
 				<Button

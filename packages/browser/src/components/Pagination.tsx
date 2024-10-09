@@ -73,7 +73,7 @@ function PaginationLink({ value, onClick, isActive, onMouseEnter }: PaginationLi
 			className={cn(
 				'inline-flex cursor-pointer items-center border-t-2 px-4 pt-4 text-xs font-medium text-foreground-muted md:text-sm',
 				{
-					'border-brand text-brand hover:border-brand-600': isActive,
+					'border-edge-brand text-brand hover:border-edge-brand': isActive,
 				},
 				{
 					'border-transparent text-foreground-muted hover:border-edge-subtle': !isActive,

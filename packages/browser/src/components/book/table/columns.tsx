@@ -4,6 +4,7 @@ import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 
 import paths from '@/paths'
+import { formatBookName } from '@/utils/format'
 
 import BookLinksCell from './BookLinksCell'
 import CoverImageCell from './CoverImageCell'
@@ -11,11 +12,9 @@ import CoverImageCell from './CoverImageCell'
 const columnHelper = createColumnHelper<Media>()
 
 const coverColumn = columnHelper.display({
-	cell: ({
-		row: {
-			original: { id, name, metadata },
-		},
-	}) => <CoverImageCell id={id} title={metadata?.title || name} />,
+	cell: ({ row: { original: book } }) => (
+		<CoverImageCell id={book.id} title={formatBookName(book)} />
+	),
 	enableGlobalFilter: true,
 	header: () => (
 		<Text size="sm" variant="secondary">
@@ -26,30 +25,33 @@ const coverColumn = columnHelper.display({
 	size: 60,
 })
 
-const nameColumn = columnHelper.accessor(({ name, metadata }) => metadata?.title || name, {
-	cell: ({
-		getValue,
-		row: {
-			original: { id },
-		},
-	}) => (
-		<Link
-			to={paths.bookOverview(id)}
-			className="line-clamp-2 text-sm text-opacity-100 no-underline hover:text-opacity-90"
-		>
-			{getValue()}
-		</Link>
-	),
-	enableGlobalFilter: true,
-	enableSorting: true,
-	header: () => (
-		<Text size="sm" variant="secondary">
-			Name
-		</Text>
-	),
-	id: 'name',
-	minSize: 285,
-})
+const nameColumn = columnHelper.accessor(
+	({ name, metadata }) => metadata?.title || name.replace(/\.[^/.]+$/, ''),
+	{
+		cell: ({
+			getValue,
+			row: {
+				original: { id },
+			},
+		}) => (
+			<Link
+				to={paths.bookOverview(id)}
+				className="line-clamp-2 text-sm text-opacity-100 no-underline hover:text-opacity-90"
+			>
+				{getValue()}
+			</Link>
+		),
+		enableGlobalFilter: true,
+		enableSorting: true,
+		header: () => (
+			<Text size="sm" variant="secondary">
+				Name
+			</Text>
+		),
+		id: 'name',
+		minSize: 285,
+	},
+)
 
 const pagesColumn = columnHelper.accessor('pages', {
 	cell: ({ getValue }) => (

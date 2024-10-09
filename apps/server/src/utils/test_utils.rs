@@ -27,6 +27,7 @@ pub fn create_prisma_user(user: &User, hashed_pass: String) -> user::Data {
 			primary_navigation_mode: user_preferences.primary_navigation_mode,
 			layout_max_width_px: user_preferences.layout_max_width_px,
 			app_theme: user_preferences.app_theme,
+			enable_gradients: user_preferences.enable_gradients,
 			app_font: user_preferences.app_font.to_string(),
 			show_query_indicator: user_preferences.show_query_indicator,
 			enable_live_refetch: user_preferences.enable_live_refetch,

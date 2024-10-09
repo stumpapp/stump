@@ -1,4 +1,5 @@
-import React from 'react'
+import { cn, useSticky } from '@stump/components'
+import { useMediaMatch } from 'rooks'
 
 import { useFilterContext } from './context'
 import Search from './Search'
@@ -30,6 +31,7 @@ type Props = {
 	layoutControls?: React.ReactNode
 }
 
+// TODO: transparent until sticky hits, then bg-background
 export default function FilterHeader({
 	isSearching,
 	isSearchDisabled,
@@ -38,10 +40,20 @@ export default function FilterHeader({
 	orderControls,
 	filterControls,
 }: Props) {
+	const isMobile = useMediaMatch('(max-width: 768px)')
+	const { ref, isSticky } = useSticky({ extraOffset: isMobile ? 56 : 0 })
 	const { filters, setFilter, removeFilter } = useFilterContext()
 
 	return (
-		<header className="sticky top-12 z-10 flex h-12 w-full shrink-0 justify-between gap-2 border-b border-edge bg-background px-4 md:top-0">
+		<header
+			ref={ref}
+			className={cn(
+				'sticky top-12 z-10 flex h-12 w-full shrink-0 justify-between gap-2 border-b border-edge px-4 md:top-0',
+				{
+					'bg-background': isSticky,
+				},
+			)}
+		>
 			<Search
 				initialValue={filters?.search as string}
 				placeholder={searchPlaceholder}

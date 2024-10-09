@@ -11,7 +11,8 @@
 		"form": {
 			"validation": {
 				"missingUsername": "Nazwa użytkownika jest wymagana",
-				"missingPassword": "Hasło jest wymagane"
+				"missingPassword": "Hasło jest wymagane",
+				"usernameAlreadyExists": "Użytkownik o takiej nazwie już istnieje"
 			},
 			"labels": {
 				"username": "Nazwa użytkownika",
@@ -149,6 +150,24 @@
 				"label": "Etykiety",
 				"description": "Używane do kategoryzowania biblioteki lub wymuszania reguł dostępu"
 			},
+			"readingSettings": {
+				"section": {
+					"heading": "Ustawienia czytania",
+					"description": "Domyślne ustawienia czytnika dla książek"
+				},
+				"imageScaling": {
+					"label": "Skalowanie obrazu",
+					"description": "Sposób skalowania dla książek obrazkowych"
+				},
+				"readingMode": {
+					"label": "Domyślny czytnik",
+					"description": "Domyślny czytnik dla książek obrazkowych"
+				},
+				"readingDirection": {
+					"label": "Kierunek czytania",
+					"description": "Kierunek, w którym czytnik przechodzi przez strony"
+				}
+			},
 			"thumbnailConfig": {
 				"section": {
 					"heading": {
@@ -236,17 +255,17 @@
 			},
 			"scannerFeatures": {
 				"section": {
-					"heading": "Optional processing",
-					"description": "Opt-in processing features for the scanner",
-					"disclaimer": "These features involve additional file reads which may slow down the scan process"
+					"heading": "Opcjonalne przetwarzanie",
+					"description": "Opcjonalne funkcje przetwarzanie dla skanera",
+					"disclaimer": "Funkcje te obejmują dodatkowe odczyty plików, które mogą spowolnić proces skanowania"
 				},
 				"processMetadata": {
-					"label": "Process metadata",
-					"description": "Extract any metadata from library files and store the results in the database"
+					"label": "Przetwarzaj metadane",
+					"description": "Wyodrębnij metadane z plików biblioteki i zapisz wyniki w bazie danych"
 				},
 				"generateFileHashes": {
-					"label": "Generate file hashes",
-					"description": "Generate a hash for each file in the library to detect duplicates"
+					"label": "Generuj skróty plików",
+					"description": "Generuj skrót dla każdego pliku w bibliotece w celu wykrycia duplikatów"
 				}
 			},
 			"libraryPattern": {
@@ -328,8 +347,8 @@
 					"ignoreRules": "Reguły pomijania",
 					"convertRar": "Konwertuj RAR/CBR",
 					"deleteConversions": "Usuń przekonwertowane pliki",
-					"processMetadata": "Process metadata",
-					"generateFileHashes": "Generate file hashes"
+					"processMetadata": "Przetwarzaj metadane",
+					"generateFileHashes": "Generuj skróty plików"
 				}
 			},
 			"buttons": {
@@ -345,6 +364,7 @@
 			"basics": "Podstawowe",
 			"options": {
 				"general": "Ogólne",
+				"reading": "Czytanie",
 				"scanning": "Skanowanie",
 				"thumbnails": "Miniatury",
 				"ignore-rules": "Reguły pomijania",
@@ -363,6 +383,10 @@
 			"form": {
 				"submit": "Aktualizuj bibliotekę"
 			}
+		},
+		"options/reading": {
+			"title": "Czytanie",
+			"description": "Domyślne ustawienia czytnika dla książek w tej bibliotece. Każda książka może nadpisać te ustawienia"
 		},
 		"options/scanning": {
 			"title": "Zachowanie skanera",
@@ -387,7 +411,7 @@
 				"analyzeBooks": {
 					"heading": "Analizuj książki",
 					"description": "Analizuj książki w tej bibliotece, aby dołączyć dodatkowe metadane w bazie danych, takie jak wymiary stron dla książek obrazkowych",
-					"disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable",
+					"disclaimer": "Ten proces jest zasobochłonny i może trochę potrwać. W przyszłości będzie bardziej konfigurowalny",
 					"analyzeButton": "Analizuj książki"
 				},
 				"missingFiles": {
@@ -656,8 +680,7 @@
 			"sections": {
 				"themeSelect": {
 					"label": "Motyw",
-					"description": "Domyślnie Stump posiada jasny i ciemny motyw",
-					"customTheme": [
+					"description": [
 						"Jeśli chcesz stworzyć swój własny motyw, sprawdź",
 						"dokumentację"
 					],
@@ -666,8 +689,10 @@
 						"dark": "Ciemny",
 						"bronze": "Jasnobrązowy",
 						"ocean": "Ocean",
-						"autumn": "Autumn",
-						"cosmic": "Cosmic"
+						"autumn": "Jesień",
+						"cosmic": "Kosmiczny",
+						"pumpkin": "Dynia",
+						"matrix": "Matrix"
 					}
 				},
 				"fontSelect": {
@@ -730,91 +755,91 @@
 			"description": "Ustawienia związane z aplikacją desktopową Stump",
 			"sections": {
 				"configuredServers": {
-					"label": "Configured servers",
-					"description": "The list of Stump servers you can connect to",
+					"label": "Skonfigurowane serwery",
+					"description": "Lista serwerów Stump, do których możesz się połączyć",
 					"unreachableServer": {
-						"tooltip": "Server unreachable"
+						"tooltip": "Serwer niedostępny"
 					},
 					"activeServer": {
-						"tooltip": "Current server"
+						"tooltip": "Bieżący serwer"
 					},
 					"addOrEditServer": {
 						"validation": {
-							"nameExists": "A server with this name already exists",
-							"nameForbidden": "This name is reserved",
-							"urlExists": "A server with this URL already exists"
+							"nameExists": "Serwer o takiej nazwie już istnieje",
+							"nameForbidden": "Ta nazwa jest już zarezerwowana",
+							"urlExists": "Serwer z takim adresem już istnieje"
 						},
 						"fields": {
 							"name": {
-								"label": "Name",
-								"description": "A friendly name to identify this server",
-								"placeholder": "My server"
+								"label": "Nazwa",
+								"description": "Przyjazna nazwa do identyfikacji tego serwera",
+								"placeholder": "Mój serwer"
 							},
 							"uri": {
 								"label": "URI",
-								"description": "The URL of the Stump server",
+								"description": "Adres serwera Stump",
 								"placeholder": "https://stump.example.com"
 							}
 						}
 					},
 					"addServer": {
-						"trigger": "Add server",
-						"title": "Add a new server",
-						"description": "Add a new Stump server to the desktop application",
-						"confirm": "Add server"
+						"trigger": "Dodaj serwer",
+						"title": "Dodaj nowy serwer",
+						"description": "Dodaj nowy serwer Stump do aplikacji desktopowej",
+						"confirm": "Dodaj serwer"
 					},
 					"editServer": {
-						"tooltip": "Edit server",
-						"title": "Edit server",
-						"description": "Edit the details of this server",
-						"confirm": "Save changes"
+						"tooltip": "Edytuj serwer",
+						"title": "Edytuj serwer",
+						"description": "Edytuj szczegóły tego serwera",
+						"confirm": "Zapisz zmiany"
 					},
 					"deleteServer": {
-						"tooltip": "Delete server",
+						"tooltip": "Usuń serwer",
 						"confirmation": {
-							"title": "Delete this server",
-							"description": "This will remove the server from the desktop application",
-							"disclaimerActiveServer": "This server is currently active. You will be logged out",
-							"disclaimerLastServer": "This is the last configured server. You will be logged out and have to reconfigure any servers in the initialization process",
-							"confirm": "Delete server"
+							"title": "Usuń ten serwer",
+							"description": "Spowoduje to usunięcie serwera z aplikacji desktopowej",
+							"disclaimerActiveServer": "Ten serwer jest aktualnie aktywny. Nastąpi wylogowanie",
+							"disclaimerLastServer": "Jest to ostatni skonfigurowany serwer. Nastąpi wylogowanie, po którym odbędzie się proces inicjalizacji wraz z konfiguracją serwerów",
+							"confirm": "Usuń serwer"
 						}
 					},
 					"switchToServer": {
-						"tooltip": "Switch to server",
+						"tooltip": "Przełącz na serwer",
 						"confirmation": {
-							"title": "Switch to this server",
-							"description": "This will log you out of your current server",
-							"confirm": "Switch to server",
-							"server": "Server",
-							"uri": "URL"
+							"title": "Przełącz na ten serwer",
+							"description": "Spowoduje to wylogowanie z bieżącego serwera",
+							"confirm": "Przełącz na serwer",
+							"server": "Serwer",
+							"uri": "Adres URL"
 						}
 					},
 					"resetConfiguration": {
-						"label": "Delete all servers",
+						"label": "Usuń wszystkie serwery",
 						"description": [
-							"Delete all configured servers from the desktop application",
-							"This action cannot be undone"
+							"Usuń wszystkie skonfigurowane serwery z aplikacji desktopowej",
+							"Tej czynności nie można cofnąć"
 						],
 						"confirmation": {
-							"trigger": "Delete all servers",
-							"title": "Delete all servers",
-							"description": "This will remove all servers from the desktop application",
-							"disclaimer": "You will be logged out and have to reconfigure any servers in the initialization process",
-							"confirm": "Delete all servers"
+							"trigger": "Usuń wszystkie serwery",
+							"title": "Usuń wszystkie serwery",
+							"description": "Spowoduje to usunięcie wszystkich serwerów z aplikacji desktopowej",
+							"disclaimer": "Nastąpi wylogowanie, po którym odbędzie się proces inicjalizacji wraz z konfiguracją serwerów",
+							"confirm": "Usuń wszystkie serwery"
 						}
 					}
 				},
 				"optionalFeatures": {
-					"label": "Optional features",
-					"description": "Manage the optional features unique to the desktop application",
+					"label": "Funkcje opcjonalne",
+					"description": "Zarządzaj funkcjami unikalnymi dla aplikacji desktopowej",
 					"bundledServer": {
-						"label": "Bundled server",
-						"description": "Run the bundled server in the background while the desktop application is running (requires restart)"
+						"label": "Wbudowany serwer",
+						"description": "Uruchom wbudowany serwer w tle podczas działania aplikacji desktopowej (wymaga restartu)"
 					},
 					"discordPresence": {
-						"label": "Discord Presence",
-						"description": "Display your Stump activity in Discord using Discord Rich Presence",
-						"reconnect": "Reconnect to Discord"
+						"label": "Status aktywności Discord",
+						"description": "Wyświetl swoją aktywność Stump na Discordzie za pomocą statusu aktywności Discorda",
+						"reconnect": "Połącz ponownie z Discord"
 					}
 				}
 			}
@@ -967,6 +992,32 @@
 						"upload": {
 							"label": "Przesyłanie plików",
 							"description": "Pozwala użytkownikowi na przesyłanie plików na serwer"
+						}
+					},
+					"emailer": {
+						"label": "Wysyłka",
+						"read": {
+							"label": "Dostęp do wysyłki",
+							"description": "Pozwala użytkownikowi na wyświetlanie skonfigurowanych wysyłek"
+						},
+						"create": {
+							"label": "Utwórz nowe wysyłki",
+							"description": "Pozwala użytkownikowi na tworzenie nowych wysyłek"
+						},
+						"manage": {
+							"label": "Zarządzaj wysyłkami",
+							"description": "Pozwala użytkownikowi zarządzać istniejącymi wysyłkami"
+						}
+					},
+					"email": {
+						"label": "Wysyłka poczty elektronicznej",
+						"send": {
+							"label": "Wysyłaj wiadomości poczty elektronicznej",
+							"description": "Pozwala użytkownikowi wysyłać wiadomości e-mail z serwera na którykolwiek ze skonfigurowanych aliasów"
+						},
+						"arbitrary_send": {
+							"label": "Wysyłaj dowolne wiadomości e-mail",
+							"description": "Pozwala użytkownikowi wysyłać wiadomości e-mail z serwera na dowolny adres e-mail"
 						}
 					},
 					"library": {
@@ -1285,11 +1336,11 @@
 		"update": "Aktualizuj",
 		"unimplemented": "Ta funkcjonalność nie jest jeszcze zaimplementowana! Sprawdź ponownie później",
 		"limitedFunctionality": "Funkcjonalność ta nie jest jeszcze w pełni zaimplementowana. Sprawdź później",
-		"logIn": "Log in",
-		"login": "Login",
-		"seeError": "See error",
-		"goBack": "Go back",
-		"goToServers": "Go to servers",
-		"notReady": "This feature is not ready"
+		"logIn": "Zaloguj się",
+		"login": "Nazwa użytkowika",
+		"seeError": "Wyświetl błąd",
+		"goBack": "Wróć",
+		"goToServers": "Przejdź do serwerów",
+		"notReady": "Ta funkcja nie jest jeszcze gotowa"
 	}
 }

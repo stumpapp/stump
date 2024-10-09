@@ -49,22 +49,23 @@ export const autumn = {
 	},
 	foreground: {
 		DEFAULT: '#F7F0E4',
+		brand: '#D0802D',
 		disabled: '#A29A8D',
 		muted: '#A29A8D',
 		'on-inverse': '#2C1A12',
 		subtle: '#E5DCC5',
 	},
 	sidebar: {
-		DEFAULT: '#2C1A12',
+		DEFAULT: '#25160F',
 		inverse: '#FFFBF3',
 		overlay: {
 			DEFAULT: '#2C1A12',
 			hover: '#4D3F33',
 		},
 		surface: {
-			DEFAULT: '#3B2D23',
-			hover: '#4D3F33',
-			secondary: '#422F25',
+			DEFAULT: '#35281F',
+			hover: '#3B2D23',
+			secondary: '#4B382D',
 		},
 	},
 } satisfies StumpTheme

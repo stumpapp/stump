@@ -60,7 +60,7 @@ use crate::{
 	middleware::auth::{auth_middleware, RequestContext},
 	utils::{
 		http::{ImageResponse, NamedFile},
-		validate_image_upload,
+		validate_and_load_image,
 	},
 };
 
@@ -88,7 +88,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.patch(patch_media_thumbnail)
 						.post(replace_media_thumbnail)
 						// TODO: configurable max file size
-						.layer(DefaultBodyLimit::max(20 * 1024 * 1024)), // 20MB
+						.layer(DefaultBodyLimit::max(
+							app_state.config.max_image_upload_size,
+						)),
 				)
 				.route("/analyze", post(start_media_analysis))
 				.route("/page/:page", get(get_media_page))
@@ -789,7 +791,7 @@ async fn get_media_by_id(
 		query = query.with(if params.load_library.unwrap_or_default() {
 			media::series::fetch()
 				.with(series::metadata::fetch())
-				.with(series::library::fetch())
+				.with(series::library::fetch().with(library::config::fetch()))
 		} else {
 			media::series::fetch().with(series::metadata::fetch())
 		});
@@ -1194,7 +1196,9 @@ async fn replace_media_thumbnail(
 		.await?
 		.ok_or(APIError::NotFound(String::from("Media not found")))?;
 
-	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
+	let (content_type, bytes) =
+		validate_and_load_image(&mut upload, Some(ctx.config.max_image_upload_size))
+			.await?;
 	let ext = content_type.extension();
 	let book_id = media.id;
 

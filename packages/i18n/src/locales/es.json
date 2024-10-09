@@ -11,7 +11,8 @@
 		"form": {
 			"validation": {
 				"missingUsername": "Se requiere un nombre de usuario",
-				"missingPassword": "Se requiere la contraseña"
+				"missingPassword": "Se requiere la contraseña",
+				"usernameAlreadyExists": "Username already exists"
 			},
 			"labels": {
 				"username": "Nombre de usuario",
@@ -148,6 +149,24 @@
 			"tags": {
 				"label": "Tags",
 				"description": "Used to categorize your library or enforce access rules"
+			},
+			"readingSettings": {
+				"section": {
+					"heading": "Reading settings",
+					"description": "Default reader settings to use for books"
+				},
+				"imageScaling": {
+					"label": "Image scaling",
+					"description": "How the image-based reader scales images to the page"
+				},
+				"readingMode": {
+					"label": "Default reader",
+					"description": "The default reader to use for image-based books"
+				},
+				"readingDirection": {
+					"label": "Reading direction",
+					"description": "Which direction the reader progresses through pages"
+				}
 			},
 			"thumbnailConfig": {
 				"section": {
@@ -345,6 +364,7 @@
 			"basics": "Basics",
 			"options": {
 				"general": "General",
+				"reading": "Reading",
 				"scanning": "Scanning",
 				"thumbnails": "Thumbnails",
 				"ignore-rules": "Ignore Rules",
@@ -363,6 +383,10 @@
 			"form": {
 				"submit": "Update library"
 			}
+		},
+		"options/reading": {
+			"title": "Reading",
+			"description": "The default reader settings to use for books in this library. Any book can override these settings"
 		},
 		"options/scanning": {
 			"title": "Scanner Behavior",
@@ -656,10 +680,9 @@
 			"sections": {
 				"themeSelect": {
 					"label": "Tema",
-					"description": "Por defecto, Stump tiene temas claro y oscuro",
-					"customTheme": [
-						"Si estás interesado en crear tu propio tema personalizado, revisa la",
-						"documentación"
+					"description": [
+						"If you're interested in creating your own custom theme, check out the",
+						"documentation"
 					],
 					"options": {
 						"light": "Claro",
@@ -667,7 +690,9 @@
 						"bronze": "Claro Bronce",
 						"ocean": "Ocean",
 						"autumn": "Autumn",
-						"cosmic": "Cosmic"
+						"cosmic": "Cosmic",
+						"pumpkin": "Pumpkin",
+						"matrix": "Matrix"
 					}
 				},
 				"fontSelect": {
@@ -967,6 +992,32 @@
 						"upload": {
 							"label": "Subir ficheros",
 							"description": "Allows the user to upload files to the server"
+						}
+					},
+					"emailer": {
+						"label": "Emailers",
+						"read": {
+							"label": "Access emailers",
+							"description": "Allows the user to view the configured emailers"
+						},
+						"create": {
+							"label": "Create emailers",
+							"description": "Allows the user to create new emailers"
+						},
+						"manage": {
+							"label": "Manage emailers",
+							"description": "Allows the user to manage existing emailers"
+						}
+					},
+					"email": {
+						"label": "Emailing",
+						"send": {
+							"label": "Send emails",
+							"description": "Allows the user to send emails from the server to any configured aliases"
+						},
+						"arbitrary_send": {
+							"label": "Send arbitrary emails",
+							"description": "Allows the user to send emails from the server to any email address"
 						}
 					},
 					"library": {

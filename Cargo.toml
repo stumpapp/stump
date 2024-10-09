@@ -9,7 +9,7 @@ members = [
 
 [workspace.package]
 version = "0.0.6"
-rust-version = "1.79.0"
+rust-version = "1.81.0"
 
 [workspace.dependencies]
 async-trait = "0.1.81"

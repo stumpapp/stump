@@ -7,6 +7,7 @@ import { Navigate, useParams } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
 import paths from '@/paths'
+import { formatBookName } from '@/utils/format'
 
 import BookThumbnailSelector from './BookThumbnailSelector'
 
@@ -41,7 +42,7 @@ export default function BookManagementScene() {
 					]
 				: []),
 			{
-				label: media.metadata?.title || media.name,
+				label: formatBookName(media),
 				to: paths.bookOverview(media.id),
 			},
 		]

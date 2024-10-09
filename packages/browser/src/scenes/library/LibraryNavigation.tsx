@@ -55,7 +55,7 @@ export default function LibraryNavigation() {
 	const preferTopBar = primary_navigation_mode === 'TOPBAR'
 
 	return (
-		<div className="sticky top-0 z-10 h-12 w-full border-b border-edge bg-background md:relative md:top-[unset] md:z-[unset]">
+		<div className="sticky top-0 z-10 h-12 w-full border-b border-edge bg-transparent md:relative md:top-[unset] md:z-[unset]">
 			<nav
 				className={cn(
 					'-mb-px flex h-12 gap-x-6 overflow-x-scroll px-3 scrollbar-hide md:overflow-x-hidden',
@@ -72,7 +72,7 @@ export default function LibraryNavigation() {
 						underline={false}
 						onMouseEnter={tab.onHover}
 						className={cn('whitespace-nowrap border-b-2 px-1 py-3 text-sm font-medium', {
-							'border-brand-500 text-brand-500': tab.isActive,
+							'border-edge-brand text-foreground-brand': tab.isActive,
 							'border-transparent text-foreground-muted hover:border-edge': !tab.isActive,
 						})}
 					>

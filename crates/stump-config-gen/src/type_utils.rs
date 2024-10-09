@@ -84,7 +84,7 @@ pub fn get_vector_type(type_path: &TypePath) -> TokenStream {
 					.to_string();
 
 				// Output the full type name, by inserting the T name into Vec
-				format!("Vec<{}>", inner_path_name)
+				format!("Vec<{inner_path_name}>")
 					.parse::<TokenStream>()
 					.unwrap()
 			}

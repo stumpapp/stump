@@ -36,6 +36,7 @@ pdfium-render = "0.8.24"
 rayon = "1.10.0"
 regex = "1.10.6"
 ring = "0.17.8"
+smart-filter-gen = { path = "../crates/smart-filter-gen"}
 thiserror = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }

@@ -1,11 +1,12 @@
 [package]
-name = "stump-config-gen"
+name = "smart-filter-gen"
 version = "0.0.6"
-description = "A procedural macro for generating the StumpConfig struct."
+description = "A procedural macro for generating smart filters."
 edition = "2021"
 
 [lib]
 proc-macro = true
+doctest = false
 
 [dependencies]
 proc-macro2 = { workspace = true }
@@ -17,4 +18,3 @@ serde = { workspace = true }
 thiserror = { workspace = true }
 itertools = { workspace = true }
 toml = { workspace = true }
-temp-env = "0.3.6"

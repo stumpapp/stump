@@ -152,20 +152,20 @@
 			},
 			"readingSettings": {
 				"section": {
-					"heading": "Reading settings",
-					"description": "Default reader settings to use for books"
+					"heading": "Nastavení čtení",
+					"description": "Výchozí nastavení čtečky pro knihy"
 				},
 				"imageScaling": {
-					"label": "Image scaling",
-					"description": "How the image-based reader scales images to the page"
+					"label": "Měřítko obrázku",
+					"description": "Jak čtečka založená na obrázcích škáluje obrázky na stránku"
 				},
 				"readingMode": {
-					"label": "Default reader",
-					"description": "The default reader to use for image-based books"
+					"label": "Výchozí čtečka",
+					"description": "Výchozí čtečka pro knihy založené na obrázcích"
 				},
 				"readingDirection": {
-					"label": "Reading direction",
-					"description": "Which direction the reader progresses through pages"
+					"label": "Směr čtení",
+					"description": "Jakým směrem se čte po stránkách"
 				}
 			},
 			"thumbnailConfig": {
@@ -364,7 +364,7 @@
 			"basics": "Základní",
 			"options": {
 				"general": "Obecné",
-				"reading": "Reading",
+				"reading": "Čtení",
 				"scanning": "Skenování",
 				"thumbnails": "Náhledy",
 				"ignore-rules": "Pravidla Ignorování",
@@ -385,8 +385,8 @@
 			}
 		},
 		"options/reading": {
-			"title": "Reading",
-			"description": "The default reader settings to use for books in this library. Any book can override these settings"
+			"title": "Čtení",
+			"description": "Výchozí nastavení čtečky pro knihy v této knihovně. Kniha může přepsat tato nastavení"
 		},
 		"options/scanning": {
 			"title": "Chování skeneru",
@@ -681,8 +681,8 @@
 				"themeSelect": {
 					"label": "Motiv",
 					"description": [
-						"If you're interested in creating your own custom theme, check out the",
-						"documentation"
+						"Pokud máte zájem o vytvoření vlastního motivu, podívejte se na",
+						"dokumentaci"
 					],
 					"options": {
 						"light": "Světlý",

@@ -23,7 +23,6 @@
 		"@stump/components": "*",
 		"@stump/i18n": "*",
 		"@stump/sdk": "*",
-		"@stump/types": "*",
 		"@tanstack/react-query": "^4.36.1",
 		"@tanstack/react-query-devtools": "^4.36.1",
 		"@tanstack/react-table": "^8.16.0",

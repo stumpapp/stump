@@ -2,17 +2,8 @@
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
 		"outDir": "./dist",
-		"skipLibCheck": true,
-		"paths": {
-			"@stump/types": ["../types/index.ts"],
-			"@stump/types/*": ["../types/*"]
-		}
+		"skipLibCheck": true
 	},
 	"include": ["src"],
-	"exclude": ["node_modules"],
-	"references": [
-		{
-			"path": "../types"
-		}
-	]
+	"exclude": ["node_modules"]
 }

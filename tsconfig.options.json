@@ -21,7 +21,6 @@
 		"paths": {
 			"@stump/client": ["./packages/client"],
 			"@stump/sdk": ["./packages/sdk"],
-			"@stump/types": ["./packages/types"],
 			"@stump/browser": ["./packages/browser"]
 		}
 	}

@@ -59,6 +59,13 @@ export type ThumbnailGenerationOutput = { visited_files: number; skipped_files: 
 export type User = { id: string; username: string; is_server_owner: boolean; avatar_url: string | null; created_at: string; last_login: string | null; is_locked: boolean; permissions: UserPermission[]; max_sessions_allowed?: number | null; login_sessions_count?: number | null; user_preferences?: UserPreferences | null; login_activity?: LoginActivity[] | null; age_restriction?: AgeRestriction | null; active_reading_sessions?: ActiveReadingSession[] | null; finished_reading_sessions?: FinishedReadingSession[] | null }
 
 /**
+ * A partial representation of a user, which does not include all fields. This should be
+ * exposed to users within the system who do not have the necessary permissions to see
+ * all fields of a user.
+ */
+export type PartialUser = { id: string; username: string; is_server_owner: boolean; avatar_url: string | null; created_at: string }
+
+/**
  * Permissions that can be granted to a user. Some permissions are implied by others,
  * and will be automatically granted if the "parent" permission is granted.
  */

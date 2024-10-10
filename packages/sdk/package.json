@@ -18,7 +18,6 @@
 		"typescript": "^5.4.5"
 	},
 	"dependencies": {
-		"@stump/types": "*",
 		"axios": "^1.6.8",
 		"qs": "^6.12.1"
 	}

@@ -18,7 +18,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 	}
 
 	let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-		.join("../../packages/types")
+		.join("../../packages/sdk/src/types")
 		.join("generated.ts");
 
 	// cargo test --package stump_core --lib -- tests::codegen --ignored

@@ -267,7 +267,7 @@ mod tests {
 	#[ignore]
 	fn codegen() -> Result<(), Box<dyn std::error::Error>> {
 		let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("../packages/types")
+			.join("../packages/sdk/src/types")
 			.join("generated.ts");
 
 		println!("Please ensure to only generate types using `cargo codegen`");
@@ -312,6 +312,7 @@ mod tests {
 		)?;
 
 		file.write_all(format!("{}\n\n", ts_export::<User>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<PartialUser>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UserPermission>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<AgeRestriction>()?).as_bytes())?;
 

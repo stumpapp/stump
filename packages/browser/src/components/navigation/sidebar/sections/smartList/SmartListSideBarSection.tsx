@@ -1,4 +1,4 @@
-import { useSmartListsQuery } from '@stump/client'
+import { usePrefetchSmartList, useSmartListsQuery } from '@stump/client'
 import { Accordion, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useLocation } from 'react-router'
@@ -18,6 +18,7 @@ export default function SmartListSideBarSection({
 
 	const { t } = useLocaleContext()
 	const { lists } = useSmartListsQuery()
+	const { prefetch } = usePrefetchSmartList()
 
 	const isCurrentList = (id: string) => location.pathname.startsWith(paths.smartList(id))
 
@@ -37,6 +38,7 @@ export default function SmartListSideBarSection({
 					to={paths.smartList(id)}
 					isActive={isCurrentList(id)}
 					className="pl-2 pr-0"
+					onMouseEnter={() => prefetch({ id })}
 				>
 					{name}
 				</SideBarButtonLink>

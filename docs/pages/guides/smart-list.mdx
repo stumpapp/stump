@@ -2,29 +2,27 @@ import { Callout } from 'nextra-theme-docs'
 
 # Smart lists
 
-<Callout emoji="🚧">
-	At the time of writing, smart lists are extremely experimental. There is no UI for creating or
-	editing them, and the internal structures are subject to change
-</Callout>
+A smart list is a dynamic list of books generated from a set of configured filters. They are powerful in that they allow you to quickly curate and organize a collection of books based on a set of criteria without having to manually manage the list.
 
-Smart lists are stored combinations of filters that can be applied to your database, generating pseudo-lists on the fly. They are a powerful tool for organizing your books in a way that makes sense to you.
+## Filters
 
-## Components
+The core of a smart list, used for determining which books are to be included in the resulting list.
 
-There are three main components to a smart list:
+A smart lists filter configuration is made up of two parts:
 
-- **Name**: The name of the smart list, which is used to identify it in the UI and must be unique _per_ user
-- **Description**: An optional description of the smart list
-- **Filters**: The magic sauce that makes smart lists work
+- **Groups**: Sub-lists of filters that are combined together using a top-level joiner (see below)
+- **Top-level joiner**: The method used to join groups together, i.e. `AND` or `OR` (all groups must match vs at least one group must match)
 
-### Filters
+A group itself has two parts:
 
-Filters are the core of a smart list. They are used to determine which books are to be included in the generated smart list.
+- **Joiner**: The method used to join filters together within the group, i.e. `AND`, `OR`, `NOT` (all filters must match, at least one filter must match, or no filters must match)
+- **Conditions**: A list of filters to apply to the books
 
-Filters are made up of two parts:
+A condition in a filter group has the following structure:
 
-- **Filter groups**: Groups of filters that are combined together using a joiner
-- **Joiner**: The combination method used to join groups together, i.e. `AND` or `OR`
+- **Attribute**: The attribute of the book to filter on. This also allows selecting attributes of related entities, such as a book's metadata, series, or library. I won't enumerate them all, but you can filter on most attributes. Any missing attributes can be requested!
+- **Operator**: The operator to use when comparing the attribute to the value. I won't enumerate them all, but you have options for string and list matching, number comparison, and range operators
+- **Value**: The actual value to compare the attribute to. The UI presents this dynamically, based on the attribute and operator selected
 
 ### Grouping
 
@@ -34,13 +32,13 @@ Not to be confused with the filter groups, grouping is a way of grouping matched
 2. `BY_LIBRARY`: Groups books together by their library
 3. `BY_BOOKS`: Does not group books together. The name is perhaps confusing, but you can think of it as "no grouping"
 
-## Access
+In the future, more grouping options may be considered
+
+## Feature Access
 
 The smart list feature, itself, is gated behind the `smartlist:read` user permission. This means that only users with this permission will be able to interact with smart lists.
 
-### Sharing
-
-<Callout emoji="🚧">Access sharing is not yet fully implemented</Callout>
+## List-level Access
 
 Smart lists can be shared with other users, and has 3 visibility options:
 
@@ -48,21 +46,16 @@ Smart lists can be shared with other users, and has 3 visibility options:
 - **Public**: Anyone can see the smart list
 - **Shared**: Only users that the smart list has been shared with can see it
 
-## Views
-
-While interacting with a smart list on the UI, you can manipulate the view to your liking. This includes:
-
-- Sorting states for the table
-- Column visibility, i.e. which columns are visible or hidden
-- Column order, i.e. the order in which columns are displayed
-
-By default, any changes you make won't be persisted. However, the UI will detect and allow you to save any adjustments as a view. This view will then be available to you in the future, along with any other views you create. If you have a view selected, the changes will provide you with the additional option of updating the view.
+<Callout emoji="🚧">
+	The `shared` visibility option is not yet fully implemented. It functions as `private` for now,
+	but will be updated in the future
+</Callout>
 
 ## Creating a Smart List
 
-Currently, the only way to create a smart list is to use the Stump API directly. You can use the swagger UI to do this, or use a tool like Postman.
+There is a query builder directly in the UI which allows you to declaratively create a smart list. This is the recommended way to create a smart list, as it is the most user-friendly. The UI is aware of the type-constraints per attribute and will guide you through the process.
 
-An example `POST` request might look like this:
+You can also use the API directly, an example `POST` request might look like this:
 
 ```json
 {
@@ -105,3 +98,13 @@ An example `POST` request might look like this:
 	"default_grouping": "BY_SERIES"
 }
 ```
+
+## Views
+
+While interacting with a smart list on the UI, you can manipulate the view to your liking. This includes:
+
+- Sorting states for the table
+- Column visibility, i.e. which columns are visible or hidden
+- Column order, i.e. the order in which columns are displayed
+
+By default, any changes you make won't be persisted. However, the UI will detect and allow you to save any adjustments as a view. This view will then be available to you in the future, along with any other views you create. If you have a view selected, the changes will provide you with the additional option of updating the view.

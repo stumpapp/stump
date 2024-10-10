@@ -1,6 +1,10 @@
 use std::{fmt::Display, str::FromStr};
 
-use prisma_client_rust::{and, not, or};
+use prisma_client_rust::{
+	and,
+	chrono::{DateTime, FixedOffset},
+	not, or,
+};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
@@ -15,16 +19,13 @@ use smart_filter_gen::generate_smart_filter;
 // 1. Performance implications. This is mostly because the assumption for each `into_prisma` call is a single param,
 //    which means for relation filters we will have an `is` call each time. I don't yet know how this actually affects
 //    performance in real-world scenarios, but it's something to keep in mind.
-// 2. Repetition of logic. There is a lot of repetition in the `into_prisma` definitions, and I think there is a way to (maybe)
-//    consolidate them into a single macro. I'm not sure if this is possible, but it's worth looking into. This will get exponentially
-//    worse as things like sorting and sorting on relations are added... :weary:
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, ToSchema, Type)]
 #[serde(untagged)]
 /// A filter for a single value, e.g. `name = "test"`
 pub enum Filter<T> {
 	/// A simple equals filter, e.g. `name = "test"`
-	Equals(T),
+	Equals { equals: T },
 	/// A simple not filter, e.g. `name != "test"`
 	Not { not: T },
 	/// A filter for a string that contains a substring, e.g. `name contains "test"`. This should
@@ -71,7 +72,7 @@ impl<T> Filter<T> {
 		WhereParam: From<prisma_client_rust::Operator<WhereParam>>,
 	{
 		match self {
-			Filter::Equals(value) => equals_fn(value),
+			Filter::Equals { equals } => equals_fn(equals),
 			Filter::Not { not } => not![equals_fn(not)],
 			Filter::Contains { contains } => contains_fn(contains),
 			Filter::Excludes { excludes } => not![contains_fn(excludes)],
@@ -93,7 +94,7 @@ impl<T> Filter<T> {
 		WhereParam: From<prisma_client_rust::Operator<WhereParam>>,
 	{
 		match self {
-			Filter::Equals(value) => equals_fn(Some(value)),
+			Filter::Equals { equals } => equals_fn(Some(equals)),
 			Filter::Not { not } => not![equals_fn(Some(not))],
 			Filter::Contains { contains } => contains_fn(contains),
 			Filter::Excludes { excludes } => not![contains_fn(excludes)],
@@ -102,22 +103,20 @@ impl<T> Filter<T> {
 			_ => unreachable!("Numeric filters should be handled elsewhere"),
 		}
 	}
-}
 
-impl Filter<i32> {
 	pub fn into_numeric_params<WhereParam>(
 		self,
-		equals_fn: fn(i32) -> WhereParam,
-		gt_fn: fn(i32) -> WhereParam,
-		gte_fn: fn(i32) -> WhereParam,
-		lt_fn: fn(i32) -> WhereParam,
-		lte_fn: fn(i32) -> WhereParam,
+		equals_fn: fn(T) -> WhereParam,
+		gt_fn: fn(T) -> WhereParam,
+		gte_fn: fn(T) -> WhereParam,
+		lt_fn: fn(T) -> WhereParam,
+		lte_fn: fn(T) -> WhereParam,
 	) -> WhereParam
 	where
 		WhereParam: From<prisma_client_rust::Operator<WhereParam>>,
 	{
 		match self {
-			Filter::Equals(value) => equals_fn(value),
+			Filter::Equals { equals } => equals_fn(equals),
 			Filter::Not { not } => not![equals_fn(not)],
 			Filter::NumericFilter(numeric_filter) => match numeric_filter {
 				NumericFilter::Gt { gt } => gt_fn(gt),
@@ -138,17 +137,17 @@ impl Filter<i32> {
 
 	pub fn into_optional_numeric_params<WhereParam>(
 		self,
-		equals_fn: fn(Option<i32>) -> WhereParam,
-		gt_fn: fn(i32) -> WhereParam,
-		gte_fn: fn(i32) -> WhereParam,
-		lt_fn: fn(i32) -> WhereParam,
-		lte_fn: fn(i32) -> WhereParam,
+		equals_fn: fn(Option<T>) -> WhereParam,
+		gt_fn: fn(T) -> WhereParam,
+		gte_fn: fn(T) -> WhereParam,
+		lt_fn: fn(T) -> WhereParam,
+		lte_fn: fn(T) -> WhereParam,
 	) -> WhereParam
 	where
 		WhereParam: From<prisma_client_rust::Operator<WhereParam>>,
 	{
 		match self {
-			Filter::Equals(value) => equals_fn(Some(value)),
+			Filter::Equals { equals } => equals_fn(Some(equals)),
 			Filter::Not { not } => not![equals_fn(Some(not))],
 			Filter::NumericFilter(numeric_filter) => match numeric_filter {
 				NumericFilter::Gt { gt } => gt_fn(gt),
@@ -217,11 +216,6 @@ impl From<&str> for FilterJoin {
 	}
 }
 
-// pub struct SmartFilterOrder {
-// 	pub direction: Direction,
-// 	pub order_by:
-// }
-
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 #[aliases(SmartFilterSchema = SmartFilter<MediaSmartFilter>)]
 pub struct SmartFilter<T> {
@@ -229,9 +223,6 @@ pub struct SmartFilter<T> {
 	#[serde(default)]
 	pub joiner: FilterJoin,
 }
-
-// TODO: figure out if perhaps macros can come in with the save here. Continuing down this path
-// will be INCREDIBLY verbose..
 
 #[generate_smart_filter]
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
@@ -335,7 +326,6 @@ pub enum MediaMetadataSmartFilter {
 	Inkers { inkers: String },
 	#[is_optional]
 	Editors { editors: String },
-	// FIXME: Current implementationm makes it awkward to support numeric filters
 	#[is_optional]
 	AgeRating { age_rating: i32 },
 	#[is_optional]
@@ -352,8 +342,13 @@ pub enum MediaMetadataSmartFilter {
 #[prisma_table("media")]
 pub enum MediaSmartFilter {
 	Name { name: String },
+	Size { size: i64 },
 	Extension { extension: String },
+	CreatedAt { created_at: DateTime<FixedOffset> },
+	UpdatedAt { updated_at: DateTime<FixedOffset> },
+	Status { status: String },
 	Path { path: String },
+	Pages { pages: i32 },
 	Metadata { metadata: MediaMetadataSmartFilter },
 	Series { series: SeriesSmartFilter },
 }
@@ -433,6 +428,83 @@ mod tests {
 						},
 					},
 				],
+			}
+		);
+	}
+
+	#[test]
+	fn it_serializes_number_correctly() {
+		let filter: FilterGroup<MediaSmartFilter> = FilterGroup::And {
+			and: vec![MediaSmartFilter::Size {
+				size: Filter::NumericFilter(NumericFilter::Gte { gte: 3000 }),
+			}],
+		};
+
+		let json = serde_json::to_string(&filter).unwrap();
+
+		assert_eq!(json, r#"{"and":[{"size":{"gte":3000}}]}"#);
+	}
+
+	#[test]
+	fn it_deserializes_number_correctly() {
+		let json = r#"{"or":[{"size":{"gte":3000}}]}"#;
+
+		let filter: FilterGroup<MediaSmartFilter> = serde_json::from_str(json).unwrap();
+
+		assert_eq!(
+			filter,
+			FilterGroup::Or {
+				or: vec![MediaSmartFilter::Size {
+					size: Filter::NumericFilter(NumericFilter::Gte { gte: 3000 }),
+				}],
+			}
+		);
+	}
+
+	#[test]
+	fn it_serializes_range_correctly() {
+		let filter: FilterGroup<MediaSmartFilter> = FilterGroup::And {
+			and: vec![MediaSmartFilter::Metadata {
+				metadata: MediaMetadataSmartFilter::AgeRating {
+					age_rating: Filter::NumericFilter(NumericFilter::Range(
+						NumericRange {
+							from: 10,
+							to: 20,
+							inclusive: true,
+						},
+					)),
+				},
+			}],
+		};
+
+		let json = serde_json::to_string(&filter).unwrap();
+
+		assert_eq!(
+			json,
+			r#"{"and":[{"metadata":{"age_rating":{"from":10,"to":20,"inclusive":true}}}]}"#
+		);
+	}
+
+	#[test]
+	fn it_deserializes_range_correctly() {
+		let json = r#"{"and":[{"metadata":{"age_rating":{"from":10,"to":20,"inclusive":true}}}]}"#;
+
+		let filter: FilterGroup<MediaSmartFilter> = serde_json::from_str(json).unwrap();
+
+		assert_eq!(
+			filter,
+			FilterGroup::And {
+				and: vec![MediaSmartFilter::Metadata {
+					metadata: MediaMetadataSmartFilter::AgeRating {
+						age_rating: Filter::NumericFilter(NumericFilter::Range(
+							NumericRange {
+								from: 10,
+								to: 20,
+								inclusive: true,
+							},
+						)),
+					},
+				}],
 			}
 		);
 	}

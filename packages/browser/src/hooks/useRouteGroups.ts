@@ -18,6 +18,7 @@ type Route = {
 	label: string
 	localeKey: string
 	permission?: UserPermission
+	customPermission?: () => boolean
 	to: string
 	subItems?: SubItem[]
 	disabled?: boolean

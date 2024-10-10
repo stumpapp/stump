@@ -188,7 +188,7 @@ export type ReactTableGlobalSort = { desc: boolean; id: string }
 /**
  * A filter for a single value, e.g. `name = "test"`
  */
-export type Filter<T> = T | { not: T } | { contains: T } | { excludes: T } | { any: T[] } | { none: T[] } | NumericFilter<T>
+export type Filter<T> = { equals: T } | { not: T } | { contains: T } | { excludes: T } | { any: T[] } | { none: T[] } | NumericFilter<T>
 
 export type NumericFilter<T> = { gt: T } | { gte: T } | { lt: T } | { lte: T } | NumericRange<T>
 
@@ -211,7 +211,7 @@ export type SmartList = { id: string; name: string; description: string | null; 
 
 export type SmartFilter<T> = { groups: FilterGroup<T>[]; joiner?: FilterJoin }
 
-export type MediaSmartFilter = { name: Filter<string> } | { extension: Filter<string> } | { path: Filter<string> } | { metadata: MediaMetadataSmartFilter } | { series: SeriesSmartFilter }
+export type MediaSmartFilter = { name: Filter<string> } | { size: Filter<number> } | { extension: Filter<string> } | { created_at: Filter<string> } | { updated_at: Filter<string> } | { status: Filter<string> } | { path: Filter<string> } | { pages: Filter<number> } | { metadata: MediaMetadataSmartFilter } | { series: SeriesSmartFilter }
 
 export type MediaMetadataSmartFilter = { publisher: Filter<string> } | { genre: Filter<string> } | { characters: Filter<string> } | { colorists: Filter<string> } | { writers: Filter<string> } | { pencillers: Filter<string> } | { letterers: Filter<string> } | { inkers: Filter<string> } | { editors: Filter<string> } | { age_rating: Filter<number> } | { year: Filter<number> } | { month: Filter<number> } | { day: Filter<number> }
 
@@ -462,9 +462,9 @@ export type PatchSeriesThumbnail = { media_id: string; page: number; is_zero_bas
 
 export type PatchLibraryThumbnail = { media_id: string; page: number; is_zero_based?: boolean | null }
 
-export type CreateOrUpdateSmartList = { name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; joiner?: FilterJoin | null; default_grouping?: SmartListItemGrouping | null }
+export type CreateOrUpdateSmartList = { name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; joiner?: FilterJoin | null; default_grouping?: SmartListItemGrouping | null; visibility?: EntityVisibility | null }
 
-export type GetSmartListsParams = { all?: boolean | null; search?: string | null }
+export type GetSmartListsParams = { all?: boolean | null; mine?: boolean | null; search?: string | null }
 
 export type SmartListRelationOptions = { load_views?: boolean }
 

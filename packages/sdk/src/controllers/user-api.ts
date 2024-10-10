@@ -81,7 +81,7 @@ export class UserAPI extends APIBase {
 	 * Update the current authenticated user's preferences
 	 */
 	async updatePreferences(payload: UpdateUserPreferences): Promise<UserPreferences> {
-		const { data: preferences } = await this.axios.patch<UserPreferences>(
+		const { data: preferences } = await this.axios.put<UserPreferences>(
 			userURL('/me/preferences'),
 			payload,
 		)

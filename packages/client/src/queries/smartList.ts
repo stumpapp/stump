@@ -29,14 +29,22 @@ export function useSmartListsQuery({ params, ...options }: UseSmartListsQueryOpt
 	return { lists: data, ...rest }
 }
 
-export const usePrefetchSmartList = ({ id }: { id: string }) => {
+export const usePrefetchSmartList = () => {
 	const { sdk } = useSDK()
 	const prefetch = useCallback(
-		() =>
-			queryClient.prefetchQuery([sdk.smartlist.keys.getByID, id], async () =>
-				sdk.smartlist.getByID(id),
-			),
-		[sdk.smartlist, id],
+		({ id }: { id: string }) =>
+			Promise.all([
+				queryClient.prefetchQuery([sdk.smartlist.keys.getByID, id], async () =>
+					sdk.smartlist.getByID(id),
+				),
+				queryClient.prefetchQuery([sdk.smartlist.keys.meta, id], async () =>
+					sdk.smartlist.meta(id),
+				),
+				queryClient.prefetchQuery([sdk.smartlist.keys.items, id], async () =>
+					sdk.smartlist.items(id),
+				),
+			]),
+		[sdk.smartlist],
 	)
 	return { prefetch }
 }
@@ -133,16 +141,50 @@ export function useSmartListWithMetaQuery({ id, params }: UseSmartListItemsWithM
 	}
 }
 
+export function useCreateSmartList(
+	options: MutationOptions<SmartList, AxiosError, CreateOrUpdateSmartList> = {},
+) {
+	const { sdk } = useSDK()
+	const { mutate, mutateAsync, isLoading, ...restReturn } = useMutation(
+		[sdk.smartlist.keys.create],
+		async (params: CreateOrUpdateSmartList) => sdk.smartlist.create(params),
+		{
+			...options,
+			onSuccess: async (...args) => {
+				await queryClient.invalidateQueries([sdk.smartlist.keys.get], {
+					exact: false,
+				})
+				options.onSuccess?.(...args)
+			},
+		},
+	)
+
+	return {
+		create: mutate,
+		createAsync: mutateAsync,
+		isCreating: isLoading,
+		...restReturn,
+	}
+}
+
 // TODO: different types!
 type UseUpdateSmartListMutationOptions = {
 	id: string
 } & MutationOptions<SmartList, AxiosError, CreateOrUpdateSmartList>
-export function useUpdateSmartListMutation({ id, ...options }: UseUpdateSmartListMutationOptions) {
+export function useUpdateSmartList({ id, ...options }: UseUpdateSmartListMutationOptions) {
 	const { sdk } = useSDK()
 	const { mutate, mutateAsync, isLoading, ...restReturn } = useMutation(
 		[sdk.smartlist.keys.update, id],
 		async (updates: CreateOrUpdateSmartList) => sdk.smartlist.update(id, updates),
-		options,
+		{
+			...options,
+			onSuccess: async (...args) => {
+				await queryClient.invalidateQueries([sdk.smartlist.keys.getByID, id], {
+					exact: false,
+				})
+				options.onSuccess?.(...args)
+			},
+		},
 	)
 
 	return {
@@ -154,7 +196,7 @@ export function useUpdateSmartListMutation({ id, ...options }: UseUpdateSmartLis
 }
 
 type UseDeleteSmartListMutationOptions = MutationOptions<SmartList, AxiosError, string>
-export function useDeleteSmartListMutation({
+export function useDeleteSmartList({
 	onSuccess,
 	...options
 }: UseDeleteSmartListMutationOptions = {}) {

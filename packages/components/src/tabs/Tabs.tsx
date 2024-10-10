@@ -9,7 +9,7 @@ const TABS_CONTENT_VARIANTS: Record<TabsVariant, string> = {
 	default:
 		'text-foreground-subtle data-[state=active]:bg-background data-[state=active]:text-foreground',
 	primary:
-		'text-foreground-subtle data-[state=active]:bg-brand-300 data-[state=active]:text-brand-800',
+		'text-foreground-subtle data-[state=active]:bg-fill-brand data-[state=active]:text-foreground',
 }
 
 export type TabsProps = {

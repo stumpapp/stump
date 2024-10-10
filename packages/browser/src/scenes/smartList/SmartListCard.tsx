@@ -25,7 +25,7 @@ export default function SmartListCard({
 		description,
 	},
 }: Props) {
-	const { prefetch } = usePrefetchSmartList({ id })
+	const { prefetch } = usePrefetchSmartList()
 	const { t } = useLocaleContext()
 	const { meta } = useSmartListMetaQuery({
 		/**
@@ -112,7 +112,7 @@ export default function SmartListCard({
 		<Link to={paths.smartList(id)} className="block w-full">
 			<Card
 				className="flex h-32 w-full flex-col gap-y-4 rounded-none border-none bg-background-surface p-4 transition-colors duration-150 first:rounded-t-sm last:rounded-b-sm hover:bg-background-surface-hover/80"
-				onMouseEnter={() => prefetch}
+				onMouseEnter={() => prefetch({ id })}
 			>
 				<div className="flex flex-col gap-y-1.5">
 					<Text>{name}</Text>

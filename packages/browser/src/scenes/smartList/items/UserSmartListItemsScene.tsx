@@ -9,6 +9,7 @@ import { useSmartListContext } from '../context'
 import { GroupedSmartListItemList } from './list'
 import { GroupedSmartListItemTable, SmartListBookTable } from './table'
 
+// FIXME: performance of these tables is ass, it really just needs virtualization
 export default function UserSmartListItemsScene() {
 	const { t } = useLocaleContext()
 	const {

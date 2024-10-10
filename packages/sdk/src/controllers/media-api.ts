@@ -1,3 +1,4 @@
+import { APIBase } from '../base'
 import {
 	Media,
 	MediaFilter,
@@ -6,8 +7,6 @@ import {
 	ProgressUpdateReturn,
 	PutMediaCompletionStatus,
 } from '../types'
-
-import { APIBase } from '../base'
 import { ClassQueryKeys, CursorQueryParams, FullQueryParams } from './types'
 import { createRouteURLHandler } from './utils'
 

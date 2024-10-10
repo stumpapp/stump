@@ -1,6 +1,5 @@
-import { DirectoryListing, DirectoryListingInput, Pageable } from '../types'
-
 import { APIBase } from '../base'
+import { DirectoryListing, DirectoryListingInput, Pageable } from '../types'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 

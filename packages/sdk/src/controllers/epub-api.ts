@@ -1,3 +1,4 @@
+import { APIBase } from '../base'
 import {
 	Bookmark,
 	CreateOrUpdateBookmark,
@@ -5,8 +6,6 @@ import {
 	Epub,
 	UpdateEpubProgress,
 } from '../types'
-
-import { APIBase } from '../base'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 

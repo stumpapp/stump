@@ -1,3 +1,4 @@
+import { APIBase } from '../base'
 import {
 	Arrangement,
 	CreateUser,
@@ -11,8 +12,6 @@ import {
 	UserPreferences,
 	UserQueryRelation,
 } from '../types'
-
-import { APIBase } from '../base'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 

@@ -1,6 +1,5 @@
-import { Log, LogFilter, LogMetadata, Pageable, PaginationQuery, QueryOrder } from '../types'
-
 import { APIBase } from '../base'
+import { Log, LogFilter, LogMetadata, Pageable, PaginationQuery, QueryOrder } from '../types'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 

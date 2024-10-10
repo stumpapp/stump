@@ -1,9 +1,8 @@
 import type { Epub, EpubContent } from '@stump/sdk'
 import { useMemo, useState } from 'react'
 
-import { useSDK } from '../sdk'
-
 import { useQuery } from '../client'
+import { useSDK } from '../sdk'
 
 export interface EpubOptions {
 	// loc is the epubcfi, comes from the query param ?loc=epubcfi(..)

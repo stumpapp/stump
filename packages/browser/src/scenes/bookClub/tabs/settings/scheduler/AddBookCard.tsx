@@ -86,7 +86,7 @@ export default function AddBookCard({ index }: Props) {
 				</div>
 			</div>
 		)
-	}, [selectedBook])
+	}, [selectedBook, sdk.media])
 
 	const renderSelectedBookOptions = useCallback(() => {
 		if (selectedBook) {

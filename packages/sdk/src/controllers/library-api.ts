@@ -1,3 +1,4 @@
+import { APIBase } from '../base'
 import {
 	CleanLibraryResponse,
 	CreateLibrary,
@@ -13,8 +14,6 @@ import {
 	UpdateLibraryExcludedUsers,
 	User,
 } from '../types'
-
-import { APIBase } from '../base'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 

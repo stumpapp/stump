@@ -1,3 +1,4 @@
+import { APIBase } from '../base'
 import {
 	CreateOrUpdateSmartList,
 	CreateOrUpdateSmartListView,
@@ -8,8 +9,6 @@ import {
 	SmartListRelationOptions,
 	SmartListView,
 } from '../types'
-
-import { APIBase } from '../base'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 

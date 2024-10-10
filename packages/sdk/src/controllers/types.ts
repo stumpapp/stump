@@ -1,4 +1,4 @@
-import { APIError, Pageable, PaginationQuery, QueryOrder } from '@stump/types'
+import { APIError, Pageable, PaginationQuery, QueryOrder } from '../types'
 import { AnyFunction } from 'ts-essentials'
 
 export type APIResult<T> = import('axios').AxiosResponse<T, import('axios').AxiosError<APIError>>

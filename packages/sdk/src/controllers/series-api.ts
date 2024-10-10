@@ -1,4 +1,4 @@
-import { Media, Pageable, PatchSeriesThumbnail, Series, SeriesFilter } from '@stump/types'
+import { Media, Pageable, PatchSeriesThumbnail, Series, SeriesFilter } from '../types'
 
 import { APIBase } from '../base'
 import { MediaAPI } from './media-api'

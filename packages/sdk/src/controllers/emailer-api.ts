@@ -9,7 +9,7 @@ import {
 	SendAttachmentEmailResponse,
 	SendAttachmentEmailsPayload,
 	SMTPEmailer,
-} from '@stump/types'
+} from '../types'
 
 import { APIBase } from '../base'
 import { ClassQueryKeys } from './types'

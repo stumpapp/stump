@@ -1,4 +1,4 @@
-import type { CoreEvent } from '@stump/types'
+import type { CoreEvent } from '@stump/sdk'
 import { useMemo } from 'react'
 import useWebSocket, { ReadyState } from 'react-use-websocket'
 

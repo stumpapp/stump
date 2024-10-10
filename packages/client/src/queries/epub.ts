@@ -1,4 +1,4 @@
-import type { Epub, EpubContent } from '@stump/types'
+import type { Epub, EpubContent } from '@stump/sdk'
 import { useMemo, useState } from 'react'
 
 import { useSDK } from '../sdk'

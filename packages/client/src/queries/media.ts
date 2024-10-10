@@ -1,5 +1,5 @@
 import { FullQueryParams, QueryOrderParams } from '@stump/sdk'
-import type { BookRelations, Media, MediaFilter, ProgressUpdateReturn } from '@stump/types'
+import type { BookRelations, Media, MediaFilter, ProgressUpdateReturn } from '@stump/sdk'
 import { AxiosError } from 'axios'
 import { useCallback } from 'react'
 

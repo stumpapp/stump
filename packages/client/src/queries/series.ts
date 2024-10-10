@@ -1,4 +1,4 @@
-import type { Media, Series, SeriesFilter } from '@stump/types'
+import type { Media, Series, SeriesFilter } from '@stump/sdk'
 import { AxiosError } from 'axios'
 import { useCallback } from 'react'
 

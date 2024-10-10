@@ -1,5 +1,5 @@
 import { CursorQueryParams, PagedQueryParams } from '@stump/sdk'
-import { Pageable } from '@stump/types'
+import { Pageable } from '@stump/sdk'
 import {
 	MutationFunction,
 	MutationKey,

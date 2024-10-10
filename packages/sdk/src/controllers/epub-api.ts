@@ -4,7 +4,7 @@ import {
 	DeleteBookmark,
 	Epub,
 	UpdateEpubProgress,
-} from '@stump/types'
+} from '../types'
 
 import { APIBase } from '../base'
 import { ClassQueryKeys } from './types'

@@ -12,7 +12,7 @@ import {
 	UpdateLibrary,
 	UpdateLibraryExcludedUsers,
 	User,
-} from '@stump/types'
+} from '../types'
 
 import { APIBase } from '../base'
 import { ClassQueryKeys } from './types'

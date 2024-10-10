@@ -7,7 +7,7 @@ import {
 	SmartListMeta,
 	SmartListRelationOptions,
 	SmartListView,
-} from '@stump/types'
+} from '../types'
 
 import { APIBase } from '../base'
 import { ClassQueryKeys } from './types'

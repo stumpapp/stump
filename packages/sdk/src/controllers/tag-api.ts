@@ -1,4 +1,4 @@
-import { Tag } from '@stump/types'
+import { Tag } from '../types'
 
 import { APIBase } from '../base'
 import { ClassQueryKeys } from './types'

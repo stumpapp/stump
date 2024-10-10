@@ -1,4 +1,4 @@
-import { DirectoryListing, DirectoryListingInput, Pageable } from '@stump/types'
+import { DirectoryListing, DirectoryListingInput, Pageable } from '../types'
 
 import { APIBase } from '../base'
 import { ClassQueryKeys } from './types'

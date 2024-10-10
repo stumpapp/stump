@@ -5,7 +5,7 @@ import {
 	PatchMediaThumbnail,
 	ProgressUpdateReturn,
 	PutMediaCompletionStatus,
-} from '@stump/types'
+} from '../types'
 
 import { APIBase } from '../base'
 import { ClassQueryKeys, CursorQueryParams, FullQueryParams } from './types'

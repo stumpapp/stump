@@ -1,4 +1,4 @@
-import { APIError } from '@stump/types'
+import { APIError } from '../types'
 import axios, { AxiosError } from 'axios'
 import qs from 'qs'
 

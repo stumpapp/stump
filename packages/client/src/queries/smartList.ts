@@ -6,7 +6,7 @@ import {
 	SmartListItems,
 	SmartListMeta,
 	SmartListRelationOptions,
-} from '@stump/types'
+} from '@stump/sdk'
 import { useQueries, UseQueryResult } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import { useCallback } from 'react'

@@ -1,4 +1,4 @@
-import { JobSchedulerConfig, Pageable, PersistedJob } from '@stump/types'
+import { JobSchedulerConfig, Pageable, PersistedJob } from '../types'
 
 import { APIBase } from '../base'
 import { ClassQueryKeys, PagedQueryParams } from './types'

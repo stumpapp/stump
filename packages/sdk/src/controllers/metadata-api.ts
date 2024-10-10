@@ -1,4 +1,4 @@
-import { MediaMetadataFilter, MediaMetadataOverview } from '@stump/types'
+import { MediaMetadataFilter, MediaMetadataOverview } from '../types'
 
 import { APIBase } from '../base'
 import { ClassQueryKeys } from './types'

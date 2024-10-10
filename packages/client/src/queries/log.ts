@@ -1,4 +1,4 @@
-import { Log, LogFilter, QueryOrder } from '@stump/types'
+import { Log, LogFilter, QueryOrder } from '@stump/sdk'
 
 import { useSDK } from '../sdk'
 

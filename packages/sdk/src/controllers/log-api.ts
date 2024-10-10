@@ -1,4 +1,4 @@
-import { Log, LogFilter, LogMetadata, Pageable, PaginationQuery, QueryOrder } from '@stump/types'
+import { Log, LogFilter, LogMetadata, Pageable, PaginationQuery, QueryOrder } from '../types'
 
 import { APIBase } from '../base'
 import { ClassQueryKeys } from './types'

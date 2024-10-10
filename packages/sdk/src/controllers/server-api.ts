@@ -1,4 +1,4 @@
-import { ClaimResponse, StumpVersion, UpdateCheck } from '@stump/types'
+import { ClaimResponse, StumpVersion, UpdateCheck } from '../types'
 
 import { APIBase } from '../base'
 import { APIResult, ClassQueryKeys } from './types'

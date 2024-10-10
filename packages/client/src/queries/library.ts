@@ -7,7 +7,7 @@ import type {
 	PaginationQuery,
 	UpdateLibrary,
 	User,
-} from '@stump/types'
+} from '@stump/sdk'
 import { AxiosError } from 'axios'
 
 import {

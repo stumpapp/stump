@@ -1,4 +1,4 @@
-import { isUser, LoginOrRegisterArgs, type User } from '@stump/types'
+import { isUser, LoginOrRegisterArgs, type User } from '@stump/sdk'
 import { useEffect, useState } from 'react'
 
 import { queryClient, QueryOptions, useMutation, useQuery } from '../client'

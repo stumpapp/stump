@@ -1,4 +1,4 @@
-import type { CoreEvent } from '@stump/types'
+import type { CoreEvent } from '@stump/sdk'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { useSDK } from '../sdk'

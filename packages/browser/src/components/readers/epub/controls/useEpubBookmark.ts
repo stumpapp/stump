@@ -1,5 +1,5 @@
 import { queryClient, useMutation, useSDK } from '@stump/client'
-import { CreateOrUpdateBookmark, DeleteBookmark } from '@stump/types'
+import { CreateOrUpdateBookmark, DeleteBookmark } from '@stump/sdk'
 import { useCallback, useMemo } from 'react'
 
 import { useEpubReaderContext } from '../context'

@@ -1,6 +1,6 @@
 import { useSDK } from '@stump/client'
 import { Accordion, cn, Text } from '@stump/components'
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import React from 'react'
 import { Link } from 'react-router-dom'

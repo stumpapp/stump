@@ -1,6 +1,6 @@
 import { useBookClubsQuery } from '@stump/client'
 import { ButtonOrLink, Card, cx, Heading, Text } from '@stump/components'
-import { BookClub } from '@stump/types'
+import { BookClub } from '@stump/sdk'
 import dayjs from 'dayjs'
 import pluralize from 'pluralize'
 import React from 'react'

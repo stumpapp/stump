@@ -1,4 +1,4 @@
-import type { Media } from '@stump/types'
+import type { Media } from '@stump/sdk'
 
 import GenericEmptyState from '../GenericEmptyState'
 import ListItem from '../ListItem'

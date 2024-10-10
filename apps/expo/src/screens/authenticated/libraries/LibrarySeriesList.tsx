@@ -1,6 +1,6 @@
 import { type RouteProp, useNavigation, useRoute } from '@react-navigation/native'
 import { useSeriesCursorQuery } from '@stump/client'
-import { Series } from '@stump/types'
+import { Series } from '@stump/sdk'
 import React, { useCallback } from 'react'
 import { FlatList, TouchableOpacity } from 'react-native'
 

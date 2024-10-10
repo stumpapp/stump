@@ -1,7 +1,7 @@
 import { useLogsQuery } from '@stump/client'
 import { Card, Heading, Text, ToolTip } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { Log } from '@stump/types'
+import { Log } from '@stump/sdk'
 import { createColumnHelper, SortingState } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'

@@ -1,4 +1,4 @@
-import { BookClub, BookClubMemberRoleSpec } from '@stump/types'
+import { BookClub, BookClubMemberRoleSpec } from '@stump/sdk'
 import { z } from 'zod'
 
 import { FORBIDDEN_ENTITY_NAMES } from '@/utils/form'

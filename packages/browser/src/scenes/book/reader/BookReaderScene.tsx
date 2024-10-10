@@ -1,5 +1,5 @@
 import { invalidateQueries, useMediaByIdQuery, useUpdateMediaProgress } from '@stump/client'
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import { Suspense, useEffect } from 'react'
 import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 

@@ -1,5 +1,5 @@
 import { Link, Text } from '@stump/components'
-import { Media, ReactTableColumnSort } from '@stump/types'
+import { Media, ReactTableColumnSort } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 

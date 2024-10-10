@@ -1,5 +1,5 @@
 import { useSDK } from '@stump/client'
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import React from 'react'
 import { TouchableOpacity } from 'react-native'
 

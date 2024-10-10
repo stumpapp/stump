@@ -1,5 +1,5 @@
 import { useUpdateLibrary } from '@stump/client'
-import { UpdateLibrary } from '@stump/types'
+import { UpdateLibrary } from '@stump/sdk'
 import React, { Suspense, useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 

@@ -1,6 +1,6 @@
 import { usePrefetchClubThread } from '@stump/client'
 import { Avatar, Button, cx, IconButton, Text, ToolTip } from '@stump/components'
-import { BookClubDiscussionMessage } from '@stump/types'
+import { BookClubDiscussionMessage } from '@stump/sdk'
 import dayjs from 'dayjs'
 import { MessageCircle, ThumbsUp } from 'lucide-react'
 import pluralize from 'pluralize'

@@ -1,4 +1,4 @@
-import { ReactTableGlobalSort } from '@stump/types'
+import { ReactTableGlobalSort } from '@stump/sdk'
 
 import { Ordering } from './context'
 

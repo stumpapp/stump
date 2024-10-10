@@ -1,7 +1,7 @@
 import { useNavigationArrangement } from '@stump/client'
 import { cn, Spacer } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { NavigationItem } from '@stump/types'
+import { NavigationItem } from '@stump/sdk'
 import { motion } from 'framer-motion'
 import { Book, Home } from 'lucide-react'
 import React, { useCallback, useMemo } from 'react'

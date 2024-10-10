@@ -1,4 +1,4 @@
-import { DesktopAppStore, SavedServer } from '@stump/types'
+import { DesktopAppStore, SavedServer } from '@stump/sdk'
 import { useCallback, useEffect } from 'react'
 import { Store } from 'tauri-plugin-store-api'
 import { create } from 'zustand'

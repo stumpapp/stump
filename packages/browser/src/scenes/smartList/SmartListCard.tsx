@@ -1,7 +1,7 @@
 import { usePrefetchSmartList, useSmartListMetaQuery } from '@stump/client'
 import { Card, Spacer, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { SmartList } from '@stump/types'
+import { SmartList } from '@stump/sdk'
 import pluralize from 'pluralize'
 import React, { useMemo } from 'react'
 import { Link } from 'react-router-dom'

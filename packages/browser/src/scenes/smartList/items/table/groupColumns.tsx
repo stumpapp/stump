@@ -1,5 +1,5 @@
 import { cn, Text } from '@stump/components'
-import { Library, ReactTableColumnSort, Series, SmartListItemGroup } from '@stump/types'
+import { Library, ReactTableColumnSort, Series, SmartListItemGroup } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { ChevronDown } from 'lucide-react'
 

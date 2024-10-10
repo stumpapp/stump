@@ -1,5 +1,5 @@
 import { ButtonOrLink } from '@stump/components'
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import { useMemo } from 'react'
 
 import paths from '../../paths'

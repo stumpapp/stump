@@ -1,4 +1,4 @@
-import { AccessRole } from '@stump/types'
+import { AccessRole } from '@stump/sdk'
 import { Bolt, NotebookTabs, PackageX, Shield } from 'lucide-react'
 
 import { RouteGroup } from '@/hooks/useRouteGroups'

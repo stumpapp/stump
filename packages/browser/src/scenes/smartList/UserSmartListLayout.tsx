@@ -5,7 +5,7 @@ import {
 } from '@stump/client'
 import { cn } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { AccessRole, SmartList, SmartListView } from '@stump/types'
+import { AccessRole, SmartList, SmartListView } from '@stump/sdk'
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import { Outlet, useLocation, useParams } from 'react-router'

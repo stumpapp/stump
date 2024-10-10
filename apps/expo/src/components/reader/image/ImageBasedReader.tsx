@@ -1,6 +1,6 @@
 import { useSDK, useUpdateMediaProgress } from '@stump/client'
 import { isAxiosError } from '@stump/sdk'
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import { useColorScheme } from 'nativewind'
 import React, { useCallback, useMemo, useState } from 'react'
 import { FlatList, TouchableWithoutFeedback, useWindowDimensions } from 'react-native'

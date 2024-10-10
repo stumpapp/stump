@@ -1,6 +1,6 @@
 import { useSDK } from '@stump/client'
 import { Button, IconButton } from '@stump/components'
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import { DownloadCloud } from 'lucide-react'
 import { useMediaMatch } from 'rooks'
 

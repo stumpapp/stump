@@ -1,6 +1,6 @@
 import { useSeriesByIdQuery } from '@stump/client'
 import { cx, Link, Text } from '@stump/components'
-import { Series } from '@stump/types'
+import { Series } from '@stump/sdk'
 import React from 'react'
 
 import paths from '../../paths'

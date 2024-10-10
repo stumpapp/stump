@@ -1,6 +1,6 @@
 import { useSDK } from '@stump/client'
 import { AspectRatio, Badge, ButtonOrLink, Card, cx, Heading, Link, Text } from '@stump/components'
-import { BookClubBook } from '@stump/types'
+import { BookClubBook } from '@stump/sdk'
 import dayjs from 'dayjs'
 import { Book } from 'lucide-react'
 import pluralize from 'pluralize'

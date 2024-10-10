@@ -6,7 +6,7 @@ import {
 	useQuery,
 	useSDK,
 } from '@stump/client'
-import { Bookmark, UpdateEpubProgress } from '@stump/types'
+import { Bookmark, UpdateEpubProgress } from '@stump/sdk'
 import { Book, Rendition } from 'epubjs'
 import uniqby from 'lodash.uniqby'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'

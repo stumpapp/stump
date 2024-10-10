@@ -1,6 +1,6 @@
 import { CheckBox, Heading, Label, Link, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { UserPermission } from '@stump/types'
+import { UserPermission } from '@stump/sdk'
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 

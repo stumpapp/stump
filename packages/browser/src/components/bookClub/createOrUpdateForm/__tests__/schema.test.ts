@@ -1,4 +1,4 @@
-import { BookClub } from '@stump/types'
+import { BookClub } from '@stump/sdk'
 
 import { FORBIDDEN_ENTITY_NAMES } from '@/utils/form'
 

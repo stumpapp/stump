@@ -1,4 +1,4 @@
-import { DirectoryListingFile } from '@stump/types'
+import { DirectoryListingFile } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
 import { noop } from '../../utils/misc'

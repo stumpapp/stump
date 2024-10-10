@@ -1,5 +1,5 @@
 import { useUsersQuery } from '@stump/client'
-import { User } from '@stump/types'
+import { User } from '@stump/sdk'
 import { PaginationState } from '@tanstack/react-table'
 import React, { lazy, useState } from 'react'
 import { Route, Routes } from 'react-router'

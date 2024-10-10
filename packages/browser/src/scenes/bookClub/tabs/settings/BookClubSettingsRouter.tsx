@@ -1,5 +1,5 @@
 import { useUpdateBookClub } from '@stump/client'
-import { UpdateBookClub } from '@stump/types'
+import { UpdateBookClub } from '@stump/sdk'
 import React, { Suspense, useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 

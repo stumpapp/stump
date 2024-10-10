@@ -1,4 +1,4 @@
-import { UpdateLibrary } from '@stump/types'
+import { UpdateLibrary } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
 import { noop } from '@/utils/misc'

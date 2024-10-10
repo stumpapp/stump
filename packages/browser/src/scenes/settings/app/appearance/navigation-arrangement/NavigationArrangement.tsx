@@ -16,7 +16,7 @@ import {
 import { useNavigationArrangement } from '@stump/client'
 import { Card, cn, IconButton, Label, Text, ToolTip } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { NavigationItem } from '@stump/types'
+import { NavigationItem } from '@stump/sdk'
 import isEqual from 'lodash.isequal'
 import { Lock, Unlock } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'

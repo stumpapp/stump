@@ -1,4 +1,4 @@
-import { SmartListMeta } from '@stump/types'
+import { SmartListMeta } from '@stump/sdk'
 
 import pluralizeStat from '@/utils/pluralize'
 

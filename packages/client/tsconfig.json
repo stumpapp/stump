@@ -16,9 +16,6 @@
 	"references": [
 		{
 			"path": "../sdk"
-		},
-		{
-			"path": "../types"
 		}
 	]
 }

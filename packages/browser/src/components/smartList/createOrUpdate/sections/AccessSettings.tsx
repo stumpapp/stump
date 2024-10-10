@@ -1,6 +1,6 @@
 import { Alert, Label, NativeSelect, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { EntityVisibility } from '@stump/types'
+import { EntityVisibility } from '@stump/sdk'
 import React from 'react'
 import { useFormContext } from 'react-hook-form'
 

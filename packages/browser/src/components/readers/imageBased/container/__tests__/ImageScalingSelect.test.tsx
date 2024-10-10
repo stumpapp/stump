@@ -1,4 +1,4 @@
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { DeepPartial } from 'react-hook-form'
 

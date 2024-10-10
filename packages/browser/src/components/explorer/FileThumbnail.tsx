@@ -1,7 +1,7 @@
 import { queryClient, useSDK } from '@stump/client'
 import { cn } from '@stump/components'
 import { Api } from '@stump/sdk'
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import { Book, Folder } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 

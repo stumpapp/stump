@@ -1,5 +1,6 @@
 import { cn, DatePicker, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
+import dayjs from 'dayjs'
 import React, { useMemo } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { match } from 'ts-pattern'
@@ -54,7 +55,7 @@ export default function FilterValue({ idx }: Props) {
 		return (
 			<DatePicker
 				placeholder={t(getKey('date'))}
-				selected={fieldDef.value as Date}
+				selected={dayjs(fieldDef.value as string).toDate()}
 				onChange={(value) => {
 					if (value) {
 						form.setValue(`filters.groups.${groupIdx}.filters.${idx}.value`, value)

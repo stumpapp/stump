@@ -1,5 +1,6 @@
 import { CheckBox, DatePicker, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
+import dayjs from 'dayjs'
 import { useMemo } from 'react'
 import { useFormContext, useFormState } from 'react-hook-form'
 import { useMediaMatch } from 'rooks'
@@ -50,7 +51,7 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 					<>
 						<DatePicker
 							placeholder={t(getKey('from.date'))}
-							selected={value?.from as Date}
+							selected={value.from ? dayjs(value.from).toDate() : undefined}
 							onChange={changeHandler('from')}
 							className="md:w-52"
 							popover={{
@@ -59,7 +60,7 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 						/>
 						<DatePicker
 							placeholder={t(getKey('to.date'))}
-							selected={value?.to as Date}
+							selected={value.to ? dayjs(value.to).toDate() : undefined}
 							onChange={changeHandler('to')}
 							className="md:w-52"
 							popover={{

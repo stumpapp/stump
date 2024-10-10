@@ -95,7 +95,7 @@ export class MediaAPI extends APIBase {
 	 * The URL for fetching a page of a media entity
 	 */
 	bookPageURL(mediaID: string, page: number): string {
-		return this.withServiceURL(mediaURL(`${mediaID}/pages/${page}`))
+		return this.withServiceURL(mediaURL(`${mediaID}/page/${page}`))
 	}
 
 	/**

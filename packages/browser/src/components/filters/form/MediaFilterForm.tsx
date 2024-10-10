@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useSDK } from '@stump/client'
 import { CheckBox, Form } from '@stump/components'
-import { MediaMetadataFilter } from '@stump/types'
+import { MediaMetadataFilter } from '@stump/sdk'
 import React, { useEffect, useMemo, useState } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import z from 'zod'

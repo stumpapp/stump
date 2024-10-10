@@ -1,3 +1,5 @@
+export * from './generated'
+
 import { CursorInfo, Library, Media, PageInfo, Series, SupportedFont, User } from './generated'
 
 export const isUser = (data: unknown): data is User => {
@@ -8,14 +10,6 @@ export const isUser = (data: unknown): data is User => {
 export const isSupportedFont = (data: unknown): data is SupportedFont => {
 	const casted = data as SupportedFont
 	return casted === 'inter' || casted === 'opendyslexic'
-}
-
-export enum FileStatus {
-	Unknown = 'UNKNOWN',
-	Ready = 'READY',
-	Unsupported = 'UNSUPPORTED',
-	Error = 'ERROR',
-	Missing = 'MISSING',
 }
 
 export type APIError =
@@ -38,6 +32,8 @@ export interface Pageable<T> {
 	// The cursor information (if cursor based).
 	_cursor?: CursorInfo
 }
+
+// TODO: audit what can be moved / removed
 
 // Note: I am separating these options / exclusions in case I want to use either independently.
 export type MediaOrderByExclusions = Extract<
@@ -83,5 +79,3 @@ export const libraryOrderByOptions: LibraryOrderByOptions = {
 	status: undefined,
 	updated_at: undefined,
 }
-
-export * from './generated'

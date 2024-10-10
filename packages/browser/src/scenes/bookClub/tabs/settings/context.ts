@@ -1,4 +1,4 @@
-import { UpdateBookClub } from '@stump/types'
+import { UpdateBookClub } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
 import { useBookClubContext } from '@/components/bookClub'

@@ -1,4 +1,4 @@
-import { Library, LibraryStats } from '@stump/types'
+import { Library, LibraryStats } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
 // TODO: add derived meta (book_count, series_count, etc)

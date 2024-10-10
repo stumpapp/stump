@@ -1,3 +1,4 @@
+import { APIBase } from '../base'
 import {
 	CreateOrUpdateEmailDevice,
 	CreateOrUpdateEmailer,
@@ -9,9 +10,7 @@ import {
 	SendAttachmentEmailResponse,
 	SendAttachmentEmailsPayload,
 	SMTPEmailer,
-} from '@stump/types'
-
-import { APIBase } from '../base'
+} from '../types'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 

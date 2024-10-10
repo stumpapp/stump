@@ -1,3 +1,4 @@
+import { APIBase } from '../base'
 import {
 	Media,
 	MediaFilter,
@@ -5,9 +6,7 @@ import {
 	PatchMediaThumbnail,
 	ProgressUpdateReturn,
 	PutMediaCompletionStatus,
-} from '@stump/types'
-
-import { APIBase } from '../base'
+} from '../types'
 import { ClassQueryKeys, CursorQueryParams, FullQueryParams } from './types'
 import { createRouteURLHandler } from './utils'
 
@@ -96,7 +95,7 @@ export class MediaAPI extends APIBase {
 	 * The URL for fetching a page of a media entity
 	 */
 	bookPageURL(mediaID: string, page: number): string {
-		return this.withServiceURL(mediaURL(`${mediaID}/pages/${page}`))
+		return this.withServiceURL(mediaURL(`${mediaID}/page/${page}`))
 	}
 
 	/**

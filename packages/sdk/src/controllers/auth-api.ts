@@ -1,6 +1,5 @@
-import { LoginOrRegisterArgs, LoginResponse, User } from '@stump/types'
-
 import { APIBase } from '../base'
+import { LoginOrRegisterArgs, LoginResponse, User } from '../types'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 

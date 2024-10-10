@@ -1,4 +1,4 @@
-import type { Media } from '@stump/types'
+import type { Media } from '@stump/sdk'
 import clsx from 'clsx'
 import React, { memo, useCallback, useMemo, useRef } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'

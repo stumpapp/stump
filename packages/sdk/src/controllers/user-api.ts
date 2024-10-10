@@ -1,3 +1,4 @@
+import { APIBase } from '../base'
 import {
 	Arrangement,
 	CreateUser,
@@ -10,9 +11,7 @@ import {
 	User,
 	UserPreferences,
 	UserQueryRelation,
-} from '@stump/types'
-
-import { APIBase } from '../base'
+} from '../types'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 

@@ -1,6 +1,6 @@
 import { useSDK } from '@stump/client'
 import { AspectRatio, Button, Card, DatePicker, Heading, Input, Text } from '@stump/components'
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 
@@ -86,7 +86,7 @@ export default function AddBookCard({ index }: Props) {
 				</div>
 			</div>
 		)
-	}, [selectedBook])
+	}, [selectedBook, sdk.media])
 
 	const renderSelectedBookOptions = useCallback(() => {
 		if (selectedBook) {

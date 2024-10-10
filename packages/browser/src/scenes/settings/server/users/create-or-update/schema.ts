@@ -1,4 +1,4 @@
-import { User } from '@stump/types'
+import { User } from '@stump/sdk'
 import { z } from 'zod'
 
 export const allPermissions = [

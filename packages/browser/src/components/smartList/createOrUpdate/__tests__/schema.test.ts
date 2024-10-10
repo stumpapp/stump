@@ -1,4 +1,4 @@
-import { Filter, MediaSmartFilter, NumericFilter } from '@stump/types'
+import { Filter, MediaSmartFilter, NumericFilter } from '@stump/sdk'
 
 import {
 	intoAPI,

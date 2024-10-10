@@ -1,4 +1,4 @@
-import { BookClub, BookClubMember } from '@stump/types'
+import { BookClub, BookClubMember } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
 export type IBookClubContext = {

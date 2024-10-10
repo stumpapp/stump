@@ -1,4 +1,4 @@
-import { User } from '@stump/types'
+import { User } from '@stump/sdk'
 
 import { allPermissions, buildSchema } from '../schema'
 

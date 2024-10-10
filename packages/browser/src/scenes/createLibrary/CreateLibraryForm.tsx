@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, cn, Form } from '@stump/components'
-import type { Library } from '@stump/types'
+import type { Library } from '@stump/sdk'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 

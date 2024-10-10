@@ -1,6 +1,5 @@
-import { JobSchedulerConfig, Pageable, PersistedJob } from '@stump/types'
-
 import { APIBase } from '../base'
+import { JobSchedulerConfig, Pageable, PersistedJob } from '../types'
 import { ClassQueryKeys, PagedQueryParams } from './types'
 import { createRouteURLHandler } from './utils'
 

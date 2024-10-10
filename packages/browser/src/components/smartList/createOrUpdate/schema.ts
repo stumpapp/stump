@@ -7,7 +7,7 @@ import {
 	SeriesSmartFilter,
 	SmartFilter,
 	SmartList,
-} from '@stump/types'
+} from '@stump/sdk'
 import getProperty from 'lodash/get'
 import { match, P } from 'ts-pattern'
 import { z } from 'zod'

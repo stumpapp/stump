@@ -7,8 +7,6 @@
 		"paths": {
 			"@stump/sdk": ["../sdk/src/index.ts"],
 			"@stump/sdk/*": ["../sdk/src/*"],
-			"@stump/types": ["../types/index.ts"],
-			"@stump/types/*": ["../types/*"],
 			"@/*": ["./src/*"]
 		},
 		"module": "NodeNext"
@@ -18,9 +16,6 @@
 	"references": [
 		{
 			"path": "../sdk"
-		},
-		{
-			"path": "../types"
 		}
 	]
 }

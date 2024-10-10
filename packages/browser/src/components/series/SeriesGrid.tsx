@@ -1,5 +1,5 @@
 import { CardGrid } from '@stump/components'
-import { type Series } from '@stump/types'
+import { type Series } from '@stump/sdk'
 
 import GenericEmptyState from '../GenericEmptyState'
 import SeriesCard from './SeriesCard'

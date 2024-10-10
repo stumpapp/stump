@@ -1,6 +1,5 @@
-import { MediaMetadataFilter, MediaMetadataOverview } from '@stump/types'
-
 import { APIBase } from '../base'
+import { MediaMetadataFilter, MediaMetadataOverview } from '../types'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 

@@ -1,6 +1,6 @@
 import { useSDK } from '@stump/client'
 import { Button, Dialog, Label, Text } from '@stump/components'
-import { Media, Series } from '@stump/types'
+import { Media, Series } from '@stump/sdk'
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 

@@ -1,6 +1,5 @@
-import { Media, Pageable, PatchSeriesThumbnail, Series, SeriesFilter } from '@stump/types'
-
 import { APIBase } from '../base'
+import { Media, Pageable, PatchSeriesThumbnail, Series, SeriesFilter } from '../types'
 import { MediaAPI } from './media-api'
 import { ClassQueryKeys, CursorQueryParams, FullQueryParams, PagedQueryParams } from './types'
 import { createRouteURLHandler } from './utils'

@@ -1,6 +1,6 @@
 import { useDeleteEmailer, usePrefetchEmailerSendHistory } from '@stump/client'
 import { Badge, Card, Text, ToolTip } from '@stump/components'
-import { SMTPEmailer } from '@stump/types'
+import { SMTPEmailer } from '@stump/sdk'
 import dayjs from 'dayjs'
 import { Sparkles } from 'lucide-react'
 import React, { Suspense, useCallback, useMemo } from 'react'

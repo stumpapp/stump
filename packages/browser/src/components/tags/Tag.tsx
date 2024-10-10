@@ -1,5 +1,5 @@
 import { Link, Text } from '@stump/components'
-import { Tag } from '@stump/types'
+import { Tag } from '@stump/sdk'
 import { Fragment } from 'react'
 
 type Props = {

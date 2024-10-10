@@ -7,7 +7,7 @@ import {
 	RegisteredEmailDevice,
 	SendAttachmentEmailsPayload,
 	SMTPEmailer,
-} from '@stump/types'
+} from '@stump/sdk'
 import { AxiosError } from 'axios'
 
 import { MutationOptions, queryClient, QueryOptions, useMutation, useQuery } from '../client'

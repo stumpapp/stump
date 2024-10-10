@@ -1,6 +1,6 @@
 import { useCreateBookClub } from '@stump/client'
 import { Alert } from '@stump/components'
-import { BookClubMemberRoleSpec, CreateBookClub } from '@stump/types'
+import { BookClubMemberRoleSpec, CreateBookClub } from '@stump/sdk'
 import React, { Suspense, useCallback, useState } from 'react'
 import { Helmet } from 'react-helmet'
 import { useNavigate } from 'react-router'

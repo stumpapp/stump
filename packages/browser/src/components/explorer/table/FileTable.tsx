@@ -1,5 +1,5 @@
 import { cn, Text } from '@stump/components'
-import { DirectoryListingFile } from '@stump/types'
+import { DirectoryListingFile } from '@stump/sdk'
 import {
 	createColumnHelper,
 	flexRender,

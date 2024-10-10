@@ -14,7 +14,6 @@
 		"typescript": "^5.4.5"
 	},
 	"dependencies": {
-		"@stump/types": "*",
 		"react": "^18.2.0"
 	}
 }

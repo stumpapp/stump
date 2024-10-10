@@ -2,7 +2,7 @@ import '@/__mocks__/resizeObserver'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@stump/components'
-import { User, UserPermission } from '@stump/types'
+import { User, UserPermission } from '@stump/sdk'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useForm } from 'react-hook-form'

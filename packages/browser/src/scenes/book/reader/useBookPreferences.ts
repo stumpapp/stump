@@ -1,5 +1,5 @@
 import { BookPreferences, ReaderStore } from '@stump/client'
-import type { LibraryConfig, Media } from '@stump/types'
+import type { LibraryConfig, Media } from '@stump/sdk'
 import { useCallback, useMemo } from 'react'
 
 import { useReaderStore } from '@/stores'

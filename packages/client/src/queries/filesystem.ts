@@ -1,9 +1,8 @@
 import { AxiosError } from 'axios'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { useSDK } from '../sdk'
-
 import { queryClient, useQuery } from '../client'
+import { useSDK } from '../sdk'
 
 type PrefetchFileParams = {
 	path: string

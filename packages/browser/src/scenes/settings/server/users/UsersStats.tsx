@@ -1,5 +1,5 @@
 import { Statistic } from '@stump/components'
-import { ActiveReadingSession, FinishedReadingSession, User } from '@stump/types'
+import { ActiveReadingSession, FinishedReadingSession, User } from '@stump/sdk'
 import groupBy from 'lodash.groupby'
 import sortBy from 'lodash.sortby'
 import uniqBy from 'lodash.uniqby'

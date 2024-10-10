@@ -1,6 +1,6 @@
 import { useJobStore } from '@stump/client'
 import { ProgressBar, Text } from '@stump/components'
-import { JobUpdate } from '@stump/types'
+import { JobUpdate } from '@stump/sdk'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo } from 'react'
 

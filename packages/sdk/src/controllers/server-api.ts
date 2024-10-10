@@ -1,6 +1,5 @@
-import { ClaimResponse, StumpVersion, UpdateCheck } from '@stump/types'
-
 import { APIBase } from '../base'
+import { ClaimResponse, StumpVersion, UpdateCheck } from '../types'
 import { APIResult, ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 

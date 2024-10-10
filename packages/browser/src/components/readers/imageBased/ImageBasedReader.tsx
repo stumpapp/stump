@@ -1,5 +1,5 @@
 import { queryClient, useSDK, useUpdateMediaProgress } from '@stump/client'
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 
@@ -129,14 +129,18 @@ export default function ImageBasedReader({
 	 *    when the user navigates away from the reader, the in-progress media is accurately reflected with
 	 *    the latest reading session.
 	 */
-	useEffect(() => {
-		return () => {
-			setSettings({
-				showToolBar: false,
-			})
-			queryClient.invalidateQueries([sdk.media.keys.inProgress], { exact: false })
-		}
-	}, [setSettings, sdk.media])
+	useEffect(
+		() => {
+			return () => {
+				setSettings({
+					showToolBar: false,
+				})
+				queryClient.invalidateQueries([sdk.media.keys.inProgress], { exact: false })
+			}
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[],
+	)
 
 	const renderReader = () => {
 		if (readingMode.startsWith('continuous')) {

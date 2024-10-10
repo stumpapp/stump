@@ -1,4 +1,4 @@
-import { Tag } from '@stump/types'
+import { Tag } from '@stump/sdk'
 
 import TagComponent from './Tag'
 

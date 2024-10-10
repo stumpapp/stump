@@ -1,7 +1,7 @@
 import { useAuthQuery, useCoreEventHandler } from '@stump/client'
 import { cn, cx } from '@stump/components'
 import { isAxiosError } from '@stump/sdk'
-import { UserPermission, UserPreferences } from '@stump/types'
+import { UserPermission, UserPreferences } from '@stump/sdk'
 import { useOverlayScrollbars } from 'overlayscrollbars-react'
 import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
 import Confetti from 'react-confetti'

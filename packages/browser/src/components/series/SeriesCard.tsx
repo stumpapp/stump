@@ -1,6 +1,6 @@
 import { usePrefetchSeries, useSDK } from '@stump/client'
 import { EntityCard, Text } from '@stump/components'
-import { FileStatus, Series } from '@stump/types'
+import { Series } from '@stump/sdk'
 
 import paths from '../../paths'
 import pluralizeStat from '../../utils/pluralize'
@@ -40,7 +40,7 @@ export default function SeriesCard({ series, fullWidth, variant = 'default' }: S
 			return null
 		}
 
-		const isMissing = series.status === FileStatus.Missing
+		const isMissing = series.status === 'MISSING'
 		if (isMissing) {
 			return (
 				<Text size="xs" className="uppercase text-amber-500">

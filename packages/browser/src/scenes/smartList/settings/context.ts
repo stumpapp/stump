@@ -1,4 +1,4 @@
-import { CreateOrUpdateSmartList } from '@stump/types'
+import { CreateOrUpdateSmartList } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
 import { useSmartListContext } from '../context'

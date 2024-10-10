@@ -19,7 +19,7 @@
 	"dependencies": {
 		"@stump/browser": "*",
 		"@stump/client": "*",
-		"@stump/types": "*",
+		"@stump/sdk": "*",
 		"@tanstack/react-query": "^4.28.0",
 		"@tauri-apps/api": "^1.6.0",
 		"react": "^18.2.0",

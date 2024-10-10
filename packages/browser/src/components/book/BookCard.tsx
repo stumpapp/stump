@@ -1,6 +1,6 @@
 import { usePrefetchMediaByID, useSDK } from '@stump/client'
 import { EntityCard, Text } from '@stump/components'
-import { FileStatus, Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import pluralize from 'pluralize'
 import { useCallback, useMemo } from 'react'
 
@@ -46,7 +46,7 @@ export default function BookCard({
 			return null
 		}
 
-		const isMissing = media.status === FileStatus.Missing
+		const isMissing = media.status === 'MISSING'
 		if (isMissing) {
 			return (
 				<Text size="xs" className="uppercase text-amber-500">

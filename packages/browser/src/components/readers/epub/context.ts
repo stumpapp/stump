@@ -1,4 +1,4 @@
-import { Bookmark, EpubContent, Media } from '@stump/types'
+import { Bookmark, EpubContent, Media } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
 import { noop } from '../../../utils/misc'

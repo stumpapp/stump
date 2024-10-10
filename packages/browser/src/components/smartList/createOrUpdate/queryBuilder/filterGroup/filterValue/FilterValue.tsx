@@ -58,7 +58,8 @@ export default function FilterValue({ idx }: Props) {
 				selected={dayjs(fieldDef.value as string).toDate()}
 				onChange={(value) => {
 					if (value) {
-						form.setValue(`filters.groups.${groupIdx}.filters.${idx}.value`, value)
+						const adjustedValue = dayjs(value).endOf('day').toDate()
+						form.setValue(`filters.groups.${groupIdx}.filters.${idx}.value`, adjustedValue)
 					} else {
 						form.resetField(`filters.groups.${groupIdx}.filters.${idx}.value`)
 					}

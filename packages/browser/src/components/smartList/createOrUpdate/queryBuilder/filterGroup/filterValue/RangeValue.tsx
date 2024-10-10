@@ -40,7 +40,8 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 		if (value === undefined) {
 			form.resetField(`filters.groups.${groupIdx}.filters.${idx}.value.${key}`)
 		} else {
-			form.setValue(`filters.groups.${groupIdx}.filters.${idx}.value.${key}`, value)
+			const adjustedValue = typeof value === 'number' ? value : dayjs(value).endOf('day').toDate()
+			form.setValue(`filters.groups.${groupIdx}.filters.${idx}.value.${key}`, adjustedValue)
 		}
 	}
 

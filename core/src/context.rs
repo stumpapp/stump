@@ -65,7 +65,7 @@ impl Ctx {
 	// - https://github.com/rust-lang/cargo/issues/8379
 
 	/// Creates a [Ctx] instance for testing **only**. The prisma client is created
-	/// pointing to the `integration-tests` crate relative to the `core` crate.
+	/// pointing to the `tests` crate relative to the `core` crate.
 	///
 	/// **This should not be used in production.**
 	pub async fn integration_test_mock() -> Ctx {

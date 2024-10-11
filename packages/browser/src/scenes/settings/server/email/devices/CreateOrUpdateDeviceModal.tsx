@@ -84,12 +84,14 @@ export default function CreateOrUpdateDeviceModal({ isOpen, updatingDevice, onCl
 							description={t(getKey('name.description'))}
 							variant="primary"
 							{...form.register('name')}
+							ignoreFill
 						/>
 						<Input
 							label={t(getKey('email.label'))}
 							description={t(getKey('email.description'))}
 							variant="primary"
 							{...form.register('email')}
+							ignoreFill
 						/>
 						<CheckBox
 							label={t(getKey('forbidden.label'))}

@@ -20,6 +20,9 @@ export default function SmartListSettingsRouter() {
 	/**
 	 * A pseudo-patch function which will update the list, mixing what is present in the cache
 	 * with the updates provided.
+	 * Note: It is important to remember the structure of the filters is vastly different from the structure
+	 * of the payload, and so be careful when calling this function that you transform the filters if they are
+	 * present
 	 */
 	const patch = useCallback(
 		(updates: Partial<CreateOrUpdateSmartList>) => {

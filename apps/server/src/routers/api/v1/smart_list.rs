@@ -1,13 +1,8 @@
-use crate::{
-	config::state::AppState,
-	errors::{APIError, APIResult},
-	filter::chain_optional_iter,
-	utils::get_user_and_enforce_permission,
-};
 use axum::{
 	extract::{Path, State},
+	middleware,
 	routing::get,
-	Json, Router,
+	Extension, Json, Router,
 };
 use prisma_client_rust::{and, or};
 use serde::{Deserialize, Serialize};
@@ -26,10 +21,16 @@ use stump_core::{
 		library, series, smart_list, smart_list_access_rule, smart_list_view, user,
 	},
 };
-use tower_sessions::Session;
 use utoipa::ToSchema;
 
-pub(crate) fn mount() -> Router<AppState> {
+use crate::{
+	config::state::AppState,
+	errors::{APIError, APIResult},
+	filter::chain_optional_iter,
+	middleware::auth::{auth_middleware, RequestContext},
+};
+
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.route("/smart-lists", get(get_smart_lists).post(create_smart_list))
 		.nest(
@@ -63,6 +64,7 @@ pub(crate) fn mount() -> Router<AppState> {
 						),
 				),
 		)
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 /// Generates a single where param that asserts the user has access to a smart list
@@ -126,11 +128,10 @@ pub struct GetSmartListsParams {
 )]
 async fn get_smart_lists(
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	QsQuery(params): QsQuery<GetSmartListsParams>,
 ) -> APIResult<Json<Vec<SmartList>>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
 	let client = &ctx.db;
 
 	let query_all = params.all.unwrap_or(false);
@@ -188,11 +189,10 @@ pub struct CreateOrUpdateSmartList {
 )]
 async fn create_smart_list(
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(input): Json<CreateOrUpdateSmartList>,
 ) -> APIResult<Json<SmartList>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
 	let client = &ctx.db;
 
 	tracing::debug!(?input, "Creating smart list");
@@ -250,10 +250,9 @@ async fn get_smart_list_by_id(
 	Path(id): Path<String>,
 	QsQuery(options): QsQuery<SmartListRelationOptions>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<SmartList>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
 	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Reader.value());
@@ -262,7 +261,7 @@ async fn get_smart_list_by_id(
 		.find_first(vec![smart_list::id::equals(id.clone()), access_condition]);
 
 	if options.load_views {
-		query = query.with(smart_list::saved_views::fetch(vec![]))
+		query = query.with(smart_list::saved_views::fetch(vec![]));
 	}
 
 	let smart_list = query
@@ -288,11 +287,10 @@ async fn get_smart_list_by_id(
 async fn update_smart_list_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(input): Json<CreateOrUpdateSmartList>,
 ) -> APIResult<Json<SmartList>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
 	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Writer.value());
@@ -348,10 +346,9 @@ async fn update_smart_list_by_id(
 async fn delete_smart_list_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<SmartList>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
 	let client = &ctx.db;
 
 	let access_condition =
@@ -399,10 +396,9 @@ async fn delete_smart_list_by_id(
 async fn get_smart_list_items(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<SmartListItems>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
 
 	let client = &ctx.db;
 
@@ -451,10 +447,9 @@ pub struct SmartListMeta {
 async fn get_smart_list_meta(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<SmartListMeta>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
 	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Reader.value());
@@ -521,10 +516,9 @@ async fn get_smart_list_access_rules() {
 async fn get_smart_list_views(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Vec<SmartListView>>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
 	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Reader.value());
@@ -559,10 +553,9 @@ async fn get_smart_list_views(
 async fn get_smart_list_view(
 	Path((id, name)): Path<(String, String)>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<SmartListView>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
 	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Reader.value());
@@ -602,11 +595,10 @@ pub struct CreateOrUpdateSmartListView {
 async fn create_smart_list_view(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(input): Json<CreateOrUpdateSmartListView>,
 ) -> APIResult<Json<SmartListView>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
 	let client = &ctx.db;
 
 	// NOTE: views are currently completely detatched from a user, rather they are tied
@@ -655,11 +647,10 @@ async fn create_smart_list_view(
 async fn update_smart_list_view(
 	Path((id, name)): Path<(String, String)>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(input): Json<CreateOrUpdateSmartListView>,
 ) -> APIResult<Json<SmartListView>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
 	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Writer.value());
@@ -704,10 +695,9 @@ async fn update_smart_list_view(
 async fn delete_smart_list_view(
 	Path((id, name)): Path<(String, String)>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<SmartListView>> {
-	let user =
-		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
 	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Writer.value());

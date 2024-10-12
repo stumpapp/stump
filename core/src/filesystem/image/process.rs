@@ -96,12 +96,14 @@ impl From<ImageFormat> for image::ImageFormat {
 #[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub struct ImageProcessorOptions {
 	/// The size factor to use when generating an image. See [`ImageResizeOptions`]
+	#[specta(optional)]
 	pub resize_options: Option<ImageResizeOptions>,
 	/// The format to use when generating an image. See [`ImageFormat`]
 	pub format: ImageFormat,
 	/// The quality to use when generating an image. This is a number between 0.0 and 100.0,
 	/// where 100.0 is the highest quality. Omitting this value will use the default quality
 	/// of 100.0.
+	#[specta(optional)]
 	pub quality: Option<f32>,
 	// TODO: this implementation is not overly ideal, and is really only here for one-off generation.
 	// I would like to iterate after the initial release to make this more robust so that these choices
@@ -128,6 +130,7 @@ impl ImageProcessorOptions {
 		}
 	}
 
+	/// Validate the image processor options to ensure that they are valid.
 	pub fn validate(&self) -> Result<(), ProcessorError> {
 		if let Some(quality) = self.quality {
 			if !(0.0..=100.0).contains(&quality) {
@@ -160,6 +163,12 @@ impl ImageProcessorOptions {
 
 		Ok(())
 	}
+
+	/// Convert the image processor options into a byte array for storage.
+	pub fn as_bytes(&self) -> Result<Vec<u8>, ProcessorError> {
+		serde_json::to_vec(self)
+			.map_err(|err| ProcessorError::InvalidConfiguration(err.to_string()))
+	}
 }
 
 impl TryFrom<Vec<u8>> for ImageProcessorOptions {
@@ -191,7 +200,7 @@ pub trait ImageProcessor {
 pub fn resized_dimensions(
 	current_height: u32,
 	current_width: u32,
-	size_options: ImageResizeOptions,
+	size_options: &ImageResizeOptions,
 ) -> (u32, u32) {
 	match size_options.mode {
 		ImageResizeMode::Scaled => (
@@ -234,7 +243,7 @@ mod tests {
 	#[test]
 	fn test_resized_dimensions_scaled() {
 		let (height, width) =
-			resized_dimensions(100, 100, ImageResizeOptions::scaled(0.75, 0.5));
+			resized_dimensions(100, 100, &ImageResizeOptions::scaled(0.75, 0.5));
 		assert_eq!(height, 75);
 		assert_eq!(width, 50);
 	}
@@ -242,7 +251,7 @@ mod tests {
 	#[test]
 	fn test_resized_dimensions_sized() {
 		let (height, width) =
-			resized_dimensions(100, 100, ImageResizeOptions::sized(50.0, 50.0));
+			resized_dimensions(100, 100, &ImageResizeOptions::sized(50.0, 50.0));
 		assert_eq!(height, 50);
 		assert_eq!(width, 50);
 	}

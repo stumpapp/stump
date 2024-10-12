@@ -1,13 +1,10 @@
-use std::{
-	path::{Path, PathBuf},
-	sync::Arc,
-};
+use std::path::{Path, PathBuf};
 
 use prisma_client_rust::chrono::{DateTime, FixedOffset, Utc};
 
 use crate::{
 	config::StumpConfig,
-	db::entity::{LibraryOptions, Media, Series},
+	db::entity::{LibraryConfig, Media, Series},
 	filesystem::{process, FileParts, PathUtils, SeriesJson},
 	CoreError, CoreResult,
 };
@@ -15,21 +12,21 @@ use crate::{
 pub struct MediaBuilder {
 	path: PathBuf,
 	series_id: String,
-	library_options: LibraryOptions,
-	config: Arc<StumpConfig>,
+	library_config: LibraryConfig,
+	config: StumpConfig,
 }
 
 impl MediaBuilder {
 	pub fn new(
 		path: &Path,
 		series_id: &str,
-		library_options: LibraryOptions,
-		config: &Arc<StumpConfig>,
+		library_config: LibraryConfig,
+		config: &StumpConfig,
 	) -> Self {
 		Self {
 			path: path.to_path_buf(),
 			series_id: series_id.to_string(),
-			library_options,
+			library_config,
 			config: config.clone(),
 		}
 	}
@@ -44,7 +41,7 @@ impl MediaBuilder {
 
 	pub fn build(self) -> CoreResult<Media> {
 		let mut processed_entry =
-			process(&self.path, self.library_options.into(), &self.config)?;
+			process(&self.path, self.library_config.into(), &self.config)?;
 
 		tracing::trace!(?processed_entry, "Processed entry");
 
@@ -71,10 +68,8 @@ impl MediaBuilder {
 
 		let pages = processed_entry.pages;
 		if let Some(ref mut metadata) = processed_entry.metadata {
-			let conflicting_page_counts = metadata
-				.page_count
-				.map(|count| count != pages)
-				.unwrap_or(false);
+			let conflicting_page_counts =
+				metadata.page_count.is_some_and(|count| count != pages);
 			if conflicting_page_counts {
 				tracing::warn!(
 					?pages,
@@ -151,32 +146,40 @@ mod tests {
 	};
 
 	#[test]
-	fn test_build_media() {
+	fn test_build_media_zip() {
 		// Test with zip
 		let media = build_media_test_helper(get_test_zip_path());
 		assert!(media.is_ok());
 		let media = media.unwrap();
 		assert_eq!(media.extension, "zip");
+	}
 
-		// Test with cbz
+	#[test]
+	fn test_build_media_cbz() {
 		let media = build_media_test_helper(get_test_cbz_path());
 		assert!(media.is_ok());
 		let media = media.unwrap();
 		assert_eq!(media.extension, "cbz");
+	}
 
-		// Test with rar
+	#[test]
+	fn test_build_media_rar() {
 		let media = build_media_test_helper(get_test_rar_path());
 		assert!(media.is_ok());
 		let media = media.unwrap();
 		assert_eq!(media.extension, "rar");
+	}
 
-		// Test with epub
+	#[test]
+	fn test_build_media_epub() {
 		let media = build_media_test_helper(get_test_epub_path());
 		assert!(media.is_ok());
 		let media = media.unwrap();
 		assert_eq!(media.extension, "epub");
+	}
 
-		// Test with pdf
+	#[test]
+	fn test_build_media_pdf() {
 		let media = build_media_test_helper(get_test_pdf_path());
 		assert!(media.is_ok());
 		let media = media.unwrap();
@@ -185,14 +188,13 @@ mod tests {
 
 	fn build_media_test_helper(path: String) -> Result<Media, CoreError> {
 		let path = Path::new(&path);
-		let library_options = LibraryOptions {
+		let library_config = LibraryConfig {
 			convert_rar_to_zip: false,
 			hard_delete_conversions: false,
 			..Default::default()
 		};
 		let series_id = "series_id";
-		let config = Arc::new(StumpConfig::debug());
 
-		MediaBuilder::new(path, series_id, library_options, &config).build()
+		MediaBuilder::new(path, series_id, library_config, &StumpConfig::debug()).build()
 	}
 }

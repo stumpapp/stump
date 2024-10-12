@@ -68,7 +68,7 @@ function RouterContainer(props: StumpClientProps) {
 
 	useApplyTheme({ appFont: userPreferences?.app_font, appTheme: userPreferences?.app_theme })
 
-	const { setUseDiscordPresence, setDiscordPresence } = props
+	const { setUseDiscordPresence, setDiscordPresence } = props.tauriRPC ?? {}
 	const discordPresenceEnabled = userPreferences?.enable_discord_presence ?? false
 	useEffect(() => {
 		setUseDiscordPresence?.(discordPresenceEnabled)
@@ -106,10 +106,9 @@ function RouterContainer(props: StumpClientProps) {
 		<StumpClientContextProvider
 			onUnauthenticatedResponse={handleUnathenticatedResponse}
 			onConnectionWithServerChanged={handleConnectionWithServerChanged}
-			setDiscordPresence={setDiscordPresence}
-			setUseDiscordPresence={setUseDiscordPresence}
+			tauriRPC={props.tauriRPC}
 		>
-			{IS_DEVELOPMENT && <ReactQueryDevtools position="bottom-left" context={defaultContext} />}
+			{IS_DEVELOPMENT && <ReactQueryDevtools position="bottom-right" context={defaultContext} />}
 			<Helmet defaultTitle="Stump">
 				<title>Stump</title>
 			</Helmet>

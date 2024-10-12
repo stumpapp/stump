@@ -20,7 +20,7 @@ impl ImageProcessor for GenericImageProcessor {
 		if let Some(resize_options) = options.resize_options {
 			let (current_width, current_height) = image.dimensions();
 			let (height, width) =
-				resized_dimensions(current_height, current_width, resize_options);
+				resized_dimensions(current_height, current_width, &resize_options);
 			image = image.resize_exact(width, height, imageops::FilterType::Triangle);
 		}
 

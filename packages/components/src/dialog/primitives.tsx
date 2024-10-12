@@ -35,6 +35,7 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 /* eslint-disable sort-keys-fix/sort-keys-fix */
 export const DIALOG_CONTENT_SIZES = {
 	sm: 'sm:max-w-[425px]',
+	// TODO: md is pretty large
 	md: 'sm:max-w-[600px]',
 	lg: 'sm:max-w-2xl',
 	xl: 'sm:max-w-3xl',
@@ -112,7 +113,7 @@ const DialogClose = React.forwardRef<
 	<DialogPrimitive.Close
 		ref={ref}
 		className={cn(
-			'absolute right-4 top-4 rounded-sm text-foreground-subtle opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-2 focus:ring-offset-background disabled:pointer-events-none data-[state=open]:bg-background',
+			'absolute right-4 top-4 rounded-sm text-foreground-subtle opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-edge-brand focus:ring-offset-2 focus:ring-offset-background disabled:pointer-events-none data-[state=open]:bg-background',
 			className,
 		)}
 		{...props}

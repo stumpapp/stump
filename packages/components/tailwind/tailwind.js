@@ -5,7 +5,7 @@ const path = require('path')
 const defaultTheme = require('tailwindcss/defaultTheme')
 const { createThemes } = require('tw-colors')
 const {
-	themes: { bronze, dark, light },
+	themes: { bronze, dark, light, ocean, cosmic, autumn, pumpkin },
 	sharedColors,
 } = require('../themes')
 
@@ -46,6 +46,10 @@ module.exports = function (relativeFromRoot) {
 				dark,
 				light,
 				bronze,
+				ocean,
+				cosmic,
+				autumn,
+				pumpkin,
 			}),
 		],
 		theme: {
@@ -53,6 +57,7 @@ module.exports = function (relativeFromRoot) {
 				animation: {
 					'accordion-down': 'accordion-down 0.2s ease-out',
 					'accordion-up': 'accordion-up 0.2s ease-out',
+					'indeterminate-progress': 'indeterminate-progress 1s infinite linear',
 				},
 				fontFamily: {
 					inter: ['Inter var', ...defaultTheme.fontFamily.sans],
@@ -71,11 +76,20 @@ module.exports = function (relativeFromRoot) {
 						from: { height: 'var(--radix-accordion-content-height)' },
 						to: { height: 0 },
 					},
+					'indeterminate-progress': {
+						'0%': { transform: ' translateX(0) scaleX(0)' },
+						'40%': { transform: 'translateX(0) scaleX(0.4)' },
+						'100%': { transform: 'translateX(100%) scaleX(0.5)' },
+					},
+				},
+				transformOrigin: {
+					'left-to-right-indeterminate': '0% 50%',
 				},
 				ringColor: {
 					DEFAULT: sharedColors.brand['500'],
 				},
 				screens: {
+					tablet: '640px',
 					'3xl': '1600px',
 					'4xl': '1920px',
 				},

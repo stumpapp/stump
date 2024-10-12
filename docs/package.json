@@ -11,7 +11,7 @@
 		"lint": "next lint",
 		"deploy-preview": "vercel",
 		"deploy": "vercel --prod",
-		"nuke": "rimraf -rf node_modules"
+		"nuke": "rimraf node_modules"
 	},
 	"keywords": [],
 	"author": "",

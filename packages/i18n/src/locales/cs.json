@@ -11,7 +11,8 @@
 		"form": {
 			"validation": {
 				"missingUsername": "Jméno uživatele je vyžadováno",
-				"missingPassword": "Heslo je vyžadováno"
+				"missingPassword": "Heslo je vyžadováno",
+				"usernameAlreadyExists": "Uživatelské jméno již existuje"
 			},
 			"labels": {
 				"username": "Uživatelské jméno",
@@ -128,17 +129,227 @@
 			"submit": "Vytvořit Knižní klub"
 		}
 	},
+	"createOrUpdateLibraryForm": {
+		"fields": {
+			"name": {
+				"label": "Název",
+				"description": "Přátelský název pro tvou knihovnu",
+				"placeholder": "Moje knihovna"
+			},
+			"path": {
+				"label": "Umístění",
+				"description": "Umístění knihovny, tak jak existuje na vašem serveru",
+				"placeholder": "/složka/umístění/knihovny"
+			},
+			"description": {
+				"label": "Popis",
+				"description": "Krátký popis vaší knihovny",
+				"placeholder": "Knihovna mých oblíbených knih"
+			},
+			"tags": {
+				"label": "Tagy",
+				"description": "Slouží ke kategorizaci knihovny nebo k vynucování pravidel přístupu"
+			},
+			"readingSettings": {
+				"section": {
+					"heading": "Reading settings",
+					"description": "Default reader settings to use for books"
+				},
+				"imageScaling": {
+					"label": "Image scaling",
+					"description": "How the image-based reader scales images to the page"
+				},
+				"readingMode": {
+					"label": "Default reader",
+					"description": "The default reader to use for image-based books"
+				},
+				"readingDirection": {
+					"label": "Reading direction",
+					"description": "Which direction the reader progresses through pages"
+				}
+			},
+			"thumbnailConfig": {
+				"section": {
+					"heading": {
+						"create": "Nastavení náhledů",
+						"update": "Generování"
+					},
+					"description": "Zlepšení dobu načítání při procházení knihovny generováním náhledů knih"
+				},
+				"enableSwitch": {
+					"label": "Zapnuto",
+					"description": "Generovat náhledové obrázky pro tuto knihovnu"
+				},
+				"scaled": {
+					"label": "Škálování",
+					"description": "Měřítko obrázku pomocí vlastního faktoru podle rozměrů",
+					"width": {
+						"label": "Měřítko šířky"
+					},
+					"height": {
+						"label": "Měřítko výšky"
+					}
+				},
+				"sized": {
+					"label": "Explicitní velikost",
+					"description": "Nastavit každou velikost náhledu (v pixelech)",
+					"width": {
+						"label": "Šířka"
+					},
+					"height": {
+						"label": "Výška"
+					}
+				},
+				"format": {
+					"label": "Formát obrázku",
+					"description": "Formát vygenerovaných obrázků náhledů"
+				},
+				"quality": {
+					"label": "Kvalita",
+					"description": "Kvalita vygenerovaných obrázků náhledů mezi 0 a 1.0"
+				}
+			},
+			"ignoreRules": {
+				"section": {
+					"heading": "Pravidla Ignorování",
+					"description": "Definujte globální vzory, podle kterých se budou ignorovat určité soubory nebo adresáře během skenu"
+				},
+				"noRules": "Nebyla nakonfigurována žádná pravidla pro ignorování",
+				"save": "Uložit změny",
+				"addRule": {
+					"label": "Nové pravidlo",
+					"description": "Globální vzor pro ignorování souborů nebo složek",
+					"addButton": "Přidat pravidlo",
+					"ignoreParents": {
+						"title": "Ignorovat všechny nadřazené adresáře",
+						"label": "Ignorovat nadřazené"
+					},
+					"ignoreSubdirs": {
+						"title": "Ignorovat všechny podadresáře",
+						"label": "Ignorovat podadresáře"
+					}
+				},
+				"invalidGlob": "Neplatný globální vzor",
+				"lockConfig": {
+					"lock": "Uzamknout nastavení",
+					"unlock": "Odemknout nastavení"
+				},
+				"editRule": "Upravit pravidlo",
+				"deleteRule": "Smazat pravidlo",
+				"cancelEdit": "Zrušit úpravu",
+				"confirmEdit": "Potvrdit úpravu"
+			},
+			"convertOptions": {
+				"section": {
+					"heading": "Konverze souboru",
+					"description": "Stump je schopný převádět určité formáty souborů do více kompatibilních"
+				},
+				"rarToZip": {
+					"label": "Převést RAR na ZIP",
+					"description": "Převést RAR/CBR soubory na ZIP/CBZ soubory během skenování"
+				},
+				"deleteRarAfter": {
+					"label": "Odstranit RAR po konverzi",
+					"description": "Smazat původní RAR/CBR soubor po konverzi. Toto je nevratné"
+				}
+			},
+			"scannerFeatures": {
+				"section": {
+					"heading": "Volitelné zpracování",
+					"description": "Opt-in funkce zpracování pro skener",
+					"disclaimer": "Tyto funkce zahrnují další čtení souborů, které mohou zpomalit proces skenování"
+				},
+				"processMetadata": {
+					"label": "Zpracování metadat",
+					"description": "Extrahovat metadata ze souborů knihovny a ukládat výsledky v databázi"
+				},
+				"generateFileHashes": {
+					"label": "Generovat hash souborů",
+					"description": "Generovat hash pro každý soubor v knihovně pro detekci duplicit"
+				}
+			},
+			"libraryPattern": {
+				"section": {
+					"heading": "Organizace",
+					"description": "Určete, který vzor nejvíce odpovídá organizaci vaší knihovny",
+					"docs": [
+						"Nejste si jisti, co vybrat? Klikněte",
+						"zde",
+						"pro více informací.",
+						"Toto nastavení nelze později změnit"
+					],
+					"disabled": "Toto nastavení nemůžete změnit"
+				},
+				"options": {
+					"label": "Vzor knihovny",
+					"description": "Nastavení, které určuje, jak bude Stump organizovat vaši knihovnu",
+					"collectionPriority": {
+						"label": "Priorita sbírky",
+						"description": "Každá složka na nejvyšší úrovni kořene knihovny je jedna série"
+					},
+					"seriesPriority": {
+						"label": "Priorita série",
+						"description": "Každá složka na libovolné úrovni rekurzivně je jedna série"
+					}
+				}
+			}
+		},
+		"scan": {
+			"label": {
+				"create": "Naskenovat po vytvoření",
+				"update": "Skenovat po aktualizaci"
+			},
+			"description": "Indexovat soubory knihovny k naplnění databáze"
+		}
+	},
 	"createLibraryScene": {
 		"heading": "Vytvořit novou knihovnu",
 		"subtitle": "Knihovny slouží k seskupování knih. Pokud si chcete osvěžit informace o knihovnách a jejich fungování, podívejte se na stránku",
 		"subtitleLink": "příslušná dokumentace",
 		"form": {
-			"labels": {
-				"libraryName": "Název",
-				"libraryPath": "Umístění",
-				"libraryPathDescription": "Umístění knihovny, tak jak existuje na vašem serveru",
-				"libraryDescription": "Popis",
-				"libraryTags": "Tagy"
+			"stepLabel": "Krok",
+			"steps": [
+				{
+					"label": "Základní",
+					"heading": "Základní informace",
+					"description": "Podrobnosti o této knihovně, včetně jejího názvu, umístění a popisu"
+				},
+				{
+					"label": "Skenování",
+					"heading": "Chování skeneru",
+					"description": "Nastavení týkající se skenování této knihovny"
+				},
+				{
+					"label": "Náhledy",
+					"heading": "Náhledy",
+					"description": "Možnosti pro zobrazení a vygenerování náhledů pro tuto knihovnu"
+				},
+				{
+					"label": "Zkontrolovat",
+					"heading": "Zkontrolovat",
+					"description": "Zkontrolujte nastavení knihovny před jejím vytvořením"
+				}
+			],
+			"review": {
+				"yes": "Ano",
+				"no": "Ne",
+				"none": "Žádné",
+				"labels": {
+					"generateThumbnails": "Generovat náhledy",
+					"mode": "Režim",
+					"format": "Formát",
+					"quality": "Kvalita",
+					"name": "Název",
+					"path": "Umístění",
+					"description": "Popis",
+					"tags": "Tagy",
+					"pattern": "Vzor",
+					"ignoreRules": "Pravidla Ignorování",
+					"convertRar": "Konverze RAR/CBR",
+					"deleteConversions": "Smazat převedené soubory",
+					"processMetadata": "Zpracování metadat",
+					"generateFileHashes": "Generovat hash souborů"
+				}
 			},
 			"buttons": {
 				"confirm": "Vytvořit knihovnu"
@@ -149,16 +360,105 @@
 		"heading": "Správa knihovny",
 		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
 		"subtitleLink": "příslušná dokumentace",
-		"form": {
-			"labels": {
-				"libraryName": "Název",
-				"libraryPath": "Umístění",
-				"libraryPathDescription": "Umístění knihovny, tak jak existuje na vašem serveru",
-				"libraryDescription": "Popis",
-				"libraryTags": "Tagy"
+		"sidebar": {
+			"basics": "Základní",
+			"options": {
+				"general": "Obecné",
+				"reading": "Reading",
+				"scanning": "Skenování",
+				"thumbnails": "Náhledy",
+				"ignore-rules": "Pravidla Ignorování",
+				"analysis": "Analýza",
+				"label": "Volby"
 			},
-			"buttons": {
-				"confirm": "Uložit změny"
+			"danger-zone": {
+				"access-control": "Správa přístupu",
+				"delete": "Smazání",
+				"label": "Nebezpečná zóna"
+			}
+		},
+		"basics": {
+			"title": "Základní informace",
+			"description": "Podrobnosti o této knihovně, včetně jejího názvu, umístění a popisu",
+			"form": {
+				"submit": "Aktualizace knihovny"
+			}
+		},
+		"options/reading": {
+			"title": "Reading",
+			"description": "The default reader settings to use for books in this library. Any book can override these settings"
+		},
+		"options/scanning": {
+			"title": "Chování skeneru",
+			"description": "Nastavení týkající se skenování této knihovny"
+		},
+		"options/thumbnails": {
+			"title": "Náhledy",
+			"description": "Možnosti nastavení a správy náhledů v této knihovně",
+			"sections": {
+				"management": {
+					"heading": "Správa",
+					"description": "Spravovat existující náhledy pro tuto knihovnu",
+					"thumbnailSelector": {},
+					"deleteThumbnails": {}
+				}
+			}
+		},
+		"options/analysis": {
+			"title": "Analýza",
+			"description": "Analyzujte obsah této knihovny, abyste zjistili možné problémy nebo vylepšení",
+			"sections": {
+				"analyzeBooks": {
+					"heading": "Analyzovat knihy",
+					"description": "Analyzujte knihy v této knihovně a připojte další metadata do databáze, například rozměry stránky pro knihy založené na obrázcích",
+					"disclaimer": "Tento proces je náročný na zdroje a může chvíli trvat. V budoucnu bude více konfigurovatelný",
+					"analyzeButton": "Analyzovat knihy"
+				},
+				"missingFiles": {
+					"heading": "Chybějící soubory",
+					"description": "Soubory, na které je odkazováno v databázi, ale nelze je nalézt na disku",
+					"noMissingFiles": "V této knihovně nejsou žádné chybějící soubory"
+				},
+				"duplicateFiles": {
+					"heading": "Duplicitní soubory",
+					"description": "Soubory, které mohou být na disku duplicitní",
+					"noDuplicateFiles": "Nebyly zjištěny žádné duplicitní soubory pro tuto knihovnu"
+				}
+			}
+		},
+		"danger-zone/access-control": {
+			"title": "Správa přístupu",
+			"description": "Kontrolujte, kdo má přístup k obsahu v této knihovně",
+			"sections": {
+				"libraryExclusions": {
+					"heading": "Vyloučení uživatelé",
+					"description": "Zabránit některým uživatelům v přístupu k této knihovně nebo k jejímu obsahu",
+					"noUsers": "Neexistují žádní další registrovaní uživatelé k vyloučení přístupu k této knihovně",
+					"updated": "Vyloučení aktualizována",
+					"failure": "Aktualizace vyloučení se nezdařila"
+				}
+			}
+		},
+		"danger-zone/delete": {
+			"title": "Akce smazání",
+			"description": "Trvale smazat tuto knihovnu a veškerý její obsah nebo určité zdroje",
+			"sections": {
+				"cleanLibrary": {
+					"heading": "Vyčistit knihovnu",
+					"description": "Odstranit všechna média a série, které nelze najít na disku",
+					"disclaimer": "Tato akce sice neodstraní žádné soubory, ale trvale smaže všechny záznamy týkající se médií a sérií, které nelze najít",
+					"confirmation": {
+						"label": "Vyčistit knihovnu",
+						"text": "Opravdu chcete vyčistit tuto knihovnu?"
+					}
+				},
+				"deleteLibrary": {
+					"heading": "Smazat knihovnu",
+					"description": [
+						"Trvale smazat tuto knihovnu a veškerý její obsah.",
+						"Tuto akci nelze vrátit zpět"
+					]
+				}
 			}
 		}
 	},
@@ -380,15 +680,19 @@
 			"sections": {
 				"themeSelect": {
 					"label": "Motiv",
-					"description": "Ve výchozím nastavení má Stump světlý a tmavý motiv",
-					"customTheme": [
-						"Pokud máte zájem o vytvoření vlastního motivu, podívejte se na",
-						"dokumentaci"
+					"description": [
+						"If you're interested in creating your own custom theme, check out the",
+						"documentation"
 					],
 					"options": {
 						"light": "Světlý",
 						"dark": "Tmavý",
-						"bronze": "Světle bronzový"
+						"bronze": "Světle bronzový",
+						"ocean": "Oceán",
+						"autumn": "Podzim",
+						"cosmic": "Cosmic",
+						"pumpkin": "Pumpkin",
+						"matrix": "Matrix"
 					}
 				},
 				"fontSelect": {
@@ -450,10 +754,93 @@
 			"title": "Nastavení plochy",
 			"description": "Nastavení vztahující se k aplikaci Stump",
 			"sections": {
-				"discordPresence": {
-					"label": "Status na Discordu",
-					"description": "Zobrazit tvou aktivitu v Discordu pomocí Discord Rich Presence",
-					"reconnect": "Znovu připojit k Discordu"
+				"configuredServers": {
+					"label": "Nastavené servery",
+					"description": "Seznam serverů Stump, ke kterým se můžete připojit",
+					"unreachableServer": {
+						"tooltip": "Server je nedostupný"
+					},
+					"activeServer": {
+						"tooltip": "Aktuální server"
+					},
+					"addOrEditServer": {
+						"validation": {
+							"nameExists": "Server s tímto názvem již existuje",
+							"nameForbidden": "Toto jméno nelze použít",
+							"urlExists": "Server s touto URL již existuje"
+						},
+						"fields": {
+							"name": {
+								"label": "Název",
+								"description": "Přátelské jméno pro identifikaci tohoto serveru",
+								"placeholder": "Můj server"
+							},
+							"uri": {
+								"label": "URI",
+								"description": "URL serveru Stump",
+								"placeholder": "https://stump.example.com"
+							}
+						}
+					},
+					"addServer": {
+						"trigger": "Přidat server",
+						"title": "Přidat nový server",
+						"description": "Přidat nový server Stump do aplikace",
+						"confirm": "Přidat server"
+					},
+					"editServer": {
+						"tooltip": "Upravit server",
+						"title": "Upravit server",
+						"description": "Upravit detaily tohoto serveru",
+						"confirm": "Uložit změny"
+					},
+					"deleteServer": {
+						"tooltip": "Smazat server",
+						"confirmation": {
+							"title": "Smazat tento server",
+							"description": "Tímto odstraníte server z desktopové aplikace",
+							"disclaimerActiveServer": "Tento server je aktuálně aktivní. Budete odhlášeni",
+							"disclaimerLastServer": "Toto je poslední nakonfigurovaný server. Budete odhlášeni a budete muset znovu nakonfigurovat všechny servery v procesu inicializace",
+							"confirm": "Smazat server"
+						}
+					},
+					"switchToServer": {
+						"tooltip": "Přepnout na server",
+						"confirmation": {
+							"title": "Přepnout na tento server",
+							"description": "Toto vás odhlásí z aktuálního serveru",
+							"confirm": "Přepnout na server",
+							"server": "Server",
+							"uri": "URL"
+						}
+					},
+					"resetConfiguration": {
+						"label": "Smazat všechny servery",
+						"description": [
+							"Odstranit všechny nastavené servery z aplikace",
+							"Tuto akci nelze vrátit zpět"
+						],
+						"confirmation": {
+							"trigger": "Smazat všechny servery",
+							"title": "Smazat všechny servery",
+							"description": "Tímto odstraníte všechny servery z desktopové aplikace",
+							"disclaimer": "Budete odhlášeni a budete muset znovu nakonfigurovat všechny servery v procesu inicializace",
+							"confirm": "Smazat všechny servery"
+						}
+					}
+				},
+				"optionalFeatures": {
+					"label": "Volitelné funkce",
+					"description": "Správa volitelných funkcí unikátních pro desktopovou aplikaci",
+					"bundledServer": {
+						"label": "Bundled server",
+						"description": "Spustit připojený server na pozadí, zatímco je spuštěna desktopová aplikace (vyžaduje restart)"
+					},
+					"discordPresence": {
+						"label": "Status na Discordu",
+						"description": "Zobrazit tvou aktivitu v Discordu pomocí Discord Rich Presence",
+						"reconnect": "Znovu připojit k Discordu"
+					}
 				}
 			}
 		},
@@ -605,6 +992,32 @@
 						"upload": {
 							"label": "Nahrát soubory",
 							"description": "Umožňuje uživateli nahrát soubory na server"
+						}
+					},
+					"emailer": {
+						"label": "E-mailery",
+						"read": {
+							"label": "Přístup k e-mailerům",
+							"description": "Umožňuje uživateli zobrazit nakonfigurované e-mailery"
+						},
+						"create": {
+							"label": "Vytvořit e-mailery",
+							"description": "Umožňuje uživateli vytvářet nové e-mailery"
+						},
+						"manage": {
+							"label": "Spravovat e-mailery",
+							"description": "Umožňuje uživateli spravovat existující e-mailery"
+						}
+					},
+					"email": {
+						"label": "E-mailing",
+						"send": {
+							"label": "Odeslat e-maily",
+							"description": "Umožňuje uživateli odesílat e-maily ze serveru na libovolné nakonfigurované aliasy"
+						},
+						"arbitrary_send": {
+							"label": "Odesílat libovolné e-maily",
+							"description": "Umožňuje uživateli odesílat e-maily ze serveru na libovolnou e-mailovou adresu"
 						}
 					},
 					"library": {
@@ -917,10 +1330,17 @@
 		"save": "Uložit",
 		"send": "Odeslat",
 		"saveChanges": "Uložit změny",
+		"noChanges": "Žádné změny",
 		"create": "Vytvořit",
 		"edit": "Upravit",
 		"update": "Aktualizovat",
 		"unimplemented": "Tato funkce ještě není implementována! Zkuste to později",
-		"limitedFunctionality": "Toto ještě není plně implementováno a chybí některé funkce. Zkuste to později"
+		"limitedFunctionality": "Toto ještě není plně implementováno a chybí některé funkce. Zkuste to později",
+		"logIn": "Přihlásit se",
+		"login": "Přihlášení",
+		"seeError": "Zobrazit chybu",
+		"goBack": "Jít zpět",
+		"goToServers": "Jít na servery",
+		"notReady": "Tato funkce není připravena"
 	}
 }

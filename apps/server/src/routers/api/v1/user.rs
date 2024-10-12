@@ -2,9 +2,9 @@ use std::{fs::File, io::Write};
 
 use axum::{
 	extract::{DefaultBodyLimit, Multipart, Path, State},
-	middleware::from_extractor_with_state,
+	middleware,
 	routing::{delete, get, put},
-	Json, Router,
+	Extension, Json, Router,
 };
 use axum_extra::extract::Query;
 use prisma_client_rust::{chrono::Utc, Direction};
@@ -19,14 +19,13 @@ use stump_core::{
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 	},
-	filesystem::{
-		get_unknown_image, read_entire_file, ContentType, FileParts, PathUtils,
-	},
+	filesystem::{get_unknown_image, ContentType, FileParts, PathUtils},
 	prisma::{
 		age_restriction, session, user, user_login_activity, user_preferences,
 		PrismaClient,
 	},
 };
+use tokio::fs;
 use tower_sessions::Session;
 use tracing::{debug, trace};
 use utoipa::ToSchema;
@@ -35,11 +34,8 @@ use crate::{
 	config::{session::SESSION_USER_KEY, state::AppState},
 	errors::{APIError, APIResult},
 	filter::{chain_optional_iter, UserQueryRelation},
-	middleware::auth::Auth,
-	utils::{
-		enforce_session_permissions, get_session_server_owner_user, get_session_user,
-		get_user_and_enforce_permission, http::ImageResponse, validate_image_upload,
-	},
+	middleware::auth::{auth_middleware, RequestContext},
+	utils::{get_session_user, http::ImageResponse, validate_and_load_image},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -77,12 +73,12 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				)
 				.route(
 					"/avatar",
-					get(get_user_avatar)
-						.post(upload_user_avatar)
-						.layer(DefaultBodyLimit::max(20 * 1024 * 1024)), // 20MB
+					get(get_user_avatar).post(upload_user_avatar).layer(
+						DefaultBodyLimit::max(app_state.config.max_image_upload_size),
+					),
 				),
 		)
-		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 pub(crate) fn apply_pagination<'a>(
@@ -129,9 +125,9 @@ async fn get_users(
 	State(ctx): State<AppState>,
 	relation_query: Query<UserQueryRelation>,
 	pagination_query: Query<PaginationQuery>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Pageable<Vec<User>>>> {
-	enforce_session_permissions(&session, &[UserPermission::ReadUsers])?;
+	req.enforce_permissions(&[UserPermission::ReadUsers])?;
 
 	let pagination = pagination_query.0.get();
 	let is_unpaged = pagination.is_unpaged();
@@ -204,9 +200,9 @@ async fn get_users(
 )]
 async fn get_user_login_activity(
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Vec<LoginActivity>>> {
-	get_session_server_owner_user(&session)?;
+	req.enforce_server_owner()?;
 
 	let client = &ctx.db;
 
@@ -236,9 +232,9 @@ async fn get_user_login_activity(
 )]
 async fn delete_user_login_activity(
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<()>> {
-	get_session_server_owner_user(&session)?;
+	req.enforce_server_owner()?;
 
 	let client = &ctx.db;
 
@@ -279,7 +275,7 @@ async fn update_user(
 			))
 		},
 		Some(max_sessions_allowed) => {
-			tracing::trace!(?max_sessions_allowed, "The max sessions allowed is set")
+			tracing::trace!(?max_sessions_allowed, "The max sessions allowed is set");
 		},
 		_ => {},
 	}
@@ -337,13 +333,16 @@ async fn update_user(
 						)
 						.exec()
 						.await?;
-					tracing::trace!(?upserted_age_restriction, "Upserted age restriction")
+					tracing::trace!(
+						?upserted_age_restriction,
+						"Upserted age restriction"
+					);
 				} else if existing_age_restriction.is_some() {
 					tx.age_restriction()
 						.delete(age_restriction::user_id::equals(for_user_id.clone()))
 						.exec()
 						.await?;
-					tracing::trace!("Deleted age restriction")
+					tracing::trace!("Deleted age restriction");
 				}
 
 				update_params.push(user::permissions::set(Some(
@@ -377,14 +376,15 @@ async fn update_preferences(
 		.update(
 			user_preferences::id::equals(preferences_id),
 			vec![
-				user_preferences::locale::set(input.locale.to_owned()),
+				user_preferences::locale::set(input.locale.clone()),
 				user_preferences::preferred_layout_mode::set(
-					input.preferred_layout_mode.to_owned(),
+					input.preferred_layout_mode.clone(),
 				),
-				user_preferences::app_theme::set(input.app_theme.to_owned()),
+				user_preferences::app_theme::set(input.app_theme.clone()),
+				user_preferences::enable_gradients::set(input.enable_gradients),
 				user_preferences::app_font::set(input.app_font.to_string()),
 				user_preferences::primary_navigation_mode::set(
-					input.primary_navigation_mode.to_owned(),
+					input.primary_navigation_mode.clone(),
 				),
 				user_preferences::layout_max_width_px::set(input.layout_max_width_px),
 				user_preferences::show_query_indicator::set(input.show_query_indicator),
@@ -437,11 +437,11 @@ pub struct CreateUser {
 )]
 /// Creates a new user.
 async fn create_user(
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateUser>,
 ) -> APIResult<Json<User>> {
-	enforce_session_permissions(&session, &[UserPermission::ManageUsers])?;
+	req.enforce_permissions(&[UserPermission::ManageUsers])?;
 
 	let db = &ctx.db;
 
@@ -461,7 +461,7 @@ async fn create_user(
 			let created_user = client
 				.user()
 				.create(
-					input.username.to_owned(),
+					input.username.clone(),
 					hashed_password,
 					chain_optional_iter(
 						vec![
@@ -489,7 +489,7 @@ async fn create_user(
 					)
 					.exec()
 					.await?;
-				tracing::trace!(?_age_restriction, "Created age restriction")
+				tracing::trace!(?_age_restriction, "Created age restriction");
 			}
 
 			let _user_preferences = client
@@ -535,22 +535,22 @@ async fn create_user(
 )]
 /// Updates the session user
 async fn update_current_user(
+	Extension(req): Extension<RequestContext>,
 	session: Session,
 	State(ctx): State<AppState>,
 	Json(input): Json<UpdateUser>,
 ) -> APIResult<Json<User>> {
 	let db = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
-	let updated_user =
-		update_user(&user, db, user.id.clone(), input, &ctx.config).await?;
+	let updated_user = update_user(user, db, user.id.clone(), input, &ctx.config).await?;
 	debug!(?updated_user, "Updated user");
 
-	session
-		.insert(SESSION_USER_KEY, updated_user.clone())
-		.map_err(|e| {
-			APIError::InternalServerError(format!("Failed to update session: {}", e))
-		})?;
+	if get_session_user(&session).await?.is_some() {
+		session
+			.insert(SESSION_USER_KEY, updated_user.clone())
+			.await?;
+	}
 
 	Ok(Json(updated_user))
 }
@@ -563,6 +563,7 @@ pub struct UpdateUserPreferences {
 	pub primary_navigation_mode: String,
 	pub layout_max_width_px: Option<i32>,
 	pub app_theme: String,
+	pub enable_gradients: bool,
 	pub app_font: SupportedFont,
 	pub show_query_indicator: bool,
 	pub enable_live_refetch: bool,
@@ -589,13 +590,14 @@ pub struct UpdateUserPreferences {
 )]
 /// Updates a user's preferences.
 async fn update_current_user_preferences(
+	Extension(req): Extension<RequestContext>,
 	session: Session,
 	State(ctx): State<AppState>,
 	Json(input): Json<UpdateUserPreferences>,
 ) -> APIResult<Json<UserPreferences>> {
 	let db = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let user_preferences = user.user_preferences.clone().unwrap_or_default();
 
 	trace!(user_id = ?user.id, ?user_preferences, updates = ?input, "Updating viewer's preferences");
@@ -603,17 +605,17 @@ async fn update_current_user_preferences(
 	let updated_preferences = update_preferences(db, user_preferences.id, input).await?;
 	debug!(?updated_preferences, "Updated user preferences");
 
-	session
-		.insert(
-			"user",
-			User {
-				user_preferences: Some(updated_preferences.clone()),
-				..user
-			},
-		)
-		.map_err(|e| {
-			APIError::InternalServerError(format!("Failed to update session: {}", e))
-		})?;
+	if get_session_user(&session).await?.is_some() {
+		session
+			.insert(
+				SESSION_USER_KEY,
+				User {
+					user_preferences: Some(updated_preferences.clone()),
+					..user.clone()
+				},
+			)
+			.await?;
+	}
 
 	Ok(Json(updated_preferences))
 }
@@ -631,10 +633,10 @@ async fn update_current_user_preferences(
 	)
 )]
 async fn get_navigation_arrangement(
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<Arrangement<NavigationItem>>> {
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let db = &ctx.db;
 
 	let user_preferences = db
@@ -667,11 +669,11 @@ async fn get_navigation_arrangement(
 	)
 )]
 async fn update_navigation_arrangement(
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	State(ctx): State<AppState>,
 	Json(input): Json<Arrangement<NavigationItem>>,
 ) -> APIResult<Json<Arrangement<NavigationItem>>> {
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let db = &ctx.db;
 
 	let user_preferences = db
@@ -696,8 +698,7 @@ async fn update_navigation_arrangement(
 			vec![user_preferences::navigation_arrangement::set(Some(
 				serde_json::to_vec(&input).map_err(|e| {
 					APIError::InternalServerError(format!(
-						"Failed to serialize navigation arrangement: {}",
-						e
+						"Failed to serialize navigation arrangement: {e}"
 					))
 				})?,
 			))],
@@ -732,11 +733,11 @@ pub struct DeleteUser {
 async fn delete_user_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(input): Json<DeleteUser>,
 ) -> APIResult<Json<User>> {
 	let db = &ctx.db;
-	let user = get_session_server_owner_user(&session)?;
+	let user = req.server_owner_user()?;
 
 	if user.id == id {
 		return Err(APIError::BadRequest(
@@ -782,23 +783,19 @@ async fn delete_user_by_id(
 async fn get_user_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<User>> {
-	get_session_server_owner_user(&session)?;
+	req.enforce_server_owner()?;
 	let db = &ctx.db;
-	let user_by_id = db
+	let fetched_user = db
 		.user()
 		.find_unique(user::id::equals(id.clone()))
 		.with(user::age_restriction::fetch())
 		.exec()
-		.await?;
-	debug!(id, ?user_by_id, "Result of fetching user by id");
+		.await?
+		.ok_or(APIError::NotFound(format!("User with id {id} not found")))?;
 
-	if user_by_id.is_none() {
-		return Err(APIError::NotFound(format!("User with id {} not found", id)));
-	}
-
-	Ok(Json(User::from(user_by_id.unwrap())))
+	Ok(Json(User::from(fetched_user)))
 }
 
 // TODO: pagination!
@@ -820,9 +817,9 @@ async fn get_user_by_id(
 async fn get_user_login_activity_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Vec<LoginActivity>>> {
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
 	let client = &ctx.db;
 
@@ -861,27 +858,26 @@ async fn get_user_login_activity_by_id(
 )]
 /// Updates a user by ID.
 async fn update_user_handler(
+	Extension(req): Extension<RequestContext>,
 	session: Session,
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	Json(input): Json<UpdateUser>,
 ) -> APIResult<Json<User>> {
 	let db = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
 	if user.id != id && !user.is_server_owner {
 		return Err(APIError::forbidden_discreet());
 	}
 
-	let updated_user = update_user(&user, db, id.clone(), input, &ctx.config).await?;
+	let updated_user = update_user(user, db, id.clone(), input, &ctx.config).await?;
 	debug!(?updated_user, "Updated user");
 
-	if user.id == id {
+	if user.id == id && get_session_user(&session).await?.is_some() {
 		session
 			.insert(SESSION_USER_KEY, updated_user.clone())
-			.map_err(|e| {
-				APIError::InternalServerError(format!("Failed to update session: {}", e))
-			})?;
+			.await?;
 	} else {
 		// When a server owner updates another user, we need to delete all sessions for that user
 		// because the user's permissions may have changed. This is a bit lazy but it works.
@@ -911,9 +907,9 @@ async fn update_user_handler(
 async fn delete_user_sessions(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<()> {
-	get_session_server_owner_user(&session)?;
+	req.enforce_server_owner()?;
 
 	let client = &ctx.db;
 	let removed_sessions = client
@@ -950,10 +946,10 @@ pub struct UpdateAccountLock {
 async fn update_user_lock_status(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(input): Json<UpdateAccountLock>,
 ) -> APIResult<Json<User>> {
-	let user = get_session_server_owner_user(&session)?;
+	let user = req.server_owner_user()?;
 	if user.id == id {
 		return Err(APIError::BadRequest(
 			"You cannot lock your own account.".into(),
@@ -1002,10 +998,10 @@ async fn update_user_lock_status(
 async fn get_user_preferences(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<UserPreferences>> {
 	let db = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = req.user();
 
 	if id != user.id {
 		return Err(APIError::forbidden_discreet());
@@ -1020,8 +1016,7 @@ async fn get_user_preferences(
 
 	if user_preferences.is_none() {
 		return Err(APIError::NotFound(format!(
-			"User preferences with id {} not found",
-			id
+			"User preferences with id {id} not found"
 		)));
 	}
 
@@ -1046,6 +1041,7 @@ async fn get_user_preferences(
 )]
 /// Updates a user's preferences.
 async fn update_user_preferences(
+	Extension(req): Extension<RequestContext>,
 	session: Session,
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
@@ -1054,7 +1050,7 @@ async fn update_user_preferences(
 	trace!(?id, ?input, "Updating user preferences");
 	let db = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let user_preferences = user.user_preferences.clone().unwrap_or_default();
 
 	if user_preferences.id != input.id {
@@ -1064,17 +1060,17 @@ async fn update_user_preferences(
 	let updated_preferences = update_preferences(db, user_preferences.id, input).await?;
 	debug!(?updated_preferences, "Updated user preferences");
 
-	session
-		.insert(
-			SESSION_USER_KEY,
-			User {
-				user_preferences: Some(updated_preferences.clone()),
-				..user
-			},
-		)
-		.map_err(|e| {
-			APIError::InternalServerError(format!("Failed to update session: {}", e))
-		})?;
+	if get_session_user(&session).await?.is_some() {
+		session
+			.insert(
+				SESSION_USER_KEY,
+				User {
+					user_preferences: Some(updated_preferences.clone()),
+					..user.clone()
+				},
+			)
+			.await?;
+	}
 
 	Ok(Json(updated_preferences))
 }
@@ -1113,7 +1109,7 @@ async fn get_user_avatar(
 			if let Some(local_file) = get_unknown_image(base_path) {
 				let FileParts { extension, .. } = local_file.file_parts();
 				let content_type = ContentType::from_extension(extension.as_str());
-				let bytes = read_entire_file(local_file)?;
+				let bytes = fs::read(local_file).await?;
 				Ok(ImageResponse::new(content_type, bytes))
 			} else {
 				Err(APIError::NotFound("User avatar not found".to_string()))
@@ -1148,10 +1144,10 @@ async fn get_user_avatar(
 async fn upload_user_avatar(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	mut upload: Multipart,
 ) -> APIResult<ImageResponse> {
-	let by_user = get_user_and_enforce_permission(&session, UserPermission::UploadFile)?;
+	let by_user = req.user_and_enforce_permissions(&[UserPermission::UploadFile])?;
 	let client = &ctx.db;
 
 	if by_user.id != id && !by_user.is_server_owner {
@@ -1167,7 +1163,9 @@ async fn upload_user_avatar(
 		.await?
 		.ok_or(APIError::NotFound("User not found".to_string()))?;
 
-	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
+	let (content_type, bytes) =
+		validate_and_load_image(&mut upload, Some(ctx.config.max_image_upload_size))
+			.await?;
 
 	let ext = content_type.extension();
 	let username = user.username.clone();
@@ -1188,8 +1186,7 @@ async fn upload_user_avatar(
 		.update(
 			user::id::equals(id.clone()),
 			vec![user::avatar_url::set(Some(format!(
-				"/api/v1/users/{}/avatar",
-				id
+				"/api/v1/users/{id}/avatar"
 			)))],
 		)
 		.exec()

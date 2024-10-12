@@ -1,7 +1,18 @@
+use std::{
+	pin::pin,
+	sync::{
+		atomic::{AtomicUsize, Ordering},
+		Arc,
+	},
+};
+
+use futures::{stream::FuturesUnordered, StreamExt};
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use tokio::sync::Semaphore;
 
 use crate::{
+	filesystem::image::ImageProcessorOptions,
 	job::{
 		error::JobError, JobExecuteLog, JobExt, JobOutputExt, JobProgress, JobTaskOutput,
 		WorkerCtx, WorkingState, WrappedJob,
@@ -10,8 +21,8 @@ use crate::{
 };
 
 use super::{
-	manager::{ParThumbnailGenerationOutput, ThumbnailManager},
-	ImageProcessorOptions,
+	generate::{generate_book_thumbnail, GenerateThumbnailOptions},
+	ThumbnailGenerateError,
 };
 
 // Note: I am type aliasing for the sake of clarity in what the provided Strings represent
@@ -61,9 +72,13 @@ pub enum ThumbnailGenerationTask {
 }
 
 #[derive(Clone, Serialize, Deserialize, Default, Debug, Type)]
+// Note: This container attribute is used to ensure future additions to the struct do not break deserialization
+#[serde(default)]
 pub struct ThumbnailGenerationOutput {
 	/// The total number of files that were visited during the thumbnail generation
 	visited_files: u64,
+	/// The number of thumbnails that were skipped (already existed and not force regenerated)
+	skipped_files: u64,
 	/// The number of thumbnails that were generated
 	generated_thumbnails: u64,
 	/// The number of thumbnails that were removed
@@ -73,6 +88,7 @@ pub struct ThumbnailGenerationOutput {
 impl JobOutputExt for ThumbnailGenerationOutput {
 	fn update(&mut self, updated: Self) {
 		self.visited_files += updated.visited_files;
+		self.skipped_files += updated.skipped_files;
 		self.generated_thumbnails += updated.generated_thumbnails;
 		self.removed_thumbnails += updated.removed_thumbnails;
 	}
@@ -149,28 +165,9 @@ impl JobExt for ThumbnailGenerationJob {
 			ThumbnailGenerationJobVariant::MediaGroup(media_ids) => media_ids.clone(),
 		};
 
-		// TODO Should find a way to keep  the same ThumbnailManager around for the whole job execution
-		let manager = ThumbnailManager::new(ctx.config.clone())
-			.map_err(|e| JobError::TaskFailed(e.to_string()))?;
-
-		let media_ids = if !self.params.force_regenerate {
-			// if we aren't force regenerating, we can skip the init if all media already have thumbnails
-			media_ids
-				.into_iter()
-				.filter(|id| !manager.has_thumbnail(id.as_str()))
-				.collect::<Vec<_>>()
-		} else {
-			media_ids
-		};
-
-		let tasks = media_ids
-			.chunks(ctx.config.scanner_chunk_size)
-			.map(|chunk| ThumbnailGenerationTask::GenerateBatch(chunk.to_vec()))
-			.collect();
-
 		Ok(WorkingState {
 			output: Some(Self::Output::default()),
-			tasks,
+			tasks: vec![ThumbnailGenerationTask::GenerateBatch(media_ids)].into(),
 			completed_tasks: 0,
 			logs: vec![],
 		})
@@ -184,9 +181,6 @@ impl JobExt for ThumbnailGenerationJob {
 		let mut output = Self::Output::default();
 		let mut logs = vec![];
 
-		let mut manager = ThumbnailManager::new(ctx.config.clone())
-			.map_err(|e| JobError::TaskFailed(e.to_string()))?;
-
 		match task {
 			ThumbnailGenerationTask::GenerateBatch(media_ids) => {
 				let media = ctx
@@ -197,50 +191,31 @@ impl JobExt for ThumbnailGenerationJob {
 					.await
 					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
 
-				if self.params.force_regenerate {
-					let media_ids_to_remove = media
-						.iter()
-						.filter(|m| manager.has_thumbnail(m.id.as_str()))
-						.map(|m| m.id.clone())
-						.collect::<Vec<String>>();
-					ctx.report_progress(JobProgress::msg(
-						format!("Removing {} thumbnails", media_ids_to_remove.len())
-							.as_str(),
-					));
-					let JobTaskOutput {
-						output: sub_output,
-						logs: sub_logs,
-						..
-					} = safely_remove_batch(&media_ids_to_remove, &mut manager);
-					output.update(sub_output);
-					logs.extend(sub_logs);
-				}
-
-				let media_to_generate_thumbnails = if self.params.force_regenerate {
-					media
-				} else {
-					media
-						.into_iter()
-						.filter(|m| !manager.has_thumbnail(m.id.as_str()))
-						.collect::<Vec<_>>()
-				};
-
-				ctx.report_progress(JobProgress::msg(
-					format!(
-						"Generating {} thumbnails",
-						media_to_generate_thumbnails.len()
-					)
-					.as_str(),
+				let task_count = media.len() as i32;
+				ctx.report_progress(JobProgress::subtask_position_msg(
+					"Generating thumbnails",
+					1,
+					task_count,
 				));
 				let JobTaskOutput {
 					output: sub_output,
 					logs: sub_logs,
 					..
 				} = safely_generate_batch(
-					&media_to_generate_thumbnails,
-					self.options.clone(),
-					&mut manager,
-				);
+					&media,
+					GenerateThumbnailOptions {
+						image_options: self.options.clone(),
+						core_config: ctx.config.as_ref().clone(),
+						force_regen: self.params.force_regenerate,
+					},
+					|position| {
+						ctx.report_progress(JobProgress::subtask_position(
+							position as i32,
+							task_count,
+						));
+					},
+				)
+				.await;
 				output.update(sub_output);
 				logs.extend(sub_logs);
 			},
@@ -254,67 +229,75 @@ impl JobExt for ThumbnailGenerationJob {
 	}
 }
 
-pub fn safely_remove_batch<S: AsRef<str>>(
-	ids: &[S],
-	manager: &mut ThumbnailManager,
+#[tracing::instrument(skip_all)]
+pub async fn safely_generate_batch(
+	books: &[media::Data],
+	options: GenerateThumbnailOptions,
+	reporter: impl Fn(usize),
 ) -> JobTaskOutput<ThumbnailGenerationJob> {
 	let mut output = ThumbnailGenerationOutput::default();
 	let mut logs = vec![];
 
-	for id in ids {
-		manager.remove_thumbnail(id).map_or_else(
-			|error| {
-				tracing::error!(error = ?error, "Failed to remove thumbnail");
+	let max_concurrency = options.core_config.max_thumbnail_concurrency;
+	let semaphore = Arc::new(Semaphore::new(max_concurrency));
+	tracing::debug!(
+		max_concurrency,
+		"Semaphore created for thumbnail generation"
+	);
+
+	let futures = books
+		.iter()
+		.map(|book| {
+			let semaphore = semaphore.clone();
+			let options = options.clone();
+			let path = book.path.clone();
+
+			async move {
+				if semaphore.available_permits() == 0 {
+					tracing::trace!(?path, "Waiting for permit for thumbnail generation");
+				}
+				let _permit = semaphore.acquire().await.map_err(|e| {
+					(ThumbnailGenerateError::Unknown(e.to_string()), path.clone())
+				})?;
+				tracing::trace!(?path, "Acquired permit for thumbnail generation");
+				generate_book_thumbnail(book, options)
+					.await
+					.map_err(|e| (e, path))
+			}
+		})
+		.collect::<FuturesUnordered<_>>();
+
+	// An atomic usize to keep track of the current position in the stream
+	// to report progress to the UI
+	let atomic_cursor = Arc::new(AtomicUsize::new(1));
+
+	let mut futures = pin!(futures);
+
+	while let Some(gen_output) = futures.next().await {
+		match gen_output {
+			Ok((_, _, did_generate)) => {
+				if did_generate {
+					output.generated_thumbnails += 1;
+				} else {
+					// If we didn't generate a thumbnail, and have a success result,
+					// then we skipped it
+					output.skipped_files += 1;
+				}
+			},
+			Err((error, path)) => {
 				logs.push(
 					JobExecuteLog::error(format!(
-						"Failed to remove thumbnail: {:?}",
+						"Failed to generate thumbnail: {:?}",
 						error.to_string()
 					))
-					.with_ctx(format!("Media ID: {}", id.as_ref())),
+					.with_ctx(format!("Media path: {path}")),
 				);
 			},
-			|_| output.removed_thumbnails += 1,
-		);
+		}
+		// We visit every file, regardless of success or failure
+		output.visited_files += 1;
+		reporter(atomic_cursor.fetch_add(1, Ordering::SeqCst));
 	}
-	output.visited_files = ids.len() as u64;
-
-	JobTaskOutput {
-		output,
-		logs,
-		subtasks: vec![],
-	}
-}
-
-pub fn safely_generate_batch(
-	media: &[media::Data],
-	options: ImageProcessorOptions,
-	manager: &mut ThumbnailManager,
-) -> JobTaskOutput<ThumbnailGenerationJob> {
-	let mut output = ThumbnailGenerationOutput::default();
-
-	let ParThumbnailGenerationOutput {
-		created_thumbnails,
-		errors,
-	} = manager.generate_thumbnails_par(media, options.clone());
-	let created_media_id_thumbnails = created_thumbnails
-		.into_iter()
-		.map(|(id, _)| id)
-		.collect::<Vec<String>>();
-	manager.track_thumbnails(&created_media_id_thumbnails, options);
-
-	output.visited_files = (created_media_id_thumbnails.len() + errors.len()) as u64;
-	output.generated_thumbnails = created_media_id_thumbnails.len() as u64;
-
-	let logs = errors
-		.into_iter()
-		.map(|(path, error)| {
-			JobExecuteLog::error(format!(
-				"Failed to generate thumbnail: {:?}",
-				error.to_string()
-			))
-			.with_ctx(format!("{:?}", path))
-		})
-		.collect();
 
 	JobTaskOutput {
 		output,

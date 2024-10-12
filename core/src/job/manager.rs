@@ -19,17 +19,17 @@ use crate::{
 
 pub type JobManagerResult<T> = Result<T, JobManagerError>;
 
-/// A helper struct that holds the job queue and a list of workers for the job manager
+/// A helper struct that holds the job queue and a list of [`Worker`]s.
 pub struct JobManager {
 	/// Queue of jobs waiting to be run in a worker thread
 	queue: RwLock<VecDeque<Box<dyn Executor>>>,
 	/// Worker threads with a running job
 	workers: RwLock<HashMap<String, Arc<Worker>>>,
-	/// A channel to send shutdown signals to the parent job manager
+	/// A channel to send shutdown signals to the parent [`JobManager`]
 	job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
 	/// A channel to emit core events
 	core_event_tx: broadcast::Sender<CoreEvent>,
-	/// A pointer to the PrismaClient
+	/// A pointer to the [`PrismaClient`]
 	client: Arc<PrismaClient>,
 	/// A pointer to the core config
 	config: Arc<StumpConfig>,
@@ -61,6 +61,34 @@ impl JobManager {
 	/// Get a reference to the event broadcaster
 	fn get_event_tx(&self) -> broadcast::Sender<CoreEvent> {
 		self.core_event_tx.clone()
+	}
+
+	/// Initialize the job manager. This will attempt to cancel any islanded jobs and re-enqueue
+	/// any paused jobs
+	pub async fn initialize(self: Arc<Self>) -> JobManagerResult<()> {
+		// Find islanded jobs and attempt to cancel them
+		let islanded_jobs = self
+			.client
+			.job()
+			.find_many(vec![job::status::equals(JobStatus::Running.to_string())])
+			.exec()
+			.await?;
+
+		tracing::debug!(?islanded_jobs, "Found islanded jobs");
+
+		for job in islanded_jobs {
+			let job_id = job.id.clone();
+			handle_do_cancel(
+				job_id,
+				&self.client,
+				Duration::from_millis(job.ms_elapsed as u64),
+			)
+			.await?;
+		}
+
+		// TODO: Re-enqueue paused jobs
+
+		Ok(())
 	}
 
 	// FIXME: there is a bug in here I haven't been able to track down,
@@ -128,12 +156,12 @@ impl JobManager {
 				.send(JobControllerCommand::EnqueueJob(next))
 				.map_or_else(
 					|error| {
-						tracing::error!(?error, "Failed to send event to job manager")
+						tracing::error!(?error, "Failed to send event to job manager");
 					},
 					|_| tracing::trace!("Sent event to job manager to enqueue next job"),
 				);
 		} else {
-			tracing::trace!("No jobs in queue to auto enqueue")
+			tracing::trace!("No jobs in queue to auto enqueue");
 		}
 	}
 
@@ -192,8 +220,12 @@ impl JobManager {
 				?islanded_job,
 				"Job was found in an invalid state, attempting to cancel"
 			);
-			handle_do_cancel(job_id.clone(), &self.client, Duration::from_secs(0))
-				.await?;
+			handle_do_cancel(
+				job_id.clone(),
+				&self.client,
+				Duration::from_millis(islanded_job.ms_elapsed as u64),
+			)
+			.await?;
 			return Err(JobManagerError::JobLostError);
 		}
 

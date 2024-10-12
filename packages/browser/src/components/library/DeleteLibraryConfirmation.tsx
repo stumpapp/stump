@@ -2,7 +2,7 @@ import { isAxiosError } from '@stump/api'
 import { useDeleteLibraryMutation } from '@stump/client'
 import { ConfirmationModal } from '@stump/components'
 import { toast } from 'react-hot-toast'
-import { useLocation, useNavigate } from 'react-router'
+import { useNavigate } from 'react-router'
 
 import { useAppContext } from '../../context'
 import paths from '../../paths'
@@ -11,17 +11,14 @@ type Props = {
 	libraryId: string
 	onClose: () => void
 	isOpen: boolean
+	trigger?: React.ReactNode
 }
-export default function DeleteLibraryConfirmation({ isOpen, libraryId, onClose }: Props) {
+export default function DeleteLibraryConfirmation({ isOpen, libraryId, onClose, trigger }: Props) {
 	const navigate = useNavigate()
-	const location = useLocation()
 
 	const { deleteLibraryAsync, isLoading } = useDeleteLibraryMutation({
 		onSuccess: () => {
-			const isOnLibrary = location.pathname.includes(paths.librarySeries(libraryId))
-			if (isOnLibrary) {
-				navigate(paths.home())
-			}
+			navigate(paths.home())
 		},
 	})
 	const { isServerOwner } = useAppContext()
@@ -54,6 +51,7 @@ export default function DeleteLibraryConfirmation({ isOpen, libraryId, onClose }
 			onClose={onClose}
 			onConfirm={handleDelete}
 			confirmIsLoading={isLoading}
+			trigger={trigger}
 		/>
 	)
 }

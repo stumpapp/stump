@@ -17,19 +17,22 @@ export const BUTTON_BASE_CLASSES = [
 // TODO: hone these variants
 export const BUTTON_VARIANTS = {
 	danger:
-		'bg-red-500 text-white hover:bg-red-600 dark:hover:bg-red-600 focus:ring-red-400 dark:focus:ring-red-400',
+		'bg-fill-danger text-white hover:bg-fill-danger-hover dark:hover:bg-fill-danger-hover focus:ring-red-400 dark:focus:ring-red-400',
 	default:
-		'bg-background-surface hover:bg-background-surface-hover text-foreground focus:ring-brand-400',
+		'bg-background-surface hover:bg-background-surface-hover text-foreground focus:ring-edge-brand',
 	ghost:
 		'bg-transparent hover:bg-background-surface-hover text-foreground-subtle data-[state=open]:bg-transparent',
 	link: 'bg-transparent dark:bg-transparent underline-offset-4 hover:underline text-gray-900 dark:text-gray-100 hover:bg-transparent dark:hover:bg-transparent',
 	outline: 'bg-transparent border border-edge-subtle hover:bg-background-surface text-foreground',
 	primary:
-		'bg-brand-500 text-white hover:bg-brand-600 dark:hover:bg-brand-600 focus:ring-brand-400 data-[state=open]:bg-brand-600',
-	secondary: 'bg-inverse text-background hover:bg-inverse/90 data-[state=open]:bg-inverse/90',
+		'bg-fill-brand hover:bg-fill-brand-hover text-white focus:ring-edge-brand data-[state=open]:bg-fill-brand-hover',
+	secondary:
+		'bg-background-inverse text-foreground-on-inverse hover:bg-background-inverse/90 data-[state=open]:bg-background-inverse/90',
 	subtle: 'bg-background-surface hover:bg-background-surface-hover text-foreground-subtle',
 	'subtle-dark':
 		'bg-background text-foreground-subtle hover:bg-background-surface data-[state=open]:bg-background-surface',
+	warning:
+		'bg-fill-warning text-foreground hover:bg-fill-warning/80 focus:ring-fill-warning-secondary',
 }
 
 export const BUTTON_ROUNDED_VARIANTS = {
@@ -128,11 +131,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 						{
 							'active:scale-95': pressEffect,
 							'cursor-not-allowed': props.disabled,
-							'focus:ring-brand-400 dark:focus:ring-brand-400': primaryFocus,
+							'focus:ring-edge-brand dark:focus:ring-edge-brand': primaryFocus,
 						},
 						className,
 					)}
 					ref={ref}
+					type="button"
 					{...props}
 				>
 					{isLoading ? (

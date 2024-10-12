@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 
 use crate::{
 	db::{
-		entity::{common::Cursor, LibraryOptions, MediaMetadata, Series, Tag},
+		entity::{common::Cursor, LibraryConfig, MediaMetadata, Series, Tag},
 		FileStatus,
 	},
 	error::CoreError,
@@ -28,8 +28,10 @@ pub struct Media {
 	pub extension: String,
 	/// The number of pages in the media. ex: "69"
 	pub pages: i32,
+	// TODO(specta): replace with DateTime<FixedOffset>
 	/// The timestamp when the media was last updated.
 	pub updated_at: String,
+	// TODO(specta): replace with DateTime<FixedOffset>
 	/// The timestamp when the media was created.
 	pub created_at: String,
 	/// The timestamp when the file was last modified on disk.
@@ -68,12 +70,23 @@ pub struct Media {
 	/// Whether or not the media is completed. Only None if the relation is not loaded.
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub is_completed: Option<bool>,
-	/// The user assigned tags for the media. ex: ["comic", "spiderman"]. Will be `None` only if the relation is not loaded.
+	/// The user assigned tags for the media. ex: `["comic", "spiderman"]`. Will be `None` only if the relation is not loaded.
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub tags: Option<Vec<Tag>>,
 	/// Bookmarks for the media. Will be `None` only if the relation is not loaded.
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub bookmarks: Option<Vec<Bookmark>>,
+}
+
+impl Media {
+	/// A convenience method to get the title of the media. If the metadata has a title, it will
+	/// return that. Otherwise, it will return the name of the media (which is the filename).
+	pub fn title(&self) -> String {
+		self.metadata
+			.as_ref()
+			.and_then(|m| m.title.clone())
+			.unwrap_or_else(|| self.name.clone())
+	}
 }
 
 impl Cursor for Media {
@@ -85,8 +98,8 @@ impl Cursor for Media {
 impl TryFrom<active_reading_session::Data> for Media {
 	type Error = CoreError;
 
-	/// Creates a [Media] instance from the loaded relation of a [media::Data] on
-	/// a [active_reading_session::Data] instance. If the relation is not loaded, it will
+	/// Creates a [Media] instance from the loaded relation of a [`media::Data`] on an
+	/// [`active_reading_session::Data`] instance. If the relation is not loaded, it will
 	/// return an error.
 	fn try_from(data: active_reading_session::Data) -> Result<Self, Self::Error> {
 		let Ok(media) = data.media() else {
@@ -106,7 +119,7 @@ impl TryFrom<active_reading_session::Data> for Media {
 #[derive(Default)]
 pub struct MediaBuilderOptions {
 	pub series_id: String,
-	pub library_options: LibraryOptions,
+	pub library_config: LibraryConfig,
 }
 
 impl From<media::Data> for Media {
@@ -122,8 +135,9 @@ impl From<media::Data> for Media {
 		};
 		let (current_page, current_epubcfi) = active_reading_session
 			.as_ref()
-			.map(|session| (session.page, session.epubcfi.clone()))
-			.unwrap_or((None, None));
+			.map_or((None, None), |session| {
+				(session.page, session.epubcfi.clone())
+			});
 
 		let finished_reading_sessions = match data.finished_user_reading_sessions() {
 			Ok(sessions) => Some(

@@ -49,7 +49,9 @@ export default function ImageBasedReader({ book, initialPage, incognito }: Props
 	const [imageSizes, setImageHeights] = useState<Record<number, ImageDimension>>({})
 
 	// const lastPrefetchStart = useRef(0)
-	const readerMode = useReaderStore((state) => state.mode)
+	// FIXME: useBookPreferences and get the reader mode from there
+	// const readerMode = useReaderStore((state) => state.mode)
+	const readerMode = 'paged'
 
 	const deviceOrientation = width > height ? 'landscape' : 'portrait'
 
@@ -166,14 +168,17 @@ const Page = React.memo(
 	}: PageProps) => {
 		const insets = useSafeAreaInsets()
 
-		const { showToolBar, setShowToolBar } = useReaderStore((state) => ({
-			setShowToolBar: state.setShowToolBar,
-			showToolBar: state.showToolBar,
+		const {
+			settings: { showToolBar },
+			setSettings,
+		} = useReaderStore((state) => ({
+			setSettings: state.setSettings,
+			settings: state.settings,
 		}))
 
 		const handlePress = useCallback(() => {
-			setShowToolBar(!showToolBar)
-		}, [showToolBar, setShowToolBar])
+			setSettings({ showToolBar: !showToolBar })
+		}, [showToolBar, setSettings])
 
 		/**
 		 * A memoized value that represents the size(s) of the image dimensions for the current page.

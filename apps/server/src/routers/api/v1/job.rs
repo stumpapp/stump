@@ -1,6 +1,6 @@
 use axum::{
 	extract::{Path, Query, State},
-	middleware::{from_extractor, from_extractor_with_state},
+	middleware,
 	routing::{delete, get},
 	Json, Router,
 };
@@ -28,7 +28,7 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
-	middleware::auth::{Auth, ServerOwnerGuard},
+	middleware::auth::{auth_middleware, server_owner_middleware},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -48,8 +48,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 					get(get_scheduler_config).post(update_scheduler_config),
 				),
 		)
-		.layer(from_extractor::<ServerOwnerGuard>())
-		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+		// TODO: consider permissions around job management
+		.layer(middleware::from_fn(server_owner_middleware))
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 #[derive(Deserialize, Serialize, ToSchema, Type)]
@@ -106,10 +107,10 @@ async fn get_jobs(
 					},
 					Pagination::Cursor(cursor_query) => {
 						if let Some(cursor) = cursor_query.cursor {
-							query = query.cursor(job::id::equals(cursor)).skip(1)
+							query = query.cursor(job::id::equals(cursor)).skip(1);
 						}
 						if let Some(limit) = cursor_query.limit {
-							query = query.take(limit)
+							query = query.take(limit);
 						}
 					},
 					_ => unreachable!(),
@@ -212,13 +213,12 @@ async fn cancel_job_by_id(
 	))
 	.map_err(|e| {
 		APIError::InternalServerError(format!(
-			"Failed to send command to job manager: {}",
-			e
+			"Failed to send command to job manager: {e}"
 		))
 	})?;
 
 	Ok(task_rx.await.map_err(|e| {
-		APIError::InternalServerError(format!("Failed to get cancel confirmation: {}", e))
+		APIError::InternalServerError(format!("Failed to get cancel confirmation: {e}"))
 	})??)
 }
 

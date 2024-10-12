@@ -4,6 +4,7 @@ import { Circle } from 'lucide-react'
 import * as React from 'react'
 
 import { cn } from '../utils'
+import { RadioGroupContext } from './context'
 import { RadioCardItem } from './RadioCardItem'
 
 export type RadioGroupProps = React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>
@@ -11,7 +12,11 @@ export const RadioGroup = React.forwardRef<
 	React.ElementRef<typeof RadioGroupPrimitive.Root>,
 	RadioGroupProps
 >(({ className, ...props }, ref) => {
-	return <RadioGroupPrimitive.Root className={cn('grid gap-2', className)} {...props} ref={ref} />
+	return (
+		<RadioGroupContext.Provider value={{ disabled: props.disabled }}>
+			<RadioGroupPrimitive.Root className={cn('grid gap-2', className)} {...props} ref={ref} />
+		</RadioGroupContext.Provider>
+	)
 }) as typeof RadioGroupPrimitive.Root & RadioGroupSubComponents
 RadioGroup.displayName = RadioGroupPrimitive.Root.displayName
 
@@ -33,7 +38,7 @@ const RadioGroupItem = React.forwardRef<
 			{...props}
 		>
 			<RadioGroupPrimitive.Indicator className="flex items-center justify-center">
-				<Circle className="text-primary h-2 w-2 fill-white text-brand-400" />
+				<Circle className="text-primary h-2 w-2 fill-white text-foreground-brand" />
 			</RadioGroupPrimitive.Indicator>
 		</RadioGroupPrimitive.Item>
 	)

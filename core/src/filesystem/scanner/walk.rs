@@ -34,7 +34,7 @@ pub struct WalkedLibrary {
 	pub ignored_directories: u64,
 	/// The paths for series that need to be created
 	pub series_to_create: Vec<PathBuf>,
-	/// The paths for series that need to be visited. This differs from [WalkedSeries::media_to_visit] because
+	/// The paths for series that need to be visited. This differs from [`WalkedSeries::media_to_visit`] because
 	/// All series will always be visited in order to determine what media need to be reconciled in the series walk
 	pub series_to_visit: Vec<PathBuf>,
 	/// The paths for series that are missing from the filesystem
@@ -86,7 +86,7 @@ pub async fn walk_library(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedLibrar
 		.min_depth(0)
 		.into_iter()
 		.filter_entry(|e| e.path().is_dir())
-		.filter_map(|e| e.ok())
+		.filter_map(Result::ok)
 		.par_bridge()
 		.partition_map::<Vec<DirEntry>, Vec<DirEntry>, _, _, _>(|entry| {
 			let entry_path = entry.path();
@@ -101,8 +101,8 @@ pub async fn walk_library(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedLibrar
 			// If we're doing a bottom up scan, we need to check that the path has
 			// media directly in it.
 			let is_valid = !should_ignore
-				&& (check_deep && entry_path.dir_has_media_deep()
-					|| (!check_deep && entry_path.dir_has_media()));
+				&& (check_deep && entry_path.dir_has_media_deep(&ignore_rules)
+					|| (!check_deep && entry_path.dir_has_media(&ignore_rules)));
 
 			tracing::trace!(?is_valid, ?entry_path_str);
 
@@ -143,7 +143,7 @@ pub async fn walk_library(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedLibrar
 		} else {
 			let existing_series_map = existing_records
 				.into_iter()
-				.map(|s| (s.path.clone(), s.to_owned()))
+				.map(|s| (s.path.clone(), s.clone()))
 				.collect::<HashMap<String, _>>();
 
 			let missing_series = existing_series_map
@@ -250,14 +250,14 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 	let walk_start = std::time::Instant::now();
 	let (valid_entries, ignored_entries) = walker
 		.into_iter()
-		.filter_map(|e| e.ok())
+		.filter_map(Result::ok)
 		.filter_map(|e| e.path().is_file().then_some(e))
 		.par_bridge()
 		.partition_map::<Vec<DirEntry>, Vec<DirEntry>, _, _, _>(|entry| {
 			let entry_path = entry.path();
 			let matches_ignore_rule = ignore_rules.is_match(entry.path());
 
-			if matches_ignore_rule || entry_path.should_ignore() {
+			if matches_ignore_rule || entry_path.is_default_ignored() {
 				Either::Right(entry)
 			} else {
 				Either::Left(entry)
@@ -294,7 +294,7 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 
 	let existing_media_map = existing_media
 		.into_iter()
-		.map(|m| (m.path.clone(), m.to_owned()))
+		.map(|m| (m.path.clone(), m.clone()))
 		.collect::<HashMap<String, _>>();
 
 	let (media_to_create, media_to_visit) = valid_entries
@@ -317,7 +317,7 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 								error = ?err,
 								path = ?entry_path,
 								"Failed to determine if entry has been modified since last scan"
-							)
+							);
 						})
 						.unwrap_or(false)
 				} else {

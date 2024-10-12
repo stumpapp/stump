@@ -1,4 +1,4 @@
-//! This module defines a struct,[OpdsFeed], for representing an OPDS catalogue feed document
+//! This module defines a struct,[`OpdsFeed`], for representing an OPDS catalogue feed document
 //! as specified at https://specs.opds.io/opds-1.2#2-opds-catalog-feed-documents
 
 use crate::{
@@ -117,7 +117,7 @@ impl From<library::Data> for OpdsFeed {
 			OpdsLink::new(
 				OpdsLinkType::Navigation,
 				OpdsLinkRel::ItSelf,
-				format!("/opds/v1.2/libraries/{}", id),
+				format!("/opds/v1.2/libraries/{id}"),
 			),
 			OpdsLink::new(
 				OpdsLinkType::Navigation,
@@ -248,7 +248,7 @@ where
 			OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::ItSelf,
-				href: format!("/opds/v1.2/{}", href_postfix),
+				href: format!("/opds/v1.2/{href_postfix}"),
 			},
 			OpdsLink {
 				link_type: OpdsLinkType::Navigation,
@@ -273,7 +273,7 @@ where
 			links.push(OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Next,
-				href: format!("/opds/v1.2/{}?page={}", href_postfix, page + 1),
+				href: format!("/opds/v1.2/{href_postfix}?page={}", page + 1),
 			});
 		}
 

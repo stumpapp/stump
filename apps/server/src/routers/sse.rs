@@ -24,9 +24,13 @@ async fn sse_handler(
 	let stream = async_stream::stream! {
 		loop {
 			if let Ok(msg) = rx.recv().await {
-				yield Ok(Event::default().json_data(&msg).unwrap());
-			} else {
-				continue;
+				match Event::default().json_data(&msg) {
+					Ok(event) => yield Ok(event),
+					Err(err) => {
+						tracing::error!("Failed to create SSE event: {}", err);
+						continue;
+					}
+				}
 			}
 		}
 	};

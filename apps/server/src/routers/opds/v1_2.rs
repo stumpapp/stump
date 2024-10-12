@@ -1,15 +1,15 @@
 use axum::{
 	extract::{Path, Query, State},
-	middleware::from_extractor_with_state,
+	middleware,
 	routing::get,
-	Router,
+	Extension, Router,
 };
 use prisma_client_rust::{chrono, Direction};
 use stump_core::{
 	db::{entity::UserPermission, query::pagination::PageQuery},
 	filesystem::{
+		get_page_async,
 		image::{GenericImageProcessor, ImageProcessor, ImageProcessorOptions},
-		media::get_page,
 		ContentType,
 	},
 	opds::v1_2::{
@@ -19,19 +19,20 @@ use stump_core::{
 	},
 	prisma::{active_reading_session, library, media, series, user},
 };
-use tower_sessions::Session;
 use tracing::{debug, trace};
 
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
-	middleware::auth::Auth,
-	routers::api::v1::media::get_media_thumbnail_by_id,
-	utils::{
-		enforce_session_permissions, get_session_user,
-		http::{ImageResponse, NamedFile, Xml},
+	middleware::auth::{auth_middleware, RequestContext},
+	routers::api::v1::{
+		library::library_not_hidden_from_user_filter,
+		media::{
+			apply_media_library_not_hidden_for_user_filter, get_media_thumbnail_by_id,
+		},
 	},
+	utils::http::{ImageResponse, NamedFile, Xml},
 };
 
 use crate::routers::api::v1::{
@@ -67,7 +68,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.route("/file/:filename", get(download_book)),
 				),
 		)
-		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 fn pagination_bounds(page: i64, page_size: i64) -> (i64, i64) {
@@ -188,10 +189,13 @@ async fn catalog() -> APIResult<Xml> {
 	Ok(Xml(feed.build()?))
 }
 
-async fn keep_reading(State(ctx): State<AppState>, session: Session) -> APIResult<Xml> {
+async fn keep_reading(
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+) -> APIResult<Xml> {
 	let db = &ctx.db;
 
-	let user_id = get_session_user(&session)?.id;
+	let user_id = req.id();
 	let in_progress_filter = vec![apply_in_progress_filter_for_user(user_id)];
 
 	let media = db
@@ -214,8 +218,7 @@ async fn keep_reading(State(ctx): State<AppState>, session: Session) -> APIResul
 		{
 			Some(session) if session.epubcfi.is_some() => session
 				.percentage_completed
-				.map(|value| value < 1.0)
-				.unwrap_or(false),
+				.is_some_and(|value| value < 1.0),
 			Some(session) if session.page.is_some() => {
 				session.page.unwrap_or(1) < m.pages
 			},
@@ -247,10 +250,18 @@ async fn keep_reading(State(ctx): State<AppState>, session: Session) -> APIResul
 }
 
 // TODO: age restrictions
-async fn get_libraries(State(ctx): State<AppState>) -> APIResult<Xml> {
+async fn get_libraries(
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+) -> APIResult<Xml> {
 	let db = &ctx.db;
 
-	let libraries = db.library().find_many(vec![]).exec().await?;
+	let user = req.user();
+	let libraries = db
+		.library()
+		.find_many(vec![library_not_hidden_from_user_filter(user)])
+		.exec()
+		.await?;
 	let entries = libraries.into_iter().map(OpdsEntry::from).collect();
 
 	let feed = OpdsFeed::new(
@@ -278,7 +289,7 @@ async fn get_library_by_id(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	pagination: Query<PageQuery>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Xml> {
 	let db = &ctx.db;
 
@@ -286,7 +297,7 @@ async fn get_library_by_id(
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
 
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -343,8 +354,7 @@ async fn get_library_by_id(
 		.build()?))
 	} else {
 		Err(APIError::NotFound(format!(
-			"Library {} not found",
-			library_id
+			"Library {library_id} not found"
 		)))
 	}
 }
@@ -354,14 +364,14 @@ async fn get_library_by_id(
 async fn get_series(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Xml> {
 	let db = &ctx.db;
 
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
 
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -401,14 +411,14 @@ async fn get_series(
 async fn get_latest_series(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Xml> {
 	let db = &ctx.db;
 
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
 
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -450,14 +460,14 @@ async fn get_series_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Xml> {
 	let db = &ctx.db;
 
 	let series_id = id.clone();
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -507,10 +517,7 @@ async fn get_series_by_id(
 		)
 		.build()?))
 	} else {
-		Err(APIError::NotFound(format!(
-			"Series {} not found",
-			series_id
-		)))
+		Err(APIError::NotFound(format!("Series {series_id} not found")))
 	}
 }
 
@@ -541,10 +548,10 @@ fn handle_opds_image_response(
 async fn get_book_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<ImageResponse> {
 	let (content_type, image_buffer) =
-		get_media_thumbnail_by_id(id, &ctx.db, &session, &ctx.config).await?;
+		get_media_thumbnail_by_id(id, &ctx.db, req.user(), &ctx.config).await?;
 
 	handle_opds_image_response(content_type, image_buffer)
 }
@@ -554,12 +561,11 @@ async fn get_book_page(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<ImageResponse> {
 	let client = &ctx.db;
 
-	let user = get_session_user(&session)?;
-	let user_id = user.id;
+	let user = req.user();
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -576,7 +582,10 @@ async fn get_book_page(
 	let book = client
 		.media()
 		.find_first(chain_optional_iter(
-			[media::id::equals(id.clone())],
+			[media::id::equals(id.clone())]
+				.into_iter()
+				.chain(apply_media_library_not_hidden_for_user_filter(user))
+				.collect::<Vec<_>>(),
 			[age_restrictions],
 		))
 		.exec()
@@ -588,7 +597,7 @@ async fn get_book_page(
 		let deleted_session = client
 			.active_reading_session()
 			.delete(active_reading_session::user_id_media_id(
-				user_id.clone(),
+				user.id.clone(),
 				id.clone(),
 			))
 			.exec()
@@ -601,7 +610,7 @@ async fn get_book_page(
 			.create(
 				deleted_session.map(|s| s.started_at).unwrap_or_default(),
 				media::id::equals(id.clone()),
-				user::id::equals(user_id.clone()),
+				user::id::equals(user.id.clone()),
 				vec![],
 			)
 			.exec()
@@ -611,10 +620,10 @@ async fn get_book_page(
 		client
 			.active_reading_session()
 			.upsert(
-				active_reading_session::user_id_media_id(user_id.clone(), id.clone()),
+				active_reading_session::user_id_media_id(user.id.clone(), id.clone()),
 				(
 					media::id::equals(id.clone()),
-					user::id::equals(user_id.clone()),
+					user::id::equals(user.id.clone()),
 					vec![active_reading_session::page::set(Some(correct_page))],
 				),
 				vec![active_reading_session::page::set(Some(correct_page))],
@@ -624,7 +633,7 @@ async fn get_book_page(
 	}
 
 	let (content_type, image_buffer) =
-		get_page(book.path.as_str(), correct_page, &ctx.config)?;
+		get_page_async(book.path.as_str(), correct_page, &ctx.config).await?;
 	handle_opds_image_response(content_type, image_buffer)
 }
 
@@ -632,10 +641,11 @@ async fn get_book_page(
 async fn download_book(
 	Path((id, filename)): Path<(String, String)>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<NamedFile> {
 	let db = &ctx.db;
-	let user = enforce_session_permissions(&session, &[UserPermission::DownloadFile])?;
+
+	let user = req.user_and_enforce_permissions(&[UserPermission::DownloadFile])?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()

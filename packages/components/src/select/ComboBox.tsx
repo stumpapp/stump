@@ -39,6 +39,8 @@ export type ComboBoxProps = {
 	descriptionPosition?: 'top' | 'bottom'
 	options: ComboBoxOption[]
 	size?: keyof typeof SIZE_VARIANTS | null
+	onAddOption?: (option: ComboBoxOption) => void
+	disabled?: boolean
 	/** Classes applied to the trigger button for the combobox */
 	triggerClassName?: string
 	triggerRef?: React.RefObject<HTMLButtonElement>
@@ -75,7 +77,9 @@ export function ComboBox({
 	isMultiSelect,
 	options,
 	value,
+	disabled,
 	onChange,
+	onAddOption,
 	size = 'default',
 	triggerClassName,
 	triggerRef: triggerRefProps,
@@ -87,7 +91,9 @@ export function ComboBox({
 	filterEmptyMessage = 'No results found',
 }: ComboBoxProps) {
 	const triggerRef = useRef<HTMLButtonElement | null>(null)
+
 	const [open, setOpen] = useState(false)
+	const [filter, setFilter] = useState('')
 
 	const handleChange = (selected: string) => {
 		if (isMultiSelect) {
@@ -123,6 +129,27 @@ export function ComboBox({
 		}
 	}
 
+	const renderEmptyState = () => {
+		if (onAddOption && filter) {
+			return (
+				<div className="overflow-hidden px-4">
+					<Button
+						className="h-[unset] shrink-0 text-ellipsis text-wrap break-all text-brand"
+						onClick={() => {
+							onAddOption({ label: filter, value: filter.toLowerCase() })
+							handleChange(filter.toLowerCase())
+							setFilter('')
+						}}
+					>
+						Add &quot;{filter}&quot;
+					</Button>
+				</div>
+			)
+		} else {
+			return filterEmptyMessage
+		}
+	}
+
 	const hasSelectedSomething = isMultiSelect ? !!value?.length : !!value
 	const Container = label || description ? 'div' : Fragment
 	const containerProps = {
@@ -150,14 +177,14 @@ export function ComboBox({
 				</Text>
 			)}
 			<Popover open={open} onOpenChange={setOpen}>
-				<Popover.Trigger asChild>
+				<Popover.Trigger asChild disabled={disabled}>
 					<Button
 						ref={mergeRefs(triggerRef, triggerRefProps)}
 						variant="outline"
 						role="combobox"
 						aria-expanded={open}
 						className={cn(
-							'h-[unset] justify-between truncate border-edge-subtle text-foreground-subtle outline-none hover:bg-background-surface data-[state=open]:bg-transparent data-[state=open]:ring-2 data-[state=open]:ring-brand-400 data-[state=open]:ring-offset-2 data-[state=open]:ring-offset-background',
+							'h-[unset] justify-between truncate border-edge-subtle text-foreground-subtle outline-none hover:bg-background-surface data-[state=open]:bg-transparent data-[state=open]:ring-2 data-[state=open]:ring-edge-brand data-[state=open]:ring-offset-2 data-[state=open]:ring-offset-background',
 							{ [SIZE_VARIANTS[size || 'default']]: !!size },
 							{ 'text-foreground-muted': !hasSelectedSomething },
 							triggerClassName,
@@ -179,8 +206,12 @@ export function ComboBox({
 					<Command>
 						{filterable && (
 							<>
-								<Command.Input placeholder={filterPlaceholder} />
-								<Command.Empty>{filterEmptyMessage}</Command.Empty>
+								<Command.Input
+									placeholder={filterPlaceholder}
+									value={filter}
+									onValueChange={setFilter}
+								/>
+								<Command.Empty>{renderEmptyState()}</Command.Empty>
 							</>
 						)}
 						<Command.Group>
@@ -190,6 +221,7 @@ export function ComboBox({
 								return (
 									<Command.Item
 										key={option.value}
+										// Note: For some reason, this transforms the `value` to lowercase...
 										onSelect={handleChange}
 										className={cn('transition-all duration-75', { 'text-brand': isSelected })}
 										value={option.value}

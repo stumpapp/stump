@@ -1,17 +1,17 @@
 {
 	"name": "@stump/web",
-	"version": "0.0.6",
+	"version": "0.0.7",
 	"description": "",
 	"license": "MIT",
 	"scripts": {
 		"dev": "vite --host",
 		"start": "vite preview",
 		"build": "vite build",
-		"nuke": "rimraf -rf node_modules"
+		"nuke": "rimraf node_modules"
 	},
 	"dependencies": {
-		"@stump/client": "*",
 		"@stump/browser": "*",
+		"@stump/client": "*",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"react-router": "^6.23.0",

@@ -2,6 +2,8 @@ import { Spacer, Text } from '@stump/components'
 import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
+import { formatBookName } from '@/utils/format'
+
 import paths from '../../../paths'
 import { useEpubReaderContext } from './context'
 import {
@@ -21,7 +23,7 @@ export default function EpubReaderHeader() {
 		readerMeta: { bookEntity },
 	} = useEpubReaderContext()
 
-	const bookName = bookEntity?.metadata?.title || bookEntity?.name || ''
+	const bookName = formatBookName(bookEntity)
 
 	return (
 		<ControlsContainer position="top">

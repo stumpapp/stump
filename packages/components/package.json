@@ -1,17 +1,18 @@
 {
 	"name": "@stump/components",
-	"version": "0.0.6",
+	"version": "0.0.7",
 	"exports": {
 		".": "./src/index.ts",
 		"./styles/overrides.css": "./src/styles/overrides.css",
 		"./tailwind/tailwind.js": "./tailwind/tailwind.js",
+		"./tailwind": "./tailwind/index.ts",
 		"./themes": "./themes/index.ts"
 	},
 	"scripts": {
 		"build": "tsc",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
-		"nuke": "rimraf -rf node_modules"
+		"nuke": "rimraf node_modules"
 	},
 	"dependencies": {
 		"@emoji-mart/react": "^1.1.1",
@@ -32,6 +33,7 @@
 		"@radix-ui/react-scroll-area": "^1.0.5",
 		"@radix-ui/react-select": "^2.0.0",
 		"@radix-ui/react-separator": "^1.0.3",
+		"@radix-ui/react-slider": "^1.2.0",
 		"@radix-ui/react-switch": "^1.0.3",
 		"@radix-ui/react-tabs": "^1.0.4",
 		"@radix-ui/react-toast": "^1.1.5",

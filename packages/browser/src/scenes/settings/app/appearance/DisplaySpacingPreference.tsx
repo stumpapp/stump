@@ -104,7 +104,7 @@ function AppearanceOption({ label, isSelected, isDisabled, onSelect }: Appearanc
 				)}
 
 				{isSelected && (
-					<div className="absolute bottom-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-brand">
+					<div className="absolute bottom-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-fill-brand">
 						<Check className="h-5 w-5 text-white" />
 					</div>
 				)}

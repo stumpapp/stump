@@ -159,6 +159,7 @@ export default function LibraryBooksScene() {
 					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
 					orderControls={<URLOrdering entity="media" />}
 					filterControls={<URLFilterDrawer entity="media" />}
+					navOffset
 				/>
 
 				{renderContent()}

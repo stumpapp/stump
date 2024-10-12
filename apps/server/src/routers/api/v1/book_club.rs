@@ -1,8 +1,8 @@
 use axum::{
 	extract::{Path, State},
-	middleware::from_extractor_with_state,
+	middleware,
 	routing::{get, post, put},
-	Json, Router,
+	Extension, Json, Router,
 };
 use prisma_client_rust::{
 	and,
@@ -26,18 +26,14 @@ use stump_core::{
 		book_club_schedule, media, user, PrismaClient,
 	},
 };
-use tower_sessions::Session;
 use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
-	middleware::auth::{Auth, BookClubGuard},
-	utils::{
-		get_session_server_owner_user, get_session_user, get_user_and_enforce_permission,
-		safe_string_to_date, string_to_date,
-	},
+	middleware::auth::{auth_middleware, permission_middleware, RequestContext},
+	utils::{safe_string_to_date, string_to_date},
 };
 
 // TODO: suggestions
@@ -91,10 +87,11 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.route("/add", post(add_books_to_book_club_schedule)),
 				),
 		)
-		.layer(from_extractor_with_state::<BookClubGuard, AppState>(
-			app_state.clone(),
+		.layer(middleware::from_fn_with_state(
+			vec![UserPermission::AccessBookClub],
+			permission_middleware,
 		))
-		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 /// A function to generate access control conditionals on book clubs for a given user. In
@@ -174,24 +171,24 @@ pub struct GetBookClubsParams {
 async fn get_book_clubs(
 	State(ctx): State<AppState>,
 	QsQuery(params): QsQuery<GetBookClubsParams>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Vec<BookClub>>> {
 	let client = &ctx.db;
-	let viewer = get_session_user(&session)?;
+	let viewer = req.user();
 
 	let where_params = if params.all {
 		vec![book_club::members::some(vec![
 			book_club_member::user_id::equals(viewer.id.clone()),
 		])]
 	} else {
-		book_club_access_for_user(&viewer)
+		book_club_access_for_user(viewer)
 	};
 
 	let book_clubs = client
 		.book_club()
 		.find_many(where_params)
 		.include(book_club_member_and_schedule_include::include(
-			book_club_member_access_for_user(&viewer),
+			book_club_member_access_for_user(viewer),
 		))
 		.exec()
 		.await?;
@@ -223,15 +220,14 @@ pub struct CreateBookClub {
 )]
 async fn create_book_club(
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(payload): Json<CreateBookClub>,
 ) -> APIResult<Json<BookClub>> {
 	let db = &ctx.db;
 
-	let viewer =
-		get_user_and_enforce_permission(&session, UserPermission::CreateBookClub)?;
+	let viewer = req.user_and_enforce_permissions(&[UserPermission::CreateBookClub])?;
 
-	// TODO(prisma 0.7.0): Nested create
+	// TODO(prisma-nested-create): Refactor once nested create is supported
 	let (book_club, _) = db
 		._transaction()
 		.run(|client| async move {
@@ -283,12 +279,12 @@ async fn create_book_club(
 async fn get_book_club(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<BookClub>> {
 	let client = &ctx.db;
-	let viewer = get_session_user(&session)?;
+	let viewer = req.user();
 
-	let where_params = book_club_access_for_user(&viewer)
+	let where_params = book_club_access_for_user(viewer)
 		.into_iter()
 		.chain([book_club::id::equals(id)])
 		.collect();
@@ -297,7 +293,7 @@ async fn get_book_club(
 		.book_club()
 		.find_first(where_params)
 		.include(book_club_with_books_include::include(
-			book_club_member_access_for_user(&viewer),
+			book_club_member_access_for_user(viewer),
 		))
 		.exec()
 		.await?
@@ -328,12 +324,12 @@ pub struct UpdateBookClub {
 async fn update_book_club(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(payload): Json<UpdateBookClub>,
 ) -> APIResult<Json<BookClub>> {
 	let client = &ctx.db;
 
-	let viewer = get_session_user(&session)?;
+	let viewer = req.user();
 
 	// Query first for access control. Realistically, I could `update_many` with the
 	// access assertions, but I would have to requery for the book afterwards anyways
@@ -342,7 +338,7 @@ async fn update_book_club(
 		.find_first(vec![
 			book_club::id::equals(id),
 			book_club::members::some(book_club_member_permission_for_user(
-				&viewer,
+				viewer,
 				BookClubMemberRole::ADMIN,
 			)),
 		])
@@ -390,11 +386,11 @@ pub struct CreateBookClubInvitation {
 async fn create_book_club_invitation(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(payload): Json<CreateBookClubInvitation>,
 ) -> APIResult<Json<BookClubInvitation>> {
 	let client = &ctx.db;
-	let viewer = get_session_user(&session)?;
+	let viewer = req.user();
 
 	// I don't check for access control before the query because I am enforcing it when
 	// I query for the book club. This way, if the user doesn't have access, they will
@@ -404,7 +400,7 @@ async fn create_book_club_invitation(
 		.find_first(vec![
 			book_club::id::equals(id),
 			book_club::members::some(book_club_member_permission_for_user(
-				&viewer,
+				viewer,
 				BookClubMemberRole::ADMIN,
 			)),
 		])
@@ -415,8 +411,7 @@ async fn create_book_club_invitation(
 	let invalid_role = payload
 		.role
 		.as_ref()
-		.map(|role| *role == BookClubMemberRole::CREATOR)
-		.unwrap_or(false);
+		.is_some_and(|role| *role == BookClubMemberRole::CREATOR);
 
 	if invalid_role {
 		return Err(APIError::BadRequest("Cannot invite a creator".to_string()));
@@ -457,13 +452,13 @@ async fn create_book_club_invitation(
 async fn get_book_club_members(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Vec<BookClubMember>>> {
 	let client = &ctx.db;
 
-	let viewer = get_session_user(&session)?;
+	let viewer = req.user();
 
-	let where_params = book_club_member_access_for_user(&viewer)
+	let where_params = book_club_member_access_for_user(viewer)
 		.into_iter()
 		.chain([book_club_member::book_club::is(vec![
 			book_club::id::equals(id),
@@ -530,12 +525,12 @@ pub struct BookClubInvitationAnswer {
 async fn respond_to_book_club_invitation(
 	State(ctx): State<AppState>,
 	Path((id, invitation_id)): Path<(String, String)>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(payload): Json<BookClubInvitationAnswer>,
 ) -> APIResult<Json<Option<BookClubMember>>> {
 	let client = &ctx.db;
 
-	let viewer = get_session_user(&session)?;
+	let viewer = req.user();
 
 	let invitation = client
 		.book_club_invitation()
@@ -550,7 +545,7 @@ async fn respond_to_book_club_invitation(
 
 	if payload.accept {
 		let input = payload.member_details.unwrap_or(CreateBookClubMember {
-			user_id: viewer.id,
+			user_id: viewer.id.clone(),
 			..Default::default()
 		});
 
@@ -588,10 +583,10 @@ async fn respond_to_book_club_invitation(
 async fn create_book_club_member_handler(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(payload): Json<CreateBookClubMember>,
 ) -> APIResult<Json<BookClubMember>> {
-	get_session_server_owner_user(&session)?;
+	req.enforce_server_owner()?;
 	let client = &ctx.db;
 	let created_member = create_book_club_member(payload, id, client).await?;
 	Ok(Json(created_member))
@@ -610,13 +605,13 @@ async fn create_book_club_member_handler(
 async fn get_book_club_member(
 	State(ctx): State<AppState>,
 	Path((id, member_id)): Path<(String, String)>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<BookClubMember>> {
 	let client = &ctx.db;
 
-	let viewer = get_session_user(&session)?;
+	let viewer = req.user();
 
-	let where_params = book_club_member_access_for_user(&viewer)
+	let where_params = book_club_member_access_for_user(viewer)
 		.into_iter()
 		.chain([
 			book_club_member::book_club_id::equals(id),
@@ -653,12 +648,12 @@ pub struct UpdateBookClubMember {
 async fn update_book_club_member(
 	State(ctx): State<AppState>,
 	Path((_id, member_id)): Path<(String, String)>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(payload): Json<UpdateBookClubMember>,
 ) -> APIResult<Json<BookClubMember>> {
 	let client = &ctx.db;
 
-	let viewer = get_session_user(&session)?;
+	let viewer = req.user();
 
 	if viewer.id != member_id && !viewer.is_server_owner {
 		return Err(APIError::Forbidden(
@@ -686,16 +681,16 @@ async fn update_book_club_member(
 async fn delete_book_club_member(
 	State(ctx): State<AppState>,
 	Path((id, member_id)): Path<(String, String)>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<BookClubMember>> {
 	let client = &ctx.db;
 
-	let viewer = get_session_user(&session)?;
+	let viewer = req.user();
 	let viewer_membership = client
 		.book_club_member()
 		.find_first(vec![
 			book_club_member::book_club_id::equals(id),
-			book_club_member::user_id::equals(viewer.id),
+			book_club_member::user_id::equals(viewer.id.clone()),
 			book_club_member::role::gte(BookClubMemberRole::ADMIN.into()),
 		])
 		.exec()
@@ -784,19 +779,19 @@ pub struct CreateBookClubSchedule {
 async fn create_book_club_schedule(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(payload): Json<CreateBookClubSchedule>,
 ) -> APIResult<Json<BookClubSchedule>> {
 	let client = &ctx.db;
 
-	let viewer = get_session_user(&session)?;
+	let viewer = req.user();
 
 	let book_club = client
 		.book_club()
 		.find_first(vec![
 			book_club::id::equals(id),
 			book_club::members::some(book_club_member_permission_for_user(
-				&viewer,
+				viewer,
 				BookClubMemberRole::ADMIN,
 			)),
 		])
@@ -837,11 +832,14 @@ async fn create_book_club_schedule(
 					},
 					(Some(start_at), None) => {
 						let start_at = safe_string_to_date(start_at);
-						(start_at, start_at + Duration::days(interval_days as i64))
+						(
+							start_at,
+							start_at + Duration::days(i64::from(interval_days)),
+						)
 					},
 					(None, Some(end_at)) => {
 						let end_at = safe_string_to_date(end_at);
-						(end_at - Duration::days(interval_days as i64), end_at)
+						(end_at - Duration::days(i64::from(interval_days)), end_at)
 					},
 					(None, None) => {
 						let start_at = if let Some(last_end_at) = last_end_at {
@@ -850,7 +848,10 @@ async fn create_book_club_schedule(
 							Utc::now()
 						};
 
-						(start_at, start_at + Duration::days(interval_days as i64))
+						(
+							start_at,
+							start_at + Duration::days(i64::from(interval_days)),
+						)
 					},
 				};
 
@@ -889,15 +890,15 @@ async fn create_book_club_schedule(
 async fn get_book_club_schedule(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<BookClubSchedule>> {
 	let client = &ctx.db;
 
-	let viewer = get_session_user(&session)?;
+	let viewer = req.user();
 
 	// TODO: not fully correct, not sure if non-members should be able to query for this when
 	// targeting public book clubs
-	let where_params = book_club_access_for_user(&viewer)
+	let where_params = book_club_access_for_user(viewer)
 		.into_iter()
 		.chain([book_club::id::equals(id)])
 		.collect();
@@ -926,19 +927,19 @@ pub struct AddBooksToBookClubSchedule {
 async fn add_books_to_book_club_schedule(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(payload): Json<AddBooksToBookClubSchedule>,
 ) -> APIResult<Json<Vec<BookClubBook>>> {
 	let client = &ctx.db;
 
-	let viewer = get_session_user(&session)?;
+	let viewer = req.user();
 
 	let book_club = client
 		.book_club()
 		.find_first(vec![
 			book_club::id::equals(id),
 			book_club::members::some(book_club_member_permission_for_user(
-				&viewer,
+				viewer,
 				BookClubMemberRole::ADMIN,
 			)),
 		])
@@ -1004,11 +1005,14 @@ async fn add_books_to_book_club_schedule(
 			},
 			(Some(start_at), None) => {
 				let start_at = safe_string_to_date(start_at);
-				(start_at, start_at + Duration::days(interval_days as i64))
+				(
+					start_at,
+					start_at + Duration::days(i64::from(interval_days)),
+				)
 			},
 			(None, Some(end_at)) => {
 				let end_at = safe_string_to_date(end_at);
-				(end_at - Duration::days(interval_days as i64), end_at)
+				(end_at - Duration::days(i64::from(interval_days)), end_at)
 			},
 			(None, None) => {
 				let start_at = if let Some(last_end_at) = last_end_at {
@@ -1017,7 +1021,10 @@ async fn add_books_to_book_club_schedule(
 					Utc::now()
 				};
 
-				(start_at, start_at + Duration::days(interval_days as i64))
+				(
+					start_at,
+					start_at + Duration::days(i64::from(interval_days)),
+				)
 			},
 		};
 
@@ -1055,13 +1062,13 @@ async fn add_books_to_book_club_schedule(
 async fn get_book_club_current_book(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<BookClubBook>> {
 	let client = &ctx.db;
 
-	let viewer = get_session_user(&session)?;
+	let viewer = req.user();
 
-	let where_params = book_club_access_for_user(&viewer)
+	let where_params = book_club_access_for_user(viewer)
 		.into_iter()
 		.chain([book_club::id::equals(id)])
 		.collect();

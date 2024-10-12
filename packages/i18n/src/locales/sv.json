@@ -11,7 +11,8 @@
 		"form": {
 			"validation": {
 				"missingUsername": "Användarnamn krävs",
-				"missingPassword": "Lösenord krävs"
+				"missingPassword": "Lösenord krävs",
+				"usernameAlreadyExists": "Username already exists"
 			},
 			"labels": {
 				"username": "Användarnamn",
@@ -128,17 +129,227 @@
 			"submit": "Create Book Club"
 		}
 	},
+	"createOrUpdateLibraryForm": {
+		"fields": {
+			"name": {
+				"label": "Name",
+				"description": "A friendly name for your library",
+				"placeholder": "My Library"
+			},
+			"path": {
+				"label": "Path",
+				"description": "The path to the library as it exists on your server",
+				"placeholder": "/path/to/library"
+			},
+			"description": {
+				"label": "Description",
+				"description": "A short description of your library",
+				"placeholder": "A library of all my favorite books"
+			},
+			"tags": {
+				"label": "Tags",
+				"description": "Used to categorize your library or enforce access rules"
+			},
+			"readingSettings": {
+				"section": {
+					"heading": "Reading settings",
+					"description": "Default reader settings to use for books"
+				},
+				"imageScaling": {
+					"label": "Image scaling",
+					"description": "How the image-based reader scales images to the page"
+				},
+				"readingMode": {
+					"label": "Default reader",
+					"description": "The default reader to use for image-based books"
+				},
+				"readingDirection": {
+					"label": "Reading direction",
+					"description": "Which direction the reader progresses through pages"
+				}
+			},
+			"thumbnailConfig": {
+				"section": {
+					"heading": {
+						"create": "Thumbnail configuration",
+						"update": "Generation"
+					},
+					"description": "Improve loading times while browsing your library by generating thumbnails for your books"
+				},
+				"enableSwitch": {
+					"label": "Enabled",
+					"description": "Generate thumbnail images for this library"
+				},
+				"scaled": {
+					"label": "Scaled",
+					"description": "Scale the image by a custom factor per dimension",
+					"width": {
+						"label": "Width scale"
+					},
+					"height": {
+						"label": "Height scale"
+					}
+				},
+				"sized": {
+					"label": "Explicitly Sized",
+					"description": "Set each dimension of the thumbnail (in pixels)",
+					"width": {
+						"label": "Width"
+					},
+					"height": {
+						"label": "Height"
+					}
+				},
+				"format": {
+					"label": "Image format",
+					"description": "The format of the generated thumbnail images"
+				},
+				"quality": {
+					"label": "Quality",
+					"description": "The quality of the generated thumbnail images, between 0 and 1.0"
+				}
+			},
+			"ignoreRules": {
+				"section": {
+					"heading": "Ignore rules",
+					"description": "Define glob patterns to ignore certain files or directories during a scan"
+				},
+				"noRules": "No ignore rules have been configured",
+				"save": "Save changes",
+				"addRule": {
+					"label": "New rule",
+					"description": "Glob pattern to ignore files or directories",
+					"addButton": "Add rule",
+					"ignoreParents": {
+						"title": "Ignore all parent directories",
+						"label": "Ignore parents"
+					},
+					"ignoreSubdirs": {
+						"title": "Ignore all subdirectories",
+						"label": "Ignore subdirectories"
+					}
+				},
+				"invalidGlob": "Invalid glob pattern",
+				"lockConfig": {
+					"lock": "Lock configuration",
+					"unlock": "Unlock configuration"
+				},
+				"editRule": "Edit rule",
+				"deleteRule": "Delete rule",
+				"cancelEdit": "Cancel edit",
+				"confirmEdit": "Confirm edit"
+			},
+			"convertOptions": {
+				"section": {
+					"heading": "File conversion",
+					"description": "Stump is capable of converting certain file formats to more compatible ones"
+				},
+				"rarToZip": {
+					"label": "Convert RAR to ZIP",
+					"description": "Convert RAR/CBR files to ZIP/CBZ files during a scan"
+				},
+				"deleteRarAfter": {
+					"label": "Delete RAR after conversion",
+					"description": "Delete the original RAR/CBR file after conversion. This is irreversible"
+				}
+			},
+			"scannerFeatures": {
+				"section": {
+					"heading": "Optional processing",
+					"description": "Opt-in processing features for the scanner",
+					"disclaimer": "These features involve additional file reads which may slow down the scan process"
+				},
+				"processMetadata": {
+					"label": "Process metadata",
+					"description": "Extract any metadata from library files and store the results in the database"
+				},
+				"generateFileHashes": {
+					"label": "Generate file hashes",
+					"description": "Generate a hash for each file in the library to detect duplicates"
+				}
+			},
+			"libraryPattern": {
+				"section": {
+					"heading": "Organization",
+					"description": "Identify which pattern most closely matches the organization of your library",
+					"docs": [
+						"Not sure which to choose? Click",
+						"here",
+						"for more information.",
+						"You cannot change this setting later"
+					],
+					"disabled": "You cannot change this setting"
+				},
+				"options": {
+					"label": "Library pattern",
+					"description": "The setting which determines how Stump will organize your library",
+					"collectionPriority": {
+						"label": "Collection priority",
+						"description": "Each folder at the top-most level of the library root is a single series"
+					},
+					"seriesPriority": {
+						"label": "Series priority",
+						"description": "Each folder at any level recursively is a single series"
+					}
+				}
+			}
+		},
+		"scan": {
+			"label": {
+				"create": "Scan after creation",
+				"update": "Scan after updates"
+			},
+			"description": "Index the library files to populate your database"
+		}
+	},
 	"createLibraryScene": {
 		"heading": "Create New Library",
 		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on libraries and how they work, check out the",
 		"subtitleLink": "relevant documentation",
 		"form": {
-			"labels": {
-				"libraryName": "Name",
-				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server",
-				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+			"stepLabel": "Step",
+			"steps": [
+				{
+					"label": "Basics",
+					"heading": "Basic Information",
+					"description": "The details of this library, including its name, path, and description"
+				},
+				{
+					"label": "Scanning",
+					"heading": "Scanner Behavior",
+					"description": "Settings related to how Stump scans this library"
+				},
+				{
+					"label": "Thumbnails",
+					"heading": "Thumbnails",
+					"description": "The options for if and how Stump generates thumbnails for this library"
+				},
+				{
+					"label": "Review",
+					"heading": "Review",
+					"description": "Review your library settings before creating it"
+				}
+			],
+			"review": {
+				"yes": "Yes",
+				"no": "No",
+				"none": "None",
+				"labels": {
+					"generateThumbnails": "Generate thumbnails",
+					"mode": "Mode",
+					"format": "Format",
+					"quality": "Quality",
+					"name": "Name",
+					"path": "Path",
+					"description": "Description",
+					"tags": "Tags",
+					"pattern": "Pattern",
+					"ignoreRules": "Ignore rules",
+					"convertRar": "Convert RAR/CBR",
+					"deleteConversions": "Delete converted files",
+					"processMetadata": "Process metadata",
+					"generateFileHashes": "Generate file hashes"
+				}
 			},
 			"buttons": {
 				"confirm": "Create Library"
@@ -149,16 +360,105 @@
 		"heading": "Manage Library",
 		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
 		"subtitleLink": "relevant documentation",
-		"form": {
-			"labels": {
-				"libraryName": "Name",
-				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server",
-				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+		"sidebar": {
+			"basics": "Basics",
+			"options": {
+				"general": "General",
+				"reading": "Reading",
+				"scanning": "Scanning",
+				"thumbnails": "Thumbnails",
+				"ignore-rules": "Ignore Rules",
+				"analysis": "Analysis",
+				"label": "Options"
 			},
-			"buttons": {
-				"confirm": "Save Changes"
+			"danger-zone": {
+				"access-control": "Access Control",
+				"delete": "Deletion",
+				"label": "Danger Zone"
+			}
+		},
+		"basics": {
+			"title": "Basic Information",
+			"description": "The details of this library, including its name, path, and description",
+			"form": {
+				"submit": "Update library"
+			}
+		},
+		"options/reading": {
+			"title": "Reading",
+			"description": "The default reader settings to use for books in this library. Any book can override these settings"
+		},
+		"options/scanning": {
+			"title": "Scanner Behavior",
+			"description": "Settings related to how Stump scans this library"
+		},
+		"options/thumbnails": {
+			"title": "Thumbnails",
+			"description": "Settings and management options for thumbnails in this library",
+			"sections": {
+				"management": {
+					"heading": "Management",
+					"description": "Manage the existing thumbnails for this library",
+					"thumbnailSelector": {},
+					"deleteThumbnails": {}
+				}
+			}
+		},
+		"options/analysis": {
+			"title": "Analysis",
+			"description": "Analyze the contents of this library to identify potential issues or improvements",
+			"sections": {
+				"analyzeBooks": {
+					"heading": "Analyze books",
+					"description": "Analyze the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
+					"disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable",
+					"analyzeButton": "Analyze books"
+				},
+				"missingFiles": {
+					"heading": "Missing files",
+					"description": "Files that are referenced in the database but cannot be located on disk",
+					"noMissingFiles": "There are no missing files in this library"
+				},
+				"duplicateFiles": {
+					"heading": "Duplicate files",
+					"description": "Files that are potentially duplicated on disk",
+					"noDuplicateFiles": "There are no duplicate files detected for this library"
+				}
+			}
+		},
+		"danger-zone/access-control": {
+			"title": "Access Control",
+			"description": "Control who can access the content in this library",
+			"sections": {
+				"libraryExclusions": {
+					"heading": "Exclude users",
+					"description": "Prevent certain users from accessing this library or its contents",
+					"noUsers": "There are no other registered users to exclude from this library",
+					"updated": "Exclusions updated",
+					"failure": "Failed to update exclusions"
+				}
+			}
+		},
+		"danger-zone/delete": {
+			"title": "Deletion Actions",
+			"description": "Permanently delete this library and all of its contents or certain resources",
+			"sections": {
+				"cleanLibrary": {
+					"heading": "Clean library",
+					"description": "Remove all media and series that cannot be located on disk",
+					"disclaimer": "While this action will not delete any files, it will permanently delete all records relating to media and series which have a missing status",
+					"confirmation": {
+						"label": "Clean library",
+						"text": "Are you sure you want to clean this library?"
+					}
+				},
+				"deleteLibrary": {
+					"heading": "Delete library",
+					"description": [
+						"Permanently delete this library and all its contents.",
+						"This action cannot be undone"
+					]
+				}
 			}
 		}
 	},
@@ -380,15 +680,19 @@
 			"sections": {
 				"themeSelect": {
 					"label": "Theme",
-					"description": "By default, Stump has a light and dark theme",
-					"customTheme": [
+					"description": [
 						"If you're interested in creating your own custom theme, check out the",
 						"documentation"
 					],
 					"options": {
 						"light": "Light",
 						"dark": "Dark",
-						"bronze": "Bronze light"
+						"bronze": "Bronze light",
+						"ocean": "Ocean",
+						"autumn": "Autumn",
+						"cosmic": "Cosmic",
+						"pumpkin": "Pumpkin",
+						"matrix": "Matrix"
 					}
 				},
 				"fontSelect": {
@@ -450,10 +754,93 @@
 			"title": "Desktop settings",
 			"description": "Settings related to the Stump desktop application",
 			"sections": {
-				"discordPresence": {
-					"label": "Discord Presence",
-					"description": "Display your Stump activity in Discord using Discord Rich Presence",
-					"reconnect": "Reconnect to Discord"
+				"configuredServers": {
+					"label": "Configured servers",
+					"description": "The list of Stump servers you can connect to",
+					"unreachableServer": {
+						"tooltip": "Server unreachable"
+					},
+					"activeServer": {
+						"tooltip": "Current server"
+					},
+					"addOrEditServer": {
+						"validation": {
+							"nameExists": "A server with this name already exists",
+							"nameForbidden": "This name is reserved",
+							"urlExists": "A server with this URL already exists"
+						},
+						"fields": {
+							"name": {
+								"label": "Name",
+								"description": "A friendly name to identify this server",
+								"placeholder": "My server"
+							},
+							"uri": {
+								"label": "URI",
+								"description": "The URL of the Stump server",
+								"placeholder": "https://stump.example.com"
+							}
+						}
+					},
+					"addServer": {
+						"trigger": "Add server",
+						"title": "Add a new server",
+						"description": "Add a new Stump server to the desktop application",
+						"confirm": "Add server"
+					},
+					"editServer": {
+						"tooltip": "Edit server",
+						"title": "Edit server",
+						"description": "Edit the details of this server",
+						"confirm": "Save changes"
+					},
+					"deleteServer": {
+						"tooltip": "Delete server",
+						"confirmation": {
+							"title": "Delete this server",
+							"description": "This will remove the server from the desktop application",
+							"disclaimerActiveServer": "This server is currently active. You will be logged out",
+							"disclaimerLastServer": "This is the last configured server. You will be logged out and have to reconfigure any servers in the initialization process",
+							"confirm": "Delete server"
+						}
+					},
+					"switchToServer": {
+						"tooltip": "Switch to server",
+						"confirmation": {
+							"title": "Switch to this server",
+							"description": "This will log you out of your current server",
+							"confirm": "Switch to server",
+							"server": "Server",
+							"uri": "URL"
+						}
+					},
+					"resetConfiguration": {
+						"label": "Delete all servers",
+						"description": [
+							"Delete all configured servers from the desktop application",
+							"This action cannot be undone"
+						],
+						"confirmation": {
+							"trigger": "Delete all servers",
+							"title": "Delete all servers",
+							"description": "This will remove all servers from the desktop application",
+							"disclaimer": "You will be logged out and have to reconfigure any servers in the initialization process",
+							"confirm": "Delete all servers"
+						}
+					}
+				},
+				"optionalFeatures": {
+					"label": "Optional features",
+					"description": "Manage the optional features unique to the desktop application",
+					"bundledServer": {
+						"label": "Bundled server",
+						"description": "Run the bundled server in the background while the desktop application is running (requires restart)"
+					},
+					"discordPresence": {
+						"label": "Discord Presence",
+						"description": "Display your Stump activity in Discord using Discord Rich Presence",
+						"reconnect": "Reconnect to Discord"
+					}
 				}
 			}
 		},
@@ -605,6 +992,32 @@
 						"upload": {
 							"label": "Upload files",
 							"description": "Allows the user to upload files to the server"
+						}
+					},
+					"emailer": {
+						"label": "Emailers",
+						"read": {
+							"label": "Access emailers",
+							"description": "Allows the user to view the configured emailers"
+						},
+						"create": {
+							"label": "Create emailers",
+							"description": "Allows the user to create new emailers"
+						},
+						"manage": {
+							"label": "Manage emailers",
+							"description": "Allows the user to manage existing emailers"
+						}
+					},
+					"email": {
+						"label": "Emailing",
+						"send": {
+							"label": "Send emails",
+							"description": "Allows the user to send emails from the server to any configured aliases"
+						},
+						"arbitrary_send": {
+							"label": "Send arbitrary emails",
+							"description": "Allows the user to send emails from the server to any email address"
 						}
 					},
 					"library": {
@@ -917,10 +1330,17 @@
 		"save": "Save",
 		"send": "Send",
 		"saveChanges": "Save changes",
+		"noChanges": "No changes",
 		"create": "Create",
 		"edit": "Edit",
 		"update": "Update",
 		"unimplemented": "This functionality is not yet implemented! Check back later",
-		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later"
+		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
+		"logIn": "Log in",
+		"login": "Login",
+		"seeError": "See error",
+		"goBack": "Go back",
+		"goToServers": "Go to servers",
+		"notReady": "This feature is not ready"
 	}
 }

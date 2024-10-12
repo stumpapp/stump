@@ -11,16 +11,22 @@ use prisma_client_rust::{
 };
 use stump_core::{
 	error::CoreError,
-	filesystem::{image::ProcessorError, FileError},
+	filesystem::{
+		image::{ProcessorError, ThumbnailGenerateError},
+		FileError,
+	},
 	job::error::JobManagerError,
+	opds::v2_0::OPDSV2Error,
 	CoreEvent,
 };
 use tokio::sync::mpsc;
-use tower_sessions::session::SessionError;
+use tower_sessions::session::Error as SessionError;
 use utoipa::ToSchema;
 
 use std::{net, num::TryFromIntError};
 use thiserror::Error;
+
+use crate::config::session::delete_cookie_header;
 
 /// A type alias for the result of a server operation
 pub type ServerResult<T> = Result<T, ServerError>;
@@ -159,6 +165,12 @@ impl APIError {
 	}
 }
 
+impl From<OPDSV2Error> for APIError {
+	fn from(error: OPDSV2Error) -> Self {
+		APIError::InternalServerError(error.to_string())
+	}
+}
+
 impl From<MultipartError> for APIError {
 	fn from(error: MultipartError) -> Self {
 		APIError::InternalServerError(error.to_string())
@@ -168,6 +180,12 @@ impl From<MultipartError> for APIError {
 impl From<reqwest::Error> for APIError {
 	fn from(error: reqwest::Error) -> Self {
 		APIError::InternalServerError(error.to_string())
+	}
+}
+
+impl From<ThumbnailGenerateError> for APIError {
+	fn from(value: ThumbnailGenerateError) -> Self {
+		APIError::InternalServerError(value.to_string())
 	}
 }
 
@@ -272,7 +290,7 @@ impl From<std::io::Error> for APIError {
 }
 
 /// The response body for API errors. This is just a basic JSON response with a status code and a message.
-/// Any axum handlers which return a Result with an Error of APIError will be converted into this response.
+/// Any axum handlers which return a [`Result`] with an Error of [`APIError`] will be converted into this response.
 pub struct APIErrorResponse {
 	status: StatusCode,
 	message: String,
@@ -295,9 +313,19 @@ impl IntoResponse for APIErrorResponse {
 		});
 
 		let base_response = Json(body).into_response();
-		Response::builder()
+
+		let mut builder = Response::builder()
 			.status(self.status)
-			.header("Content-Type", "application/json")
+			.header("Content-Type", "application/json");
+
+		// if the status is 401, we want to encourage the client to delete their
+		// session cookie
+		if self.status == StatusCode::UNAUTHORIZED {
+			let (name, value) = delete_cookie_header();
+			builder = builder.header(name, value);
+		}
+
+		builder
 			.body(base_response.into_body())
 			.unwrap_or_else(|error| {
 				tracing::error!(?error, "Failed to build response");
@@ -310,4 +338,11 @@ impl IntoResponse for APIError {
 	fn into_response(self) -> Response {
 		APIErrorResponse::from(self).into_response()
 	}
+}
+
+pub mod api_error_message {
+	pub const LOCKED_ACCOUNT: &str =
+		"Your account is locked. Please contact an administrator to unlock your account.";
+	pub const FORBIDDEN_ACTION: &str =
+		"You do not have permission to perform this action.";
 }

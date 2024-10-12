@@ -129,7 +129,7 @@ export default function BookReaderDropdown({ book }: Props) {
 								onClick: () => navigate(getReadFromBeginningLink(false)),
 							},
 							{
-								label: 'Icognito mode',
+								label: 'Incognito mode',
 								onClick: () => navigate(getReadFromBeginningLink(true)),
 							},
 						],

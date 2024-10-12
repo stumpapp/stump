@@ -18,9 +18,10 @@ export type ConfirmationModalProps = {
 	triggerVariant?: ButtonVariant
 	confirmVariant?: ButtonVariant
 	cancelVariant?: ButtonVariant
-	onConfirm: () => void
+	formId?: string
+	onConfirm?: () => void
 	onClose: () => void
-}
+} & Pick<React.ComponentProps<typeof Dialog.Content>, 'size'>
 
 export function ConfirmationModal({
 	isOpen,
@@ -35,8 +36,10 @@ export function ConfirmationModal({
 	triggerVariant,
 	confirmVariant = 'primary',
 	cancelVariant,
+	formId,
 	onConfirm,
 	onClose,
+	size = 'sm',
 }: ConfirmationModalProps) {
 	const handleOpenChange = useCallback(
 		(nowOpen: boolean) => {
@@ -58,7 +61,7 @@ export function ConfirmationModal({
 					)}
 				</Dialog.Trigger>
 			)}
-			<Dialog.Content size="sm">
+			<Dialog.Content size={size}>
 				<Dialog.Header>
 					<Dialog.Title>{title}</Dialog.Title>
 					{description && <Dialog.Description>{description}</Dialog.Description>}
@@ -69,7 +72,13 @@ export function ConfirmationModal({
 					<Button variant={cancelVariant} onClick={onClose} disabled={confirmIsLoading}>
 						{cancelText || 'Cancel'}
 					</Button>
-					<Button variant={confirmVariant} onClick={onConfirm} isLoading={confirmIsLoading}>
+					<Button
+						type={formId ? 'submit' : 'button'}
+						form={formId}
+						variant={confirmVariant}
+						onClick={onConfirm}
+						isLoading={confirmIsLoading}
+					>
 						{confirmText || 'Confirm'}
 					</Button>
 				</Dialog.Footer>

@@ -2,9 +2,9 @@ use std::collections::HashSet;
 
 use axum::{
 	extract::{DefaultBodyLimit, Multipart, Path, State},
-	middleware::from_extractor_with_state,
+	middleware,
 	routing::{get, post},
-	Json, Router,
+	Extension, Json, Router,
 };
 use axum_extra::extract::Query;
 use prisma_client_rust::{and, operator, or, Direction};
@@ -17,7 +17,7 @@ use stump_core::{
 			macros::{
 				finished_reading_session_series_complete, series_or_library_thumbnail,
 			},
-			LibraryOptions, Media, Series, User, UserPermission,
+			LibraryConfig, Media, Series, User, UserPermission,
 		},
 		query::{
 			ordering::QueryOrder,
@@ -27,14 +27,13 @@ use stump_core::{
 	},
 	filesystem::{
 		analyze_media_job::AnalyzeMediaJob,
-		get_unknown_thumnail,
+		get_thumbnail,
 		image::{
-			generate_thumbnail, place_thumbnail, remove_thumbnails, ImageFormat,
-			ImageProcessorOptions,
+			generate_book_thumbnail, place_thumbnail, remove_thumbnails,
+			GenerateThumbnailOptions, ImageFormat, ImageProcessorOptions,
 		},
-		read_entire_file,
 		scanner::SeriesScanJob,
-		ContentType, FileParts, PathUtils,
+		ContentType,
 	},
 	prisma::{
 		active_reading_session, finished_reading_session, library,
@@ -44,7 +43,7 @@ use stump_core::{
 		series_metadata,
 	},
 };
-use tower_sessions::Session;
+use tokio::fs;
 use tracing::{error, trace};
 use utoipa::ToSchema;
 
@@ -55,12 +54,9 @@ use crate::{
 		chain_optional_iter, decode_path_filter, FilterableQuery, SeriesBaseFilter,
 		SeriesFilter, SeriesQueryRelation, SeriesRelationFilter,
 	},
-	middleware::auth::Auth,
+	middleware::auth::{auth_middleware, RequestContext},
 	routers::api::v1::library::library_not_hidden_from_user_filter,
-	utils::{
-		enforce_session_permissions, get_session_user, get_user_and_enforce_permission,
-		http::ImageResponse, validate_image_upload,
-	},
+	utils::{http::ImageResponse, validate_and_load_image},
 };
 
 use super::{
@@ -68,6 +64,8 @@ use super::{
 	media::{apply_media_age_restriction, apply_media_base_filters, get_media_thumbnail},
 	metadata::apply_series_metadata_filters,
 };
+
+// TODO: support downloading entire series as a zip file
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
@@ -90,14 +88,16 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.patch(patch_series_thumbnail)
 						.post(replace_series_thumbnail)
 						// TODO: configurable max file size
-						.layer(DefaultBodyLimit::max(20 * 1024 * 1024)), // 20MB
+						.layer(DefaultBodyLimit::max(
+							app_state.config.max_image_upload_size,
+						)),
 				)
 				.route(
 					"/complete",
 					get(get_series_is_complete).put(put_series_is_complete),
 				),
 		)
-		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 pub(crate) fn apply_series_base_filters(filters: SeriesBaseFilter) -> Vec<WhereParam> {
@@ -203,6 +203,20 @@ pub(crate) fn apply_series_age_restriction(
 // 		.collect()
 // }
 
+pub fn apply_series_restrictions_for_user(user: &User) -> Vec<WhereParam> {
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
+
+	chain_optional_iter(
+		[series::library::is(vec![
+			library_not_hidden_from_user_filter(user),
+		])],
+		[age_restrictions],
+	)
+}
+
 pub(crate) fn apply_series_filters_for_user(
 	filters: SeriesFilter,
 	user: &User,
@@ -249,7 +263,7 @@ async fn get_series(
 	pagination_query: Query<PaginationQuery>,
 	relation_query: Query<SeriesQueryRelation>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Pageable<Vec<Series>>>> {
 	let FilterableQuery { ordering, filters } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
@@ -258,7 +272,7 @@ async fn get_series(
 	trace!(?filters, ?ordering, ?pagination, "get_series");
 
 	let db = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let user_id = user.id.clone();
 
 	let is_unpaged = pagination.is_unpaged();
@@ -267,10 +281,7 @@ async fn get_series(
 	let load_media = relation_query.load_media.unwrap_or(false);
 	let count_media = relation_query.count_media.unwrap_or(false);
 
-	let where_conditions = apply_series_filters_for_user(filters, &user);
-	// .into_iter()
-	// .chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_default())
-	// .collect::<Vec<WhereParam>>();
+	let where_conditions = apply_series_filters_for_user(filters, user);
 
 	// series, total series count
 	let (series, series_count) = db
@@ -297,10 +308,10 @@ async fn get_series(
 					},
 					Pagination::Cursor(cursor_query) => {
 						if let Some(cursor) = cursor_query.cursor {
-							query = query.cursor(series::id::equals(cursor)).skip(1)
+							query = query.cursor(series::id::equals(cursor)).skip(1);
 						}
 						if let Some(limit) = cursor_query.limit {
-							query = query.take(limit)
+							query = query.take(limit);
 						}
 					},
 					_ => unreachable!(),
@@ -370,11 +381,11 @@ async fn get_series_by_id(
 	query: Query<SeriesQueryRelation>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Series>> {
 	let db = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let user_id = user.id.clone();
 	let age_restrictions = user
 		.age_restriction
@@ -382,7 +393,7 @@ async fn get_series_by_id(
 		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
 	let where_params = [series::id::equals(id.clone())]
 		.into_iter()
-		.chain(apply_series_library_not_hidden_for_user_filter(&user))
+		.chain(apply_series_library_not_hidden_for_user_filter(user))
 		.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_default())
 		.collect::<Vec<WhereParam>>();
 
@@ -442,10 +453,10 @@ async fn get_series_by_id(
 async fn scan_series(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> Result<(), APIError> {
 	let db = &ctx.db;
-	get_user_and_enforce_permission(&session, UserPermission::ScanLibrary)?;
+	req.enforce_permissions(&[UserPermission::ScanLibrary])?;
 
 	let series = db
 		.series()
@@ -481,7 +492,7 @@ async fn scan_series(
 async fn get_recently_added_series_handler(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Pageable<Vec<Series>>>> {
 	if pagination.page.is_none() {
 		return Err(APIError::BadRequest(
@@ -489,7 +500,7 @@ async fn get_recently_added_series_handler(
 		));
 	}
 
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let user_id = user.id.clone();
 	// let age_restrictions = user
 	// 	.age_restriction
@@ -506,35 +517,19 @@ async fn get_recently_added_series_handler(
 	Ok(Json(recently_added_series))
 }
 
-pub(crate) fn get_series_thumbnail(
+pub(crate) async fn get_series_thumbnail(
 	id: &str,
 	first_book: Option<series_or_library_thumbnail::media::Data>,
 	image_format: Option<ImageFormat>,
 	config: &StumpConfig,
 ) -> APIResult<(ContentType, Vec<u8>)> {
-	let thumbnails_dir = config.get_thumbnails_dir();
+	let generated_thumb =
+		get_thumbnail(config.get_thumbnails_dir(), id, image_format.clone()).await?;
 
-	if let Some(format) = image_format.clone() {
-		let extension = format.extension();
-		let path = thumbnails_dir.join(format!("{}.{}", id, extension));
-
-		if path.exists() {
-			tracing::trace!(?path, id, "Found generated series thumbnail");
-			return Ok((ContentType::from(format), read_entire_file(path)?));
-		}
-	}
-
-	if let Some(path) = get_unknown_thumnail(id, thumbnails_dir) {
-		tracing::debug!(path = ?path, id, "Found series thumbnail that does not align with config");
-		let FileParts { extension, .. } = path.file_parts();
-		return Ok((
-			ContentType::from_extension(extension.as_str()),
-			read_entire_file(path)?,
-		));
-	}
-
-	if let Some(first_book) = first_book {
-		get_media_thumbnail(&first_book.id, &first_book.path, image_format, config)
+	if let Some((content_type, bytes)) = generated_thumb {
+		Ok((content_type, bytes))
+	} else if let Some(first_book) = first_book {
+		get_media_thumbnail(&first_book.id, &first_book.path, image_format, config).await
 	} else {
 		Err(APIError::NotFound(
 			"Series does not have a thumbnail".to_string(),
@@ -542,7 +537,7 @@ pub(crate) fn get_series_thumbnail(
 	}
 }
 
-// TODO: ImageResponse type for body
+/// Returns the thumbnail image for a series
 #[utoipa::path(
 	get,
 	path = "/api/v1/series/:id/thumbnail",
@@ -557,22 +552,22 @@ pub(crate) fn get_series_thumbnail(
 		(status = 500, description = "Internal server error."),
 	)
 )]
-/// Returns the thumbnail image for a series
+#[tracing::instrument(err, skip(ctx))]
 async fn get_series_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<ImageResponse> {
 	let db = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let age_restriction = user.age_restriction.as_ref();
 	let series_age_restriction = age_restriction
 		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
 	let series_filters = chain_optional_iter(
 		[series::id::equals(id.clone())]
 			.into_iter()
-			.chain(apply_series_library_not_hidden_for_user_filter(&user))
+			.chain(apply_series_library_not_hidden_for_user_filter(user))
 			.collect::<Vec<WhereParam>>(),
 		[series_age_restriction],
 	);
@@ -592,13 +587,11 @@ async fn get_series_thumbnail_handler(
 		.ok_or(APIError::NotFound("Series not found".to_string()))?;
 	let first_book = series.media.into_iter().next();
 
-	let library_options = series
-		.library
-		.map(|l| l.library_options)
-		.map(LibraryOptions::from);
-	let image_format = library_options.and_then(|o| o.thumbnail_config.map(|c| c.format));
+	let library_config = series.library.map(|l| l.config).map(LibraryConfig::from);
+	let image_format = library_config.and_then(|o| o.thumbnail_config.map(|c| c.format));
 
 	get_series_thumbnail(&id, first_book, image_format, &ctx.config)
+		.await
 		.map(ImageResponse::from)
 }
 
@@ -631,10 +624,10 @@ pub struct PatchSeriesThumbnail {
 async fn patch_series_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Json(body): Json<PatchSeriesThumbnail>,
 ) -> APIResult<ImageResponse> {
-	let user = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
+	let user = req.user_and_enforce_permissions(&[UserPermission::ManageLibrary])?;
 	let series_age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -661,23 +654,20 @@ async fn patch_series_thumbnail(
 
 	let client = &ctx.db;
 
-	let target_page = body
-		.is_zero_based
-		.map(|is_zero_based| {
-			if is_zero_based {
-				body.page + 1
-			} else {
-				body.page
-			}
-		})
-		.unwrap_or(body.page);
+	let target_page = body.is_zero_based.map_or(body.page, |is_zero_based| {
+		if is_zero_based {
+			body.page + 1
+		} else {
+			body.page
+		}
+	});
 
 	let media = client
 		.media()
 		.find_first(media_where_params)
 		.with(
 			media::series::fetch()
-				.with(series::library::fetch().with(library::library_options::fetch())),
+				.with(series::library::fetch().with(library::config::fetch())),
 		)
 		.exec()
 		.await?
@@ -692,10 +682,10 @@ async fn patch_series_thumbnail(
 		.ok_or(APIError::NotFound(String::from("Series relation missing")))?
 		.library()?
 		.ok_or(APIError::NotFound(String::from("Library relation missing")))?;
-	let thumbnail_options = library
-		.library_options()?
+	let image_options = library
+		.config()?
 		.thumbnail_config
-		.to_owned()
+		.clone()
 		.map(ImageProcessorOptions::try_from)
 		.transpose()?
 		.unwrap_or_else(|| {
@@ -706,11 +696,20 @@ async fn patch_series_thumbnail(
 		})
 		.with_page(target_page);
 
-	let format = thumbnail_options.format.clone();
-	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options, &ctx.config)?;
+	let format = image_options.format.clone();
+	let (_, path_buf, _) = generate_book_thumbnail(
+		&media,
+		GenerateThumbnailOptions {
+			image_options,
+			core_config: ctx.config.as_ref().clone(),
+			force_regen: true,
+		},
+	)
+	.await?;
+
 	Ok(ImageResponse::from((
 		ContentType::from(format),
-		read_entire_file(path_buf)?,
+		fs::read(path_buf).await?,
 	)))
 }
 
@@ -732,13 +731,13 @@ async fn patch_series_thumbnail(
 async fn replace_series_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	mut upload: Multipart,
 ) -> APIResult<ImageResponse> {
-	let user = enforce_session_permissions(
-		&session,
-		&[UserPermission::UploadFile, UserPermission::ManageLibrary],
-	)?;
+	let user = req.user_and_enforce_permissions(&[
+		UserPermission::UploadFile,
+		UserPermission::ManageLibrary,
+	])?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()
@@ -759,13 +758,15 @@ async fn replace_series_thumbnail(
 		.await?
 		.ok_or(APIError::NotFound(String::from("Series not found")))?;
 
-	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
+	let (content_type, bytes) =
+		validate_and_load_image(&mut upload, Some(ctx.config.max_image_upload_size))
+			.await?;
 	let ext = content_type.extension();
 	let series_id = series.id;
 
 	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 	// user testing I'd like to see if this becomes a problem. We'll see!
-	match remove_thumbnails(&[series_id.clone()], ctx.config.get_thumbnails_dir()) {
+	match remove_thumbnails(&[series_id.clone()], &ctx.config.get_thumbnails_dir()) {
 		Ok(count) => tracing::info!("Removed {} thumbnails!", count),
 		Err(e) => tracing::error!(
 			?e,
@@ -773,11 +774,11 @@ async fn replace_series_thumbnail(
 		),
 	}
 
-	let path_buf = place_thumbnail(&series_id, ext, &bytes, &ctx.config)?;
+	let path_buf = place_thumbnail(&series_id, ext, &bytes, &ctx.config).await?;
 
 	Ok(ImageResponse::from((
 		content_type,
-		read_entire_file(path_buf)?,
+		fs::read(path_buf).await?,
 	)))
 }
 
@@ -803,13 +804,13 @@ async fn replace_series_thumbnail(
 async fn get_series_media(
 	pagination_query: Query<PaginationQuery>,
 	ordering: Query<QueryOrder>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<Pageable<Vec<Media>>>> {
 	let db = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let user_id = user.id.clone();
 	let age_restrictions = user.age_restriction.as_ref().map(|ar| {
 		(
@@ -821,7 +822,7 @@ async fn get_series_media(
 	let series_where_params = chain_optional_iter(
 		[series::id::equals(id.clone())]
 			.into_iter()
-			.chain(apply_series_library_not_hidden_for_user_filter(&user))
+			.chain(apply_series_library_not_hidden_for_user_filter(user))
 			.collect::<Vec<WhereParam>>(),
 		[age_restrictions.as_ref().map(|(sr, _)| sr.clone())],
 	);
@@ -867,10 +868,10 @@ async fn get_series_media(
 					},
 					Pagination::Cursor(cursor_query) => {
 						if let Some(cursor) = cursor_query.cursor {
-							query = query.cursor(media::id::equals(cursor)).skip(1)
+							query = query.cursor(media::id::equals(cursor)).skip(1);
 						}
 						if let Some(limit) = cursor_query.limit {
-							query = query.take(limit)
+							query = query.take(limit);
 						}
 					},
 					_ => unreachable!(),
@@ -891,7 +892,7 @@ async fn get_series_media(
 			// FIXME: PCR doesn't support relation counts yet!
 			let test_support_for_count =
 				client.media().count(media_where_params).exec().await?;
-			dbg!(test_support_for_count);
+			tracing::debug!(?test_support_for_count, "Test support for relation counts");
 
 			client
 				.media_in_series_count(id)
@@ -928,10 +929,10 @@ async fn get_series_media(
 async fn get_next_in_series(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Option<Media>>> {
 	let db = &ctx.db;
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let user_id = user.id.clone();
 	let series_age_restrictions = user
 		.age_restriction
@@ -944,7 +945,7 @@ async fn get_next_in_series(
 	let where_params = chain_optional_iter(
 		[series::id::equals(id.clone())]
 			.into_iter()
-			.chain(apply_series_library_not_hidden_for_user_filter(&user))
+			.chain(apply_series_library_not_hidden_for_user_filter(user))
 			.collect::<Vec<WhereParam>>(),
 		[series_age_restrictions],
 	);
@@ -983,8 +984,7 @@ async fn get_next_in_series(
 					// If there is a percentage, and it is less than 1.0, then it is next!
 					Some(session) if session.epubcfi.is_some() => session
 						.percentage_completed
-						.map(|value| value < 1.0)
-						.unwrap_or(false),
+						.is_some_and(|value| value < 1.0),
 					// If there is a page, and it is less than the total pages, then it is next!
 					Some(session) if session.page.is_some() => {
 						session.page.unwrap_or(1) < m.pages
@@ -997,10 +997,7 @@ async fn get_next_in_series(
 
 		Ok(Json(next_book.map(|data| Media::from(data.to_owned()))))
 	} else {
-		Err(APIError::NotFound(format!(
-			"Series with id {} no found.",
-			id
-		)))
+		Err(APIError::NotFound(format!("Series with id {id} no found.")))
 	}
 }
 
@@ -1026,11 +1023,11 @@ pub struct SeriesIsComplete {
 async fn get_series_is_complete(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<SeriesIsComplete>> {
 	let client = &ctx.db;
 
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let user_id = user.id.clone();
 	let age_restrictions = user.age_restriction.as_ref().map(|ar| {
 		(
@@ -1042,7 +1039,7 @@ async fn get_series_is_complete(
 	let series_where_params = chain_optional_iter(
 		[series::id::equals(id.clone())]
 			.into_iter()
-			.chain(apply_series_library_not_hidden_for_user_filter(&user))
+			.chain(apply_series_library_not_hidden_for_user_filter(user))
 			.collect::<Vec<WhereParam>>(),
 		[age_restrictions.as_ref().map(|(sr, _)| sr.clone())],
 	);
@@ -1107,9 +1104,9 @@ async fn put_series_is_complete() -> APIResult<Json<SeriesIsComplete>> {
 async fn start_media_analysis(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<()> {
-	let _ = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
+	req.enforce_permissions(&[UserPermission::ManageLibrary])?;
 
 	// Start analysis job
 	ctx.enqueue_job(AnalyzeMediaJob::analyze_series(id))

@@ -53,11 +53,7 @@ pub(crate) async fn job_task_handler<J: JobExt>(
 						} = result?;
 
 						return Ok(JobTaskHandlerOutput {
-							output: JobTaskOutput {
-								output,
-								logs,
-								subtasks,
-							},
+							output: JobTaskOutput { output, subtasks, logs },
 							returned_ctx: worker_ctx,
 						});
 					}

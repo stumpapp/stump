@@ -1,6 +1,4 @@
-use axum::{
-	extract::State, middleware::from_extractor_with_state, routing::get, Json, Router,
-};
+use axum::{extract::State, middleware, routing::get, Json, Router};
 use stump_core::{
 	db::entity::{CreateTags, Tag},
 	prisma::tag,
@@ -10,13 +8,13 @@ use tracing::error;
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
-	middleware::auth::Auth,
+	middleware::auth::auth_middleware,
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.route("/tags", get(get_tags).post(create_tags))
-		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 #[utoipa::path(
@@ -79,8 +77,7 @@ async fn create_tags(
 			.join(", ");
 
 		return Err(APIError::BadRequest(format!(
-			"Attempted to create tags which already exist: {}",
-			existing_names
+			"Attempted to create tags which already exist: {existing_names}"
 		)));
 	}
 

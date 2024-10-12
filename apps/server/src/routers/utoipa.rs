@@ -1,4 +1,4 @@
-use axum::middleware::from_extractor_with_state;
+use axum::middleware;
 use axum::Router;
 use stump_core::db::entity::*;
 // TODO: investigate how to get this working for swagger...
@@ -18,7 +18,7 @@ use crate::filter::{
 	FilterableLibraryQuery, FilterableMediaQuery, FilterableSeriesQuery, LibraryFilter,
 	MediaFilter, SeriesFilter, SeriesQueryRelation,
 };
-use crate::middleware::auth::Auth;
+use crate::middleware::auth::auth_middleware;
 
 use super::api::{
 	self,
@@ -135,7 +135,7 @@ use super::api::{
     ),
     components(
         schemas(
-            Library, LibraryOptions, Media, ReadingList, ActiveReadingSession, FinishedReadingSession, Series, Tag, User,
+            Library, LibraryConfig, Media, ReadingList, ActiveReadingSession, FinishedReadingSession, Series, Tag, User,
             UserPreferences, LibraryPattern, LibraryScanMode, LogLevel, ClaimResponse,
             StumpVersion, FileStatus, PageableDirectoryListing, DirectoryListing,
             DirectoryListingFile, CursorInfo, PageInfo, PageableLibraries,
@@ -173,7 +173,7 @@ struct ApiDoc;
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.merge(swagger_ui())
-		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 pub(crate) fn swagger_ui() -> SwaggerUi {

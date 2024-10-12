@@ -1,12 +1,8 @@
-use crate::{
-	config::state::AppState,
-	errors::{APIError, APIResult},
-	utils::get_session_user,
-};
 use axum::{
 	extract::{Path, State},
+	middleware,
 	routing::get,
-	Json, Router,
+	Extension, Json, Router,
 };
 use axum_extra::extract::Query;
 use prisma_client_rust::{and, or};
@@ -17,10 +13,15 @@ use stump_core::{
 	},
 	prisma::{reading_list, reading_list_rbac, user},
 };
-use tower_sessions::Session;
 use tracing::trace;
 
-pub(crate) fn mount() -> Router<AppState> {
+use crate::{
+	config::state::AppState,
+	errors::{APIError, APIResult},
+	middleware::auth::{auth_middleware, RequestContext},
+};
+
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.route(
 			"/reading-list",
@@ -35,6 +36,7 @@ pub(crate) fn mount() -> Router<AppState> {
 					.delete(delete_reading_list_by_id),
 			),
 		)
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 // TODO: thumbnails for reading lists
@@ -119,10 +121,9 @@ pub(crate) fn apply_pagination<'a>(
 async fn get_reading_list(
 	State(ctx): State<AppState>,
 	pagination_query: Query<PaginationQuery>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Pageable<Vec<ReadingList>>>> {
-	let user = get_session_user(&session)?;
-	let user_id = user.id.clone();
+	let user_id = req.id();
 
 	let pagination = pagination_query.0.get();
 
@@ -185,12 +186,12 @@ async fn get_reading_list(
 	)
 )]
 async fn create_reading_list(
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateReadingList>,
 ) -> APIResult<Json<ReadingList>> {
 	let db = &ctx.db;
-	let user_id = get_session_user(&session)?.id;
+	let user_id = req.id();
 
 	let created_reading_list = db
 		._transaction()
@@ -198,7 +199,7 @@ async fn create_reading_list(
 			let reading_list = client
 				.reading_list()
 				.create(
-					input.id.to_owned(),
+					input.id.clone(),
 					user::id::equals(user_id.clone()),
 					vec![reading_list::visibility::set(
 						input.visibility.unwrap_or_default().to_string(),
@@ -215,7 +216,7 @@ async fn create_reading_list(
 				.map(|(idx, media_id)| {
 					client.reading_list_item().create(
 						idx as i32,
-						media_id.to_owned(),
+						media_id.clone(),
 						reading_list::id::equals(reading_list.id.clone()),
 						// TODO: determine if connect is still needed...
 						vec![],
@@ -252,9 +253,9 @@ async fn create_reading_list(
 async fn get_reading_list_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<ReadingList>> {
-	let user_id = get_session_user(&session)?.id;
+	let user_id = req.id();
 	let db = &ctx.db;
 
 	let rbac_condition = reading_list_rbac_for_user(user_id, 1);
@@ -266,16 +267,12 @@ async fn get_reading_list_by_id(
 			rbac_condition.clone(),
 		]])
 		.exec()
-		.await?;
+		.await?
+		.ok_or_else(|| {
+			APIError::NotFound(format!("Reading list with ID {id} not found"))
+		})?;
 
-	if reading_list.is_none() {
-		return Err(APIError::NotFound(format!(
-			"Reading list with ID {} not found",
-			id
-		)));
-	}
-
-	Ok(Json(ReadingList::from(reading_list.unwrap())))
+	Ok(Json(ReadingList::from(reading_list)))
 }
 
 // TODO: fix this endpoint, way too naive of an update...
@@ -296,12 +293,12 @@ async fn get_reading_list_by_id(
 	)
 )]
 async fn update_reading_list(
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateReadingList>,
 ) -> APIResult<Json<ReadingList>> {
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let db = &ctx.db;
 
 	trace!(?input, "update_reading_list");
@@ -310,16 +307,11 @@ async fn update_reading_list(
 		.reading_list()
 		.find_unique(reading_list::id::equals(id.clone()))
 		.exec()
-		.await?;
+		.await?
+		.ok_or_else(|| {
+			APIError::NotFound(format!("Reading List with id {id} not found"))
+		})?;
 
-	if reading_list.is_none() {
-		return Err(APIError::NotFound(format!(
-			"Reading List with id {} not found",
-			id
-		)));
-	}
-
-	let reading_list = reading_list.unwrap();
 	if reading_list.creating_user_id != user.id {
 		// TODO: log bad access attempt to DB
 		return Err(APIError::Forbidden(String::from(
@@ -363,27 +355,22 @@ async fn update_reading_list(
 	)
 )]
 async fn delete_reading_list_by_id(
-	session: Session,
+	Extension(req): Extension<RequestContext>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<ReadingList>> {
-	let user = get_session_user(&session)?;
+	let user = req.user();
 	let db = &ctx.db;
 
 	let reading_list = db
 		.reading_list()
 		.find_unique(reading_list::id::equals(id.clone()))
 		.exec()
-		.await?;
+		.await?
+		.ok_or_else(|| {
+			APIError::NotFound(format!("Reading List with id {id} not found"))
+		})?;
 
-	if reading_list.is_none() {
-		return Err(APIError::NotFound(format!(
-			"Reading List with id {} not found",
-			id
-		)));
-	}
-
-	let reading_list = reading_list.unwrap();
 	if reading_list.creating_user_id != user.id {
 		// TODO: log bad access attempt to DB
 		return Err(APIError::forbidden_discreet());

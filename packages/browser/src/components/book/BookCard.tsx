@@ -6,7 +6,7 @@ import pluralize from 'pluralize'
 import { useCallback, useMemo } from 'react'
 
 import paths from '@/paths'
-import { formatBytes } from '@/utils/format'
+import { formatBookName, formatBytes } from '@/utils/format'
 import { prefetchMediaPage } from '@/utils/prefetch'
 
 export type BookCardProps = {
@@ -143,7 +143,7 @@ export default function BookCard({
 	return (
 		<EntityCard
 			key={media.id}
-			title={media.metadata?.title || media.name}
+			title={formatBookName(media)}
 			href={href}
 			fullWidth={fullWidth}
 			imageUrl={getMediaThumbnail(media.id)}

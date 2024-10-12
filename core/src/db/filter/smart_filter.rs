@@ -27,10 +27,10 @@ pub enum Filter<T> {
 	/// A simple not filter, e.g. `name != "test"`
 	Not { not: T },
 	/// A filter for a string that contains a substring, e.g. `name contains "test"`. This should
-	/// not be confused with an `in` filter. See [Filter::Any] for that.
+	/// not be confused with an `in` filter. See [`Filter::Any`] for that.
 	Contains { contains: T },
 	/// A filter for a string that does not contain a substring, e.g. `name excludes "test"`. This
-	/// should not be confused with a `not in` filter. See [Filter::None] for that.
+	/// should not be confused with a `not in` filter. See [`Filter::None`] for that.
 	Excludes { excludes: T },
 	/// A filter for a vector of values, e.g. `name in ["test", "test2"]`
 	Any { any: Vec<T> },
@@ -192,7 +192,7 @@ impl FromStr for FilterJoin {
 		match s.to_lowercase().as_str() {
 			"and" => Ok(Self::And),
 			"or" => Ok(Self::Or),
-			_ => Err(format!("Invalid filter joiner: {}", s)),
+			_ => Err(format!("Invalid filter joiner: {s}")),
 		}
 	}
 }
@@ -587,6 +587,7 @@ mod tests {
 			book_club_suggestions: None,
 			bookmarks: None,
 			created_at: Utc::now().into(),
+			deleted_at: None,
 			extension: "CBZ".to_string(),
 			hash: None,
 			metadata: None,

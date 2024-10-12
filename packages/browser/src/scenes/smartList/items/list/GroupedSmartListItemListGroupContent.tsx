@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom'
 
 import { usePreferences } from '@/hooks'
 import paths from '@/paths'
+import { formatBookName } from '@/utils/format'
 
 export const ACCORDION_CONTENT_ITEM_HEIGHT = 64
 
@@ -53,10 +54,6 @@ export default function GroupedSmartListItemListGroupContent({ books }: Props) {
 								return null
 							}
 
-							const { name, metadata } = book
-
-							const resolvedName = metadata?.title || name
-
 							return (
 								<div
 									key={key}
@@ -76,7 +73,7 @@ export default function GroupedSmartListItemListGroupContent({ books }: Props) {
 										<img className="h-12 w-auto rounded-sm" src={getMediaThumbnail(book.id)} />
 										<div className="flex flex-1 flex-col space-y-1.5 self-start px-2 pt-2">
 											<Text size="sm" className="line-clamp-1">
-												{resolvedName}
+												{formatBookName(book)}
 											</Text>
 										</div>
 									</Link>

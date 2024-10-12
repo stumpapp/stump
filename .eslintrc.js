@@ -30,6 +30,12 @@ module.exports = {
 				'unicorn/prefer-module': 'off',
 			},
 		},
+		{
+			files: ['**/__tests__/**/*', '*.test.ts', '*.test.tsx'],
+			rules: {
+				'@typescript-eslint/no-explicit-any': 'off',
+			},
+		},
 	],
 	parser: '@typescript-eslint/parser',
 	parserOptions: {

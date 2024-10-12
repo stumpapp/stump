@@ -17,6 +17,104 @@ pub enum LayoutMode {
 	TABLE,
 }
 
+#[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+pub enum ReadingDirection {
+	#[default]
+	#[serde(rename = "ltr")]
+	LeftToRight,
+	#[serde(rename = "rtl")]
+	RightToLeft,
+}
+
+impl FromStr for ReadingDirection {
+	type Err = String;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s {
+			"ltr" => Ok(ReadingDirection::LeftToRight),
+			"rtl" => Ok(ReadingDirection::RightToLeft),
+			_ => Err(format!("\"{s}\" is not a valid reading direction")),
+		}
+	}
+}
+
+impl fmt::Display for ReadingDirection {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		match self {
+			ReadingDirection::LeftToRight => write!(f, "ltr"),
+			ReadingDirection::RightToLeft => write!(f, "rtl"),
+		}
+	}
+}
+
+#[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+pub enum ReadingMode {
+	#[default]
+	#[serde(rename = "paged")]
+	Paged,
+	#[serde(rename = "continuous:vertical")]
+	ContinuousVertical,
+	#[serde(rename = "continuous:horizontal")]
+	ContinuousHorizontal,
+}
+
+impl FromStr for ReadingMode {
+	type Err = String;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s {
+			"paged" => Ok(ReadingMode::Paged),
+			"continuous:vertical" => Ok(ReadingMode::ContinuousVertical),
+			"continuous:horizontal" => Ok(ReadingMode::ContinuousHorizontal),
+			_ => Err(format!("\"{s}\" is not a valid reader mode")),
+		}
+	}
+}
+
+impl fmt::Display for ReadingMode {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		match self {
+			ReadingMode::Paged => write!(f, "paged"),
+			ReadingMode::ContinuousVertical => write!(f, "continuous:vertical"),
+			ReadingMode::ContinuousHorizontal => write!(f, "continuous:horizontal"),
+		}
+	}
+}
+
+#[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+pub enum ReadingImageScaleFit {
+	#[default]
+	#[serde(rename = "height")]
+	Height,
+	#[serde(rename = "width")]
+	Width,
+	#[serde(rename = "none", alias = "original")]
+	None,
+}
+
+impl FromStr for ReadingImageScaleFit {
+	type Err = String;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s {
+			"height" => Ok(ReadingImageScaleFit::Height),
+			"width" => Ok(ReadingImageScaleFit::Width),
+			"none" | "original" => Ok(ReadingImageScaleFit::None),
+			_ => Err(format!("\"{s}\" is not a valid image scale fit")),
+		}
+	}
+}
+
+impl fmt::Display for ReadingImageScaleFit {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		match self {
+			ReadingImageScaleFit::Height => write!(f, "height"),
+			ReadingImageScaleFit::Width => write!(f, "width"),
+			ReadingImageScaleFit::None => write!(f, "none"),
+		}
+	}
+}
+
 /// A struct representing a sort order for a column using react-table (tanstack)
 #[derive(Default, Clone, Debug, Deserialize, Serialize, Type, ToSchema)]
 pub struct ReactTableColumnSort {
@@ -114,7 +212,7 @@ impl FromStr for EntityVisibility {
 			"PUBLIC" => Ok(EntityVisibility::Public),
 			"SHARED" => Ok(EntityVisibility::Shared),
 			"PRIVATE" => Ok(EntityVisibility::Private),
-			_ => Err(format!("Invalid visibility: {}", s)),
+			_ => Err(format!("Invalid visibility: {s}")),
 		}
 	}
 }

@@ -132,7 +132,7 @@ impl Ctx {
 		Arc::new(self.clone())
 	}
 
-	/// Returns the reciever for the CoreEvent channel. See [`emit_event`]
+	/// Returns the reciever for the `CoreEvent` channel. See [`emit_event`]
 	/// for more information and an example usage.
 	pub fn get_client_receiver(&self) -> Receiver<CoreEvent> {
 		self.event_channel.0.subscribe()
@@ -142,7 +142,7 @@ impl Ctx {
 		self.event_channel.0.clone()
 	}
 
-	/// Emits a [CoreEvent] to the client event channel.
+	/// Emits a [`CoreEvent`] to the client event channel.
 	///
 	/// ## Example
 	/// ```no_run
@@ -179,7 +179,7 @@ impl Ctx {
 		let _ = self.event_channel.0.send(event);
 	}
 
-	/// Sends a [JobControllerCommand] to the job controller
+	/// Sends a [`JobControllerCommand`] to the job controller
 	pub fn send_job_controller_command(
 		&self,
 		command: JobControllerCommand,
@@ -187,7 +187,7 @@ impl Ctx {
 		self.job_controller.push_command(command)
 	}
 
-	/// Sends an EnqueueJob event to the job manager.
+	/// Sends an [`JobControllerCommand::EnqueueJob`] event to the job manager.
 	pub fn enqueue_job(
 		&self,
 		job: Box<dyn Executor>,
@@ -195,7 +195,7 @@ impl Ctx {
 		self.send_job_controller_command(JobControllerCommand::EnqueueJob(job))
 	}
 
-	/// Send a [CoreEvent] through the event channel to any clients listening
+	/// Send a [`CoreEvent`] through the event channel to any clients listening
 	pub fn send_core_event(&self, event: CoreEvent) {
 		if let Err(error) = self.event_channel.0.send(event) {
 			tracing::error!(error = ?error, "Failed to send core event");

@@ -79,7 +79,7 @@ impl JobScheduler {
 							vec![]
 						});
 
-					for library in libraries_to_scan.iter() {
+					for library in &libraries_to_scan {
 						let library_path = library.path.clone();
 						// TODO: optimize query with select!/include!
 						let options = library.config().ok().take();

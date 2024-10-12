@@ -160,6 +160,7 @@ export default function SeriesOverviewScene() {
 					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
 					orderControls={<URLOrdering entity="media" />}
 					filterControls={<URLFilterDrawer entity="media" />}
+					navOffset
 				/>
 
 				{renderContent()}

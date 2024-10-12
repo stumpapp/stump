@@ -101,7 +101,7 @@ async fn get_emailers(
 
 	// TODO: consider auto truncating?
 	if include_params.include_send_history {
-		query = query.with(emailer::send_history::fetch(vec![]))
+		query = query.with(emailer::send_history::fetch(vec![]));
 	}
 
 	let emailers = query

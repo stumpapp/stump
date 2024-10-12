@@ -290,7 +290,7 @@ impl From<std::io::Error> for APIError {
 }
 
 /// The response body for API errors. This is just a basic JSON response with a status code and a message.
-/// Any axum handlers which return a Result with an Error of APIError will be converted into this response.
+/// Any axum handlers which return a [`Result`] with an Error of [`APIError`] will be converted into this response.
 pub struct APIErrorResponse {
 	status: StatusCode,
 	message: String,

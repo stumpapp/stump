@@ -70,7 +70,7 @@ impl JobController {
 		self.manager.clone().initialize().await
 	}
 
-	/// Starts the watcher loop for the [JobController]. This function will listen for incoming
+	/// Starts the watcher loop for the [`JobController`]. This function will listen for incoming
 	/// commands and execute them.
 	pub fn watch(
 		self: Arc<Self>,
@@ -108,7 +108,7 @@ impl JobController {
 									Ok(()),
 									"Successfully issued pause request",
 									"Error while sending pause confirmation",
-								)
+								);
 							},
 						);
 					},
@@ -121,7 +121,7 @@ impl JobController {
 									Ok(()),
 									"Successfully issued resume request",
 									"Error while sending resume confirmation",
-								)
+								);
 							},
 						);
 					},
@@ -135,7 +135,7 @@ impl JobController {
 								);
 							},
 							|_| tracing::trace!("Shutdown confirmation sent"),
-						)
+						);
 					},
 				}
 			}
@@ -151,8 +151,8 @@ impl JobController {
 	}
 }
 
-/// A helper function to send a [JobManagerResult] back along a job's [oneshot::Sender]
-/// and log a [tracing::trace!] `msg`. If sending fails then `err_msg`is logged as an
+/// A helper function to send a [`JobManagerResult`] back along a job's [`oneshot::Sender`]
+/// and log a [`tracing::trace!`] `msg`. If sending fails then `err_msg`is logged as an
 /// error instead.
 fn acknowledge_command_trace(
 	ack: oneshot::Sender<JobManagerResult<()>>,
@@ -165,11 +165,11 @@ fn acknowledge_command_trace(
 			tracing::error!(?error, err_msg);
 		},
 		|_| tracing::trace!(msg),
-	)
+	);
 }
 
-/// A helper function to send a [JobManagerResult] back along a job's [oneshot::Sender]
-/// and log a [tracing::info!] `msg`. If sending fails then `err_msg`is logged as an
+/// A helper function to send a [`JobManagerResult`] back along a job's [`oneshot::Sender`]
+/// and log a [`tracing::info!`] `msg`. If sending fails then `err_msg`is logged as an
 /// error instead.
 fn acknowledge_command_info(
 	ack: oneshot::Sender<JobManagerResult<()>>,
@@ -182,5 +182,5 @@ fn acknowledge_command_info(
 			tracing::error!(?error, err_msg);
 		},
 		|_| tracing::info!(msg),
-	)
+	);
 }

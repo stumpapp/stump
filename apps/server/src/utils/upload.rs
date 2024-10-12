@@ -11,18 +11,12 @@ pub async fn validate_and_load_image(
 	upload: &mut Multipart,
 	max_size: Option<usize>,
 ) -> APIResult<(ContentType, Vec<u8>)> {
-	validate_and_load_upload(
-		upload,
-		max_size,
-		|content_type| content_type.is_image(),
-		Some("image"),
-	)
-	.await
+	validate_and_load_upload(upload, max_size, ContentType::is_image, Some("image")).await
 }
 
 /// An internal helper function to validate and load a generic upload.
 /// The validator will load an image from multipart form data ([Multipart]) and check that it
-/// is not larger than the max_size. Then, it will check that the `ContentType` information from
+/// is not larger than the `max_size`. Then, it will check that the `ContentType` information from
 /// the header and/or magic numbers in the first 5 bytes of the file match the expected type using
 /// the provided `is_valid_content_type` function.
 ///
@@ -76,7 +70,7 @@ async fn validate_and_load_upload(
 	}?;
 
 	tracing::trace!(?content_type, file_size, "Validated upload");
-	Ok((content_type, bytes.to_vec()))
+	Ok((content_type, bytes))
 }
 
 /// Load up to `max_size` bytes of a field (erroring if `max_size` is exceeded).
@@ -122,8 +116,7 @@ fn validation_err(expected_type_name: Option<&str>) -> APIError {
 	if let Some(type_name) = expected_type_name {
 		if !type_name.is_empty() {
 			return APIError::BadRequest(format!(
-				"Uploaded file was expected to be {}",
-				type_name
+				"Uploaded file was expected to be {type_name}"
 			));
 		}
 	}
@@ -135,8 +128,7 @@ fn validation_err(expected_type_name: Option<&str>) -> APIError {
 /// by a thing named `name` with a value that is `actual_size`.
 fn max_size_err(max_size: usize, name: &str, actual_size: usize) -> APIError {
 	APIError::BadRequest(format!(
-		"Max size of {} bytes exceeded by {} which is {} bytes",
-		max_size, name, actual_size
+		"Max size of {max_size} bytes exceeded by {name} which is {actual_size} bytes"
 	))
 }
 

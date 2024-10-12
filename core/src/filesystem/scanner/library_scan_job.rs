@@ -272,7 +272,7 @@ impl JobExt for LibraryScanJob {
 
 				// Task count: build each series + 1 for insertion step, +1 for update tx on missing series
 				let total_subtask_count = (series_to_create.len() + 1)
-					+ if !missing_series.is_empty() { 1 } else { 0 };
+					+ usize::from(!missing_series.is_empty());
 				let mut current_subtask_index = 0;
 				ctx.report_progress(JobProgress::subtask_position(
 					current_subtask_index,
@@ -387,9 +387,10 @@ impl JobExt for LibraryScanJob {
 			},
 			LibraryScanTask::WalkSeries(path_buf) => {
 				tracing::debug!("Executing the walk series task for library scan");
-				ctx.report_progress(JobProgress::msg(
-					format!("Scanning series at {}", path_buf.display()).as_str(),
-				));
+				ctx.report_progress(JobProgress::msg(&format!(
+					"Scanning series at {}",
+					path_buf.display()
+				)));
 
 				// If the library is collection-priority, any child directories are 'ignored' and their
 				// files are part of / folded into the top-most folder (series).
@@ -470,8 +471,8 @@ impl JobExt for LibraryScanJob {
 					logs.extend(new_logs);
 					return Ok(JobTaskOutput {
 						output,
-						logs,
 						subtasks,
+						logs,
 					});
 				}
 
@@ -590,8 +591,8 @@ impl JobExt for LibraryScanJob {
 
 		Ok(JobTaskOutput {
 			output,
-			logs,
 			subtasks,
+			logs,
 		})
 	}
 }
@@ -636,8 +637,7 @@ pub async fn handle_missing_library(
 		.await
 		.map_err(|e| {
 			JobError::InitFailed(format!(
-				"A critical error occurred while handling missing library: {}",
-				e
+				"A critical error occurred while handling missing library: {e}"
 			))
 		})?;
 	tracing::trace!(

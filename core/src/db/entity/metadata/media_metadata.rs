@@ -259,23 +259,24 @@ impl From<HashMap<String, Vec<String>>> for MediaMetadata {
 				"series" => metadata.series = Some(value.join("\n").to_string()),
 				"number" => {
 					metadata.number =
-						value.into_iter().next().and_then(|n| n.parse().ok())
+						value.into_iter().next().and_then(|n| n.parse().ok());
 				},
 				"volume" => {
 					metadata.volume =
-						value.into_iter().next().and_then(|n| n.parse().ok())
+						value.into_iter().next().and_then(|n| n.parse().ok());
 				},
 				"summary" => metadata.summary = Some(value.join("\n").to_string()),
 				"notes" => metadata.notes = Some(value.join("\n").to_string()),
 				"genre" => metadata.genre = Some(value),
 				"year" => {
-					metadata.year = value.into_iter().next().and_then(|n| n.parse().ok())
+					metadata.year = value.into_iter().next().and_then(|n| n.parse().ok());
 				},
 				"month" => {
-					metadata.month = value.into_iter().next().and_then(|n| n.parse().ok())
+					metadata.month =
+						value.into_iter().next().and_then(|n| n.parse().ok());
 				},
 				"day" => {
-					metadata.day = value.into_iter().next().and_then(|n| n.parse().ok())
+					metadata.day = value.into_iter().next().and_then(|n| n.parse().ok());
 				},
 				"pencillers" => metadata.pencillers = Some(value),
 				"inkers" => metadata.inkers = Some(value),
@@ -289,7 +290,7 @@ impl From<HashMap<String, Vec<String>>> for MediaMetadata {
 				"teams" => metadata.teams = Some(value),
 				"pagecount" => {
 					metadata.page_count =
-						value.into_iter().next().and_then(|n| n.parse().ok())
+						value.into_iter().next().and_then(|n| n.parse().ok());
 				},
 				"date" => {
 					// Note: we don't know the format of the date. It could be a year, a full date, etc.
@@ -297,7 +298,7 @@ impl From<HashMap<String, Vec<String>>> for MediaMetadata {
 					// This is a bit of a hack, but it's the best we can do without knowing the format.
 					let raw_date = value.into_iter().next().unwrap_or_default();
 
-					for format in NAIVE_DATE_FORMATS.iter() {
+					for format in &NAIVE_DATE_FORMATS {
 						if let Ok(date) = NaiveDate::parse_from_str(&raw_date, format) {
 							metadata.year = Some(date.year());
 							metadata.month = Some(date.month() as i32);
@@ -332,7 +333,7 @@ impl From<HashMap<String, Vec<String>>> for MediaMetadata {
 					match (metadata.age_rating, parsed) {
 						// if metadata.age_rating has been set, we need to take the min of the two
 						(Some(existing), Some(new)) => {
-							metadata.age_rating = Some(existing.min(new))
+							metadata.age_rating = Some(existing.min(new));
 						},
 						// if metadata.age_rating has not been set, we can just take the new value
 						(_, Some(new)) => metadata.age_rating = Some(new),
@@ -353,7 +354,7 @@ impl From<Dictionary> for MediaMetadata {
 		let map = dict
 			.into_iter()
 			.map(|(k, v)| v.to_string().map(|v| (k, v)))
-			.filter_map(|result| result.ok())
+			.filter_map(Result::ok)
 			.map(|(k, v)| (k.to_lowercase(), vec![v]))
 			.collect::<HashMap<String, Vec<String>>>();
 		Self::from(map)

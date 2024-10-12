@@ -77,8 +77,7 @@ async fn create_tags(
 			.join(", ");
 
 		return Err(APIError::BadRequest(format!(
-			"Attempted to create tags which already exist: {}",
-			existing_names
+			"Attempted to create tags which already exist: {existing_names}"
 		)));
 	}
 

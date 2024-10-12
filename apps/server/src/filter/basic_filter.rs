@@ -261,7 +261,7 @@ pub struct MediaMetadataFilter {
 	pub relation_filter: MediaMetadataRelationFilter,
 }
 
-/// A user-friendly representation of a media's read_progress. This will map to
+/// A user-friendly representation of a media's `read_progress`. This will map to
 /// a query condition that will be used to filter the media.
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema, Type)]
 pub enum ReadStatus {
@@ -282,7 +282,7 @@ impl FromStr for ReadStatus {
 			"unread" => Ok(ReadStatus::Unread),
 			"reading" => Ok(ReadStatus::Reading),
 			"completed" => Ok(ReadStatus::Completed),
-			_ => Err(APIError::BadRequest(format!("invalid read status: {}", s))),
+			_ => Err(APIError::BadRequest(format!("invalid read status: {s}"))),
 		}
 	}
 }

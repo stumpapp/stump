@@ -30,7 +30,7 @@ impl FromStr for SmartListItemGrouping {
 			"by_books" => Ok(Self::ByBooks),
 			"by_series" => Ok(Self::BySeries),
 			"by_library" => Ok(Self::ByLibrary),
-			_ => Err(format!("Invalid item grouping: {}", s)),
+			_ => Err(format!("Invalid item grouping: {s}")),
 		}
 	}
 }

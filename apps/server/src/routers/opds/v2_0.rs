@@ -607,7 +607,7 @@ async fn fetch_books_and_generate_feed(
 						OPDSPaginationMetadataBuilder::default()
 							.number_of_items(books_count)
 							.items_per_page(take)
-							.current_page(pagination.page.map(|p| p as i64).unwrap_or(1))
+							.current_page(pagination.page.map_or(1, i64::from))
 							.build()?,
 					))
 					.build()?,
@@ -691,7 +691,7 @@ async fn browse_series(
 		.await?;
 	let series_count = client.series().count(series_conditions).exec().await?;
 
-	let current_page = (pagination.zero_indexed_page() + 1) as i64;
+	let current_page = i64::from(pagination.zero_indexed_page() + 1);
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 
 	Ok(Json(

@@ -45,7 +45,7 @@ impl OPDSV2PrismaExt for PrismaClient {
 		series_id: String,
 	) -> CoreResult<HashMap<String, i64>> {
 		let ranked: Vec<EntityPosition> = self
-			._query_raw(book_positions_in_series_raw_query(book_ids, series_id))
+			._query_raw(book_positions_in_series_raw_query(&book_ids, series_id))
 			.exec()
 			.await?;
 
@@ -58,7 +58,7 @@ impl OPDSV2PrismaExt for PrismaClient {
 // I have tried RANK() OVER (ORDER BY CASE WHEN md.number IS NOT NULL THEN md.number ELSE m.name END ASC) AS position
 // but it doesn't work as expected. We need to figure out how to do this properly.
 pub(crate) fn book_positions_in_series_raw_query(
-	book_ids: Vec<String>,
+	book_ids: &[String],
 	series_id: String,
 ) -> Raw {
 	raw!(
@@ -76,7 +76,7 @@ pub(crate) fn book_positions_in_series_raw_query(
 			// Note: Prisma (SQLite) doesn't support PrismaValue::List, so we need to manually format this
 			book_ids
 				.iter()
-				.map(|id| format!("'{}'", id))
+				.map(|id| format!("'{id}'"))
 				.collect::<Vec<_>>()
 				.join(",")
 		),

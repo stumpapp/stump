@@ -199,7 +199,7 @@ async fn create_reading_list(
 			let reading_list = client
 				.reading_list()
 				.create(
-					input.id.to_owned(),
+					input.id.clone(),
 					user::id::equals(user_id.clone()),
 					vec![reading_list::visibility::set(
 						input.visibility.unwrap_or_default().to_string(),
@@ -216,7 +216,7 @@ async fn create_reading_list(
 				.map(|(idx, media_id)| {
 					client.reading_list_item().create(
 						idx as i32,
-						media_id.to_owned(),
+						media_id.clone(),
 						reading_list::id::equals(reading_list.id.clone()),
 						// TODO: determine if connect is still needed...
 						vec![],
@@ -269,7 +269,7 @@ async fn get_reading_list_by_id(
 		.exec()
 		.await?
 		.ok_or_else(|| {
-			APIError::NotFound(format!("Reading list with ID {} not found", id))
+			APIError::NotFound(format!("Reading list with ID {id} not found"))
 		})?;
 
 	Ok(Json(ReadingList::from(reading_list)))
@@ -309,7 +309,7 @@ async fn update_reading_list(
 		.exec()
 		.await?
 		.ok_or_else(|| {
-			APIError::NotFound(format!("Reading List with id {} not found", id))
+			APIError::NotFound(format!("Reading List with id {id} not found"))
 		})?;
 
 	if reading_list.creating_user_id != user.id {
@@ -368,7 +368,7 @@ async fn delete_reading_list_by_id(
 		.exec()
 		.await?
 		.ok_or_else(|| {
-			APIError::NotFound(format!("Reading List with id {} not found", id))
+			APIError::NotFound(format!("Reading List with id {id} not found"))
 		})?;
 
 	if reading_list.creating_user_id != user.id {

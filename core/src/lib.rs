@@ -42,15 +42,15 @@ type JournalModeChanged = bool;
 /// A type alias strictly for explicitness in the return type of `init_encryption`.
 type EncryptionKeySet = bool;
 
-/// The [StumpCore] struct is the main entry point for any server-side Stump
-/// applications. It is responsible for managing incoming tasks ([InternalCoreTask]),
-/// outgoing events ([CoreEvent](event::CoreEvent)), and providing access to the database
-/// via the core's [Ctx].
+/// The [`StumpCore`] struct is the main entry point for any server-side Stump
+/// applications. It is responsible for managing incoming tasks ([`InternalCoreTask`]),
+/// outgoing events ([`CoreEvent`](event::CoreEvent)), and providing access to the database
+/// via the core's [`Ctx`].
 ///
-/// [StumpCore] expects the consuming application to determine its configuration prior to startup.
-/// [config::bootstrap_config_dir] enables consumers to fetch the configuration directory automatically,
-/// and [StumpCore::init_config](#method.init_config) will load any Stump.toml in the config directory
-/// or environment variables to return a [StumpConfig] struct.
+/// [`StumpCore`] expects the consuming application to determine its configuration prior to startup.
+/// [`config::bootstrap_config_dir`] enables consumers to fetch the configuration directory automatically,
+/// and [`StumpCore::init_config`](#method.init_config) will load any Stump.toml in the config directory
+/// or environment variables to return a [`StumpConfig`] struct.
 ///
 /// ## Example:
 /// ```no_run
@@ -69,7 +69,7 @@ pub struct StumpCore {
 }
 
 impl StumpCore {
-	/// Creates a new instance of [StumpCore] and returns it wrapped in an [std::sync::Arc].
+	/// Creates a new instance of [`StumpCore`] and returns it wrapped in an [`std::sync::Arc`].
 	pub async fn new(config: StumpConfig) -> StumpCore {
 		let core_ctx = Ctx::new(config).await;
 		StumpCore { ctx: core_ctx }
@@ -78,7 +78,7 @@ impl StumpCore {
 	/// A three-step configuration initialization function.
 	///
 	/// 1. Loads configuration variables from Stump.toml, located at the input
-	///    config_dir, if such a file exists.
+	///    `config_dir`, if such a file exists.
 	///
 	/// 2. Overrides variables with those set in the environment.
 	///
@@ -202,16 +202,16 @@ impl StumpCore {
 		} else {
 			let journal_mode = client.get_journal_mode().await?;
 
-			if journal_mode != JournalMode::WAL {
+			if journal_mode == JournalMode::WAL {
+				tracing::trace!("Journal mode is already set to WAL, skipping");
+			} else {
 				tracing::trace!("Journal mode is not set to WAL!");
 				let updated_journal_mode =
 					client.set_journal_mode(JournalMode::WAL).await?;
 				tracing::debug!(
 					"Initial journal mode has been set to {:?}",
 					updated_journal_mode
-				)
-			} else {
-				tracing::trace!("Journal mode is already set to WAL, skipping");
+				);
 			}
 
 			let _affected_rows = client

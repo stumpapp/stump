@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::{config::StumpConfig, filesystem::FileError};
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
@@ -11,7 +11,7 @@ pub async fn place_thumbnail(
 	bytes: &[u8],
 	config: &StumpConfig,
 ) -> Result<PathBuf, FileError> {
-	let thumbnail_path = config.get_thumbnails_dir().join(format!("{}.{}", id, ext));
+	let thumbnail_path = config.get_thumbnails_dir().join(format!("{id}.{ext}"));
 	fs::write(&thumbnail_path, bytes).await?;
 	Ok(thumbnail_path)
 }
@@ -20,10 +20,10 @@ pub const THUMBNAIL_CHUNK_SIZE: usize = 500;
 
 // TODO(perf): Async-ify
 /// Deletes thumbnails and returns the number deleted if successful, returns
-/// [FileError] otherwise.
+/// [`FileError`] otherwise.
 pub fn remove_thumbnails(
 	id_list: &[String],
-	thumbnails_dir: PathBuf,
+	thumbnails_dir: &Path,
 ) -> Result<u64, FileError> {
 	let found_thumbnails = thumbnails_dir
 		.read_dir()

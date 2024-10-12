@@ -9,7 +9,7 @@ use serde_with::skip_serializing_none;
 use super::link::OPDSLinkType;
 
 /// A struct for representing dynamic properties of an OPDS feed or collection. This is just
-/// a wrapper around a serde_json::Value, which can be used to store any arbitrary JSON data
+/// a wrapper around a [`serde_json::Value`], which can be used to store any arbitrary JSON data
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OPDSDynamicProperties(pub serde_json::Value);
 
@@ -28,7 +28,7 @@ pub struct OPDSProperties {
 }
 
 impl OPDSProperties {
-	/// Create a new OPDSProperties object with the given authentication URL
+	/// Create a new [`OPDSProperties`] object with the given authentication URL
 	pub fn with_auth(self, url: String) -> Self {
 		Self {
 			authenticate: Some(OPDSAuthenticateProperties::new(url)),

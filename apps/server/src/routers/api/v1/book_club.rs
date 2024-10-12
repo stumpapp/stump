@@ -424,8 +424,7 @@ async fn create_book_club_invitation(
 	let invalid_role = payload
 		.role
 		.as_ref()
-		.map(|role| *role == BookClubMemberRole::CREATOR)
-		.unwrap_or(false);
+		.is_some_and(|role| *role == BookClubMemberRole::CREATOR);
 
 	if invalid_role {
 		return Err(APIError::BadRequest("Cannot invite a creator".to_string()));
@@ -858,11 +857,14 @@ async fn create_book_club_schedule(
 					},
 					(Some(start_at), None) => {
 						let start_at = safe_string_to_date(start_at);
-						(start_at, start_at + Duration::days(interval_days as i64))
+						(
+							start_at,
+							start_at + Duration::days(i64::from(interval_days)),
+						)
 					},
 					(None, Some(end_at)) => {
 						let end_at = safe_string_to_date(end_at);
-						(end_at - Duration::days(interval_days as i64), end_at)
+						(end_at - Duration::days(i64::from(interval_days)), end_at)
 					},
 					(None, None) => {
 						let start_at = if let Some(last_end_at) = last_end_at {
@@ -871,7 +873,10 @@ async fn create_book_club_schedule(
 							Utc::now()
 						};
 
-						(start_at, start_at + Duration::days(interval_days as i64))
+						(
+							start_at,
+							start_at + Duration::days(i64::from(interval_days)),
+						)
 					},
 				};
 
@@ -1027,11 +1032,14 @@ async fn add_books_to_book_club_schedule(
 			},
 			(Some(start_at), None) => {
 				let start_at = safe_string_to_date(start_at);
-				(start_at, start_at + Duration::days(interval_days as i64))
+				(
+					start_at,
+					start_at + Duration::days(i64::from(interval_days)),
+				)
 			},
 			(None, Some(end_at)) => {
 				let end_at = safe_string_to_date(end_at);
-				(end_at - Duration::days(interval_days as i64), end_at)
+				(end_at - Duration::days(i64::from(interval_days)), end_at)
 			},
 			(None, None) => {
 				let start_at = if let Some(last_end_at) = last_end_at {
@@ -1040,7 +1048,10 @@ async fn add_books_to_book_club_schedule(
 					Utc::now()
 				};
 
-				(start_at, start_at + Duration::days(interval_days as i64))
+				(
+					start_at,
+					start_at + Duration::days(i64::from(interval_days)),
+				)
 			},
 		};
 

@@ -212,7 +212,7 @@ impl JobExt for ThumbnailGenerationJob {
 						ctx.report_progress(JobProgress::subtask_position(
 							position as i32,
 							task_count,
-						))
+						));
 					},
 				)
 				.await;
@@ -290,7 +290,7 @@ pub async fn safely_generate_batch(
 						"Failed to generate thumbnail: {:?}",
 						error.to_string()
 					))
-					.with_ctx(format!("Media path: {}", path)),
+					.with_ctx(format!("Media path: {path}")),
 				);
 			},
 		}

@@ -91,7 +91,7 @@ impl ContentType {
 		}
 	}
 
-	/// Infer the MIME type of a file using the [infer] crate. If the MIME type cannot be inferred,
+	/// Infer the MIME type of a file using the [`infer`] crate. If the MIME type cannot be inferred,
 	/// then the file extension is used to determine the content type.
 	///
 	/// ### Example
@@ -106,8 +106,8 @@ impl ContentType {
 		ContentType::from_path(path)
 	}
 
-	/// Infer the MIME type of a [Vec] of bytes using the [infer] crate. If the MIME type cannot be
-	/// inferred, then the content type is set to [ContentType::UNKNOWN].
+	/// Infer the MIME type of a [`Vec`] of bytes using the [`infer`] crate. If the MIME type cannot be
+	/// inferred, then the content type is set to [`ContentType::UNKNOWN`].
 	///
 	/// ### Example
 	/// ```no_run
@@ -123,7 +123,7 @@ impl ContentType {
 			.unwrap_or_default()
 	}
 
-	/// Infer the MIME type of a [Vec] of bytes using the [infer] crate. If the MIME type cannot be
+	/// Infer the MIME type of a [`Vec`] of bytes using the [`infer`] crate. If the MIME type cannot be
 	/// inferred, then the extension is used to determine the content type.
 	///
 	/// ### Example

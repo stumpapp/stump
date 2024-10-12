@@ -35,7 +35,7 @@ pub enum AnalyzeMediaTask {
 	UpdatePageCount(MediaID),
 	/// Analyze and store dimensions for each page of a media item specified by an ID.
 	AnalyzePageDimensions(MediaID),
-	/// Performs both [UpdatePageCount] and then [AnalyzePageDimensions] in sequence for
+	/// Performs both [`UpdatePageCount`] and then [`AnalyzePageDimensions`] in sequence for
 	/// the media item specified by an ID.
 	FullAnalysis(MediaID),
 }
@@ -66,14 +66,14 @@ pub struct AnalyzeMediaJob {
 }
 
 impl AnalyzeMediaJob {
-	/// Create a new [AnalyzeMediaJob] for the media specified by `media_id`.
+	/// Create a new [`AnalyzeMediaJob`] for the media specified by `media_id`.
 	pub fn analyze_media_item(media_id: String) -> Box<WrappedJob<AnalyzeMediaJob>> {
 		WrappedJob::new(Self {
 			variant: AnalyzeMediaJobVariant::AnalyzeSingleItem(media_id),
 		})
 	}
 
-	/// Create a new [AnalyzeMediaJob] for the `group_ids`s specified.
+	/// Create a new [`AnalyzeMediaJob`] for the `group_ids`s specified.
 	pub fn analyze_media_group(
 		group_ids: Vec<String>,
 	) -> Box<WrappedJob<AnalyzeMediaJob>> {
@@ -82,14 +82,14 @@ impl AnalyzeMediaJob {
 		})
 	}
 
-	/// Create a new [AnalyzeMediaJob] for the library specified by `library_id`.
+	/// Create a new [`AnalyzeMediaJob`] for the library specified by `library_id`.
 	pub fn analyze_library(library_id: String) -> Box<WrappedJob<AnalyzeMediaJob>> {
 		WrappedJob::new(Self {
 			variant: AnalyzeMediaJobVariant::AnalyzeLibrary(library_id),
 		})
 	}
 
-	/// Create a new [AnalyzeMediaJob] for the series specified by `series_id`.
+	/// Create a new [`AnalyzeMediaJob`] for the series specified by `series_id`.
 	pub fn analyze_series(series_id: String) -> Box<WrappedJob<AnalyzeMediaJob>> {
 		WrappedJob::new(Self {
 			variant: AnalyzeMediaJobVariant::AnalyzeSeries(series_id),
@@ -107,16 +107,16 @@ impl JobExt for AnalyzeMediaJob {
 	fn description(&self) -> Option<String> {
 		match &self.variant {
 			AnalyzeMediaJobVariant::AnalyzeSingleItem(id) => {
-				Some(format!("Analyze media item with id: {}", id))
+				Some(format!("Analyze media item with id: {id}"))
 			},
 			AnalyzeMediaJobVariant::AnalyzeLibrary(id) => {
-				Some(format!("Analyze library with id: {}", id))
+				Some(format!("Analyze library with id: {id}"))
 			},
 			AnalyzeMediaJobVariant::AnalyzeSeries(id) => {
-				Some(format!("Analyze series with id: {}", id))
+				Some(format!("Analyze series with id: {id}"))
 			},
 			AnalyzeMediaJobVariant::AnalyzeMediaGroup(ids) => {
-				Some(format!("Analyze media group with ids: {:?}", ids))
+				Some(format!("Analyze media group with ids: {ids:?}"))
 			},
 		}
 	}
@@ -191,17 +191,17 @@ impl JobExt for AnalyzeMediaJob {
 
 		match task {
 			AnalyzeMediaTask::UpdatePageCount(id) => {
-				task_page_count::execute(id, ctx, &mut output).await?
+				task_page_count::execute(id, ctx, &mut output).await?;
 			},
 			AnalyzeMediaTask::AnalyzePageDimensions(id) => {
-				task_analyze_dimensions::execute(id, ctx, &mut output).await?
+				task_analyze_dimensions::execute(id, ctx, &mut output).await?;
 			},
 			AnalyzeMediaTask::FullAnalysis(id) => {
 				// TODO This is suboptimal because it buffers the file twice, this should be improved later.
 				// First page count needs to be updated
 				task_page_count::execute(id.clone(), ctx, &mut output).await?;
 				// Then we can do the dimensions analysis
-				task_analyze_dimensions::execute(id, ctx, &mut output).await?
+				task_analyze_dimensions::execute(id, ctx, &mut output).await?;
 			},
 		}
 

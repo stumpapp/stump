@@ -1,4 +1,4 @@
-//! This module defines the [OpdsEntry] struct for representing an OPDS catalogue entry
+//! This module defines the [`OpdsEntry`] struct for representing an OPDS catalogue entry
 //! as specified at https://specs.opds.io/opds-1.2#5-opds-catalog-entry-documents
 
 use std::collections::HashMap;
@@ -170,8 +170,9 @@ impl From<media::Data> for OpdsEntry {
 			.ok()
 			.and_then(|sessions| sessions.first().cloned());
 		let (current_page, last_read_at) = active_reading_session
-			.map(|session| (session.page, Some(session.updated_at)))
-			.unwrap_or((None, None));
+			.map_or((None, None), |session| {
+				(session.page, Some(session.updated_at))
+			});
 
 		let target_pages = if let Some(page) = current_page {
 			vec![1, page]
@@ -204,9 +205,9 @@ impl From<media::Data> for OpdsEntry {
 				.to_owned(),
 			Some(page) => {
 				tracing::warn!(current_page=?page, book_pages=?value.pages, "Current page is out of bounds!");
-				thumbnail_link_type.to_owned()
+				thumbnail_link_type
 			},
-			_ => thumbnail_link_type.to_owned(),
+			_ => thumbnail_link_type,
 		};
 
 		let thumbnail_opds_link_type = OpdsLinkType::try_from(thumbnail_link_type)
@@ -225,17 +226,17 @@ impl From<media::Data> for OpdsEntry {
 			OpdsLink::new(
 				thumbnail_opds_link_type,
 				OpdsLinkRel::Thumbnail,
-				format!("{}/thumbnail", base_url),
+				format!("{base_url}/thumbnail"),
 			),
 			OpdsLink::new(
 				thumbnail_opds_link_type,
 				OpdsLinkRel::Image,
-				format!("{}/pages/1", base_url),
+				format!("{base_url}/pages/1"),
 			),
 			OpdsLink::new(
 				entry_file_acquisition_link_type,
 				OpdsLinkRel::Acquisition,
-				format!("{}/file/{}", base_url, file_name_encoded),
+				format!("{base_url}/file/{file_name_encoded}"),
 			),
 		];
 

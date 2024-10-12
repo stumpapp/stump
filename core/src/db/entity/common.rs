@@ -212,7 +212,7 @@ impl FromStr for EntityVisibility {
 			"PUBLIC" => Ok(EntityVisibility::Public),
 			"SHARED" => Ok(EntityVisibility::Shared),
 			"PRIVATE" => Ok(EntityVisibility::Private),
-			_ => Err(format!("Invalid visibility: {}", s)),
+			_ => Err(format!("Invalid visibility: {s}")),
 		}
 	}
 }

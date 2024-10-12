@@ -103,7 +103,7 @@ fn read_and_filter_directory(
 	let listing = std::fs::read_dir(start_path)?;
 
 	let files = listing
-		.filter_map(|res| res.ok())
+		.filter_map(Result::ok)
 		.filter_map(filter_if_hidden)
 		.map(|entry| DirectoryListingFile::from(entry.path()))
 		.collect();
@@ -193,7 +193,7 @@ mod windows_fs {
 				};
 
 				let drive_text = match volume_name {
-					Some(name) => format!("{} ({})", drive_letter, name),
+					Some(name) => format!("{drive_letter} ({name})"),
 					None => drive_letter.clone(),
 				};
 

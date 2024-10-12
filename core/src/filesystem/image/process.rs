@@ -200,7 +200,7 @@ pub trait ImageProcessor {
 pub fn resized_dimensions(
 	current_height: u32,
 	current_width: u32,
-	size_options: ImageResizeOptions,
+	size_options: &ImageResizeOptions,
 ) -> (u32, u32) {
 	match size_options.mode {
 		ImageResizeMode::Scaled => (
@@ -243,7 +243,7 @@ mod tests {
 	#[test]
 	fn test_resized_dimensions_scaled() {
 		let (height, width) =
-			resized_dimensions(100, 100, ImageResizeOptions::scaled(0.75, 0.5));
+			resized_dimensions(100, 100, &ImageResizeOptions::scaled(0.75, 0.5));
 		assert_eq!(height, 75);
 		assert_eq!(width, 50);
 	}
@@ -251,7 +251,7 @@ mod tests {
 	#[test]
 	fn test_resized_dimensions_sized() {
 		let (height, width) =
-			resized_dimensions(100, 100, ImageResizeOptions::sized(50.0, 50.0));
+			resized_dimensions(100, 100, &ImageResizeOptions::sized(50.0, 50.0));
 		assert_eq!(height, 50);
 		assert_eq!(width, 50);
 	}

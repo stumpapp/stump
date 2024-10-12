@@ -14,7 +14,8 @@ export function useSticky<T extends HTMLElement>({
 
 	const [sticky, setSticky] = useState(false)
 
-	const isRefSet = !!stickyRef.current
+	const isStickyRefSet = !!stickyRef.current
+	const isScrollRefSet = !!scrollRef.current
 	useEffect(() => {
 		const doObserve = () => {
 			if (!stickyRef.current) return
@@ -23,11 +24,7 @@ export function useSticky<T extends HTMLElement>({
 			const stickyOffset = parseInt(getComputedStyle(stickyRef.current).top)
 			const stickyActive = refPageOffset <= stickyOffset + extraOffset
 
-			if (stickyActive && !sticky) {
-				setSticky(true)
-			} else if (!stickyActive && sticky) {
-				setSticky(false)
-			}
+			setSticky(stickyActive)
 		}
 		doObserve()
 
@@ -45,7 +42,7 @@ export function useSticky<T extends HTMLElement>({
 			window.removeEventListener('resize', doObserve)
 			window.removeEventListener('orientationchange', doObserve)
 		}
-	}, [sticky, extraOffset, isRefSet, selector])
+	}, [sticky, extraOffset, isStickyRefSet, isScrollRefSet, selector])
 
 	return {
 		isSticky: sticky,

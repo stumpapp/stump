@@ -7,6 +7,11 @@ inputs:
     required: false
     default: 'true'
 
+  cache-locality:
+    description: 'The locality of the cache, e.g. either local build or docker build'
+    required: false
+    default: 'local' # 'local' or 'docker'
+
 runs:
   using: composite
   steps:
@@ -35,7 +40,7 @@ runs:
       uses: actions/cache/restore@v3
       with:
         path: core/src/prisma.rs
-        key: ${{ runner.os }}-prisma-${{ hashFiles('**/schema.prisma') }}
+        key: ${{ runner.os }}-prisma-${{ hashFiles('**/schema.prisma') }}-${{ inputs.cache-locality }}
 
     - name: Generate Prisma client
       if: ${{ steps.cache-prisma-restore.outputs.cache-hit != 'true' }}
@@ -48,4 +53,4 @@ runs:
       uses: actions/cache/save@v4
       with:
         path: core/src/prisma.rs
-        key: ${{ runner.os }}-prisma-${{ hashFiles('**/schema.prisma') }}
+        key: ${{ runner.os }}-prisma-${{ hashFiles('**/schema.prisma') }}-${{ inputs.cache-locality }}

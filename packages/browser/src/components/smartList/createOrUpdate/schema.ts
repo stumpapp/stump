@@ -295,7 +295,7 @@ export const intoAPIGroup = (input: z.infer<typeof filterGroup>): FilterGroup<Me
 
 export const filterConfig = z.object({
 	groups: z.array(filterGroup),
-	joiner: z.enum(['and', 'or', 'not']),
+	joiner: z.enum(['and', 'or']),
 })
 
 export const grouping = z.enum(['BY_BOOKS', 'BY_SERIES', 'BY_LIBRARY'])
@@ -335,7 +335,7 @@ export const intoForm = ({
 	description: description || undefined,
 	filters: {
 		groups: filters.groups.map(intoFormGroup),
-		joiner: joiner.toLowerCase() as 'and' | 'or' | 'not',
+		joiner: joiner.toLowerCase() as 'and' | 'or',
 	},
 	grouping: default_grouping || undefined,
 	name,
@@ -346,15 +346,15 @@ export const intoAPI = ({
 	name,
 	description,
 	visibility,
-	filters,
+	filters: { groups, joiner },
 	grouping,
 }: SmartListFormSchema): CreateOrUpdateSmartList => ({
 	default_grouping: grouping || null,
 	description: description || null,
 	filters: {
-		groups: filters.groups.map(intoAPIGroup),
-		joiner: filters.joiner.toUpperCase() as 'AND' | 'OR',
+		groups: groups.map(intoAPIGroup),
 	},
+	joiner: joiner.toUpperCase() as 'AND' | 'OR',
 	name,
 	visibility,
 })

@@ -43,7 +43,14 @@ export default function BasicSettingsScene() {
 		[list, name, description],
 	)
 
-	const handleSubmit = useCallback((values: SubSchema) => patch(values), [patch])
+	const handleSubmit = useCallback(
+		({ name, description }: SubSchema) =>
+			patch({
+				description,
+				name,
+			}),
+		[patch],
+	)
 
 	return (
 		<Form form={form} onSubmit={handleSubmit} fieldsetClassName="flex flex-col gap-12">

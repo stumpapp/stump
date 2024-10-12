@@ -38,16 +38,18 @@ export default function FiltersSettingsScene() {
 	)
 
 	const handleSubmit = useCallback(
-		(values: SubSchema) =>
+		({ filters, grouping }: SubSchema) => {
 			patch(
 				pick(
 					intoAPI({
 						...listAsForm,
-						...values,
+						filters,
+						grouping,
 					}),
-					['filters', 'grouping'],
+					['filters', 'grouping', 'joiner'],
 				),
-			),
+			)
+		},
 		[patch, listAsForm],
 	)
 

@@ -216,7 +216,7 @@ export type SmartListItems = { type: "Books"; items: Media[] } | { type: "Series
 
 export type SmartList = { id: string; name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; visibility: EntityVisibility; joiner: FilterJoin; default_grouping: SmartListItemGrouping; saved_views: SmartListView[] | null; creator_id?: string | null }
 
-export type SmartFilter<T> = { groups: FilterGroup<T>[]; joiner?: FilterJoin }
+export type SmartFilter<T> = { groups: FilterGroup<T>[] }
 
 export type MediaSmartFilter = { name: Filter<string> } | { size: Filter<number> } | { extension: Filter<string> } | { created_at: Filter<string> } | { updated_at: Filter<string> } | { status: Filter<string> } | { path: Filter<string> } | { pages: Filter<number> } | { metadata: MediaMetadataSmartFilter } | { series: SeriesSmartFilter }
 
@@ -378,7 +378,7 @@ export type LibraryRelationFilter = { series?: SeriesBaseFilter | null }
 export type LibraryFilter = ({ id?: string[]; name?: string[]; path?: string[]; search?: string | null }) & ({ series?: SeriesBaseFilter | null })
 
 /**
- * A user-friendly representation of a media's read_progress. This will map to
+ * A user-friendly representation of a media's `read_progress`. This will map to
  * a query condition that will be used to filter the media.
  */
 export type ReadStatus = "Unread" | "Reading" | "Completed"

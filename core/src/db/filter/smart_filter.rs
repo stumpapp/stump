@@ -220,8 +220,6 @@ impl From<&str> for FilterJoin {
 #[aliases(SmartFilterSchema = SmartFilter<MediaSmartFilter>)]
 pub struct SmartFilter<T> {
 	pub groups: Vec<FilterGroup<T>>,
-	#[serde(default)]
-	pub joiner: FilterJoin,
 }
 
 #[generate_smart_filter]

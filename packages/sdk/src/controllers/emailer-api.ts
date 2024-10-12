@@ -17,7 +17,7 @@ import { createRouteURLHandler } from './utils'
 /**
  * The root route for the emailer API
  */
-const EMAILER_ROUTE = '/emailer'
+const EMAILER_ROUTE = '/emailers'
 /**
  * A helper function to format the URL for emailer API routes with optional query parameters
  */

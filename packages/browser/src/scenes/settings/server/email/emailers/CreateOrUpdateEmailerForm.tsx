@@ -87,6 +87,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 				variant="primary"
 				{...form.register('name')}
 				errorMessage={errors.name?.message}
+				ignoreFill
 			/>
 
 			<div className="flex flex-col space-y-4">

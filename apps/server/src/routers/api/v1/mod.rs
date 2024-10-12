@@ -33,10 +33,11 @@ pub(crate) mod reading_list;
 pub(crate) mod series;
 pub(crate) mod smart_list;
 pub(crate) mod tag;
+pub(crate) mod upload;
 pub(crate) mod user;
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
-	Router::new()
+	let mut router = Router::new()
 		.merge(auth::mount(app_state.clone()))
 		.merge(epub::mount(app_state.clone()))
 		.merge(emailer::mount(app_state.clone()))
@@ -52,12 +53,19 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.merge(user::mount(app_state.clone()))
 		.merge(reading_list::mount(app_state.clone()))
 		.merge(smart_list::mount(app_state.clone()))
-		.merge(book_club::mount(app_state))
+		.merge(book_club::mount(app_state.clone()))
 		.route("/claim", get(claim))
 		.route("/ping", get(ping))
 		// TODO: should /version or /check-for-updates be behind any auth reqs?
 		.route("/version", post(version))
-		.route("/check-for-update", get(check_for_updates))
+		.route("/check-for-update", get(check_for_updates));
+
+	// Conditionally attach upload routes based on settings.
+	if app_state.config.enable_upload {
+		router = router.merge(upload::mount(app_state.clone()));
+	}
+
+	router
 }
 
 #[derive(Serialize, Type, ToSchema)]

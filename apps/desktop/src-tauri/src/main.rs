@@ -17,7 +17,10 @@ use store::AppStore;
 
 use state::AppState;
 
-use commands::{close_splashscreen, set_discord_presence, set_use_discord_connection};
+use commands::{
+	close_splashscreen, get_api_token, set_api_token, set_discord_presence,
+	set_use_discord_connection,
+};
 
 #[cfg(feature = "bundled-server")]
 use stump_server::{bootstrap_http_server_config, run_http_server};
@@ -62,7 +65,9 @@ fn main() {
 		.invoke_handler(tauri::generate_handler![
 			set_use_discord_connection,
 			set_discord_presence,
-			close_splashscreen
+			close_splashscreen,
+			get_api_token,
+			set_api_token,
 		])
 		.run(tauri::generate_context!())
 		.expect("error while running tauri application");

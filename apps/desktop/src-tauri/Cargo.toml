@@ -12,6 +12,7 @@ tauri-build = { version = "1.5.4", features = [] }
 [dependencies]
 stump_server = { path = "../../server", optional = true }
 discord-rich-presence = "0.2.3"
+keyring = { workspace = true }
 serde_json = { workspace = true }
 serde = { workspace = true }
 specta = { workspace = true }
@@ -23,6 +24,9 @@ tauri-plugin-store = { git = "https://github.com/tauri-apps/plugins-workspace", 
 # See https://github.com/dbus2/zbus/issues/667
 zbus_names = "=2.6.1"
 # TODO(?): https://github.com/Smithay/wayland-rs/pull/722
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full"] }
 
 [features]
 # by default Tauri runs in production mode

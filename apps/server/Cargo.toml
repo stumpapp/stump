@@ -16,7 +16,7 @@ axum-extra = { version = "0.9.3", features = [
   "typed-header",
   "query"
 ] }
-base64 = "0.22.1"
+base64 = { workspace = true }
 bcrypt = { workspace = true }
 cli = { path = "../../crates/cli" }
 chrono = { workspace = true }

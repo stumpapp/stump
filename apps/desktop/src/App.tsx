@@ -6,6 +6,13 @@ import { Store } from 'tauri-plugin-store-api'
 
 import { useTauriRPC } from './utils'
 
+// It looks like Apple fully blocks non-local IP addresses now. This is actually infuriating. OH WELL.
+// There really isn't much to do? Anyone using the desktop app on macOS and wants to connect outside their local
+// network will have to setup a domain name and use HTTPS. When I catch you, Apple *shakes fist*
+// See:
+// - https://developer.apple.com/documentation/security/preventing-insecure-network-connections
+// - https://developer.apple.com/documentation/bundleresources/information_property_list/nsapptransportsecurity
+
 const store = new Store('settings.json')
 
 export default function App() {

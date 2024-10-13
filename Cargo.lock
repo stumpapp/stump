@@ -3915,6 +3915,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "keyring"
+version = "3.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bd3d701d3de5b9c4b0d9d077f8c2c66f0388d75e96932ebbb7cdff8713d7f7c6"
+
+[[package]]
 name = "kqueue"
 version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7819,6 +7825,7 @@ name = "stump_desktop"
 version = "0.0.7"
 dependencies = [
  "discord-rich-presence",
+ "keyring",
  "serde",
  "serde_json",
  "specta",
@@ -7827,6 +7834,7 @@ dependencies = [
  "tauri-build",
  "tauri-plugin-store",
  "thiserror",
+ "tokio",
  "tracing",
  "zbus_names",
 ]

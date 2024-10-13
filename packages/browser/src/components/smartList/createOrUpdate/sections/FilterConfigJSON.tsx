@@ -11,12 +11,11 @@ export default function FilterConfigJSON() {
 	const [joiner] = form.watch(['filters.joiner'])
 
 	const groups = useMemo(() => (filters?.groups ?? []) as FilterGroupSchema[], [filters?.groups])
-	// FIXME: this errors lol
 	const apiFilters = useMemo(
 		() =>
 			intoAPIFilters({
 				groups,
-				joiner: joiner ?? 'AND',
+				joiner,
 			}),
 		[groups, joiner],
 	)

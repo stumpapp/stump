@@ -59,7 +59,7 @@ export default function OperatorSelect({ idx }: Props) {
 					(field) => isNumberField(field) || isDateField(field),
 					() => ['gt', 'gte', 'lt', 'lte', 'not', 'equals', 'range'] as NumberOperation[],
 				)
-				.otherwise(() => [] as Operation[]),
+				.otherwise(() => ['not', 'equals'] as Operation[]),
 		[fieldDef],
 	)
 
@@ -79,7 +79,7 @@ export default function OperatorSelect({ idx }: Props) {
 						},
 					]
 				: []),
-		]
+		].filter(({ operators }) => operators.length)
 	}, [operators, fieldDef])
 
 	useEffect(() => {

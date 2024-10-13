@@ -222,7 +222,7 @@ export type MediaSmartFilter = { name: Filter<string> } | { size: Filter<number>
 
 export type MediaMetadataSmartFilter = { publisher: Filter<string> } | { genre: Filter<string> } | { characters: Filter<string> } | { colorists: Filter<string> } | { writers: Filter<string> } | { pencillers: Filter<string> } | { letterers: Filter<string> } | { inkers: Filter<string> } | { editors: Filter<string> } | { age_rating: Filter<number> } | { year: Filter<number> } | { month: Filter<number> } | { day: Filter<number> }
 
-export type SeriesMetadataSmartFilter = { meta_type: Filter<string> } | { publisher: Filter<string> } | { status: Filter<string> } | { age_rating: Filter<number> } | { volume: Filter<number> }
+export type SeriesMetadataSmartFilter = { age_rating: Filter<number> } | { meta_type: Filter<string> } | { title: Filter<string> } | { summary: Filter<string> } | { publisher: Filter<string> } | { imprint: Filter<string> } | { comicid: Filter<number> } | { booktype: Filter<string> } | { volume: Filter<number> } | { status: Filter<string> }
 
 export type SeriesSmartFilter = { name: Filter<string> } | { path: Filter<string> } | { metadata: SeriesMetadataSmartFilter } | { library: LibrarySmartFilter }
 

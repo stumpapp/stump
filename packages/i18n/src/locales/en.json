@@ -734,10 +734,15 @@
 							"series_meta": {
 								"label": "Series Meta",
 								"attributes": {
+									"age_rating": "Age rating",
+									"title": "Title",
+									"summary": "Summary",
 									"meta_type": "Type",
 									"publisher": "Publisher",
+									"imprint": "Imprint",
+									"comicid": "Comic ID",
+									"booktype": "Book type",
 									"status": "Status",
-									"age_rating": "Age rating",
 									"volume": "Volume"
 								}
 							},

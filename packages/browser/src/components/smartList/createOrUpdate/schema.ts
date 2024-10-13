@@ -4,6 +4,7 @@ import {
 	LibrarySmartFilter,
 	MediaMetadataSmartFilter,
 	MediaSmartFilter,
+	SeriesMetadataSmartFilter,
 	SeriesSmartFilter,
 	SmartFilter,
 	SmartList,
@@ -56,6 +57,10 @@ export const stringField = z.enum([
 	'links',
 	'characters',
 	'teams',
+	'comicid',
+	'booktype',
+	'status',
+	'meta_type',
 ])
 export type StringField = z.infer<typeof stringField>
 export const isStringField = (field: string): field is StringField =>
@@ -69,6 +74,7 @@ export const numberField = z.enum([
 	'pages',
 	'page_count',
 	'size',
+	'volume',
 ])
 export type NumberField = z.infer<typeof numberField>
 export const isNumberField = (field: string): field is NumberField =>
@@ -82,7 +88,7 @@ export const filter = z
 	.object({
 		field: z.string(),
 		operation,
-		source: z.enum(['book', 'book_meta', 'series', 'library']),
+		source: z.enum(['book', 'book_meta', 'series', 'series_meta', 'library']),
 		value: z.union([
 			z.string(),
 			z.string().array(),
@@ -129,6 +135,13 @@ export const intoAPIFilter = (input: z.infer<typeof filter>): MediaSmartFilter =
 				[input.field]: fieldValue,
 			} as SeriesSmartFilter,
 		}))
+		.with('series_meta', () => ({
+			series: {
+				metadata: {
+					[input.field]: fieldValue,
+				},
+			} as SeriesSmartFilter,
+		}))
 		.with('library', () => ({
 			series: {
 				library: {
@@ -153,6 +166,10 @@ export const intoFormFilter = (input: MediaSmartFilter): z.infer<typeof filter> 
 			() => 'library' as const,
 		)
 		.when(
+			(x) => 'series' in x && 'metadata' in x.series,
+			() => 'series_meta' as const,
+		)
+		.when(
 			(x) => 'series' in x,
 			() => 'series' as const,
 		)
@@ -165,6 +182,13 @@ export const intoFormFilter = (input: MediaSmartFilter): z.infer<typeof filter> 
 			() => Object.keys((input as { metadata: MediaMetadataSmartFilter }).metadata)[0],
 		)
 		.with('series', () => Object.keys((input as { series: SeriesSmartFilter }).series)[0])
+		.with(
+			'series_meta',
+			() =>
+				Object.keys(
+					(input as { series: { metadata: SeriesMetadataSmartFilter } }).series.metadata,
+				)[0],
+		)
 		.with(
 			'library',
 			() => Object.keys((input as { series: { library: LibrarySmartFilter } }).series.library)[0],
@@ -205,6 +229,21 @@ export const intoFormFilter = (input: MediaSmartFilter): z.infer<typeof filter> 
 		.with('series', () => {
 			const castedInput = input as { series: SeriesSmartFilter } // { series: { [field]: { [operation]: value } } }
 			const filterValue = getProperty(castedInput.series, field || '')
+			const operation = 'from' in filterValue ? 'range' : Object.keys(filterValue || {})[0]
+			const value = match(operation)
+				.with('range', () => filterValue)
+				.otherwise(() => getProperty(filterValue, operation || ''))
+
+			return {
+				field,
+				operation,
+				source,
+				value,
+			}
+		})
+		.with('series_meta', () => {
+			const castedInput = input as { series: { metadata: SeriesMetadataSmartFilter } } // { series: { metadata: { [field]: { [operation]: value } } } }
+			const filterValue = getProperty(castedInput.series.metadata, field || '') // { [operation]: value }
 			const operation = 'from' in filterValue ? 'range' : Object.keys(filterValue || {})[0]
 			const value = match(operation)
 				.with('range', () => filterValue)
@@ -361,8 +400,6 @@ export const intoAPI = ({
 
 export const intoAPIFilters = ({
 	groups,
-	joiner,
 }: Pick<SmartListFormSchema, 'filters'>['filters']): SmartFilter<MediaSmartFilter> => ({
 	groups: groups.map(intoAPIGroup),
-	joiner: joiner.toUpperCase() as 'AND' | 'OR',
 })

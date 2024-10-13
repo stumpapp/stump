@@ -236,24 +236,44 @@ pub enum LibrarySmartFilter {
 #[serde(untagged)]
 #[prisma_table("series_metadata")]
 pub enum SeriesMetadataSmartFilter {
+	#[is_optional]
+	AgeRating {
+		age_rating: i32,
+	},
 	MetaType {
 		meta_type: String,
+	},
+	#[is_optional]
+	Title {
+		title: String,
+	},
+	#[is_optional]
+	Summary {
+		summary: String,
 	},
 	#[is_optional]
 	Publisher {
 		publisher: String,
 	},
 	#[is_optional]
-	Status {
-		status: String,
+	Imprint {
+		imprint: String,
 	},
 	#[is_optional]
-	AgeRating {
-		age_rating: i32,
+	ComicId {
+		comicid: i32,
+	},
+	#[is_optional]
+	BookType {
+		booktype: String,
 	},
 	#[is_optional]
 	Volume {
 		volume: i32,
+	},
+	#[is_optional]
+	Status {
+		status: String,
 	},
 }
 

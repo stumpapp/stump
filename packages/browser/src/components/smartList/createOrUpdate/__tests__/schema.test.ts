@@ -116,9 +116,40 @@ describe('schema', () => {
 					value: Object.values(filter)[0],
 				})
 			}
+		})
 
-			// TODO: support series metadata
-			// TODO: add numeric filters for series?
+		it('should convert smart filter with series meta into form filter', () => {
+			for (const filter of stringFilters) {
+				expect(
+					intoFormFilter({
+						series: {
+							metadata: {
+								title: filter,
+							},
+						},
+					} satisfies MediaSmartFilter),
+				).toEqual({
+					field: 'title',
+					operation: Object.keys(filter)[0],
+					source: 'series_meta',
+					value: Object.values(filter)[0],
+				})
+			}
+
+			for (const filter of numericFilters) {
+				const operation = 'from' in filter ? 'range' : Object.keys(filter)[0]
+				const value = 'from' in filter ? filter : Object.values(filter)[0]
+				expect(
+					intoFormFilter({
+						series: { metadata: { age_rating: filter } },
+					} satisfies MediaSmartFilter),
+				).toEqual({
+					field: 'age_rating',
+					operation,
+					source: 'series_meta',
+					value,
+				})
+			}
 		})
 
 		it('should convert smart filter with library into form filter', () => {
@@ -299,6 +330,68 @@ describe('schema', () => {
 						from: 42,
 						inclusive: true,
 						to: 69,
+					},
+				},
+			})
+		})
+
+		it('should convert smart filter form with series meta into API filter', () => {
+			// String filter
+			expect(
+				intoAPIFilter({
+					field: 'title',
+					operation: 'any',
+					source: 'series_meta',
+					value: ['foo', 'shmoo'],
+				}),
+			).toEqual({
+				series: {
+					metadata: {
+						title: {
+							any: ['foo', 'shmoo'],
+						},
+					},
+				},
+			})
+
+			// Numeric filter (basic)
+			expect(
+				intoAPIFilter({
+					field: 'age_rating',
+					operation: 'gte',
+					source: 'series_meta',
+					value: 42,
+				}),
+			).toEqual({
+				series: {
+					metadata: {
+						age_rating: {
+							gte: 42,
+						},
+					},
+				},
+			})
+
+			// Numeric filter (complex)
+			expect(
+				intoAPIFilter({
+					field: 'age_rating',
+					operation: 'range',
+					source: 'series_meta',
+					value: {
+						from: 42,
+						inclusive: true,
+						to: 69,
+					},
+				}),
+			).toEqual({
+				series: {
+					metadata: {
+						age_rating: {
+							from: 42,
+							inclusive: true,
+							to: 69,
+						},
 					},
 				},
 			})

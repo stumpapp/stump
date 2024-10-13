@@ -68,6 +68,15 @@ export function FieldSelector({ idx }: Props) {
 						{t(getSourceKey('series', 'label'))}
 						<ArrowRight className="ml-2 h-4 w-4 text-foreground-muted" />
 					</Command.Item>
+
+					<Command.Item
+						onSelect={() => setSource('series_meta')}
+						className="flex items-center justify-between"
+					>
+						{t(getSourceKey('series_meta', 'label'))}
+						<ArrowRight className="ml-2 h-4 w-4 text-foreground-muted" />
+					</Command.Item>
+
 					<Command.Item
 						onSelect={() => setSource('library')}
 						className="flex items-center justify-between"
@@ -189,6 +198,18 @@ const sourceOptions: Record<FilterSource, { value: string }[]> = {
 	],
 	library: [{ value: 'name' }, { value: 'path' }],
 	series: [{ value: 'name' }, { value: 'path' }],
+	series_meta: [
+		{ value: 'age_rating' },
+		{ value: 'meta_type' },
+		{ value: 'title' },
+		{ value: 'summary' },
+		{ value: 'publisher' },
+		{ value: 'imprint' },
+		{ value: 'comicid' },
+		{ value: 'booktype' },
+		{ value: 'status' },
+		{ value: 'volume' },
+	],
 }
 
 // TODO: series_meta: [meta_type, publisher, status, age_rating, volume]

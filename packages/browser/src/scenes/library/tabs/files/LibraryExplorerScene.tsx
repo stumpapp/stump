@@ -1,32 +1,46 @@
+import { uploadApi } from '@stump/api'
 import { Button } from '@stump/components'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
+import toast from 'react-hot-toast'
 
 import { FileExplorer } from '@/components/explorer'
 
 import { useLibraryContext } from '../../context'
 
 export default function LibraryExplorerScene() {
-	const {
-		library: { path },
-	} = useLibraryContext()
+	const { library } = useLibraryContext()
+	const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
 	const fileInputRef = useRef(null)
 
 	// TODO - Remove this test code
 	// ////////////////////////////
-	const onUploadClicked = () => {
+	const onUploadClicked = async () => {
 		// eslint-disable-next-line no-console
 		console.log(`Selected file: ${fileInputRef}`)
-	}
 
-	const onFileSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
-		if (!event.target.files) {
+		if (!selectedFile) {
 			return
 		}
 
-		const file = event.target.files[0]
-		if (file) {
-			// Handle file here
+		try {
+			await uploadApi.uploadLibraryFile(library.id, selectedFile)
+			toast.success('Successfully uploaded file')
+		} catch (error) {
+			console.error(error)
+			toast.error('Failed to upload file')
+		}
+	}
+
+	const onFileSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const files = event.target.files
+		if (!files || files.length === 0) {
+			toast.error('No file selected')
+			return
+		}
+
+		if (files[0]) {
+			setSelectedFile(files[0])
 		}
 	}
 
@@ -34,7 +48,7 @@ export default function LibraryExplorerScene() {
 		<div className="flex flex-1">
 			<Button onClick={onUploadClicked}>Upload</Button>
 			<input type="file" ref={fileInputRef} onChange={onFileSelected} title="Browse" />
-			<FileExplorer rootPath={path} />
+			<FileExplorer rootPath={library.path} />
 		</div>
 	)
 }

@@ -1,7 +1,7 @@
 import { StumpWebClient } from '@stump/browser'
 import { Platform } from '@stump/client'
-import { SavedServer } from '@stump/sdk'
-import { useEffect, useState } from 'react'
+import { SavedServer, User } from '@stump/sdk'
+import { useCallback, useEffect, useState } from 'react'
 import { Store } from 'tauri-plugin-store-api'
 
 import { useTauriRPC } from './utils'
@@ -46,10 +46,33 @@ export default function App() {
 		}
 	}, [getNativePlatform, mounted])
 
+	const handleAuthenticated = useCallback(
+		async (user: User, token?: string) => {
+			try {
+				const currentServer = await store.get<SavedServer>('active_server')
+				await tauriRPC.initCredentialStore(user.username)
+				if (token && currentServer) {
+					await tauriRPC.setApiToken(currentServer.name, token)
+				}
+			} catch (err) {
+				console.error('Failed to initialize the credential store', err)
+			}
+		},
+		[tauriRPC],
+	)
+
 	// I want to wait until platform is properly set before rendering the app
 	if (!mounted) {
 		return null
 	}
 
-	return <StumpWebClient platform={platform} baseUrl={baseURL} tauriRPC={tauriRPC} />
+	return (
+		<StumpWebClient
+			platform={platform}
+			authMethod="token" // TODO: platform-specific
+			baseUrl={baseURL}
+			tauriRPC={tauriRPC}
+			onAuthenticated={handleAuthenticated}
+		/>
+	)
 }

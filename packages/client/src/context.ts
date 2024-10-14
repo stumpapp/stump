@@ -1,3 +1,4 @@
+import { AuthenticationMethod, User } from '@stump/sdk'
 import { QueryClient } from '@tanstack/react-query'
 import { createContext, useContext } from 'react'
 
@@ -7,6 +8,7 @@ export type IStumpClientContext = {
 	onRedirect?: (url: string) => void
 	onUnauthenticatedResponse?: (redirectUrl?: string) => void
 	onConnectionWithServerChanged?: (isConnected: boolean) => void
+	onAuthenticated?: (user: User, token?: string) => void
 	tauriRPC?: TauriRPC
 }
 
@@ -16,6 +18,30 @@ export type TauriRPC = {
 	 * Invoke the IPC command to set the use of Discord presence (on/off)
 	 */
 	setUseDiscordPresence: (connect: boolean) => Promise<void>
+	/**
+	 * Get the currently active server name. If none are active, or none exist, it will
+	 * return null
+	 */
+	getCurrentServerName: () => Promise<string | null>
+	/**
+	 * Initialize the credential store for the given user
+	 *
+	 * @param forUser The username to initialize the credential store for
+	 */
+	initCredentialStore: (forUser: string) => Promise<void>
+	/**
+	 * Get the API token for the given server
+	 *
+	 * @param forServer The server which the token was created by / to be used for
+	 */
+	getApiToken: (forServer: string) => Promise<string | null>
+	/**
+	 * Set the API token for the given server
+	 *
+	 * @param forServer The server which the token was created by / to be used for
+	 * @param token The JWT token to store in the credential store
+	 */
+	setApiToken: (forServer: string, token: string) => Promise<void>
 }
 
 export const StumpClientContext = createContext<IStumpClientContext | undefined>(undefined)
@@ -30,10 +56,11 @@ export type Platform = 'browser' | 'macOS' | 'windows' | 'linux' | 'mobile' | 'u
  * The props that are passed to the root of the application
  */
 export type StumpClientProps = {
+	authMethod?: AuthenticationMethod
 	platform: Platform
 	baseUrl?: string
 	tauriRPC?: TauriRPC
-}
+} & Pick<IStumpClientContext, 'onAuthenticated'>
 
 export const useClientContext = () => {
 	const context = useContext(StumpClientContext)

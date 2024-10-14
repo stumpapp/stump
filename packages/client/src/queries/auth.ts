@@ -1,6 +1,8 @@
 import { isUser, LoginOrRegisterArgs, type User } from '@stump/sdk'
 import { useEffect, useState } from 'react'
 
+import { useClientContext } from '@/context'
+
 import { queryClient, QueryOptions, useMutation, useQuery } from '../client'
 import { useSDK } from '../sdk'
 
@@ -42,6 +44,7 @@ export function useLoginOrRegister({
 }: UseLoginOrRegisterOptions) {
 	const [isClaimed, setIsClaimed] = useState(true)
 
+	const { onAuthenticated } = useClientContext()
 	const { sdk } = useSDK()
 	const { data: claimCheck, isLoading: isCheckingClaimed } = useQuery(
 		[sdk.server.keys.claimedStatus, refetchClaimed],
@@ -62,9 +65,20 @@ export function useLoginOrRegister({
 		onError: (err) => {
 			onError?.(err)
 		},
-		onSuccess: (user) => {
-			queryClient.invalidateQueries(['getLibraries'])
-			onSuccess?.(user)
+		onSuccess: async (response) => {
+			await queryClient.invalidateQueries(['getLibraries'])
+
+			// TODO(token): refresh support
+			if ('for_user' in response && !!onAuthenticated) {
+				const {
+					for_user,
+					token: { access_token },
+				} = response
+				await onAuthenticated(for_user, access_token)
+				onSuccess?.(for_user)
+			} else if (isUser(response)) {
+				onSuccess?.(response)
+			}
 		},
 	})
 

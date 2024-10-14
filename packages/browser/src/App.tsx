@@ -87,6 +87,8 @@ function RouterContainer(props: StumpClientProps) {
 		if (redirectUrl) {
 			handleRedirect(redirectUrl)
 		}
+		// TODO: Implement this for token removal
+		// props.onUnauthenticatedResponse?.(redirectUrl)
 	}
 
 	const handleConnectionWithServerChanged = (wasReached: boolean) => {
@@ -99,19 +101,20 @@ function RouterContainer(props: StumpClientProps) {
 	}
 
 	return (
-		<SDKProvider baseURL={baseUrl || ''} authMethod="session">
-			<StumpClientContextProvider
-				onUnauthenticatedResponse={handleUnathenticatedResponse}
-				onConnectionWithServerChanged={handleConnectionWithServerChanged}
-				tauriRPC={props.tauriRPC}
-			>
+		<StumpClientContextProvider
+			onUnauthenticatedResponse={handleUnathenticatedResponse}
+			onConnectionWithServerChanged={handleConnectionWithServerChanged}
+			tauriRPC={props.tauriRPC}
+			onAuthenticated={props.onAuthenticated}
+		>
+			<SDKProvider baseURL={baseUrl || ''} authMethod={props.authMethod || 'session'}>
 				{IS_DEVELOPMENT && <ReactQueryDevtools position="bottom-right" context={defaultContext} />}
 				<Helmet defaultTitle="Stump">
 					<title>Stump</title>
 				</Helmet>
 				<AppRouter />
 				<Notifications />
-			</StumpClientContextProvider>
-		</SDKProvider>
+			</SDKProvider>
+		</StumpClientContextProvider>
 	)
 }

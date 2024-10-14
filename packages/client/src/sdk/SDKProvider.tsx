@@ -1,6 +1,8 @@
 import { Api, AuthenticationMethod } from '@stump/sdk'
 import { PropsWithChildren, useEffect, useState } from 'react'
 
+import { useClientContext } from '@/context'
+
 import { SDKContext } from './context'
 
 type SDKProviderProps = {
@@ -14,12 +16,40 @@ export function SDKProvider({
 	children,
 }: PropsWithChildren<SDKProviderProps>) {
 	const [sdk, setSDK] = useState<Api | null>(null)
+	const { tauriRPC } = useClientContext()
 
 	useEffect(() => {
-		if (baseURL) {
-			setSDK(new Api(baseURL, authMethod))
+		if (!baseURL) return
+
+		const instance = new Api(baseURL, authMethod)
+
+		if (!tauriRPC || authMethod === 'session') {
+			setSDK(instance)
+			return
 		}
-	}, [baseURL, authMethod])
+
+		const setExistingToken = async () => {
+			try {
+				const currentServer = await tauriRPC.getCurrentServerName()
+				if (!currentServer) {
+					console.warn('No active server found')
+					setSDK(instance)
+					return
+				}
+
+				const token = await tauriRPC.getApiToken(currentServer)
+				if (token) {
+					instance.token = token
+				}
+			} catch (error) {
+				console.error('Failed to get existing token', error)
+			}
+
+			setSDK(instance)
+		}
+
+		setExistingToken()
+	}, [baseURL, authMethod, tauriRPC])
 
 	if (!sdk) {
 		return null

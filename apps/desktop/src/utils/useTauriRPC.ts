@@ -33,8 +33,23 @@ export function useTauriRPC(): Return {
 	const setUseDiscordPresence = (connect: boolean) =>
 		invoke<void>('set_use_discord_connection', { connect })
 
+	const getCurrentServerName = () => invoke<string | null>('get_current_server')
+
+	const initCredentialStore = (forUser: string) =>
+		invoke<void>('init_credential_store', { username: forUser })
+
+	const getApiToken = (forServer: string) =>
+		invoke<string | null>('get_api_token', { server: forServer })
+
+	const setApiToken = (forServer: string, token: string) =>
+		invoke<void>('set_api_token', { server: forServer, token })
+
 	return {
+		getApiToken,
+		getCurrentServerName,
 		getNativePlatform,
+		initCredentialStore,
+		setApiToken,
 		setDiscordPresence,
 		setUseDiscordPresence,
 	}

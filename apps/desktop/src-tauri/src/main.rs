@@ -18,8 +18,8 @@ use store::AppStore;
 use state::AppState;
 
 use commands::{
-	close_splashscreen, get_api_token, set_api_token, set_discord_presence,
-	set_use_discord_connection,
+	close_splashscreen, get_api_token, get_current_server, init_credential_store,
+	set_api_token, set_discord_presence, set_use_discord_connection,
 };
 
 #[cfg(feature = "bundled-server")]
@@ -66,6 +66,8 @@ fn main() {
 			set_use_discord_connection,
 			set_discord_presence,
 			close_splashscreen,
+			get_current_server,
+			init_credential_store,
 			get_api_token,
 			set_api_token,
 		])

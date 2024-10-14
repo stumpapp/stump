@@ -72,6 +72,11 @@ impl SecureStore {
 		self.records.clear();
 	}
 
+	/// Replace the store with a new one (e.g. after reauthenticating)
+	pub fn replace(&mut self, new_store: SecureStore) {
+		self.records = new_store.records;
+	}
+
 	/// Get the API token for the given server, if it exists
 	pub fn get_api_token(
 		&self,

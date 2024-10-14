@@ -69,7 +69,7 @@ export default function App() {
 	return (
 		<StumpWebClient
 			platform={platform}
-			authMethod="token" // TODO: platform-specific
+			authMethod={platform === 'windows' ? 'token' : 'session'}
 			baseUrl={baseURL}
 			tauriRPC={tauriRPC}
 			onAuthenticated={handleAuthenticated}

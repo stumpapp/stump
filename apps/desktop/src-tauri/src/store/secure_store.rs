@@ -38,6 +38,19 @@ pub struct CredentialStoreTokenState(HashMap<ServerName, bool>);
 // TODO: it would be nice to manage refreshes as well as expiration times?
 // TODO: determine if I am using keyring appropriately here
 
+// TODO: REFACTOR PATTERN AWAY FROM username. So I think I approached this slightly incorrectly.
+// The main issue is that the username is not persisted between reboots/app restarts, which means that
+// there will never be a token pulled from the store because an entry is only added once a user logs in.
+// This feels correct, but is actually unintuitively wrong. The entire secure store IS scoped to a single user,
+// the username which is used in Stump is irrelevant. The server either has a token or it doesn't, and if the Stump
+// account is "wrong" then the user can log out, remove the current token, log in with the correct account, and
+// set the updated token for that server. This store shouldn't concern itself with multi-user things, the operator
+// is the single-user. This means:
+// 1. The username should be removed from the EntryParams struct, and the struct at this point can be removed
+// 2. The "user" for an entry should be the same, I guess a constand like "stump-desktop-operator" or something
+// 3. The store should be initialized with a list of servers **regardless of auth status**. It currently only gets
+//    initialized once initial login. This is outside the domain of the store, and the changes are elsewhere for this
+
 /// A secure store for API tokens **scoped to a user**. This store allows for managing multiple tokens
 /// for different servers, however they are all assumed to be for the same user. When the frontend logs a user
 /// out, the store should be reinitialized via [`SecureStore::init`] once reauthenticated.

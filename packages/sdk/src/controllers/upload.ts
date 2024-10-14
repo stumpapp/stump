@@ -5,10 +5,6 @@ export class UploadAPI extends APIBase {
 		const formData = new FormData()
 		formData.append('file', file)
 
-		return this.axios.post(`/upload/libraries/${id}`, formData, {
-			headers: {
-				'Content-Type': 'multipart/form-data',
-			},
-		})
+		return this.axios.post(`/upload/libraries/${id}`, formData)
 	}
 }

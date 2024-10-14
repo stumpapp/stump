@@ -34,6 +34,12 @@ use crate::{
 	utils::{http::ImageResponse, validate_and_load_image},
 };
 
+/// Request body for updating a media's thumbnail using a specific page from the media.
+///
+/// The `page` field specifies the page to be used to generate a thumbnail. The
+/// `is_zero_based` field  can be set to `true` if the page numbering starts from
+/// `0`. This will add 1 to the indicated `page`. A `None` value is the same
+/// as passing `Some(false)`.
 #[derive(Deserialize, ToSchema, specta::Type)]
 pub struct PatchMediaThumbnail {
 	page: i32,

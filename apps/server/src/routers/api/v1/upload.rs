@@ -11,7 +11,7 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	middleware::auth::RequestContext,
-	routers::api::v1::library::library_not_hidden_from_user_filter,
+	routers::api::filters::library_not_hidden_from_user_filter,
 	utils::validate_and_load_file_upload,
 };
 
@@ -23,7 +23,7 @@ pub(crate) fn mount(_app_state: AppState) -> Router<AppState> {
 }
 
 #[utoipa::path(
-	get,
+	post,
 	path = "/api/v1/upload/libraries/:id",
 	tag = "library",
 	params(
@@ -39,37 +39,38 @@ pub(crate) fn mount(_app_state: AppState) -> Router<AppState> {
 async fn upload_to_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	//Extension(req): Extension<RequestContext>,
 	mut upload: Multipart,
 ) -> APIResult<Json<String>> {
-	let user = req.user_and_enforce_permissions(&[
-		UserPermission::UploadFile,
-		UserPermission::ManageLibrary,
-	])?;
+	tracing::warn!("Inside upload_to_library");
+
+	//let user = req.user_and_enforce_permissions(&[
+	//	UserPermission::UploadFile,
+	//	UserPermission::ManageLibrary,
+	//])?;
 	let client = &ctx.db;
 
 	let library = client
 		.library()
 		.find_first(vec![
 			library::id::equals(id),
-			library_not_hidden_from_user_filter(&user),
+			//library_not_hidden_from_user_filter(&user),
 		])
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound(String::from("Library not found")))?;
 
-	let (_, bytes) = validate_and_load_file_upload(
+	let upload_data = validate_and_load_file_upload(
 		&mut upload,
 		Some(ctx.config.max_image_upload_size),
 	)
 	.await?;
 
-	place_libary_file("new_file.test", bytes, library)?;
-
+	place_library_file(&upload_data.name, upload_data.bytes, library)?;
 	Ok(Json("It worked".to_string()))
 }
 
-fn place_libary_file(
+fn place_library_file(
 	name: &str,
 	content: Vec<u8>,
 	library: library::Data,

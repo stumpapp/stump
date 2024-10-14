@@ -2,6 +2,7 @@ use std::{fs, path::PathBuf};
 
 use axum::{
 	extract::{Multipart, Path, State},
+	middleware,
 	routing::post,
 	Extension, Json, Router,
 };
@@ -10,16 +11,18 @@ use stump_core::{db::entity::UserPermission, prisma::library};
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
-	middleware::auth::RequestContext,
+	middleware::auth::{auth_middleware, RequestContext},
 	routers::api::filters::library_not_hidden_from_user_filter,
 	utils::validate_and_load_file_upload,
 };
 
-pub(crate) fn mount(_app_state: AppState) -> Router<AppState> {
-	Router::new().nest(
-		"/upload",
-		Router::new().route("/libraries/:id", post(upload_to_library)),
-	)
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
+	Router::new()
+		.nest(
+			"/upload",
+			Router::new().route("/libraries/:id", post(upload_to_library)),
+		)
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 #[utoipa::path(
@@ -39,22 +42,22 @@ pub(crate) fn mount(_app_state: AppState) -> Router<AppState> {
 async fn upload_to_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	//Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<RequestContext>,
 	mut upload: Multipart,
 ) -> APIResult<Json<String>> {
 	tracing::warn!("Inside upload_to_library");
 
-	//let user = req.user_and_enforce_permissions(&[
-	//	UserPermission::UploadFile,
-	//	UserPermission::ManageLibrary,
-	//])?;
+	let user = req.user_and_enforce_permissions(&[
+		UserPermission::UploadFile,
+		UserPermission::ManageLibrary,
+	])?;
 	let client = &ctx.db;
 
 	let library = client
 		.library()
 		.find_first(vec![
 			library::id::equals(id),
-			//library_not_hidden_from_user_filter(&user),
+			library_not_hidden_from_user_filter(&user),
 		])
 		.exec()
 		.await?

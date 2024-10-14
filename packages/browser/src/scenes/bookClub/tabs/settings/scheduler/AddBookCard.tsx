@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import BookSearchOverlay from '@/components/book/BookSearchOverlay'
+import { EntityImage } from '@/components/entity'
 import { formatBookName } from '@/utils/format'
 
 import { defaultBook, Schema } from './CreateOrAddToScheduleForm'
@@ -68,7 +69,7 @@ export default function AddBookCard({ index }: Props) {
 			<div className="flex">
 				<div className="max-h-[195px] w-[125px]">
 					<AspectRatio ratio={2 / 3}>
-						<img
+						<EntityImage
 							src={sdk.media.thumbnailURL(selectedBook.id)}
 							className="rounded-md object-cover"
 						/>

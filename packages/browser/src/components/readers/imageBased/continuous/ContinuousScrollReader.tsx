@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router-dom'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { ScrollerProps, Virtuoso } from 'react-virtuoso'
 
+import { EntityImage } from '@/components/entity'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 export type ContinuousReaderOrientation = 'horizontal' | 'vertical'
@@ -159,7 +160,7 @@ type PageProps = {
 	onPageClick: () => void
 }
 const Page = ({ page, src, imageScaling: { scaleToFit }, onPageClick }: PageProps) => (
-	<img
+	<EntityImage
 		key={`page-${page}-scaled-${scaleToFit}`}
 		className={cn(
 			'z-30 select-none',

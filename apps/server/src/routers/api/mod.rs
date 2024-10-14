@@ -175,9 +175,9 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<CreateBookClubSchedule>()?).as_bytes(),
 		)?;
-
-		let var_name = &format!("{}\n\n", ts_export::<PatchMediaThumbnail>()?);
-		file.write_all(var_name.as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<PatchMediaThumbnail>()?).as_bytes(),
+		)?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<PatchSeriesThumbnail>()?).as_bytes(),
 		)?;

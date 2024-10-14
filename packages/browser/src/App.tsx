@@ -106,6 +106,7 @@ function RouterContainer(props: StumpClientProps) {
 			onConnectionWithServerChanged={handleConnectionWithServerChanged}
 			tauriRPC={props.tauriRPC}
 			onAuthenticated={props.onAuthenticated}
+			onLogout={props.onLogout}
 		>
 			<SDKProvider baseURL={baseUrl || ''} authMethod={props.authMethod || 'session'}>
 				{IS_DEVELOPMENT && <ReactQueryDevtools position="bottom-right" context={defaultContext} />}

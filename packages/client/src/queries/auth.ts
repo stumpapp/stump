@@ -66,8 +66,6 @@ export function useLoginOrRegister({
 			onError?.(err)
 		},
 		onSuccess: async (response) => {
-			await queryClient.invalidateQueries(['getLibraries'])
-
 			// TODO(token): refresh support
 			if ('for_user' in response && !!onAuthenticated) {
 				const {
@@ -79,6 +77,8 @@ export function useLoginOrRegister({
 			} else if (isUser(response)) {
 				onSuccess?.(response)
 			}
+
+			await queryClient.invalidateQueries(['getLibraries'])
 		},
 	})
 
@@ -109,13 +109,15 @@ type UseLogoutParams = {
 
 export function useLogout({ removeStoreUser }: UseLogoutParams = {}) {
 	const { sdk } = useSDK()
+	const { onLogout } = useClientContext()
 	const { mutateAsync: logout, isLoading } = useMutation(
 		[sdk.auth.keys.logout],
 		() => sdk.auth.logout(),
 		{
-			onSuccess: () => {
+			onSuccess: async () => {
 				queryClient.clear()
 				removeStoreUser?.()
+				await onLogout?.()
 			},
 		},
 	)

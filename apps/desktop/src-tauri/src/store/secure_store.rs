@@ -1,8 +1,8 @@
-// TODO: store keyring entries per configured server? E.g. typescript Record<string, Entry>
-
 use std::collections::HashMap;
 
 use keyring::Entry;
+use serde::{Deserialize, Serialize};
+use specta::Type;
 
 #[derive(Debug, thiserror::Error)]
 pub enum SecureStoreError {
@@ -32,6 +32,9 @@ pub struct EntryParams {
 	pub username: String,
 }
 
+#[derive(Debug, Serialize, Deserialize, Type)]
+pub struct CredentialStoreTokenState(HashMap<ServerName, bool>);
+
 // TODO: it would be nice to manage refreshes as well as expiration times?
 // TODO: determine if I am using keyring appropriately here
 
@@ -47,7 +50,7 @@ impl SecureStore {
 		&mut self,
 		EntryParams { server, username }: EntryParams,
 	) -> Result<(), SecureStoreError> {
-		let entry = Entry::new_with_target("api-token", &server, &username)?;
+		let entry = Entry::new_with_target("user", &server, &username)?;
 		self.records.insert(server.clone(), entry);
 		Ok(())
 	}
@@ -75,6 +78,19 @@ impl SecureStore {
 	/// Replace the store with a new one (e.g. after reauthenticating)
 	pub fn replace(&mut self, new_store: SecureStore) {
 		self.records = new_store.records;
+	}
+
+	/// Return a record which indicates servers with/without tokens
+	pub fn get_login_state(&self) -> CredentialStoreTokenState {
+		CredentialStoreTokenState(
+			self.records
+				.iter()
+				.map(|(server, entry)| {
+					let has_token = entry.get_password().is_ok();
+					(server.clone(), has_token)
+				})
+				.collect(),
+		)
 	}
 
 	/// Get the API token for the given server, if it exists
@@ -108,13 +124,16 @@ impl SecureStore {
 	}
 
 	/// Delete the API token for the given server
-	pub fn delete_api_token(&self, server: ServerName) -> Result<(), SecureStoreError> {
+	pub fn delete_api_token(&self, server: ServerName) -> Result<bool, SecureStoreError> {
 		let entry = self
 			.records
 			.get(&server)
 			.ok_or(SecureStoreError::EntryMissing)?;
-		entry.delete_credential()?;
-		Ok(())
+		match entry.delete_credential() {
+			Ok(_) => Ok(true),
+			Err(keyring::Error::NoEntry) => Ok(false),
+			Err(e) => Err(e.into()),
+		}
 	}
 }
 
@@ -178,5 +197,78 @@ mod tests {
 			.expect("Failed to get token");
 
 		assert_eq!(token, None);
+	}
+
+	#[test]
+	fn test_replace() {
+		let mut store =
+			SecureStore::init(vec!["homeserver".to_string()], "oromei".to_string())
+				.expect("Failed to init store");
+		// Update the entry with a token
+		store
+			.set_api_token(
+				"homeserver".to_string(),
+				"definitely-real-token".to_string(),
+			)
+			.expect("Failed to set token");
+
+		let new_store =
+			SecureStore::init(vec!["homeserver".to_string()], "oromei".to_string())
+				.expect("Failed to init store");
+		// Update the entry with a token
+		new_store
+			.set_api_token(
+				"homeserver".to_string(),
+				"new-definitely-real-token".to_string(),
+			)
+			.expect("Failed to set token");
+
+		store.replace(new_store);
+
+		let token = store
+			.get_api_token("homeserver".to_string())
+			.expect("Failed to get token")
+			.expect("Token missing");
+
+		assert_eq!(token, "new-definitely-real-token");
+	}
+
+	#[test]
+	fn test_create_entry() {
+		let mut store = SecureStore::default();
+		assert!(store.records.is_empty());
+
+		store
+			.create_entry(EntryParams {
+				server: "homeserver".to_string(),
+				username: "oromei".to_string(),
+			})
+			.expect("Failed to create entry");
+
+		assert_eq!(store.records.len(), 1);
+	}
+
+	#[test]
+	fn test_clear() {
+		let mut store = SecureStore::default();
+		store
+			.create_entry(EntryParams {
+				server: "homeserver".to_string(),
+				username: "oromei".to_string(),
+			})
+			.expect("Failed to create entry");
+
+		store.clear();
+
+		assert!(store.records.is_empty());
+	}
+
+	#[test]
+	fn test_init() {
+		let store =
+			SecureStore::init(vec!["homeserver".to_string()], "oromei".to_string())
+				.expect("Failed to init store");
+
+		assert_eq!(store.records.len(), 1);
 	}
 }

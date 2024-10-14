@@ -18,9 +18,12 @@ use store::AppStore;
 use state::AppState;
 
 use commands::{
-	close_splashscreen, get_api_token, get_current_server, init_credential_store,
-	set_api_token, set_discord_presence, set_use_discord_connection,
+	clear_credential_store, close_splashscreen, delete_api_token, get_api_token,
+	get_credential_store_state, get_current_server, init_credential_store, set_api_token,
+	set_discord_presence, set_use_discord_connection,
 };
+
+// TODO: https://v2.tauri.app/start/migrate/from-tauri-1/
 
 #[cfg(feature = "bundled-server")]
 use stump_server::{bootstrap_http_server_config, run_http_server};
@@ -70,6 +73,9 @@ fn main() {
 			init_credential_store,
 			get_api_token,
 			set_api_token,
+			delete_api_token,
+			clear_credential_store,
+			get_credential_store_state
 		])
 		.run(tauri::generate_context!())
 		.expect("error while running tauri application");
@@ -84,7 +90,7 @@ mod tests {
 		NamedType,
 	};
 
-	use crate::store::{app_store::*, saved_server::*};
+	use crate::store::{app_store::*, saved_server::*, secure_store::*};
 
 	#[allow(dead_code)]
 	fn ts_export<T>() -> Result<String, TsExportError>
@@ -117,6 +123,10 @@ mod tests {
 
 		file.write_all(format!("{}\n\n", ts_export::<SavedServer>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<AppStore>()?).as_bytes())?;
+
+		file.write_all(
+			format!("{}\n\n", ts_export::<CredentialStoreTokenState>()?).as_bytes(),
+		)?;
 
 		Ok(())
 	}

@@ -1200,6 +1200,19 @@
 							"disclaimer": "You will be logged out and have to reconfigure any servers in the initialization process",
 							"confirm": "Delete all servers"
 						}
+					},
+					"resetTokens": {
+						"label": "Clear authentication",
+						"description": [
+							"Remove all securely-stored access tokens for your servers",
+							"You will have to re-authenticate with each server"
+						],
+						"confirmation": {
+							"trigger": "Clear authentication",
+							"title": "Clear authentication",
+							"description": "This will remove all securely-stored access tokens for your servers",
+							"confirm": "Clear authentication"
+						}
 					}
 				},
 				"optionalFeatures": {

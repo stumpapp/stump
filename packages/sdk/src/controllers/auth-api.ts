@@ -63,11 +63,13 @@ export class AuthAPI extends APIBase {
 	}
 
 	/**
-	 * Log out the currently authenticated user
+	 * Log out the currently authenticated user. If token-based authentication is used, the token will be
+	 * removed from the API instance.
 	 */
 	async logout(): Promise<void> {
 		if (this.api.isTokenAuth) {
 			await this.api.axios.delete(authURL('/token'))
+			this.api.token = undefined
 		} else {
 			await this.api.axios.post(authURL('/logout'))
 		}

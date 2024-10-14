@@ -61,6 +61,19 @@ export default function App() {
 		[tauriRPC],
 	)
 
+	const handleLogout = useCallback(async () => {
+		try {
+			const currentServer = await store.get<SavedServer>('active_server')
+			if (currentServer) {
+				await tauriRPC.deleteApiToken(currentServer.name)
+			} else {
+				await tauriRPC.clearCredentialStore()
+			}
+		} catch (err) {
+			console.error('Failed to clear credential store', err)
+		}
+	}, [tauriRPC])
+
 	// I want to wait until platform is properly set before rendering the app
 	if (!mounted) {
 		return null
@@ -69,10 +82,12 @@ export default function App() {
 	return (
 		<StumpWebClient
 			platform={platform}
-			authMethod={platform === 'windows' ? 'token' : 'session'}
+			authMethod="token"
+			// authMethod={platform === 'windows' ? 'token' : 'session'}
 			baseUrl={baseURL}
 			tauriRPC={tauriRPC}
 			onAuthenticated={handleAuthenticated}
+			onLogout={handleLogout}
 		/>
 	)
 }

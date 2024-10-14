@@ -5,7 +5,7 @@ use crate::{
 	state::WrappedState,
 	store::{
 		app_store::AppStoreExt,
-		secure_store::{self, SecureStore, SecureStoreError},
+		secure_store::{CredentialStoreTokenState, SecureStore, SecureStoreError},
 		AppStore, StoreError,
 	},
 	utils::discord::DiscordIntegrationError,
@@ -115,6 +115,14 @@ pub async fn init_credential_store(
 }
 
 #[tauri::command]
+pub async fn get_credential_store_state(
+	state: State<'_, WrappedState>,
+) -> Result<CredentialStoreTokenState, DeskopRPCError> {
+	let state = state.lock().map_err(|_| DeskopRPCError::MutexPoisoned)?;
+	Ok(state.secure_store.get_login_state())
+}
+
+#[tauri::command]
 pub async fn get_api_token(
 	server: String,
 	state: State<'_, WrappedState>,
@@ -136,5 +144,23 @@ pub async fn set_api_token(
 
 	state.secure_store.set_api_token(server, token)?;
 
+	Ok(())
+}
+
+#[tauri::command]
+pub async fn delete_api_token(
+	server: String,
+	state: State<'_, WrappedState>,
+) -> Result<bool, DeskopRPCError> {
+	let state = state.lock().map_err(|_| DeskopRPCError::MutexPoisoned)?;
+	Ok(state.secure_store.delete_api_token(server)?)
+}
+
+#[tauri::command]
+pub async fn clear_credential_store(
+	state: State<'_, WrappedState>,
+) -> Result<(), DeskopRPCError> {
+	let mut state = state.lock().map_err(|_| DeskopRPCError::MutexPoisoned)?;
+	state.secure_store.clear();
 	Ok(())
 }

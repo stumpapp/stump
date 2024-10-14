@@ -1,4 +1,5 @@
 import { Platform, TauriRPC } from '@stump/client'
+import { CredentialStoreTokenState } from '@stump/sdk'
 import { invoke, os } from '@tauri-apps/api'
 
 type Return = TauriRPC & {
@@ -38,6 +39,14 @@ export function useTauriRPC(): Return {
 	const initCredentialStore = (forUser: string) =>
 		invoke<void>('init_credential_store', { username: forUser })
 
+	const getCredentialStoreState = () =>
+		invoke<CredentialStoreTokenState>('get_credential_store_state')
+
+	const clearCredentialStore = () => invoke<void>('clear_credential_store')
+
+	const deleteApiToken = (forServer: string) =>
+		invoke<void>('delete_api_token', { server: forServer })
+
 	const getApiToken = (forServer: string) =>
 		invoke<string | null>('get_api_token', { server: forServer })
 
@@ -45,7 +54,10 @@ export function useTauriRPC(): Return {
 		invoke<void>('set_api_token', { server: forServer, token })
 
 	return {
+		clearCredentialStore,
+		deleteApiToken,
 		getApiToken,
+		getCredentialStoreState,
 		getCurrentServerName,
 		getNativePlatform,
 		initCredentialStore,

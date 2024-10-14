@@ -1,4 +1,4 @@
-import { AuthenticationMethod, User } from '@stump/sdk'
+import { AuthenticationMethod, CredentialStoreTokenState, User } from '@stump/sdk'
 import { QueryClient } from '@tanstack/react-query'
 import { createContext, useContext } from 'react'
 
@@ -8,7 +8,8 @@ export type IStumpClientContext = {
 	onRedirect?: (url: string) => void
 	onUnauthenticatedResponse?: (redirectUrl?: string) => void
 	onConnectionWithServerChanged?: (isConnected: boolean) => void
-	onAuthenticated?: (user: User, token?: string) => void
+	onAuthenticated?: (user: User, token?: string) => Promise<void>
+	onLogout?: () => Promise<void>
 	tauriRPC?: TauriRPC
 }
 
@@ -30,6 +31,15 @@ export type TauriRPC = {
 	 */
 	initCredentialStore: (forUser: string) => Promise<void>
 	/**
+	 * Get the current state of the credential store. This **will not** return actual
+	 * tokens, but will return a record for which servers have tokens stored
+	 */
+	getCredentialStoreState: () => Promise<CredentialStoreTokenState>
+	/**
+	 * Clear the credential store
+	 */
+	clearCredentialStore: () => Promise<void>
+	/**
 	 * Get the API token for the given server
 	 *
 	 * @param forServer The server which the token was created by / to be used for
@@ -42,6 +52,12 @@ export type TauriRPC = {
 	 * @param token The JWT token to store in the credential store
 	 */
 	setApiToken: (forServer: string, token: string) => Promise<void>
+	/**
+	 * Delete the API token for the given server
+	 *
+	 * @param forServer The server which the token was created by / to be used for
+	 */
+	deleteApiToken: (forServer: string) => Promise<void>
 }
 
 export const StumpClientContext = createContext<IStumpClientContext | undefined>(undefined)
@@ -60,7 +76,7 @@ export type StumpClientProps = {
 	platform: Platform
 	baseUrl?: string
 	tauriRPC?: TauriRPC
-} & Pick<IStumpClientContext, 'onAuthenticated'>
+} & Pick<IStumpClientContext, 'onAuthenticated' | 'onLogout'>
 
 export const useClientContext = () => {
 	const context = useContext(StumpClientContext)

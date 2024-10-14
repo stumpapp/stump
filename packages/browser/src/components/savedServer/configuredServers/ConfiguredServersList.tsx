@@ -7,12 +7,14 @@ import { useQueries } from '@tanstack/react-query'
 import React, { useCallback, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
+import { useTauriRPC } from '@/hooks/useTauriRPC'
 import { useAppStore, useTauriStore, useUserStore } from '@/stores'
 
 import AddServerModal from './AddServerModal'
 import ConfiguredServer from './ConfiguredServer'
 import DeleteServerConfirmation from './DeleteServerConfirmation'
 import EditServerModal from './EditServerModal'
+import RemoveAllTokensSection from './RemoveAllTokensSection'
 import ResetConfiguredServersSection from './ResetConfiguredServersSection'
 import SwitchToServerConfirmation from './SwitchToServerConfirmation'
 
@@ -38,6 +40,7 @@ export default function ConfiguredServersSection() {
 		removeServer,
 		resetStore,
 	} = useTauriStore()
+	const { clearCredentialStore } = useTauriRPC()
 
 	const setBaseURL = useAppStore((state) => state.setBaseUrl)
 	const setUser = useUserStore((state) => state.setUser)
@@ -150,6 +153,12 @@ export default function ConfiguredServersSection() {
 		}
 	}, [switchingServer, setActiveServer, safelyLogout, location.pathname, navigate])
 
+	const onClearTokens = useCallback(async () => {
+		await clearCredentialStore()
+		await safelyLogout()
+		navigate('/auth')
+	}, [clearCredentialStore, safelyLogout, navigate])
+
 	return (
 		<>
 			<SwitchToServerConfirmation
@@ -199,6 +208,7 @@ export default function ConfiguredServersSection() {
 					))}
 				</Card>
 
+				<RemoveAllTokensSection onConfirmClear={onClearTokens} />
 				<ResetConfiguredServersSection onConfirmReset={onDeleteAllServers} />
 			</div>
 		</>

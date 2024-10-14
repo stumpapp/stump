@@ -266,10 +266,10 @@ pub(crate) async fn replace_media_thumbnail(
 		.await?
 		.ok_or(APIError::NotFound(String::from("Media not found")))?;
 
-	let (content_type, bytes) =
+	let upload_data =
 		validate_and_load_image(&mut upload, Some(ctx.config.max_image_upload_size))
 			.await?;
-	let ext = content_type.extension();
+	let ext = upload_data.content_type.extension();
 	let book_id = media.id;
 
 	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
@@ -283,10 +283,11 @@ pub(crate) async fn replace_media_thumbnail(
 		);
 	}
 
-	let path_buf = place_thumbnail(&book_id, ext, &bytes, &ctx.config).await?;
+	let path_buf =
+		place_thumbnail(&book_id, ext, &upload_data.bytes, &ctx.config).await?;
 
 	Ok(ImageResponse::from((
-		content_type,
+		upload_data.content_type,
 		fs::read(path_buf).await?,
 	)))
 }

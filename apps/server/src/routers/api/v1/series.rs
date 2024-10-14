@@ -612,10 +612,10 @@ async fn replace_series_thumbnail(
 		.await?
 		.ok_or(APIError::NotFound(String::from("Series not found")))?;
 
-	let (content_type, bytes) =
+	let upload_data =
 		validate_and_load_image(&mut upload, Some(ctx.config.max_image_upload_size))
 			.await?;
-	let ext = content_type.extension();
+	let ext = upload_data.content_type.extension();
 	let series_id = series.id;
 
 	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
@@ -628,10 +628,11 @@ async fn replace_series_thumbnail(
 		),
 	}
 
-	let path_buf = place_thumbnail(&series_id, ext, &bytes, &ctx.config).await?;
+	let path_buf =
+		place_thumbnail(&series_id, ext, &upload_data.bytes, &ctx.config).await?;
 
 	Ok(ImageResponse::from((
-		content_type,
+		upload_data.content_type,
 		fs::read(path_buf).await?,
 	)))
 }

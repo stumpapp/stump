@@ -98,7 +98,6 @@ pub async fn get_current_server(
 
 #[tauri::command]
 pub async fn init_credential_store(
-	username: String,
 	state: State<'_, WrappedState>,
 	app_handle: AppHandle,
 ) -> Result<(), DeskopRPCError> {
@@ -108,7 +107,7 @@ pub async fn init_credential_store(
 	let servers = store.get_servers();
 	let server_names = servers.iter().map(|s| s.name.clone()).collect();
 
-	let secure_store = SecureStore::init(server_names, username)?;
+	let secure_store = SecureStore::init(server_names)?;
 	state.secure_store.replace(secure_store);
 
 	Ok(())

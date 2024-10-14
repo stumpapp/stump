@@ -4,6 +4,8 @@ use keyring::Entry;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
+const STORAGE_USER: &str = "stump-desktop-operator";
+
 #[derive(Debug, thiserror::Error)]
 pub enum SecureStoreError {
 	#[error("Keyring error: {0}")]
@@ -27,58 +29,30 @@ impl std::fmt::Debug for SecureStore {
 	}
 }
 
-pub struct EntryParams {
-	pub server: ServerName,
-	pub username: String,
-}
-
 #[derive(Debug, Serialize, Deserialize, Type)]
 pub struct CredentialStoreTokenState(HashMap<ServerName, bool>);
 
 // TODO: it would be nice to manage refreshes as well as expiration times?
-// TODO: determine if I am using keyring appropriately here
-
-// TODO: REFACTOR PATTERN AWAY FROM username. So I think I approached this slightly incorrectly.
-// The main issue is that the username is not persisted between reboots/app restarts, which means that
-// there will never be a token pulled from the store because an entry is only added once a user logs in.
-// This feels correct, but is actually unintuitively wrong. The entire secure store IS scoped to a single user,
-// the username which is used in Stump is irrelevant. The server either has a token or it doesn't, and if the Stump
-// account is "wrong" then the user can log out, remove the current token, log in with the correct account, and
-// set the updated token for that server. This store shouldn't concern itself with multi-user things, the operator
-// is the single-user. This means:
-// 1. The username should be removed from the EntryParams struct, and the struct at this point can be removed
-// 2. The "user" for an entry should be the same, I guess a constand like "stump-desktop-operator" or something
-// 3. The store should be initialized with a list of servers **regardless of auth status**. It currently only gets
-//    initialized once initial login. This is outside the domain of the store, and the changes are elsewhere for this
 
 /// A secure store for API tokens **scoped to a user**. This store allows for managing multiple tokens
 /// for different servers, however they are all assumed to be for the same user. When the frontend logs a user
 /// out, the store should be reinitialized via [`SecureStore::init`] once reauthenticated.
 impl SecureStore {
-	/// Create a new entry in the store for the given server and username. This should be called once
-	/// for each server the user has a token for. If a server did not exist before this store was initialized,
-	/// it should be added via this function to ensure the store is up to date. If that step is skipped, the
-	/// store will continue throwing [`SecureStoreError::EntryMissing`] until the entry is created.
-	pub fn create_entry(
-		&mut self,
-		EntryParams { server, username }: EntryParams,
-	) -> Result<(), SecureStoreError> {
-		let entry = Entry::new_with_target("user", &server, &username)?;
+	/// Create a new entry in the store for the given server. This should be called once the servers are loaded
+	/// If a server did not exist before this store was initialized, it should be added via this function to ensure
+	/// the store is up to date. If that step is skipped, the store will continue throwing [`SecureStoreError::EntryMissing`]
+	/// until the entry is created.
+	pub fn create_entry(&mut self, server: ServerName) -> Result<(), SecureStoreError> {
+		let entry = Entry::new_with_target("user", &server, STORAGE_USER)?;
 		self.records.insert(server.clone(), entry);
 		Ok(())
 	}
 
 	/// Initialize the store with entries for the given servers. This should be called each time a user logs in
-	pub fn init(
-		servers: Vec<String>,
-		for_user: String,
-	) -> Result<Self, SecureStoreError> {
+	pub fn init(servers: Vec<String>) -> Result<Self, SecureStoreError> {
 		let mut store = SecureStore::default();
 		for server in servers {
-			store.create_entry(EntryParams {
-				server,
-				username: for_user.clone(),
-			})?;
+			store.create_entry(server)?;
 		}
 		Ok(store)
 	}
@@ -156,9 +130,8 @@ mod tests {
 
 	#[test]
 	fn test_get_api_token_none() {
-		let store =
-			SecureStore::init(vec!["homeserver".to_string()], "oromei".to_string())
-				.expect("Failed to init store");
+		let store = SecureStore::init(vec!["homeserver".to_string()])
+			.expect("Failed to init store");
 
 		let token = store
 			.get_api_token("homeserver".to_string())
@@ -169,9 +142,8 @@ mod tests {
 
 	#[test]
 	fn test_get_api_token_some() {
-		let store =
-			SecureStore::init(vec!["homeserver".to_string()], "oromei".to_string())
-				.expect("Failed to init store");
+		let store = SecureStore::init(vec!["homeserver".to_string()])
+			.expect("Failed to init store");
 		// Update the entry with a token
 		store
 			.set_api_token(
@@ -190,9 +162,8 @@ mod tests {
 
 	#[test]
 	fn test_delete_api_token() {
-		let store =
-			SecureStore::init(vec!["homeserver".to_string()], "oromei".to_string())
-				.expect("Failed to init store");
+		let store = SecureStore::init(vec!["homeserver".to_string()])
+			.expect("Failed to init store");
 		// Update the entry with a token
 		store
 			.set_api_token(
@@ -214,9 +185,8 @@ mod tests {
 
 	#[test]
 	fn test_replace() {
-		let mut store =
-			SecureStore::init(vec!["homeserver".to_string()], "oromei".to_string())
-				.expect("Failed to init store");
+		let mut store = SecureStore::init(vec!["homeserver".to_string()])
+			.expect("Failed to init store");
 		// Update the entry with a token
 		store
 			.set_api_token(
@@ -225,9 +195,8 @@ mod tests {
 			)
 			.expect("Failed to set token");
 
-		let new_store =
-			SecureStore::init(vec!["homeserver".to_string()], "oromei".to_string())
-				.expect("Failed to init store");
+		let new_store = SecureStore::init(vec!["homeserver".to_string()])
+			.expect("Failed to init store");
 		// Update the entry with a token
 		new_store
 			.set_api_token(
@@ -252,10 +221,7 @@ mod tests {
 		assert!(store.records.is_empty());
 
 		store
-			.create_entry(EntryParams {
-				server: "homeserver".to_string(),
-				username: "oromei".to_string(),
-			})
+			.create_entry("homeserver".to_string())
 			.expect("Failed to create entry");
 
 		assert_eq!(store.records.len(), 1);
@@ -265,10 +231,7 @@ mod tests {
 	fn test_clear() {
 		let mut store = SecureStore::default();
 		store
-			.create_entry(EntryParams {
-				server: "homeserver".to_string(),
-				username: "oromei".to_string(),
-			})
+			.create_entry("homeserver".to_string())
 			.expect("Failed to create entry");
 
 		store.clear();
@@ -278,9 +241,8 @@ mod tests {
 
 	#[test]
 	fn test_init() {
-		let store =
-			SecureStore::init(vec!["homeserver".to_string()], "oromei".to_string())
-				.expect("Failed to init store");
+		let store = SecureStore::init(vec!["homeserver".to_string()])
+			.expect("Failed to init store");
 
 		assert_eq!(store.records.len(), 1);
 	}

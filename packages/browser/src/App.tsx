@@ -83,12 +83,11 @@ function RouterContainer(props: StumpClientProps) {
 	}
 
 	const handleUnathenticatedResponse = (redirectUrl?: string) => {
+		props.onUnauthenticatedResponse?.(redirectUrl)
 		setUser(null)
 		if (redirectUrl) {
 			handleRedirect(redirectUrl)
 		}
-		// TODO: Implement this for token removal
-		// props.onUnauthenticatedResponse?.(redirectUrl)
 	}
 
 	const handleConnectionWithServerChanged = (wasReached: boolean) => {

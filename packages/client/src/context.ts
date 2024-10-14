@@ -25,11 +25,9 @@ export type TauriRPC = {
 	 */
 	getCurrentServerName: () => Promise<string | null>
 	/**
-	 * Initialize the credential store for the given user
-	 *
-	 * @param forUser The username to initialize the credential store for
+	 * Initialize the credential store
 	 */
-	initCredentialStore: (forUser: string) => Promise<void>
+	initCredentialStore: () => Promise<void>
 	/**
 	 * Get the current state of the credential store. This **will not** return actual
 	 * tokens, but will return a record for which servers have tokens stored
@@ -76,7 +74,7 @@ export type StumpClientProps = {
 	platform: Platform
 	baseUrl?: string
 	tauriRPC?: TauriRPC
-} & Pick<IStumpClientContext, 'onAuthenticated' | 'onLogout'>
+} & Pick<IStumpClientContext, 'onAuthenticated' | 'onLogout' | 'onUnauthenticatedResponse'>
 
 export const useClientContext = () => {
 	const context = useContext(StumpClientContext)

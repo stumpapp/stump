@@ -36,8 +36,7 @@ export function useTauriRPC(): Return {
 
 	const getCurrentServerName = () => invoke<string | null>('get_current_server')
 
-	const initCredentialStore = (forUser: string) =>
-		invoke<void>('init_credential_store', { username: forUser })
+	const initCredentialStore = () => invoke<void>('init_credential_store')
 
 	const getCredentialStoreState = () =>
 		invoke<CredentialStoreTokenState>('get_credential_store_state')

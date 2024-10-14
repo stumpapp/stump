@@ -28,6 +28,7 @@ export default function App() {
 	useEffect(() => {
 		async function init() {
 			try {
+				await tauriRPC.initCredentialStore()
 				const platform = await getNativePlatform()
 				const activeServer = await store.get<SavedServer>('active_server')
 				if (activeServer) {
@@ -44,14 +45,14 @@ export default function App() {
 		if (!mounted) {
 			init()
 		}
-	}, [getNativePlatform, mounted])
+	}, [getNativePlatform, mounted, tauriRPC])
 
 	const handleAuthenticated = useCallback(
-		async (user: User, token?: string) => {
+		async (_user: User, token?: string) => {
 			try {
 				const currentServer = await store.get<SavedServer>('active_server')
-				await tauriRPC.initCredentialStore(user.username)
 				if (token && currentServer) {
+					console.debug('Saving API token for', currentServer.name)
 					await tauriRPC.setApiToken(currentServer.name, token)
 				}
 			} catch (err) {
@@ -82,12 +83,12 @@ export default function App() {
 	return (
 		<StumpWebClient
 			platform={platform}
-			authMethod="token"
-			// authMethod={platform === 'windows' ? 'token' : 'session'}
+			authMethod={platform === 'windows' ? 'token' : 'session'}
 			baseUrl={baseURL}
 			tauriRPC={tauriRPC}
 			onAuthenticated={handleAuthenticated}
 			onLogout={handleLogout}
+			onUnauthenticatedResponse={handleLogout}
 		/>
 	)
 }

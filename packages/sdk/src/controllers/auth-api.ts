@@ -68,7 +68,8 @@ export class AuthAPI extends APIBase {
 	 */
 	async logout(): Promise<void> {
 		if (this.api.isTokenAuth) {
-			await this.api.axios.delete(authURL('/token'))
+			// await this.api.axios.delete(authURL('/token'))
+			await this.api.axios.post(authURL('/logout'))
 			this.api.token = undefined
 		} else {
 			await this.api.axios.post(authURL('/logout'))

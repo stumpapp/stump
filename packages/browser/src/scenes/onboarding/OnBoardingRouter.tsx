@@ -7,7 +7,7 @@ export default function OnBoardingRouter() {
 	return (
 		<Suspense>
 			<Routes>
-				<Route path="/" element={<OnBoardingScene />} />
+				<Route path="*" element={<OnBoardingScene />} />
 			</Routes>
 		</Suspense>
 	)

@@ -4,7 +4,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { checkUrl, formatApiURL } from '@stump/sdk'
 import { SavedServer } from '@stump/sdk'
 import { useQueries } from '@tanstack/react-query'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { Fragment, PropsWithChildren, useCallback, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
 import { useTauriRPC } from '@/hooks/useTauriRPC'
@@ -104,8 +104,12 @@ export default function ConfiguredServersSection() {
 	const onCreateServer = useCallback(
 		async (server: SavedServer) => {
 			await addServer(server)
+			if (isOnboarding) {
+				setActiveServer(server.name)
+				window.location.href = '/'
+			}
 		},
-		[addServer],
+		[addServer, setActiveServer, isOnboarding],
 	)
 	/**
 	 * A callback to edit a server in the list of connected servers
@@ -162,16 +166,27 @@ export default function ConfiguredServersSection() {
 	}, [clearCredentialStore, safelyLogout, navigate])
 
 	const renderContent = () => {
-		if (isOnboarding) {
+		if (isOnboarding && !connected_servers.length) {
 			return (
 				<div className="p-4 text-foreground-muted">
 					TODO: proper onboarding messaging. Click add server
 				</div>
 			)
 		} else {
+			const SectionContainer = ({ children }: PropsWithChildren) =>
+				isOnboarding ? (
+					<div className="flex flex-col gap-y-6 px-4">{children}</div>
+				) : (
+					<Fragment>{children}</Fragment>
+				)
+
 			return (
 				<>
-					<Card className="flex flex-col divide-y divide-edge bg-background-surface">
+					<Card
+						className={cn('flex flex-col divide-y divide-edge bg-background-surface', {
+							'mx-4': isOnboarding,
+						})}
+					>
 						{connected_servers.map((server) => (
 							<ConfiguredServer
 								key={`configured-server-${server.name}_${server.uri}`}
@@ -185,8 +200,10 @@ export default function ConfiguredServersSection() {
 						))}
 					</Card>
 
-					<RemoveAllTokensSection onConfirmClear={onClearTokens} />
-					<ResetConfiguredServersSection onConfirmReset={onDeleteAllServers} />
+					<SectionContainer>
+						<RemoveAllTokensSection onConfirmClear={onClearTokens} />
+						<ResetConfiguredServersSection onConfirmReset={onDeleteAllServers} />
+					</SectionContainer>
 				</>
 			)
 		}

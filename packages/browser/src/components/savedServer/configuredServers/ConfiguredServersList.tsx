@@ -4,7 +4,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { checkUrl, formatApiURL } from '@stump/sdk'
 import { SavedServer } from '@stump/sdk'
 import { useQueries } from '@tanstack/react-query'
-import React, { Fragment, PropsWithChildren, useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
 import { useTauriRPC } from '@/hooks/useTauriRPC'
@@ -105,7 +105,8 @@ export default function ConfiguredServersSection() {
 		async (server: SavedServer) => {
 			await addServer(server)
 			if (isOnboarding) {
-				setActiveServer(server.name)
+				await setActiveServer(server.name)
+				// TODO(ux): Figure out how to avoid this, it seems like a full refresh is needed
 				window.location.href = '/'
 			}
 		},
@@ -129,15 +130,6 @@ export default function ConfiguredServersSection() {
 		[editingServer, editServer, setBaseURL],
 	)
 	/**
-	 * A callback to delete a server from the list of connected servers
-	 */
-	const onDeleteServer = useCallback(async () => {
-		if (deletingServer) {
-			await removeServer(deletingServer.name)
-			setDeletingServer(null)
-		}
-	}, [deletingServer, removeServer])
-	/**
 	 * A callback to delete all servers from the list of connected servers
 	 */
 	const onDeleteAllServers = useCallback(async () => {
@@ -145,6 +137,19 @@ export default function ConfiguredServersSection() {
 		await safelyLogout()
 		navigate('/auth')
 	}, [resetStore, safelyLogout, navigate])
+	/**
+	 * A callback to delete a server from the list of connected servers
+	 */
+	const onDeleteServer = useCallback(async () => {
+		const isLastServer = connected_servers.length === 1
+		if (isLastServer && deletingServer) {
+			await onDeleteAllServers()
+			setDeletingServer(null)
+		} else if (deletingServer) {
+			await removeServer(deletingServer.name)
+			setDeletingServer(null)
+		}
+	}, [deletingServer, removeServer, connected_servers.length, onDeleteAllServers])
 	/**
 	 * A callback to switch to a server in the list of connected servers, which will
 	 * logout the user and redirect them to the auth page to authenticate with the selected
@@ -158,56 +163,15 @@ export default function ConfiguredServersSection() {
 			navigate('/auth', { state: { from: returnTo } })
 		}
 	}, [switchingServer, setActiveServer, safelyLogout, location.pathname, navigate])
-
+	/**
+	 * A callback to clear all tokens from the credential store, which will log the user out
+	 * and redirect them to the auth page.
+	 */
 	const onClearTokens = useCallback(async () => {
 		await clearCredentialStore()
 		await safelyLogout()
 		navigate('/auth')
 	}, [clearCredentialStore, safelyLogout, navigate])
-
-	const renderContent = () => {
-		if (isOnboarding && !connected_servers.length) {
-			return (
-				<div className="p-4 text-foreground-muted">
-					TODO: proper onboarding messaging. Click add server
-				</div>
-			)
-		} else {
-			const SectionContainer = ({ children }: PropsWithChildren) =>
-				isOnboarding ? (
-					<div className="flex flex-col gap-y-6 px-4">{children}</div>
-				) : (
-					<Fragment>{children}</Fragment>
-				)
-
-			return (
-				<>
-					<Card
-						className={cn('flex flex-col divide-y divide-edge bg-background-surface', {
-							'mx-4': isOnboarding,
-						})}
-					>
-						{connected_servers.map((server) => (
-							<ConfiguredServer
-								key={`configured-server-${server.name}_${server.uri}`}
-								server={server}
-								isActive={server.name === active_server?.name}
-								onEdit={() => setEditingServer(server)}
-								onDelete={() => setDeletingServer(server)}
-								onSwitch={() => setSwitchingServer(server)}
-								isReachable={serverStatus[server.name]}
-							/>
-						))}
-					</Card>
-
-					<SectionContainer>
-						<RemoveAllTokensSection onConfirmClear={onClearTokens} />
-						<ResetConfiguredServersSection onConfirmReset={onDeleteAllServers} />
-					</SectionContainer>
-				</>
-			)
-		}
-	}
 
 	return (
 		<>
@@ -233,11 +197,7 @@ export default function ConfiguredServersSection() {
 			/>
 
 			<div className="flex flex-col gap-y-6">
-				<div
-					className={cn('flex items-end justify-between', {
-						'px-4 py-2': isOnboarding,
-					})}
-				>
+				<div className="flex items-end justify-between">
 					<div>
 						<Heading size="sm">{t(getKey('label'))}</Heading>
 						<Text variant="muted" size="sm">
@@ -248,7 +208,36 @@ export default function ConfiguredServersSection() {
 					<AddServerModal existingServers={connected_servers} onCreateServer={onCreateServer} />
 				</div>
 
-				{renderContent()}
+				{isOnboarding && !connected_servers.length && (
+					<div className="select-none rounded-lg border border-dashed border-edge-subtle p-4 text-foreground-muted">
+						{t(getKey('getStarted'))}
+					</div>
+				)}
+
+				{connected_servers.length > 0 && (
+					<Card className="flex flex-col divide-y divide-edge bg-background-surface">
+						{connected_servers.map((server) => (
+							<ConfiguredServer
+								key={`configured-server-${server.name}_${server.uri}`}
+								server={server}
+								isActive={server.name === active_server?.name}
+								onEdit={() => setEditingServer(server)}
+								onDelete={() => setDeletingServer(server)}
+								onSwitch={() => setSwitchingServer(server)}
+								isReachable={serverStatus[server.name]}
+							/>
+						))}
+					</Card>
+				)}
+
+				<div
+					className={cn('flex flex-col gap-y-6', {
+						'pointer-events-none opacity-50': connected_servers.length === 0,
+					})}
+				>
+					<RemoveAllTokensSection onConfirmClear={onClearTokens} />
+					<ResetConfiguredServersSection onConfirmReset={onDeleteAllServers} />
+				</div>
 			</div>
 		</>
 	)

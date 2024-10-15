@@ -1130,6 +1130,7 @@
 				"configuredServers": {
 					"label": "Configured servers",
 					"description": "The list of Stump servers you can connect to",
+					"getStarted": "Add a server to get started",
 					"unreachableServer": {
 						"tooltip": "Server unreachable"
 					},

@@ -1,4 +1,4 @@
-import { isUser, LoginOrRegisterArgs, type User } from '@stump/sdk'
+import { isAxiosError, isUser, LoginOrRegisterArgs, type User } from '@stump/sdk'
 import { useEffect, useState } from 'react'
 
 import { useClientContext } from '@/context'
@@ -49,6 +49,15 @@ export function useLoginOrRegister({
 	const { data: claimCheck, isLoading: isCheckingClaimed } = useQuery(
 		[sdk.server.keys.claimedStatus, refetchClaimed],
 		() => sdk.server.claimedStatus(),
+		{
+			retry: (failureCount, error) => {
+				if (failureCount > 3) {
+					return false
+				} else {
+					return isAxiosError(error) && error.code === 'ERR_NETWORK'
+				}
+			},
+		},
 	)
 
 	useEffect(() => {

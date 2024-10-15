@@ -3,7 +3,8 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { useSDK } from '../sdk'
 
-interface SseOptions {
+type SseOptions = {
+	headers?: Record<string, string>
 	onOpen?: (event: Event) => void
 	onClose?: (event?: Event) => void
 	onMessage?: (event: MessageEvent<unknown>) => void
@@ -12,7 +13,8 @@ interface SseOptions {
 
 let sse: EventSource
 
-function useSse(url: string, { onOpen, onClose, onMessage }: SseOptions = {}) {
+// TODO(tokens): Swap eventsource with polyfilled version that supports headers
+function useSse(url: string, { onOpen, onClose, onMessage, headers }: SseOptions = {}) {
 	const timoutRef = useRef<NodeJS.Timeout | null>(null)
 	/**
 	 * Initialize the EventSource connection

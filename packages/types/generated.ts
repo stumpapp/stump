@@ -366,8 +366,14 @@ export type CleanLibraryResponse = { deleted_media_count: number; deleted_series
 
 export type LibraryStatsParams = { all_users?: boolean }
 
+/**
+ * Represents an update to the completion status of a media item.
+ */
 export type PutMediaCompletionStatus = { is_complete: boolean; page?: number | null }
 
+/**
+ * Represents whether a media item is marked as completed and the last time it was completed.
+ */
 export type MediaIsComplete = { is_completed: boolean; last_completed_at: string | null }
 
 export type MediaMetadataOverview = { genres: string[]; writers: string[]; pencillers: string[]; inkers: string[]; colorists: string[]; letterers: string[]; editors: string[]; publishers: string[]; characters: string[]; teams: string[] }
@@ -408,6 +414,14 @@ export type CreateBookClubScheduleBook = { book: CreateBookClubScheduleBookOptio
 
 export type CreateBookClubSchedule = { default_interval_days: number | null; books: CreateBookClubScheduleBook[] }
 
+/**
+ * Request body for updating a media's thumbnail using a specific page from the media.
+ * 
+ * The `page` field specifies the page to be used to generate a thumbnail. The
+ * `is_zero_based` field  can be set to `true` if the page numbering starts from
+ * `0`. This will add 1 to the indicated `page`. A `None` value is the same
+ * as passing `Some(false)`.
+ */
 export type PatchMediaThumbnail = { page: number; is_zero_based?: boolean | null }
 
 export type PatchSeriesThumbnail = { media_id: string; page: number; is_zero_based?: boolean | null }

@@ -1,8 +1,9 @@
+pub(crate) mod filters;
+pub(crate) mod v1;
+
 use axum::Router;
 
 use crate::config::state::AppState;
-
-pub(crate) mod v1;
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new().nest("/api", Router::new().nest("/v1", v1::mount(app_state)))
@@ -17,12 +18,48 @@ mod tests {
 		NamedType,
 	};
 
-	use crate::{config::jwt::CreatedToken, filter::*};
-
-	use super::v1::{
-		auth::*, book_club::*, emailer::*, epub::*, job::*, library::*, media::*,
-		metadata::*, series::*, smart_list::*, user::*, ClaimResponse, StumpVersion,
-		UpdateCheck,
+	use crate::{
+		config::jwt::CreatedToken,
+		filter::{
+			LibraryBaseFilter, LibraryFilter, LibraryRelationFilter, LogFilter,
+			MediaBaseFilter, MediaFilter, MediaMetadataBaseFilter, MediaMetadataFilter,
+			MediaMetadataRelationFilter, Range, ReadStatus, SeriesBaseFilter,
+			SeriesFilter, SeriesMedataFilter, SeriesQueryRelation, UserQueryRelation,
+			ValueOrRange,
+		},
+		routers::api::v1::{
+			auth::{AuthenticationOptions, LoginOrRegisterArgs, LoginResponse},
+			book_club::{
+				BookClubInvitationAnswer, CreateBookClub, CreateBookClubInvitation,
+				CreateBookClubMember, CreateBookClubSchedule, CreateBookClubScheduleBook,
+				CreateBookClubScheduleBookOption, GetBookClubsParams, UpdateBookClub,
+				UpdateBookClubMember,
+			},
+			emailer::{
+				CreateOrUpdateEmailDevice, CreateOrUpdateEmailer, EmailerIncludeParams,
+				EmailerSendRecordIncludeParams, PatchEmailDevice,
+				SendAttachmentEmailResponse, SendAttachmentEmailsPayload,
+			},
+			epub::{CreateOrUpdateBookmark, DeleteBookmark},
+			job::UpdateSchedulerConfig,
+			library::{
+				CleanLibraryResponse, CreateLibrary, GenerateLibraryThumbnails,
+				LibraryStatsParams, PatchLibraryThumbnail, UpdateLibrary,
+				UpdateLibraryExcludedUsers,
+			},
+			media::{
+				individual::{BookRelations, MediaIsComplete, PutMediaCompletionStatus},
+				thumbnails::PatchMediaThumbnail,
+			},
+			metadata::MediaMetadataOverview,
+			series::{PatchSeriesThumbnail, SeriesIsComplete},
+			smart_list::{
+				CreateOrUpdateSmartList, CreateOrUpdateSmartListView,
+				GetSmartListsParams, SmartListMeta, SmartListRelationOptions,
+			},
+			user::{CreateUser, DeleteUser, UpdateUser, UpdateUserPreferences},
+			ClaimResponse, StumpVersion, UpdateCheck,
+		},
 	};
 
 	#[allow(dead_code)]
@@ -179,7 +216,6 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<CreateBookClubSchedule>()?).as_bytes(),
 		)?;
-
 		file.write_all(
 			format!("{}\n\n", ts_export::<PatchMediaThumbnail>()?).as_bytes(),
 		)?;

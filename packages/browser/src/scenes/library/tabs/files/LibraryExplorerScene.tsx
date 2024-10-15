@@ -1,4 +1,4 @@
-import { uploadApi } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { Button } from '@stump/components'
 import { useRef, useState } from 'react'
 import toast from 'react-hot-toast'
@@ -10,6 +10,7 @@ import { useLibraryContext } from '../../context'
 export default function LibraryExplorerScene() {
 	const { library } = useLibraryContext()
 	const [selectedFile, setSelectedFile] = useState<File | null>(null)
+	const { sdk } = useSDK()
 
 	const fileInputRef = useRef(null)
 
@@ -24,7 +25,7 @@ export default function LibraryExplorerScene() {
 		}
 
 		try {
-			await uploadApi.uploadLibraryFile(library.id, selectedFile)
+			await sdk.upload.uploadLibraryFile(library.id, selectedFile)
 			toast.success('Successfully uploaded file')
 		} catch (error) {
 			console.error(error)

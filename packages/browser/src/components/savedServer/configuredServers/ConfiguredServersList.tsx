@@ -1,5 +1,5 @@
 import { QueryClientContext, useLogout } from '@stump/client'
-import { Card, Heading, Text } from '@stump/components'
+import { Card, cn, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { checkUrl, formatApiURL } from '@stump/sdk'
 import { SavedServer } from '@stump/sdk'
@@ -29,6 +29,8 @@ type PingResult = {
 export default function ConfiguredServersSection() {
 	const location = useLocation()
 	const navigate = useNavigate()
+
+	const isOnboarding = location.pathname === '/'
 
 	const { t } = useLocaleContext()
 	const {
@@ -159,6 +161,37 @@ export default function ConfiguredServersSection() {
 		navigate('/auth')
 	}, [clearCredentialStore, safelyLogout, navigate])
 
+	const renderContent = () => {
+		if (isOnboarding) {
+			return (
+				<div className="p-4 text-foreground-muted">
+					TODO: proper onboarding messaging. Click add server
+				</div>
+			)
+		} else {
+			return (
+				<>
+					<Card className="flex flex-col divide-y divide-edge bg-background-surface">
+						{connected_servers.map((server) => (
+							<ConfiguredServer
+								key={`configured-server-${server.name}_${server.uri}`}
+								server={server}
+								isActive={server.name === active_server?.name}
+								onEdit={() => setEditingServer(server)}
+								onDelete={() => setDeletingServer(server)}
+								onSwitch={() => setSwitchingServer(server)}
+								isReachable={serverStatus[server.name]}
+							/>
+						))}
+					</Card>
+
+					<RemoveAllTokensSection onConfirmClear={onClearTokens} />
+					<ResetConfiguredServersSection onConfirmReset={onDeleteAllServers} />
+				</>
+			)
+		}
+	}
+
 	return (
 		<>
 			<SwitchToServerConfirmation
@@ -183,7 +216,11 @@ export default function ConfiguredServersSection() {
 			/>
 
 			<div className="flex flex-col gap-y-6">
-				<div className="flex items-end justify-between">
+				<div
+					className={cn('flex items-end justify-between', {
+						'px-4 py-2': isOnboarding,
+					})}
+				>
 					<div>
 						<Heading size="sm">{t(getKey('label'))}</Heading>
 						<Text variant="muted" size="sm">
@@ -194,22 +231,7 @@ export default function ConfiguredServersSection() {
 					<AddServerModal existingServers={connected_servers} onCreateServer={onCreateServer} />
 				</div>
 
-				<Card className="flex flex-col divide-y divide-edge bg-background-surface">
-					{connected_servers.map((server) => (
-						<ConfiguredServer
-							key={`configured-server-${server.name}_${server.uri}`}
-							server={server}
-							isActive={server.name === active_server?.name}
-							onEdit={() => setEditingServer(server)}
-							onDelete={() => setDeletingServer(server)}
-							onSwitch={() => setSwitchingServer(server)}
-							isReachable={serverStatus[server.name]}
-						/>
-					))}
-				</Card>
-
-				<RemoveAllTokensSection onConfirmClear={onClearTokens} />
-				<ResetConfiguredServersSection onConfirmReset={onDeleteAllServers} />
+				{renderContent()}
 			</div>
 		</>
 	)

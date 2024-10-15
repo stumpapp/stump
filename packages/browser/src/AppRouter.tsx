@@ -33,11 +33,15 @@ export function AppRouter() {
 			throw new Error('Base URL is not set')
 		}
 
-		return <OnBoardingRouter />
+		return (
+			<LocaleProvider locale={(locale as AllowedLocale) || 'en'}>
+				<OnBoardingRouter />
+			</LocaleProvider>
+		)
 	}
 
 	return (
-		<LocaleProvider locale={locale as AllowedLocale}>
+		<LocaleProvider locale={(locale as AllowedLocale) || 'en'}>
 			<Routes>
 				<Route path="/" element={<AppLayout />}>
 					<Route path="" element={<HomeScene />} />

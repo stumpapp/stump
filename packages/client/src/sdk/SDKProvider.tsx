@@ -19,7 +19,7 @@ export function SDKProvider({
 	const { tauriRPC } = useClientContext()
 
 	useEffect(() => {
-		if (!baseURL) return
+		if (!baseURL && !tauriRPC) return
 
 		const instance = new Api(baseURL, authMethod)
 

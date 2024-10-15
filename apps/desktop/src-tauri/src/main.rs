@@ -18,9 +18,9 @@ use store::AppStore;
 use state::AppState;
 
 use commands::{
-	clear_credential_store, close_splashscreen, delete_api_token, get_api_token,
-	get_credential_store_state, get_current_server, init_credential_store, set_api_token,
-	set_discord_presence, set_use_discord_connection,
+	clear_credential_store, delete_api_token, get_api_token, get_credential_store_state,
+	get_current_server, init_credential_store, set_api_token, set_discord_presence,
+	set_use_discord_connection,
 };
 
 // TODO: https://v2.tauri.app/start/migrate/from-tauri-1/
@@ -62,13 +62,14 @@ fn main() {
 	let app_state = AppState::new().expect("Failed to initialize application state");
 
 	tauri::Builder::default()
+		.plugin(tauri_plugin_shell::init())
+		.plugin(tauri_plugin_os::init())
 		.plugin(tauri_plugin_store::Builder::default().build())
 		.setup(setup_app)
 		.manage(Arc::new(Mutex::new(app_state)))
 		.invoke_handler(tauri::generate_handler![
 			set_use_discord_connection,
 			set_discord_presence,
-			close_splashscreen,
 			get_current_server,
 			init_credential_store,
 			get_api_token,

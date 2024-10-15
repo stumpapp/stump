@@ -1,8 +1,8 @@
 import { StumpWebClient } from '@stump/browser'
 import { Platform } from '@stump/client'
 import { SavedServer, User } from '@stump/sdk'
+import { createStore, Store } from '@tauri-apps/plugin-store'
 import { useCallback, useEffect, useState } from 'react'
-import { Store } from 'tauri-plugin-store-api'
 
 import { useTauriRPC } from './utils'
 
@@ -13,20 +13,35 @@ import { useTauriRPC } from './utils'
 // - https://developer.apple.com/documentation/security/preventing-insecure-network-connections
 // - https://developer.apple.com/documentation/bundleresources/information_property_list/nsapptransportsecurity
 
-const store = new Store('settings.json')
+// TODO(tauri-v2): Refactor this, the store is now dynamically loaded which makes this more awkward. Ideally we would initialize this higher in
+// the tree and pass it down where we can assert that it exists and is loaded
 
 export default function App() {
 	const { getNativePlatform, ...tauriRPC } = useTauriRPC()
 
+	const [store, setStore] = useState<Store>()
+
 	const [platform, setPlatform] = useState<Platform>('unknown')
 	const [baseURL, setBaseURL] = useState<string>()
 	const [mounted, setMounted] = useState(false)
+
+	useEffect(() => {
+		const init = async () => {
+			setStore(await createStore('settings.json'))
+		}
+
+		if (!store) {
+			init()
+		}
+	}, [store])
 
 	/**
 	 * An effect to initialize the application, setting the platform and base URL
 	 */
 	useEffect(() => {
 		async function init() {
+			if (!store) return
+
 			try {
 				await tauriRPC.initCredentialStore()
 				const platform = await getNativePlatform()
@@ -45,10 +60,11 @@ export default function App() {
 		if (!mounted) {
 			init()
 		}
-	}, [getNativePlatform, mounted, tauriRPC])
+	}, [getNativePlatform, mounted, tauriRPC, store])
 
 	const handleAuthenticated = useCallback(
 		async (_user: User, token?: string) => {
+			if (!store) return
 			try {
 				const currentServer = await store.get<SavedServer>('active_server')
 				if (token && currentServer) {
@@ -59,10 +75,11 @@ export default function App() {
 				console.error('Failed to initialize the credential store', err)
 			}
 		},
-		[tauriRPC],
+		[tauriRPC, store],
 	)
 
 	const handleLogout = useCallback(async () => {
+		if (!store) return
 		try {
 			const currentServer = await store.get<SavedServer>('active_server')
 			if (currentServer) {
@@ -73,7 +90,7 @@ export default function App() {
 		} catch (err) {
 			console.error('Failed to clear credential store', err)
 		}
-	}, [tauriRPC])
+	}, [tauriRPC, store])
 
 	// I want to wait until platform is properly set before rendering the app
 	if (!mounted) {

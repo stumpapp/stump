@@ -1,7 +1,10 @@
 import { DesktopAppStore, SavedServer } from '@stump/sdk'
-import { useCallback, useEffect } from 'react'
-import { Store } from 'tauri-plugin-store-api'
+import { createStore, Store } from '@tauri-apps/plugin-store'
+import { useCallback, useEffect, useState } from 'react'
 import { create } from 'zustand'
+
+// TODO(tauri-v2): Refactor this, the store is now dynamically loaded which makes this more awkward. Ideally we would initialize this higher in
+// the tree and pass it down where we can assert that it exists and is loaded
 
 /**
  * The type which represents the local store, which is a superset of the desktop application store
@@ -24,7 +27,7 @@ const useLocalStore = create<LocalStore>()((set) => ({
 /**
  * The desktop application store, persisted to disk and managed by Tauri
  */
-const STORE = new Store('settings.json')
+const loadStore = async () => createStore('settings.json')
 
 /**
  * A hook to interact with the desktop application store. There is a little bit of a
@@ -36,8 +39,25 @@ const STORE = new Store('settings.json')
  * to a single desktop application, there isn't really any need for a more complex solution.
  */
 export const useTauriStore = () => {
+	const [STORE, setStore] = useState<Store | null>(null)
+
 	const store = useLocalStore()
 
+	/**
+	 * An effect to load the store from disk on mount
+	 */
+	useEffect(() => {
+		const init = async () => {
+			setStore(await loadStore())
+		}
+
+		if (!STORE) {
+			init()
+		}
+	}, [STORE])
+
+	// FIXME: this effect is broken, sigh. Move the store loading into a higher component and
+	// pull it down..
 	/**
 	 * An effect to save the store to disk whenever it changes. This is a bit overly
 	 * cautious because of the following snippet from the docs:
@@ -48,14 +68,18 @@ export const useTauriStore = () => {
 	 * @see {@link Store.save}
 	 */
 	useEffect(() => {
-		STORE.save().catch((e) => console.error('Failed to save store', e))
-	}, [store])
+		STORE?.save().catch((e) => console.error('Failed to save store', e))
+	}, [STORE, store])
 
 	/**
 	 * An effect to load the store from disk on mount and sync it with the local store
 	 */
 	useEffect(
 		() => {
+			if (!STORE) {
+				return
+			}
+
 			const init = async () => {
 				try {
 					const storeEntries = await STORE.entries()
@@ -89,6 +113,10 @@ export const useTauriStore = () => {
 	 */
 	const addServer = useCallback(
 		async (server: SavedServer) => {
+			if (!STORE) {
+				return
+			}
+
 			const isEmpty = store.connected_servers.length === 0
 			await STORE.set('connected_servers', [...store.connected_servers, server])
 			if (isEmpty) {
@@ -100,7 +128,7 @@ export const useTauriStore = () => {
 			})
 			return server
 		},
-		[store],
+		[store, STORE],
 	)
 
 	/**
@@ -111,6 +139,9 @@ export const useTauriStore = () => {
 	 */
 	const editServer = useCallback(
 		async (originalName: string, server: SavedServer) => {
+			if (!STORE) {
+				return
+			}
 			const existingServer = store.connected_servers.find((s) => s.name === originalName)
 			if (!existingServer) {
 				return
@@ -123,7 +154,7 @@ export const useTauriStore = () => {
 				...(isActiveServer ? { active_server: server } : {}),
 			})
 		},
-		[store],
+		[store, STORE],
 	)
 
 	/**
@@ -133,25 +164,31 @@ export const useTauriStore = () => {
 	 */
 	const removeServer = useCallback(
 		async (name: string) => {
+			if (!STORE) {
+				return
+			}
 			const newServers = store.connected_servers.filter((server) => server.name !== name)
 			await STORE.set('connected_servers', newServers)
 			store.set({
 				connected_servers: newServers,
 			})
 		},
-		[store],
+		[store, STORE],
 	)
 
 	/**
 	 * Reset the store, deleting all connected servers and the active server.
 	 */
 	const resetStore = useCallback(async () => {
+		if (!STORE) {
+			return
+		}
 		await STORE.clear()
 		store.set({
 			active_server: undefined,
 			connected_servers: [],
 		})
-	}, [store])
+	}, [store, STORE])
 	/**
 	 * Set the active server
 	 *
@@ -159,24 +196,30 @@ export const useTauriStore = () => {
 	 */
 	const setActiveServer = useCallback(
 		async (name: string) => {
+			if (!STORE) {
+				return
+			}
 			const activeServer = store.connected_servers.find((server) => server.name === name)
 			if (activeServer) {
 				await STORE.set('active_server', activeServer)
 			}
 		},
-		[store],
+		[store, STORE],
 	)
 	/**
 	 * Set whether to run the bundled server or not
 	 */
 	const setRunBundledServer = useCallback(
 		async (value: boolean) => {
+			if (!STORE) {
+				return
+			}
 			await STORE.set('run_bundled_server', value)
 			store.set({
 				run_bundled_server: value,
 			})
 		},
-		[store],
+		[store, STORE],
 	)
 
 	return {

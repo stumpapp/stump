@@ -1,6 +1,7 @@
 import { Platform, TauriRPC } from '@stump/client'
 import { CredentialStoreTokenState } from '@stump/sdk'
-import { invoke, os } from '@tauri-apps/api'
+import { invoke } from '@tauri-apps/api/core'
+import * as os from '@tauri-apps/plugin-os'
 
 type Return = TauriRPC & {
 	getNativePlatform: () => Promise<Platform>
@@ -16,10 +17,11 @@ export function useTauriRPC(): Return {
 	 */
 	const getNativePlatform = async () => {
 		const platform = await os.platform()
+		// TODO(tauri-v2): Just use the platform string directly, they're more readable/similar now in v2
 		switch (platform) {
-			case 'darwin':
+			case 'macos':
 				return 'macOS'
-			case 'win32':
+			case 'windows':
 				return 'windows'
 			case 'linux':
 				return 'linux'

@@ -1,5 +1,5 @@
 use serde::Serialize;
-use tauri::{AppHandle, Manager, State};
+use tauri::{AppHandle, State};
 
 use crate::{
 	state::WrappedState,
@@ -16,10 +16,6 @@ use crate::{
 pub enum DeskopRPCError {
 	#[error("Failed to get state in handler")]
 	MutexPoisoned,
-	#[error("Failed action on window")]
-	WindowOperationFailed,
-	#[error("Window not found")]
-	WindowMissing,
 	#[error("{0}")]
 	DiscordError(#[from] DiscordIntegrationError),
 	#[error("{0}")]
@@ -69,29 +65,10 @@ pub fn set_discord_presence(
 }
 
 #[tauri::command]
-pub async fn close_splashscreen(window: tauri::Window) -> Result<(), DeskopRPCError> {
-	if let Some(splashscreen) = window.get_window("splashscreen") {
-		splashscreen
-			.close()
-			.map_err(|_| DeskopRPCError::WindowOperationFailed)?;
-	}
-
-	let Some(main_window) = window.get_window("main") else {
-		return Err(DeskopRPCError::WindowMissing);
-	};
-
-	main_window
-		.show()
-		.map_err(|_| DeskopRPCError::WindowOperationFailed)?;
-
-	Ok(())
-}
-
-#[tauri::command]
 pub async fn get_current_server(
 	app_handle: AppHandle,
 ) -> Result<Option<String>, DeskopRPCError> {
-	let store = AppStore::load_store(app_handle)?;
+	let store = AppStore::load_store(&app_handle)?;
 	let server = store.get_active_server();
 	Ok(server.map(|s| s.name))
 }
@@ -102,7 +79,7 @@ pub async fn init_credential_store(
 	app_handle: AppHandle,
 ) -> Result<(), DeskopRPCError> {
 	let mut state = state.lock().map_err(|_| DeskopRPCError::MutexPoisoned)?;
-	let store = AppStore::load_store(app_handle)?;
+	let store = AppStore::load_store(&app_handle)?;
 
 	let servers = store.get_servers();
 	let server_names = servers.iter().map(|s| s.name.clone()).collect();

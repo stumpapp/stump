@@ -1,7 +1,7 @@
 use serde::Serialize;
 use specta::Type;
-use tauri::{App, AppHandle, Wry};
-use tauri_plugin_store::{Store, StoreBuilder};
+use tauri::{App, AppHandle, Manager, Wry};
+use tauri_plugin_store::{Store, StoreExt};
 
 use super::saved_server::SavedServer;
 
@@ -23,14 +23,17 @@ pub struct AppStore {
 }
 
 impl AppStore {
-	pub fn load_store(handle: AppHandle) -> Result<Store<Wry>, StoreError> {
-		// Init store and load it from disk
-		let mut store = StoreBuilder::new(
-			handle,
-			STORE_FILE.parse().map_err(|_| StoreError::StoreLoadError)?,
-		)
-		.build();
+	pub fn load_store(handle: &AppHandle) -> Result<Store<Wry>, StoreError> {
+		let path = handle
+			.path()
+			.app_config_dir()
+			.map_err(|_| StoreError::StoreLoadError)?
+			.join(STORE_FILE);
 
+		// Init store and load it from disk
+		let store = handle.store_builder(path).build();
+
+		// TODO(tauri-v2): Still necessary?
 		// If there are no saved settings yet, this will return an error so we ignore the return value.
 		let _ = store.load();
 
@@ -61,7 +64,6 @@ pub trait AppStoreExt {
 impl AppStoreExt for Store<Wry> {
 	fn get_servers(&self) -> Vec<SavedServer> {
 		self.get("connected_servers")
-			.cloned()
 			.and_then(|s| s.as_array().cloned())
 			.map(SavedServer::from_vec)
 			.unwrap_or_default()
@@ -69,7 +71,6 @@ impl AppStoreExt for Store<Wry> {
 
 	fn get_active_server(&self) -> Option<SavedServer> {
 		self.get("active_server")
-			.cloned()
 			.map(SavedServer::try_from)
 			.transpose()
 			.unwrap_or_else(|error| {
@@ -80,7 +81,6 @@ impl AppStoreExt for Store<Wry> {
 
 	fn get_run_bundled_server(&self) -> bool {
 		self.get("run_bundled_server")
-			.cloned()
 			.and_then(|s| s.as_bool())
 			.unwrap_or(false)
 	}

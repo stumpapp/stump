@@ -113,6 +113,8 @@ pub struct GetSmartListsParams {
 	#[serde(default)]
 	all: Option<bool>,
 	#[serde(default)]
+	mine: Option<bool>,
+	#[serde(default)]
 	search: Option<String>,
 }
 
@@ -141,11 +143,21 @@ async fn get_smart_lists(
 		));
 	}
 
+	let mine = params.mine.unwrap_or(false);
+	if query_all && mine {
+		return Err(APIError::BadRequest(
+			"Cannot query all and mine at the same time".to_string(),
+		));
+	}
+
 	let where_params = chain_optional_iter(
 		[],
 		[
-			(!query_all)
+			// If not querying all, and not querying mine, then we need to filter by access
+			(!query_all && !mine)
 				.then(|| smart_list_access_for_user(&user, AccessRole::Reader.value())),
+			// If querying mine, then we need to filter by the user
+			mine.then(|| smart_list::creator_id::equals(user.id.clone())),
 			params.search.map(|search| {
 				or![
 					smart_list::name::contains(search.clone()),
@@ -174,6 +186,8 @@ pub struct CreateOrUpdateSmartList {
 	pub joiner: Option<FilterJoin>,
 	#[serde(default)]
 	pub default_grouping: Option<SmartListItemGrouping>,
+	#[serde(default)]
+	pub visibility: Option<EntityVisibility>,
 }
 
 #[utoipa::path(
@@ -216,6 +230,9 @@ async fn create_smart_list(
 						.map(|joiner| smart_list::joiner::set(joiner.to_string())),
 					input.default_grouping.map(|grouping| {
 						smart_list::default_grouping::set(grouping.to_string())
+					}),
+					input.visibility.map(|visibility| {
+						smart_list::visibility::set(visibility.to_string())
 					}),
 				],
 			),
@@ -322,6 +339,9 @@ async fn update_smart_list_by_id(
 						.map(|joiner| smart_list::joiner::set(joiner.to_string())),
 					input.default_grouping.map(|grouping| {
 						smart_list::default_grouping::set(grouping.to_string())
+					}),
+					input.visibility.map(|visibility| {
+						smart_list::visibility::set(visibility.to_string())
 					}),
 				],
 			),

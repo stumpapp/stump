@@ -1,7 +1,7 @@
 import { useEmailDevicesQuery } from '@stump/client'
 import { Badge, Card, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { RegisteredEmailDevice } from '@stump/types'
+import { RegisteredEmailDevice } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { CircleSlash2 } from 'lucide-react'
 import React, { useMemo, useState } from 'react'

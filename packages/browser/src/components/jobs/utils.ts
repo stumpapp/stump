@@ -1,4 +1,4 @@
-import { JobStatus } from '@stump/types'
+import { JobStatus } from '@stump/sdk'
 
 export function readableKind(kind: string | null) {
 	if (!kind) {

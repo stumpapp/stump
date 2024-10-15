@@ -1,6 +1,6 @@
 import { StumpWebClient } from '@stump/browser'
 import { Platform } from '@stump/client'
-import { SavedServer } from '@stump/types'
+import { SavedServer } from '@stump/sdk'
 import { useEffect, useState } from 'react'
 import { Store } from 'tauri-plugin-store-api'
 

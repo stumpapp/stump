@@ -1,14 +1,14 @@
-import { APIResult, createTags, getAllTags } from '@stump/api'
-import type { Tag } from '@stump/types'
+import type { Tag } from '@stump/sdk'
 import { AxiosError } from 'axios'
 import { useMemo } from 'react'
 
 import { queryClient, useMutation, useQuery } from '../client'
+import { useSDK } from '../sdk'
 
 export interface UseTagsConfig {
-	onQuerySuccess?: (res: APIResult<Tag[]>) => void
+	onQuerySuccess?: (res: Tag[]) => void
 	onQueryError?: (err: AxiosError) => void
-	onCreateSuccess?: (res: APIResult<Tag[]>) => void
+	onCreateSuccess?: (res: Tag[]) => void
 	onCreateError?: (err: AxiosError) => void
 }
 
@@ -24,7 +24,8 @@ export function useTags({
 	onCreateSuccess,
 	onCreateError,
 }: UseTagsConfig = {}) {
-	const { data, isLoading, refetch } = useQuery(['getAllTags'], getAllTags, {
+	const { sdk } = useSDK()
+	const { data, isLoading, refetch } = useQuery([sdk.tag.keys.get], () => sdk.tag.get(), {
 		onError: onQueryError,
 		onSuccess: onQuerySuccess,
 		suspense: false,
@@ -34,18 +35,17 @@ export function useTags({
 		mutate,
 		mutateAsync,
 		isLoading: isCreating,
-	} = useMutation(['createTags'], createTags, {
+	} = useMutation([sdk.tag.keys.create], (payload: string[]) => sdk.tag.create(payload), {
 		onError: onCreateError,
 		onSuccess(res) {
 			onCreateSuccess?.(res)
-
-			queryClient.refetchQueries(['getAllTags'])
+			queryClient.refetchQueries([sdk.tag.keys.get])
 		},
 	})
 
 	const { tags, options } = useMemo(() => {
-		if (data && data.data) {
-			const tagOptions = data.data?.map(
+		if (data) {
+			const tagOptions = data.map(
 				(tag) =>
 					({
 						label: tag.name,
@@ -53,7 +53,7 @@ export function useTags({
 					}) as TagOption,
 			)
 
-			return { options: tagOptions, tags: data.data }
+			return { options: tagOptions, tags: data }
 		}
 
 		return { options: [], tags: [] }

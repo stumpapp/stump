@@ -7,6 +7,7 @@ use axum::{
 use axum_extra::extract::Query;
 use prisma_client_rust::{chrono::Duration, Direction};
 use serde::{Deserialize, Serialize};
+use specta::Type;
 use stump_core::{
 	db::entity::{
 		macros::{
@@ -39,7 +40,7 @@ use crate::{
 
 /// Represents the relations to load for a book entity, including optional loading
 /// of the series and library relationships.
-#[derive(Deserialize)]
+#[derive(Deserialize, Type)]
 pub(crate) struct BookRelations {
 	#[serde(default)]
 	load_series: Option<bool>,

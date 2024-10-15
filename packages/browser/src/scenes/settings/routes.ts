@@ -1,4 +1,4 @@
-import { UserPermission } from '@stump/types'
+import { UserPermission } from '@stump/sdk'
 import {
 	AlarmClock,
 	Bell,

@@ -1,6 +1,6 @@
 import { Heading, Link, RadioGroup, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { LibraryPattern } from '@stump/types'
+import { LibraryPattern } from '@stump/sdk'
 import { useCallback } from 'react'
 import { useFormContext } from 'react-hook-form'
 

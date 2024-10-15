@@ -1,5 +1,5 @@
 import { cn, Text } from '@stump/components'
-import { AttachmentMeta } from '@stump/types'
+import { AttachmentMeta } from '@stump/sdk'
 import {
 	createColumnHelper,
 	flexRender,

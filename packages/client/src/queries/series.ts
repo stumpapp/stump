@@ -1,70 +1,91 @@
-import { seriesApi, seriesQueryKeys } from '@stump/api'
-import type { Media, Series } from '@stump/types'
+import type { Media, Series, SeriesFilter } from '@stump/sdk'
 import { AxiosError } from 'axios'
+import { useCallback } from 'react'
 
 import {
 	CursorQueryOptions,
 	PageQueryOptions,
 	queryClient,
 	QueryOptions,
+	TypedPageQueryOptions,
 	useCursorQuery,
 	usePageQuery,
 	useQuery,
 } from '../client'
-import { prefetchSeriesMedia } from './media'
+import { useSDK } from '../sdk'
+import { usePrefetchSeriesBooks } from './media'
 
 type PrefetchSeriesOptions = {
-	prefetchBooks?: boolean
-}
-export const prefetchSeries = async (
-	id: string,
-	{ prefetchBooks = true }: PrefetchSeriesOptions = {},
-) => {
-	const seriesPromise = queryClient.prefetchQuery(
-		[seriesQueryKeys.getSeriesById, id],
-		async () => {
-			const { data } = await seriesApi.getSeriesById(id)
-			return data
-		},
-		{
-			staleTime: 10 * 1000,
-		},
-	)
-
-	if (prefetchBooks) {
-		await Promise.all([seriesPromise, prefetchSeriesMedia(id)])
-	} else {
-		await seriesPromise
-	}
+	id: string
+	fetchBooks?: boolean
 }
 
-export const prefetchLibrarySeries = (id: string) =>
-	queryClient.prefetchQuery(
-		[
-			seriesQueryKeys.getSeries,
-			{ page: 1, page_size: 20, params: { count_media: true, library_id: id } },
-		],
-		async () => {
-			const { data } = await seriesApi.getSeries({
-				count_media: true,
-				library_id: id,
-				page: 1,
-				page_size: 20,
-			})
-			return data
-		},
-		{
-			staleTime: 10 * 1000,
-		},
+export const usePrefetchSeries = ({ id, fetchBooks = true }: PrefetchSeriesOptions) => {
+	const { sdk } = useSDK()
+
+	const { prefetch: prefetchBooks } = usePrefetchSeriesBooks({ id })
+
+	const prefetchSeries = useCallback(
+		() =>
+			queryClient.prefetchQuery([sdk.series.keys.getByID, id], async () => sdk.series.getByID(id), {
+				staleTime: 10 * 1000,
+			}),
+		[sdk.series, id],
 	)
+
+	const prefetch = useCallback(async () => {
+		if (fetchBooks) {
+			await Promise.all([prefetchSeries(), prefetchBooks()])
+		} else {
+			await prefetchSeries()
+		}
+	}, [fetchBooks, prefetchBooks, prefetchSeries])
+
+	return { prefetch }
+}
+
+export const usePrefetchLibrarySeries = ({ id }: { id: string }) => {
+	const { sdk } = useSDK()
+
+	const prefetch = useCallback(
+		() =>
+			queryClient.prefetchQuery(
+				[
+					sdk.series.keys.get,
+					1,
+					20,
+					{
+						library: {
+							id: [id],
+						},
+					} satisfies SeriesFilter,
+				],
+				() =>
+					sdk.series.get({
+						library: {
+							id: [id],
+						},
+						page: 1,
+						page_size: 20,
+					}),
+				{
+					staleTime: 10 * 1000,
+				},
+			),
+		[sdk.series, id],
+	)
+
+	return { prefetch }
+}
 
 type SeriesByIdOptions = {
-	params?: Record<string, unknown>
+	params?: SeriesFilter
 } & QueryOptions<Series, AxiosError>
 export function useSeriesByIdQuery(id: string, { params, ...options }: SeriesByIdOptions = {}) {
+	const { sdk } = useSDK()
 	const { data, ...ret } = useQuery(
-		[seriesQueryKeys.getSeriesById, id, params],
-		() => seriesApi.getSeriesById(id, params).then(({ data }) => data),
+		[sdk.series.keys.getByID, id, params],
+		() => sdk.series.getByID(id, params),
 		options,
 	)
 
@@ -72,12 +93,10 @@ export function useSeriesByIdQuery(id: string, { params, ...options }: SeriesByI
 }
 
 export function usePagedSeriesQuery(options: PageQueryOptions<Series> = {}) {
+	const { sdk } = useSDK()
 	const { data, ...restReturn } = usePageQuery(
-		[seriesQueryKeys.getSeries, options],
-		async ({ page, page_size, params }) => {
-			const { data } = await seriesApi.getSeries({ page, page_size, ...(params ?? {}) })
-			return data
-		},
+		[sdk.series.keys.get, options],
+		async ({ page, page_size, params }) => sdk.series.get({ page, page_size, ...(params ?? {}) }),
 		{
 			keepPreviousData: true,
 			...options,
@@ -94,19 +113,35 @@ export function usePagedSeriesQuery(options: PageQueryOptions<Series> = {}) {
 	}
 }
 
-export const prefetchPagedSeries = (options: PageQueryOptions<Series>) =>
-	queryClient.prefetchQuery([seriesQueryKeys.getSeries, options], () =>
-		seriesApi.getSeries(options),
+export const usePrefetchPagedSeries = () => {
+	const { sdk } = useSDK()
+	const prefetch = useCallback(
+		({
+			page = 1,
+			page_size = 20,
+			params,
+			...options
+		}: TypedPageQueryOptions<Series, SeriesFilter>) =>
+			queryClient.prefetchQuery(
+				[sdk.series.keys.get, params],
+				() =>
+					sdk.series.get({
+						page,
+						page_size,
+						...params,
+					}),
+				options,
+			),
+		[sdk.series],
 	)
+	return { prefetch }
+}
 
-// TODO: fix this query!
 export function useSeriesCursorQuery({ queryKey, ...options }: CursorQueryOptions<Series>) {
+	const { sdk } = useSDK()
 	const { data, ...restReturn } = useCursorQuery(
-		queryKey ?? [seriesQueryKeys.getSeriesWithCursor],
-		async (params) => {
-			const { data } = await seriesApi.getSeriesWithCursor(params)
-			return data
-		},
+		queryKey ?? [sdk.series.keys.getCursor],
+		(params) => sdk.series.getCursor(params),
 		options,
 	)
 
@@ -120,9 +155,10 @@ export function useSeriesCursorQuery({ queryKey, ...options }: CursorQueryOption
 }
 
 export function useUpNextInSeries(id: string, options: QueryOptions<Media | undefined> = {}) {
+	const { sdk } = useSDK()
 	const { data: media, ...restReturn } = useQuery(
-		[seriesQueryKeys.getNextInSeries, id],
-		() => seriesApi.getNextInSeries(id).then((res) => res.data),
+		[sdk.series.keys.nextBook, id],
+		() => sdk.series.nextBook(id),
 		{
 			...options,
 			useErrorBoundary: false,

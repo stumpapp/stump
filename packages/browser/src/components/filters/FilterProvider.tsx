@@ -1,4 +1,4 @@
-import { toObjectParams, toUrlParams } from '@stump/api'
+import { toObjectParams, toUrlParams } from '@stump/sdk'
 import React, { useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 

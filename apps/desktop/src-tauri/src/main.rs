@@ -84,14 +84,14 @@ mod tests {
 	where
 		T: NamedType,
 	{
-		export::<T>(&ExportConfiguration::new().bigint(BigIntExportBehavior::BigInt))
+		export::<T>(&ExportConfiguration::new().bigint(BigIntExportBehavior::Number))
 	}
 
 	#[test]
 	#[ignore]
 	fn codegen() -> Result<(), Box<dyn std::error::Error>> {
 		let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("../../../packages/types")
+			.join("../../../packages/sdk/src/types")
 			.join("generated.ts");
 
 		if !path.exists() {

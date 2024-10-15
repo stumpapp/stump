@@ -20,6 +20,13 @@ mod tests {
 
 	use crate::{
 		config::jwt::CreatedToken,
+		filter::{
+			LibraryBaseFilter, LibraryFilter, LibraryRelationFilter, LogFilter,
+			MediaBaseFilter, MediaFilter, MediaMetadataBaseFilter, MediaMetadataFilter,
+			MediaMetadataRelationFilter, Range, ReadStatus, SeriesBaseFilter,
+			SeriesFilter, SeriesMedataFilter, SeriesQueryRelation, UserQueryRelation,
+			ValueOrRange,
+		},
 		routers::api::v1::{
 			auth::{AuthenticationOptions, LoginOrRegisterArgs, LoginResponse},
 			book_club::{
@@ -36,11 +43,12 @@ mod tests {
 			epub::{CreateOrUpdateBookmark, DeleteBookmark},
 			job::UpdateSchedulerConfig,
 			library::{
-				CleanLibraryResponse, CreateLibrary, LibraryStatsParams,
-				PatchLibraryThumbnail, UpdateLibrary, UpdateLibraryExcludedUsers,
+				CleanLibraryResponse, CreateLibrary, GenerateLibraryThumbnails,
+				LibraryStatsParams, PatchLibraryThumbnail, UpdateLibrary,
+				UpdateLibraryExcludedUsers,
 			},
 			media::{
-				individual::{MediaIsComplete, PutMediaCompletionStatus},
+				individual::{BookRelations, MediaIsComplete, PutMediaCompletionStatus},
 				thumbnails::PatchMediaThumbnail,
 			},
 			metadata::MediaMetadataOverview,
@@ -59,14 +67,14 @@ mod tests {
 	where
 		T: NamedType,
 	{
-		export::<T>(&ExportConfiguration::new().bigint(BigIntExportBehavior::BigInt))
+		export::<T>(&ExportConfiguration::new().bigint(BigIntExportBehavior::Number))
 	}
 
 	#[test]
 	#[ignore]
 	fn codegen() -> Result<(), Box<dyn std::error::Error>> {
 		let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("../../packages/types")
+			.join("../../packages/sdk/src/types")
 			.join("generated.ts");
 
 		if !path.exists() {
@@ -121,6 +129,36 @@ mod tests {
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<PatchEmailDevice>()?).as_bytes())?;
 
+		file.write_all(format!("{}\n\n", ts_export::<LogFilter>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LibraryBaseFilter>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<LibraryRelationFilter>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<LibraryFilter>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<ReadStatus>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<MediaMetadataBaseFilter>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<MediaMetadataRelationFilter>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<MediaMetadataFilter>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<MediaBaseFilter>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<MediaFilter>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<BookRelations>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<SeriesBaseFilter>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<SeriesMedataFilter>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<SeriesFilter>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<ValueOrRange<String>>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<Range<String>>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<UserQueryRelation>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<SeriesQueryRelation>()?).as_bytes(),
+		)?;
 		file.write_all(format!("{}\n\n", ts_export::<CreateLibrary>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UpdateLibrary>()?).as_bytes())?;
 		file.write_all(
@@ -128,6 +166,9 @@ mod tests {
 		)?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<CleanLibraryResponse>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<GenerateLibraryThumbnails>()?).as_bytes(),
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryStatsParams>()?).as_bytes())?;
 

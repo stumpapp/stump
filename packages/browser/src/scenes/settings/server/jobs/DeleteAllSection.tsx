@@ -1,5 +1,4 @@
-import { jobApi, jobQueryKeys } from '@stump/api'
-import { invalidateQueries } from '@stump/client'
+import { invalidateQueries, useSDK } from '@stump/client'
 import { Alert, Button } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { AlertTriangle } from 'lucide-react'
@@ -11,6 +10,7 @@ import { useAppContext } from '@/context'
 import { useJobSettingsContext } from './context.ts'
 
 export default function DeleteAllSection() {
+	const { sdk } = useSDK()
 	const { t } = useLocaleContext()
 	const { isServerOwner } = useAppContext()
 	const { jobs } = useJobSettingsContext()
@@ -22,7 +22,7 @@ export default function DeleteAllSection() {
 	 */
 	const handleClearHistory = async () => {
 		try {
-			await jobApi.deleteAllJobs()
+			await sdk.job.deleteAll()
 		} catch (error) {
 			if (error instanceof Error) {
 				toast.error(error.message)
@@ -31,7 +31,7 @@ export default function DeleteAllSection() {
 				toast.error('An unknown error occurred')
 			}
 		} finally {
-			await invalidateQueries({ queryKey: [jobQueryKeys.getJobs] })
+			await invalidateQueries({ exact: false, queryKey: [sdk.job.get] })
 		}
 	}
 

@@ -1,7 +1,7 @@
 import {
-	prefetchPagedSeries,
-	useLibraryByIdQuery,
+	useLibraryByID,
 	usePagedSeriesQuery,
+	usePrefetchPagedSeries,
 	useVisitLibrary,
 } from '@stump/client'
 import { usePrevious, usePreviousIsDifferent } from '@stump/components'
@@ -49,7 +49,7 @@ function LibrarySeriesScene() {
 		layoutMode: state.layout,
 		setLayout: state.setLayout,
 	}))
-	const { isLoading, library } = useLibraryByIdQuery(id)
+	const { isLoading, library } = useLibraryByID(id)
 	const {
 		filters,
 		ordering,
@@ -57,6 +57,7 @@ function LibrarySeriesScene() {
 		setPage,
 		...rest
 	} = useFilterScene()
+	const { prefetch } = usePrefetchPagedSeries()
 
 	const params = useMemo(
 		() => ({
@@ -67,7 +68,7 @@ function LibrarySeriesScene() {
 				...ordering,
 				count_media: true,
 				library: {
-					id,
+					id: [id],
 				},
 			},
 		}),
@@ -90,12 +91,12 @@ function LibrarySeriesScene() {
 
 	const handlePrefetchPage = useCallback(
 		(page: number) => {
-			prefetchPagedSeries({
+			prefetch({
 				...params,
 				page,
 			})
 		},
-		[params],
+		[params, prefetch],
 	)
 
 	const previousPage = usePrevious(current_page)

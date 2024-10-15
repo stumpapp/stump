@@ -12,4 +12,3 @@ thiserror = { workspace = true }
 
 [dev-dependencies]
 tokio = { workspace = true }
-dotenv = "0.15.0"

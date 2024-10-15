@@ -1,5 +1,5 @@
 import { cn } from '@stump/components'
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import {
 	flexRender,
 	getCoreRowModel,

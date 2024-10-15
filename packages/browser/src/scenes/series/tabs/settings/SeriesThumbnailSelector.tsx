@@ -1,6 +1,6 @@
-import { getMediaPage, getSeriesThumbnail, seriesApi } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { Button, Dialog, EntityCard } from '@stump/components'
-import { Media, Series } from '@stump/types'
+import { Media, Series } from '@stump/sdk'
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
@@ -14,6 +14,7 @@ type Props = {
 }
 // TODO: this looks doody, but it's a start
 export default function SeriesThumbnailSelector({ series }: Props) {
+	const { sdk } = useSDK()
 	const [selectedBook, setSelectedBook] = useState<Media>()
 	const [page, setPage] = useState<number>()
 	const [isOpen, setIsOpen] = useState(false)
@@ -33,7 +34,7 @@ export default function SeriesThumbnailSelector({ series }: Props) {
 
 	const handleUploadImage = async (file: File) => {
 		try {
-			await seriesApi.uploadSeriesThumbnail(series.id, file)
+			await sdk.series.uploadThumbnail(series.id, file)
 			setIsOpen(false)
 		} catch (error) {
 			console.error(error)
@@ -45,7 +46,7 @@ export default function SeriesThumbnailSelector({ series }: Props) {
 		if (!selectedBook || !page) return
 
 		try {
-			await seriesApi.patchSeriesThumbnail(series.id, { media_id: selectedBook.id, page })
+			await sdk.series.patchThumbnail(series.id, { media_id: selectedBook.id, page })
 			// TODO: The browser is caching the image, so we need to force remove it and ensure
 			// the new one is loaded instead
 			setIsOpen(false)
@@ -81,7 +82,9 @@ export default function SeriesThumbnailSelector({ series }: Props) {
 		<div className="relative">
 			<EntityCard
 				imageUrl={
-					selectedBook && page ? getMediaPage(selectedBook.id, page) : getSeriesThumbnail(series.id)
+					selectedBook && page
+						? sdk.media.bookPageURL(selectedBook.id, page)
+						: sdk.series.thumbnailURL(series.id)
 				}
 				isCover
 				className="flex-auto flex-shrink-0"

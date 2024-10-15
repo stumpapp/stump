@@ -1,7 +1,6 @@
-import { mediaApi, mediaQueryKeys } from '@stump/api'
-import { invalidateQueries, useMutation } from '@stump/client'
+import { invalidateQueries, useMutation, useSDK } from '@stump/client'
 import { Button } from '@stump/components'
-import { Media, PutMediaCompletionStatus } from '@stump/types'
+import { Media, PutMediaCompletionStatus } from '@stump/sdk'
 import React, { useCallback, useMemo } from 'react'
 import toast from 'react-hot-toast'
 
@@ -14,14 +13,16 @@ type Props = {
 }
 
 export default function BookCompletionToggleButton({ book }: Props) {
+	const { sdk } = useSDK()
+
 	const { mutateAsync: completeBook } = useMutation(
-		[mediaQueryKeys.putMediaCompletion, book.id],
-		(payload: PutMediaCompletionStatus) => mediaApi.putMediaCompletion(book.id, payload),
+		[sdk.media.keys.complete, book.id],
+		(payload: PutMediaCompletionStatus) => sdk.media.complete(book.id, payload),
 	)
 
 	const { mutateAsync: deleteCurrentSession } = useMutation(
-		[mediaQueryKeys.deleteActiveReadingSession, book.id],
-		() => mediaApi.deleteActiveReadingSession(book.id),
+		[sdk.media.keys.deleteActiveReadingSession, book.id],
+		() => sdk.media.deleteActiveReadingSession(book.id),
 	)
 
 	const isCompleted = useMemo(() => isReadAgainPrompt(book), [book])
@@ -34,7 +35,7 @@ export default function BookCompletionToggleButton({ book }: Props) {
 		if (hasProgress && isCompleted) {
 			try {
 				await deleteCurrentSession()
-				invalidateQueries({ keys: [mediaQueryKeys.getMediaById] })
+				invalidateQueries({ keys: [sdk.media.keys.getByID] })
 			} catch (error) {
 				console.error(error)
 				toast.error('Failed to clear progress')
@@ -47,13 +48,13 @@ export default function BookCompletionToggleButton({ book }: Props) {
 					is_complete: willBeComplete,
 					page,
 				})
-				invalidateQueries({ keys: [mediaQueryKeys.getMediaById] })
+				invalidateQueries({ keys: [sdk.media.keys.getByID] })
 			} catch (error) {
 				console.error(error)
 				toast.error('Failed to update book completion status')
 			}
 		}
-	}, [book, completeBook, isCompleted, isEpub, hasProgress, deleteCurrentSession])
+	}, [book, completeBook, isCompleted, isEpub, hasProgress, deleteCurrentSession, sdk.media])
 
 	// There really isn't anything to do here if the book is completed and has no progress. Eventually,
 	// we will support clearing the completion history.

@@ -1,6 +1,5 @@
-import { getMediaThumbnail } from '@stump/api'
-import { useMediaCursorQuery } from '@stump/client'
-import { Media } from '@stump/types'
+import { useMediaCursorQuery, useSDK } from '@stump/client'
+import { Media } from '@stump/sdk'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import React, { useCallback, useEffect } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
@@ -12,6 +11,7 @@ type Props = {
 }
 // TODO: Create generlized VirtualizedGrid component and trim the reused logic
 export default function SeriesBookGrid({ seriesId, onSelectBook }: Props) {
+	const { sdk } = useSDK()
 	const {
 		media: books,
 		fetchNextPage,
@@ -102,7 +102,7 @@ export default function SeriesBookGrid({ seriesId, onSelectBook }: Props) {
 									{columnVirtualizer.getVirtualItems().map((virtualColumn) => {
 										const virtualPage = virtualRow.index * 4 + virtualColumn.index + 1
 										const book = books[virtualPage - 1]
-										const imageUrl = getMediaThumbnail(book?.id || '')
+										const imageUrl = sdk.media.thumbnailURL(book?.id || '')
 										return (
 											<div
 												key={virtualColumn.index}

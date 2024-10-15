@@ -33,10 +33,6 @@ The hardware requirements vary and should serve **only as a guide**. Generally s
 
 **This section will be revisited once the first beta release is out.**
 
-## When will Stump be released?
-
-Stump is currently under development. The primary developer is working on it in their free time, mostly on the weekends. There aren't many active contributors, so it's hard to say when it will be release ready. Ideally the first release candidate will be ready by the end of 2024. Please consider contributing to the project if you're interested in expediting the development. You can find more information on ways to contribute in the [contributing](/contributing) guide.
-
 ## Can I try it out?
 
 I am working on setting up a public demo instance. If it is available, you will find it at [demo.stumpapp.dev](https://demo.stumpapp.dev). The login credentials are:

@@ -1,5 +1,4 @@
-import { mediaApi } from '@stump/api'
-import { useMediaByIdQuery } from '@stump/client'
+import { useMediaByIdQuery, useSDK } from '@stump/client'
 import { Alert, Breadcrumbs, Button, Heading, Text } from '@stump/components'
 import { Construction } from 'lucide-react'
 import React, { useMemo } from 'react'
@@ -12,6 +11,7 @@ import { formatBookName } from '@/utils/format'
 import BookThumbnailSelector from './BookThumbnailSelector'
 
 export default function BookManagementScene() {
+	const { sdk } = useSDK()
 	const { id } = useParams()
 
 	if (!id) {
@@ -56,7 +56,7 @@ export default function BookManagementScene() {
 
 	function handleAnalyze() {
 		if (id != undefined) {
-			mediaApi.startMediaAnalysis(id)
+			sdk.media.analyze(id)
 		}
 	}
 

@@ -1,6 +1,6 @@
-import { getMediaThumbnail } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { Accordion, cn, Text } from '@stump/components'
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import React from 'react'
 import { Link } from 'react-router-dom'
@@ -17,6 +17,7 @@ type Props = {
 }
 
 export default function GroupedSmartListItemListGroupContent({ books }: Props) {
+	const { sdk } = useSDK()
 	const scrollRef = React.useRef<HTMLDivElement>(null)
 
 	const rowVirtualizer = useVirtualizer({
@@ -70,7 +71,7 @@ export default function GroupedSmartListItemListGroupContent({ books }: Props) {
 										to={paths.bookOverview(book.id)}
 										className="flex h-full w-full items-center px-2 hover:bg-background-surface"
 									>
-										<img className="h-12 w-auto rounded-sm" src={getMediaThumbnail(book.id)} />
+										<img className="h-12 w-auto rounded-sm" src={sdk.media.thumbnailURL(book.id)} />
 										<div className="flex flex-1 flex-col space-y-1.5 self-start px-2 pt-2">
 											<Text size="sm" className="line-clamp-1">
 												{formatBookName(book)}

@@ -1,7 +1,6 @@
-import { getSeriesThumbnail } from '@stump/api'
-import { prefetchSeries } from '@stump/client'
+import { usePrefetchSeries, useSDK } from '@stump/client'
 import { EntityCard, Text } from '@stump/components'
-import { FileStatus, Series } from '@stump/types'
+import { Series } from '@stump/sdk'
 
 import paths from '../../paths'
 import pluralizeStat from '../../utils/pluralize'
@@ -13,14 +12,15 @@ export type SeriesCardProps = {
 }
 
 export default function SeriesCard({ series, fullWidth, variant = 'default' }: SeriesCardProps) {
+	const { sdk } = useSDK()
 	const isCoverOnly = variant === 'cover'
 
 	const bookCount = Number(series.media ? series.media.length : series.media_count ?? 0)
 	const booksUnread = series.unread_media_count
 
-	const handleHover = () => {
-		prefetchSeries(series.id)
-	}
+	const { prefetch } = usePrefetchSeries({ id: series.id })
+
+	const handleHover = () => prefetch()
 
 	function getProgress() {
 		if (isCoverOnly || booksUnread == null) {
@@ -40,7 +40,7 @@ export default function SeriesCard({ series, fullWidth, variant = 'default' }: S
 			return null
 		}
 
-		const isMissing = series.status === FileStatus.Missing
+		const isMissing = series.status === 'MISSING'
 		if (isMissing) {
 			return (
 				<Text size="xs" className="uppercase text-amber-500">
@@ -73,7 +73,7 @@ export default function SeriesCard({ series, fullWidth, variant = 'default' }: S
 			key={series.id}
 			title={series.name}
 			href={paths.seriesOverview(series.id)}
-			imageUrl={getSeriesThumbnail(series.id)}
+			imageUrl={sdk.series.thumbnailURL(series.id)}
 			progress={getProgress()}
 			subtitle={getSubtitle(series)}
 			onMouseEnter={handleHover}

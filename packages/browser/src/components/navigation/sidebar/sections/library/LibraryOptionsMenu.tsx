@@ -1,7 +1,7 @@
 import { queryClient, useScanLibrary } from '@stump/client'
 import { DropdownMenu } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import type { Library } from '@stump/types'
+import type { Library } from '@stump/sdk'
 import { FolderSearch2, MoreHorizontal, ScanLine, Settings, Trash } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 import { useLocation } from 'react-router'
@@ -44,7 +44,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 		// The UI will receive updates from SSE in fractions of ms lol and it can get bogged down.
 		// So, add a slight delay so the close animation of the menu can finish cleanly.
 		setTimeout(async () => {
-			await scanAsync({ id: library.id, mode: 'DEFAULT' })
+			await scanAsync(library.id)
 			await queryClient.invalidateQueries(['getJobReports'])
 		}, 50)
 	}, [canScan, library.id, scanAsync])

@@ -1,5 +1,5 @@
 import { Link, Text } from '@stump/components'
-import { ReactTableColumnSort, Series } from '@stump/types'
+import { ReactTableColumnSort, Series } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 
 import paths from '@/paths'

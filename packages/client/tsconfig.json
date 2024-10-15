@@ -5,10 +5,8 @@
 		"jsx": "preserve",
 		"skipLibCheck": true,
 		"paths": {
-			"@stump/api": ["../api/src/index.ts"],
-			"@stump/api/*": ["../api/src/*"],
-			"@stump/types": ["../types/index.ts"],
-			"@stump/types/*": ["../types/*"],
+			"@stump/sdk": ["../sdk/src/index.ts"],
+			"@stump/sdk/*": ["../sdk/src/*"],
 			"@/*": ["./src/*"]
 		},
 		"module": "NodeNext"
@@ -17,10 +15,7 @@
 	"exclude": ["node_modules"],
 	"references": [
 		{
-			"path": "../api"
-		},
-		{
-			"path": "../types"
+			"path": "../sdk"
 		}
 	]
 }

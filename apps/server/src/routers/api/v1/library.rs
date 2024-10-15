@@ -8,6 +8,7 @@ use chrono::Duration;
 use prisma_client_rust::{chrono::Utc, not, or, raw, Direction, PrismaValue};
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
+use serde_with::skip_serializing_none;
 use specta::Type;
 use std::path;
 use tokio::fs;
@@ -353,6 +354,7 @@ async fn get_library_by_id(
 	Ok(Json(library.into()))
 }
 
+// TODO: remove? Not used on client
 #[utoipa::path(
 	get,
 	path = "/api/v1/libraries/:id/series",
@@ -454,6 +456,7 @@ async fn get_library_series(
 	Ok(Json((series, series_count, pagination).into()))
 }
 
+// TODO: remove? Not used on client
 async fn get_library_media(
 	filter_query: Query<FilterableQuery<MediaFilter>>,
 	pagination_query: Query<PaginationQuery>,
@@ -750,6 +753,7 @@ async fn replace_library_thumbnail(
 	)))
 }
 
+// TODO: support all vs just library thumb
 /// Deletes all media thumbnails in a library by id, if the current user has access to it.
 #[utoipa::path(
 	delete,
@@ -797,7 +801,8 @@ async fn delete_library_thumbnails(
 	Ok(Json(()))
 }
 
-#[derive(Debug, Deserialize, ToSchema)]
+#[skip_serializing_none]
+#[derive(Debug, Deserialize, ToSchema, Type)]
 pub struct GenerateLibraryThumbnails {
 	pub image_options: Option<ImageProcessorOptions>,
 	#[serde(default)]

@@ -1,7 +1,6 @@
-import { getMediaThumbnail } from '@stump/api'
-import { prefetchMedia } from '@stump/client'
+import { usePrefetchMediaByID, useSDK } from '@stump/client'
 import { EntityCard, Text } from '@stump/components'
-import { FileStatus, Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import pluralize from 'pluralize'
 import { useCallback, useMemo } from 'react'
 
@@ -26,16 +25,19 @@ export default function BookCard({
 	variant = 'default',
 	onSelect,
 }: BookCardProps) {
+	const { sdk } = useSDK()
+	const { prefetch } = usePrefetchMediaByID(media.id)
+
 	const isCoverOnly = variant === 'cover'
 
 	const handleHover = () => {
 		if (!readingLink) {
-			prefetchMedia(media.id)
+			prefetch()
 		}
 
 		const currentPage = media.current_page || -1
 		if (currentPage > 0) {
-			prefetchMediaPage(media.id, currentPage)
+			prefetchMediaPage(sdk, media.id, currentPage)
 		}
 	}
 
@@ -44,7 +46,7 @@ export default function BookCard({
 			return null
 		}
 
-		const isMissing = media.status === FileStatus.Missing
+		const isMissing = media.status === 'MISSING'
 		if (isMissing) {
 			return (
 				<Text size="xs" className="uppercase text-amber-500">
@@ -146,7 +148,7 @@ export default function BookCard({
 			title={formatBookName(media)}
 			href={href}
 			fullWidth={fullWidth}
-			imageUrl={getMediaThumbnail(media.id)}
+			imageUrl={sdk.media.thumbnailURL(media.id)}
 			progress={getProgress()}
 			subtitle={getSubtitle(media)}
 			onMouseEnter={handleHover}

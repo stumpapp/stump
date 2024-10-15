@@ -1,6 +1,5 @@
-import { epubApi, epubQueryKeys } from '@stump/api'
-import { queryClient, useMutation } from '@stump/client'
-import { CreateOrUpdateBookmark, DeleteBookmark } from '@stump/types'
+import { queryClient, useMutation, useSDK } from '@stump/client'
+import { CreateOrUpdateBookmark, DeleteBookmark } from '@stump/sdk'
 import { useCallback, useMemo } from 'react'
 
 import { useEpubReaderContext } from '../context'
@@ -9,6 +8,7 @@ import { useEpubReaderContext } from '../context'
  * A hook for creating and deleting bookmarks within an epub reader
  */
 export function useEpubBookmark() {
+	const { sdk } = useSDK()
 	const {
 		readerMeta: {
 			bookEntity: { id: bookId },
@@ -34,8 +34,8 @@ export function useEpubBookmark() {
 	 * A callback to invalidate the bookmarks query after a bookmark is created or deleted
 	 */
 	const onSuccess = useCallback(
-		() => queryClient.invalidateQueries({ queryKey: [epubQueryKeys.getBookmarks, bookId] }),
-		[bookId],
+		() => queryClient.invalidateQueries({ queryKey: [sdk.epub.keys.getBookmarks, bookId] }),
+		[bookId, sdk.epub],
 	)
 
 	/**
@@ -52,11 +52,8 @@ export function useEpubBookmark() {
 	}, [cfiRange, getCfiPreviewText])
 
 	const { mutate: createMutation, isLoading: isCreating } = useMutation(
-		[epubQueryKeys.createBookmark, bookId],
-		async (payload: CreateOrUpdateBookmark) => {
-			const { data } = await epubApi.createBookmark(bookId, payload)
-			return data
-		},
+		[sdk.epub.keys.createBookmark, bookId],
+		async (payload: CreateOrUpdateBookmark) => sdk.epub.createBookmark(bookId, payload),
 		{
 			onSuccess,
 		},
@@ -77,11 +74,8 @@ export function useEpubBookmark() {
 	)
 
 	const { mutate: deleteMutation, isLoading: isDeleting } = useMutation(
-		[epubQueryKeys.deleteBookmark, bookId],
-		async (payload: DeleteBookmark) => {
-			const { data } = await epubApi.deleteBookmark(bookId, payload)
-			return data
-		},
+		[sdk.epub.keys.deleteBookmark, bookId],
+		async (payload: DeleteBookmark) => sdk.epub.deleteBookmark(bookId, payload),
 		{
 			onSuccess,
 		},

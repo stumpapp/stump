@@ -1,4 +1,4 @@
-import { NavigationItem } from '@stump/types'
+import { NavigationItem } from '@stump/sdk'
 
 /**
  * A type representing a subset of the navigation items which have entity options.

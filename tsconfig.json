@@ -15,7 +15,7 @@
 			"path": "docs"
 		},
 		{
-			"path": "packages/api"
+			"path": "packages/sdk"
 		},
 		{
 			"path": "packages/client"
@@ -28,9 +28,6 @@
 		},
 		{
 			"path": "packages/i18n"
-		},
-		{
-			"path": "packages/types"
 		}
 	],
 	"compilerOptions": {

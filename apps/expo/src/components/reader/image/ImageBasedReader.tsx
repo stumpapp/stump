@@ -1,6 +1,6 @@
-import { getMediaPage, isAxiosError } from '@stump/api'
-import { useUpdateMediaProgress } from '@stump/client'
-import { Media } from '@stump/types'
+import { useSDK, useUpdateMediaProgress } from '@stump/client'
+import { isAxiosError } from '@stump/sdk'
+import { Media } from '@stump/sdk'
 import { useColorScheme } from 'nativewind'
 import React, { useCallback, useMemo, useState } from 'react'
 import { FlatList, TouchableWithoutFeedback, useWindowDimensions } from 'react-native'
@@ -166,6 +166,7 @@ const Page = React.memo(
 		maxHeight,
 		readingDirection,
 	}: PageProps) => {
+		const { sdk } = useSDK()
 		const insets = useSafeAreaInsets()
 
 		const {
@@ -224,7 +225,7 @@ const Page = React.memo(
 					}}
 				>
 					<EntityImage
-						url={getMediaPage(id, index + 1)}
+						url={sdk.media.bookPageURL(id, index + 1)}
 						style={{
 							alignSelf: readingDirection === 'horizontal' ? 'center' : undefined,
 							height,

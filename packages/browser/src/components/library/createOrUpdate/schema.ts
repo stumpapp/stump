@@ -1,5 +1,5 @@
 import { PickSelect } from '@stump/components'
-import { IgnoreRules, Library, LibraryPattern, LibraryScanMode } from '@stump/types'
+import { IgnoreRules, Library, LibraryPattern, LibraryScanMode } from '@stump/sdk'
 import isValidGlob from 'is-valid-glob'
 import { z } from 'zod'
 

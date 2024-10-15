@@ -1,5 +1,5 @@
-import { CursorQueryParams, PagedQueryParams } from '@stump/api'
-import { Pageable } from '@stump/types'
+import { CursorQueryParams, PagedQueryParams } from '@stump/sdk'
+import { Pageable } from '@stump/sdk'
 import {
 	MutationFunction,
 	MutationKey,
@@ -114,6 +114,15 @@ export type PageQueryOptions<
 	'queryKey' | 'queryFn' | 'context'
 > &
 	PageQueryParams
+
+export type TypedPageQueryOptions<Entity, Filters> = Omit<
+	PageQueryOptions<Entity, Pageable<Array<Entity>>, AxiosError, Pageable<Array<Entity>>>,
+	'params'
+> & {
+	params?: Filters
+}
+
+// TODO: these types are HORRENDOUS. REWRITE THEM :sob:
 
 export function usePageQuery<Entity = unknown, Error = AxiosError>(
 	queryKey: QueryKey,

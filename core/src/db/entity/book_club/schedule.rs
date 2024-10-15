@@ -1,4 +1,6 @@
+use prisma_client_rust::chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use specta::Type;
 use utoipa::ToSchema;
 
@@ -7,37 +9,57 @@ use crate::{
 	prisma::{book_club_book, book_club_schedule},
 };
 
-use super::{prisma_macros::book_club_with_books_include, BookClubChatBoard};
+use super::{prisma_macros::book_club_with_books_include, BookClubDiscussion};
 
+#[skip_serializing_none]
 #[derive(Default, Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct BookClubSchedule {
+	// The default interval between books in days, if any.
 	pub default_interval_days: Option<i32>,
-
-	#[serde(skip_serializing_if = "Option::is_none")]
+	// The books in the schedule. If this is `None` or empty, the schedule is empty.
 	pub books: Option<Vec<BookClubBook>>,
 }
 
+#[skip_serializing_none]
+#[derive(Default, Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
+pub struct BookClubExternalBook {
+	// The title of the book
+	pub title: String,
+	// The author of the book
+	pub author: String,
+	// The URL to the book's page, purchase page, etc.
+	pub url: Option<String>,
+	// The URL to the book's cover image
+	pub image_url: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
+#[serde(tag = "__type")]
+pub enum BookClubBookDetails {
+	#[serde(rename = "stored")]
+	Stored(Media),
+	#[serde(rename = "external")]
+	External(BookClubExternalBook),
+}
+
+#[skip_serializing_none]
 #[derive(Default, Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct BookClubBook {
+	// The ID of the book in the schedule
 	id: String,
+	// The date the book club starts reading the book
+	start_at: DateTime<FixedOffset>,
+	// The date the book club stops reading the book, generally the meeting time
+	end_at: DateTime<FixedOffset>,
+	// The number of days the book club will discuss the book, if any
+	discussion_duration_days: Option<i32>,
 
-	// TODO(specta): replace with DateTime<FixedOffset>
-	start_at: String,
-	// TODO(specta): replace with DateTime<FixedOffset>
-	end_at: String,
-	discussion_duration_days: i32,
+	// The book details, e.g. title, author, etc.
+	book: Option<BookClubBookDetails>,
 
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub title: Option<String>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub author: Option<String>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub url: Option<String>,
-
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub book_entity: Option<Media>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub chat_board: Option<BookClubChatBoard>,
+	// The chat board for the book, if any. If this is `None`, the book has no chat board or
+	// the chat board is not loaded.
+	pub discussion: Option<BookClubDiscussion>,
 }
 
 impl From<book_club_schedule::Data> for BookClubSchedule {
@@ -75,25 +97,34 @@ impl From<(book_club_schedule::Data, Vec<book_club_book::Data>)> for BookClubSch
 
 impl From<book_club_book::Data> for BookClubBook {
 	fn from(data: book_club_book::Data) -> BookClubBook {
-		let chat_board = data
-			.chat_board()
+		let discussion = data
+			.discussion()
 			.ok()
 			.flatten()
 			.cloned()
-			.map(BookClubChatBoard::from);
+			.map(BookClubDiscussion::from);
 
-		let book = data.book_entity().ok().flatten().cloned().map(Media::from);
+		let book_entity = data.book_entity().ok().flatten().cloned().map(Media::from);
+		let book = match (book_entity, data.title, data.author) {
+			(Some(book_entity), _, _) => Some(BookClubBookDetails::Stored(book_entity)),
+			(_, Some(title), Some(author)) => {
+				Some(BookClubBookDetails::External(BookClubExternalBook {
+					title,
+					author,
+					url: data.url,
+					image_url: data.image_url,
+				}))
+			},
+			_ => None,
+		};
 
 		BookClubBook {
 			id: data.id,
-			start_at: data.start_at.to_rfc3339(),
-			end_at: data.end_at.to_rfc3339(),
-			discussion_duration_days: data.discussion_duration_days.unwrap_or(2),
-			title: data.title,
-			author: data.author,
-			url: data.url,
-			chat_board,
-			book_entity: book,
+			start_at: data.start_at,
+			end_at: data.end_at,
+			discussion_duration_days: data.discussion_duration_days,
+			discussion,
+			book,
 		}
 	}
 }

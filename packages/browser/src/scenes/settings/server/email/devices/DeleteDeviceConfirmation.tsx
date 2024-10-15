@@ -1,7 +1,7 @@
-import { emailerQueryKeys, isAxiosError } from '@stump/api'
-import { invalidateQueries, useDeleteEmailDevice } from '@stump/client'
+import { invalidateQueries, useDeleteEmailDevice, useSDK } from '@stump/client'
 import { ConfirmationModal } from '@stump/components'
-import { RegisteredEmailDevice } from '@stump/types'
+import { isAxiosError } from '@stump/sdk'
+import { RegisteredEmailDevice } from '@stump/sdk'
 import React, { useCallback } from 'react'
 import toast from 'react-hot-toast'
 
@@ -9,7 +9,9 @@ type Props = {
 	device: RegisteredEmailDevice | null
 	onClose: () => void
 }
+
 export default function DeleteDeviceConfirmation({ device, onClose }: Props) {
+	const { sdk } = useSDK()
 	const { removeAsync, isDeleting } = useDeleteEmailDevice()
 
 	const handleConfirm = useCallback(async () => {
@@ -17,7 +19,7 @@ export default function DeleteDeviceConfirmation({ device, onClose }: Props) {
 
 		try {
 			await removeAsync(device.id)
-			await invalidateQueries({ keys: [emailerQueryKeys.getEmailDevices] })
+			await invalidateQueries({ keys: [sdk.emailer.keys.getDevices] })
 			onClose()
 		} catch (err) {
 			console.error(err)
@@ -28,7 +30,7 @@ export default function DeleteDeviceConfirmation({ device, onClose }: Props) {
 				toast.error('An error occurred while deleting the list')
 			}
 		}
-	}, [onClose, device, removeAsync])
+	}, [onClose, device, removeAsync, sdk.emailer])
 
 	return (
 		<ConfirmationModal

@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native'
 import { useLibraries } from '@stump/client'
-import { Library } from '@stump/types'
+import { Library } from '@stump/sdk'
 import React, { useCallback } from 'react'
 import { FlatList, TouchableOpacity } from 'react-native'
 

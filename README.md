@@ -42,11 +42,11 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 - [License 📝](#license-)
 </details>
 
-> **🚧 Disclaimer 🚧**: Stump is under active development and is an ongoing **WIP**. Anyone is welcome to try it out, but **DO NOT** expect a fully featured or bug-free experience. If you'd like to contribute and help expedite Stump's first release, please review the [developer guide](#developer-guide-).
+> **🚧 Disclaimer 🚧**: Stump is under active development and is an ongoing **WIP**. Anyone is welcome to try it out, but **DO NOT** expect a fully featured or bug-free experience. If you'd like to contribute and help expedite feature development, please review the [developer guide](#developer-guide-).
 
 ## Roadmap 🗺
 
-The following items are the major targets for Stump's first release:
+The following items are the major targets for Stump's first stable release:
 
 - 📃 Full OPDS + OPDS Page Streaming support
 - 📕 EPUB, PDF, and CBZ/CBR support
@@ -59,7 +59,7 @@ The following items are the major targets for Stump's first release:
 - 🌏 Language support _(look [here](https://github.com/stumpapp/stump/issues/106))_
 - 🌈 And more!
 
-Things you can expect to see after the first release:
+Things you can expect to see afterwards:
 
 - 🖥️ Cross-platform desktop app _(Windows, Mac, Linux)_
 - 📖 [Tachiyomi](https://github.com/stumpapp/tachiyomi-extensions) support
@@ -182,11 +182,10 @@ A NextJS application for the Stump documentation site at `/docs` in the root of 
 
 Various TypeScript packages, at `/packages` in the root of the project:
 
-- `api`: All of the API functions used by the `client` package
-- `client`: React-query config, hooks, and other client-side utilities
+- `sdk`: A TypeScript SDK for interfacing with Stump's API, including the generated types from the Rust code
+- `client`: React-query config, hooks, and other client-side utilities for React-based applications
 - `components`: Shared React components for the web and desktop applications
-- `browser`: A React component that is essentially the "main" UI for Stump on browser-based platforms. It is isolated in order to be re-used in the two browser-based apps: `web` and `desktop`
-- `types`: Shared TypeScript types for interfacing with Stump's core and API
+- `browser`: A React component that is essentially the "main" UI for Stump on browser-based platforms. This package is shared between both the `web` and `desktop` apps
 
 </details>
 

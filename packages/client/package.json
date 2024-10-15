@@ -10,8 +10,7 @@
 		"nuke": "yarn exec rimraf node_modules"
 	},
 	"dependencies": {
-		"@stump/api": "*",
-		"@stump/types": "*",
+		"@stump/sdk": "*",
 		"@tanstack/react-query": "^4.36.1",
 		"axios": "^1.6.8",
 		"deep-equal": "^2.2.3",

@@ -1,4 +1,4 @@
-import { Series } from '@stump/types'
+import { Series } from '@stump/sdk'
 import { OnChangeFn, SortingState } from '@tanstack/react-table'
 import React, { useCallback, useMemo } from 'react'
 

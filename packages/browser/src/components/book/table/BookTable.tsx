@@ -1,4 +1,4 @@
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import { OnChangeFn, SortingState } from '@tanstack/react-table'
 import React, { useCallback, useMemo } from 'react'
 

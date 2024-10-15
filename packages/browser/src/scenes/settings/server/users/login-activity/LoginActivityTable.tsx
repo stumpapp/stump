@@ -1,6 +1,6 @@
 import { useLoginActivityQuery } from '@stump/client'
 import { Badge, Card, Text } from '@stump/components'
-import { LoginActivity } from '@stump/types'
+import { LoginActivity } from '@stump/sdk'
 import {
 	ColumnDef,
 	createColumnHelper,

@@ -50,7 +50,7 @@ pub fn get_config_variables(data_struct: &DataStruct) -> Vec<StumpConfigVariable
 	let mut output_vec = Vec::new();
 
 	if let Fields::Named(fields_named) = &data_struct.fields {
-		for field in fields_named.named.iter() {
+		for field in &fields_named.named {
 			// Get the name of the variable as a String
 			let variable_name = field.ident.as_ref().unwrap().clone();
 
@@ -68,7 +68,7 @@ pub fn get_config_variables(data_struct: &DataStruct) -> Vec<StumpConfigVariable
 				is_optional,
 				is_vec,
 				attributes,
-			})
+			});
 		}
 	}
 
@@ -89,10 +89,7 @@ fn parse_config_var_attributes(field: &Field) -> StumpConfigVariableAttributes {
 		// #[default_value(Expr)]
 		if attr.path().is_ident("default_value") {
 			let default_value_expr: Expr = attr.parse_args().unwrap_or_else(|e| {
-				panic!(
-					"Failed to parse default_value expression for {}: {}",
-					field_ident, e
-				)
+				panic!("Failed to parse default_value expression for {field_ident}: {e}")
 			});
 			default_value = Some(default_value_expr);
 		}
@@ -105,10 +102,7 @@ fn parse_config_var_attributes(field: &Field) -> StumpConfigVariableAttributes {
 		// #[env_key(Expr)]
 		if attr.path().is_ident("env_key") {
 			let env_key_expr: Expr = attr.parse_args().unwrap_or_else(|e| {
-				panic!(
-					"Failed to parse env_key expression for {}: {}",
-					field_ident, e
-				)
+				panic!("Failed to parse env_key expression for {field_ident}: {e}")
 			});
 			env_key = Some(env_key_expr);
 		}
@@ -116,10 +110,7 @@ fn parse_config_var_attributes(field: &Field) -> StumpConfigVariableAttributes {
 		// #[debug_value(Expr)]
 		if attr.path().is_ident("debug_value") {
 			let debug_value_expr: Expr = attr.parse_args().unwrap_or_else(|e| {
-				panic!(
-					"Failed to parse debug_value expression for {}: {}",
-					field_ident, e
-				)
+				panic!("Failed to parse debug_value expression for {field_ident}: {e}")
 			});
 			debug_value = Some(debug_value_expr);
 		}
@@ -127,10 +118,7 @@ fn parse_config_var_attributes(field: &Field) -> StumpConfigVariableAttributes {
 		// #[validator(fn)]
 		if attr.path().is_ident("validator") {
 			let validator_iden: Ident = attr.parse_args().unwrap_or_else(|e| {
-				panic!(
-					"Failed to parse validator identity for {}: {}",
-					field_ident, e
-				)
+				panic!("Failed to parse validator identity for {field_ident}: {e}")
 			});
 			validator = Some(validator_iden);
 		}

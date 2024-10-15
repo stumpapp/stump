@@ -1,8 +1,7 @@
-import { getMediaPage } from '@stump/api'
+import { Api } from '@stump/sdk'
 
-export function prefetchMediaPage(mediaId: string, page: number): HTMLImageElement {
+export function prefetchMediaPage(sdk: Api, mediaId: string, page: number): HTMLImageElement {
 	const img = new Image()
-	img.src = getMediaPage(mediaId, page)
-
+	img.src = sdk.media.bookPageURL(mediaId, page)
 	return img
 }

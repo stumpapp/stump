@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { SavedServer } from '@stump/types'
+import { SavedServer } from '@stump/sdk'
 import React from 'react'
 import { useForm, useFormState } from 'react-hook-form'
 

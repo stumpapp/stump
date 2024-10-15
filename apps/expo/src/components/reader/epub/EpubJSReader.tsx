@@ -1,7 +1,8 @@
 import { Location, Reader } from '@epubjs-react-native/core'
 import { useFileSystem } from '@epubjs-react-native/expo-file-system'
-import { API, isAxiosError, updateEpubProgress } from '@stump/api'
-import { Media } from '@stump/types'
+import { useSDK } from '@stump/client'
+import { isAxiosError } from '@stump/sdk'
+import { Media } from '@stump/sdk'
 import { useColorScheme } from 'nativewind'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useWindowDimensions } from 'react-native'
@@ -30,6 +31,7 @@ type Props = {
  * the long run
  */
 export default function EpubJSReader({ book, initialCfi, incognito }: Props) {
+	const { sdk } = useSDK()
 	/**
 	 * The base64 representation of the book file. The reader component does not accept
 	 * credentials in the fetch, so we just have to fetch manually and pass the base64
@@ -47,7 +49,7 @@ export default function EpubJSReader({ book, initialCfi, incognito }: Props) {
 	useEffect(() => {
 		async function fetchBook() {
 			try {
-				const response = await fetch(`${API.getUri()}/media/${book.id}/file`)
+				const response = await fetch(sdk.media.downloadURL(book.id))
 				const data = await response.blob()
 				const reader = new FileReader()
 				reader.onloadend = () => {
@@ -64,7 +66,7 @@ export default function EpubJSReader({ book, initialCfi, incognito }: Props) {
 		}
 
 		fetchBook()
-	}, [book.id])
+	}, [book.id, sdk.media])
 
 	/**
 	 * A callback that updates the read progress of the current location
@@ -79,7 +81,7 @@ export default function EpubJSReader({ book, initialCfi, incognito }: Props) {
 				} = currentLocation
 
 				try {
-					await updateEpubProgress({
+					await sdk.epub.updateProgress({
 						epubcfi: cfi,
 						id: book.id,
 						is_complete: progress >= 1.0,
@@ -93,7 +95,7 @@ export default function EpubJSReader({ book, initialCfi, incognito }: Props) {
 				}
 			}
 		},
-		[incognito, book.id],
+		[incognito, book.id, sdk.epub],
 	)
 
 	if (!base64) {

@@ -40,15 +40,12 @@ export class AuthAPI extends APIBase {
 			},
 		)
 
-		if ('access_token' in response.data) {
-			this.api.token = response.data.access_token as string
+		if ('token' in response.data) {
+			const {
+				token: { access_token },
+			} = response.data
+			this.api.token = access_token
 		}
-		// if ('token' in response.data) {
-		// 	const {
-		// 		token: { access_token },
-		// 	} = response.data
-		// 	this.api.token = access_token
-		// }
 
 		return response.data
 	}

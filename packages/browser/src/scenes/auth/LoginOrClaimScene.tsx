@@ -160,6 +160,7 @@ export default function LoginOrClaimScene() {
 							label={t('authScene.form.labels.username')}
 							variant="primary"
 							autoComplete="username"
+							autoCapitalize="off"
 							autoFocus
 							fullWidth
 							{...form.register('username')}

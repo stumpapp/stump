@@ -3,24 +3,24 @@ import { useLocaleContext } from '@stump/i18n'
 import React, { useCallback, useState } from 'react'
 
 type Props = {
-	onConfirmReset: () => Promise<void>
+	onConfirmClear: () => Promise<void>
 }
 
-export default function ResetConfigurationConfirmation({ onConfirmReset }: Props) {
+export default function RemoveAllTokensConfirm({ onConfirmClear }: Props) {
 	const { t } = useLocaleContext()
 
 	const [showConfirmation, setShowConfirmation] = useState(false)
 
-	const handleConfirmReset = useCallback(async () => {
-		await onConfirmReset()
+	const handleConfirmClear = useCallback(async () => {
+		await onConfirmClear()
 		setShowConfirmation(false)
-	}, [onConfirmReset])
+	}, [onConfirmClear])
 
 	return (
 		<div>
 			<ConfirmationModal
 				isOpen={showConfirmation}
-				onConfirm={handleConfirmReset}
+				onConfirm={handleConfirmClear}
 				onClose={() => setShowConfirmation(false)}
 				title={t(getKey('title'))}
 				description={t(getKey('description'))}
@@ -47,6 +47,5 @@ export default function ResetConfigurationConfirmation({ onConfirmReset }: Props
 	)
 }
 
-const LOCALE_KEY =
-	'settingsScene.app/desktop.sections.configuredServers.resetConfiguration.confirmation'
+const LOCALE_KEY = 'settingsScene.app/desktop.sections.configuredServers.resetTokens.confirmation'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`

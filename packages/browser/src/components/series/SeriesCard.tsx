@@ -1,9 +1,10 @@
 import { usePrefetchSeries, useSDK } from '@stump/client'
-import { EntityCard, Text } from '@stump/components'
+import { Text } from '@stump/components'
 import { Series } from '@stump/sdk'
 
 import paths from '../../paths'
 import pluralizeStat from '../../utils/pluralize'
+import { EntityCard } from '../entity'
 
 export type SeriesCardProps = {
 	series: Series

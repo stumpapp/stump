@@ -11,6 +11,7 @@ import {
 	VirtuosoHandle,
 } from 'react-virtuoso'
 
+import { EntityImage } from '@/components/entity'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useImageBaseReaderContext } from '../context'
@@ -94,7 +95,7 @@ export default function ReaderFooter() {
 								},
 							)}
 						>
-							<img src={url} className="object-cover" />
+							<EntityImage src={url} className="object-cover" />
 						</AspectRatio>
 					)
 				}}

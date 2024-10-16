@@ -7,6 +7,7 @@ import pluralize from 'pluralize'
 import React, { useMemo } from 'react'
 import { match } from 'ts-pattern'
 
+import { EntityImage } from '@/components/entity'
 import paths from '@/paths'
 
 import { useBookClubContext } from '../context'
@@ -91,7 +92,6 @@ export default function BookClubScheduleTimelineItem({ book }: Props) {
 	}
 
 	const renderBookInfo = () => {
-		// const { book_entity, title, author, url } = book
 		const details = match(book.book)
 			.with({ __type: 'stored' }, ({ id, name, metadata }) => ({
 				author: metadata?.writers?.join(', '),
@@ -105,8 +105,10 @@ export default function BookClubScheduleTimelineItem({ book }: Props) {
 			}))
 			.otherwise(() => null)
 
+		const ImageComponent = book.book?.__type === 'external' ? 'img' : EntityImage
+
 		const image = details?.imageUrl ? (
-			<img src={details.imageUrl} className="rounded-md object-cover" />
+			<ImageComponent src={details.imageUrl} className="rounded-md object-cover" />
 		) : (
 			<div className="flex h-full w-full items-center justify-center rounded-md border border-edge/80 bg-background-surface/50">
 				<Book className="h-10 w-10 text-foreground-muted" />

@@ -1,12 +1,11 @@
 /* eslint-disable react/prop-types */
 
+import { cn, ProgressBar, Text } from '@stump/components'
 import { Book } from 'lucide-react'
 import React, { useState } from 'react'
 import { Link, To } from 'react-router-dom'
 
-import { ProgressBar } from '../progress'
-import { Text } from '../text'
-import { cn } from '../utils'
+import { EntityImage } from './EntityImage'
 
 type ContainerProps = React.ComponentPropsWithoutRef<'div'> & {
 	to?: To
@@ -50,7 +49,7 @@ type Props = {
  * and progress bar. All of these are optional, except for the image URL. If the image fails to load, a placeholder will be
  * displayed instead.
  */
-export function EntityCard({
+export default function EntityCard({
 	href,
 	imageUrl,
 	title,
@@ -131,10 +130,13 @@ export function EntityCard({
 	const renderImage = () => {
 		if (!isImageFailed) {
 			return (
-				<img
+				<EntityImage
 					src={imageUrl}
 					className={cn('h-full w-full object-cover')}
-					onError={() => setIsImageFailed(true)}
+					onError={(e) => {
+						console.error('Failed to load image:', e)
+						setIsImageFailed(true)
+					}}
 				/>
 			)
 		} else {

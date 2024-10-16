@@ -28,7 +28,7 @@ export class AuthAPI extends APIBase {
 	 * Authenticate a user with the given username and password. This will either rely on session-based
 	 * authentication or token-based authentication, depending on the API configuration.
 	 */
-	async login({ username, password }: LoginOrRegisterArgs): Promise<User> {
+	async login({ username, password }: LoginOrRegisterArgs): Promise<LoginResponse> {
 		const response = await this.api.axios.post<LoginResponse>(
 			authURL(
 				'/login',
@@ -40,19 +40,14 @@ export class AuthAPI extends APIBase {
 			},
 		)
 
-		let user: User
 		if ('token' in response.data) {
 			const {
-				for_user,
 				token: { access_token },
 			} = response.data
 			this.api.token = access_token
-			user = for_user
-		} else {
-			user = response.data
 		}
 
-		return user
+		return response.data
 	}
 
 	/**
@@ -68,11 +63,14 @@ export class AuthAPI extends APIBase {
 	}
 
 	/**
-	 * Log out the currently authenticated user
+	 * Log out the currently authenticated user. If token-based authentication is used, the token will be
+	 * removed from the API instance.
 	 */
 	async logout(): Promise<void> {
 		if (this.api.isTokenAuth) {
-			await this.api.axios.delete(authURL('/token'))
+			// await this.api.axios.delete(authURL('/token'))
+			await this.api.axios.post(authURL('/logout'))
+			this.api.token = undefined
 		} else {
 			await this.api.axios.post(authURL('/logout'))
 		}

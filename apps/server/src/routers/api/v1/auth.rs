@@ -151,11 +151,7 @@ async fn handle_remove_earliest_session(
 #[serde(untagged)]
 pub enum LoginResponse {
 	User(User),
-	AccessToken {
-		for_user: User,
-		#[serde(flatten)]
-		token: CreatedToken,
-	},
+	AccessToken { for_user: User, token: CreatedToken },
 }
 
 #[utoipa::path(

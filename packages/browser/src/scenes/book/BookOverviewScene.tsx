@@ -1,7 +1,7 @@
 import { useMediaByIdQuery } from '@stump/client'
 import { Badge, ButtonOrLink, Heading, Spacer, Text } from '@stump/components'
 import dayjs from 'dayjs'
-import sortBy from 'lodash.sortby'
+import sortBy from 'lodash/sortBy'
 import { Suspense, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'

@@ -16,7 +16,7 @@ export {
 	type IconButtonProps,
 } from './button'
 export { Calendar, DatePicker } from './calendar'
-export { Card, CardGrid, type CardProps, EntityCard, HoverCard, type HoverCardProps } from './card'
+export { Card, CardGrid, type CardProps, HoverCard, type HoverCardProps } from './card'
 export { Command, type CommandProps } from './command'
 export { Divider, Spacer, type SpacerProps, SplitContainer } from './container'
 export { ContextMenu, type ContextMenuProps } from './context-menu'

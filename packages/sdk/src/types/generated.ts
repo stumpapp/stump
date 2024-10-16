@@ -503,3 +503,5 @@ export type SavedServer = { name: string; uri: string }
 
 export type DesktopAppStore = { run_bundled_server: boolean; active_server?: SavedServer | null; connected_servers: SavedServer[] }
 
+export type CredentialStoreTokenState = { [key: string]: boolean }
+

@@ -1,8 +1,8 @@
 import { Statistic } from '@stump/components'
 import { ActiveReadingSession, FinishedReadingSession, User } from '@stump/sdk'
-import groupBy from 'lodash.groupby'
-import sortBy from 'lodash.sortby'
-import uniqBy from 'lodash.uniqby'
+import groupBy from 'lodash/groupBy'
+import sortBy from 'lodash/sortBy'
+import uniqBy from 'lodash/uniqBy'
 import pluralize from 'pluralize'
 import { useMemo } from 'react'
 

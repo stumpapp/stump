@@ -1,14 +1,20 @@
 import { StumpWebClient } from '@stump/browser'
-import { Platform } from '@stump/client'
-import { SavedServer } from '@stump/sdk'
-import { useEffect, useState } from 'react'
-import { Store } from 'tauri-plugin-store-api'
+import { DesktopAppContext, Platform, useDesktopAppContext } from '@stump/client'
+import { SavedServer, User } from '@stump/sdk'
+import { createStore, Store } from '@tauri-apps/plugin-store'
+import { useCallback, useEffect, useState } from 'react'
 
 import { useTauriRPC } from './utils'
 
-const store = new Store('settings.json')
+// It looks like Apple fully blocks non-local IP addresses now. This is actually infuriating. OH WELL.
+// There really isn't much to do? Anyone using the desktop app on macOS and wants to connect outside their local
+// network will have to setup a domain name and use HTTPS. When I catch you, Apple *shakes fist*
+// See:
+// - https://developer.apple.com/documentation/security/preventing-insecure-network-connections
+// - https://developer.apple.com/documentation/bundleresources/information_property_list/nsapptransportsecurity
 
-export default function App() {
+function App() {
+	const { store } = useDesktopAppContext()
 	const { getNativePlatform, ...tauriRPC } = useTauriRPC()
 
 	const [platform, setPlatform] = useState<Platform>('unknown')
@@ -21,6 +27,7 @@ export default function App() {
 	useEffect(() => {
 		async function init() {
 			try {
+				await tauriRPC.initCredentialStore()
 				const platform = await getNativePlatform()
 				const activeServer = await store.get<SavedServer>('active_server')
 				if (activeServer) {
@@ -37,12 +44,74 @@ export default function App() {
 		if (!mounted) {
 			init()
 		}
-	}, [getNativePlatform, mounted])
+	}, [getNativePlatform, mounted, tauriRPC, store])
+
+	const handleAuthenticated = useCallback(
+		async (_user: User, token?: string) => {
+			try {
+				const currentServer = await store.get<SavedServer>('active_server')
+				if (token && currentServer) {
+					console.debug('Saving API token for', currentServer.name)
+					await tauriRPC.setApiToken(currentServer.name, token)
+				}
+			} catch (err) {
+				console.error('Failed to initialize the credential store', err)
+			}
+		},
+		[tauriRPC, store],
+	)
+
+	const handleLogout = useCallback(async () => {
+		try {
+			const currentServer = await store.get<SavedServer>('active_server')
+			if (currentServer) {
+				await tauriRPC.deleteApiToken(currentServer.name)
+			} else {
+				await tauriRPC.clearCredentialStore()
+			}
+		} catch (err) {
+			console.error('Failed to clear credential store', err)
+		}
+	}, [tauriRPC, store])
 
 	// I want to wait until platform is properly set before rendering the app
 	if (!mounted) {
 		return null
 	}
 
-	return <StumpWebClient platform={platform} baseUrl={baseURL} tauriRPC={tauriRPC} />
+	return (
+		<StumpWebClient
+			platform={platform}
+			authMethod={platform === 'windows' ? 'token' : 'session'}
+			baseUrl={baseURL}
+			tauriRPC={tauriRPC}
+			onAuthenticated={handleAuthenticated}
+			onLogout={handleLogout}
+			onUnauthenticatedResponse={handleLogout}
+		/>
+	)
+}
+
+export default function AppEntry() {
+	const [store, setStore] = useState<Store>()
+
+	useEffect(() => {
+		const init = async () => {
+			setStore(await createStore('settings.json'))
+		}
+
+		if (!store) {
+			init()
+		}
+	}, [store])
+
+	if (!store) {
+		return null
+	}
+
+	return (
+		<DesktopAppContext.Provider value={{ store }}>
+			<App />
+		</DesktopAppContext.Provider>
+	)
 }

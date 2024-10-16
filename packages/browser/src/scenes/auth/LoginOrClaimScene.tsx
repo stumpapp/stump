@@ -54,7 +54,10 @@ export default function LoginOrClaimScene() {
 		const { username, password } = values
 		const doLogin = async (firstTime = false) =>
 			toast.promise(loginUser({ password, username }), {
-				error: t('authScene.toasts.loginFailed'),
+				error: (error) => {
+					console.error('Error logging in:', error)
+					return t('authScene.toasts.loginFailed')
+				},
 				loading: t('authScene.toasts.loggingIn'),
 				success: firstTime
 					? t('authScene.toasts.loggedInFirstTime')
@@ -134,7 +137,6 @@ export default function LoginOrClaimScene() {
 	}
 
 	return (
-		// <div className="flex h-full w-full flex-col items-center justify-center gap-8 bg-background p-4">
 		<div data-tauri-drag-region className="flex h-screen w-screen items-center bg-background">
 			<motion.div
 				className="w-screen shrink-0"

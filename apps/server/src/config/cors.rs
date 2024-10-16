@@ -6,11 +6,15 @@ use local_ip_address::local_ip;
 use stump_core::config::StumpConfig;
 use tower_http::cors::{AllowOrigin, CorsLayer};
 
-const DEFAULT_ALLOWED_ORIGINS: &[&str] =
-	&["tauri://localhost", "https://tauri.localhost"];
+const DEFAULT_ALLOWED_ORIGINS: &[&str] = &[
+	"tauri://localhost",
+	"https://tauri.localhost",
+	"http://tauri.localhost",
+];
 const DEBUG_ALLOWED_ORIGINS: &[&str] = &[
 	"tauri://localhost",
 	"https://tauri.localhost",
+	"http://tauri.localhost",
 	"http://localhost:3000",
 	"http://0.0.0.0:3000",
 ];

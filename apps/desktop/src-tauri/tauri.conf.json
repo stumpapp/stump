@@ -3,7 +3,6 @@
 	"build": {
 		"beforeDevCommand": "yarn vite --clearScreen=false",
 		"devUrl": "http://localhost:3000",
-		"beforeBuildCommand": "yarn exec vite build",
 		"frontendDist": "../dist"
 	},
 	"bundle": {
@@ -16,7 +15,12 @@
 			"icons/128x128@2x.png",
 			"icons/icon.icns",
 			"icons/icon.ico"
-		]
+		],
+		"windows": {
+			"certificateThumbprint": null,
+			"digestAlgorithm": "sha256",
+			"timestampUrl": null
+		}
 	},
 	"productName": "Stump",
 	"mainBinaryName": "Stump",

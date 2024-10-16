@@ -77,10 +77,12 @@ export function useLoginOrRegister({
 		onSuccess: async (response) => {
 			// TODO(token): refresh support
 			if ('for_user' in response && !!onAuthenticated) {
-				const {
-					for_user,
-					token: { access_token },
-				} = response
+				// const {
+				// 	for_user,
+				// 	token: { access_token },
+				// } = response
+				// @ts-expect-error: THIS WILL BE REVERTED
+				const { for_user, access_token } = response
 				await onAuthenticated(for_user, access_token)
 				onSuccess?.(for_user)
 			} else if (isUser(response)) {

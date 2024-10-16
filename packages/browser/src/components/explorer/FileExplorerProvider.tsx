@@ -1,4 +1,4 @@
-import { useDirectoryListing } from '@stump/client'
+import { useDirectoryListing, useSDK } from '@stump/client'
 import { DirectoryListingFile } from '@stump/sdk'
 import React, { useState } from 'react'
 import toast from 'react-hot-toast'
@@ -22,6 +22,7 @@ type Props = {
 export default function FileExplorerProvider({ rootPath }: Props) {
 	const navigate = useNavigate()
 	const isMobile = useMediaMatch('(max-width: 768px)')
+	const { sdk } = useSDK()
 
 	const [layout, setLayout] = useState<ExplorerLayout>(() => getDefaultLayout())
 
@@ -39,7 +40,7 @@ export default function FileExplorerProvider({ rootPath }: Props) {
 			setPath(entry.path)
 		} else {
 			try {
-				const entity = await getBook(entry.path)
+				const entity = await getBook(entry.path, sdk)
 				if (entity) {
 					navigate(paths.bookOverview(entity.id), {
 						state: {

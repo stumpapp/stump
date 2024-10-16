@@ -1,7 +1,6 @@
 import {
 	queryClient,
 	QueryClientContext,
-	SDKProvider,
 	StumpClientContext,
 	useClientContext,
 	useLogout,
@@ -10,10 +9,10 @@ import { checkUrl } from '@stump/sdk'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { useLocation, useNavigate } from 'react-router'
 
+import { useTauriRPC } from '@/hooks/useTauriRPC'
 import { useAppStore, useTauriStore, useUserStore } from '@/stores'
 
 import ConfiguredServersList from '../ConfiguredServersList'
-import { useTauriRPC } from '@/hooks/useTauriRPC'
 
 jest.mock('react-router', () => ({
 	useLocation: jest.fn(),

@@ -14,7 +14,7 @@ type SseOptions = {
 let sse: EventSource
 
 // TODO(tokens): Swap eventsource with polyfilled version that supports headers
-function useSse(url: string, { onOpen, onClose, onMessage, headers }: SseOptions = {}) {
+function useSse(url: string, { onOpen, onClose, onMessage }: SseOptions = {}) {
 	const timoutRef = useRef<NodeJS.Timeout | null>(null)
 	/**
 	 * Initialize the EventSource connection

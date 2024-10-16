@@ -27,7 +27,7 @@ use crate::{
 	errors::{APIError, APIResult},
 	filter::{chain_optional_iter, MediaFilter},
 	middleware::auth::{auth_middleware, RequestContext},
-	routers::api::v1::media::apply_media_filters_for_user,
+	routers::api::filters::apply_media_filters_for_user,
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {

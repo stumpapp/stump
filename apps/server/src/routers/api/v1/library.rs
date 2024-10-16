@@ -41,9 +41,7 @@ use stump_core::{
 		ContentType,
 	},
 	prisma::{
-		last_library_visit,
-		library::{self, WhereParam},
-		library_config,
+		last_library_visit, library, library_config,
 		media::{self, OrderByParam as MediaOrderByParam},
 		series::{self, OrderByParam as SeriesOrderByParam},
 		tag, user,
@@ -54,20 +52,18 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::{
-		chain_optional_iter, decode_path_filter, FilterableQuery, LibraryBaseFilter,
-		LibraryFilter, LibraryRelationFilter, MediaFilter, SeriesFilter,
+		chain_optional_iter, FilterableQuery, LibraryFilter, MediaFilter, SeriesFilter,
 	},
 	middleware::auth::{auth_middleware, RequestContext},
+	routers::api::filters::{
+		apply_library_filters_for_user, apply_media_age_restriction, apply_media_filters,
+		apply_media_pagination, apply_series_age_restriction, apply_series_filters,
+		library_not_hidden_from_user_filter,
+	},
 	utils::{http::ImageResponse, validate_and_load_image},
 };
 
-use super::{
-	media::{apply_media_age_restriction, apply_media_filters, apply_media_pagination},
-	series::{
-		apply_series_age_restriction, apply_series_base_filters, apply_series_filters,
-		get_series_thumbnail,
-	},
-};
+use super::series::get_series_thumbnail;
 
 // TODO: age restrictions!
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -117,51 +113,6 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				),
 		)
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
-}
-
-pub(crate) fn apply_library_base_filters(filters: LibraryBaseFilter) -> Vec<WhereParam> {
-	chain_optional_iter(
-		[],
-		[
-			(!filters.id.is_empty()).then(|| library::id::in_vec(filters.id)),
-			(!filters.name.is_empty()).then(|| library::name::in_vec(filters.name)),
-			(!filters.path.is_empty()).then(|| {
-				let decoded_paths = decode_path_filter(filters.path);
-				library::path::in_vec(decoded_paths)
-			}),
-			filters.search.map(library::name::contains),
-		],
-	)
-}
-
-pub(crate) fn apply_library_relation_filters(
-	filters: LibraryRelationFilter,
-) -> Vec<WhereParam> {
-	chain_optional_iter(
-		[],
-		[filters
-			.series
-			.map(apply_series_base_filters)
-			.map(library::series::some)],
-	)
-}
-
-pub(crate) fn library_not_hidden_from_user_filter(user: &User) -> WhereParam {
-	library::hidden_from_users::none(vec![user::id::equals(user.id.clone())])
-}
-
-// FIXME: hidden libraries introduced a bug here, need to fix!
-
-pub(crate) fn apply_library_filters_for_user(
-	filters: LibraryFilter,
-	user: &User,
-) -> Vec<WhereParam> {
-	let not_hidden_filter = library_not_hidden_from_user_filter(user);
-	apply_library_base_filters(filters.base_filter)
-		.into_iter()
-		.chain(apply_library_relation_filters(filters.relation_filter))
-		.chain([not_hidden_filter])
-		.collect()
 }
 
 #[utoipa::path(

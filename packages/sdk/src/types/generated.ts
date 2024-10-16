@@ -393,6 +393,10 @@ export type MediaBaseFilter = { id?: string[]; name?: string[]; extension?: stri
 
 export type MediaFilter = ({ id?: string[]; name?: string[]; extension?: string[]; path?: string[]; read_status?: ReadStatus[]; tags?: string[]; search?: string | null; metadata?: MediaMetadataBaseFilter | null }) & ({ series?: SeriesFilter | null })
 
+/**
+ * Represents the relations to load for a book entity, including optional loading
+ * of the series and library relationships.
+ */
 export type BookRelations = { load_series?: boolean | null; load_library?: boolean | null }
 
 export type SeriesBaseFilter = { id?: string[]; name?: string[]; path?: string[]; search?: string | null; metadata?: SeriesMedataFilter | null }
@@ -421,8 +425,14 @@ export type GenerateLibraryThumbnails = { image_options?: ImageProcessorOptions 
 
 export type LibraryStatsParams = { all_users?: boolean }
 
+/**
+ * Represents an update to the completion status of a media item.
+ */
 export type PutMediaCompletionStatus = { is_complete: boolean; page?: number | null }
 
+/**
+ * Represents whether a media item is marked as completed and the last time it was completed.
+ */
 export type MediaIsComplete = { is_completed: boolean; last_completed_at: string | null }
 
 export type MediaMetadataOverview = { genres: string[]; writers: string[]; pencillers: string[]; inkers: string[]; colorists: string[]; letterers: string[]; editors: string[]; publishers: string[]; characters: string[]; teams: string[] }
@@ -463,6 +473,14 @@ export type CreateBookClubScheduleBook = { book: CreateBookClubScheduleBookOptio
 
 export type CreateBookClubSchedule = { default_interval_days?: number | null; books: CreateBookClubScheduleBook[] }
 
+/**
+ * Request body for updating a media's thumbnail using a specific page from the media.
+ * 
+ * The `page` field specifies the page to be used to generate a thumbnail. The
+ * `is_zero_based` field  can be set to `true` if the page numbering starts from
+ * `0`. This will add 1 to the indicated `page`. A `None` value is the same
+ * as passing `Some(false)`.
+ */
 export type PatchMediaThumbnail = { page: number; is_zero_based?: boolean | null }
 
 export type PatchSeriesThumbnail = { media_id: string; page: number; is_zero_based?: boolean | null }

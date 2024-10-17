@@ -6,12 +6,12 @@ use syn::{parse_macro_input, Data, DeriveInput, Fields};
 
 /// Used to generate a prisma OrderByParam from an enum definition.
 ///
-/// This macro implements a generated IntoOrderBy trait for the enum, which
-/// provides a method to convert the enum into a Prisma OrderByParam scoped
-/// to the #[prisma_table("my_table")] attribute.
+/// This macro implements a `IntoOrderBy`` trait for the enum, which is expected to
+/// provide a method `into_prisma_order` to convert the enum into a Prisma OrderByParam
+/// scoped to the #[prisma_module("my_table")] attribute.
 ///
 /// The enum must be annotated with the following attributes:
-/// - `prisma_table` with the name of the table the OrderByParam is scoped to
+/// - `prisma_module` with the name of the module the OrderByParam is scoped to
 ///
 /// Any non-unit variants must also derive `OrderByGen`, and will be scoped nested
 /// under the enum.
@@ -59,7 +59,6 @@ use syn::{parse_macro_input, Data, DeriveInput, Fields};
 ///   }
 /// }
 /// ```
-///
 #[proc_macro_derive(OrderByGen)]
 pub fn order_by_gen(input: TokenStream) -> TokenStream {
 	let input = parse_macro_input!(input as DeriveInput);

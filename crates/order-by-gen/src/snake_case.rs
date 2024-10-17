@@ -1,17 +1,16 @@
 /****************************************
-* NOTICE
-* ______________________________________
 *
 * This file is slightly modified from the original. See the original file at:
 * https://gitlab.com/t101/to_snake_case/-/tree/main
 *
-* The original file is licensed under the Apache License, Version 2.0. I have made changes
-* primarily to remove the use of let_chains, which are not yet stable in Rust. The tracking
-* issue is: https://github.com/rust-lang/rust/issues/53667
+* The original file is licensed under the Apache License, Version 2.0.
+* See: https://gitlab.com/t101/to_snake_case/-/blob/main/LICENSE.md
+*
+* I have made changes primarily to remove the use of let_chains, which are not
+* yet stable in Rust.
+* The tracking issue is: https://github.com/rust-lang/rust/issues/53667
 *
 ******************************************/
-
-// TODO: Ensure I am allowed to use the code this way (MIT repo, copy-slighly-modify Apache code)
 
 pub trait ToSnakeCase: AsRef<str> {
 	fn to_snake_case(&self) -> String;

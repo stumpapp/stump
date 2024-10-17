@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Library, Series } from '@stump/types'
+import { Library, Series } from '@stump/sdk'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 

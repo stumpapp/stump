@@ -1,8 +1,7 @@
-import { Log, LogFilter, QueryOrder } from '@stump/types'
-
-import { useSDK } from '../sdk'
+import { Log, LogFilter, QueryOrder } from '@stump/sdk'
 
 import { PageQueryOptions, usePageQuery } from '../client'
+import { useSDK } from '../sdk'
 
 type UseLogsQueryParmas = Omit<PageQueryOptions<Log>, 'params'> & {
 	params?: LogFilter & Partial<QueryOrder>

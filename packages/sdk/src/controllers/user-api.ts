@@ -1,3 +1,4 @@
+import { APIBase } from '../base'
 import {
 	Arrangement,
 	CreateUser,
@@ -10,9 +11,7 @@ import {
 	User,
 	UserPreferences,
 	UserQueryRelation,
-} from '@stump/types'
-
-import { APIBase } from '../base'
+} from '../types'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 
@@ -81,7 +80,7 @@ export class UserAPI extends APIBase {
 	 * Update the current authenticated user's preferences
 	 */
 	async updatePreferences(payload: UpdateUserPreferences): Promise<UserPreferences> {
-		const { data: preferences } = await this.axios.patch<UserPreferences>(
+		const { data: preferences } = await this.axios.put<UserPreferences>(
 			userURL('/me/preferences'),
 			payload,
 		)

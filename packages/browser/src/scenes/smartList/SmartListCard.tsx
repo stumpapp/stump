@@ -1,7 +1,7 @@
 import { usePrefetchSmartList, useSmartListMetaQuery } from '@stump/client'
 import { Card, Spacer, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { SmartList } from '@stump/types'
+import { SmartList } from '@stump/sdk'
 import pluralize from 'pluralize'
 import React, { useMemo } from 'react'
 import { Link } from 'react-router-dom'
@@ -25,7 +25,7 @@ export default function SmartListCard({
 		description,
 	},
 }: Props) {
-	const { prefetch } = usePrefetchSmartList({ id })
+	const { prefetch } = usePrefetchSmartList()
 	const { t } = useLocaleContext()
 	const { meta } = useSmartListMetaQuery({
 		/**
@@ -111,8 +111,8 @@ export default function SmartListCard({
 	return (
 		<Link to={paths.smartList(id)} className="block w-full">
 			<Card
-				className="flex h-32 w-full flex-col gap-y-4 rounded-none border-none bg-background-surface p-4 transition-colors duration-150 first:rounded-t-sm last:rounded-b-sm hover:bg-background-surface-hover/80"
-				onMouseEnter={() => prefetch}
+				className="flex h-32 w-full flex-col gap-y-4 rounded-lg border-none bg-background-surface p-4 transition-colors duration-150 hover:bg-background-surface-hover/80"
+				onMouseEnter={() => prefetch({ id })}
 			>
 				<div className="flex flex-col gap-y-1.5">
 					<Text>{name}</Text>

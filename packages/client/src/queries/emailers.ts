@@ -7,7 +7,7 @@ import {
 	RegisteredEmailDevice,
 	SendAttachmentEmailsPayload,
 	SMTPEmailer,
-} from '@stump/types'
+} from '@stump/sdk'
 import { AxiosError } from 'axios'
 
 import { MutationOptions, queryClient, QueryOptions, useMutation, useQuery } from '../client'
@@ -172,8 +172,8 @@ export function useCreateEmailDevice() {
 		mutate: create,
 		mutateAsync: createAsync,
 		...restReturn
-	} = useMutation([sdk.emailer.keys.create], (payload: CreateOrUpdateEmailer) =>
-		sdk.emailer.create(payload),
+	} = useMutation([sdk.emailer.keys.createDevice], (payload: CreateOrUpdateEmailDevice) =>
+		sdk.emailer.createDevice(payload),
 	)
 
 	return {

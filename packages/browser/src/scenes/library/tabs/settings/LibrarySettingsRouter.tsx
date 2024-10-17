@@ -1,6 +1,6 @@
 import { useUpdateLibrary } from '@stump/client'
-import { UpdateLibrary } from '@stump/types'
-import React, { useCallback } from 'react'
+import { UpdateLibrary } from '@stump/sdk'
+import React, { Suspense, useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
 import { useLibraryContext } from '../../context'
@@ -50,19 +50,21 @@ export default function LibrarySettingsRouter() {
 				patch,
 			}}
 		>
-			<Routes>
-				<Route path="" element={<Navigate to="basics" replace />} />
-				<Route path="basics" element={<BasicSettingsScene />} />
+			<Suspense>
+				<Routes>
+					<Route path="" element={<Navigate to="basics" replace />} />
+					<Route path="basics" element={<BasicSettingsScene />} />
 
-				<Route path="reading" element={<LibraryReadingDefaultsScene />} />
-				<Route path="scanning" element={<ScannerBehaviorScene />} />
-				<Route path="thumbnails" element={<ThumbnailSettingsScene />} />
-				<Route path="analysis" element={<LibraryAnalysisScene />} />
+					<Route path="reading" element={<LibraryReadingDefaultsScene />} />
+					<Route path="scanning" element={<ScannerBehaviorScene />} />
+					<Route path="thumbnails" element={<ThumbnailSettingsScene />} />
+					<Route path="analysis" element={<LibraryAnalysisScene />} />
 
-				<Route path="" element={<Navigate to="access-control" replace />} />
-				<Route path="access-control" element={<AccessControlScene />} />
-				<Route path="delete" element={<DeletionScene />} />
-			</Routes>
+					<Route path="" element={<Navigate to="access-control" replace />} />
+					<Route path="access-control" element={<AccessControlScene />} />
+					<Route path="delete" element={<DeletionScene />} />
+				</Routes>
+			</Suspense>
 		</LibraryManagementContext.Provider>
 	)
 }

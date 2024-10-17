@@ -2,6 +2,8 @@ import { useSDK } from '@stump/client'
 import { Book } from 'lucide-react'
 import React, { useState } from 'react'
 
+import { EntityImage } from '@/components/entity'
+
 type Props = {
 	/**
 	 * The ID of the series
@@ -51,7 +53,7 @@ export default function CoverImageCell({ id, title }: Props) {
 	}
 
 	return (
-		<img
+		<EntityImage
 			title={title}
 			className="aspect-[2/3] h-14 w-auto rounded-sm object-cover"
 			src={sdk.series.thumbnailURL(id)}

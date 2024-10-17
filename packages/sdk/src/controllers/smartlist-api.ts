@@ -1,3 +1,4 @@
+import { APIBase } from '../base'
 import {
 	CreateOrUpdateSmartList,
 	CreateOrUpdateSmartListView,
@@ -7,9 +8,7 @@ import {
 	SmartListMeta,
 	SmartListRelationOptions,
 	SmartListView,
-} from '@stump/types'
-
-import { APIBase } from '../base'
+} from '../types'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 

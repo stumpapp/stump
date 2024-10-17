@@ -1,8 +1,9 @@
+import { APIBase } from '../base'
 import {
 	BookClub,
 	BookClubBook,
-	BookClubChatBoard,
-	BookClubChatMessage,
+	BookClubDiscussion,
+	BookClubDiscussionMessage,
 	BookClubInvitation,
 	BookClubInvitationAnswer,
 	BookClubMember,
@@ -13,9 +14,7 @@ import {
 	GetBookClubsParams,
 	UpdateBookClub,
 	UpdateBookClubMember,
-} from '@stump/types'
-
-import { APIBase } from '../base'
+} from '../types'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 
@@ -152,15 +151,15 @@ export class BookClubAPI extends APIBase {
 		return schedule
 	}
 
-	async getCurrentDiscussion(id: string): Promise<BookClubChatBoard> {
-		const { data: chat } = await this.api.axios.get<BookClubChatBoard>(
+	async getCurrentDiscussion(id: string): Promise<BookClubDiscussion> {
+		const { data: chat } = await this.api.axios.get<BookClubDiscussion>(
 			clubURL(`/${id}/chats/current`),
 		)
 		return chat
 	}
 
-	async getDiscussionById(id: string, chatId: string): Promise<BookClubChatBoard> {
-		const { data: chat } = await this.api.axios.get<BookClubChatBoard>(
+	async getDiscussionById(id: string, chatId: string): Promise<BookClubDiscussion> {
+		const { data: chat } = await this.api.axios.get<BookClubDiscussion>(
 			clubURL(`/${id}/chats/${chatId}`),
 		)
 		return chat
@@ -170,8 +169,8 @@ export class BookClubAPI extends APIBase {
 		id: string,
 		chatId: string,
 		threadId: string,
-	): Promise<BookClubChatMessage> {
-		const { data: chat } = await this.api.axios.get<BookClubChatMessage>(
+	): Promise<BookClubDiscussionMessage> {
+		const { data: chat } = await this.api.axios.get<BookClubDiscussionMessage>(
 			clubURL(`/${id}/chats/${chatId}/threads/${threadId}`),
 		)
 		return chat

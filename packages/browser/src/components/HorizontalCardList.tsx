@@ -38,7 +38,6 @@ export default function HorizontalCardList({
 
 	const columnVirtualizer = useVirtualizer({
 		count: cards.length,
-		enableSmoothScroll: true,
 		estimateSize,
 		getScrollElement: () => parentRef.current,
 		horizontal: true,
@@ -91,9 +90,9 @@ export default function HorizontalCardList({
 
 		if (!virtualItem) {
 			// NOTE: this is really just a guess, and this should never ~really~ happen
-			columnVirtualizer.scrollToOffset(getItemOffset(nextIndex), { smoothScroll: true })
+			columnVirtualizer.scrollToOffset(getItemOffset(nextIndex), { behavior: 'smooth' })
 		} else {
-			columnVirtualizer.scrollToIndex(nextIndex, { smoothScroll: true })
+			columnVirtualizer.scrollToIndex(nextIndex, { behavior: 'smooth' })
 		}
 	}
 
@@ -103,7 +102,7 @@ export default function HorizontalCardList({
 			nextIndex = 0
 		}
 
-		columnVirtualizer.scrollToIndex(nextIndex, { smoothScroll: true })
+		columnVirtualizer.scrollToIndex(nextIndex, { behavior: 'smooth' })
 	}
 
 	const renderContent = () => {

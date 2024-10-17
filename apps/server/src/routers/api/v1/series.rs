@@ -17,7 +17,7 @@ use stump_core::{
 			macros::{
 				finished_reading_session_series_complete, series_or_library_thumbnail,
 			},
-			LibraryConfig, Media, Series, User, UserPermission,
+			LibraryConfig, Media, Series, UserPermission,
 		},
 		query::{
 			ordering::QueryOrder,
@@ -50,19 +50,17 @@ use utoipa::ToSchema;
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
-	filter::{
-		chain_optional_iter, decode_path_filter, FilterableQuery, SeriesBaseFilter,
-		SeriesFilter, SeriesQueryRelation, SeriesRelationFilter,
-	},
+	filter::{chain_optional_iter, FilterableQuery, SeriesFilter, SeriesQueryRelation},
 	middleware::auth::{auth_middleware, RequestContext},
-	routers::api::v1::library::library_not_hidden_from_user_filter,
+	routers::api::{
+		filters::{
+			apply_media_age_restriction, apply_series_age_restriction,
+			apply_series_filters_for_user,
+			apply_series_library_not_hidden_for_user_filter,
+		},
+		v1::media::thumbnails::get_media_thumbnail,
+	},
 	utils::{http::ImageResponse, validate_and_load_image},
-};
-
-use super::{
-	library::apply_library_base_filters,
-	media::{apply_media_age_restriction, apply_media_base_filters, get_media_thumbnail},
-	metadata::apply_series_metadata_filters,
 };
 
 // TODO: support downloading entire series as a zip file
@@ -98,148 +96,6 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				),
 		)
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
-}
-
-pub(crate) fn apply_series_base_filters(filters: SeriesBaseFilter) -> Vec<WhereParam> {
-	chain_optional_iter(
-		[],
-		[
-			(!filters.id.is_empty()).then(|| series::id::in_vec(filters.id)),
-			(!filters.name.is_empty()).then(|| series::name::in_vec(filters.name)),
-			(!filters.path.is_empty()).then(|| {
-				let decoded_paths = decode_path_filter(filters.path);
-				series::path::in_vec(decoded_paths)
-			}),
-			filters.search.map(|s| {
-				or![
-					series::name::contains(s.clone()),
-					series::description::contains(s.clone()),
-					series::metadata::is(vec![or![
-						series_metadata::title::contains(s.clone()),
-						series_metadata::summary::contains(s),
-					]])
-				]
-			}),
-			filters
-				.metadata
-				.map(apply_series_metadata_filters)
-				.map(series::metadata::is),
-		],
-	)
-}
-
-pub(crate) fn apply_series_relation_filters(
-	filters: SeriesRelationFilter,
-) -> Vec<WhereParam> {
-	chain_optional_iter(
-		[],
-		[
-			filters
-				.library
-				.map(apply_library_base_filters)
-				.map(series::library::is),
-			filters
-				.media
-				.map(apply_media_base_filters)
-				.map(series::media::some),
-		],
-	)
-}
-
-pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {
-	apply_series_base_filters(filters.base_filter)
-		.into_iter()
-		.chain(apply_series_relation_filters(filters.relation_filter))
-		.collect()
-}
-
-pub(crate) fn apply_series_library_not_hidden_for_user_filter(
-	user: &User,
-) -> Vec<WhereParam> {
-	vec![series::library::is(vec![
-		library_not_hidden_from_user_filter(user),
-	])]
-}
-
-// TODO: this is wrong
-pub(crate) fn apply_series_age_restriction(
-	min_age: i32,
-	restrict_on_unset: bool,
-) -> WhereParam {
-	let direct_restriction = series::metadata::is(if restrict_on_unset {
-		vec![
-			series_metadata::age_rating::not(None),
-			series_metadata::age_rating::lte(min_age),
-		]
-	} else {
-		vec![or![
-			series_metadata::age_rating::equals(None),
-			series_metadata::age_rating::lte(min_age)
-		]]
-	});
-
-	let media_restriction =
-		series::media::some(vec![media::metadata::is(if restrict_on_unset {
-			vec![
-				media_metadata::age_rating::not(None),
-				media_metadata::age_rating::lte(min_age),
-			]
-		} else {
-			vec![or![
-				media_metadata::age_rating::equals(None),
-				media_metadata::age_rating::lte(min_age)
-			]]
-		})]);
-
-	or![direct_restriction, media_restriction]
-}
-
-// FIXME: hidden libraries introduced a bug here, need to fix!
-
-// fn apply_series_filters_for_user(filters: SeriesFilter, user: &User) -> Vec<WhereParam> {
-// 	apply_series_filters(filters)
-// 		.into_iter()
-// 		.chain(apply_series_library_not_hidden_for_user_filter(user))
-// 		.collect()
-// }
-
-pub fn apply_series_restrictions_for_user(user: &User) -> Vec<WhereParam> {
-	let age_restrictions = user
-		.age_restriction
-		.as_ref()
-		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
-
-	chain_optional_iter(
-		[series::library::is(vec![
-			library_not_hidden_from_user_filter(user),
-		])],
-		[age_restrictions],
-	)
-}
-
-pub(crate) fn apply_series_filters_for_user(
-	filters: SeriesFilter,
-	user: &User,
-) -> Vec<WhereParam> {
-	let age_restrictions = user
-		.age_restriction
-		.as_ref()
-		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
-
-	let base_filters = operator::and(
-		apply_series_filters(filters)
-			.into_iter()
-			.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_default())
-			.collect::<Vec<WhereParam>>(),
-	);
-
-	// TODO: This is not ideal, I am adding an _additional_ relation filter for
-	// the library exclusion, when I need to merge any requested filters with this one,
-	// instead. This was a regression from the exclusion feature I need to tackle
-	vec![and![
-		base_filters,
-		series::library::is(vec![library_not_hidden_from_user_filter(user)])
-	]]
 }
 
 #[utoipa::path(
@@ -308,10 +164,10 @@ async fn get_series(
 					},
 					Pagination::Cursor(cursor_query) => {
 						if let Some(cursor) = cursor_query.cursor {
-							query = query.cursor(series::id::equals(cursor)).skip(1)
+							query = query.cursor(series::id::equals(cursor)).skip(1);
 						}
 						if let Some(limit) = cursor_query.limit {
-							query = query.take(limit)
+							query = query.take(limit);
 						}
 					},
 					_ => unreachable!(),
@@ -654,16 +510,13 @@ async fn patch_series_thumbnail(
 
 	let client = &ctx.db;
 
-	let target_page = body
-		.is_zero_based
-		.map(|is_zero_based| {
-			if is_zero_based {
-				body.page + 1
-			} else {
-				body.page
-			}
-		})
-		.unwrap_or(body.page);
+	let target_page = body.is_zero_based.map_or(body.page, |is_zero_based| {
+		if is_zero_based {
+			body.page + 1
+		} else {
+			body.page
+		}
+	});
 
 	let media = client
 		.media()
@@ -688,7 +541,7 @@ async fn patch_series_thumbnail(
 	let image_options = library
 		.config()?
 		.thumbnail_config
-		.to_owned()
+		.clone()
 		.map(ImageProcessorOptions::try_from)
 		.transpose()?
 		.unwrap_or_else(|| {
@@ -769,7 +622,7 @@ async fn replace_series_thumbnail(
 
 	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 	// user testing I'd like to see if this becomes a problem. We'll see!
-	match remove_thumbnails(&[series_id.clone()], ctx.config.get_thumbnails_dir()) {
+	match remove_thumbnails(&[series_id.clone()], &ctx.config.get_thumbnails_dir()) {
 		Ok(count) => tracing::info!("Removed {} thumbnails!", count),
 		Err(e) => tracing::error!(
 			?e,
@@ -871,10 +724,10 @@ async fn get_series_media(
 					},
 					Pagination::Cursor(cursor_query) => {
 						if let Some(cursor) = cursor_query.cursor {
-							query = query.cursor(media::id::equals(cursor)).skip(1)
+							query = query.cursor(media::id::equals(cursor)).skip(1);
 						}
 						if let Some(limit) = cursor_query.limit {
-							query = query.take(limit)
+							query = query.take(limit);
 						}
 					},
 					_ => unreachable!(),
@@ -987,8 +840,7 @@ async fn get_next_in_series(
 					// If there is a percentage, and it is less than 1.0, then it is next!
 					Some(session) if session.epubcfi.is_some() => session
 						.percentage_completed
-						.map(|value| value < 1.0)
-						.unwrap_or(false),
+						.is_some_and(|value| value < 1.0),
 					// If there is a page, and it is less than the total pages, then it is next!
 					Some(session) if session.page.is_some() => {
 						session.page.unwrap_or(1) < m.pages
@@ -1001,10 +853,7 @@ async fn get_next_in_series(
 
 		Ok(Json(next_book.map(|data| Media::from(data.to_owned()))))
 	} else {
-		Err(APIError::NotFound(format!(
-			"Series with id {} no found.",
-			id
-		)))
+		Err(APIError::NotFound(format!("Series with id {id} no found.")))
 	}
 }
 

@@ -51,7 +51,7 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(
 			let Icon: LucideIcon | null = null
 
 			if (typeof icon === 'string') {
-				Icon = ALERT_ICONS[level || 'info'] || ALERT_ICONS.info
+				Icon = ALERT_ICONS[icon || level || 'info'] || ALERT_ICONS.info
 			} else if (icon) {
 				Icon = icon
 			}

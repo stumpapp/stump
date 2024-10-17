@@ -1,4 +1,4 @@
-import type { Tag } from '@stump/types'
+import type { Tag } from '@stump/sdk'
 import { AxiosError } from 'axios'
 import { useMemo } from 'react'
 

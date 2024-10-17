@@ -54,20 +54,18 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::{
-		chain_optional_iter, decode_path_filter, FilterableQuery, LibraryBaseFilter,
-		LibraryFilter, LibraryRelationFilter, MediaFilter, SeriesFilter,
+		chain_optional_iter, FilterableQuery, LibraryFilter, MediaFilter, SeriesFilter,
 	},
 	middleware::auth::{auth_middleware, RequestContext},
+	routers::api::filters::{
+		apply_library_filters_for_user, apply_media_age_restriction, apply_media_filters,
+		apply_media_pagination, apply_series_age_restriction, apply_series_filters,
+		library_not_hidden_from_user_filter,
+	},
 	utils::{http::ImageResponse, validate_and_load_image},
 };
 
-use super::{
-	media::{apply_media_age_restriction, apply_media_filters, apply_media_pagination},
-	series::{
-		apply_series_age_restriction, apply_series_base_filters, apply_series_filters,
-		get_series_thumbnail,
-	},
-};
+use super::series::get_series_thumbnail;
 
 // TODO: age restrictions!
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -119,51 +117,6 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
-pub(crate) fn apply_library_base_filters(filters: LibraryBaseFilter) -> Vec<WhereParam> {
-	chain_optional_iter(
-		[],
-		[
-			(!filters.id.is_empty()).then(|| library::id::in_vec(filters.id)),
-			(!filters.name.is_empty()).then(|| library::name::in_vec(filters.name)),
-			(!filters.path.is_empty()).then(|| {
-				let decoded_paths = decode_path_filter(filters.path);
-				library::path::in_vec(decoded_paths)
-			}),
-			filters.search.map(library::name::contains),
-		],
-	)
-}
-
-pub(crate) fn apply_library_relation_filters(
-	filters: LibraryRelationFilter,
-) -> Vec<WhereParam> {
-	chain_optional_iter(
-		[],
-		[filters
-			.series
-			.map(apply_series_base_filters)
-			.map(library::series::some)],
-	)
-}
-
-pub(crate) fn library_not_hidden_from_user_filter(user: &User) -> WhereParam {
-	library::hidden_from_users::none(vec![user::id::equals(user.id.clone())])
-}
-
-// FIXME: hidden libraries introduced a bug here, need to fix!
-
-pub(crate) fn apply_library_filters_for_user(
-	filters: LibraryFilter,
-	user: &User,
-) -> Vec<WhereParam> {
-	let not_hidden_filter = library_not_hidden_from_user_filter(user);
-	apply_library_base_filters(filters.base_filter)
-		.into_iter()
-		.chain(apply_library_relation_filters(filters.relation_filter))
-		.chain([not_hidden_filter])
-		.collect()
-}
-
 #[utoipa::path(
 	get,
 	path = "/api/v1/libraries",
@@ -212,10 +165,10 @@ async fn get_libraries(
 			},
 			Pagination::Cursor(cursor_query) => {
 				if let Some(cursor) = cursor_query.cursor {
-					query = query.cursor(library::id::equals(cursor)).skip(1)
+					query = query.cursor(library::id::equals(cursor)).skip(1);
 				}
 				if let Some(limit) = cursor_query.limit {
-					query = query.take(limit)
+					query = query.take(limit);
 				}
 			},
 			_ => unreachable!(),
@@ -318,7 +271,7 @@ async fn get_libraries_stats(
 
 	let stats = db
 		._query_raw::<LibraryStats>(raw!(
-			r#"
+			r"
 			WITH base_counts AS (
 				SELECT
 					COUNT(*) AS book_count,
@@ -347,7 +300,7 @@ async fn get_libraries_stats(
 			FROM
 				base_counts
 				INNER JOIN progress_counts;
-			"#,
+			",
 			PrismaValue::Boolean(params.all_users),
 			PrismaValue::String(user.id.clone()),
 			PrismaValue::String(user.id.clone())
@@ -469,10 +422,10 @@ async fn get_library_series(
 			},
 			Pagination::Cursor(cursor_query) => {
 				if let Some(cursor) = cursor_query.cursor {
-					query = query.cursor(series::id::equals(cursor)).skip(1)
+					query = query.cursor(series::id::equals(cursor)).skip(1);
 				}
 				if let Some(limit) = cursor_query.limit {
-					query = query.take(limit)
+					query = query.take(limit);
 				}
 			},
 			_ => unreachable!("Pagination should be either page or cursor"),
@@ -540,7 +493,7 @@ async fn get_library_media(
 				.order_by(order_by_param);
 
 			if !is_unpaged {
-				query = apply_media_pagination(query, &pagination_cloned)
+				query = apply_media_pagination(query, &pagination_cloned);
 			}
 
 			let media = query
@@ -686,16 +639,13 @@ async fn patch_library_thumbnail(
 
 	let client = &ctx.db;
 
-	let target_page = body
-		.is_zero_based
-		.map(|is_zero_based| {
-			if is_zero_based {
-				body.page + 1
-			} else {
-				body.page
-			}
-		})
-		.unwrap_or(body.page);
+	let target_page = body.is_zero_based.map_or(body.page, |is_zero_based| {
+		if is_zero_based {
+			body.page + 1
+		} else {
+			body.page
+		}
+	});
 
 	let media = client
 		.media()
@@ -728,7 +678,7 @@ async fn patch_library_thumbnail(
 	let image_options = library
 		.config()?
 		.thumbnail_config
-		.to_owned()
+		.clone()
 		.map(ImageProcessorOptions::try_from)
 		.transpose()?
 		.unwrap_or_else(|| {
@@ -789,7 +739,7 @@ async fn replace_library_thumbnail(
 
 	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 	// user testing I'd like to see if this becomes a problem. We'll see!
-	match remove_thumbnails(&[library_id.clone()], ctx.config.get_thumbnails_dir()) {
+	match remove_thumbnails(&[library_id.clone()], &ctx.config.get_thumbnails_dir()) {
 		Ok(count) => tracing::info!("Removed {} thumbnails!", count),
 		Err(e) => tracing::error!(
 			?e,
@@ -848,7 +798,7 @@ async fn delete_library_thumbnails(
 		.flat_map(|s| s.media.into_iter().map(|m| m.id))
 		.collect::<Vec<String>>();
 
-	remove_thumbnails(&media_ids, thumbnails_dir)?;
+	remove_thumbnails(&media_ids, &thumbnails_dir)?;
 
 	Ok(Json(()))
 }
@@ -1072,8 +1022,7 @@ async fn scan_library(
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound(format!(
-			"Library with id {} not found",
-			id
+			"Library with id {id} not found"
 		)))?;
 
 	ctx.enqueue_job(LibraryScanJob::new(library.id, library.path))
@@ -1218,7 +1167,7 @@ async fn clean_library(
 	let (response, media_to_delete_ids) = result?;
 
 	if !media_to_delete_ids.is_empty() {
-		image::remove_thumbnails(&media_to_delete_ids, thumbnails_dir).map_or_else(
+		image::remove_thumbnails(&media_to_delete_ids, &thumbnails_dir).map_or_else(
 			|error| {
 				tracing::error!(?error, "Failed to remove thumbnails for library media");
 			},
@@ -1387,11 +1336,11 @@ async fn create_library(
 			let library = client
 				.library()
 				.create(
-					input.name.to_owned(),
-					input.path.to_owned(),
+					input.name.clone(),
+					input.path.clone(),
 					library_config::id::equals(library_config.id.clone()),
 					chain_optional_iter(
-						[library::description::set(input.description.to_owned())],
+						[library::description::set(input.description.clone())],
 						[(!library_tags.is_empty()).then(|| {
 							library::tags::connect(
 								library_tags
@@ -1733,7 +1682,7 @@ async fn delete_library(
 			media_ids.len()
 		);
 
-		if let Err(err) = image::remove_thumbnails(&media_ids, thumbnails_dir) {
+		if let Err(err) = image::remove_thumbnails(&media_ids, &thumbnails_dir) {
 			error!("Failed to remove thumbnails for library media: {:?}", err);
 		} else {
 			debug!("Removed thumbnails for library media (if present)");
@@ -1756,7 +1705,7 @@ async fn get_library_stats(
 
 	let stats = db
 		._query_raw::<LibraryStats>(raw!(
-			r#"
+			r"
 			WITH base_counts AS (
 				SELECT
 					COUNT(*) AS book_count,
@@ -1788,7 +1737,7 @@ async fn get_library_stats(
 			FROM
 				base_counts
 				INNER JOIN progress_counts;
-			"#,
+			",
 			PrismaValue::String(id),
 			PrismaValue::Boolean(params.all_users),
 			PrismaValue::String(user.id.clone()),

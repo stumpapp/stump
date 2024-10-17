@@ -1,9 +1,11 @@
 import { queryClient, useSDK } from '@stump/client'
 import { cn } from '@stump/components'
 import { Api } from '@stump/sdk'
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import { Book, Folder } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
+
+import { EntityImage } from '../entity'
 
 type Props = {
 	path: string
@@ -101,7 +103,7 @@ export default function FileThumbnail({
 	}
 
 	return (
-		<img
+		<EntityImage
 			className={cn('aspect-[2/3] w-auto rounded-sm object-cover', sizeClasses)}
 			src={sdk.media.thumbnailURL(book.id)}
 			onError={() => setShowFallback(true)}

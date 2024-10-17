@@ -1,5 +1,5 @@
 import { cn } from '@stump/components'
-import { Library, Series, SmartListItemGroup } from '@stump/types'
+import { Library, Series, SmartListItemGroup } from '@stump/sdk'
 import {
 	ExpandedState,
 	flexRender,

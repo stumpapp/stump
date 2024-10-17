@@ -32,7 +32,7 @@ export default function ResetConfigurationConfirmation({ onConfirmReset }: Props
 						variant="danger"
 						onClick={() => setShowConfirmation(true)}
 						className="flex-shrink-0"
-						size="md"
+						size="sm"
 					>
 						{t(getKey('trigger'))}
 					</Button>

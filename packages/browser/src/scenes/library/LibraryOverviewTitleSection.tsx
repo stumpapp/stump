@@ -1,8 +1,9 @@
 import { useSDK } from '@stump/client'
-import { EntityCard, Heading } from '@stump/components'
-import type { Library } from '@stump/types'
+import { Heading } from '@stump/components'
+import type { Library } from '@stump/sdk'
 import { useMediaMatch } from 'rooks'
 
+import { EntityCard } from '@/components/entity'
 import ReadMore from '@/components/ReadMore'
 import TagList from '@/components/tags/TagList'
 

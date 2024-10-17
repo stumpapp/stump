@@ -1,5 +1,5 @@
 import { useSDK, useSeriesCursorQuery } from '@stump/client'
-import { Series } from '@stump/types'
+import { Series } from '@stump/sdk'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import React, { useCallback, useEffect } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'

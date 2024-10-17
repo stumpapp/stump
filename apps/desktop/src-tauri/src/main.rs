@@ -3,9 +3,6 @@
 	windows_subsystem = "windows"
 )]
 
-// TODO: https://github.com/tauri-apps/tauri-plugin-store
-// TODO: https://tauri.app/v1/guides/features/menu
-
 mod commands;
 mod error;
 mod state;
@@ -17,12 +14,14 @@ use store::AppStore;
 
 use state::AppState;
 
-use commands::{close_splashscreen, set_discord_presence, set_use_discord_connection};
+use commands::{
+	clear_credential_store, delete_api_token, get_api_token, get_credential_store_state,
+	get_current_server, init_credential_store, set_api_token, set_discord_presence,
+	set_use_discord_connection,
+};
 
 #[cfg(feature = "bundled-server")]
 use stump_server::{bootstrap_http_server_config, run_http_server};
-
-// TODO: https://github.com/tauri-apps/tauri/issues/2663
 
 fn setup_app(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 	let _app_store = AppStore::init(app)?;
@@ -52,17 +51,30 @@ fn setup_app(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 	Ok(())
 }
 
+// TODO(titlebar): https://v2.tauri.app/plugin/window-customization/#macos-transparent-titlebar-with-custom-window-background-color
+// See also https://github.com/tauri-apps/tauri/issues/2663
+
+// TODO(system-tray): https://v2.tauri.app/plugin/system-tray/
+
 fn main() {
 	let app_state = AppState::new().expect("Failed to initialize application state");
 
 	tauri::Builder::default()
+		.plugin(tauri_plugin_shell::init())
+		.plugin(tauri_plugin_os::init())
 		.plugin(tauri_plugin_store::Builder::default().build())
 		.setup(setup_app)
 		.manage(Arc::new(Mutex::new(app_state)))
 		.invoke_handler(tauri::generate_handler![
 			set_use_discord_connection,
 			set_discord_presence,
-			close_splashscreen
+			get_current_server,
+			init_credential_store,
+			get_api_token,
+			set_api_token,
+			delete_api_token,
+			clear_credential_store,
+			get_credential_store_state
 		])
 		.run(tauri::generate_context!())
 		.expect("error while running tauri application");
@@ -77,7 +89,7 @@ mod tests {
 		NamedType,
 	};
 
-	use crate::store::{app_store::*, saved_server::*};
+	use crate::store::{app_store::*, saved_server::*, secure_store::*};
 
 	#[allow(dead_code)]
 	fn ts_export<T>() -> Result<String, TsExportError>
@@ -91,7 +103,7 @@ mod tests {
 	#[ignore]
 	fn codegen() -> Result<(), Box<dyn std::error::Error>> {
 		let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("../../../packages/types")
+			.join("../../../packages/sdk/src/types")
 			.join("generated.ts");
 
 		if !path.exists() {
@@ -110,6 +122,10 @@ mod tests {
 
 		file.write_all(format!("{}\n\n", ts_export::<SavedServer>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<AppStore>()?).as_bytes())?;
+
+		file.write_all(
+			format!("{}\n\n", ts_export::<CredentialStoreTokenState>()?).as_bytes(),
+		)?;
 
 		Ok(())
 	}

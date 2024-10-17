@@ -59,8 +59,8 @@ export default function UserSmartListNavigation() {
 						key={tab.to}
 						underline={false}
 						className={cn('whitespace-nowrap border-b-2 px-1 py-3 text-sm font-medium', {
-							'border-transparent text-foreground-muted': !tab.isActive,
 							'border-edge-brand text-foreground-brand': tab.isActive,
+							'border-transparent text-foreground-muted': !tab.isActive,
 						})}
 						onMouseEnter={tab.onHover}
 					>

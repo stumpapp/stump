@@ -1,5 +1,5 @@
 import { useMediaCursorQuery } from '@stump/client'
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import { useEffect } from 'react'
 
 import MediaCard from '@/components/book/BookCard'

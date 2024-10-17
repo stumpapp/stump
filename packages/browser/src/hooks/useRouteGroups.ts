@@ -1,4 +1,4 @@
-import { UserPermission } from '@stump/types'
+import { UserPermission } from '@stump/sdk'
 import type { LucideIcon } from 'lucide-react'
 import { useMemo } from 'react'
 
@@ -18,6 +18,7 @@ type Route = {
 	label: string
 	localeKey: string
 	permission?: UserPermission
+	customPermission?: () => boolean
 	to: string
 	subItems?: SubItem[]
 	disabled?: boolean

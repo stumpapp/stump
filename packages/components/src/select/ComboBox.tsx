@@ -136,8 +136,8 @@ export function ComboBox({
 					<Button
 						className="h-[unset] shrink-0 text-ellipsis text-wrap break-all text-brand"
 						onClick={() => {
-							onAddOption({ label: filter, value: filter.toLowerCase() })
-							handleChange(filter.toLowerCase())
+							onAddOption({ label: filter, value: filter })
+							handleChange(filter)
 							setFilter('')
 						}}
 					>

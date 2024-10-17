@@ -16,7 +16,7 @@ axum-extra = { version = "0.9.3", features = [
   "typed-header",
   "query"
 ] }
-base64 = "0.22.1"
+base64 = { workspace = true }
 bcrypt = { workspace = true }
 cli = { path = "../../crates/cli" }
 chrono = { workspace = true }
@@ -60,13 +60,13 @@ axum-test = "15.3.1"
 chrono = { workspace = true }
 
 [target.aarch64-unknown-linux-musl.dependencies]
-openssl = { version = "0.10.61", features = ["vendored"] }
+openssl = { version = "0.10.66", features = ["vendored"] }
 
 [target.armv7-unknown-linux-musleabihf.dependencies]
-openssl = { version = "0.10.61", features = ["vendored"] }
+openssl = { version = "0.10.66", features = ["vendored"] }
 
 [target.x86_64-unknown-linux-musl.dependencies]
-openssl = { version = "0.10.61", features = ["vendored"] }
+openssl = { version = "0.10.66", features = ["vendored"] }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 windows = { version = "0.58.0", features = ["Win32_Storage_FileSystem"] }

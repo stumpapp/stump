@@ -1,5 +1,5 @@
 import { Sheet } from '@stump/components'
-import { User } from '@stump/types'
+import { User } from '@stump/sdk'
 import React from 'react'
 
 type Props = {

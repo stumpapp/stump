@@ -1,7 +1,7 @@
 import { queryClient, useScanLibrary } from '@stump/client'
 import { DropdownMenu } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import type { Library } from '@stump/types'
+import type { Library } from '@stump/sdk'
 import { FolderSearch2, MoreHorizontal, ScanLine, Settings, Trash } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 import { useLocation } from 'react-router'

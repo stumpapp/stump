@@ -1,5 +1,5 @@
-import { invalidateQueries, useMediaByIdQuery, useUpdateMediaProgress } from '@stump/client'
-import { Media } from '@stump/types'
+import { invalidateQueries, useMediaByIdQuery, useSDK, useUpdateMediaProgress } from '@stump/client'
+import { Media } from '@stump/sdk'
 import { Suspense, useEffect } from 'react'
 import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 
@@ -37,6 +37,8 @@ type Props = {
 function BookReaderScene({ book }: Props) {
 	const [search] = useSearchParams()
 
+	const { sdk } = useSDK()
+
 	const page = search.get('page')
 	const isIncognito = search.get('incognito') === 'true'
 	const isAnimated = search.get('animated') === 'true'
@@ -58,9 +60,9 @@ function BookReaderScene({ book }: Props) {
 	 */
 	useEffect(() => {
 		return () => {
-			invalidateQueries({ exact: false, keys: [mediaQueryKeys.getInProgressMedia] })
+			invalidateQueries({ exact: false, keys: [sdk.media.keys.inProgress] })
 		}
-	}, [])
+	}, [sdk.media])
 
 	/**
 	 * An effect to update the read progress whenever the page changes in the URL

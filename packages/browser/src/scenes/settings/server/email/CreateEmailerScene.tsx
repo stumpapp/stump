@@ -1,4 +1,5 @@
 import { useEmailersQuery, useMutation, useSDK } from '@stump/client'
+import { CreateOrUpdateEmailer } from '@stump/sdk'
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router'
 
@@ -16,7 +17,10 @@ export default function CreateEmailerScene() {
 	const { emailers } = useEmailersQuery({
 		suspense: true,
 	})
-	const { mutateAsync: createEmailer } = useMutation([sdk.emailer.keys.create], sdk.emailer.create)
+	const { mutateAsync: createEmailer } = useMutation(
+		[sdk.emailer.keys.create],
+		(params: CreateOrUpdateEmailer) => sdk.emailer.create(params),
+	)
 
 	const onSubmit = async ({ name, is_primary, ...config }: CreateOrUpdateEmailerSchema) => {
 		try {

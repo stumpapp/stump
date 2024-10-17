@@ -70,7 +70,7 @@ pub struct Media {
 	/// Whether or not the media is completed. Only None if the relation is not loaded.
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub is_completed: Option<bool>,
-	/// The user assigned tags for the media. ex: ["comic", "spiderman"]. Will be `None` only if the relation is not loaded.
+	/// The user assigned tags for the media. ex: `["comic", "spiderman"]`. Will be `None` only if the relation is not loaded.
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub tags: Option<Vec<Tag>>,
 	/// Bookmarks for the media. Will be `None` only if the relation is not loaded.
@@ -98,8 +98,8 @@ impl Cursor for Media {
 impl TryFrom<active_reading_session::Data> for Media {
 	type Error = CoreError;
 
-	/// Creates a [Media] instance from the loaded relation of a [media::Data] on
-	/// a [active_reading_session::Data] instance. If the relation is not loaded, it will
+	/// Creates a [Media] instance from the loaded relation of a [`media::Data`] on an
+	/// [`active_reading_session::Data`] instance. If the relation is not loaded, it will
 	/// return an error.
 	fn try_from(data: active_reading_session::Data) -> Result<Self, Self::Error> {
 		let Ok(media) = data.media() else {
@@ -135,8 +135,9 @@ impl From<media::Data> for Media {
 		};
 		let (current_page, current_epubcfi) = active_reading_session
 			.as_ref()
-			.map(|session| (session.page, session.epubcfi.clone()))
-			.unwrap_or((None, None));
+			.map_or((None, None), |session| {
+				(session.page, session.epubcfi.clone())
+			});
 
 		let finished_reading_sessions = match data.finished_user_reading_sessions() {
 			Ok(sessions) => Some(

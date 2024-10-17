@@ -1,13 +1,12 @@
-import { ClaimResponse, StumpVersion, UpdateCheck } from '@stump/types'
-
 import { APIBase } from '../base'
+import { ClaimResponse, StumpVersion, UpdateCheck } from '../types'
 import { APIResult, ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 
 /**
  * The root route for the server API
  */
-const SERVER_ROUTE = '/'
+const SERVER_ROUTE = ''
 /**
  * A helper function to format the URL for server API routes with optional query parameters
  */
@@ -21,7 +20,7 @@ export class ServerAPI extends APIBase {
 	 * Get the version of the Stump instance
 	 */
 	async version(): Promise<StumpVersion> {
-		const { data: version } = await this.axios.get<StumpVersion>(serverURL('version'))
+		const { data: version } = await this.axios.post<StumpVersion>(serverURL('/version'))
 		return version
 	}
 
@@ -29,7 +28,7 @@ export class ServerAPI extends APIBase {
 	 * Check for updates to the Stump instance
 	 */
 	async checkUpdate(): Promise<UpdateCheck> {
-		const { data: update } = await this.axios.get<UpdateCheck>(serverURL('update'))
+		const { data: update } = await this.axios.get<UpdateCheck>(serverURL('/update'))
 		return update
 	}
 

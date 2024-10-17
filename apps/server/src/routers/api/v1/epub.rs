@@ -74,10 +74,7 @@ async fn get_epub_by_id(
 	if let Some(book) = result {
 		Ok(Json(Epub::try_from(book)?))
 	} else {
-		Err(APIError::NotFound(format!(
-			"Media with id {} not found",
-			id
-		)))
+		Err(APIError::NotFound(format!("Media with id {id} not found")))
 	}
 }
 
@@ -281,10 +278,7 @@ async fn get_epub_chapter(
 	if let Some(book) = result {
 		Ok(EpubProcessor::get_chapter(book.path.as_str(), chapter)?.into())
 	} else {
-		Err(APIError::NotFound(format!(
-			"Media with id {} not found",
-			id
-		)))
+		Err(APIError::NotFound(format!("Media with id {id} not found")))
 	}
 }
 
@@ -323,9 +317,6 @@ async fn get_epub_meta(
 
 		Ok(BufferResponse::new(content_type, buffer))
 	} else {
-		Err(APIError::NotFound(format!(
-			"Media with id {} not found",
-			id
-		)))
+		Err(APIError::NotFound(format!("Media with id {id} not found")))
 	}
 }

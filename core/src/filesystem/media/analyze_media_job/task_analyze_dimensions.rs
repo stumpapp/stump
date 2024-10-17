@@ -10,14 +10,14 @@ use crate::{
 	prisma::{media_metadata, page_dimensions},
 };
 
-/// The logic for [super::AnalyzeMediaTask::AnalyzePageDimensions].
+/// The logic for [`super::AnalyzeMediaTask::AnalyzePageDimensions`].
 ///
 /// Reads each page of the media item and determines its dimensions then writes them to
 /// the database.
 ///
 /// # Arguments
 /// * `id` - The id for the media item being analyzed
-/// * `ctx` - A reference to the [WorkerCtx] for the job
+/// * `ctx` - A reference to the [`WorkerCtx`] for the job
 /// * `output` - A mutable reference to the job output
 pub(crate) async fn execute(
 	id: String,
@@ -56,7 +56,7 @@ pub(crate) async fn execute(
 		let (height, width) =
 			image::load_from_memory_with_format(&page_data, image_format)
 				.map_err(|e| {
-					JobError::TaskFailed(format!("Error loading image data: {}", e))
+					JobError::TaskFailed(format!("Error loading image data: {e}"))
 				})?
 				.dimensions();
 

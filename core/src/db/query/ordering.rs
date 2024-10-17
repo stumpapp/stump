@@ -29,9 +29,9 @@ impl From<Direction> for SortOrder {
 #[derive(Debug, Deserialize, Serialize, Type, ToSchema)]
 #[serde(default)]
 pub struct QueryOrder {
-	/// The field to order by. Defaults to 'name'
+	/// The field to order by. Defaults to "name"
 	pub order_by: String,
-	/// The order in which to sort, based on order_by. Defaults to 'Asc'
+	/// The order in which to sort, based on `order_by`. Defaults to [`Direction::Asc`]
 	pub direction: Direction,
 }
 

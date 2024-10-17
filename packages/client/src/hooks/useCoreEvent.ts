@@ -1,5 +1,5 @@
+import type { CoreEvent, CoreJobOutput, LibraryScanOutput } from '@stump/sdk'
 import { Api } from '@stump/sdk'
-import type { CoreEvent, CoreJobOutput, LibraryScanOutput } from '@stump/types'
 import { useCallback } from 'react'
 
 import { invalidateQueries } from '../invalidate'

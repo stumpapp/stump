@@ -44,7 +44,7 @@ impl WebpProcessor {
 	) -> DynamicImage {
 		let (current_width, current_height) = image.dimensions();
 		let (height, width) =
-			resized_dimensions(current_height, current_width, resize_options);
+			resized_dimensions(current_height, current_width, &resize_options);
 
 		DynamicImage::ImageRgba8(imageops::resize(
 			&image,
@@ -84,7 +84,7 @@ mod tests {
 			&webp_bytes,
 			image::ImageFormat::WebP
 		)
-		.is_ok())
+		.is_ok());
 	}
 
 	#[test]
@@ -106,7 +106,7 @@ mod tests {
 			&webp_bytes,
 			image::ImageFormat::WebP
 		)
-		.is_ok())
+		.is_ok());
 	}
 
 	#[test]
@@ -173,7 +173,7 @@ mod tests {
 			&webp_bytes,
 			image::ImageFormat::WebP
 		)
-		.is_ok())
+		.is_ok());
 	}
 
 	#[test]

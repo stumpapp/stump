@@ -59,7 +59,7 @@ impl FromStr for LibraryPattern {
 			"SERIES_BASED" => Ok(LibraryPattern::SeriesBased),
 			"COLLECTION_BASED" => Ok(LibraryPattern::CollectionBased),
 			"" => Ok(LibraryPattern::default()),
-			_ => Err(format!("Invalid library pattern: {}", s)),
+			_ => Err(format!("Invalid library pattern: {s}")),
 		}
 	}
 }
@@ -103,7 +103,7 @@ impl FromStr for LibraryScanMode {
 			"DEFAULT" => Ok(LibraryScanMode::Default),
 			"NONE" => Ok(LibraryScanMode::None),
 			"" => Ok(LibraryScanMode::default()),
-			_ => Err(format!("Invalid library scan mode: {}", s)),
+			_ => Err(format!("Invalid library scan mode: {s}")),
 		}
 	}
 }

@@ -68,10 +68,8 @@ impl MediaBuilder {
 
 		let pages = processed_entry.pages;
 		if let Some(ref mut metadata) = processed_entry.metadata {
-			let conflicting_page_counts = metadata
-				.page_count
-				.map(|count| count != pages)
-				.unwrap_or(false);
+			let conflicting_page_counts =
+				metadata.page_count.is_some_and(|count| count != pages);
 			if conflicting_page_counts {
 				tracing::warn!(
 					?pages,

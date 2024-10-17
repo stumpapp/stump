@@ -1,4 +1,4 @@
-import type { LayoutMode } from '@stump/types'
+import type { LayoutMode } from '@stump/sdk'
 import { useEffect, useMemo, useState } from 'react'
 
 import { useUserStore } from '@/stores'

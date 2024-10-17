@@ -1,4 +1,4 @@
-import type { JobSchedulerConfig, PersistedJob } from '@stump/types'
+import type { JobSchedulerConfig, PersistedJob } from '@stump/sdk'
 
 import { PageQueryOptions, useMutation, usePageQuery, useQuery } from '../client'
 import { useSDK } from '../sdk'

@@ -31,8 +31,6 @@ async fn sse_handler(
 						continue;
 					}
 				}
-			} else {
-				continue;
 			}
 		}
 	};

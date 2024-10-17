@@ -1,6 +1,6 @@
 import { useLibraryQuery } from '@stump/client'
 import { Heading, Text } from '@stump/components'
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 
 import { formatBytes } from '../../utils/format'
 

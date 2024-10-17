@@ -57,7 +57,7 @@ pub async fn enforce_max_sessions(
 			tracing::error!(?error, "Failed to load user's existing session(s)");
 			Vec::default()
 		})
-		.to_owned();
+		.clone();
 	let existing_login_sessions_count = existing_sessions.len() as i32;
 
 	match (for_user.max_sessions_allowed, existing_login_sessions_count) {
@@ -153,11 +153,7 @@ async fn handle_remove_earliest_session(
 #[serde(untagged)]
 pub enum LoginResponse {
 	User(User),
-	AccessToken {
-		for_user: User,
-		#[serde(flatten)]
-		token: CreatedToken,
-	},
+	AccessToken { for_user: User, token: CreatedToken },
 }
 
 #[utoipa::path(
@@ -398,7 +394,7 @@ pub async fn register(
 	let created_user = db
 		.user()
 		.create(
-			input.username.to_owned(),
+			input.username.clone(),
 			hashed_password,
 			vec![user::is_server_owner::set(is_server_owner)],
 		)

@@ -11,7 +11,7 @@ import {
 	Text,
 } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { SMTPEmailer } from '@stump/types'
+import { SMTPEmailer } from '@stump/sdk'
 import React, { useCallback, useMemo } from 'react'
 import { useForm, useFormState } from 'react-hook-form'
 
@@ -87,6 +87,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 				variant="primary"
 				{...form.register('name')}
 				errorMessage={errors.name?.message}
+				ignoreFill
 			/>
 
 			<div className="flex flex-col space-y-4">

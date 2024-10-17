@@ -1,6 +1,6 @@
 import { useUpdateBookClub } from '@stump/client'
 import { EmojiPicker } from '@stump/components'
-import { BookClub } from '@stump/types'
+import { BookClub } from '@stump/sdk'
 import React from 'react'
 import toast from 'react-hot-toast'
 

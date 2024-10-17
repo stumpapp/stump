@@ -101,7 +101,7 @@ impl FileProcessor for ZipProcessor {
 				file.read_to_end(&mut contents)?;
 				let contents = String::from_utf8_lossy(&contents).to_string();
 				trace!(contents_len = contents.len(), "Read ComicInfo.xml");
-				metadata = metadata_from_buf(contents);
+				metadata = metadata_from_buf(&contents);
 			} else if content_type.is_image() {
 				pages += 1;
 			}

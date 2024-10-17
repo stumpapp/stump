@@ -1,6 +1,6 @@
 {
 	"name": "@stump/i18n",
-	"version": "0.0.6",
+	"version": "0.0.7",
 	"description": "",
 	"main": "src/index.ts",
 	"exports": {
@@ -14,7 +14,6 @@
 		"typescript": "^5.4.5"
 	},
 	"dependencies": {
-		"@stump/types": "*",
 		"react": "^18.2.0"
 	}
 }

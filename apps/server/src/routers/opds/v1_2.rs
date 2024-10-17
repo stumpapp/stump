@@ -26,18 +26,15 @@ use crate::{
 	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
 	middleware::auth::{auth_middleware, RequestContext},
-	routers::api::v1::{
-		library::library_not_hidden_from_user_filter,
-		media::{
-			apply_media_library_not_hidden_for_user_filter, get_media_thumbnail_by_id,
+	routers::api::{
+		filters::{
+			apply_in_progress_filter_for_user, apply_media_age_restriction,
+			apply_media_library_not_hidden_for_user_filter, apply_series_age_restriction,
+			library_not_hidden_from_user_filter,
 		},
+		v1::media::thumbnails::get_media_thumbnail_by_id,
 	},
 	utils::http::{ImageResponse, NamedFile, Xml},
-};
-
-use crate::routers::api::v1::{
-	media::{apply_in_progress_filter_for_user, apply_media_age_restriction},
-	series::apply_series_age_restriction,
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -218,8 +215,7 @@ async fn keep_reading(
 		{
 			Some(session) if session.epubcfi.is_some() => session
 				.percentage_completed
-				.map(|value| value < 1.0)
-				.unwrap_or(false),
+				.is_some_and(|value| value < 1.0),
 			Some(session) if session.page.is_some() => {
 				session.page.unwrap_or(1) < m.pages
 			},
@@ -355,8 +351,7 @@ async fn get_library_by_id(
 		.build()?))
 	} else {
 		Err(APIError::NotFound(format!(
-			"Library {} not found",
-			library_id
+			"Library {library_id} not found"
 		)))
 	}
 }
@@ -519,10 +514,7 @@ async fn get_series_by_id(
 		)
 		.build()?))
 	} else {
-		Err(APIError::NotFound(format!(
-			"Series {} not found",
-			series_id
-		)))
+		Err(APIError::NotFound(format!("Series {series_id} not found")))
 	}
 }
 

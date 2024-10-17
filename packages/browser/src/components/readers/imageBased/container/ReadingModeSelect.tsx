@@ -1,5 +1,5 @@
 import { Label, NativeSelect } from '@stump/components'
-import { ReadingMode } from '@stump/types'
+import { ReadingMode } from '@stump/sdk'
 import React, { useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 

@@ -1,6 +1,6 @@
 import { Badge, Card, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { CoreJobOutput, JobStatus, PersistedJob } from '@stump/types'
+import { CoreJobOutput, JobStatus, PersistedJob } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'

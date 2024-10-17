@@ -21,6 +21,7 @@ import paths from '@/paths'
 import SmartListCard from './SmartListCard'
 
 // TODO: move filter to URL params
+// TODO(ui): this scene lowkey ugly
 
 const LOCALE_BASE_KEY = `userSmartListsScene`
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
@@ -80,7 +81,7 @@ export default function UserSmartListsScene() {
 		// TODO: prolly don't scrollarea on mobile... just scroll on the page
 		return (
 			<ScrollArea className="w-full pr-3 md:w-2/3 lg:max-w-xl">
-				<div className="flex-col divide-y divide-edge">
+				<div className="flex-col space-y-2">
 					{smartLists.map((list) => (
 						<SmartListCard key={list.id} list={list} />
 					))}
@@ -123,13 +124,13 @@ export default function UserSmartListsScene() {
 						<ButtonOrLink
 							href={paths.smartListCreate()}
 							variant="ghost"
-							className="pointer-events-none h-full shrink-0"
-							disabled
+							className="h-full shrink-0"
 						>
 							{t(withLocaleKey('buttons.createSmartList'))}
 						</ButtonOrLink>
 					</div>
 				</div>
+
 				{renderLists()}
 			</SceneContainer>
 		</>

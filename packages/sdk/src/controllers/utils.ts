@@ -1,7 +1,7 @@
-import { APIError } from '@stump/types'
 import axios, { AxiosError } from 'axios'
 import qs from 'qs'
 
+import { APIError } from '../types'
 import { CursorQueryParams, PagedQueryParams } from './types'
 
 export const createRouteURLHandler =

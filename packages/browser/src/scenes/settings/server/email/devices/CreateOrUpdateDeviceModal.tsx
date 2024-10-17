@@ -7,7 +7,7 @@ import {
 } from '@stump/client'
 import { Button, CheckBox, Dialog, Form, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { RegisteredEmailDevice } from '@stump/types'
+import { RegisteredEmailDevice } from '@stump/sdk'
 import React, { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
@@ -84,12 +84,14 @@ export default function CreateOrUpdateDeviceModal({ isOpen, updatingDevice, onCl
 							description={t(getKey('name.description'))}
 							variant="primary"
 							{...form.register('name')}
+							ignoreFill
 						/>
 						<Input
 							label={t(getKey('email.label'))}
 							description={t(getKey('email.description'))}
 							variant="primary"
 							{...form.register('email')}
+							ignoreFill
 						/>
 						<CheckBox
 							label={t(getKey('forbidden.label'))}

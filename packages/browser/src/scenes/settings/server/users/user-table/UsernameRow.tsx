@@ -1,5 +1,5 @@
 import { Avatar, Text } from '@stump/components'
-import { User } from '@stump/types'
+import { User } from '@stump/sdk'
 
 export default function UsernameRow({ username, avatar_url }: User) {
 	return (

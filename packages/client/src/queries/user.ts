@@ -7,7 +7,7 @@ import type {
 	UpdateUserPreferences,
 	User,
 	UserPreferences,
-} from '@stump/types'
+} from '@stump/sdk'
 import { AxiosError } from 'axios'
 import { useMemo } from 'react'
 

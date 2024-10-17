@@ -1,6 +1,5 @@
-import { MediaMetadataFilter, MediaMetadataOverview } from '@stump/types'
-
 import { APIBase } from '../base'
+import { MediaMetadataFilter, MediaMetadataOverview } from '../types'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 
@@ -22,7 +21,7 @@ export class MetadataAPI extends APIBase {
 	 */
 	async overview(params?: MediaMetadataFilter): Promise<MediaMetadataOverview> {
 		const { data: overview } = await this.axios.get<MediaMetadataOverview>(
-			mediaMetadataURL('overview', params),
+			mediaMetadataURL('', params),
 		)
 		return overview
 	}

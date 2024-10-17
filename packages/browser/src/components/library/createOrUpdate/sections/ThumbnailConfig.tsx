@@ -9,7 +9,7 @@ import {
 	Text,
 } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { ImageResizeMode, ImageResizeOptions } from '@stump/types'
+import { ImageResizeMode, ImageResizeOptions } from '@stump/sdk'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCallback, useMemo } from 'react'
 import { useFormContext, useFormState } from 'react-hook-form'

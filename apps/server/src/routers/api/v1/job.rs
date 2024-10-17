@@ -107,10 +107,10 @@ async fn get_jobs(
 					},
 					Pagination::Cursor(cursor_query) => {
 						if let Some(cursor) = cursor_query.cursor {
-							query = query.cursor(job::id::equals(cursor)).skip(1)
+							query = query.cursor(job::id::equals(cursor)).skip(1);
 						}
 						if let Some(limit) = cursor_query.limit {
-							query = query.take(limit)
+							query = query.take(limit);
 						}
 					},
 					_ => unreachable!(),
@@ -213,13 +213,12 @@ async fn cancel_job_by_id(
 	))
 	.map_err(|e| {
 		APIError::InternalServerError(format!(
-			"Failed to send command to job manager: {}",
-			e
+			"Failed to send command to job manager: {e}"
 		))
 	})?;
 
 	Ok(task_rx.await.map_err(|e| {
-		APIError::InternalServerError(format!("Failed to get cancel confirmation: {}", e))
+		APIError::InternalServerError(format!("Failed to get cancel confirmation: {e}"))
 	})??)
 }
 

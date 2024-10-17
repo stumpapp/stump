@@ -19,17 +19,17 @@ use crate::{
 
 pub type JobManagerResult<T> = Result<T, JobManagerError>;
 
-/// A helper struct that holds the job queue and a list of workers for the job manager
+/// A helper struct that holds the job queue and a list of [`Worker`]s.
 pub struct JobManager {
 	/// Queue of jobs waiting to be run in a worker thread
 	queue: RwLock<VecDeque<Box<dyn Executor>>>,
 	/// Worker threads with a running job
 	workers: RwLock<HashMap<String, Arc<Worker>>>,
-	/// A channel to send shutdown signals to the parent job manager
+	/// A channel to send shutdown signals to the parent [`JobManager`]
 	job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
 	/// A channel to emit core events
 	core_event_tx: broadcast::Sender<CoreEvent>,
-	/// A pointer to the PrismaClient
+	/// A pointer to the [`PrismaClient`]
 	client: Arc<PrismaClient>,
 	/// A pointer to the core config
 	config: Arc<StumpConfig>,
@@ -156,12 +156,12 @@ impl JobManager {
 				.send(JobControllerCommand::EnqueueJob(next))
 				.map_or_else(
 					|error| {
-						tracing::error!(?error, "Failed to send event to job manager")
+						tracing::error!(?error, "Failed to send event to job manager");
 					},
 					|_| tracing::trace!("Sent event to job manager to enqueue next job"),
 				);
 		} else {
-			tracing::trace!("No jobs in queue to auto enqueue")
+			tracing::trace!("No jobs in queue to auto enqueue");
 		}
 	}
 

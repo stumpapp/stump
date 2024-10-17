@@ -1,6 +1,5 @@
-import { Tag } from '@stump/types'
-
 import { APIBase } from '../base'
+import { Tag } from '../types'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 

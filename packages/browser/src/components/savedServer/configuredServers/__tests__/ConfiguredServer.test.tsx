@@ -1,4 +1,4 @@
-import { SavedServer } from '@stump/types'
+import { SavedServer } from '@stump/sdk'
 import { fireEvent, render, screen } from '@testing-library/react'
 
 import ConfiguredServer from '../ConfiguredServer'

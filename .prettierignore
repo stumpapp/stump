@@ -12,3 +12,7 @@ build
 packages/i18n/src/locales/*.json
 
 CHANGELOG.md
+
+# Tauri generated files
+/src-tauri/capabilities/*.json
+/src-tauri/gen/*.json

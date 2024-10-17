@@ -1,5 +1,55 @@
 # Changelog
 
+<a name="0.0.7"></a>
+## 0.0.7 (2024-10-10)
+
+### Added
+
+- ✨ Add image reader experience options ([#453](https://github.com/stumpapp/stump/issues/453)) [[185badd](https://github.com/stumpapp/stump/commit/185badd56844d0c3487820b880d419715c1e214f)]
+- ✨ Support full windows path navigation ([#431](https://github.com/stumpapp/stump/issues/431)) [[ee78d6b](https://github.com/stumpapp/stump/commit/ee78d6bc63a851dc45b51ad90c9be9602b15ef60)]
+- ✨ Scanner ignore rules and 💄 library settings refactor ([#422](https://github.com/stumpapp/stump/issues/422)) [[3ab0593](https://github.com/stumpapp/stump/commit/3ab05934e3d8fe54af09cf9893756f2aa81a7103)]
+- ✨ OPDS V2 Support ([#367](https://github.com/stumpapp/stump/issues/367)) [[c5f1506](https://github.com/stumpapp/stump/commit/c5f1506dd923344f0b89535a6a9ac59875cbd69b)]
+
+### Changed
+
+- 🚨 Run clippy pedantic ([#469](https://github.com/stumpapp/stump/issues/469)) [[d25de2d](https://github.com/stumpapp/stump/commit/d25de2d771c2af773817561e1014cc32c0e445d1)]
+- 🚨 Fix fmt after rust upgrade ([#463](https://github.com/stumpapp/stump/issues/463)) [[562b02c](https://github.com/stumpapp/stump/commit/562b02c0663bd1db2cd38c48df209a5c638cadc7)]
+- ⬆️ Update rust to &#x60;1.81.0&#x60; ([#458](https://github.com/stumpapp/stump/issues/458)) [[dd4966e](https://github.com/stumpapp/stump/commit/dd4966e03b08350a1ce1676e7c1d907b1a84049f)]
+- ♻️ Refactor upload image and add max_size ([#449](https://github.com/stumpapp/stump/issues/449)) [[488f37e](https://github.com/stumpapp/stump/commit/488f37ee65f89cf96766d714da9b889cf426b1a3)]
+- 💄 Add custom user-submitted themes ([#444](https://github.com/stumpapp/stump/issues/444)) [[3cc39f0](https://github.com/stumpapp/stump/commit/3cc39f0d90ffb354cfb9fb064c0b851b8004c4d0)]
+- ⚡ Refactor thumbnail generation and scanner IO operations ([#426](https://github.com/stumpapp/stump/issues/426)) ([#442](https://github.com/stumpapp/stump/issues/442)) [[a05cab6](https://github.com/stumpapp/stump/commit/a05cab6bdc4a5d57bb45361b84adcf537230a1a0)]
+- ⬆️ Update bundled &#x60;PDFium&#x60; version in Docker ([#443](https://github.com/stumpapp/stump/issues/443)) [[383f517](https://github.com/stumpapp/stump/commit/383f5170e361afbb90a3cdf5fa282f0fe713f049)]
+- 💄 Library redesign follow-up and fixes ([#428](https://github.com/stumpapp/stump/issues/428)) [[f1f4529](https://github.com/stumpapp/stump/commit/f1f4529e020530b607b80332facb8344a6796c96)]
+- ♻️ Update &#x60;axum&#x60; and refactor middlewares ([#400](https://github.com/stumpapp/stump/issues/400)) [[f643885](https://github.com/stumpapp/stump/commit/f643885667a36581065c40daa624374279260108)]
+
+### Fixed
+
+- 🐛 Fix transparent nav for library tabs ([#468](https://github.com/stumpapp/stump/issues/468)) [[a51ba78](https://github.com/stumpapp/stump/commit/a51ba78c87ce64179238ec71dcfdada325b2cacd)]
+- 💚 Fix latest builds for rootless docker ([#455](https://github.com/stumpapp/stump/issues/455)) [[630b2c3](https://github.com/stumpapp/stump/commit/630b2c3c8b91ba5f96a5469e198fb534f0624f13)]
+- 🐛 Fix PDF books in OPDS V2 catalog ([#454](https://github.com/stumpapp/stump/issues/454)) [[72d7263](https://github.com/stumpapp/stump/commit/72d7263f16343f260bcf58ace9971d9d807047e4)]
+- 🐛 Fix create/edit user form submit ([#452](https://github.com/stumpapp/stump/issues/452)) [[6948cb6](https://github.com/stumpapp/stump/commit/6948cb601570c6ba5e806e7659f372e35517024d)]
+- 🐛 Fix Cantook crash on Android ([#448](https://github.com/stumpapp/stump/issues/448)) [[d4f07b7](https://github.com/stumpapp/stump/commit/d4f07b7ce5bbf1dea97039e2ba4e46314c5fbde5)]
+- 💚 Fix &#x60;archs&#x60; input for experimental docker build [[74e867a](https://github.com/stumpapp/stump/commit/74e867aae1915f81fa499cd7b8ccfe7763383bf6)]
+
+### Miscellaneous
+
+- 💸 Add opencollective to funding.yml [[3d71924](https://github.com/stumpapp/stump/commit/3d719248670893c24a9e765475318e5eaa4b6d0e)]
+- 🌐 Update translations ([#467](https://github.com/stumpapp/stump/issues/467)) [[ba36020](https://github.com/stumpapp/stump/commit/ba36020543f6e7f44f305c84737c6aebd4f6c4b6)]
+- 📝 Add OPDS testing reviews for Foliate, Thorium, Cantook and Librera ([#466](https://github.com/stumpapp/stump/issues/466)) [[f397c8b](https://github.com/stumpapp/stump/commit/f397c8b2358677314375cb906e0338b0fd44dead)]
+- 🌐 Update translations ([#462](https://github.com/stumpapp/stump/issues/462)) [[c6506de](https://github.com/stumpapp/stump/commit/c6506deb6afc45384508ebb4af609dd23dae5bf9)]
+- 🌐 Update translations ([#456](https://github.com/stumpapp/stump/issues/456)) [[4095d1b](https://github.com/stumpapp/stump/commit/4095d1bc60670a1cbbb83b7a6e3e09766e3b5738)]
+- 🌐 Update translations ([#446](https://github.com/stumpapp/stump/issues/446)) [[7ab3adb](https://github.com/stumpapp/stump/commit/7ab3adb3cd597ece326ba9a7b3eed82e19c015e9)]
+- 🌐 Update translations ([#445](https://github.com/stumpapp/stump/issues/445)) [[07b2e79](https://github.com/stumpapp/stump/commit/07b2e79a52673f38a041311d3d87a0b822186715)]
+- 🖥️ Desktop app server management ([#441](https://github.com/stumpapp/stump/issues/441)) [[83d5032](https://github.com/stumpapp/stump/commit/83d50324e1d42030c5ba92a3d7c49ea5791679e4)]
+- 🌐 Update translations ([#439](https://github.com/stumpapp/stump/issues/439)) [[f102acf](https://github.com/stumpapp/stump/commit/f102acfb0975262286930699092fc249adbd5701)]
+-  Merge pull request [#438](https://github.com/stumpapp/stump/issues/438) from stumpapp/experimental [[7892459](https://github.com/stumpapp/stump/commit/789245982dd4d58c07b28526cecb7a4c6524ec67)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[d60113c](https://github.com/stumpapp/stump/commit/d60113c3439ef8a4edbfa8aa292ede6f33c1ef81)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[daad188](https://github.com/stumpapp/stump/commit/daad18885c7145252ae0a44cfc57de220cc2fab9)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[b4c4784](https://github.com/stumpapp/stump/commit/b4c4784913816f04b95ca2015710aaea356b3343)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[e58cecf](https://github.com/stumpapp/stump/commit/e58cecf28bfe98af239b554764167f062d4c05ea)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[1d616e1](https://github.com/stumpapp/stump/commit/1d616e18dbd08495c54796d0cb73d769dc97213e)]
+
+
 <a name="0.0.6"></a>
 ## 0.0.6 (2024-09-06)
 

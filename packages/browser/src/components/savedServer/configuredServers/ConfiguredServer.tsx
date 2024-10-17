@@ -1,6 +1,6 @@
 import { IconButton, Text, ToolTip } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { SavedServer } from '@stump/types'
+import { SavedServer } from '@stump/sdk'
 import { BadgeCheck, Power, Settings2, Trash2, WifiOff } from 'lucide-react'
 
 type Props = {

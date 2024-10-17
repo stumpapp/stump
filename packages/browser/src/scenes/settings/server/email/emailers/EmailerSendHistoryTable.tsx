@@ -1,5 +1,5 @@
 import { cn, IconButton, Text, ToolTip } from '@stump/components'
-import { EmailerSendRecord } from '@stump/types'
+import { EmailerSendRecord } from '@stump/sdk'
 import {
 	createColumnHelper,
 	ExpandedState,

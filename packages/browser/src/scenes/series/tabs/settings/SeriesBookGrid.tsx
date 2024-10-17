@@ -1,5 +1,5 @@
 import { useMediaCursorQuery, useSDK } from '@stump/client'
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import React, { useCallback, useEffect } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'

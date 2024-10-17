@@ -1,5 +1,5 @@
 import { CursorQueryParams, PagedQueryParams } from '@stump/sdk'
-import { Pageable } from '@stump/types'
+import { Pageable } from '@stump/sdk'
 import {
 	MutationFunction,
 	MutationKey,
@@ -20,6 +20,7 @@ import {
 import { AxiosError, isAxiosError } from 'axios'
 
 import { QueryClientContext, useClientContext } from './context'
+import { useSDK } from './sdk'
 
 export { QueryClientProvider } from '@tanstack/react-query'
 
@@ -64,6 +65,7 @@ export function useQuery<TQueryFnData = unknown, TError = unknown, TData = TQuer
 	options?: QueryOptions<TQueryFnData, TError, TData>,
 ) {
 	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
+	const { sdk } = useSDK()
 	return useReactQuery(queryKey, queryFn, {
 		...options,
 		context: QueryClientContext,
@@ -73,6 +75,7 @@ export function useQuery<TQueryFnData = unknown, TError = unknown, TData = TQuer
 			const isAuthError = axiosError && err.response?.status === 401
 
 			if (isAuthError) {
+				sdk.token = undefined
 				onUnauthenticatedResponse?.('/auth')
 			} else if (isNetworkError) {
 				onConnectionWithServerChanged?.(false)

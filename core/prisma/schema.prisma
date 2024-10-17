@@ -119,6 +119,7 @@ model LibraryConfig {
   default_reading_mode            String  @default("paged") // paged or continuous:(horizontal|vertical)
   default_reading_image_scale_fit String  @default("height") // height, width, none (original)
   generate_file_hashes            Boolean @default(false)
+  generate_koreader_hashes        Boolean @default(false) // TODO(koreader): determine if we need this much granularity
   process_metadata                Boolean @default(true)
   library_pattern                 String  @default("SERIES_BASED") // SERIES_BASED or COLLECTION_BASED
 
@@ -188,17 +189,18 @@ model SeriesMetadata {
 model Media {
   id String @id @default(uuid())
 
-  name        String // derived from filename
-  size        BigInt // in bytes
-  extension   String
-  pages       Int
-  updated_at  DateTime  @updatedAt
-  created_at  DateTime  @default(now())
-  modified_at DateTime? // last modified date of the file
-  deleted_at  DateTime?
-  hash        String? // This is **not** an integrity check(sum), and is not used to verify the file contents.
-  path        String
-  status      String    @default("READY") // UNKNOWN, READY, UNSUPPORTED, ERROR, MISSING
+  name          String // derived from filename
+  size          BigInt // in bytes
+  extension     String
+  pages         Int
+  updated_at    DateTime  @updatedAt
+  created_at    DateTime  @default(now())
+  modified_at   DateTime? // last modified date of the file
+  deleted_at    DateTime?
+  hash          String? // This is **not** an integrity check(sum), and is not used to verify the file contents.
+  koreader_hash String? // This is the hash used by KOReader to identify the file
+  path          String
+  status        String    @default("READY") // UNKNOWN, READY, UNSUPPORTED, ERROR, MISSING
 
   metadata  MediaMetadata?
   series    Series?        @relation(fields: [series_id], references: [id], onDelete: Cascade)
@@ -296,13 +298,23 @@ model FinishedReadingSession {
 
   // TODO: Support reading duration in the future
 
-  media_id String
-  media    Media  @relation(fields: [media_id], references: [id], onDelete: Cascade)
-
-  user_id String
-  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  media_id  String
+  media     Media                    @relation(fields: [media_id], references: [id], onDelete: Cascade)
+  user_id   String
+  user      User                     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  device_id String?
+  device    RegisteredReadingDevice? @relation(fields: [device_id], references: [id], onDelete: Cascade)
 
   @@map("finished_reading_sessions")
+}
+
+model RegisteredReadingDevice {
+  id   String  @id @default(cuid())
+  name String  @unique
+  kind String? // ex: "KOBO"
+
+  active_reading_sessions   ActiveReadingSession[]
+  finished_reading_sessions FinishedReadingSession[]
 }
 
 model ActiveReadingSession {
@@ -313,15 +325,17 @@ model ActiveReadingSession {
   page                 Int?
   percentage_completed Float? // 0.0 - 1.0
   epubcfi              String?
+  koreader_progress    String?
 
   started_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  media_id String
-  media    Media  @relation(fields: [media_id], references: [id], onDelete: Cascade)
-
-  user_id String
-  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  media_id  String
+  media     Media                    @relation(fields: [media_id], references: [id], onDelete: Cascade)
+  user_id   String
+  user      User                     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  device_id String?
+  device    RegisteredReadingDevice? @relation(fields: [device_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, media_id])
   @@map("reading_sessions")

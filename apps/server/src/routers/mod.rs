@@ -3,6 +3,7 @@ use axum::Router;
 use crate::config::state::AppState;
 
 mod api;
+mod koreader;
 mod opds;
 mod spa;
 mod sse;
@@ -20,9 +21,12 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		app_router = app_router.merge(utoipa::mount(app_state.clone()));
 	}
 
+	if app_state.config.enable_koreader_sync {
+		app_router = app_router.merge(koreader::mount(app_state.clone()));
+	}
+
 	app_router
 		.merge(spa::mount(app_state.clone()))
-		// .merge(ws::mount(app_state.clone()))
 		.merge(sse::mount())
 		.merge(api::mount(app_state.clone()))
 		.merge(opds::mount(app_state))

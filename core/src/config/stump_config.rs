@@ -26,6 +26,7 @@ pub mod env_keys {
 	pub const ORIGINS_KEY: &str = "STUMP_ALLOWED_ORIGINS";
 	pub const PDFIUM_KEY: &str = "PDFIUM_PATH";
 	pub const DISABLE_SWAGGER_KEY: &str = "DISABLE_SWAGGER_UI";
+	pub const ENABLE_KOREADER_SYNC_KEY: &str = "ENABLE_KOREADER_SYNC";
 	pub const HASH_COST_KEY: &str = "HASH_COST";
 	pub const SESSION_TTL_KEY: &str = "SESSION_TTL";
 	pub const SESSION_EXPIRY_INTERVAL_KEY: &str = "SESSION_EXPIRY_CLEANUP_INTERVAL";
@@ -130,10 +131,16 @@ pub struct StumpConfig {
 	#[env_key(PDFIUM_KEY)]
 	pub pdfium_path: Option<String>,
 
+	// TODO: rename to enable_swagger_ui for consistency and clarity (no double negatives)
 	/// Indicates if the Swagger UI should be disabled.
 	#[default_value(false)]
 	#[env_key(DISABLE_SWAGGER_KEY)]
 	pub disable_swagger: bool,
+
+	/// Indicates if the KoReader sync feature should be enabled.
+	#[default_value(false)]
+	#[env_key(ENABLE_KOREADER_SYNC_KEY)]
+	pub enable_koreader_sync: bool,
 
 	/// Password hash cost
 	#[default_value(DEFAULT_PASSWORD_HASH_COST)]
@@ -308,6 +315,7 @@ mod tests {
 			allowed_origins: Some(vec!["origin1".to_string(), "origin2".to_string()]),
 			pdfium_path: Some("not_a_path_to_pdfium".to_string()),
 			disable_swagger: Some(false),
+			enable_koreader_sync: Some(false),
 			password_hash_cost: None,
 			session_ttl: None,
 			access_token_ttl: None,
@@ -342,6 +350,7 @@ mod tests {
 				allowed_origins: Some(vec!["origin1".to_string(), "origin2".to_string()]),
 				pdfium_path: Some("not_a_path_to_pdfium".to_string()),
 				disable_swagger: Some(false),
+				enable_koreader_sync: Some(false),
 				password_hash_cost: Some(DEFAULT_PASSWORD_HASH_COST),
 				session_ttl: Some(DEFAULT_SESSION_TTL),
 				access_token_ttl: Some(DEFAULT_ACCESS_TOKEN_TTL),
@@ -393,6 +402,7 @@ mod tests {
 						allowed_origins: vec![],
 						pdfium_path: None,
 						disable_swagger: true,
+						enable_koreader_sync: false,
 						password_hash_cost: 1,
 						session_ttl: DEFAULT_SESSION_TTL,
 						access_token_ttl: DEFAULT_ACCESS_TOKEN_TTL,

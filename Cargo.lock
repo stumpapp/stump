@@ -7601,6 +7601,7 @@ dependencies = [
  "infer",
  "itertools 0.13.0",
  "libc",
+ "md5",
  "pdf",
  "pdfium-render",
  "prisma-client-rust",

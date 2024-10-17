@@ -543,6 +543,7 @@ mod tests {
 			deleted_at: None,
 			extension: "CBZ".to_string(),
 			hash: None,
+			koreader_hash: None,
 			metadata: None,
 			modified_at: None,
 			pages: 30,

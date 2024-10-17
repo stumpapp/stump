@@ -1,9 +1,9 @@
 extern crate proc_macro;
 
-// use paste::paste;
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
+use to_snake_case::ToSnakeCase;
 
 // TODO: Consider Vec<T> for nested enums?
 
@@ -93,20 +93,20 @@ pub fn order_by_gen(input: TokenStream) -> TokenStream {
 		data_enum.variants.iter().map(|variant| {
 			let variant_name = &variant.ident;
 
+			let field_name =
+				format_ident!("{}", variant_name.to_string().to_snake_case());
+
 			match &variant.fields {
 				Fields::Unit => {
-					// FIXME: needs to be snake_case not just lowercase. I think paste might work?
 					// Simple enum variant like `Title`
-					let field_name =
-						format_ident!("{}", variant_name.to_string().to_lowercase());
 					quote! {
 						#enum_name::#variant_name => prisma::#table_name::#field_name::order(direction),
 					}
 				},
 				Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
-					// Tuple variant like `Metadata(MyMetadataOrderBy)`
+					// Tuple variant like `Metadata(BookMetadataOrderBy)`
 					quote! {
-						#enum_name::#variant_name(metadata) => prisma::#table_name::metadata::order(vec![metadata.into_prisma_order(direction)]),
+						#enum_name::#variant_name(inner) => prisma::#table_name::#field_name::order(inner.into_prisma_order(direction)),
 					}
 				},
 				_ => panic!("Unsupported enum variant"),

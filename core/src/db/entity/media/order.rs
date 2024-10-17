@@ -99,6 +99,9 @@ enum MediaOrderBy {
 	Metadata(MediaMetadataOrderBy),
 }
 
+// TODO(macros): I think this is a really similar pattern to smart filters which could be a good
+// exercise / learning opportunity for me to try and implement a macro for this.
+// Maybe #[prisma_order_by = "name"] or #[prisma_order_by = "metadata::title"]?
 impl TryInto<media::OrderByWithRelationParam> for QueryOrder<MediaOrderBy> {
 	type Error = CoreError;
 

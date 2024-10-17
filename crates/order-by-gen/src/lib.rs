@@ -1,5 +1,6 @@
 extern crate proc_macro;
 
+// use paste::paste;
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
@@ -32,6 +33,7 @@ use syn::{parse_macro_input, Data, DeriveInput, Fields};
 /// enum BookOrderBy {
 ///   Name,
 ///   Path,
+///   SomePascalCase,
 ///   Metadata(BookMetadataOrderBy),
 /// }
 /// ```
@@ -56,6 +58,7 @@ use syn::{parse_macro_input, Data, DeriveInput, Fields};
 ///     match self {
 ///       BookOrderBy::Name => prisma::book::name::order(direction),
 ///       BookOrderBy::Path => prisma::book::path::order(direction),
+///       BookOrderBy::SomePascalCase => prisma::book::some_pascal_case::order(direction),
 ///       BookOrderBy::Metadata(metadata) => media::metadata::order(vec![metadata.into_prisma_order(direction)]),
 ///     }
 ///   }
@@ -92,6 +95,7 @@ pub fn order_by_gen(input: TokenStream) -> TokenStream {
 
 			match &variant.fields {
 				Fields::Unit => {
+					// FIXME: needs to be snake_case not just lowercase. I think paste might work?
 					// Simple enum variant like `Title`
 					let field_name =
 						format_ident!("{}", variant_name.to_string().to_lowercase());

@@ -8,6 +8,11 @@ use quote::{format_ident, quote};
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
 // TODO: Consider Vec<T> for nested enums?
 
+// FIXME: Fundamental misunderstanding with macros alert! See helpful feedback:
+// Okay last one is a little more hairy. It looks like in basic.rs you're wanting the struct to which it is applied to use the function you define to provision the code that the macro outputs. E.g. lines 28, 34, 40, etc.
+// That won't work. Macros can't call functions that are given to them because they get an uncompiled stream of tokens.
+// The macro needs to generate any source code from the tokens it takes in with only functions defined internally.
+
 /// Used to generate a prisma OrderByParam from an enum definition.
 ///
 /// This macro implements a `IntoOrderBy`` trait for the enum, which is expected to
@@ -90,6 +95,17 @@ pub fn order_by_gen(input: TokenStream) -> TokenStream {
 		panic!("Expected a #[prisma(module = \"..\")] attribute");
 	}
 
+	// We need module_value as a string literal
+	let module_name = match module_name {
+		syn::Expr::Lit(lit) => match lit.lit {
+			syn::Lit::Str(s) => s.value(),
+			_ => panic!("Expected a string literal"),
+		},
+		_ => panic!("Expected a string literal"),
+	};
+
+	let module_name_ident = format_ident!("{}", module_name);
+
 	// Generate the match arms for each variant
 	let match_arms = if let Data::Enum(data_enum) = &input.data {
 		data_enum.variants.iter().map(|variant| {
@@ -102,13 +118,13 @@ pub fn order_by_gen(input: TokenStream) -> TokenStream {
 				Fields::Unit => {
 					// Simple enum variant like `Title`
 					quote! {
-						#enum_name::#variant_name => prisma::#module_name::#field_name::order(direction),
+						#enum_name::#variant_name => prisma::#module_name_ident::#field_name::order(direction),
 					}
 				},
 				Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
 					// Tuple variant like `Metadata(BookMetadataOrderBy)`
 					quote! {
-						#enum_name::#variant_name(inner) => prisma::#module_name::#field_name::order(inner.into_prisma_order(direction)),
+						#enum_name::#variant_name(inner) => prisma::#module_name_ident::#field_name::order(inner.into_prisma_order(direction)),
 					}
 				},
 				_ => panic!("Unsupported enum variant"),

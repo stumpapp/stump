@@ -1,10 +1,11 @@
 extern crate proc_macro;
 
+mod snake_case;
+
+use crate::snake_case::ToSnakeCase;
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
-use to_snake_case::ToSnakeCase;
-
 // TODO: Consider Vec<T> for nested enums?
 
 /// Used to generate a prisma OrderByParam from an enum definition.

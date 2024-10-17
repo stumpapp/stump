@@ -4,6 +4,8 @@ use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
 
+// TODO: Consider Vec<T> for nested enums?
+
 /// Used to generate a prisma OrderByParam from an enum definition.
 ///
 /// This macro implements a `IntoOrderBy`` trait for the enum, which is expected to
@@ -54,7 +56,7 @@ use syn::{parse_macro_input, Data, DeriveInput, Fields};
 ///     match self {
 ///       BookOrderBy::Name => prisma::book::name::order(direction),
 ///       BookOrderBy::Path => prisma::book::path::order(direction),
-///       BookOrderBy::Metadata(metadata) => metadata.into_prisma_order(direction),
+///       BookOrderBy::Metadata(metadata) => media::metadata::order(vec![metadata.into_prisma_order(direction)]),
 ///     }
 ///   }
 /// }
@@ -100,7 +102,7 @@ pub fn order_by_gen(input: TokenStream) -> TokenStream {
 				Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
 					// Tuple variant like `Metadata(MyMetadataOrderBy)`
 					quote! {
-						#enum_name::#variant_name(inner) => inner.into_prisma_order(direction),
+						#enum_name::#variant_name(metadata) => prisma::#table_name::metadata::order(vec![metadata.into_prisma_order(direction)]),
 					}
 				},
 				_ => panic!("Unsupported enum variant"),

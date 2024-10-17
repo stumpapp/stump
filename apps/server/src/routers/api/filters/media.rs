@@ -150,9 +150,9 @@ pub(crate) fn apply_media_filters_for_user(
 }
 
 pub(crate) fn apply_media_pagination<'a>(
-	query: media::FindMany<'a>,
+	query: media::FindManyQuery<'a>,
 	pagination: &Pagination,
-) -> media::FindMany<'a> {
+) -> media::FindManyQuery<'a> {
 	match pagination {
 		Pagination::Page(page_query) => {
 			let (skip, take) = page_query.get_skip_take();

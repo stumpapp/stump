@@ -5,7 +5,7 @@ use axum::{
 	Extension, Json,
 };
 use axum_extra::extract::Query;
-use prisma_client_rust::{chrono::Duration, Direction};
+use prisma_client_rust::chrono::Duration;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use stump_core::{
@@ -20,7 +20,7 @@ use stump_core::{
 	prisma::{
 		active_reading_session, finished_reading_session, library,
 		media::{self, WhereParam},
-		media_metadata, series, user,
+		media_metadata, series, user, SortOrder,
 	},
 	Ctx,
 };
@@ -370,7 +370,7 @@ pub(crate) async fn update_media_progress(
 		.active_reading_session()
 		.upsert(
 			active_reading_session::user_id_media_id(user_id.clone(), id.clone()),
-			(
+			active_reading_session::create(
 				media::id::equals(id.clone()),
 				user::id::equals(user_id.clone()),
 				vec![active_reading_session::page::set(Some(page))],
@@ -543,7 +543,7 @@ pub(crate) async fn get_is_media_completed(
 			finished_reading_session::media::is(media_where_params),
 		])
 		.order_by(finished_reading_session::completed_at::order(
-			Direction::Desc,
+			SortOrder::Desc,
 		))
 		.include(finished_reading_session_with_book_pages::include())
 		.exec()
@@ -644,7 +644,7 @@ pub(crate) async fn put_media_complete_status(
 			.active_reading_session()
 			.upsert(
 				active_reading_session::user_id_media_id(user_id.clone(), id.clone()),
-				(
+				active_reading_session::create(
 					media::id::equals(id.clone()),
 					user::id::equals(user_id.clone()),
 					vec![active_reading_session::page::set(Some(page))],

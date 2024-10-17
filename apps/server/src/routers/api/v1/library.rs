@@ -41,9 +41,7 @@ use stump_core::{
 		ContentType,
 	},
 	prisma::{
-		last_library_visit,
-		library::{self, WhereParam},
-		library_config,
+		last_library_visit, library, library_config,
 		media::{self, OrderByWithRelationParam as MediaOrderByParam},
 		series::{self, OrderByWithRelationParam as SeriesOrderByParam},
 		tag, user, SortOrder,

@@ -1,7 +1,6 @@
 use std::collections::BTreeSet;
 
 use axum::{extract::State, middleware, routing::get, Json, Router};
-use prisma_client_rust::operator::{and, or};
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use specta::Type;
@@ -13,7 +12,7 @@ use stump_core::{
 		metadata_available_pencillers_select, metadata_available_publisher_select,
 		metadata_available_teams_select, metadata_available_writers_select,
 	},
-	prisma::{media_metadata, series_metadata, PrismaClient, SortOrder},
+	prisma::{media_metadata, PrismaClient, SortOrder},
 };
 use tracing::trace;
 use utoipa::ToSchema;

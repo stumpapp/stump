@@ -1,6 +1,6 @@
 use axum::{extract::State, Extension, Json};
 use axum_extra::extract::Query;
-use prisma_client_rust::{raw, Direction, PrismaValue};
+use prisma_client_rust::{raw, PrismaValue};
 use serde_qs::axum::QsQuery;
 use stump_core::{
 	db::{
@@ -10,7 +10,8 @@ use stump_core::{
 	},
 	prisma::{
 		active_reading_session, finished_reading_session,
-		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
+		media::{self, OrderByWithRelationParam as MediaOrderByParam, WhereParam},
+		SortOrder,
 	},
 };
 
@@ -165,8 +166,8 @@ pub(crate) async fn get_duplicate_media(
 				SELECT hash FROM media GROUP BY hash HAVING COUNT(*) > 1
 			)
 			LIMIT {} OFFSET {}",
-			PrismaValue::Int(page_bounds.take),
-			PrismaValue::Int(page_bounds.skip)
+			PrismaValue::BigInt(page_bounds.take),
+			PrismaValue::BigInt(page_bounds.skip)
 		))
 		.exec()
 		.await?;
@@ -230,7 +231,8 @@ pub(crate) async fn get_in_progress_media(
 	let pagination_cloned = pagination.clone();
 	let is_unpaged = pagination.is_unpaged();
 
-	let read_progress_filter = active_reading_session::user_id::equals(user_id.clone());
+	let read_progress_filter: active_reading_session::WhereParam =
+		active_reading_session::user_id::equals(user_id.clone());
 	let where_conditions = vec![media::active_user_reading_sessions::some(vec![
 		read_progress_filter.clone(),
 	])]
@@ -254,7 +256,7 @@ pub(crate) async fn get_in_progress_media(
 				// FIXME: not the proper ordering, BUT I cannot order based on a relation...
 				// I think this just means whenever progress updates I should update the media
 				// updated_at field, but that's a bit annoying TBH...
-				.order_by(media::updated_at::order(Direction::Desc));
+				.order_by(media::updated_at::order(SortOrder::Desc));
 
 			if !is_unpaged {
 				query = apply_media_pagination(query, &pagination_cloned);
@@ -336,7 +338,7 @@ pub(crate) async fn get_recently_added_media(
 					finished_reading_session::user_id::equals(user_id),
 				]))
 				.with(media::metadata::fetch())
-				.order_by(media::created_at::order(Direction::Desc));
+				.order_by(media::created_at::order(SortOrder::Desc));
 
 			if !is_unpaged {
 				query = apply_media_pagination(query, &pagination_cloned);

@@ -7,7 +7,6 @@ use axum::{
 	Extension, Json, Router,
 };
 use axum_extra::extract::Query;
-use prisma_client_rust::{and, operator, or};
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use stump_core::{
@@ -38,9 +37,8 @@ use stump_core::{
 	prisma::{
 		active_reading_session, finished_reading_session, library,
 		media::{self, OrderByWithRelationParam as MediaOrderByParam},
-		media_metadata,
 		series::{self, OrderByWithRelationParam as SeriesOrderByParam, WhereParam},
-		series_metadata, SortOrder,
+		SortOrder,
 	},
 };
 use tokio::fs;

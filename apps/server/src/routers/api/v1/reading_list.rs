@@ -216,7 +216,6 @@ async fn create_reading_list(
 				.map(|(idx, media_id)| {
 					client.reading_list_item().create(
 						idx as i32,
-						media_id.clone(),
 						reading_list::id::equals(reading_list.id.clone()),
 						vec![reading_list_item::media::connect(media::id::equals(
 							media_id.to_string(),

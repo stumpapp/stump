@@ -12,10 +12,10 @@ use syn::{parse_macro_input, Data, DeriveInput, Fields};
 ///
 /// This macro implements a `IntoOrderBy`` trait for the enum, which is expected to
 /// provide a method `into_prisma_order` to convert the enum into a Prisma OrderByParam
-/// scoped to the #[prisma_module("my_table")] attribute.
+/// scoped to the #[prisma("my_table")] attribute.
 ///
 /// The enum must be annotated with the following attributes:
-/// - `prisma_module` with the name of the module the OrderByParam is scoped to
+/// - `prisma` with the name of the module the OrderByParam is scoped to
 ///
 /// Any non-unit variants must also derive `OrderByGen`, and will be scoped nested
 /// under the enum.
@@ -24,13 +24,13 @@ use syn::{parse_macro_input, Data, DeriveInput, Fields};
 ///
 /// ```
 /// #[derive(OrderByGen)]
-/// #[prisma_module("book_metadata")]
+/// #[prisma(module = "book_metadata")]
 /// enum BookMetadataOrderBy {
 ///  Title,
 /// }
 ///
 /// #[derive(OrderByGen)]
-/// #[prisma_module("book")]
+/// #[prisma(module = "book")]
 /// enum BookOrderBy {
 ///   Name,
 ///   Path,
@@ -65,29 +65,30 @@ use syn::{parse_macro_input, Data, DeriveInput, Fields};
 ///   }
 /// }
 /// ```
-#[proc_macro_derive(OrderByGen)]
+#[proc_macro_derive(OrderByGen, attributes(prisma))]
 pub fn order_by_gen(input: TokenStream) -> TokenStream {
 	let input = parse_macro_input!(input as DeriveInput);
 
 	// Get the enum name
 	let enum_name = input.ident;
 
-	// Extract the `prisma` attribute with the table name
-	let table_name = input
+	// Get the prisma attribute
+	let prisma_attr = input
 		.attrs
 		.iter()
-		.find_map(|attr| {
-			if attr.path().is_ident("prisma_module") {
-				Some(
-					attr.parse_args::<syn::LitStr>()
-						.expect("Expected a string literal")
-						.value(),
-				)
-			} else {
-				None
-			}
-		})
-		.expect("Expected a #[prisma_module(\"table_name\")] attribute");
+		.find(|attr| attr.path().is_ident("prisma"))
+		.expect("Expected a #[prisma(..)] attribute");
+
+	// Extract the key/value pair from the attribute
+	let (path, module_name) = prisma_attr
+		.parse_args::<syn::MetaNameValue>()
+		.map(|meta| (meta.path, meta.value))
+		.expect("Expected a key-value attribute");
+
+	// Assert the key is "module" (in the future, support others)
+	if !path.is_ident("module") {
+		panic!("Expected a #[prisma(module = \"..\")] attribute");
+	}
 
 	// Generate the match arms for each variant
 	let match_arms = if let Data::Enum(data_enum) = &input.data {
@@ -101,13 +102,13 @@ pub fn order_by_gen(input: TokenStream) -> TokenStream {
 				Fields::Unit => {
 					// Simple enum variant like `Title`
 					quote! {
-						#enum_name::#variant_name => prisma::#table_name::#field_name::order(direction),
+						#enum_name::#variant_name => prisma::#module_name::#field_name::order(direction),
 					}
 				},
 				Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
 					// Tuple variant like `Metadata(BookMetadataOrderBy)`
 					quote! {
-						#enum_name::#variant_name(inner) => prisma::#table_name::#field_name::order(inner.into_prisma_order(direction)),
+						#enum_name::#variant_name(inner) => prisma::#module_name::#field_name::order(inner.into_prisma_order(direction)),
 					}
 				},
 				_ => panic!("Unsupported enum variant"),
@@ -120,7 +121,7 @@ pub fn order_by_gen(input: TokenStream) -> TokenStream {
 	// Generate the final implementation of IntoOrderBy
 	let expanded = quote! {
 		impl IntoOrderBy for #enum_name {
-			type OrderParam = prisma::#table_name::OrderByWithRelationParam;
+			type OrderParam = prisma::#module_name::OrderByWithRelationParam;
 
 			fn into_prisma_order(self, direction: prisma::SortOrder) -> Self::OrderParam {
 				match self {

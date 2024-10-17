@@ -6,13 +6,13 @@ trait IntoOrderBy {
 }
 
 #[derive(OrderByGen)]
-#[prisma_module("book_metadata")]
+#[prisma(module = "book_metadata")]
 enum BookMetadataOrderBy {
 	Title,
 }
 
 #[derive(OrderByGen)]
-#[prisma_module("book")]
+#[prisma(module = "book")]
 enum BookOrderBy {
 	Name,
 	Path,

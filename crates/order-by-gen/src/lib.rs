@@ -17,7 +17,7 @@ use syn::{parse_macro_input, Data, DeriveInput, Fields};
 ///
 /// This macro implements a `IntoOrderBy`` trait for the enum, which is expected to
 /// provide a method `into_prisma_order` to convert the enum into a Prisma OrderByParam
-/// scoped to the #[prisma("my_table")] attribute.
+/// scoped to the #[prisma(module = "my_table")] attribute.
 ///
 /// The enum must be annotated with the following attributes:
 /// - `prisma` with the name of the module the OrderByParam is scoped to
@@ -50,9 +50,9 @@ use syn::{parse_macro_input, Data, DeriveInput, Fields};
 /// impl IntoOrderBy for BookMetadataOrderBy {
 ///   type OrderParam = prisma::book::OrderByWithRelationParam;
 ///
-///   fn into_prisma_order(self, direction: prisma::SortOrder) -> Self::OrderParam {
+///   fn order_fn(self) -> Self::OrderParam {
 ///     match self {
-///       BookMetadataOrderBy::Title => prisma::book_metadata::title::order(direction),
+///       BookMetadataOrderBy::Title => prisma::book_metadata::title::order,
 ///     }
 ///   }
 /// }
@@ -60,11 +60,11 @@ use syn::{parse_macro_input, Data, DeriveInput, Fields};
 /// impl IntoOrderBy for BookOrderBy {
 ///   type OrderParam = prisma::book::OrderByWithRelationParam;
 ///
-///   fn into_prisma_order(self, direction: prisma::SortOrder) -> Self::OrderParam {
+///   fn order_fn(self) -> Self::OrderParam {
 ///     match self {
-///       BookOrderBy::Name => prisma::book::name::order(direction),
-///       BookOrderBy::Path => prisma::book::path::order(direction),
-///       BookOrderBy::SomePascalCase => prisma::book::some_pascal_case::order(direction),
+///       BookOrderBy::Name => prisma::book::name::order,
+///       BookOrderBy::Path => prisma::book::path::order,
+///       BookOrderBy::SomePascalCase => prisma::book::some_pascal_case::order,
 ///       BookOrderBy::Metadata(metadata) => media::metadata::order(vec![metadata.into_prisma_order(direction)]),
 ///     }
 ///   }
@@ -118,13 +118,14 @@ pub fn order_by_gen(input: TokenStream) -> TokenStream {
 				Fields::Unit => {
 					// Simple enum variant like `Title`
 					quote! {
-						#enum_name::#variant_name => prisma::#module_name_ident::#field_name::order(direction),
+						#enum_name::#variant_name => prisma::#module_name_ident::#field_name,
 					}
 				},
 				Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
+					// FIXME: wrong
 					// Tuple variant like `Metadata(BookMetadataOrderBy)`
 					quote! {
-						#enum_name::#variant_name(inner) => prisma::#module_name_ident::#field_name::order(inner.into_prisma_order(direction)),
+						#enum_name::#variant_name(inner) => prisma::#module_name_ident::#field_name,
 					}
 				},
 				_ => panic!("Unsupported enum variant"),
@@ -137,9 +138,9 @@ pub fn order_by_gen(input: TokenStream) -> TokenStream {
 	// Generate the final implementation of IntoOrderBy
 	let expanded = quote! {
 		impl IntoOrderBy for #enum_name {
-			type OrderParam = prisma::#module_name::OrderByWithRelationParam;
+			type OrderParam = prisma::#module_name_ident::OrderByWithRelationParam;
 
-			fn into_prisma_order(self, direction: prisma::SortOrder) -> Self::OrderParam {
+			fn order_fn(self) -> fn(prisma::SortOrder) -> Self::OrderParam {
 				match self {
 					#(#match_arms)*
 				}

@@ -118,16 +118,16 @@ pub fn order_by_gen(input: TokenStream) -> TokenStream {
 				Fields::Unit => {
 					// Simple enum variant like `Title`
 					quote! {
-						#enum_name::#variant_name => prisma::#module_name_ident::#field_name,
+						#enum_name::#variant_name => prisma::#module_name_ident::#field_name::order,
 					}
 				},
-				Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
-					// FIXME: wrong
-					// Tuple variant like `Metadata(BookMetadataOrderBy)`
-					quote! {
-						#enum_name::#variant_name(inner) => prisma::#module_name_ident::#field_name,
-					}
-				},
+				// Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
+				// 	// FIXME: wrong
+				// 	// Tuple variant like `Metadata(BookMetadataOrderBy)`
+				// 	quote! {
+				// 		#enum_name::#variant_name(inner) => prisma::#module_name_ident::#field_name,
+				// 	}
+				// },
 				_ => panic!("Unsupported enum variant"),
 			}
 		})

@@ -29,11 +29,11 @@ enum BookMetadataOrderBy {
 }
 
 #[derive(OrderByGen)]
-#[prisma(module = "book")]
+#[prisma(module = "books")]
 enum BookOrderBy {
 	Name,
 	Path,
-	Metadata(BookMetadataOrderBy),
+	// Metadata(BookMetadataOrderBy),
 }
 
 mod prisma {
@@ -41,20 +41,28 @@ mod prisma {
 
 	pub mod books {
 		pub mod name {
-			fn order(dir: crate::prisma::SortOrder) -> String {
-				format!("prisma::books::name::order({dir})")
+			pub fn order(
+				dir: crate::prisma::SortOrder,
+			) -> super::OrderByWithRelationParam {
+				super::OrderByWithRelationParam::Name
 			}
 		}
 
 		pub mod path {
-			fn order(dir: crate::prisma::SortOrder) -> String {
-				format!("prisma::books::path::order({dir})")
+			pub fn order(
+				dir: crate::prisma::SortOrder,
+			) -> super::OrderByWithRelationParam {
+				super::OrderByWithRelationParam::Path
 			}
 		}
 
 		pub mod metadata {
-			pub fn order(dir: crate::prisma::SortOrder) -> String {
-				format!("prisma::books::metadata::order({dir})")
+			pub fn order(
+				dir: crate::prisma::SortOrder,
+			) -> super::OrderByWithRelationParam {
+				super::OrderByWithRelationParam::Metadata(
+					crate::prisma::book_metadata::OrderByWithRelationParam::Title,
+				)
 			}
 		}
 
@@ -67,8 +75,10 @@ mod prisma {
 
 	pub mod book_metadata {
 		pub mod title {
-			fn order(dir: crate::prisma::SortOrder) -> String {
-				format!("metadata::title::order({dir})")
+			pub fn order(
+				dir: crate::prisma::SortOrder,
+			) -> super::OrderByWithRelationParam {
+				super::OrderByWithRelationParam::Title
 			}
 		}
 

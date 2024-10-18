@@ -49,7 +49,7 @@ export default function LibraryExplorerScene() {
 		<div className="flex flex-1">
 			<Button onClick={onUploadClicked}>Upload</Button>
 			<input type="file" ref={fileInputRef} onChange={onFileSelected} title="Browse" />
-			<FileExplorer rootPath={library.path} />
+			<FileExplorer rootPath={library.path} displayUpload={true} />
 		</div>
 	)
 }

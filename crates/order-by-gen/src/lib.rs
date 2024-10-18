@@ -118,7 +118,7 @@ pub fn order_by_gen(input: TokenStream) -> TokenStream {
 				Fields::Unit => {
 					// Simple enum variant like `Title`
 					quote! {
-						#enum_name::#variant_name => prisma::#module_name_ident::#field_name::order,
+						#enum_name::#variant_name => prisma::#module_name_ident::#field_name::order(dir),
 					}
 				},
 				// Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
@@ -140,7 +140,7 @@ pub fn order_by_gen(input: TokenStream) -> TokenStream {
 		impl IntoOrderBy for #enum_name {
 			type OrderParam = prisma::#module_name_ident::OrderByWithRelationParam;
 
-			fn order_fn(self) -> fn(prisma::SortOrder) -> Self::OrderParam {
+			fn into_prisma_order(self, dir: prisma::SortOrder) -> Self::OrderParam {
 				match self {
 					#(#match_arms)*
 				}

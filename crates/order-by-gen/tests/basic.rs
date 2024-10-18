@@ -2,7 +2,7 @@ use order_by_gen::OrderByGen;
 
 trait IntoOrderBy {
 	type OrderParam;
-	fn order_fn(self) -> fn(prisma::SortOrder) -> Self::OrderParam;
+	fn into_prisma_order(self, dir: prisma::SortOrder) -> Self::OrderParam;
 }
 
 struct QueryOrder<T>
@@ -13,14 +13,14 @@ where
 	order: T,
 }
 
-impl<T> QueryOrder<T>
-where
-	T: IntoOrderBy,
-{
-	fn into_prisma_order(self) -> T::OrderParam {
-		(self.order.order_fn())(self.dir)
-	}
-}
+// impl<T> QueryOrder<T>
+// where
+// 	T: IntoOrderBy,
+// {
+// 	fn into_prisma_order(self) -> T::OrderParam {
+// 		(self.order.order_fn())(self.dir)
+// 	}
+// }
 
 #[derive(OrderByGen)]
 #[prisma(module = "book_metadata")]
@@ -33,7 +33,7 @@ enum BookMetadataOrderBy {
 enum BookOrderBy {
 	Name,
 	Path,
-	// Metadata(BookMetadataOrderBy),
+	// Metadata(Vec<BookMetadataOrderBy>),
 }
 
 mod prisma {
@@ -104,39 +104,23 @@ mod prisma {
 
 #[cfg(test)]
 mod tests {
-	// use super::*;
+	use super::*;
 
-	// #[test]
-	// fn test_book_order_by_gen() {
-	// 	assert_eq!(
-	// 		BookOrderBy::Name.into_prisma_order(prisma::SortOrder::Asc),
-	// 		"prisma::books::name::order(asc)"
-	// 	);
-	// 	assert_eq!(
-	// 		BookOrderBy::Name.into_prisma_order(prisma::SortOrder::Desc),
-	// 		"prisma::books::name::order(desc)"
-	// 	);
-
-	// 	assert_eq!(
-	// 		BookOrderBy::Path.into_prisma_order(prisma::SortOrder::Asc),
-	// 		"prisma::books::path::order(asc)"
-	// 	);
-	// 	assert_eq!(
-	// 		BookOrderBy::Path.into_prisma_order(prisma::SortOrder::Desc),
-	// 		"prisma::books::path::order(desc)"
-	// 	);
-
-	// 	assert_eq!(
-	// 		BookOrderBy::Metadata(BookMetadataOrderBy::Title)
-	// 			.into_prisma_order(prisma::SortOrder::Asc),
-	// 		"metadata::title::order(asc)"
-	// 	);
-	// 	assert_eq!(
-	// 		BookOrderBy::Metadata(BookMetadataOrderBy::Title)
-	// 			.into_prisma_order(prisma::SortOrder::Desc),
-	// 		"metadata::title::order(desc)"
-	// 	);
-	// }
+	#[test]
+	fn test_book_order_by_gen() {
+		assert!(matches!(
+			BookOrderBy::Name.into_prisma_order(prisma::SortOrder::Asc),
+			prisma::books::OrderByWithRelationParam::Name
+		));
+		assert!(matches!(
+			BookOrderBy::Path.into_prisma_order(prisma::SortOrder::Asc),
+			prisma::books::OrderByWithRelationParam::Path
+		));
+		// assert!(matches!(
+		//     BookOrderBy::Metadata(BookMetadataOrderBy::Title).into_prisma_order(prisma::SortOrder::Asc),
+		//     prisma::books::OrderByWithRelationParam::Metadata(prisma::book_metadata::OrderByWithRelationParam::Title)
+		// ));
+	}
 
 	// #[test]
 	// fn test_book_metadata_order_by_gen() {

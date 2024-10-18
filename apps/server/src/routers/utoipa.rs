@@ -3,7 +3,7 @@ use axum::Router;
 use stump_core::db::entity::*;
 // TODO: investigate how to get this working for swagger...
 use stump_core::db::filter::{SmartFilterSchema as SmartFilter, *};
-use stump_core::db::query::{ordering::*, pagination::*};
+use stump_core::db::query::{pagination::*, *};
 use stump_core::filesystem::{
 	DirectoryListing, DirectoryListingFile, DirectoryListingInput,
 };
@@ -137,7 +137,7 @@ use super::api::{
             StumpVersion, FileStatus, PageableDirectoryListing, DirectoryListing,
             DirectoryListingFile, CursorInfo, PageInfo, PageableLibraries,
             PageableMedia, PageableSeries, LoginOrRegisterArgs, DirectoryListingInput,
-            PageQuery, FilterableLibraryQuery, PaginationQuery, QueryOrder, LibraryFilter,
+            PageQuery, FilterableLibraryQuery, PaginationQuery, QueryOrder<()>, LibraryFilter,
             Direction, CreateLibrary, UpdateLibrary, APIError, MediaFilter, SeriesFilter,
             FilterableMediaQuery, FilterableSeriesQuery, LibraryStats,
             JobStatus, SeriesQueryRelation, CreateReadingList, UpdateUserPreferences, UpdateUser,

@@ -12,13 +12,13 @@ use serde_qs::axum::QsQuery;
 use std::fs::File;
 use stump_core::{
 	db::{
-		entity::{Log, LogMetadata, UserPermission},
+		entity::{Log, LogMetadata, LogOrderBy, UserPermission},
 		query::{
-			ordering::QueryOrder,
 			pagination::{Pageable, Pagination, PaginationQuery},
+			QueryOrder,
 		},
 	},
-	prisma::log::{self, OrderByWithRelationParam as LogOrderByParam, WhereParam},
+	prisma::log::{self, WhereParam},
 };
 
 use crate::{
@@ -68,7 +68,7 @@ pub(crate) fn apply_log_filters(filters: LogFilter) -> Vec<WhereParam> {
 async fn get_logs(
 	State(ctx): State<AppState>,
 	filters: QsQuery<LogFilter>,
-	order: QsQuery<QueryOrder>,
+	order: QsQuery<QueryOrder<LogOrderBy>>,
 	pagination: QsQuery<PaginationQuery>,
 	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Pageable<Vec<Log>>>> {
@@ -80,7 +80,7 @@ async fn get_logs(
 
 	let db = &ctx.db;
 	let is_unpaged = pagination.is_unpaged();
-	let order_by_param: LogOrderByParam = order.try_into()?;
+	let order_by_param = order.into_prisma();
 
 	let pagination_cloned = pagination.clone();
 	let where_params = apply_log_filters(filters.0);

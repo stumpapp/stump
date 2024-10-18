@@ -305,12 +305,21 @@ export type DirectoryListingInput = { path: string | null }
 
 export type Direction = "asc" | "desc"
 
-export type PageParams = { zero_based: boolean; page: number; page_size: number }
+export type QueryOrder<O> = { order_by?: O; direction?: Direction }
 
-/**
- * Model used in media API to alter sorting/ordering of queried media
- */
-export type QueryOrder = { order_by: string; direction: Direction }
+export type MediaOrderBy = "name" | "size" | "extension" | "created_at" | "updated_at" | "status" | "path" | "pages" | { metadata: MediaMetadataOrderBy[] }
+
+export type MediaMetadataOrderBy = "title" | "series" | "number" | "volume" | "summary" | "notes" | "age_rating" | "genre" | "year" | "month" | "day" | "writers" | "pencillers" | "inkers" | "colorists" | "letterers" | "cover_artists" | "editors" | "publisher" | "links" | "characters" | "teams"
+
+export type SeriesOrderBy = "name" | "description" | "updated_at" | "created_at" | "path" | "status"
+
+export type LibraryOrderBy = "name" | "path" | "status" | "updated_at" | "created_at"
+
+export type LogOrderBy = "timestamp" | "level" | "message" | "job_id"
+
+export type JobOrderBy = "name" | "status" | "created_at" | "completed_at"
+
+export type PageParams = { zero_based: boolean; page: number; page_size: number }
 
 export type PageQuery = { zero_based?: boolean | null; page?: number | null; page_size?: number | null }
 

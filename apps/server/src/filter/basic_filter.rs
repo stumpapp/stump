@@ -24,8 +24,8 @@ use super::common::{
 
 #[derive(Debug, Default, Deserialize, Serialize, ToSchema)]
 #[aliases(
-	FilterableLibraryQuery = FilterableQuery<LibraryFilter, LibraryOrderBy>, 
-	FilterableSeriesQuery = FilterableQuery<SeriesFilter, SeriesOrderBy>, 
+	FilterableLibraryQuery = FilterableQuery<LibraryFilter, LibraryOrderBy>,
+	FilterableSeriesQuery = FilterableQuery<SeriesFilter, SeriesOrderBy>,
 	FilterableMediaQuery = FilterableQuery<MediaFilter, MediaOrderBy>
 )]
 pub struct FilterableQuery<F, O>
@@ -355,7 +355,7 @@ pub struct LogFilter {
 mod tests {
 	use super::*;
 	use serde::{Deserialize, Serialize};
-use stump_core::db::{entity::MediaMetadataOrderBy, query::Direction};
+	use stump_core::db::{entity::MediaMetadataOrderBy, query::Direction};
 
 	#[derive(Default, Deserialize, Serialize)]
 	struct TestValueOrRange {
@@ -447,7 +447,7 @@ use stump_core::db::{entity::MediaMetadataOrderBy, query::Direction};
 	}
 
 	#[test]
-	fn test_serde_qs_relation_order() {
+	fn test_serialize_serde_qs_relation_order() {
 		let order = MediaOrderBy::Metadata(vec![MediaMetadataOrderBy::Title]);
 		let serialized = serde_qs::to_string(&order).unwrap();
 		assert_eq!(serialized, "metadata[0]=title");
@@ -457,11 +457,11 @@ use stump_core::db::{entity::MediaMetadataOrderBy, query::Direction};
 			ordering: QueryOrder::<MediaOrderBy> {
 				order_by: MediaOrderBy::Metadata(vec![MediaMetadataOrderBy::Title]),
 				direction: Direction::Asc,
-			}
+			},
 		};
 
 		let serialized = serde_qs::to_string(&filterable_query).unwrap();
-		 // FIXME: this breaks the existing patterns, I believe its because the enum is Metadata(Vec<MediaMetadataOrderBy>) and not Metadata { metadata: Vec<MediaMetadataOrderBy> }
+		// FIXME: this breaks the existing patterns, I believe its because the enum is Metadata(Vec<MediaMetadataOrderBy>) and not Metadata { metadata: Vec<MediaMetadataOrderBy> }
 		assert_eq!(serialized, "order_by[metadata][0]=title&direction=asc");
 	}
 }

@@ -9,17 +9,14 @@ use serde_qs::axum::QsQuery;
 use specta::Type;
 use stump_core::{
 	db::{
-		entity::{JobSchedulerConfig, PersistedJob},
+		entity::{JobOrderBy, JobSchedulerConfig, PersistedJob},
 		query::{
-			ordering::QueryOrder,
 			pagination::{Pageable, Pagination, PaginationQuery},
+			QueryOrder,
 		},
 	},
 	job::{AcknowledgeableCommand, JobControllerCommand},
-	prisma::{
-		job::{self, OrderByWithRelationParam as JobOrderByParam},
-		job_schedule_config, library, server_config,
-	},
+	prisma::{job, job_schedule_config, library, server_config},
 };
 use tokio::sync::oneshot;
 use utoipa::ToSchema;
@@ -73,7 +70,7 @@ pub struct GetJobsParams {
 )]
 /// Get all running/pending jobs.
 async fn get_jobs(
-	order: QsQuery<QueryOrder>,
+	order: QsQuery<QueryOrder<JobOrderBy>>,
 	pagination_query: Query<PaginationQuery>,
 	relation_query: Query<GetJobsParams>,
 	State(ctx): State<AppState>,
@@ -86,7 +83,7 @@ async fn get_jobs(
 
 	let db = &ctx.db;
 	let is_unpaged = pagination.is_unpaged();
-	let order_by_param: JobOrderByParam = order.try_into()?;
+	let order_by_param = order.into_prisma();
 
 	let pagination_cloned = pagination.clone();
 

@@ -16,11 +16,11 @@ use stump_core::{
 			macros::{
 				finished_reading_session_series_complete, series_or_library_thumbnail,
 			},
-			LibraryConfig, Media, Series, SeriesOrderBy, UserPermission,
+			LibraryConfig, Media, MediaOrderBy, Series, SeriesOrderBy, UserPermission,
 		},
 		query::{
-			ordering::QueryOrder,
 			pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
+			QueryOrder,
 		},
 		PrismaCountTrait, SeriesDAO, DAO,
 	},
@@ -35,9 +35,8 @@ use stump_core::{
 		ContentType,
 	},
 	prisma::{
-		active_reading_session, finished_reading_session, library,
-		media::{self, OrderByWithRelationParam as MediaOrderByParam},
-		series::{self, OrderByWithRelationParam as SeriesOrderByParam, WhereParam},
+		active_reading_session, finished_reading_session, library, media,
+		series::{self, WhereParam},
 		SortOrder,
 	},
 };
@@ -645,7 +644,7 @@ async fn replace_series_thumbnail(
 	params(
 		("id" = String, Path, description = "The ID of the series to fetch the media for"),
 		("pagination" = Option<PaginationQuery>, Query, description = "The pagination params"),
-		("ordering" = Option<QueryOrder>, Query, description = "The ordering params"),
+		("ordering" = Option<QueryOrder<MediaOrderBy>>, Query, description = "The ordering params"),
 	),
 	responses(
 		(status = 200, description = "Successfully fetched series media.", body = PageableMedia),
@@ -657,7 +656,7 @@ async fn replace_series_thumbnail(
 /// Returns the media in a given series.
 async fn get_series_media(
 	pagination_query: Query<PaginationQuery>,
-	ordering: Query<QueryOrder>,
+	ordering: Query<QueryOrder<MediaOrderBy>>,
 	Extension(req): Extension<RequestContext>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -691,7 +690,7 @@ async fn get_series_media(
 
 	trace!(?ordering, ?pagination, "get_series_media");
 
-	let order_by_param: MediaOrderByParam = ordering.0.try_into()?;
+	let order_by_param = ordering.0.into_prisma();
 
 	let _can_access_series = db
 		.series()

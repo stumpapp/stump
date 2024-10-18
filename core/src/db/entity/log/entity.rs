@@ -4,9 +4,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::prisma::log;
-
-use super::Cursor;
+use crate::{db::entity::Cursor, prisma::log};
 
 /// Information about the Stump log file, located at `STUMP_CONFIG_DIR/Stump.log`, or
 /// `~/.stump/Stump.log` by default. Information such as the file size, last modified date, etc.

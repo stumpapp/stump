@@ -248,7 +248,7 @@ mod tests {
 		db::{
 			entity::*,
 			filter::*,
-			query::{ordering::*, pagination::*},
+			query::{pagination::*, *},
 		},
 		filesystem::{image::*, scanner::*, *},
 		job::*,
@@ -475,8 +475,17 @@ mod tests {
 		)?;
 
 		file.write_all(format!("{}\n\n", ts_export::<Direction>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<QueryOrder<()>>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<MediaOrderBy>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<MediaMetadataOrderBy>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<SeriesOrderBy>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LibraryOrderBy>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LogOrderBy>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<JobOrderBy>()?).as_bytes())?;
+
 		file.write_all(format!("{}\n\n", ts_export::<PageParams>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<QueryOrder>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<PageQuery>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<CursorQuery>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<CursorInfo>()?).as_bytes())?;

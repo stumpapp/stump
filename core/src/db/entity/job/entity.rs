@@ -3,6 +3,7 @@ use specta::Type;
 use utoipa::ToSchema;
 
 use crate::{
+	db::entity::{Cursor, Log},
 	filesystem::{
 		image::ThumbnailGenerationOutput,
 		scanner::{LibraryScanOutput, SeriesScanOutput},
@@ -10,8 +11,6 @@ use crate::{
 	job::JobStatus,
 	prisma::job,
 };
-
-use super::{Cursor, Log};
 
 // TODO: There are a couple jobs defined in the server, which obviously presents a problem with
 // this type. For now, I'll do some type gymnastics to make it work, but it's not ideal and

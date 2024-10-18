@@ -6,7 +6,9 @@ use crate::snake_case::ToSnakeCase;
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
-// TODO: Consider Vec<T> for nested enums?
+
+// TODO: Vec<O> -> relation order
+// TODO: O -> aggregate order? It might require some additional field attributes...
 
 // FIXME: Fundamental misunderstanding with macros alert! See helpful feedback:
 // Okay last one is a little more hairy. It looks like in basic.rs you're wanting the struct to which it is applied to use the function you define to provision the code that the macro outputs. E.g. lines 28, 34, 40, etc.
@@ -40,7 +42,7 @@ use syn::{parse_macro_input, Data, DeriveInput, Fields};
 ///   Name,
 ///   Path,
 ///   SomePascalCase,
-///   Metadata(BookMetadataOrderBy),
+///   Metadata(Vec<BookMetadataOrderBy>),
 /// }
 /// ```
 ///
@@ -48,11 +50,11 @@ use syn::{parse_macro_input, Data, DeriveInput, Fields};
 ///
 /// ```
 /// impl IntoOrderBy for BookMetadataOrderBy {
-///   type OrderParam = prisma::book::OrderByWithRelationParam;
+///   type OrderParam = crate::prisma::book::OrderByWithRelationParam;
 ///
-///   fn order_fn(self) -> Self::OrderParam {
+///   fn into_prisma_order(self, dir: crate::prisma::SortOrder) -> Self::OrderParam {
 ///     match self {
-///       BookMetadataOrderBy::Title => prisma::book_metadata::title::order,
+///       BookMetadataOrderBy::Title => crate::prisma::book_metadata::title::order(dir),
 ///     }
 ///   }
 /// }
@@ -60,12 +62,12 @@ use syn::{parse_macro_input, Data, DeriveInput, Fields};
 /// impl IntoOrderBy for BookOrderBy {
 ///   type OrderParam = prisma::book::OrderByWithRelationParam;
 ///
-///   fn order_fn(self) -> Self::OrderParam {
+///   fn into_prisma_order(self) -> Self::OrderParam {
 ///     match self {
-///       BookOrderBy::Name => prisma::book::name::order,
-///       BookOrderBy::Path => prisma::book::path::order,
-///       BookOrderBy::SomePascalCase => prisma::book::some_pascal_case::order,
-///       BookOrderBy::Metadata(metadata) => media::metadata::order(vec![metadata.into_prisma_order(direction)]),
+///       BookOrderBy::Name => prisma::book::name::order(dir),
+///       BookOrderBy::Path => prisma::book::path::order(dir),
+///       BookOrderBy::SomePascalCase => prisma::book::some_pascal_case::order(dir),
+///       BookOrderBy::Metadata(inner_vec) => media::metadata::order(inner_vec.into_iter().map(|f| f.into_prisma_order(dir)).collect()),
 ///     }
 ///   }
 /// }
@@ -118,14 +120,14 @@ pub fn order_by_gen(input: TokenStream) -> TokenStream {
 				Fields::Unit => {
 					// Simple enum variant like `Title`
 					quote! {
-						#enum_name::#variant_name => prisma::#module_name_ident::#field_name::order(dir),
+						#enum_name::#variant_name => crate::prisma::#module_name_ident::#field_name::order(dir),
 					}
 				},
+				// TODO: distinguish between Vec<O> and O
+				// TODO: is this right? docs unclear....
 				Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
-					// FIXME: wrong
-					// Tuple variant like `Metadata(BookMetadataOrderBy)`
 					quote! {
-						#enum_name::#variant_name(inner_vec) => prisma::#module_name_ident::#field_name::order(inner_vec.into_iter().map(|f| f.into_prisma_order(dir)).collect()),
+						#enum_name::#variant_name(inner_vec) => crate::prisma::#module_name_ident::#field_name::order(inner_vec.into_iter().map(|f| f.into_prisma_order(dir)).collect()),
 					}
 				},
 				_ => panic!("Unsupported enum variant"),
@@ -138,9 +140,9 @@ pub fn order_by_gen(input: TokenStream) -> TokenStream {
 	// Generate the final implementation of IntoOrderBy
 	let expanded = quote! {
 		impl IntoOrderBy for #enum_name {
-			type OrderParam = prisma::#module_name_ident::OrderByWithRelationParam;
+			type OrderParam = crate::prisma::#module_name_ident::OrderByWithRelationParam;
 
-			fn into_prisma_order(self, dir: prisma::SortOrder) -> Self::OrderParam {
+			fn into_prisma_order(self, dir: crate::prisma::SortOrder) -> Self::OrderParam {
 				match self {
 					#(#match_arms)*
 				}

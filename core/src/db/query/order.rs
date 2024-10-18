@@ -4,6 +4,11 @@ use utoipa::ToSchema;
 
 use crate::prisma::SortOrder;
 
+pub trait IntoOrderBy {
+	type OrderParam;
+	fn into_prisma_order(self, dir: SortOrder) -> Self::OrderParam;
+}
+
 #[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, Type, ToSchema)]
 pub enum Direction {
 	#[serde(rename = "asc")]
@@ -27,8 +32,11 @@ impl From<Direction> for SortOrder {
 }
 
 #[derive(Debug, Default, Serialize, Deserialize, Type, ToSchema)]
-pub struct QueryOrder<EntityOrder> {
-	pub order_by: EntityOrder,
+pub struct QueryOrder<O>
+where
+	O: IntoOrderBy,
+{
+	pub order_by: O,
 	pub direction: Direction,
 }
 

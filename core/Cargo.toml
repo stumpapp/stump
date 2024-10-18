@@ -30,6 +30,7 @@ stump-config-gen = { path = "../crates/stump-config-gen"}
 tokio = { workspace = true }
 toml = { workspace = true }
 trash = "3.1.2"
+order-by-gen = { path = "../crates/order-by-gen"}
 # pdf = "0.8.1"
 pdf = { git = "https://github.com/pdf-rs/pdf", rev = "3bc9e636d31b1846e51b58c7429914e640866f53" } # TODO: revert back to crates.io once fix(es) release
 pdfium-render = "0.8.24"

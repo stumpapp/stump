@@ -13,7 +13,10 @@ use crate::{config::state::AppState, middleware::auth::auth_middleware};
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
-		.route("/media", get(bulk::get_media).post(bulk::get_media_post))
+		.route(
+			"/media",
+			get(bulk::get_media).post(bulk::get_media_smart_search),
+		)
 		.route("/media/duplicates", get(bulk::get_duplicate_media))
 		.route("/media/keep-reading", get(bulk::get_in_progress_media))
 		.route("/media/recently-added", get(bulk::get_recently_added_media))

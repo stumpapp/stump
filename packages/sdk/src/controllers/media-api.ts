@@ -3,12 +3,13 @@ import {
 	Media,
 	MediaFilter,
 	MediaOrderBy,
+	MediaSmartFilter,
 	Pageable,
 	PatchMediaThumbnail,
 	ProgressUpdateReturn,
 	PutMediaCompletionStatus,
 } from '../types'
-import { ClassQueryKeys, CursorQueryParams, FullQueryParams } from './types'
+import { ClassQueryKeys, CursorQueryParams, FullQueryParams, SmartSearchBody } from './types'
 import { createRouteURLHandler } from './utils'
 
 /**
@@ -29,6 +30,14 @@ export class MediaAPI extends APIBase {
 	 */
 	async get(params?: FullQueryParams<MediaFilter, MediaOrderBy>): Promise<Pageable<Media[]>> {
 		const { data: media } = await this.axios.get<Pageable<Media[]>>(mediaURL('', params))
+		return media
+	}
+
+	async smartSearch({
+		query,
+		...body
+	}: SmartSearchBody<MediaSmartFilter, MediaOrderBy>): Promise<Pageable<Media[]>> {
+		const { data: media } = await this.axios.post<Pageable<Media[]>>(mediaURL('', query), body)
 		return media
 	}
 
@@ -163,6 +172,7 @@ export class MediaAPI extends APIBase {
 			inProgress: 'media.inProgress',
 			patchThumbnail: 'media.patchThumbnail',
 			recentlyAdded: 'media.recentlyAdded',
+			smartSearch: 'media.smartSearch',
 			updateProgress: 'media.updateProgress',
 			uploadThumbnail: 'media.uploadThumbnail',
 		}

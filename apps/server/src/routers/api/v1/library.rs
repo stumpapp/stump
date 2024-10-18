@@ -50,7 +50,7 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::{
-		chain_optional_iter, FilterableQuery, LibraryFilter, MediaFilter, SeriesFilter,
+		chain_optional_iter, FilterQuery, LibraryFilter, MediaFilter, SeriesFilter,
 	},
 	middleware::auth::{auth_middleware, RequestContext},
 	routers::api::filters::{
@@ -118,7 +118,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	path = "/api/v1/libraries",
 	tag = "library",
 	params(
-		("filter_query" = Option<FilterableLibraryQuery>, Query, description = "The library filters"),
+		("filter_query" = Option<LibraryFilterQuery>, Query, description = "The library filters"),
 		("pagination_query" = Option<PaginationQuery>, Query, description = "The pagination options")
 	),
 	responses(
@@ -130,13 +130,13 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 /// Get all libraries
 #[tracing::instrument(skip(ctx), err)]
 async fn get_libraries(
-	filter_query: QsQuery<FilterableQuery<LibraryFilter, LibraryOrderBy>>,
+	filter_query: QsQuery<FilterQuery<LibraryFilter, LibraryOrderBy>>,
 	pagination_query: Query<PaginationQuery>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Pageable<Vec<Library>>>> {
 	let user = req.user();
-	let FilterableQuery { filters, ordering } = filter_query.0.get();
+	let FilterQuery { filters, ordering } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
 
 	tracing::trace!(?filters, ?ordering, ?pagination, "get_libraries");
@@ -359,7 +359,7 @@ async fn get_library_by_id(
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID"),
-		("filter_query" = Option<FilterableLibraryQuery>, Query, description = "The library filters"),
+		("filter_query" = Option<LibraryFilterQuery>, Query, description = "The library filters"),
 		("pagination_query" = Option<PaginationQuery>, Query, description = "The pagination options")
 	),
 	responses(
@@ -371,13 +371,13 @@ async fn get_library_by_id(
 )]
 /// Returns the series in a given library. Will *not* load the media relation.
 async fn get_library_series(
-	filter_query: Query<FilterableQuery<SeriesFilter, SeriesOrderBy>>,
+	filter_query: Query<FilterQuery<SeriesFilter, SeriesOrderBy>>,
 	pagination_query: Query<PaginationQuery>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Pageable<Vec<Series>>>> {
-	let FilterableQuery {
+	let FilterQuery {
 		ordering, filters, ..
 	} = filter_query.0.get();
 	let pagination = pagination_query.0.get();
@@ -456,7 +456,7 @@ async fn get_library_series(
 
 // TODO: remove? Not used on client
 async fn get_library_media(
-	filter_query: Query<FilterableQuery<MediaFilter, MediaOrderBy>>,
+	filter_query: Query<FilterQuery<MediaFilter, MediaOrderBy>>,
 	pagination_query: Query<PaginationQuery>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -464,7 +464,7 @@ async fn get_library_media(
 ) -> APIResult<Json<Pageable<Vec<Media>>>> {
 	let user = req.user();
 
-	let FilterableQuery { ordering, filters } = filter_query.0.get();
+	let FilterQuery { ordering, filters } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
 	let pagination_cloned = pagination.clone();
 

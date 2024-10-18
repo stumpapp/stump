@@ -47,7 +47,7 @@ use utoipa::ToSchema;
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
-	filter::{chain_optional_iter, FilterableQuery, SeriesFilter, SeriesQueryRelation},
+	filter::{chain_optional_iter, FilterQuery, SeriesFilter, SeriesQueryRelation},
 	middleware::auth::{auth_middleware, RequestContext},
 	routers::api::{
 		filters::{
@@ -100,7 +100,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	path = "/api/v1/series",
 	tag = "series",
 	params(
-		("filter_query" = Option<FilterableSeriesQuery>, Query, description = "The filter options"),
+		("filter_query" = Option<SeriesFilterQuery>, Query, description = "The filter options"),
 		("pagination_query" = Option<PaginationQuery>, Query, description = "The pagination options"),
 		("relation_query" = Option<SeriesQueryRelation>, Query, description = "The relations to include"),
 	),
@@ -112,13 +112,13 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 )]
 /// Get all series accessible by user.
 async fn get_series(
-	filter_query: QsQuery<FilterableQuery<SeriesFilter, SeriesOrderBy>>,
+	filter_query: QsQuery<FilterQuery<SeriesFilter, SeriesOrderBy>>,
 	pagination_query: Query<PaginationQuery>,
 	relation_query: Query<SeriesQueryRelation>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Pageable<Vec<Series>>>> {
-	let FilterableQuery { ordering, filters } = filter_query.0.get();
+	let FilterQuery { ordering, filters } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
 	let pagination_cloned = pagination.clone();
 

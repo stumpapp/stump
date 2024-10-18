@@ -21,11 +21,11 @@ mod tests {
 	use crate::{
 		config::jwt::CreatedToken,
 		filter::{
-			LibraryBaseFilter, LibraryFilter, LibraryRelationFilter, LogFilter,
-			MediaBaseFilter, MediaFilter, MediaMetadataBaseFilter, MediaMetadataFilter,
-			MediaMetadataRelationFilter, Range, ReadStatus, SeriesBaseFilter,
-			SeriesFilter, SeriesMedataFilter, SeriesQueryRelation, UserQueryRelation,
-			ValueOrRange,
+			FilterBody, LibraryBaseFilter, LibraryFilter, LibraryRelationFilter,
+			LogFilter, MediaBaseFilter, MediaFilter, MediaMetadataBaseFilter,
+			MediaMetadataFilter, MediaMetadataRelationFilter, Range, ReadStatus,
+			SeriesBaseFilter, SeriesFilter, SeriesMedataFilter, SeriesQueryRelation,
+			UserQueryRelation, ValueOrRange,
 		},
 		routers::api::v1::{
 			auth::{AuthenticationOptions, LoginOrRegisterArgs, LoginResponse},
@@ -128,6 +128,8 @@ mod tests {
 			format!("{}\n\n", ts_export::<CreateOrUpdateEmailDevice>()?).as_bytes(),
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<PatchEmailDevice>()?).as_bytes())?;
+
+		file.write_all(format!("{}\n\n", ts_export::<FilterBody<(), ()>>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<LogFilter>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryBaseFilter>()?).as_bytes())?;

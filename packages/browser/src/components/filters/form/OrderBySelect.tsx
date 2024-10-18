@@ -1,4 +1,5 @@
 import { Label, NativeSelect } from '@stump/components'
+import { MediaMetadataOrderBy, MediaOrderBy } from '@stump/sdk'
 import React, { useMemo } from 'react'
 
 import { FilterableEntity } from '.'
@@ -36,4 +37,18 @@ export default function OrderBySelect({ entity, value, onChange }: Props) {
 			/>
 		</div>
 	)
+}
+
+const LOCALE_KEY = 'orderBy'
+const getEntityKey = (entity: FilterableEntity, key: string) => `${LOCALE_KEY}.${entity}.${key}`
+
+const MEDIA_ORDER: Record<Exclude<MediaOrderBy, { metadata: MediaMetadataOrderBy[] }>, string> = {
+	created_at: getEntityKey('media', 'created_at'),
+	extension: getEntityKey('media', 'extension'),
+	name: getEntityKey('media', 'name'),
+	pages: getEntityKey('media', 'pages'),
+	path: getEntityKey('media', 'path'),
+	size: getEntityKey('media', 'size'),
+	status: getEntityKey('media', 'status'),
+	updated_at: getEntityKey('media', 'updated_at'),
 }

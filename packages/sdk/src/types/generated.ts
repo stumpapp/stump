@@ -378,6 +378,13 @@ export type CreateOrUpdateEmailDevice = { name: string; email: string; forbidden
  */
 export type PatchEmailDevice = { name: string | null; email: string | null; forbidden: boolean | null }
 
+/**
+ * A filter body for more complex filtering and ordering operations. It uses the
+ * smart filter types as its backbone. This should be used only in request bodies,
+ * not query strings. For query strings, use [`super::FilterQuery`].
+ */
+export type FilterBody<F, O> = { filters?: FilterGroup<F>[]; order_params?: QueryOrder<O>[] }
+
 export type LogFilter = { level?: LogLevel | null; job_id?: string | null; timestamp?: ValueOrRange<string> | null }
 
 export type LibraryBaseFilter = { id?: string[]; name?: string[]; path?: string[]; search?: string | null }

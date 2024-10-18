@@ -8,7 +8,6 @@ use stump_core::db::{
 	entity::{
 		age_rating_deserializer, LibraryOrderBy, LogLevel, MediaOrderBy, SeriesOrderBy,
 	},
-	filter::FilterGroup,
 	query::{IntoOrderBy, QueryOrder},
 };
 use utoipa::ToSchema;
@@ -20,16 +19,13 @@ use super::common::{
 	string_or_seq_string,
 };
 
-// TODO: I'd love to support `not` operations somehow
-// TODO: break this file up!
-
 #[derive(Debug, Default, Deserialize, Serialize, ToSchema)]
 #[aliases(
-	FilterableLibraryQuery = FilterableQuery<LibraryFilter, LibraryOrderBy>,
-	FilterableSeriesQuery = FilterableQuery<SeriesFilter, SeriesOrderBy>,
-	FilterableMediaQuery = FilterableQuery<MediaFilter, MediaOrderBy>
+	LibraryFilterQuery = FilterQuery<LibraryFilter, LibraryOrderBy>,
+	SeriesFilterQuery = FilterQuery<SeriesFilter, SeriesOrderBy>,
+	MediaFilterQuery = FilterQuery<MediaFilter, MediaOrderBy>
 )]
-pub struct FilterableQuery<F, O>
+pub struct FilterQuery<F, O>
 where
 	F: Sized + Default,
 	O: IntoOrderBy + Default,
@@ -40,7 +36,7 @@ where
 	pub ordering: QueryOrder<O>,
 }
 
-impl<F, O> FilterableQuery<F, O>
+impl<F, O> FilterQuery<F, O>
 where
 	F: Sized + Default,
 	O: IntoOrderBy + Default,
@@ -48,19 +44,6 @@ where
 	pub fn get(self) -> Self {
 		self
 	}
-}
-
-// TODO: move into smart filter, e.g. SmartFilterBody!! :)
-#[derive(Debug, Default, Deserialize, Serialize, ToSchema)]
-pub struct FilterBody<F, O>
-where
-	F: Sized,
-	O: IntoOrderBy + Default,
-{
-	#[serde(default = "Vec::new")]
-	pub filters: Vec<FilterGroup<F>>,
-	#[serde(default)]
-	pub order_params: Vec<QueryOrder<O>>,
 }
 
 #[derive(Deserialize, Debug, Clone, Serialize, Type)]
@@ -419,14 +402,14 @@ mod tests {
 
 	#[test]
 	fn test_serde_qs_deserialize_filterable_query_value_or_range() {
-		let value: FilterableQuery<TestValueOrRange, ()> =
+		let value: FilterQuery<TestValueOrRange, ()> =
 			serde_qs::from_str("year=1").unwrap();
 		match value.filters.year {
 			Some(ValueOrRange::Value(v)) => assert_eq!(v, 1),
 			_ => panic!("expected value"),
 		}
 
-		let value: FilterableQuery<TestValueOrRange, ()> =
+		let value: FilterQuery<TestValueOrRange, ()> =
 			serde_qs::from_str("year[from]=1950&year[to]=2023").unwrap();
 		match value.filters.year {
 			Some(ValueOrRange::Range(Range { from, to })) => {
@@ -439,7 +422,7 @@ mod tests {
 
 	#[test]
 	fn test_serde_qs_deserialize_filterable_query_partial_range() {
-		let value: FilterableQuery<TestValueOrRange, ()> =
+		let value: FilterQuery<TestValueOrRange, ()> =
 			serde_qs::from_str("year[from]=1950").unwrap();
 		match value.filters.year {
 			Some(ValueOrRange::Range(Range { from, to })) => {
@@ -449,7 +432,7 @@ mod tests {
 			_ => panic!("expected range"),
 		}
 
-		let value: FilterableQuery<TestValueOrRange, ()> =
+		let value: FilterQuery<TestValueOrRange, ()> =
 			serde_qs::from_str("year[to]=2023").unwrap();
 		match value.filters.year {
 			Some(ValueOrRange::Range(Range { from, to })) => {
@@ -466,7 +449,7 @@ mod tests {
 		let serialized = serde_qs::to_string(&order).unwrap();
 		assert_eq!(serialized, "metadata[0]=title");
 
-		let filterable_query = FilterableQuery {
+		let filterable_query = FilterQuery {
 			filters: MediaFilter::default(),
 			ordering: QueryOrder::<MediaOrderBy> {
 				order_by: MediaOrderBy::Metadata(vec![MediaMetadataOrderBy::Title]),
@@ -477,34 +460,5 @@ mod tests {
 		let serialized = serde_qs::to_string(&filterable_query).unwrap();
 		// FIXME: this breaks the existing patterns, I believe its because the enum is Metadata(Vec<MediaMetadataOrderBy>) and not Metadata { metadata: Vec<MediaMetadataOrderBy> }
 		assert_eq!(serialized, "order_by[metadata][0]=title&direction=asc");
-	}
-
-	#[test]
-	fn test_serde_json_relation() {
-		let filter_body = FilterBody {
-			filters: MediaFilter {
-				relation_filter: MediaRelationFilter {
-					series: Some(SeriesFilter {
-						relation_filter: SeriesRelationFilter {
-							library: Some(LibraryBaseFilter {
-								name: vec!["test".to_string()],
-								..Default::default()
-							}),
-							..Default::default()
-						},
-						..Default::default()
-					}),
-				},
-				..Default::default()
-			},
-			order_params: vec![QueryOrder {
-				order_by: MediaOrderBy::Metadata(vec![MediaMetadataOrderBy::Title]),
-				direction: Direction::Asc,
-			}],
-		};
-
-		let serialized = serde_json::to_string(&filter_body).unwrap();
-		// TODO(test): assert
-		println!("{}", serialized);
 	}
 }

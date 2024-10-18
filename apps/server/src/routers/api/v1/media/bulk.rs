@@ -20,7 +20,7 @@ use stump_core::{
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
-	filter::{FilterBody, FilterableQuery, MediaFilter},
+	filter::{FilterBody, FilterQuery, MediaFilter},
 	middleware::auth::RequestContext,
 	routers::api::filters::{
 		apply_media_age_restriction, apply_media_filters_for_user,
@@ -34,7 +34,7 @@ use crate::{
 	path = "/api/v1/media",
 	tag = "media",
 	params(
-		("filter_query" = Option<FilterableMediaQuery>, Query, description = "The optional media filters"),
+		("filter_query" = Option<MediaFilterQuery>, Query, description = "The optional media filters"),
 		("pagination_query" = Option<PaginationQuery>, Query, description = "The pagination options"),
 	),
 	responses(
@@ -48,12 +48,12 @@ use crate::{
 /// has various pagination params available.
 #[tracing::instrument(err, skip(ctx, req))]
 pub(crate) async fn get_media(
-	filter_query: QsQuery<FilterableQuery<MediaFilter, MediaOrderBy>>,
+	filter_query: QsQuery<FilterQuery<MediaFilter, MediaOrderBy>>,
 	pagination_query: Query<PaginationQuery>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<Pageable<Vec<Media>>>> {
-	let FilterableQuery { filters, ordering } = filter_query.0.get();
+	let FilterQuery { filters, ordering } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
 
 	tracing::trace!(?filters, ?ordering, ?pagination, "get_media");
@@ -129,7 +129,7 @@ pub(crate) async fn get_media(
 
 #[tracing::instrument(skip(ctx, req))]
 #[debug_handler]
-pub(crate) async fn get_media_post(
+pub(crate) async fn get_media_smart_search(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
 	query: Query<PaginationQuery>,
@@ -388,12 +388,12 @@ pub(crate) async fn get_in_progress_media(
 /// Get all media which was added to the library in descending order of when it
 /// was added.
 pub(crate) async fn get_recently_added_media(
-	filter_query: QsQuery<FilterableQuery<MediaFilter, MediaOrderBy>>,
+	filter_query: QsQuery<FilterQuery<MediaFilter, MediaOrderBy>>,
 	pagination_query: Query<PaginationQuery>,
 	Extension(req): Extension<RequestContext>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<Pageable<Vec<Media>>>> {
-	let FilterableQuery { filters, .. } = filter_query.0.get();
+	let FilterQuery { filters, .. } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
 
 	tracing::trace!(?filters, ?pagination, "get_recently_added_media");

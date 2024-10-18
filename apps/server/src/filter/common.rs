@@ -3,7 +3,7 @@ use std::{marker::PhantomData, str::FromStr};
 use serde::{de, Deserialize, Deserializer};
 use std::fmt;
 
-use super::basic_filter::ReadStatus;
+use super::query::ReadStatus;
 
 pub fn string_or_seq_string<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
 where

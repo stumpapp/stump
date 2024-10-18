@@ -17,7 +17,7 @@ const toolTipVariants = cva(undefined, {
 	},
 })
 
-type BaseProps = VariantProps<typeof toolTipVariants> & Pick<ToolTipContentProps, 'align'>
+type BaseProps = VariantProps<typeof toolTipVariants> & Pick<ToolTipContentProps, 'align' | 'side'>
 export type ToolTipProps = {
 	children: React.ReactNode
 	content: string | React.ReactNode
@@ -25,14 +25,14 @@ export type ToolTipProps = {
 } & BaseProps
 
 export const ToolTip = forwardRef<HTMLButtonElement, ToolTipProps>(
-	({ children, content, align, size, isDisabled }, ref) => {
+	({ children, content, align, side, size, isDisabled }, ref) => {
 		return (
 			<ToolTipProvider>
 				<ToolTipPrimitive>
 					<ToolTipPrimitive.Trigger asChild disabled={isDisabled} ref={ref}>
 						{children}
 					</ToolTipPrimitive.Trigger>
-					<ToolTipPrimitive.Content align={align} className={toolTipVariants({ size })}>
+					<ToolTipPrimitive.Content align={align} side={side} className={toolTipVariants({ size })}>
 						{content}
 					</ToolTipPrimitive.Content>
 				</ToolTipPrimitive>

@@ -1,5 +1,6 @@
 import { usePagedMediaQuery, usePrefetchMediaPaged } from '@stump/client'
 import { usePreviousIsDifferent } from '@stump/components'
+import { MediaMetadataOrderBy, MediaOrderBy, MediaSmartFilter } from '@stump/sdk'
 import { useCallback, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 
@@ -8,12 +9,14 @@ import BookGrid from '@/components/book/BookGrid'
 import { defaultBookColumnSort } from '@/components/book/table'
 import {
 	FilterContext,
-	FilterHeader,
+	FilterHeader as OldFilterHeader,
 	URLFilterContainer,
 	URLFilterDrawer,
 	URLOrdering,
 	useFilterScene,
 } from '@/components/filters'
+import FilterHeader from '@/components/filters_/FilterHeader'
+import { FilterStoreProvider } from '@/components/filters_/store'
 import { EntityTableColumnConfiguration } from '@/components/table'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
@@ -139,32 +142,39 @@ export default function LibraryBooksScene() {
 	}
 
 	return (
-		<FilterContext.Provider
-			value={{
-				filters,
-				ordering,
-				pagination: { page, page_size },
-				setPage,
-				...rest,
-			}}
-		>
-			<div className="flex flex-1 flex-col pb-4 md:pb-0">
-				<Helmet>
-					<title>Stump | {library.name || ''}</title>
-				</Helmet>
+		<FilterStoreProvider<
+			MediaSmartFilter,
+			Exclude<MediaOrderBy, { metadata: MediaMetadataOrderBy[] }>
+		>>
+			<FilterContext.Provider
+				value={{
+					filters,
+					ordering,
+					pagination: { page, page_size },
+					setPage,
+					...rest,
+				}}
+			>
+				<div className="flex flex-1 flex-col pb-4 md:pb-0">
+					<Helmet>
+						<title>Stump | {library.name || ''}</title>
+					</Helmet>
 
-				<section ref={containerRef} id="grid-top-indicator" className="h-0" />
+					<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 
-				<FilterHeader
+					{/* <OldFilterHeader
 					isSearching={isRefetchingMedia}
 					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
 					orderControls={<URLOrdering entity="media" />}
 					filterControls={<URLFilterDrawer entity="media" />}
 					navOffset
-				/>
+				/> */}
 
-				{renderContent()}
-			</div>
-		</FilterContext.Provider>
+					<FilterHeader navOffset />
+
+					{renderContent()}
+				</div>
+			</FilterContext.Provider>
+		</FilterStoreProvider>
 	)
 }

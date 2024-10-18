@@ -40,6 +40,7 @@ export default function URLFilterDrawer({ entity }: Props) {
 		}
 	}
 
+	// TODO: rewrite this!
 	return (
 		<Sheet
 			open={isOpen}

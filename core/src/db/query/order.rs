@@ -14,9 +14,9 @@ pub trait IntoOrderBy {
 #[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, Type, ToSchema)]
 pub enum Direction {
 	#[serde(rename = "asc")]
+	#[default]
 	Asc,
 	#[serde(rename = "desc")]
-	#[default]
 	Desc,
 }
 
@@ -34,7 +34,9 @@ pub struct QueryOrder<O>
 where
 	O: IntoOrderBy + Default,
 {
+	#[serde(default)]
 	pub order_by: O,
+	#[serde(default)]
 	pub direction: Direction,
 }
 

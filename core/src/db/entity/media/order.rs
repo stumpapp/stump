@@ -50,3 +50,15 @@ pub enum MediaOrderBy {
 	Pages,
 	Metadata(Vec<MediaMetadataOrderBy>),
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_serialize_media_relation_order_by() {
+		let order = MediaOrderBy::Metadata(vec![MediaMetadataOrderBy::Title]);
+		let serialized = serde_json::to_string(&order).unwrap();
+		assert_eq!(serialized, r#"{"metadata":["title"]}"#);
+	}
+}

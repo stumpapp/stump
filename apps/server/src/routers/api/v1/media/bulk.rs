@@ -18,7 +18,7 @@ use stump_core::{
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
-	filter::{FilterableQuery, MediaFilter},
+	filter::{FilterBody, FilterableQuery, MediaFilter},
 	middleware::auth::RequestContext,
 	routers::api::filters::{
 		apply_media_age_restriction, apply_media_filters_for_user,
@@ -116,6 +116,81 @@ pub(crate) async fn get_media(
 				.map(|count| (media, Some(count)))
 		})
 		.await?;
+
+	if let Some(count) = count {
+		return Ok(Json(Pageable::from((media, count, pagination))));
+	}
+
+	Ok(Json(Pageable::from(media)))
+}
+
+#[tracing::instrument(skip(ctx, req))]
+pub(crate) async fn get_media_post(
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+	query: Query<PaginationQuery>,
+	Json(FilterBody {
+		filters,
+		order_params,
+	}): Json<FilterBody<MediaFilter, MediaOrderBy>>,
+) -> APIResult<Json<Pageable<Vec<Media>>>> {
+	let pagination = query.0.get();
+	let order_by_params = order_params.into_iter().map(|o| o.into_prisma());
+	let where_conditions = apply_media_filters_for_user(filters, req.user());
+
+	let pagination_cloned = pagination.clone();
+	let (media, count) = ctx
+		.db
+		._transaction()
+		.run(|client| async move {
+			let mut query = client
+				.media()
+				.find_many(where_conditions.clone())
+				.with(media::active_user_reading_sessions::fetch(vec![
+					active_reading_session::user_id::equals(req.id().clone()),
+				]))
+				.with(media::finished_user_reading_sessions::fetch(vec![
+					finished_reading_session::user_id::equals(req.id()),
+				]))
+				.with(media::metadata::fetch());
+
+			for order_by_param in order_by_params {
+				query = query.order_by(order_by_param);
+			}
+
+			let is_unpaged = pagination_cloned.is_unpaged();
+			match pagination_cloned {
+				Pagination::Page(page_query) => {
+					let (skip, take) = page_query.get_skip_take();
+					query = query.skip(skip).take(take);
+				},
+				Pagination::Cursor(cursor_query) => {
+					if let Some(cursor) = cursor_query.cursor {
+						query = query.cursor(media::id::equals(cursor)).skip(1);
+					}
+					if let Some(limit) = cursor_query.limit {
+						query = query.take(limit);
+					}
+				},
+				_ => {},
+			}
+
+			let media = query.exec().await?.into_iter().map(Media::from).collect();
+
+			if is_unpaged {
+				return Ok((media, None));
+			}
+
+			client
+				.media()
+				.count(where_conditions)
+				.exec()
+				.await
+				.map(|count| (media, Some(count)))
+		})
+		.await?;
+
+	tracing::debug!("Finished transaction");
 
 	if let Some(count) = count {
 		return Ok(Json(Pageable::from((media, count, pagination))));

@@ -49,6 +49,18 @@ where
 	}
 }
 
+#[derive(Debug, Default, Deserialize, Serialize, ToSchema)]
+pub struct FilterBody<F, O>
+where
+	F: Sized + Default,
+	O: IntoOrderBy + Default,
+{
+	#[serde(default)]
+	pub filters: F,
+	#[serde(default)]
+	pub order_params: Vec<QueryOrder<O>>,
+}
+
 #[derive(Deserialize, Debug, Clone, Serialize, Type)]
 pub struct Range<T>
 where
@@ -463,5 +475,34 @@ mod tests {
 		let serialized = serde_qs::to_string(&filterable_query).unwrap();
 		// FIXME: this breaks the existing patterns, I believe its because the enum is Metadata(Vec<MediaMetadataOrderBy>) and not Metadata { metadata: Vec<MediaMetadataOrderBy> }
 		assert_eq!(serialized, "order_by[metadata][0]=title&direction=asc");
+	}
+
+	#[test]
+	fn test_serde_json_relation() {
+		let filter_body = FilterBody {
+			filters: MediaFilter {
+				relation_filter: MediaRelationFilter {
+					series: Some(SeriesFilter {
+						relation_filter: SeriesRelationFilter {
+							library: Some(LibraryBaseFilter {
+								name: vec!["test".to_string()],
+								..Default::default()
+							}),
+							..Default::default()
+						},
+						..Default::default()
+					}),
+				},
+				..Default::default()
+			},
+			order_params: vec![QueryOrder {
+				order_by: MediaOrderBy::Metadata(vec![MediaMetadataOrderBy::Title]),
+				direction: Direction::Asc,
+			}],
+		};
+
+		let serialized = serde_json::to_string(&filter_body).unwrap();
+		// TODO(test): assert
+		println!("{}", serialized);
 	}
 }

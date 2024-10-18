@@ -4,13 +4,13 @@ use prisma_client_rust::{raw, PrismaValue};
 use serde_qs::axum::QsQuery;
 use stump_core::{
 	db::{
-		entity::Media,
+		entity::{Media, MediaOrderBy},
 		query::pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
 		CountQueryReturn,
 	},
 	prisma::{
 		active_reading_session, finished_reading_session,
-		media::{self, OrderByWithRelationParam as MediaOrderByParam, WhereParam},
+		media::{self, WhereParam},
 		SortOrder,
 	},
 };
@@ -45,7 +45,7 @@ use crate::{
 /// has various pagination params available.
 #[tracing::instrument(err, skip(ctx))]
 pub(crate) async fn get_media(
-	filter_query: QsQuery<FilterableQuery<MediaFilter>>,
+	filter_query: QsQuery<FilterableQuery<MediaFilter, MediaOrderBy>>,
 	pagination_query: Query<PaginationQuery>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
@@ -59,7 +59,7 @@ pub(crate) async fn get_media(
 	let user_id = req.id();
 
 	let is_unpaged = pagination.is_unpaged();
-	let order_by_param: MediaOrderByParam = ordering.try_into()?;
+	let order_by_param = ordering.into_prisma();
 
 	let pagination_cloned = pagination.clone();
 	let where_conditions = apply_media_filters_for_user(filters, req.user());
@@ -306,7 +306,7 @@ pub(crate) async fn get_in_progress_media(
 /// Get all media which was added to the library in descending order of when it
 /// was added.
 pub(crate) async fn get_recently_added_media(
-	filter_query: QsQuery<FilterableQuery<MediaFilter>>,
+	filter_query: QsQuery<FilterableQuery<MediaFilter, MediaOrderBy>>,
 	pagination_query: Query<PaginationQuery>,
 	Extension(req): Extension<RequestContext>,
 	State(ctx): State<AppState>,

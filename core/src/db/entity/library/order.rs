@@ -13,10 +13,11 @@ use crate::db::query::IntoOrderBy;
 // 	Series,
 // }
 
-#[derive(Debug, Deserialize, Serialize, Type, ToSchema, OrderByGen)]
+#[derive(Default, Debug, Deserialize, Serialize, Type, ToSchema, OrderByGen)]
 #[serde(rename_all = "snake_case")]
 #[prisma(module = "library")]
-enum LibraryOrderBy {
+pub enum LibraryOrderBy {
+	#[default]
 	Name,
 	Path,
 	Status,

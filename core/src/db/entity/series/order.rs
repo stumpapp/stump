@@ -11,10 +11,11 @@ use crate::db::query::IntoOrderBy;
 // 	Media,
 // }
 
-#[derive(Debug, Deserialize, Serialize, Type, ToSchema, OrderByGen)]
+#[derive(Default, Debug, Deserialize, Serialize, Type, ToSchema, OrderByGen)]
 #[serde(rename_all = "snake_case")]
 #[prisma(module = "series")]
-enum SeriesOrderBy {
+pub enum SeriesOrderBy {
+	#[default]
 	Name,
 	Description,
 	UpdatedAt,

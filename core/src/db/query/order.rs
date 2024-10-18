@@ -4,8 +4,10 @@ use utoipa::ToSchema;
 
 use crate::prisma::SortOrder;
 
+/// A trait to convert an enum variant into a prisma order parameter
 pub trait IntoOrderBy {
 	type OrderParam;
+	/// Convert the enum variant into a prisma order parameter, e.g. `media::name::order(SortOrder::Asc)`
 	fn into_prisma_order(self, dir: SortOrder) -> Self::OrderParam;
 }
 
@@ -17,10 +19,6 @@ pub enum Direction {
 	#[default]
 	Desc,
 }
-
-// This is cool and all, but implies only one order can be applied. Realistically, we can do things
-// like:
-// media::find_many(vec![params]).order_by(media::metadata::order(vec![media_metadata::title::order(SortOrder::Asc)])).order_by(media::name::order(SortOrder::Asc))
 
 impl From<Direction> for SortOrder {
 	fn from(direction: Direction) -> SortOrder {
@@ -34,32 +32,17 @@ impl From<Direction> for SortOrder {
 #[derive(Debug, Default, Serialize, Deserialize, Type, ToSchema)]
 pub struct QueryOrder<O>
 where
-	O: IntoOrderBy,
+	O: IntoOrderBy + Default,
 {
 	pub order_by: O,
 	pub direction: Direction,
 }
 
-pub trait OrderApplier<'a> {
-	type FindManyQuery;
-	type FindFirstQuery;
-
-	/// Apply the ordering to a query that returns many results
-	fn apply_many(self, query: Self::FindManyQuery) -> Self::FindManyQuery;
-	/// Apply the ordering to a query that returns a single, non-unique result
-	fn apply(self, query: Self::FindFirstQuery) -> Self::FindFirstQuery;
-}
-
-enum OrderByWithRelationOrAggregate<R, A> {
-	FieldOrRelation(R),
-	Aggregate(A),
-}
-
-impl<R, A> OrderByWithRelationOrAggregate<R, A> {
-	fn into_inner(self) -> (Option<R>, Option<A>) {
-		match self {
-			OrderByWithRelationOrAggregate::FieldOrRelation(r) => (Some(r), None),
-			OrderByWithRelationOrAggregate::Aggregate(a) => (None, Some(a)),
-		}
+impl<O> QueryOrder<O>
+where
+	O: IntoOrderBy + Default,
+{
+	pub fn into_prisma(self) -> O::OrderParam {
+		self.order_by.into_prisma_order(self.direction.into())
 	}
 }

@@ -16,7 +16,7 @@ use stump_core::{
 			macros::{
 				finished_reading_session_series_complete, series_or_library_thumbnail,
 			},
-			LibraryConfig, Media, Series, UserPermission,
+			LibraryConfig, Media, Series, SeriesOrderBy, UserPermission,
 		},
 		query::{
 			ordering::QueryOrder,
@@ -113,7 +113,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 )]
 /// Get all series accessible by user.
 async fn get_series(
-	filter_query: QsQuery<FilterableQuery<SeriesFilter>>,
+	filter_query: QsQuery<FilterableQuery<SeriesFilter, SeriesOrderBy>>,
 	pagination_query: Query<PaginationQuery>,
 	relation_query: Query<SeriesQueryRelation>,
 	State(ctx): State<AppState>,
@@ -130,7 +130,7 @@ async fn get_series(
 	let user_id = user.id.clone();
 
 	let is_unpaged = pagination.is_unpaged();
-	let order_by: SeriesOrderByParam = ordering.try_into()?;
+	let order_by = ordering.into_prisma();
 
 	let load_media = relation_query.load_media.unwrap_or(false);
 	let count_media = relation_query.count_media.unwrap_or(false);

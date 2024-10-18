@@ -23,8 +23,9 @@ use stump_core::{
 				library_series_ids_media_ids_include, library_tags_select,
 				library_thumbnails_deletion_include, series_or_library_thumbnail,
 			},
-			FileStatus, Library, LibraryConfig, LibraryScanMode, LibraryStats, Media,
-			Series, TagName, User, UserPermission,
+			FileStatus, Library, LibraryConfig, LibraryOrderBy, LibraryScanMode,
+			LibraryStats, Media, MediaOrderBy, Series, SeriesOrderBy, TagName, User,
+			UserPermission,
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 		PrismaCountTrait,
@@ -132,7 +133,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 /// Get all libraries
 #[tracing::instrument(skip(ctx), err)]
 async fn get_libraries(
-	filter_query: QsQuery<FilterableQuery<LibraryFilter>>,
+	filter_query: QsQuery<FilterableQuery<LibraryFilter, LibraryOrderBy>>,
 	pagination_query: Query<PaginationQuery>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
@@ -145,7 +146,7 @@ async fn get_libraries(
 
 	let is_unpaged = pagination.is_unpaged();
 	let where_conditions = apply_library_filters_for_user(filters, user);
-	let order_by = ordering.try_into()?;
+	let order_by = ordering.into_prisma();
 
 	let mut query = ctx
 		.db
@@ -373,7 +374,7 @@ async fn get_library_by_id(
 )]
 /// Returns the series in a given library. Will *not* load the media relation.
 async fn get_library_series(
-	filter_query: Query<FilterableQuery<SeriesFilter>>,
+	filter_query: Query<FilterableQuery<SeriesFilter, SeriesOrderBy>>,
 	pagination_query: Query<PaginationQuery>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -394,7 +395,7 @@ async fn get_library_series(
 		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
 
 	let is_unpaged = pagination.is_unpaged();
-	let order_by_param: SeriesOrderByParam = ordering.try_into()?;
+	let order_by_param = ordering.into_prisma();
 
 	let where_conditions = apply_series_filters(filters)
 		.into_iter()
@@ -458,7 +459,7 @@ async fn get_library_series(
 
 // TODO: remove? Not used on client
 async fn get_library_media(
-	filter_query: Query<FilterableQuery<MediaFilter>>,
+	filter_query: Query<FilterableQuery<MediaFilter, MediaOrderBy>>,
 	pagination_query: Query<PaginationQuery>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -471,7 +472,7 @@ async fn get_library_media(
 	let pagination_cloned = pagination.clone();
 
 	let is_unpaged = pagination.is_unpaged();
-	let order_by_param: MediaOrderByParam = ordering.try_into()?;
+	let order_by_param = ordering.into_prisma();
 
 	let media_conditions = apply_media_filters(filters)
 		.into_iter()

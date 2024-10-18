@@ -5,10 +5,11 @@ use utoipa::ToSchema;
 
 use crate::db::query::IntoOrderBy;
 
-#[derive(Debug, Deserialize, Serialize, Type, ToSchema, OrderByGen)]
+#[derive(Default, Debug, Deserialize, Serialize, Type, ToSchema, OrderByGen)]
 #[serde(rename_all = "snake_case")]
 #[prisma(module = "media_metadata")]
-enum MediaMetadataOrderBy {
+pub enum MediaMetadataOrderBy {
+	#[default]
 	Title,
 	Series,
 	Number,
@@ -34,10 +35,11 @@ enum MediaMetadataOrderBy {
 	// Pages,
 }
 
-#[derive(Debug, Deserialize, Serialize, Type, ToSchema, OrderByGen)]
+#[derive(Default, Debug, Deserialize, Serialize, Type, ToSchema, OrderByGen)]
 #[serde(rename_all = "snake_case")]
 #[prisma(module = "media")]
-enum MediaOrderBy {
+pub enum MediaOrderBy {
+	#[default]
 	Name,
 	Size,
 	Extension,

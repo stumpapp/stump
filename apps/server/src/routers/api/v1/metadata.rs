@@ -5,12 +5,15 @@ use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use specta::Type;
 use stump_core::{
-	db::entity::macros::{
-		metadata_available_characters_select, metadata_available_colorists_select,
-		metadata_available_editors_select, metadata_available_genre_select,
-		metadata_available_inkers_select, metadata_available_letterers_select,
-		metadata_available_pencillers_select, metadata_available_publisher_select,
-		metadata_available_teams_select, metadata_available_writers_select,
+	db::entity::{
+		macros::{
+			metadata_available_characters_select, metadata_available_colorists_select,
+			metadata_available_editors_select, metadata_available_genre_select,
+			metadata_available_inkers_select, metadata_available_letterers_select,
+			metadata_available_pencillers_select, metadata_available_publisher_select,
+			metadata_available_teams_select, metadata_available_writers_select,
+		},
+		MediaMetadataOrderBy,
 	},
 	prisma::{media_metadata, PrismaClient, SortOrder},
 };
@@ -81,7 +84,7 @@ pub struct MediaMetadataOverview {
 	)
 )]
 async fn get_metadata_overview(
-	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
+	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter, MediaMetadataOrderBy>>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<MediaMetadataOverview>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
@@ -156,7 +159,7 @@ async fn get_genres(
 	)
 )]
 async fn get_genres_handler(
-	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
+	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter, MediaMetadataOrderBy>>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
@@ -197,7 +200,7 @@ async fn get_writers(
 	)
 )]
 async fn get_writers_handler(
-	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
+	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter, MediaMetadataOrderBy>>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
@@ -238,7 +241,7 @@ async fn get_pencllers(
 	)
 )]
 async fn get_pencillers_handler(
-	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
+	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter, MediaMetadataOrderBy>>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
@@ -279,7 +282,7 @@ async fn get_inkers(
 	)
 )]
 async fn get_inkers_handler(
-	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
+	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter, MediaMetadataOrderBy>>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
@@ -320,7 +323,7 @@ async fn get_colorists(
 	)
 )]
 async fn get_colorists_handler(
-	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
+	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter, MediaMetadataOrderBy>>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
@@ -361,7 +364,7 @@ async fn get_letterers(
 	)
 )]
 async fn get_letterers_handler(
-	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
+	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter, MediaMetadataOrderBy>>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
@@ -402,7 +405,7 @@ async fn get_editors(
 	)
 )]
 async fn get_editors_handler(
-	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
+	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter, MediaMetadataOrderBy>>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
@@ -443,7 +446,7 @@ async fn get_publishers(
 	)
 )]
 async fn get_publishers_handler(
-	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
+	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter, MediaMetadataOrderBy>>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
@@ -484,7 +487,7 @@ async fn get_characters(
 	)
 )]
 async fn get_characters_handler(
-	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
+	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter, MediaMetadataOrderBy>>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
@@ -525,7 +528,7 @@ async fn get_teams(
 	)
 )]
 async fn get_teams_handler(
-	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
+	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter, MediaMetadataOrderBy>>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();

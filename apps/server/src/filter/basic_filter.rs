@@ -5,8 +5,10 @@ use serde_untagged::UntaggedEnumVisitor;
 use serde_with::skip_serializing_none;
 use specta::Type;
 use stump_core::db::{
-	entity::{age_rating_deserializer, LogLevel},
-	query::ordering::QueryOrder,
+	entity::{
+		age_rating_deserializer, LibraryOrderBy, LogLevel, MediaOrderBy, SeriesOrderBy,
+	},
+	query::{IntoOrderBy, QueryOrder},
 };
 use utoipa::ToSchema;
 
@@ -21,20 +23,26 @@ use super::common::{
 // TODO: break this file up!
 
 #[derive(Debug, Default, Deserialize, Serialize, ToSchema)]
-#[aliases(FilterableLibraryQuery = FilterableQuery<LibraryFilter>, FilterableSeriesQuery = FilterableQuery<SeriesFilter>, FilterableMediaQuery = FilterableQuery<MediaFilter>)]
-pub struct FilterableQuery<T>
+#[aliases(
+	FilterableLibraryQuery = FilterableQuery<LibraryFilter, LibraryOrderBy>, 
+	FilterableSeriesQuery = FilterableQuery<SeriesFilter, SeriesOrderBy>, 
+	FilterableMediaQuery = FilterableQuery<MediaFilter, MediaOrderBy>
+)]
+pub struct FilterableQuery<F, O>
 where
-	T: Sized + Default,
+	F: Sized + Default,
+	O: IntoOrderBy + Default,
 {
 	#[serde(flatten, default)]
-	pub filters: T,
+	pub filters: F,
 	#[serde(flatten)]
-	pub ordering: QueryOrder,
+	pub ordering: QueryOrder<O>,
 }
 
-impl<T> FilterableQuery<T>
+impl<F, O> FilterableQuery<F, O>
 where
-	T: Sized + Default,
+	F: Sized + Default,
+	O: IntoOrderBy + Default,
 {
 	pub fn get(self) -> Self {
 		self

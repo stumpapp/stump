@@ -121,13 +121,13 @@ pub fn order_by_gen(input: TokenStream) -> TokenStream {
 						#enum_name::#variant_name => prisma::#module_name_ident::#field_name::order(dir),
 					}
 				},
-				// Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
-				// 	// FIXME: wrong
-				// 	// Tuple variant like `Metadata(BookMetadataOrderBy)`
-				// 	quote! {
-				// 		#enum_name::#variant_name(inner) => prisma::#module_name_ident::#field_name,
-				// 	}
-				// },
+				Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
+					// FIXME: wrong
+					// Tuple variant like `Metadata(BookMetadataOrderBy)`
+					quote! {
+						#enum_name::#variant_name(inner_vec) => prisma::#module_name_ident::#field_name::order(inner_vec.into_iter().map(|f| f.into_prisma_order(dir)).collect()),
+					}
+				},
 				_ => panic!("Unsupported enum variant"),
 			}
 		})

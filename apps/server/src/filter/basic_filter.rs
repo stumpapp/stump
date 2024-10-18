@@ -8,6 +8,7 @@ use stump_core::db::{
 	entity::{
 		age_rating_deserializer, LibraryOrderBy, LogLevel, MediaOrderBy, SeriesOrderBy,
 	},
+	filter::FilterGroup,
 	query::{IntoOrderBy, QueryOrder},
 };
 use utoipa::ToSchema;
@@ -49,14 +50,15 @@ where
 	}
 }
 
+// TODO: move into smart filter, e.g. SmartFilterBody!! :)
 #[derive(Debug, Default, Deserialize, Serialize, ToSchema)]
 pub struct FilterBody<F, O>
 where
-	F: Sized + Default,
+	F: Sized,
 	O: IntoOrderBy + Default,
 {
-	#[serde(default)]
-	pub filters: F,
+	#[serde(default = "Vec::new")]
+	pub filters: Vec<FilterGroup<F>>,
 	#[serde(default)]
 	pub order_params: Vec<QueryOrder<O>>,
 }

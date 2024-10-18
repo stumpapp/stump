@@ -176,6 +176,23 @@ pub enum FilterGroup<T> {
 	Not { not: Vec<T> },
 }
 
+impl FilterGroup<MediaSmartFilter> {
+	/// Convert self into a prisma where param
+	pub fn into_params(self) -> media::WhereParam {
+		match self {
+			FilterGroup::And { and } => prisma_client_rust::operator::and(
+				and.into_iter().map(|f| f.into_params()).collect(),
+			),
+			FilterGroup::Or { or } => prisma_client_rust::operator::or(
+				or.into_iter().map(|f| f.into_params()).collect(),
+			),
+			FilterGroup::Not { not } => prisma_client_rust::operator::not(
+				not.into_iter().map(|f| f.into_params()).collect(),
+			),
+		}
+	}
+}
+
 #[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub enum FilterJoin {
 	#[default]

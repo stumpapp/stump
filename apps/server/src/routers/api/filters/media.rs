@@ -149,6 +149,30 @@ pub(crate) fn apply_media_filters_for_user(
 	]]
 }
 
+pub(crate) fn apply_where_params_for_user(
+	where_params: Vec<WhereParam>,
+	user: &User,
+) -> Vec<WhereParam> {
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+
+	let base_filters = operator::and(
+		where_params
+			.into_iter()
+			.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_default())
+			.collect::<Vec<WhereParam>>(),
+	);
+
+	vec![and![
+		base_filters,
+		media::series::is(vec![series::library::is(vec![
+			library_not_hidden_from_user_filter(user),
+		])])
+	]]
+}
+
 pub(crate) fn apply_media_pagination<'a>(
 	query: media::FindManyQuery<'a>,
 	pagination: &Pagination,

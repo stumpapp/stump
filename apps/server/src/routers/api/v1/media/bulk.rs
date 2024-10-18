@@ -1,10 +1,12 @@
 use axum::{extract::State, Extension, Json};
 use axum_extra::extract::Query;
+use axum_macros::debug_handler;
 use prisma_client_rust::{raw, PrismaValue};
 use serde_qs::axum::QsQuery;
 use stump_core::{
 	db::{
 		entity::{Media, MediaOrderBy},
+		filter::MediaSmartFilter,
 		query::pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
 		CountQueryReturn,
 	},
@@ -23,6 +25,7 @@ use crate::{
 	routers::api::filters::{
 		apply_media_age_restriction, apply_media_filters_for_user,
 		apply_media_library_not_hidden_for_user_filter, apply_media_pagination,
+		apply_where_params_for_user,
 	},
 };
 
@@ -125,6 +128,7 @@ pub(crate) async fn get_media(
 }
 
 #[tracing::instrument(skip(ctx, req))]
+#[debug_handler]
 pub(crate) async fn get_media_post(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
@@ -132,11 +136,14 @@ pub(crate) async fn get_media_post(
 	Json(FilterBody {
 		filters,
 		order_params,
-	}): Json<FilterBody<MediaFilter, MediaOrderBy>>,
+	}): Json<FilterBody<MediaSmartFilter, MediaOrderBy>>,
 ) -> APIResult<Json<Pageable<Vec<Media>>>> {
 	let pagination = query.0.get();
 	let order_by_params = order_params.into_iter().map(|o| o.into_prisma());
-	let where_conditions = apply_media_filters_for_user(filters, req.user());
+	let where_conditions = apply_where_params_for_user(
+		filters.into_iter().map(|f| f.into_params()).collect(),
+		req.user(),
+	);
 
 	let pagination_cloned = pagination.clone();
 	let (media, count) = ctx

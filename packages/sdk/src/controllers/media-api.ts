@@ -2,6 +2,7 @@ import { APIBase } from '../base'
 import {
 	Media,
 	MediaFilter,
+	MediaOrderBy,
 	Pageable,
 	PatchMediaThumbnail,
 	ProgressUpdateReturn,
@@ -26,7 +27,7 @@ export class MediaAPI extends APIBase {
 	/**
 	 * Fetch all media
 	 */
-	async get(params?: FullQueryParams<MediaFilter>): Promise<Pageable<Media[]>> {
+	async get(params?: FullQueryParams<MediaFilter, MediaOrderBy>): Promise<Pageable<Media[]>> {
 		const { data: media } = await this.axios.get<Pageable<Media[]>>(mediaURL('', params))
 		return media
 	}

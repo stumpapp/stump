@@ -17,9 +17,11 @@ export type CursorQueryParams = {
 	params?: Record<string, unknown>
 }
 
-export type QueryOrderParams = Partial<QueryOrder>
+export type QueryOrderParams<O> = Partial<QueryOrder<O>>
 
-export type FullQueryParams<Filters> = Filters & PaginationQuery & QueryOrderParams
+export type FullQueryParams<Filters, Order = never> = Filters &
+	PaginationQuery &
+	QueryOrderParams<Order>
 
 // TODO(types): figure out how to generalize the postfix URL ignore, e.g. MyType<T extends string> = `${T}URL`
 export type ClassQueryKeys<T> = Omit<

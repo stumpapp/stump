@@ -43,7 +43,7 @@ use crate::{
 )]
 /// Get all media accessible to the requester. This is a paginated request, and
 /// has various pagination params available.
-#[tracing::instrument(err, skip(ctx))]
+#[tracing::instrument(err, skip(ctx, req))]
 pub(crate) async fn get_media(
 	filter_query: QsQuery<FilterableQuery<MediaFilter, MediaOrderBy>>,
 	pagination_query: Query<PaginationQuery>,

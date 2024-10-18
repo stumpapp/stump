@@ -1,4 +1,10 @@
-import type { BookRelations, Media, MediaFilter, ProgressUpdateReturn } from '@stump/sdk'
+import type {
+	BookRelations,
+	Media,
+	MediaFilter,
+	MediaOrderBy,
+	ProgressUpdateReturn,
+} from '@stump/sdk'
 import { FullQueryParams, QueryOrderParams } from '@stump/sdk'
 import { AxiosError } from 'axios'
 import { useCallback } from 'react'
@@ -122,7 +128,7 @@ export function useMediaByIdQuery(
 }
 
 type UsePagedMediaQueryParams = Omit<PageQueryOptions<Media>, 'params'> & {
-	params?: MediaFilter & QueryOrderParams
+	params?: MediaFilter & QueryOrderParams<MediaOrderBy>
 }
 
 export function usePagedMediaQuery(options: UsePagedMediaQueryParams = {}) {

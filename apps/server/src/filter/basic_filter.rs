@@ -355,6 +355,7 @@ pub struct LogFilter {
 mod tests {
 	use super::*;
 	use serde::{Deserialize, Serialize};
+use stump_core::db::{entity::MediaMetadataOrderBy, query::Direction};
 
 	#[derive(Default, Deserialize, Serialize)]
 	struct TestValueOrRange {
@@ -404,14 +405,14 @@ mod tests {
 
 	#[test]
 	fn test_serde_qs_deserialize_filterable_query_value_or_range() {
-		let value: FilterableQuery<TestValueOrRange> =
+		let value: FilterableQuery<TestValueOrRange, ()> =
 			serde_qs::from_str("year=1").unwrap();
 		match value.filters.year {
 			Some(ValueOrRange::Value(v)) => assert_eq!(v, 1),
 			_ => panic!("expected value"),
 		}
 
-		let value: FilterableQuery<TestValueOrRange> =
+		let value: FilterableQuery<TestValueOrRange, ()> =
 			serde_qs::from_str("year[from]=1950&year[to]=2023").unwrap();
 		match value.filters.year {
 			Some(ValueOrRange::Range(Range { from, to })) => {
@@ -424,7 +425,7 @@ mod tests {
 
 	#[test]
 	fn test_serde_qs_deserialize_filterable_query_partial_range() {
-		let value: FilterableQuery<TestValueOrRange> =
+		let value: FilterableQuery<TestValueOrRange, ()> =
 			serde_qs::from_str("year[from]=1950").unwrap();
 		match value.filters.year {
 			Some(ValueOrRange::Range(Range { from, to })) => {
@@ -434,7 +435,7 @@ mod tests {
 			_ => panic!("expected range"),
 		}
 
-		let value: FilterableQuery<TestValueOrRange> =
+		let value: FilterableQuery<TestValueOrRange, ()> =
 			serde_qs::from_str("year[to]=2023").unwrap();
 		match value.filters.year {
 			Some(ValueOrRange::Range(Range { from, to })) => {
@@ -443,5 +444,24 @@ mod tests {
 			},
 			_ => panic!("expected range"),
 		}
+	}
+
+	#[test]
+	fn test_serde_qs_relation_order() {
+		let order = MediaOrderBy::Metadata(vec![MediaMetadataOrderBy::Title]);
+		let serialized = serde_qs::to_string(&order).unwrap();
+		assert_eq!(serialized, "metadata[0]=title");
+
+		let filterable_query = FilterableQuery {
+			filters: MediaFilter::default(),
+			ordering: QueryOrder::<MediaOrderBy> {
+				order_by: MediaOrderBy::Metadata(vec![MediaMetadataOrderBy::Title]),
+				direction: Direction::Asc,
+			}
+		};
+
+		let serialized = serde_qs::to_string(&filterable_query).unwrap();
+		 // FIXME: this breaks the existing patterns, I believe its because the enum is Metadata(Vec<MediaMetadataOrderBy>) and not Metadata { metadata: Vec<MediaMetadataOrderBy> }
+		assert_eq!(serialized, "order_by[metadata][0]=title&direction=asc");
 	}
 }

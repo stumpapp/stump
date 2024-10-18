@@ -48,3 +48,8 @@ where
 		self.order_by.into_prisma_order(self.direction.into())
 	}
 }
+
+impl IntoOrderBy for () {
+	type OrderParam = ();
+	fn into_prisma_order(self, _dir: SortOrder) -> Self::OrderParam {}
+}

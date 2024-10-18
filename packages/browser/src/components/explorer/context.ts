@@ -16,12 +16,14 @@ export type IExplorerContext = {
 	canGoForward: boolean
 	goForward: () => void
 	goBack: () => void
+	displayUpload: boolean
 }
 
 export const ExplorerContext = createContext<IExplorerContext>({
 	canGoBack: false,
 	canGoForward: false,
 	currentPath: null,
+	displayUpload: false,
 	files: [],
 	goBack: noop,
 	goForward: noop,

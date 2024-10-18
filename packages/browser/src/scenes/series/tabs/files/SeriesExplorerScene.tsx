@@ -11,7 +11,7 @@ export default function SeriesExplorerScene() {
 
 	return (
 		<div className="flex flex-1">
-			<FileExplorer rootPath={path} />
+			<FileExplorer rootPath={path} displayUpload={true} />
 		</div>
 	)
 }

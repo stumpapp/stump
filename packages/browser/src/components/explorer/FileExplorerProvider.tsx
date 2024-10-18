@@ -15,11 +15,12 @@ import { getBook } from './FileThumbnail'
 
 type Props = {
 	rootPath: string
+	displayUpload: boolean
 }
 
 // TODO: refactor to match other explore scenes, e.g. sticky header + fixed footer + window scrolling
 
-export default function FileExplorerProvider({ rootPath }: Props) {
+export default function FileExplorerProvider({ rootPath, displayUpload }: Props) {
 	const navigate = useNavigate()
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const { sdk } = useSDK()
@@ -68,6 +69,7 @@ export default function FileExplorerProvider({ rootPath }: Props) {
 				canGoBack: canGoBack && path !== rootPath,
 				canGoForward,
 				currentPath: path,
+				displayUpload: displayUpload,
 				files: entries,
 				goBack,
 				goForward,

@@ -15,18 +15,24 @@ pub enum JobError {
 	#[error("A task experienced a critical error while executing: {0}")]
 	TaskFailed(String),
 	#[error("A query error occurred: {0}")]
-	QueryError(#[from] prisma_client_rust::QueryError),
+	QueryError(#[from] Box<prisma_client_rust::QueryError>),
 	#[error("A file error occurred: {0}")]
 	FileError(#[from] FileError),
 	#[error("An unknown error occurred: {0}")]
 	Unknown(String),
 }
 
+impl From<prisma_client_rust::QueryError> for JobError {
+	fn from(error: prisma_client_rust::QueryError) -> Self {
+		Self::QueryError(Box::new(error))
+	}
+}
+
 impl From<CoreError> for JobError {
 	fn from(err: CoreError) -> Self {
 		match err {
-			CoreError::QueryError(err) => JobError::QueryError(err),
-			_ => JobError::Unknown(err.to_string()),
+			CoreError::QueryError(err) => Self::QueryError(err),
+			_ => Self::Unknown(err.to_string()),
 		}
 	}
 }
@@ -50,7 +56,7 @@ pub enum JobManagerError {
 	#[error("A job was found which was in a deeply invalid state")]
 	JobLostError,
 	#[error("A query error occurred {0}")]
-	QueryError(#[from] prisma_client_rust::QueryError),
+	QueryError(#[from] Box<prisma_client_rust::QueryError>),
 	#[error("An unknown error occurred {0}")]
 	Unknown(String),
 }
@@ -58,8 +64,14 @@ pub enum JobManagerError {
 impl From<JobError> for JobManagerError {
 	fn from(job_error: JobError) -> Self {
 		match job_error {
-			JobError::QueryError(e) => JobManagerError::QueryError(e),
-			_ => JobManagerError::Unknown(job_error.to_string()),
+			JobError::QueryError(e) => Self::QueryError(e),
+			_ => Self::Unknown(job_error.to_string()),
 		}
+	}
+}
+
+impl From<prisma_client_rust::QueryError> for JobManagerError {
+	fn from(error: prisma_client_rust::QueryError) -> Self {
+		Self::QueryError(Box::new(error))
 	}
 }

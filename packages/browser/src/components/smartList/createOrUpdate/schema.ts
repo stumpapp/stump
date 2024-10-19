@@ -313,7 +313,7 @@ export const intoFormGroup = (
 	return converted
 }
 
-export const intoAPIGroup = (input: z.infer<typeof filterGroup>): FilterGroup<MediaSmartFilter> => {
+export const intoAPIGroup = (input: FilterGroupSchema): FilterGroup<MediaSmartFilter> => {
 	const converted = match(input)
 		.with(
 			{ filters: P.array(), joiner: 'and' },

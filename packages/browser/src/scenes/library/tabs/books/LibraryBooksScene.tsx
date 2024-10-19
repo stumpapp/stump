@@ -142,27 +142,23 @@ export default function LibraryBooksScene() {
 	}
 
 	return (
-		<FilterStoreProvider<
-			MediaSmartFilter,
-			Exclude<MediaOrderBy, { metadata: MediaMetadataOrderBy[] }>
-		>>
-			<FilterContext.Provider
-				value={{
-					filters,
-					ordering,
-					pagination: { page, page_size },
-					setPage,
-					...rest,
-				}}
-			>
-				<div className="flex flex-1 flex-col pb-4 md:pb-0">
-					<Helmet>
-						<title>Stump | {library.name || ''}</title>
-					</Helmet>
+		<FilterContext.Provider
+			value={{
+				filters,
+				ordering,
+				pagination: { page, page_size },
+				setPage,
+				...rest,
+			}}
+		>
+			<div className="flex flex-1 flex-col pb-4 md:pb-0">
+				<Helmet>
+					<title>Stump | {library.name || ''}</title>
+				</Helmet>
 
-					<section ref={containerRef} id="grid-top-indicator" className="h-0" />
+				<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 
-					{/* <OldFilterHeader
+				{/* <OldFilterHeader
 					isSearching={isRefetchingMedia}
 					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
 					orderControls={<URLOrdering entity="media" />}
@@ -170,11 +166,10 @@ export default function LibraryBooksScene() {
 					navOffset
 				/> */}
 
-					<FilterHeader navOffset />
+				<FilterHeader navOffset />
 
-					{renderContent()}
-				</div>
-			</FilterContext.Provider>
-		</FilterStoreProvider>
+				{renderContent()}
+			</div>
+		</FilterContext.Provider>
 	)
 }

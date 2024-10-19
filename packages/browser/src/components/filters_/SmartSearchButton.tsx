@@ -3,16 +3,7 @@ import { MediaMetadataOrderBy, MediaOrderBy, MediaSmartFilter } from '@stump/sdk
 import { WandSparkles } from 'lucide-react'
 import React from 'react'
 
-import { useFilterStore } from './store'
-
 export default function SmartSearchButton() {
-	const { isSmartSearch } = useFilterStore<
-		MediaSmartFilter,
-		Exclude<MediaOrderBy, { metadata: MediaMetadataOrderBy[] }>
-	>((state) => ({
-		isSmartSearch: !!state.bodyStore?.filters,
-	}))
-
 	return (
 		<ToolTip content="Enable smart search" size="sm" side="left">
 			<IconButton

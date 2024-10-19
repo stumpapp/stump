@@ -1,30 +1,80 @@
-import { QueryOrder } from '@stump/sdk'
+import {
+	FilterEntity,
+	FilterGroup,
+	isLibraryOrderBy,
+	isMediaMetadataOrderBy,
+	isMediaOrderBy,
+	isOk,
+	isSeriesOrderBy,
+	MediaOrderBy,
+	MediaSmartFilter,
+	QueryOrder,
+	SmartSearchBody,
+} from '@stump/sdk'
 import once from 'lodash/once'
 import setProperty from 'lodash/set'
 import unsetProperty from 'lodash/unset'
-import { createContext, PropsWithChildren, useContext, useRef } from 'react'
+import { createContext, PropsWithChildren, useContext, useEffect, useRef } from 'react'
+import { match } from 'ts-pattern'
 import { createStore, StoreApi, useStore } from 'zustand'
 
-export type URLPagination = {
+import {
+	filter,
+	FilterGroupSchema,
+	intoAPIFilters,
+	intoAPIGroup,
+} from '../smartList/createOrUpdate'
+
+export type Pagination = {
 	page: number
 	page_size: number
+}
+
+type BodyFilterState = {
+	forEntity: FilterEntity
+	filters?: FilterGroupSchema[]
+	ordering?: QueryOrder<string>[]
+	pagination: Pagination
 }
 
 type URLFilterState = {
 	filters?: Record<string, unknown>
 	ordering?: QueryOrder<string>
-	pagination: URLPagination
+	pagination: Pagination
 }
 
-type BodyFilterState<F, O> = {
-	filters?: F
-	ordering?: O
-	pagination: URLPagination
+const intoBody = <F, O extends string | object>(
+	{ filters, ordering, pagination: query }: BodyFilterState,
+	isOrderBy: (ob?: string | object | undefined) => ob is O,
+): SmartSearchBody<F, O> => {
+	const orderParams = ordering?.filter((o) => isOrderBy(o.order_by)) as QueryOrder<O>[]
+	// const safeFilters = filters?.map(intoAPIGroup).
+	// TODO: types are hard.
+	// let safeFilters: FilterGroup<F>[] | undefined
+	// try {
+	// 	safeFilters = filters?.map((f: FilterGroupSchema) => intoAPIGroup(f))
+	// } catch (e) {}
+
+	return {
+		order_params: orderParams,
+		query,
+	} satisfies SmartSearchBody<F, O>
 }
 
-type FilterStore<F = Record<string, unknown>, O = string> = {
-	bodyStore: BodyFilterState<F, O>
-	patchBody: (state: Partial<BodyFilterState<F, O>>) => void
+const _test = intoBody<MediaSmartFilter, MediaOrderBy>(
+	{
+		forEntity: 'media',
+		pagination: {
+			page: 1,
+			page_size: 20,
+		},
+	},
+	isMediaOrderBy,
+)
+
+type FilterStore = {
+	bodyStore: BodyFilterState
+	patchBody: (state: Partial<BodyFilterState>) => void
 
 	urlStore: URLFilterState
 	patchUrl: (state: Partial<URLFilterState>) => void
@@ -32,16 +82,17 @@ type FilterStore<F = Record<string, unknown>, O = string> = {
 	removeUrlFilter: (key: string) => void
 }
 
-function createFilterStore<F = Record<string, unknown>, O = string>() {
-	return createStore<FilterStore<F, O>>(
+const createFilterStore = (forEntity: FilterEntity) =>
+	createStore<FilterStore>(
 		(set, get) =>
 			({
 				bodyStore: {
+					forEntity,
 					pagination: {
 						page: 1,
 						page_size: 20,
 					},
-				} satisfies BodyFilterState<F, O>,
+				} satisfies BodyFilterState,
 				patchBody: (state) => {
 					const entireStore = get()
 					const updatedState = { ...get().bodyStore, ...state }
@@ -68,46 +119,34 @@ function createFilterStore<F = Record<string, unknown>, O = string>() {
 						page_size: 20,
 					},
 				} satisfies URLFilterState,
-			}) satisfies FilterStore<F, O>,
+			}) satisfies FilterStore,
 	)
-}
-
-// const createGenericContext = once(<F, O>() => createContext(null as FilterStore<F, O> | null))
 
 const FilterStoreContext = createContext<StoreApi<FilterStore> | null>(null)
 
-export function FilterStoreProvider<F extends Record<string, unknown>, O extends string>({
+export function FilterStoreProvider({
 	children,
-}: PropsWithChildren) {
-	const storeRef = useRef<StoreApi<FilterStore<F, O>> | null>(null)
+	forEntity,
+}: PropsWithChildren<{ forEntity: FilterEntity }>) {
+	const storeRef = useRef<StoreApi<FilterStore> | null>(null)
 
-	if (!storeRef.current) {
-		storeRef.current = createFilterStore<F, O>()
-	}
+	useEffect(() => {
+		if (!storeRef.current) {
+			storeRef.current = createFilterStore(forEntity)
+		}
+	}, [forEntity])
 
-	const casted = storeRef.current as StoreApi<FilterStore<F, O>> | null
-
-	// @ts-expect-error: React sucks with generic contexts
-	return <FilterStoreContext.Provider value={casted}>{children}</FilterStoreContext.Provider>
+	return (
+		<FilterStoreContext.Provider value={storeRef.current}>{children}</FilterStoreContext.Provider>
+	)
 }
 
-type Selector<F, O> = (state: FilterStore<F, O>) => unknown
+type Selector = (state: FilterStore) => unknown
 
-export function useFilterStore<F extends Record<string, unknown>, O extends string>(
-	selector: Selector<F, O>,
-) {
+export const useFilterStore = (selector: Selector) => {
 	const store = useContext(FilterStoreContext)
 	if (!store) {
-		throw new Error('Missing FilterStoreProvider')
+		throw new Error('useFilterStore must be used within a FilterStoreProvider')
 	}
-	// @ts-expect-error: React sucks with generic contexts
 	return useStore(store, selector)
 }
-
-// const useFilterStore = (selector: Selector) => {
-// 	const store = useContext(StoreContext)
-// 	if (!store) {
-// 		throw new Error('Missing StoreProvider')
-// 	}
-// 	return useStore(store, selector)
-// }

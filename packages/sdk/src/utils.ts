@@ -37,3 +37,16 @@ export async function checkUrl(url: string) {
 
 	return res.status === 200
 }
+
+export const isOk = <R>(res: R, safeParse: (res: R) => unknown) => {
+	if (res instanceof Error) {
+		return false
+	}
+
+	try {
+		safeParse(res)
+		return true
+	} catch (err) {
+		return false
+	}
+}

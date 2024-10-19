@@ -5,6 +5,12 @@ import { noop } from '../../utils/misc'
 
 export type ExplorerLayout = 'grid' | 'table'
 
+export type UploadParams = {
+	files: File[]
+	placeAt: string
+	uploadAs: 'books' | 'series'
+}
+
 export type IExplorerContext = {
 	layout: ExplorerLayout
 	setLayout: (layout: ExplorerLayout) => void
@@ -16,14 +22,13 @@ export type IExplorerContext = {
 	canGoForward: boolean
 	goForward: () => void
 	goBack: () => void
-	displayUpload: boolean
+	onUpload?: (params: UploadParams) => void
 }
 
 export const ExplorerContext = createContext<IExplorerContext>({
 	canGoBack: false,
 	canGoForward: false,
 	currentPath: null,
-	displayUpload: false,
 	files: [],
 	goBack: noop,
 	goForward: noop,

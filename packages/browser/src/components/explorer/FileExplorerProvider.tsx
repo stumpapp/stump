@@ -7,7 +7,7 @@ import { useMediaMatch } from 'rooks'
 
 import paths from '@/paths'
 
-import { ExplorerContext, ExplorerLayout } from './context'
+import { ExplorerContext, ExplorerLayout, UploadParams } from './context'
 import FileExplorer from './FileExplorer'
 import FileExplorerFooter, { FOOTER_HEIGHT } from './FileExplorerFooter'
 import FileExplorerHeader from './FileExplorerHeader'
@@ -15,12 +15,12 @@ import { getBook } from './FileThumbnail'
 
 type Props = {
 	rootPath: string
-	displayUpload: boolean
+	onUpload?: (params: UploadParams) => void
 }
 
 // TODO: refactor to match other explore scenes, e.g. sticky header + fixed footer + window scrolling
 
-export default function FileExplorerProvider({ rootPath, displayUpload }: Props) {
+export default function FileExplorerProvider({ rootPath, onUpload }: Props) {
 	const navigate = useNavigate()
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const { sdk } = useSDK()
@@ -69,12 +69,12 @@ export default function FileExplorerProvider({ rootPath, displayUpload }: Props)
 				canGoBack: canGoBack && path !== rootPath,
 				canGoForward,
 				currentPath: path,
-				displayUpload: displayUpload,
 				files: entries,
 				goBack,
 				goForward,
 				layout,
 				onSelect: handleSelect,
+				onUpload,
 				rootPath,
 				setLayout: changeLayout,
 			}}

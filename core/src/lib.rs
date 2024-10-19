@@ -481,6 +481,9 @@ mod tests {
 			format!("{}\n\n", ts_export::<MediaMetadataOrderBy>()?).as_bytes(),
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<SeriesOrderBy>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<SeriesMetadataOrderBy>()?).as_bytes(),
+		)?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryOrderBy>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LogOrderBy>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<JobOrderBy>()?).as_bytes())?;

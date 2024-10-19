@@ -1,6 +1,12 @@
 import { match, P } from 'ts-pattern'
 
-import { LibraryOrderBy, MediaMetadataOrderBy, MediaOrderBy, SeriesOrderBy } from './generated'
+import {
+	LibraryOrderBy,
+	MediaMetadataOrderBy,
+	MediaOrderBy,
+	SeriesMetadataOrderBy,
+	SeriesOrderBy,
+} from './generated'
 
 const filterEntity = [
 	'media',
@@ -65,6 +71,20 @@ export const isMediaMetadataOrderBy = (value: unknown): value is MediaMetadataOr
 
 export const isSeriesOrderBy = (value: unknown): value is SeriesOrderBy =>
 	['name', 'created_at', 'updated_at', 'status', 'path', 'description'].includes(value as string)
+
+export const isSeriesMetadataOrderBy = (value: unknown): value is SeriesMetadataOrderBy =>
+	[
+		'title',
+		'meta_type',
+		'summary',
+		'publisher',
+		'imprint',
+		'comicid',
+		'volume',
+		'booktype',
+		'age_rating',
+		'status',
+	].includes(value as string)
 
 export const isLibraryOrderBy = (value: unknown): value is LibraryOrderBy =>
 	['name', 'created_at', 'updated_at', 'status', 'path'].includes(value as string)

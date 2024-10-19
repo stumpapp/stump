@@ -1,8 +1,9 @@
+use order_by_gen::OrderByGen;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::prisma::series_metadata;
+use crate::{db::query::IntoOrderBy, prisma::series_metadata};
 
 use super::common::age_rating_deserializer;
 
@@ -68,4 +69,21 @@ impl From<series_metadata::Data> for SeriesMetadata {
 			status: metadata.status,
 		}
 	}
+}
+
+#[derive(Default, Debug, Deserialize, Serialize, Type, ToSchema, OrderByGen)]
+#[serde(rename_all = "snake_case")]
+#[prisma(module = "series_metadata")]
+pub enum SeriesMetadataOrderBy {
+	#[default]
+	Title,
+	MetaType,
+	Summary,
+	Publisher,
+	Imprint,
+	Comicid,
+	Volume,
+	Booktype,
+	AgeRating,
+	Status,
 }

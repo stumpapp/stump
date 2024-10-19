@@ -1,4 +1,4 @@
-import { cn, useSticky } from '@stump/components'
+import { Badge, Button, cn, Text, useSticky } from '@stump/components'
 import React from 'react'
 import { useMediaMatch } from 'rooks'
 
@@ -36,7 +36,33 @@ export default function FilterHeader({ navOffset }: Props) {
 				isLoading={isSearching}
 				isDisabled={isSearchDisabled}
 			/> */}
-			<div className="flex-1" />
+			<div className="flex flex-1 items-center space-x-2">
+				<Badge
+					variant="primary"
+					size="sm"
+					className="flex cursor-pointer items-center justify-between space-x-1 pl-2 pr-1 opacity-95 hover:opacity-100"
+				>
+					<span>Smart filters</span>
+					<span className="flex h-5 w-5 items-center justify-center rounded-md bg-fill-brand-secondary">
+						5
+					</span>
+				</Badge>
+
+				<Badge
+					variant="primary"
+					size="sm"
+					className="flex cursor-pointer items-center justify-between space-x-1 pl-2 pr-1 opacity-95 hover:opacity-100"
+				>
+					<span>Order params</span>
+					<span className="flex h-5 w-5 items-center justify-center rounded-md bg-fill-brand-secondary">
+						2
+					</span>
+				</Badge>
+
+				<Text variant="muted" size="sm" className="pl-2">
+					500 results
+				</Text>
+			</div>
 
 			<div className="flex items-center gap-4">
 				<div className="flex items-center gap-x-1">

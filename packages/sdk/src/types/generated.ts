@@ -220,13 +220,13 @@ export type SmartFilter<T> = { groups: FilterGroup<T>[] }
 
 export type MediaSmartFilter = { name: Filter<string> } | { size: Filter<number> } | { extension: Filter<string> } | { created_at: Filter<string> } | { updated_at: Filter<string> } | { status: Filter<string> } | { path: Filter<string> } | { pages: Filter<number> } | { metadata: MediaMetadataSmartFilter } | { series: SeriesSmartFilter }
 
-export type MediaMetadataSmartFilter = { publisher: Filter<string> } | { genre: Filter<string> } | { characters: Filter<string> } | { colorists: Filter<string> } | { writers: Filter<string> } | { pencillers: Filter<string> } | { letterers: Filter<string> } | { inkers: Filter<string> } | { editors: Filter<string> } | { age_rating: Filter<number> } | { year: Filter<number> } | { month: Filter<number> } | { day: Filter<number> }
+export type MediaMetadataSmartFilter = { title: Filter<string> } | { publisher: Filter<string> } | { genre: Filter<string> } | { characters: Filter<string> } | { colorists: Filter<string> } | { writers: Filter<string> } | { pencillers: Filter<string> } | { letterers: Filter<string> } | { inkers: Filter<string> } | { editors: Filter<string> } | { age_rating: Filter<number> } | { year: Filter<number> } | { month: Filter<number> } | { day: Filter<number> }
 
 export type SeriesMetadataSmartFilter = { age_rating: Filter<number> } | { meta_type: Filter<string> } | { title: Filter<string> } | { summary: Filter<string> } | { publisher: Filter<string> } | { imprint: Filter<string> } | { comicid: Filter<number> } | { booktype: Filter<string> } | { volume: Filter<number> } | { status: Filter<string> }
 
 export type SeriesSmartFilter = { name: Filter<string> } | { path: Filter<string> } | { metadata: SeriesMetadataSmartFilter } | { library: LibrarySmartFilter }
 
-export type LibrarySmartFilter = { name: Filter<string> } | { path: Filter<string> }
+export type LibrarySmartFilter = { name: Filter<string> } | { path: Filter<string> } | { created_at: Filter<string> } | { updated_at: Filter<string> }
 
 export type SmartListView = ({ book_columns: ReactTableColumnSort[]; group_columns: ReactTableColumnSort[]; book_sorting: ReactTableGlobalSort[] | null; group_sorting: ReactTableGlobalSort[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string; list_id: string }
 
@@ -312,6 +312,8 @@ export type MediaOrderBy = "name" | "size" | "extension" | "created_at" | "updat
 export type MediaMetadataOrderBy = "title" | "series" | "number" | "volume" | "summary" | "notes" | "age_rating" | "genre" | "year" | "month" | "day" | "writers" | "pencillers" | "inkers" | "colorists" | "letterers" | "cover_artists" | "editors" | "publisher" | "links" | "characters" | "teams"
 
 export type SeriesOrderBy = "name" | "description" | "updated_at" | "created_at" | "path" | "status"
+
+export type SeriesMetadataOrderBy = "title" | "meta_type" | "summary" | "publisher" | "imprint" | "comicid" | "volume" | "booktype" | "age_rating" | "status"
 
 export type LibraryOrderBy = "name" | "path" | "status" | "updated_at" | "created_at"
 

@@ -246,6 +246,8 @@ pub struct SmartFilter<T> {
 pub enum LibrarySmartFilter {
 	Name { name: String },
 	Path { path: String },
+	CreatedAt { created_at: DateTime<FixedOffset> },
+	UpdatedAt { updated_at: DateTime<FixedOffset> },
 }
 
 #[generate_smart_filter]
@@ -343,6 +345,8 @@ impl SeriesSmartFilter {
 #[serde(untagged)]
 #[prisma_table("media_metadata")]
 pub enum MediaMetadataSmartFilter {
+	#[is_optional]
+	Title { title: String },
 	#[is_optional]
 	Publisher { publisher: String },
 	#[is_optional]

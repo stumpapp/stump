@@ -1,14 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { queryClient, useLoginOrRegister } from '@stump/client'
+import { queryClient, useLoginOrRegister, useSDK } from '@stump/client'
 import { Alert, Button, cx, Form, Heading, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { isAxiosError } from '@stump/sdk'
 import { motion, Variants } from 'framer-motion'
 import { ArrowLeft, ArrowRight, ShieldAlert } from 'lucide-react'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
-import { Navigate } from 'react-router'
+import { useNavigate } from 'react-router'
 import { useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 
@@ -16,17 +16,17 @@ import { ConfiguredServersList } from '@/components/savedServer'
 import { useAppStore, useUserStore } from '@/stores'
 
 export default function LoginOrClaimScene() {
+	const navigate = useNavigate()
+
 	const [params] = useSearchParams()
-	const redirect = params.get('redirect') || '/'
+	const [redirect] = useState(() => params.get('redirect') || '/')
 
 	const [showServers, setShowServers] = useState(false)
 
-	const { user, setUser } = useUserStore((store) => ({
-		setUser: store.setUser,
-		user: store.user,
-	}))
+	const setUser = useUserStore((store) => store.setUser)
 	const isDesktop = useAppStore((store) => store.platform !== 'browser')
 
+	const { sdk } = useSDK()
 	const { t } = useLocaleContext()
 	const {
 		isClaimed,
@@ -37,7 +37,15 @@ export default function LoginOrClaimScene() {
 		isRegistering,
 		loginError,
 	} = useLoginOrRegister({
-		onSuccess: setUser,
+		onSuccess: async (user) => {
+			setUser(user)
+			await queryClient.refetchQueries([sdk.auth.keys.me], { exact: false })
+			if (redirect.includes('/swagger')) {
+				window.location.href = redirect
+			} else {
+				navigate(redirect, { replace: true })
+			}
+		},
 		refetchClaimed: !showServers,
 	})
 
@@ -50,52 +58,34 @@ export default function LoginOrClaimScene() {
 		resolver: zodResolver(schema),
 	})
 
-	async function handleSubmit(values: FieldValues) {
-		const { username, password } = values
-		const doLogin = async (firstTime = false) =>
-			toast.promise(loginUser({ password, username }), {
-				error: (error) => {
-					console.error('Error logging in:', error)
-					return t('authScene.toasts.loginFailed')
-				},
-				loading: t('authScene.toasts.loggingIn'),
-				success: firstTime
-					? t('authScene.toasts.loggedInFirstTime')
-					: t('authScene.toasts.loggedIn'),
-			})
-		if (isClaimed) {
+	const login = useCallback(
+		async ({ username, password }: FieldValues) => {
 			try {
-				await doLogin()
-			} catch (_) {
-				// We already report the error from above with toast, but
-				// it still throws there error (annoyingly). In order for
-				// the form to not log up (i.e. get stuck in submitting state)
-				// we need to at the very least catch the error here
+				await loginUser({ password, username })
+			} catch (error) {
+				console.error('Error logging in:', error)
+				toast.error(t('authScene.toasts.loginFailed'))
 			}
-		} else {
-			toast
-				.promise(registerUser({ password, username }), {
-					error: t('authScene.toasts.registrationFailed'),
-					loading: t('authScene.toasts.registering'),
-					success: t('authScene.toasts.registered'),
-				})
-				.then(() => doLogin(true))
-		}
-	}
+		},
+		[loginUser, t],
+	)
 
-	if (user) {
-		queryClient.invalidateQueries(['getLibraries'])
-		// NOTE: if swagger UI, we need a redirect outside of react-router context, otherwise
-		// we will get a 404 trying to route to a server-rendered page via react-router
-		if (redirect.includes('/swagger')) {
-			window.location.href = redirect
-			return null
-		}
-
-		return <Navigate to={redirect} />
-	} else if (isCheckingClaimed) {
-		return null
-	}
+	const handleSubmit = useCallback(
+		async ({ username, password }: FieldValues) => {
+			if (isClaimed) {
+				await login({ password, username })
+			} else {
+				try {
+					await registerUser({ password, username })
+					await login({ password, username })
+				} catch (error) {
+					console.error('Error registering', error)
+					toast.error(t('authScene.toasts.registrationFailed'))
+				}
+			}
+		},
+		[isClaimed, login, registerUser, t],
+	)
 
 	const renderHeader = () => {
 		if (isClaimed) {
@@ -133,6 +123,10 @@ export default function LoginOrClaimScene() {
 			)
 		}
 
+		return null
+	}
+
+	if (isCheckingClaimed) {
 		return null
 	}
 

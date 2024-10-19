@@ -57,6 +57,7 @@ mod tests {
 				CreateOrUpdateSmartList, CreateOrUpdateSmartListView,
 				GetSmartListsParams, SmartListMeta, SmartListRelationOptions,
 			},
+			upload::UploadConfig,
 			user::{CreateUser, DeleteUser, UpdateUser, UpdateUserPreferences},
 			ClaimResponse, StumpVersion, UpdateCheck,
 		},
@@ -239,6 +240,8 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<CreateOrUpdateSmartListView>()?).as_bytes(),
 		)?;
+
+		file.write_all(format!("{}\n\n", ts_export::<UploadConfig>()?).as_bytes())?;
 
 		Ok(())
 	}

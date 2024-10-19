@@ -497,6 +497,8 @@ export type SmartListMeta = { matched_books: number; matched_series: number; mat
 
 export type CreateOrUpdateSmartListView = ({ book_columns: ReactTableColumnSort[]; group_columns: ReactTableColumnSort[]; book_sorting: ReactTableGlobalSort[] | null; group_sorting: ReactTableGlobalSort[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string }
 
+export type UploadConfig = { max_file_upload_size: number }
+
 // DESKTOP TYPE GENERATION
 
 export type SavedServer = { name: string; uri: string }

@@ -34,7 +34,7 @@ pub use user::*;
 
 pub use common::{
 	AccessRole, Cursor, EntityVisibility, FileStatus, LayoutMode, ReactTableColumnSort,
-	ReactTableGlobalSort,
+	ReactTableGlobalSort, ReadingDirection, ReadingImageScaleFit, ReadingMode,
 };
 
 pub mod utils {

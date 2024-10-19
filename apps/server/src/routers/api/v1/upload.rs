@@ -63,11 +63,9 @@ async fn upload_to_library(
 		.await?
 		.ok_or(APIError::NotFound(String::from("Library not found")))?;
 
-	let upload_data = validate_and_load_file_upload(
-		&mut upload,
-		Some(ctx.config.max_image_upload_size),
-	)
-	.await?;
+	let upload_data =
+		validate_and_load_file_upload(&mut upload, Some(ctx.config.max_file_upload_size))
+			.await?;
 
 	place_library_file(&upload_data.name, upload_data.bytes, library)?;
 	Ok(Json("It worked".to_string()))

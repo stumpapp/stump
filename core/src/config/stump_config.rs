@@ -33,6 +33,7 @@ pub mod env_keys {
 	pub const MAX_THUMBNAIL_CONCURRENCY_KEY: &str = "STUMP_MAX_THUMBNAIL_CONCURRENCY";
 	pub const MAX_IMAGE_UPLOAD_SIZE_KEY: &str = "STUMP_MAX_IMAGE_UPLOAD_SIZE";
 	pub const ENABLE_UPLOAD_KEY: &str = "STUMP_ENABLE_UPLOAD";
+	pub const MAX_FILE_UPLOAD_SIZE_KEY: &str = "STUMP_MAX_FILE_UPLOAD_SIZE";
 }
 use env_keys::*;
 
@@ -45,6 +46,7 @@ pub mod defaults {
 	pub const DEFAULT_MAX_THUMBNAIL_CONCURRENCY: usize = 50;
 	pub const DEFAULT_MAX_IMAGE_UPLOAD_SIZE: usize = 20 * 1024 * 1024; // 20 MB
 	pub const DEFAULT_ENABLE_UPLOAD: bool = false;
+	pub const DEFAULT_MAX_FILE_UPLOAD_SIZE: usize = 20 * 1024 * 1024; // 20 MB
 }
 use defaults::*;
 
@@ -178,6 +180,10 @@ pub struct StumpConfig {
 	#[default_value(DEFAULT_ENABLE_UPLOAD)]
 	#[env_key(ENABLE_UPLOAD_KEY)]
 	pub enable_upload: bool,
+
+	#[default_value(DEFAULT_MAX_FILE_UPLOAD_SIZE)]
+	#[env_key(MAX_FILE_UPLOAD_SIZE_KEY)]
+	pub max_file_upload_size: usize,
 }
 
 impl StumpConfig {
@@ -322,6 +328,7 @@ mod tests {
 			max_thumbnail_concurrency: None,
 			max_image_upload_size: None,
 			enable_upload: None,
+			max_file_upload_size: None,
 		};
 		partial_config.apply_to_config(&mut config);
 
@@ -359,6 +366,7 @@ mod tests {
 				max_thumbnail_concurrency: Some(DEFAULT_MAX_THUMBNAIL_CONCURRENCY),
 				max_image_upload_size: Some(DEFAULT_MAX_IMAGE_UPLOAD_SIZE),
 				enable_upload: Some(DEFAULT_ENABLE_UPLOAD),
+				max_file_upload_size: Some(DEFAULT_MAX_FILE_UPLOAD_SIZE)
 			}
 		);
 
@@ -411,6 +419,7 @@ mod tests {
 						max_thumbnail_concurrency: DEFAULT_MAX_THUMBNAIL_CONCURRENCY,
 						max_image_upload_size: DEFAULT_MAX_IMAGE_UPLOAD_SIZE,
 						enable_upload: DEFAULT_ENABLE_UPLOAD,
+						max_file_upload_size: DEFAULT_MAX_FILE_UPLOAD_SIZE,
 					}
 				);
 			},

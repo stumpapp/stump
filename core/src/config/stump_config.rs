@@ -177,10 +177,12 @@ pub struct StumpConfig {
 	#[env_key(MAX_IMAGE_UPLOAD_SIZE_KEY)]
 	pub max_image_upload_size: usize,
 
+	/// Whether or not the server will allow users with the appropriate permissions to upload books and series.
 	#[default_value(DEFAULT_ENABLE_UPLOAD)]
 	#[env_key(ENABLE_UPLOAD_KEY)]
 	pub enable_upload: bool,
 
+	/// The maxium file size, in bytes, of files that can be uploaded to be included in libraries.
 	#[default_value(DEFAULT_MAX_FILE_UPLOAD_SIZE)]
 	#[env_key(MAX_FILE_UPLOAD_SIZE_KEY)]
 	pub max_file_upload_size: usize,

@@ -1,6 +1,6 @@
 import { Badge, BadgeProps, PickSelect } from '@stump/components'
 import { LogLevel } from '@stump/sdk'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 
 type Props = {
 	level: LogLevel

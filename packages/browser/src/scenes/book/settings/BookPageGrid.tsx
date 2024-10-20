@@ -1,7 +1,7 @@
 import { useSDK } from '@stump/client'
 import { cx } from '@stump/components'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import React, { useCallback, useEffect } from 'react'
+import { Fragment, useCallback, useEffect, useRef } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { useMediaMatch } from 'rooks'
 
@@ -14,7 +14,7 @@ type Props = {
 // TODO: Create generlized VirtualizedGrid component and trim the reused logic
 export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage }: Props) {
 	const { sdk } = useSDK()
-	const parentRef = React.useRef<HTMLDivElement>(null)
+	const parentRef = useRef<HTMLDivElement>(null)
 
 	const isAtLeastSmall = useMediaMatch('(min-width: 640px)')
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
@@ -47,14 +47,10 @@ export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage
 		overscan: 5,
 	})
 
-	useEffect(
-		() => {
-			rowVirtualizer.measure()
-			columnVirtualizer.measure()
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[isAtLeastMedium, isAtLeastSmall],
-	)
+	useEffect(() => {
+		rowVirtualizer.measure()
+		columnVirtualizer.measure()
+	}, [isAtLeastMedium, isAtLeastSmall])
 
 	return (
 		<div className="h-96 w-full flex-1">
@@ -76,7 +72,7 @@ export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage
 							}}
 						>
 							{rowVirtualizer.getVirtualItems().map((virtualRow) => (
-								<React.Fragment key={virtualRow.index}>
+								<Fragment key={virtualRow.index}>
 									{columnVirtualizer.getVirtualItems().map((virtualColumn) => {
 										const virtualPage = virtualRow.index * 4 + virtualColumn.index + 1
 										const imageUrl = sdk.media.bookPageURL(bookId, virtualPage)
@@ -109,7 +105,7 @@ export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage
 											</div>
 										)
 									})}
-								</React.Fragment>
+								</Fragment>
 							))}
 						</div>
 					</div>

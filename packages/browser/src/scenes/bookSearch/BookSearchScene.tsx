@@ -1,6 +1,6 @@
 import { usePagedMediaQuery, usePrefetchMediaPaged } from '@stump/client'
 import { usePrevious, usePreviousIsDifferent } from '@stump/components'
-import React, { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 
 import { BookTable } from '@/components/book'
@@ -75,19 +75,15 @@ export default function BookSearchScene() {
 
 	const previousPage = usePrevious(current_page)
 	const shouldScroll = !!previousPage && previousPage !== current_page
-	useEffect(
-		() => {
-			if (!isInView && shouldScroll) {
-				containerRef.current?.scrollIntoView({
-					behavior: 'smooth',
-					block: 'nearest',
-					inline: 'start',
-				})
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[shouldScroll],
-	)
+	useEffect(() => {
+		if (!isInView && shouldScroll) {
+			containerRef.current?.scrollIntoView({
+				behavior: 'smooth',
+				block: 'nearest',
+				inline: 'start',
+			})
+		}
+	}, [shouldScroll])
 
 	const renderContent = () => {
 		if (layoutMode === 'GRID') {

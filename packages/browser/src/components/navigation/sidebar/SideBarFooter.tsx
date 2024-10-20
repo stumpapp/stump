@@ -1,5 +1,3 @@
-import React from 'react'
-
 import SettingsButton from './Settings'
 
 export default function SideBarFooter() {

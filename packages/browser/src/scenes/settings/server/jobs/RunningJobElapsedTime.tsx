@@ -2,7 +2,7 @@ import { Text } from '@stump/components'
 import { PersistedJob } from '@stump/sdk'
 import dayjs from 'dayjs'
 import { Duration } from 'dayjs/plugin/duration'
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 type Props = {
 	job: PersistedJob

@@ -1,7 +1,7 @@
 import { useSDK, useSeriesCursorQuery } from '@stump/client'
 import { Series } from '@stump/sdk'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import React, { useCallback, useEffect } from 'react'
+import { Fragment, useCallback, useEffect, useRef } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { useMediaMatch } from 'rooks'
 
@@ -21,7 +21,7 @@ export default function LibrarySeriesGrid({ libraryId, onSelectSeries }: Props) 
 		},
 	})
 
-	const parentRef = React.useRef<HTMLDivElement>(null)
+	const parentRef = useRef<HTMLDivElement>(null)
 
 	const isAtLeastSmall = useMediaMatch('(min-width: 640px)')
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
@@ -54,14 +54,10 @@ export default function LibrarySeriesGrid({ libraryId, onSelectSeries }: Props) 
 		overscan: 5,
 	})
 
-	useEffect(
-		() => {
-			rowVirtualizer.measure()
-			columnVirtualizer.measure()
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[isAtLeastMedium, isAtLeastSmall],
-	)
+	useEffect(() => {
+		rowVirtualizer.measure()
+		columnVirtualizer.measure()
+	}, [isAtLeastMedium, isAtLeastSmall])
 
 	const handleScroll = () => {
 		if (!hasNextPage) return
@@ -94,7 +90,7 @@ export default function LibrarySeriesGrid({ libraryId, onSelectSeries }: Props) 
 							}}
 						>
 							{rowVirtualizer.getVirtualItems().map((virtualRow) => (
-								<React.Fragment key={virtualRow.index}>
+								<Fragment key={virtualRow.index}>
 									{columnVirtualizer.getVirtualItems().map((virtualColumn) => {
 										const virtualPage = virtualRow.index * 4 + virtualColumn.index + 1
 										const thisSeries = series[virtualPage - 1]
@@ -125,7 +121,7 @@ export default function LibrarySeriesGrid({ libraryId, onSelectSeries }: Props) 
 											</div>
 										)
 									})}
-								</React.Fragment>
+								</Fragment>
 							))}
 						</div>
 					</div>

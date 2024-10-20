@@ -1,5 +1,5 @@
 import { Text } from '@stump/components'
-import React, { useCallback } from 'react'
+import { useCallback } from 'react'
 
 import { useEpubReaderContext } from '../context'
 

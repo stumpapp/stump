@@ -2,7 +2,7 @@ import { useStumpVersion } from '@stump/client'
 import { cn, Heading, Label, Link, Text, TEXT_VARIANTS } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import dayjs from 'dayjs'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 
 const REPO_URL = 'https://github.com/stumpapp/stump'
 

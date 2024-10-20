@@ -56,13 +56,9 @@ export default function HorizontalCardList({
 	const canSkipBackward = (lowerBound ?? 0) > 0
 	const canSkipForward = !!cards.length && (upperBound || 0) + 1 < cards.length
 
-	useEffect(
-		() => {
-			columnVirtualizer.measure()
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[isAtLeastMedium, isAtLeastSmall],
-	)
+	useEffect(() => {
+		columnVirtualizer.measure()
+	}, [isAtLeastMedium, isAtLeastSmall])
 
 	useEffect(() => {
 		const [lastItem] = [...virtualItems].reverse()

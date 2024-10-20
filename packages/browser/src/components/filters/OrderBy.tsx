@@ -1,6 +1,6 @@
 import { Button, cx, Popover } from '@stump/components'
 import { SortAsc } from 'lucide-react'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useMediaMatch } from 'rooks'
 
 import { useFilterContext } from './context'

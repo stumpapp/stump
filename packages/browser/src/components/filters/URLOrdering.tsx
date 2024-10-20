@@ -1,6 +1,6 @@
 import { IconButton, Popover, ToolTip } from '@stump/components'
 import { ArrowUpDown } from 'lucide-react'
-import React, { useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useMediaMatch } from 'rooks'
 
 import { useFilterContext } from './context'

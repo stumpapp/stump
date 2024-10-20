@@ -1,5 +1,3 @@
-import React from 'react'
-
 import DeleteBookClubSection from './DeleteBookClubSection'
 
 export default function BookClubDeletionScene() {

@@ -23,18 +23,14 @@ export default function BooksAfterCurrent({ cursor }: Props) {
 	const title = cursor.series ? `Next in ${cursor.series.name}` : 'Next in Series'
 	const cards = media.map((media) => <MediaCard media={media} key={media.id} fullWidth={false} />)
 
-	useEffect(
-		() => {
-			// NOTE: I'm honestly not sure why this is even required... Without this, no matter WHAT I do,
-			// previous data seems to stick around. Manually removing from the cache on unmount seems to
-			// fix it...
-			return () => {
-				remove()
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[],
-	)
+	useEffect(() => {
+		// NOTE: I'm honestly not sure why this is even required... Without this, no matter WHAT I do,
+		// previous data seems to stick around. Manually removing from the cache on unmount seems to
+		// fix it...
+		return () => {
+			remove()
+		}
+	}, [])
 
 	return (
 		<HorizontalCardList

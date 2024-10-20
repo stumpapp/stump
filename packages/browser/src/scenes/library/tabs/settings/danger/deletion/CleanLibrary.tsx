@@ -1,7 +1,7 @@
 import { useSDK } from '@stump/client'
 import { Alert, Button, ConfirmationModal, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'react-hot-toast'
 
 import { useLibraryManagement } from '../../context'

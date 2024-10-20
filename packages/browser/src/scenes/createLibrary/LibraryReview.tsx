@@ -1,7 +1,7 @@
 import { Heading, Label, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import pluralize from 'pluralize'
-import React, { PropsWithChildren } from 'react'
+import { PropsWithChildren } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import { CreateOrUpdateLibrarySchema } from '@/components/library/createOrUpdate'

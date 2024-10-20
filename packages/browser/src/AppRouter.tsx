@@ -1,6 +1,6 @@
 import { LocaleProvider } from '@stump/i18n'
 import { type AllowedLocale } from '@stump/i18n'
-import React, { lazy } from 'react'
+import { lazy } from 'react'
 import { Route, Routes } from 'react-router-dom'
 
 import { AppLayout } from './AppLayout.tsx'

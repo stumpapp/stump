@@ -4,7 +4,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { checkUrl, formatApiURL } from '@stump/sdk'
 import { SavedServer } from '@stump/sdk'
 import { useQueries } from '@tanstack/react-query'
-import React, { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
 import { useTauriRPC } from '@/hooks/useTauriRPC'

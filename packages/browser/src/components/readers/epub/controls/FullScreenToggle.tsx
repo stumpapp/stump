@@ -1,5 +1,4 @@
 import { Fullscreen } from 'lucide-react'
-import React from 'react'
 
 import { useEpubReaderControls } from '../context'
 import ControlButton from './ControlButton'

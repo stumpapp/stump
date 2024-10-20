@@ -1,6 +1,6 @@
 import { useDirectoryListing, useSDK } from '@stump/client'
 import { DirectoryListingFile } from '@stump/sdk'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'
 import { useMediaMatch } from 'rooks'

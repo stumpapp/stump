@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useBookClubsQuery } from '@stump/client'
 import { Button, Form } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React, { useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
 import {

@@ -1,6 +1,5 @@
 import { useSDK } from '@stump/client'
 import { AspectRatio, cn, Heading, Text } from '@stump/components'
-import React from 'react'
 
 import { EntityImage } from '@/components/entity'
 import ReadMore from '@/components/ReadMore'

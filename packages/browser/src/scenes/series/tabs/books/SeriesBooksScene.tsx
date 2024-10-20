@@ -82,19 +82,15 @@ export default function SeriesOverviewScene() {
 
 	const previousPage = usePrevious(current_page)
 	const shouldScroll = !!previousPage && previousPage !== current_page
-	useEffect(
-		() => {
-			if (!isInView && shouldScroll) {
-				containerRef.current?.scrollIntoView({
-					behavior: 'smooth',
-					block: 'nearest',
-					inline: 'start',
-				})
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[shouldScroll],
-	)
+	useEffect(() => {
+		if (!isInView && shouldScroll) {
+			containerRef.current?.scrollIntoView({
+				behavior: 'smooth',
+				block: 'nearest',
+				inline: 'start',
+			})
+		}
+	}, [shouldScroll])
 
 	const renderContent = () => {
 		if (layoutMode === 'GRID') {

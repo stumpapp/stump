@@ -1,5 +1,5 @@
 import { LoadingFileProps } from '@epubjs-react-native/core'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Text, View } from '@/components/primitives'
 

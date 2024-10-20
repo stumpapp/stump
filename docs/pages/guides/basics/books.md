@@ -57,7 +57,7 @@ EPUB files typically store their metadata in an `OPF` file, but it is more limit
 
 #### PDF
 
-PDF files do not generally have very good metadata support. In general, I have seen only a few fields that are consistently populated, such as the title and author. PDF files are somewhat smelly 💩
+PDF files do not generally have very good metadata support. In general, I have seen only a few fields that are consistently populated, such as the title and author.
 
 ### Additional sources
 

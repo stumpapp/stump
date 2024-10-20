@@ -117,31 +117,27 @@ export default function AnimatedPagedReader({
 		currPageRef.current = currentPage
 	}, [currentPage])
 
-	const imageUrls = useMemo(
-		() => {
-			const urls = []
+	const imageUrls = useMemo(() => {
+		const urls = []
 
-			// if has previous
-			if (currentPage > 1) {
-				urls.push(getPageUrl(currentPage - 1))
-			} else {
-				urls.push(undefined)
-			}
+		// if has previous
+		if (currentPage > 1) {
+			urls.push(getPageUrl(currentPage - 1))
+		} else {
+			urls.push(undefined)
+		}
 
-			urls.push(getPageUrl(currentPage))
+		urls.push(getPageUrl(currentPage))
 
-			// if has next
-			if (currentPage < media.pages) {
-				urls.push(getPageUrl(currentPage + 1))
-			} else {
-				urls.push(undefined)
-			}
+		// if has next
+		if (currentPage < media.pages) {
+			urls.push(getPageUrl(currentPage + 1))
+		} else {
+			urls.push(undefined)
+		}
 
-			return urls
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[currentPage],
-	)
+		return urls
+	}, [currentPage])
 
 	function startNextPageAnimation() {
 		Promise.all([
@@ -161,15 +157,11 @@ export default function AnimatedPagedReader({
 		})
 	}
 
-	useEffect(
-		() => {
-			controls.set(RESET_CONTROLS)
-			nextControls.set({ left: '100%' })
-			prevControls.set({ right: '100%' })
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[currentPage],
-	)
+	useEffect(() => {
+		controls.set(RESET_CONTROLS)
+		nextControls.set({ left: '100%' })
+		prevControls.set({ right: '100%' })
+	}, [currentPage])
 
 	function handleHotKeyPagination(direction: 'next' | 'prev') {
 		if (direction === 'next' && currPageRef.current < media.pages) {

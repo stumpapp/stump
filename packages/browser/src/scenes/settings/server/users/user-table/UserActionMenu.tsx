@@ -2,7 +2,7 @@ import { invalidateQueries, useSDK } from '@stump/client'
 import { DropdownMenu, IconButton } from '@stump/components'
 import { User } from '@stump/sdk'
 import { Database, Lock, MoreVertical, Pencil, Search, Trash, Unlock } from 'lucide-react'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'
 
@@ -101,7 +101,7 @@ export default function UserActionMenu({ user, onSelectForInspect }: Props) {
 				],
 			},
 		],
-		// eslint-disable-next-line react-hooks/exhaustive-deps
+
 		[setDeletingUser, user, isSelf, userSessionsCount],
 	)
 

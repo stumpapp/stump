@@ -11,7 +11,7 @@ import {
 import { useLocaleContext } from '@stump/i18n'
 import { Search } from 'lucide-react'
 import pluralize from 'pluralize'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useDebouncedValue } from 'rooks'
 
 import { SceneContainer } from '@/components/container'

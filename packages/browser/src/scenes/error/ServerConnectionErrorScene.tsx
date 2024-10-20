@@ -54,22 +54,17 @@ export default function ServerConnectionErrorScene() {
 		return undefined
 	}, [baseURL])
 
-	useEffect(
-		() => {
-			if (backOnline) {
-				toast
-					.promise(new Promise((resolve) => setTimeout(resolve, 2000)), {
-						error: t('serverSOS.reconnectFailed'),
-						loading: t('serverSOS.reconnected'),
-						success: t('serverSOS.reconnected'),
-					})
-					.then(() => setGoHome(true))
-			}
-		},
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[backOnline],
-	)
+	useEffect(() => {
+		if (backOnline) {
+			toast
+				.promise(new Promise((resolve) => setTimeout(resolve, 2000)), {
+					error: t('serverSOS.reconnectFailed'),
+					loading: t('serverSOS.reconnected'),
+					success: t('serverSOS.reconnected'),
+				})
+				.then(() => setGoHome(true))
+		}
+	}, [backOnline])
 
 	if (goHome) {
 		const from = location.state?.from || '/'

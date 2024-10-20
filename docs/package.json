@@ -8,7 +8,7 @@
 		"build": "next build",
 		"export": "next export",
 		"start": "next start",
-		"lint": "next lint",
+		"lint": "eslint .",
 		"deploy-preview": "vercel",
 		"deploy": "vercel --prod",
 		"nuke": "rimraf node_modules"
@@ -20,15 +20,16 @@
 		"@icons-pack/react-simple-icons": "=9.1.0",
 		"clsx": "2.0.0",
 		"framer-motion": "^10.16.4",
-		"next": "^13.5.6",
-		"nextra": "^2.13.2",
-		"nextra-theme-docs": "^2.13.2",
+		"next": "^14.2.15",
+		"nextra": "^3.0.15",
+		"nextra-theme-docs": "^3.0.15",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0"
 	},
 	"devDependencies": {
 		"@types/node": "^20.8.7",
 		"autoprefixer": "^10.4.16",
+		"eslint-config-next": "^14.2.15",
 		"postcss": "^8.4.31",
 		"tailwindcss": "^3.3.3",
 		"typescript": "^5.3.3"

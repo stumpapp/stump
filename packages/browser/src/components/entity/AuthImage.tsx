@@ -1,6 +1,5 @@
-/* eslint-disable react/prop-types */
 import { queryClient, useSDK } from '@stump/client'
-import React, { forwardRef, useCallback, useEffect, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useState } from 'react'
 
 type Props = {
 	token?: string

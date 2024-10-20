@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { Command as CommandPrimitive } from 'cmdk'
 import { type LucideIcon, Search } from 'lucide-react'
 

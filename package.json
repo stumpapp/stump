@@ -7,15 +7,15 @@
 	"private": true,
 	"workspaces": [
 		"apps/*",
-		"core",
 		"docs",
 		"packages/*"
 	],
 	"scripts": {
 		"prepare": "husky",
 		"setup": "yarn && yarn web build && cargo codegen",
-		"lint": "eslint .",
-		"check-types": "lerna run check-types",
+		"lint": "lerne run lint --stream --parallel && yarn check-types",
+		"check-types": "lerna run check-types  --stream --parallel",
+		"test": "lerna run test",
 		"client": "lerna run --scope @stump/client",
 		"desktop": "lerna run --scope @stump/desktop",
 		"expo": "lerna run --scope @stump/expo",

@@ -1,5 +1,5 @@
 import { LucideIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { Link } from '../link'
 import { Command } from './primitives'

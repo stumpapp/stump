@@ -2,6 +2,7 @@
 
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'
+import React from 'react'
 
 import { cn } from '../utils'
 
@@ -31,7 +32,6 @@ const DialogOverlay = React.forwardRef<
 ))
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
-/* eslint-disable sort-keys-fix/sort-keys-fix */
 export const DIALOG_CONTENT_SIZES = {
 	sm: 'sm:max-w-[425px]',
 	// TODO: md is pretty large

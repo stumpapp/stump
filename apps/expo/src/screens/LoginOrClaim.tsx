@@ -41,7 +41,7 @@ export default function LoginOrClaim() {
 					await registerUser({ password, username })
 					await loginUser({ password, username })
 				}
-			} catch (error) {
+			} catch {
 				// TODO: alert error or set error somewhere
 			}
 		},
@@ -53,6 +53,7 @@ export default function LoginOrClaim() {
 			// just return a view with the icon.png:
 			return (
 				<View>
+					{/* eslint-disable-next-line @typescript-eslint/no-require-imports */}
 					<Image className="h-32 w-32" source={require('../../assets/images/icon.png')} />
 				</View>
 			)
@@ -63,6 +64,7 @@ export default function LoginOrClaim() {
 					<Text className="mb-3 text-center text-sm">
 						Enter a username and password to claim it
 					</Text>
+					{/* eslint-disable-next-line @typescript-eslint/no-require-imports */}
 					<Image className="h-24 w-24" source={require('../../assets/images/icon.png')} />
 				</View>
 			)

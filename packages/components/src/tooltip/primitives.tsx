@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import * as TooltipPrimitive from '@radix-ui/react-tooltip'
 
 import { cn } from '../utils'

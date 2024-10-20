@@ -1,5 +1,5 @@
 import { cva, VariantProps } from 'class-variance-authority'
-
+import { forwardRef } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 
 import { cn } from '../utils'
@@ -30,7 +30,7 @@ export type LinkProps = {
 	underline?: boolean
 } & BaseProps
 
-export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(
+export const Link = forwardRef<HTMLAnchorElement, LinkProps>(
 	({ underline = true, to, href, className, variant, ...props }, ref) => {
 		const destination = {
 			[to ? 'to' : 'href']: to ?? href,

@@ -3,6 +3,7 @@ import prettierPlugin from 'eslint-plugin-prettier/recommended'
 import pluginReact from 'eslint-plugin-react'
 import pluginReactHooks from 'eslint-plugin-react-hooks'
 import simpleImportSort from 'eslint-plugin-simple-import-sort'
+import keySort from 'eslint-plugin-sort-keys-fix'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
@@ -16,6 +17,7 @@ export default [
 			'simple-import-sort': simpleImportSort,
 			react: pluginReact,
 			'react-hooks': pluginReactHooks,
+			'sort-keys-fix': keySort,
 		},
 		rules: {
 			'no-console': ['error', { allow: ['warn', 'error'] }],
@@ -43,6 +45,12 @@ export default [
 		languageOptions: { globals: globals.jest },
 		rules: {
 			'@typescript-eslint/no-explicit-any': 'off',
+		},
+	},
+	{
+		files: ['**/*.config.js'],
+		rules: {
+			'@typescript-eslint/no-require-imports': 'off',
 		},
 	},
 ]

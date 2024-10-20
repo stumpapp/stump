@@ -1,3 +1,5 @@
+import { Fragment } from 'react'
+
 import { Button } from '../button/Button'
 import { Link } from '../link'
 import { cn, XOR } from '../utils'
@@ -84,7 +86,7 @@ export function DropdownMenu({
 					)
 				}
 
-				const Container = item.href ? Link : React.Fragment
+				const Container = item.href ? Link : Fragment
 				const containerProps = item.href
 					? { className: 'hover:no-underline', to: item.href, underline: false }
 					: {}
@@ -117,11 +119,11 @@ export function DropdownMenu({
 
 			<DropdownContent className={cn('w-56', contentWrapperClassName)} align={align}>
 				{groups.map((group, groupIndex) => (
-					<React.Fragment key={groupIndex}>
+					<Fragment key={groupIndex}>
 						{group.title && <DropdownLabel>{group.title}</DropdownLabel>}
 						{groupIndex > 0 && <DropdownSeparator />}
 						<DropdownGroup>{renderItems(group.items)}</DropdownGroup>
-					</React.Fragment>
+					</Fragment>
 				))}
 			</DropdownContent>
 		</Dropdown>

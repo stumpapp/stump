@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 // FIXME: https://github.com/jsx-eslint/eslint-plugin-react/issues/3284
 
 import * as ContextMenu from '@radix-ui/react-context-menu'

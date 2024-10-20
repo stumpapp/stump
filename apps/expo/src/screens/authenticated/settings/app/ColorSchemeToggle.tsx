@@ -1,5 +1,4 @@
 import { useColorScheme } from 'nativewind'
-
 import { Switch } from 'react-native'
 
 import { Text, View } from '@/components'

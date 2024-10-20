@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { Label } from '../form'
 import { cn } from '../utils'
 import { RawSwitch, RawSwitchProps, RawSwitchRef } from './raw'

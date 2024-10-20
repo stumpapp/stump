@@ -1,7 +1,7 @@
 import { usePagedMediaQuery, usePrefetchMediaPaged } from '@stump/client'
 import { usePreviousIsDifferent } from '@stump/components'
 import { Media } from '@stump/sdk'
-import React, { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 
 import useIsInView from '@/hooks/useIsInView'
 

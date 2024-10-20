@@ -1,6 +1,6 @@
 import { Button, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import DeleteLibraryConfirmation from '@/components/library/DeleteLibraryConfirmation'
 

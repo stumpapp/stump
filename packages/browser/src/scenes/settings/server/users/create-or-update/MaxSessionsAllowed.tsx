@@ -1,5 +1,5 @@
 import { Input } from '@stump/components'
-import React, { useCallback, useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useFormContext, useFormState } from 'react-hook-form'
 
 import { CreateOrUpdateUserSchema } from './schema'

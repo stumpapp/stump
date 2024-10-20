@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { FileExplorer } from '@/components/explorer'
 
 import { useSeriesContext } from '../../context'

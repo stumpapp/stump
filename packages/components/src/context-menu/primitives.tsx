@@ -3,7 +3,6 @@
 
 import * as ContextMenu from '@radix-ui/react-context-menu'
 import { Check, ChevronRight, Circle } from 'lucide-react'
-import React from 'react'
 
 import { cn } from '../utils'
 

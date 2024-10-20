@@ -9,7 +9,7 @@ import {
 	SortingState,
 	useReactTable,
 } from '@tanstack/react-table'
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { useWindowSize } from 'rooks'
 

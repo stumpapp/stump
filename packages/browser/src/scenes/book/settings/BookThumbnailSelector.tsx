@@ -1,7 +1,7 @@
 import { useSDK } from '@stump/client'
 import { Button, Dialog } from '@stump/components'
 import { Media } from '@stump/sdk'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import toast from 'react-hot-toast'
 
 import { EntityCard } from '@/components/entity'

@@ -12,7 +12,7 @@
 		"packages/*"
 	],
 	"scripts": {
-		"prepare": "husky install",
+		"prepare": "husky",
 		"setup": "yarn && yarn web build && cargo codegen",
 		"lint": "eslint .",
 		"check-types": "lerna run check-types",
@@ -28,7 +28,7 @@
 		"dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"cargo watch --ignore core/prisma -x run -p stump_server\" \"yarn expo dev\"",
 		"prisma-studio": "npx prisma studio --schema core/prisma/schema.prisma",
 		"format": "prettier --config prettier.config.js --ignore-path .prettierignore --write .",
-		"nuke": "yarn workspaces run nuke && yarn install"
+		"nuke": "lerna run nuke"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.2",

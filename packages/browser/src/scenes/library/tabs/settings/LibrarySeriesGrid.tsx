@@ -1,7 +1,7 @@
 import { useSDK, useSeriesCursorQuery } from '@stump/client'
 import { Series } from '@stump/sdk'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import React, { useCallback, useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { useMediaMatch } from 'rooks'
 

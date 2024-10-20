@@ -1,5 +1,4 @@
 import { Meta, StoryObj } from '@storybook/react'
-import React from 'react'
 
 import { Button } from '../button'
 import { HoverCard } from './HoverCard'

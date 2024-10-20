@@ -8,7 +8,6 @@ import {
 } from '@icons-pack/react-simple-icons'
 import clsx from 'clsx'
 import { motion } from 'framer-motion'
-import React from 'react'
 
 const BASE_DELAY = 1.5
 const getDelay = (idx: number) => BASE_DELAY + (idx + 1) * 0.25

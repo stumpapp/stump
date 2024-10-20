@@ -1,5 +1,4 @@
 import { cva, VariantProps } from 'class-variance-authority'
-import React from 'react'
 
 import { cn } from '../utils'
 import { BUTTON_BASE_CLASSES, BUTTON_ROUNDED_VARIANTS, BUTTON_VARIANTS } from './Button'

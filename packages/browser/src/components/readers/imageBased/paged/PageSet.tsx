@@ -1,6 +1,6 @@
 import { BookImageScaling } from '@stump/client'
 import { cn } from '@stump/components'
-import React, { forwardRef, useCallback, useMemo } from 'react'
+import { forwardRef, useCallback, useMemo } from 'react'
 
 import { EntityImage } from '@/components/entity'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'

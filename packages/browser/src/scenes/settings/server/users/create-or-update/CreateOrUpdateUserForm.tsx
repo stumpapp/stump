@@ -3,7 +3,7 @@ import { invalidateQueries, useCreateUser, useSDK, useUpdateUser } from '@stump/
 import { Alert, Button, Form, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { User } from '@stump/sdk'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useForm, useFormState } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'

@@ -1,6 +1,6 @@
 import { usePagedMediaQuery, usePrefetchMediaPaged } from '@stump/client'
 import { usePrevious, usePreviousIsDifferent } from '@stump/components'
-import React, { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 
 import { BookTable } from '@/components/book'

@@ -2,7 +2,7 @@
 import * as SheetPrimitive from '@radix-ui/react-dialog'
 import { cva, VariantProps } from 'class-variance-authority'
 import { X } from 'lucide-react'
-import React, { ComponentProps } from 'react'
+import { ComponentProps } from 'react'
 
 import { cn } from '../utils'
 

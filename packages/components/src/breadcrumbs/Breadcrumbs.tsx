@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { Link } from '../link'
 import { Text } from '../text'
 import { cn, cx } from '../utils'

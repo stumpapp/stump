@@ -1,4 +1,4 @@
-import React, { PropsWithChildren } from 'react'
+import { PropsWithChildren } from 'react'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 

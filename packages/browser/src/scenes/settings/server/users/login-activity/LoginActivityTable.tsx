@@ -8,7 +8,7 @@ import {
 	PaginationState,
 } from '@tanstack/react-table'
 import dayjs from 'dayjs'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import { Table } from '@/components/table'
 

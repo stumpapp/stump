@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useLoginOrRegister } from '@stump/client'
-import React, { useCallback } from 'react'
+import { useCallback } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Image, Text, TouchableOpacity, View } from 'react-native'
 import { z } from 'zod'

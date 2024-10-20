@@ -1,5 +1,5 @@
 import { cn } from '@stump/components'
-import React, { forwardRef, useMemo } from 'react'
+import { forwardRef, useMemo } from 'react'
 
 import { usePreferences } from '@/hooks'
 

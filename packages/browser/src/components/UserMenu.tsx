@@ -1,6 +1,6 @@
 import { Avatar, Card, cn, Popover, Text } from '@stump/components'
 import { Bell, Settings } from 'lucide-react'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import AutoSizer from 'react-virtualized-auto-sizer'
 

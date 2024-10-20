@@ -1,7 +1,6 @@
 /* eslint-disable react/prop-types */
 import * as SelectRadix from '@radix-ui/react-select'
 import { Check, ChevronDown } from 'lucide-react'
-import React from 'react'
 
 import { cn } from '../utils'
 

@@ -1,6 +1,6 @@
 import { cn, Input, ProgressSpinner, usePreviousIsDifferent } from '@stump/components'
 import { SearchIcon } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useDebouncedValue } from 'rooks'
 
 type Props = {

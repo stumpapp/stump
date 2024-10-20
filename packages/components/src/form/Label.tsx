@@ -1,5 +1,4 @@
 import * as LabelPrimitive from '@radix-ui/react-label'
-import React from 'react'
 
 import { cn } from '../utils'
 

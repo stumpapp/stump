@@ -1,6 +1,6 @@
 import { IconButton, Input, Text, ToolTip } from '@stump/components'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 type Props = {
 	pages: number

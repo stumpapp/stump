@@ -1,5 +1,4 @@
 import { cva, VariantProps } from 'class-variance-authority'
-import React from 'react'
 
 import { ProgressSpinner } from '../progress/ProgressSpinner'
 import { cn } from '../utils'

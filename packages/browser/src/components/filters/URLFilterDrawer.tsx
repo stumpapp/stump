@@ -1,6 +1,6 @@
 import { Button, IconButton, Sheet, ToolTip } from '@stump/components'
 import { Bolt } from 'lucide-react'
-import React, { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useMediaMatch } from 'rooks'
 
 import { clearFilters, getActiveFilterCount, useFilterContext } from '.'

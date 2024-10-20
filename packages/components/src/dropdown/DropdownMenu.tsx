@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { Button } from '../button/Button'
 import { Link } from '../link'
 import { cn, XOR } from '../utils'

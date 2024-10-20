@@ -1,5 +1,4 @@
 import { CheckBox } from '@stump/components'
-import React from 'react'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 

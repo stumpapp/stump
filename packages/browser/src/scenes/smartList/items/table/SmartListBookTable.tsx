@@ -9,7 +9,7 @@ import {
 	SortingState,
 	useReactTable,
 } from '@tanstack/react-table'
-import React, { PropsWithChildren, useCallback, useMemo } from 'react'
+import { PropsWithChildren, useCallback, useMemo } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { SortIcon } from '@/components/table'

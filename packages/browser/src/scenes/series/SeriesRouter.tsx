@@ -1,4 +1,4 @@
-import React, { lazy, useMemo } from 'react'
+import { lazy, useMemo } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
 import ServerOwnerRouteWrapper from '@/components/ServerOwnerRouteWrapper.tsx'

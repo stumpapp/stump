@@ -1,7 +1,5 @@
-/* eslint-disable react/prop-types */
-
 import { useSDK } from '@stump/client'
-import React, { forwardRef, Suspense } from 'react'
+import { forwardRef, Suspense } from 'react'
 
 import { AuthImage } from './AuthImage'
 

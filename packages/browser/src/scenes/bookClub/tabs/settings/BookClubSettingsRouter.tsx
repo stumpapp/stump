@@ -1,6 +1,6 @@
 import { useUpdateBookClub } from '@stump/client'
 import { UpdateBookClub } from '@stump/sdk'
-import React, { Suspense, useCallback } from 'react'
+import { Suspense, useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
 import { useBookClubContext } from '@/components/bookClub'

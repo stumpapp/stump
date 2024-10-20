@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { GenericMenu } from '../dropdown'
 import { cn } from '../utils'
 import {

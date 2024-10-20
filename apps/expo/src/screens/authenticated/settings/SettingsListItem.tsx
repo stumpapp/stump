@@ -1,6 +1,5 @@
 import { ChevronRight } from 'lucide-react-native'
 import { useColorScheme } from 'nativewind'
-import React from 'react'
 
 import { Link, Text, View } from '@/components'
 import { gray } from '@/constants/colors'

@@ -1,5 +1,4 @@
 import { cx, Label, RawSwitch, Text } from '@stump/components'
-import React from 'react'
 
 // TODO: rename and relocate this component
 

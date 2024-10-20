@@ -1,6 +1,5 @@
 import { IconButton, ToolTip } from '@stump/components'
 import { LayoutGrid, Table } from 'lucide-react'
-import React from 'react'
 
 type Props = {
 	layout: 'GRID' | 'TABLE'

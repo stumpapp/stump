@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { BookClubSchedule, useBookClubContext } from '@/components/bookClub'
 
 import CreateOrAddToScheduleForm from './CreateOrAddToScheduleForm'

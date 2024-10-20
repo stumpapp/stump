@@ -1,6 +1,6 @@
 import { Card, cx, Divider, IconButton, Tabs, Text, ToolTip } from '@stump/components'
 import { Asterisk, AtSign } from 'lucide-react'
-import React, { useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
 import MarkdownPreview from './MarkdownPreview'
 

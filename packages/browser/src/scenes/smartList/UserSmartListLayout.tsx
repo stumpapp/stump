@@ -6,7 +6,7 @@ import {
 import { cn } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { AccessRole, SmartList, SmartListView } from '@stump/sdk'
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import { Outlet, useLocation, useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'

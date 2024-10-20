@@ -1,7 +1,6 @@
 /* eslint-disable react/prop-types */
 import * as AspectRatioPrimitive from '@radix-ui/react-aspect-ratio'
 import * as AvatarRadix from '@radix-ui/react-avatar'
-import React from 'react'
 
 import { cn } from '../utils'
 

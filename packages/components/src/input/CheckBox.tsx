@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { Label } from '../form'
 import { Text } from '../text'
 import { cx } from '../utils'

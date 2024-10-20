@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
 import * as SeparatorPrimitive from '@radix-ui/react-separator'
-import React from 'react'
 
 import { cn } from '../utils'
 

@@ -1,5 +1,5 @@
 import { Input, Text } from '@stump/components'
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { useFilterContext } from './context'
 

@@ -1,7 +1,7 @@
 import { invalidateQueries, useMutation, useSDK } from '@stump/client'
 import { Button } from '@stump/components'
 import { Media, PutMediaCompletionStatus } from '@stump/sdk'
-import React, { useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import toast from 'react-hot-toast'
 
 import { EBOOK_EXTENSION } from '@/utils/patterns'

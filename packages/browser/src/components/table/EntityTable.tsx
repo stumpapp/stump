@@ -10,7 +10,7 @@ import {
 	SortingState,
 	useReactTable,
 } from '@tanstack/react-table'
-import React, { PropsWithChildren } from 'react'
+import { PropsWithChildren } from 'react'
 
 import SortIcon from './SortIcon'
 

@@ -1,5 +1,5 @@
 import { toObjectParams, toUrlParams } from '@stump/sdk'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 import { FilterContext } from './context'

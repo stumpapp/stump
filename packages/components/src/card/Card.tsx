@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 
-import React, { forwardRef } from 'react'
+import { forwardRef } from 'react'
 
 import { cn } from '../utils'
 

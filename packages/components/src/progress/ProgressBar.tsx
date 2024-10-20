@@ -1,6 +1,6 @@
 import * as ProgressPrimitive from '@radix-ui/react-progress'
 import { cva, VariantProps } from 'class-variance-authority'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 
 import { cn, cx } from '../utils'
 

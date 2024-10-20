@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
 import * as TabsPrimitive from '@radix-ui/react-tabs'
-import React from 'react'
 
 import { cn } from '../utils'
 import { TabsContext, TabsVariant } from './context'

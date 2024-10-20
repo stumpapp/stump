@@ -1,6 +1,6 @@
 import { Label, NativeSelect, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React, { useCallback } from 'react'
+import { useCallback } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import { isGrouping, SmartListFormSchema, SmartListGroupBy } from '../schema'

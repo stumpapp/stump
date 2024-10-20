@@ -1,5 +1,4 @@
 import { Alert } from '@stump/components'
-import React from 'react'
 
 import AnalyzeMedia from './AnalyzeMedia'
 

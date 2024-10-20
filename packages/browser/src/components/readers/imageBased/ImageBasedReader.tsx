@@ -1,6 +1,6 @@
 import { queryClient, useSDK, useUpdateMediaProgress } from '@stump/client'
 import { Media } from '@stump/sdk'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { usePreloadPage } from '@/hooks/usePreloadPage'

@@ -4,7 +4,7 @@ import { BookClubBook } from '@stump/sdk'
 import dayjs from 'dayjs'
 import { Book } from 'lucide-react'
 import pluralize from 'pluralize'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { match } from 'ts-pattern'
 
 import { EntityImage } from '@/components/entity'

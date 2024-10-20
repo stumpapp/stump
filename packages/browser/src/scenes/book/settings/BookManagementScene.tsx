@@ -1,7 +1,7 @@
 import { useMediaByIdQuery, useSDK } from '@stump/client'
 import { Alert, Breadcrumbs, Button, Heading, Text } from '@stump/components'
 import { Construction } from 'lucide-react'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { Navigate, useParams } from 'react-router'
 
 import { SceneContainer } from '@/components/container'

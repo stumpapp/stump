@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react'
+import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
 import ServerOwnerRouteWrapper from '@/components/ServerOwnerRouteWrapper.tsx'

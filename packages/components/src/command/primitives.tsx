@@ -1,7 +1,6 @@
 /* eslint-disable react/prop-types */
 import { Command as CommandPrimitive } from 'cmdk'
 import { type LucideIcon, Search } from 'lucide-react'
-import React from 'react'
 
 import { Dialog, DialogProps } from '../dialog'
 import { cn } from '../utils'

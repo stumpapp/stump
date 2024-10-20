@@ -1,5 +1,4 @@
 import { cva, VariantProps } from 'class-variance-authority'
-import React from 'react'
 
 import { cn } from '../../utils'
 import { RAW_INPUT_BASE_CLASSES, RAW_INPUT_VARIANTS } from './RawInput'

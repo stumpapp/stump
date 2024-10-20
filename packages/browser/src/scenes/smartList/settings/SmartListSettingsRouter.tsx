@@ -1,6 +1,6 @@
 import { useUpdateSmartList } from '@stump/client'
 import { CreateOrUpdateSmartList } from '@stump/sdk'
-import React, { Suspense, useCallback } from 'react'
+import { Suspense, useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
 import { useSmartListContext } from '../context'

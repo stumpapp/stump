@@ -19,7 +19,7 @@ import { Button, IconButton, Sheet, Text, ToolTip } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { ReactTableColumnSort } from '@stump/sdk'
 import { Columns, Eye, EyeOff } from 'lucide-react'
-import React, { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useMediaMatch } from 'rooks'
 
 import { bookTableColumnMap } from '../book/table'

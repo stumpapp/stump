@@ -19,7 +19,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { NavigationItem } from '@stump/sdk'
 import isEqual from 'lodash/isEqual'
 import { Lock, Unlock } from 'lucide-react'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 
 import { useAppContext } from '@/context'

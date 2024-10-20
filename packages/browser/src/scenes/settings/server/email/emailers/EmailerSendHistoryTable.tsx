@@ -9,7 +9,7 @@ import {
 } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import { ChevronDown, Copy } from 'lucide-react'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import { getTableModels, SortIcon } from '@/components/table'
 

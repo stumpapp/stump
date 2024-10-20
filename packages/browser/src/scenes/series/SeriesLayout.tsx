@@ -1,6 +1,5 @@
 import { useSeriesByIdQuery } from '@stump/client'
 import { cn } from '@stump/components'
-import React from 'react'
 import { Suspense, useEffect } from 'react'
 import { Outlet, useNavigate, useParams } from 'react-router'
 

@@ -5,7 +5,7 @@
 			"@babel/preset-react",
 			{
 				// Note: This is to allow React to automatically import the JSX runtime, i.e.
-				// we don't need to have `import React from 'react'` in every file.
+				// we don't need to have `` in every file.
 				"runtime": "automatic"
 			}
 		],

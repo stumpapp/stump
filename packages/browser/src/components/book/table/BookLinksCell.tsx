@@ -1,6 +1,5 @@
 import { Badge } from '@stump/components'
 import { ExternalLink } from 'lucide-react'
-import React from 'react'
 
 type Props = {
 	links: string[]

@@ -1,6 +1,6 @@
 import { Alert, CheckBox, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { useDebouncedValue } from 'rooks'
 

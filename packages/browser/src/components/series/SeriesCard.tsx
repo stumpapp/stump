@@ -16,7 +16,7 @@ export default function SeriesCard({ series, fullWidth, variant = 'default' }: S
 	const { sdk } = useSDK()
 	const isCoverOnly = variant === 'cover'
 
-	const bookCount = Number(series.media ? series.media.length : (series.media_count ?? 0))
+	const bookCount = Number(series.media ? series.media.length : series.media_count ?? 0)
 	const booksUnread = series.unread_media_count
 
 	const { prefetch } = usePrefetchSeries({ id: series.id })

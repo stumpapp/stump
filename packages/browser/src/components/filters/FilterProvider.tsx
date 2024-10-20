@@ -68,6 +68,8 @@ export default function FilterProvider({ children }: Props) {
 
 	return (
 		<FilterContext.Provider
+			// TODO(filters): Ensure this gets cleaned up
+			// @ts-expect-error: this is acceptable since I am rewriting the filter stuff
 			value={{
 				filters: params,
 				ordering,
@@ -129,6 +131,8 @@ export function ManualFilterProvider({ children }: Props) {
 
 	return (
 		<FilterContext.Provider
+			// TODO(filters): Ensure this gets cleaned up
+			// @ts-expect-error: this is acceptable since I am rewriting the filter stuff
 			value={{
 				filters,
 				ordering,

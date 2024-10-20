@@ -2,7 +2,7 @@ import { usePrefetchMediaByID, useSDK } from '@stump/client'
 import { Text } from '@stump/components'
 import { Media } from '@stump/sdk'
 import pluralize from 'pluralize'
-import { useCallback, useMemo } from 'react'
+import { type ComponentPropsWithoutRef, useCallback, useMemo } from 'react'
 
 import paths from '@/paths'
 import { formatBookName, formatBytes } from '@/utils/format'

@@ -1,15 +1,15 @@
 import { useUpdateSmartList } from '@stump/client'
 import { CreateOrUpdateSmartList } from '@stump/sdk'
-import { Suspense, useCallback } from 'react'
+import { lazy, Suspense, useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
 import { useSmartListContext } from '../context'
 import { SmartListSettingsContext } from './context'
 
-const BasicSettingsScene = React.lazy(() => import('./basics'))
-const AccessSettingsScene = React.lazy(() => import('./access'))
-const FiltersSettingsScene = React.lazy(() => import('./filters'))
-const DangerSettingsScene = React.lazy(() => import('./danger'))
+const BasicSettingsScene = lazy(() => import('./basics'))
+const AccessSettingsScene = lazy(() => import('./access'))
+const FiltersSettingsScene = lazy(() => import('./filters'))
+const DangerSettingsScene = lazy(() => import('./danger'))
 
 export default function SmartListSettingsRouter() {
 	const { list } = useSmartListContext()

@@ -102,7 +102,6 @@ export default function PersistedLogsTable() {
 			direction: firstSort.desc ? 'desc' : 'asc',
 			job_id: jobId,
 			order_by: firstSort.id,
-			zero_based: true,
 		},
 	})
 	const pageCount = pageData?.total_pages ?? 1

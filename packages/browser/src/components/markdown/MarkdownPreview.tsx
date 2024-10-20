@@ -13,6 +13,8 @@ type Props = {
 export default function MarkdownPreview({ children, className }: Props) {
 	return (
 		<ReactMarkdown
+			// TODO(types): fix types
+			// @ts-expect-error: types are funky, check the docs
 			remarkPlugins={[remarkDirective, remarkDirectiveRehype]}
 			className={cn('text-foreground-subtle', className)}
 			components={{

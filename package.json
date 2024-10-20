@@ -47,7 +47,7 @@
 		"husky": "^9.1.6",
 		"lerna": "^8.1.8",
 		"lint-staged": "^15.2.10",
-		"prettier": "^3.3.3",
+		"prettier": "=3.3.2",
 		"prettier-eslint": "^16.3.0",
 		"prettier-plugin-tailwindcss": "^0.6.8",
 		"rimraf": "^5.0.5",

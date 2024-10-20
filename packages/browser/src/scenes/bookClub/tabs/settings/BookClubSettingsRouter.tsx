@@ -1,16 +1,16 @@
 import { useUpdateBookClub } from '@stump/client'
 import { UpdateBookClub } from '@stump/sdk'
-import { Suspense, useCallback } from 'react'
+import { lazy, Suspense, useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
 import { useBookClubContext } from '@/components/bookClub'
 
 import { BookClubManagementContext } from './context'
 
-const BasicSettingsScene = React.lazy(() => import('./basics'))
-const MemberManagementScene = React.lazy(() => import('./members'))
-const DeletionScene = React.lazy(() => import('./danger'))
-const BookClubSchedulerScene = React.lazy(() => import('./scheduler'))
+const BasicSettingsScene = lazy(() => import('./basics'))
+const MemberManagementScene = lazy(() => import('./members'))
+const DeletionScene = lazy(() => import('./danger'))
+const BookClubSchedulerScene = lazy(() => import('./scheduler'))
 
 export default function BookClubSettingsRouter() {
 	const { bookClub } = useBookClubContext()

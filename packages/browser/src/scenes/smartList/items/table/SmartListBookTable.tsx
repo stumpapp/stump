@@ -9,7 +9,7 @@ import {
 	SortingState,
 	useReactTable,
 } from '@tanstack/react-table'
-import { PropsWithChildren, useCallback, useMemo } from 'react'
+import { Fragment, PropsWithChildren, useCallback, useMemo } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { SortIcon } from '@/components/table'
@@ -90,7 +90,7 @@ export default function SmartListBookTable({ books, isIsolatedTable = true }: Pr
 					{children}
 				</div>
 			)
-		: React.Fragment
+		: Fragment
 
 	return (
 		<Container>

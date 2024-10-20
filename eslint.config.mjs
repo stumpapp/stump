@@ -36,6 +36,7 @@ export default [
 					semi: false,
 				},
 			],
+			...pluginReactHooks.configs.recommended.rules,
 		},
 	},
 	{ languageOptions: { globals: globals.node } },

@@ -1,182 +1,156 @@
-import { cx, Heading, IconButton, Text, ToolTip } from '@stump/components'
-import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { useCallback, useEffect, useRef } from 'react'
+import { Button, cn, Heading, Text, ToolTip } from '@stump/components'
+import { ChevronLeft, ChevronRight, CircleSlash2 } from 'lucide-react'
+import { forwardRef, useCallback, useMemo, useRef, useState } from 'react'
+import { ScrollerProps, Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { useMediaMatch } from 'rooks'
 
+import { usePreferences } from '../hooks'
+
 type Props = {
-	cards: JSX.Element[]
-	title?: string
-	hasMore?: boolean
-	fetchNext?: () => void
-	emptyMessage?: string | (() => React.ReactNode)
+	title: string
+	items: JSX.Element[]
+	onFetchMore: () => void
+	emptyState?: React.ReactNode
 }
-export default function HorizontalCardList({
-	cards,
-	title,
-	fetchNext,
-	emptyMessage = 'No items to display',
-}: Props) {
-	const parentRef = useRef<HTMLDivElement>(null)
-	const visibleRef = useRef([0, 0])
+
+export default function HorizontalCardList_({ title, items, onFetchMore, emptyState }: Props) {
+	const virtuosoRef = useRef<VirtuosoHandle>(null)
 
 	const isAtLeastSmall = useMediaMatch('(min-width: 640px)')
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 
-	// NOTE: "When this function's memoization changes, the entire list is recalculated"
-	// Sure doesn't seem like it! >:( I had to create an effect that calls measure() when the
-	// memoization changes. This feels like a bug TBH.
-	const estimateSize = useCallback(() => {
-		if (!isAtLeastSmall) {
-			return 170
-		} else if (!isAtLeastMedium) {
-			return 185
-		} else {
-			return 205
-		}
-	}, [isAtLeastSmall, isAtLeastMedium])
+	const height = useMemo(
+		() => (!isAtLeastSmall ? 325 : !isAtLeastMedium ? 350 : 375),
+		[isAtLeastSmall, isAtLeastMedium],
+	)
 
-	const columnVirtualizer = useVirtualizer({
-		count: cards.length,
-		estimateSize,
-		getScrollElement: () => parentRef.current,
-		horizontal: true,
-		overscan: 15,
-		rangeExtractor: useCallback((range: Range) => {
-			visibleRef.current = [range.startIndex, range.endIndex]
-			return defaultRangeExtractor(range)
-		}, []),
+	const [visibleRange, setVisibleRange] = useState({
+		endIndex: 0,
+		startIndex: 0,
 	})
 
-	const virtualItems = columnVirtualizer.getVirtualItems()
-	const isEmpty = virtualItems.length === 0
+	const { startIndex: lowerBound, endIndex: upperBound } = visibleRange
 
-	const [lowerBound, upperBound] = visibleRef.current
+	const canSkipBackward = upperBound > 0
+	const canSkipForward = items.length && upperBound + 1 < items.length
 
-	const canSkipBackward = (lowerBound ?? 0) > 0
-	const canSkipForward = !!cards.length && (upperBound || 0) + 1 < cards.length
+	const handleSkipAhead = useCallback(
+		(skip = 5) => {
+			const nextIndex = Math.min(upperBound + skip, items.length - 1)
+			virtuosoRef.current?.scrollIntoView({
+				index: nextIndex,
+				behavior: 'smooth',
+				align: 'start',
+			})
+		},
+		[upperBound, items.length],
+	)
 
-	useEffect(() => {
-		columnVirtualizer.measure()
-	}, [isAtLeastMedium, isAtLeastSmall])
-
-	useEffect(() => {
-		const [lastItem] = [...virtualItems].reverse()
-		if (!lastItem) {
-			return
-		}
-
-		// if we are 80% of the way to the end, fetch more
-		const start = upperBound || 0
-		const threshold = lastItem.index * 0.8
-		const closeToEnd = start >= threshold
-
-		if (closeToEnd) {
-			fetchNext?.()
-		}
-	}, [virtualItems, fetchNext, upperBound])
-
-	const getItemOffset = (index: number) => {
-		return index * estimateSize()
-	}
-
-	const handleSkipAhead = async (skipValue = 5) => {
-		const nextIndex = (upperBound || 5) + skipValue || 10
-		const virtualItem = virtualItems.find((item) => item.index === nextIndex)
-
-		if (!virtualItem) {
-			// NOTE: this is really just a guess, and this should never ~really~ happen
-			columnVirtualizer.scrollToOffset(getItemOffset(nextIndex), { behavior: 'smooth' })
-		} else {
-			columnVirtualizer.scrollToIndex(nextIndex, { behavior: 'smooth' })
-		}
-	}
-
-	const handleSkipBackward = (skipValue = 5) => {
-		let nextIndex = (visibleRef?.current[0] ?? 0) - skipValue || 0
-		if (nextIndex < 0) {
-			nextIndex = 0
-		}
-
-		columnVirtualizer.scrollToIndex(nextIndex, { behavior: 'smooth' })
-	}
+	const handleSkipBackward = useCallback(
+		(skip = 5) => {
+			const nextIndex = Math.max(lowerBound - skip, 0)
+			virtuosoRef.current?.scrollIntoView({
+				index: nextIndex,
+				behavior: 'smooth',
+				align: 'start',
+			})
+		},
+		[lowerBound],
+	)
 
 	const renderContent = () => {
-		if (!cards.length) {
-			return typeof emptyMessage === 'string' ? (
-				<Text size="md">{emptyMessage}</Text>
-			) : (
-				emptyMessage()
+		if (!items.length) {
+			return (
+				<div className="flex">
+					{emptyState || (
+						<div className="flex items-start justify-start space-x-3 rounded-lg border border-dashed border-edge-subtle px-4 py-4">
+							<span className="rounded-lg border border-edge bg-background-surface p-2">
+								<CircleSlash2 className="h-8 w-8 text-foreground-muted" />
+							</span>
+							<div>
+								<Text>Nothing to show</Text>
+								<Text size="sm" variant="muted">
+									No results present to display
+								</Text>
+							</div>
+						</div>
+					)}
+				</div>
+			)
+		} else {
+			return (
+				<Virtuoso
+					ref={virtuosoRef}
+					style={{ height }}
+					horizontalDirection
+					data={items}
+					components={{
+						Scroller: HorizontalScroller,
+					}}
+					itemContent={(_, card) => <div className="px-1">{card}</div>}
+					endReached={onFetchMore}
+					increaseViewportBy={5 * (height / 3)}
+					rangeChanged={setVisibleRange}
+					overscan={{ main: 3, reverse: 3 }}
+				/>
 			)
 		}
-
-		return (
-			<div
-				ref={parentRef}
-				className="h-[23rem] overflow-x-auto overflow-y-hidden scrollbar-hide sm:h-[25rem] lg:h-[28rem]"
-			>
-				<div
-					className="relative inline-flex h-full"
-					style={{
-						width: `${columnVirtualizer.getTotalSize()}px`,
-					}}
-				>
-					{columnVirtualizer.getVirtualItems().map((virtualItem) => {
-						const card = cards[virtualItem.index]
-
-						return (
-							<div
-								key={virtualItem.key}
-								style={{
-									height: '100%',
-									left: 0,
-									position: 'absolute',
-									top: 0,
-									transform: `translateX(${virtualItem.start}px)`,
-									width: `${estimateSize()}px`,
-								}}
-							>
-								{card}
-							</div>
-						)
-					})}
-				</div>
-			</div>
-		)
 	}
 
 	return (
-		<div className="flex h-full w-full flex-col space-y-2">
+		<div className="flex flex-col space-y-2">
 			<div className="flex flex-row items-center justify-between">
 				<Heading size="sm">{title}</Heading>
-				<div className={cx('self-end', { hidden: isEmpty })}>
+				<div className={cn('self-end', { hidden: !items.length })}>
 					<div className="flex gap-2">
-						<ToolTip content="Seek backwards" isDisabled={!canSkipBackward}>
-							<IconButton
+						<ToolTip content="Seek backwards" isDisabled={!canSkipBackward} align="end">
+							<Button
 								variant="ghost"
-								size="sm"
+								size="icon"
 								disabled={!canSkipBackward}
 								onClick={() => handleSkipBackward()}
 								onDoubleClick={() => handleSkipBackward(20)}
 							>
 								<ChevronLeft className="h-4 w-4" />
-							</IconButton>
+							</Button>
 						</ToolTip>
-						<ToolTip content="Seek Ahead" isDisabled={!canSkipForward}>
-							<IconButton
+						<ToolTip content="Seek Ahead" isDisabled={!canSkipForward} align="end">
+							<Button
 								variant="ghost"
-								size="sm"
+								size="icon"
 								disabled={!canSkipForward}
 								onClick={() => handleSkipAhead()}
 								onDoubleClick={() => handleSkipAhead(20)}
 							>
 								<ChevronRight className="h-4 w-4" />
-							</IconButton>
+							</Button>
 						</ToolTip>
 					</div>
 				</div>
 			</div>
+
 			{renderContent()}
 		</div>
 	)
 }
+
+const HorizontalScroller = forwardRef<HTMLDivElement, ScrollerProps>(
+	({ children, ...props }, ref) => {
+		const {
+			preferences: { enable_hide_scrollbar },
+		} = usePreferences()
+
+		return (
+			<div
+				className={cn('flex overflow-y-hidden', {
+					'scrollbar-hide': enable_hide_scrollbar,
+				})}
+				ref={ref}
+				{...props}
+			>
+				{children}
+			</div>
+		)
+	},
+)
+HorizontalScroller.displayName = 'HorizontalScroller'

@@ -574,24 +574,24 @@
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "Continue Reading",
+			"title": "Continue reading",
 			"emptyState": {
-				"heading": "No books to display",
-				"message": "Any books you're currently reading will show up here"
+				"heading": "Nothing to show",
+				"message": "Any in-progress books you start will show up here"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Recently Added Series",
+			"title": "Recently added series",
 			"emptyState": {
 				"heading": "No series to display",
 				"message": "Any series you add to your libraries will show up here"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Recently Added Books",
+			"title": "Recently added books",
 			"emptyState": {
-				"heading": "No books to display",
-				"message": "Any books you add to your libraries will show up here"
+				"heading": "Nothing to show",
+				"message": "Any recent books you add will show up here"
 			}
 		}
 	},

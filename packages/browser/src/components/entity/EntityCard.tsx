@@ -84,7 +84,7 @@ export default function EntityCard({
 	const renderTitle = () => {
 		if (typeof title === 'string') {
 			return (
-				<Text size="sm" className="line-clamp-2 h-[40px]">
+				<Text size="sm" className="line-clamp-2 h-[40px] min-w-0 whitespace-normal">
 					{title}
 				</Text>
 			)
@@ -150,7 +150,7 @@ export default function EntityCard({
 		<Container
 			{...containerProps}
 			className={cn(
-				'relative flex flex-1 flex-col space-y-1 overflow-hidden rounded-lg border-[1.5px] border-edge bg-background/80 shadow-sm transition-colors duration-100',
+				'relative flex flex-1 flex-col space-y-1 overflow-hidden rounded-lg border-[1.5px] border-edge bg-background/80 transition-colors duration-100',
 				{ 'cursor-pointer hover:border-edge-brand dark:hover:border-edge-brand': hasClickAction },
 				{ 'max-w-[16rem]': isCover },
 				{

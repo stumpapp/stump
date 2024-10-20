@@ -1,6 +1,8 @@
 use axum::{
 	extract::{ConnectInfo, Query, State},
+	http::{Response, StatusCode},
 	middleware,
+	response::IntoResponse,
 	routing::{get, post},
 	Extension, Json, Router,
 };
@@ -20,7 +22,7 @@ use utoipa::ToSchema;
 use crate::{
 	config::{
 		jwt::{create_user_jwt, CreatedToken},
-		session::SESSION_USER_KEY,
+		session::{delete_cookie_header, SESSION_USER_KEY},
 		state::AppState,
 	},
 	errors::{api_error_message, APIError, APIResult},
@@ -341,9 +343,28 @@ async fn login(
 	)
 )]
 /// Destroys the session and logs the user out.
-async fn logout(session: Session) -> APIResult<()> {
+async fn logout(session: Session) -> APIResult<impl IntoResponse> {
 	session.delete().await?;
-	Ok(())
+
+	let body = serde_json::json!({
+		"status": 200,
+		"message": "OK",
+	});
+
+	let base_response = Json(body).into_response();
+
+	let (name, value) = delete_cookie_header();
+	let builder = Response::builder()
+		.status(200)
+		.header("Content-Type", "application/json")
+		.header(name, value);
+
+	Ok(builder
+		.body(base_response.into_body())
+		.unwrap_or_else(|error| {
+			tracing::error!(?error, "Failed to build response");
+			(StatusCode::INTERNAL_SERVER_ERROR, error.to_string()).into_response()
+		}))
 }
 
 #[utoipa::path(

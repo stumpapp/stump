@@ -22,7 +22,7 @@ export default function Logout({ trigger }: Props) {
 			.promise(sdk.auth.logout(), {
 				error: 'There was an error logging you out. Please try again.',
 				loading: null,
-				success: 'You have been logged out. Redirecting...',
+				success: 'You have been logged out',
 			})
 			.then(() => {
 				invalidateQueries({ keys: [sdk.server.keys.claimedStatus] })

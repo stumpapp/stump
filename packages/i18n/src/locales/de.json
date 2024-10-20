@@ -142,26 +142,26 @@
 				{
 					"label": "Rollen",
 					"heading": "Rollen",
-					"description": "Customize the roles in your book club"
+					"description": "Passen Sie die Rollen im Buchclub an"
 				},
 				{
-					"label": "Membership",
-					"heading": "Membership Preferences",
-					"description": "Additional options for your book club"
+					"label": "Mitgliedschaft",
+					"heading": "Mitgliedschaftseinstellungen",
+					"description": "Zusätzliche Optionen für den Buchclub"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your club settings before creating it"
+					"label": "Überprüfung",
+					"heading": "Überprüfung",
+					"description": "Clubeinstellungen vorm Erstellen nochmals prüfen"
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "Ja",
+				"no": "Nein",
+				"none": "Überspringen",
 				"labels": {
 					"name": "Name",
-					"description": "Description"
+					"description": "Beschreibung"
 				}
 			},
 			"submit": "Buchclub erstellen"
@@ -169,41 +169,41 @@
 	},
 	"bookClubSettingsScene": {
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "Grundlegendes",
 			"members": {
-				"members": "Members",
-				"roles": "Roles",
-				"label": "Membership"
+				"members": "Mitglieder",
+				"roles": "Rollen",
+				"label": "Mitgliedschaft"
 			},
 			"scheduling": {
 				"scheduler": "Scheduler",
-				"options": "Options",
+				"options": "Optionen",
 				"label": "Scheduling"
 			},
 			"danger-zone": {
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"delete": "Löschen",
+				"label": "Gefahrenzone"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this book club, including its name and description",
+			"title": "Grundlegende Informationen",
+			"description": "Die Details dieses Buchclubs, einschließlich Name und Beschreibung",
 			"form": {
-				"submit": "Update club"
+				"submit": "Club aktualisieren"
 			}
 		},
 		"members": {
-			"title": "Members",
-			"description": "Manage the members of this book club",
+			"title": "Mitglieder",
+			"description": "Die Mitglieder dieses Buchclubs verwalten",
 			"sections": {}
 		},
 		"roles": {
-			"title": "Roles",
-			"description": "Customize the roles in this book club",
+			"title": "Rollen",
+			"description": "Die Rollen dieses Buchclubs anpassen",
 			"sections": {
 				"roleMappings": {
-					"heading": "Existing role mappings",
-					"description": "The current role mappings for this book club"
+					"heading": "Vorhandene Rollenzuordnungen",
+					"description": "Die aktuellen Rollenzuordnungen für diesen Buchclub"
 				}
 			}
 		},
@@ -212,20 +212,20 @@
 			"description": "Create and manage the schedule readings for this book club"
 		},
 		"scheduling/options": {
-			"title": "Options",
+			"title": "Optionen",
 			"description": "Additional options for this book club's scheduling"
 		},
 		"danger-zone/delete": {
 			"title": "Deletion Actions",
-			"description": "Permanently delete this book club and all of its contents or certain resources",
+			"description": "Diesen Buchclub und all seine Inhalte oder gewisse Ressourcen dauerhaft löschen",
 			"sections": {
 				"deleteClub": {
-					"heading": "Delete club",
+					"heading": "Club löschen",
 					"description": [
-						"Permanently delete this book club and all its contents.",
-						"This action cannot be undone"
+						"Diesen Buchclub und seinen gesamten Inhalt dauerhaft löschen.",
+						"Dieser Vorgang kann nicht rückgängig gemacht werden"
 					],
-					"trigger": "Delete club"
+					"trigger": "Club löschen"
 				}
 			}
 		}
@@ -603,35 +603,35 @@
 	},
 	"createOrUpdateSmartListForm": {
 		"validation": {
-			"nameTooShort": "Name must be at least 2 characters",
-			"nameTaken": "Cannot use this name"
+			"nameTooShort": "Name muss mindestens 2 Zeichen lang sein",
+			"nameTaken": "Dieser Name kann nicht verwendet werden"
 		},
 		"fields": {
 			"name": {
 				"label": "Name",
-				"placeholder": "My smart list",
-				"description": "Must be unique, but can be changed later"
+				"placeholder": "Meine intelligente Liste",
+				"description": "Muss einzigartig sein, kann aber später geändert werden"
 			},
 			"description": {
-				"label": "Description",
-				"placeholder": "A very intelligent list",
-				"description": "An optional description of your smart list"
+				"label": "Beschreibung",
+				"placeholder": "Eine sehr intelligente Liste",
+				"description": "Eine optionale Beschreibung der intelligenten Liste"
 			},
 			"visibility": {
-				"label": "Visibility",
+				"label": "Sichtbarkeit",
 				"options": {
 					"public": {
-						"label": "Public",
-						"description": "Accessible to all users on the server"
+						"label": "Öffentlich",
+						"description": "Für alle Benutzer auf dem Server zugänglich"
 					},
 					"shared": {
-						"label": "Shared",
-						"description": "Specific users can access this smart list",
-						"createDisclaimer": "You can select who this list is shared with after creation"
+						"label": "Geteilt",
+						"description": "Bestimmte Benutzer können auf diese intelligente Liste zugreifen",
+						"createDisclaimer": "Nach dem Erstellen kann ausgewählt werden, wer Zugriff auf diese intelligente Liste erhält"
 					},
 					"private": {
-						"label": "Private",
-						"description": "Only you can access this smart list"
+						"label": "Privat",
+						"description": "Niemand sonst kann auf diese intelligente Liste zugreifen"
 					}
 				}
 			},
@@ -639,140 +639,140 @@
 				"uiPerformance": "This feature is missing performance optimizations on the UI and may be slow with filters which produce large result sets. This will be improved in the future",
 				"rootJoiner": {
 					"and": {
-						"label": "AND",
+						"label": "UND",
 						"description": "All filter groups must be true for a book to be matched"
 					},
 					"or": {
-						"label": "OR",
-						"description": "At least one filter group must be true for a book to be matched"
+						"label": "ODER",
+						"description": "Mindestens eine Filtergruppe muss zutreffen, damit ein Buch übereinstimmt"
 					}
 				},
 				"groupJoiner": {
 					"and": {
-						"label": "AND",
-						"description": "All must be true"
+						"label": "UND",
+						"description": "Alles muss zutreffen"
 					},
 					"or": {
-						"label": "OR",
-						"description": "At least one must be true"
+						"label": "ODER",
+						"description": "Mindestens eines muss zutreffen"
 					},
 					"not": {
-						"label": "NOT",
-						"description": "None can be true"
+						"label": "NICHT",
+						"description": "Nichts darf zutreffen"
 					}
 				},
 				"grouping": {
-					"label": "Group by",
-					"description": "How the books in this smart list should be grouped",
+					"label": "Gruppierung",
+					"description": "Wie die Bücher in dieser intelligenten Liste gruppiert werden sollen",
 					"options": {
 						"by_books": {
-							"label": "None"
+							"label": "Keine"
 						},
 						"by_series": {
-							"label": "Series"
+							"label": "Serie"
 						},
 						"by_library": {
-							"label": "Library"
+							"label": "Bibliothek"
 						}
 					}
 				},
 				"filters": {
-					"emptyState": "Add a group to get started",
+					"emptyState": "Gruppe hinzufügen, um loszulegen",
 					"actions": {
-						"addFilter": "Add filter",
-						"addGroup": "Add group",
-						"deleteFilter": "Delete filter",
-						"deleteGroup": "Delete group"
+						"addFilter": "Filter hinzufügen",
+						"addGroup": "Gruppe hinzufügen",
+						"deleteFilter": "Filter löschen",
+						"deleteGroup": "Gruppe löschen"
 					},
-					"is": "is",
+					"is": "ist",
 					"fieldSelect": {
-						"placeholder": "Attribute",
+						"placeholder": "Attribut",
 						"source": {
-							"label": "Source",
-							"back": "Back",
+							"label": "Quelle",
+							"back": "Zurück",
 							"book": {
-								"label": "Book",
+								"label": "Buch",
 								"attributes": {
-									"name": "Filename",
-									"size": "Size",
-									"extension": "Extension",
-									"created_at": "Created at",
-									"updated_at": "Updated at",
+									"name": "Dateiname",
+									"size": "Größe",
+									"extension": "Dateiendung",
+									"created_at": "Erstellt am",
+									"updated_at": "Aktualisiert am",
 									"status": "Status",
-									"path": "Path",
-									"pages": "Pages",
-									"tags": "Tags"
+									"path": "Pfad",
+									"pages": "Seiten",
+									"tags": "Schlagworte"
 								}
 							},
 							"book_meta": {
-								"label": "Book Meta",
+								"label": "Buch Metadaten",
 								"attributes": {
-									"title": "Title",
-									"summary": "Summary",
-									"notes": "Notes",
+									"title": "Titel",
+									"summary": "Zusammenfassung",
+									"notes": "Anmerkungen",
 									"genre": "Genre",
-									"writers": "Writers",
-									"pencillers": "Pencillers",
-									"inkers": "Inkers",
-									"letterers": "Letterers",
-									"editors": "Editors",
-									"publisher": "Publisher",
+									"writers": "Autoren",
+									"pencillers": "Penciller",
+									"inkers": "Inker",
+									"letterers": "Letterer",
+									"editors": "Redakteure",
+									"publisher": "Herausgeber",
 									"colorists": "Colorist",
-									"cover_artists": "Cover artists",
+									"cover_artists": "Cover Künstler",
 									"links": "Links",
-									"characters": "Characters",
+									"characters": "Charaktere",
 									"teams": "Teams"
 								}
 							},
 							"series": {
-								"label": "Series",
+								"label": "Serie",
 								"attributes": {
 									"name": "Name",
-									"path": "Path"
+									"path": "Pfad"
 								}
 							},
 							"series_meta": {
-								"label": "Series Meta",
+								"label": "Serien Metadaten",
 								"attributes": {
-									"age_rating": "Age rating",
-									"title": "Title",
-									"summary": "Summary",
-									"meta_type": "Type",
-									"publisher": "Publisher",
+									"age_rating": "Alterseinstufung",
+									"title": "Titel",
+									"summary": "Zusammenfassung",
+									"meta_type": "Typ",
+									"publisher": "Herausgeber",
 									"imprint": "Imprint",
-									"comicid": "Comic ID",
-									"booktype": "Book type",
+									"comicid": "Comic-ID",
+									"booktype": "Buchtyp",
 									"status": "Status",
-									"volume": "Volume"
+									"volume": "Band"
 								}
 							},
 							"library": {
-								"label": "Library",
+								"label": "Bibliothek",
 								"attributes": {
 									"name": "Name",
-									"path": "Path"
+									"path": "Pfad"
 								}
 							}
 						}
 					},
 					"basicValue": {
-						"placeholder": "Value",
-						"date": "Date"
+						"placeholder": "Wert",
+						"date": "Datum"
 					},
 					"rangeValue": {
 						"from": {
-							"date": "From date",
-							"number": "From"
+							"date": "Von",
+							"number": "Von"
 						},
 						"to": {
-							"date": "To date",
-							"number": "To"
+							"date": "Bis",
+							"number": "Bis"
 						},
-						"inclusive": "Inclusive"
+						"inclusive": "Einschließend"
 					},
 					"listValue": {
-						"placeholder": "Add values",
-						"emptyState": "No values to display"
+						"placeholder": "Werte hinzufügen",
+						"emptyState": "Keine Werte zum Anzeigen vorhanden"
 					}
 				}
 			}

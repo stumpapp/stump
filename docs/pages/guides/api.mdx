@@ -20,19 +20,19 @@ import { Api } from '@stump/sdk'
 const sdk = new Api({
 	baseURL: 'http://localhost:10801',
 	// You may also use 'session' if you configure it properly
-	authMethod: 'token'
+	authMethod: 'token',
 })
 
 // A token will be managed for you in-memory, but you can store it yourself
 // using the returned `LoginResponse` object
 await sdk.auth.login({
 	username: 'oromei',
-	password: 'password'
+	password: 'password',
 })
 
 const favoriteBook = await sdk.media.get({
-	name: ["The Cybernetic Tea Shop"],
-	limit: 1
+	name: ['The Cybernetic Tea Shop'],
+	limit: 1,
 })
 ```
 

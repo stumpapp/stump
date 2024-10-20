@@ -9,7 +9,7 @@ import tseslint from 'typescript-eslint'
 
 export default [
 	{
-		ignores: ['**/dist/*', '**/target/**'],
+		ignores: ['**/dist/*', '**/target/**', '**/.next/**', '**/.vercel/**'],
 	},
 	{
 		files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'],
@@ -18,6 +18,11 @@ export default [
 			react: pluginReact,
 			'react-hooks': pluginReactHooks,
 			'sort-keys-fix': keySort,
+		},
+		settings: {
+			react: {
+				version: 'detect',
+			},
 		},
 		rules: {
 			'no-console': ['error', { allow: ['warn', 'error'] }],

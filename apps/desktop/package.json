@@ -4,7 +4,7 @@
 	"description": "",
 	"license": "MIT",
 	"scripts": {
-		"lint": "eslint",
+		"lint": "eslint .",
 		"tauri": "tauri",
 		"start": "tauri dev --no-watch",
 		"start-bundled": "yarn tauri dev  --no-watch -- --features bundled-server",

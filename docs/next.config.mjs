@@ -8,43 +8,23 @@ const withNextra = nextra({
 export default withNextra({
 	redirects: async () => [
 		{
-			source: '/docs',
-			destination: '/docs/getting-started',
+			source: '/guides/access-control',
+			destination: '/guides/access-control/age-restrictions',
 			permanent: true,
 		},
 		{
-			source: '/docs/installation',
-			destination: '/docs/getting-started',
+			source: '/guides/basics',
+			destination: '/guides/basics/books',
 			permanent: true,
 		},
 		{
-			source: '/docs/guides',
-			destination: '/docs/getting-started',
+			source: '/guides/book-clubs',
+			destination: '/guides/book-clubs/overview',
 			permanent: true,
 		},
 		{
-			source: '/docs/guides/access-control',
-			destination: '/docs/access-control/age-restrictions',
-			permanent: true,
-		},
-		{
-			source: '/docs/guides/basics',
-			destination: '/docs/basics/books',
-			permanent: true,
-		},
-		{
-			source: '/docs/guides/book-clubs',
-			destination: '/docs/book-clubs/overview',
-			permanent: true,
-		},
-		{
-			source: '/docs/guides/configuration',
-			destination: '/docs/configuration/server-options',
-			permanent: true,
-		},
-		{
-			source: '/docs/guides/desktop',
-			destination: '/docs/desktop/overview',
+			source: '/guides/configuration',
+			destination: '/guides/configuration/server-options',
 			permanent: true,
 		},
 	],

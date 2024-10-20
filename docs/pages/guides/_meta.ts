@@ -1,7 +1,9 @@
 import { Meta } from 'nextra'
 
 export default {
-	'getting-started': 'Getting Started',
+	index: {
+		display: 'hidden',
+	},
 	'access-control': 'Access Control',
 	basics: 'Basics',
 	'book-clubs': 'Book Clubs',

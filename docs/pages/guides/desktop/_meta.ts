@@ -1,5 +1,5 @@
 import { Meta } from 'nextra'
 
 export default {
-	overview: 'Overview',
+	index: 'Overview',
 } satisfies Meta

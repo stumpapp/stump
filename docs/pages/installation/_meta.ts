@@ -1,7 +1,7 @@
 import { Meta } from 'nextra'
 
 export default {
-	'getting-started': 'Getting Started',
+	index: 'Getting Started',
 	docker: {
 		title: 'Docker',
 		theme: {

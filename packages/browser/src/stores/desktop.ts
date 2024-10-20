@@ -51,32 +51,28 @@ export const useTauriStore = () => {
 	/**
 	 * An effect to load the store from disk on mount and sync it with the local store
 	 */
-	useEffect(
-		() => {
-			const init = async () => {
-				try {
-					const storeEntries = await store.entries()
-					const loadedStore = storeEntries.reduce(
-						(acc, [key, value]) => {
-							acc[key] = value
-							return acc
-						},
-						{} as Record<string, unknown>,
-					)
-					// TODO: smarter type assertions here
-					if ('connected_servers' in loadedStore) {
-						localStore.set(loadedStore as DesktopAppStore)
-					}
-				} catch (e) {
-					console.error('Failed to load store', e)
+	useEffect(() => {
+		const init = async () => {
+			try {
+				const storeEntries = await store.entries()
+				const loadedStore = storeEntries.reduce(
+					(acc, [key, value]) => {
+						acc[key] = value
+						return acc
+					},
+					{} as Record<string, unknown>,
+				)
+				// TODO: smarter type assertions here
+				if ('connected_servers' in loadedStore) {
+					localStore.set(loadedStore as DesktopAppStore)
 				}
+			} catch (e) {
+				console.error('Failed to load store', e)
 			}
+		}
 
-			init()
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[],
-	)
+		init()
+	}, [])
 
 	/**
 	 * Add a server to the list of connected servers. If this is the first server added,

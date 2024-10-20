@@ -77,7 +77,7 @@ export default function Search({
 			className={cn(
 				'flex-grow transition-[width] duration-200 ease-in-out',
 				{ 'w-full flex-grow sm:w-2/5': isFocused },
-				{ 'w-2/3 cursor-pointer pr-0 sm:w-3/5  md:w-1/5': !isFocused },
+				{ 'w-2/3 cursor-pointer pr-0 sm:w-3/5 md:w-1/5': !isFocused },
 			)}
 			disabled={isDisabled}
 		/>

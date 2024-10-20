@@ -64,7 +64,7 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 								to={paths.notifications()}
 								onClick={() => setIsOpen(false)}
 							>
-								<Bell className="mr-1.5 h-4 w-4 " />
+								<Bell className="mr-1.5 h-4 w-4" />
 								Notifications
 							</Link>
 

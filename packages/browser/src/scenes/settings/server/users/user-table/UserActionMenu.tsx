@@ -101,7 +101,7 @@ export default function UserActionMenu({ user, onSelectForInspect }: Props) {
 				],
 			},
 		],
-		// eslint-disable-next-line react-hooks/exhaustive-deps
+
 		[setDeletingUser, user, isSelf, userSessionsCount],
 	)
 

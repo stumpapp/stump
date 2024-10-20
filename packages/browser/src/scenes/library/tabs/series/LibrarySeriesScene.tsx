@@ -101,30 +101,22 @@ function LibrarySeriesScene() {
 
 	const previousPage = usePrevious(current_page)
 	const shouldScroll = !!previousPage && previousPage !== current_page
-	useEffect(
-		() => {
-			if (!isInView && shouldScroll) {
-				containerRef.current?.scrollIntoView({
-					behavior: 'smooth',
-					block: 'nearest',
-					inline: 'start',
-				})
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[shouldScroll],
-	)
+	useEffect(() => {
+		if (!isInView && shouldScroll) {
+			containerRef.current?.scrollIntoView({
+				behavior: 'smooth',
+				block: 'nearest',
+				inline: 'start',
+			})
+		}
+	}, [shouldScroll])
 
-	useEffect(
-		() => {
-			if (library?.id && !alreadyVisited.current) {
-				alreadyVisited.current = true
-				visitLibrary(library.id)
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[library?.id],
-	)
+	useEffect(() => {
+		if (library?.id && !alreadyVisited.current) {
+			alreadyVisited.current = true
+			visitLibrary(library.id)
+		}
+	}, [library?.id])
 
 	if (isLoading) {
 		return null

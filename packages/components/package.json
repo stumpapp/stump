@@ -4,7 +4,6 @@
 	"exports": {
 		".": "./src/index.ts",
 		"./styles/overrides.css": "./src/styles/overrides.css",
-		"./tailwind/tailwind.js": "./tailwind/tailwind.js",
 		"./tailwind": "./tailwind/index.ts",
 		"./themes": "./themes/index.ts"
 	},

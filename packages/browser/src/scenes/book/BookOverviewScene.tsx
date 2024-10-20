@@ -47,15 +47,11 @@ export default function BookOverviewScene() {
 
 	const { media, isLoading, remove } = useMediaByIdQuery(id)
 
-	useEffect(
-		() => {
-			return () => {
-				remove()
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[],
-	)
+	useEffect(() => {
+		return () => {
+			remove()
+		}
+	}, [])
 
 	if (isLoading) {
 		return null

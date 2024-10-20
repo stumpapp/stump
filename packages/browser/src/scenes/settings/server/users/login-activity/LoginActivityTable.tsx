@@ -44,7 +44,7 @@ const baseColumns = [
 	}),
 	columnHelper.accessor('ip_address', {
 		cell: ({ row: { original: activity } }) => (
-			<Text className="line-clamp-1 " size="sm">
+			<Text className="line-clamp-1" size="sm">
 				{activity.ip_address}
 			</Text>
 		),

@@ -52,16 +52,11 @@ export default function BookSearch({ page, page_size, setPage, onBookSelect, sho
 	const [containerRef, isInView] = useIsInView<HTMLDivElement | null>()
 	const isOnFirstPage = current_page === 1
 	// TODO: detect if going from page > 1 to page = 1 and scroll to top
-	useEffect(
-		() => {
-			if (!isInView && !isOnFirstPage) {
-				containerRef.current?.scrollIntoView()
-			}
-		},
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[current_page, isOnFirstPage],
-	)
+	useEffect(() => {
+		if (!isInView && !isOnFirstPage) {
+			containerRef.current?.scrollIntoView()
+		}
+	}, [current_page, isOnFirstPage])
 
 	const hasStuff = total_pages !== undefined && current_page !== undefined && total_pages > 0
 	const hasFilters = Object.keys(filters || {}).length > 0

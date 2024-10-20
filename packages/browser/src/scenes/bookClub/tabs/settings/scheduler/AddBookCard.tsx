@@ -37,20 +37,16 @@ export default function AddBookCard({ index }: Props) {
 		[externalBook],
 	)
 
-	useEffect(
-		() => {
-			if (!selectedBook && isEntityBook) {
-				form.setValue(`books.${index}.book.id`, '')
-			} else if (selectedBook) {
-				// TODO: this is annoying and not ideal
-				form.setValue(`books.${index}.book.title`, '')
-				form.setValue(`books.${index}.book.author`, '')
-				form.setValue(`books.${index}.book.url`, undefined)
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[isEntityBook, selectedBook],
-	)
+	useEffect(() => {
+		if (!selectedBook && isEntityBook) {
+			form.setValue(`books.${index}.book.id`, '')
+		} else if (selectedBook) {
+			// TODO: this is annoying and not ideal
+			form.setValue(`books.${index}.book.title`, '')
+			form.setValue(`books.${index}.book.author`, '')
+			form.setValue(`books.${index}.book.url`, undefined)
+		}
+	}, [isEntityBook, selectedBook])
 
 	const handleSelectBook = useCallback(
 		(book: Media) => {

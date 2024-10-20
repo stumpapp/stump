@@ -183,7 +183,7 @@ export default function BookClubScheduleTimelineItem({ book }: Props) {
 				{renderBookInfo()}
 
 				<div
-					className={cx('flex items-center justify-between rounded-md p-3 ', {
+					className={cx('flex items-center justify-between rounded-md p-3', {
 						'bg-background-surface': !isCurrent && !isDiscussing,
 						'bg-fill-brand-secondary': isCurrent || isDiscussing,
 					})}

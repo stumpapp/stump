@@ -1,4 +1,6 @@
 import * as TabsPrimitive from '@radix-ui/react-tabs'
+import type { ComponentPropsWithoutRef, ElementRef } from 'react'
+import React from 'react'
 
 import { cn } from '../utils'
 import { TabsContext, TabsVariant } from './context'
@@ -13,8 +15,8 @@ const TABS_CONTENT_VARIANTS: Record<TabsVariant, string> = {
 export type TabsProps = {
 	variant?: TabsVariant
 	activeOnHover?: boolean
-} & React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>
-const Tabs = React.forwardRef<React.ElementRef<typeof TabsPrimitive.Root>, TabsProps>(
+} & ComponentPropsWithoutRef<typeof TabsPrimitive.Root>
+const Tabs = React.forwardRef<ElementRef<typeof TabsPrimitive.Root>, TabsProps>(
 	({ variant = 'default', activeOnHover, ...props }, ref) => (
 		<TabsContext.Provider value={{ activeOnHover, variant }}>
 			<TabsPrimitive.Root ref={ref} {...props} />
@@ -24,8 +26,8 @@ const Tabs = React.forwardRef<React.ElementRef<typeof TabsPrimitive.Root>, TabsP
 Tabs.displayName = TabsPrimitive.Root.displayName
 
 const TabsList = React.forwardRef<
-	React.ElementRef<typeof TabsPrimitive.List>,
-	React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
+	ElementRef<typeof TabsPrimitive.List>,
+	ComponentPropsWithoutRef<typeof TabsPrimitive.List>
 >(({ className, ...props }, ref) => (
 	<TabsContext.Consumer>
 		{({ activeOnHover }) => (
@@ -44,8 +46,8 @@ const TabsList = React.forwardRef<
 TabsList.displayName = TabsPrimitive.List.displayName
 
 const TabsTrigger = React.forwardRef<
-	React.ElementRef<typeof TabsPrimitive.Trigger>,
-	React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
+	ElementRef<typeof TabsPrimitive.Trigger>,
+	ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
 >(({ className, ...props }, ref) => (
 	<TabsContext.Consumer>
 		{({ variant, activeOnHover }) => (
@@ -70,8 +72,8 @@ const TabsTrigger = React.forwardRef<
 TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
 
 const TabsContent = React.forwardRef<
-	React.ElementRef<typeof TabsPrimitive.Content>,
-	React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
+	ElementRef<typeof TabsPrimitive.Content>,
+	ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
 >(({ className, ...props }, ref) => (
 	<TabsPrimitive.Content
 		className={cn('mt-2 rounded-md border border-edge-subtle p-6', className)}

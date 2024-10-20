@@ -1,11 +1,13 @@
 import { Command as CommandPrimitive } from 'cmdk'
 import { type LucideIcon, Search } from 'lucide-react'
+import type { ComponentPropsWithoutRef, ElementRef } from 'react'
+import React from 'react'
 
 import { Dialog, DialogProps } from '../dialog'
 import { cn } from '../utils'
 
-export type CommandProps = React.ComponentPropsWithoutRef<typeof CommandPrimitive>
-const Command = React.forwardRef<React.ElementRef<typeof CommandPrimitive>, CommandProps>(
+export type CommandProps = ComponentPropsWithoutRef<typeof CommandPrimitive>
+const Command = React.forwardRef<ElementRef<typeof CommandPrimitive>, CommandProps>(
 	({ className, ...props }, ref) => (
 		<CommandPrimitive
 			ref={ref}
@@ -33,8 +35,8 @@ const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
 }
 
 const CommandInput = React.forwardRef<
-	React.ElementRef<typeof CommandPrimitive.Input>,
-	React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
+	ElementRef<typeof CommandPrimitive.Input>,
+	ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
 >(({ className, ...props }, ref) => (
 	<div
 		className="flex items-center border-b border-b-edge px-4"
@@ -57,8 +59,8 @@ const CommandInput = React.forwardRef<
 CommandInput.displayName = CommandPrimitive.Input.displayName
 
 const CommandList = React.forwardRef<
-	React.ElementRef<typeof CommandPrimitive.List>,
-	React.ComponentPropsWithoutRef<typeof CommandPrimitive.List>
+	ElementRef<typeof CommandPrimitive.List>,
+	ComponentPropsWithoutRef<typeof CommandPrimitive.List>
 >(({ className, ...props }, ref) => (
 	<CommandPrimitive.List
 		ref={ref}
@@ -70,8 +72,8 @@ const CommandList = React.forwardRef<
 CommandList.displayName = CommandPrimitive.List.displayName
 
 const CommandEmpty = React.forwardRef<
-	React.ElementRef<typeof CommandPrimitive.Empty>,
-	React.ComponentPropsWithoutRef<typeof CommandPrimitive.Empty>
+	ElementRef<typeof CommandPrimitive.Empty>,
+	ComponentPropsWithoutRef<typeof CommandPrimitive.Empty>
 >((props, ref) => (
 	<CommandPrimitive.Empty
 		ref={ref}
@@ -83,8 +85,8 @@ const CommandEmpty = React.forwardRef<
 CommandEmpty.displayName = CommandPrimitive.Empty.displayName
 
 const CommandGroup = React.forwardRef<
-	React.ElementRef<typeof CommandPrimitive.Group>,
-	React.ComponentPropsWithoutRef<typeof CommandPrimitive.Group>
+	ElementRef<typeof CommandPrimitive.Group>,
+	ComponentPropsWithoutRef<typeof CommandPrimitive.Group>
 >(({ className, ...props }, ref) => (
 	<CommandPrimitive.Group
 		ref={ref}
@@ -99,8 +101,8 @@ const CommandGroup = React.forwardRef<
 CommandGroup.displayName = CommandPrimitive.Group.displayName
 
 const CommandSeparator = React.forwardRef<
-	React.ElementRef<typeof CommandPrimitive.Separator>,
-	React.ComponentPropsWithoutRef<typeof CommandPrimitive.Separator>
+	ElementRef<typeof CommandPrimitive.Separator>,
+	ComponentPropsWithoutRef<typeof CommandPrimitive.Separator>
 >(({ className, ...props }, ref) => (
 	<CommandPrimitive.Separator
 		ref={ref}
@@ -111,8 +113,8 @@ const CommandSeparator = React.forwardRef<
 CommandSeparator.displayName = CommandPrimitive.Separator.displayName
 
 const CommandItem = React.forwardRef<
-	React.ElementRef<typeof CommandPrimitive.Item>,
-	React.ComponentPropsWithoutRef<typeof CommandPrimitive.Item>
+	ElementRef<typeof CommandPrimitive.Item>,
+	ComponentPropsWithoutRef<typeof CommandPrimitive.Item>
 >(({ className, ...props }, ref) => (
 	<CommandPrimitive.Item
 		ref={ref}
@@ -127,7 +129,7 @@ CommandItem.displayName = CommandPrimitive.Item.displayName
 
 type CommandIconProps = {
 	icon: LucideIcon
-} & React.ComponentPropsWithoutRef<LucideIcon>
+} & ComponentPropsWithoutRef<LucideIcon>
 const CommandIcon = ({ icon: Icon, className, ...props }: CommandIconProps) => {
 	return <Icon className={cn('mr-2 h-4 w-4', className)} {...props} />
 }

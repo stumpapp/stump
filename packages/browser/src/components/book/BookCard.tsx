@@ -18,7 +18,7 @@ export type BookCardProps = {
 	onSelect?: (media: Media) => void
 }
 
-type EntityCardProps = React.ComponentPropsWithoutRef<typeof EntityCard>
+type EntityCardProps = ComponentPropsWithoutRef<typeof EntityCard>
 
 export default function BookCard({
 	media,

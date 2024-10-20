@@ -1,4 +1,6 @@
 import { cva, VariantProps } from 'class-variance-authority'
+import type { ComponentPropsWithoutRef, ElementRef } from 'react'
+import React from 'react'
 
 import { cn } from '../utils'
 
@@ -33,13 +35,13 @@ const textVariants = cva('', {
 	},
 })
 
-type BaseProps = VariantProps<typeof textVariants> & React.ComponentPropsWithoutRef<'p'>
+type BaseProps = VariantProps<typeof textVariants> & ComponentPropsWithoutRef<'p'>
 // FIXME: https://github.com/jsx-eslint/eslint-plugin-react/issues/3284
 export type TextProps = {
 	className?: string
 } & BaseProps
 
-const Text = React.forwardRef<React.ElementRef<'p'>, TextProps>(
+const Text = React.forwardRef<ElementRef<'p'>, TextProps>(
 	({ className, variant, size, ...props }, ref) => (
 		<p ref={ref} className={cn(textVariants({ className, size, variant }))} {...props} />
 	),

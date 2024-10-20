@@ -1,4 +1,5 @@
 import { cva, VariantProps } from 'class-variance-authority'
+import type { ComponentPropsWithoutRef } from 'react'
 import { forwardRef } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 
@@ -20,8 +21,8 @@ const linkVariants = cva(
 	},
 )
 
-type BaseProps = React.ComponentPropsWithoutRef<'a'> &
-	Omit<React.ComponentPropsWithoutRef<typeof RouterLink>, 'to'> &
+type BaseProps = ComponentPropsWithoutRef<'a'> &
+	Omit<ComponentPropsWithoutRef<typeof RouterLink>, 'to'> &
 	VariantProps<typeof linkVariants> & {
 		to?: string
 	}

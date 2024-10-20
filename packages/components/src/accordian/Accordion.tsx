@@ -1,7 +1,6 @@
-/* eslint-disable react/prop-types */
-
 import * as AccordionPrimitive from '@radix-ui/react-accordion'
 import { ChevronDownIcon } from 'lucide-react'
+import type { ComponentPropsWithoutRef, ElementRef } from 'react'
 import * as React from 'react'
 
 import { cn } from '../utils'
@@ -9,8 +8,8 @@ import { cn } from '../utils'
 const Accordion = AccordionPrimitive.Root
 
 const AccordionItem = React.forwardRef<
-	React.ElementRef<typeof AccordionPrimitive.Item>,
-	React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>
+	ElementRef<typeof AccordionPrimitive.Item>,
+	ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>
 >(({ className, ...props }, ref) => (
 	<AccordionPrimitive.Item ref={ref} className={cn('border-b border-edge', className)} {...props} />
 ))
@@ -19,9 +18,9 @@ AccordionItem.displayName = 'AccordionItem'
 type TriggerProps = {
 	noUnderline?: boolean
 	asLabel?: boolean
-} & React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
+} & ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
 const AccordionTrigger = React.forwardRef<
-	React.ElementRef<typeof AccordionPrimitive.Trigger>,
+	ElementRef<typeof AccordionPrimitive.Trigger>,
 	TriggerProps
 >(({ className, children, noUnderline, asLabel, ...props }, ref) => (
 	<AccordionPrimitive.Header className="flex">
@@ -48,9 +47,9 @@ AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName
 // TODO: variant for no or quickened animation
 type ContentProps = {
 	containerClassName?: string
-} & React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Content>
+} & ComponentPropsWithoutRef<typeof AccordionPrimitive.Content>
 const AccordionContent = React.forwardRef<
-	React.ElementRef<typeof AccordionPrimitive.Content>,
+	ElementRef<typeof AccordionPrimitive.Content>,
 	ContentProps
 >(({ className, children, containerClassName, ...props }, ref) => (
 	<AccordionPrimitive.Content

@@ -1,13 +1,15 @@
 {
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
+		"composite": true,
 		"types": ["vite/client", "node", "jest", "@testing-library/jest-dom"],
 		"skipLibCheck": true,
 		"allowImportingTsExtensions": true,
-		"jsx": "preserve",
+		"jsx": "react-jsx",
 		"module": "ES2022",
 		"moduleResolution": "Node",
-		"outDir": "./dist",
+		"emitDeclarationOnly": true,
+		"outDir": "dist",
 		"paths": {
 			"@stump/sdk": ["../sdk/src/index.ts"],
 			"@stump/sdk/*": ["../sdk/src/*"],

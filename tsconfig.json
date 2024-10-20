@@ -31,6 +31,9 @@
 		}
 	],
 	"compilerOptions": {
-		"module": "NodeNext"
+		"module": "NodeNext",
+		"composite": true,
+		"declaration": true,
+		"emitDeclarationOnly": true
 	}
 }

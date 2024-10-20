@@ -2,8 +2,11 @@
 	"extends": "../../tsconfig.options.json",
 	"references": [],
 	"compilerOptions": {
-		"outDir": "./dist",
-		"jsx": "preserve",
+		"composite": true,
+		"skipLibCheck": true,
+		"emitDeclarationOnly": true,
+		"outDir": "dist",
+		"jsx": "react-jsx",
 		"esModuleInterop": true,
 		"module": "es2022",
 		"moduleResolution": "Node"

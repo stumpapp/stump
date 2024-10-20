@@ -8,7 +8,7 @@
 		"./themes": "./themes/index.ts"
 	},
 	"scripts": {
-		"check-types": "tsc --noemit -p tsconfig.json",
+		"check-types": "tsc -b tsconfig.json",
 		"build": "tsc",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",

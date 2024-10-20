@@ -1,12 +1,14 @@
 import * as AspectRatioPrimitive from '@radix-ui/react-aspect-ratio'
 import * as AvatarRadix from '@radix-ui/react-avatar'
+import type { ComponentPropsWithoutRef, ElementRef } from 'react'
+import React from 'react'
 
 import { cn } from '../utils'
 
-export type AvatarPrimitiveRef = React.ElementRef<typeof AvatarRadix.Root>
+export type AvatarPrimitiveRef = ElementRef<typeof AvatarRadix.Root>
 const AvatarPrimitive = React.forwardRef<
 	AvatarPrimitiveRef,
-	React.ComponentPropsWithoutRef<typeof AvatarRadix.Root>
+	ComponentPropsWithoutRef<typeof AvatarRadix.Root>
 >(({ className, ...props }, ref) => (
 	<AvatarRadix.Root
 		ref={ref}
@@ -17,8 +19,8 @@ const AvatarPrimitive = React.forwardRef<
 AvatarPrimitive.displayName = AvatarRadix.Root.displayName
 
 const AvatarImage = React.forwardRef<
-	React.ElementRef<typeof AvatarRadix.Image>,
-	React.ComponentPropsWithoutRef<typeof AvatarRadix.Image>
+	ElementRef<typeof AvatarRadix.Image>,
+	ComponentPropsWithoutRef<typeof AvatarRadix.Image>
 >(({ className, ...props }, ref) => (
 	<AvatarRadix.Image
 		ref={ref}
@@ -29,8 +31,8 @@ const AvatarImage = React.forwardRef<
 AvatarImage.displayName = AvatarRadix.Image.displayName
 
 const AvatarFallback = React.forwardRef<
-	React.ElementRef<typeof AvatarRadix.Fallback>,
-	React.ComponentPropsWithoutRef<typeof AvatarRadix.Fallback>
+	ElementRef<typeof AvatarRadix.Fallback>,
+	ComponentPropsWithoutRef<typeof AvatarRadix.Fallback>
 >(({ className, ...props }, ref) => (
 	<AvatarRadix.Fallback
 		ref={ref}

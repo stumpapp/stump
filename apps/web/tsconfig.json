@@ -6,20 +6,23 @@
 		"jsx": "preserve",
 		"module": "es2022",
 		"moduleResolution": "Node",
-		"paths": {
-			"@stump/client": ["../../packages/client/src/index.ts"],
-			"@stump/client/*": ["../../packages/client/src/*"],
-			"@stump/browser": ["../../packages/browser/src/index.ts"],
-			"@stump/browser/*": ["../../packages/browser/src/*"]
-		}
+		"composite": true,
+		"declaration": true,
+		"outDir": "./.tsc"
+		// "paths": {
+		// 	"@stump/client": ["../../packages/client/src/index.ts"],
+		// 	"@stump/client/*": ["../../packages/client/src/*"],
+		// 	"@stump/browser": ["../../packages/browser/src/index.ts"],
+		// 	"@stump/browser/*": ["../../packages/browser/src/*"]
+		// }
 	},
-	"include": ["src"],
-	"references": [
-		{
-			"path": "../../packages/client"
-		},
-		{
-			"path": "../../packages/browser"
-		}
-	]
+	"include": ["src"]
+	// "references": [
+	// 	{
+	// 		"path": "../../packages/client"
+	// 	},
+	// 	{
+	// 		"path": "../../packages/browser"
+	// 	}
+	// ]
 }

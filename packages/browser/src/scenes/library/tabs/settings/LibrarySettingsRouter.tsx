@@ -1,21 +1,19 @@
 import { useUpdateLibrary } from '@stump/client'
 import { UpdateLibrary } from '@stump/sdk'
-import { Suspense, useCallback } from 'react'
+import { lazy, Suspense, useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
 import { useLibraryContext } from '../../context'
 import { LibraryManagementContext } from './context'
 
-const BasicSettingsScene = React.lazy(() => import('./basics/BasicSettingsScene'))
-const ThumbnailSettingsScene = React.lazy(
-	() => import('./options/thumbnails/ThumbnailSettingsScene'),
-)
-const ScannerBehaviorScene = React.lazy(() => import('./options/ScannerBehaviorScene'))
-const LibraryAnalysisScene = React.lazy(() => import('./options/analysis'))
-const LibraryReadingDefaultsScene = React.lazy(() => import('./options/readingDefaults'))
+const BasicSettingsScene = lazy(() => import('./basics/BasicSettingsScene'))
+const ThumbnailSettingsScene = lazy(() => import('./options/thumbnails/ThumbnailSettingsScene'))
+const ScannerBehaviorScene = lazy(() => import('./options/ScannerBehaviorScene'))
+const LibraryAnalysisScene = lazy(() => import('./options/analysis'))
+const LibraryReadingDefaultsScene = lazy(() => import('./options/readingDefaults'))
 
-const AccessControlScene = React.lazy(() => import('./danger/accessControl'))
-const DeletionScene = React.lazy(() => import('./danger/deletion'))
+const AccessControlScene = lazy(() => import('./danger/accessControl'))
+const DeletionScene = lazy(() => import('./danger/deletion'))
 
 // Note: library:manage permission is enforced in the parent router
 export default function LibrarySettingsRouter() {

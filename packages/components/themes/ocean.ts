@@ -27,23 +27,28 @@ export const ocean = {
 	fill: {
 		brand: {
 			DEFAULT: '#0A9396',
+			hover: '#0A9396',
 			secondary: '#0A939626',
 		},
 		danger: {
 			DEFAULT: '#E63946',
+			hover: '#EC4A53',
 			secondary: '#E6394626',
 		},
 		disabled: '#577590',
 		info: {
 			DEFAULT: '#0096C7',
+			hover: '#0096C7',
 			secondary: '#0096C726',
 		},
 		success: {
 			DEFAULT: '#43AA8B',
+			hover: '#4FBBA9',
 			secondary: '#43AA8B26',
 		},
 		warning: {
 			DEFAULT: '#F77F00',
+			hover: '#FF8C00',
 			secondary: '#F77F0026',
 		},
 	},

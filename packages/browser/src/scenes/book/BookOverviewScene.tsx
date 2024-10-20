@@ -51,7 +51,7 @@ export default function BookOverviewScene() {
 		return () => {
 			remove()
 		}
-	}, [])
+	}, [remove])
 
 	if (isLoading) {
 		return null

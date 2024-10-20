@@ -1,5 +1,5 @@
 import { toObjectParams, toUrlParams } from '@stump/sdk'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 import { FilterContext } from './context'
@@ -85,7 +85,7 @@ export default function FilterProvider({ children }: Props) {
  * A context provider to handle filter state where everything is local state.
  */
 export function ManualFilterProvider({ children }: Props) {
-	const [filters, setFilters] = React.useState<Record<string, unknown>>({})
+	const [filters, setFilters] = useState<Record<string, unknown>>({})
 
 	/**
 	 * An object representation of the ordering params

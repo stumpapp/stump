@@ -31,12 +31,11 @@
 		"nuke": "lerna run nuke"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.23.2",
+		"@babel/core": "^7.25.8",
 		"@eslint/js": "^9.13.0",
 		"@typescript-eslint/eslint-plugin": "^6.8.0",
 		"@typescript-eslint/parser": "^6.8.0",
 		"concurrently": "^8.2.2",
-		"cpy-cli": "^5.0.0",
 		"eslint": "^9.13.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-prettier": "^5.2.1",
@@ -48,13 +47,11 @@
 		"husky": "^9.1.6",
 		"lerna": "^8.1.8",
 		"lint-staged": "^15.2.10",
-		"move-cli": "2.0.0",
 		"prettier": "^3.3.3",
 		"prettier-eslint": "^16.3.0",
 		"prettier-plugin-tailwindcss": "^0.6.8",
 		"rimraf": "^5.0.5",
-		"trash-cli": "^5.0.0",
-		"typescript": "^5.3.3",
+		"typescript": "^5.6.3",
 		"typescript-eslint": "^8.10.0"
 	},
 	"lint-staged": {

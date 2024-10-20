@@ -35,7 +35,7 @@ export default function CoverImageCell({ id, title }: Props) {
 		try {
 			await loadImage()
 			setShowFallback(false)
-		} catch (e) {
+		} catch {
 			setShowFallback(true)
 		}
 	}

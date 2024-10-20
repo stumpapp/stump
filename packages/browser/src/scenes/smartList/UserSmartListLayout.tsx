@@ -32,7 +32,7 @@ export default function UserSmartListLayout() {
 	const { t } = useLocaleContext()
 
 	// TODO: I don't think I need both TBH, esp with how many more features I can add to the table...
-	const [layout, setLayout] = React.useState<'table' | 'list'>(() => getDefaultLayout())
+	const [layout, setLayout] = useState<'table' | 'list'>(() => getDefaultLayout())
 	const [selectedView, setSelectedView] = useState<SmartListView>()
 	const [workingView, setWorkingView] = useState<WorkingView>()
 

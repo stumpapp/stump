@@ -62,14 +62,13 @@ export default function CreateOrUpdateUserForm({ user }: Props) {
 				: null
 
 			if (isCreating && password) {
-				const result = await createAsync({
+				await createAsync({
 					age_restriction,
 					max_sessions_allowed,
 					password: password,
 					permissions,
 					username,
 				})
-				console.debug('Created user', { result })
 				toast.success('User created successfully')
 				await invalidateQueries({ keys: [sdk.user.keys.get, sdk.user.keys.getByID] })
 				form.reset()
@@ -82,7 +81,6 @@ export default function CreateOrUpdateUserForm({ user }: Props) {
 					permissions,
 					username,
 				})
-				console.debug('Updated user', { result })
 				toast.success('User updated successfully')
 				await invalidateQueries({ keys: [sdk.user.keys.get, sdk.user.keys.getByID] })
 				form.reset({

@@ -8,7 +8,7 @@
 	"scripts": {
 		"check-types": "tsc --noemit -p tsconfig.json",
 		"lint": "eslint .",
-		"format": "eslint --fix .",
+		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
 		"test": "jest",
 		"nuke": "rimraf node_modules"
 	},

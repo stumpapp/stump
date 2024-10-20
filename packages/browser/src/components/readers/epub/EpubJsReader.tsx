@@ -127,7 +127,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		if (iframe) {
 			iframe.focus()
 		} else {
-			console.debug('Failed to find iframe in epub reader')
+			console.warn('Failed to find iframe in epub reader')
 		}
 	}
 

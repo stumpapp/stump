@@ -35,7 +35,6 @@ export default function URLFilterDrawer({ entity }: Props) {
 		} else if (entity === 'series') {
 			return <SeriesFilterForm />
 		} else {
-			console.debug('Not implemented yet')
 			return null
 		}
 	}

@@ -1,4 +1,4 @@
-import { PropsWithChildren } from 'react'
+import { Fragment, PropsWithChildren } from 'react'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
@@ -15,11 +15,11 @@ const ReaderContainer = ({ children }: PropsWithChildren) => {
 	const showBottomToolbar = readingMode === 'paged'
 
 	return (
-		<React.Fragment>
+		<Fragment>
 			<ReaderHeader />
 			{children}
 			{showBottomToolbar && <ReaderFooter />}
-		</React.Fragment>
+		</Fragment>
 	)
 }
 

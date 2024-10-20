@@ -41,7 +41,7 @@ export default function EpubStreamReader({ epub, actions, ...rest }: UseEpubRetu
 				root: epub.root_base,
 			})
 			.then((res) => {
-				console.debug(res)
+				// console.debug(res)
 				// FIXME: don't cast
 				setContent(rest.correctHtmlUrls(res as string))
 			})

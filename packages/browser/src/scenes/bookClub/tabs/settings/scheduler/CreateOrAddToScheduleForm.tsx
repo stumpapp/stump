@@ -43,6 +43,7 @@ export default function CreateOrAddToScheduleForm() {
 	const books = form.watch('books')
 
 	const handleSubmit = (data: Schema) => {
+		// eslint-disable-next-line no-console
 		console.debug(data)
 	}
 

@@ -73,7 +73,7 @@ export default function FileThumbnail({
 		try {
 			await loadImage()
 			setShowFallback(false)
-		} catch (e) {
+		} catch {
 			setShowFallback(true)
 		}
 	}

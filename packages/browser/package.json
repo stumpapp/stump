@@ -6,8 +6,9 @@
 	"private": true,
 	"main": "src/index.ts",
 	"scripts": {
-		"check-types": "tsc --build tsconfig.json",
-		"lint": "eslint --ext .ts,.tsx,.cts,.mts,.js,.jsx,.cjs,.mjs --fix --report-unused-disable-directives --no-error-on-unmatched-pattern --exit-on-fatal-error --ignore-path ../../.gitignore .",
+		"check-types": "tsc --noemit -p tsconfig.json",
+		"lint": "eslint .",
+		"format": "eslint --fix .",
 		"test": "jest",
 		"nuke": "rimraf node_modules"
 	},

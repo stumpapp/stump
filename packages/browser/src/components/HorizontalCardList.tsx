@@ -2,7 +2,7 @@ import { Button, cn, Heading, Text, ToolTip } from '@stump/components'
 import { ChevronLeft, ChevronRight, CircleSlash2 } from 'lucide-react'
 import { forwardRef, useCallback, useMemo, useRef, useState } from 'react'
 import { ScrollerProps, Virtuoso, VirtuosoHandle } from 'react-virtuoso'
-import { useMediaMatch } from 'rooks'
+import { useInViewRef, useMediaMatch } from 'rooks'
 
 import { usePreferences } from '../hooks'
 
@@ -20,10 +20,12 @@ export default function HorizontalCardList_({ title, items, onFetchMore, emptySt
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 
 	const height = useMemo(
-		() => (!isAtLeastSmall ? 325 : !isAtLeastMedium ? 350 : 375),
+		() => (!isAtLeastSmall ? 325 : !isAtLeastMedium ? 350 : 385),
 		[isAtLeastSmall, isAtLeastMedium],
 	)
 
+	const [firstCardRef, firstCardIsInView] = useInViewRef({ threshold: 0.5 })
+	const [lastCardRef, lastCardIsInView] = useInViewRef({ threshold: 0.5 })
 	const [visibleRange, setVisibleRange] = useState({
 		endIndex: 0,
 		startIndex: 0,
@@ -31,8 +33,8 @@ export default function HorizontalCardList_({ title, items, onFetchMore, emptySt
 
 	const { startIndex: lowerBound, endIndex: upperBound } = visibleRange
 
-	const canSkipBackward = upperBound > 0
-	const canSkipForward = items.length && upperBound + 1 < items.length
+	const canSkipBackward = upperBound > 0 && !firstCardIsInView
+	const canSkipForward = items.length && !lastCardIsInView
 
 	const handleSkipAhead = useCallback(
 		(skip = 5) => {
@@ -87,7 +89,18 @@ export default function HorizontalCardList_({ title, items, onFetchMore, emptySt
 					components={{
 						Scroller: HorizontalScroller,
 					}}
-					itemContent={(_, card) => <div className="px-1">{card}</div>}
+					itemContent={(idx, card) => (
+						<div
+							{...(idx === 0
+								? { ref: firstCardRef }
+								: idx === items.length - 1
+									? { ref: lastCardRef }
+									: {})}
+							className="px-1"
+						>
+							{card}
+						</div>
+					)}
 					endReached={onFetchMore}
 					increaseViewportBy={5 * (height / 3)}
 					rangeChanged={setVisibleRange}

@@ -1,3 +1,4 @@
+import { useSDK } from '@stump/client'
 import { Text, ToolTip } from '@stump/components'
 import { DirectoryListingFile, Media } from '@stump/sdk'
 import React, { useEffect, useMemo, useState } from 'react'
@@ -13,6 +14,7 @@ type Props = {
 
 export default function FileGridItem({ file }: Props) {
 	const { name, path, is_directory } = file
+	const { sdk } = useSDK()
 
 	const { onSelect } = useFileExplorerContext()
 
@@ -27,7 +29,7 @@ export default function FileGridItem({ file }: Props) {
 	useEffect(() => {
 		async function tryGetMedia() {
 			// Note: This should be cached, so it should be fast
-			const maybeBook = await getBook(path)
+			const maybeBook = await getBook(path, sdk)
 			if (maybeBook) {
 				setBook(maybeBook)
 			}
@@ -36,7 +38,7 @@ export default function FileGridItem({ file }: Props) {
 		if (!is_directory) {
 			tryGetMedia()
 		}
-	}, [path, is_directory])
+	}, [path, is_directory, sdk])
 
 	return (
 		<ToolTip content={tooltipName} align="start">

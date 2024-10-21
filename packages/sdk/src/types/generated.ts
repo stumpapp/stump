@@ -499,6 +499,36 @@ export type CreateOrUpdateSmartListView = ({ book_columns: ReactTableColumnSort[
 
 export type UploadConfig = { max_file_upload_size: number }
 
+/**
+ * Represents the configuration of a Stump application. This struct is generated at startup
+ * using a TOML file, environment variables, or both and is input when creating a `StumpCore`
+ * instance.
+ * 
+ * Example:
+ * ```
+ * use stump_core::{config::{self, StumpConfig}, StumpCore};
+ * 
+ * #[tokio::main]
+ * async fn main() {
+ * /// Get config dir from environment variables.
+ * let config_dir = config::bootstrap_config_dir();
+ * 
+ * // Create a StumpConfig using the config file and environment variables.
+ * let config = StumpConfig::new(config_dir)
+ * // Load Stump.toml file (if any)
+ * .with_config_file().unwrap()
+ * // Overlay environment variables
+ * .with_environment().unwrap();
+ * 
+ * // Ensure that config directory exists and write Stump.toml.
+ * config.write_config_dir().unwrap();
+ * // Create an instance of the stump core.
+ * let core = StumpCore::new(config).await;
+ * }
+ * ```
+ */
+export type StumpConfig = { profile: string; port: number; verbosity: number; pretty_logs: boolean; db_path: string | null; client_dir: string; custom_templates_dir: string | null; config_dir: string; allowed_origins: string[]; pdfium_path: string | null; disable_swagger: boolean; password_hash_cost: number; session_ttl: number; access_token_ttl: number; expired_session_cleanup_interval: number; max_scanner_concurrency: number; max_thumbnail_concurrency: number; max_image_upload_size: number; enable_upload: boolean; max_file_upload_size: number }
+
 // DESKTOP TYPE GENERATION
 
 export type SavedServer = { name: string; uri: string }

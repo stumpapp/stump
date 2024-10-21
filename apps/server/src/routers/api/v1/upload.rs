@@ -2,9 +2,9 @@ use std::path::PathBuf;
 
 use axum::{
 	body::Bytes,
-	extract::{multipart::Field, Multipart, Path, State},
+	extract::{Multipart, Path, State},
 	middleware,
-	routing::{get, post},
+	routing::post,
 	Extension, Json, Router,
 };
 use axum_typed_multipart::{FieldData, TryFromField, TryFromMultipart, TypedMultipart};
@@ -26,38 +26,11 @@ use crate::{
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
-		.route("/config", get(get_upload_config))
 		.nest(
 			"/upload",
 			Router::new().route("/libraries/:id", post(upload_to_library)),
 		)
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
-}
-
-#[derive(Debug, Deserialize, Serialize, Type)]
-pub struct UploadConfig {
-	max_file_upload_size: usize,
-}
-
-#[utoipa::path(
-	get,
-	path = "/api/v1/upload/config",
-	tag = "upload",
-	responses(
-		(status = 200, description = "Successfully retrieved upload config"),
-		(status = 401, description = "Unauthorized"),
-		(status = 500, description = "Internal server error")
-	)
-)]
-async fn get_upload_config(
-	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
-) -> APIResult<Json<UploadConfig>> {
-	req.enforce_permissions(&[UserPermission::UploadFile])?;
-
-	Ok(Json(UploadConfig {
-		max_file_upload_size: ctx.config.max_file_upload_size,
-	}))
 }
 
 #[derive(Debug, Deserialize, Serialize, Type, TryFromField)]

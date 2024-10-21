@@ -76,7 +76,9 @@ use defaults::*;
 ///   let core = StumpCore::new(config).await;
 /// }
 /// ```
-#[derive(StumpConfigGenerator, Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(
+	StumpConfigGenerator, Serialize, Deserialize, Debug, Clone, PartialEq, specta::Type,
+)]
 #[config_file_location(self.get_config_dir().join("Stump.toml"))]
 pub struct StumpConfig {
 	/// The "release" | "debug" profile with which the application is running.

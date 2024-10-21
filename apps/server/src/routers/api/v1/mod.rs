@@ -20,6 +20,7 @@ use crate::{
 
 pub(crate) mod auth;
 pub(crate) mod book_club;
+pub(crate) mod config;
 pub(crate) mod emailer;
 pub(crate) mod epub;
 pub(crate) mod filesystem;
@@ -54,6 +55,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.merge(reading_list::mount(app_state.clone()))
 		.merge(smart_list::mount(app_state.clone()))
 		.merge(book_club::mount(app_state.clone()))
+		.merge(config::mount(app_state.clone()))
 		.route("/claim", get(claim))
 		.route("/ping", get(ping))
 		// TODO: should /version or /check-for-updates be behind any auth reqs?

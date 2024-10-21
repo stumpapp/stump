@@ -1,27 +1,31 @@
 use axum::{
 	extract::{Path, Request, State},
-	http::HeaderMap,
 	middleware::{self, Next},
 	response::{IntoResponse, Json, Response},
 	routing::{get, put},
 	Extension, Router,
 };
+use chrono::Utc;
+use prefixed_api_key::{PrefixedApiKey, PrefixedApiKeyController};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use stump_core::{
-	db::entity::macros::{
-		finished_session_koreader, reading_session_koreader, user_password_select,
+	db::entity::{
+		macros::{
+			api_key_user_select, finished_session_koreader, reading_session_koreader,
+		},
+		UserPermission, API_KEY_PREFIX,
 	},
 	prisma::{
-		active_reading_session, finished_reading_session, media,
+		active_reading_session, api_key, finished_reading_session, media,
 		registered_reading_device, user,
 	},
+	CoreError,
 };
 
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
-	utils::verify_password,
 };
 
 // TODO: healthcheck?
@@ -31,12 +35,14 @@ use crate::{
 ///
 /// See https://github.com/koreader/koreader-sync-server/blob/master/config/routes.lua
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
-	Router::new()
-		// TODO: create? I guess that can be another config?
-		.route("/users/auth", get(check_authorized))
-		.route("/syncs/progress", put(put_progress))
-		.route("/syncs/progress/:document", get(get_progress))
-		.layer(middleware::from_fn_with_state(app_state, authorize))
+	Router::new().nest(
+		"/:api_key",
+		Router::new()
+			.route("/users/auth", get(check_authorized))
+			.route("/syncs/progress", put(put_progress))
+			.route("/syncs/progress/:document", get(get_progress))
+			.layer(middleware::from_fn_with_state(app_state, authorize)),
+	)
 }
 
 #[derive(Debug, Clone)]
@@ -45,45 +51,82 @@ struct KoReaderUser {
 	username: String,
 }
 
+// TODO: this should probably live in auth middleware now
+// RequestContext perhaps should be refactored for users + keys, e.g.
+// RequestContext(AuthedUser) -> enum AuthedUser { User(User), APIKey(APIKey) }
+// Or perhaps just override permissions on the user object itself if not inherited?
 async fn authorize(
 	State(ctx): State<AppState>,
-	headers: HeaderMap,
+	Path(api_key): Path<String>,
 	mut req: Request,
 	next: Next,
 ) -> Result<Response, impl IntoResponse> {
-	let username = headers
-		.get("x-auth-user")
-		.ok_or(APIError::Unauthorized)?
-		.to_str()
-		.map_err(|_| APIError::BadRequest("Failed to parse username".to_string()))?;
-
-	let password = headers
-		.get("x-auth-key")
-		.ok_or(APIError::Unauthorized)?
-		.to_str()
-		.map_err(|_| APIError::BadRequest("Failed to parse password".to_string()))?;
-
-	tracing::debug!(username, "authorizing user");
-
 	let client = &ctx.db;
+	let pak: PrefixedApiKey = api_key
+		.as_str()
+		.try_into()
+		.map_err(|_| APIError::Unauthorized)?;
 
-	let user = client
-		.user()
+	let controller = PrefixedApiKeyController::configure()
+		.prefix(API_KEY_PREFIX.to_owned())
+		.seam_defaults()
+		.finalize()
+		.map_err(|e| {
+			CoreError::InternalError(format!(
+				"Failed to create API key controller: {}",
+				e
+			))
+		})?;
+
+	let long_token_hash = controller.long_token_hashed(&pak);
+	let api_key = client
+		.api_key()
 		.find_first(vec![
-			user::username::equals(username.to_string()),
-			user::deleted_at::equals(None),
-			user::is_locked::equals(false),
+			api_key::short_token::equals(pak.short_token().to_string()),
+			api_key::long_token_hash::equals(long_token_hash),
+			api_key::user::is(vec![
+				user::deleted_at::equals(None),
+				user::is_locked::equals(false),
+			]),
 		])
-		.select(user_password_select::select())
+		.select(api_key_user_select::select())
 		.exec()
 		.await?
 		.ok_or(APIError::Unauthorized)?;
+	let user = &api_key.user;
 
-	verify_password(&user.hashed_password, password)?;
+	// Note: we check as a precaution. If a user had the permission revoked, that logic should also
+	// clean up keys.
+	let can_use_key = user
+		.permissions
+		.as_ref()
+		.map(|set| set.contains(&UserPermission::AccessAPIKeys.to_string()))
+		.unwrap_or(false);
+
+	if !can_use_key || !controller.check_hash(&pak, &api_key.long_token_hash) {
+		// TODO(security): track?
+		return Err(APIError::Unauthorized);
+	}
+
+	match client
+		.api_key()
+		.update(
+			api_key::id::equals(api_key.id),
+			vec![api_key::last_used_at::set(Some(Utc::now().into()))],
+		)
+		.exec()
+		.await
+	{
+		Ok(_) => (),
+		Err(e) => {
+			// IMO we shouldn't fail the request if we can't update the last used at field
+			tracing::error!(error = ?e, "Failed to update API key");
+		},
+	}
 
 	req.extensions_mut().insert(KoReaderUser {
-		id: user.id,
-		username: user.username,
+		id: user.id.clone(),
+		username: user.username.clone(),
 	});
 
 	Ok::<_, APIError>(next.run(req).await)

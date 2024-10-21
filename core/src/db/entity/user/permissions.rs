@@ -29,6 +29,9 @@ impl From<prisma::age_restriction::Data> for AgeRestriction {
 	Debug, Clone, Copy, Serialize, Deserialize, Type, ToSchema, Eq, PartialEq, Hash,
 )]
 pub enum UserPermission {
+	/// Grant access to read/create their own API keys
+	#[serde(rename = "feature:api_keys")]
+	AccessAPIKeys,
 	///TODO: Expand permissions for bookclub + smartlist
 	/// Grant access to the book club feature
 	#[serde(rename = "bookclub:read")]
@@ -147,6 +150,7 @@ impl UserPermission {
 impl fmt::Display for UserPermission {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		match self {
+			UserPermission::AccessAPIKeys => write!(f, "feature:api_keys"),
 			UserPermission::AccessBookClub => write!(f, "bookclub:read"),
 			UserPermission::CreateBookClub => write!(f, "bookclub:create"),
 			UserPermission::EmailerRead => write!(f, "emailer:read"),
@@ -178,6 +182,7 @@ impl fmt::Display for UserPermission {
 impl From<&str> for UserPermission {
 	fn from(s: &str) -> UserPermission {
 		match s {
+			"feature:api_keys" => UserPermission::AccessAPIKeys,
 			"bookclub:read" => UserPermission::AccessBookClub,
 			"bookclub:create" => UserPermission::CreateBookClub,
 			"emailer:read" => UserPermission::EmailerRead,

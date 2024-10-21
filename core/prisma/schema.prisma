@@ -47,6 +47,7 @@ model User {
   smart_lists             SmartList[]
   smart_list_access_rules SmartListAccessRule[]
   email_usage_history     EmailerSendRecord[]
+  api_keys                APIKey[]
 
   @@map("users")
 }
@@ -84,6 +85,21 @@ model AgeRestriction {
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("age_restrictions")
+}
+
+model APIKey {
+  id Int @id @default(autoincrement())
+
+  short_token     String
+  long_token_hash String
+  permissions     Bytes? // "inherit" or a list of permissions 
+  created_at      DateTime  @default(now())
+  last_used_at    DateTime?
+
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
 }
 
 model Library {

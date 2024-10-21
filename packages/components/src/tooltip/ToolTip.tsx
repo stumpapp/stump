@@ -5,13 +5,13 @@ import { ToolTipContentProps, ToolTipPrimitive, ToolTipProvider } from './primit
 
 const toolTipVariants = cva(undefined, {
 	defaultVariants: {
-		size: 'md',
+		size: 'sm',
 	},
 	variants: {
 		size: {
 			lg: 'text-base',
 			md: 'text-sm',
-			sm: 'p-1 text-sm',
+			sm: 'px-2 py-1 text-sm',
 			xs: 'p-1 text-xs',
 		},
 	},

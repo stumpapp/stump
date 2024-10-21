@@ -47,10 +47,14 @@ export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage
 		overscan: 5,
 	})
 
-	useEffect(() => {
-		rowVirtualizer.measure()
-		columnVirtualizer.measure()
-	}, [isAtLeastMedium, isAtLeastSmall])
+	useEffect(
+		() => {
+			rowVirtualizer.measure()
+			columnVirtualizer.measure()
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[isAtLeastMedium, isAtLeastSmall],
+	)
 
 	return (
 		<div className="h-96 w-full flex-1">

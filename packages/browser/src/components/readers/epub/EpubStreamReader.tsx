@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
+
 // FIXME: this file is a mess
 import { UseEpubReturn, useSDK } from '@stump/client'
 import { useEffect, useState } from 'react'
@@ -45,7 +46,7 @@ export default function EpubStreamReader({ epub, actions, ...rest }: UseEpubRetu
 				// FIXME: don't cast
 				setContent(rest.correctHtmlUrls(res as string))
 			})
-	}, [])
+	}, [epub, actions, sdk, rest])
 
 	function handleClickEvent(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
 		if (e.target instanceof HTMLAnchorElement && e.target.href) {

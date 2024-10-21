@@ -58,10 +58,14 @@ export default function SeriesBookGrid({ seriesId, onSelectBook }: Props) {
 		overscan: 5,
 	})
 
-	useEffect(() => {
-		rowVirtualizer.measure()
-		columnVirtualizer.measure()
-	}, [isAtLeastMedium, isAtLeastSmall])
+	useEffect(
+		() => {
+			rowVirtualizer.measure()
+			columnVirtualizer.measure()
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[isAtLeastMedium, isAtLeastSmall],
+	)
 
 	const handleScroll = () => {
 		if (!hasNextPage) return

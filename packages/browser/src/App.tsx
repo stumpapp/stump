@@ -51,7 +51,7 @@ function RouterContainer(props: StumpClientProps) {
 		}
 
 		setMounted(true)
-	}, [baseUrl])
+	}, [baseUrl, props.baseUrl, setBaseUrl])
 
 	useEffect(() => {
 		setPlatform(props.platform)

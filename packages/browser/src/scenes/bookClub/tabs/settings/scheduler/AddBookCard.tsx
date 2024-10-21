@@ -46,7 +46,7 @@ export default function AddBookCard({ index }: Props) {
 			form.setValue(`books.${index}.book.author`, '')
 			form.setValue(`books.${index}.book.url`, undefined)
 		}
-	}, [isEntityBook, selectedBook])
+	}, [isEntityBook, selectedBook, form, index])
 
 	const handleSelectBook = useCallback(
 		(book: Media) => {

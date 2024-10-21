@@ -64,7 +64,7 @@ export default function ServerConnectionErrorScene() {
 				})
 				.then(() => setGoHome(true))
 		}
-	}, [backOnline])
+	}, [backOnline, t])
 
 	if (goHome) {
 		const from = location.state?.from || '/'

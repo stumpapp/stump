@@ -35,14 +35,17 @@ export default function NativePDFViewer({ id }: Props) {
 			const arrayBuffer = await blob.arrayBuffer()
 			setPdfObjectUrl(URL.createObjectURL(new Blob([arrayBuffer], { type: 'application/pdf' })))
 		}
-		fetchPdf()
+
+		if (!pdfObjectUrl) {
+			fetchPdf()
+		}
 
 		return () => {
 			if (pdfObjectUrl) {
 				URL.revokeObjectURL(pdfObjectUrl)
 			}
 		}
-	}, [])
+	}, [sdk, id, pdfObjectUrl])
 
 	// TODO: consider some sort of loading state here
 	if (!pdfObjectUrl) {

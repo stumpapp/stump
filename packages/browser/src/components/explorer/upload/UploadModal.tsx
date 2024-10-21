@@ -1,4 +1,4 @@
-import { Accordion, Button, cn, Dialog, Heading, Text } from '@stump/components'
+import { Accordion, Button, cn, Dialog, Heading, Input, Text } from '@stump/components'
 import { Book } from 'lucide-react'
 import React, { useCallback, useState } from 'react'
 import { FileRejection, useDropzone } from 'react-dropzone'
@@ -19,10 +19,11 @@ import { useFileExplorerContext } from '../context'
 export default function UploadModal() {
 	const [uploadType, setUploadType] = useState<'books' | 'series'>()
 
+	const [seriesDirName, setSeriesDirName] = useState<string | undefined>(undefined)
 	const [files, setFiles] = useState<File[]>([])
 
 	const { library } = useLibraryContext()
-	const { currentPath, rootPath } = useFileExplorerContext()
+	const { currentPath } = useFileExplorerContext()
 	const { sdk } = useSDK()
 
 	const handleDrop = useCallback((acceptedFiles: File[], rejections: FileRejection[]) => {
@@ -37,18 +38,14 @@ export default function UploadModal() {
 	const { getRootProps, getInputProps, isFileDialogActive, isDragActive } = useDropzone({
 		accept: {
 			'application/zip': [],
-			...(uploadType === 'books'
-				? {
-						'application/epub+zip': [],
-						'application/pdf': [],
-						'application/vnd.comicbook+zip': [],
-						'application/vnd.comicbook-rar': [],
-						'application/vnd.rar': [],
-						'.cbz': [],
-						'.cbr': [],
-						'.epub': [],
-					}
-				: {}),
+			'application/epub+zip': [],
+			'application/pdf': [],
+			'application/vnd.comicbook+zip': [],
+			'application/vnd.comicbook-rar': [],
+			'application/vnd.rar': [],
+			'.cbz': [],
+			'.cbr': [],
+			'.epub': [],
 		},
 		// TODO(upload): pull this from the server
 		maxSize: 20 * 1024 * 1024,
@@ -73,6 +70,7 @@ export default function UploadModal() {
 			return
 		}
 
+		// Handle books/series upload paths
 		if (uploadType == 'books') {
 			try {
 				await sdk.upload.uploadLibraryBooks(library.id, currentPath, files)
@@ -80,10 +78,23 @@ export default function UploadModal() {
 				setFiles([])
 			} catch (error) {
 				console.error(error)
-				toast.error('Failed to upload file(s)')
+				toast.error('Failed to upload book(s)')
 			}
 		} else {
 			// TODO - Series upload
+			if (seriesDirName == undefined) {
+				return
+			}
+
+			try {
+				await sdk.upload.uploadLibrarySeries(library.id, seriesDirName, files)
+				toast.success('Successfully uploaded series')
+				setFiles([])
+				setSeriesDirName(undefined)
+			} catch (error) {
+				console.error(error)
+				toast.error('Failed to upload series')
+			}
 		}
 	}
 
@@ -137,6 +148,19 @@ export default function UploadModal() {
 							</Text>
 						</div>
 					</div>
+
+					{/* Conditionally render the series name input */}
+					{uploadType === 'series' && (
+						<div className="mt-2">
+							<Heading size="xs">Series Name</Heading>
+							<Input
+								placeholder="Enter series name"
+								value={seriesDirName}
+								onChange={(e) => setSeriesDirName(e.target.value)}
+								className="mt-2"
+							/>
+						</div>
+					)}
 
 					<Accordion type="single" collapsible>
 						<Accordion.Item

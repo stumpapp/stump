@@ -204,7 +204,7 @@ async fn upload_books(
 	}
 
 	// TODO - Evaluate if this is the best apporoach to uploads
-	// This pattern, including the use of `NamedFile` from the tempfile crate, is taken from
+	// This pattern, including the use of `NamedTempFile` from the tempfile crate, is taken from
 	// the documentation for axum_typed_multipart. Is this the best approach here? Some testing
 	// is needed to see how large uploads are handled.
 	for f in books_request.files {
@@ -266,20 +266,13 @@ async fn upload_series(
 	let series_path =
 		path::Path::new(&library.path).join(&series_request.series_dir_name);
 
-	// Ensure the series path is a directory
-	if !series_path.is_dir() {
-		return Err(APIError::BadRequest(
-			"The specified series path must be a directory.".to_string(),
-		));
-	}
-
 	// Create directory if necessary
 	if !series_path.exists() {
 		tokio::fs::create_dir_all(&series_path).await?;
 	}
 
 	// TODO - Evaluate if this is the best apporoach to uploads
-	// This pattern, including the use of `NamedFile` from the tempfile crate, is taken from
+	// This pattern, including the use of `NamedTempFile` from the tempfile crate, is taken from
 	// the documentation for axum_typed_multipart. Is this the best approach here? Some testing
 	// is needed to see how large uploads are handled.
 	for f in series_request.files {

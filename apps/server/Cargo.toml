@@ -37,6 +37,7 @@ serde-untagged = "0.1.2"
 serde_with = { workspace = true }
 specta = { workspace = true }
 stump_core = { path = "../../core" }
+tempfile = "3.13.0"
 tower-http = { version = "0.5.2", features = [
   "fs",
   "cors",

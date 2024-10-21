@@ -1,8 +1,8 @@
-use std::path::PathBuf;
+use std::{path, sync::Arc};
 
 use axum::{
 	body::Bytes,
-	extract::{Multipart, Path, State},
+	extract::{DefaultBodyLimit, Path, State},
 	middleware,
 	routing::post,
 	Extension, Json, Router,
@@ -11,9 +11,10 @@ use axum_typed_multipart::{FieldData, TryFromField, TryFromMultipart, TypedMulti
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use stump_core::{
-	db::entity::{macros::library_path_with_options_select, UserPermission},
-	prisma::library,
+	db::entity::{macros::library_path_with_options_select, User, UserPermission},
+	prisma::{library, PrismaClient},
 };
+use tempfile::NamedTempFile;
 use tokio::fs;
 
 use crate::{
@@ -21,15 +22,17 @@ use crate::{
 	errors::{APIError, APIResult},
 	middleware::auth::{auth_middleware, RequestContext},
 	routers::api::filters::library_not_hidden_from_user_filter,
-	utils::validate_and_load_file_upload,
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.nest(
 			"/upload",
-			Router::new().route("/libraries/:id", post(upload_to_library)),
+			Router::new()
+				.route("/libraries/:id/books", post(upload_books))
+				.route("/libraries/:id/series", post(upload_series)),
 		)
+		.layer(DefaultBodyLimit::max(app_state.config.max_file_upload_size))
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
@@ -43,7 +46,7 @@ pub enum UploadStrategy {
 
 // https://docs.rs/axum_typed_multipart/0.13.1/axum_typed_multipart/
 #[derive(TryFromMultipart)]
-struct UploadRequest {
+struct UploadFileRequest {
 	strategy: UploadStrategy,
 	/// The path to place the files at. If not provided, the library path is used. If the
 	/// path does not exist, or exists outside the library path, the request will fail.
@@ -56,11 +59,11 @@ async fn testing_ground_upload(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
-	TypedMultipart(UploadRequest {
+	TypedMultipart(UploadFileRequest {
 		strategy,
 		place_at,
 		files,
-	}): TypedMultipart<UploadRequest>,
+	}): TypedMultipart<UploadFileRequest>,
 ) -> APIResult<Json<()>> {
 	let user = req.user_and_enforce_permissions(&[
 		UserPermission::UploadFile,
@@ -98,7 +101,7 @@ async fn testing_ground_upload(
 		)));
 	}
 
-	let place_at = PathBuf::from(resolved_place_at);
+	let place_at = path::PathBuf::from(resolved_place_at);
 
 	// TODO: handle the files
 
@@ -138,62 +141,184 @@ async fn testing_ground_upload(
 	Ok(Json(()))
 }
 
-#[utoipa::path(
-	post,
-	path = "/api/v1/upload/libraries/:id",
-	tag = "library",
-	params(
-		("id" = String, Path, description = "The library ID"),
-	),
-	responses(
-		(status = 200, description = "Successfully uploaded file"),
-		(status = 401, description = "Unauthorized"),
-		(status = 404, description = "Library not found"),
-		(status = 500, description = "Internal server error")
-	)
-)]
-async fn upload_to_library(
+// ///////////////////////////////////////////////
+// Alternative proposal for handling uploads below
+// ///////////////////////////////////////////////
+
+#[derive(TryFromMultipart)]
+struct UploadBooksRequest {
+	place_at: String, // PathBuf
+	#[form_data(limit = "unlimited")]
+	files: Vec<FieldData<NamedTempFile>>,
+}
+
+async fn upload_books(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
-	mut upload: Multipart,
-) -> APIResult<Json<String>> {
-	tracing::warn!("Inside upload_to_library");
-
+	TypedMultipart(books_request): TypedMultipart<UploadBooksRequest>,
+) -> APIResult<Json<()>> {
 	let user = req.user_and_enforce_permissions(&[
 		UserPermission::UploadFile,
 		UserPermission::ManageLibrary,
 	])?;
-	let client = &ctx.db;
 
-	let library = client
+	let client = &ctx.db;
+	let library = get_library(client, id, &user).await?;
+
+	// Validate the placement path parameters, error otherwise
+	// This is an important security check.
+	if !is_subpath_secure(&books_request.place_at) {
+		return Err(APIError::BadRequest(
+			"Invalid upload path placement parameters".to_string(),
+		));
+	}
+
+	// Get path that uploads will be placed at
+	let placement_path = path::Path::new(&library.path).join(books_request.place_at);
+	// Check that it is a directory and already exists
+	if !(placement_path.is_dir() && placement_path.exists()) {
+		return Err(APIError::BadRequest(
+			"Book uploads must be placed at an existing directory.".to_string(),
+		));
+	}
+
+	// TODO - Evaluate if this is the best apporoach to uploads
+	// This pattern, including the use of `NamedFile` from the tempfile crate, is taken from
+	// the documentation for axum_typed_multipart. Is this the best approach here? Some testing
+	// is needed to see how large uploads are handled.
+	for f in books_request.files {
+		let file_name = f.metadata.file_name.as_ref().ok_or(APIError::BadRequest(
+			"Uploaded files must have filenames.".to_string(),
+		))?;
+		let target_path = placement_path.join(file_name);
+
+		copy_tempfile_to_location(f, &target_path).await?;
+	}
+
+	Ok(Json(()))
+}
+
+#[derive(TryFromMultipart)]
+struct UploadSeriesRequest {
+	series_dir_name: String,
+	#[form_data(limit = "unlimited")]
+	files: Vec<FieldData<NamedTempFile>>,
+}
+
+async fn upload_series(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+	TypedMultipart(series_request): TypedMultipart<UploadSeriesRequest>,
+) -> APIResult<Json<()>> {
+	let user = req.user_and_enforce_permissions(&[
+		UserPermission::UploadFile,
+		UserPermission::ManageLibrary,
+	])?;
+
+	let client = &ctx.db;
+	let library = get_library(client, id, &user).await?;
+
+	// Validate the series directory name - the same traversal concerns apply here
+	if !is_subpath_secure(&series_request.series_dir_name) {
+		return Err(APIError::BadRequest(
+			"Invalid series directory name".to_string(),
+		));
+	}
+
+	// Get the path for the series
+	let series_path =
+		path::Path::new(&library.path).join(&series_request.series_dir_name);
+
+	// Ensure the series path is a directory
+	if !series_path.is_dir() {
+		return Err(APIError::BadRequest(
+			"The specified series path must be a directory.".to_string(),
+		));
+	}
+
+	// Create directory if necessary
+	if !series_path.exists() {
+		tokio::fs::create_dir_all(&series_path).await?;
+	}
+
+	// TODO - Evaluate if this is the best apporoach to uploads
+	// This pattern, including the use of `NamedFile` from the tempfile crate, is taken from
+	// the documentation for axum_typed_multipart. Is this the best approach here? Some testing
+	// is needed to see how large uploads are handled.
+	for f in series_request.files {
+		let file_name = f.metadata.file_name.as_ref().ok_or(APIError::BadRequest(
+			"Uploaded files must have filenames.".to_string(),
+		))?;
+		let target_path = series_path.join(file_name);
+
+		// TODO - Add logic that handles zipped files.
+
+		copy_tempfile_to_location(f, &target_path).await?;
+	}
+
+	Ok(Json(()))
+}
+
+async fn copy_tempfile_to_location(
+	field_data: FieldData<NamedTempFile>,
+	target_path: &path::Path,
+) -> APIResult<()> {
+	// We want to prevent overwriting something that already exists
+	if target_path.exists() {
+		return Err(APIError::BadRequest(format!(
+			"File already exists at {}",
+			target_path.to_string_lossy()
+		)));
+	}
+
+	// Open the target file
+	let mut target_file = fs::File::create(target_path).await?;
+	// Get a tokio::fs::File for the temporary file
+	let mut temp_file = fs::File::from_std(field_data.contents.as_file().try_clone()?);
+
+	// Copy the bytes to the target location
+	tokio::io::copy(&mut temp_file, &mut target_file).await?;
+
+	Ok(())
+}
+
+/// Returns `true` if a parameter specifying a path from another path contains no parent directory components.
+///
+/// Upload paths for books are recieved as a path offset, where the actual path is constructed as
+/// `{library_path}/{offset}`. This could be a security vulnerability if someone sent an upload with
+/// a path containing a `..` to push the path back to the parent directoy. This could be used to escape
+/// the library and upload things elsewhere. It also means that accepting only paths that start with the
+/// library path isn't sufficient.
+///
+/// This function will reject any paths that include a parent directory component. There is unlikely to be
+/// any circumstance where a client sending one would be appropriate anyhow.
+fn is_subpath_secure(params: &str) -> bool {
+	let path = path::Path::new(params);
+
+	for component in path.components() {
+		if let std::path::Component::ParentDir = component {
+			return false;
+		}
+	}
+
+	true
+}
+
+/// Helper function to get prisma libraries by ID, respecting user filters.
+async fn get_library(
+	client: &Arc<PrismaClient>,
+	library_id: String,
+	user: &User,
+) -> APIResult<library::Data> {
+	client
 		.library()
 		.find_first(vec![
-			library::id::equals(id),
-			library_not_hidden_from_user_filter(&user),
+			library::id::equals(library_id),
+			library_not_hidden_from_user_filter(user),
 		])
 		.exec()
 		.await?
-		.ok_or(APIError::NotFound(String::from("Library not found")))?;
-
-	let upload_data =
-		validate_and_load_file_upload(&mut upload, Some(ctx.config.max_file_upload_size))
-			.await?;
-
-	place_library_file(&upload_data.name, upload_data.bytes, library).await?;
-
-	Ok(Json("It worked".to_string()))
-}
-
-async fn place_library_file(
-	name: &str,
-	content: Vec<u8>,
-	library: library::Data,
-) -> APIResult<()> {
-	let lib_path = &library.path;
-	let file_path = PathBuf::from(format!("{lib_path}/{name}"));
-
-	fs::write(file_path, content).await?;
-
-	Ok(())
+		.ok_or(APIError::NotFound(String::from("Library not found")))
 }

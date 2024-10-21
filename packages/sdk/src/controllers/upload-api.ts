@@ -18,17 +18,33 @@ export class UploadAPI extends APIBase {
 		return data
 	}
 
-	async uploadLibraryFile(id: string, file: File) {
+	async uploadLibraryBooks(library_id: string, place_at: string, files: File[]) {
 		const formData = new FormData()
-		formData.append('file', file)
+		formData.append('place_at', place_at)
 
-		return this.axios.post(`/upload/libraries/${id}`, formData)
+		files.forEach((file) => {
+			formData.append('files', file)
+		})
+
+		return this.axios.post(`/upload/libraries/${library_id}/books`, formData)
+	}
+
+	async uploadLibrarySeries(library_id: string, series_dir_name: string, files: File[]) {
+		const formData = new FormData()
+		formData.append('series_dir_name', series_dir_name)
+
+		files.forEach((file) => {
+			formData.append('files', file)
+		})
+
+		return this.axios.post(`/upload/libraries/${library_id}/series`, formData)
 	}
 
 	get keys(): ClassQueryKeys<InstanceType<typeof UploadAPI>> {
 		return {
 			config: 'upload.config',
-			uploadLibraryFile: 'upload.libraryFile',
+			uploadLibraryBooks: 'upload.LibraryBooks',
+			uploadLibrarySeries: 'upload.LibrarySeries',
 		}
 	}
 }

@@ -20,6 +20,7 @@ pub async fn validate_and_load_image(
 	validate_and_load_upload(upload, max_size, ContentType::is_image, Some("image")).await
 }
 
+// TODO(upload) - Remove?
 /// A helper function to validate and stream the bytes of a file upload from multipart form data, represented
 /// by [Multipart]. This function will return the content type of the uploaded file if it is valid.
 pub async fn validate_and_load_file_upload(

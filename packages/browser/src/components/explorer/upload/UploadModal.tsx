@@ -7,6 +7,9 @@ import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
 import { formatBytes } from '@/utils/format'
 
 import UploadMenu from './UploadMenu'
+import { useSDK } from '@stump/client'
+import toast from 'react-hot-toast'
+import { useLibraryContext } from '@/scenes/library/context'
 
 // TODO(upload): make language dynamic according to the uploadType
 // TODO(upload): add language to localization files
@@ -16,6 +19,9 @@ export default function UploadModal() {
 	const [uploadType, setUploadType] = useState<'books' | 'series'>()
 
 	const [files, setFiles] = useState<File[]>([])
+
+	const { library } = useLibraryContext()
+	const { sdk } = useSDK()
 
 	const handleDrop = useCallback((acceptedFiles: File[], rejections: FileRejection[]) => {
 		// TODO: check rejections and do sm
@@ -36,6 +42,9 @@ export default function UploadModal() {
 						'application/vnd.comicbook+zip': [],
 						'application/vnd.comicbook-rar': [],
 						'application/vnd.rar': [],
+						'.cbz': [],
+						'.cbr': [],
+						'.epub': [],
 					}
 				: {}),
 		},
@@ -48,6 +57,28 @@ export default function UploadModal() {
 	const handleOpenChanged = (isOpen: boolean) => {
 		if (!isOpen) {
 			setUploadType(undefined)
+		}
+	}
+
+	const onUploadClicked = async () => {
+		// Return if files is empty
+		if (!files) {
+			return
+		}
+
+		// TODO - How do we determine place_at?
+		let place_at = ''
+
+		if (uploadType == 'books') {
+			try {
+				await sdk.upload.uploadLibraryBooks(library.id, place_at, files)
+				toast.success('Successfully uploaded file(s)')
+			} catch (error) {
+				console.error(error)
+				toast.error('Failed to upload file(s)')
+			}
+		} else {
+			// TODO - Series upload
 		}
 	}
 
@@ -70,7 +101,7 @@ export default function UploadModal() {
 						</Dialog.Title>
 						<Dialog.Description>
 							{displayedType === 'books'
-								? 'Add books directly to the current path in the file explorer'
+								? 'Add books directly to the current path in the file explorer.'
 								: 'Add a series directly to the current path in the file explorer. '}
 							{displayedType === 'series' && (
 								<span>
@@ -153,7 +184,7 @@ export default function UploadModal() {
 						<Button variant="default" onClick={() => setUploadType(undefined)}>
 							Cancel
 						</Button>
-						<Button variant="primary" disabled={!files.length}>
+						<Button variant="primary" disabled={!files.length} onClick={onUploadClicked}>
 							Upload
 						</Button>
 					</Dialog.Footer>

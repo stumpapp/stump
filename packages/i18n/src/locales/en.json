@@ -980,6 +980,7 @@
 			"application": {
 				"account": "Account",
 				"appearance": "Appearance",
+				"api keys": "API keys",
 				"reader": "Reader",
 				"desktop": "Desktop",
 				"label": "Application"
@@ -1100,6 +1101,12 @@
 					}
 				}
 			}
+		},
+		"app/apiKeys": {
+			"helmet": "API keys",
+			"title": "API keys",
+			"description": "Manage your generated Stump API keys",
+			"sections": {}
 		},
 		"app/reader": {
 			"helmet": "Reader settings",

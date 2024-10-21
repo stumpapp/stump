@@ -1,6 +1,6 @@
 use axum::{
 	body::Body,
-	extract::{OriginalUri, Request, State},
+	extract::{OriginalUri, Path, Request, State},
 	http::{header, StatusCode},
 	middleware::Next,
 	response::{IntoResponse, Redirect, Response},
@@ -8,8 +8,10 @@ use axum::{
 };
 use base64::{engine::general_purpose::STANDARD, Engine};
 use chrono::Utc;
+use prefixed_api_key::{PrefixedApiKey, PrefixedApiKeyController};
+use prisma_client_rust::or;
 use stump_core::{
-	db::entity::{User, UserPermission},
+	db::entity::{User, UserPermission, API_KEY_PREFIX},
 	opds::v2_0::{
 		authentication::{
 			OPDSAuthenticationDocumentBuilder, OPDSSupportedAuthFlow,
@@ -17,7 +19,7 @@ use stump_core::{
 		},
 		link::OPDSLink,
 	},
-	prisma::{session, user, PrismaClient},
+	prisma::{api_key, session, user, PrismaClient},
 };
 use tower_sessions::Session;
 
@@ -117,9 +119,18 @@ impl RequestContext {
 	}
 }
 
-/// Middleware to check if a user is authenticated. If the user is not authenticated, the middleware
-/// will reject authentication. If the user is authenticated, the middleware will insert the user
-/// into the request extensions.
+/// A middleware to authenticate a user by one of the three methods:
+/// - Bearer token (JWT or API key)
+/// - Session cookie
+/// - Basic auth (only for OPDS v1.2 requests)
+/// This middleware should be used broadly across the application, however in instances where
+/// a router is scoped to an API key, the `api_key_middlware` should be used instead.
+///
+/// If the user is authenticated, the middleware will insert the user into the request
+/// extensions.
+///
+/// Note: It is important that this middlware is placed _after_ any middleware/handlers which access the
+/// request extensions, as the user is inserted into the request extensions dynamically here.
 #[tracing::instrument(skip(ctx, req, next))]
 pub async fn auth_middleware(
 	State(ctx): State<AppState>,
@@ -197,6 +208,34 @@ pub async fn auth_middleware(
 	Ok(next.run(req).await)
 }
 
+/// A middleware to authenticate a user by an API key in a *very* specific way. This middleware
+/// assumes that a fully qualified API key is provided in the path. This is used for two features today:
+///
+/// 1. An alternative for bearer token on the OPDS v1.2 API
+/// 2. A way to authenticate users for the KoReader sync API
+///
+/// This isn't necessary for OPDS v2.0 as it has a more robust authentication mechanism. The koreader
+/// frontend app will send an md5 hash of whatever password you provide. Stump does not use the same
+/// hashing algorithm, therefore the default auth method would not work.
+pub async fn api_key_middleware(
+	State(ctx): State<AppState>,
+	Path(api_key): Path<String>,
+	mut req: Request,
+	next: Next,
+) -> Result<Response, impl IntoResponse> {
+	let Ok(pak) = PrefixedApiKey::from_string(api_key.as_str()) else {
+		return Err(APIError::Unauthorized.into_response());
+	};
+
+	let user = validate_api_key(pak, &ctx.db)
+		.await
+		.map_err(|e| e.into_response())?;
+
+	req.extensions_mut().insert(RequestContext(user));
+
+	Ok(next.run(req).await)
+}
+
 /// Middleware to check if a user has the required permissions to access a route. If the user does
 /// not have the required permissions, the middleware will reject the request.
 #[tracing::instrument(skip(req, next))]
@@ -224,10 +263,76 @@ pub async fn server_owner_middleware(
 	Ok(next.run(req).await)
 }
 
+pub async fn validate_api_key(
+	pak: PrefixedApiKey,
+	client: &PrismaClient,
+) -> APIResult<User> {
+	let controller = PrefixedApiKeyController::configure()
+		.prefix(API_KEY_PREFIX.to_owned())
+		.seam_defaults()
+		.finalize()?;
+
+	let long_token_hash = controller.long_token_hashed(&pak);
+	let api_key = client
+		.api_key()
+		.find_first(vec![
+			api_key::short_token::equals(pak.short_token().to_string()),
+			api_key::long_token_hash::equals(long_token_hash),
+			api_key::user::is(vec![
+				user::deleted_at::equals(None),
+				user::is_locked::equals(false),
+			]),
+			or![
+				api_key::expires_at::gte(Utc::now().into()),
+				api_key::expires_at::equals(None),
+			],
+		])
+		.with(api_key::user::fetch())
+		.exec()
+		.await?
+		.ok_or(APIError::Unauthorized)?;
+	let key_user = api_key.user().ok().ok_or(APIError::Unauthorized)?;
+
+	// Note: we check as a precaution. If a user had the permission revoked, that logic should also
+	// clean up keys.
+	let can_use_key = key_user
+		.permissions
+		.as_ref()
+		.map(|set| set.contains(&UserPermission::AccessAPIKeys.to_string()))
+		.unwrap_or(false);
+
+	if !can_use_key || !controller.check_hash(&pak, &api_key.long_token_hash) {
+		// TODO(security): track?
+		return Err(APIError::Unauthorized);
+	}
+
+	let update_result = client
+		.api_key()
+		.update(
+			api_key::id::equals(api_key.id),
+			vec![api_key::last_used_at::set(Some(Utc::now().into()))],
+		)
+		.exec()
+		.await;
+	if let Err(e) = update_result {
+		// IMO we shouldn't fail the request if we can't update the last used at field
+		tracing::error!(error = ?e, "Failed to update API key");
+	}
+
+	Ok(User::from(key_user.clone()))
+}
+
 /// A function to handle bearer token authentication. This function will verify the token and
 /// return the user if the token is valid.
 #[tracing::instrument(skip_all)]
 async fn handle_bearer_auth(token: String, client: &PrismaClient) -> APIResult<User> {
+	match PrefixedApiKey::from_string(token.as_str()) {
+		Ok(api_key) if api_key.prefix() == API_KEY_PREFIX => {
+			return validate_api_key(api_key, client).await;
+		},
+		_ => (),
+	};
+
 	let user_id = verify_user_jwt(&token)?;
 
 	let fetched_user = client

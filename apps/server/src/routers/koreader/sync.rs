@@ -1,31 +1,24 @@
 use axum::{
-	extract::{Path, Request, State},
-	middleware::{self, Next},
-	response::{IntoResponse, Json, Response},
+	extract::{Path, State},
+	middleware,
+	response::Json,
 	routing::{get, put},
 	Extension, Router,
 };
-use chrono::Utc;
-use prefixed_api_key::{PrefixedApiKey, PrefixedApiKeyController};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use stump_core::{
-	db::entity::{
-		macros::{
-			api_key_user_select, finished_session_koreader, reading_session_koreader,
-		},
-		UserPermission, API_KEY_PREFIX,
-	},
+	db::entity::macros::{finished_session_koreader, reading_session_koreader},
 	prisma::{
-		active_reading_session, api_key, finished_reading_session, media,
+		active_reading_session, finished_reading_session, media,
 		registered_reading_device, user,
 	},
-	CoreError,
 };
 
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
+	middleware::auth::{api_key_middleware, RequestContext},
 };
 
 // TODO: healthcheck?
@@ -41,95 +34,11 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			.route("/users/auth", get(check_authorized))
 			.route("/syncs/progress", put(put_progress))
 			.route("/syncs/progress/:document", get(get_progress))
-			.layer(middleware::from_fn_with_state(app_state, authorize)),
+			.layer(middleware::from_fn_with_state(
+				app_state,
+				api_key_middleware,
+			)),
 	)
-}
-
-#[derive(Debug, Clone)]
-struct KoReaderUser {
-	id: String,
-	username: String,
-}
-
-// TODO: this should probably live in auth middleware now
-// RequestContext perhaps should be refactored for users + keys, e.g.
-// RequestContext(AuthedUser) -> enum AuthedUser { User(User), APIKey(APIKey) }
-// Or perhaps just override permissions on the user object itself if not inherited?
-async fn authorize(
-	State(ctx): State<AppState>,
-	Path(api_key): Path<String>,
-	mut req: Request,
-	next: Next,
-) -> Result<Response, impl IntoResponse> {
-	let client = &ctx.db;
-	let pak: PrefixedApiKey = api_key
-		.as_str()
-		.try_into()
-		.map_err(|_| APIError::Unauthorized)?;
-
-	let controller = PrefixedApiKeyController::configure()
-		.prefix(API_KEY_PREFIX.to_owned())
-		.seam_defaults()
-		.finalize()
-		.map_err(|e| {
-			CoreError::InternalError(format!(
-				"Failed to create API key controller: {}",
-				e
-			))
-		})?;
-
-	let long_token_hash = controller.long_token_hashed(&pak);
-	let api_key = client
-		.api_key()
-		.find_first(vec![
-			api_key::short_token::equals(pak.short_token().to_string()),
-			api_key::long_token_hash::equals(long_token_hash),
-			api_key::user::is(vec![
-				user::deleted_at::equals(None),
-				user::is_locked::equals(false),
-			]),
-		])
-		.select(api_key_user_select::select())
-		.exec()
-		.await?
-		.ok_or(APIError::Unauthorized)?;
-	let user = &api_key.user;
-
-	// Note: we check as a precaution. If a user had the permission revoked, that logic should also
-	// clean up keys.
-	let can_use_key = user
-		.permissions
-		.as_ref()
-		.map(|set| set.contains(&UserPermission::AccessAPIKeys.to_string()))
-		.unwrap_or(false);
-
-	if !can_use_key || !controller.check_hash(&pak, &api_key.long_token_hash) {
-		// TODO(security): track?
-		return Err(APIError::Unauthorized);
-	}
-
-	match client
-		.api_key()
-		.update(
-			api_key::id::equals(api_key.id),
-			vec![api_key::last_used_at::set(Some(Utc::now().into()))],
-		)
-		.exec()
-		.await
-	{
-		Ok(_) => (),
-		Err(e) => {
-			// IMO we shouldn't fail the request if we can't update the last used at field
-			tracing::error!(error = ?e, "Failed to update API key");
-		},
-	}
-
-	req.extensions_mut().insert(KoReaderUser {
-		id: user.id.clone(),
-		username: user.username.clone(),
-	});
-
-	Ok::<_, APIError>(next.run(req).await)
 }
 
 #[derive(Serialize)]
@@ -166,10 +75,11 @@ struct GetProgressResponse {
 
 async fn get_progress(
 	State(ctx): State<AppState>,
-	Extension(user): Extension<KoReaderUser>,
+	Extension(req): Extension<RequestContext>,
 	Path(document): Path<String>,
 ) -> APIResult<Json<GetProgressResponse>> {
 	let client = &ctx.db;
+	let user = req.user();
 	let document_cpy = document.clone();
 
 	let (active_session, finished_session) = client
@@ -245,7 +155,7 @@ struct PutProgressResponse {
 
 async fn put_progress(
 	State(ctx): State<AppState>,
-	Extension(user): Extension<KoReaderUser>,
+	Extension(req): Extension<RequestContext>,
 	Json(PutProgressInput {
 		document,
 		progress,
@@ -255,6 +165,7 @@ async fn put_progress(
 	}): Json<PutProgressInput>,
 ) -> APIResult<Json<PutProgressResponse>> {
 	let client = &ctx.db;
+	let user = req.user();
 
 	if !(0.0..=1.0).contains(&percentage) {
 		tracing::error!(

@@ -69,9 +69,19 @@ export type PartialUser = { id: string; username: string; is_server_owner: boole
  * Permissions that can be granted to a user. Some permissions are implied by others,
  * and will be automatically granted if the "parent" permission is granted.
  */
-export type UserPermission = "bookclub:read" | "bookclub:create" | "emailer:read" | "emailer:create" | "emailer:manage" | "email:send" | "email:arbitrary_send" | "smartlist:read" | "file:explorer" | "file:upload" | "file:download" | "library:create" | "library:edit" | "library:scan" | "library:manage" | "library:delete" | "user:read" | "user:manage" | "notifier:read" | "notifier:create" | "notifier:manage" | "notifier:delete" | "server:manage"
+export type UserPermission = "feature:api_keys" | "bookclub:read" | "bookclub:create" | "emailer:read" | "emailer:create" | "emailer:manage" | "email:send" | "email:arbitrary_send" | "smartlist:read" | "file:explorer" | "file:upload" | "file:download" | "library:create" | "library:edit" | "library:scan" | "library:manage" | "library:delete" | "user:read" | "user:manage" | "notifier:read" | "notifier:create" | "notifier:manage" | "notifier:delete" | "server:manage"
 
 export type AgeRestriction = { age: number; restrict_on_unset: boolean }
+
+/**
+ * An API key which can be used to interact with the API. API keys are scoped to a user,
+ * so all actions taken with an API key are done as if the user was taking them.
+ */
+export type APIKey = { id: number; permissions: APIKeyPermissions; created_at: string; last_used_at: string | null; expires_at: string | null }
+
+export type InheritPermissionValue = "inherit"
+
+export type APIKeyPermissions = InheritPermissionValue | UserPermission[]
 
 export type SupportedFont = "inter" | "opendyslexic"
 
@@ -345,6 +355,16 @@ export type UpdateUser = { username: string; password: string | null; avatar_url
 export type UpdateUserPreferences = { id: string; locale: string; preferred_layout_mode: string; primary_navigation_mode: string; layout_max_width_px: number | null; app_theme: string; enable_gradients: boolean; app_font: SupportedFont; show_query_indicator: boolean; enable_live_refetch: boolean; enable_discord_presence: boolean; enable_compact_display: boolean; enable_double_sidebar: boolean; enable_replace_primary_sidebar: boolean; enable_hide_scrollbar: boolean; prefer_accent_color: boolean; show_thumbnails_in_headers: boolean }
 
 export type DeleteUser = { hard_delete: boolean | null }
+
+/**
+ * The request body for creating or updating an API key
+ */
+export type CreateOrUpdateAPIKey = { permissions: APIKeyPermissions; expires_at: string | null }
+
+/**
+ * The response after creating a new API key
+ */
+export type CreatedAPIKey = { api_key: string }
 
 export type EmailerIncludeParams = { include_send_history?: boolean }
 

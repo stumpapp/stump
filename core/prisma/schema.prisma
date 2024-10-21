@@ -92,9 +92,10 @@ model APIKey {
 
   short_token     String
   long_token_hash String
-  permissions     Bytes? // "inherit" or a list of permissions 
+  permissions     Bytes // "inherit" or a list of permissions 
   created_at      DateTime  @default(now())
   last_used_at    DateTime?
+  expires_at      DateTime?
 
   user_id String
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)

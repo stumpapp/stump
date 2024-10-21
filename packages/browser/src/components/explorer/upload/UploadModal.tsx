@@ -10,6 +10,7 @@ import UploadMenu from './UploadMenu'
 import { useSDK } from '@stump/client'
 import toast from 'react-hot-toast'
 import { useLibraryContext } from '@/scenes/library/context'
+import { useFileExplorerContext } from '../context'
 
 // TODO(upload): make language dynamic according to the uploadType
 // TODO(upload): add language to localization files
@@ -21,6 +22,7 @@ export default function UploadModal() {
 	const [files, setFiles] = useState<File[]>([])
 
 	const { library } = useLibraryContext()
+	const { currentPath, rootPath } = useFileExplorerContext()
 	const { sdk } = useSDK()
 
 	const handleDrop = useCallback((acceptedFiles: File[], rejections: FileRejection[]) => {
@@ -66,13 +68,16 @@ export default function UploadModal() {
 			return
 		}
 
-		// TODO - How do we determine place_at?
-		let place_at = ''
+		// Current path needs to be set so we know where to put books
+		if (currentPath == null) {
+			return
+		}
 
 		if (uploadType == 'books') {
 			try {
-				await sdk.upload.uploadLibraryBooks(library.id, place_at, files)
+				await sdk.upload.uploadLibraryBooks(library.id, currentPath, files)
 				toast.success('Successfully uploaded file(s)')
+				setFiles([])
 			} catch (error) {
 				console.error(error)
 				toast.error('Failed to upload file(s)')

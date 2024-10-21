@@ -152,6 +152,21 @@ struct UploadBooksRequest {
 	files: Vec<FieldData<NamedTempFile>>,
 }
 
+#[utoipa::path(
+	post,
+	path = "/api/v1/upload/libraries/:id/books",
+	tag = "library",
+	request_body(content_type = "multipart/form-data", content = UploadBooksRequest),
+	params(
+		("id" = String, Path, description = "The library ID"),
+	),
+	responses(
+		(status = 200, description = "Successfully added books"),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Library not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 async fn upload_books(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -174,8 +189,13 @@ async fn upload_books(
 		));
 	}
 
-	// Get path that uploads will be placed at
-	let placement_path = path::Path::new(&library.path).join(books_request.place_at);
+	// Get path that uploads will be placed at, account for possible full path
+	let placement_path = if books_request.place_at.starts_with(&library.path) {
+		path::PathBuf::from(&books_request.place_at)
+	} else {
+		path::Path::new(&library.path).join(books_request.place_at)
+	};
+
 	// Check that it is a directory and already exists
 	if !(placement_path.is_dir() && placement_path.exists()) {
 		return Err(APIError::BadRequest(
@@ -206,6 +226,21 @@ struct UploadSeriesRequest {
 	files: Vec<FieldData<NamedTempFile>>,
 }
 
+#[utoipa::path(
+	post,
+	path = "/api/v1/upload/libraries/:id/series",
+	tag = "library",
+	request_body(content_type = "multipart/form-data", content = UploadSeriesRequest),
+	params(
+		("id" = String, Path, description = "The library ID"),
+	),
+	responses(
+		(status = 200, description = "Successfully added series"),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Library not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 async fn upload_series(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,

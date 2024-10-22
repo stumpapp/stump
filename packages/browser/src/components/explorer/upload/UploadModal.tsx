@@ -1,16 +1,28 @@
-import { Accordion, Button, cn, Dialog, Heading, Input, Text } from '@stump/components'
+import { useMutation, useQuery, useSDK } from '@stump/client'
+import {
+	Accordion,
+	Button,
+	cn,
+	Dialog,
+	Heading,
+	Input,
+	ProgressBar,
+	ProgressSpinner,
+	Text,
+} from '@stump/components'
+import { UploaderParams, UploadLibraryBooks, UploadLibrarySeries } from '@stump/sdk'
 import { Book } from 'lucide-react'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { FileRejection, useDropzone } from 'react-dropzone'
+import toast from 'react-hot-toast'
 
+import Spinner from '@/components/Spinner'
 import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
+import { useLibraryContext } from '@/scenes/library/context'
 import { formatBytes } from '@/utils/format'
 
-import UploadMenu from './UploadMenu'
-import { useSDK } from '@stump/client'
-import toast from 'react-hot-toast'
-import { useLibraryContext } from '@/scenes/library/context'
 import { useFileExplorerContext } from '../context'
+import UploadMenu from './UploadMenu'
 
 // TODO(upload): make language dynamic according to the uploadType
 // TODO(upload): add language to localization files
@@ -23,8 +35,32 @@ export default function UploadModal() {
 	const [files, setFiles] = useState<File[]>([])
 
 	const { library } = useLibraryContext()
-	const { currentPath } = useFileExplorerContext()
+	const { currentPath, refetch } = useFileExplorerContext()
 	const { sdk } = useSDK()
+	const { data: config } = useQuery([sdk.upload.keys.config], () => sdk.upload.config(), {
+		suspense: true,
+	})
+
+	const [uploadProgress, setUploadProgress] = useState(0)
+
+	const { mutateAsync: uploadBooks, isLoading: isUploadingBooks } = useMutation(
+		[sdk.upload.keys.uploadLibraryBooks],
+		(params: UploaderParams<UploadLibraryBooks>) =>
+			sdk.upload.uploadLibraryBooks({ ...params, onProgress: setUploadProgress }),
+		{
+			onSuccess: () => refetch(),
+		},
+	)
+	const { mutateAsync: uploadSeries, isLoading: isUploadingSeries } = useMutation(
+		[sdk.upload.keys.uploadLibrarySeries],
+		(params: UploaderParams<UploadLibrarySeries>) =>
+			sdk.upload.uploadLibrarySeries({ ...params, onProgress: setUploadProgress }),
+		{
+			onSuccess: () => refetch(),
+		},
+	)
+
+	const isUploading = isUploadingBooks || isUploadingSeries
 
 	const handleDrop = useCallback((acceptedFiles: File[], rejections: FileRejection[]) => {
 		// TODO: check rejections and do sm
@@ -37,18 +73,14 @@ export default function UploadModal() {
 
 	const { getRootProps, getInputProps, isFileDialogActive, isDragActive } = useDropzone({
 		accept: {
-			'application/zip': [],
-			'application/epub+zip': [],
+			'application/epub+zip': ['.epub'],
 			'application/pdf': [],
-			'application/vnd.comicbook+zip': [],
-			'application/vnd.comicbook-rar': [],
-			'application/vnd.rar': [],
-			'.cbz': [],
-			'.cbr': [],
-			'.epub': [],
+			'application/vnd.comicbook+zip': ['.cbz'],
+			'application/vnd.comicbook-rar': ['.cbr'],
+			'application/vnd.rar': ['.rar', '.cbr'],
+			'application/zip': ['.zip', '.cbz'],
 		},
-		// TODO(upload): pull this from the server
-		maxSize: 20 * 1024 * 1024,
+		maxSize: config?.max_file_upload_size ?? 0,
 		multiple: uploadType === 'books',
 		onDrop: handleDrop,
 	})
@@ -73,9 +105,9 @@ export default function UploadModal() {
 		// Handle books/series upload paths
 		if (uploadType == 'books') {
 			try {
-				await sdk.upload.uploadLibraryBooks(library.id, currentPath, files)
+				// await sdk.upload.uploadLibraryBooks(library.id, currentPath, files)
+				await uploadBooks({ files, library_id: library.id, place_at: currentPath })
 				toast.success('Successfully uploaded file(s)')
-				setFiles([])
 			} catch (error) {
 				console.error(error)
 				toast.error('Failed to upload book(s)')
@@ -87,10 +119,13 @@ export default function UploadModal() {
 			}
 
 			try {
-				await sdk.upload.uploadLibrarySeries(library.id, seriesDirName, files)
+				// await sdk.upload.uploadLibrarySeries(library.id, seriesDirName, files)
+				await uploadSeries({
+					files,
+					library_id: library.id,
+					series_dir_name: seriesDirName,
+				})
 				toast.success('Successfully uploaded series')
-				setFiles([])
-				setSeriesDirName(undefined)
 			} catch (error) {
 				console.error(error)
 				toast.error('Failed to upload series')
@@ -98,11 +133,66 @@ export default function UploadModal() {
 		}
 	}
 
+	/**
+	 * An effect to reset the state whenever uploadType becomes falsy (unset)
+	 */
+	useEffect(() => {
+		if (!uploadType) {
+			setFiles([])
+			setSeriesDirName(undefined)
+		}
+	}, [uploadType])
+
 	const isFocused = isFileDialogActive || isDragActive
 	// Note: since the open state is contigent on the uploadType, when it is closed the uploadType is set to undefined.
 	// This means that it will flash the wrong content. So, to prevent this, we will fallback to the previous
 	// uploadType if the current one is undefined.
 	const displayedType = useCurrentOrPrevious(uploadType)
+
+	const renderDropContent = () => {
+		if (isUploading) {
+			return (
+				<>
+					<span className="flex items-center justify-center rounded-lg border border-edge bg-background-surface/80 p-4">
+						<ProgressSpinner className="h-7 w-7" />
+					</span>
+
+					<div className="text-center">
+						<Heading size="xs" className="flex items-center justify-center space-x-1">
+							Uploading
+							{uploadProgress > 0 && (
+								<span className="text-foreground-muted">({uploadProgress}%)</span>
+							)}
+						</Heading>
+						<div className="mt-2 flex h-4 w-64 items-center justify-center">
+							<ProgressBar
+								value={uploadProgress}
+								isIndeterminate={uploadProgress === 0}
+								className="h-1.5 rounded-lg"
+								max={100}
+								variant="primary"
+							/>
+						</div>
+					</div>
+				</>
+			)
+		} else {
+			return (
+				<>
+					<span className="flex items-center justify-center rounded-lg border border-edge bg-background-surface/80 p-4">
+						<Book className="h-8 w-8 text-foreground-muted" />
+					</span>
+
+					<div className="text-center">
+						<Heading size="xs">Drag and drop books here</Heading>
+						<Text variant="muted" size="sm">
+							Or click to browse your computer for books to upload
+						</Text>
+					</div>
+				</>
+			)
+		}
+	}
 
 	// If we wind up using UploadButtons, we would just have each one set the uploadType accordingly
 	return (
@@ -137,16 +227,7 @@ export default function UploadModal() {
 					>
 						<input {...getInputProps()} />
 
-						<span className="flex items-center justify-center rounded-lg border border-edge bg-background-surface/80 p-4">
-							<Book className="h-8 w-8 text-foreground-muted" />
-						</span>
-
-						<div className="text-center">
-							<Heading size="xs">Drag and drop books here</Heading>
-							<Text variant="muted" size="sm">
-								Or click to browse your computer for books to upload
-							</Text>
-						</div>
+						{renderDropContent()}
 					</div>
 
 					{/* Conditionally render the series name input */}

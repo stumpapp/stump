@@ -196,6 +196,7 @@ async fn upload_books(
 		path::Path::new(&library.path).join(books_request.place_at)
 	};
 
+	// TODO(upload): async-ify this
 	// Check that it is a directory and already exists
 	if !(placement_path.is_dir() && placement_path.exists()) {
 		return Err(APIError::BadRequest(

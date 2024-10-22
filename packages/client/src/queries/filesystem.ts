@@ -75,7 +75,7 @@ export function useDirectoryListing({
 	const [history, setHistory] = useState(currentPath ? [currentPath] : [])
 	const [currentIndex, setCurrentIndex] = useState(0)
 
-	const { isLoading, error, data } = useQuery(
+	const { isLoading, error, data, refetch } = useQuery(
 		[sdk.filesystem.keys.listDirectory, currentPath, page],
 		async () => sdk.filesystem.listDirectory({ page, path: currentPath }),
 		{
@@ -238,6 +238,7 @@ export function useDirectoryListing({
 		isPathAllowed,
 		parent: directoryListing?.parent,
 		path: currentPath,
+		refetch,
 		setPath,
 	}
 }

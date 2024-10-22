@@ -1,8 +1,6 @@
 import { DirectoryListingFile } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
-import { noop } from '../../utils/misc'
-
 export type ExplorerLayout = 'grid' | 'table'
 
 export type UploadParams = {
@@ -22,19 +20,15 @@ export type IExplorerContext = {
 	canGoForward: boolean
 	goForward: () => void
 	goBack: () => void
-	onUpload?: (params: UploadParams) => void
+	refetch: () => Promise<unknown>
+	uploadEnabled: boolean
 }
 
-export const ExplorerContext = createContext<IExplorerContext>({
-	canGoBack: false,
-	canGoForward: false,
-	currentPath: null,
-	files: [],
-	goBack: noop,
-	goForward: noop,
-	layout: 'grid',
-	onSelect: noop,
-	rootPath: '',
-	setLayout: noop,
-})
-export const useFileExplorerContext = () => useContext(ExplorerContext)
+export const ExplorerContext = createContext<IExplorerContext | null>(null)
+export const useFileExplorerContext = () => {
+	const context = useContext(ExplorerContext)
+	if (!context) {
+		throw new Error('useFileExplorerContext must be used within a FileExplorerProvider')
+	}
+	return context
+}

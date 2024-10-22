@@ -10,7 +10,7 @@ export const HEADER_HEIGHT = 40
 
 // TODO: sort options, search?
 export default function FileExplorerHeader() {
-	const { currentPath, onUpload } = useFileExplorerContext()
+	const { currentPath, uploadEnabled } = useFileExplorerContext()
 
 	const basename = useMemo(() => currentPath?.split('/').pop() ?? '', [currentPath])
 
@@ -25,7 +25,7 @@ export default function FileExplorerHeader() {
 
 			<div className="flex shrink-0 items-center gap-3">
 				<LayoutButtons />
-				{!!onUpload && <UploadModal />}
+				{uploadEnabled && <UploadModal />}
 			</div>
 		</header>
 	)

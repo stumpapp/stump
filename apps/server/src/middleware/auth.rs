@@ -11,7 +11,7 @@ use chrono::Utc;
 use prefixed_api_key::{PrefixedApiKey, PrefixedApiKeyController};
 use prisma_client_rust::or;
 use stump_core::{
-	db::entity::{User, UserPermission, API_KEY_PREFIX},
+	db::entity::{APIKeyPermissions, User, UserPermission, API_KEY_PREFIX},
 	opds::v2_0::{
 		authentication::{
 			OPDSAuthenticationDocumentBuilder, OPDSSupportedAuthFlow,
@@ -292,6 +292,7 @@ pub async fn validate_api_key(
 		.await?
 		.ok_or(APIError::Unauthorized)?;
 	let key_user = api_key.user().ok().ok_or(APIError::Unauthorized)?;
+	let api_key_permissions = APIKeyPermissions::try_from(api_key.permissions.clone())?;
 
 	// Note: we check as a precaution. If a user had the permission revoked, that logic should also
 	// clean up keys.
@@ -319,7 +320,17 @@ pub async fn validate_api_key(
 		tracing::error!(error = ?e, "Failed to update API key");
 	}
 
-	Ok(User::from(key_user.clone()))
+	let constructed_user = match api_key_permissions {
+		APIKeyPermissions::Inherit(_) => User::from(key_user.clone()),
+		// Note: we don't construct permission sets for inferred permissions. What you
+		// give to your API key is what it gets.
+		APIKeyPermissions::Custom(permissions) => User {
+			permissions,
+			..User::from(key_user.clone())
+		},
+	};
+
+	Ok(constructed_user)
 }
 
 /// A function to handle bearer token authentication. This function will verify the token and

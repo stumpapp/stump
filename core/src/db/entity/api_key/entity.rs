@@ -124,6 +124,19 @@ impl APIKey {
 	}
 }
 
+impl TryFrom<Vec<u8>> for APIKeyPermissions {
+	type Error = CoreError;
+
+	fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
+		serde_json::from_slice(&value).map_err(|e| {
+			CoreError::InternalError(format!(
+				"Failed to deserialize API key permissions: {}",
+				e
+			))
+		})
+	}
+}
+
 impl TryFrom<api_key::Data> for APIKey {
 	type Error = CoreError;
 

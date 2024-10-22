@@ -1,5 +1,5 @@
 import { APIBase } from '../base'
-import { APIKey, CreateOrUpdateAPIKey } from '../types'
+import { APIKey, CreatedAPIKey, CreateOrUpdateAPIKey } from '../types'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 
@@ -44,9 +44,9 @@ export class APIKeyAPI extends APIBase {
 	/**
 	 * Create a new API key
 	 */
-	async create(payload: CreateOrUpdateAPIKey): Promise<APIKey> {
-		const { data: key } = await this.api.axios.post<APIKey>(apiKeyURL(''), payload)
-		return key
+	async create(payload: CreateOrUpdateAPIKey): Promise<CreatedAPIKey> {
+		const { data } = await this.api.axios.post<CreatedAPIKey>(apiKeyURL(''), payload)
+		return data
 	}
 
 	/**

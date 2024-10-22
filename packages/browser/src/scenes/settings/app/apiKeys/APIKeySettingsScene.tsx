@@ -12,9 +12,9 @@ export default function APIKeySettingsScene() {
 				<div className="flex flex-col gap-4">
 					<div className="flex items-end justify-between">
 						<div>
-							<Heading size="sm">Active keys</Heading>
+							<Heading size="sm">Your keys</Heading>
 							<Text size="sm" variant="muted" className="mt-1">
-								These are the API keys currently in use
+								These are the API keys you have created
 							</Text>
 						</div>
 

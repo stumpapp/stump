@@ -31,7 +31,8 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route(
 					"/:id",
 					get(get_api_key).put(update_api_key).delete(delete_api_key),
-				),
+				)
+				.route("/:id/regenerate-secret", post(regenerate_api_key_secret)),
 		)
 		.layer(middleware::from_fn(authorize)) // Note the order!
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
@@ -125,6 +126,7 @@ pub struct CreateOrUpdateAPIKey {
 	/// The permissions that the API key should have
 	permissions: APIKeyPermissions,
 	/// The expiration date for the API key, if any
+	#[specta(optional)]
 	expires_at: Option<DateTime<FixedOffset>>,
 }
 
@@ -253,4 +255,42 @@ async fn delete_api_key(
 		.await?;
 
 	Ok(())
+}
+
+/// Regenerate the secret for an existing API key. This will fully invalidate the
+/// existing pek and hash and create a new one.
+async fn regenerate_api_key_secret(
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+	Path(id): Path<i32>,
+) -> APIResult<Json<CreatedAPIKey>> {
+	let user = req.user();
+	let client = &ctx.db;
+
+	let api_key = client
+		.api_key()
+		.find_first(vec![
+			api_key::id::equals(id),
+			api_key::user_id::equals(user.id.clone()),
+		])
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound("API key not found".to_string()))?;
+
+	let (pek, hash) = APIKey::create_prefixed_key()?;
+	let _updated_key = client
+		.api_key()
+		.update(
+			api_key::id::equals(api_key.id),
+			vec![
+				api_key::short_token::set(pek.short_token().to_string()),
+				api_key::long_token_hash::set(hash),
+			],
+		)
+		.exec()
+		.await?;
+
+	Ok(Json(CreatedAPIKey {
+		api_key: pek.to_string(),
+	}))
 }

@@ -9,6 +9,7 @@ export const allPermissions = [
 	'emailer:create',
 	'emailer:manage',
 	'emailer:read',
+	'feature:api_keys',
 	'file:explorer',
 	'file:upload',
 	'file:download',

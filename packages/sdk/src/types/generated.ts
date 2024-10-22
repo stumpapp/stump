@@ -359,7 +359,7 @@ export type DeleteUser = { hard_delete: boolean | null }
 /**
  * The request body for creating or updating an API key
  */
-export type CreateOrUpdateAPIKey = { name: string; permissions: APIKeyPermissions; expires_at: string | null }
+export type CreateOrUpdateAPIKey = { name: string; permissions: APIKeyPermissions; expires_at?: string | null }
 
 /**
  * The response after creating a new API key

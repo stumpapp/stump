@@ -1,11 +1,13 @@
 use axum::{
 	extract::{Path, Request, State},
+	http::HeaderMap,
 	middleware::{self, Next},
 	response::{Json, Response},
-	routing::get,
+	routing::{get, post},
 	Extension, Router,
 };
 use chrono::{DateTime, FixedOffset};
+use prefixed_api_key::PrefixedApiKey;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use stump_core::{
@@ -16,7 +18,7 @@ use stump_core::{
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
-	middleware::auth::{auth_middleware, RequestContext},
+	middleware::auth::{auth_middleware, validate_api_key, RequestContext},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -25,6 +27,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			"/api-keys",
 			Router::new()
 				.route("/", get(get_api_keys).post(create_api_key))
+				.route("/validate-key", post(validate_api_key_handler))
 				.route(
 					"/:id",
 					get(get_api_key).put(update_api_key).delete(delete_api_key),
@@ -86,6 +89,32 @@ async fn get_api_key(
 	let api_key = api_key.ok_or(APIError::NotFound("API key not found".to_string()))?;
 
 	Ok(Json(APIKey::try_from(api_key)?))
+}
+
+// TODO: perhaps a more meaningful response when it is valid?
+async fn validate_api_key_handler(
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+	headers: HeaderMap,
+) -> APIResult<Json<bool>> {
+	let api_key = headers
+		.get("x-api-key")
+		.ok_or_else(|| APIError::BadRequest("Missing API key in headers".to_string()))?;
+	let api_key = api_key
+		.to_str()
+		.map_err(|_| APIError::BadRequest("Invalid API key in headers".to_string()))?;
+	let pak = PrefixedApiKey::from_string(api_key)
+		.map_err(|_| APIError::BadRequest("Invalid API key in headers".to_string()))?;
+
+	let is_valid = match validate_api_key(pak, &ctx.db).await {
+		Ok(key_user) => key_user.is(req.user()),
+		// We swallow errors to avoid showing our hand a bit, i.e. if the key wasn't found
+		// or is expired etc that is not surfaced. This is a bit of a tradeoff since it might
+		// not be overly useful, but it is a little more secure.
+		Err(_) => false,
+	};
+
+	Ok(Json(is_valid))
 }
 
 /// The request body for creating or updating an API key

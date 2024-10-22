@@ -20,7 +20,6 @@ prisma_sed_correction() {
 
 workspaces_sed_correction() {
     set -ex; \
-        sed -i '/core\/integration-tests/d' Cargo.toml; \
         sed -i '/apps\/desktop\/src-tauri/d' Cargo.toml; \
         sed -i '/crates\/prisma-cli/d' Cargo.toml
 }

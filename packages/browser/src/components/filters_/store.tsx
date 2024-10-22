@@ -95,6 +95,8 @@ export const intoBody = <F, O extends string | object>(
 type FilterStore = {
 	mode: 'body' | 'url'
 	setMode: (mode: 'body' | 'url') => void
+	setPage: (page: number) => void
+	setPageSize: (pageSize: number) => void
 
 	bodyStore: BodyFilterState
 	patchBody: (state: Partial<BodyFilterState>) => void
@@ -133,6 +135,22 @@ const createFilterStore = (forEntity: FilterEntity) =>
 					set(entireStore)
 				},
 				setMode: (mode) => set({ mode }),
+				setPage: (page) => {
+					const entireStore = get()
+					if (entireStore.mode === 'url') {
+						set(setProperty(entireStore, 'urlStore.pagination.page', page))
+					} else {
+						set(setProperty(entireStore, 'bodyStore.pagination.page', page))
+					}
+				},
+				setPageSize: (pageSize) => {
+					const entireStore = get()
+					if (entireStore.mode === 'url') {
+						set(setProperty(entireStore, 'urlStore.pagination.page_size', pageSize))
+					} else {
+						set(setProperty(entireStore, 'bodyStore.pagination.page_size', pageSize))
+					}
+				},
 				setUrlFilter: (key, value) => {
 					const entireStore = get()
 					const updatedState = { ...get().urlStore.filters, [key]: value }

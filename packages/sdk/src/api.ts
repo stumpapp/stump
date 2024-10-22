@@ -17,6 +17,7 @@ import {
 	SmartListAPI,
 	TagAPI,
 	UserAPI,
+	APIKeyAPI,
 } from './controllers'
 import { formatApiURL } from './utils'
 
@@ -127,6 +128,13 @@ export class Api {
 	 */
 	get auth(): AuthAPI {
 		return new AuthAPI(this)
+	}
+
+	/**
+	 * Get an instance for the APIKeyAPI
+	 */
+	get apiKey(): APIKeyAPI {
+		return new APIKeyAPI(this)
 	}
 
 	/**

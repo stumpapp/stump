@@ -77,7 +77,7 @@ export type AgeRestriction = { age: number; restrict_on_unset: boolean }
  * An API key which can be used to interact with the API. API keys are scoped to a user,
  * so all actions taken with an API key are done as if the user was taking them.
  */
-export type APIKey = { id: number; permissions: APIKeyPermissions; created_at: string; last_used_at: string | null; expires_at: string | null }
+export type APIKey = { id: number; name: string; permissions: APIKeyPermissions; created_at: string; last_used_at: string | null; expires_at: string | null }
 
 export type InheritPermissionValue = "inherit"
 
@@ -359,7 +359,7 @@ export type DeleteUser = { hard_delete: boolean | null }
 /**
  * The request body for creating or updating an API key
  */
-export type CreateOrUpdateAPIKey = { permissions: APIKeyPermissions; expires_at: string | null }
+export type CreateOrUpdateAPIKey = { name: string; permissions: APIKeyPermissions; expires_at: string | null }
 
 /**
  * The response after creating a new API key

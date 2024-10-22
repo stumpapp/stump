@@ -90,6 +90,7 @@ model AgeRestriction {
 model APIKey {
   id Int @id @default(autoincrement())
 
+  name            String
   short_token     String
   long_token_hash String
   permissions     Bytes // "inherit" or a list of permissions 

@@ -120,6 +120,8 @@ async fn validate_api_key_handler(
 /// The request body for creating or updating an API key
 #[derive(Deserialize, Type)]
 pub struct CreateOrUpdateAPIKey {
+	/// The name of the API key
+	name: String,
 	/// The permissions that the API key should have
 	permissions: APIKeyPermissions,
 	/// The expiration date for the API key, if any
@@ -161,6 +163,7 @@ async fn create_api_key(
 	let _api_key = client
 		.api_key()
 		.create(
+			body.name,
 			pek.short_token().to_string(),
 			hash,
 			permissions,
@@ -213,6 +216,7 @@ async fn update_api_key(
 		.update(
 			api_key::id::equals(api_key.id),
 			vec![
+				api_key::name::set(body.name),
 				api_key::permissions::set(permissions),
 				api_key::expires_at::set(body.expires_at),
 			],

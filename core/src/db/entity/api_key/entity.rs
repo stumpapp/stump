@@ -43,6 +43,8 @@ impl Default for APIKeyPermissions {
 pub struct APIKey {
 	/// The ID of the API key
 	id: i32,
+	/// A human-readable name for the API key
+	name: String,
 	/// The permissions for the API key, either inherited from the user or custom
 	/// permissions set on the key
 	permissions: APIKeyPermissions,
@@ -128,6 +130,7 @@ impl TryFrom<api_key::Data> for APIKey {
 	fn try_from(data: api_key::Data) -> Result<Self, Self::Error> {
 		Ok(APIKey {
 			id: data.id,
+			name: data.name,
 			permissions: serde_json::from_slice(&data.permissions)?,
 			long_token_hash: data.long_token_hash,
 			user_id: data.user_id,

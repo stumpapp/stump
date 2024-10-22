@@ -1,6 +1,6 @@
 import { CheckBox, Heading, Input, Link, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React, { useCallback, useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import paths from '@/paths'

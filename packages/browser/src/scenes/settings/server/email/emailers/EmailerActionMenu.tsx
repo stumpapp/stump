@@ -1,6 +1,5 @@
 import { DropdownMenu, IconButton } from '@stump/components'
 import { Edit, MoreVertical, Trash2 } from 'lucide-react'
-import React from 'react'
 
 type Props = {
 	onEdit: () => void

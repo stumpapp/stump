@@ -1,7 +1,7 @@
 import { BookImageScaling } from '@stump/client'
 import { cn, usePrevious } from '@stump/components'
 import { Media } from '@stump/sdk'
-import React, { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { ScrollerProps, Virtuoso } from 'react-virtuoso'

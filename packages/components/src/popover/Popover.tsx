@@ -1,5 +1,5 @@
-/* eslint-disable react/prop-types */
 import * as PopoverPrimitive from '@radix-ui/react-popover'
+import type { ComponentPropsWithoutRef, ElementRef } from 'react'
 import React from 'react'
 
 import { cn } from '../utils'
@@ -17,9 +17,9 @@ const POPOVER_SIZE_VARIANTS = {
 type PopoverContentProps = {
 	size?: keyof typeof POPOVER_SIZE_VARIANTS
 	portal?: boolean
-} & React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
+} & ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
 const PopoverContent = React.forwardRef<
-	React.ElementRef<typeof PopoverPrimitive.Content>,
+	ElementRef<typeof PopoverPrimitive.Content>,
 	PopoverContentProps
 >(({ className, align = 'center', sideOffset = 4, size, portal, ...props }, ref) => {
 	const Container = portal ? PopoverPrimitive.Portal : React.Fragment

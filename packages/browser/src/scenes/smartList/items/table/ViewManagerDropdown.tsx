@@ -1,7 +1,7 @@
 import { Button, Dropdown } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { ChevronDown } from 'lucide-react'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import { useSmartListContext } from '../../context'
 import CreateOrUpdateTableView from './CreateOrUpdateTableView'
@@ -26,7 +26,7 @@ export default function ViewManagerDropdown() {
 					>
 						<div className="inline-flex h-full items-center divide-x divide-edge">
 							<span className="flex h-full items-center px-3 py-2">{t('common.save')}</span>
-							<span className="flex h-full items-center  px-1 py-2">
+							<span className="flex h-full items-center px-1 py-2">
 								<ChevronDown className="h-4 w-4" />
 							</span>
 						</div>

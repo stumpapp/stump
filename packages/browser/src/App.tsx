@@ -45,18 +45,13 @@ function RouterContainer(props: StumpClientProps) {
 		setPlatform: store.setPlatform,
 	}))
 
-	useEffect(
-		() => {
-			if (!baseUrl && props.baseUrl) {
-				setBaseUrl(props.baseUrl)
-			}
+	useEffect(() => {
+		if (!baseUrl && props.baseUrl) {
+			setBaseUrl(props.baseUrl)
+		}
 
-			setMounted(true)
-		},
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[baseUrl],
-	)
+		setMounted(true)
+	}, [baseUrl, props.baseUrl, setBaseUrl])
 
 	useEffect(() => {
 		setPlatform(props.platform)

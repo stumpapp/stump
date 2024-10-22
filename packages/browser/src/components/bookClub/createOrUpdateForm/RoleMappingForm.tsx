@@ -1,6 +1,5 @@
 import { Card, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React from 'react'
 import { useFormContext, useFormState } from 'react-hook-form'
 
 import { CreateOrUpdateBookClubSchema } from './schema'

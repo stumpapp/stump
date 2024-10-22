@@ -1,6 +1,6 @@
 import { usePrefetchFiles, usePrefetchSeriesBooks } from '@stump/client'
 import { cn, Link, useSticky } from '@stump/components'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 

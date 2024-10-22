@@ -1,7 +1,7 @@
 import { useMediaCursorQuery, useSDK } from '@stump/client'
 import { Media } from '@stump/sdk'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import React, { useCallback, useEffect } from 'react'
+import { Fragment, useCallback, useEffect, useRef } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { useMediaMatch } from 'rooks'
 
@@ -25,7 +25,7 @@ export default function SeriesBookGrid({ seriesId, onSelectBook }: Props) {
 		},
 	})
 
-	const parentRef = React.useRef<HTMLDivElement>(null)
+	const parentRef = useRef<HTMLDivElement>(null)
 
 	const isAtLeastSmall = useMediaMatch('(min-width: 640px)')
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
@@ -98,7 +98,7 @@ export default function SeriesBookGrid({ seriesId, onSelectBook }: Props) {
 							}}
 						>
 							{rowVirtualizer.getVirtualItems().map((virtualRow) => (
-								<React.Fragment key={virtualRow.index}>
+								<Fragment key={virtualRow.index}>
 									{columnVirtualizer.getVirtualItems().map((virtualColumn) => {
 										const virtualPage = virtualRow.index * 4 + virtualColumn.index + 1
 										const book = books[virtualPage - 1]
@@ -129,7 +129,7 @@ export default function SeriesBookGrid({ seriesId, onSelectBook }: Props) {
 											</div>
 										)
 									})}
-								</React.Fragment>
+								</Fragment>
 							))}
 						</div>
 					</div>

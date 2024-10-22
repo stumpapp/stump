@@ -1,7 +1,7 @@
 import { useSDK } from '@stump/client'
 import { AspectRatio, Button, Card, DatePicker, Heading, Input, Text } from '@stump/components'
 import { Media } from '@stump/sdk'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import BookSearchOverlay from '@/components/book/BookSearchOverlay'
@@ -37,20 +37,16 @@ export default function AddBookCard({ index }: Props) {
 		[externalBook],
 	)
 
-	useEffect(
-		() => {
-			if (!selectedBook && isEntityBook) {
-				form.setValue(`books.${index}.book.id`, '')
-			} else if (selectedBook) {
-				// TODO: this is annoying and not ideal
-				form.setValue(`books.${index}.book.title`, '')
-				form.setValue(`books.${index}.book.author`, '')
-				form.setValue(`books.${index}.book.url`, undefined)
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[isEntityBook, selectedBook],
-	)
+	useEffect(() => {
+		if (!selectedBook && isEntityBook) {
+			form.setValue(`books.${index}.book.id`, '')
+		} else if (selectedBook) {
+			// TODO: this is annoying and not ideal
+			form.setValue(`books.${index}.book.title`, '')
+			form.setValue(`books.${index}.book.author`, '')
+			form.setValue(`books.${index}.book.url`, undefined)
+		}
+	}, [isEntityBook, selectedBook, form, index])
 
 	const handleSelectBook = useCallback(
 		(book: Media) => {

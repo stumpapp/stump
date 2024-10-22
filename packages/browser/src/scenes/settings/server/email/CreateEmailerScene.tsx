@@ -1,6 +1,6 @@
 import { useEmailersQuery, useMutation, useSDK } from '@stump/client'
 import { CreateOrUpdateEmailer } from '@stump/sdk'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
 
 import { ContentContainer, SceneContainer } from '@/components/container'

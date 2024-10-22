@@ -1,5 +1,5 @@
 import { APIBase } from '../base'
-import { JobSchedulerConfig, Pageable, PersistedJob } from '../types'
+import { JobSchedulerConfig, Pageable, PersistedJob, UpdateSchedulerConfig } from '../types'
 import { ClassQueryKeys, PagedQueryParams } from './types'
 import { createRouteURLHandler } from './utils'
 
@@ -64,7 +64,7 @@ export class JobAPI extends APIBase {
 	/**
 	 * Update the config for the job scheduler
 	 */
-	async updateSchedulerConfig(config: JobSchedulerConfig): Promise<JobSchedulerConfig> {
+	async updateSchedulerConfig(config: UpdateSchedulerConfig): Promise<JobSchedulerConfig> {
 		const { data: updatedConfig } = await this.axios.put<JobSchedulerConfig>(
 			jobURL('scheduler-config'),
 			config,

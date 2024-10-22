@@ -4,7 +4,7 @@ import { useLocaleContext } from '@stump/i18n'
 import dayjs from 'dayjs'
 import localizedFormat from 'dayjs/plugin/localizedFormat'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
 

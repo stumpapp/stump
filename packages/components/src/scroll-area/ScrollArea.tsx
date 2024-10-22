@@ -1,13 +1,12 @@
-/* eslint-disable react/prop-types */
-
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area'
+import type { ComponentPropsWithoutRef, ElementRef } from 'react'
 import * as React from 'react'
 
 import { cn } from '../utils'
 
 const ScrollArea = React.forwardRef<
-	React.ElementRef<typeof ScrollAreaPrimitive.Root>,
-	React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root>
+	ElementRef<typeof ScrollAreaPrimitive.Root>,
+	ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root>
 >(({ className, children, ...props }, ref) => (
 	<ScrollAreaPrimitive.Root
 		ref={ref}
@@ -24,8 +23,8 @@ const ScrollArea = React.forwardRef<
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName
 
 const ScrollBar = React.forwardRef<
-	React.ElementRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>,
-	React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>
+	ElementRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>,
+	ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>
 >(({ className, orientation = 'vertical', ...props }, ref) => (
 	<ScrollAreaPrimitive.ScrollAreaScrollbar
 		ref={ref}

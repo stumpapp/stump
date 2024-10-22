@@ -1,5 +1,5 @@
 import { useEmailerQuery, useEmailersQuery, useUpdateEmailer } from '@stump/client'
-import React, { useEffect, useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import { ContentContainer, SceneContainer } from '@/components/container'

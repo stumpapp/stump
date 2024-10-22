@@ -1,6 +1,5 @@
 import { useEpubReader } from '@stump/client'
 import { Label, NativeSelect } from '@stump/components'
-import React from 'react'
 
 export default function ReadingDirection() {
 	const { readingDirection, setReadingDirection } = useEpubReader((store) => ({

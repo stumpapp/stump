@@ -1,4 +1,5 @@
-import React from 'react'
+import type { ComponentPropsWithoutRef } from 'react'
+import { forwardRef } from 'react'
 
 import { Label } from '../form'
 import { Text } from '../text'
@@ -10,13 +11,13 @@ export type InputProps = {
 	/** The label for the input. */
 	label?: string
 	/** The optional props for the label. */
-	labelProps?: Omit<React.ComponentPropsWithoutRef<typeof Label>, 'children'>
+	labelProps?: Omit<ComponentPropsWithoutRef<typeof Label>, 'children'>
 	/** The optional description for the input. */
 	description?: string
 	/** The optional position for the description. */
 	descriptionPosition?: 'top' | 'bottom'
 	/** The optional props for the description. */
-	descriptionProps?: Omit<React.ComponentPropsWithoutRef<typeof Text>, 'children'>
+	descriptionProps?: Omit<ComponentPropsWithoutRef<typeof Text>, 'children'>
 	/** The optional variant for the input. */
 	fullWidth?: boolean
 	/** The optional error message to display. */
@@ -29,7 +30,7 @@ export type InputProps = {
 	rightDecoration?: React.ReactNode
 } & RawInputProps
 
-export const Input = React.forwardRef<HTMLInputElement, InputProps>(
+export const Input = forwardRef<HTMLInputElement, InputProps>(
 	(
 		{
 			label,

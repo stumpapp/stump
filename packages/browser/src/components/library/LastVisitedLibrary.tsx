@@ -1,6 +1,5 @@
 import { useQuery, useSDK } from '@stump/client'
 import { Label, Text } from '@stump/components'
-import React from 'react'
 
 import paths from '@/paths'
 

@@ -2,7 +2,6 @@ import { useUpdatePreferences } from '@stump/client'
 import { IconButton, Label, RawSwitch, Text, ToolTip } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { RefreshCcw } from 'lucide-react'
-import React from 'react'
 import toast from 'react-hot-toast'
 
 import { useTauriRPC } from '@/hooks/useTauriRPC'

@@ -1,5 +1,5 @@
 import { Text } from '@stump/components'
-import React, { useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
 

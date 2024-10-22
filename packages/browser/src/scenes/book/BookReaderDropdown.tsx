@@ -1,7 +1,7 @@
 import { ButtonOrLink, DropdownMenu, IconButton } from '@stump/components'
 import { Media } from '@stump/sdk'
 import { ChevronDown } from 'lucide-react'
-import React, { useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 
 import paths from '@/paths'

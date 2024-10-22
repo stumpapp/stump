@@ -51,7 +51,6 @@ function App() {
 			try {
 				const currentServer = await store.get<SavedServer>('active_server')
 				if (token && currentServer) {
-					console.debug('Saving API token for', currentServer.name)
 					await tauriRPC.setApiToken(currentServer.name, token)
 				}
 			} catch (err) {

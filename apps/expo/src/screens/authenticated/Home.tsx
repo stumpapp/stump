@@ -1,5 +1,4 @@
 import { queryClient, useSDK } from '@stump/client'
-import React from 'react'
 import { Button } from 'react-native'
 
 import { ScreenRootView, Text } from '@/components'

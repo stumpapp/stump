@@ -49,21 +49,16 @@ function useSse(url: string, { onOpen, onClose, onMessage }: SseOptions = {}) {
 		}
 	}, [onClose, onMessage, onOpen, url])
 
-	useEffect(
-		() => {
-			initEventSource()
+	useEffect(() => {
+		initEventSource()
 
-			return () => {
-				sse?.close()
-				if (timoutRef.current) {
-					clearTimeout(timoutRef.current)
-				}
+		return () => {
+			sse?.close()
+			if (timoutRef.current) {
+				clearTimeout(timoutRef.current)
 			}
-		},
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[url],
-	)
+		}
+	}, [url])
 
 	return {
 		readyState: sse?.readyState,

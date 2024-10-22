@@ -1,5 +1,6 @@
 import * as ProgressPrimitive from '@radix-ui/react-progress'
 import { cva, VariantProps } from 'class-variance-authority'
+import type { ComponentPropsWithoutRef, ElementRef } from 'react'
 import React, { useMemo } from 'react'
 
 import { cn, cx } from '../utils'
@@ -38,7 +39,7 @@ const progressVariants = cva('relative w-full overflow-hidden', {
 	},
 })
 
-type BaseProps = React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> &
+type BaseProps = ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> &
 	VariantProps<typeof progressVariants>
 
 // TODO: indeterminate state
@@ -56,7 +57,7 @@ const safeValue = (value: number | null) => {
 }
 
 export const ProgressBar = React.forwardRef<
-	React.ElementRef<typeof ProgressPrimitive.Root>,
+	ElementRef<typeof ProgressPrimitive.Root>,
 	ProgressBarProps
 >(({ className, value, variant, size, rounded, isIndeterminate, ...props }, ref) => {
 	const adjustedValue = useMemo(() => safeValue(value ?? null), [value])

@@ -1,6 +1,5 @@
 import { Label, Link, NativeSelect, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React from 'react'
 
 import { useTheme } from '@/hooks'
 

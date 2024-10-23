@@ -1,0 +1,26 @@
+import { Callout } from 'nextra/components'
+
+# KoReader Sync
+
+<Callout emoji="🔐">
+	This functionality is gated behind the `feature:koreader_sync` and `feature:api_keys` user
+	permissions. To learn more about permissions, see the
+	[permissions](/guides/access-control/permissions) guide.
+</Callout>
+
+KoReader is an open-source e-reader application that supports a variety of devices. Stump has a built-in implementation of the [sync API](https://github.com/koreader/koreader-sync-server) that enables KoReader to sync read progress with Stump.
+
+## Setup
+
+To set up KoReader sync with Stump, you'll need to do the following:
+
+1. Install KoReader on your device
+2. Enable the koreader routes on your Stump instance
+3. Generate an API key with at least the `feature:koreader_sync` permission (implies you have the `feature:api_keys` permission for your account)
+4. Configure Stump as a sync server in KoReader
+
+The URL structure for informing KoReader of your Stump server is:
+
+```bash
+http(s)://your-server(:port)(/baseUrl)/koreader/:api_key
+```

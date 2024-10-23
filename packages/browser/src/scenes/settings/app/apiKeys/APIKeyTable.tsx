@@ -15,6 +15,7 @@ import { getCommonPinningStyles } from '@/components/table/Table'
 import APIKeyActionMenu from './APIKeyActionMenu'
 import APIKeyInspector from './APIKeyInspector'
 import { useLocaleContext } from '@stump/i18n'
+import DeleteAPIKeyConfirmModal from './DeleteAPIKeyConfirmModal'
 
 dayjs.extend(relativeTime)
 
@@ -153,6 +154,8 @@ export default function APIKeyTable() {
 	return (
 		<>
 			<APIKeyInspector apiKey={inspectingKey} onClose={() => setInspectingKey(null)} />
+			<DeleteAPIKeyConfirmModal apiKey={deletingKey} onClose={() => setDeletingKey(null)} />
+
 			<Card className="overflow-x-auto">
 				<table
 					className="min-w-full"

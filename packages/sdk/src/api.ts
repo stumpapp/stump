@@ -23,6 +23,19 @@ import { formatApiURL } from './utils'
 
 export type ApiVersion = 'v1'
 
+export type ApiParams = {
+	baseURL: string
+} & (
+	| {
+			authMethod?: AuthenticationMethod
+			apiKey?: never
+	  }
+	| {
+			authMethod: 'api-key'
+			apiKey: string
+	  }
+)
+
 /**
  * A class representing the Stump API
  */
@@ -49,13 +62,16 @@ export class Api {
 	 * Create a new instance of the API
 	 * @param baseURL The base URL to the Stump server
 	 */
-	constructor(baseURL: string, authenticationMethod: AuthenticationMethod = 'session') {
+	constructor({ baseURL, authMethod = 'session', apiKey }: ApiParams) {
 		this.baseURL = baseURL
-		this.configuration = new Configuration(authenticationMethod)
+		this.configuration = new Configuration(authMethod)
+		if (apiKey) {
+			this.accessToken = apiKey
+		}
 
 		const instance = axios.create({
 			baseURL: this.serviceURL,
-			withCredentials: this.configuration.authenticationMethod === 'session',
+			withCredentials: this.configuration.authMethod === 'session',
 		})
 		instance.interceptors.request.use((config) => {
 			if (this.authorizationHeader) {
@@ -70,7 +86,7 @@ export class Api {
 	 * Check if the current authentication method is token-based
 	 */
 	get isTokenAuth(): boolean {
-		return this.configuration.authenticationMethod === 'token'
+		return this.configuration.authMethod === 'token'
 	}
 
 	/**
@@ -108,7 +124,7 @@ export class Api {
 		this.baseURL = url
 		this.axiosInstance = axios.create({
 			baseURL: this.serviceURL,
-			withCredentials: this.configuration.authenticationMethod === 'session',
+			withCredentials: this.configuration.authMethod === 'session',
 		})
 	}
 

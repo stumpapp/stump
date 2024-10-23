@@ -1,6 +1,7 @@
 import { useAppContext } from '@/context'
 import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
-import { Badge, cn, Label, Sheet, Text } from '@stump/components'
+import { Badge, Label, Sheet, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { APIKey } from '@stump/sdk'
 import dayjs from 'dayjs'
 import { KeyRound, Sparkles } from 'lucide-react'
@@ -11,6 +12,7 @@ type Props = {
 }
 
 export default function APIKeyInspector({ apiKey, onClose }: Props) {
+	const { t } = useLocaleContext()
 	const { user } = useAppContext()
 	const displayedData = useCurrentOrPrevious(apiKey)
 
@@ -25,12 +27,11 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 				<div className="mx-4 my-2 flex flex-col space-y-1.5 rounded-lg bg-fill-warning-secondary p-3">
 					<div className="flex items-center border-fill-warning-secondary border-opacity-75 text-fill-warning">
 						<Sparkles className="mr-2 h-4 w-4" />
-						<span className="font-medium">Unrestricted key </span>
+						<span className="font-medium">{t(getKey('unrestrictedKey.heading'))}</span>
 					</div>
 
 					<Text size="sm" className="text-fill-warning">
-						Since you are the server owner, this key as unrestricted access when configured to
-						inherit permissions. Please be careful.
+						{t(getKey('unrestrictedKey.description'))}
 					</Text>
 				</div>
 			)
@@ -43,7 +44,7 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 			<div className="mx-4 my-2 flex flex-col space-y-3 rounded-lg bg-background-surface p-3">
 				<div className="flex items-center border-fill-warning-secondary border-opacity-75 text-foreground-subtle/80">
 					<KeyRound className="mr-2 h-4 w-4" />
-					<span className="font-medium">Permissions</span>
+					<span className="font-medium">{t(getSharedKey('fields.permissions'))}</span>
 				</div>
 
 				<div className="flex flex-wrap gap-2">
@@ -66,25 +67,29 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 		>
 			<div className="flex flex-col">
 				<div className="px-4 py-2">
-					<Label className="text-foreground-muted">Name</Label>
+					<Label className="text-foreground-muted">{t(getSharedKey('fields.name'))}</Label>
 					<Text size="sm">{displayedData?.name}</Text>
 				</div>
 
 				{renderPermissions()}
 
 				<div className="px-4 py-2">
-					<Label className="text-foreground-muted">Expiration</Label>
-					<Text size="sm">{expiration.isValid() ? expiration.format('LLL') : 'Never'}</Text>
+					<Label className="text-foreground-muted">{t(getSharedKey('fields.expiration'))}</Label>
+					<Text size="sm">
+						{expiration.isValid() ? expiration.format('LLL') : t('common.never')}
+					</Text>
 				</div>
 
 				<div className="my-2 bg-background-surface px-4 py-2">
-					<Label className="text-foreground-muted">Last used</Label>
-					<Text size="sm">{lastUsedAt.isValid() ? lastUsedAt.format('LLL') : 'Never'}</Text>
+					<Label className="text-foreground-muted">{t(getSharedKey('fields.last_used'))}</Label>
+					<Text size="sm">
+						{lastUsedAt.isValid() ? lastUsedAt.format('LLL') : t('common.never')}
+					</Text>
 				</div>
 
 				{createdAt.isValid() && (
 					<div className="px-4 py-2">
-						<Label className="text-foreground-muted">Created</Label>
+						<Label className="text-foreground-muted">{t(getSharedKey('fields.created'))}</Label>
 						<Text size="sm">{createdAt.format('LLL')}</Text>
 					</div>
 				)}
@@ -92,3 +97,7 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 		</Sheet>
 	)
 }
+
+const LOCALE_BASE = 'settingsScene.app/apiKeys.sections.inspector'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`
+const getSharedKey = (key: string) => `settingsScene.app/apiKeys.shared.${key}`

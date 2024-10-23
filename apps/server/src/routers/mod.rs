@@ -17,7 +17,7 @@ pub(crate) use spa::relative_favicon_path;
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	let mut app_router = Router::new();
 
-	if !app_state.config.disable_swagger || app_state.config.is_debug() {
+	if app_state.config.enable_swagger || app_state.config.is_debug() {
 		app_router = app_router.merge(utoipa::mount(app_state.clone()));
 	}
 

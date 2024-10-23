@@ -1,0 +1,64 @@
+import { Callout } from 'nextra/components'
+
+# API Keys
+
+<Callout emoji="🔐">
+	This functionality is gated behind the `feature:api_keys` user permission. To learn more about
+	permissions, see the [permissions](/guides/access-control/permissions) guide.
+</Callout>
+
+API keys are user-scoped, long-lived tokens that can be used to authenticate requests to the REST API. While originally developed to support third-party integrations, they are a useful tool for any user that wants to interact with Stump programmatically.
+
+## Generating an API Key
+
+To generate an API key:
+
+1. Navigate to the app settings (`/settings/app`)
+2. Click the `API keys` tab (`/settings/app/api-keys`)
+3. Click the `Generate API key` button
+4. Give your key a name, assign it permissions, optionally declare an expiration date, and click `Create key`
+
+Once a key is generated, you will be presented with the full key. **This key will not be shown again**, so be sure to copy it to a secure location. If you lose the key, you will need to generate a new one.
+
+## Using an API Key
+
+Generally, you will use an API key by including it in the `Authorization` header of your requests. The header should look like this:
+
+```
+Authorization Bearer <your_api_key>
+```
+
+If you're using the Stump SDK, you can set it directly when you create the SDK instance:
+
+```javascript
+import { Api } from '@stump/sdk'
+
+const sdk = new Api({
+	baseURL: 'https://my-stump.cloud',
+	authMethod: 'api-key',
+	apiKey: '<your_api_key>',
+})
+```
+
+This will automatically include the key in the request headers for you.
+
+#### Special API Key Routes
+
+There are instances where you can embed an API key in the URL directly. This is primiarily only done for instances where passing the key in the header is otherwise impossible. At the time of writing, there are two such routes:
+
+- `/koreader/:api_key/*` - Used for the [KoReader sync](https://koreader.rocks) integration. See [here](/guides/integrations/koreader) for more information
+- `/opds/:api_key/v1.2/*` - An optional clone of the [OPDS](/guides/opds) integration API for clients which don't support auth headers
+
+## Permissions
+
+API keys are subject to the same permissions as user accounts. When creating a key, you have the option of:
+
+- Inheriting the permissions of the user that created the key
+- Assigning specific permissions to the key
+
+It is generally recommended to assign only the permissions that are necessary for the key to function. This is a security best practice, as it limits the potential damage that could be done if the key were to be compromised.
+
+<Callout emoji="ℹ️" type="info">
+	When the permissions of a user are updated, the permissions of any keys that inherit permissions
+	from that user will also be updated
+</Callout>

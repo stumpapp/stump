@@ -1779,6 +1779,7 @@
 		"seeError": "See error",
 		"goBack": "Go back",
 		"goToServers": "Go to servers",
-		"notReady": "This feature is not ready"
+		"notReady": "This feature is not ready",
+		"never": "Never"
 	}
 }

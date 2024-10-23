@@ -1,6 +1,5 @@
 import { Meta } from 'nextra'
 
 export default {
-	'server-options': 'Server',
-	theming: 'Theming',
+	koreader: 'KoReader',
 } satisfies Meta

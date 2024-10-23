@@ -21,6 +21,7 @@ use stump_core::{
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
+	filter::chain_optional_iter,
 	middleware::auth::{api_key_middleware, RequestContext},
 };
 
@@ -126,7 +127,6 @@ async fn get_progress(
 		})
 		.await?;
 
-	// TODO(koreader): progress string (what does it mean!? lol)
 	let progress = match (active_session, finished_session) {
 		(Some(active_session), _) => GetProgressResponse {
 			document,
@@ -134,7 +134,9 @@ async fn get_progress(
 			timestamp: Some(active_session.updated_at.timestamp_millis() as u64),
 			device: active_session.device.as_ref().map(|d| d.name.clone()),
 			device_id: active_session.device.as_ref().map(|d| d.id.clone()),
-			..Default::default()
+			progress: active_session
+				.koreader_progress
+				.or_else(|| active_session.page.map(|p| p.to_string())),
 		},
 		(_, Some(finished_session)) => GetProgressResponse {
 			document,
@@ -151,6 +153,27 @@ async fn get_progress(
 	};
 
 	Ok(Json(progress))
+}
+
+enum NativeProgress {
+	Page(i32),
+	EpubCfi(String),
+}
+
+/// Attempts to parse the progress string into a native progress type. If the progress string
+/// cannot be parsed, it is assumed to be an x-pointer. Stump does not support x-pointers, so
+/// this function will return `None` in that case.
+fn parse_progress(progress: &str) -> Option<NativeProgress> {
+	// This is a super naive check, but it should be good enough for now. Eventually
+	// I would really like to try and parse the x-pointer and translate it to a valid
+	// epubcfi if possible. The closest I've seen online to an epubcfi parser in rust is
+	// https://github.com/tnahs/readstor/blob/main/src/lib/models/epubcfi.rs. There are others
+	// in JS that can be ported, as well
+	if progress.starts_with("epubcfi(") && progress.ends_with(')') {
+		Some(NativeProgress::EpubCfi(progress.to_string()))
+	} else {
+		progress.parse::<i32>().ok().map(NativeProgress::Page)
+	}
 }
 
 #[derive(Deserialize)]
@@ -251,6 +274,39 @@ async fn put_progress(
 					.await
 					.map(|session| (None, Some(session)))
 			} else {
+				let native_progress_set_param: Option<active_reading_session::SetParam> =
+					match parse_progress(&progress) {
+						Some(NativeProgress::Page(page)) => {
+							Some(active_reading_session::page::set(Some(page)))
+						},
+						Some(NativeProgress::EpubCfi(cfi)) => {
+							Some(active_reading_session::epubcfi::set(Some(cfi)))
+						},
+						_ => {
+							tracing::debug!(
+								progress,
+								"Failed to parse progress string, assuming x-pointer"
+							);
+							None
+						},
+					};
+
+				let set_params = chain_optional_iter(
+					[
+						active_reading_session::koreader_progress::set(Some(
+							progress.clone(),
+						)),
+						active_reading_session::percentage_completed::set(Some(
+							percentage as f64,
+						)),
+						// TODO(koreader): ensure this is correct
+						active_reading_session::device::connect(
+							registered_reading_device::id::equals(device_id.clone()),
+						),
+					],
+					[native_progress_set_param],
+				);
+
 				tx.active_reading_session()
 					.upsert(
 						active_reading_session::user_id_media_id(
@@ -260,33 +316,9 @@ async fn put_progress(
 						(
 							media::id::equals(book.id.clone()),
 							user::id::equals(user.id.clone()),
-							vec![
-								active_reading_session::koreader_progress::set(Some(
-									progress.clone(),
-								)),
-								active_reading_session::percentage_completed::set(Some(
-									percentage as f64,
-								)),
-								// TODO(koreader): ensure this is correct
-								active_reading_session::device::connect(
-									registered_reading_device::id::equals(
-										device_id.clone(),
-									),
-								),
-							],
+							set_params.clone(),
 						),
-						vec![
-							active_reading_session::koreader_progress::set(Some(
-								progress.clone(),
-							)),
-							active_reading_session::percentage_completed::set(Some(
-								percentage as f64,
-							)),
-							// TODO(koreader): ensure this is correct
-							active_reading_session::device::connect(
-								registered_reading_device::id::equals(device_id.clone()),
-							),
-						],
+						set_params,
 					)
 					.exec()
 					.await

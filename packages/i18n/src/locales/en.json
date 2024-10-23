@@ -1106,7 +1106,27 @@
 			"helmet": "API keys",
 			"title": "API keys",
 			"description": "Manage your generated Stump API keys",
-			"sections": {}
+			"shared": {
+				"fields": {
+					"name": "Name",
+					"expiration": "Expiration",
+					"last_used": "Last used",
+					"created": "Created",
+					"permissions": "Permissions",
+					"inherited": "Inherited"
+				}
+			},
+			"sections": {
+				"inspector": {
+					"heading": "API key",
+					"description": "A detailed view of this key",
+					"unrestrictedKey": {
+						"heading": "Unrestricted key",
+						"description": "Since you are the server owner, this key as unrestricted access when configured to inherit permissions. Please be careful."
+					}
+				},
+				"table": {}
+			}
 		},
 		"app/reader": {
 			"helmet": "Reader settings",

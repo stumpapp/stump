@@ -1,10 +1,12 @@
-import React, { useCallback } from 'react'
+import { useCallback } from 'react'
 import { z } from 'zod'
 import { allPermissions, userPermissionSchema } from '../../server/users/create-or-update/schema'
-import { useForm } from 'react-hook-form'
+import { useForm, useFormState } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert, ComboBox, DatePicker, Form, Input, RadioGroup } from '@stump/components'
 import dayjs from 'dayjs'
+
+export const CREATE_OR_UPDATE_API_KEY_FORM_ID = 'create-or-update-api-key-form'
 
 type Props = {
 	onSubmit: (values: CreateOrUpdateAPIKeyFormValues) => void
@@ -20,6 +22,7 @@ export default function CreateOrUpdateAPIKeyForm({ onSubmit }: Props) {
 		} satisfies CreateOrUpdateAPIKeyFormValues,
 		resolver: zodResolver(schema),
 	})
+	const { errors } = useFormState({ control: form.control })
 
 	const [inherit, permissions, expiresAt] = form.watch([
 		'inherit',
@@ -40,8 +43,13 @@ export default function CreateOrUpdateAPIKeyForm({ onSubmit }: Props) {
 	)
 
 	return (
-		<Form form={form} onSubmit={onSubmit}>
-			<Input label="Name" placeholder="Koreader Sync" {...form.register('name')} />
+		<Form form={form} onSubmit={onSubmit} id={CREATE_OR_UPDATE_API_KEY_FORM_ID}>
+			<Input
+				label="Name"
+				placeholder="Koreader Sync"
+				{...form.register('name')}
+				errorMessage={errors.name?.message}
+			/>
 
 			<RadioGroup
 				value={inherit ? 'inherit' : 'explicit'}

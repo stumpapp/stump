@@ -1,5 +1,5 @@
 import { useQuery, useSDK } from '@stump/client'
-import { Card, cn, Text } from '@stump/components'
+import { Badge, Card, cn, Text } from '@stump/components'
 import { APIKey } from '@stump/sdk'
 import {
 	createColumnHelper,
@@ -8,9 +8,12 @@ import {
 	useReactTable,
 } from '@tanstack/react-table'
 import dayjs from 'dayjs'
-import React, { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { KeyRound, Slash } from 'lucide-react'
+import { getCommonPinningStyles } from '@/components/table/Table'
+import APIKeyActionMenu from './APIKeyActionMenu'
+import APIKeyInspector from './APIKeyInspector'
 
 dayjs.extend(relativeTime)
 
@@ -20,6 +23,9 @@ export default function APIKeyTable() {
 	const { data: apiKeys } = useQuery([sdk.apiKey.keys.get], () => sdk.apiKey.get(), {
 		suspense: true,
 	})
+
+	const [deletingKey, setDeletingKey] = useState<APIKey | null>(null)
+	const [inspectingKey, setInspectingKey] = useState<APIKey | null>(null)
 
 	const columns = useMemo(
 		() => [
@@ -31,6 +37,38 @@ export default function APIKeyTable() {
 				),
 				cell: ({ getValue }) => <Text size="sm">{getValue()}</Text>,
 			}),
+			columnHelper.display({
+				id: 'permission_count',
+				header: () => (
+					<Text size="sm" variant="secondary">
+						Permissions
+					</Text>
+				),
+				cell: ({
+					row: {
+						original: { permissions },
+					},
+				}) => (
+					<div className="flex">
+						<Badge
+							variant="primary"
+							size="sm"
+							className={cn(
+								'flex items-center justify-between space-x-1 pl-2 pr-1',
+
+								{ 'pr-2': permissions === 'inherit' },
+							)}
+						>
+							<span>{permissions === 'inherit' ? 'Inherited' : 'Explicit'}</span>
+							{permissions !== 'inherit' && (
+								<span className="flex h-5 w-5 items-center justify-center rounded-md bg-fill-brand-secondary">
+									{permissions.length}
+								</span>
+							)}
+						</Badge>
+					</div>
+				),
+			}),
 			columnHelper.accessor('last_used_at', {
 				header: () => (
 					<Text size="sm" variant="secondary">
@@ -39,8 +77,40 @@ export default function APIKeyTable() {
 				),
 				cell: ({ getValue }) => {
 					const parsed = dayjs(getValue())
-					return <Text size="sm">{parsed.isValid() ? parsed.fromNow() : 'Never'}</Text>
+					return (
+						<Text size="sm" title={parsed.isValid() ? parsed.format('LLL') : 'Not used yet'}>
+							{parsed.isValid() ? parsed.fromNow() : 'Never'}
+						</Text>
+					)
 				},
+			}),
+			columnHelper.accessor('expires_at', {
+				header: () => (
+					<Text size="sm" variant="secondary">
+						Expiration
+					</Text>
+				),
+				cell: ({ getValue }) => {
+					const parsed = dayjs(getValue())
+					return (
+						<Text size="sm" title={parsed.isValid() ? parsed.format('LLL') : 'No expiration set'}>
+							{parsed.isValid() ? parsed.format('LLL') : 'Never'}
+						</Text>
+					)
+				},
+			}),
+			columnHelper.display({
+				id: 'actions',
+				header: () => null,
+				cell: ({ row: { original: apiKey } }) => (
+					<div className="flex items-center justify-center">
+						<APIKeyActionMenu
+							onSelectForDelete={() => setDeletingKey(apiKey)}
+							onSelectForInspect={() => setInspectingKey(apiKey)}
+						/>
+					</div>
+				),
+				size: 20,
 			}),
 		],
 		[],
@@ -50,6 +120,9 @@ export default function APIKeyTable() {
 		columns,
 		data: apiKeys || [],
 		getCoreRowModel: getCoreRowModel(),
+		state: {
+			columnPinning: { right: ['actions'] },
+		},
 	})
 	const { rows } = table.getRowModel()
 
@@ -76,63 +149,60 @@ export default function APIKeyTable() {
 	}
 
 	return (
-		<Card className="overflow-hidden">
-			<table
-				className="min-w-full"
-				style={{
-					width: table.getCenterTotalSize(),
-				}}
-			>
-				<thead>
-					<tr>
-						{table.getFlatHeaders().map((header) => {
-							const isSortable = header.column.getCanSort()
-							return (
-								<th
-									key={header.id}
-									className="sticky !top-0 z-[2] h-10 bg-background pl-1.5 pr-1.5 shadow-sm first:pl-4 last:pr-4"
-								>
-									<div
-										className={cn('flex items-center', {
-											'cursor-pointer select-none gap-x-2': isSortable,
-										})}
-										onClick={header.column.getToggleSortingHandler()}
+		<>
+			<APIKeyInspector apiKey={inspectingKey} onClose={() => setInspectingKey(null)} />
+			<Card className="overflow-x-auto">
+				<table
+					className="min-w-full"
+					style={{
+						width: table.getCenterTotalSize(),
+					}}
+				>
+					<thead className="border-b border-edge">
+						<tr className="">
+							{table.getFlatHeaders().map((header) => {
+								return (
+									<th
+										key={header.id}
+										className="sticky !top-0 z-[2] h-10 bg-background-surface/50 px-2 shadow-sm"
+										style={getCommonPinningStyles(header.column)}
+									>
+										<div
+											className="flex items-center"
+											onClick={header.column.getToggleSortingHandler()}
+											style={{
+												width: header.getSize(),
+											}}
+										>
+											{flexRender(header.column.columnDef.header, header.getContext())}
+										</div>
+									</th>
+								)
+							})}
+						</tr>
+					</thead>
+
+					<tbody className="divide divide-y divide-edge">
+						{rows.map((row) => (
+							<tr key={row.id} className="">
+								{row.getVisibleCells().map((cell) => (
+									<td
+										className="h-14 bg-background px-2 last:px-0"
+										key={cell.id}
 										style={{
-											width: header.getSize(),
+											width: cell.column.getSize(),
+											...getCommonPinningStyles(cell.column),
 										}}
 									>
-										{flexRender(header.column.columnDef.header, header.getContext())}
-										{/* {isSortable && (
-											<SortIcon
-												direction={(header.column.getIsSorted() as SortDirection) ?? null}
-											/>
-										)} */}
-									</div>
-								</th>
-							)
-						})}
-					</tr>
-				</thead>
-
-				<tbody>
-					{rows.map((row) => (
-						<tr key={row.id} className="odd:bg-background-surface">
-							{row.getVisibleCells().map((cell) => (
-								<td
-									className="h-14 pl-1.5 pr-1.5 first:pl-4 last:pr-4"
-									key={cell.id}
-									style={{
-										width: cell.column.getSize(),
-									}}
-								>
-									{flexRender(cell.column.columnDef.cell, cell.getContext())}
-								</td>
-							))}
-						</tr>
-					))}
-				</tbody>
-			</table>
-		</Card>
+										{flexRender(cell.column.columnDef.cell, cell.getContext())}
+									</td>
+								))}
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</Card>
+		</>
 	)
 }
 

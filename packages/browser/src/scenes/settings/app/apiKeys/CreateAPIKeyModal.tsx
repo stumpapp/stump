@@ -1,10 +1,11 @@
 import { Button, Dialog, Text, useCopyToClipboard } from '@stump/components'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import CreateOrUpdateAPIKeyForm, {
+	CREATE_OR_UPDATE_API_KEY_FORM_ID,
 	CreateOrUpdateAPIKeyFormValues,
 } from './CreateOrUpdateAPIKeyForm'
 import { CreateOrUpdateAPIKey } from '@stump/sdk'
-import { useMutation, useSDK } from '@stump/client'
+import { queryClient, useMutation, useSDK } from '@stump/client'
 import { Copy, CopyCheck, Eye, EyeOff, KeyRound } from 'lucide-react'
 
 // TODO(koreader): localize
@@ -15,6 +16,9 @@ export default function CreateAPIKeyModal() {
 	const { mutateAsync: createKey, isLoading: isCreating } = useMutation(
 		[sdk.apiKey.keys.create],
 		(payload: CreateOrUpdateAPIKey) => sdk.apiKey.create(payload),
+		{
+			onSuccess: () => queryClient.invalidateQueries([sdk.apiKey.keys.get], { exact: false }),
+		},
 	)
 	const [apiSecret, setApiSecret] = useState<string | null>(null)
 	const [hideSecret, setHideSecret] = useState(true)
@@ -41,8 +45,11 @@ export default function CreateAPIKeyModal() {
 
 	useEffect(() => {
 		if (!isOpen) {
-			setApiSecret(null)
-			setHideSecret(true)
+			const timeout = setTimeout(() => {
+				setApiSecret(null)
+				setHideSecret(true)
+			})
+			return () => clearTimeout(timeout)
 		}
 	}, [isOpen])
 
@@ -111,6 +118,7 @@ export default function CreateAPIKeyModal() {
 						variant="primary"
 						size="sm"
 						type={apiSecret ? 'button' : 'submit'}
+						form={apiSecret ? undefined : CREATE_OR_UPDATE_API_KEY_FORM_ID}
 						onClick={apiSecret ? () => setIsOpen(false) : undefined}
 					>
 						{apiSecret ? 'I saved my key' : 'Create key'}

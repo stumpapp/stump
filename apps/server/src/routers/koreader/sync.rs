@@ -41,6 +41,17 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	)
 }
 
+// /// A secondary authorization middleware to ensure that the user has access to the
+// /// koreader sync endpoints. This is purely for convenience
+// async fn authorize(req: Request, next: Next) -> APIResult<Response> {
+// 	let ctx = req
+// 		.extensions()
+// 		.get::<RequestContext>()
+// 		.ok_or(APIError::Unauthorized)?;
+// 	ctx.enforce_permissions(&[UserPermission::KoreaderSync])?;
+// 	Ok(next.run(req).await)
+// }
+
 #[derive(Serialize)]
 struct CheckAuthorizedResponse {
 	authorized: String,

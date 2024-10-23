@@ -224,6 +224,7 @@ pub async fn api_key_middleware(
 	next: Next,
 ) -> Result<Response, impl IntoResponse> {
 	let Ok(pak) = PrefixedApiKey::from_string(api_key.as_str()) else {
+		tracing::error!("Failed to parse API key");
 		return Err(APIError::Unauthorized.into_response());
 	};
 
@@ -296,13 +297,15 @@ pub async fn validate_api_key(
 
 	// Note: we check as a precaution. If a user had the permission revoked, that logic should also
 	// clean up keys.
-	let can_use_key = key_user
-		.permissions
-		.as_ref()
-		.map(|set| set.contains(&UserPermission::AccessAPIKeys.to_string()))
-		.unwrap_or(false);
+	let can_use_key = key_user.is_server_owner
+		|| key_user
+			.permissions
+			.as_ref()
+			.map(|set| set.contains(&UserPermission::AccessAPIKeys.to_string()))
+			.unwrap_or(false);
 
 	if !can_use_key || !controller.check_hash(&pak, &api_key.long_token_hash) {
+		tracing::error!(?can_use_key, "API key validation failed!");
 		// TODO(security): track?
 		return Err(APIError::Unauthorized);
 	}

@@ -7,11 +7,13 @@ import CreateOrUpdateAPIKeyForm, {
 import { CreateOrUpdateAPIKey } from '@stump/sdk'
 import { queryClient, useMutation, useSDK } from '@stump/client'
 import { Copy, CopyCheck, Eye, EyeOff, KeyRound } from 'lucide-react'
+import { useLocaleContext } from '@stump/i18n'
 
 // TODO(koreader): localize
 export default function CreateAPIKeyModal() {
 	const [isOpen, setIsOpen] = useState(false)
 
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const { mutateAsync: createKey, isLoading: isCreating } = useMutation(
 		[sdk.apiKey.keys.create],
@@ -60,17 +62,15 @@ export default function CreateAPIKeyModal() {
 		<Dialog open={isOpen} onOpenChange={isCreating ? undefined : setIsOpen}>
 			<Dialog.Trigger asChild>
 				<Button size="sm" variant="secondary">
-					Create API key
+					{t(getKey('trigger'))}
 				</Button>
 			</Dialog.Trigger>
 
 			<Dialog.Content size="md">
 				<Dialog.Header>
-					<Dialog.Title>{apiSecret ? 'Created key' : 'Create API key'}</Dialog.Title>
+					<Dialog.Title>{t(getKey(`heading.${apiSecret ? 'created' : 'creating'}`))}</Dialog.Title>
 					<Dialog.Description>
-						{apiSecret
-							? 'Your new API key has been created. Save the secret somewhere safe, as it will not be shown again'
-							: 'API keys are long-lived credentials that can be used to authenticate with the API'}
+						{t(getKey(`description.${apiSecret ? 'created' : 'creating'}`))}
 					</Dialog.Description>
 				</Dialog.Header>
 
@@ -80,7 +80,7 @@ export default function CreateAPIKeyModal() {
 							<div className="flex items-center space-x-2">
 								<KeyRound className="h-4 w-4 text-foreground-muted" />
 								<Text size="sm" className="text-foreground-subtle">
-									Created key
+									{t(getKey('createdKey'))}
 								</Text>
 							</div>
 
@@ -109,7 +109,7 @@ export default function CreateAPIKeyModal() {
 				<Dialog.Footer>
 					{!apiSecret && (
 						<Button disabled={isCreating} onClick={() => setIsOpen(false)} size="sm">
-							Cancel
+							{t('common.cancel')}
 						</Button>
 					)}
 
@@ -121,10 +121,13 @@ export default function CreateAPIKeyModal() {
 						form={apiSecret ? undefined : CREATE_OR_UPDATE_API_KEY_FORM_ID}
 						onClick={apiSecret ? () => setIsOpen(false) : undefined}
 					>
-						{apiSecret ? 'I saved my key' : 'Create key'}
+						{t(getKey(apiSecret ? 'savedConfirm' : 'submit'))}
 					</Button>
 				</Dialog.Footer>
 			</Dialog.Content>
 		</Dialog>
 	)
 }
+
+const LOCALE_BASE = 'settingsScene.app/apiKeys.sections.createKey.modal'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

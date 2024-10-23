@@ -1,14 +1,17 @@
 use axum::{
-	extract::{Path, State},
-	middleware,
-	response::Json,
+	extract::{Path, Request, State},
+	middleware::{self, Next},
+	response::{Json, Response},
 	routing::{get, put},
 	Extension, Router,
 };
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use stump_core::{
-	db::entity::macros::{finished_session_koreader, reading_session_koreader},
+	db::entity::{
+		macros::{finished_session_koreader, reading_session_koreader},
+		UserPermission,
+	},
 	prisma::{
 		active_reading_session, finished_reading_session, media,
 		registered_reading_device, user,
@@ -34,6 +37,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			.route("/users/auth", get(check_authorized))
 			.route("/syncs/progress", put(put_progress))
 			.route("/syncs/progress/:document", get(get_progress))
+			.layer(middleware::from_fn(authorize)) // Note the order!
 			.layer(middleware::from_fn_with_state(
 				app_state,
 				api_key_middleware,
@@ -41,16 +45,16 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	)
 }
 
-// /// A secondary authorization middleware to ensure that the user has access to the
-// /// koreader sync endpoints. This is purely for convenience
-// async fn authorize(req: Request, next: Next) -> APIResult<Response> {
-// 	let ctx = req
-// 		.extensions()
-// 		.get::<RequestContext>()
-// 		.ok_or(APIError::Unauthorized)?;
-// 	ctx.enforce_permissions(&[UserPermission::KoreaderSync])?;
-// 	Ok(next.run(req).await)
-// }
+/// A secondary authorization middleware to ensure that the user has access to the
+/// koreader sync endpoints. This is purely for convenience
+async fn authorize(req: Request, next: Next) -> APIResult<Response> {
+	let ctx = req
+		.extensions()
+		.get::<RequestContext>()
+		.ok_or(APIError::Unauthorized)?;
+	ctx.enforce_permissions(&[UserPermission::AccessKoreaderSync])?;
+	Ok(next.run(req).await)
+}
 
 #[derive(Serialize)]
 struct CheckAuthorizedResponse {

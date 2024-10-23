@@ -68,7 +68,7 @@ export type PartialUser = { id: string; username: string; is_server_owner: boole
  * Permissions that can be granted to a user. Some permissions are implied by others,
  * and will be automatically granted if the "parent" permission is granted.
  */
-export type UserPermission = "feature:api_keys" | "bookclub:read" | "bookclub:create" | "emailer:read" | "emailer:create" | "emailer:manage" | "email:send" | "email:arbitrary_send" | "smartlist:read" | "file:explorer" | "file:upload" | "file:download" | "library:create" | "library:edit" | "library:scan" | "library:manage" | "library:delete" | "user:read" | "user:manage" | "notifier:read" | "notifier:create" | "notifier:manage" | "notifier:delete" | "server:manage"
+export type UserPermission = "feature:api_keys" | "feature:koreader_sync" | "bookclub:read" | "bookclub:create" | "emailer:read" | "emailer:create" | "emailer:manage" | "email:send" | "email:arbitrary_send" | "smartlist:read" | "file:explorer" | "file:upload" | "file:download" | "library:create" | "library:edit" | "library:scan" | "library:manage" | "library:delete" | "user:read" | "user:manage" | "notifier:read" | "notifier:create" | "notifier:manage" | "notifier:delete" | "server:manage"
 
 export type AgeRestriction = { age: number; restrict_on_unset: boolean }
 

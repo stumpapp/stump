@@ -14,6 +14,7 @@ import { KeyRound, Slash } from 'lucide-react'
 import { getCommonPinningStyles } from '@/components/table/Table'
 import APIKeyActionMenu from './APIKeyActionMenu'
 import APIKeyInspector from './APIKeyInspector'
+import { useLocaleContext } from '@stump/i18n'
 
 dayjs.extend(relativeTime)
 
@@ -23,6 +24,7 @@ export default function APIKeyTable() {
 	const { data: apiKeys } = useQuery([sdk.apiKey.keys.get], () => sdk.apiKey.get(), {
 		suspense: true,
 	})
+	const { t } = useLocaleContext()
 
 	const [deletingKey, setDeletingKey] = useState<APIKey | null>(null)
 	const [inspectingKey, setInspectingKey] = useState<APIKey | null>(null)
@@ -32,7 +34,7 @@ export default function APIKeyTable() {
 			columnHelper.accessor('name', {
 				header: () => (
 					<Text size="sm" variant="secondary">
-						Name
+						{t(getFieldKey('name'))}
 					</Text>
 				),
 				cell: ({ getValue }) => <Text size="sm">{getValue()}</Text>,
@@ -41,7 +43,7 @@ export default function APIKeyTable() {
 				id: 'permission_count',
 				header: () => (
 					<Text size="sm" variant="secondary">
-						Permissions
+						{t(getFieldKey('permissions'))}
 					</Text>
 				),
 				cell: ({
@@ -72,7 +74,7 @@ export default function APIKeyTable() {
 			columnHelper.accessor('last_used_at', {
 				header: () => (
 					<Text size="sm" variant="secondary">
-						Last used
+						{t(getFieldKey('last_used'))}
 					</Text>
 				),
 				cell: ({ getValue }) => {
@@ -87,7 +89,7 @@ export default function APIKeyTable() {
 			columnHelper.accessor('expires_at', {
 				header: () => (
 					<Text size="sm" variant="secondary">
-						Expiration
+						{t(getFieldKey('expiration'))}
 					</Text>
 				),
 				cell: ({ getValue }) => {
@@ -113,7 +115,7 @@ export default function APIKeyTable() {
 				size: 20,
 			}),
 		],
-		[],
+		[t],
 	)
 
 	const table = useReactTable({
@@ -207,3 +209,7 @@ export default function APIKeyTable() {
 }
 
 const columnHelper = createColumnHelper<APIKey>()
+
+const LOCALE_BASE = 'settingsScene.app/apiKeys'
+const getTableKey = (key: string) => `${LOCALE_BASE}.sections.table.${key}`
+const getFieldKey = (key: string) => `${LOCALE_BASE}.shared.fields.${key}`

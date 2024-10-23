@@ -1,4 +1,5 @@
 import { Button, Dropdown } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Ellipsis } from 'lucide-react'
 
 type Props = {
@@ -6,7 +7,9 @@ type Props = {
 	onSelectForInspect: () => void
 }
 
-export default function APIKeyInspector({ onSelectForDelete, onSelectForInspect }: Props) {
+export default function APIKeyActionMenu({ onSelectForDelete, onSelectForInspect }: Props) {
+	const { t } = useLocaleContext()
+
 	return (
 		<Dropdown modal={false}>
 			<Dropdown.Trigger asChild>
@@ -18,14 +21,17 @@ export default function APIKeyInspector({ onSelectForDelete, onSelectForInspect 
 			<Dropdown.Content align="end">
 				<Dropdown.Group>
 					<Dropdown.Item onClick={onSelectForInspect}>
-						<span>Inspect</span>
+						<span>{t(getKey('inspect'))}</span>
 					</Dropdown.Item>
 
 					<Dropdown.Item onClick={onSelectForDelete}>
-						<span>Delete</span>
+						<span>{t(getKey('delete'))}</span>
 					</Dropdown.Item>
 				</Dropdown.Group>
 			</Dropdown.Content>
 		</Dropdown>
 	)
 }
+
+const LOCALE_BASE = 'settingsScene.app/apiKeys.sections.table.actionMenu'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

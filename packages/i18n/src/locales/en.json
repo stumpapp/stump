@@ -1122,10 +1122,34 @@
 					"description": "A detailed view of this key",
 					"unrestrictedKey": {
 						"heading": "Unrestricted key",
-						"description": "Since you are the server owner, this key as unrestricted access when configured to inherit permissions. Please be careful."
+						"description": "Since you are the server owner, this key has unrestricted access when configured to inherit permissions. Please be careful."
 					}
 				},
-				"table": {}
+				"createKey": {
+					"modal": {
+						"trigger": "Create API key",
+						"heading": {
+							"creating": "Create API key",
+							"created": "Created key"
+						},
+						"description": {
+							"creating": "API keys are long-lived credentials that can be used to authenticate with the API",
+							"created": "Your new API key has been created. Save the secret somewhere safe, as it will not be shown again"
+						},
+						"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting",
+						"createdKey": "Created key",
+						"savedConfirm": "I saved my key",
+						"submit": "Create key"
+					}
+				},
+				"table": {
+					"title": "Your keys",
+					"description": "These are the API keys you have created",
+					"actionMenu": {
+						"inspect": "Inspect",
+						"delete": "Delete"
+					}
+				}
 			}
 		},
 		"app/reader": {

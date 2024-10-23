@@ -32,6 +32,9 @@ pub enum UserPermission {
 	/// Grant access to read/create their own API keys
 	#[serde(rename = "feature:api_keys")]
 	AccessAPIKeys,
+	/// Grant access to the koreader sync feature
+	#[serde(rename = "feature:koreader_sync")]
+	AccessKoreaderSync,
 	///TODO: Expand permissions for bookclub + smartlist
 	/// Grant access to the book club feature
 	#[serde(rename = "bookclub:read")]
@@ -151,6 +154,7 @@ impl fmt::Display for UserPermission {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		match self {
 			UserPermission::AccessAPIKeys => write!(f, "feature:api_keys"),
+			UserPermission::AccessKoreaderSync => write!(f, "feature:koreader_sync"),
 			UserPermission::AccessBookClub => write!(f, "bookclub:read"),
 			UserPermission::CreateBookClub => write!(f, "bookclub:create"),
 			UserPermission::EmailerRead => write!(f, "emailer:read"),
@@ -183,6 +187,7 @@ impl From<&str> for UserPermission {
 	fn from(s: &str) -> UserPermission {
 		match s {
 			"feature:api_keys" => UserPermission::AccessAPIKeys,
+			"feature:koreader_sync" => UserPermission::AccessKoreaderSync,
 			"bookclub:read" => UserPermission::AccessBookClub,
 			"bookclub:create" => UserPermission::CreateBookClub,
 			"emailer:read" => UserPermission::EmailerRead,

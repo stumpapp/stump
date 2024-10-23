@@ -10,6 +10,7 @@ export const allPermissions = [
 	'emailer:manage',
 	'emailer:read',
 	'feature:api_keys',
+	'feature:koreader_sync',
 	'file:explorer',
 	'file:upload',
 	'file:download',

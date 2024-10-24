@@ -1,6 +1,8 @@
 import type { ComponentPropsWithoutRef, ElementRef } from 'react'
 import * as React from 'react'
-import { Drawer as DrawerPrimitive } from 'vaul'
+import * as Vaul from 'vaul'
+
+const DrawerPrimitive: typeof Vaul.Drawer = Vaul.Drawer
 
 import { cn } from '../utils'
 
@@ -36,7 +38,7 @@ DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName
 type DrawerContentProps = {
 	showTopIndicator?: boolean
 } & ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
-const DrawerContent = React.forwardRef<
+const DrawerContent: typeof DrawerPrimitive.Content = React.forwardRef<
 	ElementRef<typeof DrawerPrimitive.Content>,
 	DrawerContentProps
 >(({ className, children, showTopIndicator = true, ...props }, ref) => (
@@ -72,7 +74,7 @@ const DrawerFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 )
 DrawerFooter.displayName = 'DrawerFooter'
 
-const DrawerTitle = React.forwardRef<
+const DrawerTitle: typeof DrawerPrimitive.Title = React.forwardRef<
 	ElementRef<typeof DrawerPrimitive.Title>,
 	ComponentPropsWithoutRef<typeof DrawerPrimitive.Title>
 >(({ className, ...props }, ref) => (
@@ -87,7 +89,7 @@ const DrawerTitle = React.forwardRef<
 ))
 DrawerTitle.displayName = DrawerPrimitive.Title.displayName
 
-const DrawerDescription = React.forwardRef<
+const DrawerDescription: typeof DrawerPrimitive.Description = React.forwardRef<
 	ElementRef<typeof DrawerPrimitive.Description>,
 	ComponentPropsWithoutRef<typeof DrawerPrimitive.Description>
 >(({ className, ...props }, ref) => (

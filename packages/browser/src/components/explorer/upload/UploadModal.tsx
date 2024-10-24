@@ -11,7 +11,7 @@ import {
 	Text,
 } from '@stump/components'
 import { UploaderParams, UploadLibraryBooks, UploadLibrarySeries } from '@stump/sdk'
-import { Book } from 'lucide-react'
+import { Book, FolderArchive } from 'lucide-react'
 import React, { useCallback, useEffect, useState } from 'react'
 import { FileRejection, useDropzone } from 'react-dropzone'
 import toast from 'react-hot-toast'
@@ -65,6 +65,12 @@ export default function UploadModal() {
 	const handleDrop = useCallback((acceptedFiles: File[], rejections: FileRejection[]) => {
 		// TODO: check rejections and do sm
 		console.debug({ acceptedFiles, rejections })
+		acceptedFiles.forEach((file) => {
+			console.log(file.type) // Log the MIME type of the accepted file
+		})
+		rejections.forEach((file) => {
+			console.error(file.errors) // Log errors for rejected files
+		})
 		setFiles((prev) => [
 			...prev,
 			...acceptedFiles.filter((file) => !prev.some((f) => f.name === file.name)),
@@ -73,12 +79,16 @@ export default function UploadModal() {
 
 	const { getRootProps, getInputProps, isFileDialogActive, isDragActive } = useDropzone({
 		accept: {
-			'application/epub+zip': ['.epub'],
-			'application/pdf': [],
-			'application/vnd.comicbook+zip': ['.cbz'],
-			'application/vnd.comicbook-rar': ['.cbr'],
-			'application/vnd.rar': ['.rar', '.cbr'],
-			'application/zip': ['.zip', '.cbz'],
+			'application/zip': uploadType === 'books' ? ['.zip', '.cbz'] : ['.zip'],
+			...(uploadType === 'books'
+				? {
+						'application/epub+zip': ['.epub'],
+						'application/pdf': [],
+						'application/vnd.comicbook+zip': ['.cbz'],
+						'application/vnd.comicbook-rar': ['.cbr'],
+						'application/vnd.rar': ['.rar', '.cbr'],
+					}
+				: {}),
 		},
 		maxSize: config?.max_file_upload_size ?? 0,
 		multiple: uploadType === 'books',
@@ -105,7 +115,6 @@ export default function UploadModal() {
 		// Handle books/series upload paths
 		if (uploadType == 'books') {
 			try {
-				// await sdk.upload.uploadLibraryBooks(library.id, currentPath, files)
 				await uploadBooks({ files, library_id: library.id, place_at: currentPath })
 				toast.success('Successfully uploaded file(s)')
 			} catch (error) {
@@ -119,9 +128,15 @@ export default function UploadModal() {
 			}
 
 			try {
-				// await sdk.upload.uploadLibrarySeries(library.id, seriesDirName, files)
+				// TODO - Better enforcement of single file
+				// We'll only take the first file for now
+				let file = files[0]
+				if (file == undefined) {
+					return
+				}
+
 				await uploadSeries({
-					files,
+					file,
 					library_id: library.id,
 					series_dir_name: seriesDirName,
 				})
@@ -180,11 +195,19 @@ export default function UploadModal() {
 			return (
 				<>
 					<span className="flex items-center justify-center rounded-lg border border-edge bg-background-surface/80 p-4">
-						<Book className="h-8 w-8 text-foreground-muted" />
+						{displayedType === 'books' ? (
+							<Book className="h-8 w-8 text-foreground-muted" />
+						) : (
+							<FolderArchive className="h-8 w-8 text-foreground-muted" />
+						)}
 					</span>
 
 					<div className="text-center">
-						<Heading size="xs">Drag and drop books here</Heading>
+						<Heading size="xs">
+							{displayedType === 'books'
+								? 'Drag and drop books here'
+								: 'Drag and drop a zip file here'}
+						</Heading>
 						<Text variant="muted" size="sm">
 							Or click to browse your computer for books to upload
 						</Text>
@@ -234,6 +257,10 @@ export default function UploadModal() {
 					{uploadType === 'series' && (
 						<div className="mt-2">
 							<Heading size="xs">Series Name</Heading>
+							<Dialog.Description>
+								This will be used as the name of the series directory. Your zip archive will be
+								unpacked here.
+							</Dialog.Description>
 							<Input
 								placeholder="Enter series name"
 								value={seriesDirName}

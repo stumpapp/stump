@@ -7931,6 +7931,7 @@ dependencies = [
  "utoipa",
  "utoipa-swagger-ui",
  "windows 0.58.0",
+ "zip 1.1.3",
 ]
 
 [[package]]

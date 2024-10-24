@@ -198,7 +198,7 @@ async fn upload_books(
 
 	// TODO(upload): async-ify this
 	// Check that it is a directory and already exists
-	if !(placement_path.is_dir() && placement_path.exists()) {
+	if !placement_path.is_dir() {
 		return Err(APIError::BadRequest(
 			"Book uploads must be placed at an existing directory.".to_string(),
 		));
@@ -224,7 +224,7 @@ async fn upload_books(
 struct UploadSeriesRequest {
 	series_dir_name: String,
 	#[form_data(limit = "unlimited")]
-	files: Vec<FieldData<NamedTempFile>>,
+	file: FieldData<NamedTempFile>,
 }
 
 #[utoipa::path(
@@ -253,6 +253,9 @@ async fn upload_series(
 		UserPermission::ManageLibrary,
 	])?;
 
+	// Validate the provided file, exit early on failure.
+	validate_series_upload(&series_request)?;
+
 	let client = &ctx.db;
 	let library = get_library(client, id, &user).await?;
 
@@ -272,20 +275,16 @@ async fn upload_series(
 		tokio::fs::create_dir_all(&series_path).await?;
 	}
 
-	// TODO - Evaluate if this is the best apporoach to uploads
-	// This pattern, including the use of `NamedTempFile` from the tempfile crate, is taken from
-	// the documentation for axum_typed_multipart. Is this the best approach here? Some testing
-	// is needed to see how large uploads are handled.
-	for f in series_request.files {
-		let file_name = f.metadata.file_name.as_ref().ok_or(APIError::BadRequest(
-			"Uploaded files must have filenames.".to_string(),
-		))?;
-		let target_path = series_path.join(file_name);
+	// Get a zip crate file handle to the temporary file
+	let temp_file = series_request.file.contents.as_file().try_clone()?;
+	let mut zip_archive = zip::ZipArchive::new(temp_file).map_err(|e| {
+		APIError::InternalServerError(format!("Error opening zip archive: {e}"))
+	})?;
 
-		// TODO - Add logic that handles zipped files.
-
-		copy_tempfile_to_location(f, &target_path).await?;
-	}
+	// Extract the contents
+	zip_archive.extract(series_path).map_err(|e| {
+		APIError::InternalServerError(format!("Error unpacking zip archive: {e}"))
+	})?;
 
 	Ok(Json(()))
 }
@@ -309,6 +308,40 @@ async fn copy_tempfile_to_location(
 
 	// Copy the bytes to the target location
 	tokio::io::copy(&mut temp_file, &mut target_file).await?;
+
+	Ok(())
+}
+
+fn validate_series_upload(series_request: &UploadSeriesRequest) -> APIResult<()> {
+	// Check extension
+	if let Some(file_name) = &series_request.file.metadata.file_name {
+		if !file_name.ends_with(".zip") {
+			return Err(APIError::BadRequest(format!(
+				"Invalid file extension: {file_name}. Only zip files are allowed."
+			)));
+		}
+	} else {
+		return Err(APIError::BadRequest(
+			"Invalid file provided, expected file to have a filename.".to_string(),
+		));
+	}
+
+	// Check content type
+	const PERMITTED_CONTENT_TYPES: &[&str] =
+		&["application/zip", "application/x-zip-compressed"];
+
+	if let Some(content_type) = &series_request.file.metadata.content_type {
+		if !PERMITTED_CONTENT_TYPES.contains(&content_type.as_str()) {
+			return Err(APIError::BadRequest(format!(
+				"Invalid content-type: {content_type:?}. Only zip files are allowed."
+			)));
+		}
+	} else {
+		return Err(APIError::BadRequest(
+			"Invalid content-type, expected uploaded series to have a content-type."
+				.to_string(),
+		));
+	}
 
 	Ok(())
 }
@@ -350,4 +383,18 @@ async fn get_library(
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound(String::from("Library not found")))
+}
+
+#[cfg(test)]
+mod tests {
+	use crate::routers::api::v1::upload::is_subpath_secure;
+
+	#[test]
+	fn test_is_subpath_secure() {
+		let secure_subpath = "series/name/secure";
+		assert!(is_subpath_secure(secure_subpath));
+
+		let insecure_subpath = "series/../../../../dastardly";
+		assert!(!is_subpath_secure(insecure_subpath));
+	}
 }

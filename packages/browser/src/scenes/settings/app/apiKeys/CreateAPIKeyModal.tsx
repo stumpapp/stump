@@ -1,13 +1,14 @@
+import { queryClient, useMutation, useSDK } from '@stump/client'
 import { Button, Dialog, Text, useCopyToClipboard } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
+import { CreateOrUpdateAPIKey } from '@stump/sdk'
+import { Copy, CopyCheck, Eye, EyeOff, KeyRound } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+
 import CreateOrUpdateAPIKeyForm, {
 	CREATE_OR_UPDATE_API_KEY_FORM_ID,
 	CreateOrUpdateAPIKeyFormValues,
 } from './CreateOrUpdateAPIKeyForm'
-import { CreateOrUpdateAPIKey } from '@stump/sdk'
-import { queryClient, useMutation, useSDK } from '@stump/client'
-import { Copy, CopyCheck, Eye, EyeOff, KeyRound } from 'lucide-react'
-import { useLocaleContext } from '@stump/i18n'
 
 // TODO(koreader): localize
 export default function CreateAPIKeyModal() {
@@ -42,7 +43,7 @@ export default function CreateAPIKeyModal() {
 			const { api_key } = await createKey(payload)
 			setApiSecret(api_key)
 		},
-		[],
+		[createKey],
 	)
 
 	useEffect(() => {

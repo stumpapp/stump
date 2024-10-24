@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from 'axios'
 
 import { AuthenticationMethod, Configuration } from './configuration'
 import {
+	APIKeyAPI,
 	AuthAPI,
 	BookClubAPI,
 	EmailerAPI,
@@ -17,7 +18,6 @@ import {
 	SmartListAPI,
 	TagAPI,
 	UserAPI,
-	APIKeyAPI,
 } from './controllers'
 import { formatApiURL } from './utils'
 

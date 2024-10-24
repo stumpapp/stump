@@ -9,6 +9,7 @@
 	},
 	"scripts": {
 		"check-types": "tsc -b tsconfig.json",
+		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
 		"build": "tsc",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",

@@ -1,6 +1,8 @@
-import { ContentContainer, SceneContainer } from '@/components/container'
 import { Heading, Text } from '@stump/components'
-import React, { Suspense } from 'react'
+import { Suspense } from 'react'
+
+import { ContentContainer, SceneContainer } from '@/components/container'
+
 import APIKeyTable from './APIKeyTable'
 import CreateAPIKeyModal from './CreateAPIKeyModal'
 

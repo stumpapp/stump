@@ -1,8 +1,8 @@
 import { lazy } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
-import { useAppStore } from '@/stores'
 import { useAppContext } from '@/context'
+import { useAppStore } from '@/stores'
 
 const GeneralSettingsScene = lazy(() => import('./general/GeneralSettingsScene.tsx'))
 const AppearanceSettingsScene = lazy(() => import('./appearance/AppearanceSettingsScene.tsx'))

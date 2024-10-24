@@ -1,10 +1,11 @@
-import { useAppContext } from '@/context'
-import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
 import { Badge, Label, Sheet, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { APIKey } from '@stump/sdk'
 import dayjs from 'dayjs'
 import { KeyRound, Sparkles } from 'lucide-react'
+
+import { useAppContext } from '@/context'
+import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
 
 type Props = {
 	apiKey: APIKey | null

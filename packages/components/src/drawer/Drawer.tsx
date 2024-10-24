@@ -12,13 +12,16 @@ const Drawer = ({
 )
 Drawer.displayName = 'Drawer'
 
-const DrawerTrigger = DrawerPrimitive.Trigger
+const DrawerTrigger: typeof DrawerPrimitive.Trigger = DrawerPrimitive.Trigger
 
 const DrawerPortal = DrawerPrimitive.Portal
 
-const DrawerClose = DrawerPrimitive.Close
+const DrawerClose: typeof DrawerPrimitive.Close = DrawerPrimitive.Close
 
-const DrawerOverlay = React.forwardRef<
+const DrawerOverlay: React.ForwardRefExoticComponent<
+	ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay> &
+		React.RefAttributes<ElementRef<typeof DrawerPrimitive.Overlay>>
+> = React.forwardRef<
 	ElementRef<typeof DrawerPrimitive.Overlay>,
 	ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>
 >(({ className, ...props }, ref) => (

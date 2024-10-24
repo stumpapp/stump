@@ -25,7 +25,6 @@ const sdk = new Api({
 	// apiKey: '*****'
 })
 
-
 // A token will be managed for you in-memory, but you can store it yourself
 // using the returned `LoginResponse` object
 await sdk.auth.login({
@@ -35,10 +34,10 @@ await sdk.auth.login({
 
 // Example query for a book by name
 const favoriteBook = (
-  await sdk.media.get({
-    name: ["The Cybernetic Tea Shop"],
-    limit: 1,
-  })
+	await sdk.media.get({
+		name: ['The Cybernetic Tea Shop'],
+		limit: 1,
+	})
 ).at(0)
 
 // Example query for a series by ID
@@ -46,10 +45,10 @@ const favoritBookSeries = await sdk.series.getByID(favoriteBook.series_id)
 
 // Example query for a library by name
 const ebooksLibrary = (
-  await sdk.library.get({
-    name: ["Ebooks"],
-    limit: 1,
-  })
+	await sdk.library.get({
+		name: ['Ebooks'],
+		limit: 1,
+	})
 ).at(0)
 
 // Example scan of a library

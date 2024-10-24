@@ -1,5 +1,6 @@
 import { useQuery, useSDK } from '@stump/client'
 import { Badge, Card, cn, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { APIKey } from '@stump/sdk'
 import {
 	createColumnHelper,
@@ -8,13 +9,14 @@ import {
 	useReactTable,
 } from '@tanstack/react-table'
 import dayjs from 'dayjs'
-import { useMemo, useState } from 'react'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { KeyRound, Slash } from 'lucide-react'
+import { useMemo, useState } from 'react'
+
 import { getCommonPinningStyles } from '@/components/table/Table'
+
 import APIKeyActionMenu from './APIKeyActionMenu'
 import APIKeyInspector from './APIKeyInspector'
-import { useLocaleContext } from '@stump/i18n'
 import DeleteAPIKeyConfirmModal from './DeleteAPIKeyConfirmModal'
 
 dayjs.extend(relativeTime)
@@ -141,7 +143,7 @@ export default function APIKeyTable() {
 					</div>
 
 					<div className="text-center">
-						<Text>You haven't created any API keys yet</Text>
+						<Text>You haven&apos;t created any API keys yet</Text>
 						<Text size="sm" variant="muted">
 							Create an API key to get started
 						</Text>
@@ -214,5 +216,4 @@ export default function APIKeyTable() {
 const columnHelper = createColumnHelper<APIKey>()
 
 const LOCALE_BASE = 'settingsScene.app/apiKeys'
-const getTableKey = (key: string) => `${LOCALE_BASE}.sections.table.${key}`
 const getFieldKey = (key: string) => `${LOCALE_BASE}.shared.fields.${key}`

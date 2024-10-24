@@ -5,6 +5,7 @@ import {
 	Book,
 	Brush,
 	Cog,
+	KeyRound,
 	LucideIcon,
 	Mail,
 	PcCase,
@@ -59,6 +60,13 @@ export const routeGroups: RouteGroup[] = [
 				label: 'Reader',
 				localeKey: 'app/reader',
 				to: '/settings/app/reader',
+			},
+			{
+				icon: KeyRound,
+				label: 'API keys',
+				localeKey: 'app/apiKeys',
+				permission: 'feature:api_keys',
+				to: '/settings/app/api-keys',
 			},
 			{
 				icon: PcCase,

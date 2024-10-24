@@ -1,3 +1,5 @@
+import { Callout } from 'nextra/components'
+
 # OPDS
 
 Open Publication Distribution System ([OPDS](https://opds.io/)) is a specification for generating and serving catalogs of digital content. It is used by many applications, such as [Panels](https://panels.app/) and [Chunky Reader](https://apps.apple.com/us/app/chunky-comic-reader/id663567628).
@@ -50,3 +52,16 @@ The following clients have been tested with Stump:
 | Android |    [Librera](https://play.google.com/store/apps/details?id=com.foobnix.pdf.reader)    |             ❓ |                                                                                       Does not work. Likely lacking OPDS 2.0 support |
 | Linux   |                  [Foliate](https://johnfactotum.github.io/foliate/)                   |             ❌ |                                                                           Loads cover previews, book names, publisher and categories |
 | Windows |                      [Thorium 3](https://thorium.edrlab.org/en/)                      |             ❌ |                                                                Loads covers and their previews, book names, publisher and categories |
+
+## Using an API Key
+
+<Callout emoji="🔐">
+	This functionality is gated behind the `feature:api_keys` user permission. To learn more about
+	permissions, see the [permissions](/guides/access-control/permissions) guide.
+</Callout>
+
+There is a special router for OPDS v1.2 that allows you to embed an API key in the URL directly. This is primarily only done to support clients which do not support passing auth credentials in the request headers. The URL structure for this is:
+
+`http(s)://your-server(:10801)(/baseUrl)/opds/(api_key)/v1.2/catalog`
+
+For additional information on API keys, see the [API keys](/guides/features/api-keys) guide.

@@ -11,8 +11,7 @@ Stump keeps track of your reading progress as you read. This includes:
 This is done on a **per-user** basis, meaning that each user has their own set of progress for the books they read on the server.
 
 <Callout emoji="🚧">
-	There are plans to support reading history, which will allow you to see a timeline of each time
-	you re-read a book. Currently, progress is reset when you re-read a book.
+	Historical read progress is available in the database, but the UI doesn't do much with it yet
 </Callout>
 
 ## Supported Clients
@@ -20,15 +19,3 @@ This is done on a **per-user** basis, meaning that each user has their own set o
 Stump natively supports tracking read progress for books when using any of the built-in [readers](/guides/basics/readers). Besides the built-in readers, Stump will update read progress when using OPDS-PSE.
 
 Most other reading clients will have their own mechanisms for tracking read progress, which is likely not compatible to sync with Stump without an additional layer of integration. If you are interested in integrating a custom reading client with Stump, please create a GitHub issue to discuss the details.
-
-## Visualizing Progress
-
-<Callout emoji="🚧">
-	There aren't many built-in, dedicated visualization options yet. This is a work in progress.
-</Callout>
-
-## Manually Updating Progress
-
-<Callout emoji="🚧">
-	This is supported, however the documentation for this is not yet available.
-</Callout>

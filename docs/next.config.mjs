@@ -18,8 +18,8 @@ export default withNextra({
 			permanent: true,
 		},
 		{
-			source: '/guides/book-clubs',
-			destination: '/guides/book-clubs/overview',
+			source: '/guides/features/book-clubs',
+			destination: '/guides/features/book-clubs/overview',
 			permanent: true,
 		},
 		{

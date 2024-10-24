@@ -318,6 +318,7 @@ mod tests {
 			path: get_test_epub_path(),
 			status: FileStatus::Ready.to_string(),
 			hash: Some(String::from("hash")),
+			koreader_hash: None,
 			series_id: Some("1".to_string()),
 			pages: 0,
 			modified_at: None,

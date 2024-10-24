@@ -1,3 +1,4 @@
+mod api_key;
 mod book_club;
 pub(crate) mod common;
 mod emailer;
@@ -18,6 +19,7 @@ mod user;
 pub use self::epub::*;
 pub use self::log::*;
 
+pub use api_key::*;
 pub use book_club::*;
 pub use emailer::*;
 pub use job::*;
@@ -43,6 +45,7 @@ pub mod utils {
 }
 
 pub mod macros {
+	pub use super::api_key::prisma_macros::*;
 	pub use super::book_club::prisma_macros::*;
 	pub use super::library::prisma_macros::*;
 	pub use super::media::prisma_macros::*;

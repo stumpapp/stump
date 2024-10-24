@@ -147,7 +147,7 @@ async fn testing_ground_upload(
 
 #[derive(TryFromMultipart)]
 struct UploadBooksRequest {
-	place_at: String, // PathBuf
+	place_at: String,
 	#[form_data(limit = "unlimited")]
 	files: Vec<FieldData<NamedTempFile>>,
 }
@@ -222,6 +222,7 @@ async fn upload_books(
 
 #[derive(TryFromMultipart)]
 struct UploadSeriesRequest {
+	place_at: String,
 	series_dir_name: String,
 	#[form_data(limit = "unlimited")]
 	file: FieldData<NamedTempFile>,
@@ -259,6 +260,12 @@ async fn upload_series(
 	let client = &ctx.db;
 	let library = get_library(client, id, &user).await?;
 
+	// Validate the placement path parameters, error otherwise
+	if !is_subpath_secure(&series_request.place_at) {
+		return Err(APIError::BadRequest(
+			"Invalid upload path placement parameters".to_string(),
+		));
+	}
 	// Validate the series directory name - the same traversal concerns apply here
 	if !is_subpath_secure(&series_request.series_dir_name) {
 		return Err(APIError::BadRequest(
@@ -266,13 +273,19 @@ async fn upload_series(
 		));
 	}
 
-	// Get the path for the series
-	let series_path =
-		path::Path::new(&library.path).join(&series_request.series_dir_name);
+	// Get path that the series upload will be placed at, accounting for possible full path
+	let placement_path = if series_request.place_at.starts_with(&library.path) {
+		path::PathBuf::from(&series_request.place_at)
+			.join(&series_request.series_dir_name)
+	} else {
+		path::Path::new(&library.path)
+			.join(series_request.place_at)
+			.join(&series_request.series_dir_name)
+	};
 
 	// Create directory if necessary
-	if !series_path.exists() {
-		tokio::fs::create_dir_all(&series_path).await?;
+	if !placement_path.exists() {
+		tokio::fs::create_dir_all(&placement_path).await?;
 	}
 
 	// Get a zip crate file handle to the temporary file
@@ -280,9 +293,8 @@ async fn upload_series(
 	let mut zip_archive = zip::ZipArchive::new(temp_file).map_err(|e| {
 		APIError::InternalServerError(format!("Error opening zip archive: {e}"))
 	})?;
-
 	// Extract the contents
-	zip_archive.extract(series_path).map_err(|e| {
+	zip_archive.extract(placement_path).map_err(|e| {
 		APIError::InternalServerError(format!("Error unpacking zip archive: {e}"))
 	})?;
 

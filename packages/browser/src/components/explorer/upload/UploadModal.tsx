@@ -16,7 +16,6 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { FileRejection, useDropzone } from 'react-dropzone'
 import toast from 'react-hot-toast'
 
-import Spinner from '@/components/Spinner'
 import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
 import { useLibraryContext } from '@/scenes/library/context'
 import { formatBytes } from '@/utils/format'
@@ -137,6 +136,7 @@ export default function UploadModal() {
 
 				await uploadSeries({
 					file,
+					place_at: currentPath,
 					library_id: library.id,
 					series_dir_name: seriesDirName,
 				})

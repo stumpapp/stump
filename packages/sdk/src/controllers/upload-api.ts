@@ -15,7 +15,6 @@ const uploadURL = createRouteURLHandler(UPLOAD_ROUTE)
 // TODO(upload): have server generate these types when API is stable
 export type UploadLibraryBooks = {
 	library_id: string
-	place_at: string
 	files: File[]
 }
 
@@ -26,6 +25,8 @@ export type UploadLibrarySeries = {
 }
 
 export type UploaderParams<T extends object> = T & {
+	place_at: string
+
 	/**
 	 * An optional callback to be called when the upload progress changes
 	 * @param progress The progress of the upload as a percentage (0-100)
@@ -64,11 +65,13 @@ export class UploadAPI extends APIBase {
 
 	async uploadLibrarySeries({
 		library_id,
+		place_at,
 		series_dir_name,
 		file,
 		onProgress,
 	}: UploaderParams<UploadLibrarySeries>) {
 		const formData = new FormData()
+		formData.append('place_at', place_at)
 		formData.append('series_dir_name', series_dir_name)
 
 		const estimatedSize = file.size

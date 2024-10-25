@@ -44,6 +44,7 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 		const renderSet = () => {
 			const shouldDisplayDoubleSpread =
 				displayedPages.length > 1 &&
+				currentPage != 1 &&
 				dimensionSet.every((dimensions) => !dimensions || dimensions.isPortrait)
 
 			if (shouldDisplayDoubleSpread) {

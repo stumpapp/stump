@@ -1270,6 +1270,9 @@ async fn create_library(
 					library_config::generate_file_hashes::set(
 						library_config.generate_file_hashes,
 					),
+					library_config::generate_koreader_hashes::set(
+						library_config.generate_koreader_hashes,
+					),
 					library_config::default_reading_dir::set(
 						library_config.default_reading_dir.to_string(),
 					),
@@ -1495,6 +1498,9 @@ async fn update_library(
 						),
 						library_config::generate_file_hashes::set(
 							library_config.generate_file_hashes,
+						),
+						library_config::generate_koreader_hashes::set(
+							library_config.generate_koreader_hashes,
 						),
 						library_config::ignore_rules::set(ignore_rules),
 						library_config::thumbnail_config::set(thumbnail_config),

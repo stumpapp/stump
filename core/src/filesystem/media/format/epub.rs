@@ -9,7 +9,7 @@ use crate::{
 	filesystem::{
 		content_type::ContentType,
 		error::FileError,
-		hash,
+		hash::{self, generate_koreader_hash},
 		media::process::{FileProcessor, FileProcessorOptions, ProcessedFile},
 	},
 };
@@ -69,6 +69,7 @@ impl FileProcessor for EpubProcessor {
 		path: &str,
 		FileProcessorOptions {
 			generate_file_hashes,
+			generate_koreader_hashes,
 			..
 		}: FileProcessorOptions,
 		_: &StumpConfig,
@@ -84,10 +85,14 @@ impl FileProcessor for EpubProcessor {
 		let hash = generate_file_hashes
 			.then(|| EpubProcessor::hash(path))
 			.flatten();
+		let koreader_hash = generate_koreader_hashes
+			.then(|| generate_koreader_hash(path))
+			.transpose()?;
 
 		Ok(ProcessedFile {
 			path: path_buf,
 			hash,
+			koreader_hash,
 			metadata: Some(metadata),
 			pages,
 		})

@@ -1,11 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert, ComboBox, DatePicker, Form, Input, RadioGroup } from '@stump/components'
+import { allPermissions, isUserPermission } from '@stump/sdk'
 import dayjs from 'dayjs'
 import { useCallback } from 'react'
 import { useForm, useFormState } from 'react-hook-form'
 import { z } from 'zod'
 
-import { allPermissions, userPermissionSchema } from '../../server/users/create-or-update/schema'
+import { useAppContext } from '@/context'
+
+import { userPermissionSchema } from '../../server/users/create-or-update/schema'
 
 export const CREATE_OR_UPDATE_API_KEY_FORM_ID = 'create-or-update-api-key-form'
 
@@ -15,6 +18,8 @@ type Props = {
 
 // TODO(koreader): localize
 export default function CreateOrUpdateAPIKeyForm({ onSubmit }: Props) {
+	const { checkPermission } = useAppContext()
+
 	const form = useForm<CreateOrUpdateAPIKeyFormValues>({
 		defaultValues: {
 			name: '',
@@ -42,6 +47,8 @@ export default function CreateOrUpdateAPIKeyForm({ onSubmit }: Props) {
 		},
 		[form],
 	)
+
+	const validPermissions = allPermissions.filter(checkPermission)
 
 	return (
 		<Form form={form} onSubmit={onSubmit} id={CREATE_OR_UPDATE_API_KEY_FORM_ID}>
@@ -84,13 +91,15 @@ export default function CreateOrUpdateAPIKeyForm({ onSubmit }: Props) {
 						<div className="pl-4">
 							<ComboBox
 								// TODO: localize
-								options={allPermissions.map((permission) => ({
+								options={validPermissions.map((permission) => ({
 									value: permission,
 									label: permission,
 								}))}
 								value={permissions}
 								// TODO: typecheck values
-								onChange={(value) => form.setValue('explicit_permissions', value || [])}
+								onChange={(value) =>
+									form.setValue('explicit_permissions', value?.filter(isUserPermission) || [])
+								}
 								isMultiSelect
 								disabled={inherit}
 							/>
@@ -112,7 +121,6 @@ export default function CreateOrUpdateAPIKeyForm({ onSubmit }: Props) {
 
 const schema = z.object({
 	name: z.string().min(1),
-	// permissions: z.union([z.literal('inherit'), z.array(userPermissionSchema)]),
 	inherit: z.boolean(),
 	explicit_permissions: z.array(userPermissionSchema),
 	expires_at: z

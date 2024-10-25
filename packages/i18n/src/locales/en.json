@@ -367,6 +367,10 @@
 				"generateFileHashes": {
 					"label": "Generate file hashes",
 					"description": "Generate a hash for each file in the library to detect duplicates"
+				},
+				"koreaderHashes": {
+					"label": "KoReader-compatible hashes",
+					"description": "If using KoReader, generate additional hashes in the format it expects"
 				}
 			},
 			"libraryPattern": {
@@ -1415,6 +1419,17 @@
 						"create": {
 							"label": "Create book clubs",
 							"description": "Allows the user to create new book clubs"
+						}
+					},
+					"feature": {
+						"label": "Feature Opt-In",
+						"api_keys": {
+							"label": "API keys",
+							"description": "Allow the user to manage their own API keys"
+						},
+						"koreader_sync": {
+							"label": "KoReader sync",
+							"description": "Allow the user to access the KoReader sync integration"
 						}
 					},
 					"file": {

@@ -24,6 +24,7 @@ export default function CreateAPIKeyModal() {
 		},
 	)
 	const [apiSecret, setApiSecret] = useState<string | null>(null)
+
 	const [hideSecret, setHideSecret] = useState(true)
 
 	const [copy, didCopy] = useCopyToClipboard(apiSecret || '')
@@ -76,8 +77,8 @@ export default function CreateAPIKeyModal() {
 				</Dialog.Header>
 
 				{apiSecret && (
-					<div className="divide divide-y divide-edge rounded-lg border border-edge bg-background-surface">
-						<div className="flex h-8 items-center justify-between pl-3 pr-2">
+					<div className="divide divide-y divide-edge rounded-lg border border-edge bg-background-surface p-0.5">
+						<div className="mb-1 flex h-8 items-center justify-between pl-3 pr-2">
 							<div className="flex items-center space-x-2">
 								<KeyRound className="h-4 w-4 text-foreground-muted" />
 								<Text size="sm" className="text-foreground-subtle">
@@ -85,23 +86,20 @@ export default function CreateAPIKeyModal() {
 								</Text>
 							</div>
 
-							<div className="divide flex items-center divide-x divide-edge">
-								<span className="pr-1">
-									<Button size="icon" onClick={() => setHideSecret((prev) => !prev)}>
-										<VisibilityIcon className="h-4 w-4 text-foreground-muted" />
-									</Button>
-								</span>
-
-								<span className="pl-1">
-									<Button size="icon" onClick={() => copy()}>
-										<CopyIcon className="h-4 w-4 text-foreground-muted" />
-									</Button>
-								</span>
+							<div className="flex items-center gap-1">
+								<Button size="icon" onClick={() => setHideSecret((prev) => !prev)}>
+									<VisibilityIcon className="h-4 w-4 text-foreground-muted" />
+								</Button>
+								<Button size="icon" onClick={() => copy()}>
+									<CopyIcon className="h-4 w-4 text-foreground-muted" />
+								</Button>
 							</div>
 						</div>
 
-						<div className="p-3 text-sm text-foreground-subtle">
-							<code>{hideSecret ? maskedSecret : apiSecret}</code>
+						<div className="rounded-lg bg-background-surface-secondary p-3 text-sm text-foreground-subtle">
+							<span>
+								<code>{hideSecret ? maskedSecret : apiSecret}</code>
+							</span>
 						</div>
 					</div>
 				)}

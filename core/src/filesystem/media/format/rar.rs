@@ -162,6 +162,8 @@ impl FileProcessor for RarProcessor {
 		Ok(ProcessedFile {
 			path: PathBuf::from(path),
 			hash,
+			// TODO(koreader): Do we want to hash RAR files?
+			koreader_hash: None,
 			metadata,
 			pages,
 		})

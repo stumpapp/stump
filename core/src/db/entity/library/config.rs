@@ -19,6 +19,7 @@ pub struct LibraryConfig {
 	pub convert_rar_to_zip: bool,
 	pub hard_delete_conversions: bool,
 	pub generate_file_hashes: bool,
+	pub generate_koreader_hashes: bool,
 	pub process_metadata: bool,
 	pub library_pattern: LibraryPattern,
 	pub thumbnail_config: Option<ImageProcessorOptions>,
@@ -50,6 +51,7 @@ impl From<library_config::Data> for LibraryConfig {
 			convert_rar_to_zip: data.convert_rar_to_zip,
 			hard_delete_conversions: data.hard_delete_conversions,
 			generate_file_hashes: data.generate_file_hashes,
+			generate_koreader_hashes: data.generate_koreader_hashes,
 			process_metadata: data.process_metadata,
 			library_pattern: LibraryPattern::from(data.library_pattern),
 			default_reading_dir: ReadingDirection::from_str(

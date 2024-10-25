@@ -15,6 +15,7 @@ type Props = {
 export default function APIKeyInspector({ apiKey, onClose }: Props) {
 	const { t } = useLocaleContext()
 	const { user } = useAppContext()
+
 	const displayedData = useCurrentOrPrevious(apiKey)
 
 	const expiration = dayjs(displayedData?.expires_at)
@@ -25,15 +26,16 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 	const renderPermissions = () => {
 		if (isAllPermissions) {
 			return (
-				<div className="mx-4 my-2 flex flex-col space-y-1.5 rounded-lg bg-fill-warning-secondary p-3">
-					<div className="flex items-center border-fill-warning-secondary border-opacity-75 text-fill-warning">
+				<div className="mx-4 my-2 flex flex-col space-y-1.5 rounded-lg bg-fill-warning-secondary p-[3px]">
+					<div className="flex items-center px-2.5 py-0.5 text-fill-warning">
 						<Sparkles className="mr-2 h-4 w-4" />
 						<span className="font-medium">{t(getKey('unrestrictedKey.heading'))}</span>
 					</div>
-
-					<Text size="sm" className="text-fill-warning">
-						{t(getKey('unrestrictedKey.description'))}
-					</Text>
+					<div className="rounded-lg bg-fill-warning-secondary p-2.5">
+						<Text size="sm" className="text-fill-warning">
+							{t(getKey('unrestrictedKey.description'))}
+						</Text>
+					</div>
 				</div>
 			)
 		}
@@ -42,18 +44,19 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 			displayedData?.permissions === 'inherit' ? user.permissions : displayedData?.permissions || []
 
 		return (
-			<div className="mx-4 my-2 flex flex-col space-y-3 rounded-lg bg-background-surface p-3">
-				<div className="flex items-center border-fill-warning-secondary border-opacity-75 text-foreground-subtle/80">
+			<div className="mx-4 my-2 flex flex-col space-y-1.5 rounded-lg bg-background-surface p-[3px]">
+				<div className="flex items-center px-2.5 py-0.5 text-foreground-subtle/80">
 					<KeyRound className="mr-2 h-4 w-4" />
 					<span className="font-medium">{t(getSharedKey('fields.permissions'))}</span>
 				</div>
-
-				<div className="flex flex-wrap gap-2">
-					{permissions.map((perm) => (
-						<Badge key={perm} variant="primary" size="sm" className="px-1">
-							{perm}
-						</Badge>
-					))}
+				<div className="rounded-lg bg-background-surface-secondary p-2.5">
+					<div className="flex flex-wrap gap-2">
+						{permissions.map((perm) => (
+							<Badge key={perm} variant="primary" size="sm" className="px-1">
+								{perm}
+							</Badge>
+						))}
+					</div>
 				</div>
 			</div>
 		)

@@ -1,5 +1,5 @@
 import { useUpdatePreferences } from '@stump/client'
-import { IconButton, Label, RawSwitch, Text, ToolTip } from '@stump/components'
+import { Button, Label, RawSwitch, Text, ToolTip } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { RefreshCcw } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -62,9 +62,9 @@ export default function DiscordPresenceSwitch() {
 					isDisabled={!isChecked || !handleReconnect}
 					align="end"
 				>
-					<IconButton variant="ghost" size="xs" disabled={!isChecked || !handleReconnect}>
+					<Button variant="ghost" size="icon" disabled={!isChecked || !handleReconnect}>
 						<RefreshCcw className="h-4 w-4" />
-					</IconButton>
+					</Button>
 				</ToolTip>
 
 				<RawSwitch

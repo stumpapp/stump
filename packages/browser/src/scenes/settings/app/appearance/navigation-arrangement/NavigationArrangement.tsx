@@ -14,7 +14,7 @@ import {
 	verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { useNavigationArrangement } from '@stump/client'
-import { Card, cn, IconButton, Label, Text, ToolTip } from '@stump/components'
+import { Button, Card, cn, Label, Text, ToolTip } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { NavigationItem } from '@stump/sdk'
 import isEqual from 'lodash/isEqual'
@@ -180,9 +180,9 @@ export default function NavigationArrangement() {
 
 		return (
 			<ToolTip content={help} align="end" size="sm">
-				<IconButton aria-label={help} onClick={() => setLocked(!locked)} variant="ghost" size="sm">
+				<Button size="icon" aria-label={help} onClick={() => setLocked(!locked)} variant="ghost">
 					<Icon className="h-4 w-4 text-foreground-muted" />
-				</IconButton>
+				</Button>
 			</ToolTip>
 		)
 	}

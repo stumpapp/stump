@@ -1,4 +1,4 @@
-import { ButtonOrLink, cn, IconButton, Label } from '@stump/components'
+import { Button, ButtonOrLink, cn, Label } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { ArrowLeft, Home } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router'
@@ -86,14 +86,15 @@ export default function BookClubSettingsSideBar() {
 
 				{enable_replace_primary_sidebar && (
 					<div className="shrink-0">
-						<IconButton
+						<Button
 							title="Go home"
 							variant="ghost"
+							size="icon"
 							className="border border-transparent p-1.5 text-foreground hover:border-edge-subtle/50 hover:bg-sidebar-surface/70"
 							onClick={() => navigate(paths.home())}
 						>
 							<Home className="h-4 w-4 -scale-x-[1] transform" />
-						</IconButton>
+						</Button>
 					</div>
 				)}
 			</div>

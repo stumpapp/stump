@@ -48,13 +48,13 @@ If a user has been locked out of their account, it is up to the server owner to 
 1. Navigate to `/settings/users` in your browser. Locate the `Users` table and click the action menu button (three dots) for the user you wish to unlock. Click the `Unlock` button in the action menu. This will open a modal asking you to confirm the unlock. Click the `Unlock` button in the modal to confirm the unlock.
 2. Use the embedded CLI in the Stump server to unlock the user account. See the [CLI](/guides/cli) guide for more information. In general, the command will look like this:
 
-   ```bash
+   ```bash copy
    ./stump account unlock --username <username>
    ```
 
    Similarly, you can lock a user account using the following command:
 
-   ```bash
+   ```bash copy
     ./stump account lock --username <username>
    ```
 
@@ -64,7 +64,7 @@ In the event the server owner account becomes locked, you will only be able to u
 
 If a user has forgotten their password, you will have to use the embedded CLI in the Stump server to reset the user's password. See the [CLI](/guides/cli) guide for more information. In general, the command will look like this:
 
-```bash
+```bash copy
 ./stump account reset-password --username <username>
 ```
 

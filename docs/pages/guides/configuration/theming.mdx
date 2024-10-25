@@ -6,8 +6,7 @@ Stump supports code-based theming. This means that you can create your own theme
 
 For example, the default dark theme for Stump can be found [here](https://github.com/stumpapp/stump/tree/develop/packages/components/themes/dark.ts). For brevity, the entire theme won't be shown here, but let's say we wanted to make a new theme called "midnight" that is based on the dark theme, but with a darker background:
 
-```ts
-// themes/midnight.ts
+```ts filename="themes/midnight.ts" copy
 export const midnight: StumpTheme = {
 	background: {
 		DEFAULT: '#000000',
@@ -19,8 +18,7 @@ export const midnight: StumpTheme = {
 
 Then we just need to include it in the exported `themes` object:
 
-```ts
-// themes/index.ts
+```ts filename="themes/index.ts" copy
 export const themes = {
 	dark,
 	light,
@@ -31,8 +29,7 @@ export const themes = {
 
 Then we should add it to the main [`ThemeSelect` component](https://github.com/stumpapp/stump/tree/develop/packages/browser/src/scenes/settings/app/appearance/ThemeSelect.tsx) so that it can be selected:
 
-```tsx
-// scenes/settings/app/appearance/ThemeSelect.tsx
+```tsx filename="scenes/settings/app/appearance/ThemeSelect.tsx" copy
 <NativeSelect
 	value={theme}
 	options={[
@@ -56,7 +53,7 @@ Stump has a limited number of fonts built-in:
 
 If you would like a new font, it will have to be added to the project manually. This can be done by appropriately defining the font in CSS, such as:
 
-```css
+```css filename="font/my-font.css" copy
 @font-face {
 	font-family: 'MyFont';
 	src: url('path/to/font.woff2') format('woff2');
@@ -65,10 +62,9 @@ If you would like a new font, it will have to be added to the project manually. 
 
 You can see how this is done in the [fonts](https://github.com/stumpapp/stump/tree/main/packages/components/src/font) directory of the `components` package.
 
-Once the font is defined, it can be added to the `fontFamily` object in the `tailwind.js` file:
+Once the font is defined, it can be added to the `fontFamily` object in the custom tailwind preset file:
 
-```js
-// tailwind.js
+```ts filename="tailwind/preset.ts" copy
 module.exports = {
 	// ... stuff here ...
 	theme: {
@@ -83,8 +79,7 @@ module.exports = {
 
 Then, the font can be used in the `FontSelect` component:
 
-```tsx
-// scenes/settings/app/appearance/FontSelect.tsx
+```tsx filename="scenes/settings/app/appearance/FontSelect.tsx" copy
 <NativeSelect
 	value={app_font || 'inter'}
 	options={[

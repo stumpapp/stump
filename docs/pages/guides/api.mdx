@@ -8,13 +8,13 @@ Stump exposes a REST API that allows you to interact with your Stump server.
 
 Stump provides a [TypeScript SDK](https://github.com/stumpapp/stump/tree/main/packages/sdk) that you can use to create your own applications and integrations with Stump. If the demand is high enough, I will prioritize a proper NPM publish workflow. For the time being, you can load the dependency using something like [gitpkg](https://gitpkg.vercel.app/).
 
-```bash
+```bash copy
 yarn add 'https://gitpkg.now.sh/stumpapp/stump/packages/sdk?main'
 ```
 
 Then use the SDK in your application like so:
 
-```typescript
+```ts filename="app.ts" copy
 import { Api } from '@stump/sdk'
 
 const sdk = new Api({

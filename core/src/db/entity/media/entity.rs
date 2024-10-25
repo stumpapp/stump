@@ -38,6 +38,8 @@ pub struct Media {
 	pub modified_at: Option<String>,
 	/// The hash of the file contents. Used to ensure only one instance of a file in the database.
 	pub hash: Option<String>,
+	/// The hash of the file contents using the koreader algorithm.
+	pub koreader_hash: Option<String>,
 	/// The path of the media. ex: "/home/user/media/comics/The Amazing Spider-Man (2018) #69.cbz"
 	pub path: String,
 	/// The status of the media
@@ -180,6 +182,7 @@ impl From<media::Data> for Media {
 			created_at: data.created_at.to_rfc3339(),
 			modified_at: data.modified_at.map(|dt| dt.to_rfc3339()),
 			hash: data.hash,
+			koreader_hash: data.koreader_hash,
 			path: data.path,
 			status: FileStatus::from_str(&data.status).unwrap_or(FileStatus::Error),
 			series_id: data.series_id.unwrap(),

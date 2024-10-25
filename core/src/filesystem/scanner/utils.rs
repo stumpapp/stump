@@ -94,6 +94,7 @@ pub(crate) async fn create_media(
 					generated.path,
 					vec![
 						media::hash::set(generated.hash),
+						media::koreader_hash::set(generated.koreader_hash),
 						media::series::connect(series::id::equals(generated.series_id)),
 					],
 				)

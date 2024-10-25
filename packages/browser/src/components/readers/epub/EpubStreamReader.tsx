@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
+
 // FIXME: this file is a mess
 import { UseEpubReturn, useSDK } from '@stump/client'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 /*
@@ -33,24 +34,19 @@ export default function EpubStreamReader({ epub, actions, ...rest }: UseEpubRetu
 
 	const [content, setContent] = useState<string>()
 
-	useEffect(
-		() => {
-			sdk.epub
-				.fetchResource({
-					id: epub.media_entity.id,
-					resourceId: actions.currentResource()?.content!,
-					root: epub.root_base,
-				})
-				.then((res) => {
-					console.debug(res)
-					// FIXME: don't cast
-					setContent(rest.correctHtmlUrls(res as string))
-				})
-		},
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[],
-	)
+	useEffect(() => {
+		sdk.epub
+			.fetchResource({
+				id: epub.media_entity.id,
+				resourceId: actions.currentResource()?.content!,
+				root: epub.root_base,
+			})
+			.then((res) => {
+				// console.debug(res)
+				// FIXME: don't cast
+				setContent(rest.correctHtmlUrls(res as string))
+			})
+	}, [epub, actions, sdk, rest])
 
 	function handleClickEvent(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
 		if (e.target instanceof HTMLAnchorElement && e.target.href) {

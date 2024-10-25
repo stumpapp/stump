@@ -45,18 +45,13 @@ function RouterContainer(props: StumpClientProps) {
 		setPlatform: store.setPlatform,
 	}))
 
-	useEffect(
-		() => {
-			if (!baseUrl && props.baseUrl) {
-				setBaseUrl(props.baseUrl)
-			}
+	useEffect(() => {
+		if (!baseUrl && props.baseUrl) {
+			setBaseUrl(props.baseUrl)
+		}
 
-			setMounted(true)
-		},
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[baseUrl],
-	)
+		setMounted(true)
+	}, [baseUrl, props.baseUrl, setBaseUrl])
 
 	useEffect(() => {
 		setPlatform(props.platform)
@@ -83,6 +78,7 @@ function RouterContainer(props: StumpClientProps) {
 	}
 
 	const handleUnathenticatedResponse = (redirectUrl?: string) => {
+		props.onUnauthenticatedResponse?.(redirectUrl)
 		setUser(null)
 		if (redirectUrl) {
 			handleRedirect(redirectUrl)
@@ -99,19 +95,21 @@ function RouterContainer(props: StumpClientProps) {
 	}
 
 	return (
-		<SDKProvider baseURL={baseUrl || ''} authMethod="session">
-			<StumpClientContextProvider
-				onUnauthenticatedResponse={handleUnathenticatedResponse}
-				onConnectionWithServerChanged={handleConnectionWithServerChanged}
-				tauriRPC={props.tauriRPC}
-			>
+		<StumpClientContextProvider
+			onUnauthenticatedResponse={handleUnathenticatedResponse}
+			onConnectionWithServerChanged={handleConnectionWithServerChanged}
+			tauriRPC={props.tauriRPC}
+			onAuthenticated={props.onAuthenticated}
+			onLogout={props.onLogout}
+		>
+			<SDKProvider baseURL={baseUrl || ''} authMethod={props.authMethod || 'session'}>
 				{IS_DEVELOPMENT && <ReactQueryDevtools position="bottom-right" context={defaultContext} />}
 				<Helmet defaultTitle="Stump">
 					<title>Stump</title>
 				</Helmet>
 				<AppRouter />
 				<Notifications />
-			</StumpClientContextProvider>
-		</SDKProvider>
+			</SDKProvider>
+		</StumpClientContextProvider>
 	)
 }

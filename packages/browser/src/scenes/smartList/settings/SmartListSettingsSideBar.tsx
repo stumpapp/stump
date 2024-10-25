@@ -1,7 +1,7 @@
 import { ButtonOrLink, cn, IconButton, Label } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { ArrowLeft, Home } from 'lucide-react'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
 import { usePreferences } from '@/hooks/usePreferences'

@@ -33,7 +33,7 @@ type SecondaryVariant = {
 	secondary: string
 } & DefaultVariant
 
-const colorVariant = ['info', 'success', 'warning', 'danger', 'brand'] as const
+export const colorVariant = ['info', 'success', 'warning', 'danger', 'brand'] as const
 
 type Border = Record<(typeof colorVariant)[number], string> & {
 	subtle: string

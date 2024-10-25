@@ -1,6 +1,5 @@
 import { IconButton, ToolTip } from '@stump/components'
 import { Grid2X2, Table } from 'lucide-react'
-import React from 'react'
 
 import { useFileExplorerContext } from './context'
 

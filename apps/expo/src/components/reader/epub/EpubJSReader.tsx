@@ -4,7 +4,7 @@ import { useSDK } from '@stump/client'
 import { isAxiosError } from '@stump/sdk'
 import { Media } from '@stump/sdk'
 import { useColorScheme } from 'nativewind'
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useWindowDimensions } from 'react-native'
 
 import EpubJSReaderContainer from './EpubJSReaderContainer'

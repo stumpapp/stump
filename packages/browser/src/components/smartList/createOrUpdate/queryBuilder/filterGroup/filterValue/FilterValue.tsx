@@ -1,7 +1,7 @@
 import { cn, DatePicker, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import dayjs from 'dayjs'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { match } from 'ts-pattern'
 

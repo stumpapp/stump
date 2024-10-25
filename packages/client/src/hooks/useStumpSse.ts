@@ -3,7 +3,8 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { useSDK } from '../sdk'
 
-interface SseOptions {
+type SseOptions = {
+	headers?: Record<string, string>
 	onOpen?: (event: Event) => void
 	onClose?: (event?: Event) => void
 	onMessage?: (event: MessageEvent<unknown>) => void
@@ -12,6 +13,7 @@ interface SseOptions {
 
 let sse: EventSource
 
+// TODO(tokens): Swap eventsource with polyfilled version that supports headers
 function useSse(url: string, { onOpen, onClose, onMessage }: SseOptions = {}) {
 	const timoutRef = useRef<NodeJS.Timeout | null>(null)
 	/**
@@ -47,21 +49,16 @@ function useSse(url: string, { onOpen, onClose, onMessage }: SseOptions = {}) {
 		}
 	}, [onClose, onMessage, onOpen, url])
 
-	useEffect(
-		() => {
-			initEventSource()
+	useEffect(() => {
+		initEventSource()
 
-			return () => {
-				sse?.close()
-				if (timoutRef.current) {
-					clearTimeout(timoutRef.current)
-				}
+		return () => {
+			sse?.close()
+			if (timoutRef.current) {
+				clearTimeout(timoutRef.current)
 			}
-		},
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[url],
-	)
+		}
+	}, [url])
 
 	return {
 		readyState: sse?.readyState,

@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { ScreenRootView, Text } from '@/components'
 
 // TODO: This component needs to be aware:

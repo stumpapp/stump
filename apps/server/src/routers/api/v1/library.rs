@@ -1729,7 +1729,9 @@ async fn get_library_stats(
 					media m
 					LEFT JOIN finished_reading_sessions frs ON frs.media_id = m.id
 					LEFT JOIN reading_sessions rs ON rs.media_id = m.id
-				WHERE {} IS TRUE OR (rs.user_id = {} OR frs.user_id = {})
+				WHERE {} IS TRUE OR (rs.user_id = {} OR frs.user_id = {}) AND m.series_id IN (
+					SELECT id FROM series WHERE library_id = {}
+				)
 			)
 			SELECT
 				*
@@ -1737,10 +1739,11 @@ async fn get_library_stats(
 				base_counts
 				INNER JOIN progress_counts;
 			",
-			PrismaValue::String(id),
+			PrismaValue::String(id.clone()),
 			PrismaValue::Boolean(params.all_users),
 			PrismaValue::String(user.id.clone()),
-			PrismaValue::String(user.id.clone())
+			PrismaValue::String(user.id.clone()),
+			PrismaValue::String(id)
 		))
 		.exec()
 		.await?

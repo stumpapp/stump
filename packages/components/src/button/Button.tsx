@@ -56,6 +56,7 @@ export const BUTTON_NY_SIZE_VARIANTS = {
 	md: 'h-8 px-3',
 	sm: 'h-7 px-2',
 	xs: 'h-5 px-1',
+	icon: 'h-6 w-6',
 }
 
 const buttonVariants = cva(BUTTON_BASE_CLASSES, {
@@ -144,7 +145,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 					{isLoading ? (
 						<ProgressSpinner
 							variant={variant === 'primary' ? 'primary' : 'default'}
-							size={size === 'icon' ? 'xs' : size}
+							size={size === 'icon' ? 'sm' : size}
 						/>
 					) : (
 						children

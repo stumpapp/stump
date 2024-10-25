@@ -36,12 +36,11 @@ export function useStumpWs({ onEvent, onConnectionWithServerChanged }: Props) {
 	}
 
 	function handleOpen() {
-		console.debug('Websocket connected')
 		onConnectionWithServerChanged?.(true)
 	}
 
 	function handleClose() {
-		console.debug('Websocket closed')
+		console.warn('Websocket closed')
 		onConnectionWithServerChanged?.(false)
 	}
 

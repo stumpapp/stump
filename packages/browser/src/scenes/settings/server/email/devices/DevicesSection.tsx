@@ -1,7 +1,7 @@
 import { Button, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { RegisteredEmailDevice } from '@stump/sdk'
-import React, { Suspense, useState } from 'react'
+import { Suspense, useState } from 'react'
 
 import { useEmailerSettingsContext } from '../context'
 import CreateOrUpdateDeviceModal from './CreateOrUpdateDeviceModal'

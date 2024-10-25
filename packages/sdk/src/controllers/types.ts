@@ -19,7 +19,7 @@ export type PagedQueryParams = {
 }
 
 export type CursorQueryParams = {
-	afterId?: string
+	cursor?: string
 	limit?: number
 	params?: Record<string, unknown>
 }

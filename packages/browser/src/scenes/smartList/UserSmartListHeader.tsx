@@ -1,6 +1,5 @@
 import { cn, Heading, Link, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React from 'react'
 
 import { usePreferences } from '@/hooks'
 import paths from '@/paths'

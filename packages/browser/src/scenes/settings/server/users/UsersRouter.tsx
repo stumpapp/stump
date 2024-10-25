@@ -1,7 +1,7 @@
 import { useUsersQuery } from '@stump/client'
 import { User } from '@stump/sdk'
 import { PaginationState } from '@tanstack/react-table'
-import React, { lazy, useState } from 'react'
+import { lazy, useState } from 'react'
 import { Route, Routes } from 'react-router'
 
 import { UserManagementContext } from './context.ts'

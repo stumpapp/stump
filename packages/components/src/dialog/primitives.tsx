@@ -1,7 +1,6 @@
-/* eslint-disable react/prop-types */
-
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'
+import type { ComponentPropsWithoutRef, ElementRef } from 'react'
 import React from 'react'
 
 import { cn } from '../utils'
@@ -14,11 +13,11 @@ const DialogTrigger = DialogPrimitive.Trigger
 const DialogPortal = DialogPrimitive.Portal
 
 export type DialogOverlayProps = Omit<
-	React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>,
+	ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>,
 	'children'
 >
 const DialogOverlay = React.forwardRef<
-	React.ElementRef<typeof DialogPrimitive.Overlay>,
+	ElementRef<typeof DialogPrimitive.Overlay>,
 	DialogOverlayProps
 >(({ className, ...props }, ref) => (
 	<DialogPrimitive.Overlay
@@ -32,7 +31,6 @@ const DialogOverlay = React.forwardRef<
 ))
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
-/* eslint-disable sort-keys-fix/sort-keys-fix */
 export const DIALOG_CONTENT_SIZES = {
 	sm: 'sm:max-w-[425px]',
 	// TODO: md is pretty large
@@ -41,11 +39,11 @@ export const DIALOG_CONTENT_SIZES = {
 	xl: 'sm:max-w-3xl',
 	massive: 'sm:max-w-7xl',
 }
-export type DialogContentProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
+export type DialogContentProps = ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
 	size?: keyof typeof DIALOG_CONTENT_SIZES
 }
 const DialogContent = React.forwardRef<
-	React.ElementRef<typeof DialogPrimitive.Content>,
+	ElementRef<typeof DialogPrimitive.Content>,
 	DialogContentProps
 >(({ className, children, size = 'md', ...props }, ref) => (
 	<DialogPortal>
@@ -83,8 +81,8 @@ const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 DialogFooter.displayName = 'DialogFooter'
 
 const DialogTitle = React.forwardRef<
-	React.ElementRef<typeof DialogPrimitive.Title>,
-	React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
+	ElementRef<typeof DialogPrimitive.Title>,
+	ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
 >(({ className, ...props }, ref) => (
 	<DialogPrimitive.Title
 		ref={ref}
@@ -95,8 +93,8 @@ const DialogTitle = React.forwardRef<
 DialogTitle.displayName = DialogPrimitive.Title.displayName
 
 const DialogDescription = React.forwardRef<
-	React.ElementRef<typeof DialogPrimitive.Description>,
-	React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
+	ElementRef<typeof DialogPrimitive.Description>,
+	ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
 >(({ className, ...props }, ref) => (
 	<DialogPrimitive.Description
 		ref={ref}
@@ -107,8 +105,8 @@ const DialogDescription = React.forwardRef<
 DialogDescription.displayName = DialogPrimitive.Description.displayName
 
 const DialogClose = React.forwardRef<
-	React.ElementRef<typeof DialogPrimitive.Close>,
-	React.ComponentPropsWithoutRef<typeof DialogPrimitive.Close>
+	ElementRef<typeof DialogPrimitive.Close>,
+	ComponentPropsWithoutRef<typeof DialogPrimitive.Close>
 >(({ className, ...props }, ref) => (
 	<DialogPrimitive.Close
 		ref={ref}

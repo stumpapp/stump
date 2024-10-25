@@ -1,7 +1,6 @@
 import { useDiscussionQuery } from '@stump/client'
 import { ButtonOrLink, Card } from '@stump/components'
 import { BookClubDiscussionMessage, User } from '@stump/sdk'
-import React from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
 
 import { useBookClubContext } from '@/components/bookClub'

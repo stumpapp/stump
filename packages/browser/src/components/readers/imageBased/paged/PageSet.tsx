@@ -2,6 +2,7 @@ import { BookImageScaling } from '@stump/client'
 import { cn } from '@stump/components'
 import React, { forwardRef, useCallback, useMemo } from 'react'
 
+import { EntityImage } from '@/components/entity'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { ImagePageDimensionRef, useImageBaseReaderContext } from '../context'
@@ -106,7 +107,7 @@ const _Page = ({
 	imageScaling: { scaleToFit },
 }: PageProps) => {
 	return (
-		<img
+		<EntityImage
 			key={`page-${page}-scaled-${scaleToFit}`}
 			className={cn(
 				'z-30 select-none',

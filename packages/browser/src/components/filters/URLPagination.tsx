@@ -1,6 +1,6 @@
 import { IconButton, Input, Text, ToolTip } from '@stump/components'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 type Props = {
 	pages: number
@@ -68,7 +68,7 @@ export default function URLPagination({ pages, currentPage, onChangePage, onPref
 					type="number"
 					variant="activeGhost"
 					size="sm"
-					className="h-7 w-7 p-0 text-center text-xs [appearance:textfield] sm:h-6 sm:w-6"
+					className="h-7 w-7 p-0 text-center text-xs [appearance:textfield] sm:h-6 sm:w-6 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 					disabled={pages <= 1}
 					value={inputPage || currentPage}
 					onChange={handleInputChange}

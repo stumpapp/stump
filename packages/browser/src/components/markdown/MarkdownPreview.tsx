@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { cn, cx, Divider, Heading, Text } from '@stump/components'
-import React, { PropsWithChildren, useState } from 'react'
+import { PropsWithChildren, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkDirective from 'remark-directive'
 import remarkDirectiveRehype from 'remark-directive-rehype'

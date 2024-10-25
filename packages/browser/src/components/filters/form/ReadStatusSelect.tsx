@@ -1,5 +1,3 @@
-import React from 'react'
-
 import GenericFilterMultiselect from './GenericFilterMultiselect'
 
 export default function ReadStatusSelect() {

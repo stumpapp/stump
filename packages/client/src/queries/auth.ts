@@ -1,5 +1,7 @@
-import { isUser, LoginOrRegisterArgs, type User } from '@stump/sdk'
+import { isAxiosError, isUser, LoginOrRegisterArgs, type User } from '@stump/sdk'
 import { useEffect, useState } from 'react'
+
+import { useClientContext } from '@/context'
 
 import { queryClient, QueryOptions, useMutation, useQuery } from '../client'
 import { useSDK } from '../sdk'
@@ -11,7 +13,7 @@ export function useAuthQuery(options: QueryOptions<User> = {}) {
 		async () => {
 			const data = await sdk.auth.me()
 			if (!isUser(data)) {
-				console.debug('Malformed response recieved from server', data)
+				console.warn('Malformed response recieved from server', data)
 				throw new Error('Malformed response recieved from server')
 			}
 			return data
@@ -42,10 +44,20 @@ export function useLoginOrRegister({
 }: UseLoginOrRegisterOptions) {
 	const [isClaimed, setIsClaimed] = useState(true)
 
+	const { onAuthenticated } = useClientContext()
 	const { sdk } = useSDK()
 	const { data: claimCheck, isLoading: isCheckingClaimed } = useQuery(
 		[sdk.server.keys.claimedStatus, refetchClaimed],
 		() => sdk.server.claimedStatus(),
+		{
+			retry: (failureCount, error) => {
+				if (failureCount > 3) {
+					return false
+				} else {
+					return isAxiosError(error) && error.code === 'ERR_NETWORK'
+				}
+			},
+		},
 	)
 
 	useEffect(() => {
@@ -62,9 +74,20 @@ export function useLoginOrRegister({
 		onError: (err) => {
 			onError?.(err)
 		},
-		onSuccess: (user) => {
-			queryClient.invalidateQueries(['getLibraries'])
-			onSuccess?.(user)
+		onSuccess: async (response) => {
+			// TODO(token): refresh support
+			if ('for_user' in response && !!onAuthenticated) {
+				const {
+					for_user,
+					token: { access_token },
+				} = response
+				await onAuthenticated(for_user, access_token)
+				onSuccess?.(for_user)
+			} else if (isUser(response)) {
+				onSuccess?.(response)
+			}
+
+			await queryClient.invalidateQueries(['getLibraries'])
 		},
 	})
 
@@ -95,13 +118,15 @@ type UseLogoutParams = {
 
 export function useLogout({ removeStoreUser }: UseLogoutParams = {}) {
 	const { sdk } = useSDK()
+	const { onLogout } = useClientContext()
 	const { mutateAsync: logout, isLoading } = useMutation(
 		[sdk.auth.keys.logout],
 		() => sdk.auth.logout(),
 		{
-			onSuccess: () => {
+			onSuccess: async () => {
 				queryClient.clear()
 				removeStoreUser?.()
+				await onLogout?.()
 			},
 		},
 	)

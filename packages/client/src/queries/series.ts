@@ -1,4 +1,4 @@
-import type { Media, Series, SeriesFilter } from '@stump/sdk'
+import type { Media, Series, SeriesFilter, SeriesQueryRelation } from '@stump/sdk'
 import { AxiosError } from 'axios'
 import { useCallback } from 'react'
 
@@ -79,7 +79,7 @@ export const usePrefetchLibrarySeries = ({ id }: { id: string }) => {
 }
 
 type SeriesByIdOptions = {
-	params?: SeriesFilter
+	params?: SeriesFilter & SeriesQueryRelation
 } & QueryOptions<Series, AxiosError>
 export function useSeriesByIdQuery(id: string, { params, ...options }: SeriesByIdOptions = {}) {
 	const { sdk } = useSDK()

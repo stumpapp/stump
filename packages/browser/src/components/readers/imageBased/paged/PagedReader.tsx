@@ -1,6 +1,6 @@
 import type { Media } from '@stump/sdk'
 import clsx from 'clsx'
-import React, { memo, useCallback, useMemo, useRef } from 'react'
+import { memo, useCallback, useMemo, useRef } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { Hotkey } from 'react-hotkeys-hook/dist/types'
 import { useSwipeable } from 'react-swipeable'

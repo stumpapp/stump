@@ -1,5 +1,4 @@
 import { useUpdatePreferences } from '@stump/client'
-import React from 'react'
 
 import { useUserStore } from '@/stores'
 

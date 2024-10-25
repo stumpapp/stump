@@ -103,13 +103,13 @@ export const toObjectParams = <T extends object>(
 }
 
 export const mergeCursorParams = ({
-	afterId,
+	cursor,
 	limit,
 	params,
 }: CursorQueryParams): URLSearchParams => {
 	const searchParams = toUrlParams(params)
-	if (afterId) {
-		searchParams.set('cursor', afterId)
+	if (cursor) {
+		searchParams.set('cursor', cursor)
 	}
 	if (limit) {
 		searchParams.set('limit', limit.toString())

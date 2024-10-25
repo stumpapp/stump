@@ -592,24 +592,24 @@
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "Continue Reading",
+			"title": "Continue reading",
 			"emptyState": {
-				"heading": "No books to display",
-				"message": "Any books you're currently reading will show up here"
+				"heading": "Nothing to show",
+				"message": "Any in-progress books you start will show up here"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Recently Added Series",
+			"title": "Recently added series",
 			"emptyState": {
 				"heading": "No series to display",
 				"message": "Any series you add to your libraries will show up here"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Recently Added Books",
+			"title": "Recently added books",
 			"emptyState": {
-				"heading": "No books to display",
-				"message": "Any books you add to your libraries will show up here"
+				"heading": "Nothing to show",
+				"message": "Any recent books you add will show up here"
 			}
 		}
 	},
@@ -1148,6 +1148,7 @@
 				"configuredServers": {
 					"label": "Configured servers",
 					"description": "The list of Stump servers you can connect to",
+					"getStarted": "Add a server to get started",
 					"unreachableServer": {
 						"tooltip": "Server unreachable"
 					},
@@ -1217,6 +1218,19 @@
 							"description": "This will remove all servers from the desktop application",
 							"disclaimer": "You will be logged out and have to reconfigure any servers in the initialization process",
 							"confirm": "Delete all servers"
+						}
+					},
+					"resetTokens": {
+						"label": "Clear authentication",
+						"description": [
+							"Remove all securely-stored access tokens for your servers",
+							"You will have to re-authenticate with each server"
+						],
+						"confirmation": {
+							"trigger": "Clear authentication",
+							"title": "Clear authentication",
+							"description": "This will remove all securely-stored access tokens for your servers",
+							"confirm": "Clear authentication"
 						}
 					}
 				},

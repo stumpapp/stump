@@ -1,5 +1,6 @@
 import { cva, VariantProps } from 'class-variance-authority'
 import { AlertCircle, AlertTriangle, CheckCircle, Info, LucideIcon } from 'lucide-react'
+import type { ComponentPropsWithoutRef } from 'react'
 import { forwardRef } from 'react'
 
 import { cn, cx } from '../utils'
@@ -41,7 +42,7 @@ export type AlertProps = {
 	icon?: LucideIcon | keyof typeof ALERT_ICONS
 	alignIcon?: 'center' | 'start'
 } & VariantProps<typeof alertVariants> &
-	React.ComponentPropsWithoutRef<'div'>
+	ComponentPropsWithoutRef<'div'>
 
 const Alert = forwardRef<HTMLDivElement, AlertProps>(
 	({ className, level, rounded, icon, alignIcon = 'center', children, ...props }, ref) => {
@@ -102,7 +103,7 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(
 )
 Alert.displayName = 'Alert'
 
-const AlertContent = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
+const AlertContent = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<'div'>>(
 	({ className, ...props }, ref) => {
 		return (
 			<div
@@ -115,7 +116,7 @@ const AlertContent = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'
 )
 AlertContent.displayName = 'AlertContent'
 
-const AlertTitle = forwardRef<HTMLHeadingElement, React.ComponentPropsWithoutRef<'h2'>>(
+const AlertTitle = forwardRef<HTMLHeadingElement, ComponentPropsWithoutRef<'h2'>>(
 	({ className, ...props }, ref) => {
 		return (
 			<AlertContext.Consumer>

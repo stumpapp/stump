@@ -1,6 +1,6 @@
 import { TagOption, useTags } from '@stump/client'
 import { ComboBox } from '@stump/components'
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 type Props = {
 	label?: string

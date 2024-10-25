@@ -90,7 +90,7 @@ export class Api {
 	/**
 	 * Set the current access token for the API
 	 */
-	set token(token: string) {
+	set token(token: string | undefined) {
 		this.accessToken = token
 	}
 

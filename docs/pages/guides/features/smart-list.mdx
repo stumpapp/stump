@@ -2,6 +2,11 @@ import { Callout } from 'nextra/components'
 
 # Smart lists
 
+<Callout emoji="🔐">
+	This functionality is gated behind the `smartlist:read` user permission. To learn more about
+	permissions, see the [permissions](/guides/access-control/permissions) guide.
+</Callout>
+
 A smart list is a dynamic list of books generated from a set of configured filters. They are powerful in that they allow you to quickly curate and organize a collection of books based on a set of criteria without having to manually manage the list.
 
 ## Filters
@@ -34,11 +39,7 @@ Not to be confused with the filter groups, grouping is a way of grouping matched
 
 In the future, more grouping options may be considered
 
-## Feature Access
-
-The smart list feature, itself, is gated behind the `smartlist:read` user permission. This means that only users with this permission will be able to interact with smart lists.
-
-## List-level Access
+## List Access
 
 Smart lists can be shared with other users, and has 3 visibility options:
 

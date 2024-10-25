@@ -9,7 +9,6 @@ export default {
 	configuration: 'Configuration',
 	features: 'Features',
 	integrations: 'Integrations',
-	'file-explorer': 'File Explorer',
 	opds: 'OPDS',
 	api: 'API',
 	cli: 'CLI',

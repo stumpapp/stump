@@ -1,5 +1,19 @@
 # FAQ
 
+A list of frequently asked questions about Stump:
+
+## Demo
+
+<Callout emoji="🚧">
+	The demo is currently unavailable. I will try to get it back up as soon as possible. See the
+	relevant [issue](https://github.com/stumpapp/stump/issues/420).
+</Callout>
+
+A demo can be found at [demo.stumpapp.dev](https://demo.stumpapp.dev). The login credentials are:
+
+- **Username:** `demouser`
+- **Password:** `demouser10801`
+
 ## What is Stump?
 
 Stump is an open source, self hostable, media server for digital books (ebooks, comic books, manga, etc). It is designed to be _easy to use_ and _easy to deploy_.

@@ -1,4 +1,4 @@
-import { Callout } from 'nextra/components'
+import { Callout, Steps } from 'nextra/components'
 
 # KoReader Sync
 
@@ -12,15 +12,43 @@ KoReader is an open-source e-reader application that supports a variety of devic
 
 ## Setup
 
-To set up KoReader sync with Stump, you'll need to do the following:
+To set up KoReader sync with Stump, you need to:
 
-1. Install KoReader on your device
-2. Enable the koreader routes on your Stump instance
-3. Generate an API key with at least the `feature:koreader_sync` permission (implies you have the `feature:api_keys` permission for your account)
-4. Configure Stump as a sync server in KoReader
+<Steps>
 
-The URL structure for informing KoReader of your Stump server is:
+### Install [KoReader](https://koreader.rocks/) on your device
 
-```bash
-http(s)://your-server(:port)(/baseUrl)/koreader/:api_key
-```
+### Enable the KoReader routes on your Stump instance
+
+The KoReader router is disabled by default. To enable it, you need to set the `ENABLE_KOREADER_SYNC` environment variable to `true`, or directly set `enable_koreader_sync=true` in the `Stump.toml` configuration file.
+
+See the [configuration guide](/guides/configuration/server-options) for more information.
+
+### Generate an API key
+
+<Callout emoji="🔐">This step requires the `feature:api_keys` user permissions.</Callout>
+
+The API key should have at least the `feature:koreader_sync` permission:
+
+1. Navigate to the app settings (`/settings/app`)
+2. Click the `API keys` tab (`/settings/app/api-keys`)
+3. Click the `Create API key` button
+4. Create your key and save the full value after creation
+
+### Configure a sync server in KoReader
+
+1. Open KoReader on your device
+2. Navigate to `Progress sync` > `Custom sync server`
+3. Enter the following URL structure:
+
+   ```bash
+   http(s)://your-server(:port)(/baseUrl)/koreader/:api_key
+   ```
+
+</Steps>
+
+<Callout emoji="🚀">
+	Have you set up KoReader sync with Stump? I'd love to hear about your experience! This is a very
+	new integration, so if you have any feedback or run into any issues, please let me know by opening
+	an [issue](https://github.com/stumpapp/stump/issues)
+</Callout>

@@ -8,6 +8,11 @@ const withNextra = nextra({
 export default withNextra({
 	redirects: async () => [
 		{
+			source: '/installation',
+			destination: '/installation/docker',
+			permanent: true,
+		},
+		{
 			source: '/guides/access-control',
 			destination: '/guides/access-control/age-restrictions',
 			permanent: true,

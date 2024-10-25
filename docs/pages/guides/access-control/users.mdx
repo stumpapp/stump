@@ -1,3 +1,5 @@
+import { Callout, Steps } from 'nextra/components'
+
 # Users and User Accounts
 
 Stump has two user account types:
@@ -7,26 +9,47 @@ Stump has two user account types:
 
 An 'unclaimed' Stump server, or a server that has no user with the `server owner` role, will prompt for an initialization step, and will automatically assign the first registered user the **Server Owner** role.
 
-## Managing Users
+## Management
 
-### Creating a user
+<Callout emoji="🔐">
+	These functionalities are gated behind the `user:manage` user permission. To learn more about
+	permissions, see the [permissions](/guides/access-control/permissions) guide.
+</Callout>
 
-To create a new user, click the `Create user` button in the `Users` section of the settings page. This will open a modal with the following fields:
+### Create a user
 
-- **Username**: The username of the user. This is used to log in to the server.
-- **Password**: The password of the user. This is used to log in to the server. You can click the `Generate` button to generate a random password, or manually enter one.
-- **Age restriction**: The _optional_ age restriction of the user. This is used to determine which books the user can access. You may enter a number corresponding to the **maximum** age rating the user can access. For example, if you enter `13` then the user will be able to access books with an age rating of `13` or lower. See the [age restrictions](/guides/access-control#age-restrictions) section of the Access Control guide for more information.
+<Steps>
+
+### Navigate to the settings page
+
+Navigate to the primary settings page (`/settings`) in your browser
+
+### Select `Users` in the `Server` section of the sidebar
+
+This will take you to the user management page. It will display a list of users, authentication history, and miscellaneous user stats.
+
+### Click the `Create user` button
+
+This will route you to a subpage which displays a form to create a new user
+
+### Fill out the form
+
+- **Username**: The username of the user. This is used to log in to the server
+- **Password**: The password of the user. This is used to log in to the server. You can click the `Generate` button to generate a random password, or manually enter one
+- **Age restriction**: The _optional_ age restriction of the user. This is used to determine which books the user can access. You may enter a number corresponding to the **maximum** age rating the user can access. For example, if you enter `13` then the user will be able to access books with an age rating of `13` or lower. See the [age restrictions](/guides/access-control#age-restrictions) section of the Access Control guide for more information
 
   - **Note**: If you check the `Enforce restrictions for missing metadata` checkbox, then the user will only be able to access books that:
 
     1. _Explicitly_ have an age rating set
-    2. The age rating is less than or equal to the user's age restriction.
+    2. The age rating is less than or equal to the user's age restriction
 
-    Otherwise, the user will be able to access books that _do not_ have an age rating set.
+    Otherwise, the user will be able to access books that _do not_ have an age rating set
+
+</Steps>
 
 ### Editing a user
 
-> Such empty! Will be filled in the future.
+Follow steps 1 and 2 above to navigate to the user management page. Locate the `Users` table and click the action menu button (three dots) for the user you wish to edit. Click the `Edit` button in the action menu. This will route you to the same subpage as the `Create user` button, but with the form pre-filled with the user's current information. Make any necessary changes and click the `Save` button to save the changes.
 
 ### Deleting a user
 

@@ -4668,7 +4668,7 @@ version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "af1844ef2428cc3e1cb900be36181049ef3d3193c63e43026cfe202983b27a56"
 dependencies = [
- "proc-macro-crate 1.2.1",
+ "proc-macro-crate 2.0.0",
  "proc-macro2",
  "quote",
  "syn 2.0.79",
@@ -7952,9 +7952,9 @@ checksum = "61c41af27dd6d1e27b1b16b489db798443478cef1f06a660c96db617ba5de3b1"
 
 [[package]]
 name = "tauri"
-version = "2.0.6"
+version = "2.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3889b392db6d32a105d3757230ea0220090b8f94c90d3e60b6c5eb91178ab1b"
+checksum = "44438500b50708bfc1e6083844e135d1b516325aae58710dcd8fb67e050ae87c"
 dependencies = [
  "anyhow",
  "bytes",
@@ -8121,9 +8121,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-store"
-version = "2.1.0"
+version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e9a580be53f04bb62422d239aa798e88522877f58a0d4a0e745f030055a51bb4"
+checksum = "5058f179f7215390fc5a68eeffcb805b7e2681d6e817a5d08094fae7ab649e68"
 dependencies = [
  "dunce",
  "log",

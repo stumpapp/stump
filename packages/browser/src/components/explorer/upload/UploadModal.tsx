@@ -22,10 +22,7 @@ import { formatBytes } from '@/utils/format'
 
 import { useFileExplorerContext } from '../context'
 import UploadMenu from './UploadMenu'
-
-// TODO(upload): make language dynamic according to the uploadType
-// TODO(upload): add language to localization files
-// TODO(upload): determine if using UploadButtons vs UploadMenu
+import { useLocaleContext } from '@stump/i18n'
 
 export default function UploadModal() {
 	const [uploadType, setUploadType] = useState<'books' | 'series'>()
@@ -33,6 +30,7 @@ export default function UploadModal() {
 	const [seriesDirName, setSeriesDirName] = useState<string | undefined>(undefined)
 	const [files, setFiles] = useState<File[]>([])
 
+	const { t } = useLocaleContext()
 	const { library } = useLibraryContext()
 	const { currentPath, refetch } = useFileExplorerContext()
 	const { sdk } = useSDK()
@@ -192,14 +190,11 @@ export default function UploadModal() {
 				</>
 			)
 		} else {
+			const Icon = displayedType === 'books' ? Book : FolderArchive
 			return (
 				<>
 					<span className="flex items-center justify-center rounded-lg border border-edge bg-background-surface/80 p-4">
-						{displayedType === 'books' ? (
-							<Book className="h-8 w-8 text-foreground-muted" />
-						) : (
-							<FolderArchive className="h-8 w-8 text-foreground-muted" />
-						)}
+						<Icon className="h-8 w-8 text-foreground-muted" />
 					</span>
 
 					<div className="text-center">
@@ -217,7 +212,6 @@ export default function UploadModal() {
 		}
 	}
 
-	// If we wind up using UploadButtons, we would just have each one set the uploadType accordingly
 	return (
 		<div>
 			<UploadMenu onSelect={setUploadType} />
@@ -225,17 +219,13 @@ export default function UploadModal() {
 			<Dialog open={!!uploadType} onOpenChange={handleOpenChanged}>
 				<Dialog.Content size="md">
 					<Dialog.Header>
-						<Dialog.Title>
-							{displayedType === 'books' ? 'Upload books' : 'Upload series'}
-						</Dialog.Title>
+						<Dialog.Title>{t(getKey(`title.${displayedType}`))}</Dialog.Title>
 						<Dialog.Description>
-							{displayedType === 'books'
-								? 'Add books directly to the current path in the file explorer.'
-								: 'Add a series directly to the current path in the file explorer. '}
+							{t(getKey(`description.${displayedType}`))}
 							{displayedType === 'series' && (
 								<span>
-									It must be a <b>zipped file</b> containing the folder which should be the series,
-									with all the books inside
+									{t(getKey('seriesDisclaimer.0'))} <b>{t(getKey('seriesDisclaimer.1'))}</b>{' '}
+									{t(getKey('seriesDisclaimer.2'))}
 								</span>
 							)}
 						</Dialog.Description>
@@ -282,7 +272,7 @@ export default function UploadModal() {
 								className={cn('py-2', { 'cursor-not-allowed opacity-50': !files.length })}
 							>
 								<span>
-									Added files{' '}
+									{t(getKey('addedFiles'))}{' '}
 									<span className="text-sm text-foreground-muted">({files.length})</span>
 								</span>
 							</Accordion.Trigger>
@@ -308,7 +298,7 @@ export default function UploadModal() {
 													setFiles((prev) => prev.filter((_, i) => i !== idx))
 												}}
 											>
-												Remove
+												{t('common.remove')}
 											</Button>
 										</div>
 									))}
@@ -319,10 +309,10 @@ export default function UploadModal() {
 
 					<Dialog.Footer>
 						<Button variant="default" onClick={() => setUploadType(undefined)}>
-							Cancel
+							{t('common.cancel')}
 						</Button>
 						<Button variant="primary" disabled={!files.length} onClick={onUploadClicked}>
-							Upload
+							{t('common.upload')}
 						</Button>
 					</Dialog.Footer>
 				</Dialog.Content>
@@ -330,3 +320,6 @@ export default function UploadModal() {
 		</div>
 	)
 }
+
+const LOCALE_BASE = 'fileExplorer.uploadModal'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

@@ -820,6 +820,36 @@
 			}
 		}
 	},
+	"createOrUpdateApiKey": {
+		"validation": {
+			"futureDate": "Expiration date must be in the future"
+		},
+		"fields": {
+			"name": {
+				"label": "Name",
+				"placeholder": "Koreader Sync"
+			},
+			"expiration": {
+				"label": "Expiration",
+				"placeholder": "Never"
+			},
+			"expires_at": {
+				"label": "Expires at",
+				"placeholder": "Never"
+			},
+			"permissions": {
+				"inherit": {
+					"label": "Inherit permissions",
+					"description": "The same permissions as your account"
+				},
+				"explicit": {
+					"label": "Explicit permissions",
+					"description": "Choose the permissions this key should have"
+				}
+			}
+		},
+		"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting"
+	},
 	"userSmartListsScene": {
 		"heading": "Smart lists",
 		"subtitle": "Your favorite searches and filters saved for easy access",

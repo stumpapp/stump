@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert, ComboBox, DatePicker, Form, Input, RadioGroup } from '@stump/components'
-import { allPermissions, isUserPermission } from '@stump/sdk'
+import { useLocaleContext } from '@stump/i18n'
+import { allPermissions, APIKey, isUserPermission } from '@stump/sdk'
 import dayjs from 'dayjs'
 import { useCallback } from 'react'
 import { useForm, useFormState } from 'react-hook-form'
@@ -13,20 +14,25 @@ import { userPermissionSchema } from '../../server/users/create-or-update/schema
 export const CREATE_OR_UPDATE_API_KEY_FORM_ID = 'create-or-update-api-key-form'
 
 type Props = {
+	editingKey?: APIKey
 	onSubmit: (values: CreateOrUpdateAPIKeyFormValues) => void
 }
 
-// TODO(koreader): localize
-export default function CreateOrUpdateAPIKeyForm({ onSubmit }: Props) {
+const formDefaults = (key?: APIKey) =>
+	({
+		name: key?.name || '',
+		inherit: key?.permissions === 'inherit',
+		explicit_permissions: key?.permissions === 'inherit' ? [] : key?.permissions || [],
+		expires_at: key?.expires_at ? new Date(key.expires_at) : undefined,
+	}) satisfies CreateOrUpdateAPIKeyFormValues
+
+export default function CreateOrUpdateAPIKeyForm({ onSubmit, editingKey }: Props) {
+	const { t } = useLocaleContext()
 	const { checkPermission } = useAppContext()
 
 	const form = useForm<CreateOrUpdateAPIKeyFormValues>({
-		defaultValues: {
-			name: '',
-			inherit: true,
-			explicit_permissions: [],
-		} satisfies CreateOrUpdateAPIKeyFormValues,
-		resolver: zodResolver(schema),
+		defaultValues: formDefaults(editingKey),
+		resolver: zodResolver(createSchema(t)),
 	})
 	const { errors } = useFormState({ control: form.control })
 
@@ -65,17 +71,14 @@ export default function CreateOrUpdateAPIKeyForm({ onSubmit }: Props) {
 			>
 				<RadioGroup.CardItem
 					value="inherit"
-					label="Inherit permissions"
-					description="The same permissions as your account"
+					label={t(getFieldKey('permissions.inherit.label'))}
+					description={t(getFieldKey('permissions.inherit.description'))}
 					isActive={inherit}
 				>
 					{inherit && (
 						<div className="pl-4">
 							<Alert level="warning">
-								<Alert.Content>
-									This API key will inherit your full permissions, which means it can do anything
-									you can do. Be careful with this setting
-								</Alert.Content>
+								<Alert.Content>{t(getKey('inheritDisclaimer'))}</Alert.Content>
 							</Alert>
 						</div>
 					)}
@@ -83,8 +86,8 @@ export default function CreateOrUpdateAPIKeyForm({ onSubmit }: Props) {
 
 				<RadioGroup.CardItem
 					value="explicit"
-					label="Explicit permissions"
-					description="Choose the permissions this key should have"
+					label={t(getFieldKey('permissions.explicit.label'))}
+					description={t(getFieldKey('permissions.explicit.description'))}
 					isActive={!inherit}
 				>
 					{!inherit && (
@@ -109,8 +112,8 @@ export default function CreateOrUpdateAPIKeyForm({ onSubmit }: Props) {
 			</RadioGroup>
 
 			<DatePicker
-				label="Expires at"
-				placeholder="Never"
+				label={t(getFieldKey('expires_at.label'))}
+				placeholder={t(getFieldKey('expires_at.placeholder'))}
 				selected={expiresAt}
 				onChange={handleDateChange}
 				minDate={dayjs().add(1, 'day').endOf('day').toDate()}
@@ -119,16 +122,21 @@ export default function CreateOrUpdateAPIKeyForm({ onSubmit }: Props) {
 	)
 }
 
-const schema = z.object({
-	name: z.string().min(1),
-	inherit: z.boolean(),
-	explicit_permissions: z.array(userPermissionSchema),
-	expires_at: z
-		.date()
-		.optional()
-		.refine((value) => value == undefined || value > new Date(), {
-			message: 'Expiration date must be in the future',
-		}),
-})
+const createSchema = (t: (key: string) => string) =>
+	z.object({
+		name: z.string().min(1),
+		inherit: z.boolean(),
+		explicit_permissions: z.array(userPermissionSchema),
+		expires_at: z
+			.date()
+			.optional()
+			.refine((value) => value == undefined || value > new Date(), {
+				message: t(getKey('validation.futureDate')),
+			}),
+	})
 
-export type CreateOrUpdateAPIKeyFormValues = z.infer<typeof schema>
+export type CreateOrUpdateAPIKeyFormValues = z.infer<ReturnType<typeof createSchema>>
+
+const LOCALE_BASE = 'createOrUpdateApiKey'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`
+const getFieldKey = (key: string) => `${LOCALE_BASE}.fields.${key}`

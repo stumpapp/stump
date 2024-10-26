@@ -1,4 +1,4 @@
-import { DirectoryListingFile } from '@stump/sdk'
+import { DirectoryListingFile, UploadConfig } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
 export type ExplorerLayout = 'grid' | 'table'
@@ -21,7 +21,7 @@ export type IExplorerContext = {
 	goForward: () => void
 	goBack: () => void
 	refetch: () => Promise<unknown>
-	uploadEnabled: boolean
+	uploadConfig?: UploadConfig
 }
 
 export const ExplorerContext = createContext<IExplorerContext | null>(null)

@@ -472,6 +472,11 @@
 				"zipped file",
 				"containing the folder which should be the series, with all the books inside"
 			],
+			"dropzone": {
+				"books": "Drag and drop books here",
+				"series": "Drag and drop a zip file here",
+				"alt": "Or click to browse your computer for books to upload"
+			},
 			"addedFiles": "Added files"
 		}
 	},
@@ -1740,6 +1745,7 @@
 		"edit": "Edit",
 		"update": "Update",
 		"upload": "Upload",
+		"uploading": "Uploading",
 		"unimplemented": "This functionality is not yet implemented! Check back later",
 		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
 		"logIn": "Log in",

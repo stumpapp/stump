@@ -38,6 +38,7 @@ async fn get_server_config(
 
 #[derive(Debug, Deserialize, Serialize, Type)]
 pub struct UploadConfig {
+	enabled: bool,
 	max_file_upload_size: usize,
 }
 
@@ -58,6 +59,7 @@ async fn get_upload_config(
 	req.enforce_permissions(&[UserPermission::UploadFile])?;
 
 	Ok(Json(UploadConfig {
+		enabled: ctx.config.enable_upload,
 		max_file_upload_size: ctx.config.max_file_upload_size,
 	}))
 }

@@ -1,5 +1,5 @@
 import { useDirectoryListing, useSDK } from '@stump/client'
-import { DirectoryListingFile } from '@stump/sdk'
+import { DirectoryListingFile, UploadConfig } from '@stump/sdk'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'
@@ -15,12 +15,12 @@ import { getBook } from './FileThumbnail'
 
 type Props = {
 	rootPath: string
-	uploadEnabled: boolean
+	uploadConfig?: UploadConfig
 }
 
 // TODO: refactor to match other explore scenes, e.g. sticky header + fixed footer + window scrolling
 
-export default function FileExplorerProvider({ rootPath, uploadEnabled }: Props) {
+export default function FileExplorerProvider({ rootPath, uploadConfig }: Props) {
 	const navigate = useNavigate()
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const { sdk } = useSDK()
@@ -77,7 +77,7 @@ export default function FileExplorerProvider({ rootPath, uploadEnabled }: Props)
 				refetch,
 				rootPath,
 				setLayout: changeLayout,
-				uploadEnabled,
+				uploadConfig,
 			}}
 		>
 			<div className="flex h-full flex-1 flex-col">

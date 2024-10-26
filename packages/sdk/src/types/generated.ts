@@ -496,7 +496,7 @@ export type SmartListMeta = { matched_books: number; matched_series: number; mat
 
 export type CreateOrUpdateSmartListView = ({ book_columns: ReactTableColumnSort[]; group_columns: ReactTableColumnSort[]; book_sorting: ReactTableGlobalSort[] | null; group_sorting: ReactTableGlobalSort[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string }
 
-export type UploadConfig = { max_file_upload_size: number }
+export type UploadConfig = { enabled: boolean; max_file_upload_size: number }
 
 /**
  * Represents the configuration of a Stump application. This struct is generated at startup

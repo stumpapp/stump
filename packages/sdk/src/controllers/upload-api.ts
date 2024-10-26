@@ -35,11 +35,16 @@ export type UploaderParams<T extends object> = T & {
 }
 
 export class UploadAPI extends APIBase {
+	/**
+	 * Fetch the upload configuration
+	 */
 	async config() {
 		const { data } = await this.axios.get<UploadConfig>('/config/upload')
 		return data
 	}
-
+	/**
+	 * Upload books to a library. This will return a 404 if upload is disabled for the server instance
+	 */
 	async uploadLibraryBooks({
 		library_id,
 		place_at,
@@ -58,11 +63,13 @@ export class UploadAPI extends APIBase {
 			onUploadProgress: ({ loaded, total }) => {
 				const progress = Math.round((loaded * 100) / (total || estimatedSize))
 				onProgress?.(progress)
-				console.log('progress event!', { loaded, progress, total })
 			},
 		})
 	}
 
+	/**
+	 * Upload a series to a library. This will return a 404 if upload is disabled for the server instance
+	 */
 	async uploadLibrarySeries({
 		library_id,
 		place_at,

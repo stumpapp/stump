@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useSDK } from '@stump/client'
+import { useMutation, useSDK } from '@stump/client'
 import {
 	Accordion,
 	Button,
@@ -10,9 +10,10 @@ import {
 	ProgressSpinner,
 	Text,
 } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { UploaderParams, UploadLibraryBooks, UploadLibrarySeries } from '@stump/sdk'
 import { Book, FolderArchive } from 'lucide-react'
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { FileRejection, useDropzone } from 'react-dropzone'
 import toast from 'react-hot-toast'
 
@@ -22,7 +23,6 @@ import { formatBytes } from '@/utils/format'
 
 import { useFileExplorerContext } from '../context'
 import UploadMenu from './UploadMenu'
-import { useLocaleContext } from '@stump/i18n'
 
 export default function UploadModal() {
 	const [uploadType, setUploadType] = useState<'books' | 'series'>()
@@ -32,11 +32,8 @@ export default function UploadModal() {
 
 	const { t } = useLocaleContext()
 	const { library } = useLibraryContext()
-	const { currentPath, refetch } = useFileExplorerContext()
+	const { currentPath, refetch, uploadConfig } = useFileExplorerContext()
 	const { sdk } = useSDK()
-	const { data: config } = useQuery([sdk.upload.keys.config], () => sdk.upload.config(), {
-		suspense: true,
-	})
 
 	const [uploadProgress, setUploadProgress] = useState(0)
 
@@ -60,14 +57,11 @@ export default function UploadModal() {
 	const isUploading = isUploadingBooks || isUploadingSeries
 
 	const handleDrop = useCallback((acceptedFiles: File[], rejections: FileRejection[]) => {
-		// TODO: check rejections and do sm
-		console.debug({ acceptedFiles, rejections })
-		acceptedFiles.forEach((file) => {
-			console.log(file.type) // Log the MIME type of the accepted file
-		})
-		rejections.forEach((file) => {
-			console.error(file.errors) // Log errors for rejected files
-		})
+		if (rejections.length) {
+			console.warn('Some files were rejected:', rejections)
+			toast.error('Some files were rejected. Please check the file type and size')
+		}
+
 		setFiles((prev) => [
 			...prev,
 			...acceptedFiles.filter((file) => !prev.some((f) => f.name === file.name)),
@@ -87,7 +81,7 @@ export default function UploadModal() {
 					}
 				: {}),
 		},
-		maxSize: config?.max_file_upload_size ?? 0,
+		maxSize: uploadConfig?.max_file_upload_size ?? 0,
 		multiple: uploadType === 'books',
 		onDrop: handleDrop,
 	})
@@ -98,7 +92,7 @@ export default function UploadModal() {
 		}
 	}
 
-	const onUploadClicked = async () => {
+	const onUploadClicked = useCallback(async () => {
 		// Return if files is empty
 		if (!files) {
 			return
@@ -127,7 +121,7 @@ export default function UploadModal() {
 			try {
 				// TODO - Better enforcement of single file
 				// We'll only take the first file for now
-				let file = files[0]
+				const file = files[0]
 				if (file == undefined) {
 					return
 				}
@@ -144,7 +138,7 @@ export default function UploadModal() {
 				toast.error('Failed to upload series')
 			}
 		}
-	}
+	}, [files, currentPath, library, uploadBooks, uploadSeries, uploadType, seriesDirName])
 
 	/**
 	 * An effect to reset the state whenever uploadType becomes falsy (unset)
@@ -172,7 +166,7 @@ export default function UploadModal() {
 
 					<div className="text-center">
 						<Heading size="xs" className="flex items-center justify-center space-x-1">
-							Uploading
+							{t('common.uploading')}{' '}
 							{uploadProgress > 0 && (
 								<span className="text-foreground-muted">({uploadProgress}%)</span>
 							)}
@@ -198,13 +192,9 @@ export default function UploadModal() {
 					</span>
 
 					<div className="text-center">
-						<Heading size="xs">
-							{displayedType === 'books'
-								? 'Drag and drop books here'
-								: 'Drag and drop a zip file here'}
-						</Heading>
+						<Heading size="xs">{t(getKey(`dropzone.${displayedType}`))}</Heading>
 						<Text variant="muted" size="sm">
-							Or click to browse your computer for books to upload
+							{t(getKey('dropzone.alt'))}
 						</Text>
 					</div>
 				</>
@@ -284,8 +274,10 @@ export default function UploadModal() {
 											key={file.name}
 											className="group flex items-center gap-x-2 rounded-lg border border-edge p-2"
 										>
-											<Text size="sm">{file.name}</Text>
-											<Text size="sm" variant="muted">
+											<Text size="sm" className="line-clamp-1">
+												{file.name}
+											</Text>
+											<Text size="sm" variant="muted" className="shrink-0">
 												{formatBytes(file.size)}
 											</Text>
 

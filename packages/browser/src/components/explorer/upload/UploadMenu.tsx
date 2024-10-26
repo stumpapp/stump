@@ -1,6 +1,5 @@
 import { Dropdown, IconButton, ToolTip } from '@stump/components'
 import { BookPlus, FolderPlus, Upload } from 'lucide-react'
-import React from 'react'
 
 type Props = {
 	onSelect: (type: 'books' | 'series') => void

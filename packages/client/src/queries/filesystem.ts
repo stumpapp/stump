@@ -13,10 +13,13 @@ export const usePrefetchFiles = ({ path }: PrefetchFileParams) => {
 
 	const prefetch = useCallback(
 		() =>
-			queryClient.prefetchQuery([sdk.filesystem.keys.listDirectory, path], () =>
-				sdk.filesystem.listDirectory(),
-			),
-		[sdk.filesystem, path],
+			Promise.all([
+				queryClient.prefetchQuery([sdk.filesystem.keys.listDirectory, path], () =>
+					sdk.filesystem.listDirectory(),
+				),
+				queryClient.prefetchQuery([sdk.upload.keys.config], () => sdk.upload.config()),
+			]),
+		[sdk, path],
 	)
 
 	return { prefetch }
@@ -27,10 +30,13 @@ export const usePrefetchLibraryFiles = ({ path }: PrefetchFileParams) => {
 
 	const prefetch = useCallback(
 		() =>
-			queryClient.prefetchQuery([sdk.filesystem.keys.listDirectory, path], () =>
-				sdk.filesystem.listDirectory(),
-			),
-		[sdk.filesystem, path],
+			Promise.all([
+				queryClient.prefetchQuery([sdk.filesystem.keys.listDirectory, path], () =>
+					sdk.filesystem.listDirectory(),
+				),
+				queryClient.prefetchQuery([sdk.upload.keys.config], () => sdk.upload.config()),
+			]),
+		[sdk, path],
 	)
 
 	return { prefetch }

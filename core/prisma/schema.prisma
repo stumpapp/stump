@@ -333,6 +333,8 @@ model RegisteredReadingDevice {
 
   active_reading_sessions   ActiveReadingSession[]
   finished_reading_sessions FinishedReadingSession[]
+
+  @@map("registered_reading_devices")
 }
 
 model ActiveReadingSession {

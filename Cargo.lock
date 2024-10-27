@@ -7743,6 +7743,7 @@ dependencies = [
  "cli",
  "futures-util",
  "hyper 0.14.27",
+ "infer",
  "jsonwebtoken",
  "linemux",
  "local-ip-address",

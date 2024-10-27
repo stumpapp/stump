@@ -12,7 +12,7 @@ pub struct FileUploadData {
 
 // TODO: it would be a great enhancement to allow hookup of a malware scanner here, e.g. clamav
 /// A helper function to validate and stream the bytes of an image upload from multipart form data, represented
-/// by [Multipart]. This function will return the content type of the uploaded image if it is valid.
+/// by [`Multipart`]. This function will return the content type of the uploaded image if it is valid.
 pub async fn validate_and_load_image(
 	upload: &mut Multipart,
 	max_size: Option<usize>,
@@ -21,7 +21,7 @@ pub async fn validate_and_load_image(
 }
 
 /// An internal helper function to validate and load a generic upload.
-/// The validator will load an image from multipart form data ([Multipart]) and check that it
+/// The validator will load an image from multipart form data ([`Multipart`]) and check that it
 /// is not larger than the `max_size`. Then, it will check that the `ContentType` information from
 /// the header and/or magic numbers in the first 5 bytes of the file match the expected type using
 /// the provided `is_valid_content_type` function.

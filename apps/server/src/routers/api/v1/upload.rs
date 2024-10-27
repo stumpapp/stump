@@ -1,21 +1,19 @@
-use std::{path, sync::Arc};
+use std::{
+	io::Read,
+	path::{self, PathBuf},
+	sync::Arc,
+};
 
 use axum::{
-	body::Bytes,
 	extract::{DefaultBodyLimit, Path, State},
 	middleware,
 	routing::post,
 	Extension, Json, Router,
 };
-use axum_typed_multipart::{FieldData, TryFromField, TryFromMultipart, TypedMultipart};
-use serde::{Deserialize, Serialize};
-use specta::Type;
-use stump_core::{
-	db::entity::{macros::library_path_with_options_select, User, UserPermission},
-	prisma::{library, PrismaClient},
-};
+use axum_typed_multipart::{FieldData, TryFromMultipart, TypedMultipart};
 use tempfile::NamedTempFile;
 use tokio::fs;
+use zip::read::ZipFile;
 
 use crate::{
 	config::state::AppState,
@@ -23,8 +21,12 @@ use crate::{
 	middleware::auth::{auth_middleware, RequestContext},
 	routers::api::filters::library_not_hidden_from_user_filter,
 };
+use stump_core::{
+	db::entity::{macros::library_path_with_options_select, User, UserPermission},
+	prisma::{library, PrismaClient},
+};
 
-pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
+pub fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.nest(
 			"/upload",
@@ -36,114 +38,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
-#[derive(Debug, Deserialize, Serialize, Type, TryFromField)]
-pub enum UploadStrategy {
-	#[serde(rename = "books")]
-	Books,
-	#[serde(rename = "series")]
-	Series,
-}
-
-// https://docs.rs/axum_typed_multipart/0.13.1/axum_typed_multipart/
-#[derive(TryFromMultipart)]
-struct UploadFileRequest {
-	strategy: UploadStrategy,
-	/// The path to place the files at. If not provided, the library path is used. If the
-	/// path does not exist, or exists outside the library path, the request will fail.
-	#[form_data(default)]
-	place_at: Option<String>, // PathBuf
-	files: Vec<FieldData<Bytes>>,
-}
-
-async fn testing_ground_upload(
-	Path(id): Path<String>,
-	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
-	TypedMultipart(UploadFileRequest {
-		strategy,
-		place_at,
-		files,
-	}): TypedMultipart<UploadFileRequest>,
-) -> APIResult<Json<()>> {
-	let user = req.user_and_enforce_permissions(&[
-		UserPermission::UploadFile,
-		UserPermission::ManageLibrary,
-	])?;
-	let client = &ctx.db;
-
-	// The form data is going to be loosely constructed by the js:
-	// const formData = new FormData();
-	// formData.append("files", files); // files is a File[]
-	// formData.append("strategy", strategy); // strategy is a string
-	// formData.append("place_at", place_at); // place_at is a Option<PathBuf>
-
-	let library = client
-		.library()
-		.find_first(vec![
-			library::id::equals(id),
-			library_not_hidden_from_user_filter(&user),
-		])
-		.select(library_path_with_options_select::select())
-		.exec()
-		.await?
-		.ok_or(APIError::NotFound(String::from("Library not found")))?;
-
-	let resolved_place_at = place_at.unwrap_or_else(|| library.path.clone());
-
-	// check the path exists
-	if fs::metadata(&resolved_place_at).await.is_err() {
-		return Err(APIError::BadRequest(String::from(
-			"The path does not exist",
-		)));
-	} else if !resolved_place_at.starts_with(&library.path) {
-		return Err(APIError::BadRequest(String::from(
-			"The path is outside the library",
-		)));
-	}
-
-	let place_at = path::PathBuf::from(resolved_place_at);
-
-	// TODO: handle the files
-
-	// Note: keeping this scrap in case the typed multipart doesn't work out
-	// let mut strategy: Option<UploadStrategy> = None;
-	// let mut place_at: Option<PathBuf> = None;
-	// let mut upload_fields = Vec::new();
-
-	// while let Some(field) = upload.next_field().await? {
-	// 	let name = field.name().unwrap_or_default();
-
-	// 	match field.content_type() {
-	// 		Some(mime) if name == "strategy" && mime == "text/plain" => {
-	// 			let bytes = field.bytes().await?;
-	// 			let strategy_str = std::str::from_utf8(bytes.as_ref()).map_err(|_| {
-	// 				APIError::BadRequest(String::from("Invalid strategy"))
-	// 			})?;
-	// 			strategy = match strategy_str {
-	// 				"books" => Some(UploadStrategy::Books),
-	// 				"series" => Some(UploadStrategy::Series),
-	// 				_ => None,
-	// 			};
-	// 		},
-	// 		Some(mime) if name == "place_at" && mime == "text/plain" => {
-	// 			let bytes = field.bytes().await?;
-	// 			let place_at_str = std::str::from_utf8(bytes.as_ref()).map_err(|_| {
-	// 				APIError::BadRequest(String::from("Invalid place_at"))
-	// 			})?;
-	// 			place_at = Some(PathBuf::from(place_at_str));
-	// 		},
-	// 		_ => {
-	// 			upload_fields.push(field);
-	// 		},
-	// 	}
-	// }
-
-	Ok(Json(()))
-}
-
-// ///////////////////////////////////////////////
-// Alternative proposal for handling uploads below
-// ///////////////////////////////////////////////
+type LibraryData = library_path_with_options_select::Data;
 
 #[derive(TryFromMultipart)]
 struct UploadBooksRequest {
@@ -181,33 +76,16 @@ async fn upload_books(
 	let client = &ctx.db;
 	let library = get_library(client, id, &user).await?;
 
-	// Validate the placement path parameters, error otherwise
-	// This is an important security check.
-	if !is_subpath_secure(&books_request.place_at) {
-		return Err(APIError::BadRequest(
-			"Invalid upload path placement parameters".to_string(),
-		));
-	}
+	// Validate and path that uploads will be placed at, account for possible full path
+	let placement_path = get_books_path(&books_request, &library)?;
 
-	// Get path that uploads will be placed at, account for possible full path
-	let placement_path = if books_request.place_at.starts_with(&library.path) {
-		path::PathBuf::from(&books_request.place_at)
-	} else {
-		path::Path::new(&library.path).join(books_request.place_at)
-	};
-
-	// TODO(upload): async-ify this
 	// Check that it is a directory and already exists
-	if !placement_path.is_dir() {
+	if !fs::metadata(&placement_path).await?.is_dir() {
 		return Err(APIError::BadRequest(
 			"Book uploads must be placed at an existing directory.".to_string(),
 		));
 	}
 
-	// TODO - Evaluate if this is the best apporoach to uploads
-	// This pattern, including the use of `NamedTempFile` from the tempfile crate, is taken from
-	// the documentation for axum_typed_multipart. Is this the best approach here? Some testing
-	// is needed to see how large uploads are handled.
 	for f in books_request.files {
 		let file_name = f.metadata.file_name.as_ref().ok_or(APIError::BadRequest(
 			"Uploaded files must have filenames.".to_string(),
@@ -255,33 +133,16 @@ async fn upload_series(
 	])?;
 
 	// Validate the provided file, exit early on failure.
-	validate_series_upload(&series_request)?;
+	validate_series_upload_zip(&series_request)?;
 
 	let client = &ctx.db;
 	let library = get_library(client, id, &user).await?;
 
-	// Validate the placement path parameters, error otherwise
-	if !is_subpath_secure(&series_request.place_at) {
-		return Err(APIError::BadRequest(
-			"Invalid upload path placement parameters".to_string(),
-		));
-	}
-	// Validate the series directory name - the same traversal concerns apply here
-	if !is_subpath_secure(&series_request.series_dir_name) {
-		return Err(APIError::BadRequest(
-			"Invalid series directory name".to_string(),
-		));
-	}
+	// Validate the placement path parameters and create the full path, error otherwise
+	let placement_path = get_series_path(&series_request, &library)?;
 
-	// Get path that the series upload will be placed at, accounting for possible full path
-	let placement_path = if series_request.place_at.starts_with(&library.path) {
-		path::PathBuf::from(&series_request.place_at)
-			.join(&series_request.series_dir_name)
-	} else {
-		path::Path::new(&library.path)
-			.join(series_request.place_at)
-			.join(&series_request.series_dir_name)
-	};
+	// Validate the contents of the zip file
+	validate_zip_contents(&series_request, &placement_path, false)?;
 
 	// Create directory if necessary
 	if !placement_path.exists() {
@@ -301,6 +162,7 @@ async fn upload_series(
 	Ok(Json(()))
 }
 
+/// A helper function to copy a tempfile from a multipart to a provided path
 async fn copy_tempfile_to_location(
 	field_data: FieldData<NamedTempFile>,
 	target_path: &path::Path,
@@ -313,21 +175,130 @@ async fn copy_tempfile_to_location(
 		)));
 	}
 
-	// Open the target file
-	let mut target_file = fs::File::create(target_path).await?;
 	// Get a tokio::fs::File for the temporary file
-	let mut temp_file = fs::File::from_std(field_data.contents.as_file().try_clone()?);
+	let mut temp_file = fs::File::from_std(field_data.contents.into_file());
 
 	// Copy the bytes to the target location
+	let mut target_file = fs::File::create(target_path).await?;
 	tokio::io::copy(&mut temp_file, &mut target_file).await?;
 
 	Ok(())
 }
 
-fn validate_series_upload(series_request: &UploadSeriesRequest) -> APIResult<()> {
+// TODO - Describe
+fn validate_zip_contents(
+	series_request: &UploadSeriesRequest,
+	series_path: &path::Path,
+	allow_overwrite: bool,
+) -> APIResult<()> {
+	let temp_file = series_request.file.contents.as_file().try_clone()?;
+	let mut zip_archive = zip::ZipArchive::new(temp_file).map_err(|e| {
+		APIError::InternalServerError(format!("Error opening zip archive: {e}"))
+	})?;
+
+	// Loop over each file in the zip archive and test them
+	for i in 0..zip_archive.len() {
+		let mut zip_file = zip_archive.by_index(i).map_err(|e| {
+			APIError::InternalServerError(format!(
+				"Error accessing file in series zip: {e}"
+			))
+		})?;
+
+		// Skip directories
+		if zip_file.is_dir() {
+			continue;
+		}
+
+		// Using `enclosed_name` also validates against path traversal attacks:
+		// https://docs.rs/zip/1.1.3/zip/read/struct.ZipFile.html#method.enclosed_name
+		let Some(enclosed_path) = zip_file.enclosed_name() else {
+			return Err(APIError::InternalServerError(
+				"Series zip contained a malformed path".to_string(),
+			));
+		};
+		// Get the path that the archive file will be extracted to
+		let extraction_path = series_path.join(enclosed_path);
+
+		// Error if the file already exists and we aren't allowing overwrites
+		if extraction_path.exists() && !allow_overwrite {
+			return Err(APIError::InternalServerError(format!(
+				"Unable to extract zip contents to {extraction_path:?}, overwrites are disabled"
+			)));
+		}
+
+		validate_zip_file(&mut zip_file)?;
+	}
+
+	Ok(())
+}
+
+fn validate_zip_file(zip_file: &mut ZipFile) -> APIResult<()> {
+	/// Any file extension not in this list will trigger an error
+	const ALLOWED_EXTENSIONS: &[&str] = &["cbr", "cbz", "epub", "pdf"];
+
+	/// Any inferred mime type not in this list will trigger an error
+	const ALLOWED_TYPES: &[&str] = &[
+		"application/zip",
+		"application/vnd.comicbook+zip",
+		"application/vnd.comicbook-rar",
+		"application/epub+zip",
+		"application/pdf",
+	];
+
+	let Some(enclosed_path) = zip_file.enclosed_name() else {
+		return Err(APIError::InternalServerError(
+			"Series zip contained a malformed path".to_string(),
+		));
+	};
+
+	let extension = enclosed_path
+		.extension()
+		.and_then(|ext| ext.to_str())
+		.map(str::to_ascii_lowercase)
+		.ok_or_else(|| {
+			APIError::InternalServerError(format!(
+				"Expected zip contents {enclosed_path:?} to have an extension."
+			))
+		})?;
+
+	if !ALLOWED_EXTENSIONS.contains(&extension.as_str()) {
+		return Err(APIError::InternalServerError(format!(
+			"Zip contents {enclosed_path:?} has a disallowed extension, permitted extensions are: {ALLOWED_EXTENSIONS:?}"
+		)));
+	}
+
+	// Read first five bytes from which to infer content type
+	let mut magic_bytes = [0u8; 5];
+	zip_file.read_exact(&mut magic_bytes).map_err(|_| {
+		APIError::InternalServerError(
+			"Failed to read first five bytes of zip file.".to_string(),
+		)
+	})?;
+
+	// TODO - Evaluate this. How often might valid uploads still fail due to infer?
+	let inferred_type = infer::get(&magic_bytes)
+		.ok_or(APIError::InternalServerError(format!(
+			"Unable to infer type for zip contents {enclosed_path:?}"
+		)))?
+		.mime_type();
+
+	if !ALLOWED_TYPES.contains(&inferred_type) {
+		return Err(APIError::InternalServerError(format!(
+			"Zip contents {enclosed_path:?} has a disallowed mime type: {inferred_type}, permitted types are: {ALLOWED_TYPES:?}"
+		)));
+	}
+
+	Ok(())
+}
+
+fn validate_series_upload_zip(series_request: &UploadSeriesRequest) -> APIResult<()> {
+	/// Any content type for a series upload that is not in this list will trigger an error.
+	const PERMITTED_CONTENT_TYPES: &[&str] =
+		&["application/zip", "application/x-zip-compressed"];
+
 	// Check extension
 	if let Some(file_name) = &series_request.file.metadata.file_name {
-		if !file_name.ends_with(".zip") {
+		if !file_name.to_ascii_lowercase().ends_with(".zip") {
 			return Err(APIError::BadRequest(format!(
 				"Invalid file extension: {file_name}. Only zip files are allowed."
 			)));
@@ -339,9 +310,6 @@ fn validate_series_upload(series_request: &UploadSeriesRequest) -> APIResult<()>
 	}
 
 	// Check content type
-	const PERMITTED_CONTENT_TYPES: &[&str] =
-		&["application/zip", "application/x-zip-compressed"];
-
 	if let Some(content_type) = &series_request.file.metadata.content_type {
 		if !PERMITTED_CONTENT_TYPES.contains(&content_type.as_str()) {
 			return Err(APIError::BadRequest(format!(
@@ -372,7 +340,7 @@ fn is_subpath_secure(params: &str) -> bool {
 	let path = path::Path::new(params);
 
 	for component in path.components() {
-		if let std::path::Component::ParentDir = component {
+		if component == std::path::Component::ParentDir {
 			return false;
 		}
 	}
@@ -380,21 +348,77 @@ fn is_subpath_secure(params: &str) -> bool {
 	true
 }
 
-/// Helper function to get prisma libraries by ID, respecting user filters.
+/// Helper function to get prisma libraries by ID, respecting user filters and returning
+/// only the path and options data.
 async fn get_library(
 	client: &Arc<PrismaClient>,
 	library_id: String,
 	user: &User,
-) -> APIResult<library::Data> {
+) -> APIResult<LibraryData> {
 	client
 		.library()
 		.find_first(vec![
 			library::id::equals(library_id),
 			library_not_hidden_from_user_filter(user),
 		])
+		.select(library_path_with_options_select::select())
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound(String::from("Library not found")))
+}
+
+/// A helper function to generate the path at which books should be placed
+/// given an input [`UploadBooksRequest`] and library.
+fn get_books_path(
+	books_request: &UploadBooksRequest,
+	library: &LibraryData,
+) -> APIResult<PathBuf> {
+	// Validate the placement path parameters, error otherwise
+	// This is an important security check.
+	if !is_subpath_secure(&books_request.place_at) {
+		return Err(APIError::BadRequest(
+			"Invalid upload path placement parameters".to_string(),
+		));
+	}
+	// Get path that uploads will be placed at, account for possible full path
+	let placement_path = if books_request.place_at.starts_with(&library.path) {
+		path::PathBuf::from(&books_request.place_at)
+	} else {
+		path::Path::new(&library.path).join(&books_request.place_at)
+	};
+
+	Ok(placement_path)
+}
+
+/// A helper function to generate the path at which a series zip should be placed
+/// given an input [`UploadSeriesRequest`] and library.
+fn get_series_path(
+	series_request: &UploadSeriesRequest,
+	library: &LibraryData,
+) -> APIResult<PathBuf> {
+	if !is_subpath_secure(&series_request.place_at) {
+		return Err(APIError::BadRequest(
+			"Invalid upload path placement parameters".to_string(),
+		));
+	}
+	// Validate the series directory name - the same traversal concerns apply here
+	if !is_subpath_secure(&series_request.series_dir_name) {
+		return Err(APIError::BadRequest(
+			"Invalid series directory name".to_string(),
+		));
+	}
+
+	// Get path that the series upload will be placed at, accounting for possible full path
+	let placement_path = if series_request.place_at.starts_with(&library.path) {
+		path::PathBuf::from(&series_request.place_at)
+			.join(&series_request.series_dir_name)
+	} else {
+		path::Path::new(&library.path)
+			.join(&series_request.place_at)
+			.join(&series_request.series_dir_name)
+	};
+
+	Ok(placement_path)
 }
 
 #[cfg(test)]

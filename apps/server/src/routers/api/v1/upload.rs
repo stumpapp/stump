@@ -23,6 +23,7 @@ use crate::{
 };
 use stump_core::{
 	db::entity::{macros::library_path_with_options_select, User, UserPermission},
+	filesystem::scanner::LibraryScanJob,
 	prisma::{library, PrismaClient},
 };
 
@@ -74,7 +75,7 @@ async fn upload_books(
 	])?;
 
 	let client = &ctx.db;
-	let library = get_library(client, id, &user).await?;
+	let library = get_library(client, &id, &user).await?;
 
 	// Validate and path that uploads will be placed at, account for possible full path
 	let placement_path = get_books_path(&books_request, &library)?;
@@ -94,6 +95,15 @@ async fn upload_books(
 
 		copy_tempfile_to_location(f, &target_path).await?;
 	}
+
+	// Start a scan of the library
+	ctx.enqueue_job(LibraryScanJob::new(id, library.path))
+		.map_err(|e| {
+			tracing::error!(?e, "Failed to enqueue library scan job");
+			APIError::InternalServerError(
+				"Failed to enqueue library scan job".to_string(),
+			)
+		})?;
 
 	Ok(Json(()))
 }
@@ -133,16 +143,16 @@ async fn upload_series(
 	])?;
 
 	// Validate the provided file, exit early on failure.
-	validate_series_upload_zip(&series_request)?;
+	validate_series_upload(&series_request)?;
 
 	let client = &ctx.db;
-	let library = get_library(client, id, &user).await?;
+	let library = get_library(client, &id, &user).await?;
 
 	// Validate the placement path parameters and create the full path, error otherwise
 	let placement_path = get_series_path(&series_request, &library)?;
 
 	// Validate the contents of the zip file
-	validate_zip_contents(&series_request, &placement_path, false)?;
+	validate_series_upload_contents(&series_request, &placement_path, false)?;
 
 	// Create directory if necessary
 	if !placement_path.exists() {
@@ -158,6 +168,15 @@ async fn upload_series(
 	zip_archive.extract(placement_path).map_err(|e| {
 		APIError::InternalServerError(format!("Error unpacking zip archive: {e}"))
 	})?;
+
+	// Start a scan of the library
+	ctx.enqueue_job(LibraryScanJob::new(id, library.path))
+		.map_err(|e| {
+			tracing::error!(?e, "Failed to enqueue library scan job");
+			APIError::InternalServerError(
+				"Failed to enqueue library scan job".to_string(),
+			)
+		})?;
 
 	Ok(Json(()))
 }
@@ -185,8 +204,47 @@ async fn copy_tempfile_to_location(
 	Ok(())
 }
 
-// TODO - Describe
-fn validate_zip_contents(
+/// A helper function to validate the file used for a series upload, this function
+/// will return an error if the file is not the appropriate file type.
+fn validate_series_upload(series_request: &UploadSeriesRequest) -> APIResult<()> {
+	/// Any content type for a series upload that is not in this list will trigger an error.
+	const PERMITTED_CONTENT_TYPES: &[&str] =
+		&["application/zip", "application/x-zip-compressed"];
+
+	// Check extension
+	if let Some(file_name) = &series_request.file.metadata.file_name {
+		if !file_name.to_ascii_lowercase().ends_with(".zip") {
+			return Err(APIError::BadRequest(format!(
+				"Invalid file extension: {file_name}. Only zip files are allowed."
+			)));
+		}
+	} else {
+		return Err(APIError::BadRequest(
+			"Invalid file provided, expected file to have a filename.".to_string(),
+		));
+	}
+
+	// Check content type
+	if let Some(content_type) = &series_request.file.metadata.content_type {
+		if !PERMITTED_CONTENT_TYPES.contains(&content_type.as_str()) {
+			return Err(APIError::BadRequest(format!(
+				"Invalid content-type: {content_type:?}. Only zip files are allowed."
+			)));
+		}
+	} else {
+		return Err(APIError::BadRequest(
+			"Invalid content-type, expected uploaded series to have a content-type."
+				.to_string(),
+		));
+	}
+
+	Ok(())
+}
+
+/// Validate the contents of the series upload file. This function will return an error
+/// if the contents of the uploaded archive do not match the permitted file types or if
+/// the archive contains malformed paths.
+fn validate_series_upload_contents(
 	series_request: &UploadSeriesRequest,
 	series_path: &path::Path,
 	allow_overwrite: bool,
@@ -232,9 +290,15 @@ fn validate_zip_contents(
 	Ok(())
 }
 
+/// Validate a file within a series upload archive. This function checks the file against
+/// allowed file types based on extension as well as magic byte inference. If either check
+/// fails then an error is returned.
 fn validate_zip_file(zip_file: &mut ZipFile) -> APIResult<()> {
 	/// Any file extension not in this list will trigger an error
-	const ALLOWED_EXTENSIONS: &[&str] = &["cbr", "cbz", "epub", "pdf"];
+	const ALLOWED_EXTENSIONS: &[&str] = &[
+		"cbr", "cbz", "epub", "pdf", "xml", "json", "png", "jpg", "jpeg", "webp", "gif",
+		"heif", "jxl", "avif",
+	];
 
 	/// Any inferred mime type not in this list will trigger an error
 	const ALLOWED_TYPES: &[&str] = &[
@@ -243,6 +307,15 @@ fn validate_zip_file(zip_file: &mut ZipFile) -> APIResult<()> {
 		"application/vnd.comicbook-rar",
 		"application/epub+zip",
 		"application/pdf",
+		"application/xml",
+		"application/json",
+		"image/png",
+		"image/jpeg",
+		"image/webp",
+		"image/gif",
+		"image/heif",
+		"image/jxl",
+		"image/avif",
 	];
 
 	let Some(enclosed_path) = zip_file.enclosed_name() else {
@@ -291,41 +364,6 @@ fn validate_zip_file(zip_file: &mut ZipFile) -> APIResult<()> {
 	Ok(())
 }
 
-fn validate_series_upload_zip(series_request: &UploadSeriesRequest) -> APIResult<()> {
-	/// Any content type for a series upload that is not in this list will trigger an error.
-	const PERMITTED_CONTENT_TYPES: &[&str] =
-		&["application/zip", "application/x-zip-compressed"];
-
-	// Check extension
-	if let Some(file_name) = &series_request.file.metadata.file_name {
-		if !file_name.to_ascii_lowercase().ends_with(".zip") {
-			return Err(APIError::BadRequest(format!(
-				"Invalid file extension: {file_name}. Only zip files are allowed."
-			)));
-		}
-	} else {
-		return Err(APIError::BadRequest(
-			"Invalid file provided, expected file to have a filename.".to_string(),
-		));
-	}
-
-	// Check content type
-	if let Some(content_type) = &series_request.file.metadata.content_type {
-		if !PERMITTED_CONTENT_TYPES.contains(&content_type.as_str()) {
-			return Err(APIError::BadRequest(format!(
-				"Invalid content-type: {content_type:?}. Only zip files are allowed."
-			)));
-		}
-	} else {
-		return Err(APIError::BadRequest(
-			"Invalid content-type, expected uploaded series to have a content-type."
-				.to_string(),
-		));
-	}
-
-	Ok(())
-}
-
 /// Returns `true` if a parameter specifying a path from another path contains no parent directory components.
 ///
 /// Upload paths for books are recieved as a path offset, where the actual path is constructed as
@@ -352,13 +390,13 @@ fn is_subpath_secure(params: &str) -> bool {
 /// only the path and options data.
 async fn get_library(
 	client: &Arc<PrismaClient>,
-	library_id: String,
+	library_id: &str,
 	user: &User,
 ) -> APIResult<LibraryData> {
 	client
 		.library()
 		.find_first(vec![
-			library::id::equals(library_id),
+			library::id::equals(library_id.to_string()),
 			library_not_hidden_from_user_filter(user),
 		])
 		.select(library_path_with_options_select::select())

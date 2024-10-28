@@ -1,17 +1,16 @@
-import { useQuery, useSDK } from '@stump/client'
+import { useUploadConfig } from '@stump/client'
 
 import { FileExplorer } from '@/components/explorer'
 
 import { useSeriesContext } from '../../context'
+import { useAppContext } from '@/context'
 
 export default function SeriesExplorerScene() {
 	const {
 		series: { path },
 	} = useSeriesContext()
-	const { sdk } = useSDK()
-	const { data: uploadConfig } = useQuery([sdk.upload.keys.config], () => sdk.upload.config(), {
-		suspense: true,
-	})
+	const { checkPermission } = useAppContext()
+	const { uploadConfig } = useUploadConfig({ enabled: checkPermission('file:upload') })
 
 	return (
 		<div className="flex flex-1">

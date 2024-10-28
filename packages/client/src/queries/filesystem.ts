@@ -6,9 +6,10 @@ import { useSDK } from '../sdk'
 
 type PrefetchFileParams = {
 	path: string
+	fetchConfig?: boolean
 }
 
-export const usePrefetchFiles = ({ path }: PrefetchFileParams) => {
+export const usePrefetchFiles = ({ path, fetchConfig }: PrefetchFileParams) => {
 	const { sdk } = useSDK()
 
 	const prefetch = useCallback(
@@ -17,15 +18,17 @@ export const usePrefetchFiles = ({ path }: PrefetchFileParams) => {
 				queryClient.prefetchQuery([sdk.filesystem.keys.listDirectory, path], () =>
 					sdk.filesystem.listDirectory(),
 				),
-				queryClient.prefetchQuery([sdk.upload.keys.config], () => sdk.upload.config()),
+				...(fetchConfig
+					? [queryClient.prefetchQuery([sdk.upload.keys.config], () => sdk.upload.config())]
+					: []),
 			]),
-		[sdk, path],
+		[sdk, path, fetchConfig],
 	)
 
 	return { prefetch }
 }
 
-export const usePrefetchLibraryFiles = ({ path }: PrefetchFileParams) => {
+export const usePrefetchLibraryFiles = ({ path, fetchConfig }: PrefetchFileParams) => {
 	const { sdk } = useSDK()
 
 	const prefetch = useCallback(
@@ -34,7 +37,9 @@ export const usePrefetchLibraryFiles = ({ path }: PrefetchFileParams) => {
 				queryClient.prefetchQuery([sdk.filesystem.keys.listDirectory, path], () =>
 					sdk.filesystem.listDirectory(),
 				),
-				queryClient.prefetchQuery([sdk.upload.keys.config], () => sdk.upload.config()),
+				...(fetchConfig
+					? [queryClient.prefetchQuery([sdk.upload.keys.config], () => sdk.upload.config())]
+					: []),
 			]),
 		[sdk, path],
 	)
@@ -247,4 +252,21 @@ export function useDirectoryListing({
 		refetch,
 		setPath,
 	}
+}
+
+type UploadConfigQueryParams = {
+	enabled?: boolean
+}
+export const useUploadConfig = ({ enabled }: UploadConfigQueryParams) => {
+	const { sdk } = useSDK()
+	const { data: uploadConfig, ...restRet } = useQuery(
+		[sdk.upload.keys.config],
+		() => sdk.upload.config(),
+		{
+			suspense: true,
+			enabled,
+		},
+	)
+
+	return { uploadConfig, ...restRet }
 }

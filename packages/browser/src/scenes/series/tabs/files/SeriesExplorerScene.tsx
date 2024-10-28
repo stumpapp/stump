@@ -1,9 +1,9 @@
 import { useUploadConfig } from '@stump/client'
 
 import { FileExplorer } from '@/components/explorer'
+import { useAppContext } from '@/context'
 
 import { useSeriesContext } from '../../context'
-import { useAppContext } from '@/context'
 
 export default function SeriesExplorerScene() {
 	const {

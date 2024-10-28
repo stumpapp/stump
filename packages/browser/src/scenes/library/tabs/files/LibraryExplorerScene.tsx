@@ -1,9 +1,9 @@
 import { useUploadConfig } from '@stump/client'
 
 import { FileExplorer } from '@/components/explorer'
+import { useAppContext } from '@/context'
 
 import { useLibraryContext } from '../../context'
-import { useAppContext } from '@/context'
 
 export default function LibraryExplorerScene() {
 	const { library } = useLibraryContext()

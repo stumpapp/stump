@@ -7,7 +7,6 @@ use crate::errors::{APIError, APIResult};
 pub struct FileUploadData {
 	pub content_type: ContentType,
 	pub bytes: Vec<u8>,
-	pub name: String,
 }
 
 // TODO: it would be a great enhancement to allow hookup of a malware scanner here, e.g. clamav

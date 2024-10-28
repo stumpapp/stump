@@ -78,7 +78,6 @@ async fn validate_and_load_upload(
 	Ok(FileUploadData {
 		content_type,
 		bytes,
-		name,
 	})
 }
 

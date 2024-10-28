@@ -39,7 +39,7 @@ async fn validate_and_load_upload(
 	let raw_content_type = field.content_type().map(ContentType::from);
 
 	// Load bytes of uploaded file
-	let (name, bytes, file_size) = load_field_up_to_size(field, max_size).await?;
+	let (_name, bytes, file_size) = load_field_up_to_size(field, max_size).await?;
 
 	// Use first 5 bytes to infer content type.
 	// See: https://en.wikipedia.org/wiki/List_of_file_signatures

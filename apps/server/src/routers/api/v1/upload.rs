@@ -366,9 +366,9 @@ fn validate_zip_file(zip_file: &mut ZipFile) -> APIResult<()> {
 
 /// Returns `true` if a parameter specifying a path from another path contains no parent directory components.
 ///
-/// Upload paths for books are recieved as a path offset, where the actual path is constructed as
+/// Upload paths for books are received as a path offset, where the actual path is constructed as
 /// `{library_path}/{offset}`. This could be a security vulnerability if someone sent an upload with
-/// a path containing a `..` to push the path back to the parent directoy. This could be used to escape
+/// a path containing a `..` to push the path back to the parent directory. This could be used to escape
 /// the library and upload things elsewhere. It also means that accepting only paths that start with the
 /// library path isn't sufficient.
 ///

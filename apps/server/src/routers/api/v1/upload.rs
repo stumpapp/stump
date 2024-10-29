@@ -88,6 +88,8 @@ async fn upload_books(
 	}
 
 	for f in books_request.files {
+		validate_book_file(&f)?;
+
 		let file_name = f.metadata.file_name.as_ref().ok_or(APIError::BadRequest(
 			"Uploaded files must have filenames.".to_string(),
 		))?;
@@ -206,6 +208,65 @@ async fn copy_tempfile_to_location(
 	// Copy the bytes to the target location
 	let mut target_file = fs::File::create(target_path).await?;
 	tokio::io::copy(&mut temp_file, &mut target_file).await?;
+
+	Ok(())
+}
+
+/// A helper function to validate the file used for a books upload, this function
+/// will return an error if the file is not the appropriate file type.
+fn validate_book_file(f: &FieldData<NamedTempFile>) -> APIResult<()> {
+	/// Any file extension not in this list will trigger an error
+	const ALLOWED_EXTENSIONS: &[&str] = &["cbr", "cbz", "epub", "pdf"];
+
+	/// Any inferred mime type not in this list will trigger an error
+	const ALLOWED_TYPES: &[&str] = &[
+		"application/zip",
+		"application/vnd.comicbook+zip",
+		"application/vnd.comicbook-rar",
+		"application/epub+zip",
+		"application/pdf",
+	];
+
+	let file_name = f.metadata.file_name.as_ref().ok_or(APIError::BadRequest(
+		"Uploaded files must have filenames.".to_string(),
+	))?;
+
+	let extension = path::Path::new(file_name)
+		.extension()
+		.and_then(|ext| ext.to_str())
+		.map(str::to_ascii_lowercase)
+		.ok_or_else(|| {
+			APIError::BadRequest(format!(
+				"Expected file {file_name} to have an extension."
+			))
+		})?;
+
+	if !ALLOWED_EXTENSIONS.contains(&extension.as_str()) {
+		return Err(APIError::BadRequest(format!(
+			"File {file_name} has a disallowed extension, permitted extensions are: {ALLOWED_EXTENSIONS:?}"
+		)));
+	}
+
+	// Read first five bytes from which to infer content type
+	let mut f_read = f.contents.reopen()?;
+	let mut magic_bytes = [0u8; 5];
+	f_read.read_exact(&mut magic_bytes).map_err(|_| {
+		APIError::InternalServerError(
+			"Failed to read first five bytes of zip file.".to_string(),
+		)
+	})?;
+
+	let inferred_type = infer::get(&magic_bytes)
+		.ok_or(APIError::InternalServerError(format!(
+			"Unable to infer type for file {file_name}"
+		)))?
+		.mime_type();
+
+	if !ALLOWED_TYPES.contains(&inferred_type) {
+		return Err(APIError::InternalServerError(format!(
+			"File {file_name} has a disallowed mime type: {inferred_type}, permitted types are: {ALLOWED_TYPES:?}"
+		)));
+	}
 
 	Ok(())
 }

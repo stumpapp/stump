@@ -113,13 +113,12 @@ export default function UploadModal() {
 				toast.error('Failed to upload book(s)')
 			}
 		} else {
-			// TODO - Series upload
 			if (seriesDirName == undefined) {
 				return
 			}
 
 			try {
-				// TODO - Better enforcement of single file
+				// TODO(upload) - Better enforcement of single file
 				// We'll only take the first file for now
 				const file = files[0]
 				if (file == undefined) {

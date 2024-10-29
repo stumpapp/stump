@@ -155,8 +155,14 @@ async fn upload_series(
 	validate_series_upload_contents(&series_request, &placement_path, false)?;
 
 	// Create directory if necessary
-	if !placement_path.exists() {
-		tokio::fs::create_dir_all(&placement_path).await?;
+	if let Err(e) = fs::metadata(&placement_path).await {
+		if e.kind() == tokio::io::ErrorKind::NotFound {
+			fs::create_dir_all(&placement_path).await?;
+		} else {
+			return Err(APIError::InternalServerError(format!(
+				"Error accessing directory {placement_path:?}: {e}"
+			)));
+		}
 	}
 
 	// Get a zip crate file handle to the temporary file
@@ -329,13 +335,13 @@ fn validate_zip_file(zip_file: &mut ZipFile) -> APIResult<()> {
 		.and_then(|ext| ext.to_str())
 		.map(str::to_ascii_lowercase)
 		.ok_or_else(|| {
-			APIError::InternalServerError(format!(
+			APIError::BadRequest(format!(
 				"Expected zip contents {enclosed_path:?} to have an extension."
 			))
 		})?;
 
 	if !ALLOWED_EXTENSIONS.contains(&extension.as_str()) {
-		return Err(APIError::InternalServerError(format!(
+		return Err(APIError::BadRequest(format!(
 			"Zip contents {enclosed_path:?} has a disallowed extension, permitted extensions are: {ALLOWED_EXTENSIONS:?}"
 		)));
 	}
@@ -348,7 +354,6 @@ fn validate_zip_file(zip_file: &mut ZipFile) -> APIResult<()> {
 		)
 	})?;
 
-	// TODO - Evaluate this. How often might valid uploads still fail due to infer?
 	let inferred_type = infer::get(&magic_bytes)
 		.ok_or(APIError::InternalServerError(format!(
 			"Unable to infer type for zip contents {enclosed_path:?}"
@@ -461,7 +466,7 @@ fn get_series_path(
 
 #[cfg(test)]
 mod tests {
-	use crate::routers::api::v1::upload::is_subpath_secure;
+	use super::*;
 
 	#[test]
 	fn test_is_subpath_secure() {

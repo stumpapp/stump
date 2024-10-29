@@ -30,7 +30,6 @@ async fn get_server_config(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<StumpConfig>> {
-	// TODO - Should user.is_server_owner be used instead?
 	req.enforce_permissions(&[UserPermission::ManageServer])?;
 
 	Ok(Json(StumpConfig::clone(&ctx.config)))

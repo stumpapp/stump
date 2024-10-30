@@ -96,6 +96,7 @@ impl JobExt for SeriesScanJob {
 		ctx: &WorkerCtx,
 	) -> Result<WorkingState<Self::Output, Self::Task>, JobError> {
 		let mut output = Self::Output::default();
+		let path_buf = PathBuf::from(self.path.clone());
 		let library = ctx
 			.db
 			.library()
@@ -117,7 +118,13 @@ impl JobExt for SeriesScanJob {
 		// If the library is not collection-priority, each subdirectory is its own series.
 		// Therefore, we only scan one level deep when walking a series whose library is not
 		// collection-priority to avoid scanning duplicates which are part of other series
-		let max_depth = (!library_config.is_collection_based()).then_some(1);
+		let mut max_depth = (!library_config.is_collection_based()).then_some(1);
+		if path_buf == PathBuf::from(&library.path) {
+			// The exception is when the series "is" the libray (i.e. the root of the library contains
+			// books). This is kind of an anti-pattern wrt collection-priority, but it needs to be handled
+			// in order to avoid the scanner re-scanning the entire library...
+			max_depth = Some(1);
+		}
 
 		self.options = Some(library_config);
 

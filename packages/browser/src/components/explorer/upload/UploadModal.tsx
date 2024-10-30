@@ -18,7 +18,7 @@ import { FileRejection, useDropzone } from 'react-dropzone'
 import toast from 'react-hot-toast'
 
 import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
-import { useLibraryContext } from '@/scenes/library/context'
+import { useSeriesContextSafe } from '@/scenes/series'
 import { formatBytes } from '@/utils/format'
 
 import { useFileExplorerContext } from '../context'
@@ -31,8 +31,8 @@ export default function UploadModal() {
 	const [files, setFiles] = useState<File[]>([])
 
 	const { t } = useLocaleContext()
-	const { library } = useLibraryContext()
-	const { currentPath, refetch, uploadConfig } = useFileExplorerContext()
+
+	const { currentPath, refetch, uploadConfig, libraryID } = useFileExplorerContext()
 	const { sdk } = useSDK()
 
 	const [uploadProgress, setUploadProgress] = useState(0)
@@ -92,6 +92,41 @@ export default function UploadModal() {
 		}
 	}
 
+	const doUploadBooks = useCallback(
+		async (params: UploaderParams<UploadLibraryBooks>) => {
+			try {
+				await uploadBooks(params)
+				toast.success('Successfully uploaded file(s)')
+			} catch (error) {
+				console.error(error)
+				toast.error('Failed to upload book(s)')
+			}
+		},
+		[uploadBooks],
+	)
+
+	const enableSeries = useSeriesContextSafe() == null
+
+	const doUploadSeries = useCallback(async () => {
+		if (!enableSeries) return
+
+		const firstFile = files?.at(0)
+		if (!seriesDirName || !firstFile || !currentPath) return
+
+		try {
+			await uploadSeries({
+				file: firstFile,
+				place_at: currentPath,
+				library_id: libraryID,
+				series_dir_name: seriesDirName,
+			})
+			toast.success('Successfully uploaded series')
+		} catch (error) {
+			console.error(error)
+			toast.error('Failed to upload series')
+		}
+	}, [uploadSeries, files, seriesDirName, currentPath, libraryID, enableSeries])
+
 	const onUploadClicked = useCallback(async () => {
 		// Return if files is empty
 		if (!files) {
@@ -105,39 +140,15 @@ export default function UploadModal() {
 
 		// Handle books/series upload paths
 		if (uploadType == 'books') {
-			try {
-				await uploadBooks({ files, library_id: library.id, place_at: currentPath })
-				toast.success('Successfully uploaded file(s)')
-			} catch (error) {
-				console.error(error)
-				toast.error('Failed to upload book(s)')
-			}
+			doUploadBooks({
+				files,
+				place_at: currentPath,
+				library_id: libraryID,
+			})
 		} else {
-			if (seriesDirName == undefined) {
-				return
-			}
-
-			try {
-				// TODO(upload) - Better enforcement of single file
-				// We'll only take the first file for now
-				const file = files[0]
-				if (file == undefined) {
-					return
-				}
-
-				await uploadSeries({
-					file,
-					place_at: currentPath,
-					library_id: library.id,
-					series_dir_name: seriesDirName,
-				})
-				toast.success('Successfully uploaded series')
-			} catch (error) {
-				console.error(error)
-				toast.error('Failed to upload series')
-			}
+			await doUploadSeries()
 		}
-	}, [files, currentPath, library, uploadBooks, uploadSeries, uploadType, seriesDirName])
+	}, [files, currentPath, libraryID, uploadType, doUploadBooks, doUploadSeries])
 
 	/**
 	 * An effect to reset the state whenever uploadType becomes falsy (unset)
@@ -148,6 +159,12 @@ export default function UploadModal() {
 			setSeriesDirName(undefined)
 		}
 	}, [uploadType])
+
+	useEffect(() => {
+		if (!enableSeries && uploadType === 'series') {
+			setUploadType('books')
+		}
+	}, [enableSeries, uploadType])
 
 	const isFocused = isFileDialogActive || isDragActive
 	// Note: since the open state is contigent on the uploadType, when it is closed the uploadType is set to undefined.

@@ -22,6 +22,7 @@ export type IExplorerContext = {
 	goBack: () => void
 	refetch: () => Promise<unknown>
 	uploadConfig?: UploadConfig
+	libraryID: string
 }
 
 export const ExplorerContext = createContext<IExplorerContext | null>(null)

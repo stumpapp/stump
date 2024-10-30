@@ -1,5 +1,5 @@
 import { useDirectoryListing, useSDK } from '@stump/client'
-import { DirectoryListingFile, UploadConfig } from '@stump/sdk'
+import { DirectoryListingFile } from '@stump/sdk'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'
@@ -7,20 +7,17 @@ import { useMediaMatch } from 'rooks'
 
 import paths from '@/paths'
 
-import { ExplorerContext, ExplorerLayout } from './context'
+import { ExplorerContext, ExplorerLayout, IExplorerContext } from './context'
 import FileExplorer from './FileExplorer'
 import FileExplorerFooter, { FOOTER_HEIGHT } from './FileExplorerFooter'
 import FileExplorerHeader from './FileExplorerHeader'
 import { getBook } from './FileThumbnail'
 
-type Props = {
-	rootPath: string
-	uploadConfig?: UploadConfig
-}
+type Props = Pick<IExplorerContext, 'libraryID' | 'rootPath' | 'uploadConfig'>
 
 // TODO: refactor to match other explore scenes, e.g. sticky header + fixed footer + window scrolling
 
-export default function FileExplorerProvider({ rootPath, uploadConfig }: Props) {
+export default function FileExplorerProvider({ rootPath, ...ctx }: Props) {
 	const navigate = useNavigate()
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const { sdk } = useSDK()
@@ -77,7 +74,7 @@ export default function FileExplorerProvider({ rootPath, uploadConfig }: Props) 
 				refetch,
 				rootPath,
 				setLayout: changeLayout,
-				uploadConfig,
+				...ctx,
 			}}
 		>
 			<div className="flex h-full flex-1 flex-col">

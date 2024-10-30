@@ -12,7 +12,7 @@ export default function LibraryExplorerScene() {
 
 	return (
 		<div className="flex flex-1">
-			<FileExplorer rootPath={library.path} uploadConfig={uploadConfig} />
+			<FileExplorer libraryID={library.id} rootPath={library.path} uploadConfig={uploadConfig} />
 		</div>
 	)
 }

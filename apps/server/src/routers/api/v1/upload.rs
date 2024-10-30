@@ -195,10 +195,9 @@ async fn copy_tempfile_to_location(
 	target_path: &path::Path,
 ) -> APIResult<()> {
 	// We want to prevent overwriting something that already exists
-	if target_path.exists() {
+	if fs::metadata(target_path).await.is_ok() {
 		return Err(APIError::BadRequest(format!(
-			"File already exists at {}",
-			target_path.to_string_lossy()
+			"File already exists at {target_path:?}",
 		)));
 	}
 

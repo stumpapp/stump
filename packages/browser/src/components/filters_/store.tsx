@@ -21,6 +21,7 @@ export type Pagination = {
 
 type BodyFilterState = {
 	forEntity: FilterEntity
+	// TODO: make this full filter config, enforce AND joiner
 	filters?: FilterGroupSchema[]
 	// TODO: it might make sense to store a form-variant of this to then convert
 	ordering?: QueryOrder<string>[]
@@ -107,11 +108,12 @@ type FilterStore = {
 	removeUrlFilter: (key: string) => void
 }
 
-const createFilterStore = (forEntity: FilterEntity) =>
+const createFilterStore = (forEntity: FilterEntity, defaultBodyFilters?: FilterGroupSchema[]) =>
 	createStore<FilterStore>(
 		(set, get) =>
 			({
 				bodyStore: {
+					filters: defaultBodyFilters,
 					forEntity,
 					pagination: {
 						page: 1,
@@ -167,10 +169,11 @@ const createFilterStore = (forEntity: FilterEntity) =>
 
 const FilterStoreContext = createContext<StoreApi<FilterStore> | null>(null)
 
-export function FilterStoreProvider({
-	children,
-	forEntity,
-}: PropsWithChildren<{ forEntity: FilterEntity }>) {
+type ProviderProps = {
+	forEntity: FilterEntity
+	defaultBodyFilters?: FilterGroupSchema[]
+}
+export function FilterStoreProvider({ children, forEntity }: PropsWithChildren<ProviderProps>) {
 	const storeRef = useRef<StoreApi<FilterStore> | null>(null)
 
 	if (!storeRef.current) {

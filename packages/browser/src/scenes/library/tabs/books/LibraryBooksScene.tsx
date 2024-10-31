@@ -1,6 +1,13 @@
-import { usePagedMediaQuery, usePrefetchMediaPaged } from '@stump/client'
+import { useDynamicSearch, usePagedMediaQuery, usePrefetchMediaPaged } from '@stump/client'
 import { usePreviousIsDifferent } from '@stump/components'
-import { MediaMetadataOrderBy, MediaOrderBy, MediaSmartFilter } from '@stump/sdk'
+import {
+	FullQueryParams,
+	isMediaOrderBy,
+	MediaFilter,
+	MediaMetadataOrderBy,
+	MediaOrderBy,
+	MediaSmartFilter,
+} from '@stump/sdk'
 import { useCallback, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 
@@ -16,7 +23,7 @@ import {
 	useFilterScene,
 } from '@/components/filters'
 import FilterHeader from '@/components/filters_/FilterHeader'
-import { FilterStoreProvider } from '@/components/filters_/store'
+import { FilterStoreProvider, intoBody, useFilterStore } from '@/components/filters_/store'
 import { EntityTableColumnConfiguration } from '@/components/table'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
@@ -24,8 +31,15 @@ import { useBooksLayout } from '@/stores/layout'
 
 import { useLibraryContext } from '../../context'
 
-export default function LibraryBooksScene() {
+function LibraryBooksScene() {
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
+
+	const { paramMode, ...store } = useFilterStore((state) => ({
+		bodyParams: intoBody<MediaSmartFilter, MediaOrderBy>(state.bodyStore, isMediaOrderBy),
+		paramMode: state.mode,
+		// TODO: no
+		urlParams: state.urlStore as FullQueryParams<MediaFilter, MediaOrderBy>,
+	}))
 
 	const { prefetch } = usePrefetchMediaPaged()
 	const { library } = useLibraryContext()
@@ -64,6 +78,14 @@ export default function LibraryBooksScene() {
 		media,
 		pageData,
 	} = usePagedMediaQuery(params)
+
+	const { media: data } = useDynamicSearch({
+		mode: paramMode,
+		...store,
+	})
+
+	console.log(data)
+
 	const { current_page, total_pages } = pageData || {}
 
 	const differentSearch = usePreviousIsDifferent(filters?.search as string)
@@ -75,10 +97,10 @@ export default function LibraryBooksScene() {
 
 	const handlePrefetchPage = useCallback(
 		(page: number) => {
-			prefetch({
-				...params,
-				page,
-			})
+			// prefetch({
+			// 	...params,
+			// 	page,
+			// })
 		},
 		[params, prefetch],
 	)
@@ -142,24 +164,23 @@ export default function LibraryBooksScene() {
 	}
 
 	return (
-		<FilterStoreProvider forEntity="media">
-			<FilterContext.Provider
-				value={{
-					filters,
-					ordering,
-					pagination: { page, page_size },
-					setPage,
-					...rest,
-				}}
-			>
-				<div className="flex flex-1 flex-col pb-4 md:pb-0">
-					<Helmet>
-						<title>Stump | {library.name || ''}</title>
-					</Helmet>
+		<FilterContext.Provider
+			value={{
+				filters,
+				ordering,
+				pagination: { page, page_size },
+				setPage,
+				...rest,
+			}}
+		>
+			<div className="flex flex-1 flex-col pb-4 md:pb-0">
+				<Helmet>
+					<title>Stump | {library.name || ''}</title>
+				</Helmet>
 
-					<section ref={containerRef} id="grid-top-indicator" className="h-0" />
+				<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 
-					{/* <OldFilterHeader
+				{/* <OldFilterHeader
 					isSearching={isRefetchingMedia}
 					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
 					orderControls={<URLOrdering entity="media" />}
@@ -167,11 +188,41 @@ export default function LibraryBooksScene() {
 					navOffset
 				/> */}
 
-					<FilterHeader navOffset />
+				<FilterHeader navOffset />
 
-					{renderContent()}
-				</div>
-			</FilterContext.Provider>
+				{renderContent()}
+			</div>
+		</FilterContext.Provider>
+	)
+}
+
+export default function LibraryBooksSceneContainer() {
+	const { library } = useLibraryContext()
+
+	const defaultFilters = useMemo<MediaSmartFilter>(
+		() => ({
+			series: {
+				library: {
+					id: {
+						equals: library.id,
+					},
+				},
+			},
+		}),
+		[library.id],
+	)
+
+	return (
+		<FilterStoreProvider
+			forEntity="media"
+			// defaultBodyFilters={[
+			// 	{
+			// 		filters: [defaultFilters],
+			// 		joiner: 'and',
+			// 	},
+			// ]}
+		>
+			<LibraryBooksScene />
 		</FilterStoreProvider>
 	)
 }

@@ -244,6 +244,7 @@ pub struct SmartFilter<T> {
 #[serde(untagged)]
 #[prisma_table("library")]
 pub enum LibrarySmartFilter {
+	Id { id: String },
 	Name { name: String },
 	Path { path: String },
 	CreatedAt { created_at: DateTime<FixedOffset> },

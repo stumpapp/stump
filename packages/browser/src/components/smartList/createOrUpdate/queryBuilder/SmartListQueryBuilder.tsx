@@ -10,9 +10,10 @@ import GroupBy from './GroupBy'
 
 type Props = {
 	disabled?: boolean
+	isolated?: boolean
 }
 
-export default function SmartListQueryBuilder({ disabled }: Props) {
+export default function SmartListQueryBuilder({ disabled, isolated }: Props) {
 	const form = useFormContext<SmartListFormSchema>()
 
 	const [joiner] = form.watch(['filters.joiner'])
@@ -24,11 +25,13 @@ export default function SmartListQueryBuilder({ disabled }: Props) {
 	return (
 		<>
 			<div className={cn('flex flex-col space-y-4', { 'cursor-not-allowed opacity-65': disabled })}>
-				<Alert level="info" icon="warning">
-					<Alert.Content>{t(getKey('uiPerformance'))}</Alert.Content>
-				</Alert>
+				{!isolated && (
+					<Alert level="info" icon="warning">
+						<Alert.Content>{t(getKey('uiPerformance'))}</Alert.Content>
+					</Alert>
+				)}
 
-				<GroupBy disabled={disabled} />
+				{!isolated && <GroupBy disabled={disabled} />}
 
 				<div className={cn('flex items-center space-x-3.5', { 'pointer-events-none': disabled })}>
 					<Tabs variant="primary" activeOnHover value={joiner}>

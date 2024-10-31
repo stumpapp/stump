@@ -363,6 +363,11 @@ const validationKey = (key: string) => `createOrUpdateSmartListForm.validation.$
 
 export type SmartListFormSchema = z.infer<ReturnType<typeof createSchema>>
 
+export const smartFilterSchema = z.object({
+	filters: filterConfig,
+})
+export type IsolatedSmartFilterSchema = z.infer<typeof smartFilterSchema>
+
 export const intoForm = ({
 	name,
 	description,

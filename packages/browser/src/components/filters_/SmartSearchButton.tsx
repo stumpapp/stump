@@ -1,4 +1,4 @@
-import { cn, Dropdown, IconButton, ToolTip } from '@stump/components'
+import { cn, Dropdown, IconButton } from '@stump/components'
 import { WandSparkles } from 'lucide-react'
 import React from 'react'
 

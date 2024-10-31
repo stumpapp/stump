@@ -202,6 +202,7 @@ export function ComboBox({
 						wrapperClassName,
 					)}
 					style={contentStyle}
+					portal={false}
 				>
 					<Command>
 						{filterable && (

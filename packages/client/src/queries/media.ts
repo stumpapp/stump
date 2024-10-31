@@ -3,7 +3,9 @@ import type {
 	Media,
 	MediaFilter,
 	MediaOrderBy,
+	MediaSmartFilter,
 	ProgressUpdateReturn,
+	SmartSearchBody,
 } from '@stump/sdk'
 import { FullQueryParams, QueryOrderParams } from '@stump/sdk'
 import { AxiosError } from 'axios'
@@ -238,6 +240,34 @@ export function useContinueReading(options: CursorQueryOptions<Media>) {
 	return {
 		data,
 		media,
+		...restReturn,
+	}
+}
+
+type UseDynamicSearchParams = {
+	mode: 'body' | 'url'
+	bodyParams: SmartSearchBody<MediaSmartFilter, MediaOrderBy>
+	urlParams: FullQueryParams<MediaFilter, MediaOrderBy>
+}
+export function useDynamicSearch({ mode, bodyParams, urlParams }: UseDynamicSearchParams) {
+	const { sdk } = useSDK()
+	const { data, ...restReturn } = usePageQuery(
+		mode === 'body' ? [sdk.media.keys.smartSearch, bodyParams] : [sdk.media.keys.get, urlParams],
+		async ({ page, page_size }) =>
+			mode === 'url'
+				? sdk.media.get({ page, page_size, ...urlParams })
+				: sdk.media.smartSearch(bodyParams),
+		{
+			keepPreviousData: true,
+		},
+	)
+
+	const media = data?.data
+	const pageData = data?._page
+
+	return {
+		media,
+		pageData,
 		...restReturn,
 	}
 }

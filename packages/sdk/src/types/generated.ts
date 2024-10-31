@@ -226,7 +226,7 @@ export type SeriesMetadataSmartFilter = { age_rating: Filter<number> } | { meta_
 
 export type SeriesSmartFilter = { name: Filter<string> } | { path: Filter<string> } | { metadata: SeriesMetadataSmartFilter } | { library: LibrarySmartFilter }
 
-export type LibrarySmartFilter = { name: Filter<string> } | { path: Filter<string> } | { created_at: Filter<string> } | { updated_at: Filter<string> }
+export type LibrarySmartFilter = { id: Filter<string> } | { name: Filter<string> } | { path: Filter<string> } | { created_at: Filter<string> } | { updated_at: Filter<string> }
 
 export type SmartListView = ({ book_columns: ReactTableColumnSort[]; group_columns: ReactTableColumnSort[]; book_sorting: ReactTableGlobalSort[] | null; group_sorting: ReactTableGlobalSort[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string; list_id: string }
 

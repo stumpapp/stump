@@ -25,7 +25,7 @@ export type FieldDef = SmartListFormSchema['filters']['groups'][number]['filters
 
 export default function FilterValue({ idx }: Props) {
 	const { t } = useLocaleContext()
-	const { groupIdx } = useFilterGroupContext()
+	const { groupIdx, isLocked } = useFilterGroupContext()
 
 	const form = useFormContext<SmartListFormSchema>()
 
@@ -64,7 +64,8 @@ export default function FilterValue({ idx }: Props) {
 						form.resetField(`filters.groups.${groupIdx}.filters.${idx}.value`)
 					}
 				}}
-				className="md:w-52"
+				className={cn('md:w-52', { 'pointer-events-none': isLocked })}
+				// disabled={isLocked} // TODO(components): Support disabled datepicker state
 			/>
 		)
 	}
@@ -79,6 +80,7 @@ export default function FilterValue({ idx }: Props) {
 			{...form.register(`filters.groups.${groupIdx}.filters.${idx}.value`, {
 				valueAsNumber: isNumber,
 			})}
+			disabled={isLocked}
 		/>
 	)
 }

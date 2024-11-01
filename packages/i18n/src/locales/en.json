@@ -682,7 +682,8 @@
 						"addFilter": "Add filter",
 						"addGroup": "Add group",
 						"deleteFilter": "Delete filter",
-						"deleteGroup": "Delete group"
+						"deleteGroup": "Delete group",
+						"locked": "This group cannot be changed"
 					},
 					"is": "is",
 					"fieldSelect": {

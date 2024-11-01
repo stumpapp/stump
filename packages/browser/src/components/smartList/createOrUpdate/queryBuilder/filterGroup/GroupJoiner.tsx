@@ -10,7 +10,7 @@ export default function GroupJoiner() {
 	const form = useFormContext<SmartListFormSchema>()
 
 	const { t } = useLocaleContext()
-	const { groupIdx } = useFilterGroupContext()
+	const { groupIdx, isLocked } = useFilterGroupContext()
 
 	const joiner = form.watch(`filters.groups.${groupIdx}.joiner`)
 
@@ -23,6 +23,7 @@ export default function GroupJoiner() {
 						asChild
 						className="w-8 min-w-[unset] rounded-lg px-1 text-xs"
 						onClick={() => form.setValue(`filters.groups.${groupIdx}.joiner`, 'and')}
+						disabled={isLocked}
 					>
 						<Text className="cursor-pointer truncate">{t(getJoinerKey('and', 'label'))}</Text>
 					</Tabs.Trigger>
@@ -32,6 +33,7 @@ export default function GroupJoiner() {
 						asChild
 						className="w-8 min-w-[unset] rounded-lg px-1 text-xs"
 						onClick={() => form.setValue(`filters.groups.${groupIdx}.joiner`, 'or')}
+						disabled={isLocked}
 					>
 						<Text className={cn('truncate', { 'cursor-pointer': true })}>
 							{t(getJoinerKey('or', 'label'))}
@@ -43,6 +45,7 @@ export default function GroupJoiner() {
 						asChild
 						className="w-8 min-w-[unset] rounded-lg px-1 text-xs"
 						onClick={() => form.setValue(`filters.groups.${groupIdx}.joiner`, 'not')}
+						disabled={isLocked}
 					>
 						<Text className={cn('truncate', { 'cursor-pointer': true })}>
 							{t(getJoinerKey('not', 'label'))}

@@ -33,14 +33,24 @@ export default function SmartListQueryBuilder({ disabled, isolated }: Props) {
 
 				{!isolated && <GroupBy disabled={disabled} />}
 
-				<div className={cn('flex items-center space-x-3.5', { 'pointer-events-none': disabled })}>
-					<Tabs variant="primary" activeOnHover value={joiner}>
+				<div
+					className={cn('flex items-center space-x-3.5', {
+						'pointer-events-none': disabled,
+					})}
+				>
+					<Tabs
+						variant="primary"
+						activeOnHover
+						value={joiner}
+						title={isolated ? 'Cannot be changed in this context' : ''}
+					>
 						<Tabs.List className="rounded-lg">
 							<Tabs.Trigger
 								value="and"
 								asChild
 								className="w-8 min-w-[unset] rounded-lg px-1 text-xs"
 								onClick={() => form.setValue('filters.joiner', 'and')}
+								disabled={disabled || isolated}
 							>
 								<Text className="cursor-pointer truncate">{t(getKey('rootJoiner.and.label'))}</Text>
 							</Tabs.Trigger>
@@ -50,6 +60,7 @@ export default function SmartListQueryBuilder({ disabled, isolated }: Props) {
 								asChild
 								className="w-8 min-w-[unset] rounded-lg px-1 text-xs"
 								onClick={() => form.setValue('filters.joiner', 'or')}
+								disabled={disabled || isolated}
 							>
 								<Text className={cx('truncate', { 'cursor-pointer': true })}>
 									{t(getKey('rootJoiner.or.label'))}

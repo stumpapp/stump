@@ -1,25 +1,23 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Badge, Button, Dialog, Form } from '@stump/components'
 import { useCallback, useMemo, useState } from 'react'
-import { useForm, useFormState, useWatch } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 
 import { IsolatedSmartFilterSchema, smartFilterSchema } from '../smartList/createOrUpdate'
 import { SmartListQueryBuilder } from '../smartList/createOrUpdate/queryBuilder'
 
 type Props = {
+	initialValues?: IsolatedSmartFilterSchema['filters']['groups']
 	onSave: (values: IsolatedSmartFilterSchema) => void
 }
 
-// TODO: default values?
-// TODO: locked groups, e.g. "series id is abc" which can't be edited / removed
-
-export default function SmartFilterModal({ onSave }: Props) {
+export default function SmartFilterModal({ initialValues, onSave }: Props) {
 	const [isOpen, setIsOpen] = useState(false)
 
 	const form = useForm<IsolatedSmartFilterSchema>({
 		defaultValues: {
 			filters: {
-				groups: [],
+				groups: initialValues ?? [],
 				joiner: 'and',
 			},
 		},
@@ -42,9 +40,6 @@ export default function SmartFilterModal({ onSave }: Props) {
 		},
 		[onSave],
 	)
-
-	const { errors } = useFormState({ control: form.control })
-	console.log({ errors, filterGroups, flatCount })
 
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -69,7 +64,12 @@ export default function SmartFilterModal({ onSave }: Props) {
 					</Dialog.Description>
 				</Dialog.Header>
 
-				<Form form={form} onSubmit={handleSave} className="h-[60vh]" id="smart-filter-form">
+				<Form
+					form={form}
+					onSubmit={handleSave}
+					className="h-[60vh] overflow-y-auto"
+					id="smart-filter-form"
+				>
 					<SmartListQueryBuilder isolated />
 				</Form>
 

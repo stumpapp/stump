@@ -1,16 +1,29 @@
 import {
 	FilterEntity,
 	FilterGroup,
+	FullQueryParams,
 	MediaSmartFilter,
 	QueryOrder,
 	SmartSearchBody,
 } from '@stump/sdk'
+import clone from 'lodash/cloneDeep'
 import getProperty from 'lodash/get'
 import setProperty from 'lodash/set'
 import unsetProperty from 'lodash/unset'
-import { createContext, PropsWithChildren, useContext, useRef } from 'react'
+import {
+	createContext,
+	PropsWithChildren,
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useRef,
+} from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { useMediaMatch } from 'rooks'
 import { match, P } from 'ts-pattern'
 import { createStore, StoreApi, useStore } from 'zustand'
+import { useShallow } from 'zustand/react/shallow'
 
 import { FilterGroupSchema, intoAPIGroup } from '../smartList/createOrUpdate'
 
@@ -26,12 +39,22 @@ type BodyFilterState = {
 	// TODO: it might make sense to store a form-variant of this to then convert
 	ordering?: QueryOrder<string>[]
 	pagination: Pagination
+	totalCount?: number
 }
 
 type URLFilterState = {
 	filters?: Record<string, unknown>
 	ordering?: QueryOrder<string>
 	pagination: Pagination
+}
+
+export const intoFullURLParams = <F, O>(state: URLFilterState): FullQueryParams<F, O> => {
+	const { filters, ordering, pagination } = state
+	return {
+		...filters,
+		...ordering,
+		...pagination,
+	} as FullQueryParams<F, O>
 }
 
 const intoFilter = <F,>(forEntity: FilterEntity, input: MediaSmartFilter): F | null =>
@@ -108,12 +131,18 @@ type FilterStore = {
 	removeUrlFilter: (key: string) => void
 }
 
-const createFilterStore = (forEntity: FilterEntity, defaultBodyFilters?: FilterGroupSchema[]) =>
+// TODO: default ordering...
+type CreateFilterStoreOptions = {
+	defaultBody?: FilterGroupSchema[]
+	defaultUrl?: Record<string, unknown>
+}
+
+const createFilterStore = (forEntity: FilterEntity, options: CreateFilterStoreOptions = {}) =>
 	createStore<FilterStore>(
 		(set, get) =>
 			({
 				bodyStore: {
-					filters: defaultBodyFilters,
+					filters: options.defaultBody,
 					forEntity,
 					pagination: {
 						page: 1,
@@ -122,23 +151,23 @@ const createFilterStore = (forEntity: FilterEntity, defaultBodyFilters?: FilterG
 				} satisfies BodyFilterState,
 				mode: 'url',
 				patchBody: (state) => {
-					const entireStore = get()
+					const entireStore = clone(get())
 					const updatedBody = { ...get().bodyStore, ...state }
 					set(setProperty(entireStore, 'bodyStore', updatedBody))
 				},
 				patchUrl: (state) => {
-					const entireStore = get()
+					const entireStore = clone(get())
 					const updatedUrlState = { ...get().urlStore, ...state }
 					set(setProperty(entireStore, 'urlStore', updatedUrlState))
 				},
 				removeUrlFilter: (key) => {
-					const entireStore = get()
+					const entireStore = clone(get())
 					unsetProperty(entireStore, `urlStore.filters.${key}`)
 					set(entireStore)
 				},
 				setMode: (mode) => set({ mode }),
 				setPage: (page) => {
-					const entireStore = get()
+					const entireStore = clone(get())
 					if (entireStore.mode === 'url') {
 						set(setProperty(entireStore, 'urlStore.pagination.page', page))
 					} else {
@@ -146,7 +175,7 @@ const createFilterStore = (forEntity: FilterEntity, defaultBodyFilters?: FilterG
 					}
 				},
 				setPageSize: (pageSize) => {
-					const entireStore = get()
+					const entireStore = clone(get())
 					if (entireStore.mode === 'url') {
 						set(setProperty(entireStore, 'urlStore.pagination.page_size', pageSize))
 					} else {
@@ -154,11 +183,12 @@ const createFilterStore = (forEntity: FilterEntity, defaultBodyFilters?: FilterG
 					}
 				},
 				setUrlFilter: (key, value) => {
-					const entireStore = get()
+					const entireStore = clone(get())
 					const updatedState = { ...get().urlStore.filters, [key]: value }
 					set(setProperty(entireStore, 'urlStore.filters', updatedState))
 				},
 				urlStore: {
+					filters: options.defaultUrl,
 					pagination: {
 						page: 1,
 						page_size: 20,
@@ -169,15 +199,25 @@ const createFilterStore = (forEntity: FilterEntity, defaultBodyFilters?: FilterG
 
 const FilterStoreContext = createContext<StoreApi<FilterStore> | null>(null)
 
+// TODO: default ordering...
 type ProviderProps = {
 	forEntity: FilterEntity
 	defaultBodyFilters?: FilterGroupSchema[]
+	defaultURLFilters?: Record<string, unknown>
 }
-export function FilterStoreProvider({ children, forEntity }: PropsWithChildren<ProviderProps>) {
+export function FilterStoreProvider({
+	children,
+	forEntity,
+	defaultBodyFilters,
+	defaultURLFilters,
+}: PropsWithChildren<ProviderProps>) {
 	const storeRef = useRef<StoreApi<FilterStore> | null>(null)
 
 	if (!storeRef.current) {
-		storeRef.current = createFilterStore(forEntity)
+		storeRef.current = createFilterStore(forEntity, {
+			defaultBody: defaultBodyFilters,
+			defaultUrl: defaultURLFilters,
+		})
 	}
 
 	return (
@@ -197,4 +237,59 @@ export const useFilterStore = <U,>(selector: (state: ExtractState<StoreApi<Filte
 		throw new Error('useFilterStore must be used within a FilterStoreProvider')
 	}
 	return useStore<StoreApi<FilterStore>, U>(store, selector)
+}
+
+export const useSyncParams = () => {
+	const [searchParams, setSearchParams] = useSearchParams()
+
+	const { mode, setPage, setPageSize, urlStore, bodyStore, ...store } = useFilterStore(
+		useShallow((state) => state),
+	)
+
+	const is3XLScreenOrBigger = useMediaMatch('(min-width: 1600px)')
+	const defaultPageSize = is3XLScreenOrBigger ? 40 : 20
+
+	const changePage = useCallback(
+		(page: number) => {
+			if (mode === 'url') {
+				setSearchParams((prev) => {
+					prev.set('page', page.toString())
+					return prev
+				})
+			} else {
+				setPage(page)
+			}
+		},
+		[setPage, mode, setSearchParams],
+	)
+
+	/**
+	 * An object representation of the pagination params currently in the url
+	 */
+	const urlPagination = useMemo(
+		() => ({
+			page: searchParams.get('page') ? parseInt(searchParams.get('page') as string) : 1,
+			page_size: searchParams.get('page_size')
+				? parseInt(searchParams.get('page_size') as string)
+				: defaultPageSize,
+		}),
+		[searchParams, defaultPageSize],
+	)
+	const { pagination } = urlStore
+	useEffect(() => {
+		if (mode === 'body') return
+
+		const { page, page_size } = pagination
+		const isDifferent = page !== urlPagination.page || page_size !== urlPagination.page_size
+		if (isDifferent) {
+			setPageSize(urlPagination.page_size)
+			setPage(urlPagination.page)
+		}
+	}, [mode, pagination, urlPagination, setSearchParams, setPage, setPageSize])
+
+	const resolvedPagination = useMemo(
+		() => (mode === 'body' ? bodyStore.pagination : urlStore.pagination),
+		[mode, bodyStore, urlStore],
+	)
+	return { changePage, pagination: resolvedPagination }
 }

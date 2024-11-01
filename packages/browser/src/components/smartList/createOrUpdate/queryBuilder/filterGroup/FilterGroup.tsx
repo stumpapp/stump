@@ -1,6 +1,6 @@
-import { Button, Card, IconButton, ToolTip } from '@stump/components'
+import { Button, Card, cn, IconButton, Text, ToolTip } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { ArrowRight, MinusCircle } from 'lucide-react'
+import { ArrowRight, Lock, MinusCircle } from 'lucide-react'
 import { useFieldArray } from 'react-hook-form'
 
 import { FilterGroupSchema, FilterSchema, SmartListFormSchema } from '../../schema'
@@ -25,8 +25,8 @@ export default function FilterGroup({ idx, group }: Props) {
 	})
 
 	return (
-		<FilterGroupContext.Provider value={{ groupIdx: idx }}>
-			<Card className="ml-4">
+		<FilterGroupContext.Provider value={{ groupIdx: idx, isLocked: group.is_locked || false }}>
+			<Card className={cn('ml-4', { 'cursor-not-allowed': group.is_locked })}>
 				<div className=" flex flex-col">
 					{!group.filters.length && (
 						<div className="p-4">
@@ -44,19 +44,32 @@ export default function FilterGroup({ idx, group }: Props) {
 									<FieldSelector idx={filterIndex} />
 									{filter.field && (
 										<>
-											<ArrowRight className="h-4 w-4 text-foreground-muted" />
+											<ArrowRight
+												className={cn('h-4 w-4 text-foreground-muted', {
+													'opacity-60': group.is_locked,
+												})}
+											/>
 											<OperatorSelect idx={filterIndex} />
 										</>
 									)}
 									{filter.operation && (
 										<>
-											<ArrowRight className="h-4 w-4 text-foreground-muted" />
+											<ArrowRight
+												className={cn('h-4 w-4 text-foreground-muted', {
+													'opacity-60': group.is_locked,
+												})}
+											/>
 											<FilterValue idx={filterIndex} />
 										</>
 									)}
 								</div>
 
-								<div className="flex h-full w-12 shrink-0 items-center justify-end transition-opacity duration-200 group-hover/filter:opacity-100 md:opacity-0">
+								<div
+									className={cn(
+										'flex h-full w-12 shrink-0 items-center justify-end transition-opacity duration-200 group-hover/filter:opacity-100 md:opacity-0',
+										{ 'group-hover/filter:opacity-0': group.is_locked },
+									)}
+								>
 									<ToolTip content={t(getKey('actions.deleteFilter'))} align="end">
 										<IconButton
 											size="xs"
@@ -78,25 +91,37 @@ export default function FilterGroup({ idx, group }: Props) {
 
 					<div className="flex-1" />
 
-					<Button
-						variant="ghost"
-						size="sm"
-						newYork
-						onClick={() => append({} as FilterSchema)}
-						className="shrink-0"
-					>
-						{t(getKey('actions.addFilter'))}
-					</Button>
+					{group.is_locked && (
+						<div className="flex items-center space-x-2">
+							<Lock className="h-4 w-4 text-foreground-muted" />
+							<Text variant="muted" size="sm">
+								{t(getKey('actions.locked'))}
+							</Text>
+						</div>
+					)}
+					{!group.is_locked && (
+						<>
+							<Button
+								variant="ghost"
+								size="sm"
+								newYork
+								onClick={() => append({} as FilterSchema)}
+								className="shrink-0"
+							>
+								{t(getKey('actions.addFilter'))}
+							</Button>
 
-					<Button
-						variant="ghost"
-						size="sm"
-						newYork
-						className="shrink-0 hover:bg-fill-danger-secondary"
-						onClick={() => removeGroup(idx)}
-					>
-						{t(getKey('actions.deleteGroup'))}
-					</Button>
+							<Button
+								variant="ghost"
+								size="sm"
+								newYork
+								className="shrink-0 hover:bg-fill-danger-secondary"
+								onClick={() => removeGroup(idx)}
+							>
+								{t(getKey('actions.deleteGroup'))}
+							</Button>
+						</>
+					)}
 				</div>
 			</Card>
 		</FilterGroupContext.Provider>

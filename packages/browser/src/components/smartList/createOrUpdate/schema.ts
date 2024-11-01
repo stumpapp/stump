@@ -275,6 +275,7 @@ export const intoFormFilter = (input: MediaSmartFilter): z.infer<typeof filter> 
 
 export const filterGroup = z.object({
 	filters: z.array(filter),
+	is_locked: z.boolean().nullish(),
 	joiner: z.enum(['and', 'or', 'not']),
 })
 export type FilterGroupSchema = z.infer<typeof filterGroup>

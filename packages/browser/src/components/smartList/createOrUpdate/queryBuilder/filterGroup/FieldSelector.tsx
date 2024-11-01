@@ -19,7 +19,7 @@ export function FieldSelector({ idx }: Props) {
 	const [source, setSource] = useState<FilterSource | null>(null)
 
 	const { t } = useLocaleContext()
-	const { groupIdx } = useFilterGroupContext()
+	const { groupIdx, isLocked } = useFilterGroupContext()
 
 	const form = useFormContext<SmartListFormSchema>()
 	const { fields, update } = useFieldArray({
@@ -140,7 +140,7 @@ export function FieldSelector({ idx }: Props) {
 
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
-			<Popover.Trigger asChild>
+			<Popover.Trigger asChild disabled={isLocked}>
 				<Button
 					variant="outline"
 					role="combobox"

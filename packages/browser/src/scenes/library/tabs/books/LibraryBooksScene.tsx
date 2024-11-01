@@ -1,15 +1,9 @@
-import { useDynamicSearch, usePagedMediaQuery, usePrefetchMediaPaged } from '@stump/client'
+import { useDynamicSearch, usePrefetchMediaPaged } from '@stump/client'
 import { usePreviousIsDifferent } from '@stump/components'
-import {
-	FullQueryParams,
-	isMediaOrderBy,
-	MediaFilter,
-	MediaMetadataOrderBy,
-	MediaOrderBy,
-	MediaSmartFilter,
-} from '@stump/sdk'
+import { isMediaOrderBy, MediaFilter, MediaOrderBy, MediaSmartFilter } from '@stump/sdk'
 import { useCallback, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
+import { useShallow } from 'zustand/react/shallow'
 
 import { BookTable } from '@/components/book'
 import BookGrid from '@/components/book/BookGrid'
@@ -23,7 +17,14 @@ import {
 	useFilterScene,
 } from '@/components/filters'
 import FilterHeader from '@/components/filters_/FilterHeader'
-import { FilterStoreProvider, intoBody, useFilterStore } from '@/components/filters_/store'
+import {
+	FilterStoreProvider,
+	intoBody,
+	intoFullURLParams,
+	useFilterStore,
+	useSyncParams,
+} from '@/components/filters_/store'
+import { intoFormFilter } from '@/components/smartList/createOrUpdate'
 import { EntityTableColumnConfiguration } from '@/components/table'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
@@ -34,12 +35,20 @@ import { useLibraryContext } from '../../context'
 function LibraryBooksScene() {
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
 
-	const { paramMode, ...store } = useFilterStore((state) => ({
-		bodyParams: intoBody<MediaSmartFilter, MediaOrderBy>(state.bodyStore, isMediaOrderBy),
-		paramMode: state.mode,
-		// TODO: no
-		urlParams: state.urlStore as FullQueryParams<MediaFilter, MediaOrderBy>,
-	}))
+	const store = useFilterStore(
+		useShallow((state) => ({
+			bodyStore: state.bodyStore,
+			mode: state.mode,
+			urlStore: state.urlStore,
+		})),
+	)
+	const params = useMemo(
+		() => ({
+			bodyParams: intoBody<MediaSmartFilter, MediaOrderBy>(store.bodyStore, isMediaOrderBy),
+			urlParams: intoFullURLParams<MediaFilter, MediaOrderBy>(store.urlStore),
+		}),
+		[store],
+	)
 
 	const { prefetch } = usePrefetchMediaPaged()
 	const { library } = useLibraryContext()
@@ -49,51 +58,55 @@ function LibraryBooksScene() {
 		setColumns: state.setColumns,
 		setLayout: state.setLayout,
 	}))
-	const {
-		filters,
-		ordering,
-		pagination: { page, page_size },
-		setPage,
-		...rest
-	} = useFilterScene()
-	const params = useMemo(
-		() => ({
-			page,
-			page_size,
-			params: {
-				...filters,
-				...ordering,
-				series: {
-					library: {
-						id: [library.id],
-					},
-				},
-			},
-		}),
-		[page, page_size, ordering, filters, library.id],
-	)
+	// const {
+	// 	filters,
+	// 	ordering,
+	// 	pagination: { page, page_size },
+	// 	setPage,
+	// 	...rest
+	// } = useFilterScene()
+	const { changePage, pagination } = useSyncParams()
+	// const params = useMemo(
+	// 	() => ({
+	// 		page,
+	// 		page_size,
+	// 		params: {
+	// 			...filters,
+	// 			...ordering,
+	// 			series: {
+	// 				library: {
+	// 					id: [library.id],
+	// 				},
+	// 			},
+	// 		},
+	// 	}),
+	// 	[page, page_size, ordering, filters, library.id],
+	// )
+	// const {
+	// 	isLoading: isLoadingMedia,
+	// 	isRefetching: isRefetchingMedia,
+	// 	// media,
+	// 	// pageData,
+	// } = usePagedMediaQuery(params)
+
 	const {
 		isLoading: isLoadingMedia,
 		isRefetching: isRefetchingMedia,
 		media,
 		pageData,
-	} = usePagedMediaQuery(params)
-
-	const { media: data } = useDynamicSearch({
-		mode: paramMode,
-		...store,
+	} = useDynamicSearch({
+		mode: store.mode,
+		...params,
 	})
-
-	console.log(data)
 
 	const { current_page, total_pages } = pageData || {}
 
-	const differentSearch = usePreviousIsDifferent(filters?.search as string)
-	useEffect(() => {
-		if (differentSearch) {
-			setPage(1)
-		}
-	}, [differentSearch, setPage])
+	// const differentSearch = usePreviousIsDifferent(filters?.search as string)
+	// useEffect(() => {
+	// 	if (differentSearch) {
+	// 		changePage(1)
+	// 	}
+	// }, [differentSearch, changePage])
 
 	const handlePrefetchPage = useCallback(
 		(page: number) => {
@@ -102,7 +115,8 @@ function LibraryBooksScene() {
 			// 	page,
 			// })
 		},
-		[params, prefetch],
+		// [params, prefetch],
+		[prefetch],
 	)
 
 	const shouldScroll = usePreviousIsDifferent(current_page)
@@ -126,14 +140,15 @@ function LibraryBooksScene() {
 				<URLFilterContainer
 					currentPage={current_page || 1}
 					pages={total_pages || 1}
-					onChangePage={setPage}
+					onChangePage={changePage}
 					onPrefetchPage={handlePrefetchPage}
 				>
 					<div className="flex flex-1 px-4 pb-2 pt-4 md:pb-4">
 						<BookGrid
 							isLoading={isLoadingMedia}
 							books={media}
-							hasFilters={Object.keys(filters || {}).length > 0}
+							// hasFilters={Object.keys(filters || {}).length > 0}
+							hasFilters={false}
 						/>
 					</div>
 				</URLFilterContainer>
@@ -146,7 +161,7 @@ function LibraryBooksScene() {
 						<URLFilterContainer
 							currentPage={current_page || 1}
 							pages={total_pages || 1}
-							onChangePage={setPage}
+							onChangePage={changePage}
 							onPrefetchPage={handlePrefetchPage}
 							tableControls={
 								<EntityTableColumnConfiguration
@@ -166,11 +181,10 @@ function LibraryBooksScene() {
 	return (
 		<FilterContext.Provider
 			value={{
-				filters,
-				ordering,
-				pagination: { page, page_size },
-				setPage,
-				...rest,
+				filters: {},
+				ordering: {},
+				pagination,
+				setPage: changePage,
 			}}
 		>
 			<div className="flex flex-1 flex-col pb-4 md:pb-0">
@@ -188,7 +202,10 @@ function LibraryBooksScene() {
 					navOffset
 				/> */}
 
-				<FilterHeader navOffset />
+				<FilterHeader
+					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
+					navOffset
+				/>
 
 				{renderContent()}
 			</div>
@@ -199,7 +216,7 @@ function LibraryBooksScene() {
 export default function LibraryBooksSceneContainer() {
 	const { library } = useLibraryContext()
 
-	const defaultFilters = useMemo<MediaSmartFilter>(
+	const defaultFilter = useMemo<MediaSmartFilter>(
 		() => ({
 			series: {
 				library: {
@@ -212,15 +229,28 @@ export default function LibraryBooksSceneContainer() {
 		[library.id],
 	)
 
+	const defaultUrl = useMemo<MediaFilter>(
+		() => ({
+			series: {
+				library: {
+					id: [library.id],
+				},
+			},
+		}),
+		[library.id],
+	)
+
 	return (
 		<FilterStoreProvider
 			forEntity="media"
-			// defaultBodyFilters={[
-			// 	{
-			// 		filters: [defaultFilters],
-			// 		joiner: 'and',
-			// 	},
-			// ]}
+			defaultBodyFilters={[
+				{
+					filters: [intoFormFilter(defaultFilter)],
+					is_locked: true,
+					joiner: 'and',
+				},
+			]}
+			defaultURLFilters={defaultUrl}
 		>
 			<LibraryBooksScene />
 		</FilterStoreProvider>

@@ -23,7 +23,7 @@ type Props = {
 type FieldDef = SmartListFormSchema['filters']['groups'][number]['filters'][number]
 
 export default function OperatorSelect({ idx }: Props) {
-	const { groupIdx } = useFilterGroupContext()
+	const { groupIdx, isLocked } = useFilterGroupContext()
 
 	const form = useFormContext<SmartListFormSchema>()
 
@@ -94,7 +94,7 @@ export default function OperatorSelect({ idx }: Props) {
 
 	return (
 		<Popover open={isOpen} onOpenChange={setIsOpen}>
-			<Popover.Trigger asChild>
+			<Popover.Trigger asChild disabled={isLocked}>
 				<Button
 					variant="outline"
 					role="combobox"

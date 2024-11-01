@@ -14,7 +14,7 @@ type Props = {
 
 export default function ListValue({ idx }: Props) {
 	const { t } = useLocaleContext()
-	const { groupIdx } = useFilterGroupContext()
+	const { groupIdx, isLocked } = useFilterGroupContext()
 
 	const form = useFormContext<SmartListFormSchema>()
 	const fieldDef = useMemo(
@@ -83,6 +83,7 @@ export default function ListValue({ idx }: Props) {
 			onAddOption={({ value }) => addValue(value)}
 			isMultiSelect
 			filterable
+			disabled={isLocked}
 		/>
 	)
 }

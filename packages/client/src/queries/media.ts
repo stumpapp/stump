@@ -9,7 +9,7 @@ import type {
 } from '@stump/sdk'
 import { FullQueryParams, QueryOrderParams } from '@stump/sdk'
 import { AxiosError } from 'axios'
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import {
 	type CursorQueryOptions,
@@ -251,8 +251,13 @@ type UseDynamicSearchParams = {
 }
 export function useDynamicSearch({ mode, bodyParams, urlParams }: UseDynamicSearchParams) {
 	const { sdk } = useSDK()
+	const qk = useMemo(
+		() =>
+			mode === 'body' ? [sdk.media.keys.smartSearch, bodyParams] : [sdk.media.keys.get, urlParams],
+		[mode, bodyParams, urlParams, sdk],
+	)
 	const { data, ...restReturn } = usePageQuery(
-		mode === 'body' ? [sdk.media.keys.smartSearch, bodyParams] : [sdk.media.keys.get, urlParams],
+		qk,
 		async ({ page, page_size }) =>
 			mode === 'url'
 				? sdk.media.get({ page, page_size, ...urlParams })

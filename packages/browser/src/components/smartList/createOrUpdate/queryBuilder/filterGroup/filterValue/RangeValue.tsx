@@ -1,4 +1,4 @@
-import { CheckBox, DatePicker, Input } from '@stump/components'
+import { CheckBox, cn, DatePicker, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import dayjs from 'dayjs'
 import { useMemo } from 'react'
@@ -28,7 +28,7 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 
 	const { t } = useLocaleContext()
-	const { groupIdx } = useFilterGroupContext()
+	const { groupIdx, isLocked } = useFilterGroupContext()
 	const { errors } = useFormState({ control: form.control })
 
 	const formError = useMemo(
@@ -54,19 +54,21 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 							placeholder={t(getKey('from.date'))}
 							selected={value.from ? dayjs(value.from).toDate() : undefined}
 							onChange={changeHandler('from')}
-							className="md:w-52"
+							className={cn('md:w-52', { 'pointer-events-none': isLocked })}
 							popover={{
 								align: isAtLeastMedium ? 'start' : 'center',
 							}}
+							// disabled={isLocked} // TODO(components): Support disabled datepicker state
 						/>
 						<DatePicker
 							placeholder={t(getKey('to.date'))}
 							selected={value.to ? dayjs(value.to).toDate() : undefined}
 							onChange={changeHandler('to')}
-							className="md:w-52"
+							className={cn('md:w-52', { 'pointer-events-none': isLocked })}
 							popover={{
 								align: isAtLeastMedium ? 'start' : 'center',
 							}}
+							// disabled={isLocked} // TODO(components): Support disabled datepicker state
 						/>
 					</>
 				))
@@ -82,6 +84,7 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 							{...form.register(`filters.groups.${groupIdx}.filters.${idx}.value.from`, {
 								valueAsNumber: true,
 							})}
+							disabled={isLocked}
 						/>
 						<Input
 							placeholder={t(getKey('to.number'))}
@@ -91,6 +94,7 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 							{...form.register(`filters.groups.${groupIdx}.filters.${idx}.value.to`, {
 								valueAsNumber: true,
 							})}
+							disabled={isLocked}
 						/>
 					</>
 				))
@@ -112,6 +116,7 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 						!value?.inclusive,
 					)
 				}
+				disabled={isLocked}
 			/>
 		</>
 	)

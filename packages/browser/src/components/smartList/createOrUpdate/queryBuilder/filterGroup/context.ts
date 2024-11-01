@@ -2,6 +2,7 @@ import { createContext, useContext } from 'react'
 
 export type IFilterGroupContext = {
 	groupIdx: number
+	isLocked?: boolean
 }
 
 export const FilterGroupContext = createContext<IFilterGroupContext | null>(null)

@@ -108,7 +108,7 @@ function RouterContainer(props: StumpClientProps) {
 			onLogout={props.onLogout}
 		>
 			<SDKProvider baseURL={baseUrl || ''} authMethod={props.authMethod || 'session'}>
-				{IS_DEVELOPMENT && <ReactQueryDevtools position="bottom-right" context={defaultContext} />}
+				{/* {IS_DEVELOPMENT && <ReactQueryDevtools position="bottom-right" context={defaultContext} />} */}
 				<Helmet defaultTitle="Stump">
 					<title>Stump</title>
 				</Helmet>

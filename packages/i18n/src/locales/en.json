@@ -457,6 +457,29 @@
 			}
 		}
 	},
+	"fileExplorer": {
+		"uploadModal": {
+			"title": {
+				"books": "Upload books",
+				"series": "Upload series"
+			},
+			"description": {
+				"books": "Add books directly to the current path in the file explorer",
+				"series": "Add a series directly to the current path in the file explorer"
+			},
+			"seriesDisclaimer": [
+				"It must be a ",
+				"zipped file",
+				"containing the folder which should be the series, with all the books inside"
+			],
+			"dropzone": {
+				"books": "Drag and drop books here",
+				"series": "Drag and drop a zip file here",
+				"alt": "Or click to browse your computer for books to upload"
+			},
+			"addedFiles": "Added files"
+		}
+	},
 	"librarySettingsScene": {
 		"heading": "Settings",
 		"subtitle": "Manage your library here. If you're wanting a refresh on these settings, check out the",
@@ -1654,7 +1677,7 @@
 		},
 		"libraryOptions": {
 			"scanLibrary": "Scan",
-			"fileExplorer": "File Explorer",
+			"fileExplorer": "Files",
 			"manageLibrary": "Settings",
 			"deleteLibrary": "Delete"
 		},
@@ -1721,11 +1744,14 @@
 		"create": "Create",
 		"edit": "Edit",
 		"update": "Update",
+		"upload": "Upload",
+		"uploading": "Uploading",
 		"unimplemented": "This functionality is not yet implemented! Check back later",
 		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
 		"logIn": "Log in",
 		"login": "Login",
 		"seeError": "See error",
+		"remove": "Remove",
 		"goBack": "Go back",
 		"goToServers": "Go to servers",
 		"notReady": "This feature is not ready"

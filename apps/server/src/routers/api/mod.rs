@@ -18,6 +18,8 @@ mod tests {
 		NamedType,
 	};
 
+	use stump_core::config::StumpConfig;
+
 	use crate::{
 		config::jwt::CreatedToken,
 		filter::{
@@ -35,6 +37,7 @@ mod tests {
 				CreateBookClubScheduleBookOption, GetBookClubsParams, UpdateBookClub,
 				UpdateBookClubMember,
 			},
+			config::UploadConfig,
 			emailer::{
 				CreateOrUpdateEmailDevice, CreateOrUpdateEmailer, EmailerIncludeParams,
 				EmailerSendRecordIncludeParams, PatchEmailDevice,
@@ -239,6 +242,10 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<CreateOrUpdateSmartListView>()?).as_bytes(),
 		)?;
+
+		file.write_all(format!("{}\n\n", ts_export::<UploadConfig>()?).as_bytes())?;
+
+		file.write_all(format!("{}\n\n", ts_export::<StumpConfig>()?).as_bytes())?;
 
 		Ok(())
 	}

@@ -180,7 +180,7 @@ export class LibraryAPI extends APIBase {
 	 * Remove all missing series and media from a library
 	 */
 	async clean(id: string): Promise<CleanLibraryResponse> {
-		const { data } = await this.api.axios.post<CleanLibraryResponse>(libraryURL(`/${id}/clean`))
+		const { data } = await this.api.axios.put<CleanLibraryResponse>(libraryURL(`/${id}/clean`))
 		return data
 	}
 
@@ -204,7 +204,7 @@ export class LibraryAPI extends APIBase {
 	 * Initiate an analysis of a library
 	 */
 	async analyze(id: string): Promise<void> {
-		await this.api.axios.get(libraryURL(`/${id}/analyze`))
+		await this.api.axios.post(libraryURL(`/${id}/analyze`))
 	}
 
 	/**

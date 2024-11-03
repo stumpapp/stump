@@ -13,7 +13,7 @@ use crate::prisma::{library, media, media_metadata, series, series_metadata};
 use smart_filter_gen::generate_smart_filter;
 
 // TODO: This rough implementation is not very great. It is very verbose and not very ergonomic. It _technically_
-// works, and while I don't think anyone using this feature will notice, from a DX/mainenance perspective, it needs
+// works, and while I don't think anyone using this feature will notice, from a DX/maintenance perspective, it needs
 // to be refactored. The two big things IMO are:
 //
 // 1. Performance implications. This is mostly because the assumption for each `into_prisma` call is a single param,

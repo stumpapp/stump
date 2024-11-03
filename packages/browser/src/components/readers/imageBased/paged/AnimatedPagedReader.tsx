@@ -38,7 +38,7 @@ const BACKWARD_START_ANIMATION = {
 // funky on mobile still but not nearly as bad.
 // FIXME: animation on mobile without drag looks bad
 // TODO: slow down the animations to test better
-// TODO: kill me, and then make the animations togglable
+// TODO: kill me, and then make the animations toggleable
 export default function AnimatedPagedReader({
 	currentPage,
 	media,

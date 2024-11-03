@@ -26,7 +26,7 @@ mod tests {
 			LibraryBaseFilter, LibraryFilter, LibraryRelationFilter, LogFilter,
 			MediaBaseFilter, MediaFilter, MediaMetadataBaseFilter, MediaMetadataFilter,
 			MediaMetadataRelationFilter, Range, ReadStatus, SeriesBaseFilter,
-			SeriesFilter, SeriesMedataFilter, SeriesQueryRelation, UserQueryRelation,
+			SeriesFilter, SeriesMetadataFilter, SeriesQueryRelation, UserQueryRelation,
 			ValueOrRange,
 		},
 		routers::api::v1::{
@@ -152,7 +152,9 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<MediaFilter>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<BookRelations>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<SeriesBaseFilter>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<SeriesMedataFilter>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<SeriesMetadataFilter>()?).as_bytes(),
+		)?;
 		file.write_all(format!("{}\n\n", ts_export::<SeriesFilter>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<ValueOrRange<String>>()?).as_bytes(),

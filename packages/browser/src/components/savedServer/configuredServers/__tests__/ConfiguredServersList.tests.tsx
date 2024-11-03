@@ -122,7 +122,7 @@ describe('ConfiguredServersList', () => {
 		).toBeInTheDocument()
 	})
 
-	it('should render a confirmation before switching to a serveer', () => {
+	it('should render a confirmation before switching to a server', () => {
 		render(<Subject />)
 
 		expect(

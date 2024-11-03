@@ -51,7 +51,7 @@ pub fn get_cors_layer(config: StumpConfig) -> CorsLayer {
 
 	// Format the local IP with both http and https, and the port. If is_debug is true,
 	// then also add port 3000.
-	let local_orgins = if local_ip.is_empty() {
+	let local_origins = if local_ip.is_empty() {
 		vec![]
 	} else {
 		let port = config.port;
@@ -77,7 +77,7 @@ pub fn get_cors_layer(config: StumpConfig) -> CorsLayer {
 	} else {
 		DEFAULT_ALLOWED_ORIGINS
 	};
-	let default_allowlist = merge_origins(defaults, local_orgins);
+	let default_allowlist = merge_origins(defaults, local_origins);
 
 	// TODO: add new config option for fully overriding the default allowlist versus appending to it
 	cors_layer = cors_layer.allow_origin(AllowOrigin::list(

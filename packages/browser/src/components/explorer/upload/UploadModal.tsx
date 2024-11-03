@@ -167,7 +167,7 @@ export default function UploadModal() {
 	}, [enableSeries, uploadType])
 
 	const isFocused = isFileDialogActive || isDragActive
-	// Note: since the open state is contigent on the uploadType, when it is closed the uploadType is set to undefined.
+	// Note: since the open state is contingent on the uploadType, when it is closed the uploadType is set to undefined.
 	// This means that it will flash the wrong content. So, to prevent this, we will fallback to the previous
 	// uploadType if the current one is undefined.
 	const displayedType = useCurrentOrPrevious(uploadType)

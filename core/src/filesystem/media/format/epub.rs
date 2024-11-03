@@ -217,7 +217,7 @@ impl EpubProcessor {
 	/// 1. Attempt to find a resource with the default ID of "cover"
 	/// 2. Attempt to find a resource with a mime type of "image/jpeg" or "image/png", and weight the
 	///    results based on how likely they are to be the cover. For example, if the cover is named
-	///    "cover.jpg", it's probably the cover. The entry with the heighest weight, if any, will be
+	///    "cover.jpg", it's probably the cover. The entry with the highest weight, if any, will be
 	///    returned.
 	pub fn get_cover(path: &str) -> Result<(ContentType, Vec<u8>), FileError> {
 		let mut epub_file = EpubDoc::new(path).map_err(|e| {

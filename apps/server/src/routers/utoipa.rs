@@ -148,7 +148,7 @@ use super::api::{
             MediaSmartFilter, MediaMetadataSmartFilter, SeriesSmartFilter, SeriesMetadataSmartFilter,
             LibrarySmartFilter, Notifier, CreateOrUpdateNotifier, PatchNotifier, LibraryBaseFilter, LibraryRelationFilter,
             MediaBaseFilter, MediaRelationFilter, SeriesBaseFilter, SeriesRelationFilter, NotifierConfig, NotifierType,
-            ReadingListItem, ReadingListVisibility, SeriesMedataFilter
+            ReadingListItem, ReadingListVisibility, SeriesMetadataFilter
         )
     ),
     tags(

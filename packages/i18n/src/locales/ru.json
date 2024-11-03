@@ -1308,7 +1308,7 @@
 		}
 	},
 	"tagSelect": {
-		"placholder": "Выберите или создайте тег",
+		"placeholder": "Выберите или создайте тег",
 		"placeholderNoTags": "Нет доступных тегов"
 	},
 	"thumbnailDropdown": {

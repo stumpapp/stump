@@ -9,7 +9,7 @@ export default function LoadingSpinner({
 	// downloadError,
 	downloadSuccess,
 }: LoadingFileProps) {
-	// Setup a timeout that will check if we are stuck loading, abougt 10 seconds
+	// Setup a timeout that will check if we are stuck loading, about 10 seconds
 	const [didTimeout, setDidTimeout] = useState(false)
 
 	// If we are still loading after 10 seconds, we are stuck

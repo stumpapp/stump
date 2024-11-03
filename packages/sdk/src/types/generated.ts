@@ -78,9 +78,9 @@ export type NavigationMode = "SIDEBAR" | "TOPBAR"
 
 export type HomeItem = { type: "ContinueReading" } | { type: "RecentlyAddedBooks" } | { type: "RecentlyAddedSeries" } | { type: "Library"; library_id: string } | { type: "SmartList"; smart_list_id: string }
 
-export type NaviationItemDisplayOptions = { show_create_action?: boolean; show_link_to_all?: boolean }
+export type NavigationItemDisplayOptions = { show_create_action?: boolean; show_link_to_all?: boolean }
 
-export type NavigationItem = { type: "Home" } | { type: "Explore" } | ({ type: "Libraries" } & NaviationItemDisplayOptions) | ({ type: "SmartLists" } & NaviationItemDisplayOptions) | ({ type: "BookClubs" } & NaviationItemDisplayOptions)
+export type NavigationItem = { type: "Home" } | { type: "Explore" } | ({ type: "Libraries" } & NavigationItemDisplayOptions) | ({ type: "SmartLists" } & NavigationItemDisplayOptions) | ({ type: "BookClubs" } & NavigationItemDisplayOptions)
 
 export type ArrangementItem<I> = { item: I; visible?: boolean }
 
@@ -398,11 +398,11 @@ export type MediaFilter = ({ id?: string[]; name?: string[]; extension?: string[
  */
 export type BookRelations = { load_series?: boolean | null; load_library?: boolean | null }
 
-export type SeriesBaseFilter = { id?: string[]; name?: string[]; path?: string[]; search?: string | null; metadata?: SeriesMedataFilter | null }
+export type SeriesBaseFilter = { id?: string[]; name?: string[]; path?: string[]; search?: string | null; metadata?: SeriesMetadataFilter | null }
 
-export type SeriesMedataFilter = { meta_type?: string[]; publisher?: string[]; status?: string[]; age_rating?: number | null; volume?: ValueOrRange<number> | null }
+export type SeriesMetadataFilter = { meta_type?: string[]; publisher?: string[]; status?: string[]; age_rating?: number | null; volume?: ValueOrRange<number> | null }
 
-export type SeriesFilter = ({ id?: string[]; name?: string[]; path?: string[]; search?: string | null; metadata?: SeriesMedataFilter | null }) & ({ library?: LibraryBaseFilter | null; media?: MediaBaseFilter | null })
+export type SeriesFilter = ({ id?: string[]; name?: string[]; path?: string[]; search?: string | null; metadata?: SeriesMetadataFilter | null }) & ({ library?: LibraryBaseFilter | null; media?: MediaBaseFilter | null })
 
 export type ValueOrRange<T> = T | Range<T>
 

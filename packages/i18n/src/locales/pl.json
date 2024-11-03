@@ -1308,7 +1308,7 @@
 		}
 	},
 	"tagSelect": {
-		"placholder": "Wybierz lub stwórz etykietę",
+		"placeholder": "Wybierz lub stwórz etykietę",
 		"placeholderNoTags": "Brak etykiet"
 	},
 	"thumbnailDropdown": {

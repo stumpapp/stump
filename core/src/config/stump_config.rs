@@ -173,7 +173,7 @@ pub struct StumpConfig {
 	#[env_key(MAX_THUMBNAIL_CONCURRENCY_KEY)]
 	pub max_thumbnail_concurrency: usize,
 
-	/// The maxium file size, in bytes, of images that can be uploaded, e.g., as thumbnails for users,
+	/// The maximum file size, in bytes, of images that can be uploaded, e.g., as thumbnails for users,
 	/// libraries, series, or media.
 	#[default_value(DEFAULT_MAX_IMAGE_UPLOAD_SIZE)]
 	#[env_key(MAX_IMAGE_UPLOAD_SIZE_KEY)]
@@ -184,7 +184,7 @@ pub struct StumpConfig {
 	#[env_key(ENABLE_UPLOAD_KEY)]
 	pub enable_upload: bool,
 
-	/// The maxium file size, in bytes, of files that can be uploaded to be included in libraries.
+	/// The maximum file size, in bytes, of files that can be uploaded to be included in libraries.
 	#[default_value(DEFAULT_MAX_FILE_UPLOAD_SIZE)]
 	#[env_key(MAX_FILE_UPLOAD_SIZE_KEY)]
 	pub max_file_upload_size: usize,

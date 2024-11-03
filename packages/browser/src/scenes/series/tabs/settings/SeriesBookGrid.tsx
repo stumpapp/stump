@@ -9,7 +9,7 @@ type Props = {
 	seriesId: string
 	onSelectBook: (book: Media) => void
 }
-// TODO: Create generlized VirtualizedGrid component and trim the reused logic
+// TODO: Create generalized VirtualizedGrid component and trim the reused logic
 export default function SeriesBookGrid({ seriesId, onSelectBook }: Props) {
 	const { sdk } = useSDK()
 	const {

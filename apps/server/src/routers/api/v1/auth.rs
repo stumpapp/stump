@@ -199,7 +199,7 @@ async fn login(
 
 	let client = state.db.clone();
 	let today: DateTime<FixedOffset> = Utc::now().into();
-	// TODO: make this configurable via environment variable so knowledgable attackers can't bypass this
+	// TODO: make this configurable via environment variable so knowledgeable attackers can't bypass this
 	let twenty_four_hours_ago = today - Duration::hours(24);
 
 	let fetch_result = client
@@ -237,7 +237,7 @@ async fn login(
 			let user_id = db_user.id.clone();
 			let matches = verify_password(&db_user.hashed_password, &input.password)?;
 			if !matches {
-				// TODO: make this configurable via environment variable so knowledgable attackers can't bypass this
+				// TODO: make this configurable via environment variable so knowledgeable attackers can't bypass this
 				let should_lock_account = db_user
 					.login_activity
 					.as_ref()

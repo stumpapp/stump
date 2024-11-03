@@ -1308,7 +1308,7 @@
 		}
 	},
 	"tagSelect": {
-		"placholder": "Seleccionar o crear etiqueta",
+		"placeholder": "Seleccionar o crear etiqueta",
 		"placeholderNoTags": "No hay etiquetas disponibles"
 	},
 	"thumbnailDropdown": {

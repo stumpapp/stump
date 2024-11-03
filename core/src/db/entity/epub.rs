@@ -63,7 +63,7 @@ pub struct Epub {
 	pub extra_css: Vec<String>,
 }
 
-/// This struct is mainly used when the Stump client sends the inital request to grab information on an epub file.
+/// This struct is mainly used when the Stump client sends the initial request to grab information on an epub file.
 /// This will get cached on the client, which will use the metadata to make consecutive requests for various
 /// resources/chapters. This struct isn't really used after that first request, everything else is file IO using [`EpubDoc`].
 impl Epub {

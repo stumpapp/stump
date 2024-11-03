@@ -53,7 +53,7 @@ export default function EpubNavigationControls({ children }: Props) {
 	/**
 	 * A swipe handler to navigate forward or backward in the book.
 	 *
-	 * Note that the swip handler function semantics are inverted wrt the reading direction.
+	 * Note that the swipe handler function semantics are inverted wrt the reading direction.
 	 */
 	const swipeHandlers = useSwipeable({
 		onSwipedLeft: onForwardNavigation,

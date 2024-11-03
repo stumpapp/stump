@@ -10,7 +10,7 @@ use crate::error::CoreError;
 pub enum FileError {
 	#[error("Error occurred while opening file: {0}")]
 	FileIoError(#[from] io::Error),
-	#[error("A zip error ocurred: {0}")]
+	#[error("A zip error occurred: {0}")]
 	ZipFileError(#[from] ZipError),
 	#[error("Archive contains no files")]
 	ArchiveEmptyError,

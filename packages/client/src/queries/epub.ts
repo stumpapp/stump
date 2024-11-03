@@ -81,9 +81,9 @@ export function useEpub(id: string, _options?: EpubOptions, enabled?: boolean) {
 			corrected = corrected.replace(entry, src)
 		})
 
-		const invlalidHrefs = corrected.match(/href="[^"]+"/g)
+		const invalidHrefs = corrected.match(/href="[^"]+"/g)
 
-		invlalidHrefs?.forEach((entry) => {
+		invalidHrefs?.forEach((entry) => {
 			const href = entry.replace(
 				'href="',
 				`href="${sdk.epub.epubServiceURL(id)}/${epub?.root_base ?? ''}/`,

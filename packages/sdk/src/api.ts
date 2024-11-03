@@ -17,6 +17,7 @@ import {
 	ServerAPI,
 	SmartListAPI,
 	TagAPI,
+	UploadAPI,
 	UserAPI,
 } from './controllers'
 import { formatApiURL } from './utils'
@@ -242,6 +243,10 @@ export class Api {
 	 */
 	get tag(): TagAPI {
 		return new TagAPI(this)
+	}
+
+	get upload(): UploadAPI {
+		return new UploadAPI(this)
 	}
 
 	/**

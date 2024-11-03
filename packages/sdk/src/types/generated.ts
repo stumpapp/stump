@@ -88,9 +88,9 @@ export type NavigationMode = "SIDEBAR" | "TOPBAR"
 
 export type HomeItem = { type: "ContinueReading" } | { type: "RecentlyAddedBooks" } | { type: "RecentlyAddedSeries" } | { type: "Library"; library_id: string } | { type: "SmartList"; smart_list_id: string }
 
-export type NaviationItemDisplayOptions = { show_create_action?: boolean; show_link_to_all?: boolean }
+export type NavigationItemDisplayOptions = { show_create_action?: boolean; show_link_to_all?: boolean }
 
-export type NavigationItem = { type: "Home" } | { type: "Explore" } | ({ type: "Libraries" } & NaviationItemDisplayOptions) | ({ type: "SmartLists" } & NaviationItemDisplayOptions) | ({ type: "BookClubs" } & NaviationItemDisplayOptions)
+export type NavigationItem = { type: "Home" } | { type: "Explore" } | ({ type: "Libraries" } & NavigationItemDisplayOptions) | ({ type: "SmartLists" } & NavigationItemDisplayOptions) | ({ type: "BookClubs" } & NavigationItemDisplayOptions)
 
 export type ArrangementItem<I> = { item: I; visible?: boolean }
 
@@ -418,11 +418,11 @@ export type MediaFilter = ({ id?: string[]; name?: string[]; extension?: string[
  */
 export type BookRelations = { load_series?: boolean | null; load_library?: boolean | null }
 
-export type SeriesBaseFilter = { id?: string[]; name?: string[]; path?: string[]; search?: string | null; metadata?: SeriesMedataFilter | null }
+export type SeriesBaseFilter = { id?: string[]; name?: string[]; path?: string[]; search?: string | null; metadata?: SeriesMetadataFilter | null }
 
-export type SeriesMedataFilter = { meta_type?: string[]; publisher?: string[]; status?: string[]; age_rating?: number | null; volume?: ValueOrRange<number> | null }
+export type SeriesMetadataFilter = { meta_type?: string[]; publisher?: string[]; status?: string[]; age_rating?: number | null; volume?: ValueOrRange<number> | null }
 
-export type SeriesFilter = ({ id?: string[]; name?: string[]; path?: string[]; search?: string | null; metadata?: SeriesMedataFilter | null }) & ({ library?: LibraryBaseFilter | null; media?: MediaBaseFilter | null })
+export type SeriesFilter = ({ id?: string[]; name?: string[]; path?: string[]; search?: string | null; metadata?: SeriesMetadataFilter | null }) & ({ library?: LibraryBaseFilter | null; media?: MediaBaseFilter | null })
 
 export type ValueOrRange<T> = T | Range<T>
 
@@ -515,6 +515,38 @@ export type SmartListRelationOptions = { load_views?: boolean }
 export type SmartListMeta = { matched_books: number; matched_series: number; matched_libraries: number }
 
 export type CreateOrUpdateSmartListView = ({ book_columns: ReactTableColumnSort[]; group_columns: ReactTableColumnSort[]; book_sorting: ReactTableGlobalSort[] | null; group_sorting: ReactTableGlobalSort[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string }
+
+export type UploadConfig = { enabled: boolean; max_file_upload_size: number }
+
+/**
+ * Represents the configuration of a Stump application. This struct is generated at startup
+ * using a TOML file, environment variables, or both and is input when creating a `StumpCore`
+ * instance.
+ * 
+ * Example:
+ * ```
+ * use stump_core::{config::{self, StumpConfig}, StumpCore};
+ * 
+ * #[tokio::main]
+ * async fn main() {
+ * /// Get config dir from environment variables.
+ * let config_dir = config::bootstrap_config_dir();
+ * 
+ * // Create a StumpConfig using the config file and environment variables.
+ * let config = StumpConfig::new(config_dir)
+ * // Load Stump.toml file (if any)
+ * .with_config_file().unwrap()
+ * // Overlay environment variables
+ * .with_environment().unwrap();
+ * 
+ * // Ensure that config directory exists and write Stump.toml.
+ * config.write_config_dir().unwrap();
+ * // Create an instance of the stump core.
+ * let core = StumpCore::new(config).await;
+ * }
+ * ```
+ */
+export type StumpConfig = { profile: string; port: number; verbosity: number; pretty_logs: boolean; db_path: string | null; client_dir: string; custom_templates_dir: string | null; config_dir: string; allowed_origins: string[]; pdfium_path: string | null; disable_swagger: boolean; password_hash_cost: number; session_ttl: number; access_token_ttl: number; expired_session_cleanup_interval: number; max_scanner_concurrency: number; max_thumbnail_concurrency: number; max_image_upload_size: number; enable_upload: boolean; max_file_upload_size: number }
 
 // DESKTOP TYPE GENERATION
 

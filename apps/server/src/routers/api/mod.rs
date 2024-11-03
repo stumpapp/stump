@@ -20,13 +20,15 @@ mod tests {
 		NamedType,
 	};
 
+	use stump_core::config::StumpConfig;
+
 	use crate::{
 		config::jwt::CreatedToken,
 		filter::{
 			LibraryBaseFilter, LibraryFilter, LibraryRelationFilter, LogFilter,
 			MediaBaseFilter, MediaFilter, MediaMetadataBaseFilter, MediaMetadataFilter,
 			MediaMetadataRelationFilter, Range, ReadStatus, SeriesBaseFilter,
-			SeriesFilter, SeriesMedataFilter, SeriesQueryRelation, UserQueryRelation,
+			SeriesFilter, SeriesMetadataFilter, SeriesQueryRelation, UserQueryRelation,
 			ValueOrRange,
 		},
 		routers::api::v1::{
@@ -38,6 +40,7 @@ mod tests {
 				CreateBookClubScheduleBookOption, GetBookClubsParams, UpdateBookClub,
 				UpdateBookClubMember,
 			},
+			config::UploadConfig,
 			emailer::{
 				CreateOrUpdateEmailDevice, CreateOrUpdateEmailer, EmailerIncludeParams,
 				EmailerSendRecordIncludeParams, PatchEmailDevice,
@@ -157,7 +160,9 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<MediaFilter>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<BookRelations>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<SeriesBaseFilter>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<SeriesMedataFilter>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<SeriesMetadataFilter>()?).as_bytes(),
+		)?;
 		file.write_all(format!("{}\n\n", ts_export::<SeriesFilter>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<ValueOrRange<String>>()?).as_bytes(),
@@ -247,6 +252,10 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<CreateOrUpdateSmartListView>()?).as_bytes(),
 		)?;
+
+		file.write_all(format!("{}\n\n", ts_export::<UploadConfig>()?).as_bytes())?;
+
+		file.write_all(format!("{}\n\n", ts_export::<StumpConfig>()?).as_bytes())?;
 
 		Ok(())
 	}

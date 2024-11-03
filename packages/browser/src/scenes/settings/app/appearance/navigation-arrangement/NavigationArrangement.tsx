@@ -67,16 +67,16 @@ export default function NavigationArrangement() {
 		[checkPermission],
 	)
 
-	const [localArragement, setLocalArrangement] = useState(() => arrangement)
+	const [localArrangement, setLocalArrangement] = useState(() => arrangement)
 
 	/**
 	 * A callback to actually update the arrangement on the server.
 	 */
 	const handleUpdateArrangement = useCallback(
-		async (updates: typeof localArragement) => {
+		async (updates: typeof localArrangement) => {
 			try {
 				const result = await updateArrangement(updates)
-				if (!isEqual(result, localArragement)) {
+				if (!isEqual(result, localArrangement)) {
 					setLocalArrangement(result)
 				}
 			} catch (error) {
@@ -84,12 +84,12 @@ export default function NavigationArrangement() {
 				toast.error('Failed to update navigation arrangement')
 			}
 		},
-		[updateArrangement, localArragement],
+		[updateArrangement, localArrangement],
 	)
 
 	const isDifferent = useMemo(
-		() => !isEqual(localArragement, arrangement),
-		[localArragement, arrangement],
+		() => !isEqual(localArrangement, arrangement),
+		[localArrangement, arrangement],
 	)
 	/**
 	 * An effect which will update the arrangement whenever the local arrangement is different
@@ -97,9 +97,9 @@ export default function NavigationArrangement() {
 	 */
 	useEffect(() => {
 		if (isDifferent) {
-			handleUpdateArrangement(localArragement)
+			handleUpdateArrangement(localArrangement)
 		}
-	}, [isDifferent, handleUpdateArrangement, localArragement])
+	}, [isDifferent, handleUpdateArrangement, localArrangement])
 
 	/**
 	 * A callback to handle the end of a drag event. This will update the arrangement
@@ -124,7 +124,7 @@ export default function NavigationArrangement() {
 	const setLocked = (isLocked: boolean) =>
 		setLocalArrangement((curr) => ({ ...curr, locked: isLocked }))
 
-	const { items, locked } = localArragement
+	const { items, locked } = localArrangement
 
 	/**
 	 * A callback to set the visibility of an item in the arrangement.

@@ -1163,11 +1163,11 @@ async fn upload_user_avatar(
 		.await?
 		.ok_or(APIError::NotFound("User not found".to_string()))?;
 
-	let (content_type, bytes) =
+	let upload_data =
 		validate_and_load_image(&mut upload, Some(ctx.config.max_image_upload_size))
 			.await?;
 
-	let ext = content_type.extension();
+	let ext = upload_data.content_type.extension();
 	let username = user.username.clone();
 
 	let base_path = ctx.config.get_avatars_dir().join(username.as_str());
@@ -1179,7 +1179,7 @@ async fn upload_user_avatar(
 	let file_name = format!("{username}.{ext}");
 	let file_path = ctx.config.get_avatars_dir().join(file_name.as_str());
 	let mut file = File::create(file_path.clone())?;
-	file.write_all(&bytes)?;
+	file.write_all(&upload_data.bytes)?;
 
 	let updated_user = client
 		.user()
@@ -1194,5 +1194,8 @@ async fn upload_user_avatar(
 
 	tracing::trace!(?updated_user, "Updated user");
 
-	Ok(ImageResponse::new(content_type, bytes))
+	Ok(ImageResponse::new(
+		upload_data.content_type,
+		upload_data.bytes,
+	))
 }

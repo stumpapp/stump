@@ -27,7 +27,7 @@ pub struct TempLibrary {
 }
 
 impl TempLibrary {
-	/// Creates the root temporary libray for the [`TempLibrary`] struct. Places it
+	/// Creates the root temporary library for the [`TempLibrary`] struct. Places it
 	/// as a child of CARGO_MANIFEST_DIR.
 	fn root() -> TempDir {
 		Builder::new()

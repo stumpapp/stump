@@ -500,7 +500,7 @@ model BookClubBook {
 
   start_at                 DateTime
   end_at                   DateTime
-  discussion_duration_days Int?     @default(1) // in days // TODO: revist this, IDK if it's necessary or how to handle it
+  discussion_duration_days Int?     @default(1) // in days // TODO: revisit this, IDK if it's necessary or how to handle it
 
   // The below group should only be set if the book is not already in the library
   title     String?
@@ -634,7 +634,7 @@ model ReadingList {
   // The visibility of the reading list. ex: "PUBLIC", "PRIVATE" or "SHARED"
   visibility  String   @default("PRIVATE")
   // The ordering of the reading list. This will either be "MANUAL" or a specific
-  // field on the media. ex: 'name', 'created_at', 'pushlish_date', etc.
+  // field on the media. ex: 'name', 'created_at', 'publish_date', etc.
   ordering    String   @default("MANUAL")
 
   // The access control rules for this reading list

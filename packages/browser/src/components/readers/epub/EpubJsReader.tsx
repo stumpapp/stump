@@ -22,7 +22,7 @@ import { stumpDark } from './themes'
 
 /** The props for the EpubJsReader component */
 type EpubJsReaderProps = {
-	/** The ID of the associated media entitiy for this epub */
+	/** The ID of the associated media entity for this epub */
 	id: string
 	/** The initial cfi to start the reader at, i.e. where the read left off */
 	initialCfi: string | null
@@ -209,7 +209,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				rendition_.themes.register('stump-dark', stumpDark)
 				rendition_.on('relocated', handleLocationChange)
 
-				// This callback is used to change the page when a keydown event is recieved.
+				// This callback is used to change the page when a keydown event is received.
 				const keydown_callback = (event: KeyboardEvent) => {
 					// Check arrow keys
 					if (event.key == 'ArrowLeft') {
@@ -403,7 +403,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		[book, rendition],
 	)
 
-	// TODO: suppport incognito mode that doesn't sync progress...
+	// TODO: support incognito mode that doesn't sync progress...
 	const spineSize = epub?.spine.length
 	/**
 	 * This effect is responsible for syncing the current epub progress information to
@@ -461,13 +461,13 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			//* terrible and doesn't provide a better way to do this.
 			const naiveAdjustment = chapterPercentage * (1 / chapterCount)
 
-			const naitveTotal = totalChapterPercentage + naiveAdjustment
-			const isAtEnd = Math.abs(naitveTotal - 1) < 0.02
+			const naiveTotal = totalChapterPercentage + naiveAdjustment
+			const isAtEnd = Math.abs(naiveTotal - 1) < 0.02
 			if (isAtEnd) {
 				//* if total is +- 0.02 of 1, then we are at the end of the book.
 				percentage = 1.0
 			} else {
-				percentage = naitveTotal
+				percentage = naiveTotal
 			}
 
 			handleUpdateProgress({

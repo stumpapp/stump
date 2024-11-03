@@ -7,19 +7,17 @@ import { useMediaMatch } from 'rooks'
 
 import paths from '@/paths'
 
-import { ExplorerContext, ExplorerLayout } from './context'
+import { ExplorerContext, ExplorerLayout, IExplorerContext } from './context'
 import FileExplorer from './FileExplorer'
 import FileExplorerFooter, { FOOTER_HEIGHT } from './FileExplorerFooter'
 import FileExplorerHeader from './FileExplorerHeader'
 import { getBook } from './FileThumbnail'
 
-type Props = {
-	rootPath: string
-}
+type Props = Pick<IExplorerContext, 'libraryID' | 'rootPath' | 'uploadConfig'>
 
 // TODO: refactor to match other explore scenes, e.g. sticky header + fixed footer + window scrolling
 
-export default function FileExplorerProvider({ rootPath }: Props) {
+export default function FileExplorerProvider({ rootPath, ...ctx }: Props) {
 	const navigate = useNavigate()
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const { sdk } = useSDK()
@@ -28,7 +26,7 @@ export default function FileExplorerProvider({ rootPath }: Props) {
 
 	// TODO: I need to store location.state somewhere so that when the user uses native navigation,
 	// their history, or at the very least where they left off, is persisted.
-	const { entries, setPath, path, goForward, goBack, canGoBack, canGoForward } =
+	const { entries, setPath, path, goForward, goBack, canGoBack, canGoForward, refetch } =
 		useDirectoryListing({
 			enabled: !!rootPath,
 			enforcedRoot: rootPath,
@@ -73,8 +71,10 @@ export default function FileExplorerProvider({ rootPath }: Props) {
 				goForward,
 				layout,
 				onSelect: handleSelect,
+				refetch,
 				rootPath,
 				setLayout: changeLayout,
+				...ctx,
 			}}
 		>
 			<div className="flex h-full flex-1 flex-col">

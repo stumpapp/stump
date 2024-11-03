@@ -15,7 +15,7 @@ export default function SmartListSettingsRouter() {
 	const { list } = useSmartListContext()
 	const { update } = useUpdateSmartList({ id: list.id })
 
-	// TODO: This is particularly fallible. It would be a lot wiser to eventually just.. yknow, literally
+	// TODO: This is particularly fallible. It would be a lot wiser to eventually just.. y'know, literally
 	// implement a patch endpoint lol. I'm being very lazy but I'll get to it. I'm tired!
 	/**
 	 * A pseudo-patch function which will update the list, mixing what is present in the cache

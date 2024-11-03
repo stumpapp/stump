@@ -9,7 +9,7 @@ type Props = {
 	libraryId: string
 	onSelectSeries: (series: Series) => void
 }
-// TODO: Create generlized VirtualizedGrid component and trim the reused logic
+// TODO: Create generalized VirtualizedGrid component and trim the reused logic
 export default function LibrarySeriesGrid({ libraryId, onSelectSeries }: Props) {
 	const { sdk } = useSDK()
 	const { series, fetchNextPage, hasNextPage } = useSeriesCursorQuery({

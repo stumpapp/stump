@@ -30,7 +30,7 @@ Stump **is not** a tool used for fetching or downloading any kind of media. It i
 
 ## Why Stump?
 
-There are some really solid, self-hostable, OPDS media servers out there. I started out using [Komga](https://komga.org). I initially started developing Stump becuase I thought it would be cool to learn what goes into making something like Komga myself.
+There are some really solid, self-hostable, OPDS media servers out there. I started out using [Komga](https://komga.org). I initially started developing Stump because I thought it would be cool to learn what goes into making something like Komga myself.
 
 In general, Stump strives for the following:
 

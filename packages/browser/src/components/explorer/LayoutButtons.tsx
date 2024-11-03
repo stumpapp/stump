@@ -7,8 +7,8 @@ export default function LayoutButtons() {
 	const { layout, setLayout } = useFileExplorerContext()
 
 	return (
-		<>
-			<ToolTip content="Grid view">
+		<div className="flex shrink-0 items-center gap-1">
+			<ToolTip content="Grid view" align="end">
 				<IconButton
 					variant="ghost"
 					size="xs"
@@ -21,7 +21,7 @@ export default function LayoutButtons() {
 				</IconButton>
 			</ToolTip>
 
-			<ToolTip content="Table view">
+			<ToolTip content="Table view" align="end">
 				<IconButton
 					variant="ghost"
 					size="xs"
@@ -33,6 +33,6 @@ export default function LayoutButtons() {
 					<Table className="h-4 w-4" />
 				</IconButton>
 			</ToolTip>
-		</>
+		</div>
 	)
 }

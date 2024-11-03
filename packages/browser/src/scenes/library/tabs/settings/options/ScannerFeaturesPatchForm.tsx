@@ -50,7 +50,7 @@ export default function ScannerFeaturesPatchForm() {
 	return (
 		<Form form={form} onSubmit={handleSubmit} fieldsetClassName="space-y-12">
 			{/* Note: This component doesn't really belong here, but I didn't want to wrap it in its own form when it is just for display */}
-			{/* Should probably create a separate, non-formy variant */}
+			{/* Should probably create a separate, non-form variant */}
 			<LibraryPattern />
 			<ScannerOptInFeatures onDidChange={handleSubmit} />
 		</Form>

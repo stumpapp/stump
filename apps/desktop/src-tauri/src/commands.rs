@@ -13,7 +13,7 @@ use crate::{
 
 /// An error type for the desktop RPC commands.
 #[derive(Debug, Serialize, thiserror::Error)]
-pub enum DeskopRPCError {
+pub enum DesktopRPCError {
 	#[error("Failed to get state in handler")]
 	MutexPoisoned,
 	#[error("{0}")]
@@ -24,7 +24,7 @@ pub enum DeskopRPCError {
 	StoreError(#[from] StoreError),
 }
 
-impl From<SecureStoreError> for DeskopRPCError {
+impl From<SecureStoreError> for DesktopRPCError {
 	fn from(error: SecureStoreError) -> Self {
 		Self::CredentialsError(error.to_string())
 	}
@@ -34,8 +34,8 @@ impl From<SecureStoreError> for DeskopRPCError {
 pub fn set_use_discord_connection(
 	connect: bool,
 	ctx: State<WrappedState>,
-) -> Result<(), DeskopRPCError> {
-	let mut state = ctx.lock().map_err(|_| DeskopRPCError::MutexPoisoned)?;
+) -> Result<(), DesktopRPCError> {
+	let mut state = ctx.lock().map_err(|_| DesktopRPCError::MutexPoisoned)?;
 	let discord_client = &mut state.discord_client;
 
 	if connect {
@@ -53,8 +53,8 @@ pub fn set_discord_presence(
 	status: Option<String>,
 	details: Option<String>,
 	state: State<WrappedState>,
-) -> Result<(), DeskopRPCError> {
-	let mut state = state.lock().map_err(|_| DeskopRPCError::MutexPoisoned)?;
+) -> Result<(), DesktopRPCError> {
+	let mut state = state.lock().map_err(|_| DesktopRPCError::MutexPoisoned)?;
 	let discord_client = &mut state.discord_client;
 
 	if discord_client.is_connected() {
@@ -67,7 +67,7 @@ pub fn set_discord_presence(
 #[tauri::command]
 pub async fn get_current_server(
 	app_handle: AppHandle,
-) -> Result<Option<String>, DeskopRPCError> {
+) -> Result<Option<String>, DesktopRPCError> {
 	let store = AppStore::load_store(&app_handle)?;
 	let server = store.get_active_server();
 	Ok(server.map(|s| s.name))
@@ -77,8 +77,8 @@ pub async fn get_current_server(
 pub async fn init_credential_store(
 	state: State<'_, WrappedState>,
 	app_handle: AppHandle,
-) -> Result<(), DeskopRPCError> {
-	let mut state = state.lock().map_err(|_| DeskopRPCError::MutexPoisoned)?;
+) -> Result<(), DesktopRPCError> {
+	let mut state = state.lock().map_err(|_| DesktopRPCError::MutexPoisoned)?;
 	let store = AppStore::load_store(&app_handle)?;
 
 	let servers = store.get_servers();
@@ -93,8 +93,8 @@ pub async fn init_credential_store(
 #[tauri::command]
 pub async fn get_credential_store_state(
 	state: State<'_, WrappedState>,
-) -> Result<CredentialStoreTokenState, DeskopRPCError> {
-	let state = state.lock().map_err(|_| DeskopRPCError::MutexPoisoned)?;
+) -> Result<CredentialStoreTokenState, DesktopRPCError> {
+	let state = state.lock().map_err(|_| DesktopRPCError::MutexPoisoned)?;
 	Ok(state.secure_store.get_login_state())
 }
 
@@ -102,8 +102,8 @@ pub async fn get_credential_store_state(
 pub async fn get_api_token(
 	server: String,
 	state: State<'_, WrappedState>,
-) -> Result<Option<String>, DeskopRPCError> {
-	let state = state.lock().map_err(|_| DeskopRPCError::MutexPoisoned)?;
+) -> Result<Option<String>, DesktopRPCError> {
+	let state = state.lock().map_err(|_| DesktopRPCError::MutexPoisoned)?;
 
 	let token = state.secure_store.get_api_token(server)?;
 
@@ -115,8 +115,8 @@ pub async fn set_api_token(
 	server: String,
 	token: String,
 	state: State<'_, WrappedState>,
-) -> Result<(), DeskopRPCError> {
-	let state = state.lock().map_err(|_| DeskopRPCError::MutexPoisoned)?;
+) -> Result<(), DesktopRPCError> {
+	let state = state.lock().map_err(|_| DesktopRPCError::MutexPoisoned)?;
 
 	state.secure_store.set_api_token(server, token)?;
 
@@ -127,16 +127,16 @@ pub async fn set_api_token(
 pub async fn delete_api_token(
 	server: String,
 	state: State<'_, WrappedState>,
-) -> Result<bool, DeskopRPCError> {
-	let state = state.lock().map_err(|_| DeskopRPCError::MutexPoisoned)?;
+) -> Result<bool, DesktopRPCError> {
+	let state = state.lock().map_err(|_| DesktopRPCError::MutexPoisoned)?;
 	Ok(state.secure_store.delete_api_token(server)?)
 }
 
 #[tauri::command]
 pub async fn clear_credential_store(
 	state: State<'_, WrappedState>,
-) -> Result<(), DeskopRPCError> {
-	let mut state = state.lock().map_err(|_| DeskopRPCError::MutexPoisoned)?;
+) -> Result<(), DesktopRPCError> {
+	let mut state = state.lock().map_err(|_| DesktopRPCError::MutexPoisoned)?;
 	state.secure_store.clear();
 	Ok(())
 }

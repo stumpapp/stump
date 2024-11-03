@@ -61,7 +61,7 @@ impl Ctx {
 	}
 
 	// Note: I cannot use #[cfg(test)] here because the tests are in a different crate and
-	// the `cfg` attribute only works for the current crate. Potential work arounds:
+	// the `cfg` attribute only works for the current crate. Potential workarounds:
 	// - https://github.com/rust-lang/cargo/issues/8379
 
 	/// Creates a [Ctx] instance for testing **only**. The prisma client is created
@@ -132,7 +132,7 @@ impl Ctx {
 		Arc::new(self.clone())
 	}
 
-	/// Returns the reciever for the `CoreEvent` channel. See [`emit_event`]
+	/// Returns the receiver for the `CoreEvent` channel. See [`emit_event`]
 	/// for more information and an example usage.
 	pub fn get_client_receiver(&self) -> Receiver<CoreEvent> {
 		self.event_channel.0.subscribe()

@@ -45,7 +45,7 @@ impl StumpConfigVariable {
 }
 
 /// Parses a struct, extracting a vec representing each of its fields
-/// so that they can be reprsented in the macro's output code.
+/// so that they can be represented in the macro's output code.
 pub fn get_config_variables(data_struct: &DataStruct) -> Vec<StumpConfigVariable> {
 	let mut output_vec = Vec::new();
 
@@ -117,10 +117,10 @@ fn parse_config_var_attributes(field: &Field) -> StumpConfigVariableAttributes {
 
 		// #[validator(fn)]
 		if attr.path().is_ident("validator") {
-			let validator_iden: Ident = attr.parse_args().unwrap_or_else(|e| {
+			let validator_ident: Ident = attr.parse_args().unwrap_or_else(|e| {
 				panic!("Failed to parse validator identity for {field_ident}: {e}")
 			});
-			validator = Some(validator_iden);
+			validator = Some(validator_ident);
 		}
 	}
 

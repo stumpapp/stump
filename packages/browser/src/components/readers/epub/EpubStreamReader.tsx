@@ -8,8 +8,8 @@ import { useNavigate } from 'react-router-dom'
 /*
 	NOTE: I have decided to move this streamable epub reading to a future feature.
 	I have to write a mini epub engine to get this working. Readium isn't MIT licensed,
-	and I'd rather not change MIT if possibile. So, for now, I'm going to get the 
-	epub.js reader working well and then get the other core features imlpemented
+	and I'd rather not change MIT if possible. So, for now, I'm going to get the 
+	epub.js reader working well and then get the other core features implemented
 	before I jump back into this. Once that happens, the overview of what needs to get
 	implemented will be:
 		- epubcfi parsing and generating
@@ -26,7 +26,7 @@ export default function EpubStreamReader({ epub, actions, ...rest }: UseEpubRetu
 	const navigate = useNavigate()
 
 	// const { isLoading: isFetchingResource, data: content } = useQuery(
-	// 	['getEbubResource', actions.currentResource()],
+	// 	['getEpubResource', actions.currentResource()],
 	// 	{
 	// 		queryFn: () => getEpubResource().then((res) => res.data),
 	// 	},

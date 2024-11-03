@@ -60,7 +60,7 @@ pub fn parse_option_inner_type(type_path: &TypePath) -> (TokenStream, bool) {
 				panic!("Failed to unravel Option, are angle brackets empty?");
 			}
 		},
-		// This shouldn't happen either, but would occur if Option had no angle backets
+		// This shouldn't happen either, but would occur if Option had no angle brackets
 		_ => panic!("Failed to unravel Option, is there no type for Option<T>?"),
 	}
 }

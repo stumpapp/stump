@@ -1308,7 +1308,7 @@
 		}
 	},
 	"tagSelect": {
-		"placholder": "Vyberte nebo vytvořte štítek",
+		"placeholder": "Vyberte nebo vytvořte štítek",
 		"placeholderNoTags": "Nejsou k dispozici žádné štítky"
 	},
 	"thumbnailDropdown": {

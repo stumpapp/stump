@@ -4,7 +4,7 @@ This app is the code for Stump's [documentation site](https://stumpapp.dev). It 
 
 ## Deployment
 
-Deployements are handled manually using the Vercel CLI. To deploy, run:
+Deployments are handled manually using the Vercel CLI. To deploy, run:
 
 ```bash
 vercel

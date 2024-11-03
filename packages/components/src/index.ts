@@ -2,7 +2,7 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Any = any
 
-export { Accordion } from './accordian'
+export { Accordion } from './accordion'
 export { Alert } from './alert'
 export { Badge, type BadgeProps } from './badge'
 export { Breadcrumbs, type BreadcrumbsProps } from './breadcrumbs'

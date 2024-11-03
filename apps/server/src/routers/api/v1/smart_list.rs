@@ -621,7 +621,7 @@ async fn create_smart_list_view(
 	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
 	let client = &ctx.db;
 
-	// NOTE: views are currently completely detatched from a user, rather they are tied
+	// NOTE: views are currently completely detached from a user, rather they are tied
 	// only to the smart list. This makes _this_ aspect a bit awkward. For now, to not over
 	// complicate sharing and permissions, I will leave this as-is. But this can be a future
 	// improvement down the road.

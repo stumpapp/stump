@@ -4,7 +4,7 @@ use stump_core::prisma::{media_metadata, series_metadata};
 use crate::{
 	filter::{
 		chain_optional_iter, MediaMetadataBaseFilter, MediaMetadataFilter,
-		MediaMetadataRelationFilter, SeriesMedataFilter, ValueOrRange,
+		MediaMetadataRelationFilter, SeriesMetadataFilter, ValueOrRange,
 	},
 	routers::api::filters::apply_media_filters,
 };
@@ -96,7 +96,7 @@ pub(crate) fn apply_media_metadata_filters(
 }
 
 pub(crate) fn apply_series_metadata_filters(
-	filters: SeriesMedataFilter,
+	filters: SeriesMetadataFilter,
 ) -> Vec<series_metadata::WhereParam> {
 	chain_optional_iter(
 		[],

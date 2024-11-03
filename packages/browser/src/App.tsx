@@ -77,7 +77,7 @@ function RouterContainer(props: StumpClientProps) {
 		})
 	}
 
-	const handleUnathenticatedResponse = (redirectUrl?: string) => {
+	const handleUnauthenticatedResponse = (redirectUrl?: string) => {
 		props.onUnauthenticatedResponse?.(redirectUrl)
 		setUser(null)
 		if (redirectUrl) {
@@ -96,7 +96,7 @@ function RouterContainer(props: StumpClientProps) {
 
 	return (
 		<StumpClientContextProvider
-			onUnauthenticatedResponse={handleUnathenticatedResponse}
+			onUnauthenticatedResponse={handleUnauthenticatedResponse}
 			onConnectionWithServerChanged={handleConnectionWithServerChanged}
 			tauriRPC={props.tauriRPC}
 			onAuthenticated={props.onAuthenticated}

@@ -11,7 +11,7 @@ type Props = {
 	bookId: string
 	pages: number
 }
-// TODO: Create generlized VirtualizedGrid component and trim the reused logic
+// TODO: Create generalized VirtualizedGrid component and trim the reused logic
 export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage }: Props) {
 	const { sdk } = useSDK()
 	const parentRef = useRef<HTMLDivElement>(null)

@@ -111,7 +111,7 @@ impl From<ContentType> for OPDSLinkType {
 }
 
 /// A struct for representing the common elements of an OPDS link. Other link types can be derived from this struct,
-/// such as [OPDSImageLink] and [OPDSNavigationLink], and flattened for serialization into a unfied JSON object.
+/// such as [OPDSImageLink] and [OPDSNavigationLink], and flattened for serialization into a unified JSON object.
 #[skip_serializing_none]
 #[derive(Debug, Default, Clone, Builder, Serialize, Deserialize)]
 #[builder(build_fn(error = "crate::CoreError"), default, setter(into))]

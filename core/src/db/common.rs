@@ -16,7 +16,7 @@ pub struct SeriesMediaCountQueryReturn {
 	pub count: i64,
 }
 
-// TODO: Replace pretty much all of these once prisma client suports relation counts. That's
+// TODO: Replace pretty much all of these once prisma client supports relation counts. That's
 // all this trait is used for. See the various FIXME notes throughout that say:
 // PCR doesn't support relation counts yet!
 #[async_trait::async_trait]

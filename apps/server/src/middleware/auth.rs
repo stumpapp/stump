@@ -304,7 +304,7 @@ async fn handle_basic_auth(
 	} else if is_match {
 		tracing::trace!(
 			username = &user.username,
-			"Basic authentication sucessful. Creating session for user"
+			"Basic authentication successful. Creating session for user"
 		);
 		enforce_max_sessions(&user, client).await?;
 		let user = User::from(user);
@@ -352,10 +352,10 @@ impl IntoResponse for OPDSBasicAuth {
 					return APIError::InternalServerError(e.to_string()).into_response();
 				},
 			};
-			let json_repsonse = Json(document).into_response();
-			let body = json_repsonse.into_body();
+			let json_response = Json(document).into_response();
+			let body = json_response.into_body();
 
-			// We want to ecourage the client to delete any existing session cookies when the current
+			// We want to encourage the client to delete any existing session cookies when the current
 			// is no longer valid
 			let delete_cookie = delete_cookie_header();
 

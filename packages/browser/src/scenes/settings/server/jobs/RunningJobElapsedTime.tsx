@@ -24,7 +24,7 @@ export default function RunningJobElapsedTime({ job, formatDuration }: Props) {
 		}
 	}, [job])
 
-	const formatedDuration = useMemo(
+	const formattedDuration = useMemo(
 		() =>
 			formatDuration(
 				// we need to add 1 second to the elapsed time because the duration
@@ -36,7 +36,7 @@ export default function RunningJobElapsedTime({ job, formatDuration }: Props) {
 
 	return (
 		<Text size="sm" variant="muted" className="line-clamp-1">
-			{formatedDuration}
+			{formattedDuration}
 		</Text>
 	)
 }

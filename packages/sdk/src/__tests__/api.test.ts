@@ -62,7 +62,7 @@ describe('Api', () => {
 	})
 
 	describe('session auth', () => {
-		it('should create an axious instance properly', () => {
+		it('should create an axios instance properly', () => {
 			const api = new Api('http://localhost:10801', 'session')
 			expect(axios.create).toHaveBeenCalledWith({
 				baseURL: 'http://localhost:10801/api/v1',
@@ -73,7 +73,7 @@ describe('Api', () => {
 	})
 
 	describe('token auth', () => {
-		it('should create an axious instance properly', () => {
+		it('should create an axios instance properly', () => {
 			const api = new Api('http://localhost:10801', 'token')
 			expect(axios.create).toHaveBeenCalledWith({
 				baseURL: 'http://localhost:10801/api/v1',

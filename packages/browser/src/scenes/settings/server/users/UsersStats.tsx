@@ -80,7 +80,7 @@ export default function UsersStats() {
 	)
 
 	/**
-	 * The total number of finsihed books throughout all users on the server
+	 * The total number of finished books throughout all users on the server
 	 */
 	const booksRead = users.reduce<BookReadStats>(
 		(acc, user) => {

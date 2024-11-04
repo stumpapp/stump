@@ -110,7 +110,7 @@ async fn ping() -> APIResult<String> {
 #[derive(Serialize, Deserialize, Type, ToSchema)]
 pub struct StumpVersion {
 	// TODO: add docker tag since special versions (e.g. nightly, experimental) will have the latest semver but a different commit
-	// Also will allow for the UI to display explcitly the docker tag if it's a special version
+	// Also will allow for the UI to display explicitly the docker tag if it's a special version
 	pub semver: String,
 	pub rev: String,
 	pub compile_time: String,

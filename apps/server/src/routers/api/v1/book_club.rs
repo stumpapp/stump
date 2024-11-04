@@ -44,7 +44,7 @@ use crate::{
 // TODO: patch schedule
 // TODO: check members can access the books in the schedule. I don't think lack of access should necessarily
 // be an error, but it would definitely be a warning for admins/creator
-// TODO: users that are members but have the feature revoked need some reconcilation...
+// TODO: users that are members but have the feature revoked need some reconciliation...
 
 // TODO: adjust the instrumentation once ret(err) is supported: https://github.com/tokio-rs/tracing/pull/2970
 
@@ -344,7 +344,7 @@ async fn update_book_club(
 	let viewer = req.user();
 
 	// Query first for access control. Realistically, I could `update_many` with the
-	// access assertions, but I would have to requery for the book afterwards anyways
+	// access assertions, but I would have to re-query for the book afterwards anyways
 	let book_club = client
 		.book_club()
 		.find_first(vec![

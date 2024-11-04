@@ -5,7 +5,9 @@ import { Callout } from 'nextra/components'
 Stump has an opt-in feature that allows your users to upload books to your server.
 
 <Callout emoji="⚠️">
-  This functionality allows files to be uploaded to your server, so it should be used with caution, and requires the server owner manually enable it by setting the `enable_upload` configuration variable to `true`.
+	This functionality allows files to be uploaded to your server, so it should be used with caution.
+	This feature must be manually enabled by the server owner by setting the `enable_upload`
+	configuration variable to `true`.
 </Callout>
 
 ## Enabling upload
@@ -18,7 +20,7 @@ When uploading is not enabled, the routes for uploading will not be attached to 
 
 Only users with permission to upload are allowed to add files to the server. Users will need the following permissions:
 
-- `upload:files`
+- `file:upload`
 - `manage:library`
 
 The servr owner can assign these permissions to users on the user management settings page. For more information on that process, see the [user permissions](/guides/access-control/permissions) guide.
@@ -39,7 +41,7 @@ Users can upload one or more book files (e.g., `.cbz`, `.cbr`, `.epub`, and `.pd
 
 ### Uploading Series
 
-Users can uploada  `.zip` file containing multiple books in an arbitrary directory structure. The archive will be extracted to the location specified when uploading.
+Users can uploada `.zip` file containing multiple books in an arbitrary directory structure. The archive will be extracted to the location specified when uploading.
 
 ### Security considerations
 
@@ -67,7 +69,7 @@ A bad request error will be returned if the request includes disallowed files or
 
 ### 401 Unauthorized
 
-This error indicates that the user attempting to upload files does not have the required `upload:files` or `manage:library` permissions.
+This error indicates that the user attempting to upload files does not have the required `file:upload` or `manage:library` permissions.
 
 ### 404 Not found
 
@@ -78,5 +80,6 @@ This error may indicate that uploading has not been enabled for your server. Dou
 The uploaded files exceeded your configured maximum upload size. Consider increasing the value of `max_file_upload_size` in `Stump.toml` or changing the value of the `STUMP_MAX_FILE_UPLOAD_SIZE` environment variable.
 
 <Callout emoji="📢">
-  If you have any questions or encounter issues, please open an [issue](https://github.com/stumpapp/stump/issues/new/choose) on GitHub.
+	If you have any questions or encounter issues, please open an
+	[issue](https://github.com/stumpapp/stump/issues/new/choose) on GitHub.
 </Callout>

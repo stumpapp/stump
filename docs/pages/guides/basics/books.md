@@ -41,7 +41,7 @@ You should ensure that your browser supports the format you plan to use. You can
 
 ## Metadata
 
-Metadata is an associated set of information _about_ a book, such as its title, author, etc. Different formats have different ways of storing and representing metadata. Stump will attempt to extract as much metadata as possible from a given book, however it is not always possible. For example, PDF files do not generally have very good metadata support, and comic book files (e.g. CBZ/CBR) often times have very malformed metadata.
+Metadata is an associated set of information _about_ a book, such as its title, author, etc. Different formats have different ways of storing and representing metadata. Stump will attempt to extract as much metadata as possible from a given book, however it is not always possible. For example, PDF files do not generally have very good metadata support, and comic book files (e.g., CBZ/CBR) often times have very malformed metadata.
 
 ### Sources per format
 

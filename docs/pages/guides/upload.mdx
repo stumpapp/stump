@@ -1,0 +1,82 @@
+import { Callout } from 'nextra/components'
+
+# Uploading Books
+
+Stump has an opt-in feature that allows your users to upload books to your server.
+
+<Callout emoji="⚠️">
+  This functionality allows files to be uploaded to your server, so it should be used with caution, and requires the server owner manually enable it by setting the `enable_upload` configuration variable to `true`.
+</Callout>
+
+## Enabling upload
+
+Uploading is **disabled by default**, and is gated behind the `enable_upload` configuration variable (`true` enables uploading). This variable can be set by modifying your `stump.toml` file to set `enable_upload: true` or by setting the environment variable `STUMP_ENABLE_UPLOAD = true`.
+
+When uploading is not enabled, the routes for uploading will not be attached to your server, and the web UI will not show the upload interface. Attempting to access uploading directly through the API will result in HTTP Error 404.
+
+### Permissions
+
+Only users with permission to upload are allowed to add files to the server. Users will need the following permissions:
+
+- `upload:files`
+- `manage:library`
+
+The servr owner can assign these permissions to users on the user management settings page. For more information on that process, see the [user permissions](/guides/access-control/permissions) guide.
+
+### Configuration
+
+The server limits the maximum upload size based on your configuration, you can change `max_file_upload_size` in `stump.toml` or the `STUMP_MAX_FILE_UPLOAD_SIZE` environment variable to set the maximum allowed upload size in bytes.
+
+## How it works
+
+This feature allows users to upload books or an entire collection of files and directories via series upload.
+
+After an upload finishes, a library scan will automatically be started to add the newly uploaded books.
+
+### Uploading books
+
+Users can upload one or more book files (e.g., `.cbz`, `.cbr`, `.epub`, and `.pdf` files) to a specific library directory.
+
+### Uploading Series
+
+Users can uploada  `.zip` file containing multiple books in an arbitrary directory structure. The archive will be extracted to the location specified when uploading.
+
+### Security considerations
+
+Stump attempts to validate uploads in order to protect the host system from misuse of upload functionality, but it should be used with care. The following section describes the validation Stump applies to incoming upload requests.
+
+#### Validations
+
+- File type: Only certain file types are permitted in uploads.
+  - Books: Only `.cbr`, `.cbz`, `.epub`, and `.pdf` files are allowed.
+  - Series: Only `.zip` archives can be uploaded.
+    - The contents of the archive must also be limited to: `.cbr`, `.cbz`, `.epub`, `.pdf`, `.xml`, `.json` and image file types.
+- Content-Type: The server attempts to validate content-type of uploads to reject anything not matching the files above.
+- Path validation: The server will not allow uploads outside the library for which they are intended, and special path components like `..` will be rejected entirely.
+- Overwrite protection: An upload cannot overwrite an existing file.
+
+Despite these validations, it may be possible to construct input that circumvents this validation. Server owners are encouraged to only enable this functionality if they need it, and to only allow trusted users permission to upload files.
+
+## Troubleshooting
+
+This section provides explanations for possible errors you may encounter when uploading files.
+
+### 400 Bad request
+
+A bad request error will be returned if the request includes disallowed files or attempts to access a path outside the library for which the upload is intended.
+
+### 401 Unauthorized
+
+This error indicates that the user attempting to upload files does not have the required `upload:files` or `manage:library` permissions.
+
+### 404 Not found
+
+This error may indicate that uploading has not been enabled for your server. Double check that you have `enable_upload: true` in your `stump.toml` or `STUMP_ENABLE_UPLOAD = true` set in your environment.
+
+### 413 Payload too large
+
+The uploaded files exceeded your configured maximum upload size. Consider increasing the value of `max_file_upload_size` in `stump.toml` or changing the value of the `STUMP_MAX_FILE_UPLOAD_SIZE` environment variable.
+
+<Callout emoji="📢">
+  If you have any questions or encounter issues, please reach out via the [community forums](https://community.stumpapp.dev) or open an [issue](https://github.com/stumpapp/stump/issues/new/choose) on GitHub.
+</Callout>

@@ -23,7 +23,7 @@ Only users with permission to upload are allowed to add files to the server. Use
 - `file:upload`
 - `manage:library`
 
-The servr owner can assign these permissions to users on the user management settings page. For more information on that process, see the [user permissions](/guides/access-control/permissions) guide.
+The server owner can assign these permissions to users on the user management settings page. For more information on that process, see the [user permissions](/guides/access-control/permissions) guide.
 
 ### Configuration
 
@@ -57,7 +57,7 @@ Stump attempts to validate uploads in order to protect the host system from misu
 - Path validation: The server will not allow uploads outside the library for which they are intended, and special path components like `..` will be rejected entirely.
 - Overwrite protection: An upload cannot overwrite an existing file.
 
-Despite these validations, it may be possible to construct input that circumvents this validation. Server owners are encouraged to only enable this functionality if they need it, and to only allow trusted users permission to upload files.
+It may be possible to construct input that circumvents this validation. Server owners are encouraged to only enable this functionality if they need it and to only allow trusted users permission to upload files.
 
 ## Troubleshooting
 

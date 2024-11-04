@@ -141,9 +141,9 @@ Whether or not to enable Swagger UI. To learn more about what Swagger UI is, vis
 
 The maximum size, in bytes, for images uploaded as thumbnails for users, libraries, series, or media.
 
-| Type    | Default Value |
-| ------- | ------------- |
-| Integer | (20 MB)       |
+| Type    | Default Value      |
+| ------- | ------------------ |
+| Integer | `20971520` (20 MB) |
 
 #### ENABLE_UPLOAD
 
@@ -155,6 +155,6 @@ The maximum size, in bytes, for images uploaded as thumbnails for users, librari
 
 The maximum allowed size, in bytes, of files uploaded via the upload interface. This configuration variable will have no effect unless `ENABLE_UPLOAD` is `true`.
 
-| Type    | Default Value |
-| ------- | ------------- |
-| Integer | (20 MB)       |
+| Type    | Default Value      |
+| ------- | ------------------ |
+| Integer | `20971520` (20 MB) |

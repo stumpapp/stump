@@ -135,7 +135,7 @@ pub enum APIError {
 	SessionFetchError(#[from] SessionError),
 	#[error("{0}")]
 	#[schema(value_type = String)]
-	PrismaError(#[from] QueryError),
+	PrismaError(#[from] Box<QueryError>),
 }
 
 impl APIError {
@@ -286,6 +286,12 @@ impl From<ProcessorError> for APIError {
 impl From<std::io::Error> for APIError {
 	fn from(error: std::io::Error) -> APIError {
 		APIError::InternalServerError(error.to_string())
+	}
+}
+
+impl From<prisma_client_rust::QueryError> for APIError {
+	fn from(error: prisma_client_rust::QueryError) -> Self {
+		Self::PrismaError(Box::new(error))
 	}
 }
 

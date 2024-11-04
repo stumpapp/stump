@@ -8,7 +8,7 @@ If you're using Stump with Docker, you'll want to specify environment variables 
 
 ## Configuration Options
 
-There are a number of configuration options that you can set to customize Stump's behavior. You will be setting these options in the `Stomp.toml` file, but you can also set them as environment variables.
+There are a number of configuration options that you can set to customize Stump's behavior. You will be setting these options in the `Stump.toml` file, but you can also set them as environment variables.
 
 ### Environment Variables
 

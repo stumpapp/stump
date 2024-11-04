@@ -10,7 +10,7 @@ Stump has an opt-in feature that allows your users to upload books to your serve
 
 ## Enabling upload
 
-Uploading is **disabled by default**, and is gated behind the `enable_upload` configuration variable (`true` enables uploading). This variable can be set by modifying your `stump.toml` file to set `enable_upload: true` or by setting the environment variable `STUMP_ENABLE_UPLOAD = true`.
+Uploading is **disabled by default**, and is gated behind the `enable_upload` configuration variable (`true` enables uploading). This variable can be set by modifying your `Stump.toml` file to set `enable_upload: true` or by setting the environment variable `STUMP_ENABLE_UPLOAD = true`.
 
 When uploading is not enabled, the routes for uploading will not be attached to your server, and the web UI will not show the upload interface. Attempting to access uploading directly through the API will result in HTTP Error 404.
 
@@ -25,7 +25,7 @@ The servr owner can assign these permissions to users on the user management set
 
 ### Configuration
 
-The server limits the maximum upload size based on your configuration, you can change `max_file_upload_size` in `stump.toml` or the `STUMP_MAX_FILE_UPLOAD_SIZE` environment variable to set the maximum allowed upload size in bytes.
+The server limits the maximum upload size based on your configuration, you can change `max_file_upload_size` in `Stump.toml` or the `STUMP_MAX_FILE_UPLOAD_SIZE` environment variable to set the maximum allowed upload size in bytes.
 
 ## How it works
 
@@ -71,11 +71,11 @@ This error indicates that the user attempting to upload files does not have the 
 
 ### 404 Not found
 
-This error may indicate that uploading has not been enabled for your server. Double check that you have `enable_upload: true` in your `stump.toml` or `STUMP_ENABLE_UPLOAD = true` set in your environment.
+This error may indicate that uploading has not been enabled for your server. Double check that you have `enable_upload: true` in your `Stump.toml` or `STUMP_ENABLE_UPLOAD = true` set in your environment.
 
 ### 413 Payload too large
 
-The uploaded files exceeded your configured maximum upload size. Consider increasing the value of `max_file_upload_size` in `stump.toml` or changing the value of the `STUMP_MAX_FILE_UPLOAD_SIZE` environment variable.
+The uploaded files exceeded your configured maximum upload size. Consider increasing the value of `max_file_upload_size` in `Stump.toml` or changing the value of the `STUMP_MAX_FILE_UPLOAD_SIZE` environment variable.
 
 <Callout emoji="📢">
   If you have any questions or encounter issues, please open an [issue](https://github.com/stumpapp/stump/issues/new/choose) on GitHub.

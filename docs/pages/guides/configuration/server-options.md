@@ -24,7 +24,7 @@ The version of the Stump API to use. This should really be left alone and **not*
 
 This corresponds to the `api_version` configuration option in the `Stump.toml` file.
 
-### PDFIUM_PATH
+#### PDFIUM_PATH
 
 The path to the PDFium binary. This is only required if you want PDF support and you're running Stump outside of Docker, since the PDFium binary is included in the Docker image. You'll want to find and download the PDFium binary for your platform from [here](https://github.com/bblanchon/pdfium-binaries/releases), and then set this environment variable to the path of the binary.
 
@@ -32,7 +32,7 @@ The path to the PDFium binary. This is only required if you want PDF support and
 | ------ | ----------------------------- |
 | String | `/lib/libpdfium.so` in Docker |
 
-### SESSION_EXPIRY_CLEANUP_INTERVAL
+#### SESSION_EXPIRY_CLEANUP_INTERVAL
 
 The time (_in seconds_) between each session expiry cleanup check. The check will remove any expired sessions from the database.
 
@@ -40,7 +40,7 @@ The time (_in seconds_) between each session expiry cleanup check. The check wil
 | ------- | ------------- |
 | Integer | `60`          |
 
-### SESSION_TTL
+#### SESSION_TTL
 
 The time-to-live for session cookies. This is the amount of time that a session cookie will be valid for _in seconds_. The default value is `259200`, or 3 days. You can set this to a different value if you want sessions to expire sooner or later, depending on your needs.
 
@@ -109,7 +109,7 @@ The available verbosity levels are:
 | `2`    | `DEBUG`, `INFO`, `WARN`, `ERROR`          |
 | `3`    | `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR` |
 
-### STUMP_MAX_SCANNER_CONCURRENCY
+#### STUMP_MAX_SCANNER_CONCURRENCY
 
 The maximum number of files which may be processed concurrently by the scanner. This is useful for limiting the number of files that are processed at once, which can help prevent the server from becoming overwhelmed on systems with limited resources.
 
@@ -119,7 +119,7 @@ The maximum number of files which may be processed concurrently by the scanner. 
 | ------- | ------------- |
 | Integer | `200`         |
 
-### STUMP_MAX_THUMBNAIL_CONCURRENCY
+#### STUMP_MAX_THUMBNAIL_CONCURRENCY
 
 The maximum number of images which may be generated concurrently by the thumbnailer. This is useful for limiting the number of thumbnails that are generated at once, which can help prevent the server from becoming overwhelmed on systems with limited resources.
 
@@ -136,3 +136,25 @@ Whether or not to enable Swagger UI. To learn more about what Swagger UI is, vis
 | Type    | Default Value |
 | ------- | ------------- |
 | Boolean | `true`        |
+
+#### MAX_IMAGE_UPLOAD_SIZE
+
+The maximum size, in bytes, for images uploaded as thumbnails for users, libraries, series, or media.
+
+| Type    | Default Value |
+| ------- | ------------- |
+| Integer | (20 MB)       |
+
+#### ENABLE_UPLOAD
+
+| Type    | Default Value |
+| ------- | ------------- |
+| Boolean | `false`       |
+
+#### MAX_FILE_UPLOAD_SIZE
+
+The maximum allowed size, in bytes, of files uploaded via the upload interface. This configuration variable will have no effect unless `ENABLE_UPLOAD` is `true`.
+
+| Type    | Default Value |
+| ------- | ------------- |
+| Integer | (20 MB)       |

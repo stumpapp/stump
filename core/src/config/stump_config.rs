@@ -184,7 +184,7 @@ pub struct StumpConfig {
 	#[env_key(ENABLE_UPLOAD_KEY)]
 	pub enable_upload: bool,
 
-	/// The maximum file size, in bytes, of files that can be uploaded to be included in libraries.
+	/// The maximum size, in bytes, of files that can be uploaded to be included in libraries.
 	#[default_value(DEFAULT_MAX_FILE_UPLOAD_SIZE)]
 	#[env_key(MAX_FILE_UPLOAD_SIZE_KEY)]
 	pub max_file_upload_size: usize,

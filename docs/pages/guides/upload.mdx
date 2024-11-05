@@ -12,7 +12,7 @@ Stump has an opt-in feature that allows your users to upload books to your serve
 
 ## Enabling upload
 
-Uploading is **disabled by default**, and is gated behind the `enable_upload` configuration variable (`true` enables uploading). This variable can be set by modifying your `Stump.toml` file to set `enable_upload: true` or by setting the environment variable `STUMP_ENABLE_UPLOAD = true`.
+Uploading is **disabled by default**, and is gated behind the `enable_upload` configuration variable (`true` enables uploading). This variable can be set by modifying your `Stump.toml` file to set `enable_upload = true` or by setting the environment variable `STUMP_ENABLE_UPLOAD=true`.
 
 When uploading is not enabled, the routes for uploading will not be attached to your server, and the web UI will not show the upload interface. Attempting to access uploading directly through the API will result in HTTP Error 404.
 

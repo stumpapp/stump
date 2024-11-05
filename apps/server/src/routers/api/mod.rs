@@ -22,45 +22,20 @@ mod tests {
 
 	use crate::{
 		config::jwt::CreatedToken,
-		filter::{
-			LibraryBaseFilter, LibraryFilter, LibraryRelationFilter, LogFilter,
-			MediaBaseFilter, MediaFilter, MediaMetadataBaseFilter, MediaMetadataFilter,
-			MediaMetadataRelationFilter, Range, ReadStatus, SeriesBaseFilter,
-			SeriesFilter, SeriesMetadataFilter, SeriesQueryRelation, UserQueryRelation,
-			ValueOrRange,
-		},
+		filter::*,
 		routers::api::v1::{
-			auth::{AuthenticationOptions, LoginOrRegisterArgs, LoginResponse},
-			book_club::{
-				BookClubInvitationAnswer, CreateBookClub, CreateBookClubInvitation,
-				CreateBookClubMember, CreateBookClubSchedule, CreateBookClubScheduleBook,
-				CreateBookClubScheduleBookOption, GetBookClubsParams, UpdateBookClub,
-				UpdateBookClubMember,
-			},
-			config::UploadConfig,
-			emailer::{
-				CreateOrUpdateEmailDevice, CreateOrUpdateEmailer, EmailerIncludeParams,
-				EmailerSendRecordIncludeParams, PatchEmailDevice,
-				SendAttachmentEmailResponse, SendAttachmentEmailsPayload,
-			},
-			epub::{CreateOrUpdateBookmark, DeleteBookmark},
-			job::UpdateSchedulerConfig,
-			library::{
-				CleanLibraryResponse, CreateLibrary, GenerateLibraryThumbnails,
-				LibraryStatsParams, PatchLibraryThumbnail, UpdateLibrary,
-				UpdateLibraryExcludedUsers,
-			},
-			media::{
-				individual::{BookRelations, MediaIsComplete, PutMediaCompletionStatus},
-				thumbnails::PatchMediaThumbnail,
-			},
-			metadata::MediaMetadataOverview,
-			series::{PatchSeriesThumbnail, SeriesIsComplete},
-			smart_list::{
-				CreateOrUpdateSmartList, CreateOrUpdateSmartListView,
-				GetSmartListsParams, SmartListMeta, SmartListRelationOptions,
-			},
-			user::{CreateUser, DeleteUser, UpdateUser, UpdateUserPreferences},
+			auth::*,
+			book_club::*,
+			config::*,
+			emailer::*,
+			epub::*,
+			job::*,
+			library::*,
+			media::{individual::*, thumbnails::*},
+			metadata::*,
+			series::*,
+			smart_list::*,
+			user::*,
 			ClaimResponse, StumpVersion, UpdateCheck,
 		},
 	};

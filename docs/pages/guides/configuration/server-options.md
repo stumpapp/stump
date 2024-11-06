@@ -2,13 +2,13 @@
 
 > Stump will use default options if you don't manually configure them. When following this guide, keep in mind you only need to provide values for things you wish to override.
 
-Stump uses something called environment variables to set all of the various configuration properties. These environment variables are controlled has a custom TOML-based configuration, which is located by default at `$STUMP_CONFIG_DIR/Stump.toml`. `STUMP_CONFIG_DIR` itself is an environment variable that defaults to `.stump` your home directory, e.g. `/Users/oromei/.stump`.
+Stump uses something called environment variables to set all of the various configuration properties. These environment variables are controlled has a custom TOML-based configuration, which is located by default at `$STUMP_CONFIG_DIR/Stump.toml`. `STUMP_CONFIG_DIR` itself is an environment variable that defaults to `.stump` your home directory, e.g., `/Users/oromei/.stump`.
 
 If you're using Stump with Docker, you'll want to specify environment variables in either the `docker run` or `docker-compose.yml` file to override the default configuration. See the [Docker](/installation/docker) guide for more information.
 
 ## Environment Variables
 
-There are a number of configuration options that you can set to customize Stump's behavior. You will be setting these options in the `Stomp.toml` file, but you can also set them as environment variables.
+There are a number of configuration options that you can set to customize Stump's behavior. You will be setting these options in the `Stump.toml` file, but you can also set them as environment variables.
 
 The following is a list of all the environment variables that Stump uses to configure itself:
 
@@ -22,7 +22,7 @@ The version of the Stump API to use. This should really be left alone and **not*
 
 This corresponds to the `api_version` configuration option in the `Stump.toml` file.
 
-### PDFIUM_PATH
+#### PDFIUM_PATH
 
 The path to the PDFium binary. This is only required if you want PDF support and you're running Stump outside of Docker, since the PDFium binary is included in the Docker image. You'll want to find and download the PDFium binary for your platform from [here](https://github.com/bblanchon/pdfium-binaries/releases), and then set this environment variable to the path of the binary.
 
@@ -30,7 +30,7 @@ The path to the PDFium binary. This is only required if you want PDF support and
 | ------ | ----------------------------- |
 | String | `/lib/libpdfium.so` in Docker |
 
-### SESSION_EXPIRY_CLEANUP_INTERVAL
+#### SESSION_EXPIRY_CLEANUP_INTERVAL
 
 The time (_in seconds_) between each session expiry cleanup check. The check will remove any expired sessions from the database.
 
@@ -38,7 +38,7 @@ The time (_in seconds_) between each session expiry cleanup check. The check wil
 | ------- | ------------- |
 | Integer | `60`          |
 
-### SESSION_TTL
+#### SESSION_TTL
 
 The time-to-live for session cookies. This is the amount of time that a session cookie will be valid for _in seconds_. The default value is `259200`, or 3 days. You can set this to a different value if you want sessions to expire sooner or later, depending on your needs.
 
@@ -141,4 +141,26 @@ Whether or not to enable the KoReader sync integration. This is a special integr
 
 | Type    | Default Value |
 | ------- | ------------- |
+| Boolean | `true`        |
+
+### ENABLE_UPLOAD
+
+| Type    | Default Value |
+| ------- | ------------- |
 | Boolean | `false`       |
+
+### MAX_IMAGE_UPLOAD_SIZE
+
+The maximum size, in bytes, for images uploaded as thumbnails for users, libraries, series, or media.
+
+| Type    | Default Value      |
+| ------- | ------------------ |
+| Integer | `20971520` (20 MB) |
+
+### MAX_FILE_UPLOAD_SIZE
+
+The maximum allowed size, in bytes, of files uploaded via the upload interface. This configuration variable will have no effect unless `ENABLE_UPLOAD` is `true`.
+
+| Type    | Default Value      |
+| ------- | ------------------ |
+| Integer | `20971520` (20 MB) |

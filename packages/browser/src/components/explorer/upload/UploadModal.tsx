@@ -252,7 +252,7 @@ export default function UploadModal() {
 					{/* Conditionally render the series name input */}
 					{uploadType === 'series' && (
 						<div className="mt-2">
-							<Heading size="xs">Series Name</Heading>
+							<Heading size="xs">Series name</Heading>
 							<Dialog.Description>
 								This will be used as the name of the series directory. Your zip archive will be
 								unpacked here.

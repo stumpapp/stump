@@ -114,7 +114,7 @@ export function DropdownMenu({
 	}
 
 	return (
-		<Dropdown>
+		<Dropdown modal={false}>
 			<DropdownTrigger asChild>{renderTrigger()}</DropdownTrigger>
 
 			<DropdownContent className={cn('w-56', contentWrapperClassName)} align={align}>

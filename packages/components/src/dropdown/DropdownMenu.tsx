@@ -47,6 +47,7 @@ type BaseProps = LabelOrTrigger &
 	ContentProps & {
 		contentWrapperClassName?: string
 		subContentWrapperClassName?: string
+		modal?: boolean
 	}
 export type DropdownMenuProps = GenericMenu<DropdownItem, DropdownItemGroup> & BaseProps
 
@@ -61,6 +62,7 @@ export function DropdownMenu({
 	contentWrapperClassName,
 	subContentWrapperClassName,
 	align,
+	modal = false,
 	...props
 }: DropdownMenuProps) {
 	const renderItems = (items: DropdownItem[]) => {
@@ -114,7 +116,7 @@ export function DropdownMenu({
 	}
 
 	return (
-		<Dropdown modal={false}>
+		<Dropdown modal={modal}>
 			<DropdownTrigger asChild>{renderTrigger()}</DropdownTrigger>
 
 			<DropdownContent className={cn('w-56', contentWrapperClassName)} align={align}>

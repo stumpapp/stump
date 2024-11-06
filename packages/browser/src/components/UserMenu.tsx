@@ -24,7 +24,7 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 	return (
 		<AutoSizer style={{ height: '2.35rem', width: isSidebar ? '100%' : '2.35rem' }}>
 			{({ width }) => (
-				<Popover onOpenChange={setIsOpen} open={isOpen}>
+				<Popover onOpenChange={setIsOpen} open={isOpen} modal>
 					<Popover.Trigger asChild>
 						<Card
 							className={cn(

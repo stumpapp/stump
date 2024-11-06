@@ -20,11 +20,11 @@ export default function APIKeyActionMenu({ onSelectForDelete, onSelectForInspect
 
 			<Dropdown.Content align="end">
 				<Dropdown.Group>
-					<Dropdown.Item onClick={onSelectForInspect}>
+					<Dropdown.Item onClick={onSelectForInspect} data-testid="inspect-key">
 						<span>{t(getKey('inspect'))}</span>
 					</Dropdown.Item>
 
-					<Dropdown.Item onClick={onSelectForDelete}>
+					<Dropdown.Item onClick={onSelectForDelete} data-testid="delete-key">
 						<span>{t(getKey('delete'))}</span>
 					</Dropdown.Item>
 				</Dropdown.Group>

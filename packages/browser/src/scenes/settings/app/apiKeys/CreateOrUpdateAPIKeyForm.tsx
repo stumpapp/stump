@@ -122,7 +122,7 @@ export default function CreateOrUpdateAPIKeyForm({ onSubmit, editingKey }: Props
 	)
 }
 
-const createSchema = (t: (key: string) => string) =>
+export const createSchema = (t: (key: string) => string) =>
 	z.object({
 		name: z.string().min(1),
 		inherit: z.boolean(),

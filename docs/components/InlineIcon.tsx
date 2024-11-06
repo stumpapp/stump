@@ -1,4 +1,3 @@
-// InlineIcon.tsx
 import React from 'react'
 
 interface InlineIconProps {

@@ -15,5 +15,3 @@ export default function InlineIcon(props: InlineIconProps) {
 		</span>
 	)
 }
-
-//, { props.size }

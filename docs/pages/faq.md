@@ -21,9 +21,9 @@ There are some really solid, self-hostable, OPDS media servers out there. I star
 In general, Stump strives for the following:
 
 - Small footprint and low resource usage
-- Efficiency and performance, even on less powerful hardware (e.g. Raspberry Pi)
+- Efficiency and performance, even on less powerful hardware (e.g., Raspberry Pi)
 - Intuitive, pretty, and easy to use interface
-- Wide format support (e.g. PDF, EPUB, CBZ/CBR)
+- Wide format support (e.g., PDF, EPUB, CBZ/CBR)
 
 ## What's compatibility like?
 

@@ -16,4 +16,5 @@ export default {
 	cli: 'CLI',
 	desktop: 'Desktop App',
 	mobile: 'Mobile App',
+	upload: 'Uploading Books',
 } satisfies Meta

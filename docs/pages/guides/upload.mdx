@@ -1,4 +1,6 @@
-import { Callout } from 'nextra/components'
+import { Steps, Callout } from 'nextra/components'
+import { BookPlus, FolderPlus, Upload } from 'lucide-react'
+import InlineIcon from '../../components/InlineIcon'
 
 # Uploading Books
 
@@ -31,33 +33,57 @@ The server limits the maximum upload size based on your configuration, you can c
 
 ## How it works
 
-This feature allows users to upload books or an entire collection of files and directories via series upload.
+This feature allows users to upload books or an entire collection of files and directories via series upload. To use it, navigate to the "Files" menu for a library and click the <InlineIcon><Upload/></InlineIcon> icon to open the upload dropdown. Select "Add books" to upload one or more book files. Select "Add series" to upload a single `.zip` archive containing the content you wish to upload.
 
 After an upload finishes, a library scan will automatically be started to add the newly uploaded books.
 
 ### Uploading books
 
-Users can upload one or more book files (e.g., `.cbz`, `.cbr`, `.epub`, and `.pdf` files) to a specific library directory.
+This menu is accessed from "<InlineIcon><BookPlus/></InlineIcon> Add books" in the upload dropdown. It allows users to upload one or more book files (e.g., `.cbz`, `.cbr`, `.epub`, and `.pdf` files) to a specific library directory.
 
-### Uploading Series
+<Steps>
 
-Users can upload a `.zip` file containing multiple books in an arbitrary directory structure. The archive will be extracted to the location specified when uploading.
+<h3>Add books</h3>
 
-### Security considerations
+Drag and drop one or more book files into the drop zone or click the drop zone to browse to the files you want to add.
 
-Stump attempts to validate uploads in order to protect the host system from misuse of upload functionality, but it should be used with care. The following section describes the validation Stump applies to incoming upload requests.
+<h3>Review the books you want to add</h3>
 
-#### Validations
+Review the list of books you have chosen to add in the "Added files" list below the dropzone.
 
-- File type: Only certain file types are permitted in uploads.
-  - Books: Only `.cbr`, `.cbz`, `.epub`, and `.pdf` files are allowed.
-  - Series: Only `.zip` archives can be uploaded.
-    - The contents of the archive must also be limited to: `.cbr`, `.cbz`, `.epub`, `.pdf`, `.xml`, `.json` and image file types.
-- Content-Type: The server attempts to validate content-type of uploads to reject anything not matching the files above.
-- Path validation: The server will not allow uploads outside the library for which they are intended, and special path components like `..` will be rejected entirely.
-- Overwrite protection: An upload cannot overwrite an existing file.
+If you added a file that you do not want to upload, you can remove it by clicking on "Remove" to the right of the file info.
 
-It may be possible to construct input that circumvents this validation. Server owners are encouraged to only enable this functionality if they need it and to only allow trusted users permission to upload files.
+<h3>Click "Upload" to begin the upload!</h3>
+
+Clicking "Upload" starts your upload. Watch the corner of the screen for a toast confirming that your upload was successful.
+
+</Steps>
+
+### Uploading series
+
+This menu is accessed from "<InlineIcon><FolderPlus/></InlineIcon> Add series" in the upload dropdown. It allows users to upload a `.zip` file containing multiple books, images, or metadata in an arbitrary directory structure. The archive will be extracted to the location specified when uploading.
+
+<Steps>
+
+<h3>Add a zip file</h3>
+
+Drag and drop one `.zip` file onto the drop zone or click the drop zone to browse to the zip archive you want to add.
+
+<h3>Enter a name for the series</h3>
+
+Enter a name for the series below the drop zone. This is the name of the directory to which your zip archive will be unpacked.
+
+<h3>Confirm the zip file you want to add</h3>
+
+Confirm that you added the right file in the "Added files" list below the "Series name" field.
+
+If you added a file that you do not want to upload, you can remove it by clicking on "Remove" to the right of the file info and select a new file.
+
+<h3>Click "Upload" to begin the upload!</h3>
+
+Clicking "Upload" starts your upload. Watch the corner of the screen for a toast confirming that your upload was successful.
+
+</Steps>
 
 ## Troubleshooting
 
@@ -78,6 +104,22 @@ This error may indicate that uploading has not been enabled for your server. Dou
 ### 413 Payload too large
 
 The uploaded files exceeded your configured maximum upload size. Consider increasing the value of `max_file_upload_size` in `Stump.toml` or changing the value of the `STUMP_MAX_FILE_UPLOAD_SIZE` environment variable.
+
+## Security considerations
+
+Stump attempts to validate uploads in order to protect the host system from misuse of upload functionality, but it should be used with care. The following section describes the validation Stump applies to incoming upload requests.
+
+### Validations
+
+- File type: Only certain file types are permitted in uploads.
+  - Books: Only `.cbr`, `.cbz`, `.epub`, and `.pdf` files are allowed.
+  - Series: Only `.zip` archives can be uploaded.
+    - The contents of the archive must also be limited to: `.cbr`, `.cbz`, `.epub`, `.pdf`, `.xml`, `.json` and image file types.
+- Content-Type: The server attempts to validate content-type of uploads to reject anything not matching the files above.
+- Path validation: The server will not allow uploads outside the library for which they are intended, and special path components like `..` will be rejected entirely.
+- Overwrite protection: An upload cannot overwrite an existing file.
+
+It may be possible to construct input that circumvents this validation. Server owners are encouraged to only enable this functionality if they need it and to only allow trusted users permission to upload files.
 
 <Callout emoji="📢">
 	If you have any questions or encounter issues, please open an

@@ -2,6 +2,7 @@ import { APIBase } from '../base'
 import {
 	Media,
 	MediaFilter,
+	DeleteMediaParams,
 	Pageable,
 	PatchMediaThumbnail,
 	ProgressUpdateReturn,
@@ -148,6 +149,13 @@ export class MediaAPI extends APIBase {
 	}
 
 	/**
+	 * Delete a media entity from the database
+	 */
+	async delete(id: string, params: DeleteMediaParams): Promise<void> {
+		await this.axios.delete(mediaURL(`${id}`, params))
+	}
+
+	/**
 	 * The keys for the media API, used for query caching on a client (e.g. react-query)
 	 */
 	get keys(): ClassQueryKeys<InstanceType<typeof MediaAPI>> {
@@ -155,6 +163,7 @@ export class MediaAPI extends APIBase {
 			analyze: 'media.analyze',
 			complete: 'media.complete',
 			deleteActiveReadingSession: 'media.deleteActiveReadingSession',
+			delete: 'media.delete',
 			get: 'media.get',
 			getByID: 'media.getByID',
 			getByPath: 'media.getByPath',

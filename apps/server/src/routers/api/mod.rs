@@ -20,44 +20,19 @@ mod tests {
 
 	use crate::{
 		config::jwt::CreatedToken,
-		filter::{
-			LibraryBaseFilter, LibraryFilter, LibraryRelationFilter, LogFilter,
-			MediaBaseFilter, MediaFilter, MediaMetadataBaseFilter, MediaMetadataFilter,
-			MediaMetadataRelationFilter, Range, ReadStatus, SeriesBaseFilter,
-			SeriesFilter, SeriesMedataFilter, SeriesQueryRelation, UserQueryRelation,
-			ValueOrRange,
-		},
+		filter::*,
 		routers::api::v1::{
-			auth::{AuthenticationOptions, LoginOrRegisterArgs, LoginResponse},
-			book_club::{
-				BookClubInvitationAnswer, CreateBookClub, CreateBookClubInvitation,
-				CreateBookClubMember, CreateBookClubSchedule, CreateBookClubScheduleBook,
-				CreateBookClubScheduleBookOption, GetBookClubsParams, UpdateBookClub,
-				UpdateBookClubMember,
-			},
-			emailer::{
-				CreateOrUpdateEmailDevice, CreateOrUpdateEmailer, EmailerIncludeParams,
-				EmailerSendRecordIncludeParams, PatchEmailDevice,
-				SendAttachmentEmailResponse, SendAttachmentEmailsPayload,
-			},
-			epub::{CreateOrUpdateBookmark, DeleteBookmark},
-			job::UpdateSchedulerConfig,
-			library::{
-				CleanLibraryResponse, CreateLibrary, GenerateLibraryThumbnails,
-				LibraryStatsParams, PatchLibraryThumbnail, UpdateLibrary,
-				UpdateLibraryExcludedUsers,
-			},
-			media::{
-				individual::{BookRelations, MediaIsComplete, PutMediaCompletionStatus},
-				thumbnails::PatchMediaThumbnail,
-			},
-			metadata::MediaMetadataOverview,
-			series::{PatchSeriesThumbnail, SeriesIsComplete},
-			smart_list::{
-				CreateOrUpdateSmartList, CreateOrUpdateSmartListView,
-				GetSmartListsParams, SmartListMeta, SmartListRelationOptions,
-			},
-			user::{CreateUser, DeleteUser, UpdateUser, UpdateUserPreferences},
+			auth::*,
+			book_club::*,
+			emailer::*,
+			epub::*,
+			job::*,
+			library::*,
+			media::{individual::*, thumbnails::*},
+			metadata::*,
+			series::*,
+			smart_list::*,
+			user::*,
 			ClaimResponse, StumpVersion, UpdateCheck,
 		},
 	};
@@ -147,6 +122,7 @@ mod tests {
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<MediaBaseFilter>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<MediaFilter>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<DeleteMediaParams>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<BookRelations>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<SeriesBaseFilter>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<SeriesMedataFilter>()?).as_bytes())?;

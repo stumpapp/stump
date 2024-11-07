@@ -60,6 +60,14 @@ export default function BookManagementScene() {
 		}
 	}
 
+	function handleDelete() {
+		if (id != undefined) {
+			sdk.media.delete(id, {
+				delete_file: false,
+			})
+		}
+	}
+
 	return (
 		<SceneContainer>
 			<div className="flex flex-col items-start gap-y-6 text-left">
@@ -80,9 +88,13 @@ export default function BookManagementScene() {
 					</Alert.Content>
 				</Alert>
 
-				<div>
+				<div className="flex flex-row items-center gap-x-4">
 					<Button size="md" variant="primary" onClick={handleAnalyze}>
 						Analyze Media
+					</Button>
+
+					<Button size="md" variant="danger" onClick={handleDelete}>
+						Delete Book
 					</Button>
 				</div>
 

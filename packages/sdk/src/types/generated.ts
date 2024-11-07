@@ -394,6 +394,11 @@ export type MediaBaseFilter = { id?: string[]; name?: string[]; extension?: stri
 export type MediaFilter = ({ id?: string[]; name?: string[]; extension?: string[]; path?: string[]; read_status?: ReadStatus[]; tags?: string[]; search?: string | null; metadata?: MediaMetadataBaseFilter | null }) & ({ series?: SeriesFilter | null })
 
 /**
+ * The query parameters sent with a media delete request.
+ */
+export type DeleteMediaParams = { delete_file?: boolean | null }
+
+/**
  * Represents the relations to load for a book entity, including optional loading
  * of the series and library relationships.
  */

@@ -24,7 +24,7 @@ export default function DeleteBookConfirmation({ id, trigger }: DeleteBookConfir
 			await sdk.media.delete(id, {
 				delete_file: deleteFile,
 			})
-			navigate(paths.libraryBooks(id, 0))
+			navigate(paths.libraries())
 		} catch (err) {
 			setError(err)
 		} finally {

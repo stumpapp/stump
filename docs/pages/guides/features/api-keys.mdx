@@ -77,3 +77,19 @@ If there is demand for it, these permissions may be made configurable in the fut
 	When the permissions of a user are updated, the permissions of any keys that inherit permissions
 	from that user will also be updated
 </Callout>
+
+## Revoking an API Key
+
+To revoke an API key, you can just delete it entirely. This will immediately invalidate the key, and it will no longer be usable for authentication.
+
+Other important notes relating to API key revocation / invalidation:
+
+- A user with a locked account will not be able to use their API key(s)
+- A user who is soft-deleted will not be able to use their API key(s)
+- A user who created an API key but has their access to the API keys feature revoked (`feature:api_keys`) will not be able to use their API key(s)
+
+<Callout emoji="🚀">
+	Have you set up API keys? I'd love to hear about your experience! This is a very new and
+	experimental feature, so if you have any feedback or run into any issues, please let me know by
+	opening an [issue](https://github.com/stumpapp/stump/issues)
+</Callout>

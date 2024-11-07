@@ -9,6 +9,7 @@ import paths from '@/paths'
 import { formatBookName } from '@/utils/format'
 
 import BookThumbnailSelector from './BookThumbnailSelector'
+import DeleteBookConfirmation from './DeleteBookConfirmation'
 
 export default function BookManagementScene() {
 	const { sdk } = useSDK()
@@ -60,14 +61,6 @@ export default function BookManagementScene() {
 		}
 	}
 
-	function handleDelete() {
-		if (id != undefined) {
-			sdk.media.delete(id, {
-				delete_file: false,
-			})
-		}
-	}
-
 	return (
 		<SceneContainer>
 			<div className="flex flex-col items-start gap-y-6 text-left">
@@ -93,9 +86,14 @@ export default function BookManagementScene() {
 						Analyze Media
 					</Button>
 
-					<Button size="md" variant="danger" onClick={handleDelete}>
-						Delete Book
-					</Button>
+					<DeleteBookConfirmation
+						id={media.id}
+						trigger={
+							<Button size="md" variant="danger">
+								Delete Book
+							</Button>
+						}
+					/>
 				</div>
 
 				<BookThumbnailSelector book={media} />

@@ -37,7 +37,7 @@ use stump_core::{
 			GenerateThumbnailOptions, ImageFormat, ImageProcessorOptions,
 			ThumbnailGenerationJob, ThumbnailGenerationJobParams,
 		},
-		scanner::LibraryScanJob,
+		scanner::{LibraryScanJob, ScanOptions},
 		ContentType,
 	},
 	prisma::{
@@ -1008,6 +1008,7 @@ async fn scan_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
+	Json(options): Json<ScanOptions>,
 ) -> Result<(), APIError> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::ScanLibrary])?;
 	let db = &ctx.db;
@@ -1024,7 +1025,7 @@ async fn scan_library(
 			"Library with id {id} not found"
 		)))?;
 
-	ctx.enqueue_job(LibraryScanJob::new(library.id, library.path))
+	ctx.enqueue_job(LibraryScanJob::new(library.id, library.path, Some(options)))
 		.map_err(|e| {
 			error!(?e, "Failed to enqueue library scan job");
 			APIError::InternalServerError(
@@ -1380,6 +1381,7 @@ async fn create_library(
 		ctx.enqueue_job(LibraryScanJob::new(
 			library.id.clone(),
 			library.path.clone(),
+			None,
 		))
 		.map_err(|e| {
 			error!(?e, "Failed to enqueue library scan job");
@@ -1613,6 +1615,7 @@ async fn update_library(
 		ctx.enqueue_job(LibraryScanJob::new(
 			updated_library.id.clone(),
 			updated_library.path.clone(),
+			None,
 		))
 		.map_err(|e| {
 			error!(?e, "Failed to enqueue library scan job");

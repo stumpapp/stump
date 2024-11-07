@@ -99,7 +99,7 @@ async fn upload_books(
 	}
 
 	// Start a scan of the library
-	ctx.enqueue_job(LibraryScanJob::new(id, library.path))
+	ctx.enqueue_job(LibraryScanJob::new(id, library.path, None))
 		.map_err(|e| {
 			tracing::error!(?e, "Failed to enqueue library scan job");
 			APIError::InternalServerError(
@@ -178,7 +178,7 @@ async fn upload_series(
 	})?;
 
 	// Start a scan of the library
-	ctx.enqueue_job(LibraryScanJob::new(id, library.path))
+	ctx.enqueue_job(LibraryScanJob::new(id, library.path, None))
 		.map_err(|e| {
 			tracing::error!(?e, "Failed to enqueue library scan job");
 			APIError::InternalServerError(

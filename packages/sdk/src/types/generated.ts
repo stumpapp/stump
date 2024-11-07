@@ -546,7 +546,7 @@ export type UploadConfig = { enabled: boolean; max_file_upload_size: number }
  * }
  * ```
  */
-export type StumpConfig = { profile: string; port: number; verbosity: number; pretty_logs: boolean; db_path: string | null; client_dir: string; custom_templates_dir: string | null; config_dir: string; allowed_origins: string[]; pdfium_path: string | null; disable_swagger: boolean; password_hash_cost: number; session_ttl: number; access_token_ttl: number; expired_session_cleanup_interval: number; max_scanner_concurrency: number; max_thumbnail_concurrency: number; max_image_upload_size: number; enable_upload: boolean; max_file_upload_size: number }
+export type StumpConfig = { profile: string; port: number; verbosity: number; pretty_logs: boolean; db_path: string | null; client_dir: string; custom_templates_dir: string | null; config_dir: string; allowed_origins: string[]; pdfium_path: string | null; enable_swagger: boolean; enable_koreader_sync: boolean; password_hash_cost: number; session_ttl: number; access_token_ttl: number; expired_session_cleanup_interval: number; max_scanner_concurrency: number; max_thumbnail_concurrency: number; max_image_upload_size: number; enable_upload: boolean; max_file_upload_size: number }
 
 // DESKTOP TYPE GENERATION
 

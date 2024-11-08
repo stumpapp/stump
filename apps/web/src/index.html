@@ -3,11 +3,45 @@
 	<head>
 		<meta charset="utf-8" />
 		<title>Stump</title>
+		<script>
+			try {
+				const zustandState = JSON.parse(
+					localStorage.getItem('stump-user-store') || '{"state": {}}',
+				).state
+				if (zustandState.userPreferences && zustandState.userPreferences.app_theme === 'dark') {
+					document.querySelector('html').classList.add('dark')
+				}
+			} catch {}
+		</script>
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+			html.dark {
+				background-color: #161719;
+			}
+			.splash-container {
+				height: 100vh;
+				width: 100vw;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			.splash {
+				max-width: 12rem;
+			}
+		</style>
 		<link rel="icon" type="image/icon" href="/assets/favicon.ico" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	</head>
 	<body>
-		<div id="root"></div>
+		<div id="root">
+			<div class="splash-container">
+				<img src="/assets/stump-splash.gif" alt="loading" class="splash" />
+			</div>
+		</div>
 		<script type="module" src="./index.tsx"></script>
 	</body>
 </html>

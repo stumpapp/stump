@@ -42,24 +42,24 @@ impl Default for APIKeyPermissions {
 #[derive(Default, Debug, Clone, Serialize, Deserialize, Type)]
 pub struct APIKey {
 	/// The ID of the API key
-	id: i32,
+	pub id: i32,
 	/// A human-readable name for the API key
-	name: String,
+	pub name: String,
 	/// The permissions for the API key, either inherited from the user or custom
 	/// permissions set on the key
-	permissions: APIKeyPermissions,
+	pub permissions: APIKeyPermissions,
 	/// The hashed long token for the API key
 	#[serde(skip_serializing)]
-	long_token_hash: String,
+	pub long_token_hash: String,
 	/// The ID of the user which is associated with the API key
 	#[serde(skip_serializing)]
-	user_id: String,
+	pub user_id: String,
 	/// The date the API key was created
-	created_at: DateTime<FixedOffset>,
+	pub created_at: DateTime<FixedOffset>,
 	/// The date the API key was last used
-	last_used_at: Option<DateTime<FixedOffset>>,
+	pub last_used_at: Option<DateTime<FixedOffset>>,
 	/// The date the API key expires, if it does
-	expires_at: Option<DateTime<FixedOffset>>,
+	pub expires_at: Option<DateTime<FixedOffset>>,
 }
 
 // TODO: once library supports checking hash without prefix, just use the users username

@@ -10,7 +10,6 @@ import CreateOrUpdateAPIKeyForm, {
 	CreateOrUpdateAPIKeyFormValues,
 } from './CreateOrUpdateAPIKeyForm'
 
-// TODO(koreader): localize
 export default function CreateAPIKeyModal() {
 	const [isOpen, setIsOpen] = useState(false)
 

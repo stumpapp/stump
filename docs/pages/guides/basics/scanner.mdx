@@ -76,6 +76,41 @@ Stump will perform some cleanup operations, such as:
 
 </Steps>
 
+## Optional Processing
+
+You are able to enable or disable certain processing options in the scanner
+
+### Metadata
+
+When the `Process metadata` option is enabled, Stump will attempt to extract metadata from your media files. For example, `ComicInfo.xml` or `OPF` files in comic books and ebooks, respectively. This metadata is then stored in the database and can be used to search, filter, and categorize your media.
+
+See the [metadata](/guides/basics/books#metadata) guide for more information.
+
+### File Hashing
+
+There are two different hashing options available in Stump. They serve different purposes and may be enabled or disabled independently:
+
+1. A generic hash used for file deduplication. This is useful for being able to identify duplicates and prevent clutter in your library.
+2. A KoReader-compatible hash, used exclusively for KoReader compatibility. See the [KoReader integration](/guides/integrations/koreader) guide for more information.
+
+If you don't care about either of these features, you can disable hashing entirely to save on processing time.
+
+### File Conversion
+
+Stump supports converting RAR files to ZIP. You can enable this by checking the `Convert RAR to ZIP` option. The important thing to note that unless you also enable the `Delete RAR after conversion` option, the RAR files will remain on disk after conversion.
+
+## Ignore Rules
+
+If you have files that you don't want Stump to scan, you can define a [glob pattern](<https://en.wikipedia.org/wiki/Glob_(programming)>) which will be used to filter **out** any candidate files which match the pattern.
+
+Stump no longer supports `.stumpignore` files. Instead, ignore rules can be set during library creation or in the `Scanning` section of the library settings. There is no limit to the number of ignore rules you can set, so long as each is a valid glob.
+
+<Callout emoji="🚨">
+	Please note that in some scenarios, updating the ignore rules may not take the desired effect. For
+	example, if you have a file which is already in the database but add an ignore rule for it, the
+	file will not be removed. This is planned to be addressed in the future.
+</Callout>
+
 ## Scheduling scans
 
 You can configure the scheduler to run scans at a specific interval. This is useful for keeping your media libraries up-to-date without having to manually run scans.
@@ -91,15 +126,3 @@ For convenience, there are a few preset options you may select from the dropdown
 - Once a month (2592000 seconds)
 
 > In the future, this section of the UI will change to include scheduling options for more than just scans. However, for now, it is only for scans.
-
-## Ignore Rules
-
-If you have files that you don't want Stump to scan, you can define a [glob pattern](<https://en.wikipedia.org/wiki/Glob_(programming)>) which will be used to filter **out** any candidate files which match the pattern.
-
-Stump no longer supports `.stumpignore` files. Instead, ignore rules can be set during library creation or in the `Scanning` section of the library settings. There is no limit to the number of ignore rules you can set, so long as each is a valid glob.
-
-<Callout emoji="🚨">
-	Please note that in some scenarios, updating the ignore rules may not take the desired effect. For
-	example, if you have a file which is already in the database but add an ignore rule for it, the
-	file will not be removed. This is planned to be addressed in the future.
-</Callout>

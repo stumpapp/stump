@@ -137,7 +137,7 @@ model LibraryConfig {
   default_reading_mode            String  @default("paged") // paged or continuous:(horizontal|vertical)
   default_reading_image_scale_fit String  @default("height") // height, width, none (original)
   generate_file_hashes            Boolean @default(false)
-  generate_koreader_hashes        Boolean @default(false) // TODO(koreader): determine if we need this much granularity
+  generate_koreader_hashes        Boolean @default(false)
   process_metadata                Boolean @default(true)
   library_pattern                 String  @default("SERIES_BASED") // SERIES_BASED or COLLECTION_BASED
 

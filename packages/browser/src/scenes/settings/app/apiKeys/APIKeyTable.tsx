@@ -21,7 +21,6 @@ import DeleteAPIKeyConfirmModal from './DeleteAPIKeyConfirmModal'
 
 dayjs.extend(relativeTime)
 
-// TODO(koreader): localize
 export default function APIKeyTable() {
 	const { sdk } = useSDK()
 	const { data: apiKeys } = useQuery([sdk.apiKey.keys.get], () => sdk.apiKey.get(), {
@@ -64,7 +63,7 @@ export default function APIKeyTable() {
 								{ 'pr-2': permissions === 'inherit' },
 							)}
 						>
-							<span>{permissions === 'inherit' ? 'Inherited' : 'Explicit'}</span>
+							<span>{t(getFieldKey(permissions === 'inherit' ? 'inherited' : 'explicit'))}</span>
 							{permissions !== 'inherit' && (
 								<span className="flex h-5 w-5 items-center justify-center rounded-md bg-fill-brand-secondary">
 									{permissions.length}
@@ -83,8 +82,11 @@ export default function APIKeyTable() {
 				cell: ({ getValue }) => {
 					const parsed = dayjs(getValue())
 					return (
-						<Text size="sm" title={parsed.isValid() ? parsed.format('LLL') : 'Not used yet'}>
-							{parsed.isValid() ? parsed.fromNow() : 'Never'}
+						<Text
+							size="sm"
+							title={parsed.isValid() ? parsed.format('LLL') : t('common.notUsedYet')}
+						>
+							{parsed.isValid() ? parsed.fromNow() : t('common.never')}
 						</Text>
 					)
 				},
@@ -98,8 +100,11 @@ export default function APIKeyTable() {
 				cell: ({ getValue }) => {
 					const parsed = dayjs(getValue())
 					return (
-						<Text size="sm" title={parsed.isValid() ? parsed.format('LLL') : 'No expiration set'}>
-							{parsed.isValid() ? parsed.format('LLL') : 'Never'}
+						<Text
+							size="sm"
+							title={parsed.isValid() ? parsed.format('LLL') : t(getKey('noExpiration'))}
+						>
+							{parsed.isValid() ? parsed.format('LL') : 'Never'}
 						</Text>
 					)
 				},
@@ -143,9 +148,9 @@ export default function APIKeyTable() {
 					</div>
 
 					<div className="text-center">
-						<Text>You haven&apos;t created any API keys yet</Text>
+						<Text>{t(getKey('empty.title'))}</Text>
 						<Text size="sm" variant="muted">
-							Create an API key to get started
+							{t(getKey('empty.action'))}
 						</Text>
 					</div>
 				</div>
@@ -217,3 +222,4 @@ const columnHelper = createColumnHelper<APIKey>()
 
 const LOCALE_BASE = 'settingsScene.app/apiKeys'
 const getFieldKey = (key: string) => `${LOCALE_BASE}.shared.fields.${key}`
+const getKey = (key: string) => `${LOCALE_BASE}.sections.table.${key}`

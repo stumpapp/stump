@@ -64,6 +64,13 @@ The API key should have at least the `feature:koreader_sync` permission:
 
 </Steps>
 
+## Future improvements
+
+While the KoReader sync integration is functional, there are a few improvements that could be made:
+
+1. **Device management**: The devices are not surfaced on the UI yet. I'd like to add functions to attach friendly names to devices so you can easily identify them (e.g. `Aaron's Kobo Clara`)
+2. **Progress translation**: The progress data which gets stored is primarily for KoReader's use, with the exception of the percentage. I'd like to add a feature to translate the x-pointer into a proper epubcfi so the native Stump reader can pick up where you left off
+
 <Callout emoji="🚀">
 	Have you set up KoReader sync with Stump? I'd love to hear about your experience! This is a very
 	new integration, so if you have any feedback or run into any issues, please let me know by opening

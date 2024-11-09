@@ -1170,7 +1170,8 @@
 					"last_used": "Last used",
 					"created": "Created",
 					"permissions": "Permissions",
-					"inherited": "Inherited"
+					"inherited": "Inherited",
+					"explicit": "Explicit"
 				}
 			},
 			"sections": {
@@ -1205,7 +1206,12 @@
 					"actionMenu": {
 						"inspect": "Inspect",
 						"delete": "Delete"
-					}
+					},
+					"empty": {
+						"title":"You haven't created any keys yet",
+						"action": "Create an API key to get started"
+					},
+					"noExpiration": "No expiration set"
 				}
 			}
 		},
@@ -1851,6 +1857,7 @@
 		"goBack": "Go back",
 		"goToServers": "Go to servers",
 		"notReady": "This feature is not ready",
+		"notUsedYet": "Not used yet",
 		"never": "Never"
 	}
 }

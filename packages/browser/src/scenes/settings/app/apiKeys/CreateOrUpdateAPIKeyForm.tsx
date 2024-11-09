@@ -63,6 +63,7 @@ export default function CreateOrUpdateAPIKeyForm({ onSubmit, editingKey }: Props
 				placeholder="Koreader Sync"
 				{...form.register('name')}
 				errorMessage={errors.name?.message}
+				ignoreFill
 			/>
 
 			<RadioGroup

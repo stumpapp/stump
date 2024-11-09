@@ -60,6 +60,7 @@ zip = { workspace = true }
 
 [dev-dependencies]
 axum-test = "15.3.1"
+tokio = { workspace = true, features = ["full", "test-util"] }
 
 [build-dependencies]
 chrono = { workspace = true }

@@ -7,7 +7,6 @@ use axum::{
 	Extension, Json,
 };
 use base64::{engine::general_purpose::STANDARD, Engine};
-use chrono::Utc;
 use prefixed_api_key::{PrefixedApiKey, PrefixedApiKeyController};
 use prisma_client_rust::or;
 use stump_core::{
@@ -32,8 +31,8 @@ use crate::{
 	errors::{api_error_message, APIError, APIResult},
 	routers::{enforce_max_sessions, relative_favicon_path},
 	utils::{
-		decode_base64_credentials, get_session_user, user_has_all_permissions,
-		verify_password,
+		current_utc_time, decode_base64_credentials, get_session_user,
+		user_has_all_permissions, verify_password,
 	},
 };
 
@@ -284,7 +283,7 @@ pub async fn validate_api_key(
 				user::is_locked::equals(false),
 			]),
 			or![
-				api_key::expires_at::gte(Utc::now().into()),
+				api_key::expires_at::gte(current_utc_time().into()),
 				api_key::expires_at::equals(None),
 			],
 		])
@@ -314,7 +313,7 @@ pub async fn validate_api_key(
 		.api_key()
 		.update(
 			api_key::id::equals(api_key.id),
-			vec![api_key::last_used_at::set(Some(Utc::now().into()))],
+			vec![api_key::last_used_at::set(Some(current_utc_time().into()))],
 		)
 		.exec()
 		.await;
@@ -397,7 +396,7 @@ async fn handle_basic_auth(
 		.with(user::user_preferences::fetch())
 		.with(user::age_restriction::fetch())
 		.with(user::sessions::fetch(vec![session::expiry_time::gt(
-			Utc::now().into(),
+			current_utc_time().into(),
 		)]))
 		.exec()
 		.await?;
@@ -544,14 +543,14 @@ mod tests {
 	use axum_test::{TestServer, TestServerConfig};
 	use header::{HeaderName, HeaderValue};
 	use prisma_client_rust::MockStore;
-	use stump_core::{config::StumpConfig, Ctx};
+	use stump_core::{config::StumpConfig, db::entity::APIKey, Ctx};
 	use time::Duration;
 	use tower_sessions::{cookie::SameSite, Expiry, MemoryStore, SessionManagerLayer};
 
 	use crate::{
 		config::jwt::{create_user_jwt, CreatedToken},
 		http_server::StumpRequestInfo,
-		utils::{hash_password, test_utils::create_prisma_user},
+		utils::{current_utc_time, hash_password, test_utils::create_prisma_user},
 	};
 
 	use super::*;
@@ -871,7 +870,7 @@ mod tests {
 					.with(user::user_preferences::fetch())
 					.with(user::age_restriction::fetch())
 					.with(user::sessions::fetch(vec![session::expiry_time::gt(
-						Utc::now().into(),
+						current_utc_time().into(),
 					)])),
 				Some(create_prisma_user(&user, hashed_pass.clone())),
 			)
@@ -892,52 +891,224 @@ mod tests {
 		assert_eq!(response.status_code().as_u16(), 401);
 	}
 
-	// TODO: Figure out how to mock Utc::now() otherwise I cannot mock the query which
-	// loads the session relation...
-	// - https://github.com/mseravalli/chrono-timesource
-	// - https://github.com/alexanderlinne/chronobreak
+	#[tokio::test]
+	async fn test_auth_middleware_with_valid_basic_auth_opds_v1_2() {
+		let config = StumpConfig::debug();
+		let user = User {
+			id: "oromei-id".to_string(),
+			username: "oromei".to_string(),
+			..Default::default()
+		};
 
-	// #[tokio::test]
-	// async fn test_auth_middleware_with_valid_basic_auth_opds_v1_2() {
-	// 	let config = StumpConfig::debug();
-	// 	let user = User {
-	// 		id: "oromei-id".to_string(),
-	// 		username: "oromei".to_string(),
-	// 		..Default::default()
-	// 	};
+		let hashed_pass =
+			hash_password("password", &config).expect("Failed to hash password");
 
-	// 	let hashed_pass =
-	// 		hash_password("password", &config).expect("Failed to hash password");
+		let (client, mock_store, server) = setup_test_app();
 
-	// 	let (client, mock_store, server) = setup_test_app();
+		mock_store
+			.expect(
+				client
+					.user()
+					.find_unique(user::username::equals("oromei".to_string()))
+					.with(user::user_preferences::fetch())
+					.with(user::age_restriction::fetch())
+					.with(user::sessions::fetch(vec![session::expiry_time::gt(
+						current_utc_time().into(),
+					)])),
+				Some(create_prisma_user(&user, hashed_pass.clone())),
+			)
+			.await;
 
-	// 	mock_store
-	// 		.expect(
-	// 			client
-	// 				.user()
-	// 				.find_unique(user::username::equals("oromei".to_string()))
-	// 				.with(user::user_preferences::fetch())
-	// 				.with(user::age_restriction::fetch())
-	// 				.with(user::sessions::fetch(vec![session::expiry_time::gt(
-	// 					Utc::now().into(),
-	// 				)])),
-	// 			Some(create_prisma_user(&user, hashed_pass.clone())),
-	// 		)
-	// 		.await;
+		let response = server
+			.get("/opds/v1.2")
+			.add_header(
+				HeaderName::from_str("Authorization").expect("Failed to create header"),
+				HeaderValue::from_str(&format!(
+					"Basic {}",
+					base64::engine::general_purpose::STANDARD
+						.encode(format!("{}:{}", "oromei", "password"))
+				))
+				.expect("Failed to create header"),
+			)
+			.await;
 
-	// 	let response = server
-	// 		.get("/opds/v1.2")
-	// 		.add_header(
-	// 			HeaderName::from_str("Authorization").expect("Failed to create header"),
-	// 			HeaderValue::from_str(&format!(
-	// 				"Basic {}",
-	// 				base64::engine::general_purpose::STANDARD
-	// 					.encode(format!("{}:{}", "oromei", "password"))
-	// 			))
-	// 			.expect("Failed to create header"),
-	// 		)
-	// 		.await;
+		assert_eq!(response.status_code().as_u16(), 200);
+	}
 
-	// 	assert_eq!(response.status_code().as_u16(), 200);
-	// }
+	fn create_key() -> (PrefixedApiKey, String, APIKey) {
+		let (pak, hash) =
+			APIKey::create_prefixed_key().expect("Failed to create API key");
+		let api_key_raw = pak.to_string();
+
+		let api_key = APIKey {
+			name: "Test API Key".to_string(),
+			long_token_hash: hash,
+			user_id: "oromei-id".to_string(),
+			permissions: APIKeyPermissions::inherit(),
+			..Default::default()
+		};
+
+		(pak, api_key_raw, api_key)
+	}
+
+	fn key_data(key: &APIKey, for_user: &User) -> api_key::Data {
+		api_key::Data {
+			id: key.id,
+			name: key.name.clone(),
+			short_token: String::default(),
+			long_token_hash: key.long_token_hash.clone(),
+			user_id: key.user_id.clone(),
+			user: Some(Box::new(create_prisma_user(for_user, String::default()))),
+			permissions: serde_json::to_vec(&key.permissions)
+				.expect("Failed to serialize"),
+			expires_at: key.expires_at,
+			created_at: key.created_at,
+			last_used_at: key.last_used_at,
+		}
+	}
+
+	#[tokio::test(start_paused = true)]
+	async fn test_auth_middleware_with_valid_api_key() {
+		let user = User {
+			id: "oromei-id".to_string(),
+			username: "oromei".to_string(),
+			is_server_owner: true,
+			..Default::default()
+		};
+
+		let (client, mock_store, server) = setup_test_app();
+
+		let (pak, api_key_raw, api_key) = create_key();
+
+		mock_store
+			.expect(
+				client
+					.api_key()
+					.find_first(vec![
+						api_key::short_token::equals(pak.short_token().to_string()),
+						api_key::long_token_hash::equals(api_key.long_token_hash.clone()),
+						api_key::user::is(vec![
+							user::deleted_at::equals(None),
+							user::is_locked::equals(false),
+						]),
+						or![
+							api_key::expires_at::gte(current_utc_time().into()),
+							api_key::expires_at::equals(None),
+						],
+					])
+					.with(api_key::user::fetch()),
+				Some(key_data(&api_key, &user)),
+			)
+			.await;
+
+		// It is a valid key, so we will update the last used at field
+		mock_store
+			.expect(
+				client.api_key().update(
+					api_key::id::equals(api_key.id),
+					vec![api_key::last_used_at::set(Some(current_utc_time().into()))],
+				),
+				key_data(&api_key, &user),
+			)
+			.await;
+
+		let response = server
+			.get("/test")
+			.add_header(
+				HeaderName::from_str("Authorization").expect("Failed to create header"),
+				HeaderValue::from_str(&format!("Bearer {api_key_raw}"))
+					.expect("Failed to create header"),
+			)
+			.await;
+
+		assert_eq!(response.status_code().as_u16(), 200);
+	}
+
+	#[tokio::test]
+	async fn test_auth_middleware_with_non_existent_api_key() {
+		let (client, mock_store, server) = setup_test_app();
+
+		let (pak, api_key_raw, api_key) = create_key();
+
+		mock_store
+			.expect(
+				client
+					.api_key()
+					.find_first(vec![
+						api_key::short_token::equals(pak.short_token().to_string()),
+						api_key::long_token_hash::equals(api_key.long_token_hash.clone()),
+						api_key::user::is(vec![
+							user::deleted_at::equals(None),
+							user::is_locked::equals(false),
+						]),
+						or![
+							api_key::expires_at::gte(current_utc_time().into()),
+							api_key::expires_at::equals(None),
+						],
+					])
+					.with(api_key::user::fetch()),
+				None,
+			)
+			.await;
+
+		let response = server
+			.get("/test")
+			.add_header(
+				HeaderName::from_str("Authorization").expect("Failed to create header"),
+				HeaderValue::from_str(&format!("Bearer {api_key_raw}"))
+					.expect("Failed to create header"),
+			)
+			.await;
+
+		assert_eq!(response.status_code().as_u16(), 401);
+	}
+
+	#[tokio::test]
+	async fn test_auth_middleware_with_revoked_api_key() {
+		let user = User {
+			id: "oromei-id".to_string(),
+			username: "oromei".to_string(),
+			// No access_api_keys permission
+			..Default::default()
+		};
+
+		let (client, mock_store, server) = setup_test_app();
+
+		let (pak, api_key_raw, api_key) = create_key();
+
+		mock_store
+			.expect(
+				client
+					.api_key()
+					.find_first(vec![
+						api_key::short_token::equals(pak.short_token().to_string()),
+						api_key::long_token_hash::equals(api_key.long_token_hash.clone()),
+						api_key::user::is(vec![
+							user::deleted_at::equals(None),
+							user::is_locked::equals(false),
+						]),
+						or![
+							api_key::expires_at::gte(current_utc_time().into()),
+							api_key::expires_at::equals(None),
+						],
+					])
+					.with(api_key::user::fetch()),
+				Some(key_data(&api_key, &user)),
+			)
+			.await;
+
+		// It is a valid key, but the user doesn't have permission to use it. So we will
+		// not update the last used at field
+
+		let response = server
+			.get("/test")
+			.add_header(
+				HeaderName::from_str("Authorization").expect("Failed to create header"),
+				HeaderValue::from_str(&format!("Bearer {api_key_raw}"))
+					.expect("Failed to create header"),
+			)
+			.await;
+
+		assert_eq!(response.status_code().as_u16(), 401);
+	}
 }

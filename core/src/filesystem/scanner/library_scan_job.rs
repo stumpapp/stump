@@ -404,10 +404,16 @@ impl JobExt for LibraryScanJob {
 				// If the library is not collection-priority, each subdirectory is its own series.
 				// Therefore, we only scan one level deep when walking a series whose library is not
 				// collection-priority to avoid scanning duplicates which are part of other series
-				let max_depth = self
+				let mut max_depth = self
 					.config
 					.as_ref()
 					.and_then(|o| (!o.is_collection_based()).then_some(1));
+				if path_buf == PathBuf::from(&self.path) {
+					// The exception is when the series "is" the libray (i.e. the root of the library contains
+					// books). This is kind of an anti-pattern wrt collection-priority, but it needs to be handled
+					// in order to avoid the scanner re-scanning the entire library...
+					max_depth = Some(1);
+				}
 
 				let Some(Ok(ignore_rules)) =
 					self.config.as_ref().map(|o| o.ignore_rules.build())

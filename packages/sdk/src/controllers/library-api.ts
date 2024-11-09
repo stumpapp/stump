@@ -173,7 +173,7 @@ export class LibraryAPI extends APIBase {
 	 * Initiate a scan of a library
 	 */
 	async scan(id: string): Promise<void> {
-		await this.api.axios.get(libraryURL(`/${id}/scan`))
+		await this.api.axios.post(libraryURL(`/${id}/scan`))
 	}
 
 	/**

@@ -90,7 +90,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 					"/excluded-users",
 					get(get_library_excluded_users).post(update_library_excluded_users),
 				)
-				.route("/scan", get(scan_library))
+				.route("/scan", post(scan_library))
 				.route("/clean", put(clean_library))
 				.route("/series", get(get_library_series))
 				.route("/media", get(get_library_media))

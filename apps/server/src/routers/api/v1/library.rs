@@ -1008,7 +1008,7 @@ async fn scan_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
-	Json(options): Json<ScanOptions>,
+	Json(options): Json<Option<ScanOptions>>,
 ) -> Result<(), APIError> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::ScanLibrary])?;
 	let db = &ctx.db;
@@ -1025,7 +1025,7 @@ async fn scan_library(
 			"Library with id {id} not found"
 		)))?;
 
-	ctx.enqueue_job(LibraryScanJob::new(library.id, library.path, Some(options)))
+	ctx.enqueue_job(LibraryScanJob::new(library.id, library.path, options))
 		.map_err(|e| {
 			error!(?e, "Failed to enqueue library scan job");
 			APIError::InternalServerError(

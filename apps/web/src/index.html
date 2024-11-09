@@ -8,8 +8,11 @@
 				const zustandState = JSON.parse(
 					localStorage.getItem('stump-user-store') || '{"state": {}}',
 				).state
-				if (zustandState.userPreferences && zustandState.userPreferences.app_theme === 'dark') {
-					document.querySelector('html').classList.add('dark')
+				const appTheme = zustandState.userPreferences?.app_theme || ''
+				const alreadyHasTheme =
+					!appTheme || document.querySelector('html').classList.contains(appTheme)
+				if (!alreadyHasTheme) {
+					document.querySelector('html').classList.add(appTheme)
 				}
 			} catch {}
 		</script>
@@ -19,8 +22,26 @@
 				padding: 0;
 				box-sizing: border-box;
 			}
+			html.autumn {
+				background-color: #2c1a12;
+			}
+			html.bronze {
+				background-color: #ffffff;
+			}
+			html.cosmic {
+				background-color: #1c0f45;
+			}
 			html.dark {
 				background-color: #161719;
+			}
+			html.light {
+				background-color: #ffffff;
+			}
+			html.ocean {
+				background-color: #0b3d4d;
+			}
+			html.pumpkin {
+				background-color: #0c0c0c;
 			}
 			.splash-container {
 				height: 100vh;

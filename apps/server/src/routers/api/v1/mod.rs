@@ -18,6 +18,7 @@ use crate::{
 // also think there is a good amount of duplication which can be trimmed down, like how I did with the OPDS v2 API. A few of those route
 // handlers are one-liners 💅
 
+pub(crate) mod api_key;
 pub(crate) mod auth;
 pub(crate) mod book_club;
 pub(crate) mod config;
@@ -40,6 +41,7 @@ pub(crate) mod user;
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	let mut router = Router::new()
 		.merge(auth::mount(app_state.clone()))
+		.merge(api_key::mount(app_state.clone()))
 		.merge(epub::mount(app_state.clone()))
 		.merge(emailer::mount(app_state.clone()))
 		.merge(library::mount(app_state.clone()))

@@ -18,7 +18,7 @@ globset = "0.4.14"
 image = { version = "0.25.2" }
 infer = { workspace = true }
 itertools = { workspace = true }
-prisma-client-rust = { workspace = true }
+md5 = { workspace = true }
 rand = { workspace = true }
 serde = { workspace = true }
 serde-xml-rs = "0.6.0" # Support for XML serialization/deserialization
@@ -33,6 +33,8 @@ trash = "3.1.2"
 # pdf = "0.8.1"
 pdf = { git = "https://github.com/pdf-rs/pdf", rev = "3bc9e636d31b1846e51b58c7429914e640866f53" } # TODO: revert back to crates.io once fix(es) release
 pdfium-render = "0.8.24"
+prisma-client-rust = { workspace = true }
+prefixed-api-key = { workspace = true}
 rayon = "1.10.0"
 regex = "1.10.6"
 ring = "0.17.8"

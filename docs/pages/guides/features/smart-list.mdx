@@ -1,6 +1,11 @@
-import { Callout } from 'nextra/components'
+import { Callout, Steps } from 'nextra/components'
 
 # Smart lists
+
+<Callout emoji="🔐">
+	This functionality is gated behind the `smartlist:read` user permission. To learn more about
+	permissions, see the [permissions](/guides/access-control/permissions) guide.
+</Callout>
 
 A smart list is a dynamic list of books generated from a set of configured filters. They are powerful in that they allow you to quickly curate and organize a collection of books based on a set of criteria without having to manually manage the list.
 
@@ -34,11 +39,7 @@ Not to be confused with the filter groups, grouping is a way of grouping matched
 
 In the future, more grouping options may be considered
 
-## Feature Access
-
-The smart list feature, itself, is gated behind the `smartlist:read` user permission. This means that only users with this permission will be able to interact with smart lists.
-
-## List-level Access
+## List Access
 
 Smart lists can be shared with other users, and has 3 visibility options:
 
@@ -51,54 +52,6 @@ Smart lists can be shared with other users, and has 3 visibility options:
 	but will be updated in the future
 </Callout>
 
-## Creating a Smart List
-
-There is a query builder directly in the UI which allows you to declaratively create a smart list. This is the recommended way to create a smart list, as it is the most user-friendly. The UI is aware of the type-constraints per attribute and will guide you through the process.
-
-You can also use the API directly, an example `POST` request might look like this:
-
-```json
-{
-	"name": "Spider-Man Collection",
-	"description": "A smart list that aggregates all of my Spider-Man-related comics into one place",
-	"filter": {
-		"groups": [
-			{
-				"or": [
-					{
-						"name": {
-							"contains": "spider"
-						}
-					},
-					{
-						"metadata": {
-							"characters": {
-								"contains": "spider-man"
-							}
-						}
-					}
-				]
-			},
-			{
-				"and": [
-					{
-						"series": {
-							"library": {
-								"name": {
-									"excludes": "Books"
-								}
-							}
-						}
-					}
-				]
-			}
-		],
-		"joiner": "AND"
-	},
-	"default_grouping": "BY_SERIES"
-}
-```
-
 ## Views
 
 While interacting with a smart list on the UI, you can manipulate the view to your liking. This includes:
@@ -108,3 +61,45 @@ While interacting with a smart list on the UI, you can manipulate the view to yo
 - Column order, i.e. the order in which columns are displayed
 
 By default, any changes you make won't be persisted. However, the UI will detect and allow you to save any adjustments as a view. This view will then be available to you in the future, along with any other views you create. If you have a view selected, the changes will provide you with the additional option of updating the view.
+
+## How-to Guides
+
+## Create a Smart List
+
+The process for creating a smart list is broken up into a few steps:
+
+<Steps>
+
+### Basics
+
+The first step is for filling out the very basic information about the list, such as its name and description. You will also need to select the visibility of the list, which defaults to `private`.
+
+### Filters
+
+<Callout emoji="🏗️" type="info">
+	The look and feel of the filter configuration may change in the future to better support different
+	languages and complex values. If you have any feedback, please let me know!
+</Callout>
+
+The second step is more complex, as it involves setting up the filters that will determine which books are included in the list. Let's break it down by using an example:
+
+> I want to create a list of all books in my library that are considered "Science Fiction". However, I don't want to include any books from my Magazine library and I don't want anything Star Wars related
+
+Depending on how your libraries are set up, your mileage may vary. An example of what you might set up includes:
+
+<br />
+<img
+	src="/images/smart-list-example-filters.png"
+	alt="Example smart list filters"
+	style={{
+		borderRadius: 8,
+	}}
+/>
+
+The group by option defaults to `None`, which maps to `BY_BOOKS`. This means that the books will not be grouped together by any attribute and will be displayed in a flat list.
+
+### Review
+
+The final step is to review your list before saving it. You can click "Create list" to save your list, or you can navigate back to any previous step by clicking it in the header.
+
+</Steps>

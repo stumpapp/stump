@@ -68,9 +68,19 @@ export type PartialUser = { id: string; username: string; is_server_owner: boole
  * Permissions that can be granted to a user. Some permissions are implied by others,
  * and will be automatically granted if the "parent" permission is granted.
  */
-export type UserPermission = "bookclub:read" | "bookclub:create" | "emailer:read" | "emailer:create" | "emailer:manage" | "email:send" | "email:arbitrary_send" | "smartlist:read" | "file:explorer" | "file:upload" | "file:download" | "library:create" | "library:edit" | "library:scan" | "library:manage" | "library:delete" | "user:read" | "user:manage" | "notifier:read" | "notifier:create" | "notifier:manage" | "notifier:delete" | "server:manage"
+export type UserPermission = "feature:api_keys" | "feature:koreader_sync" | "bookclub:read" | "bookclub:create" | "emailer:read" | "emailer:create" | "emailer:manage" | "email:send" | "email:arbitrary_send" | "smartlist:read" | "file:explorer" | "file:upload" | "file:download" | "library:create" | "library:edit" | "library:scan" | "library:manage" | "library:delete" | "user:read" | "user:manage" | "notifier:read" | "notifier:create" | "notifier:manage" | "notifier:delete" | "server:manage"
 
 export type AgeRestriction = { age: number; restrict_on_unset: boolean }
+
+/**
+ * An API key which can be used to interact with the API. API keys are scoped to a user,
+ * so all actions taken with an API key are done as if the user was taking them.
+ */
+export type APIKey = { id: number; name: string; permissions: APIKeyPermissions; created_at: string; last_used_at: string | null; expires_at: string | null }
+
+export type InheritPermissionValue = "inherit"
+
+export type APIKeyPermissions = InheritPermissionValue | UserPermission[]
 
 export type SupportedFont = "inter" | "opendyslexic"
 
@@ -138,7 +148,7 @@ export type LibraryScanMode = "DEFAULT" | "NONE"
 
 export type IgnoreRules = string[]
 
-export type LibraryConfig = { id?: string | null; convert_rar_to_zip: boolean; hard_delete_conversions: boolean; generate_file_hashes: boolean; process_metadata: boolean; library_pattern: LibraryPattern; thumbnail_config: ImageProcessorOptions | null; default_reading_dir?: ReadingDirection; default_reading_mode?: ReadingMode; default_reading_image_scale_fit?: ReadingImageScaleFit; ignore_rules?: IgnoreRules; library_id?: string | null }
+export type LibraryConfig = { id?: string | null; convert_rar_to_zip: boolean; hard_delete_conversions: boolean; generate_file_hashes: boolean; generate_koreader_hashes: boolean; process_metadata: boolean; library_pattern: LibraryPattern; thumbnail_config: ImageProcessorOptions | null; default_reading_dir?: ReadingDirection; default_reading_mode?: ReadingMode; default_reading_image_scale_fit?: ReadingImageScaleFit; ignore_rules?: IgnoreRules; library_id?: string | null }
 
 export type LibraryStats = { series_count: number; book_count: number; total_bytes: number; completed_books: number; in_progress_books: number }
 
@@ -151,7 +161,7 @@ export type Series = { id: string; name: string; path: string; description: stri
  */
 export type MediaMetadata = { title?: string | null; series?: string | null; number?: number | null; volume?: number | null; summary?: string | null; notes?: string | null; age_rating?: number | null; genre?: string[] | null; year?: number | null; month?: number | null; day?: number | null; writers?: string[] | null; pencillers?: string[] | null; inkers?: string[] | null; colorists?: string[] | null; letterers?: string[] | null; cover_artists?: string[] | null; editors?: string[] | null; publisher?: string | null; links?: string[] | null; characters?: string[] | null; teams?: string[] | null; page_count?: number | null }
 
-export type Media = { id: string; name: string; size: number; extension: string; pages: number; updated_at: string; created_at: string; modified_at: string | null; hash: string | null; path: string; status: FileStatus; series_id: string; metadata: MediaMetadata | null; series?: Series | null; active_reading_session?: ActiveReadingSession | null; finished_reading_sessions: FinishedReadingSession[] | null; current_page?: number | null; current_epubcfi?: string | null; is_completed?: boolean | null; tags?: Tag[] | null; bookmarks?: Bookmark[] | null }
+export type Media = { id: string; name: string; size: number; extension: string; pages: number; updated_at: string; created_at: string; modified_at: string | null; hash: string | null; koreader_hash: string | null; path: string; status: FileStatus; series_id: string; metadata: MediaMetadata | null; series?: Series | null; active_reading_session?: ActiveReadingSession | null; finished_reading_sessions: FinishedReadingSession[] | null; current_page?: number | null; current_epubcfi?: string | null; is_completed?: boolean | null; tags?: Tag[] | null; bookmarks?: Bookmark[] | null }
 
 /**
  * A model representing a bookmark in the database. Bookmarks are used to save specific locations
@@ -345,6 +355,16 @@ export type UpdateUserPreferences = { id: string; locale: string; preferred_layo
 
 export type DeleteUser = { hard_delete: boolean | null }
 
+/**
+ * The request body for creating or updating an API key
+ */
+export type CreateOrUpdateAPIKey = { name: string; permissions: APIKeyPermissions; expires_at?: string | null }
+
+/**
+ * The response after creating a new API key
+ */
+export type CreatedAPIKey = { api_key: string }
+
 export type EmailerIncludeParams = { include_send_history?: boolean }
 
 export type EmailerSendRecordIncludeParams = { include_sent_by?: boolean }
@@ -526,7 +546,7 @@ export type UploadConfig = { enabled: boolean; max_file_upload_size: number }
  * }
  * ```
  */
-export type StumpConfig = { profile: string; port: number; verbosity: number; pretty_logs: boolean; db_path: string | null; client_dir: string; custom_templates_dir: string | null; config_dir: string; allowed_origins: string[]; pdfium_path: string | null; disable_swagger: boolean; password_hash_cost: number; session_ttl: number; access_token_ttl: number; expired_session_cleanup_interval: number; max_scanner_concurrency: number; max_thumbnail_concurrency: number; max_image_upload_size: number; enable_upload: boolean; max_file_upload_size: number }
+export type StumpConfig = { profile: string; port: number; verbosity: number; pretty_logs: boolean; db_path: string | null; client_dir: string; custom_templates_dir: string | null; config_dir: string; allowed_origins: string[]; pdfium_path: string | null; enable_swagger: boolean; enable_koreader_sync: boolean; password_hash_cost: number; session_ttl: number; access_token_ttl: number; expired_session_cleanup_interval: number; max_scanner_concurrency: number; max_thumbnail_concurrency: number; max_image_upload_size: number; enable_upload: boolean; max_file_upload_size: number }
 
 // DESKTOP TYPE GENERATION
 

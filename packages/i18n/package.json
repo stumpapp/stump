@@ -8,6 +8,7 @@
 	},
 	"scripts": {
 		"check-types": "tsc -b tsconfig.json",
+		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
 		"nuke": "rimraf node_modules"
 	},
 	"license": "MIT",

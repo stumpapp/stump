@@ -1,4 +1,4 @@
-import { useUpdateLibrary } from '@stump/client'
+import { queryClient, useSDK, useUpdateLibrary } from '@stump/client'
 import { UpdateLibrary } from '@stump/sdk'
 import { lazy, Suspense, useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
@@ -18,9 +18,12 @@ const DeletionScene = lazy(() => import('./danger/deletion'))
 // Note: library:manage permission is enforced in the parent router
 export default function LibrarySettingsRouter() {
 	const { library } = useLibraryContext()
-
+	const { sdk } = useSDK()
 	const { editLibrary } = useUpdateLibrary({
 		id: library.id,
+		onSuccess: async ({ id }) => {
+			await queryClient.refetchQueries([sdk.library.keys.getByID, id], { exact: false })
+		},
 	})
 
 	// TODO: This is particularly fallible. It would be a lot wiser to eventually just.. y'know, literally

@@ -27,12 +27,17 @@ export default function ScannerFeaturesPatchForm() {
 		({
 			process_metadata,
 			generate_file_hashes,
-		}: Pick<CreateOrUpdateLibrarySchema, 'process_metadata' | 'generate_file_hashes'>) => {
+			generate_koreader_hashes,
+		}: Pick<
+			CreateOrUpdateLibrarySchema,
+			'process_metadata' | 'generate_file_hashes' | 'generate_koreader_hashes'
+		>) => {
 			patch({
 				config: {
 					...library.config,
 					generate_file_hashes,
 					process_metadata,
+					generate_koreader_hashes,
 				},
 				scan_mode: 'NONE',
 			})

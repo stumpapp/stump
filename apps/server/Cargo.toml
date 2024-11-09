@@ -28,6 +28,7 @@ jsonwebtoken = "9.3.0"
 linemux = { git = "https://github.com/jmagnuson/linemux.git", rev = "acaafc602afac5d7a9cd3e087dafc937cac1e364" }
 local-ip-address = "0.6.2"
 once_cell = { workspace = true }
+prefixed-api-key = { workspace = true}
 prisma-client-rust = { workspace = true }
 rand = "0.8.5"
 reqwest = { workspace = true }
@@ -59,6 +60,7 @@ zip = { workspace = true }
 
 [dev-dependencies]
 axum-test = "15.3.1"
+tokio = { workspace = true, features = ["full", "test-util"] }
 
 [build-dependencies]
 chrono = { workspace = true }

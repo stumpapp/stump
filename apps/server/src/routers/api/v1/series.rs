@@ -319,7 +319,7 @@ async fn scan_series(
 		.await?
 		.ok_or(APIError::NotFound("Series not found".to_string()))?;
 
-	ctx.enqueue_job(SeriesScanJob::new(series.id, series.path))
+	ctx.enqueue_job(SeriesScanJob::new(series.id, series.path, None))
 		.map_err(|e| {
 			error!(?e, "Failed to enqueue series scan job");
 			APIError::InternalServerError("Failed to enqueue series scan job".to_string())

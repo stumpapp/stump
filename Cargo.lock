@@ -695,7 +695,7 @@ checksum = "23285ad32269793932e830392f2fe2f83e26488fd3ec778883a93c8323735780"
 dependencies = [
  "arrayref",
  "arrayvec",
- "constant_time_eq",
+ "constant_time_eq 0.3.0",
 ]
 
 [[package]]
@@ -770,6 +770,12 @@ dependencies = [
  "alloc-no-stdlib",
  "alloc-stdlib",
 ]
+
+[[package]]
+name = "bs58"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "771fe0050b883fcc3ea2359b1a96bcfbc090b7116eae7c3c512c7a083fdf23d3"
 
 [[package]]
 name = "bstr"
@@ -1264,6 +1270,12 @@ dependencies = [
  "log",
  "web-sys",
 ]
+
+[[package]]
+name = "constant_time_eq"
+version = "0.2.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "21a53c0a4d288377e7415b53dcfc3c04da5cdc2cc95c8d5ac178b58f0b861ad6"
 
 [[package]]
 name = "constant_time_eq"
@@ -5579,6 +5591,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "925383efa346730478fb4838dbe9137d2a47675ad789c546d150a6e1dd4ab31c"
 
 [[package]]
+name = "prefixed-api-key"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "73c45ab8e504c85c6d1d32207001f4cca3370924424090a9487227843a71123d"
+dependencies = [
+ "bs58",
+ "constant_time_eq 0.2.6",
+ "digest 0.10.7",
+ "hex",
+ "rand 0.8.5",
+ "sha2 0.10.6",
+]
+
+[[package]]
 name = "pretty_assertions"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6580,7 +6606,7 @@ checksum = "a5885493fdf0be6cdff808d1533ce878d21cfa49c7086fa00c66355cd9141bfc"
 dependencies = [
  "base64 0.21.5",
  "blake2b_simd",
- "constant_time_eq",
+ "constant_time_eq 0.3.0",
  "crossbeam-utils",
 ]
 
@@ -7671,8 +7697,10 @@ dependencies = [
  "infer",
  "itertools 0.13.0",
  "libc",
+ "md5",
  "pdf",
  "pdfium-render",
+ "prefixed-api-key",
  "prisma-client-rust",
  "rand 0.8.5",
  "rayon",
@@ -7749,6 +7777,7 @@ dependencies = [
  "local-ip-address",
  "once_cell",
  "openssl",
+ "prefixed-api-key",
  "prisma-client-rust",
  "rand 0.8.5",
  "reqwest 0.12.7",
@@ -8403,9 +8432,9 @@ checksum = "cda74da7e1a664f795bb1f8a87ec406fb89a02522cf6e50620d016add6dbbf5c"
 
 [[package]]
 name = "tokio"
-version = "1.40.0"
+version = "1.41.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e2b070231665d27ad9ec9b8df639893f46727666c6767db40317fbe920a5d998"
+checksum = "22cfb5bee7a6a52939ca9224d6ac897bb669134078daa8735560897f69de4d33"
 dependencies = [
  "backtrace",
  "bytes",

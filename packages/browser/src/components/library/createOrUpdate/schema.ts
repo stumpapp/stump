@@ -72,6 +72,7 @@ export const buildSchema = (existingLibraries: Library[], library?: Library) =>
 			.optional(),
 		description: z.string().nullable().optional(),
 		generate_file_hashes: z.boolean().default(false),
+		generate_koreader_hashes: z.boolean().default(false),
 		hard_delete_conversions: z.boolean().default(false),
 		ignore_rules: z
 			.array(
@@ -144,6 +145,7 @@ export const formDefaults = (library?: Library): CreateOrUpdateLibrarySchema => 
 	default_reading_mode: library?.config.default_reading_mode || 'paged',
 	description: library?.description,
 	generate_file_hashes: library?.config.generate_file_hashes ?? false,
+	generate_koreader_hashes: library?.config.generate_koreader_hashes ?? false,
 	hard_delete_conversions: library?.config.hard_delete_conversions ?? false,
 	ignore_rules: toFormIgnoreRules(library?.config.ignore_rules),
 	library_pattern: library?.config.library_pattern || 'SERIES_BASED',

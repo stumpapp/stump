@@ -1,4 +1,4 @@
-# Server Options
+# Server Config
 
 > Stump will use default options if you don't manually configure them. When following this guide, keep in mind you only need to provide values for things you wish to override.
 
@@ -6,15 +6,13 @@ Stump uses something called environment variables to set all of the various conf
 
 If you're using Stump with Docker, you'll want to specify environment variables in either the `docker run` or `docker-compose.yml` file to override the default configuration. See the [Docker](/installation/docker) guide for more information.
 
-## Configuration Options
+## Environment Variables
 
 There are a number of configuration options that you can set to customize Stump's behavior. You will be setting these options in the `Stump.toml` file, but you can also set them as environment variables.
 
-### Environment Variables
-
 The following is a list of all the environment variables that Stump uses to configure itself:
 
-#### API_VERSION
+### API_VERSION
 
 The version of the Stump API to use. This should really be left alone and **not** manually set.
 
@@ -48,7 +46,7 @@ The time-to-live for session cookies. This is the amount of time that a session 
 | ------- | ------------- |
 | Integer | `259200`      |
 
-#### STUMP_ALLOWED_ORIGINS
+### STUMP_ALLOWED_ORIGINS
 
 A **comma-delineated** list of allowed origins for the Stump API. If you're trying to access the API from a different domain, you'll need to add it to this list. By default, origins corresponding to the Tauri desktop application are allowed, and the host machine's IP address with the configured port is allowed for both HTTP and HTTPS.
 
@@ -60,7 +58,7 @@ This corresponds to the `allowed_origins` configuration option in the `Stump.tom
 
 **Be sure to replace `{machine_ip}` and `{configured_port}` with the appropriate values for your environment.**
 
-#### STUMP_CONFIG_DIR
+### STUMP_CONFIG_DIR
 
 The directory where Stump will look for its configuration file.
 
@@ -68,7 +66,7 @@ The directory where Stump will look for its configuration file.
 | ------ | ------------- |
 | String | `~/.stump`    |
 
-#### STUMP_CLIENT_DIR
+### STUMP_CLIENT_DIR
 
 The directory the contains the web bundle for the web UI
 
@@ -76,7 +74,7 @@ The directory the contains the web bundle for the web UI
 | ------ | ------------- |
 | String | `./dist`      |
 
-#### STUMP_PROFILE
+### STUMP_PROFILE
 
 The profile to use when running Stump. This should really be left alone and **not** manually set.
 
@@ -84,7 +82,7 @@ The profile to use when running Stump. This should really be left alone and **no
 | ------ | ------------- |
 | String | `release`     |
 
-#### STUMP_PORT
+### STUMP_PORT
 
 The port for the Stump server.
 
@@ -92,7 +90,7 @@ The port for the Stump server.
 | ------- | ------------- |
 | Integer | `10801`       |
 
-#### STUMP_VERBOSITY
+### STUMP_VERBOSITY
 
 The verbosity level for Stump logs. Verbosity levels are integers that correspond to a list of log levels that will be visible, and are inclusive of all the levels below them.
 
@@ -109,7 +107,7 @@ The available verbosity levels are:
 | `2`    | `DEBUG`, `INFO`, `WARN`, `ERROR`          |
 | `3`    | `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR` |
 
-#### STUMP_MAX_SCANNER_CONCURRENCY
+### STUMP_MAX_SCANNER_CONCURRENCY
 
 The maximum number of files which may be processed concurrently by the scanner. This is useful for limiting the number of files that are processed at once, which can help prevent the server from becoming overwhelmed on systems with limited resources.
 
@@ -119,7 +117,7 @@ The maximum number of files which may be processed concurrently by the scanner. 
 | ------- | ------------- |
 | Integer | `200`         |
 
-#### STUMP_MAX_THUMBNAIL_CONCURRENCY
+### STUMP_MAX_THUMBNAIL_CONCURRENCY
 
 The maximum number of images which may be generated concurrently by the thumbnailer. This is useful for limiting the number of thumbnails that are generated at once, which can help prevent the server from becoming overwhelmed on systems with limited resources.
 
@@ -129,15 +127,29 @@ The maximum number of images which may be generated concurrently by the thumbnai
 | ------- | ------------- |
 | Integer | `50`          |
 
-#### ENABLE_SWAGGER_UI
+### ENABLE_SWAGGER_UI
 
 Whether or not to enable Swagger UI. To learn more about what Swagger UI is, visit [swagger.io](https://swagger.io/).
 
 | Type    | Default Value |
 | ------- | ------------- |
+| Boolean | `false`       |
+
+### ENABLE_KOREADER_SYNC
+
+Whether or not to enable the KoReader sync integration. This is a special integration that allows KoReader to sync with Stump. To learn more about this integration, visit the [KoReader](/guides/integrations/koreader) guide.
+
+| Type    | Default Value |
+| ------- | ------------- |
 | Boolean | `true`        |
 
-#### MAX_IMAGE_UPLOAD_SIZE
+### ENABLE_UPLOAD
+
+| Type    | Default Value |
+| ------- | ------------- |
+| Boolean | `false`       |
+
+### MAX_IMAGE_UPLOAD_SIZE
 
 The maximum size, in bytes, for images uploaded as thumbnails for users, libraries, series, or media.
 
@@ -145,13 +157,7 @@ The maximum size, in bytes, for images uploaded as thumbnails for users, librari
 | ------- | ------------------ |
 | Integer | `20971520` (20 MB) |
 
-#### ENABLE_UPLOAD
-
-| Type    | Default Value |
-| ------- | ------------- |
-| Boolean | `false`       |
-
-#### MAX_FILE_UPLOAD_SIZE
+### MAX_FILE_UPLOAD_SIZE
 
 The maximum allowed size, in bytes, of files uploaded via the upload interface. This configuration variable will have no effect unless `ENABLE_UPLOAD` is `true`.
 

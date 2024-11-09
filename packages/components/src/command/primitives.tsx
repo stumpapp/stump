@@ -40,7 +40,6 @@ const CommandInput = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<div
 		className="flex items-center border-b border-b-edge px-4"
-		// I promise this exists
 		// eslint-disable-next-line react/no-unknown-property
 		cmdk-input-wrapper=""
 	>

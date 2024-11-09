@@ -23,7 +23,7 @@ export function SDKProvider({
 			return
 		}
 
-		const instance = new Api(baseURL, authMethod)
+		const instance = new Api({ baseURL, authMethod })
 
 		if (!tauriRPC || authMethod === 'session') {
 			setSDK(instance)

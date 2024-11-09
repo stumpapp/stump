@@ -177,6 +177,12 @@ impl From<MultipartError> for APIError {
 	}
 }
 
+impl From<prefixed_api_key::BuilderError> for APIError {
+	fn from(error: prefixed_api_key::BuilderError) -> Self {
+		APIError::InternalServerError(error.to_string())
+	}
+}
+
 impl From<reqwest::Error> for APIError {
 	fn from(error: reqwest::Error) -> Self {
 		APIError::InternalServerError(error.to_string())

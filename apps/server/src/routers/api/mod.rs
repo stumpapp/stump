@@ -9,6 +9,8 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new().nest("/api", Router::new().nest("/v1", v1::mount(app_state)))
 }
 
+// TODO: move codegen to api/mod.rs
+
 #[allow(unused_imports)]
 mod tests {
 	use std::{fs::File, io::Write, path::PathBuf};
@@ -24,6 +26,7 @@ mod tests {
 		config::jwt::CreatedToken,
 		filter::*,
 		routers::api::v1::{
+			api_key::*,
 			auth::*,
 			book_club::*,
 			config::*,
@@ -86,6 +89,11 @@ mod tests {
 			format!("{}\n\n", ts_export::<UpdateUserPreferences>()?).as_bytes(),
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<DeleteUser>()?).as_bytes())?;
+
+		file.write_all(
+			format!("{}\n\n", ts_export::<CreateOrUpdateAPIKey>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<CreatedAPIKey>()?).as_bytes())?;
 
 		file.write_all(
 			format!("{}\n\n", ts_export::<EmailerIncludeParams>()?).as_bytes(),

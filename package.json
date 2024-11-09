@@ -27,7 +27,7 @@
 		"dev:web": "concurrently -n server,web -c green.bold,blue.bold \"cargo watch --ignore core/prisma -x run -p stump_server\" \"yarn web dev\"",
 		"dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"cargo watch --ignore core/prisma -x run -p stump_server\" \"yarn expo dev\"",
 		"prisma-studio": "npx prisma studio --schema core/prisma/schema.prisma",
-		"format": "prettier --config prettier.config.js --ignore-path .prettierignore --write .",
+		"format": "lerna run format --stream --parallel",
 		"nuke": "lerna run nuke"
 	},
 	"devDependencies": {

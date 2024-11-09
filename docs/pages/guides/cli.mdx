@@ -1,31 +1,36 @@
+import { Callout } from 'nextra/components'
+
 # Command-line interface
 
-The Stump server ships with a built-in CLI tool that can be used for various tasks. At the time of writing, you can use it to:
+The Stump server ships with a built-in CLI tool that allows you to manage your server from the command line
 
-- Lock or unlock a user account (i.e. prevent or allow the user to log in)
-- Reset a user's password
+<Callout emoji="ℹ️" type="info">
+	Every example in this guide assumes you are running the CLI tool from the same directory as the
+	executable. You will need to adjust the path to the executable accordingly if you are running it
+	from a different location
+</Callout>
 
-## Usage
+## Basic Usage
 
 The CLI tool is exposed via a few subcommands using the same executable as the server, itself. To see the available subcommands, run:
 
-```bash
+```bash copy
 ./stump --help
 ```
 
 This will print the various subcommands and options available to you. To see more information about a specific subcommand, run:
 
-```bash
+```bash copy
 ./stump <subcommand> --help
 ```
 
-## Examples
+## Account Management
 
 ### Locking a user account
 
 To lock a user account, run:
 
-```bash
+```bash copy
 ./stump account lock --username <username>
 ```
 
@@ -33,7 +38,7 @@ To lock a user account, run:
 
 To unlock a user account, run:
 
-```bash
+```bash copy
 ./stump account unlock --username <username>
 ```
 
@@ -41,8 +46,14 @@ To unlock a user account, run:
 
 To reset a user's password, run:
 
-```bash
+```bash copy
 ./stump account reset-password --username <username>
 ```
 
 You will be prompted to enter a new password, with a confirmation prompt to ensure you entered it correctly. The password will be hashed and salted and stored in the database to replace the existing one.
+
+<Callout emoji="📢">
+	The CLI only contains user-management commands at this time. If you have any ideas for new
+	commands or features, please create a [feature
+	request](https://github.com/stumpapp/stump/issues/new/choose) on GitHub
+</Callout>

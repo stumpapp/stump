@@ -30,7 +30,9 @@ lettre = { version = "0.11.4", default-features = false, features = [
   "tracing",
   "tokio1-rustls-tls",
 ] }
+md5 = "0.7.0"
 once_cell = "1.19.0"
+prefixed-api-key = { version = "0.3.0", features = ["sha2"] }
 prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust.git", tag = "0.6.11", features = [
   "sqlite-create-many",
   "migrations",
@@ -52,7 +54,7 @@ simple_crypt = "0.2.3"
 specta = { version = "1.0.5", features = ["chrono", "url"] }
 tempfile = "3.12.0"
 thiserror = "1.0.63"
-tokio = { version = "1.40.0", features = [
+tokio = { version = "1.41.1", features = [
   # Provides sender/reciever channels
   "sync", 
   # Tells the Tokio runtime to use the multi-thread scheduler.

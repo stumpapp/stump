@@ -17,9 +17,13 @@ type Props = {
 	 * The controls for adjusting the layout, i.e. GRID or TABLE
 	 */
 	layoutControls?: React.ReactNode
+	/**
+	 * Whether the search is being fetched from the server
+	 */
+	isSearching?: boolean
 }
 
-export default function FilterHeader({ navOffset, layoutControls }: Props) {
+export default function FilterHeader({ navOffset, layoutControls, isSearching }: Props) {
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
 	const { ref, isSticky } = useSticky({ extraOffset: isMobile ? 56 : 0 })
@@ -64,10 +68,9 @@ export default function FilterHeader({ navOffset, layoutControls }: Props) {
 			return (
 				<>
 					<Search
-						initialValue={(urlStore.filters?.search as string) || undefined}
+						initialValue={(urlStore.filters?.search as string) || ''}
 						onChange={updateSearch}
-						// isLoading={isSearching}
-						// isDisabled={isSearchDisabled}
+						isLoading={isSearching}
 					/>
 				</>
 			)
@@ -85,20 +88,7 @@ export default function FilterHeader({ navOffset, layoutControls }: Props) {
 				navOffset ? 'top-12' : 'top-0',
 			)}
 		>
-			{/* <Search
-				initialValue={filters?.search as string}
-				placeholder={searchPlaceholder}
-				onChange={(value) => {
-					if (value) {
-						setFilter('search', value)
-					} else {
-						removeFilter('search')
-					}
-				}}
-				isLoading={isSearching}
-				isDisabled={isSearchDisabled}
-			/> */}
-			<div className="flex flex-1 items-center space-x-2">{renderLeft()}</div>
+			<div className="relative flex flex-1 items-center space-x-2">{renderLeft()}</div>
 
 			<div className="flex items-center gap-4">
 				<div className="flex items-center gap-x-1">

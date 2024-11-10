@@ -205,6 +205,7 @@ function LibraryBooksScene() {
 				<FilterHeader
 					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
 					navOffset
+					isSearching={isRefetchingMedia}
 				/>
 
 				{renderContent()}

@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { ScreenRootView, Text } from '../primitives'
 
 export default function UnsupportedReader() {

@@ -7,7 +7,7 @@ pub enum OPDSV2Error {
 	#[error("OPDS feed field was not initialized: {0}")]
 	MalformedFeed(#[from] UninitializedFieldError),
 	#[error("A query failed while generated OPDS feed: {0}")]
-	QueryError(#[from] prisma_client_rust::queries::QueryError),
+	QueryError(#[from] Box<prisma_client_rust::QueryError>),
 	#[error("Failed to generate OPDS feed: {0}")]
 	InternalError(#[from] crate::CoreError),
 }
@@ -22,6 +22,12 @@ impl From<OPDSV2Error> for crate::CoreError {
 			OPDSV2Error::QueryError(err) => err.into(),
 			OPDSV2Error::InternalError(err) => err,
 		}
+	}
+}
+
+impl From<prisma_client_rust::QueryError> for OPDSV2Error {
+	fn from(error: prisma_client_rust::QueryError) -> Self {
+		Self::QueryError(Box::new(error))
 	}
 }
 

@@ -1,6 +1,6 @@
 import { Button, cn, Command, Popover } from '@stump/components'
 import { ChevronsUpDown } from 'lucide-react'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFieldArray, useFormContext } from 'react-hook-form'
 import { match } from 'ts-pattern'
 

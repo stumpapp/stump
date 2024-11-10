@@ -1,6 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@stump/components'
-import React from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import z from 'zod'
 

@@ -3,7 +3,6 @@ import { ButtonOrLink, Card, cx, Heading, Text } from '@stump/components'
 import { BookClub } from '@stump/sdk'
 import dayjs from 'dayjs'
 import pluralize from 'pluralize'
-import React from 'react'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'

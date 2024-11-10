@@ -12,7 +12,7 @@ export default function BookFileInformation({ media }: Props) {
 	const { library } = useLibraryQuery({
 		params: {
 			series: {
-				id: media.series_id,
+				id: [media.series_id],
 			},
 		},
 	})

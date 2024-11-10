@@ -1,6 +1,6 @@
 import { Alert, Button, ConfirmationModal } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React, { useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 type Props = {
 	onConfirmClear: () => Promise<void>

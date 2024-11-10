@@ -94,11 +94,11 @@ export class SeriesAPI extends APIBase {
 	 */
 	async nextBooks(
 		forSeries: string,
-		{ afterId, limit = 25, params }: CursorQueryParams,
+		{ cursor, limit = 25, params }: CursorQueryParams,
 	): Promise<Pageable<Media[]>> {
 		const bookAPI = new MediaAPI(this.api)
 		return bookAPI.getCursor({
-			afterId,
+			cursor,
 			limit,
 			params: {
 				...params,

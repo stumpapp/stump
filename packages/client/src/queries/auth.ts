@@ -13,7 +13,7 @@ export function useAuthQuery(options: QueryOptions<User> = {}) {
 		async () => {
 			const data = await sdk.auth.me()
 			if (!isUser(data)) {
-				console.debug('Malformed response recieved from server', data)
+				console.warn('Malformed response recieved from server', data)
 				throw new Error('Malformed response recieved from server')
 			}
 			return data

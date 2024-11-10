@@ -1,5 +1,5 @@
 import { useSDK } from '@stump/client'
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const MAX_BUFFER_SIZE = 1000
 

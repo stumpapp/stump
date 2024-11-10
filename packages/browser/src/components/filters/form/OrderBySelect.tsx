@@ -1,6 +1,6 @@
 import { Label, NativeSelect } from '@stump/components'
 import { MediaMetadataOrderBy, MediaOrderBy } from '@stump/sdk'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 
 import { FilterableEntity } from '.'
 

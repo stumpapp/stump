@@ -1,6 +1,6 @@
-/* eslint-disable react/prop-types */
 import * as SelectRadix from '@radix-ui/react-select'
 import { Check, ChevronDown } from 'lucide-react'
+import type { ComponentPropsWithoutRef, ElementRef } from 'react'
 import React from 'react'
 
 import { cn } from '../utils'
@@ -10,8 +10,8 @@ const SelectPrimitiveGroup = SelectRadix.Group
 const SelectPrimitiveValue = SelectRadix.Value
 
 const SelectPrimitiveTrigger = React.forwardRef<
-	React.ElementRef<typeof SelectRadix.Trigger>,
-	React.ComponentPropsWithoutRef<typeof SelectRadix.Trigger>
+	ElementRef<typeof SelectRadix.Trigger>,
+	ComponentPropsWithoutRef<typeof SelectRadix.Trigger>
 >(({ className, children, ...props }, ref) => (
 	<SelectRadix.Trigger
 		ref={ref}
@@ -28,8 +28,8 @@ const SelectPrimitiveTrigger = React.forwardRef<
 SelectPrimitiveTrigger.displayName = SelectRadix.Trigger.displayName
 
 const SelectPrimitiveContent = React.forwardRef<
-	React.ElementRef<typeof SelectRadix.Content>,
-	React.ComponentPropsWithoutRef<typeof SelectRadix.Content>
+	ElementRef<typeof SelectRadix.Content>,
+	ComponentPropsWithoutRef<typeof SelectRadix.Content>
 >(({ className, children, ...props }, ref) => (
 	<SelectRadix.Portal>
 		<SelectRadix.Content
@@ -47,8 +47,8 @@ const SelectPrimitiveContent = React.forwardRef<
 SelectPrimitiveContent.displayName = SelectRadix.Content.displayName
 
 const SelectPrimitiveLabel = React.forwardRef<
-	React.ElementRef<typeof SelectRadix.Label>,
-	React.ComponentPropsWithoutRef<typeof SelectRadix.Label>
+	ElementRef<typeof SelectRadix.Label>,
+	ComponentPropsWithoutRef<typeof SelectRadix.Label>
 >(({ className, ...props }, ref) => (
 	<SelectRadix.Label
 		ref={ref}
@@ -59,8 +59,8 @@ const SelectPrimitiveLabel = React.forwardRef<
 SelectPrimitiveLabel.displayName = SelectRadix.Label.displayName
 
 const SelectPrimitiveItem = React.forwardRef<
-	React.ElementRef<typeof SelectRadix.Item>,
-	React.ComponentPropsWithoutRef<typeof SelectRadix.Item>
+	ElementRef<typeof SelectRadix.Item>,
+	ComponentPropsWithoutRef<typeof SelectRadix.Item>
 >(({ className, children, ...props }, ref) => (
 	<SelectRadix.Item
 		ref={ref}
@@ -82,8 +82,8 @@ const SelectPrimitiveItem = React.forwardRef<
 SelectPrimitiveItem.displayName = SelectRadix.Item.displayName
 
 const SelectPrimitiveSeparator = React.forwardRef<
-	React.ElementRef<typeof SelectRadix.Separator>,
-	React.ComponentPropsWithoutRef<typeof SelectRadix.Separator>
+	ElementRef<typeof SelectRadix.Separator>,
+	ComponentPropsWithoutRef<typeof SelectRadix.Separator>
 >(({ className, ...props }, ref) => (
 	<SelectRadix.Separator
 		ref={ref}

@@ -1,4 +1,5 @@
 import { cva, VariantProps } from 'class-variance-authority'
+import type { ComponentPropsWithoutRef, ElementRef } from 'react'
 import React from 'react'
 
 import { cn } from '../utils'
@@ -31,7 +32,7 @@ const headingVariants = cva(HEADING_BASE_CLASSES, {
 	},
 })
 
-type BaseProps = VariantProps<typeof headingVariants> & React.ComponentPropsWithoutRef<As>
+type BaseProps = VariantProps<typeof headingVariants> & ComponentPropsWithoutRef<As>
 // TODO: truncate option
 export type HeadingProps = {
 	as?: As
@@ -39,7 +40,7 @@ export type HeadingProps = {
 	bold?: boolean
 } & BaseProps
 
-export const Heading = React.forwardRef<React.ElementRef<As>, HeadingProps>(
+export const Heading = React.forwardRef<ElementRef<As>, HeadingProps>(
 	({ className, as, size, variant, bold, ...props }, ref) => {
 		const Component = as ?? 'h1'
 		return (

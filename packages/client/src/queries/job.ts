@@ -1,4 +1,4 @@
-import type { JobSchedulerConfig, PersistedJob } from '@stump/sdk'
+import type { PersistedJob, UpdateSchedulerConfig } from '@stump/sdk'
 
 import { PageQueryOptions, useMutation, usePageQuery, useQuery } from '../client'
 import { useSDK } from '../sdk'
@@ -37,7 +37,7 @@ export function useJobSchedulerConfig() {
 		mutate: update,
 		isLoading: isUpdating,
 		isError: isUpdateError,
-	} = useMutation([sdk.job.keys.updateSchedulerConfig], (payload: JobSchedulerConfig) =>
+	} = useMutation([sdk.job.keys.updateSchedulerConfig], (payload: UpdateSchedulerConfig) =>
 		sdk.job.updateSchedulerConfig(payload),
 	)
 

@@ -1,5 +1,3 @@
-import React from 'react'
-
 import PreferenceToggle from '../../PreferenceToggle'
 
 // TODO: Implement this

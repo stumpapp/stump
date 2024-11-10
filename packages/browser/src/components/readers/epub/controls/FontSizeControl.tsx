@@ -1,7 +1,7 @@
 import { useEpubReader } from '@stump/client'
 import { cx, Label, Text, TEXT_VARIANTS } from '@stump/components'
 import { Minus, Plus } from 'lucide-react'
-import React, { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
 import { usePressAndHold } from '@/hooks/usePressAndHold'
 

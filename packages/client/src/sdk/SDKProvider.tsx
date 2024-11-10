@@ -20,21 +20,17 @@ export function SDKProvider({
 
 	useEffect(() => {
 		if (!baseURL && !tauriRPC) {
-			console.debug('No baseURL or Tauri RPC, likely running in browser')
 			return
 		}
 
-		console.debug('Initializing SDK with', baseURL, authMethod)
 		const instance = new Api(baseURL, authMethod)
 
 		if (!tauriRPC || authMethod === 'session') {
-			console.debug('No Tauri RPC or using session auth method')
 			setSDK(instance)
 			return
 		}
 
 		const setExistingToken = async () => {
-			console.debug('Checking for existing token')
 			try {
 				const currentServer = await tauriRPC.getCurrentServerName()
 				if (!currentServer) {
@@ -45,7 +41,6 @@ export function SDKProvider({
 
 				const token = await tauriRPC.getApiToken(currentServer)
 				if (token) {
-					console.debug('Found existing token for', currentServer)
 					instance.token = token
 				}
 			} catch (error) {

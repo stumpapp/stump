@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { ScreenRootView, Text, View } from '@/components'
 
 import SettingsListItem from './SettingsListItem'

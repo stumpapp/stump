@@ -1,6 +1,5 @@
 import { Label, NativeSelect, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import { CreateOrUpdateLibrarySchema } from '../schema'

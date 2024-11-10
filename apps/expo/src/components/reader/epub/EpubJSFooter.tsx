@@ -1,5 +1,4 @@
 import { useReader } from '@epubjs-react-native/core'
-import React from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Text, View } from '@/components/primitives'

@@ -1,6 +1,5 @@
 import { cn, IconButton, ToolTip } from '@stump/components'
 import { Settings } from 'lucide-react'
-import React from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
 import paths from '../../../paths'

@@ -30,7 +30,7 @@ const PopoverContent = React.forwardRef<
 				align={align}
 				sideOffset={sideOffset}
 				className={cn(
-					'z-50 rounded-md border border-edge bg-background p-4 shadow-md outline-none animate-in data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 ',
+					'z-50 rounded-md border border-edge bg-background p-4 shadow-md outline-none animate-in data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
 					POPOVER_SIZE_VARIANTS[size || 'default'] ?? POPOVER_SIZE_VARIANTS.default,
 					className,
 				)}

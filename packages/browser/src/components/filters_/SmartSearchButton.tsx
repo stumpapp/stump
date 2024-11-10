@@ -21,7 +21,7 @@ export default function SmartSearchButton() {
 					})}
 					pressEffect={false}
 				>
-					<WandSparkles className="h-4 w-4 " />
+					<WandSparkles className="h-4 w-4" />
 				</IconButton>
 			</Dropdown.Trigger>
 			<Dropdown.Content align="end">

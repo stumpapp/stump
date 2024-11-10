@@ -4,7 +4,8 @@ import { useMediaMatch } from 'rooks'
 
 import SmartFilterModal from './SmartFilterModal'
 import SmartSearchButton from './SmartSearchButton'
-import { useFilterStore } from './store'
+import { useFilterStore, useSyncSearch } from './store'
+import Search from './Search'
 
 type Props = {
 	navOffset?: boolean
@@ -25,9 +26,11 @@ export default function FilterHeader({ navOffset, layoutControls }: Props) {
 
 	const store = useFilterStore((state) => ({
 		bodyStore: state.bodyStore,
+		urlStore: state.urlStore,
 		mode: state.mode,
 		patchBody: state.patchBody,
 	}))
+	const { updateSearch } = useSyncSearch()
 
 	const renderLeft = () => {
 		if (store.mode === 'body') {
@@ -57,7 +60,17 @@ export default function FilterHeader({ navOffset, layoutControls }: Props) {
 				</>
 			)
 		} else {
-			return null
+			const { urlStore } = store
+			return (
+				<>
+					<Search
+						initialValue={(urlStore.filters?.search as string) || undefined}
+						onChange={updateSearch}
+						// isLoading={isSearching}
+						// isDisabled={isSearchDisabled}
+					/>
+				</>
+			)
 		}
 	}
 

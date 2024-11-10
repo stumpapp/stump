@@ -184,8 +184,8 @@ const createFilterStore = (forEntity: FilterEntity, options: CreateFilterStoreOp
 				},
 				setUrlFilter: (key, value) => {
 					const entireStore = clone(get())
-					const updatedState = { ...get().urlStore.filters, [key]: value }
-					set(setProperty(entireStore, 'urlStore.filters', updatedState))
+					const updatedFilters = { ...get().urlStore.filters, [key]: value }
+					set(setProperty(entireStore, 'urlStore.filters', updatedFilters))
 				},
 				urlStore: {
 					filters: options.defaultUrl,
@@ -292,4 +292,46 @@ export const useSyncParams = () => {
 		[mode, bodyStore, urlStore],
 	)
 	return { changePage, pagination: resolvedPagination }
+}
+
+export const useSyncSearch = () => {
+	const [searchParams, setSearchParams] = useSearchParams()
+
+	const { mode, setUrlFilter, removeUrlFilter, urlStore, bodyStore, ...store } = useFilterStore(
+		useShallow((state) => state),
+	)
+
+	const urlSearch = useMemo(() => searchParams.get('search') || undefined, [searchParams])
+	const { filters } = urlStore
+	useEffect(() => {
+		if (mode === 'body') return
+
+		const isDifferent = filters?.search !== urlSearch
+		if (!isDifferent) return
+		if (urlSearch) {
+			setUrlFilter('search', urlSearch)
+		} else {
+			removeUrlFilter('search')
+		}
+	}, [mode, urlSearch, filters?.search, setUrlFilter, removeUrlFilter])
+
+	const updateSearch = useCallback(
+		(value?: string) => {
+			if (mode === 'body') return
+
+			setSearchParams((prev) => {
+				if (value) {
+					prev.set('search', value)
+				} else {
+					prev.delete('search')
+				}
+				return prev
+			})
+		},
+		[setUrlFilter, removeUrlFilter],
+	)
+
+	return {
+		updateSearch,
+	}
 }

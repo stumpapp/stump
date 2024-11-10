@@ -55,8 +55,8 @@ export default function SmartFilterModal({ initialValues, onSave }: Props) {
 					</span>
 				</Badge>
 			</Dialog.Trigger>
-			<Dialog.Content size="massive">
-				<Dialog.Header>
+			<Dialog.Content size="massive" className="p-0">
+				<Dialog.Header className="px-4 pt-4">
 					<Dialog.Title>Smart filter builder</Dialog.Title>
 					<Dialog.Description>
 						Build a complex filter to get exactly what you need. You can save this as a smart list
@@ -67,13 +67,13 @@ export default function SmartFilterModal({ initialValues, onSave }: Props) {
 				<Form
 					form={form}
 					onSubmit={handleSave}
-					className="h-[60vh] overflow-y-auto"
+					className="h-[60vh] overflow-y-auto p-4"
 					id="smart-filter-form"
 				>
 					<SmartListQueryBuilder isolated />
 				</Form>
 
-				<Dialog.Footer>
+				<Dialog.Footer className="px-4 pb-4">
 					<Button onClick={() => setIsOpen(false)}>Cancel</Button>
 					<Button variant="primary" type="submit" form="smart-filter-form">
 						Save

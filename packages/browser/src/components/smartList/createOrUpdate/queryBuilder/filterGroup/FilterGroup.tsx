@@ -27,7 +27,7 @@ export default function FilterGroup({ idx, group }: Props) {
 	return (
 		<FilterGroupContext.Provider value={{ groupIdx: idx, isLocked: group.is_locked || false }}>
 			<Card className={cn('ml-4', { 'cursor-not-allowed': group.is_locked })}>
-				<div className=" flex flex-col">
+				<div className="flex flex-col">
 					{!group.filters.length && (
 						<div className="p-4">
 							<FieldSelector idx={0} />

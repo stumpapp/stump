@@ -1,4 +1,5 @@
 import { Sheet } from '@stump/components'
+import { Preformatted } from '@stump/components'
 import { User } from '@stump/sdk'
 
 type Props = {
@@ -15,9 +16,7 @@ export default function InspectUserSlideOver({ user, onClose }: Props) {
 			title="Inspect user"
 			description="Inspect a user's information and configuration"
 		>
-			<div className="px-6 py-2">
-				<pre>{JSON.stringify(user, null, 2)}</pre>
-			</div>
+			<Preformatted title="Raw JSON">{JSON.stringify(user, null, 2)}</Preformatted>
 		</Sheet>
 	)
 }

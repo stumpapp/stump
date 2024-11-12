@@ -16,7 +16,7 @@ export default function InspectUserSlideOver({ user, onClose }: Props) {
 			title="Inspect user"
 			description="Inspect a user's information and configuration"
 		>
-			<Preformatted title="Raw JSON">{JSON.stringify(user, null, 2)}</Preformatted>
+			<Preformatted title="Raw JSON" content={user} />
 		</Sheet>
 	)
 }

@@ -17,7 +17,7 @@ export default function JobDataInspector({ data, onClose }: Props) {
 			title="Job data"
 			description="The final output of the job after it had completed"
 		>
-			<Preformatted title="Raw JSON">{JSON.stringify(displayedData, null, 2)}</Preformatted>
+			<Preformatted title="Raw JSON" content={displayedData} />
 		</Sheet>
 	)
 }

@@ -7,12 +7,12 @@ import {
 	buildSchema,
 	CreateOrUpdateLibrarySchema,
 	formDefaults,
-	IgnoreRulesConfig,
+	ScannerOptInFeatures,
 } from '@/components/library/createOrUpdate'
 
-import { useLibraryManagement } from '../context'
+import { useLibraryManagement } from '../../context'
 
-export default function IgnoreRulesPatchForm() {
+export default function ScannerFeaturesPatchForm() {
 	const { library, patch } = useLibraryManagement()
 
 	const schema = useMemo(() => buildSchema([], library), [library])
@@ -23,11 +23,20 @@ export default function IgnoreRulesPatchForm() {
 	})
 
 	const handleSubmit = useCallback(
-		({ ignore_rules }: CreateOrUpdateLibrarySchema) => {
+		({
+			process_metadata,
+			generate_file_hashes,
+			generate_koreader_hashes,
+		}: Pick<
+			CreateOrUpdateLibrarySchema,
+			'process_metadata' | 'generate_file_hashes' | 'generate_koreader_hashes'
+		>) => {
 			patch({
 				config: {
 					...library.config,
-					ignore_rules: ignore_rules?.map(({ glob }) => glob),
+					generate_file_hashes,
+					process_metadata,
+					generate_koreader_hashes,
 				},
 				scan_mode: 'NONE',
 			})
@@ -35,9 +44,11 @@ export default function IgnoreRulesPatchForm() {
 		[patch, library],
 	)
 
+	// Note: The underlying sub-form requires a form in the context, so I am wrapping it in one. However, the submit
+	// won't ever trigger, which is why there is the `onDidChange` callback.
 	return (
-		<Form form={form} onSubmit={handleSubmit}>
-			<IgnoreRulesConfig />
+		<Form form={form} onSubmit={handleSubmit} fieldsetClassName="space-y-12">
+			<ScannerOptInFeatures onDidChange={handleSubmit} />
 		</Form>
 	)
 }

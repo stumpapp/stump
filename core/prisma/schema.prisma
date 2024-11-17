@@ -105,14 +105,15 @@ model APIKey {
 }
 
 model Library {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  description String?
-  path        String   @unique
-  status      String   @default("READY") // UNKNOWN, READY, UNSUPPORTED, ERROR, MISSING
-  updated_at  DateTime @updatedAt
-  created_at  DateTime @default(now())
-  emoji       String?
+  id              String    @id @default(uuid())
+  name            String    @unique
+  description     String?
+  path            String    @unique
+  status          String    @default("READY") // UNKNOWN, READY, UNSUPPORTED, ERROR, MISSING
+  last_scanned_at DateTime?
+  updated_at      DateTime  @updatedAt
+  created_at      DateTime  @default(now())
+  emoji           String?
 
   series Series[]
 
@@ -122,9 +123,10 @@ model Library {
   tags              Tag[]
   hidden_from_users User[]
 
-  job_schedule_config    JobScheduleConfig? @relation(fields: [job_schedule_config_id], references: [id])
+  job_schedule_config    JobScheduleConfig?       @relation(fields: [job_schedule_config_id], references: [id])
   job_schedule_config_id String?
   user_visits            LastLibraryVisit[]
+  last_granular_scan     LastGranularLibraryScan?
 
   @@map("libraries")
 }
@@ -161,6 +163,16 @@ model LastLibraryVisit {
 
   @@unique([user_id, library_id])
   @@map("last_library_visits")
+}
+
+model LastGranularLibraryScan {
+  id Int @id @default(autoincrement())
+
+  options   Bytes
+  timestamp DateTime @default(now())
+
+  library_id String  @unique
+  library    Library @relation(fields: [library_id], references: [id], onDelete: Cascade)
 }
 
 model Series {

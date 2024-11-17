@@ -24,3 +24,11 @@ library::include!(library_thumbnails_deletion_include {
 		media: select { id }
 	}
 });
+
+library::select!(library_scan_details {
+	last_scanned_at
+	last_granular_scan: select {
+		options
+		timestamp
+	}
+});

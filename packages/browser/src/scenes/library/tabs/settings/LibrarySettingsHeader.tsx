@@ -7,6 +7,7 @@ import { useMediaMatch } from 'rooks'
 import { usePreferences } from '@/hooks/usePreferences'
 
 import LibrarySettingsSelectNavigation from './LibrarySettingsSelectNavigation'
+import { LibraryPatternDisplay } from './options/scanner'
 import { routeGroups } from './routes'
 
 export default function LibrarySettingsHeader() {
@@ -51,26 +52,35 @@ export default function LibrarySettingsHeader() {
 	const translatedHeader = t(`librarySettingsScene.${activeRouteKey}.title`)
 	const translatedDescription = t(`librarySettingsScene.${activeRouteKey}.description`)
 
+	const isScannerSettings = activeRouteKey === 'options/scanning'
+
 	return (
 		<header
-			className={cn('flex w-full flex-col space-y-4 border-b border-b-edge p-4', {
-				// Note: We make the border transparent because the width constraint when using a top bar
-				'mx-auto border-b-transparent': preferTopBar && !!layout_max_width_px,
-				'pl-52': displayingSideBar,
-			})}
+			className={cn(
+				'flex w-full flex-col items-start justify-between gap-4 border-b border-b-edge p-4 lg:flex-row lg:gap-0',
+				{
+					// Note: We make the border transparent because the width constraint when using a top bar
+					'mx-auto border-b-transparent': preferTopBar && !!layout_max_width_px,
+					'pl-52': displayingSideBar,
+				},
+			)}
 			style={{
 				maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined,
 			}}
 		>
-			<div>
-				<Heading size="lg" className="font-bold">
-					{translatedHeader}
-				</Heading>
+			<div className="flex flex-col space-y-4">
+				<div>
+					<Heading size="lg" className="font-bold">
+						{translatedHeader}
+					</Heading>
 
-				<Text variant="muted" className="mt-1.5" size="sm">
-					{translatedDescription}
-				</Text>
+					<Text variant="muted" className="mt-1.5" size="sm">
+						{translatedDescription}
+					</Text>
+				</div>
 			</div>
+
+			{isScannerSettings && <LibraryPatternDisplay />}
 
 			{isMobile && <LibrarySettingsSelectNavigation />}
 		</header>

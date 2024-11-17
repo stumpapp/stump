@@ -4,7 +4,7 @@ use axum::{
 	routing::{get, post, put},
 	Extension, Json, Router,
 };
-use chrono::Duration;
+use chrono::{DateTime, Duration, FixedOffset};
 use prisma_client_rust::{chrono::Utc, not, or, raw, Direction, PrismaValue};
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
@@ -20,8 +20,9 @@ use stump_core::{
 	db::{
 		entity::{
 			macros::{
-				library_series_ids_media_ids_include, library_tags_select,
-				library_thumbnails_deletion_include, series_or_library_thumbnail,
+				library_scan_details, library_series_ids_media_ids_include,
+				library_tags_select, library_thumbnails_deletion_include,
+				series_or_library_thumbnail,
 			},
 			FileStatus, Library, LibraryConfig, LibraryScanMode, LibraryStats, Media,
 			Series, TagName, User, UserPermission,
@@ -37,7 +38,7 @@ use stump_core::{
 			GenerateThumbnailOptions, ImageFormat, ImageProcessorOptions,
 			ThumbnailGenerationJob, ThumbnailGenerationJobParams,
 		},
-		scanner::{LibraryScanJob, ScanOptions},
+		scanner::{LastGranularLibraryScan, LibraryScanJob, ScanOptions},
 		ContentType,
 	},
 	prisma::{
@@ -90,6 +91,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 					"/excluded-users",
 					get(get_library_excluded_users).post(update_library_excluded_users),
 				)
+				.route("/last-scan", get(get_library_last_scan))
 				.route("/scan", post(scan_library))
 				.route("/clean", put(clean_library))
 				.route("/series", get(get_library_series))
@@ -989,6 +991,58 @@ async fn update_library_excluded_users(
 		.await?;
 
 	Ok(Json(Library::from(updated_library)))
+}
+
+#[derive(Debug, Deserialize, Serialize, ToSchema, Type)]
+pub struct LastScanDetails {
+	last_scanned_at: Option<DateTime<FixedOffset>>,
+	last_custom_scan: Option<LastGranularLibraryScan>,
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/libraries/:id/last-scan",
+	tag = "library",
+	params(
+		("id" = String, Path, description = "The library ID")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched library last scan details", body = LastScanDetails),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Library not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
+/// Get the last scan details for a library by id, if the current user has access to it.
+/// This includes the last scanned at timestamp and the last custom scan details.
+async fn get_library_last_scan(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+) -> APIResult<Json<LastScanDetails>> {
+	let client = &ctx.db;
+
+	let record = client
+		.library()
+		.find_first(vec![
+			library::id::equals(id.clone()),
+			library_not_hidden_from_user_filter(req.user()),
+		])
+		.select(library_scan_details::select())
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound("Library not found".to_string()))?;
+
+	let last_custom_scan = record
+		.last_granular_scan
+		.map(LastGranularLibraryScan::try_from)
+		.transpose()?;
+	let last_scanned_at = record.last_scanned_at;
+
+	Ok(Json(LastScanDetails {
+		last_scanned_at,
+		last_custom_scan,
+	}))
 }
 
 #[utoipa::path(

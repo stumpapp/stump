@@ -360,6 +360,10 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<Library>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryPattern>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryScanMode>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<ScanOptions>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<LastGranularLibraryScan>()?).as_bytes(),
+		)?;
 		file.write_all(format!("{}\n\n", ts_export::<IgnoreRules>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryConfig>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryStats>()?).as_bytes())?;

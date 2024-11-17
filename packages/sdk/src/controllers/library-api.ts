@@ -3,6 +3,7 @@ import {
 	CleanLibraryResponse,
 	CreateLibrary,
 	GenerateLibraryThumbnails,
+	LastScanDetails,
 	Library,
 	LibraryFilter,
 	LibraryStats,
@@ -176,6 +177,13 @@ export class LibraryAPI extends APIBase {
 		await this.api.axios.post(libraryURL(`/${id}/scan`), {})
 	}
 
+	async lastScanDetails(id: string): Promise<LastScanDetails> {
+		const { data: lastScanDetails } = await this.api.axios.get<LastScanDetails>(
+			libraryURL(`/${id}/last-scan`),
+		)
+		return lastScanDetails
+	}
+
 	/**
 	 * Remove all missing series and media from a library
 	 */
@@ -224,6 +232,7 @@ export class LibraryAPI extends APIBase {
 			getLastVisited: 'library.getLastVisited',
 			getStats: 'library.getStats',
 			scan: 'library.scan',
+			lastScanDetails: 'library.lastScanDetails',
 			update: 'library.update',
 			updateExcludedUsers: 'library.updateExcludedUsers',
 			updateThumbnail: 'library.updateThumbnail',

@@ -1,6 +1,9 @@
-use serde::Deserialize;
+use prisma_client_rust::chrono::{DateTime, FixedOffset};
+use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
+
+use crate::{db::entity::macros::library_scan_details, CoreError};
 
 // TODO(granular-scans/metadata-merge): Support merge strategies for metadata at some point
 /*
@@ -21,7 +24,7 @@ See also https://docs.rs/merge/latest/merge/ for potentially useful crate
 /// The override options for a scan job. These options are used to override the default behavior, which generally
 /// means that the scanner will visit books it otherwise would not. How much extra work is done depends on the
 /// specific options.
-#[derive(Debug, Default, Clone, Deserialize, Type, ToSchema)]
+#[derive(Debug, Default, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct ScanOptions {
 	/// Whether a scan should forcibly rebuild each book it visits and issue an update to the database.
 	/// This is somewhat dangerous, as it can overwrite metadata which was manually set against the database
@@ -42,6 +45,31 @@ impl ScanOptions {
 	pub fn should_visit_books(&self) -> bool {
 		// If any of the options are set, we should visit books
 		self.force_rebuild || self.regen_hashes
+	}
+
+	/// Whether a scan should perform a soft visit, which means that it will not forcibly rebuild
+	/// the entire book from disk but focus on a few specific tasks (e.g., regenerating hashes).
+	pub fn soft_visit(&self) -> bool {
+		!self.force_rebuild && self.regen_hashes
+	}
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
+pub struct LastGranularLibraryScan {
+	pub options: ScanOptions,
+	pub timestamp: DateTime<FixedOffset>,
+}
+
+impl TryFrom<library_scan_details::last_granular_scan::Data> for LastGranularLibraryScan {
+	type Error = CoreError;
+
+	fn try_from(
+		data: library_scan_details::last_granular_scan::Data,
+	) -> Result<Self, Self::Error> {
+		Ok(Self {
+			options: serde_json::from_slice(&data.options)?,
+			timestamp: data.timestamp,
+		})
 	}
 }
 

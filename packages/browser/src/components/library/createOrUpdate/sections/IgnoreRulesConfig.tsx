@@ -98,6 +98,8 @@ export default function IgnoreRulesConfig() {
 			existingRules?.every((glob) => glob !== rule.glob),
 		)
 
+		if (!hasChanges) return null
+
 		return (
 			<div>
 				<Button

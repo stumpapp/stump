@@ -18,7 +18,7 @@ export default function LibrarySettingsSelectNavigation() {
 	 * The active group based on the current location
 	 */
 	const activeRouteGroup = useMemo(
-		() => groups.find((group) => group.items.some((page) => location.pathname.startsWith(page.to))),
+		() => groups.find((group) => group.items.some((page) => location.pathname.endsWith(page.to))),
 		[location.pathname, groups],
 	)
 
@@ -26,7 +26,7 @@ export default function LibrarySettingsSelectNavigation() {
 	 * The active sub-route based on the current location, if any
 	 */
 	const activeSubRoute = useMemo(
-		() => activeRouteGroup?.items.find((page) => location.pathname.startsWith(page.to))?.to,
+		() => activeRouteGroup?.items.find((page) => location.pathname.endsWith(page.to))?.to,
 		[activeRouteGroup, location.pathname],
 	)
 

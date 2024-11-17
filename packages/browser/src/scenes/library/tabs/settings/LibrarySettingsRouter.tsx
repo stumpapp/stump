@@ -10,7 +10,7 @@ import { LibraryManagementContext } from './context'
 
 const BasicSettingsScene = lazy(() => import('./basics/BasicSettingsScene'))
 const ThumbnailSettingsScene = lazy(() => import('./options/thumbnails/ThumbnailSettingsScene'))
-const ScannerBehaviorScene = lazy(() => import('./options/ScannerBehaviorScene'))
+const ScannerBehaviorScene = lazy(() => import('./options/scanner'))
 const LibraryAnalysisScene = lazy(() => import('./options/analysis'))
 const LibraryReadingDefaultsScene = lazy(() => import('./options/readingDefaults'))
 

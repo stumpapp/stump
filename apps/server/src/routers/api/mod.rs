@@ -213,6 +213,7 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<PatchLibraryThumbnail>()?).as_bytes(),
 		)?;
+		file.write_all(format!("{}\n\n", ts_export::<LastScanDetails>()?).as_bytes())?;
 
 		file.write_all(
 			format!("{}\n\n", ts_export::<CreateOrUpdateSmartList>()?).as_bytes(),

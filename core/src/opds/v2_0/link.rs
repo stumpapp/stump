@@ -450,6 +450,8 @@ mod tests {
 			hidden_from_users: None,
 			job_schedule_config: None,
 			job_schedule_config_id: None,
+			last_granular_scan: None,
+			last_scanned_at: None,
 			config: None,
 			config_id: String::default(),
 			path: String::default(),

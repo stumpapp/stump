@@ -1,5 +1,5 @@
 import { Label, NativeSelect } from '@stump/components'
-import React, { useCallback } from 'react'
+import { useCallback } from 'react'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 

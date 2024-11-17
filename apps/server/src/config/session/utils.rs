@@ -46,7 +46,7 @@ pub fn delete_cookie_header() -> (String, String) {
 	(
 		"Set-Cookie".to_string(),
 		format!(
-			"{}={}; Path={}; Domain={}; Expires={}; Max-Age=0",
+			"{}={}; HttpOnly; SameSite=Lax; Path={}; Domain={}; Expires={}; Max-Age=0",
 			SESSION_NAME, "", SESSION_PATH, "", "Thu, 01 Jan 1970 00:00:00 GMT"
 		),
 	)

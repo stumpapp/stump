@@ -48,7 +48,7 @@ export default function AppWrapper() {
 	}, [error, setIsConnectedToServer])
 
 	useEffect(() => {
-		// TODO: ios vs androind?
+		// TODO: ios vs android?
 		setPlatform('mobile')
 	}, [setPlatform])
 

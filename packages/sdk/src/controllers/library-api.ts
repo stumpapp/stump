@@ -155,7 +155,7 @@ export class LibraryAPI extends APIBase {
 	 * Update a library by ID. This is not a patch
 	 */
 	async update(id: string, payload: UpdateLibrary): Promise<Library> {
-		const { data: updatedLibrary } = await this.api.axios.post(libraryURL(id), payload)
+		const { data: updatedLibrary } = await this.api.axios.put(libraryURL(id), payload)
 		return updatedLibrary
 	}
 
@@ -173,7 +173,7 @@ export class LibraryAPI extends APIBase {
 	 * Initiate a scan of a library
 	 */
 	async scan(id: string): Promise<void> {
-		await this.api.axios.get(libraryURL(`/${id}/scan`))
+		await this.api.axios.post(libraryURL(`/${id}/scan`), {})
 	}
 
 	/**

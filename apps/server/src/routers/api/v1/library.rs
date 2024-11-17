@@ -37,7 +37,7 @@ use stump_core::{
 			GenerateThumbnailOptions, ImageFormat, ImageProcessorOptions,
 			ThumbnailGenerationJob, ThumbnailGenerationJobParams,
 		},
-		scanner::LibraryScanJob,
+		scanner::{LibraryScanJob, ScanOptions},
 		ContentType,
 	},
 	prisma::{
@@ -90,7 +90,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 					"/excluded-users",
 					get(get_library_excluded_users).post(update_library_excluded_users),
 				)
-				.route("/scan", get(scan_library))
+				.route("/scan", post(scan_library))
 				.route("/clean", put(clean_library))
 				.route("/series", get(get_library_series))
 				.route("/media", get(get_library_media))
@@ -728,11 +728,11 @@ async fn replace_library_thumbnail(
 		.await?
 		.ok_or(APIError::NotFound(String::from("Library not found")))?;
 
-	let (content_type, bytes) =
+	let upload_data =
 		validate_and_load_image(&mut upload, Some(ctx.config.max_image_upload_size))
 			.await?;
 
-	let ext = content_type.extension();
+	let ext = upload_data.content_type.extension();
 	let library_id = library.id;
 
 	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
@@ -745,10 +745,11 @@ async fn replace_library_thumbnail(
 		),
 	}
 
-	let path_buf = place_thumbnail(&library_id, ext, &bytes, &ctx.config).await?;
+	let path_buf =
+		place_thumbnail(&library_id, ext, &upload_data.bytes, &ctx.config).await?;
 
 	Ok(ImageResponse::from((
-		content_type,
+		upload_data.content_type,
 		fs::read(path_buf).await?,
 	)))
 }
@@ -1007,6 +1008,7 @@ async fn scan_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
+	Json(options): Json<Option<ScanOptions>>,
 ) -> Result<(), APIError> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::ScanLibrary])?;
 	let db = &ctx.db;
@@ -1023,7 +1025,7 @@ async fn scan_library(
 			"Library with id {id} not found"
 		)))?;
 
-	ctx.enqueue_job(LibraryScanJob::new(library.id, library.path))
+	ctx.enqueue_job(LibraryScanJob::new(library.id, library.path, options))
 		.map_err(|e| {
 			error!(?e, "Failed to enqueue library scan job");
 			APIError::InternalServerError(
@@ -1270,6 +1272,9 @@ async fn create_library(
 					library_config::generate_file_hashes::set(
 						library_config.generate_file_hashes,
 					),
+					library_config::generate_koreader_hashes::set(
+						library_config.generate_koreader_hashes,
+					),
 					library_config::default_reading_dir::set(
 						library_config.default_reading_dir.to_string(),
 					),
@@ -1376,6 +1381,7 @@ async fn create_library(
 		ctx.enqueue_job(LibraryScanJob::new(
 			library.id.clone(),
 			library.path.clone(),
+			None,
 		))
 		.map_err(|e| {
 			error!(?e, "Failed to enqueue library scan job");
@@ -1496,6 +1502,9 @@ async fn update_library(
 						library_config::generate_file_hashes::set(
 							library_config.generate_file_hashes,
 						),
+						library_config::generate_koreader_hashes::set(
+							library_config.generate_koreader_hashes,
+						),
 						library_config::ignore_rules::set(ignore_rules),
 						library_config::thumbnail_config::set(thumbnail_config),
 					],
@@ -1606,6 +1615,7 @@ async fn update_library(
 		ctx.enqueue_job(LibraryScanJob::new(
 			updated_library.id.clone(),
 			updated_library.path.clone(),
+			None,
 		))
 		.map_err(|e| {
 			error!(?e, "Failed to enqueue library scan job");
@@ -1728,7 +1738,9 @@ async fn get_library_stats(
 					media m
 					LEFT JOIN finished_reading_sessions frs ON frs.media_id = m.id
 					LEFT JOIN reading_sessions rs ON rs.media_id = m.id
-				WHERE {} IS TRUE OR (rs.user_id = {} OR frs.user_id = {})
+				WHERE {} IS TRUE OR (rs.user_id = {} OR frs.user_id = {}) AND m.series_id IN (
+					SELECT id FROM series WHERE library_id = {}
+				)
 			)
 			SELECT
 				*
@@ -1736,10 +1748,11 @@ async fn get_library_stats(
 				base_counts
 				INNER JOIN progress_counts;
 			",
-			PrismaValue::String(id),
+			PrismaValue::String(id.clone()),
 			PrismaValue::Boolean(params.all_users),
 			PrismaValue::String(user.id.clone()),
-			PrismaValue::String(user.id.clone())
+			PrismaValue::String(user.id.clone()),
+			PrismaValue::String(id)
 		))
 		.exec()
 		.await?

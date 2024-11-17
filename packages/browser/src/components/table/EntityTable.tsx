@@ -10,7 +10,7 @@ import {
 	SortingState,
 	useReactTable,
 } from '@tanstack/react-table'
-import React, { PropsWithChildren } from 'react'
+import { Fragment, PropsWithChildren } from 'react'
 
 import SortIcon from './SortIcon'
 
@@ -89,7 +89,7 @@ export default function EntityTable<Entity>({
 	})
 	const { rows } = table.getRowModel()
 
-	const Container = render ?? React.Fragment
+	const Container = render ?? Fragment
 
 	return (
 		<Container>

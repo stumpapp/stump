@@ -1,7 +1,7 @@
 import { cn, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Check } from 'lucide-react'
-import React, { useCallback } from 'react'
+import { useCallback } from 'react'
 
 import { useSteppedFormContext } from './context'
 

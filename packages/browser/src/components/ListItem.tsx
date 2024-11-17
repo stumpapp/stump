@@ -23,7 +23,7 @@ export default function ListItem({ id, title, subtitle, href }: Props) {
 				size="sm"
 				className={cx(
 					'line-clamp-1 shrink-0',
-					{ ' w-1/2 md:w-1/3 lg:w-1/4 xl:w-[23%]': !!subtitle },
+					{ 'w-1/2 md:w-1/3 lg:w-1/4 xl:w-[23%]': !!subtitle },
 					{ 'w-full': !subtitle },
 				)}
 			>

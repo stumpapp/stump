@@ -4,7 +4,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { NavigationItem } from '@stump/sdk'
 import { motion } from 'framer-motion'
 import { Book, Home } from 'lucide-react'
-import React, { useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 import { match } from 'ts-pattern'
@@ -42,10 +42,11 @@ export default function SideBar({ asChild, hidden }: Props) {
 	const { shouldUseGradient } = useTheme()
 
 	const isBrowser = platform === 'browser'
+	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
 	const renderHeader = () => {
-		if (!isBrowser && !isMobile) {
+		if (!isBrowser && isAtLeastMedium) {
 			return (
 				<header className="flex w-full justify-between gap-1">
 					<UserMenu />
@@ -131,12 +132,12 @@ export default function SideBar({ asChild, hidden }: Props) {
 				{renderHeader()}
 
 				<div className="flex max-h-full grow flex-col gap-2 overflow-y-auto p-1 scrollbar-hide">
-					{!isMobile && isBrowser && <UserMenu />}
+					{isAtLeastMedium && isBrowser && <UserMenu />}
 					{sections}
 				</div>
 				<Spacer />
 
-				{!isMobile && <SideBarFooter />}
+				{isAtLeastMedium && <SideBarFooter />}
 			</>
 		)
 	}

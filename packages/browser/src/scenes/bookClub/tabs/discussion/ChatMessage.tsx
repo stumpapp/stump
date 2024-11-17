@@ -4,7 +4,6 @@ import { BookClubDiscussionMessage } from '@stump/sdk'
 import dayjs from 'dayjs'
 import { MessageCircle, ThumbsUp } from 'lucide-react'
 import pluralize from 'pluralize'
-import React from 'react'
 import { Link } from 'react-router-dom'
 
 import { useBookClubContext } from '@/components/bookClub'

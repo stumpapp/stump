@@ -112,8 +112,6 @@ const handleJobOutput = async (output: CoreJobOutput, sdk: Api) => {
 			} catch (e) {
 				console.error('Failed to invalidate queries', e)
 			}
-		} else {
-			console.debug('No keys to invalidate')
 		}
 	} else {
 		console.warn('Unhandled job output', output)

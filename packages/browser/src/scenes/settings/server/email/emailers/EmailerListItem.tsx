@@ -3,7 +3,7 @@ import { Badge, Card, Text, ToolTip } from '@stump/components'
 import { SMTPEmailer } from '@stump/sdk'
 import dayjs from 'dayjs'
 import { Sparkles } from 'lucide-react'
-import React, { Suspense, useCallback, useMemo } from 'react'
+import { Suspense, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 
 import paths from '@/paths'

@@ -2,7 +2,7 @@ import { invalidateQueries, useDeleteEmailDevice, useSDK } from '@stump/client'
 import { ConfirmationModal } from '@stump/components'
 import { isAxiosError } from '@stump/sdk'
 import { RegisteredEmailDevice } from '@stump/sdk'
-import React, { useCallback } from 'react'
+import { useCallback } from 'react'
 import toast from 'react-hot-toast'
 
 type Props = {

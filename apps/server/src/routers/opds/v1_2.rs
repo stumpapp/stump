@@ -25,7 +25,7 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
-	middleware::auth::{auth_middleware, RequestContext},
+	middleware::auth::{api_key_middleware, auth_middleware, RequestContext},
 	routers::api::{
 		filters::{
 			apply_in_progress_filter_for_user, apply_media_age_restriction,
@@ -38,34 +38,40 @@ use crate::{
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
-	Router::new()
+	let primary_router = Router::new()
+		.route("/catalog", get(catalog))
+		.route("/keep-reading", get(keep_reading))
 		.nest(
-			"/v1.2",
+			"/libraries",
 			Router::new()
-				.route("/catalog", get(catalog))
-				.route("/keep-reading", get(keep_reading))
-				.nest(
-					"/libraries",
-					Router::new()
-						.route("/", get(get_libraries))
-						.route("/:id", get(get_library_by_id)),
-				)
-				.nest(
-					"/series",
-					Router::new()
-						.route("/", get(get_series))
-						.route("/latest", get(get_latest_series))
-						.route("/:id", get(get_series_by_id)),
-				)
-				.nest(
-					"/books/:id",
-					Router::new()
-						.route("/thumbnail", get(get_book_thumbnail))
-						.route("/pages/:page", get(get_book_page))
-						.route("/file/:filename", get(download_book)),
-				),
+				.route("/", get(get_libraries))
+				.route("/:id", get(get_library_by_id)),
 		)
-		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
+		.nest(
+			"/series",
+			Router::new()
+				.route("/", get(get_series))
+				.route("/latest", get(get_latest_series))
+				.route("/:id", get(get_series_by_id)),
+		)
+		.nest(
+			"/books/:id",
+			Router::new()
+				.route("/thumbnail", get(get_book_thumbnail))
+				.route("/pages/:page", get(get_book_page))
+				.route("/file/:filename", get(download_book)),
+		);
+	Router::new()
+		.nest("/v1.2", primary_router.clone())
+		.layer(middleware::from_fn_with_state(
+			app_state.clone(),
+			auth_middleware,
+		))
+		.nest("/:api_key/v1.2", primary_router)
+		.layer(middleware::from_fn_with_state(
+			app_state,
+			api_key_middleware,
+		))
 }
 
 fn pagination_bounds(page: i64, page_size: i64) -> (i64, i64) {

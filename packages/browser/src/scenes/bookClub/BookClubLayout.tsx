@@ -2,7 +2,7 @@ import { useBookClubQuery } from '@stump/client'
 import { cn } from '@stump/components'
 import { BookClub, Media, User } from '@stump/sdk'
 import dayjs from 'dayjs'
-import React, { Suspense, useMemo } from 'react'
+import { Suspense, useMemo } from 'react'
 import { Navigate, Outlet, useLocation, useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
 

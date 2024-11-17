@@ -2,7 +2,7 @@ import { Text } from '@stump/components'
 import { PersistedJob } from '@stump/sdk'
 import dayjs from 'dayjs'
 import { Duration } from 'dayjs/plugin/duration'
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 type Props = {
 	job: PersistedJob
@@ -24,7 +24,7 @@ export default function RunningJobElapsedTime({ job, formatDuration }: Props) {
 		}
 	}, [job])
 
-	const formatedDuration = useMemo(
+	const formattedDuration = useMemo(
 		() =>
 			formatDuration(
 				// we need to add 1 second to the elapsed time because the duration
@@ -36,7 +36,7 @@ export default function RunningJobElapsedTime({ job, formatDuration }: Props) {
 
 	return (
 		<Text size="sm" variant="muted" className="line-clamp-1">
-			{formatedDuration}
+			{formattedDuration}
 		</Text>
 	)
 }

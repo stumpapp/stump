@@ -1,31 +1,32 @@
-import { useUpdateLibrary } from '@stump/client'
+import { queryClient, useSDK, useUpdateLibrary } from '@stump/client'
 import { UpdateLibrary } from '@stump/sdk'
-import React, { Suspense, useCallback } from 'react'
+import { lazy, Suspense, useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
 import { useLibraryContext } from '../../context'
 import { LibraryManagementContext } from './context'
 
-const BasicSettingsScene = React.lazy(() => import('./basics/BasicSettingsScene'))
-const ThumbnailSettingsScene = React.lazy(
-	() => import('./options/thumbnails/ThumbnailSettingsScene'),
-)
-const ScannerBehaviorScene = React.lazy(() => import('./options/ScannerBehaviorScene'))
-const LibraryAnalysisScene = React.lazy(() => import('./options/analysis'))
-const LibraryReadingDefaultsScene = React.lazy(() => import('./options/readingDefaults'))
+const BasicSettingsScene = lazy(() => import('./basics/BasicSettingsScene'))
+const ThumbnailSettingsScene = lazy(() => import('./options/thumbnails/ThumbnailSettingsScene'))
+const ScannerBehaviorScene = lazy(() => import('./options/ScannerBehaviorScene'))
+const LibraryAnalysisScene = lazy(() => import('./options/analysis'))
+const LibraryReadingDefaultsScene = lazy(() => import('./options/readingDefaults'))
 
-const AccessControlScene = React.lazy(() => import('./danger/accessControl'))
-const DeletionScene = React.lazy(() => import('./danger/deletion'))
+const AccessControlScene = lazy(() => import('./danger/accessControl'))
+const DeletionScene = lazy(() => import('./danger/deletion'))
 
 // Note: library:manage permission is enforced in the parent router
 export default function LibrarySettingsRouter() {
 	const { library } = useLibraryContext()
-
+	const { sdk } = useSDK()
 	const { editLibrary } = useUpdateLibrary({
 		id: library.id,
+		onSuccess: async ({ id }) => {
+			await queryClient.refetchQueries([sdk.library.keys.getByID, id], { exact: false })
+		},
 	})
 
-	// TODO: This is particularly fallible. It would be a lot wiser to eventually just.. yknow, literally
+	// TODO: This is particularly fallible. It would be a lot wiser to eventually just.. y'know, literally
 	// implement a patch endpoint lol. I'm being very lazy but I'll get to it. I'm tired!
 	/**
 	 * A pseudo-patch function which will update the library, mixing what is present in the cache

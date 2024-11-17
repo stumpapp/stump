@@ -1,5 +1,4 @@
 import { ReaderProvider } from '@epubjs-react-native/core'
-import React from 'react'
 
 import { ScreenRootView, View } from '@/components/primitives'
 

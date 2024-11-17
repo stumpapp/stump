@@ -14,7 +14,7 @@ use crate::{
 	filesystem::{
 		archive::create_zip_archive,
 		error::FileError,
-		hash,
+		hash::{self, generate_koreader_hash},
 		image::ImageFormat,
 		media::process::{
 			FileConverter, FileProcessor, FileProcessorOptions, ProcessedFile,
@@ -66,6 +66,7 @@ impl FileProcessor for PdfProcessor {
 		path: &str,
 		FileProcessorOptions {
 			generate_file_hashes,
+			generate_koreader_hashes,
 			..
 		}: FileProcessorOptions,
 		_: &StumpConfig,
@@ -79,10 +80,14 @@ impl FileProcessor for PdfProcessor {
 		let hash = generate_file_hashes
 			.then(|| PdfProcessor::hash(path))
 			.flatten();
+		let koreader_hash = generate_koreader_hashes
+			.then(|| generate_koreader_hash(path))
+			.transpose()?;
 
 		Ok(ProcessedFile {
 			path: PathBuf::from(path),
 			hash,
+			koreader_hash,
 			metadata,
 			pages,
 		})

@@ -18,11 +18,17 @@ use crate::{
 	CoreResult,
 };
 
+use super::ScanOptions;
+
 pub struct WalkerCtx {
+	/// A reference to the Prisma client
 	pub db: Arc<PrismaClient>,
+	/// The globset of ignore rules to apply during the walk
 	pub ignore_rules: GlobSet,
 	// Will be 1 if the library is collection based, None
 	pub max_depth: Option<usize>,
+	/// The scan options to apply during the walk
+	pub options: ScanOptions,
 }
 
 /// The output of walking a library
@@ -52,18 +58,20 @@ impl WalkedLibrary {
 	}
 }
 
-pub async fn walk_library(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedLibrary> {
+pub async fn walk_library(
+	path: &str,
+	WalkerCtx {
+		db,
+		ignore_rules,
+		max_depth,
+		..
+	}: WalkerCtx,
+) -> CoreResult<WalkedLibrary> {
 	let library_is_missing = !PathBuf::from(path).exists();
 	if library_is_missing {
 		tracing::error!("Failed to walk: {} is missing or inaccessible", path);
 		return Ok(WalkedLibrary::missing());
 	}
-
-	let WalkerCtx {
-		db,
-		ignore_rules,
-		max_depth,
-	} = ctx;
 
 	let mut walkdir = WalkDir::new(path);
 	if let Some(num) = max_depth {
@@ -225,7 +233,15 @@ impl WalkedSeries {
 	}
 }
 
-pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries> {
+pub async fn walk_series(
+	path: &Path,
+	WalkerCtx {
+		db,
+		ignore_rules,
+		max_depth,
+		options,
+	}: WalkerCtx,
+) -> CoreResult<WalkedSeries> {
 	if !path.exists() {
 		tracing::error!(
 			"Failed to walk: {} is missing or inaccessible",
@@ -233,12 +249,6 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 		);
 		return Ok(WalkedSeries::missing());
 	}
-
-	let WalkerCtx {
-		db,
-		ignore_rules,
-		max_depth,
-	} = ctx;
 
 	tracing::debug!("Walking series at {}", path.display());
 
@@ -319,9 +329,9 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 								"Failed to determine if entry has been modified since last scan"
 							);
 						})
-						.unwrap_or(false)
+						.unwrap_or_else(|_| options.should_visit_books())
 				} else {
-					false
+					options.should_visit_books()
 				}
 			} else {
 				// If the media doesn't exist, we need to create it

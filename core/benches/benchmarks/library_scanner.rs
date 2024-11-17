@@ -206,7 +206,8 @@ async fn setup_test(
 	let job = WrappedJob::new(LibraryScanJob {
 		id: library.id.clone(),
 		path: library.path.clone(),
-		options: Some(library.config.clone()),
+		config: Some(library.config.clone()),
+		options: Default::default(),
 	});
 
 	let job_id = Uuid::new_v4().to_string();

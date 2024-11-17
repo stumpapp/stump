@@ -13,7 +13,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { AnimatePresence, motion } from 'framer-motion'
 import isValidGlob from 'is-valid-glob'
 import { Check, Edit, Lock, Trash, Unlock, X } from 'lucide-react'
-import React, { useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useFieldArray, useFormContext } from 'react-hook-form'
 
 import { useLibraryContextSafe } from '@/scenes/library/context'

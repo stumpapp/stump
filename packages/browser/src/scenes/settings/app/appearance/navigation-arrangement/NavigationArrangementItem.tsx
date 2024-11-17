@@ -4,7 +4,7 @@ import { cn, IconButton, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { NavigationItem } from '@stump/sdk'
 import { Bolt, Eye, EyeOff } from 'lucide-react'
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import EntityOptions from './EntityOptions'
 import { IEntityOptions, isNavigationItemWithEntityOptions } from './types'

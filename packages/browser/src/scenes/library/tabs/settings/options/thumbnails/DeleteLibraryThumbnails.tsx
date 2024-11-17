@@ -1,7 +1,7 @@
 import { useSDK } from '@stump/client'
 import { Alert, Button, ConfirmationModal } from '@stump/components'
 import { AlertTriangle } from 'lucide-react'
-import React, { useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
 import { useLibraryManagement } from '../../context'

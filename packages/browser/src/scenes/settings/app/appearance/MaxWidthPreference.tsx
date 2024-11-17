@@ -1,5 +1,4 @@
 import { cx, Label, NativeSelect, Text } from '@stump/components'
-import React from 'react'
 
 import { usePreferences } from '@/hooks'
 

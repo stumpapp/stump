@@ -1,4 +1,5 @@
 import { cva, VariantProps } from 'class-variance-authority'
+import type { ComponentPropsWithoutRef, ElementRef } from 'react'
 import { forwardRef } from 'react'
 
 import { useButtonContext } from '../button/context'
@@ -28,10 +29,10 @@ const spinnerVariants = cva('animate-spin text-gray-200 dark:text-gray-600', {
 })
 
 export type ProgressSpinnerProps = VariantProps<typeof spinnerVariants> &
-	React.ComponentPropsWithoutRef<'svg'>
+	ComponentPropsWithoutRef<'svg'>
 
 // TODO: make this component not indeterminate, i.e. take in progress...
-export const ProgressSpinner = forwardRef<React.ElementRef<'svg'>, ProgressSpinnerProps>(
+export const ProgressSpinner = forwardRef<ElementRef<'svg'>, ProgressSpinnerProps>(
 	({ className, variant, size, ...props }, ref) => {
 		const buttonContext = useButtonContext()
 

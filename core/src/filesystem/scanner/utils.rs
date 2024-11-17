@@ -182,6 +182,7 @@ pub(crate) async fn update_media(db: &PrismaClient, media: Media) -> CoreResult<
 						media::extension::set(media.extension.clone()),
 						media::pages::set(media.pages),
 						media::hash::set(media.hash.clone()),
+						media::koreader_hash::set(media.koreader_hash.clone()),
 						media::path::set(media.path.clone()),
 						media::status::set(media.status.to_string()),
 					],

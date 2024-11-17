@@ -173,6 +173,8 @@ model LastGranularLibraryScan {
 
   library_id String  @unique
   library    Library @relation(fields: [library_id], references: [id], onDelete: Cascade)
+
+  @@map("last_granular_library_scans")
 }
 
 model Series {

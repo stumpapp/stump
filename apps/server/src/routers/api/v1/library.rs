@@ -42,7 +42,7 @@ use stump_core::{
 		ContentType,
 	},
 	prisma::{
-		last_library_visit, library, library_config,
+		last_granular_library_scan, last_library_visit, library, library_config,
 		media::{self, OrderByParam as MediaOrderByParam},
 		series::{self, OrderByParam as SeriesOrderByParam},
 		tag, user,
@@ -1078,6 +1078,30 @@ async fn scan_library(
 		.ok_or(APIError::NotFound(format!(
 			"Library with id {id} not found"
 		)))?;
+
+	if let Some(ref opts) = options {
+		let bytes = serde_json::to_vec(opts).map_err(|e| {
+			error!(?e, "Failed to serialize scan options");
+			APIError::InternalServerError("Failed to serialize scan options".to_string())
+		})?;
+		let last_scan_record = db
+			.last_granular_library_scan()
+			.upsert(
+				last_granular_library_scan::library_id::equals(library.id.clone()),
+				(
+					bytes.clone(),
+					library::id::equals(library.id.clone()),
+					vec![],
+				),
+				vec![
+					last_granular_library_scan::options::set(bytes),
+					last_granular_library_scan::timestamp::set(Utc::now().into()),
+				],
+			)
+			.exec()
+			.await?;
+		tracing::debug!(?last_scan_record, "Updated last granular scan record");
+	}
 
 	ctx.enqueue_job(LibraryScanJob::new(library.id, library.path, options))
 		.map_err(|e| {

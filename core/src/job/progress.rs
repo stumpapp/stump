@@ -88,7 +88,7 @@ impl JobProgress {
 	}
 
 	pub fn init_done(index: i32, size: i32) -> Self {
-		Self::task_position_msg("Job intialized", index, size)
+		Self::task_position_msg("Job initialized", index, size)
 	}
 
 	pub fn restored(index: i32, size: i32) -> Self {

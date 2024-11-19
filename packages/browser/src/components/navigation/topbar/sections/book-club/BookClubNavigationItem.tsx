@@ -1,5 +1,4 @@
 import { NavigationMenu } from '@stump/components'
-import React from 'react'
 
 import { EntityOptionProps } from '@/components/navigation/types'
 

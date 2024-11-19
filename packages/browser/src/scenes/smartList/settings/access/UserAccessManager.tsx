@@ -1,6 +1,5 @@
 import { Alert } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React from 'react'
 
 // TODO: lock down access to CoCreator?
 export default function UserAccessManager() {

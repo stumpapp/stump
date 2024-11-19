@@ -1,6 +1,6 @@
 import { cn, Command, Text } from '@stump/components'
 import { Search } from 'lucide-react'
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import Spinner from '@/components/Spinner'
 

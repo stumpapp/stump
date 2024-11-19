@@ -93,7 +93,7 @@ export default function SeriesOverviewScene() {
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[shouldScroll],
+		[shouldScroll, isInView],
 	)
 
 	const renderContent = () => {

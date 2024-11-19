@@ -1,6 +1,6 @@
 import { NativeSelect } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React, { useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import { useSmartListContext } from '../../context'
 

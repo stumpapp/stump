@@ -1,7 +1,7 @@
 import { useSDK } from '@stump/client'
 import { Text, ToolTip } from '@stump/components'
 import { DirectoryListingFile, Media } from '@stump/sdk'
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { formatBookName } from '@/utils/format'
 

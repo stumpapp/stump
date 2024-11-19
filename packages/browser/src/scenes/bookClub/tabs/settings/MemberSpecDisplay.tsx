@@ -1,5 +1,4 @@
 import { Card, Heading, Text } from '@stump/components'
-import React from 'react'
 
 import { useBookClubContext } from '@/components/bookClub'
 

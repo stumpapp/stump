@@ -1,6 +1,4 @@
-import { Callout } from 'nextra-theme-docs'
-import { Steps } from 'nextra/components'
-import { Tabs } from 'nextra/components'
+import { Callout, Tabs, Steps } from 'nextra/components'
 
 # Docker
 
@@ -12,7 +10,7 @@ You have two options for spinning up a container based on your preference:
 Please ensure to adjust `PUID` and `PGID` to the user your config and data directories belong to.
 You can print those by executing:
 
-```bash
+```bash copy
 echo -e "PUID=$(id -u)\nPGID=$(id -g)"
 ```
 
@@ -33,7 +31,7 @@ echo -e "PUID=$(id -u)\nPGID=$(id -g)"
 
 Below is an example of a Docker Compose file you can use to bootstrap your Stump server:
 
-```yaml
+```yaml copy
 services:
   stump:
     image: aaronleopold/stump:latest
@@ -55,7 +53,7 @@ services:
 
 ### Start the container
 
-```bash
+```bash copy
 docker compose up -d
 ```
 
@@ -63,7 +61,7 @@ docker compose up -d
 
 When a new image is available, you can update your container using these commands:
 
-```bash
+```bash copy
 docker compose pull stump
 docker compose up -d
 ```
@@ -78,7 +76,7 @@ docker compose up -d
 
 ### Create the container
 
-```bash
+```bash copy
 # replace my paths (left of colon) with your own
 docker create \
   --name=stump \
@@ -93,14 +91,14 @@ docker create \
 
 If you prefer bind mounts, you can swap out the two `--volume` lines with:
 
-```bash
+```bash copy
 --mount type=volume,source=/home/aaronleopold/.stump,target=/config \
 --mount type=volume,source=/media/books,target=/data \
 ```
 
 ### Start the container
 
-```bash
+```bash copy
 docker start stump
 ```
 
@@ -108,14 +106,14 @@ docker start stump
 
 When a new image is available, you can update your container using these commands:
 
-```bash
+```bash copy
 docker pull aaronleopold/stump:latest
 docker restart stump
 ```
 
 </Steps>
 
-Below is a reference for some of the paremeters used in this section:
+Below is a reference for some of the parameters used in this section:
 
 | Parameter                       |                                Functionality                                |
 | ------------------------------- | :-------------------------------------------------------------------------: |
@@ -131,6 +129,6 @@ Below is a reference for some of the paremeters used in this section:
 
 To monitor the logs of the container, you can use the following command:
 
-```bash
+```bash copy
 docker logs -f stump
 ```

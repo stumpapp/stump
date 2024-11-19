@@ -1,5 +1,5 @@
 import { Text } from '@stump/components'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 
 import { useFileExplorerContext } from './context'
 

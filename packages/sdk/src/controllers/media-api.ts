@@ -36,7 +36,7 @@ export class MediaAPI extends APIBase {
 	 * Fetch media and maintain a cursor
 	 */
 	async getCursor(params: CursorQueryParams): Promise<Pageable<Media[]>> {
-		const { data: media } = await this.axios.get<Pageable<Media[]>>(mediaURL('cursor', params))
+		const { data: media } = await this.axios.get<Pageable<Media[]>>(mediaURL('', params))
 		return media
 	}
 

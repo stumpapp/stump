@@ -11,7 +11,7 @@ import {
 	SortingState,
 	useReactTable,
 } from '@tanstack/react-table'
-import React, { useCallback, useMemo, useState } from 'react'
+import { Fragment, useCallback, useMemo, useState } from 'react'
 
 import { SortIcon } from '@/components/table'
 
@@ -136,7 +136,7 @@ export default function GroupedSmartListItemTable({ items }: Props) {
 
 				<tbody className="divide relative divide-y divide-edge">
 					{rows.map((row) => (
-						<React.Fragment key={row.id}>
+						<Fragment key={row.id}>
 							<tr
 								key={row.id}
 								className={cn('h-10', {
@@ -157,7 +157,7 @@ export default function GroupedSmartListItemTable({ items }: Props) {
 									</td>
 								</tr>
 							)}
-						</React.Fragment>
+						</Fragment>
 					))}
 				</tbody>
 			</table>

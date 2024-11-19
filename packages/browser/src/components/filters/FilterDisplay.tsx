@@ -1,5 +1,5 @@
 import { Badge, Card, Text } from '@stump/components'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 
 import { useFilterContext } from './context'
 

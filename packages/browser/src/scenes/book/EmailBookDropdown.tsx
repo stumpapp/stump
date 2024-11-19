@@ -2,7 +2,7 @@ import { useEmailDevicesQuery, useSendAttachmentEmail } from '@stump/client'
 import { Badge, Button, ComboBox, Dialog, IconButton, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Send } from 'lucide-react'
-import React, { Suspense, useCallback, useMemo, useState } from 'react'
+import { Suspense, useCallback, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 
 import { useAppContext } from '@/context'

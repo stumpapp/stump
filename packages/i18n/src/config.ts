@@ -135,6 +135,7 @@ function parseMissingKeyHandler(missingKey: string) {
 
 		return missingKey
 	} catch (error) {
+		console.error('Failed to parse missing key', error)
 		return missingKey
 	}
 }

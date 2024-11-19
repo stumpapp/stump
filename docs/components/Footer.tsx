@@ -1,7 +1,6 @@
 import { SiDiscord, SiGithub, SiOpencollective, SiTwitter } from '@icons-pack/react-simple-icons'
 import clsx from 'clsx'
 import Link from 'next/link'
-import React from 'react'
 
 const navigation = {
 	nav: [

@@ -6,6 +6,6 @@ pub enum NotifierError {
 	ReqwestError(#[from] reqwest::Error),
 	#[error("{0}")]
 	Unimplemented(String),
-	#[error("Request was unsucessful")]
+	#[error("Request was unsuccessful")]
 	RequestFailed(String),
 }

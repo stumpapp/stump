@@ -29,7 +29,9 @@ export default {
 		component: NavBar,
 		extraContent: ExtraContent,
 	},
-	primaryHue: 28,
+	color: {
+		hue: 28,
+	},
 	project: {
 		link: 'https://github.com/stumpapp/stump',
 	},

@@ -1,7 +1,5 @@
-/* eslint-disable react/prop-types */
-
 import { cn } from '@stump/components'
-import React, { forwardRef } from 'react'
+import { forwardRef } from 'react'
 
 type Props = {
 	isDisabled?: boolean

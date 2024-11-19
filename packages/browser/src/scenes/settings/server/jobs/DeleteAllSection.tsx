@@ -2,7 +2,6 @@ import { invalidateQueries, useSDK } from '@stump/client'
 import { Alert, Button } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { AlertTriangle } from 'lucide-react'
-import React from 'react'
 import { toast } from 'react-hot-toast'
 
 import { useAppContext } from '@/context'

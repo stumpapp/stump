@@ -1,7 +1,7 @@
 import { useSDK } from '@stump/client'
 import { AspectRatio, cn, Heading, Text } from '@stump/components'
-import React from 'react'
 
+import { EntityImage } from '@/components/entity'
 import ReadMore from '@/components/ReadMore'
 import TagList from '@/components/tags/TagList'
 import { usePreferences } from '@/hooks'
@@ -59,7 +59,10 @@ export default function LibraryHeader() {
 				{show_thumbnails_in_headers && (
 					<div className="w-[200px]">
 						<AspectRatio ratio={2 / 3}>
-							<img src={sdk.library.thumbnailURL(library.id)} className="rounded-md object-cover" />
+							<EntityImage
+								src={sdk.library.thumbnailURL(library.id)}
+								className="rounded-md object-cover"
+							/>
 						</AspectRatio>
 					</div>
 				)}

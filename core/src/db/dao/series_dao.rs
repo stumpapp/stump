@@ -33,7 +33,7 @@ impl SeriesDAO {
 	/// NOTE: Internally invokes `do_create_many` to handle the transaction logic.
 	/// This function serves as a wrapper to handle the transaction commit/rollback.
 	pub async fn create_many(&self, series: Vec<Series>) -> CoreResult<Vec<Series>> {
-		// FIXME: this is so vile lol refactor once neseted create is supported:
+		// FIXME: this is so vile lol refactor once nested create is supported:
 		// https://github.com/Brendonovich/prisma-client-rust/issues/44
 		let (tx, client) = self.client._transaction().begin().await?;
 		match do_create_many(&client, series).await {

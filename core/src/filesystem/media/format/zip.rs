@@ -110,6 +110,8 @@ impl FileProcessor for ZipProcessor {
 		Ok(ProcessedFile {
 			path: PathBuf::from(path),
 			hash,
+			// TODO(koreader): Do we want to hash ZIP files?
+			koreader_hash: None,
 			metadata,
 			pages,
 		})

@@ -1,7 +1,7 @@
 import { useLibraries } from '@stump/client'
 import { cn, cx, Label, NavigationMenu, ScrollArea, Text } from '@stump/components'
 import { CircleSlash2, Library, LibrarySquare } from 'lucide-react'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 import AutoSizer from 'react-virtualized-auto-sizer'
 

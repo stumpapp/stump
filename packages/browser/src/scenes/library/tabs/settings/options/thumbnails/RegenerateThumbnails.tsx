@@ -1,7 +1,6 @@
 import { useMutation, useSDK } from '@stump/client'
 import { Button, DropdownMenu, Label, Text } from '@stump/components'
 import { AlertTriangle, ChevronDown, ImagePlus } from 'lucide-react'
-import React from 'react'
 
 import { useLibraryContext } from '@/scenes/library/context'
 

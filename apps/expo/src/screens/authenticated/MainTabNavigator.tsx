@@ -7,7 +7,6 @@ import {
 	Settings as SettingsIcon,
 } from 'lucide-react-native'
 import { useColorScheme } from 'nativewind'
-import React from 'react'
 
 import { gray } from '@/constants/colors'
 import { usePreferencesStore } from '@/stores'

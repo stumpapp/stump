@@ -1,12 +1,14 @@
 import { usePrefetchMediaByID, useSDK } from '@stump/client'
-import { EntityCard, Text } from '@stump/components'
+import { Text } from '@stump/components'
 import { Media } from '@stump/sdk'
 import pluralize from 'pluralize'
-import { useCallback, useMemo } from 'react'
+import { type ComponentPropsWithoutRef, useCallback, useMemo } from 'react'
 
 import paths from '@/paths'
 import { formatBookName, formatBytes } from '@/utils/format'
 import { prefetchMediaPage } from '@/utils/prefetch'
+
+import { EntityCard } from '../entity'
 
 export type BookCardProps = {
 	media: Media
@@ -16,7 +18,7 @@ export type BookCardProps = {
 	onSelect?: (media: Media) => void
 }
 
-type EntityCardProps = React.ComponentPropsWithoutRef<typeof EntityCard>
+type EntityCardProps = ComponentPropsWithoutRef<typeof EntityCard>
 
 export default function BookCard({
 	media,

@@ -1,5 +1,3 @@
-import React from 'react'
-
 import CleanLibrary from './CleanLibrary'
 import DeleteLibrary from './DeleteLibrary'
 

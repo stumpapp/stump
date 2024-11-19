@@ -4,7 +4,7 @@ import {
 	usePrefetchLibrarySeries,
 } from '@stump/client'
 import { cn, Link, useSticky } from '@stump/components'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
@@ -24,7 +24,10 @@ export default function LibraryNavigation() {
 	} = useLibraryContext()
 	const { checkPermission } = useAppContext()
 	const { prefetch: prefetchBooks } = usePrefetchLibraryBooks({ id })
-	const { prefetch: prefetchFiles } = usePrefetchLibraryFiles({ path })
+	const { prefetch: prefetchFiles } = usePrefetchLibraryFiles({
+		path,
+		fetchConfig: checkPermission('file:upload'),
+	})
 	const { prefetch: prefetchSeries } = usePrefetchLibrarySeries({ id })
 	const { ref, isSticky } = useSticky<HTMLDivElement>({ extraOffset: isMobile ? 56 : 0 })
 

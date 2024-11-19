@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form, Input } from '@stump/components'
-import React, { useCallback } from 'react'
+import { useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -43,6 +43,7 @@ export default function CreateOrAddToScheduleForm() {
 	const books = form.watch('books')
 
 	const handleSubmit = (data: Schema) => {
+		// eslint-disable-next-line no-console
 		console.debug(data)
 	}
 

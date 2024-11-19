@@ -152,7 +152,7 @@ impl From<series::Data> for OpdsEntry {
 	}
 }
 
-// TODO: I was panicing here on my hosted server, and added additional safe guards. I need to check what was happening
+// TODO: I was panicking here on my hosted server, and added additional safe guards. I need to check what was happening
 // once these changes are deployed and I can see the logs on my server.
 
 impl From<media::Data> for OpdsEntry {

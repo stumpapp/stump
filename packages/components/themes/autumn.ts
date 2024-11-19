@@ -27,23 +27,28 @@ export const autumn = {
 	fill: {
 		brand: {
 			DEFAULT: '#D08732',
+			hover: '#D0802D',
 			secondary: '#D0873226',
 		},
 		danger: {
 			DEFAULT: '#E25837',
+			hover: '#E35F40',
 			secondary: '#E2583726',
 		},
 		disabled: '#726A63',
 		info: {
 			DEFAULT: '#3B82F6',
+			hover: '#5A9CF6',
 			secondary: '#3B82F626',
 		},
 		success: {
 			DEFAULT: '#7BC96F',
+			hover: '#8CD37F',
 			secondary: '#7BC96F26',
 		},
 		warning: {
 			DEFAULT: '#FFB703',
+			hover: '#FFB70326',
 			secondary: '#FFB70326',
 		},
 	},

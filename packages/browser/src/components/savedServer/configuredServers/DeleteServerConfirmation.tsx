@@ -1,6 +1,6 @@
 import { Alert, ConfirmationModal } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React, { useCallback } from 'react'
+import { useCallback } from 'react'
 
 type Props = {
 	isOpen: boolean

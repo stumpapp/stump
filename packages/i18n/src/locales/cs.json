@@ -7,7 +7,7 @@
 	},
 	"authScene": {
 		"claimHeading": "Inicializovat váš server",
-		"claimText": "This Stump server is not initialized. Use the form below to create your account. Once created, you will have full access to all server features.",
+		"claimText": "Tento server Stump není inicializovaný. Pro vytvoření účtu použijte níže uvedený formulář. Po vytvoření budete mít plný přístup ke všem funkcím serveru.",
 		"form": {
 			"validation": {
 				"missingUsername": "Jméno uživatele je vyžadováno",
@@ -369,8 +369,8 @@
 					"description": "Generovat hash pro každý soubor v knihovně pro detekci duplicit"
 				},
 				"koreaderHashes": {
-					"label": "KoReader-compatible hashes",
-					"description": "If using KoReader, generate additional hashes in the format it expects"
+					"label": "Hash kompatibilní s KoReaderem",
+					"description": "Pokud používáte KoReader, vygenerujte další hash ve formátu, který očekává"
 				}
 			},
 			"libraryPattern": {
@@ -464,24 +464,24 @@
 	"fileExplorer": {
 		"uploadModal": {
 			"title": {
-				"books": "Upload books",
-				"series": "Upload series"
+				"books": "Nahrát knihy",
+				"series": "Nahrát série"
 			},
 			"description": {
-				"books": "Add books directly to the current path in the file explorer",
-				"series": "Add a series directly to the current path in the file explorer"
+				"books": "Přidat knihy přímo do aktuální cesty ve správci souborů",
+				"series": "Přidat série přímo do aktuální cesty ve správci souborů"
 			},
 			"seriesDisclaimer": [
-				"It must be a ",
-				"zipped file",
-				"containing the folder which should be the series, with all the books inside"
+				"Musí to být ",
+				"zip soubor",
+				"obsahující složku, která by měla být sérií, se všemi knihami uvnitř"
 			],
 			"dropzone": {
-				"books": "Drag and drop books here",
-				"series": "Drag and drop a zip file here",
-				"alt": "Or click to browse your computer for books to upload"
+				"books": "Sem přetáhněte knihy",
+				"series": "Sem přetáhněte zip soubor",
+				"alt": "Nebo klikněte zde pro procházení počítače, aby bylo možné nahrát knihy"
 			},
-			"addedFiles": "Added files"
+			"addedFiles": "Přidané soubory"
 		}
 	},
 	"librarySettingsScene": {
@@ -601,24 +601,24 @@
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "Continue reading",
+			"title": "Pokračovat ve čtení",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any in-progress books you start will show up here"
+				"heading": "Nic k zobrazení",
+				"message": "Zde se zobrazí všechny rozečtené knihy"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Recently added series",
+			"title": "Nedávno přidané série",
 			"emptyState": {
 				"heading": "Žádná série k zobrazení",
 				"message": "Všechny série, které přidáte do vašich knihoven, se zobrazí zde"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Recently added books",
+			"title": "Nedávno přidané knihy",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any recent books you add will show up here"
+				"heading": "Nic k zobrazení",
+				"message": "Zde se zobrazí všechny naposledy přidané knihy"
 			}
 		}
 	},
@@ -845,33 +845,33 @@
 	},
 	"createOrUpdateApiKey": {
 		"validation": {
-			"futureDate": "Expiration date must be in the future"
+			"futureDate": "Datum expirace musí být v budoucnu"
 		},
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "Koreader Sync"
+				"label": "Název",
+				"placeholder": "Koreader synchronizace"
 			},
 			"expiration": {
-				"label": "Expiration",
-				"placeholder": "Never"
+				"label": "Expirace",
+				"placeholder": "Nikdy"
 			},
 			"expires_at": {
-				"label": "Expires at",
-				"placeholder": "Never"
+				"label": "Vyprší",
+				"placeholder": "Nikdy"
 			},
 			"permissions": {
 				"inherit": {
-					"label": "Inherit permissions",
-					"description": "The same permissions as your account"
+					"label": "Zdědit oprávnění",
+					"description": "Stejná oprávnění jako váš účet"
 				},
 				"explicit": {
-					"label": "Explicit permissions",
-					"description": "Choose the permissions this key should have"
+					"label": "Explicitní oprávnění",
+					"description": "Zvolte oprávnění, která by měla mít tento klíč"
 				}
 			}
 		},
-		"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting"
+		"inheritDisclaimer": "Tento API klíč zdědí všechna vaše oprávnění, což znamená, že může dělat cokoliv, co můžete udělat. Buďte opatrní s tímto nastavením"
 	},
 	"userSmartListsScene": {
 		"heading": "Chytré seznamy",
@@ -1037,7 +1037,7 @@
 			"application": {
 				"account": "Účet",
 				"appearance": "Vzhled",
-				"api keys": "API keys",
+				"api keys": "API klíče",
 				"reader": "Čtečka",
 				"desktop": "Domovská obrazovka",
 				"label": "Aplikace"
@@ -1160,58 +1160,58 @@
 			}
 		},
 		"app/apiKeys": {
-			"helmet": "API keys",
-			"title": "API keys",
-			"description": "Manage your generated Stump API keys",
+			"helmet": "API klíče",
+			"title": "API klíče",
+			"description": "Spravujte vygenerované API klíče Stump",
 			"shared": {
 				"fields": {
-					"name": "Name",
-					"expiration": "Expiration",
-					"last_used": "Last used",
-					"created": "Created",
-					"permissions": "Permissions",
-					"inherited": "Inherited",
-					"explicit": "Explicit"
+					"name": "Název",
+					"expiration": "Expirace",
+					"last_used": "Naposledy použito",
+					"created": "Vytvořeno",
+					"permissions": "Oprávnění",
+					"inherited": "Zděděno",
+					"explicit": "Explicitní"
 				}
 			},
 			"sections": {
 				"inspector": {
-					"heading": "API key",
-					"description": "A detailed view of this key",
+					"heading": "API klíč",
+					"description": "Podrobný náhled tohoto klíče",
 					"unrestrictedKey": {
-						"heading": "Unrestricted key",
-						"description": "Since you are the server owner, this key has unrestricted access when configured to inherit permissions. Please be careful."
+						"heading": "Neomezený klíč",
+						"description": "Vzhledem k tomu, že jste vlastníkem serveru, má tento klíč neomezený přístup, pokud je nastaven na oprávnění dědit. Buďte prosím opatrní."
 					}
 				},
 				"createKey": {
 					"modal": {
-						"trigger": "Create API key",
+						"trigger": "Vytvořit API klíč",
 						"heading": {
-							"creating": "Create API key",
-							"created": "Created key"
+							"creating": "Vytvořit API klíč",
+							"created": "Vytvořený klíč"
 						},
 						"description": {
-							"creating": "API keys are long-lived credentials that can be used to authenticate with the API",
-							"created": "Your new API key has been created. Save the secret somewhere safe, as it will not be shown again"
+							"creating": "API klíče jsou dlouhotrvající přihlašovací údaje, které mohou být použity k ověření s API",
+							"created": "Váš nový API klíč byl vytvořen. Uložte tajný klíč někde bezpečně, protože se znovu nezobrazí"
 						},
-						"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting",
-						"createdKey": "Created key",
-						"savedConfirm": "I saved my key",
-						"submit": "Create key"
+						"inheritDisclaimer": "Tento API klíč zdědí všechna vaše oprávnění, což znamená, že může dělat cokoliv, co můžete udělat. Buďte opatrní s tímto nastavením",
+						"createdKey": "Vytvořený klíč",
+						"savedConfirm": "Uložil jsem svůj klíč",
+						"submit": "Vytvořit klíč"
 					}
 				},
 				"table": {
-					"title": "Your keys",
-					"description": "These are the API keys you have created",
+					"title": "Vaše klíče",
+					"description": "Toto jsou API klíče, které jste vytvořili",
 					"actionMenu": {
-						"inspect": "Inspect",
-						"delete": "Delete"
+						"inspect": "Projít",
+						"delete": "Smazat"
 					},
 					"empty": {
-						"title": "You haven't created any keys yet",
-						"action": "Create an API key to get started"
+						"title": "Zatím jste nevytvořili žádné klíče",
+						"action": "Vytvořte API klíč pro začátek"
 					},
-					"noExpiration": "No expiration set"
+					"noExpiration": "Není nastavena žádná expirace"
 				}
 			}
 		},
@@ -1244,7 +1244,7 @@
 				"configuredServers": {
 					"label": "Nastavené servery",
 					"description": "Seznam serverů Stump, ke kterým se můžete připojit",
-					"getStarted": "Add a server to get started",
+					"getStarted": "Přidejte server pro začátek",
 					"unreachableServer": {
 						"tooltip": "Server je nedostupný"
 					},
@@ -1317,7 +1317,7 @@
 						}
 					},
 					"resetTokens": {
-						"label": "Clear authentication",
+						"label": "Smazat ověření",
 						"description": [
 							"Remove all securely-stored access tokens for your servers",
 							"You will have to re-authenticate with each server"

@@ -1319,14 +1319,14 @@
 					"resetTokens": {
 						"label": "Smazat ověření",
 						"description": [
-							"Remove all securely-stored access tokens for your servers",
-							"You will have to re-authenticate with each server"
+							"Odstranit všechny bezpečně uložené přístupové tokeny pro vaše servery",
+							"Budete se muset znovu přihlásit na každém serveru"
 						],
 						"confirmation": {
-							"trigger": "Clear authentication",
-							"title": "Clear authentication",
-							"description": "This will remove all securely-stored access tokens for your servers",
-							"confirm": "Clear authentication"
+							"trigger": "Smazat ověření",
+							"title": "Smazat ověření",
+							"description": "Tímto odstraníte všechny bezpečně uložené přístupové tokeny pro vaše servery",
+							"confirm": "Smazat ověření"
 						}
 					}
 				},
@@ -1481,14 +1481,14 @@
 						}
 					},
 					"feature": {
-						"label": "Feature Opt-In",
+						"label": "Volitelné funkce",
 						"api_keys": {
-							"label": "API keys",
-							"description": "Allow the user to manage their own API keys"
+							"label": "API klíče",
+							"description": "Povolit uživateli spravovat vlastní API klíče"
 						},
 						"koreader_sync": {
-							"label": "KoReader sync",
-							"description": "Allow the user to access the KoReader sync integration"
+							"label": "KoReader synchronizace",
+							"description": "Povolit uživateli přístup k synchronizaci KoReader"
 						}
 					},
 					"file": {
@@ -1618,7 +1618,7 @@
 				},
 				"devices": {
 					"title": "E-mailová zařízení",
-					"description": "The device aliases you have configured for receiving emails from your Stump server instance",
+					"description": "Aliasy zařízení, které jste nakonfigurovali pro příjem e-mailů z instance serveru Stump",
 					"addDevice": "Přidat alias zařízení",
 					"addOrUpdateDevice": {
 						"title": {
@@ -1779,7 +1779,7 @@
 		},
 		"libraryOptions": {
 			"scanLibrary": "Skenovat",
-			"fileExplorer": "Files",
+			"fileExplorer": "Soubory",
 			"manageLibrary": "Manage",
 			"deleteLibrary": "Smazat"
 		},
@@ -1820,7 +1820,7 @@
 		}
 	},
 	"tagSelect": {
-		"placeholder": "Select or create tag",
+		"placeholder": "Vyberte nebo vytvořte štítek",
 		"placeholderNoTags": "Nejsou k dispozici žádné štítky"
 	},
 	"thumbnailDropdown": {
@@ -1846,18 +1846,18 @@
 		"create": "Vytvořit",
 		"edit": "Upravit",
 		"update": "Aktualizovat",
-		"upload": "Upload",
-		"uploading": "Uploading",
+		"upload": "Nahrát",
+		"uploading": "Nahrávání",
 		"unimplemented": "Tato funkce ještě není implementována! Zkuste to později",
 		"limitedFunctionality": "Toto ještě není plně implementováno a chybí některé funkce. Zkuste to později",
 		"logIn": "Přihlásit se",
 		"login": "Přihlášení",
 		"seeError": "Zobrazit chybu",
-		"remove": "Remove",
+		"remove": "Odstranit",
 		"goBack": "Jít zpět",
 		"goToServers": "Jít na servery",
 		"notReady": "Tato funkce není připravena",
-		"notUsedYet": "Not used yet",
-		"never": "Never"
+		"notUsedYet": "Zatím nepoužito",
+		"never": "Nikdy"
 	}
 }

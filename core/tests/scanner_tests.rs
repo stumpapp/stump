@@ -26,7 +26,7 @@ async fn test_scan_collection_library() {
 	)
 	.await;
 
-	ctx.enqueue_job(LibraryScanJob::new(lib_data.id, lib_data.path))
+	ctx.enqueue_job(LibraryScanJob::new(lib_data.id, lib_data.path, None))
 		.unwrap();
 	// TODO - something less heinous, there must be a way to wait on a job
 	tokio::time::sleep(Duration::from_secs(1)).await;
@@ -59,7 +59,7 @@ async fn test_scan_series_library() {
 	)
 	.await;
 
-	ctx.enqueue_job(LibraryScanJob::new(lib_data.id, lib_data.path))
+	ctx.enqueue_job(LibraryScanJob::new(lib_data.id, lib_data.path, None))
 		.unwrap();
 	// TODO - something less heinous, there must be a way to wait on a job
 	tokio::time::sleep(Duration::from_secs(1)).await;
@@ -84,6 +84,7 @@ fn default_library_config(pattern: &LibraryPattern) -> LibraryConfig {
 		convert_rar_to_zip: false,
 		hard_delete_conversions: false,
 		generate_file_hashes: true,
+		generate_koreader_hashes: true,
 		process_metadata: true,
 		library_pattern: pattern.clone(),
 		thumbnail_config: None,

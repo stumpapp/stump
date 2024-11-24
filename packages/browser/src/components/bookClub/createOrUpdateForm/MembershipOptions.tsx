@@ -1,6 +1,5 @@
 import { CheckBox, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import { CreateOrUpdateBookClubSchema } from './schema'

@@ -1,12 +1,12 @@
-import type { JobSchedulerConfig, PersistedJob } from '@stump/sdk'
+import type { PersistedJob, UpdateSchedulerConfig } from '@stump/sdk'
 
 import { PageQueryOptions, useMutation, usePageQuery, useQuery } from '../client'
 import { useSDK } from '../sdk'
 
-type UseJobsQueryParmas = PageQueryOptions<PersistedJob> & {
+type UseJobsQueryParams = PageQueryOptions<PersistedJob> & {
 	params?: Record<string, unknown>
 }
-export function useJobsQuery({ params, ...options }: UseJobsQueryParmas = {}) {
+export function useJobsQuery({ params, ...options }: UseJobsQueryParams = {}) {
 	const { sdk } = useSDK()
 	const { data, ...restReturn } = usePageQuery(
 		[sdk.job.keys.get, params],
@@ -37,7 +37,7 @@ export function useJobSchedulerConfig() {
 		mutate: update,
 		isLoading: isUpdating,
 		isError: isUpdateError,
-	} = useMutation([sdk.job.keys.updateSchedulerConfig], (payload: JobSchedulerConfig) =>
+	} = useMutation([sdk.job.keys.updateSchedulerConfig], (payload: UpdateSchedulerConfig) =>
 		sdk.job.updateSchedulerConfig(payload),
 	)
 

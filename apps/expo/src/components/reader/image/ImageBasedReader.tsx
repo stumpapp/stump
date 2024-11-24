@@ -2,7 +2,7 @@ import { useSDK, useUpdateMediaProgress } from '@stump/client'
 import { isAxiosError } from '@stump/sdk'
 import { Media } from '@stump/sdk'
 import { useColorScheme } from 'nativewind'
-import React, { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { FlatList, TouchableWithoutFeedback, useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -20,7 +20,7 @@ type ImageDimension = {
 }
 
 // TODO: This is an image-based reader right now. Extract this to a separate component
-// which is readered when the book is an image-based book.
+// which is rendered when the book is an image-based book.
 
 // TODO: Account for device orientation AND reading direction
 
@@ -55,7 +55,7 @@ export default function ImageBasedReader({ book, initialPage, incognito }: Props
 
 	const deviceOrientation = width > height ? 'landscape' : 'portrait'
 
-	// TODO: an effect that whenever the device orienation changes to something different than before,
+	// TODO: an effect that whenever the device orientation changes to something different than before,
 	// recalculate the ratios of the images? Maybe. Who knows, you will though
 
 	const { updateReadProgressAsync } = useUpdateMediaProgress(book.id)

@@ -1479,7 +1479,7 @@
 				},
 				"devices": {
 					"title": "Email devices",
-					"description": "The device aliases you have configured for recieving emails from your Stump server instance",
+					"description": "The device aliases you have configured for receiving emails from your Stump server instance",
 					"addDevice": "Add device alias",
 					"addOrUpdateDevice": {
 						"title": {
@@ -1681,7 +1681,7 @@
 		}
 	},
 	"tagSelect": {
-		"placholder": "Select or create tag",
+		"placeholder": "Select or create tag",
 		"placeholderNoTags": "No tags available"
 	},
 	"thumbnailDropdown": {

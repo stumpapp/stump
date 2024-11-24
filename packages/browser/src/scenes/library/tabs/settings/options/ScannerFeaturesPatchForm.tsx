@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@stump/components'
-import React, { useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
 import {
@@ -27,12 +27,17 @@ export default function ScannerFeaturesPatchForm() {
 		({
 			process_metadata,
 			generate_file_hashes,
-		}: Pick<CreateOrUpdateLibrarySchema, 'process_metadata' | 'generate_file_hashes'>) => {
+			generate_koreader_hashes,
+		}: Pick<
+			CreateOrUpdateLibrarySchema,
+			'process_metadata' | 'generate_file_hashes' | 'generate_koreader_hashes'
+		>) => {
 			patch({
 				config: {
 					...library.config,
 					generate_file_hashes,
 					process_metadata,
+					generate_koreader_hashes,
 				},
 				scan_mode: 'NONE',
 			})
@@ -45,7 +50,7 @@ export default function ScannerFeaturesPatchForm() {
 	return (
 		<Form form={form} onSubmit={handleSubmit} fieldsetClassName="space-y-12">
 			{/* Note: This component doesn't really belong here, but I didn't want to wrap it in its own form when it is just for display */}
-			{/* Should probably create a separate, non-formy variant */}
+			{/* Should probably create a separate, non-form variant */}
 			<LibraryPattern />
 			<ScannerOptInFeatures onDidChange={handleSubmit} />
 		</Form>

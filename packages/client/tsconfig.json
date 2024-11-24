@@ -1,9 +1,11 @@
 {
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
-		"outDir": "./dist",
+		"composite": true,
 		"jsx": "preserve",
 		"skipLibCheck": true,
+		"emitDeclarationOnly": true,
+		"outDir": "dist",
 		"paths": {
 			"@stump/sdk": ["../sdk/src/index.ts"],
 			"@stump/sdk/*": ["../sdk/src/*"],

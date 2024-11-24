@@ -317,7 +317,7 @@ impl From<HashMap<String, Vec<String>>> for MediaMetadata {
 				"creator" | "author" | "writers" => match metadata.writers {
 					Some(ref mut writers) => {
 						writers.extend(value);
-						// remove dupliates
+						// remove duplicates
 						writers.sort();
 						writers.dedup();
 					},

@@ -1,6 +1,6 @@
 import { Dialog, Tabs, Text } from '@stump/components'
 import { List } from 'lucide-react'
-import React, { useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import ControlButton from '../controls/ControlButton'
 import Bookmarks from './Bookmarks'

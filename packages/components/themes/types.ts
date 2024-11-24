@@ -33,7 +33,7 @@ type SecondaryVariant = {
 	secondary: string
 } & DefaultVariant
 
-const colorVariant = ['info', 'success', 'warning', 'danger', 'brand'] as const
+export const colorVariant = ['info', 'success', 'warning', 'danger', 'brand'] as const
 
 type Border = Record<(typeof colorVariant)[number], string> & {
 	subtle: string
@@ -66,7 +66,7 @@ type Background = {
 	 */
 	overlay: HoverVariant & DefaultVariant
 	/**
-	 * The invserse color of the base background value
+	 * The inverse color of the base background value
 	 */
 	inverse: string
 	/**

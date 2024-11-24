@@ -21,6 +21,7 @@ pub(crate) fn unexpected_error<E: std::error::Error>(err: E) -> impl IntoRespons
 		format!("An unknown error occurred: {err}"),
 	)
 }
+
 /// [`ImageResponse`] is a thin wrapper struct to return an image correctly in Axum.
 /// It contains a subset of actual Content-Type's (using [`ContentType`] enum from
 /// `stump_core`), as well as the raw image data. This is mostly the same as [`BufferResponse`],

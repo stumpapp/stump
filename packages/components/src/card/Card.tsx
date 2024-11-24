@@ -1,12 +1,11 @@
-/* eslint-disable react/prop-types */
-
+import type { ComponentPropsWithoutRef, ElementRef } from 'react'
 import React, { forwardRef } from 'react'
 
 import { cn } from '../utils'
 
-type CardBaseProps = React.ComponentPropsWithoutRef<'div'>
+type CardBaseProps = ComponentPropsWithoutRef<'div'>
 export type CardProps = CardBaseProps
-export const Card = React.forwardRef<React.ElementRef<'div'>, CardProps>(
+export const Card = React.forwardRef<ElementRef<'div'>, CardProps>(
 	({ className, ...props }, ref) => {
 		return (
 			<div
@@ -19,13 +18,13 @@ export const Card = React.forwardRef<React.ElementRef<'div'>, CardProps>(
 )
 Card.displayName = 'Card'
 
-export const CardGrid = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
+export const CardGrid = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<'div'>>(
 	({ className, ...props }, ref) => {
 		return (
 			<div
 				ref={ref}
 				className={cn(
-					'grid grid-cols-2 items-start justify-center gap-4 sm:grid-cols-4 md:justify-start lg:grid-cols-4 xl:grid-cols-5 xl:gap-4 2xl:grid-cols-7 2xl:gap-2 3xl:grid-cols-8 4xl:grid-cols-10',
+					'grid flex-1 grid-cols-2 items-start justify-center gap-4 sm:grid-cols-4 md:justify-start lg:grid-cols-4 xl:grid-cols-5 xl:gap-4 2xl:grid-cols-7 2xl:gap-2 3xl:grid-cols-8 4xl:grid-cols-10',
 					className,
 				)}
 				{...props}

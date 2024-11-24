@@ -1,6 +1,6 @@
 import { Button, IconButton, Input } from '@stump/components'
 import { Eye, EyeOff, Shield } from 'lucide-react'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useFormContext, useFormState } from 'react-hook-form'
 
 import { CreateOrUpdateUserSchema } from './schema'

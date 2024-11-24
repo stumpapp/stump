@@ -86,6 +86,7 @@ impl MediaBuilder {
 			extension,
 			pages: processed_entry.pages,
 			hash: processed_entry.hash,
+			koreader_hash: processed_entry.koreader_hash,
 			path: path_str,
 			series_id: self.series_id,
 			metadata: processed_entry.metadata,

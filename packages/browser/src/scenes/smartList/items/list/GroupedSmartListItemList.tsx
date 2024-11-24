@@ -2,7 +2,7 @@ import { Accordion, cn, Text } from '@stump/components'
 import { Library, Series, SmartListItemGroup } from '@stump/sdk'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import pluralize from 'pluralize'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { usePreferences } from '@/hooks'
@@ -84,7 +84,7 @@ export default function GroupedSmartListItemList({ items }: Props) {
 		[accordionState],
 	)
 
-	const scrollRef = React.useRef<HTMLDivElement>(null)
+	const scrollRef = useRef<HTMLDivElement>(null)
 
 	const groupVirtualizer = useVirtualizer({
 		count: items.length,

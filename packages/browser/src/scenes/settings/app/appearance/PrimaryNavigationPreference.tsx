@@ -36,7 +36,7 @@ export default function PrimaryNavigationPreference() {
 				/>
 			</div>
 			<Text size="xs" variant="muted" className="italic">
-				* Settings for the unselcted option will be disabled or hidden
+				* Settings for the unselected option will be disabled or hidden
 			</Text>
 		</div>
 	)

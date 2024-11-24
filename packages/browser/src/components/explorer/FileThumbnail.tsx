@@ -5,6 +5,8 @@ import { Media } from '@stump/sdk'
 import { Book, Folder } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { EntityImage } from '../entity'
+
 type Props = {
 	path: string
 	isDirectory: boolean
@@ -71,7 +73,7 @@ export default function FileThumbnail({
 		try {
 			await loadImage()
 			setShowFallback(false)
-		} catch (e) {
+		} catch {
 			setShowFallback(true)
 		}
 	}
@@ -101,7 +103,7 @@ export default function FileThumbnail({
 	}
 
 	return (
-		<img
+		<EntityImage
 			className={cn('aspect-[2/3] w-auto rounded-sm object-cover', sizeClasses)}
 			src={sdk.media.thumbnailURL(book.id)}
 			onError={() => setShowFallback(true)}

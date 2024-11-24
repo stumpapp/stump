@@ -3,7 +3,7 @@ import { Card, Spacer, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { SmartList } from '@stump/sdk'
 import pluralize from 'pluralize'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { match, P } from 'ts-pattern'
 

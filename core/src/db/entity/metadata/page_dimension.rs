@@ -1,5 +1,5 @@
 //! This module defines structures for storing and retrieving page dimensions data. The
-//! two primary stuctures defined here are [`PageDimension`], which represents a pair of
+//! two primary structures defined here are [`PageDimension`], which represents a pair of
 //! page dimensions (height, width), and [`PageDimensionsEntity`], which is the rust
 //! representation of a database row in the `page_dimensions` table.
 //!
@@ -116,7 +116,7 @@ pub fn dimension_vec_to_string(list: Vec<PageDimension>) -> String {
 			Some(ref run_dim) if *run_dim == next_dim => run_count += 1,
 			// If there's either a run going and it doesn't match, or no run...
 			_ => {
-				// This branch handles writeout if a run is going and it didn't match
+				// This branch handles write-out if a run is going and it didn't match
 				if let Some(run_dim) = run_dimension {
 					if run_count > 1 {
 						encoded_strings.push(format!("{run_count}>{run_dim}"));
@@ -132,7 +132,7 @@ pub fn dimension_vec_to_string(list: Vec<PageDimension>) -> String {
 		}
 	}
 
-	// This handles writeout for the final item
+	// This handles write-out for the final item
 	if let Some(run_dim) = run_dimension {
 		if run_count > 1 {
 			encoded_strings.push(format!("{run_count}>{run_dim}"));

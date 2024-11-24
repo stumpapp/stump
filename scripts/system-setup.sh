@@ -91,7 +91,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   if which apt-get &> /dev/null; then
     sudo apt-get -y update
     sudo apt-get -y install \
-      libwebkit2gtk-4.0-dev \
+      libwebkit2gtk-4.1-dev \
       pkg-config \
       build-essential \
       curl \
@@ -102,11 +102,13 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       libgtk-3-dev \
       libayatana-appindicator3-dev \
       javascriptcoregtk-4.0 \
+      libxdo-dev \
+      libssl-dev \
       librsvg2-dev \
       libvips42
   elif which pacman &> /dev/null; then
     sudo pacman -Syu
-    sudo pacman -S --needed webkit2gtk \
+    sudo pacman -S --needed webkit2gtk-4.1 \
       base-devel \
       curl \
       wget \
@@ -117,7 +119,13 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       libappindicator-gtk3 librsvg libvips
   elif which dnf &> /dev/null; then
     sudo dnf check-update
-    sudo dnf install openssl-devel webkit2gtk4.0-devel curl wget libappindicator-gtk3 librsvg2-devel dav1d
+    sudo dnf install webkit2gtk4.1-devel \
+      openssl-devel \
+      curl \
+      wget \
+      file \
+      libappindicator-gtk3-devel \
+      librsvg2-devel
     sudo dnf group install "C Development Tools and Libraries"
   else
     log_error $UNSUPPORTED_DISTRO

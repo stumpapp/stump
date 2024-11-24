@@ -48,7 +48,7 @@ pub(crate) fn reading_list_rbac_for_user(
 ) -> reading_list::WhereParam {
 	// A common condition that asserts there is a RBAC entry for the user that has a role
 	// greater than or equal to the minimum role:
-	// 1 for raeder, 2 for collaborator, 3 for creator
+	// 1 for reader, 2 for collaborator, 3 for creator
 	let base_rbac = reading_list::access_control::some(vec![and![
 		reading_list_rbac::user_id::equals(user_id.clone()),
 		reading_list_rbac::role::gte(minimum_role),

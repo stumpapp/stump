@@ -1,6 +1,5 @@
 import { Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React from 'react'
 
 import BundledServer from './BundledServer'
 import DiscordPresenceSwitch from './DiscordPresenceSwitch'

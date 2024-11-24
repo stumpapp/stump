@@ -1,5 +1,5 @@
 import { cn, NavigationMenu } from '@stump/components'
-import React, { PropsWithChildren } from 'react'
+import { PropsWithChildren } from 'react'
 import { To } from 'react-router'
 import { Link } from 'react-router-dom'
 

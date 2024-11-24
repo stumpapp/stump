@@ -1,7 +1,7 @@
-import { ButtonOrLink, cn, IconButton, Label } from '@stump/components'
+import { Button, ButtonOrLink, cn, Label } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { ArrowLeft, Home } from 'lucide-react'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
 import { usePreferences } from '@/hooks/usePreferences'
@@ -89,14 +89,15 @@ export default function SmartListSettingsSideBar() {
 
 				{enable_replace_primary_sidebar && (
 					<div className="shrink-0">
-						<IconButton
+						<Button
+							size="icon"
 							title="Go home"
 							variant="ghost"
 							className="border border-transparent p-1.5 text-foreground hover:border-edge-subtle/50 hover:bg-sidebar-surface/70"
 							onClick={() => navigate(paths.home())}
 						>
 							<Home className="h-4 w-4 -scale-x-[1] transform" />
-						</IconButton>
+						</Button>
 					</div>
 				)}
 			</div>

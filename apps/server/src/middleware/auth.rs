@@ -1,15 +1,16 @@
 use axum::{
 	body::Body,
-	extract::{OriginalUri, Request, State},
+	extract::{OriginalUri, Path, Request, State},
 	http::{header, StatusCode},
 	middleware::Next,
 	response::{IntoResponse, Redirect, Response},
 	Extension, Json,
 };
 use base64::{engine::general_purpose::STANDARD, Engine};
-use chrono::Utc;
+use prefixed_api_key::{PrefixedApiKey, PrefixedApiKeyController};
+use prisma_client_rust::or;
 use stump_core::{
-	db::entity::{User, UserPermission},
+	db::entity::{APIKeyPermissions, User, UserPermission, API_KEY_PREFIX},
 	opds::v2_0::{
 		authentication::{
 			OPDSAuthenticationDocumentBuilder, OPDSSupportedAuthFlow,
@@ -17,7 +18,7 @@ use stump_core::{
 		},
 		link::OPDSLink,
 	},
-	prisma::{session, user, PrismaClient},
+	prisma::{api_key, session, user, PrismaClient},
 };
 use tower_sessions::Session;
 
@@ -30,8 +31,8 @@ use crate::{
 	errors::{api_error_message, APIError, APIResult},
 	routers::{enforce_max_sessions, relative_favicon_path},
 	utils::{
-		decode_base64_credentials, get_session_user, user_has_all_permissions,
-		verify_password,
+		current_utc_time, decode_base64_credentials, get_session_user,
+		user_has_all_permissions, verify_password,
 	},
 };
 
@@ -117,9 +118,18 @@ impl RequestContext {
 	}
 }
 
-/// Middleware to check if a user is authenticated. If the user is not authenticated, the middleware
-/// will reject authentication. If the user is authenticated, the middleware will insert the user
-/// into the request extensions.
+/// A middleware to authenticate a user by one of the three methods:
+/// - Bearer token (JWT or API key)
+/// - Session cookie
+/// - Basic auth (only for OPDS v1.2 requests)
+/// This middleware should be used broadly across the application, however in instances where
+/// a router is scoped to an API key, the `api_key_middlware` should be used instead.
+///
+/// If the user is authenticated, the middleware will insert the user into the request
+/// extensions.
+///
+/// Note: It is important that this middlware is placed _after_ any middleware/handlers which access the
+/// request extensions, as the user is inserted into the request extensions dynamically here.
 #[tracing::instrument(skip(ctx, req, next))]
 pub async fn auth_middleware(
 	State(ctx): State<AppState>,
@@ -197,6 +207,35 @@ pub async fn auth_middleware(
 	Ok(next.run(req).await)
 }
 
+/// A middleware to authenticate a user by an API key in a *very* specific way. This middleware
+/// assumes that a fully qualified API key is provided in the path. This is used for two features today:
+///
+/// 1. An alternative for bearer token on the OPDS v1.2 API
+/// 2. A way to authenticate users for the KoReader sync API
+///
+/// This isn't necessary for OPDS v2.0 as it has a more robust authentication mechanism. The koreader
+/// frontend app will send an md5 hash of whatever password you provide. Stump does not use the same
+/// hashing algorithm, therefore the default auth method would not work.
+pub async fn api_key_middleware(
+	State(ctx): State<AppState>,
+	Path(api_key): Path<String>,
+	mut req: Request,
+	next: Next,
+) -> Result<Response, impl IntoResponse> {
+	let Ok(pak) = PrefixedApiKey::from_string(api_key.as_str()) else {
+		tracing::error!("Failed to parse API key");
+		return Err(APIError::Unauthorized.into_response());
+	};
+
+	let user = validate_api_key(pak, &ctx.db)
+		.await
+		.map_err(|e| e.into_response())?;
+
+	req.extensions_mut().insert(RequestContext(user));
+
+	Ok(next.run(req).await)
+}
+
 /// Middleware to check if a user has the required permissions to access a route. If the user does
 /// not have the required permissions, the middleware will reject the request.
 #[tracing::instrument(skip(req, next))]
@@ -224,10 +263,89 @@ pub async fn server_owner_middleware(
 	Ok(next.run(req).await)
 }
 
+pub async fn validate_api_key(
+	pak: PrefixedApiKey,
+	client: &PrismaClient,
+) -> APIResult<User> {
+	let controller = PrefixedApiKeyController::configure()
+		.prefix(API_KEY_PREFIX.to_owned())
+		.seam_defaults()
+		.finalize()?;
+
+	let long_token_hash = controller.long_token_hashed(&pak);
+	let api_key = client
+		.api_key()
+		.find_first(vec![
+			api_key::short_token::equals(pak.short_token().to_string()),
+			api_key::long_token_hash::equals(long_token_hash),
+			api_key::user::is(vec![
+				user::deleted_at::equals(None),
+				user::is_locked::equals(false),
+			]),
+			or![
+				api_key::expires_at::gte(current_utc_time().into()),
+				api_key::expires_at::equals(None),
+			],
+		])
+		.with(api_key::user::fetch())
+		.exec()
+		.await?
+		.ok_or(APIError::Unauthorized)?;
+	let key_user = api_key.user().ok().ok_or(APIError::Unauthorized)?;
+	let api_key_permissions = APIKeyPermissions::try_from(api_key.permissions.clone())?;
+
+	// Note: we check as a precaution. If a user had the permission revoked, that logic should also
+	// clean up keys.
+	let can_use_key = key_user.is_server_owner
+		|| key_user
+			.permissions
+			.as_ref()
+			.map(|set| set.contains(&UserPermission::AccessAPIKeys.to_string()))
+			.unwrap_or(false);
+
+	if !can_use_key || !controller.check_hash(&pak, &api_key.long_token_hash) {
+		tracing::error!(?can_use_key, "API key validation failed!");
+		// TODO(security): track?
+		return Err(APIError::Unauthorized);
+	}
+
+	let update_result = client
+		.api_key()
+		.update(
+			api_key::id::equals(api_key.id),
+			vec![api_key::last_used_at::set(Some(current_utc_time().into()))],
+		)
+		.exec()
+		.await;
+	if let Err(e) = update_result {
+		// IMO we shouldn't fail the request if we can't update the last used at field
+		tracing::error!(error = ?e, "Failed to update API key");
+	}
+
+	let constructed_user = match api_key_permissions {
+		APIKeyPermissions::Inherit(_) => User::from(key_user.clone()),
+		// Note: we don't construct permission sets for inferred permissions. What you
+		// give to your API key is what it gets.
+		APIKeyPermissions::Custom(permissions) => User {
+			permissions,
+			..User::from(key_user.clone())
+		},
+	};
+
+	Ok(constructed_user)
+}
+
 /// A function to handle bearer token authentication. This function will verify the token and
 /// return the user if the token is valid.
 #[tracing::instrument(skip_all)]
 async fn handle_bearer_auth(token: String, client: &PrismaClient) -> APIResult<User> {
+	match PrefixedApiKey::from_string(token.as_str()) {
+		Ok(api_key) if api_key.prefix() == API_KEY_PREFIX => {
+			return validate_api_key(api_key, client).await;
+		},
+		_ => (),
+	};
+
 	let user_id = verify_user_jwt(&token)?;
 
 	let fetched_user = client
@@ -278,7 +396,7 @@ async fn handle_basic_auth(
 		.with(user::user_preferences::fetch())
 		.with(user::age_restriction::fetch())
 		.with(user::sessions::fetch(vec![session::expiry_time::gt(
-			Utc::now().into(),
+			current_utc_time().into(),
 		)]))
 		.exec()
 		.await?;
@@ -304,7 +422,7 @@ async fn handle_basic_auth(
 	} else if is_match {
 		tracing::trace!(
 			username = &user.username,
-			"Basic authentication sucessful. Creating session for user"
+			"Basic authentication successful. Creating session for user"
 		);
 		enforce_max_sessions(&user, client).await?;
 		let user = User::from(user);
@@ -352,10 +470,10 @@ impl IntoResponse for OPDSBasicAuth {
 					return APIError::InternalServerError(e.to_string()).into_response();
 				},
 			};
-			let json_repsonse = Json(document).into_response();
-			let body = json_repsonse.into_body();
+			let json_response = Json(document).into_response();
+			let body = json_response.into_body();
 
-			// We want to ecourage the client to delete any existing session cookies when the current
+			// We want to encourage the client to delete any existing session cookies when the current
 			// is no longer valid
 			let delete_cookie = delete_cookie_header();
 
@@ -425,14 +543,14 @@ mod tests {
 	use axum_test::{TestServer, TestServerConfig};
 	use header::{HeaderName, HeaderValue};
 	use prisma_client_rust::MockStore;
-	use stump_core::{config::StumpConfig, Ctx};
+	use stump_core::{config::StumpConfig, db::entity::APIKey, Ctx};
 	use time::Duration;
 	use tower_sessions::{cookie::SameSite, Expiry, MemoryStore, SessionManagerLayer};
 
 	use crate::{
 		config::jwt::{create_user_jwt, CreatedToken},
 		http_server::StumpRequestInfo,
-		utils::{hash_password, test_utils::create_prisma_user},
+		utils::{current_utc_time, hash_password, test_utils::create_prisma_user},
 	};
 
 	use super::*;
@@ -752,7 +870,7 @@ mod tests {
 					.with(user::user_preferences::fetch())
 					.with(user::age_restriction::fetch())
 					.with(user::sessions::fetch(vec![session::expiry_time::gt(
-						Utc::now().into(),
+						current_utc_time().into(),
 					)])),
 				Some(create_prisma_user(&user, hashed_pass.clone())),
 			)
@@ -773,52 +891,224 @@ mod tests {
 		assert_eq!(response.status_code().as_u16(), 401);
 	}
 
-	// TODO: Figure out how to mock Utc::now() otherwise I cannot mock the query which
-	// loads the session relation...
-	// - https://github.com/mseravalli/chrono-timesource
-	// - https://github.com/alexanderlinne/chronobreak
+	#[tokio::test]
+	async fn test_auth_middleware_with_valid_basic_auth_opds_v1_2() {
+		let config = StumpConfig::debug();
+		let user = User {
+			id: "oromei-id".to_string(),
+			username: "oromei".to_string(),
+			..Default::default()
+		};
 
-	// #[tokio::test]
-	// async fn test_auth_middleware_with_valid_basic_auth_opds_v1_2() {
-	// 	let config = StumpConfig::debug();
-	// 	let user = User {
-	// 		id: "oromei-id".to_string(),
-	// 		username: "oromei".to_string(),
-	// 		..Default::default()
-	// 	};
+		let hashed_pass =
+			hash_password("password", &config).expect("Failed to hash password");
 
-	// 	let hashed_pass =
-	// 		hash_password("password", &config).expect("Failed to hash password");
+		let (client, mock_store, server) = setup_test_app();
 
-	// 	let (client, mock_store, server) = setup_test_app();
+		mock_store
+			.expect(
+				client
+					.user()
+					.find_unique(user::username::equals("oromei".to_string()))
+					.with(user::user_preferences::fetch())
+					.with(user::age_restriction::fetch())
+					.with(user::sessions::fetch(vec![session::expiry_time::gt(
+						current_utc_time().into(),
+					)])),
+				Some(create_prisma_user(&user, hashed_pass.clone())),
+			)
+			.await;
 
-	// 	mock_store
-	// 		.expect(
-	// 			client
-	// 				.user()
-	// 				.find_unique(user::username::equals("oromei".to_string()))
-	// 				.with(user::user_preferences::fetch())
-	// 				.with(user::age_restriction::fetch())
-	// 				.with(user::sessions::fetch(vec![session::expiry_time::gt(
-	// 					Utc::now().into(),
-	// 				)])),
-	// 			Some(create_prisma_user(&user, hashed_pass.clone())),
-	// 		)
-	// 		.await;
+		let response = server
+			.get("/opds/v1.2")
+			.add_header(
+				HeaderName::from_str("Authorization").expect("Failed to create header"),
+				HeaderValue::from_str(&format!(
+					"Basic {}",
+					base64::engine::general_purpose::STANDARD
+						.encode(format!("{}:{}", "oromei", "password"))
+				))
+				.expect("Failed to create header"),
+			)
+			.await;
 
-	// 	let response = server
-	// 		.get("/opds/v1.2")
-	// 		.add_header(
-	// 			HeaderName::from_str("Authorization").expect("Failed to create header"),
-	// 			HeaderValue::from_str(&format!(
-	// 				"Basic {}",
-	// 				base64::engine::general_purpose::STANDARD
-	// 					.encode(format!("{}:{}", "oromei", "password"))
-	// 			))
-	// 			.expect("Failed to create header"),
-	// 		)
-	// 		.await;
+		assert_eq!(response.status_code().as_u16(), 200);
+	}
 
-	// 	assert_eq!(response.status_code().as_u16(), 200);
-	// }
+	fn create_key() -> (PrefixedApiKey, String, APIKey) {
+		let (pak, hash) =
+			APIKey::create_prefixed_key().expect("Failed to create API key");
+		let api_key_raw = pak.to_string();
+
+		let api_key = APIKey {
+			name: "Test API Key".to_string(),
+			long_token_hash: hash,
+			user_id: "oromei-id".to_string(),
+			permissions: APIKeyPermissions::inherit(),
+			..Default::default()
+		};
+
+		(pak, api_key_raw, api_key)
+	}
+
+	fn key_data(key: &APIKey, for_user: &User) -> api_key::Data {
+		api_key::Data {
+			id: key.id,
+			name: key.name.clone(),
+			short_token: String::default(),
+			long_token_hash: key.long_token_hash.clone(),
+			user_id: key.user_id.clone(),
+			user: Some(Box::new(create_prisma_user(for_user, String::default()))),
+			permissions: serde_json::to_vec(&key.permissions)
+				.expect("Failed to serialize"),
+			expires_at: key.expires_at,
+			created_at: key.created_at,
+			last_used_at: key.last_used_at,
+		}
+	}
+
+	#[tokio::test(start_paused = true)]
+	async fn test_auth_middleware_with_valid_api_key() {
+		let user = User {
+			id: "oromei-id".to_string(),
+			username: "oromei".to_string(),
+			is_server_owner: true,
+			..Default::default()
+		};
+
+		let (client, mock_store, server) = setup_test_app();
+
+		let (pak, api_key_raw, api_key) = create_key();
+
+		mock_store
+			.expect(
+				client
+					.api_key()
+					.find_first(vec![
+						api_key::short_token::equals(pak.short_token().to_string()),
+						api_key::long_token_hash::equals(api_key.long_token_hash.clone()),
+						api_key::user::is(vec![
+							user::deleted_at::equals(None),
+							user::is_locked::equals(false),
+						]),
+						or![
+							api_key::expires_at::gte(current_utc_time().into()),
+							api_key::expires_at::equals(None),
+						],
+					])
+					.with(api_key::user::fetch()),
+				Some(key_data(&api_key, &user)),
+			)
+			.await;
+
+		// It is a valid key, so we will update the last used at field
+		mock_store
+			.expect(
+				client.api_key().update(
+					api_key::id::equals(api_key.id),
+					vec![api_key::last_used_at::set(Some(current_utc_time().into()))],
+				),
+				key_data(&api_key, &user),
+			)
+			.await;
+
+		let response = server
+			.get("/test")
+			.add_header(
+				HeaderName::from_str("Authorization").expect("Failed to create header"),
+				HeaderValue::from_str(&format!("Bearer {api_key_raw}"))
+					.expect("Failed to create header"),
+			)
+			.await;
+
+		assert_eq!(response.status_code().as_u16(), 200);
+	}
+
+	#[tokio::test]
+	async fn test_auth_middleware_with_non_existent_api_key() {
+		let (client, mock_store, server) = setup_test_app();
+
+		let (pak, api_key_raw, api_key) = create_key();
+
+		mock_store
+			.expect(
+				client
+					.api_key()
+					.find_first(vec![
+						api_key::short_token::equals(pak.short_token().to_string()),
+						api_key::long_token_hash::equals(api_key.long_token_hash.clone()),
+						api_key::user::is(vec![
+							user::deleted_at::equals(None),
+							user::is_locked::equals(false),
+						]),
+						or![
+							api_key::expires_at::gte(current_utc_time().into()),
+							api_key::expires_at::equals(None),
+						],
+					])
+					.with(api_key::user::fetch()),
+				None,
+			)
+			.await;
+
+		let response = server
+			.get("/test")
+			.add_header(
+				HeaderName::from_str("Authorization").expect("Failed to create header"),
+				HeaderValue::from_str(&format!("Bearer {api_key_raw}"))
+					.expect("Failed to create header"),
+			)
+			.await;
+
+		assert_eq!(response.status_code().as_u16(), 401);
+	}
+
+	#[tokio::test]
+	async fn test_auth_middleware_with_revoked_api_key() {
+		let user = User {
+			id: "oromei-id".to_string(),
+			username: "oromei".to_string(),
+			// No access_api_keys permission
+			..Default::default()
+		};
+
+		let (client, mock_store, server) = setup_test_app();
+
+		let (pak, api_key_raw, api_key) = create_key();
+
+		mock_store
+			.expect(
+				client
+					.api_key()
+					.find_first(vec![
+						api_key::short_token::equals(pak.short_token().to_string()),
+						api_key::long_token_hash::equals(api_key.long_token_hash.clone()),
+						api_key::user::is(vec![
+							user::deleted_at::equals(None),
+							user::is_locked::equals(false),
+						]),
+						or![
+							api_key::expires_at::gte(current_utc_time().into()),
+							api_key::expires_at::equals(None),
+						],
+					])
+					.with(api_key::user::fetch()),
+				Some(key_data(&api_key, &user)),
+			)
+			.await;
+
+		// It is a valid key, but the user doesn't have permission to use it. So we will
+		// not update the last used at field
+
+		let response = server
+			.get("/test")
+			.add_header(
+				HeaderName::from_str("Authorization").expect("Failed to create header"),
+				HeaderValue::from_str(&format!("Bearer {api_key_raw}"))
+					.expect("Failed to create header"),
+			)
+			.await;
+
+		assert_eq!(response.status_code().as_u16(), 401);
+	}
 }

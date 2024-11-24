@@ -1,5 +1,3 @@
-/* eslint-disable sort-keys-fix/sort-keys-fix */
-
 export const gray = {
 	DEFAULT: '#292C30',
 	50: '#E2E4E6',

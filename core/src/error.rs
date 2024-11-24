@@ -54,7 +54,7 @@ pub enum CoreError {
 	UnImplemented(String),
 	#[error("An object failed to (de)serialize: {0}")]
 	SerdeFailure(#[from] serde_json::Error),
-	#[error("An unknown error ocurred: {0}")]
+	#[error("An unknown error occurred: {0}")]
 	Unknown(String),
 }
 

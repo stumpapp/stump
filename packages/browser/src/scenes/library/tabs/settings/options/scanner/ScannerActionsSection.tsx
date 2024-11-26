@@ -38,7 +38,7 @@ export default function ScannerActionsSection() {
 
 			<div className="flex flex-col gap-y-3">
 				<div>
-					<Label className="text-base">Advanced scan</Label>
+					<Label className="text-base">Custom scan</Label>
 					<Text variant="muted">A scan with additional options for more fine-grained control</Text>
 				</div>
 

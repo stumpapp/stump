@@ -326,6 +326,42 @@ pub async fn walk_series(
 		.map(|m| (m.path.clone(), m.clone()))
 		.collect::<HashMap<String, _>>();
 
+	// TODO(granular-scans): This needs to be totally rethinked (rethunk?) for granular scans. The general idea
+	// is that this existing logic is the DEFAULT behavior, but options may override it. Right now it is naive,
+	// in that any option will trigger a visit which does a full re-build of books. This is not ideal, and instead
+	// should probably create some sort of more specialized structure that embeds context about what to _do_ with
+	// each book to visit. Maybe something like:
+	/*
+	   enum BookVisit {
+		   Rebuild
+		   RebuildMetadata(MergeStrategy)
+		   RegenHash
+	   }
+
+	   struct BookVisitContext {
+		   path: PathBuf,
+		   operation: BookVisit,
+	   }
+
+	   let operations: Vec<BookVisitContext> = [...]
+	*/
+	// This does require the visit logic to be more complex, but would embed the context. Arguably this causes bloat, though,
+	// in that we're storing more data than we necessarily need to. Perhaps making the operation the first-class citizen would reduce
+	// the bloat, but I think conceptually it is more convoluted? To get it on the page:
+	/*
+		enum BookVisit {
+			Rebuild
+			RebuildMetadata(MergeStrategy)
+			RegenHash
+		}
+
+		struct BookVisitContext {
+			paths: Vec<PathBuf>,
+			operation: BookVisit,
+		}
+
+		let operations: Vec<BookVisitContext> = [...]
+	*/
 	let (media_to_create, media_to_visit) = valid_entries
 		.par_iter()
 		// filter out entries that neither need to be created nor visited

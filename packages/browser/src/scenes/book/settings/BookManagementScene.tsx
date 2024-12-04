@@ -9,6 +9,7 @@ import paths from '@/paths'
 import { formatBookName } from '@/utils/format'
 
 import BookThumbnailSelector from './BookThumbnailSelector'
+import DeleteBookConfirmation from './DeleteBookConfirmation'
 
 export default function BookManagementScene() {
 	const { sdk } = useSDK()
@@ -80,10 +81,19 @@ export default function BookManagementScene() {
 					</Alert.Content>
 				</Alert>
 
-				<div>
+				<div className="flex flex-row items-center gap-x-4">
 					<Button size="md" variant="primary" onClick={handleAnalyze}>
 						Analyze Media
 					</Button>
+
+					<DeleteBookConfirmation
+						id={media.id}
+						trigger={
+							<Button size="md" variant="danger">
+								Delete Book
+							</Button>
+						}
+					/>
 				</div>
 
 				<BookThumbnailSelector book={media} />

@@ -2,6 +2,7 @@
 	"extends": "./tsconfig.options.json",
 	"include": [
 		"apps/**/*",
+		"integrations/**/*",
 		"core",
 		"crates/**/*",
 		"docs",

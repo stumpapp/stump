@@ -1,0 +1,16 @@
+{
+	"name": "@stump/book-sync",
+	"version": "0.0.0",
+	"license": "MIT",
+	"scripts": {
+		"test": "vitest",
+		"build": "tsc",
+		"check-types": "tsc -b tsconfig.json",
+		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write ."
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"typescript": "^5.7.2",
+		"vitest": "^2.1.8"
+	}
+}

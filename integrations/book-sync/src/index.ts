@@ -1,8 +1,12 @@
 import { Api, isAxiosError } from '@stump/sdk'
 import chokidar from 'chokidar'
+import dotenv from 'dotenv'
 
 import { getConfig } from './config'
+import { logger } from './logger'
 import { getRemotePath } from './utils'
+
+dotenv.config()
 
 const { basePaths, watchRoot, remoteIsUnix, ...apiConfig } = getConfig()
 
@@ -12,6 +16,7 @@ const sdk = new Api({
 })
 
 const checkForBook = async (path: string) => {
+	logger.debug(`Checking for book at path: ${path}`)
 	const remotePath = getRemotePath(path, basePaths, { outputUnix: remoteIsUnix })
 	try {
 		await sdk.media.getByPath(remotePath)
@@ -20,7 +25,9 @@ const checkForBook = async (path: string) => {
 		if (isAxiosError(e) && e.response?.status === 404) {
 			return false
 		} else {
-			throw e
+			// FIXME: this does not log the error?
+			logger.error(`Error while checking ${path}: %O`, e)
+			// throw e
 		}
 	}
 }

@@ -1,4 +1,9 @@
-const getVar = (key: string, fallback?: string): string => {
+import os from 'os'
+import path from 'path'
+
+export const getDefaultConfigDir = (): string => path.join(os.homedir(), '.stump-book-sync')
+
+export const getConfigVar = (key: string, fallback?: string): string => {
 	const value = process.env[key]
 	if (!value && !fallback) {
 		throw new Error(`Environment variable ${key} is not set`)
@@ -46,12 +51,12 @@ export type BookSyncConfig = {
  * are not set, this function will throw an error.
  */
 export const getConfig = (): BookSyncConfig => ({
-	baseURL: getVar('STUMP_URL'),
-	apiKey: getVar('STUMP_API_TOKEN'),
+	baseURL: getConfigVar('STUMP_URL'),
+	apiKey: getConfigVar('STUMP_API_TOKEN'),
 	basePaths: {
-		host: getVar('STUMP_HOST_BASE_PATH'),
-		remote: getVar('STUMP_REMOTE_BASE_PATH'),
+		host: getConfigVar('STUMP_HOST_BASE_PATH'),
+		remote: getConfigVar('STUMP_REMOTE_BASE_PATH'),
 	},
-	remoteIsUnix: getVar('STUMP_REMOTE_IS_UNIX', 'true') === 'true',
-	watchRoot: getVar('STUMP_WATCH_ROOT'),
+	remoteIsUnix: getConfigVar('STUMP_REMOTE_IS_UNIX', 'true') === 'true',
+	watchRoot: getConfigVar('STUMP_WATCH_ROOT'),
 })

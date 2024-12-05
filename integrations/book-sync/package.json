@@ -3,13 +3,19 @@
 	"version": "0.0.0",
 	"license": "MIT",
 	"scripts": {
+		"start": "tsx src/index.ts",
 		"test": "vitest",
 		"build": "tsc",
 		"check-types": "tsc -b tsconfig.json",
 		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write ."
 	},
-	"dependencies": {},
+	"dependencies": {
+		"@electric-sql/pglite": "^0.2.14",
+		"winston": "3.17.0"
+	},
 	"devDependencies": {
+		"dotenv": "16.4.7",
+		"tsx": "^4.19.2",
 		"typescript": "^5.7.2",
 		"vitest": "^2.1.8"
 	}

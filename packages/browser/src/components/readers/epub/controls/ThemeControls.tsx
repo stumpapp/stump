@@ -1,6 +1,5 @@
 import { Popover } from '@stump/components'
 import { Paintbrush } from 'lucide-react'
-import React from 'react'
 
 import ControlButton from './ControlButton'
 import FontSizeControl from './FontSizeControl'

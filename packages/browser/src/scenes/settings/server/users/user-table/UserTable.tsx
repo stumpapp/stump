@@ -1,5 +1,5 @@
 import { Badge, Card, Text, ToolTip } from '@stump/components'
-import { User } from '@stump/types'
+import { User } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import { HelpCircle } from 'lucide-react'

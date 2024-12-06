@@ -9,17 +9,19 @@ use prisma_client_rust::{
 	chrono::{Duration, Utc},
 	or, Direction,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
+use serde_with::skip_serializing_none;
 use specta::Type;
 use stump_core::{
 	db::entity::{
 		macros::{
-			book_club_member_and_schedule_include, book_club_with_books_include,
-			book_club_with_schedule,
+			book_club_member_and_schedule_include, book_club_member_with_user,
+			book_club_with_books_include, book_club_with_schedule,
 		},
-		BookClub, BookClubBook, BookClubInvitation, BookClubMember, BookClubMemberRole,
-		BookClubMemberRoleSpec, BookClubSchedule, User, UserPermission,
+		BookClub, BookClubBook, BookClubExternalBook, BookClubInvitation, BookClubMember,
+		BookClubMemberRole, BookClubMemberRoleSpec, BookClubSchedule, User,
+		UserPermission,
 	},
 	prisma::{
 		book_club, book_club_book, book_club_invitation, book_club_member,
@@ -42,7 +44,9 @@ use crate::{
 // TODO: patch schedule
 // TODO: check members can access the books in the schedule. I don't think lack of access should necessarily
 // be an error, but it would definitely be a warning for admins/creator
-// TODO: users that are members but have the feature revoked need some reconcilation...
+// TODO: users that are members but have the feature revoked need some reconciliation...
+
+// TODO: adjust the instrumentation once ret(err) is supported: https://github.com/tokio-rs/tracing/pull/2970
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
@@ -152,7 +156,7 @@ pub(crate) fn book_club_member_access_for_user(
 	)
 }
 
-#[derive(Deserialize, Type, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
 pub struct GetBookClubsParams {
 	#[serde(default)]
 	all: bool,
@@ -168,6 +172,7 @@ pub struct GetBookClubsParams {
 		(status = 500, description = "Internal server error")
 	)
 )]
+#[tracing::instrument(err, skip(ctx, req))]
 async fn get_book_clubs(
 	State(ctx): State<AppState>,
 	QsQuery(params): QsQuery<GetBookClubsParams>,
@@ -196,15 +201,17 @@ async fn get_book_clubs(
 	Ok(Json(book_clubs.into_iter().map(BookClub::from).collect()))
 }
 
-#[derive(Deserialize, Type, ToSchema)]
+#[skip_serializing_none]
+#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
 pub struct CreateBookClub {
 	pub name: String,
 	#[serde(default)]
 	pub is_private: bool,
+	#[specta(optional)]
 	pub member_role_spec: Option<BookClubMemberRoleSpec>,
-
 	#[serde(default)]
 	pub creator_hide_progress: bool,
+	#[specta(optional)]
 	pub creator_display_name: Option<String>,
 }
 
@@ -218,6 +225,7 @@ pub struct CreateBookClub {
         (status = 500, description = "Internal server error")
     )
 )]
+#[tracing::instrument(err, skip(ctx, req))]
 async fn create_book_club(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
@@ -276,6 +284,7 @@ async fn create_book_club(
         (status = 500, description = "Internal server error")
     )
 )]
+#[tracing::instrument(err, skip(ctx, req))]
 async fn get_book_club(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
@@ -294,6 +303,7 @@ async fn get_book_club(
 		.find_first(where_params)
 		.include(book_club_with_books_include::include(
 			book_club_member_access_for_user(viewer),
+			vec![], // TODO: access control for books and/or future schedule restrictions
 		))
 		.exec()
 		.await?
@@ -302,7 +312,8 @@ async fn get_book_club(
 	Ok(Json(BookClub::from(book_club)))
 }
 
-#[derive(Deserialize, Type, ToSchema)]
+#[skip_serializing_none]
+#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
 pub struct UpdateBookClub {
 	pub name: Option<String>,
 	pub description: Option<String>,
@@ -321,6 +332,7 @@ pub struct UpdateBookClub {
         (status = 500, description = "Internal server error")
     )
 )]
+#[tracing::instrument(err, skip(ctx, req))]
 async fn update_book_club(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
@@ -332,7 +344,7 @@ async fn update_book_club(
 	let viewer = req.user();
 
 	// Query first for access control. Realistically, I could `update_many` with the
-	// access assertions, but I would have to requery for the book afterwards anyways
+	// access assertions, but I would have to re-query for the book afterwards anyways
 	let book_club = client
 		.book_club()
 		.find_first(vec![
@@ -370,14 +382,15 @@ async fn update_book_club(
 	Ok(Json(BookClub::from(updated_book_club)))
 }
 
-#[derive(Deserialize, Type, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
 pub struct UpdateBookClubSchedule {}
 
 async fn get_book_club_invitations() -> APIResult<Json<Vec<BookClubInvitation>>> {
 	Err(APIError::NotImplemented)
 }
 
-#[derive(Deserialize, Type, ToSchema)]
+#[skip_serializing_none]
+#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
 pub struct CreateBookClubInvitation {
 	pub user_id: String,
 	pub role: Option<BookClubMemberRole>,
@@ -449,6 +462,7 @@ async fn create_book_club_invitation(
         (status = 500, description = "Internal server error")
     )
 )]
+#[tracing::instrument(err, skip(ctx, req))]
 async fn get_book_club_members(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
@@ -468,6 +482,7 @@ async fn get_book_club_members(
 	let book_club_members = client
 		.book_club_member()
 		.find_many(where_params)
+		.include(book_club_member_with_user::include())
 		.exec()
 		.await?;
 
@@ -479,7 +494,7 @@ async fn get_book_club_members(
 	))
 }
 
-#[derive(Deserialize, Type, ToSchema, Default)]
+#[derive(Serialize, Deserialize, Debug, Type, ToSchema, Default)]
 pub struct CreateBookClubMember {
 	pub user_id: String,
 	pub display_name: Option<String>,
@@ -506,7 +521,7 @@ async fn create_book_club_member(
 	Ok(BookClubMember::from(created_member))
 }
 
-#[derive(Deserialize, Type, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
 pub struct BookClubInvitationAnswer {
 	pub accept: bool,
 	pub member_details: Option<CreateBookClubMember>,
@@ -522,6 +537,7 @@ pub struct BookClubInvitationAnswer {
         (status = 500, description = "Internal server error")
     )
 )]
+#[tracing::instrument(err, skip(ctx, req))]
 async fn respond_to_book_club_invitation(
 	State(ctx): State<AppState>,
 	Path((id, invitation_id)): Path<(String, String)>,
@@ -580,9 +596,10 @@ async fn respond_to_book_club_invitation(
         (status = 500, description = "Internal server error")
     )
 )]
+#[tracing::instrument(err, skip(ctx, req))]
 async fn create_book_club_member_handler(
-	State(ctx): State<AppState>,
 	Path(id): Path<String>,
+	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
 	Json(payload): Json<CreateBookClubMember>,
 ) -> APIResult<Json<BookClubMember>> {
@@ -602,6 +619,7 @@ async fn create_book_club_member_handler(
         (status = 500, description = "Internal server error")
     )
 )]
+#[tracing::instrument(err, skip(ctx, req))]
 async fn get_book_club_member(
 	State(ctx): State<AppState>,
 	Path((id, member_id)): Path<(String, String)>,
@@ -629,7 +647,8 @@ async fn get_book_club_member(
 	Ok(Json(BookClubMember::from(book_club_member)))
 }
 
-#[derive(Deserialize, Type, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
+#[skip_serializing_none]
 pub struct UpdateBookClubMember {
 	pub display_name: Option<String>,
 	pub private_membership: Option<bool>,
@@ -645,6 +664,7 @@ pub struct UpdateBookClubMember {
         (status = 500, description = "Internal server error")
     )
 )]
+#[tracing::instrument(err, skip(ctx, req))]
 async fn update_book_club_member(
 	State(ctx): State<AppState>,
 	Path((_id, member_id)): Path<(String, String)>,
@@ -716,17 +736,13 @@ async fn delete_book_club_member(
 /// - A book that is not stored in the database
 ///
 /// This provides some flexibility for book clubs to add books that perhaps are not on the server
-#[derive(Deserialize, Type, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
 #[serde(untagged)]
 pub enum CreateBookClubScheduleBookOption {
 	/// A book that is stored in the database
 	Stored { id: String },
 	/// A book that is not stored in the database
-	External {
-		title: String,
-		author: String,
-		url: Option<String>,
-	},
+	External(BookClubExternalBook),
 }
 
 impl CreateBookClubScheduleBookOption {
@@ -739,16 +755,23 @@ impl CreateBookClubScheduleBookOption {
 					book_club_book::book_entity_id::set(Some(id)),
 				]
 			},
-			CreateBookClubScheduleBookOption::External { title, author, url } => vec![
+			CreateBookClubScheduleBookOption::External(BookClubExternalBook {
+				title,
+				author,
+				url,
+				image_url,
+			}) => vec![
 				book_club_book::title::set(Some(title)),
 				book_club_book::author::set(Some(author)),
 				book_club_book::url::set(url),
+				book_club_book::image_url::set(image_url),
 			],
 		}
 	}
 }
 
-#[derive(Deserialize, Type, ToSchema)]
+#[skip_serializing_none]
+#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
 pub struct CreateBookClubScheduleBook {
 	pub book: CreateBookClubScheduleBookOption,
 	pub start_at: Option<String>,
@@ -756,7 +779,8 @@ pub struct CreateBookClubScheduleBook {
 	pub discussion_duration_days: Option<i32>,
 }
 
-#[derive(Deserialize, Type, ToSchema)]
+#[skip_serializing_none]
+#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
 pub struct CreateBookClubSchedule {
 	pub default_interval_days: Option<i32>,
 	pub books: Vec<CreateBookClubScheduleBook>,
@@ -776,9 +800,10 @@ pub struct CreateBookClubSchedule {
         (status = 500, description = "Internal server error")
     )
 )]
+#[tracing::instrument(err, skip(ctx, req))]
 async fn create_book_club_schedule(
-	State(ctx): State<AppState>,
 	Path(id): Path<String>,
+	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
 	Json(payload): Json<CreateBookClubSchedule>,
 ) -> APIResult<Json<BookClubSchedule>> {
@@ -887,9 +912,10 @@ async fn create_book_club_schedule(
         (status = 500, description = "Internal server error")
     )
 )]
+#[tracing::instrument(err, skip(ctx, req))]
 async fn get_book_club_schedule(
-	State(ctx): State<AppState>,
 	Path(id): Path<String>,
+	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<BookClubSchedule>> {
 	let client = &ctx.db;
@@ -919,14 +945,15 @@ async fn get_book_club_schedule(
 	Ok(Json(BookClubSchedule::from(book_club_schedule)))
 }
 
-#[derive(Deserialize, Type, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
 pub struct AddBooksToBookClubSchedule {
 	pub books: Vec<CreateBookClubScheduleBook>,
 }
 
+#[tracing::instrument(err, skip(ctx, req))]
 async fn add_books_to_book_club_schedule(
-	State(ctx): State<AppState>,
 	Path(id): Path<String>,
+	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
 	Json(payload): Json<AddBooksToBookClubSchedule>,
 ) -> APIResult<Json<Vec<BookClubBook>>> {
@@ -1059,9 +1086,10 @@ async fn add_books_to_book_club_schedule(
         (status = 500, description = "Internal server error")
     )
 )]
+#[tracing::instrument(err, skip(ctx, req))]
 async fn get_book_club_current_book(
-	State(ctx): State<AppState>,
 	Path(id): Path<String>,
+	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Json<BookClubBook>> {
 	let client = &ctx.db;

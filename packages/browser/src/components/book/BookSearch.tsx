@@ -1,7 +1,7 @@
-import { prefetchPagedMedia, usePagedMediaQuery } from '@stump/client'
+import { usePagedMediaQuery, usePrefetchMediaPaged } from '@stump/client'
 import { usePreviousIsDifferent } from '@stump/components'
-import { Media } from '@stump/types'
-import React, { useCallback, useEffect, useMemo } from 'react'
+import { Media } from '@stump/sdk'
+import { useCallback, useEffect, useMemo } from 'react'
 
 import useIsInView from '@/hooks/useIsInView'
 
@@ -40,6 +40,7 @@ export default function BookSearch({ page, page_size, setPage, onBookSelect, sho
 		media,
 		pageData: { current_page, total_pages } = {},
 	} = usePagedMediaQuery(params)
+	const { prefetch } = usePrefetchMediaPaged()
 
 	const differentSearch = usePreviousIsDifferent(filters?.search as string)
 	useEffect(() => {
@@ -51,28 +52,23 @@ export default function BookSearch({ page, page_size, setPage, onBookSelect, sho
 	const [containerRef, isInView] = useIsInView<HTMLDivElement | null>()
 	const isOnFirstPage = current_page === 1
 	// TODO: detect if going from page > 1 to page = 1 and scroll to top
-	useEffect(
-		() => {
-			if (!isInView && !isOnFirstPage) {
-				containerRef.current?.scrollIntoView()
-			}
-		},
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[current_page, isOnFirstPage],
-	)
+	useEffect(() => {
+		if (!isInView && !isOnFirstPage) {
+			containerRef.current?.scrollIntoView()
+		}
+	}, [current_page, isOnFirstPage])
 
 	const hasStuff = total_pages !== undefined && current_page !== undefined && total_pages > 0
 	const hasFilters = Object.keys(filters || {}).length > 0
 
 	const handlePrefetchPage = useCallback(
 		(page: number) => {
-			prefetchPagedMedia({
+			prefetch({
 				...params,
 				page,
 			})
 		},
-		[params],
+		[prefetch, params],
 	)
 
 	return (

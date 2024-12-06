@@ -1,5 +1,5 @@
 import { useUpdatePreferences } from '@stump/client'
-import { UpdateUserPreferences, UserPreferences } from '@stump/types'
+import { UpdateUserPreferences, UserPreferences } from '@stump/sdk'
 import { useCallback } from 'react'
 
 import { useUserStore } from '@/stores'

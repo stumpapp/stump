@@ -1,5 +1,5 @@
 import { cn } from '@stump/components'
-import React, { ComponentProps } from 'react'
+import { ComponentProps } from 'react'
 import { Link } from 'react-router-dom'
 
 // TODO: tooltips, but currently they don't work with links...

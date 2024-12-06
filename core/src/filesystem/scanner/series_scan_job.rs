@@ -25,7 +25,7 @@ use super::{
 		handle_missing_media, safely_build_and_insert_media, visit_and_update_media,
 		MediaBuildOperation, MediaOperationOutput,
 	},
-	walk_series, WalkedSeries, WalkerCtx,
+	walk_series, ScanOptions, WalkedSeries, WalkerCtx,
 };
 
 #[allow(clippy::enum_variant_names)]
@@ -40,15 +40,21 @@ pub enum SeriesScanTask {
 pub struct SeriesScanJob {
 	pub id: String,
 	pub path: String,
-	pub options: Option<LibraryConfig>,
+	pub config: Option<LibraryConfig>,
+	pub options: ScanOptions,
 }
 
 impl SeriesScanJob {
-	pub fn new(id: String, path: String) -> Box<WrappedJob<SeriesScanJob>> {
+	pub fn new(
+		id: String,
+		path: String,
+		options: Option<ScanOptions>,
+	) -> Box<WrappedJob<SeriesScanJob>> {
 		WrappedJob::new(Self {
 			id,
 			path,
-			options: None,
+			config: None,
+			options: options.unwrap_or_default(),
 		})
 	}
 }
@@ -96,6 +102,7 @@ impl JobExt for SeriesScanJob {
 		ctx: &WorkerCtx,
 	) -> Result<WorkingState<Self::Output, Self::Task>, JobError> {
 		let mut output = Self::Output::default();
+		let path_buf = PathBuf::from(self.path.clone());
 		let library = ctx
 			.db
 			.library()
@@ -117,9 +124,15 @@ impl JobExt for SeriesScanJob {
 		// If the library is not collection-priority, each subdirectory is its own series.
 		// Therefore, we only scan one level deep when walking a series whose library is not
 		// collection-priority to avoid scanning duplicates which are part of other series
-		let max_depth = (!library_config.is_collection_based()).then_some(1);
+		let mut max_depth = (!library_config.is_collection_based()).then_some(1);
+		if path_buf == PathBuf::from(&library.path) {
+			// The exception is when the series "is" the libray (i.e. the root of the library contains
+			// books). This is kind of an anti-pattern wrt collection-priority, but it needs to be handled
+			// in order to avoid the scanner re-scanning the entire library...
+			max_depth = Some(1);
+		}
 
-		self.options = Some(library_config);
+		self.config = Some(library_config);
 
 		let WalkedSeries {
 			series_is_missing,
@@ -135,6 +148,7 @@ impl JobExt for SeriesScanJob {
 				db: ctx.db.clone(),
 				ignore_rules,
 				max_depth,
+				options: self.options.clone(),
 			},
 		)
 		.await?;
@@ -190,7 +204,7 @@ impl JobExt for SeriesScanJob {
 		let did_create = output.created_media > 0;
 		let did_update = output.updated_media > 0;
 		let image_options = self
-			.options
+			.config
 			.as_ref()
 			.and_then(|o| o.thumbnail_config.clone());
 
@@ -252,7 +266,7 @@ impl JobExt for SeriesScanJob {
 				} = safely_build_and_insert_media(
 					MediaBuildOperation {
 						series_id: self.id.clone(),
-						library_config: self.options.clone().unwrap_or_default(),
+						library_config: self.config.clone().unwrap_or_default(),
 						max_concurrency,
 					},
 					ctx,
@@ -281,7 +295,7 @@ impl JobExt for SeriesScanJob {
 				} = visit_and_update_media(
 					MediaBuildOperation {
 						series_id: self.id.clone(),
-						library_config: self.options.clone().unwrap_or_default(),
+						library_config: self.config.clone().unwrap_or_default(),
 						max_concurrency,
 					},
 					ctx,

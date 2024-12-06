@@ -1,4 +1,4 @@
-import { IconButton, Input, TextArea } from '@stump/components'
+import { Button, Input, TextArea } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Folder } from 'lucide-react'
 import { useFormContext, useFormState } from 'react-hook-form'
@@ -49,14 +49,9 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 					placeholder={t(getKey('path.placeholder'))}
 					containerClassName="max-w-full md:max-w-sm"
 					rightDecoration={
-						<IconButton
-							size="xs"
-							variant="ghost"
-							type="button"
-							onClick={() => onSetShowDirectoryPicker(true)}
-						>
+						<Button size="icon" type="button" onClick={() => onSetShowDirectoryPicker(true)}>
 							<Folder className="h-4 w-4 text-foreground-muted" />
-						</IconButton>
+						</Button>
 					}
 					required={isCreatingLibrary}
 					errorMessage={errors.path?.message}

@@ -1,9 +1,9 @@
 import { useNavigationArrangement } from '@stump/client'
 import { NavigationMenu } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { NavigationItem } from '@stump/types'
+import { NavigationItem } from '@stump/sdk'
 import { Book, Home } from 'lucide-react'
-import React, { useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { match } from 'ts-pattern'
 

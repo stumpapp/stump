@@ -1,6 +1,6 @@
 import { NativeSelect } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React, { useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import { useSmartListContext } from '../../context'
 
@@ -69,7 +69,7 @@ export default function SavedViewSelector() {
 	return (
 		<NativeSelect
 			title={isDisabled ? translateKey('noViewsSaved') : translateKey('selectView')}
-			className="w-[185px]"
+			className="h-8 w-[185px] py-0"
 			options={options}
 			emptyOption={emptyOption}
 			disabled={isDisabled}

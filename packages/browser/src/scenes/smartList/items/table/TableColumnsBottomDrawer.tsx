@@ -9,7 +9,7 @@ import {
 	ToolTip,
 } from '@stump/components'
 import { TableProperties } from 'lucide-react'
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 
 import { useSafeWorkingView, useSmartListContext } from '../../context'

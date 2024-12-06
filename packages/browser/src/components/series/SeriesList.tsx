@@ -1,5 +1,5 @@
 import { Heading } from '@stump/components'
-import type { Series } from '@stump/types'
+import type { Series } from '@stump/sdk'
 
 import ListItem from '../ListItem'
 

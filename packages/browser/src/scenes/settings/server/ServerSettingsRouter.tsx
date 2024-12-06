@@ -1,4 +1,4 @@
-import React, { lazy, useEffect, useMemo } from 'react'
+import { lazy, useEffect, useMemo } from 'react'
 import { Route, Routes, useNavigate } from 'react-router'
 
 import { useAppContext } from '@/context'

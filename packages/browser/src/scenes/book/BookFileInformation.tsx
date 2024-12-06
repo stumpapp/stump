@@ -1,6 +1,6 @@
 import { useLibraryQuery } from '@stump/client'
 import { Heading, Text } from '@stump/components'
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 
 import { formatBytes } from '../../utils/format'
 
@@ -12,7 +12,7 @@ export default function BookFileInformation({ media }: Props) {
 	const { library } = useLibraryQuery({
 		params: {
 			series: {
-				id: media.series_id,
+				id: [media.series_id],
 			},
 		},
 	})

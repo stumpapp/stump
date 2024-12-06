@@ -1,4 +1,4 @@
-import { SMTPEmailer } from '@stump/types'
+import { SMTPEmailer } from '@stump/sdk'
 import { z } from 'zod'
 
 import { FORBIDDEN_ENTITY_NAMES } from '@/utils/form'

@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use specta::Type;
 use tracing::trace;
 use utoipa::ToSchema;
@@ -11,6 +12,7 @@ use crate::{
 // TODO: this entire file belongs in server app, not here. It is currently used by DAOs, which are
 // very much going BYE BYE
 
+#[skip_serializing_none]
 #[derive(
 	Clone, Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type, ToSchema,
 )]
@@ -20,6 +22,7 @@ pub struct PageQuery {
 	pub page_size: Option<u32>,
 }
 
+#[skip_serializing_none]
 #[derive(
 	Clone, Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type, ToSchema,
 )]
@@ -28,6 +31,7 @@ pub struct CursorQuery {
 	pub limit: Option<i64>,
 }
 
+#[skip_serializing_none]
 #[derive(Default, Debug, Deserialize, Serialize, Type, ToSchema)]
 pub struct PaginationQuery {
 	pub zero_based: Option<bool>,
@@ -285,7 +289,7 @@ pub struct Pageable<T: Serialize> {
 	pub data: T,
 	/// The pagination information (if paginated).
 	pub _page: Option<PageInfo>,
-	/// The cursor information (if cursor-baesd paginated).
+	/// The cursor information (if cursor-based paginated).
 	pub _cursor: Option<CursorInfo>,
 }
 
@@ -297,7 +301,7 @@ pub struct PageableArray<T: Serialize> {
 	pub data: Vec<T>,
 	/// The pagination information (if paginated).
 	pub _page: Option<PageInfo>,
-	/// The cursor information (if cursor-baesd paginated).
+	/// The cursor information (if cursor-based paginated).
 	pub _cursor: Option<CursorInfo>,
 }
 

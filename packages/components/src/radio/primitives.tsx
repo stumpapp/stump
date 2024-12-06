@@ -1,15 +1,15 @@
-/* eslint-disable react/prop-types */
 import * as RadioGroupPrimitive from '@radix-ui/react-radio-group'
 import { Circle } from 'lucide-react'
+import type { ComponentPropsWithoutRef, ElementRef } from 'react'
 import * as React from 'react'
 
 import { cn } from '../utils'
 import { RadioGroupContext } from './context'
 import { RadioCardItem } from './RadioCardItem'
 
-export type RadioGroupProps = React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>
+export type RadioGroupProps = ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>
 export const RadioGroup = React.forwardRef<
-	React.ElementRef<typeof RadioGroupPrimitive.Root>,
+	ElementRef<typeof RadioGroupPrimitive.Root>,
 	RadioGroupProps
 >(({ className, ...props }, ref) => {
 	return (
@@ -21,11 +21,11 @@ export const RadioGroup = React.forwardRef<
 RadioGroup.displayName = RadioGroupPrimitive.Root.displayName
 
 export type RadioGroupItemProps = Omit<
-	React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>,
+	ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>,
 	'children'
 >
 const RadioGroupItem = React.forwardRef<
-	React.ElementRef<typeof RadioGroupPrimitive.Item>,
+	ElementRef<typeof RadioGroupPrimitive.Item>,
 	RadioGroupItemProps
 >(({ className, ...props }, ref) => {
 	return (

@@ -1,7 +1,7 @@
-import { libraryApi } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { Alert, Button, ConfirmationModal, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'react-hot-toast'
 
 import { useLibraryManagement } from '../../context'
@@ -9,6 +9,7 @@ import { useLibraryManagement } from '../../context'
 // TODO: add query for whether a clean would do anything to disable this section
 
 export default function CleanLibrary() {
+	const { sdk } = useSDK()
 	const {
 		library: { id },
 	} = useLibraryManagement()
@@ -21,12 +22,12 @@ export default function CleanLibrary() {
 	const handleDeleteThumbnails = async () => {
 		try {
 			setIsCleaning(true)
-			const { data } = await libraryApi.cleanLibrary(id)
+			const result = await sdk.library.clean(id)
 			setJustCleaned(true)
 			toast.success(
-				`Cleaned ${data.deleted_media_count} media and ${data.deleted_series_count} series`,
+				`Cleaned ${result.deleted_media_count} media and ${result.deleted_series_count} series`,
 			)
-			if (data.is_empty) {
+			if (result.is_empty) {
 				toast('The library is now empty')
 			}
 			setShowConfirmation(false)

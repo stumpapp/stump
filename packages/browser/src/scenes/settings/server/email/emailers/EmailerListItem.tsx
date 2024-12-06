@@ -1,9 +1,9 @@
-import { prefetchEmailerSendHistory, useDeleteEmailer } from '@stump/client'
+import { useDeleteEmailer, usePrefetchEmailerSendHistory } from '@stump/client'
 import { Badge, Card, Text, ToolTip } from '@stump/components'
-import { SMTPEmailer } from '@stump/types'
+import { SMTPEmailer } from '@stump/sdk'
 import dayjs from 'dayjs'
 import { Sparkles } from 'lucide-react'
-import React, { Suspense, useCallback, useMemo } from 'react'
+import { Suspense, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 
 import paths from '@/paths'
@@ -25,6 +25,7 @@ export default function EmailerListItem({ emailer }: Props) {
 		config: { smtp_host, smtp_port },
 		last_used_at,
 	} = emailer
+	const { prefetch } = usePrefetchEmailerSendHistory({ emailerId: emailer.id })
 
 	const { deleteEmailer } = useDeleteEmailer()
 
@@ -54,7 +55,7 @@ export default function EmailerListItem({ emailer }: Props) {
 	return (
 		<Card
 			className="flex flex-col space-y-2 p-4"
-			onMouseEnter={() => prefetchEmailerSendHistory(emailer.id, { include_sent_by: true })}
+			onMouseEnter={() => prefetch({ include_sent_by: true })}
 		>
 			<div className="flex items-center justify-between">
 				<Text size="md" className="font-medium">

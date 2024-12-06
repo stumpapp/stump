@@ -1,4 +1,4 @@
-import { PersistedJob } from '@stump/types'
+import { PersistedJob } from '@stump/sdk'
 import { PaginationState } from '@tanstack/react-table'
 import { createContext, useContext } from 'react'
 

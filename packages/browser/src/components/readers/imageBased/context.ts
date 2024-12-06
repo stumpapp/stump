@@ -1,4 +1,4 @@
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
 export type ImagePageDimensionRef = {

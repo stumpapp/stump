@@ -61,5 +61,6 @@ pub fn create_prisma_user(user: &User, hashed_pass: String) -> user::Data {
 		user_preferences_id: None,
 		bookmarks: None,
 		media_annotations: None,
+		api_keys: None,
 	}
 }

@@ -69,7 +69,7 @@ impl Series {
 		self.media_count = Some(count);
 	}
 
-	// TODO(prisma-nested-create): Refactor once nested create is supportedd
+	// TODO(prisma-nested-create): Refactor once nested create is supported
 	pub fn create_action(
 		self,
 	) -> (

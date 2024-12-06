@@ -50,12 +50,9 @@ use crate::{
 		host::HostExtractor,
 	},
 	routers::{
-		api::v1::{
-			library::library_not_hidden_from_user_filter,
-			media::{
-				apply_in_progress_filter_for_user, apply_media_restrictions_for_user,
-			},
-			series::apply_series_restrictions_for_user,
+		api::filters::{
+			apply_in_progress_filter_for_user, apply_media_restrictions_for_user,
+			apply_series_restrictions_for_user, library_not_hidden_from_user_filter,
 		},
 		relative_favicon_path,
 	},

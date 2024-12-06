@@ -1,6 +1,5 @@
 import { Sheet, Text, usePrevious } from '@stump/components'
-import { CoreJobOutput } from '@stump/types'
-import React from 'react'
+import { CoreJobOutput } from '@stump/sdk'
 
 type Props = {
 	data?: CoreJobOutput | null

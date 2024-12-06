@@ -1,8 +1,6 @@
-import { authApi, serverQueryKeys } from '@stump/api'
-import { invalidateQueries } from '@stump/client'
+import { invalidateQueries, useSDK } from '@stump/client'
 import { Avatar, cn, NavigationMenu } from '@stump/components'
 import { Bell, LogOut } from 'lucide-react'
-import React from 'react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'
 
@@ -14,6 +12,7 @@ import TopBarButtonItem from '../TopBarButtonItem'
 import TopBarLinkListItem from '../TopBarLinkListItem'
 
 export default function UserMenu() {
+	const { sdk } = useSDK()
 	const { user } = useAppContext()
 
 	const setUser = useUserStore((store) => store.setUser)
@@ -21,8 +20,8 @@ export default function UserMenu() {
 
 	const logout = async () => {
 		try {
-			await authApi.logout()
-			await invalidateQueries({ keys: [serverQueryKeys.checkIsClaimed] })
+			await sdk.auth.logout()
+			await invalidateQueries({ keys: [sdk.server.keys.claimedStatus] })
 			setUser(null)
 			navigate('/auth')
 		} catch (error) {

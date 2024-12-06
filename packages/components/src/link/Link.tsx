@@ -1,5 +1,6 @@
 import { cva, VariantProps } from 'class-variance-authority'
-import React from 'react'
+import type { ComponentPropsWithoutRef } from 'react'
+import { forwardRef } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 
 import { cn } from '../utils'
@@ -20,8 +21,8 @@ const linkVariants = cva(
 	},
 )
 
-type BaseProps = React.ComponentPropsWithoutRef<'a'> &
-	Omit<React.ComponentPropsWithoutRef<typeof RouterLink>, 'to'> &
+type BaseProps = ComponentPropsWithoutRef<'a'> &
+	Omit<ComponentPropsWithoutRef<typeof RouterLink>, 'to'> &
 	VariantProps<typeof linkVariants> & {
 		to?: string
 	}
@@ -30,7 +31,7 @@ export type LinkProps = {
 	underline?: boolean
 } & BaseProps
 
-export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(
+export const Link = forwardRef<HTMLAnchorElement, LinkProps>(
 	({ underline = true, to, href, className, variant, ...props }, ref) => {
 		const destination = {
 			[to ? 'to' : 'href']: to ?? href,

@@ -1,7 +1,7 @@
 import { Button, Sheet } from '@stump/components'
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import { Search } from 'lucide-react'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import { ManualFilterProvider } from '../filters/FilterProvider'
 import BookSearch from './BookSearch'

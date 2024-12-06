@@ -1,6 +1,5 @@
 import { Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React from 'react'
 
 export default function ServerPublicURL() {
 	const { t } = useLocaleContext()

@@ -1,4 +1,4 @@
-import { prefetchPagedMedia, usePagedMediaQuery } from '@stump/client'
+import { usePagedMediaQuery, usePrefetchMediaPaged } from '@stump/client'
 import { usePreviousIsDifferent } from '@stump/components'
 import { useCallback, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
@@ -24,6 +24,7 @@ import { useLibraryContext } from '../../context'
 export default function LibraryBooksScene() {
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
 
+	const { prefetch } = usePrefetchMediaPaged()
 	const { library } = useLibraryContext()
 	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout((state) => ({
 		columns: state.columns,
@@ -47,7 +48,7 @@ export default function LibraryBooksScene() {
 				...ordering,
 				series: {
 					library: {
-						id: library.id,
+						id: [library.id],
 					},
 				},
 			},
@@ -71,12 +72,12 @@ export default function LibraryBooksScene() {
 
 	const handlePrefetchPage = useCallback(
 		(page: number) => {
-			prefetchPagedMedia({
+			prefetch({
 				...params,
 				page,
 			})
 		},
-		[params],
+		[params, prefetch],
 	)
 
 	const shouldScroll = usePreviousIsDifferent(current_page)
@@ -91,7 +92,7 @@ export default function LibraryBooksScene() {
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[shouldScroll],
+		[isInView, shouldScroll],
 	)
 
 	const renderContent = () => {

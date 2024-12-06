@@ -8,6 +8,8 @@ generator client {
   output   = "../src/prisma.rs"
 }
 
+// TODO: support reading goals
+
 model User {
   id String @id @default(cuid())
 
@@ -45,6 +47,7 @@ model User {
   smart_lists             SmartList[]
   smart_list_access_rules SmartListAccessRule[]
   email_usage_history     EmailerSendRecord[]
+  api_keys                APIKey[]
 
   @@map("users")
 }
@@ -84,6 +87,23 @@ model AgeRestriction {
   @@map("age_restrictions")
 }
 
+model APIKey {
+  id Int @id @default(autoincrement())
+
+  name            String
+  short_token     String
+  long_token_hash String
+  permissions     Bytes // "inherit" or a list of permissions 
+  created_at      DateTime  @default(now())
+  last_used_at    DateTime?
+  expires_at      DateTime?
+
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
+}
+
 model Library {
   id          String   @id @default(uuid())
   name        String   @unique
@@ -117,6 +137,7 @@ model LibraryConfig {
   default_reading_mode            String  @default("paged") // paged or continuous:(horizontal|vertical)
   default_reading_image_scale_fit String  @default("height") // height, width, none (original)
   generate_file_hashes            Boolean @default(false)
+  generate_koreader_hashes        Boolean @default(false)
   process_metadata                Boolean @default(true)
   library_pattern                 String  @default("SERIES_BASED") // SERIES_BASED or COLLECTION_BASED
 
@@ -186,17 +207,18 @@ model SeriesMetadata {
 model Media {
   id String @id @default(uuid())
 
-  name        String // derived from filename
-  size        BigInt // in bytes
-  extension   String
-  pages       Int
-  updated_at  DateTime  @updatedAt
-  created_at  DateTime  @default(now())
-  modified_at DateTime? // last modified date of the file
-  deleted_at  DateTime?
-  hash        String? // This is **not** an integrity check(sum), and is not used to verify the file contents.
-  path        String
-  status      String    @default("READY") // UNKNOWN, READY, UNSUPPORTED, ERROR, MISSING
+  name          String // derived from filename
+  size          BigInt // in bytes
+  extension     String
+  pages         Int
+  updated_at    DateTime  @updatedAt
+  created_at    DateTime  @default(now())
+  modified_at   DateTime? // last modified date of the file
+  deleted_at    DateTime?
+  hash          String? // This is **not** an integrity check(sum), and is not used to verify the file contents.
+  koreader_hash String? // This is the hash used by KOReader to identify the file
+  path          String
+  status        String    @default("READY") // UNKNOWN, READY, UNSUPPORTED, ERROR, MISSING
 
   metadata  MediaMetadata?
   series    Series?        @relation(fields: [series_id], references: [id], onDelete: Cascade)
@@ -294,13 +316,25 @@ model FinishedReadingSession {
 
   // TODO: Support reading duration in the future
 
-  media_id String
-  media    Media  @relation(fields: [media_id], references: [id], onDelete: Cascade)
-
-  user_id String
-  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  media_id  String
+  media     Media                    @relation(fields: [media_id], references: [id], onDelete: Cascade)
+  user_id   String
+  user      User                     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  device_id String?
+  device    RegisteredReadingDevice? @relation(fields: [device_id], references: [id], onDelete: Cascade)
 
   @@map("finished_reading_sessions")
+}
+
+model RegisteredReadingDevice {
+  id   String  @id @default(cuid())
+  name String  @unique
+  kind String? // ex: "KOBO"
+
+  active_reading_sessions   ActiveReadingSession[]
+  finished_reading_sessions FinishedReadingSession[]
+
+  @@map("registered_reading_devices")
 }
 
 model ActiveReadingSession {
@@ -311,15 +345,17 @@ model ActiveReadingSession {
   page                 Int?
   percentage_completed Float? // 0.0 - 1.0
   epubcfi              String?
+  koreader_progress    String?
 
   started_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  media_id String
-  media    Media  @relation(fields: [media_id], references: [id], onDelete: Cascade)
-
-  user_id String
-  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  media_id  String
+  media     Media                    @relation(fields: [media_id], references: [id], onDelete: Cascade)
+  user_id   String
+  user      User                     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  device_id String?
+  device    RegisteredReadingDevice? @relation(fields: [device_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, media_id])
   @@map("reading_sessions")
@@ -387,6 +423,7 @@ model BookClub {
   @@map("book_clubs")
 }
 
+// TODO: support external invitations, i.e. not connected to a user
 model BookClubInvitation {
   id String @id @default(cuid())
 
@@ -412,12 +449,13 @@ model BookClubMember {
 
   role Int // 0 - member, 1 - moderator, 2 - admin, 3 - creator
 
-  user_id                   String
-  user                      User                         @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  book_club_id              String
-  book_club                 BookClub                     @relation(fields: [book_club_id], references: [id], onDelete: Cascade)
-  discussion_messages       BookClubChatMessage[]
-  liked_discussion_messages BookClubChatMessageLike[]
+  user_id      String
+  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  book_club_id String
+  book_club    BookClub @relation(fields: [book_club_id], references: [id], onDelete: Cascade)
+
+  discussion_messages       BookClubDiscussionMessage[]
+  liked_discussion_messages BookClubDiscussionMessageLike[]
   book_suggestions          BookClubBookSuggestion[]
   liked_book_suggestions    BookClubBookSuggestionLike[]
   favorite_book             BookClubMemberFavoriteBook?
@@ -429,22 +467,25 @@ model BookClubMember {
 model BookClubMemberFavoriteBook {
   id String @id @default(cuid())
 
-  title  String?
-  author String?
-  url    String?
-  notes  String?
+  // The book details below should only be set if the book is external (i.e. not in the library)
+  title     String?
+  author    String?
+  url       String?
+  image_url String?
+  notes     String?
+
+  // The book relation should only be set if the book is in the library
+  book_id String?
+  book    Media?  @relation(fields: [book_id], references: [id], onDelete: Cascade)
 
   member_id String         @unique
   member    BookClubMember @relation(fields: [member_id], references: [id], onDelete: Cascade)
-  book_id   String?
-  book      Media?         @relation(fields: [book_id], references: [id], onDelete: Cascade)
 
   @@map("book_club_member_favorite_books")
 }
 
 model BookClubSchedule {
   default_interval_days Int? @default(30) // in days
-  // auto_start_chat_board Boolean @default(false)
 
   books BookClubBook[]
 
@@ -459,12 +500,13 @@ model BookClubBook {
 
   start_at                 DateTime
   end_at                   DateTime
-  discussion_duration_days Int?     @default(1) // in days
+  discussion_duration_days Int?     @default(1) // in days // TODO: revisit this, IDK if it's necessary or how to handle it
 
   // The below group should only be set if the book is not already in the library
-  title  String?
-  author String?
-  url    String?
+  title     String?
+  author    String?
+  url       String?
+  image_url String?
 
   book_entity_id String?
   book_entity    Media?  @relation(fields: [book_entity_id], references: [id], onDelete: Cascade)
@@ -472,7 +514,7 @@ model BookClubBook {
   book_club_schedule_book_club_id String?
   book_club_schedule              BookClubSchedule? @relation(fields: [book_club_schedule_book_club_id], references: [book_club_id], onDelete: Cascade)
 
-  chat_board BookClubChatBoard?
+  discussion BookClubDiscussion?
 
   @@map("book_club_books")
 }
@@ -507,50 +549,52 @@ model BookClubBookSuggestionLike {
   @@map("book_club_book_suggestion_likes")
 }
 
-model BookClubChatBoard {
-  id String @id @default(cuid())
+model BookClubDiscussion {
+  id        String  @id @default(cuid())
+  is_locked Boolean @default(false)
 
-  messages BookClubChatMessage[]
+  messages BookClubDiscussionMessage[]
 
   book_club_book_id String       @unique
   book_club_book    BookClubBook @relation(fields: [book_club_book_id], references: [id], onDelete: Cascade)
 
-  @@map("book_club_chat_boards")
+  @@map("book_club_discussions")
 }
 
-model BookClubChatMessage {
+model BookClubDiscussionMessage {
   id             String   @id @default(cuid())
   content        String
   timestamp      DateTime @default(now())
   is_top_message Boolean  @default(true)
 
-  parent_message_id String?
-  // TODO: cascade delete? Not sure... I don't necessarily want to delete the children if the parent is deleted. Maybe soft delete when a user 'deletes' a message? Then just hide content from deleted messages...
-  parent_message    BookClubChatMessage? @relation("ThreadMessage", fields: [parent_message_id], references: [id])
+  deleted_at DateTime?
 
-  chat_board    BookClubChatBoard @relation(fields: [chat_board_id], references: [id], onDelete: Cascade)
-  chat_board_id String
+  parent_message_id String?
+  parent_message    BookClubDiscussionMessage? @relation("ThreadMessage", fields: [parent_message_id], references: [id]) // TODO: soft delete pattern
+
+  discussion    BookClubDiscussion @relation(fields: [discussion_id], references: [id], onDelete: Cascade)
+  discussion_id String
 
   member    BookClubMember? @relation(fields: [member_id], references: [id], onDelete: Cascade)
   member_id String?
 
-  likes          BookClubChatMessageLike[]
-  child_messages BookClubChatMessage[]     @relation("ThreadMessage")
+  likes          BookClubDiscussionMessageLike[]
+  child_messages BookClubDiscussionMessage[]     @relation("ThreadMessage")
 
-  @@map("book_club_chat_messages")
+  @@map("book_club_discussion_messages")
 }
 
-model BookClubChatMessageLike {
+model BookClubDiscussionMessageLike {
   id        String   @id @default(cuid())
   timestamp DateTime @default(now())
 
   liked_by    BookClubMember @relation(fields: [liked_by_id], references: [id], onDelete: Cascade)
   liked_by_id String
 
-  message    BookClubChatMessage @relation(fields: [message_id], references: [id], onDelete: Cascade)
+  message    BookClubDiscussionMessage @relation(fields: [message_id], references: [id], onDelete: Cascade)
   message_id String
 
-  @@map("book_club_chat_message_likes")
+  @@map("book_club_discussion_message_likes")
 }
 
 model ReadingListRBAC {
@@ -590,7 +634,7 @@ model ReadingList {
   // The visibility of the reading list. ex: "PUBLIC", "PRIVATE" or "SHARED"
   visibility  String   @default("PRIVATE")
   // The ordering of the reading list. This will either be "MANUAL" or a specific
-  // field on the media. ex: 'name', 'created_at', 'pushlish_date', etc.
+  // field on the media. ex: 'name', 'created_at', 'publish_date', etc.
   ordering    String   @default("MANUAL")
 
   // The access control rules for this reading list

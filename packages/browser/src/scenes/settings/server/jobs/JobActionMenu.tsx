@@ -1,9 +1,8 @@
-import { jobApi, jobQueryKeys, logApi } from '@stump/api'
-import { invalidateQueries } from '@stump/client'
+import { invalidateQueries, useSDK } from '@stump/client'
 import { DropdownMenu, IconButton } from '@stump/components'
-import { CoreJobOutput, PersistedJob } from '@stump/types'
+import { CoreJobOutput, PersistedJob } from '@stump/sdk'
 import { Ban, Database, FileClock, ListX, MoreVertical, Trash2 } from 'lucide-react'
-import React, { useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router'
 
@@ -13,7 +12,9 @@ type Props = {
 	job: PersistedJob
 	onInspectData: (data: CoreJobOutput | null) => void
 }
+
 export default function JobActionMenu({ job, onInspectData }: Props) {
+	const { sdk } = useSDK()
 	const navigate = useNavigate()
 
 	const isCancelable =
@@ -40,18 +41,18 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 		if (!isCancelable) {
 			// This shouldn't happen, but just in case we will refresh the jobs
 			// and just return.
-			await invalidateQueries({ queryKey: [jobQueryKeys.getJobs] })
+			await invalidateQueries({ exact: false, queryKey: [sdk.job.keys.get] })
 			return
 		}
 
 		try {
-			await jobApi.cancelJob(job.id)
+			await sdk.job.cancel(job.id)
 		} catch (error) {
 			handleError(error)
 		} finally {
-			await invalidateQueries({ queryKey: [jobQueryKeys.getJobs] })
+			await invalidateQueries({ exact: false, queryKey: [sdk.job.keys.get] })
 		}
-	}, [job.id, isCancelable])
+	}, [job.id, isCancelable, sdk.job])
 
 	/**
 	 * Deletes the record of the job from the database.
@@ -63,22 +64,22 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 		}
 
 		try {
-			await jobApi.deleteJob(job.id)
+			await sdk.job.delete(job.id)
 		} catch (error) {
 			handleError(error)
 		} finally {
-			await invalidateQueries({ queryKey: [jobQueryKeys.getJobs] })
+			await invalidateQueries({ exact: false, queryKey: [sdk.job.keys.get] })
 		}
-	}, [job.id, isDeletable])
+	}, [job.id, isDeletable, sdk.job])
 
 	const handleClearLogs = useCallback(async () => {
 		try {
-			await logApi.clearPersistedLogs({ job: { id: job.id } })
-			await invalidateQueries({ queryKey: [jobQueryKeys.getJobs] })
+			await sdk.log.clear({ job_id: job.id })
+			await invalidateQueries({ exact: false, queryKey: [sdk.job.keys.get] })
 		} catch (error) {
 			handleError(error)
 		}
-	}, [job.id])
+	}, [job.id, sdk.log, sdk.job])
 
 	const jobId = job.id
 	const jobData = job.output_data

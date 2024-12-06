@@ -1,4 +1,4 @@
-import { type User } from '@stump/types'
+import { type User } from '@stump/sdk'
 import { PaginationState } from '@tanstack/react-table'
 import { createContext, useContext } from 'react'
 

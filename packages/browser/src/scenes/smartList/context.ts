@@ -4,7 +4,7 @@ import {
 	SmartListItemGrouping,
 	SmartListMeta,
 	SmartListView,
-} from '@stump/types'
+} from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
 import { buildColumns as buildGroupColumns } from './items/table/groupColumns'

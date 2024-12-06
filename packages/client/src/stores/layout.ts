@@ -1,4 +1,4 @@
-import { LayoutMode, ReactTableColumnSort, ReactTableGlobalSort } from '@stump/types'
+import { LayoutMode, ReactTableColumnSort, ReactTableGlobalSort } from '@stump/sdk'
 import { create } from 'zustand'
 import { createJSONStorage, devtools, persist, StateStorage } from 'zustand/middleware'
 

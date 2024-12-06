@@ -1,4 +1,4 @@
-import { getMediaDownloadUrl } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { Link, Text } from '@stump/components'
 import { useEffect, useState } from 'react'
 
@@ -18,33 +18,34 @@ type Props = {
  * such as reading progress, bookmarks, and annotations.
  */
 export default function NativePDFViewer({ id }: Props) {
+	const { sdk } = useSDK()
+
 	const [pdfObjectUrl, setPdfObjectUrl] = useState<string>()
 
 	/**
 	 * An effect that fetches the PDF and creates an object URL for it.
 	 * When the component unmounts, the object URL is revoked.
 	 */
-	useEffect(
-		() => {
-			async function fetchPdf() {
-				const response = await fetch(getMediaDownloadUrl(id), {
-					credentials: 'include',
-				})
-				const blob = await response.blob()
-				const arrayBuffer = await blob.arrayBuffer()
-				setPdfObjectUrl(URL.createObjectURL(new Blob([arrayBuffer], { type: 'application/pdf' })))
-			}
-			fetchPdf()
+	useEffect(() => {
+		async function fetchPdf() {
+			const response = await fetch(sdk.media.downloadURL(id), {
+				credentials: 'include',
+			})
+			const blob = await response.blob()
+			const arrayBuffer = await blob.arrayBuffer()
+			setPdfObjectUrl(URL.createObjectURL(new Blob([arrayBuffer], { type: 'application/pdf' })))
+		}
 
-			return () => {
-				if (pdfObjectUrl) {
-					URL.revokeObjectURL(pdfObjectUrl)
-				}
+		if (!pdfObjectUrl) {
+			fetchPdf()
+		}
+
+		return () => {
+			if (pdfObjectUrl) {
+				URL.revokeObjectURL(pdfObjectUrl)
 			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[],
-	)
+		}
+	}, [sdk, id, pdfObjectUrl])
 
 	// TODO: consider some sort of loading state here
 	if (!pdfObjectUrl) {
@@ -54,7 +55,7 @@ export default function NativePDFViewer({ id }: Props) {
 	return (
 		<object data={pdfObjectUrl} type="application/pdf" width="100%" height="100%">
 			<Text>
-				PDF failed to load. <Link href={getMediaDownloadUrl(id)}>Click here</Link> attempt
+				PDF failed to load. <Link href={sdk.media.downloadURL(id)}>Click here</Link> attempt
 				downloading it directly.
 			</Text>
 		</object>

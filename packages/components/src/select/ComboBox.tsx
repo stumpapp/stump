@@ -104,6 +104,8 @@ export function ComboBox({
 			} else {
 				onChange?.([selected])
 			}
+			// FIXME: I don't know why I have to do this, something is triggering the popover to close...
+			setTimeout(() => setOpen(true))
 		} else {
 			onChange?.(selected)
 			setOpen(false)
@@ -136,8 +138,8 @@ export function ComboBox({
 					<Button
 						className="h-[unset] shrink-0 text-ellipsis text-wrap break-all text-brand"
 						onClick={() => {
-							onAddOption({ label: filter, value: filter.toLowerCase() })
-							handleChange(filter.toLowerCase())
+							onAddOption({ label: filter, value: filter })
+							handleChange(filter)
 							setFilter('')
 						}}
 					>
@@ -202,6 +204,7 @@ export function ComboBox({
 						wrapperClassName,
 					)}
 					style={contentStyle}
+					portal={false}
 				>
 					<Command>
 						{filterable && (
@@ -227,7 +230,10 @@ export function ComboBox({
 										value={option.value}
 									>
 										<Check
-											className={cn('mr-2 h-4 w-4', isSelected ? 'opacity-100' : 'opacity-0')}
+											className={cn(
+												'mr-2 h-4 w-4 shrink-0',
+												isSelected ? 'opacity-100' : 'opacity-0',
+											)}
 										/>
 										{option.label}
 									</Command.Item>

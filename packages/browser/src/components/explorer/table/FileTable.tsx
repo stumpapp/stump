@@ -1,5 +1,5 @@
 import { cn, Text } from '@stump/components'
-import { DirectoryListingFile } from '@stump/types'
+import { DirectoryListingFile } from '@stump/sdk'
 import {
 	createColumnHelper,
 	flexRender,
@@ -9,7 +9,7 @@ import {
 	SortingState,
 	useReactTable,
 } from '@tanstack/react-table'
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { useWindowSize } from 'rooks'
 

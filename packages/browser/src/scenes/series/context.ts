@@ -1,4 +1,4 @@
-import { Series } from '@stump/types'
+import { Series } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
 export type ISeriesContext = {

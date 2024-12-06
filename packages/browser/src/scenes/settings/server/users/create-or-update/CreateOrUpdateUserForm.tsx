@@ -1,10 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { userQueryKeys } from '@stump/api'
-import { invalidateQueries, useCreateUser, useUpdateUser } from '@stump/client'
+import { invalidateQueries, useCreateUser, useSDK, useUpdateUser } from '@stump/client'
 import { Alert, Button, Form, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { User } from '@stump/types'
-import React, { useMemo } from 'react'
+import { User } from '@stump/sdk'
+import { useMemo } from 'react'
 import { useForm, useFormState } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'
@@ -26,6 +25,7 @@ type Props = {
 // TODO(design): stepped form from bookclub feature branch
 
 export default function CreateOrUpdateUserForm({ user }: Props) {
+	const { sdk } = useSDK()
 	const navigate = useNavigate()
 
 	const { t } = useLocaleContext()
@@ -62,16 +62,15 @@ export default function CreateOrUpdateUserForm({ user }: Props) {
 				: null
 
 			if (isCreating && password) {
-				const result = await createAsync({
+				await createAsync({
 					age_restriction,
 					max_sessions_allowed,
 					password: password,
 					permissions,
 					username,
 				})
-				console.debug('Created user', { result })
 				toast.success('User created successfully')
-				await invalidateQueries({ keys: [userQueryKeys.getUsers, userQueryKeys.getUserById] })
+				await invalidateQueries({ keys: [sdk.user.keys.get, sdk.user.keys.getByID] })
 				form.reset()
 			} else if (user) {
 				const result = await updateAsync({
@@ -82,9 +81,8 @@ export default function CreateOrUpdateUserForm({ user }: Props) {
 					permissions,
 					username,
 				})
-				console.debug('Updated user', { result })
 				toast.success('User updated successfully')
-				await invalidateQueries({ keys: [userQueryKeys.getUsers, userQueryKeys.getUserById] })
+				await invalidateQueries({ keys: [sdk.user.keys.get, sdk.user.keys.getByID] })
 				form.reset({
 					age_restriction: result.age_restriction?.age,
 					age_restriction_on_unset: result.age_restriction?.restrict_on_unset,

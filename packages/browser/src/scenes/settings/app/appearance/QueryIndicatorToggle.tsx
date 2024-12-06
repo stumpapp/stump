@@ -1,5 +1,5 @@
 import { useUpdatePreferences } from '@stump/client'
-import React from 'react'
+import { UpdateUserPreferences } from '@stump/sdk'
 
 import { useUserStore } from '@/stores'
 
@@ -20,7 +20,7 @@ export default function QueryIndicatorToggle() {
 			update({
 				...preferences,
 				show_query_indicator: !preferences.show_query_indicator,
-			})
+			} as UpdateUserPreferences)
 		}
 	}
 

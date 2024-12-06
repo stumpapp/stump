@@ -1,6 +1,5 @@
 import { useBookClubsQuery } from '@stump/client'
 import { ButtonOrLink, cx } from '@stump/components'
-import React from 'react'
 
 import { SceneContainer } from '@/components/container'
 import GenericEmptyState from '@/components/GenericEmptyState'

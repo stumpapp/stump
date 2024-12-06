@@ -1,5 +1,5 @@
 import { useLocaleContext } from '@stump/i18n'
-import React, { Suspense } from 'react'
+import { Suspense } from 'react'
 import { Helmet } from 'react-helmet'
 
 import { Container, ContentContainer } from '@/components/container'

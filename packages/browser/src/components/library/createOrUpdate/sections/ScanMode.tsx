@@ -1,5 +1,5 @@
 import { useLocaleContext } from '@stump/i18n'
-import { LibraryScanMode } from '@stump/types'
+import { LibraryScanMode } from '@stump/sdk'
 import { useFormContext } from 'react-hook-form'
 
 import { useLibraryContextSafe } from '@/scenes/library/context'

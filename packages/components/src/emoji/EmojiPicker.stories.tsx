@@ -10,6 +10,7 @@ type Story = StoryObj<typeof EmojiPicker>
 
 export const Default: Story = {
 	args: {
+		// eslint-disable-next-line no-console
 		onEmojiSelect: console.debug,
 		onLoadError: console.error,
 	},

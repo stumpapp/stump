@@ -1,4 +1,4 @@
-import { getMediaPage } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { AspectRatio, cn, usePrevious } from '@stump/components'
 import { motion } from 'framer-motion'
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -11,11 +11,13 @@ import {
 	VirtuosoHandle,
 } from 'react-virtuoso'
 
+import { EntityImage } from '@/components/entity'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useImageBaseReaderContext } from '../context'
 
 export default function ReaderFooter() {
+	const { sdk } = useSDK()
 	const { book, currentPage, setCurrentPage } = useImageBaseReaderContext()
 	const {
 		settings: { showToolBar, preload },
@@ -74,7 +76,7 @@ export default function ReaderFooter() {
 				ref={virtuosoRef}
 				style={{ height: '100%' }}
 				horizontalDirection
-				data={pageArray.map((page) => getMediaPage(book.id, page))}
+				data={pageArray.map((page) => sdk.media.bookPageURL(book.id, page))}
 				components={{
 					Item,
 					List,
@@ -93,7 +95,7 @@ export default function ReaderFooter() {
 								},
 							)}
 						>
-							<img src={url} className="object-cover" />
+							<EntityImage src={url} className="object-cover" />
 						</AspectRatio>
 					)
 				}}

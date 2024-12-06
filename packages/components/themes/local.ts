@@ -1,9 +1,9 @@
 // TODO(383): Support local themes
 // Requires the following from tw-colors: https://github.com/L-Blondy/tw-colors/issues/39
 
-// import { ThemeDefintion } from './shared'
+// import { ThemeDefinition } from './shared'
 
-// export const local: ThemeDefintion = {
+// export const local: ThemeDefinition = {
 // 	background: {
 // 		100: 'var(--twc-background-100)',
 // 		200: 'var(--twc-background-200)',

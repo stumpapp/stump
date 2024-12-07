@@ -1117,7 +1117,7 @@ checksum = "98cc8fbded0c607b7ba9dd60cd98df59af97e84d24e49c8557331cfc26d301ce"
 
 [[package]]
 name = "cli"
-version = "0.0.7"
+version = "0.0.8"
 dependencies = [
  "bcrypt",
  "clap",
@@ -1162,7 +1162,7 @@ dependencies = [
 
 [[package]]
 name = "codegen"
-version = "0.0.7"
+version = "0.0.8"
 
 [[package]]
 name = "codespan-reporting"
@@ -2066,7 +2066,7 @@ checksum = "90e5c1c8368803113bf0c9584fc495a58b86dc8a29edbf8fe877d21d9507e797"
 
 [[package]]
 name = "email"
-version = "0.0.7"
+version = "0.0.8"
 dependencies = [
  "handlebars",
  "lettre",
@@ -3433,7 +3433,7 @@ dependencies = [
 
 [[package]]
 name = "integrations"
-version = "0.0.7"
+version = "0.0.8"
 dependencies = [
  "async-trait",
  "lettre",
@@ -7333,7 +7333,7 @@ checksum = "e6ecd384b10a64542d77071bd64bd7b231f4ed5940fba55e98c3de13824cf3d7"
 
 [[package]]
 name = "smart-filter-gen"
-version = "0.0.6"
+version = "0.0.8"
 dependencies = [
  "itertools 0.13.0",
  "proc-macro2",
@@ -7664,7 +7664,7 @@ checksum = "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
 
 [[package]]
 name = "stump-config-gen"
-version = "0.0.6"
+version = "0.0.8"
 dependencies = [
  "itertools 0.13.0",
  "proc-macro2",
@@ -7678,7 +7678,7 @@ dependencies = [
 
 [[package]]
 name = "stump_core"
-version = "0.0.7"
+version = "0.0.8"
 dependencies = [
  "alphanumeric-sort",
  "async-channel",
@@ -7735,7 +7735,7 @@ dependencies = [
 
 [[package]]
 name = "stump_desktop"
-version = "0.0.7"
+version = "0.0.8"
 dependencies = [
  "discord-rich-presence",
  "keyring",
@@ -7756,7 +7756,7 @@ dependencies = [
 
 [[package]]
 name = "stump_server"
-version = "0.0.7"
+version = "0.0.8"
 dependencies = [
  "async-stream",
  "async-trait",

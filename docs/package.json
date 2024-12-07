@@ -20,6 +20,7 @@
 		"@icons-pack/react-simple-icons": "=9.1.0",
 		"clsx": "2.0.0",
 		"framer-motion": "^10.16.4",
+		"lucide-react": "=0.428.0",
 		"next": "^14.2.15",
 		"nextra": "^3.0.15",
 		"nextra-theme-docs": "^3.0.15",

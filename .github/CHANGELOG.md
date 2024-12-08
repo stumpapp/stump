@@ -1,5 +1,14 @@
 # Changelog
 
+<a name="0.0.9"></a>
+## 0.0.9 (2024-12-08)
+
+### Fixed
+
+- 🐛 Fix API key OPDS links in v1.2 feed ([#518](https://github.com/stumpapp/stump/issues/518)) [[6984bfe](https://github.com/stumpapp/stump/commit/6984bfecac3c408c4294e1f19ec7c47d3b081d1d)]
+- 🐛 Fix Path extractor error in v1.2 OPDS router [[b06ee48](https://github.com/stumpapp/stump/commit/b06ee4896e86de22c3073dc6ee38bab2abc22ee5)]
+
+
 <a name="0.0.8"></a>
 ## 0.0.8 (2024-12-04)
 

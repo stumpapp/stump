@@ -61,17 +61,25 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/pages/:page", get(get_book_page))
 				.route("/file/:filename", get(download_book)),
 		);
-	Router::new()
-		.nest("/v1.2", primary_router.clone())
-		.layer(middleware::from_fn_with_state(
-			app_state.clone(),
-			auth_middleware,
-		))
-		.nest("/:api_key/v1.2", primary_router)
-		.layer(middleware::from_fn_with_state(
-			app_state,
-			api_key_middleware,
-		))
+
+	Router::new().nest(
+		"/v1.2",
+		Router::new()
+			.nest(
+				"/",
+				primary_router.clone().layer(middleware::from_fn_with_state(
+					app_state.clone(),
+					auth_middleware,
+				)),
+			)
+			.nest(
+				"/:api_key/v1.2",
+				primary_router.layer(middleware::from_fn_with_state(
+					app_state,
+					api_key_middleware,
+				)),
+			),
+	)
 }
 
 fn pagination_bounds(page: i64, page_size: i64) -> (i64, i64) {

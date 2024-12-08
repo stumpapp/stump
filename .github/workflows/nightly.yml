@@ -64,10 +64,8 @@ jobs:
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
-          tags: 'opds-path-error-patch'
-          # load: ${{ env.LOAD }}
-          # push: ${{ env.PUSH }}
-          load: false
-          push: true
+          tags: 'nightly'
+          load: ${{ env.LOAD }}
+          push: ${{ env.PUSH }}
           archs: ${{ env.ARCHS }}
           discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}

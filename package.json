@@ -8,6 +8,7 @@
 	"workspaces": [
 		"apps/*",
 		"docs",
+		"e2e",
 		"packages/*"
 	],
 	"scripts": {
@@ -23,6 +24,7 @@
 		"web": "lerna run --scope @stump/web",
 		"docs": "lerna run --scope @stump/docs",
 		"start:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"cargo run -p stump_server\" \"yarn desktop start\"",
+		"ci:server": "./scripts/ci-server.sh",
 		"dev:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"cargo run -p stump_server\" \"yarn desktop dev\"",
 		"dev:web": "concurrently -n server,web -c green.bold,blue.bold \"cargo watch --ignore core/prisma -x run -p stump_server\" \"yarn web dev\"",
 		"dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"cargo watch --ignore core/prisma -x run -p stump_server\" \"yarn expo dev\"",

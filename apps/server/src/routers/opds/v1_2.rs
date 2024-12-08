@@ -93,9 +93,18 @@ struct OPDSIDURLParams {
 	id: String,
 }
 
+fn number_or_string_deserializer<'de, D>(deserializer: D) -> Result<i32, D::Error>
+where
+	D: serde::Deserializer<'de>,
+{
+	let value = String::deserialize(deserializer)?;
+	value.parse::<i32>().map_err(serde::de::Error::custom)
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 struct OPDSPageURLParams {
 	id: String,
+	#[serde(deserialize_with = "number_or_string_deserializer")]
 	page: i32,
 }
 

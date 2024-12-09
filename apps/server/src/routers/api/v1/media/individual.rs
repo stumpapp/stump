@@ -176,6 +176,97 @@ pub async fn get_media_by_id(
 	Ok(Json(Media::from(media)))
 }
 
+/// The query parameters sent with a media delete request.
+#[derive(Deserialize, Type)]
+pub(crate) struct DeleteMediaParams {
+	#[serde(default)]
+	pub delete_file: Option<bool>,
+}
+
+#[utoipa::path(
+	delete,
+	path = "/api/v1/media/:id",
+	tag = "media",
+	params(
+		("id" = String, Path, description = "The ID of the media to delete"),
+		("delete_file" = Option<bool>, Query, description = "Whether to also delete the file which the media references")
+	),
+	responses(
+		(status = 200, description = "Successfully deleted media"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Media not found"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+/// Delete media by its ID.
+pub async fn delete_media_by_id(
+	Path(id): Path<String>,
+	params: Query<DeleteMediaParams>,
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+) -> APIResult<()> {
+	tracing::info!("Attempting to delete media with id: {id}");
+
+	// Only users with library management permission can delete books
+	req.enforce_permissions(&[UserPermission::ManageLibrary])?;
+
+	let media = ctx
+		.db
+		.media()
+		.find_first(vec![media::id::equals(id.clone())])
+		.with(media::metadata::fetch())
+		.with(media::series::fetch().with(series::metadata::fetch()))
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound(String::from("Media not found")))?;
+
+	ctx.db
+		._transaction()
+		.run(|client| async move {
+			// Delete associated active reading sessions
+			client
+				.active_reading_session()
+				.delete_many(vec![active_reading_session::media_id::equals(id.clone())])
+				.exec()
+				.await?;
+
+			// Delete associated finished reading sessions
+			client
+				.finished_reading_session()
+				.delete_many(vec![finished_reading_session::media_id::equals(id.clone())])
+				.exec()
+				.await?;
+
+			// Delete the media metadata
+			client
+				.media_metadata()
+				.delete_many(vec![media_metadata::media_id::equals(Some(id.clone()))])
+				.exec()
+				.await?;
+
+			// Delete the media
+			client
+				.media()
+				.delete(media::id::equals(id.clone()))
+				.exec()
+				.await
+		})
+		.await?;
+
+	// Delete file from filesystem if parameters indicate to do so
+	if params.delete_file.unwrap_or(false) {
+		if let Err(e) = tokio::fs::remove_file(&media.path).await {
+			tracing::error!("Error when trying to delete media file: {e}");
+			return Err(APIError::InternalServerError(format!(
+				"Failed to delete media file: {e}"
+			)));
+		}
+	}
+
+	Ok(())
+}
+
 // TODO: type a body
 #[utoipa::path(
 	get,

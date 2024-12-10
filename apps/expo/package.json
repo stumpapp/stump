@@ -52,6 +52,6 @@
 		"tailwindcss": "3.3.2"
 	},
 	"name": "@stump/mobile",
-	"version": "0.0.7",
+	"version": "0.0.9",
 	"private": true
 }

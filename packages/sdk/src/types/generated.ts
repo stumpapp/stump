@@ -271,7 +271,7 @@ export type Epub = { media_entity: Media; spine: string[]; resources: { [key: st
 
 export type UpdateEpubProgress = { epubcfi: string; percentage: number; is_complete: boolean | null }
 
-export type EpubContent = { label: string; content: string; play_order: number }
+export type EpubContent = { label: string; content: string; children: EpubContent[]; play_order: number }
 
 export type JobStatus = "RUNNING" | "PAUSED" | "COMPLETED" | "CANCELLED" | "FAILED" | "QUEUED"
 

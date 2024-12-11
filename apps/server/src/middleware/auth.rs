@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use axum::{
 	body::Body,
 	extract::{OriginalUri, Path, Request, State},
@@ -9,6 +11,7 @@ use axum::{
 use base64::{engine::general_purpose::STANDARD, Engine};
 use prefixed_api_key::{PrefixedApiKey, PrefixedApiKeyController};
 use prisma_client_rust::or;
+use serde::Deserialize;
 use stump_core::{
 	db::entity::{APIKeyPermissions, User, UserPermission, API_KEY_PREFIX},
 	opds::v2_0::{
@@ -44,17 +47,24 @@ use super::host::HostExtractor;
 /// - They have a valid bearer token (session may not exist)
 /// - They have valid basic auth credentials (session is created after successful authentication)
 #[derive(Debug, Clone)]
-pub struct RequestContext(User);
+pub struct RequestContext {
+	user: User,
+	api_key: Option<String>,
+}
 
 impl RequestContext {
 	/// Get a reference to the current user
 	pub fn user(&self) -> &User {
-		&self.0
+		&self.user
 	}
 
 	/// Get the ID of the current user
 	pub fn id(&self) -> String {
-		self.0.id.clone()
+		self.user.id.clone()
+	}
+
+	pub fn api_key(&self) -> Option<String> {
+		self.api_key.clone()
 	}
 
 	/// Enforce that the current user has all the permissions provided, otherwise return an error
@@ -155,7 +165,10 @@ pub async fn auth_middleware(
 
 	if let Some(user) = session_user {
 		if !user.is_locked {
-			req.extensions_mut().insert(RequestContext(user));
+			req.extensions_mut().insert(RequestContext {
+				user,
+				api_key: None,
+			});
 			return Ok(next.run(req).await);
 		}
 	}
@@ -186,7 +199,7 @@ pub async fn auth_middleware(
 		return Err(APIError::Unauthorized.into_response());
 	};
 
-	let user = match auth_header {
+	let req_ctx = match auth_header {
 		_ if auth_header.starts_with("Bearer ") && auth_header.len() > 7 => {
 			let token = auth_header[7..].to_owned();
 			handle_bearer_auth(token, &ctx.db)
@@ -202,9 +215,18 @@ pub async fn auth_middleware(
 		_ => return Err(APIError::Unauthorized.into_response()),
 	};
 
-	req.extensions_mut().insert(RequestContext(user));
+	req.extensions_mut().insert(req_ctx);
 
 	Ok(next.run(req).await)
+}
+
+#[derive(Debug, Deserialize)]
+pub struct APIKeyPath(HashMap<String, String>);
+
+impl APIKeyPath {
+	fn get_key(&self) -> Option<String> {
+		self.0.get("api_key").cloned()
+	}
 }
 
 /// A middleware to authenticate a user by an API key in a *very* specific way. This middleware
@@ -218,10 +240,15 @@ pub async fn auth_middleware(
 /// hashing algorithm, therefore the default auth method would not work.
 pub async fn api_key_middleware(
 	State(ctx): State<AppState>,
-	Path(api_key): Path<String>,
+	Path(params): Path<APIKeyPath>,
 	mut req: Request,
 	next: Next,
 ) -> Result<Response, impl IntoResponse> {
+	let Some(api_key) = params.get_key() else {
+		tracing::error!("No API key provided");
+		return Err(APIError::Unauthorized.into_response());
+	};
+
 	let Ok(pak) = PrefixedApiKey::from_string(api_key.as_str()) else {
 		tracing::error!("Failed to parse API key");
 		return Err(APIError::Unauthorized.into_response());
@@ -231,7 +258,10 @@ pub async fn api_key_middleware(
 		.await
 		.map_err(|e| e.into_response())?;
 
-	req.extensions_mut().insert(RequestContext(user));
+	req.extensions_mut().insert(RequestContext {
+		user,
+		api_key: Some(api_key),
+	});
 
 	Ok(next.run(req).await)
 }
@@ -338,10 +368,18 @@ pub async fn validate_api_key(
 /// A function to handle bearer token authentication. This function will verify the token and
 /// return the user if the token is valid.
 #[tracing::instrument(skip_all)]
-async fn handle_bearer_auth(token: String, client: &PrismaClient) -> APIResult<User> {
+async fn handle_bearer_auth(
+	token: String,
+	client: &PrismaClient,
+) -> APIResult<RequestContext> {
 	match PrefixedApiKey::from_string(token.as_str()) {
 		Ok(api_key) if api_key.prefix() == API_KEY_PREFIX => {
-			return validate_api_key(api_key, client).await;
+			return validate_api_key(api_key, client)
+				.await
+				.map(|user| RequestContext {
+					user,
+					api_key: Some(token),
+				});
 		},
 		_ => (),
 	};
@@ -371,7 +409,10 @@ async fn handle_bearer_auth(token: String, client: &PrismaClient) -> APIResult<U
 		));
 	}
 
-	Ok(User::from(user))
+	Ok(RequestContext {
+		user: User::from(user),
+		api_key: None,
+	})
 }
 
 /// A function to handle basic authentication. This function will decode the credentials and
@@ -384,7 +425,7 @@ async fn handle_basic_auth(
 	encoded_credentials: String,
 	client: &PrismaClient,
 	session: &mut Session,
-) -> APIResult<User> {
+) -> APIResult<RequestContext> {
 	let decoded_bytes = STANDARD
 		.decode(encoded_credentials.as_bytes())
 		.map_err(|e| APIError::InternalServerError(e.to_string()))?;
@@ -427,7 +468,10 @@ async fn handle_basic_auth(
 		enforce_max_sessions(&user, client).await?;
 		let user = User::from(user);
 		session.insert(SESSION_USER_KEY, user.clone()).await?;
-		return Ok(user);
+		return Ok(RequestContext {
+			user,
+			api_key: None,
+		});
 	}
 
 	Err(APIError::Unauthorized)
@@ -558,14 +602,20 @@ mod tests {
 	#[test]
 	fn test_request_context_user() {
 		let user = User::default();
-		let request_context = RequestContext(user.clone());
+		let request_context = RequestContext {
+			user: user.clone(),
+			api_key: None,
+		};
 		assert!(user.is(request_context.user()));
 	}
 
 	#[test]
 	fn test_request_context_id() {
 		let user = User::default();
-		let request_context = RequestContext(user.clone());
+		let request_context = RequestContext {
+			user: user.clone(),
+			api_key: None,
+		};
 		assert_eq!(user.id, request_context.id());
 	}
 
@@ -575,7 +625,10 @@ mod tests {
 			is_server_owner: true,
 			..Default::default()
 		};
-		let request_context = RequestContext(user.clone());
+		let request_context = RequestContext {
+			user: user.clone(),
+			api_key: None,
+		};
 		assert!(request_context
 			.enforce_permissions(&[UserPermission::AccessBookClub])
 			.is_ok());
@@ -587,7 +640,10 @@ mod tests {
 			permissions: vec![UserPermission::AccessBookClub],
 			..Default::default()
 		};
-		let request_context = RequestContext(user.clone());
+		let request_context = RequestContext {
+			user: user.clone(),
+			api_key: None,
+		};
 		assert!(request_context
 			.enforce_permissions(&[UserPermission::AccessBookClub])
 			.is_ok());
@@ -596,7 +652,10 @@ mod tests {
 	#[test]
 	fn test_request_context_enforce_permissions_when_denied() {
 		let user = User::default();
-		let request_context = RequestContext(user.clone());
+		let request_context = RequestContext {
+			user: user.clone(),
+			api_key: None,
+		};
 		assert!(request_context
 			.enforce_permissions(&[UserPermission::AccessBookClub])
 			.is_err());
@@ -608,7 +667,10 @@ mod tests {
 			permissions: vec![UserPermission::AccessBookClub],
 			..Default::default()
 		};
-		let request_context = RequestContext(user.clone());
+		let request_context = RequestContext {
+			user: user.clone(),
+			api_key: None,
+		};
 		assert!(request_context
 			.enforce_permissions(&[
 				UserPermission::AccessBookClub,
@@ -623,7 +685,10 @@ mod tests {
 			permissions: vec![UserPermission::AccessBookClub],
 			..Default::default()
 		};
-		let request_context = RequestContext(user.clone());
+		let request_context = RequestContext {
+			user: user.clone(),
+			api_key: None,
+		};
 		assert!(user.is(&request_context
 			.user_and_enforce_permissions(&[UserPermission::AccessBookClub])
 			.unwrap()));
@@ -632,7 +697,10 @@ mod tests {
 	#[test]
 	fn test_request_context_user_and_enforce_permissions_when_denied() {
 		let user = User::default();
-		let request_context = RequestContext(user.clone());
+		let request_context = RequestContext {
+			user: user.clone(),
+			api_key: None,
+		};
 		assert!(request_context
 			.user_and_enforce_permissions(&[UserPermission::AccessBookClub])
 			.is_err());
@@ -644,14 +712,20 @@ mod tests {
 			is_server_owner: true,
 			..Default::default()
 		};
-		let request_context = RequestContext(user.clone());
+		let request_context = RequestContext {
+			user: user.clone(),
+			api_key: None,
+		};
 		assert!(request_context.enforce_server_owner().is_ok());
 	}
 
 	#[test]
 	fn test_request_context_enforce_server_owner_when_not_server_owner() {
 		let user = User::default();
-		let request_context = RequestContext(user.clone());
+		let request_context = RequestContext {
+			user: user.clone(),
+			api_key: None,
+		};
 		assert!(request_context.enforce_server_owner().is_err());
 	}
 

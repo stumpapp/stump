@@ -14,6 +14,7 @@ pub async fn create_client(config: &StumpConfig) -> prisma::PrismaClient {
 		.to_str()
 		.expect("Error parsing config directory")
 		.to_string();
+	tracing::trace!(?config_dir, "Creating Prisma client");
 	// NOTE: Prisma 5.16.0 will potentially have a few fixes related to SQLite, in particular fixes for timeouts
 	// during query execution. It seems the latest PCR is on 5.1.0 (with a custom patch for PCR-specific things).
 	// Hopefully once 5.16.0 is released, PCR will be updated shortly after to take advantage of the improvements.

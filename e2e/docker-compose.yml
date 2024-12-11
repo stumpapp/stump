@@ -1,0 +1,12 @@
+services:
+  stump:
+    image: localhost:nightly
+    ports:
+      - 5869:5869
+    environment:
+      - STUMP_VERBOSITY=2
+      - STUMP_PRETTY_LOGS=true
+      - STUMP_PORT=5869
+    volumes:
+      - /todo:/data
+      - /todo:/config

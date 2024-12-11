@@ -22,6 +22,7 @@ export default function SettingsButton() {
 				)}
 				pressEffect={false}
 				onClick={() => navigate(paths.settings())}
+				data-testid="settingsButton"
 			>
 				<Settings className="h-4 w-4 -scale-x-[1] transform" />
 			</IconButton>

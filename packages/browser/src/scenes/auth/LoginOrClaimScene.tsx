@@ -173,6 +173,7 @@ export default function LoginOrClaimScene() {
 						<Button
 							size="md"
 							type="submit"
+							data-testid="loginOrRegister"
 							variant={isClaimed ? 'primary' : 'secondary'}
 							isLoading={isLoggingIn || isRegistering}
 							className="mt-2"

@@ -16,7 +16,7 @@ import { defineConfig, devices } from '@playwright/test'
 export default defineConfig({
 	testDir: './tests',
 	/* Run tests in files in parallel */
-	fullyParallel: true,
+	fullyParallel: false,
 	/* Fail the build on CI if you accidentally left test.only in the source code. */
 	forbidOnly: !!process.env.CI,
 	/* Retry on CI only */
@@ -37,47 +37,34 @@ export default defineConfig({
 	/* Configure projects for major browsers */
 	projects: [
 		{
+			name: 'setup',
+			testMatch: /global\.setup\.ts/,
+		},
+		{
 			name: 'chromium',
 			use: { ...devices['Desktop Chrome'] },
+			dependencies: ['setup'],
 		},
 
 		{
 			name: 'firefox',
 			use: { ...devices['Desktop Firefox'] },
+			dependencies: ['setup'],
 		},
 
 		{
 			name: 'webkit',
 			use: { ...devices['Desktop Safari'] },
+			dependencies: ['setup'],
 		},
-
-		/* Test against mobile viewports. */
-		// {
-		//   name: 'Mobile Chrome',
-		//   use: { ...devices['Pixel 5'] },
-		// },
-		// {
-		//   name: 'Mobile Safari',
-		//   use: { ...devices['iPhone 12'] },
-		// },
-
-		/* Test against branded browsers. */
-		// {
-		//   name: 'Microsoft Edge',
-		//   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-		// },
-		// {
-		//   name: 'Google Chrome',
-		//   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-		// },
 	],
 
+	// TODO: don't do local dev server like this, use docker
 	/* Run your local dev server before starting the tests */
 	webServer: {
 		command: 'yarn ci:server',
 		url: 'http://127.0.0.1:5869',
 		reuseExistingServer: !process.env.CI,
-		// TODO: build before this step so that the server is ready
 		timeout: 5 * 60 * 1000, // 5 minutes (in case compilation is slow)
 	},
 })

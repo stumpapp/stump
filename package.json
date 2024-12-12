@@ -33,15 +33,15 @@
 	"devDependencies": {
 		"@babel/core": "^7.25.8",
 		"@babel/traverse": "^7.25.7",
-		"@eslint/js": "^9.16.0",
-		"@typescript-eslint/eslint-plugin": "^8.18.0",
+		"@eslint/js": "^9.13.0",
+		"@typescript-eslint/eslint-plugin": "^8.10.0",
 		"@typescript-eslint/parser": "^8.10.0",
 		"concurrently": "^8.2.2",
-		"eslint": "^9.16.0",
+		"eslint": "^9.13.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-prettier": "^5.2.1",
-		"eslint-plugin-react": "^7.37.2",
-		"eslint-plugin-react-hooks": "^5.1.0",
+		"eslint-plugin-react": "^7.37.1",
+		"eslint-plugin-react-hooks": "^5.0.0",
 		"eslint-plugin-simple-import-sort": "^12.1.1",
 		"eslint-plugin-sort-keys-fix": "^1.1.2",
 		"globals": "^15.11.0",
@@ -51,9 +51,9 @@
 		"prettier": "=3.3.2",
 		"prettier-eslint": "^16.3.0",
 		"prettier-plugin-tailwindcss": "^0.6.8",
-		"rimraf": "^5.0.10",
-		"typescript": "^5.7.2",
-		"typescript-eslint": "^8.18.0"
+		"rimraf": "^5.0.5",
+		"typescript": "^5.6.3",
+		"typescript-eslint": "^8.10.0"
 	},
 	"lint-staged": {
 		"*.{js,jsx,ts,tsx,md,json}": [

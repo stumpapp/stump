@@ -2,7 +2,6 @@ import { APIBase } from '../base'
 import {
 	Media,
 	MediaFilter,
-	DeleteMediaParams,
 	Pageable,
 	PatchMediaThumbnail,
 	ProgressUpdateReturn,

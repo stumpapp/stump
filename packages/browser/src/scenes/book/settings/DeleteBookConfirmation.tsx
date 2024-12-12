@@ -14,16 +14,13 @@ type DeleteBookConfirmationProps = {
 export default function DeleteBookConfirmation({ id, trigger }: DeleteBookConfirmationProps) {
 	const navigate = useNavigate()
 	const { sdk } = useSDK()
-	const [deleteFile, { toggle: toggleDeleteFile }] = useBoolean(false)
 	const [error, setError] = useState<unknown>(null)
 	const [isOpen, setIsOpen] = useState(false)
 
 	const handleDelete = async () => {
 		setError(null)
 		try {
-			await sdk.media.delete(id, {
-				delete_file: deleteFile,
-			})
+			await sdk.media.delete(id)
 			navigate(paths.libraries())
 		} catch (err) {
 			setError(err)
@@ -59,14 +56,6 @@ export default function DeleteBookConfirmation({ id, trigger }: DeleteBookConfir
 					<Dialog.Close onClick={() => setIsOpen(false)} />
 				</Dialog.Header>
 				{renderError()}
-				<div className="mt-4">
-					<CheckBox
-						variant="primary"
-						label="Also delete the underlying file"
-						checked={deleteFile}
-						onClick={toggleDeleteFile}
-					/>
-				</div>
 				<Dialog.Footer>
 					<Button variant="ghost" onClick={() => setIsOpen(false)}>
 						Cancel

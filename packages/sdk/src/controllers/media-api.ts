@@ -151,8 +151,8 @@ export class MediaAPI extends APIBase {
 	/**
 	 * Delete a media entity from the database
 	 */
-	async delete(id: string, params: DeleteMediaParams): Promise<void> {
-		await this.axios.delete(mediaURL(`${id}`, params))
+	async delete(id: string): Promise<void> {
+		await this.axios.delete(mediaURL(`${id}`))
 	}
 
 	/**

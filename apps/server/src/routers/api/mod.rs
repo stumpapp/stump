@@ -133,7 +133,6 @@ mod tests {
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<MediaBaseFilter>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<MediaFilter>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<DeleteMediaParams>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<BookRelations>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<SeriesBaseFilter>()?).as_bytes())?;
 		file.write_all(

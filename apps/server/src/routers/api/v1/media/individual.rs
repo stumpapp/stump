@@ -183,13 +183,6 @@ pub async fn get_media_by_id(
 	Ok(Json(Media::from(media)))
 }
 
-/// The query parameters sent with a media delete request.
-#[derive(Deserialize, Type)]
-pub(crate) struct DeleteMediaParams {
-	#[serde(default)]
-	pub delete_file: Option<bool>,
-}
-
 #[utoipa::path(
 	delete,
 	path = "/api/v1/media/:id",
@@ -209,7 +202,6 @@ pub(crate) struct DeleteMediaParams {
 /// Delete media by its ID.
 pub async fn delete_media_by_id(
 	Path(id): Path<String>,
-	params: Query<DeleteMediaParams>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
 ) -> APIResult<()> {
@@ -237,14 +229,12 @@ pub async fn delete_media_by_id(
 		.exec()
 		.await?;
 
-	// Delete file from filesystem if parameters indicate to do so
-	if params.delete_file.unwrap_or(false) {
-		if let Err(e) = trash::delete(&media.path) {
-			tracing::error!("Error when trying to delete media file: {e}");
-			return Err(APIError::InternalServerError(format!(
-				"Failed to delete media file: {e}"
-			)));
-		}
+	// Delete file by moving it to the trash
+	if let Err(e) = trash::delete(&media.path) {
+		tracing::error!("Error when trying to delete media file: {e}");
+		return Err(APIError::InternalServerError(format!(
+			"Failed to delete media file: {e}"
+		)));
 	}
 
 	Ok(())

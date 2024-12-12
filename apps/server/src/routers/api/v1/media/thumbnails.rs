@@ -58,7 +58,7 @@ pub(crate) async fn get_media_thumbnail_by_id(
 		.as_ref()
 		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
 	let where_params = chain_optional_iter(
-		[media::id::equals(id.clone())]
+		[media::id::equals(id), media::deleted_at::equals(None)]
 			.into_iter()
 			.chain(apply_media_library_not_hidden_for_user_filter(user))
 			.collect::<Vec<WhereParam>>(),
@@ -153,7 +153,7 @@ pub(crate) async fn patch_media_thumbnail(
 		.as_ref()
 		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
 	let where_params = chain_optional_iter(
-		[media::id::equals(id.clone())]
+		[media::id::equals(id), media::deleted_at::equals(None)]
 			.into_iter()
 			.chain(apply_media_library_not_hidden_for_user_filter(&user))
 			.collect::<Vec<WhereParam>>(),
@@ -251,7 +251,7 @@ pub(crate) async fn replace_media_thumbnail(
 		.as_ref()
 		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
 	let where_params = chain_optional_iter(
-		[media::id::equals(id.clone())]
+		[media::id::equals(id), media::deleted_at::equals(None)]
 			.into_iter()
 			.chain(apply_media_library_not_hidden_for_user_filter(&user))
 			.collect::<Vec<WhereParam>>(),

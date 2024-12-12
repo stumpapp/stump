@@ -143,6 +143,7 @@ pub(crate) fn apply_media_filters_for_user(
 	// instead. This was a regression from the exclusion feature I need to tackle
 	vec![and![
 		base_filters,
+		media::deleted_at::equals(None),
 		media::series::is(vec![series::library::is(vec![
 			library_not_hidden_from_user_filter(user),
 		])])

@@ -5,6 +5,7 @@ use axum::{
 	Extension, Json,
 };
 use axum_extra::extract::Query;
+use chrono::Utc;
 use prisma_client_rust::{chrono::Duration, Direction};
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -91,10 +92,13 @@ pub async fn get_media_by_path(
 		.as_ref()
 		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
 	let path_str = path.to_string_lossy().to_string();
-	let required_params = [media::path::equals(path_str.clone())]
-		.into_iter()
-		.chain(apply_media_library_not_hidden_for_user_filter(user))
-		.collect::<Vec<WhereParam>>();
+	let required_params = [
+		media::path::equals(path_str.clone()),
+		media::deleted_at::equals(None),
+	]
+	.into_iter()
+	.chain(apply_media_library_not_hidden_for_user_filter(user))
+	.collect::<Vec<WhereParam>>();
 
 	let book = client
 		.media()
@@ -139,10 +143,13 @@ pub async fn get_media_by_id(
 		.as_ref()
 		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
 	let where_params = chain_optional_iter(
-		[media::id::equals(id.clone())]
-			.into_iter()
-			.chain(apply_media_library_not_hidden_for_user_filter(user))
-			.collect::<Vec<WhereParam>>(),
+		[
+			media::id::equals(id.clone()),
+			media::deleted_at::equals(None),
+		]
+		.into_iter()
+		.chain(apply_media_library_not_hidden_for_user_filter(user))
+		.collect::<Vec<WhereParam>>(),
 		[age_restrictions],
 	);
 
@@ -214,49 +221,25 @@ pub async fn delete_media_by_id(
 	let media = ctx
 		.db
 		.media()
-		.find_first(vec![media::id::equals(id.clone())])
+		.find_first(vec![media::id::equals(id), media::deleted_at::equals(None)])
 		.with(media::metadata::fetch())
-		.with(media::series::fetch().with(series::metadata::fetch()))
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound(String::from("Media not found")))?;
 
+	let now = Utc::now();
 	ctx.db
-		._transaction()
-		.run(|client| async move {
-			// Delete associated active reading sessions
-			client
-				.active_reading_session()
-				.delete_many(vec![active_reading_session::media_id::equals(id.clone())])
-				.exec()
-				.await?;
-
-			// Delete associated finished reading sessions
-			client
-				.finished_reading_session()
-				.delete_many(vec![finished_reading_session::media_id::equals(id.clone())])
-				.exec()
-				.await?;
-
-			// Delete the media metadata
-			client
-				.media_metadata()
-				.delete_many(vec![media_metadata::media_id::equals(Some(id.clone()))])
-				.exec()
-				.await?;
-
-			// Delete the media
-			client
-				.media()
-				.delete(media::id::equals(id.clone()))
-				.exec()
-				.await
-		})
+		.media()
+		.update(
+			media::id::equals(media.id),
+			vec![media::deleted_at::set(Some(now.into()))],
+		)
+		.exec()
 		.await?;
 
 	// Delete file from filesystem if parameters indicate to do so
 	if params.delete_file.unwrap_or(false) {
-		if let Err(e) = tokio::fs::remove_file(&media.path).await {
+		if let Err(e) = trash::delete(&media.path) {
 			tracing::error!("Error when trying to delete media file: {e}");
 			return Err(APIError::InternalServerError(format!(
 				"Failed to delete media file: {e}"
@@ -297,7 +280,7 @@ pub(crate) async fn get_media_file(
 		.as_ref()
 		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
 	let where_conditions = chain_optional_iter(
-		[media::id::equals(id.clone())]
+		[media::id::equals(id), media::deleted_at::equals(None)]
 			.into_iter()
 			.chain(apply_media_library_not_hidden_for_user_filter(&user))
 			.collect::<Vec<WhereParam>>(),
@@ -347,7 +330,7 @@ pub(crate) async fn convert_media(
 		.as_ref()
 		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
 	let where_params = chain_optional_iter(
-		[media::id::equals(id.clone())]
+		[media::id::equals(id), media::deleted_at::equals(None)]
 			.into_iter()
 			.chain(apply_media_library_not_hidden_for_user_filter(user))
 			.collect::<Vec<WhereParam>>(),
@@ -402,10 +385,13 @@ pub(crate) async fn get_media_page(
 		.as_ref()
 		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
 	let where_params = chain_optional_iter(
-		[media::id::equals(id.clone())]
-			.into_iter()
-			.chain(apply_media_library_not_hidden_for_user_filter(user))
-			.collect::<Vec<WhereParam>>(),
+		[
+			media::id::equals(id.clone()),
+			media::deleted_at::equals(None),
+		]
+		.into_iter()
+		.chain(apply_media_library_not_hidden_for_user_filter(user))
+		.collect::<Vec<WhereParam>>(),
 		[age_restrictions],
 	);
 
@@ -456,6 +442,7 @@ pub(crate) async fn update_media_progress(
 	let client = &ctx.db;
 	// TODO: check library access? They don't gain access to the book here, so perhaps
 	// it is acceptable to not check library access here?
+	// TODO: Same, but for deleted_at status?
 
 	let active_session = client
 		.active_reading_session()
@@ -539,10 +526,13 @@ pub(crate) async fn get_media_progress(
 		.as_ref()
 		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
 	let media_where_params = chain_optional_iter(
-		[media::id::equals(id.clone())]
-			.into_iter()
-			.chain(apply_media_library_not_hidden_for_user_filter(user))
-			.collect::<Vec<WhereParam>>(),
+		[
+			media::id::equals(id.clone()),
+			media::deleted_at::equals(None),
+		]
+		.into_iter()
+		.chain(apply_media_library_not_hidden_for_user_filter(user))
+		.collect::<Vec<WhereParam>>(),
 		[age_restrictions],
 	);
 
@@ -619,10 +609,13 @@ pub(crate) async fn get_is_media_completed(
 		.as_ref()
 		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
 	let media_where_params = chain_optional_iter(
-		[media::id::equals(id.clone())]
-			.into_iter()
-			.chain(apply_media_library_not_hidden_for_user_filter(user))
-			.collect::<Vec<WhereParam>>(),
+		[
+			media::id::equals(id.clone()),
+			media::deleted_at::equals(None),
+		]
+		.into_iter()
+		.chain(apply_media_library_not_hidden_for_user_filter(user))
+		.collect::<Vec<WhereParam>>(),
 		[age_restrictions],
 	);
 
@@ -675,10 +668,13 @@ pub(crate) async fn put_media_complete_status(
 		.as_ref()
 		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
 	let media_where_params = chain_optional_iter(
-		[media::id::equals(id.clone())]
-			.into_iter()
-			.chain(apply_media_library_not_hidden_for_user_filter(user))
-			.collect::<Vec<WhereParam>>(),
+		[
+			media::id::equals(id.clone()),
+			media::deleted_at::equals(None),
+		]
+		.into_iter()
+		.chain(apply_media_library_not_hidden_for_user_filter(user))
+		.collect::<Vec<WhereParam>>(),
 		[age_restrictions],
 	);
 
@@ -775,8 +771,19 @@ pub(crate) async fn start_media_analysis(
 ) -> APIResult<()> {
 	req.enforce_permissions(&[UserPermission::ManageLibrary])?;
 
+	// TODO - Can we only get the ID? We just need to check media existence/non-deletion here.
+	let media = ctx
+		.db
+		.media()
+		.find_first(vec![media::id::equals(id), media::deleted_at::equals(None)])
+		.exec()
+		.await?
+		.ok_or(APIError::BadRequest(String::from(
+			"Media not found, unable to analyze media",
+		)))?;
+
 	// Start analysis job
-	ctx.enqueue_job(AnalyzeMediaJob::analyze_media_item(id))
+	ctx.enqueue_job(AnalyzeMediaJob::analyze_media_item(media.id))
 		.map_err(|e| {
 			let err = "Failed to enqueue analyze media job";
 			error!(?e, err);
@@ -867,7 +874,7 @@ async fn fetch_media_page_dimensions_with_permissions(
 
 	// Build where parameters to fetch the appropriate media
 	let where_params = chain_optional_iter(
-		[media::id::equals(id.clone())]
+		[media::id::equals(id), media::deleted_at::equals(None)]
 			.into_iter()
 			.chain(apply_media_library_not_hidden_for_user_filter(user))
 			.collect::<Vec<WhereParam>>(),

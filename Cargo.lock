@@ -7797,6 +7797,7 @@ dependencies = [
  "tower-http",
  "tower-sessions",
  "tracing",
+ "trash",
  "urlencoding",
  "utoipa",
  "utoipa-swagger-ui",

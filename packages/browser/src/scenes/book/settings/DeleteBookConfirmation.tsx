@@ -1,5 +1,5 @@
 import { useSDK } from '@stump/client'
-import { Alert, Button, CheckBox, Dialog, useBoolean } from '@stump/components'
+import { Alert, Button, Dialog } from '@stump/components'
 import { handleApiError } from '@stump/sdk'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router'

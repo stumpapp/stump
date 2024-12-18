@@ -11,10 +11,11 @@ use specta::Type;
 use stump_core::{
 	db::entity::{
 		macros::{
-			finished_reading_session_with_book_pages, reading_session_with_book_pages,
+			finished_reading_session_with_book_pages, media_id_select,
+			reading_session_with_book_pages,
 		},
-		ActiveReadingSession, FinishedReadingSession, Media, PageDimension,
-		PageDimensionsEntity, ProgressUpdateReturn, User, UserPermission,
+		ActiveReadingSession, FinishedReadingSession, Media, MediaMetadata,
+		PageDimension, PageDimensionsEntity, ProgressUpdateReturn, User, UserPermission,
 	},
 	filesystem::{analyze_media_job::AnalyzeMediaJob, get_page_async},
 	prisma::{
@@ -806,4 +807,116 @@ async fn fetch_media_page_dimensions_with_permissions(
 		))?;
 
 	Ok(dimensions_entity)
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/media/:id/metadata",
+	tag = "media",
+	params(
+		("id" = String, Path, description = "The ID of the media to get metadata for")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched media metadata"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Media metadata not available"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+/// Get the metadata for a media record
+pub(crate) async fn get_media_metadata(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+) -> APIResult<Json<Option<MediaMetadata>>> {
+	let db = &ctx.db;
+	let user = req.user();
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+	let where_params = chain_optional_iter(
+		[media::id::equals(id.clone())]
+			.into_iter()
+			.chain(apply_media_library_not_hidden_for_user_filter(user))
+			.collect::<Vec<WhereParam>>(),
+		[age_restrictions],
+	);
+
+	let meta = db
+		.media_metadata()
+		.find_first(vec![media_metadata::media::is(where_params)])
+		.exec()
+		.await?;
+
+	Ok(Json(meta.map(MediaMetadata::from)))
+}
+
+#[utoipa::path(
+	put,
+	path = "/api/v1/media/:id/metadata",
+	tag = "media",
+	params(
+		("id" = String, Path, description = "The ID of the media to update metadata for")
+	),
+	responses(
+		(status = 200, description = "Successfully updated media metadata"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Media metadata not available"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+/// Update the metadata for a media record. This is a full update, so any existing metadata
+/// will be replaced with the new metadata.
+pub(crate) async fn put_media_metadata(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+	Json(metadata): Json<MediaMetadata>,
+) -> APIResult<Json<MediaMetadata>> {
+	req.enforce_permissions(&[UserPermission::ManageLibrary])?;
+
+	let db = &ctx.db;
+	let user = req.user();
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+	let where_params = chain_optional_iter(
+		[media::id::equals(id.clone())]
+			.into_iter()
+			.chain(apply_media_library_not_hidden_for_user_filter(user))
+			.collect::<Vec<WhereParam>>(),
+		[age_restrictions],
+	);
+
+	let book = db
+		.media()
+		.find_first(where_params.clone())
+		.select(media_id_select::select())
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound(String::from("Media not found")))?;
+
+	let set_params = metadata.into_prisma();
+
+	let meta = db
+		.media_metadata()
+		.upsert(
+			media_metadata::media_id::equals(id.clone()),
+			set_params
+				.clone()
+				.into_iter()
+				.chain(vec![media_metadata::media::connect(media::id::equals(
+					book.id.clone(),
+				))])
+				.collect::<Vec<_>>(),
+			set_params.clone(),
+		)
+		.exec()
+		.await?;
+
+	Ok(Json(MediaMetadata::from(meta)))
 }

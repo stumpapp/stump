@@ -2,6 +2,7 @@
 
 _CONFIG_DIR=${CONFIG_DIR:="/tmp/stump-ci-config"}
 _CLIENT_DIR=${CLIENT_DIR:="apps/web/dist"}
+_DATA_DIR=${DATA_DIR:="/tmp/stump-ci-data"}
 
 # Ensure the web app is built before moving the dist folder
 if [ -z "$(ls -A apps/web/dist)" ]; then
@@ -13,6 +14,13 @@ fi
 if [ -f "${_CONFIG_DIR}/stump.db" ]; then
   echo "Removing the existing DB file"
   rm "${_CONFIG_DIR}/stump.db"
+fi
+
+# We clone https://github.com/stumpapp/test-files.git to get the test files
+# This is a public repo with test files for the server:
+if [ ! -d "${_DATA_DIR}" ]; then
+  echo "Cloning the test files"
+  git clone https://github.com/stumpapp/test-files.git "${_DATA_DIR}"
 fi
 
 # Start the server

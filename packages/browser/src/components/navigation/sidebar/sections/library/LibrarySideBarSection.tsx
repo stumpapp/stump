@@ -92,6 +92,7 @@ export default function LibrarySideBarSection({
 							to={paths.libraryCreate()}
 							isActive={location.pathname === paths.libraryCreate()}
 							variant="action"
+							data-testid="createLibraryButton"
 						>
 							{t('sidebar.buttons.createLibrary')}
 						</SideBarButtonLink>

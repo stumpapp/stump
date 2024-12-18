@@ -27,6 +27,7 @@ export default function ThemeSelect() {
 					{ label: t(`${localeKey}.options.pumpkin`), value: 'pumpkin' },
 				]}
 				onChange={(e) => changeTheme(e.target.value)}
+				data-testid="themeSelect"
 			/>
 			<Text variant="muted" size="xs">
 				{t(`${localeKey}.description.0`)}{' '}

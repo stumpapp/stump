@@ -1,4 +1,4 @@
-use crate::prisma::media_metadata;
+use crate::prisma::{media, media_metadata};
 
 media_metadata::select!(metadata_available_genre_select { genre });
 media_metadata::select!(metadata_available_writers_select { writers });

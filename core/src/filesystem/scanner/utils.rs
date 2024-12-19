@@ -244,6 +244,8 @@ pub(crate) struct MediaOperationOutput {
 	pub logs: Vec<JobExecuteLog>,
 }
 
+/// Handles missing media by updating the database with the latest information. A media is
+/// considered missing if it was previously marked as ready and is no longer found on disk.
 pub(crate) async fn handle_missing_media(
 	ctx: &WorkerCtx,
 	series_id: &str,
@@ -278,6 +280,51 @@ pub(crate) async fn handle_missing_media(
 				tracing::error!(error = ?error, "Failed to update missing media");
 				output.logs.push(JobExecuteLog::error(format!(
 					"Failed to update missing media: {:?}",
+					error.to_string()
+				)));
+				0
+			},
+			|count| {
+				output.updated_media += count as u64;
+				count
+			},
+		);
+
+	output
+}
+
+/// Handles restored media by updating the database with the latest information. A
+/// media is considered restored if it was previously marked as missing and has been
+/// found on disk.
+pub(crate) async fn handle_restored_media(
+	ctx: &WorkerCtx,
+	series_id: &str,
+	ids: Vec<String>,
+) -> MediaOperationOutput {
+	let mut output = MediaOperationOutput::default();
+
+	if ids.is_empty() {
+		tracing::debug!("No restored media to handle");
+		return output;
+	}
+
+	let _affected_rows = ctx
+		.db
+		.media()
+		.update_many(
+			vec![
+				media::series::is(vec![series::id::equals(series_id.to_string())]),
+				media::id::in_vec(ids),
+			],
+			vec![media::status::set(FileStatus::Ready.to_string())],
+		)
+		.exec()
+		.await
+		.map_or_else(
+			|error| {
+				tracing::error!(error = ?error, "Failed to restore recovered media");
+				output.logs.push(JobExecuteLog::error(format!(
+					"Failed to update recovered media: {:?}",
 					error.to_string()
 				)));
 				0

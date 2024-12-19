@@ -8,12 +8,20 @@ type Props = {
 	isDisabled?: boolean
 	icon: LucideIcon
 	children: React.ReactNode
+	'data-testid'?: string
 }
-export default function SettingsSideBarLink({ to, isActive, isDisabled, icon, children }: Props) {
+export default function SettingsSideBarLink({
+	to,
+	isActive,
+	isDisabled,
+	icon,
+	children,
+	...props
+}: Props) {
 	const Icon = icon
 
 	return (
-		<Link to={to} className={cn({ 'pointer-events-none': isDisabled })}>
+		<Link to={to} className={cn({ 'pointer-events-none': isDisabled })} {...props}>
 			<li
 				className={cn(
 					'flex items-center rounded-md px-2 py-1.5',

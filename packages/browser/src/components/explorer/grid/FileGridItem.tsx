@@ -45,6 +45,7 @@ export default function FileGridItem({ file }: Props) {
 			<button
 				className="group flex h-full w-32 flex-col items-center justify-center gap-y-1.5 focus:outline-none"
 				onDoubleClick={() => onSelect(file)}
+				data-testid="fileItem"
 			>
 				<FileThumbnail
 					path={path}

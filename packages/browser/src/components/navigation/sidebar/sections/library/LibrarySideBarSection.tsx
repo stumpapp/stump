@@ -62,6 +62,7 @@ export default function LibrarySideBarSection({
 					leftContent={canChange ? leftContent : undefined}
 					rightContent={<LibraryOptionsMenu library={library} />}
 					// onMouseEnter={() => prefetchLibrarySeries(library.id)}
+					data-testid="libraryLink"
 				>
 					{!canChange && leftContent}
 					{library.name}
@@ -92,7 +93,7 @@ export default function LibrarySideBarSection({
 							to={paths.libraryCreate()}
 							isActive={location.pathname === paths.libraryCreate()}
 							variant="action"
-							data-testid="createLibraryButton"
+							data-testid="createLibraryLink"
 						>
 							{t('sidebar.buttons.createLibrary')}
 						</SideBarButtonLink>

@@ -80,6 +80,7 @@ export default function LibrarySettingsSidebar() {
 												isActive={location.pathname.includes(to)}
 												isDisabled={disabled}
 												icon={icon}
+												data-testid="librarySettingsLink"
 											>
 												{withGroup(label)}
 											</SideBarLinkButton>

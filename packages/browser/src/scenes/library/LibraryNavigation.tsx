@@ -94,6 +94,7 @@ export default function LibraryNavigation() {
 							'border-edge-brand text-foreground-brand': tab.isActive,
 							'border-transparent text-foreground-muted hover:border-edge': !tab.isActive,
 						})}
+						data-testid={`libraryNavigation-${tab.to}`}
 					>
 						{tab.label}
 					</Link>

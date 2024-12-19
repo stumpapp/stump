@@ -81,6 +81,7 @@ export default function SeriesCard({ series, fullWidth, variant = 'default' }: S
 			fullWidth={fullWidth}
 			isCover={isCoverOnly}
 			{...overrides}
+			data-testid="seriesCard"
 		/>
 	)
 }

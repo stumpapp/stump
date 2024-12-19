@@ -182,6 +182,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 							className="w-full md:w-auto"
 							variant="primary"
 							isLoading={isLoading}
+							data-testid="createLibraryButton"
 						>
 							Create library
 						</Button>

@@ -156,6 +156,7 @@ export default function BookCard({
 			onMouseEnter={handleHover}
 			isCover={isCoverOnly}
 			{...propsOverrides}
+			data-testid="bookCard"
 		/>
 	)
 }

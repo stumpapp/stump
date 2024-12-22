@@ -384,7 +384,11 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 	let to_visit = media_to_visit.len();
 	tracing::trace!(?media_to_visit, "Found {to_visit} media to visit");
 
-	let skipped_files = valid_entries_len - (to_create - to_visit) as u64;
+	let skipped_files = seen_files - (to_create + to_visit) as u64;
+	tracing::trace!(
+		skipped_files,
+		"Skipped files: {seen_files} - ({to_create} + {to_visit})"
+	);
 
 	let is_missing = missing_media.len();
 	tracing::trace!(

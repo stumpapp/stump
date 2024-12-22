@@ -1,0 +1,81 @@
+name: Release desktop
+
+# Manual release with input version number
+on:
+  workflow_dispatch:
+    # inputs:
+    #   version:
+    #     description: Enter the release version (e.g., 0.1.0)
+    #     required: true
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  # This job builds the common webapp HTML/JS/CSS used for all platforms
+  build-webapp:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build web application/upload artifact
+        uses: ./.github/actions/build-web
+
+  # This job builds the binaries for each release
+  build-app:
+    needs: build-webapp
+    strategy:
+      matrix:
+        # Note: macos-13 is intel-based, macos-latest is M1-based
+        # See https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
+        os: [ubuntu-latest, macos-13, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            artifact_name: linux-artifact
+            artifact_filename: stump
+          - os: macos-13
+            artifact_name: macos-intel-artifact
+            artifact_filename: bundle/macos/Stump.app
+          - os: macos-latest
+            artifact_name: macos-arm-artifact
+            artifact_filename: bundle/macos/Stump.app
+          - os: windows-latest
+            artifact_name: windows-artifact
+            artifact_filename: bundle/win-unpacked/Stump.exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Copy bundled web app
+        uses: actions/download-artifact@v4
+        with:
+          name: webapp
+          path: ./apps/desktop/dist
+
+      - name: Build desktop app
+        uses: ./.github/actions/build-desktop
+
+      - name: Get target dir
+        id: get_target_dir
+        run: |
+          if [[ ${{ matrix.os }} == 'macos-latest' ]]; then
+            echo "ARCH_DIR=aarch64-apple-darwin" >> $GITHUB_ENV
+          elif [[ ${{ matrix.os }} == 'macos-13' ]]; then
+            echo "ARCH_DIR=x86_64-apple-darwin" >> $GITHUB_ENV
+          elif [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
+            echo "ARCH_DIR=x86_64-unknown-linux-gnu" >> $GITHUB_ENV
+          elif [[ ${{ matrix.os }} == 'windows-latest' ]]; then
+            echo "ARCH_DIR=x86_64-pc-windows-msvc" >> $GITHUB_ENV
+          fi
+
+      - name: Prepare artifact
+        run: mv target/release/${{ matrix.artifact_filename }} ./staging/${{ matrix.artifact_filename }}
+
+      - name: Upload server artifact
+        uses: ./.github/actions/upload-artifact
+        with:
+          upload-name: ${{ matrix.artifact_name }}
+          upload-path: staging
+# TODO Some kind of release creation step

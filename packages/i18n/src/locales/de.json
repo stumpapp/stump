@@ -7,7 +7,7 @@
 	},
 	"authScene": {
 		"claimHeading": "Server initialisieren",
-		"claimText": "Dieser Stump-Server ist noch nicht initialisiert. Benutze das untenstehende Formular, um ein Konto zu erstellen. Dieses erhält vollen Zugriff auf alle Serverfunktionen.",
+		"claimText": "This Stump server is not initialized. Use the form below to create your account. Once created, you will have full access to all server features.",
 		"form": {
 			"validation": {
 				"missingUsername": "Der Benutzername ist erforderlich",
@@ -367,6 +367,10 @@
 				"generateFileHashes": {
 					"label": "Datei-Hashes generieren",
 					"description": "Generiert einen Hash für jede Datei in der Bibliothek, um Duplikate zu erkennen"
+				},
+				"koreaderHashes": {
+					"label": "KoReader-compatible hashes",
+					"description": "If using KoReader, generate additional hashes in the format it expects"
 				}
 			},
 			"libraryPattern": {
@@ -455,6 +459,29 @@
 			"buttons": {
 				"confirm": "Bibliothek erstellen"
 			}
+		}
+	},
+	"fileExplorer": {
+		"uploadModal": {
+			"title": {
+				"books": "Upload books",
+				"series": "Upload series"
+			},
+			"description": {
+				"books": "Add books directly to the current path in the file explorer",
+				"series": "Add a series directly to the current path in the file explorer"
+			},
+			"seriesDisclaimer": [
+				"It must be a ",
+				"zipped file",
+				"containing the folder which should be the series, with all the books inside"
+			],
+			"dropzone": {
+				"books": "Drag and drop books here",
+				"series": "Drag and drop a zip file here",
+				"alt": "Or click to browse your computer for books to upload"
+			},
+			"addedFiles": "Added files"
 		}
 	},
 	"librarySettingsScene": {
@@ -574,24 +601,24 @@
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "Weiterlesen",
+			"title": "Continue reading",
 			"emptyState": {
-				"heading": "Keine Bücher zum Anzeigen",
-				"message": "Alle Bücher, die du gerade liest, werden hier angezeigt"
+				"heading": "Nothing to show",
+				"message": "Any in-progress books you start will show up here"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Kürzlich hinzugefügte Serie",
+			"title": "Recently added series",
 			"emptyState": {
 				"heading": "Keine Serie zur Ansicht vorhanden",
 				"message": "Alle Serien, die du zu deinen Bibliotheken hinzufügst, werden hier angezeigt"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Kürzlich hinzugefügte Bücher",
+			"title": "Recently added books",
 			"emptyState": {
-				"heading": "Keine Bücher zur Ansicht vorhanden",
-				"message": "Alle Bücher, die du zu deinen Bibliotheken hinzufügst, werden hier angezeigt"
+				"heading": "Nothing to show",
+				"message": "Any recent books you add will show up here"
 			}
 		}
 	},
@@ -816,6 +843,36 @@
 			}
 		}
 	},
+	"createOrUpdateApiKey": {
+		"validation": {
+			"futureDate": "Expiration date must be in the future"
+		},
+		"fields": {
+			"name": {
+				"label": "Name",
+				"placeholder": "Koreader Sync"
+			},
+			"expiration": {
+				"label": "Expiration",
+				"placeholder": "Never"
+			},
+			"expires_at": {
+				"label": "Expires at",
+				"placeholder": "Never"
+			},
+			"permissions": {
+				"inherit": {
+					"label": "Inherit permissions",
+					"description": "The same permissions as your account"
+				},
+				"explicit": {
+					"label": "Explicit permissions",
+					"description": "Choose the permissions this key should have"
+				}
+			}
+		},
+		"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting"
+	},
 	"userSmartListsScene": {
 		"heading": "Intelligente Listen",
 		"subtitle": "Deine bevorzugten Suchen und Filter, die zum einfachen Zugriff gespeichert wurden",
@@ -980,6 +1037,7 @@
 			"application": {
 				"account": "Konto",
 				"appearance": "Darstellung",
+				"api keys": "API keys",
 				"reader": "Reader",
 				"desktop": "Desktop",
 				"label": "Anwendung"
@@ -1101,6 +1159,62 @@
 				}
 			}
 		},
+		"app/apiKeys": {
+			"helmet": "API keys",
+			"title": "API keys",
+			"description": "Manage your generated Stump API keys",
+			"shared": {
+				"fields": {
+					"name": "Name",
+					"expiration": "Expiration",
+					"last_used": "Last used",
+					"created": "Created",
+					"permissions": "Permissions",
+					"inherited": "Inherited",
+					"explicit": "Explicit"
+				}
+			},
+			"sections": {
+				"inspector": {
+					"heading": "API key",
+					"description": "A detailed view of this key",
+					"unrestrictedKey": {
+						"heading": "Unrestricted key",
+						"description": "Since you are the server owner, this key has unrestricted access when configured to inherit permissions. Please be careful."
+					}
+				},
+				"createKey": {
+					"modal": {
+						"trigger": "Create API key",
+						"heading": {
+							"creating": "Create API key",
+							"created": "Created key"
+						},
+						"description": {
+							"creating": "API keys are long-lived credentials that can be used to authenticate with the API",
+							"created": "Your new API key has been created. Save the secret somewhere safe, as it will not be shown again"
+						},
+						"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting",
+						"createdKey": "Created key",
+						"savedConfirm": "I saved my key",
+						"submit": "Create key"
+					}
+				},
+				"table": {
+					"title": "Your keys",
+					"description": "These are the API keys you have created",
+					"actionMenu": {
+						"inspect": "Inspect",
+						"delete": "Delete"
+					},
+					"empty": {
+						"title": "You haven't created any keys yet",
+						"action": "Create an API key to get started"
+					},
+					"noExpiration": "No expiration set"
+				}
+			}
+		},
 		"app/reader": {
 			"helmet": "Reader-Einstellungen",
 			"title": "Reader-Einstellungen",
@@ -1130,6 +1244,7 @@
 				"configuredServers": {
 					"label": "Konfigurierte Server",
 					"description": "Liste der Stump-Server, mit denen sich verbunden werden kann",
+					"getStarted": "Add a server to get started",
 					"unreachableServer": {
 						"tooltip": "Server nicht erreichbar"
 					},
@@ -1199,6 +1314,19 @@
 							"description": "Dadurch werden alle Server von der Desktopanwendung entfernt",
 							"disclaimer": "Du wirst ausgeloggt und musst im Initialisierungsprozess erneut einen Server konfigurieren",
 							"confirm": "Alle Server löschen"
+						}
+					},
+					"resetTokens": {
+						"label": "Clear authentication",
+						"description": [
+							"Remove all securely-stored access tokens for your servers",
+							"You will have to re-authenticate with each server"
+						],
+						"confirmation": {
+							"trigger": "Clear authentication",
+							"title": "Clear authentication",
+							"description": "This will remove all securely-stored access tokens for your servers",
+							"confirm": "Clear authentication"
 						}
 					}
 				},
@@ -1352,6 +1480,17 @@
 							"description": "Erlaubt dem Benutzer, neue Buchclubs zu erstellen"
 						}
 					},
+					"feature": {
+						"label": "Feature Opt-In",
+						"api_keys": {
+							"label": "API keys",
+							"description": "Allow the user to manage their own API keys"
+						},
+						"koreader_sync": {
+							"label": "KoReader sync",
+							"description": "Allow the user to access the KoReader sync integration"
+						}
+					},
 					"file": {
 						"label": "Dateiverwaltung",
 						"explorer": {
@@ -1479,7 +1618,7 @@
 				},
 				"devices": {
 					"title": "E-Mail Geräte",
-					"description": "Die Gerätealiase, die konfiguriert wurden, um E-Mails von dieser Stump-Serverinstanz zu erhalten",
+					"description": "The device aliases you have configured for receiving emails from your Stump server instance",
 					"addDevice": "Gerätealias hinzufügen",
 					"addOrUpdateDevice": {
 						"title": {
@@ -1640,7 +1779,7 @@
 		},
 		"libraryOptions": {
 			"scanLibrary": "Scannen",
-			"fileExplorer": "Dateiexplorer",
+			"fileExplorer": "Files",
 			"manageLibrary": "Einstellungen",
 			"deleteLibrary": "Löschen"
 		},
@@ -1707,13 +1846,18 @@
 		"create": "Erstellen",
 		"edit": "Bearbeiten",
 		"update": "Aktualisieren",
+		"upload": "Upload",
+		"uploading": "Uploading",
 		"unimplemented": "Diese Funktion ist noch nicht implementiert! Schaue später wieder vorbei",
 		"limitedFunctionality": "Das hier ist noch nicht vollständig implementiert und es fehlen noch ein paar Funktionen! Schaue später wieder vorbei",
 		"logIn": "Anmelden",
 		"login": "Login",
 		"seeError": "Fehler anzeigen",
+		"remove": "Remove",
 		"goBack": "Gehe zurück",
 		"goToServers": "Gehe zu Servern",
-		"notReady": "Diese Funktion ist noch nicht bereit"
+		"notReady": "Diese Funktion ist noch nicht bereit",
+		"notUsedYet": "Not used yet",
+		"never": "Never"
 	}
 }

@@ -1,6 +1,5 @@
-/* eslint-disable react/prop-types */
 import * as SeparatorPrimitive from '@radix-ui/react-separator'
-import React from 'react'
+import { type ComponentPropsWithoutRef, type ElementRef, forwardRef } from 'react'
 
 import { cn } from '../utils'
 
@@ -11,9 +10,9 @@ export const DIVIDER_VARIANTS = {
 
 export type DividerProps = {
 	variant?: keyof typeof DIVIDER_VARIANTS
-} & React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>
+} & ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>
 
-const Divider = React.forwardRef<React.ElementRef<typeof SeparatorPrimitive.Root>, DividerProps>(
+const Divider = forwardRef<ElementRef<typeof SeparatorPrimitive.Root>, DividerProps>(
 	(
 		{ className, orientation = 'horizontal', decorative = true, variant = 'default', ...props },
 		ref,

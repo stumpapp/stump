@@ -30,7 +30,7 @@ use super::{
 		safely_build_and_insert_media, safely_build_series, visit_and_update_media,
 		MediaBuildOperation, MediaOperationOutput, MissingSeriesOutput,
 	},
-	walk_library, walk_series, WalkedLibrary, WalkedSeries, WalkerCtx,
+	walk_library, walk_series, ScanOptions, WalkedLibrary, WalkedSeries, WalkerCtx,
 };
 
 /// The task variants that are used to scan a library
@@ -58,15 +58,21 @@ pub struct InitTaskInput {
 pub struct LibraryScanJob {
 	pub id: String,
 	pub path: String,
-	pub options: Option<LibraryConfig>,
+	pub config: Option<LibraryConfig>,
+	pub options: ScanOptions,
 }
 
 impl LibraryScanJob {
-	pub fn new(id: String, path: String) -> Box<WrappedJob<LibraryScanJob>> {
+	pub fn new(
+		id: String,
+		path: String,
+		options: Option<ScanOptions>,
+	) -> Box<WrappedJob<LibraryScanJob>> {
 		WrappedJob::new(Self {
 			id,
 			path,
-			options: None,
+			config: None,
+			options: options.unwrap_or_default(),
 		})
 	}
 }
@@ -125,7 +131,7 @@ impl JobExt for LibraryScanJob {
 		ctx: &WorkerCtx,
 	) -> Result<WorkingState<Self::Output, Self::Task>, JobError> {
 		let mut output = Self::Output::default();
-		// Note: We ignore the potential self.options here in the event that it was
+		// Note: We ignore the potential self.config here in the event that it was
 		// updated since being queued. This is perhaps a bit overly cautious, but it's
 		// just one additional query.
 		let library_config = ctx
@@ -142,7 +148,7 @@ impl JobExt for LibraryScanJob {
 		let is_collection_based = library_config.is_collection_based();
 		let ignore_rules = library_config.ignore_rules.build()?;
 
-		self.options = Some(library_config);
+		self.config = Some(library_config);
 
 		ctx.report_progress(JobProgress::msg("Performing task discovery"));
 		let WalkedLibrary {
@@ -159,6 +165,7 @@ impl JobExt for LibraryScanJob {
 				db: ctx.db.clone(),
 				ignore_rules,
 				max_depth: is_collection_based.then_some(1),
+				options: self.options.clone(),
 			},
 		)
 		.await?;
@@ -232,7 +239,7 @@ impl JobExt for LibraryScanJob {
 		let did_create = output.created_series > 0 || output.created_media > 0;
 		let did_update = output.updated_series > 0 || output.updated_media > 0;
 		let image_options = self
-			.options
+			.config
 			.as_ref()
 			.and_then(|o| o.thumbnail_config.clone());
 
@@ -444,13 +451,19 @@ impl JobExt for LibraryScanJob {
 				// If the library is not collection-priority, each subdirectory is its own series.
 				// Therefore, we only scan one level deep when walking a series whose library is not
 				// collection-priority to avoid scanning duplicates which are part of other series
-				let max_depth = self
-					.options
+				let mut max_depth = self
+					.config
 					.as_ref()
 					.and_then(|o| (!o.is_collection_based()).then_some(1));
+				if path_buf == PathBuf::from(&self.path) {
+					// The exception is when the series "is" the libray (i.e. the root of the library contains
+					// books). This is kind of an anti-pattern wrt collection-priority, but it needs to be handled
+					// in order to avoid the scanner re-scanning the entire library...
+					max_depth = Some(1);
+				}
 
 				let Some(Ok(ignore_rules)) =
-					self.options.as_ref().map(|o| o.ignore_rules.build())
+					self.config.as_ref().map(|o| o.ignore_rules.build())
 				else {
 					// Note: This failure will likely affect ALL other tasks, so we are halting the job here
 					return Err(JobError::TaskFailed(
@@ -465,6 +478,7 @@ impl JobExt for LibraryScanJob {
 						db: ctx.db.clone(),
 						ignore_rules,
 						max_depth,
+						options: self.options.clone(),
 					},
 				)
 				.await;
@@ -606,7 +620,7 @@ impl JobExt for LibraryScanJob {
 					} = safely_build_and_insert_media(
 						MediaBuildOperation {
 							series_id: series_id.clone(),
-							library_config: self.options.clone().unwrap_or_default(),
+							library_config: self.config.clone().unwrap_or_default(),
 							max_concurrency,
 						},
 						ctx,
@@ -636,7 +650,7 @@ impl JobExt for LibraryScanJob {
 					} = visit_and_update_media(
 						MediaBuildOperation {
 							series_id: series_id.clone(),
-							library_config: self.options.clone().unwrap_or_default(),
+							library_config: self.config.clone().unwrap_or_default(),
 							max_concurrency,
 						},
 						ctx,

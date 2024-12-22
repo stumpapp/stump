@@ -1,6 +1,5 @@
 import { Button, cx } from '@stump/components'
 import { SortAsc } from 'lucide-react'
-import React from 'react'
 
 type Direction = 'asc' | 'desc'
 type Props = {

@@ -7,7 +7,7 @@ import {
 	SortingState,
 	useReactTable,
 } from '@tanstack/react-table'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { getTableModels, SortIcon } from '@/components/table'

@@ -27,7 +27,7 @@ export default function FilterGroup({ idx, group }: Props) {
 	return (
 		<FilterGroupContext.Provider value={{ groupIdx: idx }}>
 			<Card className="ml-4">
-				<div className=" flex flex-col">
+				<div className="flex flex-col">
 					{!group.filters.length && (
 						<div className="p-4">
 							<FieldSelector idx={0} />

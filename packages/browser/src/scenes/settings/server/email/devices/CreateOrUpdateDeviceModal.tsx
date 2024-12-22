@@ -8,7 +8,7 @@ import {
 import { Button, CheckBox, Dialog, Form, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { RegisteredEmailDevice } from '@stump/sdk'
-import React, { useEffect, useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { z } from 'zod'
@@ -66,7 +66,7 @@ export default function CreateOrUpdateDeviceModal({ isOpen, updatingDevice, onCl
 		await invalidateQueries({ keys: [sdk.emailer.keys.getDevices] })
 	}
 
-	const onOpenChange = (nowOpen: boolean) => (nowOpen ? onClose() : null)
+	const onOpenChange = (nowOpen: boolean) => (!nowOpen ? onClose() : null)
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onOpenChange}>

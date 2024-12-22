@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native'
 import { useMediaCursorQuery } from '@stump/client'
-import React, { useCallback } from 'react'
+import { useCallback } from 'react'
 import { FlatList } from 'react-native'
 
 import { ScreenRootView, View } from '@/components'

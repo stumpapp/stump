@@ -26,27 +26,26 @@ export default function NativePDFViewer({ id }: Props) {
 	 * An effect that fetches the PDF and creates an object URL for it.
 	 * When the component unmounts, the object URL is revoked.
 	 */
-	useEffect(
-		() => {
-			async function fetchPdf() {
-				const response = await fetch(sdk.media.downloadURL(id), {
-					credentials: 'include',
-				})
-				const blob = await response.blob()
-				const arrayBuffer = await blob.arrayBuffer()
-				setPdfObjectUrl(URL.createObjectURL(new Blob([arrayBuffer], { type: 'application/pdf' })))
-			}
-			fetchPdf()
+	useEffect(() => {
+		async function fetchPdf() {
+			const response = await fetch(sdk.media.downloadURL(id), {
+				credentials: 'include',
+			})
+			const blob = await response.blob()
+			const arrayBuffer = await blob.arrayBuffer()
+			setPdfObjectUrl(URL.createObjectURL(new Blob([arrayBuffer], { type: 'application/pdf' })))
+		}
 
-			return () => {
-				if (pdfObjectUrl) {
-					URL.revokeObjectURL(pdfObjectUrl)
-				}
+		if (!pdfObjectUrl) {
+			fetchPdf()
+		}
+
+		return () => {
+			if (pdfObjectUrl) {
+				URL.revokeObjectURL(pdfObjectUrl)
 			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[],
-	)
+		}
+	}, [sdk, id, pdfObjectUrl])
 
 	// TODO: consider some sort of loading state here
 	if (!pdfObjectUrl) {

@@ -1,7 +1,7 @@
 import { usePrefetchListItems } from '@stump/client'
 import { cn, Link } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
 import { usePreferences } from '@/hooks'

@@ -2,7 +2,7 @@ import { useSDK } from '@stump/client'
 import { Accordion, cn, Text } from '@stump/components'
 import { Media } from '@stump/sdk'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import React from 'react'
+import { useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
 
 import { EntityImage } from '@/components/entity'
@@ -19,11 +19,11 @@ type Props = {
 
 export default function GroupedSmartListItemListGroupContent({ books }: Props) {
 	const { sdk } = useSDK()
-	const scrollRef = React.useRef<HTMLDivElement>(null)
+	const scrollRef = useRef<HTMLDivElement>(null)
 
 	const rowVirtualizer = useVirtualizer({
 		count: books.length,
-		estimateSize: React.useCallback(() => ACCORDION_CONTENT_ITEM_HEIGHT, []),
+		estimateSize: useCallback(() => ACCORDION_CONTENT_ITEM_HEIGHT, []),
 		getScrollElement: () => scrollRef.current,
 		overscan: 5,
 	})

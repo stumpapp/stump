@@ -1,4 +1,4 @@
-import React, { lazy, useEffect } from 'react'
+import { lazy, useEffect } from 'react'
 import { Navigate, Route, Routes, useNavigate } from 'react-router'
 
 import { useAppContext } from '@/context'

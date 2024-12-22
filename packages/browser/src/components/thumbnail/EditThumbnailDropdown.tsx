@@ -1,7 +1,7 @@
 import { Button, DropdownMenu } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { ChevronDown } from 'lucide-react'
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { useAppContext } from '@/context'
 

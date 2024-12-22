@@ -1,6 +1,5 @@
 import { Input, TextArea } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import { SmartListFormSchema } from '../schema'

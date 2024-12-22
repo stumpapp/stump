@@ -92,7 +92,7 @@ export default function LibraryBooksScene() {
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[shouldScroll],
+		[isInView, shouldScroll],
 	)
 
 	const renderContent = () => {

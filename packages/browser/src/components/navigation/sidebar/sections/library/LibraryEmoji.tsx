@@ -1,7 +1,6 @@
 import { useUpdateLibrary } from '@stump/client'
 import { EmojiPicker } from '@stump/components'
 import { Library } from '@stump/sdk'
-import React from 'react'
 
 type Props = {
 	emoji?: string

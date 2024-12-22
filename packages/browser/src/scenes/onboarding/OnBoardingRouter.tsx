@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react'
+import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
 const OnBoardingScene = lazy(() => import('./OnBoardingScene'))

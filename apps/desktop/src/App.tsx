@@ -51,7 +51,6 @@ function App() {
 			try {
 				const currentServer = await store.get<SavedServer>('active_server')
 				if (token && currentServer) {
-					console.debug('Saving API token for', currentServer.name)
 					await tauriRPC.setApiToken(currentServer.name, token)
 				}
 			} catch (err) {
@@ -82,7 +81,7 @@ function App() {
 	return (
 		<StumpWebClient
 			platform={platform}
-			authMethod={platform === 'windows' ? 'token' : 'session'}
+			authMethod="token"
 			baseUrl={baseURL}
 			tauriRPC={tauriRPC}
 			onAuthenticated={handleAuthenticated}

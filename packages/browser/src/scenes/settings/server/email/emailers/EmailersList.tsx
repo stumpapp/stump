@@ -2,7 +2,6 @@ import { useEmailersQuery } from '@stump/client'
 import { ButtonOrLink, Card, Heading } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { CircleSlash2 } from 'lucide-react'
-import React from 'react'
 
 import paths from '@/paths'
 

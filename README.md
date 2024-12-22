@@ -64,7 +64,7 @@ Things you can expect to see afterwards:
 - 🖥️ Cross-platform desktop app _(Windows, Mac, Linux)_
 - 📖 [Tachiyomi](https://github.com/stumpapp/tachiyomi-extensions) support
 - 📱 In-house mobile app _(Android, iOS)_
-- 🔎 Versitile full-text search _(blocked by [prisma#9414](https://github.com/prisma/prisma/issues/9414))_
+- 🔎 Versatile full-text search _(blocked by [prisma#9414](https://github.com/prisma/prisma/issues/9414))_
 - 👥 Configurable book clubs _(see [this issue](https://github.com/stumpapp/stump/issues/120))_
 
 Feel free to reach out if you have anything else you'd like to see!

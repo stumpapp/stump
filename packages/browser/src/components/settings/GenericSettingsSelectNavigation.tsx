@@ -1,6 +1,6 @@
 import { NativeSelect } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React, { ComponentProps, useMemo } from 'react'
+import { ComponentProps, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
 import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'

@@ -1,7 +1,7 @@
 import { Button, cx, Dialog, IconButton, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { X } from 'lucide-react'
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { type FileRejection, useDropzone } from 'react-dropzone'
 import toast from 'react-hot-toast'
 

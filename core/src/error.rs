@@ -25,7 +25,7 @@ pub enum CoreError {
 	#[error("{0}")]
 	EmailerError(#[from] email::EmailError),
 	#[error("Query error: {0}")]
-	QueryError(#[from] prisma_client_rust::queries::QueryError),
+	QueryError(#[from] Box<prisma_client_rust::QueryError>),
 	#[error("Invalid query error: {0}")]
 	InvalidQuery(String),
 	#[error("Invalid usage of query result, failed to load relation: {0}")]
@@ -54,6 +54,12 @@ pub enum CoreError {
 	UnImplemented(String),
 	#[error("An object failed to (de)serialize: {0}")]
 	SerdeFailure(#[from] serde_json::Error),
-	#[error("An unknown error ocurred: {0}")]
+	#[error("An unknown error occurred: {0}")]
 	Unknown(String),
+}
+
+impl From<prisma_client_rust::QueryError> for CoreError {
+	fn from(error: prisma_client_rust::QueryError) -> Self {
+		Self::QueryError(Box::new(error))
+	}
 }

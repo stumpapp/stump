@@ -13,12 +13,15 @@ jobs:
       changes: ${{ steps.filter.outputs.changes }}
       frontend-changed: ${{ steps.filter.outputs.frontend == 'true' }}
       rust-changed: ${{ steps.filter.outputs.rust == 'true' }}
+      docs-changed: ${{ steps.filter.outputs.docs == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v2
         id: filter
         with:
           filters: |
+            docs:
+              - './docs/**'
             frontend:
               - './apps/web/**'
               - './apps/desktop/src/**'
@@ -100,9 +103,21 @@ jobs:
       - name: Run TypeScript lints
         run: yarn lint
 
-      # TODO: Figure out how to run tests in parallel, I don't really want to upgrade to berry which
-      # means perhaps lerna is the only option? It isn't a big deal now since there is really only one
-      # package that defines tests, but this will change over time
       - name: Run TypeScript tests
         run: yarn test
-        working-directory: ./packages/browser
+
+  # TODO(ci): Add vercel dev deployment?
+  check-docs:
+    needs: code-changes-check
+    if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.docs-changed == 'true'"
+    name: Check documentation
+    runs-on: [ubuntu-22.04]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node and Yarn
+        uses: ./.github/actions/setup-yarn
+
+      - name: Build documentation app
+        run: yarn docs build

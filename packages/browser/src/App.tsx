@@ -45,18 +45,13 @@ function RouterContainer(props: StumpClientProps) {
 		setPlatform: store.setPlatform,
 	}))
 
-	useEffect(
-		() => {
-			if (!baseUrl && props.baseUrl) {
-				setBaseUrl(props.baseUrl)
-			}
+	useEffect(() => {
+		if (!baseUrl && props.baseUrl) {
+			setBaseUrl(props.baseUrl)
+		}
 
-			setMounted(true)
-		},
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[baseUrl],
-	)
+		setMounted(true)
+	}, [baseUrl, props.baseUrl, setBaseUrl])
 
 	useEffect(() => {
 		setPlatform(props.platform)
@@ -82,7 +77,7 @@ function RouterContainer(props: StumpClientProps) {
 		})
 	}
 
-	const handleUnathenticatedResponse = (redirectUrl?: string) => {
+	const handleUnauthenticatedResponse = (redirectUrl?: string) => {
 		props.onUnauthenticatedResponse?.(redirectUrl)
 		setUser(null)
 		if (redirectUrl) {
@@ -101,7 +96,7 @@ function RouterContainer(props: StumpClientProps) {
 
 	return (
 		<StumpClientContextProvider
-			onUnauthenticatedResponse={handleUnathenticatedResponse}
+			onUnauthenticatedResponse={handleUnauthenticatedResponse}
 			onConnectionWithServerChanged={handleConnectionWithServerChanged}
 			tauriRPC={props.tauriRPC}
 			onAuthenticated={props.onAuthenticated}

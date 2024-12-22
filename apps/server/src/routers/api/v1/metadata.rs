@@ -98,7 +98,7 @@ async fn get_metadata_overview(
 
 			let genres = get_genres(&client, &where_conditions).await?;
 			let writers = get_writers(&client, &where_conditions).await?;
-			let pencillers = get_pencllers(&client, &where_conditions).await?;
+			let pencillers = get_pencillers(&client, &where_conditions).await?;
 			let inkers = get_inkers(&client, &where_conditions).await?;
 			let colorists = get_colorists(&client, &where_conditions).await?;
 			let letterers = get_letterers(&client, &where_conditions).await?;
@@ -207,7 +207,7 @@ async fn get_writers_handler(
 	))
 }
 
-async fn get_pencllers(
+async fn get_pencillers(
 	client: &PrismaClient,
 	where_conditions: &[media_metadata::WhereParam],
 ) -> APIResult<Vec<String>> {
@@ -244,7 +244,7 @@ async fn get_pencillers_handler(
 ) -> APIResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	Ok(Json(
-		get_pencllers(&ctx.db, &apply_media_metadata_filters(filters)).await?,
+		get_pencillers(&ctx.db, &apply_media_metadata_filters(filters)).await?,
 	))
 }
 

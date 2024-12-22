@@ -1,21 +1,21 @@
 import { useUpdateSmartList } from '@stump/client'
 import { CreateOrUpdateSmartList } from '@stump/sdk'
-import React, { Suspense, useCallback } from 'react'
+import { lazy, Suspense, useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
 import { useSmartListContext } from '../context'
 import { SmartListSettingsContext } from './context'
 
-const BasicSettingsScene = React.lazy(() => import('./basics'))
-const AccessSettingsScene = React.lazy(() => import('./access'))
-const FiltersSettingsScene = React.lazy(() => import('./filters'))
-const DangerSettingsScene = React.lazy(() => import('./danger'))
+const BasicSettingsScene = lazy(() => import('./basics'))
+const AccessSettingsScene = lazy(() => import('./access'))
+const FiltersSettingsScene = lazy(() => import('./filters'))
+const DangerSettingsScene = lazy(() => import('./danger'))
 
 export default function SmartListSettingsRouter() {
 	const { list } = useSmartListContext()
 	const { update } = useUpdateSmartList({ id: list.id })
 
-	// TODO: This is particularly fallible. It would be a lot wiser to eventually just.. yknow, literally
+	// TODO: This is particularly fallible. It would be a lot wiser to eventually just.. y'know, literally
 	// implement a patch endpoint lol. I'm being very lazy but I'll get to it. I'm tired!
 	/**
 	 * A pseudo-patch function which will update the list, mixing what is present in the cache

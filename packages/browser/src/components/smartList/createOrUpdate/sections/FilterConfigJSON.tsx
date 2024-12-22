@@ -1,5 +1,5 @@
-import { Accordion, Text } from '@stump/components'
-import React, { useMemo } from 'react'
+import { Accordion, Preformatted, Text } from '@stump/components'
+import { useMemo } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
 import { FilterGroupSchema, intoAPIFilters, SmartListFormSchema } from '../schema'
@@ -19,7 +19,6 @@ export default function FilterConfigJSON() {
 			}),
 		[groups, joiner],
 	)
-	const formattedFilters = useMemo(() => JSON.stringify(apiFilters, null, 2), [apiFilters])
 
 	return (
 		<Accordion type="single" collapsible>
@@ -32,8 +31,8 @@ export default function FilterConfigJSON() {
 						</Text>
 					</div>
 				</Accordion.Trigger>
-				<Accordion.Content className="rounded-md bg-background-surface p-4">
-					<pre className="text-xs text-foreground-subtle">{formattedFilters}</pre>
+				<Accordion.Content>
+					<Preformatted content={apiFilters} />
 				</Accordion.Content>
 			</Accordion.Item>
 		</Accordion>

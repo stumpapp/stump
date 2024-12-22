@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { useFilterContext } from './context'
 import FilterDisplay from './FilterDisplay'
 import FilterSlideOver from './FilterSlideOver'

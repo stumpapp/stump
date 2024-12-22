@@ -1,6 +1,7 @@
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox'
 import { cva, VariantProps } from 'class-variance-authority'
 import { Check } from 'lucide-react'
+import type { ComponentPropsWithoutRef, ElementRef } from 'react'
 import React from 'react'
 
 import { cn } from '../../utils'
@@ -35,9 +36,9 @@ export const checkboxVariants = cva(RAW_CHECKBOX_BASE_CLASSES, {
 	},
 })
 
-export type RawCheckBoxRef = React.ElementRef<typeof CheckboxPrimitive.Root>
+export type RawCheckBoxRef = ElementRef<typeof CheckboxPrimitive.Root>
 export type RawCheckBoxProps = VariantProps<typeof checkboxVariants> &
-	React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
+	ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
 
 export const RawCheckBox = React.forwardRef<RawCheckBoxRef, RawCheckBoxProps>(
 	({ className, variant, size, rounded, ...props }, ref) => (

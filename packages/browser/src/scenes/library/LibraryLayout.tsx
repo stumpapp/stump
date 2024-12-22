@@ -1,6 +1,6 @@
 import { useLibraryByID, useLibraryStats } from '@stump/client'
 import { cn } from '@stump/components'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { Suspense, useEffect } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'

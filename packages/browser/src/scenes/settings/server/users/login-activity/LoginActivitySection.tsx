@@ -1,5 +1,4 @@
 import { Heading, Text } from '@stump/components'
-import React from 'react'
 
 import ClearActivitySection from './ClearActivitySection'
 import LoginActivityTable from './LoginActivityTable'

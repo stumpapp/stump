@@ -1,12 +1,14 @@
 {
 	"name": "@stump/client",
-	"version": "0.0.7",
+	"version": "0.0.9",
 	"private": true,
 	"main": "src/index.ts",
 	"exports": {
 		".": "./src/index.ts"
 	},
 	"scripts": {
+		"check-types": "tsc -b tsconfig.json",
+		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
 		"nuke": "yarn exec rimraf node_modules"
 	},
 	"dependencies": {

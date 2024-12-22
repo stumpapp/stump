@@ -2,6 +2,7 @@ import { APIBase } from '../base'
 import {
 	Media,
 	MediaFilter,
+	MediaMetadata,
 	Pageable,
 	PatchMediaThumbnail,
 	ProgressUpdateReturn,
@@ -35,7 +36,7 @@ export class MediaAPI extends APIBase {
 	 * Fetch media and maintain a cursor
 	 */
 	async getCursor(params: CursorQueryParams): Promise<Pageable<Media[]>> {
-		const { data: media } = await this.axios.get<Pageable<Media[]>>(mediaURL('cursor', params))
+		const { data: media } = await this.axios.get<Pageable<Media[]>>(mediaURL('', params))
 		return media
 	}
 
@@ -148,6 +149,27 @@ export class MediaAPI extends APIBase {
 	}
 
 	/**
+	 * Fetch the metadata of a media entity
+	 *
+	 * @param id The ID of the media entity
+	 */
+	async getMeta(id: string): Promise<MediaMetadata | null> {
+		const { data: meta } = await this.axios.get<MediaMetadata>(mediaURL(`${id}/metadata`))
+		return meta
+	}
+
+	/**
+	 * Update the metadata of a media entity. If the metadata does not exist, it will be created.
+	 *
+	 * @param id The ID of the media entity
+	 * @param payload The metadata to update or create
+	 */
+	async updateMeta(id: string, payload: MediaMetadata): Promise<MediaMetadata> {
+		const { data: updatedMeta } = await this.axios.put(mediaURL(`${id}/metadata`), payload)
+		return updatedMeta
+	}
+
+	/**
 	 * The keys for the media API, used for query caching on a client (e.g. react-query)
 	 */
 	get keys(): ClassQueryKeys<InstanceType<typeof MediaAPI>> {
@@ -164,6 +186,8 @@ export class MediaAPI extends APIBase {
 			recentlyAdded: 'media.recentlyAdded',
 			updateProgress: 'media.updateProgress',
 			uploadThumbnail: 'media.uploadThumbnail',
+			getMeta: 'media.getMeta',
+			updateMeta: 'media.updateMeta',
 		}
 	}
 }

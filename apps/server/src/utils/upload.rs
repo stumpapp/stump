@@ -4,18 +4,23 @@ use stump_core::filesystem::ContentType;
 
 use crate::errors::{APIError, APIResult};
 
+pub struct FileUploadData {
+	pub content_type: ContentType,
+	pub bytes: Vec<u8>,
+}
+
 // TODO: it would be a great enhancement to allow hookup of a malware scanner here, e.g. clamav
 /// A helper function to validate and stream the bytes of an image upload from multipart form data, represented
-/// by [Multipart]. This function will return the content type of the uploaded image if it is valid.
+/// by [`Multipart`]. This function will return the content type of the uploaded image if it is valid.
 pub async fn validate_and_load_image(
 	upload: &mut Multipart,
 	max_size: Option<usize>,
-) -> APIResult<(ContentType, Vec<u8>)> {
+) -> APIResult<FileUploadData> {
 	validate_and_load_upload(upload, max_size, ContentType::is_image, Some("image")).await
 }
 
 /// An internal helper function to validate and load a generic upload.
-/// The validator will load an image from multipart form data ([Multipart]) and check that it
+/// The validator will load an image from multipart form data ([`Multipart`]) and check that it
 /// is not larger than the `max_size`. Then, it will check that the `ContentType` information from
 /// the header and/or magic numbers in the first 5 bytes of the file match the expected type using
 /// the provided `is_valid_content_type` function.
@@ -27,14 +32,14 @@ async fn validate_and_load_upload(
 	max_size: Option<usize>,
 	is_valid_content_type: impl Fn(&ContentType) -> bool,
 	expected_type_name: Option<&str>,
-) -> APIResult<(ContentType, Vec<u8>)> {
+) -> APIResult<FileUploadData> {
 	let field = upload.next_field().await?.ok_or_else(|| {
 		APIError::BadRequest(String::from("No file provided in multipart"))
 	})?;
 	let raw_content_type = field.content_type().map(ContentType::from);
 
 	// Load bytes of uploaded file
-	let (bytes, file_size) = load_field_up_to_size(field, max_size).await?;
+	let (_name, bytes, file_size) = load_field_up_to_size(field, max_size).await?;
 
 	// Use first 5 bytes to infer content type.
 	// See: https://en.wikipedia.org/wiki/List_of_file_signatures
@@ -70,7 +75,10 @@ async fn validate_and_load_upload(
 	}?;
 
 	tracing::trace!(?content_type, file_size, "Validated upload");
-	Ok((content_type, bytes))
+	Ok(FileUploadData {
+		content_type,
+		bytes,
+	})
 }
 
 /// Load up to `max_size` bytes of a field (erroring if `max_size` is exceeded).
@@ -78,8 +86,8 @@ async fn validate_and_load_upload(
 async fn load_field_up_to_size(
 	mut field: Field<'_>,
 	max_size: Option<usize>,
-) -> APIResult<(Vec<u8>, usize)> {
-	let name = field.file_name().unwrap_or("<no filename>").to_string();
+) -> APIResult<(String, Vec<u8>, usize)> {
+	let name = field.file_name().unwrap_or("unknown filename").to_string();
 
 	// Check size hint if one was provided
 	if let (Some(max_size), (_, Some(size_hint))) = (max_size, field.size_hint()) {
@@ -107,7 +115,7 @@ async fn load_field_up_to_size(
 		return Err(APIError::BadRequest("Uploaded file is empty".to_string()));
 	}
 
-	Ok((bytes, total_size))
+	Ok((name, bytes, total_size))
 }
 
 /// Formats the validation errors used elsewhere in this module when a type doesn't

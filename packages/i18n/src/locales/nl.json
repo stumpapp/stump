@@ -68,65 +68,166 @@
 		},
 		"nextInSeries": "Volgende in serie"
 	},
-	"createBookClubScene": {
-		"heading": "Maak een nieuwe boekenclub",
-		"subtitle": "U kunt een privéboekenclub maken met bepaalde personen, of deze openbaar maken zodat iedereen op de server eraan kan deelnemen",
-		"form": {
+	"createOrUpdateBookClubForm": {
+		"fields": {
 			"name": {
-				"label": "Naam",
-				"placeholder": "Mijn boekenclub",
-				"description": "De naam van je boekenclub"
+				"label": "Name",
+				"placeholder": "My book club",
+				"description": "The name of your book club"
 			},
 			"description": {
-				"label": "Beschrijving",
-				"placeholder": "Een 'Onze Vlag Betekent De Dood' fan club. We lezen piratenfictie naar ons hart",
-				"description": "Een optionele, korte beschrijving van je boekenclub"
+				"label": "Description",
+				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
+				"description": "An optional, short description of your book club"
 			},
 			"is_private": {
-				"label": "Privéclub",
-				"description": "Als dit is ingeschakeld, kunnen alleen gebruikers die je uitnodigt lid worden van je boekenclub"
+				"label": "Private club",
+				"description": "If enabled, only users you invite will be able to join your book club"
 			},
 			"member_role_spec": {
-				"heading": "Aangepaste rol toewijzing",
+				"heading": "Custom role mapping",
 				"subtitle": [
-					"You can create custom names for the roles in your book club. For example, you could rename the 'Member' role to 'Crewmate', or 'Creator' to 'Captain'. If you don't want to use custom names, you can leave these fields blank and the default names will be used instead. For more information about roles, refer to the",
-					"documentatie"
+					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
+					"documentation"
 				],
 				"member": {
-					"label": "Lid",
-					"placeholder": "Gebruiker",
-					"description": "De naam van de standaardrol van je boekenclub"
+					"label": "Member",
+					"placeholder": "Member",
+					"description": "The name of the default role for your book club"
 				},
 				"moderator": {
 					"label": "Moderator",
 					"placeholder": "Moderator",
-					"description": "De naam van de moderator rol van je boekenclub"
+					"description": "The name of the moderator role for your book club"
 				},
 				"admin": {
-					"label": "Beheerder",
-					"placeholder": "Beheerder",
-					"description": "De naam van de beheerdersrol van uw boek club"
+					"label": "Admin",
+					"placeholder": "Admin",
+					"description": "The name of the admin role for your book club"
 				},
 				"creator": {
-					"label": "Maker",
-					"placeholder": "Maker",
-					"description": "De naam van de maker rol van je boek club. Dit ben jij!"
+					"label": "Creator",
+					"placeholder": "Creator",
+					"description": "The name of the creator role for your book club. This is you!"
 				}
 			},
-			"creator_preferences": {
-				"heading": "Your membership preferences",
-				"subtitle": "Some preferences for your membership in the book club. These can be changed at any time from the book club settings page",
-				"creator_display_name": {
-					"label": "Gebruikersnaam",
+			"membershipOptions": {
+				"displayName": {
+					"label": "Display Name",
 					"placeholder": "oromei",
-					"description": "Een optionele gebruikersnaam voor je lidmaatschap in de boekenclub. Als dit is ingesteld heeft dit voorrang op je gebruikersnaam"
+					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
 				},
-				"creator_hide_progress": {
-					"label": "Verberg voortgang",
-					"description": "Indien ingeschakeld, wordt je leesvoortgang verborgen voor andere leden van de boekenclub"
+				"hideProgress": {
+					"label": "Hide Progress",
+					"description": "If enabled, your read progress will be hidden from other members of the book club"
+				}
+			}
+		},
+		"validation": {
+			"missingName": "Name is required",
+			"alreadyTaken": "is already taken"
+		}
+	},
+	"createBookClubScene": {
+		"heading": "Maak een nieuwe boekenclub",
+		"subtitle": "U kunt een privéboekenclub maken met bepaalde personen, of deze openbaar maken zodat iedereen op de server eraan kan deelnemen",
+		"form": {
+			"stepLabel": "Step",
+			"steps": [
+				{
+					"label": "Basics",
+					"heading": "Basic Information",
+					"description": "The details of the club, including its name and description"
+				},
+				{
+					"label": "Roles",
+					"heading": "Roles",
+					"description": "Customize the roles in your book club"
+				},
+				{
+					"label": "Membership",
+					"heading": "Membership Preferences",
+					"description": "Additional options for your book club"
+				},
+				{
+					"label": "Review",
+					"heading": "Review",
+					"description": "Review your club settings before creating it"
+				}
+			],
+			"review": {
+				"yes": "Yes",
+				"no": "No",
+				"none": "None",
+				"labels": {
+					"name": "Name",
+					"description": "Description"
 				}
 			},
 			"submit": "Maak een boekenclub"
+		}
+	},
+	"bookClubSettingsScene": {
+		"sidebar": {
+			"basics": "Basics",
+			"members": {
+				"members": "Members",
+				"roles": "Roles",
+				"label": "Membership"
+			},
+			"scheduling": {
+				"scheduler": "Scheduler",
+				"options": "Options",
+				"label": "Scheduling"
+			},
+			"danger-zone": {
+				"delete": "Deletion",
+				"label": "Danger Zone"
+			}
+		},
+		"basics": {
+			"title": "Basic Information",
+			"description": "The details of this book club, including its name and description",
+			"form": {
+				"submit": "Update club"
+			}
+		},
+		"members": {
+			"title": "Members",
+			"description": "Manage the members of this book club",
+			"sections": {}
+		},
+		"roles": {
+			"title": "Roles",
+			"description": "Customize the roles in this book club",
+			"sections": {
+				"roleMappings": {
+					"heading": "Existing role mappings",
+					"description": "The current role mappings for this book club"
+				}
+			}
+		},
+		"scheduling/scheduler": {
+			"title": "Scheduler",
+			"description": "Create and manage the schedule readings for this book club"
+		},
+		"scheduling/options": {
+			"title": "Options",
+			"description": "Additional options for this book club's scheduling"
+		},
+		"danger-zone/delete": {
+			"title": "Deletion Actions",
+			"description": "Permanently delete this book club and all of its contents or certain resources",
+			"sections": {
+				"deleteClub": {
+					"heading": "Delete club",
+					"description": [
+						"Permanently delete this book club and all its contents.",
+						"This action cannot be undone"
+					],
+					"trigger": "Delete club"
+				}
+			}
 		}
 	},
 	"createOrUpdateLibraryForm": {
@@ -500,6 +601,221 @@
 			"downloadSeries": "Download serie"
 		}
 	},
+	"createOrUpdateSmartListForm": {
+		"validation": {
+			"nameTooShort": "Name must be at least 2 characters",
+			"nameTaken": "Cannot use this name"
+		},
+		"fields": {
+			"name": {
+				"label": "Name",
+				"placeholder": "My smart list",
+				"description": "Must be unique, but can be changed later"
+			},
+			"description": {
+				"label": "Description",
+				"placeholder": "A very intelligent list",
+				"description": "An optional description of your smart list"
+			},
+			"visibility": {
+				"label": "Visibility",
+				"options": {
+					"public": {
+						"label": "Public",
+						"description": "Accessible to all users on the server"
+					},
+					"shared": {
+						"label": "Shared",
+						"description": "Specific users can access this smart list",
+						"createDisclaimer": "You can select who this list is shared with after creation"
+					},
+					"private": {
+						"label": "Private",
+						"description": "Only you can access this smart list"
+					}
+				}
+			},
+			"queryBuilder": {
+				"uiPerformance": "This feature is missing performance optimizations on the UI and may be slow with filters which produce large result sets. This will be improved in the future",
+				"rootJoiner": {
+					"and": {
+						"label": "AND",
+						"description": "All filter groups must be true for a book to be matched"
+					},
+					"or": {
+						"label": "OR",
+						"description": "At least one filter group must be true for a book to be matched"
+					}
+				},
+				"groupJoiner": {
+					"and": {
+						"label": "AND",
+						"description": "All must be true"
+					},
+					"or": {
+						"label": "OR",
+						"description": "At least one must be true"
+					},
+					"not": {
+						"label": "NOT",
+						"description": "None can be true"
+					}
+				},
+				"grouping": {
+					"label": "Group by",
+					"description": "How the books in this smart list should be grouped",
+					"options": {
+						"by_books": {
+							"label": "None"
+						},
+						"by_series": {
+							"label": "Series"
+						},
+						"by_library": {
+							"label": "Library"
+						}
+					}
+				},
+				"filters": {
+					"emptyState": "Add a group to get started",
+					"actions": {
+						"addFilter": "Add filter",
+						"addGroup": "Add group",
+						"deleteFilter": "Delete filter",
+						"deleteGroup": "Delete group"
+					},
+					"is": "is",
+					"fieldSelect": {
+						"placeholder": "Attribute",
+						"source": {
+							"label": "Source",
+							"back": "Back",
+							"book": {
+								"label": "Book",
+								"attributes": {
+									"name": "Filename",
+									"size": "Size",
+									"extension": "Extension",
+									"created_at": "Created at",
+									"updated_at": "Updated at",
+									"status": "Status",
+									"path": "Path",
+									"pages": "Pages",
+									"tags": "Tags"
+								}
+							},
+							"book_meta": {
+								"label": "Book Meta",
+								"attributes": {
+									"title": "Title",
+									"summary": "Summary",
+									"notes": "Notes",
+									"genre": "Genre",
+									"writers": "Writers",
+									"pencillers": "Pencillers",
+									"inkers": "Inkers",
+									"letterers": "Letterers",
+									"editors": "Editors",
+									"publisher": "Publisher",
+									"colorists": "Colorist",
+									"cover_artists": "Cover artists",
+									"links": "Links",
+									"characters": "Characters",
+									"teams": "Teams"
+								}
+							},
+							"series": {
+								"label": "Series",
+								"attributes": {
+									"name": "Name",
+									"path": "Path"
+								}
+							},
+							"series_meta": {
+								"label": "Series Meta",
+								"attributes": {
+									"age_rating": "Age rating",
+									"title": "Title",
+									"summary": "Summary",
+									"meta_type": "Type",
+									"publisher": "Publisher",
+									"imprint": "Imprint",
+									"comicid": "Comic ID",
+									"booktype": "Book type",
+									"status": "Status",
+									"volume": "Volume"
+								}
+							},
+							"library": {
+								"label": "Library",
+								"attributes": {
+									"name": "Name",
+									"path": "Path"
+								}
+							}
+						}
+					},
+					"basicValue": {
+						"placeholder": "Value",
+						"date": "Date"
+					},
+					"rangeValue": {
+						"from": {
+							"date": "From date",
+							"number": "From"
+						},
+						"to": {
+							"date": "To date",
+							"number": "To"
+						},
+						"inclusive": "Inclusive"
+					},
+					"listValue": {
+						"placeholder": "Add values",
+						"emptyState": "No values to display"
+					}
+				}
+			}
+		}
+	},
+	"createSmartListScene": {
+		"heading": "Create smart list",
+		"subtitle": "On-the-fly list creation based on a set of filters",
+		"form": {
+			"stepLabel": "Step",
+			"steps": [
+				{
+					"label": "Basics",
+					"heading": "Basic Information",
+					"description": "The details of this smart list, including its name, description, and visibility"
+				},
+				{
+					"label": "Filters",
+					"heading": "Filters",
+					"description": "The filters to apply to this smart list"
+				},
+				{
+					"label": "Review",
+					"heading": "Review",
+					"description": "Review your smart list settings before creating it"
+				}
+			],
+			"review": {
+				"yes": "Yes",
+				"no": "No",
+				"none": "None",
+				"labels": {
+					"name": "Name",
+					"description": "Description",
+					"visibility": "Visibility",
+					"grouping": "Group by"
+				}
+			},
+			"buttons": {
+				"confirm": "Create list"
+			}
+		}
+	},
 	"userSmartListsScene": {
 		"heading": "Slimme lijsten",
 		"subtitle": "Uw favoriete zoekopdrachten en filters opgeslagen voor eenvoudige toegang",
@@ -521,6 +837,63 @@
 						"library": "bibliotheek"
 					},
 					"matches": "Overeenkomsten"
+				}
+			}
+		}
+	},
+	"smartListSettingsScene": {
+		"sidebar": {
+			"basics": "Basics",
+			"configuration": {
+				"label": "Configuration",
+				"access": "Access",
+				"filters": "Filters"
+			},
+			"danger-zone": {
+				"delete": "Deletion",
+				"label": "Danger Zone"
+			}
+		},
+		"basics": {
+			"title": "Basic Information",
+			"description": "The details of this smart list, including its name and description"
+		},
+		"access": {
+			"title": "Access",
+			"description": "Control who can access this smart list",
+			"sections": {
+				"visibility": {
+					"confirmation": {
+						"public": "This will make the list visible to everyone",
+						"private": "This will change the list to be private, making anyone with access unable to see it",
+						"shared": "You will need to share the list with specific users to give them access",
+						"fallback": "Are you sure you want to change the visibility of this list?"
+					}
+				},
+				"accessManager": {
+					"disclaimer": "Sharing is not ready yet. Please check back later!"
+				}
+			}
+		},
+		"filters": {
+			"title": "Filter Builder",
+			"description": "Manage the filters which construct this smart list"
+		},
+		"danger-zone/delete": {
+			"title": "Deletion Actions",
+			"description": "Permanently delete this smart list and all of its contents or certain resources",
+			"sections": {
+				"deleteList": {
+					"heading": "Delete list",
+					"description": [
+						"Permanently delete this smart list and all its contents.",
+						"This action cannot be undone"
+					],
+					"confirmation": {
+						"title": "Delete list",
+						"description": "Are you sure you want to delete this smart list?",
+						"confirm": "Delete list"
+					}
 				}
 			}
 		}
@@ -1106,7 +1479,7 @@
 				},
 				"devices": {
 					"title": "Email devices",
-					"description": "The device aliases you have configured for recieving emails from your Stump server instance",
+					"description": "The device aliases you have configured for receiving emails from your Stump server instance",
 					"addDevice": "Add device alias",
 					"addOrUpdateDevice": {
 						"title": {
@@ -1308,7 +1681,7 @@
 		}
 	},
 	"tagSelect": {
-		"placholder": "Select or create tag",
+		"placeholder": "Select or create tag",
 		"placeholderNoTags": "No tags available"
 	},
 	"thumbnailDropdown": {

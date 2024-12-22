@@ -1,4 +1,5 @@
 export * from './generated'
+export * from './type-guards'
 
 import { CursorInfo, Library, Media, PageInfo, Series, SupportedFont, User } from './generated'
 

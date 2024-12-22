@@ -1,13 +1,11 @@
-/* eslint-disable react/prop-types */
-
 import { cn, ProgressBar, Text } from '@stump/components'
 import { Book } from 'lucide-react'
-import React, { useState } from 'react'
+import { type ComponentPropsWithoutRef, useState } from 'react'
 import { Link, To } from 'react-router-dom'
 
 import { EntityImage } from './EntityImage'
 
-type ContainerProps = React.ComponentPropsWithoutRef<'div'> & {
+type ContainerProps = ComponentPropsWithoutRef<'div'> & {
 	to?: To
 }
 type Props = {
@@ -72,7 +70,7 @@ export default function EntityCard({
 					as: 'div',
 				}),
 		...props,
-	} as React.ComponentPropsWithoutRef<'div'> & React.ComponentPropsWithoutRef<typeof Link>
+	} as ComponentPropsWithoutRef<'div'> & ComponentPropsWithoutRef<typeof Link>
 
 	const hasClickAction = !!href || !!containerProps.onClick || !!containerProps.onDoubleClick
 
@@ -86,7 +84,7 @@ export default function EntityCard({
 	const renderTitle = () => {
 		if (typeof title === 'string') {
 			return (
-				<Text size="sm" className="line-clamp-2 h-[40px]">
+				<Text size="sm" className="line-clamp-2 h-[40px] min-w-0 whitespace-normal">
 					{title}
 				</Text>
 			)
@@ -152,7 +150,7 @@ export default function EntityCard({
 		<Container
 			{...containerProps}
 			className={cn(
-				'relative flex flex-1 flex-col space-y-1 overflow-hidden rounded-lg border-[1.5px] border-edge bg-background/80 shadow-sm transition-colors duration-100',
+				'relative flex flex-1 flex-col space-y-1 overflow-hidden rounded-lg border-[1.5px] border-edge bg-background/80 transition-colors duration-100',
 				{ 'cursor-pointer hover:border-edge-brand dark:hover:border-edge-brand': hasClickAction },
 				{ 'max-w-[16rem]': isCover },
 				{
@@ -178,4 +176,4 @@ export default function EntityCard({
  * A scuffed wrapper around a `div` used in the `EntityCard` component to conditionally render a `Link` or `div` as
  * the container element
  */
-const Div = (props: React.ComponentPropsWithoutRef<'div'>) => <div {...props} />
+const Div = (props: ComponentPropsWithoutRef<'div'>) => <div {...props} />

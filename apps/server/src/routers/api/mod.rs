@@ -9,6 +9,8 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new().nest("/api", Router::new().nest("/v1", v1::mount(app_state)))
 }
 
+// TODO: move codegen to api/mod.rs
+
 #[allow(unused_imports)]
 mod tests {
 	use std::{fs::File, io::Write, path::PathBuf};
@@ -18,46 +20,25 @@ mod tests {
 		NamedType,
 	};
 
+	use stump_core::config::StumpConfig;
+
 	use crate::{
 		config::jwt::CreatedToken,
-		filter::{
-			LibraryBaseFilter, LibraryFilter, LibraryRelationFilter, LogFilter,
-			MediaBaseFilter, MediaFilter, MediaMetadataBaseFilter, MediaMetadataFilter,
-			MediaMetadataRelationFilter, Range, ReadStatus, SeriesBaseFilter,
-			SeriesFilter, SeriesMedataFilter, SeriesQueryRelation, UserQueryRelation,
-			ValueOrRange,
-		},
+		filter::*,
 		routers::api::v1::{
-			auth::{AuthenticationOptions, LoginOrRegisterArgs, LoginResponse},
-			book_club::{
-				BookClubInvitationAnswer, CreateBookClub, CreateBookClubInvitation,
-				CreateBookClubMember, CreateBookClubSchedule, CreateBookClubScheduleBook,
-				CreateBookClubScheduleBookOption, GetBookClubsParams, UpdateBookClub,
-				UpdateBookClubMember,
-			},
-			emailer::{
-				CreateOrUpdateEmailDevice, CreateOrUpdateEmailer, EmailerIncludeParams,
-				EmailerSendRecordIncludeParams, PatchEmailDevice,
-				SendAttachmentEmailResponse, SendAttachmentEmailsPayload,
-			},
-			epub::{CreateOrUpdateBookmark, DeleteBookmark},
-			job::UpdateSchedulerConfig,
-			library::{
-				CleanLibraryResponse, CreateLibrary, GenerateLibraryThumbnails,
-				LibraryStatsParams, PatchLibraryThumbnail, UpdateLibrary,
-				UpdateLibraryExcludedUsers,
-			},
-			media::{
-				individual::{BookRelations, MediaIsComplete, PutMediaCompletionStatus},
-				thumbnails::PatchMediaThumbnail,
-			},
-			metadata::MediaMetadataOverview,
-			series::{PatchSeriesThumbnail, SeriesIsComplete},
-			smart_list::{
-				CreateOrUpdateSmartList, CreateOrUpdateSmartListView,
-				GetSmartListsParams, SmartListMeta, SmartListRelationOptions,
-			},
-			user::{CreateUser, DeleteUser, UpdateUser, UpdateUserPreferences},
+			api_key::*,
+			auth::*,
+			book_club::*,
+			config::*,
+			emailer::*,
+			epub::*,
+			job::*,
+			library::*,
+			media::{individual::*, thumbnails::*},
+			metadata::*,
+			series::*,
+			smart_list::*,
+			user::*,
 			ClaimResponse, StumpVersion, UpdateCheck,
 		},
 	};
@@ -110,6 +91,11 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<DeleteUser>()?).as_bytes())?;
 
 		file.write_all(
+			format!("{}\n\n", ts_export::<CreateOrUpdateAPIKey>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<CreatedAPIKey>()?).as_bytes())?;
+
+		file.write_all(
 			format!("{}\n\n", ts_export::<EmailerIncludeParams>()?).as_bytes(),
 		)?;
 		file.write_all(
@@ -149,7 +135,9 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<MediaFilter>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<BookRelations>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<SeriesBaseFilter>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<SeriesMedataFilter>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<SeriesMetadataFilter>()?).as_bytes(),
+		)?;
 		file.write_all(format!("{}\n\n", ts_export::<SeriesFilter>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<ValueOrRange<String>>()?).as_bytes(),
@@ -239,6 +227,10 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<CreateOrUpdateSmartListView>()?).as_bytes(),
 		)?;
+
+		file.write_all(format!("{}\n\n", ts_export::<UploadConfig>()?).as_bytes())?;
+
+		file.write_all(format!("{}\n\n", ts_export::<StumpConfig>()?).as_bytes())?;
 
 		Ok(())
 	}

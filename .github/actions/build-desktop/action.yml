@@ -12,6 +12,9 @@ runs:
     - name: Checkout project
       uses: actions/checkout@v3
 
+    - name: Setup Node and Yarn
+      uses: ./.github/actions/setup-yarn
+
     - name: Setup rust
       uses: ./.github/actions/setup-rust
 

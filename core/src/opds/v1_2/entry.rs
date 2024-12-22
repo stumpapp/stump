@@ -104,23 +104,46 @@ impl OpdsEntry {
 	}
 }
 
-impl From<library::Data> for OpdsEntry {
-	fn from(l: library::Data) -> Self {
+pub trait IntoOPDSEntry {
+	fn into_opds_entry(self) -> OpdsEntry;
+}
+
+pub struct OPDSEntryBuilder<T> {
+	data: T,
+	api_key: Option<String>,
+}
+
+impl<T> OPDSEntryBuilder<T> {
+	pub fn new(data: T, api_key: Option<String>) -> Self {
+		Self { data, api_key }
+	}
+
+	fn format_url(&self, path: &str) -> String {
+		if let Some(ref api_key) = self.api_key {
+			format!("/opds/{}/v1.2/{}", api_key, path)
+		} else {
+			format!("/opds/v1.2/{}", path)
+		}
+	}
+}
+
+impl IntoOPDSEntry for OPDSEntryBuilder<library::Data> {
+	fn into_opds_entry(self) -> OpdsEntry {
 		let mut links = Vec::new();
 
 		let nav_link = OpdsLink::new(
 			OpdsLinkType::Navigation,
 			OpdsLinkRel::Subsection,
-			format!("/opds/v1.2/libraries/{}", l.id),
+			self.format_url(&format!("libraries/{}", self.data.id)),
 		);
 
 		links.push(nav_link);
 
 		OpdsEntry {
-			id: l.id,
-			updated: l.updated_at,
-			title: l.name,
-			content: l.description,
+			id: self.data.id,
+			updated: self.data.updated_at,
+			title: self.data.name,
+			content: self.data.description,
 			authors: None,
 			links,
 			stream_link: None,
@@ -128,23 +151,23 @@ impl From<library::Data> for OpdsEntry {
 	}
 }
 
-impl From<series::Data> for OpdsEntry {
-	fn from(s: series::Data) -> Self {
+impl IntoOPDSEntry for OPDSEntryBuilder<series::Data> {
+	fn into_opds_entry(self) -> OpdsEntry {
 		let mut links = Vec::new();
 
 		let nav_link = OpdsLink::new(
 			OpdsLinkType::Navigation,
 			OpdsLinkRel::Subsection,
-			format!("/opds/v1.2/series/{}", s.id),
+			self.format_url(&format!("series/{}", self.data.id)),
 		);
 
 		links.push(nav_link);
 
 		OpdsEntry {
-			id: s.id.to_string(),
-			updated: s.updated_at,
-			title: s.name,
-			content: s.description,
+			id: self.data.id.to_string(),
+			updated: self.data.updated_at,
+			title: self.data.name,
+			content: self.data.description,
 			authors: None,
 			links,
 			stream_link: None,
@@ -152,20 +175,16 @@ impl From<series::Data> for OpdsEntry {
 	}
 }
 
-// TODO: I was panicing here on my hosted server, and added additional safe guards. I need to check what was happening
-// once these changes are deployed and I can see the logs on my server.
+impl IntoOPDSEntry for OPDSEntryBuilder<media::Data> {
+	fn into_opds_entry(self) -> OpdsEntry {
+		let base_url = self.format_url(&format!("books/{}", self.data.id));
 
-impl From<media::Data> for OpdsEntry {
-	fn from(value: media::Data) -> Self {
-		tracing::trace!(book = ?value, "Converting book to OPDS entry");
-
-		let base_url = format!("/opds/v1.2/books/{}", value.id);
-
-		let path_buf = PathBuf::from(value.path.as_str());
+		let path_buf = PathBuf::from(self.data.path.as_str());
 		let FileParts { file_name, .. } = path_buf.file_parts();
 		let file_name_encoded = encode(&file_name);
 
-		let active_reading_session = value
+		let active_reading_session = self
+			.data
 			.active_user_reading_sessions()
 			.ok()
 			.and_then(|sessions| sessions.first().cloned());
@@ -180,11 +199,13 @@ impl From<media::Data> for OpdsEntry {
 			vec![1]
 		};
 
-		let page_content_types = get_content_types_for_pages(&value.path, target_pages)
-			.unwrap_or_else(|error| {
-				tracing::error!(error = ?error, "Failed to get content types for pages");
-				HashMap::default()
-			});
+		let page_content_types =
+			get_content_types_for_pages(&self.data.path, target_pages).unwrap_or_else(
+				|error| {
+					tracing::error!(error = ?error, "Failed to get content types for pages");
+					HashMap::default()
+				},
+			);
 		tracing::trace!(?page_content_types, "Got page content types");
 
 		let thumbnail_link_type = page_content_types
@@ -196,7 +217,7 @@ impl From<media::Data> for OpdsEntry {
 			.to_owned();
 
 		let current_page_link_type = match current_page {
-			Some(page) if page < value.pages => page_content_types
+			Some(page) if page < self.data.pages => page_content_types
 				.get(&page)
 				.unwrap_or_else(|| {
 					tracing::error!("Failed to get content type for current page");
@@ -204,7 +225,7 @@ impl From<media::Data> for OpdsEntry {
 				})
 				.to_owned(),
 			Some(page) => {
-				tracing::warn!(current_page=?page, book_pages=?value.pages, "Current page is out of bounds!");
+				tracing::warn!(current_page=?page, book_pages=?self.data.pages, "Current page is out of bounds!");
 				thumbnail_link_type
 			},
 			_ => thumbnail_link_type,
@@ -217,8 +238,8 @@ impl From<media::Data> for OpdsEntry {
 		});
 
 		let entry_file_acquisition_link_type =
-			OpdsLinkType::from_extension(&value.extension).unwrap_or_else(|| {
-				tracing::error!(?value.extension, "Failed to convert file extension to OPDS link type");
+			OpdsLinkType::from_extension(&self.data.extension).unwrap_or_else(|| {
+				tracing::error!(?self.data.extension, "Failed to convert file extension to OPDS link type");
 				OpdsLinkType::Zip
 			});
 
@@ -241,16 +262,17 @@ impl From<media::Data> for OpdsEntry {
 		];
 
 		let stream_link = OpdsStreamLink::new(
-			value.id.clone(),
-			value.pages.to_string(),
+			self.data.id.clone(),
+			self.data.pages.to_string(),
 			current_page_link_type.to_string(),
 			current_page.map(|page| page.to_string()),
 			last_read_at.map(|date| date.to_string()),
 		);
 
-		let mib = value.size as f64 / (1024.0 * 1024.0);
+		let mib = self.data.size as f64 / (1024.0 * 1024.0);
 
-		let metadata = value
+		let metadata = self
+			.data
 			.metadata()
 			.ok()
 			.flatten()
@@ -263,14 +285,14 @@ impl From<media::Data> for OpdsEntry {
 		let content = match description {
 			Some(s) => Some(format!(
 				"{:.1} MiB - {}<br/><br/>{}",
-				mib, value.extension, s
+				mib, self.data.extension, s
 			)),
-			None => Some(format!("{:.1} MiB - {}", mib, value.extension)),
+			None => Some(format!("{:.1} MiB - {}", mib, self.data.extension)),
 		};
 
 		OpdsEntry {
-			id: value.id.to_string(),
-			title: value.name,
+			id: self.data.id.to_string(),
+			title: self.data.name,
 			updated: chrono::Utc::now().into(),
 			content,
 			links,

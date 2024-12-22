@@ -1,11 +1,13 @@
 use serde::Serialize;
 use specta::Type;
-use tauri::App;
-use tauri_plugin_store::StoreBuilder;
+use tauri::{App, AppHandle, Manager, Wry};
+use tauri_plugin_store::{Store, StoreExt};
 
 use super::saved_server::SavedServer;
 
-#[derive(Debug, thiserror::Error)]
+pub const STORE_FILE: &str = "settings.json";
+
+#[derive(Debug, Serialize, thiserror::Error)]
 pub enum StoreError {
 	#[error("Failed to load store")]
 	StoreLoadError,
@@ -21,46 +23,65 @@ pub struct AppStore {
 }
 
 impl AppStore {
-	pub fn init(app_handle: &mut App) -> Result<Self, StoreError> {
-		// Init store and load it from disk
-		let mut store = StoreBuilder::new(
-			app_handle.handle(),
-			"settings.json"
-				.parse()
-				.map_err(|_| StoreError::StoreLoadError)?,
-		)
-		.build();
+	pub fn load_store(handle: &AppHandle) -> Result<Store<Wry>, StoreError> {
+		let path = handle
+			.path()
+			.app_config_dir()
+			.map_err(|_| StoreError::StoreLoadError)?
+			.join(STORE_FILE);
 
+		// Init store and load it from disk
+		let store = handle.store_builder(path).build();
+
+		// TODO(tauri-v2): Still necessary?
 		// If there are no saved settings yet, this will return an error so we ignore the return value.
 		let _ = store.load();
 
-		let active_server = store
-			.get("active_server")
-			.cloned()
-			.map(SavedServer::try_from)
-			.transpose()
-			.unwrap_or_else(|error| {
-				tracing::error!(?error, "Failed to parse active server");
-				None
-			});
+		Ok(store)
+	}
 
-		let connected_servers = store
-			.get("connected_servers")
-			.cloned()
-			.and_then(|s| s.as_array().cloned())
-			.map(SavedServer::from_vec)
-			.unwrap_or_default();
+	pub fn init(app: &mut App) -> Result<Self, StoreError> {
+		let store = Self::load_store(app.handle())?;
 
-		let run_bundled_server = store
-			.get("run_bundled_server")
-			.cloned()
-			.and_then(|s| s.as_bool())
-			.unwrap_or(false);
+		let active_server = store.get_active_server();
+		let connected_servers = store.get_servers();
+		let run_bundled_server = store.get_run_bundled_server();
 
 		Ok(Self {
 			active_server,
 			connected_servers,
 			run_bundled_server,
 		})
+	}
+}
+
+pub trait AppStoreExt {
+	fn get_servers(&self) -> Vec<SavedServer>;
+	fn get_active_server(&self) -> Option<SavedServer>;
+	fn get_run_bundled_server(&self) -> bool;
+}
+
+impl AppStoreExt for Store<Wry> {
+	fn get_servers(&self) -> Vec<SavedServer> {
+		self.get("connected_servers")
+			.and_then(|s| s.as_array().cloned())
+			.map(SavedServer::from_vec)
+			.unwrap_or_default()
+	}
+
+	fn get_active_server(&self) -> Option<SavedServer> {
+		self.get("active_server")
+			.map(SavedServer::try_from)
+			.transpose()
+			.unwrap_or_else(|error| {
+				tracing::error!(?error, "Failed to parse active server");
+				None
+			})
+	}
+
+	fn get_run_bundled_server(&self) -> bool {
+		self.get("run_bundled_server")
+			.and_then(|s| s.as_bool())
+			.unwrap_or(false)
 	}
 }

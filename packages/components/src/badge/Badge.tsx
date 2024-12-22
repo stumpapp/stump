@@ -1,4 +1,5 @@
 import { cva, VariantProps } from 'class-variance-authority'
+import type { ComponentPropsWithoutRef } from 'react'
 import { forwardRef } from 'react'
 
 import { cn } from '../utils'
@@ -33,7 +34,7 @@ const badgeVariants = cva('inline-flex items-center font-medium', {
 	},
 })
 
-export type BadgeProps = VariantProps<typeof badgeVariants> & React.ComponentPropsWithoutRef<'div'>
+export type BadgeProps = VariantProps<typeof badgeVariants> & ComponentPropsWithoutRef<'div'>
 export const Badge = forwardRef<HTMLDivElement, BadgeProps>(
 	({ className, variant, size, rounded, ...props }, ref) => {
 		return (

@@ -1820,7 +1820,7 @@
 		}
 	},
 	"tagSelect": {
-		"placeholder": "Select or create tag",
+		"placeholder": "Seleziona o crea un tag",
 		"placeholderNoTags": "Nessun tag disponibile"
 	},
 	"thumbnailDropdown": {

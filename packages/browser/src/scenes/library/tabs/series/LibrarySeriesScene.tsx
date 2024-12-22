@@ -112,19 +112,15 @@ function LibrarySeriesScene() {
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[shouldScroll],
+		[isInView, shouldScroll],
 	)
 
-	useEffect(
-		() => {
-			if (library?.id && !alreadyVisited.current) {
-				alreadyVisited.current = true
-				visitLibrary(library.id)
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[library?.id],
-	)
+	useEffect(() => {
+		if (library?.id && !alreadyVisited.current) {
+			alreadyVisited.current = true
+			visitLibrary(library.id)
+		}
+	}, [library?.id])
 
 	if (isLoading) {
 		return null

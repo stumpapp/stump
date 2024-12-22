@@ -2,7 +2,7 @@ import { invalidateQueries, useSDK } from '@stump/client'
 import { DropdownMenu, IconButton } from '@stump/components'
 import { CoreJobOutput, PersistedJob } from '@stump/sdk'
 import { Ban, Database, FileClock, ListX, MoreVertical, Trash2 } from 'lucide-react'
-import React, { useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router'
 

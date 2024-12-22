@@ -2,8 +2,8 @@ import { useBookClubMembersQuery } from '@stump/client'
 import { Avatar, Card } from '@stump/components'
 import { BookClubMember, BookClubMemberRoleSpec } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
-import upperFirst from 'lodash.upperfirst'
-import React, { useMemo, useState } from 'react'
+import upperFirst from 'lodash/upperFirst'
+import { useMemo, useState } from 'react'
 
 import { Table } from '@/components/table'
 

@@ -1,8 +1,9 @@
 import { useQuery, useSDK } from '@stump/client'
-import { EntityCard, Label, Text } from '@stump/components'
-import React from 'react'
+import { Label, Text } from '@stump/components'
 
 import paths from '@/paths'
+
+import { EntityCard } from '../entity'
 
 type Props = {
 	container?: (children: React.ReactNode) => React.ReactNode

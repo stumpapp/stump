@@ -289,7 +289,7 @@ pub struct Pageable<T: Serialize> {
 	pub data: T,
 	/// The pagination information (if paginated).
 	pub _page: Option<PageInfo>,
-	/// The cursor information (if cursor-baesd paginated).
+	/// The cursor information (if cursor-based paginated).
 	pub _cursor: Option<CursorInfo>,
 }
 
@@ -301,7 +301,7 @@ pub struct PageableArray<T: Serialize> {
 	pub data: Vec<T>,
 	/// The pagination information (if paginated).
 	pub _page: Option<PageInfo>,
-	/// The cursor information (if cursor-baesd paginated).
+	/// The cursor information (if cursor-based paginated).
 	pub _cursor: Option<CursorInfo>,
 }
 

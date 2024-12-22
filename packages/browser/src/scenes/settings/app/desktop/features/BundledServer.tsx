@@ -1,5 +1,5 @@
 import { useLocaleContext } from '@stump/i18n'
-import React, { useCallback } from 'react'
+import { useCallback } from 'react'
 
 import PreferenceToggle from '@/scenes/settings/PreferenceToggle'
 import { useTauriStore } from '@/stores'

@@ -1,7 +1,6 @@
 import { ConfirmationModal } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { EntityVisibility } from '@stump/sdk'
-import React from 'react'
 
 type Props = {
 	isOpen: boolean

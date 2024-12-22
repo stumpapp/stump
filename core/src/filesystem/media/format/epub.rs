@@ -9,7 +9,7 @@ use crate::{
 	filesystem::{
 		content_type::ContentType,
 		error::FileError,
-		hash,
+		hash::{self, generate_koreader_hash},
 		media::process::{FileProcessor, FileProcessorOptions, ProcessedFile},
 	},
 };
@@ -69,6 +69,7 @@ impl FileProcessor for EpubProcessor {
 		path: &str,
 		FileProcessorOptions {
 			generate_file_hashes,
+			generate_koreader_hashes,
 			..
 		}: FileProcessorOptions,
 		_: &StumpConfig,
@@ -84,10 +85,14 @@ impl FileProcessor for EpubProcessor {
 		let hash = generate_file_hashes
 			.then(|| EpubProcessor::hash(path))
 			.flatten();
+		let koreader_hash = generate_koreader_hashes
+			.then(|| generate_koreader_hash(path))
+			.transpose()?;
 
 		Ok(ProcessedFile {
 			path: path_buf,
 			hash,
+			koreader_hash,
 			metadata: Some(metadata),
 			pages,
 		})
@@ -217,7 +222,7 @@ impl EpubProcessor {
 	/// 1. Attempt to find a resource with the default ID of "cover"
 	/// 2. Attempt to find a resource with a mime type of "image/jpeg" or "image/png", and weight the
 	///    results based on how likely they are to be the cover. For example, if the cover is named
-	///    "cover.jpg", it's probably the cover. The entry with the heighest weight, if any, will be
+	///    "cover.jpg", it's probably the cover. The entry with the highest weight, if any, will be
 	///    returned.
 	pub fn get_cover(path: &str) -> Result<(ContentType, Vec<u8>), FileError> {
 		let mut epub_file = EpubDoc::new(path).map_err(|e| {

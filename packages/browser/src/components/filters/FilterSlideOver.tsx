@@ -1,6 +1,6 @@
 import { Button, Sheet, Text } from '@stump/components'
 import { Filter } from 'lucide-react'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useMediaMatch } from 'rooks'
 
 import { useFilterContext } from './context'

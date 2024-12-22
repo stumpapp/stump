@@ -18,14 +18,14 @@ pub enum NavigationMode {
 // TODO: support order_by for some options with actions
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
-pub struct NaviationItemDisplayOptions {
+pub struct NavigationItemDisplayOptions {
 	#[serde(default = "default_true")]
 	pub show_create_action: bool,
 	#[serde(default)]
 	pub show_link_to_all: bool,
 }
 
-impl Default for NaviationItemDisplayOptions {
+impl Default for NavigationItemDisplayOptions {
 	fn default() -> Self {
 		Self {
 			show_create_action: true,
@@ -39,9 +39,9 @@ impl Default for NaviationItemDisplayOptions {
 pub enum NavigationItem {
 	Home,
 	Explore,
-	Libraries(NaviationItemDisplayOptions),
-	SmartLists(NaviationItemDisplayOptions),
-	BookClubs(NaviationItemDisplayOptions),
+	Libraries(NavigationItemDisplayOptions),
+	SmartLists(NavigationItemDisplayOptions),
+	BookClubs(NavigationItemDisplayOptions),
 }
 
 // TODO: support order_by in some options (e.g. Library)
@@ -84,19 +84,19 @@ impl<I> Arrangement<I> {
 				},
 				ArrangementItem {
 					item: NavigationItem::Libraries(
-						NaviationItemDisplayOptions::default(),
+						NavigationItemDisplayOptions::default(),
 					),
 					visible: true,
 				},
 				ArrangementItem {
 					item: NavigationItem::SmartLists(
-						NaviationItemDisplayOptions::default(),
+						NavigationItemDisplayOptions::default(),
 					),
 					visible: true,
 				},
 				ArrangementItem {
 					item: NavigationItem::BookClubs(
-						NaviationItemDisplayOptions::default(),
+						NavigationItemDisplayOptions::default(),
 					),
 					visible: true,
 				},

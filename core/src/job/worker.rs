@@ -508,7 +508,7 @@ pub(crate) async fn handle_failure_status(
 			Some,
 		);
 
-	tracing::trace!(?updated_job, "Upated job?");
+	tracing::trace!(?updated_job, "Updated job?");
 
 	Ok(())
 }

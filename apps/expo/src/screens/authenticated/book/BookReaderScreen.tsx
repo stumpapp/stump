@@ -1,6 +1,5 @@
 import { RouteProp, useRoute } from '@react-navigation/native'
 import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION, useMediaByIdQuery } from '@stump/client'
-import React from 'react'
 
 import { EpubJSReader, ImageBasedReader, UnsupportedReader } from '@/components/reader'
 

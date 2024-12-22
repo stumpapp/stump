@@ -1,4 +1,4 @@
-import { invalidateQueries, useSDK } from '@stump/client'
+import { queryClient, useSDK } from '@stump/client'
 import { ConfirmationModal, Text, useBoolean } from '@stump/components'
 import { LogOut } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -21,7 +21,7 @@ export default function SignOut() {
 				success: 'You have been logged out. Redirecting...',
 			})
 			.then(() => {
-				invalidateQueries({ keys: [sdk.server.keys.claimedStatus] })
+				queryClient.clear()
 				setUser(null)
 				navigate('/auth')
 			})

@@ -4,7 +4,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { RegisteredEmailDevice } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { CircleSlash2 } from 'lucide-react'
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { Table } from '@/components/table'
 

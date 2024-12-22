@@ -1,6 +1,6 @@
 import { Media } from '@stump/sdk'
 import { OnChangeFn, SortingState } from '@tanstack/react-table'
-import React, { useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import { orderingToTableSort, tableSortToOrdering, useFilterContext } from '@/components/filters'
 import { EntityTable, EntityTableProps } from '@/components/table'

@@ -1,7 +1,6 @@
 import { Avatar, Card, cn, Heading, Text } from '@stump/components'
 import dayjs from 'dayjs'
 import pluralize from 'pluralize'
-import React from 'react'
 
 import { useBookClubContext } from '@/components/bookClub'
 import { usePreferences } from '@/hooks'

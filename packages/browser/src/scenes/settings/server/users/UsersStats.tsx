@@ -1,8 +1,8 @@
 import { Statistic } from '@stump/components'
 import { ActiveReadingSession, FinishedReadingSession, User } from '@stump/sdk'
-import groupBy from 'lodash.groupby'
-import sortBy from 'lodash.sortby'
-import uniqBy from 'lodash.uniqby'
+// import groupBy from 'lodash/groupBy'
+// import sortBy from 'lodash/sortBy'
+import uniqBy from 'lodash/uniqBy'
 import pluralize from 'pluralize'
 import { useMemo } from 'react'
 
@@ -18,10 +18,10 @@ type BookReadStats = {
 	inProgressCount: number
 }
 
-type TopBook = {
-	bookId: string
-	readers: string[]
-}
+// type TopBook = {
+// 	bookId: string
+// 	readers: string[]
+// }
 
 export default function UsersStats() {
 	const { users } = useUserManagementContext()
@@ -80,7 +80,7 @@ export default function UsersStats() {
 	)
 
 	/**
-	 * The total number of finsihed books throughout all users on the server
+	 * The total number of finished books throughout all users on the server
 	 */
 	const booksRead = users.reduce<BookReadStats>(
 		(acc, user) => {
@@ -101,36 +101,35 @@ export default function UsersStats() {
 	/**
 	 * The IDs of the top-3 books read on the server
 	 */
-	const topBooks = useMemo<TopBook[]>(() => {
-		const usersAndBooks = users.reduce(
-			(acc, user) => {
-				const finishedUserBooks = (finishedSessionMap[user.id] || []).map(
-					({ media_id, user_id }) => ({ media_id, user_id }),
-				)
-				const activeUserBooks = (activeSessionMap[user.id] || []).map(({ media_id, user_id }) => ({
-					media_id,
-					user_id,
-				}))
-				const allForUser = finishedUserBooks.concat(activeUserBooks)
-				const dedupedAll = uniqBy(allForUser, ({ media_id }) => media_id)
-				return acc.concat(dedupedAll)
-			},
-			[] as {
-				media_id: string
-				user_id: string
-			}[],
-		)
-		const groupedByBook = groupBy(usersAndBooks, ({ media_id }) => media_id)
+	// const topBooks = useMemo<TopBook[]>(() => {
+	// 	const usersAndBooks = users.reduce(
+	// 		(acc, user) => {
+	// 			const finishedUserBooks = (finishedSessionMap[user.id] || []).map(
+	// 				({ media_id, user_id }) => ({ media_id, user_id }),
+	// 			)
+	// 			const activeUserBooks = (activeSessionMap[user.id] || []).map(({ media_id, user_id }) => ({
+	// 				media_id,
+	// 				user_id,
+	// 			}))
+	// 			const allForUser = finishedUserBooks.concat(activeUserBooks)
+	// 			const dedupedAll = uniqBy(allForUser, ({ media_id }) => media_id)
+	// 			return acc.concat(dedupedAll)
+	// 		},
+	// 		[] as {
+	// 			media_id: string
+	// 			user_id: string
+	// 		}[],
+	// 	)
+	// 	const groupedByBook = groupBy(usersAndBooks, ({ media_id }) => media_id)
 
-		return sortBy(
-			Object.entries(groupedByBook).map(([bookId, values]) => ({
-				bookId,
-				readers: values.map(({ user_id }) => user_id),
-			})),
-			({ readers }) => readers.length,
-		).slice(0, 3)
-	}, [users, activeSessionMap, finishedSessionMap])
-	console.debug(topBooks)
+	// 	return sortBy(
+	// 		Object.entries(groupedByBook).map(([bookId, values]) => ({
+	// 			bookId,
+	// 			readers: values.map(({ user_id }) => user_id),
+	// 		})),
+	// 		({ readers }) => readers.length,
+	// 	).slice(0, 3)
+	// }, [users, activeSessionMap, finishedSessionMap])
 
 	return (
 		<div className="flex items-center gap-4 divide-x divide-edge-subtle overflow-x-scroll pb-8 scrollbar-hide">

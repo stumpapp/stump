@@ -1820,7 +1820,7 @@
 		}
 	},
 	"tagSelect": {
-		"placeholder": "Select or create tag",
+		"placeholder": "Выберите или создайте тег",
 		"placeholderNoTags": "Нет доступных тегов"
 	},
 	"thumbnailDropdown": {

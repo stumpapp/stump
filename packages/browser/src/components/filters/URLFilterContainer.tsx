@@ -1,5 +1,5 @@
 import { cn } from '@stump/components'
-import React, { forwardRef, useEffect, useMemo } from 'react'
+import { forwardRef, useEffect, useMemo } from 'react'
 import useScrollbarSize from 'react-scrollbar-size'
 import { useMediaMatch } from 'rooks'
 import { create } from 'zustand'

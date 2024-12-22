@@ -53,7 +53,7 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 	let app_state = server_ctx.arced();
 	let cors_layer = cors::get_cors_layer(config.clone());
 
-	tracing::info!("{}", core.get_shadow_text());
+	println!("{}", core.get_shadow_text());
 
 	let app = Router::new()
 		.merge(routers::mount(app_state.clone()))

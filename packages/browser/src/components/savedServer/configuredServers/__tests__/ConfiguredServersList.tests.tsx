@@ -1,22 +1,19 @@
-import { queryClient, QueryClientContext, SDKProvider, StumpClientContext } from '@stump/client'
+import {
+	queryClient,
+	QueryClientContext,
+	StumpClientContext,
+	useClientContext,
+	useLogout,
+} from '@stump/client'
 import { checkUrl } from '@stump/sdk'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { useLocation, useNavigate } from 'react-router'
 
+import { useTauriRPC } from '@/hooks/useTauriRPC'
 import { useAppStore, useTauriStore, useUserStore } from '@/stores'
 
 import ConfiguredServersList from '../ConfiguredServersList'
 
-jest.mock('tauri-plugin-store-api', () => ({
-	// mock class with get/set methods
-	Store: jest.fn().mockImplementation(
-		() =>
-			({
-				get: jest.fn(),
-				set: jest.fn(),
-			}) as any,
-	),
-}))
 jest.mock('react-router', () => ({
 	useLocation: jest.fn(),
 	useNavigate: jest.fn(),
@@ -56,8 +53,22 @@ const useUserStoreRet = {
 jest.mock('@stump/client', () => ({
 	...jest.requireActual('@stump/client'),
 	useClientContext: jest.fn(),
+	useLogout: jest.fn(),
 }))
-const useClientContextRet = {} as any
+const useClientContextRet = {
+	tauriRPC: {},
+} as any
+
+const useLogoutRet = {
+	logout: jest.fn(),
+} as any
+
+jest.mock('@/hooks/useTauriRPC', () => ({
+	useTauriRPC: jest.fn(),
+}))
+const useTauriRPCRet = {
+	clearCredentialStore: jest.fn(),
+} as any
 
 jest.mock('@stump/sdk', () => ({
 	...jest.requireActual('@stump/sdk'),
@@ -65,13 +76,11 @@ jest.mock('@stump/sdk', () => ({
 }))
 
 const Subject = () => (
-	<SDKProvider baseURL="baseURL" authMethod="session">
-		<QueryClientContext.Provider value={queryClient}>
-			<StumpClientContext.Provider value={useClientContextRet}>
-				<ConfiguredServersList />
-			</StumpClientContext.Provider>
-		</QueryClientContext.Provider>
-	</SDKProvider>
+	<QueryClientContext.Provider value={queryClient}>
+		<StumpClientContext.Provider value={useClientContextRet}>
+			<ConfiguredServersList />
+		</StumpClientContext.Provider>
+	</QueryClientContext.Provider>
 )
 
 describe('ConfiguredServersList', () => {
@@ -84,6 +93,9 @@ describe('ConfiguredServersList', () => {
 		jest.mocked(useAppStore).mockReturnValue(useAppStoreRet)
 		jest.mocked(useTauriStore).mockReturnValue(createTauriStore())
 		jest.mocked(useUserStore).mockReturnValue(useUserStoreRet)
+		jest.mocked(useClientContext).mockReturnValue(useClientContextRet)
+		jest.mocked(useTauriRPC).mockReturnValue(useTauriRPCRet)
+		jest.mocked(useLogout).mockReturnValue(useLogoutRet)
 		jest.mocked(checkUrl).mockResolvedValue(true)
 	})
 
@@ -110,7 +122,7 @@ describe('ConfiguredServersList', () => {
 		).toBeInTheDocument()
 	})
 
-	it('should render a confirmation before switching to a serveer', () => {
+	it('should render a confirmation before switching to a server', () => {
 		render(<Subject />)
 
 		expect(

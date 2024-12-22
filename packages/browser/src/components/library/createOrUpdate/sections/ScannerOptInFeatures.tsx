@@ -1,6 +1,6 @@
 import { Alert, CheckBox, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { useDebouncedValue } from 'rooks'
 
@@ -12,7 +12,10 @@ type Props = {
 	 * A callback that is triggered when the form values change, debounced by 1 second.
 	 */
 	onDidChange?: (
-		values: Pick<CreateOrUpdateLibrarySchema, 'process_metadata' | 'generate_file_hashes'>,
+		values: Pick<
+			CreateOrUpdateLibrarySchema,
+			'process_metadata' | 'generate_file_hashes' | 'generate_koreader_hashes'
+		>,
 	) => void
 }
 
@@ -21,11 +24,15 @@ export default function ScannerOptInFeatures({ onDidChange }: Props) {
 	const ctx = useLibraryContextSafe()
 	const isCreating = !ctx?.library
 
-	const [processMetadata, generateFileHashes] = form.watch([
+	const [processMetadata, generateFileHashes, koreaderHashes] = form.watch([
 		'process_metadata',
 		'generate_file_hashes',
+		'generate_koreader_hashes',
 	])
-	const [debouncedOptions] = useDebouncedValue({ generateFileHashes, processMetadata }, 1000)
+	const [debouncedOptions] = useDebouncedValue(
+		{ generateFileHashes, processMetadata, koreaderHashes },
+		1000,
+	)
 
 	const { t } = useLocaleContext()
 
@@ -37,12 +44,19 @@ export default function ScannerOptInFeatures({ onDidChange }: Props) {
 
 		const existingProcessMetadata = ctx.library.config.process_metadata
 		const existingHashFiles = ctx.library.config.generate_file_hashes
-		const { processMetadata, generateFileHashes } = debouncedOptions
+		const existingKoreaderHashes = ctx.library.config.generate_koreader_hashes
+		const { processMetadata, generateFileHashes, koreaderHashes } = debouncedOptions
 
-		if (processMetadata !== existingProcessMetadata || generateFileHashes !== existingHashFiles) {
+		const didChange =
+			processMetadata !== existingProcessMetadata ||
+			generateFileHashes !== existingHashFiles ||
+			koreaderHashes !== existingKoreaderHashes
+
+		if (didChange) {
 			onDidChange({
 				generate_file_hashes: generateFileHashes,
 				process_metadata: processMetadata,
+				generate_koreader_hashes: koreaderHashes,
 			})
 		}
 	}, [ctx?.library, debouncedOptions, onDidChange])
@@ -80,6 +94,16 @@ export default function ScannerOptInFeatures({ onDidChange }: Props) {
 				checked={generateFileHashes}
 				onClick={() => form.setValue('generate_file_hashes', !generateFileHashes)}
 				{...form.register('generate_file_hashes')}
+			/>
+
+			<CheckBox
+				id="generate_koreader_hashes"
+				variant="primary"
+				label={t(getKey('koreaderHashes.label'))}
+				description={t(getKey('koreaderHashes.description'))}
+				checked={koreaderHashes}
+				onClick={() => form.setValue('generate_koreader_hashes', !koreaderHashes)}
+				{...form.register('generate_koreader_hashes')}
 			/>
 		</div>
 	)

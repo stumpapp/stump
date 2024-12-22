@@ -8,7 +8,7 @@ import LoginActivitySection from './login-activity/LoginActivitySection'
 import UserTableSection from './user-table/UserTableSection'
 import UserManagementStats from './UsersStats'
 
-// TODO: I might want to turn this into a tiny Router with breadcrumbs? Not enirely sure yet,
+// TODO: I might want to turn this into a tiny Router with breadcrumbs? Not entirely sure yet,
 // the only sub-scene I can think of is user creation which isn't essential to have perfect UX
 // out the gate
 export default function UsersScene() {

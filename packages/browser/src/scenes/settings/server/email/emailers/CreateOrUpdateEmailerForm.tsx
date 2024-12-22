@@ -12,7 +12,7 @@ import {
 } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { SMTPEmailer } from '@stump/sdk'
-import React, { useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useForm, useFormState } from 'react-hook-form'
 
 import { CreateOrUpdateEmailerSchema, createSchema, formDefaults } from './schema'

@@ -2,7 +2,7 @@ import { invalidateQueries, useSDK } from '@stump/client'
 import { DropdownMenu, IconButton } from '@stump/components'
 import { User } from '@stump/sdk'
 import { Database, Lock, MoreVertical, Pencil, Search, Trash, Unlock } from 'lucide-react'
-import React, { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'
 
@@ -26,21 +26,24 @@ export default function UserActionMenu({ user, onSelectForInspect }: Props) {
 
 	const userSessionsCount = users.find((u) => u.id === user.id)?.login_sessions_count || 0
 
-	const handleSetLockStatus = async (lock: boolean) => {
-		try {
-			await sdk.user.lockUser(user.id, lock)
-			await invalidateQueries({ keys: [sdk.user.keys.get] })
-		} catch (error) {
-			if (error instanceof Error) {
-				toast.error(error.message)
-			} else {
-				console.error(error)
-				toast.error('An unknown error occurred')
+	const handleSetLockStatus = useCallback(
+		async (lock: boolean) => {
+			try {
+				await sdk.user.lockUser(user.id, lock)
+				await invalidateQueries({ keys: [sdk.user.keys.get] })
+			} catch (error) {
+				if (error instanceof Error) {
+					toast.error(error.message)
+				} else {
+					console.error(error)
+					toast.error('An unknown error occurred')
+				}
 			}
-		}
-	}
+		},
+		[sdk, user.id],
+	)
 
-	const handleClearUserSessions = async () => {
+	const handleClearUserSessions = useCallback(async () => {
 		try {
 			await sdk.user.deleteUserSessions(user.id)
 			if (isSelf) {
@@ -56,7 +59,7 @@ export default function UserActionMenu({ user, onSelectForInspect }: Props) {
 				toast.error('An unknown error occurred')
 			}
 		}
-	}
+	}, [sdk, user.id, isSelf, navigate])
 
 	const groups = useMemo(
 		() => [
@@ -101,8 +104,17 @@ export default function UserActionMenu({ user, onSelectForInspect }: Props) {
 				],
 			},
 		],
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[setDeletingUser, user, isSelf, userSessionsCount],
+
+		[
+			setDeletingUser,
+			user,
+			isSelf,
+			userSessionsCount,
+			navigate,
+			onSelectForInspect,
+			handleClearUserSessions,
+			handleSetLockStatus,
+		],
 	)
 
 	if (!isServerOwner) {

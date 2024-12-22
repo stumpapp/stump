@@ -1,5 +1,4 @@
 import { cn } from '@stump/components'
-import React from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { VirtuosoGrid } from 'react-virtuoso'
 

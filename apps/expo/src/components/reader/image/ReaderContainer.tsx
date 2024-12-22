@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { ScreenRootView } from '@/components/primitives'
 
 type Props = {

@@ -1,7 +1,7 @@
 {
 	"underConstruction": {
-		"heading": "This is awkward",
-		"message": "You've stumbled upon a page that's still being developed. I'd love to show it to you, but it isn't quite ready yet.",
+		"heading": "这很尴尬",
+		"message": "你已经停留在一个仍在开发的页面上。我很乐意向你展示它，但它还没有做好准备。",
 		"homeLink": "返回首页",
 		"githubLink": "查看 GitHub 问题"
 	},
@@ -119,24 +119,24 @@
 				},
 				"hideProgress": {
 					"label": "Hide Progress",
-					"description": "If enabled, your read progress will be hidden from other members of the book club"
+					"description": "如果启用，您的阅读进度将对读书俱乐部的其他成员隐藏"
 				}
 			}
 		},
 		"validation": {
-			"missingName": "Name is required",
-			"alreadyTaken": "is already taken"
+			"missingName": "名称必填",
+			"alreadyTaken": "已经被使用"
 		}
 	},
 	"createBookClubScene": {
 		"heading": "创建一个新的读书俱乐部",
 		"subtitle": "您可以创建一个私人读书俱乐部，或者创建一个公开的任何人都可以加入的读书俱乐部",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "步骤",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
+					"label": "基本",
+					"heading": "基本信息",
 					"description": "The details of the club, including its name and description"
 				},
 				{
@@ -146,13 +146,13 @@
 				},
 				{
 					"label": "成员",
-					"heading": "Membership Preferences",
-					"description": "Additional options for your book club"
+					"heading": "成员设置",
+					"description": "书籍俱乐部的其他选项"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your club settings before creating it"
+					"label": "审查",
+					"heading": "审查",
+					"description": "在创建之前审查您的俱乐部设置"
 				}
 			],
 			"review": {

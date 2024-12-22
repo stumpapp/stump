@@ -5,8 +5,10 @@ media::select!(media_id_select { id });
 media::select!(media_path_select { path });
 
 media::select!(media_path_modified_at_select {
+   id
    path
    modified_at
+   status
 });
 
 media::select!(media_thumbnail {

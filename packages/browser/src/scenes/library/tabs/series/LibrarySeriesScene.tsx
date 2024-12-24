@@ -1,11 +1,6 @@
-import {
-	useLibraryByID,
-	usePagedSeriesQuery,
-	usePrefetchPagedSeries,
-	useVisitLibrary,
-} from '@stump/client'
+import { useLibraryByID, usePagedSeriesQuery, usePrefetchPagedSeries } from '@stump/client'
 import { usePrevious, usePreviousIsDifferent } from '@stump/components'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 
@@ -33,8 +28,6 @@ export default function LibrarySeriesSceneWrapper() {
 }
 
 function LibrarySeriesScene() {
-	const alreadyVisited = useRef(false)
-
 	const { id } = useParams()
 
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
@@ -42,8 +35,6 @@ function LibrarySeriesScene() {
 	if (!id) {
 		throw new Error('Library id is required')
 	}
-
-	const { visitLibrary } = useVisitLibrary()
 
 	const { layoutMode, setLayout } = useSeriesLayout((state) => ({
 		layoutMode: state.layout,
@@ -114,13 +105,6 @@ function LibrarySeriesScene() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[isInView, shouldScroll],
 	)
-
-	useEffect(() => {
-		if (library?.id && !alreadyVisited.current) {
-			alreadyVisited.current = true
-			visitLibrary(library.id)
-		}
-	}, [library?.id])
 
 	if (isLoading) {
 		return null

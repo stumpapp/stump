@@ -10,6 +10,11 @@ export type ILibraryManagementContext = {
 	 * A function that issues a PATCH update to the library.
 	 */
 	patch: (updates: Partial<UpdateLibrary>) => void
+	/**
+	 * A function that triggers a scan of the library. Will be undefined if the user does
+	 * not have the necessary permissions
+	 */
+	scan?: () => void
 }
 
 export const LibraryManagementContext = createContext<ILibraryManagementContext>({

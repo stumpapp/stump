@@ -17,7 +17,7 @@ runs:
 
     - name: Build app
       shell: bash
-      run: yarn build
+      run: yarn exec vite build
       working-directory: apps/${{ inputs.app }}
 
     - name: Upload bundle

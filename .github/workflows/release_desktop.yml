@@ -63,9 +63,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          releaseName: 'Desktop App v__VERSION__'
-          releaseBody: 'See the assets to download this version and install.'
           releaseId: 'untagged-dcf8ed03bb6a19b142e0'
-          releaseDraft: true
-          prerelease: false
           args: ${{ matrix.args }}

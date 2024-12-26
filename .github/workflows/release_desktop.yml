@@ -27,22 +27,16 @@ jobs:
     needs: build-webapp
     strategy:
       matrix:
-        # Note: macos-13 is intel-based, macos-latest is M1-based
-        # See https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
-        os: [ubuntu-latest, macos-13, macos-latest, windows-latest]
         include:
-          - os: ubuntu-latest
-            artifact_name: linux-artifact
-            artifact_filename: stump
-          - os: macos-13
-            artifact_name: macos-intel-artifact
-            artifact_filename: bundle/macos/Stump.app
-          - os: macos-latest
-            artifact_name: macos-arm-artifact
-            artifact_filename: bundle/macos/Stump.app
-          - os: windows-latest
-            artifact_name: windows-artifact
-            artifact_filename: bundle/win-unpacked/Stump.exe
+          - platform: 'macos-latest' # for Arm based macs (M1 and above).
+            args: '--target aarch64-apple-darwin'
+          - platform: 'macos-latest' # for Intel based macs.
+            args: '--target x86_64-apple-darwin'
+          - platform: 'ubuntu-22.04' # for Tauri v1 you could replace this with ubuntu-20.04.
+            args: ''
+          - platform: 'windows-latest'
+            args: ''
+
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
@@ -54,28 +48,23 @@ jobs:
           name: webapp
           path: ./apps/desktop/dist
 
-      - name: Build desktop app
-        uses: ./.github/actions/build-desktop
-
-      - name: Get target dir
-        id: get_target_dir
-        run: |
-          if [[ ${{ matrix.os }} == 'macos-latest' ]]; then
-            echo "ARCH_DIR=aarch64-apple-darwin" >> $GITHUB_ENV
-          elif [[ ${{ matrix.os }} == 'macos-13' ]]; then
-            echo "ARCH_DIR=x86_64-apple-darwin" >> $GITHUB_ENV
-          elif [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
-            echo "ARCH_DIR=x86_64-unknown-linux-gnu" >> $GITHUB_ENV
-          elif [[ ${{ matrix.os }} == 'windows-latest' ]]; then
-            echo "ARCH_DIR=x86_64-pc-windows-msvc" >> $GITHUB_ENV
-          fi
-
-      - name: Prepare artifact
-        run: mv target/release/${{ matrix.artifact_filename }} ./staging/${{ matrix.artifact_filename }}
-
-      - name: Upload server artifact
-        uses: ./.github/actions/upload-artifact
+      - name: Setup rust
+        uses: ./.github/actions/setup-rust
         with:
-          upload-name: ${{ matrix.artifact_name }}
-          upload-path: staging
-# TODO Some kind of release creation step
+          additional-targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - name: install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          releaseName: 'Desktop App v__VERSION__'
+          releaseBody: 'See the assets to download this version and install.'
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}

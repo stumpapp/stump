@@ -34,7 +34,7 @@ export default function SettingsLayout() {
 
 	// 1. if we are on mobile, we always render it
 	// 2. if not displaySideBar, we always render it
-	// 3. if topbar, never render it
+	// 3. if topbar, never render it TODO: this is a bit weird UX, let's make this a setting
 	const renderNavigation = isMobile || (!displaySideBar && !preferTopBar)
 
 	return (

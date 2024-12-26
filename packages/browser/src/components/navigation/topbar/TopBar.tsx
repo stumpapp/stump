@@ -5,6 +5,7 @@ import { NavigationItem } from '@stump/sdk'
 import { Book, Home } from 'lucide-react'
 import { useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router'
+import { useDimensionsRef } from 'rooks'
 import { match } from 'ts-pattern'
 
 import { useAppContext } from '@/context'
@@ -19,6 +20,7 @@ import TopBarNavLink from './TopBarNavLink'
 export default function TopNavigation() {
 	const location = useLocation()
 
+	const [ref, size] = useDimensionsRef()
 	const { t } = useLocaleContext()
 	const { checkPermission } = useAppContext()
 	const {
@@ -76,6 +78,7 @@ export default function TopNavigation() {
 								key="libraries-topbar-navlink"
 								showCreate={ctx.show_create_action}
 								showLinkToAll={ctx.show_link_to_all}
+								width={size?.width}
 							/>
 						))
 						// .with('SmartLists', () => <SmartListSideBarSection />)
@@ -84,12 +87,13 @@ export default function TopNavigation() {
 								key="book-clubs-topbar-navlink"
 								showCreate={ctx.show_create_action}
 								showLinkToAll={ctx.show_link_to_all}
+								width={size?.width}
 							/>
 						))
 						.otherwise(() => null),
 				)
 				.filter(Boolean),
-		[arrangement, checkSectionPermission, location, t],
+		[arrangement, checkSectionPermission, location, t, size?.width],
 	)
 
 	return (
@@ -101,10 +105,12 @@ export default function TopNavigation() {
 				}}
 			>
 				<NavigationMenu className="z-[100] h-full">
-					<NavigationMenu.List className="w-full pl-4">{sections}</NavigationMenu.List>
+					<div ref={ref}>
+						<NavigationMenu.List className="w-full pl-4">{sections}</NavigationMenu.List>
+					</div>
 				</NavigationMenu>
 
-				<div className="flex h-full items-center gap-x-2">
+				<div className="flex h-full shrink-0 items-center gap-x-2">
 					<NavigationMenu className="z-[100] h-full pr-4" viewPortProps={{ align: 'right' }}>
 						<NavigationMenu.List className="w-full">
 							<SettingsNavigationItem />

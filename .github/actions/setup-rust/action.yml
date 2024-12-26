@@ -21,13 +21,11 @@ runs:
   using: composite
   steps:
     - name: Install Rust
-      uses: actions-rs/toolchain@v1
+      uses: dtolnay/rust-toolchain@1.81.0
       with:
         toolchain: 1.81.0
-        profile: minimal
-        override: true
         components: rustfmt, clippy
-        target: ${{ inputs.additional-targets }}
+        targets: ${{ inputs.additional-targets }}
 
     - name: Configure environment
       if: ${{ runner.environment != 'self-hosted' && runner.os != 'Windows' }}

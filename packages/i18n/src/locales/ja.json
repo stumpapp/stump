@@ -1,82 +1,82 @@
 {
 	"underConstruction": {
-		"heading": "This is awkward",
-		"message": "You've stumbled upon a page that's still being developed. I'd love to show it to you, but it isn't quite ready yet.",
-		"homeLink": "Go Home",
-		"githubLink": "View the GitHub issue"
+		"heading": "気まずい",
+		"message": "まだ開発中のページを見つけました。お見せしたいのですが、まだ準備ができていません。",
+		"homeLink": "ホームへ",
+		"githubLink": "GitHubの問題を見る"
 	},
 	"authScene": {
-		"claimHeading": "Initialize your server",
-		"claimText": "This Stump server is not initialized. Use the form below to create your account. Once created, you will have full access to all server features.",
+		"claimHeading": "サーバーを初期化",
+		"claimText": "このStumpサーバーは初期化されていません。以下のフォームを使用してアカウントを作成してください。作成するとすべてのサーバー機能に完全にアクセスできるようになります。",
 		"form": {
 			"validation": {
-				"missingUsername": "Username is required",
-				"missingPassword": "Password is required",
-				"usernameAlreadyExists": "Username already exists"
+				"missingUsername": "ユーザ名が必要です",
+				"missingPassword": "パスワードが必要です",
+				"usernameAlreadyExists": "ユーザ名はすでに存在します"
 			},
 			"labels": {
-				"username": "Username",
-				"password": "Password"
+				"username": "ユーザ名",
+				"password": "パスワード"
 			},
 			"buttons": {
-				"createAccount": "Create Account",
-				"login": "Log in"
+				"createAccount": "アカウント作成",
+				"login": "ログイン"
 			}
 		},
 		"toasts": {
-			"loggingIn": "Logging in...",
-			"loggedIn": "Welcome back!",
-			"loggedInFirstTime": "Welcome!",
-			"registering": "Registering...",
-			"registered": "Registered!",
-			"loginFailed": "Login failed. Please try again",
-			"registrationFailed": "Registration failed. Please try again"
+			"loggingIn": "ログインしています...",
+			"loggedIn": "おかえりなさい！",
+			"loggedInFirstTime": "ようこそ！",
+			"registering": "登録しています...",
+			"registered": "登録しました！",
+			"loginFailed": "ログインに失敗しました。もう一度ログインしてください。",
+			"registrationFailed": "登録に失敗しました。もう一度お試しください"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "Library Configuration",
-			"subtitleCreating": "A preview of your new library will be shown below",
-			"subtitleEditing": "A preview of your library edits will be shown below"
+			"heading": "ライブラリ設定",
+			"subtitleCreating": "新しいライブラリのプレビューが以下に表示されます",
+			"subtitleEditing": "ライブラリの編集のプレビューが以下に表示されます"
 		}
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "File Information",
+			"heading": "ファイル情報",
 			"labels": {
-				"fileSize": "File Size",
-				"fileType": "File Type",
-				"fileLocation": "File Location",
-				"fileChecksum": "Checksum"
+				"fileSize": "ファイルサイズ",
+				"fileType": "ファイル形式",
+				"fileLocation": "ファイルの場所",
+				"fileChecksum": "チェックサム"
 			}
 		},
 		"emailBook": {
-			"heading": "Email book",
-			"description": "Send this book to device or email address",
+			"heading": "Eメールブック",
+			"description": "この本をデバイスまたはメールアドレスに送信する",
 			"form": {
 				"email": {
-					"label": "Email",
-					"placeholder": "Email address",
-					"description": "An email address to send the book to. Click add to finalize each input"
+					"label": "メール",
+					"placeholder": "メールアドレス",
+					"description": "本を送るメールアドレスです。各入力を完了するには追加をクリックしてください"
 				},
 				"devices": {
-					"label": "Devices",
-					"placeholder": "Select devices",
-					"noFilterMatch": "No devices match the filter"
+					"label": "デバイス",
+					"placeholder": "デバイス選択",
+					"noFilterMatch": "フィルタに一致するデバイスがありません"
 				}
 			}
 		},
-		"nextInSeries": "Next in Series"
+		"nextInSeries": "次のシリーズ"
 	},
 	"createOrUpdateBookClubForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My book club",
-				"description": "The name of your book club"
+				"label": "名前",
+				"placeholder": "マイブッククラブ",
+				"description": "ブッククラブの名前"
 			},
 			"description": {
-				"label": "Description",
+				"label": "説明",
 				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
 				"description": "An optional, short description of your book club"
 			},

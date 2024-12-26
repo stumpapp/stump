@@ -27,7 +27,7 @@ runs:
         profile: minimal
         override: true
         components: rustfmt, clippy
-        targets: ${{ inputs.additional-targets }}
+        target: ${{ inputs.additional-targets }}
 
     - name: Configure environment
       if: ${{ runner.environment != 'self-hosted' && runner.os != 'Windows' }}

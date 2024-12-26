@@ -121,3 +121,34 @@ jobs:
 
       - name: Build documentation app
         run: yarn docs build
+
+  run-e2e:
+    needs: code-changes-check
+    if: "!contains(github.event.pull_request.head.ref, 'release/v') && (needs.code-changes-check.outputs.frontend-changed == 'true' || needs.code-changes-check.outputs.rust-changed == 'true')"
+    name: End-to-end tests
+    runs-on: [self-hosted]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node and Yarn
+        uses: ./.github/actions/setup-yarn
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Build server
+        uses: ./.github/actions/build-server
+
+      - name: Build web application
+        uses: ./.github/actions/build-web
+
+      - name: Install Playwright Browsers
+        run: yarn playwright install --with-deps
+        working-directory: e2e
+
+      - name: Run Playwright tests
+        run: yarn playwright test
+        working-directory: e2e
+        # env:
+        #   DOCKER: true

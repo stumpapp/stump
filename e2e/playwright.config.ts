@@ -38,11 +38,13 @@ export default defineConfig({
 		{
 			name: 'setup users',
 			testMatch: /user\.setup\.ts/,
+			fullyParallel: false,
 		},
 		{
 			name: 'setup libraries',
 			testMatch: /library\.setup\.ts/,
 			dependencies: ['setup users'],
+			fullyParallel: false,
 		},
 		{
 			name: 'chromium',

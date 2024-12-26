@@ -41,7 +41,8 @@ jobs:
     needs: code-changes-check
     name: Build docker image
     runs-on: [self-hosted]
-    if: ${{ needs.code-changes-check.outputs.changes != '[]' }}
+    # if: ${{ needs.code-changes-check.outputs.changes != '[]' }}
+    if: false
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3

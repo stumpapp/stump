@@ -1,98 +1,98 @@
 {
 	"underConstruction": {
-		"heading": "This is awkward",
-		"message": "You've stumbled upon a page that's still being developed. I'd love to show it to you, but it isn't quite ready yet.",
-		"homeLink": "Go Home",
-		"githubLink": "View the GitHub issue"
+		"heading": "気まずい",
+		"message": "まだ開発中のページを見つけました。お見せしたいのですが、まだ準備ができていません。",
+		"homeLink": "ホームへ",
+		"githubLink": "GitHubの問題を見る"
 	},
 	"authScene": {
-		"claimHeading": "Initialize your server",
-		"claimText": "This Stump server is not initialized. Use the form below to create your account. Once created, you will have full access to all server features.",
+		"claimHeading": "サーバーを初期化",
+		"claimText": "このStumpサーバーは初期化されていません。以下のフォームを使用してアカウントを作成してください。作成するとすべてのサーバー機能に完全にアクセスできるようになります。",
 		"form": {
 			"validation": {
-				"missingUsername": "Username is required",
-				"missingPassword": "Password is required",
-				"usernameAlreadyExists": "Username already exists"
+				"missingUsername": "ユーザ名が必要です",
+				"missingPassword": "パスワードが必要です",
+				"usernameAlreadyExists": "ユーザ名はすでに存在します"
 			},
 			"labels": {
-				"username": "Username",
-				"password": "Password"
+				"username": "ユーザ名",
+				"password": "パスワード"
 			},
 			"buttons": {
-				"createAccount": "Create Account",
-				"login": "Log in"
+				"createAccount": "アカウント作成",
+				"login": "ログイン"
 			}
 		},
 		"toasts": {
-			"loggingIn": "Logging in...",
-			"loggedIn": "Welcome back!",
-			"loggedInFirstTime": "Welcome!",
-			"registering": "Registering...",
-			"registered": "Registered!",
-			"loginFailed": "Login failed. Please try again",
-			"registrationFailed": "Registration failed. Please try again"
+			"loggingIn": "ログインしています...",
+			"loggedIn": "おかえりなさい！",
+			"loggedInFirstTime": "ようこそ！",
+			"registering": "登録しています...",
+			"registered": "登録しました！",
+			"loginFailed": "ログインに失敗しました。もう一度ログインしてください。",
+			"registrationFailed": "登録に失敗しました。もう一度お試しください"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "Library Configuration",
-			"subtitleCreating": "A preview of your new library will be shown below",
-			"subtitleEditing": "A preview of your library edits will be shown below"
+			"heading": "ライブラリ設定",
+			"subtitleCreating": "新しいライブラリのプレビューが以下に表示されます",
+			"subtitleEditing": "ライブラリの編集のプレビューが以下に表示されます"
 		}
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "File Information",
+			"heading": "ファイル情報",
 			"labels": {
-				"fileSize": "File Size",
-				"fileType": "File Type",
-				"fileLocation": "File Location",
-				"fileChecksum": "Checksum"
+				"fileSize": "ファイルサイズ",
+				"fileType": "ファイル形式",
+				"fileLocation": "ファイルの場所",
+				"fileChecksum": "チェックサム"
 			}
 		},
 		"emailBook": {
-			"heading": "Email book",
-			"description": "Send this book to device or email address",
+			"heading": "Eメールブック",
+			"description": "この本をデバイスまたはメールアドレスに送信する",
 			"form": {
 				"email": {
-					"label": "Email",
-					"placeholder": "Email address",
-					"description": "An email address to send the book to. Click add to finalize each input"
+					"label": "メール",
+					"placeholder": "メールアドレス",
+					"description": "本を送るメールアドレスです。各入力を完了するには追加をクリックしてください"
 				},
 				"devices": {
-					"label": "Devices",
-					"placeholder": "Select devices",
-					"noFilterMatch": "No devices match the filter"
+					"label": "デバイス",
+					"placeholder": "デバイス選択",
+					"noFilterMatch": "フィルタに一致するデバイスがありません"
 				}
 			}
 		},
-		"nextInSeries": "Next in Series"
+		"nextInSeries": "次のシリーズ"
 	},
 	"createOrUpdateBookClubForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My book club",
-				"description": "The name of your book club"
+				"label": "名前",
+				"placeholder": "読書クラブ",
+				"description": "読書クラブの名前"
 			},
 			"description": {
-				"label": "Description",
-				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
-				"description": "An optional, short description of your book club"
+				"label": "説明",
+				"placeholder": "「私たちの旗は死を意味する」ファンクラブ。海賊版小説を心ゆくまで読みんでいます",
+				"description": "読書クラブについての短い説明（任意）"
 			},
 			"is_private": {
-				"label": "Private club",
-				"description": "If enabled, only users you invite will be able to join your book club"
+				"label": "個人クラブ",
+				"description": "有効にすると招待したユーザーのみが読書クラブに参加できるようになります"
 			},
 			"member_role_spec": {
-				"heading": "Custom role mapping",
+				"heading": "カスタムロールの割り当て",
 				"subtitle": [
-					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
-					"documentation"
+					"必要に応じて、読書クラブの役割にカスタム名を作成することもできます。詳細については、",
+					"ドキュメント"
 				],
 				"member": {
-					"label": "Member",
-					"placeholder": "Member",
+					"label": "メンバ",
+					"placeholder": "メンバ",
 					"description": "The name of the default role for your book club"
 				},
 				"moderator": {
@@ -193,39 +193,39 @@
 			}
 		},
 		"members": {
-			"title": "Members",
-			"description": "Manage the members of this book club",
+			"title": "メンバ",
+			"description": "この読書クラブのメンバを管理",
 			"sections": {}
 		},
 		"roles": {
-			"title": "Roles",
-			"description": "Customize the roles in this book club",
+			"title": "役割",
+			"description": "この読書クラブの役割をカスタマイズする",
 			"sections": {
 				"roleMappings": {
-					"heading": "Existing role mappings",
-					"description": "The current role mappings for this book club"
+					"heading": "既存のロールマッピング",
+					"description": "この読書クラブの現在のロールマッピング"
 				}
 			}
 		},
 		"scheduling/scheduler": {
-			"title": "Scheduler",
-			"description": "Create and manage the schedule readings for this book club"
+			"title": "スケジューラ",
+			"description": "この読書クラブの読書スケジュールを作成および管理する"
 		},
 		"scheduling/options": {
-			"title": "Options",
-			"description": "Additional options for this book club's scheduling"
+			"title": "オプション",
+			"description": "この読書クラブのスケジュールに関する追加オプション"
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this book club and all of its contents or certain resources",
+			"title": "削除アクション",
+			"description": "この読書クラブとそのすべてのコンテンツまたは特定のリソースを完全に削除します",
 			"sections": {
 				"deleteClub": {
-					"heading": "Delete club",
+					"heading": "クラブを削除",
 					"description": [
-						"Permanently delete this book club and all its contents.",
-						"This action cannot be undone"
+						"この読書クラブとその内容をすべて完全に削除します。",
+						"この操作は元に戻せません"
 					],
-					"trigger": "Delete club"
+					"trigger": "クラブを削除"
 				}
 			}
 		}
@@ -233,77 +233,77 @@
 	"createOrUpdateLibraryForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
-				"description": "A friendly name for your library",
-				"placeholder": "My Library"
+				"label": "名前",
+				"description": "ライブラリのわかりやすい名前",
+				"placeholder": "マイライブラリ"
 			},
 			"path": {
-				"label": "Path",
-				"description": "The path to the library as it exists on your server",
+				"label": "パス",
+				"description": "サーバー上に存在するライブラリへのパス",
 				"placeholder": "/path/to/library"
 			},
 			"description": {
-				"label": "Description",
-				"description": "A short description of your library",
-				"placeholder": "A library of all my favorite books"
+				"label": "説明",
+				"description": "ライブラリの簡単な説明",
+				"placeholder": "私のお気に入り本のライブラリ"
 			},
 			"tags": {
-				"label": "Tags",
-				"description": "Used to categorize your library or enforce access rules"
+				"label": "タグ",
+				"description": "ライブラリを分類したりアクセスルールを適用したりするために使用されます"
 			},
 			"readingSettings": {
 				"section": {
-					"heading": "Reading settings",
-					"description": "Default reader settings to use for books"
+					"heading": "設定の読み込み中",
+					"description": "書籍に使用するデフォルトのリーダー設定"
 				},
 				"imageScaling": {
-					"label": "Image scaling",
-					"description": "How the image-based reader scales images to the page"
+					"label": "画像の拡大縮小",
+					"description": "画像ベースのリーダーが画像をページに合わせて拡大縮小する方法"
 				},
 				"readingMode": {
-					"label": "Default reader",
-					"description": "The default reader to use for image-based books"
+					"label": "既定のリーダー",
+					"description": "画像ベースの書籍に使用するデフォルトのリーダー"
 				},
 				"readingDirection": {
-					"label": "Reading direction",
-					"description": "Which direction the reader progresses through pages"
+					"label": "読む方向",
+					"description": "読者がページを進める方向"
 				}
 			},
 			"thumbnailConfig": {
 				"section": {
 					"heading": {
-						"create": "Thumbnail configuration",
-						"update": "Generation"
+						"create": "サムネイルの設定",
+						"update": "生成"
 					},
-					"description": "Improve loading times while browsing your library by generating thumbnails for your books"
+					"description": "本のサムネイルを生成することでライブラリを閲覧する際の読み込み時間を短縮します。"
 				},
 				"enableSwitch": {
-					"label": "Enabled",
-					"description": "Generate thumbnail images for this library"
+					"label": "有効",
+					"description": "このライブラリのサムネイル画像を生成"
 				},
 				"scaled": {
-					"label": "Scaled",
-					"description": "Scale the image by a custom factor per dimension",
+					"label": "拡大率",
+					"description": "寸法ごとにカスタムの係数で画像を拡大縮小します",
 					"width": {
-						"label": "Width scale"
+						"label": "幅のスケール"
 					},
 					"height": {
-						"label": "Height scale"
+						"label": "高さのスケール"
 					}
 				},
 				"sized": {
-					"label": "Explicitly Sized",
-					"description": "Set each dimension of the thumbnail (in pixels)",
+					"label": "明示的にサイズ指定",
+					"description": "サムネイルの各寸法を設定します（ピクセル単位）",
 					"width": {
-						"label": "Width"
+						"label": "幅"
 					},
 					"height": {
-						"label": "Height"
+						"label": "高さ"
 					}
 				},
 				"format": {
-					"label": "Image format",
-					"description": "The format of the generated thumbnail images"
+					"label": "画像の形式",
+					"description": "生成されたサムネイル画像の形式"
 				},
 				"quality": {
 					"label": "Quality",
@@ -404,97 +404,97 @@
 				"create": "Scan after creation",
 				"update": "Scan after updates"
 			},
-			"description": "Index the library files to populate your database"
+			"description": "ライブラリファイルをインデックスしてデータベースに入力します"
 		}
 	},
 	"createLibraryScene": {
 		"heading": "Create New Library",
 		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on libraries and how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"subtitleLink": "関連ドキュメント",
 		"form": {
 			"stepLabel": "Step",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this library, including its name, path, and description"
+					"label": "基本",
+					"heading": "基本情報",
+					"description": "このライブラリの名前、パス、説明などの詳細"
 				},
 				{
-					"label": "Scanning",
-					"heading": "Scanner Behavior",
-					"description": "Settings related to how Stump scans this library"
+					"label": "スキャン中",
+					"heading": "スキャンの動作",
+					"description": "Stumpがこのライブラリをスキャンする方法に関する設定"
 				},
 				{
-					"label": "Thumbnails",
-					"heading": "Thumbnails",
-					"description": "The options for if and how Stump generates thumbnails for this library"
+					"label": "サムネイル",
+					"heading": "サムネイル",
+					"description": "Stumpがこのライブラリのサムネイルを生成するかどうか、また生成方法のオプション"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your library settings before creating it"
+					"label": "レビュー",
+					"heading": "レビュー",
+					"description": "ライブラリを作成する前に設定を確認してください"
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "はい",
+				"no": "いいえ",
+				"none": "なし",
 				"labels": {
-					"generateThumbnails": "Generate thumbnails",
-					"mode": "Mode",
-					"format": "Format",
-					"quality": "Quality",
-					"name": "Name",
-					"path": "Path",
-					"description": "Description",
-					"tags": "Tags",
-					"pattern": "Pattern",
-					"ignoreRules": "Ignore rules",
-					"convertRar": "Convert RAR/CBR",
-					"deleteConversions": "Delete converted files",
-					"processMetadata": "Process metadata",
-					"generateFileHashes": "Generate file hashes"
+					"generateThumbnails": "サムネイルを生成",
+					"mode": "モード",
+					"format": "形式",
+					"quality": "クオリティ",
+					"name": "名前",
+					"path": "パス",
+					"description": "説明",
+					"tags": "タグ",
+					"pattern": "パターン",
+					"ignoreRules": "無視ルール",
+					"convertRar": "RAR/CBR 変換",
+					"deleteConversions": "変換されたファイルを削除",
+					"processMetadata": "プロセスメタデータ",
+					"generateFileHashes": "ファイルハッシュを生成"
 				}
 			},
 			"buttons": {
-				"confirm": "Create Library"
+				"confirm": "ライブラリを作成"
 			}
 		}
 	},
 	"fileExplorer": {
 		"uploadModal": {
 			"title": {
-				"books": "Upload books",
-				"series": "Upload series"
+				"books": "本をアップロード",
+				"series": "シリーズをアップロード"
 			},
 			"description": {
-				"books": "Add books directly to the current path in the file explorer",
-				"series": "Add a series directly to the current path in the file explorer"
+				"books": "ファイルエクスプローラの現在のパスに書籍を直接追加する",
+				"series": "ファイルエクスプローラの現在のパスにシリーズを直接追加する"
 			},
 			"seriesDisclaimer": [
-				"It must be a ",
-				"zipped file",
-				"containing the folder which should be the series, with all the books inside"
+				"でなければならない ",
+				"zip形式のファイル",
+				"シリーズとなるべきフォルダとその中にあるすべての本を含む"
 			],
 			"dropzone": {
-				"books": "Drag and drop books here",
-				"series": "Drag and drop a zip file here",
-				"alt": "Or click to browse your computer for books to upload"
+				"books": "本をここにドラッグ＆ドロップ",
+				"series": "zipファイルをここにドラッグ＆ドロップ",
+				"alt": "またはクリックしてコンピュータでアップロードする書籍を参照します"
 			},
-			"addedFiles": "Added files"
+			"addedFiles": "追加されたファイル"
 		}
 	},
 	"librarySettingsScene": {
 		"heading": "Manage Library",
 		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"subtitleLink": "関連ドキュメント",
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "基本",
 			"options": {
-				"general": "General",
-				"reading": "Reading",
-				"scanning": "Scanning",
-				"thumbnails": "Thumbnails",
+				"general": "一般",
+				"reading": "閲覧中",
+				"scanning": "スキャン中",
+				"thumbnails": "サムネイル",
 				"ignore-rules": "Ignore Rules",
 				"analysis": "Analysis",
 				"label": "Options"

@@ -767,6 +767,7 @@ model UserPreferences {
   enable_hide_scrollbar          Boolean @default(false)
   prefer_accent_color            Boolean @default(true)
   show_thumbnails_in_headers     Boolean @default(false)
+  enable_job_overlay             Boolean @default(true)
 
   navigation_arrangement Bytes?
   home_arrangement       Bytes?

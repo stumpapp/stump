@@ -27,7 +27,6 @@ jobs:
     needs: build-webapp
     strategy:
       matrix:
-        os: [ubuntu-22.04, macos-latest, windows-latest]
         include:
           - platform: 'macos-latest' # for Arm based macs (M1 and above).
             args: '--target aarch64-apple-darwin'
@@ -38,7 +37,7 @@ jobs:
           - platform: 'windows-latest'
             args: ''
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -66,6 +65,7 @@ jobs:
         with:
           releaseName: 'Desktop App v__VERSION__'
           releaseBody: 'See the assets to download this version and install.'
+          releaseId: 'untagged-dcf8ed03bb6a19b142e0'
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}

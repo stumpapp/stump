@@ -9,7 +9,7 @@ on:
     #     required: true
   pull_request:
     branches:
-      - develop
+      - experimental
 
 jobs:
   # This job builds the common webapp HTML/JS/CSS used for all platforms

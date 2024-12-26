@@ -27,6 +27,7 @@ jobs:
     needs: build-webapp
     strategy:
       matrix:
+        os: [ubuntu-22.04, macos-latest, windows-latest]
         include:
           - platform: 'macos-latest' # for Arm based macs (M1 and above).
             args: '--target aarch64-apple-darwin'

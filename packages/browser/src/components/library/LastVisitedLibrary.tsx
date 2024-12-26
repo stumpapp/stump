@@ -11,7 +11,9 @@ type Props = {
 
 export default function LastVisitedLibrary({ container }: Props) {
 	const { sdk } = useSDK()
-	const { data: library } = useQuery([sdk.library.keys.getLastVisited], sdk.library.getLastVisited)
+	const { data: library } = useQuery([sdk.library.keys.getLastVisited], () =>
+		sdk.library.getLastVisited(),
+	)
 
 	if (!library) {
 		return null

@@ -84,7 +84,7 @@ export default function LibraryNavigationItem({
 			<NavigationMenu.Content>
 				<div
 					style={{ width }}
-					className={cn('flex min-h-[150px] gap-3 p-2', {
+					className={cn('flex min-h-[150px] min-w-[300px] gap-3 p-2', {
 						'md:w-[400px] lg:w-[500px]': !width,
 						'md:w-[300px] lg:w-[350px]': !width && !libraries?.length,
 					})}
@@ -102,9 +102,9 @@ export default function LibraryNavigationItem({
 									<TopBarLinkListItem
 										to={paths.libraryCreate()}
 										isActive={location.pathname.startsWith(paths.libraryCreate())}
-										className="justify-center self-end border border-dashed border-edge-subtle"
+										className="justify-center self-end border border-dashed border-edge-subtle p-1"
 									>
-										<span className="line-clamp-1 font-medium">Create library</span>
+										<span className="line-clamp-1 text-sm font-medium">Create library</span>
 									</TopBarLinkListItem>
 								)}
 
@@ -112,9 +112,9 @@ export default function LibraryNavigationItem({
 									<TopBarLinkListItem
 										to={paths.libraries()}
 										isActive={location.pathname.startsWith(paths.libraries())}
-										className="justify-center self-end border border-dashed border-edge-subtle"
+										className="justify-center self-end border border-dashed border-edge-subtle p-1"
 									>
-										<span className="line-clamp-1 font-medium">See all</span>
+										<span className="line-clamp-1 text-sm font-medium">See all</span>
 									</TopBarLinkListItem>
 								)}
 							</div>

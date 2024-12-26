@@ -63,5 +63,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          releaseId: 'RE_kwDOGmomws4Ld-tG'
+          releaseId: 192408390
           args: ${{ matrix.args }}

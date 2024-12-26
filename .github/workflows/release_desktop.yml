@@ -21,6 +21,8 @@ jobs:
 
       - name: Build web application/upload artifact
         uses: ./.github/actions/build-web
+        with:
+          app: desktop
 
   # This job builds the binaries for each release
   build-app:

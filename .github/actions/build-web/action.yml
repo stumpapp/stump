@@ -1,6 +1,11 @@
 name: Compile Web Application
 description: Compile stump web
 
+inputs:
+  app:
+    description: 'The app to build, i.e. web, desktop'
+    default: 'web'
+
 runs:
   using: composite
   steps:
@@ -13,10 +18,10 @@ runs:
     - name: Build app
       shell: bash
       run: yarn build
-      working-directory: apps/web
+      working-directory: apps/${{ inputs.app }}
 
     - name: Upload bundle
       uses: ./.github/actions/upload-artifact
       with:
         upload-name: webapp
-        upload-path: apps/web/dist
+        upload-path: apps/${{ inputs.app }}/dist

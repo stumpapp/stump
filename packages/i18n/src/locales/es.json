@@ -1495,7 +1495,7 @@
 						"label": "File Management",
 						"explorer": {
 							"label": "File Explorer",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+							"description": "Permite al usuario acceder al explorador de archivos. No se admite restricción de contenido cuando se concede esta función"
 						},
 						"download": {
 							"label": "Descargar ficheros",
@@ -1714,7 +1714,7 @@
 			"updateEmailer": {
 				"helmet": "Update emailer",
 				"title": "Update emailer",
-				"description": "Update the details of this SMTP emailer"
+				"description": ""
 			}
 		}
 	},
@@ -1824,7 +1824,7 @@
 		"placeholderNoTags": "No hay etiquetas disponibles"
 	},
 	"thumbnailDropdown": {
-		"label": "Edit thumbnail",
+		"label": "",
 		"options": {
 			"selectFromBooks": "Seleccionar desde los libros",
 			"uploadImage": "Subir una imagen"

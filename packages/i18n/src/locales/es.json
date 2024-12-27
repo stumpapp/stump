@@ -72,7 +72,7 @@
 		"fields": {
 			"name": {
 				"label": "Nombre",
-				"placeholder": "My book club",
+				"placeholder": "Mi club de libros",
 				"description": "The name of your book club"
 			},
 			"description": {
@@ -1319,7 +1319,7 @@
 					"resetTokens": {
 						"label": "Clear authentication",
 						"description": [
-							"Remove all securely-stored access tokens for your servers",
+							"Elimina todos los tokens de acceso almacenados de forma segura para tus servidores",
 							"You will have to re-authenticate with each server"
 						],
 						"confirmation": {
@@ -1387,7 +1387,7 @@
 							"timestamp": "Timestamp"
 						},
 						"emptyHeading": "No hay registros para mostrar",
-						"emptySubtitle": "Your server is either very healthy or very unhealthy"
+						"emptySubtitle": ""
 					}
 				},
 				"liveLogs": {

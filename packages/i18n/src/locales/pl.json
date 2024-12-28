@@ -464,24 +464,24 @@
 	"fileExplorer": {
 		"uploadModal": {
 			"title": {
-				"books": "Upload books",
-				"series": "Upload series"
+				"books": "Prześlij książki",
+				"series": "Prześlij serię"
 			},
 			"description": {
-				"books": "Add books directly to the current path in the file explorer",
-				"series": "Add a series directly to the current path in the file explorer"
+				"books": "Dodaj książki bezpośrednio do aktualnej ścieżki w eksploratorze plików",
+				"series": "Dodaj serie bezpośrednio do aktualnej ścieżki w eksploratorze plików"
 			},
 			"seriesDisclaimer": [
-				"It must be a ",
-				"zipped file",
-				"containing the folder which should be the series, with all the books inside"
+				"Musi to być ",
+				"spakowany plik",
+				"zawierający folder, który powinien być serią, ze wszystkimi książkami wewnątrz"
 			],
 			"dropzone": {
-				"books": "Drag and drop books here",
-				"series": "Drag and drop a zip file here",
-				"alt": "Or click to browse your computer for books to upload"
+				"books": "Przeciągnij i upuść książki tutaj",
+				"series": "Przeciągnij i upuść plik zip tutaj",
+				"alt": "Lub kliknij aby przeglądać Twój komputer w celu znalezienia książki do przesłania"
 			},
-			"addedFiles": "Added files"
+			"addedFiles": "Dodaj pliki"
 		}
 	},
 	"librarySettingsScene": {
@@ -1073,7 +1073,7 @@
 					},
 					"avatarPicker": {
 						"heading": "Ustaw swój awatar",
-						"subtitle": "Stump wspiera niestandardowe awatary które można ustawić poprzez podanie odnośnika do obrazu. Wgrywanie obrazów jest nieobsługiwane w celu zmniejszenia ilości danych przechowywanych na serwerze.",
+						"subtitle": "Stump wspiera niestandardowe awatary które można ustawić poprzez podanie odnośnika do obrazu. Przesyłanie obrazów jest nieobsługiwane w celu zmniejszenia ilości danych przechowywanych na serwerze.",
 						"preview": "Podgląd pojawi się tutaj po wprowadzeniu odnośnika.",
 						"labels": {
 							"imageUrl": "Adres obrazka",
@@ -1323,10 +1323,10 @@
 							"You will have to re-authenticate with each server"
 						],
 						"confirmation": {
-							"trigger": "Clear authentication",
-							"title": "Clear authentication",
+							"trigger": "Wyczyść uwierzytelnienia",
+							"title": "Wyczyść uwierzytelnienia",
 							"description": "This will remove all securely-stored access tokens for your servers",
-							"confirm": "Clear authentication"
+							"confirm": "Wyczyść uwierzytelnienia"
 						}
 					}
 				},
@@ -1481,14 +1481,14 @@
 						}
 					},
 					"feature": {
-						"label": "Feature Opt-In",
+						"label": "Funkcja domyślnie wyłączona",
 						"api_keys": {
-							"label": "API keys",
-							"description": "Allow the user to manage their own API keys"
+							"label": "Klucze API",
+							"description": "Pozwala użytkownikowi zarządzać własnymi kluczami API"
 						},
 						"koreader_sync": {
-							"label": "KoReader sync",
-							"description": "Allow the user to access the KoReader sync integration"
+							"label": "Synchronizacja KoReader",
+							"description": "Pozwala użytkownikowi na dostęp do integracji z synchronizacją KoReader"
 						}
 					},
 					"file": {
@@ -1618,7 +1618,7 @@
 				},
 				"devices": {
 					"title": "Urządzenia odbiorcze e-mail",
-					"description": "The device aliases you have configured for receiving emails from your Stump server instance",
+					"description": "Aliasy urządzeń skonfigurowanych do otrzymywania wiadomości e-mail z Twojej instancji serwera Stump",
 					"addDevice": "Dodaj alias urządzenia",
 					"addOrUpdateDevice": {
 						"title": {
@@ -1779,7 +1779,7 @@
 		},
 		"libraryOptions": {
 			"scanLibrary": "Skanuj",
-			"fileExplorer": "Files",
+			"fileExplorer": "Pliki",
 			"manageLibrary": "Zarządzaj",
 			"deleteLibrary": "Usuń"
 		},
@@ -1827,7 +1827,7 @@
 		"label": "Edytuj miniaturkę",
 		"options": {
 			"selectFromBooks": "Wybierz z książek",
-			"uploadImage": "Wrzuć zdjęcie"
+			"uploadImage": "Prześlij obraz"
 		},
 		"uploadImage": {
 			"emptyState": "Podgląd obrazu pojawi się tutaj",
@@ -1846,18 +1846,18 @@
 		"create": "Utwórz",
 		"edit": "Edytuj",
 		"update": "Aktualizuj",
-		"upload": "Upload",
-		"uploading": "Uploading",
+		"upload": "Prześlij",
+		"uploading": "Przesyłanie",
 		"unimplemented": "Ta funkcjonalność nie jest jeszcze zaimplementowana! Sprawdź ponownie później",
 		"limitedFunctionality": "Funkcjonalność ta nie jest jeszcze w pełni zaimplementowana. Sprawdź później",
 		"logIn": "Zaloguj się",
 		"login": "Nazwa użytkowika",
 		"seeError": "Wyświetl błąd",
-		"remove": "Remove",
+		"remove": "Usuń",
 		"goBack": "Wróć",
 		"goToServers": "Przejdź do serwerów",
 		"notReady": "Ta funkcja nie jest jeszcze gotowa",
-		"notUsedYet": "Not used yet",
-		"never": "Never"
+		"notUsedYet": "Jeszcze nieużywane",
+		"never": "Nigdy"
 	}
 }

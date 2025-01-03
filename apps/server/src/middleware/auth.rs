@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use axum::{
 	body::Body,
-	extract::{OriginalUri, Path, Request, State},
+	extract::{FromRequestParts, OriginalUri, Path, Request, State},
 	http::{header, StatusCode},
 	middleware::Next,
 	response::{IntoResponse, Redirect, Response},
@@ -143,11 +143,31 @@ impl RequestContext {
 #[tracing::instrument(skip(ctx, req, next))]
 pub async fn auth_middleware(
 	State(ctx): State<AppState>,
-	HostExtractor(host_details): HostExtractor,
-	mut session: Session,
-	mut req: Request,
+	req: Request,
 	next: Next,
 ) -> Result<Response, impl IntoResponse> {
+	// Extract Host
+	let (mut parts, body) = req.into_parts();
+	let host_details = match HostExtractor::from_request_parts(&mut parts, &ctx).await {
+		Ok(HostExtractor(host)) => host,
+		Err(err) => {
+			tracing::error!("Failed to extract Host header: {err}");
+			return Err(APIError::Unauthorized.into_response());
+		},
+	};
+
+	// Extract Session
+	let mut session = match Session::from_request_parts(&mut parts, &ctx).await {
+		Ok(session) => session,
+		Err(err) => {
+			tracing::error!("Failed to extract Session: {err:?}");
+			return Err(APIError::Unauthorized.into_response());
+		},
+	};
+
+	// Reform request
+	let mut req = Request::from_parts(parts, body);
+
 	let req_headers = req.headers().clone();
 	let auth_header = req_headers
 		.get(header::AUTHORIZATION)
@@ -805,10 +825,9 @@ mod tests {
 			.layer(session_layer)
 			.into_make_service_with_connect_info::<StumpRequestInfo>();
 
-		let config = TestServerConfig::builder()
-			.save_cookies()
-			.http_transport()
-			.build();
+		let mut config = TestServerConfig::new();
+		config.save_cookies = true;
+		config.transport = Some(axum_test::Transport::HttpRandomPort);
 
 		let mut server = TestServer::new_with_config(app, config).unwrap();
 		let (host_header, host_value) = host_header();

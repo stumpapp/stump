@@ -1,8 +1,8 @@
-use async_trait::async_trait;
 use axum::{
-	extract::{FromRef, FromRequestParts, Host},
+	extract::{FromRef, FromRequestParts},
 	http::request::Parts,
 };
+use axum_extra::extract::Host;
 use stump_core::opds::v2_0::link::OPDSLinkFinalizer;
 
 use crate::{config::state::AppState, errors::APIError};
@@ -37,7 +37,6 @@ impl From<HostDetails> for OPDSLinkFinalizer {
 #[derive(Debug, Clone)]
 pub struct HostExtractor(pub HostDetails);
 
-#[async_trait]
 impl<S> FromRequestParts<S> for HostExtractor
 where
 	AppState: FromRef<S>,

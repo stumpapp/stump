@@ -7,7 +7,7 @@
 	},
 	"authScene": {
 		"claimHeading": "Inicjalizuj serwer",
-		"claimText": "This Stump server is not initialized. Use the form below to create your account. Once created, you will have full access to all server features.",
+		"claimText": "Ten serwer Stump nie został zainicjalizowany. Użyj formularza poniżej aby stworzyć konto. Gdy będzie już ono stworzone, uzyskasz pełen dostęp do wszystkich funkcji serwera.",
 		"form": {
 			"validation": {
 				"missingUsername": "Nazwa użytkownika jest wymagana",
@@ -369,8 +369,8 @@
 					"description": "Generuj skrót dla każdego pliku w bibliotece w celu wykrycia duplikatów"
 				},
 				"koreaderHashes": {
-					"label": "KoReader-compatible hashes",
-					"description": "If using KoReader, generate additional hashes in the format it expects"
+					"label": "Skróty kompatybilne z KoReader",
+					"description": "Jeśli używasz KoReader, generuj dodatkowe skróty w formacie przezeń oczekiwanym"
 				}
 			},
 			"libraryPattern": {
@@ -464,24 +464,24 @@
 	"fileExplorer": {
 		"uploadModal": {
 			"title": {
-				"books": "Upload books",
-				"series": "Upload series"
+				"books": "Prześlij książki",
+				"series": "Prześlij serię"
 			},
 			"description": {
-				"books": "Add books directly to the current path in the file explorer",
-				"series": "Add a series directly to the current path in the file explorer"
+				"books": "Dodaj książki bezpośrednio do aktualnej ścieżki w eksploratorze plików",
+				"series": "Dodaj serie bezpośrednio do aktualnej ścieżki w eksploratorze plików"
 			},
 			"seriesDisclaimer": [
-				"It must be a ",
-				"zipped file",
-				"containing the folder which should be the series, with all the books inside"
+				"Musi to być ",
+				"spakowany plik",
+				"zawierający folder, który powinien być serią, ze wszystkimi książkami wewnątrz"
 			],
 			"dropzone": {
-				"books": "Drag and drop books here",
-				"series": "Drag and drop a zip file here",
-				"alt": "Or click to browse your computer for books to upload"
+				"books": "Przeciągnij i upuść książki tutaj",
+				"series": "Przeciągnij i upuść plik zip tutaj",
+				"alt": "Lub kliknij aby przeglądać Twój komputer w celu znalezienia książki do przesłania"
 			},
-			"addedFiles": "Added files"
+			"addedFiles": "Dodaj pliki"
 		}
 	},
 	"librarySettingsScene": {
@@ -601,30 +601,30 @@
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "Continue reading",
+			"title": "Kontynuuj czytanie",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any in-progress books you start will show up here"
+				"heading": "Brak zawartości do wyświetlenia",
+				"message": "Wszystkie rozpoczęte książki będą widoczne tutaj"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Recently added series",
+			"title": "Ostatnio dodane serie",
 			"emptyState": {
 				"heading": "Brak serii do wyświetlenia",
 				"message": "Każda seria, którą dodasz do swoich bibliotek, pojawi się tutaj"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Recently added books",
+			"title": "Ostatnio dodane książki",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any recent books you add will show up here"
+				"heading": "Brak zawartości do wyświetlenia",
+				"message": "Wszystkie ostatnio dodane książki będą widoczne tutaj"
 			}
 		}
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "Wznów czytanie",
+			"continueReading": "Kontynuuj czytanie",
 			"downloadSeries": "Pobierz serię"
 		}
 	},
@@ -845,33 +845,33 @@
 	},
 	"createOrUpdateApiKey": {
 		"validation": {
-			"futureDate": "Expiration date must be in the future"
+			"futureDate": "Data wygaśnięcia musi być w przyszłości"
 		},
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "Koreader Sync"
+				"label": "Nazwa",
+				"placeholder": "Synchronizacja KoReader"
 			},
 			"expiration": {
-				"label": "Expiration",
-				"placeholder": "Never"
+				"label": "Wygaśnięcie",
+				"placeholder": "Nigdy"
 			},
 			"expires_at": {
-				"label": "Expires at",
-				"placeholder": "Never"
+				"label": "Wygasa",
+				"placeholder": "Nigdy"
 			},
 			"permissions": {
 				"inherit": {
-					"label": "Inherit permissions",
-					"description": "The same permissions as your account"
+					"label": "Dziedzicz uprawnienia",
+					"description": "Te same uprawnienia co Twoje konto"
 				},
 				"explicit": {
-					"label": "Explicit permissions",
-					"description": "Choose the permissions this key should have"
+					"label": "Wskaż uprawnienia",
+					"description": "Wybierz uprawnienia, które powinien mieć ten klucz"
 				}
 			}
 		},
-		"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting"
+		"inheritDisclaimer": "Ten klucz API odziedziczy Twoje pełne uprawnienia, co oznacza, że może zrobić wszystko, co możesz zrobić i Ty. Zalecana jest ostrożność przy tym ustawieniu"
 	},
 	"userSmartListsScene": {
 		"heading": "Inteligentne listy",
@@ -1037,7 +1037,7 @@
 			"application": {
 				"account": "Konto",
 				"appearance": "Wygląd",
-				"api keys": "API keys",
+				"api keys": "Klucze API",
 				"reader": "Czytnik",
 				"desktop": "Pulpit",
 				"label": "Aplikacja"
@@ -1073,7 +1073,7 @@
 					},
 					"avatarPicker": {
 						"heading": "Ustaw swój awatar",
-						"subtitle": "Stump wspiera niestandardowe awatary które można ustawić poprzez podanie odnośnika do obrazu. Wgrywanie obrazów jest nieobsługiwane w celu zmniejszenia ilości danych przechowywanych na serwerze.",
+						"subtitle": "Stump wspiera niestandardowe awatary które można ustawić poprzez podanie odnośnika do obrazu. Przesyłanie obrazów jest nieobsługiwane w celu zmniejszenia ilości danych przechowywanych na serwerze.",
 						"preview": "Podgląd pojawi się tutaj po wprowadzeniu odnośnika.",
 						"labels": {
 							"imageUrl": "Adres obrazka",
@@ -1160,58 +1160,58 @@
 			}
 		},
 		"app/apiKeys": {
-			"helmet": "API keys",
-			"title": "API keys",
-			"description": "Manage your generated Stump API keys",
+			"helmet": "Klucze API",
+			"title": "Klucze API",
+			"description": "Zarządzaj wygenerowanymi kluczami API Stump",
 			"shared": {
 				"fields": {
-					"name": "Name",
-					"expiration": "Expiration",
-					"last_used": "Last used",
-					"created": "Created",
-					"permissions": "Permissions",
-					"inherited": "Inherited",
-					"explicit": "Explicit"
+					"name": "Nazwa",
+					"expiration": "Wygaśnięcie",
+					"last_used": "Ostatnio użyty",
+					"created": "Utworzony",
+					"permissions": "Uprawnienia",
+					"inherited": "Odziedziczone",
+					"explicit": "Wskazane"
 				}
 			},
 			"sections": {
 				"inspector": {
-					"heading": "API key",
-					"description": "A detailed view of this key",
+					"heading": "Klucz API",
+					"description": "Szczegółowy widok tego klucza",
 					"unrestrictedKey": {
-						"heading": "Unrestricted key",
-						"description": "Since you are the server owner, this key has unrestricted access when configured to inherit permissions. Please be careful."
+						"heading": "Klucz bez ograniczeń",
+						"description": "Ponieważ zalogowane konto jest właścicielem serwera, klucz ten ma nieograniczony dostęp po skonfigurowaniu go jako dziedziczący uprawnienia. Zachowaj ostrożność."
 					}
 				},
 				"createKey": {
 					"modal": {
-						"trigger": "Create API key",
+						"trigger": "Utwórz klucz API",
 						"heading": {
-							"creating": "Create API key",
-							"created": "Created key"
+							"creating": "Utwórz klucz API",
+							"created": "Utworzony klucz"
 						},
 						"description": {
-							"creating": "API keys are long-lived credentials that can be used to authenticate with the API",
-							"created": "Your new API key has been created. Save the secret somewhere safe, as it will not be shown again"
+							"creating": "Klucze API są długotrwałymi poświadczeniami, które mogą być użyte do uwierzytelniania z API",
+							"created": "Twój nowy klucz API został utworzony. Zapisz sekret w bezpiecznym miejscu, ponieważ nie będzie on wyświetlony ponownie"
 						},
-						"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting",
-						"createdKey": "Created key",
-						"savedConfirm": "I saved my key",
-						"submit": "Create key"
+						"inheritDisclaimer": "Ten klucz API odziedziczy Twoje pełne uprawnienia, co oznacza, że może zrobić wszystko, co możesz zrobić i Ty. Zalecana jest ostrożność przy tym ustawieniu",
+						"createdKey": "Utworzony klucz",
+						"savedConfirm": "Klucz został przeze mnie zapisany",
+						"submit": "Utwórz klucz"
 					}
 				},
 				"table": {
-					"title": "Your keys",
-					"description": "These are the API keys you have created",
+					"title": "Twoje klucze",
+					"description": "To klucze API utworzone przez Ciebie",
 					"actionMenu": {
-						"inspect": "Inspect",
-						"delete": "Delete"
+						"inspect": "Podejrzyj",
+						"delete": "Usuń"
 					},
 					"empty": {
-						"title": "You haven't created any keys yet",
-						"action": "Create an API key to get started"
+						"title": "Nie utworzono jeszcze żadnych kluczy",
+						"action": "Utwórz klucz API, aby zacząć"
 					},
-					"noExpiration": "No expiration set"
+					"noExpiration": "Nie ustawiono daty wygaśnięcia"
 				}
 			}
 		},
@@ -1244,7 +1244,7 @@
 				"configuredServers": {
 					"label": "Skonfigurowane serwery",
 					"description": "Lista serwerów Stump, do których możesz się połączyć",
-					"getStarted": "Add a server to get started",
+					"getStarted": "Aby rozpocząć, dodaj serwer",
 					"unreachableServer": {
 						"tooltip": "Serwer niedostępny"
 					},
@@ -1317,16 +1317,16 @@
 						}
 					},
 					"resetTokens": {
-						"label": "Clear authentication",
+						"label": "Wyczyść uwierzytelnienia",
 						"description": [
-							"Remove all securely-stored access tokens for your servers",
-							"You will have to re-authenticate with each server"
+							"Usuń wszystkie bezpiecznie przechowywanych tokeny dostępowe dla serwerów",
+							"Wymagane będzie ponowne zalogowanie się na każdym z serwerów"
 						],
 						"confirmation": {
-							"trigger": "Clear authentication",
-							"title": "Clear authentication",
-							"description": "This will remove all securely-stored access tokens for your servers",
-							"confirm": "Clear authentication"
+							"trigger": "Wyczyść uwierzytelnienia",
+							"title": "Wyczyść uwierzytelnienia",
+							"description": "Spowoduje to usunięcie wszystkich bezpiecznie przechowywanych tokenów dostępowych dla serwerów",
+							"confirm": "Wyczyść uwierzytelnienia"
 						}
 					}
 				},
@@ -1481,14 +1481,14 @@
 						}
 					},
 					"feature": {
-						"label": "Feature Opt-In",
+						"label": "Funkcja domyślnie wyłączona",
 						"api_keys": {
-							"label": "API keys",
-							"description": "Allow the user to manage their own API keys"
+							"label": "Klucze API",
+							"description": "Pozwala użytkownikowi zarządzać własnymi kluczami API"
 						},
 						"koreader_sync": {
-							"label": "KoReader sync",
-							"description": "Allow the user to access the KoReader sync integration"
+							"label": "Synchronizacja KoReader",
+							"description": "Pozwala użytkownikowi na dostęp do integracji z synchronizacją KoReader"
 						}
 					},
 					"file": {
@@ -1618,7 +1618,7 @@
 				},
 				"devices": {
 					"title": "Urządzenia odbiorcze e-mail",
-					"description": "The device aliases you have configured for receiving emails from your Stump server instance",
+					"description": "Aliasy urządzeń skonfigurowanych do otrzymywania wiadomości e-mail z Twojej instancji serwera Stump",
 					"addDevice": "Dodaj alias urządzenia",
 					"addOrUpdateDevice": {
 						"title": {
@@ -1779,7 +1779,7 @@
 		},
 		"libraryOptions": {
 			"scanLibrary": "Skanuj",
-			"fileExplorer": "Files",
+			"fileExplorer": "Pliki",
 			"manageLibrary": "Zarządzaj",
 			"deleteLibrary": "Usuń"
 		},
@@ -1827,7 +1827,7 @@
 		"label": "Edytuj miniaturkę",
 		"options": {
 			"selectFromBooks": "Wybierz z książek",
-			"uploadImage": "Wrzuć zdjęcie"
+			"uploadImage": "Prześlij obraz"
 		},
 		"uploadImage": {
 			"emptyState": "Podgląd obrazu pojawi się tutaj",
@@ -1846,18 +1846,18 @@
 		"create": "Utwórz",
 		"edit": "Edytuj",
 		"update": "Aktualizuj",
-		"upload": "Upload",
-		"uploading": "Uploading",
+		"upload": "Prześlij",
+		"uploading": "Przesyłanie",
 		"unimplemented": "Ta funkcjonalność nie jest jeszcze zaimplementowana! Sprawdź ponownie później",
 		"limitedFunctionality": "Funkcjonalność ta nie jest jeszcze w pełni zaimplementowana. Sprawdź później",
 		"logIn": "Zaloguj się",
 		"login": "Nazwa użytkowika",
 		"seeError": "Wyświetl błąd",
-		"remove": "Remove",
+		"remove": "Usuń",
 		"goBack": "Wróć",
 		"goToServers": "Przejdź do serwerów",
 		"notReady": "Ta funkcja nie jest jeszcze gotowa",
-		"notUsedYet": "Not used yet",
-		"never": "Never"
+		"notUsedYet": "Jeszcze nieużywane",
+		"never": "Nigdy"
 	}
 }

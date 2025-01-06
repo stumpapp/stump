@@ -1,0 +1,95 @@
+import { Callout } from 'nextra/components'
+
+# Emailing
+
+<Callout emoji="🔐">
+	Sending emails is gated behind the `email:send` user permission at a minumum. To learn more about
+	permissions, see the [permissions](/guides/access-control/permissions) guide.
+</Callout>
+
+Stump has basic email functionality built-in, allowing you to send books via email. This feature was primarily developed to support email-to-ereader integrations, however there are loose plans for expanding it in the future.
+
+## Emailers
+
+An emailer is essentially just a named configuration object that tells Stump how to send emails from a specific email account. Stump doesn't have its own email server or client, so it relies on SMTP to send emails. This means that you'll need to provide the necessary connection and auth details to send emails.
+
+### Configuration
+
+The following fields are required to configure an emailer:
+
+- `name` - The name of the emailer, used for display purposes throughout the app
+- SMTP-specifics:
+  - `host` - The SMTP server hostname, e.g., `smtp.gmail.com`
+  - `port` - The SMTP server port, e.g., `587`
+  - `username` - The username for the SMTP server, e.g., an email address
+  - `password` - The password for the SMTP server, encrypted at rest
+  - `TLS enabled` - Whether to use a secure connection (e.g., `true` for SSL, `false` for no security)
+- Sender information:
+  - `Display name` - The name that will be displayed to recipients
+  - `Email address` - The email address that will be displayed to recipients
+
+<Callout emoji="🔒">
+	The password field is encrypted at rest and not visible after creation. Stump will decrypt the
+	password when sending emails. This is a security measure to prevent unauthorized access to your
+	email server. You should still take care to secure your Stump instance.
+</Callout>
+
+You may also optionally configure the following fields:
+
+- Max attachment size - The maximum size of attachments that can be sent via this emailer
+
+## Device Aliases
+
+A device alias refers to a named email address that can be quickly selected when sending books via email. The name is perhaps misleading, since your email doesn't necessarily have to be associated with a device. This is subject to change.
+
+### Forbidden Aliases
+
+A device alias may also be "inverted" to create a forbidden email address. This is useful for blocking certain email addresses from receiving books via your server. This really only comes into play when considering arbitrary send permissions, since without that permission a user would have to select from a list of device aliases which _aren't_ forbidden.
+
+## Templates
+
+Stump uses [handlebars](https://handlebarsjs.com/) for email templating. The default templates are very basic, but you can override them with your own custom templates. The only requirement is that you ensure the template fields align with the fields Stump expects.
+
+The default templates can be found [on GitHub](https://github.com/stumpapp/stump/tree/main/crates/email/templates).
+
+### Template Overrides
+
+To override a template, simply create a new template with the same name in the template directory of your Stump instance. Stump will automatically use your custom template in place of the default.
+
+The template directory defaults to a `templates` directory in the root of your Stump configuration directory. You can change this by setting the `EMAIL_TEMPLATES_DIR` environment variable. For more information on configuring Stump, see the [configuration](/guides/configuration/server-options) guide.
+
+## Permissions
+
+The following table lists perissions which can be assigned to users to control access to email functionality:
+
+| Permission       | Description                                    | Notes / Inherited Permissions |
+| ---------------- | ---------------------------------------------- | ----------------------------- |
+| `emailer:read`   | Allows the user to view registered emailers    |                               |
+| `emailer:create` | Allows the user to create new emailers         | `emailer:read`                |
+| `emailer:manage` | Allows the user to manage existing emailers    | `emailer:read`                |
+| `email:send`     | Allows the user to send emails from the server | `emailer:read`                |
+
+## Audit Logs
+
+Stump will log each email sent, however the logs are not currently exposed in the UI. This is a planned feature, but for now you can view the logs directly in the database with your preferred SQL client.
+
+The following fields are logged for each record:
+
+- The ID of the emailer used
+- The email address the email was sent to
+- A JSON blob containing metadata for the attachment
+- The time the email was sent
+- The user ID of the user who sent the email
+
+## Future Plans
+
+The email feature is not fully fleshed out yet, and there are plans to expand it in the future. Some of the planned features revolve around:
+
+- Server invitations via email, e.g., inviting users to join your server
+- Email notifications for various server events
+- Book club email notifications
+
+<Callout emoji="🚀">
+	If you have any ideas for expanding the email functionalities, feel free to open an issue on
+	[GitHub](https://github.com/stumpapp/stump/issues)
+</Callout>

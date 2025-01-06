@@ -29,17 +29,45 @@ pub(crate) fn unexpected_error<E: std::error::Error>(err: E) -> impl IntoRespons
 pub struct ImageResponse {
 	pub content_type: ContentType,
 	pub data: Vec<u8>,
+	pub cache_control: Option<String>,
 }
 
 impl ImageResponse {
 	pub fn new(content_type: ContentType, data: Vec<u8>) -> Self {
-		Self { content_type, data }
+		Self {
+			content_type,
+			data,
+			cache_control: None,
+		}
+	}
+
+	pub fn invalidate_cache(self) -> Self {
+		Self {
+			cache_control: Some("no-cache".to_string()),
+			..self
+		}
+	}
+
+	pub fn cache_header(&self) -> HeaderValue {
+		HeaderValue::from_str(
+			self.cache_control
+				.as_deref()
+				.unwrap_or("private,max-age=31536000"), // 1 year
+		)
+		.unwrap_or_else(|err| {
+			error!(?err, "Failed to derive explicit cache control");
+			HeaderValue::from_static("private,max-age=31536000") // 1 year
+		})
 	}
 }
 
 impl From<(ContentType, Vec<u8>)> for ImageResponse {
 	fn from((content_type, data): (ContentType, Vec<u8>)) -> Self {
-		Self { content_type, data }
+		Self {
+			content_type,
+			data,
+			cache_control: None,
+		}
 	}
 }
 
@@ -56,11 +84,9 @@ impl IntoResponse for ImageResponse {
 				},
 			),
 		);
-		base_response.headers_mut().insert(
-			header::CACHE_CONTROL,
-			// 1 year
-			HeaderValue::from_static("private,max-age=31536000"),
-		);
+		base_response
+			.headers_mut()
+			.insert(header::CACHE_CONTROL, self.cache_header());
 
 		base_response
 	}

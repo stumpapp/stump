@@ -561,10 +561,10 @@ async fn patch_series_thumbnail(
 	)
 	.await?;
 
-	Ok(ImageResponse::from((
-		ContentType::from(format),
-		fs::read(path_buf).await?,
-	)))
+	Ok(
+		ImageResponse::from((ContentType::from(format), fs::read(path_buf).await?))
+			.invalidate_cache(),
+	)
 }
 
 #[utoipa::path(
@@ -631,10 +631,10 @@ async fn replace_series_thumbnail(
 	let path_buf =
 		place_thumbnail(&series_id, ext, &upload_data.bytes, &ctx.config).await?;
 
-	Ok(ImageResponse::from((
-		upload_data.content_type,
-		fs::read(path_buf).await?,
-	)))
+	Ok(
+		ImageResponse::from((upload_data.content_type, fs::read(path_buf).await?))
+			.invalidate_cache(),
+	)
 }
 
 // FIXME: age restrictions mess up the counts since PCR doesn't support relation counts yet!

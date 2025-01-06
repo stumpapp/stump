@@ -215,10 +215,10 @@ pub(crate) async fn patch_media_thumbnail(
 	)
 	.await?;
 
-	Ok(ImageResponse::from((
-		ContentType::from(format),
-		fs::read(path_buf).await?,
-	)))
+	Ok(
+		ImageResponse::from((ContentType::from(format), fs::read(path_buf).await?))
+			.invalidate_cache(),
+	)
 }
 
 #[utoipa::path(
@@ -286,8 +286,8 @@ pub(crate) async fn replace_media_thumbnail(
 	let path_buf =
 		place_thumbnail(&book_id, ext, &upload_data.bytes, &ctx.config).await?;
 
-	Ok(ImageResponse::from((
-		upload_data.content_type,
-		fs::read(path_buf).await?,
-	)))
+	Ok(
+		ImageResponse::from((upload_data.content_type, fs::read(path_buf).await?))
+			.invalidate_cache(),
+	)
 }

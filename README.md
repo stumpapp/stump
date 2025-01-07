@@ -31,7 +31,7 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 - [Roadmap 🗺](#roadmap-)
 - [Getting Started 🚀](#getting-started-)
 - [Developer Guide 💻](#developer-guide-)
-  - [Where to start?](#where-to-start)
+    - [Where to start?](#where-to-start)
 - [Project Structure 📦](#project-structure-)
   - [Apps](#apps)
   - [Core](#core)
@@ -62,7 +62,6 @@ The following items are the major targets for Stump's first stable release:
 Things you can expect to see afterwards:
 
 - 🖥️ Cross-platform desktop app _(Windows, Mac, Linux)_
-- 📖 [Tachiyomi](https://github.com/stumpapp/tachiyomi-extensions) support
 - 📱 In-house mobile app _(Android, iOS)_
 - 🔎 Versatile full-text search _(blocked by [prisma#9414](https://github.com/prisma/prisma/issues/9414))_
 - 👥 Configurable book clubs _(see [this issue](https://github.com/stumpapp/stump/issues/120))_

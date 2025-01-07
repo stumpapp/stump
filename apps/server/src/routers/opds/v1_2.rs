@@ -283,6 +283,7 @@ async fn get_libraries(
 	let libraries = db
 		.library()
 		.find_many(vec![library_not_hidden_from_user_filter(user)])
+		.order_by(library::name::order(Direction::Asc))
 		.exec()
 		.await?;
 	let entries = libraries
@@ -424,6 +425,7 @@ async fn get_series(
 				.find_many(chain_optional_iter([], [age_restrictions.clone()]))
 				.skip(skip)
 				.take(take)
+				.order_by(series::name::order(Direction::Asc))
 				.exec()
 				.await?;
 
@@ -516,7 +518,6 @@ async fn get_series_by_id(
 		params: OPDSIDURLParams { id },
 		..
 	}): Path<OPDSURLParams<OPDSIDURLParams>>,
-	// Path((id, _)): Path<(String, String)>,
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
 	Extension(req): Extension<RequestContext>,

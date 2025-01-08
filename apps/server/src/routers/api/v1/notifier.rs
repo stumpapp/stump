@@ -26,7 +26,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			Router::new()
 				.route("/", get(get_notifiers).post(create_notifier))
 				.nest(
-					"/:id",
+					"/{id}",
 					Router::new().route(
 						"/",
 						get(get_notifier_by_id)
@@ -72,7 +72,7 @@ async fn get_notifiers(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/notifiers/:id",
+	path = "/api/v1/notifiers/{id}",
 	tag = "notifier",
 	params(
 		("id" = i32, Path, description = "The notifier ID")
@@ -142,7 +142,7 @@ async fn create_notifier(
 
 #[utoipa::path(
 	put,
-	path = "/api/v1/notifiers/:id",
+	path = "/api/v1/notifiers/{id}",
 	tag = "notifier",
 	request_body = UpdateNotifier,
 	params(
@@ -191,7 +191,7 @@ pub struct PatchNotifier {
 
 #[utoipa::path(
     patch,
-    path = "/api/v1/notifiers/:id/",
+    path = "/api/v1/notifiers/{id}/",
     tag = "notifier",
     params(
         ("id" = i32, Path, description = "The ID of the notifier")
@@ -242,7 +242,7 @@ async fn patch_notifier(
 
 #[utoipa::path(
 	delete,
-	path = "/api/v1/notifiers/:id/",
+	path = "/api/v1/notifiers/{id}/",
 	tag = "notifier",
 	params(
 		("id" = i32, Path, description = "The notifier ID"),

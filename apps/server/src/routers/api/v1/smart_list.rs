@@ -34,7 +34,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.route("/smart-lists", get(get_smart_lists).post(create_smart_list))
 		.nest(
-			"/smart-lists/:id",
+			"/smart-lists/{id}",
 			Router::new()
 				.route(
 					"/",
@@ -54,7 +54,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 							get(get_smart_list_views).post(create_smart_list_view),
 						)
 						.nest(
-							"/:name",
+							"/{name}",
 							Router::new().route(
 								"/",
 								get(get_smart_list_view)
@@ -254,7 +254,7 @@ pub struct SmartListRelationOptions {
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/smart-lists/:id",
+	path = "/api/v1/smart-lists/{id}",
 	tag = "smart_list",
 	responses(
 		(status = 200, description = "Successfully fetched smart list", body = SmartList),
@@ -291,7 +291,7 @@ async fn get_smart_list_by_id(
 
 #[utoipa::path(
 	put,
-	path = "/api/v1/smart-lists/:id",
+	path = "/api/v1/smart-lists/{id}",
 	tag = "smart_list",
 	request_body = CreateOrUpdateSmartList,
 	responses(
@@ -354,7 +354,7 @@ async fn update_smart_list_by_id(
 
 #[utoipa::path(
 	delete,
-	path = "/api/v1/smart-lists/:id",
+	path = "/api/v1/smart-lists/{id}",
 	tag = "smart_list",
 	responses(
 		(status = 200, description = "Successfully deleted smart list", body = SmartList),
@@ -404,7 +404,7 @@ async fn delete_smart_list_by_id(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/smart-lists/:id/items",
+	path = "/api/v1/smart-lists/{id}/items",
 	tag = "smart_list",
 	responses(
 		(status = 200, description = "Successfully fetched smart list items", body = SmartListItems),
@@ -455,7 +455,7 @@ pub struct SmartListMeta {
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/smart-lists/:id/meta",
+	path = "/api/v1/smart-lists/{id}/meta",
 	tag = "smart_list",
 	responses(
 		(status = 200, description = "Successfully fetched smart list meta", body = SmartListMeta),
@@ -524,7 +524,7 @@ async fn get_smart_list_access_rules() {
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/smart-lists/:id/views",
+	path = "/api/v1/smart-lists/{id}/views",
 	tag = "smart_list",
 	responses(
 		(status = 200, description = "Successfully fetched smart list views", body = Vec<SmartListView>),
@@ -561,7 +561,7 @@ async fn get_smart_list_views(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/smart-lists/:id/views/:name",
+	path = "/api/v1/smart-lists/{id}/views/{name}",
 	tag = "smart_list",
 	responses(
 		(status = 200, description = "Successfully fetched smart list view", body = SmartListView),
@@ -602,7 +602,7 @@ pub struct CreateOrUpdateSmartListView {
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/smart-lists/:id/views",
+	path = "/api/v1/smart-lists/{id}/views",
 	tag = "smart_list",
 	request_body = CreateSmartListView,
 	responses(
@@ -654,7 +654,7 @@ async fn create_smart_list_view(
 
 #[utoipa::path(
 	put,
-	path = "/api/v1/smart-lists/:id/views/:name",
+	path = "/api/v1/smart-lists/{id}/views/{name}",
 	tag = "smart_list",
 	request_body = CreateOrUpdateSmartListView,
 	responses(
@@ -703,7 +703,7 @@ async fn update_smart_list_view(
 
 #[utoipa::path(
 	delete,
-	path = "/api/v1/smart-lists/:id/views/:name",
+	path = "/api/v1/smart-lists/{id}/views/{name}",
 	tag = "smart_list",
 	responses(
 		(status = 200, description = "Successfully deleted smart list view", body = SmartListView),

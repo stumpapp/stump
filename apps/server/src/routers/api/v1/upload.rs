@@ -32,8 +32,8 @@ pub fn mount(app_state: AppState) -> Router<AppState> {
 		.nest(
 			"/upload",
 			Router::new()
-				.route("/libraries/:id/books", post(upload_books))
-				.route("/libraries/:id/series", post(upload_series)),
+				.route("/libraries/{id}/books", post(upload_books))
+				.route("/libraries/{id}/series", post(upload_series)),
 		)
 		.layer(DefaultBodyLimit::max(app_state.config.max_file_upload_size))
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
@@ -50,7 +50,7 @@ struct UploadBooksRequest {
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/upload/libraries/:id/books",
+	path = "/api/v1/upload/libraries/{id}/books",
 	tag = "library",
 	request_body(content_type = "multipart/form-data", content = UploadBooksRequest),
 	params(
@@ -120,7 +120,7 @@ struct UploadSeriesRequest {
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/upload/libraries/:id/series",
+	path = "/api/v1/upload/libraries/{id}/series",
 	tag = "library",
 	request_body(content_type = "multipart/form-data", content = UploadSeriesRequest),
 	params(

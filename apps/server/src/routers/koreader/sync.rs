@@ -34,11 +34,11 @@ use crate::{
 /// See https://github.com/koreader/koreader-sync-server/blob/master/config/routes.lua
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new().nest(
-		"/:api_key",
+		"/{api_key}",
 		Router::new()
 			.route("/users/auth", get(check_authorized))
 			.route("/syncs/progress", put(put_progress))
-			.route("/syncs/progress/:document", get(get_progress))
+			.route("/syncs/progress/{document}", get(get_progress))
 			.layer(middleware::from_fn(authorize)) // Note the order!
 			.layer(middleware::from_fn_with_state(
 				app_state,

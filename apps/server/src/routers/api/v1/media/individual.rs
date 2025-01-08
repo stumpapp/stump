@@ -65,7 +65,7 @@ pub(crate) struct PutMediaCompletionStatus {
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/media/path/:path",
+	path = "/api/v1/media/path/{path}",
 	tag = "media",
 	params(
 		("path" = PathBuf, Path, description = "The path of the media to get")
@@ -109,7 +109,7 @@ pub async fn get_media_by_path(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/media/:id",
+	path = "/api/v1/media/{id}",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media to get"),
@@ -179,7 +179,7 @@ pub async fn get_media_by_id(
 // TODO: type a body
 #[utoipa::path(
 	get,
-	path = "/api/v1/media/:id/file",
+	path = "/api/v1/media/{id}/file",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media")
@@ -227,7 +227,7 @@ pub(crate) async fn get_media_file(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/media/:id/convert",
+	path = "/api/v1/media/{id}/convert",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media")
@@ -282,7 +282,7 @@ pub(crate) async fn convert_media(
 // TODO: ImageResponse as body type
 #[utoipa::path(
 	get,
-	path = "/api/v1/media/:id/page/:page",
+	path = "/api/v1/media/{id}/page/{page}",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media to get"),
@@ -339,7 +339,7 @@ pub(crate) async fn get_media_page(
 
 #[utoipa::path(
 	put,
-	path = "/api/v1/media/:id/progress/:page",
+	path = "/api/v1/media/{id}/progress/{page}",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media to get"),
@@ -424,7 +424,7 @@ pub(crate) async fn update_media_progress(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/media/:id/progress",
+	path = "/api/v1/media/{id}/progress",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media to get")
@@ -472,7 +472,7 @@ pub(crate) async fn get_media_progress(
 
 #[utoipa::path(
 	delete,
-	path = "/api/v1/media/:id/progress",
+	path = "/api/v1/media/{id}/progress",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media delete the progress for")
@@ -504,7 +504,7 @@ pub(crate) async fn delete_media_progress(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/media/:id/progress/complete",
+	path = "/api/v1/media/{id}/progress/complete",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media to get")
@@ -559,7 +559,7 @@ pub(crate) async fn get_is_media_completed(
 
 #[utoipa::path(
 	put,
-	path = "/api/v1/media/:id/progress/complete",
+	path = "/api/v1/media/{id}/progress/complete",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media to mark as completed")
@@ -664,7 +664,7 @@ pub(crate) async fn put_media_complete_status(
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/media/:id/analyze",
+	path = "/api/v1/media/{id}/analyze",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media to analyze")
@@ -697,7 +697,7 @@ pub(crate) async fn start_media_analysis(
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/media/:id/dimensions",
+	path = "/api/v1/media/{id}/dimensions",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media to get dimensions for")
@@ -724,7 +724,7 @@ pub(crate) async fn get_media_dimensions(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/media/:id/page/:page/dimensions",
+	path = "/api/v1/media/{id}/page/{page}/dimensions",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media to get dimensions for"),

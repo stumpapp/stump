@@ -38,7 +38,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			Router::new()
 				.route("/", get(get_jobs).delete(delete_jobs))
 				.nest(
-					"/:id",
+					"/{id}",
 					Router::new()
 						.route("/", delete(delete_job_by_id))
 						.route("/cancel", delete(cancel_job_by_id)),
@@ -164,7 +164,7 @@ async fn delete_jobs(State(ctx): State<AppState>) -> APIResult<()> {
 
 #[utoipa::path(
 	delete,
-	path = "/api/v1/jobs/:id",
+	path = "/api/v1/jobs/{id}",
 	tag = "job",
 	responses(
 		(status = 200, description = "Successfully deleted job"),
@@ -186,7 +186,7 @@ async fn delete_job_by_id(
 
 #[utoipa::path(
 	delete,
-	path = "/api/v1/jobs/:id/cancel",
+	path = "/api/v1/jobs/{id}/cancel",
 	tag = "job",
 	params(
 		("id" = String, Path, description = "The ID of the job to cancel.")

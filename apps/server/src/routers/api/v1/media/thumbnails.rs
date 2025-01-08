@@ -101,7 +101,7 @@ pub(crate) async fn get_media_thumbnail(
 // TODO: ImageResponse as body type
 #[utoipa::path(
 	get,
-	path = "/api/v1/media/:id/thumbnail",
+	path = "/api/v1/media/{id}/thumbnail",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media")
@@ -128,7 +128,7 @@ pub(crate) async fn get_media_thumbnail_handler(
 
 #[utoipa::path(
     patch,
-    path = "/api/v1/media/:id/thumbnail",
+    path = "/api/v1/media/{id}/thumbnail",
     tag = "media",
     params(
         ("id" = String, Path, description = "The ID of the media")
@@ -223,7 +223,7 @@ pub(crate) async fn patch_media_thumbnail(
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/media/:id/thumbnail",
+	path = "/api/v1/media/{id}/thumbnail",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media")

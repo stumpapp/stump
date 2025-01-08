@@ -71,7 +71,7 @@ export const buildSchema = (
 			.refine(
 				(value) =>
 					(!!editingUser && value === editingUser.username) ||
-					existingUsers.every((user) => user.username !== value),
+					existingUsers.every((user) => user.username.toLowerCase() !== value.toLowerCase()),
 				() => ({
 					message: t(
 						'settingsScene.server/users.createOrUpdateForm.validation.usernameAlreadyExists',

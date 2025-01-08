@@ -12,7 +12,7 @@ axum = { version = "0.8.1", features = [
   "multipart",
 ] }
 axum-macros = "0.5.0"
-axum_typed_multipart = "0.14.0"
+axum_typed_multipart = "0.15.1"
 axum-extra = { version = "0.10.0", features = [
   "typed-header",
   "query"
@@ -59,7 +59,7 @@ utoipa-swagger-ui = { version = "7.1.0", features = ["axum"] }
 zip = { workspace = true }
 
 [dev-dependencies]
-axum-test = "16.4.1"
+axum-test = "17.0.1"
 tokio = { workspace = true, features = ["full", "test-util"] }
 
 [build-dependencies]

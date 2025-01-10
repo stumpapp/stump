@@ -1,6 +1,8 @@
 //! This module defines a struct,[`OpdsFeed`], for representing an OPDS catalogue feed document
 //! as specified at https://specs.opds.io/opds-1.2#2-opds-catalog-feed-documents
 
+use std::collections::HashMap;
+
 use crate::{
 	error::CoreError,
 	opds::v1_2::{
@@ -8,6 +10,7 @@ use crate::{
 		link::OpdsLink,
 	},
 	prisma::{library, series},
+	utils::chain_optional_iter,
 };
 use prisma_client_rust::chrono::{self, DateTime, Utc};
 use xml::{writer::XmlEvent, EventWriter};
@@ -90,6 +93,22 @@ pub struct OPDSFeedBuilder {
 	api_key: Option<String>,
 }
 
+#[derive(Debug, Default)]
+pub struct OPDSFeedBuilderPageParams {
+	pub page: i64,
+	pub count: i64,
+}
+
+#[derive(Debug, Default)]
+pub struct OPDSFeedBuilderParams {
+	pub id: String,
+	pub title: String,
+	pub entries: Vec<OpdsEntry>,
+	pub href_postfix: String,
+	pub page_params: Option<OPDSFeedBuilderPageParams>,
+	pub search: Option<String>,
+}
+
 impl OPDSFeedBuilder {
 	pub fn new(api_key: Option<String>) -> Self {
 		Self { api_key }
@@ -101,6 +120,21 @@ impl OPDSFeedBuilder {
 		} else {
 			format!("/opds/v1.2/{}", path)
 		}
+	}
+
+	fn format_params(&self, path: &str, params: HashMap<String, String>) -> String {
+		let mut url = self.format_url(path);
+		if !params.is_empty() {
+			url.push('?');
+			for (idx, (key, value)) in params.iter().enumerate() {
+				if idx == params.len() - 1 {
+					url.push_str(&format!("{}={}", key, value));
+				} else {
+					url.push_str(&format!("{}={}&", key, value));
+				}
+			}
+		}
+		url
 	}
 
 	pub fn library(&self, library: library::Data) -> Result<OpdsFeed, CoreError> {
@@ -137,18 +171,33 @@ impl OPDSFeedBuilder {
 
 	pub fn paginated(
 		self,
-		id: &str,
-		title: &str,
-		entries: Vec<OpdsEntry>,
-		href_postfix: &str,
-		page: i64,
-		count: i64,
+		OPDSFeedBuilderParams {
+			id,
+			title,
+			entries,
+			href_postfix,
+			page_params,
+			search,
+		}: OPDSFeedBuilderParams,
 	) -> Result<OpdsFeed, CoreError> {
+		let OPDSFeedBuilderPageParams { page, count } = page_params.unwrap_or_default();
+
+		let search_params = search
+			.as_ref()
+			.map(|s| ("search".to_string(), s.to_string()));
+
+		let this_params = chain_optional_iter(
+			[("page".to_string(), page.to_string())],
+			[search_params.clone()],
+		)
+		.into_iter()
+		.collect::<HashMap<_, _>>();
+
 		let mut links = vec![
 			OpdsLink::new(
 				OpdsLinkType::Navigation,
 				OpdsLinkRel::ItSelf,
-				self.format_url(&format!("{}?page={}", href_postfix, page)),
+				self.format_params(&href_postfix, this_params),
 			),
 			OpdsLink::new(
 				OpdsLinkType::Navigation,
@@ -158,22 +207,73 @@ impl OPDSFeedBuilder {
 		];
 
 		if page > 0 {
+			let next_params = chain_optional_iter(
+				[("page".to_string(), (page - 1).to_string())],
+				[search_params.clone()],
+			)
+			.into_iter()
+			.collect::<HashMap<_, _>>();
+
 			links.push(OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Previous,
-				href: self.format_url(&format!("{}?page={}", href_postfix, page - 1)),
+				href: self.format_params(&href_postfix, next_params),
 			});
 		}
 
 		let total_pages = (count as f32 / 20.0).ceil() as u32;
 
 		if page < total_pages as i64 && entries.len() == 20 {
+			let next_params = chain_optional_iter(
+				[("page".to_string(), (page + 1).to_string())],
+				[search_params.clone()],
+			)
+			.into_iter()
+			.collect::<HashMap<_, _>>();
+
 			links.push(OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Next,
-				href: self.format_url(&format!("{}?page={}", href_postfix, page + 1)),
+				href: self.format_params(&href_postfix, next_params),
 			});
 		}
+
+		Ok(OpdsFeed::new(
+			id.to_string(),
+			title.to_string(),
+			Some(links),
+			entries,
+		))
+	}
+
+	pub fn unpaged(
+		self,
+		OPDSFeedBuilderParams {
+			id,
+			title,
+			entries,
+			href_postfix,
+			search,
+			..
+		}: OPDSFeedBuilderParams,
+	) -> Result<OpdsFeed, CoreError> {
+		let search_params =
+			chain_optional_iter([], [search.map(|s| ("search".to_string(), s.clone()))])
+				.into_iter()
+				.collect::<HashMap<_, _>>();
+
+		let links = vec![
+			OpdsLink::new(
+				OpdsLinkType::Navigation,
+				OpdsLinkRel::ItSelf,
+				self.format_params(&href_postfix, search_params),
+			),
+			OpdsLink::new(
+				OpdsLinkType::Navigation,
+				OpdsLinkRel::Start,
+				self.format_url("catalog"),
+			),
+		];
 
 		Ok(OpdsFeed::new(
 			id.to_string(),

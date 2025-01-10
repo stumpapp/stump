@@ -278,6 +278,7 @@ async fn browse_libraries(
 		.find_many(library_conditions.clone())
 		.take(take)
 		.skip(skip)
+		.order_by(library::name::order(Direction::Asc))
 		.exec()
 		.await?;
 	let library_count = client.library().count(library_conditions).exec().await?;

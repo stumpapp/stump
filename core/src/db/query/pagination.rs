@@ -22,6 +22,12 @@ pub struct PageQuery {
 	pub page_size: Option<u32>,
 }
 
+impl PageQuery {
+	pub fn is_empty(&self) -> bool {
+		self.page.is_none() && self.page_size.is_none()
+	}
+}
+
 #[skip_serializing_none]
 #[derive(
 	Clone, Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type, ToSchema,

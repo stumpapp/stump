@@ -18,10 +18,6 @@ fn debug_setup() {
 		"STUMP_CLIENT_DIR",
 		env!("CARGO_MANIFEST_DIR").to_string() + "/../web/dist",
 	);
-	std::env::set_var(
-		"EMAIL_TEMPLATES_DIR",
-		env!("CARGO_MANIFEST_DIR").to_string() + "/../../crates/email/templates",
-	);
 	std::env::set_var("STUMP_PROFILE", "debug");
 }
 

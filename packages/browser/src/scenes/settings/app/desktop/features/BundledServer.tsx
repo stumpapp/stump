@@ -4,8 +4,6 @@ import { useCallback } from 'react'
 import PreferenceToggle from '@/scenes/settings/PreferenceToggle'
 import { useTauriStore } from '@/stores'
 
-const IS_PRODUCTION = import.meta.env.PROD
-
 export default function BundledServer() {
 	const { t } = useLocaleContext()
 	const { run_bundled_server, setRunBundledServer } = useTauriStore()
@@ -17,12 +15,10 @@ export default function BundledServer() {
 
 	return (
 		<PreferenceToggle
-			title={IS_PRODUCTION ? t('common.notReady') : undefined}
 			label={t(getKey('label'))}
 			description={t(getKey('description'))}
 			isChecked={run_bundled_server}
 			onToggle={handleChange}
-			isDisabled={IS_PRODUCTION}
 		/>
 	)
 }

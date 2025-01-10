@@ -8,6 +8,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
 import { useTauriRPC } from '@/hooks/useTauriRPC'
+import BundledServer from '@/scenes/settings/app/desktop/features/BundledServer'
 import { useAppStore, useTauriStore, useUserStore } from '@/stores'
 
 import AddServerModal from './AddServerModal'
@@ -31,6 +32,7 @@ export default function ConfiguredServersSection() {
 	const navigate = useNavigate()
 
 	const isOnboarding = location.pathname === '/'
+	const isAuthScreen = location.pathname === '/auth'
 
 	const { t } = useLocaleContext()
 	const {
@@ -229,6 +231,8 @@ export default function ConfiguredServersSection() {
 						))}
 					</Card>
 				)}
+
+				{(isOnboarding || isAuthScreen) && <BundledServer />}
 
 				<div
 					className={cn('flex flex-col gap-y-6', {

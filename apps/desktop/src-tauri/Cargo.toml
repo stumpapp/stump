@@ -30,6 +30,7 @@ tauri-plugin-shell = "2"
 tokio = { workspace = true, features = ["full"] }
 
 [features]
+default = ["bundled-server"]
 # This feature will bundle the Stump server with the desktop app, allowing the user to use the desktop app
 # as their dedicated server instance.
-bundled-server = [ "dep:stump_server" ] 
+bundled-server = [ "dep:stump_server" ]

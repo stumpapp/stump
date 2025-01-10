@@ -4,6 +4,7 @@ use axum::{
 	routing::get,
 	Extension, Router,
 };
+use prisma_client_rust::or;
 use prisma_client_rust::{chrono, Direction};
 use serde::{Deserialize, Serialize};
 use stump_core::{
@@ -15,10 +16,13 @@ use stump_core::{
 	},
 	opds::v1_2::{
 		entry::{IntoOPDSEntry, OPDSEntryBuilder, OpdsEntry},
-		feed::{OPDSFeedBuilder, OpdsFeed},
+		feed::{
+			OPDSFeedBuilder, OPDSFeedBuilderPageParams, OPDSFeedBuilderParams, OpdsFeed,
+		},
 		link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
+		opensearch::OpdsOpenSearch,
 	},
-	prisma::{active_reading_session, library, media, series, user},
+	prisma::{active_reading_session, library, media, series, series_metadata, user},
 };
 use tracing::{debug, trace};
 
@@ -41,6 +45,7 @@ use crate::{
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	let primary_router = Router::new()
 		.route("/catalog", get(catalog))
+		.route("/search", get(search_description))
 		.route("/keep-reading", get(keep_reading))
 		.nest(
 			"/libraries",
@@ -114,6 +119,12 @@ struct OPDSFilenameURLParams {
 	filename: String,
 }
 
+#[derive(Debug, Default, Serialize, Deserialize)]
+struct OPDSSearchQuery {
+	#[serde(default)]
+	search: Option<String>,
+}
+
 fn pagination_bounds(page: i64, page_size: i64) -> (i64, i64) {
 	let skip = page * page_size;
 	(skip, page_size)
@@ -124,6 +135,14 @@ fn catalog_url(req_ctx: &RequestContext, path: &str) -> String {
 		format!("/opds/{}/v1.2/{}", api_key, path)
 	} else {
 		format!("/opds/v1.2/{}", path)
+	}
+}
+
+fn service_url(req_ctx: &RequestContext) -> String {
+	if let Some(api_key) = req_ctx.api_key() {
+		format!("/opds/{}/v1.2", api_key)
+	} else {
+		"/opds/v1.2".to_string()
 	}
 }
 
@@ -197,6 +216,11 @@ async fn catalog(Extension(req): Extension<RequestContext>) -> APIResult<Xml> {
 			rel: OpdsLinkRel::Start,
 			href: catalog_url(&req, "catalog"),
 		},
+		OpdsLink {
+			link_type: OpdsLinkType::Search,
+			rel: OpdsLinkRel::Search,
+			href: catalog_url(&req, "search"),
+		},
 	];
 
 	let feed = OpdsFeed::new(
@@ -207,6 +231,12 @@ async fn catalog(Extension(req): Extension<RequestContext>) -> APIResult<Xml> {
 	);
 
 	Ok(Xml(feed.build()?))
+}
+
+async fn search_description(Extension(req): Extension<RequestContext>) -> APIResult<Xml> {
+	Ok(OpdsOpenSearch::new(Some(service_url(&req)))
+		.build()
+		.map(Xml)?)
 }
 
 async fn keep_reading(
@@ -272,9 +302,10 @@ async fn keep_reading(
 	Ok(Xml(feed.build()?))
 }
 
-// TODO: age restrictions
+/// A handler for GET /opds/v1.2/libraries, accepts a `search` URL param
 async fn get_libraries(
 	State(ctx): State<AppState>,
+	Query(OPDSSearchQuery { search }): Query<OPDSSearchQuery>,
 	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Xml> {
 	let db = &ctx.db;
@@ -282,7 +313,10 @@ async fn get_libraries(
 	let user = req.user();
 	let libraries = db
 		.library()
-		.find_many(vec![library_not_hidden_from_user_filter(user)])
+		.find_many(chain_optional_iter(
+			[library_not_hidden_from_user_filter(user)],
+			[search.as_ref().map(|q| library::name::contains(q.clone()))],
+		))
 		.order_by(library::name::order(Direction::Asc))
 		.exec()
 		.await?;
@@ -383,14 +417,18 @@ async fn get_library_by_id(
 			})
 			.collect::<Vec<OpdsEntry>>();
 
-		let feed = OPDSFeedBuilder::new(req.api_key()).paginated(
-			library.id.as_str(),
-			library.name.as_str(),
-			entries,
-			format!("libraries/{}", &library.id).as_str(),
-			page.into(),
-			library_series_count,
-		)?;
+		let feed =
+			OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
+				id: library.id.clone(),
+				title: library.name.clone(),
+				entries,
+				href_postfix: format!("libraries/{}", &library.id),
+				page_params: Some(OPDSFeedBuilderPageParams {
+					page: page.into(),
+					count: library_series_count,
+				}),
+				search: None,
+			})?;
 		Ok(Xml(feed.build()?))
 	} else {
 		Err(APIError::NotFound(format!(
@@ -399,11 +437,16 @@ async fn get_library_by_id(
 	}
 }
 
+// FIXME: Based on testing with Panels, it seems like pagination isn't an expected default when
+// a search is present? This feels both odd but understandable to support an "at a glance" view,
+// but I feel like it should still support pagination...
+
 /// A handler for GET /opds/v1.2/series, accepts a `page` URL param. Note: OPDS
 /// pagination is zero-indexed.
 async fn get_series(
 	State(ctx): State<AppState>,
-	pagination: Query<PageQuery>,
+	Query(pagination): Query<PageQuery>,
+	Query(OPDSSearchQuery { search }): Query<OPDSSearchQuery>,
 	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Xml> {
 	let db = &ctx.db;
@@ -417,12 +460,26 @@ async fn get_series(
 		.as_ref()
 		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
 
+	let search_clone = search.clone();
 	let (series, count) = db
 		._transaction()
 		.run(|client| async move {
 			let series = client
 				.series()
-				.find_many(chain_optional_iter([], [age_restrictions.clone()]))
+				.find_many(chain_optional_iter(
+					[],
+					[
+						age_restrictions.clone(),
+						search_clone.map(|q| {
+							or![
+								series::name::contains(q.clone()),
+								series::metadata::is(vec![
+									series_metadata::title::contains(q),
+								])
+							]
+						}),
+					],
+				))
 				.skip(skip)
 				.take(take)
 				.order_by(series::name::order(Direction::Asc))
@@ -445,14 +502,17 @@ async fn get_series(
 		})
 		.collect::<Vec<OpdsEntry>>();
 
-	let feed = OPDSFeedBuilder::new(req.api_key()).paginated(
-		"allSeries",
-		"All Series",
+	let feed = OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
+		id: "allSeries".to_string(),
+		title: "All Series".to_string(),
 		entries,
-		"series",
-		page.into(),
-		count,
-	)?;
+		href_postfix: "series".to_string(),
+		page_params: Some(OPDSFeedBuilderPageParams {
+			page: page.into(),
+			count,
+		}),
+		search,
+	})?;
 
 	Ok(Xml(feed.build()?))
 }
@@ -501,14 +561,17 @@ async fn get_latest_series(
 		})
 		.collect::<Vec<OpdsEntry>>();
 
-	let feed = OPDSFeedBuilder::new(req.api_key()).paginated(
-		"latestSeries",
-		"Latest Series",
+	let feed = OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
+		id: "latestSeries".to_string(),
+		title: "Latest Series".to_string(),
 		entries,
-		"series/latest",
-		page.into(),
-		count,
-	)?;
+		href_postfix: "series/latest".to_string(),
+		page_params: Some(OPDSFeedBuilderPageParams {
+			page: page.into(),
+			count,
+		}),
+		search: None,
+	})?;
 
 	Ok(Xml(feed.build()?))
 }
@@ -575,14 +638,18 @@ async fn get_series_by_id(
 			})
 			.collect();
 
-		let feed = OPDSFeedBuilder::new(req.api_key()).paginated(
-			series.id.as_str(),
-			series.name.as_str(),
-			entries,
-			format!("series/{}", &series.id).as_str(),
-			page.into(),
-			series_book_count,
-		)?;
+		let feed =
+			OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
+				id: series.id.clone(),
+				title: series.name.clone(),
+				entries,
+				href_postfix: format!("series/{}", &series.id),
+				page_params: Some(OPDSFeedBuilderPageParams {
+					page: page.into(),
+					count: series_book_count,
+				}),
+				search: None,
+			})?;
 		Ok(Xml(feed.build()?))
 	} else {
 		Err(APIError::NotFound(format!("Series {series_id} not found")))

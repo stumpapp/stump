@@ -33,6 +33,9 @@ export default function ConfiguredServersSection() {
 
 	const isOnboarding = location.pathname === '/'
 	const isAuthScreen = location.pathname === '/auth'
+	const isServerConnectionError = location.pathname === '/server-connection-error'
+
+	const showBundleServer = isOnboarding || isAuthScreen || isServerConnectionError
 
 	const { t } = useLocaleContext()
 	const {
@@ -232,7 +235,7 @@ export default function ConfiguredServersSection() {
 					</Card>
 				)}
 
-				{(isOnboarding || isAuthScreen) && <BundledServer />}
+				{showBundleServer && <BundledServer />}
 
 				<div
 					className={cn('flex flex-col gap-y-6', {

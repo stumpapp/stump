@@ -231,9 +231,10 @@ pub(crate) async fn get_in_progress_media(
 	let is_unpaged = pagination.is_unpaged();
 
 	let read_progress_filter = active_reading_session::user_id::equals(user_id.clone());
-	let where_conditions = vec![media::active_user_reading_sessions::some(vec![
-		read_progress_filter.clone(),
-	])]
+	let where_conditions = vec![
+		media::active_user_reading_sessions::some(vec![read_progress_filter.clone()]),
+		media::deleted_at::equals(None),
+	]
 	.into_iter()
 	.chain(apply_media_library_not_hidden_for_user_filter(user))
 	.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_default())

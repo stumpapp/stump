@@ -21,7 +21,11 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.nest(
 			"/media/:id",
 			Router::new()
-				.route("/", get(individual::get_media_by_id))
+				.route(
+					"/",
+					get(individual::get_media_by_id)
+						.delete(individual::delete_media_by_id),
+				)
 				.route("/file", get(individual::get_media_file))
 				.route("/convert", get(individual::convert_media))
 				.route(

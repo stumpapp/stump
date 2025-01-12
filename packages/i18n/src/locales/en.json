@@ -1208,7 +1208,7 @@
 						"delete": "Delete"
 					},
 					"empty": {
-						"title":"You haven't created any keys yet",
+						"title": "You haven't created any keys yet",
 						"action": "Create an API key to get started"
 					},
 					"noExpiration": "No expiration set"

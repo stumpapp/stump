@@ -20,7 +20,8 @@ const IS_DEVELOPMENT = import.meta.env.MODE === 'development'
 
 export default function StumpWebClient(props: StumpClientProps) {
 	return (
-		<BrowserRouter>
+		// FIXME: This can't be fixed like this, it would have to be runtime dynamic
+		<BrowserRouter basename="/web">
 			<ErrorBoundary FallbackComponent={ErrorFallback}>
 				<RouterContainer {...props} />
 			</ErrorBoundary>

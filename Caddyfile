@@ -1,0 +1,11 @@
+# Works just fine, as expected
+# http://localhost:2015 {
+# 	reverse_proxy http://localhost:10801
+# }
+
+
+http://localhost:2015 {
+    handle_path /web* {
+        reverse_proxy http://localhost:10801
+    }
+}

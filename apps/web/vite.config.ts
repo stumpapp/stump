@@ -22,4 +22,6 @@ export default defineConfig({
 	server: {
 		port: 3000,
 	},
+	// FIXME: This can't be fixed like this, it would have to be dynamic... But this is build-time..
+	base: '/web/',
 })

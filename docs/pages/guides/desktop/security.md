@@ -26,7 +26,7 @@ macOS has hardened restrictions on what URLs an app can successfully connect to.
 
 ### App Signing (lack thereof)
 
-The desktop app is not signed, which means that macOS will likely flat out refuse to run it. This will hopefully be resolved in the future by signing the app, however since that comes at a cost it is not a priority or feasible at the moment.
+The desktop app is not signed, which means that macOS will likely flat out refuse to run it. This will hopefully be resolved in the future by signing the app, however since getting a developer license comes at a yearly-recurring cost it is not a priority or feasible at the moment.
 
 To get around this, you can force macOS to accept the risk by running the following command in Terminal:
 

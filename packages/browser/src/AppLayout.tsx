@@ -50,6 +50,9 @@ export function AppLayout() {
 	})
 
 	const hideScrollBar = storeUser?.user_preferences?.enable_hide_scrollbar ?? false
+	const jobOverlayEnabled = storeUser?.user_preferences?.enable_job_overlay ?? true
+	const showJobOverlay = jobOverlayEnabled && !location.pathname.match(/\/settings\/jobs/)
+
 	const isRefSet = !!mainRef.current
 	/**
 	 * An effect to initialize the overlay scrollbars
@@ -232,7 +235,7 @@ export function AppLayout() {
 				</div>
 
 				{/* {platform !== 'browser' && <ServerStatusOverlay />} */}
-				{!location.pathname.match(/\/settings\/jobs/) && <JobOverlay />}
+				{showJobOverlay && <JobOverlay />}
 			</Suspense>
 		</AppContext.Provider>
 	)

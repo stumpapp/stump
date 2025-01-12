@@ -41,7 +41,7 @@ export const usePrefetchLibraryFiles = ({ path, fetchConfig }: PrefetchFileParam
 					? [queryClient.prefetchQuery([sdk.upload.keys.config], () => sdk.upload.config())]
 					: []),
 			]),
-		[sdk, path],
+		[sdk, path, fetchConfig],
 	)
 
 	return { prefetch }

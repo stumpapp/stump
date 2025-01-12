@@ -66,7 +66,7 @@ export default function CreateOrUpdateDeviceModal({ isOpen, updatingDevice, onCl
 		await invalidateQueries({ keys: [sdk.emailer.keys.getDevices] })
 	}
 
-	const onOpenChange = (nowOpen: boolean) => (nowOpen ? onClose() : null)
+	const onOpenChange = (nowOpen: boolean) => (!nowOpen ? onClose() : null)
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onOpenChange}>

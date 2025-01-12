@@ -36,7 +36,7 @@ export class JobAPI extends APIBase {
 	 * Cancel a job by its ID
 	 */
 	async cancel(id: string): Promise<void> {
-		await this.axios.post(jobURL(`${id}/cancel`))
+		await this.axios.delete(jobURL(`${id}/cancel`))
 	}
 
 	/**

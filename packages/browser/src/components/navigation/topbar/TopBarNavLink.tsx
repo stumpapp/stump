@@ -8,6 +8,7 @@ type Props = {
 	isActive?: boolean
 	className?: string
 }
+
 export default function TopBarNavLink({
 	to,
 	isActive,

@@ -1,4 +1,13 @@
-import { Accordion, Alert, Button, Drawer, IconButton, Text, ToolTip } from '@stump/components'
+import {
+	Accordion,
+	Alert,
+	Button,
+	Drawer,
+	IconButton,
+	Preformatted,
+	Text,
+	ToolTip,
+} from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Construction, Filter } from 'lucide-react'
 
@@ -42,10 +51,8 @@ export default function FilterBottomDrawer() {
 										<Text size="sm" variant="muted">
 											{t(withLocaleKey('rawData.description'))}
 										</Text>
-										<div className="mt-1.5 rounded-sm bg-background-surface p-4">
-											<pre className="text-xs text-foreground-subtle">
-												{JSON.stringify(filters, null, 2)}
-											</pre>
+										<div className="mt-1.5">
+											<Preformatted content={filters} />
 										</div>
 									</Accordion.Content>
 								</Accordion.Item>

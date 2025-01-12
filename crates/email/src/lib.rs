@@ -12,6 +12,8 @@ mod template;
 
 pub use emailer::{AttachmentPayload, EmailerClient, EmailerClientConfig};
 pub use error::{EmailError, EmailResult};
-pub use template::{render_template, EmailTemplate};
+pub use template::{
+	render_template, EmailTemplate, ATTACHMENT_TEMPLATE, BASE_TEMPLATE, TEMPLATES,
+};
 
 pub use lettre::message::header::ContentType as EmailContentType;

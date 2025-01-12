@@ -14,6 +14,7 @@ use super::{media::Media, MediaAnnotation};
 pub struct EpubContent {
 	label: String,
 	content: PathBuf,
+	children: Vec<EpubContent>,
 	play_order: u32,
 }
 
@@ -22,6 +23,11 @@ impl From<NavPoint> for EpubContent {
 		EpubContent {
 			label: nav_point.label,
 			content: nav_point.content,
+			children: nav_point
+				.children
+				.into_iter()
+				.map(EpubContent::from)
+				.collect(),
 			play_order: nav_point.play_order as u32,
 		}
 	}
@@ -46,7 +52,7 @@ TODO: convert spine into this structure to match epub.js
 pub struct Epub {
 	/// This is the epub's record in Stump's database
 	pub media_entity: Media,
-	/// A list of spine IDs. See https://www.w3.org/publishing/epub3/epub-ocf.html
+	/// A list of spine IDs. See https://www.w3.org/TR/epub-33/#sec-ocf
 	pub spine: Vec<String>,
 	/// A hashmap of all the resources in the epub. A resource ID maps to a tuple containing the
 	/// path and mime type of the resource.

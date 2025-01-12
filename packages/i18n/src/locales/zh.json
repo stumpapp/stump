@@ -1582,7 +1582,10 @@
 					}
 				},
 				"validation": {
-					"ageRestrictionTooLow": "年龄限制不能小于0"
+					"ageRestrictionTooLow": "年龄限制不能小于0",
+					"missingUsername": "Username is required",
+					"missingPassword": "Password is required",
+					"usernameAlreadyExists": "Username already exists"
 				},
 				"createSubmitButton": "创建用户",
 				"updateSubmitButton": "更新用户"
@@ -1619,7 +1622,7 @@
 				"devices": {
 					"title": "Email devices",
 					"description": "The device aliases you have configured for receiving emails from your Stump server instance",
-					"addDevice": "Add device alias",
+					"addDevice": "添加设备别名",
 					"addOrUpdateDevice": {
 						"title": {
 							"create": "创建设备别名",
@@ -1820,7 +1823,7 @@
 		}
 	},
 	"tagSelect": {
-		"placeholder": "选择或创建标签",
+		"placeholder": "Select or create tag",
 		"placeholderNoTags": "没有可用的标签"
 	},
 	"thumbnailDropdown": {

@@ -1582,7 +1582,10 @@
 					}
 				},
 				"validation": {
-					"ageRestrictionTooLow": "La restriction d'âge ne peut pas être inférieure à 0"
+					"ageRestrictionTooLow": "La restriction d'âge ne peut pas être inférieure à 0",
+					"missingUsername": "Username is required",
+					"missingPassword": "Password is required",
+					"usernameAlreadyExists": "Username already exists"
 				},
 				"createSubmitButton": "Créer un utilisateur",
 				"updateSubmitButton": "Modifier l'utilisateur"
@@ -1820,7 +1823,7 @@
 		}
 	},
 	"tagSelect": {
-		"placeholder": "Choisissez ou créez une étiquette",
+		"placeholder": "Select or create tag",
 		"placeholderNoTags": "Aucune étiquette disponible"
 	},
 	"thumbnailDropdown": {

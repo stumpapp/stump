@@ -20,9 +20,9 @@ use stump_core::{
 	db::{
 		entity::{
 			macros::{
-				library_scan_details, library_series_ids_media_ids_include,
-				library_tags_select, library_thumbnails_deletion_include,
-				series_or_library_thumbnail,
+				library_idents_select, library_scan_details,
+				library_series_ids_media_ids_include, library_tags_select,
+				library_thumbnails_deletion_include, series_or_library_thumbnail,
 			},
 			FileStatus, Library, LibraryConfig, LibraryScanMode, LibraryStats, Media,
 			Series, TagName, User, UserPermission,
@@ -1073,6 +1073,7 @@ async fn scan_library(
 			library::id::equals(id.clone()),
 			library_not_hidden_from_user_filter(&user),
 		])
+		.select(library_idents_select::select())
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound(format!(

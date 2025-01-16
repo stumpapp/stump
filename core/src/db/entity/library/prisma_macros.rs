@@ -1,5 +1,9 @@
 use crate::prisma::library;
 
+library::select!(library_id_select { id });
+
+library::select!(library_idents_select { id path });
+
 library::select!(library_tags_select {
 	id
 	tags: select {

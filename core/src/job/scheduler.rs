@@ -89,6 +89,7 @@ impl JobScheduler {
 								path: library_path,
 								config: config.map(LibraryConfig::from),
 								options: Default::default(),
+								is_granular: false,
 							}));
 						if result.is_err() {
 							tracing::error!(

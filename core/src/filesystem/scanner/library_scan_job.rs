@@ -1,5 +1,6 @@
 use std::{collections::VecDeque, path::PathBuf};
 
+use prisma_client_rust::chrono;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
@@ -18,7 +19,9 @@ use crate::{
 		error::JobError, Executor, JobExecuteLog, JobExt, JobOutputExt, JobProgress,
 		JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
-	prisma::{library, library_config, media, series, PrismaClient},
+	prisma::{
+		last_granular_library_scan, library, library_config, media, series, PrismaClient,
+	},
 	utils::chain_optional_iter,
 	CoreEvent,
 };
@@ -56,10 +59,16 @@ pub struct InitTaskInput {
 /// A job that scans a library and updates the database with the results
 #[derive(Clone)]
 pub struct LibraryScanJob {
+	/// The ID of the library to scan
 	pub id: String,
+	/// The path to the library to scan
 	pub path: String,
+	/// The library configuration to use
 	pub config: Option<LibraryConfig>,
+	/// The scan options to use, if any
 	pub options: ScanOptions,
+	/// Whether the scan is granular or not (true if custom options are provided)
+	pub is_granular: bool,
 }
 
 impl LibraryScanJob {
@@ -72,6 +81,7 @@ impl LibraryScanJob {
 			id,
 			path,
 			config: None,
+			is_granular: options.is_some(),
 			options: options.unwrap_or_default(),
 		})
 	}
@@ -242,6 +252,10 @@ impl JobExt for LibraryScanJob {
 			.config
 			.as_ref()
 			.and_then(|o| o.thumbnail_config.clone());
+
+		if let Err(error) = handle_scan_complete(self, &ctx.db, &self.options).await {
+			tracing::error!(error = ?error, "Failed to handle scan completion");
+		}
 
 		match image_options {
 			Some(options) if did_create | did_update => {
@@ -730,4 +744,57 @@ pub async fn handle_missing_library(
 	);
 
 	Ok(())
+}
+
+async fn handle_scan_complete(
+	job: &LibraryScanJob,
+	client: &PrismaClient,
+	options: &ScanOptions,
+) -> Result<(), JobError> {
+	let now = chrono::Utc::now();
+
+	let update_result = client
+		.library()
+		.update(
+			library::id::equals(job.id.clone()),
+			vec![library::last_scanned_at::set(Some(now.into()))],
+		)
+		.exec()
+		.await;
+	if let Err(error) = update_result {
+		tracing::error!(?error, "Failed to update library last scanned at");
+	}
+
+	if !job.is_granular {
+		return Ok(());
+	}
+
+	match serde_json::to_vec(&options) {
+		Ok(data) => {
+			let record = client
+				.last_granular_library_scan()
+				.upsert(
+					last_granular_library_scan::library_id::equals(job.id.clone()),
+					(
+						data.clone(),
+						library::id::equals(job.id.clone()),
+						vec![last_granular_library_scan::timestamp::set(now.into())],
+					),
+					vec![
+						last_granular_library_scan::options::set(data),
+						last_granular_library_scan::timestamp::set(now.into()),
+					],
+				)
+				.exec()
+				.await?;
+			tracing::trace!(?record, "Saved granular scan record");
+			Ok(())
+		},
+		Err(e) => {
+			tracing::error!(error = ?e, "Failed to serialize scan options");
+			Err(JobError::TaskFailed(
+				"Failed to serialize scan options".to_string(),
+			))
+		},
+	}
 }

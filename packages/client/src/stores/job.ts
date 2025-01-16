@@ -1,4 +1,4 @@
-import { JobUpdate } from '@stump/types'
+import { JobUpdate } from '@stump/sdk'
 import deepEqual from 'deep-equal'
 import { produce } from 'immer'
 import { createWithEqualityFn } from 'zustand/traditional'

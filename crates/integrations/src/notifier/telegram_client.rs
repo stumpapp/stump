@@ -53,10 +53,8 @@ impl Notifier for TelegramClient {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use dotenv::dotenv;
 
 	fn get_debug_client() -> TelegramClient {
-		dotenv().ok();
 		let token = std::env::var("DUMMY_TG_TOKEN").expect("Failed to load token");
 		let chat_id = std::env::var("DUMMY_TG_CHAT_ID").expect("Failed to load chat ID");
 		TelegramClient::new(token, chat_id)

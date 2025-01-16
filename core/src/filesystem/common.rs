@@ -2,6 +2,7 @@ use globset::GlobSet;
 use std::{
 	ffi::OsStr,
 	path::{Path, PathBuf},
+	string::ToString,
 };
 use tokio::{fs, io};
 use tracing::error;
@@ -47,14 +48,14 @@ pub async fn get_thumbnail(
 pub async fn find_thumbnail(parent: &Path, name: &str) -> Option<PathBuf> {
 	let mut thumbnails_dir = parent.to_path_buf();
 
-	for extension in ACCEPTED_IMAGE_EXTENSIONS.iter() {
-		let path = parent.join(format!("{}.{}", name, extension));
+	for extension in &ACCEPTED_IMAGE_EXTENSIONS {
+		let path = parent.join(format!("{name}.{extension}"));
 
 		if fs::metadata(&path).await.is_ok() {
 			return Some(path);
 		}
 
-		thumbnails_dir.push(format!("{}.{}", name, extension));
+		thumbnails_dir.push(format!("{name}.{extension}"));
 	}
 
 	None
@@ -62,7 +63,7 @@ pub async fn find_thumbnail(parent: &Path, name: &str) -> Option<PathBuf> {
 
 // TODO(perf): Async-ify
 pub fn get_unknown_image(mut base_path: PathBuf) -> Option<PathBuf> {
-	for extension in ACCEPTED_IMAGE_EXTENSIONS.iter() {
+	for extension in &ACCEPTED_IMAGE_EXTENSIONS {
 		base_path.set_extension(extension);
 
 		if base_path.exists() {
@@ -85,7 +86,7 @@ pub trait OsStrUtils {
 
 impl OsStrUtils for OsStr {
 	fn try_to_string(&self) -> Option<String> {
-		self.to_str().map(|str| str.to_string())
+		self.to_str().map(ToString::to_string)
 	}
 }
 
@@ -132,21 +133,21 @@ impl PathUtils for Path {
 	fn file_parts(&self) -> FileParts {
 		let file_name = self
 			.file_name()
-			.and_then(|os_str| os_str.try_to_string())
+			.and_then(OsStrUtils::try_to_string)
 			.unwrap_or_else(|| {
 				tracing::warn!(path = ?self, "Failed to get file name");
 				String::default()
 			});
 		let file_stem = self
 			.file_stem()
-			.and_then(|os_str| os_str.try_to_string())
+			.and_then(OsStrUtils::try_to_string)
 			.unwrap_or_else(|| {
 				tracing::warn!(path = ?self, "Failed to get file stem");
 				String::default()
 			});
 		let extension = self
 			.extension()
-			.and_then(|os_str| os_str.try_to_string())
+			.and_then(OsStrUtils::try_to_string)
 			.unwrap_or_default();
 
 		FileParts {
@@ -184,7 +185,7 @@ impl PathUtils for Path {
 
 		let file_name = self
 			.file_name()
-			.and_then(|os_str| os_str.try_to_string())
+			.and_then(OsStrUtils::try_to_string)
 			.unwrap_or_else(|| {
 				tracing::warn!(path = ?self, "Failed to get file name");
 				String::default()
@@ -236,7 +237,7 @@ impl PathUtils for Path {
 
 		match read_result {
 			Ok(items) => items
-				.filter_map(|item| item.ok())
+				.filter_map(Result::ok)
 				.filter(|item| item.path() != self)
 				.any(|f| {
 					let path = f.path();
@@ -260,7 +261,7 @@ impl PathUtils for Path {
 
 		WalkDir::new(self)
 			.into_iter()
-			.filter_map(|item| item.ok())
+			.filter_map(Result::ok)
 			.filter(|item| item.path() != self)
 			.any(|f| {
 				let path = f.path();

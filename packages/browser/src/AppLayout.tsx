@@ -1,11 +1,12 @@
-import { isAxiosError } from '@stump/api'
 import { useAuthQuery, useCoreEventHandler } from '@stump/client'
 import { cn, cx } from '@stump/components'
-import { UserPermission, UserPreferences } from '@stump/types'
+import { isAxiosError } from '@stump/sdk'
+import { UserPermission, UserPreferences } from '@stump/sdk'
 import { useOverlayScrollbars } from 'overlayscrollbars-react'
 import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
 import Confetti from 'react-confetti'
-import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useErrorBoundary } from 'react-error-boundary'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useMediaMatch, useWindowSize } from 'rooks'
 
 import BackgroundFetchIndicator from '@/components/BackgroundFetchIndicator'
@@ -24,6 +25,8 @@ export function AppLayout() {
 	const mainRef = useRef<HTMLDivElement>(null)
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const windowSize = useWindowSize()
+
+	const { showBoundary } = useErrorBoundary()
 
 	const { showConfetti, setShowConfetti, onConnectionWithServerChanged } = useAppStore((state) => ({
 		onConnectionWithServerChanged: state.setIsConnectedWithServer,
@@ -47,6 +50,9 @@ export function AppLayout() {
 	})
 
 	const hideScrollBar = storeUser?.user_preferences?.enable_hide_scrollbar ?? false
+	const jobOverlayEnabled = storeUser?.user_preferences?.enable_job_overlay ?? true
+	const showJobOverlay = jobOverlayEnabled && !location.pathname.match(/\/settings\/jobs/)
+
 	const isRefSet = !!mainRef.current
 	/**
 	 * An effect to initialize the overlay scrollbars
@@ -159,17 +165,23 @@ export function AppLayout() {
 		onSuccess: setUser,
 	})
 
-	const axiosError = isAxiosError(error) ? error : null
-	const isUnauthorized = axiosError?.response?.status === 401
-	const isNetworkError = axiosError?.code === 'ERR_NETWORK'
-	if (isNetworkError || isUnauthorized) {
-		const to = isNetworkError ? '/server-connection-error' : '/auth'
-		return <Navigate to={to} state={{ from: location }} />
-	} else if (error && !storeUser) {
-		throw error
-	}
+	// FIXME(desktop): There is a bug somewhere here that causes a network error to be thrown before the auth takes effect.
+	// It happens intermittently, annoyingly. I'm not sure what's causing it, but it would be nice to fix it
+	useEffect(() => {
+		const axiosError = isAxiosError(error) ? error : null
+		const isUnauthorized = axiosError?.response?.status === 401
+		const isNetworkError = axiosError?.code === 'ERR_NETWORK'
 
-	if (!storeUser) {
+		if (isNetworkError || isUnauthorized) {
+			const to = isNetworkError ? '/server-connection-error' : '/auth'
+			navigate(to, { state: { from: location } })
+		} else if (error) {
+			console.error('An unknown error occurred:', error)
+			showBoundary(error)
+		}
+	}, [error, showBoundary, location, navigate])
+
+	if (!storeUser || error) {
 		return null
 	}
 
@@ -223,7 +235,7 @@ export function AppLayout() {
 				</div>
 
 				{/* {platform !== 'browser' && <ServerStatusOverlay />} */}
-				{!location.pathname.match(/\/settings\/jobs/) && <JobOverlay />}
+				{showJobOverlay && <JobOverlay />}
 			</Suspense>
 		</AppContext.Provider>
 	)

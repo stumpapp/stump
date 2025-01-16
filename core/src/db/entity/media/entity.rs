@@ -38,6 +38,8 @@ pub struct Media {
 	pub modified_at: Option<String>,
 	/// The hash of the file contents. Used to ensure only one instance of a file in the database.
 	pub hash: Option<String>,
+	/// The hash of the file contents using the koreader algorithm.
+	pub koreader_hash: Option<String>,
 	/// The path of the media. ex: "/home/user/media/comics/The Amazing Spider-Man (2018) #69.cbz"
 	pub path: String,
 	/// The status of the media
@@ -70,7 +72,7 @@ pub struct Media {
 	/// Whether or not the media is completed. Only None if the relation is not loaded.
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub is_completed: Option<bool>,
-	/// The user assigned tags for the media. ex: ["comic", "spiderman"]. Will be `None` only if the relation is not loaded.
+	/// The user assigned tags for the media. ex: `["comic", "spiderman"]`. Will be `None` only if the relation is not loaded.
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub tags: Option<Vec<Tag>>,
 	/// Bookmarks for the media. Will be `None` only if the relation is not loaded.
@@ -98,8 +100,8 @@ impl Cursor for Media {
 impl TryFrom<active_reading_session::Data> for Media {
 	type Error = CoreError;
 
-	/// Creates a [Media] instance from the loaded relation of a [media::Data] on
-	/// a [active_reading_session::Data] instance. If the relation is not loaded, it will
+	/// Creates a [Media] instance from the loaded relation of a [`media::Data`] on an
+	/// [`active_reading_session::Data`] instance. If the relation is not loaded, it will
 	/// return an error.
 	fn try_from(data: active_reading_session::Data) -> Result<Self, Self::Error> {
 		let Ok(media) = data.media() else {
@@ -135,8 +137,9 @@ impl From<media::Data> for Media {
 		};
 		let (current_page, current_epubcfi) = active_reading_session
 			.as_ref()
-			.map(|session| (session.page, session.epubcfi.clone()))
-			.unwrap_or((None, None));
+			.map_or((None, None), |session| {
+				(session.page, session.epubcfi.clone())
+			});
 
 		let finished_reading_sessions = match data.finished_user_reading_sessions() {
 			Ok(sessions) => Some(
@@ -179,6 +182,7 @@ impl From<media::Data> for Media {
 			created_at: data.created_at.to_rfc3339(),
 			modified_at: data.modified_at.map(|dt| dt.to_rfc3339()),
 			hash: data.hash,
+			koreader_hash: data.koreader_hash,
 			path: data.path,
 			status: FileStatus::from_str(&data.status).unwrap_or(FileStatus::Error),
 			series_id: data.series_id.unwrap(),

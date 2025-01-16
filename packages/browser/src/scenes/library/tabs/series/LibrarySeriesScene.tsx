@@ -1,11 +1,6 @@
-import {
-	prefetchPagedSeries,
-	useLibraryByIdQuery,
-	usePagedSeriesQuery,
-	useVisitLibrary,
-} from '@stump/client'
+import { useLibraryByID, usePagedSeriesQuery, usePrefetchPagedSeries } from '@stump/client'
 import { usePrevious, usePreviousIsDifferent } from '@stump/components'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 
@@ -33,8 +28,6 @@ export default function LibrarySeriesSceneWrapper() {
 }
 
 function LibrarySeriesScene() {
-	const alreadyVisited = useRef(false)
-
 	const { id } = useParams()
 
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
@@ -43,13 +36,11 @@ function LibrarySeriesScene() {
 		throw new Error('Library id is required')
 	}
 
-	const { visitLibrary } = useVisitLibrary()
-
 	const { layoutMode, setLayout } = useSeriesLayout((state) => ({
 		layoutMode: state.layout,
 		setLayout: state.setLayout,
 	}))
-	const { isLoading, library } = useLibraryByIdQuery(id)
+	const { isLoading, library } = useLibraryByID(id)
 	const {
 		filters,
 		ordering,
@@ -57,6 +48,7 @@ function LibrarySeriesScene() {
 		setPage,
 		...rest
 	} = useFilterScene()
+	const { prefetch } = usePrefetchPagedSeries()
 
 	const params = useMemo(
 		() => ({
@@ -67,7 +59,7 @@ function LibrarySeriesScene() {
 				...ordering,
 				count_media: true,
 				library: {
-					id,
+					id: [id],
 				},
 			},
 		}),
@@ -90,12 +82,12 @@ function LibrarySeriesScene() {
 
 	const handlePrefetchPage = useCallback(
 		(page: number) => {
-			prefetchPagedSeries({
+			prefetch({
 				...params,
 				page,
 			})
 		},
-		[params],
+		[params, prefetch],
 	)
 
 	const previousPage = usePrevious(current_page)
@@ -111,18 +103,7 @@ function LibrarySeriesScene() {
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[shouldScroll],
-	)
-
-	useEffect(
-		() => {
-			if (library?.id && !alreadyVisited.current) {
-				alreadyVisited.current = true
-				visitLibrary(library.id)
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[library?.id],
+		[isInView, shouldScroll],
 	)
 
 	if (isLoading) {

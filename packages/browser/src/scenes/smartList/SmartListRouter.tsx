@@ -1,4 +1,4 @@
-import React, { lazy, useEffect } from 'react'
+import { lazy, useEffect } from 'react'
 import { Navigate, Route, Routes, useNavigate } from 'react-router'
 
 import { useAppContext } from '@/context'
@@ -7,7 +7,7 @@ import UserSmartListLayout from './UserSmartListLayout.tsx'
 import UserSmartListRouter from './UserSmartListRouter.tsx'
 
 const UserSmartListsScene = lazy(() => import('./UserSmartListsScene.tsx'))
-const CreateSmartListScene = lazy(() => import('./create-or-update/CreateSmartListScene.tsx'))
+const CreateSmartListScene = lazy(() => import('../createSmartList/CreateSmartListScene.tsx'))
 
 export default function SmartListRouter() {
 	const { checkPermission } = useAppContext()

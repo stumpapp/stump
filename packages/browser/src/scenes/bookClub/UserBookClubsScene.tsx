@@ -1,14 +1,12 @@
 import { useBookClubsQuery } from '@stump/client'
 import { ButtonOrLink, Card, cx, Heading, Text } from '@stump/components'
-import { BookClub } from '@stump/types'
+import { BookClub } from '@stump/sdk'
 import dayjs from 'dayjs'
 import pluralize from 'pluralize'
-import React from 'react'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
-
-import paths from '../../paths'
+import paths from '@/paths'
 
 /**
  * A scene that displays all the book clubs the user is a member of

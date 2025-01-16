@@ -69,13 +69,13 @@ pub struct WorkerCtx {
 	pub commands_rx: async_channel::Receiver<WorkerCommand>,
 	/// A sender for the worker to send commands to the job manager
 	pub job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
-	/// A sender for the [WorkerCtx] to send status events to the loop which
+	/// A sender for the [`WorkerCtx`] to send status events to the loop which
 	/// is managing the corresponding worker
 	pub status_tx: async_channel::Sender<WorkerStatusEvent>,
 }
 
 impl WorkerCtx {
-	/// Emit a [CoreEvent] to any clients listening to the server that a job has started
+	/// Emit a [`CoreEvent`] to any clients listening to the server that a job has started
 	pub fn report_started(&self) {
 		let send_result = self
 			.core_event_tx
@@ -85,7 +85,7 @@ impl WorkerCtx {
 		}
 	}
 
-	/// Emit a [CoreEvent] to any clients listening to the server
+	/// Emit a [`CoreEvent`] to any clients listening to the server
 	pub fn report_progress(&self, payload: JobProgress) {
 		let send_result = self.core_event_tx.send(CoreEvent::JobUpdate(JobUpdate {
 			id: self.job_id.clone(),
@@ -96,7 +96,7 @@ impl WorkerCtx {
 		}
 	}
 
-	/// Send a command to the [super::JobManager]
+	/// Send a command to the [`super::JobManager`]
 	pub fn send_manager_command(&self, command: JobControllerCommand) {
 		self.job_controller_tx.send(command).map_or_else(
 			|error| {
@@ -119,7 +119,7 @@ impl WorkerCtx {
 		);
 	}
 
-	/// Send a batch of [WorkerSend] to the appropriate handlers
+	/// Send a batch of [`WorkerSend`] to the appropriate handlers
 	///
 	/// Note that this isn't _really_ batching on the send side, rather just providing
 	/// a convenient interface for providing multiple send operations at once.
@@ -220,7 +220,7 @@ pub struct Worker {
 
 impl Worker {
 	/// Create a new worker instance and its context
-	async fn new(
+	fn new(
 		job_id: &str,
 		db: Arc<PrismaClient>,
 		config: Arc<StumpConfig>,
@@ -264,8 +264,7 @@ impl Worker {
 			config,
 			core_event_tx,
 			job_controller_tx,
-		)
-		.await?;
+		)?;
 		let worker = worker.arced();
 
 		handle_job_start(&worker_ctx.db, job_id.clone()).await?;
@@ -336,7 +335,7 @@ impl Worker {
 				|_| {
 					tracing::trace!("Received cancel confirmation");
 				},
-			)
+			);
 		} else {
 			tracing::error!("Failed to send cancel signal to worker");
 		}
@@ -407,7 +406,7 @@ impl WorkerManager {
 									tracing::error!(?error, "Job failed with critical error");
 									finalizer_ctx.report_progress(JobProgress::status_msg(
 										JobStatus::Failed,
-										&format!("Job failed: {}", error),
+										&format!("Job failed: {error}"),
 									));
 
 									let result = returned_executor
@@ -442,7 +441,7 @@ impl WorkerManager {
 							tracing::error!(?join_error, ?elapsed, "Error while joining job worker thread");
 							finalizer_ctx.report_progress(JobProgress::status_msg(
 								JobStatus::Failed,
-								&format!("Job failed: {}", join_error),
+								&format!("Job failed: {join_error}"),
 							));
 							let _ = handle_failure_status(job_id.clone(), JobStatus::Failed, &finalizer_ctx.db, elapsed).await;
 						}
@@ -468,7 +467,7 @@ impl WorkerManager {
 								},
 							);
 						},
-						_=> {
+						_ => {
 							tracing::warn!(?status_event, "Ignoring status event. Most likely a status change to the same status");
 						}
 					}
@@ -509,7 +508,7 @@ pub(crate) async fn handle_failure_status(
 			Some,
 		);
 
-	tracing::trace!(?updated_job, "Upated job?");
+	tracing::trace!(?updated_job, "Updated job?");
 
 	Ok(())
 }

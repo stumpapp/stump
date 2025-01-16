@@ -1,20 +1,51 @@
-import { filesystemApi, filesystemQueryKeys } from '@stump/api'
 import { AxiosError } from 'axios'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { queryClient, useQuery } from '../client'
+import { useSDK } from '../sdk'
 
-export const prefetchLibraryFiles = (path: string) =>
-	queryClient.prefetchQuery([filesystemQueryKeys.listDirectory, path, 1], async () => {
-		const { data } = await filesystemApi.listDirectory({ page: 1, path })
-		return data
-	})
+type PrefetchFileParams = {
+	path: string
+	fetchConfig?: boolean
+}
 
-export const prefetchFiles = (path: string) =>
-	queryClient.prefetchQuery([filesystemQueryKeys.listDirectory, path, 1], async () => {
-		const { data } = await filesystemApi.listDirectory({ page: 1, path })
-		return data
-	})
+export const usePrefetchFiles = ({ path, fetchConfig }: PrefetchFileParams) => {
+	const { sdk } = useSDK()
+
+	const prefetch = useCallback(
+		() =>
+			Promise.all([
+				queryClient.prefetchQuery([sdk.filesystem.keys.listDirectory, path], () =>
+					sdk.filesystem.listDirectory(),
+				),
+				...(fetchConfig
+					? [queryClient.prefetchQuery([sdk.upload.keys.config], () => sdk.upload.config())]
+					: []),
+			]),
+		[sdk, path, fetchConfig],
+	)
+
+	return { prefetch }
+}
+
+export const usePrefetchLibraryFiles = ({ path, fetchConfig }: PrefetchFileParams) => {
+	const { sdk } = useSDK()
+
+	const prefetch = useCallback(
+		() =>
+			Promise.all([
+				queryClient.prefetchQuery([sdk.filesystem.keys.listDirectory, path], () =>
+					sdk.filesystem.listDirectory(),
+				),
+				...(fetchConfig
+					? [queryClient.prefetchQuery([sdk.upload.keys.config], () => sdk.upload.config())]
+					: []),
+			]),
+		[sdk, path, fetchConfig],
+	)
+
+	return { prefetch }
+}
 
 export type DirectoryListingQueryParams = {
 	enabled: boolean
@@ -50,16 +81,14 @@ export function useDirectoryListing({
 	onGoForward,
 	onGoBack,
 }: DirectoryListingQueryParams) {
+	const { sdk } = useSDK()
 	const [currentPath, setCurrentPath] = useState(initialPath || null)
 	const [history, setHistory] = useState(currentPath ? [currentPath] : [])
 	const [currentIndex, setCurrentIndex] = useState(0)
 
-	const { isLoading, error, data } = useQuery(
-		[filesystemQueryKeys.listDirectory, currentPath, page],
-		async () => {
-			const { data } = await filesystemApi.listDirectory({ page, path: currentPath })
-			return data
-		},
+	const { isLoading, error, data, refetch } = useQuery(
+		[sdk.filesystem.keys.listDirectory, currentPath, page],
+		async () => sdk.filesystem.listDirectory({ page, path: currentPath }),
 		{
 			// Do not run query until `enabled` aka modal is opened.
 			enabled,
@@ -220,6 +249,24 @@ export function useDirectoryListing({
 		isPathAllowed,
 		parent: directoryListing?.parent,
 		path: currentPath,
+		refetch,
 		setPath,
 	}
+}
+
+type UploadConfigQueryParams = {
+	enabled?: boolean
+}
+export const useUploadConfig = ({ enabled }: UploadConfigQueryParams) => {
+	const { sdk } = useSDK()
+	const { data: uploadConfig, ...restRet } = useQuery(
+		[sdk.upload.keys.config],
+		() => sdk.upload.config(),
+		{
+			suspense: true,
+			enabled,
+		},
+	)
+
+	return { uploadConfig, ...restRet }
 }

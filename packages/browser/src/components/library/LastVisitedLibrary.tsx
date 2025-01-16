@@ -1,18 +1,19 @@
-import { getLibraryThumbnail, libraryApi, libraryQueryKeys } from '@stump/api'
-import { useQuery } from '@stump/client'
-import { EntityCard, Label, Text } from '@stump/components'
-import React from 'react'
+import { useQuery, useSDK } from '@stump/client'
+import { Label, Text } from '@stump/components'
 
 import paths from '@/paths'
+
+import { EntityCard } from '../entity'
 
 type Props = {
 	container?: (children: React.ReactNode) => React.ReactNode
 }
+
 export default function LastVisitedLibrary({ container }: Props) {
-	const { data: library } = useQuery([libraryQueryKeys.getLastVisitedLibrary], async () => {
-		const { data } = await libraryApi.getLastVisitedLibrary()
-		return data
-	})
+	const { sdk } = useSDK()
+	const { data: library } = useQuery([sdk.library.keys.getLastVisited], () =>
+		sdk.library.getLastVisited(),
+	)
 
 	if (!library) {
 		return null
@@ -24,7 +25,7 @@ export default function LastVisitedLibrary({ container }: Props) {
 				<Label className="text-sm">Last visited</Label>
 				<EntityCard
 					href={paths.librarySeries(library.id)}
-					imageUrl={getLibraryThumbnail(library.id)}
+					imageUrl={sdk.library.thumbnailURL(library.id)}
 					isCover
 					className="flex-auto flex-shrink-0"
 					fullWidth={(imageFailed) => !imageFailed}

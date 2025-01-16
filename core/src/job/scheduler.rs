@@ -66,6 +66,7 @@ impl JobScheduler {
 					interval.tick().await;
 
 					tracing::info!("Scanning libraries on schedule");
+					// TODO: optimize query with select!/include!
 					let libraries_to_scan = client
 						.library()
 						.find_many(vec![library::id::not_in_vec(
@@ -79,15 +80,15 @@ impl JobScheduler {
 							vec![]
 						});
 
-					for library in libraries_to_scan.iter() {
+					for library in &libraries_to_scan {
 						let library_path = library.path.clone();
-						// TODO: optimize query with select!/include!
-						let options = library.config().ok().take();
+						let config = library.config().ok().take();
 						let result =
 							scheduler_ctx.enqueue_job(WrappedJob::new(LibraryScanJob {
 								id: library.id.clone(),
 								path: library_path,
-								options: options.map(LibraryConfig::from),
+								config: config.map(LibraryConfig::from),
+								options: Default::default(),
 							}));
 						if result.is_err() {
 							tracing::error!(

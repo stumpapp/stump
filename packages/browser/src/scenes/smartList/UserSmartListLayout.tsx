@@ -1,17 +1,24 @@
 import {
 	useSmartListViewsManager,
 	useSmartListWithMetaQuery,
-	useUpdateSmartListMutation,
+	useUpdateSmartList,
 } from '@stump/client'
+import { cn } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { AccessRole, SmartList, SmartListView } from '@stump/types'
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
+import { AccessRole, SmartList, SmartListView } from '@stump/sdk'
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
-import { Outlet, useParams } from 'react-router'
+import { Outlet, useLocation, useParams } from 'react-router'
+import { useMediaMatch } from 'rooks'
 
+import { SceneContainer } from '@/components/container'
+import { GenericSettingsHeader } from '@/components/settings'
 import { useAppContext } from '@/context'
+import { usePreferences } from '@/hooks/usePreferences'
 
 import { defaultWorkingView, SmartListContext, WorkingView } from './context'
+import { createRouteGroups } from './settings/routes'
+import SmartListSettingsSideBar from './settings/SmartListSettingsSideBar'
 import UserSmartListHeader from './UserSmartListHeader'
 import UserSmartListNavigation from './UserSmartListNavigation'
 
@@ -19,13 +26,30 @@ const LOCALE_BASE_KEY = 'userSmartListScene.layout'
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 
 export default function UserSmartListLayout() {
+	const location = useLocation()
+
 	const { id } = useParams<{ id: string }>()
 	const { t } = useLocaleContext()
 
 	// TODO: I don't think I need both TBH, esp with how many more features I can add to the table...
-	const [layout, setLayout] = React.useState<'table' | 'list'>(() => getDefaultLayout())
+	const [layout, setLayout] = useState<'table' | 'list'>(() => getDefaultLayout())
 	const [selectedView, setSelectedView] = useState<SmartListView>()
 	const [workingView, setWorkingView] = useState<WorkingView>()
+
+	const {
+		preferences: {
+			enable_double_sidebar,
+			primary_navigation_mode,
+			layout_max_width_px,
+			enable_hide_scrollbar,
+		},
+	} = usePreferences()
+
+	const isSettings = useMemo(() => location.pathname.includes('settings'), [location.pathname])
+	const isMobile = useMediaMatch('(max-width: 768px)')
+
+	const displaySideBar = !!enable_double_sidebar && !isMobile && isSettings
+	const preferTopBar = primary_navigation_mode === 'TOPBAR'
 
 	useEffect(() => {
 		localStorage.setItem(LAYOUT_PREFERENCE_KEY, layout)
@@ -52,7 +76,7 @@ export default function UserSmartListLayout() {
 			load_views: true,
 		},
 	})
-	const { updateAsync } = useUpdateSmartListMutation({ id })
+	const { updateAsync } = useUpdateSmartList({ id })
 	const { createView, updateView } = useSmartListViewsManager({ listId: id })
 	const { user } = useAppContext()
 
@@ -163,6 +187,19 @@ export default function UserSmartListLayout() {
 		[selectedView, workingView, updateView, t],
 	)
 
+	const renderHeader = () =>
+		isSettings ? (
+			<GenericSettingsHeader
+				localeBase="smartListSettingsScene"
+				routeGroups={createRouteGroups(viewerRole)}
+			/>
+		) : (
+			<>
+				<UserSmartListHeader />
+				<UserSmartListNavigation />
+			</>
+		)
+
 	if (isLoadingList) {
 		return null
 	}
@@ -189,11 +226,31 @@ export default function UserSmartListLayout() {
 				workingView,
 			}}
 		>
-			<UserSmartListHeader />
-			<UserSmartListNavigation />
-			<Suspense fallback={null}>
-				<Outlet />
-			</Suspense>
+			<div
+				className={cn('relative flex flex-1 flex-col', {
+					'mx-auto w-full': preferTopBar && !!layout_max_width_px,
+				})}
+				style={{
+					maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined,
+				}}
+			>
+				{renderHeader()}
+
+				{displaySideBar && <SmartListSettingsSideBar />}
+
+				<SceneContainer
+					className={cn('relative flex flex-1 flex-col gap-4 md:pb-0', {
+						'md:hide-scrollbar': !!enable_hide_scrollbar,
+						'p-0': !isSettings,
+						// pl-48 is for the sidebar, plus pl-4 for the padding
+						'pl-52': displaySideBar,
+					})}
+				>
+					<Suspense fallback={null}>
+						<Outlet />
+					</Suspense>
+				</SceneContainer>
+			</div>
 		</SmartListContext.Provider>
 	)
 }

@@ -1,6 +1,6 @@
 import { Alert, Button, ConfirmationModal } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React, { useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 type Props = {
 	onConfirmReset: () => Promise<void>
@@ -32,7 +32,7 @@ export default function ResetConfigurationConfirmation({ onConfirmReset }: Props
 						variant="danger"
 						onClick={() => setShowConfirmation(true)}
 						className="flex-shrink-0"
-						size="md"
+						size="sm"
 					>
 						{t(getKey('trigger'))}
 					</Button>

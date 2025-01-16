@@ -1,6 +1,6 @@
-import type { Media } from '@stump/types'
+import type { Media } from '@stump/sdk'
 import clsx from 'clsx'
-import React, { memo, useCallback, useMemo, useRef } from 'react'
+import { memo, useCallback, useMemo, useRef } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { Hotkey } from 'react-hotkeys-hook/dist/types'
 import { useSwipeable } from 'react-swipeable'
@@ -51,11 +51,17 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	const pageSetRef = useRef<HTMLDivElement | null>(null)
 
 	// TODO: this needs to be aware of overflow / if the page is too small to render double spread
-	const displayedPages = useMemo(
-		() =>
-			doubleSpread ? [currentPage, currentPage + 1].filter((p) => p <= media.pages) : [currentPage],
-		[currentPage, doubleSpread, media.pages],
-	)
+	const displayedPages = useMemo(() => {
+		if (readingDirection === 'ltr') {
+			return doubleSpread
+				? [currentPage, currentPage + 1].filter((p) => p <= media.pages)
+				: [currentPage]
+		} else {
+			return doubleSpread
+				? [currentPage + 1, currentPage].filter((p) => p <= media.pages)
+				: [currentPage]
+		}
+	}, [currentPage, doubleSpread, media.pages])
 
 	/**
 	 * If the image parts are collective >= 80% of the screen width, we want to fix the side navigation
@@ -91,7 +97,8 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	 */
 	const handleLeftwardPageChange = useCallback(() => {
 		const direction = readingDirection === 'ltr' ? -1 : 1
-		if (doubleSpread) {
+		const skip = readingDirection === 'ltr' ? 2 : 1
+		if (doubleSpread && currentPage > skip) {
 			const adjustedForBounds = currentPage + direction * 2 < 1 ? 1 : currentPage + direction * 2
 			doChangePage(adjustedForBounds)
 		} else {
@@ -104,7 +111,8 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	 */
 	const handleRightwardPageChange = useCallback(() => {
 		const direction = readingDirection === 'ltr' ? 1 : -1
-		if (doubleSpread) {
+		const skip = readingDirection === 'ltr' ? 1 : 2
+		if (doubleSpread && currentPage > skip) {
 			const adjustedForBounds =
 				currentPage + direction * 2 > media.pages ? media.pages : currentPage + direction * 2
 			doChangePage(adjustedForBounds)

@@ -37,6 +37,7 @@ pub fn create_prisma_user(user: &User, hashed_pass: String) -> user::Data {
 			enable_replace_primary_sidebar: user_preferences
 				.enable_replace_primary_sidebar,
 			enable_hide_scrollbar: user_preferences.enable_hide_scrollbar,
+			enable_job_overlay: user_preferences.enable_job_overlay,
 			prefer_accent_color: user_preferences.prefer_accent_color,
 			show_thumbnails_in_headers: user_preferences.show_thumbnails_in_headers,
 			navigation_arrangement: None,
@@ -61,5 +62,6 @@ pub fn create_prisma_user(user: &User, hashed_pass: String) -> user::Data {
 		user_preferences_id: None,
 		bookmarks: None,
 		media_annotations: None,
+		api_keys: None,
 	}
 }

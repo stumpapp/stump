@@ -39,7 +39,7 @@ fn gen_new_impl(config_vars: &[StumpConfigVariable]) -> TokenStream {
 			let var_type = &var.variable_type;
 
 			args.push(quote! {#name: #var_type});
-			setters.push(quote! {#name: #name})
+			setters.push(quote! {#name: #name});
 		} else {
 			if var.attributes.default_value.is_none() {
 				setters.push(
@@ -49,7 +49,7 @@ fn gen_new_impl(config_vars: &[StumpConfigVariable]) -> TokenStream {
 			}
 
 			let default_expr = var.attributes.default_value.as_ref().unwrap();
-			setters.push(quote! {#name: #default_expr})
+			setters.push(quote! {#name: #default_expr});
 		}
 	}
 

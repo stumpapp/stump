@@ -1,7 +1,7 @@
 import { useMediaByIdQuery } from '@stump/client'
 import { Badge, ButtonOrLink, Heading, Spacer, Text } from '@stump/components'
 import dayjs from 'dayjs'
-import sortBy from 'lodash.sortby'
+import sortBy from 'lodash/sortBy'
 import { Suspense, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
@@ -47,15 +47,11 @@ export default function BookOverviewScene() {
 
 	const { media, isLoading, remove } = useMediaByIdQuery(id)
 
-	useEffect(
-		() => {
-			return () => {
-				remove()
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[],
-	)
+	useEffect(() => {
+		return () => {
+			remove()
+		}
+	}, [remove])
 
 	if (isLoading) {
 		return null

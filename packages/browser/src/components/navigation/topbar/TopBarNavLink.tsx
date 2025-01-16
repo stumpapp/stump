@@ -1,5 +1,5 @@
 import { cn, NavigationMenu, navigationMenuTriggerStyle } from '@stump/components'
-import React, { PropsWithChildren } from 'react'
+import { PropsWithChildren } from 'react'
 import { To } from 'react-router'
 import { Link } from 'react-router-dom'
 
@@ -8,6 +8,7 @@ type Props = {
 	isActive?: boolean
 	className?: string
 }
+
 export default function TopBarNavLink({
 	to,
 	isActive,

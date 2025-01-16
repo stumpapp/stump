@@ -1,17 +1,16 @@
-import { authApi } from '@stump/api'
-import { queryClient } from '@stump/client'
-import React from 'react'
+import { queryClient, useSDK } from '@stump/client'
 import { Button } from 'react-native'
 
 import { ScreenRootView, Text } from '@/components'
 import { useUserStore } from '@/stores'
 
 export default function Home() {
+	const { sdk } = useSDK()
 	const setUser = useUserStore((state) => state.setUser)
 
 	const handleLogout = async () => {
 		try {
-			await authApi.logout()
+			await sdk.auth.logout()
 			setUser(null)
 		} catch (err) {
 			console.error(err)

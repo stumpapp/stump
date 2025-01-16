@@ -135,7 +135,7 @@ pub enum APIError {
 	SessionFetchError(#[from] SessionError),
 	#[error("{0}")]
 	#[schema(value_type = String)]
-	PrismaError(#[from] QueryError),
+	PrismaError(#[from] Box<QueryError>),
 }
 
 impl APIError {
@@ -173,6 +173,12 @@ impl From<OPDSV2Error> for APIError {
 
 impl From<MultipartError> for APIError {
 	fn from(error: MultipartError) -> Self {
+		APIError::InternalServerError(error.to_string())
+	}
+}
+
+impl From<prefixed_api_key::BuilderError> for APIError {
+	fn from(error: prefixed_api_key::BuilderError) -> Self {
 		APIError::InternalServerError(error.to_string())
 	}
 }
@@ -289,8 +295,14 @@ impl From<std::io::Error> for APIError {
 	}
 }
 
+impl From<prisma_client_rust::QueryError> for APIError {
+	fn from(error: prisma_client_rust::QueryError) -> Self {
+		Self::PrismaError(Box::new(error))
+	}
+}
+
 /// The response body for API errors. This is just a basic JSON response with a status code and a message.
-/// Any axum handlers which return a Result with an Error of APIError will be converted into this response.
+/// Any axum handlers which return a [`Result`] with an Error of [`APIError`] will be converted into this response.
 pub struct APIErrorResponse {
 	status: StatusCode,
 	message: String,

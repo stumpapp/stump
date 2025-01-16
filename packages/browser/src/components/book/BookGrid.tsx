@@ -1,5 +1,5 @@
 import { CardGrid } from '@stump/components'
-import type { Media } from '@stump/types'
+import type { Media } from '@stump/sdk'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
 

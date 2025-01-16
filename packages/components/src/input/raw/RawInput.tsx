@@ -61,15 +61,18 @@ export const inputVariants = cva(RAW_INPUT_BASE_CLASSES, {
 	variants: RAW_INPUT_VARIANTS,
 })
 export type RawInputProps = VariantProps<typeof inputVariants> &
-	Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>
+	Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> & {
+		ignoreFill?: boolean
+	}
 
 export const RawInput = React.forwardRef<HTMLInputElement, RawInputProps>(
-	({ className, variant, size, rounded, isInvalid, contrast, ...props }, ref) => {
+	({ className, variant, size, rounded, isInvalid, contrast, ignoreFill, ...props }, ref) => {
 		return (
 			<input
 				className={cn(inputVariants({ className, contrast, isInvalid, rounded, size, variant }))}
 				ref={ref}
 				{...props}
+				{...(ignoreFill ? { 'data-1p-ignore': true } : {})}
 			/>
 		)
 	},

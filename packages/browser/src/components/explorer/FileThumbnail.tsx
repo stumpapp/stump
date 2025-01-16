@@ -1,9 +1,11 @@
-import { getMediaThumbnail, mediaApi, mediaQueryKeys } from '@stump/api'
-import { queryClient } from '@stump/client'
+import { queryClient, useSDK } from '@stump/client'
 import { cn } from '@stump/components'
-import { Media } from '@stump/types'
+import { Api } from '@stump/sdk'
+import { Media } from '@stump/sdk'
 import { Book, Folder } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
+
+import { EntityImage } from '../entity'
 
 type Props = {
 	path: string
@@ -18,6 +20,7 @@ export default function FileThumbnail({
 	size = 'sm',
 	containerClassName,
 }: Props) {
+	const { sdk } = useSDK()
 	/**
 	 * A boolean state to keep track of whether or not we should show the fallback icon. This
 	 * will be set to true if the image fails to load
@@ -39,9 +42,9 @@ export default function FileThumbnail({
 	useEffect(() => {
 		if (!book && !didFetchRef.current && !isDirectory) {
 			didFetchRef.current = true
-			getBook(path).then(setBook)
+			getBook(path, sdk).then(setBook)
 		}
-	}, [book, path, isDirectory])
+	}, [book, path, isDirectory, sdk])
 
 	/**
 	 * A function that attempts to load the image associated with the book,
@@ -51,7 +54,7 @@ export default function FileThumbnail({
 		if (book) {
 			const image = new Image()
 			return new Promise((resolve, reject) => {
-				image.src = getMediaThumbnail(book.id)
+				image.src = sdk.media.thumbnailURL(book.id)
 				image.onload = () => resolve(image)
 				image.onerror = (e) => {
 					console.error('Image failed to load:', e)
@@ -61,7 +64,7 @@ export default function FileThumbnail({
 		} else {
 			return Promise.reject('No book found')
 		}
-	}, [book])
+	}, [book, sdk.media])
 
 	/**
 	 * A function that attempts to reload the image
@@ -70,7 +73,7 @@ export default function FileThumbnail({
 		try {
 			await loadImage()
 			setShowFallback(false)
-		} catch (e) {
+		} catch {
 			setShowFallback(true)
 		}
 	}
@@ -100,9 +103,9 @@ export default function FileThumbnail({
 	}
 
 	return (
-		<img
+		<EntityImage
 			className={cn('aspect-[2/3] w-auto rounded-sm object-cover', sizeClasses)}
-			src={getMediaThumbnail(book.id)}
+			src={sdk.media.thumbnailURL(book.id)}
 			onError={() => setShowFallback(true)}
 		/>
 	)
@@ -112,20 +115,20 @@ export default function FileThumbnail({
  * A function that attempts to fetch the book associated with the file, if any exists.
  * The queryClient is used in order to properly cache the result.
  */
-export const getBook = async (path: string) => {
+export const getBook = async (path: string, sdk: Api) => {
 	try {
 		const response = await queryClient.fetchQuery(
-			[mediaQueryKeys.getMedia, { path }],
+			[sdk.media.keys.get, { path }],
 			() =>
-				mediaApi.getMedia({
-					path,
+				sdk.media.get({
+					path: [path],
 				}),
 			{
 				// 15 minutes
 				cacheTime: 1000 * 60 * 15,
 			},
 		)
-		return response.data.data?.at(0) ?? null
+		return response.data?.at(0) ?? null
 	} catch (error) {
 		console.error(error)
 		return null

@@ -6,6 +6,10 @@
 		"jsx": "preserve",
 		"module": "es2022",
 		"moduleResolution": "Node",
+		"composite": true,
+		"declaration": true,
+		"emitDeclarationOnly": true,
+		"outDir": "dist",
 		"paths": {
 			"@stump/client": ["../../packages/client/src/index.ts"],
 			"@stump/client/*": ["../../packages/client/src/*"],

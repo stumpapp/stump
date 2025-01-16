@@ -14,6 +14,7 @@ use super::{media::Media, MediaAnnotation};
 pub struct EpubContent {
 	label: String,
 	content: PathBuf,
+	children: Vec<EpubContent>,
 	play_order: u32,
 }
 
@@ -22,6 +23,11 @@ impl From<NavPoint> for EpubContent {
 		EpubContent {
 			label: nav_point.label,
 			content: nav_point.content,
+			children: nav_point
+				.children
+				.into_iter()
+				.map(EpubContent::from)
+				.collect(),
 			play_order: nav_point.play_order as u32,
 		}
 	}
@@ -46,7 +52,7 @@ TODO: convert spine into this structure to match epub.js
 pub struct Epub {
 	/// This is the epub's record in Stump's database
 	pub media_entity: Media,
-	/// A list of spine IDs. See https://www.w3.org/publishing/epub3/epub-ocf.html
+	/// A list of spine IDs. See https://www.w3.org/TR/epub-33/#sec-ocf
 	pub spine: Vec<String>,
 	/// A hashmap of all the resources in the epub. A resource ID maps to a tuple containing the
 	/// path and mime type of the resource.
@@ -63,11 +69,11 @@ pub struct Epub {
 	pub extra_css: Vec<String>,
 }
 
-/// This struct is mainly used when the Stump client sends the inital request to grab information on an epub file.
+/// This struct is mainly used when the Stump client sends the initial request to grab information on an epub file.
 /// This will get cached on the client, which will use the metadata to make consecutive requests for various
-/// resources/chapters. This struct isn't really used after that first request, everything else is file IO using EpubDoc.
+/// resources/chapters. This struct isn't really used after that first request, everything else is file IO using [`EpubDoc`].
 impl Epub {
-	/// Creates an Epub from a media entity and an open EpubDoc
+	/// Creates an Epub from a media entity and an open [`EpubDoc`]
 	pub fn from(media: media::Data, epub: EpubDoc<BufReader<File>>) -> Epub {
 		let annotations = match media.annotations() {
 			Ok(annotations) => Some(
@@ -93,8 +99,8 @@ impl Epub {
 		}
 	}
 
-	/// Attempts to create an Epub from a media entity. Internally, this will attempt to open
-	/// an EpubDoc from the media's path. If this fails, it will return an EpubOpenError.
+	/// Attempts to create an Epub from a media entity. Internally, this will attempt to open an [`EpubDoc`]
+	/// from the media's path. If this fails, it will return a [`FileError::EpubOpenError`].
 	pub fn try_from(media: media::Data) -> Result<Epub, FileError> {
 		let epub_file = EpubDoc::new(media.path.as_str()).map_err(|e| {
 			error!("Failed to open epub {}: {}", &media.path, e);

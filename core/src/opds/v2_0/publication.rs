@@ -105,7 +105,7 @@ impl OPDSPublication {
 				let links = OPDSPublication::links_for_book(&book, &finalizer)?;
 				let images = OPDSPublication::images_for_book(&book, &finalizer).await?;
 
-				let position = positions.get(&book.id).cloned();
+				let position = positions.get(&book.id).copied();
 
 				let metadata = book
 					.metadata
@@ -159,7 +159,7 @@ impl OPDSPublication {
 		let positions = client
 			.book_positions_in_series(vec![book.id.clone()], series.id.clone())
 			.await?;
-		let position = positions.get(&book.id).cloned();
+		let position = positions.get(&book.id).copied();
 
 		let metadata = book
 			.metadata
@@ -318,6 +318,7 @@ mod tests {
 			path: get_test_epub_path(),
 			status: FileStatus::Ready.to_string(),
 			hash: Some(String::from("hash")),
+			koreader_hash: None,
 			series_id: Some("1".to_string()),
 			pages: 0,
 			modified_at: None,
@@ -370,7 +371,7 @@ mod tests {
 
 		mock.expect(
 			client._query_raw(book_positions_in_series_raw_query(
-				vec!["1".to_string(), "2".to_string()],
+				&["1".to_string(), "2".to_string()],
 				"1".to_string(),
 			)),
 			vec![
@@ -406,7 +407,7 @@ mod tests {
 
 		mock.expect(
 			client._query_raw(book_positions_in_series_raw_query(
-				vec!["1".to_string()],
+				&["1".to_string()],
 				"1".to_string(),
 			)),
 			vec![EntityPosition {
@@ -421,7 +422,7 @@ mod tests {
 				.page_dimensions()
 				// When metadata is not set, the metadata ID is an empty string. This will never load, but for
 				// the sake of the test it should be acceptable
-				.find_first(vec![page_dimensions::metadata_id::equals("".to_string())]),
+				.find_first(vec![page_dimensions::metadata_id::equals(String::new())]),
 			Some(page_dimensions::Data {
 				id: "1".to_string(),
 				metadata_id: "1".to_string(),

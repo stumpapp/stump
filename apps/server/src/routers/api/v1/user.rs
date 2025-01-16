@@ -275,7 +275,7 @@ async fn update_user(
 			))
 		},
 		Some(max_sessions_allowed) => {
-			tracing::trace!(?max_sessions_allowed, "The max sessions allowed is set")
+			tracing::trace!(?max_sessions_allowed, "The max sessions allowed is set");
 		},
 		_ => {},
 	}
@@ -333,13 +333,16 @@ async fn update_user(
 						)
 						.exec()
 						.await?;
-					tracing::trace!(?upserted_age_restriction, "Upserted age restriction")
+					tracing::trace!(
+						?upserted_age_restriction,
+						"Upserted age restriction"
+					);
 				} else if existing_age_restriction.is_some() {
 					tx.age_restriction()
 						.delete(age_restriction::user_id::equals(for_user_id.clone()))
 						.exec()
 						.await?;
-					tracing::trace!("Deleted age restriction")
+					tracing::trace!("Deleted age restriction");
 				}
 
 				update_params.push(user::permissions::set(Some(
@@ -373,15 +376,15 @@ async fn update_preferences(
 		.update(
 			user_preferences::id::equals(preferences_id),
 			vec![
-				user_preferences::locale::set(input.locale.to_owned()),
+				user_preferences::locale::set(input.locale.clone()),
 				user_preferences::preferred_layout_mode::set(
-					input.preferred_layout_mode.to_owned(),
+					input.preferred_layout_mode.clone(),
 				),
-				user_preferences::app_theme::set(input.app_theme.to_owned()),
+				user_preferences::app_theme::set(input.app_theme.clone()),
 				user_preferences::enable_gradients::set(input.enable_gradients),
 				user_preferences::app_font::set(input.app_font.to_string()),
 				user_preferences::primary_navigation_mode::set(
-					input.primary_navigation_mode.to_owned(),
+					input.primary_navigation_mode.clone(),
 				),
 				user_preferences::layout_max_width_px::set(input.layout_max_width_px),
 				user_preferences::show_query_indicator::set(input.show_query_indicator),
@@ -397,6 +400,7 @@ async fn update_preferences(
 					input.enable_replace_primary_sidebar,
 				),
 				user_preferences::enable_hide_scrollbar::set(input.enable_hide_scrollbar),
+				user_preferences::enable_job_overlay::set(input.enable_job_overlay),
 				user_preferences::prefer_accent_color::set(input.prefer_accent_color),
 				user_preferences::show_thumbnails_in_headers::set(
 					input.show_thumbnails_in_headers,
@@ -458,7 +462,7 @@ async fn create_user(
 			let created_user = client
 				.user()
 				.create(
-					input.username.to_owned(),
+					input.username.clone(),
 					hashed_password,
 					chain_optional_iter(
 						vec![
@@ -486,7 +490,7 @@ async fn create_user(
 					)
 					.exec()
 					.await?;
-				tracing::trace!(?_age_restriction, "Created age restriction")
+				tracing::trace!(?_age_restriction, "Created age restriction");
 			}
 
 			let _user_preferences = client
@@ -569,6 +573,7 @@ pub struct UpdateUserPreferences {
 	pub enable_double_sidebar: bool,
 	pub enable_replace_primary_sidebar: bool,
 	pub enable_hide_scrollbar: bool,
+	pub enable_job_overlay: bool,
 	pub prefer_accent_color: bool,
 	pub show_thumbnails_in_headers: bool,
 }
@@ -695,8 +700,7 @@ async fn update_navigation_arrangement(
 			vec![user_preferences::navigation_arrangement::set(Some(
 				serde_json::to_vec(&input).map_err(|e| {
 					APIError::InternalServerError(format!(
-						"Failed to serialize navigation arrangement: {}",
-						e
+						"Failed to serialize navigation arrangement: {e}"
 					))
 				})?,
 			))],
@@ -791,7 +795,7 @@ async fn get_user_by_id(
 		.with(user::age_restriction::fetch())
 		.exec()
 		.await?
-		.ok_or(APIError::NotFound(format!("User with id {} not found", id)))?;
+		.ok_or(APIError::NotFound(format!("User with id {id} not found")))?;
 
 	Ok(Json(User::from(fetched_user)))
 }
@@ -1014,8 +1018,7 @@ async fn get_user_preferences(
 
 	if user_preferences.is_none() {
 		return Err(APIError::NotFound(format!(
-			"User preferences with id {} not found",
-			id
+			"User preferences with id {id} not found"
 		)));
 	}
 
@@ -1162,11 +1165,11 @@ async fn upload_user_avatar(
 		.await?
 		.ok_or(APIError::NotFound("User not found".to_string()))?;
 
-	let (content_type, bytes) =
+	let upload_data =
 		validate_and_load_image(&mut upload, Some(ctx.config.max_image_upload_size))
 			.await?;
 
-	let ext = content_type.extension();
+	let ext = upload_data.content_type.extension();
 	let username = user.username.clone();
 
 	let base_path = ctx.config.get_avatars_dir().join(username.as_str());
@@ -1178,15 +1181,14 @@ async fn upload_user_avatar(
 	let file_name = format!("{username}.{ext}");
 	let file_path = ctx.config.get_avatars_dir().join(file_name.as_str());
 	let mut file = File::create(file_path.clone())?;
-	file.write_all(&bytes)?;
+	file.write_all(&upload_data.bytes)?;
 
 	let updated_user = client
 		.user()
 		.update(
 			user::id::equals(id.clone()),
 			vec![user::avatar_url::set(Some(format!(
-				"/api/v1/users/{}/avatar",
-				id
+				"/api/v1/users/{id}/avatar"
 			)))],
 		)
 		.exec()
@@ -1194,5 +1196,8 @@ async fn upload_user_avatar(
 
 	tracing::trace!(?updated_user, "Updated user");
 
-	Ok(ImageResponse::new(content_type, bytes))
+	Ok(ImageResponse::new(
+		upload_data.content_type,
+		upload_data.bytes,
+	))
 }

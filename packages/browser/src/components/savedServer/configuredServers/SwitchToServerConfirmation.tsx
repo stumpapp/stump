@@ -1,7 +1,6 @@
 import { ConfirmationModal, Label, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { SavedServer } from '@stump/types'
-import React from 'react'
+import { SavedServer } from '@stump/sdk'
 
 import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
 

@@ -9,7 +9,7 @@ use crate::{
 	filesystem::{
 		content_type::ContentType,
 		error::FileError,
-		hash,
+		hash::{self, generate_koreader_hash},
 		media::process::{FileProcessor, FileProcessorOptions, ProcessedFile},
 	},
 };
@@ -69,6 +69,7 @@ impl FileProcessor for EpubProcessor {
 		path: &str,
 		FileProcessorOptions {
 			generate_file_hashes,
+			generate_koreader_hashes,
 			..
 		}: FileProcessorOptions,
 		_: &StumpConfig,
@@ -84,10 +85,14 @@ impl FileProcessor for EpubProcessor {
 		let hash = generate_file_hashes
 			.then(|| EpubProcessor::hash(path))
 			.flatten();
+		let koreader_hash = generate_koreader_hashes
+			.then(|| generate_koreader_hash(path))
+			.transpose()?;
 
 		Ok(ProcessedFile {
 			path: path_buf,
 			hash,
+			koreader_hash,
 			metadata: Some(metadata),
 			pages,
 		})
@@ -138,16 +143,15 @@ impl FileProcessor for EpubProcessor {
 				));
 			}
 
-			let content_type = match epub_file.get_current_mime() {
-				Some(mime) => ContentType::from(mime.as_str()),
-				None => {
-					tracing::error!(
-						chapter_path = ?path,
-						"Failed to get explicit resource mime for chapter. Returning XHTML",
-					);
+			let content_type = if let Some(mime) = epub_file.get_current_mime() {
+				ContentType::from(mime.as_str())
+			} else {
+				tracing::error!(
+					chapter_path = ?path,
+					"Failed to get explicit resource mime for chapter. Returning XHTML",
+				);
 
-					ContentType::XHTML
-				},
+				ContentType::XHTML
 			};
 
 			content_types.insert(chapter, content_type);
@@ -218,7 +222,7 @@ impl EpubProcessor {
 	/// 1. Attempt to find a resource with the default ID of "cover"
 	/// 2. Attempt to find a resource with a mime type of "image/jpeg" or "image/png", and weight the
 	///    results based on how likely they are to be the cover. For example, if the cover is named
-	///    "cover.jpg", it's probably the cover. The entry with the heighest weight, if any, will be
+	///    "cover.jpg", it's probably the cover. The entry with the highest weight, if any, will be
 	///    returned.
 	pub fn get_cover(path: &str) -> Result<(ContentType, Vec<u8>), FileError> {
 		let mut epub_file = EpubDoc::new(path).map_err(|e| {
@@ -247,16 +251,15 @@ impl EpubProcessor {
 			FileError::EpubReadError(e.to_string())
 		})?;
 
-		let content_type = match epub_file.get_current_mime() {
-			Some(mime) => ContentType::from(mime.as_str()),
-			None => {
-				tracing::error!(
-					chapter_path = ?path,
-					"Failed to get explicit resource mime for chapter. Returning XHTML",
-				);
+		let content_type = if let Some(mime) = epub_file.get_current_mime() {
+			ContentType::from(mime.as_str())
+		} else {
+			tracing::error!(
+				chapter_path = ?path,
+				"Failed to get explicit resource mime for chapter. Returning XHTML",
+			);
 
-				ContentType::XHTML
-			},
+			ContentType::XHTML
 		};
 
 		Ok((content_type, content))
@@ -295,18 +298,18 @@ impl EpubProcessor {
 		// Note: If the resource does not have an entry in the `resources` map, then loading the content
 		// type will fail. This seems to only happen when loading the root file (e.g. container.xml,
 		// package.opf, etc.).
-		let content_type =
-			match epub_file.get_resource_mime_by_path(adjusted_path.as_path()) {
-				Some(mime) => ContentType::from(mime.as_str()),
-				None => {
-					tracing::warn!(
-						?adjusted_path,
-						"Failed to get explicit definition of resource mime",
-					);
+		let content_type = if let Some(mime) =
+			epub_file.get_resource_mime_by_path(adjusted_path.as_path())
+		{
+			ContentType::from(mime.as_str())
+		} else {
+			tracing::warn!(
+				?adjusted_path,
+				"Failed to get explicit definition of resource mime",
+			);
 
-					ContentType::from_path(adjusted_path.as_path())
-				},
-			};
+			ContentType::from_path(adjusted_path.as_path())
+		};
 
 		Ok((content_type, contents))
 	}

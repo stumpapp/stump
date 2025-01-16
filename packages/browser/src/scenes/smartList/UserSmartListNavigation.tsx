@@ -1,7 +1,7 @@
-import { prefetchSmartListItems } from '@stump/client'
+import { usePrefetchListItems } from '@stump/client'
 import { cn, Link } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
 import { usePreferences } from '@/hooks'
@@ -20,6 +20,7 @@ export default function UserSmartListNavigation() {
 	const {
 		list: { id },
 	} = useSmartListContext()
+	const { prefetch } = usePrefetchListItems({ id })
 
 	const tabs = useMemo(
 		() => [
@@ -27,7 +28,7 @@ export default function UserSmartListNavigation() {
 				// smart-lists/ID OR smart-lists/ID/items
 				isActive: location.pathname.match(/\/smart-lists\/[^/]+(\/items)?$/),
 				label: t(withLocaleKey('items')),
-				onHover: () => prefetchSmartListItems(id),
+				onHover: () => prefetch(),
 				to: 'items',
 			},
 			{
@@ -36,7 +37,7 @@ export default function UserSmartListNavigation() {
 				to: 'settings',
 			},
 		],
-		[location, id, t],
+		[location, prefetch, t],
 	)
 
 	const preferTopBar = primary_navigation_mode === 'TOPBAR'

@@ -14,7 +14,7 @@ use crate::{
 	filesystem::{
 		archive::create_zip_archive,
 		error::FileError,
-		hash,
+		hash::{self, generate_koreader_hash},
 		image::ImageFormat,
 		media::process::{
 			FileConverter, FileProcessor, FileProcessorOptions, ProcessedFile,
@@ -66,6 +66,7 @@ impl FileProcessor for PdfProcessor {
 		path: &str,
 		FileProcessorOptions {
 			generate_file_hashes,
+			generate_koreader_hashes,
 			..
 		}: FileProcessorOptions,
 		_: &StumpConfig,
@@ -79,10 +80,14 @@ impl FileProcessor for PdfProcessor {
 		let hash = generate_file_hashes
 			.then(|| PdfProcessor::hash(path))
 			.flatten();
+		let koreader_hash = generate_koreader_hashes
+			.then(|| generate_koreader_hash(path))
+			.transpose()?;
 
 		Ok(ProcessedFile {
 			path: PathBuf::from(path),
 			hash,
+			koreader_hash,
 			metadata,
 			pages,
 		})
@@ -187,8 +192,7 @@ impl FileConverter for PdfProcessor {
 
 		let output_format = format
 			.clone()
-			.map(image::ImageFormat::from)
-			.unwrap_or(image::ImageFormat::Png);
+			.map_or(image::ImageFormat::Png, image::ImageFormat::from);
 		let converted_pages = iter
 			.enumerate()
 			.map(|(idx, page)| {
@@ -235,11 +239,10 @@ impl FileConverter for PdfProcessor {
 		// write each image to the folder
 		for image_buf in converted_pages {
 			// write the image to file with proper extension
-			let output_extension =
-				format.as_ref().map(|f| f.extension()).unwrap_or("png");
+			let output_extension = format.as_ref().map_or("png", |f| f.extension());
 
 			let image_path =
-				unpacked_path.join(format!("{}.{}", file_name, output_extension));
+				unpacked_path.join(format!("{file_name}.{output_extension}"));
 
 			// NOTE: This isn't bubbling up because I don't think at this point it should
 			// kill the whole conversion process.

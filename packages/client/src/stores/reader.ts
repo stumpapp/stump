@@ -1,4 +1,4 @@
-import type { ReadingDirection, ReadingMode } from '@stump/types'
+import type { ReadingDirection, ReadingMode } from '@stump/sdk'
 import { create } from 'zustand'
 import { createJSONStorage, devtools, persist, StateStorage } from 'zustand/middleware'
 

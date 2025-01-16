@@ -1,7 +1,8 @@
-import { API } from '@stump/api'
-import type { CoreEvent } from '@stump/types'
+import type { CoreEvent } from '@stump/sdk'
 import { useMemo } from 'react'
 import useWebSocket, { ReadyState } from 'react-use-websocket'
+
+import { useSDK } from '../sdk'
 
 interface Props {
 	onEvent(event: CoreEvent): void
@@ -9,17 +10,17 @@ interface Props {
 }
 
 export function useStumpWs({ onEvent, onConnectionWithServerChanged }: Props) {
-	const URI = API?.getUri()
+	const { sdk } = useSDK()
 
 	const socketUrl = useMemo(() => {
-		let url = URI
+		let url = sdk.serviceURL
 		// remove http(s):// from url, and replace with ws(s)://
 		url = url.replace(/^http(s?):\/\//, 'ws$1://')
 		// remove /api(/) from end of url
 		url = url.replace(/\/api(\/v\d)?$/, '')
 
 		return `${url}/ws`
-	}, [URI])
+	}, [sdk])
 
 	function handleWsMessage(e: MessageEvent<unknown>) {
 		if ('data' in e && typeof e.data === 'string') {
@@ -35,12 +36,11 @@ export function useStumpWs({ onEvent, onConnectionWithServerChanged }: Props) {
 	}
 
 	function handleOpen() {
-		console.debug('Websocket connected')
 		onConnectionWithServerChanged?.(true)
 	}
 
 	function handleClose() {
-		console.debug('Websocket closed')
+		console.warn('Websocket closed')
 		onConnectionWithServerChanged?.(false)
 	}
 

@@ -16,7 +16,7 @@ pub struct SeriesMediaCountQueryReturn {
 	pub count: i64,
 }
 
-// TODO: Replace pretty much all of these once prisma client suports relation counts. That's
+// TODO: Replace pretty much all of these once prisma client supports relation counts. That's
 // all this trait is used for. See the various FIXME notes throughout that say:
 // PCR doesn't support relation counts yet!
 #[async_trait::async_trait]
@@ -97,14 +97,14 @@ impl PrismaCountTrait for PrismaClient {
 		._query_raw(raw!(format!("SELECT DISTINCT series_id as series_id, COUNT(*) as count FROM media WHERE series_id in ({}) GROUP BY series_id",
 		series_ids
 			.into_iter()
-			.map(|id| format!("\"{}\"", id))
+			.map(|id| format!("\"{id}\""))
 			.collect::<Vec<_>>()
 			.join(",")
 	).as_str())).exec().await?;
 
 		Ok(count_res
 			.iter()
-			.map(|data| (data.series_id.to_owned(), data.count))
+			.map(|data| (data.series_id.clone(), data.count))
 			.collect())
 	}
 }
@@ -139,7 +139,7 @@ impl FromStr for JournalMode {
 		match s.to_uppercase().as_str() {
 			"WAL" => Ok(Self::WAL),
 			"DELETE" => Ok(Self::DELETE),
-			_ => Err(format!("Invalid or unsupported journal mode: {}", s)),
+			_ => Err(format!("Invalid or unsupported journal mode: {s}")),
 		}
 	}
 }

@@ -1,5 +1,5 @@
 import { cn, IconButton, Text, ToolTip } from '@stump/components'
-import { EmailerSendRecord } from '@stump/types'
+import { EmailerSendRecord } from '@stump/sdk'
 import {
 	createColumnHelper,
 	ExpandedState,
@@ -9,7 +9,7 @@ import {
 } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import { ChevronDown, Copy } from 'lucide-react'
-import React, { useState } from 'react'
+import { Fragment, useState } from 'react'
 
 import { getTableModels, SortIcon } from '@/components/table'
 
@@ -56,7 +56,7 @@ export default function EmailerSendHistoryTable({ records }: Props) {
 
 				<tbody className="divide relative divide-y divide-edge">
 					{rows.map((row) => (
-						<React.Fragment key={row.id}>
+						<Fragment key={row.id}>
 							<tr key={row.id} className="h-10">
 								{row.getVisibleCells().map((cell) => (
 									<td className="first:pl-4 last:pr-4" key={cell.id}>
@@ -73,7 +73,7 @@ export default function EmailerSendHistoryTable({ records }: Props) {
 									</td>
 								</tr>
 							)}
-						</React.Fragment>
+						</Fragment>
 					))}
 				</tbody>
 			</table>

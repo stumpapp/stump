@@ -7,16 +7,16 @@ use crate::{
 	prisma::{media, media_metadata},
 };
 
-/// The logic for [super::AnalyzeMediaTask::UpdatePageCount].
+/// The logic for [`super::AnalyzeMediaTask::UpdatePageCount`].
 ///
-/// Determines the page count for media using media processor [get_page_count] function, then
+/// Determines the page count for media using media processor [`get_page_count_async`] function, then
 /// performs one of:
 /// 1. Updating metadata if it already exists and does not match the determined page count, or
 /// 2. Creating metadata if it doesn't exist and writes the determined page count.
 ///
 /// # Arguments
 /// * `id` - The id for the media item being analyzed
-/// * `ctx` - A reference to the [WorkerCtx] for the job
+/// * `ctx` - A reference to the [`WorkerCtx`] for the job
 /// * `output` - A mutable reference to the job output
 pub(crate) async fn execute(
 	id: String,
@@ -30,7 +30,7 @@ pub(crate) async fn execute(
 	let page_count = get_page_count_async(&path, &ctx.config).await?;
 	output.page_counts_analyzed += 1;
 
-	// Check if a metadata update is neded
+	// Check if a metadata update is needed
 	if let Some(metadata) = media_item.metadata {
 		// Great, there's already metadata!
 		// Check if the value matches the currently recorded one, update if not.

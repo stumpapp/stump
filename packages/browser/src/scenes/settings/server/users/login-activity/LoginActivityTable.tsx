@@ -1,6 +1,6 @@
 import { useLoginActivityQuery } from '@stump/client'
 import { Badge, Card, Text } from '@stump/components'
-import { LoginActivity } from '@stump/types'
+import { LoginActivity } from '@stump/sdk'
 import {
 	ColumnDef,
 	createColumnHelper,
@@ -8,7 +8,7 @@ import {
 	PaginationState,
 } from '@tanstack/react-table'
 import dayjs from 'dayjs'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import { Table } from '@/components/table'
 
@@ -44,7 +44,7 @@ const baseColumns = [
 	}),
 	columnHelper.accessor('ip_address', {
 		cell: ({ row: { original: activity } }) => (
-			<Text className="line-clamp-1 " size="sm">
+			<Text className="line-clamp-1" size="sm">
 				{activity.ip_address}
 			</Text>
 		),

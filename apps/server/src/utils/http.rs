@@ -18,12 +18,13 @@ use tracing::error;
 pub(crate) fn unexpected_error<E: std::error::Error>(err: E) -> impl IntoResponse {
 	(
 		StatusCode::INTERNAL_SERVER_ERROR,
-		format!("An unknown error occurred: {}", err),
+		format!("An unknown error occurred: {err}"),
 	)
 }
-/// [ImageResponse] is a thin wrapper struct to return an image correctly in Axum.
-/// It contains a subset of actual Content-Type's (using [ContentType] enum from
-/// stump_core), as well as the raw image data. This is mostly the same as [BufferResponse],
+
+/// [`ImageResponse`] is a thin wrapper struct to return an image correctly in Axum.
+/// It contains a subset of actual Content-Type's (using [`ContentType`] enum from
+/// `stump_core`), as well as the raw image data. This is mostly the same as [`BufferResponse`],
 /// but adds the Cache-Control header.
 pub struct ImageResponse {
 	pub content_type: ContentType,
@@ -84,7 +85,7 @@ impl IntoResponse for Xml {
 	}
 }
 
-/// [BufferResponse] is a wrapper struct to return a buffer of any Stump-compliant (see [ContentType])
+/// [`BufferResponse`] is a wrapper struct to return a buffer of any Stump-compliant (see [`ContentType`])
 /// Content-Type correctly in Axum.
 pub struct BufferResponse {
 	pub content_type: ContentType,
@@ -117,7 +118,7 @@ impl IntoResponse for BufferResponse {
 	}
 }
 
-/// [UnknownBufferResponse] is the same as [BufferResponse], but takes a string instead of a [ContentType].
+/// [`UnknownBufferResponse`] is the same as [`BufferResponse`], but takes a string instead of a [`ContentType`].
 /// This makes it useful for returning a buffer with a content type that Stump doesn't know about. I don't
 /// anticipate this being used much, but it's here just in case.
 pub struct UnknownBufferResponse {
@@ -144,7 +145,7 @@ impl IntoResponse for UnknownBufferResponse {
 // TODO: I think it would be cool to support some variant of a named file with
 // range request support. I'm not sure how to do that yet, but it would be cool.
 // maybe something here -> https://docs.rs/tower-http/latest/tower_http/services/fs/index.html
-/// [NamedFile] is a struct used for serving 'named' files from the server. As
+/// [`NamedFile`] is a struct used for serving 'named' files from the server. As
 /// opposed to the static files handled by Stump's SPA router, this is used for
 /// dynamic files outside of the server's static directory.
 pub struct NamedFile {
@@ -181,7 +182,7 @@ impl IntoResponse for NamedFile {
 			)
 			.header(
 				header::CONTENT_DISPOSITION,
-				format!("attachment; filename=\"{}\"", filename),
+				format!("attachment; filename=\"{filename}\""),
 			)
 			.body(body)
 			.unwrap_or_else(|e| unexpected_error(e).into_response())

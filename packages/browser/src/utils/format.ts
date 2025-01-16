@@ -1,7 +1,7 @@
 // Note: ~technically~ 1024 is correct, but it always differed from what my computer natively reported.
 // I care more about matching a users reported byte conversion, and 1000 seems to do the trick
 
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 
 // for me in my testing.
 const KILOBYTE = 1000

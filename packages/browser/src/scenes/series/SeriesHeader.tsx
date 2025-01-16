@@ -1,7 +1,7 @@
-import { getSeriesThumbnail } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { AspectRatio, cn, Heading } from '@stump/components'
-import React from 'react'
 
+import { EntityImage } from '@/components/entity'
 import ReadMore from '@/components/ReadMore'
 import TagList from '@/components/tags/TagList'
 import { usePreferences } from '@/hooks'
@@ -9,6 +9,7 @@ import { usePreferences } from '@/hooks'
 import { useSeriesContext } from './context'
 
 export default function SeriesHeader() {
+	const { sdk } = useSDK()
 	const {
 		preferences: { primary_navigation_mode, layout_max_width_px, show_thumbnails_in_headers },
 	} = usePreferences()
@@ -38,7 +39,10 @@ export default function SeriesHeader() {
 				{show_thumbnails_in_headers && (
 					<div className="w-[200px]">
 						<AspectRatio ratio={2 / 3}>
-							<img src={getSeriesThumbnail(series.id)} className="rounded-md object-cover" />
+							<EntityImage
+								src={sdk.series.thumbnailURL(series.id)}
+								className="rounded-md object-cover"
+							/>
 						</AspectRatio>
 					</div>
 				)}

@@ -1,6 +1,6 @@
 import { Label, NativeSelect } from '@stump/components'
-import { ReadingMode } from '@stump/types'
-import React, { useCallback } from 'react'
+import { ReadingMode } from '@stump/sdk'
+import { useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'

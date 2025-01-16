@@ -50,12 +50,9 @@ use crate::{
 		host::HostExtractor,
 	},
 	routers::{
-		api::v1::{
-			library::library_not_hidden_from_user_filter,
-			media::{
-				apply_in_progress_filter_for_user, apply_media_restrictions_for_user,
-			},
-			series::apply_series_restrictions_for_user,
+		api::filters::{
+			apply_in_progress_filter_for_user, apply_media_restrictions_for_user,
+			apply_series_restrictions_for_user, library_not_hidden_from_user_filter,
 		},
 		relative_favicon_path,
 	},
@@ -281,6 +278,7 @@ async fn browse_libraries(
 		.find_many(library_conditions.clone())
 		.take(take)
 		.skip(skip)
+		.order_by(library::name::order(Direction::Asc))
 		.exec()
 		.await?;
 	let library_count = client.library().count(library_conditions).exec().await?;
@@ -607,7 +605,7 @@ async fn fetch_books_and_generate_feed(
 						OPDSPaginationMetadataBuilder::default()
 							.number_of_items(books_count)
 							.items_per_page(take)
-							.current_page(pagination.page.map(|p| p as i64).unwrap_or(1))
+							.current_page(pagination.page.map_or(1, i64::from))
 							.build()?,
 					))
 					.build()?,
@@ -691,7 +689,7 @@ async fn browse_series(
 		.await?;
 	let series_count = client.series().count(series_conditions).exec().await?;
 
-	let current_page = (pagination.zero_indexed_page() + 1) as i64;
+	let current_page = i64::from(pagination.zero_indexed_page() + 1);
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 
 	Ok(Json(

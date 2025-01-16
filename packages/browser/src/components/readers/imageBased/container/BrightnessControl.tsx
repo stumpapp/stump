@@ -1,5 +1,5 @@
 import { Label, Slider } from '@stump/components'
-import React, { useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 

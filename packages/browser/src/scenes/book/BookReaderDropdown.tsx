@@ -1,7 +1,7 @@
 import { ButtonOrLink, DropdownMenu, IconButton } from '@stump/components'
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import { ChevronDown } from 'lucide-react'
-import React, { useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 
 import paths from '@/paths'
@@ -17,7 +17,7 @@ export default function BookReaderDropdown({ book }: Props) {
 	const currentPage = book?.current_page ?? -1
 
 	/**
-	 * A boolean used to control the redering of the 'Read again' prompt. A book
+	 * A boolean used to control the rendering of the 'Read again' prompt. A book
 	 * is considered to be read again if:
 	 *
 	 * - It has been completed AND the current page is the last page

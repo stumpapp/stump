@@ -1,10 +1,11 @@
 import { useLocaleContext } from '@stump/i18n'
-import React, { Suspense } from 'react'
+import { Suspense } from 'react'
 import { Helmet } from 'react-helmet'
 
 import { Container, ContentContainer } from '@/components/container'
 
 import DisplaySpacingPreference from './DisplaySpacingPreference'
+import EnableJobOverlayToggle from './EnableJobOverlayToggle'
 import FontSelect from './FontSelect'
 import GradientToggle from './GradientToggle'
 import HideScrollbarToggle from './HideScrollbarToggle'
@@ -54,6 +55,7 @@ export default function AppearanceSettingsScene() {
 					<HideScrollbarToggle />
 					<QueryIndicatorToggle />
 					<LiveRefetchToggle />
+					<EnableJobOverlayToggle />
 				</div>
 			</ContentContainer>
 		</Container>

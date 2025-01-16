@@ -20,8 +20,8 @@ use crate::{
 
 use super::{rar::RarProcessor, zip::ZipProcessor};
 
-/// A struct representing the options for processing a file. This is a subset of [LibraryConfig]
-/// and is used to pass options to the [FileProcessor] implementations.
+/// A struct representing the options for processing a file. This is a subset of [`LibraryConfig`]
+/// and is used to pass options to the [`FileProcessor`] implementations.
 #[derive(Debug, Default)]
 pub struct FileProcessorOptions {
 	/// Whether to convert RAR files to ZIP files after processing
@@ -32,6 +32,8 @@ pub struct FileProcessorOptions {
 	pub generate_file_hashes: bool,
 	/// Whether to process metadata for the file
 	pub process_metadata: bool,
+	/// Whether to generate a hash for the file that is compatible with KOReader
+	pub generate_koreader_hashes: bool,
 }
 
 impl From<LibraryConfig> for FileProcessorOptions {
@@ -40,6 +42,7 @@ impl From<LibraryConfig> for FileProcessorOptions {
 			convert_rar_to_zip: options.convert_rar_to_zip,
 			delete_conversion_source: options.hard_delete_conversions,
 			generate_file_hashes: options.generate_file_hashes,
+			generate_koreader_hashes: options.generate_koreader_hashes,
 			process_metadata: options.process_metadata,
 		}
 	}
@@ -51,6 +54,7 @@ impl From<&LibraryConfig> for FileProcessorOptions {
 			convert_rar_to_zip: options.convert_rar_to_zip,
 			delete_conversion_source: options.hard_delete_conversions,
 			generate_file_hashes: options.generate_file_hashes,
+			generate_koreader_hashes: options.generate_koreader_hashes,
 			process_metadata: options.process_metadata,
 		}
 	}
@@ -130,12 +134,13 @@ impl SeriesJson {
 pub struct ProcessedFile {
 	pub path: PathBuf,
 	pub hash: Option<String>,
+	pub koreader_hash: Option<String>,
 	pub metadata: Option<MediaMetadata>,
 	pub pages: i32,
 }
 
 /// A function to process a file in a blocking manner. This will call the appropriate
-/// [FileProcessor::process] implementation based on the file's mime type, or return an
+/// [`FileProcessor::process`] implementation based on the file's mime type, or return an
 /// error if the file type is not supported.
 pub fn process(
 	path: &Path,
@@ -198,7 +203,7 @@ pub async fn process_async(
 }
 
 /// A function to extract the bytes of a page from a file in a blocking manner. This will call the
-/// appropriate [FileProcessor::get_page] implementation based on the file's mime type, or return an
+/// appropriate [`FileProcessor::get_page`] implementation based on the file's mime type, or return an
 /// error if the file type is not supported.
 pub fn get_page(
 	path: &str,
@@ -258,7 +263,7 @@ pub async fn get_page_async(
 	Ok(page_result)
 }
 
-/// Get the number of pages in a file. This will call the appropriate [FileProcessor::get_page_count]
+/// Get the number of pages in a file. This will call the appropriate [`FileProcessor::get_page_count`]
 /// implementation based on the file's mime type, or return an error if the file type is not supported.
 pub fn get_page_count(path: &str, config: &StumpConfig) -> Result<i32, FileError> {
 	let mime = ContentType::from_file(path).mime_type();
@@ -314,7 +319,7 @@ pub async fn get_page_count_async(
 }
 
 /// Get the content types of a list of pages of a file. This will call the appropriate
-/// [FileProcessor::get_page_content_types] implementation based on the file's mime type, or return an
+/// [`FileProcessor::get_page_content_types`] implementation based on the file's mime type, or return an
 /// error if the file type is not supported.
 pub fn get_content_types_for_pages(
 	path: &str,

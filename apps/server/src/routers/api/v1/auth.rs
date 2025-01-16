@@ -1,6 +1,8 @@
 use axum::{
 	extract::{ConnectInfo, Query, State},
+	http::{Response, StatusCode},
 	middleware,
+	response::IntoResponse,
 	routing::{get, post},
 	Extension, Json, Router,
 };
@@ -20,7 +22,7 @@ use utoipa::ToSchema;
 use crate::{
 	config::{
 		jwt::{create_user_jwt, CreatedToken},
-		session::SESSION_USER_KEY,
+		session::{delete_cookie_header, SESSION_USER_KEY},
 		state::AppState,
 	},
 	errors::{api_error_message, APIError, APIResult},
@@ -55,7 +57,7 @@ pub async fn enforce_max_sessions(
 			tracing::error!(?error, "Failed to load user's existing session(s)");
 			Vec::default()
 		})
-		.to_owned();
+		.clone();
 	let existing_login_sessions_count = existing_sessions.len() as i32;
 
 	match (for_user.max_sessions_allowed, existing_login_sessions_count) {
@@ -151,11 +153,7 @@ async fn handle_remove_earliest_session(
 #[serde(untagged)]
 pub enum LoginResponse {
 	User(User),
-	AccessToken {
-		for_user: User,
-		#[serde(flatten)]
-		token: CreatedToken,
-	},
+	AccessToken { for_user: User, token: CreatedToken },
 }
 
 #[utoipa::path(
@@ -201,7 +199,7 @@ async fn login(
 
 	let client = state.db.clone();
 	let today: DateTime<FixedOffset> = Utc::now().into();
-	// TODO: make this configurable via environment variable so knowledgable attackers can't bypass this
+	// TODO: make this configurable via environment variable so knowledgeable attackers can't bypass this
 	let twenty_four_hours_ago = today - Duration::hours(24);
 
 	let fetch_result = client
@@ -239,7 +237,7 @@ async fn login(
 			let user_id = db_user.id.clone();
 			let matches = verify_password(&db_user.hashed_password, &input.password)?;
 			if !matches {
-				// TODO: make this configurable via environment variable so knowledgable attackers can't bypass this
+				// TODO: make this configurable via environment variable so knowledgeable attackers can't bypass this
 				let should_lock_account = db_user
 					.login_activity
 					.as_ref()
@@ -345,9 +343,28 @@ async fn login(
 	)
 )]
 /// Destroys the session and logs the user out.
-async fn logout(session: Session) -> APIResult<()> {
+async fn logout(session: Session) -> APIResult<impl IntoResponse> {
 	session.delete().await?;
-	Ok(())
+
+	let body = serde_json::json!({
+		"status": 200,
+		"message": "OK",
+	});
+
+	let base_response = Json(body).into_response();
+
+	let (name, value) = delete_cookie_header();
+	let builder = Response::builder()
+		.status(200)
+		.header("Content-Type", "application/json")
+		.header(name, value);
+
+	Ok(builder
+		.body(base_response.into_body())
+		.unwrap_or_else(|error| {
+			tracing::error!(?error, "Failed to build response");
+			(StatusCode::INTERNAL_SERVER_ERROR, error.to_string()).into_response()
+		}))
 }
 
 #[utoipa::path(
@@ -396,7 +413,7 @@ pub async fn register(
 	let created_user = db
 		.user()
 		.create(
-			input.username.to_owned(),
+			input.username.clone(),
 			hashed_password,
 			vec![user::is_server_owner::set(is_server_owner)],
 		)

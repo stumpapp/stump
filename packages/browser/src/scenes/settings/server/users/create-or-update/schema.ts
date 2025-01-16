@@ -1,4 +1,4 @@
-import { User } from '@stump/types'
+import { User } from '@stump/sdk'
 import { z } from 'zod'
 
 export const allPermissions = [
@@ -9,6 +9,8 @@ export const allPermissions = [
 	'emailer:create',
 	'emailer:manage',
 	'emailer:read',
+	'feature:api_keys',
+	'feature:koreader_sync',
 	'file:explorer',
 	'file:upload',
 	'file:download',
@@ -69,7 +71,7 @@ export const buildSchema = (
 			.refine(
 				(value) =>
 					(!!editingUser && value === editingUser.username) ||
-					existingUsers.every((user) => user.username !== value),
+					existingUsers.every((user) => user.username.toLowerCase() !== value.toLowerCase()),
 				() => ({
 					message: t(
 						'settingsScene.server/users.createOrUpdateForm.validation.usernameAlreadyExists',

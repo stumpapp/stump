@@ -19,9 +19,7 @@ use crate::{
 		error::JobError, Executor, JobExecuteLog, JobExt, JobOutputExt, JobProgress,
 		JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
-	prisma::{
-		last_granular_library_scan, library, library_config, media, series, PrismaClient,
-	},
+	prisma::{library, library_config, library_scan_record, media, series, PrismaClient},
 	utils::chain_optional_iter,
 	CoreEvent,
 };
@@ -765,36 +763,32 @@ async fn handle_scan_complete(
 		tracing::error!(?error, "Failed to update library last scanned at");
 	}
 
-	if !job.is_granular {
-		return Ok(());
+	let persisted_options = if options.is_default() {
+		None
+	} else {
+		match serde_json::to_vec(&options) {
+			Ok(data) => Some(data),
+			Err(e) => {
+				tracing::error!(error = ?e, "Failed to serialize scan options");
+				None
+			},
+		}
+	};
+
+	let insert_result = client
+		.library_scan_record()
+		.create(
+			library::id::equals(job.id.clone()),
+			vec![
+				library_scan_record::options::set(persisted_options),
+				library_scan_record::timestamp::set(now.into()),
+			],
+		)
+		.exec()
+		.await;
+	if let Err(error) = insert_result {
+		tracing::error!(?error, "Failed to insert library scan record");
 	}
 
-	match serde_json::to_vec(&options) {
-		Ok(data) => {
-			let record = client
-				.last_granular_library_scan()
-				.upsert(
-					last_granular_library_scan::library_id::equals(job.id.clone()),
-					(
-						data.clone(),
-						library::id::equals(job.id.clone()),
-						vec![last_granular_library_scan::timestamp::set(now.into())],
-					),
-					vec![
-						last_granular_library_scan::options::set(data),
-						last_granular_library_scan::timestamp::set(now.into()),
-					],
-				)
-				.exec()
-				.await?;
-			tracing::trace!(?record, "Saved granular scan record");
-			Ok(())
-		},
-		Err(e) => {
-			tracing::error!(error = ?e, "Failed to serialize scan options");
-			Err(JobError::TaskFailed(
-				"Failed to serialize scan options".to_string(),
-			))
-		},
-	}
+	Ok(())
 }

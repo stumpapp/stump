@@ -153,7 +153,7 @@ export type LibraryScanMode = "DEFAULT" | "NONE"
  */
 export type ScanOptions = { force_rebuild?: boolean; regen_hashes?: boolean }
 
-export type LastGranularLibraryScan = { options: ScanOptions; timestamp: string }
+export type LastLibraryScan = { options: ScanOptions | null; timestamp: string }
 
 export type IgnoreRules = string[]
 
@@ -515,7 +515,9 @@ export type PatchSeriesThumbnail = { media_id: string; page: number; is_zero_bas
 
 export type PatchLibraryThumbnail = { media_id: string; page: number; is_zero_based?: boolean | null }
 
-export type LastScanDetails = { last_scanned_at: string | null; last_custom_scan: LastGranularLibraryScan | null }
+export type LibraryScanRecord = { id: number; options: ScanOptions | null; timestamp: string; library_id: string }
+
+export type LastScanDetails = { last_scanned_at: string | null; last_scan: LastLibraryScan | null }
 
 export type CreateOrUpdateSmartList = { name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; joiner?: FilterJoin | null; default_grouping?: SmartListItemGrouping | null; visibility?: EntityVisibility | null }
 

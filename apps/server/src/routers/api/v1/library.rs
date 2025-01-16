@@ -38,11 +38,11 @@ use stump_core::{
 			GenerateThumbnailOptions, ImageFormat, ImageProcessorOptions,
 			ThumbnailGenerationJob, ThumbnailGenerationJobParams,
 		},
-		scanner::{LastGranularLibraryScan, LibraryScanJob, ScanOptions},
+		scanner::{LastLibraryScan, LibraryScanJob, LibraryScanRecord, ScanOptions},
 		ContentType,
 	},
 	prisma::{
-		last_granular_library_scan, last_library_visit, library, library_config,
+		last_library_visit, library, library_config, library_scan_record,
 		media::{self, OrderByParam as MediaOrderByParam},
 		series::{self, OrderByParam as SeriesOrderByParam},
 		tag, user,
@@ -92,6 +92,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 					get(get_library_excluded_users).post(update_library_excluded_users),
 				)
 				.route("/last-scan", get(get_library_last_scan))
+				.route("/scan-history", get(get_library_scan_history))
 				.route("/scan", post(scan_library))
 				.route("/clean", put(clean_library))
 				.route("/series", get(get_library_series))
@@ -996,7 +997,7 @@ async fn update_library_excluded_users(
 #[derive(Debug, Deserialize, Serialize, ToSchema, Type)]
 pub struct LastScanDetails {
 	last_scanned_at: Option<DateTime<FixedOffset>>,
-	last_custom_scan: Option<LastGranularLibraryScan>,
+	last_scan: Option<LastLibraryScan>,
 }
 
 #[utoipa::path(
@@ -1028,21 +1029,52 @@ async fn get_library_last_scan(
 			library::id::equals(id.clone()),
 			library_not_hidden_from_user_filter(req.user()),
 		])
+		.with(
+			library::scan_history::fetch(vec![])
+				.order_by(library_scan_record::timestamp::order(Direction::Desc)),
+		)
 		.select(library_scan_details::select())
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound("Library not found".to_string()))?;
 
-	let last_custom_scan = record
-		.last_granular_scan
-		.map(LastGranularLibraryScan::try_from)
+	let last_scan = record
+		.scan_history
+		.first()
+		.cloned()
+		.map(LastLibraryScan::try_from)
 		.transpose()?;
 	let last_scanned_at = record.last_scanned_at;
 
 	Ok(Json(LastScanDetails {
 		last_scanned_at,
-		last_custom_scan,
+		last_scan,
 	}))
+}
+
+async fn get_library_scan_history(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+) -> APIResult<Json<Vec<LibraryScanRecord>>> {
+	let client = &ctx.db;
+
+	let records = client
+		.library_scan_record()
+		.find_many(vec![library_scan_record::library::is(vec![
+			library::id::equals(id.clone()),
+			library_not_hidden_from_user_filter(req.user()),
+		])])
+		.order_by(library_scan_record::timestamp::order(Direction::Desc))
+		.exec()
+		.await?;
+
+	let scan_history = records
+		.into_iter()
+		.map(LibraryScanRecord::try_from)
+		.collect::<Result<_, _>>()?;
+
+	Ok(Json(scan_history))
 }
 
 #[utoipa::path(
@@ -1079,30 +1111,6 @@ async fn scan_library(
 		.ok_or(APIError::NotFound(format!(
 			"Library with id {id} not found"
 		)))?;
-
-	if let Some(ref opts) = options {
-		let bytes = serde_json::to_vec(opts).map_err(|e| {
-			error!(?e, "Failed to serialize scan options");
-			APIError::InternalServerError("Failed to serialize scan options".to_string())
-		})?;
-		let last_scan_record = db
-			.last_granular_library_scan()
-			.upsert(
-				last_granular_library_scan::library_id::equals(library.id.clone()),
-				(
-					bytes.clone(),
-					library::id::equals(library.id.clone()),
-					vec![],
-				),
-				vec![
-					last_granular_library_scan::options::set(bytes),
-					last_granular_library_scan::timestamp::set(Utc::now().into()),
-				],
-			)
-			.exec()
-			.await?;
-		tracing::debug!(?last_scan_record, "Updated last granular scan record");
-	}
 
 	ctx.enqueue_job(LibraryScanJob::new(library.id, library.path, options))
 		.map_err(|e| {

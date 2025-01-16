@@ -3,7 +3,9 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::{db::entity::macros::library_scan_details, CoreError};
+use crate::{
+	db::entity::macros::library_scan_details, prisma::library_scan_record, CoreError,
+};
 
 // TODO(granular-scans/metadata-merge): Support merge strategies for metadata at some point
 /*
@@ -24,7 +26,7 @@ See also https://docs.rs/merge/latest/merge/ for potentially useful crate
 /// The override options for a scan job. These options are used to override the default behavior, which generally
 /// means that the scanner will visit books it otherwise would not. How much extra work is done depends on the
 /// specific options.
-#[derive(Debug, Default, Clone, Deserialize, Serialize, Type, ToSchema)]
+#[derive(Debug, Default, Clone, Deserialize, Serialize, Type, ToSchema, PartialEq)]
 pub struct ScanOptions {
 	/// Whether a scan should forcibly rebuild each book it visits and issue an update to the database.
 	/// This is somewhat dangerous, as it can overwrite metadata which was manually set against the database
@@ -38,6 +40,10 @@ pub struct ScanOptions {
 }
 
 impl ScanOptions {
+	pub fn is_default(&self) -> bool {
+		*self == Self::default()
+	}
+
 	// TODO(granular-scans): This currently will trigger a full rebuild. This should be changed to actually use
 	// the options. The changes for this are not in this file, but walk.rs and utils.rs
 	/// Whether a scan should visit books which otherwise would not be visited (e.g., because they
@@ -54,20 +60,52 @@ impl ScanOptions {
 	}
 }
 
+// TODO: move
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
-pub struct LastGranularLibraryScan {
-	pub options: ScanOptions,
+pub struct LibraryScanRecord {
+	id: i32,
+	options: Option<ScanOptions>,
+	timestamp: DateTime<FixedOffset>,
+	library_id: String,
+}
+
+impl TryFrom<library_scan_record::Data> for LibraryScanRecord {
+	type Error = CoreError;
+
+	fn try_from(data: library_scan_record::Data) -> Result<Self, Self::Error> {
+		let options = data
+			.options
+			.map(|options| serde_json::from_slice(&options))
+			.transpose()?;
+
+		Ok(Self {
+			id: data.id,
+			options,
+			timestamp: data.timestamp,
+			library_id: data.library_id,
+		})
+	}
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
+pub struct LastLibraryScan {
+	pub options: Option<ScanOptions>,
 	pub timestamp: DateTime<FixedOffset>,
 }
 
-impl TryFrom<library_scan_details::last_granular_scan::Data> for LastGranularLibraryScan {
+impl TryFrom<library_scan_details::scan_history::Data> for LastLibraryScan {
 	type Error = CoreError;
 
 	fn try_from(
-		data: library_scan_details::last_granular_scan::Data,
+		data: library_scan_details::scan_history::Data,
 	) -> Result<Self, Self::Error> {
+		let options = data
+			.options
+			.map(|options| serde_json::from_slice(&options))
+			.transpose()?;
+
 		Ok(Self {
-			options: serde_json::from_slice(&data.options)?,
+			options,
 			timestamp: data.timestamp,
 		})
 	}

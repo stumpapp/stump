@@ -6,6 +6,7 @@ import {
 	LastScanDetails,
 	Library,
 	LibraryFilter,
+	LibraryScanRecord,
 	LibraryStats,
 	LibraryStatsParams,
 	Pageable,
@@ -143,6 +144,9 @@ export class LibraryAPI extends APIBase {
 	/**
 	 * Update the list of users excluded from having access to a library. This is a full replacement operation, so
 	 * the list of users provided will replace the existing list.
+	 *
+	 * @param id The library ID
+	 * @param payload The list of users to exclude
 	 */
 	async updateExcludedUsers(id: string, payload: UpdateLibraryExcludedUsers): Promise<Library> {
 		const { data: updatedLibrary } = await this.api.axios.post<Library>(
@@ -154,11 +158,16 @@ export class LibraryAPI extends APIBase {
 
 	/**
 	 * Update a library by ID. This is not a patch
+	 *
+	 * @param id The library ID
+	 * @param payload The library data to update. This will be a full replacement
 	 */
 	async update(id: string, payload: UpdateLibrary): Promise<Library> {
 		const { data: updatedLibrary } = await this.api.axios.put(libraryURL(id), payload)
 		return updatedLibrary
 	}
+
+	// TODO: patch
 
 	/**
 	 * Update the timestamp for the last time a library was visited by the current user
@@ -182,6 +191,16 @@ export class LibraryAPI extends APIBase {
 			libraryURL(`/${id}/last-scan`),
 		)
 		return lastScanDetails
+	}
+
+	/**
+	 * Fetch the scan history for a library
+	 */
+	async scanHistory(id: string): Promise<LibraryScanRecord[]> {
+		const { data: scanHistory } = await this.api.axios.get<LibraryScanRecord[]>(
+			libraryURL(`/${id}/scan-history`),
+		)
+		return scanHistory
 	}
 
 	/**
@@ -233,6 +252,7 @@ export class LibraryAPI extends APIBase {
 			getStats: 'library.getStats',
 			scan: 'library.scan',
 			lastScanDetails: 'library.lastScanDetails',
+			scanHistory: 'library.scanHistory',
 			update: 'library.update',
 			updateExcludedUsers: 'library.updateExcludedUsers',
 			updateThumbnail: 'library.updateThumbnail',

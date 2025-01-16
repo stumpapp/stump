@@ -123,10 +123,10 @@ model Library {
   tags              Tag[]
   hidden_from_users User[]
 
-  job_schedule_config    JobScheduleConfig?       @relation(fields: [job_schedule_config_id], references: [id])
+  job_schedule_config    JobScheduleConfig?  @relation(fields: [job_schedule_config_id], references: [id])
   job_schedule_config_id String?
   user_visits            LastLibraryVisit[]
-  last_granular_scan     LastGranularLibraryScan?
+  scan_history           LibraryScanRecord[]
 
   @@map("libraries")
 }
@@ -165,16 +165,16 @@ model LastLibraryVisit {
   @@map("last_library_visits")
 }
 
-model LastGranularLibraryScan {
+model LibraryScanRecord {
   id Int @id @default(autoincrement())
 
-  options   Bytes
+  options   Bytes?
   timestamp DateTime @default(now())
 
-  library_id String  @unique
+  library_id String
   library    Library @relation(fields: [library_id], references: [id], onDelete: Cascade)
 
-  @@map("last_granular_library_scans")
+  @@map("library_scan_records")
 }
 
 model Series {

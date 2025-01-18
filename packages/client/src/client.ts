@@ -131,8 +131,8 @@ export function usePageQuery<Entity = unknown, Error = AxiosError>(
 	queryKey: QueryKey,
 	queryFn: PageQueryFunction<Entity>,
 	{
-		page = 1,
-		page_size = 20,
+		page,
+		page_size,
 		params,
 		...options
 	}: PageQueryOptions<Entity, Pageable<Entity[]>, Error, Pageable<Entity[]>> = {},

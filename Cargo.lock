@@ -7704,6 +7704,7 @@ dependencies = [
  "rand 0.8.5",
  "rayon",
  "regex",
+ "reqwest 0.12.7",
  "ring",
  "serde",
  "serde-xml-rs",

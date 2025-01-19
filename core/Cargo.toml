@@ -37,6 +37,7 @@ prisma-client-rust = { workspace = true }
 prefixed-api-key = { workspace = true}
 rayon = "1.10.0"
 regex = "1.10.6"
+reqwest = { workspace = true }
 ring = "0.17.8"
 smart-filter-gen = { path = "../crates/smart-filter-gen"}
 thiserror = { workspace = true }

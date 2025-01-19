@@ -13,6 +13,7 @@ pub mod db;
 mod event;
 pub mod filesystem;
 pub mod job;
+pub mod metadata_getters;
 pub mod opds;
 mod utils;
 

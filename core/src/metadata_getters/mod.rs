@@ -11,12 +11,15 @@ pub mod sources {
 /// This trait defines a metadata source by which metadata for [`Media`] can be obtained.
 #[async_trait::async_trait]
 pub trait MetadataSource {
+	/// The `const &str` used to identify a particular metadata source
+	fn identifier(&self) -> &'static str;
+
 	/// Makes a request for a [`Media`] object using the implemented source logic and returns
 	/// the normalized output.
 	async fn get_metadata(
 		&self,
 		media: &Media,
-	) -> Result<MetadataOutput, MetadataIntegrationError>;
+	) -> Result<MetadataOutput, MetadataSourceError>;
 }
 
 /// A struct that holds the [`MetadataSource`] output.
@@ -26,8 +29,19 @@ pub struct MetadataOutput {
 	pub author: Option<String>,
 }
 
+fn get_source_by_name(
+	name: &str,
+) -> Result<Box<dyn MetadataSource>, MetadataSourceError> {
+	match name {
+		open_library::SOURCE_IDENTIFIER => Ok(Box::new(open_library::OpenLibrarySource)),
+		_ => Err(MetadataSourceError::InvalidName(name.to_string())),
+	}
+}
+
 #[derive(Debug, Error)]
-pub enum MetadataIntegrationError {
+pub enum MetadataSourceError {
+	#[error("Invalid metadata source name: {0}")]
+	InvalidName(String),
 	#[error("Reqwest error: {0}")]
 	ReqwestError(#[from] reqwest::Error),
 	#[error("Error deserializing JSON: {0}")]

@@ -17,8 +17,10 @@ struct OpenLibraryDoc {
 
 pub struct OpenLibrarySource;
 
+#[async_trait::async_trait]
 impl MetadataSource for OpenLibrarySource {
 	async fn get_metadata(
+		&self,
 		media: &Media,
 	) -> Result<MetadataOutput, MetadataIntegrationError> {
 		let media_name = &media.name;
@@ -46,11 +48,13 @@ mod tests {
 
 	#[tokio::test]
 	async fn dev_test() {
+		let source = OpenLibrarySource;
+
 		let test_media = Media {
 			name: "Dune".to_string(),
 			..Media::default()
 		};
-		let metadata_output = OpenLibrarySource::get_metadata(&test_media).await.unwrap();
+		let metadata_output = source.get_metadata(&test_media).await.unwrap();
 		assert_eq!(metadata_output.title.unwrap(), "Dune");
 	}
 }

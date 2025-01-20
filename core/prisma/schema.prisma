@@ -862,6 +862,13 @@ model ServerInvitation {
   @@map("server_invitations")
 }
 
+// A source of metadata that can be configured in settings.
+model MetadataSource {
+  id String @id
+
+  enabled Boolean // Whether the source is enabled or disabled
+}
+
 model ServerConfig {
   id String @id @default(cuid())
 

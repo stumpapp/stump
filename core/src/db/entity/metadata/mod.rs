@@ -1,5 +1,6 @@
 mod common;
 mod media_metadata;
+pub mod metadata_source;
 pub mod page_dimension;
 pub(crate) mod prisma_macros;
 mod series_metadata;

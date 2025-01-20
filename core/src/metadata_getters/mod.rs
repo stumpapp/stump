@@ -29,7 +29,7 @@ pub struct MetadataOutput {
 	pub author: Option<String>,
 }
 
-fn get_source_by_name(
+pub fn get_source_by_name(
 	name: &str,
 ) -> Result<Box<dyn MetadataSource>, MetadataSourceError> {
 	match name {

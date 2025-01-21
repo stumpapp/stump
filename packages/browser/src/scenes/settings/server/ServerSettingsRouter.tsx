@@ -9,6 +9,9 @@ import { UsersRouter } from './users'
 const GeneralServerSettingsScene = lazy(() => import('./general/GeneralServerSettingsScene.tsx'))
 const ServerLogsScene = lazy(() => import('./logs/ServerLogsScene.tsx'))
 const JobSettingsScene = lazy(() => import('./jobs/JobSettingsScene.tsx'))
+const MetadataSourceSettingsScene = lazy(
+	() => import('./metadata_sources/MetadataSourceSettingsScene.tsx'),
+)
 
 export default function ServerSettingsRouter() {
 	const navigate = useNavigate()
@@ -35,6 +38,9 @@ export default function ServerSettingsRouter() {
 			{canManageServer && <Route path="general" element={<GeneralServerSettingsScene />} />}
 			{canManageServer && <Route path="logs" element={<ServerLogsScene />} />}
 			{canManageServer && <Route path="jobs" element={<JobSettingsScene />} />}
+			{canManageServer && (
+				<Route path="metadata_sources" element={<MetadataSourceSettingsScene />} />
+			)}
 			{canManageUsers && <Route path="users/*" element={<UsersRouter />} />}
 			{canManageEmail && <Route path="email/*" element={<EmailSettingsRouter />} />}
 		</Routes>

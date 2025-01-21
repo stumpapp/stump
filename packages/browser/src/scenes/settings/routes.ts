@@ -9,6 +9,7 @@ import {
 	LucideIcon,
 	Mail,
 	PcCase,
+	Radar,
 	ScrollText,
 	Users,
 } from 'lucide-react'
@@ -100,6 +101,13 @@ export const routeGroups: RouteGroup[] = [
 				localeKey: 'server/jobs',
 				permission: 'server:manage',
 				to: '/settings/server/jobs',
+			},
+			{
+				icon: Radar,
+				label: 'Metadata Sources',
+				localeKey: 'server/metadata_sources',
+				permission: 'server:manage',
+				to: '/settings/server/metadata_sources',
 			},
 			{
 				icon: Users,

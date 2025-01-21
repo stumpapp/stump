@@ -331,6 +331,8 @@ export type PageInfo = { total_pages: number; current_page: number; page_size: n
 
 export type Pagination = null | PageQuery | CursorQuery
 
+export type MetadataSourceEntry = { id: string; enabled: boolean }
+
 // SERVER TYPE GENERATION
 
 export type ClaimResponse = { is_claimed: boolean }

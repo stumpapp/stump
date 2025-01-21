@@ -1047,6 +1047,7 @@
 				"logs": "Logs",
 				"users": "Users",
 				"jobs": "Jobs",
+				"metadata sources": "Metadata Sources",
 				"access": "Access",
 				"email": "Email",
 				"notifications": "Notifications",
@@ -1424,6 +1425,17 @@
 						"deleteAllConfirmButtonTitle": "Clear all job history",
 						"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
 					}
+				}
+			}
+		},
+		"server/metadata_sources": {
+			"helmet": "Metadata source management",
+			"title": "Metadata Sources",
+			"description": "Manage sources from which metadata can automatically be collected.",
+			"sections": {
+				"availableSources": {
+					"title": "Available Metadata Sources",
+					"description": "These sources will be used to collect metadata during automatic metadata collection if enabled."
 				}
 			}
 		},

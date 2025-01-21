@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use stump_core::{
 	config::StumpConfig,
-	db::entity::{metadata_source::MetadataSourceEntry, UserPermission},
+	db::entity::{MetadataSourceEntry, UserPermission},
 	prisma::metadata_source,
 };
 
@@ -71,6 +71,16 @@ async fn get_upload_config(
 	}))
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/config/metadata_sources",
+	tag = "config",
+	responses(
+		(status = 200, description = "Successfully retrieved metadata sources for server"),
+		(status = 401, description = "Unauthorized"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 async fn get_metadata_sources(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
@@ -90,6 +100,16 @@ async fn get_metadata_sources(
 	))
 }
 
+#[utoipa::path(
+	put,
+	path = "/api/v1/config/metadata_sources",
+	tag = "config",
+	responses(
+		(status = 200, description = "Successfully updated metadata source"),
+		(status = 401, description = "Unauthorized"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 async fn update_metadata_source(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,

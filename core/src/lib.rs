@@ -494,6 +494,10 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<PageInfo>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<Pagination>()?).as_bytes())?;
 
+		file.write_all(
+			format!("{}\n\n", ts_export::<MetadataSourceEntry>()?).as_bytes(),
+		)?;
+
 		Ok(())
 	}
 }

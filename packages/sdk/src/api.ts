@@ -13,6 +13,7 @@ import {
 	LogAPI,
 	MediaAPI,
 	MetadataAPI,
+	MetadataSourcesAPI,
 	SeriesAPI,
 	ServerAPI,
 	SmartListAPI,
@@ -215,6 +216,13 @@ export class Api {
 	 */
 	get metadata(): MetadataAPI {
 		return new MetadataAPI(this)
+	}
+
+	/**
+	 * Get an instance for the MetadataSourcesAPI
+	 */
+	get metadata_sources(): MetadataSourcesAPI {
+		return new MetadataSourcesAPI(this)
 	}
 
 	/**

@@ -122,9 +122,14 @@ impl StumpCore {
 		STUMP_SHADOW_TEXT
 	}
 
-	/// Runs the database migrations
-	pub async fn run_migrations(&self) -> Result<(), CoreError> {
-		db::migration::run_migrations(&self.ctx.db).await
+	/// Runs the database migrations and startup processes.
+	pub async fn initialize_database(&self) -> Result<(), CoreError> {
+		db::migration::run_migrations(&self.ctx.db).await?;
+
+		// The metadata sourcing system needs to set up expected database values.
+		metadata_getters::run_startup_process(&self.ctx.db).await?;
+
+		Ok(())
 	}
 
 	/// Initializes the server configuration record. This will only create a new record if one

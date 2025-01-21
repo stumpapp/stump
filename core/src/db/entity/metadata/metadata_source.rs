@@ -11,7 +11,9 @@ use crate::{
 // A model representing a [`metadata_source::Data`] object in the database.
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct MetadataSourceEntry {
+	/// The identifier assigned to the source.
 	pub id: String,
+	/// Whether the user has enabled the source.
 	pub enabled: bool,
 }
 

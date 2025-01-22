@@ -1,5 +1,5 @@
 import { useQuery, useSDK } from '@stump/client'
-import { Badge, Card, cn, Text } from '@stump/components'
+import { Badge, Button, Card, cn, Dropdown, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { APIKey, LibraryScanRecord } from '@stump/sdk'
 import {
@@ -10,11 +10,12 @@ import {
 } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { Database, KeyRound, Slash } from 'lucide-react'
+import { Database, Ellipsis, Slash } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { getCommonPinningStyles } from '@/components/table/Table'
-import { useLibraryContext } from '@/scenes/library/context'
+
+import { useLibraryManagement } from '../../context'
 
 dayjs.extend(relativeTime)
 
@@ -22,7 +23,8 @@ export default function ScanHistoryTable() {
 	const { sdk } = useSDK()
 	const {
 		library: { id },
-	} = useLibraryContext()
+		scan,
+	} = useLibraryManagement()
 	const { data: scanHistory } = useQuery(
 		[sdk.library.keys.scanHistory, id],
 		() => sdk.library.scanHistory(id),
@@ -40,18 +42,16 @@ export default function ScanHistoryTable() {
 				header: () => (
 					<Text size="sm" variant="secondary">
 						{/* {t(getFieldKey('timestamp'))} */}
-						Timestamp
+						Scanned At
 					</Text>
 				),
 				cell: ({ getValue }) => {
 					const parsed = dayjs(getValue())
 					if (!parsed.isValid()) return null
 
-					const fromNowSecs = dayjs().diff(parsed, 'seconds')
-
 					return (
 						<Text size="sm" title={parsed.format('LLL')}>
-							{fromNowSecs <= 120 ? parsed.fromNow() : parsed.format('LLL')}
+							{parsed.format('LLL')}
 						</Text>
 					)
 				},
@@ -75,21 +75,47 @@ export default function ScanHistoryTable() {
 					)
 				},
 			}),
-			// columnHelper.display({
-			// 	id: 'actions',
-			// 	header: () => null,
-			// 	cell: ({ row: { original: apiKey } }) => (
-			// 		<div className="flex items-center justify-center">
-			// 			<APIKeyActionMenu
-			// 				onSelectForDelete={() => setDeletingKey(apiKey)}
-			// 				onSelectForInspect={() => setInspectingRecord(apiKey)}
-			// 			/>
-			// 		</div>
-			// 	),
-			// 	size: 20,
-			// }),
+			...(scan
+				? [
+						columnHelper.display({
+							id: 'actions',
+							header: () => null,
+							cell: ({
+								row: {
+									original: { options },
+								},
+							}) => {
+								if (!options) return null
+
+								return (
+									<div className="flex items-center justify-end">
+										<Dropdown modal={false}>
+											<Dropdown.Trigger asChild>
+												<Button size="icon" variant="ghost">
+													<Ellipsis className="h-4 w-4 text-foreground" />
+												</Button>
+											</Dropdown.Trigger>
+
+											<Dropdown.Content align="end">
+												<Dropdown.Group>
+													<Dropdown.Item data-testid="run-scan" onClick={() => scan(options)}>
+														<span>
+															{/* {t(getKey('inspect'))} */}
+															Run scan
+														</span>
+													</Dropdown.Item>
+												</Dropdown.Group>
+											</Dropdown.Content>
+										</Dropdown>
+									</div>
+								)
+							},
+							size: 20,
+						}),
+					]
+				: []),
 		],
-		[t],
+		[t, scan],
 	)
 
 	const table = useReactTable({

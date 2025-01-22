@@ -1,4 +1,4 @@
-import { Button, cn, IconButton } from '@stump/components'
+import { Button, cn } from '@stump/components'
 import { ArrowLeft, ArrowRight, MoreHorizontal } from 'lucide-react'
 import { useMemo } from 'react'
 import { useWindowSize } from 'rooks'
@@ -36,9 +36,9 @@ export default function TablePagination({
 	// FIXME: Things get smushed together when there are too many pages
 	return (
 		<div className="flex items-center gap-1">
-			<IconButton disabled={currentPage <= 1} onClick={() => onChangePage(currentPage - 1)}>
+			<Button size="icon" disabled={currentPage <= 1} onClick={() => onChangePage(currentPage - 1)}>
 				<ArrowLeft className="h-4 w-4" />
-			</IconButton>
+			</Button>
 
 			{pageRange.map((page, i) => {
 				if (typeof page === 'number') {
@@ -68,9 +68,13 @@ export default function TablePagination({
 				)
 			})}
 
-			<IconButton disabled={currentPage >= pages} onClick={() => onChangePage(currentPage + 1)}>
+			<Button
+				size="icon"
+				disabled={currentPage >= pages}
+				onClick={() => onChangePage(currentPage + 1)}
+			>
 				<ArrowRight className="h-4 w-4" />
-			</IconButton>
+			</Button>
 		</div>
 	)
 }
@@ -84,13 +88,13 @@ interface PaginationNumberProps {
 // TODO: style
 function PaginationNumber({ onClick, page, isActive }: PaginationNumberProps) {
 	return (
-		<IconButton
-			size="xs"
+		<Button
+			size="icon"
 			onClick={onClick}
 			variant="ghost"
 			className={cn('h-5 w-5', isActive ? '!text-brand' : '')}
 		>
 			{page}
-		</IconButton>
+		</Button>
 	)
 }

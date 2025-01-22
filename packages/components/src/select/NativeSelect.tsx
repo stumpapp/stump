@@ -7,7 +7,7 @@ export const SELECT_SIZES = {
 	default: 'h-10 py-2',
 	lg: 'h-12  py-2',
 	sm: 'h-8',
-	xs: 'h-6',
+	xs: 'h-7',
 }
 
 export type NativeSelectProps = {

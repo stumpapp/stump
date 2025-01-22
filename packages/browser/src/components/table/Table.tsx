@@ -168,7 +168,7 @@ export default function Table<T, V>({
 											<th
 												key={header.id}
 												colSpan={header.colSpan}
-												className="py-2.5 first:pl-2.5"
+												className="bg-background-surface/50 py-2.5 first:pl-2.5"
 												style={{
 													...getCommonPinningStyles(header.column),
 												}}
@@ -228,7 +228,7 @@ export default function Table<T, V>({
 				</div>
 			</div>
 
-			<div className="flex items-center justify-between px-3">
+			<div className="flex h-10 items-center justify-between border-t border-edge px-2">
 				<div className="flex items-center gap-4">
 					<Text
 						variant="muted"
@@ -250,7 +250,7 @@ export default function Table<T, V>({
 
 					<NativeSelect
 						disabled={pageCount <= 1 && dataCount <= pageSize}
-						size="sm"
+						size="xs"
 						options={[10, 20, 30, 40, 50].map((pageSize) => ({
 							label: `Show ${pageSize} rows`,
 							// FIXME: don't cast once my select can consume numbers :nomnom:

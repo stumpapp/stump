@@ -28,6 +28,7 @@ mod tests {
 
 		let test_input = MetadataSourceInput {
 			name: "Dune".to_string(),
+			isbn: None,
 		};
 		let metadata_output = source.get_metadata(&test_input).await.unwrap();
 		assert_eq!(metadata_output.title.unwrap(), "Dune");

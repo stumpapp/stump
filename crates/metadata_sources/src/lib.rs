@@ -9,8 +9,10 @@ use thiserror::Error;
 pub const REGISTERED_SOURCES: &[&str] =
 	&[open_library::SOURCE_NAME, google_books::SOURCE_NAME];
 
+/// Information provided to a [`MetadataSource`] implementation to locate the correct metadata.
 pub struct MetadataSourceInput {
 	pub name: String,
+	pub isbn: Option<String>,
 }
 
 /// This trait defines a metadata source by which metadata for [`Media`] can be obtained.
@@ -70,6 +72,7 @@ mod tests {
 
 		let test_input = MetadataSourceInput {
 			name: "Dune".to_string(),
+			isbn: None,
 		};
 
 		for source in &sources {

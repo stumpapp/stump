@@ -4,7 +4,7 @@ import { useSDK } from '../sdk'
 export function useMetadataSourcesQuery() {
 	const { sdk } = useSDK()
 
-	const { data, ...restReturn } = useQuery([sdk.metadata_sources.get], async () =>
+	const { data, ...restReturn } = useQuery([sdk.metadata_sources.keys.get], async () =>
 		sdk.metadata_sources.get(),
 	)
 

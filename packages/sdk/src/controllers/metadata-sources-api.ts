@@ -1,5 +1,6 @@
 import { APIBase } from '../base'
 import { MetadataSourceEntry } from '../types'
+import { ClassQueryKeys } from './types'
 
 // TODO - Adjust this route during finalization
 /**
@@ -22,5 +23,15 @@ export class MetadataSourcesAPI extends APIBase {
 	 */
 	async putMetadataSource(source: MetadataSourceEntry): Promise<void> {
 		await this.axios.put(METADATA_SOURCES_ROUTE, source)
+	}
+
+	/**
+	 * The keys for the metadata sources API
+	 */
+	get keys(): ClassQueryKeys<InstanceType<typeof MetadataSourcesAPI>> {
+		return {
+			get: 'metadataSources.get',
+			putMetadataSource: 'metadataSources.putMetadataSource',
+		}
 	}
 }

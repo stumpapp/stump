@@ -4161,6 +4161,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "metadata_sources"
+version = "0.0.1"
+dependencies = [
+ "async-trait",
+ "reqwest 0.12.7",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tokio",
+]
+
+[[package]]
 name = "metrics"
 version = "0.18.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7697,6 +7709,7 @@ dependencies = [
  "itertools 0.13.0",
  "libc",
  "md5",
+ "metadata_sources",
  "pdf",
  "pdfium-render",
  "prefixed-api-key",

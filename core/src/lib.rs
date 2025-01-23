@@ -13,7 +13,6 @@ pub mod db;
 mod event;
 pub mod filesystem;
 pub mod job;
-pub mod metadata_getters;
 pub mod opds;
 mod utils;
 
@@ -127,7 +126,7 @@ impl StumpCore {
 		db::migration::run_migrations(&self.ctx.db).await?;
 
 		// The metadata sourcing system needs to set up expected database values.
-		metadata_getters::run_startup_process(&self.ctx.db).await?;
+		db::startup::run_startup_process(&self.ctx.db).await?;
 
 		Ok(())
 	}

@@ -19,6 +19,7 @@ image = { version = "0.25.2" }
 infer = { workspace = true }
 itertools = { workspace = true }
 md5 = { workspace = true }
+metadata_sources = { path = "../crates/metadata_sources" }
 rand = { workspace = true }
 serde = { workspace = true }
 serde-xml-rs = "0.6.0" # Support for XML serialization/deserialization

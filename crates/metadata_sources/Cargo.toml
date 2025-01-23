@@ -1,0 +1,14 @@
+[package]
+name = "metadata_sources"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+async-trait = { workspace = true }
+reqwest = { workspace = true }
+serde_json = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true }

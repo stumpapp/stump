@@ -4,8 +4,6 @@ use derive_builder::UninitializedFieldError;
 use prisma_client_rust::RelationNotFetchedError;
 use thiserror::Error;
 
-use crate::metadata_getters;
-
 pub type CoreResult<T> = Result<T, CoreError>;
 
 #[derive(Error, Debug)]
@@ -53,7 +51,7 @@ pub enum CoreError {
 	#[error("{0}")]
 	InternalError(String),
 	#[error("Error in metadata sourcing system: {0}")]
-	MetadataSourceError(#[from] metadata_getters::MetadataSourceError),
+	MetadataSourceError(#[from] metadata_sources::MetadataSourceError),
 	#[error("This feature is not yet implemented: {0}")]
 	UnImplemented(String),
 	#[error("An object failed to (de)serialize: {0}")]

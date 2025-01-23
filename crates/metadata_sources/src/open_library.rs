@@ -1,9 +1,8 @@
 use serde::Deserialize;
 
-use super::{MetadataOutput, MetadataSource, MetadataSourceError};
-use crate::db::entity::Media;
+use super::{MetadataOutput, MetadataSource, MetadataSourceError, MetadataSourceInput};
 
-pub const SOURCE_IDENTIFIER: &str = "OpenLibrarySource";
+pub const SOURCE_NAME: &str = "Open Library";
 
 #[derive(Debug, Deserialize)]
 struct OpenLibrarySearchResult {
@@ -21,15 +20,15 @@ pub struct OpenLibrarySource;
 
 #[async_trait::async_trait]
 impl MetadataSource for OpenLibrarySource {
-	fn identifier(&self) -> &'static str {
-		SOURCE_IDENTIFIER
+	fn name(&self) -> &'static str {
+		SOURCE_NAME
 	}
 
 	async fn get_metadata(
 		&self,
-		media: &Media,
+		input: &MetadataSourceInput,
 	) -> Result<MetadataOutput, MetadataSourceError> {
-		let media_name = &media.name;
+		let media_name = &input.name;
 		let response_text = reqwest::get(format!(
 			"https://openlibrary.org/search.json?q={media_name}"
 		))
@@ -56,11 +55,10 @@ mod tests {
 	async fn dev_test() {
 		let source = OpenLibrarySource;
 
-		let test_media = Media {
+		let test_input = MetadataSourceInput {
 			name: "Dune".to_string(),
-			..Media::default()
 		};
-		let metadata_output = source.get_metadata(&test_media).await.unwrap();
+		let metadata_output = source.get_metadata(&test_input).await.unwrap();
 		assert_eq!(metadata_output.title.unwrap(), "Dune");
 	}
 }

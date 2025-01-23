@@ -1,12 +1,9 @@
+use metadata_sources::{MetadataOutput, MetadataSourceError, MetadataSourceInput};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::{
-	db::entity::Media,
-	metadata_getters::{self, MetadataOutput, MetadataSourceError},
-	prisma::metadata_source,
-};
+use crate::prisma::metadata_source;
 
 // A model representing a [`metadata_source::Data`] object in the database.
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
@@ -20,10 +17,10 @@ pub struct MetadataSourceEntry {
 impl MetadataSourceEntry {
 	pub async fn get_metadata(
 		&self,
-		media: &Media,
+		input: &MetadataSourceInput,
 	) -> Result<MetadataOutput, MetadataSourceError> {
-		metadata_getters::get_source_by_name(&self.id)?
-			.get_metadata(media)
+		metadata_sources::get_source_by_name(&self.id)?
+			.get_metadata(input)
 			.await
 	}
 }
@@ -52,9 +49,8 @@ mod tests {
 
 	#[tokio::test]
 	async fn dev_test() {
-		let test_media = Media {
+		let test_input = MetadataSourceInput {
 			name: "Dune".to_string(),
-			..Media::default()
 		};
 
 		let source = MetadataSourceEntry {
@@ -63,7 +59,7 @@ mod tests {
 		};
 
 		let title_from_source = source
-			.get_metadata(&test_media)
+			.get_metadata(&test_input)
 			.await
 			.unwrap()
 			.title

@@ -5,6 +5,7 @@ pub mod entity;
 pub mod filter;
 pub mod migration;
 pub mod query;
+pub(crate) mod startup;
 
 pub use dao::*;
 

@@ -51,6 +51,7 @@ mod tests {
 	async fn dev_test() {
 		let test_input = MetadataSourceInput {
 			name: "Dune".to_string(),
+			isbn: None,
 		};
 
 		let source = MetadataSourceEntry {

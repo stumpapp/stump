@@ -1,3 +1,4 @@
+mod google_books;
 mod open_library;
 
 use thiserror::Error;
@@ -5,7 +6,8 @@ use thiserror::Error;
 /// A constant containing a list of source identities for implementations of [`MetadataSource`].
 /// A source's identity must be inlcuded here or it will not be written to the database to be
 /// enabled/disabled by a user.
-pub const REGISTERED_SOURCES: &[&str] = &[open_library::SOURCE_NAME];
+pub const REGISTERED_SOURCES: &[&str] =
+	&[open_library::SOURCE_NAME, google_books::SOURCE_NAME];
 
 pub struct MetadataSourceInput {
 	pub name: String,
@@ -41,6 +43,7 @@ pub fn get_source_by_name(
 ) -> Result<Box<dyn MetadataSource>, MetadataSourceError> {
 	match name {
 		open_library::SOURCE_NAME => Ok(Box::new(open_library::OpenLibrarySource)),
+		google_books::SOURCE_NAME => Ok(Box::new(google_books::GoogleBooksSource)),
 		_ => Err(MetadataSourceError::InvalidName(name.to_string())),
 	}
 }

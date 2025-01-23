@@ -1,23 +1,23 @@
-import { useMetadataSourcesQuery } from '@stump/client'
+import { useMetadataSourcesQuery, useSDK } from '@stump/client'
 import { Card, Switch, Text } from '@stump/components'
 import { MetadataSourceEntry } from '@stump/sdk'
-import { createColumnHelper } from '@tanstack/react-table'
-import { useCallback, useMemo } from 'react'
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 
 import { Table } from '@/components/table'
-
-// TODO - Make less broken
 
 const columnHelper = createColumnHelper<MetadataSourceEntry>()
 
 export default function MetadataSourcesTable() {
-	const { sources } = useMetadataSourcesQuery()
+	const { sdk } = useSDK()
+	const { sources, refetch } = useMetadataSourcesQuery()
 
-	const handleToggleEnabled = useCallback((source: MetadataSourceEntry, enabled: boolean) => {
-		console.log(`Toggling ${source.id} to enabled = ${enabled}`)
-	}, [])
+	const setSourceEnabled = async (source: MetadataSourceEntry, enabled: boolean) => {
+		source.enabled = enabled
+		await sdk.metadata_sources.putMetadataSource(source)
+		await refetch()
+	}
 
-	const baseColumns = [
+	const columns = [
 		columnHelper.accessor('id', {
 			cell: ({ getValue }) => <Text size="sm">{getValue()}</Text>,
 			header: 'Id',
@@ -29,19 +29,19 @@ export default function MetadataSourcesTable() {
 					<Switch
 						label=""
 						checked={isEnabled}
-						onCheckedChange={(checked) => handleToggleEnabled(row.original, checked)}
+						onCheckedChange={(checked) => setSourceEnabled(row.original, checked)}
 					/>
 				)
 			},
 			header: 'Enabled',
 		}),
-	]
+	] as ColumnDef<MetadataSourceEntry, string>[]
 
 	return (
 		<Card className="bg-background-surface p-1">
 			<Table
 				sortable
-				columns={baseColumns}
+				columns={columns}
 				data={sources}
 				options={{}}
 				emptyRenderer={() => (
@@ -51,7 +51,7 @@ export default function MetadataSourcesTable() {
 						</Text>
 					</div>
 				)}
-			></Table>
+			/>
 		</Card>
 	)
 }

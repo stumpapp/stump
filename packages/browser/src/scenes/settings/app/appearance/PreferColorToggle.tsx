@@ -1,16 +1,16 @@
-import PreferenceToggle from '../../PreferenceToggle'
+import { WideSwitch } from '@stump/components'
 
 // TODO: Implement this
 export default function PreferColorToggle() {
 	const handleChange = () => {}
 
 	return (
-		<PreferenceToggle
+		<WideSwitch
 			label="Prefer colors"
 			description="Display more of the main accent color instead of monochrome colors"
-			isChecked={true}
-			onToggle={handleChange}
-			isDisabled
+			checked
+			onCheckedChange={handleChange}
+			disabled
 			formId="prefer_accent_color"
 			title="This setting is not currently supported"
 		/>

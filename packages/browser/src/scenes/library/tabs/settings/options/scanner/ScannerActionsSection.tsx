@@ -15,7 +15,7 @@ export default function ScannerActionsSection() {
 					<Text variant="muted">A standard scan to index your library for new content</Text>
 				</div>
 				<div>
-					<Button size="sm" onClick={scan}>
+					<Button size="sm" onClick={() => scan()}>
 						Default scan
 					</Button>
 				</div>

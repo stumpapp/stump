@@ -1,11 +1,12 @@
 import { useQuery, useSDK } from '@stump/client'
-import { Badge, Button, Card, cn, Dropdown, Text } from '@stump/components'
+import { Badge, Button, Card, Dropdown, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { APIKey, LibraryScanRecord } from '@stump/sdk'
+import { LibraryScanRecord } from '@stump/sdk'
 import {
 	createColumnHelper,
 	flexRender,
 	getCoreRowModel,
+	getPaginationRowModel,
 	useReactTable,
 } from '@tanstack/react-table'
 import dayjs from 'dayjs'
@@ -13,9 +14,10 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { Database, Ellipsis, Slash } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
+import { TableFooter } from '@/components/table'
 import { getCommonPinningStyles } from '@/components/table/Table'
 
-import { useLibraryManagement } from '../../context'
+import { useLibraryManagement } from '../../../context'
 
 dayjs.extend(relativeTime)
 
@@ -35,6 +37,8 @@ export default function ScanHistoryTable() {
 	const { t } = useLocaleContext()
 
 	const [inspectingRecord, setInspectingRecord] = useState<LibraryScanRecord | null>(null)
+
+	const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 })
 
 	const columns = useMemo(
 		() => [
@@ -122,9 +126,12 @@ export default function ScanHistoryTable() {
 		columns,
 		data: scanHistory || [],
 		getCoreRowModel: getCoreRowModel(),
+		getPaginationRowModel: getPaginationRowModel(),
 		state: {
 			columnPinning: { right: ['actions'] },
+			pagination,
 		},
+		onPaginationChange: setPagination,
 	})
 	const { rows } = table.getRowModel()
 
@@ -153,8 +160,6 @@ export default function ScanHistoryTable() {
 
 	return (
 		<>
-			{/* <APIKeyInspector apiKey={inspectingKey} onClose={() => setInspectingRecord(null)} /> */}
-
 			<Card className="overflow-x-auto">
 				<table
 					className="min-w-full"
@@ -205,6 +210,13 @@ export default function ScanHistoryTable() {
 						))}
 					</tbody>
 				</table>
+
+				<TableFooter
+					pagination={pagination}
+					setPagination={setPagination}
+					dataCount={scanHistory.length}
+					pageCount={table.getPageCount()}
+				/>
 			</Card>
 		</>
 	)

@@ -1,4 +1,4 @@
-import { Heading, Text } from '@stump/components'
+import { Button, Heading, Text } from '@stump/components'
 import { Suspense } from 'react'
 
 import ScanHistoryTable from './ScanHistoryTable'
@@ -18,7 +18,11 @@ export default function ScanningSection() {
 					</Text>
 				</div>
 
-				{/* <CreateAPIKeyModal /> */}
+				<div className="flex justify-end">
+					<Button variant="secondary" onClick={() => {}}>
+						Delete scan history
+					</Button>
+				</div>
 			</div>
 
 			<Suspense>

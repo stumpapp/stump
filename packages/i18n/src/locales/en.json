@@ -421,7 +421,7 @@
 				},
 				{
 					"label": "Scanning",
-					"heading": "Scanner Behavior",
+					"heading": "Scanning",
 					"description": "Settings related to how Stump scans this library"
 				},
 				{
@@ -517,7 +517,7 @@
 			"description": "The default reader settings to use for books in this library. Any book can override these settings"
 		},
 		"options/scanning": {
-			"title": "Scanner Behavior",
+			"title": "Scanning",
 			"description": "Settings related to how Stump scans this library"
 		},
 		"options/thumbnails": {

@@ -36,7 +36,12 @@ export default function TablePagination({
 	// FIXME: Things get smushed together when there are too many pages
 	return (
 		<div className="flex items-center gap-1">
-			<Button size="icon" disabled={currentPage <= 1} onClick={() => onChangePage(currentPage - 1)}>
+			<Button
+				size="icon"
+				variant="ghost"
+				disabled={currentPage <= 1}
+				onClick={() => onChangePage(currentPage - 1)}
+			>
 				<ArrowLeft className="h-4 w-4" />
 			</Button>
 
@@ -70,6 +75,7 @@ export default function TablePagination({
 
 			<Button
 				size="icon"
+				variant="ghost"
 				disabled={currentPage >= pages}
 				onClick={() => onChangePage(currentPage + 1)}
 			>

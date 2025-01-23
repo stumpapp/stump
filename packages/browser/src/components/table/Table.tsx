@@ -238,7 +238,7 @@ export default function Table<T, V>({
 						{tableRows.length > 0 ? (
 							<>
 								<span>
-									Showing <strong>{viewBounds.firstIndex}</strong> to{' '}
+									<strong>{viewBounds.firstIndex}</strong> to{' '}
 									<strong>{viewBounds.lastIndex}</strong>
 								</span>
 								of <strong>{viewBounds.totalCount}</strong>

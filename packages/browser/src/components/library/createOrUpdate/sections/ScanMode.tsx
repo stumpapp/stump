@@ -1,9 +1,9 @@
+import { WideSwitch } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { LibraryScanMode } from '@stump/sdk'
 import { useFormContext } from 'react-hook-form'
 
 import { useLibraryContextSafe } from '@/scenes/library/context'
-import { WideStyleSwitch } from '@/scenes/settings'
 
 import { CreateOrUpdateLibrarySchema } from '../schema'
 
@@ -21,11 +21,11 @@ export default function ScanModeForm() {
 	}
 
 	return (
-		<WideStyleSwitch
+		<WideSwitch
 			label={t(getKey(`label.${isCreatingLibrary ? 'create' : 'update'}`))}
 			description={t(getKey('description'))}
-			isChecked={scanMode !== 'NONE'}
-			onToggle={() => handleChange(scanMode === 'NONE' ? 'DEFAULT' : 'NONE')}
+			checked={scanMode !== 'NONE'}
+			onCheckedChange={() => handleChange(scanMode === 'NONE' ? 'DEFAULT' : 'NONE')}
 		/>
 	)
 }

@@ -13,6 +13,7 @@ export default function LoginOrClaim() {
 	const { isClaimed, isCheckingClaimed, loginUser, registerUser, isLoggingIn, isRegistering } =
 		useLoginOrRegister({
 			onSuccess: setUser,
+			onError: console.error,
 		})
 
 	// TODO: generalize common form schemas between clients to the client package

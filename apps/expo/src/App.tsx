@@ -1,14 +1,13 @@
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { useAuthQuery } from '@stump/client'
-import { checkUrl, initializeApi, isAxiosError, isUrl } from '@stump/sdk'
+import { isAxiosError } from '@stump/sdk'
 import * as SplashScreen from 'expo-splash-screen'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 import { AuthenticatedNavigator } from './screens/authenticated'
 import LoginOrClaim from './screens/LoginOrClaim'
-import ServerNotAccessible from './screens/ServerNotAccessible'
 import { useAppStore, useUserStore } from './stores'
 
 const Stack = createNativeStackNavigator()
@@ -29,8 +28,6 @@ export default function AppWrapper() {
 		setIsConnectedToServer: store.setIsConnectedWithServer,
 	}))
 
-	const [isReady, setIsReady] = useState(false)
-
 	const { error } = useAuthQuery({
 		enabled: !storeUser && !!baseUrl && isConnectedToServer,
 		onSuccess: setStoreUser,
@@ -48,6 +45,10 @@ export default function AppWrapper() {
 	}, [error, setIsConnectedToServer])
 
 	useEffect(() => {
+		SplashScreen.hideAsync()
+	}, [])
+
+	useEffect(() => {
 		// TODO: ios vs android?
 		setPlatform('mobile')
 	}, [setPlatform])
@@ -55,56 +56,22 @@ export default function AppWrapper() {
 	// TODO: remove, just debugging stuff
 	useEffect(() => {
 		// setBaseUrl('https://demo.stumpapp.dev')
-		setBaseUrl('http://localhost:10801')
-		// setBaseUrl('http://192.168.0.202:10801')
+		// setBaseUrl('http://localhost:10801')
+		setBaseUrl('http://192.168.0.188:10801')
 	}, [setBaseUrl])
-
-	useEffect(() => {
-		if (isReady) {
-			SplashScreen.hideAsync()
-		}
-	}, [isReady])
-
-	/**
-	 * An effect that will verify the baseUrl is accessible to the app.
-	 */
-	useEffect(() => {
-		// TODO: handle errors!
-		async function handleVerifyConnection() {
-			if (!isUrl(baseUrl)) {
-				console.error('Invalid URL')
-			} else {
-				const isValid = await checkUrl(baseUrl)
-
-				if (!isValid) {
-					console.error(`Failed to connect to ${baseUrl}`)
-				} else {
-					initializeApi(baseUrl, 'v1')
-					setIsConnectedToServer(true)
-				}
-			}
-
-			setIsReady(true)
-		}
-
-		if (baseUrl) {
-			handleVerifyConnection()
-		} else {
-			setIsReady(true)
-		}
-	}, [baseUrl, setIsConnectedToServer])
 
 	// TODO: An offline-only stack which allows for reading of downloaded content
 	const renderApp = () => {
-		if (!isConnectedToServer) {
-			return (
-				<Stack.Screen
-					name="Server SOS"
-					component={ServerNotAccessible}
-					options={{ headerShown: false }}
-				/>
-			)
-		} else if (!storeUser) {
+		// if (!isConnectedToServer) {
+		// 	return (
+		// 		<Stack.Screen
+		// 			name="Server SOS"
+		// 			component={ServerNotAccessible}
+		// 			options={{ headerShown: false }}
+		// 		/>
+		// 	)
+		// } else
+		if (!storeUser) {
 			return <Stack.Screen name="Login" component={LoginOrClaim} options={{ headerShown: false }} />
 		} else {
 			return (
@@ -116,8 +83,6 @@ export default function AppWrapper() {
 			)
 		}
 	}
-
-	if (!isReady) return null
 
 	return (
 		<SafeAreaProvider>

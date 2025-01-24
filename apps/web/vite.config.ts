@@ -29,6 +29,31 @@ export default defineConfig({
 				maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
 			},
 			outDir: '../dist/assets/',
+			// TODO(pwa): Add more manifest definitions for better overall experience
+			manifest: {
+				name: 'Stump PWA',
+				short_name: 'Stump',
+				theme_color: '#161719',
+				icons: [
+					{
+						src: '/assets/favicon-16x16.png',
+						sizes: '16x16',
+						type: 'image/png',
+					},
+					{
+						src: '/assets/favicon-192x192.png',
+						sizes: '192x192',
+						type: 'image/png',
+					},
+					{
+						src: '/assets/favicon-512x512.png',
+						sizes: '512x512',
+						type: 'image/png',
+						purpose: 'any maskable',
+					},
+				],
+			},
+			manifestFilename: './assets/manifest.webmanifest',
 		}),
 	],
 	publicDir: '../../../packages/browser/public',

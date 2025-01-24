@@ -1,0 +1,10 @@
+{
+	"name": "My Super App",
+	"short_name": "My App",
+	"display": "standalone",
+	"scope": "/",
+	"start_url": "/",
+	"background_color": "#f6f6f6",
+	"theme_color": "#f6f6f6",
+	"id": "stump"
+}

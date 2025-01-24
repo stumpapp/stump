@@ -31,6 +31,7 @@ export default defineConfig({
 			outDir: '../dist/assets/',
 			// TODO(pwa): Add more manifest definitions for better overall experience
 			manifest: {
+				id: 'stump',
 				name: 'Stump PWA',
 				short_name: 'Stump',
 				theme_color: '#161719',

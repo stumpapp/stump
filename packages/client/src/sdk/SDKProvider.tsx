@@ -24,6 +24,8 @@ export function SDKProvider({
 
 		const instance = new Api({ baseURL, authMethod })
 
+		// TODO: this needs to be rethought to generalize for both
+		// tauri (desktop) and mobile (expo)
 		if (!tauriRPC || authMethod === 'session') {
 			setSDK(instance)
 			return

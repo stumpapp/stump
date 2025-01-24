@@ -1,5 +1,12 @@
-import { registerRootComponent } from 'expo'
+import { registerRootComponent } from 'expo';
+import { ExpoRoot } from 'expo-router';
 
-import { AppEntry } from './src/AppEntry'
+// https://docs.expo.dev/router/reference/troubleshooting/#expo_router_app_root-not-defined
 
-registerRootComponent(AppEntry)
+// Must be exported or Fast Refresh won't update the context
+export function App() {
+  const ctx = require.context('./app');
+  return <ExpoRoot context={ctx} />;
+}
+
+registerRootComponent(App);

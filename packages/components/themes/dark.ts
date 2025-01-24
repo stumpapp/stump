@@ -23,6 +23,7 @@ export const dark = {
 		subtle: '#292C30',
 		success: '#2E7D32',
 		warning: '#D8A219',
+		focus: '#CF9977',
 	},
 	fill: {
 		brand: {

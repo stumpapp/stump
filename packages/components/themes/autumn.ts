@@ -23,6 +23,7 @@ export const autumn = {
 		subtle: '#4D3F33',
 		success: '#5B8B41',
 		warning: '#F59E0B',
+		focus: '#D0802D',
 	},
 	fill: {
 		brand: {

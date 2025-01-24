@@ -38,6 +38,7 @@ export const colorVariant = ['info', 'success', 'warning', 'danger', 'brand'] as
 type Border = Record<(typeof colorVariant)[number], string> & {
 	subtle: string
 	strong: string
+	focus: string
 } & DefaultVariant
 
 type GradientVariant = {

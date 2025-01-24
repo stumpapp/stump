@@ -19,13 +19,13 @@ export const BUTTON_VARIANTS = {
 	danger:
 		'bg-fill-danger text-white hover:bg-fill-danger-hover dark:hover:bg-fill-danger-hover focus:ring-red-400 dark:focus:ring-red-400',
 	default:
-		'bg-background-surface hover:bg-background-surface-hover text-foreground focus:ring-edge-brand',
+		'bg-background-surface hover:bg-background-surface-hover text-foreground focus:ring-edge-focus',
 	ghost:
 		'bg-transparent hover:bg-background-surface-hover text-foreground-subtle data-[state=open]:bg-transparent',
 	link: 'bg-transparent dark:bg-transparent underline-offset-4 hover:underline text-gray-900 dark:text-gray-100 hover:bg-transparent dark:hover:bg-transparent',
 	outline: 'bg-transparent border border-edge-subtle hover:bg-background-surface text-foreground',
 	primary:
-		'bg-fill-brand hover:bg-fill-brand-hover text-white focus:ring-edge-brand data-[state=open]:bg-fill-brand-hover',
+		'bg-fill-brand hover:bg-fill-brand-hover text-white focus:ring-edge-focus data-[state=open]:bg-fill-brand-hover',
 	secondary:
 		'bg-background-inverse text-foreground-on-inverse hover:bg-background-inverse/90 data-[state=open]:bg-background-inverse/90',
 	subtle: 'bg-background-surface hover:bg-background-surface-hover text-foreground-subtle',
@@ -134,7 +134,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 						{
 							'active:scale-95': pressEffect,
 							'cursor-not-allowed': props.disabled,
-							'focus:ring-edge-brand dark:focus:ring-edge-brand': primaryFocus,
+							'focus:ring-edge-focus dark:focus:ring-edge-focus': primaryFocus,
 						},
 						className,
 					)}

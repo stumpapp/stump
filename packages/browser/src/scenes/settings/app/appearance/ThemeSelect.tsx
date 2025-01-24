@@ -20,6 +20,7 @@ export default function ThemeSelect() {
 				options={[
 					{ label: t(`${localeKey}.options.light`), value: 'light' },
 					{ label: t(`${localeKey}.options.dark`), value: 'dark' },
+					{ label: t(`${localeKey}.options.darkalt`), value: 'darkalt' },
 					{ label: t(`${localeKey}.options.bronze`), value: 'bronze' },
 					{ label: t(`${localeKey}.options.ocean`), value: 'ocean' },
 					{ label: t(`${localeKey}.options.autumn`), value: 'autumn' },

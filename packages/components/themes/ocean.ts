@@ -23,6 +23,7 @@ export const ocean = {
 		subtle: '#125A6D',
 		success: '#2E7D32',
 		warning: '#FFBA08',
+		focus: '#0A9396',
 	},
 	fill: {
 		brand: {

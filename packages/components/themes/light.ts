@@ -24,6 +24,7 @@ export const light = {
 		subtle: '#D3D5D7',
 		success: '#2E7D32',
 		warning: '#D8A219',
+		focus: '#CF9977',
 	},
 	fill: {
 		brand: {

@@ -24,6 +24,7 @@ export const pumpkin: StumpTheme = {
 		DEFAULT: '#631C0370',
 		brand: '#631C0390',
 		subtle: '#631C0380',
+		focus: '#631C0390',
 	},
 	fill: {
 		...dark.fill,

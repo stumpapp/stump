@@ -2,6 +2,7 @@ import { autumn } from './autumn'
 import { bronze } from './bronze'
 import { cosmic } from './cosmic'
 import { dark } from './dark'
+import { darkalt } from './dark-alt'
 import { light } from './light'
 import { ocean } from './ocean'
 import { pumpkin } from './pumpkin'
@@ -59,6 +60,7 @@ export const themes = {
 	light,
 	ocean,
 	pumpkin,
+	darkalt,
 }
 
 export type Theme = keyof typeof themes

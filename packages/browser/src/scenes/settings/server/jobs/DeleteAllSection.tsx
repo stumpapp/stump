@@ -35,7 +35,7 @@ export default function DeleteAllSection() {
 	}
 
 	return (
-		<Alert level="error" rounded="sm" icon={AlertTriangle}>
+		<Alert level="error" rounded="lg" icon={AlertTriangle}>
 			<Alert.Content className="flex flex-col gap-3 md:flex-row">
 				{t('settingsScene.server/jobs.sections.history.table.deleteAllMessage')}
 				<Button

@@ -1118,6 +1118,7 @@
 					"options": {
 						"light": "Light",
 						"dark": "Dark",
+						"darkalt": "Dark alt",
 						"bronze": "Bronze light",
 						"ocean": "Ocean",
 						"autumn": "Autumn",

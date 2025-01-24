@@ -22,7 +22,7 @@ export const SWITCH_SIZE_VARIANTS = {
 }
 export const SWITCH_VARIANTS = {
 	default: 'focus:ring-background-400 data-[state=checked]:bg-background-surface-secondary-hover',
-	primary: 'focus:ring-edge-brand data-[state=checked]:bg-fill-brand',
+	primary: 'focus:ring-edge-focus data-[state=checked]:bg-fill-brand',
 }
 export const switchVariants = cva(SWITCH_BASE_CLASSES, {
 	defaultVariants: {
@@ -46,7 +46,7 @@ export const RawSwitch = React.forwardRef<RawSwitchRef, RawSwitchProps>(
 		return (
 			<SwitchPrimitives.Root
 				className={cn(switchVariants({ className, size, variant }), {
-					'focus:ring-edge-brand': primaryRing,
+					'focus:ring-edge-focus': primaryRing,
 				})}
 				{...props}
 				ref={ref}

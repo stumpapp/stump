@@ -7,7 +7,7 @@ import AppSettingsRow from '../AppSettingsRow'
 
 export default function DefaultServer() {
 	return (
-		<AppSettingsRow icon="Database" title="Default server">
+		<AppSettingsRow icon="Server" title="Default server">
 			<View className="flex flex-row items-center gap-2">
 				<Text className="text-foreground-muted">Localhost</Text>
 				<ChevronRight size={20} className="text-foreground-muted" />

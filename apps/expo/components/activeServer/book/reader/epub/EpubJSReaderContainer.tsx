@@ -1,6 +1,5 @@
 import { ReaderProvider } from '@epubjs-react-native/core'
-
-import { ScreenRootView, View } from '@/components/primitives'
+import { View } from 'react-native'
 
 type Props = {
 	children: React.ReactNode
@@ -9,11 +8,11 @@ type Props = {
 // total ass, I hate epubjs lol maybe im just dumb? I cannot get the reader to listen to the height
 export default function EpubJSReaderContainer({ children }: Props) {
 	return (
-		<ScreenRootView classes="flex-none bg-white dark:bg-gray-950">
+		<View className="flex-none bg-background">
 			<ReaderProvider>
-				<View className="flex-none shrink dark:bg-gray-950">{children}</View>
+				<View className="flex-none shrink">{children}</View>
 				{/* <EpubJSFooter /> */}
 			</ReaderProvider>
-		</ScreenRootView>
+		</View>
 	)
 }

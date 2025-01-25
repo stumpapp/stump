@@ -28,7 +28,7 @@ export default function Screen() {
 	// })
 
 	return (
-		<View className="flex-1 items-start justify-start gap-5 bg-background p-4">
+		<View className="flex-1 items-start justify-start gap-5 bg-background p-6">
 			<View className="flex w-full items-start gap-2">
 				<Text className="text-foreground-muted">Stump</Text>
 
@@ -49,7 +49,7 @@ export default function Screen() {
 					<Link
 						key={server.id}
 						href={`/server/${server.id}`}
-						className="bg-background-muted w-full items-center rounded-lg border border-edge bg-background-surface p-2"
+						className="bg-background-muted w-full items-center rounded-lg border border-edge bg-background-surface p-3"
 					>
 						<View className="flex-1 items-start justify-center gap-1">
 							<Text className="text-lg">{server.name}</Text>

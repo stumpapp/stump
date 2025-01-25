@@ -20,16 +20,13 @@ export default function Screen() {
 
 	return (
 		<ScrollView className="flex-1 gap-5 bg-background px-3 py-10">
-			<View className="flex flex-1 items-center gap-8 pb-6">
+			<View className="flex flex-1 items-start gap-8 pb-6">
 				<View className="flex items-start gap-4">
 					<Text className="text-2xl font-bold leading-6">
 						{media.metadata?.title || media.name}
 					</Text>
 
-					<View
-						className="aspect-[2/3] overflow-hidden rounded-lg"
-						// onPress={() => router.navigate('read')}
-					>
+					<View className="aspect-[2/3] overflow-hidden rounded-lg">
 						<Image
 							source={{
 								uri: sdk.media.thumbnailURL(media.id),
@@ -44,7 +41,7 @@ export default function Screen() {
 				</View>
 
 				<Button onPress={() => router.navigate(`/server/${id}/books/${media.id}/read`)}>
-					<Text>Read</Text>
+					<Text>{media.active_reading_session ? 'Continue reading' : 'Read'}</Text>
 				</Button>
 			</View>
 		</ScrollView>

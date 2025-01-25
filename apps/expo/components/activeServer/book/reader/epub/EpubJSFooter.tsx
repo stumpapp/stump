@@ -1,7 +1,7 @@
 import { useReader } from '@epubjs-react-native/core'
+import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-
-import { Text, View } from '@/components/primitives'
+import { Text } from '~/components/ui'
 
 export const FOOTER_HEIGHT = 24
 

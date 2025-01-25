@@ -2,16 +2,12 @@ import { useSDK, useUpdateMediaProgress } from '@stump/client'
 import { isAxiosError } from '@stump/sdk'
 import { Media } from '@stump/sdk'
 import { useColorScheme } from 'nativewind'
-import React, { useCallback, useMemo, useState } from 'react'
-import { FlatList, TouchableWithoutFeedback, useWindowDimensions } from 'react-native'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
+import { FlatList, TouchableWithoutFeedback, useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { View } from '@/components'
-import EntityImage from '@/components/EntityImage'
-import { gray } from '@/constants/colors'
-import { useReaderStore } from '@/stores'
-
-import ReaderContainer from './ReaderContainer'
+import { useReaderStore } from '~/stores'
+import { Image } from 'expo-image'
 
 type ImageDimension = {
 	height: number
@@ -43,6 +39,8 @@ type Props = {
  * A reader for books that are image-based, where each page should be displayed as an image
  */
 export default function ImageBasedReader({ book, initialPage, incognito }: Props) {
+	const flatList = useRef<FlatList>(null)
+
 	const { height, width } = useWindowDimensions()
 	const { colorScheme } = useColorScheme()
 
@@ -106,9 +104,9 @@ export default function ImageBasedReader({ book, initialPage, incognito }: Props
 	)
 
 	return (
-		<ReaderContainer>
+		<View className="flex flex-1 items-center justify-center">
 			<FlatList
-				style={{ backgroundColor: colorScheme === 'dark' ? gray[950] : undefined }}
+				ref={flatList}
 				data={Array.from({ length: book.pages }, (_, i) => i)}
 				renderItem={({ item }) => (
 					<Page
@@ -138,8 +136,15 @@ export default function ImageBasedReader({ book, initialPage, incognito }: Props
 				initialNumToRender={10}
 				maxToRenderPerBatch={10}
 				initialScrollIndex={initialPage - 1}
+				// https://stackoverflow.com/questions/53059609/flat-list-scrolltoindex-should-be-used-in-conjunction-with-getitemlayout-or-on
+				onScrollToIndexFailed={(info) => {
+					const wait = new Promise((resolve) => setTimeout(resolve, 500))
+					wait.then(() => {
+						flatList.current?.scrollToIndex({ index: info.index, animated: true })
+					})
+				}}
 			/>
-		</ReaderContainer>
+		</View>
 	)
 }
 
@@ -224,8 +229,13 @@ const Page = React.memo(
 						width: maxWidth,
 					}}
 				>
-					<EntityImage
-						url={sdk.media.bookPageURL(id, index + 1)}
+					<Image
+						source={{
+							uri: sdk.media.bookPageURL(id, index + 1),
+							headers: {
+								Authorization: sdk.authorizationHeader,
+							},
+						}}
 						style={{
 							alignSelf: readingDirection === 'horizontal' ? 'center' : undefined,
 							height,

@@ -1,7 +1,7 @@
 import { LoadingFileProps } from '@epubjs-react-native/core'
 import { useEffect, useState } from 'react'
-
-import { Text, View } from '@/components/primitives'
+import { View } from 'react-native'
+import { Text } from '~/components/ui'
 
 // FIXME: This causes an error...
 export default function LoadingSpinner({

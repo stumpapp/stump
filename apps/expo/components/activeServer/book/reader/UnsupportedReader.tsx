@@ -1,9 +1,10 @@
-import { ScreenRootView, Text } from '../primitives'
+import { View } from 'react-native'
+import { Text } from '~/components/ui'
 
 export default function UnsupportedReader() {
 	return (
-		<ScreenRootView>
+		<View>
 			<Text>The book reader for this format is not supported yet. Check back later!</Text>
-		</ScreenRootView>
+		</View>
 	)
 }

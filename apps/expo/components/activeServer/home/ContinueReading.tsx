@@ -1,8 +1,9 @@
 import { useContinueReading, useSDK } from '@stump/client'
 import type { Media } from '@stump/sdk'
 import { Image } from 'expo-image'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useMemo } from 'react'
-import { FlatList, View } from 'react-native'
+import { FlatList, Pressable, View } from 'react-native'
 
 import { Progress, Text } from '~/components/ui'
 
@@ -12,6 +13,9 @@ export default function ContinueReading() {
 		limit: 20,
 		suspense: true,
 	})
+	const { id: serverID } = useLocalSearchParams<{ id: string }>()
+
+	const router = useRouter()
 
 	const activeBook = useMemo(() => media.at(0), [media])
 	const activeBookProgress = useMemo(
@@ -27,7 +31,10 @@ export default function ContinueReading() {
 				<View className="flex items-start gap-4">
 					<Text className="text-2xl font-bold leading-6">Reading Now</Text>
 
-					<View className="relative aspect-[2/3] overflow-hidden rounded-lg">
+					<Pressable
+						className="relative aspect-[2/3] overflow-hidden rounded-lg"
+						onPress={() => router.navigate(`/server/${serverID}/books/${activeBook.id}`)}
+					>
 						<View className="absolute inset-0 z-10 bg-black" style={{ opacity: 0.5 }} />
 						<Image
 							className="z-0"
@@ -55,7 +62,7 @@ export default function ContinueReading() {
 
 							{activeBookProgress && <Progress className="h-1" value={activeBookProgress} />}
 						</View>
-					</View>
+					</Pressable>
 				</View>
 			)}
 

@@ -93,7 +93,7 @@ export default function AddServerDialog() {
 				{({ pressed }) => (
 					<View
 						className={cn(
-							'aspect-square flex-1 items-start justify-center pt-0.5',
+							'aspect-square flex-1 items-start justify-center p-1',
 							pressed && 'opacity-70',
 						)}
 					>

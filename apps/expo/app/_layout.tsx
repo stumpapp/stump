@@ -64,7 +64,19 @@ export default function RootLayout() {
 							}}
 						/>
 						<Stack.Screen
+							name="server/[id]"
+							options={{
+								headerShown: false,
+							}}
+						/>
+						<Stack.Screen
 							name="server/[id]/(tabs)"
+							options={{
+								headerShown: false,
+							}}
+						/>
+						<Stack.Screen
+							name="server/[id]/books/[id]"
 							options={{
 								headerShown: false,
 							}}

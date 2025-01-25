@@ -23,11 +23,6 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	let dist_path = Path::new(&app_state.config.client_dir);
 
 	Router::new()
-		// FIXME: figure out why this doesn't work... The workaround is yucky stinky
-		// .route_service(
-		// 	"/favicon.ico",
-		// 	ServeFile::new(dist_path.join("favicon.ico")),
-		// )
 		.route(FAVICON, get(favicon))
 		.nest_service(ASSETS, ServeDir::new(dist_path.join("assets")))
 		.nest_service(DIST, ServeDir::new(dist_path))

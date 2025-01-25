@@ -2,6 +2,7 @@ import { SDKContext, StumpClientContextProvider } from '@stump/client'
 import { Api, CreatedToken } from '@stump/sdk'
 import { Redirect, Slot, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+
 import { ActiveServerContext } from '~/components/activeServer'
 import ServerAuthDialog from '~/components/ServerAuthDialog'
 import { useSavedServers } from '~/stores'
@@ -9,7 +10,7 @@ import { useSavedServers } from '~/stores'
 export default function Screen() {
 	const router = useRouter()
 
-	const { savedServers, getServerToken, saveServerToken } = useSavedServers()
+	const { savedServers, getServerToken, saveServerToken, deleteServerToken } = useSavedServers()
 	const { id: serverID } = useLocalSearchParams<{ id: string }>()
 
 	const activeServer = useMemo(
@@ -62,6 +63,16 @@ export default function Screen() {
 		[activeServer, router, saveServerToken],
 	)
 
+	const onAuthError = useCallback(async () => {
+		// Get rid of the token
+		if (activeServer) {
+			await deleteServerToken(activeServer.id)
+		}
+		// We need to retrigger the auth dialog, so we'll let the effect handle it
+		setIsAuthDialogOpen(false)
+		setSDK(null)
+	}, [activeServer, deleteServerToken])
+
 	if (!activeServer) {
 		return <Redirect href="/" />
 	}
@@ -76,7 +87,7 @@ export default function Screen() {
 				activeServer: activeServer,
 			}}
 		>
-			<StumpClientContextProvider>
+			<StumpClientContextProvider onUnauthenticatedResponse={onAuthError}>
 				<SDKContext.Provider value={{ sdk }}>
 					<ServerAuthDialog isOpen={isAuthDialogOpen} onClose={handleAuthDialogClose} />
 					<Slot routerOptions={{ headerShown: false }} />

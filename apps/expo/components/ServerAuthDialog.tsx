@@ -11,9 +11,8 @@ import { z } from 'zod'
 
 import { useUserStore } from '~/stores'
 
-import { Button, Text } from './ui'
+import { Button, Input, Text } from './ui'
 import { BottomSheet } from './ui/bottom-sheet'
-import { Input } from './ui/input'
 
 type ServerAuthDialogProps = {
 	isOpen: boolean
@@ -99,51 +98,56 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 					/>
 				)}
 			>
-				<BottomSheet.View className="flex-1 items-center gap-4 bg-background p-6">
-					<View className="w-full">
-						<Controller
-							control={control}
-							rules={{
-								required: true,
-							}}
-							render={({ field: { onChange, onBlur, value } }) => (
-								<Input
-									autoCorrect={false}
-									autoCapitalize="none"
-									placeholder="Username"
-									onBlur={onBlur}
-									onChangeText={onChange}
-									value={value}
-								/>
-							)}
-							name="username"
-						/>
-						{errors.username && <Text>{errors.username.message}</Text>}
+				<BottomSheet.View className="flex-1 items-start gap-4 bg-background p-6">
+					<View>
+						<Text className="text-2xl font-bold leading-6">Login</Text>
+						<Text className="text-base text-foreground-muted">
+							You need to login to access this server
+						</Text>
 					</View>
 
-					<View className="w-full">
-						<Controller
-							control={control}
-							rules={{
-								required: true,
-							}}
-							render={({ field: { onChange, onBlur, value } }) => (
-								<Input
-									secureTextEntry
-									autoCorrect={false}
-									autoCapitalize="none"
-									placeholder="Password"
-									onBlur={onBlur}
-									onChangeText={onChange}
-									value={value}
-								/>
-							)}
-							name="password"
-						/>
-						{errors.password && <Text>{errors.password.message}</Text>}
-					</View>
+					<Controller
+						control={control}
+						rules={{
+							required: true,
+						}}
+						render={({ field: { onChange, onBlur, value } }) => (
+							<Input
+								label="Username"
+								autoCorrect={false}
+								autoCapitalize="none"
+								placeholder="Username"
+								onBlur={onBlur}
+								onChangeText={onChange}
+								value={value}
+								errorMessage={errors.username?.message}
+							/>
+						)}
+						name="username"
+					/>
 
-					<Button onPress={handleSubmit(onSubmit)} className="w-full" disabled={isLoggingIn}>
+					<Controller
+						control={control}
+						rules={{
+							required: true,
+						}}
+						render={({ field: { onChange, onBlur, value } }) => (
+							<Input
+								label="Password"
+								secureTextEntry
+								autoCorrect={false}
+								autoCapitalize="none"
+								placeholder="Password"
+								onBlur={onBlur}
+								onChangeText={onChange}
+								value={value}
+								errorMessage={errors.password?.message}
+							/>
+						)}
+						name="password"
+					/>
+
+					<Button onPress={handleSubmit(onSubmit)} className="mt-4 w-full" disabled={isLoggingIn}>
 						<Text>Login</Text>
 					</Button>
 				</BottomSheet.View>

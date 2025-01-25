@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { uuid } from 'expo-modules-core'
 import * as SecureStore from 'expo-secure-store'
 import { useCallback } from 'react'
-import { z } from 'zod'
+import { set, z } from 'zod'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
@@ -13,7 +13,7 @@ export type SavedServer = {
 	id: ServerID
 	name: string
 	url: string
-	kind: SupportedServer
+	kind: SupportedServer // TODO: support showing stump as opds, too
 }
 
 const serverConfig = z.object({
@@ -65,6 +65,7 @@ const useSavedServerStore = create<SavedServerStore>()(
 
 export type CreateServer = {
 	config?: ServerConfig
+	defaultServer?: boolean
 } & Omit<SavedServer, 'id'>
 
 // NOTE: for debugging, uncomment to clear saved tokens each render basically
@@ -72,23 +73,29 @@ export type CreateServer = {
 
 // TODO: safety in parsing
 export const useSavedServers = () => {
-	const { savedServers, addServer, removeServer } = useSavedServerStore((state) => ({
-		savedServers: state.servers,
-		addServer: state.addServer,
-		removeServer: state.removeServer,
-	}))
+	const { savedServers, addServer, removeServer, setDefaultServer } = useSavedServerStore(
+		(state) => ({
+			savedServers: state.servers,
+			addServer: state.addServer,
+			removeServer: state.removeServer,
+			setDefaultServer: state.setDefaultServer,
+		}),
+	)
 
 	const createServer = useCallback(
 		async ({ config, ...server }: CreateServer) => {
 			const id = uuid.v4()
 			const serverMeta = { ...server, id }
 			addServer(serverMeta)
+			if (server.defaultServer) {
+				setDefaultServer(serverMeta)
+			}
 			if (config) {
 				await SecureStore.setItemAsync(formatPrefix('config', id), JSON.stringify(config))
 			}
 			return serverMeta
 		},
-		[addServer],
+		[addServer, setDefaultServer],
 	)
 
 	const deleteServer = useCallback(
@@ -135,5 +142,6 @@ export const useSavedServers = () => {
 		getServerToken,
 		saveServerToken,
 		deleteServerToken,
+		setDefaultServer,
 	}
 }

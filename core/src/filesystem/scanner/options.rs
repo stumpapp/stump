@@ -23,40 +23,56 @@ let scan_options: ScanOptions = {
 See also https://docs.rs/merge/latest/merge/ for potentially useful crate
 */
 
+#[derive(Debug, Default, Clone, Deserialize, Serialize, Type, ToSchema, PartialEq)]
+pub enum VisitStrategy {
+	/// Rebuild books that have changed on disk since the last scan
+	#[default]
+	#[serde(rename = "rebuild_changed")]
+	RebuildChanged,
+	/// Rebuild all books, regardless of whether they have changed on disk. This
+	/// will update metadata, hashes, etc.
+	#[serde(rename = "rebuild_all")]
+	RebuildAll,
+	/// Regenerate metadata for all books, regardless of whether they have changed on disk.
+	#[serde(rename = "regen_meta")]
+	RegenMeta,
+	/// Regenerate hashes for all books, regardless of whether they have changed on disk.
+	#[serde(rename = "regen_hashes")]
+	RegenHashes,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum BookVisitOperation {
+	Rebuild,
+	RegenMeta,
+	RegenHashes,
+}
+
 /// The override options for a scan job. These options are used to override the default behavior, which generally
 /// means that the scanner will visit books it otherwise would not. How much extra work is done depends on the
 /// specific options.
 #[derive(Debug, Default, Clone, Deserialize, Serialize, Type, ToSchema, PartialEq)]
 pub struct ScanOptions {
-	/// Whether a scan should forcibly rebuild each book it visits and issue an update to the database.
-	/// This is somewhat dangerous, as it can overwrite metadata which was manually set against the database
-	/// and is not present in the book's metadata.
 	#[serde(default)]
-	force_rebuild: bool,
-	/// Whether a scan should forcibly regenerate the hashes of each book it visits. This should be a no-op
-	/// for books which have not been modified and have hashes already stored.
-	#[serde(default)]
-	regen_hashes: bool,
+	pub visit_strategy: VisitStrategy,
 }
 
 impl ScanOptions {
 	pub fn is_default(&self) -> bool {
-		*self == Self::default()
+		matches!(self.visit_strategy, VisitStrategy::RebuildChanged)
 	}
 
-	// TODO(granular-scans): This currently will trigger a full rebuild. This should be changed to actually use
-	// the options. The changes for this are not in this file, but walk.rs and utils.rs
-	/// Whether a scan should visit books which otherwise would not be visited (e.g., because they
-	/// have not been updated since the last scan).
-	pub fn should_visit_books(&self) -> bool {
-		// If any of the options are set, we should visit books
-		self.force_rebuild || self.regen_hashes
-	}
-
-	/// Whether a scan should perform a soft visit, which means that it will not forcibly rebuild
-	/// the entire book from disk but focus on a few specific tasks (e.g., regenerating hashes).
-	pub fn soft_visit(&self) -> bool {
-		!self.force_rebuild && self.regen_hashes
+	/// Returns a [BookVisitOperation] if one can be naively inferred from the visit strategy.
+	/// If the operation cannot be inferred, i.e. if the strategy is dependent on more context like
+	/// the modified time of the book, this method will return None.
+	pub fn book_operation(&self) -> Option<BookVisitOperation> {
+		match self.visit_strategy {
+			VisitStrategy::RebuildAll => Some(BookVisitOperation::Rebuild),
+			VisitStrategy::RegenMeta => Some(BookVisitOperation::RegenMeta),
+			VisitStrategy::RegenHashes => Some(BookVisitOperation::RegenHashes),
+			// RebuildChanged requires more context to determine the operation
+			_ => None,
+		}
 	}
 }
 
@@ -116,28 +132,66 @@ mod tests {
 	use super::*;
 
 	#[test]
-	fn should_visit_books_when_any_set() {
+	fn test_properly_converts_to_book_operation() {
 		let options = ScanOptions::default();
-		assert!(!options.should_visit_books());
+		assert_eq!(options.book_operation(), None);
 
 		let options = ScanOptions {
-			regen_hashes: true,
-			..ScanOptions::default()
+			visit_strategy: VisitStrategy::RebuildAll,
 		};
-		assert!(options.should_visit_books());
+		assert_eq!(options.book_operation(), Some(BookVisitOperation::Rebuild));
+
+		let options = ScanOptions {
+			visit_strategy: VisitStrategy::RegenMeta,
+		};
+		assert_eq!(
+			options.book_operation(),
+			Some(BookVisitOperation::RegenMeta)
+		);
+
+		let options = ScanOptions {
+			visit_strategy: VisitStrategy::RegenHashes,
+		};
+		assert_eq!(
+			options.book_operation(),
+			Some(BookVisitOperation::RegenHashes)
+		);
 	}
 
 	#[test]
-	fn should_deserialize() {
-		let options = r#"{"regen_hashes":false}"#;
-		let options: ScanOptions = serde_json::from_str(options).unwrap();
-		assert!(!options.should_visit_books());
+	fn test_deserialize() {
+		assert_eq!(
+			serde_json::from_str::<ScanOptions>(r#"{"visit_strategy":"rebuild_all"}"#)
+				.unwrap()
+				.visit_strategy,
+			VisitStrategy::RebuildAll
+		);
+		assert_eq!(
+			serde_json::from_str::<ScanOptions>(r#"{"visit_strategy":"regen_meta"}"#)
+				.unwrap()
+				.visit_strategy,
+			VisitStrategy::RegenMeta
+		);
+		assert_eq!(
+			serde_json::from_str::<ScanOptions>(r#"{"visit_strategy":"regen_hashes"}"#)
+				.unwrap()
+				.visit_strategy,
+			VisitStrategy::RegenHashes
+		);
+		assert_eq!(
+			serde_json::from_str::<ScanOptions>(
+				r#"{"visit_strategy":"rebuild_changed"}"#
+			)
+			.unwrap()
+			.visit_strategy,
+			VisitStrategy::RebuildChanged
+		);
 	}
 
 	#[test]
-	fn should_deserialize_empty() {
+	fn test_deserialize_empty() {
 		let options = r#"{}"#;
 		let options: ScanOptions = serde_json::from_str(options).unwrap();
-		assert!(!options.should_visit_books());
+		assert!(options.is_default());
 	}
 }

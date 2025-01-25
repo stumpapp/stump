@@ -13,7 +13,10 @@ use walkdir::{DirEntry, WalkDir};
 
 use crate::{
 	db::{entity::macros::media_path_modified_at_select, FileStatus},
-	filesystem::{scanner::utils::file_updated_since_scan, PathUtils},
+	filesystem::{
+		scanner::{options::BookVisitOperation, utils::file_updated_since_scan},
+		PathUtils,
+	},
 	prisma::{media, series, PrismaClient},
 	CoreResult,
 };
@@ -362,51 +365,71 @@ pub async fn walk_series(
 
 		let operations: Vec<BookVisitContext> = [...]
 	*/
-	let (media_to_create, media_to_visit) = valid_entries
-		.par_iter()
-		// filter out entries that neither need to be created nor visited
-		.filter(|entry| {
+
+	let (media_to_create, remaining_entries) = valid_entries
+		.into_par_iter()
+		.partition_map::<Vec<PathBuf>, Vec<DirEntry>, _, _, _>(|entry| {
 			let entry_path = entry.path();
 			let entry_path_str = entry_path.to_string_lossy().to_string();
-
-			// TODO: support force re-scans
-			// If the media exists, we need to check if it has been modified. If it isn't
-			// modified, there is no point in visiting it
-			if let Some(media) = existing_media_map.get(entry_path_str.as_str()) {
-				let modified_at = media.modified_at.map(|dt| dt.to_rfc3339());
-				let is_missing = media.status == FileStatus::Missing.to_string();
-
-				if let Some(dt) = modified_at {
-					file_updated_since_scan(entry, dt)
-						.map_err(|err| {
-							tracing::error!(
-								error = ?err,
-								path = ?entry_path,
-								"Failed to determine if entry has been modified since last scan"
-							);
-						})
-						.unwrap_or_else(|_| is_missing || options.should_visit_books())
-				} else {
-					is_missing || options.should_visit_books()
-				}
-			} else {
-				// If the media doesn't exist, we need to create it
-				true
-			}
-		})
-		.partition_map::<Vec<PathBuf>, Vec<PathBuf>, _, _, _>(|entry| {
-			let entry_path = entry.path();
-			let entry_path_str = entry_path.to_string_lossy().to_string();
-
-			// At this point, anything that's left in the iterator is either new or has been modified
-			// so the either check is simple
 
 			if existing_media_map.contains_key(entry_path_str.as_str()) {
-				Either::Right(entry_path.to_path_buf())
+				Either::Right(entry)
 			} else {
 				Either::Left(entry_path.to_path_buf())
 			}
 		});
+
+	let book_visit_operations = remaining_entries
+		.into_par_iter()
+		.filter_map(|entry| {
+			let entry_path = entry.path();
+			let entry_path_str = entry_path.to_string_lossy().to_string();
+
+			// We only want to visit media that are in the database, we handle new media
+			// in the previous block of code
+			existing_media_map
+				.get(entry_path_str.as_str())
+				.map(|m| (entry, m))
+		})
+		.filter_map(|(entry, media)| {
+			let modified_at = media.modified_at.map(|dt| dt.to_rfc3339());
+			let modified = modified_at
+				.and_then(|dt| {
+					file_updated_since_scan(&entry, dt)
+						.map_err(|err| {
+							tracing::error!(
+								error = ?err,
+								path = ?entry.path(),
+								"Failed to determine if entry has been modified since last scan"
+							);
+						})
+						.ok()
+				})
+				.unwrap_or_default();
+
+			// We always rebuild when modified
+			if modified {
+				Some((entry.into_path(), BookVisitOperation::Rebuild))
+			} else {
+				// Otherwise, we will only perform the operation which is set in the options (if any)
+				options
+					.book_operation()
+					.map(|operation| (entry.into_path(), operation))
+			}
+		})
+		.collect::<Vec<(PathBuf, BookVisitOperation)>>();
+
+	// TODO(granular-scans): This is here just to compile, remove it
+	let media_to_visit = book_visit_operations
+		.iter()
+		.filter_map(|(path, operation)| {
+			if operation == &BookVisitOperation::Rebuild {
+				Some(path.clone())
+			} else {
+				None
+			}
+		})
+		.collect::<Vec<PathBuf>>();
 
 	let missing_media = existing_media_map
 		.par_iter()

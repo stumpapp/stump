@@ -1737,7 +1737,8 @@
 			"wait": "Po utworzeniu bibliotek będą one wyświetlane tutaj"
 		},
 		"links": {
-			"create": "Utwórz bibliotekę"
+			"create": "Utwórz bibliotekę",
+			"settings": "Go to settings"
 		}
 	},
 	"pagination": {

@@ -57,9 +57,9 @@
 	.dark:root {
 		--background: #000000;
 		--background-inverse: #ffffff;
-		--background-overlay: #151517;
+		--background-overlay: #111113;
 		--background-overlay-hover: #17171a;
-		--background-surface: #1b1c1d;
+		--background-surface: #0a0a0a;
 		--background-surface-hover: #242628;
 		--background-surface-secondary: #1f2123;
 

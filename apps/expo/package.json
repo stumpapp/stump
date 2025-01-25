@@ -23,6 +23,7 @@
 		"@rn-primitives/slot": "~1.1.0",
 		"@rn-primitives/tooltip": "~1.1.0",
 		"@rn-primitives/types": "~1.1.0",
+		"axios": "^1.7.9",
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.1.0",
 		"expo": "^52.0.25",

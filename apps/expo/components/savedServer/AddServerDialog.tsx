@@ -72,7 +72,7 @@ export default function AddServerDialog() {
 				)}
 			>
 				<BottomSheet.View className="flex-1 items-center bg-background">
-					<Text className="mt-10">Awesome 🎉</Text>
+					<Text className="mt-10">TODO: Add server form</Text>
 				</BottomSheet.View>
 			</BottomSheet.Modal>
 		</View>

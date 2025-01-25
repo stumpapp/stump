@@ -67,6 +67,7 @@ export type CreateServer = {
 	config?: ServerConfig
 } & Omit<SavedServer, 'id'>
 
+// NOTE: for debugging, uncomment to clear saved tokens each render basically
 // SecureStore.deleteItemAsync('stump-mobile-saved-tokens-dev')
 
 // TODO: safety in parsing

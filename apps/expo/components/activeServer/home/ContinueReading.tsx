@@ -24,7 +24,7 @@ export default function ContinueReading() {
 	return (
 		<View className="flex flex-1 gap-8 pb-6">
 			{activeBook && (
-				<View className="flex gap-4">
+				<View className="flex items-start gap-4">
 					<Text className="text-2xl font-bold leading-6">Reading Now</Text>
 
 					<View className="relative aspect-[2/3] overflow-hidden rounded-lg">
@@ -65,6 +65,7 @@ export default function ContinueReading() {
 				{/* FIXME: flex-row not working */}
 				<FlatList
 					data={leftOffBooks}
+					keyExtractor={({ id }) => id}
 					renderItem={({ item: book }) => (
 						<View key={book.id} className="flex items-start px-1">
 							<View className="relative aspect-[2/3] overflow-hidden rounded-lg">
@@ -89,7 +90,6 @@ export default function ContinueReading() {
 							</View> */}
 						</View>
 					)}
-					keyExtractor={(item) => item.toString()}
 					horizontal
 					pagingEnabled
 					initialNumToRender={10}

@@ -24,19 +24,6 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 
 	Router::new()
 		.route(FAVICON, get(favicon))
-		.nest_service("/sw.js", ServeFile::new(dist_path.join("sw.js")))
-		.nest_service(
-			"/registerSW.js",
-			ServeFile::new(dist_path.join("registerSW.js")),
-		)
-		.nest_service(
-			"/workbox-1be04862.js",
-			ServeFile::new(dist_path.join("workbox-1be04862.js")),
-		)
-		.nest_service(
-			"/manifest.webmanifest",
-			ServeFile::new(dist_path.join("manifest.webmanifest")),
-		)
 		.nest_service(ASSETS, ServeDir::new(dist_path.join("assets")))
 		.nest_service(DIST, ServeDir::new(dist_path))
 		.fallback_service(ServeFile::new(dist_path.join("index.html")))

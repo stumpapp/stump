@@ -1737,7 +1737,8 @@
 			"wait": "Jakmile budou knihovny vytvořeny, zobrazí se zde"
 		},
 		"links": {
-			"create": "Vytvořit knihovnu"
+			"create": "Vytvořit knihovnu",
+			"settings": "Go to settings"
 		}
 	},
 	"pagination": {

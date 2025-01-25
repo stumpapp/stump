@@ -6,11 +6,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
-import { ActiveServerContext } from '~/components/activeServer'
-import ServerAuthDialog from '~/components/ServerAuthDialog'
 import { icons } from '~/components/ui'
 import { cn } from '~/lib/utils'
-import { useSavedServers, useUserStore } from '~/stores'
+import { useUserStore } from '~/stores'
 
 const { Unplug, Plus } = icons
 

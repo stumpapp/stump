@@ -1,6 +1,6 @@
 import { SDKContext, StumpClientContextProvider } from '@stump/client'
 import { Api, CreatedToken } from '@stump/sdk'
-import { Slot, useLocalSearchParams, useRouter } from 'expo-router'
+import { Redirect, Slot, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ActiveServerContext } from '~/components/activeServer'
 import ServerAuthDialog from '~/components/ServerAuthDialog'
@@ -21,10 +21,10 @@ export default function Screen() {
 	const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
 
 	useEffect(() => {
-		// if (!activeServer) return
+		if (!activeServer) return
 
 		const configureSDK = async () => {
-			const { id, url } = activeServer || { id: 'dev', url: 'http://192.168.0.188:10801' }
+			const { id, url } = activeServer
 			const existingToken = await getServerToken(id)
 			const instance = new Api({ baseURL: url, authMethod: 'token' })
 			if (!existingToken) {
@@ -42,10 +42,10 @@ export default function Screen() {
 
 	const handleAuthDialogClose = useCallback(
 		(token?: CreatedToken) => {
-			if (token) {
+			if (token && activeServer) {
 				const { access_token, expires_at } = token
 				const instance = new Api({
-					baseURL: activeServer?.url || 'http://192.168.0.188:10801',
+					baseURL: activeServer.url,
 					authMethod: 'token',
 				})
 				instance.token = access_token
@@ -63,7 +63,7 @@ export default function Screen() {
 	)
 
 	if (!activeServer) {
-		// return <Redirect href="/" />
+		return <Redirect href="/" />
 	}
 
 	if (!sdk) {
@@ -73,12 +73,7 @@ export default function Screen() {
 	return (
 		<ActiveServerContext.Provider
 			value={{
-				activeServer: activeServer || {
-					id: 'dev',
-					url: 'http://192.168.0.188:10801',
-					name: 'Dev',
-					kind: 'stump',
-				},
+				activeServer: activeServer,
 			}}
 		>
 			<StumpClientContextProvider>

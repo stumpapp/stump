@@ -218,6 +218,7 @@ const Page = React.memo(
 			}
 		}, [deviceOrientation, pageSize, safeMaxHeight, maxWidth])
 
+		// TODO: https://github.com/likashefqet/react-native-image-zoom
 		return (
 			<TouchableWithoutFeedback onPress={handlePress}>
 				<View

@@ -76,6 +76,18 @@ export default function RootLayout() {
 							}}
 						/>
 						<Stack.Screen
+							name="server/[id]/libraries/[id]"
+							options={{
+								headerShown: false,
+							}}
+						/>
+						<Stack.Screen
+							name="server/[id]/series/[id]"
+							options={{
+								headerShown: false,
+							}}
+						/>
+						<Stack.Screen
 							name="server/[id]/books/[id]"
 							options={{
 								headerShown: false,

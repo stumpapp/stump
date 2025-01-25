@@ -10,11 +10,12 @@ import {
 	Pageable,
 	PaginationQuery,
 	PatchLibraryThumbnail,
+	Series,
 	UpdateLibrary,
 	UpdateLibraryExcludedUsers,
 	User,
 } from '../types'
-import { ClassQueryKeys } from './types'
+import { ClassQueryKeys, CursorQueryParams } from './types'
 import { createRouteURLHandler } from './utils'
 
 /**
@@ -46,6 +47,18 @@ export class LibraryAPI extends APIBase {
 	async getByID(id: string): Promise<Library> {
 		const { data: library } = await this.api.axios.get<Library>(libraryURL(id))
 		return library
+	}
+
+	/**
+	 *
+	 * @param id The library ID
+	 * @param params The query parameters for the series
+	 */
+	async getSeriesCursor(id: string, params: CursorQueryParams): Promise<Pageable<Series[]>> {
+		const { data: series } = await this.api.axios.get<Pageable<Series[]>>(
+			libraryURL(`/${id}/series`, params),
+		)
+		return series
 	}
 
 	/**
@@ -221,6 +234,7 @@ export class LibraryAPI extends APIBase {
 			generateThumbnails: 'library.generateThumbnails',
 			get: 'library.get',
 			getByID: 'library.getByID',
+			getSeriesCursor: 'library.getSeriesCursor',
 			getLastVisited: 'library.getLastVisited',
 			getStats: 'library.getStats',
 			scan: 'library.scan',

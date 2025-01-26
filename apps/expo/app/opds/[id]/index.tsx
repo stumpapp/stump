@@ -30,6 +30,7 @@ export default function Screen() {
 
 	// TODO: componentize this
 	// TODO: figure out style I like (the headings)
+	// TODO: figure out how linking is going to work...
 	return (
 		<ScrollView className="flex-1 bg-background p-4">
 			<View className="flex-1 gap-6">

@@ -9,6 +9,8 @@ import { usePreferencesStore, useSavedServers } from '~/stores'
 
 const { Server, Slash, Rss } = icons
 
+// TODO: https://www.npmjs.com/package/react-native-swipe-list-view
+
 export default function Screen() {
 	const { savedServers } = useSavedServers()
 	const [stumpServers, opdsServers] = partition(savedServers, (server) => server.kind === 'stump')

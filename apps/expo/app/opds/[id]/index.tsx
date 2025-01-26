@@ -2,7 +2,6 @@ import { useQuery, useSDK } from '@stump/client'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import partition from 'lodash/partition'
-import { useMemo } from 'react'
 import { FlatList, Pressable, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 
@@ -26,19 +25,6 @@ export default function Screen() {
 	)
 
 	const router = useRouter()
-
-	// const metadata = feed?.metadata
-	// const pagination = useMemo(
-	// 	() =>
-	// 		metadata?.currentPage != null
-	// 			? {
-	// 					currentPage: metadata.currentPage,
-	// 					itemsPerPage: metadata.itemsPerPage,
-	// 					numberOfItems: metadata.numberOfItems,
-	// 				}
-	// 			: null,
-	// 	[metadata],
-	// )
 
 	if (!feed) return null
 

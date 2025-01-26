@@ -1,6 +1,6 @@
 import { SDKContext, StumpClientContextProvider } from '@stump/client'
 import { Api } from '@stump/sdk'
-import { Redirect, Slot, useLocalSearchParams, useRouter } from 'expo-router'
+import { Redirect, Slot, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { match, P } from 'ts-pattern'
 
@@ -120,7 +120,7 @@ export default function Screen() {
 			<StumpClientContextProvider onUnauthenticatedResponse={onAuthError}>
 				<SDKContext.Provider value={{ sdk }}>
 					{/* <ServerAuthDialog isOpen={isAuthDialogOpen} onClose={handleAuthDialogClose} /> */}
-					<Slot routerOptions={{ headerShown: false }} />
+					<Stack screenOptions={{ headerShown: false }} />
 				</SDKContext.Provider>
 			</StumpClientContextProvider>
 		</ActiveServerContext.Provider>

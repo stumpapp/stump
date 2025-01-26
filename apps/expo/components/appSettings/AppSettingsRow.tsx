@@ -1,10 +1,10 @@
+import { forwardRef } from 'react'
 import { View } from 'react-native'
 
 import { icons } from '~/components/ui'
+import { cn } from '~/lib/utils'
 
 import { Text } from '../ui'
-import { forwardRef } from 'react'
-import { cn } from '~/lib/utils'
 
 type Props = {
 	icon: keyof typeof icons

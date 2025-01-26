@@ -131,6 +131,15 @@ export class Api {
 	}
 
 	/**
+	 * Get the basic auth string for the API
+	 */
+	get basicAuthHeader(): string | undefined {
+		return this._basicAuth
+			? Buffer.from(`${this._basicAuth.username}:${this._basicAuth.password}`).toString('base64')
+			: undefined
+	}
+
+	/**
 	 * Set custom headers to be sent with every request
 	 */
 	set customHeaders(headers: Record<string, string>) {
@@ -167,7 +176,13 @@ export class Api {
 	 * Get the current access token for the API formatted as a Bearer token
 	 */
 	get authorizationHeader(): string | undefined {
-		return this.accessToken ? `Bearer ${this.accessToken}` : undefined
+		if (this.accessToken) {
+			return `Bearer ${this.accessToken}`
+		} else if (this.basicAuthHeader) {
+			return `Basic ${this.basicAuthHeader}`
+		} else {
+			return undefined
+		}
 	}
 
 	/**

@@ -1,8 +1,9 @@
 import { useMediaByIdQuery, useSDK } from '@stump/client'
 import { Image } from 'expo-image'
-import { useGlobalSearchParams, useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { View } from 'react-native'
-import { Pressable, ScrollView } from 'react-native-gesture-handler'
+import { ScrollView } from 'react-native-gesture-handler'
+
 import { useActiveServer } from '~/components/activeServer'
 import { Button, Text } from '~/components/ui'
 

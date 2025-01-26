@@ -1,4 +1,3 @@
-import axios, { AxiosInstance } from 'axios'
 import { z } from 'zod'
 
 import { APIBase } from '../base'
@@ -19,37 +18,6 @@ const opdsURL = createRouteURLHandler(OPDS_V2_ROUTE)
  * The api-key API controller, used for interacting with the api-key endpoints of the Stump API
  */
 export class OPDSV2API extends APIBase {
-	// get _axios() {
-	// 	// We need to change the base URL for the OPDS API
-	// 	// const instance = axios.create({
-	// 	// 	baseURL: this.opdsURL,
-	// 	// 	withCredentials: super.configuration.authMethod === 'session',
-	// 	// })
-	// 	// instance.interceptors = this.api.axios.interceptors
-	// 	// 	curl http://localhost:10801/opds/v2.0/catalog \
-	// 	// -H 'Authorization: Basic b3JvbWVpOm9yb21laQ=='
-
-	// 	const headers = this.api.authorizationHeader
-
-	// 	const baseURL = this.opdsURL
-	// 	const instance = axios.create({
-	// 		baseURL,
-	// 		withCredentials: false,
-	// 	})
-	// 	instance.interceptors.request.use((config) => {
-	// 		// config.headers.Authorization = 'Basic b3JvbWVpOm9yb21laQ=='
-	// 		config.headers.Authorization = this.api.authorizationHeader
-	// 		return config
-	// 	})
-
-	// 	// instance.interceptors.request.use((config) => {
-	// 	// 	config.headers = config.headers.concat(this.headers)
-	// 	// 	return config
-	// 	// })
-
-	// 	return instance
-	// }
-
 	/**
 	 * The authentication document for the OPDS API, representing the auth
 	 * flows supported by the server
@@ -170,11 +138,11 @@ export type OPDSLinkType = string
 
 const baseLink = z.object({
 	title: z.string().optional(),
-	rel: z.union([z.string(), z.array(z.string())]),
+	rel: z.union([z.string(), z.array(z.string())]).optional(),
 	href: z.string(),
 	type: z.string().optional(),
 	templated: z.boolean().optional(),
-	properties: z.record(z.unknown()),
+	properties: z.record(z.unknown()).optional(),
 })
 export type OPDSBaseLink = z.infer<typeof baseLink>
 
@@ -205,7 +173,7 @@ const authDocument = z.object({
 	authentication: z.array(authFlow),
 	title: z.string(),
 	description: z.string().optional(),
-	links: z.array(link),
+	links: z.array(link).default([]),
 })
 export type OPDSAuthenticationDocument = z.infer<typeof authDocument>
 
@@ -221,7 +189,7 @@ const belongsTo = z.object({
 		.object({
 			name: z.string(),
 			position: z.number().optional(),
-			links: z.array(link),
+			links: z.array(link).default([]),
 		})
 		.optional(),
 })
@@ -253,18 +221,18 @@ const publication = z.object({
 export type OPDSPublication = z.infer<typeof publication>
 
 const feedGroup = z.object({
-	links: z.array(link),
-	navigation: z.array(navigationLink),
-	publications: z.array(publication),
-	metadata: metadata,
+	links: z.array(link).default([]),
+	navigation: z.array(navigationLink).default([]),
+	publications: z.array(publication).default([]),
+	metadata,
 })
 export type OPDSFeedGroup = z.infer<typeof feedGroup>
 
 const feedSchema = z.object({
-	links: z.array(link).optional(),
-	navigation: z.array(navigationLink).optional(),
-	groups: z.array(feedGroup).optional(),
-	publications: z.array(publication).optional(),
-	metadata: metadata,
+	links: z.array(link).default([]),
+	navigation: z.array(navigationLink).default([]),
+	groups: z.array(feedGroup).default([]),
+	publications: z.array(publication).default([]),
+	metadata,
 })
 export type OPDSFeed = z.infer<typeof feedSchema>

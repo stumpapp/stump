@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { match, P } from 'ts-pattern'
 
 import { ActiveServerContext } from '~/components/activeServer'
-import ServerAuthDialog from '~/components/ServerAuthDialog'
+// import ServerAuthDialog from '~/components/ServerAuthDialog'
 import { useSavedServers } from '~/stores'
 
 export default function Screen() {

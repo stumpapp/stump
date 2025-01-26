@@ -1,7 +1,7 @@
 {
 	"expo": {
-		"name": "expo-new",
-		"slug": "expo-new",
+		"name": "stump",
+		"slug": "stump",
 		"version": "1.0.0",
 		"orientation": "portrait",
 		"icon": "./assets/images/icon.png",

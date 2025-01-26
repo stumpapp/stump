@@ -24,6 +24,7 @@ const auth = z
 		z.object({
 			basic: z.object({
 				username: z.string(),
+				// TODO: NO, don't do this. Don't store a plain password lol
 				password: z.string(),
 			}),
 		}),

@@ -17,6 +17,8 @@ export default function Screen() {
 
 	const [stumpServers, opdsServers] = partition(savedServers, (server) => server.kind === 'stump')
 
+	const allOPDSServers = [...stumpServers.filter((server) => !!server.stumpOPDS), ...opdsServers]
+
 	// const serverStatuses = useQueries({
 	// 	queries: stumpServers.map((server) => ({
 	// 		queryFn: async () =>
@@ -71,11 +73,7 @@ export default function Screen() {
 							>
 								<View className="flex-1 items-start justify-center gap-1">
 									<Text className="text-lg">{server.name}</Text>
-									<Text className="text-foreground-muted">
-										{MASK_URLS
-											? server.url.replace(/(https?:\/\/)(.*?)(\/.*)/, '$1$2/...')
-											: server.url}
-									</Text>
+									<Text className="flex-1 text-foreground-muted">{formatURL(server.url)}</Text>
 								</View>
 							</Link>
 						))}
@@ -84,7 +82,7 @@ export default function Screen() {
 					<View className="flex w-full items-start gap-2">
 						<Text className="text-foreground-muted">OPDS</Text>
 
-						{!opdsServers.length && (
+						{!allOPDSServers.length && (
 							<View className="h-24 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-edge p-3">
 								<View className="relative flex justify-center">
 									<View className="flex items-center justify-center rounded-lg bg-background-surface p-2">
@@ -97,7 +95,8 @@ export default function Screen() {
 							</View>
 						)}
 
-						{opdsServers.map((server) => (
+						{/* TODO: indicate stump server visually with tiny favicon? */}
+						{allOPDSServers.map((server) => (
 							<Link
 								key={server.id}
 								href={`/opds/${server.id}`}

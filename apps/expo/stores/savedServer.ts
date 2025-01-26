@@ -14,6 +14,7 @@ export type SavedServer = {
 	name: string
 	url: string
 	kind: SupportedServer // TODO: support showing stump as opds, too
+	stumpOPDS?: boolean
 }
 
 const auth = z

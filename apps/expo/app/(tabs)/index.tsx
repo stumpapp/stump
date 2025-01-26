@@ -7,6 +7,9 @@ import { useSavedServers } from '~/stores'
 
 const { Server, Slash, Rss } = icons
 
+// TODO: implement a preference switch for this to better support screen capture debug/issue reports
+const MASK_URLS = false
+
 export default function Screen() {
 	const { savedServers } = useSavedServers()
 
@@ -26,6 +29,17 @@ export default function Screen() {
 	// 		},
 	// 	})),
 	// })
+
+	const formatURL = (url: string) => {
+		try {
+			const urlObj = new URL(url)
+			const host = urlObj.host
+			const domain = urlObj.hostname
+			return MASK_URLS ? `${host.replace(domain, domain.replace(/./g, '*'))}` : host
+		} catch {
+			return MASK_URLS ? url.replace(/./g, '*') : url
+		}
+	}
 
 	return (
 		<View className="flex-1 items-start justify-start gap-5 bg-background p-6">
@@ -53,7 +67,11 @@ export default function Screen() {
 					>
 						<View className="flex-1 items-start justify-center gap-1">
 							<Text className="text-lg">{server.name}</Text>
-							<Text className="text-foreground-muted">{server.url}</Text>
+							<Text className="text-foreground-muted">
+								{MASK_URLS
+									? server.url.replace(/(https?:\/\/)(.*?)(\/.*)/, '$1$2/...')
+									: server.url}
+							</Text>
 						</View>
 					</Link>
 				))}
@@ -83,7 +101,7 @@ export default function Screen() {
 					>
 						<View className="flex-1 items-start justify-center gap-1">
 							<Text className="text-lg">{server.name}</Text>
-							<Text className="text-foreground-muted">{server.url}</Text>
+							<Text className="text-foreground-muted">{formatURL(server.url)}</Text>
 						</View>
 					</Link>
 				))}

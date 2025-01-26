@@ -1,0 +1,16 @@
+import { OPDSPublication } from '@stump/sdk'
+import { createContext, useContext } from 'react'
+
+export type IPublicationContext = {
+	publication: OPDSPublication
+}
+
+export const PublicationContext = createContext<IPublicationContext | undefined>(undefined)
+
+export const usePublicationContext = () => {
+	const context = useContext(PublicationContext)
+	if (!context) {
+		throw new Error('usePublicationContext must be used within a PublicationContext')
+	}
+	return context
+}

@@ -208,6 +208,7 @@ impl OPDSPublication {
 
 		let metadata = OPDSMetadataBuilder::default()
 			.title(title)
+			.identifier(book.id.clone())
 			.modified(OPDSMetadata::generate_modified())
 			.description(description)
 			.belongs_to(OPDSEntryBelongsTo::from((series.clone(), position)))

@@ -120,7 +120,7 @@ export default function AddServerDialog() {
 								label="Username"
 								autoCorrect={false}
 								autoCapitalize="none"
-								placeholder="username"
+								placeholder="oromei"
 								onBlur={onBlur}
 								onChangeText={onChange}
 								value={value}
@@ -137,7 +137,7 @@ export default function AddServerDialog() {
 								label="Password"
 								autoCorrect={false}
 								autoCapitalize="none"
-								placeholder="password"
+								placeholder="*************"
 								secureTextEntry
 								onBlur={onBlur}
 								onChangeText={onChange}
@@ -405,10 +405,20 @@ const createSchema = (names: string[]) =>
 		.transform((data) => ({
 			...data,
 			stumpOPDS: data.kind === 'stump' ? data.stumpOPDS : false,
-			auth: data.token
-				? { bearer: data.token }
-				: data.basicUser
-					? { basic: { username: data.basicUser, password: data.basicPassword } }
+			config:
+				data.authMode !== 'default'
+					? {
+							auth: data.token
+								? { bearer: data.token as string }
+								: data.basicUser
+									? {
+											basic: {
+												username: data.basicUser as string,
+												password: data.basicPassword as string,
+											},
+										}
+									: undefined,
+						}
 					: undefined,
 		}))
 type AddServerSchema = z.infer<ReturnType<typeof createSchema>>

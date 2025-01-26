@@ -5,7 +5,7 @@ import { PortalHost } from '@rn-primitives/portal'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import * as React from 'react'
-import { Platform } from 'react-native'
+import { Platform, SafeAreaView } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 import { BottomSheet } from '~/components/ui/bottom-sheet'

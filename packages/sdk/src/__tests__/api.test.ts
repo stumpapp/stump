@@ -104,5 +104,7 @@ describe('Api', () => {
 			// The token should be set in the header
 			expect(config.headers.Authorization === 'Bearer give-me-access')
 		})
+
+		// TODO: basic auth tests
 	})
 })

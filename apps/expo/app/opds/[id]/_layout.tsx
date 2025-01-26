@@ -30,6 +30,11 @@ export default function Screen() {
 			const { id, url } = activeServer
 
 			const config = await getServerConfig(id)
+			// if (!config) {
+			// 	await createServerConfig(id, {
+			// 		auth: { basic: { username: 'oromei', password: 'oromei' } },
+			// 	})
+			// }
 
 			const instance = match(config?.auth)
 				.with(

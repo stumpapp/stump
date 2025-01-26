@@ -639,6 +639,7 @@ pub(crate) async fn safely_build_and_insert_media(
 				books.push_back(book);
 			},
 			Err((error, path)) => {
+				tracing::error!(error = ?error, ?path, "Failed to build book");
 				logs.push(
 					JobExecuteLog::error(format!(
 						"Failed to build book: {:?}",

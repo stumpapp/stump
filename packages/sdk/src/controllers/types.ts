@@ -40,4 +40,8 @@ export type ClassQueryKeys<T> = Omit<
 	| 'axios'
 	| 'withServiceURL'
 	| 'serviceURL'
+	| 'libraryThumbnailURL'
+	| 'seriesThumbnailURL'
+	| 'bookThumbnailURL'
+	| 'bookFileURL'
 >

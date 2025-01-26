@@ -74,6 +74,19 @@ export default function Screen() {
 						<Text>No OPDS feeds added</Text>
 					</View>
 				)}
+
+				{opdsServers.map((server) => (
+					<Link
+						key={server.id}
+						href={`/opds/${server.id}`}
+						className="bg-background-muted w-full items-center rounded-lg border border-edge bg-background-surface p-3"
+					>
+						<View className="flex-1 items-start justify-center gap-1">
+							<Text className="text-lg">{server.name}</Text>
+							<Text className="text-foreground-muted">{server.url}</Text>
+						</View>
+					</Link>
+				))}
 			</View>
 		</View>
 	)

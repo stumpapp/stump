@@ -4,7 +4,7 @@ import { ContinueReading } from '~/components/activeServer/home'
 
 export default function Screen() {
 	return (
-		<ScrollView className="g-background flex-1 gap-5 p-4">
+		<ScrollView className="flex-1 gap-5 bg-background p-4">
 			<ContinueReading />
 		</ScrollView>
 	)

@@ -33,7 +33,7 @@ const BottomSheetView = cssInterop(BSView, {
 
 const BottomSheetScrollView = cssInterop(BSScrollView, {
 	className: 'style',
-	contentContainerclassName: 'contentContainerStyle',
+	// contentContainerclassName: 'contentContainerStyle',
 })
 
 const BottomSheetHandle: React.FC<BSHandleProps> = BSHandle

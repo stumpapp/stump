@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { uuid } from 'expo-modules-core'
 import * as SecureStore from 'expo-secure-store'
 import { useCallback } from 'react'
-import { set, z } from 'zod'
+import { z } from 'zod'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
@@ -16,10 +16,25 @@ export type SavedServer = {
 	kind: SupportedServer // TODO: support showing stump as opds, too
 }
 
+const auth = z
+	.union([
+		z.object({
+			bearer: z.string(),
+		}),
+		z.object({
+			basic: z.object({
+				username: z.string(),
+				password: z.string(),
+			}),
+		}),
+	])
+	.optional()
+
 const serverConfig = z.object({
-	customHeaders: z.record(z.string()),
+	customHeaders: z.record(z.string()).optional(),
+	auth,
 })
-type ServerConfig = z.infer<typeof serverConfig>
+export type ServerConfig = z.infer<typeof serverConfig>
 
 const managedToken = z
 	.object({
@@ -91,7 +106,7 @@ export const useSavedServers = () => {
 				setDefaultServer(serverMeta)
 			}
 			if (config) {
-				await SecureStore.setItemAsync(formatPrefix('config', id), JSON.stringify(config))
+				await createServerConfig(id, config)
 			}
 			return serverMeta
 		},
@@ -110,6 +125,11 @@ export const useSavedServers = () => {
 	const getServerConfig = async (id: ServerID) => {
 		const config = await SecureStore.getItemAsync(formatPrefix('config', id))
 		return config ? serverConfig.parse(JSON.parse(config)) : null
+	}
+
+	const createServerConfig = async (id: ServerID, config: ServerConfig) => {
+		await SecureStore.setItemAsync(formatPrefix('config', id), JSON.stringify(config))
+		return config
 	}
 
 	const getServerToken = async (id: ServerID) => {
@@ -139,6 +159,7 @@ export const useSavedServers = () => {
 		createServer,
 		deleteServer,
 		getServerConfig,
+		createServerConfig,
 		getServerToken,
 		saveServerToken,
 		deleteServerToken,

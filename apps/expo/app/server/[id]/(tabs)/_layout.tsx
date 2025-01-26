@@ -1,8 +1,6 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome'
-import { SDKContext, StumpClientContextProvider, useAuthQuery, useSDK } from '@stump/client'
-import { Api, CreatedToken } from '@stump/sdk'
-import { Redirect, Tabs, useLocalSearchParams, useRouter } from 'expo-router'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useAuthQuery, useSDK } from '@stump/client'
+import { Tabs, useRouter } from 'expo-router'
 import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 

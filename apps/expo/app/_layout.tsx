@@ -93,6 +93,12 @@ export default function RootLayout() {
 								headerShown: false,
 							}}
 						/>
+						<Stack.Screen
+							name="opds/[id]"
+							options={{
+								headerShown: false,
+							}}
+						/>
 					</Stack>
 					<PortalHost />
 				</BottomSheet.Provider>

@@ -198,7 +198,6 @@ pub async fn auth_middleware(
 
 		return Err(APIError::Unauthorized.into_response());
 	};
-	dbg!(&auth_header);
 
 	let req_ctx = match auth_header {
 		_ if auth_header.starts_with("Bearer ") && auth_header.len() > 7 => {
@@ -209,7 +208,6 @@ pub async fn auth_middleware(
 		},
 		_ if auth_header.starts_with("Basic ") && auth_header.len() > 6 && is_opds => {
 			let encoded_credentials = auth_header[6..].to_owned();
-			dbg!(&encoded_credentials);
 			handle_basic_auth(encoded_credentials, &ctx.db, &mut session)
 				.await
 				.map_err(|e| e.into_response())?
@@ -453,7 +451,6 @@ async fn handle_basic_auth(
 	};
 
 	let is_match = verify_password(&user.hashed_password, &decoded_credentials.password)?;
-	dbg!(&is_match);
 
 	if is_match && user.is_locked {
 		tracing::error!(

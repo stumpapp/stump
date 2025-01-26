@@ -1,4 +1,4 @@
-import axios, { InternalAxiosRequestConfig } from 'axios'
+import axios, { AxiosRequestHeaders, InternalAxiosRequestConfig } from 'axios'
 
 import { Api } from '../api'
 
@@ -95,7 +95,11 @@ describe('Api', () => {
 
 			// Set the token
 			api.token = 'give-me-access'
-			const config = { headers: {} } as InternalAxiosRequestConfig
+			const config = {
+				headers: {
+					concat: jest.fn().mockImplementation((obj: unknown) => obj),
+				} as unknown as AxiosRequestHeaders,
+			} as InternalAxiosRequestConfig
 			use.mock.calls[0][0](config)
 			// The token should be set in the header
 			expect(config.headers.Authorization === 'Bearer give-me-access')

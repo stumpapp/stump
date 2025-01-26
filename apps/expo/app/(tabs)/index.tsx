@@ -5,19 +5,16 @@ import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { icons, Text } from '~/components/ui'
-import { useSavedServers } from '~/stores'
+import { usePreferencesStore, useSavedServers } from '~/stores'
 
 const { Server, Slash, Rss } = icons
 
-// TODO: implement a preference switch for this to better support screen capture debug/issue reports
-const MASK_URLS = false
-
 export default function Screen() {
 	const { savedServers } = useSavedServers()
-
 	const [stumpServers, opdsServers] = partition(savedServers, (server) => server.kind === 'stump')
-
 	const allOPDSServers = [...stumpServers.filter((server) => !!server.stumpOPDS), ...opdsServers]
+
+	const maskURLs = usePreferencesStore((state) => state.maskURLs)
 
 	// const serverStatuses = useQueries({
 	// 	queries: stumpServers.map((server) => ({
@@ -39,9 +36,9 @@ export default function Screen() {
 			const urlObj = new URL(url)
 			const host = urlObj.host
 			const domain = urlObj.hostname
-			return MASK_URLS ? `${host.replace(domain, domain.replace(/./g, '*'))}` : host
+			return maskURLs ? `${host.replace(domain, domain.replace(/./g, '*'))}` : host
 		} catch {
-			return MASK_URLS ? url.replace(/./g, '*') : url
+			return maskURLs ? url.replace(/./g, '*') : url
 		}
 	}
 

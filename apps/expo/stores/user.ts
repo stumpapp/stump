@@ -6,8 +6,10 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 export const useUserStore = createUserStore(AsyncStorage)
 
 type MobilePreferencesStore = {
-	show_tab_names: boolean
-	setShowTabNames: (show: boolean) => void
+	showTabLabels: boolean
+	setShowTabLabels: (show: boolean) => void
+	maskURLs: boolean
+	setMaskURLs: (mask: boolean) => void
 }
 
 /**
@@ -19,11 +21,14 @@ type MobilePreferencesStore = {
 export const usePreferencesStore = create<MobilePreferencesStore>()(
 	persist(
 		(set) => ({
-			setShowTabNames: (show) => set({ show_tab_names: show }),
-			show_tab_names: false,
+			setShowTabLabels: (show) => set({ showTabLabels: show }),
+			showTabLabels: false,
+			setMaskURLs: (mask) => set({ maskURLs: mask }),
+			maskURLs: false,
 		}),
 		{
 			name: 'stump-mobile-preferences-store',
+			version: 1,
 			storage: createJSONStorage(() => AsyncStorage),
 		},
 	),

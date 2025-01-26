@@ -3,7 +3,12 @@ import { ScrollView } from 'react-native-gesture-handler'
 
 import { ContactInformation, SupportInformation } from '~/components/appSettings'
 import { AppDataUsageLink } from '~/components/appSettings/management'
-import { AppLanguage, AppTheme, DefaultServer } from '~/components/appSettings/preferences'
+import {
+	AppLanguage,
+	AppTheme,
+	DefaultServer,
+	MaskURLs,
+} from '~/components/appSettings/preferences'
 import { Text } from '~/components/ui/text'
 
 export default function Screen() {
@@ -15,6 +20,7 @@ export default function Screen() {
 					<AppTheme />
 					<AppLanguage />
 					<DefaultServer />
+					<MaskURLs />
 				</View>
 
 				<View>

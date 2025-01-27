@@ -85,7 +85,7 @@ export const publication = z.object({
 	metadata: metadata,
 	links: z.array(link).optional(),
 	images: z.array(imageLink).optional(),
-	readingOrder: z.array(link).optional(),
+	readingOrder: z.array(imageLink).optional(),
 	resources: z.array(link).optional(),
 	toc: z.array(link).optional(),
 	landmarks: z.array(link).optional(),

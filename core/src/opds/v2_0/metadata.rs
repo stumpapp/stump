@@ -21,6 +21,15 @@ pub struct OPDSPaginationMetadata {
 	current_page: Option<i64>,
 }
 
+impl OPDSPaginationMetadata {
+	fn current_page_only(current_page: i64) -> Self {
+		Self {
+			current_page: Some(current_page),
+			..Default::default()
+		}
+	}
+}
+
 /// This is used to provide additional context for an entry, such as its position within a series.
 ///
 /// Note that the spec does not explicitly define this, and the only example of it is in the

@@ -1,13 +1,12 @@
 import { useSDK, useUpdateMediaProgress } from '@stump/client'
 import { isAxiosError } from '@stump/sdk'
 import { Media } from '@stump/sdk'
-import { useColorScheme } from 'nativewind'
+import { Image } from 'expo-image'
 import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { FlatList, TouchableWithoutFeedback, useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useReaderStore } from '~/stores'
-import { Image } from 'expo-image'
 
 type ImageDimension = {
 	height: number
@@ -35,6 +34,7 @@ type Props = {
 	incognito?: boolean
 }
 
+// TODO: refactor to be agnostic so both Stump and OPDS can use it
 /**
  * A reader for books that are image-based, where each page should be displayed as an image
  */
@@ -42,7 +42,6 @@ export default function ImageBasedReader({ book, initialPage, incognito }: Props
 	const flatList = useRef<FlatList>(null)
 
 	const { height, width } = useWindowDimensions()
-	const { colorScheme } = useColorScheme()
 
 	const [imageSizes, setImageHeights] = useState<Record<number, ImageDimension>>({})
 

@@ -1,6 +1,6 @@
 import { SDKContext, StumpClientContextProvider } from '@stump/client'
 import { Api } from '@stump/sdk'
-import { Redirect, Slot, Stack, useLocalSearchParams, useRouter } from 'expo-router'
+import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { match, P } from 'ts-pattern'
 
@@ -30,11 +30,6 @@ export default function Screen() {
 			const { id, url } = activeServer
 
 			const config = await getServerConfig(id)
-			// if (!config) {
-			// 	await createServerConfig(id, {
-			// 		auth: { basic: { username: 'oromei', password: 'oromei' } },
-			// 	})
-			// }
 
 			const instance = match(config?.auth)
 				.with(

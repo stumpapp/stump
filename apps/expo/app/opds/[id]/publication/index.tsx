@@ -1,9 +1,6 @@
 import { useSDK } from '@stump/client'
-import { OPDSMetadata } from '@stump/sdk'
-import dayjs from 'dayjs'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
-import get from 'lodash/get'
 import { Pressable, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 
@@ -12,6 +9,7 @@ import { Button, Heading, icons, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
 
 import { usePublicationContext } from './context'
+import { getDateField, getNumberField } from './utils'
 
 const { Info, Slash, BookCopy } = icons
 
@@ -22,6 +20,7 @@ export default function Screen() {
 	} = useActiveServer()
 	const {
 		publication: { metadata, images, readingOrder, links },
+		url,
 	} = usePublicationContext()
 	const { title, identifier, belongsTo } = metadata || {}
 
@@ -29,13 +28,14 @@ export default function Screen() {
 
 	const thumbnailURL = images?.at(0)?.href
 
-	const pageCount = getNumberField(metadata, 'pageCount') ?? readingOrder?.length
+	const numberOfPages = getNumberField(metadata, 'numberOfPages') ?? readingOrder?.length
 	const modified = getDateField(metadata, 'modified')
 
-	const hasInformation = !!pageCount || !!modified
+	const hasInformation = !!numberOfPages || !!modified
 	const seriesURL = belongsTo?.series?.links?.find((link) => link.rel === 'self')?.href
 
 	const downloadURL = links?.find((link) => link.rel === 'http://opds-spec.org/acquisition')?.href
+	const canStream = !!readingOrder && readingOrder.length > 0
 
 	return (
 		<ScrollView className="flex-1 gap-5 bg-background px-6">
@@ -59,13 +59,28 @@ export default function Screen() {
 				</View>
 
 				<View className="flex w-full flex-row items-center gap-2 tablet:max-w-sm tablet:self-center">
-					<Button className="flex-1 border border-edge">
+					<Button
+						className="flex-1 border border-edge"
+						onPress={() =>
+							router.push({
+								pathname: `/opds/${serverID}/publication/read`,
+								params: { url },
+							})
+						}
+						disabled={!canStream}
+					>
 						<Text>Stream</Text>
 					</Button>
 					<Button variant="secondary" disabled={!downloadURL}>
 						<Text>Download</Text>
 					</Button>
 				</View>
+
+				{!canStream && (
+					<View className="rounded-lg bg-fill-info-secondary p-3">
+						<Text>This publication lacks a defined reading order and cannot be streamed</Text>
+					</View>
+				)}
 
 				<View className="flex w-full gap-2">
 					<Text className="text-lg text-foreground-muted">Information</Text>
@@ -86,10 +101,12 @@ export default function Screen() {
 									</Text>
 								</View>
 							)}
-							{pageCount && (
+							{numberOfPages && (
 								<View className="flex flex-row items-start justify-between py-1">
 									<Text className="shrink-0 text-foreground-subtle">Number of pages</Text>
-									<Text className="max-w-[80%] truncate text-right">{pageCount.toString()}</Text>
+									<Text className="max-w-[80%] truncate text-right">
+										{numberOfPages.toString()}
+									</Text>
 								</View>
 							)}
 						</View>
@@ -173,20 +190,4 @@ export default function Screen() {
 			</View>
 		</ScrollView>
 	)
-}
-
-const getNumberField = (meta: OPDSMetadata, key: string) => {
-	const value = get(meta, key)
-	return typeof value === 'number' ? value : null
-}
-
-// const getStringField = (meta: OPDSMetadata, key: string) => {
-// 	const value = get(meta, key)
-// 	return typeof value === 'string' ? value : null
-// }
-
-const getDateField = (meta: OPDSMetadata, key: string) => {
-	const value = get(meta, key)
-	const _dayjs = dayjs(typeof value === 'string' ? value : null)
-	return _dayjs.isValid() ? _dayjs : null
 }

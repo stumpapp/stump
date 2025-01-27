@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useMemo } from 'react'
 import { FlatList, Pressable, View } from 'react-native'
 
-import { Progress, Text } from '~/components/ui'
+import { Heading, Progress, Text } from '~/components/ui'
 
 export default function ContinueReading() {
 	const { sdk } = useSDK()
@@ -29,7 +29,7 @@ export default function ContinueReading() {
 		<View className="flex flex-1 gap-8 pb-6">
 			{activeBook && (
 				<View className="flex items-start gap-4">
-					<Text className="text-2xl font-bold leading-6">Reading Now</Text>
+					<Heading size="lg">Reading Now</Heading>
 
 					<Pressable
 						className="relative aspect-[2/3] overflow-hidden rounded-lg"
@@ -67,7 +67,7 @@ export default function ContinueReading() {
 			)}
 
 			<View className="flex gap-4">
-				<Text className="text-2xl font-bold leading-6">Continue Reading</Text>
+				<Heading size="lg">Continue Reading</Heading>
 
 				{/* FIXME: flex-row not working */}
 				<FlatList

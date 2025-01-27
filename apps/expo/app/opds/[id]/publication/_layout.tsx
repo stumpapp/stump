@@ -20,7 +20,7 @@ export default function Layout() {
 
 	return (
 		<SafeAreaView className="flex-1 bg-background">
-			<PublicationContext.Provider value={{ publication }}>
+			<PublicationContext.Provider value={{ publication, url: bookURL }}>
 				<Stack screenOptions={{ headerShown: false }} />
 			</PublicationContext.Provider>
 		</SafeAreaView>

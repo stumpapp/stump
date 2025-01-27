@@ -2,6 +2,7 @@ import { OPDSPublication } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
 export type IPublicationContext = {
+	url: string
 	publication: OPDSPublication
 }
 

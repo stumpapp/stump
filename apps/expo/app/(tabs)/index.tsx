@@ -1,11 +1,11 @@
-import { Link } from 'expo-router'
 import partition from 'lodash/partition'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
+import SavedServerListItem from '~/components/savedServer/SavedServerListItem'
 import { icons, Text } from '~/components/ui'
-import { usePreferencesStore, useSavedServers } from '~/stores'
+import { useSavedServers } from '~/stores'
 
 const { Server, Slash, Rss } = icons
 
@@ -15,8 +15,6 @@ export default function Screen() {
 	const { savedServers } = useSavedServers()
 	const [stumpServers, opdsServers] = partition(savedServers, (server) => server.kind === 'stump')
 	const allOPDSServers = [...stumpServers.filter((server) => !!server.stumpOPDS), ...opdsServers]
-
-	const maskURLs = usePreferencesStore((state) => state.maskURLs)
 
 	// const serverStatuses = useQueries({
 	// 	queries: stumpServers.map((server) => ({
@@ -32,17 +30,6 @@ export default function Screen() {
 	// 		},
 	// 	})),
 	// })
-
-	const formatURL = (url: string) => {
-		try {
-			const urlObj = new URL(url)
-			const host = urlObj.host
-			const domain = urlObj.hostname
-			return maskURLs ? `${host.replace(domain, domain.replace(/./g, '*'))}` : host
-		} catch {
-			return maskURLs ? url.replace(/./g, '*') : url
-		}
-	}
 
 	return (
 		<SafeAreaView className="flex-1 bg-background">
@@ -65,16 +52,7 @@ export default function Screen() {
 						)}
 
 						{stumpServers.map((server) => (
-							<Link
-								key={server.id}
-								href={`/server/${server.id}`}
-								className="bg-background-muted w-full items-center rounded-lg border border-edge bg-background-surface p-3"
-							>
-								<View className="flex-1 items-start justify-center gap-1">
-									<Text className="text-lg">{server.name}</Text>
-									<Text className="flex-1 text-foreground-muted">{formatURL(server.url)}</Text>
-								</View>
-							</Link>
+							<SavedServerListItem key={server.id} server={server} />
 						))}
 					</View>
 
@@ -94,18 +72,8 @@ export default function Screen() {
 							</View>
 						)}
 
-						{/* TODO: indicate stump server visually with tiny favicon? */}
 						{allOPDSServers.map((server) => (
-							<Link
-								key={server.id}
-								href={`/opds/${server.id}`}
-								className="bg-background-muted w-full items-center rounded-lg border border-edge bg-background-surface p-3"
-							>
-								<View className="flex-1 items-start justify-center gap-1">
-									<Text className="text-lg">{server.name}</Text>
-									<Text className="text-foreground-muted">{formatURL(server.url)}</Text>
-								</View>
-							</Link>
+							<SavedServerListItem key={server.id} server={server} forceOPDS />
 						))}
 					</View>
 				</View>

@@ -37,7 +37,7 @@ export default function TabLayout() {
 							{({ pressed }) => (
 								<View
 									className={cn(
-										'aspect-square flex-1 items-start justify-center pt-0.5',
+										'aspect-square flex-1 items-start justify-center px-2',
 										pressed && 'opacity-70',
 									)}
 								>

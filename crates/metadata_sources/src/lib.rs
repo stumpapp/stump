@@ -1,7 +1,10 @@
 mod google_books;
 mod open_library;
+mod schema_parser;
 
 use thiserror::Error;
+
+pub use schema_parser::{SchemaField, SchemaFieldType, SchemaOutput};
 
 /// A constant containing a list of source identities for implementations of [`MetadataSource`].
 /// A source's identity must be inlcuded here or it will not be written to the database to be
@@ -25,8 +28,14 @@ pub trait MetadataSource {
 	/// the normalized output.
 	async fn get_metadata(
 		&self,
-		media: &MetadataSourceInput,
+		input: &MetadataSourceInput,
 	) -> Result<MetadataOutput, MetadataSourceError>;
+
+	// TODO - Document
+	fn get_config_schema(&self) -> Option<SchemaOutput>;
+
+	// TODO - Document
+	fn get_default_config(&self) -> Option<String>;
 }
 
 /// A struct that holds the [`MetadataSource`] output.

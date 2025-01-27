@@ -6,9 +6,10 @@ edition = "2021"
 [dependencies]
 async-trait = { workspace = true }
 reqwest = { workspace = true }
+schemars = "0.8.21"
 serde_json = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]
-tokio = { workspace = true }
+tokio = { workspace = true, features = ["full", "test-util"] }

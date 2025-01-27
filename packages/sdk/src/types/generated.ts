@@ -331,7 +331,13 @@ export type PageInfo = { total_pages: number; current_page: number; page_size: n
 
 export type Pagination = null | PageQuery | CursorQuery
 
-export type MetadataSourceEntry = { id: string; enabled: boolean }
+export type MetadataSourceEntry = { name: string; enabled: boolean; config: string | null }
+
+export type MetadataSourceSchema = { fields: MetadataSourceSchemaField[] }
+
+export type MetadataSourceSchemaField = { key: string; field_type: MetadataSourceSchemaFieldType }
+
+export type MetadataSourceSchemaFieldType = "Integer" | "Float" | "String"
 
 // SERVER TYPE GENERATION
 

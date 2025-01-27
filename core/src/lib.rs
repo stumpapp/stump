@@ -496,6 +496,15 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<MetadataSourceEntry>()?).as_bytes(),
 		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<MetadataSourceSchema>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<MetadataSourceSchemaField>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<MetadataSourceSchemaFieldType>()?).as_bytes(),
+		)?;
 
 		Ok(())
 	}

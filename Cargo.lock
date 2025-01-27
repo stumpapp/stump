@@ -4166,6 +4166,7 @@ version = "0.0.1"
 dependencies = [
  "async-trait",
  "reqwest 0.12.7",
+ "schemars",
  "serde",
  "serde_json",
  "thiserror",

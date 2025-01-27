@@ -1,5 +1,7 @@
 use serde::Deserialize;
 
+use crate::SchemaOutput;
+
 use super::{MetadataOutput, MetadataSource, MetadataSourceError, MetadataSourceInput};
 
 pub const SOURCE_NAME: &str = "Open Library";
@@ -44,6 +46,14 @@ impl MetadataSource for OpenLibrarySource {
 		let author = first_doc.and_then(|doc| doc.author_name.first().cloned());
 
 		Ok(MetadataOutput { title, author })
+	}
+
+	fn get_config_schema(&self) -> Option<SchemaOutput> {
+		None
+	}
+
+	fn get_default_config(&self) -> Option<String> {
+		None
 	}
 }
 

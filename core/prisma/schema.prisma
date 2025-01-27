@@ -863,10 +863,11 @@ model ServerInvitation {
 }
 
 // A source of metadata that can be configured in settings.
-model MetadataSource {
-  id String @id
+model MetadataSources {
+  name String @id
 
   enabled Boolean // Whether the source is enabled or disabled
+  config  String? // The JSON-encoded configuration for the source
 }
 
 model ServerConfig {

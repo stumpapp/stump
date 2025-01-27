@@ -1,10 +1,15 @@
-use axum::{extract::State, middleware, routing::get, Extension, Json, Router};
+use axum::{
+	extract::{Query, State},
+	middleware,
+	routing::get,
+	Extension, Json, Router,
+};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use stump_core::{
 	config::StumpConfig,
-	db::entity::{MetadataSourceEntry, UserPermission},
-	prisma::metadata_source,
+	db::entity::{MetadataSourceEntry, MetadataSourceSchema, UserPermission},
+	prisma::metadata_sources,
 };
 
 use crate::{
@@ -20,6 +25,10 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.route(
 			"/config/metadata_sources",
 			get(get_metadata_sources).put(update_metadata_source),
+		)
+		.route(
+			"/config/metadata_sources/schema",
+			get(get_metadata_source_schema),
 		)
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
@@ -90,7 +99,7 @@ async fn get_metadata_sources(
 
 	Ok(Json(
 		ctx.db
-			.metadata_source()
+			.metadata_sources()
 			.find_many(vec![])
 			.exec()
 			.await?
@@ -98,6 +107,48 @@ async fn get_metadata_sources(
 			.map(MetadataSourceEntry::from)
 			.collect(),
 	))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct GetMetadataSourceSchemaParams {
+	pub name: String,
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/config/metadata_sources/schema",
+	tag = "config",
+	responses(
+		(status = 200, description = "Successfully retrieved metadata sources for server"),
+		(status = 401, description = "Unauthorized"),
+		(status = 500, description = "Internal server error")
+	)
+)]
+async fn get_metadata_source_schema(
+	State(ctx): State<AppState>,
+	Query(params): Query<GetMetadataSourceSchemaParams>,
+	Extension(req): Extension<RequestContext>,
+) -> APIResult<Json<Option<MetadataSourceSchema>>> {
+	// TODO - Correct permissions?
+	req.enforce_permissions(&[UserPermission::ManageServer])?;
+
+	let source = ctx
+		.db
+		.metadata_sources()
+		.find_first(vec![metadata_sources::name::equals(params.name.clone())])
+		.exec()
+		.await?
+		.map(MetadataSourceEntry::from);
+
+	if source.is_none() {
+		return Err(crate::errors::APIError::NotFound(format!(
+			"Source {} not found.",
+			params.name
+		)));
+	}
+	let source_config = source.unwrap().get_config_schema();
+
+	Ok(Json(source_config))
 }
 
 #[utoipa::path(
@@ -122,10 +173,10 @@ async fn update_metadata_source(
 	// Other logic is responsible for initial population of sources.
 	let _ = ctx
 		.db
-		.metadata_source()
+		.metadata_sources()
 		.update(
-			metadata_source::id::equals(source.id.clone()),
-			vec![metadata_source::enabled::set(source.enabled)],
+			metadata_sources::name::equals(source.name.clone()),
+			vec![metadata_sources::enabled::set(source.enabled)],
 		)
 		.exec()
 		.await?;

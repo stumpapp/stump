@@ -101,95 +101,95 @@
 					"description": "読書クラブのモデレーターの役割名"
 				},
 				"admin": {
-					"label": "Admin",
-					"placeholder": "Admin",
-					"description": "The name of the admin role for your book club"
+					"label": "管理",
+					"placeholder": "管理",
+					"description": "読書クラブの管理者の役割名"
 				},
 				"creator": {
-					"label": "Creator",
-					"placeholder": "Creator",
-					"description": "The name of the creator role for your book club. This is you!"
+					"label": "作成者",
+					"placeholder": "作成者",
+					"description": "あなたの読書クラブの作成者の役割の名前。それはあなたです！"
 				}
 			},
 			"membershipOptions": {
 				"displayName": {
-					"label": "Display Name",
+					"label": "表示名",
 					"placeholder": "oromei",
-					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+					"description": "ブッククラブのメンバーシップの表示名（オプション）。設定されている場合ユーザー名よりも優先されます。"
 				},
 				"hideProgress": {
-					"label": "Hide Progress",
-					"description": "If enabled, your read progress will be hidden from other members of the book club"
+					"label": "進行状況を隠す",
+					"description": "有効にすると読書の進行状況は読書クラブの他のメンバーには表示されなくなります"
 				}
 			}
 		},
 		"validation": {
-			"missingName": "Name is required",
-			"alreadyTaken": "is already taken"
+			"missingName": "名前は必須です",
+			"alreadyTaken": "はすでに使われています。"
 		}
 	},
 	"createBookClubScene": {
-		"heading": "Create a new book club",
-		"subtitle": "You can create a private book club a select few, or make it public for anyone on the server to join",
+		"heading": "新しい読書クラブを作成",
+		"subtitle": "少数の人だけが参加できるプライベートな読書クラブを作成したり、サーバー上の誰でも参加できる公開読書クラブを作成することができます。",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "ステップ",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of the club, including its name and description"
+					"label": "基本",
+					"heading": "基本情報",
+					"description": "クラブの詳細（クラブ名や説明など）"
 				},
 				{
-					"label": "Roles",
-					"heading": "Roles",
-					"description": "Customize the roles in your book club"
+					"label": "役割",
+					"heading": "役割",
+					"description": "読書クラブの役割をカスタマイズする"
 				},
 				{
-					"label": "Membership",
-					"heading": "Membership Preferences",
-					"description": "Additional options for your book club"
+					"label": "メンバーシップ",
+					"heading": "メンバーシップの設定",
+					"description": "読書クラブ用の追加オプション"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your club settings before creating it"
+					"label": "レビュー",
+					"heading": "レビュー",
+					"description": "クラブを作成する前にクラブの設定を確認してください"
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "はい",
+				"no": "いいえ",
+				"none": "なし",
 				"labels": {
-					"name": "Name",
-					"description": "Description"
+					"name": "名前",
+					"description": "説明"
 				}
 			},
-			"submit": "Create Book Club"
+			"submit": "読書クラブを作成"
 		}
 	},
 	"bookClubSettingsScene": {
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "基本",
 			"members": {
-				"members": "Members",
-				"roles": "Roles",
-				"label": "Membership"
+				"members": "メンバー",
+				"roles": "役割",
+				"label": "メンバーシップ"
 			},
 			"scheduling": {
-				"scheduler": "Scheduler",
-				"options": "Options",
-				"label": "Scheduling"
+				"scheduler": "スケジューラ",
+				"options": "オプション",
+				"label": "スケジューリング"
 			},
 			"danger-zone": {
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"delete": "削除",
+				"label": "危険な操作"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this book club, including its name and description",
+			"title": "基本情報",
+			"description": "この読書クラブの詳細（名前や説明など）",
 			"form": {
-				"submit": "Update club"
+				"submit": "クラブを更新"
 			}
 		},
 		"members": {

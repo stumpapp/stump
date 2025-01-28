@@ -93,6 +93,37 @@ export const publication = z.object({
 })
 export type OPDSPublication = z.infer<typeof publication>
 
+const progessionLocation = z.object({
+	fragments: z.array(z.string()).optional(),
+	position: z.string().optional(),
+	progression: z.number().optional(),
+	totalProgression: z.number().optional(),
+})
+
+const progressionLocator = z.object({
+	title: z.string().optional(),
+	href: z.string().optional(),
+	type: z.string().optional(),
+	locations: z.array(progessionLocation).optional(),
+})
+
+const progressionDevice = z.object({
+	id: z.string(),
+	name: z.string(),
+})
+
+export const progression = z
+	.object({
+		modified: z.string(),
+		device: progressionDevice.optional(),
+		locator: progressionLocator,
+	})
+	.transform((data) => ({
+		...data,
+		modified: new Date(data.modified),
+	}))
+export type OPDSProgression = z.infer<typeof progression>
+
 const feedGroup = z.object({
 	links: z.array(link).default([]),
 	navigation: z.array(navigationLink).default([]),

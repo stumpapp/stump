@@ -7,7 +7,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDisplay } from '~/lib/hooks'
 
 import { usePublicationContext } from './context'
-import { getNumberField } from './utils'
 
 type ImageDimension = {
 	height: number
@@ -19,7 +18,8 @@ export default function Screen() {
 	const insets = useSafeAreaInsets()
 	const { sdk } = useSDK()
 	const {
-		publication: { readingOrder = [], metadata },
+		publication: { readingOrder = [] },
+		progression,
 	} = usePublicationContext()
 	const { height, width } = useDisplay()
 
@@ -62,7 +62,17 @@ export default function Screen() {
 		[imageSizes],
 	)
 
-	const currentPage = getNumberField(metadata, 'currentPage') || 1
+	const currentPage = useMemo(() => {
+		const rawPosition = progression?.locator.locations?.at(0)?.position
+		if (!rawPosition) {
+			return 1
+		}
+		const parsedPosition = parseInt(rawPosition, 10)
+		if (isNaN(parsedPosition)) {
+			return 1
+		}
+		return parsedPosition
+	}, [progression])
 
 	const flatList = useRef<FlatList>(null)
 

@@ -1,9 +1,10 @@
-import { OPDSPublication } from '@stump/sdk'
+import { OPDSProgression, OPDSPublication } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
 export type IPublicationContext = {
 	url: string
 	publication: OPDSPublication
+	progression?: OPDSProgression
 }
 
 export const PublicationContext = createContext<IPublicationContext | undefined>(undefined)

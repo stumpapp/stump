@@ -45,4 +45,5 @@ export type ClassQueryKeys<T> = Omit<
 	| 'seriesThumbnailURL'
 	| 'bookThumbnailURL'
 	| 'bookFileURL'
+	| 'imageURL'
 >

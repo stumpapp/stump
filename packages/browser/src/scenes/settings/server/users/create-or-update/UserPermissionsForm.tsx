@@ -1,42 +1,14 @@
 import { CheckBox, Heading, Label, Link, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { UserPermission } from '@stump/types'
+import { UserPermission } from '@stump/sdk'
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
-import z from 'zod'
 
 import paths from '@/paths'
 
-import { Schema } from './CreateOrUpdateUserForm'
+import { allPermissions, CreateOrUpdateUserSchema } from './schema'
 
-export const allPermissions = [
-	'bookclub:read',
-	'bookclub:create',
-	'email:arbitrary_send',
-	'email:send',
-	'emailer:create',
-	'emailer:manage',
-	'emailer:read',
-	'file:explorer',
-	'file:upload',
-	'file:download',
-	'library:create',
-	'library:edit',
-	'library:scan',
-	'library:manage',
-	'library:delete',
-	'user:read',
-	'user:manage',
-	'server:manage',
-	'smartlist:read',
-	'notifier:read',
-	'notifier:create',
-	'notifier:delete',
-	'notifier:manage',
-] as const
-export const userPermissionSchema = z.enum(allPermissions)
-
-const associatedPermissions: Record<UserPermission, UserPermission[]> = {
+export const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	'bookclub:create': ['bookclub:read'],
 	'bookclub:read': [],
 	'email:arbitrary_send': ['email:send'],
@@ -44,6 +16,8 @@ const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	'emailer:create': ['emailer:read', 'emailer:manage', 'email:send'],
 	'emailer:manage': ['emailer:read'],
 	'emailer:read': [],
+	'feature:api_keys': [],
+	'feature:koreader_sync': [],
 	'file:download': [],
 	'file:explorer': [],
 	'file:upload': [],
@@ -62,7 +36,17 @@ const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	'user:read': [],
 }
 
-const prefixes = ['bookclub', 'file', 'library', 'user', 'server', 'smartlist'] as const
+const prefixes = [
+	'bookclub',
+	'feature',
+	'file',
+	'emailer',
+	'email',
+	'library',
+	'user',
+	'server',
+	'smartlist',
+] as const
 
 const LOCAL_BASE = 'settingsScene.server/users.createOrUpdateForm.permissions'
 const getLocaleKey = (path: string) => `${LOCAL_BASE}.${path}`
@@ -78,25 +62,25 @@ const getPermissionDescription = (permission: UserPermission) => {
 }
 const getPrefixLabel = (prefix: string) => getLocaleKey(`${prefix}.label`)
 
+// TODO(design): refactor this monolith of checkboxes
+
 export default function UserPermissionsForm() {
 	const { t } = useLocaleContext()
-	const form = useFormContext<Schema>()
 
-	const selectedPermissions = form.watch('permissions') ?? []
+	const form = useFormContext<CreateOrUpdateUserSchema>()
 
-	useEffect(
-		() => {
-			const selectionsWithAssociations = selectedPermissions.reduce<UserPermission[]>(
-				(acc, permission) => [...acc, permission, ...associatedPermissions[permission]],
-				[],
-			)
-			const uniqueSelections = [...new Set(selectionsWithAssociations)]
+	const selectedPermissions = form.watch('permissions')
+
+	useEffect(() => {
+		const selectionsWithAssociations = (selectedPermissions || []).reduce<UserPermission[]>(
+			(acc, permission) => [...acc, permission, ...associatedPermissions[permission]],
+			[],
+		)
+		const uniqueSelections = [...new Set(selectionsWithAssociations)]
+		if (uniqueSelections.length !== selectedPermissions?.length) {
 			form.setValue('permissions', uniqueSelections)
-		},
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[selectedPermissions],
-	)
+		}
+	}, [form, selectedPermissions])
 
 	const handlePermissionClick = (permission: UserPermission) => {
 		const selected = form.getValues('permissions') ?? []
@@ -122,8 +106,9 @@ export default function UserPermissionsForm() {
 					<CheckBox
 						id={permission}
 						variant="primary"
+						name={permission}
 						label={label}
-						checked={selectedPermissions.includes(permission)}
+						checked={selectedPermissions?.includes(permission) ?? false}
 						onClick={() => handlePermissionClick(permission)}
 						value={permission}
 					/>
@@ -169,7 +154,9 @@ export default function UserPermissionsForm() {
 					return (
 						<div key={prefix} className="flex flex-col gap-3">
 							<Label>{label}</Label>
-							{renderSection(allPermissions.filter((permission) => permission.startsWith(prefix)))}
+							{renderSection(
+								allPermissions.filter((permission) => splitPermission(permission)[0] === prefix),
+							)}
 						</div>
 					)
 				})}

@@ -1,4 +1,4 @@
-import React from 'react'
+import { Fragment } from 'react'
 
 import { GenericMenu } from '../dropdown'
 import { cn } from '../utils'
@@ -82,11 +82,11 @@ export function ContextMenu({
 			<ContextMenuPrimitiveTrigger>{children}</ContextMenuPrimitiveTrigger>
 			<ContextMenuPrimitiveContent className={cn('w-52', contentWrapperClassName)}>
 				{groups.map((group, groupIndex) => (
-					<React.Fragment key={groupIndex}>
+					<Fragment key={groupIndex}>
 						{group.title && <ContextMenuPrimitiveLabel>{group.title}</ContextMenuPrimitiveLabel>}
 						{groupIndex > 0 && <ContextMenuPrimitiveSeparator />}
 						<ContextMenuPrimitiveGroup>{renderItems(group.items)}</ContextMenuPrimitiveGroup>
-					</React.Fragment>
+					</Fragment>
 				))}
 			</ContextMenuPrimitiveContent>
 		</ContextMenuPrimitive>

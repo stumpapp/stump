@@ -1,11 +1,13 @@
 import { useLocaleContext } from '@stump/i18n'
-import React, { Suspense } from 'react'
+import { Suspense } from 'react'
 import { Helmet } from 'react-helmet'
 
 import { Container, ContentContainer } from '@/components/container'
 
 import DisplaySpacingPreference from './DisplaySpacingPreference'
+import EnableJobOverlayToggle from './EnableJobOverlayToggle'
 import FontSelect from './FontSelect'
+import GradientToggle from './GradientToggle'
 import HideScrollbarToggle from './HideScrollbarToggle'
 import LiveRefetchToggle from './LiveRefetchToggle'
 import MaxWidthPreference from './MaxWidthPreference'
@@ -29,6 +31,7 @@ export default function AppearanceSettingsScene() {
 			<ContentContainer>
 				<div className="flex flex-col gap-y-8">
 					<ThemeSelect />
+					<GradientToggle />
 					<FontSelect />
 				</div>
 
@@ -52,6 +55,7 @@ export default function AppearanceSettingsScene() {
 					<HideScrollbarToggle />
 					<QueryIndicatorToggle />
 					<LiveRefetchToggle />
+					<EnableJobOverlayToggle />
 				</div>
 			</ContentContainer>
 		</Container>

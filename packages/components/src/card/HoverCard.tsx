@@ -1,4 +1,5 @@
 import * as HoverCardRadix from '@radix-ui/react-hover-card'
+import type { ComponentPropsWithoutRef, ElementRef } from 'react'
 import React from 'react'
 
 import { cn } from '../utils'
@@ -11,17 +12,15 @@ export type HoverCardProps = {
 	trigger: React.ReactNode
 	children: React.ReactNode
 	contentClassName?: string
-} & React.ComponentPropsWithoutRef<typeof HoverCardPrimitive>
+} & ComponentPropsWithoutRef<typeof HoverCardPrimitive>
 
-export type HoverCardContentProps = React.ComponentPropsWithoutRef<
-	typeof HoverCardPrimitiveContent
-> & {
+export type HoverCardContentProps = ComponentPropsWithoutRef<typeof HoverCardPrimitiveContent> & {
 	className?: string
 	align?: 'start' | 'center' | 'end'
 	sideOffset?: number
 }
 const HoverCardContent = React.forwardRef<
-	React.ElementRef<typeof HoverCardPrimitiveContent>,
+	ElementRef<typeof HoverCardPrimitiveContent>,
 	HoverCardContentProps
 >(({ className, align = 'center', sideOffset = 4, ...props }, ref) => (
 	<HoverCardPrimitiveContent

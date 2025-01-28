@@ -60,11 +60,15 @@ impl Ctx {
 		}
 	}
 
+	// Note: I cannot use #[cfg(test)] here because the tests are in a different crate and
+	// the `cfg` attribute only works for the current crate. Potential workarounds:
+	// - https://github.com/rust-lang/cargo/issues/8379
+
 	/// Creates a [Ctx] instance for testing **only**. The prisma client is created
 	/// pointing to the `integration-tests` crate relative to the `core` crate.
 	///
 	/// **This should not be used in production.**
-	pub async fn mock() -> Ctx {
+	pub async fn integration_test_mock() -> Ctx {
 		let config = Arc::new(StumpConfig::debug());
 		let db = Arc::new(db::create_test_client().await);
 		let event_channel = Arc::new(channel::<CoreEvent>(1024));
@@ -79,6 +83,30 @@ impl Ctx {
 			job_controller,
 			event_channel,
 		}
+	}
+
+	/// Creates a [Ctx] instance for testing **only**. The prisma client is created
+	/// with a mock store, allowing for easy testing of the core without needing to
+	/// connect to a real database.
+	pub fn mock() -> (Ctx, prisma_client_rust::MockStore) {
+		let config = Arc::new(StumpConfig::debug());
+		let (client, mock) = prisma::PrismaClient::_mock();
+
+		let event_channel = Arc::new(channel::<CoreEvent>(1024));
+		let db = Arc::new(client);
+
+		// Create job manager
+		let job_controller =
+			JobController::new(db.clone(), config.clone(), event_channel.0.clone());
+
+		let ctx = Ctx {
+			config,
+			db,
+			job_controller,
+			event_channel,
+		};
+
+		(ctx, mock)
 	}
 
 	/// Wraps the [Ctx] in an [Arc], allowing it to be shared across threads. This
@@ -104,7 +132,7 @@ impl Ctx {
 		Arc::new(self.clone())
 	}
 
-	/// Returns the reciever for the CoreEvent channel. See [`emit_event`]
+	/// Returns the receiver for the `CoreEvent` channel. See [`emit_event`]
 	/// for more information and an example usage.
 	pub fn get_client_receiver(&self) -> Receiver<CoreEvent> {
 		self.event_channel.0.subscribe()
@@ -114,7 +142,7 @@ impl Ctx {
 		self.event_channel.0.clone()
 	}
 
-	/// Emits a [CoreEvent] to the client event channel.
+	/// Emits a [`CoreEvent`] to the client event channel.
 	///
 	/// ## Example
 	/// ```no_run
@@ -151,7 +179,7 @@ impl Ctx {
 		let _ = self.event_channel.0.send(event);
 	}
 
-	/// Sends a [JobControllerCommand] to the job controller
+	/// Sends a [`JobControllerCommand`] to the job controller
 	pub fn send_job_controller_command(
 		&self,
 		command: JobControllerCommand,
@@ -159,7 +187,7 @@ impl Ctx {
 		self.job_controller.push_command(command)
 	}
 
-	/// Sends an EnqueueJob event to the job manager.
+	/// Sends an [`JobControllerCommand::EnqueueJob`] event to the job manager.
 	pub fn enqueue_job(
 		&self,
 		job: Box<dyn Executor>,
@@ -167,7 +195,7 @@ impl Ctx {
 		self.send_job_controller_command(JobControllerCommand::EnqueueJob(job))
 	}
 
-	/// Send a [CoreEvent] through the event channel to any clients listening
+	/// Send a [`CoreEvent`] through the event channel to any clients listening
 	pub fn send_core_event(&self, event: CoreEvent) {
 		if let Err(error) = self.event_channel.0.send(event) {
 			tracing::error!(error = ?error, "Failed to send core event");

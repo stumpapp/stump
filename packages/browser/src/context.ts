@@ -1,4 +1,4 @@
-import { User, UserPermission } from '@stump/types'
+import { User, UserPermission } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
 export type PermissionEnforcerOptions = {

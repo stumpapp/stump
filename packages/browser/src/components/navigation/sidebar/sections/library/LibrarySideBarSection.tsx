@@ -2,7 +2,7 @@ import { useLibraries } from '@stump/client'
 import { Accordion, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Library } from 'lucide-react'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
 import { useAppContext } from '@/context'
@@ -61,6 +61,7 @@ export default function LibrarySideBarSection({
 					className="pl-2 pr-0"
 					leftContent={canChange ? leftContent : undefined}
 					rightContent={<LibraryOptionsMenu library={library} />}
+					// onMouseEnter={() => prefetchLibrarySeries(library.id)}
 				>
 					{!canChange && leftContent}
 					{library.name}
@@ -85,7 +86,7 @@ export default function LibrarySideBarSection({
 							{t('sidebar.buttons.seeAll')}
 						</SideBarButtonLink>
 					)}
-					{renderLibraries()}
+					<div className="ml-2 space-y-1 border-l border-l-edge pl-1">{renderLibraries()}</div>
 					{showCreateLink && (
 						<SideBarButtonLink
 							to={paths.libraryCreate()}

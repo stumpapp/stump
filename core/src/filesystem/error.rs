@@ -10,7 +10,7 @@ use crate::error::CoreError;
 pub enum FileError {
 	#[error("Error occurred while opening file: {0}")]
 	FileIoError(#[from] io::Error),
-	#[error("A zip error ocurred: {0}")]
+	#[error("A zip error occurred: {0}")]
 	ZipFileError(#[from] ZipError),
 	#[error("Archive contains no files")]
 	ArchiveEmptyError,
@@ -25,7 +25,7 @@ pub enum FileError {
 	#[error("{0}")]
 	PdfError(#[from] pdf::error::PdfError),
 	#[error("{0}")]
-	PdfRendererError(#[from] pdfium_render::error::PdfiumError),
+	PdfRendererError(#[from] pdfium_render::prelude::PdfiumError),
 	#[error("Stump is not properly configured to render PDFs")]
 	PdfConfigurationError,
 	#[error("Failed to process PDF file: {0}")]

@@ -84,4 +84,3 @@ runs:
         meson build -Dprefix=C:\build -Denable_tools=false -Denable_examples=false --buildtype release
         ninja -C build
         ninja -C build install
-

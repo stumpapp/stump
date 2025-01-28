@@ -34,7 +34,7 @@ pub enum JobControllerCommand {
 }
 
 impl WorkerSendExt for JobControllerCommand {
-	fn into_send(self) -> WorkerSend {
+	fn into_worker_send(self) -> WorkerSend {
 		WorkerSend::ManagerCommand(self)
 	}
 }
@@ -66,7 +66,11 @@ impl JobController {
 		this
 	}
 
-	/// Starts the watcher loop for the [JobController]. This function will listen for incoming
+	pub async fn initialize(&self) -> JobManagerResult<()> {
+		self.manager.clone().initialize().await
+	}
+
+	/// Starts the watcher loop for the [`JobController`]. This function will listen for incoming
 	/// commands and execute them.
 	pub fn watch(
 		self: Arc<Self>,
@@ -76,10 +80,11 @@ impl JobController {
 			while let Some(event) = commands_rx.recv().await {
 				match event {
 					JobControllerCommand::EnqueueJob(job) => {
-						tracing::trace!(job_id = ?job.id(), "Received enqueue job event");
+						let name = job.name();
+						tracing::trace!(name, job_id = ?job.id(), "Received enqueue job event");
 						self.manager.clone().enqueue(job).await.map_or_else(
 							|error| tracing::error!(?error, "Failed to enqueue job!"),
-							|_| tracing::info!("Successfully enqueued job"),
+							|_| tracing::info!(name, "Successfully enqueued job"),
 						);
 					},
 					JobControllerCommand::CompleteJob(id) => {
@@ -103,7 +108,7 @@ impl JobController {
 									Ok(()),
 									"Successfully issued pause request",
 									"Error while sending pause confirmation",
-								)
+								);
 							},
 						);
 					},
@@ -116,7 +121,7 @@ impl JobController {
 									Ok(()),
 									"Successfully issued resume request",
 									"Error while sending resume confirmation",
-								)
+								);
 							},
 						);
 					},
@@ -130,7 +135,7 @@ impl JobController {
 								);
 							},
 							|_| tracing::trace!("Shutdown confirmation sent"),
-						)
+						);
 					},
 				}
 			}
@@ -146,8 +151,8 @@ impl JobController {
 	}
 }
 
-/// A helper function to send a [JobManagerResult] back along a job's [oneshot::Sender]
-/// and log a [tracing::trace!] `msg`. If sending fails then `err_msg`is logged as an
+/// A helper function to send a [`JobManagerResult`] back along a job's [`oneshot::Sender`]
+/// and log a [`tracing::trace!`] `msg`. If sending fails then `err_msg`is logged as an
 /// error instead.
 fn acknowledge_command_trace(
 	ack: oneshot::Sender<JobManagerResult<()>>,
@@ -160,11 +165,11 @@ fn acknowledge_command_trace(
 			tracing::error!(?error, err_msg);
 		},
 		|_| tracing::trace!(msg),
-	)
+	);
 }
 
-/// A helper function to send a [JobManagerResult] back along a job's [oneshot::Sender]
-/// and log a [tracing::info!] `msg`. If sending fails then `err_msg`is logged as an
+/// A helper function to send a [`JobManagerResult`] back along a job's [`oneshot::Sender`]
+/// and log a [`tracing::info!`] `msg`. If sending fails then `err_msg`is logged as an
 /// error instead.
 fn acknowledge_command_info(
 	ack: oneshot::Sender<JobManagerResult<()>>,
@@ -177,5 +182,5 @@ fn acknowledge_command_info(
 			tracing::error!(?error, err_msg);
 		},
 		|_| tracing::info!(msg),
-	)
+	);
 }

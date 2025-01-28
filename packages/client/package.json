@@ -1,14 +1,18 @@
 {
 	"name": "@stump/client",
-	"version": "0.0.5",
+	"version": "0.0.9",
 	"private": true,
 	"main": "src/index.ts",
 	"exports": {
 		".": "./src/index.ts"
 	},
+	"scripts": {
+		"check-types": "tsc -b tsconfig.json",
+		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
+		"nuke": "yarn exec rimraf node_modules"
+	},
 	"dependencies": {
-		"@stump/api": "*",
-		"@stump/types": "*",
+		"@stump/sdk": "*",
 		"@tanstack/react-query": "^4.36.1",
 		"axios": "^1.6.8",
 		"deep-equal": "^2.2.3",
@@ -19,7 +23,7 @@
 	"devDependencies": {
 		"@types/deep-equal": "^1.0.4",
 		"@types/node": "^20.12.7",
-		"@types/react": "^18.2.78",
+		"@types/react": "^18.3.11",
 		"prettier": "^3.2.5",
 		"tsconfig": "^7.0.0",
 		"typescript": "^5.4.5"

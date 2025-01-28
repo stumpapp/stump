@@ -1,6 +1,9 @@
+import { useSDK } from '@stump/client'
 import { Text, ToolTip } from '@stump/components'
-import { DirectoryListingFile, Media } from '@stump/types'
-import React, { useEffect, useMemo, useState } from 'react'
+import { DirectoryListingFile, Media } from '@stump/sdk'
+import { useEffect, useMemo, useState } from 'react'
+
+import { formatBookName } from '@/utils/format'
 
 import { useFileExplorerContext } from '../context'
 import FileThumbnail, { getBook } from '../FileThumbnail'
@@ -11,12 +14,13 @@ type Props = {
 
 export default function FileGridItem({ file }: Props) {
 	const { name, path, is_directory } = file
+	const { sdk } = useSDK()
 
 	const { onSelect } = useFileExplorerContext()
 
 	const [book, setBook] = useState<Media>()
 
-	const tooltipName = useMemo(() => (book ? book.metadata?.title || book.name : name), [book, name])
+	const tooltipName = useMemo(() => (book ? formatBookName(book) : name), [book, name])
 
 	/**
 	 * An effect that attempts to fetch the book associated with the file, if any exists.
@@ -25,7 +29,7 @@ export default function FileGridItem({ file }: Props) {
 	useEffect(() => {
 		async function tryGetMedia() {
 			// Note: This should be cached, so it should be fast
-			const maybeBook = await getBook(path)
+			const maybeBook = await getBook(path, sdk)
 			if (maybeBook) {
 				setBook(maybeBook)
 			}
@@ -34,7 +38,7 @@ export default function FileGridItem({ file }: Props) {
 		if (!is_directory) {
 			tryGetMedia()
 		}
-	}, [path, is_directory])
+	}, [path, is_directory, sdk])
 
 	return (
 		<ToolTip content={tooltipName} align="start">

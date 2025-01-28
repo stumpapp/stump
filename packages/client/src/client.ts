@@ -1,5 +1,5 @@
-import { CursorQueryParams, PagedQueryParams } from '@stump/api'
-import { Pageable } from '@stump/types'
+import { CursorQueryParams, PagedQueryParams } from '@stump/sdk'
+import { Pageable } from '@stump/sdk'
 import {
 	MutationFunction,
 	MutationKey,
@@ -20,6 +20,7 @@ import {
 import { AxiosError, isAxiosError } from 'axios'
 
 import { QueryClientContext, useClientContext } from './context'
+import { useSDK } from './sdk'
 
 export { QueryClientProvider } from '@tanstack/react-query'
 
@@ -64,6 +65,7 @@ export function useQuery<TQueryFnData = unknown, TError = unknown, TData = TQuer
 	options?: QueryOptions<TQueryFnData, TError, TData>,
 ) {
 	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
+	const { sdk } = useSDK()
 	return useReactQuery(queryKey, queryFn, {
 		...options,
 		context: QueryClientContext,
@@ -73,6 +75,7 @@ export function useQuery<TQueryFnData = unknown, TError = unknown, TData = TQuer
 			const isAuthError = axiosError && err.response?.status === 401
 
 			if (isAuthError) {
+				sdk.token = undefined
 				onUnauthenticatedResponse?.('/auth')
 			} else if (isNetworkError) {
 				onConnectionWithServerChanged?.(false)
@@ -114,6 +117,15 @@ export type PageQueryOptions<
 	'queryKey' | 'queryFn' | 'context'
 > &
 	PageQueryParams
+
+export type TypedPageQueryOptions<Entity, Filters> = Omit<
+	PageQueryOptions<Entity, Pageable<Array<Entity>>, AxiosError, Pageable<Array<Entity>>>,
+	'params'
+> & {
+	params?: Filters
+}
+
+// TODO: these types are HORRENDOUS. REWRITE THEM :sob:
 
 export function usePageQuery<Entity = unknown, Error = AxiosError>(
 	queryKey: QueryKey,
@@ -198,31 +210,15 @@ export function useCursorQuery<Entity = unknown, TError = AxiosError>(
 		[initialCursor, limit, params, ...queryKey],
 		async ({ pageParam }: CursorQueryContext) => {
 			return queryFn({
-				afterId: pageParam || initialCursor,
+				cursor: pageParam || initialCursor,
 				limit: limit || 20,
 				params,
 			})
 		},
 		{
-			getNextPageParam: (lastPage) => {
-				const hasData = !!lastPage.data.length
-				if (!hasData) {
-					return undefined
-				}
-
-				if (lastPage._cursor?.next_cursor) {
-					return lastPage._cursor?.next_cursor
-				}
-
-				return undefined
-			},
-			getPreviousPageParam: (firstPage) => {
-				const hasCursor = !!firstPage?._cursor?.current_cursor
-				if (hasCursor) {
-					return firstPage?._cursor?.current_cursor
-				}
-				return undefined
-			},
+			getNextPageParam: (lastPage) => lastPage?._cursor?.next_cursor,
+			getPreviousPageParam: (firstPage) => firstPage?._cursor?.current_cursor,
+			keepPreviousData: true,
 			...restOptions,
 		},
 	)

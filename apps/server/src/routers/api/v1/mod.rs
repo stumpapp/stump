@@ -13,8 +13,15 @@ use crate::{
 	errors::{APIError, APIResult},
 };
 
+// TODO: Also, there is a lot of cringe and smell throughout some of the older code. While I definitely want to focus on building
+// out new features and fixing bugs, I think it would be a good idea to start cleaning up some of the older code when I have time. I
+// also think there is a good amount of duplication which can be trimmed down, like how I did with the OPDS v2 API. A few of those route
+// handlers are one-liners 💅
+
+pub(crate) mod api_key;
 pub(crate) mod auth;
 pub(crate) mod book_club;
+pub(crate) mod config;
 pub(crate) mod emailer;
 pub(crate) mod epub;
 pub(crate) mod filesystem;
@@ -28,11 +35,13 @@ pub(crate) mod reading_list;
 pub(crate) mod series;
 pub(crate) mod smart_list;
 pub(crate) mod tag;
+pub(crate) mod upload;
 pub(crate) mod user;
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
-	Router::new()
-		.merge(auth::mount())
+	let mut router = Router::new()
+		.merge(auth::mount(app_state.clone()))
+		.merge(api_key::mount(app_state.clone()))
 		.merge(epub::mount(app_state.clone()))
 		.merge(emailer::mount(app_state.clone()))
 		.merge(library::mount(app_state.clone()))
@@ -45,20 +54,32 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.merge(series::mount(app_state.clone()))
 		.merge(tag::mount(app_state.clone()))
 		.merge(user::mount(app_state.clone()))
-		.merge(reading_list::mount())
-		.merge(smart_list::mount())
-		.merge(book_club::mount(app_state))
+		.merge(reading_list::mount(app_state.clone()))
+		.merge(smart_list::mount(app_state.clone()))
+		.merge(book_club::mount(app_state.clone()))
+		.merge(config::mount(app_state.clone()))
 		.route("/claim", get(claim))
 		.route("/ping", get(ping))
 		// TODO: should /version or /check-for-updates be behind any auth reqs?
 		.route("/version", post(version))
-		.route("/check-for-update", get(check_for_updates))
+		.route("/check-for-update", get(check_for_updates));
+
+	// Conditionally attach upload routes based on settings.
+	if app_state.config.enable_upload {
+		router = router.merge(upload::mount(app_state.clone()));
+	}
+
+	router
 }
 
 #[derive(Serialize, Type, ToSchema)]
 pub struct ClaimResponse {
 	pub is_claimed: bool,
 }
+
+// TODO: These root endpoints are not really versioned, so they should be moved somewhere separate
+// from the v1 module. There is only a v1 right now, so it literally doesn't matter, but it's a good
+// future note I guess.
 
 #[utoipa::path(
 	get,
@@ -90,6 +111,8 @@ async fn ping() -> APIResult<String> {
 
 #[derive(Serialize, Deserialize, Type, ToSchema)]
 pub struct StumpVersion {
+	// TODO: add docker tag since special versions (e.g. nightly, experimental) will have the latest semver but a different commit
+	// Also will allow for the UI to display explicitly the docker tag if it's a special version
 	pub semver: String,
 	pub rev: String,
 	pub compile_time: String,

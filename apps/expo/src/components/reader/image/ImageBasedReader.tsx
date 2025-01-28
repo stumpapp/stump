@@ -1,8 +1,8 @@
-import { getMediaPage, isAxiosError } from '@stump/api'
-import { useUpdateMediaProgress } from '@stump/client'
-import { Media } from '@stump/types'
+import { useSDK, useUpdateMediaProgress } from '@stump/client'
+import { isAxiosError } from '@stump/sdk'
+import { Media } from '@stump/sdk'
 import { useColorScheme } from 'nativewind'
-import React, { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { FlatList, TouchableWithoutFeedback, useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -20,7 +20,7 @@ type ImageDimension = {
 }
 
 // TODO: This is an image-based reader right now. Extract this to a separate component
-// which is readered when the book is an image-based book.
+// which is rendered when the book is an image-based book.
 
 // TODO: Account for device orientation AND reading direction
 
@@ -49,11 +49,13 @@ export default function ImageBasedReader({ book, initialPage, incognito }: Props
 	const [imageSizes, setImageHeights] = useState<Record<number, ImageDimension>>({})
 
 	// const lastPrefetchStart = useRef(0)
-	const readerMode = useReaderStore((state) => state.mode)
+	// FIXME: useBookPreferences and get the reader mode from there
+	// const readerMode = useReaderStore((state) => state.mode)
+	const readerMode = 'paged'
 
 	const deviceOrientation = width > height ? 'landscape' : 'portrait'
 
-	// TODO: an effect that whenever the device orienation changes to something different than before,
+	// TODO: an effect that whenever the device orientation changes to something different than before,
 	// recalculate the ratios of the images? Maybe. Who knows, you will though
 
 	const { updateReadProgressAsync } = useUpdateMediaProgress(book.id)
@@ -164,16 +166,20 @@ const Page = React.memo(
 		maxHeight,
 		readingDirection,
 	}: PageProps) => {
+		const { sdk } = useSDK()
 		const insets = useSafeAreaInsets()
 
-		const { showToolBar, setShowToolBar } = useReaderStore((state) => ({
-			setShowToolBar: state.setShowToolBar,
-			showToolBar: state.showToolBar,
+		const {
+			settings: { showToolBar },
+			setSettings,
+		} = useReaderStore((state) => ({
+			setSettings: state.setSettings,
+			settings: state.settings,
 		}))
 
 		const handlePress = useCallback(() => {
-			setShowToolBar(!showToolBar)
-		}, [showToolBar, setShowToolBar])
+			setSettings({ showToolBar: !showToolBar })
+		}, [showToolBar, setSettings])
 
 		/**
 		 * A memoized value that represents the size(s) of the image dimensions for the current page.
@@ -219,7 +225,7 @@ const Page = React.memo(
 					}}
 				>
 					<EntityImage
-						url={getMediaPage(id, index + 1)}
+						url={sdk.media.bookPageURL(id, index + 1)}
 						style={{
 							alignSelf: readingDirection === 'horizontal' ? 'center' : undefined,
 							height,

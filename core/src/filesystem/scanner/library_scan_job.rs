@@ -1,27 +1,24 @@
-use rayon::iter::{
-	Either, IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator,
-};
 use std::{collections::VecDeque, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
 // TODO: hone the progress messages, they are a little noisy and unhelpful (e.g. 'Starting task')
+// TODO: Refactor rayon usage to use tokio instead. I am trying to learn more about IO-bound operations in an
+// async context, and I believe tokio might be more appropriate for this use case (highly concurrent IO-bound tasks).
+// Also perhaps experiment with https://docs.rs/tokio-uring/latest/tokio_uring/index.html
 
 use crate::{
 	db::{
-		entity::{CoreJobOutput, LibraryOptions, Series},
+		entity::{CoreJobOutput, LibraryConfig},
 		FileStatus, SeriesDAO, DAO,
 	},
-	filesystem::{
-		image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
-		SeriesBuilder,
-	},
+	filesystem::image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
 	job::{
 		error::JobError, Executor, JobExecuteLog, JobExt, JobOutputExt, JobProgress,
 		JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
-	prisma::{library, library_options, media, series, PrismaClient},
+	prisma::{library, library_config, media, series, PrismaClient},
 	utils::chain_optional_iter,
 	CoreEvent,
 };
@@ -29,11 +26,11 @@ use crate::{
 use super::{
 	series_scan_job::SeriesScanTask,
 	utils::{
-		generate_rule_set, handle_create_media, handle_missing_media,
-		handle_missing_series, handle_visit_media, MediaBuildOperationCtx,
-		MediaOperationOutput, MissingSeriesOutput,
+		handle_missing_media, handle_missing_series, handle_restored_media,
+		safely_build_and_insert_media, safely_build_series, visit_and_update_media,
+		MediaBuildOperation, MediaOperationOutput, MissingSeriesOutput,
 	},
-	walk_library, walk_series, WalkedLibrary, WalkedSeries, WalkerCtx,
+	walk_library, walk_series, ScanOptions, WalkedLibrary, WalkedSeries, WalkerCtx,
 };
 
 /// The task variants that are used to scan a library
@@ -53,6 +50,7 @@ pub enum LibraryScanTask {
 pub struct InitTaskInput {
 	series_to_create: Vec<PathBuf>,
 	missing_series: Vec<PathBuf>,
+	recovered_series: Vec<String>,
 }
 
 /// A job that scans a library and updates the database with the results
@@ -60,15 +58,21 @@ pub struct InitTaskInput {
 pub struct LibraryScanJob {
 	pub id: String,
 	pub path: String,
-	pub options: Option<LibraryOptions>,
+	pub config: Option<LibraryConfig>,
+	pub options: ScanOptions,
 }
 
 impl LibraryScanJob {
-	pub fn new(id: String, path: String) -> Box<WrappedJob<LibraryScanJob>> {
+	pub fn new(
+		id: String,
+		path: String,
+		options: Option<ScanOptions>,
+	) -> Box<WrappedJob<LibraryScanJob>> {
 		WrappedJob::new(Self {
 			id,
 			path,
-			options: None,
+			config: None,
+			options: options.unwrap_or_default(),
 		})
 	}
 }
@@ -127,28 +131,29 @@ impl JobExt for LibraryScanJob {
 		ctx: &WorkerCtx,
 	) -> Result<WorkingState<Self::Output, Self::Task>, JobError> {
 		let mut output = Self::Output::default();
-		// Note: We ignore the potential self.options here in the event that it was
+		// Note: We ignore the potential self.config here in the event that it was
 		// updated since being queued. This is perhaps a bit overly cautious, but it's
 		// just one additional query.
-		let library_options = ctx
+		let library_config = ctx
 			.db
-			.library_options()
-			.find_first(vec![library_options::library::is(vec![
+			.library_config()
+			.find_first(vec![library_config::library::is(vec![
 				library::id::equals(self.id.clone()),
 				library::path::equals(self.path.clone()),
 			])])
 			.exec()
 			.await?
-			.map(LibraryOptions::from)
+			.map(LibraryConfig::from)
 			.ok_or(JobError::InitFailed("Library not found".to_string()))?;
-		let is_collection_based = library_options.is_collection_based();
-		let ignore_rules = generate_rule_set(&[PathBuf::from(self.path.clone())]);
+		let is_collection_based = library_config.is_collection_based();
+		let ignore_rules = library_config.ignore_rules.build()?;
 
-		self.options = Some(library_options);
+		self.config = Some(library_config);
 
 		ctx.report_progress(JobProgress::msg("Performing task discovery"));
 		let WalkedLibrary {
 			series_to_create,
+			recovered_series,
 			series_to_visit,
 			missing_series,
 			library_is_missing,
@@ -160,6 +165,7 @@ impl JobExt for LibraryScanJob {
 				db: ctx.db.clone(),
 				ignore_rules,
 				max_depth: is_collection_based.then_some(1),
+				options: self.options.clone(),
 			},
 		)
 		.await?;
@@ -167,6 +173,7 @@ impl JobExt for LibraryScanJob {
 			series_to_create = series_to_create.len(),
 			series_to_visit = series_to_visit.len(),
 			missing_series = missing_series.len(),
+			recovered_series = recovered_series.len(),
 			library_is_missing,
 			"Walked library"
 		);
@@ -176,8 +183,8 @@ impl JobExt for LibraryScanJob {
 		if library_is_missing {
 			handle_missing_library(&ctx.db, self.id.as_str()).await?;
 			ctx.send_batch(vec![
-				JobProgress::msg("Failed to find library on disk").into_send(),
-				CoreEvent::DiscoveredMissingLibrary(self.id.clone()).into_send(),
+				JobProgress::msg("Failed to find library on disk").into_worker_send(),
+				CoreEvent::DiscoveredMissingLibrary(self.id.clone()).into_worker_send(),
 			]);
 			return Err(JobError::InitFailed(
 				"Library could not be found on disk".to_string(),
@@ -189,6 +196,7 @@ impl JobExt for LibraryScanJob {
 		let init_task_input = InitTaskInput {
 			series_to_create: series_to_create.clone(),
 			missing_series,
+			recovered_series,
 		};
 
 		let series_to_visit = series_to_visit
@@ -231,7 +239,7 @@ impl JobExt for LibraryScanJob {
 		let did_create = output.created_series > 0 || output.created_media > 0;
 		let did_update = output.updated_series > 0 || output.updated_media > 0;
 		let image_options = self
-			.options
+			.config
 			.as_ref()
 			.and_then(|o| o.thumbnail_config.clone());
 
@@ -262,25 +270,68 @@ impl JobExt for LibraryScanJob {
 		let mut logs = vec![];
 		let mut subtasks = vec![];
 
-		let chunk_size = ctx.config.scanner_chunk_size;
+		let max_concurrency = ctx.config.max_scanner_concurrency;
 
 		match task {
 			LibraryScanTask::Init(input) => {
-				tracing::info!("Executing the init task for library scan");
+				tracing::debug!("Executing the init task for library scan");
 				ctx.report_progress(JobProgress::msg("Handling library scan init"));
 				let InitTaskInput {
 					series_to_create,
 					missing_series,
+					recovered_series,
 				} = input;
+
+				let recovered_series_step_count =
+					if !recovered_series.is_empty() { 1 } else { 0 };
 
 				// Task count: build each series + 1 for insertion step, +1 for update tx on missing series
 				let total_subtask_count = (series_to_create.len() + 1)
-					+ if !missing_series.is_empty() { 1 } else { 0 };
+					+ usize::from(!missing_series.is_empty())
+					+ recovered_series_step_count;
 				let mut current_subtask_index = 0;
 				ctx.report_progress(JobProgress::subtask_position(
 					current_subtask_index,
 					total_subtask_count as i32,
 				));
+
+				if !recovered_series.is_empty() {
+					ctx.report_progress(JobProgress::msg("Recovering series"));
+
+					let affected_rows = ctx
+						.db
+						.series()
+						.update_many(
+							vec![series::id::in_vec(recovered_series)],
+							vec![series::status::set(FileStatus::Ready.to_string())],
+						)
+						.exec()
+						.await
+						.map_or_else(
+							|error| {
+								tracing::error!(error = ?error, "Failed to recover series");
+								logs.push(JobExecuteLog::error(format!(
+									"Failed to recover series: {:?}",
+									error.to_string()
+								)));
+								0
+							},
+							|count| {
+								output.updated_series = count as u64;
+								count
+							},
+						);
+
+					ctx.report_progress(JobProgress::subtask_position(
+						(affected_rows > 0)
+							.then(|| {
+								current_subtask_index += 1;
+								current_subtask_index
+							})
+							.unwrap_or(0),
+						total_subtask_count as i32,
+					));
+				}
 
 				if !missing_series.is_empty() {
 					ctx.report_progress(JobProgress::msg("Handling missing series"));
@@ -324,53 +375,38 @@ impl JobExt for LibraryScanJob {
 				}
 
 				if !series_to_create.is_empty() {
-					ctx.report_progress(JobProgress::msg(&format!(
-						"Building {} series entities",
-						series_to_create.len()
-					)));
-					// TODO: remove this DAO!!
-					let series_dao = SeriesDAO::new(ctx.db.clone());
+					ctx.report_progress(JobProgress::msg("Building new series"));
 
-					let (built_series, failure_logs): (Vec<_>, Vec<_>) = series_to_create
-						.par_iter()
-						.enumerate()
-						.map(|(idx, path_buf)| {
-							ctx.report_progress(JobProgress::subtask_position_msg(
-								format!("Building series {}", path_buf.display())
-									.as_str(),
-								current_subtask_index + (idx as i32),
-								total_subtask_count as i32,
-							));
-							(
-								path_buf,
-								SeriesBuilder::new(path_buf.as_path(), &self.id).build(),
-							)
-						})
-						.partition_map::<_, _, _, Series, JobExecuteLog>(
-							|(path_buf, result)| match result {
-								Ok(s) => Either::Left(s),
-								Err(e) => Either::Right(
-									JobExecuteLog::error(e.to_string())
-										.with_ctx(path_buf.to_string_lossy().to_string()),
-								),
-							},
-						);
+					let task_count = series_to_create.len() as i32;
+					let (built_series, failure_logs) = safely_build_series(
+						&self.id,
+						series_to_create,
+						ctx.config.as_ref(),
+						|position| {
+							ctx.report_progress(JobProgress::subtask_position(
+								position as i32,
+								task_count,
+							))
+						},
+					)
+					.await;
+
 					current_subtask_index +=
 						(built_series.len() + failure_logs.len()) as i32;
 					logs.extend(failure_logs);
 
-					// TODO: make this configurable
-					let chunks = built_series.chunks(400);
+					// TODO: remove this DAO!!
+					let series_dao = SeriesDAO::new(ctx.db.clone());
+
+					let chunks = built_series.chunks(200);
 					let chunk_count = chunks.len();
-					tracing::debug!(chunk_count, "Batch inserting new series");
+					tracing::trace!(chunk_count, "Batch inserting new series");
+
 					for (idx, chunk) in chunks.enumerate() {
-						ctx.report_progress(JobProgress::msg(
-							format!(
-								"Processing series insertion chunk {} of {}",
-								idx + 1,
-								chunk_count
-							)
-							.as_str(),
+						ctx.report_progress(JobProgress::subtask_position_msg(
+							"Inserting built series in batches",
+							(idx + 1) as i32,
+							chunk_count as i32,
 						));
 						let result = series_dao.create_many(chunk.to_vec()).await;
 						match result {
@@ -398,26 +434,43 @@ impl JobExt for LibraryScanJob {
 						total_subtask_count as i32,
 					));
 				} else {
-					tracing::debug!("No series to create");
+					tracing::trace!("No series to create");
 				}
 
 				ctx.report_progress(JobProgress::msg("Init task complete!"));
 			},
 			LibraryScanTask::WalkSeries(path_buf) => {
-				tracing::info!("Executing the walk series task for library scan");
-				ctx.report_progress(JobProgress::msg(
-					format!("Scanning series at {}", path_buf.display()).as_str(),
-				));
+				tracing::debug!("Executing the walk series task for library scan");
+				ctx.report_progress(JobProgress::msg(&format!(
+					"Scanning series at {}",
+					path_buf.display()
+				)));
 
-				let max_depth = self
-					.options
+				// If the library is collection-priority, any child directories are 'ignored' and their
+				// files are part of / folded into the top-most folder (series).
+				// If the library is not collection-priority, each subdirectory is its own series.
+				// Therefore, we only scan one level deep when walking a series whose library is not
+				// collection-priority to avoid scanning duplicates which are part of other series
+				let mut max_depth = self
+					.config
 					.as_ref()
-					.and_then(|o| o.is_collection_based().then_some(1));
+					.and_then(|o| (!o.is_collection_based()).then_some(1));
+				if path_buf == PathBuf::from(&self.path) {
+					// The exception is when the series "is" the libray (i.e. the root of the library contains
+					// books). This is kind of an anti-pattern wrt collection-priority, but it needs to be handled
+					// in order to avoid the scanner re-scanning the entire library...
+					max_depth = Some(1);
+				}
 
-				let ignore_rules = generate_rule_set(&[
-					path_buf.clone(),
-					PathBuf::from(self.path.clone()),
-				]);
+				let Some(Ok(ignore_rules)) =
+					self.config.as_ref().map(|o| o.ignore_rules.build())
+				else {
+					// Note: This failure will likely affect ALL other tasks, so we are halting the job here
+					return Err(JobError::TaskFailed(
+						"Failed to build ignore rules. Check that the rules are valid."
+							.to_string(),
+					));
+				};
 
 				let walk_result = walk_series(
 					path_buf.as_path(),
@@ -425,6 +478,7 @@ impl JobExt for LibraryScanJob {
 						db: ctx.db.clone(),
 						ignore_rules,
 						max_depth,
+						options: self.options.clone(),
 					},
 				)
 				.await;
@@ -433,6 +487,7 @@ impl JobExt for LibraryScanJob {
 					series_is_missing,
 					media_to_create,
 					media_to_visit,
+					recovered_media,
 					missing_media,
 					seen_files,
 					ignored_files,
@@ -478,8 +533,8 @@ impl JobExt for LibraryScanJob {
 					logs.extend(new_logs);
 					return Ok(JobTaskOutput {
 						output,
-						logs,
 						subtasks,
+						logs,
 					});
 				}
 
@@ -497,6 +552,8 @@ impl JobExt for LibraryScanJob {
 					[
 						(!missing_media.is_empty())
 							.then_some(SeriesScanTask::MarkMissingMedia(missing_media)),
+						(!recovered_media.is_empty())
+							.then_some(SeriesScanTask::RestoreMedia(recovered_media)),
 						(!media_to_create.is_empty())
 							.then_some(SeriesScanTask::CreateMedia(media_to_create)),
 						(!media_to_visit.is_empty())
@@ -516,6 +573,24 @@ impl JobExt for LibraryScanJob {
 				path: _series_path,
 				task: series_task,
 			} => match series_task {
+				SeriesScanTask::RestoreMedia(ids) => {
+					ctx.report_progress(JobProgress::msg("Restoring media entities"));
+					let MediaOperationOutput {
+						updated_media,
+						logs: new_logs,
+						..
+					} = handle_restored_media(ctx, &series_id, ids).await;
+					ctx.send_batch(vec![
+						JobProgress::msg("Restored media entities").into_worker_send(),
+						CoreEvent::CreatedOrUpdatedManyMedia {
+							count: updated_media,
+							series_id,
+						}
+						.into_worker_send(),
+					]);
+					output.updated_media += updated_media;
+					logs.extend(new_logs);
+				},
 				SeriesScanTask::MarkMissingMedia(paths) => {
 					ctx.report_progress(JobProgress::msg("Handling missing media"));
 					let MediaOperationOutput {
@@ -524,12 +599,12 @@ impl JobExt for LibraryScanJob {
 						..
 					} = handle_missing_media(ctx, &series_id, paths).await;
 					ctx.send_batch(vec![
-						JobProgress::msg("Handled missing media").into_send(),
+						JobProgress::msg("Handled missing media").into_worker_send(),
 						CoreEvent::CreatedOrUpdatedManyMedia {
 							count: updated_media,
 							series_id,
 						}
-						.into_send(),
+						.into_worker_send(),
 					]);
 					output.updated_media += updated_media;
 					logs.extend(new_logs);
@@ -542,23 +617,23 @@ impl JobExt for LibraryScanJob {
 						created_media,
 						logs: new_logs,
 						..
-					} = handle_create_media(
-						MediaBuildOperationCtx {
+					} = safely_build_and_insert_media(
+						MediaBuildOperation {
 							series_id: series_id.clone(),
-							library_options: self.options.clone().unwrap_or_default(),
-							chunk_size,
+							library_config: self.config.clone().unwrap_or_default(),
+							max_concurrency,
 						},
 						ctx,
 						paths,
 					)
 					.await?;
 					ctx.send_batch(vec![
-						JobProgress::msg("Created new media").into_send(),
+						JobProgress::msg("Created new media").into_worker_send(),
 						CoreEvent::CreatedOrUpdatedManyMedia {
 							count: created_media,
 							series_id,
 						}
-						.into_send(),
+						.into_worker_send(),
 					]);
 					output.created_media += created_media;
 					logs.extend(new_logs);
@@ -572,23 +647,23 @@ impl JobExt for LibraryScanJob {
 						updated_media,
 						logs: new_logs,
 						..
-					} = handle_visit_media(
-						MediaBuildOperationCtx {
+					} = visit_and_update_media(
+						MediaBuildOperation {
 							series_id: series_id.clone(),
-							library_options: self.options.clone().unwrap_or_default(),
-							chunk_size,
+							library_config: self.config.clone().unwrap_or_default(),
+							max_concurrency,
 						},
 						ctx,
 						paths,
 					)
 					.await?;
 					ctx.send_batch(vec![
-						JobProgress::msg("Visited all media").into_send(),
+						JobProgress::msg("Visited all media").into_worker_send(),
 						CoreEvent::CreatedOrUpdatedManyMedia {
 							count: updated_media,
 							series_id,
 						}
-						.into_send(),
+						.into_worker_send(),
 					]);
 					output.updated_media += updated_media;
 					logs.extend(new_logs);
@@ -598,8 +673,8 @@ impl JobExt for LibraryScanJob {
 
 		Ok(JobTaskOutput {
 			output,
-			logs,
 			subtasks,
+			logs,
 		})
 	}
 }
@@ -644,8 +719,7 @@ pub async fn handle_missing_library(
 		.await
 		.map_err(|e| {
 			JobError::InitFailed(format!(
-				"A critical error occurred while handling missing library: {}",
-				e
+				"A critical error occurred while handling missing library: {e}"
 			))
 		})?;
 	tracing::trace!(

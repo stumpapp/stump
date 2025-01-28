@@ -1,23 +1,20 @@
-import React, { lazy, useEffect } from 'react'
+import { lazy, useEffect } from 'react'
 import { Navigate, Route, Routes, useNavigate } from 'react-router'
 
 import { UnderConstruction } from '@/components/unimplemented'
 
 import { useAppContext } from '../../context.ts'
-import BookClubHomeLayout from './home/BookClubHomeLayout.tsx'
+import BookClubHomeLayout from './BookClubLayout.tsx'
+import BookClubSettingsRouter from './tabs/settings'
 
-const BookClubExplorerScene = lazy(() => import('./explore/BookClubExploreScene.tsx'))
-const BookClubOverviewScene = lazy(() => import('./home/tabs/overview/BookClubOverviewScene.tsx'))
+const CreateBookClubScene = lazy(() => import('./createClub'))
 const UserBookClubsScene = lazy(() => import('./UserBookClubsScene.tsx'))
-const CreateBookClubScene = lazy(() => import('./create-club/CreateBookClubScene.tsx'))
-const BookClubSettingsScene = lazy(() => import('./home/tabs/settings/BookClubSettingsScene.tsx'))
-const BookClubChatBoardScene = lazy(
-	() => import('./home/tabs/chat-board/BookClubChatBoardScene.tsx'),
-)
-const BookClubMembersScene = lazy(() => import('./home/tabs/members/BookClubMembersScene.tsx'))
-const BookClubSchedulerScene = lazy(
-	() => import('./home/tabs/settings/scheduler/BookClubSchedulerScene.tsx'),
-)
+const BookClubExplorerScene = lazy(() => import('./explore/BookClubExploreScene.tsx'))
+
+// club-specific routes
+const BookClubHomeScene = lazy(() => import('./tabs/home'))
+const BookClubDiscussionScene = lazy(() => import('./tabs/discussion/index.ts'))
+const BookClubMembersScene = lazy(() => import('./tabs/members'))
 
 const IS_DEVELOPMENT = import.meta.env.DEV
 
@@ -51,12 +48,11 @@ export default function BookClubRouter() {
 			{/* TODO: router guard bookclub:create */}
 			<Route path="create" element={<CreateBookClubScene />} />
 			<Route path=":id/*" element={<BookClubHomeLayout />}>
-				<Route path="" element={<Navigate to="overview" replace />} />
-				<Route path="overview" element={<BookClubOverviewScene />} />
-				<Route path="chat-board" element={<BookClubChatBoardScene />} />
+				<Route path="" element={<BookClubHomeScene />} />
+				<Route path="home" element={<Navigate to=".." replace />} />
+				<Route path="discussion" element={<BookClubDiscussionScene />} />
 				<Route path="members" element={<BookClubMembersScene />} />
-				<Route path="settings" element={<BookClubSettingsScene />} />
-				<Route path="settings/scheduler" element={<BookClubSchedulerScene />} />
+				<Route path="settings/*" element={<BookClubSettingsRouter />} />
 			</Route>
 			<Route path="*" element={<Navigate to="/404" />} />
 		</Routes>

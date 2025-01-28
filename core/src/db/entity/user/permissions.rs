@@ -29,6 +29,12 @@ impl From<prisma::age_restriction::Data> for AgeRestriction {
 	Debug, Clone, Copy, Serialize, Deserialize, Type, ToSchema, Eq, PartialEq, Hash,
 )]
 pub enum UserPermission {
+	/// Grant access to read/create their own API keys
+	#[serde(rename = "feature:api_keys")]
+	AccessAPIKeys,
+	/// Grant access to the koreader sync feature
+	#[serde(rename = "feature:koreader_sync")]
+	AccessKoreaderSync,
 	///TODO: Expand permissions for bookclub + smartlist
 	/// Grant access to the book club feature
 	#[serde(rename = "bookclub:read")]
@@ -106,7 +112,7 @@ pub enum UserPermission {
 impl UserPermission {
 	/// Return a list of permissions, if any, which are inherited by self
 	///
-	/// For example, UserPermission::CreateNotifier implies UserPermission::ReadNotifier
+	/// For example, [`UserPermission::CreateNotifier`] implies [`UserPermission::ReadNotifier`]
 	// TODO: revisit these. I am mixing patterns, e.g. manage vs explicit edit+create+delete. Pick one!
 	pub fn associated(&self) -> Vec<UserPermission> {
 		match self {
@@ -147,6 +153,8 @@ impl UserPermission {
 impl fmt::Display for UserPermission {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		match self {
+			UserPermission::AccessAPIKeys => write!(f, "feature:api_keys"),
+			UserPermission::AccessKoreaderSync => write!(f, "feature:koreader_sync"),
 			UserPermission::AccessBookClub => write!(f, "bookclub:read"),
 			UserPermission::CreateBookClub => write!(f, "bookclub:create"),
 			UserPermission::EmailerRead => write!(f, "emailer:read"),
@@ -178,6 +186,8 @@ impl fmt::Display for UserPermission {
 impl From<&str> for UserPermission {
 	fn from(s: &str) -> UserPermission {
 		match s {
+			"feature:api_keys" => UserPermission::AccessAPIKeys,
+			"feature:koreader_sync" => UserPermission::AccessKoreaderSync,
 			"bookclub:read" => UserPermission::AccessBookClub,
 			"bookclub:create" => UserPermission::CreateBookClub,
 			"emailer:read" => UserPermission::EmailerRead,
@@ -202,7 +212,7 @@ impl From<&str> for UserPermission {
 			"notifier:delete" => UserPermission::DeleteNotifier,
 			"server:manage" => UserPermission::ManageServer,
 			// FIXME: Don't panic smh
-			_ => panic!("Invalid user permission: {}", s),
+			_ => panic!("Invalid user permission: {s}"),
 		}
 	}
 }
@@ -213,6 +223,10 @@ impl From<&str> for UserPermission {
 pub struct PermissionSet(Vec<UserPermission>);
 
 impl PermissionSet {
+	pub fn new(permissions: Vec<UserPermission>) -> PermissionSet {
+		PermissionSet(permissions)
+	}
+
 	/// Unwrap the underlying Vec<UserPermission> and include any associated permissions
 	pub fn resolve_into_vec(self) -> Vec<UserPermission> {
 		self.0
@@ -225,6 +239,15 @@ impl PermissionSet {
 			.unique()
 			.collect()
 	}
+
+	pub fn resolve_into_string(self) -> Option<String> {
+		let resolved = self.resolve_into_vec();
+		if resolved.is_empty() {
+			None
+		} else {
+			Some(resolved.into_iter().join(","))
+		}
+	}
 }
 
 impl From<String> for PermissionSet {
@@ -234,7 +257,7 @@ impl From<String> for PermissionSet {
 		}
 		let permissions = s
 			.split(',')
-			.map(|s| s.trim())
+			.map(str::trim)
 			.filter(|s| !s.is_empty())
 			.map(UserPermission::from)
 			.collect();
@@ -425,7 +448,7 @@ mod tests {
 
 	#[test]
 	fn test_permission_set_from_empty_string() {
-		let permission_set = PermissionSet::from("".to_string());
+		let permission_set = PermissionSet::from(String::new());
 		assert_eq!(permission_set.resolve_into_vec().len(), 0);
 	}
 
@@ -451,6 +474,16 @@ mod tests {
 		assert_eq!(
 			permission_set.resolve_into_vec(),
 			vec![UserPermission::AccessBookClub]
+		);
+	}
+
+	#[test]
+	fn test_permission_set_resolve_into_string() {
+		let permission_set =
+			PermissionSet::from("bookclub:read,bookclub:create".to_string());
+		assert_eq!(
+			permission_set.resolve_into_string(),
+			Some("bookclub:read,bookclub:create".to_string())
 		);
 	}
 }

@@ -1,4 +1,4 @@
-import { type UserPreferences } from '@stump/types'
+import { type UserPreferences } from '@stump/sdk'
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 

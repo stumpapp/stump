@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use specta::Type;
 use tracing::trace;
 use utoipa::ToSchema;
@@ -11,6 +12,7 @@ use crate::{
 // TODO: this entire file belongs in server app, not here. It is currently used by DAOs, which are
 // very much going BYE BYE
 
+#[skip_serializing_none]
 #[derive(
 	Clone, Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type, ToSchema,
 )]
@@ -20,6 +22,13 @@ pub struct PageQuery {
 	pub page_size: Option<u32>,
 }
 
+impl PageQuery {
+	pub fn is_empty(&self) -> bool {
+		self.page.is_none() && self.page_size.is_none()
+	}
+}
+
+#[skip_serializing_none]
 #[derive(
 	Clone, Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type, ToSchema,
 )]
@@ -28,6 +37,7 @@ pub struct CursorQuery {
 	pub limit: Option<i64>,
 }
 
+#[skip_serializing_none]
 #[derive(Default, Debug, Deserialize, Serialize, Type, ToSchema)]
 pub struct PaginationQuery {
 	pub zero_based: Option<bool>,
@@ -112,6 +122,34 @@ impl PageQuery {
 		(start, take)
 	}
 
+	pub fn zero_indexed_page(&self) -> u32 {
+		let zero_based = self.zero_based.unwrap_or(false);
+
+		if zero_based {
+			self.page.unwrap_or(0)
+		} else {
+			self.page.map_or(1, |p| p + 1)
+		}
+	}
+
+	pub fn get_previous_page(&self) -> Option<u32> {
+		let zero_based = self.zero_based.unwrap_or(false);
+		let page = self.page.unwrap_or_else(|| u32::from(!zero_based));
+
+		if page == 0 {
+			None
+		} else {
+			Some(page - 1)
+		}
+	}
+
+	pub fn get_next_page(&self) -> u32 {
+		let zero_based = self.zero_based.unwrap_or(false);
+		let page = self.page.unwrap_or_else(|| u32::from(!zero_based));
+
+		page + 1
+	}
+
 	pub fn page_params(self) -> PageParams {
 		let zero_based = self.zero_based.unwrap_or(false);
 
@@ -179,9 +217,9 @@ impl From<Option<PageQuery>> for PageParams {
 				let page = params.page.unwrap_or(default_page);
 
 				PageParams {
+					zero_based,
 					page,
 					page_size,
-					zero_based,
 				}
 			},
 			None => PageParams::default(),
@@ -202,7 +240,7 @@ pub struct PageLinks {
 	pub next: Option<String>,
 }
 
-#[derive(Serialize, Type, ToSchema)]
+#[derive(Debug, Serialize, Type, ToSchema)]
 pub struct PageInfo {
 	/// The number of pages available.
 	pub total_pages: u32,
@@ -217,7 +255,7 @@ pub struct PageInfo {
 }
 
 impl PageInfo {
-	pub fn new(page_params: PageParams, total_pages: u32) -> Self {
+	pub fn new(page_params: &PageParams, total_pages: u32) -> Self {
 		let current_page = page_params.page;
 		let page_size = page_params.page_size;
 		let zero_based = page_params.zero_based;
@@ -249,7 +287,7 @@ impl From<CursorQuery> for CursorInfo {
 	}
 }
 
-#[derive(Serialize, Type, ToSchema)]
+#[derive(Debug, Serialize, Type, ToSchema)]
 // OK, this is SO annoying...
 #[aliases(PageableDirectoryListing = Pageable<DirectoryListing>)]
 pub struct Pageable<T: Serialize> {
@@ -257,7 +295,7 @@ pub struct Pageable<T: Serialize> {
 	pub data: T,
 	/// The pagination information (if paginated).
 	pub _page: Option<PageInfo>,
-	/// The cursor information (if cursor-baesd paginated).
+	/// The cursor information (if cursor-based paginated).
 	pub _cursor: Option<CursorInfo>,
 }
 
@@ -269,7 +307,7 @@ pub struct PageableArray<T: Serialize> {
 	pub data: Vec<T>,
 	/// The pagination information (if paginated).
 	pub _page: Option<PageInfo>,
-	/// The cursor information (if cursor-baesd paginated).
+	/// The cursor information (if cursor-based paginated).
 	pub _cursor: Option<CursorInfo>,
 }
 
@@ -305,7 +343,7 @@ impl<T: Serialize> Pageable<T> {
 	/// Generates a Pageable instance using an explicitly provided count and page params. This is useful for
 	/// when the data provided is not the full set available, but rather a subset of the data (e.g. a query with
 	/// a limit).
-	pub fn with_count(data: T, db_count: i64, page_params: PageParams) -> Self {
+	pub fn with_count(data: T, db_count: i64, page_params: &PageParams) -> Self {
 		let total_pages = (db_count as f32 / page_params.page_size as f32).ceil() as u32;
 
 		Pageable::page_paginated(data, PageInfo::new(page_params, total_pages))
@@ -357,7 +395,7 @@ where
 				.to_vec();
 		}
 
-		Pageable::page_paginated(data, PageInfo::new(page_params, total_pages))
+		Pageable::page_paginated(data, PageInfo::new(&page_params, total_pages))
 	}
 }
 
@@ -380,7 +418,7 @@ where
 
 		let total_pages = (db_total as f32 / page_params.page_size as f32).ceil() as u32;
 
-		Pageable::page_paginated(data, PageInfo::new(page_params, total_pages))
+		Pageable::page_paginated(data, PageInfo::new(&page_params, total_pages))
 	}
 }
 
@@ -397,7 +435,7 @@ where
 				let page_params = page_query.page_params();
 				let total_pages =
 					(db_total as f32 / page_params.page_size as f32).ceil() as u32;
-				Pageable::page_paginated(data, PageInfo::new(page_params, total_pages))
+				Pageable::page_paginated(data, PageInfo::new(&page_params, total_pages))
 			},
 			Pagination::Cursor(cursor_query) => {
 				let next_cursor = if data.len() == db_total as usize {

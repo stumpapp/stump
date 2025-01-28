@@ -18,7 +18,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 	}
 
 	let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-		.join("../../packages/types")
+		.join("../../packages/sdk/src/types")
 		.join("generated.ts");
 
 	// cargo test --package stump_core --lib -- tests::codegen --ignored
@@ -54,6 +54,21 @@ fn main() -> Result<(), Box<dyn Error>> {
 		.wait()?;
 	assert!(command.success());
 	println!("server types have been generated successfully!");
+
+	// cargo test --package stump_desktop -- tests::codegen --ignored
+	let command = Command::new("cargo")
+		.args([
+			"test",
+			"--package",
+			"stump_desktop",
+			"--",
+			"tests::codegen",
+			"--ignored",
+		])
+		.spawn()?
+		.wait()?;
+	assert!(command.success());
+	println!("desktop types have been generated successfully!");
 
 	println!("Code generation has been completed successfully!");
 

@@ -1,31 +1,96 @@
-import { isAxiosError } from '@stump/api'
 import { useAuthQuery, useCoreEventHandler } from '@stump/client'
 import { cn, cx } from '@stump/components'
-import { UserPermission, UserPreferences } from '@stump/types'
-import { Suspense, useCallback, useMemo } from 'react'
-import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { useMediaMatch } from 'rooks'
+import { isAxiosError } from '@stump/sdk'
+import { UserPermission, UserPreferences } from '@stump/sdk'
+import { useOverlayScrollbars } from 'overlayscrollbars-react'
+import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
+import Confetti from 'react-confetti'
+import { useErrorBoundary } from 'react-error-boundary'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useMediaMatch, useWindowSize } from 'rooks'
 
 import BackgroundFetchIndicator from '@/components/BackgroundFetchIndicator'
 import JobOverlay from '@/components/jobs/JobOverlay'
 import { MobileTopBar, SideBar, TopBar } from '@/components/navigation'
 import RouteLoadingIndicator from '@/components/RouteLoadingIndicator'
-import ServerStatusOverlay from '@/components/ServerStatusOverlay'
 
 import { AppContext, PermissionEnforcerOptions } from './context'
+import { useTheme } from './hooks'
 import { useAppStore, useUserStore } from './stores'
 
 export function AppLayout() {
-	const platform = useAppStore((state) => state.platform)
 	const location = useLocation()
 	const navigate = useNavigate()
-	const isMobile = useMediaMatch('(max-width: 768px)')
 
+	const mainRef = useRef<HTMLDivElement>(null)
+	const isMobile = useMediaMatch('(max-width: 768px)')
+	const windowSize = useWindowSize()
+
+	const { showBoundary } = useErrorBoundary()
+
+	const { showConfetti, setShowConfetti, onConnectionWithServerChanged } = useAppStore((state) => ({
+		onConnectionWithServerChanged: state.setIsConnectedWithServer,
+		platform: state.platform,
+		setShowConfetti: state.setShowConfetti,
+		showConfetti: state.showConfetti,
+	}))
 	const { storeUser, setUser, checkUserPermission } = useUserStore((state) => ({
 		checkUserPermission: state.checkUserPermission,
 		setUser: state.setUser,
 		storeUser: state.user,
 	}))
+
+	const { isDarkVariant, shouldUseGradient } = useTheme()
+	const [initialize, instance] = useOverlayScrollbars({
+		options: {
+			scrollbars: {
+				theme: isDarkVariant ? 'os-theme-light' : 'os-theme-dark',
+			},
+		},
+	})
+
+	const hideScrollBar = storeUser?.user_preferences?.enable_hide_scrollbar ?? false
+	const jobOverlayEnabled = storeUser?.user_preferences?.enable_job_overlay ?? true
+	const showJobOverlay = jobOverlayEnabled && !location.pathname.match(/\/settings\/jobs/)
+
+	const isRefSet = !!mainRef.current
+	/**
+	 * An effect to initialize the overlay scrollbars
+	 */
+	useEffect(() => {
+		// TODO: make this only on desktop? or a setting for 'pretty' scrollbars
+		const { current: scrollContainer } = mainRef
+		if (scrollContainer && !hideScrollBar) {
+			initialize(scrollContainer)
+		}
+	}, [initialize, isRefSet, hideScrollBar])
+	/**
+	 * An effect to find the added viewport element and add the necessary flexbox classes
+	 * in order to not break the layout of children elements. This is because overlayscrollbars
+	 * will append a new element to the DOM to handle the scrolling
+	 */
+	useEffect(() => {
+		const viewport = instance()?.elements().viewport
+		if (!viewport) {
+			return
+		}
+
+		const requiredClasses = 'relative flex flex-1 flex-col'.split(' ')
+		const missingClasses = requiredClasses.filter((c) => !viewport.classList.contains(c))
+		if (missingClasses.length) {
+			viewport.classList.add(...missingClasses)
+		}
+		viewport.dataset.artificialScroll = 'true'
+	}, [instance, isRefSet])
+	/**
+	 * An effect to destroy the overlay scrollbars instance when it exists but hideScrollBar is true
+	 */
+	useEffect(() => {
+		const instantiatedInstance = instance()
+		if (hideScrollBar && instantiatedInstance) {
+			instantiatedInstance.destroy()
+		}
+	}, [instance, isRefSet, hideScrollBar])
 
 	/**
 	 * If the user prefers the top bar, we hide the sidebar
@@ -74,7 +139,7 @@ export function AppLayout() {
 	const hideSidebar = hideAllNavigation || preferTopBar
 	const hideTopBar = isMobile || hideAllNavigation || !preferTopBar
 
-	useCoreEventHandler({ liveRefetch })
+	useCoreEventHandler({ liveRefetch, onConnectionWithServerChanged })
 
 	/**
 	 * A callback to enforce a permission on the currently logged in user.
@@ -100,15 +165,23 @@ export function AppLayout() {
 		onSuccess: setUser,
 	})
 
-	const axiosError = isAxiosError(error) ? error : null
-	const isNetworkError = axiosError?.code === 'ERR_NETWORK'
-	if (isNetworkError) {
-		return <Navigate to="/server-connection-error" state={{ from: location }} />
-	} else if (error && !storeUser) {
-		throw error
-	}
+	// FIXME(desktop): There is a bug somewhere here that causes a network error to be thrown before the auth takes effect.
+	// It happens intermittently, annoyingly. I'm not sure what's causing it, but it would be nice to fix it
+	useEffect(() => {
+		const axiosError = isAxiosError(error) ? error : null
+		const isUnauthorized = axiosError?.response?.status === 401
+		const isNetworkError = axiosError?.code === 'ERR_NETWORK'
 
-	if (!storeUser) {
+		if (isNetworkError || isUnauthorized) {
+			const to = isNetworkError ? '/server-connection-error' : '/auth'
+			navigate(to, { state: { from: location } })
+		} else if (error) {
+			console.error('An unknown error occurred:', error)
+			showBoundary(error)
+		}
+	}, [error, showBoundary, location, navigate])
+
+	if (!storeUser || error) {
 		return null
 	}
 
@@ -122,6 +195,16 @@ export function AppLayout() {
 			}}
 		>
 			<Suspense fallback={<RouteLoadingIndicator />}>
+				{showConfetti && (
+					<Confetti
+						height={windowSize.innerHeight || undefined}
+						width={windowSize.innerWidth || undefined}
+						onConfettiComplete={() => setShowConfetti(false)}
+						style={{
+							zIndex: 1000,
+						}}
+					/>
+				)}
 				{!hideAllNavigation && <MobileTopBar />}
 				{!hideTopBar && <TopBar />}
 				<div className={cx('flex h-full flex-1', { 'pb-12': preferTopBar && !hideTopBar })}>
@@ -135,7 +218,12 @@ export function AppLayout() {
 							{
 								'scrollbar-hide': storeUser.user_preferences?.enable_hide_scrollbar,
 							},
+							{
+								'bg-gradient-to-br from-background-gradient-from to-background-gradient-to':
+									shouldUseGradient,
+							},
 						)}
+						ref={mainRef}
 					>
 						<div className="relative flex flex-1 flex-col">
 							{!!storeUser.user_preferences?.show_query_indicator && <BackgroundFetchIndicator />}
@@ -146,8 +234,8 @@ export function AppLayout() {
 					</main>
 				</div>
 
-				{platform !== 'browser' && <ServerStatusOverlay />}
-				{!location.pathname.match(/\/settings\/jobs/) && <JobOverlay />}
+				{/* {platform !== 'browser' && <ServerStatusOverlay />} */}
+				{showJobOverlay && <JobOverlay />}
 			</Suspense>
 		</AppContext.Provider>
 	)

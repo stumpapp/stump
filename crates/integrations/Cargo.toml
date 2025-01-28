@@ -1,6 +1,6 @@
 [package]
 name = "integrations"
-version = "0.0.5"
+version = "0.0.8"
 edition = "2021"
 
 [dependencies]
@@ -12,4 +12,3 @@ thiserror = { workspace = true }
 
 [dev-dependencies]
 tokio = { workspace = true }
-dotenv = "0.15.0"

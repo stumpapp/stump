@@ -22,6 +22,7 @@ use crate::{
 
 const NAIVE_DATE_FORMATS: [&str; 2] = ["%Y-%m-%d", "%m-%d-%Y"];
 
+// TODO: use skip_serializing_none after upgrade specta: https://github.com/oscartbeaumont/specta/issues/235
 // TODO: author field?
 // NOTE: alias is used primarily to support ComicInfo.xml files, as that metadata
 // is formatted in PascalCase
@@ -32,23 +33,23 @@ pub struct MediaMetadata {
 	#[serde(skip_deserializing, skip_serializing)]
 	pub id: String,
 	/// The title of the media.
-	#[serde(alias = "Title")]
+	#[serde(alias = "Title", skip_serializing_if = "Option::is_none")]
 	pub title: Option<String>,
 	/// The series name which the media belongs to. This isn't necessarily the same as the
 	/// series name as it was interpreted by Stump.
-	#[serde(alias = "Series")]
+	#[serde(alias = "Series", skip_serializing_if = "Option::is_none")]
 	pub series: Option<String>,
 	/// The number this media is in the series. This can be a float, e.g. 20.1,
 	/// which typically represents a one-shot or special issue.
-	#[serde(alias = "Number")]
+	#[serde(alias = "Number", skip_serializing_if = "Option::is_none")]
 	pub number: Option<f64>,
-	#[serde(alias = "Volume")]
+	#[serde(alias = "Volume", skip_serializing_if = "Option::is_none")]
 	pub volume: Option<i32>,
 	/// The summary of the media.
-	#[serde(alias = "Summary")]
+	#[serde(alias = "Summary", skip_serializing_if = "Option::is_none")]
 	pub summary: Option<String>,
 	/// Optional notes about the media.
-	#[serde(alias = "Notes")]
+	#[serde(alias = "Notes", skip_serializing_if = "Option::is_none")]
 	pub notes: Option<String>,
 	/// The age rating of the media. This varies a lot between media, but Stump will try
 	/// to normalize it to a number between 0 and 18.
@@ -63,102 +64,117 @@ pub struct MediaMetadata {
 	#[serde(
 		alias = "Genre",
 		deserialize_with = "string_list_deserializer",
-		default = "Option::default"
+		default = "Option::default",
+		skip_serializing_if = "Option::is_none"
 	)]
 	pub genre: Option<Vec<String>>,
 
 	/// The year the media was published.
-	#[serde(alias = "Year")]
+	#[serde(alias = "Year", skip_serializing_if = "Option::is_none")]
 	pub year: Option<i32>,
 	/// The month the media was published (1-12)
-	#[serde(alias = "Month")]
+	#[serde(alias = "Month", skip_serializing_if = "Option::is_none")]
 	pub month: Option<i32>,
 	/// The day the media was published (1-31). The day is not validated against the month.
-	#[serde(alias = "Day")]
+	#[serde(alias = "Day", skip_serializing_if = "Option::is_none")]
 	pub day: Option<i32>,
 
 	/// The writer(s) of the associated media
 	#[serde(
 		alias = "Writer",
 		deserialize_with = "string_list_deserializer",
-		default = "Option::default"
+		default = "Option::default",
+		skip_serializing_if = "Option::is_none"
 	)]
 	pub writers: Option<Vec<String>>,
 	/// The penciller(s) of the associated media
 	#[serde(
 		alias = "Penciller",
 		deserialize_with = "string_list_deserializer",
-		default = "Option::default"
+		default = "Option::default",
+		skip_serializing_if = "Option::is_none"
 	)]
 	pub pencillers: Option<Vec<String>>,
 	/// The inker(s) of the associated media
 	#[serde(
 		alias = "Inker",
 		deserialize_with = "string_list_deserializer",
-		default = "Option::default"
+		default = "Option::default",
+		skip_serializing_if = "Option::is_none"
 	)]
 	pub inkers: Option<Vec<String>>,
 	/// The colorist(s) of the associated media
 	#[serde(
 		alias = "Colorist",
 		deserialize_with = "string_list_deserializer",
-		default = "Option::default"
+		default = "Option::default",
+		skip_serializing_if = "Option::is_none"
 	)]
 	pub colorists: Option<Vec<String>>,
 	/// The letterer(s) of the associated media
 	#[serde(
 		alias = "Letterer",
 		deserialize_with = "string_list_deserializer",
-		default = "Option::default"
+		default = "Option::default",
+		skip_serializing_if = "Option::is_none"
 	)]
 	pub letterers: Option<Vec<String>>,
 	/// The cover artist(s) of the associated media
 	#[serde(
 		alias = "CoverArtist",
 		deserialize_with = "string_list_deserializer",
-		default = "Option::default"
+		default = "Option::default",
+		skip_serializing_if = "Option::is_none"
 	)]
 	pub cover_artists: Option<Vec<String>>,
 	/// The editor(s) of the associated media
 	#[serde(
 		alias = "Editor",
 		deserialize_with = "string_list_deserializer",
-		default = "Option::default"
+		default = "Option::default",
+		skip_serializing_if = "Option::is_none"
 	)]
 	pub editors: Option<Vec<String>>,
 	/// The publisher of the associated media
-	#[serde(alias = "Publisher")]
+	#[serde(alias = "Publisher", skip_serializing_if = "Option::is_none")]
 	pub publisher: Option<String>,
 
 	/// Link(s) to the associated media, e.g. a comixology link
 	#[serde(
 		alias = "Web",
 		deserialize_with = "string_list_deserializer",
-		default = "Option::default"
+		default = "Option::default",
+		skip_serializing_if = "Option::is_none"
 	)]
 	pub links: Option<Vec<String>>,
 	/// A list of characters that appear in the associated media
 	#[serde(
 		alias = "Characters",
 		deserialize_with = "string_list_deserializer",
-		default = "Option::default"
+		default = "Option::default",
+		skip_serializing_if = "Option::is_none"
 	)]
 	pub characters: Option<Vec<String>>,
 	/// A list of teams that appear in the associated media
 	#[serde(
 		alias = "Teams",
 		deserialize_with = "string_list_deserializer",
-		default = "Option::default"
+		default = "Option::default",
+		skip_serializing_if = "Option::is_none"
 	)]
 	pub teams: Option<Vec<String>>,
 
 	/// The number of pages in the associated media. This does *not* take priority over
 	/// the number of pages detected by the file processor.
-	#[serde(alias = "PageCount")]
+	#[serde(alias = "PageCount", skip_serializing_if = "Option::is_none")]
 	pub page_count: Option<i32>,
 	/// The (height, width) dimensions of each page in the associated media. This is
 	/// generated by the image analysis job and is [None] before being generated.
-	#[serde(default = "Option::default", skip_deserializing)]
+	#[serde(
+		default = "Option::default",
+		skip_deserializing,
+		skip_serializing_if = "Option::is_none"
+	)]
 	pub page_dimensions: Option<PageDimensionsEntity>,
 	//#[serde(alias = "Resolutions", default = "Option::default")]
 	//pub resolutions: Option<Vec<Resolution>>,
@@ -243,23 +259,24 @@ impl From<HashMap<String, Vec<String>>> for MediaMetadata {
 				"series" => metadata.series = Some(value.join("\n").to_string()),
 				"number" => {
 					metadata.number =
-						value.into_iter().next().and_then(|n| n.parse().ok())
+						value.into_iter().next().and_then(|n| n.parse().ok());
 				},
 				"volume" => {
 					metadata.volume =
-						value.into_iter().next().and_then(|n| n.parse().ok())
+						value.into_iter().next().and_then(|n| n.parse().ok());
 				},
 				"summary" => metadata.summary = Some(value.join("\n").to_string()),
 				"notes" => metadata.notes = Some(value.join("\n").to_string()),
 				"genre" => metadata.genre = Some(value),
 				"year" => {
-					metadata.year = value.into_iter().next().and_then(|n| n.parse().ok())
+					metadata.year = value.into_iter().next().and_then(|n| n.parse().ok());
 				},
 				"month" => {
-					metadata.month = value.into_iter().next().and_then(|n| n.parse().ok())
+					metadata.month =
+						value.into_iter().next().and_then(|n| n.parse().ok());
 				},
 				"day" => {
-					metadata.day = value.into_iter().next().and_then(|n| n.parse().ok())
+					metadata.day = value.into_iter().next().and_then(|n| n.parse().ok());
 				},
 				"pencillers" => metadata.pencillers = Some(value),
 				"inkers" => metadata.inkers = Some(value),
@@ -273,7 +290,7 @@ impl From<HashMap<String, Vec<String>>> for MediaMetadata {
 				"teams" => metadata.teams = Some(value),
 				"pagecount" => {
 					metadata.page_count =
-						value.into_iter().next().and_then(|n| n.parse().ok())
+						value.into_iter().next().and_then(|n| n.parse().ok());
 				},
 				"date" => {
 					// Note: we don't know the format of the date. It could be a year, a full date, etc.
@@ -281,7 +298,7 @@ impl From<HashMap<String, Vec<String>>> for MediaMetadata {
 					// This is a bit of a hack, but it's the best we can do without knowing the format.
 					let raw_date = value.into_iter().next().unwrap_or_default();
 
-					for format in NAIVE_DATE_FORMATS.iter() {
+					for format in &NAIVE_DATE_FORMATS {
 						if let Ok(date) = NaiveDate::parse_from_str(&raw_date, format) {
 							metadata.year = Some(date.year());
 							metadata.month = Some(date.month() as i32);
@@ -300,7 +317,7 @@ impl From<HashMap<String, Vec<String>>> for MediaMetadata {
 				"creator" | "author" | "writers" => match metadata.writers {
 					Some(ref mut writers) => {
 						writers.extend(value);
-						// remove dupliates
+						// remove duplicates
 						writers.sort();
 						writers.dedup();
 					},
@@ -316,7 +333,7 @@ impl From<HashMap<String, Vec<String>>> for MediaMetadata {
 					match (metadata.age_rating, parsed) {
 						// if metadata.age_rating has been set, we need to take the min of the two
 						(Some(existing), Some(new)) => {
-							metadata.age_rating = Some(existing.min(new))
+							metadata.age_rating = Some(existing.min(new));
 						},
 						// if metadata.age_rating has not been set, we can just take the new value
 						(_, Some(new)) => metadata.age_rating = Some(new),
@@ -337,7 +354,7 @@ impl From<Dictionary> for MediaMetadata {
 		let map = dict
 			.into_iter()
 			.map(|(k, v)| v.to_string().map(|v| (k, v)))
-			.filter_map(|result| result.ok())
+			.filter_map(Result::ok)
 			.map(|(k, v)| (k.to_lowercase(), vec![v]))
 			.collect::<HashMap<String, Vec<String>>>();
 		Self::from(map)

@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useJobSchedulerConfig, useLibraries } from '@stump/client'
 import { Alert, Button, ComboBox, Form, Input, Label, NativeSelect } from '@stump/components'
 import { Construction } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { useMediaMatch } from 'rooks'
@@ -107,7 +107,7 @@ export default function JobScheduler() {
 
 	return (
 		<div className="my-2 flex flex-col gap-6">
-			<Alert level="warning" rounded="sm" icon={Construction}>
+			<Alert level="warning" icon={Construction}>
 				<Alert.Content>
 					Stump currently only supports scheduling scanner jobs. This will be extended to support
 					other job types in the future.

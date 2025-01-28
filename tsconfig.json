@@ -15,7 +15,7 @@
 			"path": "docs"
 		},
 		{
-			"path": "packages/api"
+			"path": "packages/sdk"
 		},
 		{
 			"path": "packages/client"
@@ -28,12 +28,12 @@
 		},
 		{
 			"path": "packages/i18n"
-		},
-		{
-			"path": "packages/types"
 		}
 	],
 	"compilerOptions": {
-		"module": "NodeNext"
+		"module": "NodeNext",
+		"composite": true,
+		"declaration": true,
+		"emitDeclarationOnly": true
 	}
 }

@@ -36,7 +36,7 @@ export default function PrimaryNavigationPreference() {
 				/>
 			</div>
 			<Text size="xs" variant="muted" className="italic">
-				* Settings for the unselcted option will be disabled or hidden
+				* Settings for the unselected option will be disabled or hidden
 			</Text>
 		</div>
 	)
@@ -78,7 +78,7 @@ function AppearanceOption({ label, isSelected, onSelect }: AppearanceOptionProps
 				</div>
 
 				{isSelected && (
-					<div className="absolute bottom-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-brand">
+					<div className="absolute bottom-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-fill-brand">
 						<Check className="h-5 w-5 text-white" />
 					</div>
 				)}

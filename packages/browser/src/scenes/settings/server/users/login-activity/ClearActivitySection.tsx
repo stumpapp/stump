@@ -1,13 +1,12 @@
-import { userApi, userQueryKeys } from '@stump/api'
-import { invalidateQueries } from '@stump/client'
+import { invalidateQueries, useSDK } from '@stump/client'
 import { Alert, Button } from '@stump/components'
 import { AlertTriangle } from 'lucide-react'
-import React from 'react'
 import { toast } from 'react-hot-toast'
 
 import { useAppContext } from '@/context'
 
 export default function ClearActivitySection() {
+	const { sdk } = useSDK()
 	const { isServerOwner } = useAppContext()
 
 	if (!isServerOwner) return null
@@ -17,7 +16,7 @@ export default function ClearActivitySection() {
 	 */
 	const handleClearHistory = async () => {
 		try {
-			await userApi.deleteAllLoginActivity()
+			await sdk.user.deleteLoginActivity()
 		} catch (error) {
 			if (error instanceof Error) {
 				toast.error(error.message)
@@ -26,12 +25,12 @@ export default function ClearActivitySection() {
 				toast.error('An unknown error occurred')
 			}
 		} finally {
-			await invalidateQueries({ keys: [userQueryKeys.getLoginActivity] })
+			await invalidateQueries({ keys: [sdk.user.keys.loginActivity] })
 		}
 	}
 
 	return (
-		<Alert level="error" rounded="sm" icon={AlertTriangle}>
+		<Alert level="error" icon={AlertTriangle}>
 			<Alert.Content className="flex flex-col gap-3 md:flex-row">
 				Login activity can be cleared and deleted from the database at any time.
 				<Button

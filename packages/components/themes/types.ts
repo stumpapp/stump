@@ -24,6 +24,7 @@ type HoverVariant = {
 	hover: string
 }
 
+// TODO: hover variant..
 /**
  * A shorthand type for a color token which has a secondary variant. All secondary variants should
  * also have a default variant
@@ -32,14 +33,22 @@ type SecondaryVariant = {
 	secondary: string
 } & DefaultVariant
 
-const colorVariant = ['info', 'success', 'warning', 'danger', 'brand'] as const
+export const colorVariant = ['info', 'success', 'warning', 'danger', 'brand'] as const
 
 type Border = Record<(typeof colorVariant)[number], string> & {
 	subtle: string
 	strong: string
 } & DefaultVariant
 
-type Surface = SecondaryVariant & HoverVariant
+type GradientVariant = {
+	to: string
+	from: string
+}
+
+type Surface = SecondaryVariant &
+	HoverVariant & {
+		gradient?: GradientVariant
+	}
 
 /**
  * A type for enforcing the structure of a color used as primary background for either the root
@@ -57,9 +66,13 @@ type Background = {
 	 */
 	overlay: HoverVariant & DefaultVariant
 	/**
-	 * The invserse color of the base background value
+	 * The inverse color of the base background value
 	 */
 	inverse: string
+	/**
+	 * The color of the base background if gradients are enabled
+	 */
+	gradient?: GradientVariant
 } & DefaultVariant
 
 /**
@@ -79,6 +92,11 @@ type Foreground = {
 	 */
 	muted: string
 	/**
+	 * The color of foreground elements on the 'surface' layer which are emphasized with
+	 * the brand color
+	 */
+	brand: string
+	/**
 	 * The color of foreground elements on the 'surface' layer when placed on top
 	 * of an inverse background color
 	 */
@@ -86,11 +104,13 @@ type Foreground = {
 } & DefaultVariant &
 	DisabledVariant
 
+// TODO: add secondary fill variant
 /**
  * A type for enforcing the fill color of a specific element, such as a button, and loosely
  * follows the standard color variants of 'info', 'success', 'warning', 'danger', and 'brand'
  */
-type Color = Record<(typeof colorVariant)[number], SecondaryVariant> & DisabledVariant
+type Color = Record<(typeof colorVariant)[number], SecondaryVariant & HoverVariant> &
+	DisabledVariant
 
 /**
  * The primary type which represents the color tokens for the Stump UI. These are translated for use as

@@ -38,7 +38,7 @@ if [[ $_TARGETS == *"core"* ]]; then
   done
 
   # Fix the formatting of the JSON files from the previous step 
-  yarn prettify
+  yarn format
 fi
 
 # https://docs.gitmoji-changelog.dev/#/?id=%f0%9f%93%9a-how-it-works

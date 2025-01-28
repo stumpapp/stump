@@ -1,7 +1,7 @@
 import { useLibraries } from '@stump/client'
 import { cn, cx, Label, NavigationMenu, ScrollArea, Text } from '@stump/components'
 import { CircleSlash2, Library, LibrarySquare } from 'lucide-react'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
@@ -14,7 +14,11 @@ import TopBarLinkListItem from '../../TopBarLinkListItem'
 
 type Props = EntityOptionProps
 
-export default function LibraryNavigationItem({ showCreate = true, showLinkToAll = false }: Props) {
+export default function LibraryNavigationItem({
+	showCreate = true,
+	showLinkToAll = false,
+	width,
+}: Props) {
 	const { libraries } = useLibraries()
 
 	const location = useLocation()
@@ -54,6 +58,7 @@ export default function LibraryNavigationItem({ showCreate = true, showLinkToAll
 								<TopBarLinkListItem
 									to={paths.librarySeries(library.id)}
 									isActive={location.pathname.startsWith(paths.librarySeries(library.id))}
+									className="h-9"
 								>
 									{library.emoji ? (
 										<span className="mr-2 h-4 w-4 shrink-0">{library.emoji}</span>
@@ -78,12 +83,12 @@ export default function LibraryNavigationItem({ showCreate = true, showLinkToAll
 			</NavigationMenu.Trigger>
 			<NavigationMenu.Content>
 				<div
-					className={cn('flex min-h-[150px] gap-3 p-4 md:w-[400px] lg:w-[500px]', {
-						'md:w-[300px] lg:w-[350px]': !libraries?.length,
+					style={{ width }}
+					className={cn('flex min-h-[150px] min-w-[300px] gap-3 p-2', {
+						'md:w-[400px] lg:w-[500px]': !width,
+						'md:w-[300px] lg:w-[350px]': !width && !libraries?.length,
 					})}
 				>
-					<LastVisitedLibrary container={(children) => <div className="w-1/3">{children}</div>} />
-
 					<div
 						className={cn('flex w-2/3 shrink-0 flex-col gap-y-2', {
 							'w-full': !libraries?.length,
@@ -97,9 +102,9 @@ export default function LibraryNavigationItem({ showCreate = true, showLinkToAll
 									<TopBarLinkListItem
 										to={paths.libraryCreate()}
 										isActive={location.pathname.startsWith(paths.libraryCreate())}
-										className="shrink-0 justify-center self-end border border-dashed border-edge-subtle py-2.5"
+										className="justify-center self-end border border-dashed border-edge-subtle p-1"
 									>
-										<span className="line-clamp-1 font-medium">Create library</span>
+										<span className="line-clamp-1 text-sm font-medium">Create library</span>
 									</TopBarLinkListItem>
 								)}
 
@@ -107,14 +112,16 @@ export default function LibraryNavigationItem({ showCreate = true, showLinkToAll
 									<TopBarLinkListItem
 										to={paths.libraries()}
 										isActive={location.pathname.startsWith(paths.libraries())}
-										className="shrink-0 justify-center self-end border border-dashed border-edge-subtle py-2.5"
+										className="justify-center self-end border border-dashed border-edge-subtle p-1"
 									>
-										<span className="line-clamp-1 font-medium">See all</span>
+										<span className="line-clamp-1 text-sm font-medium">See all</span>
 									</TopBarLinkListItem>
 								)}
 							</div>
 						</div>
 					</div>
+
+					<LastVisitedLibrary container={(children) => <div className="w-1/3">{children}</div>} />
 				</div>
 			</NavigationMenu.Content>
 		</NavigationMenu.Item>

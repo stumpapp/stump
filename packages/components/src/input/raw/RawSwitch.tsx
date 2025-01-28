@@ -1,5 +1,6 @@
 import * as SwitchPrimitives from '@radix-ui/react-switch'
 import { cva, VariantProps } from 'class-variance-authority'
+import type { ComponentPropsWithoutRef, ElementRef } from 'react'
 import React from 'react'
 
 import { cn } from '../../utils'
@@ -21,7 +22,7 @@ export const SWITCH_SIZE_VARIANTS = {
 }
 export const SWITCH_VARIANTS = {
 	default: 'focus:ring-background-400 data-[state=checked]:bg-background-surface-secondary-hover',
-	primary: 'focus:ring-brand-400 data-[state=checked]:bg-brand-400',
+	primary: 'focus:ring-edge-brand data-[state=checked]:bg-fill-brand',
 }
 export const switchVariants = cva(SWITCH_BASE_CLASSES, {
 	defaultVariants: {
@@ -34,9 +35,9 @@ export const switchVariants = cva(SWITCH_BASE_CLASSES, {
 	},
 })
 
-export type RawSwitchRef = React.ElementRef<typeof SwitchPrimitives.Root>
+export type RawSwitchRef = ElementRef<typeof SwitchPrimitives.Root>
 export type RawSwitchProps = VariantProps<typeof switchVariants> &
-	React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root> & {
+	ComponentPropsWithoutRef<typeof SwitchPrimitives.Root> & {
 		primaryRing?: boolean
 	}
 
@@ -45,7 +46,7 @@ export const RawSwitch = React.forwardRef<RawSwitchRef, RawSwitchProps>(
 		return (
 			<SwitchPrimitives.Root
 				className={cn(switchVariants({ className, size, variant }), {
-					'focus:ring-brand-400': primaryRing,
+					'focus:ring-edge-brand': primaryRing,
 				})}
 				{...props}
 				ref={ref}

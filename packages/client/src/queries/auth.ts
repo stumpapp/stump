@@ -1,17 +1,20 @@
-import { authApi, authQueryKeys, checkIsClaimed, serverQueryKeys } from '@stump/api'
-import { isUser, type User } from '@stump/types'
+import { isAxiosError, isUser, LoginOrRegisterArgs, type User } from '@stump/sdk'
 import { useEffect, useState } from 'react'
 
+import { useClientContext } from '@/context'
+
 import { queryClient, QueryOptions, useMutation, useQuery } from '../client'
+import { useSDK } from '../sdk'
 
 export function useAuthQuery(options: QueryOptions<User> = {}) {
+	const { sdk } = useSDK()
 	const { data, error, isLoading, isFetching, isRefetching } = useQuery(
-		[authQueryKeys.me],
+		[sdk.auth.keys.me],
 		async () => {
-			const { data } = await authApi.me()
+			const data = await sdk.auth.me()
 			if (!isUser(data)) {
-				console.debug('Malformed response recieved from server', data)
-				throw new Error('Malformed response recieved from server')
+				console.warn('Malformed response received from server', data)
+				throw new Error('Malformed response received from server')
 			}
 			return data
 		},
@@ -31,14 +34,30 @@ export function useAuthQuery(options: QueryOptions<User> = {}) {
 type UseLoginOrRegisterOptions = {
 	onSuccess?: (data?: User | null | undefined) => void
 	onError?: (data: unknown) => void
+	refetchClaimed?: boolean
 }
 
-export function useLoginOrRegister({ onSuccess, onError }: UseLoginOrRegisterOptions) {
+export function useLoginOrRegister({
+	onSuccess,
+	onError,
+	refetchClaimed,
+}: UseLoginOrRegisterOptions) {
 	const [isClaimed, setIsClaimed] = useState(true)
 
+	const { onAuthenticated } = useClientContext()
+	const { sdk } = useSDK()
 	const { data: claimCheck, isLoading: isCheckingClaimed } = useQuery(
-		[serverQueryKeys.checkIsClaimed],
-		checkIsClaimed,
+		[sdk.server.keys.claimedStatus, refetchClaimed],
+		() => sdk.server.claimedStatus(),
+		{
+			retry: (failureCount, error) => {
+				if (failureCount > 3) {
+					return false
+				} else {
+					return isAxiosError(error) && error.code === 'ERR_NETWORK'
+				}
+			},
+		},
 	)
 
 	useEffect(() => {
@@ -51,26 +70,33 @@ export function useLoginOrRegister({ onSuccess, onError }: UseLoginOrRegisterOpt
 		isLoading: isLoggingIn,
 		mutateAsync: loginUser,
 		error: loginError,
-	} = useMutation(['loginUser'], authApi.login, {
+	} = useMutation([sdk.auth.keys.login], (params: LoginOrRegisterArgs) => sdk.auth.login(params), {
 		onError: (err) => {
 			onError?.(err)
 		},
-		onSuccess: (res) => {
-			if (!res.data) {
-				onError?.(res)
-			} else {
-				queryClient.invalidateQueries(['getLibraries'])
-				onSuccess?.(res.data)
+		onSuccess: async (response) => {
+			// TODO(token): refresh support
+			if ('for_user' in response && !!onAuthenticated) {
+				const {
+					for_user,
+					token: { access_token },
+				} = response
+				await onAuthenticated(for_user, access_token)
+				onSuccess?.(for_user)
+			} else if (isUser(response)) {
+				onSuccess?.(response)
 			}
+
+			await queryClient.invalidateQueries(['getLibraries'])
 		},
 	})
 
 	const { isLoading: isRegistering, mutateAsync: registerUser } = useMutation(
-		[authQueryKeys.register],
-		authApi.register,
+		[sdk.auth.register],
+		(params: LoginOrRegisterArgs) => sdk.auth.register(params),
 		{
 			onSuccess: async () => {
-				await queryClient.invalidateQueries([serverQueryKeys.checkIsClaimed])
+				await queryClient.invalidateQueries([sdk.server.keys.claimedStatus])
 			},
 		},
 	)
@@ -84,4 +110,26 @@ export function useLoginOrRegister({ onSuccess, onError }: UseLoginOrRegisterOpt
 		loginUser,
 		registerUser,
 	}
+}
+
+type UseLogoutParams = {
+	removeStoreUser?: () => void
+}
+
+export function useLogout({ removeStoreUser }: UseLogoutParams = {}) {
+	const { sdk } = useSDK()
+	const { onLogout } = useClientContext()
+	const { mutateAsync: logout, isLoading } = useMutation(
+		[sdk.auth.keys.logout],
+		() => sdk.auth.logout(),
+		{
+			onSuccess: async () => {
+				queryClient.clear()
+				removeStoreUser?.()
+				await onLogout?.()
+			},
+		},
+	)
+
+	return { isLoggingOut: isLoading, logout }
 }

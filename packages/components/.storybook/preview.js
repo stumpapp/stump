@@ -1,8 +1,8 @@
-import { themes } from '@storybook/theming'
-
 import '../src/styles/tailwind.css'
 import '../src/styles/preview.css'
 import '../src/styles/overrides.css'
+
+import { themes } from '@storybook/theming'
 
 // TODO: I think the dark variants are being purged? I honestly don't know, but
 // dark mode toggle isn't working and it is so annoying.

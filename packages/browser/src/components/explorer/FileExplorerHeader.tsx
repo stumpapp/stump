@@ -1,15 +1,16 @@
 import { Text } from '@stump/components'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 
 import { useFileExplorerContext } from './context'
 import FileExplorerNavigation from './FileExplorerNavigation'
 import LayoutButtons from './LayoutButtons'
+import { UploadModal } from './upload'
 
 export const HEADER_HEIGHT = 40
 
 // TODO: sort options, search?
 export default function FileExplorerHeader() {
-	const { currentPath } = useFileExplorerContext()
+	const { currentPath, uploadConfig } = useFileExplorerContext()
 
 	const basename = useMemo(() => currentPath?.split('/').pop() ?? '', [currentPath])
 
@@ -22,8 +23,9 @@ export default function FileExplorerHeader() {
 				</Text>
 			</nav>
 
-			<div className="flex shrink-0 items-center gap-1">
+			<div className="flex shrink-0 items-center gap-3">
 				<LayoutButtons />
+				{uploadConfig?.enabled && <UploadModal />}
 			</div>
 		</header>
 	)

@@ -1,6 +1,6 @@
 import { Alert, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React, { Suspense } from 'react'
+import { Suspense } from 'react'
 
 import EmailersList from './EmailersList'
 
@@ -16,7 +16,7 @@ export default function EmailersSection() {
 				</Text>
 			</div>
 
-			<Alert rounded="sm" level="info">
+			<Alert level="info" icon="info">
 				<Alert.Content>
 					<Text variant="muted">
 						{t('settingsScene.server/email.sections.emailers.singleInstanceDisclaimer')}

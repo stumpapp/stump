@@ -1,16 +1,19 @@
-import { getMediaDownloadUrl } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { Button, IconButton } from '@stump/components'
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import { DownloadCloud } from 'lucide-react'
 import { useMediaMatch } from 'rooks'
+
+import { formatBookName } from '@/utils/format'
 
 type Props = {
 	media: Media
 }
 export default function DownloadMediaButton({ media }: Props) {
+	const { sdk } = useSDK()
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 
-	const bookTitle = media.metadata?.title || media.name
+	const bookTitle = formatBookName(media)
 
 	const renderButton = () => {
 		if (isAtLeastMedium) {
@@ -29,7 +32,7 @@ export default function DownloadMediaButton({ media }: Props) {
 	}
 
 	return (
-		<a href={getMediaDownloadUrl(media.id)} download>
+		<a href={sdk.media.downloadURL(media.id)} download>
 			{renderButton()}
 		</a>
 	)

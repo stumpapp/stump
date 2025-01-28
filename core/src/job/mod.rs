@@ -5,7 +5,7 @@
 // This job module would not be possible without other awesome projects in the Rust ecosystem! They
 // taught me a lot, and I don't think I could have done this without them. Taking bits and pieces from
 // each of them, I was able to create a job system that is both flexible and powerful:
-// - https://github.com/spacedriveapp/spacedrive --> The most impressive and inflential one, the concept of jobs having typed tasks executed one-by-one in a loop, in addition to the handling logic for pause/resume, came from here
+// - https://github.com/spacedriveapp/spacedrive --> The most impressive and influential one, the concept of jobs having typed tasks executed one-by-one in a loop, in addition to the handling logic for pause/resume, came from here
 // - https://git.asonix.dog/asonix/background-jobs --> Trait design (v similar to above) and how they handle retries
 // - https://github.com/ZeroAssumptions/aide-de-camp
 // 		- Also their writeup on the fundamentals of their design: https://dev.to/zeroassumptions/build-a-job-queue-with-rust-using-aide-de-camp-part-1-4g5m
@@ -135,7 +135,7 @@ pub enum JobRetryPolicy {
 /// A trait to extend the output type for a job with a common interface. Job output starts
 /// in an 'empty' state (Default) and is frequently updated during execution.
 ///
-/// The state is also serialized and stored in the DB, so it must implement [Serialize] and [de::DeserializeOwned].
+/// The state is also serialized and stored in the DB, so it must implement [Serialize] and [`de::DeserializeOwned`].
 pub trait JobOutputExt: Serialize + de::DeserializeOwned + Debug {
 	/// Update the state with new data. By default, the implementation is a full replacement
 	fn update(&mut self, updated: Self) {
@@ -164,7 +164,7 @@ pub struct JobExecuteLog {
 }
 
 impl JobExecuteLog {
-	/// Construct a [JobExecuteLog] with the given msg and level
+	/// Construct a [`JobExecuteLog`] with the given msg and level
 	pub fn new(msg: String, level: LogLevel) -> Self {
 		Self {
 			msg,
@@ -174,7 +174,7 @@ impl JobExecuteLog {
 		}
 	}
 
-	/// Construct a [JobExecuteLog] with the given msg and [LogLevel::Error]
+	/// Construct a [`JobExecuteLog`] with the given msg and [`LogLevel::Error`]
 	pub fn error(msg: String) -> Self {
 		Self {
 			msg,
@@ -184,7 +184,7 @@ impl JobExecuteLog {
 		}
 	}
 
-	/// Construct a [JobExecuteLog] with the given msg and [LogLevel::Warn]
+	/// Construct a [`JobExecuteLog`] with the given msg and [`LogLevel::Warn`]
 	pub fn warn(msg: &str) -> Self {
 		Self {
 			msg: msg.to_string(),
@@ -194,7 +194,7 @@ impl JobExecuteLog {
 		}
 	}
 
-	/// Construct a new [JobExecuteLog] with the given context string
+	/// Construct a new [`JobExecuteLog`] with the given context string
 	pub fn with_ctx(self, ctx: String) -> Self {
 		Self {
 			context: Some(ctx),
@@ -239,7 +239,7 @@ impl<O, T> Default for WorkingState<O, T> {
 }
 
 /// A trait that defines the behavior and data types of a job. Jobs are responsible for
-/// intialization and individual task execution. Jobs are managed by an [Executor], which
+/// initialization and individual task execution. Jobs are managed by an [Executor], which
 /// is responsible for the main run loop of a job.
 #[async_trait::async_trait]
 pub trait JobExt: Send + Sync + Sized + Clone + 'static {
@@ -404,7 +404,7 @@ pub struct WrappedJob<J: JobExt> {
 	/// The internal job that will be executed. This is an Option to allow for the job to be
 	/// taken out of the wrapper and put back in after a requeue
 	inner_job: Option<J>,
-	/// The inital state of the job, used to build its working state. This is an Option to allow for
+	/// The initial state of the job, used to build its working state. This is an Option to allow for
 	/// the state to be taken out of the wrapper without a clone. At the end of the job, the state
 	/// will be reinitialized to its default state.
 	initial_state: Option<WorkingState<J::Output, J::Task>>,
@@ -414,7 +414,7 @@ pub struct WrappedJob<J: JobExt> {
 }
 
 impl<J: JobExt> WrappedJob<J> {
-	/// Create a new [WrappedJob] with the given job, wrapping itself in a Box
+	/// Create a new [`WrappedJob`] with the given job, wrapping itself in a Box
 	pub fn new(job: J) -> Box<Self> {
 		Box::new(Self {
 			id: Uuid::new_v4(),
@@ -431,7 +431,7 @@ impl<J: JobExt> WrappedJob<J> {
 }
 
 /// The output of a job's execution. To avoid the need for a generic type, the output data is serialized
-/// _prior_ to being returned from the [Executor::execute] function.
+/// _prior_ to being returned from the [`Executor::execute`] function.
 pub struct ExecutorOutput {
 	pub output: Option<serde_json::Value>,
 	pub logs: Vec<JobExecuteLog>,
@@ -597,7 +597,7 @@ impl<J: JobExt> Executor for WrappedJob<J> {
 	}
 
 	fn description(&self) -> Option<String> {
-		self.inner_job.as_ref().and_then(|job| job.description())
+		self.inner_job.as_ref().and_then(JobExt::description)
 	}
 
 	fn should_requeue(&self) -> bool {
@@ -731,10 +731,7 @@ impl<J: JobExt> Executor for WrappedJob<J> {
 				Ok(r) => r,
 				Err(e) => {
 					tracing::error!(?e, "Task handler failed");
-					logs.push(JobExecuteLog::error(format!(
-						"Critical task error: {}",
-						e
-					)));
+					logs.push(JobExecuteLog::error(format!("Critical task error: {e}")));
 					return Ok(ExecutorOutput {
 						output: working_output.into_json(),
 						logs,
@@ -770,8 +767,7 @@ impl<J: JobExt> Executor for WrappedJob<J> {
 				tasks = new_tasks;
 				ctx.report_progress(JobProgress::task_position_msg(
 					format!(
-						"{} subtask(s) discovered. Reordering the task queue",
-						subtask_count
+						"{subtask_count} subtask(s) discovered. Reordering the task queue",
 					)
 					.as_str(),
 					completed_tasks as i32,

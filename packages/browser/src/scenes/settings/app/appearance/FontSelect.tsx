@@ -1,7 +1,7 @@
 import { Label, NativeSelect, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { isSupportedFont } from '@stump/types'
-import React, { useCallback } from 'react'
+import { isSupportedFont } from '@stump/sdk'
+import { useCallback } from 'react'
 
 import { usePreferences } from '@/hooks/usePreferences'
 

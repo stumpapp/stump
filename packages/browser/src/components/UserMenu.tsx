@@ -1,6 +1,6 @@
 import { Avatar, Card, cn, Popover, Text } from '@stump/components'
 import { Bell, Settings } from 'lucide-react'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
@@ -24,7 +24,7 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 	return (
 		<AutoSizer style={{ height: '2.35rem', width: isSidebar ? '100%' : '2.35rem' }}>
 			{({ width }) => (
-				<Popover onOpenChange={setIsOpen} open={isOpen}>
+				<Popover onOpenChange={setIsOpen} open={isOpen} modal>
 					<Popover.Trigger asChild>
 						<Card
 							className={cn(
@@ -64,7 +64,7 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 								to={paths.notifications()}
 								onClick={() => setIsOpen(false)}
 							>
-								<Bell className="mr-1.5 h-4 w-4 " />
+								<Bell className="mr-1.5 h-4 w-4" />
 								Notifications
 							</Link>
 

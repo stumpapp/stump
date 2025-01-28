@@ -1,3 +1,4 @@
+import type { ComponentPropsWithoutRef } from 'react'
 import { forwardRef } from 'react'
 
 import { Text } from '../text'
@@ -11,7 +12,7 @@ export type AvatarProps = {
 	fallbackWrapperClassName?: string
 	fallbackColor?: 'brand' | 'gray'
 	rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full'
-} & React.ComponentPropsWithoutRef<typeof AvatarPrimitive>
+} & ComponentPropsWithoutRef<typeof AvatarPrimitive>
 export const Avatar = forwardRef<AvatarPrimitiveRef, AvatarProps>(
 	(
 		{
@@ -69,7 +70,7 @@ export const Avatar = forwardRef<AvatarPrimitiveRef, AvatarProps>(
 					asChild
 					className={cn(
 						{
-							'bg-brand-400': fallbackColor === 'brand',
+							'bg-fill-brand': fallbackColor === 'brand',
 						},
 						{
 							'bg-background-surface': fallbackColor === 'gray',

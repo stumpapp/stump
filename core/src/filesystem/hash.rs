@@ -1,6 +1,6 @@
 use data_encoding::HEXLOWER;
 use ring::digest::{Context, SHA256};
-use std::io;
+use std::io::{self, Read, Seek};
 use tracing::debug;
 
 // use std::fs::File;
@@ -30,7 +30,7 @@ fn read(file: &std::fs::File, offset: u64, size: u64) -> Result<Vec<u8>, io::Err
 }
 
 pub fn generate(path: &str, bytes: u64) -> Result<String, io::Error> {
-	let file = std::fs::File::open(path).unwrap();
+	let file = std::fs::File::open(path)?;
 
 	let mut ring_context = Context::new(&SHA256);
 
@@ -59,23 +59,76 @@ pub fn generate(path: &str, bytes: u64) -> Result<String, io::Error> {
 	Ok(encoded_digest)
 }
 
-// pub fn generate_from_reader<R: Read>(mut reader: R) -> Result<String, CoreError> {
-// 	let mut ring_context = Context::new(&SHA256);
+/// Generate a hash for a file using a port of the Koreader hash algorithm, which is
+/// originally written in Lua. The algorithm reads the file in 1KB chunks, starting
+/// from the beginning, until it reaches the end of the file or 10 iterations. It isn't
+/// overly complex.
+///
+/// See https://github.com/koreader/koreader/blob/master/frontend/util.lua#L1046-L1072
+#[tracing::instrument(fields(path = %path.as_ref().display()))]
+pub fn generate_koreader_hash<P: AsRef<std::path::Path>>(
+	path: P,
+) -> Result<String, io::Error> {
+	let mut file = std::fs::File::open(path)?;
 
-// 	let mut buffer = [0; 1024];
+	let mut md5_context = md5::Context::new();
 
-// 	loop {
-// 		let count = reader.read(&mut buffer)?;
+	let step = 1024i64;
+	let size = 1024i64;
 
-// 		// This reader has reached its "end of file"
-// 		if count == 0 {
-// 			break;
-// 		}
+	for i in -1..=10 {
+		let offset = if i == -1 { 0 } else { step << (2 * i) };
+		file.seek(std::io::SeekFrom::Start(offset as u64))?;
 
-// 		ring_context.update(&buffer[..count]);
-// 	}
+		let mut buffer = vec![0u8; size as usize];
+		let bytes_read = file.read(&mut buffer)?;
 
-// 	let digest = ring_context.finish();
+		// println!("Offset: {}, Bytes Read: {}, i: {i}", offset, bytes_read,);
 
-// 	Ok(HEXLOWER.encode(digest.as_ref()))
-// }
+		if bytes_read == 0 {
+			tracing::trace!(?offset, "Reached end of file");
+			break;
+		}
+
+		md5_context.consume(&buffer);
+	}
+
+	let hash = format!("{:x}", md5_context.compute());
+	tracing::debug!(hash = %hash, "Generated hash");
+
+	Ok(hash)
+}
+
+#[cfg(test)]
+mod tests {
+	use std::path::PathBuf;
+
+	use super::*;
+
+	fn epub_path() -> PathBuf {
+		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+			.join("integration-tests/data/leaves.epub")
+	}
+
+	fn pdf_path() -> PathBuf {
+		PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("integration-tests/data/tall.pdf")
+	}
+
+	// https://github.com/koreader/koreader/blob/master/spec/unit/util_spec.lua#L339-L341
+	#[test]
+	fn test_koreader_hash_epub() {
+		assert_eq!(
+			generate_koreader_hash(epub_path()).unwrap(),
+			"59d481d168cca6267322f150c5f6a2a3".to_string()
+		)
+	}
+
+	// https://github.com/koreader/koreader/blob/master/spec/unit/util_spec.lua#L342-L344
+	#[test]
+	fn test_koreader_hash_pdf() {
+		assert_eq!(
+			generate_koreader_hash(pdf_path()).unwrap(),
+			"41cce710f34e5ec21315e19c99821415".to_string()
+		)
+	}
+}

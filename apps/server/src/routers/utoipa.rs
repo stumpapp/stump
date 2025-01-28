@@ -1,4 +1,4 @@
-use axum::middleware::from_extractor_with_state;
+use axum::middleware;
 use axum::Router;
 use stump_core::db::entity::*;
 // TODO: investigate how to get this working for swagger...
@@ -14,17 +14,14 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::config::state::AppState;
 use crate::errors::APIError;
-use crate::filter::{
-	FilterableLibraryQuery, FilterableMediaQuery, FilterableSeriesQuery, LibraryFilter,
-	MediaFilter, SeriesFilter, SeriesQueryRelation,
-};
-use crate::middleware::auth::Auth;
+use crate::filter::*;
+use crate::middleware::auth::auth_middleware;
 
 use super::api::{
 	self,
 	v1::{
-		auth::LoginOrRegisterArgs, library::*, media::*, notifier::*, series::*,
-		smart_list::*, user::*, ClaimResponse, StumpVersion,
+		auth::LoginOrRegisterArgs, library::*, media::individual::*, notifier::*,
+		series::*, smart_list::*, user::*, ClaimResponse, StumpVersion,
 	},
 };
 
@@ -64,20 +61,20 @@ use super::api::{
         api::v1::library::delete_library,
         api::v1::log::get_logs,
         api::v1::log::delete_logs,
-        api::v1::media::get_media,
-        api::v1::media::get_duplicate_media,
-        api::v1::media::get_in_progress_media,
-        api::v1::media::get_recently_added_media,
-        api::v1::media::get_media_by_id,
-        api::v1::media::get_media_file,
-        api::v1::media::convert_media,
-        api::v1::media::get_media_page,
-        api::v1::media::get_media_thumbnail_handler,
-        api::v1::media::update_media_progress,
-        api::v1::media::get_media_progress,
-        api::v1::media::delete_media_progress,
-        api::v1::media::get_is_media_completed,
-        api::v1::media::put_media_complete_status,
+        api::v1::media::bulk::get_media,
+        api::v1::media::bulk::get_duplicate_media,
+        api::v1::media::bulk::get_in_progress_media,
+        api::v1::media::bulk::get_recently_added_media,
+        api::v1::media::individual::get_media_by_id,
+        api::v1::media::individual::get_media_file,
+        api::v1::media::individual::convert_media,
+        api::v1::media::individual::get_media_page,
+        api::v1::media::thumbnails::get_media_thumbnail_handler,
+        api::v1::media::individual::update_media_progress,
+        api::v1::media::individual::get_media_progress,
+        api::v1::media::individual::delete_media_progress,
+        api::v1::media::individual::get_is_media_completed,
+        api::v1::media::individual::put_media_complete_status,
         api::v1::metadata::get_metadata_overview,
         api::v1::metadata::get_genres_handler,
         api::v1::metadata::get_writers_handler,
@@ -135,7 +132,7 @@ use super::api::{
     ),
     components(
         schemas(
-            Library, LibraryOptions, Media, ReadingList, ActiveReadingSession, FinishedReadingSession, Series, Tag, User,
+            Library, LibraryConfig, Media, ReadingList, ActiveReadingSession, FinishedReadingSession, Series, Tag, User,
             UserPreferences, LibraryPattern, LibraryScanMode, LogLevel, ClaimResponse,
             StumpVersion, FileStatus, PageableDirectoryListing, DirectoryListing,
             DirectoryListingFile, CursorInfo, PageInfo, PageableLibraries,
@@ -149,7 +146,9 @@ use super::api::{
             CreateOrUpdateSmartListView, SmartListItemGrouping, SmartFilter, FilterJoin, EntityVisibility,
             SmartListViewConfig, ReactTableColumnSort, ReactTableGlobalSort,
             MediaSmartFilter, MediaMetadataSmartFilter, SeriesSmartFilter, SeriesMetadataSmartFilter,
-            LibrarySmartFilter, Notifier, CreateOrUpdateNotifier, PatchNotifier
+            LibrarySmartFilter, Notifier, CreateOrUpdateNotifier, PatchNotifier, LibraryBaseFilter, LibraryRelationFilter,
+            MediaBaseFilter, MediaRelationFilter, SeriesBaseFilter, SeriesRelationFilter, NotifierConfig, NotifierType,
+            ReadingListItem, ReadingListVisibility, SeriesMetadataFilter
         )
     ),
     tags(
@@ -173,7 +172,7 @@ struct ApiDoc;
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.merge(swagger_ui())
-		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 pub(crate) fn swagger_ui() -> SwaggerUi {

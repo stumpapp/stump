@@ -1,5 +1,5 @@
 import { cva, VariantProps } from 'class-variance-authority'
-import React from 'react'
+import { forwardRef } from 'react'
 
 import { cn } from '../utils'
 import { BUTTON_BASE_CLASSES, BUTTON_ROUNDED_VARIANTS, BUTTON_VARIANTS } from './Button'
@@ -29,7 +29,7 @@ export type IconButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
 		primaryFocus?: boolean
 	}
 
-const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
+const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
 	(
 		{ className, variant, size, rounded, pressEffect = true, primaryFocus = true, ...props },
 		ref,
@@ -41,11 +41,12 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
 					{
 						'active:scale-95': pressEffect,
 						'cursor-not-allowed': props.disabled,
-						'focus:ring-brand-400 dark:focus:ring-brand-400': primaryFocus,
+						'focus:ring-edge-brand dark:focus:ring-edge-brand': primaryFocus,
 					},
 					className,
 				)}
 				ref={ref}
+				type="button"
 				{...props}
 			/>
 		)

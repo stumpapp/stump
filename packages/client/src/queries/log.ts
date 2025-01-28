@@ -1,20 +1,17 @@
-import { logApi, logQueryKeys } from '@stump/api'
-import { Log } from '@stump/types'
+import { Log, LogFilter, QueryOrder } from '@stump/sdk'
 
 import { PageQueryOptions, usePageQuery } from '../client'
+import { useSDK } from '../sdk'
 
-// TODO: use generated type
-type UseLogsQueryParmas = PageQueryOptions<Log> & {
-	params?: Record<string, unknown>
+type UseLogsQueryParams = Omit<PageQueryOptions<Log>, 'params'> & {
+	params?: LogFilter & Partial<QueryOrder>
 }
 
-export function useLogsQuery({ params, ...options }: UseLogsQueryParmas = {}) {
+export function useLogsQuery({ params, ...options }: UseLogsQueryParams = {}) {
+	const { sdk } = useSDK()
 	const { data, ...restReturn } = usePageQuery(
-		[logQueryKeys.getLogs, params],
-		async ({ page = 1, page_size = 10 }) => {
-			const { data } = await logApi.getLogs({ page, page_size, ...params })
-			return data
-		},
+		[sdk.log.keys.get, params],
+		async ({ page = 1, page_size = 10 }) => sdk.log.get({ page, page_size, ...params }),
 		{
 			keepPreviousData: true,
 			...options,

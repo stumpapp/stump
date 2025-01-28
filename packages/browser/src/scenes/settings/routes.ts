@@ -1,15 +1,15 @@
-import { UserPermission } from '@stump/types'
+import { UserPermission } from '@stump/sdk'
 import {
 	AlarmClock,
 	Bell,
 	Book,
 	Brush,
 	Cog,
+	KeyRound,
 	LucideIcon,
 	Mail,
 	PcCase,
 	ScrollText,
-	ShieldCheck,
 	Users,
 } from 'lucide-react'
 
@@ -60,6 +60,13 @@ export const routeGroups: RouteGroup[] = [
 				label: 'Reader',
 				localeKey: 'app/reader',
 				to: '/settings/app/reader',
+			},
+			{
+				icon: KeyRound,
+				label: 'API keys',
+				localeKey: 'app/apiKeys',
+				permission: 'feature:api_keys',
+				to: '/settings/app/api-keys',
 			},
 			{
 				icon: PcCase,
@@ -122,14 +129,14 @@ export const routeGroups: RouteGroup[] = [
 				],
 				to: '/settings/server/users',
 			},
-			{
-				disabled: true,
-				icon: ShieldCheck,
-				label: 'Access',
-				localeKey: 'server/access',
-				permission: 'server:manage',
-				to: '/settings/server/access',
-			},
+			// {
+			// 	disabled: true,
+			// 	icon: ShieldCheck,
+			// 	label: 'Access',
+			// 	localeKey: 'server/access',
+			// 	permission: 'server:manage',
+			// 	to: '/settings/server/access',
+			// },
 			{
 				icon: Mail,
 				label: 'Email',

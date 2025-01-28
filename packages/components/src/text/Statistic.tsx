@@ -1,15 +1,15 @@
 // TODO: make me lawlz xoxo
 // honestly one of the chakra components I did not hate:
 // https://chakra-ui.com/docs/components/stat/usage
-
 import { VariantProps } from 'class-variance-authority'
+import type { ComponentPropsWithoutRef } from 'react'
 import { forwardRef } from 'react'
 import { useCountUp } from 'use-count-up'
 
 import { cn } from '../utils'
 import { textVariants } from './Text'
 
-type StatisticProps = React.ComponentPropsWithoutRef<'dl'>
+type StatisticProps = ComponentPropsWithoutRef<'dl'>
 const StatisticRoot = forwardRef<HTMLDListElement, StatisticProps>(
 	({ className, ...props }, ref) => (
 		<dl ref={ref} className={cn('flex flex-col gap-1', className)} {...props} />
@@ -17,7 +17,7 @@ const StatisticRoot = forwardRef<HTMLDListElement, StatisticProps>(
 )
 StatisticRoot.displayName = 'Statistic'
 
-type StatisticLabelProps = VariantProps<typeof textVariants> & React.ComponentPropsWithoutRef<'dt'>
+type StatisticLabelProps = VariantProps<typeof textVariants> & ComponentPropsWithoutRef<'dt'>
 const StatisticLabel = forwardRef<HTMLElement, StatisticLabelProps>(
 	({ className, variant, size = 'sm', ...props }, ref) => (
 		<dt
@@ -29,7 +29,7 @@ const StatisticLabel = forwardRef<HTMLElement, StatisticLabelProps>(
 )
 StatisticLabel.displayName = 'StatisticLabel'
 
-type StatisticNumberProps = VariantProps<typeof textVariants> & React.ComponentPropsWithoutRef<'dd'>
+type StatisticNumberProps = VariantProps<typeof textVariants> & ComponentPropsWithoutRef<'dd'>
 const StatisticNumber = forwardRef<HTMLElement, StatisticNumberProps>(
 	({ className, variant, size = 'lg', ...props }, ref) => (
 		<dd

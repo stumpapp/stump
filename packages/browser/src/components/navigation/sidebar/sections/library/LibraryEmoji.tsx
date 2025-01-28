@@ -1,7 +1,6 @@
-import { useEditLibraryMutation } from '@stump/client'
+import { useUpdateLibrary } from '@stump/client'
 import { EmojiPicker } from '@stump/components'
-import { Library } from '@stump/types'
-import React from 'react'
+import { Library } from '@stump/sdk'
 
 type Props = {
 	emoji?: string
@@ -10,7 +9,7 @@ type Props = {
 	disabled?: boolean
 }
 export default function LibraryEmoji({ emoji, placeholder, library, disabled }: Props) {
-	const { editLibraryAsync } = useEditLibraryMutation()
+	const { editLibraryAsync } = useUpdateLibrary({ id: library.id })
 
 	const handleEmojiSelect = (emoji?: { native: string }) => {
 		if (disabled) {
@@ -21,6 +20,7 @@ export default function LibraryEmoji({ emoji, placeholder, library, disabled }: 
 			...library,
 			emoji: emoji?.native ?? null,
 			scan_mode: 'NONE',
+			tags: library.tags?.map((tag) => tag.name) ?? [],
 		})
 	}
 

@@ -1,9 +1,9 @@
-//! Contains the [StumpConfig] struct and related functions for loading and saving configuration
+//! Contains the [`StumpConfig`] struct and related functions for loading and saving configuration
 //! values for a Stump application.
 //!
-//! Note: [StumpConfig] is constructed _before_ tracing is initializing. This is because the
+//! Note: [`StumpConfig`] is constructed _before_ tracing is initializing. This is because the
 //! configuration is used to determine the log file path and verbosity level. This means that any
-//! logging that occurs during the construction of the [StumpConfig] should be done using the
+//! logging that occurs during the construction of the [`StumpConfig`] should be done using the
 //! standard `println!` or `eprintln!` macros.
 
 use std::{env, path::PathBuf};
@@ -25,23 +25,33 @@ pub mod env_keys {
 	pub const CLIENT_KEY: &str = "STUMP_CLIENT_DIR";
 	pub const ORIGINS_KEY: &str = "STUMP_ALLOWED_ORIGINS";
 	pub const PDFIUM_KEY: &str = "PDFIUM_PATH";
-	pub const DISABLE_SWAGGER_KEY: &str = "DISABLE_SWAGGER_UI";
+	pub const ENABLE_SWAGGER_KEY: &str = "ENABLE_SWAGGER_UI";
+	pub const ENABLE_KOREADER_SYNC_KEY: &str = "ENABLE_KOREADER_SYNC";
 	pub const HASH_COST_KEY: &str = "HASH_COST";
 	pub const SESSION_TTL_KEY: &str = "SESSION_TTL";
 	pub const SESSION_EXPIRY_INTERVAL_KEY: &str = "SESSION_EXPIRY_CLEANUP_INTERVAL";
-	pub const SCANNER_CHUNK_SIZE_KEY: &str = "STUMP_SCANNER_CHUNK_SIZE";
+	pub const MAX_SCANNER_CONCURRENCY_KEY: &str = "STUMP_MAX_SCANNER_CONCURRENCY";
+	pub const MAX_THUMBNAIL_CONCURRENCY_KEY: &str = "STUMP_MAX_THUMBNAIL_CONCURRENCY";
+	pub const MAX_IMAGE_UPLOAD_SIZE_KEY: &str = "STUMP_MAX_IMAGE_UPLOAD_SIZE";
+	pub const ENABLE_UPLOAD_KEY: &str = "STUMP_ENABLE_UPLOAD";
+	pub const MAX_FILE_UPLOAD_SIZE_KEY: &str = "STUMP_MAX_FILE_UPLOAD_SIZE";
 }
 use env_keys::*;
 
 pub mod defaults {
 	pub const DEFAULT_PASSWORD_HASH_COST: u32 = 12;
 	pub const DEFAULT_SESSION_TTL: i64 = 3600 * 24 * 3; // 3 days
+	pub const DEFAULT_ACCESS_TOKEN_TTL: i64 = 3600 * 24; // 1 days
 	pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
-	pub const DEFAULT_SCANNER_CHUNK_SIZE: usize = 100;
+	pub const DEFAULT_MAX_SCANNER_CONCURRENCY: usize = 200;
+	pub const DEFAULT_MAX_THUMBNAIL_CONCURRENCY: usize = 50;
+	pub const DEFAULT_MAX_IMAGE_UPLOAD_SIZE: usize = 20 * 1024 * 1024; // 20 MB
+	pub const DEFAULT_ENABLE_UPLOAD: bool = false;
+	pub const DEFAULT_MAX_FILE_UPLOAD_SIZE: usize = 20 * 1024 * 1024; // 20 MB
 }
 use defaults::*;
 
-/// Represents the configuration of a Stump application. This file is generated at startup
+/// Represents the configuration of a Stump application. This struct is generated at startup
 /// using a TOML file, environment variables, or both and is input when creating a `StumpCore`
 /// instance.
 ///
@@ -67,7 +77,9 @@ use defaults::*;
 ///   let core = StumpCore::new(config).await;
 /// }
 /// ```
-#[derive(StumpConfigGenerator, Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(
+	StumpConfigGenerator, Serialize, Deserialize, Debug, Clone, PartialEq, specta::Type,
+)]
 #[config_file_location(self.get_config_dir().join("Stump.toml"))]
 pub struct StumpConfig {
 	/// The "release" | "debug" profile with which the application is running.
@@ -127,8 +139,13 @@ pub struct StumpConfig {
 
 	/// Indicates if the Swagger UI should be disabled.
 	#[default_value(false)]
-	#[env_key(DISABLE_SWAGGER_KEY)]
-	pub disable_swagger: bool,
+	#[env_key(ENABLE_SWAGGER_KEY)]
+	pub enable_swagger: bool,
+
+	/// Indicates if the KoReader sync feature should be enabled.
+	#[default_value(false)]
+	#[env_key(ENABLE_KOREADER_SYNC_KEY)]
+	pub enable_koreader_sync: bool,
 
 	/// Password hash cost
 	#[default_value(DEFAULT_PASSWORD_HASH_COST)]
@@ -139,18 +156,44 @@ pub struct StumpConfig {
 	#[default_value(DEFAULT_SESSION_TTL)]
 	#[env_key(SESSION_TTL_KEY)]
 	pub session_ttl: i64,
-
+	#[default_value(DEFAULT_ACCESS_TOKEN_TTL)]
+	#[env_key("ACCESS_TOKEN_TTL")]
+	pub access_token_ttl: i64,
 	/// The interval at which automatic deleted session cleanup is performed.
 	#[default_value(DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL)]
 	#[env_key(SESSION_EXPIRY_INTERVAL_KEY)]
 	pub expired_session_cleanup_interval: u64,
 
-	/// The size of chunks to use throughout scanning the filesystem. This is used to
-	/// limit the number of files that are processed at once. Realistically, you are bound
-	/// by I/O constraints, but perhaps you can squeeze out some performance by tweaking this.
-	#[default_value(DEFAULT_SCANNER_CHUNK_SIZE)]
-	#[env_key(SCANNER_CHUNK_SIZE_KEY)]
-	pub scanner_chunk_size: usize,
+	/// The maximum number of concurrent files which may be processed by a scanner. This is used
+	/// to limit/increase the number of files that are processed at once. This may be useful for those
+	/// with high or low performance systems to configure to their needs.
+	#[default_value(DEFAULT_MAX_SCANNER_CONCURRENCY)]
+	#[env_key(MAX_SCANNER_CONCURRENCY_KEY)]
+	pub max_scanner_concurrency: usize,
+
+	/// The maximum number of concurrent files which may be processed by a thumbnail generator. This is used
+	/// to limit/increase the number of images that are processed at once. Image generation can be
+	/// resource intensive, so this may be useful for those with high or low performance systems to
+	/// configure to their needs.
+	#[default_value(DEFAULT_MAX_THUMBNAIL_CONCURRENCY)]
+	#[env_key(MAX_THUMBNAIL_CONCURRENCY_KEY)]
+	pub max_thumbnail_concurrency: usize,
+
+	/// The maximum file size, in bytes, of images that can be uploaded, e.g., as thumbnails for users,
+	/// libraries, series, or media.
+	#[default_value(DEFAULT_MAX_IMAGE_UPLOAD_SIZE)]
+	#[env_key(MAX_IMAGE_UPLOAD_SIZE_KEY)]
+	pub max_image_upload_size: usize,
+
+	/// Whether or not the server will allow users with the appropriate permissions to upload books and series.
+	#[default_value(DEFAULT_ENABLE_UPLOAD)]
+	#[env_key(ENABLE_UPLOAD_KEY)]
+	pub enable_upload: bool,
+
+	/// The maximum size, in bytes, of files that can be uploaded to be included in libraries.
+	#[default_value(DEFAULT_MAX_FILE_UPLOAD_SIZE)]
+	#[env_key(MAX_FILE_UPLOAD_SIZE_KEY)]
+	pub max_file_upload_size: usize,
 }
 
 impl StumpConfig {
@@ -166,8 +209,7 @@ impl StumpConfig {
 		let config_dir = self.get_config_dir();
 		if config_dir.is_file() {
 			return Err(CoreError::InitializationError(format!(
-				"Error writing config directory: {:?} is a file",
-				config_dir
+				"Error writing config directory: {config_dir:?} is a file",
 			)));
 		}
 
@@ -205,7 +247,7 @@ impl StumpConfig {
 		std::fs::write(
 			stump_toml.as_path(),
 			toml::to_string(&self).map_err(|e| {
-				eprintln!("Failed to serialize StumpConfig to toml: {}", e);
+				eprintln!("Failed to serialize StumpConfig to toml: {e}");
 				CoreError::InitializationError(e.to_string())
 			})?,
 		)?;
@@ -257,7 +299,7 @@ fn do_validate_profile(profile: &String) -> bool {
 		return true;
 	}
 
-	eprintln!("Invalid profile value: {}", profile);
+	eprintln!("Invalid profile value: {profile}");
 	false
 }
 
@@ -287,11 +329,17 @@ mod tests {
 			config_dir: None,
 			allowed_origins: Some(vec!["origin1".to_string(), "origin2".to_string()]),
 			pdfium_path: Some("not_a_path_to_pdfium".to_string()),
-			disable_swagger: Some(false),
+			enable_swagger: Some(false),
+			enable_koreader_sync: Some(false),
 			password_hash_cost: None,
 			session_ttl: None,
+			access_token_ttl: None,
 			expired_session_cleanup_interval: None,
-			scanner_chunk_size: None,
+			max_scanner_concurrency: None,
+			max_thumbnail_concurrency: None,
+			max_image_upload_size: None,
+			enable_upload: None,
+			max_file_upload_size: None,
 		};
 		partial_config.apply_to_config(&mut config);
 
@@ -318,13 +366,19 @@ mod tests {
 				custom_templates_dir: None,
 				allowed_origins: Some(vec!["origin1".to_string(), "origin2".to_string()]),
 				pdfium_path: Some("not_a_path_to_pdfium".to_string()),
-				disable_swagger: Some(false),
+				enable_swagger: Some(false),
+				enable_koreader_sync: Some(false),
 				password_hash_cost: Some(DEFAULT_PASSWORD_HASH_COST),
 				session_ttl: Some(DEFAULT_SESSION_TTL),
+				access_token_ttl: Some(DEFAULT_ACCESS_TOKEN_TTL),
 				expired_session_cleanup_interval: Some(
 					DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL
 				),
-				scanner_chunk_size: Some(DEFAULT_SCANNER_CHUNK_SIZE),
+				max_scanner_concurrency: Some(DEFAULT_MAX_SCANNER_CONCURRENCY),
+				max_thumbnail_concurrency: Some(DEFAULT_MAX_THUMBNAIL_CONCURRENCY),
+				max_image_upload_size: Some(DEFAULT_MAX_IMAGE_UPLOAD_SIZE),
+				enable_upload: Some(DEFAULT_ENABLE_UPLOAD),
+				max_file_upload_size: Some(DEFAULT_MAX_FILE_UPLOAD_SIZE)
 			}
 		);
 
@@ -340,7 +394,7 @@ mod tests {
 			[
 				(PORT_KEY, Some("1337")),
 				(VERBOSITY_KEY, Some("2")),
-				(DISABLE_SWAGGER_KEY, Some("true")),
+				(ENABLE_SWAGGER_KEY, Some("true")),
 				(HASH_COST_KEY, Some("1")),
 			],
 			|| {
@@ -366,13 +420,19 @@ mod tests {
 						config_dir,
 						allowed_origins: vec![],
 						pdfium_path: None,
-						disable_swagger: true,
+						enable_swagger: true,
+						enable_koreader_sync: false,
 						password_hash_cost: 1,
 						session_ttl: DEFAULT_SESSION_TTL,
+						access_token_ttl: DEFAULT_ACCESS_TOKEN_TTL,
 						expired_session_cleanup_interval:
 							DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
-						scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
 						custom_templates_dir: None,
+						max_scanner_concurrency: DEFAULT_MAX_SCANNER_CONCURRENCY,
+						max_thumbnail_concurrency: DEFAULT_MAX_THUMBNAIL_CONCURRENCY,
+						max_image_upload_size: DEFAULT_MAX_IMAGE_UPLOAD_SIZE,
+						enable_upload: DEFAULT_ENABLE_UPLOAD,
+						max_file_upload_size: DEFAULT_MAX_FILE_UPLOAD_SIZE,
 					}
 				);
 			},

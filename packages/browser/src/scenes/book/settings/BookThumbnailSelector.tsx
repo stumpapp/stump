@@ -1,9 +1,10 @@
-import { getMediaPage, getMediaThumbnail, mediaApi } from '@stump/api'
-import { Button, Dialog, EntityCard } from '@stump/components'
-import { Media } from '@stump/types'
-import React, { useState } from 'react'
+import { useSDK } from '@stump/client'
+import { Button, Dialog } from '@stump/components'
+import { Media } from '@stump/sdk'
+import { useState } from 'react'
 import toast from 'react-hot-toast'
 
+import { EntityCard } from '@/components/entity'
 import EditThumbnailDropdown from '@/components/thumbnail/EditThumbnailDropdown'
 
 import BookPageGrid from './BookPageGrid'
@@ -13,6 +14,7 @@ type Props = {
 }
 // TODO: this looks doody, but it's a start
 export default function BookThumbnailSelector({ book }: Props) {
+	const { sdk } = useSDK()
 	const [isOpen, setIsOpen] = useState(false)
 	const [page, setPage] = useState<number>()
 
@@ -31,7 +33,7 @@ export default function BookThumbnailSelector({ book }: Props) {
 
 	const handleUploadImage = async (file: File) => {
 		try {
-			await mediaApi.uploadMediaThumbnail(book.id, file)
+			await sdk.media.uploadThumbnail(book.id, file)
 			setIsOpen(false)
 		} catch (error) {
 			console.error(error)
@@ -43,7 +45,7 @@ export default function BookThumbnailSelector({ book }: Props) {
 		if (!page) return
 
 		try {
-			await mediaApi.patchMediaThumbnail(book.id, { page })
+			await sdk.media.patchThumbnail(book.id, { page })
 
 			// TODO: The browser is caching the image, so we need to force remove it and ensure
 			// the new one is loaded instead
@@ -58,7 +60,7 @@ export default function BookThumbnailSelector({ book }: Props) {
 	return (
 		<div className="relative">
 			<EntityCard
-				imageUrl={page ? getMediaPage(book.id, page) : getMediaThumbnail(book.id)}
+				imageUrl={page ? sdk.media.bookPageURL(book.id, page) : sdk.media.thumbnailURL(book.id)}
 				isCover
 				className="flex-auto flex-shrink-0"
 				fullWidth={(imageFailed) => !imageFailed}

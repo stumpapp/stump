@@ -1,32 +1,35 @@
 import { Button, IconButton, Input } from '@stump/components'
 import { Eye, EyeOff, Shield } from 'lucide-react'
-import React, { useState } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useState } from 'react'
+import { useFormContext, useFormState } from 'react-hook-form'
 
-import { Schema } from './CreateOrUpdateUserForm'
+import { CreateOrUpdateUserSchema } from './schema'
 
 export default function AccountDetails() {
-	const form = useFormContext<Schema>()
+	const form = useFormContext<CreateOrUpdateUserSchema>()
+	const { errors } = useFormState({ control: form.control })
 
 	const [passwordVisible, setPasswordVisible] = useState(false)
 
 	return (
 		<div className="flex flex-col gap-4 pb-4 pt-1 md:max-w-md">
 			<Input
+				id="username"
 				variant="primary"
 				fullWidth
 				label="Username"
 				placeholder="Username"
 				autoComplete="off"
-				errorMessage={form.formState.errors.username?.message}
+				errorMessage={errors.username?.message}
 				{...form.register('username')}
 			/>
 			<Input
+				id="password"
 				variant="primary"
 				fullWidth
 				label="Password"
 				placeholder="Password"
-				errorMessage={form.formState.errors.password?.message}
+				errorMessage={errors.password?.message}
 				type={passwordVisible ? 'text' : 'password'}
 				autoComplete="off"
 				rightDecoration={
@@ -36,6 +39,7 @@ export default function AccountDetails() {
 						size="xs"
 						onClick={() => setPasswordVisible(!passwordVisible)}
 						className="text-foreground-muted"
+						data-testid="togglePasswordVisibility"
 					>
 						{passwordVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
 					</IconButton>
@@ -44,7 +48,11 @@ export default function AccountDetails() {
 			/>
 
 			<div className="flex items-center gap-1">
-				<Button type="button" onClick={() => form.setValue('password', generateRandomPassword())}>
+				<Button
+					type="button"
+					onClick={() => form.setValue('password', generateRandomPassword())}
+					data-testid="generatePassword"
+				>
 					<Shield className="mr-1.5 h-4 w-4" /> Generate Random Password
 				</Button>
 			</div>

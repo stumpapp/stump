@@ -11,14 +11,14 @@ use crate::{
 // TODO: exclude EPUB (and potentially PDF) from this task. It isn't an error, per se, but it just doesn't make
 // much sense to calculate dimensions for these types of files.
 
-/// The logic for [super::AnalyzeMediaTask::AnalyzePageDimensions].
+/// The logic for [`super::AnalyzeMediaTask::AnalyzePageDimensions`].
 ///
 /// Reads each page of the media item and determines its dimensions then writes them to
 /// the database.
 ///
 /// # Arguments
 /// * `id` - The id for the media item being analyzed
-/// * `ctx` - A reference to the [WorkerCtx] for the job
+/// * `ctx` - A reference to the [`WorkerCtx`] for the job
 /// * `output` - A mutable reference to the job output
 pub(crate) async fn execute(
 	id: String,
@@ -64,10 +64,12 @@ pub(crate) async fn execute(
 		// 	.unwrap();
 		let (height, width) =
 			get_page_dimensions(&media_item.path, page_num, &ctx.config)?;
-		image_dimensions.push(PageDimension { height, width });
-		output.image_dimensions_analyzed += 1;
-	}
+		// image::load_from_memory_with_format(&page_data, image_format)
+		// 		JobError::TaskFailed(format!("Error loading image data: {e}"))
+		// 	.dimensions();
 
+		image_dimensions.push(PageDimension { height, width });
+	}
 	// Update stored page count
 	// Check if dimensions are stored already or not yet stored
 	if let Some(current_dimensions) = metadata.page_dimensions {

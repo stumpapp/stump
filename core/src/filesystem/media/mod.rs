@@ -1,22 +1,17 @@
 pub mod analyze_media_job;
 mod builder;
-mod common;
-pub(crate) mod epub;
-pub mod pdf;
+mod format;
 mod process;
-pub mod rar;
-pub mod zip;
+mod utils;
 
 pub use crate::filesystem::media::epub::EpubProcessor;
 pub(crate) use builder::{MediaBuilder, SeriesBuilder};
-pub use common::is_accepted_cover_name;
-pub use process::{
-	get_content_types_for_pages, get_page, process, FileProcessor, FileProcessorOptions,
-	ProcessedFile, SeriesJson,
-};
+pub use format::*;
+pub use process::*;
+pub use utils::is_accepted_cover_name;
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
 	use std::{fs, path::PathBuf};
 
 	pub fn get_test_zip_path() -> String {

@@ -1,11 +1,11 @@
 //! This module defines structures for storing and retrieving page dimensions data. The
-//! two primary stuctures defined here are [PageDimension], which represents a pair of
-//! page dimensions (height, width), and [PageDimensionsEntity], which is the rust
+//! two primary structures defined here are [`PageDimension`], which represents a pair of
+//! page dimensions (height, width), and [`PageDimensionsEntity`], which is the rust
 //! representation of a database row in the `page_dimensions` table.
 //!
 //! In addition to defining data structures, this module includes a simple compression
-//! algorithm for storing and retrieving [Vec]<[PageDimension]s. The [dimension_vec_to_string]
-//! and [dimension_vec_from_str] methods can be used for serializing and deserializing this
+//! algorithm for storing and retrieving [Vec]<[`PageDimension`]s. The [`dimension_vec_to_string`]
+//! and [`dimension_vec_from_str`] methods can be used for serializing and deserializing this
 //! structure
 
 use serde::{Deserialize, Serialize};
@@ -29,9 +29,9 @@ pub enum PageDimensionParserError {
 	ErrorParsingInt(#[from] std::num::ParseIntError),
 }
 
-/// Represents a database [page_dimensions::Data] object.
+/// Represents a database [`page_dimensions::Data`] object.
 ///
-/// The `dimensions` member contains a [Vec]<[PageDimension]> containing the height and width
+/// The `dimensions` member contains a [Vec]<[`PageDimension`]> containing the height and width
 /// of each page for the media attached to the metadata for this entity.
 #[derive(Serialize, Deserialize, Debug, Clone, Type)]
 pub struct PageDimensionsEntity {
@@ -99,24 +99,24 @@ impl FromStr for PageDimension {
 	}
 }
 
-/// Serializes a [Vec]<[PageDimension]> as a [String].
+/// Serializes a [Vec]<[`PageDimension`]> as a [String].
 ///
-/// The serialization uses comma-separation for height and width in [PageDimension], and semicolon-separation
-/// for each [PageDimension] object. Additionally, it uses a form of deduplication that encodes a run of n > 1
-/// [PageDimension]s as `"n>height,width"`. An empty vector serializes to `""`.
+/// The serialization uses comma-separation for height and width in [`PageDimension`], and semicolon-separation
+/// for each [`PageDimension`] object. Additionally, it uses a form of deduplication that encodes a run of n > 1
+/// [`PageDimension`]s as `"n>height,width"`. An empty vector serializes to `""`.
 pub fn dimension_vec_to_string(list: Vec<PageDimension>) -> String {
 	let mut encoded_strings = Vec::new();
 	let mut run_count = 0;
 	let mut run_dimension: Option<PageDimension> = None;
 
 	// Loop over each of the items in the list to be encoded
-	for next_dim in list.into_iter() {
+	for next_dim in list {
 		match run_dimension {
 			// If there's already a run going and it matches the next, increment the counter
 			Some(ref run_dim) if *run_dim == next_dim => run_count += 1,
 			// If there's either a run going and it doesn't match, or no run...
 			_ => {
-				// This branch handles writeout if a run is going and it didn't match
+				// This branch handles write-out if a run is going and it didn't match
 				if let Some(run_dim) = run_dimension {
 					if run_count > 1 {
 						encoded_strings.push(format!("{run_count}>{run_dim}"));
@@ -132,7 +132,7 @@ pub fn dimension_vec_to_string(list: Vec<PageDimension>) -> String {
 		}
 	}
 
-	// This handles writeout for the final item
+	// This handles write-out for the final item
 	if let Some(run_dim) = run_dimension {
 		if run_count > 1 {
 			encoded_strings.push(format!("{run_count}>{run_dim}"));
@@ -144,11 +144,11 @@ pub fn dimension_vec_to_string(list: Vec<PageDimension>) -> String {
 	encoded_strings.join(";")
 }
 
-/// Deserializes a [Vec]<[PageDimension]> from a [String] containing its serialized form.
+/// Deserializes a [Vec]<[`PageDimension`]> from a [String] containing its serialized form.
 ///
-/// The serialization uses comma-separation for height and width in [PageDimension], and semicolon-separation
-/// for each [PageDimension] object. Additionally, it uses a form of deduplication that encodes a run of n > 1
-/// [PageDimension]s as `"n>height,width"`. An empty vector serializes to `""`.
+/// The serialization uses comma-separation for height and width in [`PageDimension`], and semicolon-separation
+/// for each [`PageDimension`] object. Additionally, it uses a form of deduplication that encodes a run of n > 1
+/// [`PageDimension`]s as `"n>height,width"`. An empty vector serializes to `""`.
 pub fn dimension_vec_from_str(
 	s: &str,
 ) -> Result<Vec<PageDimension>, PageDimensionParserError> {

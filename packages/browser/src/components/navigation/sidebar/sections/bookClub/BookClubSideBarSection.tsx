@@ -2,7 +2,6 @@ import { useBookClubsQuery } from '@stump/client'
 import { Accordion, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Club } from 'lucide-react'
-import React from 'react'
 import { useLocation } from 'react-router'
 
 import { EntityOptionProps } from '@/components/navigation/types'
@@ -87,7 +86,7 @@ export default function BookClubSideBarSection({
 							{t('sidebar.buttons.seeAll')}
 						</SideBarButtonLink>
 					)}
-					{renderBookClubs()}
+					<div className="ml-2 space-y-1 border-l border-l-edge pl-1">{renderBookClubs()}</div>
 					{showCreateLink && (
 						<SideBarButtonLink
 							to={paths.bookClubCreate()}

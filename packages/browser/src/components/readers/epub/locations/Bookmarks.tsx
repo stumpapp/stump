@@ -1,5 +1,5 @@
 import { Text } from '@stump/components'
-import React, { useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
 
@@ -11,7 +11,7 @@ type Props = {
 export default function Bookmarks({ onLocationChanged }: Props) {
 	const {
 		readerMeta: { bookMeta },
-		controls: { onLinkClick },
+		controls: { onGoToCfi },
 	} = useEpubReaderContext()
 
 	const bookmarks = useMemo(() => bookMeta?.bookmarks || {}, [bookMeta])
@@ -21,11 +21,11 @@ export default function Bookmarks({ onLocationChanged }: Props) {
 	)
 
 	const handleSelect = useCallback(
-		(href: string) => {
-			onLinkClick(href)
+		(cfi: string) => {
+			onGoToCfi(cfi)
 			onLocationChanged?.()
 		},
-		[onLinkClick, onLocationChanged],
+		[onGoToCfi, onLocationChanged],
 	)
 
 	if (!bookmarksArray.length) {

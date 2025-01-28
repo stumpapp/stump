@@ -1,55 +1,65 @@
 import { useJobStore } from '@stump/client'
 import { ProgressBar, Text } from '@stump/components'
+import { JobUpdate } from '@stump/sdk'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo } from 'react'
 
 export default function JobOverlay() {
 	const storeJobs = useJobStore((state) => state.jobs)
 
-	// get the first job that is running from the activeJobs object
+	/**
+	 * The first running job in the store, which is used to determine the progress of the job.
+	 */
 	const firstRunningJob = useMemo(
 		() => Object.values(storeJobs).find((job) => job.status === 'RUNNING'),
 		[storeJobs],
 	)
+	/**
+	 * The subtask counts for the job, which describe the smaller units of work that are
+	 * being done within the job. This is more indicative of the actual work being done
+	 */
+	const subTaskCounts = useMemo(
+		() => (firstRunningJob ? calcSubTaskCounts(firstRunningJob) : null),
+		[firstRunningJob],
+	)
+	/**
+	 * The task counts for the job, which describe the overarching tasks for the main
+	 * job. This doesn't relate to smaller units of work, but rather the larger tasks
+	 * which encompass multiple subtasks.
+	 */
+	const taskCounts = useMemo(
+		() => (firstRunningJob ? calcTaskCounts(firstRunningJob) : null),
+		[firstRunningJob],
+	)
 
-	const getSubTaskCounts = () => {
-		if (!firstRunningJob) return null
-
-		const { completed_subtasks, remaining_subtasks } = firstRunningJob
-		if (remaining_subtasks != null && remaining_subtasks > 0) {
-			return getCounts(completed_subtasks, remaining_subtasks)
-		} else {
-			return null
-		}
-	}
-	const subTaskCounts = useMemo(getSubTaskCounts, [firstRunningJob])
-
-	const getTaskCounts = () => {
-		if (!firstRunningJob) return null
-
-		const { completed_tasks, remaining_tasks } = firstRunningJob
-		if (remaining_tasks != null && remaining_tasks >= 0) {
-			return getCounts(completed_tasks, remaining_tasks)
-		} else {
-			return null
-		}
-	}
-	const taskCounts = useMemo(getTaskCounts, [firstRunningJob])
-
+	/**
+	 * The percentage value for the progress bar, calculated from the subtask counts.
+	 * Note that we don't care about the task counts here, as the subtask counts are more
+	 * indicative of actual work being done.
+	 */
 	const progressValue = useMemo(() => {
 		if (subTaskCounts != null) {
 			const { completed, total } = subTaskCounts
 			return (completed / total) * 100
-		} else if (taskCounts != null) {
-			const { completed, total } = taskCounts
-			return (completed / total) * 100
 		}
-
 		return null
-	}, [subTaskCounts, taskCounts])
-
-	const renderTaskCounts = () => `${taskCounts?.completed ?? 0}/${taskCounts?.total ?? 0}`
-	const renderSubTaskCounts = () => `${subTaskCounts?.completed ?? 0}/${subTaskCounts?.total ?? 0}`
+	}, [subTaskCounts])
+	/**
+	 * The string representation of the task counts, which is used to display the total, overarching
+	 * tasks that are being done in the job.
+	 */
+	const taskCountString = useMemo(
+		() => (taskCounts?.total ? `Tasks (${taskCounts?.completed ?? 0}/${taskCounts.total})` : null),
+		[taskCounts],
+	)
+	/**
+	 * The string representation of the subtask counts, which is used to display the total, smaller
+	 * units of work that are being done in the job.
+	 */
+	const subTaskCountString = useMemo(
+		() => (subTaskCounts?.total ? `${subTaskCounts?.completed ?? 0}/${subTaskCounts.total}` : null),
+		[subTaskCounts],
+	)
 
 	return (
 		<AnimatePresence>
@@ -66,10 +76,16 @@ export default function JobOverlay() {
 
 					<div className="flex w-full flex-col gap-y-2">
 						<div className="flex w-full items-center justify-between">
-							<Text size="xs">Tasks ({renderTaskCounts()})</Text>
-							{subTaskCounts && <Text size="xs">{renderSubTaskCounts()}</Text>}
+							{taskCountString && <Text size="xs">{taskCountString}</Text>}
+							{subTaskCounts && <Text size="xs">{subTaskCountString}</Text>}
 						</div>
-						<ProgressBar value={progressValue} size="sm" variant="primary" />
+
+						<ProgressBar
+							value={progressValue}
+							size="sm"
+							variant="primary"
+							isIndeterminate={!subTaskCounts}
+						/>
 					</div>
 				</motion.div>
 			)}
@@ -77,14 +93,20 @@ export default function JobOverlay() {
 	)
 }
 
-type TaskCount = {
-	completed: number
-	total: number
-}
-const getCounts = (completed: number | null, remaining: number | null): TaskCount => {
-	const total = (completed ?? 0) + (remaining ?? 0)
+const calcTaskCounts = ({ completed_tasks, remaining_tasks }: JobUpdate) => {
+	if (remaining_tasks == null || !completed_tasks) return null
+
+	const total = (completed_tasks ?? 0) + (remaining_tasks ?? 0)
 	return {
-		completed: completed ?? 0,
+		completed: completed_tasks ?? 0,
 		total,
+	}
+}
+
+const calcSubTaskCounts = ({ completed_subtasks, total_subtasks }: JobUpdate) => {
+	if (total_subtasks == null) return null
+	return {
+		completed: completed_subtasks ?? 0,
+		total: total_subtasks,
 	}
 }

@@ -1,16 +1,16 @@
 import { useNavigationArrangement } from '@stump/client'
-import { Spacer } from '@stump/components'
+import { cn, Spacer } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { NavigationItem } from '@stump/types'
+import { NavigationItem } from '@stump/sdk'
 import { motion } from 'framer-motion'
 import { Book, Home } from 'lucide-react'
-import React, { useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 import { match } from 'ts-pattern'
 
 import { useAppContext } from '@/context'
-import { usePreferences } from '@/hooks'
+import { usePreferences, useTheme } from '@/hooks'
 import paths from '@/paths'
 import { useAppStore } from '@/stores'
 
@@ -39,12 +39,14 @@ export default function SideBar({ asChild, hidden }: Props) {
 		defaultArrangement: navigation_arrangement,
 		suspense: false,
 	})
+	const { shouldUseGradient } = useTheme()
 
 	const isBrowser = platform === 'browser'
+	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
 	const renderHeader = () => {
-		if (!isBrowser && !isMobile) {
+		if (!isBrowser && isAtLeastMedium) {
 			return (
 				<header className="flex w-full justify-between gap-1">
 					<UserMenu />
@@ -130,12 +132,12 @@ export default function SideBar({ asChild, hidden }: Props) {
 				{renderHeader()}
 
 				<div className="flex max-h-full grow flex-col gap-2 overflow-y-auto p-1 scrollbar-hide">
-					{!isMobile && isBrowser && <UserMenu />}
+					{isAtLeastMedium && isBrowser && <UserMenu />}
 					{sections}
 				</div>
 				<Spacer />
 
-				{!isMobile && <SideBarFooter />}
+				{isAtLeastMedium && <SideBarFooter />}
 			</>
 		)
 	}
@@ -145,8 +147,8 @@ export default function SideBar({ asChild, hidden }: Props) {
 	}
 
 	const variants = {
-		hidden: { width: 0, x: '-13rem' },
-		visible: { width: '13rem', x: 0 },
+		hidden: { width: 0, x: -SIDEBAR_WIDTH },
+		visible: { width: SIDEBAR_WIDTH, x: 0 },
 	}
 
 	return (
@@ -158,11 +160,19 @@ export default function SideBar({ asChild, hidden }: Props) {
 			initial={false}
 			transition={{ duration: 0.2, ease: 'easeInOut' }}
 		>
-			<div className="relative z-10 flex h-full w-52 shrink-0 flex-col gap-4 border-r border-edge bg-sidebar px-2 py-4">
+			<div
+				className={cn(
+					'relative z-10 flex h-full w-56 shrink-0 flex-col gap-4 border-r border-edge bg-sidebar px-2 py-4',
+					{
+						'bg-gradient-to-tr from-sidebar-gradient-from to-sidebar-gradient-to':
+							shouldUseGradient,
+					},
+				)}
+			>
 				{renderContent()}
 			</div>
 		</motion.aside>
 	)
 }
 
-export const SIDEBAR_WIDTH = 208
+export const SIDEBAR_WIDTH = 224

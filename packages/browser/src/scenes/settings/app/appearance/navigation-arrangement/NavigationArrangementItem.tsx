@@ -2,9 +2,9 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { cn, IconButton, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { NavigationItem } from '@stump/types'
+import { NavigationItem } from '@stump/sdk'
 import { Bolt, Eye, EyeOff } from 'lucide-react'
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import EntityOptions from './EntityOptions'
 import { IEntityOptions, isNavigationItemWithEntityOptions } from './types'
@@ -80,7 +80,7 @@ export default function NavigationArrangementItem({
 			{...attributes}
 			{...listeners}
 			className={cn(
-				'flex cursor-grab flex-col rounded-md bg-background-surface-secondary/80 outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
+				'flex cursor-grab flex-col rounded-md bg-background-surface-secondary/80 outline-none focus-visible:ring-2 focus-visible:ring-edge-brand',
 				{
 					'cursor-not-allowed': disabled,
 				},

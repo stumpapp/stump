@@ -1,11 +1,11 @@
 import { useLocaleContext } from '@stump/i18n'
-import React from 'react'
 import { Helmet } from 'react-helmet'
 
 import { ContentContainer } from '@/components/container'
 import { SceneContainer } from '@/components/container'
 
-import DiscordPresenceSwitch from './DiscordPresenceSwitch'
+import ConfiguredServersSection from './configuredServers'
+import OptionalFeaturesSection from './features'
 
 export default function DesktopSettingsScene() {
 	const { t } = useLocaleContext()
@@ -17,7 +17,8 @@ export default function DesktopSettingsScene() {
 			</Helmet>
 
 			<ContentContainer>
-				<DiscordPresenceSwitch />
+				<ConfiguredServersSection />
+				<OptionalFeaturesSection />
 			</ContentContainer>
 		</SceneContainer>
 	)

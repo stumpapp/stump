@@ -3,7 +3,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { Home } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router'
 
-import { usePreferences } from '@/hooks'
+import { usePreferences, useTheme } from '@/hooks'
 import paths from '@/paths'
 import { useAppStore } from '@/stores'
 
@@ -19,6 +19,7 @@ export default function SettingsSideBar() {
 	const {
 		preferences: { enable_replace_primary_sidebar, primary_navigation_mode },
 	} = usePreferences()
+	const { shouldUseGradient } = useTheme()
 
 	const { groups } = useSettingsRoutes()
 
@@ -27,8 +28,12 @@ export default function SettingsSideBar() {
 			className={cn(
 				'relative flex h-full w-48 shrink-0 flex-col border-edge bg-background px-2 py-4 text-foreground-subtle',
 				primary_navigation_mode === 'TOPBAR'
-					? 'fixed top-12 z-50 h-screen border-x'
+					? 'fixed top-12 z-50 h-screen border-r'
 					: 'fixed top-0 z-50 h-screen border-r',
+				{
+					'bg-gradient-to-l from-background-gradient-from to-background-gradient-to':
+						shouldUseGradient,
+				},
 			)}
 		>
 			<div className="flex h-full flex-grow flex-col gap-4">
@@ -44,14 +49,16 @@ export default function SettingsSideBar() {
 
 								<ul className="flex flex-col gap-y-0.5 pt-2 text-sm">
 									{items.map(({ to, icon, label, disabled }) => {
-										const isDisabled =
-											disabled || (platform === 'browser' && to.includes('desktop'))
+										if (platform === 'browser' && to.includes('desktop')) {
+											return null
+										}
+
 										return (
 											<SettingsSideBarLink
 												key={to}
 												to={to}
 												isActive={location.pathname.startsWith(to)}
-												isDisabled={isDisabled}
+												isDisabled={disabled}
 												icon={icon}
 											>
 												{t(withGroup(label.toLowerCase()))}

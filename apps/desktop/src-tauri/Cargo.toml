@@ -1,37 +1,35 @@
 [package]
 name = "stump_desktop"
-version = "0.0.2"
+version = "0.0.8"
 description = ""
 authors = ["Aaron Leopold <aaronleopold1221@gmail.com>"]
 license = "MIT"
 edition = "2021"
 
 [build-dependencies]
-tauri-build = { version = "1.2.1", features = [] }
+tauri-build = { version = "2.0.1", features = [] }
 
 [dependencies]
 stump_server = { path = "../../server", optional = true }
-
-# https://github.com/tauri-apps/tauri/issues/5070 -> Once I upgrade Tauri, the workspace inheritance bug will be fixed
-# serde_json = { workspace = true }
-# serde = { workspace = true }
-serde = { version = "1.0.188", features = ["derive"] }
-serde_json = "1.0.107"
-
-tauri = { version = "1.2.5", features = ["api-all", "devtools"] }
-
-### MISC ###
 discord-rich-presence = "0.2.3"
-tracing = { version = "0.1.37", optional = true}
+keyring = { workspace = true }
+serde_json = { workspace = true }
+serde = { workspace = true }
+specta = { workspace = true }
+thiserror = { workspace = true }
+tauri = { version = "2.0.4", features = [ "devtools"] }
+tracing = { workspace = true }
+tauri-plugin-store = "2.0.1"
+# See https://github.com/dbus2/zbus/issues/667
+zbus_names = "=2.6.1"
+tauri-plugin-os = "2.0.0"
+tauri-plugin-shell = "2"
+# TODO(?): https://github.com/Smithay/wayland-rs/pull/722
 
+[dev-dependencies]
+tokio = { workspace = true, features = ["full"] }
 
 [features]
-# by default Tauri runs in production mode
-# when `tauri dev` runs it is executed with `cargo run --no-default-features` if `devPath` is an URL
-default = [ "custom-protocol" ]
-# this feature is used used for production builds where `devPath` points to the filesystem
-# DO NOT remove this
-custom-protocol = [ "tauri/custom-protocol" ]
 # This feature will bundle the Stump server with the desktop app, allowing the user to use the desktop app
 # as their dedicated server instance.
-bundled-server = [ "dep:stump_server", "dep:tracing" ] 
+bundled-server = [ "dep:stump_server" ] 

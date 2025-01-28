@@ -1,36 +1,38 @@
 use std::{fmt::Display, str::FromStr};
 
-use prisma_client_rust::{and, not, or};
+use prisma_client_rust::{
+	and,
+	chrono::{DateTime, FixedOffset},
+	not, or,
+};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
 use crate::prisma::{library, media, media_metadata, series, series_metadata};
+use smart_filter_gen::generate_smart_filter;
 
 // TODO: This rough implementation is not very great. It is very verbose and not very ergonomic. It _technically_
-// works, and while I don't think anyone using this feature will notice, from a DX/mainenance perspective, it needs
+// works, and while I don't think anyone using this feature will notice, from a DX/maintenance perspective, it needs
 // to be refactored. The two big things IMO are:
 //
 // 1. Performance implications. This is mostly because the assumption for each `into_prisma` call is a single param,
 //    which means for relation filters we will have an `is` call each time. I don't yet know how this actually affects
 //    performance in real-world scenarios, but it's something to keep in mind.
-// 2. Repetition of logic. There is a lot of repetition in the `into_prisma` definitions, and I think there is a way to (maybe)
-//    consolidate them into a single macro. I'm not sure if this is possible, but it's worth looking into. This will get exponentially
-//    worse as things like sorting and sorting on relations are added... :weary:
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, ToSchema, Type)]
 #[serde(untagged)]
 /// A filter for a single value, e.g. `name = "test"`
 pub enum Filter<T> {
 	/// A simple equals filter, e.g. `name = "test"`
-	Equals(T),
+	Equals { equals: T },
 	/// A simple not filter, e.g. `name != "test"`
 	Not { not: T },
 	/// A filter for a string that contains a substring, e.g. `name contains "test"`. This should
-	/// not be confused with an `in` filter. See [Filter::Any] for that.
+	/// not be confused with an `in` filter. See [`Filter::Any`] for that.
 	Contains { contains: T },
 	/// A filter for a string that does not contain a substring, e.g. `name excludes "test"`. This
-	/// should not be confused with a `not in` filter. See [Filter::None] for that.
+	/// should not be confused with a `not in` filter. See [`Filter::None`] for that.
 	Excludes { excludes: T },
 	/// A filter for a vector of values, e.g. `name in ["test", "test2"]`
 	Any { any: Vec<T> },
@@ -48,7 +50,7 @@ pub struct NumericRange<T> {
 	pub inclusive: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, ToSchema, Type)]
 #[serde(untagged)]
 pub enum NumericFilter<T> {
 	Gt { gt: T },
@@ -70,7 +72,7 @@ impl<T> Filter<T> {
 		WhereParam: From<prisma_client_rust::Operator<WhereParam>>,
 	{
 		match self {
-			Filter::Equals(value) => equals_fn(value),
+			Filter::Equals { equals } => equals_fn(equals),
 			Filter::Not { not } => not![equals_fn(not)],
 			Filter::Contains { contains } => contains_fn(contains),
 			Filter::Excludes { excludes } => not![contains_fn(excludes)],
@@ -92,7 +94,7 @@ impl<T> Filter<T> {
 		WhereParam: From<prisma_client_rust::Operator<WhereParam>>,
 	{
 		match self {
-			Filter::Equals(value) => equals_fn(Some(value)),
+			Filter::Equals { equals } => equals_fn(Some(equals)),
 			Filter::Not { not } => not![equals_fn(Some(not))],
 			Filter::Contains { contains } => contains_fn(contains),
 			Filter::Excludes { excludes } => not![contains_fn(excludes)],
@@ -101,22 +103,20 @@ impl<T> Filter<T> {
 			_ => unreachable!("Numeric filters should be handled elsewhere"),
 		}
 	}
-}
 
-impl Filter<i32> {
 	pub fn into_numeric_params<WhereParam>(
 		self,
-		equals_fn: fn(i32) -> WhereParam,
-		gt_fn: fn(i32) -> WhereParam,
-		gte_fn: fn(i32) -> WhereParam,
-		lt_fn: fn(i32) -> WhereParam,
-		lte_fn: fn(i32) -> WhereParam,
+		equals_fn: fn(T) -> WhereParam,
+		gt_fn: fn(T) -> WhereParam,
+		gte_fn: fn(T) -> WhereParam,
+		lt_fn: fn(T) -> WhereParam,
+		lte_fn: fn(T) -> WhereParam,
 	) -> WhereParam
 	where
 		WhereParam: From<prisma_client_rust::Operator<WhereParam>>,
 	{
 		match self {
-			Filter::Equals(value) => equals_fn(value),
+			Filter::Equals { equals } => equals_fn(equals),
 			Filter::Not { not } => not![equals_fn(not)],
 			Filter::NumericFilter(numeric_filter) => match numeric_filter {
 				NumericFilter::Gt { gt } => gt_fn(gt),
@@ -137,17 +137,17 @@ impl Filter<i32> {
 
 	pub fn into_optional_numeric_params<WhereParam>(
 		self,
-		equals_fn: fn(Option<i32>) -> WhereParam,
-		gt_fn: fn(i32) -> WhereParam,
-		gte_fn: fn(i32) -> WhereParam,
-		lt_fn: fn(i32) -> WhereParam,
-		lte_fn: fn(i32) -> WhereParam,
+		equals_fn: fn(Option<T>) -> WhereParam,
+		gt_fn: fn(T) -> WhereParam,
+		gte_fn: fn(T) -> WhereParam,
+		lt_fn: fn(T) -> WhereParam,
+		lte_fn: fn(T) -> WhereParam,
 	) -> WhereParam
 	where
 		WhereParam: From<prisma_client_rust::Operator<WhereParam>>,
 	{
 		match self {
-			Filter::Equals(value) => equals_fn(Some(value)),
+			Filter::Equals { equals } => equals_fn(Some(equals)),
 			Filter::Not { not } => not![equals_fn(Some(not))],
 			Filter::NumericFilter(numeric_filter) => match numeric_filter {
 				NumericFilter::Gt { gt } => gt_fn(gt),
@@ -192,7 +192,7 @@ impl FromStr for FilterJoin {
 		match s.to_lowercase().as_str() {
 			"and" => Ok(Self::And),
 			"or" => Ok(Self::Or),
-			_ => Err(format!("Invalid filter joiner: {}", s)),
+			_ => Err(format!("Invalid filter joiner: {s}")),
 		}
 	}
 }
@@ -216,93 +216,65 @@ impl From<&str> for FilterJoin {
 	}
 }
 
-// pub struct SmartFilterOrder {
-// 	pub direction: Direction,
-// 	pub order_by:
-// }
-
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 #[aliases(SmartFilterSchema = SmartFilter<MediaSmartFilter>)]
 pub struct SmartFilter<T> {
 	pub groups: Vec<FilterGroup<T>>,
-	#[serde(default)]
-	pub joiner: FilterJoin,
 }
 
-// TODO: figure out if perhaps macros can come in with the save here. Continuing down this path
-// will be INCREDIBLY verbose..
-
+#[generate_smart_filter]
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
 #[serde(untagged)]
+#[prisma_table("library")]
 pub enum LibrarySmartFilter {
-	Name { name: Filter<String> },
-	Path { path: Filter<String> },
+	Name { name: String },
+	Path { path: String },
 }
 
-impl LibrarySmartFilter {
-	pub fn into_params(self) -> library::WhereParam {
-		match self {
-			LibrarySmartFilter::Name { name } => name.into_params(
-				library::name::equals,
-				library::name::contains,
-				library::name::in_vec,
-			),
-			LibrarySmartFilter::Path { path } => path.into_params(
-				library::path::equals,
-				library::path::contains,
-				library::path::in_vec,
-			),
-		}
-	}
-}
-
+#[generate_smart_filter]
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
 #[serde(untagged)]
+#[prisma_table("series_metadata")]
 pub enum SeriesMetadataSmartFilter {
-	MetaType { meta_type: Filter<String> },
-	Publisher { publisher: Filter<String> },
-	Status { status: Filter<String> },
-	AgeRating { age_rating: Filter<i32> },
-	Volume { volume: Filter<i32> },
-}
-
-impl SeriesMetadataSmartFilter {
-	pub fn into_params(self) -> series_metadata::WhereParam {
-		match self {
-			SeriesMetadataSmartFilter::MetaType { meta_type } => meta_type.into_params(
-				series_metadata::meta_type::equals,
-				series_metadata::meta_type::contains,
-				series_metadata::meta_type::in_vec,
-			),
-			SeriesMetadataSmartFilter::Publisher { publisher } => publisher
-				.into_optional_params(
-					series_metadata::publisher::equals,
-					series_metadata::publisher::contains,
-					series_metadata::publisher::in_vec,
-				),
-			SeriesMetadataSmartFilter::Status { status } => status.into_optional_params(
-				series_metadata::status::equals,
-				series_metadata::status::contains,
-				series_metadata::status::in_vec,
-			),
-			SeriesMetadataSmartFilter::AgeRating { age_rating } => age_rating
-				.into_optional_numeric_params(
-					series_metadata::age_rating::equals,
-					series_metadata::age_rating::gt,
-					series_metadata::age_rating::gte,
-					series_metadata::age_rating::lt,
-					series_metadata::age_rating::lte,
-				),
-			SeriesMetadataSmartFilter::Volume { volume } => volume
-				.into_optional_numeric_params(
-					series_metadata::volume::equals,
-					series_metadata::volume::gt,
-					series_metadata::volume::gte,
-					series_metadata::volume::lt,
-					series_metadata::volume::lte,
-				),
-		}
-	}
+	#[is_optional]
+	AgeRating {
+		age_rating: i32,
+	},
+	MetaType {
+		meta_type: String,
+	},
+	#[is_optional]
+	Title {
+		title: String,
+	},
+	#[is_optional]
+	Summary {
+		summary: String,
+	},
+	#[is_optional]
+	Publisher {
+		publisher: String,
+	},
+	#[is_optional]
+	Imprint {
+		imprint: String,
+	},
+	#[is_optional]
+	ComicId {
+		comicid: i32,
+	},
+	#[is_optional]
+	BookType {
+		booktype: String,
+	},
+	#[is_optional]
+	Volume {
+		volume: i32,
+	},
+	#[is_optional]
+	Status {
+		status: String,
+	},
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
@@ -349,150 +321,54 @@ impl SeriesSmartFilter {
 	}
 }
 
+#[generate_smart_filter]
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
 #[serde(untagged)]
+#[prisma_table("media_metadata")]
 pub enum MediaMetadataSmartFilter {
-	Publisher { publisher: Filter<String> },
-	Genre { genre: Filter<String> },
-	Characters { characters: Filter<String> },
-	Colorists { colorists: Filter<String> },
-	Writers { writers: Filter<String> },
-	Pencillers { pencillers: Filter<String> },
-	Letterers { letterers: Filter<String> },
-	Inkers { inkers: Filter<String> },
-	Editors { editors: Filter<String> },
-	// FIXME: Current implementationm makes it awkward to support numeric filters
-	AgeRating { age_rating: Filter<i32> },
-	Year { year: Filter<i32> },
-	Month { month: Filter<i32> },
-	Day { day: Filter<i32> },
+	#[is_optional]
+	Publisher { publisher: String },
+	#[is_optional]
+	Genre { genre: String },
+	#[is_optional]
+	Characters { characters: String },
+	#[is_optional]
+	Colorists { colorists: String },
+	#[is_optional]
+	Writers { writers: String },
+	#[is_optional]
+	Pencillers { pencillers: String },
+	#[is_optional]
+	Letterers { letterers: String },
+	#[is_optional]
+	Inkers { inkers: String },
+	#[is_optional]
+	Editors { editors: String },
+	#[is_optional]
+	AgeRating { age_rating: i32 },
+	#[is_optional]
+	Year { year: i32 },
+	#[is_optional]
+	Month { month: i32 },
+	#[is_optional]
+	Day { day: i32 },
 }
 
-impl MediaMetadataSmartFilter {
-	pub fn into_params(self) -> media_metadata::WhereParam {
-		match self {
-			MediaMetadataSmartFilter::Publisher { publisher } => publisher
-				.into_optional_params(
-					media_metadata::publisher::equals,
-					media_metadata::publisher::contains,
-					media_metadata::publisher::in_vec,
-				),
-			MediaMetadataSmartFilter::Genre { genre } => genre.into_optional_params(
-				media_metadata::genre::equals,
-				media_metadata::genre::contains,
-				media_metadata::genre::in_vec,
-			),
-			MediaMetadataSmartFilter::Characters { characters } => characters
-				.into_optional_params(
-					media_metadata::characters::equals,
-					media_metadata::characters::contains,
-					media_metadata::characters::in_vec,
-				),
-			MediaMetadataSmartFilter::Colorists { colorists } => colorists
-				.into_optional_params(
-					media_metadata::colorists::equals,
-					media_metadata::colorists::contains,
-					media_metadata::colorists::in_vec,
-				),
-			MediaMetadataSmartFilter::Writers { writers } => writers
-				.into_optional_params(
-					media_metadata::writers::equals,
-					media_metadata::writers::contains,
-					media_metadata::writers::in_vec,
-				),
-			MediaMetadataSmartFilter::Pencillers { pencillers } => pencillers
-				.into_optional_params(
-					media_metadata::pencillers::equals,
-					media_metadata::pencillers::contains,
-					media_metadata::pencillers::in_vec,
-				),
-			MediaMetadataSmartFilter::Letterers { letterers } => letterers
-				.into_optional_params(
-					media_metadata::letterers::equals,
-					media_metadata::letterers::contains,
-					media_metadata::letterers::in_vec,
-				),
-			MediaMetadataSmartFilter::Inkers { inkers } => inkers.into_optional_params(
-				media_metadata::inkers::equals,
-				media_metadata::inkers::contains,
-				media_metadata::inkers::in_vec,
-			),
-			MediaMetadataSmartFilter::Editors { editors } => editors
-				.into_optional_params(
-					media_metadata::editors::equals,
-					media_metadata::editors::contains,
-					media_metadata::editors::in_vec,
-				),
-			MediaMetadataSmartFilter::AgeRating { age_rating } => age_rating
-				.into_optional_numeric_params(
-					media_metadata::age_rating::equals,
-					media_metadata::age_rating::gt,
-					media_metadata::age_rating::gte,
-					media_metadata::age_rating::lt,
-					media_metadata::age_rating::lte,
-				),
-			MediaMetadataSmartFilter::Year { year } => year.into_optional_numeric_params(
-				media_metadata::year::equals,
-				media_metadata::year::gt,
-				media_metadata::year::gte,
-				media_metadata::year::lt,
-				media_metadata::year::lte,
-			),
-			MediaMetadataSmartFilter::Month { month } => month
-				.into_optional_numeric_params(
-					media_metadata::month::equals,
-					media_metadata::month::gt,
-					media_metadata::month::gte,
-					media_metadata::month::lt,
-					media_metadata::month::lte,
-				),
-			MediaMetadataSmartFilter::Day { day } => day.into_optional_numeric_params(
-				media_metadata::day::equals,
-				media_metadata::day::gt,
-				media_metadata::day::gte,
-				media_metadata::day::lt,
-				media_metadata::day::lte,
-			),
-		}
-	}
-}
-
+#[generate_smart_filter]
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
 #[serde(untagged)]
+#[prisma_table("media")]
 pub enum MediaSmartFilter {
-	Name { name: Filter<String> },
-	Extension { extension: Filter<String> },
-	Path { path: Filter<String> },
+	Name { name: String },
+	Size { size: i64 },
+	Extension { extension: String },
+	CreatedAt { created_at: DateTime<FixedOffset> },
+	UpdatedAt { updated_at: DateTime<FixedOffset> },
+	Status { status: String },
+	Path { path: String },
+	Pages { pages: i32 },
 	Metadata { metadata: MediaMetadataSmartFilter },
 	Series { series: SeriesSmartFilter },
-}
-
-impl MediaSmartFilter {
-	pub fn into_params(self) -> media::WhereParam {
-		match self {
-			MediaSmartFilter::Name { name } => name.into_params(
-				media::name::equals,
-				media::name::contains,
-				media::name::in_vec,
-			),
-			MediaSmartFilter::Extension { extension } => extension.into_params(
-				media::extension::equals,
-				media::extension::contains,
-				media::extension::in_vec,
-			),
-			MediaSmartFilter::Path { path } => path.into_params(
-				media::path::equals,
-				media::path::contains,
-				media::path::in_vec,
-			),
-			MediaSmartFilter::Metadata { metadata } => {
-				media::metadata::is(vec![metadata.into_params()])
-			},
-			MediaSmartFilter::Series { series } => {
-				media::series::is(vec![series.into_params()])
-			},
-		}
-	}
 }
 
 #[cfg(test)]
@@ -574,6 +450,83 @@ mod tests {
 		);
 	}
 
+	#[test]
+	fn it_serializes_number_correctly() {
+		let filter: FilterGroup<MediaSmartFilter> = FilterGroup::And {
+			and: vec![MediaSmartFilter::Size {
+				size: Filter::NumericFilter(NumericFilter::Gte { gte: 3000 }),
+			}],
+		};
+
+		let json = serde_json::to_string(&filter).unwrap();
+
+		assert_eq!(json, r#"{"and":[{"size":{"gte":3000}}]}"#);
+	}
+
+	#[test]
+	fn it_deserializes_number_correctly() {
+		let json = r#"{"or":[{"size":{"gte":3000}}]}"#;
+
+		let filter: FilterGroup<MediaSmartFilter> = serde_json::from_str(json).unwrap();
+
+		assert_eq!(
+			filter,
+			FilterGroup::Or {
+				or: vec![MediaSmartFilter::Size {
+					size: Filter::NumericFilter(NumericFilter::Gte { gte: 3000 }),
+				}],
+			}
+		);
+	}
+
+	#[test]
+	fn it_serializes_range_correctly() {
+		let filter: FilterGroup<MediaSmartFilter> = FilterGroup::And {
+			and: vec![MediaSmartFilter::Metadata {
+				metadata: MediaMetadataSmartFilter::AgeRating {
+					age_rating: Filter::NumericFilter(NumericFilter::Range(
+						NumericRange {
+							from: 10,
+							to: 20,
+							inclusive: true,
+						},
+					)),
+				},
+			}],
+		};
+
+		let json = serde_json::to_string(&filter).unwrap();
+
+		assert_eq!(
+			json,
+			r#"{"and":[{"metadata":{"age_rating":{"from":10,"to":20,"inclusive":true}}}]}"#
+		);
+	}
+
+	#[test]
+	fn it_deserializes_range_correctly() {
+		let json = r#"{"and":[{"metadata":{"age_rating":{"from":10,"to":20,"inclusive":true}}}]}"#;
+
+		let filter: FilterGroup<MediaSmartFilter> = serde_json::from_str(json).unwrap();
+
+		assert_eq!(
+			filter,
+			FilterGroup::And {
+				and: vec![MediaSmartFilter::Metadata {
+					metadata: MediaMetadataSmartFilter::AgeRating {
+						age_rating: Filter::NumericFilter(NumericFilter::Range(
+							NumericRange {
+								from: 10,
+								to: 20,
+								inclusive: true,
+							},
+						)),
+					},
+				}],
+			}
+		);
+	}
+
 	fn default_book(name: &str) -> media::Data {
 		media::Data {
 			id: "test-id".to_string(),
@@ -587,8 +540,10 @@ mod tests {
 			book_club_suggestions: None,
 			bookmarks: None,
 			created_at: Utc::now().into(),
+			deleted_at: None,
 			extension: "CBZ".to_string(),
 			hash: None,
+			koreader_hash: None,
 			metadata: None,
 			modified_at: None,
 			pages: 30,

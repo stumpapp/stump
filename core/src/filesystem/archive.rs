@@ -17,7 +17,7 @@ pub(crate) fn zip_dir(
 
 	let mut zip_writer = zip::ZipWriter::new(zip_file);
 
-	let options: FileOptions<'_, ()> = FileOptions::default()
+	let options: FileOptions<()> = FileOptions::default()
 		.compression_method(CompressionMethod::Stored)
 		.unix_permissions(0o755);
 
@@ -26,7 +26,7 @@ pub(crate) fn zip_dir(
 	let mut buffer = Vec::new();
 	for entry in WalkDir::new(unpacked_path)
 		.into_iter()
-		.filter_map(|e| e.ok())
+		.filter_map(Result::ok)
 	{
 		let path = entry.path();
 		let name = path.strip_prefix(Path::new(prefix)).unwrap();
@@ -74,7 +74,7 @@ pub fn create_zip_archive(
 
 	trace!("Calculated extension for zip file: {}", ext);
 
-	let zip_path = destination.join(format!("{}.{}", name, ext));
+	let zip_path = destination.join(format!("{name}.{ext}"));
 
 	zip_dir(unpacked_path, &zip_path, unpacked_path)?;
 
@@ -110,7 +110,7 @@ mod tests {
 		assert_eq!(zip_archive.len(), 1);
 
 		let mut file = zip_archive.by_index(0).unwrap();
-		assert_eq!(file.name(), "file.txt");
+		assert_eq!(file.name(), "/file.txt");
 
 		let mut contents = String::new();
 		file.read_to_string(&mut contents).unwrap();

@@ -37,11 +37,11 @@ pub struct JobProgress {
 	pub completed_subtasks: Option<i32>,
 	/// The number of subtasks that exist in the current task
 	#[specta(optional)]
-	pub remaining_subtasks: Option<i32>,
+	pub total_subtasks: Option<i32>,
 }
 
 impl JobProgress {
-	/// Constructs a new JobProgress with the given message
+	/// Constructs a new [`JobProgress`] with the given message
 	pub fn msg(msg: &str) -> Self {
 		Self {
 			message: Some(msg.to_string()),
@@ -49,7 +49,7 @@ impl JobProgress {
 		}
 	}
 
-	/// Constructs a new JobProgress with the given status
+	/// Constructs a new [`JobProgress`] with the given status
 	pub fn status(status: JobStatus) -> Self {
 		Self {
 			status: Some(status),
@@ -57,7 +57,7 @@ impl JobProgress {
 		}
 	}
 
-	/// Constructs a new JobProgress with the given status and msg
+	/// Constructs a new [`JobProgress`] with the given status and msg
 	pub fn status_msg(status: JobStatus, msg: &str) -> Self {
 		Self {
 			status: Some(status),
@@ -66,12 +66,12 @@ impl JobProgress {
 		}
 	}
 
-	/// Constructs a new JobProgress with the status set to `JobStatus::Completed` and the message set to "Job finished"
+	/// Constructs a new [`JobProgress`] with the status set to `JobStatus::Completed` and the message set to "Job finished"
 	pub fn finished() -> Self {
 		Self::status_msg(JobStatus::Completed, "Job finished")
 	}
 
-	/// Constructs a new JobProgress with the given queue position and size
+	/// Constructs a new [`JobProgress`] with the given queue position and size
 	pub fn task_position(index: i32, size: i32) -> Self {
 		Self {
 			completed_tasks: Some(index),
@@ -88,7 +88,7 @@ impl JobProgress {
 	}
 
 	pub fn init_done(index: i32, size: i32) -> Self {
-		Self::task_position_msg("Job intialized", index, size)
+		Self::task_position_msg("Job initialized", index, size)
 	}
 
 	pub fn restored(index: i32, size: i32) -> Self {
@@ -98,7 +98,7 @@ impl JobProgress {
 	pub fn subtask_position(index: i32, size: i32) -> Self {
 		Self {
 			completed_subtasks: Some(index),
-			remaining_subtasks: Some(size),
+			total_subtasks: Some(size),
 			..Default::default()
 		}
 	}
@@ -112,7 +112,7 @@ impl JobProgress {
 }
 
 impl WorkerSendExt for JobProgress {
-	fn into_send(self) -> WorkerSend {
+	fn into_worker_send(self) -> WorkerSend {
 		WorkerSend::Progress(self)
 	}
 }

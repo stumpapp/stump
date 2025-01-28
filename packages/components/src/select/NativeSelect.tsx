@@ -28,7 +28,7 @@ export const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
 					[
 						'bg-transparent focus:bg-transparent enabled:hover:bg-background-surface',
 						'border border-edge-subtle',
-						'focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-2 focus:ring-offset-background',
+						'focus:outline-none focus:ring-2 focus:ring-edge-brand focus:ring-offset-2 focus:ring-offset-background',
 						'text-sm text-foreground-subtle placeholder:text-foreground-muted',
 						'disabled:cursor-not-allowed disabled:opacity-50',
 					],
@@ -42,6 +42,7 @@ export const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
 					className,
 				)}
 				{...props}
+				data-testid={props.id}
 			>
 				{emptyOption && (
 					<option value={emptyOption.value} disabled selected key="native-select-empty-option">

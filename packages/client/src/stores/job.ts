@@ -1,4 +1,4 @@
-import { JobUpdate } from '@stump/types'
+import { JobUpdate } from '@stump/sdk'
 import deepEqual from 'deep-equal'
 import { produce } from 'immer'
 import { createWithEqualityFn } from 'zustand/traditional'
@@ -50,7 +50,12 @@ export const useJobStore = createWithEqualityFn<JobStore>(
 							status: status || existingJob.status,
 						}
 					} else {
-						draft.jobs[job.id] = job
+						draft.jobs[job.id] = {
+							...job,
+							// This should be a safe assumption, as status events will always have a set status and
+							// the only time other events are sent would be updates to the job itself
+							status: job.status || 'RUNNING',
+						}
 					}
 				}),
 			)

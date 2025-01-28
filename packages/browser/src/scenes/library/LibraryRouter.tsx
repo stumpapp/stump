@@ -1,4 +1,4 @@
-import React, { lazy, useMemo } from 'react'
+import { lazy, useMemo } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
 import { useAppContext } from '@/context'
@@ -6,8 +6,8 @@ import { useAppContext } from '@/context'
 import LibraryLayout from './LibraryLayout.tsx'
 import LibraryAdminLayout from './tabs/settings/LibraryAdminLayout.tsx'
 
-const CreateLibraryScene = lazy(() => import('./tabs/settings/CreateLibraryScene.tsx'))
-const LibrarySettingsScene = lazy(() => import('./tabs/settings/LibrarySettingsScene.tsx'))
+const CreateLibraryScene = lazy(() => import('../createLibrary'))
+const LibrarySettingsRouter = lazy(() => import('./tabs/settings'))
 const LibraryExplorerScene = lazy(() => import('./tabs/files/LibraryExplorerScene.tsx'))
 const LibrarySeriesScene = lazy(() => import('./tabs/series/LibrarySeriesScene.tsx'))
 const LibraryBooksScene = lazy(() => import('./tabs/books/LibraryBooksScene.tsx'))
@@ -26,13 +26,16 @@ export default function LibraryRouter() {
 				<Route path="series" element={<LibrarySeriesScene />} />
 				<Route path="books" element={<LibraryBooksScene />} />
 				{canAccessExplorer && <Route path="files" element={<LibraryExplorerScene />} />}
+
 				<Route element={<LibraryAdminLayout />}>
-					<Route path="settings" element={<LibrarySettingsScene />} />
+					<Route path="settings/*" element={<LibrarySettingsRouter />} />
 				</Route>
 			</Route>
-			<Route element={<LibraryAdminLayout />}>
+
+			<Route element={<LibraryAdminLayout applySceneDefaults={false} />}>
 				<Route path="create" element={<CreateLibraryScene />} />
 			</Route>
+
 			<Route path="*" element={<Navigate to="/404" />} />
 		</Routes>
 	)

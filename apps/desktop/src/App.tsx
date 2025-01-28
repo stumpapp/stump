@@ -1,58 +1,77 @@
 import { StumpWebClient } from '@stump/browser'
-import { Platform } from '@stump/client'
-import { invoke, os } from '@tauri-apps/api'
-import { useEffect, useMemo, useState } from 'react'
+import { DesktopAppContext, Platform, useDesktopAppContext } from '@stump/client'
+import { SavedServer, User } from '@stump/sdk'
+import { createStore, Store } from '@tauri-apps/plugin-store'
+import { useCallback, useEffect, useState } from 'react'
 
-const VITE_STUMP_SERVER_IS_BUNDLED = import.meta.env.VITE_STUMP_SERVER_IS_BUNDLED === 'true'
+import { useTauriRPC } from './utils'
 
-export default function App() {
-	function getPlatform(platform: string): Platform {
-		switch (platform) {
-			case 'darwin':
-				return 'macOS'
-			case 'win32':
-				return 'windows'
-			case 'linux':
-				return 'linux'
-			default:
-				return 'browser'
-		}
-	}
+// It looks like Apple fully blocks non-local IP addresses now. This is actually infuriating. OH WELL.
+// There really isn't much to do? Anyone using the desktop app on macOS and wants to connect outside their local
+// network will have to setup a domain name and use HTTPS. When I catch you, Apple *shakes fist*
+// See:
+// - https://developer.apple.com/documentation/security/preventing-insecure-network-connections
+// - https://developer.apple.com/documentation/bundleresources/information_property_list/nsapptransportsecurity
 
-	const setDiscordPresence = (status?: string, details?: string) =>
-		invoke<unknown>('set_discord_presence', { details, status })
-
-	const setUseDiscordPresence = (connect: boolean) =>
-		invoke<unknown>('set_use_discord_connection', { connect })
-
-	const hideSplashScreen = () => invoke<unknown>('close_splashscreen')
+function App() {
+	const { store } = useDesktopAppContext()
+	const { getNativePlatform, ...tauriRPC } = useTauriRPC()
 
 	const [platform, setPlatform] = useState<Platform>('unknown')
+	const [baseURL, setBaseURL] = useState<string>()
 	const [mounted, setMounted] = useState(false)
 
+	/**
+	 * An effect to initialize the application, setting the platform and base URL
+	 */
 	useEffect(() => {
 		async function init() {
-			const platform = await os.platform()
-			setPlatform(getPlatform(platform))
-			setMounted(true)
-			setTimeout(hideSplashScreen, 1000)
+			try {
+				await tauriRPC.initCredentialStore()
+				const platform = await getNativePlatform()
+				const activeServer = await store.get<SavedServer>('active_server')
+				if (activeServer) {
+					setBaseURL(activeServer.uri)
+				}
+				setPlatform(platform)
+			} catch (error) {
+				console.error('Critical failure! Unable to initialize the application', error)
+			} finally {
+				setMounted(true)
+			}
 		}
 
-		init()
-	}, [])
-
-	const baseUrl = useMemo(() => {
-		if (!VITE_STUMP_SERVER_IS_BUNDLED) {
-			return undefined
+		if (!mounted) {
+			init()
 		}
+	}, [getNativePlatform, mounted, tauriRPC, store])
 
-		// TODO: The port is configurable...
-		if (platform === 'windows') {
-			return 'https://tauri.localhost:10801'
-		} else {
-			return 'http://localhost:10801'
+	const handleAuthenticated = useCallback(
+		async (_user: User, token?: string) => {
+			try {
+				const currentServer = await store.get<SavedServer>('active_server')
+				if (token && currentServer) {
+					await tauriRPC.setApiToken(currentServer.name, token)
+				}
+			} catch (err) {
+				console.error('Failed to initialize the credential store', err)
+			}
+		},
+		[tauriRPC, store],
+	)
+
+	const handleLogout = useCallback(async () => {
+		try {
+			const currentServer = await store.get<SavedServer>('active_server')
+			if (currentServer) {
+				await tauriRPC.deleteApiToken(currentServer.name)
+			} else {
+				await tauriRPC.clearCredentialStore()
+			}
+		} catch (err) {
+			console.error('Failed to clear credential store', err)
 		}
-	}, [platform])
+	}, [tauriRPC, store])
 
 	// I want to wait until platform is properly set before rendering the app
 	if (!mounted) {
@@ -62,9 +81,36 @@ export default function App() {
 	return (
 		<StumpWebClient
 			platform={platform}
-			setUseDiscordPresence={setUseDiscordPresence}
-			setDiscordPresence={setDiscordPresence}
-			baseUrl={baseUrl}
+			authMethod="token"
+			baseUrl={baseURL}
+			tauriRPC={tauriRPC}
+			onAuthenticated={handleAuthenticated}
+			onLogout={handleLogout}
+			onUnauthenticatedResponse={handleLogout}
 		/>
+	)
+}
+
+export default function AppEntry() {
+	const [store, setStore] = useState<Store>()
+
+	useEffect(() => {
+		const init = async () => {
+			setStore(await createStore('settings.json'))
+		}
+
+		if (!store) {
+			init()
+		}
+	}, [store])
+
+	if (!store) {
+		return null
+	}
+
+	return (
+		<DesktopAppContext.Provider value={{ store }}>
+			<App />
+		</DesktopAppContext.Provider>
 	)
 }

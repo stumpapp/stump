@@ -1,22 +1,22 @@
 {
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
-		"types": ["vite/client", "node"],
+		"composite": true,
+		"types": ["vite/client", "node", "jest", "@testing-library/jest-dom"],
 		"skipLibCheck": true,
 		"allowImportingTsExtensions": true,
-		"jsx": "preserve",
+		"jsx": "react-jsx",
 		"module": "ES2022",
 		"moduleResolution": "Node",
-		"outDir": "./dist",
+		"emitDeclarationOnly": true,
+		"outDir": "dist",
 		"paths": {
-			"@stump/api": ["../api/src/index.ts"],
-			"@stump/api/*": ["../api/src/*"],
+			"@stump/sdk": ["../sdk/src/index.ts"],
+			"@stump/sdk/*": ["../sdk/src/*"],
 			"@stump/client": ["../client/src/index.ts"],
 			"@stump/client/*": ["../client/src/*"],
 			"@stump/components": ["../components/src/index.ts"],
 			"@stump/components/*": ["../components/src/*"],
-			"@stump/types": ["../types/index.ts"],
-			"@stump/types/*": ["../types/*"],
 			"@/components/*": ["./src/components/*"],
 			"@/hooks/*": ["./src/hooks/*"],
 			"@/i18n": ["./src/i18n/index.ts"],
@@ -31,16 +31,13 @@
 	"include": ["src", "src/**/*.json"],
 	"references": [
 		{
-			"path": "../api"
+			"path": "../sdk"
 		},
 		{
 			"path": "../client"
 		},
 		{
 			"path": "../components"
-		},
-		{
-			"path": "../types"
 		}
 	]
 }

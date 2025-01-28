@@ -1,4 +1,5 @@
 import { cva, VariantProps } from 'class-variance-authority'
+import type { ComponentPropsWithoutRef } from 'react'
 import { forwardRef } from 'react'
 
 import { cn } from '../utils'
@@ -6,7 +7,7 @@ import { cn } from '../utils'
 export const BADGE_VARIANTS = {
 	default: 'bg-gray-75 dark:bg-gray-800 text-gray-800 dark:text-gray-100',
 	error: 'bg-red-100 text-red-800 dark:bg-red-700 dark:text-red-50',
-	primary: 'bg-brand-100 text-brand-800 dark:bg-brand-700 dark:text-brand-50',
+	primary: 'bg-fill-brand-secondary text-fill-brand',
 	secondary: 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100',
 	success: 'bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-50',
 	warning: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-50',
@@ -33,7 +34,7 @@ const badgeVariants = cva('inline-flex items-center font-medium', {
 	},
 })
 
-export type BadgeProps = VariantProps<typeof badgeVariants> & React.ComponentPropsWithoutRef<'div'>
+export type BadgeProps = VariantProps<typeof badgeVariants> & ComponentPropsWithoutRef<'div'>
 export const Badge = forwardRef<HTMLDivElement, BadgeProps>(
 	({ className, variant, size, rounded, ...props }, ref) => {
 		return (

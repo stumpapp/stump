@@ -1,8 +1,7 @@
 import './styles/index.css'
 import '@stump/components/styles/overrides.css'
 
-import { initializeApi } from '@stump/api'
-import { StumpClientContextProvider, StumpClientProps } from '@stump/client'
+import { SDKProvider, StumpClientContextProvider, StumpClientProps } from '@stump/client'
 import { defaultContext } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useEffect, useState } from 'react'
@@ -15,7 +14,6 @@ import Notifications from '@/components/Notifications'
 
 import { AppRouter } from './AppRouter'
 import { useApplyTheme } from './hooks'
-import { API_VERSION } from './index'
 import { useAppStore, useUserStore } from './stores'
 
 const IS_DEVELOPMENT = import.meta.env.MODE === 'development'
@@ -47,20 +45,13 @@ function RouterContainer(props: StumpClientProps) {
 		setPlatform: store.setPlatform,
 	}))
 
-	useEffect(
-		() => {
-			if (!baseUrl && props.baseUrl) {
-				setBaseUrl(props.baseUrl)
-			} else if (baseUrl) {
-				initializeApi(baseUrl, API_VERSION)
-			}
+	useEffect(() => {
+		if (!baseUrl && props.baseUrl) {
+			setBaseUrl(props.baseUrl)
+		}
 
-			setMounted(true)
-		},
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[baseUrl],
-	)
+		setMounted(true)
+	}, [baseUrl, props.baseUrl, setBaseUrl])
 
 	useEffect(() => {
 		setPlatform(props.platform)
@@ -68,7 +59,7 @@ function RouterContainer(props: StumpClientProps) {
 
 	useApplyTheme({ appFont: userPreferences?.app_font, appTheme: userPreferences?.app_theme })
 
-	const { setUseDiscordPresence, setDiscordPresence } = props
+	const { setUseDiscordPresence, setDiscordPresence } = props.tauriRPC ?? {}
 	const discordPresenceEnabled = userPreferences?.enable_discord_presence ?? false
 	useEffect(() => {
 		setUseDiscordPresence?.(discordPresenceEnabled)
@@ -86,7 +77,8 @@ function RouterContainer(props: StumpClientProps) {
 		})
 	}
 
-	const handleUnathenticatedResponse = (redirectUrl?: string) => {
+	const handleUnauthenticatedResponse = (redirectUrl?: string) => {
+		props.onUnauthenticatedResponse?.(redirectUrl)
 		setUser(null)
 		if (redirectUrl) {
 			handleRedirect(redirectUrl)
@@ -104,17 +96,20 @@ function RouterContainer(props: StumpClientProps) {
 
 	return (
 		<StumpClientContextProvider
-			onUnauthenticatedResponse={handleUnathenticatedResponse}
+			onUnauthenticatedResponse={handleUnauthenticatedResponse}
 			onConnectionWithServerChanged={handleConnectionWithServerChanged}
-			setDiscordPresence={setDiscordPresence}
-			setUseDiscordPresence={setUseDiscordPresence}
+			tauriRPC={props.tauriRPC}
+			onAuthenticated={props.onAuthenticated}
+			onLogout={props.onLogout}
 		>
-			{IS_DEVELOPMENT && <ReactQueryDevtools position="bottom-left" context={defaultContext} />}
-			<Helmet defaultTitle="Stump">
-				<title>Stump</title>
-			</Helmet>
-			<AppRouter />
-			<Notifications />
+			<SDKProvider baseURL={baseUrl || ''} authMethod={props.authMethod || 'session'}>
+				{IS_DEVELOPMENT && <ReactQueryDevtools position="bottom-right" context={defaultContext} />}
+				<Helmet defaultTitle="Stump">
+					<title>Stump</title>
+				</Helmet>
+				<AppRouter />
+				<Notifications />
+			</SDKProvider>
 		</StumpClientContextProvider>
 	)
 }

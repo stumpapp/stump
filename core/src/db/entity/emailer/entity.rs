@@ -1,4 +1,4 @@
-use email::{EmailerClient, EmailerClientConfig};
+use email::{EmailError, EmailerClient, EmailerClientConfig};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
@@ -20,7 +20,7 @@ pub struct EmailerConfig {
 	pub username: String,
 	/// The encrypted password to use for the SMTP server
 	#[serde(skip_serializing)]
-	pub encrypted_password: String,
+	pub encrypted_password: Option<String>,
 	/// The SMTP host to use
 	pub smtp_host: String,
 	/// The SMTP port to use
@@ -37,12 +37,18 @@ impl EmailerConfig {
 	/// Convert the config into a client config, which is used for the actual sending of emails
 	pub async fn into_client_config(self, ctx: &Ctx) -> CoreResult<EmailerClientConfig> {
 		let encryption_key = ctx.get_encryption_key().await?;
-		let password = decrypt_string(&self.encrypted_password, &encryption_key)?;
+		let password = decrypt_string(
+			&self
+				.encrypted_password
+				.ok_or_else(|| EmailError::NoPassword)?,
+			&encryption_key,
+		)?;
+
 		Ok(EmailerClientConfig {
 			sender_email: self.sender_email,
 			sender_display_name: self.sender_display_name,
 			username: self.username,
-			password,
+			password: Some(password),
 			host: self.smtp_host,
 			port: self.smtp_port,
 			tls_enabled: self.tls_enabled,
@@ -51,12 +57,21 @@ impl EmailerConfig {
 		})
 	}
 
+	/// Create an emailer config from a client config, encrypting the password
 	pub async fn from_client_config(
 		config: EmailerClientConfig,
 		ctx: &Ctx,
 	) -> CoreResult<Self> {
-		let encryption_key = ctx.get_encryption_key().await?;
-		let encrypted_password = encrypt_string(&config.password, &encryption_key)?;
+		// Note: The password isn't really optional, but in order to support update operations
+		// the type is defined as optional. This will error if the password is not set elsewhere.
+		let encrypted_password = match config.password {
+			Some(p) if !p.is_empty() => {
+				let encryption_key = ctx.get_encryption_key().await?;
+				Some(encrypt_string(&p, &encryption_key)?)
+			},
+			_ => None,
+		};
+
 		Ok(EmailerConfig {
 			sender_email: config.sender_email,
 			sender_display_name: config.sender_display_name,
@@ -117,7 +132,7 @@ impl TryFrom<emailer::Data> for SMTPEmailer {
 				sender_email: data.sender_email,
 				sender_display_name: data.sender_display_name,
 				username: data.username,
-				encrypted_password: data.encrypted_password,
+				encrypted_password: Some(data.encrypted_password),
 				smtp_host: data.smtp_host,
 				smtp_port: data.smtp_port as u16,
 				tls_enabled: data.tls_enabled,

@@ -11,7 +11,7 @@ use stump_core::{
 	fs::scanner::scan,
 	job::{persist_new_job, runner::RunnerCtx, LibraryScanJob},
 	prelude::{CoreResult, Ctx},
-	prisma::{library, library_options, PrismaClient},
+	prisma::{library, library_config, PrismaClient},
 };
 
 // https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/book/second-edition/ch11-03-test-organization.html
@@ -27,7 +27,7 @@ pub struct TempLibrary {
 }
 
 impl TempLibrary {
-	/// Creates the root temporary libray for the [`TempLibrary`] struct. Places it
+	/// Creates the root temporary library for the [`TempLibrary`] struct. Places it
 	/// as a child of CARGO_MANIFEST_DIR.
 	fn root() -> TempDir {
 		Builder::new()
@@ -147,7 +147,7 @@ impl TempLibrary {
 		client: &PrismaClient,
 		pattern: LibraryPattern,
 		scan_mode: LibraryScanMode,
-	) -> CoreResult<(library::Data, library_options::Data, TempLibrary)> {
+	) -> CoreResult<(library::Data, library_config::Data, TempLibrary)> {
 		let temp_library = match pattern {
 			LibraryPattern::CollectionBased => TempLibrary::collection_library()?,
 			LibraryPattern::SeriesBased => TempLibrary::series_library()?,
@@ -161,7 +161,7 @@ impl TempLibrary {
 	/// A helper to create a collection based library used in the epub tests.
 	pub async fn epub_library(
 		client: &PrismaClient,
-	) -> CoreResult<(library::Data, library_options::Data, TempLibrary)> {
+	) -> CoreResult<(library::Data, library_config::Data, TempLibrary)> {
 		let _tmp = TempLibrary::collection_library()?;
 
 		let (library, options) = _tmp.insert(client, LibraryScanMode::Batched).await?;
@@ -183,7 +183,7 @@ impl TempLibrary {
 		&self,
 		client: &PrismaClient,
 		scan_mode: LibraryScanMode,
-	) -> CoreResult<(library::Data, library_options::Data)> {
+	) -> CoreResult<(library::Data, library_config::Data)> {
 		let (library, options) = create_library(
 			client,
 			self.get_name(),
@@ -321,29 +321,29 @@ pub async fn create_library(
 	library_path: &str,
 	pattern: LibraryPattern,
 	scan_mode: LibraryScanMode,
-) -> CoreResult<(library::Data, library_options::Data)> {
-	let library_options_result = client
-		.library_options()
-		.create(vec![library_options::library_pattern::set(
+) -> CoreResult<(library::Data, library_config::Data)> {
+	let library_config_result = client
+		.library_config()
+		.create(vec![library_config::library_pattern::set(
 			pattern.to_string(),
 		)])
 		.exec()
 		.await;
 
 	assert!(
-		library_options_result.is_ok(),
+		library_config_result.is_ok(),
 		"Failed to create library options: {:?}",
-		library_options_result
+		library_config_result
 	);
 
-	let library_options = library_options_result.unwrap();
+	let library_config = library_config_result.unwrap();
 
 	let library = client
 		.library()
 		.create(
 			name.into(),
 			library_path.into(),
-			library_options::id::equals(library_options.id.clone()),
+			library_config::id::equals(library_config.id.clone()),
 			vec![],
 		)
 		.exec()
@@ -362,5 +362,5 @@ pub async fn create_library(
 
 	// println!("Created library at {:?}", library_path);
 
-	Ok((library, library_options))
+	Ok((library, library_config))
 }

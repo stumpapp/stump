@@ -1,15 +1,30 @@
-import { Library } from '@stump/types'
+import { UpdateLibrary } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
-import { noop } from '../../../../utils/misc'
+import { noop } from '@/utils/misc'
 
-export type LibraryAdminContextProps = {
-	libraryPreview: Partial<Library>
-	syncLibraryPreview: (library: Partial<Library>) => void
+import { useLibraryContext } from '../../context'
+
+export type ILibraryManagementContext = {
+	/**
+	 * A function that issues a PATCH update to the library.
+	 */
+	patch: (updates: Partial<UpdateLibrary>) => void
+	/**
+	 * A function that triggers a scan of the library. Will be undefined if the user does
+	 * not have the necessary permissions
+	 */
+	scan?: () => void
 }
 
-export const LibraryAdminContext = createContext<LibraryAdminContextProps>({
-	libraryPreview: {},
-	syncLibraryPreview: noop,
+export const LibraryManagementContext = createContext<ILibraryManagementContext>({
+	patch: noop,
 })
-export const useLibraryAdminContext = () => useContext(LibraryAdminContext)
+export const useLibraryManagement = () => {
+	const libraryCtx = useLibraryContext()
+	const managementCtx = useContext(LibraryManagementContext)
+	return {
+		library: libraryCtx.library,
+		...managementCtx,
+	}
+}

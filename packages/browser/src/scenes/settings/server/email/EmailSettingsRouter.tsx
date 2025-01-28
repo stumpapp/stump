@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { Route, Routes, useNavigate } from 'react-router'
 
 import { useAppContext } from '@/context'
@@ -28,7 +28,8 @@ export default function EmailSettingsRouter() {
 
 	return (
 		<EmailerSettingsContext.Provider
-			value={{ canCreateEmailer: canCreate, canEditEmailer: canEdit }}
+			// TODO: separate permission for delete?
+			value={{ canCreateEmailer: canCreate, canDeleteEmailer: canEdit, canEditEmailer: canEdit }}
 		>
 			<Suspense fallback={null}>
 				<Routes>

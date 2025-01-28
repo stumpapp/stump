@@ -1,5 +1,5 @@
 import { Label, NativeSelect } from '@stump/components'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 
 import { FilterableEntity } from '.'
 

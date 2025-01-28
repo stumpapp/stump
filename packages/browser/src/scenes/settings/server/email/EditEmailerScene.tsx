@@ -1,12 +1,12 @@
 import { useEmailerQuery, useEmailersQuery, useUpdateEmailer } from '@stump/client'
-import React, { useEffect, useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import { ContentContainer, SceneContainer } from '@/components/container'
 import paths from '@/paths'
 
 import { useEmailerSettingsContext } from './context'
-import { CreateOrUpdateEmailerForm, FormValues } from './emailers'
+import { CreateOrUpdateEmailerForm, CreateOrUpdateEmailerSchema } from './emailers'
 
 export default function EditEmailerScene() {
 	const navigate = useNavigate()
@@ -33,13 +33,16 @@ export default function EditEmailerScene() {
 		}
 	}, [id, emailer, navigate, canEditEmailer])
 
-	const onSubmit = async ({ name, is_primary, ...config }: FormValues) => {
+	const onSubmit = async ({ name, is_primary, ...config }: CreateOrUpdateEmailerSchema) => {
 		try {
 			await updateEmailer({
-				// @ts-expect-error: fixme
 				config: {
 					...config,
 					host: config.smtp_host,
+					max_attachment_size_bytes: config.max_attachment_size_bytes ?? null,
+					// TODO: support configuring this
+					max_num_attachments: null,
+					password: config.password?.length ? config.password : null,
 					port: config.smtp_port,
 				},
 				is_primary,

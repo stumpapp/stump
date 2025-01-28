@@ -87,9 +87,11 @@ ASK_FOR_CONTRIB="Please consider helping to expand support for your system: http
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   UNSUPPORTED_DISTRO="Your distro '$(lsb_release -s -d)' is not supported by this script. $ASK_FOR_CONTRIB"
 
+  # Note: If running ubuntu 24, see https://github.com/bambulab/BambuStudio/issues/3973#issuecomment-2085476683
   if which apt-get &> /dev/null; then
     sudo apt-get -y update
-    sudo apt-get -y install libwebkit2gtk-4.0-dev \
+    sudo apt-get -y install \
+      libwebkit2gtk-4.1-dev \
       pkg-config \
       build-essential \
       curl \
@@ -99,11 +101,14 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       libssl-dev \
       libgtk-3-dev \
       libayatana-appindicator3-dev \
+      javascriptcoregtk-4.0 \
+      libxdo-dev \
+      libssl-dev \
       librsvg2-dev \
       libvips42
   elif which pacman &> /dev/null; then
     sudo pacman -Syu
-    sudo pacman -S --needed webkit2gtk \
+    sudo pacman -S --needed webkit2gtk-4.1 \
       base-devel \
       curl \
       wget \
@@ -114,7 +119,13 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       libappindicator-gtk3 librsvg libvips
   elif which dnf &> /dev/null; then
     sudo dnf check-update
-    sudo dnf install openssl-devel webkit2gtk4.0-devel curl wget libappindicator-gtk3 librsvg2-devel dav1d
+    sudo dnf install webkit2gtk4.1-devel \
+      openssl-devel \
+      curl \
+      wget \
+      file \
+      libappindicator-gtk3-devel \
+      librsvg2-devel
     sudo dnf group install "C Development Tools and Libraries"
   else
     log_error $UNSUPPORTED_DISTRO

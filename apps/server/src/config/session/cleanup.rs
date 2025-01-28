@@ -51,7 +51,7 @@ impl JobExt for SessionCleanupJob {
 		let affected_rows = ctx
 			.db
 			.session()
-			.delete_many(vec![session::expires_at::lt(Utc::now().into())])
+			.delete_many(vec![session::expiry_time::lt(Utc::now().into())])
 			.exec()
 			.await
 			.map_or_else(

@@ -1,10 +1,10 @@
-import { API } from '@stump/api'
-import type { CoreEvent } from '@stump/types'
-import { useEffect, useMemo } from 'react'
+import type { CoreEvent } from '@stump/sdk'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 
-import { useClientContext } from '../context'
+import { useSDK } from '../sdk'
 
-interface SseOptions {
+type SseOptions = {
+	headers?: Record<string, string>
 	onOpen?: (event: Event) => void
 	onClose?: (event?: Event) => void
 	onMessage?: (event: MessageEvent<unknown>) => void
@@ -13,11 +13,13 @@ interface SseOptions {
 
 let sse: EventSource
 
-// this is a little meh
-function useSse(url: string, sseOptions: SseOptions = {}) {
-	const { onOpen, onClose, onMessage } = sseOptions
-
-	function initEventSource() {
+// TODO(tokens): Swap eventsource with polyfilled version that supports headers
+function useSse(url: string, { onOpen, onClose, onMessage }: SseOptions = {}) {
+	const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+	/**
+	 * Initialize the EventSource connection
+	 */
+	const initEventSource = useCallback(() => {
 		sse = new EventSource(url, {
 			withCredentials: true,
 		})
@@ -32,7 +34,7 @@ function useSse(url: string, sseOptions: SseOptions = {}) {
 
 			sse?.close()
 
-			setTimeout(() => {
+			timeoutRef.current = setTimeout(() => {
 				initEventSource()
 
 				if (sse?.readyState !== EventSource.OPEN) {
@@ -45,20 +47,18 @@ function useSse(url: string, sseOptions: SseOptions = {}) {
 		sse.onopen = (e) => {
 			onOpen?.(e)
 		}
-	}
+	}, [onClose, onMessage, onOpen, url])
 
-	useEffect(
-		() => {
-			initEventSource()
+	useEffect(() => {
+		initEventSource()
 
-			return () => {
-				sse?.close()
+		return () => {
+			sse?.close()
+			if (timeoutRef.current) {
+				clearTimeout(timeoutRef.current)
 			}
-		},
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[url],
-	)
+		}
+	}, [url])
 
 	return {
 		readyState: sse?.readyState,
@@ -66,43 +66,37 @@ function useSse(url: string, sseOptions: SseOptions = {}) {
 }
 
 interface Props {
-	onEvent(event: CoreEvent): void
+	onEvent: (event: CoreEvent) => void
+	onConnectionWithServerChanged?: (connected: boolean) => void
 }
 
-export function useStumpSse({ onEvent }: Props) {
-	const URI = API?.getUri()
+export function useStumpSse({ onEvent, onConnectionWithServerChanged }: Props) {
+	const { sdk } = useSDK()
 
-	const { onConnectionWithServerChanged } = useClientContext()
+	const eventSourceUrl = useMemo(() => sdk.eventSourceURL, [sdk.eventSourceURL])
 
-	const eventSourceUrl = useMemo(() => {
-		let url = URI
-		// remove /api(/) from end of url
-		url = url.replace(/\/api(\/v\d)?$/, '')
-
-		return `${url}/sse`
-	}, [URI])
-
-	function handleMessage(e: MessageEvent<unknown>) {
-		if ('data' in e && typeof e.data === 'string') {
-			try {
-				const event = JSON.parse(e.data)
-				onEvent(event)
-			} catch (err) {
-				console.error(err)
+	const handleMessage = useCallback(
+		(e: MessageEvent<unknown>) => {
+			if ('data' in e && typeof e.data === 'string') {
+				try {
+					const event = JSON.parse(e.data)
+					onEvent(event)
+				} catch (err) {
+					console.error(err)
+				}
+			} else {
+				console.warn('Unrecognized message event:', e)
 			}
-		} else {
-			console.warn('Unrecognized message event:', e)
-		}
-	}
+		},
+		[onEvent],
+	)
 
 	const { readyState } = useSse(eventSourceUrl, {
 		onClose: () => {
-			// setConnected(false)
 			onConnectionWithServerChanged?.(false)
 		},
 		onMessage: handleMessage,
 		onOpen: () => {
-			// setConnected(true)
 			onConnectionWithServerChanged?.(true)
 		},
 	})

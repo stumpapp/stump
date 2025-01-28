@@ -1,7 +1,7 @@
 import { useSeriesByIdQuery } from '@stump/client'
 import { cx, Link, Text } from '@stump/components'
-import { Series } from '@stump/types'
-import React from 'react'
+import { Series } from '@stump/sdk'
+import { Fragment } from 'react'
 
 import paths from '../../paths'
 import SeriesLibraryLink from '../series/SeriesLibraryLink'
@@ -51,7 +51,7 @@ export default function BookLibrarySeriesLinks({
 				const Component = segment.to ? Link : Text
 
 				return (
-					<React.Fragment key={segment.label}>
+					<Fragment key={segment.label}>
 						<span className="mx-2 text-foreground-muted">/</span>
 						<Component
 							className={cx('line-clamp-1', { 'shrink-0': segment.noShrink })}
@@ -59,7 +59,7 @@ export default function BookLibrarySeriesLinks({
 						>
 							{segment.label}
 						</Component>
-					</React.Fragment>
+					</Fragment>
 				)
 			})}
 		</div>

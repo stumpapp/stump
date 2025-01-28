@@ -1,7 +1,6 @@
 import { Alert, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Construction } from 'lucide-react'
-import React from 'react'
 
 import LiveLogsFeed from './LiveLogsFeed'
 
@@ -16,7 +15,7 @@ export default function LiveLogsSection() {
 				</Text>
 			</div>
 
-			<Alert level="warning" rounded="sm" icon={Construction}>
+			<Alert level="warning" icon={Construction}>
 				<Alert.Content>{t('common.limitedFunctionality')}</Alert.Content>
 			</Alert>
 

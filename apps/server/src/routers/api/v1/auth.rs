@@ -1,35 +1,45 @@
 use axum::{
-	extract::{ConnectInfo, State},
-	headers::UserAgent,
+	extract::{ConnectInfo, Query, State},
+	http::{Response, StatusCode},
+	middleware,
+	response::IntoResponse,
 	routing::{get, post},
-	Json, Router, TypedHeader,
+	Extension, Json, Router,
 };
-use prisma_client_rust::{
-	chrono::{DateTime, Duration, FixedOffset, Utc},
-	Direction,
-};
-use serde::Deserialize;
+use axum_extra::{headers::UserAgent, TypedHeader};
+use chrono::{DateTime, Duration, FixedOffset, Utc};
+use prisma_client_rust::Direction;
+use serde::{Deserialize, Serialize};
 use specta::Type;
 use stump_core::{
 	db::entity::User,
 	prisma::{session, user, user_login_activity, user_preferences, PrismaClient},
 };
-use tower_sessions::{session::SessionDeletion, Session};
+use tower_sessions::Session;
 use tracing::error;
 use utoipa::ToSchema;
 
 use crate::{
-	config::{session::SESSION_USER_KEY, state::AppState},
-	errors::{APIError, APIResult},
+	config::{
+		jwt::{create_user_jwt, CreatedToken},
+		session::{delete_cookie_header, SESSION_USER_KEY},
+		state::AppState,
+	},
+	errors::{api_error_message, APIError, APIResult},
 	http_server::StumpRequestInfo,
-	utils::verify_password,
+	middleware::auth::{auth_middleware, RequestContext},
+	utils::{default_true, get_session_user, hash_password, verify_password},
 };
 
-pub(crate) fn mount() -> Router<AppState> {
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new().nest(
 		"/auth",
 		Router::new()
-			.route("/me", get(viewer))
+			.route(
+				"/me",
+				get(viewer)
+					.layer(middleware::from_fn_with_state(app_state, auth_middleware)),
+			)
 			.route("/login", post(login))
 			.route("/logout", post(logout))
 			.route("/register", post(register)),
@@ -47,14 +57,14 @@ pub async fn enforce_max_sessions(
 			tracing::error!(?error, "Failed to load user's existing session(s)");
 			Vec::default()
 		})
-		.to_owned();
+		.clone();
 	let existing_login_sessions_count = existing_sessions.len() as i32;
 
 	match (for_user.max_sessions_allowed, existing_login_sessions_count) {
 		(Some(max_login_sessions), count) if count >= max_login_sessions => {
 			let oldest_session_id = existing_sessions
 				.iter()
-				.min_by_key(|session| session.expires_at)
+				.min_by_key(|session| session.expiry_time)
 				.map(|session| session.id.clone());
 			handle_remove_earliest_session(db, for_user.id.clone(), oldest_session_id)
 				.await?;
@@ -71,6 +81,14 @@ pub struct LoginOrRegisterArgs {
 	pub password: String,
 }
 
+#[derive(Debug, Deserialize, Type, ToSchema)]
+pub struct AuthenticationOptions {
+	#[serde(default)]
+	generate_token: bool,
+	#[serde(default = "default_true")]
+	create_session: bool,
+}
+
 #[utoipa::path(
 	get,
 	path = "/api/v1/auth/me",
@@ -82,12 +100,8 @@ pub struct LoginOrRegisterArgs {
 )]
 /// Returns the currently logged in user from the session. If no user is logged in, returns an
 /// unauthorized error.
-async fn viewer(session: Session) -> APIResult<Json<User>> {
-	if let Some(user) = session.get::<User>(SESSION_USER_KEY)? {
-		Ok(Json(user))
-	} else {
-		Err(APIError::Unauthorized)
-	}
+async fn viewer(Extension(req): Extension<RequestContext>) -> APIResult<Json<User>> {
+	Ok(Json(req.user().clone()))
 }
 
 async fn handle_login_attempt(
@@ -135,6 +149,13 @@ async fn handle_remove_earliest_session(
 	}
 }
 
+#[derive(Debug, Serialize, Type, ToSchema)]
+#[serde(untagged)]
+pub enum LoginResponse {
+	User(User),
+	AccessToken { for_user: User, token: CreatedToken },
+}
+
 #[utoipa::path(
 	post,
 	path = "/api/v1/auth/login",
@@ -153,17 +174,32 @@ async fn login(
 	ConnectInfo(request_info): ConnectInfo<StumpRequestInfo>,
 	session: Session,
 	State(state): State<AppState>,
+	Query(AuthenticationOptions {
+		generate_token,
+		create_session,
+	}): Query<AuthenticationOptions>,
 	Json(input): Json<LoginOrRegisterArgs>,
-) -> APIResult<Json<User>> {
-	if let Some(user) = session.get::<User>(SESSION_USER_KEY)? {
-		if input.username == user.username {
-			return Ok(Json(user));
-		}
+) -> APIResult<Json<LoginResponse>> {
+	match get_session_user(&session).await? {
+		Some(user) if user.username == input.username => {
+			// TODO: should this be tracked?
+			// TODO: should this be permission gated?
+			if generate_token {
+				let token = create_user_jwt(&user.id, &state.config)?;
+				return Ok(Json(LoginResponse::AccessToken {
+					for_user: user,
+					token,
+				}));
+			}
+
+			return Ok(Json(LoginResponse::User(user)));
+		},
+		_ => {},
 	}
 
 	let client = state.db.clone();
 	let today: DateTime<FixedOffset> = Utc::now().into();
-	// TODO: make this configurable via environment variable so knowledgable attackers can't bypass this
+	// TODO: make this configurable via environment variable so knowledgeable attackers can't bypass this
 	let twenty_four_hours_ago = today - Duration::hours(24);
 
 	let fetch_result = client
@@ -182,7 +218,7 @@ async fn login(
 			.order_by(user_login_activity::timestamp::order(Direction::Desc))
 			.take(10),
 		)
-		.with(user::sessions::fetch(vec![session::expires_at::gt(
+		.with(user::sessions::fetch(vec![session::expiry_time::gt(
 			Utc::now().into(),
 		)]))
 		.exec()
@@ -194,20 +230,24 @@ async fn login(
 				&& verify_password(&db_user.hashed_password, &input.password)? =>
 		{
 			Err(APIError::Forbidden(
-				"Account is locked. Please contact an administrator to unlock your account."
-					.to_string(),
+				api_error_message::LOCKED_ACCOUNT.to_string(),
 			))
 		},
 		Some(db_user) if !db_user.is_locked => {
 			let user_id = db_user.id.clone();
 			let matches = verify_password(&db_user.hashed_password, &input.password)?;
 			if !matches {
-				// TODO: make this configurable via environment variable so knowledgable attackers can't bypass this
+				// TODO: make this configurable via environment variable so knowledgeable attackers can't bypass this
 				let should_lock_account = db_user
 					.login_activity
 					.as_ref()
 					// If there are 9 or more failed login attempts _in a row_, within a 24 hour period, lock the account
-					.map(|activity| !activity.iter().any(|activity| activity.authentication_successful) && activity.len() >= 9)
+					.map(|activity| {
+						!activity
+							.iter()
+							.any(|activity| activity.authentication_successful)
+							&& activity.len() >= 9
+					})
 					.unwrap_or(false);
 
 				handle_login_attempt(&client, db_user, user_agent, request_info, false)
@@ -228,7 +268,11 @@ async fn login(
 						.delete_many(vec![session::user_id::equals(user_id.clone())])
 						.exec()
 						.await?;
-					tracing::debug!(?removed_sessions_count, ?user_id, "Locked user account and removed all associated sessions")
+					tracing::debug!(
+						?removed_sessions_count,
+						?user_id,
+						"Locked user account and removed all associated sessions"
+					)
 				}
 
 				return Err(APIError::Unauthorized);
@@ -269,11 +313,21 @@ async fn login(
 			}
 
 			let user = User::from(updated_user);
-			session
-				.insert(SESSION_USER_KEY, user.clone())
-				.expect("Failed to write user to session");
 
-			Ok(Json(user))
+			if create_session {
+				session.insert(SESSION_USER_KEY, user.clone()).await?;
+			}
+
+			// TODO: should this be permission gated?
+			if generate_token {
+				let token = create_user_jwt(&user.id, &state.config)?;
+				Ok(Json(LoginResponse::AccessToken {
+					for_user: user,
+					token,
+				}))
+			} else {
+				Ok(Json(LoginResponse::User(user)))
+			}
 		},
 		_ => Err(APIError::Unauthorized),
 	}
@@ -289,14 +343,28 @@ async fn login(
 	)
 )]
 /// Destroys the session and logs the user out.
-async fn logout(session: Session) -> APIResult<()> {
-	session.delete();
-	if !matches!(session.deleted(), Some(SessionDeletion::Deleted)) {
-		return Err(APIError::InternalServerError(
-			"Failed to destroy session".to_string(),
-		));
-	}
-	Ok(())
+async fn logout(session: Session) -> APIResult<impl IntoResponse> {
+	session.delete().await?;
+
+	let body = serde_json::json!({
+		"status": 200,
+		"message": "OK",
+	});
+
+	let base_response = Json(body).into_response();
+
+	let (name, value) = delete_cookie_header();
+	let builder = Response::builder()
+		.status(200)
+		.header("Content-Type", "application/json")
+		.header(name, value);
+
+	Ok(builder
+		.body(base_response.into_body())
+		.unwrap_or_else(|error| {
+			tracing::error!(?error, "Failed to build response");
+			(StatusCode::INTERNAL_SERVER_ERROR, error.to_string()).into_response()
+		}))
 }
 
 #[utoipa::path(
@@ -323,7 +391,7 @@ pub async fn register(
 
 	let mut is_server_owner = false;
 
-	let session_user = session.get::<User>(SESSION_USER_KEY)?;
+	let session_user = get_session_user(&session).await?;
 
 	// TODO: move nested if to if let once stable
 	if let Some(user) = session_user {
@@ -340,19 +408,19 @@ pub async fn register(
 		is_server_owner = true;
 	}
 
-	let hashed_password = bcrypt::hash(&input.password, ctx.config.password_hash_cost)?;
+	let hashed_password = hash_password(&input.password, &ctx.config)?;
 
 	let created_user = db
 		.user()
 		.create(
-			input.username.to_owned(),
+			input.username.clone(),
 			hashed_password,
 			vec![user::is_server_owner::set(is_server_owner)],
 		)
 		.exec()
 		.await?;
 
-	// TODO(prisma 0.7.0): Nested create
+	// TODO(prisma-nested-create): Refactor once nested create is supported
 	let _user_preferences = db
 		.user_preferences()
 		.create(vec![

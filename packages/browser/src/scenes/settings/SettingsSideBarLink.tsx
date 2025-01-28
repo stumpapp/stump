@@ -1,11 +1,10 @@
 import { cn } from '@stump/components'
 import { LucideIcon } from 'lucide-react'
-import React from 'react'
 import { Link } from 'react-router-dom'
 
 type Props = {
 	to: string
-	isActive: boolean
+	isActive?: boolean
 	isDisabled?: boolean
 	icon: LucideIcon
 	children: React.ReactNode

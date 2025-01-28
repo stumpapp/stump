@@ -1,17 +1,18 @@
 import { useLibraryQuery } from '@stump/client'
 import { Heading, Text } from '@stump/components'
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 
 import { formatBytes } from '../../utils/format'
 
 type Props = {
 	media: Media
 }
+// TODO: redesign!!
 export default function BookFileInformation({ media }: Props) {
 	const { library } = useLibraryQuery({
 		params: {
 			series: {
-				id: media.series_id,
+				id: [media.series_id],
 			},
 		},
 	})
@@ -41,12 +42,14 @@ export default function BookFileInformation({ media }: Props) {
 					Size: {formatBytes(media.size.valueOf())}
 				</Text>
 				<Text size="sm" variant="muted">
-					Kind: {media.extension?.toUpperCase()}
+					Format: {media.extension?.toUpperCase()}
 				</Text>
 			</div>
-			<Text size="sm" variant="muted" title={media.hash || ''}>
-				Hash: {formatHash(media.hash || '')}
-			</Text>
+			{media.hash && (
+				<Text size="sm" variant="muted" title={media.hash || ''}>
+					Hash: {formatHash(media.hash || '')}
+				</Text>
+			)}
 			<Text size="sm" variant="muted" title={media.path}>
 				Relative path: {formatPath(media.path || '')}
 			</Text>

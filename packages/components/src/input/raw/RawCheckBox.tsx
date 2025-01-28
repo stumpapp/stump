@@ -1,6 +1,7 @@
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox'
 import { cva, VariantProps } from 'class-variance-authority'
 import { Check } from 'lucide-react'
+import type { ComponentPropsWithoutRef, ElementRef } from 'react'
 import React from 'react'
 
 import { cn } from '../../utils'
@@ -20,7 +21,7 @@ export const RAW_CHECKBOX_ROUND_VARIANTS = {
 }
 export const RAW_CHECKBOX_VARIANTS = {
 	default: 'focus:ring-gray-400  dark:text-gray-50 dark:focus:ring-gray-400',
-	primary: 'focus:ring-brand-400 text-brand-400',
+	primary: 'focus:ring-edge-brand text-foreground-brand',
 }
 export const checkboxVariants = cva(RAW_CHECKBOX_BASE_CLASSES, {
 	defaultVariants: {
@@ -35,9 +36,9 @@ export const checkboxVariants = cva(RAW_CHECKBOX_BASE_CLASSES, {
 	},
 })
 
-export type RawCheckBoxRef = React.ElementRef<typeof CheckboxPrimitive.Root>
+export type RawCheckBoxRef = ElementRef<typeof CheckboxPrimitive.Root>
 export type RawCheckBoxProps = VariantProps<typeof checkboxVariants> &
-	React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
+	ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
 
 export const RawCheckBox = React.forwardRef<RawCheckBoxRef, RawCheckBoxProps>(
 	({ className, variant, size, rounded, ...props }, ref) => (
@@ -45,6 +46,7 @@ export const RawCheckBox = React.forwardRef<RawCheckBoxRef, RawCheckBoxProps>(
 			ref={ref}
 			className={cn(checkboxVariants({ className, rounded, size, variant }))}
 			{...props}
+			data-testid={props.id}
 		>
 			<CheckboxPrimitive.Indicator className={cn('flex items-center justify-center')}>
 				<Check className={cn(RAW_CHECKBOX_SIZE_VARIANTS[size || 'default'], 'font-medium')} />

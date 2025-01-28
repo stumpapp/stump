@@ -1,8 +1,7 @@
-import { getMediaThumbnail } from '@stump/api'
-import { useMediaCursorQuery } from '@stump/client'
-import { Media } from '@stump/types'
+import { useMediaCursorQuery, useSDK } from '@stump/client'
+import { Media } from '@stump/sdk'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import React, { useCallback, useEffect } from 'react'
+import { Fragment, useCallback, useEffect, useRef } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { useMediaMatch } from 'rooks'
 
@@ -10,8 +9,9 @@ type Props = {
 	seriesId: string
 	onSelectBook: (book: Media) => void
 }
-// TODO: Create generlized VirtualizedGrid component and trim the reused logic
+// TODO: Create generalized VirtualizedGrid component and trim the reused logic
 export default function SeriesBookGrid({ seriesId, onSelectBook }: Props) {
+	const { sdk } = useSDK()
 	const {
 		media: books,
 		fetchNextPage,
@@ -25,7 +25,7 @@ export default function SeriesBookGrid({ seriesId, onSelectBook }: Props) {
 		},
 	})
 
-	const parentRef = React.useRef<HTMLDivElement>(null)
+	const parentRef = useRef<HTMLDivElement>(null)
 
 	const isAtLeastSmall = useMediaMatch('(min-width: 640px)')
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
@@ -98,11 +98,11 @@ export default function SeriesBookGrid({ seriesId, onSelectBook }: Props) {
 							}}
 						>
 							{rowVirtualizer.getVirtualItems().map((virtualRow) => (
-								<React.Fragment key={virtualRow.index}>
+								<Fragment key={virtualRow.index}>
 									{columnVirtualizer.getVirtualItems().map((virtualColumn) => {
 										const virtualPage = virtualRow.index * 4 + virtualColumn.index + 1
 										const book = books[virtualPage - 1]
-										const imageUrl = getMediaThumbnail(book?.id || '')
+										const imageUrl = sdk.media.thumbnailURL(book?.id || '')
 										return (
 											<div
 												key={virtualColumn.index}
@@ -116,7 +116,7 @@ export default function SeriesBookGrid({ seriesId, onSelectBook }: Props) {
 												}}
 											>
 												<div
-													className="relative flex w-[7rem] flex-1 flex-col space-y-1 overflow-hidden rounded-md border-[1.5px] border-edge-subtle bg-background shadow-sm transition-colors duration-100 hover:border-brand sm:w-[7.666rem] md:w-[9rem]"
+													className="relative flex w-[7rem] flex-1 flex-col space-y-1 overflow-hidden rounded-md border-[1.5px] border-edge-subtle bg-background shadow-sm transition-colors duration-100 hover:border-edge-brand sm:w-[7.666rem] md:w-[9rem]"
 													onClick={() => onSelectBook(book!)}
 												>
 													<div
@@ -129,7 +129,7 @@ export default function SeriesBookGrid({ seriesId, onSelectBook }: Props) {
 											</div>
 										)
 									})}
-								</React.Fragment>
+								</Fragment>
 							))}
 						</div>
 					</div>

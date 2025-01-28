@@ -1,13 +1,13 @@
 import { useLogsQuery } from '@stump/client'
 import { Card, Heading, Text, ToolTip } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { Log } from '@stump/types'
+import { Log } from '@stump/sdk'
 import { createColumnHelper, SortingState } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { CircleSlash2 } from 'lucide-react'
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 import { Table } from '@/components/table'
@@ -102,7 +102,6 @@ export default function PersistedLogsTable() {
 			direction: firstSort.desc ? 'desc' : 'asc',
 			job_id: jobId,
 			order_by: firstSort.id,
-			zero_based: true,
 		},
 	})
 	const pageCount = pageData?.total_pages ?? 1

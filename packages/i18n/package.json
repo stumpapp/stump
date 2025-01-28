@@ -1,17 +1,21 @@
 {
 	"name": "@stump/i18n",
-	"version": "0.0.5",
+	"version": "0.0.9",
 	"description": "",
 	"main": "src/index.ts",
 	"exports": {
 		".": "./src/index.ts"
+	},
+	"scripts": {
+		"check-types": "tsc -b tsconfig.json",
+		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
+		"nuke": "rimraf node_modules"
 	},
 	"license": "MIT",
 	"devDependencies": {
 		"typescript": "^5.4.5"
 	},
 	"dependencies": {
-		"@stump/types": "*",
 		"react": "^18.2.0"
 	}
 }

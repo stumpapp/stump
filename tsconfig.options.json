@@ -20,8 +20,7 @@
 		"skipLibCheck": true,
 		"paths": {
 			"@stump/client": ["./packages/client"],
-			"@stump/api": ["./packages/api"],
-			"@stump/types": ["./packages/types"],
+			"@stump/sdk": ["./packages/sdk"],
 			"@stump/browser": ["./packages/browser"]
 		}
 	}

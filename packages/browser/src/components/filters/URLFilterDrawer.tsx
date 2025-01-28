@@ -1,6 +1,6 @@
 import { Button, IconButton, Sheet, ToolTip } from '@stump/components'
 import { Bolt } from 'lucide-react'
-import React, { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useMediaMatch } from 'rooks'
 
 import { clearFilters, getActiveFilterCount, useFilterContext } from '.'
@@ -35,7 +35,6 @@ export default function URLFilterDrawer({ entity }: Props) {
 		} else if (entity === 'series') {
 			return <SeriesFilterForm />
 		} else {
-			console.debug('Not implemented yet')
 			return null
 		}
 	}
@@ -62,7 +61,7 @@ export default function URLFilterDrawer({ entity }: Props) {
 
 						{activeFilters > 0 && (
 							<span className="absolute right-0 top-0 -mr-1.5 -mt-1.5 flex h-4 w-4">
-								<span className="relative inline-flex h-4 w-4 items-center justify-center rounded-full bg-brand">
+								<span className="relative inline-flex h-4 w-4 items-center justify-center rounded-full bg-fill-brand">
 									<span className="text-xxs font-semibold text-white">{activeFilters}</span>
 								</span>
 							</span>

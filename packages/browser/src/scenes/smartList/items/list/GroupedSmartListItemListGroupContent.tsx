@@ -1,12 +1,14 @@
-import { getMediaThumbnail } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { Accordion, cn, Text } from '@stump/components'
-import { Media } from '@stump/types'
+import { Media } from '@stump/sdk'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import React from 'react'
+import { useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
 
+import { EntityImage } from '@/components/entity'
 import { usePreferences } from '@/hooks'
 import paths from '@/paths'
+import { formatBookName } from '@/utils/format'
 
 export const ACCORDION_CONTENT_ITEM_HEIGHT = 64
 
@@ -16,11 +18,12 @@ type Props = {
 }
 
 export default function GroupedSmartListItemListGroupContent({ books }: Props) {
-	const scrollRef = React.useRef<HTMLDivElement>(null)
+	const { sdk } = useSDK()
+	const scrollRef = useRef<HTMLDivElement>(null)
 
 	const rowVirtualizer = useVirtualizer({
 		count: books.length,
-		estimateSize: React.useCallback(() => ACCORDION_CONTENT_ITEM_HEIGHT, []),
+		estimateSize: useCallback(() => ACCORDION_CONTENT_ITEM_HEIGHT, []),
 		getScrollElement: () => scrollRef.current,
 		overscan: 5,
 	})
@@ -53,10 +56,6 @@ export default function GroupedSmartListItemListGroupContent({ books }: Props) {
 								return null
 							}
 
-							const { name, metadata } = book
-
-							const resolvedName = metadata?.title || name
-
 							return (
 								<div
 									key={key}
@@ -73,10 +72,13 @@ export default function GroupedSmartListItemListGroupContent({ books }: Props) {
 										to={paths.bookOverview(book.id)}
 										className="flex h-full w-full items-center px-2 hover:bg-background-surface"
 									>
-										<img className="h-12 w-auto rounded-sm" src={getMediaThumbnail(book.id)} />
+										<EntityImage
+											className="h-12 w-auto rounded-sm"
+											src={sdk.media.thumbnailURL(book.id)}
+										/>
 										<div className="flex flex-1 flex-col space-y-1.5 self-start px-2 pt-2">
 											<Text size="sm" className="line-clamp-1">
-												{resolvedName}
+												{formatBookName(book)}
 											</Text>
 										</div>
 									</Link>

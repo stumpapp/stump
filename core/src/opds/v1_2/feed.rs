@@ -1,13 +1,18 @@
-//! This module defines a struct,[OpdsFeed], for representing an OPDS catalogue feed document
+//! This module defines a struct,[`OpdsFeed`], for representing an OPDS catalogue feed document
 //! as specified at https://specs.opds.io/opds-1.2#2-opds-catalog-feed-documents
+
+use std::collections::HashMap;
 
 use crate::{
 	error::CoreError,
-	opds::v1_2::link::OpdsLink,
+	opds::v1_2::{
+		entry::{IntoOPDSEntry, OPDSEntryBuilder},
+		link::OpdsLink,
+	},
 	prisma::{library, series},
+	utils::chain_optional_iter,
 };
 use prisma_client_rust::chrono::{self, DateTime, Utc};
-use tracing::warn;
 use xml::{writer::XmlEvent, EventWriter};
 
 use super::{
@@ -40,28 +45,6 @@ impl OpdsFeed {
 			entries,
 			links,
 		}
-	}
-
-	pub fn paginated<T>(
-		id: &str,
-		title: &str,
-		href_postfix: &str,
-		data: Vec<T>,
-		page: i64,
-		count: i64,
-	) -> OpdsFeed
-	where
-		OpdsEntry: From<T>,
-	{
-		(
-			id.to_string(),
-			title.to_string(),
-			href_postfix.to_string(),
-			data,
-			page,
-			count,
-		)
-			.into()
 	}
 
 	/// Build an xml string from the feed.
@@ -106,10 +89,55 @@ impl OpdsFeed {
 	}
 }
 
-// TODO: impl feeds for search results
+pub struct OPDSFeedBuilder {
+	api_key: Option<String>,
+}
 
-impl From<library::Data> for OpdsFeed {
-	fn from(library: library::Data) -> Self {
+#[derive(Debug, Default)]
+pub struct OPDSFeedBuilderPageParams {
+	pub page: i64,
+	pub count: i64,
+}
+
+#[derive(Debug, Default)]
+pub struct OPDSFeedBuilderParams {
+	pub id: String,
+	pub title: String,
+	pub entries: Vec<OpdsEntry>,
+	pub href_postfix: String,
+	pub page_params: Option<OPDSFeedBuilderPageParams>,
+	pub search: Option<String>,
+}
+
+impl OPDSFeedBuilder {
+	pub fn new(api_key: Option<String>) -> Self {
+		Self { api_key }
+	}
+
+	fn format_url(&self, path: &str) -> String {
+		if let Some(ref api_key) = self.api_key {
+			format!("/opds/{}/v1.2/{}", api_key, path)
+		} else {
+			format!("/opds/v1.2/{}", path)
+		}
+	}
+
+	fn format_params(&self, path: &str, params: HashMap<String, String>) -> String {
+		let mut url = self.format_url(path);
+		if !params.is_empty() {
+			url.push('?');
+			for (idx, (key, value)) in params.iter().enumerate() {
+				if idx == params.len() - 1 {
+					url.push_str(&format!("{}={}", key, value));
+				} else {
+					url.push_str(&format!("{}={}&", key, value));
+				}
+			}
+		}
+		url
+	}
+
+	pub fn library(&self, library: library::Data) -> Result<OpdsFeed, CoreError> {
 		let id = library.id.clone();
 		let title = library.name.clone();
 
@@ -117,167 +145,142 @@ impl From<library::Data> for OpdsFeed {
 			OpdsLink::new(
 				OpdsLinkType::Navigation,
 				OpdsLinkRel::ItSelf,
-				format!("/opds/v1.2/libraries/{}", id),
+				self.format_url(&format!("libraries/{}", id)),
 			),
 			OpdsLink::new(
 				OpdsLinkType::Navigation,
 				OpdsLinkRel::Start,
-				"/opds/v1.2/catalog".to_string(),
+				self.format_url("catalog"),
 			),
 		];
 
-		let entries = match library.series() {
-			Ok(series) => series.iter().cloned().map(OpdsEntry::from).collect(),
-			Err(e) => {
-				warn!("Failed to get series for library {}: {}", id, e);
-				vec![]
-			},
+		let Ok(series) = library.series().cloned() else {
+			return Ok(OpdsFeed::new(id, title, Some(links), vec![]));
 		};
 
-		Self::new(id, title, Some(links), entries)
+		let entries = series
+			.into_iter()
+			.map(|s| {
+				OPDSEntryBuilder::<series::Data>::new(s, self.api_key.clone())
+					.into_opds_entry()
+			})
+			.collect::<Vec<OpdsEntry>>();
+
+		Ok(OpdsFeed::new(id, title, Some(links), entries))
 	}
-}
 
-impl From<(library::Data, i64, i64)> for OpdsFeed {
-	fn from((library, page, count): (library::Data, i64, i64)) -> Self {
-		let id = library.id.clone();
-		let title = library.name.clone();
+	pub fn paginated(
+		self,
+		OPDSFeedBuilderParams {
+			id,
+			title,
+			entries,
+			href_postfix,
+			page_params,
+			search,
+		}: OPDSFeedBuilderParams,
+	) -> Result<OpdsFeed, CoreError> {
+		let OPDSFeedBuilderPageParams { page, count } = page_params.unwrap_or_default();
 
-		let href_postfix = format!("libraries/{}", &id);
+		let search_params = search
+			.as_ref()
+			.map(|s| ("search".to_string(), s.to_string()));
 
-		let data = library.series().unwrap_or(&Vec::new()).to_owned();
-
-		(id, title, href_postfix, data, page, count).into()
-
-		// let mut links = vec![
-		// 	OpdsLink::new(
-		// 		OpdsLinkType::Navigation,
-		// 		OpdsLinkRel::ItSelf,
-		// 		format!("/opds/v1.2/libraries/{}", id),
-		// 	),
-		// 	OpdsLink::new(
-		// 		OpdsLinkType::Navigation,
-		// 		OpdsLinkRel::Start,
-		// 		"/opds/v1.2/catalog".to_string(),
-		// 	),
-		// ];
-
-		// let entries = library
-		// 	.series()
-		// 	.unwrap_or(Vec::<series::Data>::new().as_ref())
-		// 	.to_owned()
-		// 	.into_iter()
-		// 	.map(OpdsEntry::from)
-		// 	.collect::<Vec<_>>();
-
-		// if page > 0 {
-		// 	links.push(OpdsLink {
-		// 		link_type: OpdsLinkType::Navigation,
-		// 		rel: OpdsLinkRel::Previous,
-		// 		href: format!("/opds/v1.2/libraries?page={}", page - 1),
-		// 	});
-		// }
-
-		// let total_pages = (count as f32 / 20.0).ceil() as u32;
-
-		// if page < total_pages as u32 && entries.len() == 20 {
-		// 	links.push(OpdsLink {
-		// 		link_type: OpdsLinkType::Navigation,
-		// 		rel: OpdsLinkRel::Next,
-		// 		href: format!("/opds/v1.2/libraries?page={}", page + 1),
-		// 	});
-		// }
-
-		// OpdsFeed::new(id, title, Some(links), entries)
-	}
-}
-
-impl From<(String, Vec<series::Data>, i64, i64)> for OpdsFeed {
-	/// Used in /opds/series?page={page}, converting the raw Vector of series into an OPDS feed.
-	/// The page URL param is also passed in, and is used when generating the OPDS links.
-	fn from((title, series, page, count): (String, Vec<series::Data>, i64, i64)) -> Self {
-		let entries = series.into_iter().map(OpdsEntry::from).collect::<Vec<_>>();
+		let this_params = chain_optional_iter(
+			[("page".to_string(), page.to_string())],
+			[search_params.clone()],
+		)
+		.into_iter()
+		.collect::<HashMap<_, _>>();
 
 		let mut links = vec![
-			OpdsLink {
-				link_type: OpdsLinkType::Navigation,
-				rel: OpdsLinkRel::ItSelf,
-				href: String::from("/opds/v1.2/series"),
-			},
-			OpdsLink {
-				link_type: OpdsLinkType::Navigation,
-				rel: OpdsLinkRel::Start,
-				href: String::from("/opds/v1.2/catalog"),
-			},
+			OpdsLink::new(
+				OpdsLinkType::Navigation,
+				OpdsLinkRel::ItSelf,
+				self.format_params(&href_postfix, this_params),
+			),
+			OpdsLink::new(
+				OpdsLinkType::Navigation,
+				OpdsLinkRel::Start,
+				self.format_url("catalog"),
+			),
 		];
 
 		if page > 0 {
+			let next_params = chain_optional_iter(
+				[("page".to_string(), (page - 1).to_string())],
+				[search_params.clone()],
+			)
+			.into_iter()
+			.collect::<HashMap<_, _>>();
+
 			links.push(OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Previous,
-				href: format!("/opds/v1.2/series?page={}", page - 1),
+				href: self.format_params(&href_postfix, next_params),
 			});
 		}
 
-		// TODO: this 20.0 is the page size, which I might make dynamic for OPDS routes... but
-		// not sure..
 		let total_pages = (count as f32 / 20.0).ceil() as u32;
 
 		if page < total_pages as i64 && entries.len() == 20 {
+			let next_params = chain_optional_iter(
+				[("page".to_string(), (page + 1).to_string())],
+				[search_params.clone()],
+			)
+			.into_iter()
+			.collect::<HashMap<_, _>>();
+
 			links.push(OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Next,
-				href: format!("/opds/v1.2/series?page={}", page + 1),
+				href: self.format_params(&href_postfix, next_params),
 			});
 		}
 
-		OpdsFeed::new("root".to_string(), title, Some(links), entries)
+		Ok(OpdsFeed::new(
+			id.to_string(),
+			title.to_string(),
+			Some(links),
+			entries,
+		))
 	}
-}
 
-impl<T> From<(String, String, String, Vec<T>, i64, i64)> for OpdsFeed
-where
-	OpdsEntry: From<T>,
-{
-	fn from(tuple: (String, String, String, Vec<T>, i64, i64)) -> OpdsFeed {
-		let (id, title, href_postfix, data, page, count) = tuple;
+	pub fn unpaged(
+		self,
+		OPDSFeedBuilderParams {
+			id,
+			title,
+			entries,
+			href_postfix,
+			search,
+			..
+		}: OPDSFeedBuilderParams,
+	) -> Result<OpdsFeed, CoreError> {
+		let search_params =
+			chain_optional_iter([], [search.map(|s| ("search".to_string(), s.clone()))])
+				.into_iter()
+				.collect::<HashMap<_, _>>();
 
-		let entries = data.into_iter().map(OpdsEntry::from).collect::<Vec<_>>();
-
-		let mut links = vec![
-			OpdsLink {
-				link_type: OpdsLinkType::Navigation,
-				rel: OpdsLinkRel::ItSelf,
-				href: format!("/opds/v1.2/{}", href_postfix),
-			},
-			OpdsLink {
-				link_type: OpdsLinkType::Navigation,
-				rel: OpdsLinkRel::Start,
-				href: "/opds/v1.2/catalog".into(),
-			},
+		let links = vec![
+			OpdsLink::new(
+				OpdsLinkType::Navigation,
+				OpdsLinkRel::ItSelf,
+				self.format_params(&href_postfix, search_params),
+			),
+			OpdsLink::new(
+				OpdsLinkType::Navigation,
+				OpdsLinkRel::Start,
+				self.format_url("catalog"),
+			),
 		];
 
-		if page > 0 {
-			links.push(OpdsLink {
-				link_type: OpdsLinkType::Navigation,
-				rel: OpdsLinkRel::Previous,
-				href: format!("/opds/v1.2/{}?page={}", href_postfix, page - 1),
-			});
-		}
-
-		// TODO: this 20.0 is the page size, which I might make dynamic for OPDS routes... but
-		// not sure..
-		let total_pages = (count as f32 / 20.0).ceil() as u32;
-
-		if page < total_pages as i64 && entries.len() == 20 {
-			links.push(OpdsLink {
-				link_type: OpdsLinkType::Navigation,
-				rel: OpdsLinkRel::Next,
-				href: format!("/opds/v1.2/{}?page={}", href_postfix, page + 1),
-			});
-		}
-
-		OpdsFeed::new(id, title, Some(links), entries)
+		Ok(OpdsFeed::new(
+			id.to_string(),
+			title.to_string(),
+			Some(links),
+			entries,
+		))
 	}
 }
 

@@ -1,4 +1,4 @@
-import { SupportedFont } from '@stump/types'
+import { SupportedFont } from '@stump/sdk'
 import { useEffect } from 'react'
 
 /**

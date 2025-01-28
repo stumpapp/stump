@@ -1,12 +1,15 @@
+pub(crate) mod filters;
+pub(crate) mod v1;
+
 use axum::Router;
 
 use crate::config::state::AppState;
 
-pub(crate) mod v1;
-
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new().nest("/api", Router::new().nest("/v1", v1::mount(app_state)))
 }
+
+// TODO: move codegen to api/mod.rs
 
 #[allow(unused_imports)]
 mod tests {
@@ -17,10 +20,27 @@ mod tests {
 		NamedType,
 	};
 
-	use super::v1::{
-		auth::*, book_club::*, emailer::*, epub::*, job::*, library::*, media::*,
-		metadata::*, series::*, smart_list::*, user::*, ClaimResponse, StumpVersion,
-		UpdateCheck,
+	use stump_core::config::StumpConfig;
+
+	use crate::{
+		config::jwt::CreatedToken,
+		filter::*,
+		routers::api::v1::{
+			api_key::*,
+			auth::*,
+			book_club::*,
+			config::*,
+			emailer::*,
+			epub::*,
+			job::*,
+			library::*,
+			media::{individual::*, thumbnails::*},
+			metadata::*,
+			series::*,
+			smart_list::*,
+			user::*,
+			ClaimResponse, StumpVersion, UpdateCheck,
+		},
 	};
 
 	#[allow(dead_code)]
@@ -28,14 +48,14 @@ mod tests {
 	where
 		T: NamedType,
 	{
-		export::<T>(&ExportConfiguration::new().bigint(BigIntExportBehavior::BigInt))
+		export::<T>(&ExportConfiguration::new().bigint(BigIntExportBehavior::Number))
 	}
 
 	#[test]
 	#[ignore]
 	fn codegen() -> Result<(), Box<dyn std::error::Error>> {
 		let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("../../packages/types")
+			.join("../../packages/sdk/src/types")
 			.join("generated.ts");
 
 		if !path.exists() {
@@ -56,6 +76,11 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<StumpVersion>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UpdateCheck>()?).as_bytes())?;
 		file.write_all(
+			format!("{}\n\n", ts_export::<AuthenticationOptions>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<CreatedToken>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LoginResponse>()?).as_bytes())?;
+		file.write_all(
 			format!("{}\n\n", ts_export::<LoginOrRegisterArgs>()?).as_bytes(),
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<CreateUser>()?).as_bytes())?;
@@ -64,6 +89,11 @@ mod tests {
 			format!("{}\n\n", ts_export::<UpdateUserPreferences>()?).as_bytes(),
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<DeleteUser>()?).as_bytes())?;
+
+		file.write_all(
+			format!("{}\n\n", ts_export::<CreateOrUpdateAPIKey>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<CreatedAPIKey>()?).as_bytes())?;
 
 		file.write_all(
 			format!("{}\n\n", ts_export::<EmailerIncludeParams>()?).as_bytes(),
@@ -85,6 +115,38 @@ mod tests {
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<PatchEmailDevice>()?).as_bytes())?;
 
+		file.write_all(format!("{}\n\n", ts_export::<LogFilter>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LibraryBaseFilter>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<LibraryRelationFilter>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<LibraryFilter>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<ReadStatus>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<MediaMetadataBaseFilter>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<MediaMetadataRelationFilter>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<MediaMetadataFilter>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<MediaBaseFilter>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<MediaFilter>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<BookRelations>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<SeriesBaseFilter>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<SeriesMetadataFilter>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<SeriesFilter>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<ValueOrRange<String>>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<Range<String>>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<UserQueryRelation>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<SeriesQueryRelation>()?).as_bytes(),
+		)?;
 		file.write_all(format!("{}\n\n", ts_export::<CreateLibrary>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UpdateLibrary>()?).as_bytes())?;
 		file.write_all(
@@ -92,6 +154,9 @@ mod tests {
 		)?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<CleanLibraryResponse>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<GenerateLibraryThumbnails>()?).as_bytes(),
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryStatsParams>()?).as_bytes())?;
 
@@ -139,7 +204,6 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<CreateBookClubSchedule>()?).as_bytes(),
 		)?;
-
 		file.write_all(
 			format!("{}\n\n", ts_export::<PatchMediaThumbnail>()?).as_bytes(),
 		)?;
@@ -163,6 +227,10 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<CreateOrUpdateSmartListView>()?).as_bytes(),
 		)?;
+
+		file.write_all(format!("{}\n\n", ts_export::<UploadConfig>()?).as_bytes())?;
+
+		file.write_all(format!("{}\n\n", ts_export::<StumpConfig>()?).as_bytes())?;
 
 		Ok(())
 	}

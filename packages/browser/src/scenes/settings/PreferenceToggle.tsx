@@ -1,5 +1,6 @@
 import { cx, Label, RawSwitch, Text } from '@stump/components'
-import React from 'react'
+
+// TODO: rename and relocate this component
 
 type Props = {
 	formId?: string
@@ -10,6 +11,7 @@ type Props = {
 	isDisabled?: boolean
 	title?: string
 }
+
 export default function PreferenceToggle({
 	formId,
 	label,
@@ -20,7 +22,7 @@ export default function PreferenceToggle({
 	title,
 }: Props) {
 	return (
-		<div className="flex items-center justify-between" title={title}>
+		<label htmlFor={formId} className="flex items-center justify-between" title={title}>
 			<div className="flex flex-grow flex-col gap-2 text-left">
 				<Label
 					htmlFor={formId}
@@ -49,6 +51,6 @@ export default function PreferenceToggle({
 				disabled={isDisabled}
 				variant="primary"
 			/>
-		</div>
+		</label>
 	)
 }

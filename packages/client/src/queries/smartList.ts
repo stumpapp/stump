@@ -1,4 +1,3 @@
-import { smartListApi, smartListQueryKeys } from '@stump/api'
 import {
 	CreateOrUpdateSmartList,
 	CreateOrUpdateSmartListView,
@@ -7,35 +6,48 @@ import {
 	SmartListItems,
 	SmartListMeta,
 	SmartListRelationOptions,
-} from '@stump/types'
+} from '@stump/sdk'
 import { useQueries, UseQueryResult } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import { useCallback } from 'react'
 
 import { MutationOptions, queryClient, QueryOptions, useMutation, useQuery } from '../client'
 import { QueryClientContext } from '../context'
+import { useSDK } from '../sdk'
 
-type UseBookClubsQueryOptions = QueryOptions<SmartList[]> & {
+type UseSmartListsQueryOptions = QueryOptions<SmartList[]> & {
 	params?: GetSmartListsParams
 }
-export function useSmartListsQuery({ params, ...options }: UseBookClubsQueryOptions = {}) {
+export function useSmartListsQuery({ params, ...options }: UseSmartListsQueryOptions = {}) {
+	const { sdk } = useSDK()
 	const { data, ...rest } = useQuery(
-		[smartListQueryKeys.getSmartLists, params],
-		async () => {
-			const { data } = await smartListApi.getSmartLists(params)
-			return data
-		},
+		[sdk.smartlist.keys.get, params],
+		async () => sdk.smartlist.get(params),
 		options,
 	)
 
 	return { lists: data, ...rest }
 }
 
-export const prefetchSmartList = (id: string) =>
-	queryClient.prefetchQuery([smartListQueryKeys.getSmartListById, id], async () => {
-		const { data } = await smartListApi.getSmartListById(id)
-		return data
-	})
+export const usePrefetchSmartList = () => {
+	const { sdk } = useSDK()
+	const prefetch = useCallback(
+		({ id }: { id: string }) =>
+			Promise.all([
+				queryClient.prefetchQuery([sdk.smartlist.keys.getByID, id], async () =>
+					sdk.smartlist.getByID(id),
+				),
+				queryClient.prefetchQuery([sdk.smartlist.keys.meta, id], async () =>
+					sdk.smartlist.meta(id),
+				),
+				queryClient.prefetchQuery([sdk.smartlist.keys.items, id], async () =>
+					sdk.smartlist.items(id),
+				),
+			]),
+		[sdk.smartlist],
+	)
+	return { prefetch }
+}
 
 // TODO: support params
 type UseSmartListQueryOptions = QueryOptions<SmartList> & {
@@ -43,12 +55,10 @@ type UseSmartListQueryOptions = QueryOptions<SmartList> & {
 }
 
 export function useSmartListQuery({ id, ...options }: UseSmartListQueryOptions) {
+	const { sdk } = useSDK()
 	const { data, ...rest } = useQuery(
-		[smartListQueryKeys.getSmartListById, id],
-		async () => {
-			const { data } = await smartListApi.getSmartListById(id)
-			return data
-		},
+		[sdk.smartlist.keys.getByID, id],
+		async () => sdk.smartlist.getByID(id),
 		options,
 	)
 
@@ -60,23 +70,29 @@ type UseSmartListMetaQueryOptions = QueryOptions<SmartListMeta> & {
 }
 
 export function useSmartListMetaQuery({ id, ...options }: UseSmartListMetaQueryOptions) {
+	const { sdk } = useSDK()
 	const { data, ...rest } = useQuery(
-		[smartListQueryKeys.getSmartListMeta, id],
-		async () => {
-			const { data } = await smartListApi.getSmartListMeta(id)
-			return data
-		},
+		[sdk.smartlist.keys.meta, id],
+		async () => sdk.smartlist.meta(id),
 		options,
 	)
 
 	return { meta: data, ...rest }
 }
 
-export const prefetchSmartListItems = (id: string) =>
-	queryClient.prefetchQuery([smartListQueryKeys.getSmartListItems, id], async () => {
-		const { data } = await smartListApi.getSmartListItems(id)
-		return data
-	})
+export const usePrefetchListItems = ({ id }: { id: string }) => {
+	const { sdk } = useSDK()
+
+	const prefetch = useCallback(
+		() =>
+			queryClient.prefetchQuery([sdk.smartlist.keys.items, id], async () =>
+				sdk.smartlist.items(id),
+			),
+		[sdk.smartlist, id],
+	)
+
+	return { prefetch }
+}
 
 // TODO: grouping override params
 // TODO: additional filter params (change the request to POST when those are provided)
@@ -84,12 +100,10 @@ type UseSmartListItemsQuery = QueryOptions<SmartListItems> & {
 	id: string
 }
 export function useSmartListItemsQuery({ id, ...options }: UseSmartListItemsQuery) {
+	const { sdk } = useSDK()
 	const { data, ...rest } = useQuery(
-		[smartListQueryKeys.getSmartListItems, id],
-		async () => {
-			const { data } = await smartListApi.getSmartListItems(id)
-			return data
-		},
+		[sdk.smartlist.keys.items, id],
+		async () => sdk.smartlist.items(id),
 		options,
 	)
 
@@ -101,22 +115,17 @@ type UseSmartListItemsWithMetaQuery = {
 	params?: SmartListRelationOptions
 }
 export function useSmartListWithMetaQuery({ id, params }: UseSmartListItemsWithMetaQuery) {
+	const { sdk } = useSDK()
 	const [listResult, metaResult] = useQueries({
 		context: QueryClientContext,
 		queries: [
 			{
-				queryFn: async () => {
-					const { data } = await smartListApi.getSmartListById(id, params)
-					return data
-				},
-				queryKey: [smartListQueryKeys.getSmartListById, id, params],
+				queryFn: async () => sdk.smartlist.getByID(id, params),
+				queryKey: [sdk.smartlist.keys.getByID, id, params],
 			},
 			{
-				queryFn: async () => {
-					const { data } = await smartListApi.getSmartListMeta(id)
-					return data
-				},
-				queryKey: [smartListQueryKeys.getSmartListMeta, id],
+				queryFn: async () => sdk.smartlist.meta(id),
+				queryKey: [sdk.smartlist.keys.meta, id],
 			},
 		],
 	})
@@ -132,18 +141,50 @@ export function useSmartListWithMetaQuery({ id, params }: UseSmartListItemsWithM
 	}
 }
 
+export function useCreateSmartList(
+	options: MutationOptions<SmartList, AxiosError, CreateOrUpdateSmartList> = {},
+) {
+	const { sdk } = useSDK()
+	const { mutate, mutateAsync, isLoading, ...restReturn } = useMutation(
+		[sdk.smartlist.keys.create],
+		async (params: CreateOrUpdateSmartList) => sdk.smartlist.create(params),
+		{
+			...options,
+			onSuccess: async (...args) => {
+				await queryClient.invalidateQueries([sdk.smartlist.keys.get], {
+					exact: false,
+				})
+				options.onSuccess?.(...args)
+			},
+		},
+	)
+
+	return {
+		create: mutate,
+		createAsync: mutateAsync,
+		isCreating: isLoading,
+		...restReturn,
+	}
+}
+
 // TODO: different types!
 type UseUpdateSmartListMutationOptions = {
 	id: string
 } & MutationOptions<SmartList, AxiosError, CreateOrUpdateSmartList>
-export function useUpdateSmartListMutation({ id, ...options }: UseUpdateSmartListMutationOptions) {
+export function useUpdateSmartList({ id, ...options }: UseUpdateSmartListMutationOptions) {
+	const { sdk } = useSDK()
 	const { mutate, mutateAsync, isLoading, ...restReturn } = useMutation(
-		[smartListQueryKeys.updateSmartList, id],
-		async (updates: CreateOrUpdateSmartList) => {
-			const { data } = await smartListApi.updateSmartList(id, updates)
-			return data
+		[sdk.smartlist.keys.update, id],
+		async (updates: CreateOrUpdateSmartList) => sdk.smartlist.update(id, updates),
+		{
+			...options,
+			onSuccess: async (...args) => {
+				await queryClient.invalidateQueries([sdk.smartlist.keys.getByID, id], {
+					exact: false,
+				})
+				options.onSuccess?.(...args)
+			},
 		},
-		options,
 	)
 
 	return {
@@ -155,19 +196,17 @@ export function useUpdateSmartListMutation({ id, ...options }: UseUpdateSmartLis
 }
 
 type UseDeleteSmartListMutationOptions = MutationOptions<SmartList, AxiosError, string>
-export function useDeleteSmartListMutation({
+export function useDeleteSmartList({
 	onSuccess,
 	...options
 }: UseDeleteSmartListMutationOptions = {}) {
+	const { sdk } = useSDK()
 	const { mutate, mutateAsync, isLoading, ...restReturn } = useMutation(
-		[smartListQueryKeys.deleteSmartList],
-		async (id: string) => {
-			const { data } = await smartListApi.deleteSmartList(id)
-			return data
-		},
+		[sdk.smartlist.keys.delete],
+		(id) => sdk.smartlist.delete(id),
 		{
 			onSuccess: async (...args) => {
-				await queryClient.invalidateQueries([smartListQueryKeys.getSmartLists], {
+				await queryClient.invalidateQueries([sdk.smartlist.keys.get], {
 					exact: false,
 				})
 				onSuccess?.(...args)
@@ -188,31 +227,27 @@ type UseSmartListViesManagerParams = {
 	listId: string
 }
 export function useSmartListViewsManager({ listId }: UseSmartListViesManagerParams) {
+	const { sdk } = useSDK()
 	const handleInvalidate = useCallback(
 		() =>
-			queryClient.invalidateQueries([smartListQueryKeys.getSmartListById, listId], {
+			queryClient.invalidateQueries([sdk.smartlist.keys.getByID, listId], {
 				exact: false,
 			}),
-		[listId],
+		[listId, sdk.smartlist],
 	)
 
 	const { mutateAsync: createView, isLoading: isCreating } = useMutation(
-		[smartListQueryKeys.createSmartListView, listId],
-		async (params: CreateOrUpdateSmartListView) => {
-			const { data } = await smartListApi.createSmartListView(listId, params)
-			return data
-		},
+		[sdk.smartlist.keys.createView, listId],
+		async (params: CreateOrUpdateSmartListView) => sdk.smartlist.createView(listId, params),
 		{
 			onSuccess: handleInvalidate,
 		},
 	)
 
 	const { mutateAsync: updateView, isLoading: isUpdating } = useMutation(
-		[smartListQueryKeys.updateSmartListView, listId],
-		async ({ originalName, ...params }: CreateOrUpdateSmartListView & { originalName: string }) => {
-			const { data } = await smartListApi.updateSmartListView(listId, originalName, params)
-			return data
-		},
+		[sdk.smartlist.keys.updateView, listId],
+		async ({ originalName, ...params }: CreateOrUpdateSmartListView & { originalName: string }) =>
+			sdk.smartlist.updateView(listId, originalName, params),
 		{
 			onSuccess: handleInvalidate,
 		},

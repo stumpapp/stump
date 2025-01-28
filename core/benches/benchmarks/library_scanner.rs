@@ -10,11 +10,11 @@ use stump_core::{
 	config::StumpConfig,
 	db::{
 		create_client_with_url,
-		entity::{Library, LibraryOptions},
+		entity::{Library, LibraryConfig},
 	},
 	filesystem::scanner::LibraryScanJob,
 	job::{Executor, WorkerCtx, WrappedJob},
-	prisma::{library, library_options, PrismaClient},
+	prisma::{library, library_config, PrismaClient},
 };
 use tempfile::{Builder as TempDirBuilder, TempDir};
 use tokio::{
@@ -40,7 +40,7 @@ impl Display for BenchmarkSize {
 }
 
 fn full_scan(c: &mut Criterion) {
-	static SIZES: [BenchmarkSize; 3] = [
+	static SIZES: [BenchmarkSize; 4] = [
 		BenchmarkSize {
 			series_count: 10,
 			media_per_series: 10,
@@ -54,10 +54,10 @@ fn full_scan(c: &mut Criterion) {
 			media_per_series: 100,
 		},
 		// Note: This benchmark is a time hog, so I have commented it out for now
-		// BenchmarkSize {
-		// 	series_count: 100,
-		// 	media_per_series: 1000,
-		// },
+		BenchmarkSize {
+			series_count: 100,
+			media_per_series: 1000,
+		},
 	];
 
 	let mut group = c.benchmark_group("full_scan");
@@ -129,7 +129,7 @@ async fn create_test_library(
 	let library_temp_dir = TempDirBuilder::new().prefix("ROOT").tempdir()?;
 	let library_temp_dir_path = library_temp_dir.path().to_str().unwrap().to_string();
 
-	let library_options = client.library_options().create(vec![]).exec().await?;
+	let library_config = client.library_config().create(vec![]).exec().await?;
 
 	let id = Uuid::new_v4().to_string();
 	let library = client
@@ -137,21 +137,19 @@ async fn create_test_library(
 		.create(
 			id.clone(),
 			library_temp_dir_path.clone(),
-			library_options::id::equals(library_options.id.clone()),
+			library_config::id::equals(library_config.id.clone()),
 			vec![library::id::set(id.clone())],
 		)
 		.exec()
 		.await?;
 
-	let library_options = client
-		.library_options()
+	let library_config = client
+		.library_config()
 		.update(
-			library_options::id::equals(library_options.id),
+			library_config::id::equals(library_config.id),
 			vec![
-				library_options::library::connect(library::id::equals(
-					library.id.clone(),
-				)),
-				library_options::library_id::set(Some(library.id.clone())),
+				library_config::library::connect(library::id::equals(library.id.clone())),
+				library_config::library_id::set(Some(library.id.clone())),
 			],
 		)
 		.exec()
@@ -192,7 +190,7 @@ async fn create_test_library(
 	tracing::info!("Library created!");
 
 	let library = Library {
-		library_options: LibraryOptions::from(library_options),
+		config: LibraryConfig::from(library_config),
 		..Library::from(library)
 	};
 
@@ -208,7 +206,8 @@ async fn setup_test(
 	let job = WrappedJob::new(LibraryScanJob {
 		id: library.id.clone(),
 		path: library.path.clone(),
-		options: Some(library.library_options.clone()),
+		config: Some(library.config.clone()),
+		options: Default::default(),
 	});
 
 	let job_id = Uuid::new_v4().to_string();

@@ -1,7 +1,7 @@
 import { useMediaByIdQuery } from '@stump/client'
 import { Badge, ButtonOrLink, Heading, Spacer, Text } from '@stump/components'
 import dayjs from 'dayjs'
-import sortBy from 'lodash.sortby'
+import sortBy from 'lodash/sortBy'
 import { Suspense, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
@@ -12,6 +12,7 @@ import { SceneContainer } from '@/components/container'
 import LinkBadge from '@/components/LinkBadge'
 import ReadMore from '@/components/ReadMore'
 import TagList from '@/components/tags/TagList'
+import { formatBookName } from '@/utils/format'
 
 import { useAppContext } from '../../context'
 import paths from '../../paths'
@@ -24,7 +25,7 @@ import BooksAfterCursor from './BooksAfterCursor'
 import DownloadMediaButton from './DownloadMediaButton'
 import EmailBookDropdown from './EmailBookDropdown'
 
-// TODO: redesign page?
+// TODO: redesign page!!
 // TODO: with metadata being collected now, there is a lot more information to display:
 // - publish date
 // - publisher
@@ -37,7 +38,7 @@ export default function BookOverviewScene() {
 	const canDownload = useMemo(() => checkPermission('file:download'), [checkPermission])
 	const canManage = useMemo(() => checkPermission('library:manage'), [checkPermission])
 
-	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
+	const isAtLeastTablet = useMediaMatch('(min-width: 640px)')
 
 	const { id } = useParams()
 	if (!id) {
@@ -46,15 +47,11 @@ export default function BookOverviewScene() {
 
 	const { media, isLoading, remove } = useMediaByIdQuery(id)
 
-	useEffect(
-		() => {
-			return () => {
-				remove()
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[],
-	)
+	useEffect(() => {
+		return () => {
+			remove()
+		}
+	}, [remove])
 
 	if (isLoading) {
 		return null
@@ -64,8 +61,8 @@ export default function BookOverviewScene() {
 
 	const renderHeader = () => {
 		return (
-			<div className="flex flex-col items-center text-center md:items-start md:text-left">
-				<Heading size="sm">{media.metadata?.title || media.name}</Heading>
+			<div className="flex flex-col items-center text-center tablet:items-start tablet:text-left">
+				<Heading size="sm">{formatBookName(media)}</Heading>
 
 				<BookLibrarySeriesLinks
 					libraryId={media.series?.library_id}
@@ -88,21 +85,21 @@ export default function BookOverviewScene() {
 		<SceneContainer>
 			<Suspense>
 				<Helmet>
-					<title>Stump | {media.metadata?.title || media.name || ''}</title>
+					<title>Stump | {formatBookName(media)}</title>
 				</Helmet>
 
 				<div className="flex h-full w-full flex-col gap-4">
-					<div className="flex flex-col items-center gap-3 md:mb-2 md:flex-row md:items-start">
+					<div className="flex flex-col items-center gap-3 tablet:mb-2 tablet:flex-row tablet:items-start">
 						<MediaCard media={media} readingLink variant="cover" />
-						<div className="flex h-full w-full flex-col gap-2 md:gap-4">
+						<div className="flex h-full w-full flex-col gap-2 tablet:gap-4">
 							{renderHeader()}
 							{completedAt && (
 								<Text size="xs" variant="muted">
 									Completed on {dayjs(completedAt).format('LLL')}
 								</Text>
 							)}
-							{isAtLeastMedium && <ReadMore text={media.metadata?.summary} />}
-							{!isAtLeastMedium && <Spacer />}
+							{isAtLeastTablet && <ReadMore text={media.metadata?.summary} />}
+							{!isAtLeastTablet && <Spacer />}
 
 							<div className="flex w-full flex-col gap-2 md:flex-row md:items-center">
 								<BookReaderDropdown book={media} />
@@ -126,7 +123,7 @@ export default function BookOverviewScene() {
 								<EmailBookDropdown mediaId={media.id} />
 							</div>
 
-							{!isAtLeastMedium && !!media.metadata?.summary && (
+							{!isAtLeastTablet && !!media.metadata?.summary && (
 								<div>
 									<Heading size="xs" className="mb-0.5">
 										Summary

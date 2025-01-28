@@ -1,5 +1,6 @@
 import { cva, VariantProps } from 'class-variance-authority'
 import { AlertCircle, AlertTriangle, CheckCircle, Info, LucideIcon } from 'lucide-react'
+import type { ComponentPropsWithoutRef } from 'react'
 import { forwardRef } from 'react'
 
 import { cn, cx } from '../utils'
@@ -41,17 +42,17 @@ export type AlertProps = {
 	icon?: LucideIcon | keyof typeof ALERT_ICONS
 	alignIcon?: 'center' | 'start'
 } & VariantProps<typeof alertVariants> &
-	React.ComponentPropsWithoutRef<'div'>
+	ComponentPropsWithoutRef<'div'>
 
 const Alert = forwardRef<HTMLDivElement, AlertProps>(
 	({ className, level, rounded, icon, alignIcon = 'center', children, ...props }, ref) => {
-		// TODO: implement me, inspriation from https://chakra-ui.com/docs/components/alert/usage
+		// TODO: implement me, inspiration from https://chakra-ui.com/docs/components/alert/usage
 
 		const renderIcon = () => {
 			let Icon: LucideIcon | null = null
 
 			if (typeof icon === 'string') {
-				Icon = ALERT_ICONS[level || 'info'] || ALERT_ICONS.info
+				Icon = ALERT_ICONS[icon || level || 'info'] || ALERT_ICONS.info
 			} else if (icon) {
 				Icon = icon
 			}
@@ -82,11 +83,17 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(
 					<div
 						className={cx(
 							'flex',
-							{ 'items-center': alignIcon === 'center' },
+							{ 'items-start md:items-center': alignIcon === 'center' },
 							{ 'items-start': alignIcon === 'start' },
 						)}
 					>
-						<div className="flex-shrink-0">{renderIcon()}</div>
+						<div
+							className={cn('flex-shrink-0', {
+								'mt-1 md:mt-0': alignIcon === 'center',
+							})}
+						>
+							{renderIcon()}
+						</div>
 						{children}
 					</div>
 				</div>
@@ -96,7 +103,7 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(
 )
 Alert.displayName = 'Alert'
 
-const AlertContent = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
+const AlertContent = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<'div'>>(
 	({ className, ...props }, ref) => {
 		return (
 			<div
@@ -109,7 +116,7 @@ const AlertContent = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'
 )
 AlertContent.displayName = 'AlertContent'
 
-const AlertTitle = forwardRef<HTMLHeadingElement, React.ComponentPropsWithoutRef<'h2'>>(
+const AlertTitle = forwardRef<HTMLHeadingElement, ComponentPropsWithoutRef<'h2'>>(
 	({ className, ...props }, ref) => {
 		return (
 			<AlertContext.Consumer>

@@ -1,4 +1,4 @@
-import type { User, UserPermission, UserPreferences } from '@stump/types'
+import type { User, UserPermission, UserPreferences } from '@stump/sdk'
 import { produce } from 'immer'
 import { create } from 'zustand'
 import { createJSONStorage, devtools, persist, StateStorage } from 'zustand/middleware'

@@ -1,6 +1,9 @@
-use crate::prisma::{
-	media::{self, WhereParam},
-	media_metadata, series, series_metadata,
+use crate::{
+	db::entity::{utils::apply_library_not_hidden_from_user_filter, User},
+	prisma::{
+		media::{self, WhereParam},
+		media_metadata, series, series_metadata,
+	},
 };
 use prisma_client_rust::{and, or};
 
@@ -53,4 +56,10 @@ pub fn apply_media_age_restriction(min_age: i32, restrict_on_unset: bool) -> Whe
 			]),
 		]
 	}
+}
+
+pub fn apply_media_library_not_hidden_for_user_filter(user: &User) -> Vec<WhereParam> {
+	vec![media::series::is(vec![series::library::is(vec![
+		apply_library_not_hidden_from_user_filter(user),
+	])])]
 }

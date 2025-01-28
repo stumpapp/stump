@@ -1,5 +1,4 @@
-import { NavigationMenu } from '@stump/components'
-import React from 'react'
+import { cn, NavigationMenu } from '@stump/components'
 
 import { EntityOptionProps } from '@/components/navigation/types'
 
@@ -8,8 +7,8 @@ const IS_DEVELOPMENT = import.meta.env.DEV
 // TODO: implement me
 
 type Props = EntityOptionProps
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default function BookClubNavigationItem(_: Props) {
+
+export default function BookClubNavigationItem({ width }: Props) {
 	if (!IS_DEVELOPMENT) {
 		return null
 	}
@@ -20,7 +19,14 @@ export default function BookClubNavigationItem(_: Props) {
 				Book clubs
 			</NavigationMenu.Trigger>
 			<NavigationMenu.Content>
-				<div className="p-4 md:w-[400px]">TODO make me</div>
+				<div
+					style={{ width }}
+					className={cn('flex min-h-[150px] gap-3 p-2', {
+						'md:w-[400px] lg:w-[500px]': !width,
+					})}
+				>
+					TODO make me
+				</div>
 			</NavigationMenu.Content>
 		</NavigationMenu.Item>
 	)

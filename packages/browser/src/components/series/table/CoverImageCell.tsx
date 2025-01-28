@@ -1,6 +1,8 @@
-import { seriesApi } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { Book } from 'lucide-react'
-import React, { useState } from 'react'
+import { useState } from 'react'
+
+import { EntityImage } from '@/components/entity'
 
 type Props = {
 	/**
@@ -14,12 +16,13 @@ type Props = {
 }
 
 export default function CoverImageCell({ id, title }: Props) {
+	const { sdk } = useSDK()
 	const [showFallback, setShowFallback] = useState(false)
 
 	const loadImage = () => {
 		const image = new Image()
 		return new Promise((resolve, reject) => {
-			image.src = seriesApi.getSeriesThumbnail(id)
+			image.src = sdk.series.thumbnailURL(id)
 			image.onload = () => resolve(image)
 			image.onerror = (e) => {
 				console.error('Image failed to load:', e)
@@ -32,7 +35,7 @@ export default function CoverImageCell({ id, title }: Props) {
 		try {
 			await loadImage()
 			setShowFallback(false)
-		} catch (e) {
+		} catch {
 			setShowFallback(true)
 		}
 	}
@@ -50,10 +53,10 @@ export default function CoverImageCell({ id, title }: Props) {
 	}
 
 	return (
-		<img
+		<EntityImage
 			title={title}
 			className="aspect-[2/3] h-14 w-auto rounded-sm object-cover"
-			src={seriesApi.getSeriesThumbnail(id)}
+			src={sdk.series.thumbnailURL(id)}
 			onError={() => setShowFallback(true)}
 		/>
 	)

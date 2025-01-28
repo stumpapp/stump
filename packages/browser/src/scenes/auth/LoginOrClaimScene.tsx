@@ -1,26 +1,32 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { isAxiosError } from '@stump/api'
-import { queryClient, useLoginOrRegister } from '@stump/client'
+import { queryClient, useLoginOrRegister, useSDK } from '@stump/client'
 import { Alert, Button, cx, Form, Heading, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { ShieldAlert } from 'lucide-react'
+import { isAxiosError } from '@stump/sdk'
+import { motion, Variants } from 'framer-motion'
+import { ArrowLeft, ArrowRight, ShieldAlert } from 'lucide-react'
+import { useCallback, useState } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
-import { Navigate } from 'react-router'
+import { useNavigate } from 'react-router'
 import { useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 
-import { useUserStore } from '@/stores'
+import { ConfiguredServersList } from '@/components/savedServer'
+import { useAppStore, useUserStore } from '@/stores'
 
 export default function LoginOrClaimScene() {
+	const navigate = useNavigate()
+
 	const [params] = useSearchParams()
-	const redirect = params.get('redirect') || '/'
+	const [redirect] = useState(() => params.get('redirect') || '/')
 
-	const { user, setUser } = useUserStore((store) => ({
-		setUser: store.setUser,
-		user: store.user,
-	}))
+	const [showServers, setShowServers] = useState(false)
 
+	const setUser = useUserStore((store) => store.setUser)
+	const isDesktop = useAppStore((store) => store.platform !== 'browser')
+
+	const { sdk } = useSDK()
 	const { t } = useLocaleContext()
 	const {
 		isClaimed,
@@ -31,7 +37,16 @@ export default function LoginOrClaimScene() {
 		isRegistering,
 		loginError,
 	} = useLoginOrRegister({
-		onSuccess: setUser,
+		onSuccess: async (user) => {
+			setUser(user)
+			await queryClient.refetchQueries([sdk.auth.keys.me], { exact: false })
+			if (redirect.includes('/swagger')) {
+				window.location.href = redirect
+			} else {
+				navigate(redirect, { replace: true })
+			}
+		},
+		refetchClaimed: !showServers,
 	})
 
 	const schema = z.object({
@@ -43,49 +58,34 @@ export default function LoginOrClaimScene() {
 		resolver: zodResolver(schema),
 	})
 
-	async function handleSubmit(values: FieldValues) {
-		const { username, password } = values
-		const doLogin = async (firstTime = false) =>
-			toast.promise(loginUser({ password, username }), {
-				error: t('authScene.toasts.loginFailed'),
-				loading: t('authScene.toasts.loggingIn'),
-				success: firstTime
-					? t('authScene.toasts.loggedInFirstTime')
-					: t('authScene.toasts.loggedIn'),
-			})
-		if (isClaimed) {
+	const login = useCallback(
+		async ({ username, password }: FieldValues) => {
 			try {
-				await doLogin()
-			} catch (_) {
-				// We already report the error from above with toast, but
-				// it still throws there error (annoyingly). In order for
-				// the form to not log up (i.e. get stuck in submitting state)
-				// we need to at the very least catch the error here
+				await loginUser({ password, username })
+			} catch (error) {
+				console.error('Error logging in:', error)
+				toast.error(t('authScene.toasts.loginFailed'))
 			}
-		} else {
-			toast
-				.promise(registerUser({ password, username }), {
-					error: t('authScene.toasts.registrationFailed'),
-					loading: t('authScene.toasts.registering'),
-					success: t('authScene.toasts.registered'),
-				})
-				.then(() => doLogin(true))
-		}
-	}
+		},
+		[loginUser, t],
+	)
 
-	if (user) {
-		queryClient.invalidateQueries(['getLibraries'])
-		// NOTE: if swagger UI, we need a redirect outside of react-router context, otherwise
-		// we will get a 404 trying to route to a server-rendered page via react-router
-		if (redirect.includes('/swagger')) {
-			window.location.href = redirect
-			return null
-		}
-
-		return <Navigate to={redirect} />
-	} else if (isCheckingClaimed) {
-		return null
-	}
+	const handleSubmit = useCallback(
+		async ({ username, password }: FieldValues) => {
+			if (isClaimed) {
+				await login({ password, username })
+			} else {
+				try {
+					await registerUser({ password, username })
+					await login({ password, username })
+				} catch (error) {
+					console.error('Error registering', error)
+					toast.error(t('authScene.toasts.registrationFailed'))
+				}
+			}
+		},
+		[isClaimed, login, registerUser, t],
+	)
 
 	const renderHeader = () => {
 		if (isClaimed) {
@@ -126,51 +126,120 @@ export default function LoginOrClaimScene() {
 		return null
 	}
 
+	if (isCheckingClaimed) {
+		return null
+	}
+
 	return (
-		<div className="flex h-full w-full flex-col items-center justify-center gap-8 bg-background p-4">
-			{renderHeader()}
-			{renderError()}
-
-			<Form
-				form={form}
-				onSubmit={handleSubmit}
-				className={cx(
-					{ 'w-full sm:max-w-md md:max-w-lg': !isClaimed },
-					{ 'min-w-[20rem]': isClaimed },
-				)}
+		<div data-tauri-drag-region className="flex h-screen w-screen items-center bg-background">
+			<motion.div
+				className="w-screen shrink-0"
+				animate={showServers ? 'appearOut' : 'appearIn'}
+				variants={variants}
 			>
-				<Input
-					id="username"
-					label={t('authScene.form.labels.username')}
-					variant="primary"
-					autoComplete="username"
-					autoFocus
-					fullWidth
-					{...form.register('username')}
-				/>
+				<div className="flex h-full w-full flex-col items-center justify-center gap-8 bg-background p-4">
+					{renderHeader()}
+					{renderError()}
 
-				<Input
-					id="password"
-					label={t('authScene.form.labels.password')}
-					variant="primary"
-					type="password"
-					autoComplete="current-password"
-					fullWidth
-					{...form.register('password')}
-				/>
+					<Form
+						form={form}
+						onSubmit={handleSubmit}
+						className={cx(
+							{ 'w-full sm:max-w-md md:max-w-lg': !isClaimed },
+							{ 'min-w-[20rem]': isClaimed },
+						)}
+					>
+						<Input
+							id="username"
+							label={t('authScene.form.labels.username')}
+							variant="primary"
+							autoComplete="username"
+							autoCapitalize="off"
+							autoFocus
+							fullWidth
+							{...form.register('username')}
+						/>
 
-				<Button
-					size="md"
-					type="submit"
-					variant={isClaimed ? 'primary' : 'secondary'}
-					isLoading={isLoggingIn || isRegistering}
-					className="mt-2"
+						<Input
+							id="password"
+							label={t('authScene.form.labels.password')}
+							variant="primary"
+							type="password"
+							autoComplete="current-password"
+							fullWidth
+							{...form.register('password')}
+						/>
+
+						<Button
+							size="md"
+							type="submit"
+							variant={isClaimed ? 'primary' : 'secondary'}
+							isLoading={isLoggingIn || isRegistering}
+							className="mt-2"
+						>
+							{isClaimed
+								? t('authScene.form.buttons.login')
+								: t('authScene.form.buttons.createAccount')}
+						</Button>
+
+						{isDesktop && (
+							<button
+								className="group flex w-full items-center justify-between border-l border-edge p-4 transition-colors duration-100 hover:border-edge-strong hover:border-opacity-70 hover:bg-background-surface/50"
+								type="button"
+								onClick={() => setShowServers(true)}
+							>
+								<span className="text-sm font-semibold text-foreground-muted transition-colors duration-100 group-hover:text-foreground-subtle">
+									{t('common.goToServers')}
+								</span>
+
+								<ArrowRight className="h-5 w-5 text-foreground-muted group-hover:text-foreground-subtle" />
+							</button>
+						)}
+					</Form>
+				</div>
+			</motion.div>
+
+			{isDesktop && (
+				<motion.div
+					className="w-screen shrink-0"
+					animate={showServers ? 'appearIn' : 'appearOut'}
+					variants={variants}
 				>
-					{isClaimed
-						? t('authScene.form.buttons.login')
-						: t('authScene.form.buttons.createAccount')}
-				</Button>
-			</Form>
+					<div className="mx-auto flex h-full w-full max-w-sm flex-col justify-start gap-6 sm:max-w-md md:max-w-xl">
+						<ConfiguredServersList />
+						<button
+							className="group flex w-full items-center space-x-4 border-l border-edge p-4 transition-colors duration-100 hover:border-edge-strong hover:border-opacity-70 hover:bg-background-surface/50"
+							type="button"
+							onClick={() => setShowServers(false)}
+						>
+							<ArrowLeft className="h-5 w-5 text-foreground-muted group-hover:text-foreground-subtle" />
+
+							<span className="text-sm font-semibold text-foreground-muted transition-colors duration-100 group-hover:text-foreground-subtle">
+								{t('common.logIn')}
+							</span>
+						</button>
+					</div>
+				</motion.div>
+			)}
 		</div>
 	)
+}
+
+const variants: Variants = {
+	appearIn: {
+		display: 'block',
+		opacity: 1,
+		scale: 1,
+		transition: {
+			damping: 20,
+			delayChildren: 0.3,
+			stiffness: 150,
+			type: 'spring',
+		},
+	},
+	appearOut: {
+		display: 'none',
+		opacity: 0,
+		scale: 0.8,
+	},
 }

@@ -1,6 +1,5 @@
 import { Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import React from 'react'
 
 export default function ServerPublicURL() {
 	const { t } = useLocaleContext()
@@ -9,11 +8,12 @@ export default function ServerPublicURL() {
 	// TODO: debounced update of public URL
 
 	return (
-		<div>
+		<div title="This feature is not available yet">
 			<Input
 				label={t(getKey('label'))}
 				description={t(getKey('description'))}
 				placeholder="https://my-stump-instance.cloud"
+				disabled
 			/>
 		</div>
 	)

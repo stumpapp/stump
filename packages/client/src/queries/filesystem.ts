@@ -1,20 +1,51 @@
-import { filesystemApi, filesystemQueryKeys } from '@stump/api'
 import { AxiosError } from 'axios'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { queryClient, useQuery } from '../client'
+import { useSDK } from '../sdk'
 
-export const prefetchLibraryFiles = (path: string) =>
-	queryClient.prefetchQuery([filesystemQueryKeys.listDirectory, path, 1], async () => {
-		const { data } = await filesystemApi.listDirectory({ page: 1, path })
-		return data
-	})
+type PrefetchFileParams = {
+	path: string
+	fetchConfig?: boolean
+}
 
-export const prefetchFiles = (path: string) =>
-	queryClient.prefetchQuery([filesystemQueryKeys.listDirectory, path, 1], async () => {
-		const { data } = await filesystemApi.listDirectory({ page: 1, path })
-		return data
-	})
+export const usePrefetchFiles = ({ path, fetchConfig }: PrefetchFileParams) => {
+	const { sdk } = useSDK()
+
+	const prefetch = useCallback(
+		() =>
+			Promise.all([
+				queryClient.prefetchQuery([sdk.filesystem.keys.listDirectory, path], () =>
+					sdk.filesystem.listDirectory(),
+				),
+				...(fetchConfig
+					? [queryClient.prefetchQuery([sdk.upload.keys.config], () => sdk.upload.config())]
+					: []),
+			]),
+		[sdk, path, fetchConfig],
+	)
+
+	return { prefetch }
+}
+
+export const usePrefetchLibraryFiles = ({ path, fetchConfig }: PrefetchFileParams) => {
+	const { sdk } = useSDK()
+
+	const prefetch = useCallback(
+		() =>
+			Promise.all([
+				queryClient.prefetchQuery([sdk.filesystem.keys.listDirectory, path], () =>
+					sdk.filesystem.listDirectory(),
+				),
+				...(fetchConfig
+					? [queryClient.prefetchQuery([sdk.upload.keys.config], () => sdk.upload.config())]
+					: []),
+			]),
+		[sdk, path, fetchConfig],
+	)
+
+	return { prefetch }
+}
 
 export type DirectoryListingQueryParams = {
 	enabled: boolean
@@ -50,16 +81,14 @@ export function useDirectoryListing({
 	onGoForward,
 	onGoBack,
 }: DirectoryListingQueryParams) {
+	const { sdk } = useSDK()
 	const [currentPath, setCurrentPath] = useState(initialPath || null)
 	const [history, setHistory] = useState(currentPath ? [currentPath] : [])
 	const [currentIndex, setCurrentIndex] = useState(0)
 
-	const { isLoading, error, data } = useQuery(
-		[filesystemQueryKeys.listDirectory, currentPath, page],
-		async () => {
-			const { data } = await filesystemApi.listDirectory({ page, path: currentPath })
-			return data
-		},
+	const { isLoading, error, data, refetch } = useQuery(
+		[sdk.filesystem.keys.listDirectory, currentPath, page],
+		async () => sdk.filesystem.listDirectory({ page, path: currentPath }),
 		{
 			// Do not run query until `enabled` aka modal is opened.
 			enabled,
@@ -96,8 +125,25 @@ export function useDirectoryListing({
 		[enforcedRoot],
 	)
 
+	const isWindowsDriveRoot = (path: string | null) => {
+		if (path == null) {
+			return false
+		}
+
+		// eslint-disable-next-line no-useless-escape
+		const windowsRootRegex = /^[A-Z]:[\/\\]{1,2}$/i
+		return windowsRootRegex.test(path)
+	}
+
 	const setPath = useCallback(
-		(directory: string, direction: 1 | -1 = 1) => {
+		(directory: string | null, direction: 1 | -1 = 1) => {
+			// Handle nulling the path
+			if (directory == null) {
+				setCurrentPath(directory)
+				setCurrentIndex(0)
+				return
+			}
+
 			let newIndex = currentIndex + direction
 			let newHistory: string[]
 			// A -1 indicates that we don't have previous history when we called setPath, so we
@@ -124,10 +170,17 @@ export function useDirectoryListing({
 	}, [currentIndex])
 
 	const canGoBack = useMemo(() => {
-		return hasBackHistory || isPathAllowed(parent || '')
-	}, [hasBackHistory, parent, isPathAllowed])
+		return hasBackHistory || isWindowsDriveRoot(currentPath) || isPathAllowed(parent || '')
+	}, [hasBackHistory, parent, currentPath, isPathAllowed])
 
 	const goBackInHistory = useCallback(() => {
+		if (directoryListing?.parent == null && isWindowsDriveRoot(currentPath)) {
+			onGoBack?.(null)
+			setCurrentPath(null)
+			setCurrentIndex(0)
+			return
+		}
+
 		const parent = directoryListing?.parent || ''
 		// If there is no parent, we are at the root directory, so we don't want to go back.
 		if (!parent) {
@@ -145,16 +198,16 @@ export function useDirectoryListing({
 			setCurrentPath(directoryListing.parent)
 			setCurrentIndex((prev) => prev - 1)
 		}
-	}, [enforcedRoot, directoryListing, onGoBack])
+	}, [enforcedRoot, directoryListing, currentPath, onGoBack])
 
 	const goBack = useCallback(() => {
 		if (!canGoBack) return
-		if (hasBackHistory) {
+		if (hasBackHistory || isWindowsDriveRoot(currentPath)) {
 			goBackInHistory()
 		} else {
-			setPath(parent || '', -1)
+			setPath(parent || null, -1)
 		}
-	}, [hasBackHistory, canGoBack, goBackInHistory, parent, setPath])
+	}, [hasBackHistory, canGoBack, goBackInHistory, parent, currentPath, setPath])
 
 	const canGoForward = useMemo(() => {
 		return history.length > currentIndex + 1
@@ -196,6 +249,24 @@ export function useDirectoryListing({
 		isPathAllowed,
 		parent: directoryListing?.parent,
 		path: currentPath,
+		refetch,
 		setPath,
 	}
+}
+
+type UploadConfigQueryParams = {
+	enabled?: boolean
+}
+export const useUploadConfig = ({ enabled }: UploadConfigQueryParams) => {
+	const { sdk } = useSDK()
+	const { data: uploadConfig, ...restRet } = useQuery(
+		[sdk.upload.keys.config],
+		() => sdk.upload.config(),
+		{
+			suspense: true,
+			enabled,
+		},
+	)
+
+	return { uploadConfig, ...restRet }
 }

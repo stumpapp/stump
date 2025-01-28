@@ -1,7 +1,7 @@
-import { getMediaPage } from '@stump/api'
+import { useSDK } from '@stump/client'
 import { cx } from '@stump/components'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import React, { useCallback, useEffect } from 'react'
+import { Fragment, useCallback, useEffect, useRef } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { useMediaMatch } from 'rooks'
 
@@ -11,9 +11,10 @@ type Props = {
 	bookId: string
 	pages: number
 }
-// TODO: Create generlized VirtualizedGrid component and trim the reused logic
+// TODO: Create generalized VirtualizedGrid component and trim the reused logic
 export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage }: Props) {
-	const parentRef = React.useRef<HTMLDivElement>(null)
+	const { sdk } = useSDK()
+	const parentRef = useRef<HTMLDivElement>(null)
 
 	const isAtLeastSmall = useMediaMatch('(min-width: 640px)')
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
@@ -75,10 +76,10 @@ export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage
 							}}
 						>
 							{rowVirtualizer.getVirtualItems().map((virtualRow) => (
-								<React.Fragment key={virtualRow.index}>
+								<Fragment key={virtualRow.index}>
 									{columnVirtualizer.getVirtualItems().map((virtualColumn) => {
 										const virtualPage = virtualRow.index * 4 + virtualColumn.index + 1
-										const imageUrl = getMediaPage(bookId, virtualPage)
+										const imageUrl = sdk.media.bookPageURL(bookId, virtualPage)
 										return (
 											<div
 												key={virtualColumn.index}
@@ -93,8 +94,8 @@ export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage
 											>
 												<div
 													className={cx(
-														'relative flex w-[7rem] flex-1 flex-col space-y-1 overflow-hidden rounded-md border-[1.5px] border-edge bg-background shadow-sm transition-colors duration-100 hover:border-brand sm:w-[7.666rem] md:w-[9rem]',
-														{ 'border-brand': virtualPage === selectedPage },
+														'relative flex w-[7rem] flex-1 flex-col space-y-1 overflow-hidden rounded-md border-[1.5px] border-edge bg-background shadow-sm transition-colors duration-100 hover:border-edge-brand sm:w-[7.666rem] md:w-[9rem]',
+														{ 'border-edge-brand': virtualPage === selectedPage },
 													)}
 													onClick={() => onSelectPage(virtualPage)}
 												>
@@ -108,7 +109,7 @@ export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage
 											</div>
 										)
 									})}
-								</React.Fragment>
+								</Fragment>
 							))}
 						</div>
 					</div>

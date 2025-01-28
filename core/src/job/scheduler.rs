@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use crate::{
-	db::entity::LibraryOptions,
+	db::entity::LibraryConfig,
 	filesystem::scanner::LibraryScanJob,
 	job::WrappedJob,
 	prisma::{job_schedule_config, library},
@@ -66,12 +66,13 @@ impl JobScheduler {
 					interval.tick().await;
 
 					tracing::info!("Scanning libraries on schedule");
+					// TODO: optimize query with select!/include!
 					let libraries_to_scan = client
 						.library()
 						.find_many(vec![library::id::not_in_vec(
 							excluded_library_ids.clone(),
 						)])
-						.with(library::library_options::fetch())
+						.with(library::config::fetch())
 						.exec()
 						.await
 						.unwrap_or_else(|e| {
@@ -79,16 +80,15 @@ impl JobScheduler {
 							vec![]
 						});
 
-					for library in libraries_to_scan.iter() {
-						// TODO: support default scan mode on libraries
-						// let scan_mode = library.default_scan_mode.clone();
+					for library in &libraries_to_scan {
 						let library_path = library.path.clone();
-						let options = library.library_options().ok().take();
+						let config = library.config().ok().take();
 						let result =
 							scheduler_ctx.enqueue_job(WrappedJob::new(LibraryScanJob {
 								id: library.id.clone(),
 								path: library_path,
-								options: options.map(LibraryOptions::from),
+								config: config.map(LibraryConfig::from),
+								options: Default::default(),
 							}));
 						if result.is_err() {
 							tracing::error!(

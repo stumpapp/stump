@@ -1,4 +1,3 @@
-import { emailerApi, emailerQueryKeys } from '@stump/api'
 import {
 	CreateOrUpdateEmailDevice,
 	CreateOrUpdateEmailer,
@@ -8,21 +7,20 @@ import {
 	RegisteredEmailDevice,
 	SendAttachmentEmailsPayload,
 	SMTPEmailer,
-} from '@stump/types'
+} from '@stump/sdk'
 import { AxiosError } from 'axios'
 
 import { MutationOptions, queryClient, QueryOptions, useMutation, useQuery } from '../client'
+import { useSDK } from '../sdk'
 
 type UseEmailersQueryOptions = {
 	params?: EmailerIncludeParams
 } & QueryOptions<SMTPEmailer[]>
 export function useEmailersQuery({ params, ...options }: UseEmailersQueryOptions = {}) {
+	const { sdk } = useSDK()
 	const { data: emailers, ...restReturn } = useQuery(
-		[emailerQueryKeys.getEmailers, params],
-		async () => {
-			const { data } = await emailerApi.getEmailers(params)
-			return data
-		},
+		[sdk.emailer.keys.get, params],
+		async () => sdk.emailer.get(params),
 		options,
 	)
 
@@ -34,12 +32,10 @@ export function useEmailersQuery({ params, ...options }: UseEmailersQueryOptions
 
 type UseEmailerQueryOptions = { id: number } & QueryOptions<SMTPEmailer>
 export function useEmailerQuery({ id, ...options }: UseEmailerQueryOptions) {
+	const { sdk } = useSDK()
 	const { data: emailer, ...restReturn } = useQuery(
-		[emailerQueryKeys.getEmailerById, id],
-		async () => {
-			const { data } = await emailerApi.getEmailerById(id)
-			return data
-		},
+		[sdk.emailer.keys.getByID, id],
+		async () => sdk.emailer.getByID(id),
 		options,
 	)
 
@@ -55,19 +51,48 @@ type UseCreateEmailerOptions = { id: number } & MutationOptions<
 	CreateOrUpdateEmailer
 >
 export function useUpdateEmailer({ id, ...options }: UseCreateEmailerOptions) {
+	const { sdk } = useSDK()
 	const {
 		mutate: update,
 		mutateAsync: updateAsync,
 		...restReturn
-	} = useMutation(
-		[emailerQueryKeys.updateEmailer],
-		(params) => emailerApi.updateEmailer(id, params).then((res) => res.data),
-		options,
-	)
+	} = useMutation([sdk.emailer.keys.update], (params) => sdk.emailer.update(id, params), {
+		...options,
+		onSuccess: () =>
+			queryClient.invalidateQueries({
+				predicate: (query) =>
+					query.queryKey.some(
+						(key) => typeof key === 'string' && key.includes(sdk.emailer.keys.get),
+					),
+			}),
+	})
 
 	return {
 		update,
 		updateAsync,
+		...restReturn,
+	}
+}
+
+export function useDeleteEmailer() {
+	const { sdk } = useSDK()
+	const {
+		mutate: deleteEmailer,
+		mutateAsync: deleteEmailerAsync,
+		...restReturn
+	} = useMutation([sdk.emailer.keys.delete], (id: number) => sdk.emailer.delete(id), {
+		onSuccess: () =>
+			queryClient.invalidateQueries({
+				predicate: (query) =>
+					query.queryKey.some(
+						(key) => typeof key === 'string' && key.includes(sdk.emailer.keys.get),
+					),
+			}),
+	})
+
+	return {
+		deleteEmailer,
+		deleteEmailerAsync,
 		...restReturn,
 	}
 }
@@ -81,12 +106,10 @@ export function useEmailerSendHistoryQuery({
 	params,
 	...options
 }: UseEmailerSendHistoryQueryOptions) {
+	const { sdk } = useSDK()
 	const { data: sendHistory, ...restReturn } = useQuery(
-		[emailerQueryKeys.getEmailerSendHistory, emailerId, params],
-		async () => {
-			const { data } = await emailerApi.getEmailerSendHistory(emailerId, params)
-			return data
-		},
+		[sdk.emailer.keys.getSendHistory, emailerId, params],
+		async () => sdk.emailer.getSendHistory(emailerId, params),
 		options,
 	)
 
@@ -95,26 +118,22 @@ export function useEmailerSendHistoryQuery({
 		...restReturn,
 	}
 }
-export const prefetchEmailerSendHistory = async (
-	emailerId: number,
-	params?: EmailerSendRecordIncludeParams,
-) =>
-	queryClient.prefetchQuery(
-		[emailerQueryKeys.getEmailerSendHistory, emailerId, params],
-		async () => {
-			const { data } = await emailerApi.getEmailerSendHistory(emailerId, params)
-			return data
-		},
-	)
+export const usePrefetchEmailerSendHistory = ({ emailerId }: { emailerId: number }) => {
+	const { sdk } = useSDK()
+	const prefetch = (params?: EmailerSendRecordIncludeParams) =>
+		queryClient.prefetchQuery([sdk.emailer.keys.getSendHistory, emailerId, params], async () =>
+			sdk.emailer.getSendHistory(emailerId, params),
+		)
+
+	return { prefetch }
+}
 
 type UseEmailDevicesQueryOptions = QueryOptions<RegisteredEmailDevice[]>
 export function useEmailDevicesQuery(options: UseEmailDevicesQueryOptions = {}) {
+	const { sdk } = useSDK()
 	const { data, ...restReturn } = useQuery(
-		[emailerQueryKeys.getEmailDevices],
-		async () => {
-			const { data } = await emailerApi.getEmailDevices()
-			return data
-		},
+		[sdk.emailer.keys.getDevices],
+		async () => sdk.emailer.getDevices(),
 		{
 			suspense: true,
 			...options,
@@ -129,13 +148,14 @@ export function useEmailDevicesQuery(options: UseEmailDevicesQueryOptions = {}) 
 }
 
 export function useSendAttachmentEmail() {
+	const { sdk } = useSDK()
 	const {
 		mutate: send,
 		mutateAsync: sendAsync,
 		isLoading: isSending,
 		...restReturn
-	} = useMutation([emailerQueryKeys.sendAttachmentEmail], (payload: SendAttachmentEmailsPayload) =>
-		emailerApi.sendAttachmentEmail(payload).then((res) => res.data),
+	} = useMutation([sdk.emailer.keys.send], (payload: SendAttachmentEmailsPayload) =>
+		sdk.emailer.send(payload),
 	)
 
 	return {
@@ -147,11 +167,14 @@ export function useSendAttachmentEmail() {
 }
 
 export function useCreateEmailDevice() {
+	const { sdk } = useSDK()
 	const {
 		mutate: create,
 		mutateAsync: createAsync,
 		...restReturn
-	} = useMutation([emailerQueryKeys.createEmailDevice], emailerApi.createEmailDevice)
+	} = useMutation([sdk.emailer.keys.createDevice], (payload: CreateOrUpdateEmailDevice) =>
+		sdk.emailer.createDevice(payload),
+	)
 
 	return {
 		create,
@@ -166,15 +189,14 @@ type UseUpdateEmailDeviceOptions = { id: number } & MutationOptions<
 	CreateOrUpdateEmailDevice
 >
 export function useUpdateEmailDevice({ id, ...options }: UseUpdateEmailDeviceOptions) {
+	const { sdk } = useSDK()
 	const {
 		mutate: update,
 		mutateAsync: updateAsync,
 		...restReturn
 	} = useMutation(
-		[emailerQueryKeys.updateEmailDevice],
-		(payload: CreateOrUpdateEmailDevice) => {
-			return emailerApi.updateEmailDevice(id, payload).then((res) => res.data)
-		},
+		[sdk.emailer.keys.update],
+		(payload: CreateOrUpdateEmailDevice) => sdk.emailer.updateDevice(id, payload),
 		options,
 	)
 
@@ -186,12 +208,13 @@ export function useUpdateEmailDevice({ id, ...options }: UseUpdateEmailDeviceOpt
 }
 
 export function useDeleteEmailDevice() {
+	const { sdk } = useSDK()
 	const {
 		mutate: remove,
 		mutateAsync: removeAsync,
 		isLoading: isDeleting,
 		...restReturn
-	} = useMutation([emailerQueryKeys.deleteEmailDevice], emailerApi.deleteEmailDevice)
+	} = useMutation([sdk.emailer.keys.deleteDevice], (id: number) => sdk.emailer.deleteDevice(id))
 
 	return {
 		isDeleting,

@@ -26,8 +26,10 @@ pub struct Series {
 	pub description: Option<String>,
 	/// The status of the series since last scan or access
 	pub status: FileStatus,
+	// TODO(specta): replace with DateTime<FixedOffset>
 	/// The timestamp of when the series was last updated
 	pub updated_at: String,
+	// TODO(specta): replace with DateTime<FixedOffset>
 	/// The timestamp of when the series was created
 	pub created_at: String,
 	/// The ID of the library this series belongs to.
@@ -46,7 +48,7 @@ pub struct Series {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	#[specta(optional)]
 	pub unread_media_count: Option<i64>,
-	/// The user assigned tags for the series. ex: ["comic", "family"]. Will be `None` only if the relation is not loaded.
+	/// The user assigned tags for the series. ex: `["comic", "family"]`. Will be `None` only if the relation is not loaded.
 	#[serde(skip_serializing_if = "Option::is_none")]
 	#[specta(optional)]
 	pub tags: Option<Vec<Tag>>,
@@ -67,7 +69,7 @@ impl Series {
 		self.media_count = Some(count);
 	}
 
-	// TODO(prisma 0.7.0): Nested created
+	// TODO(prisma-nested-create): Refactor once nested create is supported
 	pub fn create_action(
 		self,
 	) -> (

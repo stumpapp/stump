@@ -1,14 +1,14 @@
-import { API, epubApi, epubQueryKeys, mediaQueryKeys, updateEpubProgress } from '@stump/api'
 import {
 	type EpubReaderPreferences,
 	queryClient,
 	useEpubLazy,
 	useEpubReader,
 	useQuery,
+	useSDK,
 } from '@stump/client'
-import { Bookmark, UpdateEpubProgress } from '@stump/types'
+import { Bookmark, UpdateEpubProgress } from '@stump/sdk'
 import { Book, Rendition } from 'epubjs'
-import uniqby from 'lodash.uniqby'
+import uniqby from 'lodash/uniqBy'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import AutoSizer from 'react-virtualized-auto-sizer'
@@ -22,7 +22,7 @@ import { stumpDark } from './themes'
 
 /** The props for the EpubJsReader component */
 type EpubJsReaderProps = {
-	/** The ID of the associated media entitiy for this epub */
+	/** The ID of the associated media entity for this epub */
 	id: string
 	/** The initial cfi to start the reader at, i.e. where the read left off */
 	initialCfi: string | null
@@ -65,6 +65,7 @@ type EpubLocationState = {
  * epub reader as an additional option.
  */
 export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
+	const { sdk } = useSDK()
 	const { theme } = useTheme()
 
 	const ref = useRef<HTMLDivElement>(null)
@@ -78,15 +79,9 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		epubPreferences: state.preferences,
 	}))
 
-	const { data: bookmarks } = useQuery([epubQueryKeys.getBookmarks, id], async () => {
-		try {
-			const { data } = await epubApi.getBookmarks(id)
-			return data
-		} catch (error) {
-			console.error('Failed to fetch bookmarks', error)
-			return []
-		}
-	})
+	const { data: bookmarks } = useQuery([sdk.epub.keys.getBookmarks, id], () =>
+		sdk.epub.getBookmarks(id),
+	)
 	const existingBookmarks = useMemo(
 		() =>
 			(bookmarks ?? []).reduce(
@@ -132,7 +127,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		if (iframe) {
 			iframe.focus()
 		} else {
-			console.debug('Failed to find iframe in epub reader')
+			console.warn('Failed to find iframe in epub reader')
 		}
 	}
 
@@ -167,14 +162,14 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	useEffect(() => {
 		if (!book) {
 			setBook(
-				new Book(`${API.getUri()}/media/${id}/file`, {
+				new Book(sdk.media.downloadURL(id), {
 					openAs: 'epub',
 					// @ts-expect-error: epubjs has incorrect types
 					requestCredentials: true,
 				}),
 			)
 		}
-	}, [book, epub, id])
+	}, [book, epub, id, sdk.media])
 
 	/**
 	 *	A function for applying the epub reader preferences to the epubjs rendition instance
@@ -197,56 +192,52 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	 * when the book is has been loaded. It will also set the initial location and theme
 	 * for the rendition.
 	 */
-	useEffect(
-		() => {
-			if (!book) return
+	useEffect(() => {
+		if (!book) return
 
-			book.ready.then(() => {
-				if (book.spine) {
-					const defaultLoc = book.rendition?.location?.start?.cfi
+		book.ready.then(() => {
+			if (book.spine) {
+				const defaultLoc = book.rendition?.location?.start?.cfi
 
-					const rendition_ = book.renderTo(ref.current!, {
-						height: '100%',
-						width: '100%',
-					})
+				const rendition_ = book.renderTo(ref.current!, {
+					height: '100%',
+					width: '100%',
+				})
 
-					//? TODO: I guess here I would need to wait for and load in custom theme blobs...
-					//* Color manipulation reference: https://github.com/futurepress/epub.js/issues/1019
-					rendition_.themes.register('stump-dark', stumpDark)
-					rendition_.on('relocated', handleLocationChange)
+				//? TODO: I guess here I would need to wait for and load in custom theme blobs...
+				//* Color manipulation reference: https://github.com/futurepress/epub.js/issues/1019
+				rendition_.themes.register('stump-dark', stumpDark)
+				rendition_.on('relocated', handleLocationChange)
 
-					// This callback is used to change the page when a keydown event is recieved.
-					const keydown_callback = (event: KeyboardEvent) => {
-						// Check arrow keys
-						if (event.key == 'ArrowLeft') {
-							rendition_.prev()
-						}
-						if (event.key == 'ArrowRight') {
-							rendition_.next()
-						}
+				// This callback is used to change the page when a keydown event is received.
+				const keydown_callback = (event: KeyboardEvent) => {
+					// Check arrow keys
+					if (event.key == 'ArrowLeft') {
+						rendition_.prev()
 					}
-					// The rendition fires keydown events when the epub page is in focus
-					rendition_.on('keydown', keydown_callback)
-					// When the epub page isn't in focus, the window fires them instead
-					window.addEventListener('keydown', keydown_callback)
-
-					applyEpubPreferences(rendition_, epubPreferences)
-					setRendition(rendition_)
-
-					const targetCfi = epub?.media_entity.active_reading_session?.epubcfi ?? initialCfi
-					if (targetCfi) {
-						rendition_.display(targetCfi)
-					} else if (defaultLoc) {
-						rendition_.display(defaultLoc)
-					} else {
-						rendition_.display()
+					if (event.key == 'ArrowRight') {
+						rendition_.next()
 					}
 				}
-			})
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[book],
-	)
+				// The rendition fires keydown events when the epub page is in focus
+				rendition_.on('keydown', keydown_callback)
+				// When the epub page isn't in focus, the window fires them instead
+				window.addEventListener('keydown', keydown_callback)
+
+				applyEpubPreferences(rendition_, epubPreferences)
+				setRendition(rendition_)
+
+				const targetCfi = epub?.media_entity.active_reading_session?.epubcfi ?? initialCfi
+				if (targetCfi) {
+					rendition_.display(targetCfi)
+				} else if (defaultLoc) {
+					rendition_.display(defaultLoc)
+				} else {
+					rendition_.display()
+				}
+			}
+		})
+	}, [book])
 
 	// TODO: this needs to have fullscreen as an effect dependency
 	/**
@@ -290,16 +281,11 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	 * preferences change. It will only run when the epub preferences change and the
 	 * rendition instance is set.
 	 */
-	useEffect(
-		() => {
-			if (rendition) {
-				applyEpubPreferences(rendition, epubPreferences)
-			}
-		},
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[rendition, epubPreferences, theme],
-	)
+	useEffect(() => {
+		if (rendition) {
+			applyEpubPreferences(rendition, epubPreferences)
+		}
+	}, [rendition, epubPreferences, theme])
 
 	/**
 	 * This effect is responsible for invalidating the in progress media query whenever
@@ -308,9 +294,9 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	 */
 	useEffect(() => {
 		return () => {
-			queryClient.invalidateQueries([mediaQueryKeys.getInProgressMedia], { exact: false })
+			queryClient.invalidateQueries([sdk.media.keys.inProgress], { exact: false })
 		}
-	}, [])
+	}, [sdk.media])
 
 	/**
 	 * A callback for when the reader should paginate forward. This will only run if the
@@ -417,7 +403,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		[book, rendition],
 	)
 
-	// TODO: suppport icognito mode that doesn't sync progress...
+	// TODO: support incognito mode that doesn't sync progress...
 	const spineSize = epub?.spine.length
 	/**
 	 * This effect is responsible for syncing the current epub progress information to
@@ -428,74 +414,69 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	 * this information, or the pieces of information needed to calculate it. Be sure to
 	 * review the comments in this effect carefully before making any changes.
 	 */
-	useEffect(
-		() => {
-			//* We can't do anything without the entity, so short circuit. This shouldn't
-			//* really happen, though.
-			if (!epub) return
+	useEffect(() => {
+		//* We can't do anything without the entity, so short circuit. This shouldn't
+		//* really happen, though.
+		if (!epub) return
 
-			/**
-			 *
-			 * @param payload The payload to send to the server. Contains all of the information
-			 * needed to update the progress of the epub.
-			 * @returns A promise which resolves to the updated progress information.
-			 */
-			const handleUpdateProgress = async (payload: UpdateEpubProgress) => {
-				try {
-					await updateEpubProgress({ ...payload, id: epub.media_entity.id })
-				} catch (err) {
-					console.error(err)
-				}
+		/**
+		 *
+		 * @param payload The payload to send to the server. Contains all of the information
+		 * needed to update the progress of the epub.
+		 * @returns A promise which resolves to the updated progress information.
+		 */
+		const handleUpdateProgress = async (payload: UpdateEpubProgress) => {
+			try {
+				await sdk.epub.updateProgress({ ...payload, id: epub.media_entity.id })
+			} catch (err) {
+				console.error(err)
+			}
+		}
+
+		if (!currentLocation) {
+			return
+		}
+
+		const { start, end, atEnd } = currentLocation
+
+		if (!start && !end) {
+			return
+		}
+
+		let percentage: number | null = null
+
+		if (spineSize) {
+			const currentChapterPage = start.displayed.page
+			const pagesInChapter = start.displayed.total
+
+			const chapterCount = spineSize //* not a great assumption
+			//* The percentage of the book that has been read based on the chapter index.
+			//* E.g. if you are on chapter 15 of 20, this will be 0.75.
+			const totalChapterPercentage = start.index / chapterCount
+			//* The percentage of the current chapter that has been read based on the page number.
+			//* E.g. if you are on page 2 of 20 in the current chapter, this will be 0.1.
+			const chapterPercentage = currentChapterPage / pagesInChapter
+			//* The percentage of the book that has been read based on the current page, assuming
+			//* that each chapter is the same length. This is obviously not ideal, but epubjs is
+			//* terrible and doesn't provide a better way to do this.
+			const naiveAdjustment = chapterPercentage * (1 / chapterCount)
+
+			const naiveTotal = totalChapterPercentage + naiveAdjustment
+			const isAtEnd = Math.abs(naiveTotal - 1) < 0.02
+			if (isAtEnd) {
+				//* if total is +- 0.02 of 1, then we are at the end of the book.
+				percentage = 1.0
+			} else {
+				percentage = naiveTotal
 			}
 
-			if (!currentLocation) {
-				return
-			}
-
-			const { start, end, atEnd } = currentLocation
-
-			if (!start && !end) {
-				return
-			}
-
-			let percentage: number | null = null
-
-			if (spineSize) {
-				const currentChapterPage = start.displayed.page
-				const pagesInChapter = start.displayed.total
-
-				const chapterCount = spineSize //* not a great assumption
-				//* The percentage of the book that has been read based on the chapter index.
-				//* E.g. if you are on chapter 15 of 20, this will be 0.75.
-				const totalChapterPercentage = start.index / chapterCount
-				//* The percentage of the current chapter that has been read based on the page number.
-				//* E.g. if you are on page 2 of 20 in the current chapter, this will be 0.1.
-				const chapterPercentage = currentChapterPage / pagesInChapter
-				//* The percentage of the book that has been read based on the current page, assuming
-				//* that each chapter is the same length. This is obviously not ideal, but epubjs is
-				//* terrible and doesn't provide a better way to do this.
-				const naiveAdjustment = chapterPercentage * (1 / chapterCount)
-
-				const naitveTotal = totalChapterPercentage + naiveAdjustment
-				const isAtEnd = Math.abs(naitveTotal - 1) < 0.02
-				if (isAtEnd) {
-					//* if total is +- 0.02 of 1, then we are at the end of the book.
-					percentage = 1.0
-				} else {
-					percentage = naitveTotal
-				}
-
-				handleUpdateProgress({
-					epubcfi: start.cfi,
-					is_complete: atEnd ?? percentage === 1.0,
-					percentage,
-				})
-			}
-		},
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[currentLocation, spineSize],
-	)
+			handleUpdateProgress({
+				epubcfi: start.cfi,
+				is_complete: atEnd ?? percentage === 1.0,
+				percentage,
+			})
+		}
+	}, [currentLocation, spineSize])
 
 	/**
 	 * A callback for attempting to extract preview text from a given cfi. This is used for bookmarks,

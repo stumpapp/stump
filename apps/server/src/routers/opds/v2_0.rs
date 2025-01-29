@@ -12,7 +12,10 @@ use prisma_client_rust::{and, operator, Direction};
 use stump_core::{
 	db::{
 		entity::{
-			macros::{active_reading_session_book_id, media_path_select},
+			macros::{
+				active_reading_session_book_id, library_name, media_path_select,
+				series_name,
+			},
 			utils::{
 				apply_media_age_restriction,
 				apply_media_library_not_hidden_for_user_filter,
@@ -430,6 +433,7 @@ async fn browse_library_by_id(
 	let library = client
 		.library()
 		.find_first(library_conditions.clone())
+		.select(library_name::select())
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound(String::from("Library not found")))?;
@@ -563,11 +567,7 @@ async fn browse_library_by_id(
 
 	Ok(Json(
 		OPDSFeedBuilder::default()
-			.metadata(
-				OPDSMetadataBuilder::default()
-					.title(library.name.to_string())
-					.build()?,
-			)
+			.metadata(OPDSMetadataBuilder::default().title(library.name).build()?)
 			.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
 				OPDSBaseLinkBuilder::default()
 					.href(format!("/opds/v2.0/libraries/{id}"))
@@ -800,6 +800,25 @@ async fn browse_series_by_id(
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
 
+	let series_name::Data { name, metadata } = ctx
+		.db
+		.series()
+		.find_first(
+			apply_series_restrictions_for_user(user)
+				.into_iter()
+				.chain([series::id::equals(id.clone())])
+				.collect(),
+		)
+		.select(series_name::select())
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound(String::from("Series not found")))?;
+
+	let title = metadata
+		.and_then(|m| m.title)
+		.or(Some(name))
+		.unwrap_or_else(|| format!("Series {}", id));
+
 	fetch_books_and_generate_feed(
 		&ctx,
 		OPDSLinkFinalizer::from(host),
@@ -807,7 +826,7 @@ async fn browse_series_by_id(
 		vec![media::series_id::equals(Some(id.clone()))],
 		media::name::order(Direction::Asc),
 		pagination.0,
-		"All Series",
+		&title,
 		&format!("/opds/v2.0/series/{id}"),
 	)
 	.await

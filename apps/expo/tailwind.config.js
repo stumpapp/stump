@@ -86,6 +86,7 @@ module.exports = {
 			},
 			screens: {
 				tablet: '640px',
+				xs: '375px',
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',

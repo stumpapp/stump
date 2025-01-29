@@ -13,7 +13,7 @@ import {
 	publication,
 } from '../types'
 import { ClassQueryKeys } from './types'
-import { createRouteURLHandler } from './utils'
+import { createRouteURLHandler, toUrlParams, urlWithParams } from './utils'
 
 /**
  * The root route for the OPDS v2 API
@@ -59,8 +59,12 @@ export class OPDSV2API extends APIBase {
 	 * A generic method to fetch an OPDS feed from a URL that may not be from a Stump server
 	 * @param url The full URL of the feed to fetch
 	 */
-	async feed(url: string): Promise<OPDSFeed> {
-		const { data } = await this.axios.get<OPDSFeed>(url, {
+	async feed(url: string, params?: PageQuery): Promise<OPDSFeed> {
+		const resolvedURL = urlWithParams(
+			`${url.endsWith('/') ? url.slice(0, -1) : url}`,
+			toUrlParams(params),
+		)
+		const { data } = await this.axios.get<OPDSFeed>(resolvedURL, {
 			baseURL: undefined,
 		})
 		return feedSchema.parse(data)

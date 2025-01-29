@@ -24,3 +24,8 @@ library::include!(library_thumbnails_deletion_include {
 		media: select { id }
 	}
 });
+
+library::select!(library_name {
+	id
+	name
+});

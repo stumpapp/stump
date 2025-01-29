@@ -3,9 +3,9 @@ import { useMemo } from 'react'
 import { Pressable, useWindowDimensions, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SimpleGrid } from 'react-native-super-grid'
-import { useActiveServer } from '~/components/activeServer'
 
-import { Text, icons } from '~/components/ui'
+import { useActiveServer } from '~/components/activeServer'
+import { icons, Text } from '~/components/ui'
 const { Crown, Slash } = icons
 
 export default function Screen() {
@@ -23,7 +23,7 @@ export default function Screen() {
 				// 2 columns on phones
 				(isTablet ? 4 : 2) -
 			16 * 2,
-		[isTablet],
+		[isTablet, width],
 	)
 
 	return (

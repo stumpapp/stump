@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios'
 
+import { constants } from '.'
 import { AuthenticationMethod, Configuration } from './configuration'
 import {
 	APIKeyAPI,
@@ -87,6 +88,11 @@ export class Api {
 		})
 		instance.interceptors.request.use((config) => {
 			config.headers = config.headers.concat(this.headers)
+			// config.headers = {
+			// 	...config.headers,
+			// 	...this.headers,
+			// 	[constants.STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
+			// }
 			if (this._basicAuth) {
 				config.auth = this._basicAuth
 			}
@@ -146,6 +152,10 @@ export class Api {
 		this._customHeaders = headers
 	}
 
+	get customHeaders(): Record<string, string> {
+		return this._customHeaders
+	}
+
 	/**
 	 * Get the URL of the Stump service
 	 */
@@ -190,8 +200,9 @@ export class Api {
 	 */
 	get headers(): Record<string, string> {
 		return {
-			...this._customHeaders,
+			...this.customHeaders,
 			...(this.authorizationHeader ? { Authorization: this.authorizationHeader } : {}),
+			foo: 'bar',
 		}
 	}
 

@@ -1,5 +1,5 @@
 import { SDKContext, StumpClientContextProvider } from '@stump/client'
-import { Api } from '@stump/sdk'
+import { Api, constants } from '@stump/sdk'
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { match, P } from 'ts-pattern'
@@ -48,8 +48,17 @@ export default function Screen() {
 				// TODO: figure out what the deal is otherwise. Session auth? Assume basic or sm?
 				.otherwise(() => new Api({ baseURL: url, authMethod: 'basic' }))
 
-			if (config?.customHeaders) {
-				instance.customHeaders = config.customHeaders
+			const customHeaders = {
+				...config?.customHeaders,
+				...('basic' in (config?.auth || {})
+					? {
+							[constants.STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
+						}
+					: {}),
+			}
+
+			if (Object.keys(customHeaders).length) {
+				instance.customHeaders = customHeaders
 			}
 
 			if (!instance.token && !instance.basicAuth) {

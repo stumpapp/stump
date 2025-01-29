@@ -20,7 +20,10 @@ export default function SavedServerListItem({ server, forceOPDS }: Props) {
 			const urlObj = new URL(url)
 			const host = urlObj.host
 			const domain = urlObj.hostname
-			return maskURLs ? `${host.replace(domain, domain.replace(/./g, '*'))}` : host
+
+			return maskURLs
+				? `${urlObj.protocol}//${host.replace(domain, domain.replace(/./g, '*'))}`
+				: `${urlObj.protocol}//${host}`
 		} catch {
 			return maskURLs ? url.replace(/./g, '*') : url
 		}

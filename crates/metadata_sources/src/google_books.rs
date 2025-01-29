@@ -1,7 +1,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::{schema_parser::parse_schema, SchemaOutput};
+use crate::ConfigSchema;
 
 use super::{MetadataOutput, MetadataSource, MetadataSourceError, MetadataSourceInput};
 
@@ -27,9 +27,9 @@ impl MetadataSource for GoogleBooksSource {
 		todo!("Gotta implement the metadata getter for Google Books still!")
 	}
 
-	fn get_config_schema(&self) -> Option<SchemaOutput> {
-		let schema = schemars::schema_for!(GoogleBooksConfig);
-		Some(parse_schema(schema))
+	fn get_config_schema(&self) -> Option<ConfigSchema> {
+		let root_schema = schemars::schema_for!(GoogleBooksConfig);
+		Some(ConfigSchema::from(root_schema))
 	}
 
 	fn get_default_config(&self) -> Option<String> {

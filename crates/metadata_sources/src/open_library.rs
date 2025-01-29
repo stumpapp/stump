@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use crate::SchemaOutput;
+use crate::ConfigSchema;
 
 use super::{MetadataOutput, MetadataSource, MetadataSourceError, MetadataSourceInput};
 
@@ -48,7 +48,7 @@ impl MetadataSource for OpenLibrarySource {
 		Ok(MetadataOutput { title, author })
 	}
 
-	fn get_config_schema(&self) -> Option<SchemaOutput> {
+	fn get_config_schema(&self) -> Option<ConfigSchema> {
 		None
 	}
 

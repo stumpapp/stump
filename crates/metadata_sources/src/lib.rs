@@ -4,7 +4,7 @@ mod schema_parser;
 
 use thiserror::Error;
 
-pub use schema_parser::{SchemaField, SchemaFieldType, SchemaOutput};
+pub use schema_parser::{ConfigSchema, SchemaField, SchemaFieldType};
 
 /// A constant containing a list of source identities for implementations of [`MetadataSource`].
 /// A source's identity must be inlcuded here or it will not be written to the database to be
@@ -32,7 +32,7 @@ pub trait MetadataSource {
 	) -> Result<MetadataOutput, MetadataSourceError>;
 
 	// TODO - Document
-	fn get_config_schema(&self) -> Option<SchemaOutput>;
+	fn get_config_schema(&self) -> Option<ConfigSchema>;
 
 	// TODO - Document
 	fn get_default_config(&self) -> Option<String>;

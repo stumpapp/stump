@@ -4,8 +4,8 @@ use utoipa::ToSchema;
 
 use crate::prisma;
 use metadata_sources::{
-	MetadataOutput, MetadataSourceError, MetadataSourceInput, SchemaField,
-	SchemaFieldType, SchemaOutput,
+	ConfigSchema, MetadataOutput, MetadataSourceError, MetadataSourceInput, SchemaField,
+	SchemaFieldType,
 };
 
 // A model representing a [`metadata_source::Data`] object in the database.
@@ -24,8 +24,8 @@ pub struct MetadataSourceSchema {
 	pub fields: Vec<MetadataSourceSchemaField>,
 }
 
-impl From<SchemaOutput> for MetadataSourceSchema {
-	fn from(value: SchemaOutput) -> Self {
+impl From<ConfigSchema> for MetadataSourceSchema {
+	fn from(value: ConfigSchema) -> Self {
 		Self {
 			fields: value
 				.fields

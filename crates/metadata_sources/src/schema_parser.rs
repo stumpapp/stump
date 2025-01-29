@@ -115,7 +115,7 @@ mod tests {
 	use schemars::{schema_for, JsonSchema};
 
 	#[test]
-	fn test_string_struct() {
+	fn test_string_schema() {
 		#[derive(JsonSchema)]
 		#[allow(dead_code)]
 		struct StringTest {
@@ -141,7 +141,7 @@ mod tests {
 	}
 
 	#[test]
-	fn test_int_struct() {
+	fn test_int_schema() {
 		#[derive(JsonSchema)]
 		#[allow(dead_code)]
 		struct IntTest {
@@ -167,7 +167,7 @@ mod tests {
 	}
 
 	#[test]
-	fn test_float_struct() {
+	fn test_float_schema() {
 		#[derive(JsonSchema)]
 		#[allow(dead_code)]
 		struct FloatTest {
@@ -193,7 +193,7 @@ mod tests {
 	}
 
 	#[test]
-	fn test_complex_struct() {
+	fn test_complex_schema() {
 		#[derive(JsonSchema)]
 		#[allow(dead_code)]
 		struct ComplexTest {
@@ -216,5 +216,13 @@ mod tests {
 		// rating: Float
 		let rating_field = output.fields.iter().find(|f| f.key == "rating").unwrap();
 		assert!(matches!(rating_field.field_type, SchemaFieldType::Float));
+
+		// This should work
+		let valid_json = r#"{ "name": "Big Slick", "age": 20, "rating": 3.14 }"#;
+		assert!(output.validate_config(valid_json));
+
+		// This should fail because the age is a string
+		let invalid_json = r#"{ "name": "Big Slick", "age": "Twenty", "rating": 3.14 }"#;
+		assert!(!output.validate_config(invalid_json));
 	}
 }

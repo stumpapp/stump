@@ -34,15 +34,12 @@ export default function Screen() {
 		),
 	)
 
-	console.log(readingOrder)
-
 	const safeMaxHeight = useMemo(() => height - insets.top - insets.bottom, [height, insets])
 
 	// TODO: make actually correct
 	const getPageSize = useCallback(
-		(page: (typeof readingOrder)[number], idx: number) => {
+		(idx: number) => {
 			if (!imageSizes[idx]) {
-				const { width } = page
 				return { width, height: safeMaxHeight }
 			} else {
 				const { ratio } = imageSizes[idx]
@@ -86,14 +83,7 @@ export default function Screen() {
 				data={readingOrder}
 				keyExtractor={({ href }) => href}
 				renderItem={({ item: { href }, index }) => {
-					const page = readingOrder[index]
-
-					const size = getPageSize(page, index)
-
-					console.log({
-						index,
-						size,
-					})
+					const size = getPageSize(index)
 
 					return (
 						<View

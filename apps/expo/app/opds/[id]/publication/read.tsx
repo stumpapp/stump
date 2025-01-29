@@ -34,12 +34,15 @@ export default function Screen() {
 		),
 	)
 
+	console.log(readingOrder)
+
 	const safeMaxHeight = useMemo(() => height - insets.top - insets.bottom, [height, insets])
 
 	// TODO: make actually correct
 	const getPageSize = useCallback(
 		(page: (typeof readingOrder)[number], idx: number) => {
 			if (!imageSizes[idx]) {
+				const { width } = page
 				return { width, height: safeMaxHeight }
 			} else {
 				const { ratio } = imageSizes[idx]
@@ -87,6 +90,11 @@ export default function Screen() {
 
 					const size = getPageSize(page, index)
 
+					console.log({
+						index,
+						size,
+					})
+
 					return (
 						<View
 							className="flex items-center justify-center"
@@ -108,6 +116,7 @@ export default function Screen() {
 									alignSelf: 'center',
 									height: size.height,
 									width: size.width,
+									maxWidth: width,
 								}}
 								onLoad={(event) => onImageLoaded(event, index)}
 							/>

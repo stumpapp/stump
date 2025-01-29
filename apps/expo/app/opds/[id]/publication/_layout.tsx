@@ -17,7 +17,9 @@ export default function Layout() {
 		},
 	)
 	const progressionURL = useMemo(
-		() => publication?.links?.find((link) => link.rel === 'http://opds-spec.org/acquisition')?.href,
+		() =>
+			publication?.links?.find((link) => link.rel === 'http://www.cantook.com/api/progression')
+				?.href,
 		[publication],
 	)
 	const { data: progression } = useQuery(
@@ -25,7 +27,7 @@ export default function Layout() {
 		() => sdk.opds.progression(progressionURL || ''),
 		{
 			suspense: true,
-			enabled: !!progressionURL,
+			enabled: false,
 		},
 	)
 

@@ -306,57 +306,57 @@
 					"description": "生成されたサムネイル画像の形式"
 				},
 				"quality": {
-					"label": "Quality",
-					"description": "The quality of the generated thumbnail images, between 0 and 1.0"
+					"label": "品質",
+					"description": "生成されたサムネイル画像の品質（0～1.0）"
 				}
 			},
 			"ignoreRules": {
 				"section": {
-					"heading": "Ignore rules",
-					"description": "Define glob patterns to ignore certain files or directories during a scan"
+					"heading": "無視ルール",
+					"description": "スキャン中に特定のファイルやディレクトリを無視するためのglobパターンを定義します。"
 				},
-				"noRules": "No ignore rules have been configured",
-				"save": "Save changes",
+				"noRules": "無視ルールが設定されていません",
+				"save": "変更を保存",
 				"addRule": {
-					"label": "New rule",
-					"description": "Glob pattern to ignore files or directories",
-					"addButton": "Add rule",
+					"label": "新規ルール",
+					"description": "ファイルやディレクトリを無視するglobパターン",
+					"addButton": "ルールを追加",
 					"ignoreParents": {
-						"title": "Ignore all parent directories",
-						"label": "Ignore parents"
+						"title": "すべての親ディレクトリを無視",
+						"label": "親を無視"
 					},
 					"ignoreSubdirs": {
-						"title": "Ignore all subdirectories",
-						"label": "Ignore subdirectories"
+						"title": "すべてのサブディレクトリを無視",
+						"label": "サブディレクトリを無視"
 					}
 				},
-				"invalidGlob": "Invalid glob pattern",
+				"invalidGlob": "無効なglobパターン",
 				"lockConfig": {
-					"lock": "Lock configuration",
-					"unlock": "Unlock configuration"
+					"lock": "設定をロック",
+					"unlock": "設定のロックを解除"
 				},
-				"editRule": "Edit rule",
-				"deleteRule": "Delete rule",
-				"cancelEdit": "Cancel edit",
-				"confirmEdit": "Confirm edit"
+				"editRule": "ルールの編集",
+				"deleteRule": "ルールを削除",
+				"cancelEdit": "編集をキャンセル",
+				"confirmEdit": "編集を確認"
 			},
 			"convertOptions": {
 				"section": {
-					"heading": "File conversion",
-					"description": "Stump is capable of converting certain file formats to more compatible ones"
+					"heading": "ファイルの変換",
+					"description": "Stumpは特定のファイル形式をより互換性のある形式に変換することができます"
 				},
 				"rarToZip": {
-					"label": "Convert RAR to ZIP",
-					"description": "Convert RAR/CBR files to ZIP/CBZ files during a scan"
+					"label": "RARをZIPに変換",
+					"description": "スキャン中にRAR/CBRファイルをZIP/CBZファイルに変換します"
 				},
 				"deleteRarAfter": {
-					"label": "Delete RAR after conversion",
-					"description": "Delete the original RAR/CBR file after conversion. This is irreversible"
+					"label": "変換後にRARを削除",
+					"description": "変換後に元のRAR/CBRファイルを削除します。元に戻すことはできません"
 				}
 			},
 			"scannerFeatures": {
 				"section": {
-					"heading": "Optional processing",
+					"heading": "処理オプション",
 					"description": "Opt-in processing features for the scanner",
 					"disclaimer": "These features involve additional file reads which may slow down the scan process"
 				},

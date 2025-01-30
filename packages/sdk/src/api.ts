@@ -1,6 +1,5 @@
 import axios, { AxiosInstance } from 'axios'
 
-import { constants } from '.'
 import { AuthenticationMethod, Configuration } from './configuration'
 import {
 	APIKeyAPI,

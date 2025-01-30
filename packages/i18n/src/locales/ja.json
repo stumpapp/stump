@@ -93,103 +93,103 @@
 				"member": {
 					"label": "メンバ",
 					"placeholder": "メンバ",
-					"description": "The name of the default role for your book club"
+					"description": "読書クラブのデフォルト役割名"
 				},
 				"moderator": {
-					"label": "Moderator",
-					"placeholder": "Moderator",
-					"description": "The name of the moderator role for your book club"
+					"label": "モデレーター",
+					"placeholder": "モデレーター",
+					"description": "読書クラブのモデレーターの役割名"
 				},
 				"admin": {
-					"label": "Admin",
-					"placeholder": "Admin",
-					"description": "The name of the admin role for your book club"
+					"label": "管理",
+					"placeholder": "管理",
+					"description": "読書クラブの管理者の役割名"
 				},
 				"creator": {
-					"label": "Creator",
-					"placeholder": "Creator",
-					"description": "The name of the creator role for your book club. This is you!"
+					"label": "作成者",
+					"placeholder": "作成者",
+					"description": "あなたの読書クラブの作成者の役割の名前。それはあなたです！"
 				}
 			},
 			"membershipOptions": {
 				"displayName": {
-					"label": "Display Name",
+					"label": "表示名",
 					"placeholder": "oromei",
-					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+					"description": "ブッククラブのメンバーシップの表示名（オプション）。設定されている場合ユーザー名よりも優先されます。"
 				},
 				"hideProgress": {
-					"label": "Hide Progress",
-					"description": "If enabled, your read progress will be hidden from other members of the book club"
+					"label": "進行状況を隠す",
+					"description": "有効にすると読書の進行状況は読書クラブの他のメンバーには表示されなくなります"
 				}
 			}
 		},
 		"validation": {
-			"missingName": "Name is required",
-			"alreadyTaken": "is already taken"
+			"missingName": "名前は必須です",
+			"alreadyTaken": "はすでに使われています。"
 		}
 	},
 	"createBookClubScene": {
-		"heading": "Create a new book club",
-		"subtitle": "You can create a private book club a select few, or make it public for anyone on the server to join",
+		"heading": "新しい読書クラブを作成",
+		"subtitle": "少数の人だけが参加できるプライベートな読書クラブを作成したり、サーバー上の誰でも参加できる公開読書クラブを作成することができます。",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "ステップ",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of the club, including its name and description"
+					"label": "基本",
+					"heading": "基本情報",
+					"description": "クラブの詳細（クラブ名や説明など）"
 				},
 				{
-					"label": "Roles",
-					"heading": "Roles",
-					"description": "Customize the roles in your book club"
+					"label": "役割",
+					"heading": "役割",
+					"description": "読書クラブの役割をカスタマイズする"
 				},
 				{
-					"label": "Membership",
-					"heading": "Membership Preferences",
-					"description": "Additional options for your book club"
+					"label": "メンバーシップ",
+					"heading": "メンバーシップの設定",
+					"description": "読書クラブ用の追加オプション"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your club settings before creating it"
+					"label": "レビュー",
+					"heading": "レビュー",
+					"description": "クラブを作成する前にクラブの設定を確認してください"
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "はい",
+				"no": "いいえ",
+				"none": "なし",
 				"labels": {
-					"name": "Name",
-					"description": "Description"
+					"name": "名前",
+					"description": "説明"
 				}
 			},
-			"submit": "Create Book Club"
+			"submit": "読書クラブを作成"
 		}
 	},
 	"bookClubSettingsScene": {
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "基本",
 			"members": {
-				"members": "Members",
-				"roles": "Roles",
-				"label": "Membership"
+				"members": "メンバー",
+				"roles": "役割",
+				"label": "メンバーシップ"
 			},
 			"scheduling": {
-				"scheduler": "Scheduler",
-				"options": "Options",
-				"label": "Scheduling"
+				"scheduler": "スケジューラ",
+				"options": "オプション",
+				"label": "スケジューリング"
 			},
 			"danger-zone": {
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"delete": "削除",
+				"label": "危険な操作"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this book club, including its name and description",
+			"title": "基本情報",
+			"description": "この読書クラブの詳細（名前や説明など）",
 			"form": {
-				"submit": "Update club"
+				"submit": "クラブを更新"
 			}
 		},
 		"members": {
@@ -306,103 +306,103 @@
 					"description": "生成されたサムネイル画像の形式"
 				},
 				"quality": {
-					"label": "Quality",
-					"description": "The quality of the generated thumbnail images, between 0 and 1.0"
+					"label": "品質",
+					"description": "生成されたサムネイル画像の品質（0～1.0）"
 				}
 			},
 			"ignoreRules": {
 				"section": {
-					"heading": "Ignore rules",
-					"description": "Define glob patterns to ignore certain files or directories during a scan"
+					"heading": "無視ルール",
+					"description": "スキャン中に特定のファイルやディレクトリを無視するためのglobパターンを定義します。"
 				},
-				"noRules": "No ignore rules have been configured",
-				"save": "Save changes",
+				"noRules": "無視ルールが設定されていません",
+				"save": "変更を保存",
 				"addRule": {
-					"label": "New rule",
-					"description": "Glob pattern to ignore files or directories",
-					"addButton": "Add rule",
+					"label": "新規ルール",
+					"description": "ファイルやディレクトリを無視するglobパターン",
+					"addButton": "ルールを追加",
 					"ignoreParents": {
-						"title": "Ignore all parent directories",
-						"label": "Ignore parents"
+						"title": "すべての親ディレクトリを無視",
+						"label": "親を無視"
 					},
 					"ignoreSubdirs": {
-						"title": "Ignore all subdirectories",
-						"label": "Ignore subdirectories"
+						"title": "すべてのサブディレクトリを無視",
+						"label": "サブディレクトリを無視"
 					}
 				},
-				"invalidGlob": "Invalid glob pattern",
+				"invalidGlob": "無効なglobパターン",
 				"lockConfig": {
-					"lock": "Lock configuration",
-					"unlock": "Unlock configuration"
+					"lock": "設定をロック",
+					"unlock": "設定のロックを解除"
 				},
-				"editRule": "Edit rule",
-				"deleteRule": "Delete rule",
-				"cancelEdit": "Cancel edit",
-				"confirmEdit": "Confirm edit"
+				"editRule": "ルールの編集",
+				"deleteRule": "ルールを削除",
+				"cancelEdit": "編集をキャンセル",
+				"confirmEdit": "編集を確認"
 			},
 			"convertOptions": {
 				"section": {
-					"heading": "File conversion",
-					"description": "Stump is capable of converting certain file formats to more compatible ones"
+					"heading": "ファイルの変換",
+					"description": "Stumpは特定のファイル形式をより互換性のある形式に変換することができます"
 				},
 				"rarToZip": {
-					"label": "Convert RAR to ZIP",
-					"description": "Convert RAR/CBR files to ZIP/CBZ files during a scan"
+					"label": "RARをZIPに変換",
+					"description": "スキャン中にRAR/CBRファイルをZIP/CBZファイルに変換します"
 				},
 				"deleteRarAfter": {
-					"label": "Delete RAR after conversion",
-					"description": "Delete the original RAR/CBR file after conversion. This is irreversible"
+					"label": "変換後にRARを削除",
+					"description": "変換後に元のRAR/CBRファイルを削除します。元に戻すことはできません"
 				}
 			},
 			"scannerFeatures": {
 				"section": {
-					"heading": "Optional processing",
-					"description": "Opt-in processing features for the scanner",
-					"disclaimer": "These features involve additional file reads which may slow down the scan process"
+					"heading": "処理オプション",
+					"description": "スキャナのオプトイン処理機能",
+					"disclaimer": "これらの機能には追加のファイル読み取りが含まれているため、スキャン処理が遅くなる可能性があります"
 				},
 				"processMetadata": {
-					"label": "Process metadata",
-					"description": "Extract any metadata from library files and store the results in the database"
+					"label": "メタデータ処理",
+					"description": "ライブラリファイルからメタデータを抽出し、結果をデータベースに保存します"
 				},
 				"generateFileHashes": {
-					"label": "Generate file hashes",
-					"description": "Generate a hash for each file in the library to detect duplicates"
+					"label": "ファイルハッシュの生成",
+					"description": "ライブラリ内の各ファイルのハッシュを生成して重複を検出します"
 				},
 				"koreaderHashes": {
-					"label": "KoReader-compatible hashes",
-					"description": "If using KoReader, generate additional hashes in the format it expects"
+					"label": "KoReader互換のハッシュ",
+					"description": "KoReaderを使用する場合は、期待される形式で追加のハッシュを生成します。"
 				}
 			},
 			"libraryPattern": {
 				"section": {
-					"heading": "Organization",
-					"description": "Identify which pattern most closely matches the organization of your library",
+					"heading": "組織",
+					"description": "ライブラリの構成に最も近いパターンを特定します",
 					"docs": [
-						"Not sure which to choose? Click",
-						"here",
-						"for more information.",
-						"You cannot change this setting later"
+						"どれを選べばいいかわかりませんか？クリック",
+						"ここ",
+						"で詳細情報を確認してください。",
+						"この設定は後で変更できません"
 					],
-					"disabled": "You cannot change this setting"
+					"disabled": "この設定は後で変更できません"
 				},
 				"options": {
-					"label": "Library pattern",
-					"description": "The setting which determines how Stump will organize your library",
+					"label": "ライブラリのパターン",
+					"description": "Stumpがライブラリをどのように整理するかを決定する設定",
 					"collectionPriority": {
-						"label": "Collection priority",
-						"description": "Each folder at the top-most level of the library root is a single series"
+						"label": "コレクションの優先順位",
+						"description": "ライブラリルートの最上位にある各フォルダは単一のシリーズです"
 					},
 					"seriesPriority": {
-						"label": "Series priority",
-						"description": "Each folder at any level recursively is a single series"
+						"label": "シリーズの優先順位",
+						"description": "どのレベルのフォルダも再帰的に単一のシリーズです"
 					}
 				}
 			}
 		},
 		"scan": {
 			"label": {
-				"create": "Scan after creation",
-				"update": "Scan after updates"
+				"create": "作成後にスキャン",
+				"update": "アップデート後にスキャン"
 			},
 			"description": "ライブラリファイルをインデックスしてデータベースに入力します"
 		}
@@ -1737,7 +1737,8 @@
 			"wait": "Once libraries are created, they'll be displayed here"
 		},
 		"links": {
-			"create": "Create library"
+			"create": "Create library",
+			"settings": "Go to settings"
 		}
 	},
 	"pagination": {

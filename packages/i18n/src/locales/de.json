@@ -1737,7 +1737,8 @@
 			"wait": "Sobald Bibliotheken erstellt wurden, werden sie hier angezeigt"
 		},
 		"links": {
-			"create": "Bibliothek erstellen"
+			"create": "Bibliothek erstellen",
+			"settings": "Go to settings"
 		}
 	},
 	"pagination": {

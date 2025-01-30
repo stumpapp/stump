@@ -1749,7 +1749,8 @@
 			"wait": "Once libraries are created, they'll be displayed here"
 		},
 		"links": {
-			"create": "Create library"
+			"create": "Create library",
+			"settings": "Go to settings"
 		}
 	},
 	"pagination": {

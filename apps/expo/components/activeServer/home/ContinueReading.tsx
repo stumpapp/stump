@@ -6,6 +6,7 @@ import { useMemo } from 'react'
 import { FlatList, Pressable, View } from 'react-native'
 
 import { Heading, Progress, Text } from '~/components/ui'
+import { cn } from '~/lib/utils'
 
 export default function ContinueReading() {
 	const { sdk } = useSDK()
@@ -74,28 +75,34 @@ export default function ContinueReading() {
 					data={leftOffBooks}
 					keyExtractor={({ id }) => id}
 					renderItem={({ item: book }) => (
-						<View key={book.id} className="flex items-start px-1">
-							<View className="relative aspect-[2/3] overflow-hidden rounded-lg">
-								<View className="absolute inset-0 z-10 bg-black" style={{ opacity: 0.35 }} />
-								<Image
-									className="z-0"
-									source={{
-										uri: sdk.media.thumbnailURL(book.id),
-										headers: {
-											Authorization: `Bearer ${sdk.token}`,
-										},
-									}}
-									contentFit="fill"
-									style={{ height: 150, width: 'auto' }}
-								/>
-							</View>
+						<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${book.id}`)}>
+							{({ pressed }) => (
+								<View
+									key={book.id}
+									className={cn('flex items-start px-1', { 'opacity-80': pressed })}
+								>
+									<View className="aspect-[2/3] overflow-hidden rounded-lg">
+										<Image
+											className="z-0"
+											source={{
+												uri: sdk.media.thumbnailURL(book.id),
+												headers: {
+													Authorization: `Bearer ${sdk.token}`,
+												},
+											}}
+											contentFit="fill"
+											style={{ height: 150, width: 'auto' }}
+										/>
+									</View>
 
-							{/* <View className=" z-20 gap-2 p-2">
+									{/* <View className=" z-20 gap-2 p-2">
 								<Text className="text-2xl font-bold leading-8">
 									{book.metadata?.title || book.name}
 								</Text>
 							</View> */}
-						</View>
+								</View>
+							)}
+						</Pressable>
 					)}
 					horizontal
 					pagingEnabled

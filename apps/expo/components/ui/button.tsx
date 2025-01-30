@@ -31,32 +31,29 @@ const buttonVariants = cva('group flex items-center justify-center rounded-lg', 
 	},
 })
 
-const buttonTextVariants = cva(
-	'web:whitespace-nowrap text-sm native:text-base font-medium text-foreground web:transition-colors',
-	{
-		variants: {
-			variant: {
-				brand: 'text-foreground',
-				default: 'text-foreground',
-				destructive: 'text-fill-danger',
-				outline: 'group-active:text-fill-info',
-				secondary: 'text-secondary-foreground group-active:text-secondary-foreground',
-				ghost: 'group-active:text-fill-info',
-				link: 'text-primary group-active:underline',
-			},
-			size: {
-				default: '',
-				sm: '',
-				lg: 'native:text-lg',
-				icon: '',
-			},
+const buttonTextVariants = cva('text-base font-medium text-foreground', {
+	variants: {
+		variant: {
+			brand: 'text-foreground',
+			default: 'text-foreground',
+			destructive: 'text-fill-danger',
+			outline: 'group-active:text-fill-info',
+			secondary: 'text-secondary-foreground group-active:text-secondary-foreground',
+			ghost: 'group-active:text-fill-info',
+			link: 'text-primary group-active:underline',
 		},
-		defaultVariants: {
-			variant: 'default',
-			size: 'default',
+		size: {
+			default: '',
+			sm: '',
+			lg: 'text-lg',
+			icon: '',
 		},
 	},
-)
+	defaultVariants: {
+		variant: 'default',
+		size: 'default',
+	},
+})
 
 type ButtonProps = React.ComponentPropsWithoutRef<typeof Pressable> &
 	VariantProps<typeof buttonVariants>

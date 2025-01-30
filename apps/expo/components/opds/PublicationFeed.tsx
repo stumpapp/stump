@@ -95,15 +95,6 @@ export default function PublicationFeed({ feed }: Props) {
 	const availableSpaceX = width - itemsPerRow * itemWidth
 
 	// TODO: fix on xsmall, looks poopy
-	console.log({
-		isTablet,
-		isXSmall,
-		width,
-		itemWidth,
-		itemHeight,
-		itemsPerRow,
-		availableSpaceX,
-	})
 
 	const publications = data?.pages.flatMap((page) => page.publications) || feed.publications
 

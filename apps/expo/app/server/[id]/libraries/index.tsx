@@ -3,8 +3,8 @@ import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { useMemo } from 'react'
 import { Pressable, SafeAreaView, useWindowDimensions, View } from 'react-native'
-import { ScrollView } from 'react-native-gesture-handler'
 import { FlatGrid } from 'react-native-super-grid'
+
 import { useActiveServer } from '~/components/activeServer'
 import { Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
@@ -26,7 +26,7 @@ export default function Screen() {
 				// 2 columns on phones
 				(isTablet ? 4 : 2) -
 			16 * 2,
-		[isTablet],
+		[isTablet, width],
 	)
 
 	return (

@@ -15,7 +15,7 @@ pub mod publication;
 mod utils;
 
 pub use error::OPDSV2Error;
-pub use prisma_macros::books_as_publications;
+pub use prisma_macros::*;
 pub use utils::{ArrayOrItem, OPDSV2PrismaExt};
 
 // TODO(OPDS-V2): facet (kinda confused on this one still)

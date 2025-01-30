@@ -1,3 +1,6 @@
+//! This module contains the [OpenLibrary](https://openlibrary.org/developers/api) implementation of
+//! the [`MetadataSource`] trait.
+
 use serde::Deserialize;
 
 use crate::ConfigSchema;
@@ -29,23 +32,30 @@ impl MetadataSource for OpenLibrarySource {
 	async fn get_metadata(
 		&self,
 		input: &MetadataSourceInput,
+		_config: &Option<String>,
 	) -> Result<MetadataOutput, MetadataSourceError> {
-		let media_name = &input.name;
-		let response_text = reqwest::get(format!(
-			"https://openlibrary.org/search.json?q={media_name}"
+		let media_title = &input.title;
+		let response = reqwest::get(format!(
+			"https://openlibrary.org/search.json?q={media_title}"
 		))
 		.await?
-		.text()
+		.json::<OpenLibrarySearchResult>()
 		.await?;
-
-		let response: OpenLibrarySearchResult = serde_json::from_str(&response_text)?;
 
 		// TODO - Fix dumb implementation, the cloning should be unnecessary.
 		let first_doc = response.docs.first();
 		let title = first_doc.map(|doc| doc.title.clone());
-		let author = first_doc.and_then(|doc| doc.author_name.first().cloned());
+		let mut authors = Vec::new();
+		if let Some(doc) = first_doc {
+			authors.extend(doc.author_name.clone());
+		}
 
-		Ok(MetadataOutput { title, author })
+		Ok(MetadataOutput {
+			title,
+			authors,
+			description: None,
+			published: None,
+		})
 	}
 
 	fn get_config_schema(&self) -> Option<ConfigSchema> {
@@ -66,10 +76,12 @@ mod tests {
 		let source = OpenLibrarySource;
 
 		let test_input = MetadataSourceInput {
-			name: "Dune".to_string(),
+			title: "Dune".to_string(),
 			isbn: None,
+			series: None,
+			number: None,
 		};
-		let metadata_output = source.get_metadata(&test_input).await.unwrap();
+		let metadata_output = source.get_metadata(&test_input, &None).await.unwrap();
 		assert_eq!(metadata_output.title.unwrap(), "Dune");
 	}
 }

@@ -14,7 +14,7 @@ use stump_core::{
 
 use crate::{
 	config::state::AppState,
-	errors::APIResult,
+	errors::{APIError, APIResult},
 	middleware::auth::{auth_middleware, RequestContext},
 };
 
@@ -169,6 +169,28 @@ async fn update_metadata_source(
 	// TODO - Correct permissions?
 	req.enforce_permissions(&[UserPermission::ManageServer])?;
 
+	// Get the matching source from the DB, or return 404
+	let db_source = ctx
+		.db
+		.metadata_sources()
+		.find_unique(metadata_sources::name::equals(source.name.clone()))
+		.exec()
+		.await?
+		.map(MetadataSourceEntry::from)
+		.ok_or_else(|| {
+			APIError::NotFound(format!("Could not find source with name {}", source.name))
+		})?;
+
+	let mut set_params = vec![metadata_sources::enabled::set(source.enabled)];
+	if db_source.validate_config(source.config.as_ref()) {
+		set_params.push(metadata_sources::config::set(source.config));
+	} else {
+		return Err(APIError::BadRequest(format!(
+			"Invalid config: {:?}",
+			source.config
+		)));
+	}
+
 	// This should fail if the source isn't one of the ones already present in the database.
 	// Other logic is responsible for initial population of sources.
 	let _ = ctx
@@ -176,7 +198,7 @@ async fn update_metadata_source(
 		.metadata_sources()
 		.update(
 			metadata_sources::name::equals(source.name.clone()),
-			vec![metadata_sources::enabled::set(source.enabled)],
+			set_params,
 		)
 		.exec()
 		.await?;

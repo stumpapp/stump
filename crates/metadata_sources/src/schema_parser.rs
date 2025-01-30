@@ -1,5 +1,6 @@
 //! This module defines some utility functions for parsing a [`schemars::schema_for!`] output into a type,
 // [`ConfigSchema`], for transmission to the frontend to allow config options to be rendered.
+
 use schemars::schema::{InstanceType, RootSchema, Schema, SchemaObject, SingleOrVec};
 use serde_json::Value;
 
@@ -51,19 +52,6 @@ impl ConfigSchema {
 	}
 }
 
-impl SchemaField {
-	pub fn validate_value(&self, value: &Value) -> bool {
-		match (&self.field_type, value) {
-			(SchemaFieldType::Integer, Value::Number(num)) => {
-				num.is_i64() || num.is_u64()
-			},
-			(SchemaFieldType::Float, Value::Number(num)) => num.is_f64(),
-			(SchemaFieldType::String, Value::String(_)) => true,
-			_ => false,
-		}
-	}
-}
-
 impl From<RootSchema> for ConfigSchema {
 	fn from(value: RootSchema) -> Self {
 		// Get the object validation part of the schema object
@@ -89,6 +77,19 @@ impl From<RootSchema> for ConfigSchema {
 	}
 }
 
+impl SchemaField {
+	pub fn validate_value(&self, value: &Value) -> bool {
+		match (&self.field_type, value) {
+			(SchemaFieldType::Integer, Value::Number(num)) => {
+				num.is_i64() || num.is_u64()
+			},
+			(SchemaFieldType::Float, Value::Number(num)) => num.is_f64(),
+			(SchemaFieldType::String, Value::String(_)) => true,
+			_ => false,
+		}
+	}
+}
+
 fn extract_field_type(obj: &SchemaObject) -> Option<SchemaFieldType> {
 	if let Some(instance_types) = &obj.instance_type {
 		let types = match instance_types {
@@ -106,7 +107,8 @@ fn extract_field_type(obj: &SchemaObject) -> Option<SchemaFieldType> {
 		}
 	}
 
-	todo!()
+	// TODO - Is this right?
+	None
 }
 
 #[cfg(test)]

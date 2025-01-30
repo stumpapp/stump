@@ -1,3 +1,31 @@
+//! This module defines interfaces and utilities for fetching metadata from external sources.
+//! Each source is implemented as a [`MetadataSource`], which provides metadata for a given
+//! [`MetadataSourceInput`], which contains information about a media item to allow the
+//! [`MetadataSource`] implementation to construct necessary queries
+//!
+//! # Key Interfaces
+//!
+//! - [`MetadataSourceInput`] carries information needed by a source (e.g., title, ISBN).
+//! - [`MetadataOutput`] is the standardized result returned by any metadata source.
+//! - [`MetadataSource`] is the trait that each metadata source implements.
+//! - [`get_source_by_name`] maps a string (source name) to its corresponding trait object.
+//! - [`REGISTERED_SOURCES`] holds the list of source implementation names, used to  
+//!   signal which sources are available to the core crate.
+//!
+//! Errors emitted by this crate have type [`MetadataSourceError`].
+//!
+//! # Implementing [`MetadataSource`]
+//!
+//! Implementing a new metadata source can be done by the following steps:
+//!
+//! - Define a new module containing a 0-size struct which implements [`MetadataSource`]
+//! - If the metadata source requires configuration, define a structure that implements
+//!   [`schemars::JsonSchema`] and provide non-`None` values for [`MetadataSource::get_config_schema`]
+//!   and [`MetadataSource::get_default_config`].
+//! - Set a name for the source. By implementing [`MetadataSource::name`] and adding the **same name**
+//!   to the [`REGISTERED_SOURCES`] constant.
+//!
+
 mod google_books;
 mod open_library;
 mod schema_parser;
@@ -14,27 +42,42 @@ pub const REGISTERED_SOURCES: &[&str] =
 
 /// Information provided to a [`MetadataSource`] implementation to locate the correct metadata.
 pub struct MetadataSourceInput {
-	pub name: String,
+	/// The title of the input.
+	pub title: String,
+	/// The name of the series that the input is part of.
+	pub series: Option<String>,
+	/// The number in the series that the input is part of.
+	pub number: Option<u32>,
+	/// The ISBN of the input book, if any.
 	pub isbn: Option<String>,
 }
 
-/// This trait defines a metadata source by which metadata for [`Media`] can be obtained.
+/// This trait defines a metadata source which includes logic for fetching metadata for a given
+/// [`MetadataSourceInput`].
 #[async_trait::async_trait]
 pub trait MetadataSource {
 	/// The `const &str` used to identify a particular metadata source
 	fn name(&self) -> &'static str;
 
-	/// Makes a request for a [`Media`] object using the implemented source logic and returns
-	/// the normalized output.
+	/// Makes a request for metadata object the implemented source logic and returns
+	/// the normalized [`MetadataOutput`] produced by the implementation.
 	async fn get_metadata(
 		&self,
 		input: &MetadataSourceInput,
+		config: &Option<String>,
 	) -> Result<MetadataOutput, MetadataSourceError>;
 
-	// TODO - Document
+	/// Returns an optional [`ConfigSchema`] describing the JSON config structure for this source.
+	///
+	/// Implementations that require configuration (like an API key) should provide a schema
+	/// that the front-end can use to render input fields dynamically. Sources that do not
+	/// need configuration can return `None`.
 	fn get_config_schema(&self) -> Option<ConfigSchema>;
 
-	// TODO - Document
+	/// Returns an optional default configuration in JSON form.
+	///
+	/// If [`MetadataSource::get_config_schema`] is implemented, returning a default config as JSON
+	/// is required so that the database can initialize an entry for the [`MetadataSource`].
 	fn get_default_config(&self) -> Option<String>;
 }
 
@@ -42,7 +85,9 @@ pub trait MetadataSource {
 #[derive(Debug, Default)]
 pub struct MetadataOutput {
 	pub title: Option<String>,
-	pub author: Option<String>,
+	pub authors: Vec<String>,
+	pub description: Option<String>,
+	pub published: Option<String>,
 }
 
 /// Fetches a [`MetadataSource`] trait object by its identifier. Returns an error if the name
@@ -67,6 +112,10 @@ pub enum MetadataSourceError {
 	ReqwestError(#[from] reqwest::Error),
 	#[error("Error deserializing JSON: {0}")]
 	SerdeJsonError(#[from] serde_json::Error),
+	#[error("Config error: {0}")]
+	ConfigError(String),
+	#[error("Input error: {0}")]
+	InputError(String),
 }
 
 #[cfg(test)]
@@ -80,12 +129,14 @@ mod tests {
 			vec![Box::new(open_library::OpenLibrarySource)];
 
 		let test_input = MetadataSourceInput {
-			name: "Dune".to_string(),
+			title: "Dune".to_string(),
 			isbn: None,
+			series: None,
+			number: None,
 		};
 
 		for source in &sources {
-			let out = source.get_metadata(&test_input).await.unwrap();
+			let out = source.get_metadata(&test_input, &None).await.unwrap();
 			outputs.push(out);
 		}
 	}

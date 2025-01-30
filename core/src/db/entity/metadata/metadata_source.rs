@@ -8,7 +8,7 @@ use metadata_sources::{
 	SchemaFieldType,
 };
 
-// A model representing a [`metadata_source::Data`] object in the database.
+/// A model representing a [`metadata_source::Data`] object in the database.
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct MetadataSourceEntry {
 	/// The identifier assigned to the source.
@@ -17,6 +17,66 @@ pub struct MetadataSourceEntry {
 	pub enabled: bool,
 	/// The JSON-encoded config for the metadata source, if one exists.
 	pub config: Option<String>,
+}
+
+impl MetadataSourceEntry {
+	/// TODO - Document
+	pub async fn get_metadata(
+		&self,
+		input: &MetadataSourceInput,
+	) -> Result<MetadataOutput, MetadataSourceError> {
+		metadata_sources::get_source_by_name(&self.name)?
+			.get_metadata(input, &self.config)
+			.await
+	}
+
+	/// TODO - Document
+	pub fn validate_config(&self, config: Option<&String>) -> bool {
+		// This really shouldn't happen, but return false if name doesn't resolve
+		let source = match metadata_sources::get_source_by_name(&self.name) {
+			Ok(s) => s,
+			Err(_) => return false,
+		};
+
+		match source.get_config_schema() {
+			// If there's no schema, we only succeed if there's also no config
+			None => config.is_none(),
+			// If there is a schema then we need to validate against it
+			Some(schema) => match config {
+				Some(config) => schema.validate_config(config),
+				None => false,
+			},
+		}
+	}
+
+	/// TODO - Document
+	pub fn get_config_schema(&self) -> Option<MetadataSourceSchema> {
+		match metadata_sources::get_source_by_name(&self.name) {
+			Ok(source) => source.get_config_schema().map(MetadataSourceSchema::from),
+			// No schema returned for name
+			Err(_) => None,
+		}
+	}
+}
+
+impl From<prisma::metadata_sources::Data> for MetadataSourceEntry {
+	fn from(data: prisma::metadata_sources::Data) -> Self {
+		Self {
+			name: data.name,
+			enabled: data.enabled,
+			config: data.config,
+		}
+	}
+}
+
+impl From<MetadataSourceEntry> for prisma::metadata_sources::Data {
+	fn from(entry: MetadataSourceEntry) -> Self {
+		Self {
+			name: entry.name,
+			enabled: entry.enabled,
+			config: entry.config,
+		}
+	}
 }
 
 #[derive(Debug, Clone, Serialize, Type, ToSchema)]
@@ -68,45 +128,6 @@ impl From<SchemaFieldType> for MetadataSourceSchemaFieldType {
 	}
 }
 
-impl MetadataSourceEntry {
-	pub async fn get_metadata(
-		&self,
-		input: &MetadataSourceInput,
-	) -> Result<MetadataOutput, MetadataSourceError> {
-		metadata_sources::get_source_by_name(&self.name)?
-			.get_metadata(input)
-			.await
-	}
-
-	pub fn get_config_schema(&self) -> Option<MetadataSourceSchema> {
-		match metadata_sources::get_source_by_name(&self.name) {
-			Ok(source) => source.get_config_schema().map(MetadataSourceSchema::from),
-			// No schema returned for
-			Err(_) => None,
-		}
-	}
-}
-
-impl From<prisma::metadata_sources::Data> for MetadataSourceEntry {
-	fn from(value: prisma::metadata_sources::Data) -> Self {
-		Self {
-			name: value.name,
-			enabled: value.enabled,
-			config: value.config,
-		}
-	}
-}
-
-impl From<MetadataSourceEntry> for prisma::metadata_sources::Data {
-	fn from(value: MetadataSourceEntry) -> Self {
-		Self {
-			name: value.name,
-			enabled: value.enabled,
-			config: value.config,
-		}
-	}
-}
-
 #[cfg(test)]
 mod tests {
 	use super::*;
@@ -114,8 +135,10 @@ mod tests {
 	#[tokio::test]
 	async fn dev_test() {
 		let test_input = MetadataSourceInput {
-			name: "Dune".to_string(),
+			title: "Dune".to_string(),
 			isbn: None,
+			series: None,
+			number: None,
 		};
 
 		let source = MetadataSourceEntry {

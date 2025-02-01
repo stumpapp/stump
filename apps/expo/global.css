@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* FIXME: These colors do NOT work well on mobile... */
+/* TODO: remove sidebar etc */
+
+@layer base {
+	:root {
+		--background: #ffffff;
+		--background-inverse: #161719;
+		--background-overlay: #f6f6f7;
+		--background-overlay-hover: #e9eaeb;
+		--background-surface: #f7f7f8;
+		--background-surface-hover: #ececee;
+		--background-surface-secondary: #f2f2f3;
+
+		--edge: #e9eaeb;
+		--edge-brand: #cf9977;
+		--edge-danger: #b02a29;
+		--edge-info: #3f89ca;
+		--edge-strong: #ffffff;
+		--edge-subtle: #d3d5d7;
+		--edge-success: #2e7d32;
+		--edge-warning: #d8a219;
+
+		--fill-brand: #c48259;
+		--fill-brand-hover: #a9663c;
+		--fill-brand-secondary: #c4825926;
+		--fill-danger: #e53935;
+		--fill-danger-hover: #c81e1a;
+		--fill-danger-secondary: #e5393526;
+		--fill-disabled: #71757d;
+		--fill-info: #3f89ca;
+		--fill-info-hover: #2d6ca4;
+		--fill-info-secondary: #3f89ca26;
+		--fill-success: #43a047;
+		--fill-success-hover: #327835;
+		--fill-success-secondary: #43a04726;
+		--fill-warning: #f59e0b;
+		--fill-warning-hover: #c07c08;
+		--fill-warning-secondary: #f59e0b26;
+
+		--foreground: #000000;
+		--foreground-brand: #c48259;
+		--foreground-disabled: #93979d;
+		--foreground-muted: #414347;
+		--foreground-on-inverse: #161719;
+		--foreground-subtle: #26272a;
+
+		--sidebar: #f9f9f9;
+		--sidebar-inverse: #000000;
+		--sidebar-overlay: #ffffff;
+		--sidebar-overlay-hover: #f6f6f7;
+	}
+
+	.dark:root {
+		--background: #000000;
+		--background-inverse: #ffffff;
+		--background-overlay: #111113;
+		--background-overlay-hover: #17171a;
+		--background-surface: #0a0a0a;
+		--background-surface-hover: #242628;
+		--background-surface-secondary: #1f2123;
+
+		--edge: #1f2123;
+		--edge-brand: #cf9977;
+		--edge-danger: #b02a29;
+		--edge-info: #3f89ca;
+		--edge-strong: #ffffff;
+		--edge-subtle: #292c30;
+		--edge-success: #2e7d32;
+		--edge-warning: #d8a219;
+
+		--fill-brand: #c48259;
+		--fill-brand-hover: #cf9977;
+		--fill-brand-secondary: #c4825926;
+		--fill-danger: #e53935;
+		--fill-danger-hover: #ea5c59;
+		--fill-danger-secondary: #e5393526;
+		--fill-disabled: #71757d;
+		--fill-info: #3f89ca;
+		--fill-info-hover: #5f9dd3;
+		--fill-info-secondary: #3f89ca26;
+		--fill-success: #43a047;
+		--fill-success-hover: #54b859;
+		--fill-success-secondary: #43a04726;
+		--fill-warning: #f59e0b;
+		--fill-warning-hover: #f7ae32;
+		--fill-warning-secondary: #f59e0b26;
+
+		--foreground: #f5f3ef;
+		--foreground-brand: #c48259;
+		--foreground-disabled: #898d94;
+		--foreground-muted: #898d94;
+		--foreground-on-inverse: #161719;
+		--foreground-subtle: #e9eaeb;
+
+		--sidebar: #151517;
+		--sidebar-inverse: #ffffff;
+		--sidebar-overlay: #151517;
+		--sidebar-overlay-hover: #17171a;
+	}
+}

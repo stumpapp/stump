@@ -1582,7 +1582,10 @@
 					}
 				},
 				"validation": {
-					"ageRestrictionTooLow": "Age restriction cannot be less than 0"
+					"ageRestrictionTooLow": "Age restriction cannot be less than 0",
+					"missingUsername": "Username is required",
+					"missingPassword": "Password is required",
+					"usernameAlreadyExists": "Username already exists"
 				},
 				"createSubmitButton": "Create user",
 				"updateSubmitButton": "Update user"
@@ -1734,7 +1737,8 @@
 			"wait": "Once libraries are created, they'll be displayed here"
 		},
 		"links": {
-			"create": "Create library"
+			"create": "Create library",
+			"settings": "Go to settings"
 		}
 	},
 	"pagination": {
@@ -1820,7 +1824,7 @@
 		}
 	},
 	"tagSelect": {
-		"placeholder": "Selecionar ou criar etiqueta",
+		"placeholder": "Select or create tag",
 		"placeholderNoTags": "Não há tags disponíveis"
 	},
 	"thumbnailDropdown": {

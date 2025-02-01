@@ -41,6 +41,8 @@ use crate::{
 
 use super::host::HostExtractor;
 
+const STUMP_SAVE_BASIC_SESSION_HEADER: &str = "X-Stump-Save-Session";
+
 /// A struct to represent the authenticated user in the current request context. A user is
 /// authenticated if they meet one of the following criteria:
 /// - They have a valid session
@@ -152,6 +154,10 @@ pub async fn auth_middleware(
 	let auth_header = req_headers
 		.get(header::AUTHORIZATION)
 		.and_then(|header| header.to_str().ok());
+	let save_basic_session = req_headers
+		.get(STUMP_SAVE_BASIC_SESSION_HEADER)
+		.and_then(|header| header.to_str().ok())
+		.map_or(true, |header| header == "true");
 
 	let request_uri = req.extensions().get::<OriginalUri>().cloned().map_or_else(
 		|| req.uri().path().to_owned(),
@@ -208,9 +214,14 @@ pub async fn auth_middleware(
 		},
 		_ if auth_header.starts_with("Basic ") && auth_header.len() > 6 && is_opds => {
 			let encoded_credentials = auth_header[6..].to_owned();
-			handle_basic_auth(encoded_credentials, &ctx.db, &mut session)
-				.await
-				.map_err(|e| e.into_response())?
+			handle_basic_auth(
+				encoded_credentials,
+				&ctx.db,
+				&mut session,
+				save_basic_session,
+			)
+			.await
+			.map_err(|e| e.into_response())?
 		},
 		_ => return Err(APIError::Unauthorized.into_response()),
 	};
@@ -425,6 +436,7 @@ async fn handle_basic_auth(
 	encoded_credentials: String,
 	client: &PrismaClient,
 	session: &mut Session,
+	save_session: bool,
 ) -> APIResult<RequestContext> {
 	let decoded_bytes = STANDARD
 		.decode(encoded_credentials.as_bytes())
@@ -460,21 +472,24 @@ async fn handle_basic_auth(
 		return Err(APIError::Forbidden(
 			api_error_message::LOCKED_ACCOUNT.to_string(),
 		));
-	} else if is_match {
-		tracing::trace!(
-			username = &user.username,
-			"Basic authentication successful. Creating session for user"
-		);
-		enforce_max_sessions(&user, client).await?;
-		let user = User::from(user);
-		session.insert(SESSION_USER_KEY, user.clone()).await?;
-		return Ok(RequestContext {
-			user,
-			api_key: None,
-		});
+	} else if !is_match {
+		return Err(APIError::Unauthorized);
 	}
 
-	Err(APIError::Unauthorized)
+	tracing::trace!(username = &user.username, "Basic authentication successful");
+
+	if save_session {
+		tracing::trace!("Saving session for user");
+		enforce_max_sessions(&user, client).await?;
+		session
+			.insert(SESSION_USER_KEY, User::from(user.clone()))
+			.await?;
+	}
+
+	Ok(RequestContext {
+		user: User::from(user),
+		api_key: None,
+	})
 }
 
 /// A struct used to hold the details required to generate an OPDS basic auth response

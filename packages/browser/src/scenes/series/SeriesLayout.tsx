@@ -1,4 +1,4 @@
-import { useSeriesByIdQuery } from '@stump/client'
+import { useSeriesByID } from '@stump/client'
 import { cn } from '@stump/components'
 import { Suspense, useEffect } from 'react'
 import { Outlet, useNavigate, useParams } from 'react-router'
@@ -18,7 +18,7 @@ export default function SeriesLayout() {
 		throw new Error('Library id is required')
 	}
 
-	const { series, isLoading } = useSeriesByIdQuery(id, {
+	const { series, isLoading } = useSeriesByID(id, {
 		params: {
 			load_library: true,
 		},

@@ -44,3 +44,8 @@ library::select!(library_scan_details_ordered {
 	last_scanned_at
 	scan_history(vec![]).order_by(library_scan_record::timestamp::order(Direction::Desc))
 });
+
+library::select!(library_name {
+	id
+	name
+});

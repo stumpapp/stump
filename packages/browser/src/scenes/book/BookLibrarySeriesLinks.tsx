@@ -1,4 +1,4 @@
-import { useSeriesByIdQuery } from '@stump/client'
+import { useSeriesByID } from '@stump/client'
 import { cx, Link, Text } from '@stump/components'
 import { Series } from '@stump/sdk'
 import { Fragment } from 'react'
@@ -23,7 +23,7 @@ export default function BookLibrarySeriesLinks({
 	series,
 	linkSegments,
 }: Props) {
-	const { series: fetchedSeries } = useSeriesByIdQuery(seriesId, { enabled: !!series })
+	const { series: fetchedSeries } = useSeriesByID(seriesId, { enabled: !!series })
 
 	const resolvedSeries = series || fetchedSeries
 	const resolvedLibraryId = libraryId || resolvedSeries?.library_id

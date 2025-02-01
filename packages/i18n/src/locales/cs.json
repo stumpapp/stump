@@ -1582,7 +1582,10 @@
 					}
 				},
 				"validation": {
-					"ageRestrictionTooLow": "Věková omezení nesmí být nižší než 0"
+					"ageRestrictionTooLow": "Věková omezení nesmí být nižší než 0",
+					"missingUsername": "Uživatelské jméno je vyžadováno",
+					"missingPassword": "Heslo je vyžadováno",
+					"usernameAlreadyExists": "Uživatelské jméno již existuje"
 				},
 				"createSubmitButton": "Vytvořit uživatele",
 				"updateSubmitButton": "Upravit uživatele"
@@ -1734,7 +1737,8 @@
 			"wait": "Jakmile budou knihovny vytvořeny, zobrazí se zde"
 		},
 		"links": {
-			"create": "Vytvořit knihovnu"
+			"create": "Vytvořit knihovnu",
+			"settings": "Přejít do nastavení"
 		}
 	},
 	"pagination": {

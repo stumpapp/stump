@@ -1,9 +1,8 @@
 import { isAxiosError, isUser, LoginOrRegisterArgs, type User } from '@stump/sdk'
 import { useEffect, useState } from 'react'
 
-import { useClientContext } from '@/context'
-
 import { queryClient, QueryOptions, useMutation, useQuery } from '../client'
+import { useClientContext } from '../context'
 import { useSDK } from '../sdk'
 
 export function useAuthQuery(options: QueryOptions<User> = {}) {

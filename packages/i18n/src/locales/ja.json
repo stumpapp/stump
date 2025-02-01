@@ -495,107 +495,107 @@
 				"reading": "閲覧中",
 				"scanning": "スキャン中",
 				"thumbnails": "サムネイル",
-				"ignore-rules": "Ignore Rules",
-				"analysis": "Analysis",
-				"label": "Options"
+				"ignore-rules": "無視ルール",
+				"analysis": "分析",
+				"label": "オプション"
 			},
 			"danger-zone": {
-				"access-control": "Access Control",
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"access-control": "アクセス管理",
+				"delete": "削除",
+				"label": "危険な操作"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this library, including its name, path, and description",
+			"title": "基本情報",
+			"description": "このライブラリの詳細（名前、パス、説明など）",
 			"form": {
-				"submit": "Update library"
+				"submit": "ライブラリの更新"
 			}
 		},
 		"options/reading": {
-			"title": "Reading",
-			"description": "The default reader settings to use for books in this library. Any book can override these settings"
+			"title": "読書中",
+			"description": "このライブラリの書籍に使用するデフォルトのリーダー設定。どの書籍でもこれらの設定を上書きできます"
 		},
 		"options/scanning": {
-			"title": "Scanner Behavior",
-			"description": "Settings related to how Stump scans this library"
+			"title": "スキャンの動作",
+			"description": "Stumpがこのライブラリをスキャンする方法に関する設定"
 		},
 		"options/thumbnails": {
-			"title": "Thumbnails",
-			"description": "Settings and management options for thumbnails in this library",
+			"title": "サムネイル",
+			"description": "このライブラリのサムネイルの設定と管理オプション",
 			"sections": {
 				"management": {
-					"heading": "Management",
-					"description": "Manage the existing thumbnails for this library",
+					"heading": "管理",
+					"description": "このライブラリの既存のサムネイルを管理します",
 					"thumbnailSelector": {},
 					"deleteThumbnails": {}
 				}
 			}
 		},
 		"options/analysis": {
-			"title": "Analysis",
-			"description": "Analyze the contents of this library to identify potential issues or improvements",
+			"title": "分析",
+			"description": "このライブラリの内容を分析して潜在的な問題や改善点を特定します",
 			"sections": {
 				"analyzeBooks": {
-					"heading": "Analyze books",
-					"description": "Analyze the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
-					"disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable",
-					"analyzeButton": "Analyze books"
+					"heading": "書籍を分析",
+					"description": "このライブラリ内の書籍を分析して画像ベースの書籍のページ寸法などの追加のメタデータをデータベースに添付します",
+					"disclaimer": "このプロセスはリソースを大量に消費するため完了するまでに時間がかかる場合があります。将来的にはより細かく設定できるようになります",
+					"analyzeButton": "書籍を分析"
 				},
 				"missingFiles": {
-					"heading": "Missing files",
-					"description": "Files that are referenced in the database but cannot be located on disk",
-					"noMissingFiles": "There are no missing files in this library"
+					"heading": "欠損ファイル",
+					"description": "データベースで参照されているがディスク上に見つからないファイル",
+					"noMissingFiles": "このライブラリに欠けているファイルはありません"
 				},
 				"duplicateFiles": {
-					"heading": "Duplicate files",
-					"description": "Files that are potentially duplicated on disk",
-					"noDuplicateFiles": "There are no duplicate files detected for this library"
+					"heading": "重複したファイル",
+					"description": "ディスク上で重複している可能性のあるファイル",
+					"noDuplicateFiles": "このライブラリには重複ファイルは検出されませんでした"
 				}
 			}
 		},
 		"danger-zone/access-control": {
-			"title": "Access Control",
-			"description": "Control who can access the content in this library",
+			"title": "アクセス管理",
+			"description": "このライブラリ内のコンテンツにアクセスできるユーザーを制御します",
 			"sections": {
 				"libraryExclusions": {
-					"heading": "Exclude users",
-					"description": "Prevent certain users from accessing this library or its contents",
-					"noUsers": "There are no other registered users to exclude from this library",
-					"updated": "Exclusions updated",
-					"failure": "Failed to update exclusions"
+					"heading": "除外するユーザー",
+					"description": "特定のユーザーがこのライブラリまたはそのコンテンツにアクセスできないようにします",
+					"noUsers": "このライブラリから除外する他の登録ユーザーはいません",
+					"updated": "除外を更新しました",
+					"failure": "除外の更新に失敗しました"
 				}
 			}
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this library and all of its contents or certain resources",
+			"title": "削除アクション",
+			"description": "このライブラリとそのすべてのコンテンツまたは特定のリソースを完全に削除します",
 			"sections": {
 				"cleanLibrary": {
-					"heading": "Clean library",
-					"description": "Remove all media and series that cannot be located on disk",
-					"disclaimer": "While this action will not delete any files, it will permanently delete all records relating to media and series which have a missing status",
+					"heading": "ライブラリをクリーンアップする",
+					"description": "ディスク上に見つからないすべてのメディアとシリーズを削除します",
+					"disclaimer": "このアクションではファイルは削除されませんが、欠落ステータスのメディアとシリーズに関連するすべてのレコードが完全に削除されます",
 					"confirmation": {
-						"label": "Clean library",
-						"text": "Are you sure you want to clean this library?"
+						"label": "ライブラリを消去",
+						"text": "このライブラリをクリーンアップしてもよろしいですか？"
 					}
 				},
 				"deleteLibrary": {
-					"heading": "Delete library",
+					"heading": "ライブラリを削除",
 					"description": [
-						"Permanently delete this library and all its contents.",
-						"This action cannot be undone"
+						"このライブラリとそのすべてのコンテンツを完全に削除します。",
+						"この操作は元に戻せません"
 					]
 				}
 			}
 		}
 	},
 	"errorScene": {
-		"heading": "lol, oops",
-		"message": "An error occurred:",
+		"heading": "笑、しまった",
+		"message": "エラーが発生しました:",
 		"buttons": {
-			"report": "Report Bug",
-			"copy": "Copy Error Details",
+			"report": "バグを報告",
+			"copy": "エラーの詳細をコピー",
 			"goHome": "Go Home"
 		}
 	},

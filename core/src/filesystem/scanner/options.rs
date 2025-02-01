@@ -1,10 +1,15 @@
+use std::path::PathBuf;
+
 use prisma_client_rust::chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
 use crate::{
-	db::entity::macros::library_scan_details, prisma::library_scan_record, CoreError,
+	db::entity::{macros::library_scan_details, Media, MediaMetadata},
+	filesystem::ProcessedFileHashes,
+	prisma::library_scan_record,
+	CoreError,
 };
 
 // TODO(granular-scans/metadata-merge): Support merge strategies for metadata at some point
@@ -46,6 +51,25 @@ pub enum BookVisitOperation {
 	Rebuild,
 	RegenMeta,
 	RegenHashes,
+}
+
+pub struct BookVisitCtx {
+	pub operation: BookVisitOperation,
+	pub path: PathBuf,
+	pub series_id: String,
+	pub existing_book: Option<Media>,
+}
+
+pub enum BookVisitResult {
+	Built(Box<Media>),
+	RegeneratedMeta {
+		id: String,
+		meta: Box<MediaMetadata>,
+	},
+	RegeneratedHashes {
+		id: String,
+		hashes: ProcessedFileHashes,
+	},
 }
 
 /// The override options for a scan job. These options are used to override the default behavior, which generally

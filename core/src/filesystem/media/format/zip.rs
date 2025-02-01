@@ -11,7 +11,7 @@ use crate::{
 			process::{FileProcessor, FileProcessorOptions, ProcessedFile},
 			utils::{metadata_from_buf, sort_file_names},
 		},
-		FileParts, PathUtils,
+		FileParts, PathUtils, ProcessedFileHashes,
 	},
 };
 
@@ -39,7 +39,7 @@ impl FileProcessor for ZipProcessor {
 		Ok(sample_size)
 	}
 
-	fn hash(path: &str) -> Option<String> {
+	fn generate_stump_hash(path: &str) -> Option<String> {
 		let sample_result = Self::get_sample_size(path);
 
 		if let Ok(sample) = sample_result {
@@ -56,13 +56,31 @@ impl FileProcessor for ZipProcessor {
 		}
 	}
 
-	fn process(
+	fn generate_hashes(
 		path: &str,
 		FileProcessorOptions {
 			generate_file_hashes,
-			process_metadata,
+			// generate_koreader_hashes,
 			..
 		}: FileProcessorOptions,
+	) -> Result<ProcessedFileHashes, FileError> {
+		let hash = generate_file_hashes
+			.then(|| ZipProcessor::generate_stump_hash(path))
+			.flatten();
+		// TODO(koreader): Do we want to hash ZIP files?
+		// let koreader_hash = generate_koreader_hashes
+		// 	.then(|| generate_koreader_hash(path))
+		// 	.transpose()?;
+
+		Ok(ProcessedFileHashes {
+			hash,
+			koreader_hash: None,
+		})
+	}
+
+	fn process(
+		path: &str,
+		options: FileProcessorOptions,
 		_: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
 		let zip_file = File::open(path)?;
@@ -71,7 +89,10 @@ impl FileProcessor for ZipProcessor {
 		let mut metadata = None;
 		let mut pages = 0;
 
-		let hash = generate_file_hashes.then(|| Self::hash(path)).flatten();
+		let ProcessedFileHashes {
+			hash,
+			koreader_hash,
+		} = Self::generate_hashes(path, options)?;
 
 		for i in 0..archive.len() {
 			let mut file = archive.by_index(i)?;
@@ -95,7 +116,7 @@ impl FileProcessor for ZipProcessor {
 			let content_type = path.naive_content_type();
 			let FileParts { file_name, .. } = path.file_parts();
 
-			if file_name == "ComicInfo.xml" && process_metadata {
+			if file_name == "ComicInfo.xml" && options.process_metadata {
 				trace!("Found ComicInfo.xml");
 				let mut contents = Vec::new();
 				file.read_to_end(&mut contents)?;
@@ -110,8 +131,7 @@ impl FileProcessor for ZipProcessor {
 		Ok(ProcessedFile {
 			path: PathBuf::from(path),
 			hash,
-			// TODO(koreader): Do we want to hash ZIP files?
-			koreader_hash: None,
+			koreader_hash,
 			metadata,
 			pages,
 		})

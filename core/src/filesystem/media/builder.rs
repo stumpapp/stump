@@ -4,10 +4,12 @@ use prisma_client_rust::chrono::{DateTime, FixedOffset, Utc};
 
 use crate::{
 	config::StumpConfig,
-	db::entity::{LibraryConfig, Media, Series},
+	db::entity::{LibraryConfig, Media, MediaMetadata, Series},
 	filesystem::{process, FileParts, PathUtils, SeriesJson},
 	CoreError, CoreResult,
 };
+
+use super::{generate_hashes, ProcessedFileHashes};
 
 pub struct MediaBuilder {
 	path: PathBuf,
@@ -93,6 +95,14 @@ impl MediaBuilder {
 			modified_at: last_modified_at.map(|dt| dt.to_rfc3339()),
 			..Default::default()
 		})
+	}
+
+	pub fn regen_hashes(self) -> CoreResult<ProcessedFileHashes> {
+		Ok(generate_hashes(self.path, self.library_config.into())?)
+	}
+
+	pub fn regen_meta(self, media: &Media) -> CoreResult<MediaMetadata> {
+		unimplemented!()
 	}
 }
 

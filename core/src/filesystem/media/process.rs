@@ -22,7 +22,7 @@ use super::{rar::RarProcessor, zip::ZipProcessor};
 
 /// A struct representing the options for processing a file. This is a subset of [`LibraryConfig`]
 /// and is used to pass options to the [`FileProcessor`] implementations.
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct FileProcessorOptions {
 	/// Whether to convert RAR files to ZIP files after processing
 	pub convert_rar_to_zip: bool,
@@ -60,6 +60,11 @@ impl From<&LibraryConfig> for FileProcessorOptions {
 	}
 }
 
+pub struct ProcessedFileHashes {
+	pub hash: Option<String>,
+	pub koreader_hash: Option<String>,
+}
+
 // TODO(perf): Implement generic hasher which just takes X bytes from the file (and async version)
 /// Trait defining a standard API for processing files throughout Stump. Every
 /// supported file type should implement this trait.
@@ -70,7 +75,13 @@ pub trait FileProcessor {
 	/// Generate a hash of the file. In most cases, the hash is generated from select pages
 	/// of the file, rather than the entire file. This is to prevent the hash from changing
 	/// when the metadata of the file changes.
-	fn hash(path: &str) -> Option<String>;
+	fn generate_stump_hash(path: &str) -> Option<String>;
+
+	/// Generate both hashes for a file, depending on the options provided.
+	fn generate_hashes(
+		path: &str,
+		options: FileProcessorOptions,
+	) -> Result<ProcessedFileHashes, FileError>;
 
 	/// Process a file. Should gather the basic metadata and information required for
 	/// processing the file.
@@ -200,6 +211,61 @@ pub async fn process_async(
 	};
 
 	Ok(processed_file)
+}
+
+#[tracing::instrument(err, fields(path = %path.as_ref().display()))]
+pub fn generate_hashes(
+	path: impl AsRef<Path>,
+	options: FileProcessorOptions,
+) -> Result<ProcessedFileHashes, FileError> {
+	let path_str = path.as_ref().to_str().unwrap_or_default();
+
+	let mime = ContentType::from_path(path.as_ref()).mime_type();
+
+	match mime.as_str() {
+		"application/zip" | "application/vnd.comicbook+zip" => {
+			ZipProcessor::generate_hashes(path_str, options)
+		},
+		"application/vnd.rar" | "application/vnd.comicbook-rar" => {
+			RarProcessor::generate_hashes(path_str, options)
+		},
+		"application/epub+zip" => EpubProcessor::generate_hashes(path_str, options),
+		"application/pdf" => PdfProcessor::generate_hashes(path_str, options),
+		_ => Err(FileError::UnsupportedFileType(path_str.to_string())),
+	}
+}
+
+#[tracing::instrument(err, fields(path = %path.as_ref().display()))]
+pub async fn generate_hashes_async(
+	path: impl AsRef<Path>,
+	options: FileProcessorOptions,
+) -> Result<ProcessedFileHashes, FileError> {
+	let (tx, rx) = oneshot::channel();
+
+	let handle = spawn_blocking({
+		let path = path.as_ref().to_path_buf();
+
+		move || {
+			let send_result = tx.send(generate_hashes(path.as_path(), options));
+			tracing::trace!(
+				is_err = send_result.is_err(),
+				"Sending result of sync generate_hashes"
+			);
+		}
+	});
+
+	let processed_hashes = if let Ok(recv) = rx.await {
+		recv?
+	} else {
+		handle
+			.await
+			.map_err(|e| FileError::UnknownError(e.to_string()))?;
+		return Err(FileError::UnknownError(
+			"Failed to receive processed file hashes".to_string(),
+		));
+	};
+
+	Ok(processed_hashes)
 }
 
 /// A function to extract the bytes of a page from a file in a blocking manner. This will call the

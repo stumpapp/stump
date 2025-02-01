@@ -22,7 +22,7 @@ use crate::{
 			utils::metadata_from_buf,
 			zip::ZipProcessor,
 		},
-		FileParts, PathUtils,
+		FileParts, PathUtils, ProcessedFileHashes,
 	},
 };
 
@@ -80,7 +80,7 @@ impl FileProcessor for RarProcessor {
 		}
 	}
 
-	fn hash(path: &str) -> Option<String> {
+	fn generate_stump_hash(path: &str) -> Option<String> {
 		let sample_result = RarProcessor::get_sample_size(path).ok();
 
 		if let Some(sample) = sample_result {
@@ -95,6 +95,28 @@ impl FileProcessor for RarProcessor {
 		} else {
 			None
 		}
+	}
+
+	fn generate_hashes(
+		path: &str,
+		FileProcessorOptions {
+			generate_file_hashes,
+			// generate_koreader_hashes,
+			..
+		}: FileProcessorOptions,
+	) -> Result<ProcessedFileHashes, FileError> {
+		let hash = generate_file_hashes
+			.then(|| RarProcessor::generate_stump_hash(path))
+			.flatten();
+		// TODO(koreader): Do we want to hash RAR files?
+		// let koreader_hash = generate_koreader_hashes
+		// 	.then(|| generate_koreader_hash(path))
+		// 	.transpose()?;
+
+		Ok(ProcessedFileHashes {
+			hash,
+			koreader_hash: None,
+		})
 	}
 
 	fn process(
@@ -117,10 +139,10 @@ impl FileProcessor for RarProcessor {
 			return ZipProcessor::process(zip_path, options, config);
 		}
 
-		let hash = options
-			.generate_file_hashes
-			.then(|| RarProcessor::hash(path))
-			.flatten();
+		let ProcessedFileHashes {
+			hash,
+			koreader_hash,
+		} = RarProcessor::generate_hashes(path, options)?;
 
 		let mut archive = RarProcessor::open_for_processing(path)?;
 		let mut pages = 0;
@@ -162,8 +184,7 @@ impl FileProcessor for RarProcessor {
 		Ok(ProcessedFile {
 			path: PathBuf::from(path),
 			hash,
-			// TODO(koreader): Do we want to hash RAR files?
-			koreader_hash: None,
+			koreader_hash,
 			metadata,
 			pages,
 		})

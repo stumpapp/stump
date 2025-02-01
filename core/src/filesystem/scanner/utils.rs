@@ -27,12 +27,14 @@ use crate::{
 		FileStatus,
 	},
 	error::{CoreError, CoreResult},
-	filesystem::{MediaBuilder, SeriesBuilder},
+	filesystem::{scanner::options::BookVisitOperation, MediaBuilder, SeriesBuilder},
 	job::{error::JobError, JobExecuteLog, JobProgress, WorkerCtx, WorkerSendExt},
 	prisma::{media, media_metadata, series, PrismaClient},
 	utils::chain_optional_iter,
 	CoreEvent,
 };
+
+use super::options::{BookVisitCtx, BookVisitResult};
 
 pub(crate) fn file_updated_since_scan(
 	entry: &DirEntry,
@@ -514,31 +516,6 @@ pub(crate) struct MediaBuildOperation {
 	pub max_concurrency: usize,
 }
 
-// TODO(granular-scans): build_book_partial? build_partial_book?
-/*
-	A suboptimal approach could be:
-	```rust
-	struct PartialBook {
-		book: Media,
-		fields_to_update: Option<Vec<String>>, // None means full update, 0 len is err(?)
-	}
-	```
-	This would be the easiest, but would involve some wasted work. Maybe an emum?
-	```rust
-	enum BookUpdate {
-		Full(Media),
-		// TODO(granular-scans): Legacy metadata doesn't strictly set the ID to the associated
-		// media's ID. This is a problem in that the book's id would need to be provided.
-		Metadata(MediaMetadata),
-		Hashes {
-			id: String,
-			hash: Option<String>,
-			koreader_hash: Option<String>,
-		},
-	}
-	```
-*/
-
 /// Builds a media from the given path
 ///
 /// # Arguments
@@ -590,6 +567,70 @@ async fn build_book(
 
 	Ok(build_result)
 }
+
+async fn handle_book(
+	BookVisitCtx {
+		path,
+		operation,
+		series_id,
+		existing_book,
+	}: BookVisitCtx,
+	library_config: LibraryConfig,
+	config: &StumpConfig,
+) -> CoreResult<BookVisitResult> {
+	let (tx, rx) = oneshot::channel();
+
+	// Spawn a blocking task to handle the IO-intensive operations:
+	let handle = spawn_blocking({
+		let path = path.to_path_buf();
+		let series_id = series_id.to_string();
+		let library_config = library_config.clone();
+		let config = config.clone();
+
+		move || {
+			let builder = MediaBuilder::new(&path, &series_id, library_config, &config);
+			let send_result = tx.send(match (operation, existing_book) {
+				(BookVisitOperation::Rebuild, Some(book)) => builder
+					.rebuild(&book)
+					.map(|b| BookVisitResult::Built(Box::new(b))),
+				(BookVisitOperation::RegenMeta, Some(book)) => builder
+					.regen_meta(&book)
+					.map(|meta| BookVisitResult::RegeneratedMeta {
+						id: book.id,
+						meta: Box::new(meta),
+					}),
+				(BookVisitOperation::RegenHashes, Some(book)) => builder
+					.regen_hashes()
+					.map(|hashes| BookVisitResult::RegeneratedHashes {
+						id: book.id,
+						hashes,
+					}),
+				// If the existing book is None, it means the book doesn't yet exist so we
+				// always just do a full build
+				(_, None) => builder.build().map(|b| BookVisitResult::Built(Box::new(b))),
+			});
+			tracing::trace!(
+				is_err = send_result.is_err(),
+				"Sending build result to channel"
+			);
+		}
+	});
+
+	let build_result = if let Ok(recv) = rx.await {
+		recv?
+	} else {
+		handle
+			.await
+			.map_err(|e| CoreError::Unknown(e.to_string()))?;
+		return Err(CoreError::Unknown(
+			"Failed to receive build result".to_string(),
+		));
+	};
+
+	Ok(build_result)
+}
+
+// async fn handle_book_result()
 
 /// Safely builds media from a list of paths concurrently, with a maximum concurrency limit
 /// as defined by the core configuration. The media is then inserted into the database.

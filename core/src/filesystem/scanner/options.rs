@@ -46,10 +46,13 @@ pub enum VisitStrategy {
 	RegenHashes,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
 pub enum BookVisitOperation {
+	#[serde(rename = "rebuild")]
 	Rebuild,
+	#[serde(rename = "regen_meta")]
 	RegenMeta,
+	#[serde(rename = "regen_hashes")]
 	RegenHashes,
 }
 
@@ -60,16 +63,30 @@ pub struct BookVisitCtx {
 	pub existing_book: Option<Media>,
 }
 
+pub struct RegeneratedMeta {
+	pub id: String,
+	pub meta: Box<MediaMetadata>,
+}
+
+pub struct RegeneratedHashes {
+	pub id: String,
+	pub hashes: ProcessedFileHashes,
+}
+
 pub enum BookVisitResult {
 	Built(Box<Media>),
-	RegeneratedMeta {
-		id: String,
-		meta: Box<MediaMetadata>,
-	},
-	RegeneratedHashes {
-		id: String,
-		hashes: ProcessedFileHashes,
-	},
+	RegeneratedMeta(RegeneratedMeta),
+	RegeneratedHashes(RegeneratedHashes),
+}
+
+impl BookVisitResult {
+	pub fn error_ctx(&self) -> String {
+		match self {
+			BookVisitResult::Built(book) => book.path.clone(),
+			BookVisitResult::RegeneratedMeta(params) => params.id.clone(),
+			BookVisitResult::RegeneratedHashes(params) => params.id.clone(),
+		}
+	}
 }
 
 /// The override options for a scan job. These options are used to override the default behavior, which generally

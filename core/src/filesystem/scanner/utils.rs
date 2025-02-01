@@ -1,5 +1,5 @@
 use std::{
-	collections::VecDeque,
+	collections::{HashMap, VecDeque},
 	path::{Path, PathBuf},
 	pin::pin,
 	sync::{
@@ -27,7 +27,10 @@ use crate::{
 		FileStatus,
 	},
 	error::{CoreError, CoreResult},
-	filesystem::{scanner::options::BookVisitOperation, MediaBuilder, SeriesBuilder},
+	filesystem::{
+		scanner::options::{BookVisitOperation, RegeneratedHashes, RegeneratedMeta},
+		MediaBuilder, SeriesBuilder,
+	},
 	job::{error::JobError, JobExecuteLog, JobProgress, WorkerCtx, WorkerSendExt},
 	prisma::{media, media_metadata, series, PrismaClient},
 	utils::chain_optional_iter,
@@ -68,39 +71,6 @@ pub(crate) fn file_updated_since_scan(
 		Ok(true)
 	}
 }
-
-// TODO(granular-scans): Use this to determine if Full is needed?
-// pub(crate) fn book_updated_since_scan(book: &Media) -> bool {
-// 	let modified_at_result = book
-// 		.modified_at
-// 		.clone()
-// 		.map(|m| m.parse::<DateTime<Utc>>())
-// 		.transpose();
-
-// 	let modified_at = match modified_at_result {
-// 		Ok(Some(modified_at)) => modified_at,
-// 		Ok(None) => {
-// 			tracing::trace!("Modified_at is None");
-// 			return false;
-// 		},
-// 		Err(err) => {
-// 			tracing::error!(error = ?err, "Failed to parse modified_at");
-// 			return false;
-// 		},
-// 	};
-
-// 	let underlying_file = PathBuf::from(&book.path);
-// 	if let Ok(Ok(system_time)) = underlying_file.metadata().map(|m| m.modified()) {
-// 		let system_time_converted: DateTime<Utc> = system_time.into();
-// 		tracing::trace!(?system_time_converted, ?modified_at, "Comparing dates");
-
-// 		if system_time_converted > modified_at {
-// 			return true;
-// 		}
-// 	}
-
-// 	false
-// }
 
 pub(crate) async fn create_media(
 	db: &PrismaClient,
@@ -219,6 +189,69 @@ pub(crate) async fn update_media(db: &PrismaClient, media: Media) -> CoreResult<
 		.await;
 
 	Ok(result?)
+}
+
+// TODO(granular-scans): create functions for each operation
+pub(crate) async fn handle_book_visit_operation(
+	db: &PrismaClient,
+	result: BookVisitResult,
+) -> CoreResult<()> {
+	match result {
+		BookVisitResult::RegeneratedHashes(RegeneratedHashes { id, hashes }) => {
+			let _updated_book = db
+				.media()
+				.update(
+					media::id::equals(id),
+					vec![
+						media::hash::set(hashes.hash),
+						media::koreader_hash::set(hashes.koreader_hash),
+					],
+				)
+				.exec()
+				.await?;
+		},
+		BookVisitResult::RegeneratedMeta(RegeneratedMeta { id, meta }) => {
+			let params = meta
+				.into_prisma()
+				.into_iter()
+				.chain(vec![media_metadata::media_id::set(Some(id.clone()))])
+				.collect::<Vec<_>>();
+
+			let updated_meta = db
+				._transaction()
+				.run(|client| async move {
+					let meta = client
+						.media_metadata()
+						.upsert(
+							media_metadata::media_id::equals(id.clone()),
+							params.clone(),
+							params,
+						)
+						.exec()
+						.await?;
+					client
+						.media()
+						.update(
+							media::id::equals(id.clone()),
+							vec![media::metadata::connect(media_metadata::id::equals(
+								meta.id.clone(),
+							))],
+						)
+						.with(media::metadata::fetch())
+						.exec()
+						.await
+						.map(|_| meta)
+				})
+				.await;
+			tracing::trace!(?updated_meta, "Metadata upserted");
+		},
+		BookVisitResult::Built(book) => {
+			let updated_book = update_media(db, *book).await?;
+			tracing::trace!(?updated_book, "Book updated");
+		},
+	}
+
+	Ok(())
 }
 
 #[derive(Default)]
@@ -593,20 +626,25 @@ async fn handle_book(
 				(BookVisitOperation::Rebuild, Some(book)) => builder
 					.rebuild(&book)
 					.map(|b| BookVisitResult::Built(Box::new(b))),
-				(BookVisitOperation::RegenMeta, Some(book)) => builder
-					.regen_meta(&book)
-					.map(|meta| BookVisitResult::RegeneratedMeta {
-						id: book.id,
-						meta: Box::new(meta),
-					}),
-				(BookVisitOperation::RegenHashes, Some(book)) => builder
-					.regen_hashes()
-					.map(|hashes| BookVisitResult::RegeneratedHashes {
-						id: book.id,
-						hashes,
-					}),
+				(BookVisitOperation::RegenMeta, Some(book)) => {
+					builder.regen_meta(&book).map(|meta| {
+						BookVisitResult::RegeneratedMeta(RegeneratedMeta {
+							id: book.id,
+							meta: Box::new(meta),
+						})
+					})
+				},
+				(BookVisitOperation::RegenHashes, Some(book)) => {
+					builder.regen_hashes().map(|hashes| {
+						BookVisitResult::RegeneratedHashes(RegeneratedHashes {
+							id: book.id,
+							hashes,
+						})
+					})
+				},
 				// If the existing book is None, it means the book doesn't yet exist so we
-				// always just do a full build
+				// always just do a full build. However, we really shouldn't be in this state
+				// since media creation is handled in a separate flow than visit
 				(_, None) => builder.build().map(|b| BookVisitResult::Built(Box::new(b))),
 			});
 			tracing::trace!(
@@ -629,8 +667,6 @@ async fn handle_book(
 
 	Ok(build_result)
 }
-
-// async fn handle_book_result()
 
 /// Safely builds media from a list of paths concurrently, with a maximum concurrency limit
 /// as defined by the core configuration. The media is then inserted into the database.
@@ -780,7 +816,7 @@ pub(crate) async fn safely_build_and_insert_media(
 /// * `MediaBuildOperation` - The operation configuration for visiting media
 /// * `worker_ctx` - The worker context
 /// * `paths` - A list of paths to visit media from
-pub(crate) async fn visit_and_update_media(
+pub(crate) async fn visit_and_update_media_old(
 	MediaBuildOperation {
 		series_id,
 		library_config,
@@ -914,6 +950,160 @@ pub(crate) async fn visit_and_update_media(
 						e.to_string()
 					))
 					.with_ctx(path),
+				);
+			},
+		}
+
+		worker_ctx.report_progress(JobProgress::subtask_position(
+			atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
+			task_count,
+		));
+	}
+
+	let success_count = output.updated_media;
+	let error_count = output.logs.len() - error_count; // Subtract the errors from the previous step
+	tracing::debug!(elapsed = ?start.elapsed(), success_count, error_count, "Updated books in database");
+
+	Ok(output)
+}
+
+pub(crate) async fn visit_and_update_media(
+	MediaBuildOperation {
+		series_id,
+		library_config,
+		max_concurrency,
+	}: MediaBuildOperation,
+	worker_ctx: &WorkerCtx,
+	params: Vec<(PathBuf, BookVisitOperation)>,
+) -> Result<MediaOperationOutput, JobError> {
+	let mut output = MediaOperationOutput::default();
+
+	if params.is_empty() {
+		tracing::trace!("No media to visit?");
+		return Ok(output);
+	}
+
+	let client = &worker_ctx.db;
+	let paths_to_operation = params
+		.iter()
+		.map(|(p, o)| (p.to_string_lossy().to_string(), *o))
+		.collect::<HashMap<_, _>>();
+	let paths = paths_to_operation.keys().cloned().collect::<Vec<String>>();
+	let paths_len = paths.len();
+
+	let media = client
+		.media()
+		.find_many(vec![
+			media::path::in_vec(paths),
+			media::series_id::equals(Some(series_id.clone())),
+		])
+		.exec()
+		.await?
+		.into_iter()
+		.map(Media::from)
+		.collect::<Vec<Media>>();
+
+	if media.len() != paths_len {
+		output.logs.push(JobExecuteLog::warn(
+			"Not all media paths were found in the database",
+		));
+	}
+
+	let semaphore = Arc::new(Semaphore::new(max_concurrency));
+	tracing::debug!(max_concurrency, "Semaphore created for media visit");
+
+	worker_ctx.report_progress(JobProgress::msg("Visiting media on disk"));
+	let task_count = media.len() as i32;
+	let start = Instant::now();
+
+	let futures = media
+		.into_iter()
+		.filter_map(|book| {
+			paths_to_operation.get(&book.path).map(|operation| {
+				let path = book.path.clone();
+				BookVisitCtx {
+					operation: *operation,
+					existing_book: Some(book),
+					series_id: series_id.clone(),
+					path: PathBuf::from(path.as_str()),
+				}
+			})
+		})
+		.map(|ctx| {
+			let semaphore = semaphore.clone();
+			let path = ctx.path.clone();
+			let config = library_config.clone();
+
+			async move {
+				if semaphore.available_permits() == 0 {
+					tracing::debug!(?path, "No permits available, waiting for one");
+				}
+
+				let permit = semaphore
+					.acquire()
+					.await
+					.map_err(|e| (CoreError::Unknown(e.to_string()), path.clone()))?;
+				tracing::trace!(?permit, ?path, "Acquired permit for media visit");
+
+				handle_book(ctx, config, &worker_ctx.config)
+					.await
+					.map_err(|e| (e, path))
+			}
+		})
+		.collect::<FuturesUnordered<_>>();
+
+	// An atomic usize to keep track of the current position in the stream
+	// to report progress to the UI
+	let atomic_cursor = Arc::new(AtomicUsize::new(1));
+
+	let mut futures = pin!(futures);
+	let mut build_results = VecDeque::with_capacity(paths_len);
+
+	while let Some(future_result) = futures.next().await {
+		match future_result {
+			Ok(result) => {
+				build_results.push_back(result);
+			},
+			Err((error, path)) => {
+				output.logs.push(
+					JobExecuteLog::error(format!(
+						"Failed to handle book: {:?}",
+						error.to_string()
+					))
+					.with_ctx(format!("Path: {path:?}")),
+				);
+			},
+		}
+		worker_ctx.report_progress(JobProgress::subtask_position(
+			atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
+			task_count,
+		));
+	}
+
+	let success_count = build_results.len();
+	let error_count = output.logs.len();
+	tracing::debug!(elapsed = ?start.elapsed(), success_count, error_count, "Handled books from disk");
+
+	worker_ctx.report_progress(JobProgress::msg("Updating media in database"));
+	let task_count = build_results.len() as i32;
+	let start = Instant::now();
+
+	let atomic_cursor = Arc::new(AtomicUsize::new(1));
+
+	while let Some(result) = build_results.pop_front() {
+		let error_ctx = result.error_ctx();
+		match handle_book_visit_operation(&worker_ctx.db, result).await {
+			Ok(_) => {
+				output.updated_media += 1;
+			},
+			Err(e) => {
+				tracing::error!(error = ?e, ?error_ctx, "Failed to update media");
+				output.logs.push(
+					JobExecuteLog::error(format!(
+						"Failed to update media: {:?}",
+						e.to_string()
+					))
+					.with_ctx(error_ctx),
 				);
 			},
 		}

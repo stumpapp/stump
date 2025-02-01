@@ -650,9 +650,9 @@ impl JobExt for LibraryScanJob {
 					output.created_media += created_media;
 					logs.extend(new_logs);
 				},
-				SeriesScanTask::VisitMedia(paths) => {
+				SeriesScanTask::VisitMedia(params) => {
 					ctx.report_progress(JobProgress::msg(
-						format!("Visiting {} media entities on disk", paths.len())
+						format!("Visiting {} media entities on disk", params.len())
 							.as_str(),
 					));
 					let MediaOperationOutput {
@@ -666,7 +666,7 @@ impl JobExt for LibraryScanJob {
 							max_concurrency,
 						},
 						ctx,
-						paths,
+						params,
 					)
 					.await?;
 					ctx.send_batch(vec![

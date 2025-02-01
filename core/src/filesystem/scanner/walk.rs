@@ -239,7 +239,7 @@ pub struct WalkedSeries {
 	pub recovered_media: Vec<String>,
 	/// The paths for media that need to be visited, i.e. the timestamp on disk has changed and
 	/// Stump will reconcile the media with the database
-	pub media_to_visit: Vec<PathBuf>,
+	pub media_to_visit: Vec<(PathBuf, BookVisitOperation)>,
 	/// The paths for media that are missing from the filesystem
 	pub missing_media: Vec<PathBuf>,
 	/// Whether the series is missing from the filesystem
@@ -329,43 +329,6 @@ pub async fn walk_series(
 		.map(|m| (m.path.clone(), m.clone()))
 		.collect::<HashMap<String, _>>();
 
-	// TODO(granular-scans): This needs to be totally rethinked (rethunk?) for granular scans. The general idea
-	// is that this existing logic is the DEFAULT behavior, but options may override it. Right now it is naive,
-	// in that any option will trigger a visit which does a full re-build of books. This is not ideal, and instead
-	// should probably create some sort of more specialized structure that embeds context about what to _do_ with
-	// each book to visit. Maybe something like:
-	/*
-	   enum BookVisit {
-		   Rebuild
-		   RebuildMetadata(MergeStrategy)
-		   RegenHash
-	   }
-
-	   struct BookVisitContext {
-		   path: PathBuf,
-		   operation: BookVisit,
-	   }
-
-	   let operations: Vec<BookVisitContext> = [...]
-	*/
-	// This does require the visit logic to be more complex, but would embed the context. Arguably this causes bloat, though,
-	// in that we're storing more data than we necessarily need to. Perhaps making the operation the first-class citizen would reduce
-	// the bloat, but I think conceptually it is more convoluted? To get it on the page:
-	/*
-		enum BookVisit {
-			Rebuild
-			RebuildMetadata(MergeStrategy)
-			RegenHash
-		}
-
-		struct BookVisitContext {
-			paths: Vec<PathBuf>,
-			operation: BookVisit,
-		}
-
-		let operations: Vec<BookVisitContext> = [...]
-	*/
-
 	let (media_to_create, remaining_entries) = valid_entries
 		.into_par_iter()
 		.partition_map::<Vec<PathBuf>, Vec<DirEntry>, _, _, _>(|entry| {
@@ -419,18 +382,6 @@ pub async fn walk_series(
 		})
 		.collect::<Vec<(PathBuf, BookVisitOperation)>>();
 
-	// TODO(granular-scans): This is here just to compile, remove it
-	let media_to_visit = book_visit_operations
-		.iter()
-		.filter_map(|(path, operation)| {
-			if operation == &BookVisitOperation::Rebuild {
-				Some(path.clone())
-			} else {
-				None
-			}
-		})
-		.collect::<Vec<PathBuf>>();
-
 	let missing_media = existing_media_map
 		.par_iter()
 		.filter(|(path, _)| !PathBuf::from(path).exists())
@@ -449,8 +400,8 @@ pub async fn walk_series(
 	let to_create = media_to_create.len();
 	tracing::trace!(?media_to_create, "Found {to_create} media to create");
 
-	let to_visit = media_to_visit.len();
-	tracing::trace!(?media_to_visit, "Found {to_visit} media to visit");
+	let to_visit = book_visit_operations.len();
+	tracing::trace!("Found {to_visit} media to visit");
 
 	let skipped_files = seen_files - (to_create + to_visit) as u64;
 	tracing::trace!(
@@ -475,7 +426,7 @@ pub async fn walk_series(
 		skipped_files,
 		media_to_create,
 		recovered_media,
-		media_to_visit,
+		media_to_visit: book_visit_operations,
 		missing_media,
 		series_is_missing: false,
 	})

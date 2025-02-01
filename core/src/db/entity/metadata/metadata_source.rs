@@ -11,7 +11,9 @@ use metadata_sources::{
 /// A model representing a [`metadata_source::Data`] object in the database.
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct MetadataSourceEntry {
-	/// The identifier assigned to the source.
+	/// The name for the source displayed in the UI.
+	///
+	/// Note: This field is also the primary key for the source database table.
 	pub name: String,
 	/// Whether the user has enabled the source.
 	pub enabled: bool,
@@ -135,10 +137,8 @@ mod tests {
 	#[tokio::test]
 	async fn dev_test() {
 		let test_input = MetadataSourceInput {
-			title: "Dune".to_string(),
-			isbn: None,
-			series: None,
-			number: None,
+			title: Some("Dune".to_string()),
+			..Default::default()
 		};
 
 		let source = MetadataSourceEntry {

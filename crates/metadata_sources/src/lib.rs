@@ -41,15 +41,25 @@ pub const REGISTERED_SOURCES: &[&str] =
 	&[open_library::SOURCE_NAME, google_books::SOURCE_NAME];
 
 /// Information provided to a [`MetadataSource`] implementation to locate the correct metadata.
+///
+/// All inputs are optional and need not be used by source implementations. Source implementations
+/// are expected to return a [`MetadataSourceError::IncompatibleInput`] error if a necessary field
+/// is available and callers of metadata sources should handle such an error gracefully when the
+/// source API being used is not known.
+#[derive(Default)]
 pub struct MetadataSourceInput {
 	/// The title of the input.
-	pub title: String,
+	pub title: Option<String>,
 	/// The name of the series that the input is part of.
 	pub series: Option<String>,
+	/// The authors of the input, if known.
+	pub author: Vec<String>,
 	/// The number in the series that the input is part of.
 	pub number: Option<u32>,
 	/// The ISBN of the input book, if any.
 	pub isbn: Option<String>,
+	/// The publisher of the input book.
+	pub publisher: Option<String>,
 }
 
 /// This trait defines a metadata source which includes logic for fetching metadata for a given
@@ -61,6 +71,11 @@ pub trait MetadataSource {
 
 	/// Makes a request for metadata object the implemented source logic and returns
 	/// the normalized [`MetadataOutput`] produced by the implementation.
+	///
+	/// Errors are expected when calling this function on a collection of [`MetadataSource`]
+	/// implementations. Sources will return [`MetadataSourceError::IncompatibleInput`] if
+	/// the input is not sufficient to construct a request for the API backing them. This
+	/// error must be handled gracefully by the caller.
 	async fn get_metadata(
 		&self,
 		input: &MetadataSourceInput,
@@ -69,9 +84,12 @@ pub trait MetadataSource {
 
 	/// Returns an optional [`ConfigSchema`] describing the JSON config structure for this source.
 	///
-	/// Implementations that require configuration (like an API key) should provide a schema
-	/// that the front-end can use to render input fields dynamically. Sources that do not
-	/// need configuration can return `None`.
+	/// Implementations that require configuration (like an API key) should provide a schema that
+	/// the front-end can use to render input fields dynamically. Sources that do not need
+	/// configuration can return `None`.
+	///
+	/// The frontend is expected to use this schema to render a UI for setting the configuration
+	/// values for the source.
 	fn get_config_schema(&self) -> Option<ConfigSchema>;
 
 	/// Returns an optional default configuration in JSON form.
@@ -93,7 +111,7 @@ pub struct MetadataOutput {
 /// Fetches a [`MetadataSource`] trait object by its identifier. Returns an error if the name
 /// does not match one implemented below.
 ///
-/// This function must be updated whenever a new [`MetadataSource`] implementation is added.
+/// This function **must** be updated whenever a new [`MetadataSource`] implementation is added.
 pub fn get_source_by_name(
 	name: &str,
 ) -> Result<Box<dyn MetadataSource>, MetadataSourceError> {
@@ -114,8 +132,10 @@ pub enum MetadataSourceError {
 	SerdeJsonError(#[from] serde_json::Error),
 	#[error("Config error: {0}")]
 	ConfigError(String),
-	#[error("Input error: {0}")]
-	InputError(String),
+	#[error("Input incompatibility: {0}")]
+	IncompatibleInput(String),
+	#[error("Metadata source response error: {0}")]
+	ResponseError(String),
 }
 
 #[cfg(test)]
@@ -129,10 +149,8 @@ mod tests {
 			vec![Box::new(open_library::OpenLibrarySource)];
 
 		let test_input = MetadataSourceInput {
-			title: "Dune".to_string(),
-			isbn: None,
-			series: None,
-			number: None,
+			title: Some("Dune".to_string()),
+			..Default::default()
 		};
 
 		for source in &sources {

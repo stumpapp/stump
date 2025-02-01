@@ -12,7 +12,10 @@ use prisma_client_rust::{and, operator, Direction};
 use stump_core::{
 	db::{
 		entity::{
-			macros::media_path_select,
+			macros::{
+				active_reading_session_book_id, library_name, media_path_select,
+				series_name,
+			},
 			utils::{
 				apply_media_age_restriction,
 				apply_media_library_not_hidden_for_user_filter,
@@ -35,9 +38,11 @@ use stump_core::{
 			OPDSNavigationLink, OPDSNavigationLinkBuilder,
 		},
 		metadata::{OPDSMetadata, OPDSMetadataBuilder, OPDSPaginationMetadataBuilder},
+		progression::OPDSProgression,
 		publication::OPDSPublication,
+		reading_session_opds_progression,
 	},
-	prisma::{library, media, series},
+	prisma::{active_reading_session, library, media, series},
 	Ctx,
 };
 
@@ -100,8 +105,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 								.route("/", get(get_book_by_id))
 								.route("/thumbnail", get(get_book_thumbnail))
 								.route("/pages/:page", get(get_book_page))
-								// TODO(OPDS-V2): Support book progression (readium/cantook?)
-								// .route("/progression", get(get_book_progression).put(update_book_progression))
+								.route("/progression", get(get_book_progression))
 								.route("/file", get(download_book)),
 						),
 				),
@@ -225,6 +229,64 @@ async fn catalog(
 		.publications(publications)
 		.build()?;
 
+	// TODO: refactor this once ordering by relations is supported
+	let continue_reading_book_ids = client
+		.active_reading_session()
+		.find_many(vec![
+			apply_in_progress_filter_for_user(user.id.clone()),
+			active_reading_session::media::is(apply_media_restrictions_for_user(user)),
+		])
+		.order_by(active_reading_session::updated_at::order(Direction::Desc))
+		.select(active_reading_session_book_id::select())
+		.exec()
+		.await?
+		.into_iter()
+		.map(|record| record.media_id)
+		.collect::<Vec<String>>();
+	let total_cotinue_reading = continue_reading_book_ids.len();
+	let id_page = continue_reading_book_ids
+		.iter()
+		.take(DEFAULT_LIMIT as usize)
+		.cloned()
+		.collect::<Vec<String>>();
+	let continue_reading_conditions = vec![media::id::in_vec(id_page)];
+	let continue_reading = client
+		.media()
+		.find_many(continue_reading_conditions.clone())
+		.order_by(media::updated_at::order(Direction::Desc))
+		.take(DEFAULT_LIMIT)
+		.include(books_as_publications::include())
+		.exec()
+		.await?;
+
+	let publications = OPDSPublication::vec_from_books(
+		&ctx.db,
+		link_finalizer.clone(),
+		continue_reading,
+	)
+	.await?;
+	let keep_reading_group = OPDSFeedGroupBuilder::default()
+		.metadata(
+			OPDSMetadataBuilder::default()
+				.title("Keep Reading".to_string())
+				.pagination(Some(
+					OPDSPaginationMetadataBuilder::default()
+						.number_of_items(total_cotinue_reading as i64)
+						.items_per_page(DEFAULT_LIMIT)
+						.current_page(1)
+						.build()?,
+				))
+				.build()?,
+		)
+		.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
+			OPDSBaseLinkBuilder::default()
+				.href("/opds/v2.0/books/keep-reading".to_string())
+				.rel(OPDSLinkRel::SelfLink.item())
+				.build()?,
+		)]))
+		.publications(publications)
+		.build()?;
+
 	Ok(Json(
 		OPDSFeedBuilder::default()
 			.metadata(
@@ -252,7 +314,7 @@ async fn catalog(
 						.build()?,
 				)
 				.build()?])
-			.groups(vec![library_group, latest_books_group])
+			.groups(vec![library_group, latest_books_group, keep_reading_group])
 			.build()?,
 	))
 }
@@ -371,6 +433,7 @@ async fn browse_library_by_id(
 	let library = client
 		.library()
 		.find_first(library_conditions.clone())
+		.select(library_name::select())
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound(String::from("Library not found")))?;
@@ -504,11 +567,7 @@ async fn browse_library_by_id(
 
 	Ok(Json(
 		OPDSFeedBuilder::default()
-			.metadata(
-				OPDSMetadataBuilder::default()
-					.title(library.name.to_string())
-					.build()?,
-			)
+			.metadata(OPDSMetadataBuilder::default().title(library.name).build()?)
 			.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
 				OPDSBaseLinkBuilder::default()
 					.href(format!("/opds/v2.0/libraries/{id}"))
@@ -741,6 +800,25 @@ async fn browse_series_by_id(
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
 
+	let series_name::Data { name, metadata } = ctx
+		.db
+		.series()
+		.find_first(
+			apply_series_restrictions_for_user(user)
+				.into_iter()
+				.chain([series::id::equals(id.clone())])
+				.collect(),
+		)
+		.select(series_name::select())
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound(String::from("Series not found")))?;
+
+	let title = metadata
+		.and_then(|m| m.title)
+		.or(Some(name))
+		.unwrap_or_else(|| format!("Series {}", id));
+
 	fetch_books_and_generate_feed(
 		&ctx,
 		OPDSLinkFinalizer::from(host),
@@ -748,7 +826,7 @@ async fn browse_series_by_id(
 		vec![media::series_id::equals(Some(id.clone()))],
 		media::name::order(Direction::Asc),
 		pagination.0,
-		"All Series",
+		&title,
 		&format!("/opds/v2.0/series/{id}"),
 	)
 	.await
@@ -923,6 +1001,39 @@ async fn get_book_page(
 	Extension(req): Extension<RequestContext>,
 ) -> APIResult<ImageResponse> {
 	fetch_book_page_for_user(&ctx, req.user(), id, page).await
+}
+
+// .route("/chapter/:chapter", get(get_epub_chapter))
+// .route("/:root/:resource", get(get_epub_meta)),
+// async fn get_book_resource() {}
+
+/// A route handler which returns the progression of a book for a user.
+#[tracing::instrument(skip(ctx))]
+async fn get_book_progression(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	HostExtractor(host): HostExtractor,
+	Extension(req): Extension<RequestContext>,
+) -> APIResult<Json<OPDSProgression>> {
+	let client = &ctx.db;
+
+	let link_finalizer = OPDSLinkFinalizer::from(host);
+
+	let user = req.user();
+	let Some(reading_session) = client
+		.active_reading_session()
+		.find_first(vec![
+			active_reading_session::media_id::equals(id),
+			apply_in_progress_filter_for_user(user.id.clone()),
+		])
+		.select(reading_session_opds_progression::select())
+		.exec()
+		.await?
+	else {
+		return Ok(Json(OPDSProgression::default()));
+	};
+
+	Ok(Json(OPDSProgression::new(reading_session, link_finalizer)?))
 }
 
 /// A route handler which downloads a book for a user.

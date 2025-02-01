@@ -1,5 +1,5 @@
-// Learn more https://docs.expo.dev/guides/monorepos
 const { getDefaultConfig } = require('expo/metro-config')
+const { withNativeWind } = require('nativewind/metro')
 const path = require('path')
 
 // Find the project and workspace directories
@@ -19,4 +19,4 @@ config.resolver.nodeModulesPaths = [
 // TODO: Needs fix - Although not ideal, this must be set to `false` in order to avoid a dependency collision on uuid
 config.resolver.disableHierarchicalLookup = false
 
-module.exports = config
+module.exports = withNativeWind(config, { input: './global.css', projectRoot })

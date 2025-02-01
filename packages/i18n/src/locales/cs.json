@@ -1582,7 +1582,10 @@
 					}
 				},
 				"validation": {
-					"ageRestrictionTooLow": "Věková omezení nesmí být nižší než 0"
+					"ageRestrictionTooLow": "Věková omezení nesmí být nižší než 0",
+					"missingUsername": "Username is required",
+					"missingPassword": "Password is required",
+					"usernameAlreadyExists": "Username already exists"
 				},
 				"createSubmitButton": "Vytvořit uživatele",
 				"updateSubmitButton": "Upravit uživatele"

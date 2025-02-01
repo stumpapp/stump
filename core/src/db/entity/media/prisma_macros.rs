@@ -37,3 +37,5 @@ finished_reading_session::select!(finished_reading_session_series_complete {
 active_reading_session::include!(reading_session_koreader { device });
 
 finished_reading_session::include!(finished_session_koreader { device });
+
+active_reading_session::select!(active_reading_session_book_id { media_id });

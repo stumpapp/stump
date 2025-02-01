@@ -11,6 +11,10 @@ export class APIBase {
 		return this.api.axios
 	}
 
+	get configuration() {
+		return this.api.config
+	}
+
 	get serviceURL() {
 		return this.api.serviceURL
 	}

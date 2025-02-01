@@ -330,6 +330,10 @@ pub async fn walk_series(
 		.par_iter()
 		// filter out entries that neither need to be created nor visited
 		.filter(|entry| {
+			if options.should_visit_books() {
+				return true;
+			}
+
 			let entry_path = entry.path();
 			let entry_path_str = entry_path.to_string_lossy().to_string();
 

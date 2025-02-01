@@ -23,6 +23,24 @@ export const formatApiURL = (url: string, version: ApiVersion) => {
 	return correctedUrl
 }
 
+export const formatOPDSURL = (url: string) => {
+	let correctedUrl = url
+
+	// Remove trailing slash
+	if (correctedUrl.endsWith('/')) {
+		correctedUrl = correctedUrl.slice(0, -1)
+	}
+
+	// if (correctedUrl.endsWith('/api')) {
+	// 	correctedUrl = correctedUrl.slice(0, -4)
+	// }
+
+	// Remove all double slashes AFTER the initial http://, https://, etc
+	correctedUrl = correctedUrl.replace(/([^:]\/)\/+/g, '$1')
+
+	return correctedUrl
+}
+
 // TODO: make not bad
 export function isUrl(url: string) {
 	return url.startsWith('http://') || url.startsWith('https://')

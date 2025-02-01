@@ -89,6 +89,8 @@ pub enum OPDSLinkType {
 	Epub,
 	#[serde(rename = "application/vnd.readium.progression+json")]
 	Progression,
+	#[serde(rename = "application/xhtml+xml")]
+	Xhtml,
 	#[serde(untagged)]
 	Custom(String),
 }
@@ -105,6 +107,8 @@ impl From<ContentType> for OPDSLinkType {
 			ContentType::JPEG => OPDSLinkType::ImageJpeg,
 			ContentType::PNG => OPDSLinkType::ImagePng,
 			ContentType::GIF => OPDSLinkType::ImageGif,
+			ContentType::AVIF => OPDSLinkType::ImageAvif,
+			ContentType::XHTML => OPDSLinkType::Xhtml,
 			_ => OPDSLinkType::Custom(content_type.mime_type().to_string()),
 		}
 	}

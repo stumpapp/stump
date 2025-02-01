@@ -13,6 +13,7 @@ import {
 	LogAPI,
 	MediaAPI,
 	MetadataAPI,
+	OPDSV2API,
 	SeriesAPI,
 	ServerAPI,
 	SmartListAPI,
@@ -58,6 +59,16 @@ export class Api {
 	 * The current access token for the API, if any
 	 */
 	private accessToken?: string
+	/**
+	 * The basic auth string for the API, if any. This will be encoded and sent as an
+	 * Authorization header, if present.
+	 */
+	// TODO: encode
+	private _basicAuth?: { username: string; password: string }
+	/**
+	 * Custom headers to be sent with every request
+	 */
+	private _customHeaders: Record<string, string> = {}
 
 	/**
 	 * Create a new instance of the API
@@ -75,8 +86,14 @@ export class Api {
 			withCredentials: this.configuration.authMethod === 'session',
 		})
 		instance.interceptors.request.use((config) => {
-			if (this.authorizationHeader) {
-				config.headers.Authorization = this.authorizationHeader
+			config.headers = config.headers.concat(this.headers)
+			// config.headers = {
+			// 	...config.headers,
+			// 	...this.headers,
+			// 	[constants.STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
+			// }
+			if (this._basicAuth) {
+				config.auth = this._basicAuth
 			}
 			return config
 		})
@@ -112,10 +129,41 @@ export class Api {
 	}
 
 	/**
+	 * Set the basic auth string for the API using a username and password
+	 */
+	set basicAuth({ username, password }: { username: string; password: string }) {
+		this._basicAuth = { username, password }
+	}
+
+	/**
+	 * Get the basic auth string for the API
+	 */
+	get basicAuthHeader(): string | undefined {
+		return this._basicAuth
+			? Buffer.from(`${this._basicAuth.username}:${this._basicAuth.password}`).toString('base64')
+			: undefined
+	}
+
+	/**
+	 * Set custom headers to be sent with every request
+	 */
+	set customHeaders(headers: Record<string, string>) {
+		this._customHeaders = headers
+	}
+
+	get customHeaders(): Record<string, string> {
+		return this._customHeaders
+	}
+
+	/**
 	 * Get the URL of the Stump service
 	 */
 	get serviceURL(): string {
 		return formatApiURL(this.baseURL, this.configuration.apiVersion)
+	}
+
+	get config(): Configuration {
+		return this.configuration
 	}
 
 	/**
@@ -137,7 +185,24 @@ export class Api {
 	 * Get the current access token for the API formatted as a Bearer token
 	 */
 	get authorizationHeader(): string | undefined {
-		return this.accessToken ? `Bearer ${this.accessToken}` : undefined
+		if (this.accessToken) {
+			return `Bearer ${this.accessToken}`
+		} else if (this.basicAuthHeader) {
+			return `Basic ${this.basicAuthHeader}`
+		} else {
+			return undefined
+		}
+	}
+
+	/**
+	 * Get the headers to be sent with every request
+	 */
+	get headers(): Record<string, string> {
+		return {
+			...this.customHeaders,
+			...(this.authorizationHeader ? { Authorization: this.authorizationHeader } : {}),
+			foo: 'bar',
+		}
 	}
 
 	/**
@@ -215,6 +280,10 @@ export class Api {
 	 */
 	get metadata(): MetadataAPI {
 		return new MetadataAPI(this)
+	}
+
+	get opds(): OPDSV2API {
+		return new OPDSV2API(this)
 	}
 
 	/**

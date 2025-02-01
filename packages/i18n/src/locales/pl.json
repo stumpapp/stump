@@ -1582,7 +1582,10 @@
 					}
 				},
 				"validation": {
-					"ageRestrictionTooLow": "Ograniczenie wieku nie może być mniejsze niż 0"
+					"ageRestrictionTooLow": "Ograniczenie wieku nie może być mniejsze niż 0",
+					"missingUsername": "Username is required",
+					"missingPassword": "Password is required",
+					"usernameAlreadyExists": "Username already exists"
 				},
 				"createSubmitButton": "Dodaj użytkownika",
 				"updateSubmitButton": "Aktualizuj użytkownika"

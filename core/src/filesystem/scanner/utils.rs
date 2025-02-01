@@ -30,6 +30,7 @@ use crate::{
 	filesystem::{MediaBuilder, SeriesBuilder},
 	job::{error::JobError, JobExecuteLog, JobProgress, WorkerCtx, WorkerSendExt},
 	prisma::{media, media_metadata, series, PrismaClient},
+	utils::chain_optional_iter,
 	CoreEvent,
 };
 
@@ -162,30 +163,49 @@ pub(crate) async fn update_media(db: &PrismaClient, media: Media) -> CoreResult<
 	let result: Result<Media, QueryError> = db
 		._transaction()
 		.run(|client| async move {
-			if let Some(metadata) = media.metadata {
-				let params = metadata.into_prisma();
-				let updated_metadata = client
-					.media_metadata()
-					.update(media_metadata::media_id::equals(media.id.clone()), params)
-					.exec()
-					.await?;
-				tracing::trace!(?updated_metadata, "Metadata updated");
-			}
+			let metadata_id = match media.metadata {
+				Some(metadata) => {
+					let params = metadata
+						.into_prisma()
+						.into_iter()
+						.chain(vec![media_metadata::media_id::set(Some(
+							media.id.clone(),
+						))])
+						.collect::<Vec<_>>();
+					let updated_metadata = client
+						.media_metadata()
+						.upsert(
+							media_metadata::media_id::equals(media.id.clone()),
+							params.clone(),
+							params,
+						)
+						.exec()
+						.await?;
+					tracing::trace!(?updated_metadata, "Metadata upserted");
+					Some(updated_metadata.id)
+				},
+				_ => None,
+			};
 
 			let updated_media = client
 				.media()
 				.update(
 					media::id::equals(media.id.clone()),
-					vec![
-						media::name::set(media.name.clone()),
-						media::size::set(media.size),
-						media::extension::set(media.extension.clone()),
-						media::pages::set(media.pages),
-						media::hash::set(media.hash.clone()),
-						media::koreader_hash::set(media.koreader_hash.clone()),
-						media::path::set(media.path.clone()),
-						media::status::set(media.status.to_string()),
-					],
+					chain_optional_iter(
+						[
+							media::name::set(media.name.clone()),
+							media::size::set(media.size),
+							media::extension::set(media.extension.clone()),
+							media::pages::set(media.pages),
+							media::hash::set(media.hash.clone()),
+							media::koreader_hash::set(media.koreader_hash.clone()),
+							media::path::set(media.path.clone()),
+							media::status::set(media.status.to_string()),
+						],
+						[metadata_id.map(|id| {
+							media::metadata::connect(media_metadata::id::equals(id))
+						})],
+					),
 				)
 				.with(media::metadata::fetch())
 				.exec()

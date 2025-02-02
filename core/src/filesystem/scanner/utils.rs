@@ -28,7 +28,10 @@ use crate::{
 	},
 	error::{CoreError, CoreResult},
 	filesystem::{
-		scanner::options::{BookVisitOperation, RegeneratedHashes, RegeneratedMeta},
+		scanner::options::{
+			BookVisitOperation, CustomVisit, CustomVisitResult, RegeneratedHashes,
+			RegeneratedMeta,
+		},
 		MediaBuilder, SeriesBuilder,
 	},
 	job::{error::JobError, JobExecuteLog, JobProgress, WorkerCtx, WorkerSendExt},
@@ -196,53 +199,58 @@ pub(crate) async fn handle_book_visit_operation(
 	result: BookVisitResult,
 ) -> CoreResult<()> {
 	match result {
-		BookVisitResult::RegeneratedHashes(RegeneratedHashes { id, hashes }) => {
-			let _updated_book = db
-				.media()
-				.update(
-					media::id::equals(id),
-					vec![
-						media::hash::set(hashes.hash),
-						media::koreader_hash::set(hashes.koreader_hash),
-					],
-				)
-				.exec()
-				.await?;
-		},
-		BookVisitResult::RegeneratedMeta(RegeneratedMeta { id, meta }) => {
-			let params = meta
-				.into_prisma()
-				.into_iter()
-				.chain(vec![media_metadata::media_id::set(Some(id.clone()))])
-				.collect::<Vec<_>>();
+		BookVisitResult::Custom(custom) => {
+			if let Some(meta) = custom.meta {
+				let params = meta
+					.into_prisma()
+					.into_iter()
+					.chain(vec![media_metadata::media_id::set(Some(custom.id.clone()))])
+					.collect::<Vec<_>>();
+				let id = custom.id.clone();
 
-			let updated_meta = db
-				._transaction()
-				.run(|client| async move {
-					let meta = client
-						.media_metadata()
-						.upsert(
-							media_metadata::media_id::equals(id.clone()),
-							params.clone(),
-							params,
-						)
-						.exec()
-						.await?;
-					client
-						.media()
-						.update(
-							media::id::equals(id.clone()),
-							vec![media::metadata::connect(media_metadata::id::equals(
-								meta.id.clone(),
-							))],
-						)
-						.with(media::metadata::fetch())
-						.exec()
-						.await
-						.map(|_| meta)
-				})
-				.await;
-			tracing::trace!(?updated_meta, "Metadata upserted");
+				let updated_meta = db
+					._transaction()
+					.run(|client| async move {
+						let meta = client
+							.media_metadata()
+							.upsert(
+								media_metadata::media_id::equals(id.clone()),
+								params.clone(),
+								params,
+							)
+							.exec()
+							.await?;
+						client
+							.media()
+							.update(
+								media::id::equals(id),
+								vec![media::metadata::connect(
+									media_metadata::id::equals(meta.id.clone()),
+								)],
+							)
+							.with(media::metadata::fetch())
+							.exec()
+							.await
+							.map(|_| meta)
+					})
+					.await;
+				tracing::trace!(?updated_meta, "Metadata upserted");
+			}
+
+			if let Some(hashes) = custom.hashes {
+				let updated_book = db
+					.media()
+					.update(
+						media::id::equals(custom.id),
+						vec![
+							media::hash::set(hashes.hash),
+							media::koreader_hash::set(hashes.koreader_hash),
+						],
+					)
+					.exec()
+					.await?;
+				tracing::trace!(?updated_book, "Book updated with new hashes");
+			}
 		},
 		BookVisitResult::Built(book) => {
 			let updated_book = update_media(db, *book).await?;
@@ -626,26 +634,34 @@ async fn handle_book(
 				(BookVisitOperation::Rebuild, Some(book)) => builder
 					.rebuild(&book)
 					.map(|b| BookVisitResult::Built(Box::new(b))),
-				(BookVisitOperation::RegenMeta, Some(book)) => {
-					builder.regen_meta().map(|maybe_meta| {
-						// TODO: consider the case that someone might want to remove
-						// metadata from a book, this basically makes it impossible since
-						// it will just noop when the processed meta is None
-						if let Some(meta) = maybe_meta {
-							BookVisitResult::RegeneratedMeta(RegeneratedMeta {
-								id: book.id,
-								meta: Box::new(meta),
-							})
-						} else {
-							BookVisitResult::Noop
-						}
-					})
-				},
-				(BookVisitOperation::RegenHashes, Some(book)) => {
-					builder.regen_hashes().map(|hashes| {
-						BookVisitResult::RegeneratedHashes(RegeneratedHashes {
+				// (BookVisitOperation::RegenMeta, Some(book)) => {
+				// 	builder.regen_meta().map(|maybe_meta| {
+				// 		// TODO: consider the case that someone might want to remove
+				// 		// metadata from a book, this basically makes it impossible since
+				// 		// it will just noop when the processed meta is None
+				// 		if let Some(meta) = maybe_meta {
+				// 			BookVisitResult::RegeneratedMeta(RegeneratedMeta {
+				// 				id: book.id,
+				// 				meta: Box::new(meta),
+				// 			})
+				// 		} else {
+				// 			BookVisitResult::Noop
+				// 		}
+				// 	})
+				// },
+				// (BookVisitOperation::RegenHashes, Some(book)) => {
+				// 	builder.regen_hashes().map(|hashes| {
+				// 		BookVisitResult::RegeneratedHashes(RegeneratedHashes {
+				// 			id: book.id,
+				// 			hashes,
+				// 		})
+				// 	})
+				// },
+				(BookVisitOperation::Custom(custom), Some(book)) => {
+					builder.custom_visit(custom).map(|result| {
+						BookVisitResult::Custom(CustomVisitResult {
 							id: book.id,
-							hashes,
+							..result
 						})
 					})
 				},
@@ -653,6 +669,7 @@ async fn handle_book(
 				// always just do a full build. However, we really shouldn't be in this state
 				// since media creation is handled in a separate flow than visit
 				(_, None) => builder.build().map(|b| BookVisitResult::Built(Box::new(b))),
+				_ => unimplemented!(),
 			});
 			tracing::trace!(
 				is_err = send_result.is_err(),

@@ -5,7 +5,11 @@ use prisma_client_rust::chrono::{DateTime, FixedOffset, Utc};
 use crate::{
 	config::StumpConfig,
 	db::entity::{LibraryConfig, Media, MediaMetadata, Series},
-	filesystem::{process, FileParts, PathUtils, SeriesJson},
+	filesystem::{
+		process,
+		scanner::{CustomVisit, CustomVisitResult},
+		FileParts, PathUtils, SeriesJson,
+	},
 	CoreError, CoreResult,
 };
 
@@ -97,12 +101,26 @@ impl MediaBuilder {
 		})
 	}
 
-	pub fn regen_hashes(self) -> CoreResult<ProcessedFileHashes> {
-		Ok(generate_hashes(self.path, self.library_config.into())?)
+	pub fn regen_hashes(&self) -> CoreResult<ProcessedFileHashes> {
+		Ok(generate_hashes(
+			self.path.clone(),
+			self.library_config.clone().into(),
+		)?)
 	}
 
-	pub fn regen_meta(self) -> CoreResult<Option<MediaMetadata>> {
-		Ok(process_metadata(self.path)?)
+	pub fn regen_meta(&self) -> CoreResult<Option<MediaMetadata>> {
+		Ok(process_metadata(self.path.clone())?)
+	}
+
+	pub fn custom_visit(self, config: CustomVisit) -> CoreResult<CustomVisitResult> {
+		let mut result = CustomVisitResult::default();
+		if config.regen_hashes {
+			result.hashes = Some(self.regen_hashes()?);
+		}
+		if config.regen_meta {
+			result.meta = self.regen_meta()?.map(Box::new);
+		}
+		Ok(result)
 	}
 }
 

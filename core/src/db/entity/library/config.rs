@@ -8,7 +8,7 @@ use crate::{
 	db::entity::common::{ReadingDirection, ReadingImageScaleFit, ReadingMode},
 	filesystem::{
 		image::ImageProcessorOptions,
-		scanner::{ScanOptions, VisitStrategy},
+		scanner::{CustomVisit, ScanConfig, ScanOptions, VisitStrategy},
 	},
 	prisma::library_config,
 };
@@ -46,17 +46,18 @@ impl LibraryConfig {
 	}
 
 	pub fn apply(&mut self, options: ScanOptions) {
-		match options.visit_strategy {
-			VisitStrategy::RegenMeta => {
-				tracing::debug!("Altering library config to process metadata");
-				self.process_metadata = true;
-			},
-			VisitStrategy::RegenHashes => {
-				tracing::debug!("Altering library config to generate hashes");
-				self.generate_file_hashes = true;
-				// self.generate_koreader_hashes = true;
-			},
-			_ => {},
+		if let ScanConfig::Custom(CustomVisit {
+			regen_hashes,
+			regen_meta,
+		}) = options.config
+		{
+			self.generate_file_hashes = regen_hashes;
+			self.process_metadata = regen_meta;
+			tracing::trace!(
+				?regen_hashes,
+				?regen_meta,
+				"Applied custom visit options to library config"
+			);
 		}
 	}
 }

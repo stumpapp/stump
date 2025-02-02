@@ -12,6 +12,7 @@ import {
 	Pageable,
 	PaginationQuery,
 	PatchLibraryThumbnail,
+	ScanOptions,
 	Series,
 	UpdateLibrary,
 	UpdateLibraryExcludedUsers,
@@ -195,8 +196,8 @@ export class LibraryAPI extends APIBase {
 	/**
 	 * Initiate a scan of a library
 	 */
-	async scan(id: string): Promise<void> {
-		await this.api.axios.post(libraryURL(`/${id}/scan`), {})
+	async scan(id: string, options: ScanOptions = {}): Promise<void> {
+		await this.api.axios.post(libraryURL(`/${id}/scan`), options)
 	}
 
 	async lastScanDetails(id: string): Promise<LastScanDetails> {
@@ -214,6 +215,13 @@ export class LibraryAPI extends APIBase {
 			libraryURL(`/${id}/scan-history`),
 		)
 		return scanHistory
+	}
+
+	/**
+	 * Clear the scan history for a library
+	 */
+	async clearScanHistory(id: string): Promise<void> {
+		await this.api.axios.delete(libraryURL(`/${id}/scan-history`))
 	}
 
 	/**
@@ -267,6 +275,7 @@ export class LibraryAPI extends APIBase {
 			scan: 'library.scan',
 			lastScanDetails: 'library.lastScanDetails',
 			scanHistory: 'library.scanHistory',
+			clearScanHistory: 'library.clearScanHistory',
 			update: 'library.update',
 			updateExcludedUsers: 'library.updateExcludedUsers',
 			updateThumbnail: 'library.updateThumbnail',

@@ -5,7 +5,7 @@ import { RawSwitch, RawSwitchProps } from './raw'
 export type WideSwitchProps = {
 	formId?: string
 	label: string
-	description: string
+	description?: string
 	title?: string
 } & RawSwitchProps
 

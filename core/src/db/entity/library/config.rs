@@ -8,7 +8,7 @@ use crate::{
 	db::entity::common::{ReadingDirection, ReadingImageScaleFit, ReadingMode},
 	filesystem::{
 		image::ImageProcessorOptions,
-		scanner::{CustomVisit, ScanConfig, ScanOptions, VisitStrategy},
+		scanner::{CustomVisit, ScanConfig, ScanOptions},
 	},
 	prisma::library_config,
 };

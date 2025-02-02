@@ -1,6 +1,7 @@
 import { Button, Label, Text } from '@stump/components'
 
 import { useLibraryManagement } from '../../context'
+import CustomScanDialog from './customScan'
 
 export default function ScannerActionsSection() {
 	const { scan } = useLibraryManagement()
@@ -28,7 +29,7 @@ export default function ScannerActionsSection() {
 				</div>
 
 				<div>
-					<Button size="sm">Configure scan</Button>
+					<CustomScanDialog onScan={scan} />
 				</div>
 			</div>
 		</div>

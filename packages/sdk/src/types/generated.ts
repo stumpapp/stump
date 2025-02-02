@@ -146,12 +146,16 @@ export type LibraryPattern = "SERIES_BASED" | "COLLECTION_BASED"
 
 export type LibraryScanMode = "DEFAULT" | "NONE"
 
+export type CustomVisit = { regen_meta: boolean; regen_hashes: boolean }
+
+export type ScanConfig = null | { force_rebuild: boolean } | CustomVisit
+
 /**
  * The override options for a scan job. These options are used to override the default behavior, which generally
  * means that the scanner will visit books it otherwise would not. How much extra work is done depends on the
  * specific options.
  */
-export type ScanOptions = { force_rebuild?: boolean; regen_hashes?: boolean }
+export type ScanOptions = { config?: ScanConfig }
 
 export type LastLibraryScan = { options: ScanOptions | null; timestamp: string }
 

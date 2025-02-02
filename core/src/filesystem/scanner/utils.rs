@@ -28,10 +28,7 @@ use crate::{
 	},
 	error::{CoreError, CoreResult},
 	filesystem::{
-		scanner::options::{
-			BookVisitOperation, CustomVisit, CustomVisitResult, RegeneratedHashes,
-			RegeneratedMeta,
-		},
+		scanner::options::{BookVisitOperation, CustomVisitResult},
 		MediaBuilder, SeriesBuilder,
 	},
 	job::{error::JobError, JobExecuteLog, JobProgress, WorkerCtx, WorkerSendExt},
@@ -40,7 +37,7 @@ use crate::{
 	CoreEvent,
 };
 
-use super::options::{BookVisitCtx, BookVisitResult};
+use super::options::BookVisitResult;
 
 pub(crate) fn file_updated_since_scan(
 	entry: &DirEntry,
@@ -256,7 +253,6 @@ pub(crate) async fn handle_book_visit_operation(
 			let updated_book = update_media(db, *book).await?;
 			tracing::trace!(?updated_book, "Book updated");
 		},
-		BookVisitResult::Noop => (),
 	}
 
 	Ok(())
@@ -609,6 +605,13 @@ async fn build_book(
 	Ok(build_result)
 }
 
+struct BookVisitCtx {
+	operation: BookVisitOperation,
+	path: PathBuf,
+	series_id: String,
+	existing_book: Option<Media>,
+}
+
 async fn handle_book(
 	BookVisitCtx {
 		path,
@@ -634,29 +637,6 @@ async fn handle_book(
 				(BookVisitOperation::Rebuild, Some(book)) => builder
 					.rebuild(&book)
 					.map(|b| BookVisitResult::Built(Box::new(b))),
-				// (BookVisitOperation::RegenMeta, Some(book)) => {
-				// 	builder.regen_meta().map(|maybe_meta| {
-				// 		// TODO: consider the case that someone might want to remove
-				// 		// metadata from a book, this basically makes it impossible since
-				// 		// it will just noop when the processed meta is None
-				// 		if let Some(meta) = maybe_meta {
-				// 			BookVisitResult::RegeneratedMeta(RegeneratedMeta {
-				// 				id: book.id,
-				// 				meta: Box::new(meta),
-				// 			})
-				// 		} else {
-				// 			BookVisitResult::Noop
-				// 		}
-				// 	})
-				// },
-				// (BookVisitOperation::RegenHashes, Some(book)) => {
-				// 	builder.regen_hashes().map(|hashes| {
-				// 		BookVisitResult::RegeneratedHashes(RegeneratedHashes {
-				// 			id: book.id,
-				// 			hashes,
-				// 		})
-				// 	})
-				// },
 				(BookVisitOperation::Custom(custom), Some(book)) => {
 					builder.custom_visit(custom).map(|result| {
 						BookVisitResult::Custom(CustomVisitResult {
@@ -669,7 +649,6 @@ async fn handle_book(
 				// always just do a full build. However, we really shouldn't be in this state
 				// since media creation is handled in a separate flow than visit
 				(_, None) => builder.build().map(|b| BookVisitResult::Built(Box::new(b))),
-				_ => unimplemented!(),
 			});
 			tracing::trace!(
 				is_err = send_result.is_err(),

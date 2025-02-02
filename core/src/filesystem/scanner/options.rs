@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use prisma_client_rust::chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -29,26 +27,8 @@ See also https://docs.rs/merge/latest/merge/ for potentially useful crate
 */
 
 #[derive(
-	Debug, Default, Clone, Copy, Deserialize, Serialize, Type, ToSchema, PartialEq,
+	Debug, Default, Clone, Copy, Deserialize, Serialize, PartialEq, Type, ToSchema,
 )]
-pub enum VisitStrategy {
-	/// Rebuild books that have changed on disk since the last scan
-	#[default]
-	#[serde(rename = "rebuild_changed")]
-	RebuildChanged,
-	/// Rebuild all books, regardless of whether they have changed on disk. This
-	/// will update metadata, hashes, etc.
-	#[serde(rename = "rebuild_all")]
-	RebuildAll,
-	/// Regenerate metadata for all books, regardless of whether they have changed on disk.
-	#[serde(rename = "regen_meta")]
-	RegenMeta,
-	/// Regenerate hashes for all books, regardless of whether they have changed on disk.
-	#[serde(rename = "regen_hashes")]
-	RegenHashes,
-}
-
-#[derive(Debug, Default, Clone, Copy, Deserialize, Serialize, Type, ToSchema)]
 #[serde(default)]
 pub struct CustomVisit {
 	pub regen_meta: bool,
@@ -61,50 +41,36 @@ impl CustomVisit {
 	}
 }
 
-#[derive(Debug, Clone, Copy, Deserialize, Serialize)]
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq)]
 pub enum BookVisitOperation {
 	Rebuild,
 	Custom(CustomVisit),
 }
 
-pub struct BookVisitCtx {
-	pub operation: BookVisitOperation,
-	pub path: PathBuf,
-	pub series_id: String,
-	pub existing_book: Option<Media>,
-}
-
-pub struct RegeneratedMeta {
-	pub id: String,
-	pub meta: Box<MediaMetadata>,
-}
-
-pub struct RegeneratedHashes {
-	pub id: String,
-	pub hashes: ProcessedFileHashes,
-}
-
+/// The result of a custom visit operation. This stores the generated bits of a book that
+/// were targeted by the visit operation.
 #[derive(Default)]
 pub struct CustomVisitResult {
+	/// The ID of the book that was visited
 	pub id: String,
+	/// The metadata that was generated during the visit, if any
 	pub meta: Option<Box<MediaMetadata>>,
+	/// The hashes that were generated during the visit, if any
 	pub hashes: Option<ProcessedFileHashes>,
 }
 
 pub enum BookVisitResult {
 	Built(Box<Media>),
-	// RegeneratedMeta(RegeneratedMeta),
-	// RegeneratedHashes(RegeneratedHashes),
 	Custom(CustomVisitResult),
-	Noop,
 }
 
 impl BookVisitResult {
+	/// Returns the context of the error that occurred during the visit. This will either be
+	/// the path to or the ID of the book.
 	pub fn error_ctx(&self) -> String {
 		match self {
 			BookVisitResult::Built(book) => book.path.clone(),
 			BookVisitResult::Custom(result) => result.id.clone(),
-			_ => unreachable!(),
 		}
 	}
 }
@@ -112,13 +78,13 @@ impl BookVisitResult {
 /// The override options for a scan job. These options are used to override the default behavior, which generally
 /// means that the scanner will visit books it otherwise would not. How much extra work is done depends on the
 /// specific options.
-#[derive(Debug, Default, Clone, Copy, Deserialize, Serialize, Type, ToSchema)]
+#[derive(Debug, Default, Clone, Copy, Deserialize, Type, Serialize)]
 pub struct ScanOptions {
-	#[serde(default, flatten)]
+	#[serde(default)]
 	pub config: ScanConfig,
 }
 
-#[derive(Default, Debug, Clone, Copy, Deserialize, Serialize, Type, ToSchema)]
+#[derive(Default, Debug, Clone, Copy, Deserialize, Type, Serialize)]
 #[serde(untagged)]
 pub enum ScanConfig {
 	#[default]
@@ -129,9 +95,19 @@ pub enum ScanConfig {
 	Custom(CustomVisit),
 }
 
+impl ScanConfig {
+	pub fn is_useless(&self) -> bool {
+		match self {
+			ScanConfig::BuildChanged => true,
+			ScanConfig::ForceRebuild { force_rebuild } => !*force_rebuild,
+			ScanConfig::Custom(custom) => custom.is_useless(),
+		}
+	}
+}
+
 impl ScanOptions {
 	pub fn is_default(&self) -> bool {
-		matches!(self.config, ScanConfig::BuildChanged)
+		matches!(self.config, ScanConfig::BuildChanged) || self.config.is_useless()
 	}
 
 	/// Returns a [BookVisitOperation] if one can be naively inferred from the visit strategy.
@@ -139,7 +115,9 @@ impl ScanOptions {
 	/// the modified time of the book, this method will return None.
 	pub fn book_operation(&self) -> Option<BookVisitOperation> {
 		match self.config {
-			ScanConfig::BuildChanged => Some(BookVisitOperation::Rebuild),
+			// We cannot infer the operation from this strategy since it depends on the modified
+			// time of the book. So we return None.
+			ScanConfig::BuildChanged => None,
 			ScanConfig::ForceRebuild { force_rebuild } if force_rebuild => {
 				Some(BookVisitOperation::Rebuild)
 			},
@@ -151,7 +129,6 @@ impl ScanOptions {
 	}
 }
 
-// TODO: move
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct LibraryScanRecord {
 	id: i32,
@@ -206,65 +183,133 @@ impl TryFrom<library_scan_details::scan_history::Data> for LastLibraryScan {
 mod tests {
 	use super::*;
 
-	// #[test]
-	// fn test_properly_converts_to_book_operation() {
-	// 	let options = ScanOptions::default();
-	// 	assert_eq!(options.book_operation(), None);
+	#[test]
+	fn test_properly_converts_to_book_operation() {
+		let options = ScanOptions::default();
+		assert_eq!(options.book_operation(), None);
 
-	// 	let options = ScanOptions {
-	// 		visit_strategy: VisitStrategy::RebuildAll,
-	// 	};
-	// 	assert_eq!(options.book_operation(), Some(BookVisitOperation::Rebuild));
+		let options = ScanOptions {
+			config: ScanConfig::BuildChanged,
+		};
+		assert_eq!(options.book_operation(), None);
 
-	// 	let options = ScanOptions {
-	// 		visit_strategy: VisitStrategy::RegenMeta,
-	// 	};
-	// 	assert_eq!(
-	// 		options.book_operation(),
-	// 		Some(BookVisitOperation::RegenMeta)
-	// 	);
+		let options = ScanOptions {
+			config: ScanConfig::ForceRebuild {
+				force_rebuild: true,
+			},
+		};
+		assert_eq!(options.book_operation(), Some(BookVisitOperation::Rebuild));
 
-	// 	let options = ScanOptions {
-	// 		visit_strategy: VisitStrategy::RegenHashes,
-	// 	};
-	// 	assert_eq!(
-	// 		options.book_operation(),
-	// 		Some(BookVisitOperation::RegenHashes)
-	// 	);
-	// }
-
-	// #[test]
-	// fn test_deserialize() {
-	// 	assert_eq!(
-	// 		serde_json::from_str::<ScanOptions>(r#"{"visit_strategy":"rebuild_all"}"#)
-	// 			.unwrap()
-	// 			.visit_strategy,
-	// 		VisitStrategy::RebuildAll
-	// 	);
-	// 	assert_eq!(
-	// 		serde_json::from_str::<ScanOptions>(r#"{"visit_strategy":"regen_meta"}"#)
-	// 			.unwrap()
-	// 			.visit_strategy,
-	// 		VisitStrategy::RegenMeta
-	// 	);
-	// 	assert_eq!(
-	// 		serde_json::from_str::<ScanOptions>(r#"{"visit_strategy":"regen_hashes"}"#)
-	// 			.unwrap()
-	// 			.visit_strategy,
-	// 		VisitStrategy::RegenHashes
-	// 	);
-	// 	assert_eq!(
-	// 		serde_json::from_str::<ScanOptions>(
-	// 			r#"{"visit_strategy":"rebuild_changed"}"#
-	// 		)
-	// 		.unwrap()
-	// 		.visit_strategy,
-	// 		VisitStrategy::RebuildChanged
-	// 	);
-	// }
+		let options = ScanOptions {
+			config: ScanConfig::Custom(CustomVisit {
+				regen_meta: true,
+				regen_hashes: false,
+			}),
+		};
+		assert_eq!(
+			options.book_operation(),
+			Some(BookVisitOperation::Custom(CustomVisit {
+				regen_meta: true,
+				regen_hashes: false
+			}))
+		);
+	}
 
 	#[test]
-	fn test_deserialize_empty() {
+	fn test_deserialize_scan_options() {
+		assert!(matches!(
+			serde_json::from_str::<ScanOptions>(r#"{"force_rebuild":true}"#)
+				.unwrap()
+				.config,
+			ScanConfig::ForceRebuild {
+				force_rebuild: true
+			}
+		));
+
+		assert!(matches!(
+			serde_json::from_str::<ScanOptions>(r#"{"force_rebuild":false}"#)
+				.unwrap()
+				.config,
+			ScanConfig::ForceRebuild {
+				force_rebuild: false
+			}
+		));
+
+		assert!(matches!(
+			serde_json::from_str::<ScanOptions>(r#"{"regen_meta":true}"#)
+				.unwrap()
+				.config,
+			ScanConfig::Custom(CustomVisit {
+				regen_meta: true,
+				regen_hashes: false
+			})
+		));
+
+		assert!(matches!(
+			serde_json::from_str::<ScanOptions>(r#"{"regen_hashes":true}"#)
+				.unwrap()
+				.config,
+			ScanConfig::Custom(CustomVisit {
+				regen_meta: false,
+				regen_hashes: true
+			})
+		));
+
+		assert!(matches!(
+			serde_json::from_str::<ScanOptions>(
+				r#"{"regen_meta":true,"regen_hashes":true}"#
+			)
+			.unwrap()
+			.config,
+			ScanConfig::Custom(CustomVisit {
+				regen_meta: true,
+				regen_hashes: true
+			})
+		));
+	}
+
+	#[test]
+	fn test_no_useless_operations() {
+		let options = ScanOptions::default();
+		assert!(options.is_default());
+		assert!(options.book_operation().is_none());
+
+		let options = ScanOptions {
+			config: ScanConfig::ForceRebuild {
+				force_rebuild: false,
+			},
+		};
+		assert!(options.is_default());
+		assert!(options.book_operation().is_none());
+
+		let options = ScanOptions {
+			config: ScanConfig::Custom(CustomVisit {
+				regen_meta: false,
+				regen_hashes: false,
+			}),
+		};
+		assert!(options.config.is_useless());
+		assert!(options.book_operation().is_none());
+
+		let options = ScanOptions {
+			config: ScanConfig::Custom(CustomVisit {
+				regen_meta: true,
+				regen_hashes: false,
+			}),
+		};
+		assert!(!options.config.is_useless());
+
+		let options = ScanOptions {
+			config: ScanConfig::Custom(CustomVisit {
+				regen_meta: false,
+				regen_hashes: true,
+			}),
+		};
+		assert!(!options.config.is_useless());
+	}
+
+	#[test]
+	fn test_deserialize_default() {
 		let options = r#"{}"#;
 		let options: ScanOptions = serde_json::from_str(options).unwrap();
 		assert!(options.is_default());

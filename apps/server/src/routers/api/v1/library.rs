@@ -92,7 +92,10 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 					get(get_library_excluded_users).post(update_library_excluded_users),
 				)
 				.route("/last-scan", get(get_library_last_scan))
-				.route("/scan-history", get(get_library_scan_history))
+				.route(
+					"/scan-history",
+					get(get_library_scan_history).delete(delete_library_scan_history),
+				)
 				.route("/scan", post(scan_library))
 				.route("/clean", put(clean_library))
 				.route("/series", get(get_library_series))
@@ -1075,6 +1078,28 @@ async fn get_library_scan_history(
 		.collect::<Result<_, _>>()?;
 
 	Ok(Json(scan_history))
+}
+
+async fn delete_library_scan_history(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+) -> APIResult<Json<()>> {
+	req.enforce_permissions(&[UserPermission::ManageLibrary])?;
+
+	let client = &ctx.db;
+
+	let affected_rows = client
+		.library_scan_record()
+		.delete_many(vec![library_scan_record::library::is(vec![
+			library::id::equals(id.clone()),
+			library_not_hidden_from_user_filter(req.user()),
+		])])
+		.exec()
+		.await?;
+	tracing::debug!(affected_rows, "Deleted library scan history records");
+
+	Ok(Json(()))
 }
 
 #[utoipa::path(

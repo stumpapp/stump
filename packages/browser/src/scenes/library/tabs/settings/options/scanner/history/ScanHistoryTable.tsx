@@ -18,6 +18,7 @@ import { TableFooter } from '@/components/table'
 import { getCommonPinningStyles } from '@/components/table/Table'
 
 import { useLibraryManagement } from '../../../context'
+import ScanRecordInspector from './ScanRecordInspector'
 
 dayjs.extend(relativeTime)
 
@@ -84,12 +85,8 @@ export default function ScanHistoryTable() {
 						columnHelper.display({
 							id: 'actions',
 							header: () => null,
-							cell: ({
-								row: {
-									original: { options },
-								},
-							}) => {
-								if (!options) return null
+							cell: ({ row: { original } }) => {
+								if (!original.options) return null
 
 								return (
 									<div className="flex items-center justify-end">
@@ -102,10 +99,22 @@ export default function ScanHistoryTable() {
 
 											<Dropdown.Content align="end">
 												<Dropdown.Group>
-													<Dropdown.Item data-testid="run-scan" onClick={() => scan(options)}>
+													<Dropdown.Item
+														data-testid="run-scan"
+														onClick={() => scan(original.options)}
+													>
 														<span>
 															{/* {t(getKey('inspect'))} */}
 															Run scan
+														</span>
+													</Dropdown.Item>
+													<Dropdown.Item
+														data-testid="inspect-scan"
+														onClick={() => setInspectingRecord(original)}
+													>
+														<span>
+															{/* {t(getKey('inspect'))} */}
+															See details
 														</span>
 													</Dropdown.Item>
 												</Dropdown.Group>
@@ -160,6 +169,7 @@ export default function ScanHistoryTable() {
 
 	return (
 		<>
+			<ScanRecordInspector record={inspectingRecord} onClose={() => setInspectingRecord(null)} />
 			<Card className="overflow-x-auto">
 				<table
 					className="min-w-full"

@@ -1,6 +1,11 @@
 //! This module contains the [Google Books](https://developers.google.com/books) implementation of
 //! the [`MetadataSource`] trait.
 
+mod request;
+mod response;
+
+use request::build_request_url;
+use response::GoogleBooksResponse;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -12,36 +17,13 @@ use super::{MetadataOutput, MetadataSource, MetadataSourceError, MetadataSourceI
 /// implementation, and displayed to the user in the UI.
 pub const SOURCE_NAME: &str = "Google Books";
 
-/// The base url used to access the Google Books API
-const BASE_URL: &str = "https://www.googleapis.com/books/v1/volumes";
-
-/// Implements metadata retrieval using the Google Books API.
-pub struct GoogleBooksSource;
-
-#[derive(Deserialize, Serialize, JsonSchema, Default)]
+#[derive(Debug, Deserialize, Serialize, JsonSchema, Default)]
 pub struct GoogleBooksConfig {
 	api_key: Option<String>,
 }
 
-#[derive(Deserialize)]
-struct GoogleBooksResponse {
-	items: Option<Vec<GoogleBooksVolume>>,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct GoogleBooksVolume {
-	volume_info: GoogleBooksVolumeInfo,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct GoogleBooksVolumeInfo {
-	title: Option<String>,
-	authors: Option<Vec<String>>,
-	description: Option<String>,
-	published_date: Option<String>,
-}
+/// Implements metadata retrieval using the Google Books API.
+pub struct GoogleBooksSource;
 
 #[async_trait::async_trait]
 impl MetadataSource for GoogleBooksSource {
@@ -62,6 +44,7 @@ impl MetadataSource for GoogleBooksSource {
 				"No Google Books config provided".to_string(),
 			));
 		};
+
 		// We can't proceed without an api key
 		let Some(api_key) = config.api_key else {
 			return Err(MetadataSourceError::ConfigError(
@@ -76,6 +59,8 @@ impl MetadataSource for GoogleBooksSource {
 			.await?
 			.json::<GoogleBooksResponse>()
 			.await?;
+
+		println!("{response:?}");
 
 		// Use the response to fill MetadataOutput
 		if let Some(items) = response.items {
@@ -108,50 +93,6 @@ impl MetadataSource for GoogleBooksSource {
 	}
 }
 
-fn build_request_url(
-	input: &MetadataSourceInput,
-	api_key: String,
-) -> Result<String, MetadataSourceError> {
-	// Build up query parameters
-	let mut query_parts = Vec::new();
-
-	// First the search query part
-	query_parts.push(build_q_params(input));
-	// Then we add the other query params in
-	query_parts.push("maxResults=10".to_string());
-	query_parts.push("projection=lite".to_string());
-	query_parts.push("orderBy=relevance".to_string());
-	query_parts.push(format!("key={api_key}"));
-
-	let query_params = query_parts.join("&");
-	Ok(format!("{BASE_URL}?{query_params}"))
-}
-
-/// Construct the search query params for a Google books query. For example, consider
-/// the URL: `https://www.googleapis.com/books/v1/volumes?q=intitle:flowers+inauthor:keyes`
-///
-/// This function builds the `q=intitle:flowers+inauthor:keyes` part of the request.
-fn build_q_params(input: &MetadataSourceInput) -> String {
-	let mut q_param_parts = Vec::new();
-	// Query by title
-	if let Some(title) = &input.title {
-		let title = title.trim();
-		q_param_parts.push(format!("intitle:{title}"));
-	}
-	// Query by ISBN
-	if let Some(isbn) = &input.isbn {
-		let isbn = isbn.trim();
-		q_param_parts.push(format!("isbn:{isbn}"));
-	}
-	// Query by publisher
-	if let Some(publisher) = &input.publisher {
-		let publisher = publisher.trim();
-		q_param_parts.push(format!("inpublisher:{publisher}"))
-	}
-
-	format!("q={}", q_param_parts.join("+"))
-}
-
 #[cfg(test)]
 mod tests {
 	use super::*;
@@ -166,7 +107,10 @@ mod tests {
 			..Default::default()
 		};
 
-		let test_config = r#"{ "api_key": "_" }"#.to_string();
+		let test_config = r#"{
+				"api_key": "_"
+			}"#
+		.to_string();
 
 		let metadata_output = source
 			.get_metadata(&test_input, &Some(test_config))

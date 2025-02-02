@@ -331,6 +331,9 @@ export type PageInfo = { total_pages: number; current_page: number; page_size: n
 
 export type Pagination = null | PageQuery | CursorQuery
 
+/**
+ * A model representing a [`metadata_source::Data`] object in the database.
+ */
 export type MetadataSourceEntry = { name: string; enabled: boolean; config: string | null }
 
 export type MetadataSourceSchema = { fields: MetadataSourceSchemaField[] }

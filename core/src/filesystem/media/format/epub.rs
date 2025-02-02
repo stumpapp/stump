@@ -87,6 +87,11 @@ impl FileProcessor for EpubProcessor {
 		})
 	}
 
+	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError> {
+		let epub_file = Self::open(path)?;
+		Ok(Some(MediaMetadata::from(epub_file.metadata)))
+	}
+
 	fn process(
 		path: &str,
 		options: FileProcessorOptions,

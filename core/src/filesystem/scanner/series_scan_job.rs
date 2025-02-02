@@ -151,7 +151,7 @@ impl JobExt for SeriesScanJob {
 				db: ctx.db.clone(),
 				ignore_rules,
 				max_depth,
-				options: self.options.clone(),
+				options: self.options,
 			},
 		)
 		.await?;

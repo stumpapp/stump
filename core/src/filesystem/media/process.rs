@@ -91,6 +91,8 @@ pub trait FileProcessor {
 		config: &StumpConfig,
 	) -> Result<ProcessedFile, FileError>;
 
+	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError>;
+
 	/// Get the bytes of a page of the file.
 	fn get_page(
 		path: &str,
@@ -211,6 +213,59 @@ pub async fn process_async(
 	};
 
 	Ok(processed_file)
+}
+
+#[tracing::instrument(err, fields(path = %path.as_ref().display()))]
+pub fn process_metadata(
+	path: impl AsRef<Path>,
+) -> Result<Option<MediaMetadata>, FileError> {
+	let mime = ContentType::from_path(path.as_ref()).mime_type();
+
+	let path_str = path.as_ref().to_str().unwrap_or_default();
+
+	match mime.as_str() {
+		"application/zip" | "application/vnd.comicbook+zip" => {
+			ZipProcessor::process_metadata(path_str)
+		},
+		"application/vnd.rar" | "application/vnd.comicbook-rar" => {
+			RarProcessor::process_metadata(path_str)
+		},
+		"application/epub+zip" => EpubProcessor::process_metadata(path_str),
+		"application/pdf" => PdfProcessor::process_metadata(path_str),
+		_ => Err(FileError::UnsupportedFileType(path_str.to_string())),
+	}
+}
+
+#[tracing::instrument(err, fields(path = %path.as_ref().display()))]
+pub async fn process_metadata_async(
+	path: impl AsRef<Path>,
+) -> Result<Option<MediaMetadata>, FileError> {
+	let (tx, rx) = oneshot::channel();
+
+	let handle = spawn_blocking({
+		let path = path.as_ref().to_path_buf();
+
+		move || {
+			let send_result = tx.send(process_metadata(path.as_path()));
+			tracing::trace!(
+				is_err = send_result.is_err(),
+				"Sending result of sync process_metadata"
+			);
+		}
+	});
+
+	let metadata = if let Ok(recv) = rx.await {
+		recv?
+	} else {
+		handle
+			.await
+			.map_err(|e| FileError::UnknownError(e.to_string()))?;
+		return Err(FileError::UnknownError(
+			"Failed to receive metadata".to_string(),
+		));
+	};
+
+	Ok(metadata)
 }
 
 #[tracing::instrument(err, fields(path = %path.as_ref().display()))]

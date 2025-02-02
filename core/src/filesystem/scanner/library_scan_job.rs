@@ -65,8 +65,6 @@ pub struct LibraryScanJob {
 	pub config: Option<LibraryConfig>,
 	/// The scan options to use, if any
 	pub options: ScanOptions,
-	/// Whether the scan is granular or not (true if custom options are provided)
-	pub is_granular: bool,
 }
 
 impl LibraryScanJob {
@@ -79,7 +77,6 @@ impl LibraryScanJob {
 			id,
 			path,
 			config: None,
-			is_granular: options.is_some(),
 			options: options.unwrap_or_default(),
 		})
 	}
@@ -142,7 +139,7 @@ impl JobExt for LibraryScanJob {
 		// Note: We ignore the potential self.config here in the event that it was
 		// updated since being queued. This is perhaps a bit overly cautious, but it's
 		// just one additional query.
-		let library_config = ctx
+		let mut library_config = ctx
 			.db
 			.library_config()
 			.find_first(vec![library_config::library::is(vec![
@@ -153,6 +150,7 @@ impl JobExt for LibraryScanJob {
 			.await?
 			.map(LibraryConfig::from)
 			.ok_or(JobError::InitFailed("Library not found".to_string()))?;
+		library_config.apply(self.options);
 		let is_collection_based = library_config.is_collection_based();
 		let ignore_rules = library_config.ignore_rules.build()?;
 
@@ -173,7 +171,7 @@ impl JobExt for LibraryScanJob {
 				db: ctx.db.clone(),
 				ignore_rules,
 				max_depth: is_collection_based.then_some(1),
-				options: self.options.clone(),
+				options: self.options,
 			},
 		)
 		.await?;
@@ -490,7 +488,7 @@ impl JobExt for LibraryScanJob {
 						db: ctx.db.clone(),
 						ignore_rules,
 						max_depth,
-						options: self.options.clone(),
+						options: self.options,
 					},
 				)
 				.await;

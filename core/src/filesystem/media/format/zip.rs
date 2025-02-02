@@ -3,6 +3,7 @@ use tracing::{debug, error, trace};
 
 use crate::{
 	config::StumpConfig,
+	db::entity::MediaMetadata,
 	filesystem::{
 		content_type::ContentType,
 		error::FileError,
@@ -76,6 +77,47 @@ impl FileProcessor for ZipProcessor {
 			hash,
 			koreader_hash: None,
 		})
+	}
+
+	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError> {
+		let zip_file = File::open(path)?;
+		let mut archive = zip::ZipArchive::new(zip_file)?;
+
+		let mut metadata = None;
+
+		for i in 0..archive.len() {
+			let mut file = archive.by_index(i)?;
+
+			if file.is_dir() {
+				trace!("Skipping directory");
+				continue;
+			}
+
+			let path_buf = file.enclosed_name().unwrap_or_else(|| {
+				tracing::warn!("Failed to get enclosed name for zip entry");
+				PathBuf::from(file.name())
+			});
+			let path = path_buf.as_path();
+
+			if path.is_hidden_file() {
+				trace!(path = ?path, "Skipping hidden file");
+				continue;
+			}
+
+			let FileParts { file_name, .. } = path.file_parts();
+
+			if file_name == "ComicInfo.xml" {
+				trace!("Found ComicInfo.xml");
+				let mut contents = Vec::new();
+				file.read_to_end(&mut contents)?;
+				let contents = String::from_utf8_lossy(&contents).to_string();
+				trace!(contents_len = contents.len(), "Read ComicInfo.xml");
+				metadata = metadata_from_buf(&contents);
+				break;
+			}
+		}
+
+		Ok(metadata)
 	}
 
 	fn process(

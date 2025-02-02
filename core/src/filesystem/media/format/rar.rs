@@ -9,6 +9,7 @@ use unrar::{Archive, CursorBeforeHeader, List, OpenArchive, Process, UnrarResult
 
 use crate::{
 	config::StumpConfig,
+	db::entity::MediaMetadata,
 	filesystem::{
 		archive::create_zip_archive,
 		content_type::ContentType,
@@ -117,6 +118,40 @@ impl FileProcessor for RarProcessor {
 			hash,
 			koreader_hash: None,
 		})
+	}
+
+	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError> {
+		let mut archive = RarProcessor::open_for_processing(path)?;
+		let mut metadata_buf = None;
+
+		while let Ok(Some(header)) = archive.read_header() {
+			let entry = header.entry();
+
+			if entry.is_directory() {
+				archive = header.skip()?;
+				continue;
+			}
+
+			if entry.filename.is_hidden_file() {
+				archive = header.skip()?;
+				continue;
+			}
+
+			if entry.filename.as_os_str() == "ComicInfo.xml" {
+				let (data, _) = header.read()?;
+				metadata_buf = Some(data);
+				break;
+			} else {
+				archive = header.skip()?;
+			}
+		}
+
+		if let Some(buf) = metadata_buf {
+			let content_str = std::str::from_utf8(&buf)?;
+			Ok(metadata_from_buf(content_str))
+		} else {
+			Ok(None)
+		}
 	}
 
 	fn process(

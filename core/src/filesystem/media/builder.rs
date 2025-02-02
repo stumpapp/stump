@@ -9,7 +9,7 @@ use crate::{
 	CoreError, CoreResult,
 };
 
-use super::{generate_hashes, ProcessedFileHashes};
+use super::{generate_hashes, process_metadata, ProcessedFileHashes};
 
 pub struct MediaBuilder {
 	path: PathBuf,
@@ -101,8 +101,8 @@ impl MediaBuilder {
 		Ok(generate_hashes(self.path, self.library_config.into())?)
 	}
 
-	pub fn regen_meta(self, media: &Media) -> CoreResult<MediaMetadata> {
-		unimplemented!()
+	pub fn regen_meta(self) -> CoreResult<Option<MediaMetadata>> {
+		Ok(process_metadata(self.path)?)
 	}
 }
 

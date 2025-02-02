@@ -28,7 +28,9 @@ let scan_options: ScanOptions = {
 See also https://docs.rs/merge/latest/merge/ for potentially useful crate
 */
 
-#[derive(Debug, Default, Clone, Deserialize, Serialize, Type, ToSchema, PartialEq)]
+#[derive(
+	Debug, Default, Clone, Copy, Deserialize, Serialize, Type, ToSchema, PartialEq,
+)]
 pub enum VisitStrategy {
 	/// Rebuild books that have changed on disk since the last scan
 	#[default]
@@ -77,6 +79,7 @@ pub enum BookVisitResult {
 	Built(Box<Media>),
 	RegeneratedMeta(RegeneratedMeta),
 	RegeneratedHashes(RegeneratedHashes),
+	Noop,
 }
 
 impl BookVisitResult {
@@ -85,6 +88,7 @@ impl BookVisitResult {
 			BookVisitResult::Built(book) => book.path.clone(),
 			BookVisitResult::RegeneratedMeta(params) => params.id.clone(),
 			BookVisitResult::RegeneratedHashes(params) => params.id.clone(),
+			_ => unreachable!(),
 		}
 	}
 }
@@ -92,7 +96,9 @@ impl BookVisitResult {
 /// The override options for a scan job. These options are used to override the default behavior, which generally
 /// means that the scanner will visit books it otherwise would not. How much extra work is done depends on the
 /// specific options.
-#[derive(Debug, Default, Clone, Deserialize, Serialize, Type, ToSchema, PartialEq)]
+#[derive(
+	Debug, Default, Clone, Copy, Deserialize, Serialize, Type, ToSchema, PartialEq,
+)]
 pub struct ScanOptions {
 	#[serde(default)]
 	pub visit_strategy: VisitStrategy,

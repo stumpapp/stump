@@ -6,7 +6,10 @@ use utoipa::ToSchema;
 
 use crate::{
 	db::entity::common::{ReadingDirection, ReadingImageScaleFit, ReadingMode},
-	filesystem::image::ImageProcessorOptions,
+	filesystem::{
+		image::ImageProcessorOptions,
+		scanner::{ScanOptions, VisitStrategy},
+	},
 	prisma::library_config,
 };
 
@@ -40,6 +43,21 @@ pub struct LibraryConfig {
 impl LibraryConfig {
 	pub fn is_collection_based(&self) -> bool {
 		self.library_pattern == LibraryPattern::CollectionBased
+	}
+
+	pub fn apply(&mut self, options: ScanOptions) {
+		match options.visit_strategy {
+			VisitStrategy::RegenMeta => {
+				tracing::debug!("Altering library config to process metadata");
+				self.process_metadata = true;
+			},
+			VisitStrategy::RegenHashes => {
+				tracing::debug!("Altering library config to generate hashes");
+				self.generate_file_hashes = true;
+				// self.generate_koreader_hashes = true;
+			},
+			_ => {},
+		}
 	}
 }
 

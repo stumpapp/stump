@@ -83,6 +83,12 @@ impl FileProcessor for PdfProcessor {
 		})
 	}
 
+	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError> {
+		let file = FileOptions::cached().open(path)?;
+
+		Ok(file.trailer.info_dict.map(MediaMetadata::from))
+	}
+
 	fn process(
 		path: &str,
 		options: FileProcessorOptions,

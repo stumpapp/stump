@@ -191,7 +191,6 @@ pub(crate) async fn update_media(db: &PrismaClient, media: Media) -> CoreResult<
 	Ok(result?)
 }
 
-// TODO(granular-scans): create functions for each operation
 pub(crate) async fn handle_book_visit_operation(
 	db: &PrismaClient,
 	result: BookVisitResult,
@@ -249,6 +248,7 @@ pub(crate) async fn handle_book_visit_operation(
 			let updated_book = update_media(db, *book).await?;
 			tracing::trace!(?updated_book, "Book updated");
 		},
+		BookVisitResult::Noop => (),
 	}
 
 	Ok(())
@@ -627,11 +627,18 @@ async fn handle_book(
 					.rebuild(&book)
 					.map(|b| BookVisitResult::Built(Box::new(b))),
 				(BookVisitOperation::RegenMeta, Some(book)) => {
-					builder.regen_meta(&book).map(|meta| {
-						BookVisitResult::RegeneratedMeta(RegeneratedMeta {
-							id: book.id,
-							meta: Box::new(meta),
-						})
+					builder.regen_meta().map(|maybe_meta| {
+						// TODO: consider the case that someone might want to remove
+						// metadata from a book, this basically makes it impossible since
+						// it will just noop when the processed meta is None
+						if let Some(meta) = maybe_meta {
+							BookVisitResult::RegeneratedMeta(RegeneratedMeta {
+								id: book.id,
+								meta: Box::new(meta),
+							})
+						} else {
+							BookVisitResult::Noop
+						}
 					})
 				},
 				(BookVisitOperation::RegenHashes, Some(book)) => {
@@ -815,158 +822,7 @@ pub(crate) async fn safely_build_and_insert_media(
 /// # Arguments
 /// * `MediaBuildOperation` - The operation configuration for visiting media
 /// * `worker_ctx` - The worker context
-/// * `paths` - A list of paths to visit media from
-pub(crate) async fn visit_and_update_media_old(
-	MediaBuildOperation {
-		series_id,
-		library_config,
-		max_concurrency,
-	}: MediaBuildOperation,
-	worker_ctx: &WorkerCtx,
-	paths: Vec<PathBuf>,
-) -> Result<MediaOperationOutput, JobError> {
-	if paths.is_empty() {
-		tracing::trace!("No media to visit?");
-		return Ok(MediaOperationOutput::default());
-	}
-
-	let client = &worker_ctx.db;
-	let mut output = MediaOperationOutput::default();
-
-	let media = client
-		.media()
-		.find_many(vec![
-			media::path::in_vec(
-				paths
-					.iter()
-					.map(|e| e.to_string_lossy().to_string())
-					.collect::<Vec<String>>(),
-			),
-			media::series_id::equals(Some(series_id.clone())),
-		])
-		.exec()
-		.await?
-		.into_iter()
-		.map(Media::from)
-		.collect::<Vec<Media>>();
-
-	if media.len() != paths.len() {
-		output.logs.push(JobExecuteLog::warn(
-			"Not all media paths were found in the database",
-		));
-	}
-
-	let semaphore = Arc::new(Semaphore::new(max_concurrency));
-	tracing::debug!(max_concurrency, "Semaphore created for media visit");
-
-	worker_ctx.report_progress(JobProgress::msg("Visiting media on disk"));
-	let task_count = media.len() as i32;
-	let start = Instant::now();
-
-	// TODO(granular-scans): This needs to be aware of ScanOptions and build books more selectively.
-	// For example, if regen_hashes is the only option set, and the book wasn't updated,
-	// we don't need to rebuild it. We would just need to regen the hash. The only time
-	// we would need a full rebuild is if the book was updated on disk?
-	let futures = media
-		.into_iter()
-		.map(|existing_book| {
-			let semaphore = semaphore.clone();
-			let series_id = series_id.clone();
-			let library_config = library_config.clone();
-			let path = PathBuf::from(existing_book.path.as_str());
-
-			async move {
-				if semaphore.available_permits() == 0 {
-					tracing::debug!(?path, "No permits available, waiting for one");
-				}
-				let _permit = semaphore
-					.acquire()
-					.await
-					.map_err(|e| (CoreError::Unknown(e.to_string()), path.clone()))?;
-				tracing::trace!(?path, "Acquired permit for media visit");
-				build_book(
-					path.as_path(),
-					&series_id,
-					Some(existing_book),
-					library_config,
-					&worker_ctx.config,
-				)
-				.await
-				.map_err(|e| (e, path))
-			}
-		})
-		.collect::<FuturesUnordered<_>>();
-
-	// An atomic usize to keep track of the current position in the stream
-	// to report progress to the UI
-	let atomic_cursor = Arc::new(AtomicUsize::new(1));
-
-	let mut futures = pin!(futures);
-	let mut books = VecDeque::with_capacity(paths.len());
-
-	while let Some(result) = futures.next().await {
-		match result {
-			Ok(book) => {
-				books.push_back(book);
-			},
-			Err((error, path)) => {
-				output.logs.push(
-					JobExecuteLog::error(format!(
-						"Failed to build book: {:?}",
-						error.to_string()
-					))
-					.with_ctx(format!("Path: {path:?}")),
-				);
-			},
-		}
-		worker_ctx.report_progress(JobProgress::subtask_position(
-			atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
-			task_count,
-		));
-	}
-
-	let success_count = books.len();
-	let error_count = output.logs.len();
-	tracing::debug!(elapsed = ?start.elapsed(), success_count, error_count, "Rebuilt books from disk");
-
-	worker_ctx.report_progress(JobProgress::msg("Updating media in database"));
-	let task_count = books.len() as i32;
-	let start = Instant::now();
-
-	let atomic_cursor = Arc::new(AtomicUsize::new(1));
-
-	// TODO: We don't use the updated book, so chunk these and update_many?
-	while let Some(book) = books.pop_front() {
-		let path = book.path.clone();
-		match update_media(&worker_ctx.db, book).await {
-			Ok(_) => {
-				output.updated_media += 1;
-			},
-			Err(e) => {
-				tracing::error!(error = ?e, ?path, "Failed to update media");
-				output.logs.push(
-					JobExecuteLog::error(format!(
-						"Failed to update media: {:?}",
-						e.to_string()
-					))
-					.with_ctx(path),
-				);
-			},
-		}
-
-		worker_ctx.report_progress(JobProgress::subtask_position(
-			atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
-			task_count,
-		));
-	}
-
-	let success_count = output.updated_media;
-	let error_count = output.logs.len() - error_count; // Subtract the errors from the previous step
-	tracing::debug!(elapsed = ?start.elapsed(), success_count, error_count, "Updated books in database");
-
-	Ok(output)
-}
-
+/// * `params` - A list of paths and operations to visit
 pub(crate) async fn visit_and_update_media(
 	MediaBuildOperation {
 		series_id,

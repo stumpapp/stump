@@ -12,6 +12,9 @@ import { BottomSheet } from '~/components/ui/bottom-sheet'
 import { setAndroidNavigationBar } from '~/lib/android-navigation-bar'
 import { NAV_THEME } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+
+AsyncStorage.clear()
 
 const LIGHT_THEME: Theme = {
 	...DefaultTheme,

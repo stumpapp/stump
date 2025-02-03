@@ -26,19 +26,23 @@
 //!   to the [`REGISTERED_SOURCES`] constant.
 //!
 
+mod comicvine;
+mod config_schema;
 mod google_books;
 mod open_library;
-mod schema_parser;
 
 use thiserror::Error;
 
-pub use schema_parser::{ConfigSchema, SchemaField, SchemaFieldType};
+pub use config_schema::{ConfigSchema, SchemaField, SchemaFieldType};
 
 /// A constant containing a list of source identities for implementations of [`MetadataSource`].
 /// A source's identity must be inlcuded here or it will not be written to the database to be
 /// enabled/disabled by a user.
-pub const REGISTERED_SOURCES: &[&str] =
-	&[open_library::SOURCE_NAME, google_books::SOURCE_NAME];
+pub const REGISTERED_SOURCES: &[&str] = &[
+	open_library::SOURCE_NAME,
+	google_books::SOURCE_NAME,
+	comicvine::SOURCE_NAME,
+];
 
 /// Information provided to a [`MetadataSource`] implementation to locate the correct metadata.
 ///
@@ -118,6 +122,7 @@ pub fn get_source_by_name(
 	match name {
 		open_library::SOURCE_NAME => Ok(Box::new(open_library::OpenLibrarySource)),
 		google_books::SOURCE_NAME => Ok(Box::new(google_books::GoogleBooksSource)),
+		comicvine::SOURCE_NAME => Ok(Box::new(comicvine::ComicVineSource)),
 		_ => Err(MetadataSourceError::InvalidName(name.to_string())),
 	}
 }

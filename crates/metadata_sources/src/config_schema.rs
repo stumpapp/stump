@@ -4,17 +4,27 @@
 use schemars::schema::{InstanceType, RootSchema, Schema, SchemaObject, SingleOrVec};
 use serde_json::Value;
 
+/// Describes the JSON schema for a configuration of a [`MetadataSource`] implementation.
+///
+/// Internally, this type stores a [`Vec`] of [`SchemaField`]s.
 #[derive(Debug)]
 pub struct ConfigSchema {
 	pub fields: Vec<SchemaField>,
 }
 
+/// Describes a field in a [`ConfigSchema`]. Encodes the `key` and `field_type` for the field.
 #[derive(Debug)]
 pub struct SchemaField {
 	pub key: String,
 	pub field_type: SchemaFieldType,
 }
 
+/// Describes the type of a [`ConfigSchema`] field.
+///
+/// Types can be:
+///   - [`SchemaFieldType::Integer`] - A [`u32`], [`i32`], or similar type.
+///   - [`SchemaFieldType::Float`] - An [`f64`] or similar type.
+///   - [`SchemaFieldType::String`] - A [`String`] type.
 #[derive(Debug)]
 pub enum SchemaFieldType {
 	Integer,

@@ -41,14 +41,14 @@ impl MetadataSource for GoogleBooksSource {
 			serde_json::from_str(cfg_json)?
 		} else {
 			return Err(MetadataSourceError::ConfigError(
-				"No Google Books config provided".to_string(),
+				"No Google Books config provided.".to_string(),
 			));
 		};
 
 		// We can't proceed without an api key
 		let Some(api_key) = config.api_key else {
 			return Err(MetadataSourceError::ConfigError(
-				"An API key is necessary to use the Google Books metadata source"
+				"An API key is necessary to use the Google Books metadata source."
 					.to_string(),
 			));
 		};
@@ -77,7 +77,7 @@ impl MetadataSource for GoogleBooksSource {
 
 		// Return an error if the response was empty
 		return Err(MetadataSourceError::ResponseError(
-			"Google Books response contained no items".to_string(),
+			"Google Books response contained no items.".to_string(),
 		));
 	}
 
@@ -88,7 +88,7 @@ impl MetadataSource for GoogleBooksSource {
 	fn get_default_config(&self) -> Option<String> {
 		Some(
 			serde_json::to_string(&GoogleBooksConfig::default())
-				.expect("GoogleBooksConfig should be serializable"),
+				.expect("GoogleBooksConfig should be serializable."),
 		)
 	}
 }

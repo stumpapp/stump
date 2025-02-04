@@ -51,9 +51,9 @@ repositories {
 
 // See https://github.com/readium/kotlin-toolkit?tab=readme-ov-file#setting-up-readium
 dependencies {
-  implementation "org.readium.kotlin-toolkit:readium-shared:$readium_version"
+  /*implementation "org.readium.kotlin-toolkit:readium-shared:$readium_version"
   implementation "org.readium.kotlin-toolkit:readium-streamer:$readium_version"
   implementation "org.readium.kotlin-toolkit:readium-navigator:$readium_version"
   implementation "org.readium.kotlin-toolkit:readium-opds:$readium_version"
-  implementation "org.readium.kotlin-toolkit:readium-lcp:$readium_version"
+  implementation "org.readium.kotlin-toolkit:readium-lcp:$readium_version"*/
 }

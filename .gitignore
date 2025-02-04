@@ -13,6 +13,9 @@ logs/
 !.vscode/tasks.json
 !.vscode/*.todo
 
+apps/expo/ios
+apps/expo/android
+
 build/
 coverage/
 !.github/actions/coverage

@@ -8,7 +8,9 @@
 			"@stump/sdk": ["../../packages/sdk/src/index.ts"],
 			"@stump/sdk/*": ["../../packages/sdk/src/*"],
 			"@stump/client": ["../../packages/client/src/index.ts"],
-			"@stump/client/*": ["../../packages/client/src/*"]
+			"@stump/client/*": ["../../packages/client/src/*"],
+			"readium": ["./modules/readium/index.ts"],
+			"readium/*": ["./modules/readium/src/*"]
 		}
 	},
 	"include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts", "nativewind-env.d.ts"]

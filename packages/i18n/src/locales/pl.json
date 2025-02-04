@@ -1583,9 +1583,9 @@
 				},
 				"validation": {
 					"ageRestrictionTooLow": "Ograniczenie wieku nie może być mniejsze niż 0",
-					"missingUsername": "Username is required",
-					"missingPassword": "Password is required",
-					"usernameAlreadyExists": "Username already exists"
+					"missingUsername": "Nazwa użytkownika jest wymagana",
+					"missingPassword": "Hasło jest wymagane",
+					"usernameAlreadyExists": "Użytkownik o takiej nazwie już istnieje"
 				},
 				"createSubmitButton": "Dodaj użytkownika",
 				"updateSubmitButton": "Aktualizuj użytkownika"
@@ -1737,7 +1737,8 @@
 			"wait": "Po utworzeniu bibliotek będą one wyświetlane tutaj"
 		},
 		"links": {
-			"create": "Utwórz bibliotekę"
+			"create": "Utwórz bibliotekę",
+			"settings": "Przejdź do ustawień"
 		}
 	},
 	"pagination": {

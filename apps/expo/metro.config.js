@@ -15,6 +15,7 @@ config.resolver.nodeModulesPaths = [
 	path.resolve(projectRoot, 'node_modules'),
 	path.resolve(workspaceRoot, 'node_modules'),
 ]
+
 // 3. Force Metro to resolve (sub)dependencies only from the `nodeModulesPaths`
 // TODO: Needs fix - Although not ideal, this must be set to `false` in order to avoid a dependency collision on uuid
 config.resolver.disableHierarchicalLookup = false

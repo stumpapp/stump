@@ -1737,7 +1737,8 @@
 			"wait": "Una volta create le librerie, verranno visualizzate qui"
 		},
 		"links": {
-			"create": "Crea libreria"
+			"create": "Crea libreria",
+			"settings": "Go to settings"
 		}
 	},
 	"pagination": {

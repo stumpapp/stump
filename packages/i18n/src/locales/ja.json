@@ -707,11 +707,11 @@
 					"emptyState": "開始するにはグループを追加してください",
 					"actions": {
 						"addFilter": "フィルターを追加",
-						"addGroup": "Add group",
-						"deleteFilter": "Delete filter",
-						"deleteGroup": "Delete group"
+						"addGroup": "グループを追加",
+						"deleteFilter": "フィルターを削除",
+						"deleteGroup": "グループを削除"
 					},
-					"is": "is",
+					"is": "等しい",
 					"fieldSelect": {
 						"placeholder": "Attribute",
 						"source": {

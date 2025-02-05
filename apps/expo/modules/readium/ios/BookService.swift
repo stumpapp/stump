@@ -1,5 +1,5 @@
-import R2Shared
-import R2Streamer
+import ReadiumShared
+import ReadiumStreamer
 
 enum BookServiceError: Error {
     case openFailed(Publication.OpeningError)

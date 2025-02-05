@@ -3,6 +3,7 @@ import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { Pressable, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
+import { stringMd5 } from 'react-native-quick-md5'
 
 import { useActiveServer } from '~/components/activeServer'
 import { Button, Heading, icons, Text } from '~/components/ui'
@@ -10,6 +11,9 @@ import { cn } from '~/lib/utils'
 
 import { usePublicationContext } from './context'
 import { getDateField, getNumberField } from './utils'
+import { isDownloadLink } from '~/lib/opds/utils'
+import { useCallback, useState } from 'react'
+import { useDownload } from '~/stores'
 
 const { Info, Slash, BookCopy } = icons
 
@@ -23,7 +27,9 @@ export default function Screen() {
 		url,
 	} = usePublicationContext()
 	const { title, identifier, belongsTo } = metadata || {}
+	const { downloadBook } = useDownload()
 
+	const [id] = useState(() => identifier || hashFromURL(url))
 	const router = useRouter()
 
 	const thumbnailURL = images?.at(0)?.href
@@ -34,8 +40,25 @@ export default function Screen() {
 	const hasInformation = !!numberOfPages || !!modified
 	const seriesURL = belongsTo?.series?.links?.find((link) => link.rel === 'self')?.href
 
-	const downloadURL = links?.find((link) => link.rel === 'http://opds-spec.org/acquisition')?.href
+	const downloadLink = links?.find(isDownloadLink)
+	const downloadURL = downloadLink?.href
 	const canStream = !!readingOrder && readingOrder.length > 0
+
+	const handleDownloadBook = useCallback(() => {
+		if (!downloadURL) return
+
+		const expectedMime = downloadLink?.type
+
+		console.log('Downloading book', { id, serverID, downloadURL, expectedMime })
+
+		downloadBook(
+			{
+				id,
+				serverID,
+			},
+			{ url: downloadURL, expectedMime },
+		)
+	}, [downloadBook, id])
 
 	return (
 		<ScrollView className="flex-1 gap-5 bg-background px-6">
@@ -71,7 +94,7 @@ export default function Screen() {
 					>
 						<Text>Stream</Text>
 					</Button>
-					<Button variant="secondary" disabled={!downloadURL}>
+					<Button variant="secondary" disabled={!downloadURL} onPress={handleDownloadBook}>
 						<Text>Download</Text>
 					</Button>
 				</View>
@@ -191,3 +214,7 @@ export default function Screen() {
 		</ScrollView>
 	)
 }
+
+// An identifier that can be generated from a URL to uniquely identify a publication
+// without dealing with common URL issues for file names
+const hashFromURL = (url: string) => stringMd5(url)

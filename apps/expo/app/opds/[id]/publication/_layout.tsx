@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { SafeAreaView } from 'react-native'
 
 import { PublicationContext } from './context'
+import { isProgressionLink } from '~/lib/opds/utils'
 
 export default function Layout() {
 	const { url: publicationURL } = useLocalSearchParams<{ url: string }>()
@@ -17,9 +18,7 @@ export default function Layout() {
 		},
 	)
 	const progressionURL = useMemo(
-		() =>
-			publication?.links?.find((link) => link.rel === 'http://www.cantook.com/api/progression')
-				?.href,
+		() => publication?.links?.find(isProgressionLink)?.href,
 		[publication],
 	)
 	const { data: progression } = useQuery(

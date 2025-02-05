@@ -11488,7 +11488,7 @@ expo-constants@~17.0.5:
     "@expo/config" "~10.0.8"
     "@expo/env" "~0.4.1"
 
-expo-dev-client@~5.0.11:
+expo-dev-client@^5.0.11:
   version "5.0.11"
   resolved "https://registry.yarnpkg.com/expo-dev-client/-/expo-dev-client-5.0.11.tgz#7b6aefd1bde042b79008357db777f6f9195a0cfa"
   integrity sha512-ENqw9hAIEB6o2uU2/JjimF8HSQk1ZzlGckl6XL2XWf3mpmGzz2v36yFJ37HLHgSCm3vXdaZujuS9BBwtE2EEqg==

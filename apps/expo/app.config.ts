@@ -1,8 +1,10 @@
-import path from 'node:path'
 import fs from 'node:fs'
+import path from 'node:path'
+
 import { withDangerousMod, withGradleProperties } from '@expo/config-plugins'
-import type { ExpoConfig, ConfigContext } from 'expo/config'
 import { mergeContents } from '@expo/config-plugins/build/utils/generateCode'
+import type { ConfigContext, ExpoConfig } from 'expo/config'
+
 import packageInfo from './package.json'
 
 const IS_DEV = process.env['APP_VARIANT'] === 'development'
@@ -17,6 +19,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 		icon: './assets/images/icon.png',
 		scheme: 'myapp',
 		userInterfaceStyle: 'automatic',
+
+		owner: 'stumpapp',
 		newArchEnabled: true,
 		splash: {
 			image: './assets/images/splash.png',
@@ -58,7 +62,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				origin: false,
 			},
 			eas: {
-				projectId: 'ef47ae8c-1700-452a-bf20-57cbe3e3fece',
+				projectId: 'b1069238-5814-4263-983b-148216e393e5',
 			},
 		},
 	}

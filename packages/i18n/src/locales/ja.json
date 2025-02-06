@@ -713,83 +713,83 @@
 					},
 					"is": "等しい",
 					"fieldSelect": {
-						"placeholder": "Attribute",
+						"placeholder": "属性",
 						"source": {
-							"label": "Source",
-							"back": "Back",
+							"label": "ソース",
+							"back": "戻る",
 							"book": {
-								"label": "Book",
+								"label": "本",
 								"attributes": {
-									"name": "Filename",
-									"size": "Size",
-									"extension": "Extension",
-									"created_at": "Created at",
-									"updated_at": "Updated at",
-									"status": "Status",
-									"path": "Path",
-									"pages": "Pages",
-									"tags": "Tags"
+									"name": "ファイル名",
+									"size": "サイズ",
+									"extension": "拡張機能",
+									"created_at": "作成日",
+									"updated_at": "更新日",
+									"status": "状態",
+									"path": "パス",
+									"pages": "ページ",
+									"tags": "タグ"
 								}
 							},
 							"book_meta": {
-								"label": "Book Meta",
+								"label": "本のメタ情報",
 								"attributes": {
-									"title": "Title",
-									"summary": "Summary",
-									"notes": "Notes",
-									"genre": "Genre",
-									"writers": "Writers",
-									"pencillers": "Pencillers",
-									"inkers": "Inkers",
-									"letterers": "Letterers",
-									"editors": "Editors",
-									"publisher": "Publisher",
-									"colorists": "Colorist",
-									"cover_artists": "Cover artists",
-									"links": "Links",
-									"characters": "Characters",
-									"teams": "Teams"
+									"title": "タイトル",
+									"summary": "概要",
+									"notes": "ノート",
+									"genre": "ジャンル",
+									"writers": "ライター",
+									"pencillers": "ペンシラー",
+									"inkers": "インカー",
+									"letterers": "レタラー",
+									"editors": "編集者",
+									"publisher": "発行元",
+									"colorists": "カラーリスト",
+									"cover_artists": "カバーアーティスト",
+									"links": "リンク",
+									"characters": "キャラクター",
+									"teams": "チーム"
 								}
 							},
 							"series": {
-								"label": "Series",
+								"label": "シリーズ",
 								"attributes": {
-									"name": "Name",
-									"path": "Path"
+									"name": "名前",
+									"path": "パス"
 								}
 							},
 							"series_meta": {
-								"label": "Series Meta",
+								"label": "シリーズのメタ情報",
 								"attributes": {
-									"age_rating": "Age rating",
-									"title": "Title",
-									"summary": "Summary",
-									"meta_type": "Type",
-									"publisher": "Publisher",
-									"imprint": "Imprint",
-									"comicid": "Comic ID",
-									"booktype": "Book type",
-									"status": "Status",
-									"volume": "Volume"
+									"age_rating": "年齢制限",
+									"title": "タイトル",
+									"summary": "概要",
+									"meta_type": "タイプ",
+									"publisher": "発行元",
+									"imprint": "沿革",
+									"comicid": "コミックID",
+									"booktype": "本の種類",
+									"status": "状態",
+									"volume": "ボリューム"
 								}
 							},
 							"library": {
-								"label": "Library",
+								"label": "ライブラリ",
 								"attributes": {
-									"name": "Name",
-									"path": "Path"
+									"name": "名前",
+									"path": "パス"
 								}
 							}
 						}
 					},
 					"basicValue": {
-						"placeholder": "Value",
-						"date": "Date"
+						"placeholder": "値",
+						"date": "日付"
 					},
 					"rangeValue": {
 						"from": {
-							"date": "From date",
-							"number": "From"
+							"date": "開始日",
+							"number": "開始"
 						},
 						"to": {
 							"date": "To date",

@@ -230,6 +230,7 @@ export default function UploadModal() {
 							{t(getKey(`description.${displayedType}`))}
 							{displayedType === 'series' && (
 								<span>
+									{'. '}
 									{t(getKey('seriesDisclaimer.0'))} <b>{t(getKey('seriesDisclaimer.1'))}</b>{' '}
 									{t(getKey('seriesDisclaimer.2'))}
 								</span>

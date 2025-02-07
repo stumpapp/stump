@@ -25,6 +25,19 @@ use crate::{
 	middleware::auth::{api_key_middleware, RequestContext},
 };
 
+#[derive(Debug, Serialize, Deserialize)]
+struct KOReaderURLParams<D> {
+	#[serde(flatten)]
+	params: D,
+	#[serde(default)]
+	api_key: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct KOReaderDocumentURLParams {
+	document: String,
+}
+
 // TODO(koreader): healthcheck? I don't think it is required, since I could configure Stump as a
 // sync server just fine without it.
 
@@ -98,7 +111,10 @@ struct GetProgressResponse {
 async fn get_progress(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
-	Path(document): Path<String>,
+	Path(KOReaderURLParams {
+		params: KOReaderDocumentURLParams { document },
+		..
+	}): Path<KOReaderURLParams<KOReaderDocumentURLParams>>,
 ) -> APIResult<Json<GetProgressResponse>> {
 	let client = &ctx.db;
 	let user = req.user();

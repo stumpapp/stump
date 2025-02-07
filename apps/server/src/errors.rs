@@ -303,6 +303,7 @@ impl From<prisma_client_rust::QueryError> for APIError {
 
 /// The response body for API errors. This is just a basic JSON response with a status code and a message.
 /// Any axum handlers which return a [`Result`] with an Error of [`APIError`] will be converted into this response.
+#[derive(Debug)]
 pub struct APIErrorResponse {
 	status: StatusCode,
 	message: String,
@@ -323,6 +324,8 @@ impl IntoResponse for APIErrorResponse {
 			"status": self.status.as_u16(),
 			"message": self.message,
 		});
+
+		tracing::error!(error = ?self, "API error response");
 
 		let base_response = Json(body).into_response();
 

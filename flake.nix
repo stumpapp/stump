@@ -14,19 +14,19 @@
         };
 
         libraries = with pkgs;[
-          webkitgtk
+          webkitgtk_4_1
           gtk3
           cairo
           gdk-pixbuf
           glib
           dbus
-          openssl_3
+          openssl
         ];
 
         packages = with pkgs; [
           # node
-          nodePackages.yarn
-          nodejs
+          (nodePackages.yarn.override {withNode = false;})
+          nodejs_20
 
           # rust
           rustfmt
@@ -42,11 +42,11 @@
           wget
           pkg-config
           dbus
-          openssl_3
+          openssl
           glib
           gtk3
-          libsoup
-          webkitgtk
+          libsoup_2_4
+          webkitgtk_4_1
 
           # avoid openssl linking error when local git version isn't compatible with openssl_3 
           git

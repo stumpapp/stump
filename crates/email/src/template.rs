@@ -3,6 +3,12 @@ use std::path::PathBuf;
 use crate::EmailResult;
 use handlebars::Handlebars;
 
+pub static BASE_TEMPLATE: &str = include_str!("../templates/base.hbs");
+pub static ATTACHMENT_TEMPLATE: &str = include_str!("../templates/attachment.hbs");
+
+pub static TEMPLATES: &[(&str, &str)] =
+	&[("base", BASE_TEMPLATE), ("attachment", ATTACHMENT_TEMPLATE)];
+
 // TODO: expose this enumeration to the public API somehow, so that users can define their own template overrides
 
 pub enum EmailTemplate {
@@ -19,6 +25,7 @@ impl AsRef<str> for EmailTemplate {
 }
 
 /// Render a template to a string using the given data and templates directory.
+/// If the template does not exist on disk, the default template will be used.
 ///
 /// # Example
 /// ```no_run
@@ -40,14 +47,18 @@ pub fn render_template(
 ) -> EmailResult<String> {
 	let mut handlebars = Handlebars::new();
 	handlebars.register_partial("base_partial", "{{> base}}")?;
-	handlebars.register_template_file("base", templates_dir.join("base.hbs"))?;
-	handlebars
-		.register_template_file("attachment", templates_dir.join("attachment.hbs"))?;
+
+	for (name, template) in TEMPLATES {
+		let override_template = templates_dir.join(format!("{}.hbs", name));
+		if override_template.exists() {
+			handlebars.register_template_file(name, override_template)?;
+		} else {
+			handlebars.register_template_string(name, template)?;
+		}
+	}
 
 	Ok(handlebars.render(template.as_ref(), data)?)
 }
-
-// TODO: Write meaningful tests
 
 #[cfg(test)]
 mod tests {
@@ -58,7 +69,7 @@ mod tests {
 	}
 
 	#[test]
-	fn render_template_attachment() {
+	fn render_template_attachment_from_disk() {
 		let data = serde_json::json!({
 			"title": "Stump Attachment",
 		});
@@ -66,6 +77,18 @@ mod tests {
 		let rendered =
 			render_template(EmailTemplate::Attachment, &data, default_templates_dir())
 				.unwrap();
+
+		assert!(rendered.contains("Stump Attachment"));
+	}
+
+	#[test]
+	fn render_default_template_attachment() {
+		let data = serde_json::json!({
+			"title": "Stump Attachment",
+		});
+
+		let rendered =
+			render_template(EmailTemplate::Attachment, &data, PathBuf::new()).unwrap();
 
 		assert!(rendered.contains("Stump Attachment"));
 	}

@@ -1,9 +1,9 @@
 {
 	"underConstruction": {
-		"heading": "This is awkward",
+		"heading": "Esto es incómodo",
 		"message": "Has tropezado con una página que todavía está en desarrollo. Me encantaría mostrártela, pero aún no está lista.",
-		"homeLink": "Go Home",
-		"githubLink": "View the GitHub issue"
+		"homeLink": "Ir a inicio",
+		"githubLink": "Ver el problema de GitHub"
 	},
 	"authScene": {
 		"claimHeading": "Inicialice su servidor",
@@ -12,7 +12,7 @@
 			"validation": {
 				"missingUsername": "Se requiere un nombre de usuario",
 				"missingPassword": "Se requiere la contraseña",
-				"usernameAlreadyExists": "Username already exists"
+				"usernameAlreadyExists": "Este nombre de usuario ya existe"
 			},
 			"labels": {
 				"username": "Nombre de usuario",
@@ -51,17 +51,17 @@
 			}
 		},
 		"emailBook": {
-			"heading": "Email book",
+			"heading": "Enviar libro",
 			"description": "Enviar este libro a un dispositivo o dirección de correo electrónico",
 			"form": {
 				"email": {
 					"label": "Correo electrónico",
 					"placeholder": "Dirección de correo electrónico",
-					"description": "An email address to send the book to. Click add to finalize each input"
+					"description": "Una dirección de correo electrónico a la que enviar el libro. Haga clic en añadir para finalizar cada entrada"
 				},
 				"devices": {
-					"label": "Devices",
-					"placeholder": "Select devices",
+					"label": "Dispositivos",
+					"placeholder": "Selecciona dispositivos",
 					"noFilterMatch": "Ningún dispositivo coincide con el filtro"
 				}
 			}
@@ -71,8 +71,8 @@
 	"createOrUpdateBookClubForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My book club",
+				"label": "Nombre",
+				"placeholder": "Mi club de libros",
 				"description": "The name of your book club"
 			},
 			"description": {
@@ -91,8 +91,8 @@
 					"documentation"
 				],
 				"member": {
-					"label": "Member",
-					"placeholder": "Member",
+					"label": "Miembro",
+					"placeholder": "Miembro",
 					"description": "The name of the default role for your book club"
 				},
 				"moderator": {
@@ -145,8 +145,8 @@
 					"description": "Customize the roles in your book club"
 				},
 				{
-					"label": "Membership",
-					"heading": "Membership Preferences",
+					"label": "Membresía",
+					"heading": "Preferencias de Membresía",
 					"description": "Additional options for your book club"
 				},
 				{
@@ -233,22 +233,22 @@
 	"createOrUpdateLibraryForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
+				"label": "Nombre",
 				"description": "A friendly name for your library",
 				"placeholder": "My Library"
 			},
 			"path": {
-				"label": "Path",
+				"label": "Ruta",
 				"description": "The path to the library as it exists on your server",
 				"placeholder": "/path/to/library"
 			},
 			"description": {
-				"label": "Description",
+				"label": "Descripción",
 				"description": "A short description of your library",
 				"placeholder": "A library of all my favorite books"
 			},
 			"tags": {
-				"label": "Tags",
+				"label": "Etiquetas",
 				"description": "Used to categorize your library or enforce access rules"
 			},
 			"readingSettings": {
@@ -265,7 +265,7 @@
 					"description": "The default reader to use for image-based books"
 				},
 				"readingDirection": {
-					"label": "Reading direction",
+					"label": "Dirección de lectura",
 					"description": "Which direction the reader progresses through pages"
 				}
 			},
@@ -278,21 +278,21 @@
 					"description": "Improve loading times while browsing your library by generating thumbnails for your books"
 				},
 				"enableSwitch": {
-					"label": "Enabled",
+					"label": "Activado",
 					"description": "Generate thumbnail images for this library"
 				},
 				"scaled": {
 					"label": "Scaled",
 					"description": "Scale the image by a custom factor per dimension",
 					"width": {
-						"label": "Width scale"
+						"label": "Escala de ancho"
 					},
 					"height": {
-						"label": "Height scale"
+						"label": "Escala de altura"
 					}
 				},
 				"sized": {
-					"label": "Explicitly Sized",
+					"label": "Tamaño explícito",
 					"description": "Set each dimension of the thumbnail (in pixels)",
 					"width": {
 						"label": "Width"
@@ -306,7 +306,7 @@
 					"description": "The format of the generated thumbnail images"
 				},
 				"quality": {
-					"label": "Quality",
+					"label": "Calidad",
 					"description": "The quality of the generated thumbnail images, between 0 and 1.0"
 				}
 			},
@@ -316,11 +316,11 @@
 					"description": "Define glob patterns to ignore certain files or directories during a scan"
 				},
 				"noRules": "No ignore rules have been configured",
-				"save": "Save changes",
+				"save": "Guardar cambios",
 				"addRule": {
-					"label": "New rule",
+					"label": "Nueva regla",
 					"description": "Glob pattern to ignore files or directories",
-					"addButton": "Add rule",
+					"addButton": "Añadir regla",
 					"ignoreParents": {
 						"title": "Ignore all parent directories",
 						"label": "Ignore parents"
@@ -343,20 +343,20 @@
 			"convertOptions": {
 				"section": {
 					"heading": "File conversion",
-					"description": "Stump is capable of converting certain file formats to more compatible ones"
+					"description": "Stump es capaz de convertir ciertos formatos de archivo a otros más compatibles"
 				},
 				"rarToZip": {
-					"label": "Convert RAR to ZIP",
-					"description": "Convert RAR/CBR files to ZIP/CBZ files during a scan"
+					"label": "Convertir RAR a ZIP",
+					"description": "Convertir archivos RAR/CBR a archivos ZIP/CBZ durante un escaneo"
 				},
 				"deleteRarAfter": {
-					"label": "Delete RAR after conversion",
-					"description": "Delete the original RAR/CBR file after conversion. This is irreversible"
+					"label": "Eliminar RAR después de la conversión",
+					"description": "Eliminar el archivo RAR/CBR original después de la conversión. Esto es irreversible"
 				}
 			},
 			"scannerFeatures": {
 				"section": {
-					"heading": "Optional processing",
+					"heading": "Procesamiento opcional",
 					"description": "Opt-in processing features for the scanner",
 					"disclaimer": "These features involve additional file reads which may slow down the scan process"
 				},
@@ -365,40 +365,44 @@
 					"description": "Extract any metadata from library files and store the results in the database"
 				},
 				"generateFileHashes": {
-					"label": "Generate file hashes",
+					"label": "Generar hash de archivos",
 					"description": "Generate a hash for each file in the library to detect duplicates"
+				},
+				"koreaderHashes": {
+					"label": "Hash compatible con KoReader",
+					"description": "Genera hash que KoReader pueda interpretar"
 				}
 			},
 			"libraryPattern": {
 				"section": {
-					"heading": "Organization",
+					"heading": "Organización",
 					"description": "Identify which pattern most closely matches the organization of your library",
 					"docs": [
-						"Not sure which to choose? Click",
-						"here",
-						"for more information.",
-						"You cannot change this setting later"
+						"¿No estás seguro de qué elegir? Haz clic",
+						"aquí",
+						"para más información.",
+						"No puedes cambiar esta configuración más tarde"
 					],
-					"disabled": "You cannot change this setting"
+					"disabled": "No puedes cambiar esta configuración"
 				},
 				"options": {
 					"label": "Library pattern",
 					"description": "The setting which determines how Stump will organize your library",
 					"collectionPriority": {
-						"label": "Collection priority",
-						"description": "Each folder at the top-most level of the library root is a single series"
+						"label": "Priorizar colección",
+						"description": "Cada carpeta en el nivel superior de la raíz de la biblioteca es una sola serie"
 					},
 					"seriesPriority": {
-						"label": "Series priority",
-						"description": "Each folder at any level recursively is a single series"
+						"label": "Priorizar serie",
+						"description": "Cada carpeta en cualquier nivel recursivamente es una sola serie"
 					}
 				}
 			}
 		},
 		"scan": {
 			"label": {
-				"create": "Scan after creation",
-				"update": "Scan after updates"
+				"create": "Escanear tras la creación",
+				"update": "Escanear tras actualizaciones"
 			},
 			"description": "Index the library files to populate your database"
 		}
@@ -408,53 +412,76 @@
 		"subtitle": "Las bibliotecas se usan para agrupar tus libros. Si necesitas refrescar tu memoria sobre las bibliotecas y cómo funcionan, consulta la",
 		"subtitleLink": "documentación relevante",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "Etapa",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
+					"label": "Información",
+					"heading": "Información básica",
 					"description": "The details of this library, including its name, path, and description"
 				},
 				{
-					"label": "Scanning",
-					"heading": "Scanner Behavior",
+					"label": "Escaneo",
+					"heading": "Comportamiento de Escaner",
 					"description": "Settings related to how Stump scans this library"
 				},
 				{
-					"label": "Thumbnails",
-					"heading": "Thumbnails",
+					"label": "Miniaturas",
+					"heading": "Miniaturas",
 					"description": "The options for if and how Stump generates thumbnails for this library"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
+					"label": "Revisión",
+					"heading": "Revisión",
 					"description": "Review your library settings before creating it"
 				}
 			],
 			"review": {
-				"yes": "Yes",
+				"yes": "Si",
 				"no": "No",
-				"none": "None",
+				"none": "Nada",
 				"labels": {
-					"generateThumbnails": "Generate thumbnails",
-					"mode": "Mode",
-					"format": "Format",
-					"quality": "Quality",
-					"name": "Name",
-					"path": "Path",
-					"description": "Description",
-					"tags": "Tags",
-					"pattern": "Pattern",
-					"ignoreRules": "Ignore rules",
-					"convertRar": "Convert RAR/CBR",
-					"deleteConversions": "Delete converted files",
-					"processMetadata": "Process metadata",
-					"generateFileHashes": "Generate file hashes"
+					"generateThumbnails": "Generar miniaturas",
+					"mode": "Modalidad",
+					"format": "Formato",
+					"quality": "Calidad",
+					"name": "Nombre",
+					"path": "Ruta",
+					"description": "Descripción",
+					"tags": "Etiquetas",
+					"pattern": "Patrón",
+					"ignoreRules": "Reglas de exclusión",
+					"convertRar": "Convertir RAR/CBR",
+					"deleteConversions": "Eliminar archivos convertidos",
+					"processMetadata": "Procesar metadatos",
+					"generateFileHashes": "Generar hash de archivos"
 				}
 			},
 			"buttons": {
 				"confirm": "Crear biblioteca"
 			}
+		}
+	},
+	"fileExplorer": {
+		"uploadModal": {
+			"title": {
+				"books": "Subir libros",
+				"series": "Subir series"
+			},
+			"description": {
+				"books": "Añadir libros directamente a la ruta actual en el explorador de archivos",
+				"series": "Añadir una serie directamente a la ruta actual en el explorador de archivos"
+			},
+			"seriesDisclaimer": [
+				"Debe ser un ",
+				"archivo zip",
+				"que contiene la carpeta que debe ser la serie, con todos los libros dentro"
+			],
+			"dropzone": {
+				"books": "Arrastra y suelta los libros aquí",
+				"series": "Arrastra y suelta un archivo zip aquí",
+				"alt": "O haga clic para buscar libros en su computadora"
+			},
+			"addedFiles": "Archivos agregados"
 		}
 	},
 	"librarySettingsScene": {
@@ -574,24 +601,24 @@
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "Continuar leyendo",
+			"title": "Continue reading",
 			"emptyState": {
-				"heading": "No hay libros para mostrar",
-				"message": "Cualquier libro que estés leyendo se mostrará aquí"
+				"heading": "Nothing to show",
+				"message": "Any in-progress books you start will show up here"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Series añadidas recientemente",
+			"title": "Recently added series",
 			"emptyState": {
 				"heading": "No hay series para mostrar",
 				"message": "Cualquier serie que añadas a tus bibliotecas aparecerá aquí"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Libros añadidos recientemente",
+			"title": "Recently added books",
 			"emptyState": {
-				"heading": "No hay libros para mostrar",
-				"message": "Cualquier libro que añadas a tus bibliotecas aparecerá aquí"
+				"heading": "Nothing to show",
+				"message": "Any recent books you add will show up here"
 			}
 		}
 	},
@@ -816,6 +843,36 @@
 			}
 		}
 	},
+	"createOrUpdateApiKey": {
+		"validation": {
+			"futureDate": "Expiration date must be in the future"
+		},
+		"fields": {
+			"name": {
+				"label": "Name",
+				"placeholder": "Koreader Sync"
+			},
+			"expiration": {
+				"label": "Expiration",
+				"placeholder": "Never"
+			},
+			"expires_at": {
+				"label": "Expires at",
+				"placeholder": "Never"
+			},
+			"permissions": {
+				"inherit": {
+					"label": "Inherit permissions",
+					"description": "The same permissions as your account"
+				},
+				"explicit": {
+					"label": "Explicit permissions",
+					"description": "Choose the permissions this key should have"
+				}
+			}
+		},
+		"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting"
+	},
 	"userSmartListsScene": {
 		"heading": "Listas inteligentes",
 		"subtitle": "Tus búsquedas y filtros favoritos guardados para un fácil acceso",
@@ -980,6 +1037,7 @@
 			"application": {
 				"account": "Cuenta",
 				"appearance": "Apariencia",
+				"api keys": "API keys",
 				"reader": "Lector",
 				"desktop": "Ordenador",
 				"label": "Aplicación"
@@ -1101,6 +1159,62 @@
 				}
 			}
 		},
+		"app/apiKeys": {
+			"helmet": "API keys",
+			"title": "API keys",
+			"description": "Manage your generated Stump API keys",
+			"shared": {
+				"fields": {
+					"name": "Name",
+					"expiration": "Expiration",
+					"last_used": "Last used",
+					"created": "Created",
+					"permissions": "Permissions",
+					"inherited": "Inherited",
+					"explicit": "Explicit"
+				}
+			},
+			"sections": {
+				"inspector": {
+					"heading": "API key",
+					"description": "A detailed view of this key",
+					"unrestrictedKey": {
+						"heading": "Unrestricted key",
+						"description": "Since you are the server owner, this key has unrestricted access when configured to inherit permissions. Please be careful."
+					}
+				},
+				"createKey": {
+					"modal": {
+						"trigger": "Create API key",
+						"heading": {
+							"creating": "Create API key",
+							"created": "Created key"
+						},
+						"description": {
+							"creating": "API keys are long-lived credentials that can be used to authenticate with the API",
+							"created": "Your new API key has been created. Save the secret somewhere safe, as it will not be shown again"
+						},
+						"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting",
+						"createdKey": "Created key",
+						"savedConfirm": "I saved my key",
+						"submit": "Create key"
+					}
+				},
+				"table": {
+					"title": "Your keys",
+					"description": "These are the API keys you have created",
+					"actionMenu": {
+						"inspect": "Inspect",
+						"delete": "Delete"
+					},
+					"empty": {
+						"title": "You haven't created any keys yet",
+						"action": "Create an API key to get started"
+					},
+					"noExpiration": "No expiration set"
+				}
+			}
+		},
 		"app/reader": {
 			"helmet": "Configuración del lector",
 			"title": "Configuración del lector",
@@ -1130,6 +1244,7 @@
 				"configuredServers": {
 					"label": "Configured servers",
 					"description": "The list of Stump servers you can connect to",
+					"getStarted": "Add a server to get started",
 					"unreachableServer": {
 						"tooltip": "Server unreachable"
 					},
@@ -1200,6 +1315,19 @@
 							"disclaimer": "You will be logged out and have to reconfigure any servers in the initialization process",
 							"confirm": "Delete all servers"
 						}
+					},
+					"resetTokens": {
+						"label": "Clear authentication",
+						"description": [
+							"Elimina todos los tokens de acceso almacenados de forma segura para tus servidores",
+							"You will have to re-authenticate with each server"
+						],
+						"confirmation": {
+							"trigger": "Clear authentication",
+							"title": "Clear authentication",
+							"description": "This will remove all securely-stored access tokens for your servers",
+							"confirm": "Clear authentication"
+						}
 					}
 				},
 				"optionalFeatures": {
@@ -1259,7 +1387,7 @@
 							"timestamp": "Timestamp"
 						},
 						"emptyHeading": "No hay registros para mostrar",
-						"emptySubtitle": "Your server is either very healthy or very unhealthy"
+						"emptySubtitle": ""
 					}
 				},
 				"liveLogs": {
@@ -1352,11 +1480,22 @@
 							"description": "Permite al usuario crear nuevos clubs de lectura"
 						}
 					},
+					"feature": {
+						"label": "Feature Opt-In",
+						"api_keys": {
+							"label": "API keys",
+							"description": "Allow the user to manage their own API keys"
+						},
+						"koreader_sync": {
+							"label": "KoReader sync",
+							"description": "Allow the user to access the KoReader sync integration"
+						}
+					},
 					"file": {
 						"label": "File Management",
 						"explorer": {
 							"label": "File Explorer",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+							"description": "Permite al usuario acceder al explorador de archivos. No se admite restricción de contenido cuando se concede esta función"
 						},
 						"download": {
 							"label": "Descargar ficheros",
@@ -1443,7 +1582,10 @@
 					}
 				},
 				"validation": {
-					"ageRestrictionTooLow": "Age restriction cannot be less than 0"
+					"ageRestrictionTooLow": "Age restriction cannot be less than 0",
+					"missingUsername": "Username is required",
+					"missingPassword": "Password is required",
+					"usernameAlreadyExists": "Username already exists"
 				},
 				"createSubmitButton": "Create user",
 				"updateSubmitButton": "Update user"
@@ -1575,7 +1717,7 @@
 			"updateEmailer": {
 				"helmet": "Update emailer",
 				"title": "Update emailer",
-				"description": "Update the details of this SMTP emailer"
+				"description": ""
 			}
 		}
 	},
@@ -1595,7 +1737,8 @@
 			"wait": "Once libraries are created, they'll be displayed here"
 		},
 		"links": {
-			"create": "Crear biblioteca"
+			"create": "Crear biblioteca",
+			"settings": "Go to settings"
 		}
 	},
 	"pagination": {
@@ -1636,11 +1779,11 @@
 			"smartlists": "Listas inteligentes",
 			"noSmartlists": "Sin listas inteligentes",
 			"createSmartlist": "Crear lista inteligente",
-			"seeAll": "See all"
+			"seeAll": "Ver todo"
 		},
 		"libraryOptions": {
 			"scanLibrary": "Escanear",
-			"fileExplorer": "Explorador de Archivos",
+			"fileExplorer": "Archivos",
 			"manageLibrary": "Administrar",
 			"deleteLibrary": "Eliminar"
 		},
@@ -1685,35 +1828,40 @@
 		"placeholderNoTags": "No hay etiquetas disponibles"
 	},
 	"thumbnailDropdown": {
-		"label": "Edit thumbnail",
+		"label": "",
 		"options": {
-			"selectFromBooks": "Select from books",
-			"uploadImage": "Upload image"
+			"selectFromBooks": "Seleccionar desde los libros",
+			"uploadImage": "Subir una imagen"
 		},
 		"uploadImage": {
 			"emptyState": "Una vista previa de tu imagen aparecerá aquí",
-			"prompt": "Drop image here or click to select",
-			"remove": "Remove image"
+			"prompt": "Suelta la imagen aquí o haz clic para seleccionar",
+			"remove": "Quitar imagen"
 		}
 	},
 	"common": {
-		"add": "Add",
+		"add": "Agregar",
 		"cancel": "Cancelar",
-		"confirm": "Confirm",
-		"save": "Save",
-		"send": "Send",
+		"confirm": "Confirmar",
+		"save": "Guardar",
+		"send": "Enviar",
 		"saveChanges": "Guardar cambios",
-		"noChanges": "No changes",
-		"create": "Create",
-		"edit": "Edit",
-		"update": "Update",
-		"unimplemented": "This functionality is not yet implemented! Check back later",
-		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
-		"logIn": "Log in",
-		"login": "Login",
-		"seeError": "See error",
-		"goBack": "Go back",
-		"goToServers": "Go to servers",
-		"notReady": "This feature is not ready"
+		"noChanges": "Sin cambios",
+		"create": "Crear",
+		"edit": "Editar",
+		"update": "Actualizar",
+		"upload": "Subir",
+		"uploading": "Subiendo",
+		"unimplemented": "¡Esta funcionalidad aún no está implementada! Vuelve a intentarlo más tarde",
+		"limitedFunctionality": "Esto aún no está completamente implementado y falta algunas características. Vuelve más tarde",
+		"logIn": "Iniciar sesión",
+		"login": "Inicio de sesión",
+		"seeError": "Ver error",
+		"remove": "Eliminar",
+		"goBack": "Volver",
+		"goToServers": "Ir a los servidores",
+		"notReady": "Esta función no está lista",
+		"notUsedYet": "Sin uso",
+		"never": "Nunca"
 	}
 }

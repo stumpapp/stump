@@ -199,6 +199,7 @@ export function useVisitLibrary(options: MutationOptions<Library, AxiosError, st
 		onSuccess: async (library, _, __) => {
 			await invalidateQueries({
 				keys: [sdk.library.keys.getLastVisited],
+				exact: false,
 			})
 			options.onSuccess?.(library, _, __)
 		},

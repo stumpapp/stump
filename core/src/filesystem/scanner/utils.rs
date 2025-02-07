@@ -30,6 +30,7 @@ use crate::{
 	filesystem::{MediaBuilder, SeriesBuilder},
 	job::{error::JobError, JobExecuteLog, JobProgress, WorkerCtx, WorkerSendExt},
 	prisma::{media, media_metadata, series, PrismaClient},
+	utils::chain_optional_iter,
 	CoreEvent,
 };
 
@@ -162,30 +163,49 @@ pub(crate) async fn update_media(db: &PrismaClient, media: Media) -> CoreResult<
 	let result: Result<Media, QueryError> = db
 		._transaction()
 		.run(|client| async move {
-			if let Some(metadata) = media.metadata {
-				let params = metadata.into_prisma();
-				let updated_metadata = client
-					.media_metadata()
-					.update(media_metadata::media_id::equals(media.id.clone()), params)
-					.exec()
-					.await?;
-				tracing::trace!(?updated_metadata, "Metadata updated");
-			}
+			let metadata_id = match media.metadata {
+				Some(metadata) => {
+					let params = metadata
+						.into_prisma()
+						.into_iter()
+						.chain(vec![media_metadata::media_id::set(Some(
+							media.id.clone(),
+						))])
+						.collect::<Vec<_>>();
+					let updated_metadata = client
+						.media_metadata()
+						.upsert(
+							media_metadata::media_id::equals(media.id.clone()),
+							params.clone(),
+							params,
+						)
+						.exec()
+						.await?;
+					tracing::trace!(?updated_metadata, "Metadata upserted");
+					Some(updated_metadata.id)
+				},
+				_ => None,
+			};
 
 			let updated_media = client
 				.media()
 				.update(
 					media::id::equals(media.id.clone()),
-					vec![
-						media::name::set(media.name.clone()),
-						media::size::set(media.size),
-						media::extension::set(media.extension.clone()),
-						media::pages::set(media.pages),
-						media::hash::set(media.hash.clone()),
-						media::koreader_hash::set(media.koreader_hash.clone()),
-						media::path::set(media.path.clone()),
-						media::status::set(media.status.to_string()),
-					],
+					chain_optional_iter(
+						[
+							media::name::set(media.name.clone()),
+							media::size::set(media.size),
+							media::extension::set(media.extension.clone()),
+							media::pages::set(media.pages),
+							media::hash::set(media.hash.clone()),
+							media::koreader_hash::set(media.koreader_hash.clone()),
+							media::path::set(media.path.clone()),
+							media::status::set(media.status.to_string()),
+						],
+						[metadata_id.map(|id| {
+							media::metadata::connect(media_metadata::id::equals(id))
+						})],
+					),
 				)
 				.with(media::metadata::fetch())
 				.exec()
@@ -279,6 +299,8 @@ pub(crate) struct MediaOperationOutput {
 	pub logs: Vec<JobExecuteLog>,
 }
 
+/// Handles missing media by updating the database with the latest information. A media is
+/// considered missing if it was previously marked as ready and is no longer found on disk.
 pub(crate) async fn handle_missing_media(
 	ctx: &WorkerCtx,
 	series_id: &str,
@@ -313,6 +335,51 @@ pub(crate) async fn handle_missing_media(
 				tracing::error!(error = ?error, "Failed to update missing media");
 				output.logs.push(JobExecuteLog::error(format!(
 					"Failed to update missing media: {:?}",
+					error.to_string()
+				)));
+				0
+			},
+			|count| {
+				output.updated_media += count as u64;
+				count
+			},
+		);
+
+	output
+}
+
+/// Handles restored media by updating the database with the latest information. A
+/// media is considered restored if it was previously marked as missing and has been
+/// found on disk.
+pub(crate) async fn handle_restored_media(
+	ctx: &WorkerCtx,
+	series_id: &str,
+	ids: Vec<String>,
+) -> MediaOperationOutput {
+	let mut output = MediaOperationOutput::default();
+
+	if ids.is_empty() {
+		tracing::debug!("No restored media to handle");
+		return output;
+	}
+
+	let _affected_rows = ctx
+		.db
+		.media()
+		.update_many(
+			vec![
+				media::series::is(vec![series::id::equals(series_id.to_string())]),
+				media::id::in_vec(ids),
+			],
+			vec![media::status::set(FileStatus::Ready.to_string())],
+		)
+		.exec()
+		.await
+		.map_or_else(
+			|error| {
+				tracing::error!(error = ?error, "Failed to restore recovered media");
+				output.logs.push(JobExecuteLog::error(format!(
+					"Failed to update recovered media: {:?}",
 					error.to_string()
 				)));
 				0

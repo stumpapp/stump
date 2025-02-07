@@ -73,7 +73,7 @@ export class LibraryAPI extends APIBase {
 	 * @param id The library ID
 	 */
 	async updateThumbnail(id: string, payload: PatchLibraryThumbnail) {
-		return this.api.axios.patch(this.thumbnailURL(id), payload)
+		return this.api.axios.patch(libraryURL(`/${id}/thumbnail`), payload)
 	}
 
 	// TODO: type image response
@@ -86,7 +86,7 @@ export class LibraryAPI extends APIBase {
 	async uploadThumbnail(id: string, file: File) {
 		const formData = new FormData()
 		formData.append('file', file)
-		return this.api.axios.post(this.thumbnailURL(id), formData, {
+		return this.api.axios.post(libraryURL(`/${id}/thumbnail`), formData, {
 			headers: {
 				'Content-Type': 'multipart/form-data',
 			},
@@ -100,7 +100,7 @@ export class LibraryAPI extends APIBase {
 	 * @param id The library ID
 	 */
 	async deleteThumbnails(id: string): Promise<void> {
-		await this.api.axios.delete(this.thumbnailURL(id))
+		await this.api.axios.delete(libraryURL(`/${id}/thumbnail`))
 	}
 
 	/**
@@ -110,7 +110,7 @@ export class LibraryAPI extends APIBase {
 	 * @param payload The options for generating thumbnails
 	 */
 	async generateThumbnails(id: string, payload: GenerateLibraryThumbnails): Promise<void> {
-		await this.api.axios.post(`/${this.thumbnailURL(id)}/generate`, payload)
+		await this.api.axios.post(libraryURL(`/${id}/thumbnail/generate`), payload)
 	}
 
 	/**

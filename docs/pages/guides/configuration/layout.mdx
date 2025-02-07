@@ -1,0 +1,101 @@
+import { Callout, Steps } from 'nextra/components'
+import { Brush, Lock, LockOpen, Eye, EyeOff, Bolt } from 'lucide-react'
+import InlineIconButton from '../../../components/InlineIconButton'
+
+# Layout
+
+Stump has a flexible layout system that allows you to customize the layout of the app to your liking. There are more options planned, but for now the two main options are navigation placement
+
+## Navigation Placement
+
+The navigation has two main placement options:
+
+1. Sidebar
+2. Topbar
+
+They cannot be used together, and while they offer the same navigtion options there are some differences in functionality
+
+## Sidebar
+
+The sidebar is the default navigation placement. It is a vertical navigation, left-aligned and fixed to the viewport height. Since the sidebar is fixed and always visible, there is more wiggle room for squeezing in additional functionality and sub-menus. Therefore, when using the sidebar you have access to shortcuts that otherwise aren't found in the topbar. For example, the library submenu allows for:
+
+- Scanning a library
+- Accessing the file explorer
+- Directly accessing the settings page for a library
+- Quick deletion of a library (with a confirmation dialog)
+
+Each first-class item (e.g., library, smart list, etc.) has a submenu of its own, with options like outlined above.
+
+### Secondary Sidebars
+
+Throughout the app, you will find secondary sidebars that are used to display nested navigation options when needed. Some of these are collapsible, and/or can be toggled on / off. These are generally used for navigation that is specific to the current context, e.g., the library settings is organized into many pages which otherwise wouldn't fit in the main sidebar.
+
+#### Enable / Disable
+
+You can enable or disable the settings-specific secondary sidebars by toggling the switch in the appearance settings labeled `Settings sidebar`. This setting will apply to all settings pages with a secondary sidebar.
+
+#### Collapse Primary Sidebar
+
+You can set the primary sidebar to be collapsed when a secondary sidebar is present. This setting is found in the appearance settings labeled `Replace primary sidebar`.
+
+## Topbar
+
+The topbar is a horizontal navigation, top-aligned and fixed to the viewport width. It is more compact than the sidebar, and is better suited for users who prefer a more minimalistic interface. The topbar has a more limited set of options, but still allows for the same core navigation-specific functionality as the sidebar.
+
+### Last Visited Library
+
+The topbar has a special feature that allows you to quickly access the last library you visited. This is a convenience feature with no real equivalent in the sidebar, and might be useful for users who have many libraries but frequently visit the same one.
+
+<Callout emoji="🚀">
+	Stump tracks the timestamp for each library you visit, but only exposes the most recent one in the
+	UI. If you feel like this feature could be improved to utilize a history of visited libraries,
+	please let us know!
+</Callout>
+
+### Adjusted Width
+
+The topbar has a special feature that allows you to adjust the width of the margins around the main content area. This allows you to better optimize a layout that suits your needs, and is especially useful for users who prefer a more spacious layout on larger monitors. This option is unlocked when the topbar is enabled, and can be found in the appearance settings labeled `Adjusted width`
+
+## Arrangement
+
+The arrangement of the navigation items is the same between the sidebar and topbar, and you are able to customize the order of the items to your liking. You can also hide / show items as you see fit.
+
+### Customization
+
+To customize the layout of the app:
+
+<Steps>
+
+#### Navigate to appearance settings
+
+You can access the settings page by clicking on the cog icon in the sidebar or topbar, depending on your layout choice, then clicking on the <InlineIconButton text="Appearance"><Brush/></InlineIconButton> tab
+
+<Callout emoji="ℹ️">
+	If you have disabled the secondary, settings sidebar, you will either need to access the select
+	box towards the top labeled `Section` and select `Appearance` or use the topbar settings menu to
+	navigate to the appearance settings
+</Callout>
+
+#### Scroll down to the arrangement section
+
+Scroll down until you see a section titled `Navigation arrangement`. Here you can drag and drop the items to rearrange them, and toggle the visibility of items by clicking on the eye icon
+
+#### Customize to your liking
+
+To make any changes, you need to click the <InlineIconButton><Lock/></InlineIconButton> icon to unlock the arrangement. Once you are done, click the <InlineIconButton><LockOpen/></InlineIconButton> icon again to lock the arrangement. Changes are saved automatically as you make them, so you don't need to worry about losing your changes if you forget to lock the arrangement. The following is a list of icons and their meanings:
+
+| Icon                                             | Description                            |
+| ------------------------------------------------ | -------------------------------------- |
+| <InlineIconButton><Lock/></InlineIconButton>     | Arrangement is locked, click to unlock |
+| <InlineIconButton><LockOpen/></InlineIconButton> | Arrangement is unlocked, click to lock |
+| <InlineIconButton><Eye/></InlineIconButton>      | Item is visible, click to hide         |
+| <InlineIconButton><EyeOff/></InlineIconButton>   | Item is hidden, click to show          |
+| <InlineIconButton><Bolt/></InlineIconButton>     | Show / hide additional options         |
+
+</Steps>
+
+## Future Plans
+
+In the future, I would love to have the time to implement more options for the layout system. Some ideas include:
+
+- Spacing options for the entire app (e.g., compact vs spacious)

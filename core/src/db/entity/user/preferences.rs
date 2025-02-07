@@ -207,6 +207,8 @@ pub struct UserPreferences {
 	pub prefer_accent_color: bool,
 	#[serde(default)]
 	pub show_thumbnails_in_headers: bool,
+	#[serde(default = "default_true")]
+	pub enable_job_overlay: bool,
 
 	#[serde(default = "Arrangement::<NavigationItem>::default_navigation")]
 	pub navigation_arrangement: Arrangement<NavigationItem>,
@@ -232,6 +234,7 @@ impl Default for UserPreferences {
 			enable_double_sidebar: true,
 			enable_replace_primary_sidebar: false,
 			enable_hide_scrollbar: false,
+			enable_job_overlay: true,
 			prefer_accent_color: true,
 			show_thumbnails_in_headers: false,
 			navigation_arrangement: Arrangement::<NavigationItem>::default_navigation(),
@@ -285,6 +288,7 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 			enable_double_sidebar: data.enable_double_sidebar,
 			enable_replace_primary_sidebar: data.enable_replace_primary_sidebar,
 			enable_hide_scrollbar: data.enable_hide_scrollbar,
+			enable_job_overlay: data.enable_job_overlay,
 			prefer_accent_color: data.prefer_accent_color,
 			show_thumbnails_in_headers: data.show_thumbnails_in_headers,
 			navigation_arrangement,

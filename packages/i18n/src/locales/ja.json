@@ -792,117 +792,117 @@
 							"number": "開始"
 						},
 						"to": {
-							"date": "To date",
+							"date": "終了日",
 							"number": "To"
 						},
-						"inclusive": "Inclusive"
+						"inclusive": "含む"
 					},
 					"listValue": {
-						"placeholder": "Add values",
-						"emptyState": "No values to display"
+						"placeholder": "値を追加",
+						"emptyState": "表示する値がありません"
 					}
 				}
 			}
 		}
 	},
 	"createSmartListScene": {
-		"heading": "Create smart list",
-		"subtitle": "On-the-fly list creation based on a set of filters",
+		"heading": "スマートリストを作成",
+		"subtitle": "一連のフィルターに基づいたオンザフライリスト作成",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "ステップ",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this smart list, including its name, description, and visibility"
+					"label": "基本",
+					"heading": "基本情報",
+					"description": "このスマートリストの詳細（名前、説明、表示設定など）"
 				},
 				{
-					"label": "Filters",
-					"heading": "Filters",
-					"description": "The filters to apply to this smart list"
+					"label": "フィルター",
+					"heading": "フィルター",
+					"description": "このスマートリストに適用するフィルター"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your smart list settings before creating it"
+					"label": "レビュー",
+					"heading": "レビュー",
+					"description": "スマートリストを作成する前に設定を確認してください"
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "はい",
+				"no": "いいえ",
+				"none": "なし",
 				"labels": {
-					"name": "Name",
-					"description": "Description",
-					"visibility": "Visibility",
-					"grouping": "Group by"
+					"name": "名前",
+					"description": "説明",
+					"visibility": "公開範囲",
+					"grouping": "グループ化"
 				}
 			},
 			"buttons": {
-				"confirm": "Create list"
+				"confirm": "リストを作成"
 			}
 		}
 	},
 	"createOrUpdateApiKey": {
 		"validation": {
-			"futureDate": "Expiration date must be in the future"
+			"futureDate": "有効期限は未来の日付にする必要があります"
 		},
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "Koreader Sync"
+				"label": "名前",
+				"placeholder": "韓国語同期"
 			},
 			"expiration": {
-				"label": "Expiration",
-				"placeholder": "Never"
+				"label": "有効期限",
+				"placeholder": "まったくない"
 			},
 			"expires_at": {
-				"label": "Expires at",
-				"placeholder": "Never"
+				"label": "有効期限",
+				"placeholder": "まったくない"
 			},
 			"permissions": {
 				"inherit": {
-					"label": "Inherit permissions",
-					"description": "The same permissions as your account"
+					"label": "権限を継承する",
+					"description": "アカウントと同じ権限"
 				},
 				"explicit": {
-					"label": "Explicit permissions",
-					"description": "Choose the permissions this key should have"
+					"label": "明示的な権限",
+					"description": "このキーに必要な権限を選択してください"
 				}
 			}
 		},
-		"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting"
+		"inheritDisclaimer": "このAPIキーはあなたの権限をすべて継承します。つまり、あなたができることはすべて実行できます。この設定には注意してください"
 	},
 	"userSmartListsScene": {
-		"heading": "Smart lists",
-		"subtitle": "Your favorite searches and filters saved for easy access",
-		"searchPlaceholder": "Filter smart lists",
+		"heading": "スマートリスト",
+		"subtitle": "お気に入りの検索条件とフィルターを保存して簡単にアクセスできるようにします",
+		"searchPlaceholder": "スマートリストでフィルター",
 		"buttons": {
-			"createSmartList": "Create smart list"
+			"createSmartList": "スマートリストを作成"
 		},
 		"list": {
 			"emptyState": {
-				"heading": "No smart lists to display",
-				"noListsMessage": "Create a smart list to get started",
-				"noMatchesMessage": "Try changing your search query"
+				"heading": "表示するスマートリストがありません",
+				"noListsMessage": "スマートリストを作成して開始",
+				"noMatchesMessage": "検索クエリを変更してみてください"
 			},
 			"card": {
 				"meta": {
 					"figures": {
-						"books": "book",
-						"series": "series",
-						"library": "library"
+						"books": "本",
+						"series": "シリーズ",
+						"library": "ライブラリ"
 					},
-					"matches": "Matches"
+					"matches": "マッチ"
 				}
 			}
 		}
 	},
 	"smartListSettingsScene": {
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "基本",
 			"configuration": {
-				"label": "Configuration",
+				"label": "構成",
 				"access": "Access",
 				"filters": "Filters"
 			},

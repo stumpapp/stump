@@ -387,6 +387,10 @@ mod tests {
 		let result = normalize_resource_path(path, "OEBPS");
 		assert_eq!(result, PathBuf::from("OEBPS/Styles/style.css"));
 
+		let path = PathBuf::from("Styles/./style.css");
+		let result = normalize_resource_path(path, "OEBPS");
+		assert_eq!(result, PathBuf::from("OEBPS/Styles/style.css"));
+
 		let path = PathBuf::from("../Styles/style.css");
 		let result = normalize_resource_path(path, "OEBPS");
 		assert_eq!(result, PathBuf::from("Styles/style.css"));

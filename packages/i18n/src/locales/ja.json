@@ -596,313 +596,313 @@
 		"buttons": {
 			"report": "バグを報告",
 			"copy": "エラーの詳細をコピー",
-			"goHome": "Go Home"
+			"goHome": "ホームへ移動"
 		}
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "Continue reading",
+			"title": "続きを読む",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any in-progress books you start will show up here"
+				"heading": "表示するものがありません",
+				"message": "進行中の本はすべてここに表示されます"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Recently added series",
+			"title": "最近追加されたシリーズ",
 			"emptyState": {
-				"heading": "No series to display",
-				"message": "Any series you add to your libraries will show up here"
+				"heading": "表示するシリーズがありません",
+				"message": "ライブラリに追加したシリーズはすべてここに表示されます"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Recently added books",
+			"title": "最近追加された本",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any recent books you add will show up here"
+				"heading": "表示するものがありません",
+				"message": "最近追加した本はここに表示されます"
 			}
 		}
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "Continue Reading",
-			"downloadSeries": "Download Series"
+			"continueReading": "続きを読む",
+			"downloadSeries": "シリーズをダウンロード"
 		}
 	},
 	"createOrUpdateSmartListForm": {
 		"validation": {
-			"nameTooShort": "Name must be at least 2 characters",
-			"nameTaken": "Cannot use this name"
+			"nameTooShort": "名前は2文字以上必要です",
+			"nameTaken": "この名前は使用できません"
 		},
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My smart list",
-				"description": "Must be unique, but can be changed later"
+				"label": "名前",
+				"placeholder": "自分のスマートリスト",
+				"description": "一意である必要がありますが、後で変更できます"
 			},
 			"description": {
-				"label": "Description",
-				"placeholder": "A very intelligent list",
-				"description": "An optional description of your smart list"
+				"label": "説明",
+				"placeholder": "非常に賢いリスト",
+				"description": "スマートリストの説明（オプション）"
 			},
 			"visibility": {
-				"label": "Visibility",
+				"label": "公開範囲",
 				"options": {
 					"public": {
-						"label": "Public",
-						"description": "Accessible to all users on the server"
+						"label": "公開",
+						"description": "サーバー上のすべてのユーザーがアクセス可能"
 					},
 					"shared": {
-						"label": "Shared",
-						"description": "Specific users can access this smart list",
-						"createDisclaimer": "You can select who this list is shared with after creation"
+						"label": "共有",
+						"description": "特定のユーザーがこのスマートリストにアクセスできます",
+						"createDisclaimer": "作成後にこのリストを共有する相手を選択できます"
 					},
 					"private": {
-						"label": "Private",
-						"description": "Only you can access this smart list"
+						"label": "非公開",
+						"description": "あなただけがこのスマートリストにアクセスできます"
 					}
 				}
 			},
 			"queryBuilder": {
-				"uiPerformance": "This feature is missing performance optimizations on the UI and may be slow with filters which produce large result sets. This will be improved in the future",
+				"uiPerformance": "この機能にはUIのパフォーマンス最適化が欠けており、大きな結果セットを生成するフィルターでは遅くなる可能性があります。これは将来改善される予定です",
 				"rootJoiner": {
 					"and": {
-						"label": "AND",
-						"description": "All filter groups must be true for a book to be matched"
+						"label": "かつ",
+						"description": "書籍が一致するにはすべてのフィルタグループが真である必要があります"
 					},
 					"or": {
-						"label": "OR",
-						"description": "At least one filter group must be true for a book to be matched"
+						"label": "または",
+						"description": "書籍が一致するには少なくとも1つのフィルタグループが真である必要があります"
 					}
 				},
 				"groupJoiner": {
 					"and": {
-						"label": "AND",
-						"description": "All must be true"
+						"label": "かつ",
+						"description": "すべてが真である必要があります"
 					},
 					"or": {
-						"label": "OR",
-						"description": "At least one must be true"
+						"label": "または",
+						"description": "少なくとも1つは真である必要があります"
 					},
 					"not": {
-						"label": "NOT",
-						"description": "None can be true"
+						"label": "でない",
+						"description": "どれも真ではありません"
 					}
 				},
 				"grouping": {
-					"label": "Group by",
-					"description": "How the books in this smart list should be grouped",
+					"label": "グループ化",
+					"description": "このスマートリスト内の書籍をグループ化する方法",
 					"options": {
 						"by_books": {
-							"label": "None"
+							"label": "なし"
 						},
 						"by_series": {
-							"label": "Series"
+							"label": "シリーズ"
 						},
 						"by_library": {
-							"label": "Library"
+							"label": "ライブラリ"
 						}
 					}
 				},
 				"filters": {
-					"emptyState": "Add a group to get started",
+					"emptyState": "開始するにはグループを追加してください",
 					"actions": {
-						"addFilter": "Add filter",
-						"addGroup": "Add group",
-						"deleteFilter": "Delete filter",
-						"deleteGroup": "Delete group"
+						"addFilter": "フィルターを追加",
+						"addGroup": "グループを追加",
+						"deleteFilter": "フィルターを削除",
+						"deleteGroup": "グループを削除"
 					},
-					"is": "is",
+					"is": "等しい",
 					"fieldSelect": {
-						"placeholder": "Attribute",
+						"placeholder": "属性",
 						"source": {
-							"label": "Source",
-							"back": "Back",
+							"label": "ソース",
+							"back": "戻る",
 							"book": {
-								"label": "Book",
+								"label": "本",
 								"attributes": {
-									"name": "Filename",
-									"size": "Size",
-									"extension": "Extension",
-									"created_at": "Created at",
-									"updated_at": "Updated at",
-									"status": "Status",
-									"path": "Path",
-									"pages": "Pages",
-									"tags": "Tags"
+									"name": "ファイル名",
+									"size": "サイズ",
+									"extension": "拡張機能",
+									"created_at": "作成日",
+									"updated_at": "更新日",
+									"status": "状態",
+									"path": "パス",
+									"pages": "ページ",
+									"tags": "タグ"
 								}
 							},
 							"book_meta": {
-								"label": "Book Meta",
+								"label": "本のメタ情報",
 								"attributes": {
-									"title": "Title",
-									"summary": "Summary",
-									"notes": "Notes",
-									"genre": "Genre",
-									"writers": "Writers",
-									"pencillers": "Pencillers",
-									"inkers": "Inkers",
-									"letterers": "Letterers",
-									"editors": "Editors",
-									"publisher": "Publisher",
-									"colorists": "Colorist",
-									"cover_artists": "Cover artists",
-									"links": "Links",
-									"characters": "Characters",
-									"teams": "Teams"
+									"title": "タイトル",
+									"summary": "概要",
+									"notes": "ノート",
+									"genre": "ジャンル",
+									"writers": "ライター",
+									"pencillers": "ペンシラー",
+									"inkers": "インカー",
+									"letterers": "レタラー",
+									"editors": "編集者",
+									"publisher": "発行元",
+									"colorists": "カラーリスト",
+									"cover_artists": "カバーアーティスト",
+									"links": "リンク",
+									"characters": "キャラクター",
+									"teams": "チーム"
 								}
 							},
 							"series": {
-								"label": "Series",
+								"label": "シリーズ",
 								"attributes": {
-									"name": "Name",
-									"path": "Path"
+									"name": "名前",
+									"path": "パス"
 								}
 							},
 							"series_meta": {
-								"label": "Series Meta",
+								"label": "シリーズのメタ情報",
 								"attributes": {
-									"age_rating": "Age rating",
-									"title": "Title",
-									"summary": "Summary",
-									"meta_type": "Type",
-									"publisher": "Publisher",
-									"imprint": "Imprint",
-									"comicid": "Comic ID",
-									"booktype": "Book type",
-									"status": "Status",
-									"volume": "Volume"
+									"age_rating": "年齢制限",
+									"title": "タイトル",
+									"summary": "概要",
+									"meta_type": "タイプ",
+									"publisher": "発行元",
+									"imprint": "沿革",
+									"comicid": "コミックID",
+									"booktype": "本の種類",
+									"status": "状態",
+									"volume": "ボリューム"
 								}
 							},
 							"library": {
-								"label": "Library",
+								"label": "ライブラリ",
 								"attributes": {
-									"name": "Name",
-									"path": "Path"
+									"name": "名前",
+									"path": "パス"
 								}
 							}
 						}
 					},
 					"basicValue": {
-						"placeholder": "Value",
-						"date": "Date"
+						"placeholder": "値",
+						"date": "日付"
 					},
 					"rangeValue": {
 						"from": {
-							"date": "From date",
-							"number": "From"
+							"date": "開始日",
+							"number": "開始"
 						},
 						"to": {
-							"date": "To date",
+							"date": "終了日",
 							"number": "To"
 						},
-						"inclusive": "Inclusive"
+						"inclusive": "含む"
 					},
 					"listValue": {
-						"placeholder": "Add values",
-						"emptyState": "No values to display"
+						"placeholder": "値を追加",
+						"emptyState": "表示する値がありません"
 					}
 				}
 			}
 		}
 	},
 	"createSmartListScene": {
-		"heading": "Create smart list",
-		"subtitle": "On-the-fly list creation based on a set of filters",
+		"heading": "スマートリストを作成",
+		"subtitle": "一連のフィルターに基づいたオンザフライリスト作成",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "ステップ",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this smart list, including its name, description, and visibility"
+					"label": "基本",
+					"heading": "基本情報",
+					"description": "このスマートリストの詳細（名前、説明、表示設定など）"
 				},
 				{
-					"label": "Filters",
-					"heading": "Filters",
-					"description": "The filters to apply to this smart list"
+					"label": "フィルター",
+					"heading": "フィルター",
+					"description": "このスマートリストに適用するフィルター"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your smart list settings before creating it"
+					"label": "レビュー",
+					"heading": "レビュー",
+					"description": "スマートリストを作成する前に設定を確認してください"
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "はい",
+				"no": "いいえ",
+				"none": "なし",
 				"labels": {
-					"name": "Name",
-					"description": "Description",
-					"visibility": "Visibility",
-					"grouping": "Group by"
+					"name": "名前",
+					"description": "説明",
+					"visibility": "公開範囲",
+					"grouping": "グループ化"
 				}
 			},
 			"buttons": {
-				"confirm": "Create list"
+				"confirm": "リストを作成"
 			}
 		}
 	},
 	"createOrUpdateApiKey": {
 		"validation": {
-			"futureDate": "Expiration date must be in the future"
+			"futureDate": "有効期限は未来の日付にする必要があります"
 		},
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "Koreader Sync"
+				"label": "名前",
+				"placeholder": "韓国語同期"
 			},
 			"expiration": {
-				"label": "Expiration",
-				"placeholder": "Never"
+				"label": "有効期限",
+				"placeholder": "まったくない"
 			},
 			"expires_at": {
-				"label": "Expires at",
-				"placeholder": "Never"
+				"label": "有効期限",
+				"placeholder": "まったくない"
 			},
 			"permissions": {
 				"inherit": {
-					"label": "Inherit permissions",
-					"description": "The same permissions as your account"
+					"label": "権限を継承する",
+					"description": "アカウントと同じ権限"
 				},
 				"explicit": {
-					"label": "Explicit permissions",
-					"description": "Choose the permissions this key should have"
+					"label": "明示的な権限",
+					"description": "このキーに必要な権限を選択してください"
 				}
 			}
 		},
-		"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting"
+		"inheritDisclaimer": "このAPIキーはあなたの権限をすべて継承します。つまり、あなたができることはすべて実行できます。この設定には注意してください"
 	},
 	"userSmartListsScene": {
-		"heading": "Smart lists",
-		"subtitle": "Your favorite searches and filters saved for easy access",
-		"searchPlaceholder": "Filter smart lists",
+		"heading": "スマートリスト",
+		"subtitle": "お気に入りの検索条件とフィルターを保存して簡単にアクセスできるようにします",
+		"searchPlaceholder": "スマートリストでフィルター",
 		"buttons": {
-			"createSmartList": "Create smart list"
+			"createSmartList": "スマートリストを作成"
 		},
 		"list": {
 			"emptyState": {
-				"heading": "No smart lists to display",
-				"noListsMessage": "Create a smart list to get started",
-				"noMatchesMessage": "Try changing your search query"
+				"heading": "表示するスマートリストがありません",
+				"noListsMessage": "スマートリストを作成して開始",
+				"noMatchesMessage": "検索クエリを変更してみてください"
 			},
 			"card": {
 				"meta": {
 					"figures": {
-						"books": "book",
-						"series": "series",
-						"library": "library"
+						"books": "本",
+						"series": "シリーズ",
+						"library": "ライブラリ"
 					},
-					"matches": "Matches"
+					"matches": "マッチ"
 				}
 			}
 		}
 	},
 	"smartListSettingsScene": {
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "基本",
 			"configuration": {
-				"label": "Configuration",
+				"label": "構成",
 				"access": "Access",
 				"filters": "Filters"
 			},

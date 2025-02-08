@@ -1,6 +1,7 @@
 import { Meta } from 'nextra'
 
 export default {
+	webapp: 'App',
 	books: 'Books',
 	progress: 'Book Progress',
 	readers: 'Book Readers',

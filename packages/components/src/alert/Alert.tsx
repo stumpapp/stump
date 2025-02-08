@@ -46,7 +46,7 @@ export type AlertProps = {
 
 const Alert = forwardRef<HTMLDivElement, AlertProps>(
 	({ className, level, rounded, icon, alignIcon = 'center', children, ...props }, ref) => {
-		// TODO: implement me, inspriation from https://chakra-ui.com/docs/components/alert/usage
+		// TODO: implement me, inspiration from https://chakra-ui.com/docs/components/alert/usage
 
 		const renderIcon = () => {
 			let Icon: LucideIcon | null = null

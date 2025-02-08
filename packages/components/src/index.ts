@@ -2,7 +2,7 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Any = any
 
-export { Accordion } from './accordian'
+export { Accordion } from './accordion'
 export { Alert } from './alert'
 export { Badge, type BadgeProps } from './badge'
 export { Breadcrumbs, type BreadcrumbsProps } from './breadcrumbs'
@@ -25,7 +25,7 @@ export { Drawer } from './drawer'
 export { Dropdown, DropdownMenu, type DropdownMenuProps } from './dropdown'
 export { EmojiPicker } from './emoji'
 export { Form, type FormProps, Label, type LabelProps } from './form'
-export { useBodyLock, useBoolean, usePrevious, usePreviousIsDifferent, useSticky } from './hooks'
+export * from './hooks'
 export { AspectRatio, Avatar, Image } from './image'
 export {
 	CheckBox,
@@ -41,6 +41,7 @@ export {
 export { Link } from './link'
 export { NavigationMenu, navigationMenuTriggerStyle } from './navigation'
 export { Popover } from './popover'
+export { Preformatted, type PreformattedProps } from './preformatted'
 export { FullScreenLoader, ProgressBar, type ProgressBarProps, ProgressSpinner } from './progress'
 export { RadioGroup } from './radio'
 export { ScrollArea, ScrollBar } from './scroll-area'

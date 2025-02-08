@@ -21,7 +21,10 @@ export default function SeriesNavigation() {
 	const { checkPermission } = useAppContext()
 	const { ref, isSticky } = useSticky<HTMLDivElement>({ extraOffset: isMobile ? 56 : 0 })
 	const { prefetch: prefetchBooks } = usePrefetchSeriesBooks({ id })
-	const { prefetch: prefetchFiles } = usePrefetchFiles({ path })
+	const { prefetch: prefetchFiles } = usePrefetchFiles({
+		path,
+		fetchConfig: checkPermission('file:upload'),
+	})
 
 	const canAccessFiles = checkPermission('file:explorer')
 	const tabs = useMemo(

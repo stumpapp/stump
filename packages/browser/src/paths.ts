@@ -19,7 +19,7 @@ type SettingsPage =
 	| 'server/email'
 	| 'server/email/new'
 	| 'server/notifications'
-type DocTopic = 'access-control' | 'book-club'
+type DocTopic = 'access-control' | 'features/book-clubs'
 type BookClubTab = 'overview' | 'members' | 'discussion' | 'settings'
 
 const paths = {

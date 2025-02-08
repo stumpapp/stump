@@ -1,4 +1,4 @@
-import { DropdownMenu, IconButton } from '@stump/components'
+import { Button, DropdownMenu } from '@stump/components'
 import { Edit, MoreVertical, Trash2 } from 'lucide-react'
 
 type Props = {
@@ -29,9 +29,9 @@ export default function EmailerActionMenu({ onEdit, onDelete }: Props) {
 				},
 			]}
 			trigger={
-				<IconButton size="xs" variant="ghost">
+				<Button size="icon" variant="ghost">
 					<MoreVertical className="h-4 w-4" />
-				</IconButton>
+				</Button>
 			}
 			align="end"
 			contentWrapperClassName="w-28 min-w-[unset]"

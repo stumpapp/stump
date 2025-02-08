@@ -30,6 +30,7 @@ use crate::{
 	filesystem::{MediaBuilder, SeriesBuilder},
 	job::{error::JobError, JobExecuteLog, JobProgress, WorkerCtx, WorkerSendExt},
 	prisma::{media, media_metadata, series, PrismaClient},
+	utils::chain_optional_iter,
 	CoreEvent,
 };
 
@@ -66,6 +67,39 @@ pub(crate) fn file_updated_since_scan(
 	}
 }
 
+// TODO(granular-scans): Use this to determine if Full is needed?
+// pub(crate) fn book_updated_since_scan(book: &Media) -> bool {
+// 	let modified_at_result = book
+// 		.modified_at
+// 		.clone()
+// 		.map(|m| m.parse::<DateTime<Utc>>())
+// 		.transpose();
+
+// 	let modified_at = match modified_at_result {
+// 		Ok(Some(modified_at)) => modified_at,
+// 		Ok(None) => {
+// 			tracing::trace!("Modified_at is None");
+// 			return false;
+// 		},
+// 		Err(err) => {
+// 			tracing::error!(error = ?err, "Failed to parse modified_at");
+// 			return false;
+// 		},
+// 	};
+
+// 	let underlying_file = PathBuf::from(&book.path);
+// 	if let Ok(Ok(system_time)) = underlying_file.metadata().map(|m| m.modified()) {
+// 		let system_time_converted: DateTime<Utc> = system_time.into();
+// 		tracing::trace!(?system_time_converted, ?modified_at, "Comparing dates");
+
+// 		if system_time_converted > modified_at {
+// 			return true;
+// 		}
+// 	}
+
+// 	false
+// }
+
 pub(crate) async fn create_media(
 	db: &PrismaClient,
 	generated: Media,
@@ -94,6 +128,7 @@ pub(crate) async fn create_media(
 					generated.path,
 					vec![
 						media::hash::set(generated.hash),
+						media::koreader_hash::set(generated.koreader_hash),
 						media::series::connect(series::id::equals(generated.series_id)),
 					],
 				)
@@ -128,29 +163,49 @@ pub(crate) async fn update_media(db: &PrismaClient, media: Media) -> CoreResult<
 	let result: Result<Media, QueryError> = db
 		._transaction()
 		.run(|client| async move {
-			if let Some(metadata) = media.metadata {
-				let params = metadata.into_prisma();
-				let updated_metadata = client
-					.media_metadata()
-					.update(media_metadata::media_id::equals(media.id.clone()), params)
-					.exec()
-					.await?;
-				tracing::trace!(?updated_metadata, "Metadata updated");
-			}
+			let metadata_id = match media.metadata {
+				Some(metadata) => {
+					let params = metadata
+						.into_prisma()
+						.into_iter()
+						.chain(vec![media_metadata::media_id::set(Some(
+							media.id.clone(),
+						))])
+						.collect::<Vec<_>>();
+					let updated_metadata = client
+						.media_metadata()
+						.upsert(
+							media_metadata::media_id::equals(media.id.clone()),
+							params.clone(),
+							params,
+						)
+						.exec()
+						.await?;
+					tracing::trace!(?updated_metadata, "Metadata upserted");
+					Some(updated_metadata.id)
+				},
+				_ => None,
+			};
 
 			let updated_media = client
 				.media()
 				.update(
 					media::id::equals(media.id.clone()),
-					vec![
-						media::name::set(media.name.clone()),
-						media::size::set(media.size),
-						media::extension::set(media.extension.clone()),
-						media::pages::set(media.pages),
-						media::hash::set(media.hash.clone()),
-						media::path::set(media.path.clone()),
-						media::status::set(media.status.to_string()),
-					],
+					chain_optional_iter(
+						[
+							media::name::set(media.name.clone()),
+							media::size::set(media.size),
+							media::extension::set(media.extension.clone()),
+							media::pages::set(media.pages),
+							media::hash::set(media.hash.clone()),
+							media::koreader_hash::set(media.koreader_hash.clone()),
+							media::path::set(media.path.clone()),
+							media::status::set(media.status.to_string()),
+						],
+						[metadata_id.map(|id| {
+							media::metadata::connect(media_metadata::id::equals(id))
+						})],
+					),
 				)
 				.with(media::metadata::fetch())
 				.exec()
@@ -244,6 +299,8 @@ pub(crate) struct MediaOperationOutput {
 	pub logs: Vec<JobExecuteLog>,
 }
 
+/// Handles missing media by updating the database with the latest information. A media is
+/// considered missing if it was previously marked as ready and is no longer found on disk.
 pub(crate) async fn handle_missing_media(
 	ctx: &WorkerCtx,
 	series_id: &str,
@@ -278,6 +335,51 @@ pub(crate) async fn handle_missing_media(
 				tracing::error!(error = ?error, "Failed to update missing media");
 				output.logs.push(JobExecuteLog::error(format!(
 					"Failed to update missing media: {:?}",
+					error.to_string()
+				)));
+				0
+			},
+			|count| {
+				output.updated_media += count as u64;
+				count
+			},
+		);
+
+	output
+}
+
+/// Handles restored media by updating the database with the latest information. A
+/// media is considered restored if it was previously marked as missing and has been
+/// found on disk.
+pub(crate) async fn handle_restored_media(
+	ctx: &WorkerCtx,
+	series_id: &str,
+	ids: Vec<String>,
+) -> MediaOperationOutput {
+	let mut output = MediaOperationOutput::default();
+
+	if ids.is_empty() {
+		tracing::debug!("No restored media to handle");
+		return output;
+	}
+
+	let _affected_rows = ctx
+		.db
+		.media()
+		.update_many(
+			vec![
+				media::series::is(vec![series::id::equals(series_id.to_string())]),
+				media::id::in_vec(ids),
+			],
+			vec![media::status::set(FileStatus::Ready.to_string())],
+		)
+		.exec()
+		.await
+		.map_or_else(
+			|error| {
+				tracing::error!(error = ?error, "Failed to restore recovered media");
+				output.logs.push(JobExecuteLog::error(format!(
+					"Failed to update recovered media: {:?}",
 					error.to_string()
 				)));
 				0
@@ -405,11 +507,37 @@ pub(crate) async fn safely_build_series(
 	(created_series, logs)
 }
 
+// TODO(granular-scans): intake ScanOptions
 pub(crate) struct MediaBuildOperation {
 	pub series_id: String,
 	pub library_config: LibraryConfig,
 	pub max_concurrency: usize,
 }
+
+// TODO(granular-scans): build_book_partial? build_partial_book?
+/*
+	A suboptimal approach could be:
+	```rust
+	struct PartialBook {
+		book: Media,
+		fields_to_update: Option<Vec<String>>, // None means full update, 0 len is err(?)
+	}
+	```
+	This would be the easiest, but would involve some wasted work. Maybe an emum?
+	```rust
+	enum BookUpdate {
+		Full(Media),
+		// TODO(granular-scans): Legacy metadata doesn't strictly set the ID to the associated
+		// media's ID. This is a problem in that the book's id would need to be provided.
+		Metadata(MediaMetadata),
+		Hashes {
+			id: String,
+			hash: Option<String>,
+			koreader_hash: Option<String>,
+		},
+	}
+	```
+*/
 
 /// Builds a media from the given path
 ///
@@ -531,6 +659,7 @@ pub(crate) async fn safely_build_and_insert_media(
 				books.push_back(book);
 			},
 			Err((error, path)) => {
+				tracing::error!(error = ?error, ?path, "Failed to build book");
 				logs.push(
 					JobExecuteLog::error(format!(
 						"Failed to build book: {:?}",
@@ -657,6 +786,10 @@ pub(crate) async fn visit_and_update_media(
 	let task_count = media.len() as i32;
 	let start = Instant::now();
 
+	// TODO(granular-scans): This needs to be aware of ScanOptions and build books more selectively.
+	// For example, if regen_hashes is the only option set, and the book wasn't updated,
+	// we don't need to rebuild it. We would just need to regen the hash. The only time
+	// we would need a full rebuild is if the book was updated on disk?
 	let futures = media
 		.into_iter()
 		.map(|existing_book| {

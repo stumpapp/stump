@@ -63,15 +63,6 @@ export default function UserMenu() {
 						<span className="ml-1 line-clamp-1 font-medium">Notifications</span>
 					</TopBarLinkListItem>
 
-					<TopBarLinkListItem
-						className="rounded-none py-3"
-						to={paths.settings('app/appearance')}
-						isActive={location.pathname.startsWith(paths.settings('app/appearance'))}
-					>
-						<Bell className="mr-2 h-4 w-4 shrink-0" />
-						<span className="ml-1 line-clamp-1 font-medium">Preferences</span>
-					</TopBarLinkListItem>
-
 					<TopBarButtonItem className="rounded-none py-3" onClick={logout}>
 						<LogOut className="mr-2 h-4 w-4 shrink-0" />
 						Logout

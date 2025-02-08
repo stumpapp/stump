@@ -184,7 +184,7 @@ impl OPDSPublication {
 		for (idx, dim) in page_dimensions.unwrap_or_default().into_iter().enumerate() {
 			let base_link = OPDSBaseLinkBuilder::default()
 				.href(finalizer.format_link(format!(
-					"/opds/v2.0/books/{}/page/{}",
+					"/opds/v2.0/books/{}/pages/{}",
 					book.id,
 					idx + 1
 				)))
@@ -208,6 +208,7 @@ impl OPDSPublication {
 
 		let metadata = OPDSMetadataBuilder::default()
 			.title(title)
+			.identifier(book.id.clone())
 			.modified(OPDSMetadata::generate_modified())
 			.description(description)
 			.belongs_to(OPDSEntryBelongsTo::from((series.clone(), position)))
@@ -318,6 +319,7 @@ mod tests {
 			path: get_test_epub_path(),
 			status: FileStatus::Ready.to_string(),
 			hash: Some(String::from("hash")),
+			koreader_hash: None,
 			series_id: Some("1".to_string()),
 			pages: 0,
 			modified_at: None,

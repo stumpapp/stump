@@ -16,9 +16,9 @@ epub = { git = "https://github.com/stumpapp/epub-rs", rev = "38e091abe9687595255
 futures = { workspace = true }
 globset = "0.4.14"
 image = { version = "0.25.2" }
-infer = "0.16.0"
+infer = { workspace = true }
 itertools = { workspace = true }
-prisma-client-rust = { workspace = true }
+md5 = { workspace = true }
 rand = { workspace = true }
 serde = { workspace = true }
 serde-xml-rs = "0.6.0" # Support for XML serialization/deserialization
@@ -34,6 +34,8 @@ order-by-gen = { path = "../crates/order-by-gen"}
 # pdf = "0.8.1"
 pdf = { git = "https://github.com/pdf-rs/pdf", rev = "3bc9e636d31b1846e51b58c7429914e640866f53" } # TODO: revert back to crates.io once fix(es) release
 pdfium-render = "0.8.24"
+prisma-client-rust = { workspace = true }
+prefixed-api-key = { workspace = true}
 rayon = "1.10.0"
 regex = "1.10.6"
 ring = "0.17.8"
@@ -49,8 +51,7 @@ uuid = "1.10.0"
 walkdir = "2.5.0"
 webp = "0.3.0"
 xml-rs = "0.8.21" # XML reader/writer
-# Note: We need to keep this downgraded for the time being. See https://github.com/stumpapp/stump/issues/427#issuecomment-2332857700
-zip = { version = "=1.1.3", features = ["deflate"], default-features = false }
+zip = { workspace = true }
 
 [dev-dependencies]
 temp-env = "0.3.6"

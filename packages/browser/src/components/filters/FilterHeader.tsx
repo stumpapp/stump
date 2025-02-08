@@ -1,6 +1,8 @@
 import { cn, useSticky } from '@stump/components'
 import { useMediaMatch } from 'rooks'
 
+import { usePreferences } from '@/hooks/usePreferences'
+
 import { useFilterContext } from './context'
 import Search from './Search'
 import SmartSearchButton from './SmartSearchButton'
@@ -44,7 +46,13 @@ export default function FilterHeader({
 	navOffset,
 }: Props) {
 	const isMobile = useMediaMatch('(max-width: 768px)')
-	const { ref, isSticky } = useSticky({ extraOffset: isMobile ? 56 : 0 })
+	const {
+		preferences: { primary_navigation_mode },
+	} = usePreferences()
+	const { ref, isSticky } = useSticky<HTMLDivElement>({
+		extraOffset: isMobile || primary_navigation_mode === 'TOPBAR' ? 56 : 0,
+	})
+
 	const { filters, setFilter, removeFilter } = useFilterContext()
 
 	return (

@@ -16,6 +16,8 @@ export const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	'emailer:create': ['emailer:read', 'emailer:manage', 'email:send'],
 	'emailer:manage': ['emailer:read'],
 	'emailer:read': [],
+	'feature:api_keys': [],
+	'feature:koreader_sync': [],
 	'file:download': [],
 	'file:explorer': [],
 	'file:upload': [],
@@ -36,6 +38,7 @@ export const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 
 const prefixes = [
 	'bookclub',
+	'feature',
 	'file',
 	'emailer',
 	'email',

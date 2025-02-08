@@ -1,6 +1,6 @@
-import { useLibraryByID, useLibraryStats } from '@stump/client'
+import { useLibraryByID, useLibraryStats, useVisitLibrary } from '@stump/client'
 import { cn } from '@stump/components'
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { Suspense, useEffect } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
@@ -44,6 +44,15 @@ export default function LibraryLayout() {
 			navigate('/404')
 		}
 	}, [isLoading, library, navigate])
+
+	const { visitLibrary } = useVisitLibrary()
+	const alreadyVisited = useRef(false)
+	useEffect(() => {
+		if (library?.id && !alreadyVisited.current) {
+			alreadyVisited.current = true
+			visitLibrary(library.id)
+		}
+	}, [library?.id, visitLibrary])
 
 	const renderHeader = () => (isSettings ? <LibrarySettingsHeader /> : <LibraryHeader />)
 

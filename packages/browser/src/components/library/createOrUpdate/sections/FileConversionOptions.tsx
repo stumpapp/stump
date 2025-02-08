@@ -33,7 +33,7 @@ export default function FileConversionOptions({ onDidChange }: Props) {
 		if (!convertRarToZip && hardDeleteConversions) {
 			form.setValue('hard_delete_conversions', false)
 		}
-	}, [convertRarToZip, hardDeleteConversions])
+	}, [convertRarToZip, hardDeleteConversions, form])
 
 	/***
 	 * An effect that triggers the `onDidChange` callback when the form values change.

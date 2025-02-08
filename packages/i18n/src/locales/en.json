@@ -7,7 +7,7 @@
 	},
 	"authScene": {
 		"claimHeading": "Initialize your server",
-		"claimText": "This Stump server is not intialized. Use the form below to create your account. Once created, you will have full access to all server features.",
+		"claimText": "This Stump server is not initialized. Use the form below to create your account. Once created, you will have full access to all server features.",
 		"form": {
 			"validation": {
 				"missingUsername": "Username is required",
@@ -367,6 +367,10 @@
 				"generateFileHashes": {
 					"label": "Generate file hashes",
 					"description": "Generate a hash for each file in the library to detect duplicates"
+				},
+				"koreaderHashes": {
+					"label": "KoReader-compatible hashes",
+					"description": "If using KoReader, generate additional hashes in the format it expects"
 				}
 			},
 			"libraryPattern": {
@@ -455,6 +459,29 @@
 			"buttons": {
 				"confirm": "Create Library"
 			}
+		}
+	},
+	"fileExplorer": {
+		"uploadModal": {
+			"title": {
+				"books": "Upload books",
+				"series": "Upload series"
+			},
+			"description": {
+				"books": "Add books directly to the current path in the file explorer",
+				"series": "Add a series directly to the current path in the file explorer"
+			},
+			"seriesDisclaimer": [
+				"It must be a ",
+				"zipped file",
+				"containing the folder which should be the series, with all the books inside"
+			],
+			"dropzone": {
+				"books": "Drag and drop books here",
+				"series": "Drag and drop a zip file here",
+				"alt": "Or click to browse your computer for books to upload"
+			},
+			"addedFiles": "Added files"
 		}
 	},
 	"librarySettingsScene": {
@@ -817,6 +844,36 @@
 			}
 		}
 	},
+	"createOrUpdateApiKey": {
+		"validation": {
+			"futureDate": "Expiration date must be in the future"
+		},
+		"fields": {
+			"name": {
+				"label": "Name",
+				"placeholder": "Koreader Sync"
+			},
+			"expiration": {
+				"label": "Expiration",
+				"placeholder": "Never"
+			},
+			"expires_at": {
+				"label": "Expires at",
+				"placeholder": "Never"
+			},
+			"permissions": {
+				"inherit": {
+					"label": "Inherit permissions",
+					"description": "The same permissions as your account"
+				},
+				"explicit": {
+					"label": "Explicit permissions",
+					"description": "Choose the permissions this key should have"
+				}
+			}
+		},
+		"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting"
+	},
 	"userSmartListsScene": {
 		"heading": "Smart lists",
 		"subtitle": "Your favorite searches and filters saved for easy access",
@@ -981,6 +1038,7 @@
 			"application": {
 				"account": "Account",
 				"appearance": "Appearance",
+				"api keys": "API keys",
 				"reader": "Reader",
 				"desktop": "Desktop",
 				"label": "Application"
@@ -1099,6 +1157,62 @@
 							"help": "A link to a page dedicated to viewing all items of this type"
 						}
 					}
+				}
+			}
+		},
+		"app/apiKeys": {
+			"helmet": "API keys",
+			"title": "API keys",
+			"description": "Manage your generated Stump API keys",
+			"shared": {
+				"fields": {
+					"name": "Name",
+					"expiration": "Expiration",
+					"last_used": "Last used",
+					"created": "Created",
+					"permissions": "Permissions",
+					"inherited": "Inherited",
+					"explicit": "Explicit"
+				}
+			},
+			"sections": {
+				"inspector": {
+					"heading": "API key",
+					"description": "A detailed view of this key",
+					"unrestrictedKey": {
+						"heading": "Unrestricted key",
+						"description": "Since you are the server owner, this key has unrestricted access when configured to inherit permissions. Please be careful."
+					}
+				},
+				"createKey": {
+					"modal": {
+						"trigger": "Create API key",
+						"heading": {
+							"creating": "Create API key",
+							"created": "Created key"
+						},
+						"description": {
+							"creating": "API keys are long-lived credentials that can be used to authenticate with the API",
+							"created": "Your new API key has been created. Save the secret somewhere safe, as it will not be shown again"
+						},
+						"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting",
+						"createdKey": "Created key",
+						"savedConfirm": "I saved my key",
+						"submit": "Create key"
+					}
+				},
+				"table": {
+					"title": "Your keys",
+					"description": "These are the API keys you have created",
+					"actionMenu": {
+						"inspect": "Inspect",
+						"delete": "Delete"
+					},
+					"empty": {
+						"title": "You haven't created any keys yet",
+						"action": "Create an API key to get started"
+					},
+					"noExpiration": "No expiration set"
 				}
 			}
 		},
@@ -1367,6 +1481,17 @@
 							"description": "Allows the user to create new book clubs"
 						}
 					},
+					"feature": {
+						"label": "Feature Opt-In",
+						"api_keys": {
+							"label": "API keys",
+							"description": "Allow the user to manage their own API keys"
+						},
+						"koreader_sync": {
+							"label": "KoReader sync",
+							"description": "Allow the user to access the KoReader sync integration"
+						}
+					},
 					"file": {
 						"label": "File Management",
 						"explorer": {
@@ -1458,7 +1583,10 @@
 					}
 				},
 				"validation": {
-					"ageRestrictionTooLow": "Age restriction cannot be less than 0"
+					"ageRestrictionTooLow": "Age restriction cannot be less than 0",
+					"missingUsername": "Username is required",
+					"missingPassword": "Password is required",
+					"usernameAlreadyExists": "Username already exists"
 				},
 				"createSubmitButton": "Create user",
 				"updateSubmitButton": "Update user"
@@ -1494,7 +1622,7 @@
 				},
 				"devices": {
 					"title": "Email devices",
-					"description": "The device aliases you have configured for recieving emails from your Stump server instance",
+					"description": "The device aliases you have configured for receiving emails from your Stump server instance",
 					"addDevice": "Add device alias",
 					"addOrUpdateDevice": {
 						"title": {
@@ -1610,7 +1738,8 @@
 			"wait": "Once libraries are created, they'll be displayed here"
 		},
 		"links": {
-			"create": "Create library"
+			"create": "Create library",
+			"settings": "Go to settings"
 		}
 	},
 	"pagination": {
@@ -1655,7 +1784,7 @@
 		},
 		"libraryOptions": {
 			"scanLibrary": "Scan",
-			"fileExplorer": "File Explorer",
+			"fileExplorer": "Files",
 			"manageLibrary": "Settings",
 			"deleteLibrary": "Delete"
 		},
@@ -1696,7 +1825,7 @@
 		}
 	},
 	"tagSelect": {
-		"placholder": "Select or create tag",
+		"placeholder": "Select or create tag",
 		"placeholderNoTags": "No tags available"
 	},
 	"thumbnailDropdown": {
@@ -1722,13 +1851,18 @@
 		"create": "Create",
 		"edit": "Edit",
 		"update": "Update",
+		"upload": "Upload",
+		"uploading": "Uploading",
 		"unimplemented": "This functionality is not yet implemented! Check back later",
 		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
 		"logIn": "Log in",
 		"login": "Login",
 		"seeError": "See error",
+		"remove": "Remove",
 		"goBack": "Go back",
 		"goToServers": "Go to servers",
-		"notReady": "This feature is not ready"
+		"notReady": "This feature is not ready",
+		"notUsedYet": "Not used yet",
+		"never": "Never"
 	}
 }

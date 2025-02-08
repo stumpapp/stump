@@ -160,7 +160,7 @@ SheetHeader.displayName = 'SheetHeader'
 
 const SheetFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
 	<div
-		className={cn('flex flex-col-reverse px-6 sm:flex-row sm:justify-end sm:space-x-2', className)}
+		className={cn('flex flex-col-reverse px-4 sm:flex-row sm:justify-end sm:space-x-2', className)}
 		{...props}
 	/>
 )
@@ -172,7 +172,7 @@ const SheetTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<SheetPrimitive.Title
 		ref={ref}
-		className={cn('text-lg font-semibold text-foreground', 'px-6', className)}
+		className={cn('text-lg font-semibold text-foreground', 'px-4', className)}
 		{...props}
 	/>
 ))
@@ -184,7 +184,7 @@ const SheetDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<SheetPrimitive.Description
 		ref={ref}
-		className={cn('px-6 text-sm text-foreground-muted', className)}
+		className={cn('px-4 text-sm text-foreground-muted', className)}
 		{...props}
 	/>
 ))

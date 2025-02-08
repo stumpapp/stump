@@ -24,9 +24,15 @@ export default function LibraryNavigation() {
 	} = useLibraryContext()
 	const { checkPermission } = useAppContext()
 	const { prefetch: prefetchBooks } = usePrefetchLibraryBooks({ id })
-	const { prefetch: prefetchFiles } = usePrefetchLibraryFiles({ path })
+	const { prefetch: prefetchFiles } = usePrefetchLibraryFiles({
+		path,
+		fetchConfig: checkPermission('file:upload'),
+	})
 	const { prefetch: prefetchSeries } = usePrefetchLibrarySeries({ id })
-	const { ref, isSticky } = useSticky<HTMLDivElement>({ extraOffset: isMobile ? 56 : 0 })
+
+	const { ref, isSticky } = useSticky<HTMLDivElement>({
+		extraOffset: isMobile || primary_navigation_mode === 'TOPBAR' ? 56 : 0,
+	})
 
 	const canAccessFiles = checkPermission('file:explorer')
 	const tabs = useMemo(

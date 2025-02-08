@@ -18,8 +18,10 @@ use crate::{
 // also think there is a good amount of duplication which can be trimmed down, like how I did with the OPDS v2 API. A few of those route
 // handlers are one-liners 💅
 
+pub(crate) mod api_key;
 pub(crate) mod auth;
 pub(crate) mod book_club;
+pub(crate) mod config;
 pub(crate) mod emailer;
 pub(crate) mod epub;
 pub(crate) mod filesystem;
@@ -33,11 +35,13 @@ pub(crate) mod reading_list;
 pub(crate) mod series;
 pub(crate) mod smart_list;
 pub(crate) mod tag;
+pub(crate) mod upload;
 pub(crate) mod user;
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
-	Router::new()
+	let mut router = Router::new()
 		.merge(auth::mount(app_state.clone()))
+		.merge(api_key::mount(app_state.clone()))
 		.merge(epub::mount(app_state.clone()))
 		.merge(emailer::mount(app_state.clone()))
 		.merge(library::mount(app_state.clone()))
@@ -52,12 +56,20 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.merge(user::mount(app_state.clone()))
 		.merge(reading_list::mount(app_state.clone()))
 		.merge(smart_list::mount(app_state.clone()))
-		.merge(book_club::mount(app_state))
+		.merge(book_club::mount(app_state.clone()))
+		.merge(config::mount(app_state.clone()))
 		.route("/claim", get(claim))
 		.route("/ping", get(ping))
 		// TODO: should /version or /check-for-updates be behind any auth reqs?
 		.route("/version", post(version))
-		.route("/check-for-update", get(check_for_updates))
+		.route("/check-for-update", get(check_for_updates));
+
+	// Conditionally attach upload routes based on settings.
+	if app_state.config.enable_upload {
+		router = router.merge(upload::mount(app_state.clone()));
+	}
+
+	router
 }
 
 #[derive(Serialize, Type, ToSchema)]
@@ -100,7 +112,7 @@ async fn ping() -> APIResult<String> {
 #[derive(Serialize, Deserialize, Type, ToSchema)]
 pub struct StumpVersion {
 	// TODO: add docker tag since special versions (e.g. nightly, experimental) will have the latest semver but a different commit
-	// Also will allow for the UI to display explcitly the docker tag if it's a special version
+	// Also will allow for the UI to display explicitly the docker tag if it's a special version
 	pub semver: String,
 	pub rev: String,
 	pub compile_time: String,

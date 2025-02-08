@@ -10,11 +10,12 @@ import {
 	Pageable,
 	PaginationQuery,
 	PatchLibraryThumbnail,
+	Series,
 	UpdateLibrary,
 	UpdateLibraryExcludedUsers,
 	User,
 } from '../types'
-import { ClassQueryKeys } from './types'
+import { ClassQueryKeys, CursorQueryParams } from './types'
 import { createRouteURLHandler } from './utils'
 
 /**
@@ -49,6 +50,18 @@ export class LibraryAPI extends APIBase {
 	}
 
 	/**
+	 *
+	 * @param id The library ID
+	 * @param params The query parameters for the series
+	 */
+	async getSeriesCursor(id: string, params: CursorQueryParams): Promise<Pageable<Series[]>> {
+		const { data: series } = await this.api.axios.get<Pageable<Series[]>>(
+			libraryURL(`/${id}/series`, params),
+		)
+		return series
+	}
+
+	/**
 	 * Create a new library
 	 */
 	async create(payload: CreateLibrary): Promise<Library> {
@@ -73,7 +86,7 @@ export class LibraryAPI extends APIBase {
 	 * @param id The library ID
 	 */
 	async updateThumbnail(id: string, payload: PatchLibraryThumbnail) {
-		return this.api.axios.patch(this.thumbnailURL(id), payload)
+		return this.api.axios.patch(libraryURL(`/${id}/thumbnail`), payload)
 	}
 
 	// TODO: type image response
@@ -86,7 +99,7 @@ export class LibraryAPI extends APIBase {
 	async uploadThumbnail(id: string, file: File) {
 		const formData = new FormData()
 		formData.append('file', file)
-		return this.api.axios.post(this.thumbnailURL(id), formData, {
+		return this.api.axios.post(libraryURL(`/${id}/thumbnail`), formData, {
 			headers: {
 				'Content-Type': 'multipart/form-data',
 			},
@@ -100,7 +113,7 @@ export class LibraryAPI extends APIBase {
 	 * @param id The library ID
 	 */
 	async deleteThumbnails(id: string): Promise<void> {
-		await this.api.axios.delete(this.thumbnailURL(id))
+		await this.api.axios.delete(libraryURL(`/${id}/thumbnail`))
 	}
 
 	/**
@@ -110,7 +123,7 @@ export class LibraryAPI extends APIBase {
 	 * @param payload The options for generating thumbnails
 	 */
 	async generateThumbnails(id: string, payload: GenerateLibraryThumbnails): Promise<void> {
-		await this.api.axios.post(`/${this.thumbnailURL(id)}/generate`, payload)
+		await this.api.axios.post(libraryURL(`/${id}/thumbnail/generate`), payload)
 	}
 
 	/**
@@ -155,7 +168,7 @@ export class LibraryAPI extends APIBase {
 	 * Update a library by ID. This is not a patch
 	 */
 	async update(id: string, payload: UpdateLibrary): Promise<Library> {
-		const { data: updatedLibrary } = await this.api.axios.post(libraryURL(id), payload)
+		const { data: updatedLibrary } = await this.api.axios.put(libraryURL(id), payload)
 		return updatedLibrary
 	}
 
@@ -173,14 +186,14 @@ export class LibraryAPI extends APIBase {
 	 * Initiate a scan of a library
 	 */
 	async scan(id: string): Promise<void> {
-		await this.api.axios.get(libraryURL(`/${id}/scan`))
+		await this.api.axios.post(libraryURL(`/${id}/scan`), {})
 	}
 
 	/**
 	 * Remove all missing series and media from a library
 	 */
 	async clean(id: string): Promise<CleanLibraryResponse> {
-		const { data } = await this.api.axios.post<CleanLibraryResponse>(libraryURL(`/${id}/clean`))
+		const { data } = await this.api.axios.put<CleanLibraryResponse>(libraryURL(`/${id}/clean`))
 		return data
 	}
 
@@ -204,7 +217,7 @@ export class LibraryAPI extends APIBase {
 	 * Initiate an analysis of a library
 	 */
 	async analyze(id: string): Promise<void> {
-		await this.api.axios.get(libraryURL(`/${id}/analyze`))
+		await this.api.axios.post(libraryURL(`/${id}/analyze`))
 	}
 
 	/**
@@ -221,6 +234,7 @@ export class LibraryAPI extends APIBase {
 			generateThumbnails: 'library.generateThumbnails',
 			get: 'library.get',
 			getByID: 'library.getByID',
+			getSeriesCursor: 'library.getSeriesCursor',
 			getLastVisited: 'library.getLastVisited',
 			getStats: 'library.getStats',
 			scan: 'library.scan',

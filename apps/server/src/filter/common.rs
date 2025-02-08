@@ -69,7 +69,7 @@ where
 	deserializer.deserialize_any(ReadStatusOrVec(PhantomData))
 }
 
-// See https://github.com/nox/serde_urlencoded/issues/26 and the workaroud solution
+// See https://github.com/nox/serde_urlencoded/issues/26 and the workaround solution
 // https://docs.rs/serde_qs/0.6.1/serde_qs/#flatten-workaround
 // TLDR; there are issues deserializing flattened structs, esp with nested enums.
 pub fn from_optional_str<'de, D, S>(deserializer: D) -> Result<Option<S>, D::Error>

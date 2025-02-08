@@ -89,6 +89,8 @@ pub enum OPDSLinkType {
 	Epub,
 	#[serde(rename = "application/vnd.readium.progression+json")]
 	Progression,
+	#[serde(rename = "application/xhtml+xml")]
+	Xhtml,
 	#[serde(untagged)]
 	Custom(String),
 }
@@ -105,13 +107,15 @@ impl From<ContentType> for OPDSLinkType {
 			ContentType::JPEG => OPDSLinkType::ImageJpeg,
 			ContentType::PNG => OPDSLinkType::ImagePng,
 			ContentType::GIF => OPDSLinkType::ImageGif,
+			ContentType::AVIF => OPDSLinkType::ImageAvif,
+			ContentType::XHTML => OPDSLinkType::Xhtml,
 			_ => OPDSLinkType::Custom(content_type.mime_type().to_string()),
 		}
 	}
 }
 
 /// A struct for representing the common elements of an OPDS link. Other link types can be derived from this struct,
-/// such as [OPDSImageLink] and [OPDSNavigationLink], and flattened for serialization into a unfied JSON object.
+/// such as [OPDSImageLink] and [OPDSNavigationLink], and flattened for serialization into a unified JSON object.
 #[skip_serializing_none]
 #[derive(Debug, Default, Clone, Builder, Serialize, Deserialize)]
 #[builder(build_fn(error = "crate::CoreError"), default, setter(into))]

@@ -53,6 +53,11 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route(
 					"/page/:page/dimensions",
 					get(individual::get_media_page_dimensions),
+				)
+				.route(
+					"/metadata",
+					get(individual::get_media_metadata)
+						.put(individual::put_media_metadata),
 				),
 		)
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))

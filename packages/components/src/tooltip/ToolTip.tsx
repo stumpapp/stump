@@ -10,7 +10,7 @@ const toolTipVariants = cva(undefined, {
 	variants: {
 		size: {
 			lg: 'text-base',
-			md: 'text-sm',
+			md: 'text-sm p-1',
 			sm: 'px-2 py-1 text-sm',
 			xs: 'p-1 text-xs',
 		},

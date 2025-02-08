@@ -4,7 +4,9 @@ use axum::{
 	routing::get,
 	Extension, Router,
 };
-use prisma_client_rust::chrono;
+use prisma_client_rust::or;
+use prisma_client_rust::{chrono, Direction};
+use serde::{Deserialize, Serialize};
 use stump_core::{
 	db::{entity::UserPermission, query::pagination::PageQuery},
 	filesystem::{
@@ -13,11 +15,16 @@ use stump_core::{
 		ContentType,
 	},
 	opds::v1_2::{
-		entry::OpdsEntry,
-		feed::OpdsFeed,
+		entry::{IntoOPDSEntry, OPDSEntryBuilder, OpdsEntry},
+		feed::{
+			OPDSFeedBuilder, OPDSFeedBuilderPageParams, OPDSFeedBuilderParams, OpdsFeed,
+		},
 		link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
+		opensearch::OpdsOpenSearch,
 	},
-	prisma::{active_reading_session, library, media, series, user, SortOrder},
+	prisma::{
+		active_reading_session, library, media, series, series_metadata, user, SortOrder,
+	},
 };
 use tracing::{debug, trace};
 
@@ -25,7 +32,7 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
-	middleware::auth::{auth_middleware, RequestContext},
+	middleware::auth::{api_key_middleware, auth_middleware, RequestContext},
 	routers::api::{
 		filters::{
 			apply_in_progress_filter_for_user, apply_media_age_restriction,
@@ -38,34 +45,86 @@ use crate::{
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
+	let primary_router = Router::new()
+		.route("/catalog", get(catalog))
+		.route("/search", get(search_description))
+		.route("/keep-reading", get(keep_reading))
+		.nest(
+			"/libraries",
+			Router::new()
+				.route("/", get(get_libraries))
+				.route("/:id", get(get_library_by_id)),
+		)
+		.nest(
+			"/series",
+			Router::new()
+				.route("/", get(get_series))
+				.route("/latest", get(get_latest_series))
+				.route("/:id", get(get_series_by_id)),
+		)
+		.nest(
+			"/books/:id",
+			Router::new()
+				.route("/thumbnail", get(get_book_thumbnail))
+				.route("/pages/:page", get(get_book_page))
+				.route("/file/:filename", get(download_book)),
+		);
+
 	Router::new()
 		.nest(
 			"/v1.2",
-			Router::new()
-				.route("/catalog", get(catalog))
-				.route("/keep-reading", get(keep_reading))
-				.nest(
-					"/libraries",
-					Router::new()
-						.route("/", get(get_libraries))
-						.route("/:id", get(get_library_by_id)),
-				)
-				.nest(
-					"/series",
-					Router::new()
-						.route("/", get(get_series))
-						.route("/latest", get(get_latest_series))
-						.route("/:id", get(get_series_by_id)),
-				)
-				.nest(
-					"/books/:id",
-					Router::new()
-						.route("/thumbnail", get(get_book_thumbnail))
-						.route("/pages/:page", get(get_book_page))
-						.route("/file/:filename", get(download_book)),
-				),
+			primary_router.clone().layer(middleware::from_fn_with_state(
+				app_state.clone(),
+				auth_middleware,
+			)),
 		)
-		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
+		.nest(
+			"/:api_key/v1.2",
+			primary_router.layer(middleware::from_fn_with_state(
+				app_state,
+				api_key_middleware,
+			)),
+		)
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct OPDSURLParams<D> {
+	#[serde(flatten)]
+	params: D,
+	#[serde(default)]
+	api_key: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct OPDSIDURLParams {
+	id: String,
+}
+
+fn number_or_string_deserializer<'de, D>(deserializer: D) -> Result<i32, D::Error>
+where
+	D: serde::Deserializer<'de>,
+{
+	let value = String::deserialize(deserializer)?;
+	value.parse::<i32>().map_err(serde::de::Error::custom)
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct OPDSPageURLParams {
+	id: String,
+	#[serde(deserialize_with = "number_or_string_deserializer")]
+	page: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct OPDSFilenameURLParams {
+	id: String,
+	filename: String,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+struct OPDSSearchQuery {
+	#[serde(default)]
+	search: Option<String>,
 }
 
 fn pagination_bounds(page: i64, page_size: i64) -> (i64, i64) {
@@ -73,7 +132,23 @@ fn pagination_bounds(page: i64, page_size: i64) -> (i64, i64) {
 	(skip, page_size)
 }
 
-async fn catalog() -> APIResult<Xml> {
+fn catalog_url(req_ctx: &RequestContext, path: &str) -> String {
+	if let Some(api_key) = req_ctx.api_key() {
+		format!("/opds/{}/v1.2/{}", api_key, path)
+	} else {
+		format!("/opds/v1.2/{}", path)
+	}
+}
+
+fn service_url(req_ctx: &RequestContext) -> String {
+	if let Some(api_key) = req_ctx.api_key() {
+		format!("/opds/{}/v1.2", api_key)
+	} else {
+		"/opds/v1.2".to_string()
+	}
+}
+
+async fn catalog(Extension(req): Extension<RequestContext>) -> APIResult<Xml> {
 	let entries = vec![
 		OpdsEntry::new(
 			"keepReading".to_string(),
@@ -84,7 +159,7 @@ async fn catalog() -> APIResult<Xml> {
 			Some(vec![OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Subsection,
-				href: String::from("/opds/v1.2/keep-reading"),
+				href: catalog_url(&req, "keep-reading"),
 			}]),
 			None,
 		),
@@ -97,7 +172,7 @@ async fn catalog() -> APIResult<Xml> {
 			Some(vec![OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Subsection,
-				href: String::from("/opds/v1.2/series"),
+				href: catalog_url(&req, "series"),
 			}]),
 			None,
 		),
@@ -110,7 +185,7 @@ async fn catalog() -> APIResult<Xml> {
 			Some(vec![OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Subsection,
-				href: String::from("/opds/v1.2/series/latest"),
+				href: catalog_url(&req, "series/latest"),
 			}]),
 			None,
 		),
@@ -123,36 +198,10 @@ async fn catalog() -> APIResult<Xml> {
 			Some(vec![OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Subsection,
-				href: String::from("/opds/v1.2/libraries"),
+				href: catalog_url(&req, "libraries"),
 			}]),
 			None,
 		),
-		// OpdsEntry::new(
-		// 	"allCollections".to_string(),
-		// 	chrono::Utc::now().into(),
-		// 	"All collections".to_string(),
-		// 	Some(String::from("Browse by collection")),
-		// 	None,
-		// 	Some(vec![OpdsLink {
-		// 		link_type: OpdsLinkType::Navigation,
-		// 		rel: OpdsLinkRel::Subsection,
-		// 		href: String::from("/opds/v1.2/collections"),
-		// 	}]),
-		// 	None,
-		// ),
-		// OpdsEntry::new(
-		// 	"allReadLists".to_string(),
-		// 	chrono::Utc::now().into(),
-		// 	"All read lists".to_string(),
-		// 	Some(String::from("Browse by read list")),
-		// 	None,
-		// 	Some(vec![OpdsLink {
-		// 		link_type: OpdsLinkType::Navigation,
-		// 		rel: OpdsLinkRel::Subsection,
-		// 		href: String::from("/opds/v1.2/readlists"),
-		// 	}]),
-		// 	None,
-		// ),
 		// TODO: more?
 		// TODO: get user stored searches, so they don't have to redo them over and over?
 		// e.g. /opds/v1.2/series?search={searchTerms}, /opds/v1.2/libraries?search={searchTerms}, etc.
@@ -162,18 +211,18 @@ async fn catalog() -> APIResult<Xml> {
 		OpdsLink {
 			link_type: OpdsLinkType::Navigation,
 			rel: OpdsLinkRel::ItSelf,
-			href: String::from("/opds/v1.2/catalog"),
+			href: catalog_url(&req, "catalog"),
 		},
 		OpdsLink {
 			link_type: OpdsLinkType::Navigation,
 			rel: OpdsLinkRel::Start,
-			href: String::from("/opds/v1.2/catalog"),
+			href: catalog_url(&req, "catalog"),
 		},
-		// OpdsLink {
-		// 	link_type: OpdsLinkType::Search,
-		// 	rel: OpdsLinkRel::Search,
-		// 	href: String::from("/opds/v1.2/search"),
-		// },
+		OpdsLink {
+			link_type: OpdsLinkType::Search,
+			rel: OpdsLinkRel::Search,
+			href: catalog_url(&req, "search"),
+		},
 	];
 
 	let feed = OpdsFeed::new(
@@ -184,6 +233,12 @@ async fn catalog() -> APIResult<Xml> {
 	);
 
 	Ok(Xml(feed.build()?))
+}
+
+async fn search_description(Extension(req): Extension<RequestContext>) -> APIResult<Xml> {
+	Ok(OpdsOpenSearch::new(Some(service_url(&req)))
+		.build()
+		.map(Xml)?)
 }
 
 async fn keep_reading(
@@ -223,7 +278,10 @@ async fn keep_reading(
 		}
 	});
 
-	let entries = books_in_progress.into_iter().map(OpdsEntry::from).collect();
+	let entries = books_in_progress
+		.into_iter()
+		.map(|m| OPDSEntryBuilder::<media::Data>::new(m, req.api_key()).into_opds_entry())
+		.collect::<Vec<OpdsEntry>>();
 
 	let feed = OpdsFeed::new(
 		"keepReading".to_string(),
@@ -232,12 +290,12 @@ async fn keep_reading(
 			OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::ItSelf,
-				href: String::from("/opds/v1.2/keep-reading"),
+				href: catalog_url(&req, "keep-reading"),
 			},
 			OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Start,
-				href: String::from("/opds/v1.2/catalog"),
+				href: catalog_url(&req, "catalog"),
 			},
 		]),
 		entries,
@@ -246,9 +304,10 @@ async fn keep_reading(
 	Ok(Xml(feed.build()?))
 }
 
-// TODO: age restrictions
+/// A handler for GET /opds/v1.2/libraries, accepts a `search` URL param
 async fn get_libraries(
 	State(ctx): State<AppState>,
+	Query(OPDSSearchQuery { search }): Query<OPDSSearchQuery>,
 	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Xml> {
 	let db = &ctx.db;
@@ -256,10 +315,19 @@ async fn get_libraries(
 	let user = req.user();
 	let libraries = db
 		.library()
-		.find_many(vec![library_not_hidden_from_user_filter(user)])
+		.find_many(chain_optional_iter(
+			[library_not_hidden_from_user_filter(user)],
+			[search.as_ref().map(|q| library::name::contains(q.clone()))],
+		))
+		.order_by(library::name::order(Direction::Asc))
 		.exec()
 		.await?;
-	let entries = libraries.into_iter().map(OpdsEntry::from).collect();
+	let entries = libraries
+		.into_iter()
+		.map(|l| {
+			OPDSEntryBuilder::<library::Data>::new(l, req.api_key()).into_opds_entry()
+		})
+		.collect::<Vec<OpdsEntry>>();
 
 	let feed = OpdsFeed::new(
 		"allLibraries".to_string(),
@@ -268,12 +336,12 @@ async fn get_libraries(
 			OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::ItSelf,
-				href: String::from("/opds/v1.2/libraries"),
+				href: catalog_url(&req, "libraries"),
 			},
 			OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Start,
-				href: String::from("/opds/v1.2/catalog"),
+				href: catalog_url(&req, "catalog"),
 			},
 		]),
 		entries,
@@ -284,7 +352,10 @@ async fn get_libraries(
 
 async fn get_library_by_id(
 	State(ctx): State<AppState>,
-	Path(id): Path<String>,
+	Path(OPDSURLParams {
+		params: OPDSIDURLParams { id },
+		..
+	}): Path<OPDSURLParams<OPDSIDURLParams>>,
 	pagination: Query<PageQuery>,
 	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Xml> {
@@ -340,15 +411,27 @@ async fn get_library_by_id(
 			library_series_count,
 			"Fetched library with series"
 		);
-		Ok(Xml(OpdsFeed::paginated(
-			library.id.as_str(),
-			library.name.as_str(),
-			format!("libraries/{}", &library.id).as_str(),
-			library_series,
-			page.into(),
-			library_series_count,
-		)
-		.build()?))
+
+		let entries = library_series
+			.into_iter()
+			.map(|s| {
+				OPDSEntryBuilder::<series::Data>::new(s, req.api_key()).into_opds_entry()
+			})
+			.collect::<Vec<OpdsEntry>>();
+
+		let feed =
+			OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
+				id: library.id.clone(),
+				title: library.name.clone(),
+				entries,
+				href_postfix: format!("libraries/{}", &library.id),
+				page_params: Some(OPDSFeedBuilderPageParams {
+					page: page.into(),
+					count: library_series_count,
+				}),
+				search: None,
+			})?;
+		Ok(Xml(feed.build()?))
 	} else {
 		Err(APIError::NotFound(format!(
 			"Library {library_id} not found"
@@ -356,11 +439,16 @@ async fn get_library_by_id(
 	}
 }
 
+// FIXME: Based on testing with Panels, it seems like pagination isn't an expected default when
+// a search is present? This feels both odd but understandable to support an "at a glance" view,
+// but I feel like it should still support pagination...
+
 /// A handler for GET /opds/v1.2/series, accepts a `page` URL param. Note: OPDS
 /// pagination is zero-indexed.
 async fn get_series(
 	State(ctx): State<AppState>,
-	pagination: Query<PageQuery>,
+	Query(pagination): Query<PageQuery>,
+	Query(OPDSSearchQuery { search }): Query<OPDSSearchQuery>,
 	Extension(req): Extension<RequestContext>,
 ) -> APIResult<Xml> {
 	let db = &ctx.db;
@@ -374,14 +462,29 @@ async fn get_series(
 		.as_ref()
 		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
 
+	let search_clone = search.clone();
 	let (series, count) = db
 		._transaction()
 		.run(|client| async move {
 			let series = client
 				.series()
-				.find_many(chain_optional_iter([], [age_restrictions.clone()]))
+				.find_many(chain_optional_iter(
+					[],
+					[
+						age_restrictions.clone(),
+						search_clone.map(|q| {
+							or![
+								series::name::contains(q.clone()),
+								series::metadata::is(vec![
+									series_metadata::title::contains(q),
+								])
+							]
+						}),
+					],
+				))
 				.skip(skip)
 				.take(take)
+				.order_by(series::name::order(Direction::Asc))
 				.exec()
 				.await?;
 
@@ -394,15 +497,26 @@ async fn get_series(
 		})
 		.await?;
 
-	Ok(Xml(OpdsFeed::paginated(
-		"allSeries",
-		"All Series",
-		"series",
-		series,
-		page.into(),
-		count,
-	)
-	.build()?))
+	let entries = series
+		.into_iter()
+		.map(|s| {
+			OPDSEntryBuilder::<series::Data>::new(s, req.api_key()).into_opds_entry()
+		})
+		.collect::<Vec<OpdsEntry>>();
+
+	let feed = OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
+		id: "allSeries".to_string(),
+		title: "All Series".to_string(),
+		entries,
+		href_postfix: "series".to_string(),
+		page_params: Some(OPDSFeedBuilderPageParams {
+			page: page.into(),
+			count,
+		}),
+		search,
+	})?;
+
+	Ok(Xml(feed.build()?))
 }
 
 async fn get_latest_series(
@@ -442,19 +556,33 @@ async fn get_latest_series(
 		})
 		.await?;
 
-	Ok(Xml(OpdsFeed::paginated(
-		"latestSeries",
-		"Latest Series",
-		"series/latest",
-		series,
-		page.into(),
-		count,
-	)
-	.build()?))
+	let entries = series
+		.into_iter()
+		.map(|s| {
+			OPDSEntryBuilder::<series::Data>::new(s, req.api_key()).into_opds_entry()
+		})
+		.collect::<Vec<OpdsEntry>>();
+
+	let feed = OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
+		id: "latestSeries".to_string(),
+		title: "Latest Series".to_string(),
+		entries,
+		href_postfix: "series/latest".to_string(),
+		page_params: Some(OPDSFeedBuilderPageParams {
+			page: page.into(),
+			count,
+		}),
+		search: None,
+	})?;
+
+	Ok(Xml(feed.build()?))
 }
 
 async fn get_series_by_id(
-	Path(id): Path<String>,
+	Path(OPDSURLParams {
+		params: OPDSIDURLParams { id },
+		..
+	}): Path<OPDSURLParams<OPDSIDURLParams>>,
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
 	Extension(req): Extension<RequestContext>,
@@ -504,15 +632,27 @@ async fn get_series_by_id(
 		.await?;
 
 	if let (Some(series), Some(series_book_count)) = tx_result {
-		Ok(Xml(OpdsFeed::paginated(
-			series.id.as_str(),
-			series.name.as_str(),
-			format!("series/{}", &series.id).as_str(),
-			series.media().unwrap_or(&Vec::new()).to_owned(),
-			page.into(),
-			series_book_count,
-		)
-		.build()?))
+		let series_media = series.media().unwrap_or(&Vec::new()).to_owned();
+		let entries = series_media
+			.into_iter()
+			.map(|m| {
+				OPDSEntryBuilder::<media::Data>::new(m, req.api_key()).into_opds_entry()
+			})
+			.collect();
+
+		let feed =
+			OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
+				id: series.id.clone(),
+				title: series.name.clone(),
+				entries,
+				href_postfix: format!("series/{}", &series.id),
+				page_params: Some(OPDSFeedBuilderPageParams {
+					page: page.into(),
+					count: series_book_count,
+				}),
+				search: None,
+			})?;
+		Ok(Xml(feed.build()?))
 	} else {
 		Err(APIError::NotFound(format!("Series {series_id} not found")))
 	}
@@ -543,7 +683,10 @@ fn handle_opds_image_response(
 
 /// A handler for GET /opds/v1.2/books/{id}/thumbnail, returns the thumbnail
 async fn get_book_thumbnail(
-	Path(id): Path<String>,
+	Path(OPDSURLParams {
+		params: OPDSIDURLParams { id },
+		..
+	}): Path<OPDSURLParams<OPDSIDURLParams>>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
 ) -> APIResult<ImageResponse> {
@@ -555,7 +698,10 @@ async fn get_book_thumbnail(
 
 /// A handler for GET /opds/v1.2/books/{id}/page/{page}, returns the page
 async fn get_book_page(
-	Path((id, page)): Path<(String, i32)>,
+	Path(OPDSURLParams {
+		params: OPDSPageURLParams { id, page },
+		..
+	}): Path<OPDSURLParams<OPDSPageURLParams>>,
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
 	Extension(req): Extension<RequestContext>,
@@ -636,7 +782,10 @@ async fn get_book_page(
 
 /// A handler for GET /opds/v1.2/books/{id}/file/{filename}, returns the book
 async fn download_book(
-	Path((id, filename)): Path<(String, String)>,
+	Path(OPDSURLParams {
+		params: OPDSFilenameURLParams { id, filename },
+		..
+	}): Path<OPDSURLParams<OPDSFilenameURLParams>>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
 ) -> APIResult<NamedFile> {

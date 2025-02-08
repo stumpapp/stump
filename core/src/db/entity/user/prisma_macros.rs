@@ -7,3 +7,9 @@ user::select!(user_basic_profile_select {
 	avatar_url
 	created_at
 });
+
+user::select!(user_password_select {
+	id
+	username
+	hashed_password
+});

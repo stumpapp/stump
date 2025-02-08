@@ -9,7 +9,7 @@ module.exports = {
 		'@storybook/addon-essentials',
 		'@storybook/addon-interactions',
 		// FIXME: I want storybook-dark-mode ideally because it toggles all of the storybook UI
-		// accordinly, but their logic for toggling dark mode is broken. So for now I am using
+		// accordingly, but their logic for toggling dark mode is broken. So for now I am using
 		// storybook-tailwind-dark-mode, but it doesn't toggle the storybook UI (just the dark class)
 		// 'storybook-dark-mode',
 		'storybook-tailwind-dark-mode',

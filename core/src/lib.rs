@@ -106,7 +106,7 @@ impl StumpCore {
 	}
 
 	/// Returns a new instance of [`Ctx`]. This is the main context struct for the core,
-	/// prividing access to the database and internal channels.
+	/// providing access to the database and internal channels.
 	pub fn get_context(&self) -> Ctx {
 		self.ctx.clone()
 	}
@@ -315,12 +315,18 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<UserPermission>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<AgeRestriction>()?).as_bytes())?;
 
+		file.write_all(format!("{}\n\n", ts_export::<APIKey>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<InheritPermissionValue>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<APIKeyPermissions>()?).as_bytes())?;
+
 		file.write_all(format!("{}\n\n", ts_export::<SupportedFont>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<NavigationMode>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<HomeItem>()?).as_bytes())?;
 		file.write_all(
-			format!("{}\n\n", ts_export::<NaviationItemDisplayOptions>()?).as_bytes(),
+			format!("{}\n\n", ts_export::<NavigationItemDisplayOptions>()?).as_bytes(),
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<NavigationItem>()?).as_bytes())?;
 		file.write_all(

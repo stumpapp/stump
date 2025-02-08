@@ -1,12 +1,12 @@
 import { ApiVersion } from './api'
 
-export type AuthenticationMethod = 'token' | 'session'
+export type AuthenticationMethod = 'token' | 'session' | 'api-key' | 'basic'
 
 export class Configuration {
 	apiVersion: ApiVersion = 'v1'
-	authenticationMethod: AuthenticationMethod
+	authMethod: AuthenticationMethod
 
-	constructor(authenticationMethod: AuthenticationMethod) {
-		this.authenticationMethod = authenticationMethod
+	constructor(authMethod: AuthenticationMethod) {
+		this.authMethod = authMethod
 	}
 }

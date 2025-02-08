@@ -3,11 +3,99 @@
 	<head>
 		<meta charset="utf-8" />
 		<title>Stump</title>
-		<link rel="icon" type="image/icon" href="/assets/favicon.ico" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<script>
+			try {
+				const zustandState = JSON.parse(
+					localStorage.getItem('stump-user-store') || '{"state": {}}',
+				).state
+				const appTheme = zustandState.userPreferences?.app_theme || ''
+				const alreadyHasTheme =
+					!appTheme || document.querySelector('html').classList.contains(appTheme)
+				if (!alreadyHasTheme) {
+					document.querySelector('html').classList.add(appTheme)
+				}
+			} catch {}
+		</script>
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+			html.autumn {
+				background-color: #2c1a12;
+			}
+			html.bronze {
+				background-color: #ffffff;
+			}
+			html.cosmic {
+				background-color: #1c0f45;
+			}
+			html.dark {
+				background-color: #161719;
+			}
+			html.light {
+				background-color: #ffffff;
+			}
+			html.ocean {
+				background-color: #0b3d4d;
+			}
+			html.pumpkin {
+				background-color: #0c0c0c;
+			}
+			.splash-container {
+				height: 100vh;
+				width: 100vw;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			.splash {
+				max-width: 8rem;
+			}
+		</style>
+		<link rel="shortcut icon" type="image/icon" href="/assets/favicon.ico" />
+		<link
+			rel="icon"
+			type="image/png"
+			href="/assets/favicon-16x16.png"
+			sizes="16x16"
+			purpose="any"
+		/>
+		<link
+			rel="apple-touch-icon image_src"
+			type="image/png"
+			href="/assets/favicon-180x180-apple-touch-icon.png"
+			sizes="180x180"
+		/>
+		<link
+			rel="apple-touch-icon image_src"
+			type="image/png"
+			href="/assets/favicon-192x192.png"
+			sizes="192x192"
+			purpose="maskable"
+		/>
+		<link
+			rel="apple-touch-icon image_src"
+			type="image/png"
+			href="/assets/favicon-512x512.png"
+			sizes="512x512"
+			purpose="maskable"
+		/>
+
+		<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+		<meta name="theme-color" content="#161719" media="(prefers-color-scheme: dark)" />
+		<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="mobile-web-app-capable" content="yes" />
 	</head>
 	<body>
-		<div id="root"></div>
+		<div id="root">
+			<div class="splash-container">
+				<img src="/assets/stump-splash.gif" alt="loading" class="splash" />
+			</div>
+		</div>
 		<script type="module" src="./index.tsx"></script>
 	</body>
 </html>

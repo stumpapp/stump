@@ -15,7 +15,7 @@ let sse: EventSource
 
 // TODO(tokens): Swap eventsource with polyfilled version that supports headers
 function useSse(url: string, { onOpen, onClose, onMessage }: SseOptions = {}) {
-	const timoutRef = useRef<NodeJS.Timeout | null>(null)
+	const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 	/**
 	 * Initialize the EventSource connection
 	 */
@@ -34,7 +34,7 @@ function useSse(url: string, { onOpen, onClose, onMessage }: SseOptions = {}) {
 
 			sse?.close()
 
-			timoutRef.current = setTimeout(() => {
+			timeoutRef.current = setTimeout(() => {
 				initEventSource()
 
 				if (sse?.readyState !== EventSource.OPEN) {
@@ -54,8 +54,8 @@ function useSse(url: string, { onOpen, onClose, onMessage }: SseOptions = {}) {
 
 		return () => {
 			sse?.close()
-			if (timoutRef.current) {
-				clearTimeout(timoutRef.current)
+			if (timeoutRef.current) {
+				clearTimeout(timeoutRef.current)
 			}
 		}
 	}, [url])

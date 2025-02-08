@@ -8,7 +8,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.0.7"
+version = "0.0.10"
 rust-version = "1.81.0"
 
 [workspace.dependencies]
@@ -20,6 +20,7 @@ derive_builder = "0.20.0"
 chrono = { version = "0.4.38", features = ["serde"] }
 futures = "0.3.30"
 futures-util = "0.3.30"
+infer = "0.16.0"
 itertools = "0.13.0"
 keyring = { version = "3.4.0", features = ["apple-native", "windows-native", "sync-secret-service"] }
 lettre = { version = "0.11.4", default-features = false, features = [
@@ -29,7 +30,9 @@ lettre = { version = "0.11.4", default-features = false, features = [
   "tracing",
   "tokio1-rustls-tls",
 ] }
+md5 = "0.7.0"
 once_cell = "1.19.0"
+prefixed-api-key = { version = "0.3.0", features = ["sha2"] }
 prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust.git", rev = "4f9ef9d38ca732162accff72b2eb684d2f120bab", features = [
   "sqlite-create-many",
   "migrations",
@@ -51,7 +54,7 @@ simple_crypt = "0.2.3"
 specta = { version = "1.0.5", features = ["chrono", "url"] }
 tempfile = "3.12.0"
 thiserror = "1.0.63"
-tokio = { version = "1.40.0", features = [
+tokio = { version = "1.41.1", features = [
   # Provides sender/reciever channels
   "sync", 
   # Tells the Tokio runtime to use the multi-thread scheduler.
@@ -66,3 +69,5 @@ urlencoding = "2.1.3"
 proc-macro2 = "1.0.87"
 quote = "1.0.37"
 syn = "2.0.79"
+# Note: We need to keep this downgraded for the time being. See https://github.com/stumpapp/stump/issues/427#issuecomment-2332857700
+zip = { version = "=1.1.3", features = ["deflate"], default-features = false }

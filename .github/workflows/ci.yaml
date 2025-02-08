@@ -13,12 +13,15 @@ jobs:
       changes: ${{ steps.filter.outputs.changes }}
       frontend-changed: ${{ steps.filter.outputs.frontend == 'true' }}
       rust-changed: ${{ steps.filter.outputs.rust == 'true' }}
+      docs-changed: ${{ steps.filter.outputs.docs == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v2
         id: filter
         with:
           filters: |
+            docs:
+              - './docs/**'
             frontend:
               - './apps/web/**'
               - './apps/desktop/src/**'
@@ -102,3 +105,19 @@ jobs:
 
       - name: Run TypeScript tests
         run: yarn test
+
+  # TODO(ci): Add vercel dev deployment?
+  check-docs:
+    needs: code-changes-check
+    if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.docs-changed == 'true'"
+    name: Check documentation
+    runs-on: [ubuntu-22.04]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node and Yarn
+        uses: ./.github/actions/setup-yarn
+
+      - name: Build documentation app
+        run: yarn docs build

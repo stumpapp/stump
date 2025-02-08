@@ -68,10 +68,8 @@
 		},
 		"nextInSeries": "Następny w serii"
 	},
-	"createBookClubScene": {
-		"heading": "Stwórz nowy klub książki",
-		"subtitle": "Możesz utworzyć prywatny klub dla wybranych lub ustawić go jako publiczny dla każdego na serwerze",
-		"form": {
+	"createOrUpdateBookClubForm": {
+		"fields": {
 			"name": {
 				"label": "Nazwa",
 				"placeholder": "Mój klub książki",
@@ -79,7 +77,7 @@
 			},
 			"description": {
 				"label": "Opis",
-				"placeholder": "Fanowski klub 'Nasza flaga oznacza śmierć'. Czytamy fikcję piracką ku zadowoleniu naszych serc",
+				"placeholder": "Fanklub 'Nasza flaga oznacza śmierć'. Czytamy fikcję piracką ile dusza zapragnie",
 				"description": "Opcjonalny, krótki opis Twojego klubu książki"
 			},
 			"is_private": {
@@ -113,20 +111,123 @@
 					"description": "Nazwa roli twórcy dla Twojego klubu książki. To Ty!"
 				}
 			},
-			"creator_preferences": {
-				"heading": "Członkowstwo",
-				"subtitle": "Ustawienia Twojego członkowstwa w klubie książki",
-				"creator_display_name": {
+			"membershipOptions": {
+				"displayName": {
 					"label": "Nazwa wyświetlana",
 					"placeholder": "oromei",
 					"description": "Opcjonalna wyświetlana nazwa dla Twojego członkostwa w klubie książki. Ustawiona ma pierwszeństwo przed Twoją nazwą użytkownika"
 				},
-				"creator_hide_progress": {
+				"hideProgress": {
 					"label": "Ukryj postęp",
 					"description": "Jeśli opcja jest włączona, Twój postęp przeczytania zostanie ukryty przed innymi członkami klubu książki"
 				}
+			}
+		},
+		"validation": {
+			"missingName": "Nazwa jest wymagana",
+			"alreadyTaken": "jest już zajęte"
+		}
+	},
+	"createBookClubScene": {
+		"heading": "Stwórz nowy klub książki",
+		"subtitle": "Możesz utworzyć prywatny klub dla wybranych lub ustawić go jako publiczny dla każdego na serwerze",
+		"form": {
+			"stepLabel": "Krok",
+			"steps": [
+				{
+					"label": "Podstawowe",
+					"heading": "Informacje podstawowe",
+					"description": "Szczegóły tego klubu wraz z jej nazwą, ścieżką i opisem"
+				},
+				{
+					"label": "Role",
+					"heading": "Role",
+					"description": "Dostosuj role w swoim klubie książki"
+				},
+				{
+					"label": "Członkowstwo",
+					"heading": "Ustawienia członkostwa",
+					"description": "Dodatkowe opcje dla Twojego klubu książki"
+				},
+				{
+					"label": "Podsumowanie",
+					"heading": "Podsumowanie",
+					"description": "Przejrzyj ustawienia klubu przed jego utworzeniem"
+				}
+			],
+			"review": {
+				"yes": "Tak",
+				"no": "Nie",
+				"none": "Brak",
+				"labels": {
+					"name": "Nazwa",
+					"description": "Opis"
+				}
 			},
 			"submit": "Stwórz klub książki"
+		}
+	},
+	"bookClubSettingsScene": {
+		"sidebar": {
+			"basics": "Podstawowe",
+			"members": {
+				"members": "Członkowie",
+				"roles": "Role",
+				"label": "Członkowstwo"
+			},
+			"scheduling": {
+				"scheduler": "Harmonogram",
+				"options": "Ustawienia",
+				"label": "Harmonogram"
+			},
+			"danger-zone": {
+				"delete": "Usuwanie",
+				"label": "Niebezpieczna strefa"
+			}
+		},
+		"basics": {
+			"title": "Informacje podstawowe",
+			"description": "Szczegóły tego klubu książki wraz z jego nazwą i opisem",
+			"form": {
+				"submit": "Aktualizuj klub"
+			}
+		},
+		"members": {
+			"title": "Członkowie",
+			"description": "Zarządzaj członkami tego klubu książki",
+			"sections": {}
+		},
+		"roles": {
+			"title": "Role",
+			"description": "Dostosuj role w tym klubie książki",
+			"sections": {
+				"roleMappings": {
+					"heading": "Istniejące mapowanie ról",
+					"description": "Aktualne mapowanie ról dla tego klubu książki"
+				}
+			}
+		},
+		"scheduling/scheduler": {
+			"title": "Harmonogram",
+			"description": "Utwórz i zarządzaj zaplanowane czytania dla tego klubu książki"
+		},
+		"scheduling/options": {
+			"title": "Opcje",
+			"description": "Dodatkowe opcje harmonogramu dla tego klubu książki"
+		},
+		"danger-zone/delete": {
+			"title": "Akcje usuwania",
+			"description": "Trwale usuń ten klub książki i całą jego zawartość lub niektóre zasoby",
+			"sections": {
+				"deleteClub": {
+					"heading": "Usuń klub",
+					"description": [
+						"Trwale usuń ten klub książki i całą jego zawartość.",
+						"Tej czynności nie można cofnąć"
+					],
+					"trigger": "Usuń klub"
+				}
+			}
 		}
 	},
 	"createOrUpdateLibraryForm": {
@@ -266,6 +367,10 @@
 				"generateFileHashes": {
 					"label": "Generuj skróty plików",
 					"description": "Generuj skrót dla każdego pliku w bibliotece w celu wykrycia duplikatów"
+				},
+				"koreaderHashes": {
+					"label": "Skróty kompatybilne z KoReader",
+					"description": "Jeśli używasz KoReader, generuj dodatkowe skróty w formacie przezeń oczekiwanym"
 				}
 			},
 			"libraryPattern": {
@@ -354,6 +459,29 @@
 			"buttons": {
 				"confirm": "Utwórz bibliotekę"
 			}
+		}
+	},
+	"fileExplorer": {
+		"uploadModal": {
+			"title": {
+				"books": "Prześlij książki",
+				"series": "Prześlij serię"
+			},
+			"description": {
+				"books": "Dodaj książki bezpośrednio do aktualnej ścieżki w eksploratorze plików",
+				"series": "Dodaj serie bezpośrednio do aktualnej ścieżki w eksploratorze plików"
+			},
+			"seriesDisclaimer": [
+				"Musi to być ",
+				"spakowany plik",
+				"zawierający folder, który powinien być serią, ze wszystkimi książkami wewnątrz"
+			],
+			"dropzone": {
+				"books": "Przeciągnij i upuść książki tutaj",
+				"series": "Przeciągnij i upuść plik zip tutaj",
+				"alt": "Lub kliknij aby przeglądać Twój komputer w celu znalezienia książki do przesłania"
+			},
+			"addedFiles": "Dodaj pliki"
 		}
 	},
 	"librarySettingsScene": {
@@ -473,10 +601,10 @@
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "Wznów czytanie",
+			"title": "Kontynuuj czytanie",
 			"emptyState": {
-				"heading": "Brak pozycji do wyświetlenia",
-				"message": "Wszystkie książki, które obecnie czytasz, pojawią się tutaj"
+				"heading": "Brak zawartości do wyświetlenia",
+				"message": "Wszystkie rozpoczęte książki będą widoczne tutaj"
 			}
 		},
 		"recentlyAddedSeries": {
@@ -489,16 +617,261 @@
 		"recentlyAddedBooks": {
 			"title": "Ostatnio dodane książki",
 			"emptyState": {
-				"heading": "Brak książek do wyświetlenia",
-				"message": "Każda książka, którą dodasz do swoich bibliotek, pojawi się tutaj"
+				"heading": "Brak zawartości do wyświetlenia",
+				"message": "Wszystkie ostatnio dodane książki będą widoczne tutaj"
 			}
 		}
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "Wznów czytanie",
+			"continueReading": "Kontynuuj czytanie",
 			"downloadSeries": "Pobierz serię"
 		}
+	},
+	"createOrUpdateSmartListForm": {
+		"validation": {
+			"nameTooShort": "Nazwa musi zawierać co najmniej 2 znaki",
+			"nameTaken": "Nie można użyć tej nazwy"
+		},
+		"fields": {
+			"name": {
+				"label": "Nazwa",
+				"placeholder": "Moja inteligentna lista",
+				"description": "Musi być unikatowa, ale może zostać później zmieniona"
+			},
+			"description": {
+				"label": "Opis",
+				"placeholder": "Bardzo inteligentna lista",
+				"description": "Opcjonalny opis Twojej inteligentnej listy"
+			},
+			"visibility": {
+				"label": "Widoczność",
+				"options": {
+					"public": {
+						"label": "Publiczna",
+						"description": "Dostępna dla wszystkich użytkowników na serwerze"
+					},
+					"shared": {
+						"label": "Współdzielone",
+						"description": "Określeni użytkownicy mogą uzyskać dostęp do tej inteligentnej listy",
+						"createDisclaimer": "Możesz wybrać, z kim ta lista jest udostępniona po jej utworzeniu"
+					},
+					"private": {
+						"label": "Prywatne",
+						"description": "Tylko Ty możesz uzyskać dostęp do tej inteligentnej listy"
+					}
+				}
+			},
+			"queryBuilder": {
+				"uiPerformance": "Funkcja ta nie jest zoptymalizowana w interfejsie użytkownika i może powodować spowolnienie przy dużych wynikach. Zostanie to poprawione w przyszłości",
+				"rootJoiner": {
+					"and": {
+						"label": "I",
+						"description": "Wszystkie grupy filtrów muszą być spełnione, aby książka była dopasowana"
+					},
+					"or": {
+						"label": "LUB",
+						"description": "Przynajmniej jedna grupa filtrów musi być spełniona, aby książka była dopasowana"
+					}
+				},
+				"groupJoiner": {
+					"and": {
+						"label": "I",
+						"description": "Wszystkie muszą być spełnione"
+					},
+					"or": {
+						"label": "LUB",
+						"description": "Przynajmniej jedno musi być spełnione"
+					},
+					"not": {
+						"label": "NIE",
+						"description": "Żadne nie może być spełnione"
+					}
+				},
+				"grouping": {
+					"label": "Grupuj według",
+					"description": "Jak książki na tej inteligentnej liście powinny być grupowane",
+					"options": {
+						"by_books": {
+							"label": "Brak"
+						},
+						"by_series": {
+							"label": "Seria"
+						},
+						"by_library": {
+							"label": "Biblioteka"
+						}
+					}
+				},
+				"filters": {
+					"emptyState": "Dodaj grupę, aby rozpocząć",
+					"actions": {
+						"addFilter": "Dodaj filtr",
+						"addGroup": "Dodaj grupę",
+						"deleteFilter": "Usuń filtr",
+						"deleteGroup": "Usuń grupę"
+					},
+					"is": "jest",
+					"fieldSelect": {
+						"placeholder": "Atrybut",
+						"source": {
+							"label": "Źródło",
+							"back": "Powrót",
+							"book": {
+								"label": "Książka",
+								"attributes": {
+									"name": "Nazwa pliku",
+									"size": "Rozmiar",
+									"extension": "Rozszerzenie",
+									"created_at": "Utworzono",
+									"updated_at": "Zaktualizowano",
+									"status": "Status",
+									"path": "Ścieżka",
+									"pages": "Strony",
+									"tags": "Etykiety"
+								}
+							},
+							"book_meta": {
+								"label": "Metadane książki",
+								"attributes": {
+									"title": "Tytuł",
+									"summary": "Podsumowanie",
+									"notes": "Notatki",
+									"genre": "Gatunek",
+									"writers": "Pisarze",
+									"pencillers": "Rysownicy",
+									"inkers": "Kreślarz",
+									"letterers": "Kaligrafista",
+									"editors": "Edytorzy",
+									"publisher": "Wydawca",
+									"colorists": "Kolorysta",
+									"cover_artists": "Artysta okładki",
+									"links": "Odnośniki",
+									"characters": "Postaci",
+									"teams": "Zespoły"
+								}
+							},
+							"series": {
+								"label": "Serie",
+								"attributes": {
+									"name": "Nazwa",
+									"path": "Ścieżka"
+								}
+							},
+							"series_meta": {
+								"label": "Metadane serii",
+								"attributes": {
+									"age_rating": "Klasyfikacja wiekowa",
+									"title": "Tytuł",
+									"summary": "Podsumowanie",
+									"meta_type": "Typ",
+									"publisher": "Wydawca",
+									"imprint": "Imprint",
+									"comicid": "Identyfikator komiksu",
+									"booktype": "Typ książki",
+									"status": "Status",
+									"volume": "Wolumen"
+								}
+							},
+							"library": {
+								"label": "Biblioteka",
+								"attributes": {
+									"name": "Nazwa",
+									"path": "Ścieżka"
+								}
+							}
+						}
+					},
+					"basicValue": {
+						"placeholder": "Wartość",
+						"date": "Data"
+					},
+					"rangeValue": {
+						"from": {
+							"date": "Data początkowa",
+							"number": "Od"
+						},
+						"to": {
+							"date": "Data końcowa",
+							"number": "Do"
+						},
+						"inclusive": "Włącznie"
+					},
+					"listValue": {
+						"placeholder": "Dodaj wartości",
+						"emptyState": "Brak wartości do wyświetlenia"
+					}
+				}
+			}
+		}
+	},
+	"createSmartListScene": {
+		"heading": "Utwórz inteligentną listę",
+		"subtitle": "Tworzenie listy w locie na podstawie zestawu filtrów",
+		"form": {
+			"stepLabel": "Krok",
+			"steps": [
+				{
+					"label": "Podstawowe",
+					"heading": "Informacje podstawowe",
+					"description": "Szczegóły tej inteligentnej listy, w tym jej nazwę, opis i widoczność"
+				},
+				{
+					"label": "Filtry",
+					"heading": "Filtry",
+					"description": "Filtry do zastosowania do tej inteligentnej listy"
+				},
+				{
+					"label": "Podsumowanie",
+					"heading": "Podsumowanie",
+					"description": "Przejrzyj ustawienia inteligentnej listy przed jej utworzeniem"
+				}
+			],
+			"review": {
+				"yes": "Tak",
+				"no": "Nie",
+				"none": "Brak",
+				"labels": {
+					"name": "Nazwa",
+					"description": "Opis",
+					"visibility": "Widoczność",
+					"grouping": "Grupuj według"
+				}
+			},
+			"buttons": {
+				"confirm": "Utwórz listę"
+			}
+		}
+	},
+	"createOrUpdateApiKey": {
+		"validation": {
+			"futureDate": "Data wygaśnięcia musi być w przyszłości"
+		},
+		"fields": {
+			"name": {
+				"label": "Nazwa",
+				"placeholder": "Synchronizacja KoReader"
+			},
+			"expiration": {
+				"label": "Wygaśnięcie",
+				"placeholder": "Nigdy"
+			},
+			"expires_at": {
+				"label": "Wygasa",
+				"placeholder": "Nigdy"
+			},
+			"permissions": {
+				"inherit": {
+					"label": "Dziedzicz uprawnienia",
+					"description": "Te same uprawnienia co Twoje konto"
+				},
+				"explicit": {
+					"label": "Wskaż uprawnienia",
+					"description": "Wybierz uprawnienia, które powinien mieć ten klucz"
+				}
+			}
+		},
+		"inheritDisclaimer": "Ten klucz API odziedziczy Twoje pełne uprawnienia, co oznacza, że może zrobić wszystko, co możesz zrobić i Ty. Zalecana jest ostrożność przy tym ustawieniu"
 	},
 	"userSmartListsScene": {
 		"heading": "Inteligentne listy",
@@ -521,6 +894,63 @@
 						"library": "biblioteka"
 					},
 					"matches": "Dopasowania"
+				}
+			}
+		}
+	},
+	"smartListSettingsScene": {
+		"sidebar": {
+			"basics": "Podstawowe",
+			"configuration": {
+				"label": "Konfiguracja",
+				"access": "Dostęp",
+				"filters": "Filtry"
+			},
+			"danger-zone": {
+				"delete": "Usuwanie",
+				"label": "Niebezpieczna strefa"
+			}
+		},
+		"basics": {
+			"title": "Informacje podstawowe",
+			"description": "Szczegóły tej inteligentnej listy wraz z jej nazwą i opisem"
+		},
+		"access": {
+			"title": "Dostęp",
+			"description": "Określ kto może uzyskać dostęp do tej inteligentnej listy",
+			"sections": {
+				"visibility": {
+					"confirmation": {
+						"public": "To uczyni listę widoczną dla każdego",
+						"private": "Spowoduje to zmianę listy na prywatną, ukrywając ją przed wszystkimi, którzy mieli do niej dostęp",
+						"shared": "Wymagane będzie współdzielenie listy z wybranymi użytkownikami w celu nadania im dostępu",
+						"fallback": "Czy na pewno chcesz zmienić widoczność tej listy?"
+					}
+				},
+				"accessManager": {
+					"disclaimer": "Udostępnianie nie jest jeszcze gotowe. Sprawdź ponownie później!"
+				}
+			}
+		},
+		"filters": {
+			"title": "Kreator filtrów",
+			"description": "Zarządzaj filtrami tworzącymi tę inteligentną listę"
+		},
+		"danger-zone/delete": {
+			"title": "Akcje usuwania",
+			"description": "Trwale usuń tę inteligentną listę i całą jej zawartość lub niektóre zasoby",
+			"sections": {
+				"deleteList": {
+					"heading": "Usuń listę",
+					"description": [
+						"Trwale usuń tę inteligentną listę i całą jej zawartość.",
+						"Tej czynności nie można cofnąć"
+					],
+					"confirmation": {
+						"title": "Usuń listę",
+						"description": "Czy na pewno chcesz usunąć tę inteligentną listę?",
+						"confirm": "Usuń listę"
+					}
 				}
 			}
 		}
@@ -607,6 +1037,7 @@
 			"application": {
 				"account": "Konto",
 				"appearance": "Wygląd",
+				"api keys": "Klucze API",
 				"reader": "Czytnik",
 				"desktop": "Pulpit",
 				"label": "Aplikacja"
@@ -642,7 +1073,7 @@
 					},
 					"avatarPicker": {
 						"heading": "Ustaw swój awatar",
-						"subtitle": "Stump wspiera niestandardowe awatary które można ustawić poprzez podanie odnośnika do obrazu. Wgrywanie obrazów jest nieobsługiwane w celu zmniejszenia ilości danych przechowywanych na serwerze.",
+						"subtitle": "Stump wspiera niestandardowe awatary które można ustawić poprzez podanie odnośnika do obrazu. Przesyłanie obrazów jest nieobsługiwane w celu zmniejszenia ilości danych przechowywanych na serwerze.",
 						"preview": "Podgląd pojawi się tutaj po wprowadzeniu odnośnika.",
 						"labels": {
 							"imageUrl": "Adres obrazka",
@@ -728,6 +1159,62 @@
 				}
 			}
 		},
+		"app/apiKeys": {
+			"helmet": "Klucze API",
+			"title": "Klucze API",
+			"description": "Zarządzaj wygenerowanymi kluczami API Stump",
+			"shared": {
+				"fields": {
+					"name": "Nazwa",
+					"expiration": "Wygaśnięcie",
+					"last_used": "Ostatnio użyty",
+					"created": "Utworzony",
+					"permissions": "Uprawnienia",
+					"inherited": "Odziedziczone",
+					"explicit": "Wskazane"
+				}
+			},
+			"sections": {
+				"inspector": {
+					"heading": "Klucz API",
+					"description": "Szczegółowy widok tego klucza",
+					"unrestrictedKey": {
+						"heading": "Klucz bez ograniczeń",
+						"description": "Ponieważ zalogowane konto jest właścicielem serwera, klucz ten ma nieograniczony dostęp po skonfigurowaniu go jako dziedziczący uprawnienia. Zachowaj ostrożność."
+					}
+				},
+				"createKey": {
+					"modal": {
+						"trigger": "Utwórz klucz API",
+						"heading": {
+							"creating": "Utwórz klucz API",
+							"created": "Utworzony klucz"
+						},
+						"description": {
+							"creating": "Klucze API są długotrwałymi poświadczeniami, które mogą być użyte do uwierzytelniania z API",
+							"created": "Twój nowy klucz API został utworzony. Zapisz sekret w bezpiecznym miejscu, ponieważ nie będzie on wyświetlony ponownie"
+						},
+						"inheritDisclaimer": "Ten klucz API odziedziczy Twoje pełne uprawnienia, co oznacza, że może zrobić wszystko, co możesz zrobić i Ty. Zalecana jest ostrożność przy tym ustawieniu",
+						"createdKey": "Utworzony klucz",
+						"savedConfirm": "Klucz został przeze mnie zapisany",
+						"submit": "Utwórz klucz"
+					}
+				},
+				"table": {
+					"title": "Twoje klucze",
+					"description": "To klucze API utworzone przez Ciebie",
+					"actionMenu": {
+						"inspect": "Podejrzyj",
+						"delete": "Usuń"
+					},
+					"empty": {
+						"title": "Nie utworzono jeszcze żadnych kluczy",
+						"action": "Utwórz klucz API, aby zacząć"
+					},
+					"noExpiration": "Nie ustawiono daty wygaśnięcia"
+				}
+			}
+		},
 		"app/reader": {
 			"helmet": "Ustawienia czytnika",
 			"title": "Ustawienia czytnika",
@@ -757,6 +1244,7 @@
 				"configuredServers": {
 					"label": "Skonfigurowane serwery",
 					"description": "Lista serwerów Stump, do których możesz się połączyć",
+					"getStarted": "Aby rozpocząć, dodaj serwer",
 					"unreachableServer": {
 						"tooltip": "Serwer niedostępny"
 					},
@@ -826,6 +1314,19 @@
 							"description": "Spowoduje to usunięcie wszystkich serwerów z aplikacji desktopowej",
 							"disclaimer": "Nastąpi wylogowanie, po którym odbędzie się proces inicjalizacji wraz z konfiguracją serwerów",
 							"confirm": "Usuń wszystkie serwery"
+						}
+					},
+					"resetTokens": {
+						"label": "Wyczyść uwierzytelnienia",
+						"description": [
+							"Usuń wszystkie bezpiecznie przechowywanych tokeny dostępowe dla serwerów",
+							"Wymagane będzie ponowne zalogowanie się na każdym z serwerów"
+						],
+						"confirmation": {
+							"trigger": "Wyczyść uwierzytelnienia",
+							"title": "Wyczyść uwierzytelnienia",
+							"description": "Spowoduje to usunięcie wszystkich bezpiecznie przechowywanych tokenów dostępowych dla serwerów",
+							"confirm": "Wyczyść uwierzytelnienia"
 						}
 					}
 				},
@@ -979,6 +1480,17 @@
 							"description": "Pozwala użytkownikowi na tworzenie nowego klubu książki"
 						}
 					},
+					"feature": {
+						"label": "Funkcja domyślnie wyłączona",
+						"api_keys": {
+							"label": "Klucze API",
+							"description": "Pozwala użytkownikowi zarządzać własnymi kluczami API"
+						},
+						"koreader_sync": {
+							"label": "Synchronizacja KoReader",
+							"description": "Pozwala użytkownikowi na dostęp do integracji z synchronizacją KoReader"
+						}
+					},
 					"file": {
 						"label": "Zarządzanie plikami",
 						"explorer": {
@@ -1070,7 +1582,10 @@
 					}
 				},
 				"validation": {
-					"ageRestrictionTooLow": "Ograniczenie wieku nie może być mniejsze niż 0"
+					"ageRestrictionTooLow": "Ograniczenie wieku nie może być mniejsze niż 0",
+					"missingUsername": "Nazwa użytkownika jest wymagana",
+					"missingPassword": "Hasło jest wymagane",
+					"usernameAlreadyExists": "Użytkownik o takiej nazwie już istnieje"
 				},
 				"createSubmitButton": "Dodaj użytkownika",
 				"updateSubmitButton": "Aktualizuj użytkownika"
@@ -1222,7 +1737,8 @@
 			"wait": "Po utworzeniu bibliotek będą one wyświetlane tutaj"
 		},
 		"links": {
-			"create": "Utwórz bibliotekę"
+			"create": "Utwórz bibliotekę",
+			"settings": "Przejdź do ustawień"
 		}
 	},
 	"pagination": {
@@ -1267,7 +1783,7 @@
 		},
 		"libraryOptions": {
 			"scanLibrary": "Skanuj",
-			"fileExplorer": "Przeglądarka plików",
+			"fileExplorer": "Pliki",
 			"manageLibrary": "Zarządzaj",
 			"deleteLibrary": "Usuń"
 		},
@@ -1308,14 +1824,14 @@
 		}
 	},
 	"tagSelect": {
-		"placholder": "Wybierz lub stwórz etykietę",
+		"placeholder": "Wybierz lub stwórz etykietę",
 		"placeholderNoTags": "Brak etykiet"
 	},
 	"thumbnailDropdown": {
 		"label": "Edytuj miniaturkę",
 		"options": {
 			"selectFromBooks": "Wybierz z książek",
-			"uploadImage": "Wrzuć zdjęcie"
+			"uploadImage": "Prześlij obraz"
 		},
 		"uploadImage": {
 			"emptyState": "Podgląd obrazu pojawi się tutaj",
@@ -1334,13 +1850,18 @@
 		"create": "Utwórz",
 		"edit": "Edytuj",
 		"update": "Aktualizuj",
+		"upload": "Prześlij",
+		"uploading": "Przesyłanie",
 		"unimplemented": "Ta funkcjonalność nie jest jeszcze zaimplementowana! Sprawdź ponownie później",
 		"limitedFunctionality": "Funkcjonalność ta nie jest jeszcze w pełni zaimplementowana. Sprawdź później",
 		"logIn": "Zaloguj się",
 		"login": "Nazwa użytkowika",
 		"seeError": "Wyświetl błąd",
+		"remove": "Usuń",
 		"goBack": "Wróć",
 		"goToServers": "Przejdź do serwerów",
-		"notReady": "Ta funkcja nie jest jeszcze gotowa"
+		"notReady": "Ta funkcja nie jest jeszcze gotowa",
+		"notUsedYet": "Jeszcze nieużywane",
+		"never": "Nigdy"
 	}
 }

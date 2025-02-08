@@ -22,6 +22,12 @@ pub struct PageQuery {
 	pub page_size: Option<u32>,
 }
 
+impl PageQuery {
+	pub fn is_empty(&self) -> bool {
+		self.page.is_none() && self.page_size.is_none()
+	}
+}
+
 #[skip_serializing_none]
 #[derive(
 	Clone, Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type, ToSchema,
@@ -289,7 +295,7 @@ pub struct Pageable<T: Serialize> {
 	pub data: T,
 	/// The pagination information (if paginated).
 	pub _page: Option<PageInfo>,
-	/// The cursor information (if cursor-baesd paginated).
+	/// The cursor information (if cursor-based paginated).
 	pub _cursor: Option<CursorInfo>,
 }
 
@@ -301,7 +307,7 @@ pub struct PageableArray<T: Serialize> {
 	pub data: Vec<T>,
 	/// The pagination information (if paginated).
 	pub _page: Option<PageInfo>,
-	/// The cursor information (if cursor-baesd paginated).
+	/// The cursor information (if cursor-based paginated).
 	pub _cursor: Option<CursorInfo>,
 }
 

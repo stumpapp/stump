@@ -66,7 +66,7 @@ type Background = {
 	 */
 	overlay: HoverVariant & DefaultVariant
 	/**
-	 * The invserse color of the base background value
+	 * The inverse color of the base background value
 	 */
 	inverse: string
 	/**

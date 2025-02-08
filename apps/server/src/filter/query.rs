@@ -172,7 +172,7 @@ pub struct UserQueryRelation {
 
 // TODO: decide what others to include
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema, Type)]
-pub struct SeriesMedataFilter {
+pub struct SeriesMetadataFilter {
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub meta_type: Vec<String>,
 	#[serde(default, deserialize_with = "string_or_seq_string")]
@@ -203,7 +203,7 @@ pub struct SeriesBaseFilter {
 	pub search: Option<String>,
 
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub metadata: Option<SeriesMedataFilter>,
+	pub metadata: Option<SeriesMetadataFilter>,
 }
 
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema, Type)]

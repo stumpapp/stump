@@ -5,7 +5,7 @@
 // This job module would not be possible without other awesome projects in the Rust ecosystem! They
 // taught me a lot, and I don't think I could have done this without them. Taking bits and pieces from
 // each of them, I was able to create a job system that is both flexible and powerful:
-// - https://github.com/spacedriveapp/spacedrive --> The most impressive and inflential one, the concept of jobs having typed tasks executed one-by-one in a loop, in addition to the handling logic for pause/resume, came from here
+// - https://github.com/spacedriveapp/spacedrive --> The most impressive and influential one, the concept of jobs having typed tasks executed one-by-one in a loop, in addition to the handling logic for pause/resume, came from here
 // - https://git.asonix.dog/asonix/background-jobs --> Trait design (v similar to above) and how they handle retries
 // - https://github.com/ZeroAssumptions/aide-de-camp
 // 		- Also their writeup on the fundamentals of their design: https://dev.to/zeroassumptions/build-a-job-queue-with-rust-using-aide-de-camp-part-1-4g5m
@@ -239,7 +239,7 @@ impl<O, T> Default for WorkingState<O, T> {
 }
 
 /// A trait that defines the behavior and data types of a job. Jobs are responsible for
-/// intialization and individual task execution. Jobs are managed by an [Executor], which
+/// initialization and individual task execution. Jobs are managed by an [Executor], which
 /// is responsible for the main run loop of a job.
 #[async_trait::async_trait]
 pub trait JobExt: Send + Sync + Sized + Clone + 'static {
@@ -404,7 +404,7 @@ pub struct WrappedJob<J: JobExt> {
 	/// The internal job that will be executed. This is an Option to allow for the job to be
 	/// taken out of the wrapper and put back in after a requeue
 	inner_job: Option<J>,
-	/// The inital state of the job, used to build its working state. This is an Option to allow for
+	/// The initial state of the job, used to build its working state. This is an Option to allow for
 	/// the state to be taken out of the wrapper without a clone. At the end of the job, the state
 	/// will be reinitialized to its default state.
 	initial_state: Option<WorkingState<J::Output, J::Task>>,

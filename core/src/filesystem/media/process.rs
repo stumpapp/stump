@@ -32,6 +32,8 @@ pub struct FileProcessorOptions {
 	pub generate_file_hashes: bool,
 	/// Whether to process metadata for the file
 	pub process_metadata: bool,
+	/// Whether to generate a hash for the file that is compatible with KOReader
+	pub generate_koreader_hashes: bool,
 }
 
 impl From<LibraryConfig> for FileProcessorOptions {
@@ -40,6 +42,7 @@ impl From<LibraryConfig> for FileProcessorOptions {
 			convert_rar_to_zip: options.convert_rar_to_zip,
 			delete_conversion_source: options.hard_delete_conversions,
 			generate_file_hashes: options.generate_file_hashes,
+			generate_koreader_hashes: options.generate_koreader_hashes,
 			process_metadata: options.process_metadata,
 		}
 	}
@@ -51,6 +54,7 @@ impl From<&LibraryConfig> for FileProcessorOptions {
 			convert_rar_to_zip: options.convert_rar_to_zip,
 			delete_conversion_source: options.hard_delete_conversions,
 			generate_file_hashes: options.generate_file_hashes,
+			generate_koreader_hashes: options.generate_koreader_hashes,
 			process_metadata: options.process_metadata,
 		}
 	}
@@ -130,6 +134,7 @@ impl SeriesJson {
 pub struct ProcessedFile {
 	pub path: PathBuf,
 	pub hash: Option<String>,
+	pub koreader_hash: Option<String>,
 	pub metadata: Option<MediaMetadata>,
 	pub pages: i32,
 }

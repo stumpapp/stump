@@ -1,9 +1,8 @@
 import { isAxiosError, isUser, LoginOrRegisterArgs, type User } from '@stump/sdk'
 import { useEffect, useState } from 'react'
 
-import { useClientContext } from '@/context'
-
 import { queryClient, QueryOptions, useMutation, useQuery } from '../client'
+import { useClientContext } from '../context'
 import { useSDK } from '../sdk'
 
 export function useAuthQuery(options: QueryOptions<User> = {}) {
@@ -13,8 +12,8 @@ export function useAuthQuery(options: QueryOptions<User> = {}) {
 		async () => {
 			const data = await sdk.auth.me()
 			if (!isUser(data)) {
-				console.warn('Malformed response recieved from server', data)
-				throw new Error('Malformed response recieved from server')
+				console.warn('Malformed response received from server', data)
+				throw new Error('Malformed response received from server')
 			}
 			return data
 		},

@@ -5,15 +5,18 @@ import type {
 	LibraryStats,
 	LibraryStatsParams,
 	PaginationQuery,
+	Series,
 	UpdateLibrary,
 	User,
 } from '@stump/sdk'
 import { AxiosError } from 'axios'
 
 import {
+	CursorQueryOptions,
 	MutationOptions,
 	PageQueryOptions,
 	QueryOptions,
+	useCursorQuery,
 	useMutation,
 	usePageQuery,
 	useQuery,
@@ -93,6 +96,27 @@ export function useTotalLibraryStats() {
 	} = useQuery([sdk.library.keys.getStats], () => sdk.library.getStats())
 
 	return { isLoading: isLoading || isRefetching || isFetching, libraryStats }
+}
+
+export function useLibrarySeriesCursorQuery({
+	id,
+	queryKey,
+	...options
+}: CursorQueryOptions<Series> & { id: string }) {
+	const { sdk } = useSDK()
+	const { data, ...restReturn } = useCursorQuery(
+		queryKey ?? [sdk.library.keys.getSeriesCursor, id],
+		(params) => sdk.library.getSeriesCursor(id, params),
+		options,
+	)
+
+	const series = data ? data.pages.flatMap((page) => page.data) : []
+
+	return {
+		data,
+		series,
+		...restReturn,
+	}
 }
 
 export function useLibraryStats({
@@ -199,6 +223,7 @@ export function useVisitLibrary(options: MutationOptions<Library, AxiosError, st
 		onSuccess: async (library, _, __) => {
 			await invalidateQueries({
 				keys: [sdk.library.keys.getLastVisited],
+				exact: false,
 			})
 			options.onSuccess?.(library, _, __)
 		},

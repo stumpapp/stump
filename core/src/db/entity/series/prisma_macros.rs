@@ -12,3 +12,10 @@ series::select!((book_filters: Vec<book::WhereParam>) => series_or_library_thumb
 		config
 	}
 });
+
+series::select!(series_name {
+	name
+	metadata: select {
+		title
+	}
+});

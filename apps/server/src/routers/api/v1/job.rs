@@ -185,7 +185,7 @@ async fn get_job_by_id(
 		.with(job::logs::fetch(vec![]))
 		.exec()
 		.await?
-		.ok_or(APIError::NotFound(format!("Job not found")))?;
+		.ok_or(APIError::NotFound("Job not found".to_string()))?;
 
 	Ok(Json(PersistedJob::from(job)))
 }

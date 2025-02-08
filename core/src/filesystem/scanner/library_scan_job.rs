@@ -251,7 +251,7 @@ impl JobExt for LibraryScanJob {
 			.as_ref()
 			.and_then(|o| o.thumbnail_config.clone());
 
-		if let Err(error) = handle_scan_complete(self, &ctx, &self.options).await {
+		if let Err(error) = handle_scan_complete(self, ctx, &self.options).await {
 			tracing::error!(error = ?error, "Failed to handle scan completion");
 		}
 

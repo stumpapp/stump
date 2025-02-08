@@ -1452,6 +1452,12 @@
 						},
 						"emptyHeading": "No logs to display",
 						"emptySubtitle": "Your server is either very healthy or very unhealthy"
+					},
+					"deleteLogs": {
+						"title": "Delete logs",
+						"description": "Permanently delete all persisted logs from the database",
+						"disclaimer": "This action cannot be undone",
+						"confirm": "Delete logs"
 					}
 				},
 				"liveLogs": {

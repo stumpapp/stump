@@ -348,47 +348,61 @@ impl EpubProcessor {
 }
 
 pub(crate) fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {
-	let mut adjusted_path = path;
+	let mut adjusted_path = path.clone();
 
 	if !adjusted_path.starts_with(root) {
 		adjusted_path = PathBuf::from(root).join(adjusted_path);
 	}
 
-	//  This below won't work since these paths are INSIDE the epub file >:(
-	// adjusted_path = adjusted_path.canonicalize().unwrap_or_else(|err| {
-	// 	// tracing::warn!(
-	// 	// 	"Failed to safely canonicalize path {}: {}",
-	// 	// 	adjusted_path.display(),
-	// 	// 	err
-	// 	// );
+	let mut normalized = PathBuf::new();
+	for component in adjusted_path.components() {
+		match component {
+			std::path::Component::Normal(c) => normalized.push(c),
+			std::path::Component::CurDir => {},
+			std::path::Component::ParentDir => {
+				if normalized.pop() {
+				} else {
+					return path;
+				}
+			},
+			_ => {},
+		}
+	}
 
-	// 	tracing::warn!(
-	// 		"Failed to safely canonicalize path {}: {}",
-	// 		adjusted_path.display(),
-	// 		err
-	// 	);
-	// 	adjusted_path
-	// });
-
-	// FIXME: This actually is an invalid solution. If I have multiple '/../../' in the path, this will
-	// result in an incorrect path. I'm not worrying about it now, as I don't believe this will even
-	// be an issue in the context of epub resources, however once the below linked rust feature is completed
-	// I will replace this gross solution.
-	let adjusted_str = adjusted_path
-		.to_string_lossy()
-		.replace("/../", "/")
-		.replace("\\..\\", "\\");
-
-	// https://github.com/rust-lang/rust/issues/92750
-	// std::path::absolute(adjusted_path);
-
-	PathBuf::from(adjusted_str)
+	normalized
 }
 
 #[cfg(test)]
 mod tests {
 	use super::*;
 	use crate::filesystem::media::tests::get_test_epub_path;
+
+	#[test]
+	fn test_normalize_resource_path() {
+		let path = PathBuf::from("OEBPS/Styles/style.css");
+		let result = normalize_resource_path(path, "OEBPS");
+		assert_eq!(result, PathBuf::from("OEBPS/Styles/style.css"));
+
+		let path = PathBuf::from("Styles/style.css");
+		let result = normalize_resource_path(path, "OEBPS");
+		assert_eq!(result, PathBuf::from("OEBPS/Styles/style.css"));
+
+		let path = PathBuf::from("Styles/./style.css");
+		let result = normalize_resource_path(path, "OEBPS");
+		assert_eq!(result, PathBuf::from("OEBPS/Styles/style.css"));
+
+		let path = PathBuf::from("../Styles/style.css");
+		let result = normalize_resource_path(path, "OEBPS");
+		assert_eq!(result, PathBuf::from("Styles/style.css"));
+
+		let path = PathBuf::from("chapter1/../Styles/style.css");
+		let result = normalize_resource_path(path, "OEBPS");
+		assert_eq!(result, PathBuf::from("OEBPS/Styles/style.css"));
+
+		let path = PathBuf::from("chapters/chapter1/../../Styles/style.css");
+		let result = normalize_resource_path(path, "OEBPS");
+		assert_eq!(result, PathBuf::from("OEBPS/Styles/style.css"));
+	}
 
 	#[test]
 	fn test_process() {

@@ -1,5 +1,57 @@
 # Changelog
 
+<a name="0.0.10"></a>
+## 0.0.10 (2025-02-01)
+
+### Added
+
+- ✨ Make bundled web app a PWA ([#570](https://github.com/stumpapp/stump/issues/570)) [[c957fd3](https://github.com/stumpapp/stump/commit/c957fd3e505072f15b4b965ab6e87fd2e0bfddeb)]
+- ✨ Support &#x60;apple-mobile-web-app-capable&#x60; meta ([#567](https://github.com/stumpapp/stump/issues/567)) [[005ba0e](https://github.com/stumpapp/stump/commit/005ba0ea084efb27f912b6b2b1e6f7853c93ecd4)]
+- ✨ Support basic series keyword search for OPDS v1.2 ([#558](https://github.com/stumpapp/stump/issues/558)) [[f32244d](https://github.com/stumpapp/stump/commit/f32244de286f8dca5128df7d00b84143157346d3)]
+- ✨ Allow disabling job overlay ([#542](https://github.com/stumpapp/stump/issues/542)) [[821c1bc](https://github.com/stumpapp/stump/commit/821c1bc719803a9197f87ee45a82c68d4ac53b46)]
+- ✨ Add GET and PUT endpoints for media metadata ([#528](https://github.com/stumpapp/stump/issues/528)) [[6dda732](https://github.com/stumpapp/stump/commit/6dda7326e1dc50cc872fba4c955aff592f7bbbfb)]
+- ✨ render children of an epub content item [[2786af4](https://github.com/stumpapp/stump/commit/2786af4ef827a3e363c2e297fbb42bf9d35d1d63)]
+
+### Changed
+
+- 💄 Improve small topbar nav issues ([#540](https://github.com/stumpapp/stump/issues/540)) [[acd8a24](https://github.com/stumpapp/stump/commit/acd8a24043bfd39bb71a493989469539f72bff04)]
+- ♻️ Create Preformatted component to render JSON ([#505](https://github.com/stumpapp/stump/issues/505)) [[d744f66](https://github.com/stumpapp/stump/commit/d744f66ef9a26ee29ea1eafcc20b18be81962875)]
+
+### Fixed
+
+- 🐛 Fix update failure for new metadata on existing books ([#577](https://github.com/stumpapp/stump/issues/577)) [[a9cc077](https://github.com/stumpapp/stump/commit/a9cc077b2deb649c02fad04860d37c37d76804c4)]
+- 🐛 Fix path error in koreader router ([#576](https://github.com/stumpapp/stump/issues/576)) [[13ac312](https://github.com/stumpapp/stump/commit/13ac312464e54bb8573fb8e0b2ca0cbf97f76d3a)]
+- 🐛 Fix incorrect URLs for library thumbnail ops ([#575](https://github.com/stumpapp/stump/issues/575)) [[bcdef1f](https://github.com/stumpapp/stump/commit/bcdef1fbeec855adb4fb3ece6be96c8291930e80)]
+- 🐛 Fix logical error preventing force rebuild scans ([#574](https://github.com/stumpapp/stump/issues/574)) [[28cff9d](https://github.com/stumpapp/stump/commit/28cff9d8c2d18167b090c073a98000d75ddec518)]
+- 🐛 Remove auto-pagination for &#x60;usePageQuery&#x60; wrapper ([#564](https://github.com/stumpapp/stump/issues/564)) [[2a89107](https://github.com/stumpapp/stump/commit/2a89107f32d83b97076cc96b8023177e4f5e0748)]
+- 🐛 Fix &#x60;TemplateRegistrationFailed&#x60; error when sending email ([#550](https://github.com/stumpapp/stump/issues/550)) [[25d0deb](https://github.com/stumpapp/stump/commit/25d0deb2989a8ad1edd7b22da639f01a1c448a8c)]
+- 🐛 Enforce case-insensitive username uniqueness  ([#557](https://github.com/stumpapp/stump/issues/557)) [[1331426](https://github.com/stumpapp/stump/commit/1331426f759e40274c26f85cfaea7851be0dd944)]
+- 🐛 Fix unordered OPDS entries ([#553](https://github.com/stumpapp/stump/issues/553)) [[63dc413](https://github.com/stumpapp/stump/commit/63dc413917420b68c5fe92221d2d2cd4fa5243b6)]
+- ✏️ Fix missing whitespace in upload modal ([#547](https://github.com/stumpapp/stump/issues/547)) [[10eaee0](https://github.com/stumpapp/stump/commit/10eaee0e2e526aba4be2009fe55d03979f2b86ae)]
+- 🐛 Restore media/series when previously missing ([#529](https://github.com/stumpapp/stump/issues/529)) [[21cced8](https://github.com/stumpapp/stump/commit/21cced8d64be95560ca82654aaff1fd1bf1f49d7)]
+- 🐛 Fix invalid method for cancel job ([#527](https://github.com/stumpapp/stump/issues/527)) [[0ebe1ad](https://github.com/stumpapp/stump/commit/0ebe1ada1036fa72780e8593b56d4d923822e45e)]
+- 🐛 fix bookmark click redirect ([#525](https://github.com/stumpapp/stump/issues/525)) [[638fafd](https://github.com/stumpapp/stump/commit/638fafd7fae0ec1f7b8202856e41a653013c7403)]
+
+### Miscellaneous
+
+- 🌐 Update translations (Japanese) ([#578](https://github.com/stumpapp/stump/issues/578)) [[899084d](https://github.com/stumpapp/stump/commit/899084d654d653a3af5017fe2ecf24f317e7d1a9)]
+- 🔨 Fix flake.nix so its usable ([#579](https://github.com/stumpapp/stump/issues/579)) [[d1d264f](https://github.com/stumpapp/stump/commit/d1d264f5dcd5bda006ed93f47f999912f13bf714)]
+- 🌐 Update translations (multi) ([#572](https://github.com/stumpapp/stump/issues/572)) [[370e39b](https://github.com/stumpapp/stump/commit/370e39b73d34c2bb21b0359b51acdf84f0a62a50)]
+- 🌐 Update translations (multi) ([#562](https://github.com/stumpapp/stump/issues/562)) [[5828147](https://github.com/stumpapp/stump/commit/5828147bfccfaa378d16d08ed18250609c0e834d)]
+- 🔀 Promote experimental features ([#560](https://github.com/stumpapp/stump/issues/560)) [[6676d34](https://github.com/stumpapp/stump/commit/6676d3452c2654515261f907c86bf9a2f2f934bd)]
+-  Merge branch &#x27;develop&#x27; into experimental [[e7cde28](https://github.com/stumpapp/stump/commit/e7cde2839f7ffc36d742c3633b02310ff352d966)]
+- 📝 Remove Tachiyomi plans from repo and docs ([#554](https://github.com/stumpapp/stump/issues/554)) [[2cf45b4](https://github.com/stumpapp/stump/commit/2cf45b41ad179f1b48d8563524436e3999a3707d)]
+- 🌐 Update translations (multi) ([#543](https://github.com/stumpapp/stump/issues/543)) [[4f5c470](https://github.com/stumpapp/stump/commit/4f5c470fe6750bf9d86a9dda3cf1de25c5c58ca5)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[6d7759d](https://github.com/stumpapp/stump/commit/6d7759dc0b762acc706d90fd170a54f99d6e9785)]
+- 🌐 Update translations (Japanese) ([#535](https://github.com/stumpapp/stump/issues/535)) [[d34f10d](https://github.com/stumpapp/stump/commit/d34f10dc249d53f69f4bd9e679c4fa074f36a4b0)]
+-  Change CORS layer construction to allow wildcard ([#538](https://github.com/stumpapp/stump/issues/538)) [[9459fb7](https://github.com/stumpapp/stump/commit/9459fb78a528116d318dca92adf040776f52fcd5)]
+- 🌐 Update translations ([#489](https://github.com/stumpapp/stump/issues/489)) [[2dc4fef](https://github.com/stumpapp/stump/commit/2dc4fefdf218cb8043397138cc4ce90caed9711a)]
+-  Merge remote-tracking branch &#x27;origin/experimental&#x27; into experimental [[89e1885](https://github.com/stumpapp/stump/commit/89e18859a04288cd7c386dcad22859191bd73661)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[b56f999](https://github.com/stumpapp/stump/commit/b56f999a836d1133143a801fa234d34b4365b113)]
+-  Merge pull request [#521](https://github.com/stumpapp/stump/issues/521) from xendke/recursive-epub-toc [[ab52b2a](https://github.com/stumpapp/stump/commit/ab52b2a5a8350a58e134ff8089f53a40d5d375a5)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[312f5b3](https://github.com/stumpapp/stump/commit/312f5b306d9e3b2d03fb045d0776d9d7237101fa)]
+
+
 <a name="0.0.9"></a>
 ## 0.0.9 (2024-12-08)
 

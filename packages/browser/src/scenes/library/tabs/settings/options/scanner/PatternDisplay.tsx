@@ -15,7 +15,7 @@ export default function PatternDisplay() {
 
 	return (
 		<div
-			className="flex w-full flex-col space-y-1.5 rounded-lg bg-fill-warning-secondary p-[3px] lg:w-auto"
+			className="flex w-full flex-col space-y-1.5 rounded-xl bg-fill-warning-secondary p-1 lg:w-auto"
 			data-testid="unrestricted-meta"
 		>
 			<div className="flex items-center px-2.5 py-0.5 text-fill-warning">

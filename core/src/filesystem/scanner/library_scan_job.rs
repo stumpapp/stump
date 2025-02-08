@@ -19,7 +19,9 @@ use crate::{
 		error::JobError, Executor, JobExecuteLog, JobExt, JobOutputExt, JobProgress,
 		JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
-	prisma::{library, library_config, library_scan_record, media, series, PrismaClient},
+	prisma::{
+		job, library, library_config, library_scan_record, media, series, PrismaClient,
+	},
 	utils::chain_optional_iter,
 	CoreEvent,
 };
@@ -249,7 +251,7 @@ impl JobExt for LibraryScanJob {
 			.as_ref()
 			.and_then(|o| o.thumbnail_config.clone());
 
-		if let Err(error) = handle_scan_complete(self, &ctx.db, &self.options).await {
+		if let Err(error) = handle_scan_complete(self, &ctx, &self.options).await {
 			tracing::error!(error = ?error, "Failed to handle scan completion");
 		}
 
@@ -744,9 +746,10 @@ pub async fn handle_missing_library(
 
 async fn handle_scan_complete(
 	job: &LibraryScanJob,
-	client: &PrismaClient,
+	ctx: &WorkerCtx,
 	options: &ScanOptions,
 ) -> Result<(), JobError> {
+	let client = ctx.db.clone();
 	let now = chrono::Utc::now();
 
 	let update_result = client
@@ -780,6 +783,7 @@ async fn handle_scan_complete(
 			vec![
 				library_scan_record::options::set(persisted_options),
 				library_scan_record::timestamp::set(now.into()),
+				library_scan_record::job::connect(job::id::equals(ctx.job_id.clone())),
 			],
 		)
 		.exec()

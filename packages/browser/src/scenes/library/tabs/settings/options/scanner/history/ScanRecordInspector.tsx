@@ -1,11 +1,9 @@
-import { useLibraryByID, useSDK } from '@stump/client'
-import { Badge, Label, Sheet, Text } from '@stump/components'
+import { useLibraryByID, useQuery, useSDK } from '@stump/client'
+import { Alert, ButtonOrLink, Label, Sheet, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { APIKey, LibraryScanRecord } from '@stump/sdk'
+import { LibraryScanRecord } from '@stump/sdk'
 import dayjs from 'dayjs'
-import { KeyRound, Sparkles } from 'lucide-react'
 
-import { useAppContext } from '@/context'
 import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
 
 type Props = {
@@ -19,40 +17,28 @@ export default function ScanRecordInspector({ record, onClose }: Props) {
 	const { library } = useLibraryByID(record?.library_id || '', {
 		enabled: !!record,
 	})
+	const { data: job } = useQuery(
+		[sdk.job.keys.getByID, record?.job_id],
+		() => sdk.job.getByID(record?.job_id || ''),
+		{
+			enabled: !!record?.job_id,
+		},
+	)
 
 	const displayedData = useCurrentOrPrevious(record)
 
-	const config = displayedData?.options
 	const scannedAt = dayjs(displayedData?.timestamp)
-
-	// 	return (
-	// 		<div
-	// 			className="mx-4 my-2 flex flex-col space-y-1.5 rounded-lg bg-background-surface p-[3px]"
-	// 			data-testid="permissions-meta"
-	// 		>
-	// 			<div className="flex items-center px-2.5 py-0.5 text-foreground-subtle/80">
-	// 				<KeyRound className="mr-2 h-4 w-4" />
-	// 				{/* <span className="font-medium">{t(getSharedKey('fields.permissions'))}</span> */}
-	// 			</div>
-	// 			<div className="rounded-lg bg-background-surface-secondary p-2.5">
-	// 				<div className="flex flex-wrap gap-2">
-
-	// 				</div>
-	// 			</div>
-	// 		</div>
-	// 	)
-	// }
 
 	return (
 		<Sheet
 			open={!!record}
 			onClose={onClose}
-			title="Scan record"
-			description="A detailed view of this scan record"
+			title={t(getKey('title'))}
+			description={t(getKey('description'))}
 		>
 			<div className="flex flex-col">
 				<div className="px-4 py-2" data-testid="lib-meta">
-					<Label className="text-foreground-muted">Library</Label>
+					<Label className="text-foreground-muted">{t(getFieldKey('library'))}</Label>
 					{library ? (
 						<Text size="sm">{library.name}</Text>
 					) : (
@@ -61,13 +47,13 @@ export default function ScanRecordInspector({ record, onClose }: Props) {
 				</div>
 
 				<div className="px-4 py-2" data-testid="name-meta">
-					<Label className="text-foreground-muted">Date</Label>
+					<Label className="text-foreground-muted">{t(getFieldKey('date'))}</Label>
 					<Text size="sm">{scannedAt.format('LLL')}</Text>
 				</div>
 
 				{displayedData?.options?.config && (
 					<div className="flex flex-col gap-y-3 px-4 py-2">
-						<Label className="text-foreground-muted">Config</Label>
+						<Label className="text-foreground-muted">{t(getFieldKey('config'))}</Label>
 						<div className="rounded-xl bg-background-surface p-4">
 							<pre className="text-xs text-foreground-muted">
 								{JSON.stringify(displayedData.options.config, null, 2)}
@@ -75,7 +61,40 @@ export default function ScanRecordInspector({ record, onClose }: Props) {
 						</div>
 					</div>
 				)}
+
+				{job?.output_data && (
+					<div className="flex flex-col gap-y-3 px-4 py-2">
+						<Label className="text-foreground-muted">{t(getFieldKey('jobOutput'))}</Label>
+						<div className="rounded-xl bg-background-surface p-4">
+							<pre className="text-xs text-foreground-muted">
+								{JSON.stringify(job.output_data, null, 2)}
+							</pre>
+						</div>
+					</div>
+				)}
+
+				{!!job?.logs?.length && (
+					<div className="flex flex-col gap-y-3 px-4 py-2">
+						<Label className="text-foreground-muted">{t(getFieldKey('logs'))}</Label>
+
+						<Alert level="warning" className="p-2">
+							<Alert.Content className="text-sm text-foreground-subtle">
+								{t(getKey('logsPresent'))} ({job.logs.length})
+							</Alert.Content>
+						</Alert>
+
+						<div>
+							<ButtonOrLink href={`/settings/server/logs?job_id=${job.id}`} variant="secondary">
+								{t(getFieldKey('seeLogs'))}
+							</ButtonOrLink>
+						</div>
+					</div>
+				)}
 			</div>
 		</Sheet>
 	)
 }
+
+const LOCALE_BASE = 'librarySettingsScene.options/scanning.sections.history.inspector'
+const getFieldKey = (key: string) => `${LOCALE_BASE}.fields.${key}`
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

@@ -40,7 +40,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.nest(
 					"/:id",
 					Router::new()
-						.route("/", delete(delete_job_by_id))
+						.route("/", get(get_job_by_id).delete(delete_job_by_id))
 						.route("/cancel", delete(cancel_job_by_id)),
 				)
 				.route(
@@ -160,6 +160,34 @@ async fn delete_jobs(State(ctx): State<AppState>) -> APIResult<()> {
 	let result = ctx.db.job().delete_many(vec![]).exec().await?;
 	tracing::debug!("Deleted {} job reports", result);
 	Ok(())
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/jobs/:id",
+	tag = "job",
+	responses(
+		(status = 200, description = "Successfully fetched job report", body = PersistedJob),
+		(status = 401, description = "No user is logged in (unauthorized)."),
+		(status = 403, description = "User does not have permission to access this resource."),
+		(status = 404, description = "Job not found"),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+async fn get_job_by_id(
+	State(ctx): State<AppState>,
+	Path(job_id): Path<String>,
+) -> APIResult<Json<PersistedJob>> {
+	let job = ctx
+		.db
+		.job()
+		.find_unique(job::id::equals(job_id))
+		.with(job::logs::fetch(vec![]))
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound(format!("Job not found")))?;
+
+	Ok(Json(PersistedJob::from(job)))
 }
 
 #[utoipa::path(

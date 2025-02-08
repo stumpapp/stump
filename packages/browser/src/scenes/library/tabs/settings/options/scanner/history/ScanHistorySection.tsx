@@ -1,5 +1,6 @@
 import { queryClient, useMutation, useSDK } from '@stump/client'
 import { Button, Heading, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { LibraryScanRecord } from '@stump/sdk'
 import { Suspense, useEffect, useState } from 'react'
 
@@ -7,6 +8,7 @@ import { useLibraryManagement } from '../../../context'
 import ScanHistoryTable from './ScanHistoryTable'
 
 export default function ScanningSection() {
+	const { t } = useLocaleContext()
 	const {
 		library: { id },
 	} = useLibraryManagement()
@@ -44,19 +46,15 @@ export default function ScanningSection() {
 		<div className="flex flex-col gap-4">
 			<div className="flex items-end justify-between">
 				<div>
-					<Heading size="sm">
-						{/* {t(getKey('title'))} */}
-						Scan History
-					</Heading>
+					<Heading size="sm">{t(getKey('heading'))}</Heading>
 					<Text size="sm" variant="muted" className="mt-1">
-						{/* {t(getKey('description'))} */}
-						The history of all scans recorded for this library
+						{t(getKey('description'))}
 					</Text>
 				</div>
 
-				<div className="flex justify-end">
+				<div className="flex shrink-0 justify-end">
 					<Button variant="secondary" onClick={() => clearHistory()} disabled={isNoHistory}>
-						Delete scan history
+						{t(getKey('clearHistory'))}
 					</Button>
 				</div>
 			</div>
@@ -67,3 +65,6 @@ export default function ScanningSection() {
 		</div>
 	)
 }
+
+const LOCALE_BASE = 'librarySettingsScene.options/scanning.sections.history'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

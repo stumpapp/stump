@@ -135,6 +135,7 @@ pub struct LibraryScanRecord {
 	options: Option<ScanOptions>,
 	timestamp: DateTime<FixedOffset>,
 	library_id: String,
+	job_id: Option<String>,
 }
 
 impl TryFrom<library_scan_record::Data> for LibraryScanRecord {
@@ -151,6 +152,7 @@ impl TryFrom<library_scan_record::Data> for LibraryScanRecord {
 			options,
 			timestamp: data.timestamp,
 			library_id: data.library_id,
+			job_id: data.job_id,
 		})
 	}
 }

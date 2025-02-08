@@ -12,7 +12,7 @@ import {
 import { useLocaleContext } from '@stump/i18n'
 import { AnimatePresence, motion } from 'framer-motion'
 import isValidGlob from 'is-valid-glob'
-import { Check, Edit, Lock, Trash, Unlock, X } from 'lucide-react'
+import { Check, Edit, Lock, Slash, SquareAsterisk, Trash, Unlock, X } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { useFieldArray, useFormContext } from 'react-hook-form'
 
@@ -129,13 +129,22 @@ export default function IgnoreRulesConfig() {
 			</div>
 
 			{!ignoreRules.length && (
-				<div className="flex">
-					<Card className="border-dashed p-2">
-						<Text size="sm" variant="muted">
-							{t(getKey('noRules'))}
-						</Text>
-					</Card>
-				</div>
+				<Card className="flex items-center justify-center border-dashed border-edge-subtle p-6">
+					<div className="flex flex-col space-y-3">
+						<div className="relative flex justify-center">
+							<span className="flex items-center justify-center rounded-xl bg-background-surface p-2">
+								<SquareAsterisk className="h-6 w-6 text-foreground-muted" />
+								<Slash className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80" />
+							</span>
+						</div>
+
+						<div className="text-center">
+							<Text size="sm" variant="muted">
+								{t(getKey('noRules'))}
+							</Text>
+						</div>
+					</div>
+				</Card>
 			)}
 
 			{!!ignoreRules.length && (

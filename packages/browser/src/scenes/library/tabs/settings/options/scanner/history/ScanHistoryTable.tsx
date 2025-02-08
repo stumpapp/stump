@@ -46,8 +46,7 @@ export default function ScanHistoryTable() {
 			columnHelper.accessor('timestamp', {
 				header: () => (
 					<Text size="sm" variant="secondary">
-						{/* {t(getFieldKey('timestamp'))} */}
-						Scanned At
+						{t(getKey('table.columns.timestamp'))}
 					</Text>
 				),
 				cell: ({ getValue }) => {
@@ -65,7 +64,7 @@ export default function ScanHistoryTable() {
 				id: 'config',
 				header: () => (
 					<Text size="sm" variant="secondary">
-						Config
+						{t(getKey('table.columns.config'))}
 					</Text>
 				),
 				cell: ({ row: { original } }) => {
@@ -75,7 +74,7 @@ export default function ScanHistoryTable() {
 							variant={isDefault ? 'default' : 'primary'}
 							onClick={isDefault ? () => setInspectingRecord(original) : undefined}
 						>
-							{isDefault ? 'Default' : 'Custom'}
+							{t(getKey(`table.${isDefault ? 'default' : 'custom'}`))}
 						</Badge>
 					)
 				},
@@ -101,21 +100,15 @@ export default function ScanHistoryTable() {
 												<Dropdown.Group>
 													<Dropdown.Item
 														data-testid="run-scan"
-														onClick={() => scan(original.options)}
+														onClick={() => scan(original.options || undefined)}
 													>
-														<span>
-															{/* {t(getKey('inspect'))} */}
-															Run scan
-														</span>
+														<span>{t(getKey('runScan'))}</span>
 													</Dropdown.Item>
 													<Dropdown.Item
 														data-testid="inspect-scan"
 														onClick={() => setInspectingRecord(original)}
 													>
-														<span>
-															{/* {t(getKey('inspect'))} */}
-															See details
-														</span>
+														<span>{t(getKey('inspect'))}</span>
 													</Dropdown.Item>
 												</Dropdown.Group>
 											</Dropdown.Content>
@@ -149,18 +142,16 @@ export default function ScanHistoryTable() {
 			<Card className="flex items-center justify-center border-dashed border-edge-subtle p-6">
 				<div className="flex flex-col space-y-3">
 					<div className="relative flex justify-center">
-						<span className="flex items-center justify-center rounded-lg bg-background-surface p-2">
+						<span className="flex items-center justify-center rounded-xl bg-background-surface p-2">
 							<Database className="h-6 w-6 text-foreground-muted" />
 							<Slash className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80" />
 						</span>
 					</div>
 
 					<div className="text-center">
-						There are no scans recorded for this library
-						{/* <Text>{t(getKey('empty.title'))}</Text>
 						<Text size="sm" variant="muted">
-							{t(getKey('empty.action'))}
-						</Text> */}
+							{t(getKey('empty'))}
+						</Text>
 					</div>
 				</div>
 			</Card>
@@ -234,6 +225,5 @@ export default function ScanHistoryTable() {
 
 const columnHelper = createColumnHelper<LibraryScanRecord>()
 
-// const LOCALE_BASE = 'settingsScene.app/scanHistory'
-// const getFieldKey = (key: string) => `${LOCALE_BASE}.shared.fields.${key}`
-// const getKey = (key: string) => `${LOCALE_BASE}.sections.table.${key}`
+const LOCALE_BASE = 'librarySettingsScene.options/scanning.sections.history'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

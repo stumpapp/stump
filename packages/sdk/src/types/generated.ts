@@ -519,7 +519,7 @@ export type PatchSeriesThumbnail = { media_id: string; page: number; is_zero_bas
 
 export type PatchLibraryThumbnail = { media_id: string; page: number; is_zero_based?: boolean | null }
 
-export type LibraryScanRecord = { id: number; options: ScanOptions | null; timestamp: string; library_id: string }
+export type LibraryScanRecord = { id: number; options: ScanOptions | null; timestamp: string; library_id: string; job_id: string | null }
 
 export type LastScanDetails = { last_scanned_at: string | null; last_scan: LastLibraryScan | null }
 

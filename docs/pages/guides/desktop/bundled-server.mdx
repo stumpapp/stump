@@ -1,0 +1,42 @@
+import { Callout } from 'nextra/components'
+
+# Bundled Server
+
+The desktop app comes with a fully functional Stump server built-in. This is a convenience feature to make it easier to get started with Stump without needing to set up a server separately.
+
+## Friction Points
+
+There are some compromises made to make this feature work:
+
+- The bundled server comes with a cost of about 60-80MB, arguably bloating the app size for those who perhaps don't need or want it.
+- The server does not come with a web-compatible client by default, so you have to download the web client separately if you want to use it in a browser
+- When you close the app the server will also exit. The current plan is to implement a tray functionality which keeps the server running in the background when the app is closed
+
+These pain points are very much on my radar, rest assured they are not planned to be permanent fixtures.
+
+The bundled server is not currently optional due to resource constraints, namely the lack of development time to adjust CI pipelines to build two separate versions of the app. I will happily accept contributions to make this possible, otherwise it is possible to build the app locally without the server if you so desire.
+
+There are a few thoughts on improving the requirement for the web client, such as bundling it directly in the server (which would bloat further) or developing an installer that will download and install the web client for you alongside the app.
+
+<Callout emoji="📣">
+	Please share your thoughts on how to improve the bundled server feature(s) and the pain points
+	outlined above. I'm always open to suggestions!
+</Callout>
+
+## Enabling the Server
+
+The server, while bundled by default, will not be enabled unless explicitly turned on. The setting for enabling the server is in multiple places, depending on the context, however it will always appear the same:
+
+### First Run
+
+When you first run the app, you will be greeted with a setup screen that prompts you to add a server. Instead, hit the "Bundled server" switch and restart the app. The server will be enabled on the next launch, and you will be presented with the same screen to connect to it.
+
+<Callout emoji="ℹ️" type="info">
+	The default options for the bundled server can be configured by editing the `~/.stump/Stump.toml`
+	file. For additional configuration options, see the [server
+	configuration](/guides/configuration/server-options) guide.
+</Callout>
+
+### Desktop Settings
+
+If you have already configured a server with the desktop application, launching will either take you directly into the app or the login screen for the actively connected server. The bundled server setting can be found in the settings menu, under the "Desktop" tab, in addition to the setup screen. As with the setup screen, toggling the switch will require a restart to take effect.

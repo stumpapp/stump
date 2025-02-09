@@ -226,4 +226,21 @@ mod tests {
 
 		MediaBuilder::new(path, series_id, library_config, &StumpConfig::debug()).build()
 	}
+
+	#[test]
+	fn test_regen_hashes() {
+		let path = get_test_zip_path();
+		let path = Path::new(&path);
+		let library_config = LibraryConfig {
+			generate_file_hashes: true,
+			..Default::default()
+		};
+		let series_id = "series_id";
+
+		let builder =
+			MediaBuilder::new(path, series_id, library_config, &StumpConfig::debug());
+		let hashes = builder.regen_hashes();
+		assert!(hashes.is_ok());
+		assert!(hashes.unwrap().hash.is_some());
+	}
 }

@@ -183,6 +183,8 @@ impl TryFrom<library_scan_details::scan_history::Data> for LastLibraryScan {
 
 #[cfg(test)]
 mod tests {
+	use prisma_client_rust::chrono;
+
 	use super::*;
 
 	#[test]
@@ -215,6 +217,58 @@ mod tests {
 				regen_hashes: false
 			}))
 		);
+	}
+
+	#[test]
+	fn test_try_from_library_scan_record() {
+		let data = library_scan_record::Data {
+			id: 1,
+			options: Some(
+				serde_json::to_vec(&ScanOptions {
+					config: ScanConfig::ForceRebuild {
+						force_rebuild: true,
+					},
+				})
+				.unwrap(),
+			),
+			timestamp: chrono::Utc::now().into(),
+			library_id: "library".to_string(),
+			job_id: Some("job".to_string()),
+			library: None,
+			job: None,
+		};
+
+		let record = LibraryScanRecord::try_from(data).unwrap();
+		assert_eq!(record.id, 1);
+		assert!(record.options.is_some());
+		assert_eq!(record.library_id, "library");
+		assert_eq!(record.job_id, Some("job".to_string()));
+	}
+
+	#[test]
+	fn test_error_ctx() {
+		let book = Media {
+			id: "book".to_string(),
+			path: "path".to_string(),
+			..Default::default()
+		};
+
+		let result = BookVisitResult::Built(Box::new(book.clone()));
+		assert_eq!(result.error_ctx(), book.path);
+
+		let result = BookVisitResult::Custom(CustomVisitResult {
+			id: "book".to_string(),
+			meta: None,
+			hashes: None,
+		});
+		assert_eq!(result.error_ctx(), book.id);
+
+		let result = BookVisitResult::Custom(CustomVisitResult {
+			id: "book".to_string(),
+			meta: None,
+			hashes: None,
+		});
+		assert_eq!(result.error_ctx(), book.id);
 	}
 
 	#[test]
@@ -364,6 +418,13 @@ mod tests {
 			}),
 		};
 		assert!(!options.config.is_useless());
+
+		let options = ScanOptions {
+			config: ScanConfig::BuildChanged,
+		};
+		assert!(options.book_operation().is_none());
+		assert!(options.is_default());
+		assert!(options.config.is_useless());
 	}
 
 	#[test]

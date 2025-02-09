@@ -1,24 +1,28 @@
-import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION, useMediaByIdQuery } from '@stump/client'
+import {
+	ARCHIVE_EXTENSION,
+	EBOOK_EXTENSION,
+	PDF_EXTENSION,
+	useMediaByIdQuery,
+	useSDK,
+} from '@stump/client'
 import { useLocalSearchParams } from 'expo-router'
 import { View } from 'react-native'
+
 import {
 	EpubJSReader,
 	ImageBasedReader,
 	UnsupportedReader,
 } from '~/components/activeServer/book/reader'
-import { Text } from '~/components/ui'
+import { ImageBasedReaderContext } from '~/components/activeServer/book/reader/image'
 
 type Params = {
 	id: string
 	// restart?: boolean
-	// incognito?: boolean
 }
 
 export default function Screen() {
 	const { id: bookID } = useLocalSearchParams<Params>()
-	// const {
-	//   activeServer: { id },
-	// } = useActiveServer()
+	const { sdk } = useSDK()
 	const { media: book } = useMediaByIdQuery(bookID, { suspense: true })
 
 	if (!book) return null
@@ -31,7 +35,16 @@ export default function Screen() {
 		const currentProgressPage = book.current_page || 1
 		// const initialPage = restart ? 1 : currentProgressPage
 		const initialPage = currentProgressPage
-		return <ImageBasedReader book={book} initialPage={initialPage} /*incognito={incognito}*/ />
+		return (
+			<ImageBasedReaderContext.Provider
+				value={{
+					book: { id: book.id, name: book.metadata?.title || book.name, pages: book.pages },
+					pageURL: (page: number) => sdk.media.bookPageURL(book.id, page),
+				}}
+			>
+				<ImageBasedReader initialPage={initialPage} />
+			</ImageBasedReaderContext.Provider>
+		)
 	}
 
 	// TODO: support native PDF reader?

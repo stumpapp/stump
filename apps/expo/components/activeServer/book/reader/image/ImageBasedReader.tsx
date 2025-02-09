@@ -21,6 +21,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Text } from '~/components/ui'
 import { useReaderStore } from '~/stores'
 
+import ImageBasedReaderContainer from './Container'
+import { useImageBasedReader } from './context'
+
 type ImageDimension = {
 	height: number
 	width: number
@@ -33,10 +36,6 @@ type ImageDimension = {
 // TODO: Account for device orientation AND reading direction
 
 type Props = {
-	/**
-	 * The media which is being read
-	 */
-	book: Media
 	/**
 	 * The initial page to start the reader on
 	 */
@@ -51,9 +50,10 @@ type Props = {
 /**
  * A reader for books that are image-based, where each page should be displayed as an image
  */
-export default function ImageBasedReader({ book, initialPage, incognito }: Props) {
+export default function ImageBasedReader({ initialPage, incognito }: Props) {
 	const flatList = useRef<FlatList>(null)
 
+	const { book } = useImageBasedReader()
 	const { height, width } = useWindowDimensions()
 
 	const [imageSizes, setImageHeights] = useState<Record<number, ImageDimension>>({})
@@ -70,25 +70,6 @@ export default function ImageBasedReader({ book, initialPage, incognito }: Props
 	// recalculate the ratios of the images? Maybe. Who knows, you will though
 
 	const { updateReadProgressAsync } = useUpdateMediaProgress(book.id)
-
-	// FIXME: this was HARD erroring...
-
-	// const prefetchPages = useCallback(
-	// 	async (start: number, end: number) => {
-	// 		for (let i = start; i <= end; i++) {
-	// 			const prefetched = await prefetchImage(getMediaPage(id, i))
-	// 			console.log('Prefetched', i, prefetched)
-	// 		}
-	// 	},
-	// 	[id],
-	// )
-
-	// useEffect(() => {
-	// 	if (lastPrefetchStart.current === 0) {
-	// 		prefetchPages(1, 5)
-	// 		lastPrefetchStart.current = 5
-	// 	}
-	// }, [prefetchPages])
 
 	/**
 	 * A callback that updates the read progress of the current page. This will be
@@ -117,7 +98,7 @@ export default function ImageBasedReader({ book, initialPage, incognito }: Props
 	)
 
 	return (
-		<View className="flex flex-1 items-center justify-center">
+		<ImageBasedReaderContainer>
 			<FlatList
 				ref={flatList}
 				data={Array.from({ length: book.pages }, (_, i) => i)}
@@ -159,7 +140,7 @@ export default function ImageBasedReader({ book, initialPage, incognito }: Props
 				}}
 				scrollEnabled={!isZoomed}
 			/>
-		</View>
+		</ImageBasedReaderContainer>
 	)
 }
 
@@ -191,14 +172,6 @@ const Page = React.memo(
 		const { sdk } = useSDK()
 		const insets = useSafeAreaInsets()
 
-		const {
-			settings: { showToolBar },
-			setSettings,
-		} = useReaderStore((state) => ({
-			setSettings: state.setSettings,
-			settings: state.settings,
-		}))
-
 		const zoomRef = useRef<ReactNativeZoomableView>(null)
 		const doubleTapRef = useRef<TouchableWithoutFeedback>(null)
 
@@ -207,8 +180,17 @@ const Page = React.memo(
 		// const handlePress = useCallback(() => {
 		// 	setSettings({ showToolBar: !showToolBar })
 		// }, [showToolBar, setSettings])
+		const showControls = useReaderStore((state) => state.showControls)
+		const setShowControls = useReaderStore((state) => state.setShowControls)
 
-		const onSingleTap = useCallback((event: GestureHandlerGestureEvent) => {}, [])
+		const onSingleTap = useCallback(
+			(event: GestureHandlerGestureEvent) => {
+				if (event.nativeEvent.state !== State.ACTIVE) return
+
+				setShowControls(!showControls)
+			},
+			[showControls, setShowControls],
+		)
 
 		// TODO: better double tap handling
 		const isZoomed = useMemo(() => zoomLevel > 1, [zoomLevel])
@@ -218,13 +200,18 @@ const Page = React.memo(
 				if (!zoomRef.current) return
 				if (event.nativeEvent.state !== State.ACTIVE) return
 
+				// Providing x and y will change zoom relative to the area that was double-tapped.
+				// This is important for zooming in and out, but definitely makes a smoother difference
+				// when zooming out
+				const params =
+					typeof event.nativeEvent.x === 'number' && typeof event.nativeEvent.y === 'number'
+						? { x: event.nativeEvent.x, y: event.nativeEvent.y }
+						: undefined
+
 				if (isZoomed) {
-					zoomRef.current.zoomTo(1, { x: 0, y: 0 })
+					zoomRef.current.zoomTo(1, params)
 				} else {
-					zoomRef.current.zoomTo(2, {
-						x: event.nativeEvent.x,
-						y: event.nativeEvent.y,
-					})
+					zoomRef.current.zoomTo(2, params)
 				}
 			},
 			[isZoomed],
@@ -286,7 +273,6 @@ const Page = React.memo(
 						movementSensibility={isZoomed ? 1 : 5}
 						pinchToZoomInSensitivity={1}
 						onZoomAfter={onZoomChange}
-						// doubleTapDelay={1}
 					>
 						<View
 							className="flex items-center justify-center"

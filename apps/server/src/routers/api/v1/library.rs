@@ -44,8 +44,8 @@ use stump_core::{
 	},
 	prisma::{
 		last_library_visit, library, library_config, library_scan_record,
-		media::{self, OrderByParam as MediaOrderByParam},
-		series::{self, OrderByParam as SeriesOrderByParam},
+		media::{self, OrderByWithRelationParam as MediaOrderByParam},
+		series::{self, OrderByWithRelationParam as SeriesOrderByParam},
 		tag, user, SortOrder,
 	},
 };
@@ -1035,7 +1035,7 @@ async fn get_library_last_scan(
 		])
 		.with(
 			library::scan_history::fetch(vec![])
-				.order_by(library_scan_record::timestamp::order(Direction::Desc)),
+				.order_by(library_scan_record::timestamp::order(SortOrder::Desc)),
 		)
 		.select(library_scan_details::select())
 		.exec()
@@ -1069,7 +1069,7 @@ async fn get_library_scan_history(
 			library::id::equals(id.clone()),
 			library_not_hidden_from_user_filter(req.user()),
 		])])
-		.order_by(library_scan_record::timestamp::order(Direction::Desc))
+		.order_by(library_scan_record::timestamp::order(SortOrder::Desc))
 		.exec()
 		.await?;
 

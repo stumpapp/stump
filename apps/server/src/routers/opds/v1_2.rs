@@ -4,8 +4,8 @@ use axum::{
 	routing::get,
 	Extension, Router,
 };
+use prisma_client_rust::chrono;
 use prisma_client_rust::or;
-use prisma_client_rust::{chrono, Direction};
 use serde::{Deserialize, Serialize};
 use stump_core::{
 	db::{entity::UserPermission, query::pagination::PageQuery},
@@ -319,7 +319,7 @@ async fn get_libraries(
 			[library_not_hidden_from_user_filter(user)],
 			[search.as_ref().map(|q| library::name::contains(q.clone()))],
 		))
-		.order_by(library::name::order(Direction::Asc))
+		.order_by(library::name::order(SortOrder::Asc))
 		.exec()
 		.await?;
 	let entries = libraries
@@ -484,7 +484,7 @@ async fn get_series(
 				))
 				.skip(skip)
 				.take(take)
-				.order_by(series::name::order(Direction::Asc))
+				.order_by(series::name::order(SortOrder::Asc))
 				.exec()
 				.await?;
 

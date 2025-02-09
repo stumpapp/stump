@@ -139,7 +139,9 @@ pub(crate) async fn get_media_smart_search(
 	}): Json<FilterBody<MediaSmartFilter, MediaOrderBy>>,
 ) -> APIResult<Json<Pageable<Vec<Media>>>> {
 	let pagination = query.0.get();
-	let order_by_params = order_params.into_iter().map(|o| o.into_prisma());
+	let order_by_params = MediaOrderBy::ensure_default(order_params)
+		.into_iter()
+		.map(|o| o.into_prisma());
 	let where_conditions = apply_where_params_for_user(
 		filters.into_iter().map(|f| f.into_params()).collect(),
 		req.user(),

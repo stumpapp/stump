@@ -251,7 +251,7 @@ async fn put_progress(
 				.registered_reading_device()
 				.upsert(
 					registered_reading_device::id::equals(device_id.clone()),
-					(
+					registered_reading_device::create(
 						device.clone(),
 						vec![registered_reading_device::id::set(device_id.clone())],
 					),
@@ -334,7 +334,7 @@ async fn put_progress(
 							user.id.clone(),
 							book.id.clone(),
 						),
-						(
+						active_reading_session::create(
 							media::id::equals(book.id.clone()),
 							user::id::equals(user.id.clone()),
 							set_params.clone(),

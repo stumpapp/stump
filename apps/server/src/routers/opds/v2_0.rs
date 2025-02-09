@@ -236,7 +236,7 @@ async fn catalog(
 			apply_in_progress_filter_for_user(user.id.clone()),
 			active_reading_session::media::is(apply_media_restrictions_for_user(user)),
 		])
-		.order_by(active_reading_session::updated_at::order(Direction::Desc))
+		.order_by(active_reading_session::updated_at::order(SortOrder::Desc))
 		.select(active_reading_session_book_id::select())
 		.exec()
 		.await?
@@ -253,7 +253,7 @@ async fn catalog(
 	let continue_reading = client
 		.media()
 		.find_many(continue_reading_conditions.clone())
-		.order_by(media::updated_at::order(Direction::Desc))
+		.order_by(media::updated_at::order(SortOrder::Desc))
 		.take(DEFAULT_LIMIT)
 		.include(books_as_publications::include())
 		.exec()
@@ -340,7 +340,7 @@ async fn browse_libraries(
 		.find_many(library_conditions.clone())
 		.take(take)
 		.skip(skip)
-		.order_by(library::name::order(Direction::Asc))
+		.order_by(library::name::order(SortOrder::Asc))
 		.exec()
 		.await?;
 	let library_count = client.library().count(library_conditions).exec().await?;

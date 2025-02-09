@@ -1,6 +1,4 @@
-use prisma_client_rust::Direction;
-
-use crate::prisma::{library, library_scan_record};
+use crate::prisma::{library, library_scan_record, SortOrder};
 
 library::select!(library_id_select { id });
 
@@ -42,7 +40,7 @@ library::select!(library_scan_details {
 // TODO: figure out how to add ordering to nested selection, I can't figure out the syntax or if even possible
 library::select!(library_scan_details_ordered {
 	last_scanned_at
-	scan_history(vec![]).order_by(library_scan_record::timestamp::order(Direction::Desc))
+	scan_history(vec![]).order_by(library_scan_record::timestamp::order(SortOrder::Desc))
 });
 
 library::select!(library_name {

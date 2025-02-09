@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::db::query::IntoOrderBy;
+use crate::db::query::{Direction, IntoOrderBy, QueryOrder};
 
 #[derive(Default, Debug, Deserialize, Serialize, Type, ToSchema, OrderByGen)]
 #[serde(rename_all = "snake_case")]
@@ -49,6 +49,21 @@ pub enum MediaOrderBy {
 	Path,
 	Pages,
 	Metadata(Vec<MediaMetadataOrderBy>),
+}
+
+impl MediaOrderBy {
+	pub fn ensure_default(
+		v: Vec<QueryOrder<MediaOrderBy>>,
+	) -> Vec<QueryOrder<MediaOrderBy>> {
+		if v.is_empty() {
+			vec![QueryOrder {
+				order_by: MediaOrderBy::Name,
+				direction: Direction::Asc,
+			}]
+		} else {
+			v
+		}
+	}
 }
 
 #[cfg(test)]

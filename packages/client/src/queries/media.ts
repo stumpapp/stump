@@ -251,11 +251,13 @@ type UseDynamicSearchParams = {
 }
 export function useDynamicSearch({ mode, bodyParams, urlParams }: UseDynamicSearchParams) {
 	const { sdk } = useSDK()
+
 	const qk = useMemo(
 		() =>
 			mode === 'body' ? [sdk.media.keys.smartSearch, bodyParams] : [sdk.media.keys.get, urlParams],
 		[mode, bodyParams, urlParams, sdk],
 	)
+
 	const { data, ...restReturn } = usePageQuery(
 		qk,
 		async ({ page, page_size }) =>

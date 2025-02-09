@@ -906,13 +906,15 @@ pub(crate) async fn put_media_metadata(
 		.media_metadata()
 		.upsert(
 			media_metadata::media_id::equals(id.clone()),
-			set_params
-				.clone()
-				.into_iter()
-				.chain(vec![media_metadata::media::connect(media::id::equals(
-					book.id.clone(),
-				))])
-				.collect::<Vec<_>>(),
+			media_metadata::create(
+				set_params
+					.clone()
+					.into_iter()
+					.chain(vec![media_metadata::media::connect(media::id::equals(
+						book.id.clone(),
+					))])
+					.collect::<Vec<_>>(),
+			),
 			set_params.clone(),
 		)
 		.exec()

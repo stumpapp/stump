@@ -148,7 +148,7 @@ pub(crate) async fn update_media(db: &PrismaClient, media: Media) -> CoreResult<
 						.media_metadata()
 						.upsert(
 							media_metadata::media_id::equals(media.id.clone()),
-							params.clone(),
+							media_metadata::create(params.clone()),
 							params,
 						)
 						.exec()
@@ -212,7 +212,7 @@ pub(crate) async fn handle_book_visit_operation(
 							.media_metadata()
 							.upsert(
 								media_metadata::media_id::equals(id.clone()),
-								params.clone(),
+								media_metadata::create(params.clone()),
 								params,
 							)
 							.exec()

@@ -2,10 +2,10 @@ import { Badge, cn, Text, useSticky } from '@stump/components'
 import React from 'react'
 import { useMediaMatch } from 'rooks'
 
+import Search from './Search'
 import SmartFilterModal from './SmartFilterModal'
 import SmartSearchButton from './SmartSearchButton'
 import { useFilterStore, useSyncSearch } from './store'
-import Search from './Search'
 
 type Props = {
 	navOffset?: boolean

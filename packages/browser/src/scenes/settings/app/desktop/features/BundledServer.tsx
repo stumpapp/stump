@@ -1,7 +1,7 @@
+import { WideSwitch } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
-import PreferenceToggle from '@/scenes/settings/PreferenceToggle'
 import { useTauriStore } from '@/stores'
 
 const IS_PRODUCTION = import.meta.env.PROD
@@ -16,13 +16,13 @@ export default function BundledServer() {
 	)
 
 	return (
-		<PreferenceToggle
+		<WideSwitch
 			title={IS_PRODUCTION ? t('common.notReady') : undefined}
 			label={t(getKey('label'))}
 			description={t(getKey('description'))}
-			isChecked={run_bundled_server}
-			onToggle={handleChange}
-			isDisabled={IS_PRODUCTION}
+			checked={run_bundled_server}
+			onCheckedChange={handleChange}
+			disabled={IS_PRODUCTION}
 		/>
 	)
 }

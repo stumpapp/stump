@@ -142,7 +142,7 @@ impl RequestContext {
 ///
 /// Note: It is important that this middlware is placed _after_ any middleware/handlers which access the
 /// request extensions, as the user is inserted into the request extensions dynamically here.
-#[tracing::instrument(skip(ctx, req, next))]
+#[tracing::instrument(skip_all)]
 pub async fn auth_middleware(
 	State(ctx): State<AppState>,
 	HostExtractor(host_details): HostExtractor,

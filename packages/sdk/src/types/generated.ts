@@ -146,6 +146,19 @@ export type LibraryPattern = "SERIES_BASED" | "COLLECTION_BASED"
 
 export type LibraryScanMode = "DEFAULT" | "NONE"
 
+export type CustomVisit = { regen_meta: boolean; regen_hashes: boolean }
+
+export type ScanConfig = null | { force_rebuild: boolean } | CustomVisit
+
+/**
+ * The override options for a scan job. These options are used to override the default behavior, which generally
+ * means that the scanner will visit books it otherwise would not. How much extra work is done depends on the
+ * specific options.
+ */
+export type ScanOptions = { config?: ScanConfig }
+
+export type LastLibraryScan = { options: ScanOptions | null; timestamp: string }
+
 export type IgnoreRules = string[]
 
 export type LibraryConfig = { id?: string | null; convert_rar_to_zip: boolean; hard_delete_conversions: boolean; generate_file_hashes: boolean; generate_koreader_hashes: boolean; process_metadata: boolean; library_pattern: LibraryPattern; thumbnail_config: ImageProcessorOptions | null; default_reading_dir?: ReadingDirection; default_reading_mode?: ReadingMode; default_reading_image_scale_fit?: ReadingImageScaleFit; ignore_rules?: IgnoreRules; library_id?: string | null }
@@ -505,6 +518,10 @@ export type PatchMediaThumbnail = { page: number; is_zero_based?: boolean | null
 export type PatchSeriesThumbnail = { media_id: string; page: number; is_zero_based?: boolean | null }
 
 export type PatchLibraryThumbnail = { media_id: string; page: number; is_zero_based?: boolean | null }
+
+export type LibraryScanRecord = { id: number; options: ScanOptions | null; timestamp: string; library_id: string; job_id: string | null }
+
+export type LastScanDetails = { last_scanned_at: string | null; last_scan: LastLibraryScan | null }
 
 export type CreateOrUpdateSmartList = { name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; joiner?: FilterJoin | null; default_grouping?: SmartListItemGrouping | null; visibility?: EntityVisibility | null }
 

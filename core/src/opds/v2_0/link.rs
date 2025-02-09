@@ -454,6 +454,8 @@ mod tests {
 			hidden_from_users: None,
 			job_schedule_config: None,
 			job_schedule_config_id: None,
+			last_scanned_at: None,
+			scan_history: None,
 			config: None,
 			config_id: String::default(),
 			path: String::default(),
@@ -544,5 +546,43 @@ mod tests {
 			finalized_navigation_link.base_link.href,
 			"https://example.com/opds/v2.0/library/id"
 		);
+	}
+
+	#[test]
+	fn test_link_type_from_content_type() {
+		assert_eq!(
+			OPDSLinkType::from(ContentType::COMIC_RAR),
+			OPDSLinkType::Cbr
+		);
+		assert_eq!(
+			OPDSLinkType::from(ContentType::COMIC_ZIP),
+			OPDSLinkType::Cbz
+		);
+		assert_eq!(OPDSLinkType::from(ContentType::RAR), OPDSLinkType::Rar);
+		assert_eq!(OPDSLinkType::from(ContentType::ZIP), OPDSLinkType::Zip);
+		assert_eq!(OPDSLinkType::from(ContentType::PDF), OPDSLinkType::Pdf);
+		assert_eq!(
+			OPDSLinkType::from(ContentType::EPUB_ZIP),
+			OPDSLinkType::Epub
+		);
+		assert_eq!(
+			OPDSLinkType::from(ContentType::JPEG),
+			OPDSLinkType::ImageJpeg
+		);
+		assert_eq!(OPDSLinkType::from(ContentType::PNG), OPDSLinkType::ImagePng);
+		assert_eq!(OPDSLinkType::from(ContentType::GIF), OPDSLinkType::ImageGif);
+		assert_eq!(
+			OPDSLinkType::from(ContentType::AVIF),
+			OPDSLinkType::ImageAvif
+		);
+		assert_eq!(OPDSLinkType::from(ContentType::XHTML), OPDSLinkType::Xhtml);
+	}
+
+	#[test]
+	fn test_custom_link_type_serialization() {
+		let link_type = OPDSLinkType::Custom("application/custom".to_string());
+
+		let json = serde_json::to_string(&link_type).unwrap();
+		assert_eq!(json, r#""application/custom""#);
 	}
 }

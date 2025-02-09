@@ -1,9 +1,8 @@
 import { useUpdatePreferences } from '@stump/client'
+import { WideSwitch } from '@stump/components'
 import { UpdateUserPreferences } from '@stump/sdk'
 
 import { useUserStore } from '@/stores'
-
-import PreferenceToggle from '../../PreferenceToggle'
 
 export default function EnableJobOverlayToggle() {
 	const { preferences, setPreferences } = useUserStore((state) => ({
@@ -25,12 +24,12 @@ export default function EnableJobOverlayToggle() {
 	}
 
 	return (
-		<PreferenceToggle
+		<WideSwitch
 			formId="enable_job_overlay"
 			label="Job overlay"
 			description="Show a floating overlay while a job is running"
-			isChecked={preferences?.enable_job_overlay}
-			onToggle={handleChange}
+			checked={preferences?.enable_job_overlay}
+			onCheckedChange={handleChange}
 		/>
 	)
 }

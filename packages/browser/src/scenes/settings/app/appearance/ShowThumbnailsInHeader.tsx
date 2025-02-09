@@ -1,8 +1,7 @@
+import { WideSwitch } from '@stump/components'
 import { useCallback } from 'react'
 
 import { usePreferences } from '@/hooks'
-
-import PreferenceToggle from '../../PreferenceToggle'
 
 export default function ShowThumbnailsInHeader() {
 	const {
@@ -19,11 +18,11 @@ export default function ShowThumbnailsInHeader() {
 	}, [show_thumbnails_in_headers, update])
 
 	return (
-		<PreferenceToggle
+		<WideSwitch
 			label="Show thumbnails in headers"
 			description="If you prefer to see thumbnails more often, this setting will show them in more places"
-			isChecked={show_thumbnails_in_headers}
-			onToggle={handleToggle}
+			checked={show_thumbnails_in_headers}
+			onCheckedChange={handleToggle}
 			formId="show_thumbnails_in_headers"
 			title={
 				show_thumbnails_in_headers

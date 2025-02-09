@@ -11,6 +11,7 @@ use crate::{
 		error::FileError,
 		hash::{self, generate_koreader_hash},
 		media::process::{FileProcessor, FileProcessorOptions, ProcessedFile},
+		ProcessedFileHashes,
 	},
 };
 use epub::doc::EpubDoc;
@@ -49,7 +50,7 @@ impl FileProcessor for EpubProcessor {
 		Ok(sample_size)
 	}
 
-	fn hash(path: &str) -> Option<String> {
+	fn generate_stump_hash(path: &str) -> Option<String> {
 		let sample_result = EpubProcessor::get_sample_size(path);
 
 		if let Ok(sample) = sample_result {
@@ -65,13 +66,35 @@ impl FileProcessor for EpubProcessor {
 		}
 	}
 
-	fn process(
+	fn generate_hashes(
 		path: &str,
 		FileProcessorOptions {
 			generate_file_hashes,
 			generate_koreader_hashes,
 			..
 		}: FileProcessorOptions,
+	) -> Result<ProcessedFileHashes, FileError> {
+		let hash = generate_file_hashes
+			.then(|| EpubProcessor::generate_stump_hash(path))
+			.flatten();
+		let koreader_hash = generate_koreader_hashes
+			.then(|| generate_koreader_hash(path))
+			.transpose()?;
+
+		Ok(ProcessedFileHashes {
+			hash,
+			koreader_hash,
+		})
+	}
+
+	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError> {
+		let epub_file = Self::open(path)?;
+		Ok(Some(MediaMetadata::from(epub_file.metadata)))
+	}
+
+	fn process(
+		path: &str,
+		options: FileProcessorOptions,
 		_: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
 		tracing::debug!(?path, "processing epub");
@@ -82,12 +105,10 @@ impl FileProcessor for EpubProcessor {
 		let pages = epub_file.get_num_pages() as i32;
 		// Note: The metadata is already parsed by the EPUB library, so might as well use it
 		let metadata = MediaMetadata::from(epub_file.metadata);
-		let hash = generate_file_hashes
-			.then(|| EpubProcessor::hash(path))
-			.flatten();
-		let koreader_hash = generate_koreader_hashes
-			.then(|| generate_koreader_hash(path))
-			.transpose()?;
+		let ProcessedFileHashes {
+			hash,
+			koreader_hash,
+		} = Self::generate_hashes(path, options)?;
 
 		Ok(ProcessedFile {
 			path: path_buf,

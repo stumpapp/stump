@@ -1,7 +1,7 @@
 {
 	"name": "@stump/expo",
 	"main": "index.js",
-	"version": "1.0.0",
+	"version": "0.0.10",
 	"scripts": {
 		"dev": "expo start -c --ios",
 		"dev:android": "expo start -c --android",

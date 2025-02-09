@@ -9,6 +9,7 @@ use unrar::{Archive, CursorBeforeHeader, List, OpenArchive, Process, UnrarResult
 
 use crate::{
 	config::StumpConfig,
+	db::entity::MediaMetadata,
 	filesystem::{
 		archive::create_zip_archive,
 		content_type::ContentType,
@@ -22,7 +23,7 @@ use crate::{
 			utils::metadata_from_buf,
 			zip::ZipProcessor,
 		},
-		FileParts, PathUtils,
+		FileParts, PathUtils, ProcessedFileHashes,
 	},
 };
 
@@ -80,7 +81,7 @@ impl FileProcessor for RarProcessor {
 		}
 	}
 
-	fn hash(path: &str) -> Option<String> {
+	fn generate_stump_hash(path: &str) -> Option<String> {
 		let sample_result = RarProcessor::get_sample_size(path).ok();
 
 		if let Some(sample) = sample_result {
@@ -94,6 +95,62 @@ impl FileProcessor for RarProcessor {
 			}
 		} else {
 			None
+		}
+	}
+
+	fn generate_hashes(
+		path: &str,
+		FileProcessorOptions {
+			generate_file_hashes,
+			// generate_koreader_hashes,
+			..
+		}: FileProcessorOptions,
+	) -> Result<ProcessedFileHashes, FileError> {
+		let hash = generate_file_hashes
+			.then(|| RarProcessor::generate_stump_hash(path))
+			.flatten();
+		// TODO(koreader): Do we want to hash RAR files?
+		// let koreader_hash = generate_koreader_hashes
+		// 	.then(|| generate_koreader_hash(path))
+		// 	.transpose()?;
+
+		Ok(ProcessedFileHashes {
+			hash,
+			koreader_hash: None,
+		})
+	}
+
+	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError> {
+		let mut archive = RarProcessor::open_for_processing(path)?;
+		let mut metadata_buf = None;
+
+		while let Ok(Some(header)) = archive.read_header() {
+			let entry = header.entry();
+
+			if entry.is_directory() {
+				archive = header.skip()?;
+				continue;
+			}
+
+			if entry.filename.is_hidden_file() {
+				archive = header.skip()?;
+				continue;
+			}
+
+			if entry.filename.as_os_str() == "ComicInfo.xml" {
+				let (data, _) = header.read()?;
+				metadata_buf = Some(data);
+				break;
+			} else {
+				archive = header.skip()?;
+			}
+		}
+
+		if let Some(buf) = metadata_buf {
+			let content_str = std::str::from_utf8(&buf)?;
+			Ok(metadata_from_buf(content_str))
+		} else {
+			Ok(None)
 		}
 	}
 
@@ -117,10 +174,10 @@ impl FileProcessor for RarProcessor {
 			return ZipProcessor::process(zip_path, options, config);
 		}
 
-		let hash = options
-			.generate_file_hashes
-			.then(|| RarProcessor::hash(path))
-			.flatten();
+		let ProcessedFileHashes {
+			hash,
+			koreader_hash,
+		} = RarProcessor::generate_hashes(path, options)?;
 
 		let mut archive = RarProcessor::open_for_processing(path)?;
 		let mut pages = 0;
@@ -162,8 +219,7 @@ impl FileProcessor for RarProcessor {
 		Ok(ProcessedFile {
 			path: PathBuf::from(path),
 			hash,
-			// TODO(koreader): Do we want to hash RAR files?
-			koreader_hash: None,
+			koreader_hash,
 			metadata,
 			pages,
 		})

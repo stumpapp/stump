@@ -5,6 +5,7 @@ import type {
 	LibraryStats,
 	LibraryStatsParams,
 	PaginationQuery,
+	ScanOptions,
 	Series,
 	UpdateLibrary,
 	User,
@@ -138,7 +139,7 @@ export function useScanLibrary() {
 	const { sdk } = useSDK()
 	const { mutate: scan, mutateAsync: scanAsync } = useMutation(
 		[sdk.library.keys.scan],
-		(id: string) => sdk.library.scan(id),
+		({ id, ...options }: ScanOptions & { id: string }) => sdk.library.scan(id, options),
 	)
 
 	return { scan, scanAsync }

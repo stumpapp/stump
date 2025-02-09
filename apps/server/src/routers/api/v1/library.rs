@@ -1115,6 +1115,7 @@ async fn delete_library_scan_history(
 )]
 /// Queue a ScannerJob to scan the library by id. The job, when started, is
 /// executed in a separate thread.
+#[tracing::instrument(skip(ctx, req))]
 async fn scan_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -1144,6 +1145,7 @@ async fn scan_library(
 				"Failed to enqueue library scan job".to_string(),
 			)
 		})?;
+	tracing::debug!("Enqueued library scan job");
 
 	Ok(())
 }

@@ -80,7 +80,6 @@ impl BookVisitResult {
 /// specific options.
 #[derive(Debug, Default, Clone, Copy, Deserialize, Type, Serialize)]
 pub struct ScanOptions {
-	#[serde(default)]
 	pub config: ScanConfig,
 }
 
@@ -218,9 +217,65 @@ mod tests {
 	}
 
 	#[test]
+	fn test_serialize_scan_options() {
+		assert_eq!(
+			serde_json::to_string(&ScanOptions {
+				config: ScanConfig::ForceRebuild {
+					force_rebuild: true
+				}
+			})
+			.unwrap(),
+			r#"{"config":{"force_rebuild":true}}"#
+		);
+
+		assert_eq!(
+			serde_json::to_string(&ScanOptions {
+				config: ScanConfig::ForceRebuild {
+					force_rebuild: false
+				}
+			})
+			.unwrap(),
+			r#"{"config":{"force_rebuild":false}}"#
+		);
+
+		assert_eq!(
+			serde_json::to_string(&ScanOptions {
+				config: ScanConfig::Custom(CustomVisit {
+					regen_meta: true,
+					regen_hashes: false
+				})
+			})
+			.unwrap(),
+			r#"{"config":{"regen_meta":true,"regen_hashes":false}}"#
+		);
+
+		assert_eq!(
+			serde_json::to_string(&ScanOptions {
+				config: ScanConfig::Custom(CustomVisit {
+					regen_meta: false,
+					regen_hashes: true
+				})
+			})
+			.unwrap(),
+			r#"{"config":{"regen_meta":false,"regen_hashes":true}}"#
+		);
+
+		assert_eq!(
+			serde_json::to_string(&ScanOptions {
+				config: ScanConfig::Custom(CustomVisit {
+					regen_meta: true,
+					regen_hashes: true
+				})
+			})
+			.unwrap(),
+			r#"{"config":{"regen_meta":true,"regen_hashes":true}}"#
+		);
+	}
+
+	#[test]
 	fn test_deserialize_scan_options() {
 		assert!(matches!(
-			serde_json::from_str::<ScanOptions>(r#"{"force_rebuild":true}"#)
+			serde_json::from_str::<ScanOptions>(r#"{"config":{"force_rebuild":true}}"#)
 				.unwrap()
 				.config,
 			ScanConfig::ForceRebuild {
@@ -229,7 +284,7 @@ mod tests {
 		));
 
 		assert!(matches!(
-			serde_json::from_str::<ScanOptions>(r#"{"force_rebuild":false}"#)
+			serde_json::from_str::<ScanOptions>(r#"{"config":{"force_rebuild":false}}"#)
 				.unwrap()
 				.config,
 			ScanConfig::ForceRebuild {
@@ -238,7 +293,7 @@ mod tests {
 		));
 
 		assert!(matches!(
-			serde_json::from_str::<ScanOptions>(r#"{"regen_meta":true}"#)
+			serde_json::from_str::<ScanOptions>(r#"{"config":{"regen_meta":true}}"#)
 				.unwrap()
 				.config,
 			ScanConfig::Custom(CustomVisit {
@@ -248,7 +303,7 @@ mod tests {
 		));
 
 		assert!(matches!(
-			serde_json::from_str::<ScanOptions>(r#"{"regen_hashes":true}"#)
+			serde_json::from_str::<ScanOptions>(r#"{"config":{"regen_hashes":true}}"#)
 				.unwrap()
 				.config,
 			ScanConfig::Custom(CustomVisit {
@@ -259,7 +314,7 @@ mod tests {
 
 		assert!(matches!(
 			serde_json::from_str::<ScanOptions>(
-				r#"{"regen_meta":true,"regen_hashes":true}"#
+				r#"{"config":{"regen_meta":true,"regen_hashes":true}}"#
 			)
 			.unwrap()
 			.config,
@@ -312,7 +367,7 @@ mod tests {
 
 	#[test]
 	fn test_deserialize_default() {
-		let options = r#"{}"#;
+		let options = r#"{"config": null}"#;
 		let options: ScanOptions = serde_json::from_str(options).unwrap();
 		assert!(options.is_default());
 	}

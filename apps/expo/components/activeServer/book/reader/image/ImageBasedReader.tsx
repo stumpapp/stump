@@ -1,11 +1,24 @@
+import {
+	ReactNativeZoomableView,
+	ZoomableViewEvent,
+} from '@openspacelabs/react-native-zoomable-view'
 import { useSDK, useUpdateMediaProgress } from '@stump/client'
 import { isAxiosError } from '@stump/sdk'
 import { Media } from '@stump/sdk'
 import { Image } from 'expo-image'
-import React, { useCallback, useMemo, useRef, useState } from 'react'
-import { FlatList, TouchableWithoutFeedback, useWindowDimensions, View } from 'react-native'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+	FlatList,
+	GestureResponderEvent,
+	PanResponderGestureState,
+	TouchableWithoutFeedback,
+	useWindowDimensions,
+	View,
+} from 'react-native'
+import { GestureHandlerGestureEvent, State, TapGestureHandler } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { Text } from '~/components/ui'
 import { useReaderStore } from '~/stores'
 
 type ImageDimension = {
@@ -44,6 +57,7 @@ export default function ImageBasedReader({ book, initialPage, incognito }: Props
 	const { height, width } = useWindowDimensions()
 
 	const [imageSizes, setImageHeights] = useState<Record<number, ImageDimension>>({})
+	const [isZoomed, setIsZoomed] = useState(false)
 
 	// const lastPrefetchStart = useRef(0)
 	// FIXME: useBookPreferences and get the reader mode from there
@@ -119,6 +133,7 @@ export default function ImageBasedReader({ book, initialPage, incognito }: Props
 						maxHeight={height}
 						// readingDirection="vertical"
 						readingDirection="horizontal"
+						onZoomChanged={setIsZoomed}
 					/>
 				)}
 				keyExtractor={(item) => item.toString()}
@@ -142,6 +157,7 @@ export default function ImageBasedReader({ book, initialPage, incognito }: Props
 						flatList.current?.scrollToIndex({ index: info.index, animated: true })
 					})
 				}}
+				scrollEnabled={!isZoomed}
 			/>
 		</View>
 	)
@@ -158,6 +174,7 @@ type PageProps = {
 	maxWidth: number
 	maxHeight: number
 	readingDirection: 'vertical' | 'horizontal'
+	onZoomChanged: (isZoomed: boolean) => void
 }
 const Page = React.memo(
 	({
@@ -169,6 +186,7 @@ const Page = React.memo(
 		maxWidth,
 		maxHeight,
 		readingDirection,
+		onZoomChanged,
 	}: PageProps) => {
 		const { sdk } = useSDK()
 		const insets = useSafeAreaInsets()
@@ -181,9 +199,46 @@ const Page = React.memo(
 			settings: state.settings,
 		}))
 
-		const handlePress = useCallback(() => {
-			setSettings({ showToolBar: !showToolBar })
-		}, [showToolBar, setSettings])
+		const zoomRef = useRef<ReactNativeZoomableView>(null)
+		const doubleTapRef = useRef<TouchableWithoutFeedback>(null)
+
+		const [zoomLevel, setZoomLevel] = useState(() => 1)
+
+		// const handlePress = useCallback(() => {
+		// 	setSettings({ showToolBar: !showToolBar })
+		// }, [showToolBar, setSettings])
+
+		const onSingleTap = useCallback((event: GestureHandlerGestureEvent) => {}, [])
+
+		// TODO: better double tap handling
+		const isZoomed = useMemo(() => zoomLevel > 1, [zoomLevel])
+
+		const onDoubleTap = useCallback(
+			(event: GestureHandlerGestureEvent) => {
+				if (!zoomRef.current) return
+				if (event.nativeEvent.state !== State.ACTIVE) return
+
+				if (isZoomed) {
+					zoomRef.current.zoomTo(1, { x: 0, y: 0 })
+				} else {
+					zoomRef.current.zoomTo(2, {
+						x: event.nativeEvent.x,
+						y: event.nativeEvent.y,
+					})
+				}
+			},
+			[isZoomed],
+		)
+
+		const onZoomChange = (
+			_event: GestureResponderEvent | null,
+			_gestureState: PanResponderGestureState | null,
+			{ zoomLevel }: ZoomableViewEvent,
+		) => setZoomLevel(zoomLevel)
+
+		useEffect(() => {
+			onZoomChanged(isZoomed)
+		}, [isZoomed, onZoomChanged])
 
 		/**
 		 * A memoized value that represents the size(s) of the image dimensions for the current page.
@@ -217,43 +272,61 @@ const Page = React.memo(
 			}
 		}, [deviceOrientation, pageSize, safeMaxHeight, maxWidth])
 
-		// TODO: https://github.com/likashefqet/react-native-image-zoom
 		return (
-			<TouchableWithoutFeedback onPress={handlePress}>
-				<View
-					className="flex items-center justify-center"
-					style={{
-						height: safeMaxHeight,
-						minHeight: safeMaxHeight,
-						minWidth: maxWidth,
-						width: maxWidth,
-					}}
-				>
-					<Image
-						source={{
-							uri: sdk.media.bookPageURL(id, index + 1),
-							headers: {
-								Authorization: sdk.authorizationHeader,
-							},
-						}}
-						style={{
-							alignSelf: readingDirection === 'horizontal' ? 'center' : undefined,
-							height,
-							width,
-						}}
-						onLoad={({ source: { height, width } }) => {
-							setImageHeights((prev) => ({
-								...prev,
-								[index + 1]: {
-									height,
-									ratio: deviceOrientation == 'landscape' ? height / width : width / height,
-									width,
-								},
-							}))
-						}}
-					/>
-				</View>
-			</TouchableWithoutFeedback>
+			<TapGestureHandler onHandlerStateChange={onSingleTap} numberOfTaps={1} waitFor={doubleTapRef}>
+				<TapGestureHandler ref={doubleTapRef} onHandlerStateChange={onDoubleTap} numberOfTaps={2}>
+					<ReactNativeZoomableView
+						ref={zoomRef}
+						maxZoom={5}
+						minZoom={1}
+						zoomStep={0.5}
+						initialZoom={1}
+						bindToBorders={true}
+						panEnabled={isZoomed}
+						movementSensibility={isZoomed ? 1 : 5}
+						pinchToZoomInSensitivity={1}
+						onZoomAfter={onZoomChange}
+						// doubleTapDelay={1}
+					>
+						<View
+							className="flex items-center justify-center"
+							style={{
+								height: safeMaxHeight,
+								minHeight: safeMaxHeight,
+								minWidth: maxWidth,
+								width: maxWidth,
+								marginTop: insets.top,
+								marginBottom: insets.bottom,
+							}}
+						>
+							<Image
+								source={{
+									uri: sdk.media.bookPageURL(id, index + 1),
+									headers: {
+										Authorization: sdk.authorizationHeader,
+									},
+								}}
+								// style={{
+								// 	alignSelf: readingDirection === 'horizontal' ? 'center' : undefined,
+								// 	height,
+								// 	width,
+								// }}
+								style={{ width: '100%', height: '100%', resizeMode: 'contain' }}
+								onLoad={({ source: { height, width } }) => {
+									setImageHeights((prev) => ({
+										...prev,
+										[index + 1]: {
+											height,
+											ratio: deviceOrientation == 'landscape' ? height / width : width / height,
+											width,
+										},
+									}))
+								}}
+							/>
+						</View>
+					</ReactNativeZoomableView>
+				</TapGestureHandler>
+			</TapGestureHandler>
 		)
 	},
 )

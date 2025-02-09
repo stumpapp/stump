@@ -4,7 +4,6 @@ import {
 } from '@openspacelabs/react-native-zoomable-view'
 import { useSDK, useUpdateMediaProgress } from '@stump/client'
 import { isAxiosError } from '@stump/sdk'
-import { Media } from '@stump/sdk'
 import { Image } from 'expo-image'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
@@ -18,10 +17,9 @@ import {
 import { GestureHandlerGestureEvent, State, TapGestureHandler } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { Text } from '~/components/ui'
 import { useReaderStore } from '~/stores'
+import { useBookPreferences } from '~/stores/reader'
 
-import ImageBasedReaderContainer from './Container'
 import { useImageBasedReader } from './context'
 
 type ImageDimension = {
@@ -30,8 +28,9 @@ type ImageDimension = {
 	ratio: number
 }
 
-// TODO: This is an image-based reader right now. Extract this to a separate component
-// which is rendered when the book is an image-based book.
+// TODO: The reading directions don't play well with the pinch and zoom, particularly the continuous
+// scroll modes. I think when it is set to continuous, the zoom might have to be on the list?
+// Not 100% sure, it is REALLY janky right now.
 
 // TODO: Account for device orientation AND reading direction
 
@@ -40,29 +39,22 @@ type Props = {
 	 * The initial page to start the reader on
 	 */
 	initialPage: number
-	/**
-	 * Whether the reader should be in incognito mode
-	 */
-	incognito?: boolean
 }
 
-// TODO: refactor to be agnostic so both Stump and OPDS can use it
 /**
  * A reader for books that are image-based, where each page should be displayed as an image
  */
-export default function ImageBasedReader({ initialPage, incognito }: Props) {
+export default function ImageBasedReader({ initialPage }: Props) {
 	const flatList = useRef<FlatList>(null)
 
 	const { book } = useImageBasedReader()
+	const {
+		preferences: { readingMode, incognito },
+	} = useBookPreferences(book.id)
 	const { height, width } = useWindowDimensions()
 
 	const [imageSizes, setImageHeights] = useState<Record<number, ImageDimension>>({})
 	const [isZoomed, setIsZoomed] = useState(false)
-
-	// const lastPrefetchStart = useRef(0)
-	// FIXME: useBookPreferences and get the reader mode from there
-	// const readerMode = useReaderStore((state) => state.mode)
-	const readerMode = 'paged'
 
 	const deviceOrientation = width > height ? 'landscape' : 'portrait'
 
@@ -98,55 +90,51 @@ export default function ImageBasedReader({ initialPage, incognito }: Props) {
 	)
 
 	return (
-		<ImageBasedReaderContainer>
-			<FlatList
-				ref={flatList}
-				data={Array.from({ length: book.pages }, (_, i) => i)}
-				renderItem={({ item }) => (
-					<Page
-						key={`page-${item}`}
-						deviceOrientation={deviceOrientation}
-						id={book.id}
-						index={item}
-						imageSizes={imageSizes}
-						setImageHeights={setImageHeights}
-						maxWidth={width}
-						maxHeight={height}
-						// readingDirection="vertical"
-						readingDirection="horizontal"
-						onZoomChanged={setIsZoomed}
-					/>
-				)}
-				keyExtractor={(item) => item.toString()}
-				horizontal={readerMode === 'paged'}
-				pagingEnabled={readerMode === 'paged'}
-				onViewableItemsChanged={({ viewableItems }) => {
-					const fistVisibleItemIdx = viewableItems
-						.filter(({ isViewable }) => isViewable)
-						.at(0)?.index
-					if (fistVisibleItemIdx) {
-						handleCurrentPageChanged(fistVisibleItemIdx + 1)
-					}
-				}}
-				initialNumToRender={10}
-				maxToRenderPerBatch={10}
-				initialScrollIndex={initialPage - 1}
-				// https://stackoverflow.com/questions/53059609/flat-list-scrolltoindex-should-be-used-in-conjunction-with-getitemlayout-or-on
-				onScrollToIndexFailed={(info) => {
-					const wait = new Promise((resolve) => setTimeout(resolve, 500))
-					wait.then(() => {
-						flatList.current?.scrollToIndex({ index: info.index, animated: true })
-					})
-				}}
-				scrollEnabled={!isZoomed}
-			/>
-		</ImageBasedReaderContainer>
+		<FlatList
+			ref={flatList}
+			data={Array.from({ length: book.pages }, (_, i) => i)}
+			renderItem={({ item }) => (
+				<Page
+					key={`page-${item}`}
+					deviceOrientation={deviceOrientation}
+					index={item}
+					imageSizes={imageSizes}
+					setImageHeights={setImageHeights}
+					maxWidth={width}
+					maxHeight={height}
+					// readingDirection="vertical"
+					readingDirection="horizontal"
+					onZoomChanged={setIsZoomed}
+				/>
+			)}
+			keyExtractor={(item) => item.toString()}
+			horizontal={readingMode === 'paged' || readingMode === 'continuous:horizontal'}
+			pagingEnabled={readingMode === 'paged'}
+			onViewableItemsChanged={({ viewableItems }) => {
+				const fistVisibleItemIdx = viewableItems.filter(({ isViewable }) => isViewable).at(0)?.index
+				if (fistVisibleItemIdx) {
+					handleCurrentPageChanged(fistVisibleItemIdx + 1)
+				}
+			}}
+			initialNumToRender={10}
+			maxToRenderPerBatch={10}
+			initialScrollIndex={initialPage - 1}
+			// https://stackoverflow.com/questions/53059609/flat-list-scrolltoindex-should-be-used-in-conjunction-with-getitemlayout-or-on
+			onScrollToIndexFailed={(info) => {
+				const wait = new Promise((resolve) => setTimeout(resolve, 500))
+				wait.then(() => {
+					flatList.current?.scrollToIndex({ index: info.index, animated: true })
+				})
+			}}
+			scrollEnabled={!isZoomed}
+			showsVerticalScrollIndicator={false}
+			showsHorizontalScrollIndicator={false}
+		/>
 	)
 }
 
 type PageProps = {
 	deviceOrientation: string
-	id: string
 	index: number
 	imageSizes: Record<number, ImageDimension>
 	setImageHeights: (
@@ -160,15 +148,15 @@ type PageProps = {
 const Page = React.memo(
 	({
 		deviceOrientation,
-		id,
 		index,
 		imageSizes,
 		setImageHeights,
 		maxWidth,
 		maxHeight,
-		readingDirection,
+		// readingDirection,
 		onZoomChanged,
 	}: PageProps) => {
+		const { pageURL } = useImageBasedReader()
 		const { sdk } = useSDK()
 		const insets = useSafeAreaInsets()
 
@@ -236,7 +224,7 @@ const Page = React.memo(
 
 		// We always want to display the image at the full width of the screen,
 		// and then calculate the height based on the aspect ratio of the image.
-		const { height, width } = useMemo(() => {
+		const _todo = useMemo(() => {
 			if (!pageSize) {
 				return {
 					height: safeMaxHeight,
@@ -287,7 +275,7 @@ const Page = React.memo(
 						>
 							<Image
 								source={{
-									uri: sdk.media.bookPageURL(id, index + 1),
+									uri: pageURL(index + 1),
 									headers: {
 										Authorization: sdk.authorizationHeader,
 									},

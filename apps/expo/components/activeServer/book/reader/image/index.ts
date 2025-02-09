@@ -1,2 +1,2 @@
 export { ImageBasedReaderContext } from './context'
-export { default as ImageBasedReader } from './ImageBasedReader'
+export { default as ImageBasedReader } from './ImageBasedReaderContainer'

@@ -6,14 +6,12 @@ import {
 	useSDK,
 } from '@stump/client'
 import { useLocalSearchParams } from 'expo-router'
-import { View } from 'react-native'
 
 import {
 	EpubJSReader,
 	ImageBasedReader,
 	UnsupportedReader,
 } from '~/components/activeServer/book/reader'
-import { ImageBasedReaderContext } from '~/components/activeServer/book/reader/image'
 
 type Params = {
 	id: string
@@ -28,7 +26,7 @@ export default function Screen() {
 	if (!book) return null
 
 	if (book.extension.match(EBOOK_EXTENSION)) {
-		const currentProgressCfi = book.current_epubcfi || undefined
+		// const currentProgressCfi = book.current_epubcfi || undefined
 		// const initialCfi = restart ? undefined : currentProgressCfi
 		return <EpubJSReader book={book} /*initialCfi={initialCfi} incognito={incognito}*/ />
 	} else if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
@@ -36,14 +34,11 @@ export default function Screen() {
 		// const initialPage = restart ? 1 : currentProgressPage
 		const initialPage = currentProgressPage
 		return (
-			<ImageBasedReaderContext.Provider
-				value={{
-					book: { id: book.id, name: book.metadata?.title || book.name, pages: book.pages },
-					pageURL: (page: number) => sdk.media.bookPageURL(book.id, page),
-				}}
-			>
-				<ImageBasedReader initialPage={initialPage} />
-			</ImageBasedReaderContext.Provider>
+			<ImageBasedReader
+				initialPage={initialPage}
+				book={{ id: book.id, name: book.metadata?.title || book.name, pages: book.pages }}
+				pageURL={(page: number) => sdk.media.bookPageURL(book.id, page)}
+			/>
 		)
 	}
 

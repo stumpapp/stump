@@ -75,7 +75,10 @@ export const useBookPreferences = (id: string) => {
 	)
 
 	return {
-		preferences: bookSettings || store.globalSettings,
+		preferences: {
+			...(bookSettings || store.globalSettings),
+			incognito: store.globalSettings.incognito,
+		},
 		setBookPreferences,
 		updateGlobalSettings: store.setGlobalSettings,
 	}

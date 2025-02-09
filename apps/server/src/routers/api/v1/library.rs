@@ -4,8 +4,8 @@ use axum::{
 	routing::{get, post, put},
 	Extension, Json, Router,
 };
-use chrono::Duration;
-use prisma_client_rust::{chrono::Utc, not, or, raw, PrismaValue};
+use chrono::{DateTime, Duration, FixedOffset, Utc};
+use prisma_client_rust::{not, or, raw, PrismaValue};
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use serde_with::skip_serializing_none;
@@ -20,6 +20,7 @@ use stump_core::{
 	db::{
 		entity::{
 			macros::{
+				library_idents_select, library_scan_details,
 				library_series_ids_media_ids_include, library_tags_select,
 				library_thumbnails_deletion_include, series_or_library_thumbnail,
 			},
@@ -38,11 +39,14 @@ use stump_core::{
 			GenerateThumbnailOptions, ImageFormat, ImageProcessorOptions,
 			ThumbnailGenerationJob, ThumbnailGenerationJobParams,
 		},
-		scanner::{LibraryScanJob, ScanOptions},
+		scanner::{LastLibraryScan, LibraryScanJob, LibraryScanRecord, ScanOptions},
 		ContentType,
 	},
 	prisma::{
-		last_library_visit, library, library_config, media, series, tag, user, SortOrder,
+		last_library_visit, library, library_config, library_scan_record,
+		media::{self, OrderByParam as MediaOrderByParam},
+		series::{self, OrderByParam as SeriesOrderByParam},
+		tag, user, SortOrder,
 	},
 };
 
@@ -87,6 +91,11 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route(
 					"/excluded-users",
 					get(get_library_excluded_users).post(update_library_excluded_users),
+				)
+				.route("/last-scan", get(get_library_last_scan))
+				.route(
+					"/scan-history",
+					get(get_library_scan_history).delete(delete_library_scan_history),
 				)
 				.route("/scan", post(scan_library))
 				.route("/clean", put(clean_library))
@@ -989,6 +998,111 @@ async fn update_library_excluded_users(
 	Ok(Json(Library::from(updated_library)))
 }
 
+#[derive(Debug, Deserialize, Serialize, ToSchema, Type)]
+pub struct LastScanDetails {
+	last_scanned_at: Option<DateTime<FixedOffset>>,
+	last_scan: Option<LastLibraryScan>,
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/libraries/:id/last-scan",
+	tag = "library",
+	params(
+		("id" = String, Path, description = "The library ID")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched library last scan details", body = LastScanDetails),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Library not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
+/// Get the last scan details for a library by id, if the current user has access to it.
+/// This includes the last scanned at timestamp and the last custom scan details.
+async fn get_library_last_scan(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+) -> APIResult<Json<LastScanDetails>> {
+	let client = &ctx.db;
+
+	let record = client
+		.library()
+		.find_first(vec![
+			library::id::equals(id.clone()),
+			library_not_hidden_from_user_filter(req.user()),
+		])
+		.with(
+			library::scan_history::fetch(vec![])
+				.order_by(library_scan_record::timestamp::order(Direction::Desc)),
+		)
+		.select(library_scan_details::select())
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound("Library not found".to_string()))?;
+
+	let last_scan = record
+		.scan_history
+		.first()
+		.cloned()
+		.map(LastLibraryScan::try_from)
+		.transpose()?;
+	let last_scanned_at = record.last_scanned_at;
+
+	Ok(Json(LastScanDetails {
+		last_scanned_at,
+		last_scan,
+	}))
+}
+
+async fn get_library_scan_history(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+) -> APIResult<Json<Vec<LibraryScanRecord>>> {
+	let client = &ctx.db;
+
+	let records = client
+		.library_scan_record()
+		.find_many(vec![library_scan_record::library::is(vec![
+			library::id::equals(id.clone()),
+			library_not_hidden_from_user_filter(req.user()),
+		])])
+		.order_by(library_scan_record::timestamp::order(Direction::Desc))
+		.exec()
+		.await?;
+
+	let scan_history = records
+		.into_iter()
+		.map(LibraryScanRecord::try_from)
+		.collect::<Result<_, _>>()?;
+
+	Ok(Json(scan_history))
+}
+
+async fn delete_library_scan_history(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+) -> APIResult<Json<()>> {
+	req.enforce_permissions(&[UserPermission::ManageLibrary])?;
+
+	let client = &ctx.db;
+
+	let affected_rows = client
+		.library_scan_record()
+		.delete_many(vec![library_scan_record::library::is(vec![
+			library::id::equals(id.clone()),
+			library_not_hidden_from_user_filter(req.user()),
+		])])
+		.exec()
+		.await?;
+	tracing::debug!(affected_rows, "Deleted library scan history records");
+
+	Ok(Json(()))
+}
+
 #[utoipa::path(
 	post,
 	path = "/api/v1/libraries/:id/scan",
@@ -1002,6 +1116,7 @@ async fn update_library_excluded_users(
 )]
 /// Queue a ScannerJob to scan the library by id. The job, when started, is
 /// executed in a separate thread.
+#[tracing::instrument(skip(ctx, req))]
 async fn scan_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -1017,6 +1132,7 @@ async fn scan_library(
 			library::id::equals(id.clone()),
 			library_not_hidden_from_user_filter(&user),
 		])
+		.select(library_idents_select::select())
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound(format!(
@@ -1030,6 +1146,7 @@ async fn scan_library(
 				"Failed to enqueue library scan job".to_string(),
 			)
 		})?;
+	tracing::debug!("Enqueued library scan job");
 
 	Ok(())
 }

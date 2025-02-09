@@ -21,6 +21,7 @@ use crate::{
 };
 
 use super::{
+	options::BookVisitOperation,
 	utils::{
 		handle_missing_media, handle_restored_media, safely_build_and_insert_media,
 		visit_and_update_media, MediaBuildOperation, MediaOperationOutput,
@@ -34,7 +35,7 @@ pub enum SeriesScanTask {
 	MarkMissingMedia(Vec<PathBuf>),
 	RestoreMedia(Vec<String>),
 	CreateMedia(Vec<PathBuf>),
-	VisitMedia(Vec<PathBuf>),
+	VisitMedia(Vec<(PathBuf, BookVisitOperation)>),
 }
 
 #[derive(Clone)]
@@ -150,7 +151,7 @@ impl JobExt for SeriesScanJob {
 				db: ctx.db.clone(),
 				ignore_rules,
 				max_depth,
-				options: self.options.clone(),
+				options: self.options,
 			},
 		)
 		.await?;
@@ -303,9 +304,9 @@ impl JobExt for SeriesScanJob {
 				output.created_media += created_media;
 				logs.extend(new_logs);
 			},
-			SeriesScanTask::VisitMedia(paths) => {
+			SeriesScanTask::VisitMedia(params) => {
 				ctx.report_progress(JobProgress::msg(
-					format!("Visiting {} media entities on disk", paths.len()).as_str(),
+					format!("Visiting {} media entities on disk", params.len()).as_str(),
 				));
 				let MediaOperationOutput {
 					updated_media,
@@ -318,7 +319,7 @@ impl JobExt for SeriesScanJob {
 						max_concurrency,
 					},
 					ctx,
-					paths,
+					params,
 				)
 				.await?;
 				ctx.send_batch(vec![

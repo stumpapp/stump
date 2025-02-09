@@ -1,9 +1,8 @@
 import { useUpdatePreferences } from '@stump/client'
+import { WideSwitch } from '@stump/components'
 import { UpdateUserPreferences } from '@stump/sdk'
 
 import { useUserStore } from '@/stores'
-
-import PreferenceToggle from '../../PreferenceToggle'
 
 export default function QueryIndicatorToggle() {
 	const { preferences, setPreferences } = useUserStore((state) => ({
@@ -25,12 +24,12 @@ export default function QueryIndicatorToggle() {
 	}
 
 	return (
-		<PreferenceToggle
+		<WideSwitch
 			formId="show_query_indicator"
 			label="Background fetch indicator"
 			description="Show a loading indicator whenever a query is running in the background"
-			isChecked={preferences?.show_query_indicator}
-			onToggle={handleChange}
+			checked={preferences?.show_query_indicator}
+			onCheckedChange={handleChange}
 		/>
 	)
 }

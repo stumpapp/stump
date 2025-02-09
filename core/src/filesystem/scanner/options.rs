@@ -80,6 +80,7 @@ impl BookVisitResult {
 /// specific options.
 #[derive(Debug, Default, Clone, Copy, Deserialize, Type, Serialize)]
 pub struct ScanOptions {
+	#[serde(default)]
 	pub config: ScanConfig,
 }
 
@@ -367,6 +368,9 @@ mod tests {
 
 	#[test]
 	fn test_deserialize_default() {
+		let options = r#"{}"#;
+		let options: ScanOptions = serde_json::from_str(options).unwrap();
+		assert!(options.is_default());
 		let options = r#"{"config": null}"#;
 		let options: ScanOptions = serde_json::from_str(options).unwrap();
 		assert!(options.is_default());

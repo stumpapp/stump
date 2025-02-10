@@ -21,7 +21,12 @@ type Params = {
 export default function Screen() {
 	const { id: bookID } = useLocalSearchParams<Params>()
 	const { sdk } = useSDK()
-	const { media: book } = useMediaByIdQuery(bookID, { suspense: true })
+	const { media: book } = useMediaByIdQuery(bookID, {
+		suspense: true,
+		params: {
+			load_pages: true,
+		},
+	})
 
 	if (!book) return null
 
@@ -38,6 +43,11 @@ export default function Screen() {
 				initialPage={initialPage}
 				book={{ id: book.id, name: book.metadata?.title || book.name, pages: book.pages }}
 				pageURL={(page: number) => sdk.media.bookPageURL(book.id, page)}
+				imageSizes={book.metadata?.page_dimensions?.dimensions?.map(({ height, width }) => ({
+					height,
+					width,
+					ratio: width / height,
+				}))}
 			/>
 		)
 	}

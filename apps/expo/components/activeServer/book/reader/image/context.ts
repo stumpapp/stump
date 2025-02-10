@@ -6,8 +6,15 @@ export type ImageBasedBookRef = {
 	pages: number
 }
 
+export type ImageBasedBookPageRef = {
+	height: number
+	width: number
+	ratio: number
+}
+
 export type IImageBasedReaderContext = {
 	book: ImageBasedBookRef
+	imageSizes?: ImageBasedBookPageRef[]
 	pageURL: (page: number) => string
 }
 

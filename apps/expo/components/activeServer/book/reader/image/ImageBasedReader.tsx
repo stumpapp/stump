@@ -1,26 +1,21 @@
-import {
-	ReactNativeZoomableView,
-	ZoomableViewEvent,
-} from '@openspacelabs/react-native-zoomable-view'
 import { useSDK, useUpdateMediaProgress } from '@stump/client'
 import { isAxiosError } from '@stump/sdk'
-import { Image } from 'expo-image'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Image, ImageLoadEventData } from 'expo-image'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
+import { FlatList, TouchableWithoutFeedback, useWindowDimensions, View } from 'react-native'
 import {
-	FlatList,
-	GestureResponderEvent,
-	PanResponderGestureState,
-	TouchableWithoutFeedback,
-	useWindowDimensions,
-	View,
-} from 'react-native'
-import { GestureHandlerGestureEvent, State, TapGestureHandler } from 'react-native-gesture-handler'
+	GestureStateChangeEvent,
+	State,
+	TapGestureHandlerEventPayload,
+} from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Zoomable } from '@likashefqet/react-native-image-zoom'
 
 import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
 
 import { useImageBasedReader } from './context'
+import { useSharedValue } from 'react-native-reanimated'
 
 type ImageDimension = {
 	height: number
@@ -31,6 +26,7 @@ type ImageDimension = {
 // TODO: The reading directions don't play well with the pinch and zoom, particularly the continuous
 // scroll modes. I think when it is set to continuous, the zoom might have to be on the list?
 // Not 100% sure, it is REALLY janky right now.
+// TODO: depending on above, remove @openspacelabs/react-native-zoomable-view. Zoomable might be enough!!!
 
 // TODO: Account for device orientation AND reading direction
 
@@ -47,21 +43,23 @@ type Props = {
 export default function ImageBasedReader({ initialPage }: Props) {
 	const flatList = useRef<FlatList>(null)
 
-	const { book } = useImageBasedReader()
+	const { book, imageSizes = [] } = useImageBasedReader()
 	const {
 		preferences: { readingMode, incognito },
 	} = useBookPreferences(book.id)
 	const { height, width } = useWindowDimensions()
 
-	const [imageSizes, setImageHeights] = useState<Record<number, ImageDimension>>({})
-	const [isZoomed, setIsZoomed] = useState(false)
+	const [sizes, setSizes] = useState<ImageDimension[]>(() => imageSizes)
 
 	const deviceOrientation = width > height ? 'landscape' : 'portrait'
 
 	// TODO: an effect that whenever the device orientation changes to something different than before,
 	// recalculate the ratios of the images? Maybe. Who knows, you will though
 
-	const { updateReadProgressAsync } = useUpdateMediaProgress(book.id)
+	const { updateReadProgressAsync } = useUpdateMediaProgress(book.id, {
+		retry: (attempts) => attempts < 3,
+		useErrorBoundary: false,
+	})
 
 	/**
 	 * A callback that updates the read progress of the current page. This will be
@@ -74,10 +72,6 @@ export default function ImageBasedReader({ initialPage }: Props) {
 			if (!incognito) {
 				try {
 					await updateReadProgressAsync(page)
-					// if (page - lastPrefetchStart.current > 5) {
-					// 	await prefetchPages(page, page + 5)
-					// }
-					// lastPrefetchStart.current = page
 				} catch (e) {
 					console.error(e)
 					if (isAxiosError(e)) {
@@ -98,13 +92,10 @@ export default function ImageBasedReader({ initialPage }: Props) {
 					key={`page-${item}`}
 					deviceOrientation={deviceOrientation}
 					index={item}
-					imageSizes={imageSizes}
-					setImageHeights={setImageHeights}
+					onSizeLoaded={setSizes}
 					maxWidth={width}
 					maxHeight={height}
-					// readingDirection="vertical"
 					readingDirection="horizontal"
-					onZoomChanged={setIsZoomed}
 				/>
 			)}
 			keyExtractor={(item) => item.toString()}
@@ -120,13 +111,12 @@ export default function ImageBasedReader({ initialPage }: Props) {
 			maxToRenderPerBatch={10}
 			initialScrollIndex={initialPage - 1}
 			// https://stackoverflow.com/questions/53059609/flat-list-scrolltoindex-should-be-used-in-conjunction-with-getitemlayout-or-on
-			onScrollToIndexFailed={(info) => {
+			onScrollToIndexFailed={() => {
 				const wait = new Promise((resolve) => setTimeout(resolve, 500))
 				wait.then(() => {
-					flatList.current?.scrollToIndex({ index: info.index, animated: true })
+					flatList.current?.scrollToIndex({ index: initialPage - 1, animated: true })
 				})
 			}}
-			scrollEnabled={!isZoomed}
 			showsVerticalScrollIndicator={false}
 			showsHorizontalScrollIndicator={false}
 		/>
@@ -136,89 +126,58 @@ export default function ImageBasedReader({ initialPage }: Props) {
 type PageProps = {
 	deviceOrientation: string
 	index: number
-	imageSizes: Record<number, ImageDimension>
-	setImageHeights: (
-		fn: (prev: Record<number, ImageDimension>) => Record<number, ImageDimension>,
-	) => void
+	onSizeLoaded: (fn: (prev: ImageDimension[]) => ImageDimension[]) => void
 	maxWidth: number
 	maxHeight: number
 	readingDirection: 'vertical' | 'horizontal'
-	onZoomChanged: (isZoomed: boolean) => void
 }
 const Page = React.memo(
 	({
 		deviceOrientation,
 		index,
-		imageSizes,
-		setImageHeights,
+		onSizeLoaded,
 		maxWidth,
 		maxHeight,
 		// readingDirection,
-		onZoomChanged,
 	}: PageProps) => {
-		const { pageURL } = useImageBasedReader()
+		const { pageURL, imageSizes = [] } = useImageBasedReader()
 		const { sdk } = useSDK()
 		const insets = useSafeAreaInsets()
 
-		const zoomRef = useRef<ReactNativeZoomableView>(null)
-		const doubleTapRef = useRef<TouchableWithoutFeedback>(null)
+		const scale = useSharedValue(1)
 
-		const [zoomLevel, setZoomLevel] = useState(() => 1)
-
-		// const handlePress = useCallback(() => {
-		// 	setSettings({ showToolBar: !showToolBar })
-		// }, [showToolBar, setSettings])
 		const showControls = useReaderStore((state) => state.showControls)
 		const setShowControls = useReaderStore((state) => state.setShowControls)
 
 		const onSingleTap = useCallback(
-			(event: GestureHandlerGestureEvent) => {
-				if (event.nativeEvent.state !== State.ACTIVE) return
-
+			(event: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => {
+				if (event.state !== State.ACTIVE) return
 				setShowControls(!showControls)
 			},
 			[showControls, setShowControls],
 		)
 
-		// TODO: better double tap handling
-		const isZoomed = useMemo(() => zoomLevel > 1, [zoomLevel])
-
-		const onDoubleTap = useCallback(
-			(event: GestureHandlerGestureEvent) => {
-				if (!zoomRef.current) return
-				if (event.nativeEvent.state !== State.ACTIVE) return
-
-				// Providing x and y will change zoom relative to the area that was double-tapped.
-				// This is important for zooming in and out, but definitely makes a smoother difference
-				// when zooming out
-				const params =
-					typeof event.nativeEvent.x === 'number' && typeof event.nativeEvent.y === 'number'
-						? { x: event.nativeEvent.x, y: event.nativeEvent.y }
-						: undefined
-
-				if (isZoomed) {
-					zoomRef.current.zoomTo(1, params)
-				} else {
-					zoomRef.current.zoomTo(2, params)
-				}
-			},
-			[isZoomed],
-		)
-
-		const onZoomChange = (
-			_event: GestureResponderEvent | null,
-			_gestureState: PanResponderGestureState | null,
-			{ zoomLevel }: ZoomableViewEvent,
-		) => setZoomLevel(zoomLevel)
-
-		useEffect(() => {
-			onZoomChanged(isZoomed)
-		}, [isZoomed, onZoomChanged])
-
 		/**
 		 * A memoized value that represents the size(s) of the image dimensions for the current page.
 		 */
-		const pageSize = useMemo(() => imageSizes[index + 1], [imageSizes, index])
+		const pageSize = useMemo(() => imageSizes[index], [imageSizes, index])
+
+		const onImageLoaded = useCallback(
+			(event: ImageLoadEventData) => {
+				const { height, width } = event.source
+				const ratio = width / height
+
+				const isDifferent = pageSize?.height !== height || pageSize?.width !== width
+				if (isDifferent) {
+					onSizeLoaded((prev) => {
+						const next = [...prev]
+						next[index] = { height, width, ratio }
+						return next
+					})
+				}
+			},
+			[onSizeLoaded, pageSize],
+		)
 
 		const safeMaxHeight = maxHeight - insets.top - insets.bottom
 
@@ -248,59 +207,44 @@ const Page = React.memo(
 		}, [deviceOrientation, pageSize, safeMaxHeight, maxWidth])
 
 		return (
-			<TapGestureHandler onHandlerStateChange={onSingleTap} numberOfTaps={1} waitFor={doubleTapRef}>
-				<TapGestureHandler ref={doubleTapRef} onHandlerStateChange={onDoubleTap} numberOfTaps={2}>
-					<ReactNativeZoomableView
-						ref={zoomRef}
-						maxZoom={5}
-						minZoom={1}
-						zoomStep={0.5}
-						initialZoom={1}
-						bindToBorders={true}
-						panEnabled={isZoomed}
-						movementSensibility={isZoomed ? 1 : 5}
-						pinchToZoomInSensitivity={1}
-						onZoomAfter={onZoomChange}
-					>
-						<View
-							className="flex items-center justify-center"
-							style={{
-								height: safeMaxHeight,
-								minHeight: safeMaxHeight,
-								minWidth: maxWidth,
-								width: maxWidth,
-								marginTop: insets.top,
-								marginBottom: insets.bottom,
-							}}
-						>
-							<Image
-								source={{
-									uri: pageURL(index + 1),
-									headers: {
-										Authorization: sdk.authorizationHeader,
-									},
-								}}
-								// style={{
-								// 	alignSelf: readingDirection === 'horizontal' ? 'center' : undefined,
-								// 	height,
-								// 	width,
-								// }}
-								style={{ width: '100%', height: '100%', resizeMode: 'contain' }}
-								onLoad={({ source: { height, width } }) => {
-									setImageHeights((prev) => ({
-										...prev,
-										[index + 1]: {
-											height,
-											ratio: deviceOrientation == 'landscape' ? height / width : width / height,
-											width,
-										},
-									}))
-								}}
-							/>
-						</View>
-					</ReactNativeZoomableView>
-				</TapGestureHandler>
-			</TapGestureHandler>
+			<Zoomable
+				minScale={1}
+				maxScale={5}
+				scale={scale}
+				doubleTapScale={3}
+				isSingleTapEnabled
+				isDoubleTapEnabled
+				onSingleTap={onSingleTap}
+				style={{
+					flex: 1,
+				}}
+			>
+				<View
+					className="flex items-center justify-center"
+					style={{
+						height: safeMaxHeight,
+						minHeight: safeMaxHeight,
+						minWidth: maxWidth,
+						width: maxWidth,
+					}}
+				>
+					<Image
+						source={{
+							uri: pageURL(index + 1),
+							headers: {
+								Authorization: sdk.authorizationHeader,
+							},
+						}}
+						// TODO: figure out how to render landscape better...
+						style={{
+							height: '100%',
+							width: '100%',
+						}}
+						contentFit="contain"
+						onLoad={onImageLoaded}
+					/>
+				</View>
+			</Zoomable>
 		)
 	},
 )

@@ -14,6 +14,7 @@ type ImageDimension = {
 	ratio: number
 }
 
+// TODO: refactor to use imagebasedreader when able
 export default function Screen() {
 	const insets = useSafeAreaInsets()
 	const { sdk } = useSDK()

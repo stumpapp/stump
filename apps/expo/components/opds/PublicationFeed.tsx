@@ -12,12 +12,15 @@ import { cn } from '~/lib/utils'
 import { useActiveServer } from '../activeServer'
 import { Text } from '../ui'
 import FeedTitle from './FeedTitle'
+import RefreshControl from '../RefreshControl'
 
 type Props = {
 	feed: OPDSFeed
+	onRefresh?: () => void
+	isRefreshing?: boolean
 }
 
-export default function PublicationFeed({ feed }: Props) {
+export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props) {
 	const { isTablet, isXSmall, safeWidth: width } = useDisplay()
 	const {
 		activeServer: { id: serverID },
@@ -165,6 +168,11 @@ export default function PublicationFeed({ feed }: Props) {
 				keyExtractor={(item) => item.metadata.title}
 				onEndReached={onEndReached}
 				onEndReachedThreshold={0.75}
+				refreshControl={
+					!!onRefresh ? (
+						<RefreshControl refreshing={isRefreshing || false} onRefresh={onRefresh} />
+					) : undefined
+				}
 			/>
 		</View>
 	)

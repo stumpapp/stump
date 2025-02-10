@@ -35,6 +35,8 @@ export default function Screen() {
 	const seriesPosition = media.metadata?.number
 	const seriesVolume = media.metadata?.volume
 
+	const noMetadata = !description && !seriesName && !genres && !characters
+
 	const publisher = media.metadata?.publisher
 	const writers = media.metadata?.writers?.join(', ')
 	const colorists = media.metadata?.colorists?.join(', ')
@@ -95,6 +97,8 @@ export default function Screen() {
 						<Text className="text-lg text-foreground-muted">Metadata</Text>
 
 						<View className="flex flex-col gap-2 rounded-lg bg-background-surface p-3">
+							{noMetadata && <InfoRow label="No metadata available" value="" />}
+
 							{description && <InfoRow label="Description" value={description} />}
 
 							{seriesName && <InfoRow label="Series Name" value={seriesName} />}

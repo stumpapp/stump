@@ -5,14 +5,16 @@ import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
 import { icons } from '~/components/ui'
+import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 import { useUserStore } from '~/stores'
 
-const { Unplug, Plus } = icons
+const { Unplug, Plus, Home, SquareLibrary, Search } = icons
 
 export default function TabLayout() {
 	const { sdk } = useSDK()
 
+	const { isDarkColorScheme } = useColorScheme()
 	const router = useRouter()
 	const setUser = useUserStore((state) => state.setUser)
 
@@ -26,12 +28,14 @@ export default function TabLayout() {
 	}
 
 	return (
-		<Tabs screenOptions={{ tabBarActiveTintColor: 'white' }}>
+		<Tabs screenOptions={{ tabBarActiveTintColor: isDarkColorScheme ? 'white' : 'black' }}>
 			<Tabs.Screen
 				name="index"
 				options={{
 					title: 'Home',
-					tabBarIcon: ({ color }) => <FontAwesome size={20} name="home" color={color} />,
+					tabBarIcon: ({ focused }) => (
+						<Home className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })} />
+					),
 					headerLeft: () => (
 						<Pressable onPress={() => router.dismissAll()}>
 							{({ pressed }) => (
@@ -53,7 +57,11 @@ export default function TabLayout() {
 				name="browse"
 				options={{
 					title: 'Browse',
-					tabBarIcon: ({ color }) => <FontAwesome size={20} name="book" color={color} />,
+					tabBarIcon: ({ focused }) => (
+						<SquareLibrary
+							className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
+						/>
+					),
 					headerRight: () => (
 						<Pressable>
 							{({ pressed }) => (
@@ -63,7 +71,7 @@ export default function TabLayout() {
 										pressed && 'opacity-70',
 									)}
 								>
-									<Plus size={20} className="text-foreground-muted" />
+									<Plus className="h-6 w-6 text-foreground-muted" />
 								</View>
 							)}
 						</Pressable>
@@ -76,7 +84,11 @@ export default function TabLayout() {
 				options={{
 					headerShown: false,
 					title: 'Search',
-					tabBarIcon: ({ color }) => <FontAwesome size={20} name="search" color={color} />,
+					tabBarIcon: ({ focused }) => (
+						<Search
+							className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
+						/>
+					),
 				}}
 			/>
 		</Tabs>

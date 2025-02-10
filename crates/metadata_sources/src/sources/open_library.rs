@@ -3,9 +3,10 @@
 
 use serde::Deserialize;
 
-use crate::ConfigSchema;
-
-use super::{MetadataOutput, MetadataSource, MetadataSourceError, MetadataSourceInput};
+use crate::{
+	ConfigSchema, MetadataOutput, MetadataSource, MetadataSourceError,
+	MetadataSourceInput,
+};
 
 // The name used to identify the source in the database, retrieve the [`MetadataSource`]
 /// implementation, and displayed to the user in the UI.
@@ -38,7 +39,7 @@ impl MetadataSource for OpenLibrarySource {
 		&self,
 		input: &MetadataSourceInput,
 		_config: &Option<String>,
-	) -> Result<MetadataOutput, MetadataSourceError> {
+	) -> Result<Vec<MetadataOutput>, MetadataSourceError> {
 		if input.title.is_none() {
 			return Err(MetadataSourceError::IncompatibleInput(
 				"OpenLibrary requires the title field in an input".to_string(),
@@ -62,12 +63,12 @@ impl MetadataSource for OpenLibrarySource {
 			authors.extend(doc.author_name.clone());
 		}
 
-		Ok(MetadataOutput {
+		Ok(vec![MetadataOutput {
 			title,
 			authors,
 			description: None,
 			published: None,
-		})
+		}])
 	}
 
 	fn get_config_schema(&self) -> Option<ConfigSchema> {
@@ -91,7 +92,12 @@ mod tests {
 			title: Some("Dune".to_string()),
 			..Default::default()
 		};
+
 		let metadata_output = source.get_metadata(&test_input, &None).await.unwrap();
-		assert_eq!(metadata_output.title.unwrap(), "Dune");
+		let first_metadata = metadata_output
+			.first()
+			.expect("Expected at least one metadata entry");
+
+		assert_eq!(first_metadata.title.as_deref(), Some("Dune"));
 	}
 }

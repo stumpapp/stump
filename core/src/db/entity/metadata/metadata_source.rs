@@ -26,7 +26,7 @@ impl MetadataSourceEntry {
 	pub async fn get_metadata(
 		&self,
 		input: &MetadataSourceInput,
-	) -> Result<MetadataOutput, MetadataSourceError> {
+	) -> Result<Vec<MetadataOutput>, MetadataSourceError> {
 		metadata_sources::get_source_by_name(&self.name)?
 			.get_metadata(input, &self.config)
 			.await
@@ -147,12 +147,11 @@ mod tests {
 			config: None,
 		};
 
-		let title_from_source = source
-			.get_metadata(&test_input)
-			.await
-			.unwrap()
-			.title
-			.unwrap();
-		assert_eq!(title_from_source, "Dune");
+		let metadata_output = source.get_metadata(&test_input).await.unwrap();
+		let first_metadata = metadata_output
+			.first()
+			.expect("Expected at least one metadata entry");
+
+		assert_eq!(first_metadata.title.as_deref(), Some("Dune"));
 	}
 }

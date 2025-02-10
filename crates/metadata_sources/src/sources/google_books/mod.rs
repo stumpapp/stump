@@ -9,17 +9,28 @@ use response::GoogleBooksResponse;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::ConfigSchema;
-
-use super::{MetadataOutput, MetadataSource, MetadataSourceError, MetadataSourceInput};
+use crate::{
+	ConfigSchema, MetadataOutput, MetadataSource, MetadataSourceError,
+	MetadataSourceInput,
+};
 
 /// The name used to identify the source in the database, retrieve the [`MetadataSource`]
 /// implementation, and displayed to the user in the UI.
 pub const SOURCE_NAME: &str = "Google Books";
 
-#[derive(Debug, Deserialize, Serialize, JsonSchema, Default)]
+#[derive(Debug, Deserialize, Serialize, JsonSchema)]
 pub struct GoogleBooksConfig {
 	api_key: Option<String>,
+	max_result_count: u32,
+}
+
+impl Default for GoogleBooksConfig {
+	fn default() -> Self {
+		Self {
+			api_key: Default::default(),
+			max_result_count: 10,
+		}
+	}
 }
 
 /// Implements metadata retrieval using the Google Books API.
@@ -35,7 +46,7 @@ impl MetadataSource for GoogleBooksSource {
 		&self,
 		input: &MetadataSourceInput,
 		config: &Option<String>,
-	) -> Result<MetadataOutput, MetadataSourceError> {
+	) -> Result<Vec<MetadataOutput>, MetadataSourceError> {
 		// Parse config JSON or error
 		let config: GoogleBooksConfig = if let Some(cfg_json) = config {
 			serde_json::from_str(cfg_json)?
@@ -54,28 +65,32 @@ impl MetadataSource for GoogleBooksSource {
 		};
 
 		// Make the request
-		let url = build_request_url(input, api_key)?;
+		let url = build_request_url(input, api_key, config.max_result_count)?;
 		let response = reqwest::get(url)
 			.await?
 			.json::<GoogleBooksResponse>()
 			.await?;
 
+		// TODO - Remove
 		println!("{response:?}");
 
-		// Use the response to fill MetadataOutput
+		// Convert response items into MetadataOutput
 		if let Some(items) = response.items {
-			if let Some(first_item) = items.into_iter().next() {
-				let info = first_item.volume_info;
-				return Ok(MetadataOutput {
-					title: info.title,
-					authors: info.authors.unwrap_or_default(),
-					description: info.description,
-					published: info.published_date,
-				});
+			if !items.is_empty() {
+				let metadata_outputs: Vec<MetadataOutput> = items
+					.into_iter()
+					.map(|item: response::GoogleBooksVolume| MetadataOutput {
+						title: item.volume_info.title,
+						authors: item.volume_info.authors.unwrap_or_default(),
+						description: item.volume_info.description,
+						published: item.volume_info.published_date,
+					})
+					.collect();
+				return Ok(metadata_outputs);
 			}
 		}
 
-		// Return an error if the response was empty
+		// Return an error if response.items was None or empty
 		return Err(MetadataSourceError::ResponseError(
 			"Google Books response contained no items.".to_string(),
 		));
@@ -116,6 +131,10 @@ mod tests {
 			.get_metadata(&test_input, &Some(test_config))
 			.await
 			.unwrap();
-		assert_eq!(metadata_output.title.unwrap(), "Dune");
+		let first_metadata = metadata_output
+			.first()
+			.expect("Expected at least one metadata entry");
+
+		assert_eq!(first_metadata.title.as_deref(), Some("Dune"));
 	}
 }

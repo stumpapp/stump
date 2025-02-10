@@ -26,14 +26,14 @@
 //!   to the [`REGISTERED_SOURCES`] constant.
 //!
 
-mod comicvine;
 mod config_schema;
-mod google_books;
-mod open_library;
+mod filename_parser;
+mod sources;
 
 use thiserror::Error;
 
 pub use config_schema::{ConfigSchema, SchemaField, SchemaFieldType};
+use sources::*;
 
 /// A constant containing a list of source identities for implementations of [`MetadataSource`].
 /// A source's identity must be inlcuded here or it will not be written to the database to be
@@ -84,7 +84,7 @@ pub trait MetadataSource {
 		&self,
 		input: &MetadataSourceInput,
 		config: &Option<String>,
-	) -> Result<MetadataOutput, MetadataSourceError>;
+	) -> Result<Vec<MetadataOutput>, MetadataSourceError>;
 
 	/// Returns an optional [`ConfigSchema`] describing the JSON config structure for this source.
 	///

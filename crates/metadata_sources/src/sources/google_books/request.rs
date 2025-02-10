@@ -6,6 +6,7 @@ const BASE_URL: &str = "https://www.googleapis.com/books/v1/volumes";
 pub fn build_request_url(
 	input: &MetadataSourceInput,
 	api_key: String,
+	max_result_count: u32,
 ) -> Result<String, MetadataSourceError> {
 	// Build up query parameters
 	let mut query_parts = Vec::new();
@@ -13,7 +14,7 @@ pub fn build_request_url(
 	// First the search query part
 	query_parts.push(build_q_params(input));
 	// Then we add the other query params in
-	query_parts.push("maxResults=10".to_string());
+	query_parts.push(format!("maxResults={max_result_count}"));
 	query_parts.push("projection=lite".to_string());
 	query_parts.push("orderBy=relevance".to_string());
 	query_parts.push(format!("key={api_key}"));

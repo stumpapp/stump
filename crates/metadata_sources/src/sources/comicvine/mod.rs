@@ -9,9 +9,10 @@ use response::ComicVineSearchResponse;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::ConfigSchema;
-
-use super::{MetadataOutput, MetadataSource, MetadataSourceError, MetadataSourceInput};
+use crate::{
+	ConfigSchema, MetadataOutput, MetadataSource, MetadataSourceError,
+	MetadataSourceInput,
+};
 
 /// The name used to identify the source in the database, retrieve the [`MetadataSource`]
 /// implementation, and displayed to the user in the UI.
@@ -35,7 +36,7 @@ impl MetadataSource for ComicVineSource {
 		&self,
 		input: &MetadataSourceInput,
 		config: &Option<String>,
-	) -> Result<MetadataOutput, MetadataSourceError> {
+	) -> Result<Vec<MetadataOutput>, MetadataSourceError> {
 		// Parse config JSON or error
 		let config: ComicVineConfig = if let Some(cfg_json) = config {
 			serde_json::from_str(cfg_json)?
@@ -70,15 +71,19 @@ impl MetadataSource for ComicVineSource {
 		}
 
 		// TODO - Adjust further
-		// Use the response to fill MetadataOutput
+		// Convert response items into MetadataOutput
 		if let Some(results) = response.results {
-			if let Some(first) = results.into_iter().next() {
-				return Ok(MetadataOutput {
-					title: first.name,
-					authors: vec![],
-					description: first.deck.or(first.description),
-					published: None,
-				});
+			if !results.is_empty() {
+				let metadata_outputs: Vec<MetadataOutput> = results
+					.into_iter()
+					.map(|item: response::ComicVineSearchResult| MetadataOutput {
+						title: item.name,
+						authors: vec![],
+						description: item.deck.or(item.description),
+						published: None,
+					})
+					.collect();
+				return Ok(metadata_outputs);
 			}
 		}
 

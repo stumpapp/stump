@@ -51,8 +51,6 @@ export default function BookOverviewScene() {
 		throw new Error('Media not found')
 	}
 
-	const sceneHeaderBuilder = new BookOverviewSceneHeader(media)
-
 	const completedAt = sortBy(media.finished_reading_sessions, ({ completed_at }) =>
 		dayjs(completed_at).toDate(),
 	).at(-1)?.completed_at
@@ -69,7 +67,7 @@ export default function BookOverviewScene() {
 					<div className="flex flex-col items-center gap-3 tablet:mb-2 tablet:flex-row tablet:items-start">
 						<MediaCard media={media} readingLink variant="cover" />
 						<div className="flex h-full w-full flex-col gap-2 tablet:gap-4">
-							{sceneHeaderBuilder.renderHeader()}
+							<BookOverviewSceneHeader media={media} />
 							{completedAt && (
 								<Text size="xs" variant="muted">
 									Completed on {dayjs(completedAt).format('LLL')}

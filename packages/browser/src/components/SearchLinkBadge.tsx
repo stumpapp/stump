@@ -1,4 +1,4 @@
-import { Text, Link } from '@stump/components'
+import { Link, Text } from '@stump/components'
 
 type Props = {
 	searchKey: string

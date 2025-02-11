@@ -18,11 +18,11 @@ import paths from '../../paths'
 import { PDF_EXTENSION } from '../../utils/patterns'
 import BookCompletionToggleButton from './BookCompletionToggleButton'
 import BookFileInformation from './BookFileInformation'
+import BookOverviewSceneHeader from './BookOverviewSceneHeader'
 import BookReaderDropdown from './BookReaderDropdown'
 import BooksAfterCursor from './BooksAfterCursor'
 import DownloadMediaButton from './DownloadMediaButton'
 import EmailBookDropdown from './EmailBookDropdown'
-import BookOverviewSceneHeader from './BookOverviewSceneHeader'
 
 export default function BookOverviewScene() {
 	const { checkPermission, isServerOwner } = useAppContext()

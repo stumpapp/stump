@@ -1,10 +1,12 @@
-import { Media, MediaMetadata } from '@stump/sdk'
-import { formatBookName } from '@/utils/format'
-import SearchLinkBadge from '@/components/SearchLinkBadge'
-import BookLibrarySeriesLinks from './BookLibrarySeriesLinks'
-import TagList from '@/components/tags/TagList'
 import { Heading, Text } from '@stump/components'
+import { Media, MediaMetadata } from '@stump/sdk'
+
+import SearchLinkBadge from '@/components/SearchLinkBadge'
+import TagList from '@/components/tags/TagList'
+import { formatBookName } from '@/utils/format'
+
 import paths from '../../paths'
+import BookLibrarySeriesLinks from './BookLibrarySeriesLinks'
 
 interface MetadataTableItem {
 	keynameBase: string
@@ -14,13 +16,18 @@ interface MetadataTableItem {
 }
 
 function build_metadata_table(metadata: MediaMetadata) {
-	let table: MetadataTableItem[] = []
+	const table: MetadataTableItem[] = []
 
 	if (!metadata) {
 		return table
 	}
 
-	let add_to_table = (keynameBase: string, prefix: string, values: string[], searchKey: string) => {
+	const add_to_table = (
+		keynameBase: string,
+		prefix: string,
+		values: string[],
+		searchKey: string,
+	) => {
 		if (values && values.length > 0) {
 			// if all values are empty, don't add the key
 			if (values.every((v) => !v)) {

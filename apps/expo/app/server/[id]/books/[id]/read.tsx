@@ -4,6 +4,7 @@ import {
 	PDF_EXTENSION,
 	useMediaByIdQuery,
 	useSDK,
+	useUpdateMediaProgress,
 } from '@stump/client'
 import { useLocalSearchParams } from 'expo-router'
 
@@ -28,6 +29,11 @@ export default function Screen() {
 		},
 	})
 
+	const { updateReadProgressAsync } = useUpdateMediaProgress(book?.id || '', {
+		retry: (attempts) => attempts < 3,
+		useErrorBoundary: false,
+	})
+
 	if (!book) return null
 
 	if (book.extension.match(EBOOK_EXTENSION)) {
@@ -48,6 +54,7 @@ export default function Screen() {
 					width,
 					ratio: width / height,
 				}))}
+				onPageChanged={updateReadProgressAsync}
 			/>
 		)
 	}

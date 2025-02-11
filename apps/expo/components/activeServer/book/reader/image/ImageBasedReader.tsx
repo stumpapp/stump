@@ -43,7 +43,7 @@ type Props = {
 export default function ImageBasedReader({ initialPage }: Props) {
 	const flatList = useRef<FlatList>(null)
 
-	const { book, imageSizes = [] } = useImageBasedReader()
+	const { book, imageSizes = [], onPageChanged } = useImageBasedReader()
 	const {
 		preferences: { readingMode, incognito },
 	} = useBookPreferences(book.id)
@@ -56,31 +56,19 @@ export default function ImageBasedReader({ initialPage }: Props) {
 	// TODO: an effect that whenever the device orientation changes to something different than before,
 	// recalculate the ratios of the images? Maybe. Who knows, you will though
 
-	const { updateReadProgressAsync } = useUpdateMediaProgress(book.id, {
-		retry: (attempts) => attempts < 3,
-		useErrorBoundary: false,
-	})
-
 	/**
 	 * A callback that updates the read progress of the current page. This will be
 	 * called whenever the user changes the page in the reader.
 	 *
 	 * If the reader is in incognito mode, this will do nothing.
 	 */
-	const handleCurrentPageChanged = useCallback(
+	const handlePageChanged = useCallback(
 		async (page: number) => {
 			if (!incognito) {
-				try {
-					await updateReadProgressAsync(page)
-				} catch (e) {
-					console.error(e)
-					if (isAxiosError(e)) {
-						console.error(e.response?.data)
-					}
-				}
+				onPageChanged(page)
 			}
 		},
-		[updateReadProgressAsync, incognito],
+		[onPageChanged, incognito],
 	)
 
 	return (
@@ -104,7 +92,7 @@ export default function ImageBasedReader({ initialPage }: Props) {
 			onViewableItemsChanged={({ viewableItems }) => {
 				const fistVisibleItemIdx = viewableItems.filter(({ isViewable }) => isViewable).at(0)?.index
 				if (fistVisibleItemIdx) {
-					handleCurrentPageChanged(fistVisibleItemIdx + 1)
+					handlePageChanged(fistVisibleItemIdx + 1)
 				}
 			}}
 			initialNumToRender={10}

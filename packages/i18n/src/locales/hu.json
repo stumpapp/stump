@@ -1,98 +1,98 @@
 {
 	"underConstruction": {
-		"heading": "This is awkward",
-		"message": "You've stumbled upon a page that's still being developed. I'd love to show it to you, but it isn't quite ready yet.",
-		"homeLink": "Go Home",
-		"githubLink": "View the GitHub issue"
+		"heading": "Ez kínos",
+		"message": "Egy még fejlesztés alatt álló oldalra bukkantál. Szívesen megmutatnám neked, de még nincs teljesen készen.",
+		"homeLink": "Vissza a főoldalra",
+		"githubLink": "GitHub megtekintése"
 	},
 	"authScene": {
-		"claimHeading": "Initialize your server",
-		"claimText": "This Stump server is not initialized. Use the form below to create your account. Once created, you will have full access to all server features.",
+		"claimHeading": "Szerver inicializálása",
+		"claimText": "Ez a Stump szerver nincs inicializálva. Használd az alábbi űrlapot fiókod létrehozásához. A létrehozás után teljes hozzáférést kapsz az összes szerverfunkcióhoz.",
 		"form": {
 			"validation": {
-				"missingUsername": "Username is required",
-				"missingPassword": "Password is required",
-				"usernameAlreadyExists": "Username already exists"
+				"missingUsername": "Felhasználónév szükséges",
+				"missingPassword": "Jelszó szükséges",
+				"usernameAlreadyExists": "A felhasználónév már létezik"
 			},
 			"labels": {
-				"username": "Username",
-				"password": "Password"
+				"username": "Felhasználónév",
+				"password": "Jelszó"
 			},
 			"buttons": {
-				"createAccount": "Create Account",
-				"login": "Log in"
+				"createAccount": "Fiók létrehozása",
+				"login": "Bejelentkezés"
 			}
 		},
 		"toasts": {
-			"loggingIn": "Logging in...",
-			"loggedIn": "Welcome back!",
-			"loggedInFirstTime": "Welcome!",
-			"registering": "Registering...",
-			"registered": "Registered!",
-			"loginFailed": "Login failed. Please try again",
-			"registrationFailed": "Registration failed. Please try again"
+			"loggingIn": "Bejelentkezés folyamatban...",
+			"loggedIn": "Üdv újra!",
+			"loggedInFirstTime": "Üdvözöljük!",
+			"registering": "Regisztráció folyamatban...",
+			"registered": "Regisztrálva!",
+			"loginFailed": "Bejelentkezés sikertelen. Kérlek próbáld újra",
+			"registrationFailed": "Regisztráció sikertelen. Kérlek próbáld újra"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "Library Configuration",
-			"subtitleCreating": "A preview of your new library will be shown below",
-			"subtitleEditing": "A preview of your library edits will be shown below"
+			"heading": "Könyvtár konfiguráció",
+			"subtitleCreating": "Az új könyvtárad előnézete alább látható",
+			"subtitleEditing": "A könyvtárad szerkesztéseinek előnézete alább látható"
 		}
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "File Information",
+			"heading": "Fájlinformációk",
 			"labels": {
-				"fileSize": "File Size",
-				"fileType": "File Type",
-				"fileLocation": "File Location",
-				"fileChecksum": "Checksum"
+				"fileSize": "Fájlméret",
+				"fileType": "Fájltípus",
+				"fileLocation": "Fájl helye",
+				"fileChecksum": "Ellenőrző összeg"
 			}
 		},
 		"emailBook": {
-			"heading": "Email book",
-			"description": "Send this book to device or email address",
+			"heading": "Könyv elküldése",
+			"description": "Küldd el ezt a könyvet készülékedre vagy e-mail címedre",
 			"form": {
 				"email": {
-					"label": "Email",
-					"placeholder": "Email address",
-					"description": "An email address to send the book to. Click add to finalize each input"
+					"label": "E-mail",
+					"placeholder": "E-mail cím",
+					"description": "Egy e-mail cím, amelyre a könyvet szeretnéd elküldeni. Kattints a hozzáadás gombra az egyes címek véglegesítéséhez"
 				},
 				"devices": {
-					"label": "Devices",
-					"placeholder": "Select devices",
-					"noFilterMatch": "No devices match the filter"
+					"label": "Eszközök",
+					"placeholder": "Eszközök kiválasztása",
+					"noFilterMatch": "Egyetlen eszköz sem felel meg a szűrőnek"
 				}
 			}
 		},
-		"nextInSeries": "Next in Series"
+		"nextInSeries": "Következő a sorozatban"
 	},
 	"createOrUpdateBookClubForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My book club",
-				"description": "The name of your book club"
+				"label": "Név",
+				"placeholder": "Az én könyvklubom",
+				"description": "A könyvklubod neve"
 			},
 			"description": {
-				"label": "Description",
-				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
-				"description": "An optional, short description of your book club"
+				"label": "Leírás",
+				"placeholder": "Egy \"A zászlónk halált jelent\" rajongói klub. Imádunk kalózregényeket olvasni",
+				"description": "Egy opcionális, rövid leírás a könyvklubodról"
 			},
 			"is_private": {
-				"label": "Private club",
-				"description": "If enabled, only users you invite will be able to join your book club"
+				"label": "Privát klub",
+				"description": "Ha be van kapcsolva, csak a te általad meghívott felhasználók csatlakozhatnak a könyvklubodhoz"
 			},
 			"member_role_spec": {
-				"heading": "Custom role mapping",
+				"heading": "Egyéni szerepkör-hozzárendelés",
 				"subtitle": [
-					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
-					"documentation"
+					"Ha szeretnéd, egyéni neveket is létrehozhatsz a könyvklubodban betöltött szerepek számára. További információért olvassa el a",
+					"dokumentációt"
 				],
 				"member": {
-					"label": "Member",
-					"placeholder": "Member",
+					"label": "Tag",
+					"placeholder": "Tag",
 					"description": "The name of the default role for your book club"
 				},
 				"moderator": {
@@ -193,16 +193,16 @@
 			}
 		},
 		"members": {
-			"title": "Members",
-			"description": "Manage the members of this book club",
+			"title": "Tagok",
+			"description": "Könyvklub tagjainak kezelése",
 			"sections": {}
 		},
 		"roles": {
-			"title": "Roles",
-			"description": "Customize the roles in this book club",
+			"title": "Szerepkörök",
+			"description": "Szerepkörök testreszabása ebben a könyvklubban",
 			"sections": {
 				"roleMappings": {
-					"heading": "Existing role mappings",
+					"heading": "Meglévő szerepkör-hozzárendelések",
 					"description": "The current role mappings for this book club"
 				}
 			}

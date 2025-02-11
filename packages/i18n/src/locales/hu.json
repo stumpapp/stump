@@ -93,103 +93,103 @@
 				"member": {
 					"label": "Tag",
 					"placeholder": "Tag",
-					"description": "The name of the default role for your book club"
+					"description": "A könyvklubod alapértelmezett szerepének neve"
 				},
 				"moderator": {
-					"label": "Moderator",
-					"placeholder": "Moderator",
-					"description": "The name of the moderator role for your book club"
+					"label": "Moderátor",
+					"placeholder": "Moderátor",
+					"description": "A könyvklubod moderátori szerepének neve"
 				},
 				"admin": {
-					"label": "Admin",
-					"placeholder": "Admin",
-					"description": "The name of the admin role for your book club"
+					"label": "Adminisztrátor",
+					"placeholder": "Adminisztrátor",
+					"description": "A könyvklubod adminisztrátori szerepének neve"
 				},
 				"creator": {
-					"label": "Creator",
-					"placeholder": "Creator",
-					"description": "The name of the creator role for your book club. This is you!"
+					"label": "Készítő",
+					"placeholder": "Készítő",
+					"description": "A könyvklubod készítői szerepének neve. Ez te vagy!"
 				}
 			},
 			"membershipOptions": {
 				"displayName": {
-					"label": "Display Name",
+					"label": "Megjelenített név",
 					"placeholder": "oromei",
-					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+					"description": "A könyvklubban való tagságának opcionális megjelenítő neve. Ha be van állítva, ez elsőbbséget élvez a felhasználónévvel szemben"
 				},
 				"hideProgress": {
-					"label": "Hide Progress",
-					"description": "If enabled, your read progress will be hidden from other members of the book club"
+					"label": "Előrehaladás elrejtése",
+					"description": "Ha be van kapcsolva, a könyvklub többi tagja elől el lesz rejtve, hogy hogy haladsz az olvasással"
 				}
 			}
 		},
 		"validation": {
-			"missingName": "Name is required",
-			"alreadyTaken": "is already taken"
+			"missingName": "Név megadása kötelező",
+			"alreadyTaken": "már le van foglalva"
 		}
 	},
 	"createBookClubScene": {
-		"heading": "Create a new book club",
-		"subtitle": "You can create a private book club a select few, or make it public for anyone on the server to join",
+		"heading": "Új könyvklub létrehozása",
+		"subtitle": "Létrehozhatsz egy privát könyvklubot néhány kiválasztott számára, vagy nyilvánossá teheted, hogy bárki csatlakozhasson a szerveren",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "Lépés",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of the club, including its name and description"
+					"label": "Alapok",
+					"heading": "Alap adatok",
+					"description": "A klub részletei, beleértve a nevét és leírását"
 				},
 				{
-					"label": "Roles",
-					"heading": "Roles",
-					"description": "Customize the roles in your book club"
+					"label": "Szerepkörök",
+					"heading": "Szerepkörök",
+					"description": "Szerepkörök testreszabása a könyvklubodban"
 				},
 				{
-					"label": "Membership",
-					"heading": "Membership Preferences",
-					"description": "Additional options for your book club"
+					"label": "Tagság",
+					"heading": "Tagsági preferenciák",
+					"description": "További lehetőségek a könyvkluboddal kapcsolatban"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your club settings before creating it"
+					"label": "Áttekintés",
+					"heading": "Áttekintés",
+					"description": "Ellenőrizd a klubod beállításait a létrehozás előtt"
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "Igen",
+				"no": "Nem",
+				"none": "Nincs",
 				"labels": {
-					"name": "Name",
-					"description": "Description"
+					"name": "Név",
+					"description": "Leírás"
 				}
 			},
-			"submit": "Create Book Club"
+			"submit": "Könyvklub létrehozása"
 		}
 	},
 	"bookClubSettingsScene": {
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "Alapok",
 			"members": {
-				"members": "Members",
-				"roles": "Roles",
-				"label": "Membership"
+				"members": "Tagok",
+				"roles": "Szerepkörök",
+				"label": "Tagság"
 			},
 			"scheduling": {
-				"scheduler": "Scheduler",
-				"options": "Options",
-				"label": "Scheduling"
+				"scheduler": "Ütemező",
+				"options": "Lehetőségek",
+				"label": "Ütemezés"
 			},
 			"danger-zone": {
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"delete": "Törlés",
+				"label": "Veszélyzóna"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this book club, including its name and description",
+			"title": "Alap adatok",
+			"description": "Ennek a könyvklubnak a részletei, beleértve a nevét és leírását",
 			"form": {
-				"submit": "Update club"
+				"submit": "Klub frissítése"
 			}
 		},
 		"members": {
@@ -306,48 +306,48 @@
 					"description": "A generált bélyegképek formátuma"
 				},
 				"quality": {
-					"label": "Quality",
-					"description": "The quality of the generated thumbnail images, between 0 and 1.0"
+					"label": "Minőség",
+					"description": "A generált bélyegképek minősége, 0 és 1,0 között"
 				}
 			},
 			"ignoreRules": {
 				"section": {
-					"heading": "Ignore rules",
-					"description": "Define glob patterns to ignore certain files or directories during a scan"
+					"heading": "Szabályok mellőzése",
+					"description": "Glob-minták definiálása bizonyos fájlok vagy könyvtárak figyelmen kívül hagyásához a szkennelés során"
 				},
-				"noRules": "No ignore rules have been configured",
-				"save": "Save changes",
+				"noRules": "Nem kerültek konfigurálásra figyelmen kívül hagyási szabályok",
+				"save": "Módosítások mentése",
 				"addRule": {
-					"label": "New rule",
-					"description": "Glob pattern to ignore files or directories",
-					"addButton": "Add rule",
+					"label": "Új szabály",
+					"description": "Glob-minta fájlok vagy könyvtárak figyelmen kívül hagyásához",
+					"addButton": "Szabály hozzáadása",
 					"ignoreParents": {
-						"title": "Ignore all parent directories",
-						"label": "Ignore parents"
+						"title": "Minden felsőbb szintű mappa figyelmen kívül hagyása",
+						"label": "Felsőbb szintűek figyelmen kívül hagyása"
 					},
 					"ignoreSubdirs": {
-						"title": "Ignore all subdirectories",
-						"label": "Ignore subdirectories"
+						"title": "Minden almappa figyelmen kívül hagyása",
+						"label": "Almappák figyelmen kívül hagyása"
 					}
 				},
-				"invalidGlob": "Invalid glob pattern",
+				"invalidGlob": "Érvénytelen glob-minta",
 				"lockConfig": {
-					"lock": "Lock configuration",
-					"unlock": "Unlock configuration"
+					"lock": "Konfiguráció zárolása",
+					"unlock": "Konfiguráció zárolásának feloldása"
 				},
-				"editRule": "Edit rule",
-				"deleteRule": "Delete rule",
-				"cancelEdit": "Cancel edit",
-				"confirmEdit": "Confirm edit"
+				"editRule": "Szabály szerkesztése",
+				"deleteRule": "Szabály törlése",
+				"cancelEdit": "Szerkesztés megszakítása",
+				"confirmEdit": "Szerkesztés megerősítése"
 			},
 			"convertOptions": {
 				"section": {
-					"heading": "File conversion",
-					"description": "Stump is capable of converting certain file formats to more compatible ones"
+					"heading": "Fájl átalakítás",
+					"description": "A Stump képes bizonyos fájlformátumokat kompatibilisebbé konvertálni"
 				},
 				"rarToZip": {
-					"label": "Convert RAR to ZIP",
-					"description": "Convert RAR/CBR files to ZIP/CBZ files during a scan"
+					"label": "RAR átalakítása ZIP-é",
+					"description": "RAR/CBR fájlok átalakítása ZIP/CBZ fájlokká a szkennelés során"
 				},
 				"deleteRarAfter": {
 					"label": "Delete RAR after conversion",
@@ -356,7 +356,7 @@
 			},
 			"scannerFeatures": {
 				"section": {
-					"heading": "Optional processing",
+					"heading": "Választható feldolgozás",
 					"description": "Opt-in processing features for the scanner",
 					"disclaimer": "These features involve additional file reads which may slow down the scan process"
 				},
@@ -417,12 +417,12 @@
 				{
 					"label": "Alapok",
 					"heading": "Alap adatok",
-					"description": "A könyvtár részletei, beleértve a nevét, elérési útját és leírását"
+					"description": "Ennek a könyvtárnak a részletei, beleértve a nevét, elérési útját és leírását"
 				},
 				{
 					"label": "Szkennelés",
 					"heading": "Szkenner viselkedése",
-					"description": "A Stump könyvtár beolvasásával kapcsolatos beállításai"
+					"description": "Beállítások, hogy a Stump hogyan szkennelje ezt a könyvtárat"
 				},
 				{
 					"label": "Bélyegképek",
@@ -432,7 +432,7 @@
 				{
 					"label": "Áttekintés",
 					"heading": "Áttekintés",
-					"description": "Nézd át a könyvtárad beállításait a létrehozás előtt"
+					"description": "Ellenőrizd a könyvtárad beállításait a létrehozás előtt"
 				}
 			],
 			"review": {
@@ -486,7 +486,7 @@
 	},
 	"librarySettingsScene": {
 		"heading": "Manage Library",
-		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
+		"subtitle": "Frissítsd a könyvtárad adatait vagy beállításait, módosítsd a hozzáférési szabályokat, vagy végezz fájlellenőrzést. Ha szeretnél egy gyors áttekintést a könyvtárakról és működésükről, nézd meg a",
 		"subtitleLink": "vonatkozó dokumentáció",
 		"sidebar": {
 			"basics": "Alapok",
@@ -517,8 +517,8 @@
 			"description": "The default reader settings to use for books in this library. Any book can override these settings"
 		},
 		"options/scanning": {
-			"title": "Scanner Behavior",
-			"description": "Settings related to how Stump scans this library"
+			"title": "Szkenner viselkedése",
+			"description": "Beállítások, hogy a Stump hogyan szkennelje ezt a könyvtárat"
 		},
 		"options/thumbnails": {
 			"title": "Thumbnails",
@@ -913,7 +913,7 @@
 		},
 		"basics": {
 			"title": "Alap adatok",
-			"description": "Az okoslista részletei, beleértve a nevét és leírását"
+			"description": "Ennek az okoslistának a részletei, beleértve a nevét és leírását"
 		},
 		"access": {
 			"title": "Hozzáférés",
@@ -1536,11 +1536,11 @@
 						"label": "Library Management",
 						"create": {
 							"label": "Create libraries",
-							"description": "Allows the user to create new libraries.\nIncludes permissions to edit and scan"
+							"description": "Lehetővé teszi a felhasználó számára új könyvtárak létrehozását.\nTartalmazza a szerkesztési és szkennelési engedélyeket"
 						},
 						"scan": {
-							"label": "Scan libraries",
-							"description": "Allows the user to initiate scans for existing libraries"
+							"label": "Könyvtárak szkennelése",
+							"description": "Lehetővé teszi a felhasználó számára a meglévő könyvtárak szkennelésének kezdeményezését"
 						},
 						"edit": {
 							"label": "Edit libraries",
@@ -1548,11 +1548,11 @@
 						},
 						"manage": {
 							"label": "Manage libraries",
-							"description": "Allows the user to manage advanced settings for existing libraries.\nIncludes permissions to edit and scan"
+							"description": "Lehetővé teszi a felhasználó számára a meglévő könyvtárak speciális beállításainak kezelését.\nTartalmazza a szerkesztési és szkennelési engedélyeket"
 						},
 						"delete": {
 							"label": "Delete libraries",
-							"description": "Allows the user to delete existing libraries.\nIncludes permissions to edit, manage, and scan"
+							"description": "Lehetővé teszi a felhasználó számára a meglévő könyvtárak törlését.\nTartalmazza a szerkesztési, kezelési és szkennelési engedélyeket"
 						}
 					},
 					"server": {
@@ -1782,7 +1782,7 @@
 			"seeAll": "See all"
 		},
 		"libraryOptions": {
-			"scanLibrary": "Scan",
+			"scanLibrary": "Szkennelés",
 			"fileExplorer": "Files",
 			"manageLibrary": "Manage",
 			"deleteLibrary": "Delete"

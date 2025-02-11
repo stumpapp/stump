@@ -350,44 +350,44 @@
 					"description": "RAR/CBR fájlok átalakítása ZIP/CBZ fájlokká a szkennelés során"
 				},
 				"deleteRarAfter": {
-					"label": "Delete RAR after conversion",
-					"description": "Delete the original RAR/CBR file after conversion. This is irreversible"
+					"label": "RAR törlése átalakítás után",
+					"description": "Az eredeti RAR/CBR fájlok törlése az átalakítás után. Ez visszafordíthatatlan"
 				}
 			},
 			"scannerFeatures": {
 				"section": {
 					"heading": "Választható feldolgozás",
-					"description": "Opt-in processing features for the scanner",
-					"disclaimer": "These features involve additional file reads which may slow down the scan process"
+					"description": "Választható feldolgozási funkciók a szkennerhez",
+					"disclaimer": "Ezek a funkciók további fájlolvasással járnak, ami lelassíthatja a szkennelési folyamatot"
 				},
 				"processMetadata": {
-					"label": "Process metadata",
-					"description": "Extract any metadata from library files and store the results in the database"
+					"label": "Metaadatok feldolgozása",
+					"description": "Minden metaadat kinyerése a könyvtár fájljaiból, és eredmények tárolása az adatbázisban"
 				},
 				"generateFileHashes": {
-					"label": "Generate file hashes",
-					"description": "Generate a hash for each file in the library to detect duplicates"
+					"label": "Fájl hash-ek generálása",
+					"description": "Fájl hash-ek generálása minden fájlhoz a könyvtárban, duplikák megtalálása érdekében"
 				},
 				"koreaderHashes": {
-					"label": "KoReader-compatible hashes",
-					"description": "If using KoReader, generate additional hashes in the format it expects"
+					"label": "KoReader-kompatibilis hash-ek",
+					"description": "Ha KoReader-t használsz, generálj további hash-eket az általa elvárt formátumban"
 				}
 			},
 			"libraryPattern": {
 				"section": {
-					"heading": "Organization",
-					"description": "Identify which pattern most closely matches the organization of your library",
+					"heading": "Felépítés",
+					"description": "Határozd meg, hogy melyik minta illeszkedik legjobban a könyvtárad felépítéséhez",
 					"docs": [
-						"Not sure which to choose? Click",
-						"here",
-						"for more information.",
-						"You cannot change this setting later"
+						"Nem tudod, melyiket válaszd? Kattints",
+						"ide",
+						"több információért.",
+						"Ezt a beállítást később nem lehet megváltoztatni"
 					],
-					"disabled": "You cannot change this setting"
+					"disabled": "Ezt a beállítást nem lehet megváltoztatni"
 				},
 				"options": {
-					"label": "Library pattern",
-					"description": "The setting which determines how Stump will organize your library",
+					"label": "Könyvtári minta",
+					"description": "Az a beállítás, amely meghatározza, hogy a Stump hogyan építse fel a könyvtáradat",
 					"collectionPriority": {
 						"label": "Collection priority",
 						"description": "Each folder at the top-most level of the library root is a single series"
@@ -401,8 +401,8 @@
 		},
 		"scan": {
 			"label": {
-				"create": "Scan after creation",
-				"update": "Scan after updates"
+				"create": "Szkennelés a létrehozás után",
+				"update": "Szkennelés a frissítések után"
 			},
 			"description": "Indexelje a könyvtárfájlokat az adatbázis feltöltéséhez"
 		}

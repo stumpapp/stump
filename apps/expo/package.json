@@ -6,8 +6,8 @@
 		"dev": "expo start -c --ios",
 		"dev:web": "expo start -c --web",
 		"dev:android": "expo start -c --android",
-		"android": "expo start -c --android",
-		"ios": "expo start -c --ios",
+		"android": "expo run:android -d",
+		"ios": "expo run:ios -d",
 		"web": "expo start -c --web",
 		"clean": "rm -rf .expo node_modules",
 		"postinstall": "npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css"

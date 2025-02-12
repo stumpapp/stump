@@ -1,16 +1,47 @@
-# Starter base
+# Stump Mobile App
 
-A starting point to help you set up your project quickly and use the common components provided by `react-native-reusables`. The idea is to make it easier for you to get started.
+This is the expo mobile app for Stump. The app runs on both iOS and Android.
 
-## Features
+## Getting Started
 
-- NativeWind v4
-- Dark and light mode
-  - Android Navigation Bar matches mode
-  - Persistent mode
-- Common components
-  - ThemeToggle, Avatar, Button, Card, Progress, Text, Tooltip
+To get started with local development, the biggest barrier is setting up the native modules. The app uses the Swift and Kotlin [Readium](https://github.com/readium/mobile) toolkit for native EPUB parsing/rendering.
 
-<img src="https://github.com/mrzachnugent/react-native-reusables/assets/63797719/42c94108-38a7-498b-9c70-18640420f1bc"
-     alt="starter-base-template"
-     style="width:270px;" />
+### Native Development
+
+The process differs slightly between iOS and Android.
+
+#### iOS
+
+To build the app for iOS, run the following command:
+
+```bash
+yarn ios
+```
+
+This should generate a development build of the app and start the dev server. You can then run the app on an iOS simulator or device. Once you have a build, you may also run `yarn dev` to just start the app without triggering a new build.
+
+To open the Xcode project, run:
+
+```bash
+yarn open:ios
+```
+
+You can edit the native code in `Pods` -> `Development Pods` -> `Readium`
+
+#### Android
+
+To build the app for Android, run the following command:
+
+```bash
+yarn android # expo run:android
+```
+
+This should generate a development build of the app and start the dev server. You can then run the app on an Android emulator or device. Once you have a build, you may also run `yarn android` to just start the app without triggering a new build.
+
+To open in Android Studio, run:
+
+```bash
+yarn open:android
+```
+
+You can edit the native code in `android` -> `readium` -> `src/main/java/expo.modules.readium`

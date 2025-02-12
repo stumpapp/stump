@@ -26,7 +26,6 @@ type ImageDimension = {
 // TODO: The reading directions don't play well with the pinch and zoom, particularly the continuous
 // scroll modes. I think when it is set to continuous, the zoom might have to be on the list?
 // Not 100% sure, it is REALLY janky right now.
-// TODO: depending on above, remove @openspacelabs/react-native-zoomable-view. Zoomable might be enough!!!
 
 // TODO: Account for device orientation AND reading direction
 

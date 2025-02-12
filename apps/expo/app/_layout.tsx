@@ -27,10 +27,14 @@ export {
 	ErrorBoundary,
 } from 'expo-router'
 
+// TODO: hide status bar when reading
+
 export default function RootLayout() {
-	const hasMounted = React.useRef(false)
 	const { colorScheme, isDarkColorScheme } = useColorScheme()
+
 	const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false)
+
+	const hasMounted = React.useRef(false)
 
 	useIsomorphicLayoutEffect(() => {
 		if (hasMounted.current) {

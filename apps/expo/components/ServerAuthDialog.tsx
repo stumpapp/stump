@@ -147,7 +147,12 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 						name="password"
 					/>
 
-					<Button onPress={handleSubmit(onSubmit)} className="mt-4 w-full" disabled={isLoggingIn}>
+					<Button
+						onPress={handleSubmit(onSubmit)}
+						className="mt-4 w-full"
+						disabled={isLoggingIn}
+						variant="secondary"
+					>
 						<Text>Login</Text>
 					</Button>
 				</BottomSheet.View>

@@ -24,6 +24,12 @@ npm-debug.*
 yarn-debug.*
 yarn-error.*
 
+ios
+android
+
+!modules/**/ios
+!modules/**/android
+
 # macOS
 .DS_Store
 *.pem

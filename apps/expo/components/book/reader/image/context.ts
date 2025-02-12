@@ -16,7 +16,7 @@ export type IImageBasedReaderContext = {
 	book: ImageBasedBookRef
 	imageSizes?: ImageBasedBookPageRef[]
 	pageURL: (page: number) => string
-	onPageChanged: (page: number) => void
+	onPageChanged?: (page: number) => void
 }
 
 export const ImageBasedReaderContext = createContext<IImageBasedReaderContext | null>(null)

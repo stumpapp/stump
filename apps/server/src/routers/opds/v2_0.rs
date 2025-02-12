@@ -105,6 +105,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 								.route("/", get(get_book_by_id))
 								.route("/thumbnail", get(get_book_thumbnail))
 								.route("/pages/:page", get(get_book_page))
+								// TODO: PUT progression
 								.route("/progression", get(get_book_progression))
 								.route("/file", get(download_book)),
 						),

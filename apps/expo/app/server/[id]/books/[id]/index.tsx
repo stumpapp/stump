@@ -1,28 +1,35 @@
 import { useMediaByIdQuery, useSDK } from '@stump/client'
+import { ActiveReadingSession } from '@stump/sdk'
+import dayjs from 'dayjs'
 import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
+import relativeTime from 'dayjs/plugin/relativeTime'
 
 import { useActiveServer } from '~/components/activeServer'
 import { BookMetaLink } from '~/components/activeServer/book'
+import RefreshControl from '~/components/RefreshControl'
 import { Button, Heading, Text } from '~/components/ui'
 import { formatBytes } from '~/lib/format'
 
-// TODO: progression states (e.g., read, continue, etc)
+dayjs.extend(relativeTime)
+
 export default function Screen() {
 	const { id: bookID } = useLocalSearchParams<{ id: string }>()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
 	const { sdk } = useSDK()
-	const { media } = useMediaByIdQuery(bookID, { suspense: true })
+	const { media, refetch, isRefetching } = useMediaByIdQuery(bookID, { suspense: true })
 
 	const router = useRouter()
 
 	if (!media) return null
 
+	const progression = media.active_reading_session
+	const lastCompletion = media.finished_reading_sessions?.[0]
 	const formattedSize = formatBytes(media.size)
 	const summary = media.metadata?.summary || ''
 	const description = summary.length > 147 ? `${summary.slice(0, 147)}...` : summary
@@ -44,9 +51,37 @@ export default function Screen() {
 	const letterers = media.metadata?.letterers?.join(', ')
 	const coverArtists = media.metadata?.cover_artists?.join(', ')
 
+	const noAcknowledgements =
+		!publisher && !writers && !colorists && !inkers && !letterers && !coverArtists
+
+	const renderRead = () => {
+		const { page, percentage_completed } = progression || {}
+		if (page || percentage_completed) {
+			return <Text>Continue</Text>
+		} else if (media.finished_reading_sessions?.length) {
+			return <Text>Read again</Text>
+		} else {
+			return <Text>Read</Text>
+		}
+	}
+
+	const renderPercentage = ({ page, percentage_completed }: ActiveReadingSession) => {
+		if (!page && !percentage_completed) {
+			return null
+		}
+
+		const percentageCompleted =
+			percentage_completed?.toFixed(2) ?? Math.round(((page || 0) / pages) * 100)
+		// return <InfoRow label="Percentage" value={`${percentageCompleted}%`} />
+		return <InfoStat label="Percentage" value={`${percentageCompleted}%`} />
+	}
+
 	return (
 		<SafeAreaView className="flex-1 bg-background">
-			<ScrollView className="flex-1 bg-background px-6 py-3">
+			<ScrollView
+				className="flex-1 bg-background px-6 py-3"
+				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+			>
 				<View className="flex-1 gap-8">
 					<View className="flex items-start gap-4">
 						<Heading size="lg" className="mt-6 leading-6">
@@ -75,12 +110,40 @@ export default function Screen() {
 								})
 							}
 						>
-							<Text>Read</Text>
+							{renderRead()}
 						</Button>
-						<Button variant="secondary">
+						<Button variant="secondary" disabled>
 							<Text>Download</Text>
 						</Button>
 					</View>
+
+					{progression && (
+						<View className="flex flex-row justify-around">
+							{progression.page && <InfoStat label="Page" value={progression.page.toString()} />}
+							{progression.epubcfi && (
+								<InfoStat
+									label="Locator"
+									value={`${progression.epubcfi.slice(0, 4)}...${progression.epubcfi.slice(-4)}`}
+								/>
+							)}
+							{renderPercentage(progression)}
+							{progression.started_at && (
+								<InfoStat label="Started" value={dayjs(progression.started_at).fromNow(true)} />
+							)}
+						</View>
+					)}
+
+					{lastCompletion && !progression && (
+						<View className="flex flex-row justify-around">
+							<InfoStat label="Pages" value={pages.toString()} />
+							{lastCompletion.completed_at && (
+								<InfoStat
+									label="Finished"
+									value={dayjs(lastCompletion.completed_at).fromNow(false)}
+								/>
+							)}
+						</View>
+					)}
 
 					<View className="flex w-full gap-2">
 						<Text className="text-lg text-foreground-muted">Information</Text>
@@ -115,18 +178,20 @@ export default function Screen() {
 						</View>
 					</View>
 
-					<View className="flex w-full gap-2">
-						<Text className="text-lg text-foreground-muted">Acknowledgements</Text>
+					{!noAcknowledgements && (
+						<View className="flex w-full gap-2">
+							<Text className="text-lg text-foreground-muted">Acknowledgements</Text>
 
-						<View className="flex flex-col gap-2 rounded-lg bg-background-surface p-3">
-							{publisher && <InfoRow label="Publisher" value={publisher} />}
-							{writers && <InfoRow label="Writers" value={writers} />}
-							{colorists && <InfoRow label="Colorists" value={colorists} />}
-							{inkers && <InfoRow label="Inkers" value={inkers} />}
-							{letterers && <InfoRow label="Letterers" value={letterers} />}
-							{coverArtists && <InfoRow label="Cover Artists" value={coverArtists} />}
+							<View className="flex flex-col gap-2 rounded-lg bg-background-surface p-3">
+								{publisher && <InfoRow label="Publisher" value={publisher} />}
+								{writers && <InfoRow label="Writers" value={writers} />}
+								{colorists && <InfoRow label="Colorists" value={colorists} />}
+								{inkers && <InfoRow label="Inkers" value={inkers} />}
+								{letterers && <InfoRow label="Letterers" value={letterers} />}
+								{coverArtists && <InfoRow label="Cover Artists" value={coverArtists} />}
+							</View>
 						</View>
-					</View>
+					)}
 
 					{links.length > 0 && (
 						<View className="flex w-full gap-2">
@@ -139,8 +204,6 @@ export default function Screen() {
 							</View>
 						</View>
 					)}
-
-					{/* END */}
 				</View>
 			</ScrollView>
 		</SafeAreaView>
@@ -151,5 +214,14 @@ const InfoRow = ({ label, value }: { label: string; value: string }) => (
 	<View className="flex flex-row items-start justify-between py-1">
 		<Text className="shrink-0 text-foreground-subtle">{label}</Text>
 		<Text className="max-w-[75%] truncate text-right">{value}</Text>
+	</View>
+)
+
+const InfoStat = ({ label, value }: { label: string; value: string }) => (
+	<View className="flex items-center justify-center rounded-lg bg-background-surface">
+		<Heading className="font-medium">{value}</Heading>
+		<Text size="sm" className="shrink-0 text-foreground-muted">
+			{label}
+		</Text>
 	</View>
 )

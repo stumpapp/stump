@@ -8,11 +8,7 @@ import {
 } from '@stump/client'
 import { useLocalSearchParams } from 'expo-router'
 
-import {
-	EpubJSReader,
-	ImageBasedReader,
-	UnsupportedReader,
-} from '~/components/activeServer/book/reader'
+import { EpubJSReader, ImageBasedReader, UnsupportedReader } from '~/components/book/reader'
 
 type Params = {
 	id: string

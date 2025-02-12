@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 
 import { usePublicationContext } from './context'
-import { ImageBasedReader } from '~/components/activeServer/book/reader'
+import { ImageBasedReader } from '~/components/book/reader'
 import { hashFromURL } from './utils'
 
 type ImageDimension = {

@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router'
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import { Pressable, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as DropdownMenu from 'zeego/dropdown-menu'
@@ -21,6 +21,8 @@ export default function Header() {
 		setBookPreferences,
 		updateGlobalSettings,
 	} = useBookPreferences(id)
+
+	const [showGlobalSettings, setShowGlobalSettings] = useState(false)
 
 	const incognito = useReaderStore((state) => state.globalSettings.incognito)
 	const insets = useSafeAreaInsets()
@@ -138,7 +140,7 @@ export default function Header() {
 					</DropdownMenu.Group>
 
 					<DropdownMenu.Group>
-						<DropdownMenu.Item key="globalSettings">
+						<DropdownMenu.Item key="globalSettings" onSelect={() => setShowGlobalSettings(true)}>
 							<DropdownMenu.ItemTitle>Settings</DropdownMenu.ItemTitle>
 							<DropdownMenu.ItemIcon
 								ios={{

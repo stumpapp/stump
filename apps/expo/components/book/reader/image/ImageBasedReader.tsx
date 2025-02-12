@@ -1,7 +1,7 @@
 import { useSDK, useUpdateMediaProgress } from '@stump/client'
 import { isAxiosError } from '@stump/sdk'
 import { Image, ImageLoadEventData } from 'expo-image'
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FlatList, TouchableWithoutFeedback, useWindowDimensions, View } from 'react-native'
 import {
 	GestureStateChangeEvent,
@@ -65,7 +65,7 @@ export default function ImageBasedReader({ initialPage }: Props) {
 	const handlePageChanged = useCallback(
 		async (page: number) => {
 			if (!incognito) {
-				onPageChanged(page)
+				onPageChanged?.(page)
 			}
 		},
 		[onPageChanged, incognito],
@@ -99,12 +99,20 @@ export default function ImageBasedReader({ initialPage }: Props) {
 			maxToRenderPerBatch={10}
 			initialScrollIndex={initialPage - 1}
 			// https://stackoverflow.com/questions/53059609/flat-list-scrolltoindex-should-be-used-in-conjunction-with-getitemlayout-or-on
-			onScrollToIndexFailed={() => {
+			onScrollToIndexFailed={(info) => {
+				console.error("Couldn't scroll to index", info)
 				const wait = new Promise((resolve) => setTimeout(resolve, 500))
 				wait.then(() => {
-					flatList.current?.scrollToIndex({ index: initialPage - 1, animated: true })
+					flatList.current?.scrollToIndex({ index: info.index, animated: true })
 				})
 			}}
+			// Note: We need to define an explicit layout so the initial scroll index works
+			// TODO: likely won't work for vertical scrolling
+			getItemLayout={(_, index) => ({
+				length: width,
+				offset: width * index,
+				index,
+			})}
 			showsVerticalScrollIndicator={false}
 			showsHorizontalScrollIndicator={false}
 		/>

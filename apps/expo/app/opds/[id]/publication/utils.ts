@@ -8,10 +8,10 @@ export const getNumberField = (meta: OPDSMetadata, key: string) => {
 	return typeof value === 'number' ? value : null
 }
 
-// const getStringField = (meta: OPDSMetadata, key: string) => {
-// 	const value = get(meta, key)
-// 	return typeof value === 'string' ? value : null
-// }
+export const getStringField = (meta: OPDSMetadata, key: string) => {
+	const value = get(meta, key)
+	return typeof value === 'string' ? value : null
+}
 
 export const getDateField = (meta: OPDSMetadata, key: string) => {
 	const value = get(meta, key)

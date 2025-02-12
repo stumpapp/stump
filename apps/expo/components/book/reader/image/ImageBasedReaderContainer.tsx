@@ -12,7 +12,6 @@ export default function ImageBasedReaderContainer({ initialPage, ...ctx }: Props
 		<ImageBasedReaderContext.Provider value={ctx}>
 			<SafeAreaView className="flex flex-1 items-center justify-center">
 				<Header />
-
 				<ImageBasedReader initialPage={initialPage} />
 			</SafeAreaView>
 		</ImageBasedReaderContext.Provider>

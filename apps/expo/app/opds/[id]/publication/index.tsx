@@ -3,13 +3,16 @@ import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { Pressable, SafeAreaView, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
+import omit from 'lodash/omit'
 
 import { useActiveServer } from '~/components/activeServer'
 import { Button, Heading, icons, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
 
 import { usePublicationContext } from './context'
-import { getDateField, getNumberField } from './utils'
+import { getDateField, getNumberField, getStringField } from './utils'
+import { InfoRow, InfoSection } from '~/components/book/overview'
+import { Fragment } from 'react'
 
 const { Info, Slash, BookCopy } = icons
 
@@ -22,7 +25,7 @@ export default function Screen() {
 		publication: { metadata, images, readingOrder, links },
 		url,
 	} = usePublicationContext()
-	const { title, identifier, belongsTo } = metadata || {}
+	const { title, identifier, belongsTo, ...rest } = metadata || {}
 
 	const router = useRouter()
 
@@ -30,12 +33,16 @@ export default function Screen() {
 
 	const numberOfPages = getNumberField(metadata, 'numberOfPages') ?? readingOrder?.length
 	const modified = getDateField(metadata, 'modified')
+	const description = getStringField(metadata, 'description')
 
 	const hasInformation = !!numberOfPages || !!modified
 	const seriesURL = belongsTo?.series?.links?.find((link) => link.rel === 'self')?.href
 
 	const downloadURL = links?.find((link) => link.rel === 'http://opds-spec.org/acquisition')?.href
 	const canStream = !!readingOrder && readingOrder.length > 0
+
+	// TODO: dump the rest of the metadata? Or enforce servers to conform to a standard?
+	const restMeta = omit(rest, ['numberOfPages', 'modified'])
 
 	return (
 		<SafeAreaView className="flex-1 bg-background">
@@ -64,8 +71,8 @@ export default function Screen() {
 							className="flex-1 border border-edge"
 							onPress={() =>
 								router.push({
-									pathname: `/opds/${serverID}/publication/read`,
-									params: { url },
+									pathname: `/opds/[id]/publication/read`,
+									params: { url, id: serverID },
 								})
 							}
 							disabled={!canStream}
@@ -88,27 +95,11 @@ export default function Screen() {
 
 						{hasInformation && (
 							<View className="flex flex-col gap-2 rounded-lg bg-background-surface p-3">
-								{identifier && (
-									<View className="flex flex-row items-start justify-between py-1">
-										<Text className="shrink-0 text-foreground-subtle">Identifier</Text>
-										<Text className="max-w-[80%] truncate text-right">{identifier}</Text>
-									</View>
-								)}
-								{modified && (
-									<View className="flex flex-row items-start justify-between py-1">
-										<Text className="shrink-0 text-foreground-subtle">Modified</Text>
-										<Text className="max-w-[80%] truncate text-right">
-											{modified.format('MMMM DD, YYYY')}
-										</Text>
-									</View>
-								)}
+								{identifier && <InfoRow label="Identifier" value={identifier} longValue />}
+								{description && <InfoRow label="Description" value={description} longValue />}
+								{modified && <InfoRow label="Modified" value={modified.format('MMMM DD, YYYY')} />}
 								{numberOfPages && (
-									<View className="flex flex-row items-start justify-between py-1">
-										<Text className="shrink-0 text-foreground-subtle">Number of pages</Text>
-										<Text className="max-w-[80%] truncate text-right">
-											{numberOfPages.toString()}
-										</Text>
-									</View>
+									<InfoRow label="Number of pages" value={numberOfPages.toString()} />
 								)}
 							</View>
 						)}
@@ -127,23 +118,13 @@ export default function Screen() {
 						)}
 					</View>
 
-					<View className="flex w-full gap-2">
-						<Text className="text-lg text-foreground-muted">Series</Text>
-
+					<InfoSection label="Series">
 						{belongsTo?.series && (
-							<View className="flex flex-col gap-2 rounded-lg bg-background-surface p-3">
-								<View className="flex flex-row items-start justify-between py-1">
-									<Text className="shrink-0 text-foreground-subtle">Name</Text>
-									<Text className="max-w-[80%] truncate text-right">{belongsTo.series.name}</Text>
-								</View>
+							<Fragment>
+								<InfoRow label="Name" value={belongsTo.series.name} />
 
 								{belongsTo.series.position && (
-									<View className="flex flex-row items-start justify-between py-1">
-										<Text className="shrink-0 text-foreground-subtle">Position</Text>
-										<Text className="max-w-[80%] truncate text-right">
-											{belongsTo.series.position}
-										</Text>
-									</View>
+									<InfoRow label="Position" value={belongsTo.series.position.toString()} />
 								)}
 
 								{seriesURL && (
@@ -172,7 +153,7 @@ export default function Screen() {
 										</Pressable>
 									</View>
 								)}
-							</View>
+							</Fragment>
 						)}
 
 						{!belongsTo?.series && (
@@ -187,7 +168,7 @@ export default function Screen() {
 								<Text>No series information</Text>
 							</View>
 						)}
-					</View>
+					</InfoSection>
 				</View>
 			</ScrollView>
 		</SafeAreaView>

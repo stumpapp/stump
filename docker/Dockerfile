@@ -63,6 +63,8 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,id=${TARGETARCH} \
 FROM debian:buster-slim AS pdfium
 ARG TARGETARCH
 
+RUN echo $TARGETARCH
+
 RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
     apt-get update && apt-get install -y curl tar; \
         # Download and extract PDFium
@@ -71,7 +73,7 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
         if [ "$TARGETARCH" = "amd64" ]; then \
             # NOTE: This was previously -x86, need to test more on amd64-compatible systems to ensure I have the right one
             curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6707/pdfium-linux-x64.tgz; \
-        elif [ "$TARGETARCH" =~ "arm" ]; then \
+        elif [ "$TARGETARCH" = "arm64" ]; then \
             curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6707/pdfium-linux-arm64.tgz; \
         fi; \
         tar -xzvf pdfium.tgz -C ./pdfium; \

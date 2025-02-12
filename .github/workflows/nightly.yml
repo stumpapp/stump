@@ -54,7 +54,7 @@ jobs:
           echo "PUSH=${{ github.event_name == 'push' }}" >> $GITHUB_ENV
 
           if [[ ${{ github.event_name }} == 'pull_request' ]]; then
-            echo "ARCHS=amd64" >> $GITHUB_ENV
+            echo "ARCHS=arm64,amd64" >> $GITHUB_ENV
           else
             echo "ARCHS=arm64,amd64" >> $GITHUB_ENV
           fi

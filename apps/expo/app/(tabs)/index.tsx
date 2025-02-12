@@ -1,19 +1,24 @@
 import partition from 'lodash/partition'
+import { useState } from 'react'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import DeleteServerConfirmation from '~/components/savedServer/DeleteServerConfirmation'
 
 import SavedServerListItem from '~/components/savedServer/SavedServerListItem'
 import { icons, Text } from '~/components/ui'
 import { useSavedServers } from '~/stores'
+import { SavedServer } from '~/stores/savedServer'
 
 const { Server, Slash, Rss } = icons
 
-// TODO: https://www.npmjs.com/package/react-native-swipe-list-view
-
 export default function Screen() {
 	const { savedServers } = useSavedServers()
+
 	const [stumpServers, opdsServers] = partition(savedServers, (server) => server.kind === 'stump')
+	const [editingServer, setEditingServer] = useState<SavedServer | null>(null)
+	const [deletingServer, setDeletingServer] = useState<SavedServer | null>(null)
+
 	const allOPDSServers = [...stumpServers.filter((server) => !!server.stumpOPDS), ...opdsServers]
 
 	// const serverStatuses = useQueries({
@@ -33,6 +38,14 @@ export default function Screen() {
 
 	return (
 		<SafeAreaView className="flex-1 bg-background">
+			<DeleteServerConfirmation
+				isOpen={!!deletingServer}
+				onClose={() => setDeletingServer(null)}
+				onConfirm={() => {
+					console.log('delete server')
+				}}
+			/>
+
 			<ScrollView>
 				<View className="flex-1 items-start justify-start gap-5 bg-background px-6">
 					<View className="flex w-full items-start gap-2">
@@ -52,7 +65,12 @@ export default function Screen() {
 						)}
 
 						{stumpServers.map((server) => (
-							<SavedServerListItem key={server.id} server={server} />
+							<SavedServerListItem
+								key={server.id}
+								server={server}
+								onEdit={() => setEditingServer(server)}
+								onDelete={() => setDeletingServer(server)}
+							/>
 						))}
 					</View>
 
@@ -73,7 +91,13 @@ export default function Screen() {
 						)}
 
 						{allOPDSServers.map((server) => (
-							<SavedServerListItem key={server.id} server={server} forceOPDS />
+							<SavedServerListItem
+								key={server.id}
+								server={server}
+								forceOPDS
+								onEdit={() => setEditingServer(server)}
+								onDelete={() => setDeletingServer(server)}
+							/>
 						))}
 					</View>
 				</View>

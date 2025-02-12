@@ -928,28 +928,28 @@
 					}
 				},
 				"accessManager": {
-					"disclaimer": "Sharing is not ready yet. Please check back later!"
+					"disclaimer": "共有はまだ準備ができていません。後でもう一度確認してください！"
 				}
 			}
 		},
 		"filters": {
-			"title": "Filter Builder",
-			"description": "Manage the filters which construct this smart list"
+			"title": "フィルタービルダー",
+			"description": "このスマートリストを構成するフィルターを管理します"
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this smart list and all of its contents or certain resources",
+			"title": "削除操作",
+			"description": "このスマートリストとそのすべてのコンテンツまたは特定のリソースを完全に削除します",
 			"sections": {
 				"deleteList": {
-					"heading": "Delete list",
+					"heading": "リストを削除",
 					"description": [
-						"Permanently delete this smart list and all its contents.",
-						"This action cannot be undone"
+						"このスマートリストとそのすべての内容を完全に削除します。",
+						"この操作は元に戻せません"
 					],
 					"confirmation": {
-						"title": "Delete list",
-						"description": "Are you sure you want to delete this smart list?",
-						"confirm": "Delete list"
+						"title": "リストを削除",
+						"description": "このスマートリストを削除してもよろしいですか？",
+						"confirm": "リストを削除"
 					}
 				}
 			}
@@ -957,58 +957,58 @@
 	},
 	"userSmartListScene": {
 		"navigation": {
-			"items": "Items",
-			"settings": "Settings"
+			"items": "アイテム",
+			"settings": "設定"
 		},
 		"layout": {
-			"missingIdError": "This scene requires an ID in the URL",
-			"smartListNotFound": "Smart list not found",
-			"viewCreateError": "Failed to create view",
-			"viewSaveError": "Failed to save view"
+			"missingIdError": "このシーンにはURLにIDが必要です",
+			"smartListNotFound": "スマートリストが見つかりません",
+			"viewCreateError": "ビューの作成に失敗しました",
+			"viewSaveError": "ビューの保存に失敗しました"
 		},
 		"header": {
-			"backLink": "Lists"
+			"backLink": "リスト"
 		},
 		"itemsScene": {
-			"smartListNotFound": "Smart list not found",
+			"smartListNotFound": "スマートリストが見つかりません",
 			"actionHeader": {
 				"viewSelector": {
-					"customView": "Custom view",
-					"defaultView": "Default view",
-					"noViewsSaved": "No views saved",
-					"selectView": "Select a saved view"
+					"customView": "カスタムビュー",
+					"defaultView": "デフォルトビュー",
+					"noViewsSaved": "ビューが保存されていません",
+					"selectView": "保存したビューを選択"
 				},
 				"filterDrawer": {
-					"heading": "Smart list filters",
-					"description": "Change the filters for this viewing session",
+					"heading": "スマートリストフィルター",
+					"description": "この表示セッションのフィルターを変更する",
 					"rawData": {
-						"heading": "Raw filter data",
-						"description": "This is how Stump will process the filters"
+						"heading": "生のフィルターデータ",
+						"description": "Stumpがフィルターを処理する方法"
 					},
 					"buttons": {
-						"save": "Save",
-						"cancel": "Cancel"
+						"save": "保存",
+						"cancel": "キャンセル"
 					}
 				},
 				"search": {
-					"placeholder": "Quick filter"
+					"placeholder": "クイックフィルター"
 				},
 				"viewManager": {
-					"updateSelected": "Update selected",
-					"create": "Create new view",
+					"updateSelected": "選択したものを更新",
+					"create": "新しいビューを作成",
 					"modal": {
 						"heading": {
-							"create": "Create view",
-							"update": "Update view"
+							"create": "ビューを作成",
+							"update": "ビューを更新"
 						},
 						"description": {
-							"create": "Create a new view for this smart list",
-							"update": "Update the view"
+							"create": "このスマートリストの新しいビューを作成します",
+							"update": "ビューを更新"
 						},
 						"createForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
+								"label": "名前",
+								"placeholder": "マイビュー",
 								"description": "A friendly name to uniquely identify this view"
 							}
 						},

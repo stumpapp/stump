@@ -903,28 +903,28 @@
 			"basics": "基本",
 			"configuration": {
 				"label": "構成",
-				"access": "Access",
-				"filters": "Filters"
+				"access": "アクセス",
+				"filters": "フィルター"
 			},
 			"danger-zone": {
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"delete": "削除",
+				"label": "危険な操作"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this smart list, including its name and description"
+			"title": "基本情報",
+			"description": "このスマートリストの詳細（名前と説明を含む）"
 		},
 		"access": {
-			"title": "Access",
-			"description": "Control who can access this smart list",
+			"title": "アクセス",
+			"description": "このスマートリストにアクセスできるユーザーを制御します",
 			"sections": {
 				"visibility": {
 					"confirmation": {
-						"public": "This will make the list visible to everyone",
-						"private": "This will change the list to be private, making anyone with access unable to see it",
-						"shared": "You will need to share the list with specific users to give them access",
-						"fallback": "Are you sure you want to change the visibility of this list?"
+						"public": "これによりリストは誰でも閲覧できるようになります",
+						"private": "これによりリストは非公開になり、アクセス権を持つ誰もがリストを見ることができなくなります",
+						"shared": "アクセス権を付与するには特定のユーザーとリストを共有する必要があります",
+						"fallback": "このリストの表示設定を変更してもよろしいですか？"
 					}
 				},
 				"accessManager": {

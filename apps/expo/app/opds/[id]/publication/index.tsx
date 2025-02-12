@@ -48,7 +48,7 @@ export default function Screen() {
 		<SafeAreaView className="flex-1 bg-background">
 			<ScrollView className="flex-1 gap-5 bg-background px-6">
 				<View className="flex-1 gap-8">
-					<View className="flex items-start gap-4">
+					<View className="flex items-center gap-4">
 						<Heading size="lg" className="mt-6 leading-6">
 							{title || 'Publication'}
 						</Heading>

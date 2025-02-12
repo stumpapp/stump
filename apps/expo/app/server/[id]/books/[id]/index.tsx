@@ -72,7 +72,7 @@ export default function Screen() {
 		}
 		const percentageCompleted =
 			percentage_completed?.toFixed(2) ?? Math.round(((page || 0) / pages) * 100)
-		return <InfoStat label="Percentage" value={`${percentageCompleted}%`} />
+		return <InfoStat label="Completed" value={`${percentageCompleted}%`} />
 	}
 
 	return (
@@ -82,7 +82,7 @@ export default function Screen() {
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 			>
 				<View className="flex-1 gap-8">
-					<View className="flex items-start gap-4">
+					<View className="flex items-center gap-4">
 						<Heading size="lg" className="mt-6 leading-6">
 							{media.metadata?.title || media.name}
 						</Heading>

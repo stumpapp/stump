@@ -3,21 +3,18 @@
 # ------------------------------------------------------------------------------
 
 FROM debian:buster-slim AS pdfium
-ARG TARGETARCH
-
-RUN echo $TARGETARCH
 
 # Update and install curl and tar
-RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt,id=${TARGETARCH} \
+RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
     apt-get update && apt-get install -y curl tar
 
 # Download and extract the PDFium binaries
 RUN set -ex; \
     mkdir -p pdfium; \
-    if [ "$TARGETARCH" = "amd64" ]; then \
+    if [ $(arch) = "x86_64" ]; then \
         # NOTE: This was previously -x86, need to test more on amd64-compatible systems to ensure I have the right one
         curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6707/pdfium-linux-x64.tgz; \
-    elif [ "$TARGETARCH" = "arm64" ]; then \
+    elif [ $(arch) = "aarch64" ]; then \
         curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6707/pdfium-linux-arm64.tgz; \
     fi; \
     tar -xzvf pdfium.tgz -C ./pdfium; \
@@ -27,10 +24,13 @@ RUN set -ex; \
 # amd64 -> e45484bfde8165f566633bc863564fdbd964bd87
 # arm64 -> 6519048a851f97ec86c498d827cf31efe453287b
 RUN set -ex; \
-    if [ "$TARGETARCH" = "amd64" ]; then \
+    if [ $(arch) = "x86_64" ]; then \
         echo "e45484bfde8165f566633bc863564fdbd964bd87 /pdfium/lib/libpdfium.so" | sha1sum -c -; \
-    elif [ "$TARGETARCH" = "arm64" ]; then \
+    elif [ $(arch) = "aarch64" ]; then \
         echo "6519048a851f97ec86c498d827cf31efe453287b /pdfium/lib/libpdfium.so" | sha1sum -c -; \
+    else \
+        echo "Unsupported architecture"; \
+        exit 1; \
     fi
 
 # ------------------------------------------------------------------------------

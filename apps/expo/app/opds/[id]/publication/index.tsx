@@ -133,8 +133,8 @@ export default function Screen() {
 										<Pressable
 											onPress={() =>
 												router.push({
-													pathname: `/opds/${serverID}/feed`,
-													params: { url: seriesURL },
+													pathname: '/opds/[id]/feed',
+													params: { url: seriesURL, id: serverID },
 												})
 											}
 										>

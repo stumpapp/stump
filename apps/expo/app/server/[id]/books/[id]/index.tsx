@@ -13,6 +13,7 @@ import { BookMetaLink } from '~/components/activeServer/book'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Heading, Text } from '~/components/ui'
 import { formatBytes } from '~/lib/format'
+import { InfoRow, InfoStat } from '~/components/book/overview'
 
 dayjs.extend(relativeTime)
 
@@ -69,10 +70,8 @@ export default function Screen() {
 		if (!page && !percentage_completed) {
 			return null
 		}
-
 		const percentageCompleted =
 			percentage_completed?.toFixed(2) ?? Math.round(((page || 0) / pages) * 100)
-		// return <InfoRow label="Percentage" value={`${percentageCompleted}%`} />
 		return <InfoStat label="Percentage" value={`${percentageCompleted}%`} />
 	}
 
@@ -106,6 +105,7 @@ export default function Screen() {
 							className="flex-1 border border-edge"
 							onPress={() =>
 								router.push({
+									// @ts-expect-error: It is fine, expects string literal with [id]
 									pathname: `/server/${serverID}/books/${bookID}/read`,
 								})
 							}
@@ -173,6 +173,7 @@ export default function Screen() {
 							)}
 							{seriesVolume && <InfoRow label="Volume" value={seriesVolume.toString()} />}
 
+							{/* TODO: split into separate section to support click-to-search */}
 							{genres && <InfoRow label="Genres" value={genres} />}
 							{characters && <InfoRow label="Characters" value={characters} />}
 						</View>
@@ -209,19 +210,3 @@ export default function Screen() {
 		</SafeAreaView>
 	)
 }
-
-const InfoRow = ({ label, value }: { label: string; value: string }) => (
-	<View className="flex flex-row items-start justify-between py-1">
-		<Text className="shrink-0 text-foreground-subtle">{label}</Text>
-		<Text className="max-w-[75%] truncate text-right">{value}</Text>
-	</View>
-)
-
-const InfoStat = ({ label, value }: { label: string; value: string }) => (
-	<View className="flex items-center justify-center rounded-lg bg-background-surface">
-		<Heading className="font-medium">{value}</Heading>
-		<Text size="sm" className="shrink-0 text-foreground-muted">
-			{label}
-		</Text>
-	</View>
-)

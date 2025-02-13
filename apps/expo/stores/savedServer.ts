@@ -17,6 +17,10 @@ export type SavedServer = {
 	stumpOPDS?: boolean
 }
 
+export type SavedServerWithConfig = SavedServer & {
+	config: ServerConfig | null
+}
+
 const auth = z
 	.union([
 		z.object({

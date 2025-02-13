@@ -1,22 +1,23 @@
 import partition from 'lodash/partition'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import DeleteServerConfirmation from '~/components/savedServer/DeleteServerConfirmation'
+import EditServerDialog from '~/components/savedServer/EditServerDialog'
 
 import SavedServerListItem from '~/components/savedServer/SavedServerListItem'
 import { icons, Text } from '~/components/ui'
 import { useSavedServers } from '~/stores'
-import { SavedServer } from '~/stores/savedServer'
+import { SavedServer, SavedServerWithConfig } from '~/stores/savedServer'
 
 const { Server, Slash, Rss } = icons
 
 export default function Screen() {
-	const { savedServers } = useSavedServers()
+	const { savedServers, deleteServer, getServerConfig } = useSavedServers()
 
 	const [stumpServers, opdsServers] = partition(savedServers, (server) => server.kind === 'stump')
-	const [editingServer, setEditingServer] = useState<SavedServer | null>(null)
+	const [editingServer, setEditingServer] = useState<SavedServerWithConfig | null>(null)
 	const [deletingServer, setDeletingServer] = useState<SavedServer | null>(null)
 
 	const allOPDSServers = [...stumpServers.filter((server) => !!server.stumpOPDS), ...opdsServers]
@@ -36,15 +37,29 @@ export default function Screen() {
 	// 	})),
 	// })
 
+	const onConfirmDelete = useCallback(() => {
+		if (deletingServer) {
+			deleteServer(deletingServer.id)
+		}
+	}, [deletingServer, deleteServer])
+
+	const onSelectForEdit = useCallback(
+		async (server: SavedServer) => {
+			const config = await getServerConfig(server.id)
+			setEditingServer({ ...server, config })
+		},
+		[getServerConfig],
+	)
+
 	return (
 		<SafeAreaView className="flex-1 bg-background">
 			<DeleteServerConfirmation
-				isOpen={!!deletingServer}
+				deletingServer={deletingServer}
 				onClose={() => setDeletingServer(null)}
-				onConfirm={() => {
-					console.log('delete server')
-				}}
+				onConfirm={onConfirmDelete}
 			/>
+
+			<EditServerDialog editingServer={editingServer} onClose={() => setEditingServer(null)} />
 
 			<ScrollView>
 				<View className="flex-1 items-start justify-start gap-5 bg-background px-6">
@@ -68,7 +83,7 @@ export default function Screen() {
 							<SavedServerListItem
 								key={server.id}
 								server={server}
-								onEdit={() => setEditingServer(server)}
+								onEdit={() => onSelectForEdit(server)}
 								onDelete={() => setDeletingServer(server)}
 							/>
 						))}
@@ -95,7 +110,7 @@ export default function Screen() {
 								key={server.id}
 								server={server}
 								forceOPDS
-								onEdit={() => setEditingServer(server)}
+								onEdit={() => onSelectForEdit(server)}
 								onDelete={() => setDeletingServer(server)}
 							/>
 						))}

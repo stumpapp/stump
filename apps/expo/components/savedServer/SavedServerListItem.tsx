@@ -6,8 +6,6 @@ import { usePreferencesStore } from '~/stores'
 import { SavedServer } from '~/stores/savedServer'
 
 import { Text } from '../ui'
-import { cn } from '~/lib/utils'
-import { useState } from 'react'
 
 type Props = {
 	server: SavedServer
@@ -18,7 +16,6 @@ type Props = {
 
 export default function SavedServerListItem({ server, onEdit, onDelete, forceOPDS }: Props) {
 	const maskURLs = usePreferencesStore((state) => state.maskURLs)
-	const [isOpen, setIsOpen] = useState(false)
 
 	const formatURL = (url: string) => {
 		try {
@@ -36,7 +33,7 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 
 	return (
 		<View className="w-full rounded-2xl">
-			<ContextMenu.Root onOpenChange={setIsOpen}>
+			<ContextMenu.Root>
 				<ContextMenu.Trigger className="w-full">
 					<Link
 						key={server.id}
@@ -54,10 +51,22 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 
 				<ContextMenu.Content>
 					<ContextMenu.Item key="edit" onSelect={onEdit}>
-						Edit
+						<ContextMenu.ItemTitle>Edit</ContextMenu.ItemTitle>
+
+						<ContextMenu.ItemIcon
+							ios={{
+								name: 'slider.horizontal.2.square.on.square',
+							}}
+						/>
 					</ContextMenu.Item>
 					<ContextMenu.Item key="remove" destructive onSelect={onDelete}>
-						Remove
+						<ContextMenu.ItemTitle>Remove</ContextMenu.ItemTitle>
+
+						<ContextMenu.ItemIcon
+							ios={{
+								name: 'trash',
+							}}
+						/>
 					</ContextMenu.Item>
 				</ContextMenu.Content>
 			</ContextMenu.Root>

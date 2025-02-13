@@ -5,8 +5,6 @@ import { Pressable } from 'react-native'
 import { TextClassContext } from '~/components/ui/text'
 import { cn } from '~/lib/utils'
 
-// TODO: rewrite this template
-
 const buttonVariants = cva('group flex items-center justify-center rounded-lg', {
 	variants: {
 		variant: {

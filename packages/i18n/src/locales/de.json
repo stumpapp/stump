@@ -216,7 +216,7 @@
 			"description": "Additional options for this book club's scheduling"
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
+			"title": "Löschaktionen",
 			"description": "Diesen Buchclub und all seine Inhalte oder gewisse Ressourcen dauerhaft löschen",
 			"sections": {
 				"deleteClub": {
@@ -464,24 +464,24 @@
 	"fileExplorer": {
 		"uploadModal": {
 			"title": {
-				"books": "Upload books",
-				"series": "Upload series"
+				"books": "Bücher hochladen",
+				"series": "Reihe hochladen"
 			},
 			"description": {
-				"books": "Add books directly to the current path in the file explorer",
-				"series": "Add a series directly to the current path in the file explorer"
+				"books": "Fügen Sie Bücher direkt zum aktuellen Pfad im Dateimanager hinzu",
+				"series": "Fügen Sie eine Reihe direkt zum aktuellen Pfad im Dateimanager hinzu"
 			},
 			"seriesDisclaimer": [
 				"It must be a ",
-				"zipped file",
-				"containing the folder which should be the series, with all the books inside"
+				"gezippte Datei",
+				"enthält den Ordner, der die Reihe sein soll, die alle Bücher beinhaltet"
 			],
 			"dropzone": {
 				"books": "Drag and drop books here",
 				"series": "Drag and drop a zip file here",
-				"alt": "Or click to browse your computer for books to upload"
+				"alt": "Oder klicken Sie, um Ihren Computer nach Büchern zum Hochladen zu durchsuchen"
 			},
-			"addedFiles": "Added files"
+			"addedFiles": "Hinzugefügte Dateien"
 		}
 	},
 	"librarySettingsScene": {
@@ -601,24 +601,24 @@
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "Continue reading",
+			"title": "Weiterlesen",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any in-progress books you start will show up here"
+				"heading": "Nichts zu zeigen",
+				"message": "Alle angefangene Bücher, die Sie starten, werden hier angezeigt"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Recently added series",
+			"title": "Kürzlich hinzugefügte Reihe",
 			"emptyState": {
 				"heading": "Keine Serie zur Ansicht vorhanden",
 				"message": "Alle Serien, die du zu deinen Bibliotheken hinzufügst, werden hier angezeigt"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Recently added books",
+			"title": "Kürzlich hinzugefügte Bücher",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any recent books you add will show up here"
+				"heading": "Nichts zu zeigen",
+				"message": "Alle zuletzt hinzugefügten Bücher werden hier angezeigt"
 			}
 		}
 	},
@@ -806,7 +806,7 @@
 		}
 	},
 	"createSmartListScene": {
-		"heading": "Create smart list",
+		"heading": "Intelligente Liste erstellen",
 		"subtitle": "On-the-fly list creation based on a set of filters",
 		"form": {
 			"stepLabel": "Step",
@@ -828,9 +828,9 @@
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "Ja",
+				"no": "Nein",
+				"none": "Keine",
 				"labels": {
 					"name": "Name",
 					"description": "Beschreibung",
@@ -850,10 +850,10 @@
 		"fields": {
 			"name": {
 				"label": "Name",
-				"placeholder": "Koreader Sync"
+				"placeholder": "Koreader Synchronisierung"
 			},
 			"expiration": {
-				"label": "Expiration",
+				"label": "Verfallsdatum",
 				"placeholder": "Never"
 			},
 			"expires_at": {

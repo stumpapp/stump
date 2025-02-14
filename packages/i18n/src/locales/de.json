@@ -809,16 +809,16 @@
 		"heading": "Intelligente Liste erstellen",
 		"subtitle": "On-the-fly list creation based on a set of filters",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "Schritt",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
+					"label": "Allgemein",
+					"heading": "Allgemeine Informationen",
 					"description": "The details of this smart list, including its name, description, and visibility"
 				},
 				{
-					"label": "Filters",
-					"heading": "Filters",
+					"label": "Filter",
+					"heading": "Filter",
 					"description": "The filters to apply to this smart list"
 				},
 				{
@@ -857,21 +857,21 @@
 				"placeholder": "Never"
 			},
 			"expires_at": {
-				"label": "Expires at",
+				"label": "Verfällt am",
 				"placeholder": "Nie"
 			},
 			"permissions": {
 				"inherit": {
-					"label": "Inherit permissions",
-					"description": "The same permissions as your account"
+					"label": "Berechtigungen erben",
+					"description": "Die gleichen Berechtigungen wie Ihr Konto"
 				},
 				"explicit": {
-					"label": "Explicit permissions",
-					"description": "Choose the permissions this key should have"
+					"label": "Explizite Berechtigungen",
+					"description": "Wählen Sie die Berechtigungen die dieser Schlüssel haben soll"
 				}
 			}
 		},
-		"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting"
+		"inheritDisclaimer": "Dieser API-Schlüssel wird Ihre vollen Berechtigungen erben, was bedeutet, dass er alles tun kann, was Sie tun können. Seien Sie vorsichtig mit dieser Einstellung"
 	},
 	"userSmartListsScene": {
 		"heading": "Intelligente Listen",
@@ -900,45 +900,45 @@
 	},
 	"smartListSettingsScene": {
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "Allgemeines",
 			"configuration": {
-				"label": "Configuration",
-				"access": "Access",
-				"filters": "Filters"
+				"label": "Konfiguration",
+				"access": "Zugriff",
+				"filters": "Filter"
 			},
 			"danger-zone": {
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"delete": "Löschen",
+				"label": "Gefahrenzone"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this smart list, including its name and description"
+			"title": "Allgemeine Informationen",
+			"description": "Die Details dieser intelligenten Liste, einschließlich Name und Beschreibung"
 		},
 		"access": {
-			"title": "Access",
-			"description": "Control who can access this smart list",
+			"title": "Zugriff",
+			"description": "Legen Sie fest, wer auf diese Smart-Liste zugreifen kann",
 			"sections": {
 				"visibility": {
 					"confirmation": {
-						"public": "This will make the list visible to everyone",
-						"private": "This will change the list to be private, making anyone with access unable to see it",
-						"shared": "You will need to share the list with specific users to give them access",
-						"fallback": "Are you sure you want to change the visibility of this list?"
+						"public": "Dies wird die Liste für alle sichtbar machen",
+						"private": "Dies ändert die Liste zu privat, dadurch kann jeder, der Zugriff hat, nicht mehr diese sehen",
+						"shared": "Sie müssen die Liste mit bestimmten Benutzern teilen, um ihnen Zugriff zu gewähren",
+						"fallback": "Sind Sie sicher, dass Sie die Sichtbarkeit dieser Liste ändern möchten?"
 					}
 				},
 				"accessManager": {
-					"disclaimer": "Sharing is not ready yet. Please check back later!"
+					"disclaimer": "Teilen ist noch nicht fertig. Bitte später erneut versuchen!"
 				}
 			}
 		},
 		"filters": {
-			"title": "Filter Builder",
-			"description": "Manage the filters which construct this smart list"
+			"title": "Filtergenerator",
+			"description": "Verwalten Sie die Filter, die diese intelligente Liste erstellen"
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this smart list and all of its contents or certain resources",
+			"title": "Löschaktionen",
+			"description": "Permanentes Löschen dieser intelligenten Liste und aller ihrer Inhalte oder bestimmter Ressourcen",
 			"sections": {
 				"deleteList": {
 					"heading": "Delete list",

@@ -833,19 +833,19 @@
 				"none": "None",
 				"labels": {
 					"name": "Name",
-					"description": "Description",
-					"visibility": "Visibility",
-					"grouping": "Group by"
+					"description": "Beschreibung",
+					"visibility": "Sichtbarkeit",
+					"grouping": "Gruppiere nach"
 				}
 			},
 			"buttons": {
-				"confirm": "Create list"
+				"confirm": "Liste erstellen"
 			}
 		}
 	},
 	"createOrUpdateApiKey": {
 		"validation": {
-			"futureDate": "Expiration date must be in the future"
+			"futureDate": "Ablaufdatum muss in der Zukunft liegen"
 		},
 		"fields": {
 			"name": {
@@ -858,7 +858,7 @@
 			},
 			"expires_at": {
 				"label": "Expires at",
-				"placeholder": "Never"
+				"placeholder": "Nie"
 			},
 			"permissions": {
 				"inherit": {

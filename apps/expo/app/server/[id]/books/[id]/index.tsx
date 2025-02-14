@@ -1,19 +1,19 @@
 import { useMediaByIdQuery, useSDK } from '@stump/client'
 import { ActiveReadingSession } from '@stump/sdk'
 import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
-import relativeTime from 'dayjs/plugin/relativeTime'
 
 import { useActiveServer } from '~/components/activeServer'
 import { BookMetaLink } from '~/components/book'
+import { BookDescription, InfoRow, InfoStat } from '~/components/book/overview'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Heading, Text } from '~/components/ui'
 import { formatBytes } from '~/lib/format'
-import { InfoRow, InfoStat } from '~/components/book/overview'
 
 dayjs.extend(relativeTime)
 
@@ -162,7 +162,7 @@ export default function Screen() {
 						<View className="flex flex-col gap-2 rounded-lg bg-background-surface p-3">
 							{noMetadata && <InfoRow label="No metadata available" value="" />}
 
-							{description && <InfoRow label="Description" value={description} />}
+							{description && <BookDescription description={description} />}
 
 							{seriesName && <InfoRow label="Series Name" value={seriesName} />}
 							{seriesPosition && (

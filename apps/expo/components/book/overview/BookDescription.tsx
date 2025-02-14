@@ -16,8 +16,6 @@ export default function BookDescription({ description }: Props) {
 		return <InfoRow label="Description" value={description} longValue />
 	}
 
-	console.log(description.length)
-
 	return (
 		<View className="flex flex-row items-start justify-between py-1">
 			<Text className="shrink-0 text-foreground-subtle">Description</Text>

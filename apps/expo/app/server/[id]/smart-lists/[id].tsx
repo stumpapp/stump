@@ -1,4 +1,4 @@
-import { SafeAreaView, useWindowDimensions, View } from 'react-native'
+import { SafeAreaView, View } from 'react-native'
 
 import { Text } from '~/components/ui'
 

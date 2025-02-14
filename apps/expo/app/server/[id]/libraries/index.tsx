@@ -1,24 +1,15 @@
-import { useLibraries, useSDK } from '@stump/client'
-import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
+import { useLibraries } from '@stump/client'
 import { useMemo } from 'react'
-import { Pressable, SafeAreaView, useWindowDimensions, View } from 'react-native'
+import { SafeAreaView, useWindowDimensions } from 'react-native'
 import { FlatGrid } from 'react-native-super-grid'
 
-import { useActiveServer } from '~/components/activeServer'
 import { LibraryListItem } from '~/components/library'
 import RefreshControl from '~/components/RefreshControl'
-import { Heading, Text } from '~/components/ui'
-import { cn } from '~/lib/utils'
+import { Heading } from '~/components/ui'
 
 export default function Screen() {
 	const { width } = useWindowDimensions()
-	const { sdk } = useSDK()
 	const { libraries, refetch, isRefetching } = useLibraries({ suspense: true })
-	const {
-		activeServer: { id: serverID },
-	} = useActiveServer()
-	const router = useRouter()
 
 	// iPad or other large screens can have more columns (i.e., smaller itemDimension) but most phones should have 2 columns
 	const isTablet = useMemo(() => width > 768, [width])

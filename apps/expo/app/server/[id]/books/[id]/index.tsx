@@ -9,7 +9,7 @@ import { ScrollView } from 'react-native-gesture-handler'
 import relativeTime from 'dayjs/plugin/relativeTime'
 
 import { useActiveServer } from '~/components/activeServer'
-import { BookMetaLink } from '~/components/activeServer/book'
+import { BookMetaLink } from '~/components/book'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Heading, Text } from '~/components/ui'
 import { formatBytes } from '~/lib/format'

@@ -6,6 +6,7 @@ import { Pressable, SafeAreaView, useWindowDimensions, View } from 'react-native
 import { FlatGrid } from 'react-native-super-grid'
 
 import { useActiveServer } from '~/components/activeServer'
+import { LibraryListItem } from '~/components/library'
 import RefreshControl from '~/components/RefreshControl'
 import { Heading, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
@@ -41,32 +42,8 @@ export default function Screen() {
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 				itemDimension={itemDimension}
 				data={libraries || []}
-				renderItem={({ item: { id, name } }) => (
-					<Pressable onPress={() => router.navigate(`/server/${serverID}/libraries/${id}`)}>
-						{({ pressed }) => (
-							<View className="flex items-start gap-4">
-								<View
-									className={cn('aspect-[2/3] overflow-hidden rounded-lg', {
-										'opacity-80': pressed,
-									})}
-								>
-									<Image
-										source={{
-											uri: sdk.library.thumbnailURL(id),
-											headers: {
-												Authorization: sdk.authorizationHeader,
-											},
-										}}
-										contentFit="fill"
-										style={{ height: itemDimension * 1.5, width: itemDimension }}
-									/>
-								</View>
-
-								<Text className="text-xl font-medium leading-6">{name}</Text>
-							</View>
-						)}
-					</Pressable>
-				)}
+				renderItem={({ item: library }) => <LibraryListItem library={library} />}
+				keyExtractor={(library) => library.id}
 			/>
 		</SafeAreaView>
 	)

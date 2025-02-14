@@ -108,6 +108,7 @@ export default function ContinueReading() {
 					pagingEnabled
 					initialNumToRender={10}
 					maxToRenderPerBatch={10}
+					showsHorizontalScrollIndicator={false}
 				/>
 			</View>
 		</View>

@@ -1,19 +1,20 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { BottomSheet } from '../ui'
+import { BottomSheet, Text } from '../ui'
 import { View } from 'react-native'
 import AddOrEditServerForm from './AddOrEditServerForm'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { useSavedServers } from '~/stores'
 import { useSharedValue } from 'react-native-reanimated'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import { SavedServerWithConfig } from '~/stores/savedServer'
+import { CreateServer, SavedServerWithConfig } from '~/stores/savedServer'
 
 type Props = {
 	editingServer: SavedServerWithConfig | null
 	onClose: () => void
+	onSubmit: (server: CreateServer) => void
 }
 
-export default function EditServerDialog({ editingServer, onClose }: Props) {
+export default function EditServerDialog({ editingServer, onClose, onSubmit }: Props) {
 	const ref = useRef<BottomSheetModal | null>(null)
 	const snapPoints = useMemo(() => ['95%'], [])
 	const animatedIndex = useSharedValue<number>(0)
@@ -32,8 +33,6 @@ export default function EditServerDialog({ editingServer, onClose }: Props) {
 		},
 		[isOpen, onClose],
 	)
-
-	console.log('editingServer', editingServer)
 
 	useEffect(() => {
 		if (editingServer) {
@@ -62,8 +61,17 @@ export default function EditServerDialog({ editingServer, onClose }: Props) {
 					/>
 				)}
 			>
-				<BottomSheet.ScrollView className="flex-1 gap-4 bg-background p-6">
-					<AddOrEditServerForm editingServer={editingServer || undefined} onSubmit={() => {}} />
+				<BottomSheet.ScrollView className="flex-1 bg-background p-6">
+					<View className="gap-4">
+						<View>
+							<Text className="text-2xl font-bold leading-6">Edit server</Text>
+							<Text className="text-base text-foreground-muted">
+								Make changes to the server configuration
+							</Text>
+						</View>
+
+						<AddOrEditServerForm editingServer={editingServer || undefined} onSubmit={onSubmit} />
+					</View>
 				</BottomSheet.ScrollView>
 			</BottomSheet.Modal>
 		</>

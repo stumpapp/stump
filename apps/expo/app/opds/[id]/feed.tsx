@@ -10,7 +10,6 @@ import RefreshControl from '~/components/RefreshControl'
 export default function Screen() {
 	const { url: feedURL } = useLocalSearchParams<{ url: string }>()
 	const { sdk } = useSDK()
-
 	const {
 		data: feed,
 		refetch,

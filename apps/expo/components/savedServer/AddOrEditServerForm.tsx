@@ -1,9 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { checkUrl, formatApiURL } from '@stump/sdk'
-import { Fragment, useCallback, useEffect, useState } from 'react'
-import { Controller, useForm, useFormState } from 'react-hook-form'
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
+import { Controller, useForm, useFormState, useWatch } from 'react-hook-form'
 import { View } from 'react-native'
 import { z } from 'zod'
+import isEqual from 'lodash/isEqual'
 
 import { usePreferencesStore, useSavedServers } from '~/stores'
 
@@ -67,8 +68,6 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 		'stumpOPDS',
 		'authMode',
 	])
-
-	console.log({ stumpOPDS })
 
 	const renderAuthMode = () => {
 		if (kind === 'stump' && !stumpOPDS) {
@@ -144,6 +143,12 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 			)
 		}
 	}
+
+	const formValues = useWatch({ control })
+	const isUpdateReady = useMemo(
+		() => !isEqual(getDefaultValues(editingServer), formValues),
+		[formValues, editingServer],
+	)
 
 	return (
 		<View className="w-full gap-4">
@@ -293,7 +298,12 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 
 			{renderAuthMode()}
 
-			<Button variant="brand" className="mt-4 w-full" onPress={handleSubmit(onSubmit)}>
+			<Button
+				variant="brand"
+				className="mt-4 w-full"
+				onPress={handleSubmit(onSubmit)}
+				disabled={!editingServer || !isUpdateReady}
+			>
 				<Text>{editingServer ? 'Update' : 'Add'} server</Text>
 			</Button>
 		</View>

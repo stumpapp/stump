@@ -61,6 +61,7 @@ const formatPrefix = (prefix: 'token' | 'config', id: ServerID) =>
 type SavedServerStore = {
 	servers: SavedServer[]
 	addServer: (server: SavedServer) => void
+	editServer: (id: ServerID, server: SavedServer) => void
 	removeServer: (id: ServerID) => void
 	defaultServer?: SavedServer
 	setDefaultServer: (server: SavedServer) => void
@@ -73,6 +74,10 @@ const useSavedServerStore = create<SavedServerStore>()(
 			addServer: (server: SavedServer) => set((state) => ({ servers: [...state.servers, server] })),
 			removeServer: (id: ServerID) =>
 				set((state) => ({ servers: state.servers.filter((server) => server.id !== id) })),
+			editServer: (id: ServerID, server: SavedServer) =>
+				set((state) => ({
+					servers: state.servers.map((s) => (s.id === id ? server : s)),
+				})),
 			defaultServer: undefined,
 			setDefaultServer: (server: SavedServer) => set({ defaultServer: server }),
 		}),
@@ -94,20 +99,35 @@ export type CreateServer = {
 
 // TODO: safety in parsing
 export const useSavedServers = () => {
-	const { savedServers, addServer, removeServer, setDefaultServer } = useSavedServerStore(
-		(state) => ({
+	const { savedServers, addServer, editServer, removeServer, setDefaultServer } =
+		useSavedServerStore((state) => ({
 			savedServers: state.servers,
 			addServer: state.addServer,
+			editServer: state.editServer,
 			removeServer: state.removeServer,
 			setDefaultServer: state.setDefaultServer,
-		}),
-	)
+		}))
 
 	const createServer = useCallback(
 		async ({ config, ...server }: CreateServer) => {
 			const id = uuid.v4()
 			const serverMeta = { ...server, id }
 			addServer(serverMeta)
+			if (server.defaultServer) {
+				setDefaultServer(serverMeta)
+			}
+			if (config) {
+				await createServerConfig(id, config)
+			}
+			return serverMeta
+		},
+		[addServer, setDefaultServer],
+	)
+
+	const updateServer = useCallback(
+		async (id: ServerID, { config, ...server }: CreateServer) => {
+			const serverMeta = { ...server, id }
+			editServer(id, serverMeta)
 			if (server.defaultServer) {
 				setDefaultServer(serverMeta)
 			}
@@ -163,6 +183,7 @@ export const useSavedServers = () => {
 	return {
 		savedServers,
 		createServer,
+		updateServer,
 		deleteServer,
 		getServerConfig,
 		createServerConfig,

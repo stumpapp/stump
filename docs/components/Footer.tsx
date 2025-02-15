@@ -1,4 +1,4 @@
-import { SiDiscord, SiGithub, SiOpencollective, SiTwitter } from '@icons-pack/react-simple-icons'
+import { SiDiscord, SiGithub, SiOpencollective } from '@icons-pack/react-simple-icons'
 import clsx from 'clsx'
 import Link from 'next/link'
 
@@ -14,12 +14,6 @@ const navigation = {
 			icon: SiOpencollective,
 			isExternal: true,
 			name: 'Open Collective',
-		},
-		{
-			href: 'https://twitter.com/stumpapp_',
-			icon: SiTwitter,
-			isExternal: true,
-			name: 'Twitter',
 		},
 		{
 			href: 'https://github.com/stumpapp/stump',

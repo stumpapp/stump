@@ -15,6 +15,8 @@ export type IExplorerContext = {
 	currentPath: string | null
 	rootPath: string
 	files: DirectoryListingFile[]
+	canLoadMore: boolean
+	loadMore: () => void
 	onSelect: (item: DirectoryListingFile) => void
 	canGoBack: boolean
 	canGoForward: boolean

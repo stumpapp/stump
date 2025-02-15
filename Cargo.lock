@@ -7757,6 +7757,7 @@ dependencies = [
 name = "stump_server"
 version = "0.0.10"
 dependencies = [
+ "alphanumeric-sort",
  "async-stream",
  "async-trait",
  "axum",
@@ -7771,6 +7772,7 @@ dependencies = [
  "futures-util",
  "hyper 0.14.27",
  "infer",
+ "itertools 0.13.0",
  "jsonwebtoken",
  "linemux",
  "local-ip-address",

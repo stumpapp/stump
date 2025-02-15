@@ -1,7 +1,7 @@
 import { AxiosError } from 'axios'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { queryClient, useQuery } from '../client'
+import { queryClient, useInfiniteQuery, useQuery } from '../client'
 import { useSDK } from '../sdk'
 
 type PrefetchFileParams = {
@@ -86,18 +86,53 @@ export function useDirectoryListing({
 	const [history, setHistory] = useState(currentPath ? [currentPath] : [])
 	const [currentIndex, setCurrentIndex] = useState(0)
 
-	const { isLoading, error, data, refetch } = useQuery(
-		[sdk.filesystem.keys.listDirectory, currentPath, page],
-		async () => sdk.filesystem.listDirectory({ page, path: currentPath }),
+	const [initialPage, setInitialPage] = useState(() => page)
+
+	const { isLoading, error, data, refetch, ...rest } = useInfiniteQuery(
+		[sdk.filesystem.keys.listDirectory, currentPath, initialPage],
+		async ({ pageParam }) => sdk.filesystem.listDirectory({ page: pageParam, path: currentPath }),
 		{
 			// Do not run query until `enabled` aka modal is opened.
 			enabled,
 			keepPreviousData: true,
 			suspense: false,
+			getNextPageParam: (lastPage) => {
+				const totalPages = lastPage?._page?.total_pages
+				const currentPage = lastPage?._page?.current_page
+				if (totalPages == null || currentPage == null) {
+					return undefined
+				}
+				return currentPage < totalPages ? currentPage + 1 : undefined
+			},
+			getPreviousPageParam: (firstPage) => {
+				const currentPage = firstPage?._page?.current_page
+				if (currentPage == null) {
+					return undefined
+				}
+				return currentPage > 1 ? currentPage - 1 : undefined
+			},
 		},
 	)
 
-	const directoryListing = data?.data
+	/**
+	 * Whenever the current path changes, reset the initial page to 1. This is because
+	 * we are using a somewhat complex pagination state that is shared between different
+	 * directories. For example, if I scroll 4 pages deep into one directory, then switch
+	 * to another directory, the new directory should start at page 1.
+	 */
+	useEffect(() => {
+		setInitialPage(1)
+	}, [currentPath])
+
+	const directoryListing = data?.pages
+		.flatMap((page) => page.data)
+		.reduce(
+			(acc, curr) => ({
+				files: [...acc.files, ...curr.files],
+				parent: curr.parent,
+			}),
+			{ files: [], parent: null },
+		)
 	const parent = directoryListing?.parent
 
 	useEffect(() => {
@@ -251,6 +286,8 @@ export function useDirectoryListing({
 		path: currentPath,
 		refetch,
 		setPath,
+		canLoadMore: rest.hasNextPage || false,
+		loadMore: rest.fetchNextPage,
 	}
 }
 

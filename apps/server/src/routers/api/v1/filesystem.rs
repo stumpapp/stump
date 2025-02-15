@@ -1,4 +1,5 @@
 use axum::{extract::Query, middleware, routing::post, Extension, Json, Router};
+use itertools::Itertools;
 use std::{
 	fs::DirEntry,
 	path::{Path, PathBuf},
@@ -69,10 +70,12 @@ pub async fn list_directory(
 		)));
 	}
 
-	let mut files = read_and_filter_directory(&start_path)?;
-
-	// Sort the files by name, ignore case
-	files.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+	let files = read_and_filter_directory(&start_path)?
+		.into_iter()
+		.sorted_by(|a, b| {
+			alphanumeric_sort::compare_path(a.name.to_lowercase(), b.name.to_lowercase())
+		})
+		.collect::<Vec<_>>();
 
 	trace!(
 		"{} files in directory listing for: {}",

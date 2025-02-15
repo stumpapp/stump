@@ -42,6 +42,7 @@ pub const REGISTERED_SOURCES: &[&str] = &[
 	open_library::SOURCE_NAME,
 	google_books::SOURCE_NAME,
 	comicvine::SOURCE_NAME,
+	hardcover::SOURCE_NAME,
 ];
 
 /// Information provided to a [`MetadataSource`] implementation to locate the correct metadata.
@@ -123,6 +124,7 @@ pub fn get_source_by_name(
 		open_library::SOURCE_NAME => Ok(Box::new(open_library::OpenLibrarySource)),
 		google_books::SOURCE_NAME => Ok(Box::new(google_books::GoogleBooksSource)),
 		comicvine::SOURCE_NAME => Ok(Box::new(comicvine::ComicVineSource)),
+		hardcover::SOURCE_NAME => Ok(Box::new(hardcover::HardcoverSource)),
 		_ => Err(MetadataSourceError::InvalidName(name.to_string())),
 	}
 }

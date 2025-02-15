@@ -116,6 +116,7 @@ export default function PublicationGroup({
 				pagingEnabled
 				initialNumToRender={10}
 				maxToRenderPerBatch={10}
+				showsHorizontalScrollIndicator={false}
 			/>
 
 			{!publications.length && <EmptyFeed message="No publications in group" />}

@@ -11,7 +11,7 @@ import { cn } from '~/lib/utils'
 
 import { usePublicationContext } from './context'
 import { getDateField, getNumberField, getStringField } from './utils'
-import { InfoRow, InfoSection } from '~/components/book/overview'
+import { BookDescription, InfoRow, InfoSection } from '~/components/book/overview'
 import { Fragment } from 'react'
 
 const { Info, Slash, BookCopy } = icons
@@ -46,7 +46,7 @@ export default function Screen() {
 
 	return (
 		<SafeAreaView className="flex-1 bg-background">
-			<ScrollView className="flex-1 gap-5 bg-background px-6">
+			<ScrollView className="flex-1 gap-5 bg-background px-4 tablet:px-6">
 				<View className="flex-1 gap-8">
 					<View className="flex items-center gap-4">
 						<Heading size="lg" className="mt-6 leading-6">
@@ -96,7 +96,7 @@ export default function Screen() {
 						{hasInformation && (
 							<View className="flex flex-col gap-2 rounded-lg bg-background-surface p-3">
 								{identifier && <InfoRow label="Identifier" value={identifier} longValue />}
-								{description && <InfoRow label="Description" value={description} longValue />}
+								{description && <BookDescription description={description} />}
 								{modified && <InfoRow label="Modified" value={modified.format('MMMM DD, YYYY')} />}
 								{numberOfPages && (
 									<InfoRow label="Number of pages" value={numberOfPages.toString()} />

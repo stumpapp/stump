@@ -3244,13 +3244,6 @@
   dependencies:
     "@octokit/openapi-types" "^18.0.0"
 
-"@openspacelabs/react-native-zoomable-view@^2.3.1":
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/@openspacelabs/react-native-zoomable-view/-/react-native-zoomable-view-2.3.1.tgz#7ce29ba9c85bf77cc7566fa4a9844316ebde9045"
-  integrity sha512-Oe+yNf+E0qCgob7O7SOnK0v0XFbWpQ2Qr+AthOM+MOAhEdL/FwHvHYX7ioVltIlT+pZu3AQfCyRXksqBsZ76nw==
-  dependencies:
-    prop-types "^15.7.2"
-
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"

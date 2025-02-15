@@ -1,4 +1,3 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome'
 import { useAuthQuery, useSDK } from '@stump/client'
 import { Tabs, useRouter } from 'expo-router'
 import { View } from 'react-native'

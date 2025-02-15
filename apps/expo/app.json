@@ -18,13 +18,19 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.aaronleopold.stump"
+      "bundleIdentifier": "com.aaronleopold.stump",
+      "icon": {
+        "light": "./assets/images/ios-light.png",
+        "dark": "./assets/images/ios-dark.png",
+        "tinted": "./assets/images/ios-tinted.png"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.aaronleopold.stump"
     },
     "web": {
       "bundler": "metro",

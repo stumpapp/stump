@@ -14,6 +14,7 @@
 		--background-surface: #f7f7f8;
 		--background-surface-hover: #ececee;
 		--background-surface-secondary: #f2f2f3;
+		--background-opaque: hsla(0, 0%, 100%, 0.65);
 
 		--edge: #e9eaeb;
 		--edge-brand: #cf9977;
@@ -62,6 +63,7 @@
 		--background-surface: #0a0a0a;
 		--background-surface-hover: #242628;
 		--background-surface-secondary: #1f2123;
+		--background-opaque: hsla(0, 0%, 0%, 0.65);
 
 		--edge: #1f2123;
 		--edge-brand: #cf9977;

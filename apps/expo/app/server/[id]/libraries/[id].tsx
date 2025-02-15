@@ -1,15 +1,10 @@
-import {
-	useLibraryByID,
-	useLibrarySeriesCursorQuery,
-	useSDK,
-	useSeriesCursorQuery,
-} from '@stump/client'
+import { useLibraryByID, useLibrarySeriesCursorQuery, useSDK } from '@stump/client'
 import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useMemo } from 'react'
 import { Pressable, SafeAreaView, useWindowDimensions, View } from 'react-native'
-import { ScrollView } from 'react-native-gesture-handler'
 import { FlatGrid } from 'react-native-super-grid'
+
 import { useActiveServer } from '~/components/activeServer'
 import RefreshControl from '~/components/RefreshControl'
 import { Heading, Text } from '~/components/ui'
@@ -46,7 +41,7 @@ export default function Screen() {
 				// 2 columns on phones
 				(isTablet ? 4 : 2) -
 			16 * 2,
-		[isTablet],
+		[isTablet, width],
 	)
 
 	if (!library) return null

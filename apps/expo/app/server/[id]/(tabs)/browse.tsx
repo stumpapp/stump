@@ -69,6 +69,7 @@ export default function Screen() {
 							},
 						]}
 						renderItem={({ item }) => (
+							// @ts-expect-error: The URLs exist I promise
 							<Pressable className="flex-1" onPress={() => router.push(item.href)}>
 								<View className="relative h-40 w-full rounded-lg bg-background-surface">
 									<View className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center rounded-lg bg-background-surface p-1.5">

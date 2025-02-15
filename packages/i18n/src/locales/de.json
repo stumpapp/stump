@@ -667,7 +667,7 @@
 				"rootJoiner": {
 					"and": {
 						"label": "UND",
-						"description": "All filter groups must be true for a book to be matched"
+						"description": "Alle Filtergruppen müssen zutreffen, damit ein Buch übereinstimmt"
 					},
 					"or": {
 						"label": "ODER",
@@ -822,8 +822,8 @@
 					"description": "The filters to apply to this smart list"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
+					"label": "Überprüfen",
+					"heading": "Überprüfen",
 					"description": "Review your smart list settings before creating it"
 				}
 			],
@@ -854,7 +854,7 @@
 			},
 			"expiration": {
 				"label": "Verfallsdatum",
-				"placeholder": "Never"
+				"placeholder": "Nie"
 			},
 			"expires_at": {
 				"label": "Verfällt am",
@@ -862,7 +862,7 @@
 			},
 			"permissions": {
 				"inherit": {
-					"label": "Berechtigungen erben",
+					"label": "Berechtigungen übernommen",
 					"description": "Die gleichen Berechtigungen wie Ihr Konto"
 				},
 				"explicit": {
@@ -871,7 +871,7 @@
 				}
 			}
 		},
-		"inheritDisclaimer": "Dieser API-Schlüssel wird Ihre vollen Berechtigungen erben, was bedeutet, dass er alles tun kann, was Sie tun können. Seien Sie vorsichtig mit dieser Einstellung"
+		"inheritDisclaimer": "Dieser API-Schlüssel wird Ihre vollen Berechtigungen übernehmen, was bedeutet, dass er alles tun kann, was Sie tun können. Seien Sie vorsichtig mit dieser Einstellung"
 	},
 	"userSmartListsScene": {
 		"heading": "Intelligente Listen",
@@ -941,15 +941,15 @@
 			"description": "Permanentes Löschen dieser intelligenten Liste und aller ihrer Inhalte oder bestimmter Ressourcen",
 			"sections": {
 				"deleteList": {
-					"heading": "Delete list",
+					"heading": "Liste löschen",
 					"description": [
-						"Permanently delete this smart list and all its contents.",
-						"This action cannot be undone"
+						"Diese intelligente Liste und ihren gesamten Inhalt dauerhaft löschen.",
+						"Dieser Vorgang kann nicht rückgängig gemacht werden"
 					],
 					"confirmation": {
-						"title": "Delete list",
-						"description": "Are you sure you want to delete this smart list?",
-						"confirm": "Delete list"
+						"title": "Liste löschen",
+						"description": "Möchten Sie diese intelligente Liste wirklich löschen?",
+						"confirm": "Liste löschen"
 					}
 				}
 			}
@@ -1037,7 +1037,7 @@
 			"application": {
 				"account": "Konto",
 				"appearance": "Darstellung",
-				"api keys": "API keys",
+				"api keys": "API Schlüssel",
 				"reader": "Reader",
 				"desktop": "Desktop",
 				"label": "Anwendung"
@@ -1160,58 +1160,58 @@
 			}
 		},
 		"app/apiKeys": {
-			"helmet": "API keys",
-			"title": "API keys",
-			"description": "Manage your generated Stump API keys",
+			"helmet": "API Schlüssel",
+			"title": "API Schlüssel",
+			"description": "Verwalten Sie Ihre generierten Stump API Schlüssel",
 			"shared": {
 				"fields": {
 					"name": "Name",
-					"expiration": "Expiration",
-					"last_used": "Last used",
-					"created": "Created",
-					"permissions": "Permissions",
-					"inherited": "Inherited",
-					"explicit": "Explicit"
+					"expiration": "Verfallsdatum",
+					"last_used": "Zuletzt genutzt",
+					"created": "Erstellt",
+					"permissions": "Berechtigungen",
+					"inherited": "Übernommen",
+					"explicit": "Explizit"
 				}
 			},
 			"sections": {
 				"inspector": {
-					"heading": "API key",
-					"description": "A detailed view of this key",
+					"heading": "API Schlüssel",
+					"description": "Eine detaillierte Ansicht dieses Schlüssels",
 					"unrestrictedKey": {
-						"heading": "Unrestricted key",
+						"heading": "Unbeschränkter Schlüssel",
 						"description": "Since you are the server owner, this key has unrestricted access when configured to inherit permissions. Please be careful."
 					}
 				},
 				"createKey": {
 					"modal": {
-						"trigger": "Create API key",
+						"trigger": "API Schlüssel erstellen",
 						"heading": {
-							"creating": "Create API key",
-							"created": "Created key"
+							"creating": "API Schlüssel erstellen",
+							"created": "erstellte Schlüssel"
 						},
 						"description": {
 							"creating": "API keys are long-lived credentials that can be used to authenticate with the API",
 							"created": "Your new API key has been created. Save the secret somewhere safe, as it will not be shown again"
 						},
-						"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting",
-						"createdKey": "Created key",
-						"savedConfirm": "I saved my key",
-						"submit": "Create key"
+						"inheritDisclaimer": "Dieser API-Schlüssel wird Ihre vollen Berechtigungen übernehmen, was bedeutet, dass er alles tun kann, was Sie tun können. Seien Sie vorsichtig mit dieser Einstellung",
+						"createdKey": "erstellte Schlüssel",
+						"savedConfirm": "Ich habe meinen Schlüssel gespeichert",
+						"submit": "Schlüssel erstellen"
 					}
 				},
 				"table": {
-					"title": "Your keys",
-					"description": "These are the API keys you have created",
+					"title": "Ihre Schlüssel",
+					"description": "Dies sind die API Schlüssel, die Sie erstellt haben",
 					"actionMenu": {
 						"inspect": "Inspect",
-						"delete": "Delete"
+						"delete": "Löschen"
 					},
 					"empty": {
-						"title": "You haven't created any keys yet",
-						"action": "Create an API key to get started"
+						"title": "Sie haben noch keine API Schlüssel erstellt",
+						"action": "Erstelle einen API Schlüssel um loszulegen"
 					},
-					"noExpiration": "No expiration set"
+					"noExpiration": "Kein Ablaufdatum gesetzt"
 				}
 			}
 		},
@@ -1244,7 +1244,7 @@
 				"configuredServers": {
 					"label": "Konfigurierte Server",
 					"description": "Liste der Stump-Server, mit denen sich verbunden werden kann",
-					"getStarted": "Add a server to get started",
+					"getStarted": "Server hinzufügen, um loszulegen",
 					"unreachableServer": {
 						"tooltip": "Server nicht erreichbar"
 					},
@@ -1317,16 +1317,16 @@
 						}
 					},
 					"resetTokens": {
-						"label": "Clear authentication",
+						"label": "Authentifizierung löschen",
 						"description": [
-							"Remove all securely-stored access tokens for your servers",
-							"You will have to re-authenticate with each server"
+							"Entfernen Sie alle sicher gespeicherten Zugriffstoken für Ihre Server",
+							"Sie werden sich mit jedem Server erneut authentifizieren müssen"
 						],
 						"confirmation": {
-							"trigger": "Clear authentication",
-							"title": "Clear authentication",
-							"description": "This will remove all securely-stored access tokens for your servers",
-							"confirm": "Clear authentication"
+							"trigger": "Authentifizierung löschen",
+							"title": "Authentifizierung löschen",
+							"description": "Dies wird alle Ihre sicher gespeicherten Zugriffstoken für Ihre Server entfernen",
+							"confirm": "Authentifizierung löschen"
 						}
 					}
 				},
@@ -1483,12 +1483,12 @@
 					"feature": {
 						"label": "Feature Opt-In",
 						"api_keys": {
-							"label": "API keys",
-							"description": "Allow the user to manage their own API keys"
+							"label": "API Schlüssel",
+							"description": "Erlaube dem Benutzer seine eigenen API-Schlüssel zu verwalten"
 						},
 						"koreader_sync": {
-							"label": "KoReader sync",
-							"description": "Allow the user to access the KoReader sync integration"
+							"label": "KoReader Synchronisierung",
+							"description": "Erlaube dem Benutzer auf die KoReader-Synchronisierungsintegration zuzugreifen"
 						}
 					},
 					"file": {
@@ -1583,9 +1583,9 @@
 				},
 				"validation": {
 					"ageRestrictionTooLow": "Altersbeschränkung darf nicht kleiner als 0 sein",
-					"missingUsername": "Username is required",
-					"missingPassword": "Password is required",
-					"usernameAlreadyExists": "Username already exists"
+					"missingUsername": "Benutzername ist erforderlich",
+					"missingPassword": "Passwort ist erforderlich",
+					"usernameAlreadyExists": "Benutzername existiert bereits"
 				},
 				"createSubmitButton": "Benutzer erstellen",
 				"updateSubmitButton": "Benutzer aktualisieren"
@@ -1738,7 +1738,7 @@
 		},
 		"links": {
 			"create": "Bibliothek erstellen",
-			"settings": "Go to settings"
+			"settings": "Zu den Einstellungen gehen"
 		}
 	},
 	"pagination": {
@@ -1783,7 +1783,7 @@
 		},
 		"libraryOptions": {
 			"scanLibrary": "Scannen",
-			"fileExplorer": "Files",
+			"fileExplorer": "Dateien",
 			"manageLibrary": "Einstellungen",
 			"deleteLibrary": "Löschen"
 		},
@@ -1824,7 +1824,7 @@
 		}
 	},
 	"tagSelect": {
-		"placeholder": "Select or create tag",
+		"placeholder": "Tag auswählen oder erstellen",
 		"placeholderNoTags": "Keine Tags vorhanden"
 	},
 	"thumbnailDropdown": {

@@ -1,11 +1,7 @@
-import { useEpubReader } from '@stump/client'
-import { ProgressBar, Text } from '@stump/components'
-import { cx } from '@stump/components'
-import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { Text } from '@stump/components'
 
 import { useEpubReaderContext, useEpubReaderControls } from './context'
 import { ControlsContainer } from './controls'
-import ControlButton from './controls/ControlButton'
 
 /**
  * A component that shows at the bottom of the epub reader that shows, at least
@@ -23,15 +19,8 @@ function getSectionWidths(sectionsLengths: { [key: number]: number }) {
 }
 
 export default function EpubReaderFooter() {
-	const { visible, jumpToSection } = useEpubReaderControls()
+	const { jumpToSection } = useEpubReaderControls()
 	const { bookMeta } = useEpubReaderContext().readerMeta
-	const { readingDirection } = useEpubReader((state) => ({
-		readingDirection: state.preferences.readingDirection,
-	}))
-
-	const invertControls = readingDirection === 'rtl'
-
-	const [forwardOffset, backwardOffset] = invertControls ? [-1, 1] : [1, -1]
 
 	const visiblePages = (bookMeta?.chapter.currentPage ?? []).filter(Boolean)
 	const pagesVisible = visiblePages.length
@@ -57,44 +46,33 @@ export default function EpubReaderFooter() {
 
 	return (
 		<div>
-			<ControlsContainer position="bottom">
-				<Text size="sm" variant="muted">
-					{chapterName} ({virtualPage}/{virtualPageCount})
-				</Text>
+			<ControlsContainer position="bottom" className="h-[33px]">
+				<div className="z-50 flex flex-1 flex-col gap-y-1">
+					<div>
+						<Text size="xs" variant="muted">
+							{chapterName} ({virtualPage}/{virtualPageCount})
+						</Text>
+					</div>
+
+					<div className="flex flex-1 items-center justify-center space-x-px">
+						{sectionWidthKeys.map((index) => (
+							<div
+								key={`section-${index}`}
+								className="relative h-[5px] cursor-pointer bg-foreground-muted/50"
+								style={{ width: `${sectionWidths[index] ? sectionWidths[index] : 0}%` }}
+								onClick={() => jumpToSection(index)}
+							>
+								{index === currentSectionIndex && (
+									<div
+										className="absolute top-0 h-full w-[2px] bg-foreground-muted"
+										style={{ left: `${chapterProgress}%` }}
+									/>
+								)}
+							</div>
+						))}
+					</div>
+				</div>
 			</ControlsContainer>
-			<div className="flex items-center justify-center space-x-px">
-				<ControlButton
-					className={cx({ hidden: !visible })}
-					onClick={() => jumpToSection(currentSectionIndex + backwardOffset)}
-				>
-					<ArrowLeft className={cx({ hidden: !visible }) + ' h-4 w-4'} />
-				</ControlButton>
-				{!!sectionWidthKeys.length &&
-					sectionWidthKeys.map((index) => (
-						<ProgressBar
-							key={index}
-							value={
-								index < currentSectionIndex
-									? 100
-									: index === currentSectionIndex
-										? chapterProgress
-										: 0
-							}
-							size={index == currentSectionIndex ? 'lg' : 'default'}
-							rounded={'default'}
-							variant={index == currentSectionIndex ? 'primary' : 'default'}
-							className={cx({ hidden: !visible })}
-							style={{ width: `${sectionWidths[index] ? sectionWidths[index] : 0}%` }}
-							onClick={() => jumpToSection(index)}
-						></ProgressBar>
-					))}
-				<ControlButton
-					className={cx({ hidden: !visible })}
-					onClick={() => jumpToSection(currentSectionIndex + forwardOffset)}
-				>
-					<ArrowRight className={cx({ hidden: !visible }) + ' h-4 w-4'} />
-				</ControlButton>
-			</div>
 		</div>
 	)
 }

@@ -207,9 +207,13 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			if (book.spine) {
 				const defaultLoc = book.rendition?.location?.start?.cfi
 
+				const boundingClient = ref.current?.getBoundingClientRect()
+				const height = boundingClient?.height ? boundingClient.height - 2 : '100%'
+				const width = boundingClient?.width ?? '100%'
+
 				const rendition_ = book.renderTo(ref.current!, {
-					height: '100%',
-					width: '100%',
+					width,
+					height,
 				})
 
 				//? TODO: I guess here I would need to wait for and load in custom theme blobs...
@@ -494,7 +498,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				percentage,
 			})
 		}
-	}, [currentLocation, spineSize])
+	}, [currentLocation, spineSize, epub, sdk.epub])
 
 	/**
 	 * A callback for attempting to extract preview text from a given cfi. This is used for bookmarks,
@@ -634,7 +638,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			<div className="h-full w-full">
 				<AutoSizer>
 					{({ height, width }) => {
-						return <div ref={ref} style={{ height, width }} />
+						return <div ref={ref} key={epub.media_entity.id} style={{ height, width }} />
 					}}
 				</AutoSizer>
 			</div>

@@ -57,6 +57,10 @@ type EpubLocationState = {
 	end: EpubLocation
 }
 
+class SectionLengths {
+	public lengths: { [key: number]: number } = {}
+}
+
 /**
  * A component for rendering a reader capable of reading epub files. This component uses
  * epubjs internally for the main rendering logic.
@@ -72,6 +76,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 
 	const [book, setBook] = useState<Book | null>(null)
 	const [rendition, setRendition] = useState<Rendition | null>(null)
+	const [sectionsLengths, setSectionLengths] = useState<SectionLengths | null>(null)
 
 	const [currentLocation, setCurrentLocation] = useState<EpubLocationState>()
 
@@ -101,10 +106,13 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 
 	//* Note: some books have entries in the spine for each href, some don't. It seems
 	//* mostly just a matter of if the epub is good.
-	const { chapter, chapterName } = useMemo(() => {
+	const { chapter, chapterName, sectionIndex } = useMemo(() => {
 		let name: string | undefined
-
 		const currentHref = currentLocation?.start.href
+
+		const spineItem = book?.spine.get(currentHref)
+		const sectionIndex = spineItem?.index
+
 		const position = book?.navigation?.toc?.findIndex(
 			(toc) => toc.href === currentHref || (!!currentHref && toc.href.startsWith(currentHref)),
 		)
@@ -113,7 +121,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			name = book?.navigation.toc[position]?.label.trim()
 		}
 
-		return { chapter: position, chapterName: name }
+		return { chapter: position, chapterName: name, sectionIndex: sectionIndex }
 	}, [book, currentLocation])
 
 	const { epub, isLoading } = useEpubLazy(id)
@@ -235,6 +243,8 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				} else {
 					rendition_.display()
 				}
+
+				createSectionLengths(book, setSectionLengths)
 			}
 		})
 	}, [book])
@@ -348,6 +358,14 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			}
 		},
 		[rendition],
+	)
+
+	// jump to a specific section
+	const jumpToSection = useCallback(
+		async (section: number) => {
+			onJumpToSection(section, book, rendition, ref, onGoToCfi)
+		},
+		[book, rendition, onGoToCfi],
 	)
 
 	/**
@@ -594,10 +612,12 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 							currentLocation?.end.displayed.page,
 						],
 						name: chapterName,
+						sectionSpineIndex: sectionIndex,
 						position: chapter,
 						totalPages: currentLocation?.start.displayed.total,
 					},
 					toc: epub.toc,
+					sectionLengths: sectionsLengths?.lengths ?? {},
 				},
 				progress: epub.media_entity.active_reading_session?.percentage_completed || null,
 			}}
@@ -607,6 +627,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				onLinkClick,
 				onPaginateBackward,
 				onPaginateForward,
+				jumpToSection,
 				searchEntireBook,
 			}}
 		>
@@ -621,10 +642,94 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	)
 }
 
+async function createSectionLengths(
+	book: Book,
+	setSectionLengths: (sections: SectionLengths) => void,
+) {
+	const sections = new SectionLengths()
+
+	function getTextLength(node: Node): number {
+		if (!node) return 0
+
+		let length = 0
+
+		if (node.nodeType === Node.TEXT_NODE) {
+			// If it's a text node, add its length to the total.
+			length += (node as Text).length
+		} else if (node.hasChildNodes()) {
+			// Otherwise, recursively sum up the lengths of all child nodes.
+			for (const childNode of node.childNodes.values()) {
+				length += getTextLength(childNode)
+			}
+		}
+
+		return length
+	}
+
+	if (!book || !book.spine || !book.spine.each) return sections
+
+	// TODO: remove this in favor of a more efficient method where we don't have to load the entire book
+	const promises: Promise<number[] | void>[] = []
+	book.spine.each((item?: SpineItem) => {
+		if (!item) return []
+
+		promises.push(
+			item
+				// @ts-expect-error: I literally can't stand epubjs lol
+				.load(book.load.bind(book))
+				.then(() => [item.index, getTextLength(item.document?.body)])
+				.catch(() => console.error('could not load section'))
+				.finally(() => item.unload.bind(item)),
+		)
+	})
+
+	const results = await Promise.all(promises)
+	results.forEach((res) => {
+		if (!res || res.length < 2) return
+		const sectionIndex = res[0] ?? 0
+		const length = res[1] ?? 0
+		sections.lengths[sectionIndex] = length
+	})
+
+	setSectionLengths(sections)
+}
+
+async function onJumpToSection(
+	section: number,
+	book: Book | null,
+	rendition: Rendition | null,
+	ref: React.RefObject<HTMLDivElement> | undefined,
+	onGoToCfi: (cfi: string) => void,
+) {
+	if (!book || !rendition || !ref || !ref.current || section < 0) return
+
+	let maxIndex = -1
+	book?.spine.each((item?: SpineItem) => {
+		if (!item) return []
+		maxIndex = Math.max(maxIndex, item.index)
+	})
+
+	if (section > maxIndex) {
+		return
+	}
+
+	const spineItem = book?.spine.get(section)
+	const sectionHref = spineItem?.href
+
+	if (!sectionHref) {
+		return
+	}
+
+	// Load the section
+	onGoToCfi(spineItem.href)
+}
+
 interface SpineItem {
 	load: (book: Book) => Promise<object>
 	unload: (item: SpineItem) => void
 	find: (query: string) => Promise<SpineItemFindResult[]>
+	index: number
+	document: Document
 }
 
 interface SpineItemFindResult {

@@ -107,7 +107,7 @@ pub async fn list_directory(
 fn read_and_filter_directory(
 	start_path: &Path,
 	ignore_params: DirectoryListingIgnoreParams,
-) -> Result<Vec<DirectoryListingFile>, std::io::Error> {
+) -> Result<Vec<DirectoryListingFile>, APIError> {
 	let listing = std::fs::read_dir(start_path)?;
 
 	let files = listing

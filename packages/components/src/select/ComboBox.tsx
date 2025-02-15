@@ -1,5 +1,13 @@
 import { Check, ChevronsUpDown } from 'lucide-react'
-import { Fragment, MutableRefObject, RefCallback, useRef, useState } from 'react'
+import {
+	Fragment,
+	MutableRefObject,
+	RefCallback,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from 'react'
 
 import { Button } from '../button'
 import { Command } from '../command'
@@ -95,22 +103,25 @@ export function ComboBox({
 	const [open, setOpen] = useState(false)
 	const [filter, setFilter] = useState('')
 
-	const handleChange = (selected: string) => {
-		if (isMultiSelect) {
-			if (value?.includes(selected)) {
-				onChange?.(value.filter((item) => item !== selected))
-			} else if (value) {
-				onChange?.([...value, selected])
+	const handleChange = useCallback(
+		(selected: string) => {
+			if (isMultiSelect) {
+				if (value?.includes(selected)) {
+					onChange?.(value.filter((item) => item !== selected))
+				} else if (value) {
+					onChange?.([...value, selected])
+				} else {
+					onChange?.([selected])
+				}
+				// FIXME: I don't know why I have to do this, something is triggering the popover to close...
+				setTimeout(() => setOpen(true))
 			} else {
-				onChange?.([selected])
+				onChange?.(selected)
+				setOpen(false)
 			}
-			// FIXME: I don't know why I have to do this, something is triggering the popover to close...
-			setTimeout(() => setOpen(true))
-		} else {
-			onChange?.(selected)
-			setOpen(false)
-		}
-	}
+		},
+		[isMultiSelect, value, onChange],
+	)
 
 	const renderSelected = () => {
 		if (!value) {
@@ -118,9 +129,10 @@ export function ComboBox({
 		}
 
 		if (isMultiSelect) {
+			const adjustedValue = Array.isArray(value) ? value : [value]
 			return (
-				value
-					?.map((selected) => {
+				adjustedValue
+					.map((selected) => {
 						const option = options.find((option) => option.value === selected)
 						return option?.label
 					})
@@ -169,6 +181,22 @@ export function ComboBox({
 
 	const topDescription = description && descriptionPosition === 'top'
 	const bottomDescription = description && descriptionPosition === 'bottom'
+
+	/**
+	 * An effect to ensure that the value is always an array when `isMultiSelect` is true. This
+	 * can happen if the user provides their own URL filtering and doesn't properly use bracket
+	 * notation for the value
+	 */
+	useEffect(() => {
+		if (!isMultiSelect || value == null) return
+
+		if (!Array.isArray(value)) {
+			const target = options.find((option) => option.value === value || option.label === value)
+			if (target) {
+				onChange?.([target.value])
+			}
+		}
+	}, [isMultiSelect, value, onChange, options])
 
 	return (
 		<Container {...containerProps}>

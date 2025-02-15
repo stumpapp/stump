@@ -13,7 +13,8 @@ pub mod scanner;
 pub use common::*;
 pub use content_type::ContentType;
 pub use directory_listing::{
-	DirectoryListing, DirectoryListingFile, DirectoryListingInput,
+	DirectoryListing, DirectoryListingFile, DirectoryListingIgnoreParams,
+	DirectoryListingInput,
 };
 pub use error::FileError;
 pub use media::*;

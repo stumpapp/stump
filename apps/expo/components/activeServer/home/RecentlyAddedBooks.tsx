@@ -3,7 +3,7 @@ import { useCallback } from 'react'
 import { FlatList, View } from 'react-native'
 
 import { BookListItem } from '~/components/book'
-import { Heading } from '~/components/ui'
+import { Heading, Text } from '~/components/ui'
 
 export default function RecentlyAddedBooks() {
 	const { media, hasNextPage, fetchNextPage } = useRecentlyAddedMediaQuery({
@@ -32,6 +32,7 @@ export default function RecentlyAddedBooks() {
 				showsHorizontalScrollIndicator={false}
 				onEndReached={handleEndReached}
 				onEndReachedThreshold={0.75}
+				ListEmptyComponent={<Text className="text-foreground-muted">No books recently added</Text>}
 			/>
 		</View>
 	)

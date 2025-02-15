@@ -79,6 +79,7 @@ export default function ContinueReading() {
 					initialNumToRender={10}
 					maxToRenderPerBatch={10}
 					showsHorizontalScrollIndicator={false}
+					ListEmptyComponent={<Text className="text-foreground-muted">No books in progress</Text>}
 				/>
 			</View>
 		</Fragment>

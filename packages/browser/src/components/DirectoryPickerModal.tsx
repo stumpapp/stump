@@ -27,6 +27,10 @@ export default function DirectoryPickerModal({
 		useDirectoryListing({
 			enabled: isOpen,
 			initialPath: startingPath,
+			ignoreParams: {
+				ignore_files: true,
+				ignore_hidden: !showHidden,
+			},
 		})
 
 	const handleConfirm = useCallback(() => {

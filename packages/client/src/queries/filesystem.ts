@@ -1,3 +1,4 @@
+import { DirectoryListingInput } from '@stump/sdk'
 import { AxiosError } from 'axios'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -54,6 +55,10 @@ export type DirectoryListingQueryParams = {
 	 */
 	initialPath?: string
 	/**
+	 * Additional parameters to pass to the directory listing query.
+	 */
+	ignoreParams?: Omit<DirectoryListingInput, 'path'>
+	/**
 	 * The minimum path that can be queried for. This is useful for enforcing no access to parent
 	 * directories relative to the enforcedRoot.
 	 */
@@ -76,6 +81,7 @@ export type DirectoryListingQueryParams = {
 export function useDirectoryListing({
 	enabled,
 	initialPath,
+	ignoreParams = { ignore_hidden: true },
 	enforcedRoot,
 	page = 1,
 	onGoForward,
@@ -89,8 +95,9 @@ export function useDirectoryListing({
 	const [initialPage, setInitialPage] = useState(() => page)
 
 	const { isLoading, error, data, refetch, ...rest } = useInfiniteQuery(
-		[sdk.filesystem.keys.listDirectory, currentPath, initialPage],
-		async ({ pageParam }) => sdk.filesystem.listDirectory({ page: pageParam, path: currentPath }),
+		[sdk.filesystem.keys.listDirectory, currentPath, ignoreParams, initialPage],
+		async ({ pageParam }) =>
+			sdk.filesystem.listDirectory({ page: pageParam, path: currentPath, ...ignoreParams }),
 		{
 			// Do not run query until `enabled` aka modal is opened.
 			enabled,

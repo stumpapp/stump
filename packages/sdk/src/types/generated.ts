@@ -310,7 +310,7 @@ export type DirectoryListing = { parent: string | null; files: DirectoryListingF
 
 export type DirectoryListingFile = { is_directory: boolean; name: string; path: string }
 
-export type DirectoryListingInput = { path: string | null }
+export type DirectoryListingInput = ({ ignore_hidden?: boolean; ignore_files?: boolean; ignore_directories?: boolean }) & { path: string | null }
 
 export type Direction = "asc" | "desc"
 

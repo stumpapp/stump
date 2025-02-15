@@ -9,7 +9,10 @@ use stump_core::{
 		entity::UserPermission,
 		query::pagination::{PageQuery, Pageable},
 	},
-	filesystem::{DirectoryListing, DirectoryListingFile, DirectoryListingInput},
+	filesystem::{
+		DirectoryListing, DirectoryListingFile, DirectoryListingIgnoreParams,
+		DirectoryListingInput, PathUtils,
+	},
 };
 use tracing::trace;
 
@@ -49,7 +52,8 @@ pub async fn list_directory(
 	Json(input): Json<Option<DirectoryListingInput>>,
 ) -> APIResult<Json<Pageable<DirectoryListing>>> {
 	req.enforce_permissions(&[UserPermission::FileExplorer])?;
-	let list_root = input.unwrap_or_default().path.map(PathBuf::from);
+	let params = input.unwrap_or_default();
+	let list_root = params.path.clone().map(PathBuf::from);
 	let start_path = match list_root {
 		Some(path) => path,
 		#[cfg(unix)]
@@ -70,7 +74,7 @@ pub async fn list_directory(
 		)));
 	}
 
-	let files = read_and_filter_directory(&start_path)?
+	let files = read_and_filter_directory(&start_path, params.ignore_params)?
 		.into_iter()
 		.sorted_by(|a, b| {
 			alphanumeric_sort::compare_path(a.name.to_lowercase(), b.name.to_lowercase())
@@ -102,24 +106,34 @@ pub async fn list_directory(
 
 fn read_and_filter_directory(
 	start_path: &Path,
+	ignore_params: DirectoryListingIgnoreParams,
 ) -> Result<Vec<DirectoryListingFile>, std::io::Error> {
 	let listing = std::fs::read_dir(start_path)?;
 
 	let files = listing
 		.filter_map(Result::ok)
-		.filter_map(filter_if_hidden)
+		.filter_map(|entry| filter_from_params(entry, &ignore_params))
 		.map(|entry| DirectoryListingFile::from(entry.path()))
 		.collect();
 
 	Ok(files)
 }
 
-fn filter_if_hidden(entry: DirEntry) -> Option<DirEntry> {
+fn filter_from_params(
+	entry: DirEntry,
+	params: &DirectoryListingIgnoreParams,
+) -> Option<DirEntry> {
 	let path = entry.path();
-	let stem = path.file_stem().unwrap_or_default();
 
-	// Remove hidden files starting with period
-	if stem.to_str().unwrap_or_default().starts_with('.') {
+	if params.ignore_files && path.is_file() {
+		return None;
+	}
+
+	if params.ignore_directories && path.is_dir() {
+		return None;
+	}
+
+	if params.ignore_hidden && path.is_hidden_file() {
 		return None;
 	}
 

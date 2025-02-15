@@ -17,10 +17,10 @@ const filesystemURL = createRouteURLHandler(FILESYSTEM_ROUTE)
  */
 export class FilesystemAPI extends APIBase {
 	async listDirectory(
-		input?: DirectoryListingInput & { page?: number },
+		{ page, ...input }: DirectoryListingInput & { page?: number } = { page: 1, path: null },
 	): Promise<Pageable<DirectoryListing>> {
 		const { data: listing } = await this.axios.post<Pageable<DirectoryListing>>(
-			filesystemURL('', input),
+			filesystemURL('', { page }),
 			input,
 		)
 		return listing

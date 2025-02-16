@@ -27,7 +27,6 @@
 //!
 
 mod config_schema;
-mod filename_parser;
 mod sources;
 
 use thiserror::Error;

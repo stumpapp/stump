@@ -166,6 +166,71 @@ impl EpubProcessor {
 		EpubDoc::new(path).map_err(|e| FileError::EpubOpenError(e.to_string()))
 	}
 
+	fn get_cover_path(resources: &HashMap<String, (PathBuf, String)>) -> Option<String> {
+		let search_result = resources
+			.iter()
+			.filter(|(_, (_, mime))| {
+				ACCEPTED_EPUB_COVER_MIMES
+					.iter()
+					.any(|accepted_mime| accepted_mime == mime)
+			})
+			.map(|(id, (path, _))| {
+				tracing::trace!(name = ?path, "Found possible cover image");
+				// I want to weight the results based on how likely they are to be the cover.
+				// For example, if the cover is named "cover.jpg", it's probably the cover.
+
+				// png's are preferred over jpg's
+				// highest ranked cover is a top level "cover.png"
+				// next highest ranked cover is any file starting with "cover"
+				// next highest ranked cover is any file ending with "cover"
+				// TODO: add more other fallbacks
+				//  - parse the first html file and look for the first image
+				//  - check for images that have a ratio between [1.4, 1.6]
+				let path_str = path.to_string_lossy().to_lowercase();
+				let extension = path
+					.extension()
+					.unwrap_or_default()
+					.to_string_lossy()
+					.to_lowercase();
+				let file_stem =
+					path.file_stem().unwrap().to_string_lossy().to_lowercase();
+
+				if path_str.starts_with("cover") {
+					let weight = if extension == "png" { 100 } else { 75 };
+					(weight, id)
+				} else if file_stem.starts_with("cover") {
+					let weight = if extension == "png" { 65 } else { 55 };
+					(weight, id)
+				} else if file_stem.ends_with("cover") {
+					let weight = if extension == "png" { 45 } else { 35 };
+					(weight, id)
+				} else {
+					(0, id)
+				}
+			})
+			.max_by_key(|(weight, _)| *weight);
+
+		// if an image was found but weight is 0, then collect all images, sort by name, and return the first one
+		if let Some((0, _)) = search_result {
+			let mut sorted = resources
+				.iter()
+				.filter(|(_, (_, mime))| {
+					ACCEPTED_EPUB_COVER_MIMES
+						.iter()
+						.any(|accepted_mime| accepted_mime == mime)
+				})
+				.collect::<Vec<_>>();
+			sorted.sort_by(|(a, _), (b, _)| a.cmp(b));
+			return sorted.first().map(|(id, _)| id.to_string());
+		}
+
+		if let Some((_, id)) = search_result {
+			return Some(id.to_string());
+		}
+
+		None
+	}
+
 	fn get_cover_internal(
 		epub_file: &mut EpubDoc<BufReader<File>>,
 	) -> Result<(ContentType, Vec<u8>), FileError> {
@@ -181,33 +246,9 @@ impl EpubProcessor {
 		tracing::debug!(
 			"Explicit cover image could not be found, falling back to searching for best match..."
 		);
-		// FIXME: this is hack, i do NOT want to clone this entire hashmap...
-		let cloned_resources = epub_file.resources.clone();
-		let search_result = cloned_resources
-			.iter()
-			.filter(|(_, (_, mime))| {
-				ACCEPTED_EPUB_COVER_MIMES
-					.iter()
-					.any(|accepted_mime| accepted_mime == mime)
-			})
-			.map(|(id, (path, _))| {
-				tracing::trace!(name = ?path, "Found possible cover image");
-				// I want to weight the results based on how likely they are to be the cover.
-				// For example, if the cover is named "cover.jpg", it's probably the cover.
-				// TODO: this is SUPER naive, and should be improved at some point...
-				if path.starts_with("cover") {
-					let weight = if path.ends_with("png") { 100 } else { 75 };
-					(weight, id)
-				} else {
-					(0, id)
-				}
-			})
-			.max_by_key(|(weight, _)| *weight);
-
-		if let Some((_, id)) = search_result {
-			if let Some((buf, mime)) = epub_file.get_resource(id) {
-				return Ok((ContentType::from(mime.as_str()), buf));
-			}
+		let id = Self::get_cover_path(&epub_file.resources);
+		if let Some((buf, mime)) = epub_file.get_resource(id.as_ref().unwrap()) {
+			return Ok((ContentType::from(mime.as_str()), buf));
 		}
 
 		tracing::error!("Failed to find cover for epub file");
@@ -378,6 +419,155 @@ mod tests {
 	use crate::filesystem::media::tests::get_test_epub_path;
 
 	#[test]
+	fn test_get_cover_first_sorted_image() {
+		let resources = HashMap::from([
+			(
+				"id4".to_string(),
+				(PathBuf::from("Image0001.jpg"), "image/jpeg".to_string()),
+			),
+			(
+				"id5".to_string(),
+				(PathBuf::from("Image0002.jpg"), "image/jpeg".to_string()),
+			),
+			(
+				"id6".to_string(),
+				(PathBuf::from("Image0003.jpg"), "image/jpeg".to_string()),
+			),
+		]);
+		assert_eq!(
+			EpubProcessor::get_cover_path(&resources),
+			Some("id4".to_string())
+		);
+	}
+
+	#[test]
+	fn test_get_resource_by_id() {
+		let path = get_test_epub_path();
+
+		let resource = EpubProcessor::get_resource_by_id(&path, "item1");
+		assert!(resource.is_ok());
+	}
+
+	#[test]
+	fn test_get_cover_path_no_resources() {
+		let resources = HashMap::<String, (PathBuf, String)>::new();
+		assert_eq!(EpubProcessor::get_cover_path(&resources), None);
+	}
+
+	#[test]
+	fn test_get_cover_path_single_resource() {
+		let resources = HashMap::from([(
+			"id1".to_string(),
+			(PathBuf::from("cover.png"), "image/png".to_string()),
+		)]);
+		assert_eq!(
+			EpubProcessor::get_cover_path(&resources),
+			Some("id1".to_string())
+		);
+	}
+
+	#[test]
+	fn test_get_cover_path_multiple_resources() {
+		let resources = HashMap::from([
+			(
+				"id1".to_string(),
+				(PathBuf::from("cover.png"), "image/png".to_string()),
+			),
+			(
+				"id2".to_string(),
+				(PathBuf::from("not_cover.png"), "image/png".to_string()),
+			),
+		]);
+		assert_eq!(
+			EpubProcessor::get_cover_path(&resources),
+			Some("id1".to_string())
+		);
+	}
+
+	#[test]
+	fn test_get_cover_prefer_png() {
+		let resources = HashMap::from([
+			(
+				"id1".to_string(),
+				(PathBuf::from("cover1.png"), "image/png".to_string()),
+			),
+			(
+				"id2".to_string(),
+				(PathBuf::from("cover2.jpg"), "image/jpeg".to_string()),
+			),
+		]);
+		assert_eq!(
+			EpubProcessor::get_cover_path(&resources),
+			Some("id1".to_string())
+		);
+	}
+
+	#[test]
+	fn test_get_cover_path_cover_named() {
+		let resources = HashMap::from([
+			(
+				"id1".to_string(),
+				(
+					PathBuf::from("path/images/cover.png"),
+					"image/png".to_string(),
+				),
+			),
+			(
+				"id2".to_string(),
+				(
+					PathBuf::from("path/images/not_cover.png"),
+					"image/png".to_string(),
+				),
+			),
+		]);
+		assert_eq!(
+			EpubProcessor::get_cover_path(&resources),
+			Some("id1".to_string())
+		);
+	}
+
+	#[test]
+	fn test_get_cover_path_cover_named_with_weighting() {
+		let mut resources = HashMap::<String, (PathBuf, String)>::new();
+		resources.insert(
+			"id1".to_string(),
+			(PathBuf::from("path/to/cover.png"), "image/png".to_string()),
+		);
+		resources.insert(
+			"id2".to_string(),
+			(PathBuf::from("path/to/cover.jpg"), "image/jpeg".to_string()),
+		);
+		assert_eq!(
+			EpubProcessor::get_cover_path(&resources),
+			Some("id1".to_string())
+		);
+	}
+
+	#[test]
+	fn test_get_cover_path_multiple_covers() {
+		let mut resources = HashMap::<String, (PathBuf, String)>::new();
+		resources.insert(
+			"id1".to_string(),
+			(PathBuf::from("cover.png"), "image/png".to_string()),
+		);
+		resources.insert(
+			"id2".to_string(),
+			(PathBuf::from("path/to/cover.jpg"), "image/jpeg".to_string()),
+		);
+		resources.insert(
+			"id3".to_string(),
+			(
+				PathBuf::from("path/to/not_cover.jpg"),
+				"image/jpeg".to_string(),
+			),
+		);
+		assert_eq!(
+			EpubProcessor::get_cover_path(&resources),
+			Some("id1".to_string())
+		);
+	}
+
+	#[test]
 	fn test_normalize_resource_path() {
 		let path = PathBuf::from("OEBPS/Styles/style.css");
 		let result = normalize_resource_path(path, "OEBPS");
@@ -441,6 +631,16 @@ mod tests {
 	fn test_get_chapter() {
 		let path = get_test_epub_path();
 
+		let chapter = EpubProcessor::get_chapter(&path, 1);
+		assert!(chapter.is_ok());
+	}
+
+	#[test]
+	fn test_get_cover_then_chapter() {
+		let path = get_test_epub_path();
+
+		let cover = EpubProcessor::get_cover(&path);
+		assert!(cover.is_ok());
 		let chapter = EpubProcessor::get_chapter(&path, 1);
 		assert!(chapter.is_ok());
 	}

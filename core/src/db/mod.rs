@@ -6,6 +6,8 @@ pub mod filter;
 pub mod migration;
 pub mod query;
 
+mod models;
+
 pub use dao::*;
 
 pub use client::{create_client, create_client_with_url, create_test_client};

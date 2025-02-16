@@ -19,6 +19,8 @@ mod utils;
 mod context;
 pub mod error;
 
+mod schema;
+
 #[rustfmt::skip]
 #[allow(warnings, unused)]
 pub mod prisma;

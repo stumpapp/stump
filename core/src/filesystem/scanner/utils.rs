@@ -118,6 +118,15 @@ pub(crate) async fn create_media(
 				None
 			};
 
+			let modified_at = generated
+				.modified_at
+				.as_deref()
+				.and_then(|date| DateTime::parse_from_rfc3339(date).ok())
+				.or_else(|| {
+					tracing::error!("Failed to parse modified_at date");
+					None
+				});
+
 			let created_media = client
 				.media()
 				.create(
@@ -130,6 +139,7 @@ pub(crate) async fn create_media(
 						media::hash::set(generated.hash),
 						media::koreader_hash::set(generated.koreader_hash),
 						media::series::connect(series::id::equals(generated.series_id)),
+						media::modified_at::set(modified_at),
 					],
 				)
 				.exec()

@@ -118,14 +118,15 @@ pub(crate) async fn create_media(
 				None
 			};
 
-			let modified_at = generated
-				.modified_at
-				.as_deref()
-				.and_then(|date| DateTime::parse_from_rfc3339(date).ok())
-				.or_else(|| {
-					tracing::error!("Failed to parse modified_at date");
-					None
-				});
+			let modified_at = generated.modified_at.as_deref().and_then(|date| {
+				match DateTime::parse_from_rfc3339(date) {
+					Ok(dt) => Some(dt), // Successfully parsed
+					Err(e) => {
+						tracing::error!(?e, "Failed to parse modified_at date");
+						None
+					},
+				}
+			});
 
 			let created_media = client
 				.media()

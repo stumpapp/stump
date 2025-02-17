@@ -46,7 +46,7 @@ export default function Screen() {
 		async ({ username, password }: Credentials) => {
 			if (!activeServer) return false
 
-			const shouldFormatURL = !!activeServer.stumpOPDS
+			const shouldFormatURL = activeServer.kind === 'stump'
 			const api = new Api({
 				baseURL: activeServer.url,
 				authMethod: 'basic',
@@ -77,7 +77,7 @@ export default function Screen() {
 						[constants.STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
 						...sdk.customHeaders,
 					},
-					shouldFormatURL: !!activeServer.stumpOPDS,
+					shouldFormatURL: activeServer.kind === 'stump',
 				})
 				api.basicAuth = { username, password }
 				setSDK(api)

@@ -90,8 +90,8 @@ export class Api {
 			this._customHeaders = params.customHeaders
 		}
 
-		if (!params.shouldFormatURL) {
-			this._shouldFormatURL = false
+		if (params.shouldFormatURL !== undefined) {
+			this._shouldFormatURL = params.shouldFormatURL
 		}
 
 		const instance = axios.create({

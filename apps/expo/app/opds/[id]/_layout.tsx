@@ -24,10 +24,10 @@ export default function Screen() {
 		if (!activeServer) return
 
 		const configureSDK = async () => {
-			const { id, url, stumpOPDS } = activeServer
+			const { id, url, kind } = activeServer
 
 			const config = await getServerConfig(id)
-			const shouldFormatURL = !!stumpOPDS
+			const shouldFormatURL = kind === 'stump'
 
 			const instance = match(config?.auth)
 				.with(

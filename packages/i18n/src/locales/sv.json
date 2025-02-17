@@ -3,16 +3,16 @@
 		"heading": "Det här är pinsamt",
 		"message": "Du har snubblat på en sida som är under utveckling. Jag skulle vilja visa den för dig, men den är inte riktigt klar än.",
 		"homeLink": "Gå Hem",
-		"githubLink": "View the GitHub issue"
+		"githubLink": "Se problemet på GitHub"
 	},
 	"authScene": {
-		"claimHeading": "Initialize your server",
-		"claimText": "This Stump server is not initialized. Use the form below to create your account. Once created, you will have full access to all server features.",
+		"claimHeading": "Initiera din server",
+		"claimText": "Denna Stump-server är inte initierad. Använd formuläret nedan för att skapa ditt konto. När det är skapat kommer du ha full tillgång till alla serverfunktioner.",
 		"form": {
 			"validation": {
 				"missingUsername": "Användarnamn krävs",
 				"missingPassword": "Lösenord krävs",
-				"usernameAlreadyExists": "Username already exists"
+				"usernameAlreadyExists": "Användarnamnet existerar redan"
 			},
 			"labels": {
 				"username": "Användarnamn",
@@ -47,17 +47,17 @@
 				"fileSize": "Filstorlek",
 				"fileType": "Filtyp",
 				"fileLocation": "Filsökväg",
-				"fileChecksum": "Checksum"
+				"fileChecksum": "Checksumma"
 			}
 		},
 		"emailBook": {
-			"heading": "Email book",
-			"description": "Send this book to device or email address",
+			"heading": "Mejla bok",
+			"description": "Skicka den här boken till en enhet eller mejladress",
 			"form": {
 				"email": {
 					"label": "E-post",
 					"placeholder": "E-post adress",
-					"description": "An email address to send the book to. Click add to finalize each input"
+					"description": "En mejladress att skicka boken till. Tryck på lägg till för att slutföra varje tillägg"
 				},
 				"devices": {
 					"label": "Enheter",
@@ -71,28 +71,28 @@
 	"createOrUpdateBookClubForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My book club",
-				"description": "The name of your book club"
+				"label": "Namn",
+				"placeholder": "Min bokklubb",
+				"description": "Namnet på din bokklubb"
 			},
 			"description": {
-				"label": "Description",
-				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
-				"description": "An optional, short description of your book club"
+				"label": "Beskrivning",
+				"placeholder": "En \"Our Flag Means Death\" fan-klubb. Vi älskar att läsa om fiktion om pirater",
+				"description": "En valfri, kort beskrivning av din bokklubb"
 			},
 			"is_private": {
-				"label": "Private club",
-				"description": "If enabled, only users you invite will be able to join your book club"
+				"label": "Privat klubb",
+				"description": "Om aktiverat, så kan bara inbjudna användare gå med i din bokklubb"
 			},
 			"member_role_spec": {
-				"heading": "Custom role mapping",
+				"heading": "Speciella roller",
 				"subtitle": [
-					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
-					"documentation"
+					"Om du vill, kan du skapa egna namn för rollerna i din bokklubb. För mer information, se",
+					"dokumentation"
 				],
 				"member": {
-					"label": "Member",
-					"placeholder": "Member",
+					"label": "Medlem",
+					"placeholder": "Medlem",
 					"description": "The name of the default role for your book club"
 				},
 				"moderator": {

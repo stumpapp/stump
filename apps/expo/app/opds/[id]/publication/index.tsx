@@ -1,18 +1,18 @@
 import { useSDK } from '@stump/client'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
+import omit from 'lodash/omit'
+import { Fragment } from 'react'
 import { Pressable, SafeAreaView, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
-import omit from 'lodash/omit'
 
 import { useActiveServer } from '~/components/activeServer'
+import { BookDescription, InfoRow, InfoSection } from '~/components/book/overview'
 import { Button, Heading, icons, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
 
 import { usePublicationContext } from './context'
 import { getDateField, getNumberField, getStringField } from './utils'
-import { BookDescription, InfoRow, InfoSection } from '~/components/book/overview'
-import { Fragment } from 'react'
 
 const { Info, Slash, BookCopy } = icons
 
@@ -36,7 +36,9 @@ export default function Screen() {
 	const description = getStringField(metadata, 'description')
 
 	const hasInformation = !!numberOfPages || !!modified
-	const seriesURL = belongsTo?.series?.links?.find((link) => link.rel === 'self')?.href
+
+	const belongsToSeries = Array.isArray(belongsTo?.series) ? belongsTo.series[0] : belongsTo?.series
+	const seriesURL = belongsToSeries?.links?.find((link) => link.rel === 'self')?.href
 
 	const downloadURL = links?.find((link) => link.rel === 'http://opds-spec.org/acquisition')?.href
 	const canStream = !!readingOrder && readingOrder.length > 0

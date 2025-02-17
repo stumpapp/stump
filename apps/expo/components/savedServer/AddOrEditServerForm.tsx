@@ -512,7 +512,7 @@ const createSchema = (names: string[]) =>
 			token: z.string().optional(),
 			basicUser: z.string().optional(),
 			basicPassword: z.string().optional(),
-			customHeaders: z.array(headerSchema),
+			customHeaders: z.array(headerSchema).optional(),
 		})
 		.transform((data) => {
 			const baseConfig =
@@ -535,7 +535,7 @@ const createSchema = (names: string[]) =>
 				...data,
 				stumpOPDS: data.kind === 'stump' ? data.stumpOPDS : false,
 				config:
-					data.customHeaders.length > 0
+					!!data.customHeaders && data.customHeaders.length > 0
 						? {
 								...baseConfig,
 								customHeaders: data.customHeaders.reduce(

@@ -24,26 +24,27 @@ export default function Screen() {
 		if (!activeServer) return
 
 		const configureSDK = async () => {
-			const { id, url } = activeServer
+			const { id, url, stumpOPDS } = activeServer
 
 			const config = await getServerConfig(id)
+			const shouldFormatURL = !!stumpOPDS
 
 			const instance = match(config?.auth)
 				.with(
 					{ basic: P.shape({ username: P.string, password: P.string }) },
 					({ basic: { username, password } }) => {
-						const api = new Api({ baseURL: url, authMethod: 'basic' })
+						const api = new Api({ baseURL: url, authMethod: 'basic', shouldFormatURL })
 						api.basicAuth = { username, password }
 						return api
 					},
 				)
 				.with({ bearer: P.string }, ({ bearer: token }) => {
-					const api = new Api({ baseURL: url, authMethod: 'token' })
+					const api = new Api({ baseURL: url, authMethod: 'token', shouldFormatURL })
 					api.token = token
 					return api
 				})
 				// TODO: figure out what the deal is otherwise. Session auth? Assume basic or sm?
-				.otherwise(() => new Api({ baseURL: url, authMethod: 'basic' }))
+				.otherwise(() => new Api({ baseURL: url, authMethod: 'basic', shouldFormatURL }))
 
 			const customHeaders = {
 				...config?.customHeaders,

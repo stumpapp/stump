@@ -18,10 +18,20 @@ export default function Screen() {
 		data: feed,
 		refetch,
 		isRefetching,
-	} = useQuery([sdk.opds.keys.catalog, activeServer?.id], () => sdk.opds.catalog(), {
-		suspense: true,
-		useErrorBoundary: false,
-	})
+	} = useQuery(
+		[sdk.opds.keys.catalog, activeServer?.id],
+		() => {
+			if (activeServer.stumpOPDS) {
+				return sdk.opds.catalog()
+			} else {
+				return sdk.opds.feed(activeServer.url)
+			}
+		},
+		{
+			suspense: true,
+			useErrorBoundary: false,
+		},
+	)
 
 	const searchURL = feed?.links.find((link) => link.rel === 'search' && link.templated)?.href
 

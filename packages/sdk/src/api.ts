@@ -28,6 +28,7 @@ export type ApiVersion = 'v1'
 export type ApiParams = {
 	baseURL: string
 	customHeaders?: Record<string, string>
+	shouldFormatURL?: boolean
 } & (
 	| {
 			authMethod?: AuthenticationMethod
@@ -71,6 +72,8 @@ export class Api {
 	 */
 	private _customHeaders: Record<string, string> = {}
 
+	private _shouldFormatURL = true
+
 	/**
 	 * Create a new instance of the API
 	 * @param baseURL The base URL to the Stump server
@@ -85,6 +88,10 @@ export class Api {
 
 		if (params.customHeaders) {
 			this._customHeaders = params.customHeaders
+		}
+
+		if (!params.shouldFormatURL) {
+			this._shouldFormatURL = false
 		}
 
 		const instance = axios.create({
@@ -173,7 +180,9 @@ export class Api {
 	 * Get the URL of the Stump service
 	 */
 	get serviceURL(): string {
-		return formatApiURL(this.baseURL, this.configuration.apiVersion)
+		return this._shouldFormatURL
+			? formatApiURL(this.baseURL, this.configuration.apiVersion)
+			: this.baseURL
 	}
 
 	get config(): Configuration {

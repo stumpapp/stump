@@ -61,14 +61,15 @@ const paginationMeta = z.object({
 })
 export type OPDSPaginationMetadata = z.infer<typeof paginationMeta>
 
+const belongsToSeries = z.object({
+	name: z.string(),
+	position: z.number().optional(),
+	links: z.array(link).default([]),
+})
+
+// Komga sends series as an array, Stump doesnt
 const belongsTo = z.object({
-	series: z
-		.object({
-			name: z.string(),
-			position: z.number().optional(),
-			links: z.array(link).default([]),
-		})
-		.optional(),
+	series: z.union([belongsToSeries, z.array(belongsToSeries)]).optional(),
 })
 export type OPDSEntryBelongsTo = z.infer<typeof belongsTo>
 

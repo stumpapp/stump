@@ -7,6 +7,9 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 type GlobalSettings = BookPreferences & { incognito?: boolean }
 
 export type ReaderStore = {
+	isReading: boolean
+	setIsReading: (reading: boolean) => void
+
 	globalSettings: GlobalSettings
 	setGlobalSettings: (settings: Partial<GlobalSettings>) => void
 
@@ -22,6 +25,8 @@ export const useReaderStore = create<ReaderStore>()(
 	persist(
 		(set, get) =>
 			({
+				isReading: false,
+				setIsReading: (reading) => set({ isReading: reading }),
 				globalSettings: {
 					brightness: 1,
 					readingDirection: 'ltr',
@@ -82,4 +87,13 @@ export const useBookPreferences = (id: string) => {
 		setBookPreferences,
 		updateGlobalSettings: store.setGlobalSettings,
 	}
+}
+
+export const useHideStatusBar = () => {
+	const { isReading, showControls } = useReaderStore((state) => ({
+		isReading: state.isReading,
+		showControls: state.showControls,
+	}))
+
+	return isReading && !showControls
 }

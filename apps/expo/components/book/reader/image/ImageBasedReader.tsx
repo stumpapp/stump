@@ -95,6 +95,7 @@ export default function ImageBasedReader({ initialPage }: Props) {
 			}}
 			initialNumToRender={2}
 			maxToRenderPerBatch={2}
+			windowSize={3}
 			initialScrollIndex={initialPage - 1}
 			// https://stackoverflow.com/questions/53059609/flat-list-scrolltoindex-should-be-used-in-conjunction-with-getitemlayout-or-on
 			onScrollToIndexFailed={(info) => {
@@ -113,6 +114,7 @@ export default function ImageBasedReader({ initialPage }: Props) {
 			})}
 			showsVerticalScrollIndicator={false}
 			showsHorizontalScrollIndicator={false}
+			removeClippedSubviews
 		/>
 	)
 }
@@ -211,10 +213,10 @@ const Page = React.memo(
 				minScale={1}
 				maxScale={5}
 				scale={scale}
-				// doubleTapScale={3}
-				// isSingleTapEnabled={true}
-				// isDoubleTapEnabled={true}
-				// onSingleTap={onSingleTap}
+				doubleTapScale={3}
+				isSingleTapEnabled={true}
+				isDoubleTapEnabled={true}
+				onSingleTap={onSingleTap}
 			>
 				<View
 					className="flex items-center justify-center"

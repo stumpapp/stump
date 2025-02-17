@@ -7,8 +7,10 @@ import {
 	useUpdateMediaProgress,
 } from '@stump/client'
 import { useLocalSearchParams } from 'expo-router'
+import { useEffect } from 'react'
 
 import { EpubJSReader, ImageBasedReader, UnsupportedReader } from '~/components/book/reader'
+import { useReaderStore } from '~/stores'
 
 type Params = {
 	id: string
@@ -29,6 +31,14 @@ export default function Screen() {
 		retry: (attempts) => attempts < 3,
 		useErrorBoundary: false,
 	})
+
+	const setIsReading = useReaderStore((state) => state.setIsReading)
+	useEffect(() => {
+		setIsReading(true)
+		return () => {
+			setIsReading(false)
+		}
+	}, [setIsReading])
 
 	if (!book) return null
 

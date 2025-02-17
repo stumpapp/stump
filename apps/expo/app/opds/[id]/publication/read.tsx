@@ -1,7 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+
+import { ImageBasedReader } from '~/components/book/reader'
+import { useReaderStore } from '~/stores'
 
 import { usePublicationContext } from './context'
-import { ImageBasedReader } from '~/components/book/reader'
 import { hashFromURL } from './utils'
 
 type ImageDimension = {
@@ -23,6 +25,8 @@ export default function Screen() {
 
 	const [id] = useState(() => identifier || hashFromURL(url))
 
+	const setIsReading = useReaderStore((state) => state.setIsReading)
+
 	const currentPage = useMemo(() => {
 		const rawPosition = progression?.locator.locations?.at(0)?.position
 		if (!rawPosition) {
@@ -34,6 +38,13 @@ export default function Screen() {
 		}
 		return parsedPosition
 	}, [progression])
+
+	useEffect(() => {
+		setIsReading(true)
+		return () => {
+			setIsReading(false)
+		}
+	}, [setIsReading])
 
 	return (
 		<ImageBasedReader

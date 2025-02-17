@@ -12,6 +12,7 @@ import { BottomSheet } from '~/components/ui/bottom-sheet'
 import { setAndroidNavigationBar } from '~/lib/android-navigation-bar'
 import { NAV_THEME } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
+import { useHideStatusBar } from '~/stores/reader'
 
 const LIGHT_THEME: Theme = {
 	...DefaultTheme,
@@ -34,6 +35,7 @@ export default function RootLayout() {
 
 	const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false)
 
+	const shouldHideStatusBar = useHideStatusBar()
 	const hasMounted = React.useRef(false)
 
 	useIsomorphicLayoutEffect(() => {
@@ -59,7 +61,7 @@ export default function RootLayout() {
 			{/* TODO: determine if I need this? */}
 			<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
 				<BottomSheet.Provider>
-					<StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
+					<StatusBar style={isDarkColorScheme ? 'light' : 'dark'} hidden={shouldHideStatusBar} />
 					<Stack>
 						<Stack.Screen
 							name="(tabs)"

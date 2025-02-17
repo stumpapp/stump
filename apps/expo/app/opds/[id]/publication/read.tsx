@@ -3,8 +3,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { ImageBasedReader } from '~/components/book/reader'
 import { useReaderStore } from '~/stores'
 
+import { hashFromURL } from '../../../../components/opds/utils'
 import { usePublicationContext } from './context'
-import { hashFromURL } from './utils'
 
 type ImageDimension = {
 	height: number

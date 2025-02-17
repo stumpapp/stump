@@ -10,9 +10,10 @@ import { useDisplay } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
 import { useActiveServer } from '../activeServer'
+import RefreshControl from '../RefreshControl'
 import { Text } from '../ui'
 import FeedTitle from './FeedTitle'
-import RefreshControl from '../RefreshControl'
+import { getPublicationThumbnailURL } from './utils'
 
 type Props = {
 	feed: OPDSFeed
@@ -113,7 +114,7 @@ export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props
 				fixed
 				spacing={availableSpaceX / itemsPerRow}
 				renderItem={({ item: publication }) => {
-					const thumbnailURL = publication.images?.at(0)?.href
+					const thumbnailURL = getPublicationThumbnailURL(publication)
 					const selfURL = publication.links?.find((link) => link.rel === 'self')?.href
 
 					return (
@@ -121,8 +122,11 @@ export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props
 							onPress={() =>
 								selfURL
 									? router.push({
-											pathname: `/opds/${serverID}/publication`,
-											params: { url: selfURL },
+											pathname: '/opds/[id]/publication',
+											params: {
+												id: serverID,
+												url: selfURL,
+											},
 										})
 									: null
 							}
@@ -169,7 +173,7 @@ export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props
 				onEndReached={onEndReached}
 				onEndReachedThreshold={0.75}
 				refreshControl={
-					!!onRefresh ? (
+					onRefresh ? (
 						<RefreshControl refreshing={isRefreshing || false} onRefresh={onRefresh} />
 					) : undefined
 				}

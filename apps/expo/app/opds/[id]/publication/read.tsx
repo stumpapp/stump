@@ -26,6 +26,7 @@ export default function Screen() {
 	const [id] = useState(() => identifier || hashFromURL(url))
 
 	const setIsReading = useReaderStore((state) => state.setIsReading)
+	const setShowControls = useReaderStore((state) => state.setShowControls)
 
 	const currentPage = useMemo(() => {
 		const rawPosition = progression?.locator.locations?.at(0)?.position
@@ -45,6 +46,12 @@ export default function Screen() {
 			setIsReading(false)
 		}
 	}, [setIsReading])
+
+	useEffect(() => {
+		return () => {
+			setShowControls(false)
+		}
+	}, [setShowControls])
 
 	return (
 		<ImageBasedReader

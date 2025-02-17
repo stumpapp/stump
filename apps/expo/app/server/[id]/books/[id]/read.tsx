@@ -40,6 +40,13 @@ export default function Screen() {
 		}
 	}, [setIsReading])
 
+	const setShowControls = useReaderStore((state) => state.setShowControls)
+	useEffect(() => {
+		return () => {
+			setShowControls(false)
+		}
+	}, [setShowControls])
+
 	if (!book) return null
 
 	if (book.extension.match(EBOOK_EXTENSION)) {

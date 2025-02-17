@@ -15,6 +15,7 @@ export type SavedServer = {
 	url: string
 	kind: SupportedServer // TODO: support showing stump as opds, too
 	stumpOPDS?: boolean
+	defaultServer?: boolean
 }
 
 export type SavedServerWithConfig = SavedServer & {

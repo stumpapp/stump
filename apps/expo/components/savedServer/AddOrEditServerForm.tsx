@@ -26,7 +26,11 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 
 	const { control, handleSubmit, ...form } = useForm<AddOrEditServerSchema>({
 		defaultValues: getDefaultValues(editingServer),
-		resolver: zodResolver(createSchema(savedServers.map(({ name }) => name))),
+		resolver: zodResolver(
+			createSchema(
+				savedServers.map(({ name }) => name).filter((name) => name !== editingServer?.name),
+			),
+		),
 	})
 	const { errors } = useFormState({ control })
 

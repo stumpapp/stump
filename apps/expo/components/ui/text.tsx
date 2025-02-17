@@ -15,6 +15,7 @@ const textVariants = cva('text-foreground', {
 			default: 'text-base tablet:text-lg',
 			lg: 'text-lg tablet:text-xl',
 			xl: 'text-xl tablet:text-2xl',
+			'2xl': 'text-2xl tablet:text-3xl',
 		},
 	},
 	defaultVariants: {

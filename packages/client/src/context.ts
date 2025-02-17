@@ -6,7 +6,7 @@ export const QueryClientContext = createContext<QueryClient | undefined>(undefin
 
 export type IStumpClientContext = {
 	onRedirect?: (url: string) => void
-	onUnauthenticatedResponse?: (redirectUrl?: string) => void
+	onUnauthenticatedResponse?: (redirectUrl?: string, data?: unknown) => void
 	onConnectionWithServerChanged?: (isConnected: boolean) => void
 	onAuthenticated?: (user: User, token?: string) => Promise<void>
 	onLogout?: () => Promise<void>

@@ -21,6 +21,25 @@ export type SavedServerWithConfig = SavedServer & {
 	config: ServerConfig | null
 }
 
+// const bearerAuth = z.object({
+// 	bearer: z.string(),
+// })
+
+// const basicAuth = z.object({
+// 	basic: z.object({
+// 		username: z.string(),
+// 		password: z.string(), // Encrypted with expo-secure-store, so should be OK
+// 	}),
+// })
+
+// const auth = bearerAuth
+// 	.partial()
+// 	.and(basicAuth.partial())
+// 	.optional()
+// 	.refine((data) => !data || Object.keys(data).length >= 1, {
+// 		message: 'Must have at least one auth method',
+// 	})
+
 const auth = z
 	.union([
 		z.object({
@@ -29,8 +48,7 @@ const auth = z
 		z.object({
 			basic: z.object({
 				username: z.string(),
-				// TODO: NO, don't do this. Don't store a plain password lol
-				password: z.string(),
+				password: z.string(), // Encrypted with expo-secure-store, so should be OK
 			}),
 		}),
 	])
@@ -38,7 +56,7 @@ const auth = z
 
 const serverConfig = z.object({
 	customHeaders: z.record(z.string()).optional(),
-	auth,
+	auth: auth.optional(),
 })
 export type ServerConfig = z.infer<typeof serverConfig>
 

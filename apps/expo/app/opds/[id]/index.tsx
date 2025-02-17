@@ -1,15 +1,15 @@
 import { useQuery, useSDK } from '@stump/client'
+import { useRouter } from 'expo-router'
 import partition from 'lodash/partition'
+import { useCallback } from 'react'
 import { View } from 'react-native'
-import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native'
+import { ScrollView } from 'react-native-gesture-handler'
 
 import { useActiveServer } from '~/components/activeServer'
 import { OPDSNavigation, OPDSNavigationGroup, OPDSPublicationGroup } from '~/components/opds'
 import RefreshControl from '~/components/RefreshControl'
 import { Heading, Input } from '~/components/ui'
-import { useCallback } from 'react'
-import { useRouter } from 'expo-router'
 
 export default function Screen() {
 	const { activeServer } = useActiveServer()
@@ -20,25 +20,29 @@ export default function Screen() {
 		isRefetching,
 	} = useQuery([sdk.opds.keys.catalog, activeServer?.id], () => sdk.opds.catalog(), {
 		suspense: true,
+		useErrorBoundary: false,
 	})
 
 	const searchURL = feed?.links.find((link) => link.rel === 'search' && link.templated)?.href
 
 	const router = useRouter()
 
-	const onSearch = useCallback((query: string) => {
-		if (!query || !searchURL) return
+	const onSearch = useCallback(
+		(query: string) => {
+			if (!query || !searchURL) return
 
-		const url = searchURL.replace('{?query}', `?query=${encodeURIComponent(query)}`)
-		router.push({
-			pathname: `/opds/[id]/search`,
-			params: {
-				id: activeServer.id,
-				url,
-				query,
-			},
-		})
-	}, [])
+			const url = searchURL.replace('{?query}', `?query=${encodeURIComponent(query)}`)
+			router.push({
+				pathname: `/opds/[id]/search`,
+				params: {
+					id: activeServer.id,
+					url,
+					query,
+				},
+			})
+		},
+		[activeServer.id, router, searchURL],
+	)
 
 	if (!feed) return null
 

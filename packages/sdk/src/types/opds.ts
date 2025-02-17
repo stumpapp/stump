@@ -29,9 +29,20 @@ const imageLink = z
 const link = z.union([baseLink, navigationLink, imageLink])
 export type OPDSLink = z.infer<typeof link>
 
-const authFlow = z.object({
-	type: z.literal('http://opds-spec.org/auth/basic'),
-})
+const authFlow = z
+	.object({
+		type: z.literal('http://opds-spec.org/auth/basic'),
+	})
+	.and(
+		z.object({
+			labels: z
+				.object({
+					login: z.string().optional(),
+					password: z.string().optional(),
+				})
+				.optional(),
+		}),
+	)
 
 // OPDSAuthenticationDocument
 export const authDocument = z.object({

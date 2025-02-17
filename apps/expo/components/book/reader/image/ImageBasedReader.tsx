@@ -1,4 +1,4 @@
-import { Zoomable } from '@likashefqet/react-native-image-zoom'
+import { ImageZoom, Zoomable } from '@likashefqet/react-native-image-zoom'
 import { useSDK } from '@stump/client'
 import { Image, ImageLoadEventData } from 'expo-image'
 import React, { useCallback, useRef, useState } from 'react'
@@ -49,10 +49,6 @@ export default function ImageBasedReader({ initialPage }: Props) {
 
 	const [sizes, setSizes] = useState<ImageDimension[]>(() => imageSizes)
 
-	const scale = useSharedValue(1)
-	const showControls = useReaderStore((state) => state.showControls)
-	const setShowControls = useReaderStore((state) => state.setShowControls)
-
 	const deviceOrientation = width > height ? 'landscape' : 'portrait'
 
 	// TODO: an effect that whenever the device orientation changes to something different than before,
@@ -73,75 +69,51 @@ export default function ImageBasedReader({ initialPage }: Props) {
 		[onPageChanged, incognito],
 	)
 
-	const onSingleTap = useCallback(
-		(event: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => {
-			if (event.state !== State.ACTIVE) return
-			setShowControls(!showControls)
-		},
-		[showControls, setShowControls],
-	)
-
 	return (
-		<Zoomable
-			minScale={1}
-			maxScale={5}
-			scale={scale}
-			doubleTapScale={3}
-			isSingleTapEnabled
-			isDoubleTapEnabled
-			onSingleTap={onSingleTap}
-			style={{
-				flex: 1,
+		<FlatList
+			ref={flatList}
+			data={Array.from({ length: book.pages }, (_, i) => i)}
+			renderItem={({ item }) => (
+				<Page
+					deviceOrientation={deviceOrientation}
+					index={item}
+					size={sizes[item]}
+					onSizeLoaded={setSizes}
+					maxWidth={width}
+					maxHeight={height}
+					readingDirection="horizontal"
+				/>
+			)}
+			keyExtractor={(item) => item.toString()}
+			horizontal={readingMode === 'paged' || readingMode === 'continuous:horizontal'}
+			pagingEnabled={readingMode === 'paged'}
+			onViewableItemsChanged={({ viewableItems }) => {
+				const fistVisibleItemIdx = viewableItems.filter(({ isViewable }) => isViewable).at(0)?.index
+				if (fistVisibleItemIdx) {
+					handlePageChanged(fistVisibleItemIdx + 1)
+				}
 			}}
-		>
-			<FlatList
-				ref={flatList}
-				data={Array.from({ length: book.pages }, (_, i) => i)}
-				renderItem={({ item }) => (
-					<Page
-						key={`page-${item}`}
-						deviceOrientation={deviceOrientation}
-						index={item}
-						size={sizes[item]}
-						onSizeLoaded={setSizes}
-						maxWidth={width}
-						maxHeight={height}
-						readingDirection="horizontal"
-					/>
-				)}
-				keyExtractor={(item) => item.toString()}
-				horizontal={readingMode === 'paged' || readingMode === 'continuous:horizontal'}
-				pagingEnabled={readingMode === 'paged'}
-				onViewableItemsChanged={({ viewableItems }) => {
-					const fistVisibleItemIdx = viewableItems
-						.filter(({ isViewable }) => isViewable)
-						.at(0)?.index
-					if (fistVisibleItemIdx) {
-						handlePageChanged(fistVisibleItemIdx + 1)
-					}
-				}}
-				initialNumToRender={5}
-				maxToRenderPerBatch={5}
-				initialScrollIndex={initialPage - 1}
-				// https://stackoverflow.com/questions/53059609/flat-list-scrolltoindex-should-be-used-in-conjunction-with-getitemlayout-or-on
-				onScrollToIndexFailed={(info) => {
-					console.error("Couldn't scroll to index", info)
-					const wait = new Promise((resolve) => setTimeout(resolve, 500))
-					wait.then(() => {
-						flatList.current?.scrollToIndex({ index: info.index, animated: true })
-					})
-				}}
-				// Note: We need to define an explicit layout so the initial scroll index works
-				// TODO: likely won't work for vertical scrolling
-				getItemLayout={(_, index) => ({
-					length: width,
-					offset: width * index,
-					index,
-				})}
-				showsVerticalScrollIndicator={false}
-				showsHorizontalScrollIndicator={false}
-			/>
-		</Zoomable>
+			initialNumToRender={2}
+			maxToRenderPerBatch={2}
+			initialScrollIndex={initialPage - 1}
+			// https://stackoverflow.com/questions/53059609/flat-list-scrolltoindex-should-be-used-in-conjunction-with-getitemlayout-or-on
+			onScrollToIndexFailed={(info) => {
+				console.error("Couldn't scroll to index", info)
+				const wait = new Promise((resolve) => setTimeout(resolve, 500))
+				wait.then(() => {
+					flatList.current?.scrollToIndex({ index: info.index, animated: true })
+				})
+			}}
+			// Note: We need to define an explicit layout so the initial scroll index works
+			// TODO: likely won't work for vertical scrolling
+			getItemLayout={(_, index) => ({
+				length: width,
+				offset: width * index,
+				index,
+			})}
+			showsVerticalScrollIndicator={false}
+			showsHorizontalScrollIndicator={false}
+		/>
 	)
 }
 
@@ -169,6 +141,18 @@ const Page = React.memo(
 
 		const insets = useSafeAreaInsets()
 
+		const scale = useSharedValue(1)
+		const showControls = useReaderStore((state) => state.showControls)
+		const setShowControls = useReaderStore((state) => state.setShowControls)
+
+		const onSingleTap = useCallback(
+			(event: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => {
+				if (event.state !== State.ACTIVE) return
+				setShowControls(!showControls)
+			},
+			[showControls, setShowControls],
+		)
+
 		const onImageLoaded = useCallback(
 			(event: ImageLoadEventData) => {
 				const { height, width } = event.source
@@ -188,6 +172,80 @@ const Page = React.memo(
 
 		const safeMaxHeight = maxHeight - insets.top - insets.bottom
 
+		// CONTROL: No zoom
+
+		// return (
+		// 	<View
+		// 		className="flex items-center justify-center"
+		// 		style={{
+		// 			height: safeMaxHeight,
+		// 			minHeight: safeMaxHeight,
+		// 			minWidth: maxWidth,
+		// 			width: maxWidth,
+		// 		}}
+		// 	>
+		// 		<Image
+		// 			source={{
+		// 				uri: pageURL(index + 1),
+		// 				headers: {
+		// 					Authorization: sdk.authorizationHeader,
+		// 				},
+		// 			}}
+		// 			// TODO: figure out how to render landscape better...
+		// 			style={{
+		// 				height: '100%',
+		// 				width: '100%',
+		// 			}}
+		// 			contentFit="contain"
+		// 			onLoad={onImageLoaded}
+		// 		/>
+		// 	</View>
+		// )
+
+		// EXPERIMENT 1: Zoomable (try enabling/disabling the tap gestures to present the jitter/lag)
+
+		// FIXME: The zoomable component is causing some jitter/lag when swiping between pages
+		// IF the tap gestures are enabled.
+		return (
+			<Zoomable
+				minScale={1}
+				maxScale={5}
+				scale={scale}
+				// doubleTapScale={3}
+				// isSingleTapEnabled={true}
+				// isDoubleTapEnabled={true}
+				// onSingleTap={onSingleTap}
+			>
+				<View
+					className="flex items-center justify-center"
+					style={{
+						height: safeMaxHeight,
+						minHeight: safeMaxHeight,
+						minWidth: maxWidth,
+						width: maxWidth,
+					}}
+				>
+					<Image
+						source={{
+							uri: pageURL(index + 1),
+							headers: {
+								Authorization: sdk.authorizationHeader,
+							},
+						}}
+						// TODO: figure out how to render landscape better...
+						style={{
+							height: '100%',
+							width: '100%',
+						}}
+						contentFit="contain"
+						onLoad={onImageLoaded}
+					/>
+				</View>
+			</Zoomable>
+		)
+
+		// EXPERIMENT 2: ImageZoom (try enabling/disabling the tap gestures to present the jitter/lag)
+
 		return (
 			<View
 				className="flex items-center justify-center"
@@ -198,11 +256,18 @@ const Page = React.memo(
 					width: maxWidth,
 				}}
 			>
-				<Image
+				<ImageZoom
+					minScale={1}
+					maxScale={5}
+					// scale={scale}
+					doubleTapScale={3}
+					// isSingleTapEnabled={true}
+					// isDoubleTapEnabled={true}
+					// onSingleTap={onSingleTap}
 					source={{
 						uri: pageURL(index + 1),
 						headers: {
-							Authorization: sdk.authorizationHeader,
+							Authorization: sdk.authorizationHeader || '',
 						},
 					}}
 					// TODO: figure out how to render landscape better...
@@ -210,8 +275,8 @@ const Page = React.memo(
 						height: '100%',
 						width: '100%',
 					}}
-					contentFit="contain"
-					onLoad={onImageLoaded}
+					// contentFit="contain"
+					// onLoad={onImageLoaded}
 				/>
 			</View>
 		)

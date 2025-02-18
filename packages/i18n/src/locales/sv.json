@@ -223,7 +223,7 @@
 					"heading": "Radera klubb",
 					"description": [
 						"Radera denna bokklubb tillsammans med allt dess innehåll.",
-						"Denna handling kan inte ångras"
+						"Denna åtgärd kan inte ångras"
 					],
 					"trigger": "Radera klubb"
 				}
@@ -534,65 +534,65 @@
 		},
 		"options/analysis": {
 			"title": "Analys",
-			"description": "Analyze the contents of this library to identify potential issues or improvements",
+			"description": "Analysera innehållet i detta bibliotek för att identifiera potentiella problem eller förbättringar",
 			"sections": {
 				"analyzeBooks": {
-					"heading": "Analyze books",
-					"description": "Analyze the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
-					"disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable",
-					"analyzeButton": "Analyze books"
+					"heading": "Analysera böcker",
+					"description": "Analysera böckerna i detta bibliotek för att bifoga ytterligare metadata i databasen, till exempel sidomått för bildbaserade böcker",
+					"disclaimer": "Denna process är resurskrävande och kan ta ett tag att slutföra. I framtiden kommer den att vara mer konfigurerbar",
+					"analyzeButton": "Analysera böcker"
 				},
 				"missingFiles": {
-					"heading": "Missing files",
-					"description": "Files that are referenced in the database but cannot be located on disk",
-					"noMissingFiles": "There are no missing files in this library"
+					"heading": "Saknade filer",
+					"description": "Filer som refereras i databasen men inte kan hittas på disk",
+					"noMissingFiles": "Det saknas inga filer i detta bibliotek"
 				},
 				"duplicateFiles": {
-					"heading": "Duplicate files",
-					"description": "Files that are potentially duplicated on disk",
-					"noDuplicateFiles": "There are no duplicate files detected for this library"
+					"heading": "Duplicerade filer",
+					"description": "Filer som potentiellt är duplicerade på disk",
+					"noDuplicateFiles": "Det finns inga duplicerade filer i detta bibliotek"
 				}
 			}
 		},
 		"danger-zone/access-control": {
-			"title": "Access Control",
-			"description": "Control who can access the content in this library",
+			"title": "Åtkomstkontroll",
+			"description": "Styr vem som har åtkomst till innehållet i detta bibliotek",
 			"sections": {
 				"libraryExclusions": {
-					"heading": "Exclude users",
-					"description": "Prevent certain users from accessing this library or its contents",
-					"noUsers": "There are no other registered users to exclude from this library",
-					"updated": "Exclusions updated",
-					"failure": "Failed to update exclusions"
+					"heading": "Uteslut användare",
+					"description": "Förhindra vissa användare från att komma åt detta bibliotek eller dess innehåll",
+					"noUsers": "Det finns inga andra registrerade användare att utesluta från detta bibliotek",
+					"updated": "Uteslutningar uppdaterade",
+					"failure": "Det gick inte att uppdatera uteslutningar"
 				}
 			}
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this library and all of its contents or certain resources",
+			"title": "Radering",
+			"description": "Radera detta bibliotek permanent tillsammans med allt dess innehåll eller vissa resurser",
 			"sections": {
 				"cleanLibrary": {
-					"heading": "Clean library",
-					"description": "Remove all media and series that cannot be located on disk",
-					"disclaimer": "While this action will not delete any files, it will permanently delete all records relating to media and series which have a missing status",
+					"heading": "Rensa bibliotek",
+					"description": "Ta bort all media och serier som inte kan hittas på disk",
+					"disclaimer": "Även om denna åtgärd inte kommer att ta bort några filer, kommer den permanent ta bort alla handlingar som rör media och serier som anses saknade",
 					"confirmation": {
-						"label": "Clean library",
-						"text": "Are you sure you want to clean this library?"
+						"label": "Rensa bibliotek",
+						"text": "Är du säker på att du vill rensa detta bibliotek?"
 					}
 				},
 				"deleteLibrary": {
-					"heading": "Delete library",
+					"heading": "Radera bibliotek",
 					"description": [
-						"Permanently delete this library and all its contents.",
-						"This action cannot be undone"
+						"Radera detta bibliotek tillsammans med allt dess innehåll.",
+						"Denna åtgärd kan inte ångras"
 					]
 				}
 			}
 		}
 	},
 	"errorScene": {
-		"heading": "lol, oops",
-		"message": "An error occurred:",
+		"heading": "lol, oj",
+		"message": "Ett fel inträffade:",
 		"buttons": {
 			"report": "Report Bug",
 			"copy": "Copy Error Details",
@@ -944,7 +944,7 @@
 					"heading": "Delete list",
 					"description": [
 						"Permanently delete this smart list and all its contents.",
-						"This action cannot be undone"
+						"Denna åtgärd kan inte ångras"
 					],
 					"confirmation": {
 						"title": "Delete list",
@@ -1306,7 +1306,7 @@
 						"label": "Delete all servers",
 						"description": [
 							"Delete all configured servers from the desktop application",
-							"This action cannot be undone"
+							"Denna åtgärd kan inte ångras"
 						],
 						"confirmation": {
 							"trigger": "Delete all servers",
@@ -1419,7 +1419,7 @@
 						},
 						"emptyHeading": "There are no jobs to display",
 						"emptySubtitle": "You can't have a job if you don't have a job",
-						"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
+						"deleteAllMessage": "Jobbhistorik och statistik kan raderas från databasen när som helst. Denna åtgärd kan inte ångras",
 						"deleteAllConfirmButton": "Clear history",
 						"deleteAllConfirmButtonTitle": "Clear all job history",
 						"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"

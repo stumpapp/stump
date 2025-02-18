@@ -1066,51 +1066,51 @@
 					"labels": {
 						"username": "Användarnamn",
 						"password": "Lösenord",
-						"activeChangesPrompt": "You have unsaved changes"
+						"activeChangesPrompt": "Du har osparade ändringar"
 					},
 					"errors": {
-						"updateFailed": "A server error occurred while updating your profile. Please try again."
+						"updateFailed": "Ett serverfel uppstod vid uppdateringen av din profil. Försök igen."
 					},
 					"avatarPicker": {
-						"heading": "Set your Avatar Image",
-						"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
-						"preview": "A preview will appear here once you have entered a URL.",
+						"heading": "Ställ in din avatarbild",
+						"subtitle": "Stump stöder anpassade avatarer, som kan ställas in genom att ange en URL till en bild. Bilduppladdningar stöds inte för att minska mängden data som lagras på servern.",
+						"preview": "En förhandsvisning visas här när du har angett en webbadress.",
 						"labels": {
-							"imageUrl": "Image URL",
-							"customAvatar": "Custom Avatar"
+							"imageUrl": "URL till Bild",
+							"customAvatar": "Anpassad Avatar"
 						},
 						"buttons": {
-							"confirm": "Confirm Image",
-							"cancel": "Cancel",
-							"edit": "Edit",
-							"changeImage": "Change Image",
-							"removeImage": "Remove Image"
+							"confirm": "Bekräfta Bild",
+							"cancel": "Avbryt",
+							"edit": "Ändra",
+							"changeImage": "Ändra Bild",
+							"removeImage": "Ta Bort Bild"
 						}
 					},
 					"buttons": {
-						"confirm": "Save Changes"
+						"confirm": "Spara Ändringar"
 					}
 				},
 				"locale": {
 					"localeSelector": {
-						"label": "Language"
+						"label": "Språk"
 					},
-					"heading": "Language and locale",
+					"heading": "Språk och lokalisering",
 					"subtitle": [
-						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-						"Stump's translations",
-						"if you're able to!"
+						"Stump stöder flera språk och lokaliseringar, ange dina inställningar nedan. Överväg att hjälpa till att förbättra kvaliteten på",
+						"Stumps översättningar",
+						"om du kan göra det!"
 					]
 				}
 			}
 		},
 		"app/appearance": {
-			"helmet": "Appearance",
-			"title": "Appearance",
-			"description": "Customize the look and feel of the application",
+			"helmet": "Utseende",
+			"title": "Utseende",
+			"description": "Anpassa utseendet i programmet",
 			"sections": {
 				"themeSelect": {
-					"label": "Theme",
+					"label": "Tema",
 					"description": [
 						"Om du är intresserad av att skapa ditt eget tema, kolla in",
 						"dokumentationen"
@@ -1201,65 +1201,65 @@
 					}
 				},
 				"table": {
-					"title": "Your keys",
-					"description": "These are the API keys you have created",
+					"title": "Dina nycklar",
+					"description": "Dessa är de API-nycklar som du har skapat",
 					"actionMenu": {
-						"inspect": "Inspect",
-						"delete": "Delete"
+						"inspect": "Granska",
+						"delete": "Radera"
 					},
 					"empty": {
-						"title": "You haven't created any keys yet",
-						"action": "Create an API key to get started"
+						"title": "Du har inte skapat några nycklar ännu",
+						"action": "Skapa en API-nyckel för att komma igång"
 					},
-					"noExpiration": "No expiration set"
+					"noExpiration": "Inget utgångsdatum har angetts"
 				}
 			}
 		},
 		"app/reader": {
-			"helmet": "Reader settings",
-			"title": "Reader settings",
-			"description": "Default options for the Stump readers. These are bound to your current device only",
+			"helmet": "Läsinställningar",
+			"title": "Läsinställningar",
+			"description": "Standardalternativ för Stump-läsaren. Dessa är endast bundna till din nuvarande enhet",
 			"sections": {
 				"imageBasedBooks": {
-					"label": "Image-based books",
-					"description": "Comic books, manga, and other image-based books",
+					"label": "Bildbaserade böcker",
+					"description": "Serietidningar, manga och andra bildbaserade böcker",
 					"sections": {
 						"preloadAheadCount": {
-							"label": "Preload ahead count",
-							"description": "The number of pages to preload ahead of the current page"
+							"label": "Förbered antal före",
+							"description": "Antalet sidor som ska laddas upp framför den aktuella sidan"
 						},
 						"preloadBehindCount": {
-							"label": "Preload behind count",
-							"description": "The number of pages to preload behind the current page"
+							"label": "Förbered antal bakom",
+							"description": "Antalet sidor som ska laddas upp bakom den aktuella sidan"
 						}
 					}
 				}
 			}
 		},
 		"app/desktop": {
-			"helmet": "Desktop settings",
-			"title": "Desktop settings",
-			"description": "Settings related to the Stump desktop application",
+			"helmet": "Skrivbordsinställningar",
+			"title": "Skrivbordsinställningar",
+			"description": "Inställningar relaterade till Stump-skrivbordsprogrammet",
 			"sections": {
 				"configuredServers": {
-					"label": "Configured servers",
-					"description": "The list of Stump servers you can connect to",
-					"getStarted": "Add a server to get started",
+					"label": "Konfigurerade servrar",
+					"description": "Listan över Stump-servrar som du kan ansluta till",
+					"getStarted": "Lägg till en server för att komma igång",
 					"unreachableServer": {
-						"tooltip": "Server unreachable"
+						"tooltip": "Servern kan inte nås"
 					},
 					"activeServer": {
-						"tooltip": "Current server"
+						"tooltip": "Nuvarande server"
 					},
 					"addOrEditServer": {
 						"validation": {
-							"nameExists": "A server with this name already exists",
-							"nameForbidden": "This name is reserved",
-							"urlExists": "A server with this URL already exists"
+							"nameExists": "En server med detta namn finns redan",
+							"nameForbidden": "Detta namn är reserverat",
+							"urlExists": "En server med denna URL finns redan"
 						},
 						"fields": {
 							"name": {
-								"label": "Name",
+								"label": "Namn",
 								"description": "Ett trevligt namn för att identifiera denna server",
 								"placeholder": "Min server"
 							},

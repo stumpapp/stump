@@ -2,6 +2,7 @@ import { SDKContext, StumpClientContextProvider } from '@stump/client'
 import { Api, CreatedToken } from '@stump/sdk'
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { match, P } from 'ts-pattern'
 
 import { ActiveServerContext } from '~/components/activeServer'
 import ServerAuthDialog from '~/components/ServerAuthDialog'
@@ -10,7 +11,8 @@ import { useSavedServers } from '~/stores'
 export default function Screen() {
 	const router = useRouter()
 
-	const { savedServers, getServerToken, saveServerToken, deleteServerToken } = useSavedServers()
+	const { savedServers, getServerToken, saveServerToken, deleteServerToken, getServerConfig } =
+		useSavedServers()
 	const { id: serverID } = useLocalSearchParams<{ id: string }>()
 
 	const activeServer = useMemo(
@@ -21,17 +23,51 @@ export default function Screen() {
 	const [sdk, setSDK] = useState<Api | null>(null)
 	const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
 
+	const attemptLogin = useCallback(
+		async (instance: Api, username: string, password: string) => {
+			try {
+				const result = await instance.auth.login({ password, username })
+				if ('for_user' in result) {
+					const { token } = result
+					saveServerToken(activeServer?.id || 'dev', {
+						expiresAt: new Date(token.expires_at),
+						token: token.access_token,
+					})
+					return token.access_token
+				}
+			} catch (error) {
+				console.error(error)
+			}
+		},
+		[activeServer, saveServerToken],
+	)
+
 	useEffect(() => {
 		if (!activeServer) return
 
 		const configureSDK = async () => {
 			const { id, url } = activeServer
 			const existingToken = await getServerToken(id)
+			const serverConfig = await getServerConfig(id)
 			const instance = new Api({ baseURL: url, authMethod: 'token' })
-			if (!existingToken) {
+
+			const token = await match(serverConfig?.auth)
+				.with({ bearer: P.string }, ({ bearer }) => bearer)
+				.with(
+					{
+						basic: P.shape({
+							username: P.string,
+							password: P.string,
+						}),
+					},
+					async ({ basic: { username, password } }) => attemptLogin(instance, username, password),
+				)
+				.otherwise(() => existingToken?.token)
+
+			if (!token) {
 				setIsAuthDialogOpen(true)
 			} else {
-				instance.token = existingToken.token
+				instance.token = token
 			}
 			setSDK(instance)
 		}
@@ -39,7 +75,7 @@ export default function Screen() {
 		if (!sdk && !isAuthDialogOpen) {
 			configureSDK()
 		}
-	}, [activeServer, sdk, getServerToken, isAuthDialogOpen])
+	}, [activeServer, sdk, getServerToken, isAuthDialogOpen, getServerConfig, attemptLogin])
 
 	const handleAuthDialogClose = useCallback(
 		(token?: CreatedToken) => {
@@ -88,7 +124,7 @@ export default function Screen() {
 			}}
 		>
 			<StumpClientContextProvider onUnauthenticatedResponse={onAuthError}>
-				<SDKContext.Provider value={{ sdk }}>
+				<SDKContext.Provider value={{ sdk, setSDK }}>
 					<ServerAuthDialog isOpen={isAuthDialogOpen} onClose={handleAuthDialogClose} />
 					<Stack screenOptions={{ headerShown: false }} />
 				</SDKContext.Provider>

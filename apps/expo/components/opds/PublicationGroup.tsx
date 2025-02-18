@@ -42,8 +42,11 @@ export default function PublicationGroup({
 						onPress={() =>
 							selfURL
 								? router.push({
-										pathname: `/opds/${serverID}/feed`,
-										params: { url: selfURL },
+										pathname: '/opds/[id]/feed',
+										params: {
+											id: serverID,
+											url: selfURL,
+										},
 									})
 								: null
 						}
@@ -73,8 +76,11 @@ export default function PublicationGroup({
 							onPress={() =>
 								selfURL
 									? router.push({
-											pathname: `/opds/${serverID}/publication`,
-											params: { url: selfURL },
+											pathname: '/opds/[id]/publication',
+											params: {
+												id: serverID,
+												url: selfURL,
+											},
 										})
 									: null
 							}

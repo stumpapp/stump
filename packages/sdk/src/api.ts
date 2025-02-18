@@ -27,6 +27,8 @@ export type ApiVersion = 'v1'
 
 export type ApiParams = {
 	baseURL: string
+	customHeaders?: Record<string, string>
+	shouldFormatURL?: boolean
 } & (
 	| {
 			authMethod?: AuthenticationMethod
@@ -70,15 +72,26 @@ export class Api {
 	 */
 	private _customHeaders: Record<string, string> = {}
 
+	private _shouldFormatURL = true
+
 	/**
 	 * Create a new instance of the API
 	 * @param baseURL The base URL to the Stump server
 	 */
-	constructor({ baseURL, authMethod = 'session', apiKey }: ApiParams) {
+	constructor({ baseURL, authMethod = 'session', apiKey, ...params }: ApiParams) {
 		this.baseURL = baseURL
 		this.configuration = new Configuration(authMethod)
+
 		if (apiKey) {
 			this.accessToken = apiKey
+		}
+
+		if (params.customHeaders) {
+			this._customHeaders = params.customHeaders
+		}
+
+		if (params.shouldFormatURL !== undefined) {
+			this._shouldFormatURL = params.shouldFormatURL
 		}
 
 		const instance = axios.create({
@@ -145,6 +158,14 @@ export class Api {
 	}
 
 	/**
+	 * Check if the API is currently *has* auth. This could return a false positive if the
+	 * access token is expired or invalid.
+	 */
+	get isAuthed(): boolean {
+		return !!this.accessToken || !!this._basicAuth
+	}
+
+	/**
 	 * Set custom headers to be sent with every request
 	 */
 	set customHeaders(headers: Record<string, string>) {
@@ -159,7 +180,9 @@ export class Api {
 	 * Get the URL of the Stump service
 	 */
 	get serviceURL(): string {
-		return formatApiURL(this.baseURL, this.configuration.apiVersion)
+		return this._shouldFormatURL
+			? formatApiURL(this.baseURL, this.configuration.apiVersion)
+			: this.baseURL
 	}
 
 	get config(): Configuration {

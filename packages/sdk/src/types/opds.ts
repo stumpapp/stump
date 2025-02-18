@@ -29,9 +29,20 @@ const imageLink = z
 const link = z.union([baseLink, navigationLink, imageLink])
 export type OPDSLink = z.infer<typeof link>
 
-const authFlow = z.object({
-	type: z.literal('http://opds-spec.org/auth/basic'),
-})
+const authFlow = z
+	.object({
+		type: z.literal('http://opds-spec.org/auth/basic'),
+	})
+	.and(
+		z.object({
+			labels: z
+				.object({
+					login: z.string().optional(),
+					password: z.string().optional(),
+				})
+				.optional(),
+		}),
+	)
 
 // OPDSAuthenticationDocument
 export const authDocument = z.object({
@@ -50,14 +61,15 @@ const paginationMeta = z.object({
 })
 export type OPDSPaginationMetadata = z.infer<typeof paginationMeta>
 
+const belongsToSeries = z.object({
+	name: z.string(),
+	position: z.number().optional(),
+	links: z.array(link).default([]),
+})
+
+// Komga sends series as an array, Stump doesnt
 const belongsTo = z.object({
-	series: z
-		.object({
-			name: z.string(),
-			position: z.number().optional(),
-			links: z.array(link).default([]),
-		})
-		.optional(),
+	series: z.union([belongsToSeries, z.array(belongsToSeries)]).optional(),
 })
 export type OPDSEntryBelongsTo = z.infer<typeof belongsTo>
 

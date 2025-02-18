@@ -32,8 +32,11 @@ export default function Navigation({ navigation, renderEmpty }: Props) {
 					key={link.href}
 					onPress={() =>
 						router.push({
-							pathname: `/opds/${activeServer.id}/feed`,
-							params: { url: link.href },
+							pathname: '/opds/[id]/feed',
+							params: {
+								id: activeServer.id,
+								url: link.href,
+							},
 						})
 					}
 				>

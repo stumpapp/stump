@@ -15,6 +15,7 @@ export type SavedServer = {
 	url: string
 	kind: SupportedServer // TODO: support showing stump as opds, too
 	stumpOPDS?: boolean
+	defaultServer?: boolean
 }
 
 export type SavedServerWithConfig = SavedServer & {
@@ -29,8 +30,7 @@ const auth = z
 		z.object({
 			basic: z.object({
 				username: z.string(),
-				// TODO: NO, don't do this. Don't store a plain password lol
-				password: z.string(),
+				password: z.string(), // Encrypted with expo-secure-store, so should be OK
 			}),
 		}),
 	])
@@ -38,7 +38,7 @@ const auth = z
 
 const serverConfig = z.object({
 	customHeaders: z.record(z.string()).optional(),
-	auth,
+	auth: auth.optional(),
 })
 export type ServerConfig = z.infer<typeof serverConfig>
 

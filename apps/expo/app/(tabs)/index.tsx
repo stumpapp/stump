@@ -1,5 +1,6 @@
+import { useRouter } from 'expo-router'
 import partition from 'lodash/partition'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 
@@ -15,12 +16,32 @@ const { Server, Slash, Rss } = icons
 export default function Screen() {
 	const { savedServers, stumpEnabled, updateServer, deleteServer, getServerConfig } =
 		useSavedServers()
+	const router = useRouter()
 
 	const [stumpServers, opdsServers] = partition(savedServers, (server) => server.kind === 'stump')
 	const [editingServer, setEditingServer] = useState<SavedServerWithConfig | null>(null)
 	const [deletingServer, setDeletingServer] = useState<SavedServer | null>(null)
 
 	const allOPDSServers = [...stumpServers.filter((server) => !!server.stumpOPDS), ...opdsServers]
+	const defaultServer = allOPDSServers.find((server) => server.defaultServer)
+
+	const [didMount, setDidMount] = useState(false)
+	useEffect(() => {
+		if (!didMount) {
+			setDidMount(true)
+		}
+	}, [didMount])
+
+	useEffect(() => {
+		if (!didMount) return
+
+		if (defaultServer) {
+			router.push({
+				pathname: defaultServer.kind === 'stump' ? '/server/[id]' : '/opds/[id]',
+				params: { id: defaultServer.id },
+			})
+		}
+	}, [defaultServer, router, didMount])
 
 	// const serverStatuses = useQueries({
 	// 	queries: stumpServers.map((server) => ({

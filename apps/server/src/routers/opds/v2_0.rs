@@ -209,8 +209,8 @@ async fn catalog(
 	let latest_books = client
 		.media()
 		.find_many(latest_books_conditions.clone())
-		.take(DEFAULT_LIMIT)
 		.order_by(media::created_at::order(Direction::Desc))
+		.take(DEFAULT_LIMIT)
 		.include(books_as_publications::include())
 		.exec()
 		.await?;
@@ -445,8 +445,8 @@ async fn search(
 	let books = client
 		.media()
 		.find_many(book_conditions.clone())
-		.take(DEFAULT_LIMIT)
 		.order_by(media::name::order(Direction::Asc))
+		.take(DEFAULT_LIMIT)
 		.include(books_as_publications::include())
 		.exec()
 		.await?;
@@ -518,9 +518,9 @@ async fn browse_libraries(
 	let libraries = client
 		.library()
 		.find_many(library_conditions.clone())
+		.order_by(library::name::order(Direction::Asc))
 		.take(take)
 		.skip(skip)
-		.order_by(library::name::order(Direction::Asc))
 		.exec()
 		.await?;
 	let library_count = client.library().count(library_conditions).exec().await?;
@@ -529,8 +529,8 @@ async fn browse_libraries(
 	let series = client
 		.series()
 		.find_many(series_conditions.clone())
-		.take(DEFAULT_LIMIT)
 		.order_by(series::name::order(Direction::Asc))
+		.take(DEFAULT_LIMIT)
 		.exec()
 		.await?;
 	let series_count = client.series().count(series_conditions).exec().await?;
@@ -625,8 +625,8 @@ async fn browse_library_by_id(
 	let library_books = client
 		.media()
 		.find_many(library_books_conditions.clone())
-		.take(DEFAULT_LIMIT)
 		.order_by(media::created_at::order(Direction::Desc))
+		.take(DEFAULT_LIMIT)
 		.include(books_as_publications::include())
 		.exec()
 		.await?;
@@ -667,8 +667,8 @@ async fn browse_library_by_id(
 	let latest_library_books = client
 		.media()
 		.find_many(library_books_conditions.clone())
-		.take(DEFAULT_LIMIT)
 		.order_by(media::created_at::order(Direction::Desc))
+		.take(DEFAULT_LIMIT)
 		.include(books_as_publications::include())
 		.exec()
 		.await?;
@@ -708,8 +708,8 @@ async fn browse_library_by_id(
 	let library_series = client
 		.series()
 		.find_many(library_series_conditions.clone())
-		.take(DEFAULT_LIMIT)
 		.order_by(series::name::order(Direction::Asc))
+		.take(DEFAULT_LIMIT)
 		.exec()
 		.await?;
 	let library_series_count = client
@@ -787,8 +787,8 @@ async fn fetch_books_and_generate_feed(
 	let books = client
 		.media()
 		.find_many(where_params.clone())
-		.take(take)
 		.order_by(order)
+		.take(take)
 		.skip(skip)
 		.include(books_as_publications::include())
 		.exec()
@@ -921,9 +921,9 @@ async fn browse_series(
 	let series = client
 		.series()
 		.find_many(series_conditions.clone())
+		.order_by(series::name::order(Direction::Asc))
 		.take(take)
 		.skip(skip)
-		.order_by(series::name::order(Direction::Asc))
 		.exec()
 		.await?;
 	let series_count = client.series().count(series_conditions).exec().await?;

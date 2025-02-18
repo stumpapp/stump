@@ -76,7 +76,7 @@ export function useQuery<TQueryFnData = unknown, TError = unknown, TData = TQuer
 
 			if (isAuthError) {
 				sdk.token = undefined
-				onUnauthenticatedResponse?.('/auth')
+				onUnauthenticatedResponse?.('/auth', err.response?.data)
 			} else if (isNetworkError) {
 				onConnectionWithServerChanged?.(false)
 			}

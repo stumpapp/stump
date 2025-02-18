@@ -1392,99 +1392,99 @@
 				},
 				"liveLogs": {
 					"title": "Live logg-flöde",
-					"description": "Streamed directly from your Stump server instance in real-time"
+					"description": "Strömmas direkt från din Stump-serverinstans i realtid"
 				}
 			}
 		},
 		"server/jobs": {
-			"helmet": "Jobs",
-			"title": "Jobs",
-			"description": "Background jobs that run on your Stump server instance",
+			"helmet": "Jobb",
+			"title": "Jobb",
+			"description": "Jobb som körs i bakgrunden på din Stump-serverinstans",
 			"sections": {
 				"scheduling": {
-					"title": "Scheduling",
-					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart"
+					"title": "Schemaläggning",
+					"description": "Vissa jobb kan konfigureras att köra enligt ett schema. Ändringar till denna konfiguration kommer ta effekt efter en serveromstart"
 				},
 				"history": {
-					"title": "History",
-					"description": "A record of jobs that have been run on your Stump server instance",
+					"title": "Historik",
+					"description": "Ett arkiv av jobb som har körts på din Stump-serverinstans",
 					"table": {
 						"columns": {
-							"name": "Type",
-							"description": "Description",
+							"name": "Typ",
+							"description": "Beskrivning",
 							"status": "Status",
-							"createdAt": "Started At",
-							"elapsed": "Elapsed",
-							"tasks": "Tasks"
+							"createdAt": "Startade den",
+							"elapsed": "Passerat",
+							"tasks": "Uppgifter"
 						},
-						"emptyHeading": "There are no jobs to display",
-						"emptySubtitle": "You can't have a job if you don't have a job",
+						"emptyHeading": "Det finns inga jobb att visa",
+						"emptySubtitle": "Du kan inte ha ett jobb om du inte har ett jobb",
 						"deleteAllMessage": "Jobbhistorik och statistik kan raderas från databasen när som helst. Denna åtgärd kan inte ångras",
-						"deleteAllConfirmButton": "Clear history",
-						"deleteAllConfirmButtonTitle": "Clear all job history",
-						"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
+						"deleteAllConfirmButton": "Rensa historik",
+						"deleteAllConfirmButtonTitle": "Rensa all jobbhistorik",
+						"deleteAllConfirmButtonTitleNoJobs": "Inga jobb att ta bort"
 					}
 				}
 			}
 		},
 		"server/users": {
-			"helmet": "User management",
-			"title": "Users",
-			"description": "Manage the users on this server",
+			"helmet": "Användarhantering",
+			"title": "Användare",
+			"description": "Hantera användare på denna server",
 			"createUser": {
-				"helmet": "Create user",
-				"title": "Create user",
-				"description": "Create a new user on this server"
+				"helmet": "Skapa användare",
+				"title": "Skapa användare",
+				"description": "Skapa en ny användare på denna server"
 			},
 			"updateUser": {
-				"helmet": "Update user",
-				"title": "Update user",
-				"description": "Update the details of this user"
+				"helmet": "Uppdatera användare",
+				"title": "Uppdatera användare",
+				"description": "Uppdatera detaljer för denna användare"
 			},
 			"createOrUpdateForm": {
 				"accessControl": {
-					"heading": "Access control and restrictions",
+					"heading": "Åtkomstkontroll och begränsningar",
 					"subtitle": [
-						"Configure any restrictions you want to apply to this user. For more information about access control, see the",
-						"documentation"
+						"Konfigurera eventuella begränsningar som du vill tillämpa för denna användare. För mer information om åtkomstkontroll, se",
+						"dokumentationen"
 					],
 					"ageRestriction": {
-						"label": "Age restriction",
-						"description": "Restricts the user from accessing content above the set age rating threshold",
+						"label": "Åldersbegränsning",
+						"description": "Begränsar användaren från att komma åt innehåll ovanför den inställda åldersgränsen",
 						"placeholder": "13",
 						"enforceUnset": {
-							"label": "Enforce on unset",
-							"description": "If enabled, users will be restricted from accessing content with no age rating available"
+							"label": "Tvinga vid avmarkering",
+							"description": "Om aktiverad, kommer användare att vara begränsade från att komma åt innehåll utan bestämd åldersgräns"
 						}
 					},
 					"tagRestriction": {
-						"label": "Tag restrictions",
-						"description": "Restricts the user from accessing content with the selected tags",
-						"placeholder": "Adult, Gore"
+						"label": "Taggbegränsningar",
+						"description": "Begränsar användaren från att komma åt innehåll med de valda taggarna",
+						"placeholder": "Vuxet, Blodigt"
 					}
 				},
 				"permissions": {
-					"heading": "Permissions",
+					"heading": "Behörigheter",
 					"subtitle": [
-						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
-						"documentation"
+						"Välj de behörigheter du vill ge till den här användaren. För mer information om vad varje behörighet gör, se",
+						"dokumentationen"
 					],
 					"bookclub": {
-						"label": "Book Clubs",
+						"label": "Bokklubbar",
 						"read": {
-							"label": "Access book club features",
-							"description": "Allows the user to access book club features, including viewing and joining book clubs"
+							"label": "Kom åt bokklubbens funktioner",
+							"description": "Ger användaren tillgång till bokklubbens funktioner, inklusive visning och anslutning till bokklubbar"
 						},
 						"create": {
-							"label": "Create book clubs",
-							"description": "Allows the user to create new book clubs"
+							"label": "Skapa bokklubbar",
+							"description": "Tillåter användaren att skapa nya bokklubbar"
 						}
 					},
 					"feature": {
-						"label": "Feature Opt-In",
+						"label": "Valfria Funktioner",
 						"api_keys": {
-							"label": "API keys",
-							"description": "Allow the user to manage their own API keys"
+							"label": "API-nycklar",
+							"description": "Tillåt användaren att hantera sina egna API-nycklar"
 						},
 						"koreader_sync": {
 							"label": "Synkronisering KoReader",
@@ -1548,57 +1548,57 @@
 						},
 						"manage": {
 							"label": "Hantera bibliotek",
-							"description": "Allows the user to manage advanced settings for existing libraries.\nIncludes permissions to edit and scan"
+							"description": "Tillåter användaren att hantera avancerade inställningar för befintliga bibliotek.\nInkluderar behörigheter att redigera och skanna"
 						},
 						"delete": {
-							"label": "Delete libraries",
-							"description": "Allows the user to delete existing libraries.\nIncludes permissions to edit, manage, and scan"
+							"label": "Radera bibliotek",
+							"description": "Tillåter användaren att radera befintliga bibliotek.\nInkluderar behörigheter att redigera, hantera och skanna"
 						}
 					},
 					"server": {
-						"label": "Server Management",
+						"label": "Serverhantering",
 						"manage": {
-							"label": "Manage server",
-							"description": "Allows the user to manage the server.\nIncludes *many* other permissions"
+							"label": "Hantera server",
+							"description": "Tillåter användaren att hantera servern.\nInnehåller *många* andra behörigheter"
 						}
 					},
 					"user": {
-						"label": "User Management",
+						"label": "Användarhantering",
 						"read": {
-							"label": "Read users",
-							"description": "Allows the user to query other users on the server. This is required for some other features, e.g. excluding users from accessing a library"
+							"label": "Visa användare",
+							"description": "Tillåter användaren att se andra användare på servern. Detta krävs för vissa andra funktioner, t.ex. att exkludera användare från att komma åt ett bibliotek"
 						},
 						"manage": {
-							"label": "Manage users",
+							"label": "Hantera användare",
 							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
 						}
 					},
 					"smartlist": {
-						"label": "Smart Lists",
+						"label": "Smarta Listor",
 						"read": {
-							"label": "Access smart list feature",
+							"label": "Få tillgång till funktioner för smarta listor",
 							"description": "Allows the user to access smart lists features"
 						}
 					}
 				},
 				"validation": {
-					"ageRestrictionTooLow": "Age restriction cannot be less than 0",
-					"missingUsername": "Username is required",
-					"missingPassword": "Password is required",
-					"usernameAlreadyExists": "Username already exists"
+					"ageRestrictionTooLow": "Åldersgräns kan inte vara mindre än 0",
+					"missingUsername": "Användarnamn krävs",
+					"missingPassword": "Lösenord krävs",
+					"usernameAlreadyExists": "Användarnamnet är redan använt"
 				},
-				"createSubmitButton": "Create user",
-				"updateSubmitButton": "Update user"
+				"createSubmitButton": "Skapa användare",
+				"updateSubmitButton": "Uppdatera användare"
 			}
 		},
 		"server/email": {
-			"helmet": "Email settings",
-			"title": "Email",
-			"description": "Settings related to the configuring an SMTP emailer for your Stump server instance",
+			"helmet": "E-postinställningar",
+			"title": "E-post",
+			"description": "Inställningar relaterade till att konfigurera en SMTP e-postare för din Stump-serverinstans",
 			"sections": {
 				"emailers": {
-					"title": "SMTP emailers",
-					"description": "The clients you have configured for sending emails from your Stump server instance",
+					"title": "SMTP e-postare",
+					"description": "De klienter du har konfigurerat för att skicka e-post från din Stump-serverinstans",
 					"singleInstanceDisclaimer": "While Stump supports multiple SMTP configurations in the backend, only one can be configured on the UI. This will be improved in the future",
 					"list": {
 						"emptyHeading": "No SMTP emailers configured",

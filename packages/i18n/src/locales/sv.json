@@ -1599,187 +1599,187 @@
 				"emailers": {
 					"title": "SMTP e-postare",
 					"description": "De klienter du har konfigurerat för att skicka e-post från din Stump-serverinstans",
-					"singleInstanceDisclaimer": "While Stump supports multiple SMTP configurations in the backend, only one can be configured on the UI. This will be improved in the future",
+					"singleInstanceDisclaimer": "Medan Stump stöder flera SMTP-konfigurationer i backend, kan endast en konfigureras grafiskt. Detta kommer att förbättras i framtiden",
 					"list": {
-						"emptyHeading": "No SMTP emailers configured",
-						"primaryEmailer": "Primary emailer",
+						"emptyHeading": "Inga SMTP e-postare konfigurerade",
+						"primaryEmailer": "Primär e-postare",
 						"sendHistory": {
-							"heading": "Send history",
-							"description": "A record of emails sent from this emailer",
+							"heading": "Avsändningshistorik",
+							"description": "Ett register över e-postmeddelanden som har skickats från denna e-postare",
 							"table": {
 								"columns": {
-									"to": "To",
-									"subject": "Subject",
+									"to": "Till",
+									"subject": "Ämne",
 									"status": "Status",
-									"createdAt": "Sent at"
+									"createdAt": "Skickad vid"
 								}
 							},
-							"emptyHeading": "No history",
-							"emptySubtitle": "The history of this emailer is empty. It has either not been used or the history has been cleared"
+							"emptyHeading": "Ingen historik",
+							"emptySubtitle": "Historiken för denna e-postare är tom. Den har antingen inte använts eller är historiken rensad"
 						}
 					}
 				},
 				"devices": {
-					"title": "Email devices",
-					"description": "The device aliases you have configured for receiving emails from your Stump server instance",
-					"addDevice": "Add device alias",
+					"title": "E-postenheter",
+					"description": "De enhetsalias du har konfigurerat för att motta e-post från din Stump-serverinstans",
+					"addDevice": "Lägg till enhetsalias",
 					"addOrUpdateDevice": {
 						"title": {
-							"create": "Create device alias",
-							"update": "Update device alias"
+							"create": "Skapa enhetsalias",
+							"update": "Uppdatera enhetsalias"
 						},
 						"name": {
-							"label": "Name",
-							"description": "A friendly name to uniquely identify this device alias"
+							"label": "Namn",
+							"description": "Ett trevligt namn för att unikt identifiera denna enhetsalias"
 						},
 						"email": {
-							"label": "Email",
-							"description": "The email address this alias will be associated with"
+							"label": "E-post",
+							"description": "E-postadressen som detta alias kommer att förknippas med"
 						},
 						"forbidden": {
-							"label": "Forbidden",
-							"description": "When enabled, no user may send emails to the address associated with this alias"
+							"label": "Förbjudet",
+							"description": "När detta är aktiverat kan ingen användare kunna skicka e-post till den adress som är kopplad till detta alias"
 						},
 						"submit": {
-							"create": "Create device alias",
-							"update": "Update device alias"
+							"create": "Skapa enhetsalias",
+							"update": "Uppdatera enhetsalias"
 						}
 					},
 					"table": {
-						"emptyHeading": "No devices registered",
-						"emptySubtitle": "Create a new device alias for future use"
+						"emptyHeading": "Inga enheter registrerade",
+						"emptySubtitle": "Skapa ett nytt enhetsalias för framtida användning"
 					}
 				}
 			},
 			"createOrUpdateForm": {
 				"name": {
-					"label": "Name",
-					"description": "A friendly name to uniquely identify this emailer"
+					"label": "Namn",
+					"description": "Ett trevligt namn för att unikt identifiera denna e-postare"
 				},
 				"smtpSettings": {
-					"heading": "SMTP settings",
-					"description": "The SMTP-specific settings for this emailer"
+					"heading": "SMTP-inställningar",
+					"description": "De SMTP-specifika inställningarna för denna e-postare"
 				},
 				"smtpProvider": {
-					"label": "SMTP provider preset",
-					"description": "The provider of the SMTP server. This is used to prefill some common settings, but doesn't capture all providers"
+					"label": "Standardinställningar för SMTP-leverantör",
+					"description": "Leverantören av denna SMTP-server. Detta används för att fylla i några vanliga inställningar, men täcker inte alla leverantörer"
 				},
 				"smtpHost": {
-					"label": "SMTP host",
-					"description": "The hostname of the SMTP server"
+					"label": "SMTP-värd",
+					"description": "Värdnamnet för SMTP-servern"
 				},
 				"smtpPort": {
-					"label": "SMTP port",
-					"description": "The port of the SMTP server"
+					"label": "SMTP-port",
+					"description": "Porten till SMTP-servern"
 				},
 				"tlsEnabled": {
-					"label": "TLS enabled",
-					"description": "If enabled, the connection to the SMTP server will be encrypted"
+					"label": "TLS aktiverat",
+					"description": "Om aktiverad, kommer anslutningen till SMTP-servern att krypteras"
 				},
 				"username": {
-					"label": "Username",
-					"description": "The username for authenticating with the SMTP server. This is typically the email address"
+					"label": "Användarnamn",
+					"description": "Användarnamnet för autentisering med SMTP-servern. Detta brukar vara e-postadressen"
 				},
 				"password": {
-					"label": "Password",
-					"description": "The password for authenticating with the SMTP server. If you're using Gmail, you may need to generate an app-specific password"
+					"label": "Lösenord",
+					"description": "Lösenordet för autentisering med SMTP-servern. Om du använder Gmail kan du behöva skapa ett app-specifikt lösenord"
 				},
 				"senderSettings": {
-					"heading": "Sender settings",
-					"description": "The settings for the sender of the email"
+					"heading": "Avsändarens inställningar",
+					"description": "Inställningarna för avsändaren av e-post"
 				},
 				"senderDisplayName": {
-					"label": "Sender display name",
-					"description": "The name that will be displayed to recipients"
+					"label": "Visningsnamn för avsändare",
+					"description": "Det namn som kommer att visas för mottagare"
 				},
 				"senderEmail": {
-					"label": "Sender email address",
-					"description": "The email address that will be displayed to recipients"
+					"label": "Avsändarens e-postadress",
+					"description": "Den e-postadress som kommer att visas för mottagare"
 				},
 				"additionalSettings": {
-					"heading": "Additional settings",
-					"description": "Additional settings for the emailer"
+					"heading": "Ytterligare inställningar",
+					"description": "Ytterligare inställningar för e-postare"
 				},
 				"maxAttachmentSize": {
-					"label": "Max attachment size",
-					"description": "The maximum size, in bytes, that an attachment can be"
+					"label": "Max storlek på bilaga",
+					"description": "Maximal storlek, i bytes, som en bilaga kan vara"
 				},
 				"submit": {
-					"create": "Create emailer",
-					"update": "Update emailer"
+					"create": "Skapa e-postare",
+					"update": "Uppdatera e-postare"
 				}
 			},
 			"createEmailer": {
-				"helmet": "Create emailer",
-				"title": "Create emailer",
-				"description": "Create a new SMTP emailer for your Stump server instance"
+				"helmet": "Skapa e-postare",
+				"title": "Skapa e-postare",
+				"description": "Skapa en ny SMTP-e-postare för din Stump-serverinstans"
 			},
 			"updateEmailer": {
-				"helmet": "Update emailer",
-				"title": "Update emailer",
-				"description": "Update the details of this SMTP emailer"
+				"helmet": "Uppdatera e-postare",
+				"title": "Uppdatera e-postare",
+				"description": "Uppdatera detaljer för denna SMTP-e-postare"
 			}
 		}
 	},
 	"jobOverlay": {
-		"backupHeading": "Job in Progress"
+		"backupHeading": "Jobb Pågår"
 	},
 	"libraryStats": {
-		"seriesCount": "Total Series",
-		"bookCount": "Total Books",
-		"diskUsage": "Disk Usage"
+		"seriesCount": "Totalt Antal Serier",
+		"bookCount": "Totalt Antal Böcker",
+		"diskUsage": "Diskanvändning"
 	},
 	"noLibraries": {
-		"heading": "Nothing to see here",
-		"messagePrefix": "You can't see what you don't have",
+		"heading": "Inget att se här",
+		"messagePrefix": "Du kan inte se vad du inte har",
 		"message": {
-			"create": "Create a library to get started",
-			"wait": "Once libraries are created, they'll be displayed here"
+			"create": "Skapa ett bibliotek för att komma igång",
+			"wait": "När biblioteken har skapats kommer de visas här"
 		},
 		"links": {
-			"create": "Create library",
-			"settings": "Go to settings"
+			"create": "Skapa bibliotek",
+			"settings": "Gå till Inställningar"
 		}
 	},
 	"pagination": {
 		"buttons": {
-			"next": "Next",
-			"previous": "Previous"
+			"next": "Nästa",
+			"previous": "Föregående"
 		},
 		"popover": {
-			"heading": "Go to page",
+			"heading": "Gå till sida",
 			"buttons": {
-				"confirm": "Go",
-				"cancel": "Cancel"
+				"confirm": "Gå till",
+				"cancel": "Avbryt"
 			}
 		}
 	},
 	"signOutModal": {
-		"title": "Sign out",
-		"message": "Are you sure you want to sign out?",
+		"title": "Logga ut",
+		"message": "Är du säker på att du vill logga ut?",
 		"buttons": {
-			"cancel": "Cancel",
-			"signOut": "Sign out"
+			"cancel": "Avbryt",
+			"signOut": "Logga ut"
 		}
 	},
 	"sidebar": {
 		"buttons": {
-			"home": "Home",
-			"libraries": "Libraries",
-			"books": "Explore",
-			"bookClubs": "Book clubs",
-			"createLibrary": "Create library",
-			"noLibraries": "No libraries",
-			"createBookClub": "Create book club",
-			"noBookClubs": "No book clubs",
-			"settings": "Settings",
-			"themeToggle": "Toggle Theme",
-			"goForward": "Go Forward",
-			"goBack": "Go Back",
-			"smartlists": "Smart lists",
-			"noSmartlists": "No smart lists",
-			"createSmartlist": "Create smart list",
-			"seeAll": "See all"
+			"home": "Hem",
+			"libraries": "Bibliotek",
+			"books": "Utforska",
+			"bookClubs": "Bokklubbar",
+			"createLibrary": "Skapa bibliotek",
+			"noLibraries": "Inga bibliotek",
+			"createBookClub": "Skapa bokklubb",
+			"noBookClubs": "Inga bokklubbar",
+			"settings": "Inställningar",
+			"themeToggle": "Växla Tema",
+			"goForward": "Gå Framåt",
+			"goBack": "Gå Tillbaka",
+			"smartlists": "Smarta listor",
+			"noSmartlists": "Inga smarta listor",
+			"createSmartlist": "Skapa smart lista",
+			"seeAll": "Se alla"
 		},
 		"libraryOptions": {
 			"scanLibrary": "Skanna",
@@ -1800,43 +1800,43 @@
 	"serverSOS": {
 		"heading": "Otillgänglig Server",
 		"desktop": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
+			"message": "Ett nätverksfel som uppstod tyder på att din Stump-server för närvarande inte är tillgänglig. Se till att den körs och är tillgänglig från denna enhet.\nOm din serverlänk har ändrats, kan du uppdatera den med formuläret nedan"
 		},
 		"web": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
+			"message": "Ett nätverksfel som uppstod tyder på att din Stump-server inte är tillgänglig. Se till att den körs och är tillgänglig från denna enhet"
 		},
-		"reconnected": "Reconnected to server! Redirecting...",
-		"reconnectionFailed": "Something went wrong!"
+		"reconnected": "Återansluten till servern! Omdirigerar...",
+		"reconnectionFailed": "Någonting gick fel!"
 	},
 	"serverStatusOverlay": {
-		"heading": "Server isn't connected",
+		"heading": "Servern är inte ansluten",
 		"message": [
-			"Please check your internet connection",
-			"Click here",
-			"to change your server URL"
+			"Vänligen kontrollera din internetanslutning",
+			"Klicka här",
+			"för att ändra din serverlänk"
 		]
 	},
 	"slidingList": {
-		"empty": "No items to display",
+		"empty": "Inga föremål att visa",
 		"buttons": {
-			"next": "Seek Ahead",
-			"previous": "Seek Backwards"
+			"next": "Sök Framåt",
+			"previous": "Sök Bakåt"
 		}
 	},
 	"tagSelect": {
-		"placeholder": "Select or create tag",
-		"placeholderNoTags": "No tags available"
+		"placeholder": "Välj eller skapa tagg",
+		"placeholderNoTags": "Inga taggar tillgängliga"
 	},
 	"thumbnailDropdown": {
 		"label": "Edit thumbnail",
 		"options": {
-			"selectFromBooks": "Select from books",
-			"uploadImage": "Upload image"
+			"selectFromBooks": "Välj från böcker",
+			"uploadImage": "Ladda upp bild"
 		},
 		"uploadImage": {
-			"emptyState": "A preview of your image will appear here",
-			"prompt": "Drop image here or click to select",
-			"remove": "Remove image"
+			"emptyState": "En förhandsvisning av din bild visas här",
+			"prompt": "Släpp bilden här eller klicka för att välja",
+			"remove": "Ta bort bilden"
 		}
 	},
 	"common": {
@@ -1852,16 +1852,16 @@
 		"update": "Uppdatera",
 		"upload": "Ladda Upp",
 		"uploading": "Laddar upp",
-		"unimplemented": "This functionality is not yet implemented! Check back later",
-		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
+		"unimplemented": "Denna funktion finns inte ännu! Kom tillbaka senare",
+		"limitedFunctionality": "Detta är ännu inte fullt komplett och saknar vissa funktioner. Kom tillbaka senare",
 		"logIn": "Logga in",
 		"login": "Inlogg",
 		"seeError": "Se fel",
 		"remove": "Ta bort",
-		"goBack": "Go back",
-		"goToServers": "Go to servers",
-		"notReady": "This feature is not ready",
-		"notUsedYet": "Not used yet",
-		"never": "Never"
+		"goBack": "Gå tillbaka",
+		"goToServers": "Gå till servrar",
+		"notReady": "Den här funktionen är inte redo",
+		"notUsedYet": "Inte använd än",
+		"never": "Aldrig"
 	}
 }

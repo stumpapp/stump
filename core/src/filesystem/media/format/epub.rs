@@ -247,10 +247,11 @@ impl EpubProcessor {
 			"Explicit cover image could not be found, falling back to searching for best match..."
 		);
 		let id = Self::get_cover_path(&epub_file.resources);
-		if let Some((buf, mime)) = epub_file.get_resource(id.as_ref().unwrap()) {
-			return Ok((ContentType::from(mime.as_str()), buf));
+		if let Some(id) = id {
+			if let Some((buf, mime)) = epub_file.get_resource(id.as_str()) {
+				return Ok((ContentType::from(mime.as_str()), buf));
+			}
 		}
-
 		tracing::error!("Failed to find cover for epub file");
 		Err(FileError::EpubReadError(
 			"Failed to find cover for epub file".to_string(),

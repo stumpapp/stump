@@ -594,67 +594,67 @@
 		"heading": "lol, oj",
 		"message": "Ett fel inträffade:",
 		"buttons": {
-			"report": "Report Bug",
-			"copy": "Copy Error Details",
-			"goHome": "Go Home"
+			"report": "Rapportera Bugg",
+			"copy": "Kopiera Felinformation",
+			"goHome": "Gå till startsidan"
 		}
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "Continue reading",
+			"title": "Fortsätt läsa",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any in-progress books you start will show up here"
+				"heading": "Inget att visa",
+				"message": "Alla pågående böcker som du startar visas här"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Recently added series",
+			"title": "Nyligen tillagda serier",
 			"emptyState": {
-				"heading": "No series to display",
-				"message": "Any series you add to your libraries will show up here"
+				"heading": "Inga serier att visa",
+				"message": "Alla serier som du lägger till i dina bibliotek kommer att visas här"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Recently added books",
+			"title": "Nyligen tillagda böcker",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any recent books you add will show up here"
+				"heading": "Inget att visa",
+				"message": "De senaste böckerna du lägger till kommer att visas här"
 			}
 		}
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "Continue Reading",
-			"downloadSeries": "Download Series"
+			"continueReading": "Fortsätt Läsa",
+			"downloadSeries": "Ladda Ner Serie"
 		}
 	},
 	"createOrUpdateSmartListForm": {
 		"validation": {
-			"nameTooShort": "Name must be at least 2 characters",
-			"nameTaken": "Cannot use this name"
+			"nameTooShort": "Namnet måste bestå av minst 2 tecken",
+			"nameTaken": "Kan inte använda detta namn"
 		},
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My smart list",
-				"description": "Must be unique, but can be changed later"
+				"label": "Namn",
+				"placeholder": "Min smarta lista",
+				"description": "Måste vara unikt, men kan ändras senare"
 			},
 			"description": {
-				"label": "Description",
-				"placeholder": "A very intelligent list",
-				"description": "An optional description of your smart list"
+				"label": "Beskrivning",
+				"placeholder": "En mycket intelligent lista",
+				"description": "En valfri beskrivning av din smarta lista"
 			},
 			"visibility": {
-				"label": "Visibility",
+				"label": "Synlighet",
 				"options": {
 					"public": {
-						"label": "Public",
-						"description": "Accessible to all users on the server"
+						"label": "Offentlig",
+						"description": "Tillgänglig för alla användare på servern"
 					},
 					"shared": {
-						"label": "Shared",
-						"description": "Specific users can access this smart list",
-						"createDisclaimer": "You can select who this list is shared with after creation"
+						"label": "Delad",
+						"description": "Vissa användare kan komma åt den här smarta listan",
+						"createDisclaimer": "Du kan välja vem den här listan delas med efter skapandet"
 					},
 					"private": {
 						"label": "Privat",
@@ -667,21 +667,21 @@
 				"rootJoiner": {
 					"and": {
 						"label": "OCH",
-						"description": "All filter groups must be true for a book to be matched"
+						"description": "Alla filtergrupper måste vara sanna för att en bok ska matchas"
 					},
 					"or": {
 						"label": "ELLER",
-						"description": "At least one filter group must be true for a book to be matched"
+						"description": "Minst en filtergrupp måste vara sann för att en bok ska matchas"
 					}
 				},
 				"groupJoiner": {
 					"and": {
 						"label": "OCH",
-						"description": "All must be true"
+						"description": "Alla måste vara sanna"
 					},
 					"or": {
 						"label": "ELLER",
-						"description": "At least one must be true"
+						"description": "Åtminstone en måste vara sann"
 					},
 					"not": {
 						"label": "INTE",
@@ -689,86 +689,86 @@
 					}
 				},
 				"grouping": {
-					"label": "Group by",
-					"description": "How the books in this smart list should be grouped",
+					"label": "Gruppera efter",
+					"description": "Hur böckerna i denna smarta lista ska grupperas",
 					"options": {
 						"by_books": {
-							"label": "None"
+							"label": "Ingen"
 						},
 						"by_series": {
-							"label": "Series"
+							"label": "Serier"
 						},
 						"by_library": {
-							"label": "Library"
+							"label": "Bibliotek"
 						}
 					}
 				},
 				"filters": {
-					"emptyState": "Add a group to get started",
+					"emptyState": "Lägg till en grupp för att komma igång",
 					"actions": {
-						"addFilter": "Add filter",
-						"addGroup": "Add group",
-						"deleteFilter": "Delete filter",
-						"deleteGroup": "Delete group"
+						"addFilter": "Lägg till filter",
+						"addGroup": "Lägg till grupp",
+						"deleteFilter": "Radera filter",
+						"deleteGroup": "Radera grupp"
 					},
-					"is": "is",
+					"is": "är",
 					"fieldSelect": {
-						"placeholder": "Attribute",
+						"placeholder": "Egenskap",
 						"source": {
-							"label": "Source",
-							"back": "Back",
+							"label": "Källa",
+							"back": "Tillbaka",
 							"book": {
-								"label": "Book",
+								"label": "Bok",
 								"attributes": {
-									"name": "Filename",
-									"size": "Size",
-									"extension": "Extension",
-									"created_at": "Created at",
-									"updated_at": "Updated at",
+									"name": "Filnamn",
+									"size": "Storlek",
+									"extension": "Filnamnstillägg",
+									"created_at": "Skapad vid",
+									"updated_at": "Uppdaterad vid",
 									"status": "Status",
-									"path": "Path",
-									"pages": "Pages",
-									"tags": "Tags"
+									"path": "Sökväg",
+									"pages": "Sidor",
+									"tags": "Taggar"
 								}
 							},
 							"book_meta": {
-								"label": "Book Meta",
+								"label": "Bok Meta",
 								"attributes": {
-									"title": "Title",
-									"summary": "Summary",
-									"notes": "Notes",
+									"title": "Titel",
+									"summary": "Sammanfattning",
+									"notes": "Anteckningar",
 									"genre": "Genre",
-									"writers": "Writers",
-									"pencillers": "Pencillers",
-									"inkers": "Inkers",
-									"letterers": "Letterers",
-									"editors": "Editors",
-									"publisher": "Publisher",
-									"colorists": "Colorist",
-									"cover_artists": "Cover artists",
-									"links": "Links",
-									"characters": "Characters",
-									"teams": "Teams"
+									"writers": "Författare",
+									"pencillers": "Tecknare",
+									"inkers": "Tuschare",
+									"letterers": "Textare",
+									"editors": "Redaktörer",
+									"publisher": "Utgivare",
+									"colorists": "Färgläggare",
+									"cover_artists": "Omslagsmålare",
+									"links": "Länkar",
+									"characters": "Karaktärer",
+									"teams": "Team"
 								}
 							},
 							"series": {
-								"label": "Series",
+								"label": "Serier",
 								"attributes": {
-									"name": "Name",
-									"path": "Path"
+									"name": "Namn",
+									"path": "Sökväg"
 								}
 							},
 							"series_meta": {
-								"label": "Series Meta",
+								"label": "Seriens Meta",
 								"attributes": {
-									"age_rating": "Age rating",
-									"title": "Title",
-									"summary": "Summary",
-									"meta_type": "Type",
-									"publisher": "Publisher",
+									"age_rating": "Åldersgräns",
+									"title": "Titel",
+									"summary": "Sammanfattning",
+									"meta_type": "Typ",
+									"publisher": "Utgivare",
 									"imprint": "Imprint",
 									"comicid": "Comic ID",
-									"booktype": "Book type",
+									"booktype": "Boktyp",
 									"status": "Status",
 									"volume": "Volume"
 								}

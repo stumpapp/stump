@@ -32,7 +32,17 @@ export default function MaybeErrorFeed({ error }: Props) {
 				</View>
 			)
 		} else if (error instanceof Error && error.message) {
-			return <Text>{error.message}</Text>
+			return (
+				<View className="flex-1 items-center gap-2">
+					<Text>{error.message}</Text>
+
+					{typeof error.cause === 'string' && (
+						<View className="rounded-xl bg-background-surface p-4">
+							<Text>{error.cause}</Text>
+						</View>
+					)}
+				</View>
+			)
 		} else {
 			return <Text>There was an error fetching this feed.</Text>
 		}

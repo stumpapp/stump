@@ -12,6 +12,7 @@ version = "0.0.10"
 rust-version = "1.81.0"
 
 [workspace.dependencies]
+alphanumeric-sort = "1.5.3"
 async-trait = "0.1.81"
 async-stream = "0.3.5"
 base64 = "0.22.1"

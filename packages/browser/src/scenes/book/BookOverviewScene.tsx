@@ -1,5 +1,5 @@
 import { useMediaByIdQuery } from '@stump/client'
-import { Badge, ButtonOrLink, Heading, Spacer, Text } from '@stump/components'
+import { ButtonOrLink, Heading, Spacer, Text } from '@stump/components'
 import dayjs from 'dayjs'
 import sortBy from 'lodash/sortBy'
 import { Suspense, useEffect, useMemo } from 'react'
@@ -11,7 +11,6 @@ import MediaCard from '@/components/book/BookCard'
 import { SceneContainer } from '@/components/container'
 import LinkBadge from '@/components/LinkBadge'
 import ReadMore from '@/components/ReadMore'
-import TagList from '@/components/tags/TagList'
 import { formatBookName } from '@/utils/format'
 
 import { useAppContext } from '../../context'
@@ -19,19 +18,12 @@ import paths from '../../paths'
 import { PDF_EXTENSION } from '../../utils/patterns'
 import BookCompletionToggleButton from './BookCompletionToggleButton'
 import BookFileInformation from './BookFileInformation'
-import BookLibrarySeriesLinks from './BookLibrarySeriesLinks'
+import BookOverviewSceneHeader from './BookOverviewSceneHeader'
 import BookReaderDropdown from './BookReaderDropdown'
 import BooksAfterCursor from './BooksAfterCursor'
 import DownloadMediaButton from './DownloadMediaButton'
 import EmailBookDropdown from './EmailBookDropdown'
 
-// TODO: redesign page!!
-// TODO: with metadata being collected now, there is a lot more information to display:
-// - publish date
-// - publisher
-// - pencillers, authors, etc
-// - links
-// - featured characters
 export default function BookOverviewScene() {
 	const { checkPermission, isServerOwner } = useAppContext()
 
@@ -59,26 +51,9 @@ export default function BookOverviewScene() {
 		throw new Error('Media not found')
 	}
 
-	const renderHeader = () => {
-		return (
-			<div className="flex flex-col items-center text-center tablet:items-start tablet:text-left">
-				<Heading size="sm">{formatBookName(media)}</Heading>
-
-				<BookLibrarySeriesLinks
-					libraryId={media.series?.library_id}
-					seriesId={media.series_id}
-					series={media.series}
-				/>
-
-				<TagList tags={media.tags || null} baseUrl={paths.bookSearch()} />
-			</div>
-		)
-	}
-
 	const completedAt = sortBy(media.finished_reading_sessions, ({ completed_at }) =>
 		dayjs(completed_at).toDate(),
 	).at(-1)?.completed_at
-	const genres = media.metadata?.genre?.filter((g) => !!g) ?? []
 	const links = media.metadata?.links?.filter((l) => !!l) ?? []
 
 	return (
@@ -92,7 +67,7 @@ export default function BookOverviewScene() {
 					<div className="flex flex-col items-center gap-3 tablet:mb-2 tablet:flex-row tablet:items-start">
 						<MediaCard media={media} readingLink variant="cover" />
 						<div className="flex h-full w-full flex-col gap-2 tablet:gap-4">
-							{renderHeader()}
+							<BookOverviewSceneHeader media={media} />
 							{completedAt && (
 								<Text size="xs" variant="muted">
 									Completed on {dayjs(completedAt).format('LLL')}
@@ -133,16 +108,6 @@ export default function BookOverviewScene() {
 							)}
 						</div>
 					</div>
-
-					{!!genres.length && (
-						<div className="flex flex-row space-x-2">
-							{genres.map((genre) => (
-								<Badge key={genre} variant="primary">
-									{genre}
-								</Badge>
-							))}
-						</div>
-					)}
 
 					{!!links.length && (
 						<div className="flex flex-row space-x-2">

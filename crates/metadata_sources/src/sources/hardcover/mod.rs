@@ -22,6 +22,7 @@ pub const SOURCE_NAME: &str = "Hardcover";
 #[serde(default)]
 pub struct HardcoverConfig {
 	api_key: Option<String>,
+	#[serde(default = "HardcoverConfig::default_max_result_count")]
 	max_result_count: u32,
 }
 
@@ -31,6 +32,12 @@ impl Default for HardcoverConfig {
 			api_key: Default::default(),
 			max_result_count: 10,
 		}
+	}
+}
+
+impl HardcoverConfig {
+	fn default_max_result_count() -> u32 {
+		Self::default().max_result_count
 	}
 }
 
@@ -110,7 +117,6 @@ impl MetadataSource for HardcoverSource {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	const API_KEY: &str = "_";
 
 	#[tokio::test]
 	async fn title_test() {
@@ -121,7 +127,8 @@ mod tests {
 			..Default::default()
 		};
 
-		let test_config = format!("{{ \"api_key\": \"{API_KEY}\" }}").to_string();
+		let api_key = crate::tests::get_secret("HARDCOVER_API_KEY");
+		let test_config = format!("{{ \"api_key\": \"{api_key}\" }}");
 
 		let metadata_output = source
 			.get_metadata(&test_input, &Some(test_config))
@@ -143,7 +150,8 @@ mod tests {
 			..Default::default()
 		};
 
-		let test_config = format!("{{ \"api_key\": \"{API_KEY}\" }}").to_string();
+		let api_key = crate::tests::get_secret("HARDCOVER_API_KEY");
+		let test_config = format!("{{ \"api_key\": \"{api_key}\" }}");
 
 		let metadata_output = source
 			.get_metadata(&test_input, &Some(test_config))

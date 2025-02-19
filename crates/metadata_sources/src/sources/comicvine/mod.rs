@@ -119,10 +119,8 @@ mod tests {
 			..Default::default()
 		};
 
-		let test_config = r#"{
-            "api_key": "_"
-        }"#
-		.to_string();
+		let api_key = crate::tests::get_secret("COMICVINE_API_KEY");
+		let test_config = format!("{{ \"api_key\": \"{api_key}\" }}");
 
 		// Attempt to fetch metadata
 		let result = source.get_metadata(&test_input, &Some(test_config)).await;

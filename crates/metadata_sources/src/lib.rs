@@ -146,6 +146,8 @@ pub enum MetadataSourceError {
 
 #[cfg(test)]
 mod tests {
+	use std::{fs::File, io::Read, path::Path, str::FromStr};
+
 	use super::*;
 
 	#[tokio::test]
@@ -163,5 +165,47 @@ mod tests {
 			let out = source.get_metadata(&test_input, &None).await.unwrap();
 			outputs.push(out);
 		}
+	}
+
+	/// Used to fetch secrets (namely API keys) for use during testing of sources.
+	///
+	/// Priority is given to any environment variable with the name `secret_name`,
+	/// otherwise, the `secrets.json` file at the root of the crate is checked for
+	/// secrets. This file is .gitignored and so should be safe from being checked
+	/// in.
+	pub fn get_secret(secret_name: &str) -> String {
+		match std::env::var(secret_name) {
+			// Return the API key from the environment if it's found
+			Ok(val) => val,
+			// Otherwise try to fetch the secret from secrets.json file.
+			Err(_) => read_secret_from_json(secret_name),
+		}
+	}
+
+	fn read_secret_from_json(secret_name: &str) -> String {
+		// Get path to secrets file at manifest root
+		let secrets_path = Path::new(
+			&std::env::var("CARGO_MANIFEST_DIR")
+				.expect("Should be able to get cargo manifest dir"),
+		)
+		.join("secrets.json");
+
+		// Read secrets file
+		let mut secrets_content = String::new();
+		File::open(secrets_path)
+			.expect("secrets.json should be accessible")
+			.read_to_string(&mut secrets_content)
+			.expect("Should be able to read secrets.json");
+
+		// Deserialize secrets file to JSON
+		let secrets_json = serde_json::Value::from_str(&secrets_content)
+			.expect("Should be able to deserialize secrets.json");
+
+		secrets_json[secret_name]
+			.as_str()
+			.unwrap_or_else(|| {
+				panic!("Failed to deserialize {secret_name} from secrets.json - is the value set?")
+			})
+			.to_string()
 	}
 }

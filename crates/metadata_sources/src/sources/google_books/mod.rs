@@ -21,6 +21,7 @@ pub const SOURCE_NAME: &str = "Google Books";
 #[derive(Debug, Deserialize, Serialize, JsonSchema)]
 pub struct GoogleBooksConfig {
 	api_key: Option<String>,
+	#[serde(default = "GoogleBooksConfig::default_max_result_count")]
 	max_result_count: u32,
 }
 
@@ -30,6 +31,12 @@ impl Default for GoogleBooksConfig {
 			api_key: Default::default(),
 			max_result_count: 10,
 		}
+	}
+}
+
+impl GoogleBooksConfig {
+	fn default_max_result_count() -> u32 {
+		Self::default().max_result_count
 	}
 }
 
@@ -122,10 +129,9 @@ mod tests {
 			..Default::default()
 		};
 
-		let test_config = r#"{
-				"api_key": "_"
-			}"#
-		.to_string();
+		let api_key = crate::tests::get_secret("GOOGLE_BOOKS_API_KEY");
+
+		let test_config = format!("{{ \"api_key\": \"{api_key}\" }}");
 
 		let metadata_output = source
 			.get_metadata(&test_input, &Some(test_config))

@@ -127,11 +127,12 @@ impl FileProcessor for EpubProcessor {
 						}
 					},
 					Event::Text(e) => {
-						let text = e.unescape().unwrap().to_string();
-						opf_metadata
-							.entry(current_tag.clone())
-							.or_default()
-							.push(text);
+						if let Ok(text) = e.unescape() {
+							opf_metadata
+								.entry(current_tag.clone())
+								.or_default()
+								.push(text.to_string());
+						}
 					},
 					Event::Eof => {
 						break;

@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use merge::Merge;
 use pdf::{
 	object::InfoDict,
 	primitive::{Dictionary, PdfString},
@@ -27,9 +28,10 @@ const NAIVE_DATE_FORMATS: [&str; 2] = ["%Y-%m-%d", "%m-%d-%Y"];
 // NOTE: alias is used primarily to support ComicInfo.xml files, as that metadata
 // is formatted in PascalCase
 /// Struct representing the metadata for a processed file.
-#[derive(Debug, Clone, Serialize, Deserialize, Type, Default, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Default, ToSchema, Merge)]
 pub struct MediaMetadata {
 	/// The metadata of the media.
+	#[merge(skip)]
 	#[serde(skip_deserializing, skip_serializing)]
 	pub id: String,
 	/// The title of the media.

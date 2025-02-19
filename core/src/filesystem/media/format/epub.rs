@@ -1,3 +1,4 @@
+use merge::Merge;
 use quick_xml::{events::Event, Reader};
 use std::{collections::HashMap, fs::File, io::BufReader, path::PathBuf};
 
@@ -146,44 +147,7 @@ impl FileProcessor for EpubProcessor {
 			let mut combined_metadata = opf_metadata.clone();
 
 			combined_metadata.id = opf_metadata.id;
-			combined_metadata.title = opf_metadata.title.or(embedded_metadata.title);
-			combined_metadata.series = opf_metadata.series.or(embedded_metadata.series);
-			combined_metadata.number = opf_metadata.number.or(embedded_metadata.number);
-			combined_metadata.volume = opf_metadata.volume.or(embedded_metadata.volume);
-			combined_metadata.summary =
-				opf_metadata.summary.or(embedded_metadata.summary);
-			combined_metadata.notes = opf_metadata.notes.or(embedded_metadata.notes);
-			combined_metadata.age_rating =
-				opf_metadata.age_rating.or(embedded_metadata.age_rating);
-			combined_metadata.genre = opf_metadata.genre.or(embedded_metadata.genre);
-			combined_metadata.year = opf_metadata.year.or(embedded_metadata.year);
-			combined_metadata.month = opf_metadata.month.or(embedded_metadata.month);
-			combined_metadata.day = opf_metadata.day.or(embedded_metadata.day);
-			combined_metadata.writers =
-				opf_metadata.writers.or(embedded_metadata.writers);
-			combined_metadata.pencillers =
-				opf_metadata.pencillers.or(embedded_metadata.pencillers);
-			combined_metadata.inkers = opf_metadata.inkers.or(embedded_metadata.inkers);
-			combined_metadata.colorists =
-				opf_metadata.colorists.or(embedded_metadata.colorists);
-			combined_metadata.letterers =
-				opf_metadata.letterers.or(embedded_metadata.letterers);
-			combined_metadata.cover_artists = opf_metadata
-				.cover_artists
-				.or(embedded_metadata.cover_artists);
-			combined_metadata.editors =
-				opf_metadata.editors.or(embedded_metadata.editors);
-			combined_metadata.publisher =
-				opf_metadata.publisher.or(embedded_metadata.publisher);
-			combined_metadata.links = opf_metadata.links.or(embedded_metadata.links);
-			combined_metadata.characters =
-				opf_metadata.characters.or(embedded_metadata.characters);
-			combined_metadata.teams = opf_metadata.teams.or(embedded_metadata.teams);
-			combined_metadata.page_count =
-				opf_metadata.page_count.or(embedded_metadata.page_count);
-			combined_metadata.page_dimensions = opf_metadata
-				.page_dimensions
-				.or(embedded_metadata.page_dimensions);
+			combined_metadata.merge(embedded_metadata);
 
 			return Ok(Some(combined_metadata));
 		}

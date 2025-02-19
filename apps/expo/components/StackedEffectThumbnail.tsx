@@ -29,7 +29,7 @@ export default function StackedEffectThumbnail({ label, uri, href }: Props) {
 			width /
 				// 2 columns on phones
 				(isTablet ? 4 : 2) -
-			20 * 2.5,
+			20 * 3,
 		[isTablet, width],
 	)
 	const accentDimension = useMemo(() => itemDimension + 3, [itemDimension])
@@ -40,13 +40,18 @@ export default function StackedEffectThumbnail({ label, uri, href }: Props) {
 		getColors(uri, {
 			cache: true,
 			key: uri,
-		}).then(setColors)
-	}, [uri, colors])
+			headers: {
+				Authorization: sdk.authorizationHeader || '',
+			},
+		})
+			.then(setColors)
+			.catch(console.error)
+	}, [uri, colors, sdk])
 
 	const router = useRouter()
 
 	return (
-		<View className="gap-4">
+		<View className="items-center gap-4">
 			<View className="relative flex flex-1 flex-row">
 				<Pressable style={{ zIndex: 10 }} onPress={() => router.push(href)}>
 					{({ pressed }) => (
@@ -101,9 +106,11 @@ export default function StackedEffectThumbnail({ label, uri, href }: Props) {
 			</View>
 
 			{label && (
-				<Text size="xl" className="text-center font-semibold">
-					{label}
-				</Text>
+				<View style={{ width: itemDimension }}>
+					<Text size="xl" className="text-center font-semibold">
+						{label}
+					</Text>
+				</View>
 			)}
 		</View>
 	)
@@ -113,7 +120,7 @@ const getColor = (colors: ImageColorsResult | null) => {
 	if (!colors) return undefined
 
 	return match(colors)
-		.with({ platform: 'android' }, ({ average }) => average)
-		.with({ platform: 'ios' }, ({ primary }) => primary)
+		.with({ platform: 'android' }, ({ average, dominant }) => average || dominant)
+		.with({ platform: 'ios' }, ({ primary, secondary }) => primary || secondary)
 		.otherwise(() => undefined)
 }

@@ -30,6 +30,8 @@ You can edit the native code in `Pods` -> `Development Pods` -> `Readium`
 
 #### Android
 
+Ensure you follow the official [Expo](https://docs.expo.dev/workflow/android-studio-emulator/#install-watchman-and-jdk) guide to set up your Android development environment.
+
 To build the app for Android, run the following command:
 
 ```bash

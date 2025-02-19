@@ -56,8 +56,8 @@ export default function Screen() {
 		!publisher && !writers && !colorists && !inkers && !letterers && !coverArtists
 
 	const renderRead = () => {
-		const { page, percentage_completed } = progression || {}
-		if (page || percentage_completed) {
+		const { page, percentage_completed, epubcfi } = progression || {}
+		if (page || percentage_completed || !!epubcfi) {
 			return <Text>Continue</Text>
 		} else if (media.finished_reading_sessions?.length) {
 			return <Text>Read again</Text>

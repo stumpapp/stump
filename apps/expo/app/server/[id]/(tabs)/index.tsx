@@ -1,6 +1,6 @@
 import { invalidateQueries, useSDK } from '@stump/client'
 import { useCallback, useState } from 'react'
-import { SafeAreaView, View } from 'react-native'
+import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 
 import { ContinueReading } from '~/components/activeServer/home'
@@ -18,16 +18,14 @@ export default function Screen() {
 	}, [sdk])
 
 	return (
-		<SafeAreaView className="flex-1 bg-background">
-			<ScrollView
-				className="flex-1 bg-background p-4"
-				refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-			>
-				<View className="flex flex-1 gap-8 pb-4">
-					<ContinueReading />
-					<RecentlyAddedBooks />
-				</View>
-			</ScrollView>
-		</SafeAreaView>
+		<ScrollView
+			className="flex-1 bg-background p-4"
+			refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+		>
+			<View className="flex flex-1 gap-8 pb-4">
+				<ContinueReading />
+				<RecentlyAddedBooks />
+			</View>
+		</ScrollView>
 	)
 }

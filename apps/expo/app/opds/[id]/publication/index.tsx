@@ -3,8 +3,9 @@ import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import omit from 'lodash/omit'
 import { Fragment } from 'react'
-import { Pressable, SafeAreaView, View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
 import { BookDescription, InfoRow, InfoSection } from '~/components/book/overview'
@@ -51,6 +52,7 @@ export default function Screen() {
 
 	const downloadURL = links?.find((link) => link.rel === 'http://opds-spec.org/acquisition')?.href
 	const canStream = !!readingOrder && readingOrder.length > 0
+	const isSupportedStream = readingOrder?.every((link) => link.type?.startsWith('image/'))
 
 	// TODO: dump the rest of the metadata? Or enforce servers to conform to a standard?
 	const restMeta = omit(rest, ['numberOfPages', 'modified'])
@@ -86,7 +88,7 @@ export default function Screen() {
 									params: { url, id: serverID },
 								})
 							}
-							disabled={!canStream}
+							disabled={!canStream || !isSupportedStream}
 						>
 							<Text>Stream</Text>
 						</Button>
@@ -98,6 +100,14 @@ export default function Screen() {
 					{!canStream && (
 						<View className="rounded-lg bg-fill-info-secondary p-3">
 							<Text>This publication lacks a defined reading order and cannot be streamed</Text>
+						</View>
+					)}
+
+					{!isSupportedStream && (
+						<View className="rounded-lg bg-fill-info-secondary p-3">
+							<Text>
+								This publication contains unsupported media types and cannot be streamed yet
+							</Text>
 						</View>
 					)}
 

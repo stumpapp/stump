@@ -25,7 +25,8 @@
 		},
 		"android": {
 			"adaptiveIcon": {
-				"foregroundImage": "./assets/images/adaptive-icon.png",
+				"foregroundImage": "./assets/images/android-adaptive.png",
+				"monochromeImage": "./assets/images/android-monochrome.png",
 				"backgroundColor": "#ffffff"
 			},
 			"package": "com.stumpapp.stump"

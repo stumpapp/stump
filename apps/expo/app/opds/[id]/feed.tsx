@@ -1,8 +1,7 @@
 import { useQuery, useSDK } from '@stump/client'
 import { useLocalSearchParams } from 'expo-router'
-import { useCallback } from 'react'
-import { SafeAreaView } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { OPDSFeed, OPDSPublicationFeed } from '~/components/opds'
 import RefreshControl from '~/components/RefreshControl'

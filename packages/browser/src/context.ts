@@ -4,8 +4,9 @@ import { createContext, useContext } from 'react'
 export type PermissionEnforcerOptions = {
 	onFailure: () => void
 }
+
 export type IAppContext = {
-	user: User
+	user?: User
 	isServerOwner: boolean
 	checkPermission: (permission: UserPermission) => boolean
 	enforcePermission: (permission: UserPermission, options?: PermissionEnforcerOptions) => void

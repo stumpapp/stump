@@ -55,6 +55,7 @@
 		"react-native-dialog": "^9.3.0",
 		"react-native-fs": "^2.20.0",
 		"react-native-gesture-handler": "~2.20.2",
+		"react-native-image-colors": "^2.4.0",
 		"react-native-ios-context-menu": "^3.1.0",
 		"react-native-ios-utilities": "^5.1.1",
 		"react-native-quick-md5": "^3.0.6",

@@ -2,7 +2,8 @@ import { useLibraryByID, useLibrarySeriesCursorQuery, useSDK } from '@stump/clie
 import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useMemo } from 'react'
-import { Pressable, SafeAreaView, useWindowDimensions, View } from 'react-native'
+import { Pressable, useWindowDimensions, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { FlatGrid } from 'react-native-super-grid'
 
 import { useActiveServer } from '~/components/activeServer'

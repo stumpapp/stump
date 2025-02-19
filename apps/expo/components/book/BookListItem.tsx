@@ -15,6 +15,7 @@ type Props = {
 	book: Media
 }
 
+// TODO: create separate BookGridItem vs BookHorizontalListItem
 export default function BookListItem({ book }: Props) {
 	const { sdk } = useSDK()
 	const {

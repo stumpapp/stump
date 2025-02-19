@@ -1,9 +1,10 @@
 import { useLibraries } from '@stump/client'
 import { useMemo } from 'react'
-import { SafeAreaView, useWindowDimensions } from 'react-native'
+import { useWindowDimensions } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { FlatGrid } from 'react-native-super-grid'
 
-import { LibraryListItem } from '~/components/library'
+import { LibraryGridItem } from '~/components/library'
 import RefreshControl from '~/components/RefreshControl'
 import { Heading } from '~/components/ui'
 
@@ -27,13 +28,13 @@ export default function Screen() {
 			<FlatGrid
 				ListHeaderComponent={() => (
 					<Heading size="xl" className="px-4 pb-4 font-semibold">
-						All libraries
+						Libraries
 					</Heading>
 				)}
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 				itemDimension={itemDimension}
 				data={libraries || []}
-				renderItem={({ item: library }) => <LibraryListItem library={library} />}
+				renderItem={({ item: library }) => <LibraryGridItem library={library} />}
 				keyExtractor={(library) => library.id}
 			/>
 		</SafeAreaView>

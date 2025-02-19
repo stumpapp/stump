@@ -1009,14 +1009,14 @@
 							"name": {
 								"label": "名前",
 								"placeholder": "マイビュー",
-								"description": "A friendly name to uniquely identify this view"
+								"description": "このビューを一意に識別するためのフレンドリ名"
 							}
 						},
 						"updateForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "The updated name for this view, if desired"
+								"label": "名前",
+								"placeholder": "マイビュー",
+								"description": "必要に応じてこのビューの更新された名前"
 							}
 						}
 					}
@@ -1026,86 +1026,86 @@
 	},
 	"settingsScene": {
 		"navigation": {
-			"general": "General",
-			"logs": "Logs",
-			"server": "Server",
-			"jobs": "Jobs and Configuration",
-			"users": "User Management",
-			"desktop": "Desktop"
+			"general": "一般",
+			"logs": "ログ",
+			"server": "サーバー",
+			"jobs": "ジョブと設定",
+			"users": "ユーザー管理",
+			"desktop": "デスクトップ"
 		},
 		"sidebar": {
 			"application": {
-				"account": "Account",
-				"appearance": "Appearance",
-				"api keys": "API keys",
-				"reader": "Reader",
-				"desktop": "Desktop",
-				"label": "Application"
+				"account": "アカウント",
+				"appearance": "外観",
+				"api keys": "APIキー",
+				"reader": "リーダー",
+				"desktop": "デスクトップ",
+				"label": "アプリケーション"
 			},
 			"server": {
-				"general": "General",
-				"logs": "Logs",
-				"users": "Users",
-				"jobs": "Jobs",
-				"access": "Access",
-				"email": "Email",
-				"notifications": "Notifications",
-				"label": "Server"
+				"general": "一般",
+				"logs": "ログ",
+				"users": "ユーザー",
+				"jobs": "ジョブ",
+				"access": "アクセス",
+				"email": "メール",
+				"notifications": "通知",
+				"label": "サーバー"
 			}
 		},
 		"app/account": {
-			"helmet": "Account settings",
-			"title": "Account settings",
-			"description": "Settings related to your account",
+			"helmet": "アカウント設定",
+			"title": "アカウント設定",
+			"description": "アカウント関連の設定",
 			"sections": {
 				"account": {
 					"validation": {
-						"invalidUrl": "Please enter a valid URL",
-						"missingUsername": "Username is required"
+						"invalidUrl": "有効なURLを入力してください",
+						"missingUsername": "ユーザー名が必要です"
 					},
 					"labels": {
-						"username": "Username",
-						"password": "Password",
-						"activeChangesPrompt": "You have unsaved changes"
+						"username": "ユーザー名",
+						"password": "パスワード",
+						"activeChangesPrompt": "保存されていない変更があります"
 					},
 					"errors": {
-						"updateFailed": "A server error occurred while updating your profile. Please try again."
+						"updateFailed": "プロフィールの更新中にサーバーエラーが発生しました。もう一度やり直してください。"
 					},
 					"avatarPicker": {
-						"heading": "Set your Avatar Image",
-						"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
-						"preview": "A preview will appear here once you have entered a URL.",
+						"heading": "アバター画像を設定",
+						"subtitle": "Stumpは画像にURLを提供することで設定できるカスタムアバターをサポートします。サーバーに保存されているデータの量を減らすために画像のアップロードはサポートされていません。",
+						"preview": "URLを入力するとプレビューが表示されます。",
 						"labels": {
-							"imageUrl": "Image URL",
-							"customAvatar": "Custom Avatar"
+							"imageUrl": "画像のURL",
+							"customAvatar": "カスタムアバター"
 						},
 						"buttons": {
-							"confirm": "Confirm Image",
-							"cancel": "Cancel",
-							"edit": "Edit",
-							"changeImage": "Change Image",
-							"removeImage": "Remove Image"
+							"confirm": "画像の確認",
+							"cancel": "キャンセル",
+							"edit": "編集",
+							"changeImage": "画像を変更",
+							"removeImage": "画像を削除"
 						}
 					},
 					"buttons": {
-						"confirm": "Save Changes"
+						"confirm": "変更を保存"
 					}
 				},
 				"locale": {
 					"localeSelector": {
-						"label": "Language"
+						"label": "言語"
 					},
-					"heading": "Language and locale",
+					"heading": "言語とロケール",
 					"subtitle": [
-						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-						"Stump's translations",
-						"if you're able to!"
+						"Stumpは複数の言語とロケールをサポートしています。以下の設定を行ってください。品質向上のためにご検討ください",
+						"Stumpの翻訳",
+						"できれば！"
 					]
 				}
 			}
 		},
 		"app/appearance": {
-			"helmet": "Appearance",
+			"helmet": "外観",
 			"title": "Appearance",
 			"description": "Customize the look and feel of the application",
 			"sections": {

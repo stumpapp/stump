@@ -22,10 +22,10 @@ type Props = {
 }
 
 export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) {
-	const { savedServers } = useSavedServers()
+	const { savedServers, stumpEnabled } = useSavedServers()
 
 	const { control, handleSubmit, ...form } = useForm<AddOrEditServerSchema>({
-		defaultValues: getDefaultValues(editingServer),
+		defaultValues: getDefaultValues(stumpEnabled, editingServer),
 		resolver: zodResolver(
 			createSchema(
 				savedServers.map(({ name }) => name).filter((name) => name !== editingServer?.name),
@@ -176,8 +176,8 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 
 	const formValues = useWatch({ control })
 	const isUpdateReady = useMemo(
-		() => !isEqual(getDefaultValues(editingServer), formValues),
-		[formValues, editingServer],
+		() => !isEqual(getDefaultValues(stumpEnabled, editingServer), formValues),
+		[formValues, stumpEnabled, editingServer],
 	)
 
 	const onURLFocused = useCallback(
@@ -448,9 +448,9 @@ const defaultValues = {
 	basicPassword: '',
 } as AddOrEditServerSchema
 
-const getDefaultValues = (editingServer?: SavedServerWithConfig | null) => {
+const getDefaultValues = (stumpEnabled: boolean, editingServer?: SavedServerWithConfig | null) => {
 	if (!editingServer) {
-		return defaultValues
+		return { ...defaultValues, kind: stumpEnabled ? 'stump' : 'opds' } as AddOrEditServerSchema
 	}
 
 	const configs = match(editingServer.config?.auth)

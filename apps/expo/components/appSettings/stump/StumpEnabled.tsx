@@ -1,15 +1,12 @@
 import { View } from 'react-native'
 
 import { Switch } from '~/components/ui'
-import { useSavedServerStore } from '~/stores/savedServer'
+import { useSavedServers } from '~/stores/savedServer'
 
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function MaskURLs() {
-	const { stumpEnabled, setStumpEnabled } = useSavedServerStore((state) => ({
-		stumpEnabled: state.showStumpServers,
-		setStumpEnabled: state.setShowStumpServers,
-	}))
+	const { stumpEnabled, setStumpEnabled } = useSavedServers()
 
 	return (
 		<AppSettingsRow icon="Box" title="Enabled" onPress={() => setStumpEnabled(!stumpEnabled)}>

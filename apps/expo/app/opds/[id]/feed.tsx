@@ -3,7 +3,7 @@ import { useLocalSearchParams } from 'expo-router'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { OPDSFeed, OPDSPublicationFeed } from '~/components/opds'
+import { MaybeErrorFeed, OPDSFeed, OPDSPublicationFeed } from '~/components/opds'
 import RefreshControl from '~/components/RefreshControl'
 
 export default function Screen() {
@@ -13,11 +13,13 @@ export default function Screen() {
 		data: feed,
 		refetch,
 		isRefetching,
+		error,
 	} = useQuery([sdk.opds.keys.feed, feedURL], () => sdk.opds.feed(feedURL), {
 		suspense: true,
+		useErrorBoundary: false,
 	})
 
-	if (!feed) return null
+	if (!feed) return <MaybeErrorFeed error={error} />
 
 	// const allGroupsEmpty = feed.groups.every(
 	// 	(group) => !group.navigation.length && !group.publications.length,

@@ -28,6 +28,8 @@ type ImageDimension = {
 
 // TODO: Account for device orientation AND reading direction
 
+// TODO: Pull primary color from image for background color (optionally from config)
+
 type Props = {
 	/**
 	 * The initial page to start the reader on

@@ -7,7 +7,12 @@ import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
-import { OPDSNavigation, OPDSNavigationGroup, OPDSPublicationGroup } from '~/components/opds'
+import {
+	MaybeErrorFeed,
+	OPDSNavigation,
+	OPDSNavigationGroup,
+	OPDSPublicationGroup,
+} from '~/components/opds'
 import RefreshControl from '~/components/RefreshControl'
 import { Heading, Input } from '~/components/ui'
 
@@ -18,6 +23,7 @@ export default function Screen() {
 		data: feed,
 		refetch,
 		isRefetching,
+		error,
 	} = useQuery(
 		[sdk.opds.keys.catalog, activeServer?.id],
 		() => {
@@ -54,7 +60,7 @@ export default function Screen() {
 		[activeServer.id, router, searchURL],
 	)
 
-	if (!feed) return null
+	if (!feed) return <MaybeErrorFeed error={error} />
 
 	const [navGroups, publicationGroups] = partition(
 		feed.groups.filter((group) => group.navigation.length || group.publications.length),

@@ -1,4 +1,4 @@
-import { useSDK, useSeriesCursorQuery, useSmartListsQuery } from '@stump/client'
+import { useSDK, useSmartListsQuery } from '@stump/client'
 
 import { useActiveServer } from '../activeServer'
 import StackedEffectThumbnail from '../StackedEffectThumbnail'
@@ -8,11 +8,8 @@ export default function StackedSmartListThumbnails() {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-	const { series } = useSeriesCursorQuery({
-		limit: 1,
-		suspense: true,
-	})
 
+	// TODO: pagination/cursor/limit
 	const { lists } = useSmartListsQuery({
 		params: {
 			mine: true,

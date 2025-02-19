@@ -3,7 +3,7 @@ import { checkUrl, formatApiURL } from '@stump/sdk'
 import isEqual from 'lodash/isEqual'
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm, useFormState, useWatch } from 'react-hook-form'
-import { Pressable, View } from 'react-native'
+import { NativeSyntheticEvent, Pressable, TextInputFocusEventData, View } from 'react-native'
 import Dialog from 'react-native-dialog'
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable'
 import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated'
@@ -180,6 +180,15 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 		[formValues, editingServer],
 	)
 
+	const onURLFocused = useCallback(
+		(e: NativeSyntheticEvent<TextInputFocusEventData>) => {
+			if (e.nativeEvent.text === '') {
+				form.setValue('url', 'http://')
+			}
+		},
+		[form],
+	)
+
 	const onDeleteHeader = useCallback(
 		(index: number) => {
 			form.setValue(
@@ -273,6 +282,7 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 						value={value}
 						errorMessage={errors.name?.message}
 						secureTextEntry={maskURLs}
+						onFocus={onURLFocused}
 					/>
 				)}
 				name="url"

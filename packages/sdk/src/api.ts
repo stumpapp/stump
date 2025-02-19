@@ -224,7 +224,6 @@ export class Api {
 		return {
 			...this.customHeaders,
 			...(this.authorizationHeader ? { Authorization: this.authorizationHeader } : {}),
-			foo: 'bar',
 		}
 	}
 

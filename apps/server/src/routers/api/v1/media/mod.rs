@@ -3,11 +3,13 @@ pub(crate) mod individual;
 pub(crate) mod thumbnails;
 
 use axum::{
-	extract::DefaultBodyLimit,
+	extract::{DefaultBodyLimit, Extension},
 	middleware,
 	routing::{get, post, put},
 	Router,
 };
+
+use serde_qs::axum::QsQueryConfig;
 
 use crate::{config::state::AppState, middleware::auth::auth_middleware};
 
@@ -57,5 +59,6 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.put(individual::put_media_metadata),
 				),
 		)
+		.layer(Extension(QsQueryConfig::new(5, false)))
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }

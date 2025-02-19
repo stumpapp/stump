@@ -6,15 +6,42 @@ use utoipa::ToSchema;
 
 use crate::filesystem::PathUtils;
 
+fn default_true() -> bool {
+	true
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct DirectoryListingInput {
 	pub path: Option<String>,
+	#[serde(flatten, default)]
+	pub ignore_params: DirectoryListingIgnoreParams,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
+pub struct DirectoryListingIgnoreParams {
+	#[serde(default = "default_true")]
+	pub ignore_hidden: bool,
+	#[serde(default)]
+	pub ignore_files: bool,
+	#[serde(default)]
+	pub ignore_directories: bool,
+}
+
+impl Default for DirectoryListingIgnoreParams {
+	fn default() -> Self {
+		Self {
+			ignore_hidden: true,
+			ignore_files: false,
+			ignore_directories: false,
+		}
+	}
 }
 
 impl Default for DirectoryListingInput {
 	fn default() -> Self {
 		Self {
 			path: Some("/".to_string()),
+			ignore_params: DirectoryListingIgnoreParams::default(),
 		}
 	}
 }

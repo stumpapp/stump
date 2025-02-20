@@ -45,3 +45,7 @@ yarn open:android
 ```
 
 You can edit the native code in `android` -> `readium` -> `src/main/java/expo.modules.readium`
+
+## License 📝
+
+The `expo` app is licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html)

@@ -3,7 +3,7 @@
 	"version": "0.0.10",
 	"repository": "https://github.com/stumpapp/stump.git",
 	"author": "Aaron Leopold <aaronleopold1221@gmail.com>",
-	"license": "MIT",
+	"license": "SEE README.md",
 	"private": true,
 	"workspaces": [
 		"apps/*",

@@ -1,14 +1,13 @@
 import { useSDK } from '@stump/client'
 import { Image } from 'expo-image'
 import { Href, useRouter } from 'expo-router'
-import { useMemo } from 'react'
 import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
-import { useDisplay } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
-import { Text } from './ui'
+import { Text } from '../ui'
+import { useGridItemSize } from './useGridItemSize'
 
 type Props = {
 	uri: string
@@ -17,17 +16,9 @@ type Props = {
 }
 
 export default function GridImageItem({ uri, title, href }: Props) {
-	const { width, isTablet } = useDisplay()
 	const { sdk } = useSDK()
 
-	const itemDimension = useMemo(
-		() =>
-			width /
-				// 2 columns on phones
-				(isTablet ? 4 : 2) -
-			16 * 2,
-		[isTablet, width],
-	)
+	const { itemDimension } = useGridItemSize()
 
 	const router = useRouter()
 
@@ -36,7 +27,13 @@ export default function GridImageItem({ uri, title, href }: Props) {
 	return (
 		<Pressable onPress={() => router.navigate(href)}>
 			{({ pressed }) => (
-				<View className="flex items-start justify-start gap-4">
+				<View
+					className="flex items-start justify-start gap-2"
+					style={{
+						// 8*2 gap, 20 font, 4 padding + additional 4 padding
+						height: itemDimension * 1.5 + 16 + 20 + 4 * 2,
+					}}
+				>
 					<View
 						className={cn('aspect-[2/3] overflow-hidden rounded-lg', {
 							'opacity-80': pressed,
@@ -54,7 +51,9 @@ export default function GridImageItem({ uri, title, href }: Props) {
 						/>
 					</View>
 
-					<Text className="pb-1 text-xl font-medium leading-6">{truncatedTitle}</Text>
+					<Text size="xl" className="font-medium leading-6">
+						{truncatedTitle}
+					</Text>
 				</View>
 			)}
 		</Pressable>

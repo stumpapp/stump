@@ -3,7 +3,7 @@ import { Library } from '@stump/sdk'
 import * as ContextMenu from 'zeego/context-menu'
 
 import { useActiveServer } from '../activeServer'
-import GridImageItem from '../GridImageItem'
+import GridImageItem from '../grid/GridImageItem'
 
 type Props = {
 	library: Library

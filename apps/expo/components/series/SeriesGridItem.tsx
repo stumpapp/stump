@@ -2,7 +2,7 @@ import { useSDK } from '@stump/client'
 import { Series } from '@stump/sdk'
 
 import { useActiveServer } from '../activeServer'
-import GridImageItem from '../GridImageItem'
+import GridImageItem from '../grid/GridImageItem'
 
 type Props = {
 	series: Series

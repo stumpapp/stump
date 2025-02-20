@@ -1191,60 +1191,60 @@
 							"created": "キーの作成"
 						},
 						"description": {
-							"creating": "APIキーは、APIで認証するために使用できる期限の長い資格情報です",
-							"created": "Your new API key has been created. Save the secret somewhere safe, as it will not be shown again"
+							"creating": "APIキーはAPIで認証するために使用できる期限の長い資格情報です",
+							"created": "新しいAPIキーが作成されました。再度表示されませんので、どこかに安全な場所に保存してください"
 						},
-						"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting",
-						"createdKey": "Created key",
-						"savedConfirm": "I saved my key",
-						"submit": "Create key"
+						"inheritDisclaimer": "このAPIキーはあなたの権限をすべて継承します。つまり、あなたができることはすべて実行できます。この設定には注意してください",
+						"createdKey": "キーの作成",
+						"savedConfirm": "キーを保存しました",
+						"submit": "キーを作成"
 					}
 				},
 				"table": {
-					"title": "Your keys",
-					"description": "These are the API keys you have created",
+					"title": "あなたのキー",
+					"description": "これらは作成したAPIキーです",
 					"actionMenu": {
-						"inspect": "Inspect",
-						"delete": "Delete"
+						"inspect": "検査する",
+						"delete": "削除"
 					},
 					"empty": {
-						"title": "You haven't created any keys yet",
-						"action": "Create an API key to get started"
+						"title": "まだキーを作成していません",
+						"action": "APIキーを作成して開始します"
 					},
-					"noExpiration": "No expiration set"
+					"noExpiration": "有効期限はありません"
 				}
 			}
 		},
 		"app/reader": {
-			"helmet": "Reader settings",
-			"title": "Reader settings",
-			"description": "Default options for the Stump readers. These are bound to your current device only",
+			"helmet": "リーダー設定",
+			"title": "リーダー設定",
+			"description": "Stumpリーダーのデフォルトオプション。これらは現在のデバイスのみにバインドされています",
 			"sections": {
 				"imageBasedBooks": {
-					"label": "Image-based books",
-					"description": "Comic books, manga, and other image-based books",
+					"label": "画像ベースの本",
+					"description": "コミック本、漫画、その他の画像ベースの本",
 					"sections": {
 						"preloadAheadCount": {
-							"label": "Preload ahead count",
-							"description": "The number of pages to preload ahead of the current page"
+							"label": "先行読み込み数",
+							"description": "現在のページの前に読み込むするページ数"
 						},
 						"preloadBehindCount": {
-							"label": "Preload behind count",
-							"description": "The number of pages to preload behind the current page"
+							"label": "Countの後ろに事前読み込みします",
+							"description": "現在のページの後ろに読み込むするページ数"
 						}
 					}
 				}
 			}
 		},
 		"app/desktop": {
-			"helmet": "Desktop settings",
-			"title": "Desktop settings",
-			"description": "Settings related to the Stump desktop application",
+			"helmet": "デスクトップの設定",
+			"title": "デスクトップの設定",
+			"description": "Stumpデスクトップアプリケーションに関連する設定",
 			"sections": {
 				"configuredServers": {
-					"label": "Configured servers",
-					"description": "The list of Stump servers you can connect to",
-					"getStarted": "Add a server to get started",
+					"label": "サーバーの設定",
+					"description": "接続できるStumpサーバーのリスト",
+					"getStarted": "開始するサーバーを追加します",
 					"unreachableServer": {
 						"tooltip": "Server unreachable"
 					},

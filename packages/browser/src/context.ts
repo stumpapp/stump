@@ -6,7 +6,7 @@ export type PermissionEnforcerOptions = {
 }
 
 export type IAppContext = {
-	user?: User
+	user: User
 	isServerOwner: boolean
 	checkPermission: (permission: UserPermission) => boolean
 	enforcePermission: (permission: UserPermission, options?: PermissionEnforcerOptions) => void

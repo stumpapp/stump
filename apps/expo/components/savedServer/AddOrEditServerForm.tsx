@@ -280,7 +280,7 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 						onBlur={onBlur}
 						onChangeText={onChange}
 						value={value}
-						errorMessage={errors.name?.message}
+						errorMessage={errors.url?.message}
 						secureTextEntry={maskURLs}
 						onFocus={onURLFocused}
 					/>

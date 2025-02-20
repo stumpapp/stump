@@ -1,5 +1,6 @@
-import { Link } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { View } from 'react-native'
+import { Pressable } from 'react-native-gesture-handler'
 import * as ContextMenu from 'zeego/context-menu'
 
 import { usePreferencesStore } from '~/stores'
@@ -31,22 +32,30 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 		}
 	}
 
+	const router = useRouter()
+
 	return (
 		<View className="w-full rounded-2xl">
 			<ContextMenu.Root>
 				<ContextMenu.Trigger className="w-full">
-					<Link
+					<Pressable
 						key={server.id}
-						href={
-							server.kind === 'stump' && !forceOPDS ? `/server/${server.id}` : `/opds/${server.id}`
+						onPress={() =>
+							router.push({
+								pathname: server.kind === 'stump' && !forceOPDS ? '/server/[id]' : '/opds/[id]',
+								params: {
+									id: server.id,
+								},
+							})
 						}
-						className="bg-background-muted w-full items-center rounded-2xl border border-edge bg-background-surface p-3"
 					>
-						<View className="flex-1 items-start justify-center gap-1">
-							<Text className="text-lg">{server.name}</Text>
-							<Text className="flex-1 text-foreground-muted">{formatURL(server.url)}</Text>
+						<View className="bg-background-muted w-full items-start rounded-2xl border border-edge bg-background-surface p-3">
+							<View className="flex-1 items-start justify-center gap-1">
+								<Text className="text-lg">{server.name}</Text>
+								<Text className="flex-1 text-foreground-muted">{formatURL(server.url)}</Text>
+							</View>
 						</View>
-					</Link>
+					</Pressable>
 				</ContextMenu.Trigger>
 
 				<ContextMenu.Content>

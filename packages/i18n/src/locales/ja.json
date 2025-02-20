@@ -1106,92 +1106,92 @@
 		},
 		"app/appearance": {
 			"helmet": "外観",
-			"title": "Appearance",
-			"description": "Customize the look and feel of the application",
+			"title": "外観",
+			"description": "アプリケーションの外観と感触をカスタマイズします",
 			"sections": {
 				"themeSelect": {
-					"label": "Theme",
+					"label": "テーマ",
 					"description": [
-						"If you're interested in creating your own custom theme, check out the",
-						"documentation"
+						"独自のカスタムテーマの作成に興味がある場合は、",
+						"ドキュメント"
 					],
 					"options": {
-						"light": "Light",
-						"dark": "Dark",
-						"bronze": "Bronze light",
-						"ocean": "Ocean",
-						"autumn": "Autumn",
-						"cosmic": "Cosmic",
-						"pumpkin": "Pumpkin",
-						"matrix": "Matrix"
+						"light": "ライト",
+						"dark": "ダーク",
+						"bronze": "ブロンズライト",
+						"ocean": "オーシャン",
+						"autumn": "秋",
+						"cosmic": "宇宙",
+						"pumpkin": "パンプキン",
+						"matrix": "マトリックス"
 					}
 				},
 				"fontSelect": {
-					"label": "Font",
-					"description": "Customize the font used in the application"
+					"label": "フォント",
+					"description": "アプリケーションで使用されるフォントをカスタマイズします"
 				},
 				"navigationArrangement": {
-					"label": "Navigation arrangement",
+					"label": "ナビゲーションの調整",
 					"description": {
-						"sidebar": "Arrange and customize the navigation items in the sidebar",
-						"topbar": "Arrange and customize the navigation items in the topbar"
+						"sidebar": "サイドバー内のナビゲーション項目を整列しカスタマイズする",
+						"topbar": "トップバーのナビゲーション項目を整列しカスタマイズします"
 					},
-					"isLocked": "Arrangement is locked",
-					"lock": "Lock arrangement",
-					"unlock": "Unlock arrangement",
+					"isLocked": "配置はロックされています",
+					"lock": "調整をロック",
+					"unlock": "調整をロック解除",
 					"options": {
 						"Home": "Home",
-						"Explore": "Explore",
-						"Libraries": "Libraries",
-						"BookClubs": "Book clubs",
-						"SmartLists": "Smart lists"
+						"Explore": "エクスプローラ",
+						"Libraries": "ライブラリ",
+						"BookClubs": "読書クラブ",
+						"SmartLists": "スマートリスト"
 					},
 					"entityOptions": {
 						"createAction": {
-							"label": "Show create action",
-							"help": "Show the create action in the navigation"
+							"label": "作成アクションを表示",
+							"help": "ナビゲーションに作成アクションを表示"
 						},
 						"linkToAll": {
-							"label": "See all link",
-							"help": "A link to a page dedicated to viewing all items of this type"
+							"label": "すべてのリンクを表示",
+							"help": "このタイプのすべてのアイテムを表示する専用のページへのリンク"
 						}
 					}
 				}
 			}
 		},
 		"app/apiKeys": {
-			"helmet": "API keys",
-			"title": "API keys",
-			"description": "Manage your generated Stump API keys",
+			"helmet": "APIキー",
+			"title": "APIキー",
+			"description": "生成されたStump APIキーを管理します",
 			"shared": {
 				"fields": {
-					"name": "Name",
-					"expiration": "Expiration",
-					"last_used": "Last used",
-					"created": "Created",
-					"permissions": "Permissions",
-					"inherited": "Inherited",
-					"explicit": "Explicit"
+					"name": "名前",
+					"expiration": "有効期限",
+					"last_used": "最終使用日",
+					"created": "作成日",
+					"permissions": "権限",
+					"inherited": "継承されました",
+					"explicit": "明示的"
 				}
 			},
 			"sections": {
 				"inspector": {
-					"heading": "API key",
-					"description": "A detailed view of this key",
+					"heading": "APIキー",
+					"description": "このキーの詳細表示",
 					"unrestrictedKey": {
-						"heading": "Unrestricted key",
-						"description": "Since you are the server owner, this key has unrestricted access when configured to inherit permissions. Please be careful."
+						"heading": "無制限のキー",
+						"description": "あなたはサーバーの所有者であるため、このキーは許可を継承するように構成された場合、無制限のアクセス権を持っています。注意してください。"
 					}
 				},
 				"createKey": {
 					"modal": {
-						"trigger": "Create API key",
+						"trigger": "APIキーを作成",
 						"heading": {
-							"creating": "Create API key",
-							"created": "Created key"
+							"creating": "APIキーを作成",
+							"created": "キーの作成"
 						},
 						"description": {
-							"creating": "API keys are long-lived credentials that can be used to authenticate with the API",
+							"creating": "APIキーは、APIで認証するために使用できる期限の長い資格情報です",
 							"created": "Your new API key has been created. Save the secret somewhere safe, as it will not be shown again"
 						},
 						"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting",
@@ -1470,14 +1470,14 @@
 						"documentation"
 					],
 					"bookclub": {
-						"label": "Book Clubs",
+						"label": "読書クラブ",
 						"read": {
 							"label": "Access book club features",
-							"description": "Allows the user to access book club features, including viewing and joining book clubs"
+							"description": "ユーザーがブッククラブの表示や参加など、ブッククラブ機能にアクセスできるようにします"
 						},
 						"create": {
-							"label": "Create book clubs",
-							"description": "Allows the user to create new book clubs"
+							"label": "読書クラブを作成",
+							"description": "ユーザーが新しい読書クラブを作成できるようにします"
 						}
 					},
 					"feature": {
@@ -1494,8 +1494,8 @@
 					"file": {
 						"label": "File Management",
 						"explorer": {
-							"label": "File Explorer",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+							"label": "ファイルエクスプローラ",
+							"description": "ユーザーがさまざまなファイルエクスプローラーにアクセスできるようにします。\nこの機能が許可された場合、コンテンツの制限は保証できません"
 						},
 						"download": {
 							"label": "Download files",
@@ -1766,12 +1766,12 @@
 		"buttons": {
 			"home": "Home",
 			"libraries": "Libraries",
-			"books": "Explore",
-			"bookClubs": "Book clubs",
+			"books": "エクスプローラ",
+			"bookClubs": "読書クラブ",
 			"createLibrary": "Create library",
 			"noLibraries": "No libraries",
 			"createBookClub": "Create book club",
-			"noBookClubs": "No book clubs",
+			"noBookClubs": "読書クラブがありません",
 			"settings": "Settings",
 			"themeToggle": "Toggle Theme",
 			"goForward": "Go Forward",
@@ -1783,7 +1783,7 @@
 		},
 		"libraryOptions": {
 			"scanLibrary": "Scan",
-			"fileExplorer": "Files",
+			"fileExplorer": "ファイル",
 			"manageLibrary": "Manage",
 			"deleteLibrary": "Delete"
 		},

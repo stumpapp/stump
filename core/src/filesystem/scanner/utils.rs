@@ -704,7 +704,6 @@ pub(crate) async fn safely_build_and_insert_media(
 	}
 
 	let mut output = MediaOperationOutput::default();
-	let mut logs = vec![];
 
 	let semaphore = Arc::new(Semaphore::new(max_concurrency));
 	tracing::debug!(max_concurrency, "Semaphore created for media creation");
@@ -751,7 +750,7 @@ pub(crate) async fn safely_build_and_insert_media(
 			},
 			Err((error, path)) => {
 				tracing::error!(error = ?error, ?path, "Failed to build book");
-				logs.push(
+				output.logs.push(
 					JobExecuteLog::error(format!(
 						"Failed to build book: {:?}",
 						error.to_string()
@@ -767,7 +766,7 @@ pub(crate) async fn safely_build_and_insert_media(
 	}
 
 	let success_count = books.len();
-	let error_count = logs.len();
+	let error_count = output.logs.len();
 	tracing::debug!(
 		elapsed = ?start.elapsed(),
 		success_count, error_count,
@@ -805,7 +804,7 @@ pub(crate) async fn safely_build_and_insert_media(
 					task_count,
 				));
 				tracing::error!(error = ?e, ?path, "Failed to create media");
-				logs.push(
+				output.logs.push(
 					JobExecuteLog::error(format!(
 						"Failed to create media: {:?}",
 						e.to_string()
@@ -817,7 +816,7 @@ pub(crate) async fn safely_build_and_insert_media(
 	}
 
 	let success_count = output.created_media;
-	let error_count = logs.len() - error_count; // Subtract the errors from the previous step
+	let error_count = output.logs.len() - error_count; // Subtract the errors from the previous step
 	tracing::debug!(success_count, error_count, elapsed = ?start.elapsed(), "Inserted books into database");
 
 	Ok(output)

@@ -22,8 +22,6 @@ export default function GridImageItem({ uri, title, href }: Props) {
 
 	const router = useRouter()
 
-	const truncatedTitle = title.length > 33 ? `${title.slice(0, 30)}...` : title
-
 	return (
 		<Pressable onPress={() => router.navigate(href)}>
 			{({ pressed }) => (
@@ -51,8 +49,8 @@ export default function GridImageItem({ uri, title, href }: Props) {
 						/>
 					</View>
 
-					<Text size="xl" className="font-medium leading-6">
-						{truncatedTitle}
+					<Text size="xl" className="font-medium leading-6" numberOfLines={2} ellipsizeMode="tail">
+						{title}
 					</Text>
 				</View>
 			)}

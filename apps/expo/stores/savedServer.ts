@@ -63,8 +63,7 @@ type SavedServerStore = {
 	addServer: (server: SavedServer) => void
 	editServer: (id: ServerID, server: SavedServer) => void
 	removeServer: (id: ServerID) => void
-	defaultServer?: SavedServer
-	setDefaultServer: (server: SavedServer) => void
+	setDefaultServer: (serverID?: string) => void
 	showStumpServers: boolean
 	setShowStumpServers: (show: boolean) => void
 }
@@ -76,12 +75,17 @@ export const useSavedServerStore = create<SavedServerStore>()(
 			addServer: (server: SavedServer) => set((state) => ({ servers: [...state.servers, server] })),
 			removeServer: (id: ServerID) =>
 				set((state) => ({ servers: state.servers.filter((server) => server.id !== id) })),
+			setDefaultServer: (serverID?: string) =>
+				set((state) => ({
+					servers: state.servers.map((server) => ({
+						...server,
+						defaultServer: server.id === serverID,
+					})),
+				})),
 			editServer: (id: ServerID, server: SavedServer) =>
 				set((state) => ({
 					servers: state.servers.map((s) => (s.id === id ? server : s)),
 				})),
-			defaultServer: undefined,
-			setDefaultServer: (server: SavedServer) => set({ defaultServer: server }),
 			showStumpServers: true,
 			setShowStumpServers: (show) => set({ showStumpServers: show }),
 		}),
@@ -103,8 +107,15 @@ export type CreateServer = {
 
 // TODO: safety in parsing
 export const useSavedServers = () => {
-	const { servers, addServer, editServer, removeServer, setDefaultServer, showStumpServers } =
-		useSavedServerStore((state) => state)
+	const {
+		servers,
+		addServer,
+		editServer,
+		removeServer,
+		setDefaultServer,
+		showStumpServers,
+		setShowStumpServers,
+	} = useSavedServerStore((state) => state)
 
 	const getServerConfig = async (id: ServerID) => {
 		const config = await SecureStore.getItemAsync(formatPrefix('config', id))
@@ -122,7 +133,8 @@ export const useSavedServers = () => {
 			const serverMeta = { ...server, id }
 			addServer(serverMeta)
 			if (server.defaultServer) {
-				setDefaultServer(serverMeta)
+				// Ensure only one default server
+				setDefaultServer(serverMeta.id)
 			}
 			if (config) {
 				await createServerConfig(id, config)
@@ -137,7 +149,8 @@ export const useSavedServers = () => {
 			const serverMeta = { ...server, id }
 			editServer(id, serverMeta)
 			if (server.defaultServer) {
-				setDefaultServer(serverMeta)
+				// Ensure only one default server
+				setDefaultServer(serverMeta.id)
 			}
 			if (config) {
 				await createServerConfig(id, config)
@@ -178,9 +191,22 @@ export const useSavedServers = () => {
 		await SecureStore.deleteItemAsync(formatPrefix('token', id))
 	}
 
+	const setStumpEnabled = useCallback(
+		(enabled: boolean) => {
+			const defaultServer = servers.find((server) => server.defaultServer)
+			if (!enabled && defaultServer?.kind === 'stump') {
+				// If we're disabling stump servers, and the default server is a stump server, we need to unset it
+				setDefaultServer()
+			}
+			setShowStumpServers(enabled)
+		},
+		[servers, setDefaultServer, setShowStumpServers],
+	)
+
 	return {
 		savedServers: showStumpServers ? servers : servers.filter((server) => server.kind !== 'stump'),
 		stumpEnabled: showStumpServers,
+		setStumpEnabled,
 		createServer,
 		updateServer,
 		deleteServer,

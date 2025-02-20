@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Pressable, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as DropdownMenu from 'zeego/dropdown-menu'
@@ -26,7 +26,6 @@ export default function Header() {
 
 	const incognito = useReaderStore((state) => state.globalSettings.incognito)
 	const insets = useSafeAreaInsets()
-	const truncatedName = useMemo(() => (name.length > 25 ? `${name.slice(0, 25)}...` : name), [name])
 	const visible = useReaderStore((state) => state.showControls)
 
 	const router = useRouter()
@@ -51,7 +50,9 @@ export default function Header() {
 				{({ pressed }) => <X className="text-foreground" style={{ opacity: pressed ? 0.85 : 1 }} />}
 			</Pressable>
 
-			<Text className="font-semibold">{truncatedName}</Text>
+			<Text className="font-semibold" numberOfLines={1} ellipsizeMode="tail">
+				{name}
+			</Text>
 
 			<DropdownMenu.Root open={isOpen} onOpenChange={setIsOpen}>
 				<DropdownMenu.Trigger>

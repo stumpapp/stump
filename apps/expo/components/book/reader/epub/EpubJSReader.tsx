@@ -5,7 +5,9 @@ import { isAxiosError } from '@stump/sdk'
 import { Media } from '@stump/sdk'
 import { useColorScheme } from 'nativewind'
 import { useCallback, useEffect, useState } from 'react'
-import { useWindowDimensions } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
+import { useDisplay } from '~/lib/hooks'
 
 import EpubJSReaderContainer from './EpubJSReaderContainer'
 
@@ -31,6 +33,8 @@ type Props = {
  * the long run
  */
 export default function EpubJSReader({ book, initialCfi, incognito }: Props) {
+	const { width, height } = useDisplay()
+	const { colorScheme } = useColorScheme()
 	const { sdk } = useSDK()
 	/**
 	 * The base64 representation of the book file. The reader component does not accept
@@ -39,8 +43,7 @@ export default function EpubJSReader({ book, initialCfi, incognito }: Props) {
 	 */
 	const [base64, setBase64] = useState<string | null>(null)
 
-	const { width, height } = useWindowDimensions()
-	const { colorScheme } = useColorScheme()
+	const insets = useSafeAreaInsets()
 
 	/**
 	 * An effect that fetches the book file and loads it into the reader component
@@ -49,7 +52,13 @@ export default function EpubJSReader({ book, initialCfi, incognito }: Props) {
 	useEffect(() => {
 		async function fetchBook() {
 			try {
-				const response = await fetch(sdk.media.downloadURL(book.id))
+				// const response = await fetch(sdk.media.downloadURL(book.id))
+				const response = await fetch(sdk.media.downloadURL(book.id), {
+					headers: {
+						...sdk.customHeaders,
+						Authorization: sdk.authorizationHeader || '',
+					},
+				})
 				const data = await response.blob()
 				const reader = new FileReader()
 				reader.onloadend = () => {
@@ -65,8 +74,10 @@ export default function EpubJSReader({ book, initialCfi, incognito }: Props) {
 			}
 		}
 
-		fetchBook()
-	}, [book.id, sdk.media])
+		if (!base64) {
+			fetchBook()
+		}
+	}, [book.id, sdk, base64])
 
 	/**
 	 * A callback that updates the read progress of the current location
@@ -85,7 +96,7 @@ export default function EpubJSReader({ book, initialCfi, incognito }: Props) {
 						epubcfi: cfi,
 						id: book.id,
 						is_complete: progress >= 1.0,
-						percentage: progress,
+						percentage: Math.min(1, progress),
 					})
 				} catch (e) {
 					console.error(e)
@@ -109,7 +120,7 @@ export default function EpubJSReader({ book, initialCfi, incognito }: Props) {
 				onDisplayError={(error) => console.error(error)}
 				width={width}
 				// height={height - height * 0.08}
-				height={height}
+				height={height - (insets.top + insets.bottom)}
 				fileSystem={useFileSystem}
 				initialLocation={initialCfi}
 				onLocationChange={handleLocationChanged}

@@ -14,7 +14,9 @@ export type OPDSBaseLink = z.infer<typeof baseLink>
 
 const navigationLink = z
 	.object({
-		title: z.string(),
+		// Codex doesn't guarantee this field, but it is required by the spec.
+		// See https://drafts.opds.io/opds-2.0.html#21-navigation
+		title: z.string().default('Navigation Link'),
 	})
 	.and(baseLink)
 export type OPDSNavigationLink = z.infer<typeof navigationLink>
@@ -93,7 +95,7 @@ const metadata = z
 export type OPDSMetadata = z.infer<typeof metadata>
 
 export const publication = z.object({
-	context: z.string(),
+	context: z.string().nullish(), // Codex doesn't guarantee this field
 	metadata: metadata,
 	links: z.array(link).optional(),
 	images: z.array(imageLink).optional(),

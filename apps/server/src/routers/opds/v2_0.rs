@@ -966,6 +966,7 @@ async fn browse_series(
 					.map(|link| link.finalize(&link_finalizer))
 					.collect::<Vec<OPDSNavigationLink>>(),
 			)
+			.allow_empty(true)
 			.build()?,
 	))
 }

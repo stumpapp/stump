@@ -2,6 +2,7 @@ import {
 	ARCHIVE_EXTENSION,
 	EBOOK_EXTENSION,
 	PDF_EXTENSION,
+	queryClient,
 	useMediaByIdQuery,
 	useSDK,
 	useUpdateMediaProgress,
@@ -47,12 +48,26 @@ export default function Screen() {
 		}
 	}, [setShowControls])
 
+	/**
+	 * Invalidate the book query when a reader is unmounted so that the book overview
+	 * is updated with the latest read progress
+	 */
+	useEffect(
+		() => {
+			return () => {
+				queryClient.refetchQueries({ queryKey: [sdk.media.keys.getByID, bookID], exact: false })
+			}
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[],
+	)
+
 	if (!book) return null
 
 	if (book.extension.match(EBOOK_EXTENSION)) {
-		// const currentProgressCfi = book.current_epubcfi || undefined
+		const currentProgressCfi = book.current_epubcfi || undefined
 		// const initialCfi = restart ? undefined : currentProgressCfi
-		return <EpubJSReader book={book} /*initialCfi={initialCfi} incognito={incognito}*/ />
+		return <EpubJSReader book={book} initialCfi={currentProgressCfi} /*incognito={incognito}*/ />
 	} else if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
 		const currentProgressPage = book.current_page || 1
 		// const initialPage = restart ? 1 : currentProgressPage

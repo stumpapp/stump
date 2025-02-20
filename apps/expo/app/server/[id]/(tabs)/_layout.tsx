@@ -8,7 +8,7 @@ import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 import { useUserStore } from '~/stores'
 
-const { Unplug, Plus, Home, SquareLibrary, Search } = icons
+const { Unplug, Home, SquareLibrary, Search } = icons
 
 export default function TabLayout() {
 	const { sdk } = useSDK()
@@ -61,20 +61,7 @@ export default function TabLayout() {
 							className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
 						/>
 					),
-					headerRight: () => (
-						<Pressable>
-							{({ pressed }) => (
-								<View
-									className={cn(
-										'aspect-square flex-1 items-start justify-center pt-0.5',
-										pressed && 'opacity-70',
-									)}
-								>
-									<Plus className="h-6 w-6 text-foreground-muted" />
-								</View>
-							)}
-						</Pressable>
-					),
+					headerShown: false,
 				}}
 			/>
 

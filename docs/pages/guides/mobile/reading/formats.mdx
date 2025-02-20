@@ -1,0 +1,28 @@
+import { Callout } from 'nextra/components'
+
+# Supported formats
+
+<Callout emoji="⚠️" type="warning">
+	Offline reading is not yet supported, but planned for a future release. If this page references
+	offline reading, ignore it.
+</Callout>
+
+The mobile app doesn't yet support all the formats that your Stump server supports. The following table provides an overview of formats and their status:
+
+| Format  | Status | Notes                             |
+| ------- | ------ | --------------------------------- |
+| CBZ/ZIP | ✅     |                                   |
+| CBR/RAR | ✅     |                                   |
+| EPUB    | ⚠️     | Poor UX, not yet suitable for use |
+| PDF     | ⚠️     | Some PDF pages are blurry         |
+
+## OPDS Formats
+
+You may download books from your OPDS catalogs and read them offline, however only some formats support a streaming reader. The following table provides an overview of formats and their status:
+
+| Format  | Streaming | Notes                     |
+| ------- | --------- | ------------------------- |
+| CBZ/ZIP | ✅        |                           |
+| CBR/RAR | ✅        |                           |
+| EPUB    | ❌        | Support in the future     |
+| PDF     | ⚠️        | Some PDF pages are blurry |

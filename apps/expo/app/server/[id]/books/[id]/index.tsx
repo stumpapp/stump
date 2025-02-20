@@ -4,9 +4,9 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { SafeAreaView } from 'react-native'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
 import { BookMetaLink } from '~/components/book'
@@ -56,8 +56,8 @@ export default function Screen() {
 		!publisher && !writers && !colorists && !inkers && !letterers && !coverArtists
 
 	const renderRead = () => {
-		const { page, percentage_completed } = progression || {}
-		if (page || percentage_completed) {
+		const { page, percentage_completed, epubcfi } = progression || {}
+		if (page || percentage_completed || !!epubcfi) {
 			return <Text>Continue</Text>
 		} else if (media.finished_reading_sessions?.length) {
 			return <Text>Read again</Text>

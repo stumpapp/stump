@@ -3,7 +3,7 @@ import { checkUrl, formatApiURL } from '@stump/sdk'
 import isEqual from 'lodash/isEqual'
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm, useFormState, useWatch } from 'react-hook-form'
-import { Pressable, View } from 'react-native'
+import { NativeSyntheticEvent, Pressable, TextInputFocusEventData, View } from 'react-native'
 import Dialog from 'react-native-dialog'
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable'
 import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated'
@@ -22,10 +22,10 @@ type Props = {
 }
 
 export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) {
-	const { savedServers } = useSavedServers()
+	const { savedServers, stumpEnabled } = useSavedServers()
 
 	const { control, handleSubmit, ...form } = useForm<AddOrEditServerSchema>({
-		defaultValues: getDefaultValues(editingServer),
+		defaultValues: getDefaultValues(stumpEnabled, editingServer),
 		resolver: zodResolver(
 			createSchema(
 				savedServers.map(({ name }) => name).filter((name) => name !== editingServer?.name),
@@ -176,8 +176,17 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 
 	const formValues = useWatch({ control })
 	const isUpdateReady = useMemo(
-		() => !isEqual(getDefaultValues(editingServer), formValues),
-		[formValues, editingServer],
+		() => !isEqual(getDefaultValues(stumpEnabled, editingServer), formValues),
+		[formValues, stumpEnabled, editingServer],
+	)
+
+	const onURLFocused = useCallback(
+		(e: NativeSyntheticEvent<TextInputFocusEventData>) => {
+			if (e.nativeEvent.text === '') {
+				form.setValue('url', 'http://')
+			}
+		},
+		[form],
 	)
 
 	const onDeleteHeader = useCallback(
@@ -271,8 +280,9 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 						onBlur={onBlur}
 						onChangeText={onChange}
 						value={value}
-						errorMessage={errors.name?.message}
+						errorMessage={errors.url?.message}
 						secureTextEntry={maskURLs}
+						onFocus={onURLFocused}
 					/>
 				)}
 				name="url"
@@ -438,9 +448,9 @@ const defaultValues = {
 	basicPassword: '',
 } as AddOrEditServerSchema
 
-const getDefaultValues = (editingServer?: SavedServerWithConfig | null) => {
+const getDefaultValues = (stumpEnabled: boolean, editingServer?: SavedServerWithConfig | null) => {
 	if (!editingServer) {
-		return defaultValues
+		return { ...defaultValues, kind: stumpEnabled ? 'stump' : 'opds' } as AddOrEditServerSchema
 	}
 
 	const configs = match(editingServer.config?.auth)

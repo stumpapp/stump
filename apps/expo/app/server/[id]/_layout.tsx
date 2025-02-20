@@ -1,10 +1,11 @@
 import { SDKContext, StumpClientContextProvider } from '@stump/client'
-import { Api, CreatedToken } from '@stump/sdk'
+import { Api, CreatedToken, LoginResponse, User, UserPermission } from '@stump/sdk'
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { match, P } from 'ts-pattern'
 
-import { ActiveServerContext } from '~/components/activeServer'
+import { ActiveServerContext, StumpServerContext } from '~/components/activeServer'
+import { PermissionEnforcerOptions } from '~/components/activeServer/context'
 import ServerAuthDialog from '~/components/ServerAuthDialog'
 import { useSavedServers } from '~/stores'
 
@@ -22,17 +23,19 @@ export default function Screen() {
 
 	const [sdk, setSDK] = useState<Api | null>(null)
 	const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
+	const [user, setUser] = useState<User | null>(null)
 
 	const attemptLogin = useCallback(
 		async (instance: Api, username: string, password: string) => {
 			try {
 				const result = await instance.auth.login({ password, username })
 				if ('for_user' in result) {
-					const { token } = result
+					const { token, for_user } = result
 					saveServerToken(activeServer?.id || 'dev', {
 						expiresAt: new Date(token.expires_at),
 						token: token.access_token,
 					})
+					setUser(for_user)
 					return token.access_token
 				}
 			} catch (error) {
@@ -77,10 +80,30 @@ export default function Screen() {
 		}
 	}, [activeServer, sdk, getServerToken, isAuthDialogOpen, getServerConfig, attemptLogin])
 
+	useEffect(() => {
+		if (user || !sdk || !sdk.isAuthed) return
+
+		const fetchUser = async () => {
+			try {
+				const user = await sdk.auth.me()
+				setUser(user)
+			} catch (error) {
+				console.error(error)
+			}
+		}
+
+		fetchUser()
+	}, [sdk, user])
+
 	const handleAuthDialogClose = useCallback(
-		(token?: CreatedToken) => {
-			if (token && activeServer) {
-				const { access_token, expires_at } = token
+		(loginResp?: LoginResponse) => {
+			if (!loginResp || !('for_user' in loginResp) || !activeServer) {
+				router.dismissAll()
+			} else {
+				const {
+					for_user,
+					token: { access_token, expires_at },
+				} = loginResp
 				const instance = new Api({
 					baseURL: activeServer.url,
 					authMethod: 'token',
@@ -91,9 +114,8 @@ export default function Screen() {
 					expiresAt: new Date(expires_at),
 					token: access_token,
 				})
+				setUser(for_user)
 				setIsAuthDialogOpen(false)
-			} else {
-				router.dismissAll()
 			}
 		},
 		[activeServer, router, saveServerToken],
@@ -107,7 +129,23 @@ export default function Screen() {
 		// We need to retrigger the auth dialog, so we'll let the effect handle it
 		setIsAuthDialogOpen(false)
 		setSDK(null)
+		setUser(null)
 	}, [activeServer, deleteServerToken])
+
+	const checkPermission = useCallback(
+		(permission: UserPermission) =>
+			user?.is_server_owner || user?.permissions.includes(permission) || false,
+		[user],
+	)
+
+	const enforcePermission = useCallback(
+		(permission: UserPermission, { onFailure }: PermissionEnforcerOptions = {}) => {
+			if (!checkPermission(permission)) {
+				onFailure?.()
+			}
+		},
+		[checkPermission],
+	)
 
 	if (!activeServer) {
 		return <Redirect href="/" />
@@ -123,12 +161,21 @@ export default function Screen() {
 				activeServer: activeServer,
 			}}
 		>
-			<StumpClientContextProvider onUnauthenticatedResponse={onAuthError}>
-				<SDKContext.Provider value={{ sdk, setSDK }}>
-					<ServerAuthDialog isOpen={isAuthDialogOpen} onClose={handleAuthDialogClose} />
-					<Stack screenOptions={{ headerShown: false }} />
-				</SDKContext.Provider>
-			</StumpClientContextProvider>
+			<StumpServerContext.Provider
+				value={{
+					user,
+					isServerOwner: user?.is_server_owner || false,
+					checkPermission,
+					enforcePermission,
+				}}
+			>
+				<StumpClientContextProvider onUnauthenticatedResponse={onAuthError}>
+					<SDKContext.Provider value={{ sdk, setSDK }}>
+						<ServerAuthDialog isOpen={isAuthDialogOpen} onClose={handleAuthDialogClose} />
+						<Stack screenOptions={{ headerShown: false }} />
+					</SDKContext.Provider>
+				</StumpClientContextProvider>
+			</StumpServerContext.Provider>
 		</ActiveServerContext.Provider>
 	)
 }

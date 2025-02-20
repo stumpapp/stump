@@ -2,6 +2,7 @@ import { useSDK } from '@stump/client'
 import { Media } from '@stump/sdk'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
+import { useMemo } from 'react'
 import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
@@ -15,13 +16,18 @@ type Props = {
 	book: Media
 }
 
+// TODO: create separate BookGridItem vs BookHorizontalListItem
 export default function BookListItem({ book }: Props) {
 	const { sdk } = useSDK()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
 	const { isTablet } = useDisplay()
+
 	const router = useRouter()
+
+	const itemHeight = useMemo(() => (isTablet ? 225 : 150), [isTablet])
+	const itemWidth = useMemo(() => itemHeight * (2 / 3), [itemHeight])
 
 	return (
 		<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${book.id}`)}>
@@ -41,15 +47,12 @@ export default function BookListItem({ book }: Props) {
 								},
 							}}
 							contentFit="fill"
-							style={{ height: isTablet ? 200 : 150, width: 'auto' }}
+							style={{ height: isTablet ? 225 : 150, width: itemWidth }}
 						/>
 					</View>
 
 					<View>
-						<Text
-							className="mt-2 line-clamp-2 text-sm tablet:text-sm"
-							style={{ maxWidth: 150 * 0.75 }}
-						>
+						<Text className="mt-2" style={{ maxWidth: itemWidth - 4 }} numberOfLines={2}>
 							{book.metadata?.title || book.name}
 						</Text>
 					</View>

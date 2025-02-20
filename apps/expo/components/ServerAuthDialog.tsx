@@ -1,7 +1,7 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useLoginOrRegister } from '@stump/client'
-import { CreatedToken } from '@stump/sdk'
+import { LoginResponse } from '@stump/sdk'
 import { useColorScheme } from 'nativewind'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -16,7 +16,7 @@ import { BottomSheet } from './ui/bottom-sheet'
 
 type ServerAuthDialogProps = {
 	isOpen: boolean
-	onClose: (token?: CreatedToken) => void
+	onClose: (resp?: LoginResponse) => void
 }
 
 export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogProps) {
@@ -63,11 +63,7 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 			try {
 				const result = await loginUser({ password, username })
 				if ('for_user' in result) {
-					const {
-						// for_user,
-						token,
-					} = result
-					onClose(token)
+					onClose(result)
 				}
 			} catch (error) {
 				console.error(error)

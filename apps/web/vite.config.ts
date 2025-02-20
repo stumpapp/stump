@@ -29,7 +29,7 @@ export default defineConfig({
 				maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
 			},
 			outDir: '../dist/assets/',
-			base: '/assets/',
+			base: '/',
 			// TODO(pwa): Add more manifest definitions for better overall experience
 			manifest: {
 				id: 'stump',
@@ -55,7 +55,7 @@ export default defineConfig({
 					},
 				],
 			},
-			manifestFilename: './manifest.webmanifest',
+			manifestFilename: 'assets/manifest.webmanifest',
 		}),
 	],
 	publicDir: '../../../packages/browser/public',

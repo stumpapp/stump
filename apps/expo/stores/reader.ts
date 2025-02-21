@@ -1,10 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { BookPreferences } from '@stump/client'
-import { useCallback, useMemo } from 'react'
+import dayjs from 'dayjs'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useStopwatch } from 'react-timer-hook'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
 type GlobalSettings = BookPreferences & { incognito?: boolean }
+
+type ElapsedSeconds = number
 
 export type ReaderStore = {
 	isReading: boolean
@@ -16,6 +20,9 @@ export type ReaderStore = {
 	bookSettings: Record<string, BookPreferences>
 	addBookSettings: (id: string, preferences: BookPreferences) => void
 	setBookSettings: (id: string, preferences: Partial<BookPreferences>) => void
+
+	bookTimers: Record<string, ElapsedSeconds>
+	setBookTimer: (id: string, timer: ElapsedSeconds) => void
 
 	showControls: boolean
 	setShowControls: (show: boolean) => void
@@ -48,6 +55,10 @@ export const useReaderStore = create<ReaderStore>()(
 							[id]: { ...get().bookSettings[id], ...updates },
 						},
 					}),
+
+				bookTimers: {},
+				setBookTimer: (id, elapsedSeconds) =>
+					set({ bookTimers: { ...get().bookTimers, [id]: elapsedSeconds } }),
 
 				showControls: false,
 				setShowControls: (show) => set({ showControls: show }),
@@ -87,6 +98,56 @@ export const useBookPreferences = (id: string) => {
 		setBookPreferences,
 		updateGlobalSettings: store.setGlobalSettings,
 	}
+}
+
+type UseBookTimerParams = {
+	initial?: number | null
+}
+
+export const useBookReadTime = (id: string, { initial }: UseBookTimerParams = {}) => {
+	const bookTimers = useReaderStore((state) => state.bookTimers)
+	const bookTimer = useMemo(() => bookTimers[id] || 0, [bookTimers, id])
+	return bookTimer || initial || 0
+}
+
+export const useBookTimer = (id: string, params: UseBookTimerParams = {}) => {
+	const [initial] = useState(() => params.initial)
+
+	const bookTimers = useReaderStore((state) => state.bookTimers)
+	const bookTimer = useMemo(() => bookTimers[id] || 0, [bookTimers, id])
+	const setBookTimer = useReaderStore((state) => state.setBookTimer)
+
+	const resolvedTimer = useMemo(
+		() => (!!initial && initial > bookTimer ? initial : bookTimer),
+		[initial, bookTimer],
+	)
+
+	const { pause, totalSeconds, reset, isRunning } = useStopwatch({
+		autoStart: !!id,
+		offsetTimestamp: dayjs()
+			.add(resolvedTimer || 0, 'seconds')
+			.toDate(),
+	})
+
+	const pauseTimer = useCallback(() => {
+		pause()
+		setBookTimer(id, totalSeconds)
+	}, [id, pause, setBookTimer, totalSeconds])
+
+	const resumeTimer = useCallback(() => {
+		const offset = dayjs().add(totalSeconds, 'seconds').toDate()
+		reset(offset)
+	}, [totalSeconds, reset])
+
+	useEffect(() => {
+		reset(
+			dayjs()
+				.add(resolvedTimer || 0, 'seconds')
+				.toDate(),
+		)
+	}, [resolvedTimer, reset])
+
+	return { totalSeconds, pause: pauseTimer, resume: resumeTimer, isRunning }
 }
 
 export const useHideStatusBar = () => {

@@ -7,6 +7,7 @@ import {
 	PatchMediaThumbnail,
 	ProgressUpdateReturn,
 	PutMediaCompletionStatus,
+	PutMediaProgress,
 } from '../types'
 import { ClassQueryKeys, CursorQueryParams, FullQueryParams } from './types'
 import { createRouteURLHandler } from './utils'
@@ -102,8 +103,8 @@ export class MediaAPI extends APIBase {
 	/**
 	 * Update the progress of a media entity
 	 */
-	async updateProgress(mediaID: string, page: number): Promise<ProgressUpdateReturn> {
-		const { data } = await this.axios.put(mediaURL(`${mediaID}/progress/${page}`))
+	async updateProgress(mediaID: string, params: PutMediaProgress): Promise<ProgressUpdateReturn> {
+		const { data } = await this.axios.put(mediaURL(`${mediaID}/progress`), params)
 		return data
 	}
 

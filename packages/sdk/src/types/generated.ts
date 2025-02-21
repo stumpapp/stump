@@ -184,9 +184,9 @@ export type Bookmark = { id: string; preview_content: string | null; epubcfi: st
 
 export type MediaAnnotation = { id: string; highlighted_text: string | null; page: number | null; page_coordinates_x: number | null; page_coordinates_y: number | null; epubcfi: string | null; notes: string | null; media_id: string; media?: Media | null }
 
-export type ActiveReadingSession = { id: string; page: number | null; epubcfi: string | null; percentage_completed: number | null; started_at: string; media_id: string; media: Media | null; user_id: string; user: User | null }
+export type ActiveReadingSession = { id: string; page: number | null; epubcfi: string | null; percentage_completed: number | null; elapsed_seconds: number | null; started_at: string; media_id: string; media: Media | null; user_id: string; user: User | null }
 
-export type FinishedReadingSession = { id: string; started_at: string; completed_at: string; media_id: string; media: Media | null; user_id: string; user: User | null }
+export type FinishedReadingSession = { id: string; started_at: string; completed_at: string; elapsed_seconds: number | null; media_id: string; media: Media | null; user_id: string; user: User | null }
 
 export type ProgressUpdateReturn = ActiveReadingSession | FinishedReadingSession
 
@@ -424,6 +424,8 @@ export type MediaMetadataFilter = ({ publisher?: string[]; genre?: string[]; cha
 export type MediaBaseFilter = { id?: string[]; name?: string[]; extension?: string[]; path?: string[]; read_status?: ReadStatus[]; tags?: string[]; search?: string | null; metadata?: MediaMetadataBaseFilter | null }
 
 export type MediaFilter = ({ id?: string[]; name?: string[]; extension?: string[]; path?: string[]; read_status?: ReadStatus[]; tags?: string[]; search?: string | null; metadata?: MediaMetadataBaseFilter | null }) & ({ series?: SeriesFilter | null })
+
+export type PutMediaProgress = { page: number; epubcfi?: string | null; elapsed_seconds?: number | null }
 
 /**
  * Represents the relations to load for a book entity, including optional loading

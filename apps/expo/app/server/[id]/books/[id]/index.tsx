@@ -75,6 +75,19 @@ export default function Screen() {
 		return <InfoStat label="Completed" value={`${percentageCompleted}%`} />
 	}
 
+	const renderReadTime = ({ elapsed_seconds, started_at }: ActiveReadingSession) => {
+		if (!elapsed_seconds || !started_at) {
+			return null
+		}
+
+		if (elapsed_seconds) {
+			const readTime = dayjs.duration(elapsed_seconds, 'seconds').humanize()
+			return <InfoStat label="Read time" value={readTime} />
+		} else {
+			return <InfoStat label="Started" value={dayjs(started_at).fromNow(true)} />
+		}
+	}
+
 	return (
 		<SafeAreaView className="flex-1 bg-background">
 			<ScrollView
@@ -127,9 +140,7 @@ export default function Screen() {
 								/>
 							)}
 							{renderPercentage(progression)}
-							{progression.started_at && (
-								<InfoStat label="Started" value={dayjs(progression.started_at).fromNow(true)} />
-							)}
+							{renderReadTime(progression)}
 						</View>
 					)}
 

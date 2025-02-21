@@ -1,3 +1,4 @@
+import { useKeepAwake } from 'expo-keep-awake'
 import { useEffect, useMemo, useState } from 'react'
 
 import { ImageBasedReader } from '~/components/book/reader'
@@ -14,6 +15,7 @@ type ImageDimension = {
 
 // TODO: refactor to use imagebasedreader when able
 export default function Screen() {
+	useKeepAwake()
 	const {
 		publication: {
 			metadata: { identifier, title },

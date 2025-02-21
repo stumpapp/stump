@@ -328,8 +328,9 @@ model Review {
 model FinishedReadingSession {
   id String @id @default(cuid())
 
-  started_at   DateTime
-  completed_at DateTime @default(now())
+  started_at      DateTime
+  completed_at    DateTime @default(now())
+  elapsed_seconds BigInt? // The time spent reading in seconds
 
   // TODO: Support reading duration in the future
 
@@ -363,6 +364,7 @@ model ActiveReadingSession {
   percentage_completed Float? // 0.0 - 1.0
   epubcfi              String?
   koreader_progress    String?
+  elapsed_seconds      BigInt? // The time spent reading in seconds
 
   started_at DateTime @default(now())
   updated_at DateTime @updatedAt

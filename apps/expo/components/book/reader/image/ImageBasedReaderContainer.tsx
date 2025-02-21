@@ -1,12 +1,12 @@
 import { ComponentProps, useCallback, useRef, useState } from 'react'
+import { View } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useBookPreferences } from '~/stores/reader'
 
 import { IImageBasedReaderContext, ImageBasedReaderContext } from './context'
-import Footer from './Footer'
-import Header from './Header'
+import ControlsOverlay from './ControlsOverlay'
 import ImageBasedReader from './ImageBasedReader'
 
 type Props = Omit<IImageBasedReaderContext, 'currentPage' | 'flatListRef'> &
@@ -30,16 +30,22 @@ export default function ImageBasedReaderContainer({ initialPage, onPageChanged, 
 	)
 
 	const flatListRef = useRef<FlatList>(null)
+	const insets = useSafeAreaInsets()
 
 	return (
 		<ImageBasedReaderContext.Provider
 			value={{ ...ctx, currentPage, onPageChanged: onPageChangedHandler, flatListRef }}
 		>
-			<SafeAreaView className="flex flex-1 items-center justify-center">
-				<Header />
+			<View
+				className="fixed inset-0 flex-1"
+				style={{
+					paddingTop: insets.top,
+					paddingBottom: insets.bottom,
+				}}
+			>
+				<ControlsOverlay />
 				<ImageBasedReader initialPage={initialPage} />
-				<Footer />
-			</SafeAreaView>
+			</View>
 		</ImageBasedReaderContext.Provider>
 	)
 }

@@ -58,9 +58,9 @@ export default function RootLayout() {
 
 	return (
 		<GestureHandlerRootView style={{ flex: 1 }}>
-			{/* TODO: determine if I need this? */}
 			<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
 				<BottomSheet.Provider>
+					{/* TODO: This pushes content when entering/exiting */}
 					<StatusBar style={isDarkColorScheme ? 'light' : 'dark'} hidden={shouldHideStatusBar} />
 					<Stack
 					// https://github.com/expo/expo/issues/15244 ?

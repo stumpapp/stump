@@ -62,7 +62,12 @@ export default function RootLayout() {
 			<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
 				<BottomSheet.Provider>
 					<StatusBar style={isDarkColorScheme ? 'light' : 'dark'} hidden={shouldHideStatusBar} />
-					<Stack>
+					<Stack
+					// https://github.com/expo/expo/issues/15244 ?
+					// screenOptions={{
+					// 	statusBarHidden: shouldHideStatusBar,
+					// }}
+					>
 						<Stack.Screen
 							name="(tabs)"
 							options={{

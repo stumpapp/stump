@@ -1,7 +1,7 @@
-import { ImageZoom, Zoomable } from '@likashefqet/react-native-image-zoom'
+import { Zoomable } from '@likashefqet/react-native-image-zoom'
 import { useSDK } from '@stump/client'
 import { Image, ImageLoadEventData } from 'expo-image'
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { FlatList, useWindowDimensions, View } from 'react-native'
 import {
 	GestureStateChangeEvent,
@@ -41,9 +41,7 @@ type Props = {
  * A reader for books that are image-based, where each page should be displayed as an image
  */
 export default function ImageBasedReader({ initialPage }: Props) {
-	const flatList = useRef<FlatList>(null)
-
-	const { book, imageSizes = [], onPageChanged } = useImageBasedReader()
+	const { book, imageSizes = [], onPageChanged, flatListRef } = useImageBasedReader()
 	const {
 		preferences: { readingMode, incognito },
 	} = useBookPreferences(book.id)
@@ -73,7 +71,7 @@ export default function ImageBasedReader({ initialPage }: Props) {
 
 	return (
 		<FlatList
-			ref={flatList}
+			ref={flatListRef}
 			data={Array.from({ length: book.pages }, (_, i) => i)}
 			renderItem={({ item }) => (
 				<Page
@@ -104,7 +102,7 @@ export default function ImageBasedReader({ initialPage }: Props) {
 				console.error("Couldn't scroll to index", info)
 				const wait = new Promise((resolve) => setTimeout(resolve, 500))
 				wait.then(() => {
-					flatList.current?.scrollToIndex({ index: info.index, animated: true })
+					flatListRef.current?.scrollToIndex({ index: info.index, animated: true })
 				})
 			}}
 			// Note: We need to define an explicit layout so the initial scroll index works
@@ -176,40 +174,6 @@ const Page = React.memo(
 
 		const safeMaxHeight = maxHeight - insets.top - insets.bottom
 
-		// CONTROL: No zoom
-
-		// return (
-		// 	<View
-		// 		className="flex items-center justify-center"
-		// 		style={{
-		// 			height: safeMaxHeight,
-		// 			minHeight: safeMaxHeight,
-		// 			minWidth: maxWidth,
-		// 			width: maxWidth,
-		// 		}}
-		// 	>
-		// 		<Image
-		// 			source={{
-		// 				uri: pageURL(index + 1),
-		// 				headers: {
-		// 					Authorization: sdk.authorizationHeader,
-		// 				},
-		// 			}}
-		// 			// TODO: figure out how to render landscape better...
-		// 			style={{
-		// 				height: '100%',
-		// 				width: '100%',
-		// 			}}
-		// 			contentFit="contain"
-		// 			onLoad={onImageLoaded}
-		// 		/>
-		// 	</View>
-		// )
-
-		// EXPERIMENT 1: Zoomable (try enabling/disabling the tap gestures to present the jitter/lag)
-
-		// FIXME: The zoomable component is causing some jitter/lag when swiping between pages
-		// IF the tap gestures are enabled.
 		return (
 			<Zoomable
 				minScale={1}
@@ -246,43 +210,6 @@ const Page = React.memo(
 					/>
 				</View>
 			</Zoomable>
-		)
-
-		// EXPERIMENT 2: ImageZoom (try enabling/disabling the tap gestures to present the jitter/lag)
-
-		return (
-			<View
-				className="flex items-center justify-center"
-				style={{
-					height: safeMaxHeight,
-					minHeight: safeMaxHeight,
-					minWidth: maxWidth,
-					width: maxWidth,
-				}}
-			>
-				<ImageZoom
-					minScale={1}
-					maxScale={5}
-					// scale={scale}
-					doubleTapScale={3}
-					// isSingleTapEnabled={true}
-					// isDoubleTapEnabled={true}
-					// onSingleTap={onSingleTap}
-					source={{
-						uri: pageURL(index + 1),
-						headers: {
-							Authorization: sdk.authorizationHeader || '',
-						},
-					}}
-					// TODO: figure out how to render landscape better...
-					style={{
-						height: '100%',
-						width: '100%',
-					}}
-					// contentFit="contain"
-					// onLoad={onImageLoaded}
-				/>
-			</View>
 		)
 	},
 )

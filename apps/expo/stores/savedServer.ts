@@ -13,7 +13,7 @@ export type SavedServer = {
 	id: ServerID
 	name: string
 	url: string
-	kind: SupportedServer // TODO: support showing stump as opds, too
+	kind: SupportedServer
 	stumpOPDS?: boolean
 	defaultServer?: boolean
 }
@@ -106,6 +106,9 @@ export type CreateServer = {
 // SecureStore.deleteItemAsync('stump-mobile-saved-tokens-dev')
 
 // TODO: safety in parsing
+/**
+ * An RPC-like hook for interacting with saved servers and their encrypted tokens/configs.
+ */
 export const useSavedServers = () => {
 	const {
 		servers,
@@ -127,6 +130,9 @@ export const useSavedServers = () => {
 		return config
 	}, [])
 
+	/**
+	 * Create a new server and optionally save its config.
+	 */
 	const createServer = useCallback(
 		async ({ config, ...server }: CreateServer) => {
 			const id = uuid.v4()
@@ -144,6 +150,11 @@ export const useSavedServers = () => {
 		[addServer, setDefaultServer, createServerConfig],
 	)
 
+	/**
+	 * Update a server's metadata and optionally its config
+	 *
+	 * @param id The ID of the server to update
+	 */
 	const updateServer = useCallback(
 		async (id: ServerID, { config, ...server }: CreateServer) => {
 			const serverMeta = { ...server, id }
@@ -160,6 +171,11 @@ export const useSavedServers = () => {
 		[setDefaultServer, editServer, createServerConfig],
 	)
 
+	/**
+	 * Delete a server and any associated data (config, token) from storage.
+	 *
+	 * @param id The ID of the server to delete
+	 */
 	const deleteServer = useCallback(
 		async (id: ServerID) => {
 			await SecureStore.deleteItemAsync(formatPrefix('config', id))
@@ -169,6 +185,12 @@ export const useSavedServers = () => {
 		[removeServer],
 	)
 
+	/**
+	 * Get a non-expired JWT for a server. This is **not** an API key or long-lived token.
+	 *
+	 * @param id The ID of the server to get the token for
+	 * @returns A JWT if the token is valid, otherwise null
+	 */
 	const getServerToken = async (id: ServerID) => {
 		const record = await SecureStore.getItemAsync(formatPrefix('token', id))
 
@@ -183,14 +205,30 @@ export const useSavedServers = () => {
 		return token
 	}
 
+	/**
+	 * Save a JWT for a server. This is **not** an API key or long-lived token, and should
+	 * only be used for Stump servers.
+	 *
+	 * @param id The ID of the server to save the token for
+	 * @param token The token to save
+	 */
 	const saveServerToken = async (id: ServerID, token: ManagedToken) => {
 		await SecureStore.setItemAsync(formatPrefix('token', id), JSON.stringify(token))
 	}
 
+	/**
+	 * Delete a saved JWT for a server. This will be called whenever an expired token is
+	 * attempted to be used.
+	 *
+	 * @param id The ID of the server to delete the token
+	 */
 	const deleteServerToken = async (id: ServerID) => {
 		await SecureStore.deleteItemAsync(formatPrefix('token', id))
 	}
 
+	/**
+	 * Set whether or not to show stump servers in the list of saved servers
+	 */
 	const setStumpEnabled = useCallback(
 		(enabled: boolean) => {
 			const defaultServer = servers.find((server) => server.defaultServer)

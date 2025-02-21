@@ -1,5 +1,5 @@
 import { SDKContext, StumpClientContextProvider } from '@stump/client'
-import { Api, CreatedToken, LoginResponse, User, UserPermission } from '@stump/sdk'
+import { Api, LoginResponse, User, UserPermission } from '@stump/sdk'
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { match, P } from 'ts-pattern'
@@ -54,18 +54,24 @@ export default function Screen() {
 			const serverConfig = await getServerConfig(id)
 			const instance = new Api({ baseURL: url, authMethod: 'token' })
 
-			const token = await match(serverConfig?.auth)
-				.with({ bearer: P.string }, ({ bearer }) => bearer)
-				.with(
-					{
-						basic: P.shape({
-							username: P.string,
-							password: P.string,
-						}),
-					},
-					async ({ basic: { username, password } }) => attemptLogin(instance, username, password),
-				)
-				.otherwise(() => existingToken?.token)
+			let token: string | undefined
+
+			if (existingToken) {
+				token = existingToken.token
+			} else {
+				token = await match(serverConfig?.auth)
+					.with({ bearer: P.string }, ({ bearer }) => bearer)
+					.with(
+						{
+							basic: P.shape({
+								username: P.string,
+								password: P.string,
+							}),
+						},
+						async ({ basic: { username, password } }) => attemptLogin(instance, username, password),
+					)
+					.otherwise(() => undefined)
+			}
 
 			if (!token) {
 				setIsAuthDialogOpen(true)

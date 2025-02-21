@@ -100,11 +100,6 @@ export class Api {
 		})
 		instance.interceptors.request.use((config) => {
 			config.headers = config.headers.concat(this.headers)
-			// config.headers = {
-			// 	...config.headers,
-			// 	...this.headers,
-			// 	[constants.STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
-			// }
 			if (this._basicAuth) {
 				config.auth = this._basicAuth
 			}

@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use axum::{
-	extract::{FromRef, FromRequestParts, Host},
+	extract::{FromRef, FromRequestParts, Host, OriginalUri},
 	http::request::Parts,
 };
 use stump_core::opds::v2_0::link::OPDSLinkFinalizer;
@@ -52,7 +52,16 @@ where
 		let host = Host::from_request_parts(parts, state)
 			.await
 			.map_err(|_| APIError::BadRequest("Invalid host".to_string()))?;
-		let scheme = parts.uri.scheme_str().unwrap_or("http").to_string();
+		let original_uri = OriginalUri::from_request_parts(parts, state)
+			.await
+			.map_err(|_| APIError::BadRequest("Invalid URI".to_string()))?;
+		let scheme = parts
+			.uri
+			.scheme_str()
+			.or_else(|| original_uri.scheme_str())
+			.unwrap_or("http")
+			.to_string();
+
 		Ok(HostExtractor(HostDetails {
 			host: host.0,
 			scheme,

@@ -2,6 +2,7 @@ import { useSDK } from '@stump/client'
 import { OPDSFeedGroup } from '@stump/sdk'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
+import { useMemo } from 'react'
 import { FlatList, Pressable, View } from 'react-native'
 
 import { useDisplay } from '~/lib/hooks'
@@ -28,6 +29,9 @@ export default function PublicationGroup({
 	const { sdk } = useSDK()
 	const { isTablet } = useDisplay()
 
+	const itemHeight = useMemo(() => (isTablet ? 225 : 150), [isTablet])
+	const itemWidth = useMemo(() => itemHeight * (2 / 3), [itemHeight])
+
 	if (!publications.length && !renderEmpty) return null
 
 	return (
@@ -42,8 +46,11 @@ export default function PublicationGroup({
 						onPress={() =>
 							selfURL
 								? router.push({
-										pathname: `/opds/${serverID}/feed`,
-										params: { url: selfURL },
+										pathname: '/opds/[id]/feed',
+										params: {
+											id: serverID,
+											url: selfURL,
+										},
 									})
 								: null
 						}
@@ -73,8 +80,11 @@ export default function PublicationGroup({
 							onPress={() =>
 								selfURL
 									? router.push({
-											pathname: `/opds/${serverID}/publication`,
-											params: { url: selfURL },
+											pathname: '/opds/[id]/publication',
+											params: {
+												id: serverID,
+												url: selfURL,
+											},
 										})
 									: null
 							}
@@ -95,15 +105,12 @@ export default function PublicationGroup({
 												},
 											}}
 											contentFit="fill"
-											style={{ height: isTablet ? 200 : 150, width: 'auto' }}
+											style={{ height: isTablet ? 225 : 150, width: itemWidth }}
 										/>
 									</View>
 
 									<View>
-										<Text
-											className="mt-2 line-clamp-2 text-sm tablet:text-sm"
-											style={{ maxWidth: 150 * 0.75 }}
-										>
+										<Text className="mt-2" style={{ maxWidth: itemWidth - 4 }} numberOfLines={2}>
 											{publication.metadata.title}
 										</Text>
 									</View>
@@ -116,6 +123,7 @@ export default function PublicationGroup({
 				pagingEnabled
 				initialNumToRender={10}
 				maxToRenderPerBatch={10}
+				showsHorizontalScrollIndicator={false}
 			/>
 
 			{!publications.length && <EmptyFeed message="No publications in group" />}

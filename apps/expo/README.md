@@ -15,10 +15,10 @@ The process differs slightly between iOS and Android.
 To build the app for iOS, run the following command:
 
 ```bash
-yarn ios # expo run:ios
+yarn ios
 ```
 
-This should generate a development build of the app and start the dev server. You can then run the app on an iOS simulator or device. Once you have a build, you may also run `yarn ios` to just start the app without triggering a new build.
+This should generate a development build of the app and start the dev server. You can then run the app on an iOS simulator or device. Once you have a build, you may also run `yarn dev` to just start the app without triggering a new build.
 
 To open the Xcode project, run:
 
@@ -29,6 +29,8 @@ yarn open:ios
 You can edit the native code in `Pods` -> `Development Pods` -> `Readium`
 
 #### Android
+
+Ensure you follow the official [Expo](https://docs.expo.dev/workflow/android-studio-emulator/#install-watchman-and-jdk) guide to set up your Android development environment.
 
 To build the app for Android, run the following command:
 
@@ -45,3 +47,7 @@ yarn open:android
 ```
 
 You can edit the native code in `android` -> `readium` -> `src/main/java/expo.modules.readium`
+
+## License 📝
+
+The `expo` app is licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html)

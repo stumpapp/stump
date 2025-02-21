@@ -19,6 +19,8 @@ function RecentlyAddedSeries() {
 		},
 		queryKey: [sdk.series.keys.recentlyAdded],
 		suspense: true,
+		useErrorBoundary: false,
+		retry: (attempts) => attempts < 3,
 	})
 
 	const cards = series.map((series) => (

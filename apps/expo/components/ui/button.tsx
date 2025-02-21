@@ -5,14 +5,12 @@ import { Pressable } from 'react-native'
 import { TextClassContext } from '~/components/ui/text'
 import { cn } from '~/lib/utils'
 
-// TODO: rewrite this template
-
 const buttonVariants = cva('group flex items-center justify-center rounded-lg', {
 	variants: {
 		variant: {
 			brand: 'bg-fill-brand active:opacity-90',
 			default: 'bg-background-surface active:opacity-90',
-			destructive: 'bg-destructive web:hover:opacity-90 active:opacity-90',
+			destructive: 'bg-fill-danger web:hover:opacity-90 active:opacity-90',
 			outline: 'border border-edge bg-background active:bg-background-surface',
 			secondary: 'bg-background-inverse',
 			ghost: 'active:bg-accent',
@@ -36,7 +34,7 @@ const buttonTextVariants = cva('text-base font-medium text-foreground', {
 		variant: {
 			brand: 'text-foreground',
 			default: 'text-foreground',
-			destructive: 'text-fill-danger',
+			destructive: 'text-white',
 			outline: 'group-active:text-fill-info',
 			secondary: 'text-secondary-foreground group-active:text-secondary-foreground',
 			ghost: 'group-active:text-fill-info',

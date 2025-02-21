@@ -47,6 +47,8 @@ pub(crate) struct BookRelations {
 	load_series: Option<bool>,
 	#[serde(default)]
 	load_library: Option<bool>,
+	#[serde(default)]
+	load_pages: Option<bool>,
 }
 
 /// Represents whether a media item is marked as completed and the last time it was completed.
@@ -155,8 +157,15 @@ pub async fn get_media_by_id(
 		]))
 		.with(media::finished_user_reading_sessions::fetch(vec![
 			finished_reading_session::user_id::equals(user_id),
-		]))
-		.with(media::metadata::fetch());
+		]));
+
+	if params.load_pages.unwrap_or_default() {
+		query = query.with(
+			media::metadata::fetch().with(media_metadata::page_dimensions::fetch()),
+		);
+	} else {
+		query = query.with(media::metadata::fetch());
+	}
 
 	if params.load_series.unwrap_or_default() {
 		tracing::trace!(media_id = id, "Loading series relation for media");

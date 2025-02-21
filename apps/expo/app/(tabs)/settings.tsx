@@ -9,6 +9,7 @@ import {
 	DefaultServer,
 	MaskURLs,
 } from '~/components/appSettings/preferences'
+import { StumpEnabled } from '~/components/appSettings/stump'
 import { Text } from '~/components/ui/text'
 
 export default function Screen() {
@@ -21,6 +22,19 @@ export default function Screen() {
 					<AppLanguage />
 					<DefaultServer />
 					<MaskURLs />
+				</View>
+
+				<View>
+					<Text className="mb-3 text-foreground-muted">Stump</Text>
+
+					<View className="mb-2 rounded-xl bg-fill-info-secondary p-2">
+						<Text className="text-fill-info">
+							Stump features are optional, you can completely turn them off if you just want OPDS
+							support
+						</Text>
+					</View>
+
+					<StumpEnabled />
 				</View>
 
 				<View>

@@ -140,6 +140,8 @@ async fn get_series(
 	// series, total series count
 	let (series, series_count) = db
 		._transaction()
+		.with_max_wait(chrono::Duration::seconds(10).num_milliseconds() as u64)
+		.with_timeout(chrono::Duration::seconds(30).num_milliseconds() as u64)
 		.run(|client| async move {
 			let mut query = db.series().find_many(where_conditions.clone());
 			if load_media {

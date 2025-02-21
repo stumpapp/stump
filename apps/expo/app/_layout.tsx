@@ -12,9 +12,7 @@ import { BottomSheet } from '~/components/ui/bottom-sheet'
 import { setAndroidNavigationBar } from '~/lib/android-navigation-bar'
 import { NAV_THEME } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-
-AsyncStorage.clear()
+import { useHideStatusBar } from '~/stores/reader'
 
 const LIGHT_THEME: Theme = {
 	...DefaultTheme,
@@ -30,10 +28,15 @@ export {
 	ErrorBoundary,
 } from 'expo-router'
 
+// TODO: hide status bar when reading
+
 export default function RootLayout() {
-	const hasMounted = React.useRef(false)
 	const { colorScheme, isDarkColorScheme } = useColorScheme()
+
 	const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false)
+
+	const shouldHideStatusBar = useHideStatusBar()
+	const hasMounted = React.useRef(false)
 
 	useIsomorphicLayoutEffect(() => {
 		if (hasMounted.current) {
@@ -58,7 +61,7 @@ export default function RootLayout() {
 			{/* TODO: determine if I need this? */}
 			<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
 				<BottomSheet.Provider>
-					<StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
+					<StatusBar style={isDarkColorScheme ? 'light' : 'dark'} hidden={shouldHideStatusBar} />
 					<Stack>
 						<Stack.Screen
 							name="(tabs)"

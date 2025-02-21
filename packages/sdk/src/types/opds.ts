@@ -14,7 +14,9 @@ export type OPDSBaseLink = z.infer<typeof baseLink>
 
 const navigationLink = z
 	.object({
-		title: z.string(),
+		// Codex doesn't guarantee this field, but it is required by the spec.
+		// See https://drafts.opds.io/opds-2.0.html#21-navigation
+		title: z.string().default('Navigation Link'),
 	})
 	.and(baseLink)
 export type OPDSNavigationLink = z.infer<typeof navigationLink>
@@ -29,9 +31,20 @@ const imageLink = z
 const link = z.union([baseLink, navigationLink, imageLink])
 export type OPDSLink = z.infer<typeof link>
 
-const authFlow = z.object({
-	type: z.literal('http://opds-spec.org/auth/basic'),
-})
+const authFlow = z
+	.object({
+		type: z.literal('http://opds-spec.org/auth/basic'),
+	})
+	.and(
+		z.object({
+			labels: z
+				.object({
+					login: z.string().optional(),
+					password: z.string().optional(),
+				})
+				.optional(),
+		}),
+	)
 
 // OPDSAuthenticationDocument
 export const authDocument = z.object({
@@ -50,14 +63,15 @@ const paginationMeta = z.object({
 })
 export type OPDSPaginationMetadata = z.infer<typeof paginationMeta>
 
+const belongsToSeries = z.object({
+	name: z.string(),
+	position: z.number().optional(),
+	links: z.array(link).default([]),
+})
+
+// Komga sends series as an array, Stump doesnt
 const belongsTo = z.object({
-	series: z
-		.object({
-			name: z.string(),
-			position: z.number().optional(),
-			links: z.array(link).default([]),
-		})
-		.optional(),
+	series: z.union([belongsToSeries, z.array(belongsToSeries)]).optional(),
 })
 export type OPDSEntryBelongsTo = z.infer<typeof belongsTo>
 
@@ -81,7 +95,7 @@ const metadata = z
 export type OPDSMetadata = z.infer<typeof metadata>
 
 export const publication = z.object({
-	context: z.string(),
+	context: z.string().nullish(), // Codex doesn't guarantee this field
 	metadata: metadata,
 	links: z.array(link).optional(),
 	images: z.array(imageLink).optional(),

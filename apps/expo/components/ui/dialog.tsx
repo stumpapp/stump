@@ -71,7 +71,7 @@ const DialogContent = React.forwardRef<
 				<DialogPrimitive.Content
 					ref={ref}
 					className={cn(
-						'border-border web:cursor-default web:duration-200 max-w-lg gap-4 rounded-lg border bg-background p-6 shadow-lg',
+						'border-border web:cursor-default web:duration-200 max-w-lg gap-4 rounded-lg border bg-background-surface p-6 shadow-lg',
 						open
 							? 'web:animate-in web:fade-in-0 web:zoom-in-95'
 							: 'web:animate-out web:fade-out-0 web:zoom-out-95',
@@ -87,7 +87,7 @@ const DialogContent = React.forwardRef<
 					>
 						<X
 							size={Platform.OS === 'web' ? 16 : 18}
-							className={cn('text-muted-foreground', open && 'text-accent-foreground')}
+							className={cn('text-foreground-muted', open && 'text-foreground-muted')}
 						/>
 					</DialogPrimitive.Close>
 				</DialogPrimitive.Content>
@@ -130,7 +130,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<DialogPrimitive.Description
 		ref={ref}
-		className={cn('native:text-base text-muted-foreground text-sm', className)}
+		className={cn('native:text-base text-sm text-foreground-muted', className)}
 		{...props}
 	/>
 ))

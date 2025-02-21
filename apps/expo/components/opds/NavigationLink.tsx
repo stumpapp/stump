@@ -25,8 +25,8 @@ export default function NavigationLink({ link }: Props) {
 			key={link.href}
 			onPress={() =>
 				router.push({
-					pathname: `/opds/${serverID}/feed`,
-					params: { url: link.href },
+					pathname: '/opds/[id]/feed',
+					params: { id: serverID, url: link.href },
 				})
 			}
 		>

@@ -5,7 +5,7 @@ use std::{
 	path::{Path, PathBuf},
 };
 
-use pdf::file::FileOptions;
+use pdf::{file::FileOptions, object::ParseOptions};
 use pdfium_render::prelude::{PdfRenderConfig, Pdfium};
 
 use crate::{
@@ -84,7 +84,9 @@ impl FileProcessor for PdfProcessor {
 	}
 
 	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError> {
-		let file = FileOptions::cached().open(path)?;
+		let file = FileOptions::cached()
+			.parse_options(ParseOptions::tolerant())
+			.open(path)?;
 
 		Ok(file.trailer.info_dict.map(MediaMetadata::from))
 	}
@@ -94,7 +96,9 @@ impl FileProcessor for PdfProcessor {
 		options: FileProcessorOptions,
 		_: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
-		let file = FileOptions::cached().open(path)?;
+		let file = FileOptions::cached()
+			.parse_options(ParseOptions::tolerant())
+			.open(path)?;
 
 		let pages = file.pages().count() as i32;
 		// Note: The metadata is already parsed by the PDF library, so might as well use it

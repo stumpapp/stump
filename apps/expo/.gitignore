@@ -8,6 +8,9 @@ node_modules/
 dist/
 web-build/
 
+build/
+.gradle/
+
 # Native
 *.orig.*
 *.jks
@@ -16,9 +19,9 @@ web-build/
 *.key
 *.mobileprovision
 *.apk
+*.aab
+*.ipa
 
-.gradle/
-build/
 
 # Metro
 .metro-health-check*
@@ -27,6 +30,12 @@ build/
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+
+ios
+android
+
+!modules/**/ios
+!modules/**/android
 
 # macOS
 .DS_Store

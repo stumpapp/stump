@@ -55,3 +55,13 @@ export async function checkUrl(url: string) {
 
 	return res.status === 200
 }
+
+export async function checkOPDSURL(url: string) {
+	if (!isUrl(url)) {
+		return false
+	}
+
+	const res = await fetch(url).catch((err) => err)
+
+	return res.status === 200
+}

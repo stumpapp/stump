@@ -158,7 +158,11 @@ export const usePrefetchPagedSeries = () => {
 	return { prefetch }
 }
 
-export function useSeriesCursorQuery({ queryKey, ...options }: CursorQueryOptions<Series>) {
+type SeriesCursorQueryOptions = CursorQueryOptions<Series> & {
+	params?: SeriesFilter
+}
+
+export function useSeriesCursorQuery({ queryKey, ...options }: SeriesCursorQueryOptions) {
 	const { sdk } = useSDK()
 	const { data, ...restReturn } = useCursorQuery(
 		queryKey ?? [sdk.series.keys.getCursor],

@@ -43,10 +43,18 @@ pub struct OPDSFeed {
 	publications: Option<Vec<OPDSPublication>>,
 	/// Metadata for the feed
 	metadata: OPDSMetadata,
+
+	#[builder(default = "false")]
+	#[serde(skip_serializing)]
+	pub allow_empty: bool,
 }
 
 impl OPDSFeedBuilder {
 	fn validate(&self) -> Result<(), OPDSV2Error> {
+		if self.allow_empty.unwrap_or(false) {
+			return Ok(());
+		}
+
 		if self.groups.is_none() && self.publications.is_none() {
 			return Err(OPDSV2Error::FeedValidationFailed(
 				"OPDSFeed missing at least one group or publication".to_string(),

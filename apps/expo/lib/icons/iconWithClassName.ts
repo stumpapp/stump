@@ -8,6 +8,8 @@ export function iconWithClassName(icon: LucideIcon) {
 			nativeStyleToProp: {
 				color: true,
 				opacity: true,
+				height: true,
+				width: true,
 			},
 		},
 	})

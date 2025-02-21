@@ -202,10 +202,10 @@ mod tests {
 
 		let result = GenericImageProcessor::generate_from_path(&jpg_path, options);
 		assert!(result.is_err());
-		assert_eq!(
-			result.unwrap_err().to_string(),
-			"An unknown error occurred: Incorrect image processor for requested format."
-		);
+		assert!(matches!(
+			result.unwrap_err(),
+			ProcessorError::FileError(FileError::IncorrectProcessorError)
+		));
 	}
 
 	// PNG -> other

@@ -48,10 +48,12 @@ pub enum FileError {
 	ImageIoError(#[from] image::ImageError),
 	#[error("Failed to encode image to webp: {0}")]
 	WebpEncodeError(String),
-	#[error("An unknown error occurred: {0}")]
-	UnknownError(String),
 	#[error("Failed to read directory")]
 	DirectoryReadError,
+	#[error("Incorrect image processor for requested format")]
+	IncorrectProcessorError,
+	#[error("An unknown error occurred: {0}")]
+	UnknownError(String),
 }
 
 impl From<FileError> for CoreError {

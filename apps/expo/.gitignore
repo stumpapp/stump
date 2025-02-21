@@ -17,6 +17,9 @@ web-build/
 *.mobileprovision
 *.apk
 
+.gradle/
+build/
+
 # Metro
 .metro-health-check*
 

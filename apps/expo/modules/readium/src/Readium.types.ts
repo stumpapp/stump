@@ -1,19 +1,19 @@
-import type { StyleProp, ViewStyle } from 'react-native';
+import type { StyleProp, ViewStyle } from 'react-native'
 
 export type OnLoadEventPayload = {
-  url: string;
-};
+	url: string
+}
 
 export type ReadiumModuleEvents = {
-  onChange: (params: ChangeEventPayload) => void;
-};
+	onChange: (params: ChangeEventPayload) => void
+}
 
 export type ChangeEventPayload = {
-  value: string;
-};
+	value: string
+}
 
 export type ReadiumViewProps = {
-  url: string;
-  onLoad: (event: { nativeEvent: OnLoadEventPayload }) => void;
-  style?: StyleProp<ViewStyle>;
-};
+	url: string
+	onLoad: (event: { nativeEvent: OnLoadEventPayload }) => void
+	style?: StyleProp<ViewStyle>
+}

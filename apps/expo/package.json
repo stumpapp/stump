@@ -10,6 +10,7 @@
 		"open:android": "open -a \"Android Studio\" android",
 		"android": "expo run:android -d",
 		"ios": "expo run:ios -d",
+		"format": "prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
 		"web": "expo start -c --web",
 		"clean": "rm -rf .expo node_modules",
 		"postinstall": "npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css"

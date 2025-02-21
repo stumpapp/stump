@@ -12,14 +12,13 @@ const IS_DEV = process.env['APP_VARIANT'] === 'development'
 export default ({ config }: ConfigContext): ExpoConfig => {
 	const initialConfig: ExpoConfig = {
 		...config,
-		name: 'stump',
+		name: 'Stump',
 		slug: 'stump',
-		version: '1.0.0',
+		version: '0.0.0',
 		orientation: 'portrait',
 		icon: './assets/images/icon.png',
-		scheme: 'myapp',
+		scheme: 'stump',
 		userInterfaceStyle: 'automatic',
-
 		owner: 'stumpapp',
 		newArchEnabled: true,
 		splash: {
@@ -31,10 +30,16 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 		ios: {
 			supportsTablet: true,
 			bundleIdentifier: 'com.stumpapp.stump',
+			icon: {
+				light: './assets/images/ios-light.png',
+				dark: './assets/images/ios-dark.png',
+				tinted: './assets/images/ios-tinted.png',
+			},
 		},
 		android: {
 			adaptiveIcon: {
-				foregroundImage: './assets/images/adaptive-icon.png',
+				foregroundImage: './assets/images/android-adaptive.png',
+				monochromeImage: './assets/images/android-monochrome.png',
 				backgroundColor: '#ffffff',
 			},
 			package: 'com.stumpapp.stump',

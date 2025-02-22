@@ -622,7 +622,8 @@ async fn replace_series_thumbnail(
 
 	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 	// user testing I'd like to see if this becomes a problem. We'll see!
-	match remove_thumbnails(&[series_id.clone()], &ctx.config.get_thumbnails_dir()) {
+	match remove_thumbnails(&[series_id.clone()], &ctx.config.get_thumbnails_dir()).await
+	{
 		Ok(count) => tracing::info!("Removed {} thumbnails!", count),
 		Err(e) => tracing::error!(
 			?e,

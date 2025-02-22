@@ -8,9 +8,8 @@ use crate::{
 		get_page,
 		image::{
 			GenericImageProcessor, ImageFormat, ImageProcessor, ImageProcessorOptions,
-			WebpProcessor,
+			ProcessorError, WebpProcessor,
 		},
-		FileError,
 	},
 	prisma::media,
 };
@@ -21,7 +20,7 @@ pub enum ThumbnailGenerateError {
 	#[error("Could not write to disk: {0}")]
 	WriteFailed(#[from] std::io::Error),
 	#[error("{0}")]
-	FileError(#[from] FileError),
+	ProcessorError(#[from] ProcessorError),
 	#[error("Did not receive thumbnail generation result")]
 	ResultNeverReceived,
 	#[error("Something unexpected went wrong: {0}")]
@@ -50,7 +49,7 @@ fn do_generate_book_thumbnail(
 	file_name: &str,
 	config: &StumpConfig,
 	options: ImageProcessorOptions,
-) -> Result<GenerateOutput, FileError> {
+) -> Result<GenerateOutput, ProcessorError> {
 	let (_, page_data) = get_page(book_path, options.page.unwrap_or(1), config)?;
 	let ext = options.format.extension();
 

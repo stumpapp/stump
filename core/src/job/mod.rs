@@ -603,7 +603,7 @@ impl<J: JobExt> Executor for WrappedJob<J> {
 	fn should_requeue(&self) -> bool {
 		self.inner_job
 			.as_ref()
-			.map_or(false, |job| job.should_requeue(self.attempts))
+			.is_some_and(|job| job.should_requeue(self.attempts))
 	}
 
 	async fn execute(&mut self, ctx: WorkerCtx) -> Result<ExecutorOutput, JobError> {

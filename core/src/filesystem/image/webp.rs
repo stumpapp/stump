@@ -3,9 +3,14 @@ use std::fs;
 use image::{imageops, DynamicImage, EncodableLayout, GenericImageView};
 use webp::Encoder;
 
-use crate::filesystem::{error::FileError, image::process::resized_dimensions};
-
-use super::process::{ImageProcessor, ImageProcessorOptions, ImageResizeOptions};
+use crate::filesystem::{
+	error::FileError,
+	image::process::resized_dimensions,
+	image::{
+		process::{ImageProcessor, ImageProcessorOptions, ImageResizeOptions},
+		ProcessorError,
+	},
+};
 
 pub struct WebpProcessor;
 
@@ -13,7 +18,7 @@ impl ImageProcessor for WebpProcessor {
 	fn generate(
 		buffer: &[u8],
 		options: ImageProcessorOptions,
-	) -> Result<Vec<u8>, FileError> {
+	) -> Result<Vec<u8>, ProcessorError> {
 		let mut image = image::load_from_memory(buffer)?;
 
 		if let Some(resize_options) = options.resize_options {
@@ -31,7 +36,7 @@ impl ImageProcessor for WebpProcessor {
 	fn generate_from_path(
 		path: &str,
 		options: ImageProcessorOptions,
-	) -> Result<Vec<u8>, FileError> {
+	) -> Result<Vec<u8>, ProcessorError> {
 		let bytes = fs::read(path)?;
 		Self::generate(&bytes, options)
 	}

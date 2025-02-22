@@ -12,7 +12,6 @@ import ImageBasedReader from './ImageBasedReader'
 type Props = Omit<IImageBasedReaderContext, 'currentPage' | 'flatListRef'> &
 	ComponentProps<typeof ImageBasedReader>
 
-// TODO: make controls a full-screen overlay to prevent scrolling etc
 export default function ImageBasedReaderContainer({ initialPage, onPageChanged, ...ctx }: Props) {
 	const {
 		preferences: { incognito },

@@ -268,7 +268,7 @@ impl EpubProcessor {
 	///    returned.
 	pub fn get_cover(path: &str) -> Result<(ContentType, Vec<u8>), FileError> {
 		let mut epub_file = EpubDoc::new(path).map_err(|e| {
-			tracing::error!("Failed to open epub file: {}", e);
+			tracing::error!("Failed to open epub file: {e}");
 			FileError::EpubOpenError(e.to_string())
 		})?;
 
@@ -289,7 +289,7 @@ impl EpubProcessor {
 		}
 
 		let content = epub_file.get_current_with_epub_uris().map_err(|e| {
-			tracing::error!("Failed to get chapter from epub file: {}", e);
+			tracing::error!("Failed to get chapter from epub file: {e}");
 			FileError::EpubReadError(e.to_string())
 		})?;
 
@@ -314,7 +314,7 @@ impl EpubProcessor {
 		let mut epub_file = Self::open(path)?;
 
 		let (buf, mime) = epub_file.get_resource(resource_id).ok_or_else(|| {
-			tracing::error!("Failed to get resource: {}", resource_id);
+			tracing::error!("Failed to get resource: {resource_id}");
 			FileError::EpubReadError("Failed to get resource".to_string())
 		})?;
 

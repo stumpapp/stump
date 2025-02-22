@@ -38,7 +38,7 @@ impl FileProcessor for PdfProcessor {
 
 		if size < 10 {
 			tracing::warn!(path, size, "File is too small to sample!");
-			return Err(FileError::UnknownError(String::from(
+			return Err(FileError::PdfProcessingError(String::from(
 				"File is too small to sample!",
 			)));
 		}
@@ -102,10 +102,9 @@ impl FileProcessor for PdfProcessor {
 		let pdfium = PdfProcessor::renderer(&config.pdfium_path)?;
 
 		let document = pdfium.load_pdf_from_file(path, None)?;
-		let document_page =
-			document.pages().get((page - 1).try_into().map_err(
-				|e: TryFromIntError| FileError::UnknownError(e.to_string()),
-			)?)?;
+		let document_page = document.pages().get((page - 1).try_into().map_err(
+			|e: TryFromIntError| FileError::PdfProcessingError(e.to_string()),
+		)?)?;
 
 		let render_config = PdfRenderConfig::new();
 

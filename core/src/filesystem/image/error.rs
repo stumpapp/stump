@@ -13,3 +13,9 @@ pub enum ProcessorError {
 	#[error("The processor configuration is invalid: {0}")]
 	InvalidConfiguration(String),
 }
+
+impl From<std::io::Error> for ProcessorError {
+	fn from(value: std::io::Error) -> Self {
+		Self::FileError(FileError::from(value))
+	}
+}

@@ -1,19 +1,50 @@
-import { ComponentProps } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { ComponentProps, useCallback, useRef, useState } from 'react'
+import { View } from 'react-native'
+import { FlatList } from 'react-native-gesture-handler'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
+import { useBookPreferences } from '~/stores/reader'
 
 import { IImageBasedReaderContext, ImageBasedReaderContext } from './context'
-import Header from './Header'
+import ControlsOverlay from './ControlsOverlay'
 import ImageBasedReader from './ImageBasedReader'
 
-type Props = IImageBasedReaderContext & ComponentProps<typeof ImageBasedReader>
+type Props = Omit<IImageBasedReaderContext, 'currentPage' | 'flatListRef'> &
+	ComponentProps<typeof ImageBasedReader>
 
-export default function ImageBasedReaderContainer({ initialPage, ...ctx }: Props) {
+export default function ImageBasedReaderContainer({ initialPage, onPageChanged, ...ctx }: Props) {
+	const {
+		preferences: { incognito },
+	} = useBookPreferences(ctx.book.id)
+	const [currentPage, setCurrentPage] = useState(() => initialPage)
+
+	const onPageChangedHandler = useCallback(
+		(page: number) => {
+			if (!incognito) {
+				onPageChanged?.(page)
+			}
+			setCurrentPage(page)
+		},
+		[incognito, onPageChanged],
+	)
+
+	const flatListRef = useRef<FlatList>(null)
+	const insets = useSafeAreaInsets()
+
 	return (
-		<ImageBasedReaderContext.Provider value={ctx}>
-			<SafeAreaView className="flex flex-1 items-center justify-center">
-				<Header />
+		<ImageBasedReaderContext.Provider
+			value={{ ...ctx, currentPage, onPageChanged: onPageChangedHandler, flatListRef }}
+		>
+			<View
+				className="fixed inset-0 flex-1"
+				style={{
+					paddingTop: insets.top,
+					paddingBottom: insets.bottom,
+				}}
+			>
+				<ControlsOverlay />
 				<ImageBasedReader initialPage={initialPage} />
-			</SafeAreaView>
+			</View>
 		</ImageBasedReaderContext.Provider>
 	)
 }

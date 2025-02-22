@@ -17,6 +17,9 @@ pub struct ActiveReadingSession {
 	pub epubcfi: Option<String>,
 	// The percentage completed
 	pub percentage_completed: Option<f64>,
+	/// The number of seconds elapsed since the reading session was started.
+	/// This is not just a diff between `started_at` and `completed_at`
+	pub elapsed_seconds: Option<i64>,
 	// TODO(specta): replace with DateTime<FixedOffset>
 	/// The timestamp when the reading session was started
 	pub started_at: String,
@@ -38,6 +41,9 @@ pub struct FinishedReadingSession {
 	pub started_at: String,
 	/// The timestamp when the reading session was completed
 	pub completed_at: String,
+	/// The number of seconds elapsed since the reading session was started.
+	/// This is not just a diff between `started_at` and `completed_at`
+	pub elapsed_seconds: Option<i64>,
 	/// The ID of the media which has progress.
 	pub media_id: String,
 	/// The media which has progress. Will be `None` if the relation is not loaded.
@@ -69,6 +75,7 @@ impl From<active_reading_session::Data> for ActiveReadingSession {
 			page: data.page,
 			epubcfi: data.epubcfi,
 			started_at: data.started_at.to_rfc3339(),
+			elapsed_seconds: data.elapsed_seconds,
 			percentage_completed: data.percentage_completed,
 			media_id: data.media_id,
 			media,
@@ -85,6 +92,7 @@ impl From<reading_session_with_book_pages::Data> for ActiveReadingSession {
 			page: value.page,
 			epubcfi: value.epubcfi,
 			percentage_completed: value.percentage_completed,
+			elapsed_seconds: value.elapsed_seconds,
 			started_at: value.started_at.to_rfc3339(),
 			media_id: value.media_id,
 			media: None,
@@ -107,6 +115,7 @@ impl From<finished_reading_session::Data> for FinishedReadingSession {
 			id: data.id,
 			started_at: data.started_at.to_rfc3339(),
 			completed_at: data.completed_at.to_rfc3339(),
+			elapsed_seconds: data.elapsed_seconds,
 			media_id: data.media_id,
 			media,
 			user_id: data.user_id,

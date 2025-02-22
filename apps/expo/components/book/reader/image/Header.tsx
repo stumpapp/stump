@@ -50,7 +50,7 @@ export default function Header() {
 				{({ pressed }) => <X className="text-foreground" style={{ opacity: pressed ? 0.85 : 1 }} />}
 			</Pressable>
 
-			<Text className="font-semibold" numberOfLines={1} ellipsizeMode="tail">
+			<Text className="max-w-[80%] font-semibold" numberOfLines={1} ellipsizeMode="tail">
 				{name}
 			</Text>
 

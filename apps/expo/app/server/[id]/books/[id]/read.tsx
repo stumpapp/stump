@@ -7,11 +7,13 @@ import {
 	useSDK,
 	useUpdateMediaProgress,
 } from '@stump/client'
+import { useKeepAwake } from 'expo-keep-awake'
 import { useLocalSearchParams } from 'expo-router'
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 
 import { EpubJSReader, ImageBasedReader, UnsupportedReader } from '~/components/book/reader'
 import { useReaderStore } from '~/stores'
+import { useBookTimer } from '~/stores/reader'
 
 type Params = {
 	id: string
@@ -19,6 +21,7 @@ type Params = {
 }
 
 export default function Screen() {
+	useKeepAwake()
 	const { id: bookID } = useLocalSearchParams<Params>()
 	const { sdk } = useSDK()
 	const { media: book } = useMediaByIdQuery(bookID, {
@@ -27,11 +30,23 @@ export default function Screen() {
 			load_pages: true,
 		},
 	})
+	const { pause, resume, totalSeconds, isRunning } = useBookTimer(book?.id || '', {
+		initial: book?.active_reading_session?.elapsed_seconds,
+	})
 
 	const { updateReadProgressAsync } = useUpdateMediaProgress(book?.id || '', {
 		retry: (attempts) => attempts < 3,
 		useErrorBoundary: false,
 	})
+	const onPageChanged = useCallback(
+		(page: number) => {
+			updateReadProgressAsync({
+				page,
+				elapsed_seconds: totalSeconds,
+			})
+		},
+		[totalSeconds, updateReadProgressAsync],
+	)
 
 	const setIsReading = useReaderStore((state) => state.setIsReading)
 	useEffect(() => {
@@ -48,6 +63,15 @@ export default function Screen() {
 		}
 	}, [setShowControls])
 
+	const showControls = useReaderStore((state) => state.showControls)
+	useEffect(() => {
+		if (showControls && isRunning) {
+			pause()
+		} else if (!showControls && !isRunning) {
+			resume()
+		}
+	}, [showControls, pause, resume, isRunning])
+
 	/**
 	 * Invalidate the book query when a reader is unmounted so that the book overview
 	 * is updated with the latest read progress
@@ -56,6 +80,7 @@ export default function Screen() {
 		() => {
 			return () => {
 				queryClient.refetchQueries({ queryKey: [sdk.media.keys.getByID, bookID], exact: false })
+				queryClient.refetchQueries({ queryKey: [sdk.media.keys.inProgress], exact: false })
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -82,7 +107,7 @@ export default function Screen() {
 					width,
 					ratio: width / height,
 				}))}
-				onPageChanged={updateReadProgressAsync}
+				onPageChanged={onPageChanged}
 			/>
 		)
 	}

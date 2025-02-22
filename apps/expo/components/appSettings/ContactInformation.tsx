@@ -1,11 +1,11 @@
-import { View, Linking, Pressable } from 'react-native'
-import FontAwesome from '@expo/vector-icons/FontAwesome'
+import { Linking, Pressable, View } from 'react-native'
+
+import { cn } from '~/lib/utils'
 
 import { icons, Text } from '../ui'
 import AppSettingsRow from './AppSettingsRow'
-import { cn } from '~/lib/utils'
 
-const { ArrowUpRight, GitHub } = icons
+const { ArrowUpRight } = icons
 
 export default function ContactInformation() {
 	return (

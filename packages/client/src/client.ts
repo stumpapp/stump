@@ -207,7 +207,7 @@ export function useCursorQuery<Entity = unknown, TError = AxiosError>(
 	const { initialCursor, limit, params, ...restOptions } = options || {}
 
 	const { data, ...rest } = useInfiniteQuery(
-		[initialCursor, limit, params, ...queryKey],
+		[...queryKey, initialCursor, limit, params],
 		async ({ pageParam }: CursorQueryContext) => {
 			return queryFn({
 				cursor: pageParam || initialCursor,

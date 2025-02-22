@@ -44,14 +44,14 @@ pub struct OPDSFeed {
 	/// Metadata for the feed
 	metadata: OPDSMetadata,
 
-	#[builder(default = "false")]
+	#[builder(default = "true")]
 	#[serde(skip_serializing)]
 	pub allow_empty: bool,
 }
 
 impl OPDSFeedBuilder {
 	fn validate(&self) -> Result<(), OPDSV2Error> {
-		if self.allow_empty.unwrap_or(false) {
+		if self.allow_empty.unwrap_or(true) {
 			return Ok(());
 		}
 
@@ -187,6 +187,7 @@ mod tests {
 				)
 				.build()
 				.unwrap()])
+			.allow_empty(false)
 			.build()
 			.unwrap_err();
 
@@ -247,6 +248,7 @@ mod tests {
 				)
 				.build()
 				.unwrap()])
+			.allow_empty(false)
 			.build()
 			.unwrap_err();
 

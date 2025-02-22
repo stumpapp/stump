@@ -7,6 +7,7 @@ use axum::{
 use axum_extra::extract::Query;
 use prisma_client_rust::{chrono::Duration, Direction};
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use specta::Type;
 use stump_core::{
 	db::entity::{
@@ -347,13 +348,20 @@ pub(crate) async fn get_media_page(
 	}
 }
 
+#[skip_serializing_none]
+#[derive(Deserialize, Serialize, ToSchema, specta::Type)]
+pub struct PutMediaProgress {
+	pub page: i32,
+	pub epubcfi: Option<String>,
+	pub elapsed_seconds: Option<i64>,
+}
+
 #[utoipa::path(
 	put,
-	path = "/api/v1/media/:id/progress/:page",
+	path = "/api/v1/media/:id/progress",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media to get"),
-		("page" = i32, Path, description = "The page to update the read progress to")
 	),
 	responses(
 		(status = 200, description = "Successfully fetched media read progress"),
@@ -365,9 +373,14 @@ pub(crate) async fn get_media_page(
 )]
 /// Update the read progress of a media. If the progress doesn't exist, it will be created.
 pub(crate) async fn update_media_progress(
-	Path((id, page)): Path<(String, i32)>,
+	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
+	Json(PutMediaProgress {
+		page,
+		epubcfi,
+		elapsed_seconds,
+	}): Json<PutMediaProgress>,
 ) -> APIResult<Json<ProgressUpdateReturn>> {
 	let user = req.user();
 	let user_id = user.id.clone();
@@ -383,9 +396,26 @@ pub(crate) async fn update_media_progress(
 			(
 				media::id::equals(id.clone()),
 				user::id::equals(user_id.clone()),
-				vec![active_reading_session::page::set(Some(page))],
+				chain_optional_iter(
+					[active_reading_session::page::set(Some(page))],
+					[
+						epubcfi
+							.clone()
+							.map(|cfi| active_reading_session::epubcfi::set(Some(cfi))),
+						elapsed_seconds.map(|es| {
+							active_reading_session::elapsed_seconds::set(Some(es))
+						}),
+					],
+				),
 			),
-			vec![active_reading_session::page::set(Some(page))],
+			chain_optional_iter(
+				[active_reading_session::page::set(Some(page))],
+				[
+					epubcfi.map(|cfi| active_reading_session::epubcfi::set(Some(cfi))),
+					elapsed_seconds
+						.map(|es| active_reading_session::elapsed_seconds::set(Some(es))),
+				],
+			),
 		)
 		.include(reading_session_with_book_pages::include())
 		.exec()
@@ -415,7 +445,12 @@ pub(crate) async fn update_media_progress(
 						deleted_session.map(|s| s.started_at).unwrap_or_default(),
 						media::id::equals(id.clone()),
 						user::id::equals(user_id.clone()),
-						vec![],
+						chain_optional_iter(
+							[],
+							[elapsed_seconds.map(|es| {
+								finished_reading_session::elapsed_seconds::set(Some(es))
+							})],
+						),
 					)
 					.exec()
 					.await

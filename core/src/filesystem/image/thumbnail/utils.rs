@@ -27,7 +27,7 @@ pub async fn remove_thumbnails(
 	let mut read_dir = tokio::fs::read_dir(thumbnails_dir).await?;
 
 	// Asynchronously collect thumbnails
-	let mut found_thumbnails = Vec::new();
+	let mut found_thumbnails = Vec::with_capacity(id_list.len());
 	while let Some(entry) = read_dir.next_entry().await? {
 		let path = entry.path();
 		if let Some(filename) = path.file_name().and_then(|f| f.to_str()) {

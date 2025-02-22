@@ -18,9 +18,6 @@ import { useImageBasedReader } from './context'
 
 dayjs.extend(duration)
 
-// TODO: https://github.com/react-native-linear-gradient/react-native-linear-gradient
-// See also https://github.com/react-native-linear-gradient/react-native-linear-gradient/issues/247
-
 const HEIGHT_MODIFIER = 0.75
 const WIDTH_MODIFIER = 2 / 3
 

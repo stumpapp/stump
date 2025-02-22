@@ -8,7 +8,7 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 
 import { useActiveServer } from '~/components/activeServer'
 
-type GlobalSettings = IBookPreferences & { incognito?: boolean }
+type GlobalSettings = IBookPreferences & { incognito?: boolean; preferSmallImages?: boolean }
 export type BookPreferences = IBookPreferences & {
 	serverID?: string
 }
@@ -47,6 +47,7 @@ export const useReaderStore = create<ReaderStore>()(
 						scaleToFit: 'width',
 					},
 					readingMode: 'paged',
+					preferSmallImages: false,
 				} satisfies GlobalSettings,
 				setGlobalSettings: (updates: Partial<GlobalSettings>) =>
 					set({ globalSettings: { ...get().globalSettings, ...updates } }),
@@ -113,6 +114,7 @@ export const useBookPreferences = (id: string) => {
 		preferences: {
 			...(bookSettings || store.globalSettings),
 			incognito: store.globalSettings.incognito,
+			preferSmallImages: store.globalSettings.preferSmallImages,
 		},
 		setBookPreferences,
 		updateGlobalSettings: store.setGlobalSettings,

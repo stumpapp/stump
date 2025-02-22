@@ -4,8 +4,9 @@ use image::{imageops, GenericImageView, ImageFormat};
 
 use crate::filesystem::{image::process::resized_dimensions, FileError};
 
-use super::process::{
-	self, ImageProcessor, ImageProcessorOptions, ScaledDimensionResize,
+use super::{
+	process::{self, ImageProcessor, ImageProcessorOptions, ScaledDimensionResize},
+	scale_height_dimension, scale_width_dimension,
 };
 
 /// An image processor that works for the most common image types, primarily
@@ -64,22 +65,47 @@ impl ImageProcessor for GenericImageProcessor {
 	) -> Result<Vec<u8>, FileError> {
 		let mut image = image::load_from_memory(buf)?;
 
+		let read_format = image::guess_format(buf)?;
+		let format = match read_format {
+			ImageFormat::Jpeg => {
+				if image.color().has_alpha() {
+					if image.color().has_color() {
+						image = image::DynamicImage::from(image.into_rgb8());
+					} else {
+						image = image::DynamicImage::from(image.into_luma8());
+					}
+				}
+				Ok(ImageFormat::Jpeg)
+			},
+			ImageFormat::Png => Ok(ImageFormat::Png),
+			_ => Err(FileError::UnknownError(String::from(
+				"Incorrect image processor for requested format.",
+			))),
+		}?;
+
 		let (current_width, current_height) = image.dimensions();
-		let aspect_ratio = current_width as f32 / current_height as f32;
 
 		match dimension {
 			ScaledDimensionResize::Width(width) => {
-				let height = (f32::from_bits(width) / aspect_ratio) as u32;
+				let (width, height) = scale_height_dimension(
+					current_width as f32,
+					current_height as f32,
+					width as f32,
+				);
 				image = image.resize_exact(width, height, imageops::FilterType::Triangle);
 			},
 			ScaledDimensionResize::Height(height) => {
-				let width = (f32::from_bits(height) * aspect_ratio) as u32;
+				let (width, height) = scale_width_dimension(
+					current_width as f32,
+					current_height as f32,
+					height as f32,
+				);
 				image = image.resize_exact(width, height, imageops::FilterType::Triangle);
 			},
 		}
 
 		let mut buffer = Cursor::new(vec![]);
-		image.write_to(&mut buffer, ImageFormat::Jpeg)?;
+		image.write_to(&mut buffer, format)?;
 
 		Ok(buffer.into_inner())
 	}

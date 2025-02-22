@@ -29,6 +29,7 @@ export default function Footer() {
 	const {
 		book: { pages, id },
 		pageURL,
+		pageThumbnailURL,
 		currentPage = 1,
 		flatListRef: readerRef,
 	} = useImageBasedReader()
@@ -36,6 +37,7 @@ export default function Footer() {
 
 	const ref = useRef<FlatList>(null)
 	const insets = useSafeAreaInsets()
+
 	const visible = useReaderStore((state) => state.showControls)
 	const setShowControls = useReaderStore((state) => state.setShowControls)
 
@@ -89,6 +91,35 @@ export default function Footer() {
 		}
 	}, [elapsedSeconds])
 
+	const pageSource = useCallback(
+		(page: number) => ({
+			uri: pageThumbnailURL ? pageThumbnailURL(page) : pageURL(page),
+			headers: {
+				Authorization: sdk.authorizationHeader,
+			},
+		}),
+		[pageURL, pageThumbnailURL, sdk],
+	)
+
+	useEffect(
+		() => {
+			const windowSize = isTablet ? 8 : 6
+			const start = Math.max(0, currentPage - windowSize)
+			const end = Math.min(pages, currentPage + windowSize)
+			const urls = Array.from({ length: end - start }, (_, i) =>
+				pageThumbnailURL ? pageThumbnailURL(i + start) : pageURL(i + start),
+			)
+			Image.prefetch(urls, {
+				headers: {
+					Authorization: sdk.authorizationHeader || '',
+				},
+				// cachePolicy: 'memory',
+			})
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[currentPage],
+	)
+
 	if (!visible) {
 		return null
 	}
@@ -112,12 +143,7 @@ export default function Footer() {
 						<Pressable onPress={() => onChangePage(page)}>
 							<View className="aspect-[2/3] items-center justify-center overflow-hidden rounded-xl shadow-lg">
 								<Image
-									source={{
-										uri: pageURL(page),
-										headers: {
-											Authorization: sdk.authorizationHeader,
-										},
-									}}
+									source={pageSource(page)}
 									cachePolicy="memory"
 									style={getSize(page)}
 									contentFit="contain"

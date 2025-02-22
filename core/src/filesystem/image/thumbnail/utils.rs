@@ -75,3 +75,13 @@ pub fn remove_thumbnails(
 
 	Ok(deleted_thumbnails_count)
 }
+
+pub fn scale_width_dimension(w: f32, h: f32, target_height: f32) -> (u32, u32) {
+	let scale = target_height / h;
+	((w * scale).round() as u32, (h * scale).round() as u32)
+}
+
+pub fn scale_height_dimension(w: f32, h: f32, target_width: f32) -> (u32, u32) {
+	let scale = target_width / w;
+	((w * scale).round() as u32, (h * scale).round() as u32)
+}

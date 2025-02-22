@@ -17,7 +17,11 @@ use stump_core::{
 		ActiveReadingSession, FinishedReadingSession, Media, MediaMetadata,
 		PageDimension, PageDimensionsEntity, ProgressUpdateReturn, User, UserPermission,
 	},
-	filesystem::{analyze_media_job::AnalyzeMediaJob, get_page_async},
+	filesystem::{
+		analyze_media_job::AnalyzeMediaJob,
+		get_page_async,
+		image::{resize_image, ScaledDimensionResize},
+	},
 	prisma::{
 		active_reading_session, finished_reading_session, library,
 		media::{self, WhereParam},
@@ -289,10 +293,24 @@ pub(crate) async fn convert_media(
 	Err(APIError::NotImplemented)
 }
 
-#[derive(Deserialize, Serialize, ToSchema)]
-pub struct RequestPageDimensions {
-	pub height: i32,
-	pub width: i32,
+/// Extra query params for scaling a page dimension according to a specific dimension.
+/// This means the opposite dimension will be calculated based on the aspect ratio
+#[derive(Default, Debug, Deserialize, Serialize, ToSchema)]
+pub struct RequestPageScaled {
+	#[serde(default)]
+	height: Option<u32>,
+	#[serde(default)]
+	width: Option<u32>,
+}
+
+impl RequestPageScaled {
+	pub fn to_scaled_dimension(&self) -> Option<ScaledDimensionResize> {
+		match (self.height, self.width) {
+			(Some(height), _) => Some(ScaledDimensionResize::Height(height)),
+			(_, Some(width)) => Some(ScaledDimensionResize::Width(width)),
+			_ => None,
+		}
+	}
 }
 
 #[utoipa::path(
@@ -316,9 +334,11 @@ pub(crate) async fn get_media_page(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
-	Query(requested_size): Query<Option<RequestPageDimensions>>,
+	Query(requested_scale): Query<RequestPageScaled>,
 ) -> APIResult<ImageResponse> {
 	let db = &ctx.db;
+
+	tracing::trace!(?id, ?page, ?requested_scale, "Fetching media page");
 
 	let user = req.user();
 	let user_id = user.id.clone();
@@ -349,7 +369,15 @@ pub(crate) async fn get_media_page(
 			"Page {page} is out of bounds for media {id}"
 		)))
 	} else {
-		Ok(get_page_async(&media.path, page, &ctx.config).await?.into())
+		let (content_type, buf) = get_page_async(&media.path, page, &ctx.config).await?;
+		let scaled_buf = match requested_scale.to_scaled_dimension() {
+			Some(dimension) => resize_image(buf, dimension).await?,
+			_ => buf,
+		};
+		Ok(ImageResponse {
+			content_type,
+			data: scaled_buf,
+		})
 	}
 }
 

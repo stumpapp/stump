@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useLocalSearchParams } from 'expo-router'
+import { Redirect, useLocalSearchParams } from 'expo-router'
 import { useCallback } from 'react'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -11,6 +11,7 @@ import { getServerStoredPreferencesUsage } from '~/lib/filesystem'
 import { formatBytesSeparate, humanizeByteUnit } from '~/lib/format'
 import { useReaderStore } from '~/stores'
 import { useServerDownloads } from '~/stores/download'
+import { useSavedServerStore } from '~/stores/savedServer'
 
 const { Slash, HardDriveDownload } = icons
 
@@ -23,8 +24,11 @@ export default function Screen() {
 		suspense: true,
 	})
 
+	const server = useSavedServerStore((state) =>
+		state.servers.find((server) => server.id === serverID),
+	)
 	const downloadedFiles = useServerDownloads({ id: serverID })
-	const preferences = formatBytesSeparate(preferencesBytes)
+	const preferences = formatBytesSeparate(preferencesBytes, 1, 'B')
 
 	const clearLibrarySettings = useReaderStore((state) => state.clearLibrarySettings)
 	const onClearPreferences = useCallback(() => {
@@ -32,10 +36,16 @@ export default function Screen() {
 		refetch()
 	}, [serverID, clearLibrarySettings, refetch])
 
+	if (!server) {
+		return <Redirect href="/settings/usage" />
+	}
+
 	return (
 		<SafeAreaView className="flex-1 bg-background">
 			<ScrollView className="flex-1 bg-background">
 				<View className="flex-1 gap-8 bg-background px-4">
+					<Heading size="lg">{server?.name || 'Server'}</Heading>
+
 					<View className="flex-1 gap-4">
 						<Heading>Downloads</Heading>
 
@@ -70,7 +80,12 @@ export default function Screen() {
 							</View>
 						</View>
 
-						<Button variant="destructive" onPress={onClearPreferences} size="md">
+						<Button
+							variant="destructive"
+							onPress={onClearPreferences}
+							size="md"
+							disabled={!preferencesBytes}
+						>
 							<Text>Clear preferences</Text>
 						</Button>
 					</View>

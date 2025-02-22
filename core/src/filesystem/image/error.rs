@@ -14,4 +14,6 @@ pub enum ProcessorError {
 	InvalidConfiguration(String),
 	#[error("The image format is not supported")]
 	UnsupportedImageFormat,
+	#[error("An unknown error occurred: {0}")]
+	UnknownError(String),
 }

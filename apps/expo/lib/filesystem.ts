@@ -75,6 +75,10 @@ export function getServerStoredPreferencesUsage(serverID: string) {
 		}, [] as BookPreferences[])
 		.filter(Boolean)
 
+	if (bookSettingsForServer.length === 0) {
+		return 0
+	}
+
 	const size = new TextEncoder().encode(JSON.stringify(bookSettingsForServer)).length
 	return size
 }

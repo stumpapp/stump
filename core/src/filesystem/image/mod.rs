@@ -14,21 +14,50 @@ pub use process::{
 	ImageResizeOptions, ScaledDimensionResize,
 };
 pub use thumbnail::*;
+use tokio::{sync::oneshot, task::spawn_blocking};
+
+fn _resize_image(
+	buf: &[u8],
+	dimension: ScaledDimensionResize,
+) -> Result<Vec<u8>, ProcessorError> {
+	let kind = image::guess_format(buf)?;
+	match kind {
+		image::ImageFormat::WebP => Ok(WebpProcessor::resize_scaled(buf, dimension)?),
+		image::ImageFormat::Jpeg | image::ImageFormat::Png => {
+			Ok(GenericImageProcessor::resize_scaled(buf, dimension)?)
+		},
+		_ => Err(ProcessorError::UnsupportedImageFormat),
+	}
+}
 
 pub async fn resize_image(
 	buf: Vec<u8>,
 	dimension: ScaledDimensionResize,
 ) -> Result<Vec<u8>, ProcessorError> {
-	let kind = image::guess_format(&buf)?;
-	match kind {
-		image::ImageFormat::WebP => WebpProcessor::resize_scaled(buf, dimension),
-		image::ImageFormat::Jpeg | ImageFormat::Png => {
-			GenericImageProcessor::resize_scaled(buf, dimension)
-		},
-		// ImageFormat::Avif => AvifProcessor::new(),
-		// ImageFormat::JpegXl => JxlProcessor::new(),
-		_ => return Err(ProcessorError::UnsupportedImageFormat),
-	}
+	let (tx, rx) = oneshot::channel();
+
+	let handle = spawn_blocking({
+		move || {
+			let send_result = tx.send(_resize_image(&buf, dimension));
+			tracing::trace!(
+				is_err = send_result.is_err(),
+				"Sending result of resize_image"
+			);
+		}
+	});
+
+	let resized_image = if let Ok(recv) = rx.await {
+		recv?
+	} else {
+		handle
+			.await
+			.map_err(|e| ProcessorError::UnknownError(e.to_string()))?;
+		return Err(ProcessorError::UnknownError(
+			"Failed to receive resized image".to_string(),
+		));
+	};
+
+	Ok(resized_image)
 }
 
 #[cfg(test)]

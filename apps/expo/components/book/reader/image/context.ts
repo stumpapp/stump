@@ -18,6 +18,7 @@ export type IImageBasedReaderContext = {
 	book: ImageBasedBookRef
 	imageSizes?: ImageBasedBookPageRef[]
 	pageURL: (page: number) => string
+	pageThumbnailURL?: (page: number) => string
 	currentPage?: number
 	onPageChanged?: (page: number) => void
 }

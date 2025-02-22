@@ -42,7 +42,7 @@ impl ImageProcessor for WebpProcessor {
 		buf: &[u8],
 		dimension: ScaledDimensionResize,
 	) -> Result<Vec<u8>, FileError> {
-		let mut image = image::load_from_memory(buf)?;
+		let image = image::load_from_memory(buf)?;
 
 		let (current_width, current_height) = image.dimensions();
 		let aspect_ratio = current_width as f32 / current_height as f32;

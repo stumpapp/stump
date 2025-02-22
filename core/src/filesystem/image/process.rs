@@ -8,7 +8,9 @@ use super::ProcessorError;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub enum ScaledDimensionResize {
+	#[serde(rename = "height")]
 	Height(u32),
+	#[serde(rename = "width")]
 	Width(u32),
 }
 

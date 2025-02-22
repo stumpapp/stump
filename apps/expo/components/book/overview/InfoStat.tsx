@@ -1,4 +1,5 @@
 import { View } from 'react-native'
+
 import { Heading, Text } from '~/components/ui'
 
 export default function InfoStat({ label, value }: { label: string; value: string }) {

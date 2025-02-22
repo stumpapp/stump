@@ -5,7 +5,9 @@ use webp::Encoder;
 
 use crate::filesystem::{error::FileError, image::process::resized_dimensions};
 
-use super::process::{ImageProcessor, ImageProcessorOptions, ImageResizeOptions};
+use super::process::{
+	ImageProcessor, ImageProcessorOptions, ImageResizeOptions, ScaledDimensionResize,
+};
 
 pub struct WebpProcessor;
 
@@ -34,6 +36,36 @@ impl ImageProcessor for WebpProcessor {
 	) -> Result<Vec<u8>, FileError> {
 		let bytes = fs::read(path)?;
 		Self::generate(&bytes, options)
+	}
+
+	fn resize_scaled(
+		buf: &[u8],
+		dimension: ScaledDimensionResize,
+	) -> Result<Vec<u8>, FileError> {
+		let mut image = image::load_from_memory(buf)?;
+
+		let (current_width, current_height) = image.dimensions();
+		let aspect_ratio = current_width as f32 / current_height as f32;
+
+		let (height, width) = match dimension {
+			ScaledDimensionResize::Width(width) => {
+				let height = (f32::from_bits(width) / aspect_ratio) as u32;
+				(height, width)
+			},
+			ScaledDimensionResize::Height(height) => {
+				let width = (f32::from_bits(height) * aspect_ratio) as u32;
+				(height, width)
+			},
+		};
+
+		let resized_image =
+			image.resize(width, height, image::imageops::FilterType::Lanczos3);
+
+		let encoder = Encoder::from_image(&resized_image)
+			.map_err(|err| FileError::WebpEncodeError(err.to_string()))?;
+		let encoded_webp = encoder.encode(100f32);
+
+		Ok(encoded_webp.as_bytes().to_vec())
 	}
 }
 

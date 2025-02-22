@@ -6,6 +6,12 @@ use crate::filesystem::error::FileError;
 
 use super::ProcessorError;
 
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+pub enum ScaledDimensionResize {
+	Height(u32),
+	Width(u32),
+}
+
 /// The resize mode to use when generating a thumbnail.
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub enum ImageResizeMode {
@@ -194,6 +200,14 @@ pub trait ImageProcessor {
 	fn generate_from_path(
 		path: &str,
 		options: ImageProcessorOptions,
+	) -> Result<Vec<u8>, FileError>;
+
+	// TODO: try and merge options so that this can be part of
+	// generate instead of separate
+
+	fn resize_scaled(
+		buf: &[u8],
+		dimension: ScaledDimensionResize,
 	) -> Result<Vec<u8>, FileError>;
 }
 

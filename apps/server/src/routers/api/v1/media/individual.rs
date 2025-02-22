@@ -1,10 +1,9 @@
 use std::{path::PathBuf, sync::Arc};
 
 use axum::{
-	extract::{Path, State},
+	extract::{Path, Query, State},
 	Extension, Json,
 };
-use axum_extra::extract::Query;
 use prisma_client_rust::{chrono::Duration, Direction};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
@@ -290,7 +289,12 @@ pub(crate) async fn convert_media(
 	Err(APIError::NotImplemented)
 }
 
-// TODO: ImageResponse as body type
+#[derive(Deserialize, Serialize, ToSchema)]
+pub struct RequestPageDimensions {
+	pub height: i32,
+	pub width: i32,
+}
+
 #[utoipa::path(
 	get,
 	path = "/api/v1/media/:id/page/:page",
@@ -312,6 +316,7 @@ pub(crate) async fn get_media_page(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
+	Query(requested_size): Query<Option<RequestPageDimensions>>,
 ) -> APIResult<ImageResponse> {
 	let db = &ctx.db;
 

@@ -1,6 +1,8 @@
 import * as FileSystem from 'expo-file-system'
 import urlJoin from 'url-join'
 
+import { useReaderStore } from '~/stores'
+import { BookPreferences } from '~/stores/reader'
 import { useSavedServerStore } from '~/stores/savedServer'
 
 // TODO: allow for:
@@ -63,8 +65,28 @@ const getFileSize = async (path: string): Promise<number> => {
 	return subfileSizes.reduce((acc, size) => acc + size, 0)
 }
 
-export async function getServerUsage(serverID: string) {
+export function getServerStoredPreferencesUsage(serverID: string) {
+	const storedBookSettings = useReaderStore.getState().bookSettings
+	const bookSettingsForServer = Object.entries(storedBookSettings)
+		.filter(([, settings]) => settings.serverID === serverID)
+		.reduce((acc, [, prefs]) => {
+			acc.push(prefs)
+			return acc
+		}, [] as BookPreferences[])
+		.filter(Boolean)
+
+	const size = new TextEncoder().encode(JSON.stringify(bookSettingsForServer)).length
+	return size
+}
+
+export async function getServerFilesUsage(serverID: string) {
 	return getFileSize(serverDirectory(serverID))
+}
+
+export async function getServerUsage(serverID: string) {
+	const fsUsage = await getFileSize(serverDirectory(serverID))
+	const prefsUsage = getServerStoredPreferencesUsage(serverID)
+	return fsUsage + prefsUsage
 }
 
 export async function getAllServersUsage() {

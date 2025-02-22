@@ -42,9 +42,7 @@ export default function Footer() {
 	const percentage = (currentPage / pages) * 100
 
 	useEffect(() => {
-		if (visible) {
-			ref.current?.scrollToIndex({ index: currentPage - 1, animated: true, viewPosition: 0.5 })
-		}
+		ref.current?.scrollToIndex({ index: currentPage - 1, animated: true, viewPosition: 0.5 })
 	}, [visible, currentPage])
 
 	const baseSize = useMemo(
@@ -103,7 +101,7 @@ export default function Footer() {
 				right: insets.right,
 				bottom: insets.bottom,
 			}}
-			entering={SlideInDown.delay(150)}
+			entering={SlideInDown}
 		>
 			<FlatList
 				ref={ref}
@@ -120,7 +118,7 @@ export default function Footer() {
 											Authorization: sdk.authorizationHeader,
 										},
 									}}
-									cachePolicy="disk"
+									cachePolicy="memory"
 									style={getSize(page)}
 									contentFit="contain"
 								/>
@@ -139,7 +137,9 @@ export default function Footer() {
 				horizontal
 				showsHorizontalScrollIndicator={false}
 				initialScrollIndex={currentPage - 1}
-				windowSize={10}
+				windowSize={5}
+				initialNumToRender={isTablet ? 8 : 6}
+				maxToRenderPerBatch={isTablet ? 8 : 6}
 			/>
 
 			<View className="gap-2 px-1">

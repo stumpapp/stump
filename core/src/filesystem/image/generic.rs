@@ -4,7 +4,9 @@ use image::{imageops, GenericImageView, ImageFormat};
 
 use crate::filesystem::{image::process::resized_dimensions, FileError};
 
-use super::process::{self, ImageProcessor, ImageProcessorOptions};
+use super::process::{
+	self, ImageProcessor, ImageProcessorOptions, ScaledDimensionResize,
+};
 
 /// An image processor that works for the most common image types, primarily
 /// JPEG and PNG formats.
@@ -54,6 +56,32 @@ impl ImageProcessor for GenericImageProcessor {
 	) -> Result<Vec<u8>, FileError> {
 		let bytes = fs::read(path)?;
 		Self::generate(&bytes, options)
+	}
+
+	fn resize_scaled(
+		buf: &[u8],
+		dimension: ScaledDimensionResize,
+	) -> Result<Vec<u8>, FileError> {
+		let mut image = image::load_from_memory(buf)?;
+
+		let (current_width, current_height) = image.dimensions();
+		let aspect_ratio = current_width as f32 / current_height as f32;
+
+		match dimension {
+			ScaledDimensionResize::Width(width) => {
+				let height = (f32::from_bits(width) / aspect_ratio) as u32;
+				image = image.resize_exact(width, height, imageops::FilterType::Triangle);
+			},
+			ScaledDimensionResize::Height(height) => {
+				let width = (f32::from_bits(height) * aspect_ratio) as u32;
+				image = image.resize_exact(width, height, imageops::FilterType::Triangle);
+			},
+		}
+
+		let mut buffer = Cursor::new(vec![]);
+		image.write_to(&mut buffer, ImageFormat::Jpeg)?;
+
+		Ok(buffer.into_inner())
 	}
 }
 

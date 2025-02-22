@@ -150,6 +150,14 @@ export function useDownload() {
 	return { downloadBook }
 }
 
+type UseServerDownloadsParams = {
+	id: string
+}
+export const useServerDownloads = ({ id }: UseServerDownloadsParams) => {
+	const { files } = useDownloadStore((store) => ({ files: store.files }))
+	return files.filter((file) => file.serverID === id)
+}
+
 const extFromMime = (mime: string) => {
 	switch (mime) {
 		case 'application/epub+zip':

@@ -11,9 +11,25 @@ pub use error::ProcessorError;
 pub use generic::GenericImageProcessor;
 pub use process::{
 	ImageFormat, ImageProcessor, ImageProcessorOptions, ImageResizeMode,
-	ImageResizeOptions,
+	ImageResizeOptions, ScaledDimensionResize,
 };
 pub use thumbnail::*;
+
+pub async fn resize_image(
+	buf: Vec<u8>,
+	dimension: ScaledDimensionResize,
+) -> Result<Vec<u8>, ProcessorError> {
+	let kind = image::guess_format(&buf)?;
+	match kind {
+		image::ImageFormat::WebP => WebpProcessor::resize_scaled(buf, dimension),
+		image::ImageFormat::Jpeg | ImageFormat::Png => {
+			GenericImageProcessor::resize_scaled(buf, dimension)
+		},
+		// ImageFormat::Avif => AvifProcessor::new(),
+		// ImageFormat::JpegXl => JxlProcessor::new(),
+		_ => return Err(ProcessorError::UnsupportedImageFormat),
+	}
+}
 
 #[cfg(test)]
 mod tests {

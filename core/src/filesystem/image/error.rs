@@ -12,4 +12,6 @@ pub enum ProcessorError {
 	InvalidSizedImage,
 	#[error("The processor configuration is invalid: {0}")]
 	InvalidConfiguration(String),
+	#[error("The image format is not supported")]
+	UnsupportedImageFormat,
 }

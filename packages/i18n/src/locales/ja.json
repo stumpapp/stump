@@ -1009,14 +1009,14 @@
 							"name": {
 								"label": "名前",
 								"placeholder": "マイビュー",
-								"description": "A friendly name to uniquely identify this view"
+								"description": "このビューを一意に識別するためのフレンドリ名"
 							}
 						},
 						"updateForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "The updated name for this view, if desired"
+								"label": "名前",
+								"placeholder": "マイビュー",
+								"description": "必要に応じてこのビューの更新された名前"
 							}
 						}
 					}
@@ -1026,225 +1026,225 @@
 	},
 	"settingsScene": {
 		"navigation": {
-			"general": "General",
-			"logs": "Logs",
-			"server": "Server",
-			"jobs": "Jobs and Configuration",
-			"users": "User Management",
-			"desktop": "Desktop"
+			"general": "一般",
+			"logs": "ログ",
+			"server": "サーバー",
+			"jobs": "ジョブと設定",
+			"users": "ユーザー管理",
+			"desktop": "デスクトップ"
 		},
 		"sidebar": {
 			"application": {
-				"account": "Account",
-				"appearance": "Appearance",
-				"api keys": "API keys",
-				"reader": "Reader",
-				"desktop": "Desktop",
-				"label": "Application"
+				"account": "アカウント",
+				"appearance": "外観",
+				"api keys": "APIキー",
+				"reader": "リーダー",
+				"desktop": "デスクトップ",
+				"label": "アプリケーション"
 			},
 			"server": {
-				"general": "General",
-				"logs": "Logs",
-				"users": "Users",
-				"jobs": "Jobs",
-				"access": "Access",
-				"email": "Email",
-				"notifications": "Notifications",
-				"label": "Server"
+				"general": "一般",
+				"logs": "ログ",
+				"users": "ユーザー",
+				"jobs": "ジョブ",
+				"access": "アクセス",
+				"email": "メール",
+				"notifications": "通知",
+				"label": "サーバー"
 			}
 		},
 		"app/account": {
-			"helmet": "Account settings",
-			"title": "Account settings",
-			"description": "Settings related to your account",
+			"helmet": "アカウント設定",
+			"title": "アカウント設定",
+			"description": "アカウント関連の設定",
 			"sections": {
 				"account": {
 					"validation": {
-						"invalidUrl": "Please enter a valid URL",
-						"missingUsername": "Username is required"
+						"invalidUrl": "有効なURLを入力してください",
+						"missingUsername": "ユーザー名が必要です"
 					},
 					"labels": {
-						"username": "Username",
-						"password": "Password",
-						"activeChangesPrompt": "You have unsaved changes"
+						"username": "ユーザー名",
+						"password": "パスワード",
+						"activeChangesPrompt": "保存されていない変更があります"
 					},
 					"errors": {
-						"updateFailed": "A server error occurred while updating your profile. Please try again."
+						"updateFailed": "プロフィールの更新中にサーバーエラーが発生しました。もう一度やり直してください。"
 					},
 					"avatarPicker": {
-						"heading": "Set your Avatar Image",
-						"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
-						"preview": "A preview will appear here once you have entered a URL.",
+						"heading": "アバター画像を設定",
+						"subtitle": "Stumpは画像にURLを提供することで設定できるカスタムアバターをサポートします。サーバーに保存されているデータの量を減らすために画像のアップロードはサポートされていません。",
+						"preview": "URLを入力するとプレビューが表示されます。",
 						"labels": {
-							"imageUrl": "Image URL",
-							"customAvatar": "Custom Avatar"
+							"imageUrl": "画像のURL",
+							"customAvatar": "カスタムアバター"
 						},
 						"buttons": {
-							"confirm": "Confirm Image",
-							"cancel": "Cancel",
-							"edit": "Edit",
-							"changeImage": "Change Image",
-							"removeImage": "Remove Image"
+							"confirm": "画像の確認",
+							"cancel": "キャンセル",
+							"edit": "編集",
+							"changeImage": "画像を変更",
+							"removeImage": "画像を削除"
 						}
 					},
 					"buttons": {
-						"confirm": "Save Changes"
+						"confirm": "変更を保存"
 					}
 				},
 				"locale": {
 					"localeSelector": {
-						"label": "Language"
+						"label": "言語"
 					},
-					"heading": "Language and locale",
+					"heading": "言語とロケール",
 					"subtitle": [
-						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-						"Stump's translations",
-						"if you're able to!"
+						"Stumpは複数の言語とロケールをサポートしています。以下の設定を行ってください。品質向上のためにご検討ください",
+						"Stumpの翻訳",
+						"できれば！"
 					]
 				}
 			}
 		},
 		"app/appearance": {
-			"helmet": "Appearance",
-			"title": "Appearance",
-			"description": "Customize the look and feel of the application",
+			"helmet": "外観",
+			"title": "外観",
+			"description": "アプリケーションの外観と感触をカスタマイズします",
 			"sections": {
 				"themeSelect": {
-					"label": "Theme",
+					"label": "テーマ",
 					"description": [
-						"If you're interested in creating your own custom theme, check out the",
-						"documentation"
+						"独自のカスタムテーマの作成に興味がある場合は、",
+						"ドキュメント"
 					],
 					"options": {
-						"light": "Light",
-						"dark": "Dark",
-						"bronze": "Bronze light",
-						"ocean": "Ocean",
-						"autumn": "Autumn",
-						"cosmic": "Cosmic",
-						"pumpkin": "Pumpkin",
-						"matrix": "Matrix"
+						"light": "ライト",
+						"dark": "ダーク",
+						"bronze": "ブロンズライト",
+						"ocean": "オーシャン",
+						"autumn": "秋",
+						"cosmic": "宇宙",
+						"pumpkin": "パンプキン",
+						"matrix": "マトリックス"
 					}
 				},
 				"fontSelect": {
-					"label": "Font",
-					"description": "Customize the font used in the application"
+					"label": "フォント",
+					"description": "アプリケーションで使用されるフォントをカスタマイズします"
 				},
 				"navigationArrangement": {
-					"label": "Navigation arrangement",
+					"label": "ナビゲーションの調整",
 					"description": {
-						"sidebar": "Arrange and customize the navigation items in the sidebar",
-						"topbar": "Arrange and customize the navigation items in the topbar"
+						"sidebar": "サイドバー内のナビゲーション項目を整列しカスタマイズする",
+						"topbar": "トップバーのナビゲーション項目を整列しカスタマイズします"
 					},
-					"isLocked": "Arrangement is locked",
-					"lock": "Lock arrangement",
-					"unlock": "Unlock arrangement",
+					"isLocked": "配置はロックされています",
+					"lock": "調整をロック",
+					"unlock": "調整をロック解除",
 					"options": {
 						"Home": "Home",
-						"Explore": "Explore",
-						"Libraries": "Libraries",
-						"BookClubs": "Book clubs",
-						"SmartLists": "Smart lists"
+						"Explore": "エクスプローラ",
+						"Libraries": "ライブラリ",
+						"BookClubs": "読書クラブ",
+						"SmartLists": "スマートリスト"
 					},
 					"entityOptions": {
 						"createAction": {
-							"label": "Show create action",
-							"help": "Show the create action in the navigation"
+							"label": "作成アクションを表示",
+							"help": "ナビゲーションに作成アクションを表示"
 						},
 						"linkToAll": {
-							"label": "See all link",
-							"help": "A link to a page dedicated to viewing all items of this type"
+							"label": "すべてのリンクを表示",
+							"help": "このタイプのすべてのアイテムを表示する専用のページへのリンク"
 						}
 					}
 				}
 			}
 		},
 		"app/apiKeys": {
-			"helmet": "API keys",
-			"title": "API keys",
-			"description": "Manage your generated Stump API keys",
+			"helmet": "APIキー",
+			"title": "APIキー",
+			"description": "生成されたStump APIキーを管理します",
 			"shared": {
 				"fields": {
-					"name": "Name",
-					"expiration": "Expiration",
-					"last_used": "Last used",
-					"created": "Created",
-					"permissions": "Permissions",
-					"inherited": "Inherited",
-					"explicit": "Explicit"
+					"name": "名前",
+					"expiration": "有効期限",
+					"last_used": "最終使用日",
+					"created": "作成日",
+					"permissions": "権限",
+					"inherited": "継承されました",
+					"explicit": "明示的"
 				}
 			},
 			"sections": {
 				"inspector": {
-					"heading": "API key",
-					"description": "A detailed view of this key",
+					"heading": "APIキー",
+					"description": "このキーの詳細表示",
 					"unrestrictedKey": {
-						"heading": "Unrestricted key",
-						"description": "Since you are the server owner, this key has unrestricted access when configured to inherit permissions. Please be careful."
+						"heading": "無制限のキー",
+						"description": "あなたはサーバーの所有者であるため、このキーは許可を継承するように構成された場合、無制限のアクセス権を持っています。注意してください。"
 					}
 				},
 				"createKey": {
 					"modal": {
-						"trigger": "Create API key",
+						"trigger": "APIキーを作成",
 						"heading": {
-							"creating": "Create API key",
-							"created": "Created key"
+							"creating": "APIキーを作成",
+							"created": "キーの作成"
 						},
 						"description": {
-							"creating": "API keys are long-lived credentials that can be used to authenticate with the API",
-							"created": "Your new API key has been created. Save the secret somewhere safe, as it will not be shown again"
+							"creating": "APIキーはAPIで認証するために使用できる期限の長い資格情報です",
+							"created": "新しいAPIキーが作成されました。再度表示されませんので、どこかに安全な場所に保存してください"
 						},
-						"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting",
-						"createdKey": "Created key",
-						"savedConfirm": "I saved my key",
-						"submit": "Create key"
+						"inheritDisclaimer": "このAPIキーはあなたの権限をすべて継承します。つまり、あなたができることはすべて実行できます。この設定には注意してください",
+						"createdKey": "キーの作成",
+						"savedConfirm": "キーを保存しました",
+						"submit": "キーを作成"
 					}
 				},
 				"table": {
-					"title": "Your keys",
-					"description": "These are the API keys you have created",
+					"title": "あなたのキー",
+					"description": "これらは作成したAPIキーです",
 					"actionMenu": {
-						"inspect": "Inspect",
-						"delete": "Delete"
+						"inspect": "検査する",
+						"delete": "削除"
 					},
 					"empty": {
-						"title": "You haven't created any keys yet",
-						"action": "Create an API key to get started"
+						"title": "まだキーを作成していません",
+						"action": "APIキーを作成して開始します"
 					},
-					"noExpiration": "No expiration set"
+					"noExpiration": "有効期限はありません"
 				}
 			}
 		},
 		"app/reader": {
-			"helmet": "Reader settings",
-			"title": "Reader settings",
-			"description": "Default options for the Stump readers. These are bound to your current device only",
+			"helmet": "リーダー設定",
+			"title": "リーダー設定",
+			"description": "Stumpリーダーのデフォルトオプション。これらは現在のデバイスのみにバインドされています",
 			"sections": {
 				"imageBasedBooks": {
-					"label": "Image-based books",
-					"description": "Comic books, manga, and other image-based books",
+					"label": "画像ベースの本",
+					"description": "コミック本、漫画、その他の画像ベースの本",
 					"sections": {
 						"preloadAheadCount": {
-							"label": "Preload ahead count",
-							"description": "The number of pages to preload ahead of the current page"
+							"label": "先行読み込み数",
+							"description": "現在のページの前に読み込むするページ数"
 						},
 						"preloadBehindCount": {
-							"label": "Preload behind count",
-							"description": "The number of pages to preload behind the current page"
+							"label": "Countの後ろに事前読み込みします",
+							"description": "現在のページの後ろに読み込むするページ数"
 						}
 					}
 				}
 			}
 		},
 		"app/desktop": {
-			"helmet": "Desktop settings",
-			"title": "Desktop settings",
-			"description": "Settings related to the Stump desktop application",
+			"helmet": "デスクトップの設定",
+			"title": "デスクトップの設定",
+			"description": "Stumpデスクトップアプリケーションに関連する設定",
 			"sections": {
 				"configuredServers": {
-					"label": "Configured servers",
-					"description": "The list of Stump servers you can connect to",
-					"getStarted": "Add a server to get started",
+					"label": "サーバーの設定",
+					"description": "接続できるStumpサーバーのリスト",
+					"getStarted": "開始するサーバーを追加します",
 					"unreachableServer": {
 						"tooltip": "Server unreachable"
 					},
@@ -1470,14 +1470,14 @@
 						"documentation"
 					],
 					"bookclub": {
-						"label": "Book Clubs",
+						"label": "読書クラブ",
 						"read": {
 							"label": "Access book club features",
-							"description": "Allows the user to access book club features, including viewing and joining book clubs"
+							"description": "ユーザーがブッククラブの表示や参加など、ブッククラブ機能にアクセスできるようにします"
 						},
 						"create": {
-							"label": "Create book clubs",
-							"description": "Allows the user to create new book clubs"
+							"label": "読書クラブを作成",
+							"description": "ユーザーが新しい読書クラブを作成できるようにします"
 						}
 					},
 					"feature": {
@@ -1494,8 +1494,8 @@
 					"file": {
 						"label": "File Management",
 						"explorer": {
-							"label": "File Explorer",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+							"label": "ファイルエクスプローラ",
+							"description": "ユーザーがさまざまなファイルエクスプローラーにアクセスできるようにします。\nこの機能が許可された場合、コンテンツの制限は保証できません"
 						},
 						"download": {
 							"label": "Download files",
@@ -1766,12 +1766,12 @@
 		"buttons": {
 			"home": "Home",
 			"libraries": "Libraries",
-			"books": "Explore",
-			"bookClubs": "Book clubs",
+			"books": "エクスプローラ",
+			"bookClubs": "読書クラブ",
 			"createLibrary": "Create library",
 			"noLibraries": "No libraries",
 			"createBookClub": "Create book club",
-			"noBookClubs": "No book clubs",
+			"noBookClubs": "読書クラブがありません",
 			"settings": "Settings",
 			"themeToggle": "Toggle Theme",
 			"goForward": "Go Forward",
@@ -1783,7 +1783,7 @@
 		},
 		"libraryOptions": {
 			"scanLibrary": "Scan",
-			"fileExplorer": "Files",
+			"fileExplorer": "ファイル",
 			"manageLibrary": "Manage",
 			"deleteLibrary": "Delete"
 		},

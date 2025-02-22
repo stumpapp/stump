@@ -2,8 +2,6 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::filesystem::error::FileError;
-
 use super::ProcessorError;
 
 /// The resize mode to use when generating a thumbnail.
@@ -180,7 +178,6 @@ impl TryFrom<Vec<u8>> for ImageProcessorOptions {
 	}
 }
 
-// TODO: replace error with ProcessorError
 /// Trait defining a standard API for processing images throughout Stump.
 pub trait ImageProcessor {
 	/// Generate an image from a buffer. If options are provided,
@@ -188,13 +185,13 @@ pub trait ImageProcessor {
 	fn generate(
 		buffer: &[u8],
 		options: ImageProcessorOptions,
-	) -> Result<Vec<u8>, FileError>;
+	) -> Result<Vec<u8>, ProcessorError>;
 	/// Generate an image from a given path in the filesystem. If options are provided,
 	/// the image will be adjusted accordingly.
 	fn generate_from_path(
 		path: &str,
 		options: ImageProcessorOptions,
-	) -> Result<Vec<u8>, FileError>;
+	) -> Result<Vec<u8>, ProcessorError>;
 }
 
 pub fn resized_dimensions(

@@ -4,8 +4,6 @@ mod process;
 mod thumbnail;
 mod webp;
 
-// TODO: replace errors with ProcessorError throughout the module
-
 pub use self::webp::WebpProcessor;
 pub use error::ProcessorError;
 pub use generic::GenericImageProcessor;

@@ -104,7 +104,6 @@ export default function PublicationGroup({
 													Authorization: sdk.authorizationHeader,
 												},
 											}}
-											onError={(e) => console.error({ error: e, thumbnailURL })}
 											contentFit="fill"
 											style={{ height: isTablet ? 225 : 150, width: itemWidth }}
 										/>

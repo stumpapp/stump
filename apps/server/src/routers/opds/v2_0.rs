@@ -388,7 +388,6 @@ async fn search(
 				.map(|link| link.finalize(&link_finalizer))
 				.collect::<Vec<OPDSNavigationLink>>(),
 		)
-		.allow_empty(true)
 		.build()?;
 
 	let series_conditions = vec![
@@ -432,7 +431,6 @@ async fn search(
 				.map(|link| link.finalize(&link_finalizer))
 				.collect::<Vec<OPDSNavigationLink>>(),
 		)
-		.allow_empty(true)
 		.build()?;
 
 	let book_conditions = vec![
@@ -473,7 +471,6 @@ async fn search(
 					.build()?,
 			)]))
 		.publications(publications)
-		.allow_empty(true)
 		.build()?;
 
 	Ok(Json(
@@ -966,7 +963,6 @@ async fn browse_series(
 					.map(|link| link.finalize(&link_finalizer))
 					.collect::<Vec<OPDSNavigationLink>>(),
 			)
-			.allow_empty(true)
 			.build()?,
 	))
 }

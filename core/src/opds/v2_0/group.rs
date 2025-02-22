@@ -36,14 +36,14 @@ pub struct OPDSFeedGroup {
 	/// The metadata for the feed group
 	metadata: OPDSMetadata,
 
-	#[builder(default = "false")]
+	#[builder(default = "true")]
 	#[serde(skip_serializing)]
 	pub allow_empty: bool,
 }
 
 impl OPDSFeedGroupBuilder {
 	fn validate(&self) -> Result<(), OPDSV2Error> {
-		if self.allow_empty.unwrap_or(false) {
+		if self.allow_empty.unwrap_or(true) {
 			return Ok(());
 		}
 

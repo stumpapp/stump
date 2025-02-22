@@ -124,6 +124,7 @@ mod tests {
 					.build()
 					.unwrap(),
 			)
+			.allow_empty(false)
 			.build()
 			.unwrap_err();
 

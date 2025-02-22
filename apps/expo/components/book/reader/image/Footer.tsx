@@ -88,7 +88,9 @@ export default function Footer() {
 		} else if (elapsedSeconds <= 3600) {
 			return dayjs.duration(elapsedSeconds, 'seconds').format('m [minutes] s [seconds]')
 		} else {
-			return dayjs.duration(elapsedSeconds, 'seconds').format('h [hours] m [minutes]')
+			return dayjs
+				.duration(elapsedSeconds, 'seconds')
+				.format(`H [hour${elapsedSeconds >= 7200 ? 's' : ''}] m [minutes]`)
 		}
 	}, [elapsedSeconds])
 

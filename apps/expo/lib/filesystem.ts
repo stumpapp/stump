@@ -1,0 +1,106 @@
+import * as FileSystem from 'expo-file-system'
+import urlJoin from 'url-join'
+
+import { useSavedServerStore } from '~/stores/savedServer'
+
+// TODO: allow for:
+// - Custom organization of files on UI (e.g. folders)
+// - Organization derived from server-side metadata (e.g. series, library)
+// - Deleting files
+
+/*
+Filesystem structure:
+
+- /document-directory (root)
+	- /serverID
+		- /books
+			- bookID.epub
+		- /unpacked
+			- /bookID
+				- /images
+				- /styles
+				- etc
+*/
+
+export const baseDirectory = `${FileSystem.documentDirectory}`
+
+const serverDirectory = (serverID: string) => urlJoin(baseDirectory, serverID)
+
+export const serverPath = (serverID: string, path: string) =>
+	urlJoin(serverDirectory(serverID), path)
+
+export const booksDirectory = (serverID: string) => serverPath(serverID, 'books')
+
+export const activelyReadingDirectory = (serverID: string) =>
+	serverPath(serverID, 'actively-reading')
+
+export async function ensureDirectoryExists(path = baseDirectory) {
+	const info = await FileSystem.getInfoAsync(path)
+	if (!info.exists) {
+		await FileSystem.makeDirectoryAsync(path)
+	}
+}
+
+const getFileSize = async (path: string): Promise<number> => {
+	const { exists, isDirectory, ...info } = await FileSystem.getInfoAsync(path)
+
+	const size = 'size' in info ? info.size : 0
+
+	if (!exists) {
+		return 0
+	} else if (!isDirectory) {
+		return size
+	}
+
+	const subfiles = await FileSystem.readDirectoryAsync(path)
+	const subfileSizes = await Promise.all(
+		subfiles.map(async (name) => {
+			const subpath = urlJoin(path, name)
+			return await getFileSize(subpath)
+		}),
+	)
+
+	return subfileSizes.reduce((acc, size) => acc + size, 0)
+}
+
+export async function getServerUsage(serverID: string) {
+	return getFileSize(serverDirectory(serverID))
+}
+
+export async function getAllServersUsage() {
+	const serverIDs = useSavedServerStore.getState().servers.map((server) => server.id)
+	const usage = await Promise.all(serverIDs.map(getServerUsage))
+	return serverIDs.reduce(
+		(acc, server, i) => {
+			acc[server] = usage[i]
+			return acc
+		},
+		{} as Record<string, number>,
+	)
+}
+
+export async function getAppUsage() {
+	const serverIDs = useSavedServerStore.getState().servers.map((server) => server.id)
+	const allRootDirs = (await FileSystem.readDirectoryAsync(baseDirectory))
+		.filter((f) => !serverIDs.includes(f))
+		.map((f) => `${baseDirectory}/${f}`)
+
+	const serverUsage = await Promise.all(serverIDs.map(getServerUsage))
+	const appUsage = await Promise.all(allRootDirs.map(getFileSize))
+
+	const appUsageTotal = appUsage.reduce((acc, size) => acc + size, 0)
+	const serverUsageTotal = serverUsage.reduce((acc, size) => acc + size, 0)
+
+	return {
+		appTotal: appUsageTotal,
+		serversTotal: serverUsageTotal,
+		perServer: serverUsage.reduce(
+			(acc, size, i) => {
+				acc[serverIDs[i]] = size
+				return acc
+			},
+			{} as Record<string, number>,
+		),
+		total: appUsageTotal + serverUsageTotal,
+	}
+}

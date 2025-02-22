@@ -41,6 +41,8 @@ export default function TabLayout() {
 							className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
 						/>
 					),
+					// Hide the header for this route
+					headerShown: false,
 				}}
 			/>
 		</Tabs>

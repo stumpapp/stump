@@ -1,16 +1,16 @@
 import { SDKContext, StumpClientContextProvider } from '@stump/client'
-import { Api, authDocument, constants } from '@stump/sdk'
+import { Api, authDocument } from '@stump/sdk'
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { match, P } from 'ts-pattern'
 
 import { ActiveServerContext } from '~/components/activeServer'
+import { getOPDSInstance } from '~/lib/sdk/auth'
 import { useSavedServers } from '~/stores'
 
 export default function Screen() {
 	const router = useRouter()
 
-	const { savedServers, getServerToken, deleteServerToken, getServerConfig } = useSavedServers()
+	const { savedServers, getServerConfig } = useSavedServers()
 	const { id: serverID } = useLocalSearchParams<{ id: string }>()
 
 	const activeServer = useMemo(
@@ -27,49 +27,21 @@ export default function Screen() {
 			const { id, url, kind } = activeServer
 
 			const config = await getServerConfig(id)
-			const shouldFormatURL = kind === 'stump'
-
-			const instance = match(config?.auth)
-				.with(
-					{ basic: P.shape({ username: P.string, password: P.string }) },
-					({ basic: { username, password } }) => {
-						const api = new Api({ baseURL: url, authMethod: 'basic', shouldFormatURL })
-						api.basicAuth = { username, password }
-						return api
-					},
-				)
-				.with({ bearer: P.string }, ({ bearer: token }) => {
-					const api = new Api({ baseURL: url, authMethod: 'token', shouldFormatURL })
-					api.token = token
-					return api
-				})
-				// TODO: figure out what the deal is otherwise. Session auth? Assume basic or sm?
-				.otherwise(() => new Api({ baseURL: url, authMethod: 'basic', shouldFormatURL }))
-
-			const customHeaders = {
-				...config?.customHeaders,
-				...('basic' in (config?.auth || {})
-					? {
-							[constants.STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
-						}
-					: {}),
-			}
-
-			if (Object.keys(customHeaders).length) {
-				instance.customHeaders = customHeaders
-			}
-
+			const instance = await getOPDSInstance({
+				config,
+				serverKind: kind,
+				url,
+			})
 			setSDK(instance)
 		}
 
 		if (!sdk) {
 			configureSDK()
 		}
-	}, [activeServer, sdk, getServerToken, getServerConfig])
+	}, [activeServer, sdk, getServerConfig])
 
 	const onAuthError = useCallback(
 		async (_: string | undefined, data: unknown) => {
-			console.error('Auth error', data)
 			const authDoc = authDocument.safeParse(data)
 			if (!authDoc.success) {
 				throw new Error('Failed to parse auth document', authDoc.error)
@@ -86,11 +58,6 @@ export default function Screen() {
 			const username = basic.labels?.login || 'Username'
 			const password = basic.labels?.password || 'Password'
 
-			// Get rid of the token
-			if (activeServer) {
-				await deleteServerToken(activeServer.id)
-			}
-
 			// Replace the current screen with the auth screen, this was back is home
 			router.replace({
 				pathname: '/opds/[id]/auth',
@@ -102,7 +69,7 @@ export default function Screen() {
 				},
 			})
 		},
-		[activeServer, deleteServerToken, router],
+		[activeServer, router],
 	)
 
 	if (!activeServer) {

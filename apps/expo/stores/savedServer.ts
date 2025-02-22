@@ -7,13 +7,13 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
 type ServerID = string
-type SupportedServer = 'stump' | 'opds'
+export type ServerKind = 'stump' | 'opds'
 
 export type SavedServer = {
 	id: ServerID
 	name: string
 	url: string
-	kind: SupportedServer
+	kind: ServerKind
 	stumpOPDS?: boolean
 	defaultServer?: boolean
 }
@@ -51,7 +51,7 @@ const managedToken = z
 		...data,
 		expiresAt: new Date(data.expiresAt),
 	}))
-type ManagedToken = z.infer<typeof managedToken>
+export type ManagedToken = z.infer<typeof managedToken>
 
 const SAVED_TOKEN_PREFIX = 'stump-mobile-saved-tokens-' as const
 const SAVED_CONFIG_PREFIX = 'stump-mobile-saved-configs-' as const

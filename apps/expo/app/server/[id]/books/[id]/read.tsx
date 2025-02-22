@@ -80,6 +80,7 @@ export default function Screen() {
 		() => {
 			return () => {
 				queryClient.refetchQueries({ queryKey: [sdk.media.keys.getByID, bookID], exact: false })
+				queryClient.refetchQueries({ queryKey: [sdk.media.keys.inProgress], exact: false })
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps

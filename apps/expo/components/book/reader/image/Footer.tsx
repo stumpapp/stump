@@ -123,7 +123,7 @@ export default function Footer() {
 									}}
 									cachePolicy="disk"
 									style={getSize(page)}
-									contentFit="fill"
+									contentFit="contain"
 								/>
 							</View>
 						</Pressable>

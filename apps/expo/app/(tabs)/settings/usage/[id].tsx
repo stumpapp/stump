@@ -5,6 +5,7 @@ import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
+import RefreshControl from '~/components/RefreshControl'
 import { Button, Heading, Text } from '~/components/ui'
 import { icons } from '~/lib'
 import { getServerStoredPreferencesUsage } from '~/lib/filesystem'
@@ -18,7 +19,11 @@ const { Slash, HardDriveDownload } = icons
 export default function Screen() {
 	const { id: serverID } = useLocalSearchParams<{ id: string }>()
 
-	const { data: preferencesBytes, refetch } = useQuery({
+	const {
+		data: preferencesBytes,
+		refetch,
+		isRefetching,
+	} = useQuery({
 		queryKey: ['server-pref-usage', serverID],
 		queryFn: () => getServerStoredPreferencesUsage(serverID),
 		suspense: true,
@@ -42,7 +47,10 @@ export default function Screen() {
 
 	return (
 		<SafeAreaView className="flex-1 bg-background">
-			<ScrollView className="flex-1 bg-background">
+			<ScrollView
+				className="flex-1 bg-background"
+				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+			>
 				<View className="flex-1 gap-8 bg-background px-4">
 					<Heading size="lg">{server?.name || 'Server'}</Heading>
 

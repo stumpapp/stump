@@ -104,8 +104,10 @@ export function useEpub(id: string, _options?: EpubOptions, enabled?: boolean) {
 
 export function useEpubLazy(id: string) {
 	const { sdk } = useSDK()
-	const { data: epub, ...restReturn } = useQuery([sdk.epub.keys.getByID, id], () =>
-		sdk.epub.getByID(id),
+	const { data: epub, ...restReturn } = useQuery(
+		[sdk.epub.keys.getByID, id],
+		() => sdk.epub.getByID(id),
+		{ staleTime: 0, cacheTime: 0 },
 	)
 
 	return {

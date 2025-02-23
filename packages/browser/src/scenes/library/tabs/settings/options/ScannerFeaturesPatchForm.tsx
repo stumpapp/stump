@@ -26,17 +26,19 @@ export default function ScannerFeaturesPatchForm() {
 	const handleSubmit = useCallback(
 		({
 			process_metadata,
+			watch,
 			generate_file_hashes,
 			generate_koreader_hashes,
 		}: Pick<
 			CreateOrUpdateLibrarySchema,
-			'process_metadata' | 'generate_file_hashes' | 'generate_koreader_hashes'
+			'process_metadata' | 'watch' | 'generate_file_hashes' | 'generate_koreader_hashes'
 		>) => {
 			patch({
 				config: {
 					...library.config,
 					generate_file_hashes,
 					process_metadata,
+					watch,
 					generate_koreader_hashes,
 				},
 				scan_mode: 'NONE',

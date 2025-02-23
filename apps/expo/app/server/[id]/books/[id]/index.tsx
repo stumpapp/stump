@@ -1,6 +1,7 @@
 import { useMediaByIdQuery, useSDK } from '@stump/client'
 import { ActiveReadingSession } from '@stump/sdk'
 import dayjs from 'dayjs'
+import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -16,6 +17,7 @@ import { Button, Heading, Text } from '~/components/ui'
 import { formatBytes } from '~/lib/format'
 
 dayjs.extend(relativeTime)
+dayjs.extend(duration)
 
 export default function Screen() {
 	const { id: bookID } = useLocalSearchParams<{ id: string }>()

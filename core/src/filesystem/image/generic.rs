@@ -75,9 +75,7 @@ impl ImageProcessor for GenericImageProcessor {
 				Ok(ImageFormat::Jpeg)
 			},
 			ImageFormat::Png => Ok(ImageFormat::Png),
-			_ => Err(ProcessorError::UnknownError(String::from(
-				"Incorrect image processor for requested format.",
-			))),
+			_ => Err(FileError::IncorrectProcessorError),
 		}?;
 
 		let (current_width, current_height) = image.dimensions();

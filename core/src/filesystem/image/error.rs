@@ -17,3 +17,9 @@ pub enum ProcessorError {
 	#[error("An unknown error occurred: {0}")]
 	UnknownError(String),
 }
+
+impl From<std::io::Error> for ProcessorError {
+	fn from(value: std::io::Error) -> Self {
+		Self::FileError(FileError::from(value))
+	}
+}

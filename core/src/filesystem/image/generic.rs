@@ -6,7 +6,7 @@ use crate::filesystem::{image::process::resized_dimensions, FileError};
 
 use super::{
 	process::{self, ImageProcessor, ImageProcessorOptions, ScaledDimensionResize},
-	scale_height_dimension, scale_width_dimension,
+	scale_height_dimension, scale_width_dimension, ProcessorError,
 };
 
 /// An image processor that works for the most common image types, primarily
@@ -17,7 +17,7 @@ impl ImageProcessor for GenericImageProcessor {
 	fn generate(
 		buffer: &[u8],
 		options: ImageProcessorOptions,
-	) -> Result<Vec<u8>, FileError> {
+	) -> Result<Vec<u8>, ProcessorError> {
 		let mut image = image::load_from_memory(buffer)?;
 
 		if let Some(resize_options) = options.resize_options {
@@ -39,10 +39,7 @@ impl ImageProcessor for GenericImageProcessor {
 				Ok(ImageFormat::Jpeg)
 			},
 			process::ImageFormat::Png => Ok(ImageFormat::Png),
-			// TODO: change error kind
-			_ => Err(FileError::UnknownError(String::from(
-				"Incorrect image processor for requested format.",
-			))),
+			_ => Err(FileError::IncorrectProcessorError),
 		}?;
 
 		let mut buffer = Cursor::new(vec![]);
@@ -54,7 +51,7 @@ impl ImageProcessor for GenericImageProcessor {
 	fn generate_from_path(
 		path: &str,
 		options: ImageProcessorOptions,
-	) -> Result<Vec<u8>, FileError> {
+	) -> Result<Vec<u8>, ProcessorError> {
 		let bytes = fs::read(path)?;
 		Self::generate(&bytes, options)
 	}
@@ -62,7 +59,7 @@ impl ImageProcessor for GenericImageProcessor {
 	fn resize_scaled(
 		buf: &[u8],
 		dimension: ScaledDimensionResize,
-	) -> Result<Vec<u8>, FileError> {
+	) -> Result<Vec<u8>, ProcessorError> {
 		let mut image = image::load_from_memory(buf)?;
 
 		let read_format = image::guess_format(buf)?;
@@ -78,7 +75,7 @@ impl ImageProcessor for GenericImageProcessor {
 				Ok(ImageFormat::Jpeg)
 			},
 			ImageFormat::Png => Ok(ImageFormat::Png),
-			_ => Err(FileError::UnknownError(String::from(
+			_ => Err(ProcessorError::UnknownError(String::from(
 				"Incorrect image processor for requested format.",
 			))),
 		}?;
@@ -256,10 +253,10 @@ mod tests {
 
 		let result = GenericImageProcessor::generate_from_path(&jpg_path, options);
 		assert!(result.is_err());
-		assert_eq!(
-			result.unwrap_err().to_string(),
-			"An unknown error occurred: Incorrect image processor for requested format."
-		);
+		assert!(matches!(
+			result.unwrap_err(),
+			ProcessorError::FileError(FileError::IncorrectProcessorError)
+		));
 	}
 
 	// PNG -> other

@@ -3,11 +3,16 @@ use std::fs;
 use image::{imageops, DynamicImage, EncodableLayout, GenericImageView};
 use webp::Encoder;
 
-use crate::filesystem::{error::FileError, image::process::resized_dimensions};
-
-use super::process::{
-	ImageProcessor, ImageProcessorOptions, ImageResizeOptions, ScaledDimensionResize,
+use crate::filesystem::{
+	error::FileError,
+	image::process::resized_dimensions,
+	image::{
+		process::{ImageProcessor, ImageProcessorOptions, ImageResizeOptions},
+		ProcessorError,
+	},
 };
+
+use super::{scale_height_dimension, scale_width_dimension, ScaledDimensionResize};
 
 pub struct WebpProcessor;
 
@@ -15,7 +20,7 @@ impl ImageProcessor for WebpProcessor {
 	fn generate(
 		buffer: &[u8],
 		options: ImageProcessorOptions,
-	) -> Result<Vec<u8>, FileError> {
+	) -> Result<Vec<u8>, ProcessorError> {
 		let mut image = image::load_from_memory(buffer)?;
 
 		if let Some(resize_options) = options.resize_options {
@@ -33,7 +38,7 @@ impl ImageProcessor for WebpProcessor {
 	fn generate_from_path(
 		path: &str,
 		options: ImageProcessorOptions,
-	) -> Result<Vec<u8>, FileError> {
+	) -> Result<Vec<u8>, ProcessorError> {
 		let bytes = fs::read(path)?;
 		Self::generate(&bytes, options)
 	}
@@ -41,21 +46,22 @@ impl ImageProcessor for WebpProcessor {
 	fn resize_scaled(
 		buf: &[u8],
 		dimension: ScaledDimensionResize,
-	) -> Result<Vec<u8>, FileError> {
+	) -> Result<Vec<u8>, ProcessorError> {
 		let image = image::load_from_memory(buf)?;
 
 		let (current_width, current_height) = image.dimensions();
-		let aspect_ratio = current_width as f32 / current_height as f32;
 
-		let (height, width) = match dimension {
-			ScaledDimensionResize::Width(width) => {
-				let height = (f32::from_bits(width) / aspect_ratio) as u32;
-				(height, width)
-			},
-			ScaledDimensionResize::Height(height) => {
-				let width = (f32::from_bits(height) * aspect_ratio) as u32;
-				(height, width)
-			},
+		let (width, height) = match dimension {
+			ScaledDimensionResize::Width(width) => scale_height_dimension(
+				current_width as f32,
+				current_height as f32,
+				width as f32,
+			),
+			ScaledDimensionResize::Height(height) => scale_width_dimension(
+				current_width as f32,
+				current_height as f32,
+				height as f32,
+			),
 		};
 
 		let resized_image =

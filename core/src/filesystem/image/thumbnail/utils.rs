@@ -1,9 +1,9 @@
 use std::path::{Path, PathBuf};
 
-use crate::{config::StumpConfig, filesystem::FileError};
-use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 use tokio::fs;
 use tracing::{error, trace};
+
+use crate::{config::StumpConfig, filesystem::FileError};
 
 pub async fn place_thumbnail(
 	id: &str,
@@ -16,61 +16,44 @@ pub async fn place_thumbnail(
 	Ok(thumbnail_path)
 }
 
-pub const THUMBNAIL_CHUNK_SIZE: usize = 500;
+pub const THUMBNAIL_LOG_FREQUENCY: usize = 500;
 
-// TODO(perf): Async-ify
 /// Deletes thumbnails and returns the number deleted if successful, returns
 /// [`FileError`] otherwise.
-pub fn remove_thumbnails(
+pub async fn remove_thumbnails(
 	id_list: &[String],
 	thumbnails_dir: &Path,
 ) -> Result<u64, FileError> {
-	let found_thumbnails = thumbnails_dir
-		.read_dir()
-		.ok()
-		.map(|dir| dir.into_iter())
-		.map(|iter| {
-			iter.filter_map(|entry| {
-				entry.ok().and_then(|entry| {
-					let path = entry.path();
-					let file_name = path.file_name()?.to_str()?.to_string();
+	let mut read_dir = tokio::fs::read_dir(thumbnails_dir).await?;
 
-					if id_list.iter().any(|id| file_name.starts_with(id)) {
-						Some(path)
-					} else {
-						None
-					}
-				})
-			})
-		})
-		.map(|iter| iter.collect::<Vec<PathBuf>>())
-		.unwrap_or_default();
+	// Asynchronously collect thumbnails
+	let mut found_thumbnails = Vec::with_capacity(id_list.len());
+	while let Some(entry) = read_dir.next_entry().await? {
+		let path = entry.path();
+		if let Some(filename) = path.file_name().and_then(|f| f.to_str()) {
+			if id_list.iter().any(|id| filename.starts_with(id)) {
+				found_thumbnails.push(path);
+			}
+		}
+	}
 
 	let found_thumbnails_count = found_thumbnails.len();
 	tracing::debug!(found_thumbnails_count, "Found thumbnails to remove");
 
 	let mut deleted_thumbnails_count = 0;
 
-	for (idx, chunk) in found_thumbnails.chunks(THUMBNAIL_CHUNK_SIZE).enumerate() {
-		trace!(chunk = idx + 1, "Processing chunk for thumbnail removal");
-		let results = chunk
-			.into_par_iter()
-			.map(|path| {
-				std::fs::remove_file(path)?;
-				Ok(())
-			})
-			.filter_map(|res: Result<(), FileError>| {
-				if res.is_err() {
-					error!(error = ?res.err(), "Error deleting thumbnail!");
-					None
-				} else {
-					res.ok()
-				}
-			})
-			.collect::<Vec<()>>();
+	for (idx, path) in found_thumbnails.iter().enumerate() {
+		if idx % THUMBNAIL_LOG_FREQUENCY == 0 {
+			trace!("Processed {idx} thumbnails for removal.");
+		}
 
-		trace!(deleted_count = results.len(), "Deleted thumbnail batch");
-		deleted_thumbnails_count += results.len() as u64;
+		match tokio::fs::remove_file(path).await {
+			Ok(_) => deleted_thumbnails_count += 1,
+			Err(e) => {
+				error!(error = ?e, ?path, "Error deleting thumbnail!");
+				return Err(e.into());
+			},
+		};
 	}
 
 	Ok(deleted_thumbnails_count)

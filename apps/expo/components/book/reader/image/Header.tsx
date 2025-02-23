@@ -1,10 +1,12 @@
 import { useRouter } from 'expo-router'
-import { useState } from 'react'
-import { Pressable, View } from 'react-native'
+import { useEffect, useState } from 'react'
+import { Pressable } from 'react-native'
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
 import { icons, Text } from '~/components/ui'
+import { useDisplay } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
 
@@ -13,6 +15,7 @@ import { useImageBasedReader } from './context'
 const { X, CircleEllipsis } = icons
 
 export default function Header() {
+	const { height } = useDisplay()
 	const {
 		book: { name, id },
 	} = useImageBasedReader()
@@ -28,23 +31,30 @@ export default function Header() {
 	const insets = useSafeAreaInsets()
 	const visible = useReaderStore((state) => state.showControls)
 
+	const translateY = useSharedValue(0)
+	useEffect(() => {
+		translateY.value = withTiming(visible ? 0 : 100 * -1, {
+			duration: 200,
+		})
+	}, [visible, translateY, height, insets.top])
+
+	const animatedStyles = useAnimatedStyle(() => {
+		return {
+			top: insets.top,
+			left: insets.left,
+			right: insets.right,
+			transform: [{ translateY: translateY.value }],
+		}
+	})
+
 	const router = useRouter()
 
 	const [isOpen, setIsOpen] = useState(false)
 
-	// TODO: animate
-	if (!visible) {
-		return null
-	}
-
 	return (
-		<View
-			className="absolute z-10 flex-row items-center justify-between px-2"
-			style={{
-				top: insets.top,
-				left: insets.left,
-				right: insets.right,
-			}}
+		<Animated.View
+			className="absolute z-20 flex-row items-center justify-between px-2"
+			style={animatedStyles}
 		>
 			<Pressable onPress={() => router.back()}>
 				{({ pressed }) => <X className="text-foreground" style={{ opacity: pressed ? 0.85 : 1 }} />}
@@ -152,6 +162,6 @@ export default function Header() {
 					</DropdownMenu.Group>
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
-		</View>
+		</Animated.View>
 	)
 }

@@ -5,7 +5,7 @@ import { Image } from 'expo-image'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { View } from 'react-native'
 import { FlatList, Pressable } from 'react-native-gesture-handler'
-import Animated, { SlideInDown } from 'react-native-reanimated'
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Progress, Text } from '~/components/ui'
@@ -21,11 +21,9 @@ dayjs.extend(duration)
 const HEIGHT_MODIFIER = 0.75
 const WIDTH_MODIFIER = 2 / 3
 
-// TODO: animate out causes error, probably because parent is unmounted?
-
 export default function Footer() {
 	const { sdk } = useSDK()
-	const { isTablet } = useDisplay()
+	const { isTablet, height } = useDisplay()
 	const {
 		book: { pages, id },
 		pageURL,
@@ -41,11 +39,21 @@ export default function Footer() {
 	const visible = useReaderStore((state) => state.showControls)
 	const setShowControls = useReaderStore((state) => state.setShowControls)
 
-	const percentage = (currentPage / pages) * 100
-
+	const translateY = useSharedValue(0)
 	useEffect(() => {
-		ref.current?.scrollToIndex({ index: currentPage - 1, animated: true, viewPosition: 0.5 })
-	}, [visible, currentPage])
+		translateY.value = withTiming(visible ? 0 : height / 2)
+	}, [visible, translateY, height])
+
+	const animatedStyles = useAnimatedStyle(() => {
+		return {
+			left: insets.left,
+			right: insets.right,
+			bottom: insets.bottom,
+			transform: [{ translateY: translateY.value }],
+		}
+	})
+
+	const percentage = (currentPage / pages) * 100
 
 	const baseSize = useMemo(
 		() => ({
@@ -120,20 +128,8 @@ export default function Footer() {
 		[currentPage],
 	)
 
-	if (!visible) {
-		return null
-	}
-
 	return (
-		<Animated.View
-			className="absolute z-20 gap-4 px-1"
-			style={{
-				left: insets.left,
-				right: insets.right,
-				bottom: insets.bottom,
-			}}
-			entering={SlideInDown}
-		>
+		<Animated.View className="absolute z-20 shrink gap-4 px-1" style={animatedStyles}>
 			<FlatList
 				ref={ref}
 				data={Array.from({ length: pages }, (_, i) => i + 1)}
@@ -146,7 +142,7 @@ export default function Footer() {
 									source={pageSource(page)}
 									cachePolicy="memory"
 									style={getSize(page)}
-									contentFit="contain"
+									contentFit="fill"
 								/>
 							</View>
 						</Pressable>

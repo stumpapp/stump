@@ -1,8 +1,9 @@
-import React from 'react'
 import { Platform, View } from 'react-native'
-import InfoRow from './InfoRow'
 import * as ContextMenu from 'zeego/context-menu'
+
 import { Text } from '~/components/ui'
+
+import InfoRow from './InfoRow'
 
 const isAndroid = Platform.OS === 'android'
 
@@ -22,7 +23,9 @@ export default function BookDescription({ description }: Props) {
 			<View className="max-w-[75%]">
 				<ContextMenu.Root>
 					<ContextMenu.Trigger>
-						<Text className="text-right">{`${description.slice(0, 100)}...`}</Text>
+						<Text className="text-right" numberOfLines={4} ellipsizeMode="tail">
+							{description}
+						</Text>
 					</ContextMenu.Trigger>
 
 					<ContextMenu.Content>

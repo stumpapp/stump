@@ -12,6 +12,8 @@ use crate::filesystem::{
 	},
 };
 
+use super::{scale_height_dimension, scale_width_dimension, ScaledDimensionResize};
+
 pub struct WebpProcessor;
 
 impl ImageProcessor for WebpProcessor {
@@ -39,6 +41,37 @@ impl ImageProcessor for WebpProcessor {
 	) -> Result<Vec<u8>, ProcessorError> {
 		let bytes = fs::read(path)?;
 		Self::generate(&bytes, options)
+	}
+
+	fn resize_scaled(
+		buf: &[u8],
+		dimension: ScaledDimensionResize,
+	) -> Result<Vec<u8>, ProcessorError> {
+		let image = image::load_from_memory(buf)?;
+
+		let (current_width, current_height) = image.dimensions();
+
+		let (width, height) = match dimension {
+			ScaledDimensionResize::Width(width) => scale_height_dimension(
+				current_width as f32,
+				current_height as f32,
+				width as f32,
+			),
+			ScaledDimensionResize::Height(height) => scale_width_dimension(
+				current_width as f32,
+				current_height as f32,
+				height as f32,
+			),
+		};
+
+		let resized_image =
+			image.resize(width, height, image::imageops::FilterType::Lanczos3);
+
+		let encoder = Encoder::from_image(&resized_image)
+			.map_err(|err| FileError::WebpEncodeError(err.to_string()))?;
+		let encoded_webp = encoder.encode(100f32);
+
+		Ok(encoded_webp.as_bytes().to_vec())
 	}
 }
 

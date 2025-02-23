@@ -12,8 +12,9 @@ import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect } from 'react'
 
 import { EpubJSReader, ImageBasedReader, UnsupportedReader } from '~/components/book/reader'
+import { useAppState } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
-import { useBookTimer } from '~/stores/reader'
+import { useBookPreferences, useBookTimer } from '~/stores/reader'
 
 type Params = {
 	id: string
@@ -33,6 +34,9 @@ export default function Screen() {
 	const { pause, resume, totalSeconds, isRunning } = useBookTimer(book?.id || '', {
 		initial: book?.active_reading_session?.elapsed_seconds,
 	})
+	const {
+		preferences: { preferSmallImages },
+	} = useBookPreferences(book?.id || '')
 
 	const { updateReadProgressAsync } = useUpdateMediaProgress(book?.id || '', {
 		retry: (attempts) => attempts < 3,
@@ -63,14 +67,28 @@ export default function Screen() {
 		}
 	}, [setShowControls])
 
+	const onFocusedChanged = useCallback(
+		(focused: boolean) => {
+			if (!focused) {
+				pause()
+			} else if (focused) {
+				resume()
+			}
+		},
+		[pause, resume],
+	)
+
+	const appState = useAppState({
+		onStateChanged: onFocusedChanged,
+	})
 	const showControls = useReaderStore((state) => state.showControls)
 	useEffect(() => {
-		if (showControls && isRunning) {
+		if ((showControls && isRunning) || appState !== 'active') {
 			pause()
-		} else if (!showControls && !isRunning) {
+		} else if (!showControls && !isRunning && appState === 'active') {
 			resume()
 		}
-	}, [showControls, pause, resume, isRunning])
+	}, [showControls, pause, resume, isRunning, appState])
 
 	/**
 	 * Invalidate the book query when a reader is unmounted so that the book overview
@@ -102,6 +120,14 @@ export default function Screen() {
 				initialPage={initialPage}
 				book={{ id: book.id, name: book.metadata?.title || book.name, pages: book.pages }}
 				pageURL={(page: number) => sdk.media.bookPageURL(book.id, page)}
+				pageThumbnailURL={
+					preferSmallImages
+						? (page: number) =>
+								sdk.media.bookPageURL(book.id, page, {
+									height: 600,
+								})
+						: undefined
+				}
 				imageSizes={book.metadata?.page_dimensions?.dimensions?.map(({ height, width }) => ({
 					height,
 					width,

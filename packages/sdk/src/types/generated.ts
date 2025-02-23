@@ -309,6 +309,8 @@ export type ImageResizeMode = "Scaled" | "Sized"
  */
 export type ImageResizeOptions = { mode: ImageResizeMode; height: number; width: number }
 
+export type ScaledDimensionResize = { height: number } | { width: number }
+
 /**
  * Supported image formats for processing images throughout Stump.
  */

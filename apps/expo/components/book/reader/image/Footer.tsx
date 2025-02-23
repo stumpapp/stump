@@ -5,7 +5,7 @@ import { Image } from 'expo-image'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { View } from 'react-native'
 import { FlatList, Pressable } from 'react-native-gesture-handler'
-import Animated, { SlideInDown } from 'react-native-reanimated'
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Progress, Text } from '~/components/ui'
@@ -21,14 +21,13 @@ dayjs.extend(duration)
 const HEIGHT_MODIFIER = 0.75
 const WIDTH_MODIFIER = 2 / 3
 
-// TODO: animate out causes error, probably because parent is unmounted?
-
 export default function Footer() {
 	const { sdk } = useSDK()
-	const { isTablet } = useDisplay()
+	const { isTablet, height } = useDisplay()
 	const {
 		book: { pages, id },
 		pageURL,
+		pageThumbnailURL,
 		currentPage = 1,
 		flatListRef: readerRef,
 	} = useImageBasedReader()
@@ -36,16 +35,25 @@ export default function Footer() {
 
 	const ref = useRef<FlatList>(null)
 	const insets = useSafeAreaInsets()
+
 	const visible = useReaderStore((state) => state.showControls)
 	const setShowControls = useReaderStore((state) => state.setShowControls)
 
-	const percentage = (currentPage / pages) * 100
-
+	const translateY = useSharedValue(0)
 	useEffect(() => {
-		if (visible) {
-			ref.current?.scrollToIndex({ index: currentPage - 1, animated: true, viewPosition: 0.5 })
+		translateY.value = withTiming(visible ? 0 : height / 2)
+	}, [visible, translateY, height])
+
+	const animatedStyles = useAnimatedStyle(() => {
+		return {
+			left: insets.left,
+			right: insets.right,
+			bottom: insets.bottom,
+			transform: [{ translateY: translateY.value }],
 		}
-	}, [visible, currentPage])
+	})
+
+	const percentage = (currentPage / pages) * 100
 
 	const baseSize = useMemo(
 		() => ({
@@ -91,20 +99,37 @@ export default function Footer() {
 		}
 	}, [elapsedSeconds])
 
-	if (!visible) {
-		return null
-	}
+	const pageSource = useCallback(
+		(page: number) => ({
+			uri: pageThumbnailURL ? pageThumbnailURL(page) : pageURL(page),
+			headers: {
+				Authorization: sdk.authorizationHeader,
+			},
+		}),
+		[pageURL, pageThumbnailURL, sdk],
+	)
+
+	useEffect(
+		() => {
+			const windowSize = isTablet ? 8 : 6
+			const start = Math.max(0, currentPage - windowSize)
+			const end = Math.min(pages, currentPage + windowSize)
+			const urls = Array.from({ length: end - start }, (_, i) =>
+				pageThumbnailURL ? pageThumbnailURL(i + start) : pageURL(i + start),
+			)
+			Image.prefetch(urls, {
+				headers: {
+					Authorization: sdk.authorizationHeader || '',
+				},
+				// cachePolicy: 'memory',
+			})
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[currentPage],
+	)
 
 	return (
-		<Animated.View
-			className="absolute z-20 gap-4 px-1"
-			style={{
-				left: insets.left,
-				right: insets.right,
-				bottom: insets.bottom,
-			}}
-			entering={SlideInDown.delay(150)}
-		>
+		<Animated.View className="absolute z-20 shrink gap-4 px-1" style={animatedStyles}>
 			<FlatList
 				ref={ref}
 				data={Array.from({ length: pages }, (_, i) => i + 1)}
@@ -114,15 +139,10 @@ export default function Footer() {
 						<Pressable onPress={() => onChangePage(page)}>
 							<View className="aspect-[2/3] items-center justify-center overflow-hidden rounded-xl shadow-lg">
 								<Image
-									source={{
-										uri: pageURL(page),
-										headers: {
-											Authorization: sdk.authorizationHeader,
-										},
-									}}
-									cachePolicy="disk"
+									source={pageSource(page)}
+									cachePolicy="memory"
 									style={getSize(page)}
-									contentFit="contain"
+									contentFit="fill"
 								/>
 							</View>
 						</Pressable>
@@ -139,7 +159,9 @@ export default function Footer() {
 				horizontal
 				showsHorizontalScrollIndicator={false}
 				initialScrollIndex={currentPage - 1}
-				windowSize={10}
+				windowSize={5}
+				initialNumToRender={isTablet ? 8 : 6}
+				maxToRenderPerBatch={isTablet ? 8 : 6}
 			/>
 
 			<View className="gap-2 px-1">

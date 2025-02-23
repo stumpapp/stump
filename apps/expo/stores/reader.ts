@@ -1,12 +1,17 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { BookPreferences } from '@stump/client'
+import { BookPreferences as IBookPreferences } from '@stump/client'
 import dayjs from 'dayjs'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useStopwatch } from 'react-timer-hook'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
-type GlobalSettings = BookPreferences & { incognito?: boolean }
+import { useActiveServer } from '~/components/activeServer'
+
+type GlobalSettings = IBookPreferences & { incognito?: boolean; preferSmallImages?: boolean }
+export type BookPreferences = IBookPreferences & {
+	serverID?: string
+}
 
 type ElapsedSeconds = number
 
@@ -20,6 +25,7 @@ export type ReaderStore = {
 	bookSettings: Record<string, BookPreferences>
 	addBookSettings: (id: string, preferences: BookPreferences) => void
 	setBookSettings: (id: string, preferences: Partial<BookPreferences>) => void
+	clearLibrarySettings: (serverID: string) => void
 
 	bookTimers: Record<string, ElapsedSeconds>
 	setBookTimer: (id: string, timer: ElapsedSeconds) => void
@@ -41,7 +47,8 @@ export const useReaderStore = create<ReaderStore>()(
 						scaleToFit: 'width',
 					},
 					readingMode: 'paged',
-				} satisfies BookPreferences,
+					preferSmallImages: false,
+				} satisfies GlobalSettings,
 				setGlobalSettings: (updates: Partial<GlobalSettings>) =>
 					set({ globalSettings: { ...get().globalSettings, ...updates } }),
 
@@ -54,6 +61,14 @@ export const useReaderStore = create<ReaderStore>()(
 							...get().bookSettings,
 							[id]: { ...get().bookSettings[id], ...updates },
 						},
+					}),
+				clearLibrarySettings: (serverID) =>
+					set({
+						bookSettings: Object.fromEntries(
+							Object.entries(get().bookSettings).filter(
+								([, settings]) => settings.serverID !== serverID,
+							),
+						),
 					}),
 
 				bookTimers: {},
@@ -72,6 +87,10 @@ export const useReaderStore = create<ReaderStore>()(
 )
 
 export const useBookPreferences = (id: string) => {
+	const {
+		activeServer: { id: serverID },
+	} = useActiveServer()
+
 	const store = useReaderStore((state) => state)
 
 	const bookSettings = useMemo(() => store.bookSettings[id], [store.bookSettings, id])
@@ -82,18 +101,20 @@ export const useBookPreferences = (id: string) => {
 				store.addBookSettings(id, {
 					...store.globalSettings,
 					...updates,
+					serverID,
 				})
 			} else {
-				store.setBookSettings(id, updates)
+				store.setBookSettings(id, { ...updates, serverID })
 			}
 		},
-		[id, bookSettings, store],
+		[id, bookSettings, store, serverID],
 	)
 
 	return {
 		preferences: {
 			...(bookSettings || store.globalSettings),
 			incognito: store.globalSettings.incognito,
+			preferSmallImages: store.globalSettings.preferSmallImages,
 		},
 		setBookPreferences,
 		updateGlobalSettings: store.setGlobalSettings,
@@ -130,14 +151,18 @@ export const useBookTimer = (id: string, params: UseBookTimerParams = {}) => {
 	})
 
 	const pauseTimer = useCallback(() => {
-		pause()
-		setBookTimer(id, totalSeconds)
-	}, [id, pause, setBookTimer, totalSeconds])
+		if (isRunning) {
+			pause()
+			setBookTimer(id, totalSeconds)
+		}
+	}, [id, pause, setBookTimer, totalSeconds, isRunning])
 
 	const resumeTimer = useCallback(() => {
-		const offset = dayjs().add(totalSeconds, 'seconds').toDate()
-		reset(offset)
-	}, [totalSeconds, reset])
+		if (!isRunning) {
+			const offset = dayjs().add(totalSeconds, 'seconds').toDate()
+			reset(offset)
+		}
+	}, [totalSeconds, reset, isRunning])
 
 	useEffect(() => {
 		reset(

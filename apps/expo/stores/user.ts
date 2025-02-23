@@ -10,13 +10,13 @@ type MobilePreferencesStore = {
 	setShowTabLabels: (show: boolean) => void
 	maskURLs: boolean
 	setMaskURLs: (mask: boolean) => void
+	storeLastRead: boolean
+	setStoreLastRead: (shouldStore: boolean) => void
 }
 
 /**
  * A store for mobile-specific preferences. This should not be confused with the
  * user preferences that are stored on the server.
- *
- * TODO: Merge this with the server UserPreferences as optional fields?
  */
 export const usePreferencesStore = create<MobilePreferencesStore>()(
 	persist(
@@ -25,6 +25,8 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			showTabLabels: false,
 			setMaskURLs: (mask) => set({ maskURLs: mask }),
 			maskURLs: false,
+			storeLastRead: false,
+			setStoreLastRead: (shouldStore) => set({ storeLastRead: shouldStore }),
 		}),
 		{
 			name: 'stump-mobile-preferences-store',

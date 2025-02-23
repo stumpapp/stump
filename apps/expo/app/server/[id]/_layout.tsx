@@ -2,11 +2,11 @@ import { SDKContext, StumpClientContextProvider } from '@stump/client'
 import { Api, LoginResponse, User, UserPermission } from '@stump/sdk'
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { match, P } from 'ts-pattern'
 
 import { ActiveServerContext, StumpServerContext } from '~/components/activeServer'
 import { PermissionEnforcerOptions } from '~/components/activeServer/context'
 import ServerAuthDialog from '~/components/ServerAuthDialog'
+import { authSDKInstance } from '~/lib/sdk/auth'
 import { useSavedServers } from '~/stores'
 
 export default function Screen() {
@@ -25,26 +25,6 @@ export default function Screen() {
 	const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
 	const [user, setUser] = useState<User | null>(null)
 
-	const attemptLogin = useCallback(
-		async (instance: Api, username: string, password: string) => {
-			try {
-				const result = await instance.auth.login({ password, username })
-				if ('for_user' in result) {
-					const { token, for_user } = result
-					saveServerToken(activeServer?.id || 'dev', {
-						expiresAt: new Date(token.expires_at),
-						token: token.access_token,
-					})
-					setUser(for_user)
-					return token.access_token
-				}
-			} catch (error) {
-				console.error(error)
-			}
-		},
-		[activeServer, saveServerToken],
-	)
-
 	useEffect(() => {
 		if (!activeServer) return
 
@@ -54,37 +34,26 @@ export default function Screen() {
 			const serverConfig = await getServerConfig(id)
 			const instance = new Api({ baseURL: url, authMethod: 'token' })
 
-			let token: string | undefined
+			const authedInstance = await authSDKInstance(instance, {
+				config: serverConfig,
+				existingToken,
+				saveToken: async (token, forUser) => {
+					await saveServerToken(activeServer?.id || 'dev', token)
+					setUser(forUser)
+				},
+			})
 
-			if (existingToken) {
-				token = existingToken.token
-			} else {
-				token = await match(serverConfig?.auth)
-					.with({ bearer: P.string }, ({ bearer }) => bearer)
-					.with(
-						{
-							basic: P.shape({
-								username: P.string,
-								password: P.string,
-							}),
-						},
-						async ({ basic: { username, password } }) => attemptLogin(instance, username, password),
-					)
-					.otherwise(() => undefined)
-			}
-
-			if (!token) {
+			if (!authedInstance) {
 				setIsAuthDialogOpen(true)
-			} else {
-				instance.token = token
 			}
-			setSDK(instance)
+
+			setSDK(authedInstance || instance)
 		}
 
 		if (!sdk && !isAuthDialogOpen) {
 			configureSDK()
 		}
-	}, [activeServer, sdk, getServerToken, isAuthDialogOpen, getServerConfig, attemptLogin])
+	}, [activeServer, sdk, getServerToken, isAuthDialogOpen, getServerConfig, saveServerToken])
 
 	useEffect(() => {
 		if (user || !sdk || !sdk.isAuthed) return

@@ -8,7 +8,7 @@ import { Pressable, View } from 'react-native'
 import { BookMetaLink } from '~/components/book'
 import { Heading, Progress, Text } from '~/components/ui'
 import { useDisplay } from '~/lib/hooks'
-import { getBookProgression } from '~/lib/sdk'
+import { getBookProgression } from '~/lib/sdk/utils'
 
 import { useActiveServer } from '../context'
 

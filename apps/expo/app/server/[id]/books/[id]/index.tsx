@@ -1,6 +1,7 @@
 import { useMediaByIdQuery, useSDK } from '@stump/client'
 import { ActiveReadingSession } from '@stump/sdk'
 import dayjs from 'dayjs'
+import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -16,6 +17,7 @@ import { Button, Heading, Text } from '~/components/ui'
 import { formatBytes } from '~/lib/format'
 
 dayjs.extend(relativeTime)
+dayjs.extend(duration)
 
 export default function Screen() {
 	const { id: bookID } = useLocalSearchParams<{ id: string }>()
@@ -32,8 +34,7 @@ export default function Screen() {
 	const progression = media.active_reading_session
 	const lastCompletion = media.finished_reading_sessions?.[0]
 	const formattedSize = formatBytes(media.size)
-	const summary = media.metadata?.summary || ''
-	const description = summary.length > 147 ? `${summary.slice(0, 147)}...` : summary
+	const description = media.metadata?.summary || ''
 	const genres = media.metadata?.genre?.map((genre) => `#${genre}`).join(', ')
 	const links = media.metadata?.links || []
 	const pages = media.metadata?.page_count || media.pages

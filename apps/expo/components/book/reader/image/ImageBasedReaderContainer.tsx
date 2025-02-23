@@ -1,4 +1,6 @@
-import { ComponentProps, useCallback, useRef, useState } from 'react'
+import { useSDK } from '@stump/client'
+import { Image } from 'expo-image'
+import { ComponentProps, useCallback, useEffect, useRef, useState } from 'react'
 import { View } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -13,6 +15,7 @@ type Props = Omit<IImageBasedReaderContext, 'currentPage' | 'flatListRef'> &
 	ComponentProps<typeof ImageBasedReader>
 
 export default function ImageBasedReaderContainer({ initialPage, onPageChanged, ...ctx }: Props) {
+	const { sdk } = useSDK()
 	const {
 		preferences: { incognito },
 	} = useBookPreferences(ctx.book.id)
@@ -30,6 +33,18 @@ export default function ImageBasedReaderContainer({ initialPage, onPageChanged, 
 
 	const flatListRef = useRef<FlatList>(null)
 	const insets = useSafeAreaInsets()
+
+	useEffect(
+		() => {
+			Image.prefetch([ctx.pageURL(currentPage)], {
+				headers: {
+					Authorization: sdk.authorizationHeader || '',
+				},
+			})
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[initialPage],
+	)
 
 	return (
 		<ImageBasedReaderContext.Provider

@@ -64,6 +64,8 @@ impl OPDSPublication {
 		"https://readium.org/webpub-manifest/context.jsonld".to_string()
 	}
 
+	// FIXME: This fucks with the ordering of the publications in the feed. Figure something
+	// else out...
 	pub async fn vec_from_books(
 		client: &PrismaClient,
 		finalizer: OPDSLinkFinalizer,

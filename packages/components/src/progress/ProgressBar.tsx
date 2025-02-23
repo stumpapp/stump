@@ -19,7 +19,7 @@ export const PROGRESS_BAR_INDICATOR_COLOR_VARIANTS: ColorVariant = {
 	'primary-dark': 'bg-brand-600 dark:bg-brand-500',
 }
 
-const progressVariants = cva('relative w-full overflow-hidden', {
+const progressVariants = cva('relative overflow-hidden', {
 	variants: {
 		defaultVariants: {
 			rounded: 'default',
@@ -78,7 +78,7 @@ export const ProgressBar = React.forwardRef<
 		>
 			<ProgressPrimitive.Indicator
 				className={cx(
-					'h-full w-full flex-1 transition-all',
+					'h-full flex-1 transition-all',
 					PROGRESS_BAR_INDICATOR_COLOR_VARIANTS[variant || 'default'],
 					{
 						'origin-left-to-right-indeterminate animate-indeterminate-progress': isIndeterminate,

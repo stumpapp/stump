@@ -172,7 +172,7 @@ export type Series = { id: string; name: string; path: string; description: stri
 /**
  * Struct representing the metadata for a processed file.
  */
-export type MediaMetadata = { title?: string | null; series?: string | null; number?: number | null; volume?: number | null; summary?: string | null; notes?: string | null; age_rating?: number | null; genre?: string[] | null; year?: number | null; month?: number | null; day?: number | null; writers?: string[] | null; pencillers?: string[] | null; inkers?: string[] | null; colorists?: string[] | null; letterers?: string[] | null; cover_artists?: string[] | null; editors?: string[] | null; publisher?: string | null; links?: string[] | null; characters?: string[] | null; teams?: string[] | null; page_count?: number | null }
+export type MediaMetadata = { title?: string | null; series?: string | null; number?: number | null; volume?: number | null; summary?: string | null; notes?: string | null; age_rating?: number | null; genre?: string[] | null; year?: number | null; month?: number | null; day?: number | null; writers?: string[] | null; pencillers?: string[] | null; inkers?: string[] | null; colorists?: string[] | null; letterers?: string[] | null; cover_artists?: string[] | null; editors?: string[] | null; publisher?: string | null; links?: string[] | null; characters?: string[] | null; teams?: string[] | null; page_count?: number | null; page_dimensions?: PageDimensionsEntity | null }
 
 export type Media = { id: string; name: string; size: number; extension: string; pages: number; updated_at: string; created_at: string; modified_at: string | null; hash: string | null; koreader_hash: string | null; path: string; status: FileStatus; series_id: string; metadata: MediaMetadata | null; series?: Series | null; active_reading_session?: ActiveReadingSession | null; finished_reading_sessions: FinishedReadingSession[] | null; current_page?: number | null; current_epubcfi?: string | null; is_completed?: boolean | null; tags?: Tag[] | null; bookmarks?: Bookmark[] | null }
 
@@ -184,9 +184,9 @@ export type Bookmark = { id: string; preview_content: string | null; epubcfi: st
 
 export type MediaAnnotation = { id: string; highlighted_text: string | null; page: number | null; page_coordinates_x: number | null; page_coordinates_y: number | null; epubcfi: string | null; notes: string | null; media_id: string; media?: Media | null }
 
-export type ActiveReadingSession = { id: string; page: number | null; epubcfi: string | null; percentage_completed: number | null; started_at: string; media_id: string; media: Media | null; user_id: string; user: User | null }
+export type ActiveReadingSession = { id: string; page: number | null; epubcfi: string | null; percentage_completed: number | null; elapsed_seconds: number | null; started_at: string; media_id: string; media: Media | null; user_id: string; user: User | null }
 
-export type FinishedReadingSession = { id: string; started_at: string; completed_at: string; media_id: string; media: Media | null; user_id: string; user: User | null }
+export type FinishedReadingSession = { id: string; started_at: string; completed_at: string; elapsed_seconds: number | null; media_id: string; media: Media | null; user_id: string; user: User | null }
 
 export type ProgressUpdateReturn = ActiveReadingSession | FinishedReadingSession
 
@@ -309,6 +309,8 @@ export type ImageResizeMode = "Scaled" | "Sized"
  */
 export type ImageResizeOptions = { mode: ImageResizeMode; height: number; width: number }
 
+export type ScaledDimensionResize = { height: number } | { width: number }
+
 /**
  * Supported image formats for processing images throughout Stump.
  */
@@ -323,7 +325,7 @@ export type DirectoryListing = { parent: string | null; files: DirectoryListingF
 
 export type DirectoryListingFile = { is_directory: boolean; name: string; path: string }
 
-export type DirectoryListingInput = { path: string | null }
+export type DirectoryListingInput = ({ ignore_hidden?: boolean; ignore_files?: boolean; ignore_directories?: boolean }) & { path: string | null }
 
 export type Direction = "asc" | "desc"
 
@@ -443,11 +445,13 @@ export type MediaBaseFilter = { id?: string[]; name?: string[]; extension?: stri
 
 export type MediaFilter = ({ id?: string[]; name?: string[]; extension?: string[]; path?: string[]; read_status?: ReadStatus[]; tags?: string[]; search?: string | null; metadata?: MediaMetadataBaseFilter | null }) & ({ series?: SeriesFilter | null })
 
+export type PutMediaProgress = { page: number; epubcfi?: string | null; elapsed_seconds?: number | null }
+
 /**
  * Represents the relations to load for a book entity, including optional loading
  * of the series and library relationships.
  */
-export type BookRelations = { load_series?: boolean | null; load_library?: boolean | null }
+export type BookRelations = { load_series?: boolean | null; load_library?: boolean | null; load_pages?: boolean | null }
 
 export type SeriesBaseFilter = { id?: string[]; name?: string[]; path?: string[]; search?: string | null; metadata?: SeriesMetadataFilter | null }
 

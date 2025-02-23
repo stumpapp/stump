@@ -58,5 +58,5 @@ export function SDKProvider({
 		return null
 	}
 
-	return <SDKContext.Provider value={{ sdk }}>{children}</SDKContext.Provider>
+	return <SDKContext.Provider value={{ sdk, setSDK }}>{children}</SDKContext.Provider>
 }

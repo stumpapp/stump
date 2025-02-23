@@ -64,7 +64,17 @@ export const isOk = <R>(res: R, safeParse: (res: R) => unknown) => {
 	try {
 		safeParse(res)
 		return true
-	} catch (err) {
+	} catch {
 		return false
 	}
+}
+
+export async function checkOPDSURL(url: string) {
+	if (!isUrl(url)) {
+		return false
+	}
+
+	const res = await fetch(url).catch((err) => err)
+
+	return res.status === 200
 }

@@ -49,6 +49,7 @@ pub enum MediaOrderBy {
 	Path,
 	Pages,
 	Metadata(Vec<MediaMetadataOrderBy>),
+	ModifiedAt,
 }
 
 impl MediaOrderBy {

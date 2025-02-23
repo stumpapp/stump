@@ -1,12 +1,12 @@
 use std::{path::PathBuf, sync::Arc};
 
 use axum::{
-	extract::{Path, State},
+	extract::{Path, Query, State},
 	Extension, Json,
 };
-use axum_extra::extract::Query;
-use prisma_client_rust::chrono::Duration;
+use prisma_client_rust::{chrono::Duration, Direction};
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use specta::Type;
 use stump_core::{
 	db::entity::{
@@ -17,7 +17,11 @@ use stump_core::{
 		ActiveReadingSession, FinishedReadingSession, Media, MediaMetadata,
 		PageDimension, PageDimensionsEntity, ProgressUpdateReturn, User, UserPermission,
 	},
-	filesystem::{analyze_media_job::AnalyzeMediaJob, get_page_async},
+	filesystem::{
+		analyze_media_job::AnalyzeMediaJob,
+		get_page_async,
+		image::{resize_image, ScaledDimensionResize},
+	},
 	prisma::{
 		active_reading_session, finished_reading_session, library,
 		media::{self, WhereParam},
@@ -47,6 +51,8 @@ pub(crate) struct BookRelations {
 	load_series: Option<bool>,
 	#[serde(default)]
 	load_library: Option<bool>,
+	#[serde(default)]
+	load_pages: Option<bool>,
 }
 
 /// Represents whether a media item is marked as completed and the last time it was completed.
@@ -155,8 +161,15 @@ pub async fn get_media_by_id(
 		]))
 		.with(media::finished_user_reading_sessions::fetch(vec![
 			finished_reading_session::user_id::equals(user_id),
-		]))
-		.with(media::metadata::fetch());
+		]));
+
+	if params.load_pages.unwrap_or_default() {
+		query = query.with(
+			media::metadata::fetch().with(media_metadata::page_dimensions::fetch()),
+		);
+	} else {
+		query = query.with(media::metadata::fetch());
+	}
 
 	if params.load_series.unwrap_or_default() {
 		tracing::trace!(media_id = id, "Loading series relation for media");
@@ -280,7 +293,26 @@ pub(crate) async fn convert_media(
 	Err(APIError::NotImplemented)
 }
 
-// TODO: ImageResponse as body type
+/// Extra query params for scaling a page dimension according to a specific dimension.
+/// This means the opposite dimension will be calculated based on the aspect ratio
+#[derive(Default, Debug, Deserialize, Serialize, ToSchema)]
+pub struct RequestPageScaled {
+	#[serde(default)]
+	height: Option<u32>,
+	#[serde(default)]
+	width: Option<u32>,
+}
+
+impl RequestPageScaled {
+	pub fn to_scaled_dimension(&self) -> Option<ScaledDimensionResize> {
+		match (self.height, self.width) {
+			(Some(height), _) => Some(ScaledDimensionResize::Height(height)),
+			(_, Some(width)) => Some(ScaledDimensionResize::Width(width)),
+			_ => None,
+		}
+	}
+}
+
 #[utoipa::path(
 	get,
 	path = "/api/v1/media/:id/page/:page",
@@ -302,8 +334,11 @@ pub(crate) async fn get_media_page(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
+	Query(requested_scale): Query<RequestPageScaled>,
 ) -> APIResult<ImageResponse> {
 	let db = &ctx.db;
+
+	tracing::trace!(?id, ?page, ?requested_scale, "Fetching media page");
 
 	let user = req.user();
 	let user_id = user.id.clone();
@@ -334,17 +369,32 @@ pub(crate) async fn get_media_page(
 			"Page {page} is out of bounds for media {id}"
 		)))
 	} else {
-		Ok(get_page_async(&media.path, page, &ctx.config).await?.into())
+		let (content_type, buf) = get_page_async(&media.path, page, &ctx.config).await?;
+		let scaled_buf = match requested_scale.to_scaled_dimension() {
+			Some(dimension) => resize_image(buf, dimension).await?,
+			_ => buf,
+		};
+		Ok(ImageResponse {
+			content_type,
+			data: scaled_buf,
+		})
 	}
+}
+
+#[skip_serializing_none]
+#[derive(Deserialize, Serialize, ToSchema, specta::Type)]
+pub struct PutMediaProgress {
+	pub page: i32,
+	pub epubcfi: Option<String>,
+	pub elapsed_seconds: Option<i64>,
 }
 
 #[utoipa::path(
 	put,
-	path = "/api/v1/media/:id/progress/:page",
+	path = "/api/v1/media/:id/progress",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media to get"),
-		("page" = i32, Path, description = "The page to update the read progress to")
 	),
 	responses(
 		(status = 200, description = "Successfully fetched media read progress"),
@@ -356,9 +406,14 @@ pub(crate) async fn get_media_page(
 )]
 /// Update the read progress of a media. If the progress doesn't exist, it will be created.
 pub(crate) async fn update_media_progress(
-	Path((id, page)): Path<(String, i32)>,
+	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
+	Json(PutMediaProgress {
+		page,
+		epubcfi,
+		elapsed_seconds,
+	}): Json<PutMediaProgress>,
 ) -> APIResult<Json<ProgressUpdateReturn>> {
 	let user = req.user();
 	let user_id = user.id.clone();
@@ -374,9 +429,26 @@ pub(crate) async fn update_media_progress(
 			active_reading_session::create(
 				media::id::equals(id.clone()),
 				user::id::equals(user_id.clone()),
-				vec![active_reading_session::page::set(Some(page))],
+				chain_optional_iter(
+					[active_reading_session::page::set(Some(page))],
+					[
+						epubcfi
+							.clone()
+							.map(|cfi| active_reading_session::epubcfi::set(Some(cfi))),
+						elapsed_seconds.map(|es| {
+							active_reading_session::elapsed_seconds::set(Some(es))
+						}),
+					],
+				),
 			),
-			vec![active_reading_session::page::set(Some(page))],
+			chain_optional_iter(
+				[active_reading_session::page::set(Some(page))],
+				[
+					epubcfi.map(|cfi| active_reading_session::epubcfi::set(Some(cfi))),
+					elapsed_seconds
+						.map(|es| active_reading_session::elapsed_seconds::set(Some(es))),
+				],
+			),
 		)
 		.include(reading_session_with_book_pages::include())
 		.exec()
@@ -406,7 +478,12 @@ pub(crate) async fn update_media_progress(
 						deleted_session.map(|s| s.started_at).unwrap_or_default(),
 						media::id::equals(id.clone()),
 						user::id::equals(user_id.clone()),
-						vec![],
+						chain_optional_iter(
+							[],
+							[elapsed_seconds.map(|es| {
+								finished_reading_session::elapsed_seconds::set(Some(es))
+							})],
+						),
 					)
 					.exec()
 					.await

@@ -2,6 +2,9 @@ import '~/global.css'
 
 import { DarkTheme, DefaultTheme, Theme, ThemeProvider } from '@react-navigation/native'
 import { PortalHost } from '@rn-primitives/portal'
+import dayjs from 'dayjs'
+import duration from 'dayjs/plugin/duration'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import * as React from 'react'
@@ -12,6 +15,10 @@ import { BottomSheet } from '~/components/ui/bottom-sheet'
 import { setAndroidNavigationBar } from '~/lib/android-navigation-bar'
 import { NAV_THEME } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
+import { useHideStatusBar } from '~/stores/reader'
+
+dayjs.extend(relativeTime)
+dayjs.extend(duration)
 
 const LIGHT_THEME: Theme = {
 	...DefaultTheme,
@@ -27,10 +34,15 @@ export {
 	ErrorBoundary,
 } from 'expo-router'
 
+// TODO: hide status bar when reading
+
 export default function RootLayout() {
-	const hasMounted = React.useRef(false)
 	const { colorScheme, isDarkColorScheme } = useColorScheme()
+
 	const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false)
+
+	const shouldHideStatusBar = useHideStatusBar()
+	const hasMounted = React.useRef(false)
 
 	useIsomorphicLayoutEffect(() => {
 		if (hasMounted.current) {
@@ -52,11 +64,16 @@ export default function RootLayout() {
 
 	return (
 		<GestureHandlerRootView style={{ flex: 1 }}>
-			{/* TODO: determine if I need this? */}
 			<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
 				<BottomSheet.Provider>
-					<StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
-					<Stack>
+					{/* TODO: This pushes content when entering/exiting */}
+					<StatusBar style={isDarkColorScheme ? 'light' : 'dark'} hidden={shouldHideStatusBar} />
+					<Stack
+					// https://github.com/expo/expo/issues/15244 ?
+					// screenOptions={{
+					// 	statusBarHidden: shouldHideStatusBar,
+					// }}
+					>
 						<Stack.Screen
 							name="(tabs)"
 							options={{

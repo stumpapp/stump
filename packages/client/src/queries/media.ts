@@ -5,6 +5,7 @@ import type {
 	MediaOrderBy,
 	MediaSmartFilter,
 	ProgressUpdateReturn,
+	PutMediaProgress,
 	SmartSearchBody,
 } from '@stump/sdk'
 import { FullQueryParams, QueryOrderParams } from '@stump/sdk'
@@ -193,8 +194,8 @@ export function useMediaCursorQuery(options: CursorQueryOptions<Media>) {
 // TODO: the TVariables generic will need to change once epub can update their
 // progress, since this is focused around page numbers.
 export function useUpdateMediaProgress(
-	mediaId: string,
-	options?: MutationOptions<ProgressUpdateReturn, AxiosError, number>,
+	mediaID: string,
+	options?: MutationOptions<ProgressUpdateReturn, AxiosError, PutMediaProgress>,
 ) {
 	const { sdk } = useSDK()
 	const {
@@ -202,8 +203,8 @@ export function useUpdateMediaProgress(
 		mutateAsync: updateReadProgressAsync,
 		isLoading,
 	} = useMutation(
-		[sdk.media.keys.updateProgress, mediaId],
-		(page: number) => sdk.media.updateProgress(mediaId, page),
+		[sdk.media.keys.updateProgress, mediaID],
+		(params: PutMediaProgress) => sdk.media.updateProgress(mediaID, params),
 		options,
 	)
 

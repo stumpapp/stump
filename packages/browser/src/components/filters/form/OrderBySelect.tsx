@@ -7,7 +7,7 @@ import { FilterableEntity } from '.'
 const commonOptions = ['name', 'status', 'created_at', 'path']
 const options: Record<FilterableEntity, string[]> = {
 	library: commonOptions,
-	media: [...commonOptions, 'size', 'extension', 'pages', 'series_id'],
+	media: [...commonOptions, 'size', 'extension', 'pages', 'series_id', 'modified_at'],
 	series: [...commonOptions, 'description', 'library_id'],
 }
 

@@ -15,6 +15,9 @@ web-build/
 *.p12
 *.key
 *.mobileprovision
+*.ipa
+*.apk
+*.aab
 
 # Metro
 .metro-health-check*
@@ -23,6 +26,12 @@ web-build/
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+
+ios
+android
+
+!modules/**/ios
+!modules/**/android
 
 # macOS
 .DS_Store

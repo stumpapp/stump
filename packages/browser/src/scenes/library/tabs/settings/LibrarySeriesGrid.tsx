@@ -16,7 +16,7 @@ export default function LibrarySeriesGrid({ libraryId, onSelectSeries }: Props) 
 		limit: 50,
 		params: {
 			library: {
-				id: libraryId,
+				id: [libraryId],
 			},
 		},
 	})

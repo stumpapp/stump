@@ -22,7 +22,7 @@ const OPDS_V2_ROUTE = '/opds/v2.0'
 /**
  * A helper function to format the URL for OPDS v2 API routes with optional query parameters
  */
-const opdsURL = createRouteURLHandler(OPDS_V2_ROUTE)
+export const opdsURL = createRouteURLHandler(OPDS_V2_ROUTE)
 
 /**
  * The api-key API controller, used for interacting with the api-key endpoints of the Stump API

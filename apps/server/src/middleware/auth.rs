@@ -41,7 +41,7 @@ use crate::{
 
 use super::host::HostExtractor;
 
-const STUMP_SAVE_BASIC_SESSION_HEADER: &str = "X-Stump-Save-Session";
+pub const STUMP_SAVE_BASIC_SESSION_HEADER: &str = "X-Stump-Save-Session";
 
 /// A struct to represent the authenticated user in the current request context. A user is
 /// authenticated if they meet one of the following criteria:

@@ -12,6 +12,7 @@ import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect } from 'react'
 
 import { EpubJSReader, ImageBasedReader, UnsupportedReader } from '~/components/book/reader'
+import { useAppState } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences, useBookTimer } from '~/stores/reader'
 
@@ -66,14 +67,28 @@ export default function Screen() {
 		}
 	}, [setShowControls])
 
+	const onFocusedChanged = useCallback(
+		(focused: boolean) => {
+			if (!focused) {
+				pause()
+			} else if (focused) {
+				resume()
+			}
+		},
+		[pause, resume],
+	)
+
+	const appState = useAppState({
+		onStateChanged: onFocusedChanged,
+	})
 	const showControls = useReaderStore((state) => state.showControls)
 	useEffect(() => {
-		if (showControls && isRunning) {
+		if ((showControls && isRunning) || appState !== 'active') {
 			pause()
-		} else if (!showControls && !isRunning) {
+		} else if (!showControls && !isRunning && appState === 'active') {
 			resume()
 		}
-	}, [showControls, pause, resume, isRunning])
+	}, [showControls, pause, resume, isRunning, appState])
 
 	/**
 	 * Invalidate the book query when a reader is unmounted so that the book overview

@@ -151,14 +151,18 @@ export const useBookTimer = (id: string, params: UseBookTimerParams = {}) => {
 	})
 
 	const pauseTimer = useCallback(() => {
-		pause()
-		setBookTimer(id, totalSeconds)
-	}, [id, pause, setBookTimer, totalSeconds])
+		if (isRunning) {
+			pause()
+			setBookTimer(id, totalSeconds)
+		}
+	}, [id, pause, setBookTimer, totalSeconds, isRunning])
 
 	const resumeTimer = useCallback(() => {
-		const offset = dayjs().add(totalSeconds, 'seconds').toDate()
-		reset(offset)
-	}, [totalSeconds, reset])
+		if (!isRunning) {
+			const offset = dayjs().add(totalSeconds, 'seconds').toDate()
+			reset(offset)
+		}
+	}, [totalSeconds, reset, isRunning])
 
 	useEffect(() => {
 		reset(

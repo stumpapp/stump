@@ -4,7 +4,7 @@ version = { workspace = true }
 edition = "2021"
 
 [dependencies]
-alphanumeric-sort = "1.5.3"
+alphanumeric-sort = { workspace = true }
 async-channel = "2.1.0"
 async-trait = { workspace = true }
 cuid = "1.3.2"

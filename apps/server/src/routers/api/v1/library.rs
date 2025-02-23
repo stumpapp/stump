@@ -737,7 +737,8 @@ async fn replace_library_thumbnail(
 
 	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 	// user testing I'd like to see if this becomes a problem. We'll see!
-	match remove_thumbnails(&[library_id.clone()], &ctx.config.get_thumbnails_dir()) {
+	match remove_thumbnails(&[library_id.clone()], &ctx.config.get_thumbnails_dir()).await
+	{
 		Ok(count) => tracing::info!("Removed {} thumbnails!", count),
 		Err(e) => tracing::error!(
 			?e,
@@ -797,7 +798,7 @@ async fn delete_library_thumbnails(
 		.flat_map(|s| s.media.into_iter().map(|m| m.id))
 		.collect::<Vec<String>>();
 
-	remove_thumbnails(&media_ids, &thumbnails_dir)?;
+	remove_thumbnails(&media_ids, &thumbnails_dir).await?;
 
 	Ok(Json(()))
 }
@@ -1167,14 +1168,19 @@ async fn clean_library(
 	let (response, media_to_delete_ids) = result?;
 
 	if !media_to_delete_ids.is_empty() {
-		image::remove_thumbnails(&media_to_delete_ids, &thumbnails_dir).map_or_else(
-			|error| {
-				tracing::error!(?error, "Failed to remove thumbnails for library media");
-			},
-			|_| {
-				tracing::debug!("Removed thumbnails for deleted media");
-			},
-		);
+		image::remove_thumbnails(&media_to_delete_ids, &thumbnails_dir)
+			.await
+			.map_or_else(
+				|error| {
+					tracing::error!(
+						?error,
+						"Failed to remove thumbnails for library media"
+					);
+				},
+				|_| {
+					tracing::debug!("Removed thumbnails for deleted media");
+				},
+			);
 	}
 
 	Ok(Json(response))
@@ -1690,7 +1696,7 @@ async fn delete_library(
 			media_ids.len()
 		);
 
-		if let Err(err) = image::remove_thumbnails(&media_ids, &thumbnails_dir) {
+		if let Err(err) = image::remove_thumbnails(&media_ids, &thumbnails_dir).await {
 			error!("Failed to remove thumbnails for library media: {:?}", err);
 		} else {
 			debug!("Removed thumbnails for library media (if present)");

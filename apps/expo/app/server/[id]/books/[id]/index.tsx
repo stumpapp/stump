@@ -34,8 +34,7 @@ export default function Screen() {
 	const progression = media.active_reading_session
 	const lastCompletion = media.finished_reading_sessions?.[0]
 	const formattedSize = formatBytes(media.size)
-	const summary = media.metadata?.summary || ''
-	const description = summary.length > 147 ? `${summary.slice(0, 147)}...` : summary
+	const description = media.metadata?.summary || ''
 	const genres = media.metadata?.genre?.map((genre) => `#${genre}`).join(', ')
 	const links = media.metadata?.links || []
 	const pages = media.metadata?.page_count || media.pages

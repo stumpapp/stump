@@ -10,43 +10,43 @@
 		"claimText": "This Stump server is not initialized. Use the form below to create your account. Once created, you will have full access to all server features.",
 		"form": {
 			"validation": {
-				"missingUsername": "O nome de usuário é necessário",
-				"missingPassword": "A senha é necessária",
+				"missingUsername": "Username is required",
+				"missingPassword": "Password is required",
 				"usernameAlreadyExists": "Username already exists"
 			},
 			"labels": {
-				"username": "Nome de usuário",
-				"password": "Senha"
+				"username": "Username",
+				"password": "Password"
 			},
 			"buttons": {
-				"createAccount": "Criar Conta",
+				"createAccount": "Create Account",
 				"login": "Log in"
 			}
 		},
 		"toasts": {
-			"loggingIn": "Entrando...",
+			"loggingIn": "Logging in...",
 			"loggedIn": "Welcome back!",
 			"loggedInFirstTime": "Welcome!",
-			"registering": "Registrando...",
-			"registered": "Registrado!",
-			"loginFailed": "Falha no login. Tente novamente",
-			"registrationFailed": "Falha ao registrar. Por favor, tente novamente"
+			"registering": "Registering...",
+			"registered": "Registered!",
+			"loginFailed": "Login failed. Please try again",
+			"registrationFailed": "Registration failed. Please try again"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "Configuração da Biblioteca",
-			"subtitleCreating": "Uma prévia da sua nova biblioteca será exibida abaixo",
-			"subtitleEditing": "Uma prévia das edições da sua biblioteca será exibida abaixo"
+			"heading": "Library Configuration",
+			"subtitleCreating": "A preview of your new library will be shown below",
+			"subtitleEditing": "A preview of your library edits will be shown below"
 		}
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "Informações do Arquivo",
+			"heading": "File Information",
 			"labels": {
-				"fileSize": "Tamanho do arquivo",
-				"fileType": "Tipo de arquivo",
-				"fileLocation": "Localização do Arquivo",
+				"fileSize": "File Size",
+				"fileType": "File Type",
+				"fileLocation": "File Location",
 				"fileChecksum": "Checksum"
 			}
 		},
@@ -66,7 +66,7 @@
 				}
 			}
 		},
-		"nextInSeries": "Seguinte na série"
+		"nextInSeries": "Next in Series"
 	},
 	"createOrUpdateBookClubForm": {
 		"fields": {
@@ -408,9 +408,9 @@
 		}
 	},
 	"createLibraryScene": {
-		"heading": "Criar nova biblioteca",
-		"subtitle": "As bibliotecas são usadas para agrupar seus livros. Se você quer uma atualização sobre as bibliotecas e como elas funcionam, confira",
-		"subtitleLink": "documentação relevante",
+		"heading": "Create library",
+		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on how they work, check out the",
+		"subtitleLink": "relevant documentation",
 		"form": {
 			"stepLabel": "Step",
 			"steps": [
@@ -421,7 +421,7 @@
 				},
 				{
 					"label": "Scanning",
-					"heading": "Scanner Behavior",
+					"heading": "Scanning",
 					"description": "Settings related to how Stump scans this library"
 				},
 				{
@@ -457,7 +457,7 @@
 				}
 			},
 			"buttons": {
-				"confirm": "Criar Biblioteca"
+				"confirm": "Create Library"
 			}
 		}
 	},
@@ -485,9 +485,9 @@
 		}
 	},
 	"librarySettingsScene": {
-		"heading": "Gerenciar Biblioteca",
-		"subtitle": "Atualize os detalhes ou a configuração da sua biblioteca, altere as regras de acesso de controle ou arquivos de verificação. Se você está querendo uma atualização das bibliotecas e como elas funcionam, confira a",
-		"subtitleLink": "documentação relevante",
+		"heading": "Settings",
+		"subtitle": "Manage your library here. If you're wanting a refresh on these settings, check out the",
+		"subtitleLink": "relevant documentation",
 		"sidebar": {
 			"basics": "Basics",
 			"options": {
@@ -517,8 +517,72 @@
 			"description": "The default reader settings to use for books in this library. Any book can override these settings"
 		},
 		"options/scanning": {
-			"title": "Scanner Behavior",
-			"description": "Settings related to how Stump scans this library"
+			"title": "Scanning",
+			"description": "Settings related to how Stump scans this library",
+			"sections": {
+				"configureScan": {
+					"heading": "Configure scan",
+					"description": "A scan with additional options for more fine-grained control",
+					"form": {
+						"alert": "These will override corresponding library-wide settings",
+						"options": {
+							"forceRebuild": {
+								"label": "Force rebuild",
+								"description": "Rebuild every book in the library on disk",
+								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
+							},
+							"custom": {
+								"label": "Custom",
+								"description": "Customize the scan configuration",
+								"validation": {
+									"noSelection": "At least one option must be enabled"
+								}
+							},
+							"rebuildMeta": {
+								"label": "Rebuild metadata",
+								"description": "Rebuild metadata for books in the library"
+							},
+							"regenHashes": {
+								"label": "Regenerate hashes",
+								"description": "Recreate hashes for books in the library"
+							}
+						}
+					}
+				},
+				"defaultScan": {
+					"heading": "Default scan",
+					"description": "A standard scan to index your library for new content"
+				},
+				"history": {
+					"heading": "Scan history",
+					"description": "The history of all scans recorded for this library",
+					"empty": "There are no scans recorded for this library",
+					"runScan": "Run scan",
+					"inspect": "See details",
+					"inspector": {
+						"title": "Scan record",
+						"description": "A detailed view of this scan record",
+						"fields": {
+							"library": "Library",
+							"date": "Date",
+							"config": "Config",
+							"jobOutput": "Job output",
+							"logs": "Logs"
+						},
+						"logsPresent": "Logs were persisted for this job",
+						"seeLogs": "See logs"
+					},
+					"table": {
+						"columns": {
+							"timestamp": "Scanned at",
+							"config": "Config"
+						},
+						"default": "Default",
+						"custom": "Custom"
+					},
+					"clearHistory": "Delete scan history"
+				}
+			}
 		},
 		"options/thumbnails": {
 			"title": "Thumbnails",
@@ -592,11 +656,11 @@
 	},
 	"errorScene": {
 		"heading": "lol, oops",
-		"message": "Ocorreu um erro:",
+		"message": "An error occurred:",
 		"buttons": {
-			"report": "Reportar Bug",
-			"copy": "Copiar os detalhes do erro",
-			"goHome": "Ir ao Início"
+			"report": "Report Bug",
+			"copy": "Copy Error Details",
+			"goHome": "Go Home"
 		}
 	},
 	"homeScene": {
@@ -624,8 +688,8 @@
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "Continuar Lendo",
-			"downloadSeries": "Baixar Séries"
+			"continueReading": "Continue Reading",
+			"downloadSeries": "Download Series"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -1026,11 +1090,11 @@
 	},
 	"settingsScene": {
 		"navigation": {
-			"general": "Geral",
+			"general": "General",
 			"logs": "Logs",
-			"server": "Servidor",
-			"jobs": "Ações e configurações",
-			"users": "Gerenciamento de usuários",
+			"server": "Server",
+			"jobs": "Jobs and Configuration",
+			"users": "User Management",
 			"desktop": "Desktop"
 		},
 		"sidebar": {
@@ -1388,6 +1452,12 @@
 						},
 						"emptyHeading": "No logs to display",
 						"emptySubtitle": "Your server is either very healthy or very unhealthy"
+					},
+					"deleteLogs": {
+						"title": "Delete logs",
+						"description": "Permanently delete all persisted logs from the database",
+						"disclaimer": "This action cannot be undone",
+						"confirm": "Delete logs"
 					}
 				},
 				"liveLogs": {
@@ -1494,8 +1564,8 @@
 					"file": {
 						"label": "File Management",
 						"explorer": {
-							"label": "File Explorer",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+							"label": "File explorer",
+							"description": "Allows the user to access the various file explorers.\nContent restriction cannot be guaranteed when this feature is granted"
 						},
 						"download": {
 							"label": "Download files",
@@ -1570,14 +1640,14 @@
 						},
 						"manage": {
 							"label": "Manage users",
-							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
+							"description": "Allows the user to manage other users on the server.\nIncludes permissions to read, create, and update"
 						}
 					},
 					"smartlist": {
 						"label": "Smart Lists",
 						"read": {
 							"label": "Access smart list feature",
-							"description": "Allows the user to access smart lists features"
+							"description": "Allows the user to access smart lists features. Granular permissions are not yet implemented, so this\nincludes permissions to read, create, and update their own lists"
 						}
 					}
 				},
@@ -1722,12 +1792,12 @@
 		}
 	},
 	"jobOverlay": {
-		"backupHeading": "Trabalho em Progresso"
+		"backupHeading": "Job in Progress"
 	},
 	"libraryStats": {
-		"seriesCount": "Total de Séries",
-		"bookCount": "Número Total de Livros",
-		"diskUsage": "Uso de disco"
+		"seriesCount": "Total Series",
+		"bookCount": "Total Books",
+		"diskUsage": "Disk Usage"
 	},
 	"noLibraries": {
 		"heading": "Nothing to see here",
@@ -1743,39 +1813,39 @@
 	},
 	"pagination": {
 		"buttons": {
-			"next": "Próxima",
-			"previous": "Anterior"
+			"next": "Next",
+			"previous": "Previous"
 		},
 		"popover": {
-			"heading": "Ir para a página",
+			"heading": "Go to page",
 			"buttons": {
-				"confirm": "Ir",
-				"cancel": "Cancelar"
+				"confirm": "Go",
+				"cancel": "Cancel"
 			}
 		}
 	},
 	"signOutModal": {
-		"title": "Terminar Sessão",
-		"message": "Você tem certeza que deseja sair?",
+		"title": "Sign out",
+		"message": "Are you sure you want to sign out?",
 		"buttons": {
-			"cancel": "Cancelar",
-			"signOut": "Terminar Sessão"
+			"cancel": "Cancel",
+			"signOut": "Sign out"
 		}
 	},
 	"sidebar": {
 		"buttons": {
-			"home": "Início",
-			"libraries": "Bibliotecas",
+			"home": "Home",
+			"libraries": "Libraries",
 			"books": "Explore",
 			"bookClubs": "Book clubs",
 			"createLibrary": "Create library",
 			"noLibraries": "No libraries",
 			"createBookClub": "Create book club",
 			"noBookClubs": "No book clubs",
-			"settings": "Configurações",
-			"themeToggle": "Alternar tema",
-			"goForward": "Ir adiante",
-			"goBack": "Retornar",
+			"settings": "Settings",
+			"themeToggle": "Toggle Theme",
+			"goForward": "Go Forward",
+			"goBack": "Go Back",
 			"smartlists": "Smart lists",
 			"noSmartlists": "No smart lists",
 			"createSmartlist": "Create smart list",
@@ -1784,51 +1854,51 @@
 		"libraryOptions": {
 			"scanLibrary": "Scan",
 			"fileExplorer": "Files",
-			"manageLibrary": "Manage",
+			"manageLibrary": "Settings",
 			"deleteLibrary": "Delete"
 		},
 		"versionInformation": {
-			"heading": "Informações da versão",
-			"semVer": "Versionamento Semântico",
-			"commitHash": "Hash do Commit",
-			"buildDate": "Data da Compilação"
+			"heading": "Version Information",
+			"semVer": "Semantic Version",
+			"commitHash": "Commit Hash",
+			"buildDate": "Build Date"
 		}
 	},
 	"search": {
-		"placeholder": "Pesquisar"
+		"placeholder": "Search"
 	},
 	"serverSOS": {
-		"heading": "Servidor indisponível",
+		"heading": "Server Unavailable",
 		"desktop": {
-			"message": "Ocorreu um erro de rede que sugere que seu servidor Stump está indisponível. Por favor, verifique se ele está sendo executado e acessível a partir deste dispositivo.\nSe a URL do seu servidor mudou, você pode atualizá-la usando o formulário abaixo"
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
 		},
 		"web": {
-			"message": "Ocorreu um erro de rede que sugere que seu servidor Stump está indisponível no momento. Por favor, verifique se ele está sendo executado e acessível a partir deste dispositivo"
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
 		},
-		"reconnected": "Reconectado ao servidor! Redirecionando...",
-		"reconnectionFailed": "Algo deu errado!"
+		"reconnected": "Reconnected to server! Redirecting...",
+		"reconnectionFailed": "Something went wrong!"
 	},
 	"serverStatusOverlay": {
-		"heading": "Servidor não está conectado",
+		"heading": "Server isn't connected",
 		"message": [
-			"Por favor, verifique sua conexão com a internet",
-			"Clique aqui",
-			"para mudar a URL de seu servidor"
+			"Please check your internet connection",
+			"Click here",
+			"to change your server URL"
 		]
 	},
 	"slidingList": {
-		"empty": "Nenhum item para exibir",
+		"empty": "No items to display",
 		"buttons": {
-			"next": "Buscar à frente",
-			"previous": "Procurar Anterior"
+			"next": "Seek Ahead",
+			"previous": "Seek Backwards"
 		}
 	},
 	"tagSelect": {
 		"placeholder": "Select or create tag",
-		"placeholderNoTags": "Não há tags disponíveis"
+		"placeholderNoTags": "No tags available"
 	},
 	"thumbnailDropdown": {
-		"label": "Edit thumbnail",
+		"label": "Select thumbnail",
 		"options": {
 			"selectFromBooks": "Select from books",
 			"uploadImage": "Upload image"
@@ -1862,6 +1932,7 @@
 		"goToServers": "Go to servers",
 		"notReady": "This feature is not ready",
 		"notUsedYet": "Not used yet",
-		"never": "Never"
+		"never": "Never",
+		"scan": "Scan"
 	}
 }

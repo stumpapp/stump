@@ -17,7 +17,7 @@ type MediaID = String;
 type SeriesID = String;
 type LibraryID = String;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum AnalyzeMediaJobVariant {
 	/// Analyze an individual media item, specified by ID.
 	AnalyzeSingleItem(MediaID),
@@ -60,7 +60,7 @@ impl JobOutputExt for AnalyzeMediaOutput {
 
 /// A job that analyzes a media item and updates the database
 /// with information from the analysis.
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct AnalyzeMediaJob {
 	pub variant: AnalyzeMediaJobVariant,
 }

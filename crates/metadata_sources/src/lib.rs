@@ -41,6 +41,7 @@
 mod config_schema;
 mod sources;
 
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 pub use config_schema::{ConfigSchema, SchemaField, SchemaFieldType};
@@ -63,7 +64,7 @@ pub const REGISTERED_SOURCES: &[&str] = &[
 /// are expected to return a [`MetadataSourceError::IncompatibleInput`] error if a necessary field
 /// is available and callers of metadata sources should handle such an error gracefully when the
 /// source API being used is not known.
-#[derive(Default)]
+#[derive(Debug, Default, Clone)]
 pub struct MetadataSourceInput {
 	/// The title of the input.
 	pub title: Option<String>,
@@ -82,7 +83,7 @@ pub struct MetadataSourceInput {
 /// This trait defines a metadata source which includes logic for fetching metadata for a given
 /// [`MetadataSourceInput`].
 #[async_trait::async_trait]
-pub trait MetadataSource {
+pub trait MetadataSource: Send {
 	/// The `const &str` used to identify a particular metadata source
 	fn name(&self) -> &'static str;
 
@@ -117,7 +118,7 @@ pub trait MetadataSource {
 }
 
 /// A struct that holds the [`MetadataSource`] output.
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct MetadataOutput {
 	pub title: Option<String>,
 	pub authors: Vec<String>,

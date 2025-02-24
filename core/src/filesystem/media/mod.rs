@@ -1,5 +1,6 @@
 pub mod analyze_media_job;
 mod builder;
+mod download_metadata_job;
 mod format;
 mod process;
 mod utils;

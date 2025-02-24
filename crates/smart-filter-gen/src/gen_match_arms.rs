@@ -55,15 +55,17 @@ fn generate_string_match_arm(
 	let inner_name = &variant_data.variable_inner_name;
 
 	let into_fn = if variant_data.is_optional {
-		format_ident!("into_optional_params")
+		format_ident!("into_optional_string_params")
 	} else {
-		format_ident!("into_params")
+		format_ident!("into_string_params")
 	};
 
 	quote! {
 	  #ident::#name { #inner_name } => #inner_name.#into_fn(
 		#prisma_table::#inner_name::equals,
 		#prisma_table::#inner_name::contains,
+		#prisma_table::#inner_name::starts_with,
+		#prisma_table::#inner_name::ends_with,
 		#prisma_table::#inner_name::in_vec,
 	  )
 	}
@@ -90,6 +92,7 @@ fn generate_number_match_arm(
 		#prisma_table::#inner_name::gte,
 		#prisma_table::#inner_name::lt,
 		#prisma_table::#inner_name::lte,
+		#prisma_table::#inner_name::in_vec,
 	  )
 	}
 }

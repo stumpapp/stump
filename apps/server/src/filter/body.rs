@@ -33,7 +33,7 @@ mod tests {
 		entity::{MediaMetadataOrderBy, MediaOrderBy},
 		filter::{
 			Filter, LibrarySmartFilter, MediaSmartFilter, NumericFilter,
-			SeriesSmartFilter,
+			SeriesSmartFilter, StringFilter,
 		},
 		query::Direction,
 	};
@@ -77,9 +77,9 @@ mod tests {
 				and: vec![MediaSmartFilter::Series {
 					series: SeriesSmartFilter::Library {
 						library: LibrarySmartFilter::Name {
-							name: Filter::Excludes {
+							name: Filter::StringFilter(StringFilter::Excludes {
 								excludes: "test".to_string(),
-							},
+							}),
 						},
 					},
 				}],

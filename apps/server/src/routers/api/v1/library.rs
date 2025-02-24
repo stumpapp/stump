@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use serde_with::skip_serializing_none;
 use specta::Type;
-use std::path;
+use std::{collections::HashMap, path};
 use tokio::fs;
 use tracing::{debug, error, trace};
 use utoipa::ToSchema;
@@ -20,7 +20,7 @@ use stump_core::{
 	db::{
 		entity::{
 			macros::{
-				library_idents_select, library_scan_details,
+				library_id_select, library_idents_select, library_scan_details,
 				library_series_ids_media_ids_include, library_tags_select,
 				library_thumbnails_deletion_include, series_or_library_thumbnail,
 			},
@@ -54,7 +54,8 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::{
-		chain_optional_iter, FilterQuery, LibraryFilter, MediaFilter, SeriesFilter,
+		chain_optional_iter, AlphabetQueryRecord, FilterQuery, LibraryFilter,
+		MediaFilter, SeriesFilter,
 	},
 	middleware::auth::{auth_middleware, RequestContext},
 	routers::api::filters::{
@@ -102,6 +103,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/series", get(get_library_series))
 				.route("/media", get(get_library_media))
 				.route("/analyze", post(start_media_analysis))
+				.route("/alphabet", get(get_library_alphabet))
 				.nest(
 					"/thumbnail",
 					Router::new()
@@ -1917,4 +1919,114 @@ async fn start_media_analysis(
 		})?;
 
 	APIResult::Ok(())
+}
+
+#[derive(Debug, Deserialize, Serialize, ToSchema, Type)]
+pub enum LibraryAlphabetForEntity {
+	#[serde(rename = "media")]
+	Media,
+	#[serde(rename = "series")]
+	Series,
+}
+
+#[derive(Debug, Deserialize, Serialize, ToSchema, Type)]
+pub struct LibraryAlphabetParams {
+	pub r#for: LibraryAlphabetForEntity,
+}
+
+async fn get_library_alphabet(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+	Query(params): Query<LibraryAlphabetParams>,
+) -> APIResult<Json<HashMap<String, bool>>> {
+	let user = req.user();
+	let db = &ctx.db;
+
+	let _library = db
+		.library()
+		.find_first(vec![
+			library::id::equals(id.clone()),
+			library_not_hidden_from_user_filter(user),
+		])
+		.select(library_id_select::select())
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound("Library not found".to_string()))?;
+
+	let letters = match params.r#for {
+		LibraryAlphabetForEntity::Media => {
+			db._query_raw::<AlphabetQueryRecord>(raw!(
+				r"
+				SELECT DISTINCT 
+					UPPER(
+						COALESCE(
+							NULLIF(SUBSTR(mm.title, 1, 1), ''),
+							SUBSTR(m.name, 1, 1)
+						)
+					) AS letter
+				FROM media m
+				LEFT JOIN media_metadata mm ON m.id = mm.media_id
+				LEFT JOIN series s ON m.series_id = s.id
+				LEFT JOIN age_restrictions ar ON ar.user_id = {}
+				WHERE 
+					ar.age IS NULL OR (
+							(ar.restrict_on_unset = FALSE AND mm.age_rating IS NULL) OR mm.age_rating <= ar.age
+					)
+					AND COALESCE(
+						NULLIF(SUBSTR(mm.title, 1, 1), ''),
+						SUBSTR(m.name, 1, 1)
+					) IS NOT NULL
+				ORDER BY letter ASC;
+				",
+				PrismaValue::String(user.id.clone())
+			))
+			.exec()
+			.await?
+		},
+		LibraryAlphabetForEntity::Series => {
+			db._query_raw::<AlphabetQueryRecord>(raw!(
+				r"
+				SELECT DISTINCT 
+					UPPER(
+						COALESCE(
+							NULLIF(SUBSTR(sm.title, 1, 1), ''),
+							SUBSTR(s.name, 1, 1)
+						)
+					) AS letter
+				FROM series s
+				LEFT JOIN series_metadata sm ON s.id = sm.series_id
+				LEFT JOIN age_restrictions ar ON ar.user_id = {}
+				WHERE 
+					ar.age IS NULL OR (
+							(ar.restrict_on_unset = FALSE AND sm.age_rating IS NULL) OR sm.age_rating <= ar.age
+					)
+					AND COALESCE(
+						NULLIF(SUBSTR(sm.title, 1, 1), ''),
+						SUBSTR(s.name, 1, 1)
+					) IS NOT NULL
+				ORDER BY letter ASC;
+				",
+				PrismaValue::String(user.id.clone())
+			))
+			.exec()
+			.await?
+		},
+	}
+	.into_iter()
+	.map(|record| record.letter)
+	.collect::<Vec<String>>();
+
+	let alphabet = (0..26)
+		.map(|i| (65 + i) as u8)
+		.map(char::from)
+		.map(|c| {
+			(
+				c.to_uppercase().to_string(),
+				letters.iter().any(|l| *l == c.to_string()),
+			)
+		})
+		.collect::<HashMap<String, bool>>();
+
+	Ok(Json(alphabet))
 }

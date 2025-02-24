@@ -84,6 +84,14 @@ pub(crate) fn apply_media_base_filters(filters: MediaBaseFilter) -> Vec<WherePar
 					]])
 				]
 			}),
+			filters.starts_with.map(|s| {
+				or![
+					media::name::starts_with(s.clone()),
+					media::metadata::is(vec![or![media_metadata::title::starts_with(
+						s.clone()
+					),]])
+				]
+			}),
 			filters
 				.metadata
 				.map(apply_media_metadata_base_filters)

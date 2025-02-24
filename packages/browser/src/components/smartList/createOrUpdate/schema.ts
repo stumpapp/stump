@@ -13,7 +13,14 @@ import getProperty from 'lodash/get'
 import { match, P } from 'ts-pattern'
 import { z } from 'zod'
 
-export const stringOperation = z.enum(['contains', 'excludes', 'not', 'equals'])
+export const stringOperation = z.enum([
+	'contains',
+	'excludes',
+	'not',
+	'equals',
+	'starts_with',
+	'ends_with',
+])
 export type StringOperation = z.infer<typeof stringOperation>
 
 export const listOperation = z.enum(['any', 'none'])

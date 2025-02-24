@@ -71,45 +71,54 @@ pub fn parse_age_restriction(str_sequence: &str) -> Option<i32> {
 	}
 
 	// check for the third case \d and up
-	if let Ok(re) = Regex::new(r"(\d+) and up") {
-		let age = re
-			.captures(str_sequence)
-			.and_then(|c| c.get(1))
-			.and_then(|m| m.as_str().parse().ok());
+	match Regex::new(r"(\d+) and up") {
+		Ok(re) => {
+			let age = re
+				.captures(str_sequence)
+				.and_then(|c| c.get(1))
+				.and_then(|m| m.as_str().parse().ok());
 
-		if age.is_some() {
-			return age;
-		}
-	} else {
-		tracing::error!("Failed to create regex for age rating parsing");
+			if age.is_some() {
+				return age;
+			}
+		},
+		Err(e) => {
+			tracing::error!(error = ?e, "Failed to create third regex");
+		},
 	}
 
 	// check for the fourth case \d+
-	if let Ok(re) = Regex::new(r"(\d+)") {
-		let age = re
-			.captures(str_sequence)
-			.and_then(|c| c.get(1))
-			.and_then(|m| m.as_str().parse().ok());
+	match Regex::new(r"(\d+)") {
+		Ok(re) => {
+			let age = re
+				.captures(str_sequence)
+				.and_then(|c| c.get(1))
+				.and_then(|m| m.as_str().parse().ok());
 
-		if age.is_some() {
-			return age;
-		}
-	} else {
-		tracing::error!("Failed to create regex for age rating parsing");
+			if age.is_some() {
+				return age;
+			}
+		},
+		Err(e) => {
+			tracing::error!(error = ?e, "Failed to create fourth regex");
+		},
 	}
 
 	// check for the fifth case \d-\d, only the first number is used
-	if let Ok(re) = Regex::new(r"(\d+)-(\d+)") {
-		let age = re
-			.captures(str_sequence)
-			.and_then(|c| c.get(1))
-			.and_then(|m| m.as_str().parse().ok());
+	match Regex::new(r"(\d+)-(\d+)") {
+		Ok(re) => {
+			let age = re
+				.captures(str_sequence)
+				.and_then(|c| c.get(1))
+				.and_then(|m| m.as_str().parse().ok());
 
-		if age.is_some() {
-			return age;
-		}
-	} else {
-		tracing::error!("Failed to create regex for age rating parsing");
+			if age.is_some() {
+				return age;
+			}
+		},
+		Err(e) => {
+			tracing::error!(error = ?e, "Failed to create fifth regex");
+		},
 	}
 
 	// check final case of just a number
@@ -118,4 +127,31 @@ pub fn parse_age_restriction(str_sequence: &str) -> Option<i32> {
 
 pub fn comma_separated_list_to_vec(vec: String) -> Vec<String> {
 	vec.split(',').map(|v| v.trim().to_owned()).collect()
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_parse_age_restriction() {
+		assert_eq!(parse_age_restriction("G"), Some(0));
+		assert_eq!(parse_age_restriction("PG"), Some(0));
+		assert_eq!(parse_age_restriction("PG-13"), Some(13));
+		assert_eq!(parse_age_restriction("R"), Some(17));
+		assert_eq!(parse_age_restriction("All Ages"), Some(0));
+		assert_eq!(parse_age_restriction("Teen"), Some(13));
+		assert_eq!(parse_age_restriction("Teen+"), Some(16));
+		assert_eq!(parse_age_restriction("Mature"), Some(18));
+		assert_eq!(parse_age_restriction("Mature 17+"), Some(17));
+		assert_eq!(parse_age_restriction("Adults Only 18+"), Some(18));
+		assert_eq!(parse_age_restriction("R18+"), Some(18));
+		assert_eq!(parse_age_restriction("X18+"), Some(18));
+		assert_eq!(parse_age_restriction("18+"), Some(18));
+		assert_eq!(parse_age_restriction("18"), Some(18));
+		assert_eq!(parse_age_restriction("18+"), Some(18));
+		assert_eq!(parse_age_restriction("18 and up"), Some(18));
+		assert_eq!(parse_age_restriction("18+ and up"), Some(18));
+		assert_eq!(parse_age_restriction("12-17"), Some(12));
+	}
 }

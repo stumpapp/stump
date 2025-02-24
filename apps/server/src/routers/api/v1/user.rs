@@ -405,6 +405,9 @@ async fn update_preferences(
 				user_preferences::show_thumbnails_in_headers::set(
 					input.show_thumbnails_in_headers,
 				),
+				user_preferences::enable_alphabet_select::set(
+					input.enable_alphabet_select,
+				),
 			],
 		)
 		.exec()
@@ -574,6 +577,7 @@ pub struct UpdateUserPreferences {
 	pub enable_replace_primary_sidebar: bool,
 	pub enable_hide_scrollbar: bool,
 	pub enable_job_overlay: bool,
+	pub enable_alphabet_select: bool,
 	pub prefer_accent_color: bool,
 	pub show_thumbnails_in_headers: bool,
 }

@@ -5,6 +5,7 @@ import {
 	GenerateLibraryThumbnails,
 	LastScanDetails,
 	Library,
+	LibraryAlphabetParams,
 	LibraryFilter,
 	LibraryScanRecord,
 	LibraryStats,
@@ -255,11 +256,17 @@ export class LibraryAPI extends APIBase {
 		await this.api.axios.post(libraryURL(`/${id}/analyze`))
 	}
 
+	async alphabet(id: string, params: LibraryAlphabetParams): Promise<Record<string, boolean>> {
+		const { data } = await this.api.axios.get(libraryURL(`/${id}/alphabet`, params))
+		return data
+	}
+
 	/**
 	 * The query keys for the library API, used for query caching on a client (e.g. react-query)
 	 */
 	get keys(): ClassQueryKeys<InstanceType<typeof LibraryAPI>> {
 		return {
+			alphabet: 'library.alphabet',
 			analyze: 'library.analyze',
 			clean: 'library.clean',
 			create: 'library.create',

@@ -310,6 +310,8 @@ pub struct MediaBaseFilter {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub search: Option<String>,
 	#[serde(skip_serializing_if = "Option::is_none")]
+	pub starts_with: Option<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub metadata: Option<MediaMetadataBaseFilter>,
 }
 
@@ -460,5 +462,98 @@ mod tests {
 		let serialized = serde_qs::to_string(&filterable_query).unwrap();
 		// FIXME: this breaks the existing patterns, I believe its because the enum is Metadata(Vec<MediaMetadataOrderBy>) and not Metadata { metadata: Vec<MediaMetadataOrderBy> }
 		assert_eq!(serialized, "order_by[metadata][0]=title&direction=asc");
+	}
+
+	#[test]
+	fn test_serialize_common_media_filters() {
+		assert_eq!(
+			&serde_qs::to_string(&MediaFilter {
+				base_filter: MediaBaseFilter {
+					starts_with: Some("a".to_string()),
+					..Default::default()
+				},
+				..Default::default()
+			})
+			.unwrap(),
+			"starts_with=a"
+		);
+
+		assert_eq!(
+			&serde_qs::to_string(&MediaFilter {
+				base_filter: MediaBaseFilter {
+					id: vec!["1".to_string()],
+					..Default::default()
+				},
+				..Default::default()
+			})
+			.unwrap(),
+			"id[0]=1"
+		);
+
+		assert_eq!(
+			&serde_qs::to_string(&MediaFilter {
+				base_filter: MediaBaseFilter {
+					id: vec!["1".to_string(), "2".to_string()],
+					..Default::default()
+				},
+				..Default::default()
+			})
+			.unwrap(),
+			"id[0]=1&id[1]=2"
+		);
+
+		assert_eq!(
+			&serde_qs::to_string(&MediaFilter {
+				base_filter: MediaBaseFilter {
+					metadata: Some(MediaMetadataBaseFilter {
+						year: Some(ValueOrRange::Range(Range {
+							from: Some(2012),
+							to: Some(2017)
+						})),
+						..Default::default()
+					}),
+					..Default::default()
+				},
+				..Default::default()
+			})
+			.unwrap(),
+			"metadata[year][from]=2012&metadata[year][to]=2017"
+		);
+	}
+
+	#[test]
+	fn test_deserialize_common_media_filters() {
+		let filter: MediaFilter = serde_qs::from_str("starts_with=a").unwrap();
+		assert_eq!(filter.base_filter.starts_with.unwrap(), "a");
+
+		let filter: MediaFilter = serde_qs::from_str("id[0]=1").unwrap();
+		assert_eq!(filter.base_filter.id, vec!["1".to_string()]);
+
+		// Should accept single values as well
+		let filter: MediaFilter = serde_qs::from_str("id=1").unwrap();
+		assert_eq!(filter.base_filter.id, vec!["1".to_string()]);
+
+		let filter: MediaFilter = serde_qs::from_str("id[0]=1&id[1]=2").unwrap();
+		assert_eq!(
+			filter.base_filter.id,
+			vec!["1".to_string(), "2".to_string()]
+		);
+
+		let filter: MediaFilter =
+			serde_qs::from_str("metadata[year][from]=2012&metadata[year][to]=2017")
+				.unwrap();
+		assert!(matches!(
+			filter.base_filter.metadata.unwrap().year.unwrap(),
+			ValueOrRange::Range(Range {
+				from: Some(2012),
+				to: Some(2017)
+			})
+		));
+
+		let filter: MediaFilter = serde_qs::from_str("metadata[year]=2012").unwrap();
+		assert!(matches!(
+			filter.base_filter.metadata.unwrap().year.unwrap(),
+			ValueOrRange::Value(2012)
+		));
 	}
 }

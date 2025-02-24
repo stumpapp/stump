@@ -209,7 +209,8 @@ pub struct UserPreferences {
 	pub show_thumbnails_in_headers: bool,
 	#[serde(default = "default_true")]
 	pub enable_job_overlay: bool,
-
+	#[serde(default)]
+	pub enable_alphabet_select: bool,
 	#[serde(default = "Arrangement::<NavigationItem>::default_navigation")]
 	pub navigation_arrangement: Arrangement<NavigationItem>,
 	#[serde(default = "Arrangement::<HomeItem>::default_home")]
@@ -236,16 +237,13 @@ impl Default for UserPreferences {
 			enable_hide_scrollbar: false,
 			enable_job_overlay: true,
 			prefer_accent_color: true,
+			enable_alphabet_select: false,
 			show_thumbnails_in_headers: false,
 			navigation_arrangement: Arrangement::<NavigationItem>::default_navigation(),
 			home_arrangement: Arrangement::<HomeItem>::default_home(),
 		}
 	}
 }
-
-///////////////////////////////////////////////
-////////////////// CONVERSIONS ////////////////
-///////////////////////////////////////////////
 
 impl From<prisma::user_preferences::Data> for UserPreferences {
 	fn from(data: prisma::user_preferences::Data) -> UserPreferences {
@@ -290,6 +288,7 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 			enable_hide_scrollbar: data.enable_hide_scrollbar,
 			enable_job_overlay: data.enable_job_overlay,
 			prefer_accent_color: data.prefer_accent_color,
+			enable_alphabet_select: data.enable_alphabet_select,
 			show_thumbnails_in_headers: data.show_thumbnails_in_headers,
 			navigation_arrangement,
 			home_arrangement,

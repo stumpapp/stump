@@ -36,6 +36,7 @@ pub fn create_prisma_user(user: &User, hashed_pass: String) -> user::Data {
 			enable_double_sidebar: user_preferences.enable_double_sidebar,
 			enable_replace_primary_sidebar: user_preferences
 				.enable_replace_primary_sidebar,
+			enable_alphabet_select: user_preferences.enable_alphabet_select,
 			enable_hide_scrollbar: user_preferences.enable_hide_scrollbar,
 			enable_job_overlay: user_preferences.enable_job_overlay,
 			prefer_accent_color: user_preferences.prefer_accent_color,

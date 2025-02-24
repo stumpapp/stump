@@ -4,7 +4,7 @@ use axum::{
 	extract::{Path, Query, State},
 	Extension, Json,
 };
-use prisma_client_rust::{chrono::Duration, Direction};
+use prisma_client_rust::chrono::Duration;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use specta::Type;

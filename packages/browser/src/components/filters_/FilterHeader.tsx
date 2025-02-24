@@ -1,7 +1,10 @@
 import { Badge, cn, Text, useSticky } from '@stump/components'
-import React from 'react'
+import React, { Fragment } from 'react'
 import { useMediaMatch } from 'rooks'
 
+import { usePreferences } from '@/hooks/usePreferences'
+
+import { AlphabetSelect } from './alphabet'
 import Search from './Search'
 import SmartFilterModal from './SmartFilterModal'
 import SmartSearchButton from './SmartSearchButton'
@@ -25,8 +28,12 @@ type Props = {
 
 export default function FilterHeader({ navOffset, layoutControls, isSearching }: Props) {
 	const isMobile = useMediaMatch('(max-width: 768px)')
-
-	const { ref, isSticky } = useSticky({ extraOffset: isMobile ? 56 : 0 })
+	const {
+		preferences: { enable_alphabet_select },
+	} = usePreferences()
+	const { ref, isSticky } = useSticky({
+		extraOffset: isMobile ? 56 : 0,
+	})
 
 	const store = useFilterStore((state) => ({
 		bodyStore: state.bodyStore,
@@ -78,27 +85,31 @@ export default function FilterHeader({ navOffset, layoutControls, isSearching }:
 	}
 
 	return (
-		<header
-			ref={ref}
-			className={cn(
-				'sticky z-10 flex h-12 w-full shrink-0 justify-between gap-2 border-b border-edge px-4 md:top-0',
-				{
-					'bg-background': isSticky,
-				},
-				navOffset ? 'top-12' : 'top-0',
-			)}
-		>
-			<div className="relative flex flex-1 items-center space-x-2">{renderLeft()}</div>
+		<Fragment>
+			<header
+				ref={ref}
+				className={cn(
+					'sticky z-10 flex h-12 w-full shrink-0 justify-between gap-2 border-b border-edge px-4 md:top-0',
+					{
+						'bg-background': isSticky,
+					},
+					navOffset ? 'top-12' : 'top-0',
+				)}
+			>
+				<div className="relative flex flex-1 items-center space-x-2">{renderLeft()}</div>
 
-			<div className="flex items-center gap-4">
-				<div className="flex items-center gap-x-1">
-					<SmartSearchButton />
+				<div className="flex items-center gap-4">
+					<div className="flex items-center gap-x-1">
+						<SmartSearchButton />
 
-					{/* {orderControls} */}
-					{/* {filterControls} */}
+						{/* {orderControls} */}
+						{/* {filterControls} */}
+					</div>
+					{layoutControls}
 				</div>
-				{layoutControls}
-			</div>
-		</header>
+			</header>
+
+			{enable_alphabet_select && <AlphabetSelect />}
+		</Fragment>
 	)
 }

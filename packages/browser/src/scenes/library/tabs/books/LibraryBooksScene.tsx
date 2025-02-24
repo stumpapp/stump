@@ -1,4 +1,4 @@
-import { useDynamicSearch, usePrefetchMediaPaged } from '@stump/client'
+import { useDynamicSearch, usePrefetchMediaPaged, useQuery, useSDK } from '@stump/client'
 import { usePreviousIsDifferent } from '@stump/components'
 import { isMediaOrderBy, MediaFilter, MediaOrderBy, MediaSmartFilter } from '@stump/sdk'
 import { useCallback, useEffect, useMemo } from 'react'
@@ -16,6 +16,7 @@ import {
 	URLOrdering,
 	useFilterScene,
 } from '@/components/filters'
+import { AlphabetContext } from '@/components/filters_/alphabet'
 import FilterHeader from '@/components/filters_/FilterHeader'
 import {
 	FilterStoreProvider,
@@ -28,6 +29,7 @@ import { intoFormFilter } from '@/components/smartList/createOrUpdate'
 import { EntityTableColumnConfiguration } from '@/components/table'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
+import { usePreferences } from '@/hooks/usePreferences'
 import { useBooksLayout } from '@/stores/layout'
 
 import { useLibraryContext } from '../../context'
@@ -216,6 +218,18 @@ function LibraryBooksScene() {
 
 export default function LibraryBooksSceneContainer() {
 	const { library } = useLibraryContext()
+	const { sdk } = useSDK()
+	const {
+		preferences: { enable_alphabet_select },
+	} = usePreferences()
+	const { data: alphabet = {} } = useQuery(
+		[sdk.library.keys.alphabet, library.id, { for: 'media' }],
+		() => sdk.library.alphabet(library.id, { for: 'media' }),
+		{
+			cacheTime: 1000 * 60 * 60, // 1 hour
+			enabled: enable_alphabet_select,
+		},
+	)
 
 	const defaultFilter = useMemo<MediaSmartFilter>(
 		() => ({
@@ -242,18 +256,20 @@ export default function LibraryBooksSceneContainer() {
 	)
 
 	return (
-		<FilterStoreProvider
-			forEntity="media"
-			defaultBodyFilters={[
-				{
-					filters: [intoFormFilter(defaultFilter)],
-					is_locked: true,
-					joiner: 'and',
-				},
-			]}
-			defaultURLFilters={defaultUrl}
-		>
-			<LibraryBooksScene />
-		</FilterStoreProvider>
+		<AlphabetContext.Provider value={{ alphabet }}>
+			<FilterStoreProvider
+				forEntity="media"
+				defaultBodyFilters={[
+					{
+						filters: [intoFormFilter(defaultFilter)],
+						is_locked: true,
+						joiner: 'and',
+					},
+				]}
+				defaultURLFilters={defaultUrl}
+			>
+				<LibraryBooksScene />
+			</FilterStoreProvider>
+		</AlphabetContext.Provider>
 	)
 }

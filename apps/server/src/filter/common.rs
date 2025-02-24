@@ -106,3 +106,8 @@ pub fn chain_optional_iter<T>(
 		.flatten()
 		.collect()
 }
+
+#[derive(Debug, Deserialize)]
+pub struct AlphabetQueryRecord {
+	pub letter: String,
+}

@@ -150,6 +150,7 @@ const createFilterStore = (forEntity: FilterEntity, options: CreateFilterStoreOp
 					},
 				} satisfies BodyFilterState,
 				mode: 'url',
+				// TODO: probably not a true patch, I can rewrite nested properties
 				patchBody: (state) => {
 					const entireStore = clone(get())
 					const updatedBody = { ...get().bodyStore, ...state }
@@ -297,7 +298,7 @@ export const useSyncParams = () => {
 export const useSyncSearch = () => {
 	const [searchParams, setSearchParams] = useSearchParams()
 
-	const { mode, setUrlFilter, removeUrlFilter, urlStore, bodyStore, ...store } = useFilterStore(
+	const { mode, setUrlFilter, removeUrlFilter, urlStore } = useFilterStore(
 		useShallow((state) => state),
 	)
 
@@ -328,10 +329,75 @@ export const useSyncSearch = () => {
 				return prev
 			})
 		},
-		[setUrlFilter, removeUrlFilter],
+		[mode, setSearchParams],
 	)
 
 	return {
 		updateSearch,
+	}
+}
+
+export const useSyncStartsWith = () => {
+	const [searchParams, setSearchParams] = useSearchParams()
+
+	const { mode, setUrlFilter, removeUrlFilter, urlStore, patchBody, bodyStore } = useFilterStore(
+		useShallow((state) => state),
+	)
+
+	const urlStartsWith = useMemo(() => searchParams.get('starts_with') || undefined, [searchParams])
+	const { filters } = urlStore
+	useEffect(() => {
+		if (mode === 'body') return
+
+		const isDifferent = filters?.starts_with !== urlStartsWith
+		if (!isDifferent) return
+		if (urlStartsWith) {
+			setUrlFilter('starts_with', urlStartsWith)
+		} else {
+			removeUrlFilter('starts_with')
+		}
+	}, [mode, urlStartsWith, filters?.starts_with, setUrlFilter, removeUrlFilter])
+
+	const updateStartsWith = useCallback(
+		(value?: string) => {
+			if (mode === 'body' && value != null) {
+				patchBody({
+					filters: [
+						{
+							filters: [
+								{ field: 'name', operation: 'starts_with', value, source: 'book' },
+								{ field: 'title', operation: 'starts_with', value, source: 'book_meta' },
+							],
+							joiner: 'or',
+						},
+					],
+				})
+			} else if (mode === 'url') {
+				setSearchParams((prev) => {
+					if (value) {
+						prev.set('starts_with', value)
+					} else {
+						prev.delete('starts_with')
+					}
+					return prev
+				})
+			}
+		},
+		[mode, setSearchParams, patchBody],
+	)
+
+	const bodyStartsWith = useMemo(() => {
+		const filterObj = bodyStore.filters?.find(
+			(f) =>
+				f.filters?.[0]?.operation === 'starts_with' && typeof f.filters?.[0]?.value === 'string',
+		)
+		if (typeof filterObj?.filters?.[0]?.value === 'string') {
+			return filterObj.filters[0].value.at(0)?.toUpperCase()
+		}
+	}, [bodyStore.filters])
+
+	return {
+		startsWith: urlStartsWith?.at(0)?.toUpperCase() ?? bodyStartsWith,
+		updateStartsWith,
 	}
 }

@@ -118,6 +118,10 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<FilterBody<(), ()>>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<LogFilter>()?).as_bytes())?;
+
+		file.write_all(
+			format!("{}\n\n", ts_export::<LibraryAlphabetParams>()?).as_bytes(),
+		)?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryBaseFilter>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<LibraryRelationFilter>()?).as_bytes(),

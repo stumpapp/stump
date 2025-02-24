@@ -1,8 +1,7 @@
-import { useLibraryByID, usePagedSeriesQuery, usePrefetchPagedSeries } from '@stump/client'
+import { usePagedSeriesQuery, usePrefetchPagedSeries, useQuery, useSDK } from '@stump/client'
 import { usePrevious, usePreviousIsDifferent } from '@stump/components'
 import { useCallback, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
-import { useParams } from 'react-router'
 
 import {
 	FilterContext,
@@ -13,34 +12,50 @@ import {
 	URLOrdering,
 	useFilterScene,
 } from '@/components/filters'
+import { AlphabetContext } from '@/components/filters_/alphabet'
 import { SeriesTable } from '@/components/series'
 import SeriesGrid from '@/components/series/SeriesGrid'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
+import { usePreferences } from '@/hooks/usePreferences'
 import { useSeriesLayout } from '@/stores/layout'
 
+import { useLibraryContext } from '../../context'
+
 export default function LibrarySeriesSceneWrapper() {
+	const { library } = useLibraryContext()
+	const { sdk } = useSDK()
+	const {
+		preferences: { enable_alphabet_select },
+	} = usePreferences()
+	const { data: alphabet = {} } = useQuery(
+		[sdk.library.keys.alphabet, library.id, { for: 'series' }],
+		() => sdk.library.alphabet(library.id, { for: 'series' }),
+		{
+			cacheTime: 1000 * 60 * 60, // 1 hour
+			enabled: enable_alphabet_select,
+		},
+	)
+
 	return (
-		<FilterProvider>
-			<LibrarySeriesScene />
-		</FilterProvider>
+		<AlphabetContext.Provider value={{ alphabet }}>
+			<FilterProvider>
+				<LibrarySeriesScene />
+			</FilterProvider>
+		</AlphabetContext.Provider>
 	)
 }
 
 function LibrarySeriesScene() {
-	const { id } = useParams()
-
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
-
-	if (!id) {
-		throw new Error('Library id is required')
-	}
 
 	const { layoutMode, setLayout } = useSeriesLayout((state) => ({
 		layoutMode: state.layout,
 		setLayout: state.setLayout,
 	}))
-	const { isLoading, library } = useLibraryByID(id)
+	const {
+		library: { id, name },
+	} = useLibraryContext()
 	const {
 		filters,
 		ordering,
@@ -106,12 +121,6 @@ function LibrarySeriesScene() {
 		[isInView, shouldScroll],
 	)
 
-	if (isLoading) {
-		return null
-	} else if (!library) {
-		throw new Error('Library not found')
-	}
-
 	const renderContent = () => {
 		if (layoutMode === 'GRID') {
 			return (
@@ -161,7 +170,7 @@ function LibrarySeriesScene() {
 		>
 			<div className="flex flex-1 flex-col pb-4 md:pb-0">
 				<Helmet>
-					<title>Stump | {library.name}</title>
+					<title>Stump | {name}</title>
 				</Helmet>
 
 				<section ref={containerRef} id="grid-top-indicator" className="h-0" />

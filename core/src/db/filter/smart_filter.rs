@@ -3,7 +3,7 @@ use std::{fmt::Display, str::FromStr};
 use prisma_client_rust::{
 	and,
 	chrono::{DateTime, FixedOffset},
-	not, or,
+	not,
 };
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -28,16 +28,12 @@ pub enum Filter<T> {
 	Equals { equals: T },
 	/// A simple not filter, e.g. `name != "test"`
 	Not { not: T },
-	/// A filter for a string that contains a substring, e.g. `name contains "test"`. This should
-	/// not be confused with an `in` filter. See [`Filter::Any`] for that.
-	Contains { contains: T },
-	/// A filter for a string that does not contain a substring, e.g. `name excludes "test"`. This
-	/// should not be confused with a `not in` filter. See [`Filter::None`] for that.
-	Excludes { excludes: T },
 	/// A filter for a vector of values, e.g. `name in ["test", "test2"]`
 	Any { any: Vec<T> },
 	/// A filter for a vector of values, e.g. `name not in ["test", "test2"]`
 	None { none: Vec<T> },
+	/// A filter for a string value, e.g. `name contains "test"`
+	StringFilter(StringFilter<T>),
 	/// A filter for a numeric value, e.g. `year > 2000`
 	NumericFilter(NumericFilter<T>),
 }
@@ -60,12 +56,26 @@ pub enum NumericFilter<T> {
 	Range(NumericRange<T>),
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, ToSchema, Type)]
+#[serde(untagged)]
+pub enum StringFilter<T> {
+	/// A filter for a string that contains a substring, e.g. `name contains "test"`. This should
+	/// not be confused with an `in` filter. See [`Filter::Any`] for that.
+	Contains { contains: T },
+	/// A filter for a string that does not contain a substring, e.g. `name excludes "test"`. This
+	/// should not be confused with a `not in` filter. See [`Filter::None`] for that.
+	Excludes { excludes: T },
+	/// A filter for a string that starts with a substring, e.g. `name starts_with "test"`
+	StartsWith { starts_with: T },
+	/// A filter for a string that ends with a substring, e.g. `name ends_with "test"`
+	EndsWith { ends_with: T },
+}
+
 impl<T> Filter<T> {
 	/// Convert self into a prisma where param
 	pub fn into_params<WhereParam>(
 		self,
 		equals_fn: fn(T) -> WhereParam,
-		contains_fn: fn(T) -> WhereParam,
 		vec_fn: fn(Vec<T>) -> WhereParam,
 	) -> WhereParam
 	where
@@ -74,11 +84,9 @@ impl<T> Filter<T> {
 		match self {
 			Filter::Equals { equals } => equals_fn(equals),
 			Filter::Not { not } => not![equals_fn(not)],
-			Filter::Contains { contains } => contains_fn(contains),
-			Filter::Excludes { excludes } => not![contains_fn(excludes)],
 			Filter::Any { any } => vec_fn(any),
 			Filter::None { none } => not![vec_fn(none)],
-			_ => unreachable!("Numeric filters should be handled elsewhere"),
+			_ => unreachable!("Invalid filter"),
 		}
 	}
 
@@ -87,7 +95,6 @@ impl<T> Filter<T> {
 	pub fn into_optional_params<WhereParam>(
 		self,
 		equals_fn: fn(Option<T>) -> WhereParam,
-		contains_fn: fn(T) -> WhereParam,
 		vec_fn: fn(Vec<T>) -> WhereParam,
 	) -> WhereParam
 	where
@@ -96,11 +103,53 @@ impl<T> Filter<T> {
 		match self {
 			Filter::Equals { equals } => equals_fn(Some(equals)),
 			Filter::Not { not } => not![equals_fn(Some(not))],
-			Filter::Contains { contains } => contains_fn(contains),
-			Filter::Excludes { excludes } => not![contains_fn(excludes)],
 			Filter::Any { any } => vec_fn(any),
 			Filter::None { none } => not![vec_fn(none)],
-			_ => unreachable!("Numeric filters should be handled elsewhere"),
+			_ => unreachable!("Invalid filter"),
+		}
+	}
+
+	pub fn into_string_params<WhereParam>(
+		self,
+		equals_fn: fn(T) -> WhereParam,
+		contains_fn: fn(T) -> WhereParam,
+		starts_with_fn: fn(T) -> WhereParam,
+		ends_with_fn: fn(T) -> WhereParam,
+		vec_fn: fn(Vec<T>) -> WhereParam,
+	) -> WhereParam
+	where
+		WhereParam: From<prisma_client_rust::Operator<WhereParam>>,
+	{
+		match self {
+			Filter::StringFilter(string_filter) => match string_filter {
+				StringFilter::Contains { contains } => contains_fn(contains),
+				StringFilter::Excludes { excludes } => not![contains_fn(excludes)],
+				StringFilter::StartsWith { starts_with } => starts_with_fn(starts_with),
+				StringFilter::EndsWith { ends_with } => ends_with_fn(ends_with),
+			},
+			_ => Self::into_params(self, equals_fn, vec_fn),
+		}
+	}
+
+	pub fn into_optional_string_params<WhereParam>(
+		self,
+		equals_fn: fn(Option<T>) -> WhereParam,
+		contains_fn: fn(T) -> WhereParam,
+		starts_with_fn: fn(T) -> WhereParam,
+		ends_with_fn: fn(T) -> WhereParam,
+		vec_fn: fn(Vec<T>) -> WhereParam,
+	) -> WhereParam
+	where
+		WhereParam: From<prisma_client_rust::Operator<WhereParam>>,
+	{
+		match self {
+			Filter::StringFilter(string_filter) => match string_filter {
+				StringFilter::Contains { contains } => contains_fn(contains),
+				StringFilter::Excludes { excludes } => not![contains_fn(excludes)],
+				StringFilter::StartsWith { starts_with } => starts_with_fn(starts_with),
+				StringFilter::EndsWith { ends_with } => ends_with_fn(ends_with),
+			},
+			_ => Self::into_optional_params(self, equals_fn, vec_fn),
 		}
 	}
 
@@ -111,13 +160,12 @@ impl<T> Filter<T> {
 		gte_fn: fn(T) -> WhereParam,
 		lt_fn: fn(T) -> WhereParam,
 		lte_fn: fn(T) -> WhereParam,
+		vec_fn: fn(Vec<T>) -> WhereParam,
 	) -> WhereParam
 	where
 		WhereParam: From<prisma_client_rust::Operator<WhereParam>>,
 	{
 		match self {
-			Filter::Equals { equals } => equals_fn(equals),
-			Filter::Not { not } => not![equals_fn(not)],
 			Filter::NumericFilter(numeric_filter) => match numeric_filter {
 				NumericFilter::Gt { gt } => gt_fn(gt),
 				NumericFilter::Gte { gte } => gte_fn(gte),
@@ -131,7 +179,7 @@ impl<T> Filter<T> {
 					}
 				},
 			},
-			_ => unreachable!("Non-numeric filters should be handled elsewhere"),
+			_ => Self::into_params(self, equals_fn, vec_fn),
 		}
 	}
 
@@ -142,13 +190,12 @@ impl<T> Filter<T> {
 		gte_fn: fn(T) -> WhereParam,
 		lt_fn: fn(T) -> WhereParam,
 		lte_fn: fn(T) -> WhereParam,
+		vec_fn: fn(Vec<T>) -> WhereParam,
 	) -> WhereParam
 	where
 		WhereParam: From<prisma_client_rust::Operator<WhereParam>>,
 	{
 		match self {
-			Filter::Equals { equals } => equals_fn(Some(equals)),
-			Filter::Not { not } => not![equals_fn(Some(not))],
 			Filter::NumericFilter(numeric_filter) => match numeric_filter {
 				NumericFilter::Gt { gt } => gt_fn(gt),
 				NumericFilter::Gte { gte } => gte_fn(gte),
@@ -162,7 +209,7 @@ impl<T> Filter<T> {
 					}
 				},
 			},
-			_ => unreachable!("Non-numeric filters should be handled elsewhere"),
+			_ => Self::into_optional_params(self, equals_fn, vec_fn),
 		}
 	}
 }
@@ -297,48 +344,16 @@ pub enum SeriesMetadataSmartFilter {
 	},
 }
 
+#[generate_smart_filter]
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
 #[serde(untagged)]
+#[prisma_table("series")]
 pub enum SeriesSmartFilter {
-	Name { name: Filter<String> },
-	Path { path: Filter<String> },
+	Name { name: String },
+	Path { path: String },
 
 	Metadata { metadata: SeriesMetadataSmartFilter },
 	Library { library: LibrarySmartFilter },
-}
-
-impl SeriesSmartFilter {
-	pub fn into_params(self) -> series::WhereParam {
-		match self {
-			SeriesSmartFilter::Name { name } => {
-				let metadata_param = name.clone().into_optional_params(
-					series_metadata::title::equals,
-					series_metadata::title::contains,
-					series_metadata::title::in_vec,
-				);
-
-				or![
-					name.into_params(
-						series::name::equals,
-						series::name::contains,
-						series::name::in_vec,
-					),
-					series::metadata::is(vec![metadata_param])
-				]
-			},
-			SeriesSmartFilter::Path { path } => path.into_params(
-				series::path::equals,
-				series::path::contains,
-				series::path::in_vec,
-			),
-			SeriesSmartFilter::Metadata { metadata } => {
-				series::metadata::is(vec![metadata.into_params()])
-			},
-			SeriesSmartFilter::Library { library } => {
-				series::library::is(vec![library.into_params()])
-			},
-		}
-	}
 }
 
 #[generate_smart_filter]
@@ -396,6 +411,7 @@ pub enum MediaSmartFilter {
 #[cfg(test)]
 mod tests {
 	use prisma_client_rust::chrono::Utc;
+	use prisma_client_rust::or;
 
 	use super::*;
 	use crate::prisma::PrismaClient;
@@ -405,9 +421,9 @@ mod tests {
 		let filter: FilterGroup<MediaSmartFilter> = FilterGroup::And {
 			and: vec![
 				MediaSmartFilter::Name {
-					name: Filter::Contains {
+					name: Filter::StringFilter(StringFilter::Contains {
 						contains: "test".to_string(),
-					},
+					}),
 				},
 				MediaSmartFilter::Series {
 					series: SeriesSmartFilter::Name {
@@ -419,9 +435,9 @@ mod tests {
 				MediaSmartFilter::Series {
 					series: SeriesSmartFilter::Library {
 						library: LibrarySmartFilter::Name {
-							name: Filter::Excludes {
+							name: Filter::StringFilter(StringFilter::Excludes {
 								excludes: "test".to_string(),
-							},
+							}),
 						},
 					},
 				},
@@ -447,9 +463,9 @@ mod tests {
 			FilterGroup::And {
 				and: vec![
 					MediaSmartFilter::Name {
-						name: Filter::Contains {
+						name: Filter::StringFilter(StringFilter::Contains {
 							contains: "test".to_string(),
-						},
+						}),
 					},
 					MediaSmartFilter::Series {
 						series: SeriesSmartFilter::Name {
@@ -461,9 +477,9 @@ mod tests {
 					MediaSmartFilter::Series {
 						series: SeriesSmartFilter::Library {
 							library: LibrarySmartFilter::Name {
-								name: Filter::Excludes {
+								name: Filter::StringFilter(StringFilter::Excludes {
 									excludes: "test".to_string(),
-								},
+								}),
 							},
 						},
 					},
@@ -587,9 +603,9 @@ mod tests {
 		let filter = FilterGroup::Or {
 			or: vec![
 				MediaSmartFilter::Name {
-					name: Filter::Contains {
+					name: Filter::StringFilter(StringFilter::Contains {
 						contains: "test".to_string(),
-					},
+					}),
 				},
 				MediaSmartFilter::Name {
 					name: Filter::Not {
@@ -608,7 +624,7 @@ mod tests {
 			FilterGroup::Or { or } => prisma_client_rust::operator::or(
 				or.into_iter().map(|f| f.into_params()).collect(),
 			),
-			_ => unreachable!(),
+			_ => unreachable!("Invalid filter"),
 		};
 
 		mock.expect(
@@ -634,9 +650,9 @@ mod tests {
 		let filter = FilterGroup::Or {
 			or: vec![
 				MediaSmartFilter::Name {
-					name: Filter::Contains {
+					name: Filter::StringFilter(StringFilter::Contains {
 						contains: "test".to_string(),
-					},
+					}),
 				},
 				MediaSmartFilter::Name {
 					name: Filter::Not {
@@ -664,9 +680,9 @@ mod tests {
 				MediaSmartFilter::Series {
 					series: SeriesSmartFilter::Library {
 						library: LibrarySmartFilter::Name {
-							name: Filter::Excludes {
+							name: Filter::StringFilter(StringFilter::Excludes {
 								excludes: "test".to_string(),
-							},
+							}),
 						},
 					},
 				},

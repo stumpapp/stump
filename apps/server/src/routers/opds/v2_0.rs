@@ -444,7 +444,7 @@ async fn search(
 	let books = client
 		.media()
 		.find_many(book_conditions.clone())
-		.order_by(media::name::order(Direction::Asc))
+		.order_by(media::name::order(SortOrder::Asc))
 		.take(DEFAULT_LIMIT)
 		.include(books_as_publications::include())
 		.exec()

@@ -421,7 +421,7 @@
 				},
 				{
 					"label": "Skenování",
-					"heading": "Chování skeneru",
+					"heading": "Scanning",
 					"description": "Nastavení týkající se skenování této knihovny"
 				},
 				{
@@ -517,8 +517,72 @@
 			"description": "Výchozí nastavení čtečky pro knihy v této knihovně. Kniha může přepsat tato nastavení"
 		},
 		"options/scanning": {
-			"title": "Chování skeneru",
-			"description": "Nastavení týkající se skenování této knihovny"
+			"title": "Scanning",
+			"description": "Nastavení týkající se skenování této knihovny",
+			"sections": {
+				"configureScan": {
+					"heading": "Configure scan",
+					"description": "A scan with additional options for more fine-grained control",
+					"form": {
+						"alert": "These will override corresponding library-wide settings",
+						"options": {
+							"forceRebuild": {
+								"label": "Force rebuild",
+								"description": "Rebuild every book in the library on disk",
+								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
+							},
+							"custom": {
+								"label": "Custom",
+								"description": "Customize the scan configuration",
+								"validation": {
+									"noSelection": "At least one option must be enabled"
+								}
+							},
+							"rebuildMeta": {
+								"label": "Rebuild metadata",
+								"description": "Rebuild metadata for books in the library"
+							},
+							"regenHashes": {
+								"label": "Regenerate hashes",
+								"description": "Recreate hashes for books in the library"
+							}
+						}
+					}
+				},
+				"defaultScan": {
+					"heading": "Default scan",
+					"description": "A standard scan to index your library for new content"
+				},
+				"history": {
+					"heading": "Scan history",
+					"description": "The history of all scans recorded for this library",
+					"empty": "There are no scans recorded for this library",
+					"runScan": "Run scan",
+					"inspect": "See details",
+					"inspector": {
+						"title": "Scan record",
+						"description": "A detailed view of this scan record",
+						"fields": {
+							"library": "Library",
+							"date": "Date",
+							"config": "Config",
+							"jobOutput": "Job output",
+							"logs": "Logs"
+						},
+						"logsPresent": "Logs were persisted for this job",
+						"seeLogs": "See logs"
+					},
+					"table": {
+						"columns": {
+							"timestamp": "Scanned at",
+							"config": "Config"
+						},
+						"default": "Default",
+						"custom": "Custom"
+					},
+					"clearHistory": "Delete scan history"
+				}
+			}
 		},
 		"options/thumbnails": {
 			"title": "Náhledy",
@@ -1388,6 +1452,12 @@
 						},
 						"emptyHeading": "Žádné záznamy k zobrazení",
 						"emptySubtitle": "Váš server je buď velmi zdravý, nebo velmi nezdravý"
+					},
+					"deleteLogs": {
+						"title": "Delete logs",
+						"description": "Permanently delete all persisted logs from the database",
+						"disclaimer": "This action cannot be undone",
+						"confirm": "Delete logs"
 					}
 				},
 				"liveLogs": {
@@ -1862,6 +1932,7 @@
 		"goToServers": "Jít na servery",
 		"notReady": "Tato funkce není připravena",
 		"notUsedYet": "Zatím nepoužito",
-		"never": "Nikdy"
+		"never": "Nikdy",
+		"scan": "Scan"
 	}
 }

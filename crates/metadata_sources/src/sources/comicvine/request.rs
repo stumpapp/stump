@@ -1,17 +1,14 @@
-use crate::{MetadataSourceError, MetadataSourceInput};
+use crate::MetadataSourceInput;
 
 /// The base URL used to access the ComicVine API search endpoint.
 const BASE_URL: &str = "https://comicvine.gamespot.com/api/search";
 
-pub fn build_request_url(
-	input: &MetadataSourceInput,
-	api_key: String,
-) -> Result<String, MetadataSourceError> {
+pub fn build_request_url(input: &MetadataSourceInput, api_key: &str) -> String {
 	// Build up query parameters
 	let mut query_parts = Vec::new();
 
 	// Format: `api_key=XXX&format=json&resources=issue&query=Batman`
-	query_parts.push(format!("api_key={}", api_key));
+	query_parts.push(format!("api_key={api_key}"));
 	query_parts.push("format=json".to_string());
 	query_parts.push("resources=issue".to_string());
 	query_parts.push(build_query_param(input));
@@ -19,7 +16,7 @@ pub fn build_request_url(
 	query_parts.push("limit=10".to_string());
 
 	let query_params = query_parts.join("&");
-	Ok(format!("{BASE_URL}?{query_params}"))
+	format!("{BASE_URL}?{query_params}")
 }
 
 /// Construct the `query` parameter for a ComicVine search.
@@ -41,7 +38,7 @@ fn build_query_param(input: &MetadataSourceInput) -> String {
 
 	// If empty, fall back to a blank query
 	let combined_query = if query_fragments.is_empty() {
-		"".to_string()
+		String::new()
 	} else {
 		// Join with spaces so ComicVine sees them as separate keywords
 		query_fragments.join(" ")

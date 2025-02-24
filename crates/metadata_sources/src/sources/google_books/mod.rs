@@ -28,7 +28,7 @@ pub struct GoogleBooksConfig {
 impl Default for GoogleBooksConfig {
 	fn default() -> Self {
 		Self {
-			api_key: Default::default(),
+			api_key: Option::default(),
 			max_result_count: 10,
 		}
 	}
@@ -72,7 +72,7 @@ impl MetadataSource for GoogleBooksSource {
 		};
 
 		// Make the request
-		let url = build_request_url(input, api_key, config.max_result_count)?;
+		let url = build_request_url(input, &api_key, config.max_result_count);
 		let response = reqwest::get(url)
 			.await?
 			.json::<GoogleBooksResponse>()

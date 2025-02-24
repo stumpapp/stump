@@ -1,13 +1,13 @@
-use crate::{MetadataSourceError, MetadataSourceInput};
+use crate::MetadataSourceInput;
 
 /// The base url used to access the Google Books API.
 const BASE_URL: &str = "https://www.googleapis.com/books/v1/volumes";
 
 pub fn build_request_url(
 	input: &MetadataSourceInput,
-	api_key: String,
+	api_key: &str,
 	max_result_count: u32,
-) -> Result<String, MetadataSourceError> {
+) -> String {
 	// Build up query parameters
 	let mut query_parts = Vec::new();
 
@@ -20,7 +20,7 @@ pub fn build_request_url(
 	query_parts.push(format!("key={api_key}"));
 
 	let query_params = query_parts.join("&");
-	Ok(format!("{BASE_URL}?{query_params}"))
+	format!("{BASE_URL}?{query_params}")
 }
 
 /// Construct the search query params for a Google books query. For example, consider
@@ -42,7 +42,7 @@ fn build_q_params(input: &MetadataSourceInput) -> String {
 	// Query by publisher
 	if let Some(publisher) = &input.publisher {
 		let publisher = publisher.trim();
-		q_param_parts.push(format!("inpublisher:{publisher}"))
+		q_param_parts.push(format!("inpublisher:{publisher}"));
 	}
 
 	format!("q={}", q_param_parts.join("+"))

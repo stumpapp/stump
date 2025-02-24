@@ -78,7 +78,7 @@ impl From<RootSchema> for ConfigSchema {
 					fields.push(SchemaField {
 						key: prop_key,
 						field_type,
-					})
+					});
 				}
 			}
 		}
@@ -104,7 +104,7 @@ fn extract_field_type(obj: &SchemaObject) -> Option<SchemaFieldType> {
 	if let Some(instance_types) = &obj.instance_type {
 		let types = match instance_types {
 			SingleOrVec::Single(single) => vec![*single.clone()],
-			SingleOrVec::Vec(vec) => vec.to_vec(),
+			SingleOrVec::Vec(vec) => vec.clone(),
 		};
 
 		if let Some(first_type) = types.first() {

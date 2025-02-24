@@ -29,7 +29,7 @@ pub struct HardcoverConfig {
 impl Default for HardcoverConfig {
 	fn default() -> Self {
 		Self {
-			api_key: Default::default(),
+			api_key: Option::default(),
 			max_result_count: 10,
 		}
 	}

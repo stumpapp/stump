@@ -26,6 +26,18 @@
 //!   to the [`REGISTERED_SOURCES`] constant.
 //!
 
+// TODO - Remove these prior to final merge
+#![warn(clippy::all)]
+#![warn(clippy::pedantic)]
+#![warn(clippy::nursery)]
+#![allow(
+	clippy::module_name_repetitions,
+	clippy::must_use_candidate,
+	clippy::wildcard_imports,
+	clippy::doc_markdown,
+	clippy::missing_errors_doc
+)]
+
 mod config_schema;
 mod sources;
 
@@ -35,6 +47,7 @@ pub use config_schema::{ConfigSchema, SchemaField, SchemaFieldType};
 use sources::*;
 
 /// A constant containing a list of source identities for implementations of [`MetadataSource`].
+///
 /// A source's identity must be inlcuded here or it will not be written to the database to be
 /// enabled/disabled by a user.
 pub const REGISTERED_SOURCES: &[&str] = &[
@@ -174,12 +187,7 @@ mod tests {
 	/// secrets. This file is .gitignored and so should be safe from being checked
 	/// in.
 	pub fn get_secret(secret_name: &str) -> String {
-		match std::env::var(secret_name) {
-			// Return the API key from the environment if it's found
-			Ok(val) => val,
-			// Otherwise try to fetch the secret from secrets.json file.
-			Err(_) => read_secret_from_json(secret_name),
-		}
+		std::env::var(secret_name).unwrap_or_else(|_| read_secret_from_json(secret_name))
 	}
 
 	fn read_secret_from_json(secret_name: &str) -> String {

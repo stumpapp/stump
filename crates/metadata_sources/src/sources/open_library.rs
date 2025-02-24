@@ -17,7 +17,6 @@ const BASE_URL: &str = "https://openlibrary.org";
 
 #[derive(Debug, Deserialize)]
 struct OpenLibrarySearchResult {
-	num_found: u32,
 	docs: Vec<OpenLibraryDoc>,
 }
 

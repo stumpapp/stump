@@ -55,7 +55,7 @@ impl MetadataSource for ComicVineSource {
 		};
 
 		// Perform the request
-		let url = build_request_url(input, api_key)?;
+		let url = build_request_url(input, &api_key);
 		let response = reqwest::get(url)
 			.await?
 			.json::<ComicVineSearchResponse>()
@@ -128,10 +128,10 @@ mod tests {
 		// TODO - Finish test
 		match result {
 			Ok(metadata) => {
-				println!("Got metadata: {:?}", metadata);
+				println!("Got metadata: {metadata:?}");
 			},
 			Err(e) => {
-				eprintln!("Error: {:?}", e);
+				eprintln!("Error: {e:?}");
 			},
 		}
 	}

@@ -1,3 +1,5 @@
+use merge::Merge;
+use quick_xml::{events::Event, Reader};
 use std::{collections::HashMap, fs::File, io::BufReader, path::PathBuf};
 
 const ACCEPTED_EPUB_COVER_MIMES: [&str; 2] = ["image/jpeg", "image/png"];
@@ -11,6 +13,7 @@ use crate::{
 		error::FileError,
 		hash::{self, generate_koreader_hash},
 		media::process::{FileProcessor, FileProcessorOptions, ProcessedFile},
+		ProcessedFileHashes,
 	},
 };
 use epub::doc::EpubDoc;
@@ -49,7 +52,7 @@ impl FileProcessor for EpubProcessor {
 		Ok(sample_size)
 	}
 
-	fn hash(path: &str) -> Option<String> {
+	fn generate_stump_hash(path: &str) -> Option<String> {
 		let sample_result = EpubProcessor::get_sample_size(path);
 
 		if let Ok(sample) = sample_result {
@@ -65,13 +68,96 @@ impl FileProcessor for EpubProcessor {
 		}
 	}
 
-	fn process(
+	fn generate_hashes(
 		path: &str,
 		FileProcessorOptions {
 			generate_file_hashes,
 			generate_koreader_hashes,
 			..
 		}: FileProcessorOptions,
+	) -> Result<ProcessedFileHashes, FileError> {
+		let hash = generate_file_hashes
+			.then(|| EpubProcessor::generate_stump_hash(path))
+			.flatten();
+		let koreader_hash = generate_koreader_hashes
+			.then(|| generate_koreader_hash(path))
+			.transpose()?;
+
+		Ok(ProcessedFileHashes {
+			hash,
+			koreader_hash,
+		})
+	}
+
+	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError> {
+		let epub_file = Self::open(path)?;
+		let embedded_metadata = MediaMetadata::from(epub_file.metadata);
+
+		// try get opf file
+		let file_path = std::path::Path::new(path).with_extension("opf");
+		if file_path.exists() {
+			// extract OPF data
+			let opf_string = std::fs::read_to_string(file_path)?;
+			let mut reader = Reader::from_str(opf_string.as_str());
+			reader.config_mut().trim_text(true);
+			let mut current_tag = String::new();
+
+			let mut opf_metadata: HashMap<String, Vec<String>> = HashMap::new();
+
+			while let Ok(event) = reader.read_event() {
+				match event {
+					Event::Start(ref e) | Event::Empty(ref e) => {
+						let tag_name =
+							String::from_utf8_lossy(e.name().as_ref()).to_string();
+
+						// normalize tags
+						current_tag = tag_name
+							.strip_prefix("dc:")
+							.unwrap_or(tag_name.as_str())
+							.to_string();
+
+						if let Some(attr) =
+							e.attributes().filter_map(|a| a.ok()).find(|a| {
+								a.key.as_ref() == b"property" || a.key.as_ref() == b"name"
+							}) {
+							current_tag = format!(
+								"{}: {}",
+								current_tag,
+								String::from_utf8_lossy(&attr.value)
+							);
+						}
+					},
+					Event::Text(e) => {
+						if let Ok(text) = e.unescape() {
+							opf_metadata
+								.entry(current_tag.clone())
+								.or_default()
+								.push(text.to_string());
+						}
+					},
+					Event::Eof => {
+						break;
+					},
+					_ => {},
+				}
+			}
+
+			// merge opf and embedded, prioritizing opf
+			let opf_metadata = MediaMetadata::from(opf_metadata);
+			let mut combined_metadata = opf_metadata.clone();
+
+			combined_metadata.id = opf_metadata.id;
+			combined_metadata.merge(embedded_metadata);
+
+			return Ok(Some(combined_metadata));
+		}
+
+		Ok(Some(embedded_metadata))
+	}
+
+	fn process(
+		path: &str,
+		options: FileProcessorOptions,
 		_: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
 		tracing::debug!(?path, "processing epub");
@@ -82,12 +168,10 @@ impl FileProcessor for EpubProcessor {
 		let pages = epub_file.get_num_pages() as i32;
 		// Note: The metadata is already parsed by the EPUB library, so might as well use it
 		let metadata = MediaMetadata::from(epub_file.metadata);
-		let hash = generate_file_hashes
-			.then(|| EpubProcessor::hash(path))
-			.flatten();
-		let koreader_hash = generate_koreader_hashes
-			.then(|| generate_koreader_hash(path))
-			.transpose()?;
+		let ProcessedFileHashes {
+			hash,
+			koreader_hash,
+		} = Self::generate_hashes(path, options)?;
 
 		Ok(ProcessedFile {
 			path: path_buf,
@@ -610,6 +694,24 @@ mod tests {
 			&config,
 		);
 		assert!(processed_file.is_ok());
+	}
+
+	#[test]
+	fn test_process_metadata() {
+		let path = get_test_epub_path();
+
+		let processed_metadata = EpubProcessor::process_metadata(&path);
+		match processed_metadata {
+			Ok(Some(metadata)) => {
+				assert_eq!(
+					metadata.title,
+					Some("Alice's Adventures in Wonderland - Test OPF".to_string())
+				);
+				assert_eq!(metadata.writers, Some(vec!["Lewis Carroll".to_string()]));
+			},
+			Ok(None) => panic!("No metadata returned"),
+			Err(e) => panic!("Failed to get metadata: {:?}", e),
+		}
 	}
 
 	#[test]

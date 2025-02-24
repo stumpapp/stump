@@ -113,7 +113,7 @@ export default function UserTable() {
 	)
 
 	return (
-		<Card className="bg-background-surface p-1">
+		<Card>
 			<Table
 				sortable
 				columns={columns}
@@ -130,7 +130,7 @@ export default function UserTable() {
 				}}
 				data={users}
 				fullWidth
-				cellClassName="bg-background-surface"
+				cellClassName="bg-background"
 			/>
 			<InspectUserSlideOver user={inspectingUser} onClose={() => setInspectingUser(null)} />
 		</Card>

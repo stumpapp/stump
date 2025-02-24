@@ -1,0 +1,32 @@
+import { Callout } from 'nextra/components'
+
+# Readers
+
+The mobile app provides a few different readers with unique experiences tailored to the format of the book you're reading
+
+## Comics / Manga / Image-based Books
+
+Any format that is image-based will generally use the same image-based reader. This includes formats like `.cbz`/`.zip` and `.cbr`/`.rar` files that contain images of the pages. PDF files are considered here as well, at least from Stump server sources.
+
+### Presets
+
+The image-based reader has a few presets that you can use to customize your reading experience:
+
+1. Horizontal paged swipe (default, `ltr` or `rtl`)
+2. Horizontal continuous scroll (`ltr` or `rtl`)
+3. Vertical continuous scroll (`ttb` or `btt`)
+
+There are plans to add more customizations in the future, however these are the presets that are available at the time of writing.
+
+### Incognito Mode
+
+The image-based reader can be used in incognito mode, which will not save your reading progress. When enabled, no progress-related API calls will be made to the server.
+
+## Ebook Reader
+
+<Callout emoji="⚠️" type="warning">
+	The ebook reader provides really poor UX. It is recommended to use a different reader until this
+	is improved. It is planned for a future release!
+</Callout>
+
+> Documentation will be added when the reader is improved

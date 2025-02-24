@@ -1,8 +1,7 @@
 import { Api, AuthenticationMethod } from '@stump/sdk'
 import { PropsWithChildren, useEffect, useState } from 'react'
 
-import { useClientContext } from '@/context'
-
+import { useClientContext } from '../context'
 import { SDKContext } from './context'
 
 type SDKProviderProps = {
@@ -25,6 +24,8 @@ export function SDKProvider({
 
 		const instance = new Api({ baseURL, authMethod })
 
+		// TODO: this needs to be rethought to generalize for both
+		// tauri (desktop) and mobile (expo)
 		if (!tauriRPC || authMethod === 'session') {
 			setSDK(instance)
 			return
@@ -57,5 +58,5 @@ export function SDKProvider({
 		return null
 	}
 
-	return <SDKContext.Provider value={{ sdk }}>{children}</SDKContext.Provider>
+	return <SDKContext.Provider value={{ sdk, setSDK }}>{children}</SDKContext.Provider>
 }

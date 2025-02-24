@@ -42,7 +42,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 					get(individual::get_media_progress)
 						.delete(individual::delete_media_progress),
 				)
-				.route("/progress/:page", put(individual::update_media_progress))
+				.route("/progress", put(individual::update_media_progress))
 				.route(
 					"/progress/complete",
 					get(individual::get_is_media_completed)

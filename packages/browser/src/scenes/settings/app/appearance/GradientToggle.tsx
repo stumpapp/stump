@@ -1,8 +1,7 @@
 import { useUpdatePreferences } from '@stump/client'
+import { WideSwitch } from '@stump/components'
 
 import { useUserStore } from '@/stores'
-
-import PreferenceToggle from '../../PreferenceToggle'
 
 export default function GradientToggle() {
 	const { preferences, setPreferences } = useUserStore((state) => ({
@@ -24,12 +23,12 @@ export default function GradientToggle() {
 	}
 
 	return (
-		<PreferenceToggle
+		<WideSwitch
 			formId="enable_gradients"
 			label="Enable gradients"
 			description="Some themes optionally support gradients for a more dynamic look"
-			isChecked={preferences?.enable_gradients}
-			onToggle={handleChange}
+			checked={preferences?.enable_gradients}
+			onCheckedChange={handleChange}
 		/>
 	)
 }

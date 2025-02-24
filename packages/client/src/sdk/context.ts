@@ -3,6 +3,7 @@ import { createContext, useContext } from 'react'
 
 export type ISDKContext = {
 	sdk: Api
+	setSDK: (sdk: Api) => void
 }
 
 export const SDKContext = createContext<ISDKContext | null>(null)

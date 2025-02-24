@@ -31,7 +31,7 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 - [Roadmap 🗺](#roadmap-)
 - [Getting Started 🚀](#getting-started-)
 - [Developer Guide 💻](#developer-guide-)
-    - [Where to start?](#where-to-start)
+  - [Where to start?](#where-to-start)
 - [Project Structure 📦](#project-structure-)
   - [Apps](#apps)
   - [Core](#core)
@@ -201,4 +201,4 @@ There are a number of other projects that are similar to Stump, it certainly isn
 
 ## License 📝
 
-Stump is licensed under the [MIT License](https://www.tldrlegal.com/license/mit-license). This applies to the entire repository except for subfolders/packages which contain their own license file(s). In such cases, the license file(s) in the subfolder/package take precedence.
+Stump is broken up into a number of different packages and applications. Some of these have their own licenses. For example, the `expo` app is licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html). If a package has its own license, it will be noted in the package's README or LICENSE file. In such cases, the license file(s) in the subfolder/package take precedence. If such a license or disclaimer is not present, it is safe to assume that the code is licensed under the [MIT License](https://www.tldrlegal.com/license/mit-license).

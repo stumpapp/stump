@@ -302,15 +302,19 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	}, [rendition, epubPreferences, theme])
 
 	/**
-	 * This effect is responsible for invalidating the in progress media query whenever
-	 * the epub reader is unmounted. This is so that the in progress media query will
-	 * refetch the updated progress information.
+	 * Invalidate the book query when a reader is unmounted so that the book overview
+	 * is updated with the latest read progress
 	 */
-	useEffect(() => {
-		return () => {
-			queryClient.invalidateQueries([sdk.media.keys.inProgress], { exact: false })
-		}
-	}, [sdk.media])
+	useEffect(
+		() => {
+			return () => {
+				queryClient.refetchQueries({ queryKey: [sdk.media.keys.getByID, id], exact: false })
+				queryClient.refetchQueries({ queryKey: [sdk.media.keys.inProgress], exact: false })
+			}
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[],
+	)
 
 	/**
 	 * A callback for when the reader should paginate forward. This will only run if the

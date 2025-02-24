@@ -19,7 +19,6 @@ import RunningJobElapsedTime from './RunningJobElapsedTime.tsx'
 dayjs.extend(duration)
 dayjs.extend(relativeTime)
 
-const DEBUG = import.meta.env.DEV
 const LOCALE_BASE = 'settingsScene.server/jobs.sections.history.table'
 
 const columnHelper = createColumnHelper<PersistedJob>()
@@ -139,14 +138,11 @@ export default function JobTable() {
 	)
 
 	return (
-		<Card className="bg-background-surface p-1">
+		<Card>
 			<Table
 				sortable
 				columns={columns}
 				options={{
-					debugColumns: DEBUG,
-					debugHeaders: DEBUG,
-					debugTable: DEBUG,
 					enableSorting: false,
 					manualPagination: true,
 					onPaginationChange: setPagination,
@@ -169,7 +165,7 @@ export default function JobTable() {
 					</div>
 				)}
 				isZeroBasedPagination
-				cellClassName="bg-background-surface"
+				cellClassName="bg-background"
 			/>
 
 			<JobDataInspector data={inspectingData} onClose={() => setInspectingData(null)} />

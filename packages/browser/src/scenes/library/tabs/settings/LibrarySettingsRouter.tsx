@@ -1,5 +1,5 @@
 import { queryClient, useScanLibrary, useSDK, useUpdateLibrary } from '@stump/client'
-import { UpdateLibrary } from '@stump/sdk'
+import { ScanOptions, UpdateLibrary } from '@stump/sdk'
 import { lazy, Suspense, useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
@@ -10,7 +10,7 @@ import { LibraryManagementContext } from './context'
 
 const BasicSettingsScene = lazy(() => import('./basics/BasicSettingsScene'))
 const ThumbnailSettingsScene = lazy(() => import('./options/thumbnails/ThumbnailSettingsScene'))
-const ScannerBehaviorScene = lazy(() => import('./options/ScannerBehaviorScene'))
+const ScannerBehaviorScene = lazy(() => import('./options/scanner'))
 const LibraryAnalysisScene = lazy(() => import('./options/analysis'))
 const LibraryReadingDefaultsScene = lazy(() => import('./options/readingDefaults'))
 
@@ -30,7 +30,10 @@ export default function LibrarySettingsRouter() {
 	})
 
 	const { scan } = useScanLibrary()
-	const scanLibrary = useCallback(() => scan(library.id), [library.id, scan])
+	const scanLibrary = useCallback(
+		(options: ScanOptions = {}) => scan({ id: library.id, ...options }),
+		[library.id, scan],
+	)
 
 	const canScan = checkPermission('library:scan')
 

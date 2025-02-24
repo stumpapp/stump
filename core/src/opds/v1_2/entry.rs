@@ -377,4 +377,41 @@ mod tests {
 
 		assert_eq!(result, expected_result);
 	}
+
+	fn library() -> library::Data {
+		library::Data {
+			id: "123".to_string(),
+			name: "Library".to_string(),
+			created_at: chrono::Utc::now().into(),
+			updated_at: chrono::Utc::now().into(),
+			description: None,
+			emoji: None,
+			hidden_from_users: None,
+			job_schedule_config: None,
+			job_schedule_config_id: None,
+			last_scanned_at: None,
+			scan_history: None,
+			config: None,
+			config_id: String::default(),
+			path: String::default(),
+			series: None,
+			status: String::from("READY"),
+			tags: None,
+			user_visits: None,
+		}
+	}
+
+	#[test]
+	fn test_builder_url_format_with_api_key() {
+		let builder = OPDSEntryBuilder::new(library(), Some("api_key".to_string()));
+		let entry = builder.into_opds_entry();
+		assert_eq!(entry.links[0].href, "/opds/api_key/v1.2/libraries/123");
+	}
+
+	#[test]
+	fn test_builder_url_format_without_api_key() {
+		let builder = OPDSEntryBuilder::new(library(), None);
+		let entry = builder.into_opds_entry();
+		assert_eq!(entry.links[0].href, "/opds/v1.2/libraries/123");
+	}
 }

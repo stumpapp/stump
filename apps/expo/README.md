@@ -1,46 +1,53 @@
-# Stump Mobile Application
+# Stump Mobile App
 
-This is the mobile application for the Stump. It is built with [Expo](https://expo.io/) and is currently in the very early stages of development.
+This is the expo mobile app for Stump. The app runs on both iOS and Android.
 
-## Getting Started 🚀
+## Getting Started
 
-> Note: You need to have the Expo CLI installed, as well as the mobile SDKs (depending on where you want to run the app). See the [Expo docs](https://docs.expo.io/get-started/installation/) for more info.
+To get started with local development, the biggest barrier is setting up the native modules. The app uses the Swift and Kotlin [Readium](https://github.com/readium/mobile) toolkit for native EPUB parsing/rendering.
 
-1. Clone the repo
-2. Follow the [developer guide](https://github.com/aaronleopold/stump#developer-guide-) at the root of the Stump monorepo
-3. Start the mobile app and the server:
+### Native Development
 
-   To start the server and mobile app concurrently, you can use the following command:
+The process differs slightly between iOS and Android.
 
-   ```bash
-   yarn dev:expo
-   ```
+#### iOS
 
-   If you want to start the server and mobile app separately, you can use the following commands in two separate terminals:
+To build the app for iOS, run the following command:
 
-   ```bash
-   cargo run --package stump_server
-   yarn workspace @stump/expo start --clear
-   ```
+```bash
+yarn ios
+```
 
-And that's it!
+This should generate a development build of the app and start the dev server. You can then run the app on an iOS simulator or device. Once you have a build, you may also run `yarn dev` to just start the app without triggering a new build.
 
-## Contributing 🤝
+To open the Xcode project, run:
 
-Be sure to review the [CONTRIBUTING.md](https://github.com/aaronleopold/stump/tree/develop/.github/CONTRIBUTING.md) before getting started, as it overviews the guidelines and general process for contributing to the project. Once you've done that, it's as simple as:
+```bash
+yarn open:ios
+```
 
-1. Fork the repo
-2. Create a new branch
-3. Make your changes
-4. Open a PR (following the title and description guidelines)
-5. Wait for review
-6. Merge 😍
+You can edit the native code in `Pods` -> `Development Pods` -> `Readium`
 
-## Roadmap 🗺️
+#### Android
 
-You can find the high-level roadmap for the Stump mobile app in the [documentation](https://www.stumpapp.dev/guides/mobile/app#planned-features). For a more granular view of what is coming, you can also take a look at the [project board](https://github.com/orgs/stumpapp/projects/8).
+Ensure you follow the official [Expo](https://docs.expo.dev/workflow/android-studio-emulator/#install-watchman-and-jdk) guide to set up your Android development environment.
 
-## Acknowledgements 🙏
+To build the app for Android, run the following command:
 
-- Thanks to [@dancamdev](https://github.com/dancamdev) for bootstrapping this Expo project template 🙌
-- Thanks to [@LRotenberger](https://github.com/LRotenberger) for building out the initial POC for the mobile app 🚀
+```bash
+yarn android # expo run:android
+```
+
+This should generate a development build of the app and start the dev server. You can then run the app on an Android emulator or device. Once you have a build, you may also run `yarn android` to just start the app without triggering a new build.
+
+To open in Android Studio, run:
+
+```bash
+yarn open:android
+```
+
+You can edit the native code in `android` -> `readium` -> `src/main/java/expo.modules.readium`
+
+## License 📝
+
+The `expo` app is licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html)

@@ -417,6 +417,8 @@ mod tests {
 			.sender
 			.send(LibraryWatcherCommand::ChangedFiles(vec![new_file.clone()]))
 			.is_ok());
+
+		// Wait for the background thread to trigger the flush
 		tokio::time::sleep(Duration::from_millis(20)).await;
 		let (id, path) = mock_objs.jobs_receiver.try_recv().expect("Expected a job");
 		assert_eq!(id, "42");

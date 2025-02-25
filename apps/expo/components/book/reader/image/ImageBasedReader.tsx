@@ -11,6 +11,7 @@ import {
 import { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { useDisplay } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
 
@@ -128,6 +129,7 @@ type PageProps = {
 	maxHeight: number
 	readingDirection: 'vertical' | 'horizontal'
 }
+
 const Page = React.memo(
 	({
 		// deviceOrientation,
@@ -138,7 +140,18 @@ const Page = React.memo(
 		maxHeight,
 		// readingDirection,
 	}: PageProps) => {
-		const { pageURL } = useImageBasedReader()
+		const {
+			book: { id },
+			pageURL,
+			flatListRef,
+		} = useImageBasedReader()
+		const {
+			preferences: {
+				tapSidesToNavigate,
+				// imageScaling: { scaleToFit },
+			},
+		} = useBookPreferences(id)
+		const { isTablet } = useDisplay()
 		const { sdk } = useSDK()
 
 		const insets = useSafeAreaInsets()
@@ -147,12 +160,39 @@ const Page = React.memo(
 		const showControls = useReaderStore((state) => state.showControls)
 		const setShowControls = useReaderStore((state) => state.setShowControls)
 
+		const tapThresholdRatio = isTablet ? 4 : 5
+
+		const onCheckForNavigationTaps = useCallback(
+			(x: number) => {
+				const isLeft = x < maxWidth / tapThresholdRatio
+				const isRight = x > maxWidth - maxWidth / tapThresholdRatio
+
+				if (isLeft) {
+					flatListRef.current?.scrollToIndex({ index: index - 1, animated: true })
+				} else if (isRight) {
+					flatListRef.current?.scrollToIndex({ index: index + 1, animated: true })
+				}
+
+				return isLeft || isRight
+			},
+			[maxWidth, index, flatListRef, tapThresholdRatio],
+		)
+
 		const onSingleTap = useCallback(
 			(event: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => {
 				if (event.state !== State.ACTIVE) return
-				setShowControls(!showControls)
+
+				if (!tapSidesToNavigate) {
+					setShowControls(!showControls)
+					return
+				}
+
+				const didNavigate = onCheckForNavigationTaps(event.x)
+				if (!didNavigate) {
+					setShowControls(!showControls)
+				}
 			},
-			[showControls, setShowControls],
+			[showControls, setShowControls, onCheckForNavigationTaps, tapSidesToNavigate],
 		)
 
 		const onImageLoaded = useCallback(
@@ -200,7 +240,6 @@ const Page = React.memo(
 								Authorization: sdk.authorizationHeader,
 							},
 						}}
-						// TODO: figure out how to render landscape better...
 						style={{
 							height: '100%',
 							width: '100%',

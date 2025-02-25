@@ -8,10 +8,20 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 
 import { useActiveServer } from '~/components/activeServer'
 
-type GlobalSettings = IBookPreferences & { incognito?: boolean; preferSmallImages?: boolean }
+export type DoublePageBehavior = 'auto' | 'always' | 'off'
+
+export type FooterControls = 'images' | 'slider'
+
 export type BookPreferences = IBookPreferences & {
 	serverID?: string
+	incognito?: boolean
+	preferSmallImages?: boolean
+	doublePageBehavior?: DoublePageBehavior
+	tapSidesToNavigate?: boolean
+	footerControls?: FooterControls
+	trackElapsedTime?: boolean
 }
+export type GlobalSettings = Omit<BookPreferences, 'serverID'>
 
 type ElapsedSeconds = number
 
@@ -46,8 +56,12 @@ export const useReaderStore = create<ReaderStore>()(
 					imageScaling: {
 						scaleToFit: 'width',
 					},
+					doublePageBehavior: 'auto',
 					readingMode: 'paged',
 					preferSmallImages: false,
+					footerControls: 'images',
+					tapSidesToNavigate: true,
+					trackElapsedTime: true,
 				} satisfies GlobalSettings,
 				setGlobalSettings: (updates: Partial<GlobalSettings>) =>
 					set({ globalSettings: { ...get().globalSettings, ...updates } }),
@@ -111,10 +125,10 @@ export const useBookPreferences = (id: string) => {
 	)
 
 	return {
+		globalSettings: store.globalSettings,
 		preferences: {
+			...store.globalSettings,
 			...(bookSettings || store.globalSettings),
-			incognito: store.globalSettings.incognito,
-			preferSmallImages: store.globalSettings.preferSmallImages,
 		},
 		setBookPreferences,
 		updateGlobalSettings: store.setGlobalSettings,
@@ -123,15 +137,24 @@ export const useBookPreferences = (id: string) => {
 
 type UseBookTimerParams = {
 	initial?: number | null
+	enabled?: boolean
 }
 
-export const useBookReadTime = (id: string, { initial }: UseBookTimerParams = {}) => {
+export const useBookReadTime = (
+	id: string,
+	{ initial }: Omit<UseBookTimerParams, 'enabled'> = {},
+) => {
 	const bookTimers = useReaderStore((state) => state.bookTimers)
 	const bookTimer = useMemo(() => bookTimers[id] || 0, [bookTimers, id])
 	return bookTimer || initial || 0
 }
 
-export const useBookTimer = (id: string, params: UseBookTimerParams = {}) => {
+const defaultParams: UseBookTimerParams = {
+	initial: 0,
+	enabled: true,
+}
+
+export const useBookTimer = (id: string, params: UseBookTimerParams = defaultParams) => {
 	const [initial] = useState(() => params.initial)
 
 	const bookTimers = useReaderStore((state) => state.bookTimers)
@@ -144,7 +167,7 @@ export const useBookTimer = (id: string, params: UseBookTimerParams = {}) => {
 	)
 
 	const { pause, totalSeconds, reset, isRunning } = useStopwatch({
-		autoStart: !!id,
+		autoStart: !!id && !!params.enabled,
 		offsetTimestamp: dayjs()
 			.add(resolvedTimer || 0, 'seconds')
 			.toDate(),
@@ -158,11 +181,18 @@ export const useBookTimer = (id: string, params: UseBookTimerParams = {}) => {
 	}, [id, pause, setBookTimer, totalSeconds, isRunning])
 
 	const resumeTimer = useCallback(() => {
+		if (!params.enabled) return
+
 		if (!isRunning) {
 			const offset = dayjs().add(totalSeconds, 'seconds').toDate()
 			reset(offset)
 		}
-	}, [totalSeconds, reset, isRunning])
+	}, [totalSeconds, reset, isRunning, params.enabled])
+
+	const resetTimer = useCallback(() => {
+		reset(undefined, params.enabled)
+		setBookTimer(id, 0)
+	}, [reset, params.enabled, id, setBookTimer])
 
 	useEffect(() => {
 		reset(
@@ -172,7 +202,14 @@ export const useBookTimer = (id: string, params: UseBookTimerParams = {}) => {
 		)
 	}, [resolvedTimer, reset])
 
-	return { totalSeconds, pause: pauseTimer, resume: resumeTimer, isRunning }
+	useEffect(() => {
+		if (!params.enabled) {
+			pause()
+			setBookTimer(id, totalSeconds)
+		}
+	}, [params.enabled, isRunning, pause, setBookTimer, id, totalSeconds])
+
+	return { totalSeconds, pause: pauseTimer, resume: resumeTimer, reset: resetTimer, isRunning }
 }
 
 export const useHideStatusBar = () => {

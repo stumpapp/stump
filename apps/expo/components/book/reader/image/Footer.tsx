@@ -1,8 +1,10 @@
+import { Slider as Slider2 } from '@miblanchard/react-native-slider'
 import { useSDK } from '@stump/client'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import { Image } from 'expo-image'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { debounce } from 'lodash'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 import { FlatList, Pressable } from 'react-native-gesture-handler'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
@@ -12,7 +14,7 @@ import { Progress, Text } from '~/components/ui'
 import { useDisplay } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { useReaderStore } from '~/stores'
-import { useBookReadTime } from '~/stores/reader'
+import { useBookPreferences, useBookReadTime } from '~/stores/reader'
 
 import { useImageBasedReader } from './context'
 
@@ -32,6 +34,9 @@ export default function Footer() {
 		flatListRef: readerRef,
 	} = useImageBasedReader()
 	const elapsedSeconds = useBookReadTime(id)
+	const {
+		preferences: { footerControls },
+	} = useBookPreferences(id)
 
 	const ref = useRef<FlatList>(null)
 	const insets = useSafeAreaInsets()
@@ -111,6 +116,8 @@ export default function Footer() {
 
 	useEffect(
 		() => {
+			if (footerControls !== 'images') return
+
 			const windowSize = isTablet ? 8 : 6
 			const start = Math.max(0, currentPage - windowSize)
 			const end = Math.min(pages, currentPage + windowSize)
@@ -128,49 +135,96 @@ export default function Footer() {
 		[currentPage],
 	)
 
+	const [sliderValue, setSliderValue] = useState(currentPage - 1)
+
+	const handleSlideValueChange = useCallback(
+		(idx: number) => {
+			if (footerControls !== 'slider') return
+
+			const currentIdx = currentPage - 1
+			if (idx < 0 || idx >= pages) return
+			if (idx === currentIdx) return
+			setSliderValue(idx)
+			readerRef.current?.scrollToIndex({ index: idx, animated: true })
+		},
+		[currentPage, pages, footerControls, readerRef],
+	)
+	const debouncedSliderChange = debounce(handleSlideValueChange, 100)
+
+	useEffect(
+		() => {
+			if (visible) {
+				setSliderValue(currentPage - 1)
+			}
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[visible],
+	)
+
 	return (
 		<Animated.View className="absolute z-20 shrink gap-4 px-1" style={animatedStyles}>
-			<FlatList
-				ref={ref}
-				data={Array.from({ length: pages }, (_, i) => i + 1)}
-				keyExtractor={(item) => item.toString()}
-				renderItem={({ item: page }) => (
-					<View className={cn({ 'pl-1': page === 1, 'pr-1': page === pages })}>
-						<Pressable onPress={() => onChangePage(page)}>
-							<View className="aspect-[2/3] items-center justify-center overflow-hidden rounded-xl shadow-lg">
-								<Image
-									source={pageSource(page)}
-									cachePolicy="memory"
-									style={getSize(page)}
-									contentFit="fill"
-								/>
-							</View>
-						</Pressable>
+			{footerControls === 'images' && (
+				<FlatList
+					ref={ref}
+					data={Array.from({ length: pages }, (_, i) => i + 1)}
+					keyExtractor={(item) => item.toString()}
+					renderItem={({ item: page }) => (
+						<View className={cn({ 'pl-1': page === 1, 'pr-1': page === pages })}>
+							<Pressable onPress={() => onChangePage(page)}>
+								<View className="aspect-[2/3] items-center justify-center overflow-hidden rounded-xl shadow-lg">
+									<Image
+										source={pageSource(page)}
+										cachePolicy="memory"
+										style={getSize(page)}
+										contentFit="fill"
+									/>
+								</View>
+							</Pressable>
 
-						{page !== currentPage && (
-							<Text size="sm" className="shrink-0 text-center text-[#898d94]">
-								{page}
-							</Text>
-						)}
-					</View>
-				)}
-				contentContainerStyle={{ gap: 4, alignItems: 'flex-end' }}
-				getItemLayout={getItemLayout}
-				horizontal
-				showsHorizontalScrollIndicator={false}
-				initialScrollIndex={currentPage - 1}
-				windowSize={5}
-				initialNumToRender={isTablet ? 8 : 6}
-				maxToRenderPerBatch={isTablet ? 8 : 6}
-			/>
+							{page !== currentPage && (
+								<Text size="sm" className="shrink-0 text-center text-[#898d94]">
+									{page}
+								</Text>
+							)}
+						</View>
+					)}
+					contentContainerStyle={{ gap: 4, alignItems: 'flex-end' }}
+					getItemLayout={getItemLayout}
+					horizontal
+					showsHorizontalScrollIndicator={false}
+					initialScrollIndex={currentPage - 1}
+					windowSize={5}
+					initialNumToRender={isTablet ? 8 : 6}
+					maxToRenderPerBatch={isTablet ? 8 : 6}
+				/>
+			)}
 
 			<View className="gap-2 px-1">
-				<Progress
-					className="h-1 bg-[#898d94]"
-					indicatorClassName="bg-[#f5f3ef]"
-					value={percentage}
-					max={100}
-				/>
+				{footerControls === 'images' && (
+					<Progress
+						className="h-1 bg-[#898d94]"
+						indicatorClassName="bg-[#f5f3ef]"
+						value={percentage}
+						max={100}
+					/>
+				)}
+
+				{footerControls === 'slider' && (
+					<Slider2
+						maximumValue={pages}
+						step={1}
+						value={sliderValue}
+						trackStyle={{
+							height: 12,
+							borderRadius: 6,
+							backgroundColor: '#898d9490',
+						}}
+						minimumTrackStyle={{ backgroundColor: 'rgb(196, 130, 89)' }}
+						thumbStyle={{ width: 24, height: 24, backgroundColor: 'white', borderRadius: 999 }}
+						onValueChange={([idx]) => debouncedSliderChange(idx)}
+						animationType="timing"
+					/>
+				)}
 
 				<View className="flex flex-row justify-between">
 					<View>

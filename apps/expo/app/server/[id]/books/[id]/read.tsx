@@ -31,12 +31,13 @@ export default function Screen() {
 			load_pages: true,
 		},
 	})
-	const { pause, resume, totalSeconds, isRunning } = useBookTimer(book?.id || '', {
-		initial: book?.active_reading_session?.elapsed_seconds,
-	})
 	const {
-		preferences: { preferSmallImages },
+		preferences: { preferSmallImages, trackElapsedTime },
 	} = useBookPreferences(book?.id || '')
+	const { pause, resume, totalSeconds, isRunning, reset } = useBookTimer(book?.id || '', {
+		initial: book?.active_reading_session?.elapsed_seconds,
+		enabled: trackElapsedTime,
+	})
 
 	const { updateReadProgressAsync } = useUpdateMediaProgress(book?.id || '', {
 		retry: (attempts) => attempts < 3,
@@ -134,6 +135,7 @@ export default function Screen() {
 					ratio: width / height,
 				}))}
 				onPageChanged={onPageChanged}
+				resetTimer={reset}
 			/>
 		)
 	}

@@ -421,7 +421,7 @@
 				},
 				{
 					"label": "Skenování",
-					"heading": "Scanning",
+					"heading": "Skenování",
 					"description": "Nastavení týkající se skenování této knihovny"
 				},
 				{
@@ -517,17 +517,17 @@
 			"description": "Výchozí nastavení čtečky pro knihy v této knihovně. Kniha může přepsat tato nastavení"
 		},
 		"options/scanning": {
-			"title": "Scanning",
+			"title": "Skenování",
 			"description": "Nastavení týkající se skenování této knihovny",
 			"sections": {
 				"configureScan": {
-					"heading": "Configure scan",
-					"description": "A scan with additional options for more fine-grained control",
+					"heading": "Nastavit skenování",
+					"description": "Další možnosti nastavení skenování",
 					"form": {
-						"alert": "These will override corresponding library-wide settings",
+						"alert": "Toto přepíše odpovídající nastavení pro celou knihovnu",
 						"options": {
 							"forceRebuild": {
-								"label": "Force rebuild",
+								"label": "Vynutit obnovu",
 								"description": "Rebuild every book in the library on disk",
 								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
 							},

@@ -1,6 +1,5 @@
-use crate::db::entity::Library;
-use crate::prisma::library;
-use crate::prisma::PrismaClient;
+use crate::db::entity::macros::library_idents_select;
+use crate::prisma::{library, library_config, PrismaClient};
 use crate::{
 	filesystem::scanner::LibraryScanJob,
 	job::{JobController, JobControllerCommand},
@@ -37,8 +36,8 @@ fn create_watcher(sender: UnboundedSender<LibraryWatcherCommand>) -> INotifyWatc
 			},
 			_ => {},
 		},
-		Err(_) => {
-			tracing::error!("Error processing file");
+		Err(e) => {
+			tracing::error!(?e, "Error processing file");
 		},
 	})
 	.expect("Failed to create watcher")
@@ -111,7 +110,7 @@ impl LibraryWatcherInternal {
 
 #[async_trait]
 trait LibrariesProvider {
-	async fn get_libraries(&self) -> CoreResult<Vec<Library>>;
+	async fn get_libraries(&self) -> CoreResult<Vec<library_idents_select::Data>>;
 }
 
 #[derive(Debug, Clone)]
@@ -121,26 +120,20 @@ struct LibraryProvider {
 
 #[async_trait]
 impl LibrariesProvider for LibraryProvider {
-	async fn get_libraries(&self) -> CoreResult<Vec<Library>> {
+	async fn get_libraries(&self) -> CoreResult<Vec<library_idents_select::Data>> {
 		// get list of all libraries
 		// for each library, if watching is enabled, watch their directory
 		Ok(self
 			.db_client
 			.library()
-			.find_many(vec![library::status::equals("READY".to_string())])
-			.with(library::config::fetch())
+			.find_many(vec![
+				library::status::equals("READY".to_string()),
+				library::config::is(vec![library_config::watch::equals(true)]),
+			])
+			.select(library_idents_select::select())
 			.exec()
-			.await
-			.map_err(|e| CoreError::InitializationError(e.to_string()))?
+			.await?
 			.into_iter()
-			.filter(|library| {
-				if let Some(config) = &library.config {
-					config.watch
-				} else {
-					false
-				}
-			})
-			.map(Library::from)
 			.collect())
 	}
 }
@@ -334,20 +327,14 @@ impl LibraryWatcher {
 mod tests {
 	use super::*;
 
-	use crate::db::entity::common::{
-		ReadingDirection, ReadingImageScaleFit, ReadingMode,
-	};
-	use crate::db::entity::LibraryConfig;
-	use crate::db::entity::{IgnoreRules, LibraryPattern};
-
 	#[allow(dead_code)]
 	struct MockLibraryProvider {
-		libraries: Vec<Library>,
+		libraries: Vec<library_idents_select::Data>,
 	}
 
 	#[async_trait]
 	impl LibrariesProvider for MockLibraryProvider {
-		async fn get_libraries(&self) -> CoreResult<Vec<Library>> {
+		async fn get_libraries(&self) -> CoreResult<Vec<library_idents_select::Data>> {
 			Ok(self.libraries.clone())
 		}
 	}
@@ -375,7 +362,9 @@ mod tests {
 	}
 
 	#[allow(dead_code)]
-	async fn create_mock_library(libraries: Vec<Library>) -> Result<MockObjs, CoreError> {
+	async fn create_mock_library(
+		libraries: Vec<library_idents_select::Data>,
+	) -> Result<MockObjs, CoreError> {
 		let (tx_jobs, rx_jobs) = tokio::sync::mpsc::unbounded_channel();
 		let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
 
@@ -403,128 +392,108 @@ mod tests {
 	}
 
 	#[allow(dead_code)]
-	fn create_test_libraries(base_dir: String) -> Vec<Library> {
-		let library_config = LibraryConfig {
-			id: None,
-			convert_rar_to_zip: false,
-			hard_delete_conversions: false,
-			generate_file_hashes: false,
-			generate_koreader_hashes: false,
-			process_metadata: false,
-			watch: true,
-			library_pattern: LibraryPattern::SeriesBased,
-			thumbnail_config: None,
-			default_reading_dir: ReadingDirection::RightToLeft,
-			default_reading_mode: ReadingMode::Paged,
-			default_reading_image_scale_fit: ReadingImageScaleFit::Height,
-			ignore_rules: IgnoreRules::default(),
-			library_id: None,
-		};
-
-		vec![Library {
+	fn create_test_libraries(base_dir: String) -> Vec<library_idents_select::Data> {
+		vec![library_idents_select::Data {
 			id: "42".to_string(),
-			description: None,
-			emoji: None,
-			name: "Test Library".to_string(),
 			path: base_dir,
-			series: None,
-			tags: None,
-			status: "READY".to_string(),
-			updated_at: "2022-04-20 04:20:69".to_string(),
-			config: library_config,
 		}]
 	}
 
 	#[tokio::test]
 	async fn test_library_watcher_init() {
 		let tmp_dir = std::env::temp_dir().join("stump_test");
+		std::fs::create_dir_all(&tmp_dir).unwrap();
 		let libraries = create_test_libraries(tmp_dir.to_string_lossy().to_string());
 
 		let mut mock_objs = create_mock_library(libraries).await.unwrap();
 
-		if let Ok(_) = mock_objs.library_watcher.add_watcher(tmp_dir.clone()).await {
-			let new_file = tmp_dir.join("new_file");
-			if let Ok(_) = mock_objs
-				.sender
-				.send(LibraryWatcherCommand::ChangedFiles(vec![new_file.clone()]))
-			{
-				tokio::time::sleep(Duration::from_millis(20)).await;
-				if let Ok((id, path)) = mock_objs.jobs_receiver.try_recv() {
-					assert_eq!(id, "42");
-					assert_eq!(path, tmp_dir.to_string_lossy().to_string());
-					return;
-				}
-			}
-		}
-		panic!("Unexpected result");
+		assert!(mock_objs
+			.library_watcher
+			.add_watcher(tmp_dir.clone())
+			.await
+			.is_ok());
+		let new_file = tmp_dir.join("new_file");
+		assert!(mock_objs
+			.sender
+			.send(LibraryWatcherCommand::ChangedFiles(vec![new_file.clone()]))
+			.is_ok());
+		tokio::time::sleep(Duration::from_millis(20)).await;
+		let (id, path) = mock_objs.jobs_receiver.try_recv().expect("Expected a job");
+		assert_eq!(id, "42");
+		assert_eq!(path, tmp_dir.to_string_lossy().to_string());
 	}
 
 	#[tokio::test]
 	async fn test_remove() {
 		let tmp_dir = std::env::temp_dir().join("stump_test");
+		std::fs::create_dir_all(&tmp_dir).unwrap();
 		let libraries = create_test_libraries(tmp_dir.to_string_lossy().to_string());
 
 		let mock_objs = create_mock_library(libraries).await.unwrap();
 
-		if let Ok(_) = mock_objs.library_watcher.add_watcher(tmp_dir.clone()).await {
-			if let Ok(_) = mock_objs
-				.library_watcher
-				.remove_watcher(tmp_dir.clone())
-				.await
-			{
-				// try removing again
-				if let Ok(_) = mock_objs
-					.library_watcher
-					.remove_watcher(tmp_dir.clone())
-					.await
-				{
-					return;
-				}
-			}
-		}
-		panic!("Unexpected result");
+		assert!(mock_objs
+			.library_watcher
+			.add_watcher(tmp_dir.clone())
+			.await
+			.is_ok());
+		assert!(mock_objs
+			.library_watcher
+			.remove_watcher(tmp_dir.clone())
+			.await
+			.is_ok());
+
+		// try removing again
+		assert!(mock_objs
+			.library_watcher
+			.remove_watcher(tmp_dir.clone())
+			.await
+			.is_ok());
 	}
 
 	#[tokio::test]
 	async fn test_add_watcher_twice() {
 		let tmp_dir = std::env::temp_dir().join("stump_test");
+		std::fs::create_dir_all(&tmp_dir).unwrap();
 		let libraries = create_test_libraries(tmp_dir.to_string_lossy().to_string());
 
 		let mock_objs = create_mock_library(libraries).await.unwrap();
-
-		if let Ok(_) = mock_objs.library_watcher.add_watcher(tmp_dir.clone()).await {
-			if let Ok(_) = mock_objs.library_watcher.add_watcher(tmp_dir.clone()).await {
-				return;
-			}
-		}
-		panic!("Unexpected result");
+		assert!(mock_objs
+			.library_watcher
+			.add_watcher(tmp_dir.clone())
+			.await
+			.is_ok());
+		assert!(mock_objs
+			.library_watcher
+			.add_watcher(tmp_dir.clone())
+			.await
+			.is_ok());
 	}
 
 	#[tokio::test]
 	async fn test_library_watcher_stop() {
 		let tmp_dir = std::env::temp_dir().join("stump_test");
+		std::fs::create_dir_all(&tmp_dir).unwrap();
 		let libraries = create_test_libraries(tmp_dir.to_string_lossy().to_string());
 
 		let mock_objs = create_mock_library(libraries).await.unwrap();
 
-		if let Ok(_) = mock_objs.library_watcher.add_watcher(tmp_dir.clone()).await {
-			let new_file = tmp_dir.join("new_file");
-			if let Ok(_) = mock_objs
-				.sender
-				.send(LibraryWatcherCommand::ChangedFiles(vec![new_file.clone()]))
-			{
-				tokio::time::sleep(Duration::from_millis(20)).await;
-				if let Ok(_) = mock_objs.library_watcher.stop().await {
-					return;
-				}
-			}
-		}
-		panic!("Unexpected result");
+		assert!(mock_objs
+			.library_watcher
+			.add_watcher(tmp_dir.clone())
+			.await
+			.is_ok());
+		let new_file = tmp_dir.join("new_file");
+		assert!(mock_objs
+			.sender
+			.send(LibraryWatcherCommand::ChangedFiles(vec![new_file.clone()]))
+			.is_ok());
+		assert!(mock_objs.library_watcher.stop().await.is_ok());
 	}
 
 	#[tokio::test]
 	async fn test_start_jobs() {
 		let tmp_dir = std::env::temp_dir().join("stump_test");
+		std::fs::create_dir_all(&tmp_dir).unwrap();
 		let libraries = create_test_libraries(tmp_dir.to_string_lossy().to_string());
 
 		let paths =
@@ -532,25 +501,23 @@ mod tests {
 
 		let mut mock_objs = create_mock_library(libraries).await.unwrap();
 
-		LibraryWatcher::start_jobs(
+		assert!(LibraryWatcher::start_jobs(
 			&mock_objs.library_watcher.library_provider,
 			&mock_objs.library_watcher.job_submitter,
 			paths,
 		)
 		.await
-		.unwrap();
+		.is_ok());
 
-		if let Ok((id, path)) = mock_objs.jobs_receiver.try_recv() {
-			assert_eq!(id, "42");
-			assert_eq!(path, tmp_dir.to_string_lossy().to_string());
-			return;
-		}
-		panic!("Unexpected result");
+		let (id, path) = mock_objs.jobs_receiver.try_recv().expect("Expected a job");
+		assert_eq!(id, "42");
+		assert_eq!(path, tmp_dir.to_string_lossy().to_string());
 	}
 
 	#[tokio::test]
 	async fn test_start_jobs_on_bad_library() {
 		let tmp_dir = std::env::temp_dir().join("stump_test");
+		std::fs::create_dir_all(&tmp_dir).unwrap();
 		let libraries = create_test_libraries(tmp_dir.to_string_lossy().to_string());
 
 		let bad_paths =
@@ -558,19 +525,17 @@ mod tests {
 
 		let mut mock_objs = create_mock_library(libraries).await.unwrap();
 
-		LibraryWatcher::start_jobs(
+		assert!(LibraryWatcher::start_jobs(
 			&mock_objs.library_watcher.library_provider,
 			&mock_objs.library_watcher.job_submitter,
 			bad_paths,
 		)
 		.await
-		.unwrap();
+		.is_ok());
 
-		if let Err(tokio::sync::mpsc::error::TryRecvError::Empty) =
-			mock_objs.jobs_receiver.try_recv()
-		{
-			return;
-		}
-		panic!("Unexpected result");
+		assert_eq!(
+			mock_objs.jobs_receiver.try_recv().unwrap_err(),
+			tokio::sync::mpsc::error::TryRecvError::Empty
+		);
 	}
 }

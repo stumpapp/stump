@@ -1,6 +1,7 @@
 import type { ReadingDirection, ReadingMode } from '@stump/sdk'
 import { create } from 'zustand'
 import { createJSONStorage, devtools, persist, StateStorage } from 'zustand/middleware'
+import { produce } from 'immer'
 
 export type BookImageScalingFit = 'width' | 'height' | 'none'
 export type BookImageScaling = {

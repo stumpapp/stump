@@ -15,17 +15,18 @@ type Return = Omit<ReaderStore, 'bookPreferences' | 'setBookPreferences'> & {
 
 export function useBookPreferences({ book }: Params): Return {
 	const {
-		// Note: This is a selection from the store, not a direct state value
-		bookPreferences: storedBookPreferences,
+		bookPreferences: allPreferences,
 		setBookPreferences: storedSetBookPreferences,
 		settings,
 		setSettings,
 	} = useReaderStore((state) => ({
-		bookPreferences: state.bookPreferences[book.id],
+		bookPreferences: state.bookPreferences,
 		setBookPreferences: state.setBookPreferences,
 		setSettings: state.setSettings,
 		settings: state.settings,
 	}))
+
+	const storedBookPreferences = useMemo(() => allPreferences[book.id], [allPreferences, book.id])
 
 	/**
 	 * The library configuration, used for picking default reader settings. This realistically
@@ -65,3 +66,11 @@ const defaultPreferences = (libraryConfig?: LibraryConfig): BookPreferences =>
 		readingDirection: libraryConfig?.default_reading_dir || 'ltr',
 		readingMode: libraryConfig?.default_reading_mode || 'paged',
 	}) as BookPreferences
+
+export const ensureFullPreferences = (
+	preferences: Partial<BookPreferences>,
+	libraryConfig?: LibraryConfig,
+): BookPreferences => ({
+	...defaultPreferences(libraryConfig),
+	...preferences,
+})

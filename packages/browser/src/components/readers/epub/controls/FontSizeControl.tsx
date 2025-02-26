@@ -1,15 +1,19 @@
-import { useEpubReader } from '@stump/client'
 import { cx, Label, Text, TEXT_VARIANTS } from '@stump/components'
 import { Minus, Plus } from 'lucide-react'
 import { useCallback, useEffect, useRef } from 'react'
 
 import { usePressAndHold } from '@/hooks/usePressAndHold'
+import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
+import { useEpubReaderContext } from '../context'
 
 export default function FontSizeControl() {
-	const { fontSize, setFontSize } = useEpubReader((state) => ({
-		fontSize: state.preferences.fontSize,
-		setFontSize: state.setFontSize,
-	}))
+	const {
+		readerMeta: { bookEntity },
+	} = useEpubReaderContext()
+	const {
+		bookPreferences: { fontSize = 13 },
+		setBookPreferences,
+	} = useBookPreferences({ book: bookEntity })
 	const fontSizeRef = useRef(fontSize)
 	useEffect(() => {
 		fontSizeRef.current = fontSize
@@ -20,10 +24,10 @@ export default function FontSizeControl() {
 			if (newSize < 1) {
 				return
 			} else {
-				setFontSize(newSize)
+				setBookPreferences({ fontSize: newSize })
 			}
 		},
-		[setFontSize],
+		[setBookPreferences],
 	)
 
 	const { bindButton } = usePressAndHold()

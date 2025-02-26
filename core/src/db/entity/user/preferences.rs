@@ -131,6 +131,9 @@ pub enum SupportedFont {
 	#[default]
 	Inter,
 	OpenDyslexic,
+	AtkinsonHyperlegible,
+	Charis,
+	Literata,
 	// TODO(383): Support custom fonts
 	// Custom(String),
 }
@@ -140,6 +143,9 @@ impl Display for SupportedFont {
 		match self {
 			SupportedFont::Inter => write!(f, "inter"),
 			SupportedFont::OpenDyslexic => write!(f, "opendyslexic"),
+			SupportedFont::AtkinsonHyperlegible => write!(f, "atkinsonhyperlegible"),
+			SupportedFont::Charis => write!(f, "charis"),
+			SupportedFont::Literata => write!(f, "literata"),
 		}
 	}
 }
@@ -148,6 +154,9 @@ impl From<String> for SupportedFont {
 	fn from(value: String) -> Self {
 		match value.to_lowercase().as_str() {
 			"opendyslexic" => SupportedFont::OpenDyslexic,
+			"atkinsonhyperlegible" => SupportedFont::AtkinsonHyperlegible,
+			"charis" => SupportedFont::Charis,
+			"literata" => SupportedFont::Literata,
 			// Note: for now we just always default to Inter. This will be acceptable
 			// until we have custom font support.
 			_ => SupportedFont::Inter,

@@ -11,7 +11,7 @@ export const isUser = (data: unknown): data is User => {
 
 export const isSupportedFont = (data: unknown): data is SupportedFont => {
 	const casted = data as SupportedFont
-	return casted === 'inter' || casted === 'opendyslexic'
+	return ['inter', 'opendyslexic', 'atkinsonhyperlegible', 'charis', 'literata'].includes(casted)
 }
 
 export type APIError =

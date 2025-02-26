@@ -32,6 +32,9 @@ export default {
 			fontFamily: {
 				inter: ['Inter var', ...defaultTheme.fontFamily.sans],
 				opendyslexic: ['OpenDyslexicRegular', ...defaultTheme.fontFamily.sans],
+				atkinsonhyperlegible: ['Atkinson Hyperlegible', ...defaultTheme.fontFamily.sans],
+				charis: ['CharisSILW', ...defaultTheme.fontFamily.serif],
+				literata: ['Literata', ...defaultTheme.fontFamily.serif],
 			},
 			fontSize: {
 				xxs: '0.65rem',

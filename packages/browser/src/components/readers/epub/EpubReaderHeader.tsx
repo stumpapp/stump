@@ -16,8 +16,6 @@ import {
 } from './controls'
 import { LocationManager } from './locations'
 
-// TODO(UX): gather feedback on the header design. I am worried the actionable items are too small on
-// mobile devices.
 export default function EpubReaderHeader() {
 	const {
 		readerMeta: { bookEntity },

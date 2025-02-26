@@ -1,5 +1,6 @@
 use std::{collections::VecDeque, path::PathBuf};
 
+use prisma_client_rust::chrono;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
@@ -18,7 +19,9 @@ use crate::{
 		error::JobError, Executor, JobExecuteLog, JobExt, JobOutputExt, JobProgress,
 		JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
-	prisma::{library, library_config, media, series, PrismaClient},
+	prisma::{
+		job, library, library_config, library_scan_record, media, series, PrismaClient,
+	},
 	utils::chain_optional_iter,
 	CoreEvent,
 };
@@ -56,9 +59,13 @@ pub struct InitTaskInput {
 /// A job that scans a library and updates the database with the results
 #[derive(Clone)]
 pub struct LibraryScanJob {
+	/// The ID of the library to scan
 	pub id: String,
+	/// The path to the library to scan
 	pub path: String,
+	/// The library configuration to use
 	pub config: Option<LibraryConfig>,
+	/// The scan options to use, if any
 	pub options: ScanOptions,
 }
 
@@ -134,7 +141,7 @@ impl JobExt for LibraryScanJob {
 		// Note: We ignore the potential self.config here in the event that it was
 		// updated since being queued. This is perhaps a bit overly cautious, but it's
 		// just one additional query.
-		let library_config = ctx
+		let mut library_config = ctx
 			.db
 			.library_config()
 			.find_first(vec![library_config::library::is(vec![
@@ -145,6 +152,7 @@ impl JobExt for LibraryScanJob {
 			.await?
 			.map(LibraryConfig::from)
 			.ok_or(JobError::InitFailed("Library not found".to_string()))?;
+		library_config.apply(self.options);
 		let is_collection_based = library_config.is_collection_based();
 		let ignore_rules = library_config.ignore_rules.build()?;
 
@@ -165,7 +173,7 @@ impl JobExt for LibraryScanJob {
 				db: ctx.db.clone(),
 				ignore_rules,
 				max_depth: is_collection_based.then_some(1),
-				options: self.options.clone(),
+				options: self.options,
 			},
 		)
 		.await?;
@@ -242,6 +250,10 @@ impl JobExt for LibraryScanJob {
 			.config
 			.as_ref()
 			.and_then(|o| o.thumbnail_config.clone());
+
+		if let Err(error) = handle_scan_complete(self, ctx, &self.options).await {
+			tracing::error!(error = ?error, "Failed to handle scan completion");
+		}
 
 		match image_options {
 			Some(options) if did_create | did_update => {
@@ -478,7 +490,7 @@ impl JobExt for LibraryScanJob {
 						db: ctx.db.clone(),
 						ignore_rules,
 						max_depth,
-						options: self.options.clone(),
+						options: self.options,
 					},
 				)
 				.await;
@@ -638,9 +650,9 @@ impl JobExt for LibraryScanJob {
 					output.created_media += created_media;
 					logs.extend(new_logs);
 				},
-				SeriesScanTask::VisitMedia(paths) => {
+				SeriesScanTask::VisitMedia(params) => {
 					ctx.report_progress(JobProgress::msg(
-						format!("Visiting {} media entities on disk", paths.len())
+						format!("Visiting {} media entities on disk", params.len())
 							.as_str(),
 					));
 					let MediaOperationOutput {
@@ -654,7 +666,7 @@ impl JobExt for LibraryScanJob {
 							max_concurrency,
 						},
 						ctx,
-						paths,
+						params,
 					)
 					.await?;
 					ctx.send_batch(vec![
@@ -728,6 +740,57 @@ pub async fn handle_missing_library(
 		affected_media,
 		"Marked library as missing"
 	);
+
+	Ok(())
+}
+
+async fn handle_scan_complete(
+	job: &LibraryScanJob,
+	ctx: &WorkerCtx,
+	options: &ScanOptions,
+) -> Result<(), JobError> {
+	let client = ctx.db.clone();
+	let now = chrono::Utc::now();
+
+	let update_result = client
+		.library()
+		.update(
+			library::id::equals(job.id.clone()),
+			vec![library::last_scanned_at::set(Some(now.into()))],
+		)
+		.exec()
+		.await;
+	if let Err(error) = update_result {
+		tracing::error!(?error, "Failed to update library last scanned at");
+	}
+
+	let persisted_options = if options.is_default() {
+		None
+	} else {
+		match serde_json::to_vec(&options) {
+			Ok(data) => Some(data),
+			Err(e) => {
+				tracing::error!(error = ?e, "Failed to serialize scan options");
+				None
+			},
+		}
+	};
+
+	let insert_result = client
+		.library_scan_record()
+		.create(
+			library::id::equals(job.id.clone()),
+			vec![
+				library_scan_record::options::set(persisted_options),
+				library_scan_record::timestamp::set(now.into()),
+				library_scan_record::job::connect(job::id::equals(ctx.job_id.clone())),
+			],
+		)
+		.exec()
+		.await;
+	if let Err(error) = insert_result {
+		tracing::error!(?error, "Failed to insert library scan record");
+	}
 
 	Ok(())
 }

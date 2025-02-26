@@ -364,6 +364,10 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<Library>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryPattern>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryScanMode>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<CustomVisit>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<ScanConfig>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<ScanOptions>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LastLibraryScan>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<IgnoreRules>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryConfig>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryStats>()?).as_bytes())?;
@@ -470,6 +474,9 @@ mod tests {
 
 		file.write_all(format!("{}\n\n", ts_export::<ImageResizeMode>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<ImageResizeOptions>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<ScaledDimensionResize>()?).as_bytes(),
+		)?;
 		file.write_all(format!("{}\n\n", ts_export::<ImageFormat>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<ImageProcessorOptions>()?).as_bytes(),

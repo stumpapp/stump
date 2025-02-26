@@ -1,8 +1,7 @@
+import { WideSwitch } from '@stump/components'
 import { useCallback } from 'react'
 
 import { usePreferences } from '@/hooks'
-
-import PreferenceToggle from '../../../PreferenceToggle'
 
 export default function ReplacePrimarySidebarToggle() {
 	const {
@@ -19,12 +18,12 @@ export default function ReplacePrimarySidebarToggle() {
 	}, [enable_replace_primary_sidebar, update])
 
 	return (
-		<PreferenceToggle
+		<WideSwitch
 			label="Replace primary sidebar"
 			description="Any instance of a secondary sidebar will replace the primary sidebar instead of being displayed next to it"
-			isChecked={enable_replace_primary_sidebar}
-			isDisabled={!enable_double_sidebar || primary_navigation_mode !== 'SIDEBAR'}
-			onToggle={handleToggle}
+			checked={enable_replace_primary_sidebar}
+			disabled={!enable_double_sidebar || primary_navigation_mode !== 'SIDEBAR'}
+			onCheckedChange={handleToggle}
 			formId="enable_replace_primary_sidebar"
 			title={
 				!enable_double_sidebar

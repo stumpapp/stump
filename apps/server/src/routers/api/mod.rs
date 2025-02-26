@@ -20,7 +20,7 @@ mod tests {
 		NamedType,
 	};
 
-	use stump_core::config::StumpConfig;
+	use stump_core::{config::StumpConfig, filesystem::scanner::LibraryScanRecord};
 
 	use crate::{
 		config::jwt::CreatedToken,
@@ -133,6 +133,7 @@ mod tests {
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<MediaBaseFilter>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<MediaFilter>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<PutMediaProgress>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<BookRelations>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<SeriesBaseFilter>()?).as_bytes())?;
 		file.write_all(
@@ -213,6 +214,8 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<PatchLibraryThumbnail>()?).as_bytes(),
 		)?;
+		file.write_all(format!("{}\n\n", ts_export::<LibraryScanRecord>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LastScanDetails>()?).as_bytes())?;
 
 		file.write_all(
 			format!("{}\n\n", ts_export::<CreateOrUpdateSmartList>()?).as_bytes(),

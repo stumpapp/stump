@@ -7,6 +7,7 @@ import {
 	NativeSelect,
 	RadioGroup,
 	Text,
+	WideSwitch,
 } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { ImageResizeMode, ImageResizeOptions } from '@stump/sdk'
@@ -15,7 +16,6 @@ import { useCallback, useMemo } from 'react'
 import { useFormContext, useFormState } from 'react-hook-form'
 
 import { useLibraryContextSafe } from '@/scenes/library/context'
-import { WideStyleSwitch } from '@/scenes/settings'
 
 import { CreateOrUpdateLibrarySchema } from '../schema'
 
@@ -101,11 +101,11 @@ export default function ThumbnailConfigForm() {
 			</div>
 
 			<div className="flex max-w-2xl flex-col gap-4">
-				<WideStyleSwitch
+				<WideSwitch
 					description="Generate thumbnail images for this library"
 					label="Enabled"
-					isChecked={!!resize_options}
-					onToggle={() => handleSelection(resize_options ? 'disabled' : 'Scaled')}
+					checked={!!resize_options}
+					onCheckedChange={() => handleSelection(resize_options ? 'disabled' : 'Scaled')}
 				/>
 
 				<AnimatePresence>

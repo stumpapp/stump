@@ -23,7 +23,11 @@ export default function EpubReaderFooter() {
 	const { bookMeta } = useEpubReaderContext().readerMeta
 
 	const visiblePages = (bookMeta?.chapter.currentPage ?? []).filter(Boolean)
-	const pagesVisible = visiblePages.length
+	let pagesVisible = visiblePages.length
+	// if all pages visible are the same page then we're looking at one page at a time
+	if (visiblePages.every((page) => page === visiblePages[0])) {
+		pagesVisible = 1
+	}
 
 	const chapterPageCount = bookMeta?.chapter.totalPages || 1
 	const chapterName = bookMeta?.chapter.name || ''

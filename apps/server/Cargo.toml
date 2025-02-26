@@ -16,7 +16,7 @@ axum-macros = "0.4.1"
 axum_typed_multipart = "0.13.1"
 axum-extra = { version = "0.9.3", features = [
   "typed-header",
-  "query"
+  "query",
 ] }
 base64 = { workspace = true }
 bcrypt = { workspace = true }

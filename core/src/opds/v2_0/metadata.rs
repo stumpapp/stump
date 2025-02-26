@@ -71,6 +71,7 @@ impl From<(books_as_publications::series::Data, Option<i64>)> for OPDSEntryBelon
 pub struct OPDSDynamicMetadata(pub serde_json::Value);
 
 /// Metadata for an OPDS 2.0 feed or collection
+/// See also: https://github.com/readium/webpub-manifest/tree/master/contexts/default
 #[skip_serializing_none]
 #[derive(Debug, Clone, Builder, Serialize, Deserialize)]
 #[builder(build_fn(error = "crate::CoreError"), default, setter(into))]
@@ -78,6 +79,8 @@ pub struct OPDSDynamicMetadata(pub serde_json::Value);
 pub struct OPDSMetadata {
 	/// The title of the feed or collection
 	title: String,
+	/// The unique identifier for the feed or collection
+	identifier: Option<String>,
 	/// The date and time the feed or collection was last modified, in RFC 3339 format
 	modified: Option<String>,
 	/// A human-readable description, if available
@@ -101,6 +104,7 @@ impl Default for OPDSMetadata {
 	fn default() -> Self {
 		Self {
 			title: String::new(),
+			identifier: None,
 			modified: Some(Utc::now().to_rfc3339()),
 			description: None,
 			belongs_to: None,
@@ -118,6 +122,7 @@ mod tests {
 	fn test_opds_metadata_serialization() {
 		let metadata = OPDSMetadata {
 			title: String::from("Book"),
+			identifier: None,
 			modified: Some(String::from("2021-08-01T00:00:00Z")),
 			description: Some(String::from("A cool book")),
 			belongs_to: Some(OPDSEntryBelongsTo::Series(OPDSEntryBelongsToEntity {

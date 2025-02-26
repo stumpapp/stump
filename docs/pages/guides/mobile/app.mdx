@@ -3,32 +3,76 @@ import { Callout } from 'nextra/components'
 # Mobile App
 
 <Callout emoji="🚧">
-	A mobile app is currently in a **POC** (proof of concept) stage. If you're interested in updates,
-	you can track the broad progress [here](https://github.com/orgs/stumpapp/projects/8). If you're a
-	mobile developer and would like to help out, please feel free to reach out!
+	A mobile app is currently in a **PoC** (proof of concept) stage. Please be aware that these
+	sections of the documentation subject to change or might not be fully implemented yet
 </Callout>
-
-## Supported Platforms
 
 The mobile app is being developed using [React Native](https://reactnative.dev/), which enables support for both iOS and Android with a single codebase. This is mostly to reduce the overhead of maintaining two separate codebases.
 
 ## Planned Features
 
-The mobile app will be a bit more trimmed down in scope compared to the built in web app, but will aim to provide a more focused experience that is particularly tailored to on-the-go, mobile use cases. Here are some of the planned features:
+The mobile app will be a bit more trimmed down in scope compared to the built in web app, but will aim to provide a more focused experience tailored to on-the-go, mobile use cases. Here are some of the planned features:
 
-- Multi-server configurations, in case you have multiple Stump instances to swap between
-- OPDS support, so you can use the app with other OPDS-compatible services (e.g., [Kavita](https://wiki.kavitareader.com/))
-- Readers for the supported book formats (e.g., CBZ/CBR, EPUB, PDF, etc.)
-- Offline reading support so you don't need an active connection to your Stump/OPDS instance(s)
+<br />
+
+- [x] Multi-server configurations
+- [x] OPDS support, so you can use the app with other OPDS-compatible services
+- [ ] Readers for the supported book formats (e.g., CBZ/CBR, EPUB, PDF, etc.)
+- [ ] Offline reading so you don't need an active internet connection
+
+<Callout emoji="🚀">
+	Want to see a feature added? Feel free to suggest it on
+	[GitHub](https://github.com/stumpapp/stump/issues/new/choose) or in the
+	[Discord](https://discord.gg/63Ybb7J3as)!
+</Callout>
+
+## Alpha Testing
+
+The app is currently available for alpha testing on both iOS and Android. If you're interested in testing it out, please reach out on [Discord](https://discord.gg/63Ybb7J3as)!
+
+<Callout emoji="ℹ️" type="info">
+	Please remember that the app is in a **PoC** stage, so there will be bugs and missing features.
+	Your feedback is greatly appreciated!
+</Callout>
 
 ## Contributing
 
 If you are a mobile developer and would like to help out, please feel free to reach out on [Discord](https://discord.gg/63Ybb7J3as)! There is no official project or roadmap yet, but I'm happy to discuss the current state of the app and what needs to be done.
 
-I'm also open to suggestions and ideas, so feel free to share your thoughts! You don't need to be a developer to contribute effectively.
+To see actual developer guides, refer to the app repository on [GitHub](https://github.com/stumpapp/stump/blob/experimental/apps/expo/README.md).
 
-## Considerations
+## FAQ
+
+### Pricing
+
+<Callout emoji="⚠️" type="warning">
+	The price has yet to be determined and **subject to change**
+</Callout>
+
+The app will remain free for alpha testers, via TestFlight and Google Play. Once the app is more stable and feature-complete, it will be released as a paid app on both platforms. The price is still to be determined, but it will be a one-time purchase with **no required recurring fees or subscriptions** that otherwise gate features.
+
+There is an actual, monetary, developer cost associated with maintaining the app on both platforms - looking at **you** Apple - so the price will be set to ideally cover those costs over time.
+
+### Why React Native?
 
 React Native is often criticized for its performance and reliability, but it has come a long way since its inception. Stump is primarily developed and maintained by a single person, so it is important to consider the trade-offs between performance and development overhead.
 
 Regardless, I am confident that it is at least a good fit for Stump, as it is a relatively simple app with a focus on content consumption - which doesn't inherently require a lot of performance.
+
+<Callout emoji="🚀">
+	If you're interested in updates, you can track the broad progress
+	[here](https://github.com/orgs/stumpapp/projects/8). If you're a mobile developer and would like
+	to help out, please feel free to reach out!
+</Callout>
+
+### Why OPDS v2?
+
+I recognize that there are many OPDS v1.2-compatible servers out there, and OPDS v2.0 is not widely adopted yet.
+
+However, I **really** don't like XML - at least not from the perspective of a developer. I don't want to have to maintain an XML client for the app, there are lots of really great v1.2-compatible apps out there, so I'm only supporting OPDS v2.0.
+
+That said, I will consider outside contributions that successfully wrangle v1.2 vs v2.0 client-side negotiations without breakage. Please reach out if you're interested in contributing!
+
+### Will there be translations?
+
+Yes! The app will be translated into multiple languages in the same way the web app is.

@@ -1,12 +1,4 @@
-import {
-	BookPreferences,
-	type EpubReaderPreferences,
-	queryClient,
-	useEpubLazy,
-	useEpubReader,
-	useQuery,
-	useSDK,
-} from '@stump/client'
+import { BookPreferences, queryClient, useEpubLazy, useQuery, useSDK } from '@stump/client'
 import { Bookmark, Media, UpdateEpubProgress } from '@stump/sdk'
 import { Book, Rendition } from 'epubjs'
 import uniqby from 'lodash/uniqBy'
@@ -15,12 +7,10 @@ import toast from 'react-hot-toast'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { useTheme } from '@/hooks'
+import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import EpubReaderContainer from './EpubReaderContainer'
 import { applyTheme, stumpDark } from './themes'
-import { ensureFullPreferences, useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
-import { useEpubReaderContext } from './context'
-import { useReaderStore } from '@/stores'
 
 // NOTE: http://epubjs.org/documentation/0.3/ for epubjs documentation overview
 

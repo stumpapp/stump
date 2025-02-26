@@ -2,9 +2,9 @@ import { Dialog, Heading, Popover } from '@stump/components'
 import { Paintbrush } from 'lucide-react'
 
 import ControlButton from './ControlButton'
+import FontFamily from './FontFamily'
 import FontSizeControl from './FontSizeControl'
 import ReadingDirection from './ReadingDirection'
-import FontFamily from './FontFamily'
 
 export default function ThemeControls() {
 	return (

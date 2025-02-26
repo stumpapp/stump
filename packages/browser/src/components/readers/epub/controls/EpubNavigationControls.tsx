@@ -1,10 +1,11 @@
-import { useEpubReader } from '@stump/client'
 import { cx } from '@stump/components'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback } from 'react'
 import { useSwipeable } from 'react-swipeable'
 
-import { useEpubReaderControls } from '../context'
+import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
+
+import { useEpubReaderContext, useEpubReaderControls } from '../context'
 import ControlButton from './ControlButton'
 
 type Props = {
@@ -12,11 +13,13 @@ type Props = {
 }
 
 export default function EpubNavigationControls({ children }: Props) {
+	const {
+		readerMeta: { bookEntity: book },
+	} = useEpubReaderContext()
 	const { visible, onPaginateBackward, onPaginateForward, setVisible } = useEpubReaderControls()
-
-	const { readingDirection } = useEpubReader((state) => ({
-		readingDirection: state.preferences.readingDirection,
-	}))
+	const {
+		bookPreferences: { readingDirection },
+	} = useBookPreferences({ book })
 
 	const invertControls = readingDirection === 'rtl'
 

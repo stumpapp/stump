@@ -3,31 +3,28 @@ import { useLocaleContext } from '@stump/i18n'
 import { isSupportedFont } from '@stump/sdk'
 import { useCallback } from 'react'
 
-import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 import { SUPPORTED_FONT_OPTIONS } from '@/scenes/settings/app/appearance/FontSelect'
+import { useReaderStore } from '@/stores'
 
-import { useEpubReaderContext } from '../context'
-
-export default function FontFamily() {
+export default function DefaultFontFamily() {
 	const { t } = useLocaleContext()
 	const {
-		readerMeta: { bookEntity },
-	} = useEpubReaderContext()
-	const {
-		bookPreferences: { fontFamily },
-		setBookPreferences,
-	} = useBookPreferences({ book: bookEntity })
+		settings: { fontFamily },
+		setSettings,
+	} = useReaderStore((state) => ({
+		setSettings: state.setSettings,
+		settings: state.settings,
+	}))
 
 	const changeFont = useCallback(
-		(font: string) => {
+		(font?: string) => {
 			if (!font) {
-				setBookPreferences({ fontFamily: undefined })
+				setSettings({ fontFamily: undefined })
 			} else if (isSupportedFont(font)) {
-				// Note: useApplyTheme will apply the font to the body element after the preferences are updated
-				setBookPreferences({ fontFamily: font })
+				setSettings({ fontFamily: font })
 			}
 		},
-		[setBookPreferences],
+		[setSettings],
 	)
 
 	return (
@@ -35,7 +32,6 @@ export default function FontFamily() {
 			<Label htmlFor="font-family">{t(getKey('fontFamily.label'))}</Label>
 			<NativeSelect
 				id="font-family"
-				size="sm"
 				options={[{ value: '', label: 'Default' }].concat(SUPPORTED_FONT_OPTIONS)}
 				value={fontFamily ?? ''}
 				onChange={(e) => changeFont(e.target.value)}

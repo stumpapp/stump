@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef } from 'react'
 
 import { usePressAndHold } from '@/hooks/usePressAndHold'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
+
 import { useEpubReaderContext } from '../context'
 
 export default function FontSizeControl() {

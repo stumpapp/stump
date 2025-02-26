@@ -1,4 +1,4 @@
-import { BookPreferences, ReaderStore } from '@stump/client'
+import { BookPreferences, ReaderSettings, ReaderStore } from '@stump/client'
 import type { LibraryConfig, Media } from '@stump/sdk'
 import { useCallback, useMemo } from 'react'
 
@@ -35,7 +35,7 @@ export function useBookPreferences({ book }: Params): Return {
 	const libraryConfig = useMemo(() => book?.series?.library?.config, [book])
 
 	const bookPreferences = useMemo(
-		() => storedBookPreferences ?? defaultPreferences(libraryConfig),
+		() => buildPreferences(storedBookPreferences ?? {}, settings, libraryConfig),
 		[storedBookPreferences, libraryConfig],
 	)
 
@@ -57,7 +57,7 @@ export function useBookPreferences({ book }: Params): Return {
 	}
 }
 
-const defaultPreferences = (libraryConfig?: LibraryConfig): BookPreferences =>
+const defaultsFromLibraryConfig = (libraryConfig?: LibraryConfig): BookPreferences =>
 	({
 		brightness: 1,
 		imageScaling: {
@@ -67,10 +67,12 @@ const defaultPreferences = (libraryConfig?: LibraryConfig): BookPreferences =>
 		readingMode: libraryConfig?.default_reading_mode || 'paged',
 	}) as BookPreferences
 
-export const ensureFullPreferences = (
+const buildPreferences = (
 	preferences: Partial<BookPreferences>,
+	settings: ReaderSettings,
 	libraryConfig?: LibraryConfig,
 ): BookPreferences => ({
-	...defaultPreferences(libraryConfig),
+	...settings,
+	...defaultsFromLibraryConfig(libraryConfig),
 	...preferences,
 })

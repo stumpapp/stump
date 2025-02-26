@@ -1,7 +1,6 @@
 import type { ReadingDirection, ReadingMode } from '@stump/sdk'
 import { create } from 'zustand'
 import { createJSONStorage, devtools, persist, StateStorage } from 'zustand/middleware'
-import { produce } from 'immer'
 
 export type BookImageScalingFit = 'width' | 'height' | 'none'
 export type BookImageScaling = {
@@ -58,7 +57,7 @@ type BookID = string
 /**
  * The store for the reader itself, less specific to a single book and more about the reader
  */
-type ReaderSettings = {
+export type ReaderSettings = {
 	/**
 	 * Whether the toolbar should be shown
 	 */
@@ -78,7 +77,7 @@ type ReaderSettings = {
 		 */
 		behind: number
 	}
-}
+} & BookPreferences
 
 export type ReaderStore = {
 	/**
@@ -93,6 +92,10 @@ export type ReaderStore = {
 	 * The preferences for each book, if they have been overridden from the default preferences
 	 */
 	bookPreferences: Record<BookID, BookPreferences>
+	/**
+	 * A function to clear the store
+	 */
+	clearStore: () => void
 	/**
 	 * A setter for a *specific* book's preferences
 	 */
@@ -115,6 +118,10 @@ export const createReaderStore = (storage?: StateStorage) =>
 								},
 							})
 						},
+						clearStore: () =>
+							set({
+								bookPreferences: {},
+							}),
 						setSettings: (settings) => set({ settings: { ...get().settings, ...settings } }),
 						settings: {
 							preload: {
@@ -122,6 +129,13 @@ export const createReaderStore = (storage?: StateStorage) =>
 								behind: 3,
 							},
 							showToolBar: false,
+							fontSize: 13,
+							brightness: 1,
+							readingMode: 'paged',
+							readingDirection: 'ltr',
+							imageScaling: {
+								scaleToFit: 'height',
+							},
 						},
 					}) as ReaderStore,
 				{

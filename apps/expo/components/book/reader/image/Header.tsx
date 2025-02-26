@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Pressable, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -11,6 +11,7 @@ import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
 
 import { useImageBasedReader } from './context'
+import { invertReadingDirection } from './utils'
 
 const { X, CircleEllipsis } = icons
 
@@ -21,8 +22,10 @@ type Props = {
 export default function Header({ onShowGlobalSettings }: Props) {
 	const { height } = useDisplay()
 	const {
-		book: { name, id },
+		book: { name, id, pages },
+		currentPage,
 		resetTimer,
+		flatListRef,
 	} = useImageBasedReader()
 	const {
 		preferences: { readingDirection, readingMode, trackElapsedTime },
@@ -49,6 +52,16 @@ export default function Header({ onShowGlobalSettings }: Props) {
 			transform: [{ translateY: translateY.value }],
 		}
 	})
+
+	const onChangeReadingDirection = useCallback(() => {
+		const converted = invertReadingDirection({
+			direction: readingDirection,
+			page: currentPage || 1,
+			totalPages: pages,
+		})
+		setBookPreferences({ readingDirection: converted.direction })
+		flatListRef.current?.scrollToIndex({ index: converted.page - 1, animated: false })
+	}, [currentPage, pages, readingDirection, setBookPreferences, flatListRef])
 
 	const router = useRouter()
 
@@ -126,14 +139,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 								/>
 							</DropdownMenu.CheckboxItem>
 
-							<DropdownMenu.Item
-								key="readingDirection"
-								onSelect={() =>
-									setBookPreferences({
-										readingDirection: readingDirection === 'ltr' ? 'rtl' : 'ltr',
-									})
-								}
-							>
+							<DropdownMenu.Item key="readingDirection" onSelect={onChangeReadingDirection}>
 								<DropdownMenu.ItemTitle>Reading Direction</DropdownMenu.ItemTitle>
 								<DropdownMenu.ItemIcon
 									ios={{

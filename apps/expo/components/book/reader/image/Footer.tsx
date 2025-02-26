@@ -35,7 +35,7 @@ export default function Footer() {
 	} = useImageBasedReader()
 	const elapsedSeconds = useBookReadTime(id)
 	const {
-		preferences: { footerControls },
+		preferences: { footerControls, trackElapsedTime },
 	} = useBookPreferences(id)
 
 	const ref = useRef<FlatList>(null)
@@ -228,7 +228,9 @@ export default function Footer() {
 
 				<View className="flex flex-row justify-between">
 					<View>
-						<Text className="text-sm text-[#898d94]">Reading time: {formatDuration()}</Text>
+						{trackElapsedTime && (
+							<Text className="text-sm text-[#898d94]">Reading time: {formatDuration()}</Text>
+						)}
 					</View>
 
 					<View>

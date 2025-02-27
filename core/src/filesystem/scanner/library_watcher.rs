@@ -6,7 +6,7 @@ use crate::{
 	CoreError, CoreResult,
 };
 use async_trait::async_trait;
-use notify::{Event, INotifyWatcher, Watcher};
+use notify::{Event, RecommendedWatcher, Watcher};
 use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -24,7 +24,7 @@ pub enum LibraryWatcherCommand {
 	StopWatchers,
 }
 
-fn create_watcher(sender: UnboundedSender<LibraryWatcherCommand>) -> INotifyWatcher {
+fn create_watcher(sender: UnboundedSender<LibraryWatcherCommand>) -> RecommendedWatcher {
 	notify::recommended_watcher(move |result: Result<Event, _>| match result {
 		Ok(event) => match event.kind {
 			notify::EventKind::Create(_) | notify::EventKind::Modify(_) => {
@@ -46,7 +46,7 @@ fn create_watcher(sender: UnboundedSender<LibraryWatcherCommand>) -> INotifyWatc
 struct LibraryWatcherInternal {
 	wait_interval: Duration,
 	sender: UnboundedSender<LibraryWatcherCommand>,
-	watcher: INotifyWatcher,
+	watcher: RecommendedWatcher,
 	last_update_time: Arc<Mutex<std::time::SystemTime>>,
 	accumulated_paths: HashSet<PathBuf>,
 	wait_thread: Option<tokio::task::JoinHandle<()>>,
@@ -54,7 +54,7 @@ struct LibraryWatcherInternal {
 
 impl LibraryWatcherInternal {
 	fn new(
-		watcher: INotifyWatcher,
+		watcher: RecommendedWatcher,
 		sender: UnboundedSender<LibraryWatcherCommand>,
 		wait_duration: Duration,
 	) -> LibraryWatcherInternal {
@@ -189,7 +189,7 @@ impl LibraryWatcher {
 	fn new_internal(
 		tx: UnboundedSender<LibraryWatcherCommand>,
 		rx: UnboundedReceiver<LibraryWatcherCommand>,
-		watcher: INotifyWatcher,
+		watcher: RecommendedWatcher,
 		library_provider: impl LibrariesProvider + Send + Sync + 'static,
 		job_submitter: impl SubmitScanJob + Send + Sync + 'static,
 		wait_duration: Duration,
@@ -212,7 +212,7 @@ impl LibraryWatcher {
 	}
 
 	fn listen(
-		watcher: INotifyWatcher,
+		watcher: RecommendedWatcher,
 		sender: UnboundedSender<LibraryWatcherCommand>,
 		mut receiver: UnboundedReceiver<LibraryWatcherCommand>,
 		library_provider: Arc<dyn LibrariesProvider + Send + Sync>,

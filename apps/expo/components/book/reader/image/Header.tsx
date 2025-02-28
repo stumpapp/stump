@@ -11,7 +11,6 @@ import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
 
 import { useImageBasedReader } from './context'
-import { invertReadingDirection } from './utils'
 
 const { X, CircleEllipsis } = icons
 
@@ -22,7 +21,7 @@ type Props = {
 export default function Header({ onShowGlobalSettings }: Props) {
 	const { height } = useDisplay()
 	const {
-		book: { name, id, pages },
+		book: { name, id },
 		currentPage,
 		resetTimer,
 		flatListRef,
@@ -54,14 +53,9 @@ export default function Header({ onShowGlobalSettings }: Props) {
 	})
 
 	const onChangeReadingDirection = useCallback(() => {
-		const converted = invertReadingDirection({
-			direction: readingDirection,
-			page: currentPage || 1,
-			totalPages: pages,
-		})
-		setBookPreferences({ readingDirection: converted.direction })
-		flatListRef.current?.scrollToIndex({ index: converted.page - 1, animated: false })
-	}, [currentPage, pages, readingDirection, setBookPreferences, flatListRef])
+		setBookPreferences({ readingDirection: readingDirection === 'ltr' ? 'rtl' : 'ltr' })
+		flatListRef.current?.scrollToIndex({ index: (currentPage || 1) - 1, animated: false })
+	}, [currentPage, readingDirection, setBookPreferences, flatListRef])
 
 	const router = useRouter()
 

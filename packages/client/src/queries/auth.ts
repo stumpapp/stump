@@ -5,10 +5,13 @@ import { queryClient, QueryOptions, useMutation, useQuery } from '../client'
 import { useClientContext } from '../context'
 import { useSDK } from '../sdk'
 
-export function useAuthQuery(options: QueryOptions<User> = {}) {
+type Params = QueryOptions<User> & {
+	additionalKeys?: string[]
+}
+export function useAuthQuery({ additionalKeys, ...options }: Params = {}) {
 	const { sdk } = useSDK()
 	const { data, error, isLoading, isFetching, isRefetching } = useQuery(
-		[sdk.auth.keys.me],
+		[sdk.auth.keys.me, ...(additionalKeys || [])],
 		async () => {
 			const data = await sdk.auth.me()
 			if (!isUser(data)) {

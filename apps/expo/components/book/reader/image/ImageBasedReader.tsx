@@ -1,7 +1,7 @@
 import { Zoomable } from '@likashefqet/react-native-image-zoom'
 import { useSDK } from '@stump/client'
 import { Image, ImageLoadEventData } from 'expo-image'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { FlatList, useWindowDimensions, View } from 'react-native'
 import {
 	GestureStateChangeEvent,
@@ -70,15 +70,11 @@ export default function ImageBasedReader({ initialPage }: Props) {
 		[onPageChanged, incognito],
 	)
 
-	const indices = useMemo(() => {
-		const base = Array.from({ length: book.pages }, (_, i) => i)
-		return readingDirection === 'rtl' ? base.reverse() : base
-	}, [book.pages, readingDirection])
-
 	return (
 		<FlatList
 			ref={flatListRef}
-			data={indices}
+			data={Array.from({ length: book.pages }, (_, i) => i)}
+			inverted={readingDirection === 'rtl' && readingMode !== 'continuous:vertical'}
 			renderItem={({ item }) => (
 				<Page
 					deviceOrientation={deviceOrientation}
@@ -94,17 +90,15 @@ export default function ImageBasedReader({ initialPage }: Props) {
 			horizontal={readingMode === 'paged' || readingMode === 'continuous:horizontal'}
 			pagingEnabled={readingMode === 'paged'}
 			onViewableItemsChanged={({ viewableItems }) => {
-				const fistVisibleItemIdx = viewableItems.filter(({ isViewable }) => isViewable).at(0)?.item
-				if (fistVisibleItemIdx) {
-					handlePageChanged(fistVisibleItemIdx + 1)
+				const fistVisibleItem = viewableItems.filter(({ isViewable }) => isViewable).at(0)?.index
+				if (fistVisibleItem) {
+					handlePageChanged(fistVisibleItem + 1)
 				}
 			}}
 			initialNumToRender={2}
 			maxToRenderPerBatch={2}
 			windowSize={3}
-			initialScrollIndex={
-				readingDirection === 'rtl' ? indices.length - initialPage : initialPage - 1
-			}
+			initialScrollIndex={initialPage - 1}
 			// https://stackoverflow.com/questions/53059609/flat-list-scrolltoindex-should-be-used-in-conjunction-with-getitemlayout-or-on
 			onScrollToIndexFailed={(info) => {
 				console.error("Couldn't scroll to index", info)
@@ -148,7 +142,7 @@ const Page = React.memo(
 		// readingDirection,
 	}: PageProps) => {
 		const {
-			book: { id, pages },
+			book: { id },
 			pageURL,
 			flatListRef,
 		} = useImageBasedReader()
@@ -175,17 +169,17 @@ const Page = React.memo(
 				const isLeft = x < maxWidth / tapThresholdRatio
 				const isRight = x > maxWidth - maxWidth / tapThresholdRatio
 
-				const adjustedIndex = readingDirection === 'rtl' ? pages - index - 1 : index
-
 				if (isLeft) {
-					flatListRef.current?.scrollToIndex({ index: adjustedIndex - 1, animated: true })
+					const modifier = readingDirection === 'rtl' ? 1 : -1
+					flatListRef.current?.scrollToIndex({ index: index + modifier, animated: true })
 				} else if (isRight) {
-					flatListRef.current?.scrollToIndex({ index: adjustedIndex + 1, animated: true })
+					const modifier = readingDirection === 'rtl' ? -1 : 1
+					flatListRef.current?.scrollToIndex({ index: index + modifier, animated: true })
 				}
 
 				return isLeft || isRight
 			},
-			[maxWidth, index, flatListRef, tapThresholdRatio, readingDirection, pages],
+			[maxWidth, index, flatListRef, tapThresholdRatio, readingDirection],
 		)
 
 		const onSingleTap = useCallback(

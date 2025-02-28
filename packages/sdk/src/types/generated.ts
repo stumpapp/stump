@@ -82,7 +82,7 @@ export type InheritPermissionValue = "inherit"
 
 export type APIKeyPermissions = InheritPermissionValue | UserPermission[]
 
-export type SupportedFont = "inter" | "opendyslexic" | "atkinsonhyperlegible" | "charis" | "literata"
+export type SupportedFont = "atkinsonhyperlegible" | "bitter" | "charis" | "inter" | "librebaskerville" | "literata" | "nunito" | "opendyslexic"
 
 export type NavigationMode = "SIDEBAR" | "TOPBAR"
 

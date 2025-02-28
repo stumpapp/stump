@@ -35,6 +35,9 @@ export default {
 				atkinsonhyperlegible: ['Atkinson Hyperlegible', ...defaultTheme.fontFamily.sans],
 				charis: ['CharisSILW', ...defaultTheme.fontFamily.serif],
 				literata: ['Literata', ...defaultTheme.fontFamily.serif],
+				bitter: ['Bitter', ...defaultTheme.fontFamily.serif],
+				librebaskerville: ['Libre Baskerville', ...defaultTheme.fontFamily.serif],
+				nunito: ['Nunito', ...defaultTheme.fontFamily.sans],
 			},
 			fontSize: {
 				xxs: '0.65rem',

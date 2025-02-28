@@ -128,12 +128,15 @@ impl<I> Arrangement<I> {
 #[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 #[serde(rename_all = "lowercase")]
 pub enum SupportedFont {
+	AtkinsonHyperlegible,
+	Bitter,
+	Charis,
 	#[default]
 	Inter,
-	OpenDyslexic,
-	AtkinsonHyperlegible,
-	Charis,
+	LibreBaskerville,
 	Literata,
+	Nunito,
+	OpenDyslexic,
 	// TODO(383): Support custom fonts
 	// Custom(String),
 }
@@ -141,11 +144,14 @@ pub enum SupportedFont {
 impl Display for SupportedFont {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			SupportedFont::Inter => write!(f, "inter"),
-			SupportedFont::OpenDyslexic => write!(f, "opendyslexic"),
 			SupportedFont::AtkinsonHyperlegible => write!(f, "atkinsonhyperlegible"),
+			SupportedFont::Bitter => write!(f, "bitter"),
 			SupportedFont::Charis => write!(f, "charis"),
+			SupportedFont::Inter => write!(f, "inter"),
+			SupportedFont::LibreBaskerville => write!(f, "librebaskerville"),
 			SupportedFont::Literata => write!(f, "literata"),
+			SupportedFont::Nunito => write!(f, "nunito"),
+			SupportedFont::OpenDyslexic => write!(f, "opendyslexic"),
 		}
 	}
 }
@@ -153,10 +159,13 @@ impl Display for SupportedFont {
 impl From<String> for SupportedFont {
 	fn from(value: String) -> Self {
 		match value.to_lowercase().as_str() {
-			"opendyslexic" => SupportedFont::OpenDyslexic,
 			"atkinsonhyperlegible" => SupportedFont::AtkinsonHyperlegible,
+			"bitter" => SupportedFont::Bitter,
 			"charis" => SupportedFont::Charis,
+			"librebaskerville" => SupportedFont::LibreBaskerville,
 			"literata" => SupportedFont::Literata,
+			"nunito" => SupportedFont::Nunito,
+			"opendyslexic" => SupportedFont::OpenDyslexic,
 			// Note: for now we just always default to Inter. This will be acceptable
 			// until we have custom font support.
 			_ => SupportedFont::Inter,

@@ -57,9 +57,12 @@ export default function FontSelect() {
 const localeKey = 'settingsScene.app/appearance.sections.fontSelect'
 
 export const SUPPORTED_FONT_OPTIONS = [
-	{ label: 'Inter', value: 'inter' },
-	{ label: 'OpenDyslexic', value: 'opendyslexic' },
 	{ label: 'Atkinson Hyperlegible', value: 'atkinsonhyperlegible' },
+	{ label: 'Bitter', value: 'bitter' },
 	{ label: 'Charis SIL', value: 'charis' },
+	{ label: 'Inter', value: 'inter' },
+	{ label: 'Libre Baskerville', value: 'librebaskerville' },
 	{ label: 'Literata', value: 'literata' },
+	{ label: 'Nunito', value: 'nunito' },
+	{ label: 'OpenDyslexic', value: 'opendyslexic' },
 ]

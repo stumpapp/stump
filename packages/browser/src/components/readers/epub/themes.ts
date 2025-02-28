@@ -91,6 +91,12 @@ const toFamilyName = (font: SupportedFont) => {
 			return 'Charis SIL'
 		case 'literata':
 			return 'Literata'
+		case 'bitter':
+			return 'Bitter'
+		case 'librebaskerville':
+			return 'Libre Baskerville'
+		case 'nunito':
+			return 'Nunito'
 		default:
 			return font
 	}

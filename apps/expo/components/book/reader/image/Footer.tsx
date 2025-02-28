@@ -19,16 +19,12 @@ import { useImageBasedReader } from './context'
 
 dayjs.extend(duration)
 
-const HEIGHT_MODIFIER = 0.75
+const HEIGHT_MODIFIER = 2 / 3
 const WIDTH_MODIFIER = 2 / 3
-
-// FIXME: The image gallery, frankly, is ass. It doesn't want to retain
-// focus (scroll position) on the current page (synced from the reader). It's
-// a bit frustrating at this point.
 
 export default function Footer() {
 	const { sdk } = useSDK()
-	const { isTablet, height } = useDisplay()
+	const { isTablet, height, width } = useDisplay()
 	const {
 		book: { pages, id },
 		pageURL,
@@ -41,13 +37,15 @@ export default function Footer() {
 		preferences: { footerControls, trackElapsedTime, readingDirection },
 	} = useBookPreferences(id)
 
-	const ref = useRef<FlatList>(null)
+	const galleryRef = useRef<FlatList>(null)
 	const insets = useSafeAreaInsets()
 
 	const visible = useReaderStore((state) => state.showControls)
 	const setShowControls = useReaderStore((state) => state.setShowControls)
 
-	const translateY = useSharedValue(0)
+	const [isSliderDragging, setIsSliderDragging] = useState(false)
+
+	const translateY = useSharedValue(height / 2)
 	useEffect(() => {
 		translateY.value = withTiming(visible ? 0 : height / 2)
 	}, [visible, translateY, height])
@@ -79,12 +77,26 @@ export default function Footer() {
 	)
 
 	const getItemLayout = useCallback(
-		(_: ArrayLike<number> | null | undefined, index: number) => ({
-			length: getSize(index).width,
-			offset: getSize(index).width * index /* + (index === 0 || index === pages - 1 ? 4 : 0)*/,
-			index,
-		}),
-		[getSize],
+		(_: ArrayLike<number> | null | undefined, index: number) => {
+			const isAtOrAfterCurrentPage = index >= currentPage - 1
+			if (isAtOrAfterCurrentPage) {
+				// Up until the current page each item is the baseSize, then we have ONE larger item
+				// which is the current page, and the rest are baseSize.
+				return {
+					length: getSize(index).width,
+					offset: baseSize.width * index + baseSize.width / WIDTH_MODIFIER + 4,
+					index,
+				}
+			}
+
+			// Before the current page, all items are the baseSize
+			return {
+				length: getSize(index).width,
+				offset: getSize(index).width * index + 4 * index,
+				index,
+			}
+		},
+		[getSize, currentPage, baseSize],
 	)
 
 	const onChangePage = useCallback(
@@ -94,6 +106,19 @@ export default function Footer() {
 		},
 		[readerRef, setShowControls],
 	)
+
+	const visibilityChanged = usePrevious(visible) !== visible
+	useEffect(() => {
+		if (footerControls !== 'images') return
+
+		if (visible && visibilityChanged) {
+			galleryRef.current?.scrollToIndex({
+				index: currentPage - 1,
+				animated: false,
+				viewPosition: 0.5,
+			})
+		}
+	}, [footerControls, currentPage, visible, visibilityChanged])
 
 	const formatDuration = useCallback(() => {
 		if (elapsedSeconds <= 60) {
@@ -155,24 +180,52 @@ export default function Footer() {
 		[currentPage, pages, footerControls],
 	)
 
+	const getSliderThumbTranslations = useCallback(
+		(value: number) => {
+			const containerWidth = isTablet ? 200 : 150
+			const approxStepSize = width / pages
+			const approximatePosition = value * approxStepSize
+			const translateY = isTablet ? -20 : -10
+
+			// If we aren't close to an edge, we can just divide containerWidth by 2
+			// If we are close to an edge, we need to offset the translation
+			let translateX = (containerWidth / 2) * -1
+			if (approximatePosition < containerWidth / 2) {
+				translateX = -approximatePosition
+			} else if (approximatePosition > width - containerWidth / 2) {
+				translateX = (containerWidth - (width - approximatePosition)) * -1
+			}
+
+			return {
+				translateX,
+				translateY,
+			}
+		},
+		[isTablet, width, pages],
+	)
+
 	const renderAboveThumbComponent = useCallback(
 		(_: number, value: number) => {
 			if (value < 0 || value >= pages) return null
 
 			const actualPage = readingDirection === 'rtl' ? pages - value : value
-			if (actualPage === currentPage) return null
+			if (actualPage === currentPage && !isSliderDragging) return null
+
+			const containerSize = {
+				height: isTablet ? 300 : 200,
+				width: isTablet ? 200 : 150,
+			}
+
+			const { translateX, translateY } = getSliderThumbTranslations(value)
 
 			return (
 				<View
 					style={{
-						height: isTablet ? 300 : 200,
-						width: isTablet ? 200 : 150,
+						...containerSize,
 						transform: [
-							// TODO: as we are close to either end of the screen, we need to offset the translation
-							// as to avoid going off-screen
-							{ translateX: isTablet ? -100 : -75 },
+							{ translateX },
 							{
-								translateY: isTablet ? -20 : -10,
+								translateY,
 							},
 						],
 					}}
@@ -199,11 +252,20 @@ export default function Footer() {
 				</View>
 			)
 		},
-		[currentPage, pages, readingDirection, isTablet, pageSource],
+		[
+			currentPage,
+			pages,
+			readingDirection,
+			isTablet,
+			isSliderDragging,
+			pageSource,
+			getSliderThumbTranslations,
+		],
 	)
 
 	const onSlidingComplete = useCallback(
 		(page: number) => {
+			setIsSliderDragging(false)
 			if (footerControls !== 'slider') return
 			const idx = (readingDirection === 'rtl' ? pages - page : page) - 1
 			onChangePage(idx)
@@ -228,11 +290,13 @@ export default function Footer() {
 	 * doesn't support an inverted mode, so we manually invert the numbers
 	 */
 	useEffect(() => {
-		if (previousReadingDirection !== readingDirection) {
+		if (previousReadingDirection === readingDirection) return
+
+		if (footerControls === 'slider') {
 			const newValue = readingDirection === 'rtl' ? pages - currentPage : currentPage
 			setSliderValue(newValue)
 		}
-	}, [currentPage, pages, readingDirection, previousReadingDirection])
+	}, [currentPage, pages, readingDirection, previousReadingDirection, footerControls])
 
 	// Note: The minimum and maximum track styles are inverted based on the reading direction, as
 	// to give the appearance of either ltr or rtl (minimum track is ltr, maximum track is rtl)
@@ -249,18 +313,24 @@ export default function Footer() {
 		<Animated.View className="absolute z-20 shrink gap-4 px-1" style={animatedStyles}>
 			{footerControls === 'images' && (
 				<FlatList
-					ref={ref}
+					ref={galleryRef}
 					data={Array.from({ length: pages }, (_, i) => i + 1)}
 					inverted={readingDirection === 'rtl'}
-					keyExtractor={(item) => item.toString()}
+					keyExtractor={(item) => `gallery-${item}`}
 					renderItem={({ item: page, index }) => (
 						<View className={cn({ 'pl-1': index === 0, 'pr-1': index === pages - 1 })}>
 							<Pressable onPress={() => onChangePage(index)}>
-								<View className="aspect-[2/3] items-center justify-center overflow-hidden rounded-xl shadow-lg">
+								<View
+									className="items-center justify-center overflow-hidden rounded-md shadow-lg"
+									style={getSize(index)}
+								>
 									<Image
 										source={pageSource(page)}
 										cachePolicy="memory"
-										style={getSize(index)}
+										style={{
+											height: '100%',
+											width: '100%',
+										}}
 										contentFit="fill"
 									/>
 								</View>
@@ -273,11 +343,10 @@ export default function Footer() {
 							)}
 						</View>
 					)}
-					contentContainerStyle={{ gap: 4, alignItems: 'flex-end' }}
+					contentContainerStyle={{ gap: 4, alignItems: 'flex-end', height: isTablet ? 200 : 150 }}
 					getItemLayout={getItemLayout}
 					horizontal
 					showsHorizontalScrollIndicator={false}
-					initialScrollIndex={currentPage - 1}
 					windowSize={5}
 					initialNumToRender={isTablet ? 8 : 6}
 					maxToRenderPerBatch={isTablet ? 8 : 6}
@@ -312,15 +381,18 @@ export default function Footer() {
 						animationType="timing"
 						renderAboveThumbComponent={renderAboveThumbComponent}
 						onSlidingComplete={([page]) => onSlidingComplete(page)}
+						onSlidingStart={() => setIsSliderDragging(true)}
 					/>
 				)}
 
-				<View className="flex flex-row justify-between">
-					<View>
-						{trackElapsedTime && (
+				<View
+					className={cn('flex flex-row justify-between', { 'justify-around': !trackElapsedTime })}
+				>
+					{trackElapsedTime && (
+						<View>
 							<Text className="text-sm text-[#898d94]">Reading time: {formatDuration()}</Text>
-						)}
-					</View>
+						</View>
+					)}
 
 					<View>
 						<Text className="text-sm text-[#898d94]">

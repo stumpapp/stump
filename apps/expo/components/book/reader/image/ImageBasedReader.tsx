@@ -26,10 +26,9 @@ type ImageDimension = {
 // TODO: The reading directions don't play well with the pinch and zoom, particularly the continuous
 // scroll modes. I think when it is set to continuous, the zoom might have to be on the list?
 // Not 100% sure, it is REALLY janky right now.
-
 // TODO: Account for device orientation AND reading direction
-
-// TODO: Pull primary color from image for background color (optionally from config)
+// TODO: Account for the image scaling settings
+// TODO: Support vertical
 
 type Props = {
 	/**

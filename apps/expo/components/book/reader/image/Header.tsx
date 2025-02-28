@@ -18,6 +18,8 @@ type Props = {
 	onShowGlobalSettings: () => void
 }
 
+// TODO: Remove hardcoded disabled values and support vertical continuous scrolling
+
 export default function Header({ onShowGlobalSettings }: Props) {
 	const { height } = useDisplay()
 	const {
@@ -36,7 +38,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 	const insets = useSafeAreaInsets()
 	const visible = useReaderStore((state) => state.showControls)
 
-	const translateY = useSharedValue(0)
+	const translateY = useSharedValue(-400)
 	useEffect(() => {
 		translateY.value = withTiming(visible ? 0 : 400 * -1, {
 			duration: 200,
@@ -105,6 +107,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 										key="vscroll"
 										value={readingMode === 'continuous:vertical'}
 										onValueChange={() => setBookPreferences({ readingMode: 'continuous:vertical' })}
+										disabled
 									>
 										<DropdownMenu.ItemTitle>Vertical Scroll</DropdownMenu.ItemTitle>
 									</DropdownMenu.CheckboxItem>

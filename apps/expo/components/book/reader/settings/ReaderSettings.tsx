@@ -98,8 +98,9 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 
 					<View className="h-px w-full bg-edge" />
 
-					<View className="flex flex-row items-center justify-between p-4">
-						<Text>Download Panel</Text>
+					{/* TODO: https://docs.expo.dev/versions/latest/sdk/media-library/ */}
+					<View className="flex flex-row items-center justify-between p-4 opacity-50">
+						<Text>Panel Downloads</Text>
 
 						<Switch checked={false} onCheckedChange={() => {}} />
 					</View>

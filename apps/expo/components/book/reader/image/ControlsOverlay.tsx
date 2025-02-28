@@ -10,6 +10,8 @@ import Footer from './Footer'
 import Header from './Header'
 import ImageReaderGlobalSettingsDialog from './ImageReaderGlobalSettingsDialog'
 
+// TODO: support setting custom gradient colors
+
 export default function ControlsOverlay() {
 	const controls = useReaderStore((state) => ({
 		isVisible: state.showControls,

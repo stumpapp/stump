@@ -13,6 +13,8 @@ type Props = {
 	onChange: (behavior: BookImageScalingFit) => void
 }
 
+// TODO: Remove hardcoded disabled values and support scaling
+
 export default function ImageScalingSelect({ behavior, onChange }: Props) {
 	const [isOpen, setIsOpen] = useState(false)
 
@@ -33,6 +35,7 @@ export default function ImageScalingSelect({ behavior, onChange }: Props) {
 						key="width"
 						value={behavior === 'width'}
 						onValueChange={() => onChange('width')}
+						disabled
 					>
 						<DropdownMenu.ItemTitle>Fit Width</DropdownMenu.ItemTitle>
 					</DropdownMenu.CheckboxItem>
@@ -41,6 +44,7 @@ export default function ImageScalingSelect({ behavior, onChange }: Props) {
 						key="height"
 						value={behavior === 'height'}
 						onValueChange={() => onChange('height')}
+						disabled
 					>
 						<DropdownMenu.ItemTitle>Fit Height</DropdownMenu.ItemTitle>
 					</DropdownMenu.CheckboxItem>
@@ -49,6 +53,7 @@ export default function ImageScalingSelect({ behavior, onChange }: Props) {
 						key="none"
 						value={behavior === 'none'}
 						onValueChange={() => onChange('none')}
+						disabled
 					>
 						<DropdownMenu.ItemTitle>None</DropdownMenu.ItemTitle>
 					</DropdownMenu.CheckboxItem>

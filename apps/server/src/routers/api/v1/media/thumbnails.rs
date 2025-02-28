@@ -211,6 +211,7 @@ pub(crate) async fn patch_media_thumbnail(
 			image_options,
 			core_config: ctx.config.as_ref().clone(),
 			force_regen: true,
+			filename: Some(media.id.clone()),
 		},
 	)
 	.await?;

@@ -161,7 +161,7 @@ export type LastLibraryScan = { options: ScanOptions | null; timestamp: string }
 
 export type IgnoreRules = string[]
 
-export type LibraryConfig = { id?: string | null; convert_rar_to_zip: boolean; hard_delete_conversions: boolean; generate_file_hashes: boolean; generate_koreader_hashes: boolean; process_metadata: boolean; library_pattern: LibraryPattern; thumbnail_config: ImageProcessorOptions | null; default_reading_dir?: ReadingDirection; default_reading_mode?: ReadingMode; default_reading_image_scale_fit?: ReadingImageScaleFit; ignore_rules?: IgnoreRules; library_id?: string | null }
+export type LibraryConfig = { id?: string | null; convert_rar_to_zip: boolean; hard_delete_conversions: boolean; generate_file_hashes: boolean; generate_koreader_hashes: boolean; process_metadata: boolean; watch: boolean; library_pattern: LibraryPattern; thumbnail_config: ImageProcessorOptions | null; default_reading_dir?: ReadingDirection; default_reading_mode?: ReadingMode; default_reading_image_scale_fit?: ReadingImageScaleFit; ignore_rules?: IgnoreRules; library_id?: string | null }
 
 export type LibraryStats = { series_count: number; book_count: number; total_bytes: number; completed_books: number; in_progress_books: number }
 

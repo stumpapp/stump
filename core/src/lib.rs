@@ -231,6 +231,10 @@ impl StumpCore {
 	pub async fn init_scheduler(&self) -> Result<Arc<JobScheduler>, CoreError> {
 		JobScheduler::init(self.ctx.arced()).await
 	}
+
+	pub async fn init_library_watcher(&self) -> CoreResult<()> {
+		self.ctx.library_watcher.init().await
+	}
 }
 
 #[allow(unused_imports)]

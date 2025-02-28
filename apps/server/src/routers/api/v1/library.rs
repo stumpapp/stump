@@ -1365,6 +1365,8 @@ async fn create_library(
 	// TODO(prisma-nested-create): Refactor once nested create is supported
 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
 	let library_config = input.config.unwrap_or_default();
+	let watch = library_config.watch;
+	let path = input.path.clone();
 	let transaction_result: Result<Library, APIError> = db
 		._transaction()
 		.with_timeout(Duration::seconds(30).num_milliseconds() as u64)
@@ -1409,6 +1411,7 @@ async fn create_library(
 					),
 					library_config::thumbnail_config::set(thumbnail_config),
 					library_config::ignore_rules::set(ignore_rules),
+					library_config::watch::set(library_config.watch),
 				])
 				.exec()
 				.await?;
@@ -1511,6 +1514,16 @@ async fn create_library(
 		})?;
 	}
 
+	if watch {
+		ctx.library_watcher
+			.add_watcher(path.into())
+			.await
+			.map_err(|e| {
+				error!(?e, "Failed to add library watcher");
+				APIError::InternalServerError("Failed to add library watcher".to_string())
+			})?;
+	}
+
 	Ok(Json(library))
 }
 
@@ -1583,6 +1596,8 @@ async fn update_library(
 		.ok_or(APIError::NotFound("Library not found".to_string()))?;
 	let existing_tags = existing_library.tags;
 
+	let watch = input.config.watch;
+	let path = input.path.clone();
 	let update_result: Result<Library, APIError> = db
 		._transaction()
 		.with_timeout(Duration::seconds(30).num_milliseconds() as u64)
@@ -1626,6 +1641,7 @@ async fn update_library(
 							library_config.generate_koreader_hashes,
 						),
 						library_config::ignore_rules::set(ignore_rules),
+						library_config::watch::set(library_config.watch),
 						library_config::thumbnail_config::set(thumbnail_config),
 					],
 				)
@@ -1743,6 +1759,26 @@ async fn update_library(
 				"Failed to enqueue library scan job".to_string(),
 			)
 		})?;
+	}
+
+	if watch {
+		ctx.library_watcher
+			.add_watcher(path.into())
+			.await
+			.map_err(|e| {
+				error!(?e, "Failed to add library watcher");
+				APIError::InternalServerError("Failed to add library watcher".to_string())
+			})?;
+	} else {
+		ctx.library_watcher
+			.remove_watcher(path.into())
+			.await
+			.map_err(|e| {
+				error!(?e, "Failed to remove library watcher");
+				APIError::InternalServerError(
+					"Failed to remove library watcher".to_string(),
+				)
+			})?;
 	}
 
 	Ok(Json(updated_library))

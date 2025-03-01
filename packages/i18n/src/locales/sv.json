@@ -421,7 +421,7 @@
 				},
 				{
 					"label": "Skanning",
-					"heading": "Scanning",
+					"heading": "Skanning",
 					"description": "Inställningar relaterade till hur Stump skannar detta bibliotek"
 				},
 				{
@@ -517,70 +517,70 @@
 			"description": "Standardinställningarna för läsaren för böcker i det här biblioteket. Alla böcker kan åsidosätta dessa inställningar"
 		},
 		"options/scanning": {
-			"title": "Scanning",
+			"title": "Skanning",
 			"description": "Inställningar relaterade till hur Stump skannar detta bibliotek",
 			"sections": {
 				"configureScan": {
-					"heading": "Configure scan",
-					"description": "A scan with additional options for more fine-grained control",
+					"heading": "Konfigurera skanning",
+					"description": "En skanning med ytterligare alternativ för mer finkornig kontroll",
 					"form": {
-						"alert": "These will override corresponding library-wide settings",
+						"alert": "Dessa kommer åsidosätta motsvarande inställningar för hela bibliotek",
 						"options": {
 							"forceRebuild": {
-								"label": "Force rebuild",
-								"description": "Rebuild every book in the library on disk",
-								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
+								"label": "Tvinga ombyggnad",
+								"description": "Bygg om alla böcker i biblioteket på disk",
+								"alert": "Detta kommer att bygga om varje bok i biblioteket från början, inklusive metadata och hash"
 							},
 							"custom": {
-								"label": "Custom",
-								"description": "Customize the scan configuration",
+								"label": "Anpassad",
+								"description": "Anpassa konfigurationen för skanning",
 								"validation": {
-									"noSelection": "At least one option must be enabled"
+									"noSelection": "Minst ett alternativ måste vara aktiverat"
 								}
 							},
 							"rebuildMeta": {
-								"label": "Rebuild metadata",
-								"description": "Rebuild metadata for books in the library"
+								"label": "Bygg om metadata",
+								"description": "Bygg om metadata för böcker i biblioteket"
 							},
 							"regenHashes": {
-								"label": "Regenerate hashes",
-								"description": "Recreate hashes for books in the library"
+								"label": "Återskapa hashar",
+								"description": "Återskapa hashar för böcker i biblioteket"
 							}
 						}
 					}
 				},
 				"defaultScan": {
-					"heading": "Default scan",
-					"description": "A standard scan to index your library for new content"
+					"heading": "Standardskanning",
+					"description": "En standardskanning för att indexera ditt bibliotek efter nytt innehåll"
 				},
 				"history": {
-					"heading": "Scan history",
-					"description": "The history of all scans recorded for this library",
-					"empty": "There are no scans recorded for this library",
-					"runScan": "Run scan",
-					"inspect": "See details",
+					"heading": "Skanningshistorik",
+					"description": "Historiken för alla skanningar som registrerats för detta bibliotek",
+					"empty": "Det finns inga skanningar registrerade för detta bibliotek",
+					"runScan": "Kör skanning",
+					"inspect": "Visa detaljer",
 					"inspector": {
-						"title": "Scan record",
-						"description": "A detailed view of this scan record",
+						"title": "Skanningsinfo",
+						"description": "En detaljerad vy av denna skanning",
 						"fields": {
-							"library": "Library",
-							"date": "Date",
-							"config": "Config",
-							"jobOutput": "Job output",
-							"logs": "Logs"
+							"library": "Bibliotek",
+							"date": "Datum",
+							"config": "Konfiguration",
+							"jobOutput": "Utdata från jobb",
+							"logs": "Loggar"
 						},
-						"logsPresent": "Logs were persisted for this job",
-						"seeLogs": "See logs"
+						"logsPresent": "Loggar har bevarats för detta jobb",
+						"seeLogs": "Visa loggar"
 					},
 					"table": {
 						"columns": {
-							"timestamp": "Scanned at",
-							"config": "Config"
+							"timestamp": "Skannad den",
+							"config": "Konfiguration"
 						},
-						"default": "Default",
-						"custom": "Custom"
+						"default": "Standard",
+						"custom": "Anpassad"
 					},
-					"clearHistory": "Delete scan history"
+					"clearHistory": "Radera skanningshistorik"
 				}
 			}
 		},
@@ -1287,8 +1287,8 @@
 				"universal": {
 					"sections": {
 						"readingDirection": {
-							"label": "Reading direction",
-							"description": "The direction in which the reader will progress through pages"
+							"label": "Läsriktning",
+							"description": "Den riktning i vilken läsaren kommer att gå igenom sidor"
 						}
 					}
 				},
@@ -1307,25 +1307,25 @@
 					}
 				},
 				"textBasedBooks": {
-					"label": "Ebook reader",
-					"description": "Default settings for text-based books",
+					"label": "E-bokläsare",
+					"description": "Standardinställningar för textbaserade böcker",
 					"sections": {
 						"fontSize": {
-							"label": "Font size",
-							"description": "The size of the font used in the reader"
+							"label": "Teckenstorlek",
+							"description": "Storleken på typsnittet som används i läsaren"
 						},
 						"fontFamily": {
-							"label": "Font family",
-							"description": "The font used in the reader"
+							"label": "Typsnittsfamilj",
+							"description": "Typsnittet som används i läsaren"
 						}
 					}
 				},
 				"data": {
 					"sections": {
 						"clearStore": {
-							"label": "Clear preferences",
-							"description": "Reset all individual book settings that override the defaults",
-							"button": "Clear preferences"
+							"label": "Rensa inställningar",
+							"description": "Återställ alla individuella bokinställningar som åsidosätter standardinställningarna",
+							"button": "Rensa inställningar"
 						}
 					}
 				}
@@ -1485,10 +1485,10 @@
 						"emptySubtitle": "Din server är antingen mycket frisk eller mycket ohälsosam"
 					},
 					"deleteLogs": {
-						"title": "Delete logs",
-						"description": "Permanently delete all persisted logs from the database",
-						"disclaimer": "This action cannot be undone",
-						"confirm": "Delete logs"
+						"title": "Radera loggar",
+						"description": "Radera alla bestående loggar från databasen permanent",
+						"disclaimer": "Denna åtgärd kan inte ångras",
+						"confirm": "Radera loggar"
 					}
 				},
 				"liveLogs": {
@@ -1964,6 +1964,6 @@
 		"notReady": "Den här funktionen är inte redo",
 		"notUsedYet": "Inte använd än",
 		"never": "Aldrig",
-		"scan": "Scan"
+		"scan": "Skanna"
 	}
 }

@@ -8,7 +8,7 @@ type Params = {
 	book: Media
 }
 
-type Return = Omit<ReaderStore, 'bookPreferences' | 'setBookPreferences'> & {
+type Return = Omit<ReaderStore, 'bookPreferences' | 'setBookPreferences' | 'clearStore'> & {
 	bookPreferences: BookPreferences
 	setBookPreferences: (preferences: Partial<BookPreferences>) => void
 }

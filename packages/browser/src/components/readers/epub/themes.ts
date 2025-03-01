@@ -1,3 +1,6 @@
+import { BookPreferences } from '@stump/client'
+import { SupportedFont } from '@stump/sdk'
+
 export interface EpubTheme {
 	[tag: string]: object
 }
@@ -18,4 +21,83 @@ export const stumpDark: EpubTheme = {
 	p: { color: '#E8EDF4 !important', 'font-size': 'unset' },
 	span: { color: '#E8EDF4' },
 	ul: { color: '#E8EDF4' },
+}
+
+export const applyTheme = (theme: EpubTheme, preferences: BookPreferences) => {
+	const fontFamily = preferences.fontFamily
+		? `${toFamilyName(preferences.fontFamily as SupportedFont)} !important`
+		: undefined
+	const fontStyles = {
+		...(fontFamily ? { 'font-family': fontFamily } : {}),
+	}
+
+	return {
+		a: {
+			...theme.a,
+			...fontStyles,
+		},
+		blockquote: {
+			...theme.blockquote,
+			...fontStyles,
+		},
+		body: {
+			...theme.body,
+			...fontStyles,
+		},
+		h1: {
+			...theme.h1,
+			...fontStyles,
+		},
+		h2: {
+			...theme.h2,
+			...fontStyles,
+		},
+		h3: {
+			...theme.h3,
+			...fontStyles,
+		},
+		h4: {
+			...theme.h4,
+			...fontStyles,
+		},
+		h5: {
+			...theme.h5,
+			...fontStyles,
+		},
+		p: {
+			...theme.p,
+			...fontStyles,
+		},
+		span: {
+			...theme.span,
+			...fontStyles,
+		},
+		ul: {
+			...theme.ul,
+			...fontStyles,
+		},
+	}
+}
+
+const toFamilyName = (font: SupportedFont) => {
+	switch (font) {
+		case 'inter':
+			return 'Inter var'
+		case 'opendyslexic':
+			return 'OpenDyslexic'
+		case 'atkinsonhyperlegible':
+			return 'Atkinson Hyperlegible'
+		case 'charis':
+			return 'Charis SIL'
+		case 'literata':
+			return 'Literata'
+		case 'bitter':
+			return 'Bitter'
+		case 'librebaskerville':
+			return 'Libre Baskerville'
+		case 'nunito':
+			return 'Nunito'
+		default:
+			return font
+	}
 }

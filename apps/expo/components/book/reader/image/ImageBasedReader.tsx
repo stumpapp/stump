@@ -149,6 +149,7 @@ const Page = React.memo(
 			preferences: {
 				tapSidesToNavigate,
 				readingDirection,
+				allowDownscaling,
 				// imageScaling: { scaleToFit },
 			},
 		} = useBookPreferences(id)
@@ -247,6 +248,7 @@ const Page = React.memo(
 							height: '100%',
 							width: '100%',
 						}}
+						allowDownscaling={allowDownscaling}
 						contentFit="contain"
 						onLoad={onImageLoaded}
 					/>

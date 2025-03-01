@@ -16,6 +16,7 @@ export type BookPreferences = IBookPreferences & {
 	serverID?: string
 	incognito?: boolean
 	preferSmallImages?: boolean
+	allowDownscaling?: boolean
 	doublePageBehavior?: DoublePageBehavior
 	tapSidesToNavigate?: boolean
 	footerControls?: FooterControls
@@ -53,6 +54,7 @@ export const useReaderStore = create<ReaderStore>()(
 				globalSettings: {
 					brightness: 1,
 					readingDirection: 'ltr',
+					allowDownscaling: false,
 					imageScaling: {
 						scaleToFit: 'width',
 					},

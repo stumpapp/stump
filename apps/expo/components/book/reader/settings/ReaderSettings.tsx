@@ -56,6 +56,8 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 		[forBook, forServer, setBookPreferences, store],
 	)
 
+	const allowDownscaling = activeSettings.allowDownscaling ?? true
+
 	return (
 		<View className="flex-1 gap-8">
 			<View>
@@ -95,6 +97,17 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 						behavior={activeSettings.imageScaling.scaleToFit}
 						onChange={(fit) => onPreferenceChange({ imageScaling: { scaleToFit: fit } })}
 					/>
+
+					<View className="h-px w-full bg-edge" />
+
+					<View className="flex flex-row items-center justify-between p-4">
+						<Text>Downscaling</Text>
+
+						<Switch
+							checked={allowDownscaling}
+							onCheckedChange={(value) => onPreferenceChange({ allowDownscaling: value })}
+						/>
+					</View>
 
 					<View className="h-px w-full bg-edge" />
 

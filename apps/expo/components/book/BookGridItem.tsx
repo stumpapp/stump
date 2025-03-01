@@ -6,9 +6,10 @@ import GridImageItem from '../grid/GridImageItem'
 
 type Props = {
 	book: Media
+	index: number
 }
 
-export default function BookGridItem({ book }: Props) {
+export default function BookGridItem({ book, index }: Props) {
 	const { sdk } = useSDK()
 	const {
 		activeServer: { id: serverID },
@@ -19,6 +20,7 @@ export default function BookGridItem({ book }: Props) {
 			uri={sdk.media.thumbnailURL(book.id)}
 			title={book.metadata?.title || book.name}
 			href={`/server/${serverID}/books/${book.id}`}
+			index={index}
 		/>
 	)
 }

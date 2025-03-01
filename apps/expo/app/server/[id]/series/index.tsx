@@ -1,9 +1,11 @@
 import { useSeriesCursorQuery } from '@stump/client'
 import { useCallback } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { ImageGrid } from '~/components/grid'
 import { SeriesGridItem } from '~/components/series'
+import { Heading, icons, Text } from '~/components/ui'
+
+const { CircleEllipsis } = icons
 
 export default function Screen() {
 	const { series, isRefetching, refetch, hasNextPage, fetchNextPage } = useSeriesCursorQuery({
@@ -17,16 +19,23 @@ export default function Screen() {
 	}, [hasNextPage, fetchNextPage])
 
 	return (
-		<SafeAreaView className="flex-1 bg-background">
-			<ImageGrid
-				header="Series"
-				data={series || []}
-				renderItem={({ item: series }) => <SeriesGridItem series={series} />}
-				keyExtractor={(series) => series.id}
-				onEndReached={onFetchMore}
-				onRefresh={refetch}
-				isRefetching={isRefetching}
-			/>
-		</SafeAreaView>
+		<ImageGrid
+			largeHeader={<Heading size="xl">Series</Heading>}
+			header={{
+				headerCenter: (
+					<Text size="lg" className="tracking-wide text-foreground">
+						Series
+					</Text>
+				),
+				headerRight: <CircleEllipsis className="h-6 w-6 text-foreground" />,
+				headerRightFadesIn: true,
+			}}
+			data={series || []}
+			renderItem={({ item: series, index }) => <SeriesGridItem series={series} index={index} />}
+			keyExtractor={(series) => series.id}
+			onEndReached={onFetchMore}
+			onRefresh={refetch}
+			isRefetching={isRefetching}
+		/>
 	)
 }

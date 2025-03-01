@@ -1,10 +1,13 @@
 import { useSeriesBookCursorQuery, useSeriesByID } from '@stump/client'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { BookGridItem } from '~/components/book'
 import { ImageGrid } from '~/components/grid'
+import { Heading, Text } from '~/components/ui'
+import { icons } from '~/lib'
+
+const { CircleEllipsis } = icons
 
 export default function Screen() {
 	const { id } = useLocalSearchParams<{ id: string }>()
@@ -25,15 +28,22 @@ export default function Screen() {
 	const seriesName = series.metadata?.title || series.name
 
 	return (
-		<SafeAreaView className="flex-1 bg-background">
-			<ImageGrid
-				header={seriesName}
-				data={media || []}
-				renderItem={({ item: book }) => <BookGridItem book={book} />}
-				onEndReached={onEndReached}
-				onRefresh={refetch}
-				isRefetching={isRefetching}
-			/>
-		</SafeAreaView>
+		<ImageGrid
+			largeHeader={<Heading size="xl">{seriesName}</Heading>}
+			header={{
+				headerCenter: (
+					<Text size="lg" className="tracking-wide text-foreground">
+						{seriesName}
+					</Text>
+				),
+				headerRight: <CircleEllipsis className="h-6 w-6 text-foreground" />,
+				headerRightFadesIn: true,
+			}}
+			data={media || []}
+			renderItem={({ item: book, index }) => <BookGridItem book={book} index={index} />}
+			onEndReached={onEndReached}
+			onRefresh={refetch}
+			isRefetching={isRefetching}
+		/>
 	)
 }

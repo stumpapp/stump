@@ -7,9 +7,10 @@ import GridImageItem from '../grid/GridImageItem'
 
 type Props = {
 	library: Library
+	index: number
 }
 
-export default function LibraryGridItem({ library }: Props) {
+export default function LibraryGridItem({ library, index }: Props) {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -22,6 +23,7 @@ export default function LibraryGridItem({ library }: Props) {
 					uri={sdk.library.thumbnailURL(library.id)}
 					title={library.name}
 					href={`/server/${serverID}/libraries/${library.id}`}
+					index={index}
 				/>
 			</ContextMenu.Trigger>
 

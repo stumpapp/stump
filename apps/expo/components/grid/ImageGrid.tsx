@@ -68,11 +68,17 @@ export default function ImageGrid<T = Any>({
 
 	const LargeHeaderComponent = ({ scrollY }: ScrollLargeHeaderProps) => {
 		return (
-			<LargeHeader>
+			<LargeHeader
+				headerStyle={{
+					marginTop: -insets.top / 2,
+				}}
+			>
 				<ScalingView
 					scrollY={scrollY}
 					className="-ml-2 flex-1 flex-row items-center justify-between"
-					style={{ marginTop: -insets.top / 2, paddingBottom: 8 }}
+					style={{
+						paddingBottom: 8,
+					}}
 				>
 					{largeHeader}
 				</ScalingView>
@@ -82,6 +88,7 @@ export default function ImageGrid<T = Any>({
 
 	const { numColumns, sizeEstimate } = useGridItemSize()
 
+	// FIXME: absoluteHeader is causing issues with the refresh control
 	return (
 		<FlashListWithHeaders
 			absoluteHeader
@@ -99,6 +106,7 @@ export default function ImageGrid<T = Any>({
 			containerStyle={[
 				containerStyle,
 				{
+					paddingTop: 0,
 					paddingBottom: insets.bottom,
 				},
 			]}

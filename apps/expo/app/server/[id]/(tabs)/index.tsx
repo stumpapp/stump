@@ -55,10 +55,11 @@ export default function Screen() {
 	return (
 		<ScrollViewWithHeaders
 			className="flex-1 bg-background p-4"
-			absoluteHeader
 			HeaderComponent={HeaderComponent}
 			disableLargeHeaderFadeAnim
-			refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+			refreshControl={
+				<RefreshControl refreshing={refreshing} onRefresh={onRefresh} style={{ zIndex: 100 }} />
+			}
 			style={{
 				flex: 1,
 				zIndex: -100,

@@ -34,8 +34,6 @@ export {
 	ErrorBoundary,
 } from 'expo-router'
 
-// TODO: hide status bar when reading
-
 export default function RootLayout() {
 	const { colorScheme, isDarkColorScheme } = useColorScheme()
 

@@ -93,7 +93,7 @@ export default function ReadingNow({ book }: Props) {
 
 	return (
 		<View className="flex items-start gap-4">
-			<Heading size="lg">Reading Now</Heading>
+			<Heading size="xl">Reading Now</Heading>
 
 			<View className="flex flex-row gap-4">
 				<Pressable

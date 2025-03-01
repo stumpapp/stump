@@ -1,14 +1,19 @@
 import { Tabs } from 'expo-router'
 
-import { AddServerDialog } from '~/components/savedServer'
 import { icons } from '~/lib'
+import { useColors } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 
 const { Server, HardDriveDownload, Settings } = icons
 
 export default function TabLayout() {
+	const colors = useColors()
 	return (
-		<Tabs screenOptions={{ tabBarActiveTintColor: 'white' }}>
+		<Tabs
+			screenOptions={{
+				tabBarActiveTintColor: colors.foreground.DEFAULT,
+			}}
+		>
 			<Tabs.Screen
 				name="index"
 				options={{
@@ -18,7 +23,7 @@ export default function TabLayout() {
 							className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
 						/>
 					),
-					headerRight: () => <AddServerDialog />,
+					headerShown: false,
 				}}
 			/>
 			<Tabs.Screen

@@ -1,13 +1,21 @@
+import {
+	Header,
+	LargeHeader,
+	ScalingView,
+	ScrollHeaderProps,
+	ScrollLargeHeaderProps,
+	ScrollViewWithHeaders,
+} from '@codeherence/react-native-header'
 import { useRouter } from 'expo-router'
 import partition from 'lodash/partition'
 import { useCallback, useEffect, useState } from 'react'
 import { View } from 'react-native'
-import { ScrollView } from 'react-native-gesture-handler'
 
+import { AddServerDialog } from '~/components/savedServer'
 import DeleteServerConfirmation from '~/components/savedServer/DeleteServerConfirmation'
 import EditServerDialog from '~/components/savedServer/EditServerDialog'
 import SavedServerListItem from '~/components/savedServer/SavedServerListItem'
-import { icons, Text } from '~/components/ui'
+import { Heading, icons, Text } from '~/components/ui'
 import { useSavedServers } from '~/stores'
 import { CreateServer, SavedServer, SavedServerWithConfig } from '~/stores/savedServer'
 
@@ -82,8 +90,43 @@ export default function Screen() {
 		[setEditingServer, updateServer, editingServer],
 	)
 
+	const HeaderComponent = ({ showNavBar }: ScrollHeaderProps) => {
+		return (
+			<Header
+				showNavBar={showNavBar}
+				noBottomBorder
+				headerLeftFadesIn
+				headerLeftStyle={{ flex: 1 }}
+				headerLeft={
+					<Text size="lg" className="uppercase text-foreground-muted">
+						Servers
+					</Text>
+				}
+			/>
+		)
+	}
+
+	const LargeHeaderComponent = ({ scrollY }: ScrollLargeHeaderProps) => {
+		return (
+			<LargeHeader>
+				<ScalingView
+					scrollY={scrollY}
+					className="-mt-2 flex-1 flex-row items-center justify-between"
+				>
+					<Heading size="xl">Servers</Heading>
+					<AddServerDialog />
+				</ScalingView>
+			</LargeHeader>
+		)
+	}
+
 	return (
-		<ScrollView className="flex-1 bg-background">
+		<ScrollViewWithHeaders
+			className="flex-1 bg-background"
+			disableAutoFixScroll
+			HeaderComponent={HeaderComponent}
+			LargeHeaderComponent={LargeHeaderComponent}
+		>
 			<DeleteServerConfirmation
 				deletingServer={deletingServer}
 				onClose={() => setDeletingServer(null)}
@@ -96,7 +139,7 @@ export default function Screen() {
 				onSubmit={onEdit}
 			/>
 
-			<View className="flex-1 items-start justify-start gap-5 bg-background p-6">
+			<View className="flex-1 items-start justify-start gap-5 bg-background p-4">
 				{stumpEnabled && (
 					<View className="flex w-full items-start gap-2">
 						<Text className="text-foreground-muted">Stump</Text>
@@ -152,6 +195,6 @@ export default function Screen() {
 					))}
 				</View>
 			</View>
-		</ScrollView>
+		</ScrollViewWithHeaders>
 	)
 }

@@ -1,20 +1,17 @@
 import { useAuthQuery, useSDK } from '@stump/client'
-import { Tabs, useRouter } from 'expo-router'
-import { View } from 'react-native'
-import { Pressable } from 'react-native-gesture-handler'
+import { Tabs } from 'expo-router'
 
 import { icons } from '~/components/ui'
-import { useColorScheme } from '~/lib/useColorScheme'
+import { useColors } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 import { useUserStore } from '~/stores'
 
-const { Unplug, Home, SquareLibrary, Search } = icons
+const { Home, SquareLibrary, Search } = icons
 
 export default function TabLayout() {
 	const { sdk } = useSDK()
 
-	const { isDarkColorScheme } = useColorScheme()
-	const router = useRouter()
+	const colors = useColors()
 	const setUser = useUserStore((state) => state.setUser)
 
 	const { user } = useAuthQuery({
@@ -28,7 +25,7 @@ export default function TabLayout() {
 	}
 
 	return (
-		<Tabs screenOptions={{ tabBarActiveTintColor: isDarkColorScheme ? 'white' : 'black' }}>
+		<Tabs screenOptions={{ tabBarActiveTintColor: colors.foreground.DEFAULT }}>
 			<Tabs.Screen
 				name="index"
 				options={{
@@ -36,20 +33,7 @@ export default function TabLayout() {
 					tabBarIcon: ({ focused }) => (
 						<Home className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })} />
 					),
-					headerLeft: () => (
-						<Pressable onPress={() => router.dismissAll()}>
-							{({ pressed }) => (
-								<View
-									className={cn(
-										'aspect-square flex-1 items-start justify-center px-2',
-										pressed && 'opacity-70',
-									)}
-								>
-									<Unplug size={20} className="text-foreground-muted" />
-								</View>
-							)}
-						</Pressable>
-					),
+					headerShown: false,
 				}}
 			/>
 

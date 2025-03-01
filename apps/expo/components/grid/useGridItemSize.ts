@@ -1,20 +1,38 @@
 import { useMemo } from 'react'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useDisplay } from '~/lib/hooks'
 
-export function useGridItemSize() {
+type Params = {
+	gap?: number
+	padding?: number
+}
+
+const defaultParams = {
+	gap: 8,
+	padding: 16 * 2,
+}
+
+export function useGridItemSize(params: Params = {}) {
 	const { width, isTablet, isLandscapeTablet } = useDisplay()
 
-	const padding = useMemo(() => (isTablet ? 16 : 20), [isTablet])
-	const itemDimension = useMemo(
-		() =>
-			width / (isLandscapeTablet ? 7 : isTablet ? 4 : 2) -
-			// 16 padding each side
-			padding * 2,
-		[isTablet, isLandscapeTablet, width, padding],
+	const insets = useSafeAreaInsets()
+
+	const numColumns = useMemo(
+		() => (isLandscapeTablet ? 6 : isTablet ? 4 : 2),
+		[isTablet, isLandscapeTablet],
 	)
+	const availableSpace = width - insets.left - insets.right
 
-	const spacing = useMemo(() => (isLandscapeTablet ? 30 : 25), [isLandscapeTablet])
+	const { gap, padding } = { ...defaultParams, ...params }
 
-	return { itemDimension, spacing }
+	const resolvedGap = useMemo(() => (isLandscapeTablet ? gap * 2 : gap), [isLandscapeTablet, gap])
+
+	const itemDimension = useMemo(
+		() => (availableSpace - padding - resolvedGap * (numColumns + 1)) / numColumns,
+		[availableSpace, padding, resolvedGap, numColumns],
+	)
+	const sizeEstimate = itemDimension * 1.5 + 16 + 20 + 4 * 2
+
+	return { itemDimension, gap: resolvedGap, numColumns, sizeEstimate }
 }

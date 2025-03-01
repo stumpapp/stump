@@ -1,14 +1,15 @@
 import { useLibraryByID, useLibrarySeriesCursorQuery } from '@stump/client'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { ImageGrid } from '~/components/grid'
 import { SeriesGridItem } from '~/components/series'
+import { Heading, icons, Text } from '~/components/ui'
+
+const { CircleEllipsis } = icons
 
 export default function Screen() {
 	const { id } = useLocalSearchParams<{ id: string }>()
-
 	const { library } = useLibraryByID(id, { suspense: true })
 	const { series, hasNextPage, fetchNextPage, refetch, isRefetching } = useLibrarySeriesCursorQuery(
 		{
@@ -26,16 +27,23 @@ export default function Screen() {
 	if (!library) return null
 
 	return (
-		<SafeAreaView className="flex-1 bg-background">
-			<ImageGrid
-				header={library.name}
-				data={series || []}
-				renderItem={({ item: series }) => <SeriesGridItem series={series} />}
-				keyExtractor={(series) => series.id}
-				onRefresh={refetch}
-				isRefetching={isRefetching}
-				onEndReached={onEndReached}
-			/>
-		</SafeAreaView>
+		<ImageGrid
+			largeHeader={<Heading size="xl">{library.name}</Heading>}
+			header={{
+				headerCenter: (
+					<Text size="lg" className="tracking-wide text-foreground">
+						{library.name}
+					</Text>
+				),
+				headerRight: <CircleEllipsis className="h-6 w-6 text-foreground" />,
+				headerRightFadesIn: true,
+			}}
+			data={series || []}
+			renderItem={({ item: series, index }) => <SeriesGridItem series={series} index={index} />}
+			keyExtractor={(series) => series.id}
+			onEndReached={onEndReached}
+			onRefresh={refetch}
+			isRefetching={isRefetching}
+		/>
 	)
 }

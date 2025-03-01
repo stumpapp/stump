@@ -8,6 +8,7 @@ export default function Layout() {
 		<QueryClientProvider client={settingsQueryClient}>
 			<Stack
 				screenOptions={{
+					title: 'Settings',
 					headerShown: false,
 				}}
 			>
@@ -15,7 +16,7 @@ export default function Layout() {
 					name="index"
 					options={{
 						title: 'Settings',
-						headerShown: true,
+						headerShown: false,
 					}}
 				/>
 			</Stack>

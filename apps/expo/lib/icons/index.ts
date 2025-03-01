@@ -1,6 +1,7 @@
 export { ArrowUpRight } from './ArrowUpRight'
 export { BookCopy } from './BookCopy'
 export { Box } from './Box'
+export { ChevronLeft } from './ChevronLeft'
 export { ChevronRight } from './ChevronRight'
 export { ChevronsUpDown } from './ChevronsUpDown'
 export { CircleEllipsis } from './CircleEllipsis'

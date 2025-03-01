@@ -44,6 +44,29 @@
 					"configureAndroidBackup": true,
 					"faceIDPermission": "Allow $(PRODUCT_NAME) to access your Face ID biometric data."
 				}
+			],
+			[
+				"expo-font",
+				{
+					"fonts": [
+						"assets/fonts/Atkinson-Hyperlegible-Bold.ttf",
+						"assets/fonts/Atkinson-Hyperlegible-BoldItalic.ttf",
+						"assets/fonts/Atkinson-Hyperlegible-Italic.ttf",
+						"assets/fonts/Atkinson-Hyperlegible-Regular.ttf",
+						"assets/fonts/Bitter-Italic-VariableFont_wght.ttf",
+						"assets/fonts/Bitter-VariableFont_wght.ttf",
+						"assets/fonts/CharisSIL-Bold.ttf",
+						"assets/fonts/CharisSIL-BoldItalic.ttf",
+						"assets/fonts/CharisSIL-Italic.ttf",
+						"assets/fonts/CharisSIL-Regular.ttf",
+						"assets/fonts/Literata-Italic[opsz,wght].ttf",
+						"assets/fonts/Literata[opsz,wght].ttf",
+						"assets/fonts/OpenDyslexic-Bold-Italic.otf",
+						"assets/fonts/OpenDyslexic-Bold.otf",
+						"assets/fonts/OpenDyslexic-Italic.otf",
+						"assets/fonts/OpenDyslexic-Regular.otf"
+					]
+				}
 			]
 		],
 		"owner": "stumpapp",

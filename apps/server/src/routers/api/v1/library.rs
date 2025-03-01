@@ -700,6 +700,7 @@ async fn patch_library_thumbnail(
 			image_options,
 			core_config: ctx.config.as_ref().clone(),
 			force_regen: true,
+			filename: Some(id.clone()),
 		},
 	)
 	.await?;

@@ -4,6 +4,7 @@ import { View } from 'react-native'
 import { Card, Switch, Text } from '~/components/ui'
 import { BookPreferences, GlobalSettings, useReaderStore } from '~/stores/reader'
 
+import CachePolicySelect from './CachePolicySelect'
 import DoublePageSelect from './DoublePageSelect'
 import FooterControlsSelect from './FootControlsSelect'
 import ImageScalingSelect from './ImageScalingSelect'
@@ -86,6 +87,13 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 				<Text className="mb-3 text-foreground-muted">Image Options</Text>
 
 				<Card className="flex rounded-xl border border-edge bg-background-surface">
+					<CachePolicySelect
+						policy={activeSettings.cachePolicy || 'memory-disk'}
+						onChange={(policy) => onPreferenceChange({ cachePolicy: policy })}
+					/>
+
+					<View className="h-px w-full bg-edge" />
+
 					<DoublePageSelect
 						behavior={activeSettings.doublePageBehavior || 'auto'}
 						onChange={(behavior) => onPreferenceChange({ doublePageBehavior: behavior })}

@@ -12,11 +12,16 @@ export type DoublePageBehavior = 'auto' | 'always' | 'off'
 
 export type FooterControls = 'images' | 'slider'
 
+export type CachePolicy = 'none' | 'disk' | 'memory' | 'memory-disk'
+export const isCachePolicy = (value: string): value is CachePolicy =>
+	['none', 'disk', 'memory', 'memory-disk'].includes(value)
+
 export type BookPreferences = IBookPreferences & {
 	serverID?: string
 	incognito?: boolean
 	preferSmallImages?: boolean
 	allowDownscaling?: boolean
+	cachePolicy?: CachePolicy
 	doublePageBehavior?: DoublePageBehavior
 	tapSidesToNavigate?: boolean
 	footerControls?: FooterControls
@@ -58,6 +63,7 @@ export const useReaderStore = create<ReaderStore>()(
 					imageScaling: {
 						scaleToFit: 'width',
 					},
+					cachePolicy: 'memory-disk',
 					doublePageBehavior: 'auto',
 					readingMode: 'paged',
 					preferSmallImages: false,

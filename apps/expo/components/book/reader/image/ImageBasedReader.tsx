@@ -151,6 +151,7 @@ const Page = React.memo(
 				readingDirection,
 				allowDownscaling,
 				// imageScaling: { scaleToFit },
+				cachePolicy,
 			},
 		} = useBookPreferences(id)
 		const { isTablet } = useDisplay()
@@ -249,6 +250,7 @@ const Page = React.memo(
 							width: '100%',
 						}}
 						allowDownscaling={allowDownscaling}
+						cachePolicy={cachePolicy}
 						contentFit="contain"
 						onLoad={onImageLoaded}
 					/>

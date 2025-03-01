@@ -94,8 +94,8 @@ export default function ImageBasedReader({ initialPage }: Props) {
 					handlePageChanged(fistVisibleItem + 1)
 				}
 			}}
-			initialNumToRender={2}
-			maxToRenderPerBatch={2}
+			initialNumToRender={3}
+			maxToRenderPerBatch={3}
 			windowSize={3}
 			initialScrollIndex={initialPage - 1}
 			// https://stackoverflow.com/questions/53059609/flat-list-scrolltoindex-should-be-used-in-conjunction-with-getitemlayout-or-on

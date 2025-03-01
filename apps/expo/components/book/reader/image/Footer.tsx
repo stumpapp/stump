@@ -80,11 +80,13 @@ export default function Footer() {
 		(_: ArrayLike<number> | null | undefined, index: number) => {
 			const isAtOrAfterCurrentPage = index >= currentPage - 1
 			if (isAtOrAfterCurrentPage) {
+				// TODO: my math is actually comically bad and this needs adjustment
 				// Up until the current page each item is the baseSize, then we have ONE larger item
 				// which is the current page, and the rest are baseSize.
+				const baseOffset = baseSize.width * index + 2 * index
 				return {
 					length: getSize(index).width,
-					offset: baseSize.width * index + baseSize.width / WIDTH_MODIFIER + 4,
+					offset: baseOffset + baseSize.width / WIDTH_MODIFIER,
 					index,
 				}
 			}
@@ -101,10 +103,11 @@ export default function Footer() {
 
 	const onChangePage = useCallback(
 		(idx: number) => {
+			if (idx < 0 || idx >= pages) return
 			setShowControls(false)
 			readerRef.current?.scrollToIndex({ index: idx, animated: false })
 		},
-		[readerRef, setShowControls],
+		[readerRef, setShowControls, pages],
 	)
 
 	const visibilityChanged = usePrevious(visible) !== visible
@@ -113,7 +116,7 @@ export default function Footer() {
 
 		if (visible && visibilityChanged) {
 			galleryRef.current?.scrollToIndex({
-				index: currentPage - 1,
+				index: currentPage > 0 ? currentPage - 1 : 0,
 				animated: false,
 				viewPosition: 0.5,
 			})
@@ -343,7 +346,7 @@ export default function Footer() {
 							)}
 						</View>
 					)}
-					contentContainerStyle={{ gap: 4, alignItems: 'flex-end', height: isTablet ? 200 : 150 }}
+					contentContainerStyle={{ gap: 4, alignItems: 'flex-end' }}
 					getItemLayout={getItemLayout}
 					horizontal
 					showsHorizontalScrollIndicator={false}

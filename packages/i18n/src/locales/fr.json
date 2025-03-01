@@ -1284,6 +1284,14 @@
 			"title": "Paramètres du lecteur",
 			"description": "Options par défaut pour les lecteurs. Elles sont liées à votre appareil actuel uniquement",
 			"sections": {
+				"universal": {
+					"sections": {
+						"readingDirection": {
+							"label": "Reading direction",
+							"description": "The direction in which the reader will progress through pages"
+						}
+					}
+				},
 				"imageBasedBooks": {
 					"label": "Livres à base d'images",
 					"description": "Bandes dessinées, mangas, et autres livres illustrés",
@@ -1295,6 +1303,29 @@
 						"preloadBehindCount": {
 							"label": "Nombre de préchargements après la page actuelle",
 							"description": "Le nombre de pages à précharger après la page actuelle"
+						}
+					}
+				},
+				"textBasedBooks": {
+					"label": "Ebook reader",
+					"description": "Default settings for text-based books",
+					"sections": {
+						"fontSize": {
+							"label": "Font size",
+							"description": "The size of the font used in the reader"
+						},
+						"fontFamily": {
+							"label": "Font family",
+							"description": "The font used in the reader"
+						}
+					}
+				},
+				"data": {
+					"sections": {
+						"clearStore": {
+							"label": "Clear preferences",
+							"description": "Reset all individual book settings that override the defaults",
+							"button": "Clear preferences"
 						}
 					}
 				}

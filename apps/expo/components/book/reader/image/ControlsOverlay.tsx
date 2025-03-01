@@ -1,4 +1,4 @@
-import { Fragment, useEffect } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { Pressable } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
@@ -8,6 +8,9 @@ import { useReaderStore } from '~/stores'
 
 import Footer from './Footer'
 import Header from './Header'
+import ImageReaderGlobalSettingsDialog from './ImageReaderGlobalSettingsDialog'
+
+// TODO: support setting custom gradient colors
 
 export default function ControlsOverlay() {
 	const controls = useReaderStore((state) => ({
@@ -26,6 +29,8 @@ export default function ControlsOverlay() {
 		[controls.isVisible],
 	)
 
+	const [showGlobalSettings, setShowGlobalSettings] = useState(false)
+
 	const containerStyles = useAnimatedStyle(() => {
 		return {
 			display: container.value === 1 ? 'flex' : 'none',
@@ -34,7 +39,7 @@ export default function ControlsOverlay() {
 
 	return (
 		<Fragment>
-			<Header />
+			<Header onShowGlobalSettings={() => setShowGlobalSettings(true)} />
 
 			<Animated.View className={cn('absolute inset-0 z-10 flex-1')} style={containerStyles}>
 				<Pressable
@@ -46,10 +51,12 @@ export default function ControlsOverlay() {
 					<LinearGradient
 						colors={[
 							'hsla(0, 0%, 0%, 0.75)',
+							'hsla(0, 0%, 0%, 0.75)',
 							'hsla(0, 0%, 0%, 0.5)',
 							'hsla(0, 0%, 0%, 0.5)',
 							'hsla(0, 0%, 0%, 0.5)',
 							'hsla(0, 0%, 0%, 0.5)',
+							'hsla(0, 0%, 0%, 0.75)',
 							'hsla(0, 0%, 0%, 0.95)',
 						]}
 						style={{
@@ -58,6 +65,11 @@ export default function ControlsOverlay() {
 					/>
 				</Pressable>
 			</Animated.View>
+
+			<ImageReaderGlobalSettingsDialog
+				isOpen={showGlobalSettings}
+				onClose={() => setShowGlobalSettings(false)}
+			/>
 
 			<Footer />
 		</Fragment>

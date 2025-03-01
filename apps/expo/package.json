@@ -19,6 +19,7 @@
 		"@epubjs-react-native/expo-file-system": "^1.1.3",
 		"@gorhom/bottom-sheet": "^4",
 		"@likashefqet/react-native-image-zoom": "^4.3.0",
+		"@miblanchard/react-native-slider": "^2.6.0",
 		"@react-native-async-storage/async-storage": "1.23.1",
 		"@react-native-menu/menu": "^1.2.2",
 		"@react-native-picker/picker": "2.9.0",

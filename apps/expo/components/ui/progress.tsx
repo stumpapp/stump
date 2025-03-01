@@ -1,6 +1,5 @@
 import * as ProgressPrimitive from '@rn-primitives/progress'
 import * as React from 'react'
-import { Platform, View } from 'react-native'
 import Animated, {
 	Extrapolation,
 	interpolate,
@@ -11,30 +10,38 @@ import Animated, {
 
 import { cn } from '~/lib/utils'
 
-const Progress = React.forwardRef<
-	ProgressPrimitive.RootRef,
-	ProgressPrimitive.RootProps & {
-		indicatorClassName?: string
-	}
->(({ className, value, indicatorClassName, ...props }, ref) => {
-	return (
-		<ProgressPrimitive.Root
-			ref={ref}
-			className={cn(
-				'relative h-4 w-full overflow-hidden rounded-full bg-background-surface',
-				className,
-			)}
-			{...props}
-		>
-			<Indicator value={value} className={indicatorClassName} />
-		</ProgressPrimitive.Root>
-	)
-})
+type Props = {
+	indicatorClassName?: string
+	inverted?: boolean
+} & ProgressPrimitive.RootProps
+
+const Progress = React.forwardRef<ProgressPrimitive.RootRef, Props>(
+	({ className, value, indicatorClassName, inverted, ...props }, ref) => {
+		return (
+			<ProgressPrimitive.Root
+				ref={ref}
+				className={cn(
+					'relative h-4 w-full overflow-hidden rounded-full bg-background-surface',
+					{ 'rotate-180 transform': inverted },
+					className,
+				)}
+				{...props}
+			>
+				<Indicator value={value} className={indicatorClassName} />
+			</ProgressPrimitive.Root>
+		)
+	},
+)
 Progress.displayName = ProgressPrimitive.Root.displayName
 
 export { Progress }
 
-function Indicator({ value, className }: { value: number | undefined | null; className?: string }) {
+type IndicatorProps = {
+	value: number | undefined | null
+	className?: string
+}
+
+function Indicator({ value, className }: IndicatorProps) {
 	const progress = useDerivedValue(() => value ?? 0)
 
 	const indicator = useAnimatedStyle(() => {
@@ -45,17 +52,6 @@ function Indicator({ value, className }: { value: number | undefined | null; cla
 			),
 		}
 	})
-
-	if (Platform.OS === 'web') {
-		return (
-			<View
-				className={cn('h-full w-full flex-1 bg-fill-brand', className)}
-				style={{ transform: `translateX(-${100 - (value ?? 0)}%)` }}
-			>
-				<ProgressPrimitive.Indicator className={cn('h-full w-full', className)} />
-			</View>
-		)
-	}
 
 	return (
 		<ProgressPrimitive.Indicator asChild>

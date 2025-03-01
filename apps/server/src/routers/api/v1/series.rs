@@ -559,9 +559,11 @@ async fn patch_series_thumbnail(
 			image_options,
 			core_config: ctx.config.as_ref().clone(),
 			force_regen: true,
+			filename: media.series_id.clone(),
 		},
 	)
 	.await?;
+	tracing::debug!(?path_buf, "Generated thumbnail for series");
 
 	Ok(ImageResponse::from((
 		ContentType::from(format),

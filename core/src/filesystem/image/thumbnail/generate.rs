@@ -33,6 +33,7 @@ pub struct GenerateThumbnailOptions {
 	pub image_options: ImageProcessorOptions,
 	pub core_config: StumpConfig,
 	pub force_regen: bool,
+	pub filename: Option<String>,
 }
 
 /// A type alias for whether a thumbnail was generated or not during the generation process. This is
@@ -74,10 +75,11 @@ pub async fn generate_book_thumbnail(
 		image_options,
 		core_config,
 		force_regen,
+		filename,
 	}: GenerateThumbnailOptions,
 ) -> Result<GenerateOutput, ThumbnailGenerateError> {
 	let book_path = book.path.clone();
-	let file_name = book.id.clone();
+	let file_name = filename.unwrap_or_else(|| book.id.clone());
 
 	let file_path = core_config.get_thumbnails_dir().join(format!(
 		"{}.{}",

@@ -207,6 +207,7 @@ impl JobExt for ThumbnailGenerationJob {
 						image_options: self.options.clone(),
 						core_config: ctx.config.as_ref().clone(),
 						force_regen: self.params.force_regenerate,
+						filename: None, // Each book will use its ID as the filename
 					},
 					|position| {
 						ctx.report_progress(JobProgress::subtask_position(

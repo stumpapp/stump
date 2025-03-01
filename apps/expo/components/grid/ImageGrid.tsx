@@ -95,7 +95,6 @@ export default function ImageGrid<T = Any>({
 			HeaderComponent={HeaderComponent}
 			LargeHeaderComponent={LargeHeaderComponent}
 			numColumns={numColumns}
-			className="px-4"
 			style={[
 				style,
 				{

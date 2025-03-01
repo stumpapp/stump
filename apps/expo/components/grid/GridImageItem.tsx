@@ -27,7 +27,7 @@ export default function GridImageItem({ uri, title, href, index }: Props) {
 		<Pressable onPress={() => router.navigate(href)}>
 			{({ pressed }) => (
 				<View
-					className={cn('flex-1 gap-2 pb-4', {
+					className={cn('flex-1 gap-2 px-4 pb-4', {
 						'mr-auto': index % 2 === 0,
 						'ml-auto': index % 2 === 1,
 					})}

@@ -1284,6 +1284,14 @@
 			"title": "リーダー設定",
 			"description": "Stumpリーダーのデフォルトオプション。これらは現在のデバイスのみにバインドされています",
 			"sections": {
+				"universal": {
+					"sections": {
+						"readingDirection": {
+							"label": "Reading direction",
+							"description": "The direction in which the reader will progress through pages"
+						}
+					}
+				},
 				"imageBasedBooks": {
 					"label": "画像ベースの本",
 					"description": "コミック本、漫画、その他の画像ベースの本",
@@ -1295,6 +1303,29 @@
 						"preloadBehindCount": {
 							"label": "Countの後ろに事前読み込みします",
 							"description": "現在のページの後ろに読み込むするページ数"
+						}
+					}
+				},
+				"textBasedBooks": {
+					"label": "Ebook reader",
+					"description": "Default settings for text-based books",
+					"sections": {
+						"fontSize": {
+							"label": "Font size",
+							"description": "The size of the font used in the reader"
+						},
+						"fontFamily": {
+							"label": "Font family",
+							"description": "The font used in the reader"
+						}
+					}
+				},
+				"data": {
+					"sections": {
+						"clearStore": {
+							"label": "Clear preferences",
+							"description": "Reset all individual book settings that override the defaults",
+							"button": "Clear preferences"
 						}
 					}
 				}

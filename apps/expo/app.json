@@ -29,7 +29,10 @@
 				"monochromeImage": "./assets/images/android-monochrome.png",
 				"backgroundColor": "#ffffff"
 			},
-			"package": "com.stumpapp.stump"
+			"package": "com.stumpapp.stump",
+			"androidNavigationBar": {
+				"visible": "immersive"
+			}
 		},
 		"web": {
 			"bundler": "metro",

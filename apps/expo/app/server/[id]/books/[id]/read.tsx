@@ -8,6 +8,7 @@ import {
 	useUpdateMediaProgress,
 } from '@stump/client'
 import { useKeepAwake } from 'expo-keep-awake'
+import * as NavigationBar from 'expo-navigation-bar'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect } from 'react'
 
@@ -97,7 +98,9 @@ export default function Screen() {
 	 */
 	useEffect(
 		() => {
+			NavigationBar.setVisibilityAsync('hidden')
 			return () => {
+				NavigationBar.setVisibilityAsync('visible')
 				queryClient.refetchQueries({ queryKey: [sdk.media.keys.getByID, bookID], exact: false })
 				queryClient.refetchQueries({ queryKey: [sdk.media.keys.inProgress], exact: false })
 			}

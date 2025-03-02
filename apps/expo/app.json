@@ -67,6 +67,14 @@
 						"assets/fonts/OpenDyslexic-Regular.otf"
 					]
 				}
+			],
+			[
+				"expo-build-properties",
+				{
+					"android": {
+						"usesCleartextTraffic": true
+					}
+				}
 			]
 		],
 		"owner": "stumpapp",
@@ -77,6 +85,11 @@
 			"eas": {
 				"projectId": "b1069238-5814-4263-983b-148216e393e5"
 			}
+		}
+	},
+	"preview": {
+		"android": {
+			"buildType": "apk"
 		}
 	}
 }

@@ -123,6 +123,8 @@ export default function Screen() {
 		[activeServer, router, saveServerToken],
 	)
 
+	// TODO: attempt reauth automatically when able
+
 	const onAuthError = useCallback(async () => {
 		// Get rid of the token
 		if (activeServer) {

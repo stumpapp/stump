@@ -4,7 +4,7 @@ import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import { Image } from 'expo-image'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { View } from 'react-native'
+import { Platform, View } from 'react-native'
 import { FlatList, Pressable } from 'react-native-gesture-handler'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -21,6 +21,9 @@ dayjs.extend(duration)
 
 const HEIGHT_MODIFIER = 2 / 3
 const WIDTH_MODIFIER = 2 / 3
+
+// TODO: account for image ratio when rendering in gallery
+// TODO: double spread when double spread is enabled and gallery is visible
 
 export default function Footer() {
 	const { sdk } = useSDK()
@@ -356,7 +359,7 @@ export default function Footer() {
 				/>
 			)}
 
-			<View className="gap-2 px-1">
+			<View className={cn('gap-2 px-1', { 'pb-1': Platform.OS === 'android' })}>
 				{footerControls === 'images' && (
 					<Progress
 						className="h-1 bg-[#898d94]"

@@ -1,9 +1,11 @@
+import { FlashList } from '@shopify/flash-list'
 import { useContinueReading } from '@stump/client'
-import { Fragment, useMemo } from 'react'
-import { FlatList, View } from 'react-native'
+import { Fragment, useCallback, useMemo, useState } from 'react'
+import { View } from 'react-native'
 
 import { BookListItem } from '~/components/book'
 import { Heading, Text } from '~/components/ui'
+import { useListItemSize } from '~/lib/hooks'
 
 import { useActiveServer } from '../context'
 import ReadingNow from './ReadingNow'
@@ -12,15 +14,27 @@ export default function ContinueReading() {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-	const { media } = useContinueReading({
+	const { media, data, fetchNextPage, hasNextPage } = useContinueReading({
 		limit: 20,
 		suspense: true,
 		useErrorBoundary: false,
 		queryKey: [serverID],
 	})
 
-	const activeBook = useMemo(() => media.at(0), [media])
-	const leftOffBooks = useMemo(() => media.slice(1), [media])
+	const [activeBook] = useState(() => data?.pages.at(0)?.data.at(0))
+
+	const leftOffBooks = useMemo(
+		() => media.filter(({ id }) => id !== activeBook?.id),
+		[media, activeBook],
+	)
+
+	const onEndReached = useCallback(() => {
+		if (hasNextPage) {
+			fetchNextPage()
+		}
+	}, [hasNextPage, fetchNextPage])
+
+	const { width, gap } = useListItemSize()
 
 	return (
 		<Fragment>
@@ -29,14 +43,14 @@ export default function ContinueReading() {
 			<View className="flex gap-4">
 				<Heading size="lg">Continue Reading</Heading>
 
-				<FlatList
+				<FlashList
 					data={leftOffBooks}
 					keyExtractor={({ id }) => id}
 					renderItem={({ item: book }) => <BookListItem book={book} />}
 					horizontal
-					pagingEnabled
-					initialNumToRender={10}
-					maxToRenderPerBatch={10}
+					estimatedItemSize={width + gap}
+					onEndReached={onEndReached}
+					onEndReachedThreshold={0.85}
 					showsHorizontalScrollIndicator={false}
 					ListEmptyComponent={<Text className="text-foreground-muted">No books in progress</Text>}
 				/>

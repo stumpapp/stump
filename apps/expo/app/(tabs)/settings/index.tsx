@@ -6,9 +6,11 @@ import { AppDataUsageLink } from '~/components/appSettings/management'
 import {
 	AppLanguage,
 	AppTheme,
+	CachePolicySelect,
 	DefaultServer,
 	MaskURLs,
 	ReaderSettingsLink,
+	ReduceAnimations,
 } from '~/components/appSettings/preferences'
 import { StumpEnabled } from '~/components/appSettings/stump'
 import { Text } from '~/components/ui/text'
@@ -22,7 +24,6 @@ export default function Screen() {
 					<AppTheme />
 					<AppLanguage />
 					<DefaultServer />
-					<MaskURLs />
 				</View>
 
 				<View>
@@ -47,6 +48,13 @@ export default function Screen() {
 				<View>
 					<Text className="mb-3 text-foreground-muted">Management</Text>
 					<AppDataUsageLink />
+				</View>
+
+				<View>
+					<Text className="mb-3 text-foreground-muted">Debug</Text>
+					<CachePolicySelect />
+					<ReduceAnimations />
+					<MaskURLs />
 				</View>
 
 				<ContactInformation />

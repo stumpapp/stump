@@ -1,7 +1,5 @@
 import { useSDK } from '@stump/client'
-import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
-// import omit from 'lodash/omit'
 import { Fragment, useEffect } from 'react'
 import { Pressable, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -9,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
 import { BookDescription, InfoRow, InfoSection } from '~/components/book/overview'
+import { Image } from '~/components/Image'
 import {
 	getDateField,
 	getNumberField,

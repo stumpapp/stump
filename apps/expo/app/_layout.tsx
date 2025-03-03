@@ -15,6 +15,7 @@ import { BottomSheet } from '~/components/ui/bottom-sheet'
 import { setAndroidNavigationBar } from '~/lib/android-navigation-bar'
 import { NAV_THEME } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
+import { usePreferencesStore } from '~/stores'
 import { useHideStatusBar } from '~/stores/reader'
 
 dayjs.extend(relativeTime)
@@ -44,6 +45,8 @@ export default function RootLayout() {
 	const shouldHideStatusBar = useHideStatusBar()
 	const hasMounted = React.useRef(false)
 
+	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
+
 	useIsomorphicLayoutEffect(() => {
 		if (hasMounted.current) {
 			return
@@ -69,10 +72,13 @@ export default function RootLayout() {
 					{/* TODO: This pushes content when entering/exiting */}
 					<StatusBar style={isDarkColorScheme ? 'light' : 'dark'} hidden={shouldHideStatusBar} />
 					<Stack
-					// https://github.com/expo/expo/issues/15244 ?
-					// screenOptions={{
-					// 	statusBarHidden: shouldHideStatusBar,
-					// }}
+						// https://github.com/expo/expo/issues/15244 ?
+						// screenOptions={{
+						// 	statusBarHidden: shouldHideStatusBar,
+						// }}
+						screenOptions={{
+							animation: animationEnabled ? 'default' : 'none',
+						}}
 					>
 						<Stack.Screen
 							name="(tabs)"

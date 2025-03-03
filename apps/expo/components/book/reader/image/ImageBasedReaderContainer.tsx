@@ -1,7 +1,7 @@
 import { useSDK } from '@stump/client'
 import { Image } from 'expo-image'
 import { ComponentProps, useCallback, useEffect, useRef, useState } from 'react'
-import { View } from 'react-native'
+import { Dimensions, View } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -55,6 +55,7 @@ export default function ImageBasedReaderContainer({ initialPage, onPageChanged, 
 				style={{
 					paddingTop: insets.top,
 					paddingBottom: insets.bottom,
+					height: Dimensions.get('screen').height - insets.top - insets.bottom,
 				}}
 			>
 				<ControlsOverlay />

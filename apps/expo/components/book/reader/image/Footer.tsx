@@ -315,6 +315,7 @@ export default function Footer() {
 		[readingDirection],
 	)
 
+	// TODO: swap to flashlist, does NOT like dynamic height though...
 	return (
 		<Animated.View className="absolute z-20 shrink gap-4 px-1" style={animatedStyles}>
 			{footerControls === 'images' && (
@@ -337,7 +338,7 @@ export default function Footer() {
 											height: '100%',
 											width: '100%',
 										}}
-										contentFit="fill"
+										contentFit="cover"
 									/>
 								</View>
 							</Pressable>

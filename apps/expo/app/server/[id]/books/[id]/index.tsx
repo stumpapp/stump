@@ -3,7 +3,7 @@ import { ActiveReadingSession } from '@stump/sdk'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { Image } from 'expo-image'
+import { Image as ExpoImage } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect } from 'react'
 import { View } from 'react-native'
@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useActiveServer } from '~/components/activeServer'
 import { BookMetaLink } from '~/components/book'
 import { BookDescription, InfoRow, InfoStat } from '~/components/book/overview'
+import { Image } from '~/components/Image'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Heading, Text } from '~/components/ui'
 import { formatBytes } from '~/lib/format'
@@ -32,7 +33,7 @@ export default function Screen() {
 
 	useEffect(() => {
 		if (media?.current_page) {
-			Image.prefetch(sdk.media.bookPageURL(media.id, media.current_page), {
+			ExpoImage.prefetch(sdk.media.bookPageURL(media.id, media.current_page), {
 				headers: {
 					Authorization: sdk.authorizationHeader || '',
 				},

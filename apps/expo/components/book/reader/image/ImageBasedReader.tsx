@@ -1,7 +1,7 @@
 import { Zoomable } from '@likashefqet/react-native-image-zoom'
 import { useSDK } from '@stump/client'
 import { Image, ImageLoadEventData } from 'expo-image'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { FlatList, useWindowDimensions, View } from 'react-native'
 import {
 	GestureStateChangeEvent,
@@ -29,6 +29,9 @@ type ImageDimension = {
 // TODO: Account for device orientation AND reading direction
 // TODO: Account for the image scaling settings
 // TODO: Support vertical
+
+// TODO(perf): Use a FlashList instead. I encountered LOTS of issues trying to get it to work, but
+// it boasts a lot of performance improvements over the FlatList.
 
 type Props = {
 	/**
@@ -69,10 +72,12 @@ export default function ImageBasedReader({ initialPage }: Props) {
 		[onPageChanged, incognito],
 	)
 
+	const data = useMemo(() => Array.from({ length: book.pages }, (_, i) => i), [book.pages])
+
 	return (
 		<FlatList
 			ref={flatListRef}
-			data={Array.from({ length: book.pages }, (_, i) => i)}
+			data={data}
 			inverted={readingDirection === 'rtl' && readingMode !== 'continuous:vertical'}
 			renderItem={({ item }) => (
 				<Page

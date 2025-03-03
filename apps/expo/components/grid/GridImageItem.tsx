@@ -1,11 +1,11 @@
 import { useSDK } from '@stump/client'
-import { Image } from 'expo-image'
 import { Href, useRouter } from 'expo-router'
 import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
 import { cn } from '~/lib/utils'
 
+import { Image } from '../Image'
 import { Text } from '../ui'
 import { useGridItemSize } from './useGridItemSize'
 

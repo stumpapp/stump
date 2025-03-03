@@ -14,7 +14,7 @@ const getDelay = (idx: number) => BASE_DELAY + (idx + 1) * 0.25
 
 export default function DownloadLinks() {
 	return (
-		<div className="relative flex w-full items-center justify-center space-x-2">
+		<div className="relative flex w-full items-start justify-center space-x-2 md:justify-start">
 			{links.map((link, idx) => (
 				<motion.div
 					key={idx}

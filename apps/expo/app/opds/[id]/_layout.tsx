@@ -5,10 +5,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { ActiveServerContext } from '~/components/activeServer'
 import { getOPDSInstance } from '~/lib/sdk/auth'
-import { useSavedServers } from '~/stores'
+import { usePreferencesStore, useSavedServers } from '~/stores'
 
 export default function Screen() {
 	const router = useRouter()
+	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
 	const { savedServers, getServerConfig } = useSavedServers()
 	const { id: serverID } = useLocalSearchParams<{ id: string }>()
@@ -88,7 +89,9 @@ export default function Screen() {
 		>
 			<StumpClientContextProvider onUnauthenticatedResponse={onAuthError}>
 				<SDKContext.Provider value={{ sdk, setSDK }}>
-					<Stack screenOptions={{ headerShown: false }} />
+					<Stack
+						screenOptions={{ headerShown: false, animation: animationEnabled ? 'default' : 'none' }}
+					/>
 				</SDKContext.Provider>
 			</StumpClientContextProvider>
 		</ActiveServerContext.Provider>

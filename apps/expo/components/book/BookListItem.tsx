@@ -2,6 +2,7 @@ import { useSDK } from '@stump/client'
 import { Media } from '@stump/sdk'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
+import { memo } from 'react'
 import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
@@ -15,7 +16,7 @@ type Props = {
 	book: Media
 }
 
-export default function BookListItem({ book }: Props) {
+function BookListItem({ book }: Props) {
 	const { sdk } = useSDK()
 	const {
 		activeServer: { id: serverID },
@@ -58,3 +59,5 @@ export default function BookListItem({ book }: Props) {
 		</Pressable>
 	)
 }
+
+export default memo(BookListItem)

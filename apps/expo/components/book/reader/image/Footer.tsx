@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Progress, Text } from '~/components/ui'
 import { useDisplay, usePrevious } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
-import { useReaderStore } from '~/stores'
+import { usePreferencesStore, useReaderStore } from '~/stores'
 import { useBookPreferences, useBookReadTime } from '~/stores/reader'
 
 import { useImageBasedReader } from './context'
@@ -39,6 +39,7 @@ export default function Footer() {
 	const {
 		preferences: { footerControls, trackElapsedTime, readingDirection },
 	} = useBookPreferences(id)
+	const globalCachePolicy = usePreferencesStore((state) => state.cachePolicy)
 
 	const galleryRef = useRef<FlatList>(null)
 	const insets = useSafeAreaInsets()
@@ -165,7 +166,7 @@ export default function Footer() {
 				headers: {
 					Authorization: sdk.authorizationHeader || '',
 				},
-				// cachePolicy: 'memory',
+				cachePolicy: globalCachePolicy === 'none' ? undefined : globalCachePolicy,
 			})
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps

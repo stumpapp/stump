@@ -4,17 +4,18 @@ import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
 import { icons } from '~/components/ui'
-import { useColorScheme } from '~/lib/useColorScheme'
+import { useColors } from '~/lib/constants'
 import { cn } from '~/lib/utils'
-import { useUserStore } from '~/stores'
+import { usePreferencesStore, useUserStore } from '~/stores'
 
 const { Unplug, Home, SquareLibrary, Search } = icons
 
 export default function TabLayout() {
 	const { sdk } = useSDK()
 
-	const { isDarkColorScheme } = useColorScheme()
+	const colors = useColors()
 	const router = useRouter()
+	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 	const setUser = useUserStore((state) => state.setUser)
 
 	const { user } = useAuthQuery({
@@ -28,7 +29,12 @@ export default function TabLayout() {
 	}
 
 	return (
-		<Tabs screenOptions={{ tabBarActiveTintColor: isDarkColorScheme ? 'white' : 'black' }}>
+		<Tabs
+			screenOptions={{
+				tabBarActiveTintColor: colors.foreground.DEFAULT,
+				animation: animationEnabled ? undefined : 'none',
+			}}
+		>
 			<Tabs.Screen
 				name="index"
 				options={{

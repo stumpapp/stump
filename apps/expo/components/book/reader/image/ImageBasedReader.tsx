@@ -31,7 +31,7 @@ type ImageDimension = {
 // TODO: Support vertical
 
 // TODO(perf): Use a FlashList instead. I encountered LOTS of issues trying to get it to work, but
-// it boasts a lot of performance improvements over the FlatList.
+// it boasts a lot of performance improvements over the FlatList. Or potentially https://github.com/LegendApp/legend-list ?
 
 type Props = {
 	/**
@@ -74,6 +74,52 @@ export default function ImageBasedReader({ initialPage }: Props) {
 
 	const data = useMemo(() => Array.from({ length: book.pages }, (_, i) => i), [book.pages])
 
+	// return (
+	// 	<View
+	// 		style={{
+	// 			height,
+	// 		}}
+	// 	>
+	// 		<FlashList
+	// 			ref={flatListRef}
+	// 			data={data}
+	// 			renderItem={({ item }) => (
+	// 				<View
+	// 					style={{
+	// 						height,
+	// 						width,
+	// 					}}
+	// 					className="items-center justify-center"
+	// 				>
+	// 					<Page
+	// 						deviceOrientation={deviceOrientation}
+	// 						index={item}
+	// 						size={sizes[item]}
+	// 						onSizeLoaded={setSizes}
+	// 						maxWidth={width}
+	// 						maxHeight={height}
+	// 						readingDirection="horizontal"
+	// 					/>
+	// 				</View>
+	// 			)}
+	// 			onViewableItemsChanged={({ viewableItems }) => {
+	// 				const fistVisibleItem = viewableItems.filter(({ isViewable }) => isViewable).at(0)?.index
+	// 				if (fistVisibleItem) {
+	// 					handlePageChanged(fistVisibleItem + 1)
+	// 				}
+	// 			}}
+	// 			keyExtractor={(item) => item.toString()}
+	// 			horizontal={readingMode === 'paged' || readingMode === 'continuous:horizontal'}
+	// 			pagingEnabled={readingMode === 'paged'}
+	// 			initialScrollIndex={initialPage - 1}
+	// 			showsHorizontalScrollIndicator={false}
+	// 			showsVerticalScrollIndicator={false}
+	// 			estimatedItemSize={width}
+	// 			estimatedListSize={{ height, width }}
+	// 		/>
+	// 	</View>
+	// )
+
 	return (
 		<FlatList
 			ref={flatListRef}
@@ -110,6 +156,9 @@ export default function ImageBasedReader({ initialPage }: Props) {
 				wait.then(() => {
 					flatListRef.current?.scrollToIndex({ index: info.index, animated: true })
 				})
+			}}
+			viewabilityConfig={{
+				itemVisiblePercentThreshold: 100,
 			}}
 			// Note: We need to define an explicit layout so the initial scroll index works
 			// TODO: likely won't work for vertical scrolling

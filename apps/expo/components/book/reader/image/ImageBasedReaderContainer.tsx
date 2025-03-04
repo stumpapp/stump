@@ -32,6 +32,7 @@ export default function ImageBasedReaderContainer({ initialPage, onPageChanged, 
 	)
 
 	const flatListRef = useRef<FlatList>(null)
+	// const flatListRef = useRef<FlashList<number>>(null)
 	const insets = useSafeAreaInsets()
 
 	useEffect(
@@ -51,7 +52,7 @@ export default function ImageBasedReaderContainer({ initialPage, onPageChanged, 
 			value={{ ...ctx, currentPage, onPageChanged: onPageChangedHandler, flatListRef }}
 		>
 			<View
-				className="fixed inset-0 flex-1"
+				className="fixed inset-0 flex-1 bg-black"
 				style={{
 					paddingTop: insets.top,
 					paddingBottom: insets.bottom,

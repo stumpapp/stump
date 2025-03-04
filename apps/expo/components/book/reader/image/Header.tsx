@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
 import { Heading, icons } from '~/components/ui'
+import { COLORS } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
@@ -68,8 +69,20 @@ export default function Header({ onShowGlobalSettings }: Props) {
 			<View className="flex-row items-center justify-between">
 				<Pressable onPress={() => router.back()}>
 					{({ pressed }) => (
-						<View className="rounded-full border border-edge bg-background-overlay p-1 tablet:p-2">
-							<X className="text-foreground" style={{ opacity: pressed ? 0.85 : 1 }} />
+						<View
+							className="rounded-full border p-1 tablet:p-2"
+							style={{
+								backgroundColor: COLORS.dark.background.overlay.DEFAULT,
+								borderColor: COLORS.dark.edge.DEFAULT,
+							}}
+						>
+							<X
+								style={{
+									opacity: pressed ? 0.85 : 1,
+									// @ts-expect-error: This is fine
+									color: COLORS.dark.foreground.DEFAULT,
+								}}
+							/>
 						</View>
 					)}
 				</Pressable>
@@ -78,10 +91,19 @@ export default function Header({ onShowGlobalSettings }: Props) {
 					<DropdownMenu.Trigger>
 						<Pressable onPress={() => setIsOpen((prev) => !prev)}>
 							{({ pressed }) => (
-								<View className="rounded-full border border-edge bg-background-overlay p-1 tablet:p-2">
+								<View
+									className="rounded-full border p-1 tablet:p-2"
+									style={{
+										backgroundColor: COLORS.dark.background.overlay.DEFAULT,
+										borderColor: COLORS.dark.edge.DEFAULT,
+									}}
+								>
 									<CircleEllipsis
-										className="text-foreground"
-										style={{ opacity: isOpen ? 0.5 : pressed ? 0.85 : 1 }}
+										style={{
+											opacity: isOpen ? 0.5 : pressed ? 0.85 : 1,
+											// @ts-expect-error: This is fine
+											color: COLORS.dark.foreground.DEFAULT,
+										}}
 									/>
 								</View>
 							)}
@@ -194,7 +216,14 @@ export default function Header({ onShowGlobalSettings }: Props) {
 				</DropdownMenu.Root>
 			</View>
 
-			<Heading className="font-semibold tablet:text-3xl" numberOfLines={2} ellipsizeMode="tail">
+			<Heading
+				className="font-semibold tablet:text-3xl"
+				numberOfLines={2}
+				ellipsizeMode="tail"
+				style={{
+					color: COLORS.dark.foreground.DEFAULT,
+				}}
+			>
 				{name}
 			</Heading>
 		</Animated.View>

@@ -4,6 +4,7 @@ import { usePreferencesStore } from '~/stores'
 
 export const Image = (props: ImageProps) => {
 	const cachePolicy = usePreferencesStore((state) => state.cachePolicy)
+	const allowDownscaling = usePreferencesStore((state) => state.allowDownscaling)
 
-	return <EImage cachePolicy={cachePolicy} {...props} />
+	return <EImage cachePolicy={cachePolicy} allowDownscaling={allowDownscaling} {...props} />
 }

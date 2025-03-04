@@ -13,7 +13,8 @@ type MobilePreferencesStore = {
 	setMaskURLs: (mask: boolean) => void
 	storeLastRead: boolean
 	reduceAnimations: boolean
-	cachePolicy?: CachePolicy
+	cachePolicy: CachePolicy
+	allowDownscaling: boolean
 	/**
 	 * Patch the store with new values.
 	 */
@@ -33,6 +34,7 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			storeLastRead: false,
 			reduceAnimations: false,
 			cachePolicy: 'memory-disk',
+			allowDownscaling: true,
 			patch: (data) => set(data),
 		}),
 		{

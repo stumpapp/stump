@@ -84,42 +84,49 @@ export default function RootLayout() {
 							name="(tabs)"
 							options={{
 								headerShown: false,
+								animation: animationEnabled ? 'default' : 'none',
 							}}
 						/>
 						<Stack.Screen
 							name="server/[id]"
 							options={{
 								headerShown: false,
+								animation: animationEnabled ? 'default' : 'none',
 							}}
 						/>
 						<Stack.Screen
 							name="server/[id]/(tabs)"
 							options={{
 								headerShown: false,
+								animation: animationEnabled ? 'default' : 'none',
 							}}
 						/>
 						<Stack.Screen
 							name="server/[id]/libraries/[id]"
 							options={{
 								headerShown: false,
+								animation: animationEnabled ? 'default' : 'none',
 							}}
 						/>
 						<Stack.Screen
 							name="server/[id]/series/[id]"
 							options={{
 								headerShown: false,
+								animation: animationEnabled ? 'default' : 'none',
 							}}
 						/>
 						<Stack.Screen
 							name="server/[id]/books/[id]"
 							options={{
 								headerShown: false,
+								animation: animationEnabled ? 'default' : 'none',
 							}}
 						/>
 						<Stack.Screen
 							name="opds/[id]"
 							options={{
 								headerShown: false,
+								animation: animationEnabled ? 'default' : 'none',
 							}}
 						/>
 					</Stack>

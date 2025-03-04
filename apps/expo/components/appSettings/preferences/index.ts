@@ -1,3 +1,4 @@
+export { default as AllowDownscaling } from './AllowDownscaling'
 export { default as AppLanguage } from './AppLanguage'
 export { default as AppTheme } from './AppTheme'
 export { default as CachePolicySelect } from './CachePolicySelect'

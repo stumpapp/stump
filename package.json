@@ -1,83 +1,89 @@
 {
-	"name": "@stump/monorepo",
-	"version": "0.0.10",
-	"repository": "https://github.com/stumpapp/stump.git",
-	"author": "Aaron Leopold <aaronleopold1221@gmail.com>",
-	"license": "SEE README.md",
-	"private": true,
-	"workspaces": [
-		"apps/*",
-		"docs",
-		"packages/*"
-	],
-	"scripts": {
-		"prepare": "husky",
-		"setup": "yarn && yarn web build && cargo codegen",
-		"lint": "lerna run lint --stream --parallel && yarn check-types",
-		"check-types": "lerna run check-types  --stream --parallel",
-		"test": "lerna run test",
-		"client": "lerna run --scope @stump/client",
-		"desktop": "lerna run --scope @stump/desktop",
-		"expo": "lerna run --scope @stump/expo",
-		"browser": "lerna run --scope @stump/browser",
-		"web": "lerna run --scope @stump/web",
-		"docs": "lerna run --scope @stump/docs",
-		"start:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"cargo run -p stump_server\" \"yarn desktop start\"",
-		"dev:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"cargo run -p stump_server\" \"yarn desktop dev\"",
-		"dev:web": "concurrently -n server,web -c green.bold,blue.bold \"cargo watch --ignore core/prisma -x run -p stump_server\" \"yarn web dev\"",
-		"dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"cargo watch --ignore core/prisma -x run -p stump_server\" \"yarn expo dev\"",
-		"prisma-studio": "npx prisma studio --schema core/prisma/schema.prisma",
-		"format": "lerna run format --stream --parallel",
-		"nuke": "concurrently -n root,monorepo -c green.bold,blue.bold \"yarn exec rimraf node_modules\" \"lerna run nuke\""
-	},
-	"devDependencies": {
-		"@babel/core": "^7.25.8",
-		"@babel/traverse": "^7.25.7",
-		"@eslint/js": "^9.13.0",
-		"@typescript-eslint/eslint-plugin": "^8.10.0",
-		"@typescript-eslint/parser": "^8.10.0",
-		"concurrently": "^8.2.2",
-		"eslint": "^9.13.0",
-		"eslint-config-prettier": "^9.1.0",
-		"eslint-plugin-prettier": "^5.2.1",
-		"eslint-plugin-react": "^7.37.1",
-		"eslint-plugin-react-hooks": "^5.0.0",
-		"eslint-plugin-simple-import-sort": "^12.1.1",
-		"eslint-plugin-sort-keys-fix": "^1.1.2",
-		"globals": "^15.11.0",
-		"husky": "^9.1.6",
-		"lerna": "^8.1.8",
-		"lint-staged": "^15.2.10",
-		"prettier": "=3.3.2",
-		"prettier-eslint": "^16.3.0",
-		"prettier-plugin-tailwindcss": "^0.6.8",
-		"rimraf": "^5.0.5",
-		"typescript": "^5.6.3",
-		"typescript-eslint": "^8.10.0"
-	},
-	"resolutions": {
-		"@types/react": "=18.3.12"
-	},
-	"lint-staged": {
-		"*.{js,jsx,ts,tsx,md,json}": [
-			"prettier --config prettier.config.js --check"
-		],
-		"*.rs": [
-			"cargo fmt --check --manifest-path=core/Cargo.toml --",
-			"cargo fmt --check --manifest-path=apps/server/Cargo.toml --",
-			"cargo fmt --check --manifest-path=apps/desktop/src-tauri/Cargo.toml --"
-		]
-	},
-	"engines": {
-		"node": ">=20.0.0"
-	},
-	"packageManager": "yarn@1.22.21",
-	"yarn": {
-		"peerDependencyRules": {
-			"ignoreMissing": [
-				"@babel/core"
-			]
-		}
-	},
-	"dependencies": {}
+  "name": "@stump/monorepo",
+  "version": "0.0.10",
+  "repository": "https://github.com/stumpapp/stump.git",
+  "author": "Aaron Leopold <aaronleopold1221@gmail.com>",
+  "license": "SEE README.md",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "docs",
+    "packages/*"
+  ],
+  "scripts": {
+    "prepare": "husky",
+    "setup": "yarn && yarn web build && cargo codegen",
+    "lint": "lerna run lint --stream --parallel && yarn check-types",
+    "check-types": "lerna run check-types  --stream --parallel",
+    "test": "lerna run test",
+    "client": "lerna run --scope @stump/client",
+    "desktop": "lerna run --scope @stump/desktop",
+    "expo": "lerna run --scope @stump/expo",
+    "browser": "lerna run --scope @stump/browser",
+    "web": "lerna run --scope @stump/web",
+    "docs": "lerna run --scope @stump/docs",
+    "start:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"cargo run -p stump_server\" \"yarn desktop start\"",
+    "dev:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"cargo run -p stump_server\" \"yarn desktop dev\"",
+    "dev:web": "concurrently -n server,web -c green.bold,blue.bold \"cargo watch --ignore core/prisma -x run -p stump_server\" \"yarn web dev\"",
+    "dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"cargo watch --ignore core/prisma -x run -p stump_server\" \"yarn expo dev\"",
+    "prisma-studio": "npx prisma studio --schema core/prisma/schema.prisma",
+    "format": "lerna run format --stream --parallel",
+    "nuke": "concurrently -n root,monorepo -c green.bold,blue.bold \"yarn exec rimraf node_modules\" \"lerna run nuke\"",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.8",
+    "@babel/traverse": "^7.25.7",
+    "@eslint/js": "^9.13.0",
+    "@typescript-eslint/eslint-plugin": "^8.10.0",
+    "@typescript-eslint/parser": "^8.10.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^9.13.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-react": "^7.37.1",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "eslint-plugin-sort-keys-fix": "^1.1.2",
+    "globals": "^15.11.0",
+    "husky": "^9.1.6",
+    "lerna": "^8.1.8",
+    "lint-staged": "^15.2.10",
+    "prettier": "=3.3.2",
+    "prettier-eslint": "^16.3.0",
+    "prettier-plugin-tailwindcss": "^0.6.8",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.10.0"
+  },
+  "resolutions": {
+    "@types/react": "=18.3.12"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,md,json}": [
+      "prettier --config prettier.config.js --check"
+    ],
+    "*.rs": [
+      "cargo fmt --check --manifest-path=core/Cargo.toml --",
+      "cargo fmt --check --manifest-path=apps/server/Cargo.toml --",
+      "cargo fmt --check --manifest-path=apps/desktop/src-tauri/Cargo.toml --"
+    ]
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "yarn@1.22.21",
+  "yarn": {
+    "peerDependencyRules": {
+      "ignoreMissing": [
+        "@babel/core"
+      ]
+    }
+  },
+  "dependencies": {
+    "expo": "~52.0.37",
+    "react": "18.3.1",
+    "react-native": "0.76.7"
+  }
 }

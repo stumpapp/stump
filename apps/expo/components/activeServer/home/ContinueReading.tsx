@@ -1,6 +1,7 @@
 import { FlashList } from '@shopify/flash-list'
 import { useContinueReading } from '@stump/client'
-import { Fragment, useCallback, useMemo, useState } from 'react'
+import { Media } from '@stump/sdk'
+import { Fragment, memo, useCallback, useMemo, useState } from 'react'
 import { View } from 'react-native'
 
 import { BookListItem } from '~/components/book'
@@ -10,7 +11,7 @@ import { useListItemSize } from '~/lib/hooks'
 import { useActiveServer } from '../context'
 import ReadingNow from './ReadingNow'
 
-export default function ContinueReading() {
+function ContinueReading() {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -36,6 +37,8 @@ export default function ContinueReading() {
 
 	const { width, gap } = useListItemSize()
 
+	const renderItem = useCallback(({ item }: { item: Media }) => <BookListItem book={item} />, [])
+
 	return (
 		<Fragment>
 			{activeBook && <ReadingNow book={activeBook} />}
@@ -46,7 +49,7 @@ export default function ContinueReading() {
 				<FlashList
 					data={leftOffBooks}
 					keyExtractor={({ id }) => id}
-					renderItem={({ item: book }) => <BookListItem book={book} />}
+					renderItem={renderItem}
 					horizontal
 					estimatedItemSize={width + gap}
 					onEndReached={onEndReached}
@@ -58,3 +61,5 @@ export default function ContinueReading() {
 		</Fragment>
 	)
 }
+
+export default memo(ContinueReading)

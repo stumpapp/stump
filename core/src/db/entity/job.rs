@@ -61,7 +61,7 @@ impl Cursor for PersistedJob {
 
 impl From<job::Data> for PersistedJob {
 	fn from(job: job::Data) -> Self {
-		let logs = job.logs().ok().take().map(|logs| {
+		let logs = job.logs().ok().map(|logs| {
 			logs.iter()
 				.map(|log| Log::from(log.to_owned()))
 				.collect::<Vec<Log>>()

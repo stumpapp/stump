@@ -2,5 +2,7 @@ import { Meta } from 'nextra'
 
 export default {
 	app: 'App',
-	tachiyomi: 'Tachiyomi',
+	servers: 'Servers',
+	reading: 'Reading',
+	settings: 'Settings',
 } satisfies Meta

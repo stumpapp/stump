@@ -421,7 +421,7 @@
 				},
 				{
 					"label": "Scanning",
-					"heading": "Scanner Behavior",
+					"heading": "Scanning",
 					"description": "Settings related to how Stump scans this library"
 				},
 				{
@@ -517,8 +517,72 @@
 			"description": "The default reader settings to use for books in this library. Any book can override these settings"
 		},
 		"options/scanning": {
-			"title": "Scanner Behavior",
-			"description": "Settings related to how Stump scans this library"
+			"title": "Scanning",
+			"description": "Settings related to how Stump scans this library",
+			"sections": {
+				"configureScan": {
+					"heading": "Configure scan",
+					"description": "A scan with additional options for more fine-grained control",
+					"form": {
+						"alert": "These will override corresponding library-wide settings",
+						"options": {
+							"forceRebuild": {
+								"label": "Force rebuild",
+								"description": "Rebuild every book in the library on disk",
+								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
+							},
+							"custom": {
+								"label": "Custom",
+								"description": "Customize the scan configuration",
+								"validation": {
+									"noSelection": "At least one option must be enabled"
+								}
+							},
+							"rebuildMeta": {
+								"label": "Rebuild metadata",
+								"description": "Rebuild metadata for books in the library"
+							},
+							"regenHashes": {
+								"label": "Regenerate hashes",
+								"description": "Recreate hashes for books in the library"
+							}
+						}
+					}
+				},
+				"defaultScan": {
+					"heading": "Default scan",
+					"description": "A standard scan to index your library for new content"
+				},
+				"history": {
+					"heading": "Scan history",
+					"description": "The history of all scans recorded for this library",
+					"empty": "There are no scans recorded for this library",
+					"runScan": "Run scan",
+					"inspect": "See details",
+					"inspector": {
+						"title": "Scan record",
+						"description": "A detailed view of this scan record",
+						"fields": {
+							"library": "Library",
+							"date": "Date",
+							"config": "Config",
+							"jobOutput": "Job output",
+							"logs": "Logs"
+						},
+						"logsPresent": "Logs were persisted for this job",
+						"seeLogs": "See logs"
+					},
+					"table": {
+						"columns": {
+							"timestamp": "Scanned at",
+							"config": "Config"
+						},
+						"default": "Default",
+						"custom": "Custom"
+					},
+					"clearHistory": "Delete scan history"
+				}
+			}
 		},
 		"options/thumbnails": {
 			"title": "Thumbnails",
@@ -1388,6 +1452,12 @@
 						},
 						"emptyHeading": "No logs to display",
 						"emptySubtitle": "Your server is either very healthy or very unhealthy"
+					},
+					"deleteLogs": {
+						"title": "Delete logs",
+						"description": "Permanently delete all persisted logs from the database",
+						"disclaimer": "This action cannot be undone",
+						"confirm": "Delete logs"
 					}
 				},
 				"liveLogs": {
@@ -1582,7 +1652,10 @@
 					}
 				},
 				"validation": {
-					"ageRestrictionTooLow": "Age restriction cannot be less than 0"
+					"ageRestrictionTooLow": "Age restriction cannot be less than 0",
+					"missingUsername": "Username is required",
+					"missingPassword": "Password is required",
+					"usernameAlreadyExists": "Username already exists"
 				},
 				"createSubmitButton": "Create user",
 				"updateSubmitButton": "Update user"
@@ -1734,7 +1807,8 @@
 			"wait": "Once libraries are created, they'll be displayed here"
 		},
 		"links": {
-			"create": "Create library"
+			"create": "Create library",
+			"settings": "Go to settings"
 		}
 	},
 	"pagination": {
@@ -1858,6 +1932,7 @@
 		"goToServers": "Go to servers",
 		"notReady": "This feature is not ready",
 		"notUsedYet": "Not used yet",
-		"never": "Never"
+		"never": "Never",
+		"scan": "Scan"
 	}
 }

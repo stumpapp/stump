@@ -3,11 +3,13 @@ pub(crate) mod individual;
 pub(crate) mod thumbnails;
 
 use axum::{
-	extract::DefaultBodyLimit,
+	extract::{DefaultBodyLimit, Extension},
 	middleware,
 	routing::{get, post, put},
 	Router,
 };
+
+use serde_qs::axum::QsQueryConfig;
 
 use crate::{config::state::AppState, middleware::auth::auth_middleware};
 
@@ -40,7 +42,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 					get(individual::get_media_progress)
 						.delete(individual::delete_media_progress),
 				)
-				.route("/progress/{page}", put(individual::update_media_progress))
+				.route("/progress", put(individual::update_media_progress))
 				.route(
 					"/progress/complete",
 					get(individual::get_is_media_completed)
@@ -50,7 +52,13 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route(
 					"/page/{page}/dimensions",
 					get(individual::get_media_page_dimensions),
+				)
+				.route(
+					"/metadata",
+					get(individual::get_media_metadata)
+						.put(individual::put_media_metadata),
 				),
 		)
+		.layer(Extension(QsQueryConfig::new(5, false)))
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }

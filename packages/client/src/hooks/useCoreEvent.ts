@@ -95,7 +95,7 @@ const handleJobOutput = async (output: CoreJobOutput, sdk: Api) => {
 		const requeryBooks = output.created_media.valueOf() + output.updated_media.valueOf() > 0
 		const requerySeries = output.created_series.valueOf() + output.updated_series.valueOf() > 0
 
-		const keys = []
+		const keys = [sdk.library.keys.scanHistory, sdk.library.keys.getStats]
 
 		if (requeryBooks) {
 			keys.push(sdk.media.keys.recentlyAdded, sdk.media.keys.get)
@@ -105,13 +105,10 @@ const handleJobOutput = async (output: CoreJobOutput, sdk: Api) => {
 			keys.push(...[sdk.series.keys.recentlyAdded, sdk.series.keys.get])
 		}
 
-		if (keys.length > 0) {
-			keys.push(...[sdk.library.keys.getStats])
-			try {
-				await invalidateQueries({ keys })
-			} catch (e) {
-				console.error('Failed to invalidate queries', e)
-			}
+		try {
+			await invalidateQueries({ keys })
+		} catch (e) {
+			console.error('Failed to invalidate queries', e)
 		}
 	} else {
 		console.warn('Unhandled job output', output)

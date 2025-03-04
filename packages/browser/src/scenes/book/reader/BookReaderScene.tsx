@@ -76,7 +76,7 @@ function BookReaderScene({ book }: Props) {
 		const maxPage = book.pages
 		if (parsedPage <= 0 || parsedPage > maxPage) return
 
-		updateReadProgress(parsedPage)
+		updateReadProgress({ page: parsedPage })
 	}, [page, updateReadProgress, book, isIncognito])
 
 	if (book.extension.match(EBOOK_EXTENSION)) {

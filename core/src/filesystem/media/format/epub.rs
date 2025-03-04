@@ -1,3 +1,5 @@
+use merge::Merge;
+use quick_xml::{events::Event, Reader};
 use std::{collections::HashMap, fs::File, io::BufReader, path::PathBuf};
 
 const ACCEPTED_EPUB_COVER_MIMES: [&str; 2] = ["image/jpeg", "image/png"];
@@ -11,6 +13,7 @@ use crate::{
 		error::FileError,
 		hash::{self, generate_koreader_hash},
 		media::process::{FileProcessor, FileProcessorOptions, ProcessedFile},
+		ProcessedFileHashes,
 	},
 };
 use epub::doc::EpubDoc;
@@ -49,7 +52,7 @@ impl FileProcessor for EpubProcessor {
 		Ok(sample_size)
 	}
 
-	fn hash(path: &str) -> Option<String> {
+	fn generate_stump_hash(path: &str) -> Option<String> {
 		let sample_result = EpubProcessor::get_sample_size(path);
 
 		if let Ok(sample) = sample_result {
@@ -65,13 +68,96 @@ impl FileProcessor for EpubProcessor {
 		}
 	}
 
-	fn process(
+	fn generate_hashes(
 		path: &str,
 		FileProcessorOptions {
 			generate_file_hashes,
 			generate_koreader_hashes,
 			..
 		}: FileProcessorOptions,
+	) -> Result<ProcessedFileHashes, FileError> {
+		let hash = generate_file_hashes
+			.then(|| EpubProcessor::generate_stump_hash(path))
+			.flatten();
+		let koreader_hash = generate_koreader_hashes
+			.then(|| generate_koreader_hash(path))
+			.transpose()?;
+
+		Ok(ProcessedFileHashes {
+			hash,
+			koreader_hash,
+		})
+	}
+
+	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError> {
+		let epub_file = Self::open(path)?;
+		let embedded_metadata = MediaMetadata::from(epub_file.metadata);
+
+		// try get opf file
+		let file_path = std::path::Path::new(path).with_extension("opf");
+		if file_path.exists() {
+			// extract OPF data
+			let opf_string = std::fs::read_to_string(file_path)?;
+			let mut reader = Reader::from_str(opf_string.as_str());
+			reader.config_mut().trim_text(true);
+			let mut current_tag = String::new();
+
+			let mut opf_metadata: HashMap<String, Vec<String>> = HashMap::new();
+
+			while let Ok(event) = reader.read_event() {
+				match event {
+					Event::Start(ref e) | Event::Empty(ref e) => {
+						let tag_name =
+							String::from_utf8_lossy(e.name().as_ref()).to_string();
+
+						// normalize tags
+						current_tag = tag_name
+							.strip_prefix("dc:")
+							.unwrap_or(tag_name.as_str())
+							.to_string();
+
+						if let Some(attr) =
+							e.attributes().filter_map(|a| a.ok()).find(|a| {
+								a.key.as_ref() == b"property" || a.key.as_ref() == b"name"
+							}) {
+							current_tag = format!(
+								"{}: {}",
+								current_tag,
+								String::from_utf8_lossy(&attr.value)
+							);
+						}
+					},
+					Event::Text(e) => {
+						if let Ok(text) = e.unescape() {
+							opf_metadata
+								.entry(current_tag.clone())
+								.or_default()
+								.push(text.to_string());
+						}
+					},
+					Event::Eof => {
+						break;
+					},
+					_ => {},
+				}
+			}
+
+			// merge opf and embedded, prioritizing opf
+			let opf_metadata = MediaMetadata::from(opf_metadata);
+			let mut combined_metadata = opf_metadata.clone();
+
+			combined_metadata.id = opf_metadata.id;
+			combined_metadata.merge(embedded_metadata);
+
+			return Ok(Some(combined_metadata));
+		}
+
+		Ok(Some(embedded_metadata))
+	}
+
+	fn process(
+		path: &str,
+		options: FileProcessorOptions,
 		_: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
 		tracing::debug!(?path, "processing epub");
@@ -82,12 +168,10 @@ impl FileProcessor for EpubProcessor {
 		let pages = epub_file.get_num_pages() as i32;
 		// Note: The metadata is already parsed by the EPUB library, so might as well use it
 		let metadata = MediaMetadata::from(epub_file.metadata);
-		let hash = generate_file_hashes
-			.then(|| EpubProcessor::hash(path))
-			.flatten();
-		let koreader_hash = generate_koreader_hashes
-			.then(|| generate_koreader_hash(path))
-			.transpose()?;
+		let ProcessedFileHashes {
+			hash,
+			koreader_hash,
+		} = Self::generate_hashes(path, options)?;
 
 		Ok(ProcessedFile {
 			path: path_buf,
@@ -166,6 +250,71 @@ impl EpubProcessor {
 		EpubDoc::new(path).map_err(|e| FileError::EpubOpenError(e.to_string()))
 	}
 
+	fn get_cover_path(resources: &HashMap<String, (PathBuf, String)>) -> Option<String> {
+		let search_result = resources
+			.iter()
+			.filter(|(_, (_, mime))| {
+				ACCEPTED_EPUB_COVER_MIMES
+					.iter()
+					.any(|accepted_mime| accepted_mime == mime)
+			})
+			.map(|(id, (path, _))| {
+				tracing::trace!(name = ?path, "Found possible cover image");
+				// I want to weight the results based on how likely they are to be the cover.
+				// For example, if the cover is named "cover.jpg", it's probably the cover.
+
+				// png's are preferred over jpg's
+				// highest ranked cover is a top level "cover.png"
+				// next highest ranked cover is any file starting with "cover"
+				// next highest ranked cover is any file ending with "cover"
+				// TODO: add more other fallbacks
+				//  - parse the first html file and look for the first image
+				//  - check for images that have a ratio between [1.4, 1.6]
+				let path_str = path.to_string_lossy().to_lowercase();
+				let extension = path
+					.extension()
+					.unwrap_or_default()
+					.to_string_lossy()
+					.to_lowercase();
+				let file_stem =
+					path.file_stem().unwrap().to_string_lossy().to_lowercase();
+
+				if path_str.starts_with("cover") {
+					let weight = if extension == "png" { 100 } else { 75 };
+					(weight, id)
+				} else if file_stem.starts_with("cover") {
+					let weight = if extension == "png" { 65 } else { 55 };
+					(weight, id)
+				} else if file_stem.ends_with("cover") {
+					let weight = if extension == "png" { 45 } else { 35 };
+					(weight, id)
+				} else {
+					(0, id)
+				}
+			})
+			.max_by_key(|(weight, _)| *weight);
+
+		// if an image was found but weight is 0, then collect all images, sort by name, and return the first one
+		if let Some((0, _)) = search_result {
+			let mut sorted = resources
+				.iter()
+				.filter(|(_, (_, mime))| {
+					ACCEPTED_EPUB_COVER_MIMES
+						.iter()
+						.any(|accepted_mime| accepted_mime == mime)
+				})
+				.collect::<Vec<_>>();
+			sorted.sort_by(|(a, _), (b, _)| a.cmp(b));
+			return sorted.first().map(|(id, _)| id.to_string());
+		}
+
+		if let Some((_, id)) = search_result {
+			return Some(id.to_string());
+		}
+
+		None
+	}
+
 	fn get_cover_internal(
 		epub_file: &mut EpubDoc<BufReader<File>>,
 	) -> Result<(ContentType, Vec<u8>), FileError> {
@@ -181,35 +330,12 @@ impl EpubProcessor {
 		tracing::debug!(
 			"Explicit cover image could not be found, falling back to searching for best match..."
 		);
-		// FIXME: this is hack, i do NOT want to clone this entire hashmap...
-		let cloned_resources = epub_file.resources.clone();
-		let search_result = cloned_resources
-			.iter()
-			.filter(|(_, (_, mime))| {
-				ACCEPTED_EPUB_COVER_MIMES
-					.iter()
-					.any(|accepted_mime| accepted_mime == mime)
-			})
-			.map(|(id, (path, _))| {
-				tracing::trace!(name = ?path, "Found possible cover image");
-				// I want to weight the results based on how likely they are to be the cover.
-				// For example, if the cover is named "cover.jpg", it's probably the cover.
-				// TODO: this is SUPER naive, and should be improved at some point...
-				if path.starts_with("cover") {
-					let weight = if path.ends_with("png") { 100 } else { 75 };
-					(weight, id)
-				} else {
-					(0, id)
-				}
-			})
-			.max_by_key(|(weight, _)| *weight);
-
-		if let Some((_, id)) = search_result {
-			if let Some((buf, mime)) = epub_file.get_resource(id) {
+		let id = Self::get_cover_path(&epub_file.resources);
+		if let Some(id) = id {
+			if let Some((buf, mime)) = epub_file.get_resource(id.as_str()) {
 				return Ok((ContentType::from(mime.as_str()), buf));
 			}
 		}
-
 		tracing::error!("Failed to find cover for epub file");
 		Err(FileError::EpubReadError(
 			"Failed to find cover for epub file".to_string(),
@@ -226,7 +352,7 @@ impl EpubProcessor {
 	///    returned.
 	pub fn get_cover(path: &str) -> Result<(ContentType, Vec<u8>), FileError> {
 		let mut epub_file = EpubDoc::new(path).map_err(|e| {
-			tracing::error!("Failed to open epub file: {}", e);
+			tracing::error!("Failed to open epub file: {e}");
 			FileError::EpubOpenError(e.to_string())
 		})?;
 
@@ -247,7 +373,7 @@ impl EpubProcessor {
 		}
 
 		let content = epub_file.get_current_with_epub_uris().map_err(|e| {
-			tracing::error!("Failed to get chapter from epub file: {}", e);
+			tracing::error!("Failed to get chapter from epub file: {e}");
 			FileError::EpubReadError(e.to_string())
 		})?;
 
@@ -272,7 +398,7 @@ impl EpubProcessor {
 		let mut epub_file = Self::open(path)?;
 
 		let (buf, mime) = epub_file.get_resource(resource_id).ok_or_else(|| {
-			tracing::error!("Failed to get resource: {}", resource_id);
+			tracing::error!("Failed to get resource: {resource_id}");
 			FileError::EpubReadError("Failed to get resource".to_string())
 		})?;
 
@@ -348,47 +474,210 @@ impl EpubProcessor {
 }
 
 pub(crate) fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {
-	let mut adjusted_path = path;
+	let mut adjusted_path = path.clone();
 
 	if !adjusted_path.starts_with(root) {
 		adjusted_path = PathBuf::from(root).join(adjusted_path);
 	}
 
-	//  This below won't work since these paths are INSIDE the epub file >:(
-	// adjusted_path = adjusted_path.canonicalize().unwrap_or_else(|err| {
-	// 	// tracing::warn!(
-	// 	// 	"Failed to safely canonicalize path {}: {}",
-	// 	// 	adjusted_path.display(),
-	// 	// 	err
-	// 	// );
+	let mut normalized = PathBuf::new();
+	for component in adjusted_path.components() {
+		match component {
+			std::path::Component::Normal(c) => normalized.push(c),
+			std::path::Component::CurDir => {},
+			std::path::Component::ParentDir => {
+				if normalized.pop() {
+				} else {
+					return path;
+				}
+			},
+			_ => {},
+		}
+	}
 
-	// 	tracing::warn!(
-	// 		"Failed to safely canonicalize path {}: {}",
-	// 		adjusted_path.display(),
-	// 		err
-	// 	);
-	// 	adjusted_path
-	// });
-
-	// FIXME: This actually is an invalid solution. If I have multiple '/../../' in the path, this will
-	// result in an incorrect path. I'm not worrying about it now, as I don't believe this will even
-	// be an issue in the context of epub resources, however once the below linked rust feature is completed
-	// I will replace this gross solution.
-	let adjusted_str = adjusted_path
-		.to_string_lossy()
-		.replace("/../", "/")
-		.replace("\\..\\", "\\");
-
-	// https://github.com/rust-lang/rust/issues/92750
-	// std::path::absolute(adjusted_path);
-
-	PathBuf::from(adjusted_str)
+	normalized
 }
 
 #[cfg(test)]
 mod tests {
 	use super::*;
 	use crate::filesystem::media::tests::get_test_epub_path;
+
+	#[test]
+	fn test_get_cover_first_sorted_image() {
+		let resources = HashMap::from([
+			(
+				"id4".to_string(),
+				(PathBuf::from("Image0001.jpg"), "image/jpeg".to_string()),
+			),
+			(
+				"id5".to_string(),
+				(PathBuf::from("Image0002.jpg"), "image/jpeg".to_string()),
+			),
+			(
+				"id6".to_string(),
+				(PathBuf::from("Image0003.jpg"), "image/jpeg".to_string()),
+			),
+		]);
+		assert_eq!(
+			EpubProcessor::get_cover_path(&resources),
+			Some("id4".to_string())
+		);
+	}
+
+	#[test]
+	fn test_get_resource_by_id() {
+		let path = get_test_epub_path();
+
+		let resource = EpubProcessor::get_resource_by_id(&path, "item1");
+		assert!(resource.is_ok());
+	}
+
+	#[test]
+	fn test_get_cover_path_no_resources() {
+		let resources = HashMap::<String, (PathBuf, String)>::new();
+		assert_eq!(EpubProcessor::get_cover_path(&resources), None);
+	}
+
+	#[test]
+	fn test_get_cover_path_single_resource() {
+		let resources = HashMap::from([(
+			"id1".to_string(),
+			(PathBuf::from("cover.png"), "image/png".to_string()),
+		)]);
+		assert_eq!(
+			EpubProcessor::get_cover_path(&resources),
+			Some("id1".to_string())
+		);
+	}
+
+	#[test]
+	fn test_get_cover_path_multiple_resources() {
+		let resources = HashMap::from([
+			(
+				"id1".to_string(),
+				(PathBuf::from("cover.png"), "image/png".to_string()),
+			),
+			(
+				"id2".to_string(),
+				(PathBuf::from("not_cover.png"), "image/png".to_string()),
+			),
+		]);
+		assert_eq!(
+			EpubProcessor::get_cover_path(&resources),
+			Some("id1".to_string())
+		);
+	}
+
+	#[test]
+	fn test_get_cover_prefer_png() {
+		let resources = HashMap::from([
+			(
+				"id1".to_string(),
+				(PathBuf::from("cover1.png"), "image/png".to_string()),
+			),
+			(
+				"id2".to_string(),
+				(PathBuf::from("cover2.jpg"), "image/jpeg".to_string()),
+			),
+		]);
+		assert_eq!(
+			EpubProcessor::get_cover_path(&resources),
+			Some("id1".to_string())
+		);
+	}
+
+	#[test]
+	fn test_get_cover_path_cover_named() {
+		let resources = HashMap::from([
+			(
+				"id1".to_string(),
+				(
+					PathBuf::from("path/images/cover.png"),
+					"image/png".to_string(),
+				),
+			),
+			(
+				"id2".to_string(),
+				(
+					PathBuf::from("path/images/not_cover.png"),
+					"image/png".to_string(),
+				),
+			),
+		]);
+		assert_eq!(
+			EpubProcessor::get_cover_path(&resources),
+			Some("id1".to_string())
+		);
+	}
+
+	#[test]
+	fn test_get_cover_path_cover_named_with_weighting() {
+		let mut resources = HashMap::<String, (PathBuf, String)>::new();
+		resources.insert(
+			"id1".to_string(),
+			(PathBuf::from("path/to/cover.png"), "image/png".to_string()),
+		);
+		resources.insert(
+			"id2".to_string(),
+			(PathBuf::from("path/to/cover.jpg"), "image/jpeg".to_string()),
+		);
+		assert_eq!(
+			EpubProcessor::get_cover_path(&resources),
+			Some("id1".to_string())
+		);
+	}
+
+	#[test]
+	fn test_get_cover_path_multiple_covers() {
+		let mut resources = HashMap::<String, (PathBuf, String)>::new();
+		resources.insert(
+			"id1".to_string(),
+			(PathBuf::from("cover.png"), "image/png".to_string()),
+		);
+		resources.insert(
+			"id2".to_string(),
+			(PathBuf::from("path/to/cover.jpg"), "image/jpeg".to_string()),
+		);
+		resources.insert(
+			"id3".to_string(),
+			(
+				PathBuf::from("path/to/not_cover.jpg"),
+				"image/jpeg".to_string(),
+			),
+		);
+		assert_eq!(
+			EpubProcessor::get_cover_path(&resources),
+			Some("id1".to_string())
+		);
+	}
+
+	#[test]
+	fn test_normalize_resource_path() {
+		let path = PathBuf::from("OEBPS/Styles/style.css");
+		let result = normalize_resource_path(path, "OEBPS");
+		assert_eq!(result, PathBuf::from("OEBPS/Styles/style.css"));
+
+		let path = PathBuf::from("Styles/style.css");
+		let result = normalize_resource_path(path, "OEBPS");
+		assert_eq!(result, PathBuf::from("OEBPS/Styles/style.css"));
+
+		let path = PathBuf::from("Styles/./style.css");
+		let result = normalize_resource_path(path, "OEBPS");
+		assert_eq!(result, PathBuf::from("OEBPS/Styles/style.css"));
+
+		let path = PathBuf::from("../Styles/style.css");
+		let result = normalize_resource_path(path, "OEBPS");
+		assert_eq!(result, PathBuf::from("Styles/style.css"));
+
+		let path = PathBuf::from("chapter1/../Styles/style.css");
+		let result = normalize_resource_path(path, "OEBPS");
+		assert_eq!(result, PathBuf::from("OEBPS/Styles/style.css"));
+
+		let path = PathBuf::from("chapters/chapter1/../../Styles/style.css");
+		let result = normalize_resource_path(path, "OEBPS");
+		assert_eq!(result, PathBuf::from("OEBPS/Styles/style.css"));
+	}
 
 	#[test]
 	fn test_process() {
@@ -405,6 +694,24 @@ mod tests {
 			&config,
 		);
 		assert!(processed_file.is_ok());
+	}
+
+	#[test]
+	fn test_process_metadata() {
+		let path = get_test_epub_path();
+
+		let processed_metadata = EpubProcessor::process_metadata(&path);
+		match processed_metadata {
+			Ok(Some(metadata)) => {
+				assert_eq!(
+					metadata.title,
+					Some("Alice's Adventures in Wonderland - Test OPF".to_string())
+				);
+				assert_eq!(metadata.writers, Some(vec!["Lewis Carroll".to_string()]));
+			},
+			Ok(None) => panic!("No metadata returned"),
+			Err(e) => panic!("Failed to get metadata: {:?}", e),
+		}
 	}
 
 	#[test]
@@ -427,6 +734,16 @@ mod tests {
 	fn test_get_chapter() {
 		let path = get_test_epub_path();
 
+		let chapter = EpubProcessor::get_chapter(&path, 1);
+		assert!(chapter.is_ok());
+	}
+
+	#[test]
+	fn test_get_cover_then_chapter() {
+		let path = get_test_epub_path();
+
+		let cover = EpubProcessor::get_cover(&path);
+		assert!(cover.is_ok());
 		let chapter = EpubProcessor::get_chapter(&path, 1);
 		assert!(chapter.is_ok());
 	}

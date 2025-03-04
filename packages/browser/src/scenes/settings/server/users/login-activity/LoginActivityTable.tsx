@@ -8,6 +8,7 @@ import {
 	PaginationState,
 } from '@tanstack/react-table'
 import dayjs from 'dayjs'
+import { Fingerprint, Slash } from 'lucide-react'
 import { useState } from 'react'
 
 import { Table } from '@/components/table'
@@ -83,9 +84,31 @@ export default function LoginActivityTable() {
 		pageSize: 10,
 	})
 
+	if (!loginActivity?.length && !pagination.pageIndex) {
+		return (
+			<Card className="flex items-center justify-center border-dashed border-edge-subtle p-6">
+				<div className="flex flex-col space-y-3">
+					<div className="relative flex justify-center">
+						<span className="flex items-center justify-center rounded-lg bg-background-surface p-2">
+							<Fingerprint className="h-6 w-6 text-foreground-muted" />
+							<Slash className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80" />
+						</span>
+					</div>
+
+					<div className="text-center">
+						<Text>No login activity</Text>
+						<Text size="sm" variant="muted">
+							No users have logged in yet, or the data has been cleared
+						</Text>
+					</div>
+				</div>
+			</Card>
+		)
+	}
+
 	// FIXME: doesn't scale well on mobile
 	return (
-		<Card className="bg-background-surface p-1">
+		<Card>
 			<Table
 				data={loginActivity || []}
 				columns={baseColumns}

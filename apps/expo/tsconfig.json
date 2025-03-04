@@ -1,15 +1,15 @@
 {
 	"extends": "expo/tsconfig.base",
 	"compilerOptions": {
-		"skipLibCheck": true,
-		"jsx": "preserve",
-		"module": "esnext",
+		"strict": true,
+		"baseUrl": ".",
 		"paths": {
+			"~/*": ["*"],
 			"@stump/sdk": ["../../packages/sdk/src/index.ts"],
 			"@stump/sdk/*": ["../../packages/sdk/src/*"],
 			"@stump/client": ["../../packages/client/src/index.ts"],
-			"@stump/client/*": ["../../packages/client/src/*"],
-			"@/*": ["./src/*"]
+			"@stump/client/*": ["../../packages/client/src/*"]
 		}
-	}
+	},
+	"include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts", "nativewind-env.d.ts"]
 }

@@ -6,7 +6,7 @@ use crate::{
 		analyze_media_job::{utils::fetch_media_with_dimensions, AnalyzeMediaOutput},
 		media::process::get_page,
 	},
-	job::{error::JobError, WorkerCtx},
+	job::{error::JobError, JobProgress, WorkerCtx},
 	prisma::{media_metadata, page_dimensions},
 };
 
@@ -46,14 +46,21 @@ pub(crate) async fn execute(
 	// Iterate over each page, checking the image's dimensions
 	let mut image_dimensions: Vec<PageDimension> =
 		Vec::with_capacity(page_count as usize);
+
 	for page_num in 1..=page_count {
+		ctx.report_progress(JobProgress::subtask_position_msg(
+			"Extracting image dimensions",
+			page_num,
+			page_count,
+		));
+
 		let (content_type, page_data) =
 			get_page(&media_item.path, page_num, &ctx.config)?;
 		// Confirm that content_type is compatible with the image crate
 		let image_format = content_type.try_into()?;
 
 		// Open image with image crate and extract dimensions
-		let (height, width) =
+		let (width, height) =
 			image::load_from_memory_with_format(&page_data, image_format)
 				.map_err(|e| {
 					JobError::TaskFailed(format!("Error loading image data: {e}"))
@@ -63,6 +70,8 @@ pub(crate) async fn execute(
 		image_dimensions.push(PageDimension { height, width });
 		output.image_dimensions_analyzed += 1;
 	}
+
+	ctx.report_progress(JobProgress::msg("Writing to database"));
 
 	// Update stored page count
 	// Check if dimensions are stored already or not yet stored

@@ -1,9 +1,9 @@
 {
 	"name": "@stump/monorepo",
-	"version": "0.0.9",
+	"version": "0.0.10",
 	"repository": "https://github.com/stumpapp/stump.git",
 	"author": "Aaron Leopold <aaronleopold1221@gmail.com>",
-	"license": "MIT",
+	"license": "SEE README.md",
 	"private": true,
 	"workspaces": [
 		"apps/*",
@@ -28,7 +28,7 @@
 		"dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"cargo watch --ignore core/prisma -x run -p stump_server\" \"yarn expo dev\"",
 		"prisma-studio": "npx prisma studio --schema core/prisma/schema.prisma",
 		"format": "lerna run format --stream --parallel",
-		"nuke": "lerna run nuke"
+		"nuke": "concurrently -n root,monorepo -c green.bold,blue.bold \"yarn exec rimraf node_modules\" \"lerna run nuke\""
 	},
 	"devDependencies": {
 		"@babel/core": "^7.25.8",
@@ -55,6 +55,9 @@
 		"typescript": "^5.6.3",
 		"typescript-eslint": "^8.10.0"
 	},
+	"resolutions": {
+		"@types/react": "=18.3.12"
+	},
 	"lint-staged": {
 		"*.{js,jsx,ts,tsx,md,json}": [
 			"prettier --config prettier.config.js --check"
@@ -66,7 +69,7 @@
 		]
 	},
 	"engines": {
-		"node": "^20.0.0"
+		"node": ">=20.0.0"
 	},
 	"packageManager": "yarn@1.22.21",
 	"yarn": {

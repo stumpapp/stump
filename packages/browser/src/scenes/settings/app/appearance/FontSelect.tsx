@@ -44,10 +44,7 @@ export default function FontSelect() {
 			{/* TODO: don't use a native select, instead some combobox which renders each option in the font */}
 			<NativeSelect
 				value={app_font || 'inter'}
-				options={[
-					{ label: 'Inter', value: 'inter' },
-					{ label: 'OpenDyslexic', value: 'opendyslexic' },
-				]}
+				options={SUPPORTED_FONT_OPTIONS}
 				onChange={(e) => changeFont(e.target.value)}
 			/>
 			<Text variant="muted" size="xs">
@@ -58,3 +55,14 @@ export default function FontSelect() {
 }
 
 const localeKey = 'settingsScene.app/appearance.sections.fontSelect'
+
+export const SUPPORTED_FONT_OPTIONS = [
+	{ label: 'Atkinson Hyperlegible', value: 'atkinsonhyperlegible' },
+	{ label: 'Bitter', value: 'bitter' },
+	{ label: 'Charis SIL', value: 'charis' },
+	{ label: 'Inter', value: 'inter' },
+	{ label: 'Libre Baskerville', value: 'librebaskerville' },
+	{ label: 'Literata', value: 'literata' },
+	{ label: 'Nunito', value: 'nunito' },
+	{ label: 'OpenDyslexic', value: 'opendyslexic' },
+]

@@ -2,10 +2,13 @@ import { APIBase } from '../base'
 import {
 	Media,
 	MediaFilter,
+	MediaMetadata,
 	Pageable,
 	PatchMediaThumbnail,
 	ProgressUpdateReturn,
 	PutMediaCompletionStatus,
+	PutMediaProgress,
+	ScaledDimensionResize,
 } from '../types'
 import { ClassQueryKeys, CursorQueryParams, FullQueryParams } from './types'
 import { createRouteURLHandler } from './utils'
@@ -94,15 +97,15 @@ export class MediaAPI extends APIBase {
 	/**
 	 * The URL for fetching a page of a media entity
 	 */
-	bookPageURL(mediaID: string, page: number): string {
-		return this.withServiceURL(mediaURL(`${mediaID}/page/${page}`))
+	bookPageURL(mediaID: string, page: number, params?: ScaledDimensionResize): string {
+		return this.withServiceURL(mediaURL(`${mediaID}/page/${page}`, params))
 	}
 
 	/**
 	 * Update the progress of a media entity
 	 */
-	async updateProgress(mediaID: string, page: number): Promise<ProgressUpdateReturn> {
-		const { data } = await this.axios.put(mediaURL(`${mediaID}/progress/${page}`))
+	async updateProgress(mediaID: string, params: PutMediaProgress): Promise<ProgressUpdateReturn> {
+		const { data } = await this.axios.put(mediaURL(`${mediaID}/progress`), params)
 		return data
 	}
 
@@ -148,6 +151,27 @@ export class MediaAPI extends APIBase {
 	}
 
 	/**
+	 * Fetch the metadata of a media entity
+	 *
+	 * @param id The ID of the media entity
+	 */
+	async getMeta(id: string): Promise<MediaMetadata | null> {
+		const { data: meta } = await this.axios.get<MediaMetadata>(mediaURL(`${id}/metadata`))
+		return meta
+	}
+
+	/**
+	 * Update the metadata of a media entity. If the metadata does not exist, it will be created.
+	 *
+	 * @param id The ID of the media entity
+	 * @param payload The metadata to update or create
+	 */
+	async updateMeta(id: string, payload: MediaMetadata): Promise<MediaMetadata> {
+		const { data: updatedMeta } = await this.axios.put(mediaURL(`${id}/metadata`), payload)
+		return updatedMeta
+	}
+
+	/**
 	 * The keys for the media API, used for query caching on a client (e.g. react-query)
 	 */
 	get keys(): ClassQueryKeys<InstanceType<typeof MediaAPI>> {
@@ -164,6 +188,8 @@ export class MediaAPI extends APIBase {
 			recentlyAdded: 'media.recentlyAdded',
 			updateProgress: 'media.updateProgress',
 			uploadThumbnail: 'media.uploadThumbnail',
+			getMeta: 'media.getMeta',
+			updateMeta: 'media.updateMeta',
 		}
 	}
 }

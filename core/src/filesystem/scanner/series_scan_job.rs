@@ -21,9 +21,10 @@ use crate::{
 };
 
 use super::{
+	options::BookVisitOperation,
 	utils::{
-		handle_missing_media, safely_build_and_insert_media, visit_and_update_media,
-		MediaBuildOperation, MediaOperationOutput,
+		handle_missing_media, handle_restored_media, safely_build_and_insert_media,
+		visit_and_update_media, MediaBuildOperation, MediaOperationOutput,
 	},
 	walk_series, ScanOptions, WalkedSeries, WalkerCtx,
 };
@@ -32,8 +33,9 @@ use super::{
 #[derive(Serialize, Deserialize)]
 pub enum SeriesScanTask {
 	MarkMissingMedia(Vec<PathBuf>),
+	RestoreMedia(Vec<String>),
 	CreateMedia(Vec<PathBuf>),
-	VisitMedia(Vec<PathBuf>),
+	VisitMedia(Vec<(PathBuf, BookVisitOperation)>),
 }
 
 #[derive(Clone)]
@@ -138,6 +140,7 @@ impl JobExt for SeriesScanJob {
 			series_is_missing,
 			media_to_create,
 			media_to_visit,
+			recovered_media,
 			missing_media,
 			seen_files,
 			ignored_files,
@@ -148,7 +151,7 @@ impl JobExt for SeriesScanJob {
 				db: ctx.db.clone(),
 				ignore_rules,
 				max_depth,
-				options: self.options.clone(),
+				options: self.options,
 			},
 		)
 		.await?;
@@ -172,14 +175,13 @@ impl JobExt for SeriesScanJob {
 		let tasks = VecDeque::from(chain_optional_iter(
 			[],
 			[
-				missing_media
-					.is_empty()
+				(!missing_media.is_empty())
 					.then_some(SeriesScanTask::MarkMissingMedia(missing_media)),
-				media_to_create
-					.is_empty()
+				(!recovered_media.is_empty())
+					.then_some(SeriesScanTask::RestoreMedia(recovered_media)),
+				(!media_to_create.is_empty())
 					.then_some(SeriesScanTask::CreateMedia(media_to_create)),
-				media_to_visit
-					.is_empty()
+				(!media_to_visit.is_empty())
 					.then_some(SeriesScanTask::VisitMedia(media_to_visit)),
 			],
 		));
@@ -237,6 +239,24 @@ impl JobExt for SeriesScanJob {
 		let max_concurrency = ctx.config.max_scanner_concurrency;
 
 		match task {
+			SeriesScanTask::RestoreMedia(ids) => {
+				ctx.report_progress(JobProgress::msg("Restoring media entities"));
+				let MediaOperationOutput {
+					updated_media,
+					logs: new_logs,
+					..
+				} = handle_restored_media(ctx, &self.id, ids).await;
+				ctx.send_batch(vec![
+					JobProgress::msg("Restored media entities").into_worker_send(),
+					CoreEvent::CreatedOrUpdatedManyMedia {
+						count: updated_media,
+						series_id: self.id.clone(),
+					}
+					.into_worker_send(),
+				]);
+				output.updated_media += updated_media;
+				logs.extend(new_logs);
+			},
 			SeriesScanTask::MarkMissingMedia(paths) => {
 				ctx.report_progress(JobProgress::msg("Handling missing media"));
 				let MediaOperationOutput {
@@ -284,9 +304,9 @@ impl JobExt for SeriesScanJob {
 				output.created_media += created_media;
 				logs.extend(new_logs);
 			},
-			SeriesScanTask::VisitMedia(paths) => {
+			SeriesScanTask::VisitMedia(params) => {
 				ctx.report_progress(JobProgress::msg(
-					format!("Visiting {} media entities on disk", paths.len()).as_str(),
+					format!("Visiting {} media entities on disk", params.len()).as_str(),
 				));
 				let MediaOperationOutput {
 					updated_media,
@@ -299,7 +319,7 @@ impl JobExt for SeriesScanJob {
 						max_concurrency,
 					},
 					ctx,
-					paths,
+					params,
 				)
 				.await?;
 				ctx.send_batch(vec![

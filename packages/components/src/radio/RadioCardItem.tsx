@@ -9,7 +9,7 @@ type RadioCardProps = {
 	description?: string
 	descriptionClassName?: string
 	value: string
-	isActive: boolean
+	isActive?: boolean
 	children?: React.ReactNode
 	className?: string
 	innerContainerClassName?: string

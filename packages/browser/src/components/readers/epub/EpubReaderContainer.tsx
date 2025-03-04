@@ -13,6 +13,7 @@ type Props = {
 		| 'onLinkClick'
 		| 'onPaginateBackward'
 		| 'onPaginateForward'
+		| 'jumpToSection'
 		| 'getCfiPreviewText'
 		| 'searchEntireBook'
 		| 'onGoToCfi'

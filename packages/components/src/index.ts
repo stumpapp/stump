@@ -37,10 +37,13 @@ export {
 	type SwitchProps,
 	TextArea,
 	type TextAreaProps,
+	WideSwitch,
+	type WideSwitchProps,
 } from './input'
 export { Link } from './link'
 export { NavigationMenu, navigationMenuTriggerStyle } from './navigation'
 export { Popover } from './popover'
+export { Preformatted, type PreformattedProps } from './preformatted'
 export { FullScreenLoader, ProgressBar, type ProgressBarProps, ProgressSpinner } from './progress'
 export { RadioGroup } from './radio'
 export { ScrollArea, ScrollBar } from './scroll-area'

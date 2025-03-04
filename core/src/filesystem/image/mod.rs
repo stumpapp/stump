@@ -4,16 +4,59 @@ mod process;
 mod thumbnail;
 mod webp;
 
-// TODO: replace errors with ProcessorError throughout the module
-
 pub use self::webp::WebpProcessor;
 pub use error::ProcessorError;
 pub use generic::GenericImageProcessor;
 pub use process::{
 	ImageFormat, ImageProcessor, ImageProcessorOptions, ImageResizeMode,
-	ImageResizeOptions,
+	ImageResizeOptions, ScaledDimensionResize,
 };
 pub use thumbnail::*;
+use tokio::{sync::oneshot, task::spawn_blocking};
+
+fn _resize_image(
+	buf: &[u8],
+	dimension: ScaledDimensionResize,
+) -> Result<Vec<u8>, ProcessorError> {
+	let kind = image::guess_format(buf)?;
+	match kind {
+		image::ImageFormat::WebP => Ok(WebpProcessor::resize_scaled(buf, dimension)?),
+		image::ImageFormat::Jpeg | image::ImageFormat::Png => {
+			Ok(GenericImageProcessor::resize_scaled(buf, dimension)?)
+		},
+		_ => Err(ProcessorError::UnsupportedImageFormat),
+	}
+}
+
+pub async fn resize_image(
+	buf: Vec<u8>,
+	dimension: ScaledDimensionResize,
+) -> Result<Vec<u8>, ProcessorError> {
+	let (tx, rx) = oneshot::channel();
+
+	let handle = spawn_blocking({
+		move || {
+			let send_result = tx.send(_resize_image(&buf, dimension));
+			tracing::trace!(
+				is_err = send_result.is_err(),
+				"Sending result of resize_image"
+			);
+		}
+	});
+
+	let resized_image = if let Ok(recv) = rx.await {
+		recv?
+	} else {
+		handle
+			.await
+			.map_err(|e| ProcessorError::UnknownError(e.to_string()))?;
+		return Err(ProcessorError::UnknownError(
+			"Failed to receive resized image".to_string(),
+		));
+	};
+
+	Ok(resized_image)
+}
 
 #[cfg(test)]
 mod tests {

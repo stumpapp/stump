@@ -128,8 +128,14 @@ impl<I> Arrangement<I> {
 #[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 #[serde(rename_all = "lowercase")]
 pub enum SupportedFont {
+	AtkinsonHyperlegible,
+	Bitter,
+	Charis,
 	#[default]
 	Inter,
+	LibreBaskerville,
+	Literata,
+	Nunito,
 	OpenDyslexic,
 	// TODO(383): Support custom fonts
 	// Custom(String),
@@ -138,7 +144,13 @@ pub enum SupportedFont {
 impl Display for SupportedFont {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
+			SupportedFont::AtkinsonHyperlegible => write!(f, "atkinsonhyperlegible"),
+			SupportedFont::Bitter => write!(f, "bitter"),
+			SupportedFont::Charis => write!(f, "charis"),
 			SupportedFont::Inter => write!(f, "inter"),
+			SupportedFont::LibreBaskerville => write!(f, "librebaskerville"),
+			SupportedFont::Literata => write!(f, "literata"),
+			SupportedFont::Nunito => write!(f, "nunito"),
 			SupportedFont::OpenDyslexic => write!(f, "opendyslexic"),
 		}
 	}
@@ -147,6 +159,12 @@ impl Display for SupportedFont {
 impl From<String> for SupportedFont {
 	fn from(value: String) -> Self {
 		match value.to_lowercase().as_str() {
+			"atkinsonhyperlegible" => SupportedFont::AtkinsonHyperlegible,
+			"bitter" => SupportedFont::Bitter,
+			"charis" => SupportedFont::Charis,
+			"librebaskerville" => SupportedFont::LibreBaskerville,
+			"literata" => SupportedFont::Literata,
+			"nunito" => SupportedFont::Nunito,
 			"opendyslexic" => SupportedFont::OpenDyslexic,
 			// Note: for now we just always default to Inter. This will be acceptable
 			// until we have custom font support.
@@ -207,6 +225,8 @@ pub struct UserPreferences {
 	pub prefer_accent_color: bool,
 	#[serde(default)]
 	pub show_thumbnails_in_headers: bool,
+	#[serde(default = "default_true")]
+	pub enable_job_overlay: bool,
 
 	#[serde(default = "Arrangement::<NavigationItem>::default_navigation")]
 	pub navigation_arrangement: Arrangement<NavigationItem>,
@@ -232,6 +252,7 @@ impl Default for UserPreferences {
 			enable_double_sidebar: true,
 			enable_replace_primary_sidebar: false,
 			enable_hide_scrollbar: false,
+			enable_job_overlay: true,
 			prefer_accent_color: true,
 			show_thumbnails_in_headers: false,
 			navigation_arrangement: Arrangement::<NavigationItem>::default_navigation(),
@@ -285,6 +306,7 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 			enable_double_sidebar: data.enable_double_sidebar,
 			enable_replace_primary_sidebar: data.enable_replace_primary_sidebar,
 			enable_hide_scrollbar: data.enable_hide_scrollbar,
+			enable_job_overlay: data.enable_job_overlay,
 			prefer_accent_color: data.prefer_accent_color,
 			show_thumbnails_in_headers: data.show_thumbnails_in_headers,
 			navigation_arrangement,

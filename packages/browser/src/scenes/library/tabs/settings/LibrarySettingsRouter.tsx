@@ -1,14 +1,16 @@
-import { queryClient, useSDK, useUpdateLibrary } from '@stump/client'
-import { UpdateLibrary } from '@stump/sdk'
+import { queryClient, useScanLibrary, useSDK, useUpdateLibrary } from '@stump/client'
+import { ScanOptions, UpdateLibrary } from '@stump/sdk'
 import { lazy, Suspense, useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
+
+import { useAppContext } from '@/context'
 
 import { useLibraryContext } from '../../context'
 import { LibraryManagementContext } from './context'
 
 const BasicSettingsScene = lazy(() => import('./basics/BasicSettingsScene'))
 const ThumbnailSettingsScene = lazy(() => import('./options/thumbnails/ThumbnailSettingsScene'))
-const ScannerBehaviorScene = lazy(() => import('./options/ScannerBehaviorScene'))
+const ScannerBehaviorScene = lazy(() => import('./options/scanner'))
 const LibraryAnalysisScene = lazy(() => import('./options/analysis'))
 const LibraryReadingDefaultsScene = lazy(() => import('./options/readingDefaults'))
 
@@ -17,6 +19,7 @@ const DeletionScene = lazy(() => import('./danger/deletion'))
 
 // Note: library:manage permission is enforced in the parent router
 export default function LibrarySettingsRouter() {
+	const { checkPermission } = useAppContext()
 	const { library } = useLibraryContext()
 	const { sdk } = useSDK()
 	const { editLibrary } = useUpdateLibrary({
@@ -25,6 +28,14 @@ export default function LibrarySettingsRouter() {
 			await queryClient.refetchQueries([sdk.library.keys.getByID, id], { exact: false })
 		},
 	})
+
+	const { scan } = useScanLibrary()
+	const scanLibrary = useCallback(
+		(options: ScanOptions = {}) => scan({ id: library.id, ...options }),
+		[library.id, scan],
+	)
+
+	const canScan = checkPermission('library:scan')
 
 	// TODO: This is particularly fallible. It would be a lot wiser to eventually just.. y'know, literally
 	// implement a patch endpoint lol. I'm being very lazy but I'll get to it. I'm tired!
@@ -49,6 +60,7 @@ export default function LibrarySettingsRouter() {
 		<LibraryManagementContext.Provider
 			value={{
 				patch,
+				scan: canScan ? scanLibrary : undefined,
 			}}
 		>
 			<Suspense>

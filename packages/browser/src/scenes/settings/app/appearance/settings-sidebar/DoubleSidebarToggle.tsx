@@ -1,8 +1,7 @@
+import { WideSwitch } from '@stump/components'
 import { useCallback } from 'react'
 
 import { usePreferences } from '@/hooks'
-
-import PreferenceToggle from '../../../PreferenceToggle'
 
 export default function DoubleSidebarToggle() {
 	const {
@@ -19,11 +18,11 @@ export default function DoubleSidebarToggle() {
 	}, [enable_double_sidebar, update])
 
 	return (
-		<PreferenceToggle
+		<WideSwitch
 			label="Settings sidebar"
 			description="Enables the sidebar navigation for the settings pages. If you frequently use a smaller screen, you may want to disable this."
-			isChecked={enable_double_sidebar}
-			onToggle={handleToggle}
+			checked={enable_double_sidebar}
+			onCheckedChange={handleToggle}
 			formId="enable_double_sidebar"
 		/>
 	)

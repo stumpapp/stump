@@ -1,9 +1,8 @@
 import { useDirectoryListing, useSDK } from '@stump/client'
 import { DirectoryListingFile } from '@stump/sdk'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'
-import { useMediaMatch } from 'rooks'
 
 import paths from '@/paths'
 
@@ -19,19 +18,28 @@ type Props = Pick<IExplorerContext, 'libraryID' | 'rootPath' | 'uploadConfig'>
 
 export default function FileExplorerProvider({ rootPath, ...ctx }: Props) {
 	const navigate = useNavigate()
-	const isMobile = useMediaMatch('(max-width: 768px)')
 	const { sdk } = useSDK()
 
 	const [layout, setLayout] = useState<ExplorerLayout>(() => getDefaultLayout())
 
 	// TODO: I need to store location.state somewhere so that when the user uses native navigation,
 	// their history, or at the very least where they left off, is persisted.
-	const { entries, setPath, path, goForward, goBack, canGoBack, canGoForward, refetch } =
-		useDirectoryListing({
-			enabled: !!rootPath,
-			enforcedRoot: rootPath,
-			initialPath: rootPath,
-		})
+	const {
+		entries,
+		setPath,
+		path,
+		goForward,
+		goBack,
+		canGoBack,
+		canGoForward,
+		refetch,
+		canLoadMore,
+		loadMore,
+	} = useDirectoryListing({
+		enabled: !!rootPath,
+		enforcedRoot: rootPath,
+		initialPath: rootPath,
+	})
 
 	const handleSelect = async (entry: DirectoryListingFile) => {
 		if (entry.is_directory) {
@@ -60,6 +68,12 @@ export default function FileExplorerProvider({ rootPath, ...ctx }: Props) {
 		setLayout(newLayout)
 	}
 
+	const onLoadMore = useCallback(() => {
+		if (canLoadMore) {
+			loadMore()
+		}
+	}, [canLoadMore, loadMore])
+
 	return (
 		<ExplorerContext.Provider
 			value={{
@@ -74,6 +88,8 @@ export default function FileExplorerProvider({ rootPath, ...ctx }: Props) {
 				refetch,
 				rootPath,
 				setLayout: changeLayout,
+				canLoadMore,
+				loadMore: onLoadMore,
 				...ctx,
 			}}
 		>
@@ -82,7 +98,7 @@ export default function FileExplorerProvider({ rootPath, ...ctx }: Props) {
 				<div
 					className="flex-1"
 					style={{
-						marginBottom: FOOTER_HEIGHT + (isMobile ? 50 : 0),
+						marginBottom: FOOTER_HEIGHT,
 					}}
 				>
 					<FileExplorer />

@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use derivative::Derivative;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
@@ -17,8 +18,10 @@ use super::{ActiveReadingSession, Bookmark, FinishedReadingSession};
 
 // TODO: Now that we have a single ActiveReadingSession, reevaluate if we need root-level fields for current_page, current_epubcfi, etc.
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type, Default, ToSchema)]
+#[derive(Debug, Clone, Derivative, Deserialize, Serialize, Type, ToSchema)]
+#[derivative(Default)]
 pub struct Media {
+	#[derivative(Default(value = "uuid::Uuid::new_v4().to_string()"))]
 	pub id: String,
 	/// The name of the media. ex: "The Amazing Spider-Man (2018) #69"
 	pub name: String,

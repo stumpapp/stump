@@ -5,6 +5,7 @@ edition = "2021"
 default-run = "stump_server"
 
 [dependencies]
+alphanumeric-sort = { workspace = true }
 async-stream = { workspace = true }
 async-trait = { workspace = true }
 axum = { version = "0.8.1", features = [
@@ -15,7 +16,7 @@ axum-macros = "0.5.0"
 axum_typed_multipart = "0.15.1"
 axum-extra = { version = "0.10.0", features = [
   "typed-header",
-  "query"
+  "query",
 ] }
 base64 = { workspace = true }
 bcrypt = { workspace = true }
@@ -24,6 +25,7 @@ chrono = { workspace = true }
 futures-util = { workspace = true }
 hyper = "0.14.27"
 infer = { workspace = true }
+itertools = { workspace = true }
 jsonwebtoken = "9.3.0"
 linemux = { git = "https://github.com/jmagnuson/linemux.git", rev = "acaafc602afac5d7a9cd3e087dafc937cac1e364" }
 local-ip-address = "0.6.2"

@@ -3,6 +3,8 @@ import { Heading, Text } from '@stump/components'
 import ClearActivitySection from './ClearActivitySection'
 import LoginActivityTable from './LoginActivityTable'
 
+// TODO: locale
+// TODO: move clear to top section
 export default function LoginActivitySection() {
 	return (
 		<div className="flex flex-col gap-y-4">

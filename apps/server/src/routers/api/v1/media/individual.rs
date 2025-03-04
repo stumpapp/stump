@@ -1,22 +1,27 @@
 use std::{path::PathBuf, sync::Arc};
 
 use axum::{
-	extract::{Path, State},
+	extract::{Path, Query, State},
 	Extension, Json,
 };
-use axum_extra::extract::Query;
 use prisma_client_rust::{chrono::Duration, Direction};
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use specta::Type;
 use stump_core::{
 	db::entity::{
 		macros::{
-			finished_reading_session_with_book_pages, reading_session_with_book_pages,
+			finished_reading_session_with_book_pages, media_id_select,
+			reading_session_with_book_pages,
 		},
-		ActiveReadingSession, FinishedReadingSession, Media, PageDimension,
-		PageDimensionsEntity, ProgressUpdateReturn, User, UserPermission,
+		ActiveReadingSession, FinishedReadingSession, Media, MediaMetadata,
+		PageDimension, PageDimensionsEntity, ProgressUpdateReturn, User, UserPermission,
 	},
-	filesystem::{analyze_media_job::AnalyzeMediaJob, get_page_async},
+	filesystem::{
+		analyze_media_job::AnalyzeMediaJob,
+		get_page_async,
+		image::{resize_image, ScaledDimensionResize},
+	},
 	prisma::{
 		active_reading_session, finished_reading_session, library,
 		media::{self, WhereParam},
@@ -46,6 +51,8 @@ pub(crate) struct BookRelations {
 	load_series: Option<bool>,
 	#[serde(default)]
 	load_library: Option<bool>,
+	#[serde(default)]
+	load_pages: Option<bool>,
 }
 
 /// Represents whether a media item is marked as completed and the last time it was completed.
@@ -154,8 +161,15 @@ pub async fn get_media_by_id(
 		]))
 		.with(media::finished_user_reading_sessions::fetch(vec![
 			finished_reading_session::user_id::equals(user_id),
-		]))
-		.with(media::metadata::fetch());
+		]));
+
+	if params.load_pages.unwrap_or_default() {
+		query = query.with(
+			media::metadata::fetch().with(media_metadata::page_dimensions::fetch()),
+		);
+	} else {
+		query = query.with(media::metadata::fetch());
+	}
 
 	if params.load_series.unwrap_or_default() {
 		tracing::trace!(media_id = id, "Loading series relation for media");
@@ -279,7 +293,26 @@ pub(crate) async fn convert_media(
 	Err(APIError::NotImplemented)
 }
 
-// TODO: ImageResponse as body type
+/// Extra query params for scaling a page dimension according to a specific dimension.
+/// This means the opposite dimension will be calculated based on the aspect ratio
+#[derive(Default, Debug, Deserialize, Serialize, ToSchema)]
+pub struct RequestPageScaled {
+	#[serde(default)]
+	height: Option<u32>,
+	#[serde(default)]
+	width: Option<u32>,
+}
+
+impl RequestPageScaled {
+	pub fn to_scaled_dimension(&self) -> Option<ScaledDimensionResize> {
+		match (self.height, self.width) {
+			(Some(height), _) => Some(ScaledDimensionResize::Height(height)),
+			(_, Some(width)) => Some(ScaledDimensionResize::Width(width)),
+			_ => None,
+		}
+	}
+}
+
 #[utoipa::path(
 	get,
 	path = "/api/v1/media/{id}/page/{page}",
@@ -301,8 +334,11 @@ pub(crate) async fn get_media_page(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
+	Query(requested_scale): Query<RequestPageScaled>,
 ) -> APIResult<ImageResponse> {
 	let db = &ctx.db;
+
+	tracing::trace!(?id, ?page, ?requested_scale, "Fetching media page");
 
 	let user = req.user();
 	let user_id = user.id.clone();
@@ -333,17 +369,32 @@ pub(crate) async fn get_media_page(
 			"Page {page} is out of bounds for media {id}"
 		)))
 	} else {
-		Ok(get_page_async(&media.path, page, &ctx.config).await?.into())
+		let (content_type, buf) = get_page_async(&media.path, page, &ctx.config).await?;
+		let scaled_buf = match requested_scale.to_scaled_dimension() {
+			Some(dimension) => resize_image(buf, dimension).await?,
+			_ => buf,
+		};
+		Ok(ImageResponse {
+			content_type,
+			data: scaled_buf,
+		})
 	}
+}
+
+#[skip_serializing_none]
+#[derive(Deserialize, Serialize, ToSchema, specta::Type)]
+pub struct PutMediaProgress {
+	pub page: i32,
+	pub epubcfi: Option<String>,
+	pub elapsed_seconds: Option<i64>,
 }
 
 #[utoipa::path(
 	put,
-	path = "/api/v1/media/{id}/progress/{page}",
+	path = "/api/v1/media/{id}/progress",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media to get"),
-		("page" = i32, Path, description = "The page to update the read progress to")
 	),
 	responses(
 		(status = 200, description = "Successfully fetched media read progress"),
@@ -355,9 +406,14 @@ pub(crate) async fn get_media_page(
 )]
 /// Update the read progress of a media. If the progress doesn't exist, it will be created.
 pub(crate) async fn update_media_progress(
-	Path((id, page)): Path<(String, i32)>,
+	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
+	Json(PutMediaProgress {
+		page,
+		epubcfi,
+		elapsed_seconds,
+	}): Json<PutMediaProgress>,
 ) -> APIResult<Json<ProgressUpdateReturn>> {
 	let user = req.user();
 	let user_id = user.id.clone();
@@ -373,9 +429,26 @@ pub(crate) async fn update_media_progress(
 			(
 				media::id::equals(id.clone()),
 				user::id::equals(user_id.clone()),
-				vec![active_reading_session::page::set(Some(page))],
+				chain_optional_iter(
+					[active_reading_session::page::set(Some(page))],
+					[
+						epubcfi
+							.clone()
+							.map(|cfi| active_reading_session::epubcfi::set(Some(cfi))),
+						elapsed_seconds.map(|es| {
+							active_reading_session::elapsed_seconds::set(Some(es))
+						}),
+					],
+				),
 			),
-			vec![active_reading_session::page::set(Some(page))],
+			chain_optional_iter(
+				[active_reading_session::page::set(Some(page))],
+				[
+					epubcfi.map(|cfi| active_reading_session::epubcfi::set(Some(cfi))),
+					elapsed_seconds
+						.map(|es| active_reading_session::elapsed_seconds::set(Some(es))),
+				],
+			),
 		)
 		.include(reading_session_with_book_pages::include())
 		.exec()
@@ -405,7 +478,12 @@ pub(crate) async fn update_media_progress(
 						deleted_session.map(|s| s.started_at).unwrap_or_default(),
 						media::id::equals(id.clone()),
 						user::id::equals(user_id.clone()),
-						vec![],
+						chain_optional_iter(
+							[],
+							[elapsed_seconds.map(|es| {
+								finished_reading_session::elapsed_seconds::set(Some(es))
+							})],
+						),
 					)
 					.exec()
 					.await
@@ -806,4 +884,116 @@ async fn fetch_media_page_dimensions_with_permissions(
 		))?;
 
 	Ok(dimensions_entity)
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/media/:id/metadata",
+	tag = "media",
+	params(
+		("id" = String, Path, description = "The ID of the media to get metadata for")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched media metadata"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Media metadata not available"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+/// Get the metadata for a media record
+pub(crate) async fn get_media_metadata(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+) -> APIResult<Json<Option<MediaMetadata>>> {
+	let db = &ctx.db;
+	let user = req.user();
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+	let where_params = chain_optional_iter(
+		[media::id::equals(id.clone())]
+			.into_iter()
+			.chain(apply_media_library_not_hidden_for_user_filter(user))
+			.collect::<Vec<WhereParam>>(),
+		[age_restrictions],
+	);
+
+	let meta = db
+		.media_metadata()
+		.find_first(vec![media_metadata::media::is(where_params)])
+		.exec()
+		.await?;
+
+	Ok(Json(meta.map(MediaMetadata::from)))
+}
+
+#[utoipa::path(
+	put,
+	path = "/api/v1/media/:id/metadata",
+	tag = "media",
+	params(
+		("id" = String, Path, description = "The ID of the media to update metadata for")
+	),
+	responses(
+		(status = 200, description = "Successfully updated media metadata"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Media metadata not available"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+/// Update the metadata for a media record. This is a full update, so any existing metadata
+/// will be replaced with the new metadata.
+pub(crate) async fn put_media_metadata(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+	Json(metadata): Json<MediaMetadata>,
+) -> APIResult<Json<MediaMetadata>> {
+	req.enforce_permissions(&[UserPermission::ManageLibrary])?;
+
+	let db = &ctx.db;
+	let user = req.user();
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+	let where_params = chain_optional_iter(
+		[media::id::equals(id.clone())]
+			.into_iter()
+			.chain(apply_media_library_not_hidden_for_user_filter(user))
+			.collect::<Vec<WhereParam>>(),
+		[age_restrictions],
+	);
+
+	let book = db
+		.media()
+		.find_first(where_params.clone())
+		.select(media_id_select::select())
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound(String::from("Media not found")))?;
+
+	let set_params = metadata.into_prisma();
+
+	let meta = db
+		.media_metadata()
+		.upsert(
+			media_metadata::media_id::equals(id.clone()),
+			set_params
+				.clone()
+				.into_iter()
+				.chain(vec![media_metadata::media::connect(media::id::equals(
+					book.id.clone(),
+				))])
+				.collect::<Vec<_>>(),
+			set_params.clone(),
+		)
+		.exec()
+		.await?;
+
+	Ok(Json(MediaMetadata::from(meta)))
 }

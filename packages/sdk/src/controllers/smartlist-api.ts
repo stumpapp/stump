@@ -42,6 +42,13 @@ export class SmartListAPI extends APIBase {
 	}
 
 	/**
+	 * Fetch the URL for the thumbnail of a smartlist
+	 */
+	thumbnailURL(id: string): string {
+		return this.withServiceURL(smartListURL(`${id}/thumbnail`))
+	}
+
+	/**
 	 * Fetch the metadata for a smartlist
 	 */
 	async meta(id: string): Promise<SmartListMeta> {

@@ -34,6 +34,7 @@ type Props = {
 	initialPage?: number
 }
 
+// TODO: support read time
 export default function ImageBasedReader({
 	media,
 	isAnimated = false,
@@ -66,7 +67,7 @@ export default function ImageBasedReader({
 	const handleUpdateProgress = useCallback(
 		(page: number) => {
 			if (!isIncognito) {
-				updateReadProgress(page)
+				updateReadProgress({ page })
 			}
 		},
 		[updateReadProgress, isIncognito],

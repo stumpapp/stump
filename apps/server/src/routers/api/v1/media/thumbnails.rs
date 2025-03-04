@@ -211,6 +211,7 @@ pub(crate) async fn patch_media_thumbnail(
 			image_options,
 			core_config: ctx.config.as_ref().clone(),
 			force_regen: true,
+			filename: Some(media.id.clone()),
 		},
 	)
 	.await?;
@@ -275,7 +276,7 @@ pub(crate) async fn replace_media_thumbnail(
 	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 	// user testing I'd like to see if this becomes a problem. We'll see!
 	if let Err(e) =
-		remove_thumbnails(&[book_id.clone()], &ctx.config.get_thumbnails_dir())
+		remove_thumbnails(&[book_id.clone()], &ctx.config.get_thumbnails_dir()).await
 	{
 		tracing::error!(
 			?e,

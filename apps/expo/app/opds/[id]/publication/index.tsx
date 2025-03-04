@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
 import { BookDescription, InfoRow, InfoSection } from '~/components/book/overview'
-import { Image } from '~/components/Image'
+import { FasterImage, Image } from '~/components/Image'
 import {
 	getDateField,
 	getNumberField,
@@ -77,7 +77,7 @@ export default function Screen() {
 							{title || 'Publication'}
 						</Heading>
 						<View className="aspect-[2/3] self-center overflow-hidden rounded-lg">
-							<Image
+							{/* <Image
 								source={{
 									uri: thumbnailURL,
 									headers: {
@@ -85,6 +85,16 @@ export default function Screen() {
 									},
 								}}
 								contentFit="fill"
+								style={{ height: 350, width: 'auto' }}
+							/> */}
+							<FasterImage
+								source={{
+									url: thumbnailURL || '',
+									headers: {
+										Authorization: sdk.authorizationHeader || '',
+									},
+									resizeMode: 'fill',
+								}}
 								style={{ height: 350, width: 'auto' }}
 							/>
 						</View>

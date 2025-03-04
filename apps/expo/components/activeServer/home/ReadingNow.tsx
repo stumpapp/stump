@@ -1,11 +1,11 @@
 import { useSDK } from '@stump/client'
 import { Media } from '@stump/sdk'
-import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { useCallback, useMemo } from 'react'
 import { Pressable, View } from 'react-native'
 
 import { BookMetaLink } from '~/components/book'
+import { FasterImage, Image } from '~/components/Image'
 import { Heading, Progress, Text } from '~/components/ui'
 import { useDisplay } from '~/lib/hooks'
 import { getBookProgression } from '~/lib/sdk/utils'
@@ -101,7 +101,7 @@ export default function ReadingNow({ book }: Props) {
 					onPress={() => router.navigate(`/server/${serverID}/books/${book.id}`)}
 				>
 					<View className="absolute inset-0 z-10 bg-black" style={{ opacity: 0.5 }} />
-					<Image
+					{/* <Image
 						className="z-0"
 						source={{
 							uri: sdk.media.thumbnailURL(book.id),
@@ -110,6 +110,17 @@ export default function ReadingNow({ book }: Props) {
 							},
 						}}
 						contentFit="fill"
+						style={{ height: 400, width: 400 * (2 / 3) }}
+					/> */}
+
+					<FasterImage
+						source={{
+							url: sdk.media.thumbnailURL(book.id),
+							headers: {
+								Authorization: sdk.authorizationHeader || '',
+							},
+							resizeMode: 'fill',
+						}}
 						style={{ height: 400, width: 400 * (2 / 3) }}
 					/>
 

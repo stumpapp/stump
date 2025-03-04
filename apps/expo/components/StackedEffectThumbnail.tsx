@@ -1,5 +1,4 @@
 import { useSDK } from '@stump/client'
-import { Image } from 'expo-image'
 import { Href, useRouter } from 'expo-router'
 import { useEffect, useMemo, useState } from 'react'
 import { View } from 'react-native'
@@ -10,6 +9,7 @@ import { match } from 'ts-pattern'
 import { useDisplay } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
+import { FasterImage, Image } from './Image'
 import { Text } from './ui'
 
 type Props = {
@@ -60,7 +60,7 @@ export default function StackedEffectThumbnail({ label, uri, href }: Props) {
 								'opacity-80': pressed,
 							})}
 						>
-							<Image
+							{/* <Image
 								source={{
 									uri,
 									headers: {
@@ -68,6 +68,17 @@ export default function StackedEffectThumbnail({ label, uri, href }: Props) {
 									},
 								}}
 								contentFit="fill"
+								style={{ height: itemDimension * 1.5, width: itemDimension }}
+							/> */}
+
+							<FasterImage
+								source={{
+									url: uri,
+									headers: {
+										Authorization: sdk.authorizationHeader || '',
+									},
+									resizeMode: 'fill',
+								}}
 								style={{ height: itemDimension * 1.5, width: itemDimension }}
 							/>
 						</View>

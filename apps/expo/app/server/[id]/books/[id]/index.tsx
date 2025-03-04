@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useActiveServer } from '~/components/activeServer'
 import { BookMetaLink } from '~/components/book'
 import { BookDescription, InfoRow, InfoStat } from '~/components/book/overview'
-import { Image } from '~/components/Image'
+import { FasterImage, Image } from '~/components/Image'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Heading, Text } from '~/components/ui'
 import { formatBytes } from '~/lib/format'
@@ -113,7 +113,7 @@ export default function Screen() {
 							{media.metadata?.title || media.name}
 						</Heading>
 						<View className="aspect-[2/3] self-center overflow-hidden rounded-lg">
-							<Image
+							{/* <Image
 								source={{
 									uri: sdk.media.thumbnailURL(media.id),
 									headers: {
@@ -121,6 +121,16 @@ export default function Screen() {
 									},
 								}}
 								contentFit="fill"
+								style={{ height: 350, width: 'auto' }}
+							/> */}
+							<FasterImage
+								source={{
+									url: sdk.media.thumbnailURL(media.id),
+									headers: {
+										Authorization: sdk.authorizationHeader || '',
+									},
+									resizeMode: 'fill',
+								}}
 								style={{ height: 350, width: 'auto' }}
 							/>
 						</View>

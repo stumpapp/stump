@@ -2,13 +2,13 @@ import { Slider } from '@miblanchard/react-native-slider'
 import { useSDK } from '@stump/client'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
-import { Image } from 'expo-image'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Platform, View } from 'react-native'
 import { FlatList, Pressable } from 'react-native-gesture-handler'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { FasterImage, Image } from '~/components/Image'
 import { Progress, Text } from '~/components/ui'
 import { useDisplay, usePrevious } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
@@ -162,12 +162,12 @@ export default function Footer() {
 			const urls = Array.from({ length: end - start }, (_, i) =>
 				pageThumbnailURL ? pageThumbnailURL(i + start) : pageURL(i + start),
 			)
-			Image.prefetch(urls, {
-				headers: {
-					Authorization: sdk.authorizationHeader || '',
-				},
-				cachePolicy: globalCachePolicy === 'none' ? undefined : globalCachePolicy,
-			})
+			// Image.prefetch(urls, {
+			// 	headers: {
+			// 		Authorization: sdk.authorizationHeader || '',
+			// 	},
+			// 	cachePolicy: globalCachePolicy === 'none' ? undefined : globalCachePolicy,
+			// })
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[currentPage, readingDirection],
@@ -244,7 +244,7 @@ export default function Footer() {
 							width: '100%',
 						}}
 					>
-						<Image
+						{/* <Image
 							source={pageSource(actualPage)}
 							cachePolicy="memory"
 							style={{
@@ -252,6 +252,18 @@ export default function Footer() {
 								height: '100%',
 							}}
 							contentFit="fill"
+						/> */}
+
+						<FasterImage
+							source={{
+								url: pageSource(actualPage).uri,
+								headers: pageSource(actualPage).headers as Record<string, string>,
+								resizeMode: 'fill',
+							}}
+							style={{
+								width: '100%',
+								height: '100%',
+							}}
 						/>
 					</View>
 
@@ -332,7 +344,7 @@ export default function Footer() {
 									className="items-center justify-center overflow-hidden rounded-md shadow-lg"
 									style={getSize(index)}
 								>
-									<Image
+									{/* <Image
 										source={pageSource(page)}
 										cachePolicy="memory"
 										style={{
@@ -340,6 +352,18 @@ export default function Footer() {
 											width: '100%',
 										}}
 										contentFit="cover"
+									/> */}
+
+									<FasterImage
+										source={{
+											url: pageSource(page).uri,
+											headers: pageSource(page).headers as Record<string, string>,
+											resizeMode: 'cover',
+										}}
+										style={{
+											height: '100%',
+											width: '100%',
+										}}
 									/>
 								</View>
 							</Pressable>

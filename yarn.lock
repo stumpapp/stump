@@ -1319,6 +1319,11 @@
   resolved "https://registry.yarnpkg.com/@braintree/sanitize-url/-/sanitize-url-7.1.1.tgz#15e19737d946559289b915e5dad3b4c28407735e"
   integrity sha512-i1L7noDNxtFyL5DmZafWy1wRVhGehQmzZaz1HiN5e7iylJMSZR7ekOV7NsIqa5qBldlLrsKv4HbgFUVlQrz8Mw==
 
+"@candlefinance/faster-image@1.7.2":
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/@candlefinance/faster-image/-/faster-image-1.7.2.tgz#b87fc7d5178f26b20436395b6f5384883d224a30"
+  integrity sha512-zHo/MYrcO4G7WRqLLVbg6rnqUPWlQLk4X8DgA7hpO0c3Nv0OOcV0ZQZvE1022X0Pau5VNiZxCVHriqIjEo+0sA==
+
 "@chevrotain/cst-dts-gen@11.0.3":
   version "11.0.3"
   resolved "https://registry.yarnpkg.com/@chevrotain/cst-dts-gen/-/cst-dts-gen-11.0.3.tgz#5e0863cc57dc45e204ccfee6303225d15d9d4783"

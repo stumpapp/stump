@@ -1,6 +1,5 @@
 import { useSDK } from '@stump/client'
 import { Media } from '@stump/sdk'
-import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { memo } from 'react'
 import { View } from 'react-native'
@@ -10,6 +9,7 @@ import { useDisplay, useListItemSize } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
 import { useActiveServer } from '../activeServer'
+import { FasterImage, Image } from '../Image'
 import { Text } from '../ui'
 
 type Props = {
@@ -36,7 +36,7 @@ function BookListItem({ book }: Props) {
 					})}
 				>
 					<View className="relative overflow-hidden rounded-lg">
-						<Image
+						{/* <Image
 							className="z-0"
 							source={{
 								uri: sdk.media.thumbnailURL(book.id),
@@ -45,6 +45,16 @@ function BookListItem({ book }: Props) {
 								},
 							}}
 							contentFit="fill"
+							style={{ height: isTablet ? 225 : 150, width: width }}
+						/> */}
+						<FasterImage
+							source={{
+								url: sdk.media.thumbnailURL(book.id),
+								headers: {
+									Authorization: sdk.authorizationHeader || '',
+								},
+								resizeMode: 'fill',
+							}}
 							style={{ height: isTablet ? 225 : 150, width: width }}
 						/>
 					</View>

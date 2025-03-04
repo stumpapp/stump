@@ -14,6 +14,7 @@
 		"postinstall": "npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css"
 	},
 	"dependencies": {
+		"@candlefinance/faster-image": "1.7.2",
 		"@craftzdog/react-native-buffer": "^6.0.5",
 		"@epubjs-react-native/core": "^1.4.6",
 		"@epubjs-react-native/expo-file-system": "^1.1.3",

@@ -1,6 +1,6 @@
 import { Zoomable } from '@likashefqet/react-native-image-zoom'
 import { useSDK } from '@stump/client'
-import { Image, ImageLoadEventData } from 'expo-image'
+import { ImageLoadEventData } from 'expo-image'
 import React, { useCallback, useMemo, useState } from 'react'
 import { FlatList, useWindowDimensions, View } from 'react-native'
 import {
@@ -11,6 +11,7 @@ import {
 import { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { FasterImage, intoFastCachePolicy } from '~/components/Image'
 import { useDisplay } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
@@ -292,7 +293,7 @@ const Page = React.memo(
 						width: maxWidth,
 					}}
 				>
-					<Image
+					{/* <Image
 						source={{
 							uri: pageURL(index + 1),
 							headers: {
@@ -307,6 +308,24 @@ const Page = React.memo(
 						cachePolicy={cachePolicy}
 						contentFit="contain"
 						onLoad={onImageLoaded}
+					/> */}
+
+					<FasterImage
+						source={{
+							url: pageURL(index + 1),
+							headers: {
+								Authorization: sdk.authorizationHeader || '',
+							},
+							cachePolicy: intoFastCachePolicy(cachePolicy || 'memory-disk'),
+						}}
+						style={{
+							height: '100%',
+							width: '100%',
+						}}
+						// allowDownscaling={allowDownscaling}
+						// cachePolicy={cachePolicy}
+						// contentFit="contain"
+						// onSuccess={onImageLoaded}
 					/>
 				</View>
 			</Zoomable>

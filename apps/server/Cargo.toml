@@ -36,7 +36,7 @@ rand = "0.8.5"
 reqwest = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-serde_qs = { version = "0.13.0", features = ["axum"] }
+serde_qs = { version = "0.14.0", features = ["axum"] }
 serde-untagged = "0.1.2"
 serde_with = { workspace = true }
 specta = { workspace = true }

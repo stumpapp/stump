@@ -78,7 +78,7 @@
 			"description": {
 				"label": "Описание",
 				"placeholder": "Фан-клуб \"Наш флаг означает смерть\". Книги про пиратов всегда в наших сердцах",
-				"description": "Краткое описание вашего книжного клуба (опционально)"
+				"description": "Краткое описание вашего книжного клуба — опционально"
 			},
 			"is_private": {
 				"label": "Частный клуб",
@@ -156,76 +156,76 @@
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "Да",
+				"no": "Нет",
+				"none": "Отсутствует",
 				"labels": {
-					"name": "Name",
-					"description": "Description"
+					"name": "Название",
+					"description": "Описание"
 				}
 			},
-			"submit": "Create Book Club"
+			"submit": "Создать Книжный Клуб"
 		}
 	},
 	"bookClubSettingsScene": {
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "Базовые сведения",
 			"members": {
-				"members": "Members",
-				"roles": "Roles",
-				"label": "Membership"
+				"members": "Участники",
+				"roles": "Роли",
+				"label": "Членство"
 			},
 			"scheduling": {
-				"scheduler": "Scheduler",
-				"options": "Options",
-				"label": "Scheduling"
+				"scheduler": "Планировщик",
+				"options": "Настройки",
+				"label": "Планирование"
 			},
 			"danger-zone": {
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"delete": "Удаление",
+				"label": "Осторожно, зона риска"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this book club, including its name and description",
+			"title": "Основная информация",
+			"description": "Информация об этом клубе, включая его название и описание",
 			"form": {
-				"submit": "Update club"
+				"submit": "Обновить клуб"
 			}
 		},
 		"members": {
-			"title": "Members",
-			"description": "Manage the members of this book club",
+			"title": "Участники",
+			"description": "Управление участниками книжного клуба",
 			"sections": {}
 		},
 		"roles": {
-			"title": "Roles",
-			"description": "Customize the roles in this book club",
+			"title": "Роли",
+			"description": "Настройка ролей в книжном клубе",
 			"sections": {
 				"roleMappings": {
-					"heading": "Existing role mappings",
-					"description": "The current role mappings for this book club"
+					"heading": "Существующие профили ролей",
+					"description": "Текущие сопоставления ролей для книжного клуба"
 				}
 			}
 		},
 		"scheduling/scheduler": {
-			"title": "Scheduler",
-			"description": "Create and manage the schedule readings for this book club"
+			"title": "Планировщик",
+			"description": "Создание и управление расписанием чтений этого клуба"
 		},
 		"scheduling/options": {
-			"title": "Options",
-			"description": "Additional options for this book club's scheduling"
+			"title": "Настройки",
+			"description": "Дополнительные параметры для планирования в клубе"
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this book club and all of its contents or certain resources",
+			"title": "Действия при удалении",
+			"description": "Полностью удалить этот книжный клуб и все его содержимое или определенные ресурсы",
 			"sections": {
 				"deleteClub": {
-					"heading": "Delete club",
+					"heading": "Удалить клуб",
 					"description": [
-						"Permanently delete this book club and all its contents.",
-						"This action cannot be undone"
+						"Полностью удалить этот книжный клуб и все его содержимое.",
+						"Это действие нельзя будет отменить"
 					],
-					"trigger": "Delete club"
+					"trigger": "Удалить клуб"
 				}
 			}
 		}
@@ -233,178 +233,178 @@
 	"createOrUpdateLibraryForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
-				"description": "A friendly name for your library",
-				"placeholder": "My Library"
+				"label": "Название",
+				"description": "Понятное название вашей библиотеки",
+				"placeholder": "Моя библиотека"
 			},
 			"path": {
-				"label": "Path",
-				"description": "The path to the library as it exists on your server",
-				"placeholder": "/path/to/library"
+				"label": "Путь",
+				"description": "Путь к папке библиотеки на вашем сервере",
+				"placeholder": "/путь/к/библиотеке"
 			},
 			"description": {
 				"label": "Описание",
-				"description": "A short description of your library",
-				"placeholder": "A library of all my favorite books"
+				"description": "Краткое описание вашей библиотеки",
+				"placeholder": "Библиотека всех моих любимых книг"
 			},
 			"tags": {
-				"label": "Tags",
-				"description": "Used to categorize your library or enforce access rules"
+				"label": "Метки",
+				"description": "Используется для категоризации вашей библиотеки или обеспечения соблюдения правил доступа"
 			},
 			"readingSettings": {
 				"section": {
-					"heading": "Reading settings",
-					"description": "Default reader settings to use for books"
+					"heading": "Настройки чтения",
+					"description": "Настройки чтения по умолчанию для книг"
 				},
 				"imageScaling": {
-					"label": "Image scaling",
-					"description": "How the image-based reader scales images to the page"
+					"label": "Масштабирование изображения",
+					"description": "Как читалка на основе изображений масштабирует картинки на странице"
 				},
 				"readingMode": {
-					"label": "Default reader",
-					"description": "The default reader to use for image-based books"
+					"label": "Читалка по умолчанию",
+					"description": "Читалка по умолчанию для книг с изображениями"
 				},
 				"readingDirection": {
 					"label": "Направление чтения",
-					"description": "Which direction the reader progresses through pages"
+					"description": "В каком направлении читатель продвигается по страницам"
 				}
 			},
 			"thumbnailConfig": {
 				"section": {
 					"heading": {
-						"create": "Thumbnail configuration",
-						"update": "Generation"
+						"create": "Настройки миниатюр",
+						"update": "Создание"
 					},
-					"description": "Improve loading times while browsing your library by generating thumbnails for your books"
+					"description": "Ускорьте загрузку при просмотре вашей библиотеки путем создания эскизов для ваших книг"
 				},
 				"enableSwitch": {
-					"label": "Enabled",
-					"description": "Generate thumbnail images for this library"
+					"label": "Включено",
+					"description": "Создать эскизы для этой библиотеки"
 				},
 				"scaled": {
-					"label": "Scaled",
-					"description": "Scale the image by a custom factor per dimension",
+					"label": "Масштаб",
+					"description": "Масштабируйте изображение с помощью настраиваемого коэффициента для каждого измерения",
 					"width": {
-						"label": "Width scale"
+						"label": "Масштаб ширины"
 					},
 					"height": {
-						"label": "Height scale"
+						"label": "Масштаб высоты"
 					}
 				},
 				"sized": {
-					"label": "Explicitly Sized",
-					"description": "Set each dimension of the thumbnail (in pixels)",
+					"label": "Задать размер",
+					"description": "Установить для каждого измерения миниатюры (в пикселях)",
 					"width": {
-						"label": "Width"
+						"label": "Ширина"
 					},
 					"height": {
-						"label": "Height"
+						"label": "Высота"
 					}
 				},
 				"format": {
-					"label": "Image format",
-					"description": "The format of the generated thumbnail images"
+					"label": "Формат изображения",
+					"description": "Формат создаваемых эскизов изображений"
 				},
 				"quality": {
-					"label": "Quality",
-					"description": "The quality of the generated thumbnail images, between 0 and 1.0"
+					"label": "Качество",
+					"description": "Качество создаваемых эскизов изображений, между 0 и 1.0"
 				}
 			},
 			"ignoreRules": {
 				"section": {
-					"heading": "Ignore rules",
-					"description": "Define glob patterns to ignore certain files or directories during a scan"
+					"heading": "Правила игнорирования",
+					"description": "Определите глобальные шаблоны, позволяющие игнорировать определенные файлы или каталоги во время сканирования"
 				},
-				"noRules": "No ignore rules have been configured",
-				"save": "Save changes",
+				"noRules": "Нет настроенных правил игнорирования",
+				"save": "Сохранить изменения",
 				"addRule": {
-					"label": "New rule",
-					"description": "Glob pattern to ignore files or directories",
+					"label": "Новое правило",
+					"description": "Глобальный шаблон для игнорирования файлов или каталогов",
 					"addButton": "Добавить правило",
 					"ignoreParents": {
-						"title": "Ignore all parent directories",
-						"label": "Ignore parents"
+						"title": "Игнорировать все родительские каталоги",
+						"label": "Игнорировать родительские каталоги"
 					},
 					"ignoreSubdirs": {
-						"title": "Ignore all subdirectories",
-						"label": "Ignore subdirectories"
+						"title": "Игнорировать  все подкаталоги",
+						"label": "Игнорировать подкаталоги"
 					}
 				},
-				"invalidGlob": "Invalid glob pattern",
+				"invalidGlob": "Неверный глобальный шаблон",
 				"lockConfig": {
-					"lock": "Lock configuration",
-					"unlock": "Unlock configuration"
+					"lock": "Заблокировать настройку",
+					"unlock": "Разблокировать настройку"
 				},
-				"editRule": "Edit rule",
-				"deleteRule": "Delete rule",
-				"cancelEdit": "Cancel edit",
-				"confirmEdit": "Confirm edit"
+				"editRule": "Редактировать правило",
+				"deleteRule": "Удалить правило",
+				"cancelEdit": "Отменить изменения",
+				"confirmEdit": "Подтвердить изменение"
 			},
 			"convertOptions": {
 				"section": {
-					"heading": "File conversion",
-					"description": "Stump is capable of converting certain file formats to more compatible ones"
+					"heading": "Преобразование файла",
+					"description": "Stump может преобразовать некоторые форматы файлов в более совместимые"
 				},
 				"rarToZip": {
-					"label": "Convert RAR to ZIP",
-					"description": "Convert RAR/CBR files to ZIP/CBZ files during a scan"
+					"label": "Преобразовать RAR в ZIP",
+					"description": "Во время сканирования преобразовать RAR/CBR файлы в ZIP/CBZ "
 				},
 				"deleteRarAfter": {
-					"label": "Delete RAR after conversion",
-					"description": "Delete the original RAR/CBR file after conversion. This is irreversible"
+					"label": "Удалить RAR после преобразования",
+					"description": "Удалить исходный файл RAR/CBR после преобразования. Это необратимо"
 				}
 			},
 			"scannerFeatures": {
 				"section": {
-					"heading": "Optional processing",
-					"description": "Opt-in processing features for the scanner",
-					"disclaimer": "These features involve additional file reads which may slow down the scan process"
+					"heading": "Дополнительная обработка",
+					"description": "Дополнительные функции обработки для сканера",
+					"disclaimer": "Эти функции включают дополнительные процессы чтения файлов, которые могут замедлить сканирование"
 				},
 				"processMetadata": {
-					"label": "Process metadata",
-					"description": "Extract any metadata from library files and store the results in the database"
+					"label": "Обработка метаданных",
+					"description": "Извлечь любые метаданные из файлов библиотеки и сохранить результаты в базе данных"
 				},
 				"generateFileHashes": {
-					"label": "Generate file hashes",
-					"description": "Generate a hash for each file in the library to detect duplicates"
+					"label": "Генерировать хэши файлов",
+					"description": "Сгенерировать хэш каждого файла в библиотеке для обнаружения дубликатов"
 				},
 				"koreaderHashes": {
-					"label": "KoReader-compatible hashes",
-					"description": "If using KoReader, generate additional hashes in the format it expects"
+					"label": "Совместимые с KoReader хэши",
+					"description": "При использовании KoReader, генерировать дополнительные хэши в формате, который он ожидает"
 				}
 			},
 			"libraryPattern": {
 				"section": {
-					"heading": "Organization",
-					"description": "Identify which pattern most closely matches the organization of your library",
+					"heading": "Организация",
+					"description": "Определить, какой шаблон наиболее близко соответствует организации вашей библиотеки",
 					"docs": [
-						"Not sure which to choose? Click",
-						"here",
-						"for more information.",
-						"You cannot change this setting later"
+						"Не уверены, какой выбрать? Нажмите",
+						"сюда",
+						"чтобы получить больше информации",
+						"Вы не сможете изменить эту настройку позже"
 					],
-					"disabled": "You cannot change this setting"
+					"disabled": "Нельзя изменить эту настройку"
 				},
 				"options": {
-					"label": "Library pattern",
-					"description": "The setting which determines how Stump will organize your library",
+					"label": "Шаблон библиотеки",
+					"description": "Параметр, который определяет, как Stump будет упорядочивать вашу библиотеку",
 					"collectionPriority": {
-						"label": "Collection priority",
-						"description": "Each folder at the top-most level of the library root is a single series"
+						"label": "Приоритет коллекции",
+						"description": "Каждая папка самого верхнего уровня корня библиотеки является отдельной серией"
 					},
 					"seriesPriority": {
-						"label": "Series priority",
-						"description": "Each folder at any level recursively is a single series"
+						"label": "Приоритет серий",
+						"description": "Каждая папка рекурсивно на любом уровне является отдельной серией"
 					}
 				}
 			}
 		},
 		"scan": {
 			"label": {
-				"create": "Scan after creation",
-				"update": "Scan after updates"
+				"create": "Сканировать после создания",
+				"update": "Сканировать после обновления"
 			},
-			"description": "Index the library files to populate your database"
+			"description": "Индексация файлов библиотеки для заполнения базы данных"
 		}
 	},
 	"createLibraryScene": {
@@ -412,48 +412,48 @@
 		"subtitle": "Библиотеки используются для группировки книг вместе. Если вы хотите обновить библиотеки и узнать как они работают, проверьте",
 		"subtitleLink": "соответствующую документацию",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "Шаг",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this library, including its name, path, and description"
+					"label": "Базовые сведения",
+					"heading": "Основная информация",
+					"description": "Детали этой библиотеки, включая ее название, путь и описание"
 				},
 				{
-					"label": "Scanning",
-					"heading": "Scanning",
-					"description": "Settings related to how Stump scans this library"
+					"label": "Сканирование",
+					"heading": "Сканирование",
+					"description": "Настройки, связанные с тем, как Stump сканирует библиотеку"
 				},
 				{
-					"label": "Thumbnails",
-					"heading": "Thumbnails",
-					"description": "The options for if and how Stump generates thumbnails for this library"
+					"label": "Эскизы",
+					"heading": "Эскизы",
+					"description": "Настройки, связанные с тем, будет ли Stump для этой библиотеки создавать эскизы и как"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your library settings before creating it"
+					"label": "Предпросмотр",
+					"heading": "Предпросмотр",
+					"description": "Просмотр настроек библиотеки перед созданием"
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "Да",
+				"no": "Нет",
+				"none": "Отсутствует",
 				"labels": {
-					"generateThumbnails": "Generate thumbnails",
-					"mode": "Mode",
-					"format": "Format",
-					"quality": "Quality",
-					"name": "Name",
-					"path": "Path",
-					"description": "Description",
-					"tags": "Tags",
-					"pattern": "Pattern",
-					"ignoreRules": "Ignore rules",
-					"convertRar": "Convert RAR/CBR",
-					"deleteConversions": "Delete converted files",
-					"processMetadata": "Process metadata",
-					"generateFileHashes": "Generate file hashes"
+					"generateThumbnails": "Создать миниатюры",
+					"mode": "Режим",
+					"format": "Формат",
+					"quality": "Качество",
+					"name": "Название",
+					"path": "Путь",
+					"description": "Описание",
+					"tags": "Метки",
+					"pattern": "Шаблон",
+					"ignoreRules": "Правила игнорирования",
+					"convertRar": "Преобразование RAR/CBR",
+					"deleteConversions": "Удалить преобразованные файлы",
+					"processMetadata": "Обработка метаданных",
+					"generateFileHashes": "Генерировать хэши файлов"
 				}
 			},
 			"buttons": {
@@ -464,21 +464,21 @@
 	"fileExplorer": {
 		"uploadModal": {
 			"title": {
-				"books": "Upload books",
-				"series": "Upload series"
+				"books": "Загрузка книг на сервер",
+				"series": "Загрузка серий на сервер"
 			},
 			"description": {
-				"books": "Add books directly to the current path in the file explorer",
-				"series": "Add a series directly to the current path in the file explorer"
+				"books": "Добавить книги непосредственно по текущему пути в обозревателе файлов",
+				"series": "Добавить серии непосредственно по текущему пути в обозревателе файлов"
 			},
 			"seriesDisclaimer": [
-				"It must be a ",
-				"zipped file",
-				"containing the folder which should be the series, with all the books inside"
+				"Это должно быть ",
+				"архивированный файл",
+				"содержащий папку, которая должна быть серией, со всеми книгами внутри"
 			],
 			"dropzone": {
-				"books": "Drag and drop books here",
-				"series": "Drag and drop a zip file here",
+				"books": "Перетащите книги сюда",
+				"series": "Перетащите архив zip сюда",
 				"alt": "Or click to browse your computer for books to upload"
 			},
 			"addedFiles": "Added files"

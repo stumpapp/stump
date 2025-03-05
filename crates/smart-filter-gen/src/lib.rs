@@ -133,8 +133,23 @@ fn gen_smart_filter_enum(
 			let ty = &variant_data.variable_type;
 
 			if enum_data::should_filter_type(ty) {
-				quote! { #name { #inner_name: Filter<#ty> } }
-			} else {
+				// DateTimes need to be handled differently because the type
+				// does not implement utoipa's ToSchema trait.
+				if enum_data::is_datetime(ty) {
+					quote! {
+						#name {
+							#[schema(value_type = Filter<String>)]
+							#inner_name: Filter<#ty>
+						}
+					}
+				}
+				// If not a Datetime then no attribute is needed.
+				else {
+					quote! { #name { #inner_name: Filter<#ty> } }
+				}
+			}
+			// If not a filter type then the type can be passed through.
+			else {
 				quote! { #name { #inner_name: #ty } }
 			}
 		})

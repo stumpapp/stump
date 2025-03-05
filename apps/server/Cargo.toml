@@ -56,8 +56,8 @@ tower = "0.4.13"
 tower-sessions = "0.14.0"
 tracing = { workspace = true }
 urlencoding = { workspace = true }
-utoipa = { version = "4.2.3", features = ["axum_extras"] }
-utoipa-swagger-ui = { version = "7.1.0", features = ["axum"] }
+utoipa = { version = "5.3.1", features = ["axum_extras"] }
+utoipa-swagger-ui = { version = "9.0.0", features = ["axum"] }
 zip = { workspace = true }
 
 [dev-dependencies]

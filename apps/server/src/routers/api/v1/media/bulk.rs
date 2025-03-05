@@ -5,7 +5,9 @@ use serde_qs::axum::QsQuery;
 use stump_core::{
 	db::{
 		entity::Media,
-		query::pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
+		query::pagination::{
+			PageQuery, Pageable, PageableMedia, Pagination, PaginationQuery,
+		},
 		CountQueryReturn,
 	},
 	prisma::{
@@ -17,7 +19,7 @@ use stump_core::{
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
-	filter::{FilterableQuery, MediaFilter},
+	filter::{FilterableMediaQuery, FilterableQuery, MediaFilter},
 	middleware::auth::RequestContext,
 	routers::api::filters::{
 		apply_media_age_restriction, apply_media_filters_for_user,

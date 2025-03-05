@@ -13,7 +13,8 @@ use specta::Type;
 use stump_core::{
 	db::entity::{
 		AttachmentMeta, EmailerConfig, EmailerConfigInput, EmailerSendRecord,
-		EmailerSendTo, Media, RegisteredEmailDevice, SMTPEmailer, User, UserPermission,
+		EmailerSendTo, Media, Notifier, RegisteredEmailDevice, SMTPEmailer, User,
+		UserPermission,
 	},
 	filesystem::{ContentType, FileParts, PathUtils},
 	prisma::{emailer, emailer_send_record, registered_email_device, user, PrismaClient},

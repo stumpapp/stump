@@ -13,6 +13,7 @@ use axum::{
 use axum_typed_multipart::{FieldData, TryFromMultipart, TypedMultipart};
 use tempfile::NamedTempFile;
 use tokio::fs;
+use utoipa::ToSchema;
 use zip::read::ZipFile;
 
 use crate::{
@@ -41,10 +42,11 @@ pub fn mount(app_state: AppState) -> Router<AppState> {
 
 type LibraryData = library_path_with_options_select::Data;
 
-#[derive(TryFromMultipart)]
+#[derive(TryFromMultipart, ToSchema)]
 struct UploadBooksRequest {
 	place_at: String,
 	#[form_data(limit = "unlimited")]
+	#[schema(value_type = Vec<Object>)]
 	files: Vec<FieldData<NamedTempFile>>,
 }
 
@@ -110,11 +112,12 @@ async fn upload_books(
 	Ok(Json(()))
 }
 
-#[derive(TryFromMultipart)]
+#[derive(TryFromMultipart, ToSchema)]
 struct UploadSeriesRequest {
 	place_at: String,
 	series_dir_name: String,
 	#[form_data(limit = "unlimited")]
+	#[schema(value_type = Vec<Object>)]
 	file: FieldData<NamedTempFile>,
 }
 

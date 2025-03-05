@@ -27,7 +27,9 @@ use stump_core::{
 			FileStatus, Library, LibraryConfig, LibraryScanMode, LibraryStats, Media,
 			Series, TagName, User, UserPermission,
 		},
-		query::pagination::{Pageable, Pagination, PaginationQuery},
+		query::pagination::{
+			Pageable, PageableLibraries, PageableSeries, Pagination, PaginationQuery,
+		},
 		PrismaCountTrait,
 	},
 	filesystem::{
@@ -53,7 +55,8 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::{
-		chain_optional_iter, FilterableQuery, LibraryFilter, MediaFilter, SeriesFilter,
+		chain_optional_iter, FilterableLibraryQuery, FilterableQuery, LibraryFilter,
+		MediaFilter, SeriesFilter,
 	},
 	middleware::auth::{auth_middleware, RequestContext},
 	routers::api::filters::{
@@ -1001,6 +1004,7 @@ async fn update_library_excluded_users(
 
 #[derive(Debug, Deserialize, Serialize, ToSchema, Type)]
 pub struct LastScanDetails {
+	#[schema(value_type = Option<String>)]
 	last_scanned_at: Option<DateTime<FixedOffset>>,
 	last_scan: Option<LastLibraryScan>,
 }

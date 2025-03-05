@@ -75,7 +75,7 @@ pub(crate) struct PutMediaCompletionStatus {
 	path = "/api/v1/media/path/{path}",
 	tag = "media",
 	params(
-		("path" = PathBuf, Path, description = "The path of the media to get")
+		("path" = String, Path, description = "The path of the media to get")
 	),
 	responses(
 		(status = 200, description = "Successfully fetched media", body = Media),

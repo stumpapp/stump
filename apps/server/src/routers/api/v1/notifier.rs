@@ -144,7 +144,7 @@ async fn create_notifier(
 	put,
 	path = "/api/v1/notifiers/{id}",
 	tag = "notifier",
-	request_body = UpdateNotifier,
+	request_body = CreateOrUpdateNotifier,
 	params(
 		("id" = i32, Path, description = "The id of the notifier to update")
 	),

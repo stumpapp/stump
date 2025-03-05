@@ -604,7 +604,7 @@ pub struct CreateOrUpdateSmartListView {
 	post,
 	path = "/api/v1/smart-lists/{id}/views",
 	tag = "smart_list",
-	request_body = CreateSmartListView,
+	request_body = CreateOrUpdateSmartListView,
 	responses(
 		(status = 200, description = "Successfully created smart list view", body = SmartListView),
 		(status = 401, description = "Unauthorized"),

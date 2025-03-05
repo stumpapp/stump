@@ -21,7 +21,10 @@ use stump_core::{
 		},
 		query::{
 			ordering::QueryOrder,
-			pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
+			pagination::{
+				PageQuery, Pageable, PageableMedia, PageableSeries, Pagination,
+				PaginationQuery,
+			},
 		},
 		PrismaCountTrait, SeriesDAO, DAO,
 	},
@@ -48,7 +51,10 @@ use utoipa::ToSchema;
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
-	filter::{chain_optional_iter, FilterableQuery, SeriesFilter, SeriesQueryRelation},
+	filter::{
+		chain_optional_iter, FilterableQuery, FilterableSeriesQuery, SeriesFilter,
+		SeriesQueryRelation,
+	},
 	middleware::auth::{auth_middleware, RequestContext},
 	routers::api::{
 		filters::{

@@ -61,7 +61,7 @@ utoipa-swagger-ui = { version = "9.0.0", features = ["axum"] }
 zip = { workspace = true }
 
 [dev-dependencies]
-axum-test = "17.0.1"
+axum-test = "17.2.0"
 tokio = { workspace = true, features = ["full", "test-util"] }
 
 [build-dependencies]

@@ -8,6 +8,7 @@ import {
 	AppTheme,
 	DefaultServer,
 	MaskURLs,
+	ReaderSettingsLink,
 } from '~/components/appSettings/preferences'
 import { StumpEnabled } from '~/components/appSettings/stump'
 import { Text } from '~/components/ui/text'
@@ -22,6 +23,12 @@ export default function Screen() {
 					<AppLanguage />
 					<DefaultServer />
 					<MaskURLs />
+				</View>
+
+				<View>
+					<Text className="mb-3 text-foreground-muted">Reading</Text>
+
+					<ReaderSettingsLink />
 				</View>
 
 				<View>

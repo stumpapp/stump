@@ -141,6 +141,13 @@ export default function LibraryReview() {
 					</div>
 
 					<div>
+						<Label>{t(getLabelKey('dirWatch'))}</Label>
+						<Text variant="muted" size="sm">
+							{state.watch ? 'Yes' : 'No'}
+						</Text>
+					</div>
+
+					<div>
 						<Label>{t(getLabelKey('generateFileHashes'))}</Label>
 						<Text variant="muted" size="sm">
 							{state.generate_file_hashes ? 'Yes' : 'No'}

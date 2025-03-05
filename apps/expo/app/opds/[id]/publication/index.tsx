@@ -1,8 +1,8 @@
 import { useSDK } from '@stump/client'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
-import omit from 'lodash/omit'
-import { Fragment } from 'react'
+// import omit from 'lodash/omit'
+import { Fragment, useEffect } from 'react'
 import { Pressable, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -31,9 +31,21 @@ export default function Screen() {
 		publication: { metadata, images, readingOrder, links, resources },
 		url,
 	} = usePublicationContext()
-	const { title, identifier, belongsTo, ...rest } = metadata || {}
+	const { title, identifier, belongsTo } = metadata || {}
 
 	const router = useRouter()
+
+	// TODO: once I sort out progress sync, prefetch the current page
+	const firstPageURL = readingOrder?.[0]?.href
+	useEffect(() => {
+		if (firstPageURL) {
+			Image.prefetch(firstPageURL, {
+				headers: {
+					Authorization: sdk.authorizationHeader || '',
+				},
+			})
+		}
+	}, [sdk, firstPageURL])
 
 	const thumbnailURL = getPublicationThumbnailURL({
 		images,
@@ -55,7 +67,7 @@ export default function Screen() {
 	const isSupportedStream = readingOrder?.every((link) => link.type?.startsWith('image/'))
 
 	// TODO: dump the rest of the metadata? Or enforce servers to conform to a standard?
-	const restMeta = omit(rest, ['numberOfPages', 'modified'])
+	// const restMeta = omit(rest, ['numberOfPages', 'modified'])
 
 	return (
 		<SafeAreaView className="flex-1 bg-background">

@@ -10,6 +10,7 @@ use crate::{
 	config::StumpConfig,
 	db,
 	event::CoreEvent,
+	filesystem::scanner::LibraryWatcher,
 	job::{Executor, JobController, JobControllerCommand},
 	prisma::{self, server_config},
 	CoreError, CoreResult,
@@ -26,6 +27,7 @@ pub struct Ctx {
 	pub db: Arc<prisma::PrismaClient>,
 	pub job_controller: Arc<JobController>,
 	pub event_channel: Arc<EventChannel>,
+	pub library_watcher: Arc<LibraryWatcher>,
 }
 
 impl Ctx {
@@ -48,15 +50,17 @@ impl Ctx {
 		let config = Arc::new(config.clone());
 		let db = Arc::new(db::create_client(&config).await);
 		let event_channel = Arc::new(channel::<CoreEvent>(1024));
-
 		let job_controller =
 			JobController::new(db.clone(), config.clone(), event_channel.0.clone());
+		let library_watcher =
+			Arc::new(LibraryWatcher::new(db.clone(), job_controller.clone()));
 
 		Ctx {
 			config,
 			db,
 			job_controller,
 			event_channel,
+			library_watcher,
 		}
 	}
 
@@ -77,11 +81,15 @@ impl Ctx {
 		let job_controller =
 			JobController::new(db.clone(), config.clone(), event_channel.0.clone());
 
+		let library_watcher =
+			Arc::new(LibraryWatcher::new(db.clone(), job_controller.clone()));
+
 		Ctx {
 			config,
 			db,
 			job_controller,
 			event_channel,
+			library_watcher,
 		}
 	}
 
@@ -99,11 +107,15 @@ impl Ctx {
 		let job_controller =
 			JobController::new(db.clone(), config.clone(), event_channel.0.clone());
 
+		let library_watcher =
+			Arc::new(LibraryWatcher::new(db.clone(), job_controller.clone()));
+
 		let ctx = Ctx {
 			config,
 			db,
 			job_controller,
 			event_channel,
+			library_watcher,
 		};
 
 		(ctx, mock)

@@ -5,10 +5,17 @@ import { FlatList, View } from 'react-native'
 import { BookListItem } from '~/components/book'
 import { Heading, Text } from '~/components/ui'
 
+import { useActiveServer } from '../context'
+
 export default function RecentlyAddedBooks() {
+	const {
+		activeServer: { id: serverID },
+	} = useActiveServer()
 	const { media, hasNextPage, fetchNextPage } = useRecentlyAddedMediaQuery({
 		limit: 20,
 		suspense: true,
+		queryKey: [serverID],
+		useErrorBoundary: false,
 	})
 
 	const handleEndReached = useCallback(() => {

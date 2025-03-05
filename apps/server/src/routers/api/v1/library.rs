@@ -1011,7 +1011,7 @@ pub struct LastScanDetails {
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/libraries/:id/last-scan",
+	path = "/api/v1/libraries/{id}/last-scan",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID")

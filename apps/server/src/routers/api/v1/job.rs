@@ -164,7 +164,7 @@ async fn delete_jobs(State(ctx): State<AppState>) -> APIResult<()> {
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/jobs/:id",
+	path = "/api/v1/jobs/{id}",
 	tag = "job",
 	responses(
 		(status = 200, description = "Successfully fetched job report", body = PersistedJob),

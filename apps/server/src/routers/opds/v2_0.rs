@@ -1181,8 +1181,8 @@ async fn get_book_page(
 	fetch_book_page_for_user(&ctx, req.user(), id, page).await
 }
 
-// .route("/chapter/:chapter", get(get_epub_chapter))
-// .route("/:root/:resource", get(get_epub_meta)),
+// .route("/chapter/{chapter}", get(get_epub_chapter))
+// .route("/{root}/{resource}", get(get_epub_meta)),
 // async fn get_book_resource() {}
 
 /// A route handler which returns the progression of a book for a user.

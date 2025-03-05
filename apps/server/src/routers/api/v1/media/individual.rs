@@ -888,7 +888,7 @@ async fn fetch_media_page_dimensions_with_permissions(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/media/:id/metadata",
+	path = "/api/v1/media/{id}/metadata",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media to get metadata for")
@@ -932,7 +932,7 @@ pub(crate) async fn get_media_metadata(
 
 #[utoipa::path(
 	put,
-	path = "/api/v1/media/:id/metadata",
+	path = "/api/v1/media/{id}/metadata",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media to update metadata for")

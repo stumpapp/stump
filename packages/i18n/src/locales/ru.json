@@ -7,7 +7,7 @@
 	},
 	"authScene": {
 		"claimHeading": "Инициализируйте сервер",
-		"claimText": "This Stump server is not initialized. Use the form below to create your account. Once created, you will have full access to all server features.",
+		"claimText": "Этот сервер Stump не инициализирован. Используйте форму ниже, чтобы создать свою учетную запись. После создания вы получите полный доступ ко всем функциям сервера.",
 		"form": {
 			"validation": {
 				"missingUsername": "Вы не ввели имя пользователя",
@@ -57,12 +57,12 @@
 				"email": {
 					"label": "Электронная почта",
 					"placeholder": "Адрес эл. почты",
-					"description": "An email address to send the book to. Click add to finalize each input"
+					"description": "Адрес электронной почты для отправки книги. Нажмите \"Добавить\" после ввода каждой строки"
 				},
 				"devices": {
-					"label": "Devices",
-					"placeholder": "Select devices",
-					"noFilterMatch": "No devices match the filter"
+					"label": "Устройства",
+					"placeholder": "Выбор устройств",
+					"noFilterMatch": "Нет подходящих устройств"
 				}
 			}
 		},
@@ -71,88 +71,88 @@
 	"createOrUpdateBookClubForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My book club",
-				"description": "The name of your book club"
+				"label": "Название",
+				"placeholder": "Мой книжный клуб",
+				"description": "Название вашего книжного клуба"
 			},
 			"description": {
-				"label": "Description",
-				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
-				"description": "An optional, short description of your book club"
+				"label": "Описание",
+				"placeholder": "Фан-клуб \"Наш флаг означает смерть\". Книги про пиратов всегда в наших сердцах",
+				"description": "Краткое описание вашего книжного клуба (опционально)"
 			},
 			"is_private": {
-				"label": "Private club",
-				"description": "If enabled, only users you invite will be able to join your book club"
+				"label": "Частный клуб",
+				"description": "Если эта опция включена, только приглашаемые вами пользователи смогут присоединиться к клубу"
 			},
 			"member_role_spec": {
-				"heading": "Custom role mapping",
+				"heading": "Настраиваемые роли пользователей",
 				"subtitle": [
-					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
-					"documentation"
+					"Если хотите, можете задать собственные названия ролям в книжном клубе. Дополнительную информацию можно посмотреть в разделе",
+					"документация"
 				],
 				"member": {
-					"label": "Member",
-					"placeholder": "Member",
-					"description": "The name of the default role for your book club"
+					"label": "Участник",
+					"placeholder": "Участник",
+					"description": "Название роли по умолчанию для вашего книжного клуба"
 				},
 				"moderator": {
-					"label": "Moderator",
-					"placeholder": "Moderator",
-					"description": "The name of the moderator role for your book club"
+					"label": "Модератор",
+					"placeholder": "Модератор",
+					"description": "Название роли модератора для вашего книжного клуба"
 				},
 				"admin": {
-					"label": "Admin",
-					"placeholder": "Admin",
-					"description": "The name of the admin role for your book club"
+					"label": "Админ",
+					"placeholder": "Админ",
+					"description": "Название роли администратора для вашего книжного клуба"
 				},
 				"creator": {
-					"label": "Creator",
-					"placeholder": "Creator",
-					"description": "The name of the creator role for your book club. This is you!"
+					"label": "Создатель",
+					"placeholder": "Создатель",
+					"description": "Название роли создателя для вашего книжного клуба. Это вы!"
 				}
 			},
 			"membershipOptions": {
 				"displayName": {
-					"label": "Display Name",
-					"placeholder": "oromei",
-					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+					"label": "Отображаемое имя",
+					"placeholder": "Отображаемое имя",
+					"description": "Опциональное отображаемое имя в книжном клубе. Если установлено, то замещает ваше имя пользователя"
 				},
 				"hideProgress": {
-					"label": "Hide Progress",
-					"description": "If enabled, your read progress will be hidden from other members of the book club"
+					"label": "Скрыть прогресс",
+					"description": "Если включено, ваш прогресс чтения будет скрыт от других участников книжного клуба"
 				}
 			}
 		},
 		"validation": {
-			"missingName": "Name is required",
-			"alreadyTaken": "is already taken"
+			"missingName": "Название обязательно",
+			"alreadyTaken": "уже занято"
 		}
 	},
 	"createBookClubScene": {
-		"heading": "Create a new book club",
-		"subtitle": "You can create a private book club a select few, or make it public for anyone on the server to join",
+		"heading": "Создать новый книжный клуб",
+		"subtitle": "Вы можете создать частный клуб, выбрав несколько, или сделать его открытым для всех на сервере",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "Шаг",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of the club, including its name and description"
+					"label": "Базовые сведения",
+					"heading": "Основная информация",
+					"description": "Детали клуба, включая его название и описание"
 				},
 				{
-					"label": "Roles",
-					"heading": "Roles",
-					"description": "Customize the roles in your book club"
+					"label": "Роли",
+					"heading": "Роли",
+					"description": "Настройте роли в книжном клубе"
 				},
 				{
-					"label": "Membership",
-					"heading": "Membership Preferences",
-					"description": "Additional options for your book club"
+					"label": "Членство",
+					"heading": "Настройки членства",
+					"description": "Дополнительные настройки вашего книжного клуба"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your club settings before creating it"
+					"label": "Предпросмотр",
+					"heading": "Предпросмотр",
+					"description": "Проверьте настройки клуба перед созданием"
 				}
 			],
 			"review": {

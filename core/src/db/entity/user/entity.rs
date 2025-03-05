@@ -29,7 +29,7 @@ pub struct User {
 	#[schema(value_type = String)]
 	pub created_at: DateTime<FixedOffset>,
 	/// A timestamp of when the user last logged in, in RFC3339 format
-	#[schema(value_type = String)]
+	#[schema(value_type = Option<String>)]
 	pub last_login: Option<DateTime<FixedOffset>>,
 	/// A boolean to indicate if the user is locked, which prevents them from logging in
 	pub is_locked: bool,

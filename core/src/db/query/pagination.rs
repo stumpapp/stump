@@ -304,6 +304,7 @@ pub type PageableDirectoryListing = Pageable<DirectoryListing>;
 #[derive(Serialize, Type, ToSchema)]
 pub struct PageableArray<T: Serialize> {
 	/// The target data being returned.
+	#[schema(no_recursion)]
 	pub data: Vec<T>,
 	/// The pagination information (if paginated).
 	pub _page: Option<PageInfo>,

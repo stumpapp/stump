@@ -162,12 +162,14 @@ impl FileProcessor for EpubProcessor {
 	) -> Result<ProcessedFile, FileError> {
 		tracing::debug!(?path, "processing epub");
 
+		let metadata = Self::process_metadata(path);
+
 		let path_buf = PathBuf::from(path);
 		let epub_file = Self::open(path)?;
 
 		let pages = epub_file.get_num_pages() as i32;
-		// Get metadata from epub file or opf if it exists
-		let metadata = match Self::process_metadata(path) {
+		// Get metadata from epub file if process_metadata failed
+		let metadata = match metadata {
 			Ok(Some(m)) => m,
 			_ => MediaMetadata::from(epub_file.metadata),
 		};

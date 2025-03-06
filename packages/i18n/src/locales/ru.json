@@ -1071,16 +1071,16 @@
 						},
 						"createForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "A friendly name to uniquely identify this view"
+								"label": "Название",
+								"placeholder": "Мой вид",
+								"description": "Понятное название для уникальной идентификации этого вида"
 							}
 						},
 						"updateForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "The updated name for this view, if desired"
+								"label": "Название",
+								"placeholder": "Мой вид",
+								"description": "Обновленное название для этого вида, если необходимо"
 							}
 						}
 					}
@@ -1091,7 +1091,7 @@
 	"settingsScene": {
 		"navigation": {
 			"general": "Общие",
-			"logs": "Logs",
+			"logs": "Логи",
 			"server": "Сервер",
 			"jobs": "Задачи и настройки",
 			"users": "Управление пользователями",
@@ -1099,215 +1099,215 @@
 		},
 		"sidebar": {
 			"application": {
-				"account": "Account",
-				"appearance": "Appearance",
-				"api keys": "API keys",
-				"reader": "Reader",
-				"desktop": "Desktop",
-				"label": "Application"
+				"account": "Учетная запись",
+				"appearance": "Оформление",
+				"api keys": "Ключи API",
+				"reader": "Читалка",
+				"desktop": "Рабочий стол",
+				"label": "Приложение"
 			},
 			"server": {
-				"general": "General",
-				"logs": "Logs",
-				"users": "Users",
-				"jobs": "Jobs",
-				"access": "Access",
-				"email": "Email",
-				"notifications": "Notifications",
-				"label": "Server"
+				"general": "Общие",
+				"logs": "Логи",
+				"users": "Пользователи",
+				"jobs": "Задачи",
+				"access": "Права доступа",
+				"email": "Электронная почта",
+				"notifications": "Уведомления",
+				"label": "Сервер"
 			}
 		},
 		"app/account": {
-			"helmet": "Account settings",
-			"title": "Account settings",
-			"description": "Settings related to your account",
+			"helmet": "Настройки учетной записи",
+			"title": "Настройки учетной записи",
+			"description": "Настройки, связанные с вашей учетной записью",
 			"sections": {
 				"account": {
 					"validation": {
-						"invalidUrl": "Please enter a valid URL",
-						"missingUsername": "Username is required"
+						"invalidUrl": "Пожалуйста, введите правильный URL",
+						"missingUsername": "Требуется имя пользователя"
 					},
 					"labels": {
-						"username": "Username",
-						"password": "Password",
-						"activeChangesPrompt": "You have unsaved changes"
+						"username": "Имя пользователя",
+						"password": "Пароль",
+						"activeChangesPrompt": "У вас есть несохраненные изменения"
 					},
 					"errors": {
-						"updateFailed": "A server error occurred while updating your profile. Please try again."
+						"updateFailed": "Произошла ошибка сервера при обновлении вашего профиля. Пожалуйста, попробуйте еще раз."
 					},
 					"avatarPicker": {
-						"heading": "Set your Avatar Image",
-						"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
-						"preview": "A preview will appear here once you have entered a URL.",
+						"heading": "Установить ваш аватар",
+						"subtitle": "Stump поддерживает внешние пользовательские аватары, которые можно установить с помощью URL. Загрузка изображений не поддерживается, чтобы уменьшить количество данных, хранящихся на сервере.",
+						"preview": "После ввода URL здесь будет предварительный просмотр.",
 						"labels": {
-							"imageUrl": "Image URL",
-							"customAvatar": "Custom Avatar"
+							"imageUrl": "URL изображения",
+							"customAvatar": "Пользовательский аватар"
 						},
 						"buttons": {
-							"confirm": "Confirm Image",
-							"cancel": "Cancel",
-							"edit": "Edit",
-							"changeImage": "Change Image",
-							"removeImage": "Remove Image"
+							"confirm": "Подтвердить изображение",
+							"cancel": "Отменить",
+							"edit": "Редактировать",
+							"changeImage": "Изменить изображение",
+							"removeImage": "Удалить изображение"
 						}
 					},
 					"buttons": {
-						"confirm": "Save Changes"
+						"confirm": "Сохранить изменения"
 					}
 				},
 				"locale": {
 					"localeSelector": {
-						"label": "Language"
+						"label": "Язык"
 					},
-					"heading": "Language and locale",
+					"heading": "Язык и локализация",
 					"subtitle": [
-						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-						"Stump's translations",
-						"if you're able to!"
+						"Stump поддерживает несколько языков и локализаций, установите предпочитаемые. Пожалуйста, подумайте о помощи в улучшении качества",
+						"Переводы Stump",
+						"если вы можете!"
 					]
 				}
 			}
 		},
 		"app/appearance": {
-			"helmet": "Appearance",
-			"title": "Appearance",
-			"description": "Customize the look and feel of the application",
+			"helmet": "Внешний вид",
+			"title": "Внешний вид",
+			"description": "Настроить внешний вид приложения",
 			"sections": {
 				"themeSelect": {
-					"label": "Theme",
+					"label": "Тема оформления",
 					"description": [
-						"If you're interested in creating your own custom theme, check out the",
-						"documentation"
+						"Если вы заинтересованы в создании собственной пользовательской темы, посмотрите",
+						"документацию"
 					],
 					"options": {
-						"light": "Light",
-						"dark": "Dark",
-						"bronze": "Bronze light",
-						"ocean": "Ocean",
-						"autumn": "Autumn",
-						"cosmic": "Cosmic",
-						"pumpkin": "Pumpkin",
-						"matrix": "Matrix"
+						"light": "Светлая",
+						"dark": "Темная",
+						"bronze": "Светлая бронза",
+						"ocean": "Океан",
+						"autumn": "Осень",
+						"cosmic": "Космическая",
+						"pumpkin": "Тыквенная",
+						"matrix": "Матрица"
 					}
 				},
 				"fontSelect": {
-					"label": "Font",
-					"description": "Customize the font used in the application"
+					"label": "Шрифт",
+					"description": "Настроить шрифт, используемый в приложении"
 				},
 				"navigationArrangement": {
-					"label": "Navigation arrangement",
+					"label": "Расположение навигации",
 					"description": {
-						"sidebar": "Arrange and customize the navigation items in the sidebar",
-						"topbar": "Arrange and customize the navigation items in the topbar"
+						"sidebar": "Размещать и настраивать элементы навигации в боковой панели",
+						"topbar": "Размещать и настраивать навигационные элементы в верхней панели"
 					},
-					"isLocked": "Arrangement is locked",
-					"lock": "Lock arrangement",
-					"unlock": "Unlock arrangement",
+					"isLocked": "Размещение заблокировано",
+					"lock": "Заблокировать размещения",
+					"unlock": "Разблокировать размещения",
 					"options": {
-						"Home": "Home",
-						"Explore": "Explore",
-						"Libraries": "Libraries",
-						"BookClubs": "Book clubs",
-						"SmartLists": "Smart lists"
+						"Home": "Главная",
+						"Explore": "Обзор",
+						"Libraries": "Библиотеки",
+						"BookClubs": "Книжные клубы",
+						"SmartLists": "Умные списки"
 					},
 					"entityOptions": {
 						"createAction": {
-							"label": "Show create action",
-							"help": "Show the create action in the navigation"
+							"label": "Показывать действие создания",
+							"help": "Показывать действие создания в навигации"
 						},
 						"linkToAll": {
-							"label": "See all link",
-							"help": "A link to a page dedicated to viewing all items of this type"
+							"label": "Показывать все ссылки",
+							"help": "Ссылка на страницу, посвященную просмотру всех элементов этого типа"
 						}
 					}
 				}
 			}
 		},
 		"app/apiKeys": {
-			"helmet": "API keys",
-			"title": "API keys",
-			"description": "Manage your generated Stump API keys",
+			"helmet": "Ключи API",
+			"title": "Ключи API",
+			"description": "Управление созданными API-ключами Stump",
 			"shared": {
 				"fields": {
-					"name": "Name",
-					"expiration": "Expiration",
-					"last_used": "Last used",
-					"created": "Created",
-					"permissions": "Permissions",
-					"inherited": "Inherited",
-					"explicit": "Explicit"
+					"name": "Название",
+					"expiration": "Срок действия",
+					"last_used": "Последнее использование",
+					"created": "Дата создания",
+					"permissions": "Права доступа",
+					"inherited": "Унаследовано",
+					"explicit": "Явные"
 				}
 			},
 			"sections": {
 				"inspector": {
-					"heading": "API key",
-					"description": "A detailed view of this key",
+					"heading": "Ключ API",
+					"description": "Подробности об этом ключе",
 					"unrestrictedKey": {
-						"heading": "Unrestricted key",
-						"description": "Since you are the server owner, this key has unrestricted access when configured to inherit permissions. Please be careful."
+						"heading": "Неограниченный ключ",
+						"description": "Поскольку вы являетесь владельцем сервера, этот ключ имеет неограниченный доступ при настройке наследования разрешений. Пожалуйста, будьте осторожны."
 					}
 				},
 				"createKey": {
 					"modal": {
-						"trigger": "Create API key",
+						"trigger": "Создать ключ API",
 						"heading": {
-							"creating": "Create API key",
-							"created": "Created key"
+							"creating": "Создать ключ API",
+							"created": "Создать ключ"
 						},
 						"description": {
-							"creating": "API keys are long-lived credentials that can be used to authenticate with the API",
-							"created": "Your new API key has been created. Save the secret somewhere safe, as it will not be shown again"
+							"creating": "Ключи API - это учетные данные с длительным сроком жизни, которые можно использовать для аутентификации с помощью API",
+							"created": "Ваш новый API ключ был создан. Сохраните секретную комбинацию где-то в безопасном месте, позже ее нельзя будет тут подсмотреть"
 						},
-						"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting",
-						"createdKey": "Created key",
-						"savedConfirm": "I saved my key",
-						"submit": "Create key"
+						"inheritDisclaimer": "Этот ключ API наследует ваши полные права доступа. Это значит, что он может делать всё, что можете сделать вы. Будьте осторожны с этой настройкой",
+						"createdKey": "Созданный ключ",
+						"savedConfirm": "Я сохранил свой ключ",
+						"submit": "Создать ключ"
 					}
 				},
 				"table": {
-					"title": "Your keys",
-					"description": "These are the API keys you have created",
+					"title": "Ваши ключи",
+					"description": "Это созданные вами ключи API",
 					"actionMenu": {
-						"inspect": "Inspect",
-						"delete": "Delete"
+						"inspect": "Осмотреть",
+						"delete": "Удалить"
 					},
 					"empty": {
-						"title": "You haven't created any keys yet",
-						"action": "Create an API key to get started"
+						"title": "Вы еще не создали ни одного ключа",
+						"action": "Для начала создайте ключ API"
 					},
-					"noExpiration": "No expiration set"
+					"noExpiration": "Срок действия не установлен"
 				}
 			}
 		},
 		"app/reader": {
-			"helmet": "Reader settings",
-			"title": "Reader settings",
-			"description": "Default options for the Stump readers. These are bound to your current device only",
+			"helmet": "Настройки читалки",
+			"title": "Настройки читалки",
+			"description": "Опции по умолчанию для читалки Stump. Они привязаны только к вашему текущему устройству",
 			"sections": {
 				"universal": {
 					"sections": {
 						"readingDirection": {
-							"label": "Reading direction",
-							"description": "The direction in which the reader will progress through pages"
+							"label": "Направление чтения",
+							"description": "Направление смены страниц в процессе чтения"
 						}
 					}
 				},
 				"imageBasedBooks": {
-					"label": "Image-based books",
-					"description": "Comic books, manga, and other image-based books",
+					"label": "Книги на основе изображений",
+					"description": "Комиксы, манга и другие книги на основе изображений",
 					"sections": {
 						"preloadAheadCount": {
-							"label": "Preload ahead count",
-							"description": "The number of pages to preload ahead of the current page"
+							"label": "Количество предзагруженных до",
+							"description": "Количество страниц до текущей, которые требуется предзагрузить"
 						},
 						"preloadBehindCount": {
-							"label": "Preload behind count",
-							"description": "The number of pages to preload behind the current page"
+							"label": "Количество предзагруженных после",
+							"description": "Количество страниц после текущей, которые требуется предзагрузить"
 						}
 					}
 				},
 				"textBasedBooks": {
-					"label": "Ebook reader",
+					"label": "Читалка электронных книг",
 					"description": "Default settings for text-based books",
 					"sections": {
 						"fontSize": {

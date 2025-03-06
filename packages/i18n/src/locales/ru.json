@@ -575,80 +575,80 @@
 					"table": {
 						"columns": {
 							"timestamp": "Сканировалось в",
-							"config": "Config"
+							"config": "Конфигурация"
 						},
-						"default": "Default",
-						"custom": "Custom"
+						"default": "По умолчанию",
+						"custom": "Настраиваемый"
 					},
-					"clearHistory": "Delete scan history"
+					"clearHistory": "Удалить историю сканирования"
 				}
 			}
 		},
 		"options/thumbnails": {
-			"title": "Thumbnails",
-			"description": "Settings and management options for thumbnails in this library",
+			"title": "Эскизы",
+			"description": "Настройки и параметры управления миниатюрами в этой библиотеке",
 			"sections": {
 				"management": {
-					"heading": "Management",
-					"description": "Manage the existing thumbnails for this library",
+					"heading": "Управление",
+					"description": "Управление существующими миниатюрами для этой библиотеки",
 					"thumbnailSelector": {},
 					"deleteThumbnails": {}
 				}
 			}
 		},
 		"options/analysis": {
-			"title": "Analysis",
-			"description": "Analyze the contents of this library to identify potential issues or improvements",
+			"title": "Анализ",
+			"description": "Анализ содержимого этой библиотеки для выявления потенциальных проблем или улучшений",
 			"sections": {
 				"analyzeBooks": {
-					"heading": "Analyze books",
-					"description": "Analyze the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
-					"disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable",
-					"analyzeButton": "Analyze books"
+					"heading": "Анализ книг",
+					"description": "Анализ книг в этой библиотеке для прикрепления дополнительных метаданных в базе данных, таких, как размеры страниц для книг на основе изображений",
+					"disclaimer": "Этот процесс потребляет много ресурсов и может длиться продолжительное время. В будущем он будет более настраиваемым",
+					"analyzeButton": "Анализ книг"
 				},
 				"missingFiles": {
-					"heading": "Missing files",
-					"description": "Files that are referenced in the database but cannot be located on disk",
-					"noMissingFiles": "There are no missing files in this library"
+					"heading": "Отсутствующие файлы",
+					"description": "Файлы, на которые ссылается база данных, но не обнаруженные на диске",
+					"noMissingFiles": "В этой библиотеке нет отсутствующих файлов"
 				},
 				"duplicateFiles": {
-					"heading": "Duplicate files",
-					"description": "Files that are potentially duplicated on disk",
-					"noDuplicateFiles": "There are no duplicate files detected for this library"
+					"heading": "Дубликаты файлов",
+					"description": "Файлы, которые потенциально дублируются на диске",
+					"noDuplicateFiles": "В этой библиотеке е обнаружено дубликатов файлов"
 				}
 			}
 		},
 		"danger-zone/access-control": {
-			"title": "Access Control",
-			"description": "Control who can access the content in this library",
+			"title": "Управление доступом",
+			"description": "Контролирование получения доступа к содержимому этой библиотеки",
 			"sections": {
 				"libraryExclusions": {
-					"heading": "Exclude users",
-					"description": "Prevent certain users from accessing this library or its contents",
-					"noUsers": "There are no other registered users to exclude from this library",
-					"updated": "Exclusions updated",
-					"failure": "Failed to update exclusions"
+					"heading": "Исключенные пользователи",
+					"description": "Запретить определенным пользователям доступ к этой библиотеке или ее содержимому",
+					"noUsers": "Нет зарегистрированных пользователей для исключения из этой библиотеки",
+					"updated": "Исключения обновлены",
+					"failure": "Не удалось обновить исключения"
 				}
 			}
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this library and all of its contents or certain resources",
+			"title": "Действия при удалении",
+			"description": "Полностью удалить эту библиотеку и все ее содержимое или определенные ресурсы",
 			"sections": {
 				"cleanLibrary": {
-					"heading": "Clean library",
-					"description": "Remove all media and series that cannot be located on disk",
-					"disclaimer": "While this action will not delete any files, it will permanently delete all records relating to media and series which have a missing status",
+					"heading": "Почистить библиотеку",
+					"description": "Удалить все медиа и серии, которые не удалось обнаружить на диске",
+					"disclaimer": "Хотя это действие не удалит ни одного файла, оно навсегда удалит все записи, относящиеся к медиа и сериям со статусом \"отсутствует\"",
 					"confirmation": {
-						"label": "Clean library",
-						"text": "Are you sure you want to clean this library?"
+						"label": "Почистить библиотеку",
+						"text": "Вы уверены, что хотите почистить эту библиотеку?"
 					}
 				},
 				"deleteLibrary": {
-					"heading": "Delete library",
+					"heading": "Удалить библиотеку",
 					"description": [
-						"Permanently delete this library and all its contents.",
-						"This action cannot be undone"
+						"Полностью удалить эту библиотеку и все ее содержимое.",
+						"Это действие нельзя будет отменить"
 					]
 				}
 			}
@@ -665,24 +665,24 @@
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "Continue reading",
+			"title": "Продолжить чтение",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any in-progress books you start will show up here"
+				"heading": "Нет данных для отображения",
+				"message": "Здесь будут отображаться все начатые книги"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Recently added series",
+			"title": "Недавно добавленные серии",
 			"emptyState": {
-				"heading": "No series to display",
-				"message": "Any series you add to your libraries will show up here"
+				"heading": "Нет серий для отображения",
+				"message": "Здесь будут отображаться все добавленные в библиотеку серии"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Recently added books",
+			"title": "Недавно добавленные книги",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any recent books you add will show up here"
+				"heading": "Нет данных для отображения",
+				"message": "Здесь будут отображаться недавно добавленные книги"
 			}
 		}
 	},
@@ -694,248 +694,248 @@
 	},
 	"createOrUpdateSmartListForm": {
 		"validation": {
-			"nameTooShort": "Name must be at least 2 characters",
-			"nameTaken": "Cannot use this name"
+			"nameTooShort": "Название должно содержать не менее 2 символов",
+			"nameTaken": "Нельзя использовать это название"
 		},
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My smart list",
-				"description": "Must be unique, but can be changed later"
+				"label": "Название",
+				"placeholder": "Мой умный список",
+				"description": "Должно быть уникальным, но может быть изменено позже"
 			},
 			"description": {
-				"label": "Description",
-				"placeholder": "A very intelligent list",
-				"description": "An optional description of your smart list"
+				"label": "Описание",
+				"placeholder": "Очень умный список",
+				"description": "Описание вашего умного списка — опционально"
 			},
 			"visibility": {
-				"label": "Visibility",
+				"label": "Доступность просмотра",
 				"options": {
 					"public": {
-						"label": "Public",
-						"description": "Accessible to all users on the server"
+						"label": "Открытый доступ",
+						"description": "Доступно для всех пользователей сервера"
 					},
 					"shared": {
-						"label": "Shared",
-						"description": "Specific users can access this smart list",
-						"createDisclaimer": "You can select who this list is shared with after creation"
+						"label": "Общий доступ",
+						"description": "Определенные пользователи имеют доступ к этому умному списку",
+						"createDisclaimer": "После создания вы можете выбрать, с кем поделиться этим список"
 					},
 					"private": {
-						"label": "Private",
-						"description": "Only you can access this smart list"
+						"label": "Частный",
+						"description": "Только вы имеете доступ к этому умному списку"
 					}
 				}
 			},
 			"queryBuilder": {
-				"uiPerformance": "This feature is missing performance optimizations on the UI and may be slow with filters which produce large result sets. This will be improved in the future",
+				"uiPerformance": "Производительность этой функции не оптимизирована на уровне интерфейса пользователя и может медленно работать с фильтрами, возвращающими большие объемы данных. В будущем мы это улучшим и оптимизируем",
 				"rootJoiner": {
 					"and": {
-						"label": "AND",
-						"description": "All filter groups must be true for a book to be matched"
+						"label": "И",
+						"description": "Все группы фильтров должны быть истиной для подходящей книги"
 					},
 					"or": {
-						"label": "OR",
-						"description": "At least one filter group must be true for a book to be matched"
+						"label": "ИЛИ",
+						"description": "По крайней мере одна группа фильтров должна быть истиной для подходящей книги"
 					}
 				},
 				"groupJoiner": {
 					"and": {
-						"label": "AND",
-						"description": "All must be true"
+						"label": "И",
+						"description": "Все должны быть истиной"
 					},
 					"or": {
-						"label": "OR",
-						"description": "At least one must be true"
+						"label": "ИЛИ",
+						"description": "По крайней мере один должен быть истиной"
 					},
 					"not": {
-						"label": "NOT",
-						"description": "None can be true"
+						"label": "НЕ",
+						"description": "None может быть истиной"
 					}
 				},
 				"grouping": {
-					"label": "Group by",
-					"description": "How the books in this smart list should be grouped",
+					"label": "Группировать по",
+					"description": "Как следует сгруппировать книги в этом умном списке",
 					"options": {
 						"by_books": {
-							"label": "None"
+							"label": "Без группировки"
 						},
 						"by_series": {
-							"label": "Series"
+							"label": "По сериям"
 						},
 						"by_library": {
-							"label": "Library"
+							"label": "По библиотеке"
 						}
 					}
 				},
 				"filters": {
-					"emptyState": "Add a group to get started",
+					"emptyState": "Добавить группу для начала",
 					"actions": {
-						"addFilter": "Add filter",
-						"addGroup": "Add group",
-						"deleteFilter": "Delete filter",
-						"deleteGroup": "Delete group"
+						"addFilter": "Добавить фильтр",
+						"addGroup": "Добавить группу",
+						"deleteFilter": "Удалить фильтр",
+						"deleteGroup": "Удалить группу"
 					},
-					"is": "is",
+					"is": "равно",
 					"fieldSelect": {
-						"placeholder": "Attribute",
+						"placeholder": "Атрибут",
 						"source": {
-							"label": "Source",
-							"back": "Back",
+							"label": "Источник",
+							"back": "Назад",
 							"book": {
-								"label": "Book",
+								"label": "Книга",
 								"attributes": {
-									"name": "Filename",
-									"size": "Size",
-									"extension": "Extension",
-									"created_at": "Created at",
-									"updated_at": "Updated at",
-									"status": "Status",
-									"path": "Path",
-									"pages": "Pages",
-									"tags": "Tags"
+									"name": "Имя файла",
+									"size": "Размер",
+									"extension": "Расширение",
+									"created_at": "Дата создания",
+									"updated_at": "Дата изменения",
+									"status": "Статус",
+									"path": "Путь",
+									"pages": "Страницы",
+									"tags": "Метки"
 								}
 							},
 							"book_meta": {
-								"label": "Book Meta",
+								"label": "Метаданные книги",
 								"attributes": {
-									"title": "Title",
-									"summary": "Summary",
-									"notes": "Notes",
-									"genre": "Genre",
-									"writers": "Writers",
-									"pencillers": "Pencillers",
-									"inkers": "Inkers",
-									"letterers": "Letterers",
-									"editors": "Editors",
-									"publisher": "Publisher",
-									"colorists": "Colorist",
-									"cover_artists": "Cover artists",
-									"links": "Links",
-									"characters": "Characters",
-									"teams": "Teams"
+									"title": "Заголовок",
+									"summary": "Сводка",
+									"notes": "Примечания",
+									"genre": "Жанр",
+									"writers": "Писатели",
+									"pencillers": "Иллюстраторы",
+									"inkers": "Тушевальщики",
+									"letterers": "Литераторы",
+									"editors": "Редакторы",
+									"publisher": "Издатели",
+									"colorists": "Колористы",
+									"cover_artists": "Иллюстраторы обложек",
+									"links": "Ссылки",
+									"characters": "Персонажи",
+									"teams": "Команды"
 								}
 							},
 							"series": {
-								"label": "Series",
+								"label": "Серии",
 								"attributes": {
-									"name": "Name",
-									"path": "Path"
+									"name": "Название",
+									"path": "Путь"
 								}
 							},
 							"series_meta": {
-								"label": "Series Meta",
+								"label": "Метаданные серий",
 								"attributes": {
-									"age_rating": "Age rating",
-									"title": "Title",
-									"summary": "Summary",
-									"meta_type": "Type",
-									"publisher": "Publisher",
-									"imprint": "Imprint",
-									"comicid": "Comic ID",
-									"booktype": "Book type",
-									"status": "Status",
-									"volume": "Volume"
+									"age_rating": "Возрастной рейтинг",
+									"title": "Заголовок",
+									"summary": "Сводка",
+									"meta_type": "Тип",
+									"publisher": "Издатель",
+									"imprint": "Отпечаток",
+									"comicid": "ID комикса",
+									"booktype": "Тип книги",
+									"status": "Статус",
+									"volume": "Том"
 								}
 							},
 							"library": {
-								"label": "Library",
+								"label": "Библиотека",
 								"attributes": {
-									"name": "Name",
-									"path": "Path"
+									"name": "Название",
+									"path": "Путь"
 								}
 							}
 						}
 					},
 					"basicValue": {
-						"placeholder": "Value",
-						"date": "Date"
+						"placeholder": "Значение",
+						"date": "Дата"
 					},
 					"rangeValue": {
 						"from": {
-							"date": "From date",
-							"number": "From"
+							"date": "С даты",
+							"number": "С"
 						},
 						"to": {
-							"date": "To date",
-							"number": "To"
+							"date": "До даты",
+							"number": "До"
 						},
-						"inclusive": "Inclusive"
+						"inclusive": "Включительно"
 					},
 					"listValue": {
-						"placeholder": "Add values",
-						"emptyState": "No values to display"
+						"placeholder": "Добавить значение",
+						"emptyState": "Нет значений для отображения"
 					}
 				}
 			}
 		}
 	},
 	"createSmartListScene": {
-		"heading": "Create smart list",
-		"subtitle": "On-the-fly list creation based on a set of filters",
+		"heading": "Создать умный список",
+		"subtitle": "Создание списка на лету на основе набора фильтров",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "Шаг",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this smart list, including its name, description, and visibility"
+					"label": "Базовые сведения",
+					"heading": "Основная информация",
+					"description": "Детали этого умного списка, включая его название, описание и видимость"
 				},
 				{
-					"label": "Filters",
-					"heading": "Filters",
-					"description": "The filters to apply to this smart list"
+					"label": "Фильтры",
+					"heading": "Фильтры",
+					"description": "Применяемые к этому умному списку фильтры"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your smart list settings before creating it"
+					"label": "Предпросмотр",
+					"heading": "Предпросмотр",
+					"description": "Просмотр вашего умного списка перед созданием"
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "Да",
+				"no": "Нет",
+				"none": "Отсутствует",
 				"labels": {
-					"name": "Name",
-					"description": "Description",
-					"visibility": "Visibility",
-					"grouping": "Group by"
+					"name": "Название",
+					"description": "Описание",
+					"visibility": "Видимость",
+					"grouping": "Группировать по"
 				}
 			},
 			"buttons": {
-				"confirm": "Create list"
+				"confirm": "Создать список"
 			}
 		}
 	},
 	"createOrUpdateApiKey": {
 		"validation": {
-			"futureDate": "Expiration date must be in the future"
+			"futureDate": "Срок действия должен быть в будущем"
 		},
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "Koreader Sync"
+				"label": "Название",
+				"placeholder": "Синхронизация Koreader"
 			},
 			"expiration": {
-				"label": "Expiration",
-				"placeholder": "Never"
+				"label": "Срок действия",
+				"placeholder": "Никогда"
 			},
 			"expires_at": {
-				"label": "Expires at",
-				"placeholder": "Never"
+				"label": "Истекает",
+				"placeholder": "Никогда"
 			},
 			"permissions": {
 				"inherit": {
-					"label": "Inherit permissions",
-					"description": "The same permissions as your account"
+					"label": "Наследовать права доступа",
+					"description": "Те же права, что и у вашей учетной записи"
 				},
 				"explicit": {
-					"label": "Explicit permissions",
-					"description": "Choose the permissions this key should have"
+					"label": "Явные права",
+					"description": "Выберите права, которые должен иметь ключ"
 				}
 			}
 		},
-		"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting"
+		"inheritDisclaimer": "Этот ключ API наследует ваши полные права доступа. Это значит, что он может делать всё, что можете сделать вы. Будьте осторожны с этой настройкой"
 	},
 	"userSmartListsScene": {
 		"heading": "Smart lists",

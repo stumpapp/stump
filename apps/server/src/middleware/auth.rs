@@ -177,7 +177,7 @@ pub async fn auth_middleware(
 	let save_basic_session = req_headers
 		.get(STUMP_SAVE_BASIC_SESSION_HEADER)
 		.and_then(|header| header.to_str().ok())
-		.is_none_or(|header| header == "true");
+		.map_or(true, |header| header == "true");
 
 	let request_uri = req.extensions().get::<OriginalUri>().cloned().map_or_else(
 		|| req.uri().path().to_owned(),

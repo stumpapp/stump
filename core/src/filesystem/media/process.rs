@@ -32,6 +32,8 @@ pub struct FileProcessorOptions {
 	pub generate_file_hashes: bool,
 	/// Whether to process metadata for the file
 	pub process_metadata: bool,
+	/// Whether to process page count for the file
+	pub process_pages: bool,
 	/// Whether to generate a hash for the file that is compatible with KOReader
 	pub generate_koreader_hashes: bool,
 }
@@ -44,6 +46,7 @@ impl From<LibraryConfig> for FileProcessorOptions {
 			generate_file_hashes: options.generate_file_hashes,
 			generate_koreader_hashes: options.generate_koreader_hashes,
 			process_metadata: options.process_metadata,
+			process_pages: true,
 		}
 	}
 }
@@ -56,6 +59,7 @@ impl From<&LibraryConfig> for FileProcessorOptions {
 			generate_file_hashes: options.generate_file_hashes,
 			generate_koreader_hashes: options.generate_koreader_hashes,
 			process_metadata: options.process_metadata,
+			process_pages: true,
 		}
 	}
 }
@@ -90,8 +94,6 @@ pub trait FileProcessor {
 		options: FileProcessorOptions,
 		config: &StumpConfig,
 	) -> Result<ProcessedFile, FileError>;
-
-	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError>;
 
 	/// Get the bytes of a page of the file.
 	fn get_page(
@@ -218,35 +220,34 @@ pub async fn process_async(
 #[tracing::instrument(err, fields(path = %path.as_ref().display()))]
 pub fn process_metadata(
 	path: impl AsRef<Path>,
+	config: &StumpConfig,
 ) -> Result<Option<MediaMetadata>, FileError> {
-	let mime = ContentType::from_path(path.as_ref()).mime_type();
+	let options = FileProcessorOptions {
+		convert_rar_to_zip: false,
+		delete_conversion_source: false,
+		generate_file_hashes: false,
+		process_metadata: true,
+		process_pages: true,
+		generate_koreader_hashes: false,
+	};
 
-	let path_str = path.as_ref().to_str().unwrap_or_default();
-
-	match mime.as_str() {
-		"application/zip" | "application/vnd.comicbook+zip" => {
-			ZipProcessor::process_metadata(path_str)
-		},
-		"application/vnd.rar" | "application/vnd.comicbook-rar" => {
-			RarProcessor::process_metadata(path_str)
-		},
-		"application/epub+zip" => EpubProcessor::process_metadata(path_str),
-		"application/pdf" => PdfProcessor::process_metadata(path_str),
-		_ => Err(FileError::UnsupportedFileType(path_str.to_string())),
-	}
+	let path = path.as_ref().to_path_buf();
+	Ok(process(path.as_path(), options, config)?.metadata)
 }
 
 #[tracing::instrument(err, fields(path = %path.as_ref().display()))]
 pub async fn process_metadata_async(
 	path: impl AsRef<Path>,
+	config: &StumpConfig,
 ) -> Result<Option<MediaMetadata>, FileError> {
 	let (tx, rx) = oneshot::channel();
 
 	let handle = spawn_blocking({
 		let path = path.as_ref().to_path_buf();
+		let config = config.clone();
 
 		move || {
-			let send_result = tx.send(process_metadata(path.as_path()));
+			let send_result = tx.send(process_metadata(path.as_path(), &config));
 			tracing::trace!(
 				is_err = send_result.is_err(),
 				"Sending result of sync process_metadata"

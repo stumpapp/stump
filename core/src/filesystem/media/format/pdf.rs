@@ -83,39 +83,47 @@ impl FileProcessor for PdfProcessor {
 		})
 	}
 
-	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError> {
-		let file = FileOptions::cached()
-			.parse_options(ParseOptions::tolerant())
-			.open(path)?;
-
-		Ok(file.trailer.info_dict.map(MediaMetadata::from))
-	}
-
 	fn process(
 		path: &str,
 		options: FileProcessorOptions,
 		_: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
-		let file = FileOptions::cached()
-			.parse_options(ParseOptions::tolerant())
-			.open(path)?;
-
-		let pages = file.pages().count() as i32;
-		// Note: The metadata is already parsed by the PDF library, so might as well use it
-		// PDF metadata is generally poop though
-		let metadata = file.trailer.info_dict.map(MediaMetadata::from);
-		let ProcessedFileHashes {
-			hash,
-			koreader_hash,
-		} = PdfProcessor::generate_hashes(path, options)?;
-
-		Ok(ProcessedFile {
+		let mut processed_file = ProcessedFile {
 			path: PathBuf::from(path),
-			hash,
-			koreader_hash,
-			metadata,
-			pages,
-		})
+			hash: None,
+			koreader_hash: None,
+			metadata: None,
+			pages: 0,
+		};
+		if options.process_pages || options.process_metadata {
+			let file = FileOptions::cached()
+				.parse_options(ParseOptions::tolerant())
+				.open(path)?;
+			if options.process_pages {
+				processed_file.pages = file.pages().count() as i32;
+			}
+			// Note: The metadata is already parsed by the PDF library, so might as well use it
+			// PDF metadata is generally poop though
+			if options.process_metadata {
+				processed_file.metadata = file.trailer.info_dict.map(MediaMetadata::from);
+			}
+		}
+
+		if options.generate_file_hashes || options.generate_koreader_hashes {
+			let ProcessedFileHashes {
+				hash,
+				koreader_hash,
+			} = PdfProcessor::generate_hashes(path, options)?;
+
+			if options.generate_file_hashes {
+				processed_file.hash = hash;
+			}
+			if options.generate_koreader_hashes {
+				processed_file.koreader_hash = koreader_hash;
+			}
+		}
+
+		Ok(processed_file)
 	}
 
 	// TODO: The decision to use PNG should be a configuration option

@@ -9,7 +9,6 @@ use unrar::{Archive, CursorBeforeHeader, List, OpenArchive, Process, UnrarResult
 
 use crate::{
 	config::StumpConfig,
-	db::entity::MediaMetadata,
 	filesystem::{
 		archive::create_zip_archive,
 		content_type::ContentType,
@@ -120,45 +119,19 @@ impl FileProcessor for RarProcessor {
 		})
 	}
 
-	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError> {
-		let mut archive = RarProcessor::open_for_processing(path)?;
-		let mut metadata_buf = None;
-
-		while let Ok(Some(header)) = archive.read_header() {
-			let entry = header.entry();
-
-			if entry.is_directory() {
-				archive = header.skip()?;
-				continue;
-			}
-
-			if entry.filename.is_hidden_file() {
-				archive = header.skip()?;
-				continue;
-			}
-
-			if entry.filename.as_os_str() == "ComicInfo.xml" {
-				let (data, _) = header.read()?;
-				metadata_buf = Some(data);
-				break;
-			} else {
-				archive = header.skip()?;
-			}
-		}
-
-		if let Some(buf) = metadata_buf {
-			let content_str = std::str::from_utf8(&buf)?;
-			Ok(metadata_from_buf(content_str))
-		} else {
-			Ok(None)
-		}
-	}
-
 	fn process(
 		path: &str,
 		options: FileProcessorOptions,
 		config: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
+		let mut processed_file = ProcessedFile {
+			path: PathBuf::from(path),
+			hash: None,
+			koreader_hash: None,
+			metadata: None,
+			pages: 0,
+		};
+
 		if options.convert_rar_to_zip {
 			let zip_path_buf = RarProcessor::to_zip(
 				path,
@@ -174,55 +147,67 @@ impl FileProcessor for RarProcessor {
 			return ZipProcessor::process(zip_path, options, config);
 		}
 
-		let ProcessedFileHashes {
-			hash,
-			koreader_hash,
-		} = RarProcessor::generate_hashes(path, options)?;
-
-		let mut archive = RarProcessor::open_for_processing(path)?;
-		let mut pages = 0;
-		let mut metadata_buf = None;
-
-		while let Ok(Some(header)) = archive.read_header() {
-			let entry = header.entry();
-
-			if entry.is_directory() {
-				archive = header.skip()?;
-				continue;
+		if options.generate_file_hashes || options.generate_koreader_hashes {
+			let ProcessedFileHashes {
+				hash,
+				koreader_hash,
+			} = RarProcessor::generate_hashes(path, options)?;
+			if options.generate_file_hashes {
+				processed_file.hash = hash;
 			}
-
-			if entry.filename.is_hidden_file() {
-				archive = header.skip()?;
-				continue;
-			}
-
-			if entry.filename.as_os_str() == "ComicInfo.xml" && options.process_metadata {
-				let (data, rest) = header.read()?;
-				metadata_buf = Some(data);
-				archive = rest;
-			} else {
-				// If the entry is not an image then it cannot be a valid page
-				if entry.filename.is_img() {
-					pages += 1;
-				}
-				archive = header.skip()?;
+			if options.generate_koreader_hashes {
+				processed_file.koreader_hash = koreader_hash;
 			}
 		}
 
-		let metadata = if let Some(buf) = metadata_buf {
-			let content_str = std::str::from_utf8(&buf)?;
-			metadata_from_buf(content_str)
-		} else {
-			None
-		};
+		if options.process_pages || options.process_metadata {
+			let mut archive = RarProcessor::open_for_processing(path)?;
+			let mut pages = 0;
+			let mut metadata_buf = None;
 
-		Ok(ProcessedFile {
-			path: PathBuf::from(path),
-			hash,
-			koreader_hash,
-			metadata,
-			pages,
-		})
+			while let Ok(Some(header)) = archive.read_header() {
+				let entry = header.entry();
+
+				if entry.is_directory() {
+					archive = header.skip()?;
+					continue;
+				}
+
+				if entry.filename.is_hidden_file() {
+					archive = header.skip()?;
+					continue;
+				}
+
+				if entry.filename.as_os_str() == "ComicInfo.xml"
+					&& options.process_metadata
+				{
+					let (data, rest) = header.read()?;
+					metadata_buf = Some(data);
+					archive = rest;
+				} else {
+					// If the entry is not an image then it cannot be a valid page
+					if entry.filename.is_img() {
+						pages += 1;
+					}
+					archive = header.skip()?;
+				}
+			}
+
+			let metadata = if let Some(buf) = metadata_buf {
+				let content_str = std::str::from_utf8(&buf)?;
+				metadata_from_buf(content_str)
+			} else {
+				None
+			};
+			if options.process_pages {
+				processed_file.pages = pages;
+			}
+			if options.process_metadata {
+				processed_file.metadata = metadata;
+			}
+		}
+
+		Ok(processed_file)
 	}
 
 	fn get_page(

@@ -89,72 +89,6 @@ impl FileProcessor for EpubProcessor {
 		})
 	}
 
-	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError> {
-		let epub_file = Self::open(path)?;
-		let embedded_metadata = MediaMetadata::from(epub_file.metadata);
-
-		// try get opf file
-		let file_path = std::path::Path::new(path).with_extension("opf");
-		if file_path.exists() {
-			// extract OPF data
-			let opf_string = std::fs::read_to_string(file_path)?;
-			let mut reader = Reader::from_str(opf_string.as_str());
-			reader.config_mut().trim_text(true);
-			let mut current_tag = String::new();
-
-			let mut opf_metadata: HashMap<String, Vec<String>> = HashMap::new();
-
-			while let Ok(event) = reader.read_event() {
-				match event {
-					Event::Start(ref e) | Event::Empty(ref e) => {
-						let tag_name =
-							String::from_utf8_lossy(e.name().as_ref()).to_string();
-
-						// normalize tags
-						current_tag = tag_name
-							.strip_prefix("dc:")
-							.unwrap_or(tag_name.as_str())
-							.to_string();
-
-						if let Some(attr) =
-							e.attributes().filter_map(|a| a.ok()).find(|a| {
-								a.key.as_ref() == b"property" || a.key.as_ref() == b"name"
-							}) {
-							current_tag = format!(
-								"{}: {}",
-								current_tag,
-								String::from_utf8_lossy(&attr.value)
-							);
-						}
-					},
-					Event::Text(e) => {
-						if let Ok(text) = e.unescape() {
-							opf_metadata
-								.entry(current_tag.clone())
-								.or_default()
-								.push(text.to_string());
-						}
-					},
-					Event::Eof => {
-						break;
-					},
-					_ => {},
-				}
-			}
-
-			// merge opf and embedded, prioritizing opf
-			let opf_metadata = MediaMetadata::from(opf_metadata);
-			let mut combined_metadata = opf_metadata.clone();
-
-			combined_metadata.id = opf_metadata.id;
-			combined_metadata.merge(embedded_metadata);
-
-			return Ok(Some(combined_metadata));
-		}
-
-		Ok(Some(embedded_metadata))
-	}
-
 	fn process(
 		path: &str,
 		options: FileProcessorOptions,
@@ -162,29 +96,36 @@ impl FileProcessor for EpubProcessor {
 	) -> Result<ProcessedFile, FileError> {
 		tracing::debug!(?path, "processing epub");
 
-		let metadata = Self::process_metadata(path);
-
-		let path_buf = PathBuf::from(path);
-		let epub_file = Self::open(path)?;
-
-		let pages = epub_file.get_num_pages() as i32;
-		// Get metadata from epub file if process_metadata failed
-		let metadata = match metadata {
-			Ok(Some(m)) => m,
-			_ => MediaMetadata::from(epub_file.metadata),
+		let mut processed_file = ProcessedFile {
+			path: PathBuf::from(path),
+			hash: None,
+			koreader_hash: None,
+			metadata: None,
+			pages: 0,
 		};
-		let ProcessedFileHashes {
-			hash,
-			koreader_hash,
-		} = Self::generate_hashes(path, options)?;
 
-		Ok(ProcessedFile {
-			path: path_buf,
-			hash,
-			koreader_hash,
-			metadata: Some(metadata),
-			pages,
-		})
+		if options.process_pages || options.process_metadata {
+			let epub_file = Self::open(path)?;
+
+			if options.process_pages {
+				processed_file.pages = epub_file.get_num_pages() as i32;
+			}
+			// This still needs to be changed to take epub_file
+			if options.process_metadata {
+				processed_file.metadata = Self::process_metadata(path, epub_file)?;
+			}
+		};
+
+		if options.generate_file_hashes || options.generate_koreader_hashes {
+			let ProcessedFileHashes {
+				hash,
+				koreader_hash,
+			} = Self::generate_hashes(path, options)?;
+			processed_file.hash = hash;
+			processed_file.koreader_hash = koreader_hash;
+		};
+
+		Ok(processed_file)
 	}
 
 	fn get_page(
@@ -253,6 +194,74 @@ impl FileProcessor for EpubProcessor {
 impl EpubProcessor {
 	pub fn open(path: &str) -> Result<EpubDoc<BufReader<File>>, FileError> {
 		EpubDoc::new(path).map_err(|e| FileError::EpubOpenError(e.to_string()))
+	}
+
+	pub fn process_metadata(
+		path: &str,
+		epub_file: EpubDoc<BufReader<File>>,
+	) -> Result<Option<MediaMetadata>, FileError> {
+		let embedded_metadata = MediaMetadata::from(epub_file.metadata);
+
+		// try get opf file
+		let file_path = std::path::Path::new(path).with_extension("opf");
+		if file_path.exists() {
+			// extract OPF data
+			let opf_string = std::fs::read_to_string(file_path)?;
+			let mut reader = Reader::from_str(opf_string.as_str());
+			reader.config_mut().trim_text(true);
+			let mut current_tag = String::new();
+
+			let mut opf_metadata: HashMap<String, Vec<String>> = HashMap::new();
+
+			while let Ok(event) = reader.read_event() {
+				match event {
+					Event::Start(ref e) | Event::Empty(ref e) => {
+						let tag_name =
+							String::from_utf8_lossy(e.name().as_ref()).to_string();
+
+						// normalize tags
+						current_tag = tag_name
+							.strip_prefix("dc:")
+							.unwrap_or(tag_name.as_str())
+							.to_string();
+
+						if let Some(attr) =
+							e.attributes().filter_map(|a| a.ok()).find(|a| {
+								a.key.as_ref() == b"property" || a.key.as_ref() == b"name"
+							}) {
+							current_tag = format!(
+								"{}: {}",
+								current_tag,
+								String::from_utf8_lossy(&attr.value)
+							);
+						}
+					},
+					Event::Text(e) => {
+						if let Ok(text) = e.unescape() {
+							opf_metadata
+								.entry(current_tag.clone())
+								.or_default()
+								.push(text.to_string());
+						}
+					},
+					Event::Eof => {
+						break;
+					},
+					_ => {},
+				}
+			}
+
+			// merge opf and embedded, prioritizing opf
+			let opf_metadata = MediaMetadata::from(opf_metadata);
+			let mut combined_metadata = opf_metadata.clone();
+
+			combined_metadata.id = opf_metadata.id;
+			combined_metadata.merge(embedded_metadata);
+
+			return Ok(Some(combined_metadata));
+		}
+
+		Ok(Some(embedded_metadata))
 	}
 
 	fn get_cover_path(resources: &HashMap<String, (PathBuf, String)>) -> Option<String> {
@@ -704,8 +713,9 @@ mod tests {
 	#[test]
 	fn test_process_metadata() {
 		let path = get_test_epub_path();
+		let epub_file = EpubProcessor::open(&path).unwrap();
 
-		let processed_metadata = EpubProcessor::process_metadata(&path);
+		let processed_metadata = EpubProcessor::process_metadata(&path, epub_file);
 		match processed_metadata {
 			Ok(Some(metadata)) => {
 				assert_eq!(

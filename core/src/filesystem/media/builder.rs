@@ -4,7 +4,7 @@ use prisma_client_rust::chrono::{DateTime, FixedOffset, Utc};
 
 use crate::{
 	config::StumpConfig,
-	db::entity::{LibraryConfig, Media, MediaMetadata, Series},
+	db::entity::{LibraryConfig, Media, Series},
 	filesystem::{
 		process,
 		scanner::{CustomVisit, CustomVisitResult},
@@ -13,7 +13,7 @@ use crate::{
 	CoreError, CoreResult,
 };
 
-use super::{generate_hashes, process_metadata, ProcessedFileHashes};
+use super::{FileProcessorOptions, ProcessedFileHashes};
 
 pub struct MediaBuilder {
 	path: PathBuf,
@@ -101,24 +101,26 @@ impl MediaBuilder {
 		})
 	}
 
-	pub fn regen_hashes(&self) -> CoreResult<ProcessedFileHashes> {
-		Ok(generate_hashes(
-			self.path.clone(),
-			self.library_config.clone().into(),
-		)?)
-	}
-
-	pub fn regen_meta(&self) -> CoreResult<Option<MediaMetadata>> {
-		Ok(process_metadata(self.path.clone())?)
-	}
-
 	pub fn custom_visit(self, config: CustomVisit) -> CoreResult<CustomVisitResult> {
 		let mut result = CustomVisitResult::default();
+		let processor_options = FileProcessorOptions {
+			convert_rar_to_zip: false,
+			delete_conversion_source: false,
+			generate_file_hashes: config.regen_hashes,
+			generate_koreader_hashes: config.regen_hashes,
+			process_metadata: config.regen_meta,
+			process_pages: config.regen_meta,
+		};
+		let processed_file =
+			process(self.path.as_path(), processor_options, &self.config)?;
 		if config.regen_hashes {
-			result.hashes = Some(self.regen_hashes()?);
+			result.hashes = Some(ProcessedFileHashes {
+				hash: processed_file.hash,
+				koreader_hash: processed_file.koreader_hash,
+			});
 		}
 		if config.regen_meta {
-			result.meta = self.regen_meta()?.map(Box::new);
+			result.meta = processed_file.metadata.map(Box::new);
 		}
 		Ok(result)
 	}
@@ -239,8 +241,12 @@ mod tests {
 
 		let builder =
 			MediaBuilder::new(path, series_id, library_config, &StumpConfig::debug());
-		let hashes = builder.regen_hashes();
-		assert!(hashes.is_ok());
+		let custom_visit = CustomVisit {
+			regen_hashes: true,
+			regen_meta: false,
+		};
+		let hashes = builder.custom_visit(custom_visit).unwrap().hashes;
+		assert!(hashes.is_some());
 		assert!(hashes.unwrap().hash.is_some());
 	}
 }

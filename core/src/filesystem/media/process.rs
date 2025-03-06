@@ -227,7 +227,7 @@ pub fn process_metadata(
 		delete_conversion_source: false,
 		generate_file_hashes: false,
 		process_metadata: true,
-		process_pages: true,
+		process_pages: false,
 		generate_koreader_hashes: false,
 	};
 

@@ -1535,290 +1535,290 @@
 			"createUser": {
 				"helmet": "Создать пользователя",
 				"title": "Создать пользователя",
-				"description": "Create a new user on this server"
+				"description": "Создать нового пользователя на этом сервере"
 			},
 			"updateUser": {
-				"helmet": "Update user",
-				"title": "Update user",
-				"description": "Update the details of this user"
+				"helmet": "Обновить пользователя",
+				"title": "Обновить пользователя",
+				"description": "Обновить данные этого пользователя"
 			},
 			"createOrUpdateForm": {
 				"accessControl": {
-					"heading": "Access control and restrictions",
+					"heading": "Контроль и ограничения доступа",
 					"subtitle": [
-						"Configure any restrictions you want to apply to this user. For more information about access control, see the",
-						"documentation"
+						"Настройте ограничения, которые вы хотите применить к этому пользователю. Для получения дополнительной информации о контроле доступа обратитесь к",
+						"документации"
 					],
 					"ageRestriction": {
-						"label": "Age restriction",
-						"description": "Restricts the user from accessing content above the set age rating threshold",
+						"label": "Ограничение по возрасту",
+						"description": "Ограничивает доступ пользователя к содержимому выше установленного возрастного рейтинга",
 						"placeholder": "13",
 						"enforceUnset": {
-							"label": "Enforce on unset",
-							"description": "If enabled, users will be restricted from accessing content with no age rating available"
+							"label": "Принудительно применять при отключении",
+							"description": "Если этот параметр включен, пользователи будут ограничены доступом к содержимому без возрастной оценки"
 						}
 					},
 					"tagRestriction": {
-						"label": "Tag restrictions",
-						"description": "Restricts the user from accessing content with the selected tags",
-						"placeholder": "Adult, Gore"
+						"label": "Ограничение по меткам",
+						"description": "Ограничение доступа пользователя к содержимому с выбранными метками",
+						"placeholder": "Для взрослых, Насилие"
 					}
 				},
 				"permissions": {
-					"heading": "Permissions",
+					"heading": "Права доступа",
 					"subtitle": [
-						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
-						"documentation"
+						"Выберите разрешения, которые вы хотите предоставить этому пользователю. Для получения дополнительной информации о том, что делает каждое разрешение, смотрите",
+						"документацию"
 					],
 					"bookclub": {
-						"label": "Book Clubs",
+						"label": "Книжные клубы",
 						"read": {
-							"label": "Access book club features",
-							"description": "Allows the user to access book club features, including viewing and joining book clubs"
+							"label": "Доступ к функционалу книжных клубов",
+							"description": "Разрешить пользователю доступ к функционалу книжных клубов, включая просмотр и присоединение"
 						},
 						"create": {
-							"label": "Create book clubs",
-							"description": "Allows the user to create new book clubs"
+							"label": "Создание книжных клубов",
+							"description": "Позволяет пользователю создавать новые книжные клубы"
 						}
 					},
 					"feature": {
-						"label": "Feature Opt-In",
+						"label": "Включенные функции",
 						"api_keys": {
-							"label": "API keys",
-							"description": "Allow the user to manage their own API keys"
+							"label": "Ключи API",
+							"description": "Разрешить пользователю управлять собственными ключами API"
 						},
 						"koreader_sync": {
-							"label": "KoReader sync",
-							"description": "Allow the user to access the KoReader sync integration"
+							"label": "Синхронизация KoReader",
+							"description": "Разрешить пользователю доступ к интеграции синхронизации KoReader"
 						}
 					},
 					"file": {
-						"label": "File Management",
+						"label": "Управление файлами",
 						"explorer": {
 							"label": "File Explorer",
 							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
 						},
 						"download": {
-							"label": "Download files",
-							"description": "Allows the user to download files from the server"
+							"label": "Скачивание файлов",
+							"description": "Позволяет пользователю скачивать файлы с сервера"
 						},
 						"upload": {
-							"label": "Upload files",
-							"description": "Allows the user to upload files to the server"
+							"label": "Загрузка файлов",
+							"description": "Позволяет пользователю загружать файлы на сервер"
 						}
 					},
 					"emailer": {
-						"label": "Emailers",
+						"label": "Почтовые рассылки",
 						"read": {
-							"label": "Access emailers",
-							"description": "Allows the user to view the configured emailers"
+							"label": "Доступ к почтовым рассылкам",
+							"description": "Позволяет пользователю просматривать настроенные рассылки"
 						},
 						"create": {
-							"label": "Create emailers",
-							"description": "Allows the user to create new emailers"
+							"label": "Создание рассылок",
+							"description": "Позволяет пользователю создавать новые рассылки"
 						},
 						"manage": {
-							"label": "Manage emailers",
-							"description": "Allows the user to manage existing emailers"
+							"label": "Управление рассылками",
+							"description": "Позволяет пользователю управлять существующими рассылками"
 						}
 					},
 					"email": {
-						"label": "Emailing",
+						"label": "Обмен электронной почтой",
 						"send": {
-							"label": "Send emails",
-							"description": "Allows the user to send emails from the server to any configured aliases"
+							"label": "Отправка писем",
+							"description": "Позволяет пользователю отправлять письма с сервера на любые настроенные псевдонимы"
 						},
 						"arbitrary_send": {
-							"label": "Send arbitrary emails",
-							"description": "Allows the user to send emails from the server to any email address"
+							"label": "Отправка произвольных писем",
+							"description": "Позволяет пользователю отправлять письма с сервера на любой адрес электронной почты"
 						}
 					},
 					"library": {
-						"label": "Library Management",
+						"label": "Управление библиотекой",
 						"create": {
-							"label": "Create libraries",
-							"description": "Allows the user to create new libraries.\nIncludes permissions to edit and scan"
+							"label": "Создание библиотек",
+							"description": "Позволяет пользователю создавать новые библиотеки. Включает в себя доступ к редактированию и сканированию."
 						},
 						"scan": {
-							"label": "Scan libraries",
-							"description": "Allows the user to initiate scans for existing libraries"
+							"label": "Сканирование библиотек",
+							"description": "Позволяет пользователю запускать сканирование существующих библиотек"
 						},
 						"edit": {
-							"label": "Edit libraries",
-							"description": "Allows the user to edit basic details for existing libraries"
+							"label": "Редактирование библиотек",
+							"description": "Позволяет пользователю редактировать основные сведения существующих библиотек"
 						},
 						"manage": {
-							"label": "Manage libraries",
-							"description": "Allows the user to manage advanced settings for existing libraries.\nIncludes permissions to edit and scan"
+							"label": "Управление библиотеками",
+							"description": "Позволяет пользователю управлять расширенными настройками существующих библиотек. Включает в себя доступ к редактированию и сканированию"
 						},
 						"delete": {
-							"label": "Delete libraries",
-							"description": "Allows the user to delete existing libraries.\nIncludes permissions to edit, manage, and scan"
+							"label": "Удаление библиотек",
+							"description": "Позволяет пользователю удалять существующие библиотеки. Включает в себя доступ к редактированию, управлению и сканированию"
 						}
 					},
 					"server": {
-						"label": "Server Management",
+						"label": "Управление сервером",
 						"manage": {
-							"label": "Manage server",
-							"description": "Allows the user to manage the server.\nIncludes *many* other permissions"
+							"label": "Управление сервером",
+							"description": "Позволяет пользователю управлять сервером. Включает *множество* других доступов"
 						}
 					},
 					"user": {
-						"label": "User Management",
+						"label": "Управление пользователями",
 						"read": {
-							"label": "Read users",
-							"description": "Allows the user to query other users on the server. This is required for some other features, e.g. excluding users from accessing a library"
+							"label": "Просмотр пользователей",
+							"description": "Позволяет пользователю запрашивать информацию о других пользователях на сервере. Это необходимо для некоторых других функций, например, для запрета доступа пользователей к библиотеке"
 						},
 						"manage": {
-							"label": "Manage users",
+							"label": "Управление пользователями",
 							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
 						}
 					},
 					"smartlist": {
-						"label": "Smart Lists",
+						"label": "Умные списки",
 						"read": {
-							"label": "Access smart list feature",
+							"label": "Доступ к функционалу умных списков",
 							"description": "Allows the user to access smart lists features"
 						}
 					}
 				},
 				"validation": {
-					"ageRestrictionTooLow": "Age restriction cannot be less than 0",
-					"missingUsername": "Username is required",
-					"missingPassword": "Password is required",
-					"usernameAlreadyExists": "Username already exists"
+					"ageRestrictionTooLow": "Возрастное ограничение не может быть меньше 0",
+					"missingUsername": "Требуется имя пользователя",
+					"missingPassword": "Требуется пароль",
+					"usernameAlreadyExists": "Пользователь с таким именем уже существует"
 				},
-				"createSubmitButton": "Create user",
-				"updateSubmitButton": "Update user"
+				"createSubmitButton": "Создать пользователя",
+				"updateSubmitButton": "Обновить пользователя"
 			}
 		},
 		"server/email": {
-			"helmet": "Email settings",
-			"title": "Email",
-			"description": "Settings related to the configuring an SMTP emailer for your Stump server instance",
+			"helmet": "Настройки электронной почты",
+			"title": "Электронная почта",
+			"description": "Настройки, связанные с настройкой SMTP для вашего сервера Stump",
 			"sections": {
 				"emailers": {
-					"title": "SMTP emailers",
-					"description": "The clients you have configured for sending emails from your Stump server instance",
-					"singleInstanceDisclaimer": "While Stump supports multiple SMTP configurations in the backend, only one can be configured on the UI. This will be improved in the future",
+					"title": "SMTP",
+					"description": "Клиенты, которые вы настроили для отправки писем с вашего сервера Stump",
+					"singleInstanceDisclaimer": "Хотя движок Stump поддерживает настройку нескольких SMTP, через пользовательский интерфейс может быть настроен только один. В будущем это будет улучшено",
 					"list": {
-						"emptyHeading": "No SMTP emailers configured",
-						"primaryEmailer": "Primary emailer",
+						"emptyHeading": "Не настроено ни одного SMTP",
+						"primaryEmailer": "Основной SMTP",
 						"sendHistory": {
-							"heading": "Send history",
-							"description": "A record of emails sent from this emailer",
+							"heading": "История отправки",
+							"description": "Запись писем, отправленных этим SMTP",
 							"table": {
 								"columns": {
-									"to": "To",
-									"subject": "Subject",
-									"status": "Status",
-									"createdAt": "Sent at"
+									"to": "Кому",
+									"subject": "Тема",
+									"status": "Статус",
+									"createdAt": "Отправлено в"
 								}
 							},
-							"emptyHeading": "No history",
-							"emptySubtitle": "The history of this emailer is empty. It has either not been used or the history has been cleared"
+							"emptyHeading": "Нет истории",
+							"emptySubtitle": "История этого SMTP пуста. Он не использовался или история была очищена"
 						}
 					}
 				},
 				"devices": {
-					"title": "Email devices",
-					"description": "The device aliases you have configured for receiving emails from your Stump server instance",
-					"addDevice": "Add device alias",
+					"title": "Почтовые устройства",
+					"description": "Псевдонимы устройств, которые вы настроили для получения писем от вашего сервера Stump",
+					"addDevice": "Добавить псевдоним устройства",
 					"addOrUpdateDevice": {
 						"title": {
-							"create": "Create device alias",
-							"update": "Update device alias"
+							"create": "Создать псевдоним устройства",
+							"update": "Обновить псевдоним устройства"
 						},
 						"name": {
-							"label": "Name",
-							"description": "A friendly name to uniquely identify this device alias"
+							"label": "Название",
+							"description": "Понятное название для идентификации этого псевдонима"
 						},
 						"email": {
-							"label": "Email",
-							"description": "The email address this alias will be associated with"
+							"label": "Электронная почта",
+							"description": "Адрес электронной почты, с которым будет связан псевдоним"
 						},
 						"forbidden": {
-							"label": "Forbidden",
-							"description": "When enabled, no user may send emails to the address associated with this alias"
+							"label": "Запрещено",
+							"description": "Когда включено, ни один пользователь не может отправлять письма на адрес, связанный с этим псевдонимом"
 						},
 						"submit": {
-							"create": "Create device alias",
-							"update": "Update device alias"
+							"create": "Создать псевдоним устройства",
+							"update": "Обновить псевдоним устройства"
 						}
 					},
 					"table": {
-						"emptyHeading": "No devices registered",
-						"emptySubtitle": "Create a new device alias for future use"
+						"emptyHeading": "Нет зарегистрированных устройств",
+						"emptySubtitle": "Создать новый псевдоним устройства для использования в будущем"
 					}
 				}
 			},
 			"createOrUpdateForm": {
 				"name": {
-					"label": "Name",
-					"description": "A friendly name to uniquely identify this emailer"
+					"label": "Название",
+					"description": "Понятное имя для уникальной идентификации этого SMTP"
 				},
 				"smtpSettings": {
-					"heading": "SMTP settings",
-					"description": "The SMTP-specific settings for this emailer"
+					"heading": "Настройка SMTP",
+					"description": "Специфические настройки SMTP"
 				},
 				"smtpProvider": {
-					"label": "SMTP provider preset",
-					"description": "The provider of the SMTP server. This is used to prefill some common settings, but doesn't capture all providers"
+					"label": "Предустановка поставщика SMTP",
+					"description": "Поставщик SMTP-сервера. Используется для предварительного заполнения общих настроек, но не всех поставщиков"
 				},
 				"smtpHost": {
-					"label": "SMTP host",
-					"description": "The hostname of the SMTP server"
+					"label": "Хост SMTP",
+					"description": "Имя хоста SMTP сервера"
 				},
 				"smtpPort": {
-					"label": "SMTP port",
-					"description": "The port of the SMTP server"
+					"label": "Порт SMTP",
+					"description": "Порт SMTP сервера"
 				},
 				"tlsEnabled": {
-					"label": "TLS enabled",
-					"description": "If enabled, the connection to the SMTP server will be encrypted"
+					"label": "TLS включен",
+					"description": "Если включено, соединение с SMTP сервером будет зашифровано"
 				},
 				"username": {
-					"label": "Username",
-					"description": "The username for authenticating with the SMTP server. This is typically the email address"
+					"label": "Имя пользователя",
+					"description": "Имя пользователя для аутентификации на SMTP сервере. Обычно это адрес электронной почты"
 				},
 				"password": {
-					"label": "Password",
-					"description": "The password for authenticating with the SMTP server. If you're using Gmail, you may need to generate an app-specific password"
+					"label": "Пароль",
+					"description": "Пароль для аутентификации на SMTP сервере. Если вы используете Gmail, вам может потребоваться дополнительно создать пароль приложения"
 				},
 				"senderSettings": {
-					"heading": "Sender settings",
-					"description": "The settings for the sender of the email"
+					"heading": "Настройки отправителя",
+					"description": "Настройки отправителя электронной почты"
 				},
 				"senderDisplayName": {
-					"label": "Sender display name",
-					"description": "The name that will be displayed to recipients"
+					"label": "Отображаемое имя отправителя",
+					"description": "Имя, которое будет отображаться у получателей"
 				},
 				"senderEmail": {
-					"label": "Sender email address",
-					"description": "The email address that will be displayed to recipients"
+					"label": "Адрес электронной почты отправителя",
+					"description": "Адрес электронной почты, который будет отображаться у получателей"
 				},
 				"additionalSettings": {
-					"heading": "Additional settings",
-					"description": "Additional settings for the emailer"
+					"heading": "Дополнительные настройки",
+					"description": "Дополнительные настройки SMTP"
 				},
 				"maxAttachmentSize": {
-					"label": "Max attachment size",
-					"description": "The maximum size, in bytes, that an attachment can be"
+					"label": "Максимальный размер вложения",
+					"description": "Максимальный размер в байтах файла, который может быть приложен к письму"
 				},
 				"submit": {
-					"create": "Create emailer",
-					"update": "Update emailer"
+					"create": "Создать отправщик",
+					"update": "Обновить отправщик"
 				}
 			},
 			"createEmailer": {
-				"helmet": "Create emailer",
-				"title": "Create emailer",
-				"description": "Create a new SMTP emailer for your Stump server instance"
+				"helmet": "Создать отправщик",
+				"title": "Обновить отправщик",
+				"description": "Создать новый отправщик для вашего сервера Stump"
 			},
 			"updateEmailer": {
-				"helmet": "Update emailer",
-				"title": "Update emailer",
-				"description": "Update the details of this SMTP emailer"
+				"helmet": "Обновить отправщик",
+				"title": "Обновить отправщик",
+				"description": "Обновить сведения об этом SMTP"
 			}
 		}
 	},
@@ -1831,15 +1831,15 @@
 		"diskUsage": "Использование диска"
 	},
 	"noLibraries": {
-		"heading": "Nothing to see here",
-		"messagePrefix": "You can't see what you don't have",
+		"heading": "Здесь не на что смотреть",
+		"messagePrefix": "Вы не можете увидеть то, чего у вас нет",
 		"message": {
-			"create": "Create a library to get started",
-			"wait": "Once libraries are created, they'll be displayed here"
+			"create": "Для начала создайте библиотеку",
+			"wait": "После создания библиотек, они будут отображаться здесь"
 		},
 		"links": {
-			"create": "Create library",
-			"settings": "Go to settings"
+			"create": "Создать библиотеку",
+			"settings": "Перейти к настройкам"
 		}
 	},
 	"pagination": {
@@ -1867,26 +1867,26 @@
 		"buttons": {
 			"home": "Главная",
 			"libraries": "Библиотеки",
-			"books": "Explore",
-			"bookClubs": "Book clubs",
-			"createLibrary": "Create library",
-			"noLibraries": "No libraries",
-			"createBookClub": "Create book club",
-			"noBookClubs": "No book clubs",
+			"books": "Обзор",
+			"bookClubs": "Книжные клубы",
+			"createLibrary": "Создать библиотеку",
+			"noLibraries": "Нет библиотек",
+			"createBookClub": "Создать Книжный Клуб",
+			"noBookClubs": "Нет книжных клубов",
 			"settings": "Настройки",
 			"themeToggle": "Изменить тему",
 			"goForward": "Вперёд",
 			"goBack": "Назад",
-			"smartlists": "Smart lists",
-			"noSmartlists": "No smart lists",
-			"createSmartlist": "Create smart list",
-			"seeAll": "See all"
+			"smartlists": "Умные списки",
+			"noSmartlists": "Нет умных списков",
+			"createSmartlist": "Создать умный список",
+			"seeAll": "Показать все"
 		},
 		"libraryOptions": {
-			"scanLibrary": "Scan",
-			"fileExplorer": "Files",
+			"scanLibrary": "Сканирование",
+			"fileExplorer": "Файлы",
 			"manageLibrary": "Manage",
-			"deleteLibrary": "Delete"
+			"deleteLibrary": "Удалить"
 		},
 		"versionInformation": {
 			"heading": "Версия",
@@ -1925,45 +1925,45 @@
 		}
 	},
 	"tagSelect": {
-		"placeholder": "Select or create tag",
+		"placeholder": "Выбрать или создать метку",
 		"placeholderNoTags": "Нет доступных тегов"
 	},
 	"thumbnailDropdown": {
 		"label": "Edit thumbnail",
 		"options": {
-			"selectFromBooks": "Select from books",
-			"uploadImage": "Upload image"
+			"selectFromBooks": "Выбрать из книг",
+			"uploadImage": "Загрузить изображение"
 		},
 		"uploadImage": {
-			"emptyState": "A preview of your image will appear here",
-			"prompt": "Drop image here or click to select",
-			"remove": "Remove image"
+			"emptyState": "Предпросмотр вашего изображения появится здесь",
+			"prompt": "Перетащите изображение сюда или нажмите для выбора",
+			"remove": "Удалить изображение"
 		}
 	},
 	"common": {
-		"add": "Add",
-		"cancel": "Cancel",
-		"confirm": "Confirm",
-		"save": "Save",
-		"send": "Send",
-		"saveChanges": "Save changes",
-		"noChanges": "No changes",
-		"create": "Create",
-		"edit": "Edit",
-		"update": "Update",
-		"upload": "Upload",
-		"uploading": "Uploading",
-		"unimplemented": "This functionality is not yet implemented! Check back later",
-		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
-		"logIn": "Log in",
-		"login": "Login",
-		"seeError": "See error",
-		"remove": "Remove",
-		"goBack": "Go back",
-		"goToServers": "Go to servers",
-		"notReady": "This feature is not ready",
-		"notUsedYet": "Not used yet",
-		"never": "Never",
-		"scan": "Scan"
+		"add": "Добавить",
+		"cancel": "Отменить",
+		"confirm": "Подтвердить",
+		"save": "Сохранить",
+		"send": "Отправить",
+		"saveChanges": "Сохранить изменения",
+		"noChanges": "Нет изменений",
+		"create": "Создать",
+		"edit": "Редактировать",
+		"update": "Обновить",
+		"upload": "Загрузить",
+		"uploading": "Загрузка",
+		"unimplemented": "Эта функция еще не реализована! Проверьте позже",
+		"limitedFunctionality": "Это еще не полностью реализовано, некоторые функции отсутствуют. Проверьте позже",
+		"logIn": "Войти",
+		"login": "Вход",
+		"seeError": "Посмотреть ошибку",
+		"remove": "Удалить",
+		"goBack": "Вернуться",
+		"goToServers": "Перейти к серверам",
+		"notReady": "Эта функция еще не готова",
+		"notUsedYet": "Пока не используется",
+		"never": "Никогда",
+		"scan": "Сканирование"
 	}
 }

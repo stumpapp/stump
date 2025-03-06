@@ -3,9 +3,7 @@ import { ActiveReadingSession } from '@stump/sdk'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { Image as ExpoImage } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { useEffect } from 'react'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -13,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useActiveServer } from '~/components/activeServer'
 import { BookMetaLink } from '~/components/book'
 import { BookDescription, InfoRow, InfoStat } from '~/components/book/overview'
-import { FasterImage, Image } from '~/components/Image'
+import { FasterImage } from '~/components/Image'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Heading, Text } from '~/components/ui'
 import { formatBytes } from '~/lib/format'
@@ -31,15 +29,16 @@ export default function Screen() {
 
 	const router = useRouter()
 
-	useEffect(() => {
-		if (media?.current_page) {
-			ExpoImage.prefetch(sdk.media.bookPageURL(media.id, media.current_page), {
-				headers: {
-					Authorization: sdk.authorizationHeader || '',
-				},
-			})
-		}
-	}, [sdk, media?.current_page, media?.id])
+	// TODO: prefetch, see https://github.com/candlefinance/faster-image/issues/73
+	// useEffect(() => {
+	// 	if (media?.current_page) {
+	// 		ExpoImage.prefetch(sdk.media.bookPageURL(media.id, media.current_page), {
+	// 			headers: {
+	// 				Authorization: sdk.authorizationHeader || '',
+	// 			},
+	// 		})
+	// 	}
+	// }, [sdk, media?.current_page, media?.id])
 
 	if (!media) return null
 
@@ -113,16 +112,6 @@ export default function Screen() {
 							{media.metadata?.title || media.name}
 						</Heading>
 						<View className="aspect-[2/3] self-center overflow-hidden rounded-lg">
-							{/* <Image
-								source={{
-									uri: sdk.media.thumbnailURL(media.id),
-									headers: {
-										Authorization: sdk.authorizationHeader,
-									},
-								}}
-								contentFit="fill"
-								style={{ height: 350, width: 'auto' }}
-							/> */}
 							<FasterImage
 								source={{
 									url: sdk.media.thumbnailURL(media.id),

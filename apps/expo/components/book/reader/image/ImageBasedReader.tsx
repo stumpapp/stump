@@ -1,7 +1,8 @@
 import { Zoomable } from '@likashefqet/react-native-image-zoom'
 import { useSDK } from '@stump/client'
+import { generatePageSets } from '@stump/sdk'
 import { ImageLoadEventData } from 'expo-image'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { FlatList, useWindowDimensions, View } from 'react-native'
 import {
 	GestureStateChangeEvent,
@@ -11,8 +12,9 @@ import {
 import { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { FasterImage, intoFastCachePolicy } from '~/components/Image'
+import { Image } from '~/components/Image'
 import { useDisplay } from '~/lib/hooks'
+import { cn } from '~/lib/utils'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
 
@@ -45,15 +47,25 @@ type Props = {
  * A reader for books that are image-based, where each page should be displayed as an image
  */
 export default function ImageBasedReader({ initialPage }: Props) {
-	const { book, imageSizes = [], onPageChanged, flatListRef } = useImageBasedReader()
+	const { book, imageSizes = [], setImageSizes, onPageChanged, flatListRef } = useImageBasedReader()
 	const {
-		preferences: { readingMode, incognito, readingDirection },
+		preferences: { readingMode, incognito, readingDirection, doublePageBehavior = 'off' },
 	} = useBookPreferences(book.id)
 	const { height, width } = useWindowDimensions()
 
-	const [sizes, setSizes] = useState<ImageDimension[]>(() => imageSizes)
+	const deviceOrientation = useMemo(
+		() => (width > height ? 'landscape' : 'portrait'),
+		[width, height],
+	)
 
-	const deviceOrientation = width > height ? 'landscape' : 'portrait'
+	const pageSets = useMemo(() => {
+		const autoButOff = doublePageBehavior === 'auto' && deviceOrientation === 'portrait'
+		const modeForceOff = readingMode === 'continuous:vertical'
+		if (doublePageBehavior === 'off' || autoButOff || modeForceOff) {
+			return Array.from({ length: book.pages }, (_, i) => [i])
+		}
+		return generatePageSets({ imageSizes, pages: book.pages })
+	}, [doublePageBehavior, book.pages, imageSizes, deviceOrientation, readingMode])
 
 	// TODO: an effect that whenever the device orientation changes to something different than before,
 	// recalculate the ratios of the images? Maybe. Who knows, you will though
@@ -72,8 +84,6 @@ export default function ImageBasedReader({ initialPage }: Props) {
 		},
 		[onPageChanged, incognito],
 	)
-
-	const data = useMemo(() => Array.from({ length: book.pages }, (_, i) => i), [book.pages])
 
 	// return (
 	// 	<View
@@ -124,14 +134,15 @@ export default function ImageBasedReader({ initialPage }: Props) {
 	return (
 		<FlatList
 			ref={flatListRef}
-			data={data}
+			data={pageSets}
 			inverted={readingDirection === 'rtl' && readingMode !== 'continuous:vertical'}
-			renderItem={({ item }) => (
+			renderItem={({ item, index }) => (
 				<Page
 					deviceOrientation={deviceOrientation}
-					index={item}
-					size={sizes[item]}
-					onSizeLoaded={setSizes}
+					index={index}
+					indexes={item as [number, number]}
+					sizes={item.map((i: number) => imageSizes[i]).filter(Boolean)}
+					onSizeLoaded={setImageSizes}
 					maxWidth={width}
 					maxHeight={height}
 					readingDirection="horizontal"
@@ -178,7 +189,9 @@ export default function ImageBasedReader({ initialPage }: Props) {
 type PageProps = {
 	deviceOrientation: string
 	index: number
-	size?: ImageDimension
+	indexes: [number, number]
+	sizes: ImageDimension[]
+	// size?: ImageDimension // TODO(double-spread): This should be sizes: [ImageDimension, ImageDimension]
 	onSizeLoaded: (fn: (prev: ImageDimension[]) => ImageDimension[]) => void
 	maxWidth: number
 	maxHeight: number
@@ -189,7 +202,8 @@ const Page = React.memo(
 	({
 		// deviceOrientation,
 		index,
-		size,
+		indexes,
+		sizes,
 		onSizeLoaded,
 		maxWidth,
 		maxHeight,
@@ -204,7 +218,6 @@ const Page = React.memo(
 			preferences: {
 				tapSidesToNavigate,
 				readingDirection,
-				allowDownscaling,
 				// imageScaling: { scaleToFit },
 				cachePolicy,
 			},
@@ -256,24 +269,28 @@ const Page = React.memo(
 		)
 
 		const onImageLoaded = useCallback(
-			(event: ImageLoadEventData) => {
+			(event: ImageLoadEventData, idxIdx: number) => {
 				const { height, width } = event.source
+				if (!height || !width) return
 				const ratio = width / height
 
-				const isDifferent = size?.height !== height || size?.width !== width
+				const pageSize = sizes[idxIdx]
+				const isDifferent = pageSize?.height !== height || pageSize?.width !== width
 				if (isDifferent) {
 					onSizeLoaded((prev) => {
 						const next = [...prev]
-						next[index] = { height, width, ratio }
+						const actualIdx = indexes[idxIdx]
+						next[actualIdx] = { height, width, ratio }
 						return next
 					})
 				}
 			},
-			[onSizeLoaded, size, index],
+			[onSizeLoaded, sizes, indexes],
 		)
 
 		const safeMaxHeight = maxHeight - insets.top - insets.bottom
 
+		// https://github.com/candlefinance/faster-image/issues/75
 		return (
 			<Zoomable
 				minScale={1}
@@ -285,48 +302,33 @@ const Page = React.memo(
 				onSingleTap={onSingleTap}
 			>
 				<View
-					className="flex items-center justify-center"
+					className={cn('relative flex justify-center', {
+						'mx-auto flex-row gap-0': indexes.length > 1,
+					})}
 					style={{
 						height: safeMaxHeight,
-						minHeight: safeMaxHeight,
-						minWidth: maxWidth,
 						width: maxWidth,
 					}}
 				>
-					{/* <Image
-						source={{
-							uri: pageURL(index + 1),
-							headers: {
-								Authorization: sdk.authorizationHeader,
-							},
-						}}
-						style={{
-							height: '100%',
-							width: '100%',
-						}}
-						allowDownscaling={allowDownscaling}
-						cachePolicy={cachePolicy}
-						contentFit="contain"
-						onLoad={onImageLoaded}
-					/> */}
-
-					<FasterImage
-						source={{
-							url: pageURL(index + 1),
-							headers: {
-								Authorization: sdk.authorizationHeader || '',
-							},
-							cachePolicy: intoFastCachePolicy(cachePolicy || 'memory-disk'),
-						}}
-						style={{
-							height: '100%',
-							width: '100%',
-						}}
-						// allowDownscaling={allowDownscaling}
-						// cachePolicy={cachePolicy}
-						// contentFit="contain"
-						// onSuccess={onImageLoaded}
-					/>
+					{indexes.map((pageIdx, i) => (
+						<Image
+							key={pageIdx}
+							source={{
+								uri: pageURL(pageIdx + 1),
+								headers: {
+									Authorization: sdk.authorizationHeader,
+								},
+								cachePolicy: cachePolicy,
+							}}
+							style={{
+								height: '100%',
+								width: indexes.length > 1 ? '50%' : '100%',
+							}}
+							contentFit="contain"
+							contentPosition={indexes.length > 1 ? (i === 0 ? 'right' : 'left') : 'center'}
+							onLoad={(e) => onImageLoaded(e, i)}
+						/>
+					))}
 				</View>
 			</Zoomable>
 		)

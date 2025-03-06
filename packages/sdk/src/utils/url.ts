@@ -1,4 +1,4 @@
-import { ApiVersion } from './api'
+import { ApiVersion } from '../api'
 
 export const formatApiURL = (url: string, version: ApiVersion) => {
 	let correctedUrl = url

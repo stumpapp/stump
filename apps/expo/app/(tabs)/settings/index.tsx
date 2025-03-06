@@ -4,7 +4,6 @@ import { ScrollView } from 'react-native-gesture-handler'
 import { ContactInformation, SupportInformation } from '~/components/appSettings'
 import { AppDataUsageLink } from '~/components/appSettings/management'
 import {
-	AllowDownscaling,
 	AppLanguage,
 	AppTheme,
 	CachePolicySelect,
@@ -53,7 +52,6 @@ export default function Screen() {
 
 				<View>
 					<Text className="mb-3 text-foreground-muted">Debug</Text>
-					<AllowDownscaling />
 					<CachePolicySelect />
 					<ReduceAnimations />
 					<MaskURLs />

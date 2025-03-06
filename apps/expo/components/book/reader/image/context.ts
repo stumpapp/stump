@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react'
+import { FlatList } from 'react-native'
 
 export type ImageBasedBookRef = {
 	id: string
@@ -17,6 +18,7 @@ export type IImageBasedReaderContext = {
 	// flatListRef: React.RefObject<FlashList<number>>
 	book: ImageBasedBookRef
 	imageSizes?: ImageBasedBookPageRef[]
+	setImageSizes: React.Dispatch<React.SetStateAction<ImageBasedBookPageRef[]>>
 	pageURL: (page: number) => string
 	pageThumbnailURL?: (page: number) => string
 	currentPage?: number

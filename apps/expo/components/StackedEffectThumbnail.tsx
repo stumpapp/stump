@@ -9,7 +9,7 @@ import { match } from 'ts-pattern'
 import { useDisplay } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
-import { FasterImage, Image } from './Image'
+import { FasterImage } from './Image'
 import { Text } from './ui'
 
 type Props = {
@@ -60,17 +60,6 @@ export default function StackedEffectThumbnail({ label, uri, href }: Props) {
 								'opacity-80': pressed,
 							})}
 						>
-							{/* <Image
-								source={{
-									uri,
-									headers: {
-										Authorization: sdk.authorizationHeader,
-									},
-								}}
-								contentFit="fill"
-								style={{ height: itemDimension * 1.5, width: itemDimension }}
-							/> */}
-
 							<FasterImage
 								source={{
 									url: uri,

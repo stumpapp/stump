@@ -1,13 +1,13 @@
 import { useSDK } from '@stump/client'
 import { useRouter } from 'expo-router'
-import { Fragment, useEffect } from 'react'
+import { Fragment } from 'react'
 import { Pressable, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
 import { BookDescription, InfoRow, InfoSection } from '~/components/book/overview'
-import { FasterImage, Image } from '~/components/Image'
+import { FasterImage } from '~/components/Image'
 import {
 	getDateField,
 	getNumberField,
@@ -35,16 +35,17 @@ export default function Screen() {
 	const router = useRouter()
 
 	// TODO: once I sort out progress sync, prefetch the current page
-	const firstPageURL = readingOrder?.[0]?.href
-	useEffect(() => {
-		if (firstPageURL) {
-			Image.prefetch(firstPageURL, {
-				headers: {
-					Authorization: sdk.authorizationHeader || '',
-				},
-			})
-		}
-	}, [sdk, firstPageURL])
+	// TODO: prefetch the first page of the publication, see https://github.com/candlefinance/faster-image/issues/73
+	// const firstPageURL = readingOrder?.[0]?.href
+	// useEffect(() => {
+	// 	if (firstPageURL) {
+	// 		EImage.prefetch(firstPageURL, {
+	// 			headers: {
+	// 				Authorization: sdk.authorizationHeader || '',
+	// 			},
+	// 		})
+	// 	}
+	// }, [sdk, firstPageURL])
 
 	const thumbnailURL = getPublicationThumbnailURL({
 		images,
@@ -77,16 +78,6 @@ export default function Screen() {
 							{title || 'Publication'}
 						</Heading>
 						<View className="aspect-[2/3] self-center overflow-hidden rounded-lg">
-							{/* <Image
-								source={{
-									uri: thumbnailURL,
-									headers: {
-										Authorization: sdk.authorizationHeader,
-									},
-								}}
-								contentFit="fill"
-								style={{ height: 350, width: 'auto' }}
-							/> */}
 							<FasterImage
 								source={{
 									url: thumbnailURL || '',

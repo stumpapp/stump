@@ -9,7 +9,7 @@ import { useDisplay, useListItemSize } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
 import { useActiveServer } from '../activeServer'
-import { FasterImage, Image } from '../Image'
+import { FasterImage } from '../Image'
 import { Text } from '../ui'
 
 type Props = {
@@ -36,17 +36,6 @@ function BookListItem({ book }: Props) {
 					})}
 				>
 					<View className="relative overflow-hidden rounded-lg">
-						{/* <Image
-							className="z-0"
-							source={{
-								uri: sdk.media.thumbnailURL(book.id),
-								headers: {
-									Authorization: sdk.authorizationHeader,
-								},
-							}}
-							contentFit="fill"
-							style={{ height: isTablet ? 225 : 150, width: width }}
-						/> */}
 						<FasterImage
 							source={{
 								url: sdk.media.thumbnailURL(book.id),

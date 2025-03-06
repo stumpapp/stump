@@ -21,7 +21,7 @@ import {
 	UploadAPI,
 	UserAPI,
 } from './controllers'
-import { formatApiURL } from './utils'
+import { formatApiURL } from './utils/url'
 
 export type ApiVersion = 'v1'
 

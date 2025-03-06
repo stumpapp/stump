@@ -1,6 +1,5 @@
 import { FasterImageProps, FasterImageView } from '@candlefinance/faster-image'
 import { Image as EImage, ImageProps } from 'expo-image'
-import { Platform } from 'react-native'
 
 import { usePreferencesStore } from '~/stores'
 import { CachePolicy } from '~/stores/reader'

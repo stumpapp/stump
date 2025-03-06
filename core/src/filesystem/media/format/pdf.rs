@@ -90,10 +90,7 @@ impl FileProcessor for PdfProcessor {
 	) -> Result<ProcessedFile, FileError> {
 		let mut processed_file = ProcessedFile {
 			path: PathBuf::from(path),
-			hash: None,
-			koreader_hash: None,
-			metadata: None,
-			pages: 0,
+			..Default::default()
 		};
 		if options.process_pages || options.process_metadata {
 			let file = FileOptions::cached()

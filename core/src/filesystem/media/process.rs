@@ -145,7 +145,7 @@ impl SeriesJson {
 
 /// Struct representing a processed file. This is the output of the `process` function
 /// on a `FileProcessor` implementation.
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct ProcessedFile {
 	pub path: PathBuf,
 	pub hash: Option<String>,

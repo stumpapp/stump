@@ -85,10 +85,7 @@ impl FileProcessor for ZipProcessor {
 	) -> Result<ProcessedFile, FileError> {
 		let mut processed_file = ProcessedFile {
 			path: PathBuf::from(path),
-			hash: None,
-			koreader_hash: None,
-			metadata: None,
-			pages: 0,
+			..Default::default()
 		};
 
 		if options.generate_file_hashes || options.generate_koreader_hashes {

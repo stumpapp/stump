@@ -126,10 +126,7 @@ impl FileProcessor for RarProcessor {
 	) -> Result<ProcessedFile, FileError> {
 		let mut processed_file = ProcessedFile {
 			path: PathBuf::from(path),
-			hash: None,
-			koreader_hash: None,
-			metadata: None,
-			pages: 0,
+			..Default::default()
 		};
 
 		if options.convert_rar_to_zip {

@@ -121,8 +121,12 @@ impl FileProcessor for EpubProcessor {
 				hash,
 				koreader_hash,
 			} = Self::generate_hashes(path, options)?;
-			processed_file.hash = hash;
-			processed_file.koreader_hash = koreader_hash;
+			if options.generate_file_hashes {
+				processed_file.hash = hash;
+			}
+			if options.generate_koreader_hashes {
+				processed_file.koreader_hash = koreader_hash;
+			}
 		};
 
 		Ok(processed_file)
@@ -701,13 +705,62 @@ mod tests {
 		let processed_file = EpubProcessor::process(
 			&path,
 			FileProcessorOptions {
-				convert_rar_to_zip: false,
-				delete_conversion_source: false,
 				..Default::default()
 			},
 			&config,
 		);
 		assert!(processed_file.is_ok());
+		let processed_file = processed_file.unwrap();
+		assert!(processed_file.hash.is_none());
+		assert!(processed_file.koreader_hash.is_none());
+		assert!(processed_file.metadata.is_none());
+		assert_eq!(processed_file.pages, 0);
+
+		let processed_file = EpubProcessor::process(
+			&path,
+			FileProcessorOptions {
+				generate_file_hashes: true,
+				generate_koreader_hashes: true,
+				..Default::default()
+			},
+			&config,
+		);
+		assert!(processed_file.is_ok());
+		let processed_file = processed_file.unwrap();
+		assert!(processed_file.hash.is_some());
+		assert!(processed_file.koreader_hash.is_some());
+		assert!(processed_file.metadata.is_none());
+		assert_eq!(processed_file.pages, 0);
+
+		let processed_file = EpubProcessor::process(
+			&path,
+			FileProcessorOptions {
+				process_metadata: true,
+				..Default::default()
+			},
+			&config,
+		);
+		assert!(processed_file.is_ok());
+		let processed_file = processed_file.unwrap();
+		assert!(processed_file.hash.is_none());
+		assert!(processed_file.koreader_hash.is_none());
+		assert!(processed_file.metadata.is_some());
+		assert_eq!(processed_file.pages, 0);
+
+		let processed_file = EpubProcessor::process(
+			&path,
+			FileProcessorOptions {
+				process_pages: true,
+				..Default::default()
+			},
+			&config,
+		);
+		assert!(processed_file.is_ok());
+		let processed_file = processed_file.unwrap();
+		assert!(processed_file.hash.is_none());
+		assert!(processed_file.koreader_hash.is_none());
+		assert!(processed_file.metadata.is_none());
+		assert_ne!(processed_file.pages, 0);
 	}
 
 	#[test]

@@ -1,6 +1,5 @@
 import { Zoomable } from '@likashefqet/react-native-image-zoom'
 import { useSDK } from '@stump/client'
-import { generatePageSets } from '@stump/sdk'
 import { ImageLoadEventData } from 'expo-image'
 import React, { useCallback, useMemo } from 'react'
 import { FlatList, useWindowDimensions, View } from 'react-native'
@@ -47,9 +46,9 @@ type Props = {
  * A reader for books that are image-based, where each page should be displayed as an image
  */
 export default function ImageBasedReader({ initialPage }: Props) {
-	const { book, imageSizes = [], setImageSizes, onPageChanged, flatListRef } = useImageBasedReader()
+	const { book, imageSizes = {}, onPageChanged, pageSets, flatListRef } = useImageBasedReader()
 	const {
-		preferences: { readingMode, incognito, readingDirection, doublePageBehavior = 'off' },
+		preferences: { readingMode, incognito, readingDirection },
 	} = useBookPreferences(book.id)
 	const { height, width } = useWindowDimensions()
 
@@ -57,15 +56,6 @@ export default function ImageBasedReader({ initialPage }: Props) {
 		() => (width > height ? 'landscape' : 'portrait'),
 		[width, height],
 	)
-
-	const pageSets = useMemo(() => {
-		const autoButOff = doublePageBehavior === 'auto' && deviceOrientation === 'portrait'
-		const modeForceOff = readingMode === 'continuous:vertical'
-		if (doublePageBehavior === 'off' || autoButOff || modeForceOff) {
-			return Array.from({ length: book.pages }, (_, i) => [i])
-		}
-		return generatePageSets({ imageSizes, pages: book.pages })
-	}, [doublePageBehavior, book.pages, imageSizes, deviceOrientation, readingMode])
 
 	// TODO: an effect that whenever the device orientation changes to something different than before,
 	// recalculate the ratios of the images? Maybe. Who knows, you will though
@@ -85,52 +75,6 @@ export default function ImageBasedReader({ initialPage }: Props) {
 		[onPageChanged, incognito],
 	)
 
-	// return (
-	// 	<View
-	// 		style={{
-	// 			height,
-	// 		}}
-	// 	>
-	// 		<FlashList
-	// 			ref={flatListRef}
-	// 			data={data}
-	// 			renderItem={({ item }) => (
-	// 				<View
-	// 					style={{
-	// 						height,
-	// 						width,
-	// 					}}
-	// 					className="items-center justify-center"
-	// 				>
-	// 					<Page
-	// 						deviceOrientation={deviceOrientation}
-	// 						index={item}
-	// 						size={sizes[item]}
-	// 						onSizeLoaded={setSizes}
-	// 						maxWidth={width}
-	// 						maxHeight={height}
-	// 						readingDirection="horizontal"
-	// 					/>
-	// 				</View>
-	// 			)}
-	// 			onViewableItemsChanged={({ viewableItems }) => {
-	// 				const fistVisibleItem = viewableItems.filter(({ isViewable }) => isViewable).at(0)?.index
-	// 				if (fistVisibleItem) {
-	// 					handlePageChanged(fistVisibleItem + 1)
-	// 				}
-	// 			}}
-	// 			keyExtractor={(item) => item.toString()}
-	// 			horizontal={readingMode === 'paged' || readingMode === 'continuous:horizontal'}
-	// 			pagingEnabled={readingMode === 'paged'}
-	// 			initialScrollIndex={initialPage - 1}
-	// 			showsHorizontalScrollIndicator={false}
-	// 			showsVerticalScrollIndicator={false}
-	// 			estimatedItemSize={width}
-	// 			estimatedListSize={{ height, width }}
-	// 		/>
-	// 	</View>
-	// )
-
 	return (
 		<FlatList
 			ref={flatListRef}
@@ -142,7 +86,6 @@ export default function ImageBasedReader({ initialPage }: Props) {
 					index={index}
 					indexes={item as [number, number]}
 					sizes={item.map((i: number) => imageSizes[i]).filter(Boolean)}
-					onSizeLoaded={setImageSizes}
 					maxWidth={width}
 					maxHeight={height}
 					readingDirection="horizontal"
@@ -152,15 +95,20 @@ export default function ImageBasedReader({ initialPage }: Props) {
 			horizontal={readingMode === 'paged' || readingMode === 'continuous:horizontal'}
 			pagingEnabled={readingMode === 'paged'}
 			onViewableItemsChanged={({ viewableItems }) => {
-				const fistVisibleItem = viewableItems.filter(({ isViewable }) => isViewable).at(0)?.index
-				if (fistVisibleItem) {
-					handlePageChanged(fistVisibleItem + 1)
+				const firstVisibleItem = viewableItems.filter(({ isViewable }) => isViewable).at(0)
+				if (!firstVisibleItem) return
+
+				const { item } = firstVisibleItem
+				const page = item.at(-1) + 1
+
+				if (firstVisibleItem) {
+					handlePageChanged(page)
 				}
 			}}
 			initialNumToRender={3}
 			maxToRenderPerBatch={3}
 			windowSize={3}
-			initialScrollIndex={initialPage - 1}
+			initialScrollIndex={pageSets.findIndex((set) => set.includes(initialPage - 1)) || 0}
 			// https://stackoverflow.com/questions/53059609/flat-list-scrolltoindex-should-be-used-in-conjunction-with-getitemlayout-or-on
 			onScrollToIndexFailed={(info) => {
 				console.error("Couldn't scroll to index", info)
@@ -191,8 +139,6 @@ type PageProps = {
 	index: number
 	indexes: [number, number]
 	sizes: ImageDimension[]
-	// size?: ImageDimension // TODO(double-spread): This should be sizes: [ImageDimension, ImageDimension]
-	onSizeLoaded: (fn: (prev: ImageDimension[]) => ImageDimension[]) => void
 	maxWidth: number
 	maxHeight: number
 	readingDirection: 'vertical' | 'horizontal'
@@ -204,7 +150,6 @@ const Page = React.memo(
 		index,
 		indexes,
 		sizes,
-		onSizeLoaded,
 		maxWidth,
 		maxHeight,
 		// readingDirection,
@@ -213,6 +158,7 @@ const Page = React.memo(
 			book: { id },
 			pageURL,
 			flatListRef,
+			setImageSizes,
 		} = useImageBasedReader()
 		const {
 			preferences: {
@@ -277,15 +223,14 @@ const Page = React.memo(
 				const pageSize = sizes[idxIdx]
 				const isDifferent = pageSize?.height !== height || pageSize?.width !== width
 				if (isDifferent) {
-					onSizeLoaded((prev) => {
-						const next = [...prev]
+					setImageSizes((prev) => {
 						const actualIdx = indexes[idxIdx]
-						next[actualIdx] = { height, width, ratio }
-						return next
+						prev[actualIdx] = { height, width, ratio }
+						return prev
 					})
 				}
 			},
-			[onSizeLoaded, sizes, indexes],
+			[setImageSizes, sizes, indexes],
 		)
 
 		const safeMaxHeight = maxHeight - insets.top - insets.bottom
@@ -327,6 +272,7 @@ const Page = React.memo(
 							contentFit="contain"
 							contentPosition={indexes.length > 1 ? (i === 0 ? 'right' : 'left') : 'center'}
 							onLoad={(e) => onImageLoaded(e, i)}
+							allowDownscaling={false}
 						/>
 					))}
 				</View>

@@ -17,8 +17,9 @@ export type IImageBasedReaderContext = {
 	flatListRef: React.RefObject<FlatList>
 	// flatListRef: React.RefObject<FlashList<number>>
 	book: ImageBasedBookRef
-	imageSizes?: ImageBasedBookPageRef[]
-	setImageSizes: React.Dispatch<React.SetStateAction<ImageBasedBookPageRef[]>>
+	imageSizes?: Record<number, ImageBasedBookPageRef>
+	setImageSizes: React.Dispatch<React.SetStateAction<Record<number, ImageBasedBookPageRef>>>
+	pageSets: number[][]
 	pageURL: (page: number) => string
 	pageThumbnailURL?: (page: number) => string
 	currentPage?: number

@@ -1,18 +1,15 @@
 import { useKeepAwake } from 'expo-keep-awake'
 import * as NavigationBar from 'expo-navigation-bar'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { ImageBasedReader } from '~/components/book/reader'
+import { ImageBasedBookPageRef } from '~/components/book/reader/image'
+import { useAppState } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
+import { useBookPreferences, useBookTimer } from '~/stores/reader'
 
 import { hashFromURL } from '../../../../components/opds/utils'
 import { usePublicationContext } from './context'
-
-type ImageDimension = {
-	height: number
-	width: number
-	ratio: number
-}
 
 export default function Screen() {
 	useKeepAwake()
@@ -26,6 +23,37 @@ export default function Screen() {
 	} = usePublicationContext()
 
 	const [id] = useState(() => identifier || hashFromURL(url))
+
+	const {
+		preferences: { trackElapsedTime },
+	} = useBookPreferences(id)
+	const { pause, resume, isRunning } = useBookTimer(id, {
+		enabled: trackElapsedTime,
+	})
+
+	const onFocusedChanged = useCallback(
+		(focused: boolean) => {
+			if (!focused) {
+				pause()
+			} else if (focused) {
+				resume()
+			}
+		},
+		[pause, resume],
+	)
+
+	const appState = useAppState({
+		onStateChanged: onFocusedChanged,
+	})
+
+	const showControls = useReaderStore((state) => state.showControls)
+	useEffect(() => {
+		if ((showControls && isRunning) || appState !== 'active') {
+			pause()
+		} else if (!showControls && !isRunning && appState === 'active') {
+			resume()
+		}
+	}, [showControls, pause, resume, isRunning, appState])
 
 	const setIsReading = useReaderStore((state) => state.setIsReading)
 	const setShowControls = useReaderStore((state) => state.setShowControls)
@@ -62,6 +90,28 @@ export default function Screen() {
 		}
 	}, [])
 
+	const imageSizes = useMemo(
+		() =>
+			readingOrder
+				.filter(({ height, width }) => height && width)
+				?.map(
+					({ height, width }) =>
+						({
+							height,
+							width,
+							ratio: (width as number) / (height as number),
+						}) as ImageBasedBookPageRef,
+				)
+				.reduce(
+					(acc, ref, index) => {
+						acc[index] = ref
+						return acc
+					},
+					{} as Record<number, ImageBasedBookPageRef>,
+				),
+		[readingOrder],
+	)
+
 	return (
 		<ImageBasedReader
 			initialPage={currentPage}
@@ -70,15 +120,7 @@ export default function Screen() {
 				name: title,
 				pages: readingOrder.length,
 			}}
-			imageSizes={
-				readingOrder
-					.filter(({ height, width }) => height && width)
-					.map(({ height, width }) => ({
-						height,
-						width,
-						ratio: (width as number) / (height as number),
-					})) as ImageDimension[]
-			}
+			imageSizes={imageSizes}
 			pageURL={(page: number) => readingOrder[page - 1].href}
 		/>
 	)

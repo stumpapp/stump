@@ -5,19 +5,23 @@ export type ImageBasedBookPageRef = {
 }
 
 export type GeneratePageSetsParams = {
-	imageSizes: ImageBasedBookPageRef[]
+	imageSizes: Record<number, ImageBasedBookPageRef>
 	pages: number
-	// screenWidth: number
 }
 
-export const generatePageSets = ({
-	imageSizes,
-	pages,
-	// screenWidth,
-}: GeneratePageSetsParams): number[][] => {
+export const generatePageSets = ({ imageSizes, pages }: GeneratePageSetsParams): number[][] => {
 	const sets: number[][] = []
 
-	const landscapePages = imageSizes.filter(Boolean).map((size) => size.width > size.height)
+	const landscapePages = Object.keys(imageSizes).reduce(
+		(acc, key) => {
+			const idx = parseInt(key)
+			if (isNaN(idx)) return acc
+			if (!imageSizes[idx]) return acc
+			acc[idx] = imageSizes[idx].ratio >= 1
+			return acc
+		},
+		{} as Record<number, boolean>,
+	)
 
 	// If a page is landscape, we only ever want to show it by itself
 	// If a page is portrait, we will only show it by itself if the next page is also portrait

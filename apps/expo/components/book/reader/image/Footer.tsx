@@ -34,7 +34,9 @@ export default function Footer() {
 		pageURL,
 		pageThumbnailURL,
 		currentPage = 1,
+		pageSets,
 		flatListRef: readerRef,
+		imageSizes,
 	} = useImageBasedReader()
 	const elapsedSeconds = useBookReadTime(id)
 	const {
@@ -81,9 +83,46 @@ export default function Footer() {
 		[currentPage, baseSize],
 	)
 
+	const getGalleryItemSize = useCallback(
+		(idx: number) => {
+			const set = pageSets[idx]
+			const isDoubleSpread = set.length === 2
+			const isLandscape = set.some((page) => (imageSizes?.[page]?.ratio || 0) >= 1)
+
+			let containerSize = baseSize
+			if (isLandscape) {
+				containerSize = {
+					height: containerSize.width,
+					width: containerSize.height,
+				}
+			}
+
+			if (isDoubleSpread) {
+				containerSize = {
+					height: containerSize.height,
+					width: containerSize.width * 2,
+				}
+			}
+
+			if (set.includes(currentPage - 1)) {
+				containerSize = {
+					height: containerSize.height / HEIGHT_MODIFIER,
+					width: containerSize.width / WIDTH_MODIFIER,
+				}
+			}
+
+			return containerSize
+		},
+		[currentPage, baseSize, pageSets, imageSizes],
+	)
+
 	const getItemLayout = useCallback(
-		(_: ArrayLike<number> | null | undefined, index: number) => {
-			const isAtOrAfterCurrentPage = index >= currentPage - 1
+		(_: ArrayLike<number[]> | null | undefined, index: number) => {
+			const set = pageSets[index]
+			if (!set) return { length: 0, offset: 0, index }
+
+			const currentSetIdx = set.findIndex((page) => page === currentPage - 1)
+			const isAtOrAfterCurrentPage = index >= currentSetIdx
 			if (isAtOrAfterCurrentPage) {
 				// TODO: my math is actually comically bad and this needs adjustment
 				// Up until the current page each item is the baseSize, then we have ONE larger item
@@ -103,16 +142,16 @@ export default function Footer() {
 				index,
 			}
 		},
-		[getSize, currentPage, baseSize],
+		[getSize, currentPage, baseSize, pageSets],
 	)
 
 	const onChangePage = useCallback(
 		(idx: number) => {
-			if (idx < 0 || idx >= pages) return
+			if (idx < 0 || idx >= pageSets.length) return
 			setShowControls(false)
 			readerRef.current?.scrollToIndex({ index: idx, animated: false })
 		},
-		[readerRef, setShowControls, pages],
+		[readerRef, setShowControls, pageSets.length],
 	)
 
 	const visibilityChanged = usePrevious(visible) !== visible
@@ -120,13 +159,15 @@ export default function Footer() {
 		if (footerControls !== 'images') return
 
 		if (visible && visibilityChanged) {
+			const idx = pageSets.findIndex((set) => set.includes(currentPage - 1))
+			if (idx === -1) return
 			galleryRef.current?.scrollToIndex({
-				index: currentPage > 0 ? currentPage - 1 : 0,
+				index: idx,
 				animated: false,
 				viewPosition: 0.5,
 			})
 		}
-	}, [footerControls, currentPage, visible, visibilityChanged])
+	}, [footerControls, currentPage, visible, visibilityChanged, pageSets])
 
 	const formatDuration = useCallback(() => {
 		if (elapsedSeconds <= 60) {
@@ -189,111 +230,119 @@ export default function Footer() {
 		[currentPage, pages, footerControls],
 	)
 
-	const getSliderThumbTranslations = useCallback(
-		(value: number) => {
-			const containerWidth = isTablet ? 200 : 150
-			const approxStepSize = width / pages
+	const getSliderImageContainerStyles = useCallback(
+		(value: number, pageSet: number[]) => {
+			const isLandscape = (imageSizes?.[value - 1].ratio || 0) >= 1
+			let containerSize = {
+				height: isTablet ? 300 : 200,
+				width: isTablet ? 200 : 150,
+			}
+			if (isLandscape) {
+				containerSize = {
+					height: containerSize.width,
+					width: containerSize.height,
+				}
+			}
+
+			if (pageSet.length === 2) {
+				containerSize = {
+					height: containerSize.height,
+					width: containerSize.width * 2,
+				}
+			}
+
+			const approxStepSize = width / pageSets.length
 			const approximatePosition = value * approxStepSize
 			const translateY = isTablet ? -20 : -10
 
 			// If we aren't close to an edge, we can just divide containerWidth by 2
 			// If we are close to an edge, we need to offset the translation
-			let translateX = (containerWidth / 2) * -1
-			if (approximatePosition < containerWidth / 2) {
+			let translateX = (containerSize.width / 2) * -1
+			if (approximatePosition < containerSize.width / 2) {
 				translateX = -approximatePosition
-			} else if (approximatePosition > width - containerWidth / 2) {
-				translateX = (containerWidth - (width - approximatePosition)) * -1
+			} else if (approximatePosition > width - containerSize.width / 2) {
+				translateX = (containerSize.width - (width - approximatePosition)) * -1
 			}
 
 			return {
 				translateX,
 				translateY,
+				containerSize,
 			}
 		},
-		[isTablet, width, pages],
+		[isTablet, width, pageSets, imageSizes],
 	)
 
 	const renderAboveThumbComponent = useCallback(
 		(_: number, value: number) => {
 			if (value < 0 || value >= pages) return null
 			if (!visible) return null
+			if (!isSliderDragging) return null
 
-			const actualPage = readingDirection === 'rtl' ? pages - value : value
-			if (actualPage === currentPage && !isSliderDragging) return null
+			const pageSet = pageSets.find((set) => set.includes(value - 1)) || []
 
-			const containerSize = {
-				height: isTablet ? 300 : 200,
-				width: isTablet ? 200 : 150,
-			}
-
-			const { translateX, translateY } = getSliderThumbTranslations(value)
+			const { translateX, translateY, containerSize } = getSliderImageContainerStyles(
+				value,
+				pageSet,
+			)
 
 			return (
 				<View
-					style={{
-						...containerSize,
-						transform: [
-							{ translateX },
-							{
-								translateY,
-							},
-						],
-					}}
+					style={[
+						{
+							transform: [
+								{ translateX },
+								{
+									translateY,
+								},
+							],
+						},
+					]}
 				>
 					<View
-						className="overflow-hidden rounded-lg"
+						className="flex flex-row"
 						style={{
-							height: '100%',
-							width: '100%',
+							height: containerSize.height,
+							width: containerSize.width,
+							gap: 1,
 						}}
 					>
-						{/* <Image
-							source={pageSource(actualPage)}
-							cachePolicy="memory"
-							style={{
-								width: '100%',
-								height: '100%',
-							}}
-							contentFit="fill"
-						/> */}
-
-						<FasterImage
-							source={{
-								url: pageSource(actualPage).uri,
-								headers: pageSource(actualPage).headers as Record<string, string>,
-								resizeMode: 'fill',
-							}}
-							style={{
-								width: '100%',
-								height: '100%',
-							}}
-						/>
+						{pageSet.map((pageIdx, i) => {
+							return (
+								<FasterImage
+									key={`thumb-${pageIdx + 1}-${i}`}
+									source={{
+										url: pageSource(pageIdx + 1).uri,
+										headers: pageSource(pageIdx + 1).headers as Record<string, string>,
+										resizeMode: 'fill',
+										borderRadius: 8,
+									}}
+									style={{
+										width: pageSet.length === 1 ? '100%' : '50%',
+										height: '100%',
+									}}
+								/>
+							)
+						})}
 					</View>
 
-					<Text className="text-center">{actualPage}</Text>
+					<Text className="text-center">{pageSet.map((i) => i + 1).join('-')}</Text>
 				</View>
 			)
 		},
-		[
-			currentPage,
-			pages,
-			readingDirection,
-			isTablet,
-			isSliderDragging,
-			pageSource,
-			getSliderThumbTranslations,
-			visible,
-		],
+		[pages, isSliderDragging, pageSource, getSliderImageContainerStyles, visible, pageSets],
 	)
 
 	const onSlidingComplete = useCallback(
 		(page: number) => {
 			setIsSliderDragging(false)
 			if (footerControls !== 'slider') return
-			const idx = (readingDirection === 'rtl' ? pages - page : page) - 1
+			const resolvedPage = (readingDirection === 'rtl' ? pages - page : page) - 1
+			const idx = pageSets.findIndex((set) => set.includes(resolvedPage))
+			if (idx === -1) return
 			onChangePage(idx)
 		},
-		[onChangePage, pages, readingDirection, footerControls],
+		[onChangePage, pages, readingDirection, footerControls, pageSets],
 	)
 
 	useEffect(
@@ -332,44 +381,59 @@ export default function Footer() {
 		[readingDirection],
 	)
 
+	const renderGalleryItem = useCallback(
+		({ item, index }: { item: number[]; index: number }) => {
+			const isCurrentPage = item.includes(currentPage - 1)
+			return (
+				<Pressable onPress={() => onChangePage(index)}>
+					<View
+						className={cn('flex flex-row', { 'pl-1': index === 0, 'pr-1': index === pages - 1 })}
+						style={{
+							...getGalleryItemSize(index),
+							gap: 1,
+						}}
+					>
+						{item.map((pageIdx, i) => {
+							return (
+								<FasterImage
+									key={`thumb-${pageIdx + 1}-${i}`}
+									source={{
+										url: pageSource(pageIdx + 1).uri,
+										headers: pageSource(pageIdx + 1).headers as Record<string, string>,
+										resizeMode: 'fill',
+										borderRadius: 8,
+									}}
+									style={{
+										width: item.length === 1 ? '100%' : '50%',
+										height: '100%',
+									}}
+								/>
+							)
+						})}
+					</View>
+
+					{!isCurrentPage && (
+						<Text size="sm" className="shrink-0 text-center text-[#898d94]">
+							{item.map((i) => i + 1).join('-')}
+						</Text>
+					)}
+				</Pressable>
+			)
+		},
+		[onChangePage, currentPage, pages, pageSource, getGalleryItemSize],
+	)
+
 	// TODO: swap to flashlist, does NOT like dynamic height though...
 	return (
 		<Animated.View className="absolute z-20 shrink gap-4 px-1" style={animatedStyles}>
 			{footerControls === 'images' && (
 				<FlatList
 					ref={galleryRef}
-					data={Array.from({ length: pages }, (_, i) => i + 1)}
+					data={pageSets}
 					inverted={readingDirection === 'rtl'}
-					keyExtractor={(item) => `gallery-${item}`}
-					renderItem={({ item: page, index }) => (
-						<View className={cn({ 'pl-1': index === 0, 'pr-1': index === pages - 1 })}>
-							<Pressable onPress={() => onChangePage(index)}>
-								<View
-									className="items-center justify-center overflow-hidden rounded-md shadow-lg"
-									style={getSize(index)}
-								>
-									<FasterImage
-										source={{
-											url: pageSource(page).uri,
-											headers: pageSource(page).headers as Record<string, string>,
-											resizeMode: 'cover',
-										}}
-										style={{
-											height: '100%',
-											width: '100%',
-										}}
-									/>
-								</View>
-							</Pressable>
-
-							{index !== currentPage - 1 && (
-								<Text size="sm" className="shrink-0 text-center text-[#898d94]">
-									{index + 1}
-								</Text>
-							)}
-						</View>
-					)}
-					contentContainerStyle={{ gap: 4, alignItems: 'flex-end' }}
+					keyExtractor={(item) => `gallery-${item.join('-')}`}
+					renderItem={renderGalleryItem}
+					contentContainerStyle={{ gap: 6, alignItems: 'flex-end' }}
 					getItemLayout={getItemLayout}
 					horizontal
 					showsHorizontalScrollIndicator={false}
@@ -392,7 +456,7 @@ export default function Footer() {
 
 				{footerControls === 'slider' && (
 					<Slider
-						maximumValue={pages}
+						maximumValue={pageSets.length - 1}
 						step={1}
 						value={sliderValue}
 						trackStyle={{

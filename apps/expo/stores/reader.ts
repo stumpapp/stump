@@ -32,7 +32,7 @@ export type GlobalSettings = Omit<BookPreferences, 'serverID'>
 type ElapsedSeconds = number
 
 type BookCacheData = {
-	dimensions: string
+	dimensions: Record<number, { width: number; height: number; ratio: number }>
 }
 
 export type ReaderStore = {
@@ -111,7 +111,6 @@ export const useReaderStore = create<ReaderStore>()(
 							),
 						),
 					}),
-
 				bookTimers: {},
 				setBookTimer: (id, elapsedSeconds) =>
 					set({ bookTimers: { ...get().bookTimers, [id]: elapsedSeconds } }),
@@ -240,10 +239,9 @@ export const useBookTimer = (id: string, params: UseBookTimerParams = defaultPar
 }
 
 export const useHideStatusBar = () => {
-	const { isReading, showControls } = useReaderStore((state) => ({
+	const { isReading } = useReaderStore((state) => ({
 		isReading: state.isReading,
-		showControls: state.showControls,
 	}))
 
-	return isReading && !showControls
+	return isReading
 }

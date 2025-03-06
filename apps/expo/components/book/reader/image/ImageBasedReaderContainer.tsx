@@ -1,8 +1,10 @@
-import { ComponentProps, useCallback, useRef, useState } from 'react'
+import { generatePageSets } from '@stump/sdk'
+import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
 import { Dimensions, View } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { useDisplay } from '~/lib/hooks'
 import { useBookPreferences } from '~/stores/reader'
 
 import { IImageBasedReaderContext, ImageBasedReaderContext } from './context'
@@ -10,7 +12,10 @@ import ControlsOverlay from './ControlsOverlay'
 import ImageBasedReader from './ImageBasedReader'
 import { useDimensions } from './useDimensions'
 
-type Props = Omit<IImageBasedReaderContext, 'currentPage' | 'flatListRef' | 'setImageSizes'> &
+type Props = Omit<
+	IImageBasedReaderContext,
+	'currentPage' | 'flatListRef' | 'setImageSizes' | 'pageSets'
+> &
 	ComponentProps<typeof ImageBasedReader>
 
 export default function ImageBasedReaderContainer({
@@ -19,14 +24,31 @@ export default function ImageBasedReaderContainer({
 	imageSizes,
 	...ctx
 }: Props) {
+	const { height, width } = useDisplay()
 	const {
-		preferences: { incognito },
+		preferences: { incognito, doublePageBehavior, readingMode },
 	} = useBookPreferences(ctx.book.id)
-	const [currentPage, setCurrentPage] = useState(() => initialPage)
 	const { sizes, setSizes } = useDimensions({
 		bookID: ctx.book.id,
 		imageSizes,
 	})
+
+	const deviceOrientation = useMemo(
+		() => (width > height ? 'landscape' : 'portrait'),
+		[width, height],
+	)
+
+	const pages = ctx.book.pages
+	const pageSets = useMemo(() => {
+		const autoButOff = doublePageBehavior === 'auto' && deviceOrientation === 'portrait'
+		const modeForceOff = readingMode === 'continuous:vertical'
+		if (doublePageBehavior === 'off' || autoButOff || modeForceOff) {
+			return Array.from({ length: pages }, (_, i) => [i])
+		}
+		return generatePageSets({ imageSizes: sizes, pages: pages })
+	}, [doublePageBehavior, pages, sizes, deviceOrientation, readingMode])
+
+	const [currentPage, setCurrentPage] = useState(() => initialPage)
 
 	const onPageChangedHandler = useCallback(
 		(page: number) => {
@@ -63,6 +85,7 @@ export default function ImageBasedReaderContainer({
 				onPageChanged: onPageChangedHandler,
 				imageSizes: sizes,
 				setImageSizes: setSizes,
+				pageSets,
 				flatListRef,
 			}}
 		>

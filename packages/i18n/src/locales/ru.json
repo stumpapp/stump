@@ -1308,233 +1308,233 @@
 				},
 				"textBasedBooks": {
 					"label": "Читалка электронных книг",
-					"description": "Default settings for text-based books",
+					"description": "Настройки по умолчанию для текстовых книг",
 					"sections": {
 						"fontSize": {
-							"label": "Font size",
-							"description": "The size of the font used in the reader"
+							"label": "Размер шрифта",
+							"description": "Размер шрифта, используемого в читалке"
 						},
 						"fontFamily": {
-							"label": "Font family",
-							"description": "The font used in the reader"
+							"label": "Семейство шрифтов",
+							"description": "Шрифт, используемый в читалке"
 						}
 					}
 				},
 				"data": {
 					"sections": {
 						"clearStore": {
-							"label": "Clear preferences",
-							"description": "Reset all individual book settings that override the defaults",
-							"button": "Clear preferences"
+							"label": "Очистить настройки",
+							"description": "Сбросить индивидуальные настройки книг, которые переопределяют значения по умолчанию",
+							"button": "Очистить настройки"
 						}
 					}
 				}
 			}
 		},
 		"app/desktop": {
-			"helmet": "Desktop settings",
-			"title": "Desktop settings",
-			"description": "Settings related to the Stump desktop application",
+			"helmet": "Настройки рабочего стола",
+			"title": "Настройки рабочего стола",
+			"description": "Настройки, относящиеся к десктопному приложению Stump",
 			"sections": {
 				"configuredServers": {
-					"label": "Configured servers",
-					"description": "The list of Stump servers you can connect to",
-					"getStarted": "Add a server to get started",
+					"label": "Настроенные серверы",
+					"description": "Список серверов Stump, к которым можно подключаться",
+					"getStarted": "Для начала добавьте сервер",
 					"unreachableServer": {
-						"tooltip": "Server unreachable"
+						"tooltip": "Сервер недоступен"
 					},
 					"activeServer": {
-						"tooltip": "Current server"
+						"tooltip": "Текущий сервер"
 					},
 					"addOrEditServer": {
 						"validation": {
-							"nameExists": "A server with this name already exists",
-							"nameForbidden": "This name is reserved",
-							"urlExists": "A server with this URL already exists"
+							"nameExists": "Сервер с таким именем уже существует",
+							"nameForbidden": "Это имя зарезервировано",
+							"urlExists": "Сервер с таким URL уже существует"
 						},
 						"fields": {
 							"name": {
-								"label": "Name",
-								"description": "A friendly name to identify this server",
-								"placeholder": "My server"
+								"label": "Имя",
+								"description": "Понятное имя для идентификации этого сервера",
+								"placeholder": "Мой сервер"
 							},
 							"uri": {
 								"label": "URI",
-								"description": "The URL of the Stump server",
+								"description": "URL-адрес сервера Stump",
 								"placeholder": "https://stump.example.com"
 							}
 						}
 					},
 					"addServer": {
-						"trigger": "Add server",
-						"title": "Add a new server",
-						"description": "Add a new Stump server to the desktop application",
-						"confirm": "Add server"
+						"trigger": "Добавить сервер",
+						"title": "Добавить новый сервер",
+						"description": "Добавить новый сервер Stump в десктопное приложение",
+						"confirm": "Добавить сервер"
 					},
 					"editServer": {
-						"tooltip": "Edit server",
-						"title": "Edit server",
-						"description": "Edit the details of this server",
-						"confirm": "Save changes"
+						"tooltip": "Редактировать сервер",
+						"title": "Редактировать сервер",
+						"description": "Редактировать сведения об этом сервере",
+						"confirm": "Сохранить изменения"
 					},
 					"deleteServer": {
-						"tooltip": "Delete server",
+						"tooltip": "Удалить сервер",
 						"confirmation": {
-							"title": "Delete this server",
-							"description": "This will remove the server from the desktop application",
-							"disclaimerActiveServer": "This server is currently active. You will be logged out",
-							"disclaimerLastServer": "This is the last configured server. You will be logged out and have to reconfigure any servers in the initialization process",
-							"confirm": "Delete server"
+							"title": "Удалить этот сервер",
+							"description": "Это удалит сервер из десктопного приложения",
+							"disclaimerActiveServer": "Этот сервер в настоящее время активен. Вы выйдите из системы",
+							"disclaimerLastServer": "Это последний настроенный сервер. Вы выйдете из системы и должны будете перенастроить все серверы в процессе инициализации",
+							"confirm": "Удалить сервер"
 						}
 					},
 					"switchToServer": {
-						"tooltip": "Switch to server",
+						"tooltip": "Переключиться на сервер",
 						"confirmation": {
-							"title": "Switch to this server",
-							"description": "This will log you out of your current server",
-							"confirm": "Switch to server",
-							"server": "Server",
+							"title": "Переключиться на этот сервер",
+							"description": "Вы выйдете из вашего текущего сервера",
+							"confirm": "Переключиться на сервер",
+							"server": "Сервер",
 							"uri": "URL"
 						}
 					},
 					"resetConfiguration": {
-						"label": "Delete all servers",
+						"label": "Удалить все серверы",
 						"description": [
-							"Delete all configured servers from the desktop application",
-							"This action cannot be undone"
+							"Удалить все настроенные серверы из десктопного приложения",
+							"Это действие нельзя будет отменить"
 						],
 						"confirmation": {
-							"trigger": "Delete all servers",
-							"title": "Delete all servers",
-							"description": "This will remove all servers from the desktop application",
-							"disclaimer": "You will be logged out and have to reconfigure any servers in the initialization process",
-							"confirm": "Delete all servers"
+							"trigger": "Удалить все серверы",
+							"title": "Удалить все серверы",
+							"description": "Это удалит все серверы из десктопного приложения",
+							"disclaimer": "Вы выйдете из системы и должны будете перенастроить все серверы в процессе инициализации",
+							"confirm": "Удалить все серверы"
 						}
 					},
 					"resetTokens": {
-						"label": "Clear authentication",
+						"label": "Сбросить аутентификацию",
 						"description": [
-							"Remove all securely-stored access tokens for your servers",
-							"You will have to re-authenticate with each server"
+							"Удалите все сохраненные токены доступа к вашим серверам",
+							"Вам придется повторно авторизоваться на каждом сервере"
 						],
 						"confirmation": {
-							"trigger": "Clear authentication",
-							"title": "Clear authentication",
-							"description": "This will remove all securely-stored access tokens for your servers",
-							"confirm": "Clear authentication"
+							"trigger": "Сбросить аутентификацию",
+							"title": "Сбросить аутентификацию",
+							"description": "Это удалит все сохраненные токены доступа к вашим серверам",
+							"confirm": "Сбросить аутентификацию"
 						}
 					}
 				},
 				"optionalFeatures": {
-					"label": "Optional features",
-					"description": "Manage the optional features unique to the desktop application",
+					"label": "Дополнительные функции",
+					"description": "Управление дополнительными функциями, уникальными для десктопного приложения",
 					"bundledServer": {
-						"label": "Bundled server",
-						"description": "Run the bundled server in the background while the desktop application is running (requires restart)"
+						"label": "Встроенный сервер",
+						"description": "Запускать встроенный сервер в фоновом режиме, пока запущено десктопное приложение (требуется перезапуск)"
 					},
 					"discordPresence": {
-						"label": "Discord Presence",
-						"description": "Display your Stump activity in Discord using Discord Rich Presence",
-						"reconnect": "Reconnect to Discord"
+						"label": "Отображение в Discord",
+						"description": "Отображать активность вашего Stump в Discord, используя Discord Rich Presence",
+						"reconnect": "Переподключиться к Discord"
 					}
 				}
 			}
 		},
 		"server/general": {
-			"helmet": "General server settings",
-			"title": "General settings",
-			"description": "General settings related to your Stump server instance",
+			"helmet": "Основные настройки сервера",
+			"title": "Основные настройки",
+			"description": "Общие настройки, относящиеся к вашему серверу Stump",
 			"sections": {
 				"updateAvailable": {
-					"message": "Your server is not up to date. Please update to the latest version!"
+					"message": "Ваш сервер потерял свою свежесть. Пожалуйста, обновите до последней версии!"
 				},
 				"serverInfo": {
-					"title": "Server information",
-					"description": "Basic details about your Stump server instance",
+					"title": "Информация о сервере",
+					"description": "Основные сведения о вашем сервере Stump",
 					"build": {
-						"label": "Build",
-						"description": "Details about the version and build",
+						"label": "Сборка",
+						"description": "Подробности о версии и сборке",
 						"version": {
-							"semver": "Version",
-							"commitHash": "Exact commit",
-							"date": "Build date"
+							"semver": "Версия",
+							"commitHash": "Точный коммит",
+							"date": "Дата сборки"
 						}
 					}
 				},
 				"serverPublicUrl": {
-					"label": "Public URL",
-					"description": "The URL that your server is accessible from outside your network, if applicable. This will enable invite links and other features"
+					"label": "Общедоступный URL",
+					"description": "URL, по которому сервер доступен извне вашей локальной сети, если применимо. Это даст доступ к пригласительным ссылкам и другим функциям"
 				}
 			}
 		},
 		"server/logs": {
-			"helmet": "Logs",
-			"title": "Logs",
-			"description": "The logs generated by your Stump server instance",
+			"helmet": "Логи",
+			"title": "Логи",
+			"description": "Логи, созданные вашим сервером Stump",
 			"sections": {
 				"persistedLogs": {
-					"title": "Persisted logs",
-					"description": "These logs have been manually persisted to the database, typically associated with a specific job or event",
+					"title": "Сохраненные логи",
+					"description": "Эти логи были сохранены в базе данных вручную, обычно связаны с конкретным заданием или событием",
 					"table": {
 						"columns": {
-							"level": "Level",
-							"message": "Message",
-							"timestamp": "Timestamp"
+							"level": "Уровень",
+							"message": "Сообщение",
+							"timestamp": "Временная метка"
 						},
-						"emptyHeading": "No logs to display",
-						"emptySubtitle": "Your server is either very healthy or very unhealthy"
+						"emptyHeading": "Нет логов для отображения",
+						"emptySubtitle": "Вашему серверу либо очень хорошо, либо он сильно заболел"
 					},
 					"deleteLogs": {
-						"title": "Delete logs",
-						"description": "Permanently delete all persisted logs from the database",
-						"disclaimer": "This action cannot be undone",
-						"confirm": "Delete logs"
+						"title": "Удалить логи",
+						"description": "Полностью удалить все сохраненные логи из базы данных",
+						"disclaimer": "Это действие нельзя будет отменить",
+						"confirm": "Удалить логи"
 					}
 				},
 				"liveLogs": {
-					"title": "Live logs feed",
-					"description": "Streamed directly from your Stump server instance in real-time"
+					"title": "Лента текущих логов",
+					"description": "Трансляция непосредственно с вашего сервера Stump в режиме реального времени"
 				}
 			}
 		},
 		"server/jobs": {
-			"helmet": "Jobs",
-			"title": "Jobs",
-			"description": "Background jobs that run on your Stump server instance",
+			"helmet": "Задачи",
+			"title": "Задачи",
+			"description": "Задачи, выполняемые в фоне на вашем сервере Stump",
 			"sections": {
 				"scheduling": {
-					"title": "Scheduling",
-					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart"
+					"title": "Планирование",
+					"description": "Некоторые задачи могут быть настроены для запуска по расписанию. Изменения в этой конфигурации вступят в силу после перезапуска сервера"
 				},
 				"history": {
-					"title": "History",
-					"description": "A record of jobs that have been run on your Stump server instance",
+					"title": "История",
+					"description": "Запись задач, которые были запущены на вашем сервере Stump",
 					"table": {
 						"columns": {
-							"name": "Type",
-							"description": "Description",
-							"status": "Status",
-							"createdAt": "Started At",
-							"elapsed": "Elapsed",
-							"tasks": "Tasks"
+							"name": "Тип",
+							"description": "Описание",
+							"status": "Статус",
+							"createdAt": "Началось в",
+							"elapsed": "Прошло времени",
+							"tasks": "Задачи"
 						},
-						"emptyHeading": "There are no jobs to display",
-						"emptySubtitle": "You can't have a job if you don't have a job",
-						"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
-						"deleteAllConfirmButton": "Clear history",
-						"deleteAllConfirmButtonTitle": "Clear all job history",
-						"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
+						"emptyHeading": "Нет задач для отображения",
+						"emptySubtitle": "У вас не может быт задач, если у вас нет задач",
+						"deleteAllMessage": "История задач и статистика могут быть удалены из базы данных в любое время. Это действие не может быть отменено",
+						"deleteAllConfirmButton": "Очистить историю",
+						"deleteAllConfirmButtonTitle": "Очистить историю задач",
+						"deleteAllConfirmButtonTitleNoJobs": "Нет задач для очистки"
 					}
 				}
 			}
 		},
 		"server/users": {
-			"helmet": "User management",
-			"title": "Users",
-			"description": "Manage the users on this server",
+			"helmet": "Управление пользователями",
+			"title": "Пользователи",
+			"description": "Управление пользователями на этом сервере",
 			"createUser": {
-				"helmet": "Create user",
-				"title": "Create user",
+				"helmet": "Создать пользователя",
+				"title": "Создать пользователя",
 				"description": "Create a new user on this server"
 			},
 			"updateUser": {

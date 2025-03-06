@@ -223,12 +223,8 @@ pub fn process_metadata(
 	config: &StumpConfig,
 ) -> Result<Option<MediaMetadata>, FileError> {
 	let options = FileProcessorOptions {
-		convert_rar_to_zip: false,
-		delete_conversion_source: false,
-		generate_file_hashes: false,
 		process_metadata: true,
-		process_pages: false,
-		generate_koreader_hashes: false,
+		..Default::default()
 	};
 
 	let path = path.as_ref().to_path_buf();

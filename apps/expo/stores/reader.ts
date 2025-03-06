@@ -31,6 +31,10 @@ export type GlobalSettings = Omit<BookPreferences, 'serverID'>
 
 type ElapsedSeconds = number
 
+type BookCacheData = {
+	dimensions: string
+}
+
 export type ReaderStore = {
 	isReading: boolean
 	setIsReading: (reading: boolean) => void
@@ -42,6 +46,12 @@ export type ReaderStore = {
 	addBookSettings: (id: string, preferences: BookPreferences) => void
 	setBookSettings: (id: string, preferences: Partial<BookPreferences>) => void
 	clearLibrarySettings: (serverID: string) => void
+
+	/**
+	 * A cache of miscellaneous book data Stump uses
+	 */
+	bookCache: Record<string, BookCacheData>
+	setBookCache: (id: string, data: BookCacheData) => void
 
 	bookTimers: Record<string, ElapsedSeconds>
 	setBookTimer: (id: string, timer: ElapsedSeconds) => void
@@ -84,6 +94,15 @@ export const useReaderStore = create<ReaderStore>()(
 							[id]: { ...get().bookSettings[id], ...updates },
 						},
 					}),
+				bookCache: {},
+				setBookCache: (id, data) => {
+					set({
+						bookCache: {
+							...get().bookCache,
+							[id]: data,
+						},
+					})
+				},
 				clearLibrarySettings: (serverID) =>
 					set({
 						bookSettings: Object.fromEntries(

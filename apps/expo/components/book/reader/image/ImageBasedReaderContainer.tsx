@@ -5,9 +5,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useBookPreferences } from '~/stores/reader'
 
-import { IImageBasedReaderContext, ImageBasedBookPageRef, ImageBasedReaderContext } from './context'
+import { IImageBasedReaderContext, ImageBasedReaderContext } from './context'
 import ControlsOverlay from './ControlsOverlay'
 import ImageBasedReader from './ImageBasedReader'
+import { useDimensions } from './useDimensions'
 
 type Props = Omit<IImageBasedReaderContext, 'currentPage' | 'flatListRef' | 'setImageSizes'> &
 	ComponentProps<typeof ImageBasedReader>
@@ -15,14 +16,17 @@ type Props = Omit<IImageBasedReaderContext, 'currentPage' | 'flatListRef' | 'set
 export default function ImageBasedReaderContainer({
 	initialPage,
 	onPageChanged,
-	imageSizes = [],
+	imageSizes,
 	...ctx
 }: Props) {
 	const {
 		preferences: { incognito },
 	} = useBookPreferences(ctx.book.id)
 	const [currentPage, setCurrentPage] = useState(() => initialPage)
-	const [sizes, setSizes] = useState<ImageBasedBookPageRef[]>(() => imageSizes)
+	const { sizes, setSizes } = useDimensions({
+		bookID: ctx.book.id,
+		imageSizes,
+	})
 
 	const onPageChangedHandler = useCallback(
 		(page: number) => {

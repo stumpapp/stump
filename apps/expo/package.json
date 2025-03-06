@@ -54,6 +54,7 @@
 		"expo-splash-screen": "~0.29.22",
 		"expo-status-bar": "~2.0.1",
 		"expo-system-ui": "~4.0.8",
+		"image-size": "^2.0.0",
 		"lodash": "^4.17.21",
 		"lucide-react-native": "^0.378.0",
 		"nativewind": "^4.1.23",

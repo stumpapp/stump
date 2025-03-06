@@ -92,6 +92,7 @@ export type ReaderStore = {
 	 * The preferences for each book, if they have been overridden from the default preferences
 	 */
 	bookPreferences: Record<BookID, BookPreferences>
+
 	/**
 	 * A function to clear the store
 	 */

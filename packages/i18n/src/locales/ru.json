@@ -479,9 +479,9 @@
 			"dropzone": {
 				"books": "Перетащите книги сюда",
 				"series": "Перетащите архив zip сюда",
-				"alt": "Or click to browse your computer for books to upload"
+				"alt": "Или нажмите для просмотра и загрузки книг с вашего компьютера"
 			},
-			"addedFiles": "Added files"
+			"addedFiles": "Добавленные файлы"
 		}
 	},
 	"librarySettingsScene": {
@@ -489,92 +489,92 @@
 		"subtitle": "Обновите настройки вашей библиотеки, измените правила доступа или сканируйте файлы. Если вы хотите обновить библиотеки и узнать как они работают, проверьте",
 		"subtitleLink": "соответствующую документацию",
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "Базовые сведения",
 			"options": {
-				"general": "General",
-				"reading": "Reading",
-				"scanning": "Scanning",
-				"thumbnails": "Thumbnails",
-				"ignore-rules": "Ignore Rules",
-				"analysis": "Analysis",
-				"label": "Options"
+				"general": "Основные",
+				"reading": "Чтение",
+				"scanning": "Сканирование",
+				"thumbnails": "Эскизы",
+				"ignore-rules": "Правила игнорирования",
+				"analysis": "Анализ",
+				"label": "Настройки"
 			},
 			"danger-zone": {
-				"access-control": "Access Control",
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"access-control": "Управление доступом",
+				"delete": "Удаление",
+				"label": "Осторожно, зона риска"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this library, including its name, path, and description",
+			"title": "Основная информация",
+			"description": "Детали этой библиотеки, включая ее название, путь и описание",
 			"form": {
-				"submit": "Update library"
+				"submit": "Обновление библиотеки"
 			}
 		},
 		"options/reading": {
-			"title": "Reading",
-			"description": "The default reader settings to use for books in this library. Any book can override these settings"
+			"title": "Чтение",
+			"description": "Настройки чтения по умолчанию для книг в этой библиотеке. Любая книга может переопределить эти настройки"
 		},
 		"options/scanning": {
-			"title": "Scanning",
-			"description": "Settings related to how Stump scans this library",
+			"title": "Сканирование",
+			"description": "Настройки, связанные с тем, как Stump сканирует библиотеку",
 			"sections": {
 				"configureScan": {
-					"heading": "Configure scan",
-					"description": "A scan with additional options for more fine-grained control",
+					"heading": "Настройка сканирования",
+					"description": "Сканирование с дополнительными опциями для более тонкого контроля",
 					"form": {
-						"alert": "These will override corresponding library-wide settings",
+						"alert": "Это переопределит соответствующие настройки для всей библиотеки",
 						"options": {
 							"forceRebuild": {
-								"label": "Force rebuild",
-								"description": "Rebuild every book in the library on disk",
-								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
+								"label": "Принудительное реконструирование",
+								"description": "Реконструировать на диске каждую книгу из библиотеки",
+								"alert": "Это позволит реконструировать все книги в библиотеке с нуля, включая метаданные и хэши"
 							},
 							"custom": {
-								"label": "Custom",
-								"description": "Customize the scan configuration",
+								"label": "Настраиваемый",
+								"description": "Настроить конфигурацию сканирования",
 								"validation": {
-									"noSelection": "At least one option must be enabled"
+									"noSelection": "По крайней мере одна опция должна быть включена"
 								}
 							},
 							"rebuildMeta": {
-								"label": "Rebuild metadata",
-								"description": "Rebuild metadata for books in the library"
+								"label": "Реконструировать метаданные",
+								"description": "Реконструировать метаданные книг в библиотеке"
 							},
 							"regenHashes": {
-								"label": "Regenerate hashes",
-								"description": "Recreate hashes for books in the library"
+								"label": "Сгенерировать новые хэши",
+								"description": "Пересоздать хэши книг в библиотеке"
 							}
 						}
 					}
 				},
 				"defaultScan": {
-					"heading": "Default scan",
-					"description": "A standard scan to index your library for new content"
+					"heading": "Сканирование по умолчанию",
+					"description": "Стандартное сканирование для индексирования нового контента в вашей библиотеке"
 				},
 				"history": {
-					"heading": "Scan history",
-					"description": "The history of all scans recorded for this library",
-					"empty": "There are no scans recorded for this library",
-					"runScan": "Run scan",
-					"inspect": "See details",
+					"heading": "История сканирования",
+					"description": "История сканирования этой библиотеки",
+					"empty": "Нет сохраненной информации о сканировании этой библиотеки",
+					"runScan": "Запустить сканирование",
+					"inspect": "Смотреть подробности",
 					"inspector": {
-						"title": "Scan record",
-						"description": "A detailed view of this scan record",
+						"title": "Запись о сканировании",
+						"description": "Подробности записи о сканировании",
 						"fields": {
-							"library": "Library",
-							"date": "Date",
-							"config": "Config",
-							"jobOutput": "Job output",
-							"logs": "Logs"
+							"library": "Библиотека",
+							"date": "Дата",
+							"config": "Конфигурация",
+							"jobOutput": "Результат задания",
+							"logs": "Логи"
 						},
-						"logsPresent": "Logs were persisted for this job",
-						"seeLogs": "See logs"
+						"logsPresent": "Сохраненные логи этого задания",
+						"seeLogs": "Смотреть логи"
 					},
 					"table": {
 						"columns": {
-							"timestamp": "Scanned at",
+							"timestamp": "Сканировалось в",
 							"config": "Config"
 						},
 						"default": "Default",

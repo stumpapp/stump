@@ -1,7 +1,7 @@
 import { Zoomable } from '@likashefqet/react-native-image-zoom'
 import { useSDK } from '@stump/client'
 import { ImageLoadEventData } from 'expo-image'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 import { FlatList, useWindowDimensions, View } from 'react-native'
 import {
 	GestureStateChangeEvent,
@@ -12,7 +12,7 @@ import { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Image } from '~/components/Image'
-import { useDisplay } from '~/lib/hooks'
+import { useDisplay, usePrevious } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
@@ -46,7 +46,14 @@ type Props = {
  * A reader for books that are image-based, where each page should be displayed as an image
  */
 export default function ImageBasedReader({ initialPage }: Props) {
-	const { book, imageSizes = {}, onPageChanged, pageSets, flatListRef } = useImageBasedReader()
+	const {
+		book,
+		imageSizes = {},
+		onPageChanged,
+		pageSets,
+		currentPage,
+		flatListRef,
+	} = useImageBasedReader()
 	const {
 		preferences: { readingMode, incognito, readingDirection },
 	} = useBookPreferences(book.id)
@@ -57,8 +64,23 @@ export default function ImageBasedReader({ initialPage }: Props) {
 		[width, height],
 	)
 
-	// TODO: an effect that whenever the device orientation changes to something different than before,
-	// recalculate the ratios of the images? Maybe. Who knows, you will though
+	const previousOrientation = usePrevious(deviceOrientation)
+	useEffect(
+		() => {
+			if (!currentPage) return
+			if (deviceOrientation !== previousOrientation) {
+				const scrollTo = pageSets.findIndex((set) => set.includes(currentPage - 1))
+				if (scrollTo === -1) return
+				const timeout = setTimeout(
+					() => flatListRef?.current?.scrollToIndex({ index: scrollTo, animated: false }),
+					100,
+				)
+				return () => clearTimeout(timeout)
+			}
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[deviceOrientation, previousOrientation],
+	)
 
 	/**
 	 * A callback that updates the read progress of the current page. This will be
@@ -263,7 +285,7 @@ const Page = React.memo(
 								headers: {
 									Authorization: sdk.authorizationHeader,
 								},
-								cachePolicy: cachePolicy,
+								cachePolicy,
 							}}
 							style={{
 								height: '100%',

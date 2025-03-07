@@ -75,17 +75,9 @@ export default function Footer() {
 		}),
 		[isTablet],
 	)
-	const getSize = useCallback(
-		(idx: number) => ({
-			width: idx === currentPage - 1 ? baseSize.width / WIDTH_MODIFIER : baseSize.width,
-			height: idx === currentPage - 1 ? baseSize.height / HEIGHT_MODIFIER : baseSize.height,
-		}),
-		[currentPage, baseSize],
-	)
 
-	const getGalleryItemSize = useCallback(
-		(idx: number) => {
-			const set = pageSets[idx]
+	const calcSetContainerSize = useCallback(
+		(set: number[]) => {
 			const isDoubleSpread = set.length === 2
 			const isLandscape = set.some((page) => (imageSizes?.[page]?.ratio || 0) >= 1)
 
@@ -113,36 +105,31 @@ export default function Footer() {
 
 			return containerSize
 		},
-		[currentPage, baseSize, pageSets, imageSizes],
+		[currentPage, baseSize, imageSizes],
+	)
+
+	const getGalleryItemSize = useCallback(
+		(idx: number) => {
+			const set = pageSets[idx]
+			const containerSize = calcSetContainerSize(set)
+			return containerSize
+		},
+		[pageSets, calcSetContainerSize],
 	)
 
 	const getItemLayout = useCallback(
 		(_: ArrayLike<number[]> | null | undefined, index: number) => {
-			const set = pageSets[index]
-			if (!set) return { length: 0, offset: 0, index }
+			const totalOffset = pageSets
+				.slice(0, index)
+				.reduce((acc, set) => acc + calcSetContainerSize(set).width, 0)
 
-			const currentSetIdx = set.findIndex((page) => page === currentPage - 1)
-			const isAtOrAfterCurrentPage = index >= currentSetIdx
-			if (isAtOrAfterCurrentPage) {
-				// TODO: my math is actually comically bad and this needs adjustment
-				// Up until the current page each item is the baseSize, then we have ONE larger item
-				// which is the current page, and the rest are baseSize.
-				const baseOffset = baseSize.width * index + 2 * index
-				return {
-					length: getSize(index).width,
-					offset: baseOffset + baseSize.width / WIDTH_MODIFIER,
-					index,
-				}
-			}
-
-			// Before the current page, all items are the baseSize
 			return {
-				length: getSize(index).width,
-				offset: getSize(index).width * index + 4 * index,
+				length: getGalleryItemSize(index).width,
+				offset: totalOffset,
 				index,
 			}
 		},
-		[getSize, currentPage, baseSize, pageSets],
+		[getGalleryItemSize, pageSets, calcSetContainerSize],
 	)
 
 	const onChangePage = useCallback(
@@ -353,7 +340,7 @@ export default function Footer() {
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[visible, readingDirection],
+		[visible, readingDirection, currentPage],
 	)
 
 	const previousReadingDirection = usePrevious(readingDirection)

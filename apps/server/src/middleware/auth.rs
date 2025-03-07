@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use axum::{
 	body::Body,
-	extract::{FromRequestParts, OriginalUri, Path, Request, State},
+	extract::{OriginalUri, Path, Request, State},
 	http::{header, StatusCode},
 	middleware::Next,
 	response::{IntoResponse, Redirect, Response},
@@ -145,31 +145,11 @@ impl RequestContext {
 #[tracing::instrument(skip_all)]
 pub async fn auth_middleware(
 	State(ctx): State<AppState>,
-	req: Request,
+	HostExtractor(host_details): HostExtractor,
+	mut session: Session,
+	mut req: Request,
 	next: Next,
 ) -> Result<Response, impl IntoResponse> {
-	// Extract Host
-	let (mut parts, body) = req.into_parts();
-	let host_details = match HostExtractor::from_request_parts(&mut parts, &ctx).await {
-		Ok(HostExtractor(host)) => host,
-		Err(err) => {
-			tracing::error!("Failed to extract Host header: {err}");
-			return Err(APIError::Unauthorized.into_response());
-		},
-	};
-
-	// Extract Session
-	let mut session = match Session::from_request_parts(&mut parts, &ctx).await {
-		Ok(session) => session,
-		Err(err) => {
-			tracing::error!("Failed to extract Session: {err:?}");
-			return Err(APIError::Unauthorized.into_response());
-		},
-	};
-
-	// Reform request
-	let mut req = Request::from_parts(parts, body);
-
 	let req_headers = req.headers().clone();
 	let auth_header = req_headers
 		.get(header::AUTHORIZATION)

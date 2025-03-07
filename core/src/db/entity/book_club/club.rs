@@ -23,7 +23,6 @@ pub struct BookClub {
 	description: Option<String>,
 	emoji: Option<String>,
 	is_private: bool,
-	#[schema(value_type = String)]
 	created_at: DateTime<FixedOffset>,
 	member_role_spec: BookClubMemberRoleSpec,
 

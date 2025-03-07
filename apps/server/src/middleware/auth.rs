@@ -820,10 +820,9 @@ mod tests {
 			.layer(session_layer)
 			.into_make_service_with_connect_info::<StumpRequestInfo>();
 
-		let config = TestServerConfig::builder()
-			.save_cookies()
-			.http_transport()
-			.build();
+		let mut config = TestServerConfig::new();
+		config.save_cookies = true;
+		config.transport = Some(axum_test::Transport::HttpRandomPort);
 
 		let mut server = TestServer::new_with_config(app, config).unwrap();
 		let (host_header, host_value) = host_header();

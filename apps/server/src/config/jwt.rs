@@ -6,6 +6,7 @@ use rand::distributions::{Alphanumeric, DistString};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use stump_core::config::StumpConfig;
+use utoipa::ToSchema;
 
 use crate::errors::{APIError, APIResult};
 
@@ -25,9 +26,10 @@ struct Claims {
 	exp: usize,
 }
 
-#[derive(Debug, Serialize, Type)]
+#[derive(Debug, Serialize, Type, ToSchema)]
 pub struct CreatedToken {
 	pub access_token: String,
+	#[schema(value_type = String)]
 	pub expires_at: DateTime<FixedOffset>,
 	// TODO(219): Support refresh tokens
 }

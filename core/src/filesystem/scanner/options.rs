@@ -78,13 +78,13 @@ impl BookVisitResult {
 /// The override options for a scan job. These options are used to override the default behavior, which generally
 /// means that the scanner will visit books it otherwise would not. How much extra work is done depends on the
 /// specific options.
-#[derive(Debug, Default, Clone, Copy, Deserialize, Type, Serialize)]
+#[derive(Debug, Default, Clone, Copy, Deserialize, Serialize, Type, ToSchema)]
 pub struct ScanOptions {
 	#[serde(default)]
 	pub config: ScanConfig,
 }
 
-#[derive(Default, Debug, Clone, Copy, Deserialize, Type, Serialize)]
+#[derive(Default, Debug, Clone, Copy, Deserialize, Serialize, Type, ToSchema)]
 #[serde(untagged)]
 pub enum ScanConfig {
 	#[default]
@@ -133,6 +133,7 @@ impl ScanOptions {
 pub struct LibraryScanRecord {
 	id: i32,
 	options: Option<ScanOptions>,
+	#[schema(value_type = String)]
 	timestamp: DateTime<FixedOffset>,
 	library_id: String,
 	job_id: Option<String>,
@@ -160,6 +161,7 @@ impl TryFrom<library_scan_record::Data> for LibraryScanRecord {
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct LastLibraryScan {
 	pub options: Option<ScanOptions>,
+	#[schema(value_type = String)]
 	pub timestamp: DateTime<FixedOffset>,
 }
 

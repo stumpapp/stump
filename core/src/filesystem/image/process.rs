@@ -57,7 +57,9 @@ impl ImageResizeOptions {
 }
 
 /// Supported image formats for processing images throughout Stump.
-#[derive(Default, Debug, Clone, Serialize, Deserialize, Type, PartialEq, Eq)]
+#[derive(
+	Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema, PartialEq, Eq,
+)]
 pub enum ImageFormat {
 	Webp,
 	#[default]

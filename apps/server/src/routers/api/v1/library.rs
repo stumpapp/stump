@@ -27,7 +27,9 @@ use stump_core::{
 			FileStatus, Library, LibraryConfig, LibraryScanMode, LibraryStats, Media,
 			Series, TagName, User, UserPermission,
 		},
-		query::pagination::{Pageable, Pagination, PaginationQuery},
+		query::pagination::{
+			Pageable, PageableLibraries, PageableSeries, Pagination, PaginationQuery,
+		},
 		PrismaCountTrait,
 	},
 	filesystem::{
@@ -53,7 +55,8 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::{
-		chain_optional_iter, FilterableQuery, LibraryFilter, MediaFilter, SeriesFilter,
+		chain_optional_iter, FilterableLibraryQuery, FilterableQuery, LibraryFilter,
+		MediaFilter, SeriesFilter,
 	},
 	middleware::auth::{auth_middleware, RequestContext},
 	routers::api::filters::{
@@ -75,10 +78,10 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			"/libraries/last-visited",
 			Router::new()
 				.route("/", get(get_last_visited_library))
-				.route("/:id", put(update_last_visited_library)),
+				.route("/{id}", put(update_last_visited_library)),
 		)
 		.nest(
-			"/libraries/:id",
+			"/libraries/{id}",
 			Router::new()
 				.route(
 					"/",
@@ -322,7 +325,7 @@ async fn get_libraries_stats(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/libraries/:id",
+	path = "/api/v1/libraries/{id}",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID")
@@ -363,7 +366,7 @@ async fn get_library_by_id(
 // TODO: remove? Not used on client
 #[utoipa::path(
 	get,
-	path = "/api/v1/libraries/:id/series",
+	path = "/api/v1/libraries/{id}/series",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID"),
@@ -547,7 +550,7 @@ pub(crate) async fn get_library_thumbnail(
 // TODO: ImageResponse for utoipa
 #[utoipa::path(
 	get,
-	path = "/api/v1/libraries/:id/thumbnail",
+	path = "/api/v1/libraries/{id}/thumbnail",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID"),
@@ -620,7 +623,7 @@ pub struct PatchLibraryThumbnail {
 
 #[utoipa::path(
     patch,
-    path = "/api/v1/libraries/:id/thumbnail",
+    path = "/api/v1/libraries/{id}/thumbnail",
     tag = "library",
     params(
         ("id" = String, Path, description = "The ID of the library")
@@ -766,7 +769,7 @@ async fn replace_library_thumbnail(
 /// Deletes all media thumbnails in a library by id, if the current user has access to it.
 #[utoipa::path(
 	delete,
-	path = "/api/v1/libraries/:id/thumbnail",
+	path = "/api/v1/libraries/{id}/thumbnail",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID"),
@@ -821,7 +824,7 @@ pub struct GenerateLibraryThumbnails {
 /// Generate thumbnails for all the media in a library by id, if the current user has access to it.
 #[utoipa::path(
 	post,
-	path = "/api/v1/libraries/:id/thumbnail/generate",
+	path = "/api/v1/libraries/{id}/thumbnail/generate",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID"),
@@ -875,7 +878,7 @@ async fn generate_library_thumbnails(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/libraries/:id/excluded-users",
+	path = "/api/v1/libraries/{id}/excluded-users",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID")
@@ -918,7 +921,7 @@ pub struct UpdateLibraryExcludedUsers {
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/libraries/:id/excluded-users",
+	path = "/api/v1/libraries/{id}/excluded-users",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID")
@@ -1001,13 +1004,14 @@ async fn update_library_excluded_users(
 
 #[derive(Debug, Deserialize, Serialize, ToSchema, Type)]
 pub struct LastScanDetails {
+	#[schema(value_type = Option<String>)]
 	last_scanned_at: Option<DateTime<FixedOffset>>,
 	last_scan: Option<LastLibraryScan>,
 }
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/libraries/:id/last-scan",
+	path = "/api/v1/libraries/{id}/last-scan",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID")
@@ -1106,7 +1110,7 @@ async fn delete_library_scan_history(
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/libraries/:id/scan",
+	path = "/api/v1/libraries/{id}/scan",
 	tag = "library",
 	responses(
 		(status = 200, description = "Successfully queued library scan"),
@@ -1161,7 +1165,7 @@ pub struct CleanLibraryResponse {
 
 #[utoipa::path(
 	put,
-	path = "/api/v1/libraries/:id/clean",
+	path = "/api/v1/libraries/{id}/clean",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID")
@@ -1553,7 +1557,7 @@ pub struct UpdateLibrary {
 // TODO(prisma-nested-create): Refactor once nested create is supported
 #[utoipa::path(
 	put,
-	path = "/api/v1/libraries/:id",
+	path = "/api/v1/libraries/{id}",
 	tag = "library",
 	request_body = UpdateLibrary,
 	params(
@@ -1787,7 +1791,7 @@ async fn update_library(
 
 #[utoipa::path(
 	delete,
-	path = "/api/v1/libraries/:id",
+	path = "/api/v1/libraries/{id}",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The id of the library to delete")
@@ -1924,7 +1928,7 @@ async fn get_library_stats(
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/libraries/:id/analyze",
+	path = "/api/v1/libraries/{id}/analyze",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The ID of the library to analyze")

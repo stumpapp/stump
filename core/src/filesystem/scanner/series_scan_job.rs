@@ -2,6 +2,7 @@ use std::{collections::VecDeque, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use utoipa::ToSchema;
 
 use crate::{
 	db::{
@@ -63,7 +64,7 @@ impl SeriesScanJob {
 
 // TODO: emit progress events. This job isn't exposed in the UI yet, so it's not a big deal for now
 
-#[derive(Clone, Serialize, Deserialize, Default, Debug, Type)]
+#[derive(Clone, Serialize, Deserialize, Default, Debug, Type, ToSchema)]
 pub struct SeriesScanOutput {
 	/// The number of files to scan relative to the series root
 	total_files: u64,

@@ -132,6 +132,7 @@ pub enum APIError {
 	#[error("{0}")]
 	Redirect(String),
 	#[error("{0}")]
+	#[schema(value_type = String)]
 	SessionFetchError(#[from] SessionError),
 	#[error("{0}")]
 	#[schema(value_type = String)]

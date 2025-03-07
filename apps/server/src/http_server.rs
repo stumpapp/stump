@@ -6,7 +6,7 @@ use stump_core::{
 	job::JobControllerCommand,
 	StumpCore,
 };
-use tokio::sync::oneshot;
+use tokio::{net::TcpListener, sync::oneshot};
 use tower_http::trace::TraceLayer;
 
 use crate::{
@@ -125,8 +125,8 @@ pub struct StumpRequestInfo {
 	pub ip_addr: std::net::IpAddr,
 }
 
-impl Connected<IncomingStream<'_>> for StumpRequestInfo {
-	fn connect_info(target: IncomingStream<'_>) -> Self {
+impl Connected<IncomingStream<'_, TcpListener>> for StumpRequestInfo {
+	fn connect_info(target: IncomingStream<'_, TcpListener>) -> Self {
 		StumpRequestInfo {
 			ip_addr: target.remote_addr().ip(),
 		}

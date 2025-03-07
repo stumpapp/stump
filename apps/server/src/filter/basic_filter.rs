@@ -21,7 +21,6 @@ use super::common::{
 // TODO: break this file up!
 
 #[derive(Debug, Default, Deserialize, Serialize, ToSchema)]
-#[aliases(FilterableLibraryQuery = FilterableQuery<LibraryFilter>, FilterableSeriesQuery = FilterableQuery<SeriesFilter>, FilterableMediaQuery = FilterableQuery<MediaFilter>)]
 pub struct FilterableQuery<T>
 where
 	T: Sized + Default,
@@ -32,6 +31,10 @@ where
 	pub ordering: QueryOrder,
 }
 
+pub type FilterableLibraryQuery = FilterableQuery<LibraryFilter>;
+pub type FilterableSeriesQuery = FilterableQuery<SeriesFilter>;
+pub type FilterableMediaQuery = FilterableQuery<MediaFilter>;
+
 impl<T> FilterableQuery<T>
 where
 	T: Sized + Default,
@@ -41,7 +44,7 @@ where
 	}
 }
 
-#[derive(Deserialize, Debug, Clone, Serialize, Type)]
+#[derive(Deserialize, Debug, Clone, Serialize, Type, ToSchema)]
 pub struct Range<T>
 where
 	T: std::str::FromStr,

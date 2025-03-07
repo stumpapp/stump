@@ -82,7 +82,7 @@ impl JobScheduler {
 
 					for library in &libraries_to_scan {
 						let library_path = library.path.clone();
-						let config = library.config().ok().take();
+						let config = library.config().ok();
 						let result =
 							scheduler_ctx.enqueue_job(WrappedJob::new(LibraryScanJob {
 								id: library.id.clone(),

@@ -88,3 +88,22 @@ pub fn should_filter_type(ty: &Type) -> bool {
 		_ => false,
 	}
 }
+
+pub fn is_datetime(ty: &Type) -> bool {
+	match ty {
+		Type::Path(type_path) => {
+			if let Some(type_ident) = type_path.path.segments.last() {
+				let ident_str = type_ident.ident.to_string();
+				match ident_str.as_str() {
+					"DateTime" => {
+						return true;
+					},
+					_ => return false,
+				}
+			}
+
+			false
+		},
+		_ => false,
+	}
+}

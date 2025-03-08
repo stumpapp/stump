@@ -219,7 +219,7 @@ export default function Footer() {
 
 	const getSliderImageContainerStyles = useCallback(
 		(value: number, pageSet: number[]) => {
-			const isLandscape = (imageSizes?.[value - 1].ratio || 0) >= 1
+			const isLandscape = (imageSizes?.[value - 1]?.ratio || 0) >= 1
 			let containerSize = {
 				height: isTablet ? 300 : 200,
 				width: isTablet ? 200 : 150,

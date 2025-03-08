@@ -67,7 +67,12 @@ export default function Header({ onShowGlobalSettings }: Props) {
 	return (
 		<Animated.View className="absolute z-20 gap-2 px-2" style={animatedStyles}>
 			<View className="flex-row items-center justify-between">
-				<Pressable onPress={() => router.back()}>
+				<Pressable
+					onPress={() => router.back()}
+					style={{
+						zIndex: 100,
+					}}
+				>
 					{({ pressed }) => (
 						<View
 							className="rounded-full border p-1 tablet:p-2"
@@ -89,7 +94,12 @@ export default function Header({ onShowGlobalSettings }: Props) {
 
 				<DropdownMenu.Root open={isOpen} onOpenChange={setIsOpen}>
 					<DropdownMenu.Trigger>
-						<Pressable onPress={() => setIsOpen((prev) => !prev)}>
+						<Pressable
+							onPress={() => setIsOpen((prev) => !prev)}
+							style={{
+								zIndex: 100,
+							}}
+						>
 							{({ pressed }) => (
 								<View
 									className="rounded-full border p-1 tablet:p-2"

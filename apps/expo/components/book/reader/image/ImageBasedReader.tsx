@@ -254,7 +254,7 @@ const Page = React.memo(
 
 		// TODO: Absolutely don't do this, this is terrible. We need my PRs to be merged upstream:
 		// https://github.com/candlefinance/faster-image/pulls
-		const renderPages = () => {
+		const renderPages = useCallback(() => {
 			if (doublePageBehavior === 'off') {
 				return indexes.map((pageIdx, i) => (
 					<FasterImage
@@ -298,7 +298,7 @@ const Page = React.memo(
 					/>
 				))
 			}
-		}
+		}, [cachePolicy, doublePageBehavior, indexes, onImageLoaded, pageURL, sdk])
 
 		// https://github.com/candlefinance/faster-image/issues/75
 		return (

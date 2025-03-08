@@ -74,7 +74,7 @@ export default function ReaderFooter() {
 	const renderItem = useCallback(
 		(idx: number, indexes: number[]) => {
 			return (
-				<div className="flex items-center gap-px">
+				<div className="flex items-center">
 					{indexes.map((index) => {
 						const url = sdk.media.bookPageURL(book.id, getRelativePage(index))
 						const imageSize = pageDimensions[index]

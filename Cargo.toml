@@ -9,7 +9,7 @@ members = [
 
 [workspace.package]
 version = "0.0.10"
-rust-version = "1.81.0"
+rust-version = "1.85.0"
 
 [workspace.dependencies]
 alphanumeric-sort = "1.5.3"

@@ -18,7 +18,6 @@ type Props = {
 
 export default function GridImageItem({ uri, title, href, index }: Props) {
 	const { sdk } = useSDK()
-
 	const { itemDimension } = useGridItemSize()
 
 	const router = useRouter()
@@ -27,9 +26,9 @@ export default function GridImageItem({ uri, title, href, index }: Props) {
 		<Pressable onPress={() => router.navigate(href)}>
 			{({ pressed }) => (
 				<View
-					className={cn('flex-1 gap-2 px-4 pb-4', {
-						'mr-auto': index % 2 === 0,
-						'ml-auto': index % 2 === 1,
+					className={cn('flex-1 gap-2 pb-4', {
+						// 'mr-auto': index % 2 === 0,
+						// 'ml-auto': index % 2 === 1,
 					})}
 				>
 					<View
@@ -49,6 +48,7 @@ export default function GridImageItem({ uri, title, href, index }: Props) {
 								},
 								resizeMode: 'cover',
 								borderRadius: 8,
+								cachePolicy: 'discWithCacheControl',
 							}}
 							style={{
 								height: '100%',

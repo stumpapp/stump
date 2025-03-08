@@ -29,7 +29,7 @@ export default function CachePolicySelect() {
 			<DropdownMenu.Root onOpenChange={setIsOpen}>
 				<DropdownMenu.Trigger>
 					<View className={cn('flex-row items-center gap-1.5', { 'opacity-80': isOpen })}>
-						<Text>{LABELS[cachePolicy]}</Text>
+						<Text className="text-foreground-muted">{LABELS[cachePolicy]}</Text>
 						<ChevronsUpDown className="h-5 text-foreground-muted" />
 					</View>
 				</DropdownMenu.Trigger>

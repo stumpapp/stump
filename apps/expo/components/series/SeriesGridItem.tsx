@@ -6,9 +6,10 @@ import GridImageItem from '../grid/GridImageItem'
 
 type Props = {
 	series: Series
+	index: number
 }
 
-export default function SeriesGridItem({ series }: Props) {
+export default function SeriesGridItem({ series, index }: Props) {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -19,6 +20,7 @@ export default function SeriesGridItem({ series }: Props) {
 			uri={sdk.series.thumbnailURL(series.id)}
 			title={series.metadata?.title || series.name}
 			href={`/server/${serverID}/series/${series.id}`}
+			index={index}
 		/>
 	)
 }

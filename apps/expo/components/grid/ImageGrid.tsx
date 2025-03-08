@@ -1,4 +1,4 @@
-import { FlatGrid, FlatGridProps } from 'react-native-super-grid'
+import { FlashList, FlashListProps } from '@shopify/flash-list'
 
 import type { Any } from '~/lib/utils'
 
@@ -10,7 +10,7 @@ type Props<ItemType = Any> = {
 	header?: string
 	onRefresh?: () => void
 	isRefetching?: boolean
-} & Omit<FlatGridProps<ItemType>, 'refreshControl'>
+} & Omit<FlashListProps<ItemType>, 'refreshControl'>
 
 export default function ImageGrid<ItemType = Any>({
 	header,
@@ -18,26 +18,26 @@ export default function ImageGrid<ItemType = Any>({
 	isRefetching,
 	...props
 }: Props<ItemType>) {
-	const { spacing } = useGridItemSize()
+	const { numColumns, sizeEstimate } = useGridItemSize()
+
 	return (
-		<FlatGrid
-			horizontal={false}
+		<FlashList
+			numColumns={numColumns}
 			ListHeaderComponent={
-				header
-					? () => (
-							<Heading size="xl" className="px-4 pb-4 font-semibold">
-								{header}
-							</Heading>
-						)
-					: undefined
+				<Heading size="xl" className="mb-4">
+					{header}
+				</Heading>
 			}
+			contentContainerStyle={{ padding: 16 }}
+			estimatedItemSize={sizeEstimate}
 			refreshControl={
 				onRefresh ? (
 					<RefreshControl refreshing={isRefetching || false} onRefresh={onRefresh} />
 				) : undefined
 			}
-			onEndReachedThreshold={props.onEndReached ? 0.75 : undefined}
-			spacing={spacing}
+			onRefresh={onRefresh}
+			refreshing={isRefetching}
+			onEndReachedThreshold={props.onEndReached ? 0.65 : undefined}
 			{...props}
 		/>
 	)

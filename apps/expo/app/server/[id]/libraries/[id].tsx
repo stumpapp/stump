@@ -1,4 +1,5 @@
 import { useLibraryByID, useLibrarySeriesCursorQuery } from '@stump/client'
+import { Series } from '@stump/sdk'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -23,6 +24,13 @@ export default function Screen() {
 		}
 	}, [hasNextPage, fetchNextPage])
 
+	const renderItem = useCallback(
+		({ item: series, index }: { item: Series; index: number }) => (
+			<SeriesGridItem series={series} index={index} />
+		),
+		[],
+	)
+
 	if (!library) return null
 
 	return (
@@ -30,7 +38,7 @@ export default function Screen() {
 			<ImageGrid
 				header={library.name}
 				data={series || []}
-				renderItem={({ item: series }) => <SeriesGridItem series={series} />}
+				renderItem={renderItem}
 				keyExtractor={(series) => series.id}
 				onRefresh={refetch}
 				isRefetching={isRefetching}

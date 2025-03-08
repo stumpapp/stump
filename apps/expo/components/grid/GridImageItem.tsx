@@ -13,9 +13,10 @@ type Props = {
 	uri: string
 	title: string
 	href: Href
+	index: number
 }
 
-export default function GridImageItem({ uri, title, href }: Props) {
+export default function GridImageItem({ uri, title, href, index }: Props) {
 	const { sdk } = useSDK()
 
 	const { itemDimension } = useGridItemSize()
@@ -26,16 +27,19 @@ export default function GridImageItem({ uri, title, href }: Props) {
 		<Pressable onPress={() => router.navigate(href)}>
 			{({ pressed }) => (
 				<View
-					className="flex items-start justify-start gap-2"
-					style={{
-						// 8*2 gap, 20 font, 4 padding + additional 4 padding
-						height: itemDimension * 1.5 + 16 + 20 + 4 * 2,
-					}}
+					className={cn('flex-1 gap-2 px-4 pb-4', {
+						'mr-auto': index % 2 === 0,
+						'ml-auto': index % 2 === 1,
+					})}
 				>
 					<View
-						className={cn('aspect-[2/3] overflow-hidden rounded-lg', {
+						className={cn({
 							'opacity-80': pressed,
 						})}
+						style={{
+							height: itemDimension * 1.5,
+							width: itemDimension,
+						}}
 					>
 						<FasterImage
 							source={{
@@ -43,13 +47,25 @@ export default function GridImageItem({ uri, title, href }: Props) {
 								headers: {
 									Authorization: sdk.authorizationHeader || '',
 								},
-								resizeMode: 'fill',
+								resizeMode: 'cover',
+								borderRadius: 8,
 							}}
-							style={{ height: itemDimension * 1.5, width: itemDimension }}
+							style={{
+								height: '100%',
+								width: '100%',
+							}}
 						/>
 					</View>
 
-					<Text size="xl" className="font-medium leading-6" numberOfLines={2} ellipsizeMode="tail">
+					<Text
+						size="xl"
+						className="font-medium leading-6"
+						numberOfLines={2}
+						ellipsizeMode="tail"
+						style={{
+							maxWidth: itemDimension - 4,
+						}}
+					>
 						{title}
 					</Text>
 				</View>

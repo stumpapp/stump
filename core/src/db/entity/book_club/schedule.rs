@@ -48,10 +48,8 @@ pub struct BookClubBook {
 	// The ID of the book in the schedule
 	id: String,
 	// The date the book club starts reading the book
-	#[schema(value_type = String)]
 	start_at: DateTime<FixedOffset>,
 	// The date the book club stops reading the book, generally the meeting time
-	#[schema(value_type = String)]
 	end_at: DateTime<FixedOffset>,
 	// The number of days the book club will discuss the book, if any
 	discussion_duration_days: Option<i32>,

@@ -1284,6 +1284,14 @@
 			"title": "Configuración del lector",
 			"description": "Opciones predeterminadas para los lectores de Stump. Estas solo están vinculadas a tu dispositivo actual",
 			"sections": {
+				"universal": {
+					"sections": {
+						"readingDirection": {
+							"label": "Reading direction",
+							"description": "The direction in which the reader will progress through pages"
+						}
+					}
+				},
 				"imageBasedBooks": {
 					"label": "Libros basados en imágenes",
 					"description": "Cómics, mangas y otros libros basados en imágenes",
@@ -1295,6 +1303,29 @@
 						"preloadBehindCount": {
 							"label": "Preload behind count",
 							"description": "The number of pages to preload behind the current page"
+						}
+					}
+				},
+				"textBasedBooks": {
+					"label": "Ebook reader",
+					"description": "Default settings for text-based books",
+					"sections": {
+						"fontSize": {
+							"label": "Font size",
+							"description": "The size of the font used in the reader"
+						},
+						"fontFamily": {
+							"label": "Font family",
+							"description": "The font used in the reader"
+						}
+					}
+				},
+				"data": {
+					"sections": {
+						"clearStore": {
+							"label": "Clear preferences",
+							"description": "Reset all individual book settings that override the defaults",
+							"button": "Clear preferences"
 						}
 					}
 				}

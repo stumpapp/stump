@@ -1284,6 +1284,14 @@
 			"title": "Ustawienia czytnika",
 			"description": "Domyślne opcje dla czytników Stump. Są one powiązane jedynie z bieżącym urządzeniem",
 			"sections": {
+				"universal": {
+					"sections": {
+						"readingDirection": {
+							"label": "Reading direction",
+							"description": "The direction in which the reader will progress through pages"
+						}
+					}
+				},
 				"imageBasedBooks": {
 					"label": "Książki obrazkowe",
 					"description": "Komiksy, manga i inne książki obrazkowe",
@@ -1295,6 +1303,29 @@
 						"preloadBehindCount": {
 							"label": "Ilość do wstępnego załadowania do tyłu",
 							"description": "Ilość stron do wstępnego załadowania do tyłu względem aktualnej strony"
+						}
+					}
+				},
+				"textBasedBooks": {
+					"label": "Ebook reader",
+					"description": "Default settings for text-based books",
+					"sections": {
+						"fontSize": {
+							"label": "Font size",
+							"description": "The size of the font used in the reader"
+						},
+						"fontFamily": {
+							"label": "Font family",
+							"description": "The font used in the reader"
+						}
+					}
+				},
+				"data": {
+					"sections": {
+						"clearStore": {
+							"label": "Clear preferences",
+							"description": "Reset all individual book settings that override the defaults",
+							"button": "Clear preferences"
 						}
 					}
 				}

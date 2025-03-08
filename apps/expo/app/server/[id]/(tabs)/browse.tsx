@@ -9,7 +9,7 @@ import { StackedBookThumbnails } from '~/components/book'
 import { StackedLibraryThumbnails } from '~/components/library'
 import { StackedSeriesThumbnails } from '~/components/series'
 import { StackedSmartListThumbnails } from '~/components/smartList'
-import { Heading, icons, Text } from '~/components/ui'
+import { Button, Heading, icons, Text } from '~/components/ui'
 const { Crown, Slash } = icons
 
 const ITEM_SPACING = 10
@@ -90,6 +90,10 @@ export default function Screen() {
 							<Text>No favorites</Text>
 						</View>
 					</View>
+
+					<Button>
+						<Text>Hi</Text>
+					</Button>
 
 					<View>
 						<Text className="mb-3 text-foreground-muted">All</Text>

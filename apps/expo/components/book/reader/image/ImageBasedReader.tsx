@@ -11,7 +11,7 @@ import {
 import { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { Image } from '~/components/Image'
+import { FasterImage, Image, intoFastCachePolicy } from '~/components/Image'
 import { useDisplay, usePrevious } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { useReaderStore } from '~/stores'
@@ -183,12 +183,7 @@ const Page = React.memo(
 			setImageSizes,
 		} = useImageBasedReader()
 		const {
-			preferences: {
-				tapSidesToNavigate,
-				readingDirection,
-				// imageScaling: { scaleToFit },
-				cachePolicy,
-			},
+			preferences: { tapSidesToNavigate, readingDirection, cachePolicy, doublePageBehavior },
 		} = useBookPreferences(id)
 		const { isTablet } = useDisplay()
 		const { sdk } = useSDK()
@@ -257,6 +252,54 @@ const Page = React.memo(
 
 		const safeMaxHeight = maxHeight - insets.top - insets.bottom
 
+		// TODO: Absolutely don't do this, this is terrible. We need my PRs to be merged upstream:
+		// https://github.com/candlefinance/faster-image/pulls
+		const renderPages = () => {
+			if (doublePageBehavior === 'off') {
+				return indexes.map((pageIdx, i) => (
+					<FasterImage
+						key={pageIdx}
+						source={{
+							url: pageURL(pageIdx + 1),
+							headers: {
+								Authorization: sdk.authorizationHeader || '',
+							},
+							cachePolicy: cachePolicy ? intoFastCachePolicy(cachePolicy) : 'memoryAndDisc',
+							resizeMode: 'contain',
+						}}
+						style={{
+							height: '100%',
+							width: indexes.length > 1 ? '50%' : '100%',
+						}}
+						onSuccess={({ nativeEvent }) =>
+							onImageLoaded({ source: nativeEvent } as unknown as ImageLoadEventData, i)
+						}
+					/>
+				))
+			} else {
+				return indexes.map((pageIdx, i) => (
+					<Image
+						key={pageIdx}
+						source={{
+							uri: pageURL(pageIdx + 1),
+							headers: {
+								Authorization: sdk.authorizationHeader,
+							},
+							cachePolicy,
+						}}
+						style={{
+							height: '100%',
+							width: indexes.length > 1 ? '50%' : '100%',
+						}}
+						contentFit="contain"
+						contentPosition={indexes.length > 1 ? (i === 0 ? 'right' : 'left') : 'center'}
+						onLoad={(e) => onImageLoaded(e, i)}
+						allowDownscaling={false}
+					/>
+				))
+			}
+		}
+
 		// https://github.com/candlefinance/faster-image/issues/75
 		return (
 			<Zoomable
@@ -277,26 +320,7 @@ const Page = React.memo(
 						width: maxWidth,
 					}}
 				>
-					{indexes.map((pageIdx, i) => (
-						<Image
-							key={pageIdx}
-							source={{
-								uri: pageURL(pageIdx + 1),
-								headers: {
-									Authorization: sdk.authorizationHeader,
-								},
-								cachePolicy,
-							}}
-							style={{
-								height: '100%',
-								width: indexes.length > 1 ? '50%' : '100%',
-							}}
-							contentFit="contain"
-							contentPosition={indexes.length > 1 ? (i === 0 ? 'right' : 'left') : 'center'}
-							onLoad={(e) => onImageLoaded(e, i)}
-							allowDownscaling={false}
-						/>
-					))}
+					{renderPages()}
 				</View>
 			</Zoomable>
 		)

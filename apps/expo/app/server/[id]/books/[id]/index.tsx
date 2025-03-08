@@ -125,7 +125,7 @@ export default function Screen() {
 						</View>
 					</View>
 
-					<View className="flex w-full flex-row items-center gap-2 tablet:max-w-sm tablet:self-center">
+					<View className="flex w-full flex-row items-center gap-x-2 tablet:max-w-sm tablet:self-center">
 						<Button
 							className="flex-1 border border-edge"
 							onPress={() =>

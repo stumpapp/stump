@@ -9,7 +9,7 @@ type Params = {
 	imageSizes?: Record<number, ImageBasedBookPageRef>
 }
 export function useDimensions({ bookID, imageSizes }: Params) {
-	const bookCache = useReaderStore((store) => store.bookCache[bookID])
+	const bookCache = useReaderStore((store) => store.bookCache[bookID] || {})
 	const setBookCache = useReaderStore((store) => store.setBookCache)
 
 	const [sizes, setSizes] = useState<Record<number, ImageBasedBookPageRef>>(

@@ -1004,6 +1004,7 @@ async fn update_library_excluded_users(
 
 #[derive(Debug, Deserialize, Serialize, ToSchema, Type)]
 pub struct LastScanDetails {
+	#[schema(value_type = Option<String>)]
 	last_scanned_at: Option<DateTime<FixedOffset>>,
 	last_scan: Option<LastLibraryScan>,
 }

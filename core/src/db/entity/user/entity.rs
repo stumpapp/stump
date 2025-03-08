@@ -26,8 +26,10 @@ pub struct User {
 	/// The URL of the user's avatar, if any
 	pub avatar_url: Option<String>,
 	/// A timestamp of when the user was created, in RFC3339 format
+	#[schema(value_type = String)]
 	pub created_at: DateTime<FixedOffset>,
 	/// A timestamp of when the user last logged in, in RFC3339 format
+	#[schema(value_type = Option<String>)]
 	pub last_login: Option<DateTime<FixedOffset>>,
 	/// A boolean to indicate if the user is locked, which prevents them from logging in
 	pub is_locked: bool,
@@ -86,6 +88,7 @@ pub struct PartialUser {
 	/// The URL of the user's avatar, if any
 	pub avatar_url: Option<String>,
 	/// A timestamp of when the user was created, in RFC3339 format
+	#[schema(value_type = String)]
 	pub created_at: DateTime<FixedOffset>,
 	// TODO: other "public-facing" fields which are opt-in social features (e.g. currently reading, etc.)
 }

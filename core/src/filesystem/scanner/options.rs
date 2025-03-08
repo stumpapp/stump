@@ -133,6 +133,7 @@ impl ScanOptions {
 pub struct LibraryScanRecord {
 	id: i32,
 	options: Option<ScanOptions>,
+	#[schema(value_type = String)]
 	timestamp: DateTime<FixedOffset>,
 	library_id: String,
 	job_id: Option<String>,
@@ -160,6 +161,7 @@ impl TryFrom<library_scan_record::Data> for LibraryScanRecord {
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct LastLibraryScan {
 	pub options: Option<ScanOptions>,
+	#[schema(value_type = String)]
 	pub timestamp: DateTime<FixedOffset>,
 }
 

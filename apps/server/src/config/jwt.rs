@@ -29,7 +29,6 @@ struct Claims {
 #[derive(Debug, Serialize, Type, ToSchema)]
 pub struct CreatedToken {
 	pub access_token: String,
-	#[schema(value_type = String)]
 	pub expires_at: DateTime<FixedOffset>,
 	// TODO(219): Support refresh tokens
 }

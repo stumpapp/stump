@@ -157,26 +157,25 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	useHotkeys('right, left, space, escape', (_, handler) => hotKeyHandler(handler))
 
 	const swipeHandlers = useSwipeable({
-		delta: 150,
+		delta: 10,
 		onSwipedLeft: handleLeftwardPageChange,
 		onSwipedRight: handleRightwardPageChange,
 		preventScrollOnSwipe: true,
 	})
-	const swipeEnabled = useMemo(
-		() => !isZoomed && !showToolBar && isMobile,
-		[isZoomed, showToolBar, isMobile],
-	)
+	const swipeEnabled = useMemo(() => !isZoomed && !showToolBar, [isZoomed, showToolBar])
 
 	return (
 		<div
 			className="relative flex h-full w-full items-center justify-center"
 			{...(swipeEnabled ? swipeHandlers : {})}
 		>
-			<SideBarControl
-				fixed={fixSideNavigation}
-				position="left"
-				onClick={() => handleLeftwardPageChange()}
-			/>
+			{!showToolBar && (
+				<SideBarControl
+					fixed={fixSideNavigation}
+					position="left"
+					onClick={() => handleLeftwardPageChange()}
+				/>
+			)}
 
 			<PageSet
 				ref={pageSetRef}
@@ -186,11 +185,13 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 				onPageClick={() => setSettings({ showToolBar: !showToolBar })}
 			/>
 
-			<SideBarControl
-				fixed={fixSideNavigation}
-				position="right"
-				onClick={() => handleRightwardPageChange()}
-			/>
+			{!showToolBar && (
+				<SideBarControl
+					fixed={fixSideNavigation}
+					position="right"
+					onClick={() => handleRightwardPageChange()}
+				/>
+			)}
 		</div>
 	)
 }

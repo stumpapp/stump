@@ -1,5 +1,5 @@
 import { queryClient, useSDK, useUpdateMediaProgress } from '@stump/client'
-import { Media } from '@stump/sdk'
+import { generatePageSets, Media } from '@stump/sdk'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 
@@ -48,13 +48,44 @@ export default function ImageBasedReader({
 	 * The current page of the reader
 	 */
 	const [currentPage, setCurrentPage] = useState(initialPage || 1)
-	const [pageDimensions, setPageDimensions] = useState<Record<number, ImagePageDimensionRef>>({})
+
+	const [pageDimensions, setPageDimensions] = useState<Record<number, ImagePageDimensionRef>>(
+		() =>
+			media?.metadata?.page_dimensions?.dimensions
+				?.map(({ height, width }) => ({
+					height,
+					width,
+					ratio: width / height,
+				}))
+				.reduce(
+					(acc, ref, index) => {
+						acc[index] = ref
+						return acc
+					},
+					{} as Record<number, { height: number; width: number; ratio: number }>,
+				) ?? {},
+	)
 
 	const {
 		settings: { preload },
-		bookPreferences: { readingMode },
+		bookPreferences: { doublePageBehavior = 'always', readingMode },
 		setSettings,
 	} = useBookPreferences({ book: media })
+
+	const deviceOrientation = useMemo(
+		() => (window.innerWidth > window.innerHeight ? 'landscape' : 'portrait'),
+		[],
+	)
+
+	const pages = media.pages
+	const pageSets = useMemo(() => {
+		const autoButOff = doublePageBehavior === 'auto' && deviceOrientation === 'portrait'
+		const modeForceOff = readingMode === 'continuous:vertical'
+		if (doublePageBehavior === 'off' || autoButOff || modeForceOff) {
+			return Array.from({ length: pages }, (_, i) => [i])
+		}
+		return generatePageSets({ imageSizes: pageDimensions, pages: pages })
+	}, [doublePageBehavior, pages, pageDimensions, deviceOrientation, readingMode])
 
 	const { updateReadProgress } = useUpdateMediaProgress(media.id, {
 		onError(err) {
@@ -115,8 +146,9 @@ export default function ImageBasedReader({
 	 * prevent wait times for the next page to load.
 	 */
 	usePreloadPage({
-		onStoreDimensions: (page, dimensions) =>
-			setPageDimensions((prev) => ({ ...prev, [page]: dimensions })),
+		onStoreDimensions: (page, dimensions) => {
+			setPageDimensions((prev) => ({ ...prev, [page - 1]: dimensions }))
+		},
 		pages: pagesToPreload,
 		urlBuilder: getPageUrl,
 	})
@@ -176,6 +208,7 @@ export default function ImageBasedReader({
 				pageDimensions,
 				setCurrentPage: handleChangePage,
 				setDimensions: setPageDimensions,
+				pageSets,
 			}}
 		>
 			<ReaderContainer>{renderReader()}</ReaderContainer>

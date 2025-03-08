@@ -46,7 +46,7 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 			const shouldDisplayDoubleSpread =
 				displayedPages.length > 1 &&
 				currentPage != 1 &&
-				dimensionSet.every((dimensions) => !dimensions || dimensions.isPortrait)
+				dimensionSet.every((dimensions) => !dimensions || dimensions.ratio > 1)
 
 			if (shouldDisplayDoubleSpread) {
 				return (
@@ -123,15 +123,12 @@ const _Page = ({
 				},
 			)}
 			src={getPageUrl(page)}
-			onLoad={(e) => {
-				const img = e.target as HTMLImageElement
-				if (img.height && img.width) {
-					upsertDimensions(page, {
-						height: img.height,
-						isPortrait: img.height > img.width,
-						width: img.width,
-					})
-				}
+			onLoad={({ height, width }) => {
+				upsertDimensions(page, {
+					height,
+					width,
+					ratio: width / height,
+				})
 			}}
 			onError={(err) => {
 				// @ts-expect-error: is oke

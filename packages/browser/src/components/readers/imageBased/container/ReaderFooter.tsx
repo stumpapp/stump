@@ -1,5 +1,5 @@
 import { useSDK } from '@stump/client'
-import { AspectRatio, cn, usePrevious } from '@stump/components'
+import { cn, ProgressBar, Text, usePrevious } from '@stump/components'
 import { motion } from 'framer-motion'
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
@@ -18,7 +18,8 @@ import { useImageBaseReaderContext } from '../context'
 
 export default function ReaderFooter() {
 	const { sdk } = useSDK()
-	const { book, currentPage, setCurrentPage } = useImageBaseReaderContext()
+	const { book, currentPage, setCurrentPage, pageDimensions, setDimensions, pageSets } =
+		useImageBaseReaderContext()
 	const {
 		settings: { showToolBar, preload },
 		bookPreferences: { readingDirection },
@@ -28,6 +29,12 @@ export default function ReaderFooter() {
 
 	const [range, setRange] = useState<ListRange>({ endIndex: 0, startIndex: 0 })
 
+	const currentPageSetIdx = useMemo(
+		() => pageSets.findIndex((set) => set.includes(currentPage - 1)),
+		[currentPage, pageSets],
+	)
+
+	// TODO: remove this shit
 	/**
 	 * A range of pages to display in the Virtuoso component, based on the current page
 	 * and the reading direction (since RTL means we want to scroll in reverse)
@@ -40,6 +47,7 @@ export default function ReaderFooter() {
 		[book.pages, readingDirection],
 	)
 
+	// TODO: remove this shit
 	const getRelativePage = useCallback((idx: number) => pageArray[idx] ?? idx, [pageArray])
 
 	const previousPage = usePrevious(currentPage)
@@ -48,21 +56,69 @@ export default function ReaderFooter() {
 	 * is close to exiting the view.
 	 */
 	useEffect(() => {
-		const pageAsIndex = getRelativePage(currentPage)
 		const { startIndex, endIndex } = range
 
-		const endThresholdMet = startIndex <= pageAsIndex
-		const startThresholdMet = endIndex >= pageAsIndex
+		const endThresholdMet = startIndex <= currentPageSetIdx
+		const startThresholdMet = endIndex >= currentPageSetIdx
 		const pageIsInView = startThresholdMet && endThresholdMet
 
 		if (!pageIsInView && previousPage !== currentPage) {
 			virtuosoRef.current?.scrollIntoView({
 				align: 'center',
 				behavior: 'smooth',
-				index: pageAsIndex,
+				index: currentPageSetIdx,
 			})
 		}
-	}, [currentPage, previousPage, range, getRelativePage, pageArray])
+	}, [currentPage, previousPage, range, currentPageSetIdx])
+
+	const renderItem = useCallback(
+		(idx: number, indexes: number[]) => {
+			return (
+				<div className="flex items-center gap-px">
+					{indexes.map((index) => {
+						const url = sdk.media.bookPageURL(book.id, getRelativePage(index))
+						const imageSize = pageDimensions[index]
+						const isPortraitOrUnknown = !imageSize || imageSize.ratio < 1
+
+						return (
+							<div className="flex flex-col gap-1" key={index}>
+								<div
+									onClick={() => setCurrentPage(getRelativePage(index))}
+									className={cn(
+										'flex cursor-pointer items-center overflow-hidden rounded-md border-2 border-solid border-transparent shadow-xl transition duration-300 hover:border-edge-brand',
+										{
+											'border-edge-brand': idx === currentPageSetIdx,
+										},
+									)}
+									style={{
+										width: isPortraitOrUnknown ? 100 : 150,
+										height: isPortraitOrUnknown ? 150 : 100,
+									}}
+								>
+									<EntityImage
+										src={url}
+										className="object-contain"
+										onLoad={({ height, width }) =>
+											setDimensions((prev) => ({
+												...prev,
+												[index]: {
+													height,
+													width,
+													ratio: width / height,
+												},
+											}))
+										}
+									/>
+								</div>
+								<Text className="text-center text-xs text-[#898d94]">{getRelativePage(index)}</Text>
+							</div>
+						)
+					})}
+				</div>
+			)
+		},
+		[pageDimensions, sdk, book.id, getRelativePage, setCurrentPage, setDimensions, currentPage],
+	)
 
 	return (
 		<motion.nav
@@ -70,40 +126,35 @@ export default function ReaderFooter() {
 			animate={showToolBar ? 'visible' : 'hidden'}
 			variants={transition}
 			transition={{ duration: 0.2, ease: 'easeInOut' }}
-			className="fixed bottom-0 left-0 z-[100] h-[125px] w-full overflow-hidden bg-opacity-75 text-white shadow-lg"
+			className="fixed bottom-0 left-0 z-[100] flex h-[200px] w-full flex-col gap-2 overflow-hidden bg-opacity-75 text-white shadow-lg"
 		>
 			<Virtuoso
 				ref={virtuosoRef}
 				style={{ height: '100%' }}
 				horizontalDirection
-				data={pageArray.map((page) => sdk.media.bookPageURL(book.id, page))}
+				data={pageSets}
 				components={{
 					Item,
 					List,
 					Scroller,
 				}}
 				rangeChanged={setRange}
-				itemContent={(idx, url) => {
-					return (
-						<AspectRatio
-							onClick={() => setCurrentPage(getRelativePage(idx))}
-							ratio={2 / 3}
-							className={cn(
-								'flex cursor-pointer items-center overflow-hidden rounded-md border-2 border-solid border-transparent shadow-xl transition duration-300 hover:border-edge-brand',
-								{
-									'border-edge-brand': currentPage === getRelativePage(idx),
-								},
-							)}
-						>
-							<EntityImage src={url} className="object-cover" />
-						</AspectRatio>
-					)
-				}}
+				itemContent={renderItem}
 				overscan={{ main: preload.ahead || 1, reverse: preload.behind || 1 }}
 				initialTopMostItemIndex={
-					readingDirection === 'rtl' ? book.pages - currentPage : currentPage
+					readingDirection === 'rtl' ? pageSets.length - currentPageSetIdx : currentPageSetIdx
 				}
 			/>
+
+			<div className="w-full px-4 pb-4">
+				<ProgressBar
+					size="sm"
+					value={40}
+					max={book.pages}
+					className="bg-[#898d94]"
+					indicatorClassName="bg-[#f5f3ef]"
+				/>
+			</div>
 		</motion.nav>
 	)
 }
@@ -126,13 +177,22 @@ const List = forwardRef<HTMLDivElement, ListProps>(({ children, ...props }, ref)
 })
 List.displayName = 'List'
 
-const Item = forwardRef<HTMLDivElement, ItemProps<string>>(({ children, ...props }, ref) => {
-	return (
-		<div className="flex h-full w-20 items-center pr-2 first:pl-2" ref={ref} {...props}>
-			{children}
-		</div>
-	)
-})
+const Item = forwardRef<HTMLDivElement, ItemProps<number[]>>(
+	({ children, style, ...props }, ref) => {
+		return (
+			<div
+				className="flex items-center px-1"
+				ref={ref}
+				{...props}
+				style={{
+					...style,
+				}}
+			>
+				{children}
+			</div>
+		)
+	},
+)
 Item.displayName = 'Item'
 
 const transition = {

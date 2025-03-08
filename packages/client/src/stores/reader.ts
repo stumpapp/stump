@@ -7,6 +7,8 @@ export type BookImageScaling = {
 	scaleToFit: BookImageScalingFit
 }
 
+export type DoublePageBehavior = 'auto' | 'always' | 'off'
+
 /**
  * The preferences for a book, which represents an override of a user's default preferences for a
  * specific book
@@ -31,6 +33,8 @@ export type BookPreferences = {
 	 * mode is set to `continuous`
 	 */
 	doubleSpread?: boolean
+	doublePageBehavior?: DoublePageBehavior
+
 	/**
 	 * The font size to use for the book. This will have no effect if the book is image-based
 	 */
@@ -137,6 +141,7 @@ export const createReaderStore = (storage?: StateStorage) =>
 							imageScaling: {
 								scaleToFit: 'height',
 							},
+							doublePageBehavior: 'off',
 						},
 					}) as ReaderStore,
 				{

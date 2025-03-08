@@ -4,7 +4,7 @@ import { createContext, useContext } from 'react'
 export type ImagePageDimensionRef = {
 	height: number
 	width: number
-	isPortrait: boolean
+	ratio: number
 }
 
 export type IImageBaseReaderContext = {
@@ -28,6 +28,8 @@ export type IImageBaseReaderContext = {
 	 * A function to set the dimensions of a page
 	 */
 	setDimensions: React.Dispatch<React.SetStateAction<Record<number, ImagePageDimensionRef>>>
+
+	pageSets: number[][]
 }
 
 export const ImageBaseReaderContext = createContext<IImageBaseReaderContext | null>(null)

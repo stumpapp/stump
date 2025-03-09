@@ -34,6 +34,7 @@ export default function Footer() {
 		pageSets,
 		flatListRef: readerRef,
 		imageSizes,
+		setImageSizes,
 	} = useImageBasedReader()
 	const elapsedSeconds = useBookReadTime(id)
 	const {
@@ -174,6 +175,23 @@ export default function Footer() {
 		[pageURL, pageThumbnailURL, sdk],
 	)
 
+	const onImageLoaded = useCallback(
+		(idx: number, { height, width }: { height: number; width: number }) => {
+			const existingSize = imageSizes?.[idx]
+			const isDifferent = existingSize?.height !== height || existingSize?.width !== width
+			if (!isDifferent) return
+			setImageSizes((prev) => ({
+				...prev,
+				[idx]: {
+					height,
+					width,
+					ratio: width / height,
+				},
+			}))
+		},
+		[imageSizes, setImageSizes],
+	)
+
 	// TODO: prefetch, see https://github.com/candlefinance/faster-image/issues/73
 	useEffect(
 		() => {
@@ -305,6 +323,7 @@ export default function Footer() {
 										width: pageSet.length === 1 ? '100%' : '50%',
 										height: '100%',
 									}}
+									onSuccess={({ nativeEvent }) => onImageLoaded(pageIdx, nativeEvent)}
 								/>
 							)
 						})}
@@ -391,6 +410,7 @@ export default function Footer() {
 										width: item.length === 1 ? '100%' : '50%',
 										height: '100%',
 									}}
+									onSuccess={({ nativeEvent }) => onImageLoaded(pageIdx, nativeEvent)}
 								/>
 							)
 						})}

@@ -55,5 +55,5 @@ export const generatePageSets = ({ imageSizes, pages }: GeneratePageSetsParams):
 		}
 	}
 
-	return sets
+	return sets.filter((set) => set.length > 0)
 }

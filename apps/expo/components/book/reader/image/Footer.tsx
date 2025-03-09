@@ -23,9 +23,6 @@ dayjs.extend(duration)
 const HEIGHT_MODIFIER = 2 / 3
 const WIDTH_MODIFIER = 2 / 3
 
-// TODO: account for image ratio when rendering in gallery
-// TODO: double spread when double spread is enabled and gallery is visible
-
 export default function Footer() {
 	const { sdk } = useSDK()
 	const { isTablet, height, width } = useDisplay()
@@ -40,9 +37,8 @@ export default function Footer() {
 	} = useImageBasedReader()
 	const elapsedSeconds = useBookReadTime(id)
 	const {
-		preferences: { footerControls, trackElapsedTime, readingDirection },
+		preferences: { footerControls = 'slider', trackElapsedTime, readingDirection },
 	} = useBookPreferences(id)
-	// const globalCachePolicy = usePreferencesStore((state) => state.cachePolicy)
 
 	const galleryRef = useRef<FlatList>(null)
 	const insets = useSafeAreaInsets()
@@ -295,12 +291,13 @@ export default function Footer() {
 						}}
 					>
 						{pageSet.map((pageIdx, i) => {
+							const source = pageSource(pageIdx + 1)
 							return (
 								<FasterImage
 									key={`thumb-${pageIdx + 1}-${i}`}
 									source={{
-										url: pageSource(pageIdx + 1).uri,
-										headers: pageSource(pageIdx + 1).headers as Record<string, string>,
+										url: source.uri,
+										headers: source.headers as Record<string, string>,
 										resizeMode: 'fill',
 										borderRadius: 8,
 									}}

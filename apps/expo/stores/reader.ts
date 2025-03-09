@@ -20,12 +20,12 @@ export type BookPreferences = IBookPreferences & {
 	serverID?: string
 	incognito?: boolean
 	preferSmallImages?: boolean
-	allowDownscaling?: boolean
-	cachePolicy?: CachePolicy
-	doublePageBehavior?: DoublePageBehavior
-	tapSidesToNavigate?: boolean
-	footerControls?: FooterControls
-	trackElapsedTime?: boolean
+	allowDownscaling: boolean
+	cachePolicy: CachePolicy
+	doublePageBehavior: DoublePageBehavior
+	tapSidesToNavigate: boolean
+	footerControls: FooterControls
+	trackElapsedTime: boolean
 }
 export type GlobalSettings = Omit<BookPreferences, 'serverID'>
 

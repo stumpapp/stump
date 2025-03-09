@@ -26,7 +26,7 @@ export default function ImageBasedReaderContainer({
 }: Props) {
 	const { height, width } = useDisplay()
 	const {
-		preferences: { incognito, doublePageBehavior, readingMode },
+		preferences: { incognito, doublePageBehavior = 'auto', readingMode },
 	} = useBookPreferences(ctx.book.id)
 	const { sizes, setSizes } = useDimensions({
 		bookID: ctx.book.id,

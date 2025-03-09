@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router'
 import { usePreloadPage } from '@/hooks/usePreloadPage'
 import paths from '@/paths'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
+import { useBookTimer } from '@/stores/reader'
 
 import ReaderContainer from './container'
 import { ImageBaseReaderContext, ImagePageDimensionRef } from './context'
@@ -67,10 +68,28 @@ export default function ImageBasedReader({
 	)
 
 	const {
-		settings: { preload },
-		bookPreferences: { doublePageBehavior = 'always', readingMode },
+		settings: { preload, showToolBar },
+		bookPreferences: {
+			doublePageBehavior = 'always',
+			readingMode,
+			readingDirection,
+			trackElapsedTime,
+		},
 		setSettings,
 	} = useBookPreferences({ book: media })
+
+	const { pause, resume, totalSeconds, isRunning, reset } = useBookTimer(media?.id || '', {
+		initial: media?.active_reading_session?.elapsed_seconds,
+		enabled: trackElapsedTime,
+	})
+
+	useEffect(() => {
+		if (showToolBar && isRunning) {
+			pause()
+		} else if (!showToolBar && !isRunning) {
+			resume()
+		}
+	}, [showToolBar, isRunning, pause, resume])
 
 	const deviceOrientation = useMemo(
 		() => (window.innerWidth > window.innerHeight ? 'landscape' : 'portrait'),
@@ -84,13 +103,16 @@ export default function ImageBasedReader({
 		if (doublePageBehavior === 'off' || autoButOff || modeForceOff) {
 			return Array.from({ length: pages }, (_, i) => [i])
 		}
-		return generatePageSets({ imageSizes: pageDimensions, pages: pages })
-	}, [doublePageBehavior, pages, pageDimensions, deviceOrientation, readingMode])
+		const sets = generatePageSets({ imageSizes: pageDimensions, pages: pages })
+		if (readingDirection === 'rtl') {
+			return sets.reverse()
+		}
+		return sets
+	}, [doublePageBehavior, pages, pageDimensions, deviceOrientation, readingMode, readingDirection])
 
 	const { updateReadProgress } = useUpdateMediaProgress(media.id, {
-		onError(err) {
-			console.error(err)
-		},
+		retry: (attempts) => attempts < 3,
+		useErrorBoundary: false,
 	})
 	/**
 	 * A callback to update the read progress, if the reader is not in incognito mode.
@@ -98,10 +120,10 @@ export default function ImageBasedReader({
 	const handleUpdateProgress = useCallback(
 		(page: number) => {
 			if (!isIncognito) {
-				updateReadProgress({ page })
+				updateReadProgress({ page, elapsed_seconds: totalSeconds })
 			}
 		},
-		[updateReadProgress, isIncognito],
+		[updateReadProgress, isIncognito, totalSeconds],
 	)
 
 	/**
@@ -209,6 +231,7 @@ export default function ImageBasedReader({
 				setCurrentPage: handleChangePage,
 				setDimensions: setPageDimensions,
 				pageSets,
+				resetTimer: reset,
 			}}
 		>
 			<ReaderContainer>{renderReader()}</ReaderContainer>

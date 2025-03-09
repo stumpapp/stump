@@ -7213,7 +7213,7 @@
     "@types/history" "^4.7.11"
     "@types/react" "*"
 
-"@types/react@*", "@types/react@=18.3.12", "@types/react@>=16", "@types/react@^18.3.12":
+"@types/react@*", "@types/react@>=16", "@types/react@^18.3.12":
   version "18.3.12"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-18.3.12.tgz#99419f182ccd69151813b7ee24b792fe08774f60"
   integrity sha512-D2wOSq/d6Agt28q7rSI3jhU7G6aiuzljDGZ2hTZHIkrTLUI+AF3WMeKkEZ9nN2fkBAlcktT6vcZjDFiIhMYEQw==
@@ -19631,6 +19631,11 @@ react-timer-hook@^3.0.8:
   version "3.0.8"
   resolved "https://registry.yarnpkg.com/react-timer-hook/-/react-timer-hook-3.0.8.tgz#246e3e809aa02094f40116d72464c9b2a5cd27ce"
   integrity sha512-bi2e7DhPBU1MRPU4ZHaVqBmgM9e2HK0ae8O2AIqwqjcPo4/qR7lVGQonOQLAKOZPQCJSYfV8F5aBWzOLXElzqQ==
+
+react-timer-hook@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/react-timer-hook/-/react-timer-hook-4.0.1.tgz#8f8432e58b1173717367f90212910f903576d8a0"
+  integrity sha512-tOye9WelyDctxIk2FnH+jqXhIx+mHr8wf1v2SR0ZJDYMKSH6JVAUj70OT3oOGWuWIFSCW4GxPDM9QGwEOAOOKA==
 
 react-use-websocket@^4.8.1:
   version "4.11.1"

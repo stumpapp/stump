@@ -34,14 +34,13 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	const {
 		settings: { showToolBar },
 		setSettings,
-		bookPreferences: { readingDirection, doubleSpread },
 	} = useBookPreferences({ book: media })
 
-	const { pageDimensions } = useImageBaseReaderContext()
+	const { pageDimensions, pageSets } = useImageBaseReaderContext()
 	/**
 	 * A memoized callback to get the dimensions of a given page
 	 */
-	const getDimensions = useCallback((page: number) => pageDimensions[page], [pageDimensions])
+	const getDimensions = useCallback((idx: number) => pageDimensions[idx], [pageDimensions])
 
 	const { innerWidth } = useWindowSize()
 	const { isZoomed } = useDetectZoom()
@@ -50,30 +49,27 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 
 	const pageSetRef = useRef<HTMLDivElement | null>(null)
 
-	// TODO: this needs to be aware of overflow / if the page is too small to render double spread
-	const displayedPages = useMemo(() => {
-		if (readingDirection === 'ltr') {
-			return doubleSpread
-				? [currentPage, currentPage + 1].filter((p) => p <= media.pages)
-				: [currentPage]
-		} else {
-			return doubleSpread
-				? [currentPage + 1, currentPage].filter((p) => p <= media.pages)
-				: [currentPage]
-		}
-	}, [currentPage, doubleSpread, media.pages])
+	const currentSet = useMemo(
+		() => pageSets.find((set) => set.includes(currentPage - 1)) || [currentPage - 1],
+		[currentPage, pageSets],
+	)
+
+	const currentSetIdx = useMemo(
+		() => pageSets.findIndex((set) => set.includes(currentPage - 1)),
+		[currentPage, pageSets],
+	)
 
 	/**
 	 * If the image parts are collective >= 80% of the screen width, we want to fix the side navigation
 	 */
 	const fixSideNavigation = useMemo(() => {
-		const dimensionSet = displayedPages
-			.map((page) => getDimensions(page))
+		const dimensionSet = currentSet
+			.map((pageIdx) => getDimensions(pageIdx))
 			.filter(Boolean) as ImagePageDimensionRef[]
 		const totalWidth = dimensionSet.reduce((acc, dimensions) => acc + dimensions.width, 0)
 
 		return (!!innerWidth && totalWidth >= innerWidth * 0.8) || isMobile
-	}, [displayedPages, getDimensions, innerWidth, isMobile])
+	}, [currentSet, getDimensions, innerWidth, isMobile])
 
 	/**
 	 * A callback to actually change the page. This should not be called directly, but rather
@@ -90,36 +86,41 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 		},
 		[media.pages, onPageChange],
 	)
-	// TODO: once the UI here is 'smarter' and knows when a double spread isn't feasible, the math needs to be adjusted
+
 	/**
 	 * A callback to change the page to the left. This will respect the reading direction
 	 * and the double spread setting.
 	 */
 	const handleLeftwardPageChange = useCallback(() => {
-		const direction = readingDirection === 'ltr' ? -1 : 1
-		const skip = readingDirection === 'ltr' ? 2 : 1
-		if (doubleSpread && currentPage > skip) {
-			const adjustedForBounds = currentPage + direction * 2 < 1 ? 1 : currentPage + direction * 2
-			doChangePage(adjustedForBounds)
-		} else {
-			doChangePage(currentPage + direction)
+		const nextSetIdx = currentSetIdx - 1
+		const nextSet = pageSets[nextSetIdx]
+		const endOfNextSet = nextSet?.at(-1)
+
+		if (!nextSet || endOfNextSet == null) {
+			return
 		}
-	}, [readingDirection, doChangePage, currentPage, doubleSpread])
+
+		if (nextSetIdx >= 0 && nextSetIdx < pageSets.length) {
+			doChangePage(endOfNextSet + 1)
+		}
+	}, [doChangePage, currentSetIdx, pageSets])
 	/**
 	 * A callback to change the page to the right. This will respect the reading direction
 	 * and the double spread setting.
 	 */
 	const handleRightwardPageChange = useCallback(() => {
-		const direction = readingDirection === 'ltr' ? 1 : -1
-		const skip = readingDirection === 'ltr' ? 1 : 2
-		if (doubleSpread && currentPage > skip) {
-			const adjustedForBounds =
-				currentPage + direction * 2 > media.pages ? media.pages : currentPage + direction * 2
-			doChangePage(adjustedForBounds)
-		} else {
-			doChangePage(currentPage + direction)
+		const nextSetIdx = currentSetIdx + 1
+		const nextSet = pageSets[nextSetIdx]
+		const startOfNextSet = nextSet?.at(0)
+
+		if (!nextSet || startOfNextSet == null) {
+			return
 		}
-	}, [readingDirection, doChangePage, currentPage, doubleSpread, media.pages])
+
+		if (nextSetIdx >= 0 && nextSetIdx < pageSets.length) {
+			doChangePage(startOfNextSet + 1)
+		}
+	}, [doChangePage, currentSetIdx, pageSets])
 
 	/**
 	 * A callback handler for changing the page or toggling the toolbar visibility via
@@ -180,7 +181,6 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 			<PageSet
 				ref={pageSetRef}
 				currentPage={currentPage}
-				displayedPages={displayedPages}
 				getPageUrl={getPageUrl}
 				onPageClick={() => setSettings({ showToolBar: !showToolBar })}
 			/>

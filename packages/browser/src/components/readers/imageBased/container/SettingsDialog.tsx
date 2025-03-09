@@ -1,39 +1,15 @@
-import { Dialog, Heading } from '@stump/components'
+import { Dialog, Tabs } from '@stump/components'
 import { Settings2 } from 'lucide-react'
-
-import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
+import { useState } from 'react'
 
 import { useImageBaseReaderContext } from '../context'
-import BrightnessControl from './BrightnessControl'
 import ControlButton from './ControlButton'
-import DoubleSpreadToggle from './DoubleSpreadToggle'
-import ImageScalingSelect from './ImageScalingSelect'
-import ReadingDirectionSelect from './ReadingDirectionSelect'
-import ReadingModeSelect from './ReadingModeSelect'
+import ReaderSettings from './ReaderSettings'
 
 export default function SettingsDialog() {
 	const { book } = useImageBaseReaderContext()
-	const {
-		bookPreferences: { readingMode },
-	} = useBookPreferences({ book })
 
-	const renderDoubleSpreadOption = () => {
-		// TODO(readers): Support double spread for horizontal scrolling
-		if (readingMode.startsWith('continuous')) {
-			return null
-		} else {
-			return <DoubleSpreadToggle />
-		}
-	}
-
-	const renderDirectionalOptions = () => {
-		// TODO(readers): Support rtl reading direction for horizontal scrolling
-		if (readingMode.startsWith('continuous')) {
-			return null
-		} else {
-			return <ReadingDirectionSelect />
-		}
-	}
+	const [modality, setModality] = useState<'book' | 'global'>('book')
 
 	return (
 		<Dialog>
@@ -44,13 +20,18 @@ export default function SettingsDialog() {
 			</Dialog.Trigger>
 
 			<Dialog.Content size="md" className="z-[101] flex flex-col gap-4 bg-background-surface">
-				<Heading size="md">Settings</Heading>
+				<Tabs
+					value={modality}
+					defaultValue="book"
+					onValueChange={(value) => setModality(value as 'book' | 'global')}
+				>
+					<Tabs.List>
+						<Tabs.Trigger value="book">Book</Tabs.Trigger>
+						<Tabs.Trigger value="global">Global</Tabs.Trigger>
+					</Tabs.List>
+				</Tabs>
 
-				<ImageScalingSelect />
-				{renderDoubleSpreadOption()}
-				<ReadingModeSelect />
-				{renderDirectionalOptions()}
-				<BrightnessControl />
+				<ReaderSettings forBook={modality === 'book' ? book.id : undefined} />
 			</Dialog.Content>
 		</Dialog>
 	)

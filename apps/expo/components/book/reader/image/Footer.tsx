@@ -333,7 +333,15 @@ export default function Footer() {
 				</View>
 			)
 		},
-		[pages, isSliderDragging, pageSource, getSliderImageContainerStyles, visible, pageSets],
+		[
+			pages,
+			isSliderDragging,
+			pageSource,
+			getSliderImageContainerStyles,
+			visible,
+			pageSets,
+			onImageLoaded,
+		],
 	)
 
 	const onSlidingComplete = useCallback(
@@ -424,7 +432,7 @@ export default function Footer() {
 				</Pressable>
 			)
 		},
-		[onChangePage, currentPage, pages, pageSource, getGalleryItemSize],
+		[onChangePage, currentPage, pages, pageSource, getGalleryItemSize, onImageLoaded],
 	)
 
 	// TODO: swap to flashlist, does NOT like dynamic height though...

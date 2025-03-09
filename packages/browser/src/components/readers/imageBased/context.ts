@@ -28,8 +28,14 @@ export type IImageBaseReaderContext = {
 	 * A function to set the dimensions of a page
 	 */
 	setDimensions: React.Dispatch<React.SetStateAction<Record<number, ImagePageDimensionRef>>>
-
+	/**
+	 * The page sets for the book
+	 */
 	pageSets: number[][]
+	/**
+	 * A function to reset the read timer
+	 */
+	resetTimer: () => void
 }
 
 export const ImageBaseReaderContext = createContext<IImageBaseReaderContext | null>(null)

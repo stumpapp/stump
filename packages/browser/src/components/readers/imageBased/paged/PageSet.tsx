@@ -9,21 +9,17 @@ import { ImagePageDimensionRef, useImageBaseReaderContext } from '../context'
 
 type Props = {
 	currentPage: number
-	displayedPages: number[]
 	getPageUrl: (page: number) => string
 	onPageClick: () => void
 }
 
 const PageSet = forwardRef<HTMLDivElement, Props>(
-	({ currentPage, displayedPages, getPageUrl, onPageClick }, ref) => {
-		const { pageDimensions, setDimensions, book } = useImageBaseReaderContext()
+	({ currentPage, getPageUrl, onPageClick }, ref) => {
+		const { setDimensions, book, pageSets } = useImageBaseReaderContext()
 		const {
 			bookPreferences: { imageScaling, brightness },
 		} = useBookPreferences({ book })
-		/**
-		 * A memoized callback to get the dimensions of a given page
-		 */
-		const getDimensions = useCallback((page: number) => pageDimensions[page], [pageDimensions])
+
 		/**
 		 * A memoized callback to set the dimensions of a given page
 		 */
@@ -31,50 +27,16 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 			(page: number, dimensions: ImagePageDimensionRef) => {
 				setDimensions((prev) => ({
 					...prev,
-					[page]: dimensions,
+					[page - 1]: dimensions,
 				}))
 			},
 			[setDimensions],
 		)
 
-		const dimensionSet = useMemo(
-			() => displayedPages.map((page) => getDimensions(page)),
-			[displayedPages, getDimensions],
+		const currentSet = useMemo(
+			() => pageSets.find((set) => set.includes(currentPage - 1)) || [currentPage - 1],
+			[currentPage, pageSets],
 		)
-
-		const renderSet = () => {
-			const shouldDisplayDoubleSpread =
-				displayedPages.length > 1 &&
-				currentPage != 1 &&
-				dimensionSet.every((dimensions) => !dimensions || dimensions.ratio > 1)
-
-			if (shouldDisplayDoubleSpread) {
-				return (
-					<>
-						{displayedPages.map((page) => (
-							<Page
-								key={page}
-								page={page}
-								getPageUrl={getPageUrl}
-								onPageClick={onPageClick}
-								upsertDimensions={upsertDimensions}
-								imageScaling={imageScaling}
-							/>
-						))}
-					</>
-				)
-			} else {
-				return (
-					<Page
-						page={currentPage}
-						getPageUrl={getPageUrl}
-						onPageClick={onPageClick}
-						upsertDimensions={upsertDimensions}
-						imageScaling={imageScaling}
-					/>
-				)
-			}
-		}
 
 		return (
 			<div
@@ -84,7 +46,16 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 					filter: `brightness(${brightness * 100}%)`,
 				}}
 			>
-				{renderSet()}
+				{currentSet.map((idx) => (
+					<Page
+						key={`page-${idx + 1}`}
+						page={idx + 1}
+						getPageUrl={getPageUrl}
+						onPageClick={onPageClick}
+						upsertDimensions={upsertDimensions}
+						imageScaling={imageScaling}
+					/>
+				))}
 			</div>
 		)
 	},

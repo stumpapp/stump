@@ -10,6 +10,7 @@ import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 import { useImageBaseReaderContext } from '../context'
 import ControlButton from './ControlButton'
 import SettingsDialog from './SettingsDialog'
+import TimerMenu from './TimerMenu'
 
 export default function ReaderHeader() {
 	const { book } = useImageBaseReaderContext()
@@ -52,6 +53,8 @@ export default function ReaderHeader() {
 							<FullScreenIcon className="h-4 w-4" />
 						</ControlButton>
 					)}
+
+					<TimerMenu />
 
 					<SettingsDialog />
 				</div>

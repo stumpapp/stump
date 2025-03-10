@@ -47,15 +47,13 @@ impl OPDSFeedGroupBuilder {
 			return Ok(());
 		}
 
-		let navigation_empty = self
-			.navigation
-			.as_ref()
-			.map_or(true, std::vec::Vec::is_empty);
+		let navigation_empty =
+			self.navigation.as_ref().is_none_or(std::vec::Vec::is_empty);
 
 		let publications_empty = self
 			.publications
 			.as_ref()
-			.map_or(true, std::vec::Vec::is_empty);
+			.is_none_or(std::vec::Vec::is_empty);
 
 		if navigation_empty && publications_empty {
 			return Err(OPDSV2Error::FeedValidationFailed(

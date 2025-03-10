@@ -90,13 +90,6 @@ pub struct PartialUser {
 	// TODO: other "public-facing" fields which are opt-in social features (e.g. currently reading, etc.)
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
-#[serde(untagged)]
-pub enum UserProfile {
-	Full(User),
-	Partial(PartialUser),
-}
-
 impl From<User> for PartialUser {
 	fn from(user: User) -> PartialUser {
 		PartialUser {

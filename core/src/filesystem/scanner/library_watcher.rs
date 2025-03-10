@@ -498,8 +498,7 @@ mod tests {
 		std::fs::create_dir_all(&tmp_dir).unwrap();
 		let libraries = create_test_libraries(tmp_dir.to_string_lossy().to_string());
 
-		let paths =
-			HashSet::from_iter(vec![PathBuf::from(tmp_dir.clone().join("new_file"))]);
+		let paths = HashSet::from_iter(vec![tmp_dir.clone().join("new_file")]);
 
 		let mut mock_objs = create_mock_library(libraries).await.unwrap();
 

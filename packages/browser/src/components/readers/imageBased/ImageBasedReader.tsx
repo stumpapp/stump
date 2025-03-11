@@ -2,6 +2,7 @@ import { queryClient, useSDK, useUpdateMediaProgress } from '@stump/client'
 import { generatePageSets, Media } from '@stump/sdk'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
+import { useWindowSize } from 'rooks'
 
 import { usePreloadPage } from '@/hooks/usePreloadPage'
 import paths from '@/paths'
@@ -70,7 +71,7 @@ export default function ImageBasedReader({
 	const {
 		settings: { preload, showToolBar },
 		bookPreferences: {
-			doublePageBehavior = 'always',
+			doublePageBehavior = 'auto',
 			readingMode,
 			readingDirection,
 			trackElapsedTime,
@@ -91,9 +92,11 @@ export default function ImageBasedReader({
 		}
 	}, [showToolBar, isRunning, pause, resume])
 
+	const windowSize = useWindowSize()
+
 	const deviceOrientation = useMemo(
-		() => (window.innerWidth > window.innerHeight ? 'landscape' : 'portrait'),
-		[],
+		() => ((windowSize.innerWidth || 0) > (windowSize.innerHeight || 0) ? 'landscape' : 'portrait'),
+		[windowSize],
 	)
 
 	const pages = media.pages

@@ -1,13 +1,9 @@
 import { cva, type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
-import { Platform, Pressable } from 'react-native'
+import { Pressable } from 'react-native'
 
 import { TextClassContext } from '~/components/ui/text'
 import { cn } from '~/lib/utils'
-
-const IS_OLD_ANDROID = Platform.OS === 'android' && Platform.Version < 21
-
-console.log('IS_OLD_ANDROID', IS_OLD_ANDROID, Platform.OS, Platform.Version, Platform.constants)
 
 const buttonVariants = cva('group flex items-center justify-center rounded-lg', {
 	variants: {

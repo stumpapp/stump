@@ -92,16 +92,6 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 					direction={activeSettings.readingDirection || 'ltr'}
 					onChange={(direction) => onPreferenceChange({ readingDirection: direction })}
 				/>
-
-				<Label className="flex items-center justify-between px-1 pt-4">
-					<span>Tap sides to navigate</span>
-					<RawSwitch
-						primaryRing
-						variant="primary"
-						checked={activeSettings.tapSidesToNavigate}
-						onCheckedChange={(checked) => onPreferenceChange({ tapSidesToNavigate: checked })}
-					/>
-				</Label>
 			</div>
 
 			<div>
@@ -122,6 +112,30 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 						})
 					}
 				/>
+			</div>
+
+			<div>
+				<Label className="text-xs font-medium uppercase text-foreground-muted">Preferences</Label>
+
+				<Label className="flex items-center justify-between px-1 pt-4">
+					<span>Tap sides to navigate</span>
+					<RawSwitch
+						primaryRing
+						variant="primary"
+						checked={activeSettings.tapSidesToNavigate}
+						onCheckedChange={(checked) => onPreferenceChange({ tapSidesToNavigate: checked })}
+					/>
+				</Label>
+
+				<Label className="flex items-center justify-between px-1 pt-4">
+					<span>Reading timer</span>
+					<RawSwitch
+						primaryRing
+						variant="primary"
+						checked={activeSettings.trackElapsedTime}
+						onCheckedChange={(checked) => onPreferenceChange({ trackElapsedTime: checked })}
+					/>
+				</Label>
 			</div>
 
 			{/* <ImageScalingSelect />

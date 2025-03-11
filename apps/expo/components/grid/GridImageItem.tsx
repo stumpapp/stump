@@ -13,10 +13,9 @@ type Props = {
 	uri: string
 	title: string
 	href: Href
-	index: number
 }
 
-export default function GridImageItem({ uri, title, href, index }: Props) {
+export default function GridImageItem({ uri, title, href }: Props) {
 	const { sdk } = useSDK()
 	const { itemDimension } = useGridItemSize()
 

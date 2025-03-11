@@ -4,7 +4,7 @@ import Link from 'next/link'
 export default function MobileApp() {
 	return (
 		<div className="w-full bg-white dark:bg-[#0E0E0E]">
-			<div className="mx-auto flex min-h-screen max-w-7xl flex-col items-center gap-20 px-6 py-10 lg:px-8 lg:py-24">
+			<div className="mx-auto flex min-h-screen max-w-7xl flex-col items-center gap-16 px-6 py-10 lg:gap-20 lg:px-8 lg:py-24">
 				<div className="mx-auto max-w-2xl flex-shrink-0 md:text-center lg:mx-0 lg:max-w-xl lg:pt-8">
 					<h2 className="text-2xl font-bold tracking-tight text-black sm:text-4xl dark:text-neutral-100">
 						Mobile app coming soon
@@ -42,7 +42,7 @@ export default function MobileApp() {
 					</div>
 				</div>
 
-				<div className="mx-auto max-w-7xl px-6 lg:px-8">
+				<div className="mx-auto max-w-7xl lg:px-8">
 					<img src="/images/expo-preview.png" className="w-auto object-scale-down" />
 				</div>
 

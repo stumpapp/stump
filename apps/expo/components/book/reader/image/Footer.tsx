@@ -65,13 +65,13 @@ export default function Footer() {
 
 	const percentage = (currentPage / pages) * 100
 
-	const baseSize = useMemo(
-		() => ({
-			width: isTablet ? 100 : 75,
-			height: isTablet ? 150 : 100,
-		}),
-		[isTablet],
-	)
+	const baseSize = useMemo(() => {
+		const baseWidth = isTablet ? 120 : 75
+		return {
+			height: baseWidth / HEIGHT_MODIFIER,
+			width: baseWidth,
+		}
+	}, [isTablet])
 
 	const calcSetContainerSize = useCallback(
 		(set: number[]) => {
@@ -234,10 +234,9 @@ export default function Footer() {
 	const getSliderImageContainerStyles = useCallback(
 		(value: number, pageSet: number[]) => {
 			const isLandscape = (imageSizes?.[value - 1]?.ratio || 0) >= 1
-			let containerSize = {
-				height: isTablet ? 300 : 200,
-				width: isTablet ? 200 : 150,
-			}
+
+			let containerSize = baseSize
+
 			if (isLandscape) {
 				containerSize = {
 					height: containerSize.width,
@@ -271,7 +270,7 @@ export default function Footer() {
 				containerSize,
 			}
 		},
-		[isTablet, width, pageSets, imageSizes],
+		[isTablet, width, pageSets, imageSizes, baseSize],
 	)
 
 	const renderAboveThumbComponent = useCallback(
@@ -395,6 +394,18 @@ export default function Footer() {
 	const renderGalleryItem = useCallback(
 		({ item, index }: { item: number[]; index: number }) => {
 			const isCurrentPage = item.includes(currentPage - 1)
+			const isLandscape = item.some((page) => (imageSizes?.[page]?.ratio || 0) >= 1)
+
+			const transform =
+				isLandscape && isCurrentPage
+					? [
+							{
+								// Text size
+								translateY: isTablet ? -20 : -18,
+							},
+						]
+					: undefined
+
 			return (
 				<Pressable onPress={() => onChangePage(index)}>
 					<View
@@ -402,6 +413,7 @@ export default function Footer() {
 						style={{
 							...getGalleryItemSize(index),
 							gap: 1,
+							transform,
 						}}
 					>
 						{item.map((pageIdx, i) => {
@@ -432,7 +444,16 @@ export default function Footer() {
 				</Pressable>
 			)
 		},
-		[onChangePage, currentPage, pages, pageSource, getGalleryItemSize, onImageLoaded],
+		[
+			onChangePage,
+			currentPage,
+			pages,
+			pageSource,
+			getGalleryItemSize,
+			onImageLoaded,
+			isTablet,
+			imageSizes,
+		],
 	)
 
 	// TODO: swap to flashlist, does NOT like dynamic height though...

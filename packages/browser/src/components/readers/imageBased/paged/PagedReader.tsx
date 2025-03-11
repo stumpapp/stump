@@ -3,10 +3,8 @@ import clsx from 'clsx'
 import { memo, useCallback, useMemo, useRef } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { Hotkey } from 'react-hotkeys-hook/dist/types'
-import { useSwipeable } from 'react-swipeable'
 import { useMediaMatch, useWindowSize } from 'rooks'
 
-import { useDetectZoom } from '@/hooks/useDetectZoom'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { ImagePageDimensionRef, useImageBaseReaderContext } from '../context'
@@ -32,7 +30,7 @@ export type PagedReaderProps = {
  */
 function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedReaderProps) {
 	const {
-		settings: { showToolBar },
+		settings: { showToolBar, tapSidesToNavigate },
 		setSettings,
 	} = useBookPreferences({ book: media })
 
@@ -43,7 +41,6 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	const getDimensions = useCallback((idx: number) => pageDimensions[idx], [pageDimensions])
 
 	const { innerWidth } = useWindowSize()
-	const { isZoomed } = useDetectZoom()
 
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
@@ -157,20 +154,9 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	 */
 	useHotkeys('right, left, space, escape', (_, handler) => hotKeyHandler(handler))
 
-	const swipeHandlers = useSwipeable({
-		delta: 10,
-		onSwipedLeft: handleLeftwardPageChange,
-		onSwipedRight: handleRightwardPageChange,
-		preventScrollOnSwipe: true,
-	})
-	const swipeEnabled = useMemo(() => !isZoomed && !showToolBar, [isZoomed, showToolBar])
-
 	return (
-		<div
-			className="relative flex h-full w-full items-center justify-center"
-			{...(swipeEnabled ? swipeHandlers : {})}
-		>
-			{!showToolBar && (
+		<div className="relative flex h-full w-full items-center justify-center">
+			{!showToolBar && tapSidesToNavigate && (
 				<SideBarControl
 					fixed={fixSideNavigation}
 					position="left"
@@ -185,7 +171,7 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 				onPageClick={() => setSettings({ showToolBar: !showToolBar })}
 			/>
 
-			{!showToolBar && (
+			{!showToolBar && tapSidesToNavigate && (
 				<SideBarControl
 					fixed={fixSideNavigation}
 					position="right"

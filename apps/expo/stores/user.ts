@@ -1,11 +1,11 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createUserStore } from '@stump/client'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
 import { CachePolicy } from './reader'
+import { ZustandMMKVStorage } from './store'
 
-export const useUserStore = createUserStore(AsyncStorage)
+export const useUserStore = createUserStore(ZustandMMKVStorage)
 
 type MobilePreferencesStore = {
 	showTabLabels: boolean
@@ -28,7 +28,7 @@ type MobilePreferencesStore = {
 export const usePreferencesStore = create<MobilePreferencesStore>()(
 	persist(
 		(set) => ({
-			showTabLabels: false,
+			showTabLabels: true,
 			maskURLs: false,
 			setMaskURLs: (mask) => set({ maskURLs: mask }),
 			storeLastRead: false,
@@ -40,7 +40,7 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 		{
 			name: 'stump-mobile-preferences-store',
 			version: 1,
-			storage: createJSONStorage(() => AsyncStorage),
+			storage: createJSONStorage(() => ZustandMMKVStorage),
 		},
 	),
 )

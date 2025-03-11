@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { BookPreferences as IBookPreferences } from '@stump/client'
 import dayjs from 'dayjs'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -7,6 +6,8 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
 import { useActiveServer } from '~/components/activeServer'
+
+import { ZustandMMKVStorage } from './store'
 
 export type DoublePageBehavior = 'auto' | 'always' | 'off'
 
@@ -120,7 +121,7 @@ export const useReaderStore = create<ReaderStore>()(
 			}) as ReaderStore,
 		{
 			name: 'stump-reader-store',
-			storage: createJSONStorage(() => AsyncStorage),
+			storage: createJSONStorage(() => ZustandMMKVStorage),
 			version: 1,
 		},
 	),

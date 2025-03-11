@@ -22,7 +22,7 @@ export default function Hero() {
 	}, [resolvedTheme, imageURL])
 
 	return (
-		<div className="mx-auto max-w-7xl px-6 py-10 lg:flex lg:px-8 lg:py-20">
+		<div className="mx-auto max-w-7xl px-6 pb-10 lg:flex lg:px-8 lg:pb-20 lg:pt-10">
 			<div className="mx-auto max-w-2xl flex-shrink-0 lg:mx-0 lg:max-w-xl lg:pt-8">
 				<div className="flex flex-col items-center gap-5 md:items-start">
 					<div>
@@ -87,7 +87,7 @@ export default function Hero() {
 				</div>
 			</div>
 
-			<div className="mx-auto mt-16 max-w-2xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-24">
+			<div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-24">
 				<div className="h-full max-w-3xl sm:max-w-5xl lg:max-w-none">
 					<motion.img
 						initial={{ opacity: 0, y: 40 }}

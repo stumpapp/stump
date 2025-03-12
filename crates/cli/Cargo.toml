@@ -10,7 +10,6 @@ path = "bin/main.rs"
 [dependencies]
 stump_core = { path = "../../core" }
 tokio = { workspace = true }
-prisma-client-rust = { workspace = true }
 bcrypt = { workspace = true }
 thiserror = { workspace = true }
 clap = { version = "4.5.16", features = ["derive"] }

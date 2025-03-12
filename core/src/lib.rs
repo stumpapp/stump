@@ -19,10 +19,6 @@ mod utils;
 mod context;
 pub mod error;
 
-#[rustfmt::skip]
-#[allow(warnings, unused)]
-pub mod prisma;
-
 use config::logging::STUMP_SHADOW_TEXT;
 use config::StumpConfig;
 use db::{DBPragma, JournalMode};

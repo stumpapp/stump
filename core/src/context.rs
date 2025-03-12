@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use prisma_client_rust::not;
+use entity::sea_orm::DatabaseConnection;
 use tokio::sync::{
 	broadcast::{channel, Receiver, Sender},
 	mpsc::error::SendError,
@@ -12,7 +12,6 @@ use crate::{
 	event::CoreEvent,
 	filesystem::scanner::LibraryWatcher,
 	job::{Executor, JobController, JobControllerCommand},
-	prisma::{self, server_config},
 	CoreError, CoreResult,
 };
 
@@ -24,7 +23,7 @@ type EventChannel = (Sender<CoreEvent>, Receiver<CoreEvent>);
 #[derive(Clone)]
 pub struct Ctx {
 	pub config: Arc<StumpConfig>,
-	pub db: Arc<prisma::PrismaClient>,
+	pub conn: Arc<DatabaseConnection>,
 	pub job_controller: Arc<JobController>,
 	pub event_channel: Arc<EventChannel>,
 	pub library_watcher: Arc<LibraryWatcher>,
@@ -48,20 +47,23 @@ impl Ctx {
 	/// ```
 	pub async fn new(config: StumpConfig) -> Ctx {
 		let config = Arc::new(config.clone());
-		let db = Arc::new(db::create_client(&config).await);
+		let conn = Arc::new(db::create_connection(&config).await);
 		let event_channel = Arc::new(channel::<CoreEvent>(1024));
-		let job_controller =
-			JobController::new(db.clone(), config.clone(), event_channel.0.clone());
-		let library_watcher =
-			Arc::new(LibraryWatcher::new(db.clone(), job_controller.clone()));
 
-		Ctx {
-			config,
-			db,
-			job_controller,
-			event_channel,
-			library_watcher,
-		}
+		unimplemented!()
+
+		// let job_controller =
+		// 	JobController::new(db.clone(), config.clone(), event_channel.0.clone());
+		// let library_watcher =
+		// 	Arc::new(LibraryWatcher::new(db.clone(), job_controller.clone()));
+
+		// Ctx {
+		// 	config,
+		// 	conn,
+		// 	job_controller,
+		// 	event_channel,
+		// 	library_watcher,
+		// }
 	}
 
 	// Note: I cannot use #[cfg(test)] here because the tests are in a different crate and
@@ -74,51 +76,25 @@ impl Ctx {
 	/// **This should not be used in production.**
 	pub async fn integration_test_mock() -> Ctx {
 		let config = Arc::new(StumpConfig::debug());
-		let db = Arc::new(db::create_test_client().await);
+		let conn = Arc::new(db::create_connection(&config).await);
 		let event_channel = Arc::new(channel::<CoreEvent>(1024));
 
-		// Create job manager
-		let job_controller =
-			JobController::new(db.clone(), config.clone(), event_channel.0.clone());
+		unimplemented!()
 
-		let library_watcher =
-			Arc::new(LibraryWatcher::new(db.clone(), job_controller.clone()));
+		// // Create job manager
+		// let job_controller =
+		// 	JobController::new(db.clone(), config.clone(), event_channel.0.clone());
 
-		Ctx {
-			config,
-			db,
-			job_controller,
-			event_channel,
-			library_watcher,
-		}
-	}
+		// let library_watcher =
+		// 	Arc::new(LibraryWatcher::new(db.clone(), job_controller.clone()));
 
-	/// Creates a [Ctx] instance for testing **only**. The prisma client is created
-	/// with a mock store, allowing for easy testing of the core without needing to
-	/// connect to a real database.
-	pub fn mock() -> (Ctx, prisma_client_rust::MockStore) {
-		let config = Arc::new(StumpConfig::debug());
-		let (client, mock) = prisma::PrismaClient::_mock();
-
-		let event_channel = Arc::new(channel::<CoreEvent>(1024));
-		let db = Arc::new(client);
-
-		// Create job manager
-		let job_controller =
-			JobController::new(db.clone(), config.clone(), event_channel.0.clone());
-
-		let library_watcher =
-			Arc::new(LibraryWatcher::new(db.clone(), job_controller.clone()));
-
-		let ctx = Ctx {
-			config,
-			db,
-			job_controller,
-			event_channel,
-			library_watcher,
-		};
-
-		(ctx, mock)
+		// Ctx {
+		// 	config,
+		// 	db,
+		// 	job_controller,
+		// 	event_channel,
+		// 	library_watcher,
+		// }
 	}
 
 	/// Wraps the [Ctx] in an [Arc], allowing it to be shared across threads. This

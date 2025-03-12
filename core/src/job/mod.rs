@@ -15,7 +15,7 @@
 // - https://github.com/Nukesor/pueue
 use std::{collections::VecDeque, fmt::Debug, sync::Arc, time::Duration};
 
-use prisma_client_rust::chrono::{self, DateTime, Utc};
+use entity::sea_orm::{prelude::*, EntityOrSelect, QuerySelect};
 use serde::{de, Deserialize, Serialize};
 
 mod controller;
@@ -26,6 +26,7 @@ mod scheduler;
 mod task;
 mod worker;
 
+use chrono::{DateTime, Utc};
 use error::JobError;
 pub use progress::*;
 pub use scheduler::JobScheduler;
@@ -39,10 +40,7 @@ pub use controller::*;
 pub use manager::*;
 use uuid::Uuid;
 
-use crate::{
-	db::entity::LogLevel,
-	prisma::{job, log},
-};
+use crate::db::entity::LogLevel;
 
 #[derive(
 	Clone, Debug, Default, Serialize, Deserialize, PartialEq, Eq, Type, ToSchema,
@@ -202,18 +200,18 @@ impl JobExecuteLog {
 		}
 	}
 
-	/// Constructs a Prisma create payload for the error
-	pub fn into_prisma(self, job_id: String) -> (String, Vec<log::SetParam>) {
-		(
-			self.msg,
-			vec![
-				log::context::set(self.context),
-				log::level::set(self.level.to_string()),
-				log::timestamp::set(self.timestamp.into()),
-				log::job::connect(job::id::equals(job_id.clone())),
-			],
-		)
-	}
+	// /// Constructs a Prisma create payload for the error
+	// pub fn into_prisma(self, job_id: String) -> (String, Vec<log::SetParam>) {
+	// 	(
+	// 		self.msg,
+	// 		vec![
+	// 			log::context::set(self.context),
+	// 			log::level::set(self.level.to_string()),
+	// 			log::timestamp::set(self.timestamp.into()),
+	// 			log::job::connect(job::id::equals(job_id.clone())),
+	// 		],
+	// 	)
+	// }
 }
 
 /// The working state of a job. This is frequently updated during execution, and is used to track
@@ -275,12 +273,12 @@ pub trait JobExt: Send + Sync + Sized + Clone + 'static {
 		&self,
 		ctx: &WorkerCtx,
 	) -> Result<Option<WorkingState<Self::Output, Self::Task>>, JobError> {
-		let db = ctx.db.clone();
+		let conn = ctx.conn.as_ref();
 
-		let stored_job = db
-			.job()
-			.find_unique(job::id::equals(ctx.job_id.clone()))
-			.exec()
+		let stored_job = entity::job::Entity::find_by_id(ctx.job_id.clone())
+			.select()
+			.column(entity::job::Column::SaveState)
+			.one(conn)
 			.await?;
 
 		match stored_job {
@@ -320,7 +318,7 @@ pub trait JobExt: Send + Sync + Sized + Clone + 'static {
 		completed_tasks: usize,
 		logs: &Vec<JobExecuteLog>,
 	) -> Result<(), JobError> {
-		let db = ctx.db.clone();
+		let conn = ctx.conn.as_ref();
 		let job_id = ctx.job_id.clone();
 
 		let json_output = serde_json::to_value(output)
@@ -329,6 +327,7 @@ pub trait JobExt: Send + Sync + Sized + Clone + 'static {
 			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
 		let json_logs = serde_json::to_value(logs)
 			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
+
 		let working_state = serde_json::json!({
 			"output": json_output,
 			"tasks": json_tasks,
@@ -339,16 +338,21 @@ pub trait JobExt: Send + Sync + Sized + Clone + 'static {
 		let save_state = serde_json::to_vec(&working_state)
 			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
 
-		let persisted_job = db
-			.job()
-			.update(
-				job::id::equals(job_id),
-				vec![job::save_state::set(Some(save_state))],
+		let affected_rows = entity::job::Entity::update_many()
+			.filter(entity::job::Column::Id.eq(job_id.clone()))
+			.col_expr(
+				entity::job::Column::SaveState,
+				Expr::value(Some(save_state)),
 			)
-			.exec()
-			.await
-			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
-		tracing::trace!(?persisted_job, "Persisted job save state to DB");
+			.exec(conn)
+			.await?
+			.rows_affected;
+
+		if affected_rows == 0 {
+			return Err(JobError::StateSaveFailed(
+				"Failed to persist job save state to DB".to_string(),
+			));
+		}
 
 		Ok(())
 	}
@@ -472,64 +476,61 @@ pub trait Executor: Send + Sync {
 		output: ExecutorOutput,
 		elapsed: Duration,
 	) -> Result<(), JobError> {
-		let db = ctx.db.clone();
+		let conn = ctx.conn.as_ref();
 		let job_id = self.id();
 
 		let expected_logs = output.logs.len();
-		if expected_logs > 0 {
-			let creates = output
-				.logs
-				.into_iter()
-				.map(|log| log.into_prisma(job_id.to_string()))
-				.map(|(msg, params)| db.log().create(msg, params));
-			let persisted_logs = db._batch(creates).await.map_or_else(
-				|error| {
-					tracing::error!(?error, "Failed to persist job logs!");
-					0
-				},
-				|logs| logs.len(),
-			);
+		// TODO(sea-orm): Fix (active row model prolly)
+		// if expected_logs > 0 {
+		// 	let creates = output
+		// 		.logs
+		// 		.into_iter()
+		// 		.map(|log| log.into_prisma(job_id.to_string()))
+		// 		.map(|(msg, params)| db.log().create(msg, params));
+		// 	let persisted_logs = db._batch(creates).await.map_or_else(
+		// 		|error| {
+		// 			tracing::error!(?error, "Failed to persist job logs!");
+		// 			0
+		// 		},
+		// 		|logs| logs.len(),
+		// 	);
 
-			if persisted_logs != expected_logs {
-				tracing::warn!(
-					?persisted_logs,
-					?expected_logs,
-					"Failed to persist all job logs!"
-				);
-			}
-		}
+		// 	if persisted_logs != expected_logs {
+		// 		tracing::warn!(
+		// 			?persisted_logs,
+		// 			?expected_logs,
+		// 			"Failed to persist all job logs!"
+		// 		);
+		// 	}
+		// }
 
 		let output_data = serde_json::to_vec(&output.output)
 			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
 
-		let tx_timeout = chrono::Duration::seconds(60).num_milliseconds() as u64;
-		let persisted_job_with_data = db
-			._transaction()
-			.with_max_wait(tx_timeout)
-			.with_timeout(tx_timeout)
-			.run(|client| async move {
-				client
-					.job()
-					.update(
-						job::id::equals(job_id.to_string()),
-						vec![
-							job::save_state::set(None),
-							job::output_data::set(Some(output_data)),
-							job::status::set(JobStatus::Completed.to_string()),
-							job::ms_elapsed::set(
-								elapsed.as_millis().try_into().unwrap_or_else(|e| {
-									tracing::error!(error = ?e, "Wow! You defied logic and overflowed an i64 during the attempt to convert job duration to milliseconds. It must have been a long 292_471_208 years!");
-									i64::MAX
-								}),
-							),
-						],
-					)
-					.exec()
-					.await
-			})
-			.await
-			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
-		tracing::trace!(?persisted_job_with_data, "Persisted completed job to DB");
+		let affected_rows = entity::job::Entity::update_many()
+			.filter(entity::job::Column::Id.eq(job_id.to_string()))
+			.col_expr(entity::job::Column::SaveState, Expr::value(None::<Vec<u8>>))
+			.col_expr(
+				entity::job::Column::OutputData,
+				Expr::value(Some(output_data)),
+			)
+			.col_expr(
+				entity::job::Column::Status,
+				Expr::value(JobStatus::Completed.to_string()),
+			)
+			.col_expr(
+				entity::job::Column::MsElapsed,
+				Expr::value(elapsed.as_millis() as i64),
+			)
+			.exec(conn)
+			.await?
+			.rows_affected;
+
+		if affected_rows == 0 {
+			return Err(JobError::StateSaveFailed(
+				"Failed to persist job output to DB".to_string(),
+			));
+		}
 
 		Ok(())
 	}
@@ -541,7 +542,7 @@ pub trait Executor: Send + Sync {
 		status: JobStatus,
 		elapsed: Duration,
 	) -> Result<(), JobError> {
-		let db = ctx.db.clone();
+		let conn = ctx.conn.as_ref();
 		let job_id = self.id();
 
 		if status.is_success() || status.is_pending() {
@@ -554,31 +555,22 @@ pub trait Executor: Send + Sync {
 			));
 		}
 
-		let tx_timeout = chrono::Duration::seconds(60).num_milliseconds() as u64;
-		let _persisted_job = db
-			._transaction()
-			.with_max_wait(tx_timeout)
-			.with_timeout(tx_timeout)
-			.run(|client| async move {
-				client
-					.job()
-					.update(
-						job::id::equals(job_id.to_string()),
-						vec![
-							job::status::set(status.to_string()),
-							job::ms_elapsed::set(
-								elapsed.as_millis().try_into().unwrap_or_else(|e| {
-									tracing::error!(error = ?e, "Wow! You defied logic and overflowed an i64 during the attempt to convert job duration to milliseconds. It must have been a long 292_471_208 years!");
-									i64::MAX
-								}),
-							),
-						],
-					)
-					.exec()
-					.await
-			})
-			.await
-			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
+		let affected_rows = entity::job::Entity::update_many()
+			.filter(entity::job::Column::Id.eq(job_id.to_string()))
+			.col_expr(entity::job::Column::Status, Expr::value(status.to_string()))
+			.col_expr(
+				entity::job::Column::MsElapsed,
+				Expr::value(elapsed.as_millis() as i64),
+			)
+			.exec(conn)
+			.await?
+			.rows_affected;
+
+		if affected_rows == 0 {
+			return Err(JobError::StateSaveFailed(
+				"Failed to persist job failure to DB".to_string(),
+			));
+		}
 
 		Ok(())
 	}

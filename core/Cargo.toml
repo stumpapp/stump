@@ -1,68 +1,69 @@
 [package]
 name = "stump_core"
-version = { workspace = true }
+version.workspace = true
 edition = "2021"
 
 [dependencies]
-alphanumeric-sort = { workspace = true }
+alphanumeric-sort.workspace = true
 notify = "8.0.0"
 async-channel = "2.1.0"
-async-trait = { workspace = true }
+async-trait.workspace = true
+chrono.workspace = true
 cuid = "1.3.2"
 data-encoding = "2.5.0"
-derive_builder = { workspace = true }
-derivative = { workspace = true }
+derive_builder.workspace = true
+derivative.workspace = true
 dirs = "5.0.1"
 email = { path = "../crates/email" }
+entity = { path = "../crates/entity" }
 epub = { git = "https://github.com/stumpapp/epub-rs", rev = "38e091abe96875952556ab7dec195022d0230e14" }
-futures = { workspace = true }
+futures.workspace = true
 globset = "0.4.14"
 image = { version = "0.25.2" }
-infer = { workspace = true }
-itertools = { workspace = true }
-md5 = { workspace = true }
-rand = { workspace = true }
-serde = { workspace = true }
+infer.workspace = true
+itertools.workspace = true
+md5.workspace = true
+rand.workspace = true
+serde.workspace = true
 serde-xml-rs = "0.6.0" # Support for XML serialization/deserialization
-serde_json = { workspace = true }
-serde_with = { workspace = true }
-simple_crypt = { workspace = true }
-specta = { workspace = true }
+serde_json.workspace = true
+serde_with.workspace = true
+simple_crypt.workspace = true
+specta.workspace = true
 stump-config-gen = { path = "../crates/stump-config-gen"}
-tokio = { workspace = true }
-toml = { workspace = true }
+tokio.workspace = true
+toml.workspace = true
 trash = "3.1.2"
 # pdf = "0.8.1"
 pdf = { git = "https://github.com/pdf-rs/pdf", rev = "3bc9e636d31b1846e51b58c7429914e640866f53" } # TODO: revert back to crates.io once fix(es) release
 pdfium-render = "0.8.24"
-prisma-client-rust = { workspace = true }
 prefixed-api-key = { workspace = true}
 rayon = "1.10.0"
 regex = "1.10.6"
 ring = "0.17.8"
 smart-filter-gen = { path = "../crates/smart-filter-gen"}
-thiserror = { workspace = true }
-tracing = { workspace = true }
+thiserror.workspace = true
+tracing.workspace = true
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 tracing-appender = "0.2.3"
 unrar = { version = "0.5.6" }
-urlencoding = { workspace = true }
+urlencoding.workspace = true
 utoipa = { version = "5.3.1", features = ["chrono"] }
-uuid = "1.10.0"
+uuid = { version = "1.10.0", features = ["v4"] }
 walkdir = "2.5.0"
 webp = "0.3.0"
 xml-rs = "0.8.21" # XML reader/writer
-zip = { workspace = true }
+zip.workspace = true
 quick-xml = "0.37.2"
 merge = "0.1.0"
 
 [dev-dependencies]
 temp-env = "0.3.6"
-tempfile = { workspace = true }
+tempfile.workspace = true
 criterion = { version = "0.5.1", features = ["html_reports", "async_tokio"] }
 
 [build-dependencies]
-chrono = { workspace = true }
+chrono.workspace = true
 
 [target.'cfg(target_os = "linux")'.dependencies]
 libc = "0.2.152"

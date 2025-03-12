@@ -11,6 +11,7 @@ import {
 import { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { useDisplay } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
 
@@ -25,10 +26,9 @@ type ImageDimension = {
 // TODO: The reading directions don't play well with the pinch and zoom, particularly the continuous
 // scroll modes. I think when it is set to continuous, the zoom might have to be on the list?
 // Not 100% sure, it is REALLY janky right now.
-
 // TODO: Account for device orientation AND reading direction
-
-// TODO: Pull primary color from image for background color (optionally from config)
+// TODO: Account for the image scaling settings
+// TODO: Support vertical
 
 type Props = {
 	/**
@@ -43,7 +43,7 @@ type Props = {
 export default function ImageBasedReader({ initialPage }: Props) {
 	const { book, imageSizes = [], onPageChanged, flatListRef } = useImageBasedReader()
 	const {
-		preferences: { readingMode, incognito },
+		preferences: { readingMode, incognito, readingDirection },
 	} = useBookPreferences(book.id)
 	const { height, width } = useWindowDimensions()
 
@@ -73,6 +73,7 @@ export default function ImageBasedReader({ initialPage }: Props) {
 		<FlatList
 			ref={flatListRef}
 			data={Array.from({ length: book.pages }, (_, i) => i)}
+			inverted={readingDirection === 'rtl' && readingMode !== 'continuous:vertical'}
 			renderItem={({ item }) => (
 				<Page
 					deviceOrientation={deviceOrientation}
@@ -88,13 +89,13 @@ export default function ImageBasedReader({ initialPage }: Props) {
 			horizontal={readingMode === 'paged' || readingMode === 'continuous:horizontal'}
 			pagingEnabled={readingMode === 'paged'}
 			onViewableItemsChanged={({ viewableItems }) => {
-				const fistVisibleItemIdx = viewableItems.filter(({ isViewable }) => isViewable).at(0)?.index
-				if (fistVisibleItemIdx) {
-					handlePageChanged(fistVisibleItemIdx + 1)
+				const fistVisibleItem = viewableItems.filter(({ isViewable }) => isViewable).at(0)?.index
+				if (fistVisibleItem) {
+					handlePageChanged(fistVisibleItem + 1)
 				}
 			}}
-			initialNumToRender={2}
-			maxToRenderPerBatch={2}
+			initialNumToRender={3}
+			maxToRenderPerBatch={3}
 			windowSize={3}
 			initialScrollIndex={initialPage - 1}
 			// https://stackoverflow.com/questions/53059609/flat-list-scrolltoindex-should-be-used-in-conjunction-with-getitemlayout-or-on
@@ -128,6 +129,7 @@ type PageProps = {
 	maxHeight: number
 	readingDirection: 'vertical' | 'horizontal'
 }
+
 const Page = React.memo(
 	({
 		// deviceOrientation,
@@ -138,7 +140,21 @@ const Page = React.memo(
 		maxHeight,
 		// readingDirection,
 	}: PageProps) => {
-		const { pageURL } = useImageBasedReader()
+		const {
+			book: { id },
+			pageURL,
+			flatListRef,
+		} = useImageBasedReader()
+		const {
+			preferences: {
+				tapSidesToNavigate,
+				readingDirection,
+				allowDownscaling,
+				// imageScaling: { scaleToFit },
+				cachePolicy,
+			},
+		} = useBookPreferences(id)
+		const { isTablet } = useDisplay()
 		const { sdk } = useSDK()
 
 		const insets = useSafeAreaInsets()
@@ -147,12 +163,41 @@ const Page = React.memo(
 		const showControls = useReaderStore((state) => state.showControls)
 		const setShowControls = useReaderStore((state) => state.setShowControls)
 
+		const tapThresholdRatio = isTablet ? 4 : 5
+
+		const onCheckForNavigationTaps = useCallback(
+			(x: number) => {
+				const isLeft = x < maxWidth / tapThresholdRatio
+				const isRight = x > maxWidth - maxWidth / tapThresholdRatio
+
+				if (isLeft) {
+					const modifier = readingDirection === 'rtl' ? 1 : -1
+					flatListRef.current?.scrollToIndex({ index: index + modifier, animated: true })
+				} else if (isRight) {
+					const modifier = readingDirection === 'rtl' ? -1 : 1
+					flatListRef.current?.scrollToIndex({ index: index + modifier, animated: true })
+				}
+
+				return isLeft || isRight
+			},
+			[maxWidth, index, flatListRef, tapThresholdRatio, readingDirection],
+		)
+
 		const onSingleTap = useCallback(
 			(event: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => {
 				if (event.state !== State.ACTIVE) return
-				setShowControls(!showControls)
+
+				if (!tapSidesToNavigate) {
+					setShowControls(!showControls)
+					return
+				}
+
+				const didNavigate = onCheckForNavigationTaps(event.x)
+				if (!didNavigate) {
+					setShowControls(!showControls)
+				}
 			},
-			[showControls, setShowControls],
+			[showControls, setShowControls, onCheckForNavigationTaps, tapSidesToNavigate],
 		)
 
 		const onImageLoaded = useCallback(
@@ -200,11 +245,12 @@ const Page = React.memo(
 								Authorization: sdk.authorizationHeader,
 							},
 						}}
-						// TODO: figure out how to render landscape better...
 						style={{
 							height: '100%',
 							width: '100%',
 						}}
+						allowDownscaling={allowDownscaling}
+						cachePolicy={cachePolicy}
 						contentFit="contain"
 						onLoad={onImageLoaded}
 					/>

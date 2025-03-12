@@ -1,12 +1,5 @@
-import {
-	type EpubReaderPreferences,
-	queryClient,
-	useEpubLazy,
-	useEpubReader,
-	useQuery,
-	useSDK,
-} from '@stump/client'
-import { Bookmark, UpdateEpubProgress } from '@stump/sdk'
+import { BookPreferences, queryClient, useEpubLazy, useQuery, useSDK } from '@stump/client'
+import { Bookmark, Media, UpdateEpubProgress } from '@stump/sdk'
 import { Book, Rendition } from 'epubjs'
 import uniqby from 'lodash/uniqBy'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -14,9 +7,10 @@ import toast from 'react-hot-toast'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { useTheme } from '@/hooks'
+import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import EpubReaderContainer from './EpubReaderContainer'
-import { stumpDark } from './themes'
+import { applyTheme, stumpDark } from './themes'
 
 // NOTE: http://epubjs.org/documentation/0.3/ for epubjs documentation overview
 
@@ -72,6 +66,8 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	const { sdk } = useSDK()
 	const { theme } = useTheme()
 
+	const { epub, isLoading } = useEpubLazy(id)
+
 	const ref = useRef<HTMLDivElement>(null)
 
 	const [book, setBook] = useState<Book | null>(null)
@@ -80,9 +76,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 
 	const [currentLocation, setCurrentLocation] = useState<EpubLocationState>()
 
-	const { epubPreferences } = useEpubReader((state) => ({
-		epubPreferences: state.preferences,
-	}))
+	const { bookPreferences } = useBookPreferences({ book: epub?.media_entity || ({} as Media) })
 
 	const { data: bookmarks } = useQuery([sdk.epub.keys.getBookmarks, id], () =>
 		sdk.epub.getBookmarks(id),
@@ -123,8 +117,6 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 
 		return { chapter: position, chapterName: name, sectionIndex: sectionIndex }
 	}, [book, currentLocation])
-
-	const { epub, isLoading } = useEpubLazy(id)
 
 	/**
 	 * A function for focusing the iframe in the epub reader. This will be used to ensure
@@ -185,14 +177,18 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	 * @param rendition: The epubjs rendition instance
 	 * @param preferences The epub reader preferences
 	 */
-	const applyEpubPreferences = (rendition: Rendition, preferences: EpubReaderPreferences) => {
+	const applyEpubPreferences = (rendition: Rendition, preferences: BookPreferences) => {
 		if (theme === 'dark') {
+			rendition.themes.register('stump-dark', applyTheme(stumpDark, preferences))
 			rendition.themes.select('stump-dark')
 		} else {
+			rendition.themes.register('stump-light', applyTheme({}, preferences))
 			rendition.themes.select('stump-light')
 		}
 		rendition.direction(preferences.readingDirection)
-		rendition.themes.fontSize(`${preferences.fontSize}px`)
+		if (preferences.fontSize) {
+			rendition.themes.fontSize(`${preferences.fontSize}px`)
+		}
 	}
 
 	/**
@@ -218,7 +214,9 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 
 				//? TODO: I guess here I would need to wait for and load in custom theme blobs...
 				//* Color manipulation reference: https://github.com/futurepress/epub.js/issues/1019
-				rendition_.themes.register('stump-dark', stumpDark)
+				rendition_.themes.register('stump-dark', applyTheme(stumpDark, bookPreferences))
+				rendition_.themes.register('stump-light', applyTheme({}, bookPreferences))
+
 				rendition_.on('relocated', handleLocationChange)
 
 				// This callback is used to change the page when a keydown event is received.
@@ -236,7 +234,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				// When the epub page isn't in focus, the window fires them instead
 				window.addEventListener('keydown', keydown_callback)
 
-				applyEpubPreferences(rendition_, epubPreferences)
+				applyEpubPreferences(rendition_, bookPreferences)
 				setRendition(rendition_)
 
 				const targetCfi = epub?.media_entity.active_reading_session?.epubcfi ?? initialCfi
@@ -297,9 +295,9 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	 */
 	useEffect(() => {
 		if (rendition) {
-			applyEpubPreferences(rendition, epubPreferences)
+			applyEpubPreferences(rendition, bookPreferences)
 		}
-	}, [rendition, epubPreferences, theme])
+	}, [rendition, bookPreferences, theme])
 
 	/**
 	 * Invalidate the book query when a reader is unmounted so that the book overview
@@ -603,7 +601,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	// 	'epubcfi(/6/12!/4[3Q280-a9efbf2f573d4345819e3829f80e5dbc]/2[prologue]/4[prologue-text]/8/1:56)',
 	// ).then((res) => console.log('cfiWithinAnother', res))
 
-	if (isLoading || !epub) {
+	if (isLoading || !epub?.media_entity) {
 		return null
 	}
 

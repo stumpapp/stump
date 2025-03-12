@@ -13,7 +13,8 @@ use specta::Type;
 use stump_core::{
 	db::entity::{
 		AttachmentMeta, EmailerConfig, EmailerConfigInput, EmailerSendRecord,
-		EmailerSendTo, Media, RegisteredEmailDevice, SMTPEmailer, User, UserPermission,
+		EmailerSendTo, Media, Notifier, RegisteredEmailDevice, SMTPEmailer, User,
+		UserPermission,
 	},
 	filesystem::{ContentType, FileParts, PathUtils},
 	prisma::{
@@ -40,7 +41,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			Router::new()
 				.route("/", get(get_emailers).post(create_emailer))
 				.nest(
-					"/:id",
+					"/{id}",
 					Router::new()
 						.route(
 							"/",
@@ -61,7 +62,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			Router::new()
 				.route("/", get(get_email_devices).post(create_email_device))
 				.nest(
-					"/:id",
+					"/{id}",
 					Router::new().route(
 						"/",
 						get(get_email_device_by_id)
@@ -120,7 +121,7 @@ async fn get_emailers(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/emailers/:id",
+	path = "/api/v1/emailers/{id}",
 	tag = "emailer",
 	params(
 		("id" = i32, Path, description = "The emailer ID")
@@ -214,7 +215,7 @@ async fn create_emailer(
 /// Update an existing emailer by ID
 #[utoipa::path(
 	put,
-	path = "/api/v1/emailers/:id",
+	path = "/api/v1/emailers/{id}",
 	tag = "emailer",
 	request_body = CreateOrUpdateEmailer,
 	params(
@@ -275,7 +276,7 @@ async fn update_emailer(
 
 // #[utoipa::path(
 //     patch,
-//     path = "/api/v1/emailers/:id/",
+//     path = "/api/v1/emailers/{id}/",
 //     tag = "emailer",
 //     params(
 //         ("id" = i32, Path, description = "The ID of the emailer")
@@ -306,7 +307,7 @@ async fn update_emailer(
 /// Delete an emailer by ID
 #[utoipa::path(
 	delete,
-	path = "/api/v1/emailers/:id/",
+	path = "/api/v1/emailers/{id}/",
 	tag = "emailer",
 	params(
 		("id" = i32, Path, description = "The emailer ID"),
@@ -344,7 +345,7 @@ pub struct EmailerSendRecordIncludeParams {
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/emailers/:id/send-history",
+	path = "/api/v1/emailers/{id}/send-history",
 	tag = "emailer",
 	params(
 		("id" = i32, Path, description = "The ID of the emailer")
@@ -672,7 +673,7 @@ async fn get_email_devices(
 /// Get an email device by its ID
 #[utoipa::path(
     get,
-    path = "/api/v1/email-devices/:id",
+    path = "/api/v1/email-devices/{id}",
     tag = "email-devices",
     params(
         ("id" = i32, Path, description = "The ID of the email device")
@@ -752,7 +753,7 @@ async fn create_email_device(
 /// Update an existing email device by its ID
 #[utoipa::path(
     put,
-    path = "/api/v1/email-devices/:id",
+    path = "/api/v1/email-devices/{id}",
     tag = "email-devices",
     params(
         ("id" = i32, Path, description = "The ID of the email device")
@@ -804,7 +805,7 @@ pub struct PatchEmailDevice {
 
 #[utoipa::path(
     patch,
-    path = "/api/v1/email-devices/:id",
+    path = "/api/v1/email-devices/{id}",
     tag = "email-devices",
     params(
         ("id" = i32, Path, description = "The ID of the email device")
@@ -851,7 +852,7 @@ async fn patch_email_device(
 /// Delete an email device by its ID
 #[utoipa::path(
     delete,
-    path = "/api/v1/email-devices/:id",
+    path = "/api/v1/email-devices/{id}",
     tag = "email-devices",
     params(
         ("id" = i32, Path, description = "The ID of the email device")

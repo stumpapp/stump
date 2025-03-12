@@ -81,7 +81,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.nest(
 					"/libraries",
 					Router::new().route("/", get(browse_libraries)).nest(
-						"/:id",
+						"/{id}",
 						Router::new().route("/", get(browse_library_by_id)).nest(
 							"/books",
 							Router::new()
@@ -92,9 +92,10 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				)
 				.nest(
 					"/series",
-					Router::new()
-						.route("/", get(browse_series))
-						.nest("/:id", Router::new().route("/", get(browse_series_by_id))),
+					Router::new().route("/", get(browse_series)).nest(
+						"/{id}",
+						Router::new().route("/", get(browse_series_by_id)),
+					),
 				)
 				// TODO(OPDS-V2): Support smart list feeds
 				// .nest("/smart-lists", Router::new())
@@ -105,11 +106,11 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.route("/latest", get(latest_books))
 						.route("/keep-reading", get(keep_reading))
 						.nest(
-							"/:id",
+							"/{id}",
 							Router::new()
 								.route("/", get(get_book_by_id))
 								.route("/thumbnail", get(get_book_thumbnail))
-								.route("/pages/:page", get(get_book_page))
+								.route("/pages/{page}", get(get_book_page))
 								// TODO: PUT progression
 								.route("/progression", get(get_book_progression))
 								.route("/file", get(download_book)),
@@ -1181,8 +1182,8 @@ async fn get_book_page(
 	fetch_book_page_for_user(&ctx, req.user(), id, page).await
 }
 
-// .route("/chapter/:chapter", get(get_epub_chapter))
-// .route("/:root/:resource", get(get_epub_meta)),
+// .route("/chapter/{chapter}", get(get_epub_chapter))
+// .route("/{root}/{resource}", get(get_epub_meta)),
 // async fn get_book_resource() {}
 
 /// A route handler which returns the progression of a book for a user.

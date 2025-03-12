@@ -1,7 +1,7 @@
-import { useSDK } from '@stump/client'
+import { useMutation, useSDK } from '@stump/client'
 import { Button, Dialog, Label, Text } from '@stump/components'
-import { Media, Series } from '@stump/sdk'
-import { useEffect, useState } from 'react'
+import { Media, PatchLibraryThumbnail, Series } from '@stump/sdk'
+import { useCallback, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
 import EditThumbnailDropdown from '@/components/thumbnail/EditThumbnailDropdown'
@@ -21,6 +21,34 @@ export default function LibraryThumbnailSelector() {
 
 	const { library } = useLibraryContext()
 
+	const onSuccess = useCallback(
+		() =>
+			sdk.axios.get(sdk.library.thumbnailURL(library.id), {
+				headers: {
+					'Cache-Control': 'no-cache',
+					Pragma: 'no-cache',
+					Expires: '0',
+				},
+			}),
+		[sdk, library.id],
+	)
+
+	const { mutateAsync: patchThumbnail, isLoading: isPatchingThumbnail } = useMutation(
+		[sdk.library.keys.updateThumbnail, library.id],
+		async (data: PatchLibraryThumbnail) => {
+			await sdk.library.updateThumbnail(library.id, data)
+			await onSuccess()
+		},
+	)
+
+	const { mutate: uploadThumbnail, isLoading: isUploadingThumbnail } = useMutation(
+		[sdk.library.keys.uploadThumbnail, library.id],
+		async (file: File) => {
+			await sdk.library.uploadThumbnail(library.id, file)
+			await onSuccess()
+		},
+	)
+
 	const handleOpenChange = (nowOpen: boolean) => {
 		if (!nowOpen) {
 			setIsOpen(false)
@@ -36,7 +64,7 @@ export default function LibraryThumbnailSelector() {
 
 	const handleUploadImage = async (file: File) => {
 		try {
-			await sdk.library.uploadThumbnail(library.id, file)
+			await uploadThumbnail(file)
 			setIsOpen(false)
 		} catch (error) {
 			console.error(error)
@@ -48,12 +76,7 @@ export default function LibraryThumbnailSelector() {
 		if (!selectedBook || !page) return
 
 		try {
-			await sdk.library.updateThumbnail(library.id, {
-				media_id: selectedBook.id,
-				page,
-			})
-			// TODO: The browser is caching the image, so we need to force remove it and ensure
-			// the new one is loaded instead
+			await patchThumbnail({ media_id: selectedBook.id, page })
 			setIsOpen(false)
 		} catch (error) {
 			console.error(error)
@@ -153,6 +176,7 @@ export default function LibraryThumbnailSelector() {
 							variant="primary"
 							onClick={handleConfirm}
 							disabled={!selectedSeries || !selectedBook || !page}
+							isLoading={isPatchingThumbnail || isUploadingThumbnail}
 						>
 							Confirm selection
 						</Button>

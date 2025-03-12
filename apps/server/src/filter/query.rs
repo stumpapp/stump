@@ -20,11 +20,6 @@ use super::common::{
 };
 
 #[derive(Debug, Default, Deserialize, Serialize, ToSchema)]
-#[aliases(
-	LibraryFilterQuery = FilterQuery<LibraryFilter, LibraryOrderBy>,
-	SeriesFilterQuery = FilterQuery<SeriesFilter, SeriesOrderBy>,
-	MediaFilterQuery = FilterQuery<MediaFilter, MediaOrderBy>
-)]
 pub struct FilterQuery<F, O>
 where
 	F: Sized + Default,
@@ -46,7 +41,11 @@ where
 	}
 }
 
-#[derive(Deserialize, Debug, Clone, Serialize, Type)]
+pub type FilterableLibraryQuery = FilterableQuery<LibraryFilter>;
+pub type FilterableSeriesQuery = FilterableQuery<SeriesFilter>;
+pub type FilterableMediaQuery = FilterableQuery<MediaFilter>;
+
+#[derive(Deserialize, Debug, Clone, Serialize, Type, ToSchema)]
 pub struct Range<T>
 where
 	T: std::str::FromStr,

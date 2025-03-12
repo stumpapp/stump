@@ -28,7 +28,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			get(get_reading_list).post(create_reading_list),
 		)
 		.nest(
-			"/reading-list/:id",
+			"/reading-list/{id}",
 			Router::new().route(
 				"/",
 				get(get_reading_list_by_id)
@@ -238,7 +238,7 @@ async fn create_reading_list(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/reading-list/:id",
+	path = "/api/v1/reading-list/{id}",
 	tag = "reading-list",
 	params(
 		("id" = String, Path, description = "The ID of the reading list to fetch.")
@@ -278,7 +278,7 @@ async fn get_reading_list_by_id(
 // TODO: fix this endpoint, way too naive of an update...
 #[utoipa::path(
 	put,
-	path = "/api/v1/reading-list/:id",
+	path = "/api/v1/reading-list/{id}",
 	tag = "reading-list",
 	params(
 		("id" = String, Path, description = "The ID of the reading list to update.")
@@ -341,7 +341,7 @@ async fn update_reading_list(
 
 #[utoipa::path(
 	delete,
-	path = "/api/v1/reading-list/:id",
+	path = "/api/v1/reading-list/{id}",
 	tag = "reading-list",
 	params(
 		("id" = String, Path, description = "The ID of the reading list to delete.")

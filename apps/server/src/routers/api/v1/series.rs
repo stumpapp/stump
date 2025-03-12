@@ -70,7 +70,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			get(get_recently_added_series_handler),
 		)
 		.nest(
-			"/series/:id",
+			"/series/{id}",
 			Router::new()
 				.route("/", get(get_series_by_id))
 				.route("/scan", post(scan_series))
@@ -217,7 +217,7 @@ async fn get_series(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/series/:id",
+	path = "/api/v1/series/{id}",
 	tag = "series",
 	params(
 		("id" = String, Path, description = "The ID of the series to fetch"),
@@ -295,7 +295,7 @@ async fn get_series_by_id(
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/series/:id/scan",
+	path = "/api/v1/series/{id}/scan",
 	tag = "series",
 	responses(
 		(status = 200, description = "Successfully queued series scan"),
@@ -395,7 +395,7 @@ pub(crate) async fn get_series_thumbnail(
 /// Returns the thumbnail image for a series
 #[utoipa::path(
 	get,
-	path = "/api/v1/series/:id/thumbnail",
+	path = "/api/v1/series/{id}/thumbnail",
 	tag = "series",
 	params(
 		("id" = String, Path, description = "The ID of the series to fetch the thumbnail for"),
@@ -463,7 +463,7 @@ pub struct PatchSeriesThumbnail {
 
 #[utoipa::path(
     patch,
-    path = "/api/v1/series/:id/thumbnail",
+    path = "/api/v1/series/{id}/thumbnail",
     tag = "series",
     params(
         ("id" = String, Path, description = "The ID of the series")
@@ -558,9 +558,11 @@ async fn patch_series_thumbnail(
 			image_options,
 			core_config: ctx.config.as_ref().clone(),
 			force_regen: true,
+			filename: media.series_id.clone(),
 		},
 	)
 	.await?;
+	tracing::debug!(?path_buf, "Generated thumbnail for series");
 
 	Ok(ImageResponse::from((
 		ContentType::from(format),
@@ -570,7 +572,7 @@ async fn patch_series_thumbnail(
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/series/:id/thumbnail",
+	path = "/api/v1/series/{id}/thumbnail",
 	tag = "series",
 	params(
 		("id" = String, Path, description = "The ID of the series")
@@ -643,7 +645,7 @@ async fn replace_series_thumbnail(
 // TODO: media filtering...
 #[utoipa::path(
 	get,
-	path = "/api/v1/series/:id/media",
+	path = "/api/v1/series/{id}/media",
 	tag = "series",
 	params(
 		("id" = String, Path, description = "The ID of the series to fetch the media for"),
@@ -767,7 +769,7 @@ async fn get_series_media(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/series/:id/media/next",
+	path = "/api/v1/series/{id}/media/next",
 	tag = "series",
 	params(
 		("id" = String, Path, description = "The ID of the series to fetch the up-next media for"),
@@ -866,7 +868,7 @@ pub struct SeriesIsComplete {
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/series/:id/complete",
+	path = "/api/v1/series/{id}/complete",
 	tag = "series",
 	params(
 		("id" = String, Path, description = "The ID of the series to check"),
@@ -945,7 +947,7 @@ async fn put_series_is_complete() -> APIResult<Json<SeriesIsComplete>> {
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/series/:id/analyze",
+	path = "/api/v1/series/{id}/analyze",
 	tag = "series",
 	params(
 		("id" = String, Path, description = "The ID of the series to analyze")

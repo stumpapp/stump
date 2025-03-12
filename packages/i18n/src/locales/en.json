@@ -364,6 +364,10 @@
 					"label": "Process metadata",
 					"description": "Extract any metadata from library files and store the results in the database"
 				},
+				"watch": {
+					"label": "Watch",
+					"description": "Watch the library directory for changes and update the database accordingly"
+				},
 				"generateFileHashes": {
 					"label": "Generate file hashes",
 					"description": "Generate a hash for each file in the library to detect duplicates"
@@ -452,6 +456,7 @@
 					"ignoreRules": "Ignore rules",
 					"convertRar": "Convert RAR/CBR",
 					"deleteConversions": "Delete converted files",
+					"watch": "Watch directory for changes",
 					"processMetadata": "Process metadata",
 					"generateFileHashes": "Generate file hashes"
 				}
@@ -1285,6 +1290,14 @@
 			"title": "Reader settings",
 			"description": "Default options for the Stump readers. These are bound to your current device only",
 			"sections": {
+				"universal": {
+					"sections": {
+						"readingDirection": {
+							"label": "Reading direction",
+							"description": "The direction in which the reader will progress through pages"
+						}
+					}
+				},
 				"imageBasedBooks": {
 					"label": "Image-based books",
 					"description": "Comic books, manga, and other image-based books",
@@ -1296,6 +1309,29 @@
 						"preloadBehindCount": {
 							"label": "Preload behind count",
 							"description": "The number of pages to preload behind the current page"
+						}
+					}
+				},
+				"textBasedBooks": {
+					"label": "Ebook reader",
+					"description": "Default settings for text-based books",
+					"sections": {
+						"fontSize": {
+							"label": "Font size",
+							"description": "The size of the font used in the reader"
+						},
+						"fontFamily": {
+							"label": "Font family",
+							"description": "The font used in the reader"
+						}
+					}
+				},
+				"data":{
+					"sections": {
+						"clearStore": {
+							"label": "Clear preferences",
+							"description": "Reset all individual book settings that override the defaults",
+							"button": "Clear preferences"
 						}
 					}
 				}

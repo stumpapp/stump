@@ -20,6 +20,7 @@ export default function TabLayout() {
 	const { user } = useAuthQuery({
 		enabled: !!sdk.token,
 		onSuccess: setUser,
+		useErrorBoundary: false,
 	})
 
 	if (!sdk.token || !user) {

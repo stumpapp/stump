@@ -1,4 +1,4 @@
-import { BookPreferences, ReaderStore } from '@stump/client'
+import { BookPreferences, ReaderSettings, ReaderStore } from '@stump/client'
 import type { LibraryConfig, Media } from '@stump/sdk'
 import { useCallback, useMemo } from 'react'
 
@@ -8,24 +8,25 @@ type Params = {
 	book: Media
 }
 
-type Return = Omit<ReaderStore, 'bookPreferences' | 'setBookPreferences'> & {
+type Return = Omit<ReaderStore, 'bookPreferences' | 'setBookPreferences' | 'clearStore'> & {
 	bookPreferences: BookPreferences
 	setBookPreferences: (preferences: Partial<BookPreferences>) => void
 }
 
 export function useBookPreferences({ book }: Params): Return {
 	const {
-		// Note: This is a selection from the store, not a direct state value
-		bookPreferences: storedBookPreferences,
+		bookPreferences: allPreferences,
 		setBookPreferences: storedSetBookPreferences,
 		settings,
 		setSettings,
 	} = useReaderStore((state) => ({
-		bookPreferences: state.bookPreferences[book.id],
+		bookPreferences: state.bookPreferences,
 		setBookPreferences: state.setBookPreferences,
 		setSettings: state.setSettings,
 		settings: state.settings,
 	}))
+
+	const storedBookPreferences = useMemo(() => allPreferences[book.id], [allPreferences, book.id])
 
 	/**
 	 * The library configuration, used for picking default reader settings. This realistically
@@ -34,7 +35,7 @@ export function useBookPreferences({ book }: Params): Return {
 	const libraryConfig = useMemo(() => book?.series?.library?.config, [book])
 
 	const bookPreferences = useMemo(
-		() => storedBookPreferences ?? defaultPreferences(libraryConfig),
+		() => buildPreferences(storedBookPreferences ?? {}, settings, libraryConfig),
 		[storedBookPreferences, libraryConfig],
 	)
 
@@ -56,7 +57,7 @@ export function useBookPreferences({ book }: Params): Return {
 	}
 }
 
-const defaultPreferences = (libraryConfig?: LibraryConfig): BookPreferences =>
+const defaultsFromLibraryConfig = (libraryConfig?: LibraryConfig): BookPreferences =>
 	({
 		brightness: 1,
 		imageScaling: {
@@ -65,3 +66,13 @@ const defaultPreferences = (libraryConfig?: LibraryConfig): BookPreferences =>
 		readingDirection: libraryConfig?.default_reading_dir || 'ltr',
 		readingMode: libraryConfig?.default_reading_mode || 'paged',
 	}) as BookPreferences
+
+const buildPreferences = (
+	preferences: Partial<BookPreferences>,
+	settings: ReaderSettings,
+	libraryConfig?: LibraryConfig,
+): BookPreferences => ({
+	...settings,
+	...defaultsFromLibraryConfig(libraryConfig),
+	...preferences,
+})

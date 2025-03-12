@@ -96,8 +96,8 @@ You can generated user-scoped API keys to authenticate requests to the REST API.
 
 There are instances where you can embed an API key in the URL directly. This will only be available for features/integrations where passing the key in the header is otherwise impossible. At the time of writing, there are two such routes:
 
-- `/koreader/:api_key/*` - Used for the [KoReader sync](https://koreader.rocks) integration. See [here](/guides/integrations/koreader) for more information
-- `/opds/:api_key/v1.2/*` - An optional clone of the [OPDS](/guides/opds) integration API for clients which don't support auth headers
+- `/koreader/{api_key}/*` - Used for the [KoReader sync](https://koreader.rocks) integration. See [here](/guides/integrations/koreader) for more information
+- `/opds/{api_key}/v1.2/*` - An optional clone of the [OPDS](/guides/opds) integration API for clients which don't support auth headers
 
 For more information on API keys, see the [API keys](/guides/features/api-keys) guide.
 

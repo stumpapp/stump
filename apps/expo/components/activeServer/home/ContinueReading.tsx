@@ -5,12 +5,18 @@ import { FlatList, View } from 'react-native'
 import { BookListItem } from '~/components/book'
 import { Heading, Text } from '~/components/ui'
 
+import { useActiveServer } from '../context'
 import ReadingNow from './ReadingNow'
 
 export default function ContinueReading() {
+	const {
+		activeServer: { id: serverID },
+	} = useActiveServer()
 	const { media } = useContinueReading({
 		limit: 20,
 		suspense: true,
+		useErrorBoundary: false,
+		queryKey: [serverID],
 	})
 
 	const activeBook = useMemo(() => media.at(0), [media])

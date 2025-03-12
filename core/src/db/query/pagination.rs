@@ -289,7 +289,6 @@ impl From<CursorQuery> for CursorInfo {
 
 #[derive(Debug, Serialize, Type, ToSchema)]
 // OK, this is SO annoying...
-#[aliases(PageableDirectoryListing = Pageable<DirectoryListing>)]
 pub struct Pageable<T: Serialize> {
 	/// The target data being returned.
 	pub data: T,
@@ -299,17 +298,23 @@ pub struct Pageable<T: Serialize> {
 	pub _cursor: Option<CursorInfo>,
 }
 
+pub type PageableDirectoryListing = Pageable<DirectoryListing>;
+
 // NOTE: this is an infuriating workaround for getting Pageable<Vec<T>> to work with utoipa
 #[derive(Serialize, Type, ToSchema)]
-#[aliases(PageableLibraries = PageableArray<Library>, PageableSeries = PageableArray<Series>, PageableMedia = PageableArray<Media>)]
 pub struct PageableArray<T: Serialize> {
 	/// The target data being returned.
+	#[schema(no_recursion)]
 	pub data: Vec<T>,
 	/// The pagination information (if paginated).
 	pub _page: Option<PageInfo>,
 	/// The cursor information (if cursor-based paginated).
 	pub _cursor: Option<CursorInfo>,
 }
+
+pub type PageableLibraries = PageableArray<Library>;
+pub type PageableSeries = PageableArray<Series>;
+pub type PageableMedia = PageableArray<Media>;
 
 impl<T: Serialize> Pageable<T> {
 	pub fn unpaged(data: T) -> Self {

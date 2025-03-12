@@ -1,4 +1,5 @@
 import { useKeepAwake } from 'expo-keep-awake'
+import * as NavigationBar from 'expo-navigation-bar'
 import { useEffect, useMemo, useState } from 'react'
 
 import { ImageBasedReader } from '~/components/book/reader'
@@ -13,7 +14,6 @@ type ImageDimension = {
 	ratio: number
 }
 
-// TODO: refactor to use imagebasedreader when able
 export default function Screen() {
 	useKeepAwake()
 	const {
@@ -54,6 +54,13 @@ export default function Screen() {
 			setShowControls(false)
 		}
 	}, [setShowControls])
+
+	useEffect(() => {
+		NavigationBar.setVisibilityAsync('hidden')
+		return () => {
+			NavigationBar.setVisibilityAsync('visible')
+		}
+	}, [])
 
 	return (
 		<ImageBasedReader

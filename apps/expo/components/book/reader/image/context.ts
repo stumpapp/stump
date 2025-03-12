@@ -21,6 +21,7 @@ export type IImageBasedReaderContext = {
 	pageThumbnailURL?: (page: number) => string
 	currentPage?: number
 	onPageChanged?: (page: number) => void
+	resetTimer?: () => void
 }
 
 export const ImageBasedReaderContext = createContext<IImageBasedReaderContext | null>(null)

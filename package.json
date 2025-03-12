@@ -28,7 +28,7 @@
 		"dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"cargo watch --ignore core/prisma -x run -p stump_server\" \"yarn expo dev\"",
 		"prisma-studio": "npx prisma studio --schema core/prisma/schema.prisma",
 		"format": "lerna run format --stream --parallel",
-		"nuke": "lerna run nuke"
+		"nuke": "concurrently -n root,monorepo -c green.bold,blue.bold \"yarn exec rimraf node_modules\" \"lerna run nuke\""
 	},
 	"devDependencies": {
 		"@babel/core": "^7.25.8",

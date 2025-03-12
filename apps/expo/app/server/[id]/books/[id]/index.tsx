@@ -5,6 +5,7 @@ import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useEffect } from 'react'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -28,6 +29,16 @@ export default function Screen() {
 	const { media, refetch, isRefetching } = useMediaByIdQuery(bookID, { suspense: true })
 
 	const router = useRouter()
+
+	useEffect(() => {
+		if (media?.current_page) {
+			Image.prefetch(sdk.media.bookPageURL(media.id, media.current_page), {
+				headers: {
+					Authorization: sdk.authorizationHeader || '',
+				},
+			})
+		}
+	}, [sdk, media?.current_page, media?.id])
 
 	if (!media) return null
 

@@ -10,6 +10,7 @@ use crate::{db::entity::Cursor, prisma::log};
 /// `~/.stump/Stump.log` by default. Information such as the file size, last modified date, etc.
 #[derive(Serialize, Deserialize, Type, ToSchema)]
 pub struct LogMetadata {
+	#[schema(value_type = String)]
 	pub path: PathBuf,
 	pub size: u64,
 	pub modified: String,

@@ -205,9 +205,15 @@ impl StumpCore {
 				))
 				.await?
 			{
-				Some(result) => result
-					.try_get::<String>("", "journal_mode")
-					.map(|s| JournalMode::from_str(&s))??,
+				Some(result) => {
+					let raw = result.try_get::<String>("", "journal_mode")?;
+					JournalMode::from_str(&raw).map_err(|e| {
+						CoreError::InternalError(format!(
+							"Failed to parse journal mode: {}",
+							e
+						))
+					})?
+				},
 				None => {
 					tracing::warn!("No journal mode found! Defaulting to WAL assumption");
 					JournalMode::default()

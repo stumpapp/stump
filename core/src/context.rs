@@ -1,6 +1,9 @@
 use std::sync::Arc;
 
-use entity::sea_orm::DatabaseConnection;
+use entity::{
+	sea_orm::{prelude::*, DatabaseConnection, SelectColumns},
+	server_config,
+};
 use tokio::sync::{
 	broadcast::{channel, Receiver, Sender},
 	mpsc::error::SendError,
@@ -193,14 +196,12 @@ impl Ctx {
 	}
 
 	pub async fn get_encryption_key(&self) -> CoreResult<String> {
-		let server_config = self
-			.db
-			.server_config()
-			.find_first(vec![not![server_config::encryption_key::equals(None)]])
-			.exec()
+		let record = server_config::Entity::find()
+			.select_column(server_config::Column::EncryptionKey)
+			.one(self.conn.as_ref())
 			.await?;
 
-		let encryption_key = server_config
+		let encryption_key = record
 			.and_then(|config| config.encryption_key)
 			.ok_or(CoreError::EncryptionKeyNotSet)?;
 

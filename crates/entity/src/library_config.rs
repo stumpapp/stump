@@ -1,4 +1,7 @@
+use std::{fmt, str::FromStr};
+
 use sea_orm::entity::prelude::*;
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "library_configs")]
@@ -26,6 +29,12 @@ pub struct Model {
 	pub library_id: Option<String>,
 }
 
+impl Model {
+	pub fn is_collection_based(&self) -> bool {
+		self.library_pattern == LibraryPattern::CollectionBased.to_string()
+	}
+}
+
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
 	#[sea_orm(has_one = "super::library::Entity")]
@@ -39,3 +48,47 @@ impl Related<super::library::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
+pub enum LibraryPattern {
+	#[serde(rename = "SERIES_BASED")]
+	SeriesBased,
+	#[serde(rename = "COLLECTION_BASED")]
+	CollectionBased,
+}
+
+impl FromStr for LibraryPattern {
+	type Err = String;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		let uppercase = s.to_uppercase();
+
+		match uppercase.as_str() {
+			"SERIES_BASED" => Ok(LibraryPattern::SeriesBased),
+			"COLLECTION_BASED" => Ok(LibraryPattern::CollectionBased),
+			"" => Ok(LibraryPattern::default()),
+			_ => Err(format!("Invalid library pattern: {s}")),
+		}
+	}
+}
+
+impl Default for LibraryPattern {
+	fn default() -> Self {
+		Self::SeriesBased
+	}
+}
+
+impl From<String> for LibraryPattern {
+	fn from(s: String) -> Self {
+		LibraryPattern::from_str(&s).unwrap_or_default()
+	}
+}
+
+impl fmt::Display for LibraryPattern {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		match self {
+			LibraryPattern::SeriesBased => write!(f, "SERIES_BASED"),
+			LibraryPattern::CollectionBased => write!(f, "COLLECTION_BASED"),
+		}
+	}
+}

@@ -14,7 +14,7 @@ use entity::{
 	media, media_metadata,
 	sea_orm::{
 		prelude::*,
-		sea_query::{IdenList, OnConflict, OnConflictAction, Query},
+		sea_query::{IdenList, OnConflict, Query},
 		ActiveValue::Set,
 		Condition, DatabaseConnection, IntoActiveModel, Iterable, TransactionTrait,
 	},
@@ -39,7 +39,6 @@ use crate::{
 		MediaBuilder, SeriesBuilder,
 	},
 	job::{error::JobError, JobExecuteLog, JobProgress, WorkerCtx, WorkerSendExt},
-	utils::chain_optional_iter,
 	CoreEvent,
 };
 
@@ -331,22 +330,21 @@ pub(crate) async fn handle_missing_media(
 		return output;
 	}
 
-	let _affected_rows = ctx
-		.db
-		.media()
-		.update_many(
-			vec![
-				media::series::is(vec![series::id::equals(series_id.to_string())]),
-				media::path::in_vec(
-					paths
-						.iter()
-						.map(|e| e.to_string_lossy().to_string())
-						.collect::<Vec<String>>(),
-				),
-			],
-			vec![media::status::set(FileStatus::Missing.to_string())],
+	let _affected_rows = media::Entity::update_many()
+		.filter(media::Column::SeriesId.eq(series_id.to_string()))
+		.filter(
+			media::Column::Path.is_in(
+				paths
+					.iter()
+					.map(|p| p.to_string_lossy().to_string())
+					.collect::<Vec<String>>(),
+			),
 		)
-		.exec()
+		.col_expr(
+			media::Column::Status,
+			Expr::value(FileStatus::Missing.to_string()),
+		)
+		.exec(ctx.conn.as_ref())
 		.await
 		.map_or_else(
 			|error| {
@@ -357,9 +355,9 @@ pub(crate) async fn handle_missing_media(
 				)));
 				0
 			},
-			|count| {
-				output.updated_media += count as u64;
-				count
+			|res| {
+				output.updated_media += res.rows_affected as u64;
+				res.rows_affected
 			},
 		);
 
@@ -381,30 +379,30 @@ pub(crate) async fn handle_restored_media(
 		return output;
 	}
 
-	let _affected_rows = ctx
-		.db
-		.media()
-		.update_many(
-			vec![
-				media::series::is(vec![series::id::equals(series_id.to_string())]),
-				media::id::in_vec(ids),
-			],
-			vec![media::status::set(FileStatus::Ready.to_string())],
+	let _affected_series = media::Entity::update_many()
+		.filter(media::Column::SeriesId.eq(series_id.to_string()))
+		.filter(
+			media::Column::Id
+				.is_in(ids.iter().map(|id| id.to_string()).collect::<Vec<String>>()),
 		)
-		.exec()
+		.col_expr(
+			media::Column::Status,
+			Expr::value(FileStatus::Ready.to_string()),
+		)
+		.exec(ctx.conn.as_ref())
 		.await
 		.map_or_else(
 			|error| {
-				tracing::error!(error = ?error, "Failed to restore recovered media");
+				tracing::error!(error = ?error, "Failed to update restored media");
 				output.logs.push(JobExecuteLog::error(format!(
-					"Failed to update recovered media: {:?}",
+					"Failed to update restored media: {:?}",
 					error.to_string()
 				)));
 				0
 			},
-			|count| {
-				output.updated_media += count as u64;
-				count
+			|res| {
+				output.updated_media += res.rows_affected as u64;
+				res.rows_affected
 			},
 		);
 
@@ -588,7 +586,7 @@ struct BookVisitCtx {
 	operation: BookVisitOperation,
 	path: PathBuf,
 	series_id: String,
-	existing_book: Option<Media>,
+	existing_book: Option<media::Model>,
 }
 
 async fn handle_book(
@@ -613,9 +611,13 @@ async fn handle_book(
 		move || {
 			let builder = MediaBuilder::new(&path, &series_id, library_config, &config);
 			let send_result = tx.send(match (operation, existing_book) {
-				(BookVisitOperation::Rebuild, Some(book)) => builder
-					.rebuild(&book)
-					.map(|b| BookVisitResult::Built(Box::new(b))),
+				(BookVisitOperation::Rebuild, Some(book)) => {
+					unimplemented!()
+					// TODO(sea-orm): Fix
+					// builder
+					// .rebuild(&book)
+					// .map(|b| BookVisitResult::Built(Box::new(b)))
+				},
 				(BookVisitOperation::Custom(custom), Some(book)) => {
 					builder.custom_visit(custom).map(|result| {
 						BookVisitResult::Custom(CustomVisitResult {
@@ -750,7 +752,7 @@ pub(crate) async fn safely_build_and_insert_media(
 	// TODO: consider small batches of _batch instead?
 	while let Some(book) = books.pop_front() {
 		let path = book.path.clone();
-		match create_media(&worker_ctx.db, book).await {
+		match create_media(&worker_ctx.conn, book).await {
 			Ok(created_media) => {
 				output.created_media += 1;
 				worker_ctx.send_batch(vec![
@@ -813,7 +815,7 @@ pub(crate) async fn visit_and_update_media(
 		return Ok(output);
 	}
 
-	let client = &worker_ctx.db;
+	let conn = worker_ctx.conn.as_ref();
 	let paths_to_operation = params
 		.iter()
 		.map(|(p, o)| (p.to_string_lossy().to_string(), *o))
@@ -821,17 +823,14 @@ pub(crate) async fn visit_and_update_media(
 	let paths = paths_to_operation.keys().cloned().collect::<Vec<String>>();
 	let paths_len = paths.len();
 
-	let media = client
-		.media()
-		.find_many(vec![
-			media::path::in_vec(paths),
-			media::series_id::equals(Some(series_id.clone())),
-		])
-		.exec()
-		.await?
-		.into_iter()
-		.map(Media::from)
-		.collect::<Vec<Media>>();
+	let media = media::Entity::find()
+		.filter(
+			media::Column::Path
+				.is_in(paths.iter().map(|p| p.to_string()).collect::<Vec<String>>()),
+		)
+		.filter(media::Column::SeriesId.eq(series_id.to_string()))
+		.all(conn)
+		.await?;
 
 	if media.len() != paths_len {
 		output.logs.push(JobExecuteLog::warn(
@@ -922,7 +921,7 @@ pub(crate) async fn visit_and_update_media(
 
 	while let Some(result) = build_results.pop_front() {
 		let error_ctx = result.error_ctx();
-		match handle_book_visit_operation(&worker_ctx.db, result).await {
+		match handle_book_visit_operation(&worker_ctx.conn, result).await {
 			Ok(_) => {
 				output.updated_media += 1;
 			},

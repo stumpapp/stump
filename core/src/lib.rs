@@ -4,9 +4,7 @@
 #![recursion_limit = "256"]
 #![warn(clippy::dbg_macro)]
 
-use std::sync::Arc;
-
-// TODO: cleanup hoisted crates to only what is needed
+use std::{str::FromStr, sync::Arc};
 
 pub mod config;
 pub mod db;
@@ -21,9 +19,15 @@ pub mod error;
 
 use config::logging::STUMP_SHADOW_TEXT;
 use config::StumpConfig;
-use db::{DBPragma, JournalMode};
+use db::JournalMode;
+use entity::{
+	sea_orm::{
+		prelude::*, ActiveModelTrait, DatabaseBackend, EntityTrait, PaginatorTrait,
+		SelectColumns, Statement,
+	},
+	server_config,
+};
 use job::{JobController, JobScheduler};
-use prisma::server_config;
 
 pub use context::Ctx;
 pub use error::{CoreError, CoreResult};
@@ -119,23 +123,25 @@ impl StumpCore {
 
 	/// Runs the database migrations
 	pub async fn run_migrations(&self) -> Result<(), CoreError> {
-		db::migration::run_migrations(&self.ctx.db).await
+		// db::migration::run_migrations(&self.ctx.db).await
+		// TODO(sea-orm): Fix
+		Ok(())
 	}
 
 	/// Initializes the server configuration record. This will only create a new record if one
 	/// does not already exist.
 	pub async fn init_server_config(&self) -> Result<(), CoreError> {
-		let config_exists = self
-			.ctx
-			.db
-			.server_config()
-			.find_first(vec![])
-			.exec()
-			.await?
-			.is_some();
+		let config_exists = server_config::Entity::find()
+			.count(self.ctx.conn.as_ref())
+			.await? > 0;
 
 		if !config_exists {
-			self.ctx.db.server_config().create(vec![]).exec().await?;
+			let active_model = server_config::ActiveModel {
+				..Default::default()
+			};
+			server_config::Entity::insert(active_model)
+				.exec(self.ctx.conn.as_ref())
+				.await?;
 		}
 
 		Ok(())
@@ -146,27 +152,26 @@ impl StumpCore {
 	/// Initializes the encryption key for the database. This will only set the encryption key
 	/// if one does not already exist.
 	pub async fn init_encryption(&self) -> Result<EncryptionKeySet, CoreError> {
-		let client = self.ctx.db.clone();
+		let conn = self.ctx.conn.as_ref();
 
-		let encryption_key_set = client
-			.server_config()
-			.find_first(vec![server_config::encryption_key::not(None)])
-			.exec()
+		let encryption_key_set = server_config::Entity::find()
+			.select_column(server_config::Column::EncryptionKey)
+			.one(conn)
 			.await?
-			.is_some();
+			.is_some_and(|config| config.encryption_key.is_some());
 
 		if encryption_key_set {
 			Ok(false)
 		} else {
 			let encryption_key = utils::create_encryption_key()?;
-			let affected_rows = client
-				.server_config()
-				.update_many(
-					vec![],
-					vec![server_config::encryption_key::set(Some(encryption_key))],
+			let affected_rows = server_config::Entity::update_many()
+				.col_expr(
+					server_config::Column::EncryptionKey,
+					Expr::value(Some(encryption_key)),
 				)
-				.exec()
-				.await?;
+				.exec(conn)
+				.await?
+				.rows_affected;
 			tracing::trace!(affected_rows, "Updated encryption key");
 			if affected_rows > 1 {
 				tracing::warn!("More than one encryption key was updated? This is definitely not expected");
@@ -175,50 +180,57 @@ impl StumpCore {
 		}
 	}
 
+	// TODO(sea-orm): I don't think this is actually needed anymore!
 	/// Initializes the journal mode for the database. This will only set the journal mode to WAL
 	/// provided a few conditions are met:
 	///
 	/// 1. The initial WAL setup has not already been completed on first run
 	/// 2. The journal mode is not already set to WAL
 	pub async fn init_journal_mode(&self) -> Result<JournalModeChanged, CoreError> {
-		let client = self.ctx.db.clone();
+		let conn = self.ctx.conn.as_ref();
 
-		let wal_mode_setup_completed = client
-			.server_config()
-			.find_first(vec![server_config::initial_wal_setup_complete::equals(
-				true,
-			)])
-			.exec()
-			.await?
-			.is_some();
+		let wal_mode_setup_completed = server_config::Entity::find()
+			.filter(server_config::Column::InitialWalSetupComplete.eq(true))
+			.count(conn)
+			.await? > 0;
 
 		if wal_mode_setup_completed {
 			tracing::trace!("Initial WAL setup has already been completed, skipping");
 			Ok(false)
 		} else {
-			let journal_mode = client.get_journal_mode().await?;
+			let journal_mode = match conn
+				.query_one(Statement::from_string(
+					DatabaseBackend::Sqlite,
+					"PRAGMA journal_mode;",
+				))
+				.await?
+			{
+				Some(result) => result
+					.try_get::<String>("", "journal_mode")
+					.map(|s| JournalMode::from_str(&s))??,
+				None => {
+					tracing::warn!("No journal mode found! Defaulting to WAL assumption");
+					JournalMode::default()
+				},
+			};
 
 			if journal_mode == JournalMode::WAL {
 				tracing::trace!("Journal mode is already set to WAL, skipping");
 			} else {
 				tracing::trace!("Journal mode is not set to WAL!");
-				let updated_journal_mode =
-					client.set_journal_mode(JournalMode::WAL).await?;
-				tracing::debug!(
-					"Initial journal mode has been set to {:?}",
-					updated_journal_mode
-				);
+				let result = conn.execute_unprepared("PRAGMA journal_mode=WAL;").await?;
+				tracing::debug!(?result, "Set journal mode to WAL");
 			}
 
-			let _affected_rows = client
-				.server_config()
-				.update_many(
-					vec![],
-					vec![server_config::initial_wal_setup_complete::set(true)],
+			let affected_rows = server_config::Entity::update_many()
+				.col_expr(
+					server_config::Column::InitialWalSetupComplete,
+					Expr::value(true),
 				)
-				.exec()
-				.await?;
-			tracing::trace!(_affected_rows, "Updated initial WAL setup complete flag");
+				.exec(conn)
+				.await?
+				.rows_affected;
+			tracing::trace!(affected_rows, "Updated initial WAL setup complete flag");
 
 			Ok(journal_mode != JournalMode::WAL)
 		}

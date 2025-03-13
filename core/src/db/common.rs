@@ -1,5 +1,6 @@
 use std::{collections::HashMap, str::FromStr};
 
+use entity::sea_orm::FromQueryResult;
 use prisma_client_rust::{raw, PrismaValue, QueryError};
 use serde::{Deserialize, Serialize};
 
@@ -144,7 +145,7 @@ impl FromStr for JournalMode {
 	}
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, FromQueryResult)]
 pub struct JournalModeQueryResult {
 	pub journal_mode: JournalMode,
 }

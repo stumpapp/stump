@@ -1,6 +1,4 @@
-
-
-use sea_orm::entity::prelude::*;
+use sea_orm::{entity::prelude::*, FromQueryResult};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "media")]
@@ -31,6 +29,23 @@ pub struct Model {
 	pub deleted_at: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub koreader_hash: Option<String>,
+}
+
+pub struct ModelWithMetadata {
+	pub media: Model,
+	pub metadata: Option<super::media_metadata::Model>,
+}
+
+impl FromQueryResult for ModelWithMetadata {
+	fn from_query_result(
+		res: &sea_orm::QueryResult,
+		_pre: &str,
+	) -> Result<Self, sea_orm::DbErr> {
+		let media = Model::from_query_result(res, Entity.table_name())?;
+		let metadata =
+			super::media_metadata::Model::from_query_result_optional(res, "metadata")?;
+		Ok(Self { media, metadata })
+	}
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

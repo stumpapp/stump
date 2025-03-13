@@ -1,4 +1,5 @@
 use derive_builder::UninitializedFieldError;
+use entity::sea_orm;
 
 #[derive(Debug, thiserror::Error)]
 pub enum OPDSV2Error {
@@ -7,7 +8,7 @@ pub enum OPDSV2Error {
 	#[error("OPDS feed field was not initialized: {0}")]
 	MalformedFeed(#[from] UninitializedFieldError),
 	#[error("A query failed while generated OPDS feed: {0}")]
-	QueryError(#[from] Box<prisma_client_rust::QueryError>),
+	DBError(#[from] sea_orm::error::DbErr),
 	#[error("Failed to generate OPDS feed: {0}")]
 	InternalError(#[from] crate::CoreError),
 }
@@ -19,15 +20,9 @@ impl From<OPDSV2Error> for crate::CoreError {
 				crate::CoreError::InternalError(msg)
 			},
 			OPDSV2Error::MalformedFeed(err) => err.into(),
-			OPDSV2Error::QueryError(err) => err.into(),
+			OPDSV2Error::DBError(err) => err.into(),
 			OPDSV2Error::InternalError(err) => err,
 		}
-	}
-}
-
-impl From<prisma_client_rust::QueryError> for OPDSV2Error {
-	fn from(error: prisma_client_rust::QueryError) -> Self {
-		Self::QueryError(Box::new(error))
 	}
 }
 

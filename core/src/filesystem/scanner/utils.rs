@@ -9,11 +9,18 @@ use std::{
 	time::Instant,
 };
 
-use futures::{stream::FuturesUnordered, StreamExt};
-use prisma_client_rust::{
-	chrono::{DateTime, Utc},
-	QueryError,
+use chrono::{DateTime, Utc};
+use entity::{
+	media, media_metadata,
+	sea_orm::{
+		prelude::*,
+		sea_query::{IdenList, OnConflict, OnConflictAction, Query},
+		ActiveValue::Set,
+		Condition, DatabaseConnection, IntoActiveModel, Iterable, TransactionTrait,
+	},
+	series,
 };
+use futures::{stream::FuturesUnordered, StreamExt};
 use tokio::{
 	sync::{oneshot, Semaphore},
 	task::spawn_blocking,
@@ -32,7 +39,6 @@ use crate::{
 		MediaBuilder, SeriesBuilder,
 	},
 	job::{error::JobError, JobExecuteLog, JobProgress, WorkerCtx, WorkerSendExt},
-	prisma::{media, media_metadata, series, PrismaClient},
 	utils::chain_optional_iter,
 	CoreEvent,
 };
@@ -73,200 +79,155 @@ pub(crate) fn file_updated_since_scan(
 }
 
 pub(crate) async fn create_media(
-	db: &PrismaClient,
+	db: &DatabaseConnection,
 	generated: Media,
-) -> CoreResult<Media> {
-	let result: Result<Media, QueryError> = db
-		._transaction()
-		.run(|client| async move {
-			let created_metadata = if let Some(metadata) = generated.metadata {
-				let params = metadata.into_prisma();
-				let created_metadata =
-					client.media_metadata().create(params).exec().await?;
-				tracing::trace!(?created_metadata, "Metadata inserted");
-				Some(created_metadata)
-			} else {
-				tracing::trace!("No metadata to insert");
-				None
-			};
+) -> CoreResult<media::Model> {
+	let txn = db.begin().await?;
 
-			let modified_at = generated.modified_at.as_deref().and_then(|date| {
-				match DateTime::parse_from_rfc3339(date) {
-					Ok(dt) => Some(dt), // Successfully parsed
-					Err(e) => {
-						tracing::error!(?e, "Failed to parse modified_at date");
-						None
-					},
-				}
-			});
+	let media = media::ActiveModel {
+		name: Set(generated.name),
+		size: Set(generated.size),
+		extension: Set(generated.extension),
+		pages: Set(generated.pages),
+		path: Set(generated.path),
+		hash: Set(generated.hash),
+		koreader_hash: Set(generated.koreader_hash),
+		series_id: Set(Some(generated.series_id)),
+		modified_at: Set(generated.modified_at),
+		..Default::default()
+	};
 
-			let created_media = client
-				.media()
-				.create(
-					generated.name,
-					generated.size,
-					generated.extension,
-					generated.pages,
-					generated.path,
-					vec![
-						media::hash::set(generated.hash),
-						media::koreader_hash::set(generated.koreader_hash),
-						media::series::connect(series::id::equals(generated.series_id)),
-						media::modified_at::set(modified_at),
-					],
-				)
-				.exec()
-				.await?;
-			tracing::trace!(?created_media, "Media inserted");
+	let created_media = media::Entity::insert(media)
+		.exec_with_returning(&txn)
+		.await?;
 
-			if let Some(media_metadata) = created_metadata {
-				let updated_media = client
-					.media()
-					.update(
-						media::id::equals(created_media.id),
-						vec![media::metadata::connect(media_metadata::id::equals(
-							media_metadata.id,
-						))],
-					)
-					.with(media::metadata::fetch())
-					.exec()
-					.await?;
-				tracing::trace!("Media updated with metadata");
-				Ok(Media::from(updated_media))
-			} else {
-				Ok(Media::from(created_media))
-			}
-		})
-		.await;
+	if let Some(meta) = generated.metadata {
+		let metadata = media_metadata::ActiveModel {
+			media_id: Set(Some(created_media.id)),
+			title: Set(meta.title),
+			series: Set(meta.series),
+			number: Set(meta.number.and_then(|n| Decimal::try_from(n).ok())),
+			volume: Set(meta.volume),
+			summary: Set(meta.summary),
+			notes: Set(meta.notes),
+			age_rating: Set(meta.age_rating),
+			genre: Set(meta.genre.map(|v| v.join(", "))),
+			year: Set(meta.year),
+			month: Set(meta.month),
+			day: Set(meta.day),
+			writers: Set(meta.writers.map(|v| v.join(", "))),
+			pencillers: Set(meta.pencillers.map(|v| v.join(", "))),
+			inkers: Set(meta.inkers.map(|v| v.join(", "))),
+			colorists: Set(meta.colorists.map(|v| v.join(", "))),
+			letterers: Set(meta.letterers.map(|v| v.join(", "))),
+			cover_artists: Set(meta.cover_artists.map(|v| v.join(", "))),
+			editors: Set(meta.editors.map(|v| v.join(", "))),
+			publisher: Set(meta.publisher),
+			links: Set(meta.links.map(|v| v.join(", "))),
+			characters: Set(meta.characters.map(|v| v.join(", "))),
+			teams: Set(meta.teams.map(|v| v.join(", "))),
+			page_count: Set(meta.page_count),
+			..Default::default()
+		};
 
-	Ok(result?)
+		media_metadata::Entity::insert(metadata).exec(&txn).await?;
+	}
+
+	txn.commit().await?;
+
+	Ok(created_media)
 }
 
-pub(crate) async fn update_media(db: &PrismaClient, media: Media) -> CoreResult<Media> {
-	let result: Result<Media, QueryError> = db
-		._transaction()
-		.run(|client| async move {
-			let metadata_id = match media.metadata {
-				Some(metadata) => {
-					let params = metadata
-						.into_prisma()
-						.into_iter()
-						.chain(vec![media_metadata::media_id::set(Some(
-							media.id.clone(),
-						))])
-						.collect::<Vec<_>>();
-					let updated_metadata = client
-						.media_metadata()
-						.upsert(
-							media_metadata::media_id::equals(media.id.clone()),
-							params.clone(),
-							params,
-						)
-						.exec()
-						.await?;
-					tracing::trace!(?updated_metadata, "Metadata upserted");
-					Some(updated_metadata.id)
-				},
-				_ => None,
-			};
+pub(crate) async fn update_media(
+	db: &DatabaseConnection,
+	media::ModelWithMetadata { media, metadata }: media::ModelWithMetadata,
+) -> CoreResult<media::Model> {
+	let txn = db.begin().await?;
 
-			let updated_media = client
-				.media()
-				.update(
-					media::id::equals(media.id.clone()),
-					chain_optional_iter(
-						[
-							media::name::set(media.name.clone()),
-							media::size::set(media.size),
-							media::extension::set(media.extension.clone()),
-							media::pages::set(media.pages),
-							media::hash::set(media.hash.clone()),
-							media::koreader_hash::set(media.koreader_hash.clone()),
-							media::path::set(media.path.clone()),
-							media::status::set(media.status.to_string()),
-						],
-						[metadata_id.map(|id| {
-							media::metadata::connect(media_metadata::id::equals(id))
-						})],
-					),
-				)
-				.with(media::metadata::fetch())
-				.exec()
-				.await?;
-			tracing::trace!(?updated_media, "Media updated");
+	let active_model = media.into_active_model();
+	let updated_media = active_model.update(&txn).await?;
 
-			Ok(Media::from(updated_media))
-		})
-		.await;
+	if let Some(meta) = metadata {
+		let mut on_conflict = OnConflict::new();
+		on_conflict.update_columns(media_metadata::Column::iter());
+		media_metadata::Entity::insert(meta.into_active_model())
+			.on_conflict(on_conflict)
+			.exec(&txn)
+			.await?;
+	}
 
-	Ok(result?)
+	txn.commit().await?;
+
+	Ok(updated_media)
 }
 
 pub(crate) async fn handle_book_visit_operation(
-	db: &PrismaClient,
+	db: &DatabaseConnection,
 	result: BookVisitResult,
 ) -> CoreResult<()> {
-	match result {
-		BookVisitResult::Custom(custom) => {
-			if let Some(meta) = custom.meta {
-				let params = meta
-					.into_prisma()
-					.into_iter()
-					.chain(vec![media_metadata::media_id::set(Some(custom.id.clone()))])
-					.collect::<Vec<_>>();
-				let id = custom.id.clone();
+	// TODO(sea-orm): Fix once I sort out what gets passed around the core
+	unimplemented!()
+	// match result {
+	// 	BookVisitResult::Custom(custom) => {
+	// 		if let Some(meta) = custom.meta {
+	// 			let params = meta
+	// 				.into_prisma()
+	// 				.into_iter()
+	// 				.chain(vec![media_metadata::media_id::set(Some(custom.id.clone()))])
+	// 				.collect::<Vec<_>>();
+	// 			let id = custom.id.clone();
 
-				let updated_meta = db
-					._transaction()
-					.run(|client| async move {
-						let meta = client
-							.media_metadata()
-							.upsert(
-								media_metadata::media_id::equals(id.clone()),
-								params.clone(),
-								params,
-							)
-							.exec()
-							.await?;
-						client
-							.media()
-							.update(
-								media::id::equals(id),
-								vec![media::metadata::connect(
-									media_metadata::id::equals(meta.id.clone()),
-								)],
-							)
-							.with(media::metadata::fetch())
-							.exec()
-							.await
-							.map(|_| meta)
-					})
-					.await;
-				tracing::trace!(?updated_meta, "Metadata upserted");
-			}
+	// 			let updated_meta = db
+	// 				._transaction()
+	// 				.run(|client| async move {
+	// 					let meta = client
+	// 						.media_metadata()
+	// 						.upsert(
+	// 							media_metadata::media_id::equals(id.clone()),
+	// 							params.clone(),
+	// 							params,
+	// 						)
+	// 						.exec()
+	// 						.await?;
+	// 					client
+	// 						.media()
+	// 						.update(
+	// 							media::id::equals(id),
+	// 							vec![media::metadata::connect(
+	// 								media_metadata::id::equals(meta.id.clone()),
+	// 							)],
+	// 						)
+	// 						.with(media::metadata::fetch())
+	// 						.exec()
+	// 						.await
+	// 						.map(|_| meta)
+	// 				})
+	// 				.await;
+	// 			tracing::trace!(?updated_meta, "Metadata upserted");
+	// 		}
 
-			if let Some(hashes) = custom.hashes {
-				let updated_book = db
-					.media()
-					.update(
-						media::id::equals(custom.id),
-						vec![
-							media::hash::set(hashes.hash),
-							media::koreader_hash::set(hashes.koreader_hash),
-						],
-					)
-					.exec()
-					.await?;
-				tracing::trace!(?updated_book, "Book updated with new hashes");
-			}
-		},
-		BookVisitResult::Built(book) => {
-			let updated_book = update_media(db, *book).await?;
-			tracing::trace!(?updated_book, "Book updated");
-		},
-	}
+	// 		if let Some(hashes) = custom.hashes {
+	// 			let updated_book = db
+	// 				.media()
+	// 				.update(
+	// 					media::id::equals(custom.id),
+	// 					vec![
+	// 						media::hash::set(hashes.hash),
+	// 						media::koreader_hash::set(hashes.koreader_hash),
+	// 					],
+	// 				)
+	// 				.exec()
+	// 				.await?;
+	// 			tracing::trace!(?updated_book, "Book updated with new hashes");
+	// 		}
+	// 	},
+	// 	BookVisitResult::Built(book) => {
+	// 		let updated_book = update_media(db, *book).await?;
+	// 		tracing::trace!(?updated_book, "Book updated");
+	// 	},
+	// }
 
-	Ok(())
+	// Ok(())
 }
 
 #[derive(Default)]
@@ -277,18 +238,18 @@ pub(crate) struct MissingSeriesOutput {
 }
 
 pub(crate) async fn handle_missing_series(
-	client: &PrismaClient,
+	client: &DatabaseConnection,
 	path: &str,
 ) -> Result<MissingSeriesOutput, JobError> {
 	let mut output = MissingSeriesOutput::default();
 
-	let affected_rows = client
-		.series()
-		.update_many(
-			vec![series::path::equals(path.to_string())],
-			vec![series::status::set(FileStatus::Missing.to_string())],
+	let affected_rows = series::Entity::update_many()
+		.filter(series::Column::Path.eq(path.to_string()))
+		.col_expr(
+			series::Column::Status,
+			Expr::value(FileStatus::Missing.to_string()),
 		)
-		.exec()
+		.exec(client)
 		.await
 		.map_or_else(
 			|error| {
@@ -297,12 +258,11 @@ pub(crate) async fn handle_missing_series(
 					"Failed to update missing series: {:?}",
 					error.to_string()
 				)));
-
 				0
 			},
-			|count| {
-				output.updated_series += count as u64;
-				count
+			|res| {
+				output.updated_series += res.rows_affected as u64;
+				res.rows_affected
 			},
 		);
 
@@ -314,15 +274,23 @@ pub(crate) async fn handle_missing_series(
 		);
 	}
 
-	let _affected_media = client
-		.media()
-		.update_many(
-			vec![media::series::is(vec![series::path::equals(
-				path.to_string(),
-			)])],
-			vec![media::status::set(FileStatus::Missing.to_string())],
+	let _affected_media = media::Entity::update_many()
+		.filter(
+			Condition::any().add(
+				media::Column::SeriesId.in_subquery(
+					Query::select()
+						.column(series::Column::Id)
+						.from(series::Entity)
+						.and_where(series::Column::Path.eq(path.to_string()))
+						.to_owned(),
+				),
+			),
 		)
-		.exec()
+		.col_expr(
+			media::Column::Status,
+			Expr::value(FileStatus::Missing.to_string()),
+		)
+		.exec(client)
 		.await
 		.map_or_else(
 			|error| {
@@ -333,9 +301,9 @@ pub(crate) async fn handle_missing_series(
 				)));
 				0
 			},
-			|count| {
-				output.updated_media += count as u64;
-				count
+			|res| {
+				output.updated_media += res.rows_affected as u64;
+				res.rows_affected
 			},
 		);
 

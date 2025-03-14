@@ -11,11 +11,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 		scheme: 'stump',
 		userInterfaceStyle: 'automatic',
 		newArchEnabled: true,
-		splash: {
-			image: './assets/images/splash.png',
-			resizeMode: 'contain',
-			backgroundColor: '#ffffff',
-		},
 		assetBundlePatterns: ['**/*'],
 		ios: {
 			supportsTablet: true,
@@ -82,6 +77,15 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				{
 					android: {
 						usesCleartextTraffic: true,
+					},
+				},
+			],
+			[
+				'expo-splash-screen',
+				{
+					backgroundColor: '#F4E8E0',
+					dark: {
+						backgroundColor: '#000000',
 					},
 				},
 			],

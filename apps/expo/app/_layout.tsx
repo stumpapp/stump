@@ -6,11 +6,15 @@ import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { Stack } from 'expo-router'
+import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
+import LottieView from 'lottie-react-native'
 import * as React from 'react'
-import { Platform } from 'react-native'
+import { Platform, View } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
+import darkSplash from '~/assets/splash/dark.json'
+import lightSplash from '~/assets/splash/light.json'
 import { BottomSheet } from '~/components/ui/bottom-sheet'
 import { setAndroidNavigationBar } from '~/lib/android-navigation-bar'
 import { NAV_THEME } from '~/lib/constants'
@@ -35,13 +39,23 @@ export {
 	ErrorBoundary,
 } from 'expo-router'
 
+// Instruct SplashScreen not to hide yet, we want to do this manually
+SplashScreen.preventAutoHideAsync().catch(() => {
+	/* reloading the app might trigger some race conditions, ignore them */
+})
+
 // TODO: hide status bar when reading
+const IS_DEVELOPMENT = process.env.NODE_ENV === 'development'
 
 export default function RootLayout() {
 	const { colorScheme, isDarkColorScheme } = useColorScheme()
 
 	const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false)
 
+	const [isAnimationReady, setIsAnimationReady] = React.useState(false)
+	const [isReady, setIsReady] = React.useState(false)
+
+	const animation = React.useRef<LottieView>(null)
 	const shouldHideStatusBar = useHideStatusBar()
 	const hasMounted = React.useRef(false)
 
@@ -51,18 +65,38 @@ export default function RootLayout() {
 		if (hasMounted.current) {
 			return
 		}
-
-		if (Platform.OS === 'web') {
-			// Adds the background color to the html element to prevent white background on overscroll.
-			document.documentElement.classList.add('bg-background')
-		}
 		setAndroidNavigationBar(colorScheme)
 		setIsColorSchemeLoaded(true)
 		hasMounted.current = true
+
+		SplashScreen.hideAsync().then(() => {
+			setIsAnimationReady(true)
+		})
 	}, [])
 
-	if (!isColorSchemeLoaded) {
+	if (!isColorSchemeLoaded || !isAnimationReady) {
 		return null
+	}
+
+	if (!isReady && !IS_DEVELOPMENT) {
+		return (
+			<View
+				style={{
+					flex: 1,
+				}}
+			>
+				<LottieView
+					autoPlay
+					ref={animation}
+					source={colorScheme === 'dark' ? darkSplash : lightSplash}
+					style={{
+						flex: 1,
+					}}
+					loop={false}
+					onAnimationFinish={() => setIsReady(true)}
+				/>
+			</View>
+		)
 	}
 
 	return (

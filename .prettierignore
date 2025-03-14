@@ -16,3 +16,5 @@ CHANGELOG.md
 # Tauri generated files
 /src-tauri/capabilities/*.json
 /src-tauri/gen/*.json
+
+apps/expo/assets/*.json

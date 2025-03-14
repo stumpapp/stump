@@ -157,7 +157,7 @@ pub async fn auth_middleware(
 	let save_basic_session = req_headers
 		.get(STUMP_SAVE_BASIC_SESSION_HEADER)
 		.and_then(|header| header.to_str().ok())
-		.map_or(true, |header| header == "true");
+		.is_none_or(|header| header == "true");
 
 	let request_uri = req.extensions().get::<OriginalUri>().cloned().map_or_else(
 		|| req.uri().path().to_owned(),
@@ -820,10 +820,9 @@ mod tests {
 			.layer(session_layer)
 			.into_make_service_with_connect_info::<StumpRequestInfo>();
 
-		let config = TestServerConfig::builder()
-			.save_cookies()
-			.http_transport()
-			.build();
+		let mut config = TestServerConfig::new();
+		config.save_cookies = true;
+		config.transport = Some(axum_test::Transport::HttpRandomPort);
 
 		let mut server = TestServer::new_with_config(app, config).unwrap();
 		let (host_header, host_value) = host_header();

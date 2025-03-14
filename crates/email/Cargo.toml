@@ -2,8 +2,6 @@
 name = "email"
 edition = "2021"
 version.workspace = true
-rust-version.workspace = true
-
 
 [dependencies]
 handlebars = "5.1.0"
@@ -13,4 +11,4 @@ serde_json = { workspace = true }
 specta = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
-utoipa = { version = "4.2.3" }
+utoipa = { version = "5.3.1" }

@@ -56,6 +56,7 @@ pub struct DirectoryListing {
 pub struct DirectoryListingFile {
 	pub is_directory: bool,
 	pub name: String,
+	#[schema(value_type = String)]
 	pub path: PathBuf,
 }
 

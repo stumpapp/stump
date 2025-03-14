@@ -51,21 +51,21 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			"/libraries",
 			Router::new()
 				.route("/", get(get_libraries))
-				.route("/:id", get(get_library_by_id)),
+				.route("/{id}", get(get_library_by_id)),
 		)
 		.nest(
 			"/series",
 			Router::new()
 				.route("/", get(get_series))
 				.route("/latest", get(get_latest_series))
-				.route("/:id", get(get_series_by_id)),
+				.route("/{id}", get(get_series_by_id)),
 		)
 		.nest(
-			"/books/:id",
+			"/books/{id}",
 			Router::new()
 				.route("/thumbnail", get(get_book_thumbnail))
-				.route("/pages/:page", get(get_book_page))
-				.route("/file/:filename", get(download_book)),
+				.route("/pages/{page}", get(get_book_page))
+				.route("/file/{filename}", get(download_book)),
 		);
 
 	Router::new()
@@ -77,7 +77,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			)),
 		)
 		.nest(
-			"/:api_key/v1.2",
+			"/{api_key}/v1.2",
 			primary_router.layer(middleware::from_fn_with_state(
 				app_state,
 				api_key_middleware,

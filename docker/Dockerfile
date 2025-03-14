@@ -59,7 +59,7 @@ RUN --mount=type=cache,target=/usr/local/yarn/.cache,id=${TARGETARCH} \
 # Cargo Build Stage
 # ------------------------------------------------------------------------------
 
-FROM rust:1.81-bookworm AS builder
+FROM rust:1.85-bookworm AS builder
 
 ARG GIT_REV
 ARG TARGETARCH

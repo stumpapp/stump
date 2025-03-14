@@ -52,7 +52,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.route("/book-clubs", get(get_book_clubs).post(create_book_club))
 		.nest(
-			"/book-clubs/:id",
+			"/book-clubs/{id}",
 			Router::new()
 				.route("/", get(get_book_club).put(update_book_club))
 				.route("/current-book", get(get_book_club_current_book))
@@ -64,7 +64,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 							get(get_book_club_invitations)
 								.post(create_book_club_invitation),
 						)
-						.route("/:id", put(respond_to_book_club_invitation)),
+						.route("/{id}", put(respond_to_book_club_invitation)),
 				)
 				.nest(
 					"/members",
@@ -75,7 +75,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 								.post(create_book_club_member_handler),
 						)
 						.route(
-							"/:id",
+							"/{id}",
 							get(get_book_club_member)
 								.put(update_book_club_member)
 								.delete(delete_book_club_member),
@@ -276,7 +276,7 @@ async fn create_book_club(
 
 #[utoipa::path(
     get,
-    path = "/api/v1/book_clubs/:id",
+    path = "/api/v1/book_clubs/{id}",
     tag = "book_club",
     responses(
         (status = 200, description = "Successfully retrieved book club", body = BookClub),
@@ -324,7 +324,7 @@ pub struct UpdateBookClub {
 
 #[utoipa::path(
     put,
-    path = "/api/v1/book_clubs/:id",
+    path = "/api/v1/book_clubs/{id}",
     tag = "book_club",
     responses(
         (status = 200, description = "Successfully patched book club", body = BookClub),
@@ -454,7 +454,7 @@ async fn create_book_club_invitation(
 
 #[utoipa::path(
     get,
-    path = "/api/v1/book_clubs/:id/members",
+    path = "/api/v1/book_clubs/{id}/members",
     tag = "book_club",
     responses(
         (status = 200, description = "Successfully retrieved book club members", body = Vec<BookClubMember>),
@@ -529,7 +529,7 @@ pub struct BookClubInvitationAnswer {
 
 #[utoipa::path(
     post,
-    path = "/api/v1/book_clubs/:id/invitations/:invitation_id",
+    path = "/api/v1/book_clubs/{id}/invitations/{invitation_id}",
     tag = "book_club",
     responses(
         (status = 200, description = "Successfully responded to book club invitation", body = Option<BookClubMember>),
@@ -588,7 +588,7 @@ async fn respond_to_book_club_invitation(
 
 #[utoipa::path(
     post,
-    path = "/api/v1/book_clubs/:id/members",
+    path = "/api/v1/book_clubs/{id}/members",
     tag = "book_club",
     responses(
         (status = 200, description = "Successfully created book club member", body = BookClubMember),
@@ -611,7 +611,7 @@ async fn create_book_club_member_handler(
 
 #[utoipa::path(
     get,
-    path = "/api/v1/book_clubs/:id/members/:member_id",
+    path = "/api/v1/book_clubs/{id}/members/{member_id}",
     tag = "book_club",
     responses(
         (status = 200, description = "Successfully retrieved book club member", body = BookClubMember),
@@ -656,7 +656,7 @@ pub struct UpdateBookClubMember {
 
 #[utoipa::path(
     put,
-    path = "/api/v1/book_clubs/:id/members/:member_id",
+    path = "/api/v1/book_clubs/{id}/members/{member_id}",
     tag = "book_club",
     responses(
         (status = 200, description = "Successfully updated book club member", body = BookClubMember),
@@ -792,7 +792,7 @@ pub struct CreateBookClubSchedule {
 // The second book should have a start_at date after the end_at date of the first book
 #[utoipa::path(
     post,
-    path = "/api/v1/book_clubs/:id/schedule",
+    path = "/api/v1/book_clubs/{id}/schedule",
     tag = "book_club",
     responses(
         (status = 200, description = "Successfully created book club schedule", body = BookClubSchedule),
@@ -904,7 +904,7 @@ async fn create_book_club_schedule(
 
 #[utoipa::path(
     get,
-    path = "/api/v1/book_clubs/:id/schedule",
+    path = "/api/v1/book_clubs/{id}/schedule",
     tag = "book_club",
     responses(
         (status = 200, description = "Successfully retrieved book club schedule", body = BookClubSchedule),
@@ -1078,7 +1078,7 @@ async fn add_books_to_book_club_schedule(
 
 #[utoipa::path(
     get,
-    path = "/api/v1/book_clubs/:id/schedule/current-book",
+    path = "/api/v1/book_clubs/{id}/schedule/current-book",
     tag = "book_club",
     responses(
         (status = 200, description = "Successfully retrieved book club current book", body = BookClubBook),

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use entity::{
 	job_schedule_config, library, library_config,
-	sea_orm::{prelude::*, EntityOrSelect},
+	sea_orm::{prelude::*, Iterable, QuerySelect},
 };
 
 use crate::{
@@ -22,9 +22,10 @@ impl JobScheduler {
 	pub async fn init(core_ctx: Arc<Ctx>) -> CoreResult<Arc<Self>> {
 		let conn = core_ctx.conn.as_ref();
 
-		// TODO(sea-orm): figure out how to only select library ID
 		let result = job_schedule_config::Entity::find()
-			.select()
+			.select_only()
+			.columns(job_schedule_config::Column::iter())
+			.column(library::Column::Id)
 			.find_with_related(library::Entity)
 			.all(conn)
 			.await?

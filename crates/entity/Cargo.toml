@@ -3,5 +3,6 @@ name = "entity"
 edition = "2021"
 
 [dependencies]
+itertools.workspace = true
 sea-orm.workspace = true
 serde.workspace = true

@@ -2100,6 +2100,7 @@ dependencies = [
 name = "entity"
 version = "0.0.0"
 dependencies = [
+ "itertools 0.13.0",
  "sea-orm",
  "serde",
 ]

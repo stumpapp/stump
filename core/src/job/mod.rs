@@ -15,7 +15,7 @@
 // - https://github.com/Nukesor/pueue
 use std::{collections::VecDeque, fmt::Debug, sync::Arc, time::Duration};
 
-use entity::sea_orm::{prelude::*, EntityOrSelect, QuerySelect};
+use entity::sea_orm::{prelude::*, QuerySelect};
 use serde::{de, Deserialize, Serialize};
 
 mod controller;
@@ -276,7 +276,7 @@ pub trait JobExt: Send + Sync + Sized + Clone + 'static {
 		let conn = ctx.conn.as_ref();
 
 		let stored_job = entity::job::Entity::find_by_id(ctx.job_id.clone())
-			.select()
+			.select_only()
 			.column(entity::job::Column::SaveState)
 			.one(conn)
 			.await?;

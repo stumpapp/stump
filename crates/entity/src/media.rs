@@ -1,4 +1,11 @@
-use sea_orm::{entity::prelude::*, FromQueryResult};
+use sea_orm::{
+	entity::prelude::*, sea_query::Query, Condition, FromQueryResult, JoinType,
+	QuerySelect, QueryTrait,
+};
+
+use crate::{
+	library_hidden_to_user, media_metadata, series, series_metadata, user::AuthUser,
+};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "media")]
@@ -29,6 +36,100 @@ pub struct Model {
 	pub deleted_at: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub koreader_hash: Option<String>,
+}
+
+pub fn get_age_restriction_filter(min_age: i32, restrict_on_unset: bool) -> Condition {
+	if restrict_on_unset {
+		Condition::any()
+			// If the media has no age rating, then we can defer to the series age rating.
+			.add(
+				Condition::all()
+					.add(media_metadata::Column::AgeRating.is_null())
+					.add(series_metadata::Column::AgeRating.is_not_null())
+					.add(series_metadata::Column::AgeRating.lte(min_age)),
+			)
+			// If the media has an age rating, it must be under the user age restriction
+			.add(
+				Condition::all()
+					.add(media_metadata::Column::AgeRating.is_not_null())
+					.add(media_metadata::Column::AgeRating.lte(min_age)),
+			)
+	} else {
+		Condition::any()
+			.add(
+				// If there is no media metadata at all, or it exists with no age rating, then we
+				// should try to defer to the series age rating
+				Condition::all()
+					.add(
+						Condition::any()
+							.add(media_metadata::Column::Id.is_null())
+							.add(media_metadata::Column::AgeRating.is_null()),
+					)
+					.add(
+						Condition::any()
+							// If the series has no metadata, then we can allow the media
+							.add(series_metadata::Column::SeriesId.is_null())
+							// Or if the series has an age rating and it is under the user age restriction
+							.add(
+								Condition::all()
+									.add(series_metadata::Column::SeriesId.is_not_null())
+									.add(series_metadata::Column::AgeRating.is_not_null())
+									.add(series_metadata::Column::AgeRating.lte(min_age)),
+							)
+							// Or if the series has no age rating, then we can allow the media
+							.add(
+								Condition::all()
+									.add(series_metadata::Column::SeriesId.is_not_null())
+									.add(series_metadata::Column::AgeRating.is_null()),
+							),
+					),
+			)
+			// If the media has an age rating, it must be under the user age restriction
+			.add(
+				Condition::all()
+					.add(media_metadata::Column::Id.is_not_null())
+					.add(
+						media_metadata::Column::AgeRating
+							.is_not_null()
+							.add(media_metadata::Column::AgeRating.lte(min_age)),
+					),
+			)
+	}
+}
+
+impl Entity {
+	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
+		let age_restriction_filter =
+			user.age_restriction.as_ref().map(|age_restriction| {
+				get_age_restriction_filter(
+					age_restriction.age,
+					age_restriction.restrict_on_unset,
+				)
+			});
+
+		Entity::find()
+			.left_join(media_metadata::Entity)
+			.inner_join(series::Entity)
+			.join_rev(
+				JoinType::LeftJoin,
+				series_metadata::Entity::belongs_to(series::Entity)
+					.from(series_metadata::Column::SeriesId)
+					.to(series::Column::Id)
+					.into(),
+			)
+			.filter(
+				series::Column::LibraryId.not_in_subquery(
+					Query::select()
+						.column(library_hidden_to_user::Column::LibraryId)
+						.from(library_hidden_to_user::Entity)
+						.and_where(
+							library_hidden_to_user::Column::UserId.eq(user.id.clone()),
+						)
+						.to_owned(),
+				),
+			)
+			.apply_if(age_restriction_filter, |query, filter| query.filter(filter))
+	}
 }
 
 pub struct ModelWithMetadata {
@@ -64,6 +165,8 @@ pub enum Relation {
 	MediaAnnotation,
 	#[sea_orm(has_one = "super::media_metadata::Entity")]
 	MediaMetadata,
+	#[sea_orm(has_many = "super::media_to_tag::Entity")]
+	Tags,
 	#[sea_orm(has_many = "super::reading_list_item::Entity")]
 	ReadingListItem,
 	#[sea_orm(has_many = "super::reading_session::Entity")]
@@ -119,6 +222,12 @@ impl Related<super::media_annotation::Entity> for Entity {
 impl Related<super::media_metadata::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::MediaMetadata.def()
+	}
+}
+
+impl Related<super::media_to_tag::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::Tags.def()
 	}
 }
 

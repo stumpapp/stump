@@ -370,7 +370,7 @@ pub async fn walk_series(
 				.modified_at
 				.as_ref()
 				.and_then(|dt| {
-					file_updated_since_scan(&entry, dt.clone())
+					file_updated_since_scan(&entry, dt.to_rfc3339())
 						.map_err(|err| {
 							tracing::error!(
 								error = ?err,

@@ -60,9 +60,14 @@ pub enum CoreError {
 	QueryError(#[from] Box<prisma_client_rust::QueryError>),
 }
 
-
 impl From<prisma_client_rust::QueryError> for CoreError {
 	fn from(error: prisma_client_rust::QueryError) -> Self {
 		Self::QueryError(Box::new(error))
+	}
+}
+
+impl From<chrono::ParseError> for CoreError {
+	fn from(error: chrono::ParseError) -> Self {
+		Self::InternalError(error.to_string())
 	}
 }

@@ -11,6 +11,7 @@ mod http_server;
 mod middleware;
 mod routers;
 mod utils;
+mod graphql;
 
 #[cfg(debug_assertions)]
 fn debug_setup() {

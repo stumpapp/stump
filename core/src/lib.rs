@@ -27,8 +27,8 @@ use config::StumpConfig;
 use db::JournalMode;
 use entity::{
 	sea_orm::{
-		prelude::*, ActiveModelTrait, DatabaseBackend, EntityTrait, PaginatorTrait,
-		QuerySelect, SelectColumns, Statement,
+		prelude::*, DatabaseBackend, EntityTrait, PaginatorTrait, QuerySelect,
+		SelectColumns, Statement,
 	},
 	server_config,
 };

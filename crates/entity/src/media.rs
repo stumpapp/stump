@@ -1,3 +1,4 @@
+use async_graphql::SimpleObject;
 use sea_orm::{
 	entity::prelude::*, sea_query::Query, Condition, FromQueryResult, JoinType,
 	QuerySelect, QueryTrait,
@@ -7,7 +8,8 @@ use crate::{
 	library_hidden_to_user, media_metadata, series, series_metadata, user::AuthUser,
 };
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
+#[graphql(name = "Media")]
 #[sea_orm(table_name = "media")]
 pub struct Model {
 	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
@@ -19,11 +21,11 @@ pub struct Model {
 	pub extension: String,
 	pub pages: i32,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub updated_at: String,
+	pub updated_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub created_at: String,
+	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
-	pub modified_at: Option<String>,
+	pub modified_at: Option<DateTimeWithTimeZone>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub hash: Option<String>,
 	#[sea_orm(column_type = "Text")]
@@ -33,7 +35,7 @@ pub struct Model {
 	#[sea_orm(column_type = "Text", nullable)]
 	pub series_id: Option<String>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
-	pub deleted_at: Option<String>,
+	pub deleted_at: Option<DateTimeWithTimeZone>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub koreader_hash: Option<String>,
 }

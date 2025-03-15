@@ -92,7 +92,7 @@ pub(crate) async fn create_media(
 		hash: Set(generated.hash),
 		koreader_hash: Set(generated.koreader_hash),
 		series_id: Set(Some(generated.series_id)),
-		modified_at: Set(generated.modified_at),
+		modified_at: Set(generated.modified_at.map(|d| d.parse()).transpose()?),
 		..Default::default()
 	};
 

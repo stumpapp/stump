@@ -3,6 +3,7 @@ name = "entity"
 edition = "2021"
 
 [dependencies]
+async-graphql.workspace = true
 itertools.workspace = true
 sea-orm.workspace = true
 serde.workspace = true

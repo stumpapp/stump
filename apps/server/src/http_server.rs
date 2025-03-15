@@ -59,8 +59,9 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 
 	println!("{}", core.get_shadow_text());
 
+	let app_router = routers::mount(app_state.clone()).await;
 	let app = Router::new()
-		.merge(routers::mount(app_state.clone()))
+		.merge(app_router)
 		.with_state(app_state.clone())
 		.layer(get_session_layer(app_state.clone()))
 		.layer(cors_layer)

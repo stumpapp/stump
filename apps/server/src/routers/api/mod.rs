@@ -1,12 +1,59 @@
 pub(crate) mod filters;
 pub(crate) mod v1;
 
-use axum::Router;
+use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
+use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
+use axum::{
+	extract::State,
+	response::{Html, IntoResponse},
+	routing::post,
+	Extension, Router,
+};
 
-use crate::config::state::AppState;
+use crate::{
+	config::state::AppState,
+	graphql::{build_schema, AppSchema, GraphQLData},
+};
 
-pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
-	Router::new().nest("/api", Router::new().nest("/v1", v1::mount(app_state)))
+pub(crate) async fn mount(app_state: AppState) -> Router<AppState> {
+	Router::new().nest(
+		"/api",
+		Router::new()
+			.nest("/graphql", graphql(app_state.clone()).await)
+			.nest("/v1", v1::mount(app_state)),
+	)
+}
+
+pub(crate) async fn graphql(app_state: AppState) -> Router<AppState> {
+	let schema = build_schema(app_state.clone()).await;
+
+	let mut method_router = post(graphql_handler);
+	if app_state.config.is_debug() {
+		method_router = method_router.get(playground);
+	}
+
+	Router::new()
+		.route("/", method_router)
+		.layer(Extension(schema))
+}
+
+// TODO(sea-orm): Consider new user permission
+async fn playground() -> impl IntoResponse {
+	Html(playground_source(GraphQLPlaygroundConfig::new(
+		"/api/graphql",
+	)))
+}
+
+// TODO(sea-orm): Move to separate file, get OPTIONAL user(?), enforce user for all but login-related mutations? Or just retain restful login?
+async fn graphql_handler(
+	schema: Extension<AppSchema>,
+	State(ctx): State<AppState>,
+	// Extension(req_ctx): Extension<RequestContext>,
+	req: GraphQLRequest,
+) -> GraphQLResponse {
+	let mut req = req.into_inner();
+	req = req.data(GraphQLData { ctx });
+	schema.execute(req).await.into()
 }
 
 // TODO: move codegen to api/mod.rs

@@ -2,5 +2,6 @@ import { Meta } from 'nextra'
 
 export default {
 	formats: 'Formats',
-	readers: 'Readers',
+	'image-based': 'Comic/Manga',
+	books: 'Books',
 } satisfies Meta

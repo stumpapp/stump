@@ -1,28 +1,30 @@
 import { useLibraries } from '@stump/client'
+import { Library } from '@stump/sdk'
+import { useCallback } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { FlatGrid } from 'react-native-super-grid'
 
+import { ImageGrid } from '~/components/grid'
 import { LibraryGridItem } from '~/components/library'
-import RefreshControl from '~/components/RefreshControl'
-import { Heading } from '~/components/ui'
 
 export default function Screen() {
 	const { libraries, refetch, isRefetching } = useLibraries({ suspense: true })
 
+	const renderItem = useCallback(
+		({ item: library, index }: { item: Library; index: number }) => (
+			<LibraryGridItem library={library} index={index} />
+		),
+		[],
+	)
+
 	return (
 		<SafeAreaView className="flex-1 bg-background">
-			<FlatGrid
-				ListHeaderComponent={() => (
-					<Heading size="xl" className="px-4 pb-4 font-semibold">
-						Libraries
-					</Heading>
-				)}
-				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
-				// itemDimension={itemDimension}
+			<ImageGrid
+				header="Libraries"
 				data={libraries || []}
-				renderItem={({ item: library }) => <LibraryGridItem library={library} />}
+				renderItem={renderItem}
 				keyExtractor={(library) => library.id}
-				spacing={25}
+				onRefresh={refetch}
+				isRefetching={isRefetching}
 			/>
 		</SafeAreaView>
 	)

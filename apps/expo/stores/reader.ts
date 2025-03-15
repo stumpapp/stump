@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { BookPreferences as IBookPreferences } from '@stump/client'
 import dayjs from 'dayjs'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -7,6 +6,8 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
 import { useActiveServer } from '~/components/activeServer'
+
+import { ZustandMMKVStorage } from './store'
 
 export type DoublePageBehavior = 'auto' | 'always' | 'off'
 
@@ -20,16 +21,20 @@ export type BookPreferences = IBookPreferences & {
 	serverID?: string
 	incognito?: boolean
 	preferSmallImages?: boolean
-	allowDownscaling?: boolean
-	cachePolicy?: CachePolicy
-	doublePageBehavior?: DoublePageBehavior
-	tapSidesToNavigate?: boolean
-	footerControls?: FooterControls
-	trackElapsedTime?: boolean
+	allowDownscaling: boolean
+	cachePolicy: CachePolicy
+	doublePageBehavior: DoublePageBehavior
+	tapSidesToNavigate: boolean
+	footerControls: FooterControls
+	trackElapsedTime: boolean
 }
 export type GlobalSettings = Omit<BookPreferences, 'serverID'>
 
 type ElapsedSeconds = number
+
+type BookCacheData = {
+	dimensions: Record<number, { width: number; height: number; ratio: number }>
+}
 
 export type ReaderStore = {
 	isReading: boolean
@@ -42,6 +47,12 @@ export type ReaderStore = {
 	addBookSettings: (id: string, preferences: BookPreferences) => void
 	setBookSettings: (id: string, preferences: Partial<BookPreferences>) => void
 	clearLibrarySettings: (serverID: string) => void
+
+	/**
+	 * A cache of miscellaneous book data Stump uses
+	 */
+	bookCache: Record<string, BookCacheData>
+	setBookCache: (id: string, data: BookCacheData) => void
 
 	bookTimers: Record<string, ElapsedSeconds>
 	setBookTimer: (id: string, timer: ElapsedSeconds) => void
@@ -84,6 +95,15 @@ export const useReaderStore = create<ReaderStore>()(
 							[id]: { ...get().bookSettings[id], ...updates },
 						},
 					}),
+				bookCache: {},
+				setBookCache: (id, data) => {
+					set({
+						bookCache: {
+							...get().bookCache,
+							[id]: data,
+						},
+					})
+				},
 				clearLibrarySettings: (serverID) =>
 					set({
 						bookSettings: Object.fromEntries(
@@ -92,7 +112,6 @@ export const useReaderStore = create<ReaderStore>()(
 							),
 						),
 					}),
-
 				bookTimers: {},
 				setBookTimer: (id, elapsedSeconds) =>
 					set({ bookTimers: { ...get().bookTimers, [id]: elapsedSeconds } }),
@@ -102,7 +121,7 @@ export const useReaderStore = create<ReaderStore>()(
 			}) as ReaderStore,
 		{
 			name: 'stump-reader-store',
-			storage: createJSONStorage(() => AsyncStorage),
+			storage: createJSONStorage(() => ZustandMMKVStorage),
 			version: 1,
 		},
 	),
@@ -221,10 +240,9 @@ export const useBookTimer = (id: string, params: UseBookTimerParams = defaultPar
 }
 
 export const useHideStatusBar = () => {
-	const { isReading, showControls } = useReaderStore((state) => ({
+	const { isReading } = useReaderStore((state) => ({
 		isReading: state.isReading,
-		showControls: state.showControls,
 	}))
 
-	return isReading && !showControls
+	return isReading
 }

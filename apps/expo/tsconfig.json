@@ -3,6 +3,7 @@
 	"compilerOptions": {
 		"strict": true,
 		"baseUrl": ".",
+		"resolveJsonModule": true,
 		"paths": {
 			"~/*": ["*"],
 			"@stump/sdk": ["../../packages/sdk/src/index.ts"],

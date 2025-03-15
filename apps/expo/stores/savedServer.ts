@@ -1,10 +1,11 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { uuid } from 'expo-modules-core'
 import * as SecureStore from 'expo-secure-store'
 import { useCallback } from 'react'
 import { z } from 'zod'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
+
+import { ZustandMMKVStorage } from './store'
 
 type ServerID = string
 export type ServerKind = 'stump' | 'opds'
@@ -91,7 +92,7 @@ export const useSavedServerStore = create<SavedServerStore>()(
 		}),
 		{
 			name: 'stump-mobile-saved-servers-store',
-			storage: createJSONStorage(() => AsyncStorage),
+			storage: createJSONStorage(() => ZustandMMKVStorage),
 			version: 1,
 		},
 	),

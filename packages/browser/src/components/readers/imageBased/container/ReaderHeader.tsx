@@ -1,13 +1,16 @@
 import { Link, Text } from '@stump/components'
 import { motion } from 'framer-motion'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Fullscreen, Shrink } from 'lucide-react'
 import { useMemo } from 'react'
+import { useFullscreen } from 'rooks'
 
 import paths from '@/paths'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useImageBaseReaderContext } from '../context'
-import LayoutMenu from './LayoutMenu'
+import ControlButton from './ControlButton'
+import SettingsDialog from './SettingsDialog'
+import TimerMenu from './TimerMenu'
 
 export default function ReaderHeader() {
 	const { book } = useImageBaseReaderContext()
@@ -19,9 +22,13 @@ export default function ReaderHeader() {
 
 	const title = useMemo(() => metadata?.title || name, [metadata, name])
 
+	const { isFullscreenAvailable, isFullscreenEnabled, toggleFullscreen } = useFullscreen()
+
+	const FullScreenIcon = isFullscreenEnabled ? Shrink : Fullscreen
+
 	return (
 		<motion.nav
-			className="fixed left-0 top-0 z-[100] flex h-12 w-full items-center bg-sidebar/95 px-4 text-foreground"
+			className="fixed left-0 top-0 z-[100] flex h-12 w-full items-center px-4 text-foreground"
 			initial={false}
 			animate={showToolBar ? 'visible' : 'hidden'}
 			variants={transition}
@@ -41,7 +48,15 @@ export default function ReaderHeader() {
 				<Text>{title}</Text>
 
 				<div className="flex items-center space-x-2">
-					<LayoutMenu />
+					{isFullscreenAvailable && (
+						<ControlButton onClick={toggleFullscreen}>
+							<FullScreenIcon className="h-4 w-4" />
+						</ControlButton>
+					)}
+
+					<TimerMenu />
+
+					<SettingsDialog />
 				</div>
 			</div>
 		</motion.nav>

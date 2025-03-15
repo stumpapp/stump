@@ -3,7 +3,6 @@ import { queryClient, useSDK } from '@stump/client'
 import { Api, constants } from '@stump/sdk'
 import { opdsURL } from '@stump/sdk/controllers'
 import { isAxiosError } from 'axios'
-import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -13,6 +12,7 @@ import urlJoin from 'url-join'
 import { z } from 'zod'
 
 import { useActiveServer } from '~/components/activeServer'
+import { Image } from '~/components/Image'
 import { Button, Input, Text } from '~/components/ui'
 
 type Credentials = {

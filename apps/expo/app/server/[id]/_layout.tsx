@@ -9,10 +9,11 @@ import { PermissionEnforcerOptions } from '~/components/activeServer/context'
 import ServerAuthDialog from '~/components/ServerAuthDialog'
 import ServerConnectFailed from '~/components/ServerConnectFailed'
 import { authSDKInstance } from '~/lib/sdk/auth'
-import { useSavedServers } from '~/stores'
+import { usePreferencesStore, useSavedServers } from '~/stores'
 
 export default function Screen() {
 	const router = useRouter()
+	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
 	const { savedServers, getServerToken, saveServerToken, deleteServerToken, getServerConfig } =
 		useSavedServers()
@@ -193,7 +194,12 @@ export default function Screen() {
 				>
 					<SDKContext.Provider value={{ sdk, setSDK }}>
 						<ServerAuthDialog isOpen={isAuthDialogOpen} onClose={handleAuthDialogClose} />
-						<Stack screenOptions={{ headerShown: false }} />
+						<Stack
+							screenOptions={{
+								headerShown: false,
+								animation: animationEnabled ? 'default' : 'none',
+							}}
+						/>
 					</SDKContext.Provider>
 				</StumpClientContextProvider>
 			</StumpServerContext.Provider>

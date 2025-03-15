@@ -1,23 +1,22 @@
 import { useSDK } from '@stump/client'
 import { Media } from '@stump/sdk'
-import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
-import { useMemo } from 'react'
+import { memo } from 'react'
 import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
-import { useDisplay } from '~/lib/hooks'
+import { useDisplay, useListItemSize } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
 import { useActiveServer } from '../activeServer'
+import { FasterImage } from '../Image'
 import { Text } from '../ui'
 
 type Props = {
 	book: Media
 }
 
-// TODO: create separate BookGridItem vs BookHorizontalListItem
-export default function BookListItem({ book }: Props) {
+function BookListItem({ book }: Props) {
 	const { sdk } = useSDK()
 	const {
 		activeServer: { id: serverID },
@@ -26,8 +25,7 @@ export default function BookListItem({ book }: Props) {
 
 	const router = useRouter()
 
-	const itemHeight = useMemo(() => (isTablet ? 225 : 150), [isTablet])
-	const itemWidth = useMemo(() => itemHeight * (2 / 3), [itemHeight])
+	const { width } = useListItemSize()
 
 	return (
 		<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${book.id}`)}>
@@ -37,22 +35,21 @@ export default function BookListItem({ book }: Props) {
 						'opacity-90': pressed,
 					})}
 				>
-					<View className="relative aspect-[2/3] overflow-hidden rounded-lg">
-						<Image
-							className="z-0"
+					<View className="relative overflow-hidden rounded-lg">
+						<FasterImage
 							source={{
-								uri: sdk.media.thumbnailURL(book.id),
+								url: sdk.media.thumbnailURL(book.id),
 								headers: {
-									Authorization: sdk.authorizationHeader,
+									Authorization: sdk.authorizationHeader || '',
 								},
+								resizeMode: 'fill',
 							}}
-							contentFit="fill"
-							style={{ height: isTablet ? 225 : 150, width: itemWidth }}
+							style={{ height: isTablet ? 225 : 150, width: width }}
 						/>
 					</View>
 
 					<View>
-						<Text className="mt-2" style={{ maxWidth: itemWidth - 4 }} numberOfLines={2}>
+						<Text className="mt-2" style={{ maxWidth: width - 4 }} numberOfLines={2}>
 							{book.metadata?.title || book.name}
 						</Text>
 					</View>
@@ -61,3 +58,5 @@ export default function BookListItem({ book }: Props) {
 		</Pressable>
 	)
 }
+
+export default memo(BookListItem)

@@ -62,8 +62,6 @@ pub struct WorkerCtx {
 	pub job_id: String,
 	/// A pointer to the prisma client
 	pub conn: Arc<DatabaseConnection>,
-	// TODO(sea-orm): Remove this
-	pub db: Arc<PrismaClient>,
 	/// A pointer to the stump configuration
 	pub config: Arc<StumpConfig>,
 	/// A sender for the core event channel
@@ -238,7 +236,6 @@ impl Worker {
 		let worker_ctx = WorkerCtx {
 			job_id: job_id.to_string(),
 			conn,
-			db,
 			config,
 			core_event_tx,
 			commands_rx,

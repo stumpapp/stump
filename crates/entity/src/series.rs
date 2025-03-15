@@ -1,6 +1,4 @@
-
-
-use sea_orm::entity::prelude::*;
+use sea_orm::{entity::prelude::*, FromQueryResult};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "series")]
@@ -21,6 +19,12 @@ pub struct Model {
 	pub status: String,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub library_id: Option<String>,
+}
+
+#[derive(FromQueryResult)]
+pub struct SeriesIdentSelect {
+	pub id: String,
+	pub path: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

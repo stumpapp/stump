@@ -1,6 +1,10 @@
 use std::{collections::VecDeque, path::PathBuf};
 
-use prisma_client_rust::chrono;
+use entity::{
+	library, library_config,
+	sea_orm::prelude::*,
+	series::{self, SeriesIdentSelect},
+};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
@@ -12,7 +16,7 @@ use utoipa::ToSchema;
 
 use crate::{
 	db::{
-		entity::{CoreJobOutput, LibraryConfig},
+		entity::{CoreJobOutput, IgnoreRules, LibraryConfig},
 		FileStatus, SeriesDAO, DAO,
 	},
 	filesystem::image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
@@ -20,9 +24,7 @@ use crate::{
 		error::JobError, Executor, JobExecuteLog, JobExt, JobOutputExt, JobProgress,
 		JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
-	prisma::{
-		job, library, library_config, library_scan_record, media, series, PrismaClient,
-	},
+	prisma::{job, library_scan_record, media, PrismaClient},
 	utils::chain_optional_iter,
 	CoreEvent,
 };
@@ -65,7 +67,7 @@ pub struct LibraryScanJob {
 	/// The path to the library to scan
 	pub path: String,
 	/// The library configuration to use
-	pub config: Option<LibraryConfig>,
+	pub config: Option<library_config::Model>,
 	/// The scan options to use, if any
 	pub options: ScanOptions,
 }
@@ -142,22 +144,24 @@ impl JobExt for LibraryScanJob {
 		// Note: We ignore the potential self.config here in the event that it was
 		// updated since being queued. This is perhaps a bit overly cautious, but it's
 		// just one additional query.
-		let mut library_config = ctx
-			.db
-			.library_config()
-			.find_first(vec![library_config::library::is(vec![
-				library::id::equals(self.id.clone()),
-				library::path::equals(self.path.clone()),
-			])])
-			.exec()
+		let config = library_config::Entity::find()
+			.filter(library_config::Column::LibraryId.eq(self.id.clone()))
+			.one(ctx.conn.as_ref())
 			.await?
-			.map(LibraryConfig::from)
-			.ok_or(JobError::InitFailed("Library not found".to_string()))?;
-		library_config.apply(self.options);
-		let is_collection_based = library_config.is_collection_based();
-		let ignore_rules = library_config.ignore_rules.build()?;
+			.ok_or(JobError::InitFailed(
+				"Library is missing configuration".to_string(),
+			))?;
+		// library_config.apply(self.options);
+		let is_collection_based = config.is_collection_based();
+		let ignore_rules = config
+			.ignore_rules
+			.clone()
+			.map_or_else(IgnoreRules::default, |rules| {
+				IgnoreRules::try_from(rules).unwrap_or_default()
+			})
+			.build()?;
 
-		self.config = Some(library_config);
+		self.config = Some(config);
 
 		ctx.report_progress(JobProgress::msg("Performing task discovery"));
 		let WalkedLibrary {
@@ -259,13 +263,15 @@ impl JobExt for LibraryScanJob {
 		match image_options {
 			Some(options) if did_create | did_update => {
 				tracing::trace!("Thumbnail generation job should be enqueued");
-				Ok(Some(WrappedJob::new(ThumbnailGenerationJob {
-					options,
-					params: ThumbnailGenerationJobParams::single_library(
-						self.id.clone(),
-						false,
-					),
-				})))
+				// TODO(sea-orm): Fix
+				// Ok(Some(WrappedJob::new(ThumbnailGenerationJob {
+				// 	options,
+				// 	params: ThumbnailGenerationJobParams::single_library(
+				// 		self.id.clone(),
+				// 		false,
+				// 	),
+				// })))
+				Ok(None)
 			},
 			_ => {
 				tracing::debug!("No cleanup required for library scan job");
@@ -311,14 +317,13 @@ impl JobExt for LibraryScanJob {
 				if !recovered_series.is_empty() {
 					ctx.report_progress(JobProgress::msg("Recovering series"));
 
-					let affected_rows = ctx
-						.db
-						.series()
-						.update_many(
-							vec![series::id::in_vec(recovered_series)],
-							vec![series::status::set(FileStatus::Ready.to_string())],
+					let affected_rows = series::Entity::update_many()
+						.col_expr(
+							series::Column::Status,
+							Expr::value(FileStatus::Ready.to_string()),
 						)
-						.exec()
+						.filter(series::Column::Id.is_in(recovered_series))
+						.exec(ctx.conn.as_ref())
 						.await
 						.map_or_else(
 							|error| {
@@ -329,9 +334,9 @@ impl JobExt for LibraryScanJob {
 								)));
 								0
 							},
-							|count| {
-								output.updated_series = count as u64;
-								count
+							|result| {
+								output.updated_series = result.rows_affected;
+								result.rows_affected
 							},
 						);
 
@@ -352,14 +357,14 @@ impl JobExt for LibraryScanJob {
 						.iter()
 						.map(|e| e.to_string_lossy().to_string())
 						.collect::<Vec<String>>();
-					let affected_rows = ctx
-						.db
-						.series()
-						.update_many(
-							vec![series::path::in_vec(missing_series_str.clone())],
-							vec![series::status::set(FileStatus::Missing.to_string())],
+
+					let affected_rows = series::Entity::update_many()
+						.col_expr(
+							series::Column::Status,
+							Expr::value(FileStatus::Missing.to_string()),
 						)
-						.exec()
+						.filter(series::Column::Path.is_in(missing_series_str))
+						.exec(ctx.conn.as_ref())
 						.await
 						.map_or_else(
 							|error| {
@@ -370,9 +375,9 @@ impl JobExt for LibraryScanJob {
 								)));
 								0
 							},
-							|count| {
-								output.updated_series = count as u64;
-								count
+							|result| {
+								output.updated_series = result.rows_affected;
+								result.rows_affected
 							},
 						);
 
@@ -475,14 +480,29 @@ impl JobExt for LibraryScanJob {
 					max_depth = Some(1);
 				}
 
-				let Some(Ok(ignore_rules)) =
-					self.config.as_ref().map(|o| o.ignore_rules.build())
-				else {
-					// Note: This failure will likely affect ALL other tasks, so we are halting the job here
-					return Err(JobError::TaskFailed(
-						"Failed to build ignore rules. Check that the rules are valid."
-							.to_string(),
-					));
+				let ignore_rules = match self.config.map(|c| {
+					c.ignore_rules
+						.clone()
+						.map_or_else(IgnoreRules::default, |rules| {
+							IgnoreRules::try_from(rules).unwrap_or_default()
+						})
+						.build()
+				}) {
+					Some(Ok(rules)) => rules,
+					Some(Err(err)) => {
+						tracing::error!(error = ?err, "Failed to build ignore rules");
+						return Err(JobError::TaskFailed(
+							"Failed to build ignore rules. Check that the rules are valid."
+								.to_string(),
+						));
+					},
+					_ => {
+						tracing::error!(?self.config, "Library config is missing?");
+						return Err(JobError::TaskFailed(
+							"A critical error occurred while attempting to scan the library"
+								.to_string(),
+						));
+					},
 				};
 
 				let walk_result = walk_series(
@@ -552,11 +572,11 @@ impl JobExt for LibraryScanJob {
 				}
 
 				let series_path_str = path_buf.to_str().unwrap_or_default().to_string();
-				let series = ctx
-					.db
-					.series()
-					.find_first(vec![series::path::equals(series_path_str.clone())])
-					.exec()
+
+				let series = series::Entity::find()
+					.filter(series::Column::Path.eq(series_path_str.clone()))
+					.into_model::<series::SeriesIdentSelect>()
+					.one(ctx.conn.as_ref())
 					.await?
 					.ok_or(JobError::TaskFailed("Series not found".to_string()))?;
 

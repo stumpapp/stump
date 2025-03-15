@@ -125,9 +125,7 @@ impl JobExt for SeriesScanJob {
 			.find_also_related(library_config::Entity)
 			.one(ctx.conn.as_ref())
 			.await?
-			.ok_or(JobError::InitFailed(
-				"Associated library not found".to_string(),
-			))?;
+			.ok_or(JobError::InitFailed("Library not found".to_string()))?;
 
 		let config = config.ok_or(JobError::InitFailed(
 			"Library is missing a configuration".to_string(),

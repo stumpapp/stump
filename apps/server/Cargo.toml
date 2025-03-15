@@ -22,6 +22,7 @@ base64 = { workspace = true }
 bcrypt = { workspace = true }
 cli = { path = "../../crates/cli" }
 chrono = { workspace = true }
+entity = { path = "../../crates/entity" }
 futures-util = { workspace = true }
 hyper = "0.14.27"
 infer = { workspace = true }

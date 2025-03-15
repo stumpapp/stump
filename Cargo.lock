@@ -8759,6 +8759,7 @@ dependencies = [
  "bcrypt",
  "chrono",
  "cli",
+ "entity",
  "futures-util",
  "hyper 0.14.27",
  "infer",

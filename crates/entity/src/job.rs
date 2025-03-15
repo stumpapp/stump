@@ -1,4 +1,4 @@
-use sea_orm::entity::prelude::*;
+use sea_orm::{entity::prelude::*, FromQueryResult};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "jobs")]
@@ -20,6 +20,11 @@ pub struct Model {
 	pub created_at: String,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub completed_at: Option<String>,
+}
+
+#[derive(FromQueryResult)]
+pub struct SaveStateSelect {
+	pub save_state: Option<Vec<u8>>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

@@ -1,5 +1,3 @@
-
-
 use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
@@ -10,7 +8,7 @@ pub struct Model {
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub created_at: String,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub expiry_time: String,
+	pub expiry_time: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "Blob")]
 	pub data: Vec<u8>,
 	#[sea_orm(column_type = "Text")]

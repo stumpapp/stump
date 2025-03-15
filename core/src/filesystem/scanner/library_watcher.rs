@@ -122,6 +122,7 @@ struct LibraryProvider {
 
 #[async_trait]
 impl LibrariesProvider for LibraryProvider {
+	#[tracing::instrument(skip(self), err)]
 	async fn get_libraries(&self) -> CoreResult<Vec<library::LibraryIdentModel>> {
 		// get list of all libraries
 		// for each library, if watching is enabled, watch their directory

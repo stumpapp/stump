@@ -39,16 +39,24 @@ pub fn init_tracing(config: &StumpConfig) {
 		);
 
 	if config.verbosity > 2 {
-		env_filter = env_filter.add_directive(
-			"quaint::connector::metrics=debug"
-				.parse()
-				.expect("Failed to parse tracing directive for quaint!"),
-		);
+		env_filter = env_filter
+			.add_directive(
+				"quaint::connector::metrics=debug"
+					.parse()
+					.expect("Failed to parse tracing directive for quaint!"),
+			)
+			.add_directive(
+				"sqlx::query=debug"
+					.parse()
+					.expect("Failed to parse tracing directive for sqlx!"),
+			);
 	}
 
 	let base_layer = tracing_subscriber::registry()
 		.with(max_level)
 		.with(env_filter);
+
+	// let base_layer = tracing_subscriber::registry().with(max_level);
 
 	// TODO: This is likely unnecessary duplication(?), and should be revisited
 	if config.pretty_logs {

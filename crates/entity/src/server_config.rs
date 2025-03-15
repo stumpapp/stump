@@ -1,6 +1,4 @@
-
-
-use sea_orm::entity::prelude::*;
+use sea_orm::{entity::prelude::*, FromQueryResult};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "server_config")]
@@ -13,6 +11,11 @@ pub struct Model {
 	#[sea_orm(column_type = "Text", nullable, unique)]
 	pub job_schedule_config_id: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
+	pub encryption_key: Option<String>,
+}
+
+#[derive(FromQueryResult)]
+pub struct EncryptionKeySelect {
 	pub encryption_key: Option<String>,
 }
 

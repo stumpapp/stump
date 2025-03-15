@@ -8769,6 +8769,7 @@ dependencies = [
  "once_cell",
  "openssl",
  "prefixed-api-key",
+ "prisma-client-rust",
  "rand 0.8.5",
  "reqwest 0.12.7",
  "serde",

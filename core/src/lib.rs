@@ -28,7 +28,7 @@ use db::JournalMode;
 use entity::{
 	sea_orm::{
 		prelude::*, ActiveModelTrait, DatabaseBackend, EntityTrait, PaginatorTrait,
-		SelectColumns, Statement,
+		QuerySelect, SelectColumns, Statement,
 	},
 	server_config,
 };
@@ -156,14 +156,18 @@ impl StumpCore {
 	// to reduce friction of setting up the server for folks who might not understand encryption keys.
 	/// Initializes the encryption key for the database. This will only set the encryption key
 	/// if one does not already exist.
+	#[tracing::instrument(skip(self), err)]
 	pub async fn init_encryption(&self) -> Result<EncryptionKeySet, CoreError> {
 		let conn = self.ctx.conn.as_ref();
 
 		let encryption_key_set = server_config::Entity::find()
+			.select_only()
 			.select_column(server_config::Column::EncryptionKey)
+			.into_model::<server_config::EncryptionKeySelect>()
 			.one(conn)
 			.await?
 			.is_some_and(|config| config.encryption_key.is_some());
+		tracing::trace!(encryption_key_set, "Encryption key set");
 
 		if encryption_key_set {
 			Ok(false)

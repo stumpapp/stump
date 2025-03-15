@@ -4,8 +4,10 @@ use specta::Type;
 use utoipa::ToSchema;
 
 use crate::{
-	db::entity::{Media, MediaMetadata},
+	db::entity::{macros::library_scan_details, Media, MediaMetadata},
 	filesystem::ProcessedFileHashes,
+	prisma::library_scan_record,
+	CoreError,
 };
 
 // TODO(granular-scans/metadata-merge): Support merge strategies for metadata at some point
@@ -136,24 +138,24 @@ pub struct LibraryScanRecord {
 	job_id: Option<String>,
 }
 
-// impl TryFrom<library_scan_record::Data> for LibraryScanRecord {
-// 	type Error = CoreError;
+impl TryFrom<library_scan_record::Data> for LibraryScanRecord {
+	type Error = CoreError;
 
-// 	fn try_from(data: library_scan_record::Data) -> Result<Self, Self::Error> {
-// 		let options = data
-// 			.options
-// 			.map(|options| serde_json::from_slice(&options))
-// 			.transpose()?;
+	fn try_from(data: library_scan_record::Data) -> Result<Self, Self::Error> {
+		let options = data
+			.options
+			.map(|options| serde_json::from_slice(&options))
+			.transpose()?;
 
-// 		Ok(Self {
-// 			id: data.id,
-// 			options,
-// 			timestamp: data.timestamp,
-// 			library_id: data.library_id,
-// 			job_id: data.job_id,
-// 		})
-// 	}
-// }
+		Ok(Self {
+			id: data.id,
+			options,
+			timestamp: data.timestamp,
+			library_id: data.library_id,
+			job_id: data.job_id,
+		})
+	}
+}
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct LastLibraryScan {
@@ -161,23 +163,23 @@ pub struct LastLibraryScan {
 	pub timestamp: DateTime<FixedOffset>,
 }
 
-// impl TryFrom<library_scan_details::scan_history::Data> for LastLibraryScan {
-// 	type Error = CoreError;
+impl TryFrom<library_scan_details::scan_history::Data> for LastLibraryScan {
+	type Error = CoreError;
 
-// 	fn try_from(
-// 		data: library_scan_details::scan_history::Data,
-// 	) -> Result<Self, Self::Error> {
-// 		let options = data
-// 			.options
-// 			.map(|options| serde_json::from_slice(&options))
-// 			.transpose()?;
+	fn try_from(
+		data: library_scan_details::scan_history::Data,
+	) -> Result<Self, Self::Error> {
+		let options = data
+			.options
+			.map(|options| serde_json::from_slice(&options))
+			.transpose()?;
 
-// 		Ok(Self {
-// 			options,
-// 			timestamp: data.timestamp,
-// 		})
-// 	}
-// }
+		Ok(Self {
+			options,
+			timestamp: data.timestamp,
+		})
+	}
+}
 
 #[cfg(test)]
 mod tests {

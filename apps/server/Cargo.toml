@@ -59,6 +59,9 @@ utoipa = { version = "5.3.1", features = ["axum_extras", "chrono"] }
 utoipa-swagger-ui = { version = "9.0.0", features = ["axum"] }
 zip = { workspace = true }
 
+# TODO(sea-orm): REMOVE
+prisma-client-rust = { workspace = true }
+
 [dev-dependencies]
 axum-test = "17.2.0"
 tokio = { workspace = true, features = ["full", "test-util"] }

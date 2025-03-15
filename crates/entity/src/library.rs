@@ -1,4 +1,4 @@
-use sea_orm::{entity::prelude::*, FromQueryResult};
+use sea_orm::{entity::prelude::*, DerivePartialModel, FromQueryResult};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "libraries")]
@@ -27,7 +27,8 @@ pub struct Model {
 	pub last_scanned_at: Option<String>,
 }
 
-#[derive(Clone, Debug, FromQueryResult)]
+#[derive(Clone, Debug, DerivePartialModel, FromQueryResult)]
+#[sea_orm(entity = "<Model as ModelTrait>::Entity")]
 pub struct LibraryIdentModel {
 	pub id: String,
 	pub path: String,

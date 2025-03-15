@@ -129,11 +129,10 @@ impl LibrariesProvider for LibraryProvider {
 		let conn = self.conn.as_ref();
 
 		let libraries: Vec<library::LibraryIdentModel> = library::Entity::find()
-			.select_only()
 			.inner_join(library_config::Entity)
 			.filter(library::Column::Status.eq("READY"))
 			.filter(library_config::Column::Watch.eq(true))
-			.into_model::<library::LibraryIdentModel>()
+			.into_partial_model::<library::LibraryIdentModel>()
 			.all(conn)
 			.await?;
 

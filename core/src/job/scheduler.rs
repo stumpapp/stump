@@ -22,6 +22,7 @@ impl JobScheduler {
 	pub async fn init(core_ctx: Arc<Ctx>) -> CoreResult<Arc<Self>> {
 		let conn = core_ctx.conn.as_ref();
 
+		// TODO(sea-orm): Confirm this is OK without a partial model
 		let result = job_schedule_config::Entity::find()
 			.select_only()
 			.columns(job_schedule_config::Column::iter())
@@ -65,6 +66,7 @@ impl JobScheduler {
 
 					tracing::info!("Scanning libraries on schedule");
 
+					// TODO(sea-orm): Confirm this is OK without a partial model
 					let libraries_to_scan = library::Entity::find()
 						.select_only()
 						.column(library::Column::Id)

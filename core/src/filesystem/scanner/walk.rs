@@ -368,8 +368,9 @@ pub async fn walk_series(
 		.filter_map(|(entry, media)| {
 			let modified = media
 				.modified_at
+				.as_ref()
 				.and_then(|dt| {
-					file_updated_since_scan(&entry, dt)
+					file_updated_since_scan(&entry, dt.clone())
 						.map_err(|err| {
 							tracing::error!(
 								error = ?err,

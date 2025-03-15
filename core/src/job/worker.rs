@@ -10,6 +10,7 @@ use crate::{
 	config::StumpConfig,
 	event::CoreEvent,
 	job::{JobError, JobStatus},
+	prisma::PrismaClient,
 };
 
 use super::{Executor, JobControllerCommand, JobManager, JobProgress, JobUpdate};
@@ -61,6 +62,8 @@ pub struct WorkerCtx {
 	pub job_id: String,
 	/// A pointer to the prisma client
 	pub conn: Arc<DatabaseConnection>,
+	// TODO(sea-orm): Remove this
+	pub db: Arc<PrismaClient>,
 	/// A pointer to the stump configuration
 	pub config: Arc<StumpConfig>,
 	/// A sender for the core event channel
@@ -223,6 +226,7 @@ impl Worker {
 	fn new(
 		job_id: &str,
 		conn: Arc<DatabaseConnection>,
+		db: Arc<PrismaClient>,
 		config: Arc<StumpConfig>,
 		core_event_tx: broadcast::Sender<CoreEvent>,
 		job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
@@ -234,6 +238,7 @@ impl Worker {
 		let worker_ctx = WorkerCtx {
 			job_id: job_id.to_string(),
 			conn,
+			db,
 			config,
 			core_event_tx,
 			commands_rx,
@@ -253,6 +258,7 @@ impl Worker {
 		job: Box<dyn Executor>,
 		manager: Arc<JobManager>,
 		conn: Arc<DatabaseConnection>,
+		db: Arc<PrismaClient>,
 		config: Arc<StumpConfig>,
 		core_event_tx: broadcast::Sender<CoreEvent>,
 		job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
@@ -261,6 +267,7 @@ impl Worker {
 		let (worker, worker_ctx, status_rx) = Worker::new(
 			job_id.as_str(),
 			conn.clone(),
+			db,
 			config,
 			core_event_tx,
 			job_controller_tx,

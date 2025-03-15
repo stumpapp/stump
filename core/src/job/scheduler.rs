@@ -83,19 +83,20 @@ impl JobScheduler {
 
 					for (library, config) in &libraries_to_scan {
 						let library_path = library.path.clone();
-						let result =
-							scheduler_ctx.enqueue_job(WrappedJob::new(LibraryScanJob {
-								id: library.id.clone(),
-								path: library_path,
-								config: config.map(LibraryConfig::from),
-								options: Default::default(),
-							}));
-						if result.is_err() {
-							tracing::error!(
-								?library,
-								"Failed to dispatch scan job for library"
-							);
-						}
+						// TODO(sea-orm): Fix
+						// let result =
+						// 	scheduler_ctx.enqueue_job(WrappedJob::new(LibraryScanJob {
+						// 		id: library.id.clone(),
+						// 		path: library_path,
+						// 		config: config.map(LibraryConfig::from),
+						// 		options: Default::default(),
+						// 	}));
+						// if result.is_err() {
+						// 	tracing::error!(
+						// 		?library,
+						// 		"Failed to dispatch scan job for library"
+						// 	);
+						// }
 					}
 				}
 			});

@@ -15,7 +15,7 @@
 // - https://github.com/Nukesor/pueue
 use std::{collections::VecDeque, fmt::Debug, sync::Arc, time::Duration};
 
-use entity::sea_orm::{prelude::*, QuerySelect};
+use entity::sea_orm::{prelude::*, QuerySelect, Set};
 use serde::{de, Deserialize, Serialize};
 
 mod controller;
@@ -484,31 +484,19 @@ pub trait Executor: Send + Sync {
 		if expected_logs > 0 {
 			let active_models =
 				output.logs.into_iter().map(|log| entity::log::ActiveModel {
-					job_id: job_id.to_string(),
-					level: log.level.to_string(),
-					message: log.msg,
-					timestamp: log.timestamp,
-					context: log.context,
+					job_id: Set(Some(job_id.to_string())),
+					level: Set(log.level.to_string()),
+					message: Set(log.msg),
+					timestamp: Set(log.timestamp.to_rfc3339()),
+					context: Set(log.context),
 					..Default::default()
 				});
 
-			let inserted_rows = entity::log::Entity::insert_many(active_models)
+			if let Err(error) = entity::log::Entity::insert_many(active_models)
 				.exec(conn)
 				.await
-				.map_or_else(
-					|error| {
-						tracing::error!(?error, "Failed to persist job logs!");
-						0
-					},
-					|logs| logs.len(),
-				);
-
-			if inserted_rows != expected_logs {
-				tracing::warn!(
-					?inserted_rows,
-					?expected_logs,
-					"Failed to persist all job logs!"
-				);
+			{
+				tracing::error!(?error, "Failed to persist job logs to DB");
 			}
 		}
 

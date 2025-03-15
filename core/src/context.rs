@@ -15,6 +15,7 @@ use crate::{
 	event::CoreEvent,
 	filesystem::scanner::LibraryWatcher,
 	job::{Executor, JobController, JobControllerCommand},
+	prisma::PrismaClient,
 	CoreError, CoreResult,
 };
 
@@ -27,6 +28,7 @@ type EventChannel = (Sender<CoreEvent>, Receiver<CoreEvent>);
 pub struct Ctx {
 	pub config: Arc<StumpConfig>,
 	pub conn: Arc<DatabaseConnection>,
+	pub db: Arc<PrismaClient>,
 	pub job_controller: Arc<JobController>,
 	pub event_channel: Arc<EventChannel>,
 	pub library_watcher: Arc<LibraryWatcher>,
@@ -51,24 +53,29 @@ impl Ctx {
 	pub async fn new(config: StumpConfig) -> Ctx {
 		let config = Arc::new(config.clone());
 		let conn = Arc::new(db::create_connection(&config).await);
+		let db = Arc::new(db::create_client(&config).await);
 		let event_channel = Arc::new(channel::<CoreEvent>(1024));
 
-		unimplemented!()
+		let job_controller = JobController::new(
+			conn.clone(),
+			db.clone(),
+			config.clone(),
+			event_channel.0.clone(),
+		);
+		let library_watcher =
+			Arc::new(LibraryWatcher::new(conn.clone(), job_controller.clone()));
 
-		// let job_controller =
-		// 	JobController::new(db.clone(), config.clone(), event_channel.0.clone());
-		// let library_watcher =
-		// 	Arc::new(LibraryWatcher::new(db.clone(), job_controller.clone()));
-
-		// Ctx {
-		// 	config,
-		// 	conn,
-		// 	job_controller,
-		// 	event_channel,
-		// 	library_watcher,
-		// }
+		Ctx {
+			config,
+			conn,
+			db,
+			job_controller,
+			event_channel,
+			library_watcher,
+		}
 	}
 
+	// TODO(sea-orm): Fix
 	// Note: I cannot use #[cfg(test)] here because the tests are in a different crate and
 	// the `cfg` attribute only works for the current crate. Potential workarounds:
 	// - https://github.com/rust-lang/cargo/issues/8379

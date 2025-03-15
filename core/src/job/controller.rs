@@ -8,7 +8,7 @@ use tokio::sync::{
 };
 
 use super::{Executor, JobManager, JobManagerResult, WorkerSend, WorkerSendExt};
-use crate::{config::StumpConfig, event::CoreEvent};
+use crate::{config::StumpConfig, event::CoreEvent, prisma::PrismaClient};
 
 /// Input for commands that require an acknowledgement when they are completed
 /// (e.g. cancel, pause, resume)
@@ -52,13 +52,16 @@ impl JobController {
 	/// Creates a new job controller instance and starts the watcher loop in a new thread
 	pub fn new(
 		conn: Arc<DatabaseConnection>,
+		// TODO(sea-orm): Remove this
+		db: Arc<PrismaClient>,
 		config: Arc<StumpConfig>,
 		core_event_tx: broadcast::Sender<CoreEvent>,
 	) -> Arc<Self> {
 		let (commands_tx, commands_rx) = mpsc::unbounded_channel();
 		let this = Arc::new(Self {
 			commands_tx: commands_tx.clone(),
-			manager: JobManager::new(conn, config, commands_tx, core_event_tx).arced(),
+			manager: JobManager::new(conn, db, config, commands_tx, core_event_tx)
+				.arced(),
 		});
 
 		let this_cpy = this.clone();

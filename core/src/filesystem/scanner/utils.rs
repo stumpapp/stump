@@ -102,7 +102,7 @@ pub(crate) async fn create_media(
 
 	if let Some(meta) = generated.metadata {
 		let metadata = media_metadata::ActiveModel {
-			media_id: Set(Some(created_media.id)),
+			media_id: Set(Some(created_media.id.clone())),
 			title: Set(meta.title),
 			series: Set(meta.series),
 			number: Set(meta.number.and_then(|n| Decimal::try_from(n).ok())),

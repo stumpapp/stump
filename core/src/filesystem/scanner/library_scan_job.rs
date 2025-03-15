@@ -171,7 +171,7 @@ impl JobExt for LibraryScanJob {
 		} = walk_library(
 			&self.path,
 			WalkerCtx {
-				db: ctx.db.clone(),
+				db: ctx.conn.clone(),
 				ignore_rules,
 				max_depth: is_collection_based.then_some(1),
 				options: self.options,
@@ -488,7 +488,7 @@ impl JobExt for LibraryScanJob {
 				let walk_result = walk_series(
 					path_buf.as_path(),
 					WalkerCtx {
-						db: ctx.db.clone(),
+						db: ctx.conn.clone(),
 						ignore_rules,
 						max_depth,
 						options: self.options,
@@ -537,7 +537,7 @@ impl JobExt for LibraryScanJob {
 						updated_media,
 						logs: new_logs,
 					} = handle_missing_series(
-						&ctx.db,
+						&ctx.conn,
 						path_buf.to_str().unwrap_or_default(),
 					)
 					.await?;

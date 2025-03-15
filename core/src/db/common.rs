@@ -1,6 +1,6 @@
 use std::{collections::HashMap, str::FromStr};
 
-use entity::sea_orm::FromQueryResult;
+use entity::sea_orm::{self, FromQueryResult};
 use prisma_client_rust::{raw, PrismaValue, QueryError};
 use serde::{Deserialize, Serialize};
 
@@ -145,9 +145,26 @@ impl FromStr for JournalMode {
 	}
 }
 
-#[derive(Debug, Serialize, Deserialize, FromQueryResult)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct JournalModeQueryResult {
 	pub journal_mode: JournalMode,
+}
+
+impl FromQueryResult for JournalModeQueryResult {
+	fn from_query_result(
+		res: &sea_orm::QueryResult,
+		_pre: &str,
+	) -> Result<Self, sea_orm::DbErr> {
+		let journal_mode = match res.try_get::<String>("", "journal_mode") {
+			Ok(value) => JournalMode::from_str(value.as_str()).unwrap_or_default(),
+			_ => {
+				tracing::warn!("No journal mode found! Defaulting to WAL assumption");
+				JournalMode::default()
+			},
+		};
+
+		Ok(Self { journal_mode })
+	}
 }
 
 #[async_trait::async_trait]

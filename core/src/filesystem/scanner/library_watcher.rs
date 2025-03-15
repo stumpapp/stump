@@ -132,6 +132,7 @@ impl LibrariesProvider for LibraryProvider {
 			.inner_join(library_config::Entity)
 			.filter(library::Column::Status.eq("READY"))
 			.filter(library_config::Column::Watch.eq(true))
+			.into_model::<library::LibraryIdentModel>()
 			.all(conn)
 			.await?;
 
@@ -170,10 +171,10 @@ pub struct LibraryWatcher {
 
 impl LibraryWatcher {
 	pub fn new(
-		db_client: Arc<PrismaClient>,
+		conn: Arc<DatabaseConnection>,
 		job_controller: Arc<JobController>,
 	) -> LibraryWatcher {
-		let library_provider = LibraryProvider { db_client };
+		let library_provider = LibraryProvider { conn };
 		let job_submitter = JobControllerSubmitter { job_controller };
 		let (tx, rx) = unbounded_channel();
 		let watcher = create_watcher(tx.clone());
@@ -330,12 +331,12 @@ mod tests {
 
 	#[allow(dead_code)]
 	struct MockLibraryProvider {
-		libraries: Vec<library_idents_select::Data>,
+		libraries: Vec<library::LibraryIdentModel>,
 	}
 
 	#[async_trait]
 	impl LibrariesProvider for MockLibraryProvider {
-		async fn get_libraries(&self) -> CoreResult<Vec<library_idents_select::Data>> {
+		async fn get_libraries(&self) -> CoreResult<Vec<library::LibraryIdentModel>> {
 			Ok(self.libraries.clone())
 		}
 	}
@@ -364,7 +365,7 @@ mod tests {
 
 	#[allow(dead_code)]
 	async fn create_mock_library(
-		libraries: Vec<library_idents_select::Data>,
+		libraries: Vec<library::LibraryIdentModel>,
 	) -> Result<MockObjs, CoreError> {
 		let (tx_jobs, rx_jobs) = tokio::sync::mpsc::unbounded_channel();
 		let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
@@ -393,8 +394,8 @@ mod tests {
 	}
 
 	#[allow(dead_code)]
-	fn create_test_libraries(base_dir: String) -> Vec<library_idents_select::Data> {
-		vec![library_idents_select::Data {
+	fn create_test_libraries(base_dir: String) -> Vec<library::LibraryIdentModel> {
+		vec![library::LibraryIdentModel {
 			id: "42".to_string(),
 			path: base_dir,
 		}]

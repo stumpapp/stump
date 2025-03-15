@@ -11,6 +11,16 @@ pub enum OPDSV2Error {
 	DBError(#[from] sea_orm::error::DbErr),
 	#[error("Failed to generate OPDS feed: {0}")]
 	InternalError(#[from] crate::CoreError),
+
+	// TODO(sea-orm):Remove this
+	#[error("Query error: {0}")]
+	QueryError(#[from] Box<prisma_client_rust::QueryError>),
+}
+
+impl From<prisma_client_rust::QueryError> for OPDSV2Error {
+	fn from(error: prisma_client_rust::QueryError) -> Self {
+		Self::QueryError(Box::new(error))
+	}
 }
 
 impl From<OPDSV2Error> for crate::CoreError {
@@ -21,6 +31,7 @@ impl From<OPDSV2Error> for crate::CoreError {
 			},
 			OPDSV2Error::MalformedFeed(err) => err.into(),
 			OPDSV2Error::DBError(err) => err.into(),
+			OPDSV2Error::QueryError(err) => err.into(),
 			OPDSV2Error::InternalError(err) => err,
 		}
 	}

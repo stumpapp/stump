@@ -11,7 +11,7 @@ use utoipa::ToSchema;
 
 use crate::{
 	db::{
-		entity::{CoreJobOutput, IgnoreRules},
+		entity::{CoreJobOutput, IgnoreRules, LibraryConfig},
 		FileStatus,
 	},
 	filesystem::image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
@@ -116,8 +116,9 @@ impl JobExt for SeriesScanJob {
 						Query::select()
 							.column(series::Column::LibraryId)
 							.from(series::Entity)
-							.and_where(series::Column::Id.equals(self.id.clone()))
-							.and_where(series::Column::Path.equals(self.path.clone())),
+							.and_where(series::Column::Id.eq(self.id.clone()))
+							.and_where(series::Column::Path.eq(self.path.clone()))
+							.to_owned(),
 					),
 				),
 			)
@@ -128,12 +129,17 @@ impl JobExt for SeriesScanJob {
 				"Associated library not found".to_string(),
 			))?;
 
-		let ignore_rules = match config {
-			Some(c) => c.ignore_rules.map_or_else(IgnoreRules::default, |rules| {
+		let config = config.ok_or(JobError::InitFailed(
+			"Library is missing a configuration".to_string(),
+		))?;
+
+		let ignore_rules = config
+			.ignore_rules
+			.clone()
+			.map_or_else(IgnoreRules::default, |rules| {
 				IgnoreRules::try_from(rules).unwrap_or_default()
-			}),
-			_ => IgnoreRules::default(),
-		};
+			})
+			.build()?;
 
 		// If the library is collection-priority, any child directories are 'ignored' and their
 		// files are part of / folded into the top-most folder (series).
@@ -148,7 +154,7 @@ impl JobExt for SeriesScanJob {
 			max_depth = Some(1);
 		}
 
-		self.config = config;
+		self.config = Some(config);
 
 		let WalkedSeries {
 			series_is_missing,
@@ -162,7 +168,7 @@ impl JobExt for SeriesScanJob {
 		} = walk_series(
 			PathBuf::from(self.path.clone()).as_path(),
 			WalkerCtx {
-				db: ctx.db.clone(),
+				db: ctx.conn.clone(),
 				ignore_rules,
 				max_depth,
 				options: self.options,
@@ -171,7 +177,7 @@ impl JobExt for SeriesScanJob {
 		.await?;
 
 		if series_is_missing {
-			let _ = handle_missing_series(&ctx.db, self.path.as_str()).await;
+			let _ = handle_missing_series(&ctx.conn, self.path.as_str()).await;
 			return Err(JobError::InitFailed(
 				"Series could not be found on disk".to_string(),
 			));
@@ -227,13 +233,15 @@ impl JobExt for SeriesScanJob {
 		match image_options {
 			Some(options) if did_create | did_update => {
 				tracing::trace!("Thumbnail generation job should be enqueued");
-				Ok(Some(WrappedJob::new(ThumbnailGenerationJob {
-					options,
-					params: ThumbnailGenerationJobParams::single_series(
-						self.id.clone(),
-						false,
-					),
-				})))
+				// TODO(sea-orm): Fix
+				// Ok(Some(WrappedJob::new(ThumbnailGenerationJob {
+				// 	options,
+				// 	params: ThumbnailGenerationJobParams::single_series(
+				// 		self.id.clone(),
+				// 		false,
+				// 	),
+				// })))
+				Ok(None)
 			},
 			_ => {
 				tracing::trace!("No cleanup required for series scan job");
@@ -300,7 +308,9 @@ impl JobExt for SeriesScanJob {
 				} = safely_build_and_insert_media(
 					MediaBuildOperation {
 						series_id: self.id.clone(),
-						library_config: self.config.clone().unwrap_or_default(),
+						// TODO(sea-orm): Fix
+						// library_config: self.config.clone().unwrap_or_default(),
+						library_config: LibraryConfig::default(),
 						max_concurrency,
 					},
 					ctx,
@@ -329,7 +339,9 @@ impl JobExt for SeriesScanJob {
 				} = visit_and_update_media(
 					MediaBuildOperation {
 						series_id: self.id.clone(),
-						library_config: self.config.clone().unwrap_or_default(),
+						// TODO(sea-orm): Fix
+						// library_config: self.config.clone().unwrap_or_default(),
+						library_config: LibraryConfig::default(),
 						max_concurrency,
 					},
 					ctx,

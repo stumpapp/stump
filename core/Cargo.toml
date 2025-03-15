@@ -57,6 +57,9 @@ zip.workspace = true
 quick-xml = "0.37.2"
 merge = "0.1.0"
 
+# TODO(sea-orm): REMOVE
+prisma-client-rust = { workspace = true }
+
 [dev-dependencies]
 temp-env = "0.3.6"
 tempfile.workspace = true

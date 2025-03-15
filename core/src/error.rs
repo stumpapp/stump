@@ -54,4 +54,15 @@ pub enum CoreError {
 	SerdeFailure(#[from] serde_json::Error),
 	#[error("An unknown error occurred: {0}")]
 	Unknown(String),
+
+	// TODO(sea-orm):Remove this
+	#[error("Query error: {0}")]
+	QueryError(#[from] Box<prisma_client_rust::QueryError>),
+}
+
+
+impl From<prisma_client_rust::QueryError> for CoreError {
+	fn from(error: prisma_client_rust::QueryError) -> Self {
+		Self::QueryError(Box::new(error))
+	}
 }

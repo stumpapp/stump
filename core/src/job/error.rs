@@ -21,6 +21,16 @@ pub enum JobError {
 	FileError(#[from] FileError),
 	#[error("An unknown error occurred: {0}")]
 	Unknown(String),
+
+	// TODO(sea-orm):Remove this
+	#[error("Query error: {0}")]
+	QueryError(#[from] Box<prisma_client_rust::QueryError>),
+}
+
+impl From<prisma_client_rust::QueryError> for JobError {
+	fn from(error: prisma_client_rust::QueryError) -> Self {
+		Self::QueryError(Box::new(error))
+	}
 }
 
 impl From<CoreError> for JobError {
@@ -54,12 +64,22 @@ pub enum JobManagerError {
 	DbError(#[from] sea_orm::error::DbErr),
 	#[error("An unknown error occurred {0}")]
 	Unknown(String),
+
+	// TODO(sea-orm):Remove this
+	#[error("Query error: {0}")]
+	QueryError(#[from] Box<prisma_client_rust::QueryError>),
+}
+
+impl From<prisma_client_rust::QueryError> for JobManagerError {
+	fn from(error: prisma_client_rust::QueryError) -> Self {
+		Self::QueryError(Box::new(error))
+	}
 }
 
 impl From<JobError> for JobManagerError {
 	fn from(job_error: JobError) -> Self {
 		match job_error {
-			JobError::DbErr(err) => Self::DbError(err),
+			JobError::DbError(err) => Self::DbError(err),
 			_ => Self::Unknown(job_error.to_string()),
 		}
 	}

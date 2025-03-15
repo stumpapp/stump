@@ -8,7 +8,8 @@ pub mod query;
 
 pub use dao::*;
 
-pub use client::create_connection;
+// TODO(sea-orm): Change export
+pub use client::{create_connection, *};
 pub use common::{
 	CountQueryReturn, DBPragma, JournalMode, JournalModeQueryResult, PrismaCountTrait,
 };

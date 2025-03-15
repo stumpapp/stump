@@ -10,7 +10,9 @@ use futures::future::join_all;
 use tokio::sync::{broadcast, mpsc, RwLock};
 
 use super::{error::JobManagerError, Executor, JobControllerCommand, Worker};
-use crate::{config::StumpConfig, event::CoreEvent, job::JobStatus};
+use crate::{
+	config::StumpConfig, event::CoreEvent, job::JobStatus, prisma::PrismaClient,
+};
 
 pub type JobManagerResult<T> = Result<T, JobManagerError>;
 
@@ -26,6 +28,8 @@ pub struct JobManager {
 	core_event_tx: broadcast::Sender<CoreEvent>,
 	/// A pointer to the database client
 	conn: Arc<DatabaseConnection>,
+	// TODO(sea-orm): Remove this
+	db: Arc<PrismaClient>,
 	/// A pointer to the core config
 	config: Arc<StumpConfig>,
 }
@@ -34,6 +38,7 @@ impl JobManager {
 	/// Creates a new Jobs instance
 	pub fn new(
 		conn: Arc<DatabaseConnection>,
+		db: Arc<PrismaClient>,
 		config: Arc<StumpConfig>,
 		job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
 		core_event_tx: broadcast::Sender<CoreEvent>,
@@ -44,6 +49,7 @@ impl JobManager {
 			job_controller_tx,
 			core_event_tx,
 			conn,
+			db,
 			config,
 		}
 	}
@@ -122,6 +128,7 @@ impl JobManager {
 				job,
 				self.clone(),
 				self.conn.clone(),
+				self.db.clone(),
 				self.config.clone(),
 				self.get_event_tx(),
 				self.job_controller_tx.clone(),

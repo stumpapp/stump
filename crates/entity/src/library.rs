@@ -1,4 +1,4 @@
-use sea_orm::entity::prelude::*;
+use sea_orm::{entity::prelude::*, FromQueryResult};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "libraries")]
@@ -25,6 +25,12 @@ pub struct Model {
 	pub job_schedule_config_id: Option<String>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub last_scanned_at: Option<String>,
+}
+
+#[derive(Clone, Debug, FromQueryResult)]
+pub struct LibraryIdentModel {
+	pub id: String,
+	pub path: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

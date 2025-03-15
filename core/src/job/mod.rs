@@ -480,29 +480,37 @@ pub trait Executor: Send + Sync {
 		let job_id = self.id();
 
 		let expected_logs = output.logs.len();
-		// TODO(sea-orm): Fix (active row model prolly)
-		// if expected_logs > 0 {
-		// 	let creates = output
-		// 		.logs
-		// 		.into_iter()
-		// 		.map(|log| log.into_prisma(job_id.to_string()))
-		// 		.map(|(msg, params)| db.log().create(msg, params));
-		// 	let persisted_logs = db._batch(creates).await.map_or_else(
-		// 		|error| {
-		// 			tracing::error!(?error, "Failed to persist job logs!");
-		// 			0
-		// 		},
-		// 		|logs| logs.len(),
-		// 	);
 
-		// 	if persisted_logs != expected_logs {
-		// 		tracing::warn!(
-		// 			?persisted_logs,
-		// 			?expected_logs,
-		// 			"Failed to persist all job logs!"
-		// 		);
-		// 	}
-		// }
+		if expected_logs > 0 {
+			let active_models =
+				output.logs.into_iter().map(|log| entity::log::ActiveModel {
+					job_id: job_id.to_string(),
+					level: log.level.to_string(),
+					message: log.msg,
+					timestamp: log.timestamp,
+					context: log.context,
+					..Default::default()
+				});
+
+			let inserted_rows = entity::log::Entity::insert_many(active_models)
+				.exec(conn)
+				.await
+				.map_or_else(
+					|error| {
+						tracing::error!(?error, "Failed to persist job logs!");
+						0
+					},
+					|logs| logs.len(),
+				);
+
+			if inserted_rows != expected_logs {
+				tracing::warn!(
+					?inserted_rows,
+					?expected_logs,
+					"Failed to persist all job logs!"
+				);
+			}
+		}
 
 		let output_data = serde_json::to_vec(&output.output)
 			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;

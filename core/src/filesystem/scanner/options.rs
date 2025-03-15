@@ -1,13 +1,11 @@
-use prisma_client_rust::chrono::{DateTime, FixedOffset};
+use chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
 use crate::{
-	db::entity::{macros::library_scan_details, Media, MediaMetadata},
+	db::entity::{Media, MediaMetadata},
 	filesystem::ProcessedFileHashes,
-	prisma::library_scan_record,
-	CoreError,
 };
 
 // TODO(granular-scans/metadata-merge): Support merge strategies for metadata at some point
@@ -138,24 +136,24 @@ pub struct LibraryScanRecord {
 	job_id: Option<String>,
 }
 
-impl TryFrom<library_scan_record::Data> for LibraryScanRecord {
-	type Error = CoreError;
+// impl TryFrom<library_scan_record::Data> for LibraryScanRecord {
+// 	type Error = CoreError;
 
-	fn try_from(data: library_scan_record::Data) -> Result<Self, Self::Error> {
-		let options = data
-			.options
-			.map(|options| serde_json::from_slice(&options))
-			.transpose()?;
+// 	fn try_from(data: library_scan_record::Data) -> Result<Self, Self::Error> {
+// 		let options = data
+// 			.options
+// 			.map(|options| serde_json::from_slice(&options))
+// 			.transpose()?;
 
-		Ok(Self {
-			id: data.id,
-			options,
-			timestamp: data.timestamp,
-			library_id: data.library_id,
-			job_id: data.job_id,
-		})
-	}
-}
+// 		Ok(Self {
+// 			id: data.id,
+// 			options,
+// 			timestamp: data.timestamp,
+// 			library_id: data.library_id,
+// 			job_id: data.job_id,
+// 		})
+// 	}
+// }
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct LastLibraryScan {
@@ -163,27 +161,26 @@ pub struct LastLibraryScan {
 	pub timestamp: DateTime<FixedOffset>,
 }
 
-impl TryFrom<library_scan_details::scan_history::Data> for LastLibraryScan {
-	type Error = CoreError;
+// impl TryFrom<library_scan_details::scan_history::Data> for LastLibraryScan {
+// 	type Error = CoreError;
 
-	fn try_from(
-		data: library_scan_details::scan_history::Data,
-	) -> Result<Self, Self::Error> {
-		let options = data
-			.options
-			.map(|options| serde_json::from_slice(&options))
-			.transpose()?;
+// 	fn try_from(
+// 		data: library_scan_details::scan_history::Data,
+// 	) -> Result<Self, Self::Error> {
+// 		let options = data
+// 			.options
+// 			.map(|options| serde_json::from_slice(&options))
+// 			.transpose()?;
 
-		Ok(Self {
-			options,
-			timestamp: data.timestamp,
-		})
-	}
-}
+// 		Ok(Self {
+// 			options,
+// 			timestamp: data.timestamp,
+// 		})
+// 	}
+// }
 
 #[cfg(test)]
 mod tests {
-	use prisma_client_rust::chrono;
 
 	use super::*;
 
@@ -219,31 +216,31 @@ mod tests {
 		);
 	}
 
-	#[test]
-	fn test_try_from_library_scan_record() {
-		let data = library_scan_record::Data {
-			id: 1,
-			options: Some(
-				serde_json::to_vec(&ScanOptions {
-					config: ScanConfig::ForceRebuild {
-						force_rebuild: true,
-					},
-				})
-				.unwrap(),
-			),
-			timestamp: chrono::Utc::now().into(),
-			library_id: "library".to_string(),
-			job_id: Some("job".to_string()),
-			library: None,
-			job: None,
-		};
+	// #[test]
+	// fn test_try_from_library_scan_record() {
+	// 	let data = library_scan_record::Data {
+	// 		id: 1,
+	// 		options: Some(
+	// 			serde_json::to_vec(&ScanOptions {
+	// 				config: ScanConfig::ForceRebuild {
+	// 					force_rebuild: true,
+	// 				},
+	// 			})
+	// 			.unwrap(),
+	// 		),
+	// 		timestamp: chrono::Utc::now().into(),
+	// 		library_id: "library".to_string(),
+	// 		job_id: Some("job".to_string()),
+	// 		library: None,
+	// 		job: None,
+	// 	};
 
-		let record = LibraryScanRecord::try_from(data).unwrap();
-		assert_eq!(record.id, 1);
-		assert!(record.options.is_some());
-		assert_eq!(record.library_id, "library");
-		assert_eq!(record.job_id, Some("job".to_string()));
-	}
+	// 	let record = LibraryScanRecord::try_from(data).unwrap();
+	// 	assert_eq!(record.id, 1);
+	// 	assert!(record.options.is_some());
+	// 	assert_eq!(record.library_id, "library");
+	// 	assert_eq!(record.job_id, Some("job".to_string()));
+	// }
 
 	#[test]
 	fn test_error_ctx() {

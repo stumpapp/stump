@@ -1,13 +1,15 @@
-use crate::db::entity::macros::library_idents_select;
-use crate::prisma::{library, library_config, PrismaClient};
 use crate::{
 	filesystem::scanner::LibraryScanJob,
 	job::{JobController, JobControllerCommand},
 	CoreError, CoreResult,
 };
 use async_trait::async_trait;
+use entity::{
+	library, library_config,
+	sea_orm::{prelude::*, QuerySelect},
+};
 use notify::{Event, RecommendedWatcher, Watcher};
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
@@ -110,31 +112,30 @@ impl LibraryWatcherInternal {
 
 #[async_trait]
 trait LibrariesProvider {
-	async fn get_libraries(&self) -> CoreResult<Vec<library_idents_select::Data>>;
+	async fn get_libraries(&self) -> CoreResult<Vec<library::LibraryIdentModel>>;
 }
 
 #[derive(Debug, Clone)]
 struct LibraryProvider {
-	db_client: Arc<PrismaClient>,
+	conn: Arc<DatabaseConnection>,
 }
 
 #[async_trait]
 impl LibrariesProvider for LibraryProvider {
-	async fn get_libraries(&self) -> CoreResult<Vec<library_idents_select::Data>> {
+	async fn get_libraries(&self) -> CoreResult<Vec<library::LibraryIdentModel>> {
 		// get list of all libraries
 		// for each library, if watching is enabled, watch their directory
-		Ok(self
-			.db_client
-			.library()
-			.find_many(vec![
-				library::status::equals("READY".to_string()),
-				library::config::is(vec![library_config::watch::equals(true)]),
-			])
-			.select(library_idents_select::select())
-			.exec()
-			.await?
-			.into_iter()
-			.collect())
+		let conn = self.conn.as_ref();
+
+		let libraries: Vec<library::LibraryIdentModel> = library::Entity::find()
+			.select_only()
+			.inner_join(library_config::Entity)
+			.filter(library::Column::Status.eq("READY"))
+			.filter(library_config::Column::Watch.eq(true))
+			.all(conn)
+			.await?;
+
+		Ok(libraries)
 	}
 }
 

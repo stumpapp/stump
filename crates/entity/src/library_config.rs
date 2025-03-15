@@ -19,6 +19,7 @@ pub struct Model {
 	pub generate_file_hashes: bool,
 	pub generate_koreader_hashes: bool,
 	pub process_metadata: bool,
+	pub watch: bool,
 	#[sea_orm(column_type = "Text")]
 	pub library_pattern: String,
 	#[sea_orm(column_type = "Blob", nullable)]
@@ -33,6 +34,13 @@ impl Model {
 	pub fn is_collection_based(&self) -> bool {
 		self.library_pattern == LibraryPattern::CollectionBased.to_string()
 	}
+
+	// pub fn ignore_rules(&self) -> IgnoreRules {
+	// 	self.ignore_rules
+	// 		.map_or_else(IgnoreRules::default, |rules| {
+	// 			IgnoreRules::try_from(rules).unwrap_or_default()
+	// 		})
+	// }
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

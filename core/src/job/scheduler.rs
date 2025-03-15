@@ -65,8 +65,11 @@ impl JobScheduler {
 
 					tracing::info!("Scanning libraries on schedule");
 
-					// TODO(sea-orm): figure out how to select ID and path for library + relation
 					let libraries_to_scan = library::Entity::find()
+						.select_only()
+						.column(library::Column::Id)
+						.column(library::Column::Path)
+						.columns(library_config::Column::iter())
 						.filter(
 							library::Column::Id.is_not_in(excluded_library_ids.clone()),
 						)

@@ -128,10 +128,12 @@ impl JobExt for SeriesScanJob {
 				"Associated library not found".to_string(),
 			))?;
 
-		// TODO(sea-orm): Ignore rules
-		// let library_config = LibraryConfig::from(config);
-		// let ignore_rules = library_config.ignore_rules.build()?;
-		let ignore_rules = IgnoreRules::default();
+		let ignore_rules = match config {
+			Some(c) => c.ignore_rules.map_or_else(IgnoreRules::default, |rules| {
+				IgnoreRules::try_from(rules).unwrap_or_default()
+			}),
+			_ => IgnoreRules::default(),
+		};
 
 		// If the library is collection-priority, any child directories are 'ignored' and their
 		// files are part of / folded into the top-most folder (series).

@@ -1,6 +1,4 @@
-
-
-use sea_orm::entity::prelude::*;
+use sea_orm::{entity::prelude::*, FromQueryResult, JoinType, QuerySelect};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "reading_sessions")]
@@ -73,3 +71,70 @@ impl Related<super::user::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+#[derive(FromQueryResult)]
+pub struct OPDSV2ProgressionDevice {
+	#[sea_orm(from_alias = "device_id")]
+	id: String,
+	name: String,
+}
+
+#[derive(FromQueryResult)]
+pub struct OPDSV2Book {
+	#[sea_orm(from_alias = "book_id")]
+	id: String,
+	extension: String,
+	pages: i32,
+	page_dimensions: Option<String>, // Convert after?
+}
+
+#[derive(FromQueryResult)]
+pub struct OPDSV2Progression {
+	page: Option<i32>,
+	percentage_completed: Option<Decimal>,
+	epubcfi: Option<String>,
+	updated_at: String,
+	#[sea_orm(nested)]
+	device: OPDSV2ProgressionDevice,
+	#[sea_orm(nested)]
+	book: OPDSV2Book,
+}
+
+impl OPDSV2Progression {
+	pub fn find() -> Select<Entity> {
+		use super::{
+			media, media_metadata, page_dimension, reading_session,
+			registered_reading_device,
+		};
+
+		reading_session::Entity::find()
+			.select_only()
+			.columns(vec![
+				reading_session::Column::Page,
+				reading_session::Column::PercentageCompleted,
+				reading_session::Column::Epubcfi,
+				reading_session::Column::UpdatedAt,
+			])
+			.column_as(registered_reading_device::Column::Id, "device_id")
+			.column_as(registered_reading_device::Column::Name, "device_id")
+			.column_as(media::Column::Id, "book_id")
+			.columns(vec![media::Column::Extension, media::Column::Pages])
+			.column_as(page_dimension::Column::Dimensions, "page_dimensions")
+			.left_join(registered_reading_device::Entity)
+			.inner_join(media::Entity)
+			.join_rev(
+				JoinType::InnerJoin,
+				media_metadata::Entity::belongs_to(media::Entity)
+					.from(media_metadata::Column::MediaId)
+					.to(media::Column::Id)
+					.into(),
+			)
+			.join_rev(
+				JoinType::LeftJoin,
+				page_dimension::Entity::belongs_to(media_metadata::Entity)
+					.from(page_dimension::Column::MetadataId)
+					.to(media_metadata::Column::Id)
+					.into(),
+			)
+	}
+}

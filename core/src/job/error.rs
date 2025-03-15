@@ -16,7 +16,7 @@ pub enum JobError {
 	#[error("A task experienced a critical error while executing: {0}")]
 	TaskFailed(String),
 	#[error("A query error occurred: {0}")]
-	DbErr(#[from] sea_orm::error::DbErr),
+	DbError(#[from] sea_orm::error::DbErr),
 	#[error("A file error occurred: {0}")]
 	FileError(#[from] FileError),
 	#[error("An unknown error occurred: {0}")]
@@ -26,8 +26,7 @@ pub enum JobError {
 impl From<CoreError> for JobError {
 	fn from(err: CoreError) -> Self {
 		match err {
-			// TODO(sea-orm): Fix
-			// CoreError::QueryError(err) => Self::QueryError(err),
+			CoreError::DBError(err) => Self::DbError(err),
 			_ => Self::Unknown(err.to_string()),
 		}
 	}
@@ -52,7 +51,7 @@ pub enum JobManagerError {
 	#[error("A job was found which was in a deeply invalid state")]
 	JobLostError,
 	#[error("A query error occurred {0}")]
-	QueryError(#[from] sea_orm::error::DbErr),
+	DbError(#[from] sea_orm::error::DbErr),
 	#[error("An unknown error occurred {0}")]
 	Unknown(String),
 }
@@ -60,8 +59,7 @@ pub enum JobManagerError {
 impl From<JobError> for JobManagerError {
 	fn from(job_error: JobError) -> Self {
 		match job_error {
-			// TODO(sea-orm): Fix
-			// JobError::QueryError(e) => Self::QueryError(e),
+			JobError::DbErr(err) => Self::DbError(err),
 			_ => Self::Unknown(job_error.to_string()),
 		}
 	}

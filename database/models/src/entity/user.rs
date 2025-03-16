@@ -21,7 +21,7 @@ pub struct Model {
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub last_login: Option<String>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub created_at: String,
+	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub deleted_at: Option<String>,
 	pub is_locked: bool,

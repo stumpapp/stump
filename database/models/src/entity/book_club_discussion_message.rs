@@ -8,7 +8,7 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	pub content: String,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub timestamp: String,
+	pub timestamp: DateTimeWithTimeZone,
 	pub is_top_message: bool,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub deleted_at: Option<String>,

@@ -112,7 +112,7 @@ impl JobManager {
 			name: Set(job.name().to_string()),
 			description: Set(job.description()),
 			status: Set(JobStatus::Queued.to_string()),
-			created_at: Set(Utc::now().to_rfc3339()),
+			created_at: Set(Utc::now().into()),
 			..Default::default()
 		};
 		let created_job = job::Entity::insert(active_model)

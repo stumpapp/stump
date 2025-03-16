@@ -6,7 +6,7 @@ pub struct Model {
 	#[sea_orm(primary_key)]
 	pub id: i32,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub timestamp: String,
+	pub timestamp: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "Text")]
 	pub liked_by_id: String,
 	#[sea_orm(column_type = "Text")]

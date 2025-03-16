@@ -798,6 +798,7 @@ async fn handle_scan_complete(
 			options: Set(persisted_options),
 			timestamp: Set(now.into()),
 			job_id: Set(Some(ctx.job_id.clone())),
+			library_id: Set(job.id.clone()),
 			..Default::default()
 		})
 		.exec(conn)

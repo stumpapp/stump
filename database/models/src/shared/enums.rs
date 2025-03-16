@@ -41,10 +41,10 @@ pub enum AccessRole {
 )]
 #[sea_orm(
 	rs_type = "String",
-	rename_all = "UPPERCASE",
+	rename_all = "SCREAMING_SNAKE_CASE",
 	db_type = "String(StringLen::None)"
 )]
-#[serde(rename_all = "UPPERCASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum EntityVisibility {
 	Public,
 	Shared,
@@ -68,10 +68,10 @@ pub enum EntityVisibility {
 )]
 #[sea_orm(
 	rs_type = "String",
-	rename_all = "UPPERCASE",
+	rename_all = "SCREAMING_SNAKE_CASE",
 	db_type = "String(StringLen::None)"
 )]
-#[serde(rename_all = "UPPERCASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum FileStatus {
 	Unknown,
 	#[default]
@@ -97,10 +97,10 @@ pub enum FileStatus {
 )]
 #[sea_orm(
 	rs_type = "String",
-	rename_all = "UPPERCASE",
+	rename_all = "SCREAMING_SNAKE_CASE",
 	db_type = "String(StringLen::None)"
 )]
-#[serde(rename_all = "UPPERCASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum InterfaceLayout {
 	Grid,
 	Table,
@@ -121,10 +121,10 @@ pub enum InterfaceLayout {
 )]
 #[sea_orm(
 	rs_type = "String",
-	rename_all = "UPPERCASE",
+	rename_all = "SCREAMING_SNAKE_CASE",
 	db_type = "String(StringLen::None)"
 )]
-#[serde(rename_all = "UPPERCASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum LibraryPattern {
 	SeriesBased,
 	CollectionBased,
@@ -146,10 +146,10 @@ pub enum LibraryPattern {
 )]
 #[sea_orm(
 	rs_type = "String",
-	rename_all = "UPPERCASE",
+	rename_all = "SCREAMING_SNAKE_CASE",
 	db_type = "String(StringLen::None)"
 )]
-#[serde(rename_all = "UPPERCASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ReadingDirection {
 	#[default]
 	Ltr,
@@ -172,10 +172,10 @@ pub enum ReadingDirection {
 )]
 #[sea_orm(
 	rs_type = "String",
-	rename_all = "UPPERCASE",
+	rename_all = "SCREAMING_SNAKE_CASE",
 	db_type = "String(StringLen::None)"
 )]
-#[serde(rename_all = "UPPERCASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ReadingImageScaleFit {
 	#[default]
 	Height,
@@ -200,10 +200,10 @@ pub enum ReadingImageScaleFit {
 )]
 #[sea_orm(
 	rs_type = "String",
-	rename_all = "UPPERCASE",
+	rename_all = "SCREAMING_SNAKE_CASE",
 	db_type = "String(StringLen::None)"
 )]
-#[serde(rename_all = "UPPERCASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ReadingMode {
 	#[default]
 	Paged,

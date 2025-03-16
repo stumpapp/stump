@@ -1,5 +1,3 @@
-
-
 use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
@@ -12,7 +10,7 @@ pub struct Model {
 	#[sea_orm(column_type = "Text", nullable)]
 	pub description: Option<String>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub updated_at: String,
+	pub updated_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "Text")]
 	pub visibility: String,
 	#[sea_orm(column_type = "Text")]

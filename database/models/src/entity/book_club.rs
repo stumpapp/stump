@@ -13,7 +13,7 @@ pub struct Model {
 	#[sea_orm(column_type = "Blob", nullable)]
 	pub member_role_spec: Option<Vec<u8>>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub created_at: String,
+	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub emoji: Option<String>,
 }

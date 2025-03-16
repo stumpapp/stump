@@ -4759,6 +4759,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "migrations"
+version = "0.0.0"
+
+[[package]]
 name = "mime"
 version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4839,6 +4843,20 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "models"
+version = "0.0.0"
+dependencies = [
+ "async-graphql",
+ "globset",
+ "itertools 0.13.0",
+ "sea-orm",
+ "serde",
+ "serde_json",
+ "strum",
+ "thiserror 1.0.63",
 ]
 
 [[package]]

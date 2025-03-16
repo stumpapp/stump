@@ -1,7 +1,7 @@
-use async_graphql::{Context, Object, Result};
-use models::entity::{media, sea_orm::prelude::*};
-
 use crate::graphql::GraphQLData;
+use async_graphql::{Context, Object, Result};
+use models::entity::media;
+use sea_orm::prelude::*;
 
 #[derive(Default)]
 pub struct MediaQuery;

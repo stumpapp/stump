@@ -205,21 +205,22 @@ pub(crate) async fn patch_media_thumbnail(
 		.with_page(target_page);
 
 	let format = image_options.format.clone();
-	let (_, path_buf, _) = generate_book_thumbnail(
-		&media,
-		GenerateThumbnailOptions {
-			image_options,
-			core_config: ctx.config.as_ref().clone(),
-			force_regen: true,
-			filename: Some(media.id.clone()),
-		},
-	)
-	.await?;
+	unimplemented!("SeaORM migration")
+	// let (_, path_buf, _) = generate_book_thumbnail(
+	// 	&media,
+	// 	GenerateThumbnailOptions {
+	// 		image_options,
+	// 		core_config: ctx.config.as_ref().clone(),
+	// 		force_regen: true,
+	// 		filename: Some(media.id.clone()),
+	// 	},
+	// )
+	// .await?;
 
-	Ok(ImageResponse::from((
-		ContentType::from(format),
-		fs::read(path_buf).await?,
-	)))
+	// Ok(ImageResponse::from((
+	// 	ContentType::from(format),
+	// 	fs::read(path_buf).await?,
+	// )))
 }
 
 #[utoipa::path(

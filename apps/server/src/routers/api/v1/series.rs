@@ -559,22 +559,23 @@ async fn patch_series_thumbnail(
 		.with_page(target_page);
 
 	let format = image_options.format.clone();
-	let (_, path_buf, _) = generate_book_thumbnail(
-		&media,
-		GenerateThumbnailOptions {
-			image_options,
-			core_config: ctx.config.as_ref().clone(),
-			force_regen: true,
-			filename: media.series_id.clone(),
-		},
-	)
-	.await?;
-	tracing::debug!(?path_buf, "Generated thumbnail for series");
+	unimplemented!("SeaORM migration")
+	// let (_, path_buf, _) = generate_book_thumbnail(
+	// 	&media,
+	// 	GenerateThumbnailOptions {
+	// 		image_options,
+	// 		core_config: ctx.config.as_ref().clone(),
+	// 		force_regen: true,
+	// 		filename: media.series_id.clone(),
+	// 	},
+	// )
+	// .await?;
+	// tracing::debug!(?path_buf, "Generated thumbnail for series");
 
-	Ok(ImageResponse::from((
-		ContentType::from(format),
-		fs::read(path_buf).await?,
-	)))
+	// Ok(ImageResponse::from((
+	// 	ContentType::from(format),
+	// 	fs::read(path_buf).await?,
+	// )))
 }
 
 #[utoipa::path(

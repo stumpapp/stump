@@ -128,13 +128,7 @@ impl JobExt for SeriesScanJob {
 			"Library is missing a configuration".to_string(),
 		))?;
 
-		let ignore_rules = config
-			.ignore_rules
-			.clone()
-			.map_or_else(IgnoreRules::default, |rules| {
-				IgnoreRules::try_from(rules).unwrap_or_default()
-			})
-			.build()?;
+		let ignore_rules = config.ignore_rules().build()?;
 
 		// If the library is collection-priority, any child directories are 'ignored' and their
 		// files are part of / folded into the top-most folder (series).
@@ -303,9 +297,11 @@ impl JobExt for SeriesScanJob {
 				} = safely_build_and_insert_media(
 					MediaBuildOperation {
 						series_id: self.id.clone(),
-						// TODO(sea-orm): Fix
-						// library_config: self.config.clone().unwrap_or_default(),
-						library_config: LibraryConfig::default(),
+						library_config: self.config.clone().ok_or(
+							JobError::TaskFailed(
+								"Library configuration is missing".to_string(),
+							),
+						)?,
 						max_concurrency,
 					},
 					ctx,
@@ -334,9 +330,11 @@ impl JobExt for SeriesScanJob {
 				} = visit_and_update_media(
 					MediaBuildOperation {
 						series_id: self.id.clone(),
-						// TODO(sea-orm): Fix
-						// library_config: self.config.clone().unwrap_or_default(),
-						library_config: LibraryConfig::default(),
+						library_config: self.config.clone().ok_or(
+							JobError::TaskFailed(
+								"Library configuration is missing".to_string(),
+							),
+						)?,
 						max_concurrency,
 					},
 					ctx,

@@ -153,9 +153,10 @@ impl JobExt for LibraryScanJob {
 			.ok_or(JobError::InitFailed(
 				"Library is missing configuration".to_string(),
 			))?;
+		// TODO(sea-orm): Fix
 		// library_config.apply(self.options);
 		let is_collection_based = config.is_collection_based();
-		let ignore_rules = config.ignore_rules.build()?;
+		let ignore_rules = config.ignore_rules().build()?;
 
 		self.config = Some(config);
 
@@ -474,23 +475,24 @@ impl JobExt for LibraryScanJob {
 					max_depth = Some(1);
 				}
 
-				let ignore_rules = match self.config.map(|c| c.ignore_rules().build()) {
-					Some(Ok(rules)) => rules,
-					Some(Err(err)) => {
-						tracing::error!(error = ?err, "Failed to build ignore rules");
-						return Err(JobError::TaskFailed(
+				let ignore_rules =
+					match self.config.as_ref().map(|c| c.ignore_rules().build()) {
+						Some(Ok(rules)) => rules,
+						Some(Err(err)) => {
+							tracing::error!(error = ?err, "Failed to build ignore rules");
+							return Err(JobError::TaskFailed(
 							"Failed to build ignore rules. Check that the rules are valid."
 								.to_string(),
 						));
-					},
-					_ => {
-						tracing::error!(?self.config, "Library config is missing?");
-						return Err(JobError::TaskFailed(
+						},
+						_ => {
+							tracing::error!(?self.config, "Library config is missing?");
+							return Err(JobError::TaskFailed(
 							"A critical error occurred while attempting to scan the library"
 								.to_string(),
 						));
-					},
-				};
+						},
+					};
 
 				let walk_result = walk_series(
 					path_buf.as_path(),

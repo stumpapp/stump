@@ -8919,6 +8919,7 @@ dependencies = [
  "prisma-client-rust",
  "rand 0.8.5",
  "reqwest 0.12.7",
+ "sea-orm",
  "serde",
  "serde-untagged",
  "serde_json",

@@ -5,7 +5,7 @@ mod process;
 mod utils;
 
 pub use crate::filesystem::media::epub::EpubProcessor;
-pub(crate) use builder::{MediaBuilder, SeriesBuilder};
+pub(crate) use builder::{BuiltSeries, MediaBuilder, SeriesBuilder};
 pub use format::*;
 pub use process::*;
 pub use utils::is_accepted_cover_name;

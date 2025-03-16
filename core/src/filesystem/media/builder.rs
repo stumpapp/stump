@@ -2,9 +2,17 @@ use std::path::{Path, PathBuf};
 
 use prisma_client_rust::chrono::{DateTime, FixedOffset, Utc};
 
+use entity::{
+	sea_orm::{prelude::*, Set},
+	series, series_metadata,
+};
+
 use crate::{
 	config::StumpConfig,
-	db::entity::{LibraryConfig, Media, MediaMetadata, Series},
+	db::{
+		entity::{LibraryConfig, Media, MediaMetadata, Series},
+		FileStatus,
+	},
 	filesystem::{
 		process,
 		scanner::{CustomVisit, CustomVisitResult},
@@ -129,6 +137,12 @@ pub struct SeriesBuilder {
 	library_id: String,
 }
 
+#[derive(Debug, Clone)]
+pub struct BuiltSeries {
+	pub series: series::ActiveModel,
+	pub metadata: Option<series_metadata::ActiveModel>,
+}
+
 impl SeriesBuilder {
 	pub fn new(path: &Path, library_id: &str) -> Self {
 		Self {
@@ -137,7 +151,7 @@ impl SeriesBuilder {
 		}
 	}
 
-	pub fn build(self) -> CoreResult<Series> {
+	pub fn build(self) -> CoreResult<BuiltSeries> {
 		let path = self.path.as_path();
 
 		let file_name = path
@@ -156,13 +170,29 @@ impl SeriesBuilder {
 
 		tracing::debug!(file_name, path_str, ?metadata, "Parsed series information");
 
-		Ok(Series {
-			path: path_str,
-			name: file_name,
-			library_id: self.library_id,
-			metadata,
+		let series = series::ActiveModel {
+			path: Set(path_str),
+			name: Set(file_name),
+			library_id: Set(Some(self.library_id)),
+			status: Set(FileStatus::Ready.to_string()),
 			..Default::default()
-		})
+		};
+
+		let metadata = metadata.map(|metadata| series_metadata::ActiveModel {
+			meta_type: Set(metadata._type),
+			title: Set(metadata.title),
+			summary: Set(metadata.summary),
+			publisher: Set(metadata.publisher),
+			imprint: Set(metadata.imprint),
+			comicid: Set(metadata.comicid),
+			volume: Set(metadata.volume),
+			booktype: Set(metadata.booktype),
+			age_rating: Set(metadata.age_rating),
+			status: Set(metadata.status),
+			..Default::default()
+		});
+
+		Ok(BuiltSeries { series, metadata })
 	}
 }
 

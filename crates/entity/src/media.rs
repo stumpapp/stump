@@ -151,6 +151,12 @@ impl FromQueryResult for ModelWithMetadata {
 	}
 }
 
+#[derive(Debug, FromQueryResult)]
+pub struct MediaIdentSelect {
+	pub id: String,
+	pub path: String,
+}
+
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
 	#[sea_orm(has_many = "super::book_club_book_suggestion::Entity")]

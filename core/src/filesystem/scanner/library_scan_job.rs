@@ -19,7 +19,10 @@ use crate::{
 		entity::{CoreJobOutput, IgnoreRules, LibraryConfig},
 		FileStatus, SeriesDAO, DAO,
 	},
-	filesystem::image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
+	filesystem::{
+		image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
+		scanner::utils::safely_insert_series,
+	},
 	job::{
 		error::JobError, Executor, JobExecuteLog, JobExt, JobOutputExt, JobProgress,
 		JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
@@ -152,13 +155,7 @@ impl JobExt for LibraryScanJob {
 			))?;
 		// library_config.apply(self.options);
 		let is_collection_based = config.is_collection_based();
-		let ignore_rules = config
-			.ignore_rules
-			.clone()
-			.map_or_else(IgnoreRules::default, |rules| {
-				IgnoreRules::try_from(rules).unwrap_or_default()
-			})
-			.build()?;
+		let ignore_rules = config.ignore_rules().build()?;
 
 		self.config = Some(config);
 
@@ -193,7 +190,7 @@ impl JobExt for LibraryScanJob {
 		output.ignored_directories = ignored_directories;
 
 		if library_is_missing {
-			handle_missing_library(&ctx.db, self.id.as_str()).await?;
+			handle_missing_library(&ctx.conn, self.id.as_str()).await?;
 			ctx.send_batch(vec![
 				JobProgress::msg("Failed to find library on disk").into_worker_send(),
 				CoreEvent::DiscoveredMissingLibrary(self.id.clone()).into_worker_send(),
@@ -412,9 +409,6 @@ impl JobExt for LibraryScanJob {
 						(built_series.len() + failure_logs.len()) as i32;
 					logs.extend(failure_logs);
 
-					// TODO: remove this DAO!!
-					let series_dao = SeriesDAO::new(ctx.db.clone());
-
 					let chunks = built_series.chunks(200);
 					let chunk_count = chunks.len();
 					tracing::trace!(chunk_count, "Batch inserting new series");
@@ -425,8 +419,9 @@ impl JobExt for LibraryScanJob {
 							(idx + 1) as i32,
 							chunk_count as i32,
 						));
-						let result = series_dao.create_many(chunk.to_vec()).await;
-						match result {
+						match safely_insert_series(chunk.to_vec(), ctx.conn.as_ref())
+							.await
+						{
 							Ok(created_series) => {
 								output.created_series += created_series.len() as u64;
 								ctx.send_core_event(CoreEvent::CreatedManySeries {
@@ -479,14 +474,7 @@ impl JobExt for LibraryScanJob {
 					max_depth = Some(1);
 				}
 
-				let ignore_rules = match self.config.map(|c| {
-					c.ignore_rules
-						.clone()
-						.map_or_else(IgnoreRules::default, |rules| {
-							IgnoreRules::try_from(rules).unwrap_or_default()
-						})
-						.build()
-				}) {
+				let ignore_rules = match self.config.map(|c| c.ignore_rules().build()) {
 					Some(Ok(rules)) => rules,
 					Some(Err(err)) => {
 						tracing::error!(error = ?err, "Failed to build ignore rules");

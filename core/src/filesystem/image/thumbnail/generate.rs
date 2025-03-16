@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use entity::media;
 use tokio::{fs, sync::oneshot, task::spawn_blocking};
 
 use crate::{
@@ -11,7 +12,6 @@ use crate::{
 			ProcessorError, WebpProcessor,
 		},
 	},
-	prisma::media,
 };
 
 /// An error enum for thumbnail generation errors
@@ -70,7 +70,7 @@ fn do_generate_book_thumbnail(
 /// exists and `force_regen` is false, the function will return the existing thumbnail data.
 #[tracing::instrument(skip_all)]
 pub async fn generate_book_thumbnail(
-	book: &media::Data,
+	book: &media::MediaIdentSelect,
 	GenerateThumbnailOptions {
 		image_options,
 		core_config,

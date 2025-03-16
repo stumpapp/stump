@@ -12,13 +12,18 @@ use specta::Type;
 use tokio::sync::Semaphore;
 use utoipa::ToSchema;
 
+use entity::{
+	media,
+	sea_orm::{prelude::*, QuerySelect},
+	series,
+};
+
 use crate::{
 	filesystem::image::ImageProcessorOptions,
 	job::{
 		error::JobError, JobExecuteLog, JobExt, JobOutputExt, JobProgress, JobTaskOutput,
 		WorkerCtx, WorkingState, WrappedJob,
 	},
-	prisma::{media, series},
 };
 
 use super::{
@@ -140,28 +145,29 @@ impl JobExt for ThumbnailGenerationJob {
 	) -> Result<WorkingState<Self::Output, Self::Task>, JobError> {
 		let media_ids = match &self.params.variant {
 			ThumbnailGenerationJobVariant::SingleLibrary(id) => {
-				let library_media = ctx
-					.db
-					.media()
-					.find_many(vec![media::series::is(vec![series::library_id::equals(
-						Some(id.clone()),
-					)])])
-					.exec()
+				let books = media::Entity::find()
+					.select_only()
+					.columns(vec![media::Column::Id, media::Column::Path])
+					.inner_join(series::Entity)
+					.filter(series::Column::LibraryId.eq(id))
+					.into_model::<media::MediaIdentSelect>()
+					.all(ctx.conn.as_ref())
 					.await
 					.map_err(|e| JobError::InitFailed(e.to_string()))?;
 
-				library_media.into_iter().map(|m| m.id).collect::<Vec<_>>()
+				books.into_iter().map(|m| m.id).collect::<Vec<_>>()
 			},
 			ThumbnailGenerationJobVariant::SingleSeries(id) => {
-				let series_media = ctx
-					.db
-					.media()
-					.find_many(vec![media::series_id::equals(Some(id.clone()))])
-					.exec()
+				let books = media::Entity::find()
+					.select_only()
+					.columns(vec![media::Column::Id, media::Column::Path])
+					.filter(media::Column::SeriesId.eq(id))
+					.into_model::<media::MediaIdentSelect>()
+					.all(ctx.conn.as_ref())
 					.await
 					.map_err(|e| JobError::InitFailed(e.to_string()))?;
 
-				series_media.into_iter().map(|m| m.id).collect::<Vec<_>>()
+				books.into_iter().map(|m| m.id).collect::<Vec<_>>()
 			},
 			ThumbnailGenerationJobVariant::MediaGroup(media_ids) => media_ids.clone(),
 		};
@@ -184,11 +190,12 @@ impl JobExt for ThumbnailGenerationJob {
 
 		match task {
 			ThumbnailGenerationTask::GenerateBatch(media_ids) => {
-				let media = ctx
-					.db
-					.media()
-					.find_many(vec![media::id::in_vec(media_ids)])
-					.exec()
+				let media = media::Entity::find()
+					.select_only()
+					.columns(vec![media::Column::Id, media::Column::Path])
+					.filter(media::Column::Id.is_in(media_ids))
+					.into_model::<media::MediaIdentSelect>()
+					.all(ctx.conn.as_ref())
 					.await
 					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
 
@@ -203,7 +210,7 @@ impl JobExt for ThumbnailGenerationJob {
 					logs: sub_logs,
 					..
 				} = safely_generate_batch(
-					&media,
+					media,
 					GenerateThumbnailOptions {
 						image_options: self.options.clone(),
 						core_config: ctx.config.as_ref().clone(),
@@ -233,7 +240,7 @@ impl JobExt for ThumbnailGenerationJob {
 
 #[tracing::instrument(skip_all)]
 pub async fn safely_generate_batch(
-	books: &[media::Data],
+	books: Vec<media::MediaIdentSelect>,
 	options: GenerateThumbnailOptions,
 	reporter: impl Fn(usize),
 ) -> JobTaskOutput<ThumbnailGenerationJob> {

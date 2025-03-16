@@ -18,7 +18,7 @@ use entity::{
 		ActiveValue::Set,
 		Condition, DatabaseConnection, IntoActiveModel, Iterable, TransactionTrait,
 	},
-	series,
+	series, series_metadata,
 };
 use futures::{stream::FuturesUnordered, StreamExt};
 use tokio::{
@@ -36,7 +36,7 @@ use crate::{
 	error::{CoreError, CoreResult},
 	filesystem::{
 		scanner::options::{BookVisitOperation, CustomVisitResult},
-		MediaBuilder, SeriesBuilder,
+		BuiltSeries, MediaBuilder, SeriesBuilder,
 	},
 	job::{error::JobError, JobExecuteLog, JobProgress, WorkerCtx, WorkerSendExt},
 	CoreEvent,
@@ -414,7 +414,7 @@ pub(crate) async fn handle_restored_media(
 /// # Arguments
 /// * `for_library` - The library ID to associate the series with
 /// * `path` - The path to the series on disk
-async fn build_series(for_library: &str, path: &Path) -> CoreResult<Series> {
+async fn build_series(for_library: &str, path: &Path) -> CoreResult<BuiltSeries> {
 	let (tx, rx) = oneshot::channel();
 
 	// Spawn a blocking task to handle the IO-intensive operations:
@@ -458,7 +458,7 @@ pub(crate) async fn safely_build_series(
 	paths: Vec<PathBuf>,
 	core_config: &StumpConfig,
 	reporter: impl Fn(usize),
-) -> (Vec<Series>, Vec<JobExecuteLog>) {
+) -> (Vec<BuiltSeries>, Vec<JobExecuteLog>) {
 	let mut logs = vec![];
 	let mut created_series = Vec::with_capacity(paths.len());
 
@@ -521,6 +521,36 @@ pub(crate) async fn safely_build_series(
 	tracing::debug!(elapsed = ?start.elapsed(), success_count, error_count, "Finished batch of series");
 
 	(created_series, logs)
+}
+
+pub(crate) async fn safely_insert_series(
+	series: Vec<BuiltSeries>,
+	conn: &DatabaseConnection,
+) -> Result<Vec<series::Model>, JobError> {
+	let mut output = Vec::with_capacity(series.len());
+
+	let txn = conn.begin().await?;
+
+	for BuiltSeries { series, metadata } in series {
+		let created_series = series::Entity::insert(series)
+			.exec_with_returning(&txn)
+			.await?;
+
+		// I opted to not kill the transaction if metadata insertion fails, I figure this
+		// is a best-effort operation and we can always try again later after fixing a bad
+		// metadata entry vs killing the entire series creation process over a single bad entry
+		if let Some(meta) = metadata {
+			if let Err(error) = series_metadata::Entity::insert(meta).exec(&txn).await {
+				tracing::error!(?error, "Failed to insert series metadata");
+			}
+		}
+
+		output.push(created_series);
+	}
+
+	txn.commit().await?;
+	tracing::debug!(series_count = output.len(), "Inserted series into database");
+	Ok(output)
 }
 
 // TODO(granular-scans): intake ScanOptions

@@ -27,6 +27,25 @@ pub struct SeriesIdentSelect {
 	pub path: String,
 }
 
+pub struct ModelWithMetadata {
+	pub series: Model,
+	pub metadata: Option<super::series_metadata::Model>,
+}
+
+impl FromQueryResult for ModelWithMetadata {
+	fn from_query_result(
+		res: &sea_orm::QueryResult,
+		_pre: &str,
+	) -> Result<Self, sea_orm::DbErr> {
+		let series = Model::from_query_result(res, Entity.table_name())?;
+		let metadata = super::series_metadata::Model::from_query_result_optional(
+			res,
+			"series_metadata",
+		)?;
+		Ok(Self { series, metadata })
+	}
+}
+
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
 	#[sea_orm(

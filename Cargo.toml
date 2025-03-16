@@ -73,13 +73,13 @@ syn = "2.0.79"
 zip = { version = "=1.1.3", features = ["deflate"], default-features = false }
 
 
-prisma-client-rust = { git = "https://github.com/darby42/prisma-client-rust.git", rev = "9c50b3c", features = [
+prisma-client-rust = { git = "https://github.com/darby42/prisma-client-rust.git", rev = "40a69fd", features = [
   "sqlite-create-many",
   "migrations",
   "sqlite",
   "mocking"
 ], default-features = false }
-prisma-client-rust-cli = { git = "https://github.com/darby42/prisma-client-rust.git", rev = "9c50b3c", features = [
+prisma-client-rust-cli = { git = "https://github.com/darby42/prisma-client-rust.git", rev = "40a69fd", features = [
   "sqlite-create-many",
   "migrations",
   "sqlite",

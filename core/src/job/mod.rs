@@ -15,10 +15,8 @@
 // - https://github.com/Nukesor/pueue
 use std::{collections::VecDeque, fmt::Debug, sync::Arc, time::Duration};
 
-use entity::{
-	job,
-	sea_orm::{prelude::*, QuerySelect, Set},
-};
+use models::entity::{job, log};
+use sea_orm::{prelude::*, QuerySelect, Set};
 use serde::{de, Deserialize, Serialize};
 
 mod controller;
@@ -342,12 +340,9 @@ pub trait JobExt: Send + Sync + Sized + Clone + 'static {
 		let save_state = serde_json::to_vec(&working_state)
 			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
 
-		let affected_rows = entity::job::Entity::update_many()
-			.filter(entity::job::Column::Id.eq(job_id.clone()))
-			.col_expr(
-				entity::job::Column::SaveState,
-				Expr::value(Some(save_state)),
-			)
+		let affected_rows = job::Entity::update_many()
+			.filter(job::Column::Id.eq(job_id.clone()))
+			.col_expr(job::Column::SaveState, Expr::value(Some(save_state)))
 			.exec(conn)
 			.await?
 			.rows_affected;
@@ -486,20 +481,16 @@ pub trait Executor: Send + Sync {
 		let expected_logs = output.logs.len();
 
 		if expected_logs > 0 {
-			let active_models =
-				output.logs.into_iter().map(|log| entity::log::ActiveModel {
-					job_id: Set(Some(job_id.to_string())),
-					level: Set(log.level.to_string()),
-					message: Set(log.msg),
-					timestamp: Set(log.timestamp.to_rfc3339()),
-					context: Set(log.context),
-					..Default::default()
-				});
+			let active_models = output.logs.into_iter().map(|log| log::ActiveModel {
+				job_id: Set(Some(job_id.to_string())),
+				level: Set(log.level.to_string()),
+				message: Set(log.msg),
+				timestamp: Set(log.timestamp.to_rfc3339()),
+				context: Set(log.context),
+				..Default::default()
+			});
 
-			if let Err(error) = entity::log::Entity::insert_many(active_models)
-				.exec(conn)
-				.await
-			{
+			if let Err(error) = log::Entity::insert_many(active_models).exec(conn).await {
 				tracing::error!(?error, "Failed to persist job logs to DB");
 			}
 		}
@@ -507,19 +498,16 @@ pub trait Executor: Send + Sync {
 		let output_data = serde_json::to_vec(&output.output)
 			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
 
-		let affected_rows = entity::job::Entity::update_many()
-			.filter(entity::job::Column::Id.eq(job_id.to_string()))
-			.col_expr(entity::job::Column::SaveState, Expr::value(None::<Vec<u8>>))
+		let affected_rows = job::Entity::update_many()
+			.filter(job::Column::Id.eq(job_id.to_string()))
+			.col_expr(job::Column::SaveState, Expr::value(None::<Vec<u8>>))
+			.col_expr(job::Column::OutputData, Expr::value(Some(output_data)))
 			.col_expr(
-				entity::job::Column::OutputData,
-				Expr::value(Some(output_data)),
-			)
-			.col_expr(
-				entity::job::Column::Status,
+				job::Column::Status,
 				Expr::value(JobStatus::Completed.to_string()),
 			)
 			.col_expr(
-				entity::job::Column::MsElapsed,
+				job::Column::MsElapsed,
 				Expr::value(elapsed.as_millis() as i64),
 			)
 			.exec(conn)
@@ -555,11 +543,11 @@ pub trait Executor: Send + Sync {
 			));
 		}
 
-		let affected_rows = entity::job::Entity::update_many()
-			.filter(entity::job::Column::Id.eq(job_id.to_string()))
-			.col_expr(entity::job::Column::Status, Expr::value(status.to_string()))
+		let affected_rows = job::Entity::update_many()
+			.filter(job::Column::Id.eq(job_id.to_string()))
+			.col_expr(job::Column::Status, Expr::value(status.to_string()))
 			.col_expr(
-				entity::job::Column::MsElapsed,
+				job::Column::MsElapsed,
 				Expr::value(elapsed.as_millis() as i64),
 			)
 			.exec(conn)

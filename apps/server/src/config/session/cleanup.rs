@@ -1,7 +1,8 @@
 use std::collections::VecDeque;
 
 use chrono::Utc;
-use entity::{sea_orm::prelude::*, session};
+use models::entity::session;
+use sea_orm::prelude::*;
 use serde::{Deserialize, Serialize};
 use stump_core::job::{
 	error::JobError, JobExecuteLog, JobExt, JobOutputExt, JobTaskOutput, WorkerCtx,

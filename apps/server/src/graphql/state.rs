@@ -1,4 +1,4 @@
-use entity::user::AuthUser;
+use models::entity::user::AuthUser;
 
 use crate::config::state::AppState;
 

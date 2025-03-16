@@ -1,5 +1,4 @@
 use derive_builder::UninitializedFieldError;
-use entity::sea_orm;
 
 #[derive(Debug, thiserror::Error)]
 pub enum OPDSV2Error {

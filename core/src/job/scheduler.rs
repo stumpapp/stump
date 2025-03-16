@@ -1,14 +1,11 @@
 use std::sync::Arc;
 
-use entity::{
-	job_schedule_config, library, library_config,
-	sea_orm::{prelude::*, Iterable, QuerySelect},
-};
-
 use crate::{
 	db::entity::LibraryConfig, filesystem::scanner::LibraryScanJob, job::WrappedJob,
 	CoreResult, Ctx,
 };
+use models::entity::{job_schedule_config, library, library_config};
+use sea_orm::{prelude::*, Iterable, QuerySelect};
 
 // TODO: refactor this!
 // 1. Schedule multiple job types (complex config)

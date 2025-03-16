@@ -1,10 +1,10 @@
 use std::{collections::VecDeque, path::PathBuf};
 
-use entity::{
+use models::entity::{
 	library, library_config, library_scan_record, media,
-	sea_orm::{prelude::*, sea_query::Query, Set, TransactionTrait},
 	series::{self, SeriesIdentSelect},
 };
+use sea_orm::{prelude::*, sea_query::Query, Set, TransactionTrait};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;

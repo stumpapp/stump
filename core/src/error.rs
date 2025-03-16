@@ -1,7 +1,6 @@
 use std::io;
 
 use derive_builder::UninitializedFieldError;
-use entity::sea_orm;
 use thiserror::Error;
 
 pub type CoreResult<T> = Result<T, CoreError>;

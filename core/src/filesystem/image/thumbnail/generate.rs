@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use entity::media;
+use models::entity::media;
 use tokio::{fs, sync::oneshot, task::spawn_blocking};
 
 use crate::{

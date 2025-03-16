@@ -3,7 +3,8 @@ use std::{
 	time::{Duration, Instant},
 };
 
-use entity::sea_orm::{prelude::*, DatabaseConnection};
+use models::entity::job;
+use sea_orm::{prelude::*, DatabaseConnection};
 use tokio::sync::{broadcast, mpsc, oneshot};
 
 use crate::{
@@ -271,10 +272,10 @@ impl Worker {
 		)?;
 		let worker = worker.arced();
 
-		let affected_rows = entity::job::Entity::update_many()
-			.filter(entity::job::Column::Id.eq(job_id))
+		let affected_rows = job::Entity::update_many()
+			.filter(job::Column::Id.eq(job_id))
 			.col_expr(
-				entity::job::Column::Status,
+				job::Column::Status,
 				Expr::value(JobStatus::Running.to_string()),
 			)
 			.exec(conn.as_ref())
@@ -504,14 +505,14 @@ pub(crate) async fn handle_failure_status(
 	conn: &DatabaseConnection,
 	elapsed: Duration,
 ) -> Result<(), JobError> {
-	let update_result = entity::job::Entity::update_many()
-		.filter(entity::job::Column::Id.eq(job_id.clone()))
+	let update_result = job::Entity::update_many()
+		.filter(job::Column::Id.eq(job_id.clone()))
 		.col_expr(
-			entity::job::Column::Status,
+			job::Column::Status,
 			Expr::value(status.to_string()),
 		)
 		.col_expr(
-			entity::job::Column::MsElapsed,
+			job::Column::MsElapsed,
 			Expr::value(
 				elapsed.as_millis().try_into().unwrap_or_else(|e| {
 					tracing::error!(error = ?e, "Wow! You defied logic and overflowed an i64 during the attempt to convert job duration to milliseconds. It must have been a long 292_471_208 years!");

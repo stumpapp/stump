@@ -25,14 +25,12 @@ pub mod prisma;
 use config::logging::STUMP_SHADOW_TEXT;
 use config::StumpConfig;
 use db::JournalMode;
-use entity::{
-	sea_orm::{
-		prelude::*, DatabaseBackend, EntityTrait, PaginatorTrait, QuerySelect,
-		SelectColumns, Statement,
-	},
-	server_config,
-};
 use job::{JobController, JobScheduler};
+use models::entity::server_config;
+use sea_orm::{
+	prelude::*, DatabaseBackend, EntityTrait, PaginatorTrait, QuerySelect, SelectColumns,
+	Statement,
+};
 
 pub use context::Ctx;
 pub use error::{CoreError, CoreResult};

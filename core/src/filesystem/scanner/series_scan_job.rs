@@ -1,10 +1,7 @@
 use std::{collections::VecDeque, path::PathBuf};
 
-use entity::{
-	library, library_config, media,
-	sea_orm::{prelude::*, sea_query::Query, Condition, UpdateResult},
-	series,
-};
+use models::entity::{library, library_config, media, series};
+use sea_orm::{prelude::*, sea_query::Query, Condition, UpdateResult};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;

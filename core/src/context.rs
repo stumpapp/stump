@@ -1,9 +1,7 @@
 use std::sync::Arc;
 
-use entity::{
-	sea_orm::{prelude::*, DatabaseConnection, SelectColumns},
-	server_config,
-};
+use models::entity::server_config;
+use sea_orm::{prelude::*, DatabaseConnection, SelectColumns};
 use tokio::sync::{
 	broadcast::{channel, Receiver, Sender},
 	mpsc::error::SendError,

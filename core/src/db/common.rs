@@ -1,7 +1,7 @@
 use std::{collections::HashMap, str::FromStr};
 
-use entity::sea_orm::{self, FromQueryResult};
 use prisma_client_rust::{raw, PrismaValue, QueryError};
+use sea_orm::{self, FromQueryResult};
 use serde::{Deserialize, Serialize};
 
 use crate::{error::CoreResult, prisma::PrismaClient, CoreError};

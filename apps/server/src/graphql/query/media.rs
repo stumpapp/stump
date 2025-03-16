@@ -1,5 +1,5 @@
 use async_graphql::{Context, Object, Result};
-use entity::{media, sea_orm::prelude::*};
+use models::entity::{media, sea_orm::prelude::*};
 
 use crate::graphql::GraphQLData;
 

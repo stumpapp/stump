@@ -3,10 +3,11 @@ use std::{
 	sync::Arc,
 };
 
-use entity::sea_orm::{
+use futures::future::join_all;
+use models::entity::job;
+use sea_orm::{
 	prelude::*, sqlx::types::chrono::Utc, ActiveValue::Set, DatabaseConnection,
 };
-use futures::future::join_all;
 use tokio::sync::{broadcast, mpsc, RwLock};
 
 use super::{error::JobManagerError, Executor, JobControllerCommand, Worker};
@@ -69,14 +70,14 @@ impl JobManager {
 	pub async fn initialize(self: Arc<Self>) -> JobManagerResult<()> {
 		let conn = self.conn.as_ref();
 
-		let affected_rows = entity::job::Entity::update_many()
-			.filter(entity::job::Column::Status.eq(JobStatus::Running.to_string()))
+		let affected_rows = job::Entity::update_many()
+			.filter(job::Column::Status.eq(JobStatus::Running.to_string()))
 			.col_expr(
-				entity::job::Column::Status,
+				job::Column::Status,
 				Expr::value(JobStatus::Cancelled.to_string()),
 			)
 			.col_expr(
-				entity::job::Column::CompletedAt,
+				job::Column::CompletedAt,
 				Expr::value(Some(Utc::now().to_rfc3339())),
 			)
 			.exec(conn)
@@ -106,7 +107,7 @@ impl JobManager {
 			return Err(JobManagerError::JobAlreadyExists(job_id));
 		}
 
-		let active_model = entity::job::ActiveModel {
+		let active_model = job::ActiveModel {
 			id: Set(job.id().to_string()),
 			name: Set(job.name().to_string()),
 			description: Set(job.description()),
@@ -114,7 +115,7 @@ impl JobManager {
 			created_at: Set(Utc::now().to_rfc3339()),
 			..Default::default()
 		};
-		let created_job = entity::job::Entity::insert(active_model)
+		let created_job = job::Entity::insert(active_model)
 			.exec(self.conn.as_ref())
 			.await
 			.map_err(|err| JobManagerError::JobPersistFailed(err.to_string()))?;
@@ -191,10 +192,10 @@ impl JobManager {
 			drop(workers);
 			self.auto_enqueue().await;
 		} else if let Some(index) = self.get_queued_job_index(&job_id).await {
-			entity::job::Entity::update_many()
-				.filter(entity::job::Column::Id.eq(job_id.clone()))
+			job::Entity::update_many()
+				.filter(job::Column::Id.eq(job_id.clone()))
 				.col_expr(
-					entity::job::Column::Status,
+					job::Column::Status,
 					Expr::value(JobStatus::Cancelled.to_string()),
 				)
 				.exec(self.conn.as_ref())
@@ -210,10 +211,10 @@ impl JobManager {
                 },
 			);
 		} else {
-			let affected_rows = entity::job::Entity::update_many()
-				.filter(entity::job::Column::Id.eq(job_id.clone()))
+			let affected_rows = job::Entity::update_many()
+				.filter(job::Column::Id.eq(job_id.clone()))
 				.col_expr(
-					entity::job::Column::Status,
+					job::Column::Status,
 					Expr::value(JobStatus::Cancelled.to_string()),
 				)
 				.exec(self.conn.as_ref())

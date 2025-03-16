@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use prisma_client_rust::chrono::{DateTime, FixedOffset, Utc};
 
-use entity::{
+use models::entity::{
 	sea_orm::{prelude::*, Set},
 	series, series_metadata,
 };

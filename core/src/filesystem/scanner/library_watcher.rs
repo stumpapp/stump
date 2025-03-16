@@ -4,11 +4,9 @@ use crate::{
 	CoreError, CoreResult,
 };
 use async_trait::async_trait;
-use entity::{
-	library, library_config,
-	sea_orm::{prelude::*, QuerySelect},
-};
+use models::entity::{library, library_config};
 use notify::{Event, RecommendedWatcher, Watcher};
+use sea_orm::{prelude::*, QuerySelect};
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::path::PathBuf;
 use std::sync::Arc;

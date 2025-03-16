@@ -4,16 +4,13 @@ use std::{
 	sync::Arc,
 };
 
-use entity::{
-	media,
-	sea_orm::{prelude::*, DatabaseConnection, QuerySelect},
-	series,
-};
 use globset::GlobSet;
 use itertools::Either;
+use models::entity::{media, series};
 use rayon::iter::{
 	IntoParallelIterator, IntoParallelRefIterator, ParallelBridge, ParallelIterator,
 };
+use sea_orm::{prelude::*, DatabaseConnection, QuerySelect};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::{

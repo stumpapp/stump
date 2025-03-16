@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use entity::sea_orm::DatabaseConnection;
+use sea_orm::DatabaseConnection;
 use tokio::sync::{
 	broadcast,
 	mpsc::{self, error::SendError},

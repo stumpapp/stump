@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use entity::sea_orm::{self, DatabaseConnection};
+use sea_orm::{self, DatabaseConnection};
 
 use crate::{config::StumpConfig, prisma};
 

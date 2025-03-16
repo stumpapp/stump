@@ -1,4 +1,5 @@
-use entity::sea_orm;
+use models::error::EntityError;
+use sea_orm;
 use tokio::sync::oneshot;
 
 use crate::{filesystem::error::FileError, CoreError};
@@ -25,6 +26,15 @@ pub enum JobError {
 	// TODO(sea-orm):Remove this
 	#[error("Query error: {0}")]
 	QueryError(#[from] Box<prisma_client_rust::QueryError>),
+}
+
+// TODO(sea-orm): do something else
+impl From<EntityError> for JobError {
+	fn from(err: EntityError) -> Self {
+		match err {
+			_ => Self::Unknown(err.to_string()),
+		}
+	}
 }
 
 impl From<prisma_client_rust::QueryError> for JobError {

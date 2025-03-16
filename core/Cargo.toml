@@ -15,7 +15,7 @@ derive_builder.workspace = true
 derivative.workspace = true
 dirs = "5.0.1"
 email = { path = "../crates/email" }
-entity = { path = "../crates/entity" }
+models = { path = "../database/models" }
 epub = { git = "https://github.com/stumpapp/epub-rs", rev = "38e091abe96875952556ab7dec195022d0230e14" }
 futures.workspace = true
 globset = "0.4.14"
@@ -24,6 +24,7 @@ infer.workspace = true
 itertools.workspace = true
 md5.workspace = true
 rand.workspace = true
+sea-orm.workspace = true
 serde.workspace = true
 serde-xml-rs = "0.6.0" # Support for XML serialization/deserialization
 serde_json.workspace = true

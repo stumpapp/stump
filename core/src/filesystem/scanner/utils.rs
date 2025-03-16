@@ -10,17 +10,14 @@ use std::{
 };
 
 use chrono::{DateTime, Utc};
-use entity::{
-	media, media_metadata,
-	sea_orm::{
-		prelude::*,
-		sea_query::{IdenList, OnConflict, Query},
-		ActiveValue::Set,
-		Condition, DatabaseConnection, IntoActiveModel, Iterable, TransactionTrait,
-	},
-	series, series_metadata,
-};
 use futures::{stream::FuturesUnordered, StreamExt};
+use models::entity::{media, media_metadata, series, series_metadata};
+use sea_orm::{
+	prelude::*,
+	sea_query::{IdenList, OnConflict, Query},
+	ActiveValue::Set,
+	Condition, DatabaseConnection, IntoActiveModel, Iterable, TransactionTrait,
+};
 use tokio::{
 	sync::{oneshot, Semaphore},
 	task::spawn_blocking,

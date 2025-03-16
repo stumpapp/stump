@@ -12,11 +12,8 @@ use specta::Type;
 use tokio::sync::Semaphore;
 use utoipa::ToSchema;
 
-use entity::{
-	media,
-	sea_orm::{prelude::*, QuerySelect},
-	series,
-};
+use models::entity::{media, series};
+use sea_orm::{prelude::*, QuerySelect};
 
 use crate::{
 	filesystem::image::ImageProcessorOptions,

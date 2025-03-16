@@ -2412,9 +2412,12 @@ name = "entity"
 version = "0.0.0"
 dependencies = [
  "async-graphql",
+ "globset",
  "itertools 0.13.0",
  "sea-orm",
  "serde",
+ "serde_json",
+ "thiserror 1.0.63",
 ]
 
 [[package]]

@@ -8,7 +8,7 @@ pub struct Model {
 	#[sea_orm(column_type = "Blob", nullable)]
 	pub options: Option<Vec<u8>>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub timestamp: String,
+	pub timestamp: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "Text")]
 	pub library_id: String,
 	#[sea_orm(column_type = "Text", nullable, unique)]

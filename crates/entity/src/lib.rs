@@ -1,5 +1,7 @@
 pub mod prelude;
 
+// TODO(sea-orm): Nest the entities in a folder
+
 pub mod age_restriction;
 pub mod api_key;
 pub mod book_club;
@@ -17,7 +19,9 @@ pub mod bookmark;
 pub mod collection;
 pub mod emailer;
 pub mod emailer_send_record;
+pub mod error;
 pub mod finished_reading_session;
+pub mod ignore_rules;
 pub mod job;
 pub mod job_schedule_config;
 pub mod last_library_visit;

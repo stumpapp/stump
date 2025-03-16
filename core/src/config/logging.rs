@@ -52,11 +52,17 @@ pub fn init_tracing(config: &StumpConfig) {
 			);
 	}
 
+	if cfg!(debug_assertions) {
+		env_filter = env_filter.add_directive(
+			"sea_orm::driver::sqlx_sqlite=debug"
+				.parse()
+				.expect("Failed to parse tracing directive for sea_orm!"),
+		)
+	}
+
 	let base_layer = tracing_subscriber::registry()
 		.with(max_level)
 		.with(env_filter);
-
-	// let base_layer = tracing_subscriber::registry().with(max_level);
 
 	// TODO: This is likely unnecessary duplication(?), and should be revisited
 	if config.pretty_logs {

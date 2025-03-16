@@ -27,9 +27,9 @@ pub struct LibraryConfig {
 	pub watch: bool,
 	pub library_pattern: LibraryPattern,
 	pub thumbnail_config: Option<ImageProcessorOptions>,
-	#[serde(default)] // TODO: remove this after update with experimental
+	#[serde(default)]
 	pub default_reading_dir: ReadingDirection,
-	#[serde(default)] // TODO: remove this after update with experimental
+	#[serde(default)]
 	pub default_reading_mode: ReadingMode,
 	#[serde(default)]
 	pub default_reading_image_scale_fit: ReadingImageScaleFit,

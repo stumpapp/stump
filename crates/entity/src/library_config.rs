@@ -3,6 +3,8 @@ use std::{fmt, str::FromStr};
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
+use crate::ignore_rules::IgnoreRules;
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "library_configs")]
 pub struct Model {
@@ -35,12 +37,13 @@ impl Model {
 		self.library_pattern == LibraryPattern::CollectionBased.to_string()
 	}
 
-	// pub fn ignore_rules(&self) -> IgnoreRules {
-	// 	self.ignore_rules
-	// 		.map_or_else(IgnoreRules::default, |rules| {
-	// 			IgnoreRules::try_from(rules).unwrap_or_default()
-	// 		})
-	// }
+	pub fn ignore_rules(&self) -> IgnoreRules {
+		self.ignore_rules
+			.clone()
+			.map_or_else(IgnoreRules::default, |rules| {
+				IgnoreRules::try_from(rules).unwrap_or_default()
+			})
+	}
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

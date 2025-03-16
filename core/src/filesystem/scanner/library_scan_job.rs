@@ -1,8 +1,8 @@
 use std::{collections::VecDeque, path::PathBuf};
 
 use entity::{
-	library, library_config,
-	sea_orm::prelude::*,
+	library, library_config, library_scan_record, media,
+	sea_orm::{prelude::*, sea_query::Query, Set, TransactionTrait},
 	series::{self, SeriesIdentSelect},
 };
 use serde::{Deserialize, Serialize};
@@ -24,7 +24,6 @@ use crate::{
 		error::JobError, Executor, JobExecuteLog, JobExt, JobOutputExt, JobProgress,
 		JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
-	prisma::{job, library_scan_record, media, PrismaClient},
 	utils::chain_optional_iter,
 	CoreEvent,
 };
@@ -713,54 +712,52 @@ impl JobExt for LibraryScanJob {
 }
 
 pub async fn handle_missing_library(
-	db: &PrismaClient,
+	conn: &DatabaseConnection,
 	library_id: &str,
 ) -> Result<(), JobError> {
-	let (updated_library, affected_series, affected_media) = db
-		._transaction()
-		.run(|client| async move {
-			let updated_library = client
-				.library()
-				.update(
-					library::id::equals(library_id.to_string()),
-					vec![library::status::set(FileStatus::Missing.to_string())],
-				)
-				.exec()
-				.await?;
+	let txn = conn.begin().await?;
 
-			let affected_series = client
-				.series()
-				.update_many(
-					vec![series::library_id::equals(Some(library_id.to_string()))],
-					vec![series::status::set(FileStatus::Missing.to_string())],
-				)
-				.exec()
-				.await?;
+	let _affected_libraries = library::Entity::update_many()
+		.col_expr(
+			library::Column::Status,
+			Expr::value(FileStatus::Missing.to_string()),
+		)
+		.filter(library::Column::Id.eq(library_id))
+		.exec(&txn)
+		.await?
+		.rows_affected;
 
-			client
-				.media()
-				.update_many(
-					vec![media::series::is(vec![series::library_id::equals(Some(
-						library_id.to_string(),
-					))])],
-					vec![media::status::set(FileStatus::Missing.to_string())],
-				)
-				.exec()
-				.await
-				.map(|affected_media| (updated_library, affected_series, affected_media))
-		})
-		.await
-		.map_err(|e| {
-			JobError::InitFailed(format!(
-				"A critical error occurred while handling missing library: {e}"
-			))
-		})?;
-	tracing::trace!(
-		?updated_library,
-		affected_series,
-		affected_media,
-		"Marked library as missing"
-	);
+	let affected_series = series::Entity::update_many()
+		.col_expr(
+			series::Column::Status,
+			Expr::value(FileStatus::Missing.to_string()),
+		)
+		.filter(series::Column::LibraryId.eq(library_id))
+		.exec(&txn)
+		.await?
+		.rows_affected;
+
+	let affected_books = media::Entity::update_many()
+		.col_expr(
+			media::Column::Status,
+			Expr::value(FileStatus::Missing.to_string()),
+		)
+		.filter(
+			media::Column::SeriesId.in_subquery(
+				Query::select()
+					.column(series::Column::Id)
+					.from(series::Entity)
+					.and_where(series::Column::LibraryId.eq(library_id))
+					.to_owned(),
+			),
+		)
+		.exec(&txn)
+		.await?
+		.rows_affected;
+
+	txn.commit().await?;
+
+	tracing::info!(affected_series, affected_books, "Marked library as missing");
 
 	Ok(())
 }
@@ -770,17 +767,18 @@ async fn handle_scan_complete(
 	ctx: &WorkerCtx,
 	options: &ScanOptions,
 ) -> Result<(), JobError> {
-	let client = ctx.db.clone();
+	let conn = ctx.conn.as_ref();
 	let now = chrono::Utc::now();
 
-	let update_result = client
-		.library()
-		.update(
-			library::id::equals(job.id.clone()),
-			vec![library::last_scanned_at::set(Some(now.into()))],
+	let update_result = library::Entity::update_many()
+		.col_expr(
+			library::Column::LastScannedAt,
+			Expr::value(now.to_rfc3339()),
 		)
-		.exec()
+		.filter(library::Column::Id.eq(job.id.clone()))
+		.exec(conn)
 		.await;
+
 	if let Err(error) = update_result {
 		tracing::error!(?error, "Failed to update library last scanned at");
 	}
@@ -797,18 +795,16 @@ async fn handle_scan_complete(
 		}
 	};
 
-	let insert_result = client
-		.library_scan_record()
-		.create(
-			library::id::equals(job.id.clone()),
-			vec![
-				library_scan_record::options::set(persisted_options),
-				library_scan_record::timestamp::set(now.into()),
-				library_scan_record::job::connect(job::id::equals(ctx.job_id.clone())),
-			],
-		)
-		.exec()
+	let insert_result =
+		library_scan_record::Entity::insert(library_scan_record::ActiveModel {
+			options: Set(persisted_options),
+			timestamp: Set(now.into()),
+			job_id: Set(Some(ctx.job_id.clone())),
+			..Default::default()
+		})
+		.exec(conn)
 		.await;
+
 	if let Err(error) = insert_result {
 		tracing::error!(?error, "Failed to insert library scan record");
 	}

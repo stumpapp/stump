@@ -1,9 +1,6 @@
-use std::{fmt, str::FromStr};
-
 use sea_orm::entity::prelude::*;
-use serde::{Deserialize, Serialize};
 
-use crate::shared::ignore_rules::IgnoreRules;
+use crate::shared::{enums::LibraryPattern, ignore_rules::IgnoreRules};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "library_configs")]
@@ -23,26 +20,22 @@ pub struct Model {
 	pub process_metadata: bool,
 	pub watch: bool,
 	#[sea_orm(column_type = "Text")]
-	pub library_pattern: String,
+	pub library_pattern: LibraryPattern,
 	#[sea_orm(column_type = "Blob", nullable)]
 	pub thumbnail_config: Option<Vec<u8>>,
-	#[sea_orm(column_type = "Blob", nullable)]
-	pub ignore_rules: Option<Vec<u8>>,
+	#[sea_orm(column_type = "Json", nullable)]
+	pub ignore_rules: Option<IgnoreRules>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub library_id: Option<String>,
 }
 
 impl Model {
 	pub fn is_collection_based(&self) -> bool {
-		self.library_pattern == LibraryPattern::CollectionBased.to_string()
+		self.library_pattern == LibraryPattern::CollectionBased
 	}
 
 	pub fn ignore_rules(&self) -> IgnoreRules {
-		self.ignore_rules
-			.clone()
-			.map_or_else(IgnoreRules::default, |rules| {
-				IgnoreRules::try_from(rules).unwrap_or_default()
-			})
+		self.ignore_rules.clone().unwrap_or_default()
 	}
 }
 
@@ -59,47 +52,3 @@ impl Related<super::library::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
-
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
-pub enum LibraryPattern {
-	#[serde(rename = "SERIES_BASED")]
-	SeriesBased,
-	#[serde(rename = "COLLECTION_BASED")]
-	CollectionBased,
-}
-
-impl FromStr for LibraryPattern {
-	type Err = String;
-
-	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		let uppercase = s.to_uppercase();
-
-		match uppercase.as_str() {
-			"SERIES_BASED" => Ok(LibraryPattern::SeriesBased),
-			"COLLECTION_BASED" => Ok(LibraryPattern::CollectionBased),
-			"" => Ok(LibraryPattern::default()),
-			_ => Err(format!("Invalid library pattern: {s}")),
-		}
-	}
-}
-
-impl Default for LibraryPattern {
-	fn default() -> Self {
-		Self::SeriesBased
-	}
-}
-
-impl From<String> for LibraryPattern {
-	fn from(s: String) -> Self {
-		LibraryPattern::from_str(&s).unwrap_or_default()
-	}
-}
-
-impl fmt::Display for LibraryPattern {
-	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		match self {
-			LibraryPattern::SeriesBased => write!(f, "SERIES_BASED"),
-			LibraryPattern::CollectionBased => write!(f, "COLLECTION_BASED"),
-		}
-	}
-}

@@ -1,4 +1,5 @@
 use globset::{Glob, GlobSet, GlobSetBuilder};
+use sea_orm::FromJsonQueryResult;
 use serde::{Deserialize, Serialize};
 
 use crate::error::EntityError;
@@ -6,7 +7,9 @@ use crate::error::EntityError;
 // Note: These are glob patterns, but that is not a serializable type in Rust.
 // So we're just going to use strings which are validated upon creation.
 // The vector is not public to enforce validation on creation.
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[derive(
+	Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq, FromJsonQueryResult,
+)]
 pub struct IgnoreRules(Vec<String>);
 
 impl IgnoreRules {
@@ -45,31 +48,9 @@ impl IgnoreRules {
 			.collect()
 	}
 
-	/// Serialize the ignore rules to a byte vector, which gets dumped into the
-	/// database.
-	pub fn as_bytes(&self) -> Result<Vec<u8>, EntityError> {
-		Ok(serde_json::to_vec(self)?)
-	}
-
 	/// Convert the ignore rules into a glob set
 	pub fn build(&self) -> Result<GlobSet, EntityError> {
 		GlobSet::try_from(self.clone())
-	}
-}
-
-impl TryFrom<Vec<u8>> for IgnoreRules {
-	type Error = EntityError;
-
-	fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
-		Ok(serde_json::from_slice(&value)?)
-	}
-}
-
-impl TryFrom<IgnoreRules> for Vec<u8> {
-	type Error = EntityError;
-
-	fn try_from(value: IgnoreRules) -> Result<Self, Self::Error> {
-		value.as_bytes()
 	}
 }
 
@@ -174,22 +155,22 @@ mod tests {
 		assert!(!globset.is_match("path/to/another/file.txt"));
 	}
 
-	#[test]
-	fn test_ignore_rules_serialization() {
-		let rules = IgnoreRules::new(vec![
-			"*.txt".to_string(),
-			"*.jpg".to_string(),
-			"*.png".to_string(),
-		])
-		.unwrap();
+	// #[test]
+	// fn test_ignore_rules_serialization() {
+	// 	let rules = IgnoreRules::new(vec![
+	// 		"*.txt".to_string(),
+	// 		"*.jpg".to_string(),
+	// 		"*.png".to_string(),
+	// 	])
+	// 	.unwrap();
 
-		let bytes = rules.as_bytes().unwrap();
-		let deserialized = IgnoreRules::try_from(bytes).unwrap();
+	// 	let bytes = rules.as_bytes().unwrap();
+	// 	let deserialized = IgnoreRules::try_from(bytes).unwrap();
 
-		assert_eq!(rules.0[0], deserialized.0[0]);
-		assert_eq!(rules.0[1], deserialized.0[1]);
-		assert_eq!(rules.0[2], deserialized.0[2]);
-	}
+	// 	assert_eq!(rules.0[0], deserialized.0[0]);
+	// 	assert_eq!(rules.0[1], deserialized.0[1]);
+	// 	assert_eq!(rules.0[2], deserialized.0[2]);
+	// }
 
 	#[test]
 	fn test_ignore_rules_len() {

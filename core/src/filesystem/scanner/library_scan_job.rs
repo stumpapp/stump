@@ -155,7 +155,7 @@ impl JobExt for LibraryScanJob {
 			))?;
 		// library_config.apply(self.options);
 		let is_collection_based = config.is_collection_based();
-		let ignore_rules = config.ignore_rules().build()?;
+		let ignore_rules = config.ignore_rules.build()?;
 
 		self.config = Some(config);
 

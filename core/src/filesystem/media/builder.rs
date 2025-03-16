@@ -1,16 +1,13 @@
 use std::path::{Path, PathBuf};
 
+use models::entity::{library_config, media, media_metadata, series, series_metadata};
 use prisma_client_rust::chrono::{DateTime, FixedOffset, Utc};
-
-use models::entity::{
-	sea_orm::{prelude::*, Set},
-	series, series_metadata,
-};
+use sea_orm::Set;
 
 use crate::{
 	config::StumpConfig,
 	db::{
-		entity::{LibraryConfig, Media, MediaMetadata, Series},
+		entity::{Media, MediaMetadata},
 		FileStatus,
 	},
 	filesystem::{
@@ -26,15 +23,21 @@ use super::{generate_hashes, process_metadata, ProcessedFileHashes};
 pub struct MediaBuilder {
 	path: PathBuf,
 	series_id: String,
-	library_config: LibraryConfig,
+	library_config: library_config::Model,
 	config: StumpConfig,
+}
+
+#[derive(Debug, Clone)]
+pub struct BuiltMedia {
+	pub media: media::ActiveModel,
+	pub metadata: Option<media_metadata::ActiveModel>,
 }
 
 impl MediaBuilder {
 	pub fn new(
 		path: &Path,
 		series_id: &str,
-		library_config: LibraryConfig,
+		library_config: library_config::Model,
 		config: &StumpConfig,
 	) -> Self {
 		Self {
@@ -247,7 +250,7 @@ mod tests {
 
 	fn build_media_test_helper(path: String) -> Result<Media, CoreError> {
 		let path = Path::new(&path);
-		let library_config = LibraryConfig {
+		let library_config = library_config::Model {
 			convert_rar_to_zip: false,
 			hard_delete_conversions: false,
 			..Default::default()
@@ -261,7 +264,7 @@ mod tests {
 	fn test_regen_hashes() {
 		let path = get_test_zip_path();
 		let path = Path::new(&path);
-		let library_config = LibraryConfig {
+		let library_config = library_config::Model {
 			generate_file_hashes: true,
 			..Default::default()
 		};

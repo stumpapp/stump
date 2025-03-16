@@ -11,7 +11,7 @@ use std::{
 
 use chrono::{DateTime, Utc};
 use futures::{stream::FuturesUnordered, StreamExt};
-use models::entity::{media, media_metadata, series, series_metadata};
+use models::entity::{library_config, media, media_metadata, series, series_metadata};
 use sea_orm::{
 	prelude::*,
 	sea_query::{IdenList, OnConflict, Query},
@@ -553,7 +553,7 @@ pub(crate) async fn safely_insert_series(
 // TODO(granular-scans): intake ScanOptions
 pub(crate) struct MediaBuildOperation {
 	pub series_id: String,
-	pub library_config: LibraryConfig,
+	pub library_config: library_config::Model,
 	pub max_concurrency: usize,
 }
 
@@ -569,7 +569,7 @@ async fn build_book(
 	path: &Path,
 	series_id: &str,
 	existing_book: Option<Media>,
-	library_config: LibraryConfig,
+	library_config: library_config::Model,
 	config: &StumpConfig,
 ) -> CoreResult<Media> {
 	let (tx, rx) = oneshot::channel();
@@ -623,7 +623,7 @@ async fn handle_book(
 		series_id,
 		existing_book,
 	}: BookVisitCtx,
-	library_config: LibraryConfig,
+	library_config: library_config::Model,
 	config: &StumpConfig,
 ) -> CoreResult<BookVisitResult> {
 	let (tx, rx) = oneshot::channel();

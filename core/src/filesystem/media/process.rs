@@ -5,6 +5,7 @@ use std::{
 	path::{Path, PathBuf},
 };
 
+use models::entity::library_config;
 use serde::{Deserialize, Serialize};
 use tokio::{sync::oneshot, task::spawn_blocking};
 use tracing::debug;
@@ -50,6 +51,18 @@ impl From<LibraryConfig> for FileProcessorOptions {
 
 impl From<&LibraryConfig> for FileProcessorOptions {
 	fn from(options: &LibraryConfig) -> Self {
+		Self {
+			convert_rar_to_zip: options.convert_rar_to_zip,
+			delete_conversion_source: options.hard_delete_conversions,
+			generate_file_hashes: options.generate_file_hashes,
+			generate_koreader_hashes: options.generate_koreader_hashes,
+			process_metadata: options.process_metadata,
+		}
+	}
+}
+
+impl From<library_config::Model> for FileProcessorOptions {
+	fn from(options: library_config::Model) -> Self {
 		Self {
 			convert_rar_to_zip: options.convert_rar_to_zip,
 			delete_conversion_source: options.hard_delete_conversions,

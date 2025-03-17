@@ -14,7 +14,7 @@ use futures::{stream::FuturesUnordered, StreamExt};
 use models::entity::{library_config, media, media_metadata, series, series_metadata};
 use sea_orm::{
 	prelude::*,
-	sea_query::{IdenList, OnConflict, Query},
+	sea_query::{OnConflict, Query},
 	ActiveValue::Set,
 	Condition, DatabaseConnection, IntoActiveModel, Iterable, TransactionTrait,
 };
@@ -26,14 +26,11 @@ use walkdir::DirEntry;
 
 use crate::{
 	config::StumpConfig,
-	db::{
-		entity::{LibraryConfig, Media, Series},
-		FileStatus,
-	},
+	db::FileStatus,
 	error::{CoreError, CoreResult},
 	filesystem::{
 		scanner::options::{BookVisitOperation, CustomVisitResult},
-		BuiltSeries, MediaBuilder, SeriesBuilder,
+		BuiltMedia, BuiltSeries, MediaBuilder, SeriesBuilder,
 	},
 	job::{error::JobError, JobExecuteLog, JobProgress, WorkerCtx, WorkerSendExt},
 	CoreEvent,
@@ -76,57 +73,43 @@ pub(crate) fn file_updated_since_scan(
 
 pub(crate) async fn create_media(
 	db: &DatabaseConnection,
-	generated: Media,
+	BuiltMedia { media, metadata }: BuiltMedia,
 ) -> CoreResult<media::Model> {
 	let txn = db.begin().await?;
-
-	let media = media::ActiveModel {
-		name: Set(generated.name),
-		size: Set(generated.size),
-		extension: Set(generated.extension),
-		pages: Set(generated.pages),
-		path: Set(generated.path),
-		hash: Set(generated.hash),
-		koreader_hash: Set(generated.koreader_hash),
-		series_id: Set(Some(generated.series_id)),
-		modified_at: Set(generated.modified_at.map(|d| d.parse()).transpose()?),
-		..Default::default()
-	};
 
 	let created_media = media::Entity::insert(media)
 		.exec_with_returning(&txn)
 		.await?;
 
-	if let Some(meta) = generated.metadata {
-		let metadata = media_metadata::ActiveModel {
-			media_id: Set(Some(created_media.id.clone())),
-			title: Set(meta.title),
-			series: Set(meta.series),
-			number: Set(meta.number.and_then(|n| Decimal::try_from(n).ok())),
-			volume: Set(meta.volume),
-			summary: Set(meta.summary),
-			notes: Set(meta.notes),
-			age_rating: Set(meta.age_rating),
-			genre: Set(meta.genre.map(|v| v.join(", "))),
-			year: Set(meta.year),
-			month: Set(meta.month),
-			day: Set(meta.day),
-			writers: Set(meta.writers.map(|v| v.join(", "))),
-			pencillers: Set(meta.pencillers.map(|v| v.join(", "))),
-			inkers: Set(meta.inkers.map(|v| v.join(", "))),
-			colorists: Set(meta.colorists.map(|v| v.join(", "))),
-			letterers: Set(meta.letterers.map(|v| v.join(", "))),
-			cover_artists: Set(meta.cover_artists.map(|v| v.join(", "))),
-			editors: Set(meta.editors.map(|v| v.join(", "))),
-			publisher: Set(meta.publisher),
-			links: Set(meta.links.map(|v| v.join(", "))),
-			characters: Set(meta.characters.map(|v| v.join(", "))),
-			teams: Set(meta.teams.map(|v| v.join(", "))),
-			page_count: Set(meta.page_count),
-			..Default::default()
-		};
-
-		media_metadata::Entity::insert(metadata).exec(&txn).await?;
+	if let Some(meta) = metadata {
+		// let metadata = media_metadata::ActiveModel {
+		// 	media_id: Set(Some(created_media.id.clone())),
+		// 	title: Set(meta.title),
+		// 	series: Set(meta.series),
+		// 	number: Set(meta.number.and_then(|n| Decimal::try_from(n).ok())),
+		// 	volume: Set(meta.volume),
+		// 	summary: Set(meta.summary),
+		// 	notes: Set(meta.notes),
+		// 	age_rating: Set(meta.age_rating),
+		// 	genre: Set(meta.genre.map(|v| v.join(", "))),
+		// 	year: Set(meta.year),
+		// 	month: Set(meta.month),
+		// 	day: Set(meta.day),
+		// 	writers: Set(meta.writers.map(|v| v.join(", "))),
+		// 	pencillers: Set(meta.pencillers.map(|v| v.join(", "))),
+		// 	inkers: Set(meta.inkers.map(|v| v.join(", "))),
+		// 	colorists: Set(meta.colorists.map(|v| v.join(", "))),
+		// 	letterers: Set(meta.letterers.map(|v| v.join(", "))),
+		// 	cover_artists: Set(meta.cover_artists.map(|v| v.join(", "))),
+		// 	editors: Set(meta.editors.map(|v| v.join(", "))),
+		// 	publisher: Set(meta.publisher),
+		// 	links: Set(meta.links.map(|v| v.join(", "))),
+		// 	characters: Set(meta.characters.map(|v| v.join(", "))),
+		// 	teams: Set(meta.teams.map(|v| v.join(", "))),
+		// 	page_count: Set(meta.page_count),
+		// 	..Default::default()
+		// };
+		media_metadata::Entity::insert(meta).exec(&txn).await?;
 	}
 
 	txn.commit().await?;
@@ -257,7 +240,7 @@ pub(crate) async fn handle_missing_series(
 				0
 			},
 			|res| {
-				output.updated_series += res.rows_affected as u64;
+				output.updated_series += res.rows_affected;
 				res.rows_affected
 			},
 		);
@@ -398,7 +381,7 @@ pub(crate) async fn handle_restored_media(
 				0
 			},
 			|res| {
-				output.updated_media += res.rows_affected as u64;
+				output.updated_media += res.rows_affected;
 				res.rows_affected
 			},
 		);
@@ -568,10 +551,10 @@ pub(crate) struct MediaBuildOperation {
 async fn build_book(
 	path: &Path,
 	series_id: &str,
-	existing_book: Option<Media>,
+	existing_book: Option<media::ModelWithMetadata>,
 	library_config: library_config::Model,
 	config: &StumpConfig,
-) -> CoreResult<Media> {
+) -> CoreResult<BuiltMedia> {
 	let (tx, rx) = oneshot::channel();
 
 	// Spawn a blocking task to handle the IO-intensive operations:
@@ -656,7 +639,10 @@ async fn handle_book(
 				// If the existing book is None, it means the book doesn't yet exist so we
 				// always just do a full build. However, we really shouldn't be in this state
 				// since media creation is handled in a separate flow than visit
-				(_, None) => builder.build().map(|b| BookVisitResult::Built(Box::new(b))),
+				(_, None) => {
+					unimplemented!()
+					// builder.build().map(|b| BookVisitResult::Built(Box::new(b)))
+				},
 			});
 			tracing::trace!(
 				is_err = send_result.is_err(),
@@ -778,7 +764,8 @@ pub(crate) async fn safely_build_and_insert_media(
 
 	// TODO: consider small batches of _batch instead?
 	while let Some(book) = books.pop_front() {
-		let path = book.path.clone();
+		// let path = book.path.clone();
+		let path = String::default();
 		match create_media(&worker_ctx.conn, book).await {
 			Ok(created_media) => {
 				output.created_media += 1;

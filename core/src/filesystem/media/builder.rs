@@ -2,7 +2,8 @@ use std::path::{Path, PathBuf};
 
 use models::entity::{library_config, media, media_metadata, series, series_metadata};
 use prisma_client_rust::chrono::{DateTime, FixedOffset, Utc};
-use sea_orm::Set;
+use sea_orm::{prelude::Decimal, Set, TryIntoModel};
+use uuid::Uuid;
 
 use crate::{
 	config::StumpConfig,
@@ -48,16 +49,22 @@ impl MediaBuilder {
 		}
 	}
 
-	pub fn rebuild(self, media: &Media) -> CoreResult<Media> {
+	pub fn rebuild(self, media: &media::ModelWithMetadata) -> CoreResult<BuiltMedia> {
 		let generated = self.build()?;
-		Ok(Media {
-			id: media.id.clone(),
-			..generated
+		Ok(BuiltMedia {
+			media: media::ActiveModel {
+				id: Set(media.media.id.clone()),
+				..generated.media
+			},
+			metadata: generated.metadata.map(|meta| media_metadata::ActiveModel {
+				media_id: Set(Some(media.media.id.clone())),
+				..meta
+			}),
 		})
 	}
 
-	pub fn build(self) -> CoreResult<Media> {
-		let mut processed_entry =
+	pub fn build(self) -> CoreResult<BuiltMedia> {
+		let processed_entry =
 			process(&self.path, self.library_config.into(), &self.config)?;
 
 		tracing::trace!(?processed_entry, "Processed entry");
@@ -83,8 +90,12 @@ impl MediaBuilder {
 			0
 		});
 
+		let id = Uuid::new_v4().to_string();
 		let pages = processed_entry.pages;
-		if let Some(ref mut metadata) = processed_entry.metadata {
+		let mut resolved_metadata = None;
+
+		// TODO(sea-orm): processing should return active model
+		if let Some(mut metadata) = processed_entry.metadata {
 			let conflicting_page_counts =
 				metadata.page_count.is_some_and(|count| count != pages);
 			if conflicting_page_counts {
@@ -95,20 +106,53 @@ impl MediaBuilder {
 				);
 				metadata.page_count = Some(pages);
 			}
+
+			resolved_metadata = Some(media_metadata::ActiveModel {
+				title: Set(metadata.title),
+				series: Set(metadata.series),
+				number: Set(metadata.number.and_then(|n| Decimal::try_from(n).ok())),
+				volume: Set(metadata.volume),
+				summary: Set(metadata.summary),
+				notes: Set(metadata.notes),
+				age_rating: Set(metadata.age_rating),
+				genre: Set(metadata.genre.map(|v| v.join(", "))),
+				year: Set(metadata.year),
+				month: Set(metadata.month),
+				day: Set(metadata.day),
+				writers: Set(metadata.writers.map(|v| v.join(", "))),
+				pencillers: Set(metadata.pencillers.map(|v| v.join(", "))),
+				inkers: Set(metadata.inkers.map(|v| v.join(", "))),
+				colorists: Set(metadata.colorists.map(|v| v.join(", "))),
+				letterers: Set(metadata.letterers.map(|v| v.join(", "))),
+				cover_artists: Set(metadata.cover_artists.map(|v| v.join(", "))),
+				editors: Set(metadata.editors.map(|v| v.join(", "))),
+				publisher: Set(metadata.publisher),
+				links: Set(metadata.links.map(|v| v.join(", "))),
+				characters: Set(metadata.characters.map(|v| v.join(", "))),
+				teams: Set(metadata.teams.map(|v| v.join(", "))),
+				page_count: Set(metadata.page_count),
+				media_id: Set(Some(id.clone())),
+				..Default::default()
+			});
 		}
 
-		Ok(Media {
-			name: file_name,
-			size,
-			extension,
-			pages: processed_entry.pages,
-			hash: processed_entry.hash,
-			koreader_hash: processed_entry.koreader_hash,
-			path: path_str,
-			series_id: self.series_id,
-			metadata: processed_entry.metadata,
-			modified_at: last_modified_at.map(|dt| dt.to_rfc3339()),
+		let media = media::ActiveModel {
+			id: Set(id),
+			name: Set(file_name),
+			size: Set(size),
+			extension: Set(extension),
+			pages: Set(pages),
+			hash: Set(processed_entry.hash),
+			koreader_hash: Set(processed_entry.koreader_hash),
+			path: Set(path_str),
+			series_id: Set(Some(self.series_id)),
+			modified_at: Set(last_modified_at),
 			..Default::default()
+		};
+
+		Ok(BuiltMedia {
+			media,
+			metadata: resolved_metadata,
 		})
 	}
 

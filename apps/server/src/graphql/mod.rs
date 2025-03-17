@@ -10,3 +10,5 @@ pub type AppSchema = Schema<Query, EmptyMutation, EmptySubscription>;
 
 pub use schema::build_schema;
 pub use state::GraphQLData;
+
+// TODO: move graphql to its own crate?

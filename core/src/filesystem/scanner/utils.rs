@@ -119,7 +119,7 @@ pub(crate) async fn create_media(
 
 pub(crate) async fn update_media(
 	db: &DatabaseConnection,
-	media::ModelWithMetadata { media, metadata }: media::ModelWithMetadata,
+	media::EntityWithMetadata { media, metadata }: media::EntityWithMetadata,
 ) -> CoreResult<media::Model> {
 	let txn = db.begin().await?;
 
@@ -551,7 +551,7 @@ pub(crate) struct MediaBuildOperation {
 async fn build_book(
 	path: &Path,
 	series_id: &str,
-	existing_book: Option<media::ModelWithMetadata>,
+	existing_book: Option<media::EntityWithMetadata>,
 	library_config: library_config::Model,
 	config: &StumpConfig,
 ) -> CoreResult<BuiltMedia> {

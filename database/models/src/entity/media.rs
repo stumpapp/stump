@@ -1,8 +1,8 @@
 use async_graphql::SimpleObject;
 use async_trait::async_trait;
 use sea_orm::{
-	prelude::*, sea_query::Query, ActiveValue, Condition, FromQueryResult, Iterable,
-	JoinType, QuerySelect, QueryTrait,
+	prelude::*, sea_query::Query, ActiveValue, Condition, FromQueryResult, JoinType,
+	QuerySelect, QueryTrait,
 };
 
 use crate::prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer};
@@ -12,7 +12,7 @@ use super::{
 };
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
-#[graphql(name = "Media")]
+#[graphql(name = "MediaModel")]
 #[sea_orm(table_name = "media")]
 pub struct Model {
 	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
@@ -137,13 +137,14 @@ impl Entity {
 	}
 }
 
-#[derive(Debug)]
-pub struct ModelWithMetadata {
+#[derive(Debug, SimpleObject)]
+pub struct EntityWithMetadata {
+	#[graphql(flatten)]
 	pub media: Model,
 	pub metadata: Option<media_metadata::Model>,
 }
 
-impl FromQueryResult for ModelWithMetadata {
+impl FromQueryResult for EntityWithMetadata {
 	fn from_query_result(
 		res: &sea_orm::QueryResult,
 		_pre: &str,
@@ -157,9 +158,17 @@ impl FromQueryResult for ModelWithMetadata {
 	}
 }
 
-impl ModelWithMetadata {
+impl EntityWithMetadata {
 	pub fn find() -> Select<Entity> {
 		Prefixer::new(Entity::find().select_only())
+			.add_columns(Entity)
+			.add_columns(media_metadata::Entity)
+			.selector
+			.left_join(media_metadata::Entity)
+	}
+
+	pub fn find_by_id(id: String) -> Select<Entity> {
+		Prefixer::new(Entity::find_by_id(id).select_only())
 			.add_columns(Entity)
 			.add_columns(media_metadata::Entity)
 			.selector
@@ -175,7 +184,7 @@ impl ModelWithMetadata {
 				)
 			});
 
-		ModelWithMetadata::find()
+		EntityWithMetadata::find()
 			.inner_join(series::Entity)
 			.join_rev(
 				JoinType::LeftJoin,

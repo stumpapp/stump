@@ -2,6 +2,7 @@ use async_graphql::{EmptyMutation, EmptySubscription, Schema};
 use query::Query;
 
 mod mutation;
+mod object;
 mod query;
 mod schema;
 mod state;

@@ -1,6 +1,8 @@
+use async_graphql::SimpleObject;
 use sea_orm::{entity::prelude::*, FromQueryResult};
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
+#[graphql(name = "SeriesModel")]
 #[sea_orm(table_name = "series")]
 pub struct Model {
 	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
@@ -27,12 +29,12 @@ pub struct SeriesIdentSelect {
 	pub path: String,
 }
 
-pub struct ModelWithMetadata {
+pub struct EntityWithMetadata {
 	pub series: Model,
 	pub metadata: Option<super::series_metadata::Model>,
 }
 
-impl FromQueryResult for ModelWithMetadata {
+impl FromQueryResult for EntityWithMetadata {
 	fn from_query_result(
 		res: &sea_orm::QueryResult,
 		_pre: &str,

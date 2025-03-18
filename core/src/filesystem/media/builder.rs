@@ -49,7 +49,7 @@ impl MediaBuilder {
 		}
 	}
 
-	pub fn rebuild(self, media: &media::ModelWithMetadata) -> CoreResult<BuiltMedia> {
+	pub fn rebuild(self, media: &media::EntityWithMetadata) -> CoreResult<BuiltMedia> {
 		let generated = self.build()?;
 		Ok(BuiltMedia {
 			media: media::ActiveModel {

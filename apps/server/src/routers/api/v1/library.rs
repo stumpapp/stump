@@ -33,13 +33,13 @@ use stump_core::{
 		PrismaCountTrait,
 	},
 	filesystem::{
-		analyze_media_job::AnalyzeMediaJob,
 		get_thumbnail,
 		image::{
 			self, generate_book_thumbnail, place_thumbnail, remove_thumbnails,
 			GenerateThumbnailOptions, ImageFormat, ImageProcessorOptions,
 			ThumbnailGenerationJob, ThumbnailGenerationJobParams,
 		},
+		media::analyze_media_job::AnalyzeMediaJob,
 		scanner::{LastLibraryScan, LibraryScanJob, LibraryScanRecord, ScanOptions},
 		ContentType,
 	},

@@ -1,5 +1,12 @@
 use async_graphql::SimpleObject;
-use sea_orm::{entity::prelude::*, FromQueryResult};
+use sea_orm::{
+	entity::prelude::*, sea_query::Query, Condition, FromQueryResult, QuerySelect,
+	QueryTrait,
+};
+
+use crate::prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer};
+
+use super::{library_hidden_to_user, series_metadata, user::AuthUser};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "SeriesModel")]
@@ -23,28 +30,98 @@ pub struct Model {
 	pub library_id: Option<String>,
 }
 
+pub fn get_age_restriction_filter(min_age: i32, restrict_on_unset: bool) -> Condition {
+	unimplemented!()
+}
+
 #[derive(FromQueryResult)]
 pub struct SeriesIdentSelect {
 	pub id: String,
 	pub path: String,
 }
 
-pub struct EntityWithMetadata {
+pub struct ModelWithMetadata {
 	pub series: Model,
-	pub metadata: Option<super::series_metadata::Model>,
+	pub metadata: Option<series_metadata::Model>,
 }
 
-impl FromQueryResult for EntityWithMetadata {
+impl FromQueryResult for ModelWithMetadata {
 	fn from_query_result(
 		res: &sea_orm::QueryResult,
 		_pre: &str,
 	) -> Result<Self, sea_orm::DbErr> {
-		let series = Model::from_query_result(res, Entity.table_name())?;
-		let metadata = super::series_metadata::Model::from_query_result_optional(
-			res,
-			"series_metadata",
-		)?;
+		let series = parse_query_to_model::<Model, Entity>(res)?;
+		let metadata = parse_query_to_model_optional::<
+			series_metadata::Model,
+			series_metadata::Entity,
+		>(res)?;
 		Ok(Self { series, metadata })
+	}
+}
+
+impl ModelWithMetadata {
+	pub fn find() -> Select<Entity> {
+		Prefixer::new(Entity::find().select_only())
+			.add_columns(Entity)
+			.add_columns(series_metadata::Entity)
+			.selector
+			.left_join(series_metadata::Entity)
+	}
+
+	pub fn find_by_id(id: String) -> Select<Entity> {
+		Prefixer::new(Entity::find_by_id(id).select_only())
+			.add_columns(Entity)
+			.add_columns(series_metadata::Entity)
+			.selector
+			.left_join(series_metadata::Entity)
+	}
+
+	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
+		let age_restriction_filter =
+			user.age_restriction.as_ref().map(|age_restriction| {
+				get_age_restriction_filter(
+					age_restriction.age,
+					age_restriction.restrict_on_unset,
+				)
+			});
+
+		ModelWithMetadata::find()
+			.filter(
+				Column::LibraryId.not_in_subquery(
+					Query::select()
+						.column(library_hidden_to_user::Column::LibraryId)
+						.from(library_hidden_to_user::Entity)
+						.and_where(
+							library_hidden_to_user::Column::UserId.eq(user.id.clone()),
+						)
+						.to_owned(),
+				),
+			)
+			.apply_if(age_restriction_filter, |query, filter| query.filter(filter))
+	}
+
+	pub fn find_by_id_for_user(id: String, user: &AuthUser) -> Select<Entity> {
+		let age_restriction_filter =
+			user.age_restriction.as_ref().map(|age_restriction| {
+				get_age_restriction_filter(
+					age_restriction.age,
+					age_restriction.restrict_on_unset,
+				)
+			});
+
+		ModelWithMetadata::find_by_id(id)
+			.filter(
+				Column::LibraryId.not_in_subquery(
+					Query::select()
+						.column(library_hidden_to_user::Column::LibraryId)
+						.from(library_hidden_to_user::Entity)
+						.and_where(
+							library_hidden_to_user::Column::UserId.eq(user.id.clone()),
+						)
+						.to_owned(),
+				),
+			)
+			.apply_if(age_restriction_filter, |query, filter| query.filter(filter))
 	}
 }
 

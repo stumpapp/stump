@@ -138,13 +138,13 @@ impl Entity {
 }
 
 #[derive(Debug, SimpleObject)]
-pub struct EntityWithMetadata {
+pub struct ModelWithMetadata {
 	#[graphql(flatten)]
 	pub media: Model,
 	pub metadata: Option<media_metadata::Model>,
 }
 
-impl FromQueryResult for EntityWithMetadata {
+impl FromQueryResult for ModelWithMetadata {
 	fn from_query_result(
 		res: &sea_orm::QueryResult,
 		_pre: &str,
@@ -158,7 +158,7 @@ impl FromQueryResult for EntityWithMetadata {
 	}
 }
 
-impl EntityWithMetadata {
+impl ModelWithMetadata {
 	pub fn find() -> Select<Entity> {
 		Prefixer::new(Entity::find().select_only())
 			.add_columns(Entity)
@@ -184,7 +184,39 @@ impl EntityWithMetadata {
 				)
 			});
 
-		EntityWithMetadata::find()
+		ModelWithMetadata::find()
+			.inner_join(series::Entity)
+			.join_rev(
+				JoinType::LeftJoin,
+				series_metadata::Entity::belongs_to(series::Entity)
+					.from(series_metadata::Column::SeriesId)
+					.to(series::Column::Id)
+					.into(),
+			)
+			.filter(
+				series::Column::LibraryId.not_in_subquery(
+					Query::select()
+						.column(library_hidden_to_user::Column::LibraryId)
+						.from(library_hidden_to_user::Entity)
+						.and_where(
+							library_hidden_to_user::Column::UserId.eq(user.id.clone()),
+						)
+						.to_owned(),
+				),
+			)
+			.apply_if(age_restriction_filter, |query, filter| query.filter(filter))
+	}
+
+	pub fn find_by_id_for_user(id: String, user: &AuthUser) -> Select<Entity> {
+		let age_restriction_filter =
+			user.age_restriction.as_ref().map(|age_restriction| {
+				get_age_restriction_filter(
+					age_restriction.age,
+					age_restriction.restrict_on_unset,
+				)
+			});
+
+		ModelWithMetadata::find_by_id(id)
 			.inner_join(series::Entity)
 			.join_rev(
 				JoinType::LeftJoin,

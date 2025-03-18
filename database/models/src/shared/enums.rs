@@ -65,6 +65,8 @@ pub enum EntityVisibility {
 	Serialize,
 	Deserialize,
 	DeriveActiveEnum,
+	EnumString,
+	Display,
 )]
 #[sea_orm(
 	rs_type = "String",

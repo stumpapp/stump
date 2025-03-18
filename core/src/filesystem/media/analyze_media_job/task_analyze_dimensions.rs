@@ -1,14 +1,14 @@
 use image::GenericImageView;
 
 use crate::{
-	filesystem::{analyze_media_job::AnalyzeMediaOutput, media::process::get_page},
+	filesystem::media::{analyze_media_job::AnalyzeMediaOutput, process::get_page},
 	job::{error::JobError, JobProgress, WorkerCtx},
 };
 use models::{
 	entity::{media, media_metadata, page_dimension},
-	shared::page_dimension::{PageDimension, PageDimensions},
+	shared::page_dimension::{PageAnalysis, PageDimension},
 };
-use sea_orm::{prelude::*, FromQueryResult, JoinType, QuerySelect, Set};
+use sea_orm::{prelude::*, FromQueryResult, JoinType, QuerySelect};
 
 #[derive(Debug, FromQueryResult)]
 struct MediaWithDimensions {
@@ -16,8 +16,7 @@ struct MediaWithDimensions {
 	path: String,
 	pages: i32,
 	page_count: Option<i32>,
-	#[sea_orm(nested)]
-	dimensions: Option<page_dimension::Model>,
+	page_analysis: Option<PageAnalysis>,
 }
 
 /// The logic for [`super::AnalyzeMediaTask::AnalyzePageDimensions`].
@@ -93,33 +92,23 @@ pub(crate) async fn execute(
 
 	ctx.report_progress(JobProgress::msg("Writing to database"));
 
-	// Update stored page count
-	// Check if dimensions are stored already or not yet stored
-	if let Some(current_dimensions) = media_item.dimensions {
-		// There are already dimensions, we only need to update them if there's a mismatch
-		if current_dimensions.dimensions.0 != image_dimensions {
-			page_dimension::Entity::update_many()
-				.filter(page_dimension::Column::Id.eq(current_dimensions.id))
-				.col_expr(
-					page_dimension::Column::Dimensions,
-					Expr::value(PageDimensions(image_dimensions)),
-				)
-				.exec(ctx.conn.as_ref())
-				.await?;
-		}
-	} else {
-		// There is no dimensions data, we need to create a new database object for them
-		// Serialize collected dimensions
+	let update_expr = match media_item.page_analysis {
+		Some(PageAnalysis { dimensions }) if dimensions != image_dimensions => {
+			Expr::value(PageAnalysis {
+				dimensions: image_dimensions,
+			})
+		},
+		None => Expr::value(PageAnalysis {
+			dimensions: image_dimensions,
+		}),
+		_ => return Ok(()),
+	};
 
-		let active_model = page_dimension::ActiveModel {
-			dimensions: Set(PageDimensions(image_dimensions)),
-			metadata_id: Set(media_item.id.clone()),
-			..Default::default()
-		};
-		page_dimension::Entity::insert(active_model)
-			.exec(ctx.conn.as_ref())
-			.await?;
-	}
+	media_metadata::Entity::update_many()
+		.filter(media_metadata::Column::Id.eq(media_item.id))
+		.col_expr(media_metadata::Column::PageAnalysis, update_expr)
+		.exec(ctx.conn.as_ref())
+		.await?;
 
 	Ok(())
 }

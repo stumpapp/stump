@@ -52,7 +52,7 @@ async fn graphql_handler(
 	req: GraphQLRequest,
 ) -> GraphQLResponse {
 	let mut req = req.into_inner();
-	req = req.data(GraphQLData { ctx });
+	req = req.data(GraphQLData { core: ctx });
 	schema.execute(req).await.into()
 }
 

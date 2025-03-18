@@ -10,8 +10,8 @@ use serde::{Deserialize, Serialize};
 use stump_core::{
 	db::{entity::UserPermission, query::pagination::PageQuery},
 	filesystem::{
-		get_page_async,
 		image::{GenericImageProcessor, ImageProcessor, ImageProcessorOptions},
+		media::get_page_async,
 		ContentType,
 	},
 	opds::v1_2::{

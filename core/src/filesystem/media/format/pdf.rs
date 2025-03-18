@@ -10,16 +10,18 @@ use pdfium_render::prelude::{PdfRenderConfig, Pdfium};
 
 use crate::{
 	config::StumpConfig,
-	db::entity::MediaMetadata,
 	filesystem::{
 		archive::create_zip_archive,
 		error::FileError,
 		hash::{self, generate_koreader_hash},
 		image::ImageFormat,
-		media::process::{
-			FileConverter, FileProcessor, FileProcessorOptions, ProcessedFile,
+		media::{
+			process::{
+				FileConverter, FileProcessor, FileProcessorOptions, ProcessedFile,
+			},
+			ProcessedFileHashes, ProcessedMediaMetadata,
 		},
-		ContentType, FileParts, PathUtils, ProcessedFileHashes,
+		ContentType, FileParts, PathUtils,
 	},
 };
 
@@ -83,12 +85,12 @@ impl FileProcessor for PdfProcessor {
 		})
 	}
 
-	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError> {
+	fn process_metadata(path: &str) -> Result<Option<ProcessedMediaMetadata>, FileError> {
 		let file = FileOptions::cached()
 			.parse_options(ParseOptions::tolerant())
 			.open(path)?;
 
-		Ok(file.trailer.info_dict.map(MediaMetadata::from))
+		Ok(file.trailer.info_dict.map(ProcessedMediaMetadata::from))
 	}
 
 	fn process(
@@ -103,7 +105,7 @@ impl FileProcessor for PdfProcessor {
 		let pages = file.pages().count() as i32;
 		// Note: The metadata is already parsed by the PDF library, so might as well use it
 		// PDF metadata is generally poop though
-		let metadata = file.trailer.info_dict.map(MediaMetadata::from);
+		let metadata = file.trailer.info_dict.map(ProcessedMediaMetadata::from);
 		let ProcessedFileHashes {
 			hash,
 			koreader_hash,

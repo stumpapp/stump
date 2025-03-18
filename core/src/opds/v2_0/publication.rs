@@ -9,7 +9,7 @@ use serde_with::skip_serializing_none;
 
 use crate::{
 	db::entity::{MediaMetadata, PageDimensionsEntity},
-	filesystem::{get_content_type_for_page, ContentType},
+	filesystem::{media::get_content_type_for_page, ContentType},
 	prisma::{page_dimensions, PrismaClient},
 	CoreError, CoreResult,
 };

@@ -6,11 +6,11 @@ use tokio::{fs, sync::oneshot, task::spawn_blocking};
 use crate::{
 	config::StumpConfig,
 	filesystem::{
-		get_page,
 		image::{
 			GenericImageProcessor, ImageFormat, ImageProcessor, ImageProcessorOptions,
 			ProcessorError, WebpProcessor,
 		},
+		media::get_page,
 	},
 };
 

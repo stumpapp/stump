@@ -1,6 +1,6 @@
 use tracing::error;
 
-use crate::db::entity::MediaMetadata;
+use super::ProcessedMediaMetadata;
 
 pub fn is_accepted_cover_name(name: &str) -> bool {
 	let cover_file_names = ["cover", "thumbnail", "folder"];
@@ -9,7 +9,7 @@ pub fn is_accepted_cover_name(name: &str) -> bool {
 		.any(|&cover_name| name.eq_ignore_ascii_case(cover_name))
 }
 
-pub(crate) fn metadata_from_buf(contents: &str) -> Option<MediaMetadata> {
+pub(crate) fn metadata_from_buf(contents: &str) -> Option<ProcessedMediaMetadata> {
 	let adjusted = contents.trim();
 	// let adjusted = adjusted.trim_start_matches("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
 

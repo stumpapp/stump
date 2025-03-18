@@ -1,9 +1,6 @@
 use std::sync::Arc;
 
-use crate::{
-	db::entity::LibraryConfig, filesystem::scanner::LibraryScanJob, job::WrappedJob,
-	CoreResult, Ctx,
-};
+use crate::{filesystem::scanner::LibraryScanJob, job::WrappedJob, CoreResult, Ctx};
 use models::entity::{job_schedule_config, library, library_config};
 use sea_orm::{prelude::*, Iterable, QuerySelect};
 
@@ -82,20 +79,19 @@ impl JobScheduler {
 
 					for (library, config) in &libraries_to_scan {
 						let library_path = library.path.clone();
-						// TODO(sea-orm): Fix
-						// let result =
-						// 	scheduler_ctx.enqueue_job(WrappedJob::new(LibraryScanJob {
-						// 		id: library.id.clone(),
-						// 		path: library_path,
-						// 		config: config.map(LibraryConfig::from),
-						// 		options: Default::default(),
-						// 	}));
-						// if result.is_err() {
-						// 	tracing::error!(
-						// 		?library,
-						// 		"Failed to dispatch scan job for library"
-						// 	);
-						// }
+						let result =
+							scheduler_ctx.enqueue_job(WrappedJob::new(LibraryScanJob {
+								id: library.id.clone(),
+								path: library_path,
+								config: config.clone(),
+								options: Default::default(),
+							}));
+						if result.is_err() {
+							tracing::error!(
+								?library,
+								"Failed to dispatch scan job for library"
+							);
+						}
 					}
 				}
 			});

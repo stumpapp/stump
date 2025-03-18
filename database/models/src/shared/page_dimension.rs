@@ -8,6 +8,9 @@
 //! and [`dimension_vec_from_str`] methods can be used for serializing and deserializing this
 //! structure
 
+// TODO(sea-orm): rename page_analysis and add content_types
+
+use async_graphql::SimpleObject;
 use sea_orm::FromJsonQueryResult;
 use serde::{Deserialize, Serialize};
 
@@ -25,13 +28,20 @@ pub enum PageDimensionParserError {
 	ErrorParsingInt(#[from] std::num::ParseIntError),
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, FromJsonQueryResult)]
+#[derive(
+	Serialize, Deserialize, Debug, Clone, PartialEq, Eq, FromJsonQueryResult, SimpleObject,
+)]
 
-pub struct PageDimensions(pub Vec<PageDimension>);
+pub struct PageAnalysis {
+	pub dimensions: Vec<PageDimension>,
+	// pub content_types: Vec<ContentType>, // or Vec<String>?
+}
 
 /// Represents a page dimension for a page of a Stump media item. It consists of a
 /// height and a width.
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(
+	Serialize, Deserialize, Debug, Clone, PartialEq, Eq, FromJsonQueryResult, SimpleObject,
+)]
 pub struct PageDimension {
 	pub height: u32,
 	pub width: u32,

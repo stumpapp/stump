@@ -1,6 +1,8 @@
+use async_graphql::SimpleObject;
 use sea_orm::entity::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
+#[graphql(name = "SeriesMetadataModel")]
 #[sea_orm(table_name = "series_metadata")]
 pub struct Model {
 	#[sea_orm(column_type = "Text")]

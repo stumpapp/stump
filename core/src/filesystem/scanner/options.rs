@@ -5,7 +5,7 @@ use utoipa::ToSchema;
 
 use crate::{
 	db::entity::{macros::library_scan_details, Media, MediaMetadata},
-	filesystem::ProcessedFileHashes,
+	filesystem::media::{ProcessedFileHashes, ProcessedMediaMetadata},
 	prisma::library_scan_record,
 	CoreError,
 };
@@ -54,7 +54,7 @@ pub struct CustomVisitResult {
 	/// The ID of the book that was visited
 	pub id: String,
 	/// The metadata that was generated during the visit, if any
-	pub meta: Option<Box<MediaMetadata>>,
+	pub meta: Option<Box<ProcessedMediaMetadata>>,
 	/// The hashes that were generated during the visit, if any
 	pub hashes: Option<ProcessedFileHashes>,
 }

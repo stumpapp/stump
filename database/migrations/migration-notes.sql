@@ -128,6 +128,7 @@ CREATE TABLE "new_media_metadata" (
     "page_count" INTEGER,
     "media_id" TEXT,
     "age_rating" INTEGER,
+    "page_analysis" TEXT,
     CONSTRAINT "media_metadata_media_id_fkey" FOREIGN KEY ("media_id") REFERENCES "media" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 INSERT INTO "new_media_metadata"(
@@ -181,6 +182,7 @@ SELECT "title",
     "media_id",
     "age_rating"
 FROM "media_metadata";
+-- TODO: We need to figure out how to handle the page_analysis column
 DROP TABLE "media_metadata";
 ALTER TABLE "new_media_metadata"
     RENAME TO "media_metadata";

@@ -3158,6 +3158,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "graphql"
+version = "0.0.10"
+dependencies = [
+ "async-graphql",
+ "models",
+ "sea-orm",
+ "stump_core",
+ "tracing",
+]
+
+[[package]]
 name = "graphql-parser"
 version = "0.3.0"
 source = "git+https://github.com/prisma/graphql-parser#6a3f58bd879065588e710cb02b5bd30c1ce182c3"
@@ -5558,6 +5569,15 @@ name = "option-ext"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
+
+[[package]]
+name = "order-by-gen"
+version = "0.0.10"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.87",
+]
 
 [[package]]
 name = "ordered-float"

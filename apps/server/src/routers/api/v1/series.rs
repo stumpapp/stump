@@ -29,12 +29,12 @@ use stump_core::{
 		PrismaCountTrait, SeriesDAO, DAO,
 	},
 	filesystem::{
-		analyze_media_job::AnalyzeMediaJob,
 		get_thumbnail,
 		image::{
 			generate_book_thumbnail, place_thumbnail, remove_thumbnails,
 			GenerateThumbnailOptions, ImageFormat, ImageProcessorOptions,
 		},
+		media::analyze_media_job::AnalyzeMediaJob,
 		scanner::SeriesScanJob,
 		ContentType,
 	},

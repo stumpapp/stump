@@ -3,6 +3,8 @@ use std::str::FromStr;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
+use crate::entity::user::AuthUser;
+
 use super::enums::UserPermission;
 
 pub trait AssociatedPermission {
@@ -93,4 +95,31 @@ impl AssociatedPermission for UserPermission {
 			_ => vec![],
 		}
 	}
+}
+
+/// A function to determine whether a user has a specific permission. The permission
+/// is checked against their explicitly assigned permissions, as well as any inherited
+/// ones through permission associations.
+fn user_has_permission(user: &AuthUser, permission: UserPermission) -> bool {
+	user.is_server_owner
+		|| user
+			.permissions
+			.iter()
+			.any(|p| p == &permission || p.associated().contains(&permission))
+}
+
+pub fn user_has_all_permissions(user: &AuthUser, permissions: &[UserPermission]) -> bool {
+	if user.is_server_owner {
+		return true;
+	}
+
+	let missing_permissions = permissions
+		.iter()
+		.filter(|&permission| !user_has_permission(user, *permission))
+		.collect::<Vec<_>>();
+	// if !missing_permissions.is_empty() {
+	// 	tracing::error!(?user, ?missing_permissions, "User does not have permission");
+	// }
+
+	missing_permissions.is_empty()
 }

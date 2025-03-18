@@ -7,13 +7,14 @@ const DEFAULT_EPUB_COVER_ID: &str = "cover";
 
 use crate::{
 	config::StumpConfig,
-	db::entity::MediaMetadata,
 	filesystem::{
 		content_type::ContentType,
 		error::FileError,
 		hash::{self, generate_koreader_hash},
-		media::process::{FileProcessor, FileProcessorOptions, ProcessedFile},
-		ProcessedFileHashes,
+		media::{
+			process::{FileProcessor, FileProcessorOptions, ProcessedFile},
+			ProcessedFileHashes, ProcessedMediaMetadata,
+		},
 	},
 };
 use epub::doc::EpubDoc;
@@ -89,9 +90,9 @@ impl FileProcessor for EpubProcessor {
 		})
 	}
 
-	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError> {
+	fn process_metadata(path: &str) -> Result<Option<ProcessedMediaMetadata>, FileError> {
 		let epub_file = Self::open(path)?;
-		let embedded_metadata = MediaMetadata::from(epub_file.metadata);
+		let embedded_metadata = ProcessedMediaMetadata::from(epub_file.metadata);
 
 		// try get opf file
 		let file_path = std::path::Path::new(path).with_extension("opf");
@@ -143,10 +144,9 @@ impl FileProcessor for EpubProcessor {
 			}
 
 			// merge opf and embedded, prioritizing opf
-			let opf_metadata = MediaMetadata::from(opf_metadata);
+			let opf_metadata = ProcessedMediaMetadata::from(opf_metadata);
 			let mut combined_metadata = opf_metadata.clone();
 
-			combined_metadata.id = opf_metadata.id;
 			combined_metadata.merge(embedded_metadata);
 
 			return Ok(Some(combined_metadata));
@@ -171,7 +171,7 @@ impl FileProcessor for EpubProcessor {
 		// Get metadata from epub file if process_metadata failed
 		let metadata = match metadata {
 			Ok(Some(m)) => m,
-			_ => MediaMetadata::from(epub_file.metadata),
+			_ => ProcessedMediaMetadata::from(epub_file.metadata),
 		};
 		let ProcessedFileHashes {
 			hash,

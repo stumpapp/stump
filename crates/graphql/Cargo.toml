@@ -1,0 +1,11 @@
+[package]
+name = "graphql"
+edition = "2021"
+version.workspace = true
+
+[dependencies]
+async-graphql.workspace = true
+models = { path = "../../database/models" }
+sea-orm.workspace = true
+stump_core = { path = "../../core" }
+tracing.workspace = true

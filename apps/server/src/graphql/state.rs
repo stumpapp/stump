@@ -1,7 +1,7 @@
-use models::entity::user::AuthUser;
+use std::sync::Arc;
 
-use crate::config::state::AppState;
+use stump_core::Ctx;
 
 pub struct GraphQLData {
-	pub ctx: AppState,
+	pub core: Arc<Ctx>,
 }

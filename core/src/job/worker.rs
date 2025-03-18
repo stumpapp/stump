@@ -225,7 +225,6 @@ impl Worker {
 	fn new(
 		job_id: &str,
 		conn: Arc<DatabaseConnection>,
-		db: Arc<PrismaClient>,
 		config: Arc<StumpConfig>,
 		core_event_tx: broadcast::Sender<CoreEvent>,
 		job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
@@ -256,7 +255,6 @@ impl Worker {
 		job: Box<dyn Executor>,
 		manager: Arc<JobManager>,
 		conn: Arc<DatabaseConnection>,
-		db: Arc<PrismaClient>,
 		config: Arc<StumpConfig>,
 		core_event_tx: broadcast::Sender<CoreEvent>,
 		job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
@@ -265,7 +263,6 @@ impl Worker {
 		let (worker, worker_ctx, status_rx) = Worker::new(
 			job_id.as_str(),
 			conn.clone(),
-			db,
 			config,
 			core_event_tx,
 			job_controller_tx,

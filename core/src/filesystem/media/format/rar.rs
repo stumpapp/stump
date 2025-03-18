@@ -9,7 +9,6 @@ use unrar::{Archive, CursorBeforeHeader, List, OpenArchive, Process, UnrarResult
 
 use crate::{
 	config::StumpConfig,
-	db::entity::MediaMetadata,
 	filesystem::{
 		archive::create_zip_archive,
 		content_type::ContentType,
@@ -19,11 +18,13 @@ use crate::{
 		media::{
 			process::{
 				FileConverter, FileProcessor, FileProcessorOptions, ProcessedFile,
+				ProcessedFileHashes,
 			},
 			utils::metadata_from_buf,
 			zip::ZipProcessor,
+			ProcessedMediaMetadata,
 		},
-		FileParts, PathUtils, ProcessedFileHashes,
+		FileParts, PathUtils,
 	},
 };
 
@@ -120,7 +121,7 @@ impl FileProcessor for RarProcessor {
 		})
 	}
 
-	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError> {
+	fn process_metadata(path: &str) -> Result<Option<ProcessedMediaMetadata>, FileError> {
 		let mut archive = RarProcessor::open_for_processing(path)?;
 		let mut metadata_buf = None;
 

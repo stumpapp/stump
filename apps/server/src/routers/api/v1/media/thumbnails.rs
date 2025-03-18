@@ -7,11 +7,12 @@ use stump_core::{
 	config::StumpConfig,
 	db::entity::{macros::media_thumbnail, LibraryConfig, User, UserPermission},
 	filesystem::{
-		get_page_async, get_thumbnail,
+		get_thumbnail,
 		image::{
 			generate_book_thumbnail, place_thumbnail, remove_thumbnails,
 			GenerateThumbnailOptions, ImageFormat, ImageProcessorOptions,
 		},
+		media::get_page_async,
 		ContentType,
 	},
 	prisma::{

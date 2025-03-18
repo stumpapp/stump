@@ -15,7 +15,6 @@ use models::entity::{library_config, media, media_metadata, series, series_metad
 use sea_orm::{
 	prelude::*,
 	sea_query::{OnConflict, Query},
-	ActiveValue::Set,
 	Condition, DatabaseConnection, IntoActiveModel, Iterable, TransactionTrait,
 };
 use tokio::{
@@ -29,8 +28,9 @@ use crate::{
 	db::FileStatus,
 	error::{CoreError, CoreResult},
 	filesystem::{
+		media::{BuiltMedia, MediaBuilder},
 		scanner::options::{BookVisitOperation, CustomVisitResult},
-		BuiltMedia, BuiltSeries, MediaBuilder, SeriesBuilder,
+		series::{BuiltSeries, SeriesBuilder},
 	},
 	job::{error::JobError, JobExecuteLog, JobProgress, WorkerCtx, WorkerSendExt},
 	CoreEvent,
@@ -82,33 +82,6 @@ pub(crate) async fn create_media(
 		.await?;
 
 	if let Some(meta) = metadata {
-		// let metadata = media_metadata::ActiveModel {
-		// 	media_id: Set(Some(created_media.id.clone())),
-		// 	title: Set(meta.title),
-		// 	series: Set(meta.series),
-		// 	number: Set(meta.number.and_then(|n| Decimal::try_from(n).ok())),
-		// 	volume: Set(meta.volume),
-		// 	summary: Set(meta.summary),
-		// 	notes: Set(meta.notes),
-		// 	age_rating: Set(meta.age_rating),
-		// 	genre: Set(meta.genre.map(|v| v.join(", "))),
-		// 	year: Set(meta.year),
-		// 	month: Set(meta.month),
-		// 	day: Set(meta.day),
-		// 	writers: Set(meta.writers.map(|v| v.join(", "))),
-		// 	pencillers: Set(meta.pencillers.map(|v| v.join(", "))),
-		// 	inkers: Set(meta.inkers.map(|v| v.join(", "))),
-		// 	colorists: Set(meta.colorists.map(|v| v.join(", "))),
-		// 	letterers: Set(meta.letterers.map(|v| v.join(", "))),
-		// 	cover_artists: Set(meta.cover_artists.map(|v| v.join(", "))),
-		// 	editors: Set(meta.editors.map(|v| v.join(", "))),
-		// 	publisher: Set(meta.publisher),
-		// 	links: Set(meta.links.map(|v| v.join(", "))),
-		// 	characters: Set(meta.characters.map(|v| v.join(", "))),
-		// 	teams: Set(meta.teams.map(|v| v.join(", "))),
-		// 	page_count: Set(meta.page_count),
-		// 	..Default::default()
-		// };
 		media_metadata::Entity::insert(meta).exec(&txn).await?;
 	}
 
@@ -119,7 +92,7 @@ pub(crate) async fn create_media(
 
 pub(crate) async fn update_media(
 	db: &DatabaseConnection,
-	media::EntityWithMetadata { media, metadata }: media::EntityWithMetadata,
+	media::ModelWithMetadata { media, metadata }: media::ModelWithMetadata,
 ) -> CoreResult<media::Model> {
 	let txn = db.begin().await?;
 
@@ -551,7 +524,7 @@ pub(crate) struct MediaBuildOperation {
 async fn build_book(
 	path: &Path,
 	series_id: &str,
-	existing_book: Option<media::EntityWithMetadata>,
+	existing_book: Option<media::ModelWithMetadata>,
 	library_config: library_config::Model,
 	config: &StumpConfig,
 ) -> CoreResult<BuiltMedia> {

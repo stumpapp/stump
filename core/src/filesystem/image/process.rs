@@ -12,6 +12,8 @@ pub enum ScaledDimensionResize {
 	Width(u32),
 }
 
+// TODO(sea-orm): This needs to use models which is now very diff
+
 /// The resize mode to use when generating a thumbnail.
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub enum ImageResizeMode {

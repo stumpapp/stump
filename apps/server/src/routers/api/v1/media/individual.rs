@@ -18,9 +18,8 @@ use stump_core::{
 		PageDimension, PageDimensionsEntity, ProgressUpdateReturn, User, UserPermission,
 	},
 	filesystem::{
-		analyze_media_job::AnalyzeMediaJob,
-		get_page_async,
 		image::{resize_image, ScaledDimensionResize},
+		media::{analyze_media_job::AnalyzeMediaJob, get_page_async},
 	},
 	prisma::{
 		active_reading_session, finished_reading_session, library,

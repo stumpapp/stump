@@ -1,25 +1,24 @@
 use std::{
 	collections::HashMap,
-	fs::File,
-	io::BufReader,
 	path::{Path, PathBuf},
 };
 
 use models::entity::library_config;
-use serde::{Deserialize, Serialize};
 use tokio::{sync::oneshot, task::spawn_blocking};
 use tracing::debug;
 
 use crate::{
 	config::StumpConfig,
-	db::entity::{LibraryConfig, MediaMetadata, SeriesMetadata},
+	db::entity::LibraryConfig,
 	filesystem::{
-		content_type::ContentType, epub::EpubProcessor, error::FileError,
-		image::ImageFormat, pdf::PdfProcessor,
+		content_type::ContentType,
+		error::FileError,
+		image::ImageFormat,
+		media::{epub::EpubProcessor, pdf::PdfProcessor},
 	},
 };
 
-use super::{rar::RarProcessor, zip::ZipProcessor};
+use super::{metadata::ProcessedMediaMetadata, rar::RarProcessor, zip::ZipProcessor};
 
 /// A struct representing the options for processing a file. This is a subset of [`LibraryConfig`]
 /// and is used to pass options to the [`FileProcessor`] implementations.
@@ -104,7 +103,9 @@ pub trait FileProcessor {
 		config: &StumpConfig,
 	) -> Result<ProcessedFile, FileError>;
 
-	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError>;
+	/// Process the metadata of a file. This should gather the metadata of the file
+	/// without processing the entire file.
+	fn process_metadata(path: &str) -> Result<Option<ProcessedMediaMetadata>, FileError>;
 
 	/// Get the bytes of a page of the file.
 	fn get_page(
@@ -134,26 +135,6 @@ pub trait FileConverter {
 	) -> Result<PathBuf, FileError>;
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct SeriesJson {
-	pub version: Option<String>,
-	pub metadata: SeriesMetadata,
-}
-
-impl SeriesJson {
-	pub fn from_file(path: &Path) -> Result<SeriesJson, FileError> {
-		let file = File::open(path)?;
-		let reader = BufReader::new(file);
-		let series_json: SeriesJson = serde_json::from_reader(reader)?;
-		Ok(series_json)
-	}
-
-	pub fn from_folder(folder: &Path) -> Result<SeriesJson, FileError> {
-		let series_json_path = folder.join("series.json");
-		SeriesJson::from_file(&series_json_path)
-	}
-}
-
 /// Struct representing a processed file. This is the output of the `process` function
 /// on a `FileProcessor` implementation.
 #[derive(Debug)]
@@ -161,7 +142,7 @@ pub struct ProcessedFile {
 	pub path: PathBuf,
 	pub hash: Option<String>,
 	pub koreader_hash: Option<String>,
-	pub metadata: Option<MediaMetadata>,
+	pub metadata: Option<ProcessedMediaMetadata>,
 	pub pages: i32,
 }
 
@@ -231,7 +212,7 @@ pub async fn process_async(
 #[tracing::instrument(err, fields(path = %path.as_ref().display()))]
 pub fn process_metadata(
 	path: impl AsRef<Path>,
-) -> Result<Option<MediaMetadata>, FileError> {
+) -> Result<Option<ProcessedMediaMetadata>, FileError> {
 	let mime = ContentType::from_path(path.as_ref()).mime_type();
 
 	let path_str = path.as_ref().to_str().unwrap_or_default();
@@ -252,7 +233,7 @@ pub fn process_metadata(
 #[tracing::instrument(err, fields(path = %path.as_ref().display()))]
 pub async fn process_metadata_async(
 	path: impl AsRef<Path>,
-) -> Result<Option<MediaMetadata>, FileError> {
+) -> Result<Option<ProcessedMediaMetadata>, FileError> {
 	let (tx, rx) = oneshot::channel();
 
 	let handle = spawn_blocking({

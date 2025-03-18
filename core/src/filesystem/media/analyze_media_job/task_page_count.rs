@@ -1,6 +1,6 @@
 use crate::{
-	filesystem::{
-		analyze_media_job::AnalyzeMediaOutput, media::process::get_page_count_async,
+	filesystem::media::{
+		analyze_media_job::AnalyzeMediaOutput, process::get_page_count_async,
 	},
 	job::{error::JobError, WorkerCtx},
 };

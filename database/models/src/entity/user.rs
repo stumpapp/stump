@@ -1,14 +1,13 @@
-use itertools::Itertools;
-use std::fmt;
+use async_graphql::SimpleObject;
 
 use sea_orm::{entity::prelude::*, FromQueryResult};
-use serde::{Deserialize, Serialize};
 
 use crate::shared::{enums::UserPermission, permission_set::PermissionSet};
 
 use super::age_restriction;
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
+#[graphql(name = "UserModel")]
 #[sea_orm(table_name = "users")]
 pub struct Model {
 	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
@@ -16,16 +15,17 @@ pub struct Model {
 	#[sea_orm(column_type = "Text", unique)]
 	pub username: String,
 	#[sea_orm(column_type = "Text")]
+	#[graphql(skip)]
 	pub hashed_password: String,
 	pub is_server_owner: bool,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub avatar_url: Option<String>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
-	pub last_login: Option<String>,
+	pub last_login: Option<DateTimeWithTimeZone>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
-	pub deleted_at: Option<String>,
+	pub deleted_at: Option<DateTimeWithTimeZone>,
 	pub is_locked: bool,
 	pub max_sessions_allowed: Option<i32>,
 	#[sea_orm(column_type = "Text", nullable)]

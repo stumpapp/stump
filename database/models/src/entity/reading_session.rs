@@ -1,6 +1,8 @@
+use async_graphql::SimpleObject;
 use sea_orm::{entity::prelude::*, FromQueryResult, JoinType, QuerySelect};
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
+#[graphql(name = "ReadingSessionModel")]
 #[sea_orm(table_name = "reading_sessions")]
 pub struct Model {
 	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
@@ -12,9 +14,9 @@ pub struct Model {
 	#[sea_orm(column_type = "Text", nullable)]
 	pub koreader_progress: Option<String>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub started_at: String,
+	pub started_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub updated_at: String,
+	pub updated_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "Text")]
 	pub media_id: String,
 	#[sea_orm(column_type = "Text")]

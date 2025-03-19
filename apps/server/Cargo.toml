@@ -26,6 +26,7 @@ cli = { path = "../../crates/cli" }
 chrono.workspace = true
 models = { path = "../../database/models" }
 futures-util.workspace = true
+graphql = { path = "../../crates/graphql" }
 hyper = "0.14.27"
 infer.workspace = true
 itertools.workspace = true

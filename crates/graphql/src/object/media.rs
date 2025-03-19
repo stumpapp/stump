@@ -1,6 +1,6 @@
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
-use models::entity::{library, media, media_metadata, series};
+use models::entity::{library, media, media_metadata, reading_session, series};
 use sea_orm::{prelude::*, sea_query::Query};
 
 use crate::data::CoreContext;
@@ -58,5 +58,21 @@ impl Media {
 			.ok_or("Library not found")?;
 
 		Ok(Library::from(model))
+	}
+
+	async fn progress(
+		&self,
+		ctx: &Context<'_>,
+	) -> Result<Option<reading_session::Model>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		// TODO(sea-orm): user ID
+		let progress = reading_session::Entity::find()
+			.filter(reading_session::Column::MediaId.eq(&self.model.id))
+			.into_model::<reading_session::Model>()
+			.one(conn)
+			.await?;
+
+		Ok(progress)
 	}
 }

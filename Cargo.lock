@@ -8927,6 +8927,7 @@ dependencies = [
  "chrono",
  "cli",
  "futures-util",
+ "graphql",
  "hyper 0.14.27",
  "infer",
  "itertools 0.13.0",

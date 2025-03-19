@@ -4,7 +4,6 @@ pub(crate) mod v1;
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use axum::{
-	extract::State,
 	response::{Html, IntoResponse},
 	routing::post,
 	Extension, Router,
@@ -12,7 +11,7 @@ use axum::{
 
 use crate::{
 	config::state::AppState,
-	graphql::{build_schema, AppSchema, GraphQLData},
+	graphql::{build_schema, AppSchema},
 };
 
 pub(crate) async fn mount(app_state: AppState) -> Router<AppState> {
@@ -47,12 +46,11 @@ async fn playground() -> impl IntoResponse {
 // TODO(sea-orm): Move to separate file, get OPTIONAL user(?), enforce user for all but login-related mutations? Or just retain restful login?
 async fn graphql_handler(
 	schema: Extension<AppSchema>,
-	State(ctx): State<AppState>,
 	// Extension(req_ctx): Extension<RequestContext>,
 	req: GraphQLRequest,
 ) -> GraphQLResponse {
 	let mut req = req.into_inner();
-	req = req.data(GraphQLData { core: ctx });
+	// req = req.data(GraphQLData { core: ctx });
 	schema.execute(req).await.into()
 }
 

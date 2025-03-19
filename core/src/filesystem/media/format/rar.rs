@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use models::shared::image_processor_options::SupportedImageFormat;
 use std::{
 	collections::HashMap,
 	fs::File,
@@ -14,7 +15,6 @@ use crate::{
 		content_type::ContentType,
 		error::FileError,
 		hash::{self, HASH_SAMPLE_COUNT, HASH_SAMPLE_SIZE},
-		image::ImageFormat,
 		media::{
 			process::{
 				FileConverter, FileProcessor, FileProcessorOptions, ProcessedFile,
@@ -335,7 +335,7 @@ impl FileConverter for RarProcessor {
 	fn to_zip(
 		path: &str,
 		delete_source: bool,
-		_: Option<ImageFormat>,
+		_: Option<SupportedImageFormat>,
 		config: &StumpConfig,
 	) -> Result<PathBuf, FileError> {
 		debug!(path, "Converting RAR to ZIP");

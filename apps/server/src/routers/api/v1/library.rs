@@ -5,6 +5,9 @@ use axum::{
 	Extension, Json, Router,
 };
 use chrono::{DateTime, Duration, FixedOffset};
+use models::shared::image_processor_options::{
+	ImageProcessorOptions, SupportedImageFormat,
+};
 use prisma_client_rust::{chrono::Utc, not, or, raw, Direction, PrismaValue};
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
@@ -36,8 +39,8 @@ use stump_core::{
 		get_thumbnail,
 		image::{
 			self, generate_book_thumbnail, place_thumbnail, remove_thumbnails,
-			GenerateThumbnailOptions, ImageFormat, ImageProcessorOptions,
-			ThumbnailGenerationJob, ThumbnailGenerationJobParams,
+			GenerateThumbnailOptions, ThumbnailGenerationJob,
+			ThumbnailGenerationJobParams,
 		},
 		media::analyze_media_job::AnalyzeMediaJob,
 		scanner::{LastLibraryScan, LibraryScanJob, LibraryScanRecord, ScanOptions},
@@ -534,7 +537,7 @@ pub(crate) async fn get_library_thumbnail(
 	id: &str,
 	first_series: series_or_library_thumbnail::Data,
 	first_book: Option<series_or_library_thumbnail::media::Data>,
-	image_format: Option<ImageFormat>,
+	image_format: Option<SupportedImageFormat>,
 	config: &StumpConfig,
 ) -> APIResult<(ContentType, Vec<u8>)> {
 	let generated_thumb =
@@ -603,7 +606,9 @@ async fn get_library_thumbnail_handler(
 		.as_ref()
 		.map(|l| l.config.clone())
 		.map(LibraryConfig::from);
-	let image_format = library_config.and_then(|o| o.thumbnail_config.map(|c| c.format));
+	// let image_format = library_config.and_then(|o| o.thumbnail_config.map(|c| c.format));
+	// TODO(sea-orm): Fix
+	let image_format: Option<SupportedImageFormat> = None;
 
 	get_library_thumbnail(&id, first_series, first_book, image_format, &ctx.config)
 		.await
@@ -682,23 +687,26 @@ async fn patch_library_thumbnail(
 		.ok_or(APIError::NotFound(String::from("Series relation missing")))?
 		.library()?
 		.ok_or(APIError::NotFound(String::from("Library relation missing")))?;
-	let image_options = library
-		.config()?
-		.thumbnail_config
-		.clone()
-		.map(ImageProcessorOptions::try_from)
-		.transpose()?
-		.unwrap_or_else(|| {
-			tracing::warn!(
-				"Failed to parse existing thumbnail config! Using a default config"
-			);
-			ImageProcessorOptions::default()
-		})
-		.with_page(target_page);
 
-	let format = image_options.format.clone();
-
+	// TODO(sea-orm): Fix
 	unimplemented!("SeaORM migration")
+
+	// let image_options = library
+	// 	.config()?
+	// 	.thumbnail_config
+	// 	.clone()
+	// 	.map(ImageProcessorOptions::try_from)
+	// 	.transpose()?
+	// 	.unwrap_or_else(|| {
+	// 		tracing::warn!(
+	// 			"Failed to parse existing thumbnail config! Using a default config"
+	// 		);
+	// 		ImageProcessorOptions::default()
+	// 	})
+	// 	.with_page(target_page);
+
+	// let format = image_options.format.clone();
+
 	// let (_, path_buf, _) = generate_book_thumbnail(
 	// 	&media,
 	// 	GenerateThumbnailOptions {
@@ -818,7 +826,7 @@ async fn delete_library_thumbnails(
 #[skip_serializing_none]
 #[derive(Debug, Deserialize, ToSchema, Type)]
 pub struct GenerateLibraryThumbnails {
-	pub image_options: Option<ImageProcessorOptions>,
+	// pub image_options: Option<ImageProcessorOptions>,
 	#[serde(default)]
 	pub force_regenerate: bool,
 }
@@ -857,23 +865,27 @@ async fn generate_library_thumbnails(
 		.await?
 		.ok_or(APIError::NotFound("Library not found".to_string()))?;
 	let library_config = library.config()?.to_owned();
-	let existing_options = if let Some(config) = library_config.thumbnail_config {
-		// I hard error here so that we don't accidentally generate thumbnails in an invalid or
-		// otherwise undesired way per the existing (but not properly parsed) config
-		Some(ImageProcessorOptions::try_from(config)?)
-	} else {
-		None
-	};
-	let options = input.image_options.or(existing_options).unwrap_or_default();
+	// let existing_options = if let Some(config) = library_config.thumbnail_config {
+	// 	// I hard error here so that we don't accidentally generate thumbnails in an invalid or
+	// 	// otherwise undesired way per the existing (but not properly parsed) config
+	// 	Some(ImageProcessorOptions::try_from(config)?)
+	// } else {
+	// 	None
+	// };
+	// let options = input.image_options.or(existing_options).unwrap_or_default();
 	let config =
 		ThumbnailGenerationJobParams::single_library(library.id, input.force_regenerate);
-	ctx.enqueue_job(ThumbnailGenerationJob::new(options, config))
-		.map_err(|e| {
-			error!(?e, "Failed to enqueue thumbnail generation job");
-			APIError::InternalServerError(
-				"Failed to enqueue thumbnail generation job".to_string(),
-			)
-		})?;
+	// TODO(sea-orm): Fix
+	ctx.enqueue_job(ThumbnailGenerationJob::new(
+		ImageProcessorOptions::default(),
+		config,
+	))
+	.map_err(|e| {
+		error!(?e, "Failed to enqueue thumbnail generation job");
+		APIError::InternalServerError(
+			"Failed to enqueue thumbnail generation job".to_string(),
+		)
+	})?;
 
 	Ok(Json(()))
 }
@@ -1380,10 +1392,10 @@ async fn create_library(
 			let ignore_rules = (!library_config.ignore_rules.is_empty())
 				.then(|| library_config.ignore_rules.as_bytes())
 				.transpose()?;
-			let thumbnail_config = library_config
-				.thumbnail_config
-				.map(|options| options.as_bytes())
-				.transpose()?;
+			// let thumbnail_config = library_config
+			// 	.thumbnail_config
+			// 	.map(|options| options.as_bytes())
+			// 	.transpose()?;
 
 			let library_config = client
 				.library_config()
@@ -1415,7 +1427,7 @@ async fn create_library(
 					library_config::library_pattern::set(
 						library_config.library_pattern.to_string(),
 					),
-					library_config::thumbnail_config::set(thumbnail_config),
+					// library_config::thumbnail_config::set(thumbnail_config),
 					library_config::ignore_rules::set(ignore_rules),
 					library_config::watch::set(library_config.watch),
 				])
@@ -1612,10 +1624,10 @@ async fn update_library(
 			let ignore_rules = (!library_config.ignore_rules.is_empty())
 				.then(|| library_config.ignore_rules.as_bytes())
 				.transpose()?;
-			let thumbnail_config = library_config
-				.thumbnail_config
-				.map(|options| options.as_bytes())
-				.transpose()?;
+			// let thumbnail_config = library_config
+			// 	.thumbnail_config
+			// 	.map(|options| options.as_bytes())
+			// 	.transpose()?;
 
 			client
 				.library_config()
@@ -1648,7 +1660,7 @@ async fn update_library(
 						),
 						library_config::ignore_rules::set(ignore_rules),
 						library_config::watch::set(library_config.watch),
-						library_config::thumbnail_config::set(thumbnail_config),
+						// library_config::thumbnail_config::set(thumbnail_config),
 					],
 				)
 				.exec()

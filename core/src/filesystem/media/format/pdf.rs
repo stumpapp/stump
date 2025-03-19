@@ -5,6 +5,7 @@ use std::{
 	path::{Path, PathBuf},
 };
 
+use models::shared::image_processor_options::SupportedImageFormat;
 use pdf::{file::FileOptions, object::ParseOptions};
 use pdfium_render::prelude::{PdfRenderConfig, Pdfium};
 
@@ -14,7 +15,7 @@ use crate::{
 		archive::create_zip_archive,
 		error::FileError,
 		hash::{self, generate_koreader_hash},
-		image::ImageFormat,
+		image::into_image_format,
 		media::{
 			process::{
 				FileConverter, FileProcessor, FileProcessorOptions, ProcessedFile,
@@ -206,7 +207,7 @@ impl FileConverter for PdfProcessor {
 	fn to_zip(
 		path: &str,
 		delete_source: bool,
-		format: Option<ImageFormat>,
+		format: Option<SupportedImageFormat>,
 		config: &StumpConfig,
 	) -> Result<PathBuf, FileError> {
 		let pdfium = PdfProcessor::renderer(&config.pdfium_path)?;
@@ -216,9 +217,9 @@ impl FileConverter for PdfProcessor {
 
 		let render_config = PdfRenderConfig::new();
 
-		let output_format = format
-			.clone()
-			.map_or(image::ImageFormat::Png, image::ImageFormat::from);
+		let output_format =
+			into_image_format(format.clone().unwrap_or(SupportedImageFormat::Png));
+
 		let converted_pages = iter
 			.enumerate()
 			.map(|(idx, page)| {

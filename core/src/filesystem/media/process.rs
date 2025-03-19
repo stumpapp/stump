@@ -3,7 +3,9 @@ use std::{
 	path::{Path, PathBuf},
 };
 
-use models::entity::library_config;
+use models::{
+	entity::library_config, shared::image_processor_options::SupportedImageFormat,
+};
 use tokio::{sync::oneshot, task::spawn_blocking};
 use tracing::debug;
 
@@ -13,7 +15,6 @@ use crate::{
 	filesystem::{
 		content_type::ContentType,
 		error::FileError,
-		image::ImageFormat,
 		media::{epub::EpubProcessor, pdf::PdfProcessor},
 	},
 };
@@ -130,7 +131,7 @@ pub trait FileConverter {
 	fn to_zip(
 		path: &str,
 		delete_source: bool,
-		image_format: Option<ImageFormat>,
+		image_format: Option<SupportedImageFormat>,
 		config: &StumpConfig,
 	) -> Result<PathBuf, FileError>;
 }

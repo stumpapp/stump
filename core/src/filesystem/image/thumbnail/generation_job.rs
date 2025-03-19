@@ -12,15 +12,15 @@ use specta::Type;
 use tokio::sync::Semaphore;
 use utoipa::ToSchema;
 
-use models::entity::{media, series};
+use models::{
+	entity::{media, series},
+	shared::image_processor_options::ImageProcessorOptions,
+};
 use sea_orm::{prelude::*, QuerySelect};
 
-use crate::{
-	filesystem::image::ImageProcessorOptions,
-	job::{
-		error::JobError, JobExecuteLog, JobExt, JobOutputExt, JobProgress, JobTaskOutput,
-		WorkerCtx, WorkingState, WrappedJob,
-	},
+use crate::job::{
+	error::JobError, JobExecuteLog, JobExt, JobOutputExt, JobProgress, JobTaskOutput,
+	WorkerCtx, WorkingState, WrappedJob,
 };
 
 use super::{

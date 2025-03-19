@@ -2,6 +2,7 @@ use axum::{
 	extract::{Multipart, Path, State},
 	Extension, Json,
 };
+use models::shared::image_processor_options::SupportedImageFormat;
 use serde::Deserialize;
 use stump_core::{
 	config::StumpConfig,
@@ -10,7 +11,7 @@ use stump_core::{
 		get_thumbnail,
 		image::{
 			generate_book_thumbnail, place_thumbnail, remove_thumbnails,
-			GenerateThumbnailOptions, ImageFormat, ImageProcessorOptions,
+			GenerateThumbnailOptions,
 		},
 		media::get_page_async,
 		ContentType,
@@ -78,7 +79,9 @@ pub(crate) async fn get_media_thumbnail_by_id(
 		.series
 		.and_then(|s| s.library.map(|l| l.config))
 		.map(LibraryConfig::from);
-	let image_format = library_config.and_then(|o| o.thumbnail_config.map(|c| c.format));
+	// let image_format = library_config.and_then(|o| o.thumbnail_config.map(|c| c.format));
+	// TODO(sea-orm):Fix
+	let image_format: Option<SupportedImageFormat> = None;
 
 	get_media_thumbnail(&book.id, &book.path, image_format, config).await
 }
@@ -86,7 +89,7 @@ pub(crate) async fn get_media_thumbnail_by_id(
 pub(crate) async fn get_media_thumbnail(
 	id: &str,
 	path: &str,
-	image_format: Option<ImageFormat>,
+	image_format: Option<SupportedImageFormat>,
 	config: &StumpConfig,
 ) -> APIResult<(ContentType, Vec<u8>)> {
 	let generated_thumb =
@@ -191,22 +194,25 @@ pub(crate) async fn patch_media_thumbnail(
 		.ok_or(APIError::NotFound(String::from("Series relation missing")))?
 		.library()?
 		.ok_or(APIError::NotFound(String::from("Library relation missing")))?;
-	let image_options = library
-		.config()?
-		.thumbnail_config
-		.clone()
-		.map(ImageProcessorOptions::try_from)
-		.transpose()?
-		.unwrap_or_else(|| {
-			tracing::warn!(
-				"Failed to parse existing thumbnail config! Using a default config"
-			);
-			ImageProcessorOptions::default()
-		})
-		.with_page(target_page);
 
-	let format = image_options.format.clone();
+	// TODO(sea-orm): Fix
 	unimplemented!("SeaORM migration")
+
+	// let image_options = library
+	// 	.config()?
+	// 	.thumbnail_config
+	// 	.clone()
+	// 	.map(ImageProcessorOptions::try_from)
+	// 	.transpose()?
+	// 	.unwrap_or_else(|| {
+	// 		tracing::warn!(
+	// 			"Failed to parse existing thumbnail config! Using a default config"
+	// 		);
+	// 		ImageProcessorOptions::default()
+	// 	})
+	// 	.with_page(target_page);
+
+	// let format = image_options.format.clone();
 	// let (_, path_buf, _) = generate_book_thumbnail(
 	// 	&media,
 	// 	GenerateThumbnailOptions {

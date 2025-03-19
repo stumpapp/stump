@@ -6,7 +6,6 @@ use pdf::{
 	primitive::{Dictionary, PdfString},
 };
 use prisma_client_rust::chrono::{Datelike, NaiveDate};
-use sea_orm::{prelude::*, Set};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
@@ -209,35 +208,6 @@ impl MediaMetadata {
 			media_metadata::teams::set(self.teams.map(|v| v.join(", "))),
 			media_metadata::page_count::set(self.page_count),
 		]
-	}
-
-	pub fn into_active_model(self) -> models::entity::media_metadata::ActiveModel {
-		models::entity::media_metadata::ActiveModel {
-			title: Set(self.title),
-			series: Set(self.series),
-			number: Set(self.number.and_then(|n| Decimal::try_from(n).ok())),
-			volume: Set(self.volume),
-			summary: Set(self.summary),
-			notes: Set(self.notes),
-			age_rating: Set(self.age_rating),
-			genre: Set(self.genre.map(|v| v.join(", "))),
-			year: Set(self.year),
-			month: Set(self.month),
-			day: Set(self.day),
-			writers: Set(self.writers.map(|v| v.join(", "))),
-			pencillers: Set(self.pencillers.map(|v| v.join(", "))),
-			inkers: Set(self.inkers.map(|v| v.join(", "))),
-			colorists: Set(self.colorists.map(|v| v.join(", "))),
-			letterers: Set(self.letterers.map(|v| v.join(", "))),
-			cover_artists: Set(self.cover_artists.map(|v| v.join(", "))),
-			editors: Set(self.editors.map(|v| v.join(", "))),
-			publisher: Set(self.publisher),
-			links: Set(self.links.map(|v| v.join(", "))),
-			characters: Set(self.characters.map(|v| v.join(", "))),
-			teams: Set(self.teams.map(|v| v.join(", "))),
-			page_count: Set(self.page_count),
-			..Default::default()
-		}
 	}
 }
 

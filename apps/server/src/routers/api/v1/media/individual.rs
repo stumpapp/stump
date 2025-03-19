@@ -4,6 +4,7 @@ use axum::{
 	extract::{Path, Query, State},
 	Extension, Json,
 };
+use models::shared::image_processor_options::ScaledDimensionResize;
 use prisma_client_rust::{chrono::Duration, Direction};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
@@ -18,7 +19,7 @@ use stump_core::{
 		PageDimension, PageDimensionsEntity, ProgressUpdateReturn, User, UserPermission,
 	},
 	filesystem::{
-		image::{resize_image, ScaledDimensionResize},
+		image::resize_image,
 		media::{analyze_media_job::AnalyzeMediaJob, get_page_async},
 	},
 	prisma::{

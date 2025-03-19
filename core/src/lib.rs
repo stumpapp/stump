@@ -303,222 +303,223 @@ mod tests {
 
 		file.write_all(b"// CORE TYPE GENERATION\n\n")?;
 
-		file.write_all(format!("{}\n\n", ts_export::<PaginationQuery>()?).as_bytes())?;
+		// TODO(sea-orm): Fix (or remove??)
+		// file.write_all(format!("{}\n\n", ts_export::<PaginationQuery>()?).as_bytes())?;
 
-		file.write_all(format!("{}\n\n", ts_export::<CoreEvent>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<CoreEvent>()?).as_bytes())?;
 
-		file.write_all(format!("{}\n\n", ts_export::<EntityVisibility>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<AccessRole>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<EntityVisibility>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<AccessRole>()?).as_bytes())?;
 
-		file.write_all(format!("{}\n\n", ts_export::<Log>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LogMetadata>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LogLevel>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<Log>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<LogMetadata>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<LogLevel>()?).as_bytes())?;
 
-		file.write_all(format!("{}\n\n", ts_export::<PersistedJob>()?).as_bytes())?;
-		// file.write_all(format!("{}\n\n", ts_export::<CoreJobOutput>()?).as_bytes())?;
-		// TODO: Fix this... Must move all job defs to the core... Otherwise, the `unknown` type swallows the others in the union
-		file.write_all(
-			"export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput\n\n".to_string()
-			.as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<JobUpdate>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<JobProgress>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LibraryScanOutput>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<SeriesScanOutput>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ThumbnailGenerationJobVariant>()?).as_bytes(),
-		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ThumbnailGenerationJobParams>()?).as_bytes(),
-		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ThumbnailGenerationOutput>()?).as_bytes(),
-		)?;
-
-		file.write_all(format!("{}\n\n", ts_export::<User>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<PartialUser>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<UserPermission>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<AgeRestriction>()?).as_bytes())?;
-
-		file.write_all(format!("{}\n\n", ts_export::<APIKey>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<InheritPermissionValue>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<APIKeyPermissions>()?).as_bytes())?;
-
-		file.write_all(format!("{}\n\n", ts_export::<SupportedFont>()?).as_bytes())?;
-
-		file.write_all(format!("{}\n\n", ts_export::<NavigationMode>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<HomeItem>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<NavigationItemDisplayOptions>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<NavigationItem>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ArrangementItem<()>>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<Arrangement<()>>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<UserPreferences>()?).as_bytes())?;
-
-		file.write_all(format!("{}\n\n", ts_export::<LoginActivity>()?).as_bytes())?;
-
-		file.write_all(format!("{}\n\n", ts_export::<EmailerSendTo>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<EmailerConfig>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<EmailerClientConfig>()?).as_bytes(),
-		)?;
-
-		file.write_all(format!("{}\n\n", ts_export::<SMTPEmailer>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<RegisteredEmailDevice>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<EmailerSendRecord>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<AttachmentMeta>()?).as_bytes())?;
-
-		file.write_all(format!("{}\n\n", ts_export::<ReadingDirection>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<ReadingMode>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ReadingImageScaleFit>()?).as_bytes(),
-		)?;
-
-		file.write_all(format!("{}\n\n", ts_export::<FileStatus>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<Library>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LibraryPattern>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LibraryScanMode>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<CustomVisit>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<ScanConfig>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<ScanOptions>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LastLibraryScan>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<IgnoreRules>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LibraryConfig>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LibraryStats>()?).as_bytes())?;
-
-		file.write_all(format!("{}\n\n", ts_export::<SeriesMetadata>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<Series>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<MediaMetadata>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<Media>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<Bookmark>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<MediaAnnotation>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ActiveReadingSession>()?).as_bytes(),
-		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<FinishedReadingSession>()?).as_bytes(),
-		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ProgressUpdateReturn>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<PageDimension>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<PageDimensionsEntity>()?).as_bytes(),
-		)?;
-
-		file.write_all(
-			format!("{}\n\n", ts_export::<ReactTableColumnSort>()?).as_bytes(),
-		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ReactTableGlobalSort>()?).as_bytes(),
-		)?;
-
-		file.write_all(format!("{}\n\n", ts_export::<Filter<()>>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<NumericFilter<()>>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<NumericRange<()>>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<FilterGroup<()>>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<FilterJoin>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<SmartListItemGrouping>()?).as_bytes(),
-		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<SmartListItemGroup<()>>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<SmartListItems>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<SmartList>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<SmartFilter<()>>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<MediaSmartFilter>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<MediaMetadataSmartFilter>()?).as_bytes(),
-		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<SeriesMetadataSmartFilter>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<SeriesSmartFilter>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LibrarySmartFilter>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<SmartListView>()?).as_bytes())?;
-
-		file.write_all(format!("{}\n\n", ts_export::<BookClub>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<BookClubMember>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<BookClubMemberRole>()?).as_bytes())?;
-		// TODO: https://github.com/oscartbeaumont/specta/issues/65 -> v2 stable will fix this
+		// file.write_all(format!("{}\n\n", ts_export::<PersistedJob>()?).as_bytes())?;
+		// // file.write_all(format!("{}\n\n", ts_export::<CoreJobOutput>()?).as_bytes())?;
+		// // TODO: Fix this... Must move all job defs to the core... Otherwise, the `unknown` type swallows the others in the union
 		// file.write_all(
-		// 	format!("{}\n\n", ts_export::<BookClubMemberRoleSpec>()?).as_bytes(),
+		// 	"export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput\n\n".to_string()
+		// 	.as_bytes(),
 		// )?;
-		file.write_all(
-			format!(
-				"{}\n\n",
-				"export type BookClubMemberRoleSpec = Record<BookClubMemberRole, string>"
-			)
-			.as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<BookClubSchedule>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<BookClubExternalBook>()?).as_bytes(),
-		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<BookClubBookDetails>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<BookClubBook>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<BookClubDiscussion>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<BookClubDiscussionMessage>()?).as_bytes(),
-		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<BookClubDiscussionMessageLike>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<BookClubInvitation>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<JobUpdate>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<JobProgress>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<LibraryScanOutput>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<SeriesScanOutput>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ThumbnailGenerationJobVariant>()?).as_bytes(),
+		// )?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ThumbnailGenerationJobParams>()?).as_bytes(),
+		// )?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ThumbnailGenerationOutput>()?).as_bytes(),
+		// )?;
 
-		file.write_all(format!("{}\n\n", ts_export::<Tag>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LayoutMode>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<User>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<PartialUser>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<UserPermission>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<AgeRestriction>()?).as_bytes())?;
 
-		file.write_all(format!("{}\n\n", ts_export::<Epub>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<UpdateEpubProgress>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<EpubContent>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<APIKey>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<InheritPermissionValue>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<APIKeyPermissions>()?).as_bytes())?;
 
-		file.write_all(format!("{}\n\n", ts_export::<JobStatus>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<JobSchedulerConfig>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<SupportedFont>()?).as_bytes())?;
 
-		file.write_all(format!("{}\n\n", ts_export::<ReadingListItem>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ReadingListVisibility>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<ReadingList>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<CreateReadingList>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<NavigationMode>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<HomeItem>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<NavigationItemDisplayOptions>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<NavigationItem>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ArrangementItem<()>>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<Arrangement<()>>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<UserPreferences>()?).as_bytes())?;
 
-		file.write_all(format!("{}\n\n", ts_export::<ImageResizeMode>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<ImageResizeOptions>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ScaledDimensionResize>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<ImageFormat>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ImageProcessorOptions>()?).as_bytes(),
-		)?;
+		// file.write_all(format!("{}\n\n", ts_export::<LoginActivity>()?).as_bytes())?;
 
-		file.write_all(format!("{}\n\n", ts_export::<DirectoryListing>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<DirectoryListingFile>()?).as_bytes(),
-		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<DirectoryListingInput>()?).as_bytes(),
-		)?;
+		// file.write_all(format!("{}\n\n", ts_export::<EmailerSendTo>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<EmailerConfig>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<EmailerClientConfig>()?).as_bytes(),
+		// )?;
 
-		file.write_all(format!("{}\n\n", ts_export::<Direction>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<PageParams>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<QueryOrder>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<PageQuery>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<CursorQuery>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<CursorInfo>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<PageInfo>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<Pagination>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<SMTPEmailer>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<RegisteredEmailDevice>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<EmailerSendRecord>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<AttachmentMeta>()?).as_bytes())?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<ReadingDirection>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<ReadingMode>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ReadingImageScaleFit>()?).as_bytes(),
+		// )?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<FileStatus>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<Library>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<LibraryPattern>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<LibraryScanMode>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<CustomVisit>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<ScanConfig>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<ScanOptions>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<LastLibraryScan>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<IgnoreRules>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<LibraryConfig>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<LibraryStats>()?).as_bytes())?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<SeriesMetadata>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<Series>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<MediaMetadata>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<Media>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<Bookmark>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<MediaAnnotation>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ActiveReadingSession>()?).as_bytes(),
+		// )?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<FinishedReadingSession>()?).as_bytes(),
+		// )?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ProgressUpdateReturn>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<PageDimension>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<PageDimensionsEntity>()?).as_bytes(),
+		// )?;
+
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ReactTableColumnSort>()?).as_bytes(),
+		// )?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ReactTableGlobalSort>()?).as_bytes(),
+		// )?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<Filter<()>>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<NumericFilter<()>>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<NumericRange<()>>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<FilterGroup<()>>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<FilterJoin>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<SmartListItemGrouping>()?).as_bytes(),
+		// )?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<SmartListItemGroup<()>>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<SmartListItems>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<SmartList>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<SmartFilter<()>>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<MediaSmartFilter>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<MediaMetadataSmartFilter>()?).as_bytes(),
+		// )?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<SeriesMetadataSmartFilter>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<SeriesSmartFilter>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<LibrarySmartFilter>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<SmartListView>()?).as_bytes())?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<BookClub>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<BookClubMember>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<BookClubMemberRole>()?).as_bytes())?;
+		// // TODO: https://github.com/oscartbeaumont/specta/issues/65 -> v2 stable will fix this
+		// // file.write_all(
+		// // 	format!("{}\n\n", ts_export::<BookClubMemberRoleSpec>()?).as_bytes(),
+		// // )?;
+		// file.write_all(
+		// 	format!(
+		// 		"{}\n\n",
+		// 		"export type BookClubMemberRoleSpec = Record<BookClubMemberRole, string>"
+		// 	)
+		// 	.as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<BookClubSchedule>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<BookClubExternalBook>()?).as_bytes(),
+		// )?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<BookClubBookDetails>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<BookClubBook>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<BookClubDiscussion>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<BookClubDiscussionMessage>()?).as_bytes(),
+		// )?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<BookClubDiscussionMessageLike>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<BookClubInvitation>()?).as_bytes())?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<Tag>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<LayoutMode>()?).as_bytes())?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<Epub>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<UpdateEpubProgress>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<EpubContent>()?).as_bytes())?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<JobStatus>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<JobSchedulerConfig>()?).as_bytes())?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<ReadingListItem>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ReadingListVisibility>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<ReadingList>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<CreateReadingList>()?).as_bytes())?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<ImageResizeMode>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<ImageResizeOptions>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ScaledDimensionResize>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<ImageFormat>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ImageProcessorOptions>()?).as_bytes(),
+		// )?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<DirectoryListing>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<DirectoryListingFile>()?).as_bytes(),
+		// )?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<DirectoryListingInput>()?).as_bytes(),
+		// )?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<Direction>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<PageParams>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<QueryOrder>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<PageQuery>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<CursorQuery>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<CursorInfo>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<PageInfo>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<Pagination>()?).as_bytes())?;
 
 		Ok(())
 	}

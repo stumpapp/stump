@@ -213,6 +213,39 @@ pub enum ReadingMode {
 	ContinuousHorizontal,
 }
 
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Clone,
+	Default,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "lowercase",
+	db_type = "String(StringLen::None)"
+)]
+#[serde(rename_all = "lowercase")]
+pub enum SupportedFont {
+	AtkinsonHyperlegible,
+	Bitter,
+	Charis,
+	#[default]
+	Inter,
+	LibreBaskerville,
+	Literata,
+	Nunito,
+	OpenDyslexic,
+	// TODO(383): Support custom fonts
+	// Custom(String),
+}
+
 /// The permissions a user may be granted
 #[derive(
 	Eq,

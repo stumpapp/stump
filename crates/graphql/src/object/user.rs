@@ -1,7 +1,7 @@
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
-use models::entity::{library, media, reading_session, series, series_metadata, user};
-use sea_orm::prelude::*;
+use models::entity::{media, reading_session, user};
+use sea_orm::{prelude::*, QueryOrder};
 
 use crate::data::CoreContext;
 
@@ -22,12 +22,14 @@ impl From<user::Model> for User {
 
 #[ComplexObject]
 impl User {
+	// TODO(graphql): SelfGuard.or(ServerOwnerGuard)
 	async fn continue_reading(&self, ctx: &Context<'_>) -> Result<Vec<Media>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let in_progress_models = media::ModelWithMetadata::find()
 			.inner_join(reading_session::Entity)
 			.filter(reading_session::Column::UserId.eq(&self.model.id))
+			.order_by_desc(reading_session::Column::UpdatedAt)
 			.into_model::<media::ModelWithMetadata>()
 			.all(conn)
 			.await?;

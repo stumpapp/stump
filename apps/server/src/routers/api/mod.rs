@@ -4,14 +4,18 @@ pub(crate) mod v1;
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use axum::{
+	middleware,
 	response::{Html, IntoResponse},
 	routing::post,
 	Extension, Router,
 };
+use models::entity::user::AuthUser;
 
 use crate::{
 	config::state::AppState,
+	errors::APIError,
 	graphql::{build_schema, AppSchema},
+	middleware::auth::{auth_middleware, RequestContext},
 };
 
 pub(crate) async fn mount(app_state: AppState) -> Router<AppState> {
@@ -27,30 +31,55 @@ pub(crate) async fn graphql(app_state: AppState) -> Router<AppState> {
 	let schema = build_schema(app_state.clone()).await;
 
 	let mut method_router = post(graphql_handler);
-	if app_state.config.is_debug() {
-		method_router = method_router.get(playground);
-	}
+	// if app_state.config.enable_swagger {
+	method_router = method_router.get(playground);
+	// }
 
 	Router::new()
 		.route("/", method_router)
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 		.layer(Extension(schema))
 }
 
 // TODO(sea-orm): Consider new user permission
-async fn playground() -> impl IntoResponse {
-	Html(playground_source(GraphQLPlaygroundConfig::new(
-		"/api/graphql",
+async fn playground(
+	Extension(req_ctx): Extension<RequestContext>,
+) -> Result<impl IntoResponse, APIError> {
+	if !req_ctx.user().is_server_owner {
+		return Err(APIError::forbidden_discreet());
+	}
+
+	Ok(Html(playground_source(
+		GraphQLPlaygroundConfig::new("/api/graphql")
+			.with_setting("request.credentials", "include"),
 	)))
 }
 
 // TODO(sea-orm): Move to separate file, get OPTIONAL user(?), enforce user for all but login-related mutations? Or just retain restful login?
 async fn graphql_handler(
 	schema: Extension<AppSchema>,
-	// Extension(req_ctx): Extension<RequestContext>,
+	Extension(req_ctx): Extension<RequestContext>,
 	req: GraphQLRequest,
 ) -> GraphQLResponse {
 	let mut req = req.into_inner();
-	// req = req.data(GraphQLData { core: ctx });
+
+	let user = req_ctx.user();
+	// TODO(sea-orm): Use graphQL everywhere once User model is widely used
+	let req_ctx = graphql::data::RequestContext {
+		user: AuthUser {
+			id: user.id.clone(),
+			username: user.username.clone(),
+			is_server_owner: user.is_server_owner,
+			is_locked: user.is_locked,
+			// age_restriction: user.age_restriction,
+			// permissions: user.permissions,
+			age_restriction: None,
+			permissions: vec![],
+		},
+		api_key: req_ctx.api_key(),
+	};
+	req = req.data(req_ctx);
+
 	schema.execute(req).await.into()
 }
 

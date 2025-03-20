@@ -12,19 +12,19 @@ use crate::error_message;
 pub type CoreContext = Arc<Ctx>;
 
 pub struct RequestContext {
-	pub user: Option<AuthUser>,
+	pub user: AuthUser,
 	pub api_key: Option<String>,
 }
 
 impl RequestContext {
 	/// Get the current user
-	pub fn user(&self) -> Result<AuthUser> {
-		self.user.clone().ok_or("Unauthorized".into())
+	pub fn user(&self) -> AuthUser {
+		self.user.clone()
 	}
 
 	/// Get the ID of the current user
-	pub fn id(&self) -> Result<String> {
-		Ok(self.user()?.id)
+	pub fn id(&self) -> String {
+		self.user.id.clone()
 	}
 
 	pub fn api_key(&self) -> Option<String> {
@@ -34,7 +34,7 @@ impl RequestContext {
 	/// Enforce that the current user has all the permissions provided, otherwise return an error
 	#[tracing::instrument(skip(self))]
 	pub fn enforce_permissions(&self, permissions: &[UserPermission]) -> Result<()> {
-		let user = self.user()?;
+		let user = self.user();
 
 		if user.is_server_owner {
 			return Ok(());
@@ -59,13 +59,13 @@ impl RequestContext {
 		permissions: &[UserPermission],
 	) -> Result<AuthUser> {
 		self.enforce_permissions(permissions)?;
-		Ok(self.user()?.clone())
+		Ok(self.user())
 	}
 
 	/// Enforce that the current user is the server owner, otherwise return an error
 	#[tracing::instrument(skip(self))]
 	pub fn enforce_server_owner(&self) -> Result<()> {
-		let user = self.user()?;
+		let user = self.user();
 
 		if user.is_server_owner {
 			Ok(())
@@ -82,6 +82,6 @@ impl RequestContext {
 	#[tracing::instrument(skip(self))]
 	pub fn server_owner_user(&self) -> Result<AuthUser> {
 		self.enforce_server_owner()?;
-		Ok(self.user()?.clone())
+		Ok(self.user())
 	}
 }

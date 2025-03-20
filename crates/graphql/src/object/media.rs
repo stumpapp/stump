@@ -3,7 +3,7 @@ use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 use models::entity::{library, media, media_metadata, reading_session, series};
 use sea_orm::{prelude::*, sea_query::Query};
 
-use crate::data::CoreContext;
+use crate::data::{CoreContext, RequestContext};
 
 use super::{library::Library, series::Series};
 
@@ -42,6 +42,8 @@ impl Media {
 	async fn library(&self, ctx: &Context<'_>) -> Result<Library> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
+		// TODO: hidden from user? Access to this node _implies_ access to the library,
+		// so perhaps not
 		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
 		let model = library::Entity::find()
 			.filter(
@@ -60,19 +62,47 @@ impl Media {
 		Ok(Library::from(model))
 	}
 
-	async fn progress(
+	async fn read_progress(
 		&self,
 		ctx: &Context<'_>,
 	) -> Result<Option<reading_session::Model>> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		// TODO(sea-orm): user ID
 		let progress = reading_session::Entity::find()
-			.filter(reading_session::Column::MediaId.eq(&self.model.id))
+			.filter(
+				reading_session::Column::MediaId
+					.eq(&self.model.id)
+					.and(reading_session::Column::UserId.eq(&user.id)),
+			)
 			.into_model::<reading_session::Model>()
 			.one(conn)
 			.await?;
 
 		Ok(progress)
+	}
+
+	// async fn read_history(&self, ctx: &Context<'_>) -> Result<Vec<finished_reading_session::Model>> {}
+
+	async fn next_in_series(
+		&self,
+		ctx: &Context<'_>,
+		#[graphql(default = 1, validator(minimum = 1))] take: u64,
+	) -> Result<Vec<Media>> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
+		let mut cursor = media::ModelWithMetadata::find_for_user(user)
+			.filter(media::Column::SeriesId.eq(series_id))
+			.cursor_by(media::Column::Name);
+		cursor.after(&self.model.name).first(take);
+
+		let next = cursor
+			.into_model::<media::ModelWithMetadata>()
+			.all(conn)
+			.await?;
+
+		Ok(next.into_iter().map(Media::from).collect())
 	}
 }

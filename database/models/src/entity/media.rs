@@ -137,7 +137,7 @@ impl Entity {
 	}
 }
 
-#[derive(Debug, SimpleObject)]
+#[derive(Debug, Clone, SimpleObject)]
 pub struct ModelWithMetadata {
 	#[graphql(flatten)]
 	pub media: Model,
@@ -244,6 +244,11 @@ impl ModelWithMetadata {
 pub struct MediaIdentSelect {
 	pub id: String,
 	pub path: String,
+}
+
+#[derive(Debug, FromQueryResult)]
+pub struct MediaNameCmpSelect {
+	pub name: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

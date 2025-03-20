@@ -251,6 +251,11 @@ pub struct MediaNameCmpSelect {
 	pub name: String,
 }
 
+#[derive(Debug, FromQueryResult)]
+pub struct MediaCreatedAtCmpSelect {
+	pub created_at: DateTimeWithTimeZone,
+}
+
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
 	#[sea_orm(has_many = "super::book_club_book_suggestion::Entity")]

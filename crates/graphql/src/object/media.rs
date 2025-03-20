@@ -1,7 +1,9 @@
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
-use models::entity::{library, media, media_metadata, reading_session, series};
-use sea_orm::{prelude::*, sea_query::Query};
+use models::entity::{
+	finished_reading_session, library, media, media_metadata, reading_session, series,
+};
+use sea_orm::{prelude::*, sea_query::Query, QuerySelect};
 
 use crate::data::{CoreContext, RequestContext};
 
@@ -62,6 +64,7 @@ impl Media {
 		Ok(Library::from(model))
 	}
 
+	// TODO(graphql): Create object to query for device
 	async fn read_progress(
 		&self,
 		ctx: &Context<'_>,
@@ -82,7 +85,26 @@ impl Media {
 		Ok(progress)
 	}
 
-	// async fn read_history(&self, ctx: &Context<'_>) -> Result<Vec<finished_reading_session::Model>> {}
+	// TODO(graphql): Create object to query for device
+	async fn read_history(
+		&self,
+		ctx: &Context<'_>,
+	) -> Result<Vec<finished_reading_session::Model>> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let history = finished_reading_session::Entity::find()
+			.filter(
+				finished_reading_session::Column::MediaId
+					.eq(&self.model.id)
+					.and(finished_reading_session::Column::UserId.eq(&user.id)),
+			)
+			.into_model::<finished_reading_session::Model>()
+			.all(conn)
+			.await?;
+
+		Ok(history)
+	}
 
 	async fn next_in_series(
 		&self,

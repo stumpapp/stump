@@ -3164,6 +3164,10 @@ dependencies = [
  "async-graphql",
  "models",
  "sea-orm",
+ "serde",
+ "serde_json",
+ "serde_with",
+ "strum",
  "stump_core",
  "tracing",
 ]

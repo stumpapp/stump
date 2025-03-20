@@ -1,6 +1,8 @@
+use async_graphql::SimpleObject;
 use sea_orm::entity::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
+#[graphql(name = "FinishedReadingSessionModel")]
 #[sea_orm(table_name = "finished_reading_sessions")]
 pub struct Model {
 	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]

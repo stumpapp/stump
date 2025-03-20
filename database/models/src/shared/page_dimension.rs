@@ -28,6 +28,7 @@ pub enum PageDimensionParserError {
 	ErrorParsingInt(#[from] std::num::ParseIntError),
 }
 
+/// A struct containing the various analyses of a book in Stump, e.g., page dimensions.
 #[derive(
 	Serialize, Deserialize, Debug, Clone, PartialEq, Eq, FromJsonQueryResult, SimpleObject,
 )]

@@ -3,7 +3,7 @@ I want to totally revamp the filtering system. I'll maintain the two concepts of
 to construct them using the same base structure. I envision:
 
 {
-  media(filter: { metadata: { title: { contains: "test" } } }) {
+  media(filter: { metadata: { title: { contains: "test" } }, name: { eq: "test" } }) {
 	nodes {
 	  name
 	  metadata {
@@ -75,67 +75,75 @@ Condition::all()
 	) <- This is from the access control imposed by Stump
 */
 
-#[generate_smart_filter]
-#[derive(Debug, Clone, PartialEq)]
-#[serde(untagged)]
-#[prisma_table("media")]
-pub enum MediaFilter {
-	Name { name: String },
-	Size { size: i64 },
-	Extension { extension: String },
-	CreatedAt { created_at: DateTime<FixedOffset> },
-	UpdatedAt { updated_at: DateTime<FixedOffset> },
-	Status { status: String },
-	Path { path: String },
-	Pages { pages: i32 },
-	// Metadata { metadata: MediaMetadataSmartFilter },
-	// Series { series: SeriesSmartFilter },
+use async_graphql::Enum;
+use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
+use strum::{Display, EnumString};
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+pub struct FilterInput {
+	#[serde(default)]
+	root_operator: FilterOperator,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(
+	Debug,
+	Default,
+	Clone,
+	Copy,
+	PartialEq,
+	Eq,
+	Serialize,
+	Deserialize,
+	Enum,
+	EnumString,
+	Display,
+)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum FilterOperator {
+	#[default]
+	And,
+	Or,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
-/// A filter for a single value, e.g. `name = "test"`
-pub enum Filter<T> {
-	/// A simple equals filter, e.g. `name = "test"`
-	Equals { equals: T },
-	/// A simple not filter, e.g. `name != "test"`
-	Not { not: T },
-	/// A filter for a vector of values, e.g. `name in ["test", "test2"]`
+pub enum FilterGroup<T> {
+	And { _and: Vec<T> },
+	Or { _or: Vec<T> },
+	Not { _not: Vec<T> },
+	// Basic(HashMap<String, FieldFilter<T>>), // or something, dynamic keys doesn't really work
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum SmartFilterGroup<T> {
+	And { _and: Vec<T> },
+	Or { _or: Vec<T> },
+	Not { _not: Vec<T> },
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum FieldFilter<T> {
+	Equals { eq: T },
+	Not { neq: T },
 	Any { any: Vec<T> },
-	/// A filter for a vector of values, e.g. `name not in ["test", "test2"]`
 	None { none: Vec<T> },
-	/// A filter for a string value, e.g. `name contains "test"`
-	StringFilter(StringFilter<T>),
-	/// A filter for a numeric value, e.g. `year > 2000`
-	NumericFilter(NumericFilter<T>),
+	StringFieldFilter(StringFilter<T>),
+	NumericFieldFilter(NumericFilter<T>),
 }
 
-#[derive(Debug, Clone, PartialEq)]
-#[serde(untagged)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum StringFilter<T> {
-	/// A filter for a string that matches a pattern, e.g. `name like "%test%"`
 	Like { like: T },
-	/// A filter for a string that contains a substring, e.g. `name contains "test"`. This should
-	/// not be confused with an `in` filter. See [`Filter::Any`] for that.
 	Contains { contains: T },
-	/// A filter for a string that does not contain a substring, e.g. `name excludes "test"`. This
-	/// should not be confused with a `not in` filter. See [`Filter::None`] for that.
 	Excludes { excludes: T },
-	/// A filter for a string that starts with a substring, e.g. `name starts_with "test"`
 	StartsWith { starts_with: T },
-	/// A filter for a string that ends with a substring, e.g. `name ends_with "test"`
 	EndsWith { ends_with: T },
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct NumericRange<T> {
-	pub from: T,
-	pub to: T,
-	#[serde(default)]
-	pub inclusive: bool,
-}
-
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum NumericFilter<T> {
 	Gt { gt: T },
@@ -145,100 +153,302 @@ pub enum NumericFilter<T> {
 	Range(NumericRange<T>),
 }
 
-/// A trait to convert an enum variant into a prisma order parameter
-pub trait IntoOrderBy {
-	type OrderParam;
-	/// Convert the enum variant into a prisma order parameter, e.g. `media::name::order(SortOrder::Asc)`
-	fn into_order(self, dir: SortOrder) -> Self::OrderParam;
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NumericRange<T> {
+	pub from: T,
+	pub to: T,
+	pub inclusive: bool,
 }
 
-#[derive(Default, Debug, OrderByGen)]
-#[prisma(module = "media_metadata")]
-pub enum MediaMetadataOrderBy {
-	#[default]
-	Title,
-	Series,
-	Number,
-	Volume,
-	Summary,
-	Notes,
-	AgeRating,
-	Genre,
-	Year,
-	Month,
-	Day,
-	Writers,
-	Pencillers,
-	Inkers,
-	Colorists,
-	Letterers,
-	CoverArtists,
-	Editors,
-	Publisher,
-	Links,
-	Characters,
-	Teams,
+#[skip_serializing_none]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MediaFilterInput {
+	pub name: Option<FieldFilter<String>>,
+	pub metadata: Option<MediaMetadataFilterInput>,
+
+	pub _and: Option<Vec<MediaFilterInput>>,
+	pub _not: Option<Vec<MediaFilterInput>>,
+	pub _or: Option<Vec<MediaFilterInput>>,
 }
 
-#[derive(Default, Debug, OrderByGen)]
-#[prisma(module = "media")]
-pub enum MediaOrderBy {
-	#[default]
-	Name,
-	Size,
-	Extension,
-	CreatedAt,
-	UpdatedAt,
-	Status,
-	Path,
-	Pages,
-	Metadata(Vec<MediaMetadataOrderBy>),
-	ModifiedAt,
+#[skip_serializing_none]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MediaMetadataFilterInput {
+	pub title: Option<FieldFilter<String>>,
+	pub series: Option<FieldFilter<String>>,
+
+	pub _and: Option<Vec<MediaMetadataFilterInput>>,
+	pub _not: Option<Vec<MediaMetadataFilterInput>>,
+	pub _or: Option<Vec<MediaMetadataFilterInput>>,
 }
 
-// #[derive(Debug, Deserialize, Serialize)]
-// enum SeriesAggregateOrderBy {
-// 	Media,
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_serialize_media_filter() {
+		let filter = MediaFilterInput {
+			name: Some(FieldFilter::Equals {
+				eq: "test".to_string(),
+			}),
+			..Default::default()
+		};
+
+		let serialized = serde_json::to_string(&filter).unwrap();
+		assert_eq!(serialized, r#"{"name":{"eq":"test"}}"#);
+	}
+
+	#[test]
+	fn test_serialize_media_filter_with_metadata() {
+		let filter = MediaFilterInput {
+			name: Some(FieldFilter::Equals {
+				eq: "test".to_string(),
+			}),
+			metadata: Some(MediaMetadataFilterInput {
+				title: Some(FieldFilter::Equals {
+					eq: "test".to_string(),
+				}),
+				series: Some(FieldFilter::Equals {
+					eq: "theseries".to_string(),
+				}),
+				..Default::default()
+			}),
+			..Default::default()
+		};
+
+		let serialized = serde_json::to_string(&filter).unwrap();
+		assert_eq!(
+			serialized,
+			r#"{"name":{"eq":"test"},"metadata":{"title":{"eq":"test"},"series":{"eq":"theseries"}}}"#
+		);
+	}
+
+	#[test]
+	fn test_serialize_media_filter_with_and() {
+		let filter = MediaFilterInput {
+			_and: Some(vec![
+				MediaFilterInput {
+					name: Some(FieldFilter::Equals {
+						eq: "test".to_string(),
+					}),
+					..Default::default()
+				},
+				MediaFilterInput {
+					name: Some(FieldFilter::Equals {
+						eq: "test2".to_string(),
+					}),
+					..Default::default()
+				},
+			]),
+			..Default::default()
+		};
+
+		let serialized = serde_json::to_string(&filter).unwrap();
+		assert_eq!(
+			serialized,
+			r#"{"_and":[{"name":{"eq":"test"}},{"name":{"eq":"test2"}}]}"#
+		);
+	}
+
+	#[test]
+	fn test_serialize_media_filter_with_metadata_with_ands() {
+		let filter = MediaFilterInput {
+			name: Some(FieldFilter::Equals {
+				eq: "test".to_string(),
+			}),
+			metadata: Some(MediaMetadataFilterInput {
+				_and: Some(vec![
+					MediaMetadataFilterInput {
+						title: Some(FieldFilter::Equals {
+							eq: "test".to_string(),
+						}),
+						..Default::default()
+					},
+					MediaMetadataFilterInput {
+						series: Some(FieldFilter::Equals {
+							eq: "theseries".to_string(),
+						}),
+						..Default::default()
+					},
+				]),
+				..Default::default()
+			}),
+			..Default::default()
+		};
+
+		let serialized = serde_json::to_string(&filter).unwrap();
+		assert_eq!(
+			serialized,
+			r#"{"name":{"eq":"test"},"metadata":{"_and":[{"title":{"eq":"test"}},{"series":{"eq":"theseries"}}]}}"#
+		);
+	}
+}
+
+// #[generate_smart_filter]
+// #[derive(Debug, Clone, PartialEq)]
+// #[serde(untagged)]
+// #[prisma_table("media")]
+// pub enum MediaFilter {
+// 	Name { name: String },
+// 	Size { size: i64 },
+// 	Extension { extension: String },
+// 	CreatedAt { created_at: DateTime<FixedOffset> },
+// 	UpdatedAt { updated_at: DateTime<FixedOffset> },
+// 	Status { status: String },
+// 	Path { path: String },
+// 	Pages { pages: i32 },
+// 	// Metadata { metadata: MediaMetadataSmartFilter },
+// 	// Series { series: SeriesSmartFilter },
 // }
 
-#[derive(Default, Debug, OrderByGen)]
-#[prisma(module = "series")]
-pub enum SeriesOrderBy {
-	#[default]
-	Name,
-	Description,
-	UpdatedAt,
-	CreatedAt,
-	Path,
-	Status,
-	// _Count(SeriesAggregateOrderBy),
-}
+// #[derive(Debug, Clone, PartialEq)]
+// #[serde(untagged)]
+// /// A filter for a single value, e.g. `name = "test"`
+// pub enum Filter<T> {
+// 	/// A simple equals filter, e.g. `name = "test"`
+// 	Equals { equals: T },
+// 	/// A simple not filter, e.g. `name != "test"`
+// 	Not { not: T },
+// 	/// A filter for a vector of values, e.g. `name in ["test", "test2"]`
+// 	Any { any: Vec<T> },
+// 	/// A filter for a vector of values, e.g. `name not in ["test", "test2"]`
+// 	None { none: Vec<T> },
+// 	/// A filter for a string value, e.g. `name contains "test"`
+// 	StringFilter(StringFilter<T>),
+// 	/// A filter for a numeric value, e.g. `year > 2000`
+// 	NumericFilter(NumericFilter<T>),
+// }
 
-// #[derive(Debug, OrderByGen)]
-// #[prisma(module = "library")]
-// enum LibraryAggregateOrderBy {
-// 	Media,
+// #[derive(Debug, Clone, PartialEq)]
+// #[serde(untagged)]
+// pub enum StringFilter<T> {
+// 	/// A filter for a string that matches a pattern, e.g. `name like "%test%"`
+// 	Like { like: T },
+// 	/// A filter for a string that contains a substring, e.g. `name contains "test"`. This should
+// 	/// not be confused with an `in` filter. See [`Filter::Any`] for that.
+// 	Contains { contains: T },
+// 	/// A filter for a string that does not contain a substring, e.g. `name excludes "test"`. This
+// 	/// should not be confused with a `not in` filter. See [`Filter::None`] for that.
+// 	Excludes { excludes: T },
+// 	/// A filter for a string that starts with a substring, e.g. `name starts_with "test"`
+// 	StartsWith { starts_with: T },
+// 	/// A filter for a string that ends with a substring, e.g. `name ends_with "test"`
+// 	EndsWith { ends_with: T },
+// }
+
+// #[derive(Debug, Clone, PartialEq)]
+// pub struct NumericRange<T> {
+// 	pub from: T,
+// 	pub to: T,
+// 	#[serde(default)]
+// 	pub inclusive: bool,
+// }
+
+// #[derive(Debug, Clone, PartialEq)]
+// #[serde(untagged)]
+// pub enum NumericFilter<T> {
+// 	Gt { gt: T },
+// 	Gte { gte: T },
+// 	Lt { lt: T },
+// 	Lte { lte: T },
+// 	Range(NumericRange<T>),
+// }
+
+// /// A trait to convert an enum variant into a prisma order parameter
+// pub trait IntoOrderBy {
+// 	type OrderParam;
+// 	/// Convert the enum variant into a prisma order parameter, e.g. `media::name::order(SortOrder::Asc)`
+// 	fn into_order(self, dir: SortOrder) -> Self::OrderParam;
+// }
+
+// #[derive(Default, Debug, OrderByGen)]
+// #[prisma(module = "media_metadata")]
+// pub enum MediaMetadataOrderBy {
+// 	#[default]
+// 	Title,
 // 	Series,
+// 	Number,
+// 	Volume,
+// 	Summary,
+// 	Notes,
+// 	AgeRating,
+// 	Genre,
+// 	Year,
+// 	Month,
+// 	Day,
+// 	Writers,
+// 	Pencillers,
+// 	Inkers,
+// 	Colorists,
+// 	Letterers,
+// 	CoverArtists,
+// 	Editors,
+// 	Publisher,
+// 	Links,
+// 	Characters,
+// 	Teams,
 // }
 
-#[derive(Default, Debug, OrderByGen)]
-#[prisma(module = "library")]
-pub enum LibraryOrderBy {
-	#[default]
-	Name,
-	Path,
-	Status,
-	UpdatedAt,
-	CreatedAt,
-	// _Count(LibraryAggregateOrderBy),
-}
+// #[derive(Default, Debug, OrderByGen)]
+// #[prisma(module = "media")]
+// pub enum MediaOrderBy {
+// 	#[default]
+// 	Name,
+// 	Size,
+// 	Extension,
+// 	CreatedAt,
+// 	UpdatedAt,
+// 	Status,
+// 	Path,
+// 	Pages,
+// 	Metadata(Vec<MediaMetadataOrderBy>),
+// 	ModifiedAt,
+// }
 
-#[derive(Default, Debug, OrderByGen)]
-#[prisma(module = "job")]
-pub enum JobOrderBy {
-	#[default]
-	Name,
-	Status,
-	CreatedAt,
-	CompletedAt,
-}
+// // #[derive(Debug, Deserialize, Serialize)]
+// // enum SeriesAggregateOrderBy {
+// // 	Media,
+// // }
+
+// #[derive(Default, Debug, OrderByGen)]
+// #[prisma(module = "series")]
+// pub enum SeriesOrderBy {
+// 	#[default]
+// 	Name,
+// 	Description,
+// 	UpdatedAt,
+// 	CreatedAt,
+// 	Path,
+// 	Status,
+// 	// _Count(SeriesAggregateOrderBy),
+// }
+
+// // #[derive(Debug, OrderByGen)]
+// // #[prisma(module = "library")]
+// // enum LibraryAggregateOrderBy {
+// // 	Media,
+// // 	Series,
+// // }
+
+// #[derive(Default, Debug, OrderByGen)]
+// #[prisma(module = "library")]
+// pub enum LibraryOrderBy {
+// 	#[default]
+// 	Name,
+// 	Path,
+// 	Status,
+// 	UpdatedAt,
+// 	CreatedAt,
+// 	// _Count(LibraryAggregateOrderBy),
+// }
+
+// #[derive(Default, Debug, OrderByGen)]
+// #[prisma(module = "job")]
+// pub enum JobOrderBy {
+// 	#[default]
+// 	Name,
+// 	Status,
+// 	CreatedAt,
+// 	CompletedAt,
+// }

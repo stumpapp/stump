@@ -8,6 +8,8 @@ pub enum EntityError {
 	DbError(#[from] sea_orm::error::DbErr),
 	#[error("Invalid ignore rules were provided: {0}")]
 	InvalidIgnoreRules(String),
+	#[error("The requested column does not exist")]
+	ColumnDoesNotExist,
 }
 
 impl From<globset::Error> for EntityError {

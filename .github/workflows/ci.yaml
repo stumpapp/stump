@@ -1,6 +1,10 @@
 name: 'Stump Checks CI'
 on:
   pull_request:
+    # TODO(sea-orm): Undo
+    branches:
+      - '**'
+      - '!breaking/sea-orm'
   push:
     branches:
       - main

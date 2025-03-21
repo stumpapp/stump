@@ -27,10 +27,24 @@ pub struct MediaBuilder {
 	config: StumpConfig,
 }
 
+// TODO(sea-orm): Rename ProcessedMedia ?
 #[derive(Debug, Clone)]
 pub struct BuiltMedia {
 	pub media: media::ActiveModel,
 	pub metadata: Option<media_metadata::ActiveModel>,
+}
+
+impl BuiltMedia {
+	#[tracing::instrument(skip(self))]
+	pub fn path(&self) -> Option<String> {
+		match self.media.path.clone().into_value() {
+			Some(path) => Some(path.to_string()),
+			_ => {
+				tracing::warn!(result = ?self, "Failed to get path from constructed media");
+				None
+			},
+		}
+	}
 }
 
 impl MediaBuilder {

@@ -15,7 +15,7 @@ use models::entity::{library_config, media, media_metadata, series, series_metad
 use sea_orm::{
 	prelude::*,
 	sea_query::{OnConflict, Query},
-	Condition, DatabaseConnection, IntoActiveModel, Iterable, TransactionTrait,
+	Condition, DatabaseConnection, IntoActiveModel, Iterable, Set, TransactionTrait,
 };
 use tokio::{
 	sync::{oneshot, Semaphore},
@@ -92,16 +92,16 @@ pub(crate) async fn create_media(
 
 pub(crate) async fn update_media(
 	db: &DatabaseConnection,
-	media::ModelWithMetadata { media, metadata }: media::ModelWithMetadata,
+	BuiltMedia { media, metadata }: BuiltMedia,
 ) -> CoreResult<media::Model> {
 	let txn = db.begin().await?;
 
-	let active_model = media.into_active_model();
-	let updated_media = active_model.update(&txn).await?;
+	let updated_media = media.update(&txn).await?;
 
 	if let Some(meta) = metadata {
-		let mut on_conflict = OnConflict::new();
-		on_conflict.update_columns(media_metadata::Column::iter());
+		let on_conflict = OnConflict::new()
+			.update_columns(media_metadata::Column::iter())
+			.to_owned();
 		media_metadata::Entity::insert(meta.into_active_model())
 			.on_conflict(on_conflict)
 			.exec(&txn)
@@ -117,69 +117,39 @@ pub(crate) async fn handle_book_visit_operation(
 	db: &DatabaseConnection,
 	result: BookVisitResult,
 ) -> CoreResult<()> {
-	// TODO(sea-orm): Fix once I sort out what gets passed around the core
-	unimplemented!()
-	// match result {
-	// 	BookVisitResult::Custom(custom) => {
-	// 		if let Some(meta) = custom.meta {
-	// 			let params = meta
-	// 				.into_prisma()
-	// 				.into_iter()
-	// 				.chain(vec![media_metadata::media_id::set(Some(custom.id.clone()))])
-	// 				.collect::<Vec<_>>();
-	// 			let id = custom.id.clone();
+	match result {
+		BookVisitResult::Custom(custom) => {
+			if let Some(meta) = custom.meta {
+				let active_model = media_metadata::ActiveModel {
+					media_id: Set(Some(custom.id.clone())),
+					..meta.into_active_model()
+				};
+				let updated_meta = active_model.update(db).await?;
 
-	// 			let updated_meta = db
-	// 				._transaction()
-	// 				.run(|client| async move {
-	// 					let meta = client
-	// 						.media_metadata()
-	// 						.upsert(
-	// 							media_metadata::media_id::equals(id.clone()),
-	// 							params.clone(),
-	// 							params,
-	// 						)
-	// 						.exec()
-	// 						.await?;
-	// 					client
-	// 						.media()
-	// 						.update(
-	// 							media::id::equals(id),
-	// 							vec![media::metadata::connect(
-	// 								media_metadata::id::equals(meta.id.clone()),
-	// 							)],
-	// 						)
-	// 						.with(media::metadata::fetch())
-	// 						.exec()
-	// 						.await
-	// 						.map(|_| meta)
-	// 				})
-	// 				.await;
-	// 			tracing::trace!(?updated_meta, "Metadata upserted");
-	// 		}
+				tracing::trace!(?updated_meta, "Metadata upserted");
+			}
 
-	// 		if let Some(hashes) = custom.hashes {
-	// 			let updated_book = db
-	// 				.media()
-	// 				.update(
-	// 					media::id::equals(custom.id),
-	// 					vec![
-	// 						media::hash::set(hashes.hash),
-	// 						media::koreader_hash::set(hashes.koreader_hash),
-	// 					],
-	// 				)
-	// 				.exec()
-	// 				.await?;
-	// 			tracing::trace!(?updated_book, "Book updated with new hashes");
-	// 		}
-	// 	},
-	// 	BookVisitResult::Built(book) => {
-	// 		let updated_book = update_media(db, *book).await?;
-	// 		tracing::trace!(?updated_book, "Book updated");
-	// 	},
-	// }
+			if let Some(hashes) = custom.hashes {
+				let affected_rows = media::Entity::update_many()
+					.filter(media::Column::Id.eq(custom.id.clone()))
+					.col_expr(media::Column::Hash, Expr::value(hashes.hash))
+					.col_expr(
+						media::Column::KoreaderHash,
+						Expr::value(hashes.koreader_hash),
+					)
+					.exec(db)
+					.await?
+					.rows_affected;
+				tracing::trace!(affected_rows, "Book updated with new hashes");
+			}
+		},
+		BookVisitResult::Built(book) => {
+			let updated_media = update_media(db, *book).await?;
+			tracing::trace!(?updated_media, "Book updated");
+		},
+	}
 
-	// Ok(())
+	Ok(())
 }
 
 #[derive(Default)]
@@ -254,7 +224,7 @@ pub(crate) async fn handle_missing_series(
 				0
 			},
 			|res| {
-				output.updated_media += res.rows_affected as u64;
+				output.updated_media += res.rows_affected;
 				res.rows_affected
 			},
 		);
@@ -309,7 +279,7 @@ pub(crate) async fn handle_missing_media(
 				0
 			},
 			|res| {
-				output.updated_media += res.rows_affected as u64;
+				output.updated_media += res.rows_affected;
 				res.rows_affected
 			},
 		);
@@ -569,7 +539,7 @@ struct BookVisitCtx {
 	operation: BookVisitOperation,
 	path: PathBuf,
 	series_id: String,
-	existing_book: Option<media::Model>,
+	existing_book: Option<media::ModelWithMetadata>,
 }
 
 async fn handle_book(
@@ -594,17 +564,13 @@ async fn handle_book(
 		move || {
 			let builder = MediaBuilder::new(&path, &series_id, library_config, &config);
 			let send_result = tx.send(match (operation, existing_book) {
-				(BookVisitOperation::Rebuild, Some(book)) => {
-					unimplemented!()
-					// TODO(sea-orm): Fix
-					// builder
-					// .rebuild(&book)
-					// .map(|b| BookVisitResult::Built(Box::new(b)))
-				},
+				(BookVisitOperation::Rebuild, Some(book)) => builder
+					.rebuild(&book)
+					.map(|b| BookVisitResult::Built(Box::new(b))),
 				(BookVisitOperation::Custom(custom), Some(book)) => {
 					builder.custom_visit(custom).map(|result| {
 						BookVisitResult::Custom(CustomVisitResult {
-							id: book.id,
+							id: book.media.id,
 							..result
 						})
 					})
@@ -612,10 +578,7 @@ async fn handle_book(
 				// If the existing book is None, it means the book doesn't yet exist so we
 				// always just do a full build. However, we really shouldn't be in this state
 				// since media creation is handled in a separate flow than visit
-				(_, None) => {
-					unimplemented!()
-					// builder.build().map(|b| BookVisitResult::Built(Box::new(b)))
-				},
+				(_, None) => builder.build().map(|b| BookVisitResult::Built(Box::new(b))),
 			});
 			tracing::trace!(
 				is_err = send_result.is_err(),
@@ -735,10 +698,10 @@ pub(crate) async fn safely_build_and_insert_media(
 
 	let atomic_cursor = Arc::new(AtomicUsize::new(1));
 
-	// TODO: consider small batches of _batch instead?
 	while let Some(book) = books.pop_front() {
-		// let path = book.path.clone();
-		let path = String::default();
+		let Some(path) = book.path() else {
+			continue;
+		};
 		match create_media(&worker_ctx.conn, book).await {
 			Ok(created_media) => {
 				output.created_media += 1;
@@ -810,12 +773,13 @@ pub(crate) async fn visit_and_update_media(
 	let paths = paths_to_operation.keys().cloned().collect::<Vec<String>>();
 	let paths_len = paths.len();
 
-	let media = media::Entity::find()
+	let media = media::ModelWithMetadata::find()
 		.filter(
 			media::Column::Path
 				.is_in(paths.iter().map(|p| p.to_string()).collect::<Vec<String>>()),
 		)
 		.filter(media::Column::SeriesId.eq(series_id.to_string()))
+		.into_model::<media::ModelWithMetadata>()
 		.all(conn)
 		.await?;
 
@@ -835,8 +799,8 @@ pub(crate) async fn visit_and_update_media(
 	let futures = media
 		.into_iter()
 		.filter_map(|book| {
-			paths_to_operation.get(&book.path).map(|operation| {
-				let path = book.path.clone();
+			paths_to_operation.get(&book.media.path).map(|operation| {
+				let path = book.media.path.clone();
 				BookVisitCtx {
 					operation: *operation,
 					existing_book: Some(book),

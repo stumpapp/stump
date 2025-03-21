@@ -1,9 +1,6 @@
 use std::{collections::VecDeque, path::PathBuf};
 
-use models::entity::{
-	library, library_config, library_scan_record, media,
-	series::{self, SeriesIdentSelect},
-};
+use models::entity::{library, library_config, library_scan_record, media, series};
 use sea_orm::{prelude::*, sea_query::Query, Set, TransactionTrait};
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -15,10 +12,7 @@ use utoipa::ToSchema;
 // Also perhaps experiment with https://docs.rs/tokio-uring/latest/tokio_uring/index.html
 
 use crate::{
-	db::{
-		entity::{CoreJobOutput, IgnoreRules, LibraryConfig},
-		FileStatus,
-	},
+	db::{entity::CoreJobOutput, FileStatus},
 	filesystem::{
 		image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
 		scanner::utils::safely_insert_series,
@@ -260,15 +254,13 @@ impl JobExt for LibraryScanJob {
 		match image_options {
 			Some(options) if did_create | did_update => {
 				tracing::trace!("Thumbnail generation job should be enqueued");
-				// TODO(sea-orm): Fix
-				// Ok(Some(WrappedJob::new(ThumbnailGenerationJob {
-				// 	options,
-				// 	params: ThumbnailGenerationJobParams::single_library(
-				// 		self.id.clone(),
-				// 		false,
-				// 	),
-				// })))
-				Ok(None)
+				Ok(Some(WrappedJob::new(ThumbnailGenerationJob {
+					options,
+					params: ThumbnailGenerationJobParams::single_library(
+						self.id.clone(),
+						false,
+					),
+				})))
 			},
 			_ => {
 				tracing::debug!("No cleanup required for library scan job");

@@ -31,7 +31,15 @@ pub struct Model {
 }
 
 pub fn get_age_restriction_filter(min_age: i32, restrict_on_unset: bool) -> Condition {
-	unimplemented!()
+	if restrict_on_unset {
+		Condition::all()
+			.add(series_metadata::Column::AgeRating.is_not_null())
+			.add(series_metadata::Column::AgeRating.lte(min_age))
+	} else {
+		Condition::any()
+			.add(series_metadata::Column::AgeRating.is_null())
+			.add(series_metadata::Column::AgeRating.lte(min_age))
+	}
 }
 
 #[derive(FromQueryResult)]

@@ -7,10 +7,7 @@ use specta::Type;
 use utoipa::ToSchema;
 
 use crate::{
-	db::{
-		entity::{CoreJobOutput, IgnoreRules, LibraryConfig},
-		FileStatus,
-	},
+	db::{entity::CoreJobOutput, FileStatus},
 	filesystem::image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
 	job::{
 		error::JobError, Executor, JobExt, JobOutputExt, JobProgress, JobTaskOutput,
@@ -222,15 +219,13 @@ impl JobExt for SeriesScanJob {
 		match image_options {
 			Some(options) if did_create | did_update => {
 				tracing::trace!("Thumbnail generation job should be enqueued");
-				// TODO(sea-orm): Fix
-				// Ok(Some(WrappedJob::new(ThumbnailGenerationJob {
-				// 	options,
-				// 	params: ThumbnailGenerationJobParams::single_series(
-				// 		self.id.clone(),
-				// 		false,
-				// 	),
-				// })))
-				Ok(None)
+				Ok(Some(WrappedJob::new(ThumbnailGenerationJob {
+					options,
+					params: ThumbnailGenerationJobParams::single_series(
+						self.id.clone(),
+						false,
+					),
+				})))
 			},
 			_ => {
 				tracing::trace!("No cleanup required for series scan job");

@@ -8,6 +8,9 @@ node_modules/
 dist/
 web-build/
 
+build/
+.gradle/
+
 # Native
 *.orig.*
 *.jks
@@ -15,9 +18,10 @@ web-build/
 *.p12
 *.key
 *.mobileprovision
-*.ipa
 *.apk
 *.aab
+*.ipa
+
 
 # Metro
 .metro-health-check*

@@ -1,17 +1,9 @@
 {
-  "platforms": [
-    "apple",
-    "android",
-    "web"
-  ],
-  "apple": {
-    "modules": [
-      "ReadiumModule"
-    ]
-  },
-  "android": {
-    "modules": [
-      "expo.modules.readium.ReadiumModule"
-    ]
-  }
+	"platforms": ["apple", "android", "web"],
+	"apple": {
+		"modules": ["ReadiumModule"]
+	},
+	"android": {
+		"modules": ["expo.modules.readium.ReadiumModule"]
+	}
 }

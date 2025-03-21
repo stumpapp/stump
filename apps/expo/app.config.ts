@@ -14,6 +14,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 		icon: './assets/images/icon.png',
 		scheme: 'stump',
 		userInterfaceStyle: 'automatic',
+		owner: 'stumpapp',
 		newArchEnabled: true,
 		assetBundlePatterns: ['**/*'],
 		ios: {
@@ -97,7 +98,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				},
 			],
 		],
-		owner: 'stumpapp',
 		experiments: {
 			typedRoutes: true,
 		},

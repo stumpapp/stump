@@ -1,11 +1,10 @@
-import { requireNativeView } from 'expo';
-import * as React from 'react';
+import { requireNativeView } from 'expo'
+import * as React from 'react'
 
-import { ReadiumViewProps } from './Readium.types';
+import { ReadiumViewProps } from './Readium.types'
 
-const NativeView: React.ComponentType<ReadiumViewProps> =
-  requireNativeView('Readium');
+const NativeView: React.ComponentType<ReadiumViewProps> = requireNativeView('Readium')
 
 export default function ReadiumView(props: ReadiumViewProps) {
-  return <NativeView {...props} />;
+	return <NativeView {...props} />
 }

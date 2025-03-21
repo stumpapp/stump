@@ -1,24 +1,27 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome'
 import { useAuthQuery, useSDK } from '@stump/client'
 import { Tabs, useRouter } from 'expo-router'
 import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
 import { icons } from '~/components/ui'
+import { useColors } from '~/lib/constants'
 import { cn } from '~/lib/utils'
-import { useUserStore } from '~/stores'
+import { usePreferencesStore, useUserStore } from '~/stores'
 
-const { Unplug, Plus } = icons
+const { Unplug, Home, SquareLibrary, Search } = icons
 
 export default function TabLayout() {
 	const { sdk } = useSDK()
 
+	const colors = useColors()
 	const router = useRouter()
+	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 	const setUser = useUserStore((state) => state.setUser)
 
 	const { user } = useAuthQuery({
 		enabled: !!sdk.token,
 		onSuccess: setUser,
+		useErrorBoundary: false,
 	})
 
 	if (!sdk.token || !user) {
@@ -26,12 +29,19 @@ export default function TabLayout() {
 	}
 
 	return (
-		<Tabs screenOptions={{ tabBarActiveTintColor: 'white' }}>
+		<Tabs
+			screenOptions={{
+				tabBarActiveTintColor: colors.foreground.DEFAULT,
+				animation: animationEnabled ? undefined : 'none',
+			}}
+		>
 			<Tabs.Screen
 				name="index"
 				options={{
 					title: 'Home',
-					tabBarIcon: ({ color }) => <FontAwesome size={20} name="home" color={color} />,
+					tabBarIcon: ({ focused }) => (
+						<Home className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })} />
+					),
 					headerLeft: () => (
 						<Pressable onPress={() => router.dismissAll()}>
 							{({ pressed }) => (
@@ -53,21 +63,12 @@ export default function TabLayout() {
 				name="browse"
 				options={{
 					title: 'Browse',
-					tabBarIcon: ({ color }) => <FontAwesome size={20} name="book" color={color} />,
-					headerRight: () => (
-						<Pressable>
-							{({ pressed }) => (
-								<View
-									className={cn(
-										'aspect-square flex-1 items-start justify-center pt-0.5',
-										pressed && 'opacity-70',
-									)}
-								>
-									<Plus size={20} className="text-foreground-muted" />
-								</View>
-							)}
-						</Pressable>
+					tabBarIcon: ({ focused }) => (
+						<SquareLibrary
+							className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
+						/>
 					),
+					headerShown: false,
 				}}
 			/>
 
@@ -76,7 +77,11 @@ export default function TabLayout() {
 				options={{
 					headerShown: false,
 					title: 'Search',
-					tabBarIcon: ({ color }) => <FontAwesome size={20} name="search" color={color} />,
+					tabBarIcon: ({ focused }) => (
+						<Search
+							className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
+						/>
+					),
 				}}
 			/>
 		</Tabs>

@@ -90,6 +90,16 @@ pub(crate) async fn create_media(
 				None
 			};
 
+			let modified_at = generated.modified_at.as_deref().and_then(|date| {
+				match DateTime::parse_from_rfc3339(date) {
+					Ok(dt) => Some(dt), // Successfully parsed
+					Err(e) => {
+						tracing::error!(?e, "Failed to parse modified_at date");
+						None
+					},
+				}
+			});
+
 			let created_media = client
 				.media()
 				.create(
@@ -102,6 +112,7 @@ pub(crate) async fn create_media(
 						media::hash::set(generated.hash),
 						media::koreader_hash::set(generated.koreader_hash),
 						media::series::connect(series::id::equals(generated.series_id)),
+						media::modified_at::set(modified_at),
 					],
 				)
 				.exec()
@@ -693,7 +704,6 @@ pub(crate) async fn safely_build_and_insert_media(
 	}
 
 	let mut output = MediaOperationOutput::default();
-	let mut logs = vec![];
 
 	let semaphore = Arc::new(Semaphore::new(max_concurrency));
 	tracing::debug!(max_concurrency, "Semaphore created for media creation");
@@ -740,7 +750,7 @@ pub(crate) async fn safely_build_and_insert_media(
 			},
 			Err((error, path)) => {
 				tracing::error!(error = ?error, ?path, "Failed to build book");
-				logs.push(
+				output.logs.push(
 					JobExecuteLog::error(format!(
 						"Failed to build book: {:?}",
 						error.to_string()
@@ -756,7 +766,7 @@ pub(crate) async fn safely_build_and_insert_media(
 	}
 
 	let success_count = books.len();
-	let error_count = logs.len();
+	let error_count = output.logs.len();
 	tracing::debug!(
 		elapsed = ?start.elapsed(),
 		success_count, error_count,
@@ -794,7 +804,7 @@ pub(crate) async fn safely_build_and_insert_media(
 					task_count,
 				));
 				tracing::error!(error = ?e, ?path, "Failed to create media");
-				logs.push(
+				output.logs.push(
 					JobExecuteLog::error(format!(
 						"Failed to create media: {:?}",
 						e.to_string()
@@ -806,7 +816,7 @@ pub(crate) async fn safely_build_and_insert_media(
 	}
 
 	let success_count = output.created_media;
-	let error_count = logs.len() - error_count; // Subtract the errors from the previous step
+	let error_count = output.logs.len() - error_count; // Subtract the errors from the previous step
 	tracing::debug!(success_count, error_count, elapsed = ?start.elapsed(), "Inserted books into database");
 
 	Ok(output)

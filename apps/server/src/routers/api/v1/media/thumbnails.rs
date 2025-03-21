@@ -101,7 +101,7 @@ pub(crate) async fn get_media_thumbnail(
 // TODO: ImageResponse as body type
 #[utoipa::path(
 	get,
-	path = "/api/v1/media/:id/thumbnail",
+	path = "/api/v1/media/{id}/thumbnail",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media")
@@ -128,7 +128,7 @@ pub(crate) async fn get_media_thumbnail_handler(
 
 #[utoipa::path(
     patch,
-    path = "/api/v1/media/:id/thumbnail",
+    path = "/api/v1/media/{id}/thumbnail",
     tag = "media",
     params(
         ("id" = String, Path, description = "The ID of the media")
@@ -211,6 +211,7 @@ pub(crate) async fn patch_media_thumbnail(
 			image_options,
 			core_config: ctx.config.as_ref().clone(),
 			force_regen: true,
+			filename: Some(media.id.clone()),
 		},
 	)
 	.await?;
@@ -223,7 +224,7 @@ pub(crate) async fn patch_media_thumbnail(
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/media/:id/thumbnail",
+	path = "/api/v1/media/{id}/thumbnail",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media")
@@ -275,7 +276,7 @@ pub(crate) async fn replace_media_thumbnail(
 	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 	// user testing I'd like to see if this becomes a problem. We'll see!
 	if let Err(e) =
-		remove_thumbnails(&[book_id.clone()], &ctx.config.get_thumbnails_dir())
+		remove_thumbnails(&[book_id.clone()], &ctx.config.get_thumbnails_dir()).await
 	{
 		tracing::error!(
 			?e,

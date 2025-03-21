@@ -1,24 +1,12 @@
 import { Fragment, PropsWithChildren } from 'react'
 
-import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
-
-import { useImageBaseReaderContext } from '../context'
-import ReaderFooter from './ReaderFooter'
-import ReaderHeader from './ReaderHeader'
+import ControlsOverlay from './ControlsOverlay'
 
 const ReaderContainer = ({ children }: PropsWithChildren) => {
-	const { book } = useImageBaseReaderContext()
-	const {
-		bookPreferences: { readingMode },
-	} = useBookPreferences({ book })
-
-	const showBottomToolbar = readingMode === 'paged'
-
 	return (
 		<Fragment>
-			<ReaderHeader />
+			<ControlsOverlay />
 			{children}
-			{showBottomToolbar && <ReaderFooter />}
 		</Fragment>
 	)
 }

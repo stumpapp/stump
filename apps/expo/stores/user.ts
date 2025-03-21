@@ -1,35 +1,46 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createUserStore } from '@stump/client'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
-export const useUserStore = createUserStore(AsyncStorage)
+import { CachePolicy } from './reader'
+import { ZustandMMKVStorage } from './store'
+
+export const useUserStore = createUserStore(ZustandMMKVStorage)
 
 type MobilePreferencesStore = {
 	showTabLabels: boolean
-	setShowTabLabels: (show: boolean) => void
 	maskURLs: boolean
 	setMaskURLs: (mask: boolean) => void
+	storeLastRead: boolean
+	reduceAnimations: boolean
+	cachePolicy: CachePolicy
+	allowDownscaling: boolean
+	/**
+	 * Patch the store with new values.
+	 */
+	patch: (data: Partial<MobilePreferencesStore>) => void
 }
 
 /**
  * A store for mobile-specific preferences. This should not be confused with the
  * user preferences that are stored on the server.
- *
- * TODO: Merge this with the server UserPreferences as optional fields?
  */
 export const usePreferencesStore = create<MobilePreferencesStore>()(
 	persist(
 		(set) => ({
-			setShowTabLabels: (show) => set({ showTabLabels: show }),
-			showTabLabels: false,
-			setMaskURLs: (mask) => set({ maskURLs: mask }),
+			showTabLabels: true,
 			maskURLs: false,
+			setMaskURLs: (mask) => set({ maskURLs: mask }),
+			storeLastRead: false,
+			reduceAnimations: false,
+			cachePolicy: 'memory-disk',
+			allowDownscaling: true,
+			patch: (data) => set(data),
 		}),
 		{
 			name: 'stump-mobile-preferences-store',
 			version: 1,
-			storage: createJSONStorage(() => AsyncStorage),
+			storage: createJSONStorage(() => ZustandMMKVStorage),
 		},
 	),
 )

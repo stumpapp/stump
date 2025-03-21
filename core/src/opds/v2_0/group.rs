@@ -35,19 +35,25 @@ pub struct OPDSFeedGroup {
 	publications: Vec<OPDSPublication>,
 	/// The metadata for the feed group
 	metadata: OPDSMetadata,
+
+	#[builder(default = "true")]
+	#[serde(skip_serializing)]
+	pub allow_empty: bool,
 }
 
 impl OPDSFeedGroupBuilder {
 	fn validate(&self) -> Result<(), OPDSV2Error> {
-		let navigation_empty = self
-			.navigation
-			.as_ref()
-			.map_or(true, std::vec::Vec::is_empty);
+		if self.allow_empty.unwrap_or(true) {
+			return Ok(());
+		}
+
+		let navigation_empty =
+			self.navigation.as_ref().is_none_or(std::vec::Vec::is_empty);
 
 		let publications_empty = self
 			.publications
 			.as_ref()
-			.map_or(true, std::vec::Vec::is_empty);
+			.is_none_or(std::vec::Vec::is_empty);
 
 		if navigation_empty && publications_empty {
 			return Err(OPDSV2Error::FeedValidationFailed(
@@ -116,6 +122,7 @@ mod tests {
 					.build()
 					.unwrap(),
 			)
+			.allow_empty(false)
 			.build()
 			.unwrap_err();
 

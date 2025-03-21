@@ -1,5 +1,5 @@
 import { forwardRef } from 'react'
-import { View } from 'react-native'
+import { Pressable, View } from 'react-native'
 
 import { icons } from '~/components/ui'
 import { cn } from '~/lib/utils'
@@ -19,7 +19,7 @@ const AppSettingsRow = forwardRef<View, Props>(
 	({ icon, title, children, className, ...props }, ref) => {
 		const Icon = icons[icon]
 		return (
-			<View
+			<Pressable
 				className={cn('flex-row items-center justify-between py-2', className)}
 				{...props}
 				ref={ref}
@@ -31,7 +31,7 @@ const AppSettingsRow = forwardRef<View, Props>(
 					<Text className="text-lg">{title}</Text>
 				</View>
 				{children}
-			</View>
+			</Pressable>
 		)
 	},
 )

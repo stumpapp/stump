@@ -29,10 +29,10 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/", get(get_api_keys).post(create_api_key))
 				.route("/validate-key", post(validate_api_key_handler))
 				.route(
-					"/:id",
+					"/{id}",
 					get(get_api_key).put(update_api_key).delete(delete_api_key),
 				)
-				.route("/:id/regenerate-secret", post(regenerate_api_key_secret)),
+				.route("/{id}/regenerate-secret", post(regenerate_api_key_secret)),
 		)
 		.layer(middleware::from_fn(authorize)) // Note the order!
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))

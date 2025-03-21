@@ -54,6 +54,7 @@ pub struct ReadingListItem {
 	pub display_order: i32,
 	pub media_id: String,
 	pub reading_list_id: String,
+	#[schema(no_recursion)]
 	pub media: Option<Media>,
 }
 

@@ -1,6 +1,5 @@
 import { useInfiniteQuery, useSDK } from '@stump/client'
 import { OPDSFeed } from '@stump/sdk'
-import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Pressable, View } from 'react-native'
@@ -10,14 +9,19 @@ import { useDisplay } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
 import { useActiveServer } from '../activeServer'
+import { Image } from '../Image'
+import RefreshControl from '../RefreshControl'
 import { Text } from '../ui'
 import FeedTitle from './FeedTitle'
+import { getPublicationThumbnailURL } from './utils'
 
 type Props = {
 	feed: OPDSFeed
+	onRefresh?: () => void
+	isRefreshing?: boolean
 }
 
-export default function PublicationFeed({ feed }: Props) {
+export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props) {
 	const { isTablet, isXSmall, safeWidth: width } = useDisplay()
 	const {
 		activeServer: { id: serverID },
@@ -110,7 +114,7 @@ export default function PublicationFeed({ feed }: Props) {
 				fixed
 				spacing={availableSpaceX / itemsPerRow}
 				renderItem={({ item: publication }) => {
-					const thumbnailURL = publication.images?.at(0)?.href
+					const thumbnailURL = getPublicationThumbnailURL(publication)
 					const selfURL = publication.links?.find((link) => link.rel === 'self')?.href
 
 					return (
@@ -118,8 +122,11 @@ export default function PublicationFeed({ feed }: Props) {
 							onPress={() =>
 								selfURL
 									? router.push({
-											pathname: `/opds/${serverID}/publication`,
-											params: { url: selfURL },
+											pathname: '/opds/[id]/publication',
+											params: {
+												id: serverID,
+												url: selfURL,
+											},
 										})
 									: null
 							}
@@ -165,6 +172,11 @@ export default function PublicationFeed({ feed }: Props) {
 				keyExtractor={(item) => item.metadata.title}
 				onEndReached={onEndReached}
 				onEndReachedThreshold={0.75}
+				refreshControl={
+					onRefresh ? (
+						<RefreshControl refreshing={isRefreshing || false} onRefresh={onRefresh} />
+					) : undefined
+				}
 			/>
 		</View>
 	)

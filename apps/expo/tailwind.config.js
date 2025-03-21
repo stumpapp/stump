@@ -22,6 +22,7 @@ module.exports = {
 					},
 					// TODO: figure this out
 					tabs: 'var(--tabs)',
+					opaque: 'var(--background-opaque)',
 				},
 				edge: {
 					DEFAULT: 'var(--edge)',

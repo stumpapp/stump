@@ -3,23 +3,23 @@ import { cva, VariantProps } from 'class-variance-authority'
 import type { ComponentPropsWithoutRef, ElementRef } from 'react'
 import React, { useMemo } from 'react'
 
-import { cn, cx } from '../utils'
+import { cn } from '../utils'
 
 type ProgressBarColorVariants = 'default' | 'primary' | 'primary-dark'
 type ColorVariant = Record<ProgressBarColorVariants, string>
 
 export const PROGRESS_BAR_COLOR_VARIANTS: ColorVariant = {
-	default: 'bg-gray-200 dark:bg-gray-800',
+	default: 'bg-background-surface',
 	primary: 'bg-fill-brand-secondary',
 	'primary-dark': 'bg-brand-200 dark:bg-brand-250',
 }
 export const PROGRESS_BAR_INDICATOR_COLOR_VARIANTS: ColorVariant = {
-	default: 'bg-gray-800 dark:bg-gray-400',
+	default: 'bg-foreground',
 	primary: 'bg-fill-brand/70',
 	'primary-dark': 'bg-brand-600 dark:bg-brand-500',
 }
 
-const progressVariants = cva('relative w-full overflow-hidden', {
+const progressVariants = cva('relative overflow-hidden', {
 	variants: {
 		defaultVariants: {
 			rounded: 'default',
@@ -48,6 +48,7 @@ export type ProgressBarProps = {
 	className?: string
 	value?: number | null
 	isIndeterminate?: boolean
+	indicatorClassName?: string
 } & BaseProps
 
 const safeValue = (value: number | null) => {
@@ -59,36 +60,53 @@ const safeValue = (value: number | null) => {
 export const ProgressBar = React.forwardRef<
 	ElementRef<typeof ProgressPrimitive.Root>,
 	ProgressBarProps
->(({ className, value, variant, size, rounded, isIndeterminate, ...props }, ref) => {
-	const adjustedValue = useMemo(() => safeValue(value ?? null), [value])
+>(
+	(
+		{
+			className,
+			value,
+			variant,
+			size,
+			rounded = 'default',
+			isIndeterminate,
+			indicatorClassName,
+			...props
+		},
+		ref,
+	) => {
+		const adjustedValue = useMemo(() => safeValue(value ?? null), [value])
 
-	return (
-		<ProgressPrimitive.Root
-			ref={ref}
-			className={cn(
-				progressVariants({
-					rounded,
-					size,
-					variant,
-				}),
-				className,
-			)}
-			value={adjustedValue}
-			{...props}
-		>
-			<ProgressPrimitive.Indicator
-				className={cx(
-					'h-full w-full flex-1 transition-all',
-					PROGRESS_BAR_INDICATOR_COLOR_VARIANTS[variant || 'default'],
-					{
-						'origin-left-to-right-indeterminate animate-indeterminate-progress': isIndeterminate,
-					},
+		return (
+			<ProgressPrimitive.Root
+				ref={ref}
+				className={cn(
+					progressVariants({
+						rounded,
+						size,
+						variant,
+					}),
+					className,
 				)}
-				style={
-					isIndeterminate ? undefined : { transform: `translateX(-${100 - (adjustedValue || 0)}%)` }
-				}
-			/>
-		</ProgressPrimitive.Root>
-	)
-})
+				value={adjustedValue}
+				{...props}
+			>
+				<ProgressPrimitive.Indicator
+					className={cn(
+						'h-full flex-1 transition-all',
+						PROGRESS_BAR_INDICATOR_COLOR_VARIANTS[variant || 'default'],
+						{
+							'origin-left-to-right-indeterminate animate-indeterminate-progress': isIndeterminate,
+						},
+						indicatorClassName,
+					)}
+					style={
+						isIndeterminate
+							? undefined
+							: { transform: `translateX(-${100 - (adjustedValue || 0)}%)` }
+					}
+				/>
+			</ProgressPrimitive.Root>
+		)
+	},
+)
 ProgressBar.displayName = ProgressPrimitive.Root.displayName

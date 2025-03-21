@@ -55,8 +55,8 @@ This will automatically include the key in the request headers for you.
 
 There are instances where you can embed an API key in the URL directly. This is primiarily only done for instances where passing the key in the header is otherwise impossible. At the time of writing, there are two such routes:
 
-- `/koreader/:api_key/*` - Used for the [KoReader sync](https://koreader.rocks) integration. See [here](/guides/integrations/koreader) for more information
-- `/opds/:api_key/v1.2/*` - An optional clone of the [OPDS](/guides/opds) integration API for clients which don't support auth headers
+- `/koreader/{api_key}/*` - Used for the [KoReader sync](https://koreader.rocks) integration. See [here](/guides/integrations/koreader) for more information
+- `/opds/{api_key}/v1.2/*` - An optional clone of the [OPDS](/guides/opds) integration API for clients which don't support auth headers
 
 ## Permissions
 

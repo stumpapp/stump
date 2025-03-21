@@ -15,6 +15,7 @@ pub struct LoginActivity {
 	pub timestamp: String,
 
 	#[serde(skip_serializing_if = "Option::is_none")]
+	#[schema(no_recursion)]
 	pub user: Option<User>,
 }
 

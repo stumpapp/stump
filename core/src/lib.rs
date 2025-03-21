@@ -231,6 +231,10 @@ impl StumpCore {
 	pub async fn init_scheduler(&self) -> Result<Arc<JobScheduler>, CoreError> {
 		JobScheduler::init(self.ctx.arced()).await
 	}
+
+	pub async fn init_library_watcher(&self) -> CoreResult<()> {
+		self.ctx.library_watcher.init().await
+	}
 }
 
 #[allow(unused_imports)]
@@ -470,6 +474,9 @@ mod tests {
 
 		file.write_all(format!("{}\n\n", ts_export::<ImageResizeMode>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<ImageResizeOptions>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<ScaledDimensionResize>()?).as_bytes(),
+		)?;
 		file.write_all(format!("{}\n\n", ts_export::<ImageFormat>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<ImageProcessorOptions>()?).as_bytes(),

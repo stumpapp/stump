@@ -56,7 +56,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				),
 		)
 		.nest(
-			"/users/:id",
+			"/users/{id}",
 			Router::new()
 				.route(
 					"/",
@@ -718,7 +718,7 @@ pub struct DeleteUser {
 
 #[utoipa::path(
 	delete,
-	path = "/api/v1/users/:id",
+	path = "/api/v1/users/{id}",
 	tag = "user",
 	params(
 		("id" = String, Path, description = "The user's id.", example = "1ab2c3d4")
@@ -768,7 +768,7 @@ async fn delete_user_by_id(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/users/:id",
+	path = "/api/v1/users/{id}",
 	tag = "user",
 	params(
 		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")
@@ -803,7 +803,7 @@ async fn get_user_by_id(
 // TODO: pagination!
 #[utoipa::path(
 	get,
-	path = "/api/v1/users/:id/login-activity",
+	path = "/api/v1/users/{id}/login-activity",
 	tag = "user",
 	params(
 		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")
@@ -845,7 +845,7 @@ async fn get_user_login_activity_by_id(
 
 #[utoipa::path(
 	put,
-	path = "/api/v1/users/:id",
+	path = "/api/v1/users/{id}",
 	tag = "user",
 	params(
 		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")
@@ -894,7 +894,7 @@ async fn update_user_handler(
 
 #[utoipa::path(
 	delete,
-	path = "/api/v1/users/:id/sessions",
+	path = "/api/v1/users/{id}/sessions",
 	tag = "user",
 	params(
 		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")
@@ -931,7 +931,7 @@ pub struct UpdateAccountLock {
 
 #[utoipa::path(
 	put,
-	path = "/api/v1/users/:id/lock",
+	path = "/api/v1/users/{id}/lock",
 	tag = "user",
 	params(
 		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")
@@ -983,7 +983,7 @@ async fn update_user_lock_status(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/users/:id/preferences",
+	path = "/api/v1/users/{id}/preferences",
 	tag = "user",
 	params(
 		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")
@@ -1028,7 +1028,7 @@ async fn get_user_preferences(
 // TODO: this is now a duplicate, do I need it? I think to remain RESTful, yes...
 #[utoipa::path(
 	put,
-	path = "/api/v1/users/:id/preferences",
+	path = "/api/v1/users/{id}/preferences",
 	tag = "user",
 	params(
 		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")
@@ -1079,7 +1079,7 @@ async fn update_user_preferences(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/users/:id/avatar",
+	path = "/api/v1/users/{id}/avatar",
 	tag = "user",
 	params(
 		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4"),
@@ -1130,7 +1130,7 @@ async fn get_user_avatar(
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/users/:id/avatar",
+	path = "/api/v1/users/{id}/avatar",
 	tag = "user",
 	params(
 		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")

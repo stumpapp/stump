@@ -27,7 +27,9 @@ use stump_core::{
 			FileStatus, Library, LibraryConfig, LibraryScanMode, LibraryStats, Media,
 			Series, TagName, User, UserPermission,
 		},
-		query::pagination::{Pageable, Pagination, PaginationQuery},
+		query::pagination::{
+			Pageable, PageableLibraries, PageableSeries, Pagination, PaginationQuery,
+		},
 		PrismaCountTrait,
 	},
 	filesystem::{
@@ -53,7 +55,8 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::{
-		chain_optional_iter, FilterableQuery, LibraryFilter, MediaFilter, SeriesFilter,
+		chain_optional_iter, FilterableLibraryQuery, FilterableQuery, LibraryFilter,
+		MediaFilter, SeriesFilter,
 	},
 	middleware::auth::{auth_middleware, RequestContext},
 	routers::api::filters::{
@@ -75,10 +78,10 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			"/libraries/last-visited",
 			Router::new()
 				.route("/", get(get_last_visited_library))
-				.route("/:id", put(update_last_visited_library)),
+				.route("/{id}", put(update_last_visited_library)),
 		)
 		.nest(
-			"/libraries/:id",
+			"/libraries/{id}",
 			Router::new()
 				.route(
 					"/",
@@ -322,7 +325,7 @@ async fn get_libraries_stats(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/libraries/:id",
+	path = "/api/v1/libraries/{id}",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID")
@@ -363,7 +366,7 @@ async fn get_library_by_id(
 // TODO: remove? Not used on client
 #[utoipa::path(
 	get,
-	path = "/api/v1/libraries/:id/series",
+	path = "/api/v1/libraries/{id}/series",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID"),
@@ -547,7 +550,7 @@ pub(crate) async fn get_library_thumbnail(
 // TODO: ImageResponse for utoipa
 #[utoipa::path(
 	get,
-	path = "/api/v1/libraries/:id/thumbnail",
+	path = "/api/v1/libraries/{id}/thumbnail",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID"),
@@ -620,7 +623,7 @@ pub struct PatchLibraryThumbnail {
 
 #[utoipa::path(
     patch,
-    path = "/api/v1/libraries/:id/thumbnail",
+    path = "/api/v1/libraries/{id}/thumbnail",
     tag = "library",
     params(
         ("id" = String, Path, description = "The ID of the library")
@@ -700,6 +703,7 @@ async fn patch_library_thumbnail(
 			image_options,
 			core_config: ctx.config.as_ref().clone(),
 			force_regen: true,
+			filename: Some(id.clone()),
 		},
 	)
 	.await?;
@@ -743,7 +747,8 @@ async fn replace_library_thumbnail(
 
 	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 	// user testing I'd like to see if this becomes a problem. We'll see!
-	match remove_thumbnails(&[library_id.clone()], &ctx.config.get_thumbnails_dir()) {
+	match remove_thumbnails(&[library_id.clone()], &ctx.config.get_thumbnails_dir()).await
+	{
 		Ok(count) => tracing::info!("Removed {} thumbnails!", count),
 		Err(e) => tracing::error!(
 			?e,
@@ -764,7 +769,7 @@ async fn replace_library_thumbnail(
 /// Deletes all media thumbnails in a library by id, if the current user has access to it.
 #[utoipa::path(
 	delete,
-	path = "/api/v1/libraries/:id/thumbnail",
+	path = "/api/v1/libraries/{id}/thumbnail",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID"),
@@ -803,7 +808,7 @@ async fn delete_library_thumbnails(
 		.flat_map(|s| s.media.into_iter().map(|m| m.id))
 		.collect::<Vec<String>>();
 
-	remove_thumbnails(&media_ids, &thumbnails_dir)?;
+	remove_thumbnails(&media_ids, &thumbnails_dir).await?;
 
 	Ok(Json(()))
 }
@@ -819,7 +824,7 @@ pub struct GenerateLibraryThumbnails {
 /// Generate thumbnails for all the media in a library by id, if the current user has access to it.
 #[utoipa::path(
 	post,
-	path = "/api/v1/libraries/:id/thumbnail/generate",
+	path = "/api/v1/libraries/{id}/thumbnail/generate",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID"),
@@ -873,7 +878,7 @@ async fn generate_library_thumbnails(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/libraries/:id/excluded-users",
+	path = "/api/v1/libraries/{id}/excluded-users",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID")
@@ -916,7 +921,7 @@ pub struct UpdateLibraryExcludedUsers {
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/libraries/:id/excluded-users",
+	path = "/api/v1/libraries/{id}/excluded-users",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID")
@@ -1005,7 +1010,7 @@ pub struct LastScanDetails {
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/libraries/:id/last-scan",
+	path = "/api/v1/libraries/{id}/last-scan",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID")
@@ -1104,7 +1109,7 @@ async fn delete_library_scan_history(
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/libraries/:id/scan",
+	path = "/api/v1/libraries/{id}/scan",
 	tag = "library",
 	responses(
 		(status = 200, description = "Successfully queued library scan"),
@@ -1159,7 +1164,7 @@ pub struct CleanLibraryResponse {
 
 #[utoipa::path(
 	put,
-	path = "/api/v1/libraries/:id/clean",
+	path = "/api/v1/libraries/{id}/clean",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID")
@@ -1281,14 +1286,19 @@ async fn clean_library(
 	let (response, media_to_delete_ids) = result?;
 
 	if !media_to_delete_ids.is_empty() {
-		image::remove_thumbnails(&media_to_delete_ids, &thumbnails_dir).map_or_else(
-			|error| {
-				tracing::error!(?error, "Failed to remove thumbnails for library media");
-			},
-			|_| {
-				tracing::debug!("Removed thumbnails for deleted media");
-			},
-		);
+		image::remove_thumbnails(&media_to_delete_ids, &thumbnails_dir)
+			.await
+			.map_or_else(
+				|error| {
+					tracing::error!(
+						?error,
+						"Failed to remove thumbnails for library media"
+					);
+				},
+				|_| {
+					tracing::debug!("Removed thumbnails for deleted media");
+				},
+			);
 	}
 
 	Ok(Json(response))
@@ -1359,6 +1369,8 @@ async fn create_library(
 	// TODO(prisma-nested-create): Refactor once nested create is supported
 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
 	let library_config = input.config.unwrap_or_default();
+	let watch = library_config.watch;
+	let path = input.path.clone();
 	let transaction_result: Result<Library, APIError> = db
 		._transaction()
 		.with_timeout(Duration::seconds(30).num_milliseconds() as u64)
@@ -1403,6 +1415,7 @@ async fn create_library(
 					),
 					library_config::thumbnail_config::set(thumbnail_config),
 					library_config::ignore_rules::set(ignore_rules),
+					library_config::watch::set(library_config.watch),
 				])
 				.exec()
 				.await?;
@@ -1505,6 +1518,16 @@ async fn create_library(
 		})?;
 	}
 
+	if watch {
+		ctx.library_watcher
+			.add_watcher(path.into())
+			.await
+			.map_err(|e| {
+				error!(?e, "Failed to add library watcher");
+				APIError::InternalServerError("Failed to add library watcher".to_string())
+			})?;
+	}
+
 	Ok(Json(library))
 }
 
@@ -1533,7 +1556,7 @@ pub struct UpdateLibrary {
 // TODO(prisma-nested-create): Refactor once nested create is supported
 #[utoipa::path(
 	put,
-	path = "/api/v1/libraries/:id",
+	path = "/api/v1/libraries/{id}",
 	tag = "library",
 	request_body = UpdateLibrary,
 	params(
@@ -1577,6 +1600,8 @@ async fn update_library(
 		.ok_or(APIError::NotFound("Library not found".to_string()))?;
 	let existing_tags = existing_library.tags;
 
+	let watch = input.config.watch;
+	let path = input.path.clone();
 	let update_result: Result<Library, APIError> = db
 		._transaction()
 		.with_timeout(Duration::seconds(30).num_milliseconds() as u64)
@@ -1620,6 +1645,7 @@ async fn update_library(
 							library_config.generate_koreader_hashes,
 						),
 						library_config::ignore_rules::set(ignore_rules),
+						library_config::watch::set(library_config.watch),
 						library_config::thumbnail_config::set(thumbnail_config),
 					],
 				)
@@ -1739,12 +1765,32 @@ async fn update_library(
 		})?;
 	}
 
+	if watch {
+		ctx.library_watcher
+			.add_watcher(path.into())
+			.await
+			.map_err(|e| {
+				error!(?e, "Failed to add library watcher");
+				APIError::InternalServerError("Failed to add library watcher".to_string())
+			})?;
+	} else {
+		ctx.library_watcher
+			.remove_watcher(path.into())
+			.await
+			.map_err(|e| {
+				error!(?e, "Failed to remove library watcher");
+				APIError::InternalServerError(
+					"Failed to remove library watcher".to_string(),
+				)
+			})?;
+	}
+
 	Ok(Json(updated_library))
 }
 
 #[utoipa::path(
 	delete,
-	path = "/api/v1/libraries/:id",
+	path = "/api/v1/libraries/{id}",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The id of the library to delete")
@@ -1804,7 +1850,7 @@ async fn delete_library(
 			media_ids.len()
 		);
 
-		if let Err(err) = image::remove_thumbnails(&media_ids, &thumbnails_dir) {
+		if let Err(err) = image::remove_thumbnails(&media_ids, &thumbnails_dir).await {
 			error!("Failed to remove thumbnails for library media: {:?}", err);
 		} else {
 			debug!("Removed thumbnails for library media (if present)");
@@ -1881,7 +1927,7 @@ async fn get_library_stats(
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/libraries/:id/analyze",
+	path = "/api/v1/libraries/{id}/analyze",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The ID of the library to analyze")

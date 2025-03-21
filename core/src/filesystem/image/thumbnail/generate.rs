@@ -8,9 +8,8 @@ use crate::{
 		get_page,
 		image::{
 			GenericImageProcessor, ImageFormat, ImageProcessor, ImageProcessorOptions,
-			WebpProcessor,
+			ProcessorError, WebpProcessor,
 		},
-		FileError,
 	},
 	prisma::media,
 };
@@ -21,7 +20,7 @@ pub enum ThumbnailGenerateError {
 	#[error("Could not write to disk: {0}")]
 	WriteFailed(#[from] std::io::Error),
 	#[error("{0}")]
-	FileError(#[from] FileError),
+	ProcessorError(#[from] ProcessorError),
 	#[error("Did not receive thumbnail generation result")]
 	ResultNeverReceived,
 	#[error("Something unexpected went wrong: {0}")]
@@ -34,6 +33,7 @@ pub struct GenerateThumbnailOptions {
 	pub image_options: ImageProcessorOptions,
 	pub core_config: StumpConfig,
 	pub force_regen: bool,
+	pub filename: Option<String>,
 }
 
 /// A type alias for whether a thumbnail was generated or not during the generation process. This is
@@ -50,7 +50,7 @@ fn do_generate_book_thumbnail(
 	file_name: &str,
 	config: &StumpConfig,
 	options: ImageProcessorOptions,
-) -> Result<GenerateOutput, FileError> {
+) -> Result<GenerateOutput, ProcessorError> {
 	let (_, page_data) = get_page(book_path, options.page.unwrap_or(1), config)?;
 	let ext = options.format.extension();
 
@@ -75,10 +75,11 @@ pub async fn generate_book_thumbnail(
 		image_options,
 		core_config,
 		force_regen,
+		filename,
 	}: GenerateThumbnailOptions,
 ) -> Result<GenerateOutput, ThumbnailGenerateError> {
 	let book_path = book.path.clone();
-	let file_name = book.id.clone();
+	let file_name = filename.unwrap_or_else(|| book.id.clone());
 
 	let file_path = core_config.get_thumbnails_dir().join(format!(
 		"{}.{}",

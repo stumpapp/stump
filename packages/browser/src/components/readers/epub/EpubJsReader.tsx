@@ -1,12 +1,5 @@
-import {
-	type EpubReaderPreferences,
-	queryClient,
-	useEpubLazy,
-	useEpubReader,
-	useQuery,
-	useSDK,
-} from '@stump/client'
-import { Bookmark, UpdateEpubProgress } from '@stump/sdk'
+import { BookPreferences, queryClient, useEpubLazy, useQuery, useSDK } from '@stump/client'
+import { Bookmark, Media, UpdateEpubProgress } from '@stump/sdk'
 import { Book, Rendition } from 'epubjs'
 import uniqby from 'lodash/uniqBy'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -14,9 +7,10 @@ import toast from 'react-hot-toast'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { useTheme } from '@/hooks'
+import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import EpubReaderContainer from './EpubReaderContainer'
-import { stumpDark } from './themes'
+import { applyTheme, stumpDark } from './themes'
 
 // NOTE: http://epubjs.org/documentation/0.3/ for epubjs documentation overview
 
@@ -57,6 +51,10 @@ type EpubLocationState = {
 	end: EpubLocation
 }
 
+class SectionLengths {
+	public lengths: { [key: number]: number } = {}
+}
+
 /**
  * A component for rendering a reader capable of reading epub files. This component uses
  * epubjs internally for the main rendering logic.
@@ -68,16 +66,17 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	const { sdk } = useSDK()
 	const { theme } = useTheme()
 
+	const { epub, isLoading } = useEpubLazy(id)
+
 	const ref = useRef<HTMLDivElement>(null)
 
 	const [book, setBook] = useState<Book | null>(null)
 	const [rendition, setRendition] = useState<Rendition | null>(null)
+	const [sectionsLengths, setSectionLengths] = useState<SectionLengths | null>(null)
 
 	const [currentLocation, setCurrentLocation] = useState<EpubLocationState>()
 
-	const { epubPreferences } = useEpubReader((state) => ({
-		epubPreferences: state.preferences,
-	}))
+	const { bookPreferences } = useBookPreferences({ book: epub?.media_entity || ({} as Media) })
 
 	const { data: bookmarks } = useQuery([sdk.epub.keys.getBookmarks, id], () =>
 		sdk.epub.getBookmarks(id),
@@ -101,10 +100,13 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 
 	//* Note: some books have entries in the spine for each href, some don't. It seems
 	//* mostly just a matter of if the epub is good.
-	const { chapter, chapterName } = useMemo(() => {
+	const { chapter, chapterName, sectionIndex } = useMemo(() => {
 		let name: string | undefined
-
 		const currentHref = currentLocation?.start.href
+
+		const spineItem = book?.spine.get(currentHref)
+		const sectionIndex = spineItem?.index
+
 		const position = book?.navigation?.toc?.findIndex(
 			(toc) => toc.href === currentHref || (!!currentHref && toc.href.startsWith(currentHref)),
 		)
@@ -113,10 +115,8 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			name = book?.navigation.toc[position]?.label.trim()
 		}
 
-		return { chapter: position, chapterName: name }
+		return { chapter: position, chapterName: name, sectionIndex: sectionIndex }
 	}, [book, currentLocation])
-
-	const { epub, isLoading } = useEpubLazy(id)
 
 	/**
 	 * A function for focusing the iframe in the epub reader. This will be used to ensure
@@ -177,14 +177,18 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	 * @param rendition: The epubjs rendition instance
 	 * @param preferences The epub reader preferences
 	 */
-	const applyEpubPreferences = (rendition: Rendition, preferences: EpubReaderPreferences) => {
+	const applyEpubPreferences = (rendition: Rendition, preferences: BookPreferences) => {
 		if (theme === 'dark') {
+			rendition.themes.register('stump-dark', applyTheme(stumpDark, preferences))
 			rendition.themes.select('stump-dark')
 		} else {
+			rendition.themes.register('stump-light', applyTheme({}, preferences))
 			rendition.themes.select('stump-light')
 		}
 		rendition.direction(preferences.readingDirection)
-		rendition.themes.fontSize(`${preferences.fontSize}px`)
+		if (preferences.fontSize) {
+			rendition.themes.fontSize(`${preferences.fontSize}px`)
+		}
 	}
 
 	/**
@@ -199,14 +203,20 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			if (book.spine) {
 				const defaultLoc = book.rendition?.location?.start?.cfi
 
+				const boundingClient = ref.current?.getBoundingClientRect()
+				const height = boundingClient?.height ? boundingClient.height - 2 : '100%'
+				const width = boundingClient?.width ?? '100%'
+
 				const rendition_ = book.renderTo(ref.current!, {
-					height: '100%',
-					width: '100%',
+					width,
+					height,
 				})
 
 				//? TODO: I guess here I would need to wait for and load in custom theme blobs...
 				//* Color manipulation reference: https://github.com/futurepress/epub.js/issues/1019
-				rendition_.themes.register('stump-dark', stumpDark)
+				rendition_.themes.register('stump-dark', applyTheme(stumpDark, bookPreferences))
+				rendition_.themes.register('stump-light', applyTheme({}, bookPreferences))
+
 				rendition_.on('relocated', handleLocationChange)
 
 				// This callback is used to change the page when a keydown event is received.
@@ -224,7 +234,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				// When the epub page isn't in focus, the window fires them instead
 				window.addEventListener('keydown', keydown_callback)
 
-				applyEpubPreferences(rendition_, epubPreferences)
+				applyEpubPreferences(rendition_, bookPreferences)
 				setRendition(rendition_)
 
 				const targetCfi = epub?.media_entity.active_reading_session?.epubcfi ?? initialCfi
@@ -235,6 +245,8 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				} else {
 					rendition_.display()
 				}
+
+				createSectionLengths(book, setSectionLengths)
 			}
 		})
 	}, [book])
@@ -283,20 +295,24 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	 */
 	useEffect(() => {
 		if (rendition) {
-			applyEpubPreferences(rendition, epubPreferences)
+			applyEpubPreferences(rendition, bookPreferences)
 		}
-	}, [rendition, epubPreferences, theme])
+	}, [rendition, bookPreferences, theme])
 
 	/**
-	 * This effect is responsible for invalidating the in progress media query whenever
-	 * the epub reader is unmounted. This is so that the in progress media query will
-	 * refetch the updated progress information.
+	 * Invalidate the book query when a reader is unmounted so that the book overview
+	 * is updated with the latest read progress
 	 */
-	useEffect(() => {
-		return () => {
-			queryClient.invalidateQueries([sdk.media.keys.inProgress], { exact: false })
-		}
-	}, [sdk.media])
+	useEffect(
+		() => {
+			return () => {
+				queryClient.refetchQueries({ queryKey: [sdk.media.keys.getByID, id], exact: false })
+				queryClient.refetchQueries({ queryKey: [sdk.media.keys.inProgress], exact: false })
+			}
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[],
+	)
 
 	/**
 	 * A callback for when the reader should paginate forward. This will only run if the
@@ -348,6 +364,14 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			}
 		},
 		[rendition],
+	)
+
+	// jump to a specific section
+	const jumpToSection = useCallback(
+		async (section: number) => {
+			onJumpToSection(section, book, rendition, ref, onGoToCfi)
+		},
+		[book, rendition, onGoToCfi],
 	)
 
 	/**
@@ -476,7 +500,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				percentage,
 			})
 		}
-	}, [currentLocation, spineSize])
+	}, [currentLocation, spineSize, epub, sdk.epub])
 
 	/**
 	 * A callback for attempting to extract preview text from a given cfi. This is used for bookmarks,
@@ -577,7 +601,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	// 	'epubcfi(/6/12!/4[3Q280-a9efbf2f573d4345819e3829f80e5dbc]/2[prologue]/4[prologue-text]/8/1:56)',
 	// ).then((res) => console.log('cfiWithinAnother', res))
 
-	if (isLoading || !epub) {
+	if (isLoading || !epub?.media_entity) {
 		return null
 	}
 
@@ -594,10 +618,12 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 							currentLocation?.end.displayed.page,
 						],
 						name: chapterName,
+						sectionSpineIndex: sectionIndex,
 						position: chapter,
 						totalPages: currentLocation?.start.displayed.total,
 					},
 					toc: epub.toc,
+					sectionLengths: sectionsLengths?.lengths ?? {},
 				},
 				progress: epub.media_entity.active_reading_session?.percentage_completed || null,
 			}}
@@ -607,13 +633,14 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				onLinkClick,
 				onPaginateBackward,
 				onPaginateForward,
+				jumpToSection,
 				searchEntireBook,
 			}}
 		>
 			<div className="h-full w-full">
 				<AutoSizer>
 					{({ height, width }) => {
-						return <div ref={ref} style={{ height, width }} />
+						return <div ref={ref} key={epub.media_entity.id} style={{ height, width }} />
 					}}
 				</AutoSizer>
 			</div>
@@ -621,10 +648,94 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	)
 }
 
+async function createSectionLengths(
+	book: Book,
+	setSectionLengths: (sections: SectionLengths) => void,
+) {
+	const sections = new SectionLengths()
+
+	function getTextLength(node: Node): number {
+		if (!node) return 0
+
+		let length = 0
+
+		if (node.nodeType === Node.TEXT_NODE) {
+			// If it's a text node, add its length to the total.
+			length += (node as Text).length
+		} else if (node.hasChildNodes()) {
+			// Otherwise, recursively sum up the lengths of all child nodes.
+			for (const childNode of node.childNodes.values()) {
+				length += getTextLength(childNode)
+			}
+		}
+
+		return length
+	}
+
+	if (!book || !book.spine || !book.spine.each) return sections
+
+	// TODO: remove this in favor of a more efficient method where we don't have to load the entire book
+	const promises: Promise<number[] | void>[] = []
+	book.spine.each((item?: SpineItem) => {
+		if (!item) return []
+
+		promises.push(
+			item
+				// @ts-expect-error: I literally can't stand epubjs lol
+				.load(book.load.bind(book))
+				.then(() => [item.index, getTextLength(item.document?.body)])
+				.catch(() => console.error('could not load section'))
+				.finally(() => item.unload.bind(item)),
+		)
+	})
+
+	const results = await Promise.all(promises)
+	results.forEach((res) => {
+		if (!res || res.length < 2) return
+		const sectionIndex = res[0] ?? 0
+		const length = res[1] ?? 0
+		sections.lengths[sectionIndex] = length
+	})
+
+	setSectionLengths(sections)
+}
+
+async function onJumpToSection(
+	section: number,
+	book: Book | null,
+	rendition: Rendition | null,
+	ref: React.RefObject<HTMLDivElement> | undefined,
+	onGoToCfi: (cfi: string) => void,
+) {
+	if (!book || !rendition || !ref || !ref.current || section < 0) return
+
+	let maxIndex = -1
+	book?.spine.each((item?: SpineItem) => {
+		if (!item) return []
+		maxIndex = Math.max(maxIndex, item.index)
+	})
+
+	if (section > maxIndex) {
+		return
+	}
+
+	const spineItem = book?.spine.get(section)
+	const sectionHref = spineItem?.href
+
+	if (!sectionHref) {
+		return
+	}
+
+	// Load the section
+	onGoToCfi(spineItem.href)
+}
+
 interface SpineItem {
 	load: (book: Book) => Promise<object>
 	unload: (item: SpineItem) => void
 	find: (query: string) => Promise<SpineItemFindResult[]>
+	index: number
+	document: Document
 }
 
 interface SpineItemFindResult {

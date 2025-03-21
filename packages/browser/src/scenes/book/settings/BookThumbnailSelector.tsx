@@ -1,7 +1,7 @@
-import { useSDK } from '@stump/client'
+import { useMutation, useSDK } from '@stump/client'
 import { Button, Dialog } from '@stump/components'
-import { Media } from '@stump/sdk'
-import { useState } from 'react'
+import { Media, PatchMediaThumbnail } from '@stump/sdk'
+import { useCallback, useState } from 'react'
 import toast from 'react-hot-toast'
 
 import { EntityCard } from '@/components/entity'
@@ -18,6 +18,34 @@ export default function BookThumbnailSelector({ book }: Props) {
 	const [isOpen, setIsOpen] = useState(false)
 	const [page, setPage] = useState<number>()
 
+	const onSuccess = useCallback(
+		() =>
+			sdk.axios.get(sdk.media.thumbnailURL(book.id), {
+				headers: {
+					'Cache-Control': 'no-cache',
+					Pragma: 'no-cache',
+					Expires: '0',
+				},
+			}),
+		[sdk, book.id],
+	)
+
+	const { mutateAsync: patchThumbnail, isLoading: isPatchingThumbnail } = useMutation(
+		[sdk.media.keys.patchThumbnail, book.id],
+		async (data: PatchMediaThumbnail) => {
+			await sdk.media.patchThumbnail(book.id, data)
+			await onSuccess()
+		},
+	)
+
+	const { mutate: uploadThumbnail, isLoading: isUploadingThumbnail } = useMutation(
+		[sdk.media.keys.uploadThumbnail, book.id],
+		async (file: File) => {
+			await sdk.media.uploadThumbnail(book.id, file)
+			await onSuccess()
+		},
+	)
+
 	const handleOpenChange = (nowOpen: boolean) => {
 		if (!nowOpen) {
 			setIsOpen(false)
@@ -33,7 +61,7 @@ export default function BookThumbnailSelector({ book }: Props) {
 
 	const handleUploadImage = async (file: File) => {
 		try {
-			await sdk.media.uploadThumbnail(book.id, file)
+			await uploadThumbnail(file)
 			setIsOpen(false)
 		} catch (error) {
 			console.error(error)
@@ -45,11 +73,7 @@ export default function BookThumbnailSelector({ book }: Props) {
 		if (!page) return
 
 		try {
-			await sdk.media.patchThumbnail(book.id, { page })
-
-			// TODO: The browser is caching the image, so we need to force remove it and ensure
-			// the new one is loaded instead
-
+			await patchThumbnail({ page })
 			setIsOpen(false)
 		} catch (error) {
 			console.error(error)
@@ -95,7 +119,12 @@ export default function BookThumbnailSelector({ book }: Props) {
 						<Button variant="default" onClick={handleCancel}>
 							Cancel
 						</Button>
-						<Button variant="primary" onClick={handleConfirm} disabled={!page}>
+						<Button
+							variant="primary"
+							onClick={handleConfirm}
+							disabled={!page}
+							isLoading={isPatchingThumbnail || isUploadingThumbnail}
+						>
 							Confirm selection
 						</Button>
 					</Dialog.Footer>

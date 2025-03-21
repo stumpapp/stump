@@ -35,6 +35,7 @@ pub struct Series {
 	/// The ID of the library this series belongs to.
 	pub library_id: String,
 	/// The library this series belongs to. Will be `None` only if the relation is not loaded.
+	#[schema(no_recursion)]
 	pub library: Option<Library>,
 	/// The media that are in this series. Will be `None` only if the relation is not loaded.
 	pub media: Option<Vec<Media>>,

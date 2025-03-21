@@ -30,6 +30,8 @@ You can edit the native code in `Pods` -> `Development Pods` -> `Readium`
 
 #### Android
 
+Ensure you follow the official [Expo](https://docs.expo.dev/workflow/android-studio-emulator/#install-watchman-and-jdk) guide to set up your Android development environment.
+
 To build the app for Android, run the following command:
 
 ```bash
@@ -45,3 +47,7 @@ yarn open:android
 ```
 
 You can edit the native code in `android` -> `readium` -> `src/main/java/expo.modules.readium`
+
+## License 📝
+
+The `expo` app is licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html)

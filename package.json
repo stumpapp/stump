@@ -3,7 +3,7 @@
 	"version": "0.0.10",
 	"repository": "https://github.com/stumpapp/stump.git",
 	"author": "Aaron Leopold <aaronleopold1221@gmail.com>",
-	"license": "MIT",
+	"license": "SEE README.md",
 	"private": true,
 	"workspaces": [
 		"apps/*",
@@ -28,7 +28,9 @@
 		"dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"cargo watch --ignore core/prisma -x run -p stump_server\" \"yarn expo dev\"",
 		"prisma-studio": "npx prisma studio --schema core/prisma/schema.prisma",
 		"format": "lerna run format --stream --parallel",
-		"nuke": "lerna run nuke"
+		"nuke": "lerna run nuke",
+		"android": "expo run:android",
+		"ios": "expo run:ios"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.25.8",
@@ -79,5 +81,8 @@
 			]
 		}
 	},
-	"dependencies": {}
+	"dependencies": {
+		"expo": "~52.0.37",
+		"react": "18.3.1"
+	}
 }

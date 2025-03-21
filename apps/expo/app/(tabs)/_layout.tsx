@@ -1,16 +1,30 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome'
 import { Tabs } from 'expo-router'
 
 import { AddServerDialog } from '~/components/savedServer'
+import { icons } from '~/lib'
+import { useColors } from '~/lib/constants'
+import { cn } from '~/lib/utils'
+
+const { Server, HardDriveDownload, Settings } = icons
 
 export default function TabLayout() {
+	const colors = useColors()
+
 	return (
-		<Tabs screenOptions={{ tabBarActiveTintColor: 'white' }}>
+		<Tabs
+			screenOptions={{
+				tabBarActiveTintColor: colors.foreground.DEFAULT,
+			}}
+		>
 			<Tabs.Screen
 				name="index"
 				options={{
 					title: 'Servers',
-					tabBarIcon: ({ color }) => <FontAwesome size={20} name="database" color={color} />,
+					tabBarIcon: ({ focused }) => (
+						<Server
+							className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
+						/>
+					),
 					headerRight: () => <AddServerDialog />,
 				}}
 			/>
@@ -18,14 +32,24 @@ export default function TabLayout() {
 				name="downloads"
 				options={{
 					title: 'Downloads',
-					tabBarIcon: ({ color }) => <FontAwesome size={20} name="download" color={color} />,
+					tabBarIcon: ({ focused }) => (
+						<HardDriveDownload
+							className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
+						/>
+					),
 				}}
 			/>
 			<Tabs.Screen
 				name="settings"
 				options={{
 					title: 'Settings',
-					tabBarIcon: ({ color }) => <FontAwesome size={20} name="cog" color={color} />,
+					tabBarIcon: ({ focused }) => (
+						<Settings
+							className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
+						/>
+					),
+					// Hide the header for this route
+					headerShown: false,
 				}}
 			/>
 

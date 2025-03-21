@@ -31,7 +31,7 @@ use crate::{
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.nest(
-			"/epub/:id",
+			"/epub/{id}",
 			Router::new()
 				.route("/", get(get_epub_by_id))
 				.route("/progress", put(update_epub_progress))
@@ -41,8 +41,8 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.post(create_or_update_bookmark)
 						.delete(delete_bookmark),
 				)
-				.route("/chapter/:chapter", get(get_epub_chapter))
-				.route("/:root/:resource", get(get_epub_meta)),
+				.route("/chapter/{chapter}", get(get_epub_chapter))
+				.route("/{root}/{resource}", get(get_epub_meta)),
 		)
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }

@@ -10,9 +10,6 @@ export default function Head() {
 				name="description"
 				content="Free, open source, self-hosting for your comic books, manga and digital book collections."
 			/>
-			<meta name="twitter:card" content="summary_large_image" />
-			<meta name="twitter:site" content="@stumpapp_" />
-			<meta name="twitter:creator" content="@stumpapp_" />
 			<meta property="og:title" content="Stump" />
 			<meta
 				property="og:description"

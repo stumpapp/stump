@@ -35,7 +35,7 @@ async fn handle_socket(socket: WebSocket, ctx: Arc<Ctx>) {
 	while let Ok(core_event) = rx.recv().await {
 		if let Ok(payload) = serde_json::to_string(&core_event) {
 			// TODO: Pipe errors give me a twitchy eye
-			let _ = sender.send(Message::Text(payload)).await;
+			let _ = sender.send(Message::Text(payload.into())).await;
 		}
 	}
 }

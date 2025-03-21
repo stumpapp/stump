@@ -28,6 +28,7 @@ pub struct Library {
 	// TODO(specta): replace with DateTime<FixedOffset>
 	pub updated_at: String,
 	/// The series that are in this library. Will be `None` only if the relation is not loaded.
+	#[schema(no_recursion)]
 	pub series: Option<Vec<Series>>,
 	/// The tags associated with this library. Will be `None` only if the relation is not loaded.
 	pub tags: Option<Vec<Tag>>,

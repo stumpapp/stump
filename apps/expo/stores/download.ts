@@ -1,49 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useSDK } from '@stump/client'
 import { Library, Media, Series } from '@stump/sdk'
-import { AxiosInstance } from 'axios'
 import * as FileSystem from 'expo-file-system'
 import { useCallback, useEffect } from 'react'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
-// TODO: allow for:
-// - Custom organization of files on UI (e.g. folders)
-// - Organization derived from server-side metadata (e.g. series, library)
-// - Deleting files
-
-/*
-Filesystem structure:
-
-- /document-directory (root)
-	- /serverID
-		- /books
-			- bookID.epub
-		- /unpacked
-			- /bookID
-				- /images
-				- /styles
-				- etc
-*/
-
-const baseDirectory = `${FileSystem.documentDirectory}`
-
-const serverDirectory = (serverID: string, path: string) => {
-	return `${baseDirectory}${serverID}/${path}`
-}
-
-const booksDirectory = (serverID: string) => {
-	return serverDirectory(serverID, 'books')
-}
-
-export async function ensureDirectoryExists(path = baseDirectory) {
-	const info = await FileSystem.getInfoAsync(path)
-	if (!info.exists) {
-		console.log('Creating directory', path)
-		await FileSystem.makeDirectoryAsync(path)
-		console.log('Directory created', path)
-	}
-}
+import { booksDirectory, ensureDirectoryExists } from '~/lib/filesystem'
 
 type UnsyncedReadProgress = {}
 
@@ -67,6 +30,9 @@ type StumpSeriesRefMap = Record<string, SeriesRef>
 type LibraryRef = Pick<Library, 'id' | 'name'>
 type StumpLibraryRefMap = Record<string, LibraryRef>
 
+// A reference to a book that is currently being read. This will be used for widgets
+// type ActivelyReadingRef = {}
+
 type AddFileMeta = {
 	seriesRef?: SeriesRef
 	libraryRef?: LibraryRef
@@ -81,7 +47,6 @@ type DownloadStore = {
 	 * A function to add a file to the list of downloaded files
 	 */
 	addFile: (file: DownloadedFile, meta?: AddFileMeta) => void
-
 	/**
 	 * A map of references to Stump series, used for offline displaying of series-related
 	 * information
@@ -179,10 +144,18 @@ export function useDownload() {
 				console.error('Error downloading book', e)
 			}
 		},
-		[addFile],
+		[addFile, files, sdk],
 	)
 
 	return { downloadBook }
+}
+
+type UseServerDownloadsParams = {
+	id: string
+}
+export const useServerDownloads = ({ id }: UseServerDownloadsParams) => {
+	const { files } = useDownloadStore((store) => ({ files: store.files }))
+	return files.filter((file) => file.serverID === id)
 }
 
 const extFromMime = (mime: string) => {

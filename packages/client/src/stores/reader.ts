@@ -7,12 +7,15 @@ export type BookImageScaling = {
 	scaleToFit: BookImageScalingFit
 }
 
+export type DoublePageBehavior = 'auto' | 'always' | 'off'
+export const isDoublePageBehavior = (value: string): value is DoublePageBehavior =>
+	['auto', 'always', 'off'].includes(value)
+
 /**
  * The preferences for a book, which represents an override of a user's default preferences for a
  * specific book
  */
 export type BookPreferences = {
-	// TODO: might be better in settings...
 	/**
 	 * A brightness value for the book, which will apply a filter to dim / brighten the page.
 	 * This must be a value between 0 and 1.
@@ -27,10 +30,9 @@ export type BookPreferences = {
 	 */
 	readingDirection: ReadingDirection
 	/**
-	 * Whether the reader should be in double spread mode. This will have no effect if the reader
-	 * mode is set to `continuous`
+	 * The behavior for double-page spreads
 	 */
-	doubleSpread?: boolean
+	doublePageBehavior?: DoublePageBehavior
 	/**
 	 * The font size to use for the book. This will have no effect if the book is image-based
 	 */
@@ -47,6 +49,14 @@ export type BookPreferences = {
 	 * The image scaling preferences for the book. This will have no effect if the book is not an image-based book
 	 */
 	imageScaling: BookImageScaling
+	/**
+	 * The behavior for tapping the sides of the screen to navigate
+	 */
+	tapSidesToNavigate: boolean
+	/**
+	 * Whether or not to track elapsed time for the book
+	 */
+	trackElapsedTime: boolean
 }
 
 /**
@@ -57,7 +67,7 @@ type BookID = string
 /**
  * The store for the reader itself, less specific to a single book and more about the reader
  */
-type ReaderSettings = {
+export type ReaderSettings = {
 	/**
 	 * Whether the toolbar should be shown
 	 */
@@ -77,7 +87,9 @@ type ReaderSettings = {
 		 */
 		behind: number
 	}
-}
+} & BookPreferences
+
+type ElapsedSeconds = number
 
 export type ReaderStore = {
 	/**
@@ -92,6 +104,14 @@ export type ReaderStore = {
 	 * The preferences for each book, if they have been overridden from the default preferences
 	 */
 	bookPreferences: Record<BookID, BookPreferences>
+
+	bookTimers: Record<BookID, ElapsedSeconds>
+	setBookTimer: (id: string, timer: ElapsedSeconds) => void
+
+	/**
+	 * A function to clear the store
+	 */
+	clearStore: () => void
 	/**
 	 * A setter for a *specific* book's preferences
 	 */
@@ -114,6 +134,15 @@ export const createReaderStore = (storage?: StateStorage) =>
 								},
 							})
 						},
+
+						bookTimers: {},
+						setBookTimer: (id, elapsedSeconds) =>
+							set({ bookTimers: { ...get().bookTimers, [id]: elapsedSeconds } }),
+
+						clearStore: () =>
+							set({
+								bookPreferences: {},
+							}),
 						setSettings: (settings) => set({ settings: { ...get().settings, ...settings } }),
 						settings: {
 							preload: {
@@ -121,6 +150,16 @@ export const createReaderStore = (storage?: StateStorage) =>
 								behind: 3,
 							},
 							showToolBar: false,
+							fontSize: 13,
+							brightness: 1,
+							readingMode: 'paged',
+							readingDirection: 'ltr',
+							imageScaling: {
+								scaleToFit: 'height',
+							},
+							doublePageBehavior: 'off',
+							trackElapsedTime: true,
+							tapSidesToNavigate: true,
 						},
 					}) as ReaderStore,
 				{

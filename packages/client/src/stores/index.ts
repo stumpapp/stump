@@ -1,5 +1,4 @@
 export * from './app'
-export * from './epub'
 export * from './job'
 export * from './layout'
 export * from './reader'

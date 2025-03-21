@@ -27,7 +27,7 @@ use stump_core::{
 				PaginationQuery,
 			},
 		},
-		PrismaCountTrait, SeriesDAO, DAO,
+		PrismaCountTrait,
 	},
 	filesystem::{
 		get_thumbnail,
@@ -371,13 +371,16 @@ async fn get_recently_added_series_handler(
 	// 	.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
 
 	let page_params = pagination.0.page_params();
-	let series_dao = SeriesDAO::new(ctx.db.clone());
 
-	let recently_added_series = series_dao
-		.get_recently_added_series(&user_id, page_params)
-		.await?;
+	// TODO(sea-orm): Fix
+	unimplemented!("SeaORM migration")
+	// let series_dao = SeriesDAO::new(ctx.db.clone());
 
-	Ok(Json(recently_added_series))
+	// let recently_added_series = series_dao
+	// 	.get_recently_added_series(&user_id, page_params)
+	// 	.await?;
+
+	// Ok(Json(recently_added_series))
 }
 
 pub(crate) async fn get_series_thumbnail(

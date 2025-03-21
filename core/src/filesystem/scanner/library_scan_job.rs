@@ -17,7 +17,7 @@ use utoipa::ToSchema;
 use crate::{
 	db::{
 		entity::{CoreJobOutput, IgnoreRules, LibraryConfig},
-		FileStatus, SeriesDAO, DAO,
+		FileStatus,
 	},
 	filesystem::{
 		image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},

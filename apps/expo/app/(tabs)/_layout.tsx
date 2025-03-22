@@ -5,7 +5,7 @@ import { icons } from '~/lib'
 import { useColors } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 
-const { Server, HardDriveDownload, Settings } = icons
+const { Server, HardDriveDownload, Settings, Box } = icons
 
 export default function TabLayout() {
 	const colors = useColors()
@@ -57,7 +57,9 @@ export default function TabLayout() {
 				name="ebook"
 				options={{
 					title: 'Ebook Test',
-					tabBarIcon: ({ color }) => <FontAwesome size={20} name="cog" color={color} />,
+					tabBarIcon: ({ focused }) => (
+						<Box className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })} />
+					),
 				}}
 			/>
 		</Tabs>

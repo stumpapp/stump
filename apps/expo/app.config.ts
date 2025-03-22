@@ -82,7 +82,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				{
 					android: {
 						usesCleartextTraffic: true,
-						kotlinVersion: '1.9.24',
+						compileSdkVersion: 35,
+						targetSdkVersion: 34,
+						buildToolsVersion: '35.0.0',
+						kotlinVersion: '1.9.25',
 					},
 				},
 			],
@@ -112,7 +115,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 	// TODO: Update to 3.1.0
 	// TODO: Determine which Readium modules are necessary for the app, e.g. OPDS probably not
 
-	return withDangerousMod(initialConfig, [
+	const withSwiftConfig = withDangerousMod(initialConfig, [
 		'ios',
 		async (config) => {
 			const filePath = path.join(config.modRequest.platformProjectRoot, 'Podfile')
@@ -143,4 +146,13 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 			return config
 		},
 	])
+
+	return withGradleProperties(withSwiftConfig, (config) => {
+		config.modResults.push({
+			type: 'property',
+			key: 'android.enableJetifier',
+			value: 'true',
+		})
+		return config
+	})
 }

@@ -44,7 +44,7 @@
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.1.0",
 		"dayjs": "^1.11.13",
-		"expo": "^52.0.40",
+		"expo": "^52.0.36",
 		"expo-application": "~6.0.2",
 		"expo-build-properties": "~0.13.2",
 		"expo-font": "~13.0.4",

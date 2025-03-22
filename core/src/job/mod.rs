@@ -485,7 +485,7 @@ pub trait Executor: Send + Sync {
 				job_id: Set(Some(job_id.to_string())),
 				level: Set(log.level.to_string()),
 				message: Set(log.msg),
-				timestamp: Set(log.timestamp.to_rfc3339()),
+				timestamp: Set(log.timestamp.into()),
 				context: Set(log.context),
 				..Default::default()
 			});

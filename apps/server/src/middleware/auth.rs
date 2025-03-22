@@ -11,6 +11,7 @@ use axum::{
 use base64::{engine::general_purpose::STANDARD, Engine};
 use prefixed_api_key::{PrefixedApiKey, PrefixedApiKeyController};
 use prisma_client_rust::or;
+use reqwest::Method;
 use serde::Deserialize;
 use stump_core::{
 	db::entity::{APIKeyPermissions, User, UserPermission, API_KEY_PREFIX},
@@ -42,6 +43,9 @@ use crate::{
 use super::host::HostExtractor;
 
 pub const STUMP_SAVE_BASIC_SESSION_HEADER: &str = "X-Stump-Save-Session";
+
+// TODO(sea-orm): Use models
+// TODO(sea-orm): Convert to GQL context
 
 /// A struct to represent the authenticated user in the current request context. A user is
 /// authenticated if they meet one of the following criteria:
@@ -181,6 +185,9 @@ pub async fn auth_middleware(
 
 	let is_opds = request_uri.starts_with("/opds");
 	let is_swagger = request_uri.starts_with("/swagger-ui");
+	// TODO(sea-orm): Check if enabled by config?
+	let is_playground =
+		request_uri.starts_with("/api/graphql") && *req.method() == Method::GET;
 
 	let Some(auth_header) = auth_header else {
 		if is_opds {
@@ -200,6 +207,9 @@ pub async fn auth_middleware(
 		} else if is_swagger {
 			// Sign in via React app and then redirect to server-side swagger-ui
 			return Err(Redirect::to("/auth?redirect=%2Fswagger-ui/").into_response());
+		} else if is_playground {
+			// Sign in via React app and then redirect to server-side playground
+			return Err(Redirect::to("/auth?redirect=%2Fapi%2Fgraphql").into_response());
 		}
 
 		return Err(APIError::Unauthorized.into_response());

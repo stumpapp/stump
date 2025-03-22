@@ -10,7 +10,7 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	pub message: String,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub timestamp: String,
+	pub timestamp: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub job_id: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]

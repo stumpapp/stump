@@ -326,6 +326,7 @@ dependencies = [
  "num-traits",
  "pin-project-lite",
  "regex",
+ "rust_decimal",
  "serde",
  "serde_json",
  "serde_urlencoded",
@@ -3157,6 +3158,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "graphql"
+version = "0.0.10"
+dependencies = [
+ "async-graphql",
+ "models",
+ "sea-orm",
+ "serde",
+ "serde_json",
+ "serde_with",
+ "strum",
+ "stump_core",
+ "tracing",
+]
+
+[[package]]
 name = "graphql-parser"
 version = "0.3.0"
 source = "git+https://github.com/prisma/graphql-parser#6a3f58bd879065588e710cb02b5bd30c1ce182c3"
@@ -5557,6 +5573,15 @@ name = "option-ext"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
+
+[[package]]
+name = "order-by-gen"
+version = "0.0.10"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.87",
+]
 
 [[package]]
 name = "ordered-float"
@@ -8906,6 +8931,7 @@ dependencies = [
  "chrono",
  "cli",
  "futures-util",
+ "graphql",
  "hyper 0.14.27",
  "infer",
  "itertools 0.13.0",
@@ -8919,6 +8945,7 @@ dependencies = [
  "prisma-client-rust",
  "rand 0.8.5",
  "reqwest 0.12.7",
+ "sea-orm",
  "serde",
  "serde-untagged",
  "serde_json",

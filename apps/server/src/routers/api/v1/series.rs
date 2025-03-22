@@ -7,6 +7,7 @@ use axum::{
 	Extension, Json, Router,
 };
 use axum_extra::extract::Query;
+use models::shared::image_processor_options::SupportedImageFormat;
 use prisma_client_rust::Direction;
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
@@ -26,15 +27,15 @@ use stump_core::{
 				PaginationQuery,
 			},
 		},
-		PrismaCountTrait, SeriesDAO, DAO,
+		PrismaCountTrait,
 	},
 	filesystem::{
-		analyze_media_job::AnalyzeMediaJob,
 		get_thumbnail,
 		image::{
 			generate_book_thumbnail, place_thumbnail, remove_thumbnails,
-			GenerateThumbnailOptions, ImageFormat, ImageProcessorOptions,
+			GenerateThumbnailOptions,
 		},
+		media::analyze_media_job::AnalyzeMediaJob,
 		scanner::SeriesScanJob,
 		ContentType,
 	},
@@ -370,19 +371,22 @@ async fn get_recently_added_series_handler(
 	// 	.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
 
 	let page_params = pagination.0.page_params();
-	let series_dao = SeriesDAO::new(ctx.db.clone());
 
-	let recently_added_series = series_dao
-		.get_recently_added_series(&user_id, page_params)
-		.await?;
+	// TODO(sea-orm): Fix
+	unimplemented!("SeaORM migration")
+	// let series_dao = SeriesDAO::new(ctx.db.clone());
 
-	Ok(Json(recently_added_series))
+	// let recently_added_series = series_dao
+	// 	.get_recently_added_series(&user_id, page_params)
+	// 	.await?;
+
+	// Ok(Json(recently_added_series))
 }
 
 pub(crate) async fn get_series_thumbnail(
 	id: &str,
 	first_book: Option<series_or_library_thumbnail::media::Data>,
-	image_format: Option<ImageFormat>,
+	image_format: Option<SupportedImageFormat>,
 	config: &StumpConfig,
 ) -> APIResult<(ContentType, Vec<u8>)> {
 	let generated_thumb =
@@ -450,7 +454,9 @@ async fn get_series_thumbnail_handler(
 	let first_book = series.media.into_iter().next();
 
 	let library_config = series.library.map(|l| l.config).map(LibraryConfig::from);
-	let image_format = library_config.and_then(|o| o.thumbnail_config.map(|c| c.format));
+	// let image_format = library_config.and_then(|o| o.thumbnail_config.map(|c| c.format));
+	// TODO(sea-orm): Fix
+	let image_format: Option<SupportedImageFormat> = None;
 
 	get_series_thumbnail(&id, first_book, image_format, &ctx.config)
 		.await
@@ -544,37 +550,41 @@ async fn patch_series_thumbnail(
 		.ok_or(APIError::NotFound(String::from("Series relation missing")))?
 		.library()?
 		.ok_or(APIError::NotFound(String::from("Library relation missing")))?;
-	let image_options = library
-		.config()?
-		.thumbnail_config
-		.clone()
-		.map(ImageProcessorOptions::try_from)
-		.transpose()?
-		.unwrap_or_else(|| {
-			tracing::warn!(
-				"Failed to parse existing thumbnail config! Using a default config"
-			);
-			ImageProcessorOptions::default()
-		})
-		.with_page(target_page);
 
-	let format = image_options.format.clone();
-	let (_, path_buf, _) = generate_book_thumbnail(
-		&media,
-		GenerateThumbnailOptions {
-			image_options,
-			core_config: ctx.config.as_ref().clone(),
-			force_regen: true,
-			filename: media.series_id.clone(),
-		},
-	)
-	.await?;
-	tracing::debug!(?path_buf, "Generated thumbnail for series");
+	// TODO(sea-orm): Fix
+	unimplemented!("SeaORM migration")
 
-	Ok(ImageResponse::from((
-		ContentType::from(format),
-		fs::read(path_buf).await?,
-	)))
+	// let image_options = library
+	// 	.config()?
+	// 	.thumbnail_config
+	// 	.clone()
+	// 	.map(ImageProcessorOptions::try_from)
+	// 	.transpose()?
+	// 	.unwrap_or_else(|| {
+	// 		tracing::warn!(
+	// 			"Failed to parse existing thumbnail config! Using a default config"
+	// 		);
+	// 		ImageProcessorOptions::default()
+	// 	})
+	// 	.with_page(target_page);
+
+	// let format = image_options.format.clone();
+	// let (_, path_buf, _) = generate_book_thumbnail(
+	// 	&media,
+	// 	GenerateThumbnailOptions {
+	// 		image_options,
+	// 		core_config: ctx.config.as_ref().clone(),
+	// 		force_regen: true,
+	// 		filename: media.series_id.clone(),
+	// 	},
+	// )
+	// .await?;
+	// tracing::debug!(?path_buf, "Generated thumbnail for series");
+
+	// Ok(ImageResponse::from((
+	// 	ContentType::from(format),
+	// 	fs::read(path_buf).await?,
+	// )))
 }
 
 #[utoipa::path(

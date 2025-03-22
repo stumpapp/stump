@@ -110,7 +110,7 @@ impl LibraryWatcherInternal {
 
 #[async_trait]
 trait LibrariesProvider {
-	async fn get_libraries(&self) -> CoreResult<Vec<library::LibraryIdentModel>>;
+	async fn get_libraries(&self) -> CoreResult<Vec<library::LibraryIdentSelect>>;
 }
 
 #[derive(Debug, Clone)]
@@ -121,16 +121,16 @@ struct LibraryProvider {
 #[async_trait]
 impl LibrariesProvider for LibraryProvider {
 	#[tracing::instrument(skip(self), err)]
-	async fn get_libraries(&self) -> CoreResult<Vec<library::LibraryIdentModel>> {
+	async fn get_libraries(&self) -> CoreResult<Vec<library::LibraryIdentSelect>> {
 		// get list of all libraries
 		// for each library, if watching is enabled, watch their directory
 		let conn = self.conn.as_ref();
 
-		let libraries: Vec<library::LibraryIdentModel> = library::Entity::find()
+		let libraries: Vec<library::LibraryIdentSelect> = library::Entity::find()
 			.inner_join(library_config::Entity)
 			.filter(library::Column::Status.eq("READY"))
 			.filter(library_config::Column::Watch.eq(true))
-			.into_partial_model::<library::LibraryIdentModel>()
+			.into_partial_model::<library::LibraryIdentSelect>()
 			.all(conn)
 			.await?;
 
@@ -329,12 +329,12 @@ mod tests {
 
 	#[allow(dead_code)]
 	struct MockLibraryProvider {
-		libraries: Vec<library::LibraryIdentModel>,
+		libraries: Vec<library::LibraryIdentSelect>,
 	}
 
 	#[async_trait]
 	impl LibrariesProvider for MockLibraryProvider {
-		async fn get_libraries(&self) -> CoreResult<Vec<library::LibraryIdentModel>> {
+		async fn get_libraries(&self) -> CoreResult<Vec<library::LibraryIdentSelect>> {
 			Ok(self.libraries.clone())
 		}
 	}
@@ -363,7 +363,7 @@ mod tests {
 
 	#[allow(dead_code)]
 	async fn create_mock_library(
-		libraries: Vec<library::LibraryIdentModel>,
+		libraries: Vec<library::LibraryIdentSelect>,
 	) -> Result<MockObjs, CoreError> {
 		let (tx_jobs, rx_jobs) = tokio::sync::mpsc::unbounded_channel();
 		let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
@@ -392,8 +392,8 @@ mod tests {
 	}
 
 	#[allow(dead_code)]
-	fn create_test_libraries(base_dir: String) -> Vec<library::LibraryIdentModel> {
-		vec![library::LibraryIdentModel {
+	fn create_test_libraries(base_dir: String) -> Vec<library::LibraryIdentSelect> {
+		vec![library::LibraryIdentSelect {
 			id: "42".to_string(),
 			path: base_dir,
 		}]

@@ -11,12 +11,11 @@ use std::{
 
 use chrono::{DateTime, Utc};
 use futures::{stream::FuturesUnordered, StreamExt};
-use models::entity::{media, media_metadata, series, series_metadata};
+use models::entity::{library_config, media, media_metadata, series, series_metadata};
 use sea_orm::{
 	prelude::*,
-	sea_query::{IdenList, OnConflict, Query},
-	ActiveValue::Set,
-	Condition, DatabaseConnection, IntoActiveModel, Iterable, TransactionTrait,
+	sea_query::{OnConflict, Query},
+	Condition, DatabaseConnection, IntoActiveModel, Iterable, Set, TransactionTrait,
 };
 use tokio::{
 	sync::{oneshot, Semaphore},
@@ -26,14 +25,12 @@ use walkdir::DirEntry;
 
 use crate::{
 	config::StumpConfig,
-	db::{
-		entity::{LibraryConfig, Media, Series},
-		FileStatus,
-	},
+	db::FileStatus,
 	error::{CoreError, CoreResult},
 	filesystem::{
+		media::{BuiltMedia, MediaBuilder},
 		scanner::options::{BookVisitOperation, CustomVisitResult},
-		BuiltSeries, MediaBuilder, SeriesBuilder,
+		series::{BuiltSeries, SeriesBuilder},
 	},
 	job::{error::JobError, JobExecuteLog, JobProgress, WorkerCtx, WorkerSendExt},
 	CoreEvent,
@@ -76,57 +73,16 @@ pub(crate) fn file_updated_since_scan(
 
 pub(crate) async fn create_media(
 	db: &DatabaseConnection,
-	generated: Media,
+	BuiltMedia { media, metadata }: BuiltMedia,
 ) -> CoreResult<media::Model> {
 	let txn = db.begin().await?;
-
-	let media = media::ActiveModel {
-		name: Set(generated.name),
-		size: Set(generated.size),
-		extension: Set(generated.extension),
-		pages: Set(generated.pages),
-		path: Set(generated.path),
-		hash: Set(generated.hash),
-		koreader_hash: Set(generated.koreader_hash),
-		series_id: Set(Some(generated.series_id)),
-		modified_at: Set(generated.modified_at.map(|d| d.parse()).transpose()?),
-		..Default::default()
-	};
 
 	let created_media = media::Entity::insert(media)
 		.exec_with_returning(&txn)
 		.await?;
 
-	if let Some(meta) = generated.metadata {
-		let metadata = media_metadata::ActiveModel {
-			media_id: Set(Some(created_media.id.clone())),
-			title: Set(meta.title),
-			series: Set(meta.series),
-			number: Set(meta.number.and_then(|n| Decimal::try_from(n).ok())),
-			volume: Set(meta.volume),
-			summary: Set(meta.summary),
-			notes: Set(meta.notes),
-			age_rating: Set(meta.age_rating),
-			genre: Set(meta.genre.map(|v| v.join(", "))),
-			year: Set(meta.year),
-			month: Set(meta.month),
-			day: Set(meta.day),
-			writers: Set(meta.writers.map(|v| v.join(", "))),
-			pencillers: Set(meta.pencillers.map(|v| v.join(", "))),
-			inkers: Set(meta.inkers.map(|v| v.join(", "))),
-			colorists: Set(meta.colorists.map(|v| v.join(", "))),
-			letterers: Set(meta.letterers.map(|v| v.join(", "))),
-			cover_artists: Set(meta.cover_artists.map(|v| v.join(", "))),
-			editors: Set(meta.editors.map(|v| v.join(", "))),
-			publisher: Set(meta.publisher),
-			links: Set(meta.links.map(|v| v.join(", "))),
-			characters: Set(meta.characters.map(|v| v.join(", "))),
-			teams: Set(meta.teams.map(|v| v.join(", "))),
-			page_count: Set(meta.page_count),
-			..Default::default()
-		};
-
-		media_metadata::Entity::insert(metadata).exec(&txn).await?;
+	if let Some(meta) = metadata {
+		media_metadata::Entity::insert(meta).exec(&txn).await?;
 	}
 
 	txn.commit().await?;
@@ -136,16 +92,16 @@ pub(crate) async fn create_media(
 
 pub(crate) async fn update_media(
 	db: &DatabaseConnection,
-	media::ModelWithMetadata { media, metadata }: media::ModelWithMetadata,
+	BuiltMedia { media, metadata }: BuiltMedia,
 ) -> CoreResult<media::Model> {
 	let txn = db.begin().await?;
 
-	let active_model = media.into_active_model();
-	let updated_media = active_model.update(&txn).await?;
+	let updated_media = media.update(&txn).await?;
 
 	if let Some(meta) = metadata {
-		let mut on_conflict = OnConflict::new();
-		on_conflict.update_columns(media_metadata::Column::iter());
+		let on_conflict = OnConflict::new()
+			.update_columns(media_metadata::Column::iter())
+			.to_owned();
 		media_metadata::Entity::insert(meta.into_active_model())
 			.on_conflict(on_conflict)
 			.exec(&txn)
@@ -161,69 +117,39 @@ pub(crate) async fn handle_book_visit_operation(
 	db: &DatabaseConnection,
 	result: BookVisitResult,
 ) -> CoreResult<()> {
-	// TODO(sea-orm): Fix once I sort out what gets passed around the core
-	unimplemented!()
-	// match result {
-	// 	BookVisitResult::Custom(custom) => {
-	// 		if let Some(meta) = custom.meta {
-	// 			let params = meta
-	// 				.into_prisma()
-	// 				.into_iter()
-	// 				.chain(vec![media_metadata::media_id::set(Some(custom.id.clone()))])
-	// 				.collect::<Vec<_>>();
-	// 			let id = custom.id.clone();
+	match result {
+		BookVisitResult::Custom(custom) => {
+			if let Some(meta) = custom.meta {
+				let active_model = media_metadata::ActiveModel {
+					media_id: Set(Some(custom.id.clone())),
+					..meta.into_active_model()
+				};
+				let updated_meta = active_model.update(db).await?;
 
-	// 			let updated_meta = db
-	// 				._transaction()
-	// 				.run(|client| async move {
-	// 					let meta = client
-	// 						.media_metadata()
-	// 						.upsert(
-	// 							media_metadata::media_id::equals(id.clone()),
-	// 							params.clone(),
-	// 							params,
-	// 						)
-	// 						.exec()
-	// 						.await?;
-	// 					client
-	// 						.media()
-	// 						.update(
-	// 							media::id::equals(id),
-	// 							vec![media::metadata::connect(
-	// 								media_metadata::id::equals(meta.id.clone()),
-	// 							)],
-	// 						)
-	// 						.with(media::metadata::fetch())
-	// 						.exec()
-	// 						.await
-	// 						.map(|_| meta)
-	// 				})
-	// 				.await;
-	// 			tracing::trace!(?updated_meta, "Metadata upserted");
-	// 		}
+				tracing::trace!(?updated_meta, "Metadata upserted");
+			}
 
-	// 		if let Some(hashes) = custom.hashes {
-	// 			let updated_book = db
-	// 				.media()
-	// 				.update(
-	// 					media::id::equals(custom.id),
-	// 					vec![
-	// 						media::hash::set(hashes.hash),
-	// 						media::koreader_hash::set(hashes.koreader_hash),
-	// 					],
-	// 				)
-	// 				.exec()
-	// 				.await?;
-	// 			tracing::trace!(?updated_book, "Book updated with new hashes");
-	// 		}
-	// 	},
-	// 	BookVisitResult::Built(book) => {
-	// 		let updated_book = update_media(db, *book).await?;
-	// 		tracing::trace!(?updated_book, "Book updated");
-	// 	},
-	// }
+			if let Some(hashes) = custom.hashes {
+				let affected_rows = media::Entity::update_many()
+					.filter(media::Column::Id.eq(custom.id.clone()))
+					.col_expr(media::Column::Hash, Expr::value(hashes.hash))
+					.col_expr(
+						media::Column::KoreaderHash,
+						Expr::value(hashes.koreader_hash),
+					)
+					.exec(db)
+					.await?
+					.rows_affected;
+				tracing::trace!(affected_rows, "Book updated with new hashes");
+			}
+		},
+		BookVisitResult::Built(book) => {
+			let updated_media = update_media(db, *book).await?;
+			tracing::trace!(?updated_media, "Book updated");
+		},
+	}
 
-	// Ok(())
+	Ok(())
 }
 
 #[derive(Default)]
@@ -257,7 +183,7 @@ pub(crate) async fn handle_missing_series(
 				0
 			},
 			|res| {
-				output.updated_series += res.rows_affected as u64;
+				output.updated_series += res.rows_affected;
 				res.rows_affected
 			},
 		);
@@ -298,7 +224,7 @@ pub(crate) async fn handle_missing_series(
 				0
 			},
 			|res| {
-				output.updated_media += res.rows_affected as u64;
+				output.updated_media += res.rows_affected;
 				res.rows_affected
 			},
 		);
@@ -353,7 +279,7 @@ pub(crate) async fn handle_missing_media(
 				0
 			},
 			|res| {
-				output.updated_media += res.rows_affected as u64;
+				output.updated_media += res.rows_affected;
 				res.rows_affected
 			},
 		);
@@ -398,7 +324,7 @@ pub(crate) async fn handle_restored_media(
 				0
 			},
 			|res| {
-				output.updated_media += res.rows_affected as u64;
+				output.updated_media += res.rows_affected;
 				res.rows_affected
 			},
 		);
@@ -553,7 +479,7 @@ pub(crate) async fn safely_insert_series(
 // TODO(granular-scans): intake ScanOptions
 pub(crate) struct MediaBuildOperation {
 	pub series_id: String,
-	pub library_config: LibraryConfig,
+	pub library_config: library_config::Model,
 	pub max_concurrency: usize,
 }
 
@@ -568,10 +494,10 @@ pub(crate) struct MediaBuildOperation {
 async fn build_book(
 	path: &Path,
 	series_id: &str,
-	existing_book: Option<Media>,
-	library_config: LibraryConfig,
+	existing_book: Option<media::ModelWithMetadata>,
+	library_config: library_config::Model,
 	config: &StumpConfig,
-) -> CoreResult<Media> {
+) -> CoreResult<BuiltMedia> {
 	let (tx, rx) = oneshot::channel();
 
 	// Spawn a blocking task to handle the IO-intensive operations:
@@ -613,7 +539,7 @@ struct BookVisitCtx {
 	operation: BookVisitOperation,
 	path: PathBuf,
 	series_id: String,
-	existing_book: Option<media::Model>,
+	existing_book: Option<media::ModelWithMetadata>,
 }
 
 async fn handle_book(
@@ -623,7 +549,7 @@ async fn handle_book(
 		series_id,
 		existing_book,
 	}: BookVisitCtx,
-	library_config: LibraryConfig,
+	library_config: library_config::Model,
 	config: &StumpConfig,
 ) -> CoreResult<BookVisitResult> {
 	let (tx, rx) = oneshot::channel();
@@ -638,17 +564,13 @@ async fn handle_book(
 		move || {
 			let builder = MediaBuilder::new(&path, &series_id, library_config, &config);
 			let send_result = tx.send(match (operation, existing_book) {
-				(BookVisitOperation::Rebuild, Some(book)) => {
-					unimplemented!()
-					// TODO(sea-orm): Fix
-					// builder
-					// .rebuild(&book)
-					// .map(|b| BookVisitResult::Built(Box::new(b)))
-				},
+				(BookVisitOperation::Rebuild, Some(book)) => builder
+					.rebuild(&book)
+					.map(|b| BookVisitResult::Built(Box::new(b))),
 				(BookVisitOperation::Custom(custom), Some(book)) => {
 					builder.custom_visit(custom).map(|result| {
 						BookVisitResult::Custom(CustomVisitResult {
-							id: book.id,
+							id: book.media.id,
 							..result
 						})
 					})
@@ -776,9 +698,10 @@ pub(crate) async fn safely_build_and_insert_media(
 
 	let atomic_cursor = Arc::new(AtomicUsize::new(1));
 
-	// TODO: consider small batches of _batch instead?
 	while let Some(book) = books.pop_front() {
-		let path = book.path.clone();
+		let Some(path) = book.path() else {
+			continue;
+		};
 		match create_media(&worker_ctx.conn, book).await {
 			Ok(created_media) => {
 				output.created_media += 1;
@@ -850,12 +773,13 @@ pub(crate) async fn visit_and_update_media(
 	let paths = paths_to_operation.keys().cloned().collect::<Vec<String>>();
 	let paths_len = paths.len();
 
-	let media = media::Entity::find()
+	let media = media::ModelWithMetadata::find()
 		.filter(
 			media::Column::Path
 				.is_in(paths.iter().map(|p| p.to_string()).collect::<Vec<String>>()),
 		)
 		.filter(media::Column::SeriesId.eq(series_id.to_string()))
+		.into_model::<media::ModelWithMetadata>()
 		.all(conn)
 		.await?;
 
@@ -875,8 +799,8 @@ pub(crate) async fn visit_and_update_media(
 	let futures = media
 		.into_iter()
 		.filter_map(|book| {
-			paths_to_operation.get(&book.path).map(|operation| {
-				let path = book.path.clone();
+			paths_to_operation.get(&book.media.path).map(|operation| {
+				let path = book.media.path.clone();
 				BookVisitCtx {
 					operation: *operation,
 					existing_book: Some(book),

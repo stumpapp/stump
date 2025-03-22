@@ -1,6 +1,12 @@
-use sea_orm::{entity::prelude::*, DerivePartialModel, FromQueryResult};
+use async_graphql::SimpleObject;
+use sea_orm::{
+	entity::prelude::*, sea_query::Query, DerivePartialModel, FromQueryResult,
+};
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
+use super::{library_hidden_to_user, user::AuthUser};
+
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
+#[graphql(name = "LibraryModel")]
 #[sea_orm(table_name = "libraries")]
 pub struct Model {
 	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
@@ -14,9 +20,9 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	pub status: String,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub updated_at: String,
+	pub updated_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub created_at: String,
+	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub emoji: Option<String>,
 	#[sea_orm(column_type = "Text", unique)]
@@ -27,9 +33,23 @@ pub struct Model {
 	pub last_scanned_at: Option<String>,
 }
 
+impl Entity {
+	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
+		Entity::find().filter(
+			Column::Id.not_in_subquery(
+				Query::select()
+					.column(library_hidden_to_user::Column::LibraryId)
+					.from(library_hidden_to_user::Entity)
+					.and_where(library_hidden_to_user::Column::UserId.eq(user.id.clone()))
+					.to_owned(),
+			),
+		)
+	}
+}
+
 #[derive(Clone, Debug, DerivePartialModel, FromQueryResult)]
 #[sea_orm(entity = "<Model as ModelTrait>::Entity")]
-pub struct LibraryIdentModel {
+pub struct LibraryIdentSelect {
 	pub id: String,
 	pub path: String,
 }

@@ -17,7 +17,7 @@ pub struct Model {
 	pub output_data: Option<Vec<u8>>,
 	pub ms_elapsed: i64,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub created_at: String,
+	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub completed_at: Option<String>,
 }

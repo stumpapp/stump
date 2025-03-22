@@ -6,9 +6,9 @@ pub struct Model {
 	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
 	pub id: String,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub start_at: String,
+	pub start_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub end_at: String,
+	pub end_at: DateTimeWithTimeZone,
 	pub discussion_duration_days: Option<i32>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub title: Option<String>,

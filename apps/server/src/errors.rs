@@ -137,6 +137,8 @@ pub enum APIError {
 	#[error("{0}")]
 	#[schema(value_type = Box<String>)]
 	PrismaError(#[from] Box<QueryError>),
+	#[error("{0}")]
+	DbError(#[from] sea_orm::error::DbErr),
 }
 
 impl APIError {
@@ -159,6 +161,10 @@ impl APIError {
 				} else {
 					StatusCode::INTERNAL_SERVER_ERROR
 				}
+			},
+			APIError::DbError(error) => match error {
+				sea_orm::error::DbErr::RecordNotFound(_) => StatusCode::NOT_FOUND,
+				_ => StatusCode::INTERNAL_SERVER_ERROR,
 			},
 			APIError::Redirect(_) => StatusCode::TEMPORARY_REDIRECT,
 			_ => StatusCode::INTERNAL_SERVER_ERROR,

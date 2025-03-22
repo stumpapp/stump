@@ -26,6 +26,7 @@ cli = { path = "../../crates/cli" }
 chrono.workspace = true
 models = { path = "../../database/models" }
 futures-util.workspace = true
+graphql = { path = "../../crates/graphql" }
 hyper = "0.14.27"
 infer.workspace = true
 itertools.workspace = true
@@ -36,6 +37,7 @@ once_cell.workspace = true
 prefixed-api-key = { workspace = true}
 rand = "0.8.5"
 reqwest.workspace = true
+sea-orm.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 serde_qs = { version = "0.14.0", features = ["axum"] }

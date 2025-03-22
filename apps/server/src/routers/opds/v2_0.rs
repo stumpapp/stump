@@ -25,7 +25,7 @@ use stump_core::{
 		},
 		query::pagination::PageQuery,
 	},
-	filesystem::get_page_async,
+	filesystem::media::get_page_async,
 	opds::v2_0::{
 		authentication::{
 			OPDSAuthenticationDocument, OPDSAuthenticationDocumentBuilder,

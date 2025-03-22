@@ -41,10 +41,10 @@ pub enum AccessRole {
 )]
 #[sea_orm(
 	rs_type = "String",
-	rename_all = "UPPERCASE",
+	rename_all = "SCREAMING_SNAKE_CASE",
 	db_type = "String(StringLen::None)"
 )]
-#[serde(rename_all = "UPPERCASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum EntityVisibility {
 	Public,
 	Shared,
@@ -65,13 +65,15 @@ pub enum EntityVisibility {
 	Serialize,
 	Deserialize,
 	DeriveActiveEnum,
+	EnumString,
+	Display,
 )]
 #[sea_orm(
 	rs_type = "String",
-	rename_all = "UPPERCASE",
+	rename_all = "SCREAMING_SNAKE_CASE",
 	db_type = "String(StringLen::None)"
 )]
-#[serde(rename_all = "UPPERCASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum FileStatus {
 	Unknown,
 	#[default]
@@ -97,10 +99,10 @@ pub enum FileStatus {
 )]
 #[sea_orm(
 	rs_type = "String",
-	rename_all = "UPPERCASE",
+	rename_all = "SCREAMING_SNAKE_CASE",
 	db_type = "String(StringLen::None)"
 )]
-#[serde(rename_all = "UPPERCASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum InterfaceLayout {
 	Grid,
 	Table,
@@ -121,10 +123,10 @@ pub enum InterfaceLayout {
 )]
 #[sea_orm(
 	rs_type = "String",
-	rename_all = "UPPERCASE",
+	rename_all = "SCREAMING_SNAKE_CASE",
 	db_type = "String(StringLen::None)"
 )]
-#[serde(rename_all = "UPPERCASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum LibraryPattern {
 	SeriesBased,
 	CollectionBased,
@@ -146,10 +148,10 @@ pub enum LibraryPattern {
 )]
 #[sea_orm(
 	rs_type = "String",
-	rename_all = "UPPERCASE",
+	rename_all = "SCREAMING_SNAKE_CASE",
 	db_type = "String(StringLen::None)"
 )]
-#[serde(rename_all = "UPPERCASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ReadingDirection {
 	#[default]
 	Ltr,
@@ -172,10 +174,10 @@ pub enum ReadingDirection {
 )]
 #[sea_orm(
 	rs_type = "String",
-	rename_all = "UPPERCASE",
+	rename_all = "SCREAMING_SNAKE_CASE",
 	db_type = "String(StringLen::None)"
 )]
-#[serde(rename_all = "UPPERCASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ReadingImageScaleFit {
 	#[default]
 	Height,
@@ -200,15 +202,48 @@ pub enum ReadingImageScaleFit {
 )]
 #[sea_orm(
 	rs_type = "String",
-	rename_all = "UPPERCASE",
+	rename_all = "SCREAMING_SNAKE_CASE",
 	db_type = "String(StringLen::None)"
 )]
-#[serde(rename_all = "UPPERCASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ReadingMode {
 	#[default]
 	Paged,
 	ContinuousVertical,
 	ContinuousHorizontal,
+}
+
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Clone,
+	Default,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "lowercase",
+	db_type = "String(StringLen::None)"
+)]
+#[serde(rename_all = "lowercase")]
+pub enum SupportedFont {
+	AtkinsonHyperlegible,
+	Bitter,
+	Charis,
+	#[default]
+	Inter,
+	LibreBaskerville,
+	Literata,
+	Nunito,
+	OpenDyslexic,
+	// TODO(383): Support custom fonts
+	// Custom(String),
 }
 
 /// The permissions a user may be granted

@@ -1,6 +1,10 @@
 use sea_orm::entity::prelude::*;
 
-use crate::shared::{enums::LibraryPattern, ignore_rules::IgnoreRules};
+use crate::shared::{
+	enums::{LibraryPattern, ReadingImageScaleFit},
+	ignore_rules::IgnoreRules,
+	image_processor_options::ImageProcessorOptions,
+};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "library_configs")]
@@ -14,15 +18,15 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	pub default_reading_mode: String,
 	#[sea_orm(column_type = "Text")]
-	pub default_reading_image_scale_fit: String,
+	pub default_reading_image_scale_fit: ReadingImageScaleFit,
 	pub generate_file_hashes: bool,
 	pub generate_koreader_hashes: bool,
 	pub process_metadata: bool,
 	pub watch: bool,
 	#[sea_orm(column_type = "Text")]
 	pub library_pattern: LibraryPattern,
-	#[sea_orm(column_type = "Blob", nullable)]
-	pub thumbnail_config: Option<Vec<u8>>,
+	#[sea_orm(column_type = "Json", nullable)]
+	pub thumbnail_config: Option<ImageProcessorOptions>,
 	#[sea_orm(column_type = "Json", nullable)]
 	pub ignore_rules: Option<IgnoreRules>,
 	#[sea_orm(column_type = "Text", nullable)]

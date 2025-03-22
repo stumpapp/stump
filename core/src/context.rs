@@ -54,12 +54,8 @@ impl Ctx {
 		let db = Arc::new(db::create_client(&config).await);
 		let event_channel = Arc::new(channel::<CoreEvent>(1024));
 
-		let job_controller = JobController::new(
-			conn.clone(),
-			db.clone(),
-			config.clone(),
-			event_channel.0.clone(),
-		);
+		let job_controller =
+			JobController::new(conn.clone(), config.clone(), event_channel.0.clone());
 		let library_watcher =
 			Arc::new(LibraryWatcher::new(conn.clone(), job_controller.clone()));
 

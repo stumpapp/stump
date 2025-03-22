@@ -4,14 +4,17 @@ use axum::{
 	routing::get,
 	Extension, Router,
 };
+use models::shared::image_processor_options::{
+	ImageProcessorOptions, SupportedImageFormat,
+};
 use prisma_client_rust::or;
 use prisma_client_rust::{chrono, Direction};
 use serde::{Deserialize, Serialize};
 use stump_core::{
 	db::{entity::UserPermission, query::pagination::PageQuery},
 	filesystem::{
-		get_page_async,
-		image::{GenericImageProcessor, ImageProcessor, ImageProcessorOptions},
+		image::{GenericImageProcessor, ImageProcessor},
+		media::get_page_async,
 		ContentType,
 	},
 	opds::v1_2::{
@@ -667,7 +670,10 @@ fn handle_opds_image_response(
 		tracing::debug!("Converting image to JPEG for legacy OPDS compatibility");
 		let jpeg_buffer = GenericImageProcessor::generate(
 			&image_buffer,
-			ImageProcessorOptions::jpeg(),
+			ImageProcessorOptions {
+				format: SupportedImageFormat::Jpeg,
+				..Default::default()
+			},
 		)?;
 		Ok(ImageResponse::new(ContentType::JPEG, jpeg_buffer))
 	} else {

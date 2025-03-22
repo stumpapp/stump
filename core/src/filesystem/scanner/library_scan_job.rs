@@ -1,9 +1,6 @@
 use std::{collections::VecDeque, path::PathBuf};
 
-use models::entity::{
-	library, library_config, library_scan_record, media,
-	series::{self, SeriesIdentSelect},
-};
+use models::entity::{library, library_config, library_scan_record, media, series};
 use sea_orm::{prelude::*, sea_query::Query, Set, TransactionTrait};
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -15,10 +12,7 @@ use utoipa::ToSchema;
 // Also perhaps experiment with https://docs.rs/tokio-uring/latest/tokio_uring/index.html
 
 use crate::{
-	db::{
-		entity::{CoreJobOutput, IgnoreRules, LibraryConfig},
-		FileStatus, SeriesDAO, DAO,
-	},
+	db::{entity::CoreJobOutput, FileStatus},
 	filesystem::{
 		image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
 		scanner::utils::safely_insert_series,
@@ -153,9 +147,10 @@ impl JobExt for LibraryScanJob {
 			.ok_or(JobError::InitFailed(
 				"Library is missing configuration".to_string(),
 			))?;
+		// TODO(sea-orm): Fix
 		// library_config.apply(self.options);
 		let is_collection_based = config.is_collection_based();
-		let ignore_rules = config.ignore_rules.build()?;
+		let ignore_rules = config.ignore_rules().build()?;
 
 		self.config = Some(config);
 
@@ -259,15 +254,13 @@ impl JobExt for LibraryScanJob {
 		match image_options {
 			Some(options) if did_create | did_update => {
 				tracing::trace!("Thumbnail generation job should be enqueued");
-				// TODO(sea-orm): Fix
-				// Ok(Some(WrappedJob::new(ThumbnailGenerationJob {
-				// 	options,
-				// 	params: ThumbnailGenerationJobParams::single_library(
-				// 		self.id.clone(),
-				// 		false,
-				// 	),
-				// })))
-				Ok(None)
+				Ok(Some(WrappedJob::new(ThumbnailGenerationJob {
+					options,
+					params: ThumbnailGenerationJobParams::single_library(
+						self.id.clone(),
+						false,
+					),
+				})))
 			},
 			_ => {
 				tracing::debug!("No cleanup required for library scan job");
@@ -474,23 +467,24 @@ impl JobExt for LibraryScanJob {
 					max_depth = Some(1);
 				}
 
-				let ignore_rules = match self.config.map(|c| c.ignore_rules().build()) {
-					Some(Ok(rules)) => rules,
-					Some(Err(err)) => {
-						tracing::error!(error = ?err, "Failed to build ignore rules");
-						return Err(JobError::TaskFailed(
+				let ignore_rules =
+					match self.config.as_ref().map(|c| c.ignore_rules().build()) {
+						Some(Ok(rules)) => rules,
+						Some(Err(err)) => {
+							tracing::error!(error = ?err, "Failed to build ignore rules");
+							return Err(JobError::TaskFailed(
 							"Failed to build ignore rules. Check that the rules are valid."
 								.to_string(),
 						));
-					},
-					_ => {
-						tracing::error!(?self.config, "Library config is missing?");
-						return Err(JobError::TaskFailed(
+						},
+						_ => {
+							tracing::error!(?self.config, "Library config is missing?");
+							return Err(JobError::TaskFailed(
 							"A critical error occurred while attempting to scan the library"
 								.to_string(),
 						));
-					},
-				};
+						},
+					};
 
 				let walk_result = walk_series(
 					path_buf.as_path(),
@@ -640,7 +634,11 @@ impl JobExt for LibraryScanJob {
 					} = safely_build_and_insert_media(
 						MediaBuildOperation {
 							series_id: series_id.clone(),
-							library_config: self.config.clone().unwrap_or_default(),
+							library_config: self.config.clone().ok_or(
+								JobError::TaskFailed(
+									"Library configuration is missing".to_string(),
+								),
+							)?,
 							max_concurrency,
 						},
 						ctx,
@@ -670,7 +668,11 @@ impl JobExt for LibraryScanJob {
 					} = visit_and_update_media(
 						MediaBuildOperation {
 							series_id: series_id.clone(),
-							library_config: self.config.clone().unwrap_or_default(),
+							library_config: self.config.clone().ok_or(
+								JobError::TaskFailed(
+									"Library configuration is missing".to_string(),
+								),
+							)?,
 							max_concurrency,
 						},
 						ctx,
@@ -788,6 +790,7 @@ async fn handle_scan_complete(
 			options: Set(persisted_options),
 			timestamp: Set(now.into()),
 			job_id: Set(Some(ctx.job_id.clone())),
+			library_id: Set(job.id.clone()),
 			..Default::default()
 		})
 		.exec(conn)

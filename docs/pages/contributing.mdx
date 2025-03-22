@@ -29,19 +29,6 @@ You need to install [yarn](https://yarnpkg.com), [rust](https://www.rust-lang.or
 yarn run setup
 ```
 
-This will install the project dependencies, build the frontend bundle (required for server to start), generate the prisma client, and create the sqlite database.
-
-To do any of these individually, you can run:
-
-```bash
-# install the project dependencies
-yarn install
-# build the React app
-yarn web build
-# generate the Prisma client and Rust-TypeScript types
-cargo codegen # or cargo prisma generate --schema=./core/prisma/schema.prisma for just the Prisma client
-```
-
 ### Running Stump
 
 I use [yarn workspaces](https://yarnpkg.com/features/workspaces) and [cargo workspaces](https://doc.rust-lang.org/cargo/reference/workspaces.html):
@@ -102,7 +89,7 @@ Below is a list of resources that I've found helpful in developing Stump. I'll t
 
 - [Rust Book](https://doc.rust-lang.org/book/)
 - [Axum documentation](https://docs.rs/axum/latest/axum/)
-- [Prisma Client Rust Documentation](https://prisma.brendonovich.dev/introduction)
+- [Thinking in GraphQL](https://relay.dev/docs/next/principles-and-architecture/thinking-in-graphql/)
 - [OPDS specification](https://specs.opds.io/)
 - [OPDS Page Streaming](https://vaemendis.net/opds-pse/#:~:text=The%20OPDS%20Page%20Streaming%20Extension,having%20to%20download%20it%20completely.)
 - [Getting started with React](https://reactjs.org/docs/getting-started.html)

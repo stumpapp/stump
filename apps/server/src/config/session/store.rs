@@ -1,13 +1,10 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
+use models::entity::session;
 use prisma_client_rust::chrono::{DateTime, Duration, FixedOffset, Utc};
-use stump_core::{
-	config::StumpConfig,
-	db::entity::User,
-	prisma::{session, user, PrismaClient},
-	Ctx,
-};
+use sea_orm::{prelude::*, sea_query::OnConflict, DatabaseConnection, Iterable, Set};
+use stump_core::{config::StumpConfig, db::entity::User, Ctx};
 use tokio::time::MissedTickBehavior;
 use tower_sessions::{
 	session::{Id, Record},
@@ -19,8 +16,11 @@ use super::{SessionCleanupJob, SESSION_USER_KEY};
 
 // TODO(axum-upgrade): Refactor this store. See https://github.com/maxcountryman/tower-sessions-stores/blob/main/sqlx-store/src/sqlite_store.rs
 // TODO(axum-upgrade): refactor error variants
+
 #[derive(Debug, thiserror::Error)]
 pub enum SessionError {
+	#[error("{0}")]
+	DbError(#[from] sea_orm::error::DbErr),
 	#[error("Session not found")]
 	NotFound,
 	#[error("{0}")]
@@ -35,6 +35,7 @@ impl From<SessionError> for session_store::Error {
 			SessionError::NotFound => {
 				session_store::Error::Backend("Session not found".to_string())
 			},
+			SessionError::DbError(e) => session_store::Error::Backend(e.to_string()),
 			SessionError::QueryError(e) => session_store::Error::Backend(e.to_string()),
 			SessionError::SerdeError(e) => session_store::Error::Decode(e.to_string()),
 		}
@@ -42,14 +43,14 @@ impl From<SessionError> for session_store::Error {
 }
 
 #[derive(Clone, Debug)]
-pub struct PrismaSessionStore {
-	client: Arc<PrismaClient>,
+pub struct StumpSessionStore {
+	conn: Arc<DatabaseConnection>,
 	config: Arc<StumpConfig>,
 }
 
-impl PrismaSessionStore {
-	pub fn new(client: Arc<PrismaClient>, config: Arc<StumpConfig>) -> Self {
-		Self { client, config }
+impl StumpSessionStore {
+	pub fn new(conn: Arc<DatabaseConnection>, config: Arc<StumpConfig>) -> Self {
+		Self { conn, config }
 	}
 
 	pub async fn continuously_delete_expired(
@@ -72,25 +73,26 @@ impl PrismaSessionStore {
 }
 
 #[async_trait]
-impl ExpiredDeletion for PrismaSessionStore {
+impl ExpiredDeletion for StumpSessionStore {
 	#[tracing::instrument(skip(self))]
 	async fn delete_expired(&self) -> session_store::Result<()> {
-		let expired_sessions = self
-			.client
-			.session()
-			.delete_many(vec![session::expiry_time::lt(Utc::now().into())])
-			.exec()
+		let affected_rows = session::Entity::delete_many()
+			.filter(
+				session::Column::ExpiryTime.lt::<DateTimeWithTimeZone>(Utc::now().into()),
+			)
+			.exec(self.conn.as_ref())
 			.await
-			.map_err(SessionError::QueryError)?;
+			.map_err(SessionError::DbError)?
+			.rows_affected;
 
-		tracing::trace!(expired_sessions = ?expired_sessions, "Deleted expired sessions");
+		tracing::trace!(?affected_rows, "Deleted expired sessions");
 
 		Ok(())
 	}
 }
 
 #[async_trait]
-impl SessionStore for PrismaSessionStore {
+impl SessionStore for StumpSessionStore {
 	#[tracing::instrument(skip(self))]
 	async fn save(&self, record: &Record) -> session_store::Result<()> {
 		let expiry_time: DateTime<FixedOffset> =
@@ -103,34 +105,35 @@ impl SessionStore for PrismaSessionStore {
 			.ok_or(SessionError::NotFound)?;
 		let session_data =
 			serde_json::to_vec(&record).map_err(SessionError::SerdeError)?;
+		// TODO(sea-orm): use User model
 		let user = serde_json::from_value::<User>(session_user.clone())
 			.map_err(SessionError::SerdeError)?;
 		let session_id = record.id.to_string();
 
 		tracing::trace!(session_id, ?user, "Saving session");
 
-		let result = self
-			.client
-			.session()
-			.upsert(
-				session::id::equals(session_id.clone()),
-				(
-					expiry_time,
-					session_data.clone(),
-					user::id::equals(user.id.clone()),
-					vec![session::id::set(session_id)],
-				),
-				vec![
-					session::user::connect(user::id::equals(user.id)),
-					session::expiry_time::set(expiry_time),
-					session::data::set(session_data),
-				],
-			)
-			.exec()
-			.await
-			.map_err(SessionError::QueryError)?;
+		let active_model = session::ActiveModel {
+			id: Set(session_id.clone()),
+			expiry_time: Set(expiry_time),
+			data: Set(session_data),
+			user_id: Set(user.id.clone()),
+			..Default::default()
+		};
 
-		tracing::trace!(session_id = result.id, "Upserted session");
+		let on_conflict = OnConflict::new()
+			.update_columns(session::Column::iter().filter(|col| match col {
+				session::Column::CreatedAt => false,
+				_ => true,
+			}))
+			.to_owned();
+
+		let _result = session::Entity::insert(active_model)
+			.on_conflict(on_conflict)
+			.exec(self.conn.as_ref())
+			.await
+			.map_err(SessionError::DbError)?;
+
+		tracing::trace!(session_id, "Upserted session");
 
 		Ok(())
 	}
@@ -139,16 +142,13 @@ impl SessionStore for PrismaSessionStore {
 	async fn load(&self, session_id: &Id) -> session_store::Result<Option<Record>> {
 		tracing::trace!(?session_id, "Loading session");
 
-		let record = self
-			.client
-			.session()
-			.find_first(vec![
-				session::id::equals(session_id.to_string()),
-				session::expiry_time::gt(Utc::now().into()),
-			])
-			.exec()
+		let record = session::Entity::find()
+			.filter(session::Column::Id.eq(session_id.to_string()).and(
+				session::Column::ExpiryTime.gt::<DateTimeWithTimeZone>(Utc::now().into()),
+			))
+			.one(self.conn.as_ref())
 			.await
-			.map_err(SessionError::QueryError)?;
+			.map_err(SessionError::DbError)?;
 
 		if let Some(result) = record {
 			tracing::trace!("Found session record");
@@ -165,15 +165,14 @@ impl SessionStore for PrismaSessionStore {
 	async fn delete(&self, session_id: &Id) -> session_store::Result<()> {
 		tracing::trace!(session_id = ?session_id, "Deleting session");
 
-		let removed_session = self
-			.client
-			.session()
-			.delete(session::id::equals(session_id.to_string()))
-			.exec()
+		let affected_rows = session::Entity::delete_many()
+			.filter(session::Column::Id.eq(session_id.to_string()))
+			.exec(self.conn.as_ref())
 			.await
-			.map_err(SessionError::QueryError)?;
+			.map_err(SessionError::DbError)?
+			.rows_affected;
 
-		tracing::trace!(removed_session = ?removed_session, "Removed session");
+		tracing::trace!(affected_rows, "Removed session");
 
 		Ok(())
 	}

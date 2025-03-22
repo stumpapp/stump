@@ -1,16 +1,16 @@
 use std::path::PathBuf;
 
-use models::entity::media;
+use models::{
+	entity::media,
+	shared::image_processor_options::{ImageProcessorOptions, SupportedImageFormat},
+};
 use tokio::{fs, sync::oneshot, task::spawn_blocking};
 
 use crate::{
 	config::StumpConfig,
 	filesystem::{
-		get_page,
-		image::{
-			GenericImageProcessor, ImageFormat, ImageProcessor, ImageProcessorOptions,
-			ProcessorError, WebpProcessor,
-		},
+		image::{GenericImageProcessor, ImageProcessor, ProcessorError, WebpProcessor},
+		media::get_page,
 	},
 };
 
@@ -59,7 +59,7 @@ fn do_generate_book_thumbnail(
 		.join(format!("{}.{}", &file_name, ext));
 
 	match options.format {
-		ImageFormat::Webp => WebpProcessor::generate(&page_data, options),
+		SupportedImageFormat::Webp => WebpProcessor::generate(&page_data, options),
 		_ => GenericImageProcessor::generate(&page_data, options),
 	}
 	.map(|buf| (buf, thumbnail_path, true))

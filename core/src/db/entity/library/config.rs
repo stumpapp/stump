@@ -1,15 +1,13 @@
 use std::str::FromStr;
 
+use models::shared::image_processor_options::ImageProcessorOptions;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
 use crate::{
 	db::entity::common::{ReadingDirection, ReadingImageScaleFit, ReadingMode},
-	filesystem::{
-		image::ImageProcessorOptions,
-		scanner::{CustomVisit, ScanConfig, ScanOptions},
-	},
+	filesystem::scanner::{CustomVisit, ScanConfig, ScanOptions},
 	prisma::library_config,
 };
 
@@ -26,7 +24,7 @@ pub struct LibraryConfig {
 	pub process_metadata: bool,
 	pub watch: bool,
 	pub library_pattern: LibraryPattern,
-	pub thumbnail_config: Option<ImageProcessorOptions>,
+	// pub thumbnail_config: Option<ImageProcessorOptions>,
 	#[serde(default)]
 	pub default_reading_dir: ReadingDirection,
 	#[serde(default)]
@@ -87,9 +85,11 @@ impl From<library_config::Data> for LibraryConfig {
 				data.default_reading_image_scale_fit.as_str(),
 			)
 			.unwrap_or_default(),
-			thumbnail_config: data.thumbnail_config.map(|config| {
-				ImageProcessorOptions::try_from(config).unwrap_or_default()
-			}),
+			// thumbnail_config: data.thumbnail_config.map(|config| {
+			// 	ImageProcessorOptions::try_from(config).unwrap_or_default()
+			// }),
+			// TODO(sea-orm): Fix
+			// thumbnail_config: None,
 			ignore_rules: data
 				.ignore_rules
 				.map_or_else(IgnoreRules::default, |rules| {

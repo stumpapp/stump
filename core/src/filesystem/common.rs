@@ -1,4 +1,5 @@
 use globset::GlobSet;
+use models::shared::image_processor_options::SupportedImageFormat;
 use std::{
 	ffi::OsStr,
 	path::{Path, PathBuf},
@@ -8,7 +9,7 @@ use tokio::{fs, io};
 use tracing::error;
 use walkdir::WalkDir;
 
-use super::{image::ImageFormat, media::is_accepted_cover_name, ContentType};
+use super::{media::is_accepted_cover_name, ContentType};
 
 pub const ACCEPTED_IMAGE_EXTENSIONS: [&str; 8] =
 	["jpg", "png", "jpeg", "jxl", "webp", "gif", "avif", "heif"];
@@ -16,7 +17,7 @@ pub const ACCEPTED_IMAGE_EXTENSIONS: [&str; 8] =
 pub async fn get_thumbnail(
 	parent: impl AsRef<Path>,
 	name: &str,
-	format: Option<ImageFormat>,
+	format: Option<SupportedImageFormat>,
 ) -> io::Result<Option<(ContentType, Vec<u8>)>> {
 	let thumbnails_dir = parent.as_ref().to_path_buf();
 

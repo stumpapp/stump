@@ -1,12 +1,16 @@
-
-
+use async_graphql::SimpleObject;
 use sea_orm::entity::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
+use crate::shared::page_dimension::PageAnalysis;
+
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
+#[graphql(name = "MediaMetadataModel")]
 #[sea_orm(table_name = "media_metadata")]
 pub struct Model {
-	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
-	pub id: String,
+	#[sea_orm(primary_key, auto_increment = true)]
+	pub id: i32,
+	#[sea_orm(column_type = "Text", nullable, unique)]
+	pub media_id: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub title: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
@@ -45,9 +49,9 @@ pub struct Model {
 	#[sea_orm(column_type = "Text", nullable)]
 	pub teams: Option<String>,
 	pub page_count: Option<i32>,
-	#[sea_orm(column_type = "Text", nullable, unique)]
-	pub media_id: Option<String>,
 	pub age_rating: Option<i32>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub page_analysis: Option<PageAnalysis>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

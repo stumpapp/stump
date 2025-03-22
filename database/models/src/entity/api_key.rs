@@ -14,11 +14,11 @@ pub struct Model {
 	#[sea_orm(column_type = "Blob")]
 	pub permissions: Vec<u8>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub created_at: String,
+	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
-	pub last_used_at: Option<String>,
+	pub last_used_at: Option<DateTimeWithTimeZone>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
-	pub expires_at: Option<String>,
+	pub expires_at: Option<DateTimeWithTimeZone>,
 	#[sea_orm(column_type = "Text")]
 	pub user_id: String,
 }

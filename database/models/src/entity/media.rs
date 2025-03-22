@@ -1,15 +1,18 @@
 use async_graphql::SimpleObject;
+use async_trait::async_trait;
 use sea_orm::{
-	entity::prelude::*, sea_query::Query, Condition, FromQueryResult, JoinType,
+	prelude::*, sea_query::Query, ActiveValue, Condition, FromQueryResult, JoinType,
 	QuerySelect, QueryTrait,
 };
+
+use crate::prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer};
 
 use super::{
 	library_hidden_to_user, media_metadata, series, series_metadata, user::AuthUser,
 };
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
-#[graphql(name = "Media")]
+#[graphql(name = "MediaModel")]
 #[sea_orm(table_name = "media")]
 pub struct Model {
 	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
@@ -134,9 +137,11 @@ impl Entity {
 	}
 }
 
+#[derive(Debug, Clone, SimpleObject)]
 pub struct ModelWithMetadata {
+	#[graphql(flatten)]
 	pub media: Model,
-	pub metadata: Option<super::media_metadata::Model>,
+	pub metadata: Option<media_metadata::Model>,
 }
 
 impl FromQueryResult for ModelWithMetadata {
@@ -144,10 +149,94 @@ impl FromQueryResult for ModelWithMetadata {
 		res: &sea_orm::QueryResult,
 		_pre: &str,
 	) -> Result<Self, sea_orm::DbErr> {
-		let media = Model::from_query_result(res, Entity.table_name())?;
-		let metadata =
-			super::media_metadata::Model::from_query_result_optional(res, "metadata")?;
+		let media = parse_query_to_model::<Model, Entity>(res)?;
+		let metadata = parse_query_to_model_optional::<
+			media_metadata::Model,
+			media_metadata::Entity,
+		>(res)?;
 		Ok(Self { media, metadata })
+	}
+}
+
+impl ModelWithMetadata {
+	pub fn find() -> Select<Entity> {
+		Prefixer::new(Entity::find().select_only())
+			.add_columns(Entity)
+			.add_columns(media_metadata::Entity)
+			.selector
+			.left_join(media_metadata::Entity)
+	}
+
+	pub fn find_by_id(id: String) -> Select<Entity> {
+		Prefixer::new(Entity::find_by_id(id).select_only())
+			.add_columns(Entity)
+			.add_columns(media_metadata::Entity)
+			.selector
+			.left_join(media_metadata::Entity)
+	}
+
+	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
+		let age_restriction_filter =
+			user.age_restriction.as_ref().map(|age_restriction| {
+				get_age_restriction_filter(
+					age_restriction.age,
+					age_restriction.restrict_on_unset,
+				)
+			});
+
+		ModelWithMetadata::find()
+			.inner_join(series::Entity)
+			.join_rev(
+				JoinType::LeftJoin,
+				series_metadata::Entity::belongs_to(series::Entity)
+					.from(series_metadata::Column::SeriesId)
+					.to(series::Column::Id)
+					.into(),
+			)
+			.filter(
+				series::Column::LibraryId.not_in_subquery(
+					Query::select()
+						.column(library_hidden_to_user::Column::LibraryId)
+						.from(library_hidden_to_user::Entity)
+						.and_where(
+							library_hidden_to_user::Column::UserId.eq(user.id.clone()),
+						)
+						.to_owned(),
+				),
+			)
+			.apply_if(age_restriction_filter, |query, filter| query.filter(filter))
+	}
+
+	pub fn find_by_id_for_user(id: String, user: &AuthUser) -> Select<Entity> {
+		let age_restriction_filter =
+			user.age_restriction.as_ref().map(|age_restriction| {
+				get_age_restriction_filter(
+					age_restriction.age,
+					age_restriction.restrict_on_unset,
+				)
+			});
+
+		ModelWithMetadata::find_by_id(id)
+			.inner_join(series::Entity)
+			.join_rev(
+				JoinType::LeftJoin,
+				series_metadata::Entity::belongs_to(series::Entity)
+					.from(series_metadata::Column::SeriesId)
+					.to(series::Column::Id)
+					.into(),
+			)
+			.filter(
+				series::Column::LibraryId.not_in_subquery(
+					Query::select()
+						.column(library_hidden_to_user::Column::LibraryId)
+						.from(library_hidden_to_user::Entity)
+						.and_where(
+							library_hidden_to_user::Column::UserId.eq(user.id.clone()),
+						)
+						.to_owned(),
+				),
+			)
+			.apply_if(age_restriction_filter, |query, filter| query.filter(filter))
 	}
 }
 
@@ -155,6 +244,16 @@ impl FromQueryResult for ModelWithMetadata {
 pub struct MediaIdentSelect {
 	pub id: String,
 	pub path: String,
+}
+
+#[derive(Debug, FromQueryResult)]
+pub struct MediaNameCmpSelect {
+	pub name: String,
+}
+
+#[derive(Debug, FromQueryResult)]
+pub struct MediaCreatedAtCmpSelect {
+	pub created_at: DateTimeWithTimeZone,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -263,4 +362,16 @@ impl Related<super::series::Entity> for Entity {
 	}
 }
 
-impl ActiveModelBehavior for ActiveModel {}
+#[async_trait]
+impl ActiveModelBehavior for ActiveModel {
+	async fn before_save<C>(mut self, _db: &C, insert: bool) -> Result<Self, DbErr>
+	where
+		C: ConnectionTrait,
+	{
+		if insert && self.id.is_not_set() {
+			self.id = ActiveValue::Set(Uuid::new_v4().to_string());
+		}
+
+		Ok(self)
+	}
+}

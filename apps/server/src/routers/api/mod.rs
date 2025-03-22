@@ -1,5 +1,6 @@
 pub(crate) mod filters;
 pub(crate) mod v1;
+pub(crate) mod v2;
 
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
@@ -10,6 +11,7 @@ use axum::{
 	Extension, Router,
 };
 use models::entity::user::AuthUser;
+use reqwest::header::USER_AGENT;
 
 use crate::{
 	config::state::AppState,

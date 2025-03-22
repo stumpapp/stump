@@ -1,5 +1,9 @@
 use async_graphql::SimpleObject;
-use sea_orm::{entity::prelude::*, DerivePartialModel, FromQueryResult};
+use sea_orm::{
+	entity::prelude::*, sea_query::Query, DerivePartialModel, FromQueryResult,
+};
+
+use super::{library_hidden_to_user, user::AuthUser};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "LibraryModel")]
@@ -29,9 +33,23 @@ pub struct Model {
 	pub last_scanned_at: Option<String>,
 }
 
+impl Entity {
+	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
+		Entity::find().filter(
+			Column::Id.not_in_subquery(
+				Query::select()
+					.column(library_hidden_to_user::Column::LibraryId)
+					.from(library_hidden_to_user::Entity)
+					.and_where(library_hidden_to_user::Column::UserId.eq(user.id.clone()))
+					.to_owned(),
+			),
+		)
+	}
+}
+
 #[derive(Clone, Debug, DerivePartialModel, FromQueryResult)]
 #[sea_orm(entity = "<Model as ModelTrait>::Entity")]
-pub struct LibraryIdentModel {
+pub struct LibraryIdentSelect {
 	pub id: String,
 	pub path: String,
 }

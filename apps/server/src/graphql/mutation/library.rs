@@ -1,0 +1,133 @@
+use async_graphql::{Context, Object, Result, SimpleObject, ID};
+use graphql::{
+	data::{CoreContext, RequestContext},
+	guard::PermissionGuard,
+};
+use models::{
+	entity::{library, media, series},
+	shared::enums::{FileStatus, UserPermission},
+};
+use sea_orm::{prelude::*, sea_query::Query, Condition, TransactionTrait};
+use stump_core::filesystem::{image::remove_thumbnails, scanner::LibraryScanJob};
+
+#[derive(Default, SimpleObject)]
+struct CleanLibraryResponse {
+	deleted_media_count: usize,
+	deleted_series_count: usize,
+	is_empty: bool,
+}
+
+#[derive(Default)]
+pub struct LibraryMutation;
+
+#[Object]
+impl LibraryMutation {
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
+	async fn clean_library(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+	) -> Result<CleanLibraryResponse> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let _library = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.into_model::<library::LibraryIdentSelect>()
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+
+		let thumbnails_dir = core.config.get_thumbnails_dir();
+
+		let txn = core.conn.as_ref().begin().await?;
+
+		let deleted_media_ids = media::Entity::delete_many()
+			.filter(
+				media::Column::Status.ne(FileStatus::Ready.to_string()).and(
+					media::Column::SeriesId.in_subquery(
+						Query::select()
+							.column(series::Column::Id)
+							.from(series::Entity)
+							.and_where(series::Column::LibraryId.eq(id.to_string()))
+							.to_owned(),
+					),
+				),
+			)
+			.exec_with_returning(&txn)
+			.await?
+			.into_iter()
+			.map(|m| m.id)
+			.collect::<Vec<_>>();
+
+		let deleted_series_ids = series::Entity::delete_many()
+			.filter(series::Column::LibraryId.eq(id.to_string()))
+			.filter(
+				Condition::any()
+					.add(series::Column::Status.ne(FileStatus::Ready.to_string()))
+					// TODO: Double check that this query is correct
+					.add(
+						series::Column::Id.not_in_subquery(
+							Query::select()
+								.column(media::Column::SeriesId)
+								.distinct()
+								.from(media::Entity)
+								.to_owned(),
+						),
+					),
+			)
+			.exec_with_returning(&txn)
+			.await?
+			.into_iter()
+			.map(|s| s.id)
+			.collect::<Vec<_>>();
+
+		let is_library_empty = series::Entity::find()
+			.filter(series::Column::LibraryId.eq(id.to_string()))
+			.count(&txn)
+			.await? == 0;
+
+		txn.commit().await?;
+
+		if !deleted_media_ids.is_empty() {
+			if let Err(error) =
+				remove_thumbnails(&deleted_media_ids, &thumbnails_dir).await
+			{
+				tracing::error!(?error, "Failed to remove thumbnails for library media");
+			}
+		}
+
+		if !deleted_series_ids.is_empty() {
+			if let Err(error) =
+				remove_thumbnails(&deleted_series_ids, &thumbnails_dir).await
+			{
+				tracing::error!(?error, "Failed to remove thumbnails for library series");
+			}
+		}
+
+		Ok(CleanLibraryResponse {
+			deleted_media_count: deleted_media_ids.len(),
+			deleted_series_count: deleted_series_ids.len(),
+			is_empty: is_library_empty,
+		})
+	}
+
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ScanLibrary)")]
+	async fn scan_library(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let library = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.into_model::<library::LibraryIdentSelect>()
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+
+		// TODO(graphql): ScanOptions
+		core.enqueue_job(LibraryScanJob::new(library.id, library.path, None))?;
+		tracing::debug!("Enqueued library scan job");
+
+		Ok(true)
+	}
+}

@@ -44,6 +44,9 @@ use super::host::HostExtractor;
 
 pub const STUMP_SAVE_BASIC_SESSION_HEADER: &str = "X-Stump-Save-Session";
 
+// TODO(sea-orm): Use models
+// TODO(sea-orm): Convert to GQL context
+
 /// A struct to represent the authenticated user in the current request context. A user is
 /// authenticated if they meet one of the following criteria:
 /// - They have a valid session

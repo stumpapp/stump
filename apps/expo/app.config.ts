@@ -1,6 +1,6 @@
-import type { ConfigContext, ExpoConfig } from 'expo/config'
 import { withDangerousMod, withGradleProperties } from '@expo/config-plugins'
 import { mergeContents } from '@expo/config-plugins/build/utils/generateCode'
+import type { ConfigContext, ExpoConfig } from 'expo/config'
 import fs from 'fs'
 import path from 'path'
 
@@ -82,6 +82,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				{
 					android: {
 						usesCleartextTraffic: true,
+						kotlinVersion: '1.9.24',
 					},
 				},
 			],

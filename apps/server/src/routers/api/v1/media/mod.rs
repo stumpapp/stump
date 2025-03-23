@@ -19,9 +19,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.route("/media/duplicates", get(bulk::get_duplicate_media))
 		.route("/media/keep-reading", get(bulk::get_in_progress_media))
 		.route("/media/recently-added", get(bulk::get_recently_added_media))
-		.route("/media/path/:path", get(individual::get_media_by_path))
+		.route("/media/path/{path}", get(individual::get_media_by_path))
 		.nest(
-			"/media/:id",
+			"/media/{id}",
 			Router::new()
 				.route("/", get(individual::get_media_by_id))
 				.route("/file", get(individual::get_media_file))
@@ -36,7 +36,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						)),
 				)
 				.route("/analyze", post(individual::start_media_analysis))
-				.route("/page/:page", get(individual::get_media_page))
+				.route("/page/{page}", get(individual::get_media_page))
 				.route(
 					"/progress",
 					get(individual::get_media_progress)
@@ -50,7 +50,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				)
 				.route("/dimensions", get(individual::get_media_dimensions))
 				.route(
-					"/page/:page/dimensions",
+					"/page/{page}/dimensions",
 					get(individual::get_media_page_dimensions),
 				)
 				.route(

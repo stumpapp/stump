@@ -8,6 +8,7 @@ import {
 	useUpdateMediaProgress,
 } from '@stump/client'
 import { useKeepAwake } from 'expo-keep-awake'
+import * as NavigationBar from 'expo-navigation-bar'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect } from 'react'
 
@@ -31,12 +32,13 @@ export default function Screen() {
 			load_pages: true,
 		},
 	})
-	const { pause, resume, totalSeconds, isRunning } = useBookTimer(book?.id || '', {
-		initial: book?.active_reading_session?.elapsed_seconds,
-	})
 	const {
-		preferences: { preferSmallImages },
+		preferences: { preferSmallImages, trackElapsedTime },
 	} = useBookPreferences(book?.id || '')
+	const { pause, resume, totalSeconds, isRunning, reset } = useBookTimer(book?.id || '', {
+		initial: book?.active_reading_session?.elapsed_seconds,
+		enabled: trackElapsedTime,
+	})
 
 	const { updateReadProgressAsync } = useUpdateMediaProgress(book?.id || '', {
 		retry: (attempts) => attempts < 3,
@@ -96,7 +98,9 @@ export default function Screen() {
 	 */
 	useEffect(
 		() => {
+			NavigationBar.setVisibilityAsync('hidden')
 			return () => {
+				NavigationBar.setVisibilityAsync('visible')
 				queryClient.refetchQueries({ queryKey: [sdk.media.keys.getByID, bookID], exact: false })
 				queryClient.refetchQueries({ queryKey: [sdk.media.keys.inProgress], exact: false })
 			}
@@ -134,6 +138,7 @@ export default function Screen() {
 					ratio: width / height,
 				}))}
 				onPageChanged={onPageChanged}
+				resetTimer={reset}
 			/>
 		)
 	}

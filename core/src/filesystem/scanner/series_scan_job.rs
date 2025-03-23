@@ -1,21 +1,18 @@
 use std::{collections::VecDeque, path::PathBuf};
 
+use models::entity::{library, library_config, media, series};
+use sea_orm::{prelude::*, sea_query::Query, Condition, UpdateResult};
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use utoipa::ToSchema;
 
 use crate::{
-	db::{
-		entity::{
-			macros::library_path_with_options_select, CoreJobOutput, LibraryConfig,
-		},
-		FileStatus,
-	},
+	db::{entity::CoreJobOutput, FileStatus},
 	filesystem::image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
 	job::{
 		error::JobError, Executor, JobExt, JobOutputExt, JobProgress, JobTaskOutput,
 		WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
-	prisma::{library, media, series, PrismaClient},
 	utils::chain_optional_iter,
 	CoreEvent,
 };
@@ -42,7 +39,7 @@ pub enum SeriesScanTask {
 pub struct SeriesScanJob {
 	pub id: String,
 	pub path: String,
-	pub config: Option<LibraryConfig>,
+	pub config: Option<library_config::Model>,
 	pub options: ScanOptions,
 }
 
@@ -63,7 +60,7 @@ impl SeriesScanJob {
 
 // TODO: emit progress events. This job isn't exposed in the UI yet, so it's not a big deal for now
 
-#[derive(Clone, Serialize, Deserialize, Default, Debug, Type)]
+#[derive(Clone, Serialize, Deserialize, Default, Debug, Type, ToSchema)]
 pub struct SeriesScanOutput {
 	/// The number of files to scan relative to the series root
 	total_files: u64,
@@ -105,28 +102,37 @@ impl JobExt for SeriesScanJob {
 	) -> Result<WorkingState<Self::Output, Self::Task>, JobError> {
 		let mut output = Self::Output::default();
 		let path_buf = PathBuf::from(self.path.clone());
-		let library = ctx
-			.db
-			.library()
-			.find_first(vec![library::series::some(vec![
-				series::id::equals(self.id.clone()),
-				series::path::equals(self.path.clone()),
-			])])
-			.select(library_path_with_options_select::select())
-			.exec()
+
+		let (library, config) = library::Entity::find()
+			.filter(
+				Condition::all().add(
+					library::Column::Id.in_subquery(
+						Query::select()
+							.column(series::Column::LibraryId)
+							.from(series::Entity)
+							.and_where(series::Column::Id.eq(self.id.clone()))
+							.and_where(series::Column::Path.eq(self.path.clone()))
+							.to_owned(),
+					),
+				),
+			)
+			.find_also_related(library_config::Entity)
+			.one(ctx.conn.as_ref())
 			.await?
-			.ok_or(JobError::InitFailed(
-				"Associated library not found".to_string(),
-			))?;
-		let library_config = LibraryConfig::from(library.config);
-		let ignore_rules = library_config.ignore_rules.build()?;
+			.ok_or(JobError::InitFailed("Library not found".to_string()))?;
+
+		let config = config.ok_or(JobError::InitFailed(
+			"Library is missing a configuration".to_string(),
+		))?;
+
+		let ignore_rules = config.ignore_rules().build()?;
 
 		// If the library is collection-priority, any child directories are 'ignored' and their
 		// files are part of / folded into the top-most folder (series).
 		// If the library is not collection-priority, each subdirectory is its own series.
 		// Therefore, we only scan one level deep when walking a series whose library is not
 		// collection-priority to avoid scanning duplicates which are part of other series
-		let mut max_depth = (!library_config.is_collection_based()).then_some(1);
+		let mut max_depth = (!config.is_collection_based()).then_some(1);
 		if path_buf == PathBuf::from(&library.path) {
 			// The exception is when the series "is" the libray (i.e. the root of the library contains
 			// books). This is kind of an anti-pattern wrt collection-priority, but it needs to be handled
@@ -134,7 +140,7 @@ impl JobExt for SeriesScanJob {
 			max_depth = Some(1);
 		}
 
-		self.config = Some(library_config);
+		self.config = Some(config);
 
 		let WalkedSeries {
 			series_is_missing,
@@ -148,7 +154,7 @@ impl JobExt for SeriesScanJob {
 		} = walk_series(
 			PathBuf::from(self.path.clone()).as_path(),
 			WalkerCtx {
-				db: ctx.db.clone(),
+				db: ctx.conn.clone(),
 				ignore_rules,
 				max_depth,
 				options: self.options,
@@ -157,7 +163,7 @@ impl JobExt for SeriesScanJob {
 		.await?;
 
 		if series_is_missing {
-			let _ = handle_missing_series(&ctx.db, self.path.as_str()).await;
+			let _ = handle_missing_series(&ctx.conn, self.path.as_str()).await;
 			return Err(JobError::InitFailed(
 				"Series could not be found on disk".to_string(),
 			));
@@ -286,7 +292,11 @@ impl JobExt for SeriesScanJob {
 				} = safely_build_and_insert_media(
 					MediaBuildOperation {
 						series_id: self.id.clone(),
-						library_config: self.config.clone().unwrap_or_default(),
+						library_config: self.config.clone().ok_or(
+							JobError::TaskFailed(
+								"Library configuration is missing".to_string(),
+							),
+						)?,
 						max_concurrency,
 					},
 					ctx,
@@ -315,7 +325,11 @@ impl JobExt for SeriesScanJob {
 				} = visit_and_update_media(
 					MediaBuildOperation {
 						series_id: self.id.clone(),
-						library_config: self.config.clone().unwrap_or_default(),
+						library_config: self.config.clone().ok_or(
+							JobError::TaskFailed(
+								"Library configuration is missing".to_string(),
+							),
+						)?,
 						max_concurrency,
 					},
 					ctx,
@@ -344,45 +358,42 @@ impl JobExt for SeriesScanJob {
 }
 
 async fn handle_missing_series(
-	client: &PrismaClient,
+	conn: &DatabaseConnection,
 	path: &str,
 ) -> Result<(), JobError> {
-	let affected_rows = client
-		.series()
-		.update_many(
-			vec![series::path::equals(path.to_string())],
-			vec![series::status::set(FileStatus::Missing.to_string())],
+	let affected_rows = series::Entity::update_many()
+		.filter(series::Column::Path.eq(path))
+		.col_expr(
+			series::Column::Status,
+			Expr::value(FileStatus::Missing.to_string()),
 		)
-		.exec()
+		.exec(conn)
 		.await
 		.unwrap_or_else(|error| {
 			tracing::error!(error = ?error, "Failed to update missing series");
-			0
-		});
+			UpdateResult::default()
+		})
+		.rows_affected;
+	tracing::trace!(affected_rows, "Marked series as missing");
 
 	if affected_rows > 1 {
-		tracing::warn!(
-			affected_rows,
-			"Updated more than one series with path: {}",
-			path
-		);
+		tracing::warn!(?path, "Updated more than expected");
 	}
 
-	let _affected_media = client
-		.media()
-		.update_many(
-			vec![media::series::is(vec![series::path::equals(
-				path.to_string(),
-			)])],
-			vec![media::status::set(FileStatus::Missing.to_string())],
+	let affected_media = media::Entity::update_many()
+		.filter(media::Column::SeriesId.eq(path))
+		.col_expr(
+			media::Column::Status,
+			Expr::value(FileStatus::Missing.to_string()),
 		)
-		.exec()
+		.exec(conn)
 		.await
 		.unwrap_or_else(|error| {
 			tracing::error!(error = ?error, "Failed to update missing media");
-
-			0
-		});
+			UpdateResult::default()
+		})
+		.rows_affected;
+	tracing::trace!(?affected_media, "Marked media as missing");
 
 	Ok(())
 }

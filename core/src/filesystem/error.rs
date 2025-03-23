@@ -88,9 +88,3 @@ impl From<FileError> for ScanError {
 		}
 	}
 }
-
-impl From<prisma_client_rust::queries::QueryError> for ScanError {
-	fn from(e: prisma_client_rust::queries::QueryError) -> Self {
-		ScanError::QueryError(e.to_string())
-	}
-}

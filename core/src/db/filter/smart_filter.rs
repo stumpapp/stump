@@ -42,7 +42,7 @@ pub enum Filter<T> {
 	NumericFilter(NumericFilter<T>),
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
 pub struct NumericRange<T> {
 	pub from: T,
 	pub to: T,
@@ -217,10 +217,11 @@ impl From<&str> for FilterJoin {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
-#[aliases(SmartFilterSchema = SmartFilter<MediaSmartFilter>)]
 pub struct SmartFilter<T> {
 	pub groups: Vec<FilterGroup<T>>,
 }
+
+pub type SmartFilterSchema = SmartFilter<MediaSmartFilter>;
 
 #[generate_smart_filter]
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]

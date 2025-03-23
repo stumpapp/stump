@@ -27,6 +27,8 @@ const NAIVE_DATE_FORMATS: [&str; 2] = ["%Y-%m-%d", "%m-%d-%Y"];
 // TODO: author field?
 // NOTE: alias is used primarily to support ComicInfo.xml files, as that metadata
 // is formatted in PascalCase
+
+// TODO(sea-orm): Rename to BuiltMediaMetadata ? Move to filesystem/media/builder.rs ?
 /// Struct representing the metadata for a processed file.
 #[derive(Debug, Clone, Serialize, Deserialize, Type, Default, ToSchema, Merge)]
 pub struct MediaMetadata {

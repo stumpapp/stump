@@ -7,6 +7,7 @@ use stump_core::{
 mod config;
 mod errors;
 mod filter;
+mod graphql;
 mod http_server;
 mod middleware;
 mod routers;

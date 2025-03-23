@@ -39,11 +39,25 @@ pub fn init_tracing(config: &StumpConfig) {
 		);
 
 	if config.verbosity > 2 {
+		env_filter = env_filter
+			.add_directive(
+				"quaint::connector::metrics=debug"
+					.parse()
+					.expect("Failed to parse tracing directive for quaint!"),
+			)
+			.add_directive(
+				"sqlx::query=debug"
+					.parse()
+					.expect("Failed to parse tracing directive for sqlx!"),
+			);
+	}
+
+	if cfg!(debug_assertions) {
 		env_filter = env_filter.add_directive(
-			"quaint::connector::metrics=debug"
+			"sea_orm::driver::sqlx_sqlite=debug"
 				.parse()
-				.expect("Failed to parse tracing directive for quaint!"),
-		);
+				.expect("Failed to parse tracing directive for sea_orm!"),
+		)
 	}
 
 	let base_layer = tracing_subscriber::registry()

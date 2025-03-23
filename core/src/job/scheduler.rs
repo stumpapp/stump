@@ -1,12 +1,8 @@
 use std::sync::Arc;
 
-use crate::{
-	db::entity::LibraryConfig,
-	filesystem::scanner::LibraryScanJob,
-	job::WrappedJob,
-	prisma::{job_schedule_config, library},
-	CoreResult, Ctx,
-};
+use crate::{filesystem::scanner::LibraryScanJob, job::WrappedJob, CoreResult, Ctx};
+use models::entity::{job_schedule_config, library, library_config};
+use sea_orm::{prelude::*, Iterable, QuerySelect};
 
 // TODO: refactor this!
 // 1. Schedule multiple job types (complex config)
@@ -18,31 +14,28 @@ pub struct JobScheduler {
 
 impl JobScheduler {
 	pub async fn init(core_ctx: Arc<Ctx>) -> CoreResult<Arc<Self>> {
-		let client = core_ctx.db.clone();
+		let conn = core_ctx.conn.as_ref();
 
-		let result = client
-			.job_schedule_config()
-			.find_first(vec![])
-			.with(job_schedule_config::excluded_libraries::fetch(vec![]))
-			.exec()
-			.await?;
+		// TODO(sea-orm): Confirm this is OK without a partial model
+		let result = job_schedule_config::Entity::find()
+			.select_only()
+			.columns(job_schedule_config::Column::iter())
+			.column(library::Column::Id)
+			.find_with_related(library::Entity)
+			.all(conn)
+			.await?
+			.pop();
 
-		if let Some(schedule_config) = result {
+		if let Some((schedule_config, excluded_libraries)) = result {
 			tracing::info!(
 				?schedule_config,
 				"Found schedule config. Initializing scheduler."
 			);
 
-			let excluded_library_ids = schedule_config
-				.excluded_libraries()
-				.cloned()
-				.unwrap_or_else(|e| {
-					tracing::error!(?e, "Failed to fetch excluded libraries");
-					vec![]
-				})
+			let excluded_library_ids = excluded_libraries
 				.into_iter()
-				.map(|l| l.id)
-				.collect::<Vec<String>>();
+				.map(|library| library.id)
+				.collect::<Vec<_>>();
 
 			let interval_secs: u64 = schedule_config
 				.interval_secs
@@ -57,7 +50,7 @@ impl JobScheduler {
 
 			let handle = tokio::spawn(async move {
 				let scheduler_ctx = core_ctx.clone();
-				let client = scheduler_ctx.db.clone();
+				let conn = scheduler_ctx.conn.clone();
 				let mut interval =
 					tokio::time::interval(std::time::Duration::from_secs(interval_secs));
 
@@ -66,28 +59,31 @@ impl JobScheduler {
 					interval.tick().await;
 
 					tracing::info!("Scanning libraries on schedule");
-					// TODO: optimize query with select!/include!
-					let libraries_to_scan = client
-						.library()
-						.find_many(vec![library::id::not_in_vec(
-							excluded_library_ids.clone(),
-						)])
-						.with(library::config::fetch())
-						.exec()
+
+					// TODO(sea-orm): Confirm this is OK without a partial model
+					let libraries_to_scan = library::Entity::find()
+						.select_only()
+						.column(library::Column::Id)
+						.column(library::Column::Path)
+						.columns(library_config::Column::iter())
+						.filter(
+							library::Column::Id.is_not_in(excluded_library_ids.clone()),
+						)
+						.find_also_related(library_config::Entity)
+						.all(conn.as_ref())
 						.await
 						.unwrap_or_else(|e| {
 							tracing::error!(?e, "Failed to fetch libraries to scan");
 							vec![]
 						});
 
-					for library in &libraries_to_scan {
+					for (library, config) in &libraries_to_scan {
 						let library_path = library.path.clone();
-						let config = library.config().ok().take();
 						let result =
 							scheduler_ctx.enqueue_job(WrappedJob::new(LibraryScanJob {
 								id: library.id.clone(),
 								path: library_path,
-								config: config.map(LibraryConfig::from),
+								config: config.clone(),
 								options: Default::default(),
 							}));
 						if result.is_err() {

@@ -40,7 +40,7 @@ export default function LoginOrClaimScene() {
 		onSuccess: async (user) => {
 			setUser(user)
 			await queryClient.refetchQueries([sdk.auth.keys.me], { exact: false })
-			if (redirect.includes('/swagger')) {
+			if (redirect.includes('/swagger') || redirect.includes('/api')) {
 				window.location.href = redirect
 			} else {
 				navigate(redirect, { replace: true })

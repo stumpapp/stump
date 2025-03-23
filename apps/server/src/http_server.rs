@@ -6,7 +6,7 @@ use stump_core::{
 	job::JobControllerCommand,
 	StumpCore,
 };
-use tokio::sync::oneshot;
+use tokio::{net::TcpListener, sync::oneshot};
 use tower_http::trace::TraceLayer;
 
 use crate::{
@@ -49,14 +49,19 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 
+	core.init_library_watcher()
+		.await
+		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
+
 	let server_ctx = core.get_context();
 	let app_state = server_ctx.arced();
 	let cors_layer = cors::get_cors_layer(config.clone());
 
 	println!("{}", core.get_shadow_text());
 
+	let app_router = routers::mount(app_state.clone()).await;
 	let app = Router::new()
-		.merge(routers::mount(app_state.clone()))
+		.merge(app_router)
 		.with_state(app_state.clone())
 		.layer(get_session_layer(app_state.clone()))
 		.layer(cors_layer)
@@ -71,6 +76,8 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 		let _ = core
 			.get_context()
 			.send_job_controller_command(JobControllerCommand::Shutdown(shutdown_tx));
+
+		let _ = core.get_context().library_watcher.stop().await;
 
 		shutdown_rx
 			.await
@@ -119,8 +126,8 @@ pub struct StumpRequestInfo {
 	pub ip_addr: std::net::IpAddr,
 }
 
-impl Connected<IncomingStream<'_>> for StumpRequestInfo {
-	fn connect_info(target: IncomingStream<'_>) -> Self {
+impl Connected<IncomingStream<'_, TcpListener>> for StumpRequestInfo {
+	fn connect_info(target: IncomingStream<'_, TcpListener>) -> Self {
 		StumpRequestInfo {
 			ip_addr: target.remote_addr().ip(),
 		}

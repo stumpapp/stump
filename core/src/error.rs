@@ -1,7 +1,6 @@
 use std::io;
 
 use derive_builder::UninitializedFieldError;
-use prisma_client_rust::RelationNotFetchedError;
 use thiserror::Error;
 
 pub type CoreResult<T> = Result<T, CoreError>;
@@ -25,11 +24,9 @@ pub enum CoreError {
 	#[error("{0}")]
 	EmailerError(#[from] email::EmailError),
 	#[error("Query error: {0}")]
-	QueryError(#[from] Box<prisma_client_rust::QueryError>),
+	DBError(#[from] sea_orm::error::DbErr),
 	#[error("Invalid query error: {0}")]
 	InvalidQuery(String),
-	#[error("Invalid usage of query result, failed to load relation: {0}")]
-	RelationNotLoaded(#[from] RelationNotFetchedError),
 	#[error("Migration error: {0}")]
 	MigrationError(String),
 	#[error("Failed to parse regex patterns into globset: {0}")]
@@ -56,10 +53,20 @@ pub enum CoreError {
 	SerdeFailure(#[from] serde_json::Error),
 	#[error("An unknown error occurred: {0}")]
 	Unknown(String),
+
+	// TODO(sea-orm):Remove this
+	#[error("Query error: {0}")]
+	QueryError(#[from] Box<prisma_client_rust::QueryError>),
 }
 
 impl From<prisma_client_rust::QueryError> for CoreError {
 	fn from(error: prisma_client_rust::QueryError) -> Self {
 		Self::QueryError(Box::new(error))
+	}
+}
+
+impl From<chrono::ParseError> for CoreError {
+	fn from(error: chrono::ParseError) -> Self {
+		Self::InternalError(error.to_string())
 	}
 }

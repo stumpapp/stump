@@ -1,13 +1,12 @@
 use std::collections::VecDeque;
 
-use prisma_client_rust::chrono::Utc;
+use chrono::Utc;
+use models::entity::session;
+use sea_orm::prelude::*;
 use serde::{Deserialize, Serialize};
-use stump_core::{
-	job::{
-		error::JobError, JobExecuteLog, JobExt, JobOutputExt, JobTaskOutput, WorkerCtx,
-		WorkingState, WrappedJob,
-	},
-	prisma::session,
+use stump_core::job::{
+	error::JobError, JobExecuteLog, JobExt, JobOutputExt, JobTaskOutput, WorkerCtx,
+	WorkingState, WrappedJob,
 };
 
 pub const SESSION_CLEANUP_JOB_NAME: &str = "session_cleanup";
@@ -48,11 +47,11 @@ impl JobExt for SessionCleanupJob {
 		let mut output = Self::Output::default();
 		let mut logs = vec![];
 
-		let affected_rows = ctx
-			.db
-			.session()
-			.delete_many(vec![session::expiry_time::lt(Utc::now().into())])
-			.exec()
+		let affected_rows = session::Entity::delete_many()
+			.filter(
+				session::Column::ExpiryTime.lt(DateTimeWithTimeZone::from(Utc::now())),
+			)
+			.exec(ctx.conn.as_ref())
 			.await
 			.map_or_else(
 				|e| {
@@ -62,7 +61,7 @@ impl JobExt for SessionCleanupJob {
 					)));
 					0
 				},
-				|count| count as u64,
+				|result| result.rows_affected,
 			);
 		output.removed_sessions = affected_rows;
 		tracing::debug!(affected_rows = ?affected_rows, "Deleted expired sessions");

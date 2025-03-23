@@ -9,10 +9,13 @@ use std::{
 	time::Instant,
 };
 
+use chrono::{DateTime, Utc};
 use futures::{stream::FuturesUnordered, StreamExt};
-use prisma_client_rust::{
-	chrono::{DateTime, Utc},
-	QueryError,
+use models::entity::{library_config, media, media_metadata, series, series_metadata};
+use sea_orm::{
+	prelude::*,
+	sea_query::{OnConflict, Query},
+	Condition, DatabaseConnection, IntoActiveModel, Iterable, Set, TransactionTrait,
 };
 use tokio::{
 	sync::{oneshot, Semaphore},
@@ -22,18 +25,14 @@ use walkdir::DirEntry;
 
 use crate::{
 	config::StumpConfig,
-	db::{
-		entity::{LibraryConfig, Media, Series},
-		FileStatus,
-	},
+	db::FileStatus,
 	error::{CoreError, CoreResult},
 	filesystem::{
+		media::{BuiltMedia, MediaBuilder},
 		scanner::options::{BookVisitOperation, CustomVisitResult},
-		MediaBuilder, SeriesBuilder,
+		series::{BuiltSeries, SeriesBuilder},
 	},
 	job::{error::JobError, JobExecuteLog, JobProgress, WorkerCtx, WorkerSendExt},
-	prisma::{media, media_metadata, series, PrismaClient},
-	utils::chain_optional_iter,
 	CoreEvent,
 };
 
@@ -73,196 +72,80 @@ pub(crate) fn file_updated_since_scan(
 }
 
 pub(crate) async fn create_media(
-	db: &PrismaClient,
-	generated: Media,
-) -> CoreResult<Media> {
-	let result: Result<Media, QueryError> = db
-		._transaction()
-		.run(|client| async move {
-			let created_metadata = if let Some(metadata) = generated.metadata {
-				let params = metadata.into_prisma();
-				let created_metadata =
-					client.media_metadata().create(params).exec().await?;
-				tracing::trace!(?created_metadata, "Metadata inserted");
-				Some(created_metadata)
-			} else {
-				tracing::trace!("No metadata to insert");
-				None
-			};
+	db: &DatabaseConnection,
+	BuiltMedia { media, metadata }: BuiltMedia,
+) -> CoreResult<media::Model> {
+	let txn = db.begin().await?;
 
-			let modified_at = generated.modified_at.as_deref().and_then(|date| {
-				match DateTime::parse_from_rfc3339(date) {
-					Ok(dt) => Some(dt), // Successfully parsed
-					Err(e) => {
-						tracing::error!(?e, "Failed to parse modified_at date");
-						None
-					},
-				}
-			});
+	let created_media = media::Entity::insert(media)
+		.exec_with_returning(&txn)
+		.await?;
 
-			let created_media = client
-				.media()
-				.create(
-					generated.name,
-					generated.size,
-					generated.extension,
-					generated.pages,
-					generated.path,
-					vec![
-						media::hash::set(generated.hash),
-						media::koreader_hash::set(generated.koreader_hash),
-						media::series::connect(series::id::equals(generated.series_id)),
-						media::modified_at::set(modified_at),
-					],
-				)
-				.exec()
-				.await?;
-			tracing::trace!(?created_media, "Media inserted");
+	if let Some(meta) = metadata {
+		media_metadata::Entity::insert(meta).exec(&txn).await?;
+	}
 
-			if let Some(media_metadata) = created_metadata {
-				let updated_media = client
-					.media()
-					.update(
-						media::id::equals(created_media.id),
-						vec![media::metadata::connect(media_metadata::id::equals(
-							media_metadata.id,
-						))],
-					)
-					.with(media::metadata::fetch())
-					.exec()
-					.await?;
-				tracing::trace!("Media updated with metadata");
-				Ok(Media::from(updated_media))
-			} else {
-				Ok(Media::from(created_media))
-			}
-		})
-		.await;
+	txn.commit().await?;
 
-	Ok(result?)
+	Ok(created_media)
 }
 
-pub(crate) async fn update_media(db: &PrismaClient, media: Media) -> CoreResult<Media> {
-	let result: Result<Media, QueryError> = db
-		._transaction()
-		.run(|client| async move {
-			let metadata_id = match media.metadata {
-				Some(metadata) => {
-					let params = metadata
-						.into_prisma()
-						.into_iter()
-						.chain(vec![media_metadata::media_id::set(Some(
-							media.id.clone(),
-						))])
-						.collect::<Vec<_>>();
-					let updated_metadata = client
-						.media_metadata()
-						.upsert(
-							media_metadata::media_id::equals(media.id.clone()),
-							params.clone(),
-							params,
-						)
-						.exec()
-						.await?;
-					tracing::trace!(?updated_metadata, "Metadata upserted");
-					Some(updated_metadata.id)
-				},
-				_ => None,
-			};
+pub(crate) async fn update_media(
+	db: &DatabaseConnection,
+	BuiltMedia { media, metadata }: BuiltMedia,
+) -> CoreResult<media::Model> {
+	let txn = db.begin().await?;
 
-			let updated_media = client
-				.media()
-				.update(
-					media::id::equals(media.id.clone()),
-					chain_optional_iter(
-						[
-							media::name::set(media.name.clone()),
-							media::size::set(media.size),
-							media::extension::set(media.extension.clone()),
-							media::pages::set(media.pages),
-							media::hash::set(media.hash.clone()),
-							media::koreader_hash::set(media.koreader_hash.clone()),
-							media::path::set(media.path.clone()),
-							media::status::set(media.status.to_string()),
-						],
-						[metadata_id.map(|id| {
-							media::metadata::connect(media_metadata::id::equals(id))
-						})],
-					),
-				)
-				.with(media::metadata::fetch())
-				.exec()
-				.await?;
-			tracing::trace!(?updated_media, "Media updated");
+	let updated_media = media.update(&txn).await?;
 
-			Ok(Media::from(updated_media))
-		})
-		.await;
+	if let Some(meta) = metadata {
+		let on_conflict = OnConflict::new()
+			.update_columns(media_metadata::Column::iter())
+			.to_owned();
+		media_metadata::Entity::insert(meta.into_active_model())
+			.on_conflict(on_conflict)
+			.exec(&txn)
+			.await?;
+	}
 
-	Ok(result?)
+	txn.commit().await?;
+
+	Ok(updated_media)
 }
 
 pub(crate) async fn handle_book_visit_operation(
-	db: &PrismaClient,
+	db: &DatabaseConnection,
 	result: BookVisitResult,
 ) -> CoreResult<()> {
 	match result {
 		BookVisitResult::Custom(custom) => {
 			if let Some(meta) = custom.meta {
-				let params = meta
-					.into_prisma()
-					.into_iter()
-					.chain(vec![media_metadata::media_id::set(Some(custom.id.clone()))])
-					.collect::<Vec<_>>();
-				let id = custom.id.clone();
+				let active_model = media_metadata::ActiveModel {
+					media_id: Set(Some(custom.id.clone())),
+					..meta.into_active_model()
+				};
+				let updated_meta = active_model.update(db).await?;
 
-				let updated_meta = db
-					._transaction()
-					.run(|client| async move {
-						let meta = client
-							.media_metadata()
-							.upsert(
-								media_metadata::media_id::equals(id.clone()),
-								params.clone(),
-								params,
-							)
-							.exec()
-							.await?;
-						client
-							.media()
-							.update(
-								media::id::equals(id),
-								vec![media::metadata::connect(
-									media_metadata::id::equals(meta.id.clone()),
-								)],
-							)
-							.with(media::metadata::fetch())
-							.exec()
-							.await
-							.map(|_| meta)
-					})
-					.await;
 				tracing::trace!(?updated_meta, "Metadata upserted");
 			}
 
 			if let Some(hashes) = custom.hashes {
-				let updated_book = db
-					.media()
-					.update(
-						media::id::equals(custom.id),
-						vec![
-							media::hash::set(hashes.hash),
-							media::koreader_hash::set(hashes.koreader_hash),
-						],
+				let affected_rows = media::Entity::update_many()
+					.filter(media::Column::Id.eq(custom.id.clone()))
+					.col_expr(media::Column::Hash, Expr::value(hashes.hash))
+					.col_expr(
+						media::Column::KoreaderHash,
+						Expr::value(hashes.koreader_hash),
 					)
-					.exec()
-					.await?;
-				tracing::trace!(?updated_book, "Book updated with new hashes");
+					.exec(db)
+					.await?
+					.rows_affected;
+				tracing::trace!(affected_rows, "Book updated with new hashes");
 			}
 		},
 		BookVisitResult::Built(book) => {
-			let updated_book = update_media(db, *book).await?;
-			tracing::trace!(?updated_book, "Book updated");
+			let updated_media = update_media(db, *book).await?;
+			tracing::trace!(?updated_media, "Book updated");
 		},
 	}
 
@@ -277,18 +160,18 @@ pub(crate) struct MissingSeriesOutput {
 }
 
 pub(crate) async fn handle_missing_series(
-	client: &PrismaClient,
+	client: &DatabaseConnection,
 	path: &str,
 ) -> Result<MissingSeriesOutput, JobError> {
 	let mut output = MissingSeriesOutput::default();
 
-	let affected_rows = client
-		.series()
-		.update_many(
-			vec![series::path::equals(path.to_string())],
-			vec![series::status::set(FileStatus::Missing.to_string())],
+	let affected_rows = series::Entity::update_many()
+		.filter(series::Column::Path.eq(path.to_string()))
+		.col_expr(
+			series::Column::Status,
+			Expr::value(FileStatus::Missing.to_string()),
 		)
-		.exec()
+		.exec(client)
 		.await
 		.map_or_else(
 			|error| {
@@ -297,12 +180,11 @@ pub(crate) async fn handle_missing_series(
 					"Failed to update missing series: {:?}",
 					error.to_string()
 				)));
-
 				0
 			},
-			|count| {
-				output.updated_series += count as u64;
-				count
+			|res| {
+				output.updated_series += res.rows_affected;
+				res.rows_affected
 			},
 		);
 
@@ -314,15 +196,23 @@ pub(crate) async fn handle_missing_series(
 		);
 	}
 
-	let _affected_media = client
-		.media()
-		.update_many(
-			vec![media::series::is(vec![series::path::equals(
-				path.to_string(),
-			)])],
-			vec![media::status::set(FileStatus::Missing.to_string())],
+	let _affected_media = media::Entity::update_many()
+		.filter(
+			Condition::any().add(
+				media::Column::SeriesId.in_subquery(
+					Query::select()
+						.column(series::Column::Id)
+						.from(series::Entity)
+						.and_where(series::Column::Path.eq(path.to_string()))
+						.to_owned(),
+				),
+			),
 		)
-		.exec()
+		.col_expr(
+			media::Column::Status,
+			Expr::value(FileStatus::Missing.to_string()),
+		)
+		.exec(client)
 		.await
 		.map_or_else(
 			|error| {
@@ -333,9 +223,9 @@ pub(crate) async fn handle_missing_series(
 				)));
 				0
 			},
-			|count| {
-				output.updated_media += count as u64;
-				count
+			|res| {
+				output.updated_media += res.rows_affected;
+				res.rows_affected
 			},
 		);
 
@@ -363,22 +253,21 @@ pub(crate) async fn handle_missing_media(
 		return output;
 	}
 
-	let _affected_rows = ctx
-		.db
-		.media()
-		.update_many(
-			vec![
-				media::series::is(vec![series::id::equals(series_id.to_string())]),
-				media::path::in_vec(
-					paths
-						.iter()
-						.map(|e| e.to_string_lossy().to_string())
-						.collect::<Vec<String>>(),
-				),
-			],
-			vec![media::status::set(FileStatus::Missing.to_string())],
+	let _affected_rows = media::Entity::update_many()
+		.filter(media::Column::SeriesId.eq(series_id.to_string()))
+		.filter(
+			media::Column::Path.is_in(
+				paths
+					.iter()
+					.map(|p| p.to_string_lossy().to_string())
+					.collect::<Vec<String>>(),
+			),
 		)
-		.exec()
+		.col_expr(
+			media::Column::Status,
+			Expr::value(FileStatus::Missing.to_string()),
+		)
+		.exec(ctx.conn.as_ref())
 		.await
 		.map_or_else(
 			|error| {
@@ -389,9 +278,9 @@ pub(crate) async fn handle_missing_media(
 				)));
 				0
 			},
-			|count| {
-				output.updated_media += count as u64;
-				count
+			|res| {
+				output.updated_media += res.rows_affected;
+				res.rows_affected
 			},
 		);
 
@@ -413,30 +302,30 @@ pub(crate) async fn handle_restored_media(
 		return output;
 	}
 
-	let _affected_rows = ctx
-		.db
-		.media()
-		.update_many(
-			vec![
-				media::series::is(vec![series::id::equals(series_id.to_string())]),
-				media::id::in_vec(ids),
-			],
-			vec![media::status::set(FileStatus::Ready.to_string())],
+	let _affected_series = media::Entity::update_many()
+		.filter(media::Column::SeriesId.eq(series_id.to_string()))
+		.filter(
+			media::Column::Id
+				.is_in(ids.iter().map(|id| id.to_string()).collect::<Vec<String>>()),
 		)
-		.exec()
+		.col_expr(
+			media::Column::Status,
+			Expr::value(FileStatus::Ready.to_string()),
+		)
+		.exec(ctx.conn.as_ref())
 		.await
 		.map_or_else(
 			|error| {
-				tracing::error!(error = ?error, "Failed to restore recovered media");
+				tracing::error!(error = ?error, "Failed to update restored media");
 				output.logs.push(JobExecuteLog::error(format!(
-					"Failed to update recovered media: {:?}",
+					"Failed to update restored media: {:?}",
 					error.to_string()
 				)));
 				0
 			},
-			|count| {
-				output.updated_media += count as u64;
-				count
+			|res| {
+				output.updated_media += res.rows_affected;
+				res.rows_affected
 			},
 		);
 
@@ -448,7 +337,7 @@ pub(crate) async fn handle_restored_media(
 /// # Arguments
 /// * `for_library` - The library ID to associate the series with
 /// * `path` - The path to the series on disk
-async fn build_series(for_library: &str, path: &Path) -> CoreResult<Series> {
+async fn build_series(for_library: &str, path: &Path) -> CoreResult<BuiltSeries> {
 	let (tx, rx) = oneshot::channel();
 
 	// Spawn a blocking task to handle the IO-intensive operations:
@@ -492,7 +381,7 @@ pub(crate) async fn safely_build_series(
 	paths: Vec<PathBuf>,
 	core_config: &StumpConfig,
 	reporter: impl Fn(usize),
-) -> (Vec<Series>, Vec<JobExecuteLog>) {
+) -> (Vec<BuiltSeries>, Vec<JobExecuteLog>) {
 	let mut logs = vec![];
 	let mut created_series = Vec::with_capacity(paths.len());
 
@@ -557,10 +446,39 @@ pub(crate) async fn safely_build_series(
 	(created_series, logs)
 }
 
+pub(crate) async fn safely_insert_series(
+	series: Vec<BuiltSeries>,
+	conn: &DatabaseConnection,
+) -> Result<Vec<series::Model>, JobError> {
+	let mut output = Vec::with_capacity(series.len());
+
+	let txn = conn.begin().await?;
+
+	for BuiltSeries { series, metadata } in series {
+		let created_series = series.insert(&txn).await?;
+
+		// I opted to not kill the transaction if metadata insertion fails, I figure this
+		// is a best-effort operation and we can always try again later after fixing a bad
+		// metadata entry vs killing the entire series creation process over a single bad entry
+		if let Some(mut meta) = metadata {
+			meta.series_id = Set(created_series.id.clone());
+			if let Err(error) = meta.insert(conn).await {
+				tracing::error!(?error, "Failed to insert series metadata");
+			}
+		}
+
+		output.push(created_series);
+	}
+
+	txn.commit().await?;
+	tracing::debug!(series_count = output.len(), "Inserted series into database");
+	Ok(output)
+}
+
 // TODO(granular-scans): intake ScanOptions
 pub(crate) struct MediaBuildOperation {
 	pub series_id: String,
-	pub library_config: LibraryConfig,
+	pub library_config: library_config::Model,
 	pub max_concurrency: usize,
 }
 
@@ -575,10 +493,10 @@ pub(crate) struct MediaBuildOperation {
 async fn build_book(
 	path: &Path,
 	series_id: &str,
-	existing_book: Option<Media>,
-	library_config: LibraryConfig,
+	existing_book: Option<media::ModelWithMetadata>,
+	library_config: library_config::Model,
 	config: &StumpConfig,
-) -> CoreResult<Media> {
+) -> CoreResult<BuiltMedia> {
 	let (tx, rx) = oneshot::channel();
 
 	// Spawn a blocking task to handle the IO-intensive operations:
@@ -620,7 +538,7 @@ struct BookVisitCtx {
 	operation: BookVisitOperation,
 	path: PathBuf,
 	series_id: String,
-	existing_book: Option<Media>,
+	existing_book: Option<media::ModelWithMetadata>,
 }
 
 async fn handle_book(
@@ -630,7 +548,7 @@ async fn handle_book(
 		series_id,
 		existing_book,
 	}: BookVisitCtx,
-	library_config: LibraryConfig,
+	library_config: library_config::Model,
 	config: &StumpConfig,
 ) -> CoreResult<BookVisitResult> {
 	let (tx, rx) = oneshot::channel();
@@ -651,7 +569,7 @@ async fn handle_book(
 				(BookVisitOperation::Custom(custom), Some(book)) => {
 					builder.custom_visit(custom).map(|result| {
 						BookVisitResult::Custom(CustomVisitResult {
-							id: book.id,
+							id: book.media.id,
 							..result
 						})
 					})
@@ -779,10 +697,11 @@ pub(crate) async fn safely_build_and_insert_media(
 
 	let atomic_cursor = Arc::new(AtomicUsize::new(1));
 
-	// TODO: consider small batches of _batch instead?
 	while let Some(book) = books.pop_front() {
-		let path = book.path.clone();
-		match create_media(&worker_ctx.db, book).await {
+		let Some(path) = book.path() else {
+			continue;
+		};
+		match create_media(&worker_ctx.conn, book).await {
 			Ok(created_media) => {
 				output.created_media += 1;
 				worker_ctx.send_batch(vec![
@@ -845,7 +764,7 @@ pub(crate) async fn visit_and_update_media(
 		return Ok(output);
 	}
 
-	let client = &worker_ctx.db;
+	let conn = worker_ctx.conn.as_ref();
 	let paths_to_operation = params
 		.iter()
 		.map(|(p, o)| (p.to_string_lossy().to_string(), *o))
@@ -853,17 +772,15 @@ pub(crate) async fn visit_and_update_media(
 	let paths = paths_to_operation.keys().cloned().collect::<Vec<String>>();
 	let paths_len = paths.len();
 
-	let media = client
-		.media()
-		.find_many(vec![
-			media::path::in_vec(paths),
-			media::series_id::equals(Some(series_id.clone())),
-		])
-		.exec()
-		.await?
-		.into_iter()
-		.map(Media::from)
-		.collect::<Vec<Media>>();
+	let media = media::ModelWithMetadata::find()
+		.filter(
+			media::Column::Path
+				.is_in(paths.iter().map(|p| p.to_string()).collect::<Vec<String>>()),
+		)
+		.filter(media::Column::SeriesId.eq(series_id.to_string()))
+		.into_model::<media::ModelWithMetadata>()
+		.all(conn)
+		.await?;
 
 	if media.len() != paths_len {
 		output.logs.push(JobExecuteLog::warn(
@@ -881,8 +798,8 @@ pub(crate) async fn visit_and_update_media(
 	let futures = media
 		.into_iter()
 		.filter_map(|book| {
-			paths_to_operation.get(&book.path).map(|operation| {
-				let path = book.path.clone();
+			paths_to_operation.get(&book.media.path).map(|operation| {
+				let path = book.media.path.clone();
 				BookVisitCtx {
 					operation: *operation,
 					existing_book: Some(book),
@@ -954,7 +871,7 @@ pub(crate) async fn visit_and_update_media(
 
 	while let Some(result) = build_results.pop_front() {
 		let error_ctx = result.error_ctx();
-		match handle_book_visit_operation(&worker_ctx.db, result).await {
+		match handle_book_visit_operation(&worker_ctx.conn, result).await {
 			Ok(_) => {
 				output.updated_media += 1;
 			},

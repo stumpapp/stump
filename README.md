@@ -16,7 +16,7 @@
 </p>
 
 <p align='center'>
-Stump is a free and open source comics, manga and digital book server with OPDS support, created with <a href="https://www.rust-lang.org/">Rust</a>, <a href='https://github.com/tokio-rs/axum'>Axum</a>, <a href='https://github.com/Brendonovich/prisma-client-rust'>Prisma</a> and <a href='https://reactjs.org/'>React</a>.
+Stump is a free and open source comics, manga and digital book server with OPDS support, created with <a href="https://www.rust-lang.org/">Rust</a>, <a href='https://github.com/tokio-rs/axum'>Axum</a>, <a href='https://www.sea-ql.org/SeaORM/'>SeaORM</a> and <a href='https://reactjs.org/'>React</a>.
 </p>
 
 <p align='center'>
@@ -31,11 +31,12 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 - [Roadmap 🗺](#roadmap-)
 - [Getting Started 🚀](#getting-started-)
 - [Developer Guide 💻](#developer-guide-)
-  - [Where to start?](#where-to-start)
+    - [Where to start?](#where-to-start)
 - [Project Structure 📦](#project-structure-)
   - [Apps](#apps)
   - [Core](#core)
   - [Crates](#crates)
+  - [Database](#database)
   - [Docs](#docs)
   - [Packages](#packages)
 - [Similar Projects 👯](#similar-projects-)
@@ -63,7 +64,7 @@ Things you can expect to see afterwards:
 
 - 🖥️ Cross-platform desktop app _(Windows, Mac, Linux)_
 - 📱 In-house mobile app _(Android, iOS)_
-- 🔎 Versatile full-text search _(blocked by [prisma#9414](https://github.com/prisma/prisma/issues/9414))_
+- 🔎 Versatile full-text search
 - 👥 Configurable book clubs _(see [this issue](https://github.com/stumpapp/stump/issues/120))_
 
 Feel free to reach out if you have anything else you'd like to see!
@@ -94,15 +95,6 @@ A quick summary of the steps required to get going:
 
    ```bash
    yarn run setup
-   ```
-
-   This will build the React app, generate the Prisma client, and generate the Rust-TypeScript types. To do any of these individually, you can run:
-
-   ```bash
-    # build the React app
-    yarn web build
-    # generate the Prisma client and Rust-TypeScript types
-    cargo codegen # or cargo prisma generate --schema=./core/prisma/schema.prisma for just the Prisma client
    ```
 
 4. Start one of the apps:
@@ -170,8 +162,15 @@ Various Rust crates, at `/crates` in the root of the project:
 
 - `cli`: A CLI library used in the `server` app
 - `codegen`: A small rust app that handles all of the code generation for Stump
+- `graphql`: All of the GraphQL related object definitions
 - `integrations`: A rust library containing integrations with other notification services
-- `prisma-cli`: A small wrapper rust app to run the Prisma CLI
+
+### Database
+
+A few database-specific crates are organized in the `/database` directory in the root of the project:
+
+- `migrations`: Contains all of the database migrations
+- `models`: Contains all of the database models
 
 ### Docs
 

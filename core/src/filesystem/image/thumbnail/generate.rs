@@ -1,17 +1,17 @@
 use std::path::PathBuf;
 
+use models::{
+	entity::media,
+	shared::image_processor_options::{ImageProcessorOptions, SupportedImageFormat},
+};
 use tokio::{fs, sync::oneshot, task::spawn_blocking};
 
 use crate::{
 	config::StumpConfig,
 	filesystem::{
-		get_page,
-		image::{
-			GenericImageProcessor, ImageFormat, ImageProcessor, ImageProcessorOptions,
-			ProcessorError, WebpProcessor,
-		},
+		image::{GenericImageProcessor, ImageProcessor, ProcessorError, WebpProcessor},
+		media::get_page,
 	},
-	prisma::media,
 };
 
 /// An error enum for thumbnail generation errors
@@ -59,7 +59,7 @@ fn do_generate_book_thumbnail(
 		.join(format!("{}.{}", &file_name, ext));
 
 	match options.format {
-		ImageFormat::Webp => WebpProcessor::generate(&page_data, options),
+		SupportedImageFormat::Webp => WebpProcessor::generate(&page_data, options),
 		_ => GenericImageProcessor::generate(&page_data, options),
 	}
 	.map(|buf| (buf, thumbnail_path, true))
@@ -70,7 +70,7 @@ fn do_generate_book_thumbnail(
 /// exists and `force_regen` is false, the function will return the existing thumbnail data.
 #[tracing::instrument(skip_all)]
 pub async fn generate_book_thumbnail(
-	book: &media::Data,
+	book: &media::MediaIdentSelect,
 	GenerateThumbnailOptions {
 		image_options,
 		core_config,

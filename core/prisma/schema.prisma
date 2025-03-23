@@ -93,7 +93,7 @@ model APIKey {
   name            String
   short_token     String
   long_token_hash String
-  permissions     Bytes // "inherit" or a list of permissions 
+  permissions     Bytes // "inherit" or a list of permissions
   created_at      DateTime  @default(now())
   last_used_at    DateTime?
   expires_at      DateTime?
@@ -142,6 +142,7 @@ model LibraryConfig {
   generate_koreader_hashes        Boolean @default(false)
   process_metadata                Boolean @default(true)
   library_pattern                 String  @default("SERIES_BASED") // SERIES_BASED or COLLECTION_BASED
+  watch                           Boolean @default(true)
 
   thumbnail_config Bytes? // { size_factor: "...", format: "...", quality: ... }
   ignore_rules     Bytes? // ["glob1", "glob2", ...]
@@ -890,7 +891,7 @@ model ServerConfig {
 
   initial_wal_setup_complete Boolean @default(false) // Whether the initial WAL setup has been completed
   // TODO: For obvious reasons, this is severely insecure lol i.e. don't store an encryption key in the database...
-  // However, I don't have a better solution at the moment. This, at best, provides a small barrier to entry I guess 
+  // However, I don't have a better solution at the moment. This, at best, provides a small barrier to entry I guess
   // for bad actors. I am not overly knowledgeable in cryptography, so I'm not sure what the best solution is here.
   encryption_key             String? // The encryption key used to encrypt sensitive data
 

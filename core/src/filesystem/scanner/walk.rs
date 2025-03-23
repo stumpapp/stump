@@ -6,18 +6,19 @@ use std::{
 
 use globset::GlobSet;
 use itertools::Either;
+use models::entity::{media, series};
 use rayon::iter::{
 	IntoParallelIterator, IntoParallelRefIterator, ParallelBridge, ParallelIterator,
 };
+use sea_orm::{prelude::*, DatabaseConnection, QuerySelect};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::{
-	db::{entity::macros::media_path_modified_at_select, FileStatus},
+	db::FileStatus,
 	filesystem::{
 		scanner::{options::BookVisitOperation, utils::file_updated_since_scan},
 		PathUtils,
 	},
-	prisma::{media, series, PrismaClient},
 	CoreResult,
 };
 
@@ -25,7 +26,7 @@ use super::ScanOptions;
 
 pub struct WalkerCtx {
 	/// A reference to the Prisma client
-	pub db: Arc<PrismaClient>,
+	pub db: Arc<DatabaseConnection>,
 	/// The globset of ignore rules to apply during the walk
 	pub ignore_rules: GlobSet,
 	// Will be 1 if the library is collection based, None
@@ -138,12 +139,16 @@ pub async fn walk_library(
 
 	let computation_start = std::time::Instant::now();
 	let (series_to_create, missing_series, recovered_series, series_to_visit) = {
-		let existing_records = db
-			.series()
-			.find_many(vec![series::path::starts_with(path.to_string())])
-			.select(series::select!({ id path status }))
-			.exec()
+		let existing_records = series::Entity::find()
+			.columns(vec![
+				series::Column::Id,
+				series::Column::Path,
+				series::Column::Status,
+			])
+			.filter(series::Column::Path.starts_with(path))
+			.all(db.as_ref())
 			.await?;
+
 		if existing_records.is_empty() {
 			tracing::debug!(
 				"No existing series found in the database, all series are new"
@@ -308,13 +313,16 @@ pub async fn walk_series(
 
 	tracing::trace!("Fetching existing media...");
 	let fetch_start = std::time::Instant::now();
-	let existing_media = db
-		.media()
-		.find_many(vec![media::series::is(vec![series::path::equals(
-			path.to_string_lossy().to_string(),
-		)])])
-		.select(media_path_modified_at_select::select())
-		.exec()
+	let existing_media = media::Entity::find()
+		.columns(vec![
+			media::Column::Id,
+			media::Column::Path,
+			media::Column::ModifiedAt,
+			media::Column::Status,
+		])
+		.inner_join(series::Entity)
+		.filter(series::Column::Path.starts_with(path.to_string_lossy().to_string()))
+		.all(db.as_ref())
 		.await?;
 	tracing::trace!(
 		"Fetched {} existing media in {}ms",
@@ -355,10 +363,11 @@ pub async fn walk_series(
 				.map(|m| (entry, m))
 		})
 		.filter_map(|(entry, media)| {
-			let modified_at = media.modified_at.map(|dt| dt.to_rfc3339());
-			let modified = modified_at
+			let modified = media
+				.modified_at
+				.as_ref()
 				.and_then(|dt| {
-					file_updated_since_scan(&entry, dt)
+					file_updated_since_scan(&entry, dt.to_rfc3339())
 						.map_err(|err| {
 							tracing::error!(
 								error = ?err,

@@ -1,6 +1,7 @@
 use std::{collections::HashMap, str::FromStr};
 
 use prisma_client_rust::{raw, PrismaValue, QueryError};
+use sea_orm::{self, FromQueryResult};
 use serde::{Deserialize, Serialize};
 
 use crate::{error::CoreResult, prisma::PrismaClient, CoreError};
@@ -149,6 +150,23 @@ pub struct JournalModeQueryResult {
 	pub journal_mode: JournalMode,
 }
 
+impl FromQueryResult for JournalModeQueryResult {
+	fn from_query_result(
+		res: &sea_orm::QueryResult,
+		_pre: &str,
+	) -> Result<Self, sea_orm::DbErr> {
+		let journal_mode = match res.try_get::<String>("", "journal_mode") {
+			Ok(value) => JournalMode::from_str(value.as_str()).unwrap_or_default(),
+			_ => {
+				tracing::warn!("No journal mode found! Defaulting to WAL assumption");
+				JournalMode::default()
+			},
+		};
+
+		Ok(Self { journal_mode })
+	}
+}
+
 #[async_trait::async_trait]
 pub trait DBPragma {
 	async fn get_journal_mode(&self) -> CoreResult<JournalMode>;
@@ -162,7 +180,7 @@ impl DBPragma for PrismaClient {
 			._query_raw::<JournalModeQueryResult>(raw!("PRAGMA journal_mode;"))
 			.exec()
 			.await?;
-		let result = result_vec.first().take();
+		let result = result_vec.first();
 
 		if let Some(record) = result {
 			Ok(record.journal_mode)

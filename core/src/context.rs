@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
-use prisma_client_rust::not;
+use models::entity::server_config;
+use sea_orm::{prelude::*, DatabaseConnection, SelectColumns};
 use tokio::sync::{
 	broadcast::{channel, Receiver, Sender},
 	mpsc::error::SendError,
@@ -10,8 +11,9 @@ use crate::{
 	config::StumpConfig,
 	db,
 	event::CoreEvent,
+	filesystem::scanner::LibraryWatcher,
 	job::{Executor, JobController, JobControllerCommand},
-	prisma::{self, server_config},
+	prisma::PrismaClient,
 	CoreError, CoreResult,
 };
 
@@ -23,9 +25,11 @@ type EventChannel = (Sender<CoreEvent>, Receiver<CoreEvent>);
 #[derive(Clone)]
 pub struct Ctx {
 	pub config: Arc<StumpConfig>,
-	pub db: Arc<prisma::PrismaClient>,
+	pub conn: Arc<DatabaseConnection>,
+	pub db: Arc<PrismaClient>,
 	pub job_controller: Arc<JobController>,
 	pub event_channel: Arc<EventChannel>,
+	pub library_watcher: Arc<LibraryWatcher>,
 }
 
 impl Ctx {
@@ -46,20 +50,26 @@ impl Ctx {
 	/// ```
 	pub async fn new(config: StumpConfig) -> Ctx {
 		let config = Arc::new(config.clone());
+		let conn = Arc::new(db::create_connection(&config).await);
 		let db = Arc::new(db::create_client(&config).await);
 		let event_channel = Arc::new(channel::<CoreEvent>(1024));
 
 		let job_controller =
-			JobController::new(db.clone(), config.clone(), event_channel.0.clone());
+			JobController::new(conn.clone(), config.clone(), event_channel.0.clone());
+		let library_watcher =
+			Arc::new(LibraryWatcher::new(conn.clone(), job_controller.clone()));
 
 		Ctx {
 			config,
+			conn,
 			db,
 			job_controller,
 			event_channel,
+			library_watcher,
 		}
 	}
 
+	// TODO(sea-orm): Fix
 	// Note: I cannot use #[cfg(test)] here because the tests are in a different crate and
 	// the `cfg` attribute only works for the current crate. Potential workarounds:
 	// - https://github.com/rust-lang/cargo/issues/8379
@@ -70,43 +80,25 @@ impl Ctx {
 	/// **This should not be used in production.**
 	pub async fn integration_test_mock() -> Ctx {
 		let config = Arc::new(StumpConfig::debug());
-		let db = Arc::new(db::create_test_client().await);
+		let conn = Arc::new(db::create_connection(&config).await);
 		let event_channel = Arc::new(channel::<CoreEvent>(1024));
 
-		// Create job manager
-		let job_controller =
-			JobController::new(db.clone(), config.clone(), event_channel.0.clone());
+		unimplemented!()
 
-		Ctx {
-			config,
-			db,
-			job_controller,
-			event_channel,
-		}
-	}
+		// // Create job manager
+		// let job_controller =
+		// 	JobController::new(db.clone(), config.clone(), event_channel.0.clone());
 
-	/// Creates a [Ctx] instance for testing **only**. The prisma client is created
-	/// with a mock store, allowing for easy testing of the core without needing to
-	/// connect to a real database.
-	pub fn mock() -> (Ctx, prisma_client_rust::MockStore) {
-		let config = Arc::new(StumpConfig::debug());
-		let (client, mock) = prisma::PrismaClient::_mock();
+		// let library_watcher =
+		// 	Arc::new(LibraryWatcher::new(db.clone(), job_controller.clone()));
 
-		let event_channel = Arc::new(channel::<CoreEvent>(1024));
-		let db = Arc::new(client);
-
-		// Create job manager
-		let job_controller =
-			JobController::new(db.clone(), config.clone(), event_channel.0.clone());
-
-		let ctx = Ctx {
-			config,
-			db,
-			job_controller,
-			event_channel,
-		};
-
-		(ctx, mock)
+		// Ctx {
+		// 	config,
+		// 	db,
+		// 	job_controller,
+		// 	event_channel,
+		// 	library_watcher,
+		// }
 	}
 
 	/// Wraps the [Ctx] in an [Arc], allowing it to be shared across threads. This
@@ -205,14 +197,12 @@ impl Ctx {
 	}
 
 	pub async fn get_encryption_key(&self) -> CoreResult<String> {
-		let server_config = self
-			.db
-			.server_config()
-			.find_first(vec![not![server_config::encryption_key::equals(None)]])
-			.exec()
+		let record = server_config::Entity::find()
+			.select_column(server_config::Column::EncryptionKey)
+			.one(self.conn.as_ref())
 			.await?;
 
-		let encryption_key = server_config
+		let encryption_key = record
 			.and_then(|config| config.encryption_key)
 			.ok_or(CoreError::EncryptionKeyNotSet)?;
 

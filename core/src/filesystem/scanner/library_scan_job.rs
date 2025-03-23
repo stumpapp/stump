@@ -1,8 +1,10 @@
 use std::{collections::VecDeque, path::PathBuf};
 
-use prisma_client_rust::chrono;
+use models::entity::{library, library_config, library_scan_record, media, series};
+use sea_orm::{prelude::*, sea_query::Query, Set, TransactionTrait};
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use utoipa::ToSchema;
 
 // TODO: hone the progress messages, they are a little noisy and unhelpful (e.g. 'Starting task')
 // TODO: Refactor rayon usage to use tokio instead. I am trying to learn more about IO-bound operations in an
@@ -10,17 +12,14 @@ use specta::Type;
 // Also perhaps experiment with https://docs.rs/tokio-uring/latest/tokio_uring/index.html
 
 use crate::{
-	db::{
-		entity::{CoreJobOutput, LibraryConfig},
-		FileStatus, SeriesDAO, DAO,
+	db::{entity::CoreJobOutput, FileStatus},
+	filesystem::{
+		image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
+		scanner::utils::safely_insert_series,
 	},
-	filesystem::image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
 	job::{
 		error::JobError, Executor, JobExecuteLog, JobExt, JobOutputExt, JobProgress,
 		JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
-	},
-	prisma::{
-		job, library, library_config, library_scan_record, media, series, PrismaClient,
 	},
 	utils::chain_optional_iter,
 	CoreEvent,
@@ -64,7 +63,7 @@ pub struct LibraryScanJob {
 	/// The path to the library to scan
 	pub path: String,
 	/// The library configuration to use
-	pub config: Option<LibraryConfig>,
+	pub config: Option<library_config::Model>,
 	/// The scan options to use, if any
 	pub options: ScanOptions,
 }
@@ -85,7 +84,7 @@ impl LibraryScanJob {
 }
 
 /// The data that is collected and updated during the execution of a library scan job
-#[derive(Clone, Serialize, Deserialize, Default, Debug, Type)]
+#[derive(Clone, Serialize, Deserialize, Default, Debug, Type, ToSchema)]
 pub struct LibraryScanOutput {
 	/// The number of files visited during the scan
 	total_files: u64,
@@ -141,22 +140,19 @@ impl JobExt for LibraryScanJob {
 		// Note: We ignore the potential self.config here in the event that it was
 		// updated since being queued. This is perhaps a bit overly cautious, but it's
 		// just one additional query.
-		let mut library_config = ctx
-			.db
-			.library_config()
-			.find_first(vec![library_config::library::is(vec![
-				library::id::equals(self.id.clone()),
-				library::path::equals(self.path.clone()),
-			])])
-			.exec()
+		let config = library_config::Entity::find()
+			.filter(library_config::Column::LibraryId.eq(self.id.clone()))
+			.one(ctx.conn.as_ref())
 			.await?
-			.map(LibraryConfig::from)
-			.ok_or(JobError::InitFailed("Library not found".to_string()))?;
-		library_config.apply(self.options);
-		let is_collection_based = library_config.is_collection_based();
-		let ignore_rules = library_config.ignore_rules.build()?;
+			.ok_or(JobError::InitFailed(
+				"Library is missing configuration".to_string(),
+			))?;
+		// TODO(sea-orm): Fix
+		// library_config.apply(self.options);
+		let is_collection_based = config.is_collection_based();
+		let ignore_rules = config.ignore_rules().build()?;
 
-		self.config = Some(library_config);
+		self.config = Some(config);
 
 		ctx.report_progress(JobProgress::msg("Performing task discovery"));
 		let WalkedLibrary {
@@ -170,7 +166,7 @@ impl JobExt for LibraryScanJob {
 		} = walk_library(
 			&self.path,
 			WalkerCtx {
-				db: ctx.db.clone(),
+				db: ctx.conn.clone(),
 				ignore_rules,
 				max_depth: is_collection_based.then_some(1),
 				options: self.options,
@@ -189,7 +185,7 @@ impl JobExt for LibraryScanJob {
 		output.ignored_directories = ignored_directories;
 
 		if library_is_missing {
-			handle_missing_library(&ctx.db, self.id.as_str()).await?;
+			handle_missing_library(&ctx.conn, self.id.as_str()).await?;
 			ctx.send_batch(vec![
 				JobProgress::msg("Failed to find library on disk").into_worker_send(),
 				CoreEvent::DiscoveredMissingLibrary(self.id.clone()).into_worker_send(),
@@ -310,14 +306,13 @@ impl JobExt for LibraryScanJob {
 				if !recovered_series.is_empty() {
 					ctx.report_progress(JobProgress::msg("Recovering series"));
 
-					let affected_rows = ctx
-						.db
-						.series()
-						.update_many(
-							vec![series::id::in_vec(recovered_series)],
-							vec![series::status::set(FileStatus::Ready.to_string())],
+					let affected_rows = series::Entity::update_many()
+						.col_expr(
+							series::Column::Status,
+							Expr::value(FileStatus::Ready.to_string()),
 						)
-						.exec()
+						.filter(series::Column::Id.is_in(recovered_series))
+						.exec(ctx.conn.as_ref())
 						.await
 						.map_or_else(
 							|error| {
@@ -328,9 +323,9 @@ impl JobExt for LibraryScanJob {
 								)));
 								0
 							},
-							|count| {
-								output.updated_series = count as u64;
-								count
+							|result| {
+								output.updated_series = result.rows_affected;
+								result.rows_affected
 							},
 						);
 
@@ -351,14 +346,14 @@ impl JobExt for LibraryScanJob {
 						.iter()
 						.map(|e| e.to_string_lossy().to_string())
 						.collect::<Vec<String>>();
-					let affected_rows = ctx
-						.db
-						.series()
-						.update_many(
-							vec![series::path::in_vec(missing_series_str.clone())],
-							vec![series::status::set(FileStatus::Missing.to_string())],
+
+					let affected_rows = series::Entity::update_many()
+						.col_expr(
+							series::Column::Status,
+							Expr::value(FileStatus::Missing.to_string()),
 						)
-						.exec()
+						.filter(series::Column::Path.is_in(missing_series_str))
+						.exec(ctx.conn.as_ref())
 						.await
 						.map_or_else(
 							|error| {
@@ -369,9 +364,9 @@ impl JobExt for LibraryScanJob {
 								)));
 								0
 							},
-							|count| {
-								output.updated_series = count as u64;
-								count
+							|result| {
+								output.updated_series = result.rows_affected;
+								result.rows_affected
 							},
 						);
 
@@ -407,9 +402,6 @@ impl JobExt for LibraryScanJob {
 						(built_series.len() + failure_logs.len()) as i32;
 					logs.extend(failure_logs);
 
-					// TODO: remove this DAO!!
-					let series_dao = SeriesDAO::new(ctx.db.clone());
-
 					let chunks = built_series.chunks(200);
 					let chunk_count = chunks.len();
 					tracing::trace!(chunk_count, "Batch inserting new series");
@@ -420,8 +412,9 @@ impl JobExt for LibraryScanJob {
 							(idx + 1) as i32,
 							chunk_count as i32,
 						));
-						let result = series_dao.create_many(chunk.to_vec()).await;
-						match result {
+						match safely_insert_series(chunk.to_vec(), ctx.conn.as_ref())
+							.await
+						{
 							Ok(created_series) => {
 								output.created_series += created_series.len() as u64;
 								ctx.send_core_event(CoreEvent::CreatedManySeries {
@@ -474,20 +467,29 @@ impl JobExt for LibraryScanJob {
 					max_depth = Some(1);
 				}
 
-				let Some(Ok(ignore_rules)) =
-					self.config.as_ref().map(|o| o.ignore_rules.build())
-				else {
-					// Note: This failure will likely affect ALL other tasks, so we are halting the job here
-					return Err(JobError::TaskFailed(
-						"Failed to build ignore rules. Check that the rules are valid."
-							.to_string(),
-					));
-				};
+				let ignore_rules =
+					match self.config.as_ref().map(|c| c.ignore_rules().build()) {
+						Some(Ok(rules)) => rules,
+						Some(Err(err)) => {
+							tracing::error!(error = ?err, "Failed to build ignore rules");
+							return Err(JobError::TaskFailed(
+							"Failed to build ignore rules. Check that the rules are valid."
+								.to_string(),
+						));
+						},
+						_ => {
+							tracing::error!(?self.config, "Library config is missing?");
+							return Err(JobError::TaskFailed(
+							"A critical error occurred while attempting to scan the library"
+								.to_string(),
+						));
+						},
+					};
 
 				let walk_result = walk_series(
 					path_buf.as_path(),
 					WalkerCtx {
-						db: ctx.db.clone(),
+						db: ctx.conn.clone(),
 						ignore_rules,
 						max_depth,
 						options: self.options,
@@ -536,7 +538,7 @@ impl JobExt for LibraryScanJob {
 						updated_media,
 						logs: new_logs,
 					} = handle_missing_series(
-						&ctx.db,
+						&ctx.conn,
 						path_buf.to_str().unwrap_or_default(),
 					)
 					.await?;
@@ -551,11 +553,11 @@ impl JobExt for LibraryScanJob {
 				}
 
 				let series_path_str = path_buf.to_str().unwrap_or_default().to_string();
-				let series = ctx
-					.db
-					.series()
-					.find_first(vec![series::path::equals(series_path_str.clone())])
-					.exec()
+
+				let series = series::Entity::find()
+					.filter(series::Column::Path.eq(series_path_str.clone()))
+					.into_model::<series::SeriesIdentSelect>()
+					.one(ctx.conn.as_ref())
 					.await?
 					.ok_or(JobError::TaskFailed("Series not found".to_string()))?;
 
@@ -632,7 +634,11 @@ impl JobExt for LibraryScanJob {
 					} = safely_build_and_insert_media(
 						MediaBuildOperation {
 							series_id: series_id.clone(),
-							library_config: self.config.clone().unwrap_or_default(),
+							library_config: self.config.clone().ok_or(
+								JobError::TaskFailed(
+									"Library configuration is missing".to_string(),
+								),
+							)?,
 							max_concurrency,
 						},
 						ctx,
@@ -662,7 +668,11 @@ impl JobExt for LibraryScanJob {
 					} = visit_and_update_media(
 						MediaBuildOperation {
 							series_id: series_id.clone(),
-							library_config: self.config.clone().unwrap_or_default(),
+							library_config: self.config.clone().ok_or(
+								JobError::TaskFailed(
+									"Library configuration is missing".to_string(),
+								),
+							)?,
 							max_concurrency,
 						},
 						ctx,
@@ -692,54 +702,52 @@ impl JobExt for LibraryScanJob {
 }
 
 pub async fn handle_missing_library(
-	db: &PrismaClient,
+	conn: &DatabaseConnection,
 	library_id: &str,
 ) -> Result<(), JobError> {
-	let (updated_library, affected_series, affected_media) = db
-		._transaction()
-		.run(|client| async move {
-			let updated_library = client
-				.library()
-				.update(
-					library::id::equals(library_id.to_string()),
-					vec![library::status::set(FileStatus::Missing.to_string())],
-				)
-				.exec()
-				.await?;
+	let txn = conn.begin().await?;
 
-			let affected_series = client
-				.series()
-				.update_many(
-					vec![series::library_id::equals(Some(library_id.to_string()))],
-					vec![series::status::set(FileStatus::Missing.to_string())],
-				)
-				.exec()
-				.await?;
+	let _affected_libraries = library::Entity::update_many()
+		.col_expr(
+			library::Column::Status,
+			Expr::value(FileStatus::Missing.to_string()),
+		)
+		.filter(library::Column::Id.eq(library_id))
+		.exec(&txn)
+		.await?
+		.rows_affected;
 
-			client
-				.media()
-				.update_many(
-					vec![media::series::is(vec![series::library_id::equals(Some(
-						library_id.to_string(),
-					))])],
-					vec![media::status::set(FileStatus::Missing.to_string())],
-				)
-				.exec()
-				.await
-				.map(|affected_media| (updated_library, affected_series, affected_media))
-		})
-		.await
-		.map_err(|e| {
-			JobError::InitFailed(format!(
-				"A critical error occurred while handling missing library: {e}"
-			))
-		})?;
-	tracing::trace!(
-		?updated_library,
-		affected_series,
-		affected_media,
-		"Marked library as missing"
-	);
+	let affected_series = series::Entity::update_many()
+		.col_expr(
+			series::Column::Status,
+			Expr::value(FileStatus::Missing.to_string()),
+		)
+		.filter(series::Column::LibraryId.eq(library_id))
+		.exec(&txn)
+		.await?
+		.rows_affected;
+
+	let affected_books = media::Entity::update_many()
+		.col_expr(
+			media::Column::Status,
+			Expr::value(FileStatus::Missing.to_string()),
+		)
+		.filter(
+			media::Column::SeriesId.in_subquery(
+				Query::select()
+					.column(series::Column::Id)
+					.from(series::Entity)
+					.and_where(series::Column::LibraryId.eq(library_id))
+					.to_owned(),
+			),
+		)
+		.exec(&txn)
+		.await?
+		.rows_affected;
+
+	txn.commit().await?;
+
+	tracing::info!(affected_series, affected_books, "Marked library as missing");
 
 	Ok(())
 }
@@ -749,17 +757,18 @@ async fn handle_scan_complete(
 	ctx: &WorkerCtx,
 	options: &ScanOptions,
 ) -> Result<(), JobError> {
-	let client = ctx.db.clone();
+	let conn = ctx.conn.as_ref();
 	let now = chrono::Utc::now();
 
-	let update_result = client
-		.library()
-		.update(
-			library::id::equals(job.id.clone()),
-			vec![library::last_scanned_at::set(Some(now.into()))],
+	let update_result = library::Entity::update_many()
+		.col_expr(
+			library::Column::LastScannedAt,
+			Expr::value(now.to_rfc3339()),
 		)
-		.exec()
+		.filter(library::Column::Id.eq(job.id.clone()))
+		.exec(conn)
 		.await;
+
 	if let Err(error) = update_result {
 		tracing::error!(?error, "Failed to update library last scanned at");
 	}
@@ -776,18 +785,17 @@ async fn handle_scan_complete(
 		}
 	};
 
-	let insert_result = client
-		.library_scan_record()
-		.create(
-			library::id::equals(job.id.clone()),
-			vec![
-				library_scan_record::options::set(persisted_options),
-				library_scan_record::timestamp::set(now.into()),
-				library_scan_record::job::connect(job::id::equals(ctx.job_id.clone())),
-			],
-		)
-		.exec()
+	let insert_result =
+		library_scan_record::Entity::insert(library_scan_record::ActiveModel {
+			options: Set(persisted_options),
+			timestamp: Set(now.into()),
+			job_id: Set(Some(ctx.job_id.clone())),
+			library_id: Set(job.id.clone()),
+			..Default::default()
+		})
+		.exec(conn)
 		.await;
+
 	if let Err(error) = insert_result {
 		tracing::error!(?error, "Failed to insert library scan record");
 	}

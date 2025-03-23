@@ -7,7 +7,7 @@ use std::{
 use stump_core::{
 	db::{
 		entity::UserPermission,
-		query::pagination::{PageQuery, Pageable},
+		query::pagination::{PageQuery, Pageable, PageableDirectoryListing},
 	},
 	filesystem::{
 		DirectoryListing, DirectoryListingFile, DirectoryListingIgnoreParams,

@@ -9,6 +9,7 @@
 //! structure
 
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
 use std::fmt;
 use std::str::FromStr;
@@ -33,7 +34,7 @@ pub enum PageDimensionParserError {
 ///
 /// The `dimensions` member contains a [Vec]<[`PageDimension`]> containing the height and width
 /// of each page for the media attached to the metadata for this entity.
-#[derive(Serialize, Deserialize, Debug, Clone, Type)]
+#[derive(Serialize, Deserialize, Debug, Clone, Type, ToSchema)]
 pub struct PageDimensionsEntity {
 	pub id: String,
 	pub dimensions: Vec<PageDimension>,
@@ -60,7 +61,7 @@ impl From<page_dimensions::Data> for PageDimensionsEntity {
 
 /// Represents a page dimension for a page of a Stump media item. It consists of a
 /// height and a width.
-#[derive(Serialize, Deserialize, Debug, Clone, Type, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Type, PartialEq, ToSchema)]
 pub struct PageDimension {
 	pub height: u32,
 	pub width: u32,

@@ -1,4 +1,5 @@
 import { Api, constants, User } from '@stump/sdk'
+import { isAxiosError } from 'axios'
 import { match, P } from 'ts-pattern'
 
 import { ManagedToken, ServerConfig, ServerKind } from '~/stores/savedServer'
@@ -9,6 +10,15 @@ type AuthSDKParams = {
 	saveToken?: (token: ManagedToken, forUser: User) => Promise<void>
 }
 
+/**
+ * Authenticate an SDK instance with the provided configuration and token information.
+ *
+ * @param instance A base instance of the SDK. This will be mutated with the auth token
+ * @param params An object containing the configuration and token information
+ *
+ * @returns The instance of the SDK with the auth token set
+ * @throws If the server is unreachable, a failed login attempt does not throw an error
+ */
 export const authSDKInstance = async (
 	instance: Api,
 	{ config, existingToken, saveToken }: AuthSDKParams,
@@ -62,7 +72,13 @@ const login = async (instance: Api, { username, password, saveToken }: LoginPara
 			return access_token
 		}
 	} catch (error) {
-		console.error(error)
+		const axiosError = isAxiosError(error) ? error : null
+		const isNetworkError = axiosError?.code === 'ERR_NETWORK'
+		if (isNetworkError) {
+			throw error
+		} else {
+			console.warn('Failed to login:', error)
+		}
 	}
 }
 

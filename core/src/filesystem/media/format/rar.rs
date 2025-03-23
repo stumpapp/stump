@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use models::shared::image_processor_options::SupportedImageFormat;
 use std::{
 	collections::HashMap,
 	fs::File,
@@ -9,21 +10,21 @@ use unrar::{Archive, CursorBeforeHeader, List, OpenArchive, Process, UnrarResult
 
 use crate::{
 	config::StumpConfig,
-	db::entity::MediaMetadata,
 	filesystem::{
 		archive::create_zip_archive,
 		content_type::ContentType,
 		error::FileError,
 		hash::{self, HASH_SAMPLE_COUNT, HASH_SAMPLE_SIZE},
-		image::ImageFormat,
 		media::{
 			process::{
 				FileConverter, FileProcessor, FileProcessorOptions, ProcessedFile,
+				ProcessedFileHashes,
 			},
 			utils::metadata_from_buf,
 			zip::ZipProcessor,
+			ProcessedMediaMetadata,
 		},
-		FileParts, PathUtils, ProcessedFileHashes,
+		FileParts, PathUtils,
 	},
 };
 
@@ -120,7 +121,7 @@ impl FileProcessor for RarProcessor {
 		})
 	}
 
-	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError> {
+	fn process_metadata(path: &str) -> Result<Option<ProcessedMediaMetadata>, FileError> {
 		let mut archive = RarProcessor::open_for_processing(path)?;
 		let mut metadata_buf = None;
 
@@ -334,7 +335,7 @@ impl FileConverter for RarProcessor {
 	fn to_zip(
 		path: &str,
 		delete_source: bool,
-		_: Option<ImageFormat>,
+		_: Option<SupportedImageFormat>,
 		config: &StumpConfig,
 	) -> Result<PathBuf, FileError> {
 		debug!(path, "Converting RAR to ZIP");

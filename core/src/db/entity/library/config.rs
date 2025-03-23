@@ -1,15 +1,13 @@
 use std::str::FromStr;
 
+use models::shared::image_processor_options::ImageProcessorOptions;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
 use crate::{
 	db::entity::common::{ReadingDirection, ReadingImageScaleFit, ReadingMode},
-	filesystem::{
-		image::ImageProcessorOptions,
-		scanner::{CustomVisit, ScanConfig, ScanOptions},
-	},
+	filesystem::scanner::{CustomVisit, ScanConfig, ScanOptions},
 	prisma::library_config,
 };
 
@@ -24,11 +22,12 @@ pub struct LibraryConfig {
 	pub generate_file_hashes: bool,
 	pub generate_koreader_hashes: bool,
 	pub process_metadata: bool,
+	pub watch: bool,
 	pub library_pattern: LibraryPattern,
-	pub thumbnail_config: Option<ImageProcessorOptions>,
-	#[serde(default)] // TODO: remove this after update with experimental
+	// pub thumbnail_config: Option<ImageProcessorOptions>,
+	#[serde(default)]
 	pub default_reading_dir: ReadingDirection,
-	#[serde(default)] // TODO: remove this after update with experimental
+	#[serde(default)]
 	pub default_reading_mode: ReadingMode,
 	#[serde(default)]
 	pub default_reading_image_scale_fit: ReadingImageScaleFit,
@@ -72,6 +71,7 @@ impl From<library_config::Data> for LibraryConfig {
 			generate_file_hashes: data.generate_file_hashes,
 			generate_koreader_hashes: data.generate_koreader_hashes,
 			process_metadata: data.process_metadata,
+			watch: data.watch,
 			library_pattern: LibraryPattern::from(data.library_pattern),
 			default_reading_dir: ReadingDirection::from_str(
 				data.default_reading_dir.as_str(),
@@ -85,9 +85,11 @@ impl From<library_config::Data> for LibraryConfig {
 				data.default_reading_image_scale_fit.as_str(),
 			)
 			.unwrap_or_default(),
-			thumbnail_config: data.thumbnail_config.map(|config| {
-				ImageProcessorOptions::try_from(config).unwrap_or_default()
-			}),
+			// thumbnail_config: data.thumbnail_config.map(|config| {
+			// 	ImageProcessorOptions::try_from(config).unwrap_or_default()
+			// }),
+			// TODO(sea-orm): Fix
+			// thumbnail_config: None,
 			ignore_rules: data
 				.ignore_rules
 				.map_or_else(IgnoreRules::default, |rules| {

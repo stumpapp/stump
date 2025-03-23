@@ -132,10 +132,14 @@ pub enum APIError {
 	#[error("{0}")]
 	Redirect(String),
 	#[error("{0}")]
+	#[schema(value_type = String)]
 	SessionFetchError(#[from] SessionError),
 	#[error("{0}")]
-	#[schema(value_type = String)]
+	#[schema(value_type = Box<String>)]
 	PrismaError(#[from] Box<QueryError>),
+	// FIXME: doesn't impl ToSchema?
+	// #[error("{0}")]
+	// DbError(#[from] sea_orm::error::DbErr),
 }
 
 impl APIError {
@@ -159,6 +163,10 @@ impl APIError {
 					StatusCode::INTERNAL_SERVER_ERROR
 				}
 			},
+			// APIError::DbError(error) => match error {
+			// 	sea_orm::error::DbErr::RecordNotFound(_) => StatusCode::NOT_FOUND,
+			// 	_ => StatusCode::INTERNAL_SERVER_ERROR,
+			// },
 			APIError::Redirect(_) => StatusCode::TEMPORARY_REDIRECT,
 			_ => StatusCode::INTERNAL_SERVER_ERROR,
 		}

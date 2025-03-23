@@ -1,14 +1,23 @@
 use image::GenericImageView;
 
 use crate::{
-	db::entity::page_dimension::{dimension_vec_to_string, PageDimension},
-	filesystem::{
-		analyze_media_job::{utils::fetch_media_with_dimensions, AnalyzeMediaOutput},
-		media::process::get_page,
-	},
+	filesystem::media::{analyze_media_job::AnalyzeMediaOutput, process::get_page},
 	job::{error::JobError, JobProgress, WorkerCtx},
-	prisma::{media_metadata, page_dimensions},
 };
+use models::{
+	entity::{media, media_metadata, page_dimension},
+	shared::page_dimension::{PageAnalysis, PageDimension},
+};
+use sea_orm::{prelude::*, FromQueryResult, JoinType, QuerySelect};
+
+#[derive(Debug, FromQueryResult)]
+struct MediaWithDimensions {
+	id: String,
+	path: String,
+	pages: i32,
+	page_count: Option<i32>,
+	page_analysis: Option<PageAnalysis>,
+}
 
 /// The logic for [`super::AnalyzeMediaTask::AnalyzePageDimensions`].
 ///
@@ -25,23 +34,33 @@ pub(crate) async fn execute(
 	output: &mut AnalyzeMediaOutput,
 ) -> Result<(), JobError> {
 	// Get media by id from the database
-	let media_item = fetch_media_with_dimensions(&id, ctx).await?;
-
-	// Get metadata if present
-	let metadata = media_item.metadata.ok_or_else(|| {
-		JobError::TaskFailed(format!(
-			"Unable to retrieve metadata for media item: {}",
-			media_item.id
-		))
-	})?;
+	let media_item = media::Entity::find()
+		.select_only()
+		.columns(vec![
+			media::Column::Id,
+			media::Column::Path,
+			media::Column::Pages,
+		])
+		.column(media_metadata::Column::PageCount)
+		.left_join(media_metadata::Entity)
+		.join_rev(
+			JoinType::LeftJoin,
+			page_dimension::Entity::belongs_to(media_metadata::Entity)
+				.from(page_dimension::Column::MetadataId)
+				.to(media_metadata::Column::Id)
+				.into(),
+		)
+		.filter(media::Column::Id.eq(id.clone()))
+		.into_model::<MediaWithDimensions>()
+		.one(ctx.conn.as_ref())
+		.await
+		.map_err(|e| JobError::TaskFailed(e.to_string()))?
+		.ok_or_else(|| {
+			JobError::TaskFailed(format!("Unable to find media item with id: {id}"))
+		})?;
 
 	// Get page count if present
-	let page_count = metadata.page_count.ok_or_else(|| {
-		JobError::TaskFailed(format!(
-			"Unable to retrieve page count for media item: {}",
-			media_item.id
-		))
-	})?;
+	let page_count = media_item.page_count.unwrap_or(media_item.pages);
 
 	// Iterate over each page, checking the image's dimensions
 	let mut image_dimensions: Vec<PageDimension> =
@@ -73,52 +92,23 @@ pub(crate) async fn execute(
 
 	ctx.report_progress(JobProgress::msg("Writing to database"));
 
-	// Update stored page count
-	// Check if dimensions are stored already or not yet stored
-	if let Some(current_dimensions) = metadata.page_dimensions {
-		// There are already dimensions, we only need to update them if there's a mismatch
-		if current_dimensions.dimensions != image_dimensions {
-			// Serialize collected dimensions
-			let dimensions_str = dimension_vec_to_string(image_dimensions);
+	let update_expr = match media_item.page_analysis {
+		Some(PageAnalysis { dimensions }) if dimensions != image_dimensions => {
+			Expr::value(PageAnalysis {
+				dimensions: image_dimensions,
+			})
+		},
+		None => Expr::value(PageAnalysis {
+			dimensions: image_dimensions,
+		}),
+		_ => return Ok(()),
+	};
 
-			ctx.db
-				.page_dimensions()
-				.update(
-					page_dimensions::id::equals(current_dimensions.id),
-					vec![page_dimensions::dimensions::set(dimensions_str)],
-				)
-				.exec()
-				.await?;
-		}
-	} else {
-		// There is no dimensions data, we need to create a new database object for them
-		// Serialize collected dimensions
-		let dimensions_str = dimension_vec_to_string(image_dimensions);
-
-		// Create a new dimensions database object
-		let dimensions_entity = ctx
-			.db
-			.page_dimensions()
-			.create(
-				dimensions_str,
-				media_metadata::id::equals(metadata.id.clone()),
-				vec![],
-			)
-			.exec()
-			.await?;
-
-		// Link it to the media's metadata
-		ctx.db
-			.media_metadata()
-			.update(
-				media_metadata::id::equals(metadata.id),
-				vec![media_metadata::page_dimensions::connect(
-					page_dimensions::id::equals(dimensions_entity.id),
-				)],
-			)
-			.exec()
-			.await?;
-	}
+	media_metadata::Entity::update_many()
+		.filter(media_metadata::Column::Id.eq(media_item.id))
+		.col_expr(media_metadata::Column::PageAnalysis, update_expr)
+		.exec(ctx.conn.as_ref())
+		.await?;
 
 	Ok(())
 }

@@ -14,7 +14,7 @@ type Props = {
 	onDidChange?: (
 		values: Pick<
 			CreateOrUpdateLibrarySchema,
-			'process_metadata' | 'generate_file_hashes' | 'generate_koreader_hashes'
+			'process_metadata' | 'watch' | 'generate_file_hashes' | 'generate_koreader_hashes'
 		>,
 	) => void
 }
@@ -24,13 +24,14 @@ export default function ScannerOptInFeatures({ onDidChange }: Props) {
 	const ctx = useLibraryContextSafe()
 	const isCreating = !ctx?.library
 
-	const [processMetadata, generateFileHashes, koreaderHashes] = form.watch([
+	const [processMetadata, watch, generateFileHashes, koreaderHashes] = form.watch([
 		'process_metadata',
+		'watch',
 		'generate_file_hashes',
 		'generate_koreader_hashes',
 	])
 	const [debouncedOptions] = useDebouncedValue(
-		{ generateFileHashes, processMetadata, koreaderHashes },
+		{ processMetadata, watch, generateFileHashes, koreaderHashes },
 		1000,
 	)
 
@@ -43,19 +44,22 @@ export default function ScannerOptInFeatures({ onDidChange }: Props) {
 		if (!ctx?.library || !onDidChange) return
 
 		const existingProcessMetadata = ctx.library.config.process_metadata
+		const existingWatch = ctx.library.config.watch
 		const existingHashFiles = ctx.library.config.generate_file_hashes
 		const existingKoreaderHashes = ctx.library.config.generate_koreader_hashes
-		const { processMetadata, generateFileHashes, koreaderHashes } = debouncedOptions
+		const { processMetadata, watch, generateFileHashes, koreaderHashes } = debouncedOptions
 
 		const didChange =
 			processMetadata !== existingProcessMetadata ||
+			watch !== existingWatch ||
 			generateFileHashes !== existingHashFiles ||
 			koreaderHashes !== existingKoreaderHashes
 
 		if (didChange) {
 			onDidChange({
-				generate_file_hashes: generateFileHashes,
 				process_metadata: processMetadata,
+				watch: watch,
+				generate_file_hashes: generateFileHashes,
 				generate_koreader_hashes: koreaderHashes,
 			})
 		}
@@ -84,6 +88,16 @@ export default function ScannerOptInFeatures({ onDidChange }: Props) {
 				checked={processMetadata}
 				onClick={() => form.setValue('process_metadata', !processMetadata)}
 				{...form.register('process_metadata')}
+			/>
+
+			<CheckBox
+				id="watch"
+				variant="primary"
+				label={t(getKey('watch.label'))}
+				description={t(getKey('watch.description'))}
+				checked={watch}
+				onClick={() => form.setValue('watch', !watch)}
+				{...form.register('watch')}
 			/>
 
 			<CheckBox

@@ -4,9 +4,7 @@
 #![recursion_limit = "256"]
 #![warn(clippy::dbg_macro)]
 
-use std::sync::Arc;
-
-// TODO: cleanup hoisted crates to only what is needed
+use std::{str::FromStr, sync::Arc};
 
 pub mod config;
 pub mod db;
@@ -19,15 +17,20 @@ mod utils;
 mod context;
 pub mod error;
 
+// TODO(sea-orm): Remove this once the sea-orm issue is fixed
 #[rustfmt::skip]
 #[allow(warnings, unused)]
 pub mod prisma;
 
 use config::logging::STUMP_SHADOW_TEXT;
 use config::StumpConfig;
-use db::{DBPragma, JournalMode};
+use db::JournalMode;
 use job::{JobController, JobScheduler};
-use prisma::server_config;
+use models::entity::server_config;
+use sea_orm::{
+	prelude::*, DatabaseBackend, EntityTrait, PaginatorTrait, QuerySelect, SelectColumns,
+	Statement,
+};
 
 pub use context::Ctx;
 pub use error::{CoreError, CoreResult};
@@ -123,23 +126,25 @@ impl StumpCore {
 
 	/// Runs the database migrations
 	pub async fn run_migrations(&self) -> Result<(), CoreError> {
-		db::migration::run_migrations(&self.ctx.db).await
+		// db::migration::run_migrations(&self.ctx.db).await
+		// TODO(sea-orm): Fix
+		Ok(())
 	}
 
 	/// Initializes the server configuration record. This will only create a new record if one
 	/// does not already exist.
 	pub async fn init_server_config(&self) -> Result<(), CoreError> {
-		let config_exists = self
-			.ctx
-			.db
-			.server_config()
-			.find_first(vec![])
-			.exec()
-			.await?
-			.is_some();
+		let config_exists = server_config::Entity::find()
+			.count(self.ctx.conn.as_ref())
+			.await? > 0;
 
 		if !config_exists {
-			self.ctx.db.server_config().create(vec![]).exec().await?;
+			let active_model = server_config::ActiveModel {
+				..Default::default()
+			};
+			server_config::Entity::insert(active_model)
+				.exec(self.ctx.conn.as_ref())
+				.await?;
 		}
 
 		Ok(())
@@ -149,28 +154,31 @@ impl StumpCore {
 	// to reduce friction of setting up the server for folks who might not understand encryption keys.
 	/// Initializes the encryption key for the database. This will only set the encryption key
 	/// if one does not already exist.
+	#[tracing::instrument(skip(self), err)]
 	pub async fn init_encryption(&self) -> Result<EncryptionKeySet, CoreError> {
-		let client = self.ctx.db.clone();
+		let conn = self.ctx.conn.as_ref();
 
-		let encryption_key_set = client
-			.server_config()
-			.find_first(vec![server_config::encryption_key::not(None)])
-			.exec()
+		let encryption_key_set = server_config::Entity::find()
+			.select_only()
+			.select_column(server_config::Column::EncryptionKey)
+			.into_model::<server_config::EncryptionKeySelect>()
+			.one(conn)
 			.await?
-			.is_some();
+			.is_some_and(|config| config.encryption_key.is_some());
+		tracing::trace!(encryption_key_set, "Encryption key set");
 
 		if encryption_key_set {
 			Ok(false)
 		} else {
 			let encryption_key = utils::create_encryption_key()?;
-			let affected_rows = client
-				.server_config()
-				.update_many(
-					vec![],
-					vec![server_config::encryption_key::set(Some(encryption_key))],
+			let affected_rows = server_config::Entity::update_many()
+				.col_expr(
+					server_config::Column::EncryptionKey,
+					Expr::value(Some(encryption_key)),
 				)
-				.exec()
-				.await?;
+				.exec(conn)
+				.await?
+				.rows_affected;
 			tracing::trace!(affected_rows, "Updated encryption key");
 			if affected_rows > 1 {
 				tracing::warn!("More than one encryption key was updated? This is definitely not expected");
@@ -179,50 +187,63 @@ impl StumpCore {
 		}
 	}
 
+	// TODO(sea-orm): I don't think this is actually needed anymore!
 	/// Initializes the journal mode for the database. This will only set the journal mode to WAL
 	/// provided a few conditions are met:
 	///
 	/// 1. The initial WAL setup has not already been completed on first run
 	/// 2. The journal mode is not already set to WAL
 	pub async fn init_journal_mode(&self) -> Result<JournalModeChanged, CoreError> {
-		let client = self.ctx.db.clone();
+		let conn = self.ctx.conn.as_ref();
 
-		let wal_mode_setup_completed = client
-			.server_config()
-			.find_first(vec![server_config::initial_wal_setup_complete::equals(
-				true,
-			)])
-			.exec()
-			.await?
-			.is_some();
+		let wal_mode_setup_completed = server_config::Entity::find()
+			.filter(server_config::Column::InitialWalSetupComplete.eq(true))
+			.count(conn)
+			.await? > 0;
 
 		if wal_mode_setup_completed {
 			tracing::trace!("Initial WAL setup has already been completed, skipping");
 			Ok(false)
 		} else {
-			let journal_mode = client.get_journal_mode().await?;
+			let journal_mode = match conn
+				.query_one(Statement::from_string(
+					DatabaseBackend::Sqlite,
+					"PRAGMA journal_mode;",
+				))
+				.await?
+			{
+				Some(result) => {
+					let raw = result.try_get::<String>("", "journal_mode")?;
+					JournalMode::from_str(&raw).map_err(|e| {
+						CoreError::InternalError(format!(
+							"Failed to parse journal mode: {}",
+							e
+						))
+					})?
+				},
+				None => {
+					tracing::warn!("No journal mode found! Defaulting to WAL assumption");
+					JournalMode::default()
+				},
+			};
 
 			if journal_mode == JournalMode::WAL {
 				tracing::trace!("Journal mode is already set to WAL, skipping");
 			} else {
 				tracing::trace!("Journal mode is not set to WAL!");
-				let updated_journal_mode =
-					client.set_journal_mode(JournalMode::WAL).await?;
-				tracing::debug!(
-					"Initial journal mode has been set to {:?}",
-					updated_journal_mode
-				);
+				let result = conn.execute_unprepared("PRAGMA journal_mode=WAL;").await?;
+				tracing::debug!(?result, "Set journal mode to WAL");
 			}
 
-			let _affected_rows = client
-				.server_config()
-				.update_many(
-					vec![],
-					vec![server_config::initial_wal_setup_complete::set(true)],
+			let affected_rows = server_config::Entity::update_many()
+				.col_expr(
+					server_config::Column::InitialWalSetupComplete,
+					Expr::value(true),
 				)
-				.exec()
-				.await?;
-			tracing::trace!(_affected_rows, "Updated initial WAL setup complete flag");
+				.exec(conn)
+				.await?
+				.rows_affected;
+			tracing::trace!(affected_rows, "Updated initial WAL setup complete flag");
 
 			Ok(journal_mode != JournalMode::WAL)
 		}
@@ -230,6 +251,10 @@ impl StumpCore {
 
 	pub async fn init_scheduler(&self) -> Result<Arc<JobScheduler>, CoreError> {
 		JobScheduler::init(self.ctx.arced()).await
+	}
+
+	pub async fn init_library_watcher(&self) -> CoreResult<()> {
+		self.ctx.library_watcher.init().await
 	}
 }
 
@@ -278,222 +303,223 @@ mod tests {
 
 		file.write_all(b"// CORE TYPE GENERATION\n\n")?;
 
-		file.write_all(format!("{}\n\n", ts_export::<PaginationQuery>()?).as_bytes())?;
+		// TODO(sea-orm): Fix (or remove??)
+		// file.write_all(format!("{}\n\n", ts_export::<PaginationQuery>()?).as_bytes())?;
 
-		file.write_all(format!("{}\n\n", ts_export::<CoreEvent>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<CoreEvent>()?).as_bytes())?;
 
-		file.write_all(format!("{}\n\n", ts_export::<EntityVisibility>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<AccessRole>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<EntityVisibility>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<AccessRole>()?).as_bytes())?;
 
-		file.write_all(format!("{}\n\n", ts_export::<Log>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LogMetadata>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LogLevel>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<Log>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<LogMetadata>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<LogLevel>()?).as_bytes())?;
 
-		file.write_all(format!("{}\n\n", ts_export::<PersistedJob>()?).as_bytes())?;
-		// file.write_all(format!("{}\n\n", ts_export::<CoreJobOutput>()?).as_bytes())?;
-		// TODO: Fix this... Must move all job defs to the core... Otherwise, the `unknown` type swallows the others in the union
-		file.write_all(
-			"export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput\n\n".to_string()
-			.as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<JobUpdate>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<JobProgress>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LibraryScanOutput>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<SeriesScanOutput>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ThumbnailGenerationJobVariant>()?).as_bytes(),
-		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ThumbnailGenerationJobParams>()?).as_bytes(),
-		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ThumbnailGenerationOutput>()?).as_bytes(),
-		)?;
-
-		file.write_all(format!("{}\n\n", ts_export::<User>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<PartialUser>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<UserPermission>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<AgeRestriction>()?).as_bytes())?;
-
-		file.write_all(format!("{}\n\n", ts_export::<APIKey>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<InheritPermissionValue>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<APIKeyPermissions>()?).as_bytes())?;
-
-		file.write_all(format!("{}\n\n", ts_export::<SupportedFont>()?).as_bytes())?;
-
-		file.write_all(format!("{}\n\n", ts_export::<NavigationMode>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<HomeItem>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<NavigationItemDisplayOptions>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<NavigationItem>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ArrangementItem<()>>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<Arrangement<()>>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<UserPreferences>()?).as_bytes())?;
-
-		file.write_all(format!("{}\n\n", ts_export::<LoginActivity>()?).as_bytes())?;
-
-		file.write_all(format!("{}\n\n", ts_export::<EmailerSendTo>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<EmailerConfig>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<EmailerClientConfig>()?).as_bytes(),
-		)?;
-
-		file.write_all(format!("{}\n\n", ts_export::<SMTPEmailer>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<RegisteredEmailDevice>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<EmailerSendRecord>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<AttachmentMeta>()?).as_bytes())?;
-
-		file.write_all(format!("{}\n\n", ts_export::<ReadingDirection>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<ReadingMode>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ReadingImageScaleFit>()?).as_bytes(),
-		)?;
-
-		file.write_all(format!("{}\n\n", ts_export::<FileStatus>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<Library>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LibraryPattern>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LibraryScanMode>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<CustomVisit>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<ScanConfig>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<ScanOptions>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LastLibraryScan>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<IgnoreRules>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LibraryConfig>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LibraryStats>()?).as_bytes())?;
-
-		file.write_all(format!("{}\n\n", ts_export::<SeriesMetadata>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<Series>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<MediaMetadata>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<Media>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<Bookmark>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<MediaAnnotation>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ActiveReadingSession>()?).as_bytes(),
-		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<FinishedReadingSession>()?).as_bytes(),
-		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ProgressUpdateReturn>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<PageDimension>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<PageDimensionsEntity>()?).as_bytes(),
-		)?;
-
-		file.write_all(
-			format!("{}\n\n", ts_export::<ReactTableColumnSort>()?).as_bytes(),
-		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ReactTableGlobalSort>()?).as_bytes(),
-		)?;
-
-		file.write_all(format!("{}\n\n", ts_export::<Filter<()>>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<NumericFilter<()>>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<NumericRange<()>>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<FilterGroup<()>>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<FilterJoin>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<SmartListItemGrouping>()?).as_bytes(),
-		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<SmartListItemGroup<()>>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<SmartListItems>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<SmartList>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<SmartFilter<()>>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<MediaSmartFilter>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<MediaMetadataSmartFilter>()?).as_bytes(),
-		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<SeriesMetadataSmartFilter>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<SeriesSmartFilter>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LibrarySmartFilter>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<SmartListView>()?).as_bytes())?;
-
-		file.write_all(format!("{}\n\n", ts_export::<BookClub>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<BookClubMember>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<BookClubMemberRole>()?).as_bytes())?;
-		// TODO: https://github.com/oscartbeaumont/specta/issues/65 -> v2 stable will fix this
+		// file.write_all(format!("{}\n\n", ts_export::<PersistedJob>()?).as_bytes())?;
+		// // file.write_all(format!("{}\n\n", ts_export::<CoreJobOutput>()?).as_bytes())?;
+		// // TODO: Fix this... Must move all job defs to the core... Otherwise, the `unknown` type swallows the others in the union
 		// file.write_all(
-		// 	format!("{}\n\n", ts_export::<BookClubMemberRoleSpec>()?).as_bytes(),
+		// 	"export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput\n\n".to_string()
+		// 	.as_bytes(),
 		// )?;
-		file.write_all(
-			format!(
-				"{}\n\n",
-				"export type BookClubMemberRoleSpec = Record<BookClubMemberRole, string>"
-			)
-			.as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<BookClubSchedule>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<BookClubExternalBook>()?).as_bytes(),
-		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<BookClubBookDetails>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<BookClubBook>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<BookClubDiscussion>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<BookClubDiscussionMessage>()?).as_bytes(),
-		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<BookClubDiscussionMessageLike>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<BookClubInvitation>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<JobUpdate>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<JobProgress>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<LibraryScanOutput>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<SeriesScanOutput>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ThumbnailGenerationJobVariant>()?).as_bytes(),
+		// )?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ThumbnailGenerationJobParams>()?).as_bytes(),
+		// )?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ThumbnailGenerationOutput>()?).as_bytes(),
+		// )?;
 
-		file.write_all(format!("{}\n\n", ts_export::<Tag>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LayoutMode>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<User>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<PartialUser>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<UserPermission>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<AgeRestriction>()?).as_bytes())?;
 
-		file.write_all(format!("{}\n\n", ts_export::<Epub>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<UpdateEpubProgress>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<EpubContent>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<APIKey>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<InheritPermissionValue>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<APIKeyPermissions>()?).as_bytes())?;
 
-		file.write_all(format!("{}\n\n", ts_export::<JobStatus>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<JobSchedulerConfig>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<SupportedFont>()?).as_bytes())?;
 
-		file.write_all(format!("{}\n\n", ts_export::<ReadingListItem>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ReadingListVisibility>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<ReadingList>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<CreateReadingList>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<NavigationMode>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<HomeItem>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<NavigationItemDisplayOptions>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<NavigationItem>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ArrangementItem<()>>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<Arrangement<()>>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<UserPreferences>()?).as_bytes())?;
 
-		file.write_all(format!("{}\n\n", ts_export::<ImageResizeMode>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<ImageResizeOptions>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ScaledDimensionResize>()?).as_bytes(),
-		)?;
-		file.write_all(format!("{}\n\n", ts_export::<ImageFormat>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<ImageProcessorOptions>()?).as_bytes(),
-		)?;
+		// file.write_all(format!("{}\n\n", ts_export::<LoginActivity>()?).as_bytes())?;
 
-		file.write_all(format!("{}\n\n", ts_export::<DirectoryListing>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<DirectoryListingFile>()?).as_bytes(),
-		)?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<DirectoryListingInput>()?).as_bytes(),
-		)?;
+		// file.write_all(format!("{}\n\n", ts_export::<EmailerSendTo>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<EmailerConfig>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<EmailerClientConfig>()?).as_bytes(),
+		// )?;
 
-		file.write_all(format!("{}\n\n", ts_export::<Direction>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<PageParams>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<QueryOrder>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<PageQuery>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<CursorQuery>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<CursorInfo>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<PageInfo>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<Pagination>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<SMTPEmailer>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<RegisteredEmailDevice>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<EmailerSendRecord>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<AttachmentMeta>()?).as_bytes())?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<ReadingDirection>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<ReadingMode>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ReadingImageScaleFit>()?).as_bytes(),
+		// )?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<FileStatus>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<Library>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<LibraryPattern>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<LibraryScanMode>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<CustomVisit>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<ScanConfig>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<ScanOptions>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<LastLibraryScan>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<IgnoreRules>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<LibraryConfig>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<LibraryStats>()?).as_bytes())?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<SeriesMetadata>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<Series>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<MediaMetadata>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<Media>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<Bookmark>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<MediaAnnotation>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ActiveReadingSession>()?).as_bytes(),
+		// )?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<FinishedReadingSession>()?).as_bytes(),
+		// )?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ProgressUpdateReturn>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<PageDimension>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<PageDimensionsEntity>()?).as_bytes(),
+		// )?;
+
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ReactTableColumnSort>()?).as_bytes(),
+		// )?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ReactTableGlobalSort>()?).as_bytes(),
+		// )?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<Filter<()>>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<NumericFilter<()>>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<NumericRange<()>>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<FilterGroup<()>>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<FilterJoin>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<SmartListItemGrouping>()?).as_bytes(),
+		// )?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<SmartListItemGroup<()>>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<SmartListItems>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<SmartList>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<SmartFilter<()>>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<MediaSmartFilter>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<MediaMetadataSmartFilter>()?).as_bytes(),
+		// )?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<SeriesMetadataSmartFilter>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<SeriesSmartFilter>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<LibrarySmartFilter>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<SmartListView>()?).as_bytes())?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<BookClub>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<BookClubMember>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<BookClubMemberRole>()?).as_bytes())?;
+		// // TODO: https://github.com/oscartbeaumont/specta/issues/65 -> v2 stable will fix this
+		// // file.write_all(
+		// // 	format!("{}\n\n", ts_export::<BookClubMemberRoleSpec>()?).as_bytes(),
+		// // )?;
+		// file.write_all(
+		// 	format!(
+		// 		"{}\n\n",
+		// 		"export type BookClubMemberRoleSpec = Record<BookClubMemberRole, string>"
+		// 	)
+		// 	.as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<BookClubSchedule>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<BookClubExternalBook>()?).as_bytes(),
+		// )?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<BookClubBookDetails>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<BookClubBook>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<BookClubDiscussion>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<BookClubDiscussionMessage>()?).as_bytes(),
+		// )?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<BookClubDiscussionMessageLike>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<BookClubInvitation>()?).as_bytes())?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<Tag>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<LayoutMode>()?).as_bytes())?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<Epub>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<UpdateEpubProgress>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<EpubContent>()?).as_bytes())?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<JobStatus>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<JobSchedulerConfig>()?).as_bytes())?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<ReadingListItem>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ReadingListVisibility>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<ReadingList>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<CreateReadingList>()?).as_bytes())?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<ImageResizeMode>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<ImageResizeOptions>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ScaledDimensionResize>()?).as_bytes(),
+		// )?;
+		// file.write_all(format!("{}\n\n", ts_export::<ImageFormat>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<ImageProcessorOptions>()?).as_bytes(),
+		// )?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<DirectoryListing>()?).as_bytes())?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<DirectoryListingFile>()?).as_bytes(),
+		// )?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<DirectoryListingInput>()?).as_bytes(),
+		// )?;
+
+		// file.write_all(format!("{}\n\n", ts_export::<Direction>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<PageParams>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<QueryOrder>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<PageQuery>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<CursorQuery>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<CursorInfo>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<PageInfo>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<Pagination>()?).as_bytes())?;
 
 		Ok(())
 	}

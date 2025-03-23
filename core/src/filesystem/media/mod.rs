@@ -1,12 +1,14 @@
 pub mod analyze_media_job;
 mod builder;
 mod format;
+mod metadata;
 mod process;
 mod utils;
 
 pub use crate::filesystem::media::epub::EpubProcessor;
-pub(crate) use builder::{MediaBuilder, SeriesBuilder};
+pub(crate) use builder::{BuiltMedia, MediaBuilder};
 pub use format::*;
+pub use metadata::*;
 pub use process::*;
 pub use utils::is_accepted_cover_name;
 

@@ -5,6 +5,9 @@ use axum::{
 	Extension, Json, Router,
 };
 use chrono::{DateTime, Duration, FixedOffset};
+use models::shared::image_processor_options::{
+	ImageProcessorOptions, SupportedImageFormat,
+};
 use prisma_client_rust::{chrono::Utc, not, or, raw, Direction, PrismaValue};
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
@@ -27,17 +30,19 @@ use stump_core::{
 			FileStatus, Library, LibraryConfig, LibraryScanMode, LibraryStats, Media,
 			Series, TagName, User, UserPermission,
 		},
-		query::pagination::{Pageable, Pagination, PaginationQuery},
+		query::pagination::{
+			Pageable, PageableLibraries, PageableSeries, Pagination, PaginationQuery,
+		},
 		PrismaCountTrait,
 	},
 	filesystem::{
-		analyze_media_job::AnalyzeMediaJob,
 		get_thumbnail,
 		image::{
 			self, generate_book_thumbnail, place_thumbnail, remove_thumbnails,
-			GenerateThumbnailOptions, ImageFormat, ImageProcessorOptions,
-			ThumbnailGenerationJob, ThumbnailGenerationJobParams,
+			GenerateThumbnailOptions, ThumbnailGenerationJob,
+			ThumbnailGenerationJobParams,
 		},
+		media::analyze_media_job::AnalyzeMediaJob,
 		scanner::{LastLibraryScan, LibraryScanJob, LibraryScanRecord, ScanOptions},
 		ContentType,
 	},
@@ -53,7 +58,8 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::{
-		chain_optional_iter, FilterableQuery, LibraryFilter, MediaFilter, SeriesFilter,
+		chain_optional_iter, FilterableLibraryQuery, FilterableQuery, LibraryFilter,
+		MediaFilter, SeriesFilter,
 	},
 	middleware::auth::{auth_middleware, RequestContext},
 	routers::api::filters::{
@@ -75,10 +81,10 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			"/libraries/last-visited",
 			Router::new()
 				.route("/", get(get_last_visited_library))
-				.route("/:id", put(update_last_visited_library)),
+				.route("/{id}", put(update_last_visited_library)),
 		)
 		.nest(
-			"/libraries/:id",
+			"/libraries/{id}",
 			Router::new()
 				.route(
 					"/",
@@ -322,7 +328,7 @@ async fn get_libraries_stats(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/libraries/:id",
+	path = "/api/v1/libraries/{id}",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID")
@@ -363,7 +369,7 @@ async fn get_library_by_id(
 // TODO: remove? Not used on client
 #[utoipa::path(
 	get,
-	path = "/api/v1/libraries/:id/series",
+	path = "/api/v1/libraries/{id}/series",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID"),
@@ -531,7 +537,7 @@ pub(crate) async fn get_library_thumbnail(
 	id: &str,
 	first_series: series_or_library_thumbnail::Data,
 	first_book: Option<series_or_library_thumbnail::media::Data>,
-	image_format: Option<ImageFormat>,
+	image_format: Option<SupportedImageFormat>,
 	config: &StumpConfig,
 ) -> APIResult<(ContentType, Vec<u8>)> {
 	let generated_thumb =
@@ -547,7 +553,7 @@ pub(crate) async fn get_library_thumbnail(
 // TODO: ImageResponse for utoipa
 #[utoipa::path(
 	get,
-	path = "/api/v1/libraries/:id/thumbnail",
+	path = "/api/v1/libraries/{id}/thumbnail",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID"),
@@ -600,7 +606,9 @@ async fn get_library_thumbnail_handler(
 		.as_ref()
 		.map(|l| l.config.clone())
 		.map(LibraryConfig::from);
-	let image_format = library_config.and_then(|o| o.thumbnail_config.map(|c| c.format));
+	// let image_format = library_config.and_then(|o| o.thumbnail_config.map(|c| c.format));
+	// TODO(sea-orm): Fix
+	let image_format: Option<SupportedImageFormat> = None;
 
 	get_library_thumbnail(&id, first_series, first_book, image_format, &ctx.config)
 		.await
@@ -620,7 +628,7 @@ pub struct PatchLibraryThumbnail {
 
 #[utoipa::path(
     patch,
-    path = "/api/v1/libraries/:id/thumbnail",
+    path = "/api/v1/libraries/{id}/thumbnail",
     tag = "library",
     params(
         ("id" = String, Path, description = "The ID of the library")
@@ -679,36 +687,41 @@ async fn patch_library_thumbnail(
 		.ok_or(APIError::NotFound(String::from("Series relation missing")))?
 		.library()?
 		.ok_or(APIError::NotFound(String::from("Library relation missing")))?;
-	let image_options = library
-		.config()?
-		.thumbnail_config
-		.clone()
-		.map(ImageProcessorOptions::try_from)
-		.transpose()?
-		.unwrap_or_else(|| {
-			tracing::warn!(
-				"Failed to parse existing thumbnail config! Using a default config"
-			);
-			ImageProcessorOptions::default()
-		})
-		.with_page(target_page);
 
-	let format = image_options.format.clone();
-	let (_, path_buf, _) = generate_book_thumbnail(
-		&media,
-		GenerateThumbnailOptions {
-			image_options,
-			core_config: ctx.config.as_ref().clone(),
-			force_regen: true,
-			filename: Some(id.clone()),
-		},
-	)
-	.await?;
+	// TODO(sea-orm): Fix
+	unimplemented!("SeaORM migration")
 
-	Ok(ImageResponse::from((
-		ContentType::from(format),
-		fs::read(path_buf).await?,
-	)))
+	// let image_options = library
+	// 	.config()?
+	// 	.thumbnail_config
+	// 	.clone()
+	// 	.map(ImageProcessorOptions::try_from)
+	// 	.transpose()?
+	// 	.unwrap_or_else(|| {
+	// 		tracing::warn!(
+	// 			"Failed to parse existing thumbnail config! Using a default config"
+	// 		);
+	// 		ImageProcessorOptions::default()
+	// 	})
+	// 	.with_page(target_page);
+
+	// let format = image_options.format.clone();
+
+	// let (_, path_buf, _) = generate_book_thumbnail(
+	// 	&media,
+	// 	GenerateThumbnailOptions {
+	// 		image_options,
+	// 		core_config: ctx.config.as_ref().clone(),
+	// 		force_regen: true,
+	// 		filename: Some(id.clone()),
+	// 	},
+	// )
+	// .await?;
+
+	// Ok(ImageResponse::from((
+	// 	ContentType::from(format),
+	// 	fs::read(path_buf).await?,
+	// )))
 }
 
 async fn replace_library_thumbnail(
@@ -766,7 +779,7 @@ async fn replace_library_thumbnail(
 /// Deletes all media thumbnails in a library by id, if the current user has access to it.
 #[utoipa::path(
 	delete,
-	path = "/api/v1/libraries/:id/thumbnail",
+	path = "/api/v1/libraries/{id}/thumbnail",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID"),
@@ -813,7 +826,7 @@ async fn delete_library_thumbnails(
 #[skip_serializing_none]
 #[derive(Debug, Deserialize, ToSchema, Type)]
 pub struct GenerateLibraryThumbnails {
-	pub image_options: Option<ImageProcessorOptions>,
+	// pub image_options: Option<ImageProcessorOptions>,
 	#[serde(default)]
 	pub force_regenerate: bool,
 }
@@ -821,7 +834,7 @@ pub struct GenerateLibraryThumbnails {
 /// Generate thumbnails for all the media in a library by id, if the current user has access to it.
 #[utoipa::path(
 	post,
-	path = "/api/v1/libraries/:id/thumbnail/generate",
+	path = "/api/v1/libraries/{id}/thumbnail/generate",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID"),
@@ -852,30 +865,34 @@ async fn generate_library_thumbnails(
 		.await?
 		.ok_or(APIError::NotFound("Library not found".to_string()))?;
 	let library_config = library.config()?.to_owned();
-	let existing_options = if let Some(config) = library_config.thumbnail_config {
-		// I hard error here so that we don't accidentally generate thumbnails in an invalid or
-		// otherwise undesired way per the existing (but not properly parsed) config
-		Some(ImageProcessorOptions::try_from(config)?)
-	} else {
-		None
-	};
-	let options = input.image_options.or(existing_options).unwrap_or_default();
+	// let existing_options = if let Some(config) = library_config.thumbnail_config {
+	// 	// I hard error here so that we don't accidentally generate thumbnails in an invalid or
+	// 	// otherwise undesired way per the existing (but not properly parsed) config
+	// 	Some(ImageProcessorOptions::try_from(config)?)
+	// } else {
+	// 	None
+	// };
+	// let options = input.image_options.or(existing_options).unwrap_or_default();
 	let config =
 		ThumbnailGenerationJobParams::single_library(library.id, input.force_regenerate);
-	ctx.enqueue_job(ThumbnailGenerationJob::new(options, config))
-		.map_err(|e| {
-			error!(?e, "Failed to enqueue thumbnail generation job");
-			APIError::InternalServerError(
-				"Failed to enqueue thumbnail generation job".to_string(),
-			)
-		})?;
+	// TODO(sea-orm): Fix
+	ctx.enqueue_job(ThumbnailGenerationJob::new(
+		ImageProcessorOptions::default(),
+		config,
+	))
+	.map_err(|e| {
+		error!(?e, "Failed to enqueue thumbnail generation job");
+		APIError::InternalServerError(
+			"Failed to enqueue thumbnail generation job".to_string(),
+		)
+	})?;
 
 	Ok(Json(()))
 }
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/libraries/:id/excluded-users",
+	path = "/api/v1/libraries/{id}/excluded-users",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID")
@@ -918,7 +935,7 @@ pub struct UpdateLibraryExcludedUsers {
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/libraries/:id/excluded-users",
+	path = "/api/v1/libraries/{id}/excluded-users",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID")
@@ -1007,7 +1024,7 @@ pub struct LastScanDetails {
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/libraries/:id/last-scan",
+	path = "/api/v1/libraries/{id}/last-scan",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID")
@@ -1106,7 +1123,7 @@ async fn delete_library_scan_history(
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/libraries/:id/scan",
+	path = "/api/v1/libraries/{id}/scan",
 	tag = "library",
 	responses(
 		(status = 200, description = "Successfully queued library scan"),
@@ -1161,7 +1178,7 @@ pub struct CleanLibraryResponse {
 
 #[utoipa::path(
 	put,
-	path = "/api/v1/libraries/:id/clean",
+	path = "/api/v1/libraries/{id}/clean",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID")
@@ -1366,6 +1383,8 @@ async fn create_library(
 	// TODO(prisma-nested-create): Refactor once nested create is supported
 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
 	let library_config = input.config.unwrap_or_default();
+	let watch = library_config.watch;
+	let path = input.path.clone();
 	let transaction_result: Result<Library, APIError> = db
 		._transaction()
 		.with_timeout(Duration::seconds(30).num_milliseconds() as u64)
@@ -1373,10 +1392,10 @@ async fn create_library(
 			let ignore_rules = (!library_config.ignore_rules.is_empty())
 				.then(|| library_config.ignore_rules.as_bytes())
 				.transpose()?;
-			let thumbnail_config = library_config
-				.thumbnail_config
-				.map(|options| options.as_bytes())
-				.transpose()?;
+			// let thumbnail_config = library_config
+			// 	.thumbnail_config
+			// 	.map(|options| options.as_bytes())
+			// 	.transpose()?;
 
 			let library_config = client
 				.library_config()
@@ -1408,8 +1427,9 @@ async fn create_library(
 					library_config::library_pattern::set(
 						library_config.library_pattern.to_string(),
 					),
-					library_config::thumbnail_config::set(thumbnail_config),
+					// library_config::thumbnail_config::set(thumbnail_config),
 					library_config::ignore_rules::set(ignore_rules),
+					library_config::watch::set(library_config.watch),
 				])
 				.exec()
 				.await?;
@@ -1512,6 +1532,16 @@ async fn create_library(
 		})?;
 	}
 
+	if watch {
+		ctx.library_watcher
+			.add_watcher(path.into())
+			.await
+			.map_err(|e| {
+				error!(?e, "Failed to add library watcher");
+				APIError::InternalServerError("Failed to add library watcher".to_string())
+			})?;
+	}
+
 	Ok(Json(library))
 }
 
@@ -1540,7 +1570,7 @@ pub struct UpdateLibrary {
 // TODO(prisma-nested-create): Refactor once nested create is supported
 #[utoipa::path(
 	put,
-	path = "/api/v1/libraries/:id",
+	path = "/api/v1/libraries/{id}",
 	tag = "library",
 	request_body = UpdateLibrary,
 	params(
@@ -1584,6 +1614,8 @@ async fn update_library(
 		.ok_or(APIError::NotFound("Library not found".to_string()))?;
 	let existing_tags = existing_library.tags;
 
+	let watch = input.config.watch;
+	let path = input.path.clone();
 	let update_result: Result<Library, APIError> = db
 		._transaction()
 		.with_timeout(Duration::seconds(30).num_milliseconds() as u64)
@@ -1592,10 +1624,10 @@ async fn update_library(
 			let ignore_rules = (!library_config.ignore_rules.is_empty())
 				.then(|| library_config.ignore_rules.as_bytes())
 				.transpose()?;
-			let thumbnail_config = library_config
-				.thumbnail_config
-				.map(|options| options.as_bytes())
-				.transpose()?;
+			// let thumbnail_config = library_config
+			// 	.thumbnail_config
+			// 	.map(|options| options.as_bytes())
+			// 	.transpose()?;
 
 			client
 				.library_config()
@@ -1627,7 +1659,8 @@ async fn update_library(
 							library_config.generate_koreader_hashes,
 						),
 						library_config::ignore_rules::set(ignore_rules),
-						library_config::thumbnail_config::set(thumbnail_config),
+						library_config::watch::set(library_config.watch),
+						// library_config::thumbnail_config::set(thumbnail_config),
 					],
 				)
 				.exec()
@@ -1746,12 +1779,32 @@ async fn update_library(
 		})?;
 	}
 
+	if watch {
+		ctx.library_watcher
+			.add_watcher(path.into())
+			.await
+			.map_err(|e| {
+				error!(?e, "Failed to add library watcher");
+				APIError::InternalServerError("Failed to add library watcher".to_string())
+			})?;
+	} else {
+		ctx.library_watcher
+			.remove_watcher(path.into())
+			.await
+			.map_err(|e| {
+				error!(?e, "Failed to remove library watcher");
+				APIError::InternalServerError(
+					"Failed to remove library watcher".to_string(),
+				)
+			})?;
+	}
+
 	Ok(Json(updated_library))
 }
 
 #[utoipa::path(
 	delete,
-	path = "/api/v1/libraries/:id",
+	path = "/api/v1/libraries/{id}",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The id of the library to delete")
@@ -1888,7 +1941,7 @@ async fn get_library_stats(
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/libraries/:id/analyze",
+	path = "/api/v1/libraries/{id}/analyze",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The ID of the library to analyze")

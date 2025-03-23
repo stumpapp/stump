@@ -1,10 +1,9 @@
 use std::path::Path;
 
+use models::shared::image_processor_options::SupportedImageFormat;
 use serde::Serialize;
 
 use crate::CoreError;
-
-use super::image::ImageFormat;
 
 /// [`ContentType`] is an enum that represents the HTTP content type. This is a smaller
 /// subset of the full list of content types, mostly focusing on types supported by Stump.
@@ -355,15 +354,14 @@ impl std::fmt::Display for ContentType {
 	}
 }
 
-impl From<ImageFormat> for ContentType {
-	fn from(format: ImageFormat) -> Self {
+// TODO(339): Support JpegXl and Avif
+
+impl From<SupportedImageFormat> for ContentType {
+	fn from(format: SupportedImageFormat) -> Self {
 		match format {
-			ImageFormat::Jpeg => ContentType::JPEG,
-			// TODO(339): Support JpegXl and Avif
-			// ImageFormat::JpegXl => ContentType::JPEG,
-			ImageFormat::Png => ContentType::PNG,
-			ImageFormat::Webp => ContentType::WEBP,
-			// ImageFormat::Avif => ContentType::AVIF,
+			SupportedImageFormat::Jpeg => ContentType::JPEG,
+			SupportedImageFormat::Png => ContentType::PNG,
+			SupportedImageFormat::Webp => ContentType::WEBP,
 		}
 	}
 }

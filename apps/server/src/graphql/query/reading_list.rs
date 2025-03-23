@@ -1,36 +1,106 @@
-use async_graphql::{Context, Object, Result};
+use async_graphql::{Context, Object, Result, SimpleObject, ID};
 use graphql::{
 	data::{CoreContext, RequestContext},
 	object::reading_list::ReadingList,
+	pagination::{
+		CursorPaginationInfo, OffsetPaginationInfo, Pagination, PaginationInfo,
+		PaginationValidator,
+	},
 };
 use models::entity::reading_list;
-use sea_orm::prelude::*;
+use sea_orm::{prelude::*, QueryOrder, QuerySelect};
 
 #[derive(Default)]
 pub struct ReadingListQuery;
 
+#[derive(Debug, SimpleObject)]
+pub struct ReadingListPaginatedResponse {
+	pub nodes: Vec<ReadingList>,
+	pub page_info: PaginationInfo,
+}
+
 #[Object]
 impl ReadingListQuery {
-	async fn reading_list(&self, ctx: &Context<'_>) -> Result<Vec<ReadingList>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
-		// TODO: add RBAC controls
-		// TODO: add pagination
+	/// Retrieves a paginated list of reading lists for the current user.
+	///
+	/// # Returns
+	///
+	/// A paginated list of reading lists.
+	async fn reading_list(
+		&self,
+		ctx: &Context<'_>,
+		#[graphql(default, validator(custom = "PaginationValidator"))]
+		pagination: Pagination,
+	) -> Result<ReadingListPaginatedResponse> {
+		let user_id = ctx.data::<RequestContext>()?.id();
 
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-		let first = reading_list::Entity::find().one(conn).await?;
+		let query = reading_list::Entity::find_for_user(&user_id, 1);
 
-		if first.is_none() {
-			return Ok(vec![]);
+		match pagination {
+			Pagination::Cursor(info) => {
+				let mut cursor = query.cursor_by(reading_list::Column::Id);
+				if let Some(ref id) = info.after {
+					let reading_list = reading_list::Entity::find_for_user(&user_id, 1)
+						.select_only()
+						.column(reading_list::Column::Id)
+						.filter(reading_list::Column::Id.eq(id.clone()))
+						.order_by_asc(reading_list::Column::Id)
+						.into_model::<reading_list::ReadingListIdCmpSelect>()
+						.one(conn)
+						.await?
+						.ok_or("Cursor not found")?;
+					cursor.after(reading_list.id);
+				}
+				cursor.first(info.limit);
+
+				let models = cursor.into_model::<reading_list::Model>().all(conn).await?;
+				let current_cursor =
+					info.after.or_else(|| models.first().map(|m| m.id.clone()));
+				let next_cursor = models.last().map(|m| m.id.clone());
+
+				Ok(ReadingListPaginatedResponse {
+					nodes: models.into_iter().map(ReadingList::from).collect(),
+					page_info: CursorPaginationInfo {
+						current_cursor,
+						next_cursor,
+					}
+					.into(),
+				})
+			},
+			Pagination::Offset(info) => {
+				let count = query.clone().count(conn).await?;
+
+				let models = query
+					.order_by_asc(reading_list::Column::Id)
+					.offset(info.offset())
+					.limit(info.limit())
+					.into_model::<reading_list::Model>()
+					.all(conn)
+					.await?;
+
+				Ok(ReadingListPaginatedResponse {
+					nodes: models.into_iter().map(ReadingList::from).collect(),
+					page_info: OffsetPaginationInfo::new(info, count).into(),
+				})
+			},
 		}
-
-		Ok(vec![ReadingList::from(first.unwrap())])
 	}
 
-	// create reading list
+	/// Retrieves a reading list by ID for the current user.
+	///
+	/// # Returns
+	/// A reading list with the given ID. If no reading list with this ID exists for the current user, an error will be returned.
+	async fn reading_list_by_id(&self, ctx: &Context<'_>, id: ID) -> Result<ReadingList> {
+		let user_id = ctx.data::<RequestContext>()?.id();
 
-	// get reading list by id
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let query = reading_list::Entity::find_for_user(&user_id, 1)
+			.filter(reading_list::Column::Id.eq(id.to_string()))
+			.into_model::<reading_list::Model>()
+			.one(conn)
+			.await?;
 
-	// update reading list
-
-	// delete reading list
+		Ok(ReadingList::from(query.ok_or("Reading list not found")?))
+	}
 }

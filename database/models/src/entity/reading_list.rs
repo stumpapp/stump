@@ -1,5 +1,7 @@
 use async_graphql::SimpleObject;
-use sea_orm::entity::prelude::*;
+use sea_orm::{prelude::*, Condition, FromQueryResult};
+
+use super::reading_list_rule;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "ReadingListModel")]
@@ -56,3 +58,52 @@ impl Related<super::user::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+fn get_reading_list_rbac_for_user(user_id: &String, minimum_role: i32) -> Condition {
+	// A common condition that asserts there is a RBAC entry for the user that has a role
+	// greater than or equal to the minimum role:
+	// 1 for reader, 2 for collaborator, 3 for creator
+	let base_rbac = Condition::all()
+		.add(reading_list_rule::Column::UserId.eq(user_id.clone()))
+		.add(reading_list_rule::Column::Role.gte(minimum_role));
+
+	Condition::any()
+		// creator always has access
+		.add(Column::CreatingUserId.eq(user_id.clone()))
+		// condition where visibility is PUBLIC:
+		.add(
+			Condition::all()
+				.add(Column::Visibility.eq("PUBLIC".to_string()))
+				// This asserts the reader RBAC is present OR there is no RBAC present
+				.add(
+					Condition::any()
+						.add(base_rbac.clone())
+						.add(reading_list_rule::Column::UserId.is_null()),
+				),
+		)
+		// condition where visibility is SHARED:
+		.add(
+			Condition::all()
+				.add(Column::Visibility.eq("SHARED".to_string()))
+				.add(base_rbac),
+		)
+		// condition where visibility is PRIVATE:
+		.add(
+			Condition::all()
+				.add(Column::Visibility.eq("PRIVATE".to_string()))
+				.add(Column::CreatingUserId.eq(user_id)),
+		)
+}
+
+#[derive(Debug, FromQueryResult)]
+pub struct ReadingListIdCmpSelect {
+	pub id: String,
+}
+
+impl Entity {
+	pub fn find_for_user(user_id: &String, minimum_role: i32) -> Select<Entity> {
+		Entity::find()
+			.left_join(reading_list_rule::Entity)
+			.filter(get_reading_list_rbac_for_user(user_id, minimum_role))
+	}
+}

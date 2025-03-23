@@ -1,7 +1,7 @@
 use async_graphql::{Context, Enum, InputObject, Object, Result};
 use graphql::{
 	data::{CoreContext, RequestContext},
-	object::{reading_list::ReadingList, reading_list_item::ReadingListItem},
+	object::reading_list::ReadingList,
 };
 use models::entity::reading_list;
 use models::entity::reading_list_item;
@@ -36,6 +36,11 @@ struct ReadingListInput {
 
 #[Object]
 impl ReadingListMutation {
+	/// Creates a new reading list.
+	///
+	/// # Returns
+	///
+	/// A result containing the newly created reading list, or an error if creation failed.
 	async fn create_reading_list(
 		&self,
 		ctx: &Context<'_>,
@@ -86,6 +91,11 @@ impl ReadingListMutation {
 			.await?)
 	}
 
+	/// Updates an existing reading list.
+	///
+	/// # Returns
+	///
+	/// A result containing the updated reading list, or an error if update failed.
 	async fn update_reading_list(
 		&self,
 		ctx: &Context<'_>,
@@ -112,6 +122,11 @@ impl ReadingListMutation {
 		Err("Not implemented".to_string().into())
 	}
 
+	/// Deletes a reading list by ID.
+	///
+	/// # Returns
+	///
+	/// A result containing the deleted reading list, or an error if deletion failed.
 	async fn delete_reading_list(
 		&self,
 		ctx: &Context<'_>,
@@ -135,12 +150,6 @@ impl ReadingListMutation {
 		}
 
 		// delete reading list
-		// Question: should `ON DELETE RESTRICT` be changed to `ON DELETE CASCADE` for
-		// reading_list_items?
-		let _ = reading_list_item::Entity::delete_many()
-			.filter(reading_list_item::Column::ReadingListId.eq(id))
-			.exec(conn)
-			.await?;
 		let _ = reading_list.clone().delete(conn).await?;
 
 		Ok(ReadingList {

@@ -17,13 +17,39 @@ impl Guard for ServerOwnerGuard {
 	}
 }
 
+pub struct SelfGuard {
+	pub user_id: String,
+}
+
+impl SelfGuard {
+	pub fn new(user_id: &str) -> Self {
+		Self {
+			user_id: user_id.to_string(),
+		}
+	}
+}
+
+impl Guard for SelfGuard {
+	async fn check(&self, ctx: &Context<'_>) -> Result<()> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+
+		if user.id == self.user_id {
+			Ok(())
+		} else {
+			Err(error_message::FORBIDDEN_ACTION.into())
+		}
+	}
+}
+
 pub struct PermissionGuard {
 	permissions: Vec<UserPermission>,
 }
 
 impl PermissionGuard {
-	pub fn new(permissions: Vec<UserPermission>) -> Self {
-		Self { permissions }
+	pub fn new(permissions: &[UserPermission]) -> Self {
+		Self {
+			permissions: permissions.to_vec(),
+		}
 	}
 
 	pub fn one(permission: UserPermission) -> Self {

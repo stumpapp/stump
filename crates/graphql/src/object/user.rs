@@ -3,7 +3,10 @@ use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 use models::entity::{media, reading_session, user};
 use sea_orm::{prelude::*, QueryOrder};
 
-use crate::data::CoreContext;
+use crate::{
+	data::CoreContext,
+	guard::{SelfGuard, ServerOwnerGuard},
+};
 
 use super::media::Media;
 
@@ -22,7 +25,7 @@ impl From<user::Model> for User {
 
 #[ComplexObject]
 impl User {
-	// TODO(graphql): SelfGuard.or(ServerOwnerGuard)
+	#[graphql(guard = "SelfGuard::new(&self.model.id).or(ServerOwnerGuard)")]
 	async fn continue_reading(&self, ctx: &Context<'_>) -> Result<Vec<Media>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 

@@ -6,6 +6,7 @@ use crate::shared::{enums::UserPermission, permission_set::PermissionSet};
 
 use super::age_restriction;
 
+// TODO: skip fields which most users shouldn't see
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "UserModel")]
 #[sea_orm(table_name = "users")]
@@ -34,6 +35,7 @@ pub struct Model {
 	pub user_preferences_id: Option<String>,
 }
 
+// TODO: change name?
 #[derive(Clone)]
 pub struct AuthUser {
 	pub id: String,

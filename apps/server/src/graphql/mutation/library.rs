@@ -138,6 +138,7 @@ impl LibraryMutation {
 		enforce_valid_library_path(core.conn.as_ref(), &input.path, None).await?;
 
 		let scan_after_creation = input.scan_after_persist;
+		let add_watcher = input.config.as_ref().map_or(false, |config| config.watch);
 		let tags = input.tags.take();
 
 		let txn = core.conn.as_ref().begin().await?;
@@ -205,6 +206,12 @@ impl LibraryMutation {
 			))?;
 		}
 
+		if add_watcher {
+			core.library_watcher
+				.add_watcher(created_library.path.clone().into())
+				.await?;
+		}
+
 		Ok(Library::from(created_library))
 	}
 
@@ -255,6 +262,7 @@ impl LibraryMutation {
 		.await?;
 
 		let scan_after_update = input.scan_after_persist;
+		let add_watcher = input.config.as_ref().map_or(false, |config| config.watch);
 		let tags = input.tags.take();
 
 		let txn = core.conn.as_ref().begin().await?;
@@ -355,8 +363,24 @@ impl LibraryMutation {
 			))?;
 		}
 
+		if add_watcher {
+			core.library_watcher
+				.add_watcher(updated_library.path.clone().into())
+				.await?;
+		} else {
+			core.library_watcher
+				.remove_watcher(existing_library.path.clone().into())
+				.await?;
+		}
+
 		Ok(Library::from(updated_library))
 	}
+
+	// (thumbnail API remains RESTful)
+
+	// update_library_excluded_users
+
+	// delete_library_scan_history
 
 	/// Delete a library, including all associated media and series via cascading deletes. This
 	/// operation cannot be undone.
@@ -397,6 +421,8 @@ impl LibraryMutation {
 
 		Ok(true)
 	}
+
+	// visit_library (formerly update_last_visited_library)
 }
 
 async fn enforce_valid_library_path(

@@ -1,11 +1,22 @@
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
-use models::entity::{library, library_config, library_to_tag, series, tag};
-use sea_orm::{prelude::*, sea_query::Query};
+use models::{
+	entity::{
+		library, library_config, library_hidden_to_user, library_to_tag, series, tag,
+		user,
+	},
+	shared::enums::UserPermission,
+};
+use sea_orm::{
+	prelude::*, sea_query::Query, DatabaseBackend, FromQueryResult, Statement,
+};
 
-use crate::data::CoreContext;
+use crate::{
+	data::{CoreContext, RequestContext},
+	guard::PermissionGuard,
+};
 
-use super::{library_config::LibraryConfig, series::Series};
+use super::{library_config::LibraryConfig, series::Series, user::User};
 
 #[derive(Debug, SimpleObject)]
 #[graphql(complex)]
@@ -34,6 +45,35 @@ impl Library {
 		Ok(config.into())
 	}
 
+	#[graphql(
+		guard = "PermissionGuard::new(&[UserPermission::ReadUsers, UserPermission::ManageLibrary])"
+	)]
+	async fn excluded_users(&self, ctx: &Context<'_>) -> Result<Vec<User>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let users = user::Entity::find()
+			.filter(
+				user::Column::Id.in_subquery(
+					Query::select()
+						.column(library_hidden_to_user::Column::UserId)
+						.from(library_hidden_to_user::Entity)
+						.and_where(
+							library_hidden_to_user::Column::LibraryId
+								.eq(self.model.id.clone()),
+						)
+						.to_owned(),
+				),
+			)
+			.all(conn)
+			.await?;
+
+		Ok(users.into_iter().map(User::from).collect())
+	}
+
+	// last_scan
+
+	// scan_history
+
 	async fn series(&self, ctx: &Context<'_>) -> Result<Vec<Series>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
@@ -44,6 +84,55 @@ impl Library {
 			.await?;
 
 		Ok(models.into_iter().map(Series::from).collect())
+	}
+
+	async fn stats(
+		&self,
+		ctx: &Context<'_>,
+		all_users: Option<bool>,
+	) -> Result<LibraryStats> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let result = conn
+			.query_one(Statement::from_sql_and_values(
+				DatabaseBackend::Sqlite,
+				r"
+				WITH base_counts AS (
+					SELECT
+						COUNT(*) AS book_count,
+						IFNULL(SUM(media.size), 0) AS total_bytes,
+						IFNULL(series_count, 0) AS series_count
+					FROM
+						media
+						INNER JOIN (
+							SELECT
+								COUNT(*) AS series_count
+							FROM
+								series)
+				),
+				progress_counts AS (
+					SELECT
+						COUNT(frs.id) AS completed_books,
+						COUNT(rs.id) AS in_progress_books
+					FROM
+						media m
+						LEFT JOIN finished_reading_sessions frs ON frs.media_id = m.id
+						LEFT JOIN reading_sessions rs ON rs.media_id = m.id
+					WHERE $1 IS TRUE OR (rs.user_id = $2 OR frs.user_id = $2)
+				)
+				SELECT
+					*
+				FROM
+					base_counts
+					INNER JOIN progress_counts;
+				",
+				[all_users.unwrap_or(false).into(), user.id.clone().into()],
+			))
+			.await?
+			.ok_or("Library stats failed to be calculated")?;
+
+		Ok(LibraryStats::from_query_result(&result, "")?)
 	}
 
 	async fn tags(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
@@ -66,4 +155,13 @@ impl Library {
 
 		Ok(tags.into_iter().map(|t| t.name).collect())
 	}
+}
+
+#[derive(Debug, FromQueryResult, SimpleObject)]
+pub struct LibraryStats {
+	series_count: u64,
+	book_count: u64,
+	total_bytes: u64,
+	completed_books: u64,
+	in_progress_books: u64,
 }

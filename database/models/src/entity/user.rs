@@ -36,7 +36,7 @@ pub struct Model {
 }
 
 // TODO: change name?
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AuthUser {
 	pub id: String,
 	pub username: String,
@@ -72,6 +72,12 @@ impl FromQueryResult for AuthUser {
 			age_restriction,
 		})
 	}
+}
+
+#[derive(Debug, FromQueryResult)]
+pub struct UserIdentSelect {
+	pub id: String,
+	pub username: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

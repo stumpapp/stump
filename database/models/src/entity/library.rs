@@ -66,6 +66,8 @@ pub enum Relation {
 	JobScheduleConfig,
 	#[sea_orm(has_many = "super::last_library_visit::Entity")]
 	LastLibraryVisit,
+	#[sea_orm(has_many = "super::library_hidden_to_user::Entity")]
+	HiddenFromUsers,
 	#[sea_orm(
 		belongs_to = "super::library_config::Entity",
 		from = "Column::ConfigId",
@@ -89,6 +91,12 @@ impl Related<super::job_schedule_config::Entity> for Entity {
 impl Related<super::last_library_visit::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::LastLibraryVisit.def()
+	}
+}
+
+impl Related<super::library_hidden_to_user::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::HiddenFromUsers.def()
 	}
 }
 

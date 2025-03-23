@@ -1,16 +1,28 @@
-use async_graphql::{Context, Object, Result, SimpleObject, ID};
+use async_graphql::{Context, Json, Object, Result, SimpleObject, ID};
+use chrono::Utc;
 use graphql::{
 	data::{CoreContext, RequestContext},
+	error_message,
 	guard::PermissionGuard,
 	input::CreateOrUpdateLibraryInput,
 	object::library::Library,
 };
 use models::{
-	entity::{library, library_config, library_to_tag, media, series, tag},
+	entity::{
+		last_library_visit, library, library_config, library_hidden_to_user,
+		library_scan_record, library_to_tag, media, series, tag, user,
+	},
 	shared::enums::{FileStatus, UserPermission},
 };
-use sea_orm::{prelude::*, sea_query::Query, Condition, Set, TransactionTrait};
-use stump_core::filesystem::{image::remove_thumbnails, scanner::LibraryScanJob};
+use sea_orm::{
+	prelude::*,
+	sea_query::{OnConflict, Query},
+	Condition, QuerySelect, Set, TransactionTrait,
+};
+use stump_core::filesystem::{
+	image::remove_thumbnails,
+	scanner::{LibraryScanJob, ScanOptions},
+};
 use tokio::fs;
 
 #[derive(Default, SimpleObject)]
@@ -138,7 +150,7 @@ impl LibraryMutation {
 		enforce_valid_library_path(core.conn.as_ref(), &input.path, None).await?;
 
 		let scan_after_creation = input.scan_after_persist;
-		let add_watcher = input.config.as_ref().map_or(false, |config| config.watch);
+		let add_watcher = input.config.as_ref().is_some_and(|config| config.watch);
 		let tags = input.tags.take();
 
 		let txn = core.conn.as_ref().begin().await?;
@@ -262,7 +274,7 @@ impl LibraryMutation {
 		.await?;
 
 		let scan_after_update = input.scan_after_persist;
-		let add_watcher = input.config.as_ref().map_or(false, |config| config.watch);
+		let add_watcher = input.config.as_ref().is_some_and(|config| config.watch);
 		let tags = input.tags.take();
 
 		let txn = core.conn.as_ref().begin().await?;
@@ -376,11 +388,130 @@ impl LibraryMutation {
 		Ok(Library::from(updated_library))
 	}
 
-	// (thumbnail API remains RESTful)
+	// TODO(graphql): (thumbnail API remains RESTful). This serves as a reminder, it won't live here
 
-	// update_library_excluded_users
+	/// Exclude users from a library, preventing them from seeing the library in the UI. This operates as a
+	/// full replacement of the excluded users list, so any users not included in the provided list will be
+	/// removed from the exclusion list if they were previously excluded.
+	///
+	/// The server owner cannot be excluded from a library, nor can the user performing the action exclude
+	/// themselves.
+	#[graphql(
+		guard = "PermissionGuard::new(&[UserPermission::ManageLibrary, UserPermission::ReadUsers])"
+	)]
+	async fn update_library_excluded_users(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		user_ids: Vec<String>,
+	) -> Result<Library> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let core = ctx.data::<CoreContext>()?;
 
-	// delete_library_scan_history
+		if user_ids.contains(&user.id) {
+			return Err("Cannot exclude self from library".into());
+		}
+
+		let server_owner_id = if user.is_server_owner {
+			user.id.clone()
+		} else {
+			user::Entity::find()
+				.select_only()
+				.columns(vec![user::Column::Id, user::Column::Username])
+				.filter(user::Column::IsServerOwner.eq(true))
+				.into_model::<user::UserIdentSelect>()
+				.one(core.conn.as_ref())
+				.await?
+				.ok_or("Server owner not found")?
+				.id
+		};
+
+		if user_ids.contains(&server_owner_id) {
+			tracing::error!(?user, library = ?id, "Attempted to exclude server owner from library");
+			return Err(error_message::FORBIDDEN_ACTION.into());
+		}
+
+		let library = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+
+		let existing_exclusions = library_hidden_to_user::Entity::find()
+			.filter(library_hidden_to_user::Column::LibraryId.eq(library.id.clone()))
+			.all(core.conn.as_ref())
+			.await?;
+
+		let to_add = user_ids
+			.iter()
+			.filter(|id| {
+				!existing_exclusions
+					.iter()
+					.any(|exclusion| exclusion.user_id == **id)
+			})
+			.map(|id| library_hidden_to_user::ActiveModel {
+				library_id: Set(library.id.clone()),
+				user_id: Set(id.clone()),
+				..Default::default()
+			})
+			.collect::<Vec<_>>();
+
+		let to_remove = existing_exclusions
+			.iter()
+			.filter(|exclusion| !user_ids.contains(&exclusion.user_id))
+			.map(|exclusion| exclusion.id)
+			.collect::<Vec<_>>();
+
+		if to_add.is_empty() && to_remove.is_empty() {
+			tracing::warn!("No changes to library exclusions");
+			return Ok(Library::from(library));
+		}
+
+		let txn = core.conn.as_ref().begin().await?;
+
+		if !to_add.is_empty() {
+			library_hidden_to_user::Entity::insert_many(to_add)
+				.on_conflict_do_nothing()
+				.exec(&txn)
+				.await?;
+		}
+
+		if !to_remove.is_empty() {
+			library_hidden_to_user::Entity::delete_many()
+				.filter(library_hidden_to_user::Column::Id.is_in(to_remove))
+				.exec(&txn)
+				.await?;
+		}
+
+		txn.commit().await?;
+
+		// Note: We return the full node so the ID may be pulled to properly update the cache.
+		Ok(Library::from(library))
+	}
+
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
+	async fn delete_library_scan_history(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+	) -> Result<Library> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let library = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+
+		library_scan_record::Entity::delete_many()
+			.filter(library_scan_record::Column::LibraryId.eq(library.id.clone()))
+			.exec(core.conn.as_ref())
+			.await?;
+
+		// Note: We return the full node so the ID may be pulled to properly update the cache.
+		Ok(Library::from(library))
+	}
 
 	/// Delete a library, including all associated media and series via cascading deletes. This
 	/// operation cannot be undone.
@@ -403,8 +534,18 @@ impl LibraryMutation {
 		Ok(Library::from(library))
 	}
 
+	/// Enqueue a scan job for a library. This will index the filesystem from the library's root path
+	/// and update the database accordingly.
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ScanLibrary)")]
-	async fn scan_library(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
+	async fn scan_library(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		// TODO(graphql): Investigate not using a JSON wrapper for this. async_graphql doesn't support
+		// non-unit enums, so it might just be a limitation. It does degrate the DX a bit missing
+		// out on the types.
+		option: Option<Json<ScanOptions>>,
+	) -> Result<bool> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
@@ -415,16 +556,50 @@ impl LibraryMutation {
 			.await?
 			.ok_or("Library not found")?;
 
-		// TODO(graphql): ScanOptions
-		core.enqueue_job(LibraryScanJob::new(library.id, library.path, None))?;
+		core.enqueue_job(LibraryScanJob::new(
+			library.id,
+			library.path,
+			option.map(|o| o.0),
+		))?;
 		tracing::debug!("Enqueued library scan job");
 
 		Ok(true)
 	}
 
-	// visit_library (formerly update_last_visited_library)
+	/// "Visit" a library, which will upsert a record of the user's last visit to the library.
+	/// This is used to inform the UI of the last library which was visited by the user
+	async fn visit_library(&self, ctx: &Context<'_>, id: ID) -> Result<Library> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let library = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+
+		let active_model = last_library_visit::ActiveModel {
+			library_id: Set(library.id.clone()),
+			user_id: Set(user.id.clone()),
+			timestamp: Set(Utc::now().into()),
+			..Default::default()
+		};
+
+		last_library_visit::Entity::insert(active_model)
+			.on_conflict(
+				OnConflict::new()
+					.update_column(last_library_visit::Column::Timestamp)
+					.to_owned(),
+			)
+			.exec(core.conn.as_ref())
+			.await?;
+
+		Ok(Library::from(library))
+	}
 }
 
+/// A helper function to enforce that a library path is valid and does not conflict with
+/// other libraries.
 async fn enforce_valid_library_path(
 	conn: &DatabaseConnection,
 	path: &str,

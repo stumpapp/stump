@@ -117,7 +117,6 @@ impl Library {
 		Ok(models.into_iter().map(Series::from).collect())
 	}
 
-	// FIXME(sea-orm): Type Error: u64 unsupported by sqlx-sqlite
 	async fn stats(
 		&self,
 		ctx: &Context<'_>,
@@ -191,9 +190,9 @@ impl Library {
 
 #[derive(Debug, FromQueryResult, SimpleObject)]
 pub struct LibraryStats {
-	series_count: u64,
-	book_count: u64,
-	total_bytes: u64,
-	completed_books: u64,
-	in_progress_books: u64,
+	series_count: u32,
+	book_count: u32,
+	total_bytes: u32,
+	completed_books: u32,
+	in_progress_books: u32,
 }

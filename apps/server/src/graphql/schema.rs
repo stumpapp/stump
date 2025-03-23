@@ -1,11 +1,11 @@
-use async_graphql::{EmptyMutation, EmptySubscription, Schema};
+use async_graphql::{EmptySubscription, Schema};
 
 use crate::config::state::AppState;
 
-use super::{query::Query, AppSchema};
+use super::{mutation::Mutation, query::Query, AppSchema};
 
 pub async fn build_schema(state: AppState) -> AppSchema {
-	Schema::build(Query::default(), EmptyMutation, EmptySubscription)
+	Schema::build(Query::default(), Mutation::default(), EmptySubscription)
 		.data(state)
 		.finish()
 }

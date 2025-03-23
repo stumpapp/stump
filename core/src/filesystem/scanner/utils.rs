@@ -455,15 +455,14 @@ pub(crate) async fn safely_insert_series(
 	let txn = conn.begin().await?;
 
 	for BuiltSeries { series, metadata } in series {
-		let created_series = series::Entity::insert(series)
-			.exec_with_returning(&txn)
-			.await?;
+		let created_series = series.insert(&txn).await?;
 
 		// I opted to not kill the transaction if metadata insertion fails, I figure this
 		// is a best-effort operation and we can always try again later after fixing a bad
 		// metadata entry vs killing the entire series creation process over a single bad entry
-		if let Some(meta) = metadata {
-			if let Err(error) = series_metadata::Entity::insert(meta).exec(&txn).await {
+		if let Some(mut meta) = metadata {
+			meta.series_id = Set(created_series.id.clone());
+			if let Err(error) = meta.insert(conn).await {
 				tracing::error!(?error, "Failed to insert series metadata");
 			}
 		}

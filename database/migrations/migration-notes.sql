@@ -186,5 +186,131 @@ FROM "media_metadata";
 DROP TABLE "media_metadata";
 ALTER TABLE "new_media_metadata"
     RENAME TO "media_metadata";
+-- Changes:
+-- 1. id is now an autoincrementing integer
+CREATE TABLE "new_library_configs" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "convert_rar_to_zip" BOOLEAN NOT NULL DEFAULT false,
+    "hard_delete_conversions" BOOLEAN NOT NULL DEFAULT false,
+    "default_reading_dir" TEXT NOT NULL DEFAULT 'ltr',
+    "default_reading_mode" TEXT NOT NULL DEFAULT 'paged',
+    "default_reading_image_scale_fit" TEXT NOT NULL DEFAULT 'height',
+    "generate_file_hashes" BOOLEAN NOT NULL DEFAULT false,
+    "generate_koreader_hashes" BOOLEAN NOT NULL DEFAULT false,
+    "process_metadata" BOOLEAN NOT NULL DEFAULT true,
+    "library_pattern" TEXT NOT NULL DEFAULT 'SERIES_BASED',
+    "thumbnail_config" BLOB,
+    "ignore_rules" BLOB,
+    "library_id" TEXT,
+    "watch" BOOLEAN DEFAULT TRUE
+);
+INSERT INTO "new_library_configs"(
+        "convert_rar_to_zip",
+        "hard_delete_conversions",
+        "default_reading_dir",
+        "default_reading_mode",
+        "default_reading_image_scale_fit",
+        "generate_file_hashes",
+        "generate_koreader_hashes",
+        "process_metadata",
+        "library_pattern",
+        "library_id"
+    )
+SELECT "convert_rar_to_zip",
+    "hard_delete_conversions",
+    "default_reading_dir",
+    "default_reading_mode",
+    "default_reading_image_scale_fit",
+    "generate_file_hashes",
+    "generate_koreader_hashes",
+    "process_metadata",
+    "library_pattern",
+    "library_id"
+FROM "library_configs";
+DROP TABLE "library_configs";
+ALTER TABLE "new_library_configs"
+    RENAME TO "library_configs";
+-- Changes:
+-- 1. updated_at column default to current timestamp
+-- 2. config_id is now non-nullable integer
+CREATE TABLE "new_libraries" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "path" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'READY',
+    "updated_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "emoji" TEXT,
+    "config_id" INTEGER NOT NULL,
+    "job_schedule_config_id" TEXT,
+    "last_scanned_at" DATETIME,
+    CONSTRAINT "libraries_config_id_fkey" FOREIGN KEY ("config_id") REFERENCES "library_configs" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "libraries_job_schedule_config_id_fkey" FOREIGN KEY ("job_schedule_config_id") REFERENCES "job_schedule_configs" ("id") ON DELETE
+    SET NULL ON UPDATE CASCADE
+);
+INSERT INTO "new_libraries"(
+        "id",
+        "name",
+        "description",
+        "path",
+        "status",
+        "updated_at",
+        "created_at",
+        "emoji",
+        "config_id",
+        "job_schedule_config_id",
+        "last_scanned_at"
+    )
+SELECT "id",
+    "name",
+    "description",
+    "path",
+    "status",
+    "updated_at",
+    "created_at",
+    "emoji",
+    "config_id",
+    "job_schedule_config_id",
+    "last_scanned_at"
+FROM "libraries";
+DROP TABLE "libraries";
+ALTER TABLE "new_libraries"
+    RENAME TO "libraries";
+-- Changes:
+-- 1. updated_at column default to current timestamp
+CREATE TABLE "new_series" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "updated_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "path" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'READY',
+    "library_id" TEXT,
+    CONSTRAINT "series_library_id_fkey" FOREIGN KEY ("library_id") REFERENCES "libraries" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+INSERT INTO "new_series"(
+        "id",
+        "name",
+        "description",
+        "updated_at",
+        "created_at",
+        "path",
+        "status",
+        "library_id"
+    )
+SELECT "id",
+    "name",
+    "description",
+    "updated_at",
+    "created_at",
+    "path",
+    "status",
+    "library_id"
+FROM "series";
+DROP TABLE "series";
+ALTER TABLE "new_series"
+    RENAME TO "series";
 PRAGMA foreign_keys = ON;
 COMMIT;

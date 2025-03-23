@@ -1,3 +1,4 @@
+use async_graphql::SimpleObject;
 use sea_orm::entity::prelude::*;
 
 use crate::shared::{
@@ -6,11 +7,12 @@ use crate::shared::{
 	image_processor_options::ImageProcessorOptions,
 };
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
+#[graphql(name = "LibraryConfigModel")]
 #[sea_orm(table_name = "library_configs")]
 pub struct Model {
-	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
-	pub id: String,
+	#[sea_orm(primary_key, auto_increment = true)]
+	pub id: i32,
 	pub convert_rar_to_zip: bool,
 	pub hard_delete_conversions: bool,
 	#[sea_orm(column_type = "Text")]
@@ -25,9 +27,11 @@ pub struct Model {
 	pub watch: bool,
 	#[sea_orm(column_type = "Text")]
 	pub library_pattern: LibraryPattern,
+	#[graphql(skip)]
 	#[sea_orm(column_type = "Json", nullable)]
 	pub thumbnail_config: Option<ImageProcessorOptions>,
 	#[sea_orm(column_type = "Json", nullable)]
+	#[graphql(skip)]
 	pub ignore_rules: Option<IgnoreRules>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub library_id: Option<String>,

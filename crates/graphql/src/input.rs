@@ -14,21 +14,21 @@ use sea_orm::{prelude::*, Set};
 // 2. Group inputs in own modules _like_ objects but not in same file? (e.g., `input/library.rs`)
 
 #[derive(Debug, InputObject)]
-pub struct CreateLibraryInput {
+pub struct CreateOrUpdateLibraryInput {
 	pub name: String,
-	pub description: Option<String>,
 	pub path: String,
+	pub description: Option<String>,
 	pub emoji: Option<String>,
 	pub tags: Option<Vec<String>>,
 	pub config: Option<LibraryConfigInput>,
-	pub scan_on_create: bool,
+	pub scan_after_persist: bool,
 }
 
-impl CreateLibraryInput {
+impl CreateOrUpdateLibraryInput {
 	pub fn into_active_model(
 		self,
 	) -> (library::ActiveModel, library_config::ActiveModel) {
-		let CreateLibraryInput {
+		let CreateOrUpdateLibraryInput {
 			name,
 			description,
 			path,
@@ -44,8 +44,6 @@ impl CreateLibraryInput {
 			description: Set(description),
 			path: Set(path),
 			emoji: Set(emoji),
-			// tags: Set(tags),
-			// scan_on_create: Set(scan_on_create),
 			..Default::default()
 		};
 

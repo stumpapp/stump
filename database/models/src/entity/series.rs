@@ -1,7 +1,7 @@
 use async_graphql::SimpleObject;
 use sea_orm::{
-	entity::prelude::*, sea_query::Query, Condition, FromQueryResult, QuerySelect,
-	QueryTrait,
+	entity::prelude::*, prelude::async_trait::async_trait, sea_query::Query, ActiveValue,
+	Condition, FromQueryResult, QuerySelect, QueryTrait,
 };
 
 use crate::prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer};
@@ -167,4 +167,16 @@ impl Related<super::series_metadata::Entity> for Entity {
 	}
 }
 
-impl ActiveModelBehavior for ActiveModel {}
+#[async_trait]
+impl ActiveModelBehavior for ActiveModel {
+	async fn before_save<C>(mut self, _db: &C, insert: bool) -> Result<Self, DbErr>
+	where
+		C: ConnectionTrait,
+	{
+		if insert && self.id.is_not_set() {
+			self.id = ActiveValue::Set(Uuid::new_v4().to_string());
+		}
+
+		Ok(self)
+	}
+}

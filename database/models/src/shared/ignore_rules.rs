@@ -52,6 +52,10 @@ impl IgnoreRules {
 	pub fn build(&self) -> Result<GlobSet, EntityError> {
 		GlobSet::try_from(self.clone())
 	}
+
+	pub fn as_vec(&self) -> Vec<String> {
+		self.0.clone()
+	}
 }
 
 impl TryFrom<IgnoreRules> for GlobSet {

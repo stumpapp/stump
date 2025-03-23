@@ -2,7 +2,7 @@ use async_graphql::{Context, Object, Result, SimpleObject, ID};
 use graphql::{
 	data::{CoreContext, RequestContext},
 	guard::PermissionGuard,
-	input::CreateLibraryInput,
+	input::CreateOrUpdateLibraryInput,
 	object::library::Library,
 };
 use models::{
@@ -25,6 +25,13 @@ pub struct LibraryMutation;
 
 #[Object]
 impl LibraryMutation {
+	/// Delete media and series from a library that match one of the following conditions:
+	///
+	/// - A series that is missing from disk (status is not `Ready`)
+	/// - A media that is missing from disk (status is not `Ready`)
+	/// - A series that is not associated with any media (i.e., no media in the series)
+	///
+	/// This operation will also remove any associated thumbnails of the deleted media and series.
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
 	async fn clean_library(
 		&self,
@@ -115,35 +122,19 @@ impl LibraryMutation {
 		})
 	}
 
+	/// Create a new library with the provided configuration. If `scan_after_persist` is `true`,
+	/// the library will be scanned immediately after creation.
 	#[graphql(guard = "PermissionGuard::one(UserPermission::CreateLibrary)")]
 	async fn create_library(
 		&self,
 		ctx: &Context<'_>,
-		mut input: CreateLibraryInput,
+		mut input: CreateOrUpdateLibraryInput,
 	) -> Result<Library> {
 		let core = ctx.data::<CoreContext>()?;
 
-		match fs::metadata(&input.path).await {
-			Ok(metadata) => {
-				if !metadata.is_dir() {
-					return Err("Path is not a directory".into());
-				}
-			},
-			Err(error) => {
-				return Err(error.to_string().into());
-			},
-		}
+		enforce_valid_library_path(core.conn.as_ref(), &input.path, None).await?;
 
-		let child_libraries = library::Entity::find()
-			.filter(library::Column::Path.starts_with(input.path.clone()))
-			.count(core.conn.as_ref())
-			.await?;
-
-		if child_libraries > 0 {
-			return Err("Path is a parent of another library on the filesystem".into());
-		}
-
-		let scan_after_creation = input.scan_on_create;
+		let scan_after_creation = input.scan_after_persist;
 		let tags = input.tags.take();
 
 		let txn = core.conn.as_ref().begin().await?;
@@ -155,6 +146,7 @@ impl LibraryMutation {
 			id: Set(created_config
 				.library_id
 				.ok_or("Library config not created correctly")?),
+			config_id: Set(created_config.id),
 			..library
 		})
 		.exec_with_returning(&txn)
@@ -213,6 +205,177 @@ impl LibraryMutation {
 		Ok(Library::from(created_library))
 	}
 
+	/// Update an existing library with the provided configuration. If `scan_after_persist` is `true`,
+	/// the library will be scanned immediately after updating.
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditLibrary)")]
+	async fn update_library(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		mut input: CreateOrUpdateLibraryInput,
+	) -> Result<Library> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let (existing_library, existing_config) = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.find_also_related(library_config::Entity)
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+
+		let Some(existing_config) = existing_config else {
+			return Err("Library is missing associated config!".into());
+		};
+
+		let existing_tags = tag::Entity::find()
+			.filter(
+				tag::Column::Id.in_subquery(
+					Query::select()
+						.column(library_to_tag::Column::TagId)
+						.from(library_to_tag::Entity)
+						.and_where(
+							library_to_tag::Column::LibraryId
+								.eq(existing_library.id.clone()),
+						)
+						.to_owned(),
+				),
+			)
+			.all(core.conn.as_ref())
+			.await?;
+
+		enforce_valid_library_path(
+			core.conn.as_ref(),
+			&input.path,
+			Some(&existing_library.path),
+		)
+		.await?;
+
+		let scan_after_update = input.scan_after_persist;
+		let tags = input.tags.take();
+
+		let txn = core.conn.as_ref().begin().await?;
+
+		let (library, config) = input.into_active_model();
+
+		let _updated_config = library_config::ActiveModel {
+			id: Set(existing_config.id),
+			library_id: Set(existing_config.library_id.clone()),
+			..config
+		}
+		.update(&txn)
+		.await?;
+
+		let updated_library = library::ActiveModel {
+			id: Set(existing_library.id),
+			..library
+		}
+		.update(&txn)
+		.await?;
+
+		if let Some(tags) = tags {
+			let tags_not_in_existing = tags
+				.iter()
+				.filter(|tag| !existing_tags.iter().any(|t| t.name == **tag))
+				.collect::<Vec<_>>();
+
+			let tags_to_add_which_already_exist = tag::Entity::find()
+				.filter(tag::Column::Name.is_in(tags_not_in_existing.clone()))
+				.all(&txn)
+				.await?;
+
+			let tags_to_create = tags_not_in_existing
+				.iter()
+				.filter(|tag| {
+					!tags_to_add_which_already_exist
+						.iter()
+						.any(|t| t.name == ***tag)
+				})
+				.map(|tag| tag::ActiveModel {
+					name: Set(tag.to_string()),
+					..Default::default()
+				})
+				.collect::<Vec<_>>();
+
+			let created_tags = tag::Entity::insert_many(tags_to_create)
+				.exec_with_returning_many(&txn)
+				.await?;
+
+			let tags_to_connect = tags_to_add_which_already_exist
+				.iter()
+				.chain(created_tags.iter())
+				.map(|tag| tag.id.clone())
+				.collect::<Vec<_>>();
+
+			let tags_to_disconnect = existing_tags
+				.iter()
+				.filter(|tag| !tags.iter().any(|t| t == &tag.name))
+				.map(|tag| tag.id.clone())
+				.collect::<Vec<_>>();
+
+			if !tags_to_disconnect.is_empty() {
+				let affected_rows = library_to_tag::Entity::delete_many()
+					.filter(library_to_tag::Column::Id.is_in(tags_to_disconnect).and(
+						library_to_tag::Column::LibraryId.eq(updated_library.id.clone()),
+					))
+					.exec(&txn)
+					.await?
+					.rows_affected;
+				tracing::debug!(affected_rows, "Deleted tags from library");
+			}
+
+			if !tags_to_connect.is_empty() {
+				let library_id = updated_library.id.clone();
+				let to_link = tags_to_connect
+					.into_iter()
+					.map(|tag_id| library_to_tag::ActiveModel {
+						library_id: Set(library_id.clone()),
+						tag_id: Set(tag_id),
+						..Default::default()
+					})
+					.collect::<Vec<library_to_tag::ActiveModel>>();
+
+				library_to_tag::Entity::insert_many(to_link)
+					.on_conflict_do_nothing()
+					.exec(&txn)
+					.await?;
+			}
+		}
+
+		txn.commit().await?;
+
+		if scan_after_update {
+			core.enqueue_job(LibraryScanJob::new(
+				updated_library.id.clone(),
+				updated_library.path.clone(),
+				None,
+			))?;
+		}
+
+		Ok(Library::from(updated_library))
+	}
+
+	/// Delete a library, including all associated media and series via cascading deletes. This
+	/// operation cannot be undone.
+	#[graphql(guard = "PermissionGuard::one(UserPermission::DeleteLibrary)")]
+	async fn delete_library(&self, ctx: &Context<'_>, id: ID) -> Result<Library> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let library = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+		library.clone().delete(core.conn.as_ref()).await?;
+
+		// TODO: delete thumbnails!
+
+		// Note: We return the full node so the ID may be pulled to properly update the cache.
+		// For obvious reasons, certain fields will error if accessed.
+		Ok(Library::from(library))
+	}
+
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ScanLibrary)")]
 	async fn scan_library(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
@@ -231,4 +394,38 @@ impl LibraryMutation {
 
 		Ok(true)
 	}
+}
+
+async fn enforce_valid_library_path(
+	conn: &DatabaseConnection,
+	path: &str,
+	existing_path: Option<&str>,
+) -> Result<()> {
+	match fs::metadata(path).await {
+		Ok(metadata) => {
+			if !metadata.is_dir() {
+				return Err("Path is not a directory".into());
+			}
+		},
+		Err(error) => {
+			return Err(error.to_string().into());
+		},
+	}
+
+	if let Some(existing_path) = existing_path {
+		if existing_path == path {
+			return Ok(());
+		}
+	}
+
+	let child_libraries = library::Entity::find()
+		.filter(library::Column::Path.starts_with(path))
+		.count(conn)
+		.await?;
+
+	if child_libraries > 0 {
+		return Err("Path is a parent of another library on the filesystem".into());
+	}
+
+	Ok(())
 }

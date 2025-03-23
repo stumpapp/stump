@@ -1,6 +1,7 @@
 use async_graphql::SimpleObject;
 use sea_orm::{
-	entity::prelude::*, sea_query::Query, DerivePartialModel, FromQueryResult,
+	entity::prelude::*, prelude::async_trait::async_trait, sea_query::Query, ActiveValue,
+	DerivePartialModel, FromQueryResult,
 };
 
 use super::{library_hidden_to_user, user::AuthUser};
@@ -25,8 +26,7 @@ pub struct Model {
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub emoji: Option<String>,
-	#[sea_orm(column_type = "Text", unique)]
-	pub config_id: String,
+	pub config_id: i32,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub job_schedule_config_id: Option<String>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
@@ -110,4 +110,16 @@ impl Related<super::series::Entity> for Entity {
 	}
 }
 
-impl ActiveModelBehavior for ActiveModel {}
+#[async_trait]
+impl ActiveModelBehavior for ActiveModel {
+	async fn before_save<C>(mut self, _db: &C, insert: bool) -> Result<Self, DbErr>
+	where
+		C: ConnectionTrait,
+	{
+		if insert && self.id.is_not_set() {
+			self.id = ActiveValue::Set(Uuid::new_v4().to_string());
+		}
+
+		Ok(self)
+	}
+}

@@ -3,6 +3,8 @@ use async_graphql::{
 	Union,
 };
 
+use crate::object::{media::Media, reading_list::ReadingList};
+
 /// A simple cursor-based pagination input object
 #[derive(Debug, Clone, InputObject)]
 pub struct CursorPagination {
@@ -154,6 +156,8 @@ pub enum PaginationInfo {
 }
 
 #[derive(Debug, SimpleObject)]
+#[graphql(concrete(name = "PaginatedMediaResponse", params(Media)))]
+#[graphql(concrete(name = "PaginatedReadingListResponse", params(ReadingList)))]
 pub struct PaginatedResponse<T>
 where
 	T: OutputType,

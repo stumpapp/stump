@@ -41,6 +41,9 @@ pub enum AccessRole {
 	Serialize,
 	Deserialize,
 	DeriveActiveEnum,
+	Enum,
+	EnumString,
+	Display,
 )]
 #[sea_orm(
 	rs_type = "String",
@@ -48,6 +51,7 @@ pub enum AccessRole {
 	db_type = "String(StringLen::None)"
 )]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 pub enum EntityVisibility {
 	Public,
 	Shared,

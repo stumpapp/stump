@@ -1,10 +1,10 @@
-use async_graphql::{Context, Enum, InputObject, Object, Result};
+use async_graphql::{Context, InputObject, Object, Result};
 use graphql::{
 	data::{CoreContext, RequestContext},
 	object::reading_list::ReadingList,
 };
-use models::entity::reading_list;
 use models::entity::reading_list_item;
+use models::{entity::reading_list, shared::enums::EntityVisibility};
 use sea_orm::prelude::*;
 use sea_orm::ActiveValue::Set;
 use sea_orm::TransactionTrait;
@@ -12,25 +12,11 @@ use sea_orm::TransactionTrait;
 #[derive(Default)]
 pub struct ReadingListMutation;
 
-#[derive(Default, Debug, Copy, Clone, Eq, PartialEq, Enum)]
-enum Visibility {
-	Public,
-	#[default]
-	Private,
-	Shared,
-}
-
-impl std::fmt::Display for Visibility {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(f, "{:?}", self)
-	}
-}
-
 #[derive(InputObject)]
 struct ReadingListInput {
 	id: String,
 	name: String,
-	visibility: Option<Visibility>,
+	visibility: Option<EntityVisibility>,
 	media_ids: Vec<String>,
 }
 
@@ -105,12 +91,12 @@ impl ReadingListMutation {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let reading_list_id = input.id.clone();
 
-		// check if reading list exists
+		// Check if reading list exists
 		let reading_list = reading_list::Entity::find()
 			.filter(reading_list::Column::Id.eq(reading_list_id.clone()))
 			.one(conn)
 			.await?
-			.ok_or_else(|| "Reading list not found")?;
+			.ok_or("Reading list not found")?;
 
 		if reading_list.creating_user_id != user_id {
 			// TODO: log bad access attempt to DB
@@ -135,12 +121,12 @@ impl ReadingListMutation {
 		let user_id = ctx.data::<RequestContext>()?.id();
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		// check if reading list exists
+		// Check if reading list exists
 		let reading_list = reading_list::Entity::find()
 			.filter(reading_list::Column::Id.eq(id.clone()))
 			.one(conn)
 			.await?
-			.ok_or_else(|| "Reading list not found")?;
+			.ok_or("Reading list not found")?;
 
 		if reading_list.creating_user_id != user_id {
 			// TODO: log bad access attempt to DB
@@ -149,7 +135,7 @@ impl ReadingListMutation {
 				.into());
 		}
 
-		// delete reading list
+		// Delete reading list
 		let _ = reading_list.clone().delete(conn).await?;
 
 		Ok(ReadingList {

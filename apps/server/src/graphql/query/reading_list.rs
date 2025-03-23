@@ -1,9 +1,9 @@
-use async_graphql::{Context, Object, Result, SimpleObject, ID};
+use async_graphql::{Context, Object, Result, ID};
 use graphql::{
 	data::{CoreContext, RequestContext},
 	object::reading_list::ReadingList,
 	pagination::{
-		CursorPaginationInfo, OffsetPaginationInfo, Pagination, PaginationInfo,
+		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
 		PaginationValidator,
 	},
 };
@@ -13,12 +13,6 @@ use sea_orm::{prelude::*, QueryOrder, QuerySelect};
 #[derive(Default)]
 pub struct ReadingListQuery;
 
-#[derive(Debug, SimpleObject)]
-pub struct ReadingListPaginatedResponse {
-	pub nodes: Vec<ReadingList>,
-	pub page_info: PaginationInfo,
-}
-
 #[Object]
 impl ReadingListQuery {
 	/// Retrieves a paginated list of reading lists for the current user.
@@ -26,12 +20,12 @@ impl ReadingListQuery {
 	/// # Returns
 	///
 	/// A paginated list of reading lists.
-	async fn reading_list(
+	async fn reading_lists(
 		&self,
 		ctx: &Context<'_>,
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
-	) -> Result<ReadingListPaginatedResponse> {
+	) -> Result<PaginatedResponse<ReadingList>> {
 		let user_id = ctx.data::<RequestContext>()?.id();
 
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
@@ -59,7 +53,7 @@ impl ReadingListQuery {
 					info.after.or_else(|| models.first().map(|m| m.id.clone()));
 				let next_cursor = models.last().map(|m| m.id.clone());
 
-				Ok(ReadingListPaginatedResponse {
+				Ok(PaginatedResponse {
 					nodes: models.into_iter().map(ReadingList::from).collect(),
 					page_info: CursorPaginationInfo {
 						current_cursor,
@@ -79,7 +73,7 @@ impl ReadingListQuery {
 					.all(conn)
 					.await?;
 
-				Ok(ReadingListPaginatedResponse {
+				Ok(PaginatedResponse {
 					nodes: models.into_iter().map(ReadingList::from).collect(),
 					page_info: OffsetPaginationInfo::new(info, count).into(),
 				})

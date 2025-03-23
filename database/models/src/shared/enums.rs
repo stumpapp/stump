@@ -3,6 +3,8 @@ use sea_orm::{prelude::*, DeriveActiveEnum, EnumIter};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
 
+// TODO: Consider not using screaming case?
+
 /// The different roles a user may have for a role-based access control system scoped
 /// to a specific entity
 #[derive(
@@ -75,6 +77,7 @@ pub enum EntityVisibility {
 	db_type = "String(StringLen::None)"
 )]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 pub enum FileStatus {
 	Unknown,
 	#[default]
@@ -275,6 +278,7 @@ pub enum SupportedFont {
 	db_type = "String(StringLen::None)"
 )]
 #[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
 pub enum UserPermission {
 	/// Grant access to read/create their own API keys
 	AccessAPIKeys,

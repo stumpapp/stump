@@ -41,6 +41,7 @@ impl LibraryMutation {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
+		// This is primarily for access control assertion
 		let _library = library::Entity::find_for_user(user)
 			.filter(library::Column::Id.eq(id.to_string()))
 			.into_model::<library::LibraryIdentSelect>()
@@ -69,6 +70,7 @@ impl LibraryMutation {
 			.into_iter()
 			.map(|m| m.id)
 			.collect::<Vec<_>>();
+		tracing::trace!(?deleted_media_ids, "Deleted media ids");
 
 		let deleted_series_ids = series::Entity::delete_many()
 			.filter(series::Column::LibraryId.eq(id.to_string()))
@@ -91,6 +93,7 @@ impl LibraryMutation {
 			.into_iter()
 			.map(|s| s.id)
 			.collect::<Vec<_>>();
+		tracing::trace!(?deleted_series_ids, "Deleted series ids");
 
 		let is_library_empty = series::Entity::find()
 			.filter(series::Column::LibraryId.eq(id.to_string()))

@@ -2,13 +2,13 @@ use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
 use models::{
 	entity::{
-		library, library_config, library_hidden_to_user, library_to_tag, series, tag,
-		user,
+		library, library_config, library_hidden_to_user, library_scan_record,
+		library_to_tag, series, tag, user,
 	},
 	shared::enums::UserPermission,
 };
 use sea_orm::{
-	prelude::*, sea_query::Query, DatabaseBackend, FromQueryResult, Statement,
+	prelude::*, sea_query::Query, DatabaseBackend, FromQueryResult, QueryOrder, Statement,
 };
 
 use crate::{
@@ -70,10 +70,41 @@ impl Library {
 		Ok(users.into_iter().map(User::from).collect())
 	}
 
-	// last_scan
+	// TODO(graphql): object type to load job details
+	/// Get the details of the last scan job for this library, if any exists.
+	async fn last_scan(
+		&self,
+		ctx: &Context<'_>,
+	) -> Result<Option<library_scan_record::Model>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-	// scan_history
+		let record = library_scan_record::Entity::find()
+			.filter(library_scan_record::Column::LibraryId.eq(self.model.id.clone()))
+			.order_by_desc(library_scan_record::Column::Timestamp)
+			.one(conn)
+			.await?;
 
+		Ok(record)
+	}
+
+	// TODO(graphql): object type to load job details
+	/// Get the full history of scan jobs for this library.
+	async fn scan_history(
+		&self,
+		ctx: &Context<'_>,
+	) -> Result<Vec<library_scan_record::Model>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let records = library_scan_record::Entity::find()
+			.filter(library_scan_record::Column::LibraryId.eq(self.model.id.clone()))
+			.order_by_desc(library_scan_record::Column::Timestamp)
+			.all(conn)
+			.await?;
+
+		Ok(records)
+	}
+
+	// TODO(graphql): Pagination
 	async fn series(&self, ctx: &Context<'_>) -> Result<Vec<Series>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 

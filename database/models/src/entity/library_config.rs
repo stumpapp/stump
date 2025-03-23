@@ -1,7 +1,7 @@
 use sea_orm::entity::prelude::*;
 
 use crate::shared::{
-	enums::{LibraryPattern, ReadingImageScaleFit},
+	enums::{LibraryPattern, ReadingDirection, ReadingImageScaleFit, ReadingMode},
 	ignore_rules::IgnoreRules,
 	image_processor_options::ImageProcessorOptions,
 };
@@ -14,9 +14,9 @@ pub struct Model {
 	pub convert_rar_to_zip: bool,
 	pub hard_delete_conversions: bool,
 	#[sea_orm(column_type = "Text")]
-	pub default_reading_dir: String,
+	pub default_reading_dir: ReadingDirection,
 	#[sea_orm(column_type = "Text")]
-	pub default_reading_mode: String,
+	pub default_reading_mode: ReadingMode,
 	#[sea_orm(column_type = "Text")]
 	pub default_reading_image_scale_fit: ReadingImageScaleFit,
 	pub generate_file_hashes: bool,

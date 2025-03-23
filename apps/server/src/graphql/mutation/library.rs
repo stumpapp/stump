@@ -2,13 +2,16 @@ use async_graphql::{Context, Object, Result, SimpleObject, ID};
 use graphql::{
 	data::{CoreContext, RequestContext},
 	guard::PermissionGuard,
+	input::CreateLibraryInput,
+	object::library::Library,
 };
 use models::{
-	entity::{library, media, series},
+	entity::{library, library_config, media, series},
 	shared::enums::{FileStatus, UserPermission},
 };
-use sea_orm::{prelude::*, sea_query::Query, Condition, TransactionTrait};
+use sea_orm::{prelude::*, sea_query::Query, Condition, Set, TransactionTrait};
 use stump_core::filesystem::{image::remove_thumbnails, scanner::LibraryScanJob};
+use tokio::fs;
 
 #[derive(Default, SimpleObject)]
 struct CleanLibraryResponse {
@@ -110,6 +113,56 @@ impl LibraryMutation {
 			deleted_series_count: deleted_series_ids.len(),
 			is_empty: is_library_empty,
 		})
+	}
+
+	#[graphql(guard = "PermissionGuard::one(UserPermission::CreateLibrary)")]
+	async fn create_library(
+		&self,
+		ctx: &Context<'_>,
+		mut input: CreateLibraryInput,
+	) -> Result<Library> {
+		let core = ctx.data::<CoreContext>()?;
+
+		match fs::metadata(&input.path).await {
+			Ok(metadata) => {
+				if !metadata.is_dir() {
+					return Err("Path is not a directory".into());
+				}
+			},
+			Err(error) => {
+				return Err(error.to_string().into());
+			},
+		}
+
+		let child_libraries = library::Entity::find()
+			.filter(library::Column::Path.starts_with(input.path.clone()))
+			.count(core.conn.as_ref())
+			.await?;
+
+		if child_libraries > 0 {
+			return Err("Path is a parent of another library on the filesystem".into());
+		}
+
+		let scan_after_creation = input.scan_on_create;
+		let tags = input.tags.take();
+
+		let txn = core.conn.as_ref().begin().await?;
+
+		let (library, config) = input.into_active_model();
+
+		let created_config = config.insert(&txn).await?;
+		let created_library = library::Entity::insert(library::ActiveModel {
+			id: Set(created_config
+				.library_id
+				.ok_or("Library config not created correctly")?),
+			..library
+		})
+		.exec(&txn)
+		.await?;
+
+		// TODO: create / link tags
+
+		unimplemented!()
 	}
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ScanLibrary)")]

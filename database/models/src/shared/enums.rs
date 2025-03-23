@@ -1,3 +1,4 @@
+use async_graphql::Enum;
 use sea_orm::{prelude::*, DeriveActiveEnum, EnumIter};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
@@ -114,12 +115,14 @@ pub enum InterfaceLayout {
 	Copy,
 	Hash,
 	Debug,
+	Default,
 	Clone,
 	EnumIter,
 	PartialEq,
 	Serialize,
 	Deserialize,
 	DeriveActiveEnum,
+	Enum,
 )]
 #[sea_orm(
 	rs_type = "String",
@@ -128,6 +131,7 @@ pub enum InterfaceLayout {
 )]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum LibraryPattern {
+	#[default]
 	SeriesBased,
 	CollectionBased,
 }
@@ -145,6 +149,7 @@ pub enum LibraryPattern {
 	Serialize,
 	Deserialize,
 	DeriveActiveEnum,
+	Enum,
 )]
 #[sea_orm(
 	rs_type = "String",
@@ -171,6 +176,7 @@ pub enum ReadingDirection {
 	Serialize,
 	Deserialize,
 	DeriveActiveEnum,
+	Enum,
 )]
 #[sea_orm(
 	rs_type = "String",
@@ -199,6 +205,7 @@ pub enum ReadingImageScaleFit {
 	Serialize,
 	Deserialize,
 	DeriveActiveEnum,
+	Enum,
 )]
 #[sea_orm(
 	rs_type = "String",
@@ -225,6 +232,7 @@ pub enum ReadingMode {
 	Serialize,
 	Deserialize,
 	DeriveActiveEnum,
+	Enum,
 )]
 #[sea_orm(
 	rs_type = "String",

@@ -6,7 +6,7 @@ use graphql::{
 	object::library::Library,
 };
 use models::{
-	entity::{library, library_config, media, series},
+	entity::{library, library_config, library_to_tag, media, series, tag},
 	shared::enums::{FileStatus, UserPermission},
 };
 use sea_orm::{prelude::*, sea_query::Query, Condition, Set, TransactionTrait};
@@ -157,12 +157,60 @@ impl LibraryMutation {
 				.ok_or("Library config not created correctly")?),
 			..library
 		})
-		.exec(&txn)
+		.exec_with_returning(&txn)
 		.await?;
 
-		// TODO: create / link tags
+		if let Some(tags) = tags {
+			let existing_tags = tag::Entity::find()
+				.filter(tag::Column::Name.is_in(tags.clone()))
+				.all(&txn)
+				.await?;
 
-		unimplemented!()
+			let tags_to_create = tags
+				.iter()
+				.filter(|tag| !existing_tags.iter().any(|t| t.name == **tag))
+				.map(|tag| tag::ActiveModel {
+					name: Set(tag.clone()),
+					..Default::default()
+				})
+				.collect::<Vec<_>>();
+
+			let created_tags = tag::Entity::insert_many(tags_to_create)
+				.exec_with_returning_many(&txn)
+				.await?;
+
+			let to_link = existing_tags
+				.iter()
+				.chain(created_tags.iter())
+				.map(|tag| tag.id.clone())
+				.collect::<Vec<_>>();
+
+			library_to_tag::Entity::insert_many(
+				to_link
+					.into_iter()
+					.map(|tag_id| library_to_tag::ActiveModel {
+						library_id: Set(created_library.id.clone()),
+						tag_id: Set(tag_id),
+						..Default::default()
+					})
+					.collect::<Vec<library_to_tag::ActiveModel>>(),
+			)
+			.on_conflict_do_nothing()
+			.exec(&txn)
+			.await?;
+		}
+
+		txn.commit().await?;
+
+		if scan_after_creation {
+			core.enqueue_job(LibraryScanJob::new(
+				created_library.id.clone(),
+				created_library.path.clone(),
+				None,
+			))?;
+		}
+
+		Ok(Library::from(created_library))
 	}
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ScanLibrary)")]

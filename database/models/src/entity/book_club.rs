@@ -1,7 +1,12 @@
 use async_graphql::SimpleObject;
-use sea_orm::{entity::prelude::*, sea_query::Query, Condition};
+use sea_orm::{
+	entity::prelude::*, sea_query::Query, sqlx::types::Json, Condition, QueryTrait,
+};
 
-use crate::entity::book_club_member;
+use crate::{
+	entity::book_club_member,
+	shared::book_club::{BookClubMemberRole, BookClubMemberRoleSpec},
+};
 
 use super::user::AuthUser;
 
@@ -16,9 +21,9 @@ pub struct Model {
 	#[sea_orm(column_type = "Text", nullable)]
 	pub description: Option<String>,
 	pub is_private: bool,
-	// TODO(sea-orm): Json
-	#[sea_orm(column_type = "Blob", nullable)]
-	pub member_role_spec: Option<Vec<u8>>,
+	#[graphql(skip)]
+	#[sea_orm(column_type = "Json", nullable)]
+	pub member_role_spec: Option<BookClubMemberRoleSpec>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "Text", nullable)]
@@ -46,8 +51,44 @@ pub fn book_clubs_accessible_to_user(user: &AuthUser) -> Option<Condition> {
 }
 
 impl Entity {
+	/// Find all book clubs that the user can access
 	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
-		unimplemented!()
+		Entity::find().apply_if(book_clubs_accessible_to_user(user), |query, cond| {
+			query.filter(cond)
+		})
+	}
+
+	/// Find all book clubs that the user is a member of
+	pub fn find_for_member_user(user: &AuthUser) -> Select<Entity> {
+		Entity::find().filter(
+			Column::Id.in_subquery(
+				Query::select()
+					.column(book_club_member::Column::BookClubId)
+					.from(book_club_member::Entity)
+					.and_where(book_club_member::Column::UserId.eq(user.id.clone()))
+					.to_owned(),
+			),
+		)
+	}
+
+	pub fn find_for_member_enforce_role(
+		user: &AuthUser,
+		role: BookClubMemberRole,
+	) -> Select<Entity> {
+		if user.is_server_owner {
+			return Entity::find();
+		}
+
+		Entity::find().filter(
+			Column::Id.in_subquery(
+				Query::select()
+					.column(book_club_member::Column::BookClubId)
+					.from(book_club_member::Entity)
+					.and_where(book_club_member::Column::UserId.eq(user.id.clone()))
+					.and_where(book_club_member::Column::Role.gte::<i32>(role as i32))
+					.to_owned(),
+			),
+		)
 	}
 }
 

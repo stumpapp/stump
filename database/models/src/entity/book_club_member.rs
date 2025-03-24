@@ -1,5 +1,7 @@
 use sea_orm::entity::prelude::*;
 
+use crate::shared::book_club::BookClubMemberRole;
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "book_club_members")]
 pub struct Model {
@@ -10,7 +12,7 @@ pub struct Model {
 	pub is_creator: bool,
 	pub hide_progress: bool,
 	pub private_membership: bool,
-	pub role: i32,
+	pub role: BookClubMemberRole,
 	#[sea_orm(column_type = "Text")]
 	pub user_id: String,
 	#[sea_orm(column_type = "Text")]

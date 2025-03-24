@@ -3,8 +3,9 @@ use sea_orm::entity::prelude::*;
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "book_club_schedules")]
 pub struct Model {
+	#[sea_orm(primary_key, auto_increment = true)]
+	pub id: i32,
 	pub default_interval_days: Option<i32>,
-	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
 	pub book_club_id: String,
 }
 

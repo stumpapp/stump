@@ -17,11 +17,10 @@ pub struct Model {
 	#[sea_orm(column_type = "Text", nullable)]
 	pub url: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
-	pub book_entity_id: Option<String>,
-	#[sea_orm(column_type = "Text", nullable)]
-	pub book_club_schedule_book_club_id: Option<String>,
-	#[sea_orm(column_type = "Text", nullable)]
 	pub image_url: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub book_entity_id: Option<String>,
+	pub book_club_schedule_id: Option<i32>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -30,8 +29,8 @@ pub enum Relation {
 	BookClubDiscussion,
 	#[sea_orm(
 		belongs_to = "super::book_club_schedule::Entity",
-		from = "Column::BookClubScheduleBookClubId",
-		to = "super::book_club_schedule::Column::BookClubId",
+		from = "Column::BookClubScheduleId",
+		to = "super::book_club_schedule::Column::Id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]

@@ -1,11 +1,15 @@
-use sea_orm::entity::prelude::*;
+use async_graphql::SimpleObject;
+use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue};
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
+use crate::shared::book_club::BookClubMemberRole;
+
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
+#[graphql(name = "BookClubInvitationModel")]
 #[sea_orm(table_name = "book_club_invitations")]
 pub struct Model {
 	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
 	pub id: String,
-	pub role: i32,
+	pub role: BookClubMemberRole,
 	#[sea_orm(column_type = "Text")]
 	pub user_id: String,
 	#[sea_orm(column_type = "Text")]
@@ -44,4 +48,16 @@ impl Related<super::user::Entity> for Entity {
 	}
 }
 
-impl ActiveModelBehavior for ActiveModel {}
+#[async_trait]
+impl ActiveModelBehavior for ActiveModel {
+	async fn before_save<C>(mut self, _db: &C, insert: bool) -> Result<Self, DbErr>
+	where
+		C: ConnectionTrait,
+	{
+		if insert && self.id.is_not_set() {
+			self.id = ActiveValue::Set(Uuid::new_v4().to_string());
+		}
+
+		Ok(self)
+	}
+}

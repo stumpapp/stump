@@ -8,6 +8,12 @@ pub struct BookClub {
 	model: book_club::Model,
 }
 
+impl From<book_club::Model> for BookClub {
+	fn from(model: book_club::Model) -> Self {
+		Self { model }
+	}
+}
+
 #[ComplexObject]
 impl BookClub {
 	async fn current_book(&self) -> Result<String> {

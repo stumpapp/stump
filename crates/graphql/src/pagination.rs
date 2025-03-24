@@ -44,6 +44,14 @@ impl OffsetPagination {
 	}
 }
 
+/// A simple pagination input object which does not paginate. An explicit struct is
+/// required as a limitation of async_graphql's [OneofObject], which doesn't allow
+/// for empty variants.
+#[derive(Debug, Clone, InputObject)]
+pub struct Unpaginated {
+	unpaginated: bool,
+}
+
 /// A union of the supported pagination flavors which Stump supports. The resulting
 /// response will be dependent on the pagination type used, e.g. a [CursorPaginatedResponse]
 /// will be returned if the [CursorPagination] type is used.
@@ -59,11 +67,36 @@ impl OffsetPagination {
 ///     }
 /// }
 /// ```
+///
+/// A special case is the `None` variant, which will return an offset-based pagination info
+/// object based on the size of the result set. This will not paginate the results, so be
+/// cautious when using this with large result sets.
+///
+/// **Note**: Be sure to call [Pagination::resolve] before using the pagination object
+/// to ensure that the pagination object is in a valid state.
 #[derive(Debug, Clone, OneofObject)]
 pub enum Pagination {
 	Cursor(CursorPagination),
 	Offset(OffsetPagination),
-	// TODO(graphql): None pagination type, i.e. no pagination
+	None(Unpaginated),
+}
+
+impl Pagination {
+	/// Resolves the pagination object, ensuring that the pagination object is in a valid state. This
+	/// primarily ensures that the `None` variant is converted to an offset-based pagination object
+	/// when an invalid-but-non-error state of unpaginated=false is present.
+	pub fn resolve(self) -> Pagination {
+		match self {
+			Pagination::None(input) if !input.unpaginated => {
+				Pagination::Offset(OffsetPagination {
+					page: 1,
+					page_size: default_page_size(),
+					zero_based: default_zero_based(),
+				})
+			},
+			_ => self,
+		}
+	}
 }
 
 impl Default for Pagination {
@@ -143,6 +176,16 @@ impl OffsetPaginationInfo {
 			total_pages,
 			page_offset,
 			zero_based,
+		}
+	}
+
+	pub fn unpaged(count: u64) -> Self {
+		Self {
+			current_page: 1,
+			page_size: count,
+			total_pages: 1,
+			page_offset: 0,
+			zero_based: false,
 		}
 	}
 }

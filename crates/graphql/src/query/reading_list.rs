@@ -33,7 +33,7 @@ impl ReadingListQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let query = reading_list::Entity::find_for_user(&user_id, 1);
 
-		match pagination {
+		match pagination.resolve() {
 			Pagination::Cursor(info) => {
 				let mut cursor = query.cursor_by(reading_list::Column::Id);
 				if let Some(ref id) = info.after {
@@ -78,6 +78,19 @@ impl ReadingListQuery {
 				Ok(PaginatedResponse {
 					nodes: models.into_iter().map(ReadingList::from).collect(),
 					page_info: OffsetPaginationInfo::new(info, count).into(),
+				})
+			},
+			Pagination::None(_) => {
+				let models = query
+					.order_by_asc(reading_list::Column::Id)
+					.into_model::<reading_list::Model>()
+					.all(conn)
+					.await?;
+				let count = models.len().try_into()?;
+
+				Ok(PaginatedResponse {
+					nodes: models.into_iter().map(ReadingList::from).collect(),
+					page_info: OffsetPaginationInfo::unpaged(count).into(),
 				})
 			},
 		}

@@ -32,7 +32,7 @@ impl MediaQuery {
 
 		let query = media::ModelWithMetadata::find_for_user(user);
 
-		match pagination {
+		match pagination.resolve() {
 			Pagination::Cursor(info) => {
 				let mut cursor = query.cursor_by(media::Column::Name);
 				if let Some(ref id) = info.after {
@@ -81,6 +81,18 @@ impl MediaQuery {
 					page_info: OffsetPaginationInfo::new(info, count).into(),
 				})
 			},
+			Pagination::None(_) => {
+				let models = query
+					.into_model::<media::ModelWithMetadata>()
+					.all(conn)
+					.await?;
+				let count = models.len().try_into()?;
+
+				Ok(PaginatedResponse {
+					nodes: models.into_iter().map(Media::from).collect(),
+					page_info: OffsetPaginationInfo::unpaged(count).into(),
+				})
+			},
 		}
 	}
 
@@ -120,7 +132,7 @@ impl MediaQuery {
 			)
 			.order_by_desc(reading_session::Column::UpdatedAt);
 
-		match pagination {
+		match pagination.resolve() {
 			Pagination::Cursor(info) => {
 				let user_id = user.id.clone();
 				let mut cursor = query.cursor_by(reading_session::Column::UpdatedAt);
@@ -187,6 +199,18 @@ impl MediaQuery {
 					page_info: OffsetPaginationInfo::new(info, count).into(),
 				})
 			},
+			Pagination::None(_) => {
+				let models = query
+					.into_model::<media::ModelWithMetadata>()
+					.all(conn)
+					.await?;
+				let count = models.len().try_into()?;
+
+				Ok(PaginatedResponse {
+					nodes: models.into_iter().map(Media::from).collect(),
+					page_info: OffsetPaginationInfo::unpaged(count).into(),
+				})
+			},
 		}
 	}
 
@@ -201,7 +225,7 @@ impl MediaQuery {
 
 		let query = media::ModelWithMetadata::find_for_user(user);
 
-		match pagination {
+		match pagination.resolve() {
 			Pagination::Cursor(info) => {
 				let mut cursor = query.cursor_by(media::Column::CreatedAt);
 				if let Some(ref id) = info.after {
@@ -249,6 +273,19 @@ impl MediaQuery {
 				Ok(PaginatedResponse {
 					nodes: models.into_iter().map(Media::from).collect(),
 					page_info: OffsetPaginationInfo::new(info, count).into(),
+				})
+			},
+			Pagination::None(_) => {
+				let models = query
+					.order_by_desc(media::Column::CreatedAt)
+					.into_model::<media::ModelWithMetadata>()
+					.all(conn)
+					.await?;
+				let count = models.len().try_into()?;
+
+				Ok(PaginatedResponse {
+					nodes: models.into_iter().map(Media::from).collect(),
+					page_info: OffsetPaginationInfo::unpaged(count).into(),
 				})
 			},
 		}

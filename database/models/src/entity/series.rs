@@ -42,6 +42,32 @@ pub fn get_age_restriction_filter(min_age: i32, restrict_on_unset: bool) -> Cond
 	}
 }
 
+impl Entity {
+	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
+		let age_restriction_filter =
+			user.age_restriction.as_ref().map(|age_restriction| {
+				get_age_restriction_filter(
+					age_restriction.age,
+					age_restriction.restrict_on_unset,
+				)
+			});
+
+		Entity::find()
+			.filter(
+				Column::LibraryId.not_in_subquery(
+					Query::select()
+						.column(library_hidden_to_user::Column::LibraryId)
+						.from(library_hidden_to_user::Entity)
+						.and_where(
+							library_hidden_to_user::Column::UserId.eq(user.id.clone()),
+						)
+						.to_owned(),
+				),
+			)
+			.apply_if(age_restriction_filter, |query, filter| query.filter(filter))
+	}
+}
+
 #[derive(FromQueryResult)]
 pub struct SeriesIdentSelect {
 	pub id: String,

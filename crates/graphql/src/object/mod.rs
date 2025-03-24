@@ -1,3 +1,5 @@
+pub mod book_club;
+pub mod book_club_member;
 pub mod library;
 pub mod library_config;
 pub mod media;

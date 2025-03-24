@@ -1,3 +1,4 @@
+mod book_club;
 pub(crate) mod media;
 pub(crate) mod reading_list;
 pub(crate) mod user;

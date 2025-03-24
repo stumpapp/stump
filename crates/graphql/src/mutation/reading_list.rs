@@ -1,13 +1,14 @@
 use async_graphql::{Context, InputObject, Object, Result};
-use graphql::{
-	data::{CoreContext, RequestContext},
-	object::reading_list::ReadingList,
-};
 use models::entity::reading_list_item;
 use models::{entity::reading_list, shared::enums::EntityVisibility};
 use sea_orm::prelude::*;
 use sea_orm::ActiveValue::Set;
 use sea_orm::TransactionTrait;
+
+use crate::{
+	data::{CoreContext, RequestContext},
+	object::reading_list::ReadingList,
+};
 
 #[derive(Default)]
 pub struct ReadingListMutation;

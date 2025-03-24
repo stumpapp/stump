@@ -3,7 +3,6 @@
 pub mod config;
 mod errors;
 mod filter;
-mod graphql;
 mod http_server;
 pub mod middleware;
 mod routers;

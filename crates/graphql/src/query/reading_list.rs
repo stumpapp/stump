@@ -1,5 +1,9 @@
 use async_graphql::{Context, Object, Result, ID};
-use graphql::{
+
+use models::entity::reading_list;
+use sea_orm::{prelude::*, QueryOrder, QuerySelect};
+
+use crate::{
 	data::{CoreContext, RequestContext},
 	object::reading_list::ReadingList,
 	pagination::{
@@ -7,8 +11,6 @@ use graphql::{
 		PaginationValidator,
 	},
 };
-use models::entity::reading_list;
-use sea_orm::{prelude::*, QueryOrder, QuerySelect};
 
 #[derive(Default)]
 pub struct ReadingListQuery;

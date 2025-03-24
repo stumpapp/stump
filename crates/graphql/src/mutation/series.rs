@@ -1,13 +1,14 @@
 use async_graphql::{Context, Object, Result, ID};
-use graphql::{
-	data::{CoreContext, RequestContext},
-	guard::PermissionGuard,
-	object::series::Series,
-};
 use models::{entity::series, shared::enums::UserPermission};
 use sea_orm::{prelude::*, QuerySelect};
 use stump_core::filesystem::{
 	media::analyze_media_job::AnalyzeMediaJob, scanner::SeriesScanJob,
+};
+
+use crate::{
+	data::{CoreContext, RequestContext},
+	guard::PermissionGuard,
+	object::series::Series,
 };
 
 #[derive(Default)]

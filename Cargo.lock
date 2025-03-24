@@ -3162,6 +3162,7 @@ name = "graphql"
 version = "0.0.10"
 dependencies = [
  "async-graphql",
+ "chrono",
  "models",
  "sea-orm",
  "serde",
@@ -3169,6 +3170,7 @@ dependencies = [
  "serde_with",
  "strum",
  "stump_core",
+ "tokio",
  "tracing",
 ]
 

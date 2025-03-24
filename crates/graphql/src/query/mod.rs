@@ -1,6 +1,6 @@
-mod media;
-mod reading_list;
-mod user;
+pub(crate) mod media;
+pub(crate) mod reading_list;
+pub(crate) mod user;
 
 use media::MediaQuery;
 use reading_list::ReadingListQuery;

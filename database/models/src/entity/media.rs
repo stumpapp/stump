@@ -5,7 +5,10 @@ use sea_orm::{
 	QuerySelect, QueryTrait,
 };
 
-use crate::prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer};
+use crate::{
+	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
+	shared::enums::FileStatus,
+};
 
 use super::{
 	library_hidden_to_user, media_metadata, series, series_metadata, user::AuthUser,
@@ -15,32 +18,51 @@ use super::{
 #[graphql(name = "MediaModel")]
 #[sea_orm(table_name = "media")]
 pub struct Model {
+	/// The unique identifier for the media
 	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
 	pub id: String,
+	/// The name of the media, derived from the filename and excluding the extension
 	#[sea_orm(column_type = "Text")]
 	pub name: String,
+	/// The size of the media file in bytes
 	pub size: i64,
+	/// The extension of the media file, excluding the leading period
 	#[sea_orm(column_type = "Text")]
 	pub extension: String,
+	/// The number of pages in the media, if applicable. Will be -1 for certain media types
 	pub pages: i32,
+	/// The timestamp of the last time the media was updated. This will be set during creation, as well
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub updated_at: DateTimeWithTimeZone,
+	/// The timestamp of the creation of the media
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub created_at: DateTimeWithTimeZone,
+	/// The timestamp of when the underlying file was last modified on disk. This will only be set if
+	/// a timestamp can be retrieved from the filesystem
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub modified_at: Option<DateTimeWithTimeZone>,
+	/// A Stump-specific hash of the media file. This is used as a secondary identifier for the media, primarily
+	/// in aiding in the identification of duplicate media files
 	#[sea_orm(column_type = "Text", nullable)]
 	pub hash: Option<String>,
-	#[sea_orm(column_type = "Text")]
-	pub path: String,
-	#[sea_orm(column_type = "Text")]
-	pub status: String,
-	#[sea_orm(column_type = "Text", nullable)]
-	pub series_id: Option<String>,
-	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
-	pub deleted_at: Option<DateTimeWithTimeZone>,
+	/// A hash of the media file that adheres to the KoReader hash algorithm. This is used to identify
+	/// books from the KoReader application so progress can be synced between the two applications
 	#[sea_orm(column_type = "Text", nullable)]
 	pub koreader_hash: Option<String>,
+	/// The path of the underlying media file on disk
+	#[sea_orm(column_type = "Text")]
+	pub path: String,
+	/// The status of the media. This is used to determine if the media is available for reading (i.e.,
+	/// if it is available on disk)
+	#[sea_orm(column_type = "Text")]
+	pub status: FileStatus,
+	/// The unique identifier of the series that the media belongs to. While this is nullable, it is
+	/// expected that all media will belong to a series
+	#[sea_orm(column_type = "Text", nullable)]
+	pub series_id: Option<String>,
+	/// The timestamp of when the media was **soft** deleted. This will act like a trash bin.
+	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
+	pub deleted_at: Option<DateTimeWithTimeZone>,
 }
 
 pub fn get_age_restriction_filter(min_age: i32, restrict_on_unset: bool) -> Condition {
@@ -254,6 +276,11 @@ pub struct MediaNameCmpSelect {
 #[derive(Debug, FromQueryResult)]
 pub struct MediaCreatedAtCmpSelect {
 	pub created_at: DateTimeWithTimeZone,
+}
+
+#[derive(Debug, FromQueryResult)]
+pub struct ReadingSessionUpdatedAtCmpSelect {
+	pub updated_at: DateTimeWithTimeZone,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

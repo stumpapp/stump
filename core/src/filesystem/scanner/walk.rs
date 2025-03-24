@@ -6,7 +6,10 @@ use std::{
 
 use globset::GlobSet;
 use itertools::Either;
-use models::entity::{media, series};
+use models::{
+	entity::{media, series},
+	shared::enums::FileStatus,
+};
 use rayon::iter::{
 	IntoParallelIterator, IntoParallelRefIterator, ParallelBridge, ParallelIterator,
 };
@@ -14,7 +17,6 @@ use sea_orm::{prelude::*, DatabaseConnection, QuerySelect};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::{
-	db::FileStatus,
 	filesystem::{
 		scanner::{options::BookVisitOperation, utils::file_updated_since_scan},
 		PathUtils,
@@ -400,8 +402,7 @@ pub async fn walk_series(
 	let recovered_media = existing_media_map
 		.into_par_iter()
 		.filter(|(path, media)| {
-			media.status == FileStatus::Missing.to_string()
-				&& PathBuf::from(path).exists()
+			media.status == FileStatus::Missing && PathBuf::from(path).exists()
 		})
 		.map(|(_, media)| media.id)
 		.collect::<Vec<String>>();

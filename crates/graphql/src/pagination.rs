@@ -44,10 +44,26 @@ impl OffsetPagination {
 	}
 }
 
+/// A union of the supported pagination flavors which Stump supports. The resulting
+/// response will be dependent on the pagination type used, e.g. a [CursorPaginatedResponse]
+/// will be returned if the [CursorPagination] type is used.
+///
+/// You may use a conditional fragment in your GraphQL query for type-specific fields:
+/// ```graphql
+/// query MyQuery {
+///     media(pagination: { offset: { page: 1, pageSize: 20 } }) {
+///         ... on OffsetPaginationInfo {
+///            totalPages
+///            currentPage
+///         }
+///     }
+/// }
+/// ```
 #[derive(Debug, Clone, OneofObject)]
 pub enum Pagination {
 	Cursor(CursorPagination),
 	Offset(OffsetPagination),
+	// TODO(graphql): None pagination type, i.e. no pagination
 }
 
 impl Default for Pagination {

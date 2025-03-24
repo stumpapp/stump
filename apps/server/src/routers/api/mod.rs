@@ -10,13 +10,12 @@ use axum::{
 	routing::post,
 	Extension, Router,
 };
+use graphql::schema::{build_schema, AppSchema};
 use models::entity::user::AuthUser;
-use reqwest::header::USER_AGENT;
 
 use crate::{
 	config::state::AppState,
 	errors::APIError,
-	graphql::{build_schema, AppSchema},
 	middleware::auth::{auth_middleware, RequestContext},
 };
 
@@ -33,9 +32,9 @@ pub(crate) async fn graphql(app_state: AppState) -> Router<AppState> {
 	let schema = build_schema(app_state.clone()).await;
 
 	let mut method_router = post(graphql_handler);
-	// if app_state.config.enable_swagger {
-	method_router = method_router.get(playground);
-	// }
+	if app_state.config.enable_swagger || cfg!(debug_assertions) {
+		method_router = method_router.get(playground);
+	}
 
 	Router::new()
 		.route("/", method_router)

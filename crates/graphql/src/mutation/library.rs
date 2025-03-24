@@ -1,12 +1,5 @@
 use async_graphql::{Context, Json, Object, Result, SimpleObject, ID};
 use chrono::Utc;
-use graphql::{
-	data::{CoreContext, RequestContext},
-	error_message,
-	guard::PermissionGuard,
-	input::CreateOrUpdateLibraryInput,
-	object::library::Library,
-};
 use models::{
 	entity::{
 		last_library_visit, library, library_config, library_hidden_to_user,
@@ -24,6 +17,14 @@ use stump_core::filesystem::{
 	scanner::{LibraryScanJob, ScanOptions},
 };
 use tokio::fs;
+
+use crate::{
+	data::{CoreContext, RequestContext},
+	error_message,
+	guard::PermissionGuard,
+	input::CreateOrUpdateLibraryInput,
+	object::library::Library,
+};
 
 #[derive(Default, SimpleObject)]
 struct CleanLibraryResponse {
@@ -605,6 +606,7 @@ async fn enforce_valid_library_path(
 	path: &str,
 	existing_path: Option<&str>,
 ) -> Result<()> {
+	// TODO: Move this to the core, Ideally we avoid pulling tokio for this crate
 	match fs::metadata(path).await {
 		Ok(metadata) => {
 			if !metadata.is_dir() {

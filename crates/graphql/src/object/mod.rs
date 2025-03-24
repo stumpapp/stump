@@ -1,10 +1,13 @@
 pub mod book_club;
 pub mod book_club_invitation;
 pub mod book_club_member;
+pub mod bookmark;
+pub mod epub;
 pub mod library;
 pub mod library_config;
 pub mod media;
 pub mod reading_list;
 pub mod reading_list_item;
+pub mod reading_session;
 pub mod series;
 pub mod user;

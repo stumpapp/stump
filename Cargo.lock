@@ -3163,6 +3163,7 @@ version = "0.0.10"
 dependencies = [
  "async-graphql",
  "chrono",
+ "epub",
  "models",
  "sea-orm",
  "serde",

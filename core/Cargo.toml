@@ -16,7 +16,7 @@ derivative.workspace = true
 dirs = "5.0.1"
 email = { path = "../crates/email" }
 models = { path = "../database/models" }
-epub = { git = "https://github.com/stumpapp/epub-rs", rev = "38e091abe96875952556ab7dec195022d0230e14" }
+epub.workspace = true
 futures.workspace = true
 globset = "0.4.14"
 image = { version = "0.25.2" }

@@ -6,6 +6,7 @@ version.workspace = true
 [dependencies]
 async-graphql.workspace = true
 chrono.workspace = true
+epub.workspace = true
 models = { path = "../../database/models" }
 sea-orm.workspace = true
 serde.workspace = true

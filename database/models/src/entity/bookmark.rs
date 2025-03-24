@@ -1,7 +1,9 @@
-use sea_orm::entity::prelude::*;
+use async_graphql::SimpleObject;
+use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue};
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[sea_orm(table_name = "bookmarks")]
+#[graphql(name = "BookmarkModel")]
 pub struct Model {
 	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
 	pub id: String,
@@ -48,4 +50,24 @@ impl Related<super::user::Entity> for Entity {
 	}
 }
 
-impl ActiveModelBehavior for ActiveModel {}
+#[async_trait]
+impl ActiveModelBehavior for ActiveModel {
+	async fn before_save<C>(mut self, _db: &C, insert: bool) -> Result<Self, DbErr>
+	where
+		C: ConnectionTrait,
+	{
+		if insert && self.id.is_not_set() {
+			self.id = ActiveValue::Set(Uuid::new_v4().to_string());
+		}
+
+		Ok(self)
+	}
+}
+
+impl Entity {
+	pub fn find_for_user(user_id: &str, media_id: &str) -> Select<Entity> {
+		Entity::find()
+			.filter(Column::UserId.eq(user_id))
+			.filter(Column::MediaId.eq(media_id))
+	}
+}

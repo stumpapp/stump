@@ -11,4 +11,5 @@ pub mod reading_list;
 pub mod reading_list_item;
 pub mod reading_session;
 pub mod series;
+pub mod tag;
 pub mod user;

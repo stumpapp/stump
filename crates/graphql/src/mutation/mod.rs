@@ -4,12 +4,14 @@ mod library;
 mod media;
 mod reading_list;
 mod series;
+mod tag;
 
 use book_club::BookClubMutation;
 use epub::EpubMutation;
 use library::LibraryMutation;
 use reading_list::ReadingListMutation;
 use series::SeriesMutation;
+use tag::TagMutation;
 
 #[derive(async_graphql::MergedObject, Default)]
 pub struct Mutation(
@@ -18,4 +20,5 @@ pub struct Mutation(
 	LibraryMutation,
 	ReadingListMutation,
 	SeriesMutation,
+	TagMutation,
 );

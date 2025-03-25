@@ -58,10 +58,10 @@ impl ReadingListMutation {
 					let item_creates =
 						input.media_ids.iter().enumerate().map(|(idx, media_id)| {
 							reading_list_item::ActiveModel {
-								id: Set(idx as i32),
 								display_order: Set(idx as i32),
 								media_id: Set(media_id.clone()),
 								reading_list_id: Set(reading_list.id.clone()),
+								..Default::default()
 							}
 							.insert(txn)
 						});

@@ -31,10 +31,10 @@ macro_rules! get_unique_values_inner {
 }
 
 #[derive(Default, Debug, Clone)]
-pub struct MediaMetadata {}
+pub struct MediaMetadataOverview {}
 
 #[Object]
-impl MediaMetadata {
+impl MediaMetadataOverview {
 	async fn genres(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
 		get_unique_values_inner!(Genre, ctx)
 	}

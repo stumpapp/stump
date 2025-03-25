@@ -6,6 +6,7 @@ pub mod epub;
 pub mod library;
 pub mod library_config;
 pub mod media;
+pub mod media_metadata;
 pub mod reading_list;
 pub mod reading_list_item;
 pub mod reading_session;

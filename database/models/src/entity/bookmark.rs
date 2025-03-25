@@ -1,6 +1,8 @@
 use async_graphql::SimpleObject;
 use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue};
 
+// TODO(sea-orm): Consider i32 for ID
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[sea_orm(table_name = "bookmarks")]
 #[graphql(name = "BookmarkModel")]

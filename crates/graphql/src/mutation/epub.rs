@@ -84,6 +84,8 @@ async fn update_epub_progress_active(
 	input: EpubProgressInput,
 ) -> Result<EpubProgressOutput> {
 	let active_session = reading_session::ActiveModel {
+		// TODO: Consider i32 for ID
+		id: Set(Uuid::new_v4().to_string()),
 		epubcfi: Set(Some(input.epubcfi.clone())),
 		percentage_completed: Set(Some(input.percentage)),
 		media_id: Set(input.media_id.clone()),
@@ -94,13 +96,16 @@ async fn update_epub_progress_active(
 
 	let upserted_session = reading_session::Entity::insert(active_session)
 		.on_conflict(
-			OnConflict::new()
-				.update_columns(vec![
-					reading_session::Column::Epubcfi,
-					reading_session::Column::PercentageCompleted,
-					reading_session::Column::UpdatedAt,
-				])
-				.to_owned(),
+			OnConflict::columns(vec![
+				reading_session::Column::MediaId,
+				reading_session::Column::UserId,
+			])
+			.update_columns(vec![
+				reading_session::Column::Epubcfi,
+				reading_session::Column::PercentageCompleted,
+				reading_session::Column::UpdatedAt,
+			])
+			.to_owned(),
 		)
 		.exec_with_returning(conn)
 		.await?;
@@ -149,19 +154,24 @@ impl EpubMutation {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let bookmark = bookmark::ActiveModel {
+			// TODO(sea-orm): Consider i32 for ID
+			id: Set(Uuid::new_v4().to_string()),
 			epubcfi: Set(Some(input.epubcfi.clone())),
 			preview_content: Set(input.preview_content.clone()),
 			media_id: Set(input.media_id.clone()),
 			user_id: Set(user_id.clone()),
 			page: Set(Some(-1)),
-			..Default::default()
 		};
 
 		let upserted_bookmark = bookmark::Entity::insert(bookmark)
 			.on_conflict(
-				OnConflict::new()
-					.update_column(bookmark::Column::PreviewContent)
-					.to_owned(),
+				OnConflict::columns(vec![
+					bookmark::Column::MediaId,
+					bookmark::Column::UserId,
+					bookmark::Column::Epubcfi,
+				])
+				.update_column(bookmark::Column::PreviewContent)
+				.to_owned(),
 			)
 			.exec_with_returning(conn)
 			.await?;

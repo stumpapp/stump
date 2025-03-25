@@ -6,6 +6,8 @@ use sea_orm::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, path::PathBuf};
 
+use super::media::Media;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EpubContent {
 	label: String,
@@ -32,9 +34,7 @@ impl From<NavPoint> for EpubContent {
 #[derive(Debug, Clone, SimpleObject)]
 #[graphql(complex)]
 pub struct Epub {
-	// TODO(graphql): use media graphql object here so that we can use the resolvers there
-	pub media_entity: media::Model,
-
+	pub media_id: String,
 	pub spine: Vec<String>,
 	pub resources: HashMap<String, (String, String)>,
 	pub toc: Vec<String>,
@@ -45,8 +45,8 @@ pub struct Epub {
 }
 
 impl Epub {
-	pub fn try_from(entity: media::Model) -> Result<Self> {
-		let epub_file = EpubDoc::new(entity.path.as_str()).map_err(|e| {
+	pub fn try_from(ident: media::MediaIdentSelect) -> Result<Self> {
+		let epub_file = EpubDoc::new(ident.path.as_str()).map_err(|e| {
 			tracing::error!("Error parsing epub file: {:?}", e);
 			"Error parsing epub file"
 		})?;
@@ -66,7 +66,7 @@ impl Epub {
 			.collect::<Result<Vec<String>>>()?;
 
 		Ok(Self {
-			media_entity: entity,
+			media_id: ident.id,
 			spine: epub_file.spine,
 			resources: resources_serialized,
 			toc: toc_serialized,
@@ -93,7 +93,7 @@ impl Epub {
 		ctx: &Context<'_>,
 	) -> Result<Vec<media_annotation::Model>> {
 		let user_id = ctx.data::<RequestContext>()?.id();
-		let media_id = self.media_entity.id.clone();
+		let media_id = self.media_id.clone();
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let sessions = media_annotation::Entity::find()
@@ -103,5 +103,17 @@ impl Epub {
 			.await?;
 
 		Ok(sessions)
+	}
+
+	async fn media(&self, ctx: &Context<'_>) -> Result<Media> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let model = media::ModelWithMetadata::find_by_id(self.media_id.clone())
+			.into_model::<media::ModelWithMetadata>()
+			.one(conn)
+			.await?
+			.ok_or("Media not found")?;
+
+		Ok(model.into())
 	}
 }

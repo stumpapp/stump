@@ -4,6 +4,8 @@ use sea_orm::{
 	JoinType, QuerySelect,
 };
 
+// TODO(sea-orm): Consider i32 for ID
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "ReadingSessionModel")]
 #[sea_orm(table_name = "reading_sessions")]

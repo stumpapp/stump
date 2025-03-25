@@ -1,6 +1,8 @@
 use async_graphql::SimpleObject;
 use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue};
 
+// TODO(sea-orm): Consider i32 for ID
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "FinishedReadingSessionModel")]
 #[sea_orm(table_name = "finished_reading_sessions")]
@@ -8,9 +10,9 @@ pub struct Model {
 	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
 	pub id: String,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub started_at: String,
+	pub started_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub completed_at: String,
+	pub completed_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "Text")]
 	pub media_id: String,
 	#[sea_orm(column_type = "Text")]

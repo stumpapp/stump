@@ -3,7 +3,7 @@ use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 use models::entity::{
 	finished_reading_session, library, media, media_metadata, reading_session, series,
 };
-use sea_orm::{prelude::*, sea_query::Query, QuerySelect};
+use sea_orm::{prelude::*, sea_query::Query};
 
 use crate::data::{CoreContext, RequestContext};
 

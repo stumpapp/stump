@@ -1,7 +1,7 @@
 use async_graphql::SimpleObject;
 use models::entity::tag;
 
-#[derive(Debug, SimpleObject)]
+#[derive(Debug, SimpleObject, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Tag {
 	#[graphql(flatten)]
 	pub model: tag::Model,

@@ -16,3 +16,6 @@ strum.workspace = true
 stump_core = { path = "../../core" }
 tokio.workspace = true
 tracing.workspace = true
+
+[dev-dependencies]
+maplit.workspace = true

@@ -88,3 +88,6 @@ prisma-client-rust-cli = { git = "https://github.com/darby42/prisma-client-rust.
   "sqlite",
   "mocking"
 ], default-features = false }
+
+# Only used to test with sea-orm
+maplit = { version = "1.0.2" }

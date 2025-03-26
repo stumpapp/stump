@@ -269,36 +269,30 @@ pub async fn process_metadata_async(
 pub fn generate_hashes(
 	path: impl AsRef<Path>,
 	options: FileProcessorOptions,
+	config: &StumpConfig,
 ) -> Result<ProcessedFileHashes, FileError> {
-	let path_str = path.as_ref().to_str().unwrap_or_default();
-
-	let mime = ContentType::from_path(path.as_ref()).mime_type();
-
-	match mime.as_str() {
-		"application/zip" | "application/vnd.comicbook+zip" => {
-			ZipProcessor::generate_hashes(path_str, options)
-		},
-		"application/vnd.rar" | "application/vnd.comicbook-rar" => {
-			RarProcessor::generate_hashes(path_str, options)
-		},
-		"application/epub+zip" => EpubProcessor::generate_hashes(path_str, options),
-		"application/pdf" => PdfProcessor::generate_hashes(path_str, options),
-		_ => Err(FileError::UnsupportedFileType(path_str.to_string())),
-	}
+	let path = path.as_ref().to_path_buf();
+	let result = process(path.as_path(), options, config)?;
+	Ok(ProcessedFileHashes {
+		hash: result.hash,
+		koreader_hash: result.koreader_hash,
+	})
 }
 
 #[tracing::instrument(err, fields(path = %path.as_ref().display()))]
 pub async fn generate_hashes_async(
 	path: impl AsRef<Path>,
 	options: FileProcessorOptions,
+	config: &StumpConfig,
 ) -> Result<ProcessedFileHashes, FileError> {
 	let (tx, rx) = oneshot::channel();
 
 	let handle = spawn_blocking({
 		let path = path.as_ref().to_path_buf();
+		let config = config.clone();
 
 		move || {
-			let send_result = tx.send(generate_hashes(path.as_path(), options));
+			let send_result = tx.send(generate_hashes(path.as_path(), options, &config));
 			tracing::trace!(
 				is_err = send_result.is_err(),
 				"Sending result of sync generate_hashes"
@@ -383,20 +377,17 @@ pub async fn get_page_async(
 
 /// Get the number of pages in a file. This will call the appropriate [`FileProcessor::get_page_count`]
 /// implementation based on the file's mime type, or return an error if the file type is not supported.
-pub fn get_page_count(path: &str, config: &StumpConfig) -> Result<i32, FileError> {
-	let mime = ContentType::from_file(path).mime_type();
+pub fn get_page_count(
+	path: impl AsRef<Path>,
+	config: &StumpConfig,
+) -> Result<i32, FileError> {
+	let options = FileProcessorOptions {
+		process_pages: true,
+		..Default::default()
+	};
 
-	match mime.as_str() {
-		"application/zip" | "application/vnd.comicbook+zip" => {
-			ZipProcessor::get_page_count(path, config)
-		},
-		"application/vnd.rar" | "application/vnd.comicbook-rar" => {
-			RarProcessor::get_page_count(path, config)
-		},
-		"application/epub+zip" => EpubProcessor::get_page_count(path, config),
-		"application/pdf" => PdfProcessor::get_page_count(path, config),
-		_ => Err(FileError::UnsupportedFileType(path.to_string())),
-	}
+	let path = path.as_ref().to_path_buf();
+	Ok(process(path.as_path(), options, config)?.pages)
 }
 
 /// Get the number of pages in a file in the context of a spawned, blocking task. This will call the
@@ -413,8 +404,7 @@ pub async fn get_page_count_async(
 		let config = config.clone();
 
 		move || {
-			let send_result =
-				tx.send(get_page_count(path.to_str().unwrap_or_default(), &config));
+			let send_result = tx.send(get_page_count(path, &config));
 			tracing::trace!(
 				is_err = send_result.is_err(),
 				"Sending result of sync get_page_count"

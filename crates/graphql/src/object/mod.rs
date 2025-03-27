@@ -5,6 +5,7 @@ pub mod bookmark;
 pub mod epub;
 pub mod library;
 pub mod library_config;
+pub mod log;
 pub mod media;
 pub mod media_metadata_overview;
 pub mod reading_list;

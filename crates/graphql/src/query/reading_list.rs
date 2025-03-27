@@ -1,15 +1,13 @@
 use async_graphql::{Context, Object, Result, ID};
 
+use crate::pagination::get_paginated_results;
 use models::entity::reading_list;
-use sea_orm::{prelude::*, QueryOrder, QuerySelect};
+use sea_orm::{prelude::*, QueryOrder};
 
 use crate::{
 	data::{CoreContext, RequestContext},
 	object::reading_list::ReadingList,
-	pagination::{
-		CursorPagination, CursorPaginationInfo, OffsetPagination, OffsetPaginationInfo,
-		PaginatedResponse, Pagination, PaginationValidator,
-	},
+	pagination::{PaginatedResponse, Pagination, PaginationValidator},
 };
 
 #[derive(Default)]
@@ -30,12 +28,7 @@ impl ReadingListQuery {
 	) -> Result<PaginatedResponse<ReadingList>> {
 		let user_id = ctx.data::<RequestContext>()?.id();
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-
-		match pagination.resolve() {
-			Pagination::Cursor(info) => get_cursor_result(user_id, conn, info).await,
-			Pagination::Offset(info) => get_offset_result(user_id, conn, info).await,
-			Pagination::None(_) => get_no_pagination_result(user_id, conn).await,
-		}
+		get_paginated_reading_list(user_id, conn, pagination).await
 	}
 
 	/// Retrieves a reading list by ID for the current user.
@@ -56,85 +49,31 @@ impl ReadingListQuery {
 	}
 }
 
-async fn get_cursor_result(
+async fn get_paginated_reading_list(
 	user_id: String,
 	conn: &DbConn,
-	info: CursorPagination,
+	pagination: Pagination,
 ) -> Result<PaginatedResponse<ReadingList>> {
-	let query = reading_list::Entity::find_for_user(&user_id, 1);
-	let mut cursor = query.cursor_by(reading_list::Column::Id);
-	if let Some(ref id) = info.after {
-		let reading_list = reading_list::Entity::find_for_user(&user_id, 1)
-			.select_only()
-			.column(reading_list::Column::Id)
-			.filter(reading_list::Column::Id.eq(id.clone()))
-			.order_by_asc(reading_list::Column::Id)
-			.into_model::<reading_list::ReadingListIdCmpSelect>()
-			.one(conn)
-			.await?
-			.ok_or("Cursor not found")?;
-		cursor.after(reading_list.id);
-	}
-	cursor.first(info.limit);
-
-	let models = cursor.into_model::<reading_list::Model>().all(conn).await?;
-	let current_cursor = info.after.or_else(|| models.first().map(|m| m.id.clone()));
-	let next_cursor = models.last().map(|m| m.id.clone());
-
-	Ok(PaginatedResponse {
-		nodes: models.into_iter().map(ReadingList::from).collect(),
-		page_info: CursorPaginationInfo {
-			current_cursor,
-			next_cursor,
-		}
-		.into(),
-	})
-}
-
-async fn get_offset_result(
-	user_id: String,
-	conn: &DbConn,
-	info: OffsetPagination,
-) -> Result<PaginatedResponse<ReadingList>> {
-	let query = reading_list::Entity::find_for_user(&user_id, 1);
-	let count = query.clone().count(conn).await?;
-
-	let models = query
-		.order_by_asc(reading_list::Column::Id)
-		.offset(info.offset())
-		.limit(info.limit())
-		.into_model::<reading_list::Model>()
-		.all(conn)
-		.await?;
-
-	Ok(PaginatedResponse {
-		nodes: models.into_iter().map(ReadingList::from).collect(),
-		page_info: OffsetPaginationInfo::new(info, count).into(),
-	})
-}
-
-async fn get_no_pagination_result(
-	user_id: String,
-	conn: &DbConn,
-) -> Result<PaginatedResponse<ReadingList>> {
-	let query = reading_list::Entity::find_for_user(&user_id, 1);
-	let models = query
-		.order_by_asc(reading_list::Column::Id)
-		.into_model::<reading_list::Model>()
-		.all(conn)
-		.await?;
-	let count = models.len().try_into()?;
-
-	Ok(PaginatedResponse {
-		nodes: models.into_iter().map(ReadingList::from).collect(),
-		page_info: OffsetPaginationInfo::unpaged(count).into(),
-	})
+	let query = reading_list::Entity::find_for_user(&user_id, 1)
+		.order_by_asc(reading_list::Column::Id);
+	let get_cursor =
+		|m: &<models::entity::reading_list::Entity as sea_orm::EntityTrait>::Model| {
+			m.id.to_string()
+		};
+	get_paginated_results(
+		query,
+		reading_list::Column::Id,
+		conn,
+		pagination,
+		get_cursor,
+	)
+	.await
 }
 
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::pagination::PaginationInfo;
+	use crate::pagination::{CursorPagination, OffsetPagination, PaginationInfo};
 	use sea_orm::MockDatabase;
 
 	fn get_test_model() -> reading_list::Model {
@@ -155,13 +94,14 @@ mod tests {
 			.append_query_results(vec![vec![get_test_model()], vec![get_test_model()]])
 			.into_connection();
 
-		let cursor_info = CursorPagination {
+		let cursor_info = Pagination::Cursor(CursorPagination {
 			after: Some("abc".to_string()),
 			limit: 1,
-		};
-		let reading_lists = get_cursor_result("42".to_string(), &mock_db, cursor_info)
-			.await
-			.unwrap();
+		});
+		let reading_lists =
+			get_paginated_reading_list("42".to_string(), &mock_db, cursor_info)
+				.await
+				.unwrap();
 
 		assert_eq!(reading_lists.nodes.len(), 1);
 		assert_eq!(reading_lists.nodes[0].model.id, "1");
@@ -182,12 +122,12 @@ mod tests {
 			.append_query_results::<reading_list::Model, _, _>(vec![vec![]])
 			.into_connection();
 
-		let cursor_info = CursorPagination {
+		let cursor_info = Pagination::Cursor(CursorPagination {
 			after: Some("abc".to_string()),
 			limit: 1,
-		};
+		});
 		let reading_lists =
-			get_cursor_result("42".to_string(), &mock_db, cursor_info).await;
+			get_paginated_reading_list("42".to_string(), &mock_db, cursor_info).await;
 
 		assert!(reading_lists.is_err());
 	}
@@ -198,13 +138,14 @@ mod tests {
 			.append_query_results(vec![vec![get_test_model()], vec![]])
 			.into_connection();
 
-		let cursor_info = CursorPagination {
+		let cursor_info = Pagination::Cursor(CursorPagination {
 			after: Some("abc".to_string()),
 			limit: 1,
-		};
-		let reading_lists = get_cursor_result("42".to_string(), &mock_db, cursor_info)
-			.await
-			.unwrap();
+		});
+		let reading_lists =
+			get_paginated_reading_list("42".to_string(), &mock_db, cursor_info)
+				.await
+				.unwrap();
 
 		assert!(reading_lists.nodes.is_empty());
 
@@ -218,12 +159,20 @@ mod tests {
 	}
 
 	#[tokio::test]
-	async fn test_no_pagination() {
+	async fn test_offset_pagination() {
 		let mock_db = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
+			.append_query_results(vec![vec![maplit::btreemap! {
+				"num_items" => Into::<Value>::into(1),
+			}]])
 			.append_query_results(vec![vec![get_test_model()]])
 			.into_connection();
 
-		let reading_lists = get_no_pagination_result("42".to_string(), &mock_db)
+		let info = Pagination::Offset(OffsetPagination {
+			page: 1,
+			page_size: Some(1),
+			zero_based: None,
+		});
+		let reading_lists = get_paginated_reading_list("42".to_string(), &mock_db, info)
 			.await
 			.unwrap();
 
@@ -242,12 +191,20 @@ mod tests {
 	}
 
 	#[tokio::test]
-	async fn test_no_pagination_no_results() {
+	async fn test_offset_pagination_no_results() {
 		let mock_db = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
+			.append_query_results(vec![vec![maplit::btreemap! {
+				"num_items" => Into::<Value>::into(0),
+			}]])
 			.append_query_results::<reading_list::Model, _, _>(vec![vec![]])
 			.into_connection();
 
-		let reading_lists = get_no_pagination_result("42".to_string(), &mock_db)
+		let info = Pagination::Offset(OffsetPagination {
+			page: 1,
+			page_size: Some(1),
+			zero_based: None,
+		});
+		let reading_lists = get_paginated_reading_list("42".to_string(), &mock_db, info)
 			.await
 			.unwrap();
 
@@ -255,9 +212,9 @@ mod tests {
 
 		match reading_lists.page_info {
 			PaginationInfo::Offset(info) => {
-				assert_eq!(info.total_pages, 1);
+				assert_eq!(info.total_pages, 0);
 				assert_eq!(info.current_page, 1);
-				assert_eq!(info.page_size, 0);
+				assert_eq!(info.page_size, 1);
 				assert_eq!(info.page_offset, 0);
 			},
 			_ => panic!("Expected Offset pagination info"),

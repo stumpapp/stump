@@ -1,9 +1,10 @@
+use crate::object::{log::Log, media::Media, reading_list::ReadingList};
 use async_graphql::{
-	CustomValidator, InputObject, InputValueError, OneofObject, OutputType, SimpleObject,
-	Union,
+	CustomValidator, InputObject, InputValueError, OneofObject, OutputType, Result,
+	SimpleObject, Union,
 };
-
-use crate::object::{media::Media, reading_list::ReadingList};
+use sea_orm::{prelude::*, FromQueryResult, QueryOrder, QuerySelect, Select};
+use std::fmt::Debug;
 
 /// A simple cursor-based pagination input object
 #[derive(Debug, Clone, InputObject)]
@@ -217,10 +218,106 @@ pub enum PaginationInfo {
 #[derive(Debug, SimpleObject)]
 #[graphql(concrete(name = "PaginatedMediaResponse", params(Media)))]
 #[graphql(concrete(name = "PaginatedReadingListResponse", params(ReadingList)))]
+#[graphql(concrete(name = "PaginatedLogResponse", params(Log)))]
 pub struct PaginatedResponse<T>
 where
 	T: OutputType,
 {
 	pub nodes: Vec<T>,
 	pub page_info: PaginationInfo,
+}
+
+async fn get_paginated_offset_results<
+	EntityType: EntityTrait<Model: Debug + FromQueryResult + Sized + Send + Sync>,
+	GraphqlOutputType: From<EntityType::Model> + OutputType,
+>(
+	query: Select<EntityType>,
+	conn: &DbConn,
+	info: OffsetPagination,
+) -> Result<PaginatedResponse<GraphqlOutputType>> {
+	let count = query.clone().count(conn).await?;
+
+	let models = query
+		.offset(info.offset())
+		.limit(info.limit())
+		.into_model::<EntityType::Model>()
+		.all(conn)
+		.await?;
+
+	Ok(PaginatedResponse {
+		nodes: models.into_iter().map(GraphqlOutputType::from).collect(),
+		page_info: OffsetPaginationInfo::new(info, count).into(),
+	})
+}
+
+async fn get_paginated_cursor_results<
+	EntityType: EntityTrait<Model: Debug + FromQueryResult + Sized + Send + Sync>,
+	GraphqlOutputType: From<EntityType::Model> + OutputType,
+>(
+	query: Select<EntityType>,
+	cursor_column: EntityType::Column,
+	conn: &DbConn,
+	info: CursorPagination,
+	get_cursor: impl Fn(&EntityType::Model) -> String,
+) -> Result<PaginatedResponse<GraphqlOutputType>> {
+	let mut cursor = query.clone().cursor_by(cursor_column);
+	if let Some(ref id) = info.after {
+		let last_row = query
+			.filter(cursor_column.eq(id.clone()))
+			.into_model::<EntityType::Model>()
+			.one(conn)
+			.await?
+			.ok_or("Cursor not found")?;
+		cursor.after(last_row.get(cursor_column));
+	}
+	cursor.first(info.limit);
+
+	let models = cursor.into_model::<EntityType::Model>().all(conn).await?;
+	let current_cursor = info.after.or_else(|| models.first().map(&get_cursor));
+	let next_cursor = models.last().map(|m| get_cursor(m));
+
+	Ok(PaginatedResponse {
+		nodes: models.into_iter().map(GraphqlOutputType::from).collect(),
+		page_info: CursorPaginationInfo {
+			current_cursor,
+			next_cursor,
+		}
+		.into(),
+	})
+}
+
+async fn get_paginated_none_results<
+	EntityType: EntityTrait<Model: Debug + FromQueryResult + Sized + Send + Sync>,
+	GraphqlOutputType: From<EntityType::Model> + OutputType,
+>(
+	query: Select<EntityType>,
+	conn: &DbConn,
+) -> Result<PaginatedResponse<GraphqlOutputType>> {
+	let models = query.into_model::<EntityType::Model>().all(conn).await?;
+	let count = models.len().try_into()?;
+
+	Ok(PaginatedResponse {
+		nodes: models.into_iter().map(GraphqlOutputType::from).collect(),
+		page_info: OffsetPaginationInfo::unpaged(count).into(),
+	})
+}
+
+pub async fn get_paginated_results<
+	EntityType: EntityTrait<Model: Debug + FromQueryResult + Sized + Send + Sync>,
+	GraphqlOutputType: From<EntityType::Model> + OutputType,
+>(
+	query: Select<EntityType>,
+	cursor_column: EntityType::Column,
+	conn: &DbConn,
+	pagination: Pagination,
+	get_cursor: impl Fn(&EntityType::Model) -> String,
+) -> Result<PaginatedResponse<GraphqlOutputType>> {
+	match pagination {
+		Pagination::Cursor(info) => {
+			get_paginated_cursor_results(query, cursor_column, conn, info, get_cursor)
+				.await
+		},
+		Pagination::Offset(info) => get_paginated_offset_results(query, conn, info).await,
+		Pagination::None(_) => get_paginated_none_results(query, conn).await,
+	}
 }

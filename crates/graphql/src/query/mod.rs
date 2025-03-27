@@ -1,5 +1,6 @@
 mod book_club;
 mod epub;
+mod log;
 pub(crate) mod media;
 mod media_metadata_overview;
 pub(crate) mod reading_list;
@@ -7,6 +8,7 @@ mod tag;
 pub(crate) mod user;
 
 use epub::EpubQuery;
+use log::LogQuery;
 use media::MediaQuery;
 use media_metadata_overview::MediaMetadataOverviewQuery;
 use reading_list::ReadingListQuery;
@@ -21,4 +23,5 @@ pub struct Query(
 	EpubQuery,
 	MediaMetadataOverviewQuery,
 	TagQuery,
+	LogQuery,
 );

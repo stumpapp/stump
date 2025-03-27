@@ -2432,7 +2432,7 @@ dependencies = [
 [[package]]
 name = "epub"
 version = "2.1.1"
-source = "git+https://github.com/darby42/epub-rs?rev=3b36d54#3b36d547bbfacb5891070c161f7f043f7e405dea"
+source = "git+https://github.com/stumpapp/epub-rs?rev=38e091abe96875952556ab7dec195022d0230e14#38e091abe96875952556ab7dec195022d0230e14"
 dependencies = [
  "percent-encoding",
  "regex",

@@ -29,8 +29,10 @@ pub struct Model {
 	pub deleted_at: Option<DateTimeWithTimeZone>,
 	pub is_locked: bool,
 	pub max_sessions_allowed: Option<i32>,
+	#[graphql(skip)]
 	#[sea_orm(column_type = "Text", nullable)]
 	pub permissions: Option<String>,
+	#[graphql(skip)]
 	#[sea_orm(column_type = "Text", nullable, unique)]
 	pub user_preferences_id: Option<String>,
 }
@@ -117,13 +119,13 @@ pub enum Relation {
 	#[sea_orm(has_many = "super::user_login_activity::Entity")]
 	UserLoginActivity,
 	#[sea_orm(
-		belongs_to = "super::user_preference::Entity",
+		belongs_to = "super::user_preferences::Entity",
 		from = "Column::UserPreferencesId",
-		to = "super::user_preference::Column::Id",
+		to = "super::user_preferences::Column::Id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
-	UserPreference,
+	UserPreferences,
 }
 
 impl Related<super::age_restriction::Entity> for Entity {
@@ -228,9 +230,9 @@ impl Related<super::user_login_activity::Entity> for Entity {
 	}
 }
 
-impl Related<super::user_preference::Entity> for Entity {
+impl Related<super::user_preferences::Entity> for Entity {
 	fn to() -> RelationDef {
-		Relation::UserPreference.def()
+		Relation::UserPreferences.def()
 	}
 }
 

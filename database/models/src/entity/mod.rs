@@ -49,4 +49,4 @@ pub mod smart_list_view;
 pub mod tag;
 pub mod user;
 pub mod user_login_activity;
-pub mod user_preference;
+pub mod user_preferences;

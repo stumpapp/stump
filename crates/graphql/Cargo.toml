@@ -4,9 +4,12 @@ edition = "2021"
 version.workspace = true
 
 [dependencies]
+alphanumeric-sort.workspace = true
 async-graphql.workspace = true
 chrono.workspace = true
 epub.workspace = true
+infer.workspace = true
+itertools.workspace = true
 models = { path = "../../database/models" }
 sea-orm.workspace = true
 serde.workspace = true
@@ -16,6 +19,7 @@ strum.workspace = true
 stump_core = { path = "../../core" }
 tokio.workspace = true
 tracing.workspace = true
+zip.workspace = true
 
 [dev-dependencies]
 maplit.workspace = true

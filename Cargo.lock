@@ -3161,9 +3161,12 @@ dependencies = [
 name = "graphql"
 version = "0.0.10"
 dependencies = [
+ "alphanumeric-sort",
  "async-graphql",
  "chrono",
  "epub",
+ "infer",
+ "itertools 0.13.0",
  "maplit",
  "models",
  "sea-orm",
@@ -3174,6 +3177,7 @@ dependencies = [
  "stump_core",
  "tokio",
  "tracing",
+ "zip 1.1.3",
 ]
 
 [[package]]

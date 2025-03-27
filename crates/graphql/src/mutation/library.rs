@@ -22,7 +22,7 @@ use crate::{
 	data::{CoreContext, RequestContext},
 	error_message,
 	guard::PermissionGuard,
-	input::CreateOrUpdateLibraryInput,
+	input::library::CreateOrUpdateLibraryInput,
 	object::library::Library,
 };
 

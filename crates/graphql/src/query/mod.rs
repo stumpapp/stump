@@ -1,5 +1,7 @@
 mod book_club;
+mod emailer;
 mod epub;
+mod filesystem;
 mod log;
 pub(crate) mod media;
 mod media_metadata_overview;
@@ -7,6 +9,7 @@ pub(crate) mod reading_list;
 mod tag;
 pub(crate) mod user;
 
+use emailer::EmailerQuery;
 use epub::EpubQuery;
 use log::LogQuery;
 use media::MediaQuery;
@@ -17,6 +20,7 @@ use user::UserQuery;
 
 #[derive(async_graphql::MergedObject, Default)]
 pub struct Query(
+	EmailerQuery,
 	MediaQuery,
 	UserQuery,
 	ReadingListQuery,

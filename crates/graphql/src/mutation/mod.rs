@@ -5,6 +5,7 @@ mod media;
 mod reading_list;
 mod series;
 mod tag;
+mod upload;
 
 use book_club::BookClubMutation;
 use epub::EpubMutation;
@@ -12,6 +13,7 @@ use library::LibraryMutation;
 use reading_list::ReadingListMutation;
 use series::SeriesMutation;
 use tag::TagMutation;
+use upload::UploadMutation;
 
 #[derive(async_graphql::MergedObject, Default)]
 pub struct Mutation(
@@ -21,4 +23,5 @@ pub struct Mutation(
 	ReadingListMutation,
 	SeriesMutation,
 	TagMutation,
+	UploadMutation,
 );

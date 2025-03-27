@@ -1,5 +1,5 @@
 use async_graphql::{Context, Object, Result, ID};
-use chrono::{Duration, Utc};
+use chrono::{DateTime, Duration, FixedOffset, Utc};
 use models::{
 	entity::{
 		book_club, book_club_book, book_club_invitation, book_club_member,
@@ -12,12 +12,12 @@ use models::{
 		enums::UserPermission,
 	},
 };
-use sea_orm::{prelude::*, IntoActiveModel, Set, TransactionTrait};
+use sea_orm::{prelude::*, IntoActiveModel, QueryOrder, Set, TransactionTrait};
 
 use crate::{
 	data::{CoreContext, RequestContext},
 	guard::PermissionGuard,
-	input::{
+	input::book_club::{
 		BookClubInvitationInput, BookClubInvitationResponseInput,
 		BookClubInvitationResponseValidator, CreateBookClubInput,
 		CreateBookClubScheduleBook, CreateBookClubScheduleInput, UpdateBookClubInput,
@@ -162,9 +162,9 @@ impl BookClubMutation {
 		Ok(invitation.into())
 	}
 
-	async fn create_book_club_member(&self, book_club_id: ID) -> Result<String> {
-		unimplemented!()
-	}
+	// async fn create_book_club_member(&self, book_club_id: ID) -> Result<String> {
+	// 	unimplemented!()
+	// }
 
 	async fn create_book_club_schedule(
 		&self,
@@ -198,71 +198,13 @@ impl BookClubMutation {
 		.await?;
 
 		let mut last_end_at = None;
-		let mut active_models = Vec::with_capacity(books_to_create.len());
 
-		for book in books_to_create {
-			let CreateBookClubScheduleBook {
-				book,
-				start_at,
-				end_at,
-				discussion_duration_days,
-			} = book;
-
-			let (start_at, end_at) = match (start_at, end_at) {
-				(Some(start_at), Some(end_at)) => (start_at, end_at),
-				(Some(start_at), None) => (
-					start_at,
-					start_at + Duration::days(i64::from(interval_days)),
-				),
-				(None, Some(end_at)) => {
-					(end_at - Duration::days(i64::from(interval_days)), end_at)
-				},
-				(None, None) => {
-					let start_at = if let Some(last_end_at) = last_end_at {
-						last_end_at
-					} else {
-						Utc::now().into()
-					};
-					(
-						start_at,
-						start_at + Duration::days(i64::from(interval_days)),
-					)
-				},
-			};
-
-			last_end_at = Some(end_at);
-
-			let active_model = match book {
-				BookClubBook::Stored(BookClubInternalBook { id }) => {
-					book_club_book::ActiveModel {
-						start_at: Set(start_at),
-						end_at: Set(end_at),
-						discussion_duration_days: Set(discussion_duration_days),
-						book_entity_id: Set(Some(id)),
-						book_club_schedule_id: Set(Some(created_schedule.id)),
-						..Default::default()
-					}
-				},
-				BookClubBook::External(BookClubExternalBook {
-					title,
-					author,
-					url,
-					image_url,
-				}) => book_club_book::ActiveModel {
-					start_at: Set(start_at),
-					end_at: Set(end_at),
-					discussion_duration_days: Set(discussion_duration_days),
-					title: Set(Some(title)),
-					author: Set(Some(author)),
-					url: Set(url),
-					image_url: Set(image_url),
-					book_club_schedule_id: Set(Some(created_schedule.id)),
-					..Default::default()
-				},
-			};
-
-			active_models.push(active_model);
-		}
+		let active_models = books_to_create
+			.into_iter()
+			.map(|book| {
+				create_book_active_model(&created_schedule, &mut last_end_at, book)
+			})
+			.collect::<Vec<_>>();
 
 		book_club_book::Entity::insert_many(active_models)
 			.exec(&txn)
@@ -273,7 +215,121 @@ impl BookClubMutation {
 		Ok(book_club.into())
 	}
 
-	async fn add_books_to_book_club_schedule(&self, book_club_id: ID) -> Result<String> {
-		unimplemented!()
+	async fn add_books_to_book_club_schedule(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		#[graphql(validator(min_items = 1))] books: Vec<CreateBookClubScheduleBook>,
+	) -> Result<BookClub> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let book_club = book_club::Entity::find_for_member_enforce_role(
+			user,
+			BookClubMemberRole::Admin,
+		)
+		.filter(book_club::Column::Id.eq(id.to_string()))
+		.one(conn)
+		.await?
+		.ok_or("Book club not found or you lack permission to adjust the schedule")?;
+
+		let schedule = book_club_schedule::Entity::find()
+			.filter(book_club_schedule::Column::BookClubId.eq(id.to_string()))
+			.one(conn)
+			.await?
+			.ok_or("Schedule not found")?;
+		let existing_books = book_club_book::Entity::find()
+			.filter(
+				book_club_book::Column::BookClubScheduleId
+					.eq(schedule.id)
+					.and(
+						book_club_book::Column::EndAt
+							.gte::<DateTimeWithTimeZone>(Utc::now().into()),
+					),
+			)
+			.order_by_asc(book_club_book::Column::StartAt)
+			.all(conn)
+			.await?;
+
+		let mut last_end_at = existing_books.last().map(|book| book.end_at);
+
+		let active_models = books
+			.into_iter()
+			.map(|book| create_book_active_model(&schedule, &mut last_end_at, book))
+			.collect::<Vec<_>>();
+
+		book_club_book::Entity::insert_many(active_models)
+			.exec(conn)
+			.await?;
+
+		Ok(book_club.into())
+	}
+}
+
+fn create_book_active_model(
+	schedule: &book_club_schedule::Model,
+	last_end_at: &mut Option<DateTime<FixedOffset>>,
+	input: CreateBookClubScheduleBook,
+) -> book_club_book::ActiveModel {
+	let CreateBookClubScheduleBook {
+		book,
+		start_at,
+		end_at,
+		discussion_duration_days,
+	} = input;
+
+	let interval_days = schedule.default_interval_days.unwrap_or(30);
+
+	let (start_at, end_at) = match (start_at, end_at) {
+		(Some(start_at), Some(end_at)) => (start_at, end_at),
+		(Some(start_at), None) => (
+			start_at,
+			start_at + Duration::days(i64::from(interval_days)),
+		),
+		(None, Some(end_at)) => {
+			(end_at - Duration::days(i64::from(interval_days)), end_at)
+		},
+		(None, None) => {
+			let start_at = if let Some(last_end_at) = *last_end_at {
+				last_end_at
+			} else {
+				Utc::now().into()
+			};
+			(
+				start_at,
+				start_at + Duration::days(i64::from(interval_days)),
+			)
+		},
+	};
+
+	*last_end_at = Some(end_at);
+
+	match book {
+		BookClubBook::Stored(BookClubInternalBook { id }) => {
+			book_club_book::ActiveModel {
+				start_at: Set(start_at),
+				end_at: Set(end_at),
+				discussion_duration_days: Set(discussion_duration_days),
+				book_entity_id: Set(Some(id)),
+				book_club_schedule_id: Set(Some(schedule.id)),
+				..Default::default()
+			}
+		},
+		BookClubBook::External(BookClubExternalBook {
+			title,
+			author,
+			url,
+			image_url,
+		}) => book_club_book::ActiveModel {
+			start_at: Set(start_at),
+			end_at: Set(end_at),
+			discussion_duration_days: Set(discussion_duration_days),
+			title: Set(Some(title)),
+			author: Set(Some(author)),
+			url: Set(url),
+			image_url: Set(image_url),
+			book_club_schedule_id: Set(Some(schedule.id)),
+			..Default::default()
+		},
 	}
 }

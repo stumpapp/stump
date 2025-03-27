@@ -1,14 +1,19 @@
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
-use models::entity::user;
+use models::{
+	entity::{user, user_preferences},
+	shared::{enums::UserPermission, permission_set::PermissionSet},
+};
+use sea_orm::prelude::*;
 
 use crate::{
-	guard::{SelfGuard, ServerOwnerGuard},
+	data::CoreContext,
+	guard::{PermissionGuard, SelfGuard, ServerOwnerGuard},
 	pagination::{PaginatedResponse, Pagination, PaginationValidator},
 	query::media::MediaQuery,
 };
 
-use super::media::Media;
+use super::{media::Media, user_preferences::UserPreferences};
 
 #[derive(Debug, SimpleObject)]
 #[graphql(complex)]
@@ -33,5 +38,26 @@ impl User {
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<Media>> {
 		MediaQuery.keep_reading(ctx, pagination).await
+	}
+
+	#[graphql(
+		guard = "SelfGuard::new(&self.model.id).or(PermissionGuard::one(UserPermission::ManageUsers))"
+	)]
+	async fn permissions(&self) -> Vec<UserPermission> {
+		PermissionSet::from(self.model.permissions.clone().unwrap_or_default())
+			.resolve_into_vec()
+	}
+
+	#[graphql(guard = "SelfGuard::new(&self.model.id).or(ServerOwnerGuard)")]
+	async fn preferences(&self, ctx: &Context<'_>) -> Result<UserPreferences> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let preferences = user_preferences::Entity::find()
+			.filter(user_preferences::Column::UserId.eq(&self.model.id))
+			.one(conn)
+			.await?
+			.ok_or("User preferences not found")?;
+
+		Ok(preferences.into())
 	}
 }

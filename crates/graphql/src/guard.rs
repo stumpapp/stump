@@ -1,8 +1,12 @@
 use async_graphql::{Context, Guard, Result};
 use models::shared::enums::UserPermission;
 
-use crate::{data::RequestContext, error_message};
+use crate::{
+	data::{CoreContext, RequestContext},
+	error_message,
+};
 
+/// Guard that checks if the user is the owner of the server.
 pub struct ServerOwnerGuard;
 
 impl Guard for ServerOwnerGuard {
@@ -17,6 +21,9 @@ impl Guard for ServerOwnerGuard {
 	}
 }
 
+/// Guard that checks if the user is themselves. This is dependent on the user ID
+/// provided and compared with the ID of the current user. So be sure to provide
+/// the correct user ID.
 pub struct SelfGuard {
 	pub user_id: String,
 }
@@ -41,6 +48,8 @@ impl Guard for SelfGuard {
 	}
 }
 
+/// Guard that checks if the user has the required permissions to perform an action.
+/// If the user does not have the required permissions, an error is returned.
 pub struct PermissionGuard {
 	permissions: Vec<UserPermission>,
 }
@@ -77,6 +86,42 @@ impl Guard for PermissionGuard {
 			Ok(())
 		} else {
 			Err(error_message::FORBIDDEN_ACTION.into())
+		}
+	}
+}
+
+/// Optional features that can be enabled or disabled in the server configuration.
+#[derive(Debug, Clone, Copy)]
+pub enum OptionalFeature {
+	Upload,
+	KoReader,
+}
+
+/// Guard that checks if an optional feature is enabled in the server configuration.
+/// If the feature is disabled, an error is returned.
+pub struct OptionalFeatureGuard {
+	feature: OptionalFeature,
+}
+
+impl OptionalFeatureGuard {
+	pub fn new(feature: OptionalFeature) -> Self {
+		Self { feature }
+	}
+}
+
+impl Guard for OptionalFeatureGuard {
+	async fn check(&self, ctx: &Context<'_>) -> Result<()> {
+		let core = ctx.data::<CoreContext>()?;
+
+		let permitted = match self.feature {
+			OptionalFeature::Upload => core.config.enable_upload,
+			OptionalFeature::KoReader => core.config.enable_koreader_sync,
+		};
+
+		if permitted {
+			Ok(())
+		} else {
+			Err(error_message::DISABLED_FEATURE.into())
 		}
 	}
 }

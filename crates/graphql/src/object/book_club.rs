@@ -16,6 +16,7 @@ impl From<book_club::Model> for BookClub {
 
 #[ComplexObject]
 impl BookClub {
+	// TODO(book-clubs): Support multiple books at once?
 	async fn current_book(&self) -> Result<String> {
 		unimplemented!()
 	}

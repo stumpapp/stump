@@ -1,9 +1,12 @@
-use crate::object::{log::Log, media::Media, reading_list::ReadingList};
+use crate::object::{
+	directory_listing::DirectoryListing, log::Log, media::Media,
+	reading_list::ReadingList,
+};
 use async_graphql::{
 	CustomValidator, InputObject, InputValueError, OneofObject, OutputType, Result,
 	SimpleObject, Union,
 };
-use sea_orm::{prelude::*, FromQueryResult, QueryOrder, QuerySelect, Select};
+use sea_orm::{prelude::*, FromQueryResult, QuerySelect, Select};
 use std::fmt::Debug;
 
 /// A simple cursor-based pagination input object
@@ -29,6 +32,16 @@ pub struct OffsetPagination {
 	pub page_size: Option<u64>,
 	#[graphql(default_with = "default_zero_based()")]
 	pub zero_based: Option<bool>,
+}
+
+impl Default for OffsetPagination {
+	fn default() -> Self {
+		Self {
+			page: 1,
+			page_size: default_page_size(),
+			zero_based: default_zero_based(),
+		}
+	}
 }
 
 impl OffsetPagination {
@@ -201,6 +214,10 @@ where
 }
 
 #[derive(Debug, SimpleObject)]
+#[graphql(concrete(
+	name = "OffsetPaginatedDirectoryListingResponse",
+	params(DirectoryListing)
+))]
 pub struct OffsetPaginatedResponse<T>
 where
 	T: OutputType,
@@ -216,9 +233,13 @@ pub enum PaginationInfo {
 }
 
 #[derive(Debug, SimpleObject)]
+#[graphql(concrete(
+	name = "PaginatedDirectoryListingResponse",
+	params(DirectoryListing)
+))]
+#[graphql(concrete(name = "PaginatedLogResponse", params(Log)))]
 #[graphql(concrete(name = "PaginatedMediaResponse", params(Media)))]
 #[graphql(concrete(name = "PaginatedReadingListResponse", params(ReadingList)))]
-#[graphql(concrete(name = "PaginatedLogResponse", params(Log)))]
 pub struct PaginatedResponse<T>
 where
 	T: OutputType,
@@ -274,7 +295,7 @@ async fn get_paginated_cursor_results<
 
 	let models = cursor.into_model::<EntityType::Model>().all(conn).await?;
 	let current_cursor = info.after.or_else(|| models.first().map(&get_cursor));
-	let next_cursor = models.last().map(|m| get_cursor(m));
+	let next_cursor = models.last().map(get_cursor);
 
 	Ok(PaginatedResponse {
 		nodes: models.into_iter().map(GraphqlOutputType::from).collect(),
@@ -302,6 +323,8 @@ async fn get_paginated_none_results<
 	})
 }
 
+/// A helper function to get paginated results based on the pagination type, reducing
+/// boilerplate in the resolver functions.
 pub async fn get_paginated_results<
 	EntityType: EntityTrait<Model: Debug + FromQueryResult + Sized + Send + Sync>,
 	GraphqlOutputType: From<EntityType::Model> + OutputType,

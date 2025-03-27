@@ -274,6 +274,7 @@ pub enum SupportedFont {
 	Serialize,
 	Deserialize,
 	DeriveActiveEnum,
+	Enum,
 	EnumString,
 	Display,
 )]

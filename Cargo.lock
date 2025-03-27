@@ -3172,6 +3172,7 @@ dependencies = [
  "serde_with",
  "strum",
  "stump_core",
+ "tempfile",
  "tokio",
  "tracing",
 ]

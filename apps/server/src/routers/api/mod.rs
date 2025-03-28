@@ -2,21 +2,26 @@ pub(crate) mod filters;
 pub(crate) mod v1;
 pub(crate) mod v2;
 
-use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
-use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
+use crate::middleware::auth::auth_middleware;
+use async_graphql::http::{
+	playground_source, GraphQLPlaygroundConfig, ALL_WEBSOCKET_PROTOCOLS,
+};
+use async_graphql_axum::{
+	GraphQLProtocol, GraphQLRequest, GraphQLResponse, GraphQLWebSocket,
+};
 use axum::{
+	extract::{ws::WebSocketUpgrade, State},
 	middleware,
 	response::{Html, IntoResponse},
-	routing::post,
+	routing::{get, post},
 	Extension, Router,
 };
+
 use graphql::schema::{build_schema, AppSchema};
 use models::entity::user::AuthUser;
 
 use crate::{
-	config::state::AppState,
-	errors::APIError,
-	middleware::auth::{auth_middleware, RequestContext},
+	config::state::AppState, errors::APIError, middleware::auth::RequestContext,
 };
 
 pub(crate) async fn mount(app_state: AppState) -> Router<AppState> {
@@ -38,6 +43,7 @@ pub(crate) async fn graphql(app_state: AppState) -> Router<AppState> {
 
 	Router::new()
 		.route("/", method_router)
+		.route("/ws", get(graphql_subscription_handler))
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 		.layer(Extension(schema))
 }
@@ -52,21 +58,15 @@ async fn playground(
 
 	Ok(Html(playground_source(
 		GraphQLPlaygroundConfig::new("/api/graphql")
+			.subscription_endpoint("/api/graphql/ws")
 			.with_setting("request.credentials", "include"),
 	)))
 }
 
-// TODO(sea-orm): Move to separate file, get OPTIONAL user(?), enforce user for all but login-related mutations? Or just retain restful login?
-async fn graphql_handler(
-	schema: Extension<AppSchema>,
-	Extension(req_ctx): Extension<RequestContext>,
-	req: GraphQLRequest,
-) -> GraphQLResponse {
-	let mut req = req.into_inner();
-
+fn get_graphql_req_ctx(req_ctx: RequestContext) -> graphql::data::RequestContext {
 	let user = req_ctx.user();
 	// TODO(sea-orm): Use graphQL everywhere once User model is widely used
-	let req_ctx = graphql::data::RequestContext {
+	graphql::data::RequestContext {
 		user: AuthUser {
 			id: user.id.clone(),
 			username: user.username.clone(),
@@ -78,10 +78,42 @@ async fn graphql_handler(
 			permissions: vec![],
 		},
 		api_key: req_ctx.api_key(),
-	};
+	}
+}
+
+// TODO(sea-orm): Move to separate file, get OPTIONAL user(?), enforce user for all but login-related mutations? Or just retain restful login?
+async fn graphql_handler(
+	schema: Extension<AppSchema>,
+	Extension(req_ctx): Extension<RequestContext>,
+	req: GraphQLRequest,
+) -> GraphQLResponse {
+	let mut req = req.into_inner();
+
+	let req_ctx = get_graphql_req_ctx(req_ctx);
 	req = req.data(req_ctx);
 
 	schema.execute(req).await.into()
+}
+
+async fn graphql_subscription_handler(
+	schema: Extension<AppSchema>,
+	State(ctx): State<AppState>,
+	Extension(req_ctx): Extension<RequestContext>,
+	protocol: GraphQLProtocol,
+	websocket: WebSocketUpgrade,
+) -> impl IntoResponse {
+	let req_ctx = get_graphql_req_ctx(req_ctx);
+	let mut data = async_graphql::Data::default();
+	data.insert(req_ctx);
+	data.insert(ctx);
+
+	websocket
+		.protocols(ALL_WEBSOCKET_PROTOCOLS)
+		.on_upgrade(move |stream| {
+			GraphQLWebSocket::new(stream, schema.0, protocol)
+				.with_data(data)
+				.serve()
+		})
 }
 
 // TODO: move codegen to api/mod.rs

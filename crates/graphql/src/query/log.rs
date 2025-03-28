@@ -36,6 +36,6 @@ impl LogQuery {
 	async fn logfile_info(&self, ctx: &Context<'_>) -> Result<LogFileInfo> {
 		let config = ctx.data::<CoreContext>()?.config.as_ref();
 
-		LogFileInfo::try_from(config)
+		LogFileInfo::try_from(config).await
 	}
 }

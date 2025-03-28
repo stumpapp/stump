@@ -30,6 +30,8 @@ pub struct LogDeleteOutput {
 }
 
 impl LogFileInfo {
+	// TODO: async-ify this since it will be requested in async runtime
+	// and we don't want to block the runtime
 	pub fn try_from(config: &StumpConfig) -> Result<Self> {
 		let log_file_path = config.get_log_file();
 		let file = File::open(log_file_path.as_path())?;

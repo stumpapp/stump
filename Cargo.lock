@@ -2605,6 +2605,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "filter-gen"
+version = "0.0.0"
+dependencies = [
+ "itertools 0.13.0",
+ "proc-macro2",
+ "quote",
+ "serde",
+ "syn 2.0.87",
+ "thiserror 1.0.63",
+ "toml 0.8.19",
+]
+
+[[package]]
 name = "finl_unicode"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3167,6 +3180,7 @@ dependencies = [
  "axum",
  "chrono",
  "epub",
+ "filter-gen",
  "futures-util",
  "infer",
  "itertools 0.13.0",

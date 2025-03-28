@@ -76,9 +76,17 @@ Condition::all()
 */
 
 use async_graphql::Enum;
+use filter_gen::IntoFilter;
+use sea_orm::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use strum::{Display, EnumString};
+
+// NOTE: I originally went for IntoCondition, but that is a trait for sea-query and
+// I wanted to avoid conflicts in the naming
+pub trait IntoFilter {
+	fn into_filter(self) -> sea_orm::Condition;
+}
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct FilterInput {
@@ -162,6 +170,27 @@ pub struct NumericRange<T> {
 }
 
 #[skip_serializing_none]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, IntoFilter)]
+pub struct TestFilter {
+	#[field_column("models::entity::media::Column::Name")]
+	pub name: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media::Column::Size")]
+	pub size: Option<FieldFilter<i64>>,
+	// #[field_column("models::entity::media::Column::Extension")]
+	// pub extension: Option<FieldFilter<String>>,
+	// #[field_column("models::entity::media::Column::CreatedAt")]
+	// pub created_at: Option<FieldFilter<DateTimeWithTimeZone>>,
+	// #[field_column("models::entity::media::Column::UpdatedAt")]
+	// pub updated_at: Option<FieldFilter<DateTimeWithTimeZone>>,
+	// #[field_column("models::entity::media::Column::Status")]
+	// pub status: Option<FieldFilter<String>>,
+	// #[field_column("models::entity::media::Column::Path")]
+	// pub path: Option<FieldFilter<String>>,
+	// #[field_column("models::entity::media::Column::Pages")]
+	// pub pages: Option<FieldFilter<i32>>,
+}
+
+#[skip_serializing_none]
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MediaFilterInput {
 	pub name: Option<FieldFilter<String>>,
@@ -186,6 +215,8 @@ pub struct MediaMetadataFilterInput {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use models::entity::*;
+	use sea_orm::sea_query::IntoCondition;
 
 	#[test]
 	fn test_serialize_media_filter() {
@@ -282,6 +313,97 @@ mod tests {
 		assert_eq!(
 			serialized,
 			r#"{"name":{"eq":"test"},"metadata":{"_and":[{"title":{"eq":"test"}},{"series":{"eq":"theseries"}}]}}"#
+		);
+	}
+
+	#[test]
+	fn test_into_filter() {
+		let condition = TestFilter {
+			name: Some(FieldFilter::Equals {
+				eq: "test".to_string(),
+			}),
+			..Default::default()
+		}
+		.into_filter();
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all().add(media::Column::Name.eq("test"))
+		);
+
+		let condition = TestFilter {
+			name: Some(FieldFilter::Not {
+				neq: "test".to_string(),
+			}),
+			..Default::default()
+		}
+		.into_filter();
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all().add(media::Column::Name.ne("test"))
+		);
+
+		let condition = TestFilter {
+			name: Some(FieldFilter::Any {
+				any: vec!["test".to_string(), "test2".to_string()],
+			}),
+			..Default::default()
+		}
+		.into_filter();
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all()
+				.add(media::Column::Name.is_in(vec!["test", "test2"]))
+		);
+
+		let condition = TestFilter {
+			name: Some(FieldFilter::None {
+				none: vec!["test".to_string(), "test2".to_string()],
+			}),
+			..Default::default()
+		}
+		.into_filter();
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all()
+				.add(media::Column::Name.is_not_in(vec!["test", "test2"]))
+		);
+
+		let condition = TestFilter {
+			name: Some(FieldFilter::StringFieldFilter(StringFilter::Like {
+				like: "test".to_string(),
+			})),
+			..Default::default()
+		}
+		.into_filter();
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all()
+				.add(media::Column::Name.like(format!("%{}%", "test")))
+		);
+
+		let condition = TestFilter {
+			name: Some(FieldFilter::StringFieldFilter(StringFilter::Contains {
+				contains: "test".to_string(),
+			})),
+			..Default::default()
+		}
+		.into_filter();
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all().add(media::Column::Name.contains("test"))
+		);
+
+		let condition = TestFilter {
+			name: Some(FieldFilter::StringFieldFilter(StringFilter::Excludes {
+				excludes: "test".to_string(),
+			})),
+			..Default::default()
+		}
+		.into_filter();
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all()
+				.add(media::Column::Name.not_like(format!("%{}%", "test")))
 		);
 	}
 }

@@ -8,7 +8,7 @@ use models::{entity::library, shared::enums::UserPermission};
 use sea_orm::prelude::*;
 use stump_core::filesystem::scanner::LibraryScanJob;
 use tokio::fs;
-use zip::ZipArchive;
+use zip::{read::ZipFile, ZipArchive};
 
 use crate::{
 	data::{CoreContext, RequestContext},
@@ -32,6 +32,8 @@ struct UploadSeriesInput {
 	series_dir_name: String,
 	upload: Upload,
 }
+
+// TODO: consider thumbnail upload for this mutation object, e.g. `upload_media_thumbnail`
 
 #[Object]
 impl UploadMutation {
@@ -104,7 +106,7 @@ impl UploadMutation {
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
 
-		let value = upload.value(ctx)?;
+		let mut value = upload.value(ctx)?;
 		validate_series_upload(&value)?;
 
 		let library = library::Entity::find_for_user(user)
@@ -118,7 +120,7 @@ impl UploadMutation {
 		let placement_path = get_series_path(&place_at, &series_dir_name, &library)?;
 
 		// Validate the contents of the zip file
-		validate_series_upload_contents();
+		validate_series_upload_contents(&mut value, &placement_path, false)?;
 
 		// Create directory if necessary
 		if let Err(e) = fs::metadata(&placement_path).await {
@@ -172,54 +174,113 @@ async fn copy_tempfile_to_location(data: UploadValue, target_path: &Path) -> Res
 /// Validate the contents of the series upload file. This function will return an error
 /// if the contents of the uploaded archive do not match the permitted file types or if
 /// the archive contains malformed paths.
-fn validate_series_upload_contents() {
-	todo!()
+fn validate_series_upload_contents(
+	value: &mut UploadValue,
+	series_path: &Path,
+	allow_overwrite: bool,
+) -> Result<()> {
+	let temp_file = &mut value.content;
+	tokio::task::block_in_place(|| {
+		let mut zip_archive = ZipArchive::new(temp_file)
+			.map_err(|_| "Error opening zip archive".to_string())?;
+
+		// Loop over each file in the zip archive and test them
+		for i in 0..zip_archive.len() {
+			let mut zip_file = zip_archive.by_index(i)?;
+
+			// Skip directories
+			if zip_file.is_dir() {
+				continue;
+			}
+
+			// Using `enclosed_name` also validates against path traversal attacks:
+			// https://docs.rs/zip/1.1.3/zip/read/struct.ZipFile.html#method.enclosed_name
+			let Some(enclosed_path) = zip_file.enclosed_name() else {
+				return Err("Series zip contained a malformed path".into());
+			};
+			// Get the path that the archive file will be extracted to
+			let extraction_path = series_path.join(enclosed_path);
+
+			// Error if the file already exists and we aren't allowing overwrites
+			if extraction_path.exists() && !allow_overwrite {
+				return Err(format!(
+                    "Unable to extract zip contents to {extraction_path:?}, overwrites are disabled"
+                ).into());
+			}
+
+			validate_zip_file(&mut zip_file)?;
+		}
+
+		Ok::<(), Error>(())
+	})?;
+
+	Ok(())
 }
-// fn validate_series_upload_contents(
-// 	series_request: &UploadSeriesRequest,
-// 	series_path: &path::Path,
-// 	allow_overwrite: bool,
-// ) -> APIResult<()> {
-// 	let temp_file = series_request.file.contents.as_file().try_clone()?;
-// 	let mut zip_archive = zip::ZipArchive::new(temp_file).map_err(|e| {
-// 		APIError::InternalServerError(format!("Error opening zip archive: {e}"))
-// 	})?;
 
-// 	// Loop over each file in the zip archive and test them
-// 	for i in 0..zip_archive.len() {
-// 		let mut zip_file = zip_archive.by_index(i).map_err(|e| {
-// 			APIError::InternalServerError(format!(
-// 				"Error accessing file in series zip: {e}"
-// 			))
-// 		})?;
+/// Validate a file within a series upload archive. This function checks the file against
+/// allowed file types based on extension as well as magic byte inference. If either check
+/// fails then an error is returned.
+fn validate_zip_file(zip_file: &mut ZipFile) -> Result<()> {
+	/// Any file extension not in this list will trigger an error
+	const ALLOWED_EXTENSIONS: &[&str] = &[
+		"cbr", "cbz", "epub", "pdf", "xml", "json", "png", "jpg", "jpeg", "webp", "gif",
+		"heif", "jxl", "avif",
+	];
 
-// 		// Skip directories
-// 		if zip_file.is_dir() {
-// 			continue;
-// 		}
+	/// Any inferred mime type not in this list will trigger an error
+	const ALLOWED_TYPES: &[&str] = &[
+		"application/zip",
+		"application/vnd.comicbook+zip",
+		"application/vnd.comicbook-rar",
+		"application/epub+zip",
+		"application/pdf",
+		"application/xml",
+		"application/json",
+		"image/png",
+		"image/jpeg",
+		"image/webp",
+		"image/gif",
+		"image/heif",
+		"image/jxl",
+		"image/avif",
+	];
 
-// 		// Using `enclosed_name` also validates against path traversal attacks:
-// 		// https://docs.rs/zip/1.1.3/zip/read/struct.ZipFile.html#method.enclosed_name
-// 		let Some(enclosed_path) = zip_file.enclosed_name() else {
-// 			return Err(APIError::InternalServerError(
-// 				"Series zip contained a malformed path".to_string(),
-// 			));
-// 		};
-// 		// Get the path that the archive file will be extracted to
-// 		let extraction_path = series_path.join(enclosed_path);
+	let Some(enclosed_path) = zip_file.enclosed_name() else {
+		return Err("Series zip contained a malformed path".into());
+	};
 
-// 		// Error if the file already exists and we aren't allowing overwrites
-// 		if extraction_path.exists() && !allow_overwrite {
-// 			return Err(APIError::InternalServerError(format!(
-// 				"Unable to extract zip contents to {extraction_path:?}, overwrites are disabled"
-// 			)));
-// 		}
+	let extension = enclosed_path
+		.extension()
+		.and_then(|ext| ext.to_str())
+		.map(str::to_ascii_lowercase)
+		.ok_or("Expected zip contents {enclosed_path:?} to have an extension")?;
 
-// 		validate_zip_file(&mut zip_file)?;
-// 	}
+	if !ALLOWED_EXTENSIONS.contains(&extension.as_str()) {
+		return Err(format!(
+			"Zip contents {enclosed_path:?} has a disallowed extension, permitted extensions are: {ALLOWED_EXTENSIONS:?}"
+		).into());
+	}
 
-// 	Ok(())
-// }
+	// Read first five bytes from which to infer content type
+	let mut magic_bytes = [0u8; 5];
+	zip_file
+		.read_exact(&mut magic_bytes)
+		.map_err(|_| "Failed to read first five bytes of zip file.".to_string())?;
+
+	let inferred_type = infer::get(&magic_bytes)
+		.ok_or(format!(
+			"Unable to infer type for zip contents {enclosed_path:?}"
+		))?
+		.mime_type();
+
+	if !ALLOWED_TYPES.contains(&inferred_type) {
+		return Err(format!(
+			"Zip contents {enclosed_path:?} has a disallowed mime type: {inferred_type}, permitted types are: {ALLOWED_TYPES:?}"
+		).into());
+	}
+
+	Ok(())
+}
 
 /// A helper function to validate the file used for a books upload, this function
 /// will return an error if the file is not the appropriate file type.

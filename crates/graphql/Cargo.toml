@@ -16,6 +16,13 @@ strum.workspace = true
 stump_core = { path = "../../core" }
 tokio.workspace = true
 tracing.workspace = true
+futures-util.workspace = true
+linemux = { git = "https://github.com/jmagnuson/linemux.git", rev = "acaafc602afac5d7a9cd3e087dafc937cac1e364" }
+axum = { version = "0.8.1", features = [
+  "ws",
+  "multipart",
+] }
+async-stream.workspace = true
 
 [dev-dependencies]
 maplit.workspace = true

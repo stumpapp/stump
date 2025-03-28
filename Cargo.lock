@@ -3162,8 +3162,12 @@ name = "graphql"
 version = "0.0.10"
 dependencies = [
  "async-graphql",
+ "async-stream",
+ "axum",
  "chrono",
  "epub",
+ "futures-util",
+ "linemux",
  "maplit",
  "models",
  "sea-orm",

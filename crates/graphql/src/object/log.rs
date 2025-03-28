@@ -30,12 +30,9 @@ pub struct LogDeleteOutput {
 }
 
 impl LogFileInfo {
-	// TODO: async-ify this since it will be requested in async runtime
-	// and we don't want to block the runtime
-	pub fn try_from(config: &StumpConfig) -> Result<Self> {
+	pub async fn try_from(config: &StumpConfig) -> Result<Self> {
 		let log_file_path = config.get_log_file();
-		let file = File::open(log_file_path.as_path())?;
-		let metadata = file.metadata()?;
+		let metadata = tokio::fs::metadata(log_file_path.clone()).await?;
 		let system_time = metadata.modified()?;
 		let datetime: DateTime<Utc> = system_time.into();
 
@@ -54,15 +51,15 @@ mod tests {
 	use std::{fs::File, io::Write};
 	use tempfile::tempdir;
 
-	#[test]
-	fn test_logfile_info() {
+	#[tokio::test]
+	async fn test_logfile_info() {
 		let dir = tempdir().unwrap();
 		let log_file_path = dir.path().join("Stump.log");
 		let mut file = File::create(&log_file_path).unwrap();
 		writeln!(file, "Hello, world!").unwrap();
 
 		let config = StumpConfig::new(dir.path().to_string_lossy().to_string());
-		let log_file_info = LogFileInfo::try_from(&config).unwrap();
+		let log_file_info = LogFileInfo::try_from(&config).await.unwrap();
 
 		assert_eq!(
 			log_file_info.path,

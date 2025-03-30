@@ -210,15 +210,15 @@ pub struct MediaFilterInput {
 }
 
 #[skip_serializing_none]
-#[derive(Debug, Clone, Default, Serialize, Deserialize, IntoFilter)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MediaMetadataFilterInput {
-	#[field_column("models::entity::media_metadata::Column::Title")]
+	// #[field_column("models::entity::media_metadata::Column::Title")]
 	pub title: Option<FieldFilter<String>>,
-	#[field_column("models::entity::media_metadata::Column::Series")]
+	// #[field_column("models::entity::media_metadata::Column::Series")]
 	pub series: Option<FieldFilter<String>>,
-	// pub _and: Option<Vec<MediaMetadataFilterInput>>,
-	// pub _not: Option<Vec<MediaMetadataFilterInput>>,
-	// pub _or: Option<Vec<MediaMetadataFilterInput>>,
+	pub _and: Option<Vec<MediaMetadataFilterInput>>,
+	pub _not: Option<Vec<MediaMetadataFilterInput>>,
+	pub _or: Option<Vec<MediaMetadataFilterInput>>,
 }
 
 #[cfg(test)]

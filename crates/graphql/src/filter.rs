@@ -75,7 +75,12 @@ Condition::all()
 	) <- This is from the access control imposed by Stump
 */
 
-use async_graphql::Enum;
+use std::borrow::Cow;
+
+use async_graphql::{
+	dynamic::{self, InputValue, TypeRef},
+	Enum, InputObject, InputType, OneofObject, OutputType,
+};
 use filter_gen::IntoFilter;
 use sea_orm::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -169,57 +174,54 @@ pub struct NumericRange<T> {
 	pub inclusive: bool,
 }
 
-#[skip_serializing_none]
 #[derive(Debug, Clone, Default, Serialize, Deserialize, IntoFilter)]
-pub struct TestFilter {
+pub struct MediaFilterInput {
 	#[field_column("models::entity::media::Column::Name")]
 	pub name: Option<FieldFilter<String>>,
 	#[field_column("models::entity::media::Column::Size")]
 	pub size: Option<FieldFilter<i64>>,
-	// FIXME: proc-macro panicked: Missing field_column attribute for filter field
-	// #[nested_filter]
-	// pub metadata: Option<MediaMetadataFilterInput>,
-	pub _and: Option<Vec<TestFilter>>,
-	pub _or: Option<Vec<TestFilter>>,
-	pub _not: Option<Vec<TestFilter>>,
-}
+	#[field_column("models::entity::media::Column::Extension")]
+	pub extension: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media::Column::CreatedAt")]
+	pub created_at: Option<FieldFilter<DateTimeWithTimeZone>>,
+	#[field_column("models::entity::media::Column::UpdatedAt")]
+	pub updated_at: Option<FieldFilter<DateTimeWithTimeZone>>,
+	#[field_column("models::entity::media::Column::Status")]
+	pub status: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media::Column::Path")]
+	pub path: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media::Column::Pages")]
+	pub pages: Option<FieldFilter<i32>>,
 
-#[skip_serializing_none]
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct MediaFilterInput {
-	pub name: Option<FieldFilter<String>>,
-	// #[field_column("models::entity::media::Column::Size")]
-	// pub size: Option<FieldFilter<i64>>,
-	// #[field_column("models::entity::media::Column::Extension")]
-	// pub extension: Option<FieldFilter<String>>,
-	// #[field_column("models::entity::media::Column::CreatedAt")]
-	// pub created_at: Option<FieldFilter<DateTimeWithTimeZone>>,
-	// #[field_column("models::entity::media::Column::UpdatedAt")]
-	// pub updated_at: Option<FieldFilter<DateTimeWithTimeZone>>,
-	// #[field_column("models::entity::media::Column::Status")]
-	// pub status: Option<FieldFilter<String>>,
-	// #[field_column("models::entity::media::Column::Path")]
-	// pub path: Option<FieldFilter<String>>,
-	// #[field_column("models::entity::media::Column::Pages")]
-	// pub pages: Option<FieldFilter<i32>>,
-	// FIXME: proc-macro panicked: Missing field_column attribute for filter field
-	// #[nested_filter]
+	#[nested_filter]
 	pub metadata: Option<MediaMetadataFilterInput>,
+
 	pub _and: Option<Vec<MediaFilterInput>>,
 	pub _not: Option<Vec<MediaFilterInput>>,
 	pub _or: Option<Vec<MediaFilterInput>>,
 }
 
-#[skip_serializing_none]
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, IntoFilter)]
 pub struct MediaMetadataFilterInput {
-	// #[field_column("models::entity::media_metadata::Column::Title")]
+	#[field_column("models::entity::media_metadata::Column::Title")]
 	pub title: Option<FieldFilter<String>>,
-	// #[field_column("models::entity::media_metadata::Column::Series")]
+	#[field_column("models::entity::media_metadata::Column::Series")]
 	pub series: Option<FieldFilter<String>>,
+
 	pub _and: Option<Vec<MediaMetadataFilterInput>>,
 	pub _not: Option<Vec<MediaMetadataFilterInput>>,
 	pub _or: Option<Vec<MediaMetadataFilterInput>>,
+}
+
+pub fn filter_inputs() -> Vec<dynamic::InputObject> {
+	let mut inputs = vec![];
+
+	let media_filter_input =
+		dynamic::InputObject::new("MediaMetadataFilterInput".to_string());
+
+	inputs.push(media_filter_input);
+
+	inputs
 }
 
 #[cfg(test)]
@@ -330,8 +332,8 @@ mod tests {
 	}
 
 	#[test]
-	fn test_into_filter() {
-		let condition = TestFilter {
+	fn test_basic_into_filter() {
+		let condition = MediaFilterInput {
 			name: Some(FieldFilter::Equals {
 				eq: "test".to_string(),
 			}),
@@ -343,7 +345,7 @@ mod tests {
 			sea_orm::Condition::all().add(media::Column::Name.eq("test"))
 		);
 
-		let condition = TestFilter {
+		let condition = MediaFilterInput {
 			name: Some(FieldFilter::Not {
 				neq: "test".to_string(),
 			}),
@@ -355,7 +357,7 @@ mod tests {
 			sea_orm::Condition::all().add(media::Column::Name.ne("test"))
 		);
 
-		let condition = TestFilter {
+		let condition = MediaFilterInput {
 			name: Some(FieldFilter::Any {
 				any: vec!["test".to_string(), "test2".to_string()],
 			}),
@@ -368,7 +370,7 @@ mod tests {
 				.add(media::Column::Name.is_in(vec!["test", "test2"]))
 		);
 
-		let condition = TestFilter {
+		let condition = MediaFilterInput {
 			name: Some(FieldFilter::None {
 				none: vec!["test".to_string(), "test2".to_string()],
 			}),
@@ -381,7 +383,7 @@ mod tests {
 				.add(media::Column::Name.is_not_in(vec!["test", "test2"]))
 		);
 
-		let condition = TestFilter {
+		let condition = MediaFilterInput {
 			name: Some(FieldFilter::StringFieldFilter(StringFilter::Like {
 				like: "test".to_string(),
 			})),
@@ -394,7 +396,7 @@ mod tests {
 				.add(media::Column::Name.like(format!("%{}%", "test")))
 		);
 
-		let condition = TestFilter {
+		let condition = MediaFilterInput {
 			name: Some(FieldFilter::StringFieldFilter(StringFilter::Contains {
 				contains: "test".to_string(),
 			})),
@@ -406,7 +408,7 @@ mod tests {
 			sea_orm::Condition::all().add(media::Column::Name.contains("test"))
 		);
 
-		let condition = TestFilter {
+		let condition = MediaFilterInput {
 			name: Some(FieldFilter::StringFieldFilter(StringFilter::Excludes {
 				excludes: "test".to_string(),
 			})),
@@ -418,17 +420,20 @@ mod tests {
 			sea_orm::Condition::all()
 				.add(media::Column::Name.not_like(format!("%{}%", "test")))
 		);
+	}
 
+	#[test]
+	fn test_grouped_into_filter() {
 		// _and
-		let condition = TestFilter {
+		let condition = MediaFilterInput {
 			_and: Some(vec![
-				TestFilter {
+				MediaFilterInput {
 					name: Some(FieldFilter::Equals {
 						eq: "test".to_string(),
 					}),
 					..Default::default()
 				},
-				TestFilter {
+				MediaFilterInput {
 					name: Some(FieldFilter::Equals {
 						eq: "test2".to_string(),
 					}),
@@ -438,7 +443,6 @@ mod tests {
 			..Default::default()
 		}
 		.into_filter();
-
 		assert_eq!(
 			condition,
 			sea_orm::Condition::all().add(
@@ -449,15 +453,15 @@ mod tests {
 		);
 
 		// _or
-		let condition = TestFilter {
+		let condition = MediaFilterInput {
 			_or: Some(vec![
-				TestFilter {
+				MediaFilterInput {
 					name: Some(FieldFilter::Equals {
 						eq: "test".to_string(),
 					}),
 					..Default::default()
 				},
-				TestFilter {
+				MediaFilterInput {
 					name: Some(FieldFilter::Equals {
 						eq: "test2".to_string(),
 					}),
@@ -477,15 +481,15 @@ mod tests {
 		);
 
 		// _not
-		let condition = TestFilter {
+		let condition = MediaFilterInput {
 			_not: Some(vec![
-				TestFilter {
+				MediaFilterInput {
 					name: Some(FieldFilter::Equals {
 						eq: "test".to_string(),
 					}),
 					..Default::default()
 				},
-				TestFilter {
+				MediaFilterInput {
 					name: Some(FieldFilter::Equals {
 						eq: "test2".to_string(),
 					}),
@@ -503,6 +507,36 @@ mod tests {
 					.add(media::Column::Name.eq("test2"))
 					.not()
 			)
+		);
+	}
+
+	#[test]
+	fn test_nested_into_filter() {
+		let condition = MediaFilterInput {
+			name: Some(FieldFilter::Equals {
+				eq: "test".to_string(),
+			}),
+			metadata: Some(MediaMetadataFilterInput {
+				title: Some(FieldFilter::Equals {
+					eq: "test".to_string(),
+				}),
+				series: Some(FieldFilter::Equals {
+					eq: "theseries".to_string(),
+				}),
+				..Default::default()
+			}),
+			..Default::default()
+		}
+		.into_filter();
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all()
+				.add(media::Column::Name.eq("test"))
+				.add(
+					sea_orm::Condition::all()
+						.add(media_metadata::Column::Title.eq("test"))
+						.add(media_metadata::Column::Series.eq("theseries"))
+				)
 		);
 	}
 }

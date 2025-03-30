@@ -2,7 +2,7 @@ use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::{parse_macro_input, DeriveInput};
 
-#[proc_macro_derive(IntoFilter, attributes(field_column))]
+#[proc_macro_derive(IntoFilter, attributes(field_column, nested_filter))]
 pub fn derive_into_filter(input: TokenStream) -> TokenStream {
 	let input = parse_macro_input!(input as DeriveInput);
 	let name = &input.ident;

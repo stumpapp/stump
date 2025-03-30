@@ -180,7 +180,7 @@ pub struct TestFilter {
 	// #[nested_filter]
 	// pub metadata: Option<MediaMetadataFilterInput>,
 	// FIXME: proc-macro panicked: Missing field_column attribute for filter field
-	// pub _and: Option<Vec<TestFilter>>,
+	pub _and: Option<Vec<TestFilter>>,
 }
 
 #[skip_serializing_none]

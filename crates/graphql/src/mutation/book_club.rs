@@ -80,6 +80,34 @@ impl BookClubMutation {
 		Ok(updated_club.into())
 	}
 
+	// pub fn book_clubs_accessible_to_user(user: &AuthUser) -> Option<Condition> {
+	// 	// Server owner can see all book clubs
+	// 	if user.is_server_owner {
+	// 		return None;
+	// 	}
+
+	// 	// Any other user can see a book club if they are a member OR if it is not private
+	// 	Some(
+	// 		Condition::any().add(Column::IsPrivate.eq(false)).add(
+	// 			Column::Id.in_subquery(
+	// 				Query::select()
+	// 					.column(book_club_member::Column::BookClubId)
+	// 					.from(book_club_member::Entity)
+	// 					.and_where(book_club_member::Column::UserId.eq(user.id.clone()))
+	// 					.to_owned(),
+	// 			),
+	// 		),
+	// 	)
+	// }
+
+	// impl Entity {
+	// 	/// Find all book clubs that the user can access
+	// 	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
+	// 		Entity::find().apply_if(book_clubs_accessible_to_user(user), |query, cond| {
+	// 			query.filter(cond)
+	// 		})
+	// 	}
+
 	async fn create_book_club_invitation(
 		&self,
 		ctx: &Context<'_>,

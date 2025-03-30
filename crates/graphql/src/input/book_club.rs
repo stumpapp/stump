@@ -31,6 +31,7 @@ impl CreateBookClubInput {
 		};
 
 		let owning_member = book_club_member::ActiveModel {
+			id: Set(Uuid::new_v4().to_string()),
 			role: Set(BookClubMemberRole::Creator),
 			is_creator: Set(true),
 			hide_progress: Set(self.creator_hide_progress),
@@ -131,4 +132,26 @@ pub struct CreateBookClubScheduleBook {
 pub struct CreateBookClubScheduleInput {
 	pub default_interval_days: Option<i32>,
 	pub books: Vec<CreateBookClubScheduleBook>,
+}
+
+#[derive(Debug, InputObject)]
+pub struct CreateBookClubMemberInput {
+	pub user_id: String,
+	pub display_name: Option<String>,
+	pub private_membership: Option<bool>,
+	pub role: BookClubMemberRole,
+}
+
+impl CreateBookClubMemberInput {
+	pub fn into_active_model(self, book_club_id: &str) -> book_club_member::ActiveModel {
+		book_club_member::ActiveModel {
+			id: Set(self.user_id),
+			display_name: Set(self.display_name),
+			book_club_id: Set(book_club_id.to_string()),
+			private_membership: Set(self.private_membership.unwrap_or(false)),
+			hide_progress: Set(self.private_membership.unwrap_or(false)),
+			role: Set(self.role),
+			..Default::default()
+		}
+	}
 }

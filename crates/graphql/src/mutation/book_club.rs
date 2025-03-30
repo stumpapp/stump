@@ -20,9 +20,13 @@ use crate::{
 	input::book_club::{
 		BookClubInvitationInput, BookClubInvitationResponseInput,
 		BookClubInvitationResponseValidator, CreateBookClubInput,
-		CreateBookClubScheduleBook, CreateBookClubScheduleInput, UpdateBookClubInput,
+		CreateBookClubMemberInput, CreateBookClubScheduleBook,
+		CreateBookClubScheduleInput, UpdateBookClubInput,
 	},
-	object::{book_club::BookClub, book_club_invitation::BookClubInvitation},
+	object::{
+		book_club::BookClub, book_club_invitation::BookClubInvitation,
+		book_club_member::BookClubMember,
+	},
 };
 
 #[derive(Default)]
@@ -162,9 +166,21 @@ impl BookClubMutation {
 		Ok(invitation.into())
 	}
 
-	// async fn create_book_club_member(&self, book_club_id: ID) -> Result<String> {
-	// 	unimplemented!()
-	// }
+	async fn create_book_club_member(
+		&self,
+		ctx: &Context<'_>,
+		book_club_id: ID,
+		input: CreateBookClubMemberInput,
+	) -> Result<BookClubMember> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let created_member = input
+			.into_active_model(&book_club_id.to_string())
+			.insert(conn)
+			.await?;
+
+		Ok(BookClubMember::from(created_member))
+	}
 
 	async fn create_book_club_schedule(
 		&self,
@@ -307,6 +323,7 @@ fn create_book_active_model(
 	match book {
 		BookClubBook::Stored(BookClubInternalBook { id }) => {
 			book_club_book::ActiveModel {
+				id: Set(Uuid::new_v4().to_string()),
 				start_at: Set(start_at),
 				end_at: Set(end_at),
 				discussion_duration_days: Set(discussion_duration_days),
@@ -321,6 +338,7 @@ fn create_book_active_model(
 			url,
 			image_url,
 		}) => book_club_book::ActiveModel {
+			id: Set(Uuid::new_v4().to_string()),
 			start_at: Set(start_at),
 			end_at: Set(end_at),
 			discussion_duration_days: Set(discussion_duration_days),

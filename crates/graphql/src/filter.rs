@@ -179,8 +179,9 @@ pub struct TestFilter {
 	// FIXME: proc-macro panicked: Missing field_column attribute for filter field
 	// #[nested_filter]
 	// pub metadata: Option<MediaMetadataFilterInput>,
-	// FIXME: proc-macro panicked: Missing field_column attribute for filter field
 	pub _and: Option<Vec<TestFilter>>,
+	pub _or: Option<Vec<TestFilter>>,
+	pub _not: Option<Vec<TestFilter>>,
 }
 
 #[skip_serializing_none]
@@ -225,7 +226,10 @@ pub struct MediaMetadataFilterInput {
 mod tests {
 	use super::*;
 	use models::entity::*;
-	use sea_orm::sea_query::IntoCondition;
+	use sea_orm::{
+		sea_query::{IntoCondition, Query, SqliteQueryBuilder},
+		DbBackend, QueryTrait,
+	};
 
 	#[test]
 	fn test_serialize_media_filter() {
@@ -414,78 +418,94 @@ mod tests {
 			sea_orm::Condition::all()
 				.add(media::Column::Name.not_like(format!("%{}%", "test")))
 		);
+
+		// _and
+		let condition = TestFilter {
+			_and: Some(vec![
+				TestFilter {
+					name: Some(FieldFilter::Equals {
+						eq: "test".to_string(),
+					}),
+					..Default::default()
+				},
+				TestFilter {
+					name: Some(FieldFilter::Equals {
+						eq: "test2".to_string(),
+					}),
+					..Default::default()
+				},
+			]),
+			..Default::default()
+		}
+		.into_filter();
+
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all().add(
+				sea_orm::Condition::all()
+					.add(media::Column::Name.eq("test"))
+					.add(media::Column::Name.eq("test2"))
+			)
+		);
+
+		// _or
+		let condition = TestFilter {
+			_or: Some(vec![
+				TestFilter {
+					name: Some(FieldFilter::Equals {
+						eq: "test".to_string(),
+					}),
+					..Default::default()
+				},
+				TestFilter {
+					name: Some(FieldFilter::Equals {
+						eq: "test2".to_string(),
+					}),
+					..Default::default()
+				},
+			]),
+			..Default::default()
+		}
+		.into_filter();
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all().add(
+				sea_orm::Condition::any()
+					.add(media::Column::Name.eq("test"))
+					.add(media::Column::Name.eq("test2"))
+			)
+		);
+
+		// _not
+		let condition = TestFilter {
+			_not: Some(vec![
+				TestFilter {
+					name: Some(FieldFilter::Equals {
+						eq: "test".to_string(),
+					}),
+					..Default::default()
+				},
+				TestFilter {
+					name: Some(FieldFilter::Equals {
+						eq: "test2".to_string(),
+					}),
+					..Default::default()
+				},
+			]),
+			..Default::default()
+		}
+		.into_filter();
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all().add(
+				sea_orm::Condition::any()
+					.add(media::Column::Name.eq("test"))
+					.add(media::Column::Name.eq("test2"))
+					.not()
+			)
+		);
 	}
 }
-
-// #[generate_smart_filter]
-// #[derive(Debug, Clone, PartialEq)]
-// #[serde(untagged)]
-// #[prisma_table("media")]
-// pub enum MediaFilter {
-// 	Name { name: String },
-// 	Size { size: i64 },
-// 	Extension { extension: String },
-// 	CreatedAt { created_at: DateTime<FixedOffset> },
-// 	UpdatedAt { updated_at: DateTime<FixedOffset> },
-// 	Status { status: String },
-// 	Path { path: String },
-// 	Pages { pages: i32 },
-// 	// Metadata { metadata: MediaMetadataSmartFilter },
-// 	// Series { series: SeriesSmartFilter },
-// }
-
-// #[derive(Debug, Clone, PartialEq)]
-// #[serde(untagged)]
-// /// A filter for a single value, e.g. `name = "test"`
-// pub enum Filter<T> {
-// 	/// A simple equals filter, e.g. `name = "test"`
-// 	Equals { equals: T },
-// 	/// A simple not filter, e.g. `name != "test"`
-// 	Not { not: T },
-// 	/// A filter for a vector of values, e.g. `name in ["test", "test2"]`
-// 	Any { any: Vec<T> },
-// 	/// A filter for a vector of values, e.g. `name not in ["test", "test2"]`
-// 	None { none: Vec<T> },
-// 	/// A filter for a string value, e.g. `name contains "test"`
-// 	StringFilter(StringFilter<T>),
-// 	/// A filter for a numeric value, e.g. `year > 2000`
-// 	NumericFilter(NumericFilter<T>),
-// }
-
-// #[derive(Debug, Clone, PartialEq)]
-// #[serde(untagged)]
-// pub enum StringFilter<T> {
-// 	/// A filter for a string that matches a pattern, e.g. `name like "%test%"`
-// 	Like { like: T },
-// 	/// A filter for a string that contains a substring, e.g. `name contains "test"`. This should
-// 	/// not be confused with an `in` filter. See [`Filter::Any`] for that.
-// 	Contains { contains: T },
-// 	/// A filter for a string that does not contain a substring, e.g. `name excludes "test"`. This
-// 	/// should not be confused with a `not in` filter. See [`Filter::None`] for that.
-// 	Excludes { excludes: T },
-// 	/// A filter for a string that starts with a substring, e.g. `name starts_with "test"`
-// 	StartsWith { starts_with: T },
-// 	/// A filter for a string that ends with a substring, e.g. `name ends_with "test"`
-// 	EndsWith { ends_with: T },
-// }
-
-// #[derive(Debug, Clone, PartialEq)]
-// pub struct NumericRange<T> {
-// 	pub from: T,
-// 	pub to: T,
-// 	#[serde(default)]
-// 	pub inclusive: bool,
-// }
-
-// #[derive(Debug, Clone, PartialEq)]
-// #[serde(untagged)]
-// pub enum NumericFilter<T> {
-// 	Gt { gt: T },
-// 	Gte { gte: T },
-// 	Lt { lt: T },
-// 	Lte { lte: T },
-// 	Range(NumericRange<T>),
-// }
 
 // /// A trait to convert an enum variant into a prisma order parameter
 // pub trait IntoOrderBy {

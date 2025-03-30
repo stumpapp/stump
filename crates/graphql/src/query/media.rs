@@ -1,4 +1,4 @@
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, Json, Object, Result, ID};
 use models::entity::{media, reading_session};
 use sea_orm::{
 	prelude::*,
@@ -8,6 +8,7 @@ use sea_orm::{
 
 use crate::{
 	data::{CoreContext, RequestContext},
+	filter::{IntoFilter, MediaFilterInput},
 	object::media::Media,
 	pagination::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
@@ -24,13 +25,15 @@ impl MediaQuery {
 	async fn media(
 		&self,
 		ctx: &Context<'_>,
+		#[graphql(default)] filter: Json<MediaFilterInput>,
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<Media>> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let query = media::ModelWithMetadata::find_for_user(user);
+		let conditions = filter.0.into_filter();
+		let query = media::ModelWithMetadata::find_for_user(user).filter(conditions);
 
 		match pagination.resolve() {
 			Pagination::Cursor(info) => {

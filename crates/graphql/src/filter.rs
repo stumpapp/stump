@@ -149,6 +149,7 @@ pub enum FieldFilter<T> {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
 pub enum StringFilter<T> {
 	Like { like: T },
 	Contains { contains: T },
@@ -174,6 +175,7 @@ pub struct NumericRange<T> {
 	pub inclusive: bool,
 }
 
+#[skip_serializing_none]
 #[derive(Debug, Clone, Default, Serialize, Deserialize, IntoFilter)]
 pub struct MediaFilterInput {
 	#[field_column("models::entity::media::Column::Name")]
@@ -201,6 +203,7 @@ pub struct MediaFilterInput {
 	pub _or: Option<Vec<MediaFilterInput>>,
 }
 
+#[skip_serializing_none]
 #[derive(Debug, Clone, Default, Serialize, Deserialize, IntoFilter)]
 pub struct MediaMetadataFilterInput {
 	#[field_column("models::entity::media_metadata::Column::Title")]
@@ -228,10 +231,6 @@ pub fn filter_inputs() -> Vec<dynamic::InputObject> {
 mod tests {
 	use super::*;
 	use models::entity::*;
-	use sea_orm::{
-		sea_query::{IntoCondition, Query, SqliteQueryBuilder},
-		DbBackend, QueryTrait,
-	};
 
 	#[test]
 	fn test_serialize_media_filter() {

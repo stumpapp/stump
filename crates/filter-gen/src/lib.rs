@@ -37,17 +37,55 @@ fn implement_into_filter(input: &DeriveInput) -> proc_macro2::TokenStream {
 		let field_name = field.ident.as_ref().unwrap();
 		let field_type = &field.ty;
 
-		// Get column attribute if specified
-		let column_path = find_column_path(&field.attrs);
-
 		let is_logical_op =
 			field_name == "_and" || field_name == "_or" || field_name == "_not";
 
-		// TODO: Handle nested types!! E.g. MediaMetadataFilter inside MediaFilter
+		eprintln!("FIELD_NAME: {}", field_name);
+		eprintln!("LOGICAL_OP: {}", is_logical_op);
 
 		let field_condition = if is_logical_op {
-			unimplemented!("Logical operations are not yet implemented")
+			if field_name == "_and" {
+				quote! {
+					if let Some(filters) = self._and {
+						let mut and_condition = sea_orm::Condition::all();
+						for filter in filters {
+							and_condition = and_condition.add(filter.into_filter());
+						}
+						condition = condition.add(and_condition);
+					}
+				}
+			} else if field_name == "_or" {
+				quote! {
+					if let Some(filters) = self._or {
+						let mut or_condition = sea_orm::Condition::any();
+						for filter in filters {
+							or_condition = or_condition.add(filter.into_filter());
+						}
+						condition = condition.add(or_condition);
+					}
+				}
+			} else {
+				quote! {
+					if let Some(filters) = self._not {
+						let mut not_condition = sea_orm::Condition::any();
+						for filter in filters {
+							not_condition = not_condition.add(filter.into_filter());
+						}
+						condition = condition.add(not_condition.not());
+					}
+				}
+			}
+		} else if is_nested_type(&field.attrs) {
+			eprintln!("FIELD_NAME NESTED: {}", field_name);
+			quote! {
+				if let Some(field_filter) = self.#field_name {
+					condition = condition.add(field_filter.into_filter());
+				}
+			}
 		} else {
+			eprintln!("FIELD_NAME NOT OP: {}", field_name);
+			let column_path = find_column_path(&field.attrs);
+
 			let string_filter_gen_arm = if is_string_filter_type(field_type) {
 				quote! {
 					match string_filter {
@@ -212,9 +250,14 @@ fn is_numeric_filter_type(ty: &syn::Type) -> bool {
 }
 
 // Helper function to detect nested filter types
-fn is_nested_type(ty: &syn::Type) -> bool {
-	// Check if it derives from IntoFilter
-	unimplemented!("Nested filter types are not yet implemented")
+fn is_nested_type(attrs: &[syn::Attribute]) -> bool {
+	for attr in attrs {
+		if attr.path().is_ident("nested_filter") {
+			return true;
+		}
+	}
+
+	false
 }
 
 // TODO: Don't require this!

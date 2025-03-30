@@ -176,6 +176,19 @@ pub struct TestFilter {
 	pub name: Option<FieldFilter<String>>,
 	#[field_column("models::entity::media::Column::Size")]
 	pub size: Option<FieldFilter<i64>>,
+	// FIXME: proc-macro panicked: Missing field_column attribute for filter field
+	// #[nested_filter]
+	// pub metadata: Option<MediaMetadataFilterInput>,
+	// FIXME: proc-macro panicked: Missing field_column attribute for filter field
+	// pub _and: Option<Vec<TestFilter>>,
+}
+
+#[skip_serializing_none]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MediaFilterInput {
+	pub name: Option<FieldFilter<String>>,
+	// #[field_column("models::entity::media::Column::Size")]
+	// pub size: Option<FieldFilter<i64>>,
 	// #[field_column("models::entity::media::Column::Extension")]
 	// pub extension: Option<FieldFilter<String>>,
 	// #[field_column("models::entity::media::Column::CreatedAt")]
@@ -188,28 +201,24 @@ pub struct TestFilter {
 	// pub path: Option<FieldFilter<String>>,
 	// #[field_column("models::entity::media::Column::Pages")]
 	// pub pages: Option<FieldFilter<i32>>,
-}
-
-#[skip_serializing_none]
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct MediaFilterInput {
-	pub name: Option<FieldFilter<String>>,
+	// FIXME: proc-macro panicked: Missing field_column attribute for filter field
+	// #[nested_filter]
 	pub metadata: Option<MediaMetadataFilterInput>,
-
 	pub _and: Option<Vec<MediaFilterInput>>,
 	pub _not: Option<Vec<MediaFilterInput>>,
 	pub _or: Option<Vec<MediaFilterInput>>,
 }
 
 #[skip_serializing_none]
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, IntoFilter)]
 pub struct MediaMetadataFilterInput {
+	#[field_column("models::entity::media_metadata::Column::Title")]
 	pub title: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Series")]
 	pub series: Option<FieldFilter<String>>,
-
-	pub _and: Option<Vec<MediaMetadataFilterInput>>,
-	pub _not: Option<Vec<MediaMetadataFilterInput>>,
-	pub _or: Option<Vec<MediaMetadataFilterInput>>,
+	// pub _and: Option<Vec<MediaMetadataFilterInput>>,
+	// pub _not: Option<Vec<MediaMetadataFilterInput>>,
+	// pub _or: Option<Vec<MediaMetadataFilterInput>>,
 }
 
 #[cfg(test)]

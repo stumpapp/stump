@@ -1,8 +1,15 @@
-use sea_orm::entity::prelude::*;
+use super::{book_club, user::AuthUser};
+use async_graphql::SimpleObject;
+use sea_orm::{
+	prelude::*,
+	sea_query::{Query, SimpleExpr},
+	ColumnTrait, Condition,
+};
 
 use crate::shared::book_club::BookClubMemberRole;
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
+#[graphql(name = "BookClubMemberModel")]
 #[sea_orm(table_name = "book_club_members")]
 pub struct Model {
 	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
@@ -92,3 +99,41 @@ impl Related<super::user::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+impl Entity {
+	fn members_accessible_to_user_for_book_club_member(user: &AuthUser) -> SimpleExpr {
+		Column::BookClubId.in_subquery(
+			Query::select()
+				.column(Column::BookClubId)
+				.from(Self)
+				.and_where(Column::UserId.eq(user.id.clone()))
+				.to_owned(),
+		)
+	}
+
+	fn members_accessible_to_user_for_non_book_club_member() -> Condition {
+		Condition::all()
+			.add(Column::PrivateMembership.eq(false))
+			.add(
+				Column::BookClubId.in_subquery(
+					Query::select()
+						.column(book_club::Column::Id)
+						.from(Self)
+						.and_where(book_club::Column::IsPrivate.eq(false))
+						.to_owned(),
+				),
+			)
+	}
+
+	pub fn find_members_accessible_to_user(user: &AuthUser) -> Select<Self> {
+		if user.is_server_owner {
+			Self::find()
+		} else {
+			Self::find().filter(
+				Condition::any()
+					.add(Self::members_accessible_to_user_for_book_club_member(user))
+					.add(Self::members_accessible_to_user_for_non_book_club_member()),
+			)
+		}
+	}
+}

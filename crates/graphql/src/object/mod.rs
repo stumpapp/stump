@@ -1,6 +1,7 @@
 pub mod book_club;
 pub mod book_club_invitation;
 pub mod book_club_member;
+pub mod book_club_schedule;
 pub mod bookmark;
 pub mod directory_listing;
 pub mod email_device;

@@ -29,15 +29,14 @@ impl BookClub {
 	async fn current_book(&self, ctx: &Context<'_>) -> Result<BookClubBook> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let book_club_book = book_club_book::Entity::find()
-			.inner_join(book_club_schedule::Entity)
-			.filter(book_club_schedule::Column::BookClubId.eq(&self.model.id.clone()))
-			.filter(book_club_book::Column::EndAt.gte(chrono::Utc::now()))
-			.order_by_asc(book_club_book::Column::StartAt)
-			.into_model::<book_club_book::Model>()
-			.one(conn)
-			.await?
-			.ok_or("No current book found")?;
+		let book_club_book = book_club_book::Entity::find_with_schedule(
+			&self.model.id,
+			chrono::Utc::now(),
+		)
+		.into_model::<book_club_book::Model>()
+		.one(conn)
+		.await?
+		.ok_or("No current book found")?;
 
 		Ok(book_club_book.into())
 	}

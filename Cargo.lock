@@ -4872,6 +4872,7 @@ name = "models"
 version = "0.0.0"
 dependencies = [
  "async-graphql",
+ "chrono",
  "globset",
  "itertools 0.13.0",
  "sea-orm",
@@ -4879,6 +4880,7 @@ dependencies = [
  "serde_json",
  "strum",
  "thiserror 1.0.63",
+ "uuid 1.10.0",
 ]
 
 [[package]]

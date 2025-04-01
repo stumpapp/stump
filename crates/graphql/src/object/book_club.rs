@@ -43,11 +43,11 @@ impl BookClub {
 
 	async fn invitations(&self, ctx: &Context<'_>) -> Result<Vec<BookClubInvitation>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-		let book_club_invitations = book_club_invitation::Entity::find()
-			.filter(book_club_invitation::Column::BookClubId.eq(&self.model.id.clone()))
-			.into_model::<book_club_invitation::Model>()
-			.all(conn)
-			.await?;
+		let book_club_invitations =
+			book_club_invitation::Entity::find_for_book_club_id(&self.model.id.clone())
+				.into_model::<book_club_invitation::Model>()
+				.all(conn)
+				.await?;
 
 		Ok(book_club_invitations
 			.into_iter()
@@ -59,11 +59,13 @@ impl BookClub {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let book_club_members =
-			book_club_member::Entity::find_members_accessible_to_user(user)
-				.filter(book_club_member::Column::BookClubId.eq(&self.model.id.clone()))
-				.into_model::<book_club_member::Model>()
-				.all(conn)
-				.await?;
+			book_club_member::Entity::find_members_accessible_to_user_for_book_club_id(
+				user,
+				&self.model.id.clone(),
+			)
+			.into_model::<book_club_member::Model>()
+			.all(conn)
+			.await?;
 
 		Ok(book_club_members
 			.into_iter()
@@ -74,12 +76,12 @@ impl BookClub {
 	async fn schedule(&self, ctx: &Context<'_>) -> Result<BookClubSchedule> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let book_club_schedule = book_club_schedule::Entity::find()
-			.filter(book_club_schedule::Column::BookClubId.eq(&self.model.id.clone()))
-			.into_model::<book_club_schedule::Model>()
-			.one(conn)
-			.await?
-			.ok_or("No schedule found")?;
+		let book_club_schedule =
+			book_club_schedule::Entity::find_for_book_club_id(&self.model.id.clone())
+				.into_model::<book_club_schedule::Model>()
+				.one(conn)
+				.await?
+				.ok_or("No schedule found")?;
 
 		Ok(book_club_schedule.into())
 	}

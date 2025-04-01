@@ -38,3 +38,24 @@ impl Related<super::book_club::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+impl Entity {
+	pub fn find_for_book_club_id(book_club_id: &str) -> Select<Entity> {
+		Entity::find().filter(Column::BookClubId.eq(book_club_id))
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::tests::common::*;
+
+	#[test]
+	fn test_find_for_book_club_id() {
+		let select = Entity::find_for_book_club_id("314");
+		assert_eq!(
+			select_no_cols_to_string(select),
+			r#"SELECT  FROM "book_club_schedules" WHERE "book_club_schedules"."book_club_id" = '314'"#.to_string()
+		);
+	}
+}

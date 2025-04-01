@@ -5,10 +5,7 @@ use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 use models::entity::{
 	book_club, book_club_book, book_club_invitation, book_club_member, book_club_schedule,
 };
-use models::shared::book_club::{
-	BookClubBook, BookClubExternalBook, BookClubInternalBook,
-};
-use sea_orm::{prelude::*, ColumnTrait, QueryOrder};
+use models::shared::book_club::BookClubBook;
 
 #[derive(Debug, SimpleObject)]
 #[graphql(complex)]
@@ -29,7 +26,7 @@ impl BookClub {
 	async fn current_book(&self, ctx: &Context<'_>) -> Result<BookClubBook> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let book_club_book = book_club_book::Entity::find_with_schedule(
+		let book_club_book = book_club_book::Entity::find_with_schedule_for_book_club_id(
 			&self.model.id,
 			chrono::Utc::now(),
 		)

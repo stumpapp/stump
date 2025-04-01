@@ -1,25 +1,17 @@
-use async_graphql::{Context, InputObject, Object, Result};
-use models::entity::reading_list_item;
-use models::{entity::reading_list, shared::enums::EntityVisibility};
+use async_graphql::{Context, Object, Result};
+use models::entity::{reading_list, reading_list_item};
 use sea_orm::ActiveValue::Set;
 use sea_orm::TransactionTrait;
 use sea_orm::{prelude::*, DatabaseTransaction};
 
 use crate::{
 	data::{CoreContext, RequestContext},
+	input::reading_list::ReadingListInput,
 	object::reading_list::ReadingList,
 };
 
 #[derive(Default)]
 pub struct ReadingListMutation;
-
-#[derive(InputObject)]
-struct ReadingListInput {
-	id: String,
-	name: String,
-	visibility: Option<EntityVisibility>,
-	media_ids: Vec<String>,
-}
 
 #[Object]
 impl ReadingListMutation {
@@ -36,25 +28,16 @@ impl ReadingListMutation {
 		let user_id = ctx.data::<RequestContext>()?.id();
 
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-		Ok(conn
-			.transaction::<_, ReadingList, DbErr>(|txn| {
-				Box::pin(async move {
-					let reading_list =
-						create_reading_list_for_user_id(user_id, &input, &txn).await?;
+		let txn = conn.begin().await?;
+		let media_ids = input.media_ids.clone();
+		let reading_list = create_reading_list_for_user_id(&user_id, input, &txn).await?;
 
-					create_reading_list_items(
-						reading_list.id.clone(),
-						input.media_ids,
-						txn,
-					)
-					.await?;
+		create_reading_list_items(reading_list.id.clone(), media_ids, &txn).await?;
+		txn.commit().await?;
 
-					Ok(ReadingList {
-						model: reading_list,
-					})
-				})
-			})
-			.await?)
+		Ok(ReadingList {
+			model: reading_list,
+		})
 	}
 
 	/// Updates an existing reading list.
@@ -101,24 +84,11 @@ impl ReadingListMutation {
 }
 
 async fn create_reading_list_for_user_id(
-	user_id: String,
-	input: &ReadingListInput,
+	user_id: &str,
+	input: ReadingListInput,
 	txn: &DatabaseTransaction,
 ) -> Result<reading_list::Model, DbErr> {
-	Ok(reading_list::ActiveModel {
-		id: Set(input.id.clone()),
-		name: Set(input.name.clone()),
-		updated_at: Set(chrono::Utc::now().into()),
-		visibility: Set(input
-			.visibility
-			.unwrap_or_default()
-			.to_string()
-			.to_uppercase()),
-		creating_user_id: Set(user_id.clone()),
-		..Default::default()
-	}
-	.insert(txn)
-	.await?)
+	Ok(input.into_active_model(user_id).insert(txn).await?)
 }
 
 async fn create_reading_list_items(
@@ -167,6 +137,7 @@ async fn get_for_owner(
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use models::shared::enums::EntityVisibility;
 	use sea_orm::MockDatabase;
 
 	fn get_reading_list_test_object() -> reading_list::Model {
@@ -223,7 +194,7 @@ mod tests {
 		};
 
 		let txn = mock_db.begin().await.unwrap();
-		let result = create_reading_list_for_user_id(user_id, &input, &txn)
+		let result = create_reading_list_for_user_id(&user_id, input, &txn)
 			.await
 			.unwrap();
 

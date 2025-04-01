@@ -1,5 +1,4 @@
 use sea_orm::{
-	prelude::*,
 	sea_query::{Condition, Query, SqliteQueryBuilder},
 	EntityTrait, QuerySelect, QueryTrait,
 };

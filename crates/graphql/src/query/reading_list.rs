@@ -1,8 +1,8 @@
 use async_graphql::{Context, Object, Result, ID};
 
 use crate::pagination::get_paginated_results;
-use models::entity::reading_list;
-use sea_orm::{prelude::*, QueryOrder};
+use models::entity::{reading_list, user::AuthUser};
+use sea_orm::prelude::*;
 
 use crate::{
 	data::{CoreContext, RequestContext},
@@ -26,9 +26,9 @@ impl ReadingListQuery {
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<ReadingList>> {
-		let user_id = ctx.data::<RequestContext>()?.id();
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-		get_paginated_reading_list(user_id, conn, pagination).await
+		get_paginated_reading_list(&user, conn, pagination).await
 	}
 
 	/// Retrieves a reading list by ID for the current user.
@@ -36,11 +36,10 @@ impl ReadingListQuery {
 	/// # Returns
 	/// A reading list with the given ID. If no reading list with this ID exists for the current user, an error will be returned.
 	async fn reading_list_by_id(&self, ctx: &Context<'_>, id: ID) -> Result<ReadingList> {
-		let user_id = ctx.data::<RequestContext>()?.id();
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let query = reading_list::Entity::find_for_user(&user_id, 1)
-			.filter(reading_list::Column::Id.eq(id.to_string()))
+		let query = reading_list::Entity::find_for_user_and_id(user, 1, &id.to_string())
 			.into_model::<reading_list::Model>()
 			.one(conn)
 			.await?;
@@ -50,12 +49,11 @@ impl ReadingListQuery {
 }
 
 async fn get_paginated_reading_list(
-	user_id: String,
+	user: &AuthUser,
 	conn: &DbConn,
 	pagination: Pagination,
 ) -> Result<PaginatedResponse<ReadingList>> {
-	let query = reading_list::Entity::find_for_user(&user_id, 1)
-		.order_by_asc(reading_list::Column::Id);
+	let query = reading_list::Entity::find_for_user(user, 1);
 	let get_cursor =
 		|m: &<models::entity::reading_list::Entity as sea_orm::EntityTrait>::Model| {
 			m.id.to_string()
@@ -76,6 +74,17 @@ mod tests {
 	use crate::pagination::{CursorPagination, OffsetPagination, PaginationInfo};
 	use sea_orm::MockDatabase;
 
+	fn get_default_user() -> AuthUser {
+		AuthUser {
+			id: "42".to_string(),
+			username: "test".to_string(),
+			is_server_owner: true,
+			is_locked: false,
+			permissions: vec![],
+			age_restriction: None,
+		}
+	}
+
 	fn get_test_model() -> reading_list::Model {
 		reading_list::Model {
 			id: "1".to_string(),
@@ -90,6 +99,7 @@ mod tests {
 
 	#[tokio::test]
 	async fn test_cursor_pagination() {
+		let user = get_default_user();
 		let mock_db = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
 			.append_query_results(vec![vec![get_test_model()], vec![get_test_model()]])
 			.into_connection();
@@ -98,10 +108,9 @@ mod tests {
 			after: Some("abc".to_string()),
 			limit: 1,
 		});
-		let reading_lists =
-			get_paginated_reading_list("42".to_string(), &mock_db, cursor_info)
-				.await
-				.unwrap();
+		let reading_lists = get_paginated_reading_list(&user, &mock_db, cursor_info)
+			.await
+			.unwrap();
 
 		assert_eq!(reading_lists.nodes.len(), 1);
 		assert_eq!(reading_lists.nodes[0].model.id, "1");
@@ -118,6 +127,7 @@ mod tests {
 
 	#[tokio::test]
 	async fn test_cursor_pagination_cursor_not_found() {
+		let user = get_default_user();
 		let mock_db = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
 			.append_query_results::<reading_list::Model, _, _>(vec![vec![]])
 			.into_connection();
@@ -127,13 +137,14 @@ mod tests {
 			limit: 1,
 		});
 		let reading_lists =
-			get_paginated_reading_list("42".to_string(), &mock_db, cursor_info).await;
+			get_paginated_reading_list(&user, &mock_db, cursor_info).await;
 
 		assert!(reading_lists.is_err());
 	}
 
 	#[tokio::test]
 	async fn test_cursor_pagination_no_more_results() {
+		let user = get_default_user();
 		let mock_db = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
 			.append_query_results(vec![vec![get_test_model()], vec![]])
 			.into_connection();
@@ -142,10 +153,9 @@ mod tests {
 			after: Some("abc".to_string()),
 			limit: 1,
 		});
-		let reading_lists =
-			get_paginated_reading_list("42".to_string(), &mock_db, cursor_info)
-				.await
-				.unwrap();
+		let reading_lists = get_paginated_reading_list(&user, &mock_db, cursor_info)
+			.await
+			.unwrap();
 
 		assert!(reading_lists.nodes.is_empty());
 
@@ -160,6 +170,7 @@ mod tests {
 
 	#[tokio::test]
 	async fn test_offset_pagination() {
+		let user = get_default_user();
 		let mock_db = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
 			.append_query_results(vec![vec![maplit::btreemap! {
 				"num_items" => Into::<Value>::into(1),
@@ -172,7 +183,7 @@ mod tests {
 			page_size: Some(1),
 			zero_based: None,
 		});
-		let reading_lists = get_paginated_reading_list("42".to_string(), &mock_db, info)
+		let reading_lists = get_paginated_reading_list(&user, &mock_db, info)
 			.await
 			.unwrap();
 
@@ -192,6 +203,7 @@ mod tests {
 
 	#[tokio::test]
 	async fn test_offset_pagination_no_results() {
+		let user = get_default_user();
 		let mock_db = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
 			.append_query_results(vec![vec![maplit::btreemap! {
 				"num_items" => Into::<Value>::into(0),
@@ -204,7 +216,7 @@ mod tests {
 			page_size: Some(1),
 			zero_based: None,
 		});
-		let reading_lists = get_paginated_reading_list("42".to_string(), &mock_db, info)
+		let reading_lists = get_paginated_reading_list(&user, &mock_db, info)
 			.await
 			.unwrap();
 

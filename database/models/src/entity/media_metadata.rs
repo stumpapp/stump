@@ -1,5 +1,5 @@
 use async_graphql::SimpleObject;
-use sea_orm::entity::prelude::*;
+use sea_orm::{prelude::*, QueryOrder, QuerySelect};
 
 use crate::shared::page_dimension::PageAnalysis;
 
@@ -81,3 +81,28 @@ impl Related<super::page_dimension::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+impl Entity {
+	pub fn find_for_column(col: Column) -> Select<Entity> {
+		Self::find()
+			.select_only()
+			.columns(vec![col])
+			.filter(col.is_not_null())
+			.order_by_asc(col)
+			.distinct()
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use sea_orm::{sea_query::SqliteQueryBuilder, QueryTrait};
+
+	#[test]
+	fn test_find_for_column() {
+		let actual = Entity::find_for_column(Column::Title)
+			.into_query()
+			.to_string(SqliteQueryBuilder);
+		assert_eq!(actual, r#"SELECT DISTINCT "media_metadata"."title" FROM "media_metadata" WHERE "media_metadata"."title" IS NOT NULL ORDER BY "media_metadata"."title" ASC"#.to_string());
+	}
+}

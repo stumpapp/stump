@@ -188,4 +188,23 @@ mod tests {
 			r#"SELECT  FROM "book_club_members""#.to_string()
 		);
 	}
+
+	#[test]
+	fn test_find_members_accessible_to_book_club_id_for_server_owner() {
+		let user = AuthUser {
+			id: "42".to_string(),
+			username: "test".to_string(),
+			is_server_owner: true,
+			is_locked: false,
+			permissions: vec![],
+			age_restriction: None,
+		};
+
+		let select =
+			Entity::find_members_accessible_to_user_for_book_club_id(&user, "321");
+		assert_eq!(
+			select_no_cols_to_string(select),
+			(r#"SELECT  FROM "book_club_members" WHERE "book_club_members"."book_club_id" = '321'"#)
+		);
+	}
 }

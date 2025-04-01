@@ -1,16 +1,5 @@
-use async_graphql::{ComplexObject, Context, Result, SimpleObject};
-use models::{
-	entity::{book_club, book_club_member, user},
-	shared::enums::UserPermission,
-};
-use sea_orm::EntityTrait;
-
-use crate::{
-	data::CoreContext,
-	guard::{PermissionGuard, SelfGuard},
-};
-
-use super::{book_club::BookClub, user::User};
+use async_graphql::SimpleObject;
+use models::entity::book_club_member;
 
 #[derive(Debug, SimpleObject)]
 // #[graphql(complex)]

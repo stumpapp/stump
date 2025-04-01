@@ -19,7 +19,7 @@ impl BookClubQuery {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let models = book_club::Entity::find_all_for_user(all, user)
+		let models = book_club::Entity::find_all_for_user(all.unwrap_or(false), user)
 			.all(conn)
 			.await?;
 

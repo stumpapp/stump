@@ -72,6 +72,8 @@ impl Entity {
 mod tests {
 	use super::*;
 	use crate::tests::common::*;
+	use sea_orm::{DatabaseBackend, MockDatabase, Set};
+	use tokio_test;
 
 	#[test]
 	fn test_find_for_book_club_id() {
@@ -80,5 +82,21 @@ mod tests {
 			select_no_cols_to_string(select),
 			r#"SELECT  FROM "book_club_invitations" WHERE "book_club_invitations"."book_club_id" = '314'"#.to_string()
 		);
+	}
+
+	#[test]
+	fn test_active_model() {
+		let db = MockDatabase::new(DatabaseBackend::Sqlite);
+		let conn = db.into_connection();
+
+		let model = ActiveModel {
+			id: Set("123".to_owned()),
+			role: Set(BookClubMemberRole::Member),
+			user_id: Set("456".to_owned()),
+			book_club_id: Set("789".to_owned()),
+		};
+
+		let model = tokio_test::block_on(model.before_save(&conn, true)).unwrap();
+		assert!(!model.id.unwrap().is_empty());
 	}
 }

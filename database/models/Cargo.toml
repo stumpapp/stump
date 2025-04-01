@@ -13,3 +13,6 @@ strum.workspace = true
 thiserror.workspace = true
 uuid.workspace = true
 chrono.workspace = true
+
+[dev-dependencies]
+tokio-test = "0.4.4"

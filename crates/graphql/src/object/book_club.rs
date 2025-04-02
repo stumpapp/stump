@@ -23,7 +23,7 @@ impl From<book_club::Model> for BookClub {
 #[ComplexObject]
 impl BookClub {
 	// TODO(book-clubs): Support multiple books at once?
-	async fn current_book(&self, ctx: &Context<'_>) -> Result<BookClubBook> {
+	async fn current_book(&self, ctx: &Context<'_>) -> Result<Option<BookClubBook>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let book_club_book = book_club_book::Entity::find_with_schedule_for_book_club_id(
@@ -32,10 +32,13 @@ impl BookClub {
 		)
 		.into_model::<book_club_book::Model>()
 		.one(conn)
-		.await?
-		.ok_or("No current book found")?;
+		.await?;
 
-		Ok(book_club_book.into())
+		if let Some(book_club_book) = book_club_book {
+			return Ok(Some(book_club_book.into()));
+		} else {
+			Ok(None)
+		}
 	}
 
 	async fn invitations(&self, ctx: &Context<'_>) -> Result<Vec<BookClubInvitation>> {
@@ -70,16 +73,19 @@ impl BookClub {
 			.collect())
 	}
 
-	async fn schedule(&self, ctx: &Context<'_>) -> Result<BookClubSchedule> {
+	async fn schedule(&self, ctx: &Context<'_>) -> Result<Option<BookClubSchedule>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let book_club_schedule =
 			book_club_schedule::Entity::find_for_book_club_id(&self.model.id.clone())
 				.into_model::<book_club_schedule::Model>()
 				.one(conn)
-				.await?
-				.ok_or("No schedule found")?;
+				.await?;
 
-		Ok(book_club_schedule.into())
+		if let Some(book_club_schedule) = book_club_schedule {
+			Ok(Some(book_club_schedule.into()))
+		} else {
+			Ok(None)
+		}
 	}
 }

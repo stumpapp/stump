@@ -1,6 +1,6 @@
 use async_graphql::{Context, Object, Result, ID};
 use models::{
-	entity::{book_club, book_club_invitation, book_club_member, user::AuthUser},
+	entity::{book_club_invitation, book_club_member, user::AuthUser},
 	shared::book_club::BookClubMemberRole,
 };
 use sea_orm::{prelude::*, Set};
@@ -153,11 +153,13 @@ fn create_member_active_model(
 	input: BookClubMemberInput,
 ) -> book_club_member::ActiveModel {
 	book_club_member::ActiveModel {
+		id: Set(Uuid::new_v4().to_string()),
 		display_name: Set(input.display_name),
 		private_membership: Set(input.private_membership.unwrap_or(false)),
 		user_id: Set(user.id.clone()),
 		book_club_id: Set(invitation.book_club_id.clone()),
 		role: Set(invitation.role),
+		hide_progress: Set(input.private_membership.unwrap_or(false)),
 		is_creator: Set(false),
 		..Default::default()
 	}
@@ -168,6 +170,7 @@ mod tests {
 	use crate::tests::common::*;
 
 	use super::*;
+	use models::entity::book_club;
 	use pretty_assertions::assert_eq;
 	use sea_orm::TryIntoModel;
 
@@ -233,10 +236,7 @@ mod tests {
 		};
 
 		let invitation = get_default_book_club_invitation();
-		let mut member_active_model =
-			create_member_active_model(&user, &invitation, member);
-		member_active_model.id = Set("1".to_string());
-		member_active_model.hide_progress = Set(false);
+		let member_active_model = create_member_active_model(&user, &invitation, member);
 		let member_model = member_active_model.try_into_model().unwrap();
 		let mock_db = get_mock_db_for_model(vec![invitation.clone()])
 			.append_query_results(vec![vec![member_model]])

@@ -145,13 +145,47 @@ pub struct CreateBookClubMemberInput {
 impl CreateBookClubMemberInput {
 	pub fn into_active_model(self, book_club_id: &str) -> book_club_member::ActiveModel {
 		book_club_member::ActiveModel {
-			id: Set(self.user_id),
+			id: Set(Uuid::new_v4().to_string()),
 			display_name: Set(self.display_name),
 			book_club_id: Set(book_club_id.to_string()),
 			private_membership: Set(self.private_membership.unwrap_or(false)),
 			hide_progress: Set(self.private_membership.unwrap_or(false)),
+			user_id: Set(self.user_id),
 			role: Set(self.role),
 			..Default::default()
 		}
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use crate::tests::common::*;
+
+	use super::*;
+	use pretty_assertions::assert_eq;
+
+	#[test]
+	fn test_into_active_model() {
+		let input = CreateBookClubInput {
+			name: "Test".to_string(),
+			is_private: false,
+			member_role_spec: None,
+			creator_hide_progress: false,
+			creator_display_name: None,
+		};
+
+		let user = get_default_user();
+
+		let (club, member) = input.into_active_model(&user);
+
+		assert_eq!(club.name, Set("Test".to_string()));
+		assert_eq!(club.is_private, Set(false));
+		assert_eq!(club.member_role_spec, Set(None));
+
+		assert_eq!(member.role, Set(BookClubMemberRole::Creator));
+		assert_eq!(member.hide_progress, Set(false));
+		assert_eq!(member.display_name, Set(None));
+		assert_eq!(member.user_id, Set(user.id));
+		assert!(Uuid::parse_str(&member.id.unwrap()).is_ok());
 	}
 }

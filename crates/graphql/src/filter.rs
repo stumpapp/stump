@@ -89,37 +89,13 @@ pub struct MediaFilterInput {
 	#[nested_filter]
 	pub metadata: Option<MediaMetadataFilterInput>,
 
+	#[serde(rename = "snake_case")]
 	pub _and: Option<Vec<MediaFilterInput>>,
+	#[serde(rename = "snake_case")]
 	pub _not: Option<Vec<MediaFilterInput>>,
+	#[serde(rename = "snake_case")]
 	pub _or: Option<Vec<MediaFilterInput>>,
 }
-
-// #[is_optional]
-// 	Publisher { publisher: String },
-// 	#[is_optional]
-// 	Genre { genre: String },
-// 	#[is_optional]
-// 	Characters { characters: String },
-// 	#[is_optional]
-// 	Colorists { colorists: String },
-// 	#[is_optional]
-// 	Writers { writers: String },
-// 	#[is_optional]
-// 	Pencillers { pencillers: String },
-// 	#[is_optional]
-// 	Letterers { letterers: String },
-// 	#[is_optional]
-// 	Inkers { inkers: String },
-// 	#[is_optional]
-// 	Editors { editors: String },
-// 	#[is_optional]
-// 	AgeRating { age_rating: i32 },
-// 	#[is_optional]
-// 	Year { year: i32 },
-// 	#[is_optional]
-// 	Month { month: i32 },
-// 	#[is_optional]
-// 	Day { day: i32 },
 
 #[skip_serializing_none]
 #[derive(Debug, Clone, Default, Serialize, Deserialize, IntoFilter)]
@@ -164,8 +140,11 @@ pub struct MediaMetadataFilterInput {
 	#[field_column("models::entity::media_metadata::Column::Series")]
 	pub series: Option<FieldFilter<String>>,
 
+	#[serde(rename = "snake_case")]
 	pub _and: Option<Vec<MediaMetadataFilterInput>>,
+	#[serde(rename = "snake_case")]
 	pub _not: Option<Vec<MediaMetadataFilterInput>>,
+	#[serde(rename = "snake_case")]
 	pub _or: Option<Vec<MediaMetadataFilterInput>>,
 }
 
@@ -281,6 +260,15 @@ mod tests {
 			serialized,
 			r#"{"name":{"eq":"test"},"metadata":{"_and":[{"title":{"eq":"test"}},{"series":{"eq":"theseries"}}]}}"#
 		);
+	}
+
+	// FIXME: Not working as expected
+	#[test]
+	fn test_deserialize_grouped_media_filter() {
+		let filter = r#"{"_and":[{"name":{"eq":"test"}},{"name":{"eq":"test2"}}]}"#;
+		let deserialized: MediaFilterInput = serde_json::from_str(filter).unwrap();
+		assert!(deserialized._and.is_some());
+		assert_eq!(deserialized._and.unwrap().len(), 2);
 	}
 
 	#[test]

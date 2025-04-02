@@ -30,11 +30,7 @@ impl ReadingListInput {
 #[cfg(test)]
 mod tests {
 	use super::*;
-
-	fn is_close_to_now(time: chrono::DateTime<chrono::Utc>) -> bool {
-		time.signed_duration_since(chrono::Utc::now()).abs()
-			< chrono::Duration::minutes(1)
-	}
+	use crate::tests::common::*;
 
 	#[test]
 	fn test_readinglistinput_into_activemodel_default() {

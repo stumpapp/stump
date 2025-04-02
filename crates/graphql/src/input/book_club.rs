@@ -86,7 +86,7 @@ pub struct BookClubInvitationInput {
 	pub role: Option<BookClubMemberRole>,
 }
 
-#[derive(Debug, InputObject)]
+#[derive(Debug, Clone, InputObject)]
 pub struct BookClubMemberInput {
 	pub user_id: String,
 	pub display_name: Option<String>,

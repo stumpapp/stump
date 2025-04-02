@@ -111,6 +111,14 @@ impl Entity {
 
 		Entity::find().filter(condition)
 	}
+
+	pub fn find_for_member_enforce_role_and_id(
+		user: &AuthUser,
+		role: BookClubMemberRole,
+		id: &str,
+	) -> Select<Entity> {
+		Self::find_for_member_enforce_role(user, role).filter(Column::Id.eq(id))
+	}
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

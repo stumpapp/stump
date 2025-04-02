@@ -72,18 +72,8 @@ async fn get_paginated_reading_list(
 mod tests {
 	use super::*;
 	use crate::pagination::{CursorPagination, OffsetPagination, PaginationInfo};
+	use crate::tests::common::*;
 	use sea_orm::MockDatabase;
-
-	fn get_default_user() -> AuthUser {
-		AuthUser {
-			id: "42".to_string(),
-			username: "test".to_string(),
-			is_server_owner: true,
-			is_locked: false,
-			permissions: vec![],
-			age_restriction: None,
-		}
-	}
 
 	fn get_test_model() -> reading_list::Model {
 		reading_list::Model {

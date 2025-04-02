@@ -1,7 +1,7 @@
 use async_graphql::SimpleObject;
 use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue};
 
-use crate::shared::book_club::BookClubMemberRole;
+use crate::{entity::user::AuthUser, shared::book_club::BookClubMemberRole};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "BookClubInvitationModel")]
@@ -66,6 +66,10 @@ impl Entity {
 	pub fn find_for_book_club_id(book_club_id: &str) -> Select<Entity> {
 		Self::find().filter(Column::BookClubId.eq(book_club_id))
 	}
+
+	pub fn find_for_user_and_id(user: &AuthUser, id: &str) -> Select<Entity> {
+		Self::find_by_id(id).filter(Column::UserId.eq(&user.id))
+	}
 }
 
 #[cfg(test)]
@@ -74,6 +78,23 @@ mod tests {
 	use crate::tests::common::*;
 	use sea_orm::{DatabaseBackend, MockDatabase, Set};
 	use tokio_test;
+
+	#[test]
+	fn test_find_for_user_and_id() {
+		let user = AuthUser {
+			id: "42".to_string(),
+			username: "".to_string(),
+			is_server_owner: true,
+			is_locked: false,
+			permissions: vec![],
+			age_restriction: None,
+		};
+		let select = Entity::find_for_user_and_id(&user, "123");
+		assert_eq!(
+			select_no_cols_to_string(select),
+			r#"SELECT  FROM "book_club_invitations" WHERE "book_club_invitations"."id" = '123' AND "book_club_invitations"."user_id" = '42'"#.to_string()
+		);
+	}
 
 	#[test]
 	fn test_find_for_book_club_id() {

@@ -19,9 +19,9 @@ use crate::{
 #[derive(Default)]
 pub struct MediaQuery;
 
-// TODO(graphql): Filters
 #[Object]
 impl MediaQuery {
+	// TODO(graphql): Typed filters
 	async fn media(
 		&self,
 		ctx: &Context<'_>,

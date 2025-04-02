@@ -1,91 +1,12 @@
-/*
-I want to totally revamp the filtering system. I'll maintain the two concepts of "basic" and "smart" filters, but I want
-to construct them using the same base structure. I envision:
-
-{
-  media(filter: { metadata: { title: { contains: "test" } }, name: { eq: "test" } }) {
-	nodes {
-	  name
-	  metadata {
-		title
-	  }
-	}
-	pageInfo {...}
-  }
-}
-
-{
-  media(
-	smartFilter: { _or: [
-	  { metadata: { title: { contains: "biz" } } },
-	  { metadata: { genre: { contains: "baz" } } }
-	] }
-) {
-	nodes {
-	  name
-	  metadata {
-		title
-	  }
-	}
-	pageInfo {...}
-  }
-}
-
-I guess an alternative might be allowing both as variants of filter:
-
-pub enum MediaFilter {
-	Name { name: String },
-}
-
-pub enum Filter<T> {
-	And { _and: Vec<T> },
-	Or { _or: Vec<T> },
-	Not { _not: Vec<T> },
-	Basic(HashMap<String, FieldFilter<T>>) // or something, dynamic keys doesn't really work
-}
-
-pub enum FieldFilter<T> {
-	Equals { eq: T },
-	Not { neq: T },
-	Any { any: Vec<T> },
-	None { none: Vec<T> },
-	StringFieldFilter(StringFilter<T>),
-	NumericFieldFilter(NumericFilter<T>),
-}
-
-So e.g. Filter<MediaFilter> would parse either:
-
-1. { name: { eq: "test" } }
-2. { _or: [ { name: { eq: "test" } }, { name: { eq: "test2" } } ] }
-
-This will output a Condition tree to pass to sea-orm, so it can also be merged with access control. For example:
-
-{ _or: [ { name: { eq: "test" } }, { name: { eq: "test2" } } ] } -> age_restrion on user is 12
-
-Condition::all()
-	.add(
-		Condition::any()
-			.add(Condition::all().add(media::Column::Name.eq("test")))
-			.add(Condition::all().add(media::Column::Name.eq("test2")))
-	) <- This is from the filter
-	.add(
-		Condition::any()
-			.add(...)
-			.add(...)
-	) <- This is from the access control imposed by Stump
-*/
-
-use std::borrow::Cow;
-
-use async_graphql::{
-	dynamic::{self, InputValue, TypeRef},
-	Enum, InputObject, InputType, OneofObject, OutputType,
-};
 use filter_gen::IntoFilter;
 use sea_orm::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
-use strum::{Display, EnumString};
+
+// TODO: This probably needs a rewrite to make it more compatible with async-graphql. The big issue is generics
+// with input objects. Look at and yoink from seaography for how they are doing things
+
+// Note: See https://github.com/serde-rs/json/issues/501
 
 // NOTE: I originally went for IntoCondition, but that is a trait for sea-query and
 // I wanted to avoid conflicts in the naming
@@ -93,50 +14,7 @@ pub trait IntoFilter {
 	fn into_filter(self) -> sea_orm::Condition;
 }
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
-pub struct FilterInput {
-	#[serde(default)]
-	root_operator: FilterOperator,
-}
-
-#[derive(
-	Debug,
-	Default,
-	Clone,
-	Copy,
-	PartialEq,
-	Eq,
-	Serialize,
-	Deserialize,
-	Enum,
-	EnumString,
-	Display,
-)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
-pub enum FilterOperator {
-	#[default]
-	And,
-	Or,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum FilterGroup<T> {
-	And { _and: Vec<T> },
-	Or { _or: Vec<T> },
-	Not { _not: Vec<T> },
-	// Basic(HashMap<String, FieldFilter<T>>), // or something, dynamic keys doesn't really work
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum SmartFilterGroup<T> {
-	And { _and: Vec<T> },
-	Or { _or: Vec<T> },
-	Not { _not: Vec<T> },
-}
-
+// TODO: Support is_null and is_not_null
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum FieldFilter<T> {
@@ -151,11 +29,23 @@ pub enum FieldFilter<T> {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum StringFilter<T> {
-	Like { like: T },
-	Contains { contains: T },
-	Excludes { excludes: T },
-	StartsWith { starts_with: T },
-	EndsWith { ends_with: T },
+	Like {
+		like: T,
+	},
+	Contains {
+		contains: T,
+	},
+	Excludes {
+		excludes: T,
+	},
+	#[serde(rename_all = "camelCase")]
+	StartsWith {
+		starts_with: T,
+	},
+	#[serde(rename_all = "camelCase")]
+	EndsWith {
+		ends_with: T,
+	},
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -177,6 +67,7 @@ pub struct NumericRange<T> {
 
 #[skip_serializing_none]
 #[derive(Debug, Clone, Default, Serialize, Deserialize, IntoFilter)]
+#[serde(rename_all = "camelCase")]
 pub struct MediaFilterInput {
 	#[field_column("models::entity::media::Column::Name")]
 	pub name: Option<FieldFilter<String>>,
@@ -203,11 +94,73 @@ pub struct MediaFilterInput {
 	pub _or: Option<Vec<MediaFilterInput>>,
 }
 
+// #[is_optional]
+// 	Publisher { publisher: String },
+// 	#[is_optional]
+// 	Genre { genre: String },
+// 	#[is_optional]
+// 	Characters { characters: String },
+// 	#[is_optional]
+// 	Colorists { colorists: String },
+// 	#[is_optional]
+// 	Writers { writers: String },
+// 	#[is_optional]
+// 	Pencillers { pencillers: String },
+// 	#[is_optional]
+// 	Letterers { letterers: String },
+// 	#[is_optional]
+// 	Inkers { inkers: String },
+// 	#[is_optional]
+// 	Editors { editors: String },
+// 	#[is_optional]
+// 	AgeRating { age_rating: i32 },
+// 	#[is_optional]
+// 	Year { year: i32 },
+// 	#[is_optional]
+// 	Month { month: i32 },
+// 	#[is_optional]
+// 	Day { day: i32 },
+
 #[skip_serializing_none]
 #[derive(Debug, Clone, Default, Serialize, Deserialize, IntoFilter)]
+#[serde(rename_all = "camelCase")]
 pub struct MediaMetadataFilterInput {
 	#[field_column("models::entity::media_metadata::Column::Title")]
 	pub title: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Publisher")]
+	pub publisher: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Genre")]
+	pub genre: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Characters")]
+	pub characters: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Colorists")]
+	pub colorists: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Writers")]
+	pub writers: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Pencillers")]
+	pub pencillers: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Letterers")]
+	pub letterers: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::CoverArtists")]
+	pub cover_artists: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Inkers")]
+	pub inkers: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Editors")]
+	pub editors: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::AgeRating")]
+	pub age_rating: Option<FieldFilter<i32>>,
+	#[field_column("models::entity::media_metadata::Column::Year")]
+	pub year: Option<FieldFilter<i32>>,
+	#[field_column("models::entity::media_metadata::Column::Month")]
+	pub month: Option<FieldFilter<i32>>,
+	#[field_column("models::entity::media_metadata::Column::Day")]
+	pub day: Option<FieldFilter<i32>>,
+	#[field_column("models::entity::media_metadata::Column::Links")]
+	pub links: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Teams")]
+	pub teams: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Summary")]
+	pub summary: Option<FieldFilter<String>>,
 	#[field_column("models::entity::media_metadata::Column::Series")]
 	pub series: Option<FieldFilter<String>>,
 
@@ -216,16 +169,16 @@ pub struct MediaMetadataFilterInput {
 	pub _or: Option<Vec<MediaMetadataFilterInput>>,
 }
 
-pub fn filter_inputs() -> Vec<dynamic::InputObject> {
-	let mut inputs = vec![];
+// pub fn filter_inputs() -> Vec<dynamic::InputObject> {
+// 	let mut inputs = vec![];
 
-	let media_filter_input =
-		dynamic::InputObject::new("MediaMetadataFilterInput".to_string());
+// 	let media_filter_input =
+// 		dynamic::InputObject::new("MediaMetadataFilterInput".to_string());
 
-	inputs.push(media_filter_input);
+// 	inputs.push(media_filter_input);
 
-	inputs
-}
+// 	inputs
+// }
 
 #[cfg(test)]
 mod tests {

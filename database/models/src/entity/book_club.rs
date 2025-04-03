@@ -1,10 +1,12 @@
 use async_graphql::SimpleObject;
 use sea_orm::{
-	entity::prelude::*, sea_query::Query, sqlx::types::Json, Condition, QueryTrait,
+	entity::prelude::*,
+	sea_query::{Query, SelectStatement},
+	Condition,
 };
 
 use crate::{
-	entity::book_club_member,
+	entity::{book_club, book_club_member},
 	shared::book_club::{BookClubMemberRole, BookClubMemberRoleSpec},
 };
 
@@ -30,65 +32,92 @@ pub struct Model {
 	pub emoji: Option<String>,
 }
 
-pub fn book_clubs_accessible_to_user(user: &AuthUser) -> Option<Condition> {
-	// Server owner can see all book clubs
-	if user.is_server_owner {
-		return None;
+impl Entity {
+	fn filter_for_user(user: &AuthUser) -> Condition {
+		Condition::all().add_option(
+			// Server owner can see all book clubs
+			if user.is_server_owner {
+				None
+			} else {
+				// Any other user can see a book club if they are a member OR if it is not private
+				Some(
+					Condition::any().add(Column::IsPrivate.eq(false)).add(
+						Column::Id.in_subquery(
+							Query::select()
+								.column(book_club_member::Column::BookClubId)
+								.from(book_club_member::Entity)
+								.and_where(book_club_member::Column::UserId.eq(&user.id))
+								.to_owned(),
+						),
+					),
+				)
+			},
+		)
 	}
 
-	// Any other user can see a book club if they are a member OR if it is not private
-	Some(
-		Condition::any().add(Column::IsPrivate.eq(false)).add(
-			Column::Id.in_subquery(
-				Query::select()
-					.column(book_club_member::Column::BookClubId)
-					.from(book_club_member::Entity)
-					.and_where(book_club_member::Column::UserId.eq(user.id.clone()))
-					.to_owned(),
-			),
-		),
-	)
-}
+	fn filter_for_member_user(user: &AuthUser) -> Condition {
+		Condition::all()
+			.add(book_club::Column::Id.in_subquery(Self::subquery_for_user(user)))
+	}
 
-impl Entity {
+	fn subquery_for_user(user: &AuthUser) -> SelectStatement {
+		Query::select()
+			.column(book_club_member::Column::BookClubId)
+			.from(book_club_member::Entity)
+			.and_where(book_club_member::Column::UserId.eq(&user.id.clone()))
+			.to_owned()
+	}
+
+	pub fn find_by_id_and_user(id: &str, user: &AuthUser) -> Select<Entity> {
+		Entity::find()
+			.filter(Self::filter_for_user(user))
+			.filter(book_club::Column::Id.eq(id))
+	}
+
+	pub fn find_all_for_user(all: bool, user: &AuthUser) -> Select<Entity> {
+		let condition = if all {
+			Self::filter_for_user(user)
+		} else {
+			Self::filter_for_member_user(user)
+		};
+		Entity::find().filter(condition)
+	}
+
 	/// Find all book clubs that the user can access
 	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
-		Entity::find().apply_if(book_clubs_accessible_to_user(user), |query, cond| {
-			query.filter(cond)
-		})
+		Entity::find().filter(Self::filter_for_user(user))
 	}
 
 	/// Find all book clubs that the user is a member of
 	pub fn find_for_member_user(user: &AuthUser) -> Select<Entity> {
-		Entity::find().filter(
-			Column::Id.in_subquery(
-				Query::select()
-					.column(book_club_member::Column::BookClubId)
-					.from(book_club_member::Entity)
-					.and_where(book_club_member::Column::UserId.eq(user.id.clone()))
-					.to_owned(),
-			),
-		)
+		Entity::find().filter(Self::filter_for_member_user(user))
 	}
 
 	pub fn find_for_member_enforce_role(
 		user: &AuthUser,
 		role: BookClubMemberRole,
 	) -> Select<Entity> {
-		if user.is_server_owner {
-			return Entity::find();
-		}
+		let condition = Condition::all().add_option(if user.is_server_owner {
+			None
+		} else {
+			Some(
+				book_club::Column::Id.in_subquery(
+					Self::subquery_for_user(user)
+						.and_where(book_club_member::Column::Role.gte::<i32>(role as i32))
+						.to_owned(),
+				),
+			)
+		});
 
-		Entity::find().filter(
-			Column::Id.in_subquery(
-				Query::select()
-					.column(book_club_member::Column::BookClubId)
-					.from(book_club_member::Entity)
-					.and_where(book_club_member::Column::UserId.eq(user.id.clone()))
-					.and_where(book_club_member::Column::Role.gte::<i32>(role as i32))
-					.to_owned(),
-			),
-		)
+		Entity::find().filter(condition)
+	}
+
+	pub fn find_for_member_enforce_role_and_id(
+		user: &AuthUser,
+		role: BookClubMemberRole,
+		id: &str,
+	) -> Select<Entity> {
+		Self::find_for_member_enforce_role(user, role).filter(Column::Id.eq(id))
 	}
 }
 
@@ -121,3 +150,86 @@ impl Related<super::book_club_schedule::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::tests::common::*;
+
+	fn get_default_user() -> AuthUser {
+		AuthUser {
+			id: "42".to_string(),
+			username: "test".to_string(),
+			is_server_owner: true,
+			is_locked: false,
+			permissions: vec![],
+			age_restriction: None,
+		}
+	}
+
+	#[test]
+	fn test_all_for_user_server_owner() {
+		let user = get_default_user();
+		let select = Entity::find_all_for_user(true, &user);
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(
+			stmt_str,
+			r#"SELECT  FROM "book_clubs" WHERE TRUE"#.to_string()
+		);
+	}
+
+	#[test]
+	fn test_all_for_user() {
+		let mut user = get_default_user();
+		user.is_server_owner = false;
+
+		let select = Entity::find_all_for_user(true, &user);
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(stmt_str, r#"SELECT  FROM "book_clubs" WHERE "book_clubs"."is_private" = FALSE OR "book_clubs"."id" IN (SELECT "book_club_id" FROM "book_club_members" WHERE "book_club_members"."user_id" = '42')"#.to_string());
+	}
+
+	#[test]
+	fn test_all_for_user_member() {
+		let mut user = get_default_user();
+		user.is_server_owner = false;
+
+		let select = Entity::find_all_for_user(false, &user);
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(stmt_str, r#"SELECT  FROM "book_clubs" WHERE "book_clubs"."id" IN (SELECT "book_club_id" FROM "book_club_members" WHERE "book_club_members"."user_id" = '42')"#.to_string());
+	}
+
+	#[test]
+	fn test_for_id_and_user() {
+		let mut user = get_default_user();
+		user.is_server_owner = false;
+
+		let select = Entity::find_by_id_and_user("314", &user);
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(stmt_str, r#"SELECT  FROM "book_clubs" WHERE ("book_clubs"."is_private" = FALSE OR "book_clubs"."id" IN (SELECT "book_club_id" FROM "book_club_members" WHERE "book_club_members"."user_id" = '42')) AND "book_clubs"."id" = '314'"#.to_string());
+	}
+
+	#[test]
+	fn find_for_member_enforce_role() {
+		let mut user = get_default_user();
+		user.is_server_owner = false;
+
+		let select =
+			Entity::find_for_member_enforce_role(&user, BookClubMemberRole::Moderator);
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(stmt_str, r#"SELECT  FROM "book_clubs" WHERE "book_clubs"."id" IN (SELECT "book_club_id" FROM "book_club_members" WHERE "book_club_members"."user_id" = '42' AND "book_club_members"."role" >= 1)"#.to_string());
+	}
+
+	#[test]
+	fn find_for_member_enforce_role_server_owner() {
+		let mut user = get_default_user();
+		user.is_server_owner = true;
+
+		let select =
+			Entity::find_for_member_enforce_role(&user, BookClubMemberRole::Moderator);
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(
+			stmt_str,
+			r#"SELECT  FROM "book_clubs" WHERE TRUE"#.to_string()
+		);
+	}
+}

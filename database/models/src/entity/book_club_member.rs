@@ -136,4 +136,75 @@ impl Entity {
 			)
 		}
 	}
+
+	pub fn find_members_accessible_to_user_for_book_club_id(
+		user: &AuthUser,
+		book_club_id: &str,
+	) -> Select<Self> {
+		Self::find_members_accessible_to_user(user)
+			.filter(Column::BookClubId.eq(book_club_id))
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::tests::common::*;
+
+	#[test]
+	fn test_find_members_accessible_to_user() {
+		let user = AuthUser {
+			id: "42".to_string(),
+			username: "test".to_string(),
+			is_server_owner: false,
+			is_locked: false,
+			permissions: vec![],
+			age_restriction: None,
+		};
+
+		let select = Entity::find_members_accessible_to_user(&user);
+		assert_eq!(
+			select_no_cols_to_string(select),
+			(r#"SELECT  FROM "book_club_members" WHERE "#.to_string()
+				+ r#""book_club_members"."book_club_id" IN (SELECT "book_club_id" FROM "book_club_members" WHERE "book_club_members"."user_id" = '42') "#
+				+ r#"OR ("book_club_members"."private_membership" = FALSE AND "book_club_members"."book_club_id" IN (SELECT "id" FROM "book_club_members" WHERE "book_clubs"."is_private" = FALSE))"#)
+		);
+	}
+
+	#[test]
+	fn test_find_members_accessible_to_user_server_owner() {
+		let user = AuthUser {
+			id: "42".to_string(),
+			username: "test".to_string(),
+			is_server_owner: true,
+			is_locked: false,
+			permissions: vec![],
+			age_restriction: None,
+		};
+
+		let select = Entity::find_members_accessible_to_user(&user);
+		assert_eq!(
+			select_no_cols_to_string(select),
+			r#"SELECT  FROM "book_club_members""#.to_string()
+		);
+	}
+
+	#[test]
+	fn test_find_members_accessible_to_book_club_id_for_server_owner() {
+		let user = AuthUser {
+			id: "42".to_string(),
+			username: "test".to_string(),
+			is_server_owner: true,
+			is_locked: false,
+			permissions: vec![],
+			age_restriction: None,
+		};
+
+		let select =
+			Entity::find_members_accessible_to_user_for_book_club_id(&user, "321");
+		assert_eq!(
+			select_no_cols_to_string(select),
+			(r#"SELECT  FROM "book_club_members" WHERE "book_club_members"."book_club_id" = '321'"#)
+		);
+	}
 }

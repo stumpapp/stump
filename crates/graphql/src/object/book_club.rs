@@ -5,10 +5,7 @@ use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 use models::entity::{
 	book_club, book_club_book, book_club_invitation, book_club_member, book_club_schedule,
 };
-use models::shared::book_club::{
-	BookClubBook, BookClubExternalBook, BookClubInternalBook,
-};
-use sea_orm::{prelude::*, ColumnTrait, QueryOrder};
+use models::shared::book_club::BookClubBook;
 
 #[derive(Debug, SimpleObject)]
 #[graphql(complex)]
@@ -26,29 +23,31 @@ impl From<book_club::Model> for BookClub {
 #[ComplexObject]
 impl BookClub {
 	// TODO(book-clubs): Support multiple books at once?
-	async fn current_book(&self, ctx: &Context<'_>) -> Result<BookClubBook> {
+	async fn current_book(&self, ctx: &Context<'_>) -> Result<Option<BookClubBook>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let book_club_book = book_club_book::Entity::find()
-			.inner_join(book_club_schedule::Entity)
-			.filter(book_club_schedule::Column::BookClubId.eq(&self.model.id.clone()))
-			.filter(book_club_book::Column::EndAt.gte(chrono::Utc::now()))
-			.order_by_asc(book_club_book::Column::StartAt)
-			.into_model::<book_club_book::Model>()
-			.one(conn)
-			.await?
-			.ok_or("No current book found")?;
+		let book_club_book = book_club_book::Entity::find_with_schedule_for_book_club_id(
+			&self.model.id,
+			chrono::Utc::now(),
+		)
+		.into_model::<book_club_book::Model>()
+		.one(conn)
+		.await?;
 
-		Ok(book_club_book.into())
+		if let Some(book_club_book) = book_club_book {
+			return Ok(Some(book_club_book.into()));
+		} else {
+			Ok(None)
+		}
 	}
 
 	async fn invitations(&self, ctx: &Context<'_>) -> Result<Vec<BookClubInvitation>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-		let book_club_invitations = book_club_invitation::Entity::find()
-			.filter(book_club_invitation::Column::BookClubId.eq(&self.model.id.clone()))
-			.into_model::<book_club_invitation::Model>()
-			.all(conn)
-			.await?;
+		let book_club_invitations =
+			book_club_invitation::Entity::find_for_book_club_id(&self.model.id.clone())
+				.into_model::<book_club_invitation::Model>()
+				.all(conn)
+				.await?;
 
 		Ok(book_club_invitations
 			.into_iter()
@@ -60,11 +59,13 @@ impl BookClub {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let book_club_members =
-			book_club_member::Entity::find_members_accessible_to_user(user)
-				.filter(book_club_member::Column::BookClubId.eq(&self.model.id.clone()))
-				.into_model::<book_club_member::Model>()
-				.all(conn)
-				.await?;
+			book_club_member::Entity::find_members_accessible_to_user_for_book_club_id(
+				user,
+				&self.model.id.clone(),
+			)
+			.into_model::<book_club_member::Model>()
+			.all(conn)
+			.await?;
 
 		Ok(book_club_members
 			.into_iter()
@@ -72,16 +73,19 @@ impl BookClub {
 			.collect())
 	}
 
-	async fn schedule(&self, ctx: &Context<'_>) -> Result<BookClubSchedule> {
+	async fn schedule(&self, ctx: &Context<'_>) -> Result<Option<BookClubSchedule>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let book_club_schedule = book_club_schedule::Entity::find()
-			.filter(book_club_schedule::Column::BookClubId.eq(&self.model.id.clone()))
-			.into_model::<book_club_schedule::Model>()
-			.one(conn)
-			.await?
-			.ok_or("No schedule found")?;
+		let book_club_schedule =
+			book_club_schedule::Entity::find_for_book_club_id(&self.model.id.clone())
+				.into_model::<book_club_schedule::Model>()
+				.one(conn)
+				.await?;
 
-		Ok(book_club_schedule.into())
+		if let Some(book_club_schedule) = book_club_schedule {
+			Ok(Some(book_club_schedule.into()))
+		} else {
+			Ok(None)
+		}
 	}
 }

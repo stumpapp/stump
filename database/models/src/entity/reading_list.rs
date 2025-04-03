@@ -1,7 +1,7 @@
 use async_graphql::SimpleObject;
-use sea_orm::{prelude::*, Condition, FromQueryResult};
+use sea_orm::{prelude::*, Condition, FromQueryResult, QueryOrder};
 
-use super::reading_list_rule;
+use super::{reading_list_rule, user::AuthUser};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "ReadingListModel")]
@@ -87,12 +87,6 @@ fn get_reading_list_rbac_for_user(user_id: &String, minimum_role: i32) -> Condit
 				.add(Column::Visibility.eq("SHARED".to_string()))
 				.add(base_rbac),
 		)
-		// condition where visibility is PRIVATE:
-		.add(
-			Condition::all()
-				.add(Column::Visibility.eq("PRIVATE".to_string()))
-				.add(Column::CreatingUserId.eq(user_id)),
-		)
 }
 
 #[derive(Debug, FromQueryResult)]
@@ -101,9 +95,78 @@ pub struct ReadingListIdCmpSelect {
 }
 
 impl Entity {
-	pub fn find_for_user(user_id: &String, minimum_role: i32) -> Select<Entity> {
+	pub fn find_for_user(user: &AuthUser, minimum_role: i32) -> Select<Entity> {
 		Entity::find()
 			.left_join(reading_list_rule::Entity)
-			.filter(get_reading_list_rbac_for_user(user_id, minimum_role))
+			.filter(get_reading_list_rbac_for_user(&user.id, minimum_role))
+			.order_by_asc(Column::Id)
+	}
+
+	pub fn find_for_user_and_id(
+		user: &AuthUser,
+		minimum_role: i32,
+		id: &str,
+	) -> Select<Entity> {
+		Entity::find()
+			.left_join(reading_list_rule::Entity)
+			.filter(Column::Id.eq(id))
+			.filter(get_reading_list_rbac_for_user(&user.id, minimum_role))
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::tests::common::*;
+
+	fn get_default_user() -> AuthUser {
+		AuthUser {
+			id: "42".to_string(),
+			username: "test".to_string(),
+			is_server_owner: true,
+			is_locked: false,
+			permissions: vec![],
+			age_restriction: None,
+		}
+	}
+
+	#[test]
+	fn test_reading_list_rbac() {
+		let condition = get_reading_list_rbac_for_user(&"42".to_string(), 1);
+		assert_eq!(
+			condition_to_string(&condition),
+			r#"SELECT  WHERE "#.to_string()
+				+ r#""reading_lists"."creating_user_id" = '42' OR "#
+				+ r#"("reading_lists"."visibility" = 'PUBLIC' AND (("reading_list_rules"."user_id" = '42' AND "reading_list_rules"."role" >= 1) OR "reading_list_rules"."user_id" IS NULL)) OR "#
+				+ r#"("reading_lists"."visibility" = 'SHARED' AND ("reading_list_rules"."user_id" = '42' AND "reading_list_rules"."role" >= 1))"#
+		);
+	}
+
+	#[test]
+	fn test_find_for_user() {
+		let user = get_default_user();
+		let stmt = Entity::find_for_user(&user, 1);
+		assert_eq!(
+			select_no_cols_to_string(stmt),
+			r#"SELECT  FROM "reading_lists" LEFT JOIN "reading_list_rules" ON "reading_lists"."id" = "reading_list_rules"."reading_list_id" WHERE "#.to_string()
+				+ r#""reading_lists"."creating_user_id" = '42' OR "#
+				+ r#"("reading_lists"."visibility" = 'PUBLIC' AND (("reading_list_rules"."user_id" = '42' AND "reading_list_rules"."role" >= 1) OR "reading_list_rules"."user_id" IS NULL)) OR "#
+				+ r#"("reading_lists"."visibility" = 'SHARED' AND ("reading_list_rules"."user_id" = '42' AND "reading_list_rules"."role" >= 1))"#
+                + r#" ORDER BY "reading_lists"."id" ASC"#
+		);
+	}
+
+	#[test]
+	fn test_find_for_user_and_id() {
+		let user = get_default_user();
+		let stmt = Entity::find_for_user_and_id(&user, 1, "314");
+		assert_eq!(
+			select_no_cols_to_string(stmt),
+			r#"SELECT  FROM "reading_lists" LEFT JOIN "reading_list_rules" ON "reading_lists"."id" = "reading_list_rules"."reading_list_id" WHERE "#.to_string()
+				+ r#""reading_lists"."id" = '314' AND "#
+				+ r#"("reading_lists"."creating_user_id" = '42' OR "#
+				+ r#"("reading_lists"."visibility" = 'PUBLIC' AND (("reading_list_rules"."user_id" = '42' AND "reading_list_rules"."role" >= 1) OR "reading_list_rules"."user_id" IS NULL)) OR "#
+				+ r#"("reading_lists"."visibility" = 'SHARED' AND ("reading_list_rules"."user_id" = '42' AND "reading_list_rules"."role" >= 1)))"#
+		);
 	}
 }

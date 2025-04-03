@@ -1,7 +1,7 @@
 use crate::data::CoreContext;
 use async_graphql::{Context, Object, Result};
 use models::entity::media_metadata;
-use sea_orm::{prelude::*, QueryOrder, QuerySelect};
+use sea_orm::DatabaseConnection;
 use std::collections::BTreeSet;
 
 static VALUE_SEPERATOR: char = ',';
@@ -20,15 +20,11 @@ fn list_str_to_vec(list: String) -> Vec<String> {
 
 macro_rules! get_unique_values_inner {
 	($column:ident, $conn:ident) => {{
-		let values: Vec<String> = media_metadata::Entity::find()
-			.select_only()
-			.columns(vec![media_metadata::Column::$column])
-			.filter(media_metadata::Column::$column.is_not_null())
-			.order_by_asc(media_metadata::Column::$column)
-			.distinct()
-			.into_tuple()
-			.all($conn)
-			.await?;
+		let values: Vec<String> =
+			media_metadata::Entity::find_for_column(media_metadata::Column::$column)
+				.into_tuple()
+				.all($conn)
+				.await?;
 		Ok(make_unique(values.into_iter().flat_map(list_str_to_vec)))
 	}};
 }
@@ -92,7 +88,7 @@ impl MediaMetadataOverview {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use sea_orm::MockDatabase;
+	use sea_orm::{MockDatabase, Value};
 
 	async fn get_unique_values_inner_test(
 		conn: &DatabaseConnection,

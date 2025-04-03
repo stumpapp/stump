@@ -13,7 +13,7 @@ use crate::{
 	event::CoreEvent,
 	filesystem::scanner::LibraryWatcher,
 	job::{Executor, JobController, JobControllerCommand},
-	prisma::PrismaClient,
+	prisma::{self, PrismaClient},
 	CoreError, CoreResult,
 };
 
@@ -99,6 +99,36 @@ impl Ctx {
 		// 	event_channel,
 		// 	library_watcher,
 		// }
+	}
+
+	/// Creates a [Ctx] instance for testing **only**. The prisma client is created
+	/// with a mock store, allowing for easy testing of the core without needing to
+	/// connect to a real database.
+	pub fn mock() -> (Ctx, prisma_client_rust::MockStore) {
+		let config = Arc::new(StumpConfig::debug());
+		let (client, mock) = prisma::PrismaClient::_mock();
+
+		let event_channel = Arc::new(channel::<CoreEvent>(1024));
+		let db = Arc::new(client);
+		let mock_db = sea_orm::MockDatabase::new(sea_orm::DatabaseBackend::Sqlite);
+		let conn = Arc::new(mock_db.into_connection());
+
+		// Create job manager
+		let job_controller =
+			JobController::new(conn.clone(), config.clone(), event_channel.0.clone());
+		let library_watcher =
+			Arc::new(LibraryWatcher::new(conn.clone(), job_controller.clone()));
+
+		let ctx = Ctx {
+			config,
+			db,
+			conn,
+			job_controller,
+			event_channel,
+			library_watcher,
+		};
+
+		(ctx, mock)
 	}
 
 	/// Wraps the [Ctx] in an [Arc], allowing it to be shared across threads. This

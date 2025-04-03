@@ -1,6 +1,5 @@
 use async_graphql::{Context, Object, Result, ID};
 use models::entity::book_club;
-use sea_orm::prelude::*;
 
 use crate::{
 	data::{CoreContext, RequestContext},
@@ -20,13 +19,9 @@ impl BookClubQuery {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let query = if all.unwrap_or(false) {
-			book_club::Entity::find_for_user(user)
-		} else {
-			book_club::Entity::find_for_member_user(user)
-		};
-
-		let models = query.all(conn).await?;
+		let models = book_club::Entity::find_all_for_user(all.unwrap_or(false), user)
+			.all(conn)
+			.await?;
 
 		Ok(models.into_iter().map(BookClub::from).collect())
 	}
@@ -39,8 +34,7 @@ impl BookClubQuery {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let model = book_club::Entity::find_for_user(user)
-			.filter(book_club::Column::Id.eq(id.to_string()))
+		let model = book_club::Entity::find_by_id_and_user(&id.to_string(), user)
 			.one(conn)
 			.await?;
 

@@ -29,3 +29,4 @@ zip.workspace = true
 [dev-dependencies]
 maplit.workspace = true
 tempfile.workspace = true
+pretty_assertions.workspace = true

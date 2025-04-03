@@ -1,4 +1,6 @@
-use sea_orm::prelude::*;
+use sea_orm::{prelude::*, QueryOrder};
+
+use super::book_club_schedule;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "book_club_books")]
@@ -64,3 +66,38 @@ impl Related<super::media::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+impl Entity {
+	pub fn find_with_schedule_for_book_club_id(
+		book_club_id: &str,
+		date: chrono::DateTime<chrono::Utc>,
+	) -> Select<Entity> {
+		Entity::find()
+			.inner_join(book_club_schedule::Entity)
+			.filter(book_club_schedule::Column::BookClubId.eq(book_club_id))
+			.filter(Column::EndAt.gte(date.clone()))
+			.order_by_asc(Column::StartAt)
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::tests::common::*;
+	use chrono::NaiveDate;
+
+	#[test]
+	fn test_find_with_schedule() {
+		let book_club_id = "314";
+		let dt = NaiveDate::from_ymd_opt(2014, 7, 8)
+			.unwrap()
+			.and_hms_milli_opt(9, 10, 11, 12)
+			.unwrap()
+			.and_utc();
+		let select = Entity::find_with_schedule_for_book_club_id(book_club_id, dt);
+		assert_eq!(
+			select_no_cols_to_string(select),
+			r#"SELECT  FROM "book_club_books" INNER JOIN "book_club_schedules" ON "book_club_books"."book_club_schedule_id" = "book_club_schedules"."id" WHERE "book_club_schedules"."book_club_id" = '314' AND "book_club_books"."end_at" >= '2014-07-08 09:10:11 +00:00' ORDER BY "book_club_books"."start_at" ASC"#
+		);
+	}
+}

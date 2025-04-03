@@ -2,6 +2,7 @@ use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
 use models::entity::{
 	finished_reading_session, library, media, reading_session, series, series_metadata,
+	user::AuthUser,
 };
 use sea_orm::{prelude::*, Condition, JoinType, QueryOrder, QuerySelect};
 
@@ -145,18 +146,8 @@ impl Series {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let media_count = media::Entity::find_for_user(user)
-			.filter(media::Column::SeriesId.eq(self.model.id.clone()))
-			.count(conn)
-			.await?;
-
-		let finished_count = finished_reading_session::Entity::find()
-			.inner_join(media::Entity)
-			.filter(media::Column::SeriesId.eq(self.model.id.clone()))
-			.filter(finished_reading_session::Column::UserId.eq(user.id.clone()))
-			.distinct_on([finished_reading_session::Column::MediaId])
-			.count(conn)
-			.await?;
+		let (media_count, finished_count) =
+			get_series_progress(user, self.model.id.clone(), conn).await?;
 
 		Ok(finished_count >= media_count)
 	}
@@ -165,19 +156,31 @@ impl Series {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let media_count = media::Entity::find_for_user(user)
-			.filter(media::Column::SeriesId.eq(self.model.id.clone()))
-			.count(conn)
-			.await?;
-
-		let finished_count = finished_reading_session::Entity::find()
-			.inner_join(media::Entity)
-			.filter(media::Column::SeriesId.eq(self.model.id.clone()))
-			.filter(finished_reading_session::Column::UserId.eq(user.id.clone()))
-			.distinct_on([finished_reading_session::Column::MediaId])
-			.count(conn)
-			.await?;
+		let (media_count, finished_count) =
+			get_series_progress(user, self.model.id.clone(), conn).await?;
 
 		Ok(std::cmp::max(0, media_count - finished_count))
 	}
 }
+
+async fn get_series_progress(
+	user: &AuthUser,
+	series_id: String,
+	conn: &DatabaseConnection,
+) -> Result<(u64, u64)> {
+	let media_count = media::Entity::find_for_series_id(user, series_id.clone())
+		.count(conn)
+		.await?;
+
+	let finished_count = finished_reading_session::Entity::find_finished_in_series(
+		user,
+		series_id.clone(),
+	)
+	.count(conn)
+	.await?;
+
+	Ok((media_count, finished_count))
+}
+
+#[cfg(test)]
+mod tests {}

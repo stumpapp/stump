@@ -3,6 +3,8 @@ use sea_orm::{
 	EntityTrait, QuerySelect, QueryTrait,
 };
 
+use crate::entity::user::AuthUser;
+
 pub fn condition_to_string(condition: &Condition) -> String {
 	Query::select()
 		.cond_where(condition.clone())
@@ -16,4 +18,15 @@ pub fn select_no_cols_to_string<EntityType: EntityTrait>(
 		.select_only()
 		.into_query()
 		.to_string(SqliteQueryBuilder)
+}
+
+pub fn get_default_user() -> AuthUser {
+	AuthUser {
+		id: "42".to_string(),
+		username: "test".to_string(),
+		is_server_owner: true,
+		is_locked: false,
+		permissions: vec![],
+		age_restriction: None,
+	}
 }

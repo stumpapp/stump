@@ -16,3 +16,4 @@ chrono.workspace = true
 
 [dev-dependencies]
 tokio-test.workspace = true
+pretty_assertions.workspace = true

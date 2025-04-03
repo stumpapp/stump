@@ -1,5 +1,8 @@
+use super::{media, user::AuthUser};
 use async_graphql::SimpleObject;
-use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue};
+use sea_orm::{
+	entity::prelude::*, prelude::async_trait::async_trait, ActiveValue, QuerySelect,
+};
 
 // TODO(sea-orm): Consider i32 for ID
 
@@ -79,5 +82,43 @@ impl ActiveModelBehavior for ActiveModel {
 		}
 
 		Ok(self)
+	}
+}
+
+impl Entity {
+	pub fn find_finished_in_series(user: &AuthUser, series_id: String) -> Select<Self> {
+		Self::find()
+			.inner_join(media::Entity)
+			.filter(media::Column::SeriesId.eq(series_id))
+			.filter(Column::UserId.eq(user.id.clone()))
+			.distinct_on([Column::MediaId])
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::tests::common::*;
+
+	fn get_default_user() -> AuthUser {
+		AuthUser {
+			id: "42".to_string(),
+			username: "test".to_string(),
+			is_server_owner: true,
+			is_locked: false,
+			permissions: vec![],
+			age_restriction: None,
+		}
+	}
+
+	#[test]
+	fn test_find_finished_in_series() {
+		let user = get_default_user();
+		let select = Entity::find_finished_in_series(&user, "123".to_string());
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(
+			stmt_str,
+			r#"SELECT   FROM "finished_reading_sessions" INNER JOIN "media" ON "finished_reading_sessions"."media_id" = "media"."id" WHERE "media"."series_id" = '123' AND "finished_reading_sessions"."user_id" = '42'"#.to_string()
+		);
 	}
 }

@@ -22,14 +22,12 @@ impl SeriesMutation {
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
 
-		let model = series::Entity::find_for_user(user)
-			.select_only()
-			.columns(vec![series::Column::Id, series::Column::Path])
-			.filter(series::Column::Id.eq(id.to_string()))
-			.into_model::<series::SeriesIdentSelect>()
-			.one(conn)
-			.await?
-			.ok_or("Series not found")?;
+		let model =
+			series::Entity::find_series_ident_for_user_and_id(user, id.to_string())
+				.into_model::<series::SeriesIdentSelect>()
+				.one(conn)
+				.await?
+				.ok_or("Series not found")?;
 
 		core.enqueue_job(AnalyzeMediaJob::analyze_series(model.id))?;
 
@@ -49,14 +47,12 @@ impl SeriesMutation {
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
 
-		let model = series::Entity::find_for_user(user)
-			.select_only()
-			.columns(vec![series::Column::Id, series::Column::Path])
-			.filter(series::Column::Id.eq(id.to_string()))
-			.into_model::<series::SeriesIdentSelect>()
-			.one(conn)
-			.await?
-			.ok_or("Series not found")?;
+		let model =
+			series::Entity::find_series_ident_for_user_and_id(user, id.to_string())
+				.into_model::<series::SeriesIdentSelect>()
+				.one(conn)
+				.await?
+				.ok_or("Series not found")?;
 
 		core.enqueue_job(SeriesScanJob::new(model.id, model.path, None))?;
 

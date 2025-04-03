@@ -1,3 +1,4 @@
+use crate::entity::age_restriction;
 use async_graphql::SimpleObject;
 use async_trait::async_trait;
 use sea_orm::{
@@ -124,38 +125,48 @@ pub fn get_age_restriction_filter(min_age: i32, restrict_on_unset: bool) -> Cond
 	}
 }
 
+fn apply_age_restriction_filter(
+	query: Select<Entity>,
+	age_restriction: Option<age_restriction::Model>,
+) -> Select<Entity> {
+	if let Some(age_restriction) = age_restriction {
+		query.filter(get_age_restriction_filter(
+			age_restriction.age,
+			age_restriction.restrict_on_unset,
+		))
+	} else {
+		query
+	}
+}
+
+fn apply_series_metadata_join(query: Select<Entity>) -> Select<Entity> {
+	query.inner_join(series::Entity).join_rev(
+		JoinType::LeftJoin,
+		series_metadata::Entity::belongs_to(series::Entity)
+			.from(series_metadata::Column::SeriesId)
+			.to(series::Column::Id)
+			.into(),
+	)
+}
+
+fn apply_library_hidden_filter(query: Select<Entity>, user: &AuthUser) -> Select<Entity> {
+	query.filter(
+		series::Column::LibraryId.not_in_subquery(
+			Query::select()
+				.column(library_hidden_to_user::Column::LibraryId)
+				.from(library_hidden_to_user::Entity)
+				.and_where(library_hidden_to_user::Column::UserId.eq(user.id.clone()))
+				.to_owned(),
+		),
+	)
+}
+
 impl Entity {
 	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
-		let age_restriction_filter =
-			user.age_restriction.as_ref().map(|age_restriction| {
-				get_age_restriction_filter(
-					age_restriction.age,
-					age_restriction.restrict_on_unset,
-				)
-			});
-
-		Entity::find()
-			.left_join(media_metadata::Entity)
-			.inner_join(series::Entity)
-			.join_rev(
-				JoinType::LeftJoin,
-				series_metadata::Entity::belongs_to(series::Entity)
-					.from(series_metadata::Column::SeriesId)
-					.to(series::Column::Id)
-					.into(),
-			)
-			.filter(
-				series::Column::LibraryId.not_in_subquery(
-					Query::select()
-						.column(library_hidden_to_user::Column::LibraryId)
-						.from(library_hidden_to_user::Entity)
-						.and_where(
-							library_hidden_to_user::Column::UserId.eq(user.id.clone()),
-						)
-						.to_owned(),
-				),
-			)
-			.apply_if(age_restriction_filter, |query, filter| query.filter(filter))
+		let select = Entity::find().left_join(media_metadata::Entity);
+		let select = apply_series_metadata_join(select);
+		let select = apply_library_hidden_filter(select, user);
+		apply_age_restriction_filter(select, user.age_restriction.clone())
 	}
 
 	pub fn find_media_ids_for_user(id: String, user: &AuthUser) -> Select<Entity> {
@@ -163,6 +174,10 @@ impl Entity {
 			.select_only()
 			.columns(vec![Column::Id, Column::Path])
 			.filter(Column::Id.eq(id))
+	}
+
+	pub fn find_for_series_id(user: &AuthUser, series_id: String) -> Select<Self> {
+		Self::find_for_user(user).filter(series::Column::Id.eq(series_id))
 	}
 }
 
@@ -205,67 +220,17 @@ impl ModelWithMetadata {
 	}
 
 	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
-		let age_restriction_filter =
-			user.age_restriction.as_ref().map(|age_restriction| {
-				get_age_restriction_filter(
-					age_restriction.age,
-					age_restriction.restrict_on_unset,
-				)
-			});
-
-		ModelWithMetadata::find()
-			.inner_join(series::Entity)
-			.join_rev(
-				JoinType::LeftJoin,
-				series_metadata::Entity::belongs_to(series::Entity)
-					.from(series_metadata::Column::SeriesId)
-					.to(series::Column::Id)
-					.into(),
-			)
-			.filter(
-				series::Column::LibraryId.not_in_subquery(
-					Query::select()
-						.column(library_hidden_to_user::Column::LibraryId)
-						.from(library_hidden_to_user::Entity)
-						.and_where(
-							library_hidden_to_user::Column::UserId.eq(user.id.clone()),
-						)
-						.to_owned(),
-				),
-			)
-			.apply_if(age_restriction_filter, |query, filter| query.filter(filter))
+		let select = ModelWithMetadata::find();
+		let select = apply_series_metadata_join(select);
+		let select = apply_library_hidden_filter(select, user);
+		apply_age_restriction_filter(select, user.age_restriction.clone())
 	}
 
 	pub fn find_by_id_for_user(id: String, user: &AuthUser) -> Select<Entity> {
-		let age_restriction_filter =
-			user.age_restriction.as_ref().map(|age_restriction| {
-				get_age_restriction_filter(
-					age_restriction.age,
-					age_restriction.restrict_on_unset,
-				)
-			});
-
-		ModelWithMetadata::find_by_id(id)
-			.inner_join(series::Entity)
-			.join_rev(
-				JoinType::LeftJoin,
-				series_metadata::Entity::belongs_to(series::Entity)
-					.from(series_metadata::Column::SeriesId)
-					.to(series::Column::Id)
-					.into(),
-			)
-			.filter(
-				series::Column::LibraryId.not_in_subquery(
-					Query::select()
-						.column(library_hidden_to_user::Column::LibraryId)
-						.from(library_hidden_to_user::Entity)
-						.and_where(
-							library_hidden_to_user::Column::UserId.eq(user.id.clone()),
-						)
-						.to_owned(),
-				),
-			)
-			.apply_if(age_restriction_filter, |query, filter| query.filter(filter))
+		let select = ModelWithMetadata::find_by_id(id);
+		let select = apply_series_metadata_join(select);
+		let select = apply_library_hidden_filter(select, user);
+		apply_age_restriction_filter(select, user.age_restriction.clone())
 	}
 }
 
@@ -407,5 +372,115 @@ impl ActiveModelBehavior for ActiveModel {
 		}
 
 		Ok(self)
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::tests::common::*;
+	use pretty_assertions::assert_eq;
+
+	#[test]
+	fn test_age_restriction_filter_restrict_on_unset() {
+		let filter = get_age_restriction_filter(18, true);
+		assert_eq!(
+			condition_to_string(&filter),
+			r#"SELECT  WHERE "#.to_string()
+				+ r#"("media_metadata"."age_rating" IS NULL AND "series_metadata"."age_rating" IS NOT NULL AND "series_metadata"."age_rating" <= 18) OR "#
+				+ r#"("media_metadata"."age_rating" IS NOT NULL AND "media_metadata"."age_rating" <= 18)"#,
+		);
+	}
+
+	#[test]
+	fn test_age_restriction_filter_no_restrict_on_unset() {
+		let filter = get_age_restriction_filter(18, false);
+		assert_eq!(
+			condition_to_string(&filter),
+			r#"SELECT  WHERE "#.to_string()
+				+ r#"(("media_metadata"."id" IS NULL OR "media_metadata"."age_rating" IS NULL) AND "#
+				+ r#"("series_metadata"."series_id" IS NULL OR ("series_metadata"."series_id" IS NOT NULL AND "series_metadata"."age_rating" IS NOT NULL AND "series_metadata"."age_rating" <= 18) OR "#
+				+ r#"("series_metadata"."series_id" IS NOT NULL AND "series_metadata"."age_rating" IS NULL))) OR "#
+				+ r#"("media_metadata"."id" IS NOT NULL AND ("media_metadata"."age_rating" IS NOT NULL) + ("media_metadata"."age_rating" <= 18))"#
+		);
+	}
+
+	#[test]
+	fn test_find_for_user() {
+		let user = get_default_user();
+		let select = Entity::find_for_user(&user);
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(
+            stmt_str,
+            r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
+            r#"WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42')"#
+        );
+	}
+
+	#[test]
+	fn test_find_for_user_age_restrict() {
+		let mut user = get_default_user();
+		user.age_restriction = Some(age_restriction::Model {
+			id: 1,
+			age: 18,
+			restrict_on_unset: true,
+			user_id: user.id.clone(),
+		});
+		let select = Entity::find_for_user(&user);
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(
+            stmt_str,
+            r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
+            r#"WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42')"# +
+            r#" AND (("media_metadata"."age_rating" IS NULL AND "series_metadata"."age_rating" IS NOT NULL AND "series_metadata"."age_rating" <= 18) OR ("media_metadata"."age_rating" IS NOT NULL AND "media_metadata"."age_rating" <= 18))"#
+        );
+	}
+
+	#[test]
+	fn test_find_media_ids_for_user() {
+		let user = get_default_user();
+		let select = Entity::find_media_ids_for_user("123".to_string(), &user);
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(
+            stmt_str,
+            r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
+            r#"WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42') AND "media"."id" = '123'"#
+        );
+	}
+
+	#[test]
+	fn test_find_for_series_id() {
+		let user = get_default_user();
+		let select = Entity::find_for_series_id(&user, "123".to_string());
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(
+			stmt_str,
+			r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
+			r#"WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42') AND "series"."id" = '123'"#
+		);
+	}
+
+	#[test]
+	fn test_metadata_find_for_user() {
+		let user = get_default_user();
+		let select = ModelWithMetadata::find_for_user(&user);
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(
+            stmt_str,
+            r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
+            r#"WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42')"#
+            );
+	}
+
+	#[test]
+	fn test_metadata_by_id_find_for_users() {
+		let user = get_default_user();
+		let select = ModelWithMetadata::find_by_id_for_user("123".to_string(), &user);
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(
+            stmt_str,
+            r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
+            r#"WHERE "media"."id" = '123' AND "series"."library_id" NOT IN (SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42')"#
+            );
 	}
 }

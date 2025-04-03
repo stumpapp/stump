@@ -4901,6 +4901,7 @@ dependencies = [
  "chrono",
  "globset",
  "itertools 0.13.0",
+ "pretty_assertions",
  "sea-orm",
  "serde",
  "serde_json",

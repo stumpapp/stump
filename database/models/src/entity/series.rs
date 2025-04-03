@@ -66,6 +66,16 @@ impl Entity {
 			)
 			.apply_if(age_restriction_filter, |query, filter| query.filter(filter))
 	}
+
+	pub fn find_series_ident_for_user_and_id(
+		user: &AuthUser,
+		id: String,
+	) -> Select<Self> {
+		Self::find_for_user(user)
+			.select_only()
+			.columns(vec![Column::Id, Column::Path])
+			.filter(Column::Id.eq(id))
+	}
 }
 
 #[derive(FromQueryResult)]
@@ -111,52 +121,43 @@ impl ModelWithMetadata {
 	}
 
 	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
-		let age_restriction_filter =
-			user.age_restriction.as_ref().map(|age_restriction| {
-				get_age_restriction_filter(
-					age_restriction.age,
-					age_restriction.restrict_on_unset,
-				)
-			});
-
-		ModelWithMetadata::find()
-			.filter(
-				Column::LibraryId.not_in_subquery(
-					Query::select()
-						.column(library_hidden_to_user::Column::LibraryId)
-						.from(library_hidden_to_user::Entity)
-						.and_where(
-							library_hidden_to_user::Column::UserId.eq(user.id.clone()),
-						)
-						.to_owned(),
-				),
-			)
-			.apply_if(age_restriction_filter, |query, filter| query.filter(filter))
+		let select = ModelWithMetadata::find();
+		apply_age_restriction_filter(user, apply_hidden_library_filter(user, select))
 	}
 
 	pub fn find_by_id_for_user(id: String, user: &AuthUser) -> Select<Entity> {
-		let age_restriction_filter =
-			user.age_restriction.as_ref().map(|age_restriction| {
-				get_age_restriction_filter(
-					age_restriction.age,
-					age_restriction.restrict_on_unset,
-				)
-			});
-
-		ModelWithMetadata::find_by_id(id)
-			.filter(
-				Column::LibraryId.not_in_subquery(
-					Query::select()
-						.column(library_hidden_to_user::Column::LibraryId)
-						.from(library_hidden_to_user::Entity)
-						.and_where(
-							library_hidden_to_user::Column::UserId.eq(user.id.clone()),
-						)
-						.to_owned(),
-				),
-			)
-			.apply_if(age_restriction_filter, |query, filter| query.filter(filter))
+		let select = ModelWithMetadata::find_by_id(id);
+		apply_age_restriction_filter(user, apply_hidden_library_filter(user, select))
 	}
+}
+
+fn apply_hidden_library_filter(
+	user: &AuthUser,
+	select: Select<Entity>,
+) -> Select<Entity> {
+	select
+		.filter(
+			Column::LibraryId.not_in_subquery(
+				Query::select()
+					.column(library_hidden_to_user::Column::LibraryId)
+					.from(library_hidden_to_user::Entity)
+					.and_where(library_hidden_to_user::Column::UserId.eq(user.id.clone()))
+					.to_owned(),
+			),
+		)
+		.to_owned()
+}
+
+fn apply_age_restriction_filter(
+	user: &AuthUser,
+	select: Select<Entity>,
+) -> Select<Entity> {
+	let age_restriction_filter = user.age_restriction.as_ref().map(|age_restriction| {
+		get_age_restriction_filter(age_restriction.age, age_restriction.restrict_on_unset)
+	});
+	select
+		.apply_if(age_restriction_filter, |query, filter| query.filter(filter))
+		.to_owned()
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -204,5 +205,90 @@ impl ActiveModelBehavior for ActiveModel {
 		}
 
 		Ok(self)
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::entity::age_restriction;
+	use crate::tests::common::*;
+
+	#[test]
+	fn find_for_user_no_age_restriction() {
+		let user = get_default_user();
+		let select = Entity::find_for_user(&user);
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(
+			stmt_str,
+			r#"SELECT  FROM "series" WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42')"#
+		);
+	}
+
+	#[test]
+	fn find_for_user_age_restriction() {
+		let mut user = get_default_user();
+		user.age_restriction = Some(age_restriction::Model {
+			id: 1,
+			age: 18,
+			restrict_on_unset: true,
+			user_id: user.id.clone(),
+		});
+
+		let select = Entity::find_for_user(&user);
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(
+			stmt_str,
+			r#"SELECT  FROM "series" WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42') AND "series_metadata"."age_rating" IS NOT NULL AND "series_metadata"."age_rating" <= 18"#
+		);
+	}
+
+	#[test]
+	fn test_age_restriction_filter() {
+		let filter = get_age_restriction_filter(18, true);
+		assert_eq!(
+			condition_to_string(&filter),
+			r#"SELECT  WHERE "series_metadata"."age_rating" IS NOT NULL AND "series_metadata"."age_rating" <= 18"#
+		);
+
+		let filter = get_age_restriction_filter(18, false);
+		assert_eq!(
+			condition_to_string(&filter),
+			r#"SELECT  WHERE "series_metadata"."age_rating" IS NULL OR "series_metadata"."age_rating" <= 18"#
+		);
+	}
+
+	#[test]
+	fn test_find_series_ident_for_user_and_id() {
+		let user = get_default_user();
+
+		let select = Entity::find_series_ident_for_user_and_id(&user, "123".to_string());
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(
+			stmt_str,
+			r#"SELECT  FROM "series" WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42') AND "series"."id" = '123'"#.to_string()
+		);
+	}
+
+	#[test]
+	fn test_find_media_with_metadata() {
+		let user = get_default_user();
+		let select = ModelWithMetadata::find_for_user(&user);
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(
+			stmt_str,
+			r#"SELECT  FROM "series" LEFT JOIN "series_metadata" ON "series"."id" = "series_metadata"."series_id" WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42')"#
+		);
+	}
+
+	#[test]
+	fn test_find_media_with_metadata_for_id() {
+		let user = get_default_user();
+		let select = ModelWithMetadata::find_by_id_for_user("123".to_string(), &user);
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(
+            stmt_str,
+            r#"SELECT  FROM "series" LEFT JOIN "series_metadata" ON "series"."id" = "series_metadata"."series_id" WHERE "series"."id" = '123' AND "series"."library_id" NOT IN (SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42')"#.to_string()
+        );
 	}
 }

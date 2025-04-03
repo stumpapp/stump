@@ -89,11 +89,11 @@ pub struct MediaFilterInput {
 	#[nested_filter]
 	pub metadata: Option<MediaMetadataFilterInput>,
 
-	#[serde(rename = "snake_case")]
+	#[serde(rename = "_and")]
 	pub _and: Option<Vec<MediaFilterInput>>,
-	#[serde(rename = "snake_case")]
+	#[serde(rename = "_not")]
 	pub _not: Option<Vec<MediaFilterInput>>,
-	#[serde(rename = "snake_case")]
+	#[serde(rename = "_or")]
 	pub _or: Option<Vec<MediaFilterInput>>,
 }
 
@@ -140,11 +140,11 @@ pub struct MediaMetadataFilterInput {
 	#[field_column("models::entity::media_metadata::Column::Series")]
 	pub series: Option<FieldFilter<String>>,
 
-	#[serde(rename = "snake_case")]
+	#[serde(rename = "_and")]
 	pub _and: Option<Vec<MediaMetadataFilterInput>>,
-	#[serde(rename = "snake_case")]
+	#[serde(rename = "_not")]
 	pub _not: Option<Vec<MediaMetadataFilterInput>>,
-	#[serde(rename = "snake_case")]
+	#[serde(rename = "_or")]
 	pub _or: Option<Vec<MediaMetadataFilterInput>>,
 }
 
@@ -262,13 +262,34 @@ mod tests {
 		);
 	}
 
-	// FIXME: Not working as expected
 	#[test]
 	fn test_deserialize_grouped_media_filter() {
 		let filter = r#"{"_and":[{"name":{"eq":"test"}},{"name":{"eq":"test2"}}]}"#;
 		let deserialized: MediaFilterInput = serde_json::from_str(filter).unwrap();
 		assert!(deserialized._and.is_some());
 		assert_eq!(deserialized._and.unwrap().len(), 2);
+
+		let filter = r#"{"_or":[{"name":{"eq":"test"}},{"name":{"eq":"test2"}}]}"#;
+		let deserialized: MediaFilterInput = serde_json::from_str(filter).unwrap();
+		assert!(deserialized._or.is_some());
+		assert_eq!(deserialized._or.unwrap().len(), 2);
+
+		let filter = r#"{"_not":[{"name":{"eq":"test"}},{"name":{"eq":"test2"}}]}"#;
+		let deserialized: MediaFilterInput = serde_json::from_str(filter).unwrap();
+		assert!(deserialized._not.is_some());
+		assert_eq!(deserialized._not.unwrap().len(), 2);
+	}
+
+	#[test]
+	fn test_deserialize_grouped_media_filter_with_meta() {
+		let filter = r#"{"_and":[{"name":{"eq":"test"}},{"metadata":{"_and":[{"title":{"eq":"test"}},{"series":{"eq":"theseries"}}]}}]}"#;
+		let deserialized: MediaFilterInput = serde_json::from_str(filter).unwrap();
+		assert!(deserialized._and.is_some());
+		assert_eq!(deserialized._and.unwrap().len(), 2);
+		assert!(deserialized.metadata.is_some());
+		let metadata = deserialized.metadata.unwrap();
+		assert!(metadata._and.is_some());
+		assert_eq!(metadata._and.unwrap().len(), 2);
 	}
 
 	#[test]
@@ -480,101 +501,3 @@ mod tests {
 		);
 	}
 }
-
-// /// A trait to convert an enum variant into a prisma order parameter
-// pub trait IntoOrderBy {
-// 	type OrderParam;
-// 	/// Convert the enum variant into a prisma order parameter, e.g. `media::name::order(SortOrder::Asc)`
-// 	fn into_order(self, dir: SortOrder) -> Self::OrderParam;
-// }
-
-// #[derive(Default, Debug, OrderByGen)]
-// #[prisma(module = "media_metadata")]
-// pub enum MediaMetadataOrderBy {
-// 	#[default]
-// 	Title,
-// 	Series,
-// 	Number,
-// 	Volume,
-// 	Summary,
-// 	Notes,
-// 	AgeRating,
-// 	Genre,
-// 	Year,
-// 	Month,
-// 	Day,
-// 	Writers,
-// 	Pencillers,
-// 	Inkers,
-// 	Colorists,
-// 	Letterers,
-// 	CoverArtists,
-// 	Editors,
-// 	Publisher,
-// 	Links,
-// 	Characters,
-// 	Teams,
-// }
-
-// #[derive(Default, Debug, OrderByGen)]
-// #[prisma(module = "media")]
-// pub enum MediaOrderBy {
-// 	#[default]
-// 	Name,
-// 	Size,
-// 	Extension,
-// 	CreatedAt,
-// 	UpdatedAt,
-// 	Status,
-// 	Path,
-// 	Pages,
-// 	Metadata(Vec<MediaMetadataOrderBy>),
-// 	ModifiedAt,
-// }
-
-// // #[derive(Debug, Deserialize, Serialize)]
-// // enum SeriesAggregateOrderBy {
-// // 	Media,
-// // }
-
-// #[derive(Default, Debug, OrderByGen)]
-// #[prisma(module = "series")]
-// pub enum SeriesOrderBy {
-// 	#[default]
-// 	Name,
-// 	Description,
-// 	UpdatedAt,
-// 	CreatedAt,
-// 	Path,
-// 	Status,
-// 	// _Count(SeriesAggregateOrderBy),
-// }
-
-// // #[derive(Debug, OrderByGen)]
-// // #[prisma(module = "library")]
-// // enum LibraryAggregateOrderBy {
-// // 	Media,
-// // 	Series,
-// // }
-
-// #[derive(Default, Debug, OrderByGen)]
-// #[prisma(module = "library")]
-// pub enum LibraryOrderBy {
-// 	#[default]
-// 	Name,
-// 	Path,
-// 	Status,
-// 	UpdatedAt,
-// 	CreatedAt,
-// 	// _Count(LibraryAggregateOrderBy),
-// }
-
-// #[derive(Default, Debug, OrderByGen)]
-// #[prisma(module = "job")]
-// pub enum JobOrderBy {
-// 	#[default]
-// 	Name,
-// 	Status,
-// 	CreatedAt,
-// 	CompletedAt,
-// }

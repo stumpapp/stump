@@ -4,6 +4,8 @@ use sea_orm::{
 	JoinType, QuerySelect,
 };
 
+use super::user::AuthUser;
+
 // TODO(sea-orm): Consider i32 for ID
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
@@ -155,5 +157,41 @@ impl OPDSV2Progression {
 					.to(media_metadata::Column::Id)
 					.into(),
 			)
+	}
+}
+
+impl Entity {
+	pub fn find_for_user_and_media_id(user: &AuthUser, media_id: &str) -> Select<Entity> {
+		Entity::find()
+			.filter(Column::UserId.eq(&user.id))
+			.filter(Column::MediaId.eq(media_id))
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::tests::common::*;
+
+	fn get_default_user() -> AuthUser {
+		AuthUser {
+			id: "42".to_string(),
+			username: "test".to_string(),
+			is_server_owner: true,
+			is_locked: false,
+			permissions: vec![],
+			age_restriction: None,
+		}
+	}
+
+	#[test]
+	fn test_find_for_user_and_media() {
+		let user = get_default_user();
+		let select = Entity::find_for_user_and_media_id(&user, "123");
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(
+			stmt_str,
+			r#"SELECT  FROM "reading_sessions" WHERE "reading_sessions"."user_id" = '42' AND "reading_sessions"."media_id" = '123'"#.to_string()
+		);
 	}
 }

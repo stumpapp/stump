@@ -157,6 +157,13 @@ impl Entity {
 			)
 			.apply_if(age_restriction_filter, |query, filter| query.filter(filter))
 	}
+
+	pub fn find_media_ids_for_user(id: String, user: &AuthUser) -> Select<Entity> {
+		Self::find_for_user(user)
+			.select_only()
+			.columns(vec![Column::Id, Column::Path])
+			.filter(Column::Id.eq(id))
+	}
 }
 
 #[derive(Debug, Clone, SimpleObject)]

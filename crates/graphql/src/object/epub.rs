@@ -33,10 +33,18 @@ impl From<NavPoint> for EpubContent {
 }
 
 #[derive(Debug, Clone, SimpleObject)]
+pub struct SpineItem {
+	pub idref: String,
+	pub id: Option<String>,
+	pub properties: Option<String>,
+	pub linear: bool,
+}
+
+#[derive(Debug, Clone, SimpleObject)]
 #[graphql(complex)]
 pub struct Epub {
 	pub media_id: String,
-	pub spine: Vec<String>,
+	pub spine: Vec<SpineItem>,
 	pub resources: HashMap<String, (String, String)>,
 	pub toc: Vec<String>,
 	pub metadata: HashMap<String, Vec<String>>,
@@ -64,9 +72,20 @@ impl Epub {
 			.map(|x| Ok(serde_json::to_string(&EpubContent::from(x))?))
 			.collect::<Result<Vec<String>>>()?;
 
+		let spine = epub_file
+			.spine
+			.into_iter()
+			.map(|x| SpineItem {
+				idref: x.idref,
+				id: x.id,
+				properties: x.properties,
+				linear: x.linear,
+			})
+			.collect();
+
 		Ok(Self {
 			media_id: ident.id,
-			spine: epub_file.spine,
+			spine,
 			resources: resources_serialized,
 			toc: toc_serialized,
 			metadata: epub_file.metadata,
@@ -122,5 +141,90 @@ impl Epub {
 			.ok_or("Media not found")?;
 
 		Ok(model.into())
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use models::entity::media::MediaIdentSelect;
+	#[tokio::test]
+	async fn test_epub_try_from() {
+		let mut epub_doc = EpubDoc::mock().unwrap();
+		epub_doc.resources.insert(
+			"test.css".to_string(),
+			(PathBuf::from("test.css"), "text/css".to_string()),
+		);
+		epub_doc.toc = vec![NavPoint {
+			label: "test".to_string(),
+			content: PathBuf::from("test.html"),
+			children: vec![],
+			play_order: 0,
+		}];
+		epub_doc.root_base = PathBuf::from("/");
+		epub_doc.root_file = PathBuf::from("test.html");
+		let epub = Epub::try_from_with_epub(
+			MediaIdentSelect {
+				id: "test".to_string(),
+				path: "test.epub".to_string(),
+			},
+			epub_doc,
+		)
+		.unwrap();
+		assert_eq!(epub.media_id, "test");
+		assert_eq!(epub.resources.get("test.css").unwrap().0, "test.css");
+		assert_eq!(epub.resources.get("test.css").unwrap().1, "text/css");
+		assert_eq!(epub.toc.len(), 1);
+		assert_eq!(epub.toc[0], "{\"label\":\"test\",\"content\":\"test.html\",\"children\":[],\"play_order\":0}".to_string());
+		assert_eq!(epub.root_base, "/");
+		assert_eq!(epub.root_file, "test.html");
+	}
+	// Test for malformed epub file, non-utf8 path are os dependent so only run on linux
+	#[cfg(target_os = "linux")]
+	#[tokio::test]
+	async fn test_epub_try_from_malformed() {
+		use std::ffi::OsString;
+		use std::os::unix::ffi::OsStringExt;
+		let malformed_path = PathBuf::from(OsString::from_vec(vec![255]));
+		let mut epub_doc = EpubDoc::mock().unwrap();
+		epub_doc.resources.insert(
+			"test.css".to_string(),
+			(malformed_path.clone(), "text/css".to_string()),
+		);
+		let epub = Epub::try_from_with_epub(
+			MediaIdentSelect {
+				id: "test".to_string(),
+				path: "test.epub".to_string(),
+			},
+			epub_doc,
+		);
+		assert!(epub.is_err());
+		// try with toc
+		epub_doc = EpubDoc::mock().unwrap();
+		epub_doc.toc = vec![NavPoint {
+			label: "test".to_string(),
+			content: malformed_path.clone(),
+			children: vec![],
+			play_order: 0,
+		}];
+		let epub = Epub::try_from_with_epub(
+			MediaIdentSelect {
+				id: "test".to_string(),
+				path: "test.epub".to_string(),
+			},
+			epub_doc,
+		);
+		assert!(epub.is_err());
+		// try with base file
+		epub_doc = EpubDoc::mock().unwrap();
+		epub_doc.root_base = malformed_path.clone();
+		let epub = Epub::try_from_with_epub(
+			MediaIdentSelect {
+				id: "test".to_string(),
+				path: "test.epub".to_string(),
+			},
+			epub_doc,
+		);
+		assert!(epub.is_err());
 	}
 }

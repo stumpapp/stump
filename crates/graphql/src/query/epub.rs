@@ -1,6 +1,5 @@
 use async_graphql::{Context, Object, Result, ID};
 use models::entity::{bookmark, media};
-use sea_orm::{prelude::*, QuerySelect};
 
 use crate::{
 	data::{CoreContext, RequestContext},
@@ -17,10 +16,7 @@ impl EpubQuery {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let model = media::Entity::find_for_user(user)
-			.select_only()
-			.columns(vec![media::Column::Id, media::Column::Path])
-			.filter(media::Column::Id.eq(id.to_string()))
+		let model = media::Entity::find_media_ids_for_user(id.to_string(), user)
 			.into_model::<media::MediaIdentSelect>()
 			.one(conn)
 			.await?
@@ -35,15 +31,17 @@ impl EpubQuery {
 		ctx: &Context<'_>,
 		id: ID,
 	) -> Result<Vec<Bookmark>> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-		let user_id = ctx.data::<RequestContext>()?.id();
 
-		Ok(bookmark::Entity::find_for_user(&user_id, id.as_ref())
-			.into_model::<bookmark::Model>()
-			.all(conn)
-			.await?
-			.into_iter()
-			.map(Bookmark::from)
-			.collect())
+		Ok(
+			bookmark::Entity::find_for_user_and_media_id(&user, id.as_ref())
+				.into_model::<bookmark::Model>()
+				.all(conn)
+				.await?
+				.into_iter()
+				.map(Bookmark::from)
+				.collect(),
+		)
 	}
 }

@@ -1,31 +1,17 @@
 use crate::{
 	data::{CoreContext, RequestContext},
+	input::epub::{BookmarkInput, EpubProgressInput},
 	object::{
 		bookmark::Bookmark,
 		reading_session::{ActiveReadingSession, FinishedReadingSession},
 	},
 };
-use async_graphql::{Context, InputObject, Object, Result, SimpleObject, ID};
-use models::entity::{bookmark, finished_reading_session, reading_session};
-use sea_orm::{prelude::*, sea_query::OnConflict, ActiveValue::Set, TransactionTrait};
+use async_graphql::{Context, Object, Result, SimpleObject, ID};
+use models::entity::{bookmark, reading_session, user::AuthUser};
+use sea_orm::{prelude::*, sea_query::OnConflict, TransactionTrait};
 
 #[derive(Default)]
 pub struct EpubMutation;
-
-#[derive(InputObject)]
-struct BookmarkInput {
-	media_id: String,
-	epubcfi: String,
-	preview_content: Option<String>,
-}
-
-#[derive(InputObject)]
-struct EpubProgressInput {
-	media_id: String,
-	epubcfi: String,
-	percentage: Decimal,
-	is_complete: Option<bool>,
-}
 
 #[derive(Debug, SimpleObject)]
 pub struct EpubProgressOutput {
@@ -35,64 +21,45 @@ pub struct EpubProgressOutput {
 
 async fn update_epub_progress_finished(
 	conn: &DatabaseConnection,
-	user_id: String,
+	user: &AuthUser,
 	input: EpubProgressInput,
 ) -> Result<EpubProgressOutput> {
-	Ok(conn
-		.transaction::<_, _, DbErr>(|txn| {
-			Box::pin(async move {
-				let active_session = reading_session::Entity::find()
-					.filter(reading_session::Column::UserId.eq(user_id.clone()))
-					.filter(reading_session::Column::MediaId.eq(input.media_id.clone()))
-					.one(txn)
-					.await?;
+	let txn = conn.begin().await?;
+	let active_session =
+		reading_session::Entity::find_for_user_and_media_id(user, &input.media_id)
+			.one(&txn)
+			.await?;
 
-				let started_at = active_session
-					.as_ref()
-					.map(|s| s.started_at)
-					.unwrap_or_default();
+	let started_at = active_session
+		.as_ref()
+		.map(|s| s.started_at)
+		.unwrap_or_default();
 
-				let finished_reading_session = finished_reading_session::ActiveModel {
-					started_at: Set(started_at),
-					media_id: Set(input.media_id.clone()),
-					user_id: Set(user_id.clone()),
-					completed_at: Set(chrono::Utc::now().into()),
-					..Default::default()
-				};
+	let finished_reading_session =
+		input.into_finished_session_active_model(user, started_at);
 
-				// Note that finished reading session is used as a read history, so we don't
-				// clean up existing ones. The active reading session is deleted, though.
-				let finished_reading_session =
-					finished_reading_session.insert(txn).await?;
+	// Note that finished reading session is used as a read history, so we don't
+	// clean up existing ones. The active reading session is deleted, though.
+	let finished_reading_session = finished_reading_session.insert(&txn).await?;
 
-				if let Some(active_session) = active_session.clone() {
-					let _ = active_session.delete(txn).await?;
-				}
+	if let Some(active_session) = active_session.clone() {
+		let _ = active_session.delete(&txn).await?;
+	}
 
-				Ok(EpubProgressOutput {
-					active_session: None,
-					finished_session: Some(finished_reading_session.into()),
-				})
-			})
-		})
-		.await?)
+	txn.commit().await?;
+
+	Ok(EpubProgressOutput {
+		active_session: None,
+		finished_session: Some(finished_reading_session.into()),
+	})
 }
 
 async fn update_epub_progress_active(
 	conn: &DatabaseConnection,
-	user_id: String,
+	user: &AuthUser,
 	input: EpubProgressInput,
 ) -> Result<EpubProgressOutput> {
-	let active_session = reading_session::ActiveModel {
-		// TODO: Consider i32 for ID
-		id: Set(Uuid::new_v4().to_string()),
-		epubcfi: Set(Some(input.epubcfi.clone())),
-		percentage_completed: Set(Some(input.percentage)),
-		media_id: Set(input.media_id.clone()),
-		user_id: Set(user_id.clone()),
-		updated_at: Set(chrono::Utc::now().into()),
-		..Default::default()
-	};
+	let active_session = input.into_reading_session_active_model(user);
 
 	let upserted_session = reading_session::Entity::insert(active_session)
 		.on_conflict(
@@ -128,7 +95,7 @@ impl EpubMutation {
 		ctx: &Context<'_>,
 		input: EpubProgressInput,
 	) -> Result<EpubProgressOutput> {
-		let user_id = ctx.data::<RequestContext>()?.id();
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 
 		let is_complete = input
 			.is_complete
@@ -136,9 +103,9 @@ impl EpubMutation {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		if is_complete {
-			update_epub_progress_finished(conn, user_id, input).await
+			update_epub_progress_finished(conn, user, input).await
 		} else {
-			update_epub_progress_active(conn, user_id, input).await
+			update_epub_progress_active(conn, user, input).await
 		}
 	}
 
@@ -149,26 +116,17 @@ impl EpubMutation {
 		ctx: &Context<'_>,
 		input: BookmarkInput,
 	) -> Result<Bookmark> {
-		let user_id = ctx.data::<RequestContext>()?.id();
-
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let bookmark = bookmark::ActiveModel {
-			// TODO(sea-orm): Consider i32 for ID
-			id: Set(Uuid::new_v4().to_string()),
-			epubcfi: Set(Some(input.epubcfi.clone())),
-			preview_content: Set(input.preview_content.clone()),
-			media_id: Set(input.media_id.clone()),
-			user_id: Set(user_id.clone()),
-			page: Set(Some(-1)),
-		};
-
+		let bookmark = input.into_active_model(user);
 		let upserted_bookmark = bookmark::Entity::insert(bookmark)
 			.on_conflict(
 				OnConflict::columns(vec![
-					bookmark::Column::MediaId,
 					bookmark::Column::UserId,
+					bookmark::Column::MediaId,
 					bookmark::Column::Epubcfi,
+					bookmark::Column::Page,
 				])
 				.update_column(bookmark::Column::PreviewContent)
 				.to_owned(),
@@ -183,15 +141,14 @@ impl EpubMutation {
 
 	/// Delete a bookmark by ID. The user must be the owner of the bookmark.
 	async fn delete_bookmark(&self, ctx: &Context<'_>, id: ID) -> Result<Bookmark> {
-		let user_id = ctx.data::<RequestContext>()?.id();
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let bookmark = bookmark::Entity::find()
-			.filter(bookmark::Column::Id.eq(id.to_string()))
-			.filter(bookmark::Column::UserId.eq(user_id))
-			.one(conn)
-			.await?
-			.ok_or("Bookmark not found")?;
+		let bookmark =
+			bookmark::Entity::find_for_user_and_media_id(&user, &id.to_string())
+				.one(conn)
+				.await?
+				.ok_or("Bookmark not found")?;
 
 		let _ = bookmark.clone().delete(conn).await?;
 		Ok(Bookmark { model: bookmark })

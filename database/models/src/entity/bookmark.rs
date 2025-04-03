@@ -1,6 +1,8 @@
 use async_graphql::SimpleObject;
 use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue};
 
+use super::user::AuthUser;
+
 // TODO(sea-orm): Consider i32 for ID
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
@@ -67,9 +69,9 @@ impl ActiveModelBehavior for ActiveModel {
 }
 
 impl Entity {
-	pub fn find_for_user(user_id: &str, media_id: &str) -> Select<Entity> {
+	pub fn find_for_user_and_media_id(user: &AuthUser, media_id: &str) -> Select<Entity> {
 		Entity::find()
-			.filter(Column::UserId.eq(user_id))
+			.filter(Column::UserId.eq(&user.id))
 			.filter(Column::MediaId.eq(media_id))
 	}
 }

@@ -86,9 +86,14 @@ impl Epub {
 			Err(_) => None,
 		};
 
+		// new epub-rs uses a structured spine-item to include attributes like idref, linear, etc.,
+		// get a list of the idrefs from the spine items so that they match older versions of
+		// epub-rs responses https://github.com/danigm/epub-rs/pull/47
+		let spine = epub.spine.iter().map(|item| item.idref.clone()).collect();
+
 		Epub {
 			media_entity: Media::from(media),
-			spine: epub.spine,
+			spine,
 			resources: epub.resources,
 			toc: epub.toc.into_iter().map(|c| c.into()).collect(),
 			metadata: epub.metadata,

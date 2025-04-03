@@ -1,16 +1,22 @@
 use crate::{
-	data::CoreContext, mutation::Mutation, query::Query, subscription::Subscription,
+	data::CoreContext, loader::reading_session::ReadingSessionLoader, mutation::Mutation,
+	query::Query, subscription::Subscription,
 };
-use async_graphql::Schema;
+use async_graphql::{dataloader::DataLoader, Schema};
 
 pub type AppSchema = Schema<Query, Mutation, Subscription>;
 
 pub async fn build_schema(ctx: CoreContext) -> AppSchema {
+	let conn = ctx.conn.clone();
 	Schema::build(
 		Query::default(),
 		Mutation::default(),
 		Subscription::default(),
 	)
 	.data(ctx)
+	.data(DataLoader::new(
+		ReadingSessionLoader::new(conn),
+		tokio::spawn,
+	))
 	.finish()
 }

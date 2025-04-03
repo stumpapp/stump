@@ -1,13 +1,23 @@
-use async_graphql::{ComplexObject, Context, Result, SimpleObject};
-
-use models::entity::{
-	finished_reading_session, library, media, media_metadata, reading_session, series,
+use async_graphql::{
+	dataloader::DataLoader, ComplexObject, Context, Result, SimpleObject,
 };
+
+use models::entity::{library, media, media_metadata, series};
 use sea_orm::{prelude::*, sea_query::Query};
 
-use crate::data::{CoreContext, RequestContext};
+use crate::{
+	data::{CoreContext, RequestContext},
+	loader::reading_session::{
+		ActiveReadingSessionLoaderKey, FinishedReadingSessionLoaderKey,
+		ReadingSessionLoader,
+	},
+};
 
-use super::{library::Library, series::Series};
+use super::{
+	library::Library,
+	reading_session::{ActiveReadingSession, FinishedReadingSession},
+	series::Series,
+};
 
 #[derive(Debug, SimpleObject)]
 #[graphql(complex)]
@@ -68,18 +78,15 @@ impl Media {
 	async fn read_progress(
 		&self,
 		ctx: &Context<'_>,
-	) -> Result<Option<reading_session::Model>> {
+	) -> Result<Option<ActiveReadingSession>> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let loader = ctx.data::<DataLoader<ReadingSessionLoader>>()?;
 
-		let progress = reading_session::Entity::find()
-			.filter(
-				reading_session::Column::MediaId
-					.eq(&self.model.id)
-					.and(reading_session::Column::UserId.eq(&user.id)),
-			)
-			.into_model::<reading_session::Model>()
-			.one(conn)
+		let progress = loader
+			.load_one(ActiveReadingSessionLoaderKey {
+				user_id: user.id.clone(),
+				media_id: self.model.id.clone(),
+			})
 			.await?;
 
 		Ok(progress)
@@ -89,19 +96,17 @@ impl Media {
 	async fn read_history(
 		&self,
 		ctx: &Context<'_>,
-	) -> Result<Vec<finished_reading_session::Model>> {
+	) -> Result<Vec<FinishedReadingSession>> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let loader = ctx.data::<DataLoader<ReadingSessionLoader>>()?;
 
-		let history = finished_reading_session::Entity::find()
-			.filter(
-				finished_reading_session::Column::MediaId
-					.eq(&self.model.id)
-					.and(finished_reading_session::Column::UserId.eq(&user.id)),
-			)
-			.into_model::<finished_reading_session::Model>()
-			.all(conn)
-			.await?;
+		let history = loader
+			.load_one(FinishedReadingSessionLoaderKey {
+				user_id: user.id.clone(),
+				media_id: self.model.id.clone(),
+			})
+			.await?
+			.unwrap_or_default();
 
 		Ok(history)
 	}

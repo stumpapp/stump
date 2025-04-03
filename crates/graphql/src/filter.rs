@@ -1,129 +1,20 @@
-/*
-I want to totally revamp the filtering system. I'll maintain the two concepts of "basic" and "smart" filters, but I want
-to construct them using the same base structure. I envision:
-
-{
-  media(filter: { metadata: { title: { contains: "test" } }, name: { eq: "test" } }) {
-	nodes {
-	  name
-	  metadata {
-		title
-	  }
-	}
-	pageInfo {...}
-  }
-}
-
-{
-  media(
-	smartFilter: { _or: [
-	  { metadata: { title: { contains: "biz" } } },
-	  { metadata: { genre: { contains: "baz" } } }
-	] }
-) {
-	nodes {
-	  name
-	  metadata {
-		title
-	  }
-	}
-	pageInfo {...}
-  }
-}
-
-I guess an alternative might be allowing both as variants of filter:
-
-pub enum MediaFilter {
-	Name { name: String },
-}
-
-pub enum Filter<T> {
-	And { _and: Vec<T> },
-	Or { _or: Vec<T> },
-	Not { _not: Vec<T> },
-	Basic(HashMap<String, FieldFilter<T>>) // or something, dynamic keys doesn't really work
-}
-
-pub enum FieldFilter<T> {
-	Equals { eq: T },
-	Not { neq: T },
-	Any { any: Vec<T> },
-	None { none: Vec<T> },
-	StringFieldFilter(StringFilter<T>),
-	NumericFieldFilter(NumericFilter<T>),
-}
-
-So e.g. Filter<MediaFilter> would parse either:
-
-1. { name: { eq: "test" } }
-2. { _or: [ { name: { eq: "test" } }, { name: { eq: "test2" } } ] }
-
-This will output a Condition tree to pass to sea-orm, so it can also be merged with access control. For example:
-
-{ _or: [ { name: { eq: "test" } }, { name: { eq: "test2" } } ] } -> age_restrion on user is 12
-
-Condition::all()
-	.add(
-		Condition::any()
-			.add(Condition::all().add(media::Column::Name.eq("test")))
-			.add(Condition::all().add(media::Column::Name.eq("test2")))
-	) <- This is from the filter
-	.add(
-		Condition::any()
-			.add(...)
-			.add(...)
-	) <- This is from the access control imposed by Stump
-*/
-
-use async_graphql::Enum;
+use filter_gen::IntoFilter;
+use sea_orm::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
-use strum::{Display, EnumString};
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
-pub struct FilterInput {
-	#[serde(default)]
-	root_operator: FilterOperator,
+// TODO: This probably needs a rewrite to make it more compatible with async-graphql. The big issue is generics
+// with input objects. Look at and yoink from seaography for how they are doing things
+
+// Note: See https://github.com/serde-rs/json/issues/501
+
+// NOTE: I originally went for IntoCondition, but that is a trait for sea-query and
+// I wanted to avoid conflicts in the naming
+pub trait IntoFilter {
+	fn into_filter(self) -> sea_orm::Condition;
 }
 
-#[derive(
-	Debug,
-	Default,
-	Clone,
-	Copy,
-	PartialEq,
-	Eq,
-	Serialize,
-	Deserialize,
-	Enum,
-	EnumString,
-	Display,
-)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
-pub enum FilterOperator {
-	#[default]
-	And,
-	Or,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum FilterGroup<T> {
-	And { _and: Vec<T> },
-	Or { _or: Vec<T> },
-	Not { _not: Vec<T> },
-	// Basic(HashMap<String, FieldFilter<T>>), // or something, dynamic keys doesn't really work
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum SmartFilterGroup<T> {
-	And { _and: Vec<T> },
-	Or { _or: Vec<T> },
-	Not { _not: Vec<T> },
-}
-
+// TODO: Support is_null and is_not_null
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum FieldFilter<T> {
@@ -136,12 +27,25 @@ pub enum FieldFilter<T> {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
 pub enum StringFilter<T> {
-	Like { like: T },
-	Contains { contains: T },
-	Excludes { excludes: T },
-	StartsWith { starts_with: T },
-	EndsWith { ends_with: T },
+	Like {
+		like: T,
+	},
+	Contains {
+		contains: T,
+	},
+	Excludes {
+		excludes: T,
+	},
+	#[serde(rename_all = "camelCase")]
+	StartsWith {
+		starts_with: T,
+	},
+	#[serde(rename_all = "camelCase")]
+	EndsWith {
+		ends_with: T,
+	},
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -162,30 +66,103 @@ pub struct NumericRange<T> {
 }
 
 #[skip_serializing_none]
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, IntoFilter)]
+#[serde(rename_all = "camelCase")]
 pub struct MediaFilterInput {
+	#[field_column("models::entity::media::Column::Name")]
 	pub name: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media::Column::Size")]
+	pub size: Option<FieldFilter<i64>>,
+	#[field_column("models::entity::media::Column::Extension")]
+	pub extension: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media::Column::CreatedAt")]
+	pub created_at: Option<FieldFilter<DateTimeWithTimeZone>>,
+	#[field_column("models::entity::media::Column::UpdatedAt")]
+	pub updated_at: Option<FieldFilter<DateTimeWithTimeZone>>,
+	#[field_column("models::entity::media::Column::Status")]
+	pub status: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media::Column::Path")]
+	pub path: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media::Column::Pages")]
+	pub pages: Option<FieldFilter<i32>>,
+
+	#[nested_filter]
 	pub metadata: Option<MediaMetadataFilterInput>,
 
+	#[serde(rename = "_and")]
 	pub _and: Option<Vec<MediaFilterInput>>,
+	#[serde(rename = "_not")]
 	pub _not: Option<Vec<MediaFilterInput>>,
+	#[serde(rename = "_or")]
 	pub _or: Option<Vec<MediaFilterInput>>,
 }
 
 #[skip_serializing_none]
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, IntoFilter)]
+#[serde(rename_all = "camelCase")]
 pub struct MediaMetadataFilterInput {
+	#[field_column("models::entity::media_metadata::Column::Title")]
 	pub title: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Publisher")]
+	pub publisher: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Genre")]
+	pub genre: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Characters")]
+	pub characters: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Colorists")]
+	pub colorists: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Writers")]
+	pub writers: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Pencillers")]
+	pub pencillers: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Letterers")]
+	pub letterers: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::CoverArtists")]
+	pub cover_artists: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Inkers")]
+	pub inkers: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Editors")]
+	pub editors: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::AgeRating")]
+	pub age_rating: Option<FieldFilter<i32>>,
+	#[field_column("models::entity::media_metadata::Column::Year")]
+	pub year: Option<FieldFilter<i32>>,
+	#[field_column("models::entity::media_metadata::Column::Month")]
+	pub month: Option<FieldFilter<i32>>,
+	#[field_column("models::entity::media_metadata::Column::Day")]
+	pub day: Option<FieldFilter<i32>>,
+	#[field_column("models::entity::media_metadata::Column::Links")]
+	pub links: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Teams")]
+	pub teams: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Summary")]
+	pub summary: Option<FieldFilter<String>>,
+	#[field_column("models::entity::media_metadata::Column::Series")]
 	pub series: Option<FieldFilter<String>>,
 
+	#[serde(rename = "_and")]
 	pub _and: Option<Vec<MediaMetadataFilterInput>>,
+	#[serde(rename = "_not")]
 	pub _not: Option<Vec<MediaMetadataFilterInput>>,
+	#[serde(rename = "_or")]
 	pub _or: Option<Vec<MediaMetadataFilterInput>>,
 }
+
+// pub fn filter_inputs() -> Vec<dynamic::InputObject> {
+// 	let mut inputs = vec![];
+
+// 	let media_filter_input =
+// 		dynamic::InputObject::new("MediaMetadataFilterInput".to_string());
+
+// 	inputs.push(media_filter_input);
+
+// 	inputs
+// }
 
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use models::entity::*;
 
 	#[test]
 	fn test_serialize_media_filter() {
@@ -284,172 +261,243 @@ mod tests {
 			r#"{"name":{"eq":"test"},"metadata":{"_and":[{"title":{"eq":"test"}},{"series":{"eq":"theseries"}}]}}"#
 		);
 	}
+
+	#[test]
+	fn test_deserialize_grouped_media_filter() {
+		let filter = r#"{"_and":[{"name":{"eq":"test"}},{"name":{"eq":"test2"}}]}"#;
+		let deserialized: MediaFilterInput = serde_json::from_str(filter).unwrap();
+		assert!(deserialized._and.is_some());
+		assert_eq!(deserialized._and.unwrap().len(), 2);
+
+		let filter = r#"{"_or":[{"name":{"eq":"test"}},{"name":{"eq":"test2"}}]}"#;
+		let deserialized: MediaFilterInput = serde_json::from_str(filter).unwrap();
+		assert!(deserialized._or.is_some());
+		assert_eq!(deserialized._or.unwrap().len(), 2);
+
+		let filter = r#"{"_not":[{"name":{"eq":"test"}},{"name":{"eq":"test2"}}]}"#;
+		let deserialized: MediaFilterInput = serde_json::from_str(filter).unwrap();
+		assert!(deserialized._not.is_some());
+		assert_eq!(deserialized._not.unwrap().len(), 2);
+	}
+
+	#[test]
+	fn test_deserialize_grouped_media_filter_with_meta() {
+		let filter = r#"{"_and":[{"name":{"eq":"test"}},{"metadata":{"_and":[{"title":{"eq":"test"}},{"series":{"eq":"theseries"}}]}}]}"#;
+		let deserialized: MediaFilterInput = serde_json::from_str(filter).unwrap();
+		assert!(deserialized._and.is_some());
+		assert_eq!(deserialized._and.unwrap().len(), 2);
+		assert!(deserialized.metadata.is_some());
+		let metadata = deserialized.metadata.unwrap();
+		assert!(metadata._and.is_some());
+		assert_eq!(metadata._and.unwrap().len(), 2);
+	}
+
+	#[test]
+	fn test_basic_into_filter() {
+		let condition = MediaFilterInput {
+			name: Some(FieldFilter::Equals {
+				eq: "test".to_string(),
+			}),
+			..Default::default()
+		}
+		.into_filter();
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all().add(media::Column::Name.eq("test"))
+		);
+
+		let condition = MediaFilterInput {
+			name: Some(FieldFilter::Not {
+				neq: "test".to_string(),
+			}),
+			..Default::default()
+		}
+		.into_filter();
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all().add(media::Column::Name.ne("test"))
+		);
+
+		let condition = MediaFilterInput {
+			name: Some(FieldFilter::Any {
+				any: vec!["test".to_string(), "test2".to_string()],
+			}),
+			..Default::default()
+		}
+		.into_filter();
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all()
+				.add(media::Column::Name.is_in(vec!["test", "test2"]))
+		);
+
+		let condition = MediaFilterInput {
+			name: Some(FieldFilter::None {
+				none: vec!["test".to_string(), "test2".to_string()],
+			}),
+			..Default::default()
+		}
+		.into_filter();
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all()
+				.add(media::Column::Name.is_not_in(vec!["test", "test2"]))
+		);
+
+		let condition = MediaFilterInput {
+			name: Some(FieldFilter::StringFieldFilter(StringFilter::Like {
+				like: "test".to_string(),
+			})),
+			..Default::default()
+		}
+		.into_filter();
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all()
+				.add(media::Column::Name.like(format!("%{}%", "test")))
+		);
+
+		let condition = MediaFilterInput {
+			name: Some(FieldFilter::StringFieldFilter(StringFilter::Contains {
+				contains: "test".to_string(),
+			})),
+			..Default::default()
+		}
+		.into_filter();
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all().add(media::Column::Name.contains("test"))
+		);
+
+		let condition = MediaFilterInput {
+			name: Some(FieldFilter::StringFieldFilter(StringFilter::Excludes {
+				excludes: "test".to_string(),
+			})),
+			..Default::default()
+		}
+		.into_filter();
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all()
+				.add(media::Column::Name.not_like(format!("%{}%", "test")))
+		);
+	}
+
+	#[test]
+	fn test_grouped_into_filter() {
+		// _and
+		let condition = MediaFilterInput {
+			_and: Some(vec![
+				MediaFilterInput {
+					name: Some(FieldFilter::Equals {
+						eq: "test".to_string(),
+					}),
+					..Default::default()
+				},
+				MediaFilterInput {
+					name: Some(FieldFilter::Equals {
+						eq: "test2".to_string(),
+					}),
+					..Default::default()
+				},
+			]),
+			..Default::default()
+		}
+		.into_filter();
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all().add(
+				sea_orm::Condition::all()
+					.add(media::Column::Name.eq("test"))
+					.add(media::Column::Name.eq("test2"))
+			)
+		);
+
+		// _or
+		let condition = MediaFilterInput {
+			_or: Some(vec![
+				MediaFilterInput {
+					name: Some(FieldFilter::Equals {
+						eq: "test".to_string(),
+					}),
+					..Default::default()
+				},
+				MediaFilterInput {
+					name: Some(FieldFilter::Equals {
+						eq: "test2".to_string(),
+					}),
+					..Default::default()
+				},
+			]),
+			..Default::default()
+		}
+		.into_filter();
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all().add(
+				sea_orm::Condition::any()
+					.add(media::Column::Name.eq("test"))
+					.add(media::Column::Name.eq("test2"))
+			)
+		);
+
+		// _not
+		let condition = MediaFilterInput {
+			_not: Some(vec![
+				MediaFilterInput {
+					name: Some(FieldFilter::Equals {
+						eq: "test".to_string(),
+					}),
+					..Default::default()
+				},
+				MediaFilterInput {
+					name: Some(FieldFilter::Equals {
+						eq: "test2".to_string(),
+					}),
+					..Default::default()
+				},
+			]),
+			..Default::default()
+		}
+		.into_filter();
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all().add(
+				sea_orm::Condition::any()
+					.add(media::Column::Name.eq("test"))
+					.add(media::Column::Name.eq("test2"))
+					.not()
+			)
+		);
+	}
+
+	#[test]
+	fn test_nested_into_filter() {
+		let condition = MediaFilterInput {
+			name: Some(FieldFilter::Equals {
+				eq: "test".to_string(),
+			}),
+			metadata: Some(MediaMetadataFilterInput {
+				title: Some(FieldFilter::Equals {
+					eq: "test".to_string(),
+				}),
+				series: Some(FieldFilter::Equals {
+					eq: "theseries".to_string(),
+				}),
+				..Default::default()
+			}),
+			..Default::default()
+		}
+		.into_filter();
+		assert_eq!(
+			condition,
+			sea_orm::Condition::all()
+				.add(media::Column::Name.eq("test"))
+				.add(
+					sea_orm::Condition::all()
+						.add(media_metadata::Column::Title.eq("test"))
+						.add(media_metadata::Column::Series.eq("theseries"))
+				)
+		);
+	}
 }
-
-// #[generate_smart_filter]
-// #[derive(Debug, Clone, PartialEq)]
-// #[serde(untagged)]
-// #[prisma_table("media")]
-// pub enum MediaFilter {
-// 	Name { name: String },
-// 	Size { size: i64 },
-// 	Extension { extension: String },
-// 	CreatedAt { created_at: DateTime<FixedOffset> },
-// 	UpdatedAt { updated_at: DateTime<FixedOffset> },
-// 	Status { status: String },
-// 	Path { path: String },
-// 	Pages { pages: i32 },
-// 	// Metadata { metadata: MediaMetadataSmartFilter },
-// 	// Series { series: SeriesSmartFilter },
-// }
-
-// #[derive(Debug, Clone, PartialEq)]
-// #[serde(untagged)]
-// /// A filter for a single value, e.g. `name = "test"`
-// pub enum Filter<T> {
-// 	/// A simple equals filter, e.g. `name = "test"`
-// 	Equals { equals: T },
-// 	/// A simple not filter, e.g. `name != "test"`
-// 	Not { not: T },
-// 	/// A filter for a vector of values, e.g. `name in ["test", "test2"]`
-// 	Any { any: Vec<T> },
-// 	/// A filter for a vector of values, e.g. `name not in ["test", "test2"]`
-// 	None { none: Vec<T> },
-// 	/// A filter for a string value, e.g. `name contains "test"`
-// 	StringFilter(StringFilter<T>),
-// 	/// A filter for a numeric value, e.g. `year > 2000`
-// 	NumericFilter(NumericFilter<T>),
-// }
-
-// #[derive(Debug, Clone, PartialEq)]
-// #[serde(untagged)]
-// pub enum StringFilter<T> {
-// 	/// A filter for a string that matches a pattern, e.g. `name like "%test%"`
-// 	Like { like: T },
-// 	/// A filter for a string that contains a substring, e.g. `name contains "test"`. This should
-// 	/// not be confused with an `in` filter. See [`Filter::Any`] for that.
-// 	Contains { contains: T },
-// 	/// A filter for a string that does not contain a substring, e.g. `name excludes "test"`. This
-// 	/// should not be confused with a `not in` filter. See [`Filter::None`] for that.
-// 	Excludes { excludes: T },
-// 	/// A filter for a string that starts with a substring, e.g. `name starts_with "test"`
-// 	StartsWith { starts_with: T },
-// 	/// A filter for a string that ends with a substring, e.g. `name ends_with "test"`
-// 	EndsWith { ends_with: T },
-// }
-
-// #[derive(Debug, Clone, PartialEq)]
-// pub struct NumericRange<T> {
-// 	pub from: T,
-// 	pub to: T,
-// 	#[serde(default)]
-// 	pub inclusive: bool,
-// }
-
-// #[derive(Debug, Clone, PartialEq)]
-// #[serde(untagged)]
-// pub enum NumericFilter<T> {
-// 	Gt { gt: T },
-// 	Gte { gte: T },
-// 	Lt { lt: T },
-// 	Lte { lte: T },
-// 	Range(NumericRange<T>),
-// }
-
-// /// A trait to convert an enum variant into a prisma order parameter
-// pub trait IntoOrderBy {
-// 	type OrderParam;
-// 	/// Convert the enum variant into a prisma order parameter, e.g. `media::name::order(SortOrder::Asc)`
-// 	fn into_order(self, dir: SortOrder) -> Self::OrderParam;
-// }
-
-// #[derive(Default, Debug, OrderByGen)]
-// #[prisma(module = "media_metadata")]
-// pub enum MediaMetadataOrderBy {
-// 	#[default]
-// 	Title,
-// 	Series,
-// 	Number,
-// 	Volume,
-// 	Summary,
-// 	Notes,
-// 	AgeRating,
-// 	Genre,
-// 	Year,
-// 	Month,
-// 	Day,
-// 	Writers,
-// 	Pencillers,
-// 	Inkers,
-// 	Colorists,
-// 	Letterers,
-// 	CoverArtists,
-// 	Editors,
-// 	Publisher,
-// 	Links,
-// 	Characters,
-// 	Teams,
-// }
-
-// #[derive(Default, Debug, OrderByGen)]
-// #[prisma(module = "media")]
-// pub enum MediaOrderBy {
-// 	#[default]
-// 	Name,
-// 	Size,
-// 	Extension,
-// 	CreatedAt,
-// 	UpdatedAt,
-// 	Status,
-// 	Path,
-// 	Pages,
-// 	Metadata(Vec<MediaMetadataOrderBy>),
-// 	ModifiedAt,
-// }
-
-// // #[derive(Debug, Deserialize, Serialize)]
-// // enum SeriesAggregateOrderBy {
-// // 	Media,
-// // }
-
-// #[derive(Default, Debug, OrderByGen)]
-// #[prisma(module = "series")]
-// pub enum SeriesOrderBy {
-// 	#[default]
-// 	Name,
-// 	Description,
-// 	UpdatedAt,
-// 	CreatedAt,
-// 	Path,
-// 	Status,
-// 	// _Count(SeriesAggregateOrderBy),
-// }
-
-// // #[derive(Debug, OrderByGen)]
-// // #[prisma(module = "library")]
-// // enum LibraryAggregateOrderBy {
-// // 	Media,
-// // 	Series,
-// // }
-
-// #[derive(Default, Debug, OrderByGen)]
-// #[prisma(module = "library")]
-// pub enum LibraryOrderBy {
-// 	#[default]
-// 	Name,
-// 	Path,
-// 	Status,
-// 	UpdatedAt,
-// 	CreatedAt,
-// 	// _Count(LibraryAggregateOrderBy),
-// }
-
-// #[derive(Default, Debug, OrderByGen)]
-// #[prisma(module = "job")]
-// pub enum JobOrderBy {
-// 	#[default]
-// 	Name,
-// 	Status,
-// 	CreatedAt,
-// 	CompletedAt,
-// }

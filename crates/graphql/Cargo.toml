@@ -10,6 +10,7 @@ async-stream.workspace = true
 axum.workspace = true
 chrono.workspace = true
 epub.workspace = true
+filter-gen = { path = "../filter-gen" }
 futures-util.workspace = true
 infer.workspace = true
 itertools.workspace = true

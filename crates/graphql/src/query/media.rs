@@ -32,7 +32,6 @@ impl MediaQuery {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		dbg!(&filter.0);
 		let conditions = filter.0.into_filter();
 		let query = media::ModelWithMetadata::find_for_user(user).filter(conditions);
 

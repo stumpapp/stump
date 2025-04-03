@@ -40,9 +40,6 @@ fn implement_into_filter(input: &DeriveInput) -> proc_macro2::TokenStream {
 		let is_logical_op =
 			field_name == "_and" || field_name == "_or" || field_name == "_not";
 
-		eprintln!("FIELD_NAME: {}", field_name);
-		eprintln!("LOGICAL_OP: {}", is_logical_op);
-
 		let field_condition = if is_logical_op {
 			if field_name == "_and" {
 				quote! {
@@ -76,14 +73,12 @@ fn implement_into_filter(input: &DeriveInput) -> proc_macro2::TokenStream {
 				}
 			}
 		} else if is_nested_type(&field.attrs) {
-			eprintln!("FIELD_NAME NESTED: {}", field_name);
 			quote! {
 				if let Some(field_filter) = self.#field_name {
 					condition = condition.add(field_filter.into_filter());
 				}
 			}
 		} else {
-			eprintln!("FIELD_NAME NOT OP: {}", field_name);
 			let column_path = find_column_path(&field.attrs);
 
 			let string_filter_gen_arm = if is_string_filter_type(field_type) {

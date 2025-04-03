@@ -316,11 +316,13 @@ dependencies = [
  "chrono",
  "fast_chemail",
  "fnv",
+ "futures-channel",
  "futures-timer",
  "futures-util",
  "handlebars",
  "http 1.2.0",
  "indexmap 2.2.6",
+ "lru 0.12.5",
  "mime",
  "multer",
  "num-traits",
@@ -2605,6 +2607,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "filter-gen"
+version = "0.0.0"
+dependencies = [
+ "itertools 0.13.0",
+ "proc-macro2",
+ "quote",
+ "serde",
+ "syn 2.0.87",
+ "thiserror 1.0.63",
+ "toml 0.8.19",
+]
+
+[[package]]
 name = "finl_unicode"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3167,6 +3182,7 @@ dependencies = [
  "axum",
  "chrono",
  "epub",
+ "filter-gen",
  "futures-util",
  "infer",
  "itertools 0.13.0",
@@ -4491,6 +4507,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e999beba7b6e8345721bd280141ed958096a2e4abdf74f67ff4ce49b4b54e47a"
 dependencies = [
  "hashbrown 0.12.3",
+]
+
+[[package]]
+name = "lru"
+version = "0.12.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "234cf4f4a04dc1f57e24b96cc0cd600cf2af460d4161ac5ecdd0af8e1f3b2a38"
+dependencies = [
+ "hashbrown 0.15.2",
 ]
 
 [[package]]
@@ -6673,7 +6698,7 @@ dependencies = [
  "indexmap 1.9.2",
  "itertools 0.10.5",
  "lazy_static",
- "lru",
+ "lru 0.7.8",
  "once_cell",
  "opentelemetry",
  "parking_lot 0.12.1",

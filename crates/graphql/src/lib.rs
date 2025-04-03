@@ -3,6 +3,7 @@ pub mod error_message;
 pub mod filter;
 pub mod guard;
 pub mod input;
+pub mod loader;
 pub mod mutation;
 pub mod object;
 pub mod pagination;

@@ -312,5 +312,6 @@ FROM "series";
 DROP TABLE "series";
 ALTER TABLE "new_series"
     RENAME TO "series";
+-- TODO: book club schedule (and possibly others) id
 PRAGMA foreign_keys = ON;
 COMMIT;

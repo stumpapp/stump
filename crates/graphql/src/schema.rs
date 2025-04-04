@@ -1,6 +1,12 @@
 use crate::{
-	data::CoreContext, loader::reading_session::ReadingSessionLoader, mutation::Mutation,
-	query::Query, subscription::Subscription,
+	data::CoreContext,
+	loader::{
+		library::LibraryLoader, reading_session::ReadingSessionLoader,
+		series::SeriesLoader,
+	},
+	mutation::Mutation,
+	query::Query,
+	subscription::Subscription,
 };
 use async_graphql::{dataloader::DataLoader, Schema};
 
@@ -15,8 +21,13 @@ pub async fn build_schema(ctx: CoreContext) -> AppSchema {
 	)
 	.data(ctx)
 	.data(DataLoader::new(
-		ReadingSessionLoader::new(conn),
+		ReadingSessionLoader::new(conn.clone()),
 		tokio::spawn,
 	))
+	.data(DataLoader::new(
+		LibraryLoader::new(conn.clone()),
+		tokio::spawn,
+	))
+	.data(DataLoader::new(SeriesLoader::new(conn), tokio::spawn))
 	.finish()
 }

@@ -18,7 +18,7 @@ use crate::{
 
 use super::{library_config::LibraryConfig, series::Series, user::User};
 
-#[derive(Debug, SimpleObject)]
+#[derive(Clone, Debug, SimpleObject)]
 #[graphql(complex)]
 pub struct Library {
 	#[graphql(flatten)]

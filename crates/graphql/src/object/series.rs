@@ -10,7 +10,7 @@ use crate::data::{CoreContext, RequestContext};
 
 use super::{library::Library, media::Media};
 
-#[derive(Debug, SimpleObject)]
+#[derive(Clone, Debug, SimpleObject)]
 #[graphql(complex)]
 pub struct Series {
 	#[graphql(flatten)]

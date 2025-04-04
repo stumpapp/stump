@@ -76,6 +76,30 @@ impl FromQueryResult for AuthUser {
 	}
 }
 
+// TODO: If the data loader requires access-related restrictions, we need to provide
+// something like this generic interface to the loader. Leaving as a comment for now,
+// but the parent node should always be gated so it likely won't be needed.
+// pub trait UserRef {
+// 	fn id(&self) -> String;
+// 	fn age_restriction(&self) -> Option<super::age_restriction::Model>;
+// }
+//
+// #[derive(Clone, Debug, PartialEq, Eq, Hash)]
+// pub struct LoaderUserRefKey {
+// 	pub id: String,
+// 	pub age_restriction: Option<super::age_restriction::Model>,
+// }
+
+// impl UserRef for LoaderUserRefKey {
+// 	fn id(&self) -> String {
+// 		self.id.clone()
+// 	}
+
+// 	fn age_restriction(&self) -> Option<super::age_restriction::Model> {
+// 		self.age_restriction.clone()
+// 	}
+// }
+
 #[derive(Debug, FromQueryResult)]
 pub struct UserIdentSelect {
 	pub id: String,

@@ -7,9 +7,12 @@ use sea_orm::{prelude::*, sea_query::Query};
 
 use crate::{
 	data::{CoreContext, RequestContext},
-	loader::reading_session::{
-		ActiveReadingSessionLoaderKey, FinishedReadingSessionLoaderKey,
-		ReadingSessionLoader,
+	loader::{
+		reading_session::{
+			ActiveReadingSessionLoaderKey, FinishedReadingSessionLoaderKey,
+			ReadingSessionLoader,
+		},
+		series::{SeriesLoader, SeriesLoaderKey},
 	},
 };
 
@@ -39,23 +42,21 @@ impl From<media::ModelWithMetadata> for Media {
 #[ComplexObject]
 impl Media {
 	async fn series(&self, ctx: &Context<'_>) -> Result<Series> {
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let loader = ctx.data::<DataLoader<SeriesLoader>>()?;
 
 		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
-		let model = series::ModelWithMetadata::find_by_id(series_id)
-			.into_model::<series::ModelWithMetadata>()
-			.one(conn)
+
+		let series = loader
+			.load_one(series_id)
 			.await?
 			.ok_or("Series not found")?;
 
-		Ok(Series::from(model))
+		Ok(series)
 	}
 
 	async fn library(&self, ctx: &Context<'_>) -> Result<Library> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		// TODO: hidden from user? Access to this node _implies_ access to the library,
-		// so perhaps not
 		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
 		let model = library::Entity::find()
 			.filter(

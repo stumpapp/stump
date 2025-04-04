@@ -3,7 +3,7 @@ use async_graphql::SimpleObject;
 use async_trait::async_trait;
 use sea_orm::{
 	prelude::*, sea_query::Query, ActiveValue, Condition, FromQueryResult, JoinType,
-	QuerySelect, QueryTrait,
+	QuerySelect,
 };
 
 use crate::{
@@ -150,15 +150,9 @@ fn apply_series_metadata_join(query: Select<Entity>) -> Select<Entity> {
 }
 
 fn apply_library_hidden_filter(query: Select<Entity>, user: &AuthUser) -> Select<Entity> {
-	query.filter(
-		series::Column::LibraryId.not_in_subquery(
-			Query::select()
-				.column(library_hidden_to_user::Column::LibraryId)
-				.from(library_hidden_to_user::Entity)
-				.and_where(library_hidden_to_user::Column::UserId.eq(user.id.clone()))
-				.to_owned(),
-		),
-	)
+	query.filter(series::Column::LibraryId.not_in_subquery(
+		library_hidden_to_user::Entity::library_hidden_to_user_query(user),
+	))
 }
 
 impl Entity {

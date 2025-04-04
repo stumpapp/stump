@@ -172,6 +172,7 @@ impl Entity {
 mod tests {
 	use super::*;
 	use crate::tests::common::*;
+	use pretty_assertions::assert_eq;
 
 	fn get_default_user() -> AuthUser {
 		AuthUser {

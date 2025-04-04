@@ -76,6 +76,7 @@ impl Entity {
 mod tests {
 	use super::*;
 	use crate::tests::common::*;
+	use pretty_assertions::assert_eq;
 	use sea_orm::{DatabaseBackend, MockDatabase, Set};
 	use tokio_test;
 

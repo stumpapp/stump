@@ -1,4 +1,8 @@
-use sea_orm::entity::prelude::*;
+use super::user::AuthUser;
+use sea_orm::{
+	entity::prelude::*,
+	sea_query::{Query, SelectStatement},
+};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "_library_hidden_to_user")]
@@ -44,3 +48,31 @@ impl Related<super::user::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+impl Entity {
+	pub fn library_hidden_to_user_query(user: &AuthUser) -> SelectStatement {
+		Query::select()
+			.column(Column::LibraryId)
+			.from(Entity)
+			.and_where(Column::UserId.eq(user.id.clone()))
+			.to_owned()
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::tests::common::*;
+	use pretty_assertions::assert_eq;
+
+	#[test]
+	fn test_query() {
+		let user = get_default_user();
+		let stmt_str = Entity::library_hidden_to_user_query(&user)
+			.to_string(sea_orm::sea_query::SqliteQueryBuilder);
+		assert_eq!(
+			stmt_str,
+			r#"SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42'"#
+		);
+	}
+}

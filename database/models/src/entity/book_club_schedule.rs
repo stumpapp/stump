@@ -49,6 +49,7 @@ impl Entity {
 mod tests {
 	use super::*;
 	use crate::tests::common::*;
+	use pretty_assertions::assert_eq;
 
 	#[test]
 	fn test_find_for_book_club_id() {

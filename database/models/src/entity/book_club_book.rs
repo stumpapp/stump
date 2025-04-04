@@ -85,6 +85,7 @@ mod tests {
 	use super::*;
 	use crate::tests::common::*;
 	use chrono::NaiveDate;
+	use pretty_assertions::assert_eq;
 
 	#[test]
 	fn test_find_with_schedule() {

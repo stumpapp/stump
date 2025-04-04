@@ -35,15 +35,9 @@ pub struct Model {
 
 impl Entity {
 	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
-		Entity::find().filter(
-			Column::Id.not_in_subquery(
-				Query::select()
-					.column(library_hidden_to_user::Column::LibraryId)
-					.from(library_hidden_to_user::Entity)
-					.and_where(library_hidden_to_user::Column::UserId.eq(user.id.clone()))
-					.to_owned(),
-			),
-		)
+		Entity::find().filter(Column::Id.not_in_subquery(
+			library_hidden_to_user::Entity::library_hidden_to_user_query(user),
+		))
 	}
 }
 
@@ -129,5 +123,23 @@ impl ActiveModelBehavior for ActiveModel {
 		}
 
 		Ok(self)
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::tests::common::*;
+	use pretty_assertions::assert_eq;
+
+	#[test]
+	fn find_for_user() {
+		let user = get_default_user();
+		let select = Entity::find_for_user(&user);
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(
+			stmt_str,
+			r#"SELECT  FROM "libraries" WHERE "libraries"."id" NOT IN (SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42')"#
+		);
 	}
 }

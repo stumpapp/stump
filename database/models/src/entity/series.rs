@@ -53,17 +53,9 @@ impl Entity {
 			});
 
 		Entity::find()
-			.filter(
-				Column::LibraryId.not_in_subquery(
-					Query::select()
-						.column(library_hidden_to_user::Column::LibraryId)
-						.from(library_hidden_to_user::Entity)
-						.and_where(
-							library_hidden_to_user::Column::UserId.eq(user.id.clone()),
-						)
-						.to_owned(),
-				),
-			)
+			.filter(Column::LibraryId.not_in_subquery(
+				library_hidden_to_user::Entity::library_hidden_to_user_query(user),
+			))
 			.apply_if(age_restriction_filter, |query, filter| query.filter(filter))
 	}
 
@@ -213,6 +205,7 @@ mod tests {
 	use super::*;
 	use crate::entity::age_restriction;
 	use crate::tests::common::*;
+	use pretty_assertions::assert_eq;
 
 	#[test]
 	fn find_for_user_no_age_restriction() {

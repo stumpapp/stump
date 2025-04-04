@@ -3,7 +3,6 @@ use tracing::{debug, error, trace};
 
 use crate::{
 	config::StumpConfig,
-	db::entity::MediaMetadata,
 	filesystem::{
 		content_type::ContentType,
 		error::FileError,
@@ -79,104 +78,78 @@ impl FileProcessor for ZipProcessor {
 		})
 	}
 
-	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError> {
-		let zip_file = File::open(path)?;
-		let mut archive = zip::ZipArchive::new(zip_file)?;
-
-		let mut metadata = None;
-
-		for i in 0..archive.len() {
-			let mut file = archive.by_index(i)?;
-
-			if file.is_dir() {
-				trace!("Skipping directory");
-				continue;
-			}
-
-			let path_buf = file.enclosed_name().unwrap_or_else(|| {
-				tracing::warn!("Failed to get enclosed name for zip entry");
-				PathBuf::from(file.name())
-			});
-			let path = path_buf.as_path();
-
-			if path.is_hidden_file() {
-				trace!(path = ?path, "Skipping hidden file");
-				continue;
-			}
-
-			let FileParts { file_name, .. } = path.file_parts();
-
-			if file_name == "ComicInfo.xml" {
-				trace!("Found ComicInfo.xml");
-				let mut contents = Vec::new();
-				file.read_to_end(&mut contents)?;
-				let contents = String::from_utf8_lossy(&contents).to_string();
-				trace!(contents_len = contents.len(), "Read ComicInfo.xml");
-				metadata = metadata_from_buf(&contents);
-				break;
-			}
-		}
-
-		Ok(metadata)
-	}
-
 	fn process(
 		path: &str,
 		options: FileProcessorOptions,
 		_: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
-		let zip_file = File::open(path)?;
-		let mut archive = zip::ZipArchive::new(zip_file)?;
+		let mut processed_file = ProcessedFile {
+			path: PathBuf::from(path),
+			..Default::default()
+		};
 
-		let mut metadata = None;
-		let mut pages = 0;
+		if options.generate_file_hashes || options.generate_koreader_hashes {
+			let ProcessedFileHashes {
+				hash,
+				koreader_hash,
+			} = Self::generate_hashes(path, options)?;
+			if options.generate_file_hashes {
+				processed_file.hash = hash;
+			}
+			if options.generate_koreader_hashes {
+				processed_file.koreader_hash = koreader_hash;
+			}
+		};
 
-		let ProcessedFileHashes {
-			hash,
-			koreader_hash,
-		} = Self::generate_hashes(path, options)?;
+		if options.process_pages || options.process_metadata {
+			let zip_file = File::open(path)?;
+			let mut archive = zip::ZipArchive::new(zip_file)?;
 
-		for i in 0..archive.len() {
-			let mut file = archive.by_index(i)?;
+			let mut metadata = None;
+			let mut pages = 0;
+			for i in 0..archive.len() {
+				let mut file = archive.by_index(i)?;
 
-			if file.is_dir() {
-				trace!("Skipping directory");
-				continue;
+				if file.is_dir() {
+					trace!("Skipping directory");
+					continue;
+				}
+
+				let path_buf = file.enclosed_name().unwrap_or_else(|| {
+					tracing::warn!("Failed to get enclosed name for zip entry");
+					PathBuf::from(file.name())
+				});
+				let path = path_buf.as_path();
+
+				if path.is_hidden_file() {
+					trace!(path = ?path, "Skipping hidden file");
+					continue;
+				}
+
+				let content_type = path.naive_content_type();
+				let FileParts { file_name, .. } = path.file_parts();
+
+				if file_name == "ComicInfo.xml" && options.process_metadata {
+					trace!("Found ComicInfo.xml");
+					let mut contents = Vec::new();
+					file.read_to_end(&mut contents)?;
+					let contents = String::from_utf8_lossy(&contents).to_string();
+					trace!(contents_len = contents.len(), "Read ComicInfo.xml");
+					metadata = metadata_from_buf(&contents);
+				} else if content_type.is_image() {
+					pages += 1;
+				}
 			}
 
-			let path_buf = file.enclosed_name().unwrap_or_else(|| {
-				tracing::warn!("Failed to get enclosed name for zip entry");
-				PathBuf::from(file.name())
-			});
-			let path = path_buf.as_path();
-
-			if path.is_hidden_file() {
-				trace!(path = ?path, "Skipping hidden file");
-				continue;
+			if options.process_metadata {
+				processed_file.metadata = metadata;
 			}
-
-			let content_type = path.naive_content_type();
-			let FileParts { file_name, .. } = path.file_parts();
-
-			if file_name == "ComicInfo.xml" && options.process_metadata {
-				trace!("Found ComicInfo.xml");
-				let mut contents = Vec::new();
-				file.read_to_end(&mut contents)?;
-				let contents = String::from_utf8_lossy(&contents).to_string();
-				trace!(contents_len = contents.len(), "Read ComicInfo.xml");
-				metadata = metadata_from_buf(&contents);
-			} else if content_type.is_image() {
-				pages += 1;
+			if options.process_pages {
+				processed_file.pages = pages;
 			}
 		}
 
-		Ok(ProcessedFile {
-			path: PathBuf::from(path),
-			hash,
-			koreader_hash,
-			metadata,
-			pages,
-		})
+		Ok(processed_file)
 	}
 
 	fn get_page(
@@ -370,6 +343,7 @@ mod tests {
 			FileProcessorOptions {
 				convert_rar_to_zip: false,
 				delete_conversion_source: false,
+				process_pages: true,
 				..Default::default()
 			},
 			&config,

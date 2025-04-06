@@ -1,0 +1,32 @@
+Backend / Core:
+- [ ] Typed GraphQL filter objects
+- [ ] Finalize and test intial migration
+- [ ] Unify `RequestContext` between REST and GraphQL APIs
+  - [ ] Port all middleware to work with updated types/structs/etc
+- [ ] Develop (port) GET thumbnail and/or page API for:
+  - [ ] media
+  - [ ] series
+  - [ ] library
+- [ ] Move all the deserializer utils (e.g., age_rating_deserializer)
+- [ ] Remove sse and ws from REST, move to GraphQL
+- [ ] Port other remaining RESTful APIs:
+  - [ ] smart-lists
+  - [ ] notifier
+  - [ ] emailer
+  - [ ] config
+  - [ ] api_key
+  - [ ] user
+- [ ] Develop migration system according to SeaORM standards
+- [ ] Investigate whether `init_journal_mode` is needed
+- [ ] Address any remaining SeaORM issues (see `TODO(sea-orm)` or `TODO(graphql)` comments)
+- [ ] Remove Prisma entirely
+- [ ] Remove codegen crate
+- [ ] Remove utoipa and other OpenAPI-related crates
+
+Frontend / JS-related Packages:
+- [ ] Rewrite `sdk` package to basically be a slim wrapper around an authed axios instance
+  - [ ] Port any v1 features which are staying to v2
+  - [ ] Retain OPDS client sdk impl
+- [ ] Investigate relay vs apollo and select one (lean towards relay)
+  - [ ] Setup generic client to share between web, desktop, mobile
+  - [ ] Port all RESTful API calls to GraphQL (easily one of the biggest tasks)

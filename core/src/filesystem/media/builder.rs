@@ -107,7 +107,6 @@ impl MediaBuilder {
 		let pages = processed_entry.pages;
 		let mut resolved_metadata = None;
 
-		// TODO(sea-orm): processing should return active model?
 		if let Some(mut metadata) = processed_entry.metadata {
 			let conflicting_page_counts =
 				metadata.page_count.is_some_and(|count| count != pages);

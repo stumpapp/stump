@@ -1,0 +1,954 @@
+type ActiveReadingSession {
+	id: String!
+	page: Int
+	percentageCompleted: Decimal
+	epubcfi: String
+	koreaderProgress: String
+	startedAt: DateTime!
+	updatedAt: DateTime!
+	mediaId: String!
+	userId: String!
+	deviceId: String
+	elapsedSeconds: Int
+}
+
+type BookClub {
+	id: String!
+	name: String!
+	description: String
+	isPrivate: Boolean!
+	createdAt: DateTime!
+	emoji: String
+	currentBook: BookClubBook
+	invitations: [BookClubInvitation!]!
+	members: [BookClubMember!]!
+	schedule: BookClubSchedule
+}
+
+union BookClubBook = BookClubInternalBook | BookClubExternalBook
+
+input BookClubBookInput @oneOf {
+	stored: BookClubInternalBookInput
+	external: BookClubExternalBookInput
+}
+
+type BookClubExternalBook {
+	title: String!
+	author: String!
+	url: String
+	imageUrl: String
+}
+
+input BookClubExternalBookInput {
+	title: String!
+	author: String!
+	url: String
+	imageUrl: String
+}
+
+type BookClubInternalBook {
+	id: String!
+}
+
+input BookClubInternalBookInput {
+	id: String!
+}
+
+type BookClubInvitation {
+	id: String!
+	role: BookClubMemberRole!
+	userId: String!
+	bookClubId: String!
+	"The book club that the user was invited to"
+	bookClub: BookClub!
+	"The user who was invited to the book club"
+	user: User!
+}
+
+input BookClubInvitationInput {
+	userId: String!
+	role: BookClubMemberRole
+}
+
+input BookClubInvitationResponseInput {
+	accept: Boolean!
+	member: BookClubMemberInput
+}
+
+type BookClubMember {
+	id: String!
+	displayName: String
+	isCreator: Boolean!
+	hideProgress: Boolean!
+	privateMembership: Boolean!
+	role: BookClubMemberRole!
+	userId: String!
+	bookClubId: String!
+}
+
+input BookClubMemberInput {
+	userId: String!
+	displayName: String
+	privateMembership: Boolean
+}
+
+"The visibility of a shareable entity"
+enum BookClubMemberRole {
+	MEMBER
+	MODERATOR
+	ADMIN
+	CREATOR
+}
+
+type BookClubSchedule {
+	id: Int!
+	defaultIntervalDays: Int
+	bookClubId: String!
+	books: [BookClubBook!]!
+}
+
+type Bookmark {
+	id: String!
+	previewContent: String
+	epubcfi: String
+	page: Int
+	mediaId: String!
+	userId: String!
+}
+
+input BookmarkInput {
+	mediaId: String!
+	epubcfi: String!
+	previewContent: String
+}
+
+
+type CleanLibraryResponse {
+	deletedMediaCount: Int!
+	deletedSeriesCount: Int!
+	isEmpty: Boolean!
+}
+
+input CreateBookClubInput {
+	name: String!
+	isPrivate: Boolean! = false
+	memberRoleSpec: JSON
+	creatorHideProgress: Boolean!
+	creatorDisplayName: String
+}
+
+input CreateBookClubMemberInput {
+	userId: String!
+	displayName: String
+	privateMembership: Boolean
+	role: BookClubMemberRole!
+}
+
+input CreateBookClubScheduleBook {
+	book: BookClubBookInput!
+	startAt: DateTime
+	endAt: DateTime
+	discussionDurationDays: Int
+}
+
+input CreateBookClubScheduleInput {
+	defaultIntervalDays: Int
+	books: [CreateBookClubScheduleBook!]!
+}
+
+input CreateOrUpdateLibraryInput {
+	name: String!
+	path: String!
+	description: String
+	emoji: String
+	tags: [String!]
+	config: LibraryConfigInput
+	scanAfterPersist: Boolean!
+}
+
+"A simple cursor-based pagination input object"
+input CursorPagination {
+	after: String
+	limit: Int!
+}
+
+"Information about the current cursor pagination state"
+type CursorPaginationInfo {
+	"""
+	The cursor of the current page. This should only be None if there are no results,
+	since there is no cursor present to pull from. This technically deviates from
+	popular (read: Relay) specs, but it works better for Stump
+	"""
+	currentCursor: String
+	"The cursor the next page should use, if it exists."
+	nextCursor: String
+}
+
+"""
+Implement the DateTime<FixedOffset> scalar
+
+The input/output is a string in RFC3339 format.
+"""
+scalar DateTime
+
+scalar Decimal
+
+type Emailer {
+	id: Int!
+	name: String!
+	isPrimary: Boolean!
+	senderEmail: String!
+	senderDisplayName: String!
+	username: String!
+	smtpHost: String!
+	smtpPort: Int!
+	tlsEnabled: Boolean!
+	maxAttachmentSizeBytes: Int
+	maxNumAttachments: Int
+	lastUsedAt: DateTime
+	sendHistory: [EmailerSendRecord!]!
+}
+
+type EmailerSendRecord {
+	id: Int!
+	emailerId: Int!
+	recipientEmail: String!
+	attachmentMeta: [Int!]
+	sentAt: String!
+	sentByUserId: String
+	sentBy: User
+}
+
+"The visibility of a shareable entity"
+enum EntityVisibility {
+	PUBLIC
+	SHARED
+	PRIVATE
+}
+
+type Epub {
+	mediaId: String!
+	spine: [SpineItem!]!
+	resources: JSONObject!
+	toc: [String!]!
+	metadata: JSONObject!
+	rootBase: String!
+	rootFile: String!
+	extraCss: [String!]!
+	annotations: [MediaAnnotationsModel!]!
+	media: Media!
+}
+
+input EpubProgressInput {
+	mediaId: String!
+	epubcfi: String!
+	percentage: Decimal!
+	isComplete: Boolean
+}
+
+type EpubProgressOutput {
+	activeSession: ActiveReadingSession
+	finishedSession: FinishedReadingSession
+}
+
+"The different statuses a file reference can have"
+enum FileStatus {
+	UNKNOWN
+	READY
+	UNSUPPORTED
+	ERROR
+	MISSING
+}
+
+type FinishedReadingSession {
+	id: String!
+	startedAt: DateTime!
+	completedAt: DateTime!
+	mediaId: String!
+	userId: String!
+	deviceId: String
+	elapsedSeconds: Int
+}
+
+
+
+
+"A scalar that can represent any JSON value."
+scalar JSON
+
+"A scalar that can represent any JSON Object value."
+scalar JSONObject
+
+type Library {
+	id: String!
+	name: String!
+	description: String
+	path: String!
+	status: String!
+	updatedAt: DateTime!
+	createdAt: DateTime!
+	emoji: String
+	configId: Int!
+	jobScheduleConfigId: String
+	lastScannedAt: String
+	config: LibraryConfig!
+	excludedUsers: [User!]!
+	"Get the details of the last scan job for this library, if any exists."
+	lastScan: LibraryScanRecordModel
+	"Get the full history of scan jobs for this library."
+	scanHistory: [LibraryScanRecordModel!]!
+	series: [Series!]!
+	stats(allUsers: Boolean): LibraryStats!
+	tags: [String!]!
+}
+
+type LibraryConfig {
+	id: Int!
+	convertRarToZip: Boolean!
+	hardDeleteConversions: Boolean!
+	defaultReadingDir: ReadingDirection!
+	defaultReadingMode: ReadingMode!
+	defaultReadingImageScaleFit: ReadingImageScaleFit!
+	generateFileHashes: Boolean!
+	generateKoreaderHashes: Boolean!
+	processMetadata: Boolean!
+	watch: Boolean!
+	libraryPattern: LibraryPattern!
+	libraryId: String
+	imageProcessorOptions: JSON
+	ignoreRules: [String!]
+}
+
+input LibraryConfigInput {
+	convertRarToZip: Boolean!
+	hardDeleteConversions: Boolean!
+	generateFileHashes: Boolean!
+	generateKoreaderHashes: Boolean!
+	processMetadata: Boolean!
+	watch: Boolean!
+	libraryPattern: LibraryPattern!
+	thumbnailConfig: JSON
+	defaultReadingDir: ReadingDirection!
+	defaultReadingMode: ReadingMode!
+	defaultReadingImageScaleFit: ReadingImageScaleFit!
+	ignoreRules: [String!]
+}
+
+"The different patterns a library may be organized by"
+enum LibraryPattern {
+	SERIES_BASED
+	COLLECTION_BASED
+}
+
+type LibraryScanRecordModel {
+	id: Int!
+	options: [Int!]
+	timestamp: DateTime!
+	libraryId: String!
+	jobId: String
+}
+
+type LibraryStats {
+	seriesCount: Int!
+	bookCount: Int!
+	totalBytes: Int!
+	completedBooks: Int!
+	inProgressBooks: Int!
+}
+
+type Log {
+	id: Int!
+	level: String!
+	message: String!
+	timestamp: DateTime!
+	jobId: String
+	context: String
+}
+
+type LogDeleteOutput {
+	deleted: Int!
+}
+
+type LogFileInfo {
+	path: String!
+	size: Int!
+	modified: String!
+}
+
+type Media {
+	"The unique identifier for the media"
+	id: String!
+	"The name of the media, derived from the filename and excluding the extension"
+	name: String!
+	"The size of the media file in bytes"
+	size: Int!
+	"The extension of the media file, excluding the leading period"
+	extension: String!
+	"The number of pages in the media, if applicable. Will be -1 for certain media types"
+	pages: Int!
+	"The timestamp of the last time the media was updated. This will be set during creation, as well"
+	updatedAt: DateTime!
+	"The timestamp of the creation of the media"
+	createdAt: DateTime!
+	"""
+	The timestamp of when the underlying file was last modified on disk. This will only be set if
+	a timestamp can be retrieved from the filesystem
+	"""
+	modifiedAt: DateTime
+	"""
+	A Stump-specific hash of the media file. This is used as a secondary identifier for the media, primarily
+	in aiding in the identification of duplicate media files
+	"""
+	hash: String
+	"""
+	A hash of the media file that adheres to the KoReader hash algorithm. This is used to identify
+	books from the KoReader application so progress can be synced between the two applications
+	"""
+	koreaderHash: String
+	"The path of the underlying media file on disk"
+	path: String!
+	"""
+	The status of the media. This is used to determine if the media is available for reading (i.e.,
+	if it is available on disk)
+	"""
+	status: FileStatus!
+	"""
+	The unique identifier of the series that the media belongs to. While this is nullable, it is
+	expected that all media will belong to a series
+	"""
+	seriesId: String
+	"The timestamp of when the media was **soft** deleted. This will act like a trash bin."
+	deletedAt: DateTime
+	metadata: MediaMetadataModel
+	series: Series!
+	library: Library!
+	readProgress: ActiveReadingSession
+	readHistory: [FinishedReadingSession!]!
+	nextInSeries(take: Int! = 1): [Media!]!
+}
+
+type MediaAnnotationsModel {
+	id: String!
+	highlightedText: String
+	epubcfi: String
+	page: Int
+	pageCoordinatesX: Decimal
+	pageCoordinatesY: Decimal
+	notes: String
+	userId: String!
+	mediaId: String!
+}
+
+type MediaMetadataModel {
+	id: Int!
+	mediaId: String
+	title: String
+	series: String
+	number: Decimal
+	volume: Int
+	summary: String
+	notes: String
+	genre: String
+	year: Int
+	month: Int
+	day: Int
+	writers: String
+	pencillers: String
+	inkers: String
+	colorists: String
+	letterers: String
+	coverArtists: String
+	editors: String
+	publisher: String
+	links: String
+	characters: String
+	teams: String
+	pageCount: Int
+	ageRating: Int
+	pageAnalysis: PageAnalysis
+}
+
+type MediaMetadataOverview {
+	genres: [String!]!
+	writers: [String!]!
+	pencillers: [String!]!
+	inkers: [String!]!
+	colorists: [String!]!
+	letterers: [String!]!
+	editors: [String!]!
+	publishers: [String!]!
+	characters: [String!]!
+	teams: [String!]!
+}
+
+type Mutation {
+	createBookClub(input: CreateBookClubInput!): BookClub!
+	updateBookClub(id: ID!, input: UpdateBookClubInput!): BookClub!
+	createBookClubInvitation(id: ID!, input: BookClubInvitationInput!): BookClubInvitation!
+	respondToBookClubInvitation(id: ID!, input: BookClubInvitationResponseInput!): BookClubInvitation!
+	createBookClubMember(bookClubId: ID!, input: CreateBookClubMemberInput!): BookClubMember!
+	createBookClubSchedule(id: ID!, input: CreateBookClubScheduleInput!): BookClub!
+	addBooksToBookClubSchedule(id: ID!, books: [CreateBookClubScheduleBook!]!): BookClub!
+	"""
+	Update the progress of an epub for a user. If the percentage is 1 or greater, the epub is
+	considered finished and the active session is deleted and a finished session is created.
+	
+	If the epub is already finished and the percentage is 1 or greater, the old finished
+	session is deleted and a new one is created.
+	"""
+	updateEpubProgress(input: EpubProgressInput!): EpubProgressOutput!
+	"""
+	Create or update a bookmark for a user. If a bookmark already exists for the given media
+	and epubcfi, the preview content is updated.
+	"""
+	createOrUpdateBookmark(input: BookmarkInput!): Bookmark!
+	"Delete a bookmark by ID. The user must be the owner of the bookmark."
+	deleteBookmark(id: ID!): Bookmark!
+	"""
+	Delete media and series from a library that match one of the following conditions:
+	
+	- A series that is missing from disk (status is not `Ready`)
+	- A media that is missing from disk (status is not `Ready`)
+	- A series that is not associated with any media (i.e., no media in the series)
+	
+	This operation will also remove any associated thumbnails of the deleted media and series.
+	"""
+	cleanLibrary(id: ID!): CleanLibraryResponse!
+	"""
+	Create a new library with the provided configuration. If `scan_after_persist` is `true`,
+	the library will be scanned immediately after creation.
+	"""
+	createLibrary(input: CreateOrUpdateLibraryInput!): Library!
+	"""
+	Update an existing library with the provided configuration. If `scan_after_persist` is `true`,
+	the library will be scanned immediately after updating.
+	"""
+	updateLibrary(id: ID!, input: CreateOrUpdateLibraryInput!): Library!
+	"""
+	Exclude users from a library, preventing them from seeing the library in the UI. This operates as a
+	full replacement of the excluded users list, so any users not included in the provided list will be
+	removed from the exclusion list if they were previously excluded.
+	
+	The server owner cannot be excluded from a library, nor can the user performing the action exclude
+	themselves.
+	"""
+	updateLibraryExcludedUsers(id: ID!, userIds: [String!]!): Library!
+	deleteLibraryScanHistory(id: ID!): Library!
+	"""
+	Delete a library, including all associated media and series via cascading deletes. This
+	operation cannot be undone.
+	"""
+	deleteLibrary(id: ID!): Library!
+	"""
+	Enqueue a scan job for a library. This will index the filesystem from the library's root path
+	and update the database accordingly.
+	"""
+	scanLibrary(id: ID!, option: JSON): Boolean!
+	"""
+	"Visit" a library, which will upsert a record of the user's last visit to the library.
+	This is used to inform the UI of the last library which was visited by the user
+	"""
+	visitLibrary(id: ID!): Library!
+	deleteLogs: LogDeleteOutput!
+	deleteLogFile: Boolean!
+	"""
+	Creates a new reading list.
+	
+	# Returns
+	
+	A result containing the newly created reading list, or an error if creation failed.
+	"""
+	createReadingList(input: ReadingListInput!): ReadingList!
+	"""
+	Updates an existing reading list.
+	
+	# Returns
+	
+	A result containing the updated reading list, or an error if update failed.
+	"""
+	updateReadingList(input: ReadingListInput!): ReadingList!
+	"""
+	Deletes a reading list by ID.
+	
+	# Returns
+	
+	A result containing the deleted reading list, or an error if deletion failed.
+	"""
+	deleteReadingList(id: String!): ReadingList!
+	analyzeSeries(id: ID!): Boolean!
+	markSeriesAsComplete(id: ID!): Series!
+	scanSeries(id: ID!): Boolean!
+	"""
+	Returns a list containing the newly created tags, or an error if creation failed.
+	
+	If any of the tags already exist an error is returned.
+	
+	* `tags` - A non-empty list of tags to create.
+	"""
+	createTags(tags: [String!]!): [Tag!]!
+	"""
+	Delete tags. Returns a list containing the deleted tags, or an error if deletion failed.
+	
+	* `tags` - A non-empty list of tags to create.
+	"""
+	deleteTags(tags: [String!]!): [Tag!]!
+	uploadBooks(input: UploadBooksInput!): Boolean!
+	uploadSeries(input: UploadSeriesInput!): Boolean!
+}
+
+"A simple offset-based pagination input object"
+input OffsetPagination {
+	page: Int!
+	pageSize: Int = 20
+	zeroBased: Boolean = false
+}
+
+"Information about the current offset pagination state"
+type OffsetPaginationInfo {
+	"""
+	The number of pages available. This is **not** affected by the zero-based flag,
+	so a client requesting zero-based pagination will need to adjust their pagination
+	logic accordingly.
+	"""
+	totalPages: Int!
+	"The current page, zero-indexed."
+	currentPage: Int!
+	"The number of elements per page."
+	pageSize: Int!
+	"The offset of the current page. E.g. if current page is 1, and pageSize is 10, the offset is 20."
+	pageOffset: Int!
+	"Whether or not the page is zero-indexed."
+	zeroBased: Boolean!
+}
+
+"A struct containing the various analyses of a book in Stump, e.g., page dimensions."
+type PageAnalysis {
+	dimensions: [PageDimension!]!
+}
+
+"""
+Represents a page dimension for a page of a Stump media item. It consists of a
+height and a width.
+"""
+type PageDimension {
+	height: Int!
+	width: Int!
+}
+
+type PaginatedLogResponse {
+	nodes: [Log!]!
+	pageInfo: PaginationInfo!
+}
+
+type PaginatedMediaResponse {
+	nodes: [Media!]!
+	pageInfo: PaginationInfo!
+}
+
+type PaginatedReadingListResponse {
+	nodes: [ReadingList!]!
+	pageInfo: PaginationInfo!
+}
+
+"""
+A union of the supported pagination flavors which Stump supports. The resulting
+response will be dependent on the pagination type used, e.g. a [CursorPaginatedResponse]
+will be returned if the [CursorPagination] type is used.
+
+You may use a conditional fragment in your GraphQL query for type-specific fields:
+```graphql
+query MyQuery {
+media(pagination: { offset: { page: 1, pageSize: 20 } }) {
+... on OffsetPaginationInfo {
+totalPages
+currentPage
+}
+}
+}
+```
+
+A special case is the `None` variant, which will return an offset-based pagination info
+object based on the size of the result set. This will not paginate the results, so be
+cautious when using this with large result sets.
+
+**Note**: Be sure to call [Pagination::resolve] before using the pagination object
+to ensure that the pagination object is in a valid state.
+"""
+input Pagination @oneOf {
+	cursor: CursorPagination
+	offset: OffsetPagination
+	none: Unpaginated
+}
+
+union PaginationInfo = CursorPaginationInfo | OffsetPaginationInfo
+
+type Query {
+	bookClubs(all: Boolean = null): [BookClub!]!
+	bookClubById(id: ID!): BookClub
+	emailers: [Emailer!]!
+	emailerById(id: ID!): Emailer
+	media(filter: JSON! = "{}", pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	mediaById(id: ID!): Media
+	keepReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	recentlyAddedMedia(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	duplicateMedia: [Media!]!
+	me: User!
+	users: [User!]!
+	userById(id: ID!): User!
+	"""
+	Retrieves a paginated list of reading lists for the current user.
+	
+	# Returns
+	
+	A paginated list of reading lists.
+	"""
+	readingLists(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedReadingListResponse!
+	"""
+	Retrieves a reading list by ID for the current user.
+	
+	# Returns
+	A reading list with the given ID. If no reading list with this ID exists for the current user, an error will be returned.
+	"""
+	readingListById(id: ID!): ReadingList!
+	"Get a single epub by its media ID"
+	epubById(id: ID!): Epub!
+	"Get all bookmarks for a single epub by its media ID"
+	bookmarksByMediaId(id: ID!): [Bookmark!]!
+	mediaMetadataOverview: MediaMetadataOverview!
+	"Returns a list of all tags."
+	tags: [Tag!]!
+	logs(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLogResponse!
+	"""
+	Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
+	~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
+	"""
+	logfileInfo: LogFileInfo!
+}
+
+"The different reading directions supported by any Stump reader"
+enum ReadingDirection {
+	LTR
+	RTL
+}
+
+"The different ways an image may be scaled to fit a reader's viewport"
+enum ReadingImageScaleFit {
+	HEIGHT
+	WIDTH
+	NONE
+}
+
+type ReadingList {
+	id: String!
+	name: String!
+	description: String
+	updatedAt: DateTime!
+	visibility: String!
+	ordering: String!
+	creatingUserId: String!
+}
+
+input ReadingListInput {
+	id: String!
+	name: String!
+	visibility: EntityVisibility
+	mediaIds: [String!]!
+}
+
+"The different reading modes supported by any Stump reader"
+enum ReadingMode {
+	PAGED
+	CONTINUOUS_VERTICAL
+	CONTINUOUS_HORIZONTAL
+}
+
+type Series {
+	id: String!
+	name: String!
+	description: String
+	updatedAt: DateTime!
+	createdAt: DateTime!
+	path: String!
+	status: String!
+	libraryId: String
+	metadata: SeriesMetadataModel
+	library: Library!
+	media: [Media!]!
+	upNext(take: Int! = 1, cursor: String): [Media!]!
+	isComplete: Boolean!
+	unreadCount: Int!
+}
+
+type SeriesMetadataModel {
+	metaType: String!
+	title: String
+	summary: String
+	publisher: String
+	imprint: String
+	comicid: Int
+	volume: Int
+	booktype: String
+	ageRating: Int
+	status: String
+	seriesId: String!
+}
+
+type SpineItem {
+	idref: String!
+	id: String
+	properties: String
+	linear: Boolean!
+}
+
+
+type Subscription {
+	tailLogFile: String!
+}
+
+type Tag {
+	id: String!
+	name: String!
+}
+
+"""
+A simple pagination input object which does not paginate. An explicit struct is
+required as a limitation of async_graphql's [OneofObject], which doesn't allow
+for empty variants.
+"""
+input Unpaginated {
+	unpaginated: Boolean!
+}
+
+input UpdateBookClubInput {
+	name: String
+	description: String
+	isPrivate: Boolean
+	memberRoleSpec: JSON
+	emoji: String
+}
+
+scalar Upload
+
+input UploadBooksInput {
+	libraryId: String!
+	placeAt: String!
+	uploads: [Upload!]!
+}
+
+input UploadSeriesInput {
+	libraryId: String!
+	placeAt: String!
+	seriesDirName: String!
+	upload: Upload!
+}
+
+type User {
+	id: String!
+	username: String!
+	isServerOwner: Boolean!
+	avatarUrl: String
+	lastLogin: DateTime
+	createdAt: DateTime!
+	deletedAt: DateTime
+	isLocked: Boolean!
+	maxSessionsAllowed: Int
+	continueReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	permissions: [UserPermission!]!
+	preferences: UserPreferences!
+}
+
+"The permissions a user may be granted"
+enum UserPermission {
+	"Grant access to read/create their own API keys"
+	ACCESS_API_KEYS
+	"Grant access to the koreader sync feature"
+	ACCESS_KOREADER_SYNC
+	"""
+	TODO: Expand permissions for bookclub + smartlist
+	Grant access to the book club feature
+	"""
+	ACCESS_BOOK_CLUB
+	"Grant access to create a book club (access book club)"
+	CREATE_BOOK_CLUB
+	"Grant access to read any emailers in the system"
+	EMAILER_READ
+	"Grant access to create an emailer"
+	EMAILER_CREATE
+	"Grant access to manage an emailer"
+	EMAILER_MANAGE
+	"Grant access to send an email"
+	EMAIL_SEND
+	"Grant access to send an arbitrary email, bypassing any registered device requirements"
+	EMAIL_ARBITRARY_SEND
+	"Grant access to access the smart list feature. This includes the ability to create and edit smart lists"
+	ACCESS_SMART_LIST
+	"Grant access to access the file explorer"
+	FILE_EXPLORER
+	"Grant access to upload files to a library"
+	UPLOAD_FILE
+	"Grant access to download files from a library"
+	DOWNLOAD_FILE
+	"Grant access to create a library"
+	CREATE_LIBRARY
+	"Grant access to edit basic details about the library"
+	EDIT_LIBRARY
+	"Grant access to scan the library for new files"
+	SCAN_LIBRARY
+	"Grant access to manage the library (scan,edit,manage relations)"
+	MANAGE_LIBRARY
+	"Grant access to delete the library (manage library)"
+	DELETE_LIBRARY
+	"""
+	Grant access to read users.
+	
+	Note that this is explicitly for querying users via user-specific endpoints.
+	This would not affect relational queries, such as members in a common book club.
+	"""
+	READ_USERS
+	"Grant access to manage users (create,edit,delete)"
+	MANAGE_USERS
+	READ_NOTIFIER
+	"Grant access to create a notifier"
+	CREATE_NOTIFIER
+	"Grant access to manage a notifier"
+	MANAGE_NOTIFIER
+	"Grant access to delete a notifier"
+	DELETE_NOTIFIER
+	"Grant access to manage the server. This is effectively a step below server owner"
+	MANAGE_SERVER
+}
+
+type UserPreferences {
+	id: String!
+	preferredLayoutMode: String!
+	locale: String!
+	appTheme: String!
+	appFont: String!
+	primaryNavigationMode: String!
+	layoutMaxWidthPx: Int
+	showQueryIndicator: Boolean!
+	enableLiveRefetch: Boolean!
+	enableDiscordPresence: Boolean!
+	enableCompactDisplay: Boolean!
+	enableGradients: Boolean!
+	enableDoubleSidebar: Boolean!
+	enableReplacePrimarySidebar: Boolean!
+	enableHideScrollbar: Boolean!
+	preferAccentColor: Boolean!
+	showThumbnailsInHeaders: Boolean!
+	enableJobOverlay: Boolean!
+	enableAlphabetSelect: Boolean!
+	navigationArrangement: [Int!]
+	homeArrangement: [Int!]
+	userId: String
+}
+
+directive @include(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+directive @oneOf on INPUT_OBJECT
+directive @skip(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+directive @specifiedBy(url: String!) on SCALAR
+schema {
+	query: Query
+	mutation: Mutation
+	subscription: Subscription
+}

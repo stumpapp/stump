@@ -30,6 +30,7 @@
 		"typescript": "^5.4.5",
 		"vite": "^4.5.3",
 		"vite-plugin-pwa": "^0.21.1",
-		"vite-plugin-tsconfig-paths": "^1.4.1"
+		"vite-plugin-tsconfig-paths": "^1.4.1",
+		"vite-plugin-relay": "^2.1.0"
 	}
 }

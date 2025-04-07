@@ -3181,6 +3181,7 @@ dependencies = [
  "async-stream",
  "axum",
  "chrono",
+ "clap",
  "epub",
  "filter-gen",
  "futures-util",

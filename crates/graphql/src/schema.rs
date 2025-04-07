@@ -31,3 +31,12 @@ pub async fn build_schema(ctx: CoreContext) -> AppSchema {
 	.data(DataLoader::new(SeriesLoader::new(conn), tokio::spawn))
 	.finish()
 }
+
+pub fn build_schema_bare() -> AppSchema {
+	Schema::build(
+		Query::default(),
+		Mutation::default(),
+		Subscription::default(),
+	)
+	.finish()
+}

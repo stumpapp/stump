@@ -7,27 +7,40 @@ use crate::{
 	},
 };
 use async_graphql::{Context, Object, Result, SimpleObject, ID};
-use models::entity::{bookmark, reading_session, user::AuthUser};
+use models::entity::{
+	bookmark, finished_reading_session, reading_session, user::AuthUser,
+};
 use sea_orm::{prelude::*, sea_query::OnConflict, TransactionTrait};
 
 #[derive(Default)]
 pub struct EpubMutation;
 
 #[derive(Debug, SimpleObject)]
-pub struct EpubProgressOutput {
+pub struct ReadingProgressOutput {
 	active_session: Option<ActiveReadingSession>,
 	finished_session: Option<FinishedReadingSession>,
+}
+
+impl ReadingProgressOutput {
+	pub fn new(
+		active_session: Option<ActiveReadingSession>,
+		finished_session: Option<FinishedReadingSession>,
+	) -> Self {
+		Self {
+			active_session,
+			finished_session,
+		}
+	}
 }
 
 async fn update_epub_progress_finished(
 	conn: &DatabaseConnection,
 	user: &AuthUser,
 	input: EpubProgressInput,
-) -> Result<EpubProgressOutput> {
-	let txn = conn.begin().await?;
+) -> Result<ReadingProgressOutput> {
 	let active_session =
 		reading_session::Entity::find_for_user_and_media_id(user, &input.media_id)
-			.one(&txn)
+			.one(conn)
 			.await?;
 
 	let started_at = active_session
@@ -37,6 +50,23 @@ async fn update_epub_progress_finished(
 
 	let finished_reading_session =
 		input.into_finished_session_active_model(user, started_at);
+
+	let finished_reading_session =
+		insert_finished_reading_session(active_session, finished_reading_session, conn)
+			.await?;
+
+	Ok(ReadingProgressOutput {
+		active_session: None,
+		finished_session: Some(finished_reading_session.into()),
+	})
+}
+
+pub async fn insert_finished_reading_session(
+	active_session: Option<reading_session::Model>,
+	finished_reading_session: finished_reading_session::ActiveModel,
+	conn: &DatabaseConnection,
+) -> Result<finished_reading_session::Model> {
+	let txn = conn.begin().await?;
 
 	// Note that finished reading session is used as a read history, so we don't
 	// clean up existing ones. The active reading session is deleted, though.
@@ -48,17 +78,14 @@ async fn update_epub_progress_finished(
 
 	txn.commit().await?;
 
-	Ok(EpubProgressOutput {
-		active_session: None,
-		finished_session: Some(finished_reading_session.into()),
-	})
+	Ok(finished_reading_session.into())
 }
 
 async fn update_epub_progress_active(
 	conn: &DatabaseConnection,
 	user: &AuthUser,
 	input: EpubProgressInput,
-) -> Result<EpubProgressOutput> {
+) -> Result<ReadingProgressOutput> {
 	let active_session = input.into_reading_session_active_model(user);
 
 	let upserted_session = reading_session::Entity::insert(active_session)
@@ -77,7 +104,7 @@ async fn update_epub_progress_active(
 		.exec_with_returning(conn)
 		.await?;
 
-	Ok(EpubProgressOutput {
+	Ok(ReadingProgressOutput {
 		active_session: Some(upserted_session.into()),
 		finished_session: None,
 	})
@@ -94,7 +121,7 @@ impl EpubMutation {
 		&self,
 		ctx: &Context<'_>,
 		input: EpubProgressInput,
-	) -> Result<EpubProgressOutput> {
+	) -> Result<ReadingProgressOutput> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 
 		let is_complete = input

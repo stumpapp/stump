@@ -3178,6 +3178,7 @@ version = "0.0.10"
 dependencies = [
  "alphanumeric-sort",
  "async-graphql",
+ "async-graphql-axum",
  "async-stream",
  "axum",
  "chrono",

@@ -18,6 +18,7 @@ use book_club_schedule::BookClubScheduleMutation;
 use epub::EpubMutation;
 use library::LibraryMutation;
 use log::LogMutation;
+use media::MediaMutation;
 use reading_list::ReadingListMutation;
 use series::SeriesMutation;
 use tag::TagMutation;
@@ -30,6 +31,7 @@ pub struct Mutation(
 	BookClubMemberMutation,
 	BookClubScheduleMutation,
 	EpubMutation,
+	MediaMutation,
 	LibraryMutation,
 	LogMutation,
 	ReadingListMutation,

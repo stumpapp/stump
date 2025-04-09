@@ -19,4 +19,5 @@ pub mod reading_session;
 pub mod series;
 pub mod tag;
 pub mod user;
+pub mod user_login_activity;
 pub mod user_preferences;

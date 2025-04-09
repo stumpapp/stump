@@ -1,6 +1,8 @@
 use async_graphql::SimpleObject;
 
-use sea_orm::{entity::prelude::*, FromQueryResult};
+use sea_orm::{
+	entity::prelude::*, prelude::async_trait::async_trait, ActiveValue, FromQueryResult,
+};
 
 use crate::shared::{enums::UserPermission, permission_set::PermissionSet};
 
@@ -260,4 +262,16 @@ impl Related<super::user_preferences::Entity> for Entity {
 	}
 }
 
-impl ActiveModelBehavior for ActiveModel {}
+#[async_trait]
+impl ActiveModelBehavior for ActiveModel {
+	async fn before_save<C>(mut self, _db: &C, insert: bool) -> Result<Self, DbErr>
+	where
+		C: ConnectionTrait,
+	{
+		if insert && self.id.is_not_set() {
+			self.id = ActiveValue::Set(Uuid::new_v4().to_string());
+		}
+
+		Ok(self)
+	}
+}

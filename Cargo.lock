@@ -3181,6 +3181,7 @@ dependencies = [
  "async-graphql-axum",
  "async-stream",
  "axum",
+ "bcrypt",
  "chrono",
  "epub",
  "filter-gen",

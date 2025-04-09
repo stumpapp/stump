@@ -25,6 +25,7 @@ stump_core = { path = "../../core" }
 tokio.workspace = true
 tracing.workspace = true
 zip.workspace = true
+bcrypt.workspace = true
 
 [dev-dependencies]
 maplit.workspace = true

@@ -10,6 +10,7 @@ mod reading_list;
 mod series;
 mod tag;
 mod upload;
+mod user;
 
 use book_club::BookClubMutation;
 use book_club_invitation::BookClubInvitationMutation;
@@ -18,10 +19,12 @@ use book_club_schedule::BookClubScheduleMutation;
 use epub::EpubMutation;
 use library::LibraryMutation;
 use log::LogMutation;
+use media::MediaMutation;
 use reading_list::ReadingListMutation;
 use series::SeriesMutation;
 use tag::TagMutation;
 use upload::UploadMutation;
+use user::UserMutation;
 
 #[derive(async_graphql::MergedObject, Default)]
 pub struct Mutation(
@@ -30,10 +33,12 @@ pub struct Mutation(
 	BookClubMemberMutation,
 	BookClubScheduleMutation,
 	EpubMutation,
+	MediaMutation,
 	LibraryMutation,
 	LogMutation,
 	ReadingListMutation,
 	SeriesMutation,
 	TagMutation,
 	UploadMutation,
+	UserMutation,
 );

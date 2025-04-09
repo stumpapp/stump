@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use models::entity::server_config;
-use sea_orm::{prelude::*, DatabaseConnection, SelectColumns};
+use sea_orm::{prelude::*, DatabaseConnection, MockDatabase, SelectColumns};
 use tokio::sync::{
 	broadcast::{channel, Receiver, Sender},
 	mpsc::error::SendError,
@@ -99,6 +99,33 @@ impl Ctx {
 		// 	event_channel,
 		// 	library_watcher,
 		// }
+	}
+
+	/// Creates a [Ctx] instance for testing **only**. The prisma client is created
+	/// with a mock store, allowing for easy testing of the core without needing to
+	/// connect to a real database.
+	pub fn mock_sea(mock_db: MockDatabase) -> Ctx {
+		let config = Arc::new(StumpConfig::debug());
+		let (client, _) = prisma::PrismaClient::_mock();
+
+		let event_channel = Arc::new(channel::<CoreEvent>(1024));
+		let db = Arc::new(client);
+		let conn = Arc::new(mock_db.into_connection());
+
+		// Create job manager
+		let job_controller =
+			JobController::new(conn.clone(), config.clone(), event_channel.0.clone());
+		let library_watcher =
+			Arc::new(LibraryWatcher::new(conn.clone(), job_controller.clone()));
+
+		Ctx {
+			config,
+			db,
+			conn,
+			job_controller,
+			event_channel,
+			library_watcher,
+		}
 	}
 
 	/// Creates a [Ctx] instance for testing **only**. The prisma client is created

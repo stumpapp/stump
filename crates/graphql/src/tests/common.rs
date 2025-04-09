@@ -1,6 +1,10 @@
+use crate::{data::RequestContext, schema::add_data_loaders};
+use async_graphql::{EmptyMutation, EmptySubscription, ObjectType, Request, Schema};
 use chrono::{DateTime, Duration, Utc};
 use models::entity::user::AuthUser;
 use sea_orm::{DatabaseBackend::Sqlite, MockDatabase, ModelTrait};
+use std::sync::Arc;
+use stump_core::Ctx;
 
 pub fn is_close_to_now(time: DateTime<Utc>) -> bool {
 	let now = Utc::now();
@@ -24,4 +28,28 @@ pub fn get_default_user() -> AuthUser {
 		permissions: vec![],
 		age_restriction: None,
 	}
+}
+
+pub async fn get_graphql_query_response<QueryType: ObjectType + 'static>(
+	query: QueryType,
+	req_str: String,
+	db: MockDatabase,
+	user: AuthUser,
+) -> String {
+	let core_ctx = Arc::new(Ctx::mock_sea(db));
+	let req_ctx = RequestContext {
+		user: user.clone(),
+		api_key: None,
+	};
+
+	let mut req = Request::new(req_str);
+	req = req.data(req_ctx);
+
+	let conn = core_ctx.conn.clone();
+	let schema_builder =
+		Schema::build(query, EmptyMutation, EmptySubscription).data(core_ctx);
+	let schema = add_data_loaders(schema_builder, conn).finish();
+
+	let response = schema.execute(req).await;
+	serde_json::to_string_pretty(&response).unwrap()
 }

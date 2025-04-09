@@ -30,8 +30,10 @@ stump_core = { path = "../../core" }
 tokio.workspace = true
 tracing.workspace = true
 zip.workspace = true
+bcrypt.workspace = true
 
 [dev-dependencies]
 maplit.workspace = true
 tempfile.workspace = true
 pretty_assertions.workspace = true
+async-graphql-axum.workspace = true

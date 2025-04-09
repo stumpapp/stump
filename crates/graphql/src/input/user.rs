@@ -7,10 +7,17 @@ use models::{
 use sea_orm::{prelude::*, ActiveValue::Set};
 
 #[derive(InputObject)]
+pub struct AgeRestrictionInput {
+	pub age: i32,
+	pub restrict_on_unset: bool,
+}
+
+#[derive(InputObject)]
 pub struct CreateUserInput {
 	pub username: String,
 	pub password: String,
 	pub permissions: Vec<UserPermission>,
-	// pub age_restriction: Option<AgeRestriction>,
+	#[graphql(default)]
+	pub age_restriction: Option<AgeRestrictionInput>,
 	pub max_sessions_allowed: Option<i32>,
 }

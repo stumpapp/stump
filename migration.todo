@@ -1,5 +1,6 @@
 Backend / Core:
 - [ ] Typed GraphQL filter objects
+- [ ] Dynamic GraphQL ordering (e.g., `media(order_by: { title: ASC })`)
 - [ ] Finalize and test intial migration
 - [ ] Unify `RequestContext` between REST and GraphQL APIs
   - [ ] Port all middleware to work with updated types/structs/etc

@@ -1,5 +1,8 @@
 import { Api, AuthenticationMethod } from '@stump/sdk'
 import { PropsWithChildren, useEffect, useState } from 'react'
+import { RelayEnvironmentProvider } from 'react-relay'
+
+import { createEnvironment } from '@/relay'
 
 import { useClientContext } from '../context'
 import { SDKContext } from './context'
@@ -58,5 +61,9 @@ export function SDKProvider({
 		return null
 	}
 
-	return <SDKContext.Provider value={{ sdk, setSDK }}>{children}</SDKContext.Provider>
+	return (
+		<RelayEnvironmentProvider environment={createEnvironment(sdk)}>
+			<SDKContext.Provider value={{ sdk, setSDK }}>{children}</SDKContext.Provider>
+		</RelayEnvironmentProvider>
+	)
 }

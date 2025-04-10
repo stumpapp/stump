@@ -3,6 +3,7 @@ use async_graphql::SimpleObject;
 use sea_orm::{
 	entity::prelude::*, prelude::async_trait::async_trait, ActiveValue, FromQueryResult,
 };
+use serde::{Deserialize, Serialize};
 
 use crate::shared::{enums::UserPermission, permission_set::PermissionSet};
 
@@ -39,8 +40,7 @@ pub struct Model {
 	pub user_preferences_id: Option<String>,
 }
 
-// TODO: change name?
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct AuthUser {
 	pub id: String,
 	pub username: String,

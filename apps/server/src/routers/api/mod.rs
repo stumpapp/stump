@@ -1,5 +1,5 @@
 pub(crate) mod filters;
-pub(crate) mod v1;
+// pub(crate) mod v1;
 pub(crate) mod v2;
 
 use crate::middleware::auth::auth_middleware;
@@ -29,7 +29,8 @@ pub(crate) async fn mount(app_state: AppState) -> Router<AppState> {
 		"/api",
 		Router::new()
 			.nest("/graphql", graphql(app_state.clone()).await)
-			.nest("/v1", v1::mount(app_state)),
+			// .nest("/v1", v1::mount(app_state.clone()))
+			.nest("/v2", v2::mount(app_state)),
 	)
 }
 

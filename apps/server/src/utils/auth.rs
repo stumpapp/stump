@@ -1,7 +1,8 @@
-use stump_core::{
-	config::StumpConfig,
-	db::entity::{User, UserPermission},
+use models::{
+	entity::user::AuthUser,
+	shared::{enums::UserPermission, permission_set::AssociatedPermission},
 };
+use stump_core::config::StumpConfig;
 use tower_sessions::Session;
 
 use crate::{
@@ -48,14 +49,14 @@ pub fn decode_base64_credentials(
 	}
 }
 
-pub async fn get_session_user(session: &Session) -> APIResult<Option<User>> {
-	Ok(session.get::<User>(SESSION_USER_KEY).await?)
+pub async fn get_session_user(session: &Session) -> APIResult<Option<AuthUser>> {
+	Ok(session.get::<AuthUser>(SESSION_USER_KEY).await?)
 }
 
 /// A function to determine whether a user has a specific permission. The permission
 /// is checked against their explicitly assigned permissions, as well as any inherited
 /// ones through permission associations.
-fn user_has_permission(user: &User, permission: UserPermission) -> bool {
+fn user_has_permission(user: &AuthUser, permission: UserPermission) -> bool {
 	user.is_server_owner
 		|| user
 			.permissions
@@ -63,7 +64,7 @@ fn user_has_permission(user: &User, permission: UserPermission) -> bool {
 			.any(|p| p == &permission || p.associated().contains(&permission))
 }
 
-pub fn user_has_all_permissions(user: &User, permissions: &[UserPermission]) -> bool {
+pub fn user_has_all_permissions(user: &AuthUser, permissions: &[UserPermission]) -> bool {
 	if user.is_server_owner {
 		return true;
 	}
@@ -143,7 +144,7 @@ mod tests {
 
 	#[test]
 	fn test_associated_permissions() {
-		let user = User {
+		let user = AuthUser {
 			permissions: vec![
 				UserPermission::CreateLibrary,
 				UserPermission::ManageNotifier,

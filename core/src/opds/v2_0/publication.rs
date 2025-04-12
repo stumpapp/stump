@@ -258,7 +258,7 @@ impl OPDSPublication {
 					.href(format!("/opds/v2.0/books/{}/file", book.media.id))
 					.rel(OPDSLinkRel::Acquisition.item())
 					._type(OPDSLinkType::from(ContentType::from_extension(
-						&book.extension,
+						&book.media.extension,
 					)))
 					.properties(
 						OPDSProperties::default()

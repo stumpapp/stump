@@ -60,18 +60,6 @@ impl From<&library_config::Model> for FileProcessorOptions {
 	}
 }
 
-impl From<library_config::Model> for FileProcessorOptions {
-	fn from(options: library_config::Model) -> Self {
-		Self {
-			convert_rar_to_zip: options.convert_rar_to_zip,
-			delete_conversion_source: options.hard_delete_conversions,
-			generate_file_hashes: options.generate_file_hashes,
-			generate_koreader_hashes: options.generate_koreader_hashes,
-			process_metadata: options.process_metadata,
-		}
-	}
-}
-
 pub struct ProcessedFileHashes {
 	pub hash: Option<String>,
 	pub koreader_hash: Option<String>,

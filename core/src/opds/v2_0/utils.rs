@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
-use prisma_client_rust::{chrono::Utc, raw, PrismaValue, Raw};
+use chrono::Utc;
 use sea_orm::{
 	prelude::*, DatabaseBackend, DatabaseConnection, FromQueryResult, Statement,
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{prisma::PrismaClient, CoreResult};
+use crate::CoreResult;
 
 pub fn default_now() -> String {
 	Utc::now().to_rfc3339()
@@ -54,7 +54,8 @@ impl OPDSV2QueryExt for DatabaseConnection {
 		let result: Vec<QueryResult> = self
 			.query_all(Statement::from_sql_and_values(
 				DatabaseBackend::Sqlite,
-				r"
+				format!(
+					r"
 				WITH ranked AS (
 					SELECT id, RANK() OVER (ORDER BY name ASC) AS position
 					FROM media
@@ -62,9 +63,15 @@ impl OPDSV2QueryExt for DatabaseConnection {
 				)
 				SELECT id, position
 				FROM ranked
-				WHERE id IN (?)
+				WHERE id IN ({})
 				",
-				[series_id.into(), book_ids.into()],
+					book_ids
+						.into_iter()
+						.map(|id| format!("\"{id}\""))
+						.collect::<Vec<_>>()
+						.join(",")
+				),
+				[series_id.into()],
 			))
 			.await?;
 

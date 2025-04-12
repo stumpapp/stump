@@ -9,13 +9,13 @@ use graphql::data::RequestContext;
 use models::shared::enums::UserPermission;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
-use stump_core::{
-	db::entity::macros::{finished_session_koreader, reading_session_koreader},
-	prisma::{
-		active_reading_session, finished_reading_session, media,
-		registered_reading_device, user,
-	},
-};
+// use stump_core::{
+// 	// db::entity::macros::{finished_session_koreader, reading_session_koreader},
+// 	// prisma::{
+// 	// 	active_reading_session, finished_reading_session, media,
+// 	// 	registered_reading_device, user,
+// 	// },
+// };
 
 use crate::{
 	config::state::AppState,

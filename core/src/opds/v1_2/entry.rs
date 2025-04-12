@@ -10,7 +10,6 @@ use prisma_client_rust::chrono::{self, FixedOffset};
 use urlencoding::encode;
 use xml::{writer::XmlEvent, EventWriter};
 
-use crate::db::entity::MediaMetadata;
 use crate::error::CoreResult;
 use crate::filesystem::media::get_content_types_for_pages;
 use crate::filesystem::{ContentType, FileParts, PathUtils};
@@ -271,34 +270,36 @@ impl IntoOPDSEntry for OPDSEntryBuilder<media::Data> {
 
 		let mib = self.data.size as f64 / (1024.0 * 1024.0);
 
-		let metadata = self
-			.data
-			.metadata()
-			.ok()
-			.flatten()
-			.map(|meta| MediaMetadata::from(meta.to_owned()));
-		let description = metadata
-			.as_ref()
-			.and_then(|m| m.summary.as_ref())
-			.map(|s| s.to_owned());
+		// TODO(sea-orm): Fix this
+		unimplemented!();
+		// let metadata = self
+		// 	.data
+		// 	.metadata()
+		// 	.ok()
+		// 	.flatten()
+		// 	.map(|meta| MediaMetadata::from(meta.to_owned()));
+		// let description = metadata
+		// 	.as_ref()
+		// 	.and_then(|m| m.summary.as_ref())
+		// 	.map(|s| s.to_owned());
 
-		let content = match description {
-			Some(s) => Some(format!(
-				"{:.1} MiB - {}<br/><br/>{}",
-				mib, self.data.extension, s
-			)),
-			None => Some(format!("{:.1} MiB - {}", mib, self.data.extension)),
-		};
+		// let content = match description {
+		// 	Some(s) => Some(format!(
+		// 		"{:.1} MiB - {}<br/><br/>{}",
+		// 		mib, self.data.extension, s
+		// 	)),
+		// 	None => Some(format!("{:.1} MiB - {}", mib, self.data.extension)),
+		// };
 
-		OpdsEntry {
-			id: self.data.id.to_string(),
-			title: self.data.name,
-			updated: chrono::Utc::now().into(),
-			content,
-			links,
-			authors: None,
-			stream_link: Some(stream_link),
-		}
+		// OpdsEntry {
+		// 	id: self.data.id.to_string(),
+		// 	title: self.data.name,
+		// 	updated: chrono::Utc::now().into(),
+		// 	content,
+		// 	links,
+		// 	authors: None,
+		// 	stream_link: Some(stream_link),
+		// }
 	}
 }
 

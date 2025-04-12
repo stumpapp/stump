@@ -1,8 +1,13 @@
 use models::{
-	entity::{media, media_metadata, series, series_metadata},
+	entity::{
+		library_hidden_to_user,
+		media::{self, get_age_restriction_filter},
+		media_metadata, series, series_metadata,
+		user::AuthUser,
+	},
 	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
 };
-use sea_orm::{entity::prelude::*, FromQueryResult, QuerySelect};
+use sea_orm::{entity::prelude::*, Condition, FromQueryResult, JoinType, QuerySelect};
 
 #[derive(Clone, Debug)]
 pub struct OPDSSeries {
@@ -28,7 +33,40 @@ impl OPDSPublicationEntity {
 			.selector
 			.left_join(media_metadata::Entity)
 			.inner_join(series::Entity)
-			.left_join(series_metadata::Entity)
+			.join_rev(
+				JoinType::LeftJoin,
+				series_metadata::Entity::belongs_to(series::Entity)
+					.from(series_metadata::Column::SeriesId)
+					.to(series::Column::Id)
+					.into(),
+			)
+	}
+
+	pub fn find_for_user(user: &AuthUser) -> Select<media::Entity> {
+		let age_restriction_filter = user
+			.age_restriction
+			.as_ref()
+			.map(|res| get_age_restriction_filter(res.age, res.restrict_on_unset));
+
+		Prefixer::new(media::Entity::find().select_only())
+			.add_columns(media::Entity)
+			.add_columns(media_metadata::Entity)
+			.add_columns(series::Entity)
+			.add_columns(series_metadata::Entity)
+			.selector
+			.filter(series::Column::LibraryId.not_in_subquery(
+				library_hidden_to_user::Entity::library_hidden_to_user_query(user),
+			))
+			.filter(Condition::all().add_option(age_restriction_filter))
+			.left_join(media_metadata::Entity)
+			.inner_join(series::Entity)
+			.join_rev(
+				JoinType::LeftJoin,
+				series_metadata::Entity::belongs_to(series::Entity)
+					.from(series_metadata::Column::SeriesId)
+					.to(series::Column::Id)
+					.into(),
+			)
 	}
 }
 

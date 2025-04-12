@@ -1,12 +1,16 @@
 use async_graphql::SimpleObject;
 use sea_orm::{prelude::*, QueryOrder, QuerySelect};
+use serde::Serialize;
 
 use crate::shared::page_dimension::PageAnalysis;
 
-#[derive(Clone, Default, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
+#[derive(
+	Clone, Default, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Serialize,
+)]
 #[graphql(name = "MediaMetadataModel")]
 #[sea_orm(table_name = "media_metadata")]
 pub struct Model {
+	#[serde(skip_serializing)]
 	#[sea_orm(primary_key, auto_increment = true)]
 	pub id: i32,
 	#[sea_orm(column_type = "Text", nullable, unique)]

@@ -4,10 +4,7 @@ use specta::Type;
 use tracing::trace;
 use utoipa::ToSchema;
 
-use crate::{
-	db::entity::{common::Cursor, Library, Media, Series},
-	filesystem::DirectoryListing,
-};
+use crate::filesystem::DirectoryListing;
 
 // TODO: this entire file belongs in server app, not here. It is currently used by DAOs, which are
 // very much going BYE BYE
@@ -312,10 +309,6 @@ pub struct PageableArray<T: Serialize> {
 	pub _cursor: Option<CursorInfo>,
 }
 
-pub type PageableLibraries = PageableArray<Library>;
-pub type PageableSeries = PageableArray<Series>;
-pub type PageableMedia = PageableArray<Media>;
-
 impl<T: Serialize> Pageable<T> {
 	pub fn unpaged(data: T) -> Self {
 		Pageable {
@@ -430,7 +423,7 @@ where
 // Note: this is used when you have to query the database for the total number of pages.
 impl<T> From<(Vec<T>, i64, Pagination)> for Pageable<Vec<T>>
 where
-	T: Serialize + Clone + Cursor,
+	T: Serialize + Clone,
 {
 	fn from(tuple: (Vec<T>, i64, Pagination)) -> Pageable<Vec<T>> {
 		let (data, db_total, pagination) = tuple;

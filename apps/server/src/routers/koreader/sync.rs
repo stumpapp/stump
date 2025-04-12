@@ -313,13 +313,14 @@ async fn put_progress(
 		let active_session = reading_session::Entity::insert(active_model)
 			.on_conflict(
 				OnConflict::new()
-					.update_columns(reading_session::Column::iter().filter(
-						|col| match col {
+					.update_columns(reading_session::Column::iter().filter(|col| {
+						matches!(
+							col,
 							reading_session::Column::Page
-							| reading_session::Column::Epubcfi => true,
-							_ => false,
-						},
-					))
+								| reading_session::Column::Epubcfi
+								| reading_session::Column::DeviceId
+						)
+					}))
 					.to_owned(),
 			)
 			.exec_with_returning(&tx)

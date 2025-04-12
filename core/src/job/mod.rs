@@ -15,13 +15,17 @@
 // - https://github.com/Nukesor/pueue
 use std::{collections::VecDeque, fmt::Debug, sync::Arc, time::Duration};
 
-use models::entity::{job, log};
+use models::{
+	entity::{job, log},
+	shared::enums::{JobStatus, LogLevel},
+};
 use sea_orm::{prelude::*, QuerySelect, Set};
 use serde::{de, Deserialize, Serialize};
 
 mod controller;
 pub mod error;
 mod manager;
+mod output;
 mod progress;
 mod scheduler;
 mod task;
@@ -29,9 +33,9 @@ mod worker;
 
 use chrono::{DateTime, Utc};
 use error::JobError;
+pub use output::*;
 pub use progress::*;
 pub use scheduler::JobScheduler;
-use specta::Type;
 pub use task::JobTaskOutput;
 use task::{job_task_handler, JobTaskHandlerOutput};
 use utoipa::ToSchema;
@@ -41,86 +45,6 @@ pub use controller::*;
 pub use manager::*;
 use uuid::Uuid;
 
-use crate::db::entity::LogLevel;
-
-#[derive(
-	Clone, Debug, Default, Serialize, Deserialize, PartialEq, Eq, Type, ToSchema,
-)]
-pub enum JobStatus {
-	#[serde(rename = "RUNNING")]
-	Running,
-	#[serde(rename = "PAUSED")]
-	Paused,
-	#[serde(rename = "COMPLETED")]
-	Completed,
-	#[serde(rename = "CANCELLED")]
-	Cancelled,
-	#[serde(rename = "FAILED")]
-	Failed,
-	#[default]
-	#[serde(rename = "QUEUED")]
-	Queued,
-}
-
-impl JobStatus {
-	/// A helper function to determine if a job status is resolved. A job is considered
-	/// resolved if it is in a final state (Completed, Cancelled, or Failed).
-	pub fn is_resolved(&self) -> bool {
-		matches!(
-			self,
-			JobStatus::Completed | JobStatus::Cancelled | JobStatus::Failed
-		)
-	}
-
-	/// A helper function to determine if a job status is successful. A job is considered
-	/// successful if it is in a Completed state.
-	pub fn is_success(&self) -> bool {
-		matches!(self, JobStatus::Completed)
-	}
-
-	/// A helper function to determine if a job status is pending. A job is considered pending
-	/// if it is in a Running, Paused, or Queued state.
-	pub fn is_pending(&self) -> bool {
-		matches!(
-			self,
-			JobStatus::Running | JobStatus::Paused | JobStatus::Queued
-		)
-	}
-}
-
-impl std::fmt::Display for JobStatus {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		match self {
-			JobStatus::Running => write!(f, "RUNNING"),
-			JobStatus::Paused => write!(f, "PAUSED"),
-			JobStatus::Completed => write!(f, "COMPLETED"),
-			JobStatus::Cancelled => write!(f, "CANCELLED"),
-			JobStatus::Failed => write!(f, "FAILED"),
-			JobStatus::Queued => write!(f, "QUEUED"),
-		}
-	}
-}
-
-impl From<&str> for JobStatus {
-	fn from(s: &str) -> Self {
-		match s {
-			"RUNNING" => JobStatus::Running,
-			"PAUSED" => JobStatus::Paused,
-			"COMPLETED" => JobStatus::Completed,
-			"CANCELLED" => JobStatus::Cancelled,
-			"FAILED" => JobStatus::Failed,
-			"QUEUED" => JobStatus::Queued,
-			_ => unreachable!(),
-		}
-	}
-}
-
-impl From<String> for JobStatus {
-	fn from(s: String) -> Self {
-		JobStatus::from(s.as_str())
-	}
-}
-
 /// The retry policy for a job. This is used to determine if a job should be requeued after
 /// a non-critical failure.
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -129,28 +53,6 @@ pub enum JobRetryPolicy {
 	Infinite,
 	/// Only retry the job a fixed number of times before giving up
 	Count(usize),
-}
-
-/// A trait to extend the output type for a job with a common interface. Job output starts
-/// in an 'empty' state (Default) and is frequently updated during execution.
-///
-/// The state is also serialized and stored in the DB, so it must implement [Serialize] and [`de::DeserializeOwned`].
-pub trait JobOutputExt: Serialize + de::DeserializeOwned + Debug {
-	/// Update the state with new data. By default, the implementation is a full replacement
-	fn update(&mut self, updated: Self) {
-		*self = updated;
-	}
-
-	/// Serialize the state to JSON. If serialization fails, the error is logged and None is returned.
-	fn into_json(self) -> Option<serde_json::Value> {
-		serde_json::to_value(&self).map_or_else(
-			|error| {
-				tracing::error!(?error, job_data = ?self, "Failed to serialize job data!");
-				None
-			},
-			Some,
-		)
-	}
 }
 
 /// A log that will be persisted from a job's execution
@@ -201,6 +103,7 @@ impl JobExecuteLog {
 		}
 	}
 
+	// TODO(sea-orm): Port
 	// /// Constructs a Prisma create payload for the error
 	// pub fn into_prisma(self, job_id: String) -> (String, Vec<log::SetParam>) {
 	// 	(

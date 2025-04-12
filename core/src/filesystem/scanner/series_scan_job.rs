@@ -1,17 +1,19 @@
 use std::{collections::VecDeque, path::PathBuf};
 
-use models::entity::{library, library_config, media, series};
+use models::{
+	entity::{library, library_config, media, series},
+	shared::enums::FileStatus,
+};
 use sea_orm::{prelude::*, sea_query::Query, Condition, UpdateResult};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
 use crate::{
-	db::{entity::CoreJobOutput, FileStatus},
 	filesystem::image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
 	job::{
-		error::JobError, Executor, JobExt, JobOutputExt, JobProgress, JobTaskOutput,
-		WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
+		error::JobError, CoreJobOutput, Executor, JobExt, JobOutputExt, JobProgress,
+		JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
 	utils::chain_optional_iter,
 	CoreEvent,

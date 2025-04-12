@@ -11,7 +11,6 @@ use tracing::debug;
 
 use crate::{
 	config::StumpConfig,
-	db::entity::LibraryConfig,
 	filesystem::{
 		content_type::ContentType,
 		error::FileError,
@@ -37,8 +36,8 @@ pub struct FileProcessorOptions {
 	pub generate_koreader_hashes: bool,
 }
 
-impl From<LibraryConfig> for FileProcessorOptions {
-	fn from(options: LibraryConfig) -> Self {
+impl From<library_config::Model> for FileProcessorOptions {
+	fn from(options: library_config::Model) -> Self {
 		Self {
 			convert_rar_to_zip: options.convert_rar_to_zip,
 			delete_conversion_source: options.hard_delete_conversions,
@@ -49,8 +48,8 @@ impl From<LibraryConfig> for FileProcessorOptions {
 	}
 }
 
-impl From<&LibraryConfig> for FileProcessorOptions {
-	fn from(options: &LibraryConfig) -> Self {
+impl From<&library_config::Model> for FileProcessorOptions {
+	fn from(options: &library_config::Model) -> Self {
 		Self {
 			convert_rar_to_zip: options.convert_rar_to_zip,
 			delete_conversion_source: options.hard_delete_conversions,

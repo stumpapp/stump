@@ -1,6 +1,9 @@
 use std::{collections::VecDeque, path::PathBuf};
 
-use models::entity::{library, library_config, library_scan_record, media, series};
+use models::{
+	entity::{library, library_config, library_scan_record, media, series},
+	shared::enums::FileStatus,
+};
 use sea_orm::{prelude::*, sea_query::Query, Set, TransactionTrait};
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -12,14 +15,13 @@ use utoipa::ToSchema;
 // Also perhaps experiment with https://docs.rs/tokio-uring/latest/tokio_uring/index.html
 
 use crate::{
-	db::{entity::CoreJobOutput, FileStatus},
 	filesystem::{
 		image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
 		scanner::utils::safely_insert_series,
 	},
 	job::{
-		error::JobError, Executor, JobExecuteLog, JobExt, JobOutputExt, JobProgress,
-		JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
+		error::JobError, CoreJobOutput, Executor, JobExecuteLog, JobExt, JobOutputExt,
+		JobProgress, JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
 	utils::chain_optional_iter,
 	CoreEvent,

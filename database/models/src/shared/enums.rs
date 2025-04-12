@@ -117,6 +117,65 @@ pub enum InterfaceLayout {
 	Table,
 }
 
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Default,
+	Clone,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+	Enum,
+	EnumString,
+	Display,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum JobStatus {
+	Running,
+	Paused,
+	Completed,
+	Cancelled,
+	Failed,
+	#[default]
+	Queued,
+}
+
+impl JobStatus {
+	/// A helper function to determine if a job status is resolved. A job is considered
+	/// resolved if it is in a final state (Completed, Cancelled, or Failed).
+	pub fn is_resolved(&self) -> bool {
+		matches!(
+			self,
+			JobStatus::Completed | JobStatus::Cancelled | JobStatus::Failed
+		)
+	}
+
+	/// A helper function to determine if a job status is successful. A job is considered
+	/// successful if it is in a Completed state.
+	pub fn is_success(&self) -> bool {
+		matches!(self, JobStatus::Completed)
+	}
+
+	/// A helper function to determine if a job status is pending. A job is considered pending
+	/// if it is in a Running, Paused, or Queued state.
+	pub fn is_pending(&self) -> bool {
+		matches!(
+			self,
+			JobStatus::Running | JobStatus::Paused | JobStatus::Queued
+		)
+	}
+}
+
 /// The different patterns a library may be organized by
 #[derive(
 	Eq,
@@ -142,6 +201,37 @@ pub enum LibraryPattern {
 	#[default]
 	SeriesBased,
 	CollectionBased,
+}
+
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Default,
+	Clone,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+	Enum,
+	EnumString,
+	Display,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum LogLevel {
+	Error,
+	Warn,
+	#[default]
+	Info,
+	Debug,
 }
 
 /// The different reading directions supported by any Stump reader

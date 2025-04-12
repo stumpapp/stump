@@ -40,7 +40,7 @@ pdf = { git = "https://github.com/pdf-rs/pdf", rev = "3bc9e636d31b1846e51b58c742
 pdfium-render = "0.8.24"
 prefixed-api-key = { workspace = true}
 rayon = "1.10.0"
-regex = "1.10.6"
+regex.workspace = true
 ring = "0.17.8"
 smart-filter-gen = { path = "../crates/smart-filter-gen"}
 thiserror.workspace = true

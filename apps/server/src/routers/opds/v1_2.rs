@@ -35,18 +35,10 @@ use crate::{
 	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
 	middleware::auth::{api_key_middleware, auth_middleware},
-	routers::api::{
-		filters::{
-			apply_in_progress_filter_for_user, apply_media_age_restriction,
-			apply_media_library_not_hidden_for_user_filter, apply_series_age_restriction,
-			library_not_hidden_from_user_filter,
-		},
-		v1::media::thumbnails::get_media_thumbnail_by_id,
-	},
 	utils::http::{ImageResponse, NamedFile, Xml},
 };
 
-// TODO(sea-orm): Remove Prisma usage
+// TODO(sea-orm): Port prisma usage
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	let primary_router = Router::new()

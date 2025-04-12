@@ -4,7 +4,6 @@ use specta::Type;
 use utoipa::ToSchema;
 
 use crate::{
-	db::entity::macros::library_scan_details,
 	filesystem::media::{BuiltMedia, ProcessedFileHashes, ProcessedMediaMetadata},
 	prisma::library_scan_record,
 	CoreError,
@@ -145,30 +144,6 @@ impl TryFrom<library_scan_record::Data> for LibraryScanRecord {
 			timestamp: data.timestamp,
 			library_id: data.library_id,
 			job_id: data.job_id,
-		})
-	}
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
-pub struct LastLibraryScan {
-	pub options: Option<ScanOptions>,
-	pub timestamp: DateTime<FixedOffset>,
-}
-
-impl TryFrom<library_scan_details::scan_history::Data> for LastLibraryScan {
-	type Error = CoreError;
-
-	fn try_from(
-		data: library_scan_details::scan_history::Data,
-	) -> Result<Self, Self::Error> {
-		let options = data
-			.options
-			.map(|options| serde_json::from_slice(&options))
-			.transpose()?;
-
-		Ok(Self {
-			options,
-			timestamp: data.timestamp,
 		})
 	}
 }

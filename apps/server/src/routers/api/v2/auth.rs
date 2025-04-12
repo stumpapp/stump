@@ -3,18 +3,16 @@ use axum::{
 	http::{Response, StatusCode},
 	response::IntoResponse,
 	routing::post,
-	Extension, Json, Router,
+	Json, Router,
 };
 use axum_extra::{headers::UserAgent, TypedHeader};
 use chrono::{DateTime, Duration, FixedOffset, Utc};
 use models::entity::{
-	age_restriction,
 	user::{self, AuthUser},
 	user_login_activity, user_preferences,
 };
-use prisma_client_rust::Direction;
 use sea_orm::prelude::*;
-use sea_orm::{DatabaseConnection, EntityTrait};
+use sea_orm::{DatabaseConnection, EntityTrait, Set};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use tower_sessions::Session;
@@ -43,7 +41,7 @@ pub(crate) fn mount() -> Router<AppState> {
 }
 
 pub async fn enforce_max_sessions(
-	for_user: &AuthUser,
+	for_user: &user::LoginUser,
 	conn: &DatabaseConnection,
 ) -> APIResult<()> {
 	// let existing_sessions = for_user
@@ -88,7 +86,7 @@ pub struct AuthenticationOptions {
 
 async fn handle_login_attempt(
 	conn: &DatabaseConnection,
-	for_user: &AuthUser,
+	for_user: &user::LoginUser,
 	user_agent: UserAgent,
 	request_info: StumpRequestInfo,
 	success: bool,
@@ -173,163 +171,111 @@ async fn login(
 		_ => {},
 	}
 
-	let client = state.db.clone();
 	let today: DateTime<FixedOffset> = Utc::now().into();
 	// TODO: make this configurable via environment variable so knowledgeable attackers can't bypass this
 	let twenty_four_hours_ago = today - Duration::hours(24);
 
-	// let fetch_result = client
-	// 	.user()
-	// 	.find_first(vec![
-	// 		user::username::equals(input.username.to_owned()),
-	// 		user::deleted_at::equals(None),
-	// 	])
-	// 	.with(user::user_preferences::fetch())
-	// 	.with(user::age_restriction::fetch())
-	// 	.with(
-	// 		user::login_activity::fetch(vec![
-	// 			user_login_activity::timestamp::gte(twenty_four_hours_ago),
-	// 			user_login_activity::timestamp::lte(today),
-	// 		])
-	// 		.order_by(user_login_activity::timestamp::order(Direction::Desc))
-	// 		.take(10),
-	// 	)
-	// 	.with(user::sessions::fetch(vec![session::expiry_time::gt(
-	// 		Utc::now().into(),
-	// 	)]))
-	// 	.exec()
-	// 	.await?;
-
 	let conn = state.conn.as_ref();
 
-	let fetch_result = user::Entity::find()
+	let fetch_result = user::LoginUser::find()
 		.filter(
 			user::Column::Username
 				.eq(input.username.to_owned())
 				.and(user::Column::DeletedAt.is_null()),
 		)
-		.inner_join(user_preferences::Entity)
-		.inner_join(age_restriction::Entity)
-		.inner_join(user_login_activity::Entity);
+		.into_model::<user::LoginUser>()
+		.one(conn)
+		.await?;
 
 	match fetch_result {
-		Some(db_user)
-			if db_user.is_locked
-				&& verify_password(&db_user.hashed_password, &input.password)? =>
+		Some(user)
+			if user.is_locked
+				&& verify_password(&user.hashed_password, &input.password)? =>
 		{
 			Err(APIError::Forbidden(
 				api_error_message::LOCKED_ACCOUNT.to_string(),
 			))
 		},
-		Some(db_user) if !db_user.is_locked => {
-			let user_id = db_user.id.clone();
-			let matches = verify_password(&db_user.hashed_password, &input.password)?;
-			if !matches {
-				// TODO: make this configurable via environment variable so knowledgeable attackers can't bypass this
-				let should_lock_account = db_user
-					.login_activity
-					.as_ref()
-					// If there are 9 or more failed login attempts _in a row_, within a 24 hour period, lock the account
-					.map(|activity| {
-						!activity
-							.iter()
-							.any(|activity| activity.authentication_successful)
-							&& activity.len() >= 9
-					})
-					.unwrap_or(false);
+		Some(user) if !user.is_locked => {
+			let user_id = user.id.clone();
+			let matches = verify_password(&user.hashed_password, &input.password)?;
 
-				handle_login_attempt(&client, db_user, user_agent, request_info, false)
-					.await?;
-
-				if should_lock_account {
-					let _locked_user = client
-						.user()
-						.update(
-							user::id::equals(user_id.clone()),
-							vec![user::is_locked::set(true)],
-						)
-						.exec()
-						.await?;
-
-					let removed_sessions_count = client
-						.session()
-						.delete_many(vec![session::user_id::equals(user_id.clone())])
-						.exec()
-						.await?;
-					tracing::debug!(
-						?removed_sessions_count,
-						?user_id,
-						"Locked user account and removed all associated sessions"
+			let should_lock_account = !matches && {
+				user_login_activity::Entity::find()
+					.filter(
+						user_login_activity::Column::UserId
+							.eq(user_id.clone())
+							.and(
+								user_login_activity::Column::Timestamp
+									.gte(twenty_four_hours_ago)
+									.and(
+										user_login_activity::Column::Timestamp.lte(today),
+									),
+							)
+							.and(
+								user_login_activity::Column::AuthenticationSuccessful
+									.eq(false),
+							),
 					)
-				}
+					.count(conn)
+					.await? >= 9
+			};
 
-				return Err(APIError::Unauthorized);
-			}
-
-			enforce_max_sessions(&db_user, &client).await?;
-
-			let updated_user = state
-				.db
-				.user()
-				.update(
-					user::id::equals(db_user.id.clone()),
-					vec![user::last_login::set(Some(Utc::now().into()))],
-				)
-				.with(user::user_preferences::fetch())
-				.with(user::age_restriction::fetch())
-				.exec()
-				.await
-				.unwrap_or_else(|err| {
-					error!(error = ?err, "Failed to update user last login!");
-					user::Data {
-						last_login: Some(Utc::now().into()),
-						..db_user
-					}
-				});
-
-			let login_track_result = handle_login_attempt(
-				&state.db,
-				updated_user.clone(),
-				user_agent,
-				request_info,
-				true,
-			)
-			.await;
+			let login_track_result =
+				handle_login_attempt(conn, &user, user_agent, request_info, matches)
+					.await;
 			// I don't want to kill the login here, so not bubbling up the error
 			if let Err(err) = login_track_result {
 				error!(error = ?err, "Failed to track login attempt!");
 			}
 
-			let user = User::from(updated_user);
+			if should_lock_account {
+				let _locked_user = user::Entity::update_many()
+					.filter(user::Column::Id.eq(user_id.clone()))
+					.col_expr(user::Column::IsLocked, Expr::value(true))
+					.exec(conn)
+					.await?;
+
+				let removed_sessions = user::Entity::delete_many()
+					.filter(user::Column::Id.eq(user_id.clone()))
+					.exec(conn)
+					.await?
+					.rows_affected;
+				tracing::debug!(
+					?removed_sessions,
+					?user_id,
+					"Locked user account and removed all associated sessions"
+				);
+			}
+
+			if !matches {
+				return Err(APIError::Unauthorized);
+			}
+
+			enforce_max_sessions(&user, conn).await?;
+
+			let auth_user = AuthUser::from(user);
 
 			if create_session {
-				session.insert(SESSION_USER_KEY, user.clone()).await?;
+				session.insert(SESSION_USER_KEY, auth_user.clone()).await?;
 			}
 
 			// TODO: should this be permission gated?
 			if generate_token {
-				let token = create_user_jwt(&user.id, &state.config)?;
+				let token = create_user_jwt(&auth_user.id, &state.config)?;
 				Ok(Json(LoginResponse::AccessToken {
-					for_user: user,
+					for_user: auth_user,
 					token,
 				}))
 			} else {
-				Ok(Json(LoginResponse::User(user)))
+				Ok(Json(LoginResponse::User(auth_user)))
 			}
 		},
+
 		_ => Err(APIError::Unauthorized),
 	}
 }
 
-#[utoipa::path(
-	post,
-	path = "/api/v1/auth/logout",
-	tag = "auth",
-	responses(
-		(status = 200, description = "Destroys the session and logs the user out."),
-		(status = 500, description = "Failed to destroy session.")
-	)
-)]
 /// Destroys the session and logs the user out.
 async fn logout(session: Session) -> APIResult<impl IntoResponse> {
 	session.delete().await?;
@@ -355,27 +301,19 @@ async fn logout(session: Session) -> APIResult<impl IntoResponse> {
 		}))
 }
 
-#[utoipa::path(
-	post,
-	path = "/api/v1/auth/register",
-	tag = "auth",
-	request_body = LoginOrRegisterArgs,
-	responses(
-		(status = 200, description = "Successfully registered new user.", body = User),
-		(status = 403, description = "Must be server owner to register member accounts."),
-		(status = 500, description = "An internal server error occurred.")
-	)
-)]
 /// Attempts to register a new user. If no users exist in the database, the user is registered as a server owner.
 /// Otherwise, the registration is rejected by all users except the server owner.
 pub async fn register(
 	session: Session,
 	State(ctx): State<AppState>,
 	Json(input): Json<LoginOrRegisterArgs>,
-) -> APIResult<Json<User>> {
-	let db = &ctx.db;
-
-	let has_users = db.user().find_first(vec![]).exec().await?.is_some();
+) -> APIResult<Json<AuthUser>> {
+	let conn = ctx.conn.as_ref();
+	let has_users = user::Entity::find()
+		.filter(user::Column::DeletedAt.is_null())
+		.count(conn)
+		.await?
+		> 0;
 
 	let mut is_server_owner = false;
 
@@ -398,36 +336,29 @@ pub async fn register(
 
 	let hashed_password = hash_password(&input.password, &ctx.config)?;
 
-	let created_user = db
-		.user()
-		.create(
-			input.username.clone(),
-			hashed_password,
-			vec![user::is_server_owner::set(is_server_owner)],
-		)
-		.exec()
-		.await?;
+	let active_model = user::ActiveModel {
+		username: Set(input.username.clone()),
+		hashed_password: Set(hashed_password),
+		is_server_owner: Set(is_server_owner),
+		..Default::default()
+	};
+	let created_user = active_model.insert(conn).await?;
 
-	// TODO(prisma-nested-create): Refactor once nested create is supported
-	let _user_preferences = db
-		.user_preferences()
-		.create(vec![
-			user_preferences::user::connect(user::id::equals(created_user.id.clone())),
-			user_preferences::user_id::set(Some(created_user.id.clone())),
-		])
-		.exec()
-		.await?;
+	let active_model = user_preferences::ActiveModel {
+		user_id: Set(Some(created_user.id.clone())),
+		..Default::default()
+	};
+	let _created_user_preferences = active_model.insert(conn).await?;
 
-	let user = db
-		.user()
-		.find_unique(user::id::equals(created_user.id))
-		.with(user::user_preferences::fetch())
-		.with(user::age_restriction::fetch())
-		.exec()
+	let auth_user = user::LoginUser::find()
+		.filter(user::Column::Id.eq(created_user.id.clone()))
+		.into_model::<user::LoginUser>()
+		.one(conn)
 		.await?
 		.ok_or(APIError::InternalServerError(
 			"Failed to fetch user after registration.".to_string(),
 		))?;
+	let auth_user = AuthUser::from(auth_user);
 
-	Ok(Json(user.into()))
+	Ok(Json(auth_user))
 }

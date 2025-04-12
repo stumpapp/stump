@@ -137,9 +137,9 @@ pub enum APIError {
 	#[error("{0}")]
 	#[schema(value_type = Box<String>)]
 	PrismaError(#[from] Box<QueryError>),
-	// FIXME: doesn't impl ToSchema?
-	// #[error("{0}")]
-	// DbError(#[from] sea_orm::error::DbErr),
+	#[error("{0}")]
+	#[schema(value_type = String)]
+	DbError(#[from] sea_orm::error::DbErr),
 }
 
 impl APIError {

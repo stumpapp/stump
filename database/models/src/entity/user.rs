@@ -2,10 +2,14 @@ use async_graphql::SimpleObject;
 
 use sea_orm::{
 	entity::prelude::*, prelude::async_trait::async_trait, ActiveValue, FromQueryResult,
+	QuerySelect,
 };
 use serde::{Deserialize, Serialize};
 
-use crate::shared::{enums::UserPermission, permission_set::PermissionSet};
+use crate::{
+	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
+	shared::{enums::UserPermission, permission_set::PermissionSet},
+};
 
 use super::age_restriction;
 
@@ -78,29 +82,64 @@ impl FromQueryResult for AuthUser {
 	}
 }
 
-// TODO: If the data loader requires access-related restrictions, we need to provide
-// something like this generic interface to the loader. Leaving as a comment for now,
-// but the parent node should always be gated so it likely won't be needed.
-// pub trait UserRef {
-// 	fn id(&self) -> String;
-// 	fn age_restriction(&self) -> Option<super::age_restriction::Model>;
-// }
-//
-// #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-// pub struct LoaderUserRefKey {
-// 	pub id: String,
-// 	pub age_restriction: Option<super::age_restriction::Model>,
-// }
+pub struct LoginUser {
+	pub id: String,
+	pub username: String,
+	pub hashed_password: String,
+	pub is_server_owner: bool,
+	pub is_locked: bool,
+	pub max_sessions_allowed: Option<i32>,
+	pub permissions: Vec<UserPermission>,
+	pub age_restriction: Option<super::age_restriction::Model>,
+}
 
-// impl UserRef for LoaderUserRefKey {
-// 	fn id(&self) -> String {
-// 		self.id.clone()
-// 	}
+impl LoginUser {
+	pub fn find() -> Select<Entity> {
+		Prefixer::new(Entity::find().select_only())
+			.add_columns(Entity)
+			.add_columns(age_restriction::Entity)
+			.selector
+			.left_join(age_restriction::Entity)
+	}
+}
 
-// 	fn age_restriction(&self) -> Option<super::age_restriction::Model> {
-// 		self.age_restriction.clone()
-// 	}
-// }
+impl FromQueryResult for LoginUser {
+	fn from_query_result(
+		res: &sea_orm::QueryResult,
+		_pre: &str,
+	) -> Result<Self, sea_orm::DbErr> {
+		let user = parse_query_to_model::<Model, Entity>(res)?;
+		let age_restriction = parse_query_to_model_optional::<
+			age_restriction::Model,
+			age_restriction::Entity,
+		>(res)?;
+
+		Ok(LoginUser {
+			id: user.id,
+			username: user.username,
+			hashed_password: user.hashed_password,
+			is_server_owner: user.is_server_owner,
+			is_locked: user.is_locked,
+			max_sessions_allowed: user.max_sessions_allowed,
+			permissions: PermissionSet::from(user.permissions.unwrap_or_default())
+				.resolve_into_vec(),
+			age_restriction,
+		})
+	}
+}
+
+impl From<LoginUser> for AuthUser {
+	fn from(user: LoginUser) -> Self {
+		AuthUser {
+			id: user.id,
+			username: user.username,
+			is_server_owner: user.is_server_owner,
+			is_locked: user.is_locked,
+			permissions: user.permissions,
+			age_restriction: user.age_restriction,
+		}
+	}
+}
 
 #[derive(Debug, FromQueryResult)]
 pub struct UserIdentSelect {

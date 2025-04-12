@@ -15,10 +15,8 @@ use models::entity::{
 use sea_orm::prelude::*;
 use sea_orm::{DatabaseConnection, EntityTrait, Set};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use tower_sessions::Session;
 use tracing::error;
-use utoipa::ToSchema;
 
 use crate::{
 	config::{
@@ -68,13 +66,13 @@ pub async fn enforce_max_sessions(
 	Ok(())
 }
 
-#[derive(Deserialize, Type, ToSchema)]
+#[derive(Deserialize)]
 pub struct LoginOrRegisterArgs {
 	pub username: String,
 	pub password: String,
 }
 
-#[derive(Debug, Deserialize, Type, ToSchema)]
+#[derive(Debug, Deserialize)]
 pub struct AuthenticationOptions {
 	#[serde(default)]
 	generate_token: bool,
@@ -315,7 +313,6 @@ pub async fn register(
 
 	let session_user = get_session_user(&session).await?;
 
-	// TODO: move nested if to if let once stable
 	if let Some(user) = session_user {
 		if !user.is_server_owner {
 			return Err(APIError::Forbidden(String::from(

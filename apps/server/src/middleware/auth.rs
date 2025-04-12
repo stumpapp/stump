@@ -9,9 +9,15 @@ use axum::{
 	Extension, Json,
 };
 use base64::{engine::general_purpose::STANDARD, Engine};
+use graphql::data::RequestContext;
+use models::entity::{
+	api_key::{self, APIKeyWithUser},
+	user::AuthUser,
+};
 use prefixed_api_key::{PrefixedApiKey, PrefixedApiKeyController};
 use prisma_client_rust::or;
 use reqwest::Method;
+use sea_orm::{prelude::*, Condition, DatabaseConnection};
 use serde::Deserialize;
 use stump_core::{
 	db::entity::{APIKeyPermissions, User, UserPermission, API_KEY_PREFIX},
@@ -22,7 +28,7 @@ use stump_core::{
 		},
 		link::OPDSLink,
 	},
-	prisma::{api_key, session, user, PrismaClient},
+	prisma::{session, user, PrismaClient},
 };
 use tower_sessions::Session;
 
@@ -46,93 +52,6 @@ pub const STUMP_SAVE_BASIC_SESSION_HEADER: &str = "X-Stump-Save-Session";
 
 // TODO(sea-orm): Use models
 // TODO(sea-orm): Convert to GQL context
-
-/// A struct to represent the authenticated user in the current request context. A user is
-/// authenticated if they meet one of the following criteria:
-/// - They have a valid session
-/// - They have a valid bearer token (session may not exist)
-/// - They have valid basic auth credentials (session is created after successful authentication)
-#[derive(Debug, Clone)]
-pub struct RequestContext {
-	user: User,
-	api_key: Option<String>,
-}
-
-impl RequestContext {
-	/// Get a reference to the current user
-	pub fn user(&self) -> &User {
-		&self.user
-	}
-
-	/// Get the ID of the current user
-	pub fn id(&self) -> String {
-		self.user.id.clone()
-	}
-
-	pub fn api_key(&self) -> Option<String> {
-		self.api_key.clone()
-	}
-
-	/// Enforce that the current user has all the permissions provided, otherwise return an error
-	#[tracing::instrument(skip(self))]
-	pub fn enforce_permissions(&self, permissions: &[UserPermission]) -> APIResult<()> {
-		let user = self.user();
-
-		if user.is_server_owner {
-			return Ok(());
-		}
-
-		if user.is_locked {
-			return Err(APIError::Forbidden(
-				api_error_message::LOCKED_ACCOUNT.to_string(),
-			));
-		}
-
-		if user_has_all_permissions(user, permissions) {
-			Ok(())
-		} else {
-			Err(APIError::Forbidden(
-				api_error_message::FORBIDDEN_ACTION.to_string(),
-			))
-		}
-	}
-
-	/// Get the current user and enforce that they have all the permissions provided, otherwise
-	/// return an error
-	#[tracing::instrument(skip(self))]
-	pub fn user_and_enforce_permissions(
-		&self,
-		permissions: &[UserPermission],
-	) -> APIResult<User> {
-		self.enforce_permissions(permissions)?;
-		Ok(self.user().clone())
-	}
-
-	/// Enforce that the current user is the server owner, otherwise return an error
-	#[tracing::instrument(skip(self))]
-	pub fn enforce_server_owner(&self) -> APIResult<()> {
-		let user = self.user();
-
-		if user.is_server_owner {
-			Ok(())
-		} else {
-			tracing::error!(
-				username = &user.username,
-				"User is not server owner, denying access"
-			);
-			Err(APIError::Forbidden(
-				api_error_message::FORBIDDEN_ACTION.to_string(),
-			))
-		}
-	}
-
-	/// Get the current user and enforce that they are the server owner, otherwise return an error
-	#[tracing::instrument(skip(self))]
-	pub fn server_owner_user(&self) -> APIResult<User> {
-		self.enforce_server_owner()?;
-		Ok(self.user().clone())
-	}
-}
 
 /// A middleware to authenticate a user by one of the three methods:
 /// - Bearer token (JWT or API key)
@@ -186,8 +105,11 @@ pub async fn auth_middleware(
 	let is_opds = request_uri.starts_with("/opds");
 	let is_swagger = request_uri.starts_with("/swagger-ui");
 	// TODO(sea-orm): Check if enabled by config?
-	let is_playground =
+
+	let is_playground_request =
 		request_uri.starts_with("/api/graphql") && *req.method() == Method::GET;
+	let is_playground_allowed = ctx.config.enable_swagger || cfg!(debug_assertions);
+	let is_playground = is_playground_request && is_playground_allowed;
 
 	let Some(auth_header) = auth_header else {
 		if is_opds {
@@ -316,41 +238,42 @@ pub async fn server_owner_middleware(
 
 pub async fn validate_api_key(
 	pak: PrefixedApiKey,
-	client: &PrismaClient,
-) -> APIResult<User> {
+	conn: &DatabaseConnection,
+) -> APIResult<AuthUser> {
 	let controller = PrefixedApiKeyController::configure()
 		.prefix(API_KEY_PREFIX.to_owned())
 		.seam_defaults()
 		.finalize()?;
 
 	let long_token_hash = controller.long_token_hashed(&pak);
-	let api_key = client
-		.api_key()
-		.find_first(vec![
-			api_key::short_token::equals(pak.short_token().to_string()),
-			api_key::long_token_hash::equals(long_token_hash),
-			api_key::user::is(vec![
-				user::deleted_at::equals(None),
-				user::is_locked::equals(false),
-			]),
-			or![
-				api_key::expires_at::gte(current_utc_time().into()),
-				api_key::expires_at::equals(None),
-			],
-		])
-		.with(api_key::user::fetch())
-		.exec()
+
+	let APIKeyWithUser { api_key, user } = APIKeyWithUser::find()
+		.filter(
+			Condition::all()
+				.add(
+					api_key::Column::ShortToken
+						.eq(pak.short_token().to_string())
+						.and(api_key::Column::LongTokenHash.eq(long_token_hash)),
+				)
+				.add(
+					Condition::any()
+						.add(api_key::Column::ExpiresAt.gte(current_utc_time().into()))
+						.add(api_key::Column::ExpiresAt.is_null()),
+				),
+		)
+		.into_model::<APIKeyWithUser>()
+		.one(conn)
 		.await?
 		.ok_or(APIError::Unauthorized)?;
-	let key_user = api_key.user().ok().ok_or(APIError::Unauthorized)?;
+
 	let api_key_permissions = APIKeyPermissions::try_from(api_key.permissions.clone())?;
 
 	// Note: we check as a precaution. If a user had the permission revoked, that logic should also
 	// clean up keys.
-	let can_use_key = key_user.is_server_owner
-		|| key_user
+	let can_use_key = user.is_server_owner
+		|| user
 			.permissions
-			.as_ref()
+			.iter()
 			.map(|set| set.contains(&UserPermission::AccessAPIKeys.to_string()))
 			.unwrap_or(false);
 

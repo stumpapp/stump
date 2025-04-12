@@ -3,7 +3,7 @@ use sea_orm::{prelude::*, QueryOrder, QuerySelect};
 
 use crate::shared::page_dimension::PageAnalysis;
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
+#[derive(Clone, Default, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "MediaMetadataModel")]
 #[sea_orm(table_name = "media_metadata")]
 pub struct Model {

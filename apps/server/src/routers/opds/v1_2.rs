@@ -4,6 +4,7 @@ use axum::{
 	routing::get,
 	Extension, Router,
 };
+use graphql::data::RequestContext;
 use models::shared::image_processor_options::{
 	ImageProcessorOptions, SupportedImageFormat,
 };
@@ -33,7 +34,7 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
-	middleware::auth::{api_key_middleware, auth_middleware, RequestContext},
+	middleware::auth::{api_key_middleware, auth_middleware},
 	routers::api::{
 		filters::{
 			apply_in_progress_filter_for_user, apply_media_age_restriction,
@@ -44,6 +45,8 @@ use crate::{
 	},
 	utils::http::{ImageResponse, NamedFile, Xml},
 };
+
+// TODO(sea-orm): Remove Prisma usage
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	let primary_router = Router::new()

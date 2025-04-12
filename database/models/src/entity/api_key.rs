@@ -1,6 +1,9 @@
 use sea_orm::{entity::prelude::*, FromQueryResult, JoinType, QuerySelect};
 
-use crate::prefixer::{parse_query_to_model, Prefixer};
+use crate::{
+	prefixer::{parse_query_to_model, Prefixer},
+	shared::api_key::APIKeyPermissions,
+};
 
 use super::{age_restriction, user};
 
@@ -15,8 +18,8 @@ pub struct Model {
 	pub short_token: String,
 	#[sea_orm(column_type = "Text")]
 	pub long_token_hash: String,
-	#[sea_orm(column_type = "Blob")]
-	pub permissions: Vec<u8>,
+	#[sea_orm(column_type = "Json", nullable)]
+	pub permissions: APIKeyPermissions,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]

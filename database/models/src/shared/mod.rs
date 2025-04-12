@@ -1,3 +1,4 @@
+pub mod api_key;
 pub mod book_club;
 pub mod enums;
 pub mod ignore_rules;

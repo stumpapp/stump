@@ -5,13 +5,12 @@ use axum::{
 	routing::{get, put},
 	Extension, Router,
 };
+use graphql::data::RequestContext;
+use models::shared::enums::UserPermission;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use stump_core::{
-	db::entity::{
-		macros::{finished_session_koreader, reading_session_koreader},
-		UserPermission,
-	},
+	db::entity::macros::{finished_session_koreader, reading_session_koreader},
 	prisma::{
 		active_reading_session, finished_reading_session, media,
 		registered_reading_device, user,
@@ -22,8 +21,10 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
-	middleware::auth::{api_key_middleware, RequestContext},
+	middleware::auth::api_key_middleware,
 };
+
+// TODO(sea-orm): Remove Prisma usage
 
 #[derive(Debug, Serialize, Deserialize)]
 struct KOReaderURLParams<D> {
@@ -67,7 +68,12 @@ async fn authorize(req: Request, next: Next) -> APIResult<Response> {
 		.extensions()
 		.get::<RequestContext>()
 		.ok_or(APIError::Unauthorized)?;
-	ctx.enforce_permissions(&[UserPermission::AccessKoreaderSync])?;
+	ctx.enforce_permissions(&[UserPermission::AccessKoreaderSync])
+		.map_err(|_| {
+			APIError::Forbidden(
+				"You do not have permission to use KOReader sync".to_string(),
+			)
+		})?;
 	Ok(next.run(req).await)
 }
 

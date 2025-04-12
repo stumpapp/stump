@@ -54,6 +54,12 @@ pub struct AuthUser {
 	pub age_restriction: Option<super::age_restriction::Model>,
 }
 
+impl AuthUser {
+	pub fn is(&self, user: &AuthUser) -> bool {
+		self.id == user.id
+	}
+}
+
 impl FromQueryResult for AuthUser {
 	fn from_query_result(
 		res: &sea_orm::QueryResult,
@@ -82,6 +88,7 @@ impl FromQueryResult for AuthUser {
 	}
 }
 
+#[derive(Clone)]
 pub struct LoginUser {
 	pub id: String,
 	pub username: String,

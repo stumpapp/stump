@@ -1,4 +1,4 @@
-// TODO: rename this? DatabaseError? ModelError? Or is this fine?
+// TODO: rename this? DatabaseError? ModelError?
 
 #[derive(Debug, thiserror::Error)]
 pub enum EntityError {
@@ -10,6 +10,8 @@ pub enum EntityError {
 	InvalidIgnoreRules(String),
 	#[error("The requested column does not exist")]
 	ColumnDoesNotExist,
+	#[error("Invalid API key provided")]
+	InvalidAPIKey,
 }
 
 impl From<globset::Error> for EntityError {

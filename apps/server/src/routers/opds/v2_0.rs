@@ -8,6 +8,7 @@ use axum::{
 	routing::get,
 	Extension, Json, Router,
 };
+use graphql::data::RequestContext;
 use prisma_client_rust::{and, operator, or, Direction};
 use serde::{Deserialize, Serialize};
 use stump_core::{
@@ -53,10 +54,7 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
-	middleware::{
-		auth::{auth_middleware, RequestContext},
-		host::HostExtractor,
-	},
+	middleware::{auth::auth_middleware, host::HostExtractor},
 	routers::{
 		api::filters::{
 			apply_in_progress_filter_for_user, apply_media_restrictions_for_user,
@@ -66,6 +64,8 @@ use crate::{
 	},
 	utils::http::{ImageResponse, NamedFile},
 };
+
+// TODO(sea-orm): Remove Prisma usage
 
 const DEFAULT_LIMIT: i64 = 10;
 

@@ -1,7 +1,10 @@
-use super::{media, user::AuthUser};
+use crate::prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer};
+
+use super::{media, registered_reading_device, user::AuthUser};
 use async_graphql::SimpleObject;
 use sea_orm::{
-	entity::prelude::*, prelude::async_trait::async_trait, ActiveValue, QuerySelect,
+	entity::prelude::*, prelude::async_trait::async_trait, ActiveValue, FromQueryResult,
+	QuerySelect,
 };
 
 // TODO(sea-orm): Consider i32 for ID
@@ -23,6 +26,35 @@ pub struct Model {
 	#[sea_orm(column_type = "Text", nullable)]
 	pub device_id: Option<String>,
 	pub elapsed_seconds: Option<i64>,
+}
+
+pub struct ModelWithDevice {
+	pub model: Model,
+	pub device: Option<registered_reading_device::Model>,
+}
+
+impl ModelWithDevice {
+	pub fn find() -> Select<Entity> {
+		Prefixer::new(Entity::find().select_only())
+			.add_columns(Entity)
+			.add_columns(registered_reading_device::Entity)
+			.selector
+			.left_join(registered_reading_device::Entity)
+	}
+}
+
+impl FromQueryResult for ModelWithDevice {
+	fn from_query_result(
+		res: &sea_orm::QueryResult,
+		_pre: &str,
+	) -> Result<Self, sea_orm::DbErr> {
+		let model = parse_query_to_model::<Model, Entity>(res)?;
+		let device = parse_query_to_model_optional::<
+			registered_reading_device::Model,
+			registered_reading_device::Entity,
+		>(res)?;
+		Ok(Self { model, device })
+	}
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

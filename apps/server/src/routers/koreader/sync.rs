@@ -6,25 +6,21 @@ use axum::{
 	Extension, Router,
 };
 use graphql::data::RequestContext;
-use models::shared::enums::UserPermission;
+use models::{
+	entity::{
+		finished_reading_session, media, reading_session, registered_reading_device,
+	},
+	shared::enums::UserPermission,
+};
+use sea_orm::{prelude::*, sea_query::OnConflict, Iterable, Set, TransactionTrait};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
-// use stump_core::{
-// 	// db::entity::macros::{finished_session_koreader, reading_session_koreader},
-// 	// prisma::{
-// 	// 	active_reading_session, finished_reading_session, media,
-// 	// 	registered_reading_device, user,
-// 	// },
-// };
 
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
-	filter::chain_optional_iter,
 	middleware::auth::api_key_middleware,
 };
-
-// TODO(sea-orm): Remove Prisma usage
 
 #[derive(Debug, Serialize, Deserialize)]
 struct KOReaderURLParams<D> {
@@ -122,54 +118,45 @@ async fn get_progress(
 		..
 	}): Path<KOReaderURLParams<KOReaderDocumentURLParams>>,
 ) -> APIResult<Json<GetProgressResponse>> {
-	let client = &ctx.db;
+	let conn = ctx.conn.as_ref();
 	let user = req.user();
 	let document_cpy = document.clone();
 
-	let (active_session, finished_session) = client
-		._transaction()
-		.run(|tx| async move {
-			let active_session = tx
-				.active_reading_session()
-				.find_first(vec![
-					active_reading_session::user_id::equals(user.id.clone()),
-					active_reading_session::media::is(vec![
-						media::koreader_hash::equals(Some(document_cpy.clone())),
-					]),
-				])
-				.include(reading_session_koreader::include())
-				.exec()
-				.await?;
+	let active_session = reading_session::ModelWithDevice::find()
+		.inner_join(media::Entity)
+		.filter(reading_session::Column::UserId.eq(user.id.clone()))
+		.filter(media::Column::KoreaderHash.eq(document_cpy.clone()))
+		.into_model::<reading_session::ModelWithDevice>()
+		.one(conn)
+		.await?;
 
-			tx.finished_reading_session()
-				.find_first(vec![
-					finished_reading_session::user_id::equals(user.id.clone()),
-					finished_reading_session::media::is(vec![
-						media::koreader_hash::equals(Some(document_cpy)),
-					]),
-				])
-				.include(finished_session_koreader::include())
-				.exec()
-				.await
-				.map(|session| (active_session, session))
-		})
+	let finished_session = finished_reading_session::ModelWithDevice::find()
+		.inner_join(media::Entity)
+		.filter(finished_reading_session::Column::UserId.eq(user.id.clone()))
+		.filter(media::Column::KoreaderHash.eq(document_cpy))
+		.into_model::<finished_reading_session::ModelWithDevice>()
+		.one(conn)
 		.await?;
 
 	let progress = match (active_session, finished_session) {
 		(Some(active_session), _) => GetProgressResponse {
 			document,
-			percentage: active_session.percentage_completed.map(|p| p as f32),
-			timestamp: Some(active_session.updated_at.timestamp_millis() as u64),
+			percentage: active_session
+				.model
+				.percentage_completed
+				.map(|dec| dec.try_into().unwrap_or(0.0)),
+			timestamp: Some(active_session.model.updated_at.timestamp_millis() as u64),
 			device: active_session.device.as_ref().map(|d| d.name.clone()),
 			device_id: active_session.device.as_ref().map(|d| d.id.clone()),
 			progress: active_session
+				.model
 				.koreader_progress
-				.or_else(|| active_session.page.map(|p| p.to_string())),
+				.or_else(|| active_session.model.page.map(|p| p.to_string())),
 		},
 		(_, Some(finished_session)) => GetProgressResponse {
 			document,
 			percentage: Some(1.0),
-			timestamp: Some(finished_session.completed_at.timestamp_millis() as u64),
+			timestamp: Some(finished_session.model.completed_at.timestamp_millis() as u64),
 			device: finished_session.device.as_ref().map(|d| d.name.clone()),
 			device_id: finished_session.device.as_ref().map(|d| d.id.clone()),
 			..Default::default()
@@ -230,7 +217,7 @@ async fn put_progress(
 		device_id,
 	}): Json<PutProgressInput>,
 ) -> APIResult<Json<PutProgressResponse>> {
-	let client = &ctx.db;
+	let conn = ctx.conn.as_ref();
 	let user = req.user();
 
 	if !(0.0..=1.0).contains(&percentage) {
@@ -241,118 +228,107 @@ async fn put_progress(
 		return Err(APIError::BadRequest("Invalid percentage".to_string()));
 	}
 
-	let book = client
-		.media()
-		.find_first(vec![media::koreader_hash::equals(Some(document.clone()))])
-		.exec()
+	let book = media::Entity::find()
+		.filter(media::Column::KoreaderHash.eq(document.clone()))
+		.one(conn)
 		.await?
 		.ok_or_else(|| APIError::NotFound("Book not found".to_string()))?;
 
 	let is_completed = percentage == 1.0;
 	let document_cpy = document.clone();
-	let (active_session, finished_session) = client
-		._transaction()
-		.run(|tx| async move {
-			let _device_record = tx
-				.registered_reading_device()
-				.upsert(
-					registered_reading_device::id::equals(device_id.clone()),
-					(
-						device.clone(),
-						vec![registered_reading_device::id::set(device_id.clone())],
-					),
-					vec![registered_reading_device::name::set(device.clone())],
-				)
-				.exec()
-				.await?;
 
-			let existing_active_session = tx
-				.active_reading_session()
-				.find_first(vec![
-					active_reading_session::user_id::equals(user.id.clone()),
-					active_reading_session::media::is(vec![
-						media::koreader_hash::equals(Some(document_cpy.clone())),
-					]),
-				])
-				.exec()
-				.await?;
+	let tx = ctx.conn.as_ref().begin().await?;
 
-			if is_completed {
-				if let Some(ref active_session) = existing_active_session {
-					tx.active_reading_session()
-						.delete(active_reading_session::id::equals(
-							active_session.id.clone(),
-						))
-						.exec()
-						.await?;
-				}
+	let on_conflict = OnConflict::new()
+		.update_columns(registered_reading_device::Column::iter().filter(
+			|col| match col {
+				registered_reading_device::Column::Name => true,
+				_ => false,
+			},
+		))
+		.to_owned();
 
-				tx.finished_reading_session()
-					.create(
-						existing_active_session
-							.map(|s| s.started_at)
-							.unwrap_or_default(),
-						media::id::equals(book.id.clone()),
-						user::id::equals(user.id.clone()),
-						vec![finished_reading_session::device::connect(
-							registered_reading_device::id::equals(device_id.clone()),
-						)],
-					)
-					.exec()
-					.await
-					.map(|session| (None, Some(session)))
-			} else {
-				let native_progress_set_param: Option<active_reading_session::SetParam> =
-					match parse_progress(&progress) {
-						Some(NativeProgress::Page(page)) => {
-							Some(active_reading_session::page::set(Some(page)))
-						},
-						Some(NativeProgress::EpubCfi(cfi)) => {
-							Some(active_reading_session::epubcfi::set(Some(cfi)))
-						},
-						_ => {
-							tracing::debug!(
-								progress,
-								"Failed to parse progress string, assuming x-pointer"
-							);
-							None
-						},
-					};
+	let _device_record = registered_reading_device::Entity::insert(
+		registered_reading_device::ActiveModel {
+			id: Set(device_id.clone()),
+			name: Set(device.clone()),
+			..Default::default()
+		},
+	)
+	.on_conflict(on_conflict)
+	.exec(&tx)
+	.await?;
 
-				let set_params = chain_optional_iter(
-					[
-						active_reading_session::koreader_progress::set(Some(
-							progress.clone(),
-						)),
-						active_reading_session::percentage_completed::set(Some(
-							percentage as f64,
-						)),
-						active_reading_session::device::connect(
-							registered_reading_device::id::equals(device_id.clone()),
-						),
-					],
-					[native_progress_set_param],
-				);
-
-				tx.active_reading_session()
-					.upsert(
-						active_reading_session::user_id_media_id(
-							user.id.clone(),
-							book.id.clone(),
-						),
-						(
-							media::id::equals(book.id.clone()),
-							user::id::equals(user.id.clone()),
-							set_params.clone(),
-						),
-						set_params,
-					)
-					.exec()
-					.await
-					.map(|session| (Some(session), None))
-			}
-		})
+	let existing_active_session = reading_session::Entity::find()
+		.inner_join(media::Entity)
+		.filter(reading_session::Column::UserId.eq(user.id.clone()))
+		.filter(media::Column::KoreaderHash.eq(document_cpy.clone()))
+		.one(&tx)
 		.await?;
+
+	let (active_session, finished_session) = if is_completed {
+		let mut started_at = None;
+		if let Some(active_session) = existing_active_session {
+			started_at = Some(active_session.started_at);
+			active_session.delete(&tx).await?;
+		}
+
+		let finished_session = finished_reading_session::ActiveModel {
+			user_id: Set(user.id.clone()),
+			media_id: Set(book.id.clone()),
+			device_id: Set(Some(device_id.clone())),
+			started_at: Set(started_at.unwrap_or_default()),
+			..Default::default()
+		};
+		let finished_session = finished_reading_session::Entity::insert(finished_session)
+			.exec_with_returning(&tx)
+			.await?;
+
+		(None, Some(finished_session))
+	} else {
+		let mut active_model = reading_session::ActiveModel {
+			user_id: Set(user.id.clone()),
+			media_id: Set(book.id.clone()),
+			device_id: Set(Some(device_id.clone())),
+			percentage_completed: Set(Decimal::try_from(percentage).ok()),
+			koreader_progress: Set(Some(progress.clone())),
+			..Default::default()
+		};
+
+		match parse_progress(&progress) {
+			Some(NativeProgress::Page(page)) => {
+				active_model.page = Set(Some(page));
+			},
+			Some(NativeProgress::EpubCfi(cfi)) => {
+				active_model.epubcfi = Set(Some(cfi));
+			},
+			_ => {
+				tracing::debug!(
+					progress,
+					"Failed to parse progress string, assuming x-pointer"
+				);
+			},
+		};
+
+		let active_session = reading_session::Entity::insert(active_model)
+			.on_conflict(
+				OnConflict::new()
+					.update_columns(reading_session::Column::iter().filter(
+						|col| match col {
+							reading_session::Column::Page
+							| reading_session::Column::Epubcfi => true,
+							_ => false,
+						},
+					))
+					.to_owned(),
+			)
+			.exec_with_returning(&tx)
+			.await?;
+
+		(Some(active_session), None)
+	};
+
+	tx.commit().await?;
 
 	let timestamp = match (active_session, finished_session) {
 		(Some(active_session), _) => active_session.updated_at.timestamp_millis() as u64,

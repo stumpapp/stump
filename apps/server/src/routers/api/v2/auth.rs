@@ -8,6 +8,7 @@ use axum::{
 use axum_extra::{headers::UserAgent, TypedHeader};
 use chrono::{DateTime, Duration, FixedOffset, Utc};
 use models::entity::{
+	session,
 	user::{self, AuthUser},
 	user_login_activity, user_preferences,
 };
@@ -44,30 +45,27 @@ pub async fn enforce_max_sessions(
 	for_user: &user::LoginUser,
 	conn: &DatabaseConnection,
 ) -> APIResult<()> {
-	// let existing_sessions = for_user
-	// 	.sessions()
-	// 	.cloned()
-	// 	.unwrap_or_else(|error| {
-	// 		tracing::error!(?error, "Failed to load user's existing session(s)");
-	// 		Vec::default()
-	// 	})
-	// 	.clone();
-	// let existing_login_sessions_count = existing_sessions.len() as i32;
+	let existing_sessions = session::Entity::find()
+		.filter(session::Column::UserId.eq(for_user.id.clone()))
+		.all(conn)
+		.await?;
+	let existing_login_sessions_count = existing_sessions.len() as i32;
+	tracing::trace!(?existing_login_sessions_count, "Existing sessions count");
 
-	// match (for_user.max_sessions_allowed, existing_login_sessions_count) {
-	// 	(Some(max_login_sessions), count) if count >= max_login_sessions => {
-	// 		let oldest_session_id = existing_sessions
-	// 			.iter()
-	// 			.min_by_key(|session| session.expiry_time)
-	// 			.map(|session| session.id.clone());
-	// 		handle_remove_earliest_session(db, for_user.id.clone(), oldest_session_id)
-	// 			.await?;
-	// 	},
-	// 	_ => (),
-	// }
+	match (for_user.max_sessions_allowed, existing_login_sessions_count) {
+		(Some(max_login_sessions), count) if count >= max_login_sessions => {
+			let oldest_session_id = existing_sessions
+				.iter()
+				.min_by_key(|session| session.expiry_time)
+				.map(|session| session.id.clone());
 
-	// Ok(())
-	unimplemented!()
+			handle_remove_earliest_session(conn, for_user.id.clone(), oldest_session_id)
+				.await?;
+		},
+		_ => (),
+	}
+
+	Ok(())
 }
 
 #[derive(Deserialize, Type, ToSchema)]
@@ -91,44 +89,42 @@ async fn handle_login_attempt(
 	request_info: StumpRequestInfo,
 	success: bool,
 ) -> APIResult<user_login_activity::Model> {
-	// let login_activity = client
-	// 	.user_login_activity()
-	// 	.create(
-	// 		request_info.ip_addr.to_string(),
-	// 		user_agent.to_string(),
-	// 		success,
-	// 		user::id::equals(for_user.id),
-	// 		vec![],
-	// 	)
-	// 	.exec()
-	// 	.await?;
-	// Ok(login_activity)
-	unimplemented!()
+	let active_model = user_login_activity::ActiveModel {
+		user_id: Set(for_user.id.clone()),
+		ip_address: Set(request_info.ip_addr.to_string()),
+		user_agent: Set(user_agent.to_string()),
+		timestamp: Set(Utc::now().into()),
+		authentication_successful: Set(success),
+		..Default::default()
+	};
+	let login_activity = active_model.insert(conn).await?;
+	tracing::trace!(?login_activity, "Tracked login activity");
+	Ok(login_activity)
 }
 
 async fn handle_remove_earliest_session(
 	conn: &DatabaseConnection,
 	for_user_id: String,
 	session_id: Option<String>,
-) -> APIResult<i32> {
-	// if let Some(oldest_session_id) = session_id {
-	// 	let deleted_session = client
-	// 		.session()
-	// 		.delete(session::id::equals(oldest_session_id))
-	// 		.exec()
-	// 		.await?;
-	// 	tracing::trace!(?deleted_session, "Removed oldest session for user");
-	// 	Ok(1)
-	// } else {
-	// 	tracing::warn!("No existing session ID was provided for enforcing the maximum number of sessions. Deleting all sessions for user instead.");
-	// 	let deleted_sessions_count = client
-	// 		.session()
-	// 		.delete_many(vec![session::user_id::equals(for_user_id)])
-	// 		.exec()
-	// 		.await?;
-	// 	Ok(deleted_sessions_count as i32)
-	// }
-	unimplemented!()
+) -> APIResult<u64> {
+	if let Some(oldest_session_id) = session_id {
+		let affected_rows = session::Entity::delete_by_id(oldest_session_id)
+			.filter(session::Column::UserId.eq(for_user_id))
+			.exec(conn)
+			.await?
+			.rows_affected;
+		tracing::trace!(?affected_rows, "Removed oldest session for user");
+		Ok(affected_rows)
+	} else {
+		tracing::warn!("Deleting all sessions for user");
+		let deleted_sessions = session::Entity::delete_many()
+			.filter(session::Column::UserId.eq(for_user_id))
+			.exec(conn)
+			.await?
+			.rows_affected;
+		tracing::trace!(?deleted_sessions, "Removed all sessions for user");
+		Ok(deleted_sessions)
+	}
 }
 
 #[derive(Debug, Serialize)]

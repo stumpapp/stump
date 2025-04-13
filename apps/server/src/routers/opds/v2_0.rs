@@ -9,8 +9,9 @@ use axum::{
 	Extension, Json, Router,
 };
 use graphql::data::RequestContext;
-use models::entity::{library, media, reading_session};
-use prisma_client_rust::{and, operator, or, Direction};
+use models::entity::{
+	library, media, media_metadata, reading_session, series, series_metadata,
+};
 use sea_orm::{prelude::*, Condition, JoinType, QueryOrder};
 use sea_orm::{PaginatorTrait, QuerySelect};
 use serde::{Deserialize, Serialize};
@@ -54,15 +55,8 @@ use stump_core::{
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
-	filter::chain_optional_iter,
 	middleware::{auth::auth_middleware, host::HostExtractor},
-	routers::{
-		api::filters::{
-			apply_in_progress_filter_for_user, apply_media_restrictions_for_user,
-			apply_series_restrictions_for_user, library_not_hidden_from_user_filter,
-		},
-		relative_favicon_path,
-	},
+	routers::relative_favicon_path,
 	utils::http::{ImageResponse, NamedFile},
 };
 
@@ -76,8 +70,8 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			"/v2.0",
 			Router::new()
 				.route("/auth", get(auth))
-				.route("/catalog", get(catalog)),
-			// .route("/search", get(search))
+				.route("/catalog", get(catalog))
+				.route("/search", get(search)),
 			// .nest(
 			// 	"/libraries",
 			// 	Router::new().route("/", get(browse_libraries)).nest(
@@ -342,165 +336,161 @@ async fn catalog(
 	))
 }
 
-// #[tracing::instrument(err, skip(ctx))]
-// async fn search(
-// 	State(ctx): State<AppState>,
-// 	HostExtractor(host): HostExtractor,
-// 	Query(OPDSSearchQuery { query }): Query<OPDSSearchQuery>,
-// 	Extension(req): Extension<RequestContext>,
-// ) -> APIResult<Json<OPDSFeed>> {
-// 	let client = &ctx.db;
+#[tracing::instrument(err, skip(ctx))]
+async fn search(
+	State(ctx): State<AppState>,
+	HostExtractor(host): HostExtractor,
+	Query(OPDSSearchQuery { query }): Query<OPDSSearchQuery>,
+	Extension(req): Extension<RequestContext>,
+) -> APIResult<Json<OPDSFeed>> {
+	let user = req.user();
+	let link_finalizer = OPDSLinkFinalizer::from(host);
+	let query = query.ok_or(APIError::BadRequest(
+		"Query parameter is required".to_string(),
+	))?;
 
-// 	let user = req.user();
-// 	let link_finalizer = OPDSLinkFinalizer::from(host);
-// 	let query = query.ok_or(APIError::BadRequest(
-// 		"Query parameter is required".to_string(),
-// 	))?;
+	let libraries = library::Entity::find_for_user(&user)
+		.filter(library::Column::Name.contains(query.clone()))
+		.limit(DEFAULT_LIMIT)
+		.all(ctx.conn.as_ref())
+		.await?;
+	let library_count = library::Entity::find_for_user(&user)
+		.filter(library::Column::Name.contains(query.clone()))
+		.count(ctx.conn.as_ref())
+		.await?;
 
-// 	let library_conditions = vec![
-// 		library::name::contains(query.clone()),
-// 		library_not_hidden_from_user_filter(user),
-// 	];
-// 	let libraries = client
-// 		.library()
-// 		.find_many(library_conditions.clone())
-// 		.take(DEFAULT_LIMIT)
-// 		.exec()
-// 		.await?;
-// 	let library_count = client.library().count(library_conditions).exec().await?;
-// 	let library_group = OPDSFeedGroupBuilder::default()
-// 		.metadata(
-// 			OPDSMetadataBuilder::default()
-// 				.title("Libraries".to_string())
-// 				.pagination(Some(
-// 					OPDSPaginationMetadataBuilder::default()
-// 						.number_of_items(library_count)
-// 						.items_per_page(DEFAULT_LIMIT)
-// 						.current_page(1)
-// 						.build()?,
-// 				))
-// 				.build()?,
-// 		)
-// 		.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
-// 				OPDSBaseLinkBuilder::default()
-// 					.href(format!("/opds/v2.0/libraries/search?query={}", query.clone()))
-// 					.rel(OPDSLinkRel::SelfLink.item())
-// 					.build()?,
-// 			)]))
-// 		.navigation(
-// 			libraries
-// 				.into_iter()
-// 				.map(OPDSNavigationLink::from)
-// 				.map(|link| link.finalize(&link_finalizer))
-// 				.collect::<Vec<OPDSNavigationLink>>(),
-// 		)
-// 		.build()?;
+	let library_group = OPDSFeedGroupBuilder::default()
+		.metadata(
+			OPDSMetadataBuilder::default()
+				.title("Libraries".to_string())
+				.pagination(Some(
+					OPDSPaginationMetadataBuilder::default()
+						.number_of_items(library_count)
+						.items_per_page(DEFAULT_LIMIT)
+						.current_page(1)
+						.build()?,
+				))
+				.build()?,
+		)
+		.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href(format!("/opds/v2.0/libraries/search?query={}", query.clone()))
+					.rel(OPDSLinkRel::SelfLink.item())
+					.build()?,
+			)]))
+		.navigation(
+			libraries
+				.into_iter()
+				.map(OPDSNavigationLink::from)
+				.map(|link| link.finalize(&link_finalizer))
+				.collect::<Vec<OPDSNavigationLink>>(),
+		)
+		.build()?;
 
-// 	let series_conditions = vec![
-// 		or![
-// 			series::name::contains(query.clone()),
-// 			series::metadata::is(vec![series_metadata::title::contains(query.clone())]),
-// 		],
-// 		operator::and(apply_series_restrictions_for_user(user)),
-// 	];
-// 	let series = client
-// 		.series()
-// 		.find_many(series_conditions.clone())
-// 		.take(DEFAULT_LIMIT)
-// 		.exec()
-// 		.await?;
-// 	let series_count = client.series().count(series_conditions).exec().await?;
+	let series_condition = Condition::any()
+		.add(series::Column::Name.contains(query.clone()))
+		.add(series_metadata::Column::Title.contains(query.clone()));
+	let series = series::Entity::find_for_user(&user)
+		.filter(series_condition.clone())
+		.left_join(series_metadata::Entity)
+		.limit(DEFAULT_LIMIT)
+		.all(ctx.conn.as_ref())
+		.await?;
+	let series_count = series::Entity::find_for_user(&user)
+		.filter(series_condition)
+		.count(ctx.conn.as_ref())
+		.await?;
 
-// 	let series_group = OPDSFeedGroupBuilder::default()
-// 		.metadata(
-// 			OPDSMetadataBuilder::default()
-// 				.title("Series".to_string())
-// 				.pagination(Some(
-// 					OPDSPaginationMetadataBuilder::default()
-// 						.number_of_items(series_count)
-// 						.items_per_page(DEFAULT_LIMIT)
-// 						.current_page(1)
-// 						.build()?,
-// 				))
-// 				.build()?,
-// 		)
-// 		.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
-// 				OPDSBaseLinkBuilder::default()
-// 					.href(format!("/opds/v2.0/series/search?query={}", query.clone()))
-// 					.rel(OPDSLinkRel::SelfLink.item())
-// 					.build()?,
-// 			)]))
-// 		.navigation(
-// 			series
-// 				.into_iter()
-// 				.map(OPDSNavigationLink::from)
-// 				.map(|link| link.finalize(&link_finalizer))
-// 				.collect::<Vec<OPDSNavigationLink>>(),
-// 		)
-// 		.build()?;
+	let series_group = OPDSFeedGroupBuilder::default()
+		.metadata(
+			OPDSMetadataBuilder::default()
+				.title("Series".to_string())
+				.pagination(Some(
+					OPDSPaginationMetadataBuilder::default()
+						.number_of_items(series_count)
+						.items_per_page(DEFAULT_LIMIT)
+						.current_page(1)
+						.build()?,
+				))
+				.build()?,
+		)
+		.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href(format!("/opds/v2.0/series/search?query={}", query.clone()))
+					.rel(OPDSLinkRel::SelfLink.item())
+					.build()?,
+			)]))
+		.navigation(
+			series
+				.into_iter()
+				.map(OPDSNavigationLink::from)
+				.map(|link| link.finalize(&link_finalizer))
+				.collect::<Vec<OPDSNavigationLink>>(),
+		)
+		.build()?;
 
-// 	let book_conditions = vec![
-// 		or![
-// 			media::name::contains(query.clone()),
-// 			media::metadata::is(vec![media_metadata::title::contains(query.clone())]),
-// 		],
-// 		operator::and(apply_media_restrictions_for_user(user)),
-// 	];
-// 	let books = client
-// 		.media()
-// 		.find_many(book_conditions.clone())
-// 		.order_by(media::name::order(Direction::Asc))
-// 		.take(DEFAULT_LIMIT)
-// 		.include(books_as_publications::include())
-// 		.exec()
-// 		.await?;
-// 	let books_count = client.media().count(book_conditions).exec().await?;
-// 	let publications =
-// 		OPDSPublication::vec_from_books(&ctx.db, link_finalizer.clone(), books).await?;
-// 	let books_group = OPDSFeedGroupBuilder::default()
-// 		.metadata(
-// 			OPDSMetadataBuilder::default()
-// 				.title("Books".to_string())
-// 				.pagination(Some(
-// 					OPDSPaginationMetadataBuilder::default()
-// 						.number_of_items(books_count)
-// 						.items_per_page(DEFAULT_LIMIT)
-// 						.current_page(1)
-// 						.build()?,
-// 				))
-// 				.build()?,
-// 		)
-// 		.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
-// 				OPDSBaseLinkBuilder::default()
-// 					.href(format!("/opds/v2.0/books/search?query={}", query.clone()))
-// 					.rel(OPDSLinkRel::SelfLink.item())
-// 					.build()?,
-// 			)]))
-// 		.publications(publications)
-// 		.build()?;
+	let book_condition = Condition::any()
+		.add(media::Column::Name.contains(query.clone()))
+		.add(media_metadata::Column::Title.contains(query.clone()));
+	let books = OPDSPublicationEntity::find_for_user(&user)
+		.filter(book_condition.clone())
+		.order_by_asc(media::Column::Name)
+		.limit(DEFAULT_LIMIT)
+		.into_model::<OPDSPublicationEntity>()
+		.all(ctx.conn.as_ref())
+		.await?;
+	let books_count = OPDSPublicationEntity::find_for_user(&user)
+		.filter(book_condition)
+		.count(ctx.conn.as_ref())
+		.await?;
 
-// 	Ok(Json(
-// 		OPDSFeedBuilder::default()
-// 			.metadata(
-// 				OPDSMetadataBuilder::default()
-// 					.title(format!("Search - {}", query.clone()))
-// 					.modified(OPDSMetadata::generate_modified())
-// 					.build()?,
-// 			)
-// 			.links(link_finalizer.finalize_all(vec![
-// 					OPDSBaseLinkBuilder::default()
-// 						.href(format!("/opds/v2.0/search?query={}", query.clone()))
-// 						.rel(OPDSLinkRel::SelfLink.item())
-// 						.build()?.as_link(),
-// 					OPDSBaseLinkBuilder::default()
-// 						.href("/opds/v2.0/catalog".to_string())
-// 						.rel(OPDSLinkRel::Start.item())
-// 						.build()?.as_link(),
-// 				]))
-// 			.groups(vec![library_group, series_group, books_group])
-// 			.build()?,
-// 	))
-// }
+	let publications =
+		OPDSPublication::vec_from_books(ctx.conn.as_ref(), link_finalizer.clone(), books)
+			.await?;
+	let books_group = OPDSFeedGroupBuilder::default()
+		.metadata(
+			OPDSMetadataBuilder::default()
+				.title("Books".to_string())
+				.pagination(Some(
+					OPDSPaginationMetadataBuilder::default()
+						.number_of_items(books_count)
+						.items_per_page(DEFAULT_LIMIT)
+						.current_page(1)
+						.build()?,
+				))
+				.build()?,
+		)
+		.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href(format!("/opds/v2.0/books/search?query={}", query.clone()))
+					.rel(OPDSLinkRel::SelfLink.item())
+					.build()?,
+			)]))
+		.publications(publications)
+		.build()?;
+
+	Ok(Json(
+		OPDSFeedBuilder::default()
+			.metadata(
+				OPDSMetadataBuilder::default()
+					.title(format!("Search - {}", query.clone()))
+					.modified(OPDSMetadata::generate_modified())
+					.build()?,
+			)
+			.links(link_finalizer.finalize_all(vec![
+					OPDSBaseLinkBuilder::default()
+						.href(format!("/opds/v2.0/search?query={}", query.clone()))
+						.rel(OPDSLinkRel::SelfLink.item())
+						.build()?.as_link(),
+					OPDSBaseLinkBuilder::default()
+						.href("/opds/v2.0/catalog".to_string())
+						.rel(OPDSLinkRel::Start.item())
+						.build()?.as_link(),
+				]))
+			.groups(vec![library_group, series_group, books_group])
+			.build()?,
+	))
+}
 
 // /// A route handler which returns a feed of libraries for a user. The feed includes groups for
 // /// series and books in each library.

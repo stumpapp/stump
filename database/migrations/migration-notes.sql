@@ -340,5 +340,26 @@ FROM "user_login_activity";
 DROP TABLE "user_login_activity";
 ALTER TABLE "new_user_login_activity"
     RENAME TO "user_login_activity";
+-- Changes:
+-- 1. id is now an autoincrementing integer
+CREATE TABLE "new_age_restrictions" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "age" INTEGER NOT NULL,
+    "restrict_on_unset" BOOLEAN NOT NULL DEFAULT false,
+    "user_id" TEXT NOT NULL,
+    CONSTRAINT "age_restrictions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+INSERT INTO "new_age_restrictions"(
+        "age",
+        "restrict_on_unset",
+        "user_id"
+    )
+SELECT "age",
+    "restrict_on_unset",
+    "user_id"
+FROM "age_restrictions";
+DROP TABLE "age_restrictions";
+ALTER TABLE "new_age_restrictions"
+    RENAME TO "age_restrictions";
 PRAGMA foreign_keys = ON;
 COMMIT;

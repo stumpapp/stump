@@ -4,10 +4,7 @@ use serde::{de, Deserialize, Serialize};
 use serde_untagged::UntaggedEnumVisitor;
 use serde_with::skip_serializing_none;
 use specta::Type;
-use stump_core::db::{
-	entity::{age_rating_deserializer, LogLevel},
-	query::ordering::QueryOrder,
-};
+use stump_core::db::query::ordering::QueryOrder;
 use utoipa::ToSchema;
 
 use crate::errors::APIError;

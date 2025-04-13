@@ -8,7 +8,7 @@ use axum::{
 	routing::get,
 	Extension, Json, Router,
 };
-use graphql::data::RequestContext;
+use graphql::{data::RequestContext, pagination::OffsetPagination};
 use models::entity::{
 	library, media, media_metadata, reading_session, series, series_metadata,
 };
@@ -492,100 +492,99 @@ async fn search(
 	))
 }
 
-// /// A route handler which returns a feed of libraries for a user. The feed includes groups for
-// /// series and books in each library.
-// #[tracing::instrument(skip(ctx))]
-// async fn browse_libraries(
-// 	State(ctx): State<AppState>,
-// 	HostExtractor(host): HostExtractor,
-// 	pagination: Query<PageQuery>,
-// 	Extension(req): Extension<RequestContext>,
-// ) -> APIResult<Json<OPDSFeed>> {
-// 	let client = &ctx.db;
-// 	let link_finalizer = OPDSLinkFinalizer::from(host);
+/// A route handler which returns a feed of libraries for a user. The feed includes groups for
+/// series and books in each library.
+#[tracing::instrument(skip(ctx))]
+async fn browse_libraries(
+	State(ctx): State<AppState>,
+	HostExtractor(host): HostExtractor,
+	pagination: Query<OffsetPagination>,
+	Extension(req): Extension<RequestContext>,
+) -> APIResult<Json<OPDSFeed>> {
+	let link_finalizer = OPDSLinkFinalizer::from(host);
 
-// 	let user = req.user();
+	let user = req.user();
 
-// 	let (skip, take) = pagination.get_skip_take();
-// 	let library_conditions = vec![library_not_hidden_from_user_filter(user)];
-// 	let libraries = client
-// 		.library()
-// 		.find_many(library_conditions.clone())
-// 		.order_by(library::name::order(Direction::Asc))
-// 		.take(take)
-// 		.skip(skip)
-// 		.exec()
-// 		.await?;
-// 	let library_count = client.library().count(library_conditions).exec().await?;
+	let take = pagination.limit();
 
-// 	let series_conditions = apply_series_restrictions_for_user(user);
-// 	let series = client
-// 		.series()
-// 		.find_many(series_conditions.clone())
-// 		.order_by(series::name::order(Direction::Asc))
-// 		.take(DEFAULT_LIMIT)
-// 		.exec()
-// 		.await?;
-// 	let series_count = client.series().count(series_conditions).exec().await?;
-// 	let series_group = OPDSFeedGroupBuilder::default()
-// 		.metadata(
-// 			OPDSMetadataBuilder::default()
-// 				.title("Series".to_string())
-// 				.pagination(Some(
-// 					OPDSPaginationMetadataBuilder::default()
-// 						.number_of_items(series_count)
-// 						.items_per_page(DEFAULT_LIMIT)
-// 						.current_page(1)
-// 						.build()?,
-// 				))
-// 				.build()?,
-// 		)
-// 		.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
-// 			OPDSBaseLinkBuilder::default()
-// 				.href("/opds/v2.0/series".to_string())
-// 				.rel(OPDSLinkRel::SelfLink.item())
-// 				.build()?,
-// 		)]))
-// 		.navigation(
-// 			series
-// 				.into_iter()
-// 				.map(OPDSNavigationLink::from)
-// 				.map(|link| link.finalize(&link_finalizer))
-// 				.collect::<Vec<OPDSNavigationLink>>(),
-// 		)
-// 		.build()?;
+	let libraries = library::Entity::find_for_user(&user)
+		.limit(take)
+		.offset(pagination.offset())
+		.order_by_asc(library::Column::Name)
+		.all(ctx.conn.as_ref())
+		.await?;
+	let library_count = library::Entity::find_for_user(&user)
+		.count(ctx.conn.as_ref())
+		.await?;
 
-// 	Ok(Json(
-// 		OPDSFeedBuilder::default()
-// 			.metadata(
-// 				OPDSMetadataBuilder::default()
-// 					.title("Browse Libraries".to_string())
-// 					.pagination(Some(
-// 						OPDSPaginationMetadataBuilder::default()
-// 							.number_of_items(library_count)
-// 							.items_per_page(take)
-// 							.current_page(1)
-// 							.build()?,
-// 					))
-// 					.build()?,
-// 			)
-// 			.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
-// 				OPDSBaseLinkBuilder::default()
-// 					.href("/opds/v2.0/libraries/browse".to_string())
-// 					.rel(OPDSLinkRel::SelfLink.item())
-// 					.build()?,
-// 			)]))
-// 			.navigation(
-// 				libraries
-// 					.into_iter()
-// 					.map(OPDSNavigationLink::from)
-// 					.map(|link| link.finalize(&link_finalizer))
-// 					.collect::<Vec<OPDSNavigationLink>>(),
-// 			)
-// 			.groups(vec![series_group])
-// 			.build()?,
-// 	))
-// }
+	let series = series::Entity::find_for_user(&user)
+		.limit(DEFAULT_LIMIT)
+		.order_by_asc(series::Column::Name)
+		.all(ctx.conn.as_ref())
+		.await?;
+	let series_count = series::Entity::find_for_user(&user)
+		.count(ctx.conn.as_ref())
+		.await?;
+
+	let series_group = OPDSFeedGroupBuilder::default()
+		.metadata(
+			OPDSMetadataBuilder::default()
+				.title("Series".to_string())
+				.pagination(Some(
+					OPDSPaginationMetadataBuilder::default()
+						.number_of_items(series_count)
+						.items_per_page(DEFAULT_LIMIT)
+						.current_page(1)
+						.build()?,
+				))
+				.build()?,
+		)
+		.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
+			OPDSBaseLinkBuilder::default()
+				.href("/opds/v2.0/series".to_string())
+				.rel(OPDSLinkRel::SelfLink.item())
+				.build()?,
+		)]))
+		.navigation(
+			series
+				.into_iter()
+				.map(OPDSNavigationLink::from)
+				.map(|link| link.finalize(&link_finalizer))
+				.collect::<Vec<OPDSNavigationLink>>(),
+		)
+		.build()?;
+
+	Ok(Json(
+		OPDSFeedBuilder::default()
+			.metadata(
+				OPDSMetadataBuilder::default()
+					.title("Browse Libraries".to_string())
+					.pagination(Some(
+						OPDSPaginationMetadataBuilder::default()
+							.number_of_items(library_count)
+							.items_per_page(take)
+							.current_page(1)
+							.build()?,
+					))
+					.build()?,
+			)
+			.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href("/opds/v2.0/libraries/browse".to_string())
+					.rel(OPDSLinkRel::SelfLink.item())
+					.build()?,
+			)]))
+			.navigation(
+				libraries
+					.into_iter()
+					.map(OPDSNavigationLink::from)
+					.map(|link| link.finalize(&link_finalizer))
+					.collect::<Vec<OPDSNavigationLink>>(),
+			)
+			.groups(vec![series_group])
+			.build()?,
+	))
+}
 
 // #[tracing::instrument(skip(ctx))]
 // async fn browse_library_by_id(

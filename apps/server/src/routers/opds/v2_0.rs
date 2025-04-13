@@ -586,170 +586,152 @@ async fn browse_libraries(
 	))
 }
 
-// #[tracing::instrument(skip(ctx))]
-// async fn browse_library_by_id(
-// 	State(ctx): State<AppState>,
-// 	HostExtractor(host): HostExtractor,
-// 	Path(id): Path<String>,
-// 	Extension(req): Extension<RequestContext>,
-// ) -> APIResult<Json<OPDSFeed>> {
-// 	let client = &ctx.db;
-// 	let link_finalizer = OPDSLinkFinalizer::from(host);
+#[tracing::instrument(skip(ctx))]
+async fn browse_library_by_id(
+	State(ctx): State<AppState>,
+	HostExtractor(host): HostExtractor,
+	Path(id): Path<String>,
+	Extension(req): Extension<RequestContext>,
+) -> APIResult<Json<OPDSFeed>> {
+	let link_finalizer = OPDSLinkFinalizer::from(host);
 
-// 	let user = req.user();
+	let user = req.user();
 
-// 	let library_conditions = vec![
-// 		library_not_hidden_from_user_filter(user),
-// 		library::id::equals(id.clone()),
-// 	];
-// 	let library = client
-// 		.library()
-// 		.find_first(library_conditions.clone())
-// 		.select(library_name::select())
-// 		.exec()
-// 		.await?
-// 		.ok_or(APIError::NotFound(String::from("Library not found")))?;
+	let library = library::Entity::find_for_user(&user)
+		.filter(library::Column::Id.eq(id.clone()))
+		.one(ctx.conn.as_ref())
+		.await?
+		.ok_or(APIError::NotFound("Library not found".to_string()))?;
 
-// 	let library_books_conditions = vec![
-// 		operator::and(apply_media_restrictions_for_user(user)),
-// 		media::series::is(vec![series::library_id::equals(Some(id.clone()))]),
-// 	];
-// 	let library_books = client
-// 		.media()
-// 		.find_many(library_books_conditions.clone())
-// 		.order_by(media::created_at::order(Direction::Desc))
-// 		.take(DEFAULT_LIMIT)
-// 		.include(books_as_publications::include())
-// 		.exec()
-// 		.await?;
-// 	let library_books_count = client
-// 		.media()
-// 		.count(library_books_conditions.clone())
-// 		.exec()
-// 		.await?;
-// 	let books_group = OPDSFeedGroupBuilder::default()
-// 		.metadata(
-// 			OPDSMetadataBuilder::default()
-// 				.title("Library Books - All".to_string())
-// 				.pagination(Some(
-// 					OPDSPaginationMetadataBuilder::default()
-// 						.number_of_items(library_books_count)
-// 						.items_per_page(DEFAULT_LIMIT)
-// 						.current_page(1)
-// 						.build()?,
-// 				))
-// 				.build()?,
-// 		)
-// 		.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
-// 			OPDSBaseLinkBuilder::default()
-// 				.href(format!("/opds/v2.0/libraries/{id}/books"))
-// 				.rel(OPDSLinkRel::SelfLink.item())
-// 				.build()?,
-// 		)]))
-// 		.publications(
-// 			OPDSPublication::vec_from_books(
-// 				&ctx.db,
-// 				link_finalizer.clone(),
-// 				library_books,
-// 			)
-// 			.await?,
-// 		)
-// 		.build()?;
+	let library_books = OPDSPublicationEntity::find_for_user(&user)
+		.filter(series::Column::LibraryId.eq(id.clone()))
+		.limit(DEFAULT_LIMIT)
+		.order_by_asc(media::Column::Name)
+		.into_model::<OPDSPublicationEntity>()
+		.all(ctx.conn.as_ref())
+		.await?;
+	let library_books_count = OPDSPublicationEntity::find_for_user(&user)
+		.filter(series::Column::LibraryId.eq(id.clone()))
+		.count(ctx.conn.as_ref())
+		.await?;
 
-// 	let latest_library_books = client
-// 		.media()
-// 		.find_many(library_books_conditions.clone())
-// 		.order_by(media::created_at::order(Direction::Desc))
-// 		.take(DEFAULT_LIMIT)
-// 		.include(books_as_publications::include())
-// 		.exec()
-// 		.await?;
-// 	let latest_books_group = OPDSFeedGroupBuilder::default()
-// 		.metadata(
-// 			OPDSMetadataBuilder::default()
-// 				.title("Library Books - Latest".to_string())
-// 				.pagination(Some(
-// 					OPDSPaginationMetadataBuilder::default()
-// 						.number_of_items(library_books_count)
-// 						.items_per_page(DEFAULT_LIMIT)
-// 						.current_page(1)
-// 						.build()?,
-// 				))
-// 				.build()?,
-// 		)
-// 		.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
-// 			OPDSBaseLinkBuilder::default()
-// 				.href(format!("/opds/v2.0/libraries/{id}/books/latest"))
-// 				.rel(OPDSLinkRel::SelfLink.item())
-// 				.build()?,
-// 		)]))
-// 		.publications(
-// 			OPDSPublication::vec_from_books(
-// 				&ctx.db,
-// 				link_finalizer.clone(),
-// 				latest_library_books,
-// 			)
-// 			.await?,
-// 		)
-// 		.build()?;
+	let books_group = OPDSFeedGroupBuilder::default()
+		.metadata(
+			OPDSMetadataBuilder::default()
+				.title("Library Books - All".to_string())
+				.pagination(Some(
+					OPDSPaginationMetadataBuilder::default()
+						.number_of_items(library_books_count)
+						.items_per_page(DEFAULT_LIMIT)
+						.current_page(1)
+						.build()?,
+				))
+				.build()?,
+		)
+		.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
+			OPDSBaseLinkBuilder::default()
+				.href(format!("/opds/v2.0/libraries/{id}/books"))
+				.rel(OPDSLinkRel::SelfLink.item())
+				.build()?,
+		)]))
+		.publications(
+			OPDSPublication::vec_from_books(
+				ctx.conn.as_ref(),
+				link_finalizer.clone(),
+				library_books,
+			)
+			.await?,
+		)
+		.build()?;
 
-// 	let library_series_conditions = vec![
-// 		operator::and(apply_series_restrictions_for_user(user)),
-// 		series::library_id::equals(Some(id.clone())),
-// 	];
-// 	let library_series = client
-// 		.series()
-// 		.find_many(library_series_conditions.clone())
-// 		.order_by(series::name::order(Direction::Asc))
-// 		.take(DEFAULT_LIMIT)
-// 		.exec()
-// 		.await?;
-// 	let library_series_count = client
-// 		.series()
-// 		.count(library_series_conditions)
-// 		.exec()
-// 		.await?;
-// 	let series_group = OPDSFeedGroupBuilder::default()
-// 		.metadata(
-// 			OPDSMetadataBuilder::default()
-// 				.title("Library Series".to_string())
-// 				.pagination(Some(
-// 					OPDSPaginationMetadataBuilder::default()
-// 						.number_of_items(library_series_count)
-// 						.items_per_page(DEFAULT_LIMIT)
-// 						.current_page(1)
-// 						.build()?,
-// 				))
-// 				.build()?,
-// 		)
-// 		// .links(vec![OPDSLink::Link(
-// 		// 	OPDSBaseLinkBuilder::default()
-// 		// 		.href(format!("/opds/v2.0/libraries/{id}/series"))
-// 		// 		.rel(OPDSLinkRel::SelfLink.item()) // TODO(OPDS-V2): Not self
-// 		// 		.build()?,
-// 		// )])
-// 		.navigation(
-// 			library_series
-// 				.into_iter()
-// 				.map(OPDSNavigationLink::from)
-// 				.map(|link| link.finalize(&link_finalizer))
-// 				.collect::<Vec<OPDSNavigationLink>>(),
-// 		)
-// 		.build()?;
+	let latest_library_books = OPDSPublicationEntity::find_for_user(&user)
+		.filter(series::Column::LibraryId.eq(id.clone()))
+		.limit(DEFAULT_LIMIT)
+		.order_by_asc(media::Column::CreatedAt)
+		.into_model::<OPDSPublicationEntity>()
+		.all(ctx.conn.as_ref())
+		.await?;
+	let latest_books_group = OPDSFeedGroupBuilder::default()
+		.metadata(
+			OPDSMetadataBuilder::default()
+				.title("Library Books - Latest".to_string())
+				.pagination(Some(
+					OPDSPaginationMetadataBuilder::default()
+						.number_of_items(library_books_count)
+						.items_per_page(DEFAULT_LIMIT)
+						.current_page(1)
+						.build()?,
+				))
+				.build()?,
+		)
+		.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
+			OPDSBaseLinkBuilder::default()
+				.href(format!("/opds/v2.0/libraries/{id}/books/latest"))
+				.rel(OPDSLinkRel::SelfLink.item())
+				.build()?,
+		)]))
+		.publications(
+			OPDSPublication::vec_from_books(
+				ctx.conn.as_ref(),
+				link_finalizer.clone(),
+				latest_library_books,
+			)
+			.await?,
+		)
+		.build()?;
 
-// 	Ok(Json(
-// 		OPDSFeedBuilder::default()
-// 			.metadata(OPDSMetadataBuilder::default().title(library.name).build()?)
-// 			.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
-// 				OPDSBaseLinkBuilder::default()
-// 					.href(format!("/opds/v2.0/libraries/{id}"))
-// 					.rel(OPDSLinkRel::SelfLink.item())
-// 					.build()?,
-// 			)]))
-// 			.groups(vec![books_group, latest_books_group, series_group])
-// 			.build()?,
-// 	))
-// }
+	let library_series = series::Entity::find_for_user(&user)
+		.filter(series::Column::LibraryId.eq(id.clone()))
+		.limit(DEFAULT_LIMIT)
+		.order_by_asc(series::Column::Name)
+		.all(ctx.conn.as_ref())
+		.await?;
+	let library_series_count = series::Entity::find_for_user(&user)
+		.filter(series::Column::LibraryId.eq(id.clone()))
+		.count(ctx.conn.as_ref())
+		.await?;
+
+	let series_group = OPDSFeedGroupBuilder::default()
+		.metadata(
+			OPDSMetadataBuilder::default()
+				.title("Library Series".to_string())
+				.pagination(Some(
+					OPDSPaginationMetadataBuilder::default()
+						.number_of_items(library_series_count)
+						.items_per_page(DEFAULT_LIMIT)
+						.current_page(1)
+						.build()?,
+				))
+				.build()?,
+		)
+		// .links(vec![OPDSLink::Link(
+		// 	OPDSBaseLinkBuilder::default()
+		// 		.href(format!("/opds/v2.0/libraries/{id}/series"))
+		// 		.rel(OPDSLinkRel::SelfLink.item()) // TODO(OPDS-V2): Not self
+		// 		.build()?,
+		// )])
+		.navigation(
+			library_series
+				.into_iter()
+				.map(OPDSNavigationLink::from)
+				.map(|link| link.finalize(&link_finalizer))
+				.collect::<Vec<OPDSNavigationLink>>(),
+		)
+		.build()?;
+
+	Ok(Json(
+		OPDSFeedBuilder::default()
+			.metadata(OPDSMetadataBuilder::default().title(library.name).build()?)
+			.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href(format!("/opds/v2.0/libraries/{id}"))
+					.rel(OPDSLinkRel::SelfLink.item())
+					.build()?,
+			)]))
+			.groups(vec![books_group, latest_books_group, series_group])
+			.build()?,
+	))
+}
 
 // /// A helper function to fetch books and generate an OPDS feed for a user. This is not a route
 // #[allow(clippy::too_many_arguments)]

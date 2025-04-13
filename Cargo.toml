@@ -24,6 +24,7 @@ axum = { version = "0.8.1", features = [
 ] }
 base64 = "0.22.1"
 bcrypt = "0.15.1"
+rust_decimal = "1.37.1"
 derive_builder = "0.20.0"
 derivative = "2.2.0"
 chrono = { version = "0.4.38", features = ["serde"] }

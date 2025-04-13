@@ -2,10 +2,12 @@ use models::{
 	entity::{
 		library_hidden_to_user,
 		media::{self, get_age_restriction_filter},
-		media_metadata, series, series_metadata,
+		media_metadata, page_dimension, reading_session, registered_reading_device,
+		series, series_metadata,
 		user::AuthUser,
 	},
 	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
+	shared::page_dimension::PageAnalysis,
 };
 use sea_orm::{entity::prelude::*, Condition, FromQueryResult, JoinType, QuerySelect};
 
@@ -95,6 +97,75 @@ impl FromQueryResult for OPDSPublicationEntity {
 				name: series_name,
 				metadata: series_metadata,
 			},
+		})
+	}
+}
+
+#[derive(Clone, Debug, FromQueryResult)]
+pub struct OPDSProgressionBookRef {
+	pub id: String,
+	pub extension: String,
+	pub pages: i32,
+	pub analysis: Option<PageAnalysis>,
+}
+
+pub struct OPDSProgressionEntity {
+	pub session: reading_session::Model,
+	pub device: Option<registered_reading_device::Model>,
+	pub book: OPDSProgressionBookRef,
+}
+
+impl OPDSProgressionEntity {
+	pub fn find() -> Select<reading_session::Entity> {
+		Prefixer::new(reading_session::Entity::find().select_only())
+			.add_columns(reading_session::Entity)
+			.add_columns(registered_reading_device::Entity)
+			.add_named_columns(
+				&[
+					media::Column::Id,
+					media::Column::Extension,
+					media::Column::Pages,
+				],
+				"bookref",
+			)
+			.add_named_columns(&[page_dimension::Column::Dimensions], "bookref")
+			.selector
+			.left_join(registered_reading_device::Entity)
+			.inner_join(media::Entity)
+			.join_rev(
+				JoinType::LeftJoin,
+				page_dimension::Entity::belongs_to(media::Entity)
+					.from(page_dimension::Column::MetadataId)
+					.to(media::Column::Id)
+					.into(),
+			)
+			.join_rev(
+				JoinType::LeftJoin,
+				page_dimension::Entity::belongs_to(media_metadata::Entity)
+					.from(page_dimension::Column::MetadataId)
+					.to(media_metadata::Column::Id)
+					.into(),
+			)
+	}
+}
+
+impl FromQueryResult for OPDSProgressionEntity {
+	fn from_query_result(
+		res: &sea_orm::QueryResult,
+		_pre: &str,
+	) -> Result<Self, sea_orm::DbErr> {
+		let session =
+			parse_query_to_model::<reading_session::Model, reading_session::Entity>(res)?;
+		let device = parse_query_to_model_optional::<
+			registered_reading_device::Model,
+			registered_reading_device::Entity,
+		>(res)?;
+		let book = OPDSProgressionBookRef::from_query_result(res, "bookref")?;
+
+		Ok(OPDSProgressionEntity {
+			session,
+			device,
+			book,
 		})
 	}
 }

@@ -11,6 +11,7 @@ async-trait.workspace = true
 chrono.workspace = true
 cuid = "1.3.2"
 data-encoding = "2.5.0"
+rust_decimal.workspace = true
 derive_builder.workspace = true
 derivative.workspace = true
 dirs = "5.0.1"

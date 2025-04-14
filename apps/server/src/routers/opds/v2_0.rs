@@ -221,37 +221,22 @@ async fn catalog(
 		.publications(publications)
 		.build()?;
 
-	let user_id = user.id.clone();
+	let in_progress_filter = Condition::all()
+		.add(reading_session::Column::UserId.eq(user.id.clone()))
+		.add(
+			Condition::any()
+				.add(reading_session::Column::Page.gt(0))
+				.add(reading_session::Column::Epubcfi.is_not_null()),
+		);
 	let continue_reading = OPDSPublicationEntity::find_for_user(&user)
-		.join_rev(
-			JoinType::InnerJoin,
-			reading_session::Entity::belongs_to(media::Entity)
-				.from(reading_session::Column::MediaId)
-				.to(media::Column::Id)
-				.on_condition(move |_left, _right| {
-					Condition::all()
-						.add(reading_session::Column::UserId.eq(user_id.clone()))
-				})
-				.into(),
-		)
+		.filter(in_progress_filter.clone())
 		.limit(DEFAULT_LIMIT)
 		.order_by_asc(reading_session::Column::UpdatedAt)
 		.into_model::<OPDSPublicationEntity>()
 		.all(ctx.conn.as_ref())
 		.await?;
-	let user_id = user.id.clone();
-	let continue_reading_count = media::Entity::find_for_user(&user)
-		.join_rev(
-			JoinType::InnerJoin,
-			reading_session::Entity::belongs_to(media::Entity)
-				.from(reading_session::Column::MediaId)
-				.to(media::Column::Id)
-				.on_condition(move |_left, _right| {
-					Condition::all()
-						.add(reading_session::Column::UserId.eq(user_id.clone()))
-				})
-				.into(),
-		)
+	let continue_reading_count = OPDSPublicationEntity::find_for_user(&user)
+		.filter(in_progress_filter)
 		.count(ctx.conn.as_ref())
 		.await?;
 

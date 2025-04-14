@@ -744,18 +744,7 @@ where
 		.apply_if(
 			(order_by_entity == *"reading_sessions").then_some(()),
 			|query, _| {
-				query.join_rev(
-					JoinType::InnerJoin,
-					reading_session::Entity::belongs_to(media::Entity)
-						.from(reading_session::Column::MediaId)
-						.to(media::Column::Id)
-						.on_condition(move |_left, _right| {
-							Condition::all().add(
-								reading_session::Column::UserId.eq(for_user_id.clone()),
-							)
-						})
-						.into(),
-				)
+				query.filter(reading_session::Column::UserId.eq(for_user_id.clone()))
 			},
 		)
 		.limit(take)
@@ -770,18 +759,7 @@ where
 		.apply_if(
 			(order_by_entity == *"reading_sessions").then_some(()),
 			|query, _| {
-				query.join_rev(
-					JoinType::InnerJoin,
-					reading_session::Entity::belongs_to(media::Entity)
-						.from(reading_session::Column::MediaId)
-						.to(media::Column::Id)
-						.on_condition(move |_left, _right| {
-							Condition::all().add(
-								reading_session::Column::UserId.eq(for_user_id.clone()),
-							)
-						})
-						.into(),
-				)
+				query.filter(reading_session::Column::UserId.eq(for_user_id.clone()))
 			},
 		)
 		.count(ctx.conn.as_ref())

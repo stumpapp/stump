@@ -18,11 +18,13 @@ pub struct OPDSSeries {
 	pub metadata: Option<series_metadata::Model>,
 }
 
+// TODO: Move this to a shared location between 1.2 and 2.0
 #[derive(Clone, Debug)]
 pub struct OPDSPublicationEntity {
 	pub media: media::Model,
 	pub metadata: Option<media_metadata::Model>,
 	pub series: OPDSSeries,
+	pub reading_session: Option<reading_session::Model>,
 }
 
 impl OPDSPublicationEntity {
@@ -50,11 +52,13 @@ impl OPDSPublicationEntity {
 			.as_ref()
 			.map(|res| get_age_restriction_filter(res.age, res.restrict_on_unset));
 
+		let for_user_id = user.id.clone();
 		Prefixer::new(media::Entity::find().select_only())
 			.add_columns(media::Entity)
 			.add_columns(media_metadata::Entity)
 			.add_columns(series::Entity)
 			.add_columns(series_metadata::Entity)
+			.add_columns(reading_session::Entity)
 			.selector
 			.filter(series::Column::LibraryId.not_in_subquery(
 				library_hidden_to_user::Entity::library_hidden_to_user_query(user),
@@ -67,6 +71,17 @@ impl OPDSPublicationEntity {
 				series_metadata::Entity::belongs_to(series::Entity)
 					.from(series_metadata::Column::SeriesId)
 					.to(series::Column::Id)
+					.into(),
+			)
+			.join_rev(
+				JoinType::LeftJoin,
+				reading_session::Entity::belongs_to(media::Entity)
+					.from(reading_session::Column::MediaId)
+					.to(media::Column::Id)
+					.on_condition(move |_left, _right| {
+						Condition::all()
+							.add(reading_session::Column::UserId.eq(for_user_id.clone()))
+					})
 					.into(),
 			)
 	}
@@ -88,6 +103,10 @@ impl FromQueryResult for OPDSPublicationEntity {
 		>(res)?;
 		let series_name = res.try_get("series", "name")?;
 		let series_id = res.try_get("series", "id")?;
+		let reading_session = parse_query_to_model_optional::<
+			reading_session::Model,
+			reading_session::Entity,
+		>(res)?;
 
 		Ok(OPDSPublicationEntity {
 			media,
@@ -97,6 +116,7 @@ impl FromQueryResult for OPDSPublicationEntity {
 				name: series_name,
 				metadata: series_metadata,
 			},
+			reading_session,
 		})
 	}
 }

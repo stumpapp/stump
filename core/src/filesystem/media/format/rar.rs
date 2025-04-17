@@ -394,7 +394,7 @@ mod tests {
 	use super::*;
 	use crate::filesystem::{
 		media::tests::{get_test_rar_file_data, get_test_rar_path},
-		tests::{get_test_complex_rar_file_data, get_test_complex_rar_path},
+		tests::get_test_complex_rar_path,
 	};
 
 	use std::fs;

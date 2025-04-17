@@ -3,7 +3,7 @@
 		"heading": "有点尴尬",
 		"message": "你发现了一个还在开发中的页面。我很想展示给你看，但它还没准备好。",
 		"homeLink": "返回首页",
-		"githubLink": "查看 GitHub 问题"
+		"githubLink": "查看 GitHub issues"
 	},
 	"authScene": {
 		"claimHeading": "初始化您的服务器",
@@ -66,7 +66,7 @@
 				}
 			}
 		},
-		"nextInSeries": "系列中的下一本"
+		"nextInSeries": "丛书中的下一本"
 	},
 	"createOrUpdateBookClubForm": {
 		"fields": {
@@ -390,11 +390,11 @@
 					"description": "决定 Stump 如何组织书库的设置",
 					"collectionPriority": {
 						"label": "合集优先",
-						"description": "书库根目录下的每个文件夹视为一个系列"
+						"description": "书库根目录下的每个文件夹视为一套丛书"
 					},
 					"seriesPriority": {
-						"label": "系列优先",
-						"description": "任意层级的每个文件夹视为一个系列（递归）"
+						"label": "丛书优先",
+						"description": "任意层级的每个文件夹视为一套丛书（递归）"
 					}
 				}
 			}
@@ -465,16 +465,16 @@
 		"uploadModal": {
 			"title": {
 				"books": "上传书籍",
-				"series": "上传系列"
+				"series": "上传丛书"
 			},
 			"description": {
 				"books": "直接向文件浏览器的当前路径添加书籍",
-				"series": "直接向文件浏览器的当前路径添加系列"
+				"series": "直接向文件浏览器的当前路径添加丛书"
 			},
 			"seriesDisclaimer": [
 				"必须为 ",
 				"压缩文件",
-				"包含作为系列的文件夹及其内部所有书籍"
+				"包含作为丛书的文件夹及其内部所有书籍"
 			],
 			"dropzone": {
 				"books": "拖放书籍至此",
@@ -573,8 +573,8 @@
 			"sections": {
 				"cleanLibrary": {
 					"heading": "清理书库",
-					"description": "移除所有无法定位的媒体和系列",
-					"disclaimer": "此操作不会删除任何文件，但会永久删除所有与缺失状态的媒体和系列相关的记录",
+					"description": "移除所有无法定位的书籍和丛书",
+					"disclaimer": "此操作不会删除任何文件，但会永久删除所有与缺失状态的书籍和丛书相关的记录",
 					"confirmation": {
 						"label": "清理书库",
 						"text": "确定要清理此书库吗？"
@@ -608,10 +608,10 @@
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "最近添加的系列",
+			"title": "最近添加的丛书",
 			"emptyState": {
-				"heading": "没有要显示的系列",
-				"message": "您添加到书库中的任何系列都会在此处显示"
+				"heading": "没有要显示的丛书",
+				"message": "您添加到书库中的任何丛书都会在此处显示"
 			}
 		},
 		"recentlyAddedBooks": {
@@ -625,7 +625,7 @@
 	"seriesOverviewScene": {
 		"buttons": {
 			"continueReading": "继续阅读",
-			"downloadSeries": "下载系列文件"
+			"downloadSeries": "下载丛书文件"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -696,7 +696,7 @@
 							"label": "无"
 						},
 						"by_series": {
-							"label": "系列"
+							"label": "丛书"
 						},
 						"by_library": {
 							"label": "书库"
@@ -752,14 +752,14 @@
 								}
 							},
 							"series": {
-								"label": "系列",
+								"label": "丛书",
 								"attributes": {
 									"name": "名称",
 									"path": "路径"
 								}
 							},
 							"series_meta": {
-								"label": "系列元数据",
+								"label": "丛书元数据",
 								"attributes": {
 									"age_rating": "年龄分级",
 									"title": "标题",
@@ -890,7 +890,7 @@
 				"meta": {
 					"figures": {
 						"books": "本书",
-						"series": "系列",
+						"series": "丛书",
 						"library": "书库"
 					},
 					"matches": "匹配项"
@@ -1725,7 +1725,7 @@
 		"backupHeading": "正在执行的任务"
 	},
 	"libraryStats": {
-		"seriesCount": "总系列数",
+		"seriesCount": "总丛书数",
 		"bookCount": "总书籍数",
 		"diskUsage": "磁盘使用量"
 	},

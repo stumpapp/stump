@@ -186,6 +186,12 @@ impl FileProcessor for RarProcessor {
 		while let Ok(Some(header)) = archive.read_header() {
 			let entry = header.entry();
 
+			let Some(filename) = entry.filename.as_path().file_name() else {
+				tracing::warn!(?entry.filename, "Failed to get filename from entry");
+				archive = header.skip()?;
+				continue;
+			};
+
 			if entry.is_directory() {
 				archive = header.skip()?;
 				continue;
@@ -196,7 +202,7 @@ impl FileProcessor for RarProcessor {
 				continue;
 			}
 
-			if entry.filename.as_os_str() == "ComicInfo.xml" && options.process_metadata {
+			if filename == "ComicInfo.xml" && options.process_metadata {
 				let (data, rest) = header.read()?;
 				metadata_buf = Some(data);
 				archive = rest;

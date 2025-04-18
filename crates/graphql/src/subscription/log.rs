@@ -28,12 +28,8 @@ impl LogSubscription {
 			let mut lines = MuxedLines::new()?;
 			lines.add_file(log_file_path.unwrap().as_path()).await?;
 
-			loop {
-				if let Ok(Some(line)) = lines.next_line().await {
-					yield Ok(line.line().to_string());
-				} else {
-					break;
-				}
+			while let Ok(Some(line)) = lines.next_line().await {
+				yield Ok(line.line().to_string());
 			}
 		}
 	}

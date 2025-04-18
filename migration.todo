@@ -3,10 +3,10 @@ Backend / Core:
 - [ ] Finalize and test intial migration
 - [x] Unify `RequestContext` between REST and GraphQL APIs
   - [x] Port all middleware to work with updated types/structs/etc
-- [ ] Develop (port) GET thumbnail and/or page API for:
-  - [ ] media
-  - [ ] series
-  - [ ] library
+- [x] Develop (port) GET thumbnail and/or page API for:
+  - [x] media
+  - [x] series
+  - [x] library
 - [x] Move all the deserializer utils (e.g., age_rating_deserializer)
 - [ ] Remove sse and ws from REST, move to GraphQL
   - [ ] Port SSE to GraphQL
@@ -19,9 +19,9 @@ Backend / Core:
   - [ ] config
   - [ ] api_key
   - [ ] user
-  - [ ] OPDS
-    - [ ] OPDS 1.2
-    - [ ] OPDS 2.0
+  - [x] OPDS
+    - [x] OPDS 1.2
+    - [x] OPDS 2.0
   - [x] KoReader
 - [ ] Develop migration system according to SeaORM standards
 - [ ] Investigate whether `init_journal_mode` is needed

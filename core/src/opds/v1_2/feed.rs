@@ -3,16 +3,8 @@
 
 use std::collections::HashMap;
 
-use crate::{
-	error::CoreError,
-	opds::v1_2::{
-		entry::{IntoOPDSEntry, OPDSEntryBuilder},
-		link::OpdsLink,
-	},
-	utils::chain_optional_iter,
-};
+use crate::{error::CoreError, opds::v1_2::link::OpdsLink, utils::chain_optional_iter};
 use chrono::{DateTime, Utc};
-use models::entity::{library, series};
 use xml::{writer::XmlEvent, EventWriter};
 
 use super::{
@@ -136,38 +128,6 @@ impl OPDSFeedBuilder {
 		}
 		url
 	}
-
-	// pub fn library(&self, library: library::Model) -> Result<OpdsFeed, CoreError> {
-	// 	let id = library.id.clone();
-	// 	let title = library.name.clone();
-
-	// 	let links = vec![
-	// 		OpdsLink::new(
-	// 			OpdsLinkType::Navigation,
-	// 			OpdsLinkRel::ItSelf,
-	// 			self.format_url(&format!("libraries/{}", id)),
-	// 		),
-	// 		OpdsLink::new(
-	// 			OpdsLinkType::Navigation,
-	// 			OpdsLinkRel::Start,
-	// 			self.format_url("catalog"),
-	// 		),
-	// 	];
-
-	// 	let Ok(series) = library.series().cloned() else {
-	// 		return Ok(OpdsFeed::new(id, title, Some(links), vec![]));
-	// 	};
-
-	// 	let entries = series
-	// 		.into_iter()
-	// 		.map(|s| {
-	// 			OPDSEntryBuilder::<series::Model>::new(s, self.api_key.clone())
-	// 				.into_opds_entry()
-	// 		})
-	// 		.collect::<Vec<OpdsEntry>>();
-
-	// 	Ok(OpdsFeed::new(id, title, Some(links), entries))
-	// }
 
 	pub fn paginated(
 		self,

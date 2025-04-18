@@ -5,7 +5,7 @@ use std::{
 	path::{Path, PathBuf},
 };
 
-use pdf::file::FileOptions;
+use pdf::{file::FileOptions, object::ParseOptions};
 use pdfium_render::prelude::{PdfRenderConfig, Pdfium};
 
 use crate::{
@@ -19,7 +19,7 @@ use crate::{
 		media::process::{
 			FileConverter, FileProcessor, FileProcessorOptions, ProcessedFile,
 		},
-		ContentType, FileParts, PathUtils,
+		ContentType, FileParts, PathUtils, ProcessedFileHashes,
 	},
 };
 
@@ -38,7 +38,7 @@ impl FileProcessor for PdfProcessor {
 
 		if size < 10 {
 			tracing::warn!(path, size, "File is too small to sample!");
-			return Err(FileError::UnknownError(String::from(
+			return Err(FileError::PdfProcessingError(String::from(
 				"File is too small to sample!",
 			)));
 		}
@@ -46,7 +46,7 @@ impl FileProcessor for PdfProcessor {
 		Ok(size / 10)
 	}
 
-	fn hash(path: &str) -> Option<String> {
+	fn generate_stump_hash(path: &str) -> Option<String> {
 		let sample_result = PdfProcessor::get_sample_size(path);
 
 		if let Ok(sample) = sample_result {
@@ -62,27 +62,52 @@ impl FileProcessor for PdfProcessor {
 		}
 	}
 
-	fn process(
+	fn generate_hashes(
 		path: &str,
 		FileProcessorOptions {
 			generate_file_hashes,
 			generate_koreader_hashes,
 			..
 		}: FileProcessorOptions,
+	) -> Result<ProcessedFileHashes, FileError> {
+		let hash = generate_file_hashes
+			.then(|| PdfProcessor::generate_stump_hash(path))
+			.flatten();
+		let koreader_hash = generate_koreader_hashes
+			.then(|| generate_koreader_hash(path))
+			.transpose()?;
+
+		Ok(ProcessedFileHashes {
+			hash,
+			koreader_hash,
+		})
+	}
+
+	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError> {
+		let file = FileOptions::cached()
+			.parse_options(ParseOptions::tolerant())
+			.open(path)?;
+
+		Ok(file.trailer.info_dict.map(MediaMetadata::from))
+	}
+
+	fn process(
+		path: &str,
+		options: FileProcessorOptions,
 		_: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
-		let file = FileOptions::cached().open(path)?;
+		let file = FileOptions::cached()
+			.parse_options(ParseOptions::tolerant())
+			.open(path)?;
 
 		let pages = file.pages().count() as i32;
 		// Note: The metadata is already parsed by the PDF library, so might as well use it
 		// PDF metadata is generally poop though
 		let metadata = file.trailer.info_dict.map(MediaMetadata::from);
-		let hash = generate_file_hashes
-			.then(|| PdfProcessor::hash(path))
-			.flatten();
-		let koreader_hash = generate_koreader_hashes
-			.then(|| generate_koreader_hash(path))
-			.transpose()?;
+		let ProcessedFileHashes {
+			hash,
+			koreader_hash,
+		} = PdfProcessor::generate_hashes(path, options)?;
 
 		Ok(ProcessedFile {
 			path: PathBuf::from(path),
@@ -102,10 +127,9 @@ impl FileProcessor for PdfProcessor {
 		let pdfium = PdfProcessor::renderer(&config.pdfium_path)?;
 
 		let document = pdfium.load_pdf_from_file(path, None)?;
-		let document_page =
-			document.pages().get((page - 1).try_into().map_err(
-				|e: TryFromIntError| FileError::UnknownError(e.to_string()),
-			)?)?;
+		let document_page = document.pages().get((page - 1).try_into().map_err(
+			|e: TryFromIntError| FileError::PdfProcessingError(e.to_string()),
+		)?)?;
 
 		let render_config = PdfRenderConfig::new();
 

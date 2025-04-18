@@ -140,6 +140,8 @@ async fn get_series(
 	// series, total series count
 	let (series, series_count) = db
 		._transaction()
+		.with_max_wait(chrono::Duration::seconds(10).num_milliseconds() as u64)
+		.with_timeout(chrono::Duration::seconds(30).num_milliseconds() as u64)
 		.run(|client| async move {
 			let mut query = db.series().find_many(where_conditions.clone());
 			if load_media {
@@ -557,9 +559,11 @@ async fn patch_series_thumbnail(
 			image_options,
 			core_config: ctx.config.as_ref().clone(),
 			force_regen: true,
+			filename: media.series_id.clone(),
 		},
 	)
 	.await?;
+	tracing::debug!(?path_buf, "Generated thumbnail for series");
 
 	Ok(ImageResponse::from((
 		ContentType::from(format),
@@ -620,7 +624,8 @@ async fn replace_series_thumbnail(
 
 	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 	// user testing I'd like to see if this becomes a problem. We'll see!
-	match remove_thumbnails(&[series_id.clone()], &ctx.config.get_thumbnails_dir()) {
+	match remove_thumbnails(&[series_id.clone()], &ctx.config.get_thumbnails_dir()).await
+	{
 		Ok(count) => tracing::info!("Removed {} thumbnails!", count),
 		Err(e) => tracing::error!(
 			?e,

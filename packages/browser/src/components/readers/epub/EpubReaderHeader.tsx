@@ -1,7 +1,8 @@
-import { Spacer, Text } from '@stump/components'
+import { cn, Spacer, Text } from '@stump/components'
 import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
+import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 import { formatBookName } from '@/utils/format'
 
 import paths from '../../../paths'
@@ -16,12 +17,13 @@ import {
 } from './controls'
 import { LocationManager } from './locations'
 
-// TODO(UX): gather feedback on the header design. I am worried the actionable items are too small on
-// mobile devices.
 export default function EpubReaderHeader() {
 	const {
 		readerMeta: { bookEntity },
 	} = useEpubReaderContext()
+	const {
+		bookPreferences: { fontFamily },
+	} = useBookPreferences({ book: bookEntity })
 
 	const bookName = formatBookName(bookEntity)
 
@@ -39,7 +41,12 @@ export default function EpubReaderHeader() {
 
 			<Spacer />
 
-			<Text size="sm" className="line-clamp-1">
+			<Text
+				size="sm"
+				className={cn('line-clamp-1', {
+					[`font-${fontFamily}`]: !!fontFamily,
+				})}
+			>
 				{bookName}
 			</Text>
 

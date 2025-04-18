@@ -22,6 +22,9 @@ export const createRouteURLHandler =
 		)
 	}
 
+// FIXME: This query isn't passing the params correctly to the server, but it seems
+// to only be a react-native issue lol of course
+
 /** Formats a string with UrlSearchParams */
 export const urlWithParams = (url: string, params?: URLSearchParams) => {
 	// NOTE: it is important to decode the params because qs.stringify will encode them

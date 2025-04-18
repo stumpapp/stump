@@ -1,2 +1,2 @@
-export { useSDK } from './context'
+export { SDKContext, useSDK } from './context'
 export { SDKProvider } from './SDKProvider'

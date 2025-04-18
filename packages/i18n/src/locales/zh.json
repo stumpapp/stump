@@ -518,7 +518,71 @@
 		},
 		"options/scanning": {
 			"title": "扫描行为",
-			"description": "与 Stump 扫描此书库相关的设置"
+			"description": "与 Stump 扫描此书库相关的设置",
+			"sections": {
+				"configureScan": {
+					"heading": "Configure scan",
+					"description": "A scan with additional options for more fine-grained control",
+					"form": {
+						"alert": "These will override corresponding library-wide settings",
+						"options": {
+							"forceRebuild": {
+								"label": "Force rebuild",
+								"description": "Rebuild every book in the library on disk",
+								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
+							},
+							"custom": {
+								"label": "Custom",
+								"description": "Customize the scan configuration",
+								"validation": {
+									"noSelection": "At least one option must be enabled"
+								}
+							},
+							"rebuildMeta": {
+								"label": "Rebuild metadata",
+								"description": "Rebuild metadata for books in the library"
+							},
+							"regenHashes": {
+								"label": "Regenerate hashes",
+								"description": "Recreate hashes for books in the library"
+							}
+						}
+					}
+				},
+				"defaultScan": {
+					"heading": "Default scan",
+					"description": "A standard scan to index your library for new content"
+				},
+				"history": {
+					"heading": "Scan history",
+					"description": "The history of all scans recorded for this library",
+					"empty": "There are no scans recorded for this library",
+					"runScan": "Run scan",
+					"inspect": "See details",
+					"inspector": {
+						"title": "Scan record",
+						"description": "A detailed view of this scan record",
+						"fields": {
+							"library": "Library",
+							"date": "Date",
+							"config": "Config",
+							"jobOutput": "Job output",
+							"logs": "Logs"
+						},
+						"logsPresent": "Logs were persisted for this job",
+						"seeLogs": "See logs"
+					},
+					"table": {
+						"columns": {
+							"timestamp": "Scanned at",
+							"config": "Config"
+						},
+						"default": "Default",
+						"custom": "Custom"
+					},
+					"clearHistory": "Delete scan history"
+				}
+			}
 		},
 		"options/thumbnails": {
 			"title": "缩略图",
@@ -1220,6 +1284,14 @@
 			"title": "阅读器设置",
 			"description": "Stump 阅读器的默认选项。这些设置仅绑定到当前设备",
 			"sections": {
+				"universal": {
+					"sections": {
+						"readingDirection": {
+							"label": "Reading direction",
+							"description": "The direction in which the reader will progress through pages"
+						}
+					}
+				},
 				"imageBasedBooks": {
 					"label": "图像类书籍",
 					"description": "漫画、图像小说等以图像为主的书籍",
@@ -1231,6 +1303,29 @@
 						"preloadBehindCount": {
 							"label": "预加载后页数",
 							"description": "预加载当前页之后的页数"
+						}
+					}
+				},
+				"textBasedBooks": {
+					"label": "Ebook reader",
+					"description": "Default settings for text-based books",
+					"sections": {
+						"fontSize": {
+							"label": "Font size",
+							"description": "The size of the font used in the reader"
+						},
+						"fontFamily": {
+							"label": "Font family",
+							"description": "The font used in the reader"
+						}
+					}
+				},
+				"data": {
+					"sections": {
+						"clearStore": {
+							"label": "Clear preferences",
+							"description": "Reset all individual book settings that override the defaults",
+							"button": "Clear preferences"
 						}
 					}
 				}
@@ -1388,6 +1483,12 @@
 						},
 						"emptyHeading": "无日志可显示",
 						"emptySubtitle": "您的服务器非常健康或非常不健康"
+					},
+					"deleteLogs": {
+						"title": "Delete logs",
+						"description": "Permanently delete all persisted logs from the database",
+						"disclaimer": "This action cannot be undone",
+						"confirm": "Delete logs"
 					}
 				},
 				"liveLogs": {
@@ -1863,5 +1964,6 @@
 		"notReady": "此功能尚未就绪",
 		"notUsedYet": "尚未使用",
 		"never": "永不"
+		"scan": "Scan"
 	}
 }

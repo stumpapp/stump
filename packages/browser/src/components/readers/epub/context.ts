@@ -8,6 +8,8 @@ export type EpubReaderChapterMeta = {
 	name?: string
 	/** The chapter's position in the book. */
 	position?: number
+	/** The chapter's index in the spine */
+	sectionSpineIndex?: number
 	/** The chapter's total number of pages. */
 	totalPages?: number
 	/**
@@ -24,6 +26,7 @@ export type EpubReaderChapterMeta = {
 export type EpubReaderBookMeta = {
 	chapter: EpubReaderChapterMeta
 	toc: EpubContent[]
+	sectionLengths: { [key: number]: number }
 	bookmarks: Record<string, Bookmark>
 }
 
@@ -43,6 +46,7 @@ export type EpubReaderControls = {
 	onLinkClick: (href: string) => void
 	onPaginateForward: () => void
 	onPaginateBackward: () => void
+	jumpToSection: (section: number) => void
 	getCfiPreviewText: (cfi: string) => Promise<string | null>
 	searchEntireBook: (query: string) => Promise<SpineSearchResult[]>
 	onGoToCfi: (cfi: string) => void
@@ -73,6 +77,7 @@ export const EpubReaderContext = createContext<EpubReaderContextProps>({
 		onMouseLeaveControls: noop,
 		onPaginateBackward: noop,
 		onPaginateForward: noop,
+		jumpToSection: noop,
 		searchEntireBook: async () => [],
 		setFullscreen: noop,
 		setVisible: noop,

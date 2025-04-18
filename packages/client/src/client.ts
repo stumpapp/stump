@@ -76,7 +76,7 @@ export function useQuery<TQueryFnData = unknown, TError = unknown, TData = TQuer
 
 			if (isAuthError) {
 				sdk.token = undefined
-				onUnauthenticatedResponse?.('/auth')
+				onUnauthenticatedResponse?.('/auth', err.response?.data)
 			} else if (isNetworkError) {
 				onConnectionWithServerChanged?.(false)
 			}
@@ -207,7 +207,7 @@ export function useCursorQuery<Entity = unknown, TError = AxiosError>(
 	const { initialCursor, limit, params, ...restOptions } = options || {}
 
 	const { data, ...rest } = useInfiniteQuery(
-		[initialCursor, limit, params, ...queryKey],
+		[...queryKey, initialCursor, limit, params],
 		async ({ pageParam }: CursorQueryContext) => {
 			return queryFn({
 				cursor: pageParam || initialCursor,

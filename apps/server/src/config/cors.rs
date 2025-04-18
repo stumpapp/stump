@@ -1,10 +1,14 @@
+use std::str::FromStr;
+
 use axum::http::{
 	header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
-	HeaderValue, Method,
+	HeaderName, HeaderValue, Method,
 };
 use local_ip_address::local_ip;
 use stump_core::config::StumpConfig;
 use tower_http::cors::{AllowOrigin, CorsLayer};
+
+use crate::middleware::auth::STUMP_SAVE_BASIC_SESSION_HEADER;
 
 const DEFAULT_ALLOWED_ORIGINS: &[&str] = &[
 	"tauri://localhost",
@@ -44,7 +48,14 @@ pub fn get_cors_layer(config: StumpConfig) -> CorsLayer {
 			Method::OPTIONS,
 			Method::CONNECT,
 		])
-		.allow_headers([ACCEPT, AUTHORIZATION, CONTENT_TYPE])
+		// TODO: support custom header configurations
+		.allow_headers([
+			ACCEPT,
+			AUTHORIZATION,
+			CONTENT_TYPE,
+			HeaderName::from_str(STUMP_SAVE_BASIC_SESSION_HEADER)
+				.expect("Failed to parse header name"),
+		])
 		.allow_credentials(true);
 
 	// If allowed origins include the general wildcard ("*") then we can return a permissive CORS layer and exit early.

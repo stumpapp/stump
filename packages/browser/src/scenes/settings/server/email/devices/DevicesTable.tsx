@@ -1,9 +1,9 @@
 import { useEmailDevicesQuery } from '@stump/client'
-import { Badge, Card, Heading, Text } from '@stump/components'
+import { Badge, Card, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { RegisteredEmailDevice } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
-import { CircleSlash2 } from 'lucide-react'
+import { Slash, Smartphone } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { Table } from '@/components/table'
@@ -80,13 +80,35 @@ export default function DevicesTable({ onSelectForUpdate }: Props) {
 		[onSelectForUpdate, canEditEmailer],
 	)
 
+	if (!devices?.length) {
+		return (
+			<Card className="flex items-center justify-center border-dashed border-edge-subtle p-6">
+				<div className="flex flex-col space-y-3">
+					<div className="relative flex justify-center">
+						<span className="flex items-center justify-center rounded-lg bg-background-surface p-2">
+							<Smartphone className="h-6 w-6 text-foreground-muted" />
+							<Slash className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80" />
+						</span>
+					</div>
+
+					<div className="text-center">
+						<Text>{t(`${LOCALE_BASE}.emptyHeading`)}</Text>
+						<Text size="sm" variant="muted">
+							{t(`${LOCALE_BASE}.emptySubtitle`)}
+						</Text>
+					</div>
+				</div>
+			</Card>
+		)
+	}
+
 	return (
 		<>
 			{canEditEmailer && (
 				<DeleteDeviceConfirmation device={deletingDevice} onClose={() => setDeletingDevice(null)} />
 			)}
 
-			<Card className="bg-background-surface p-1">
+			<Card>
 				<Table
 					sortable
 					columns={columns}
@@ -99,19 +121,8 @@ export default function DevicesTable({ onSelectForUpdate }: Props) {
 					}}
 					data={devices}
 					fullWidth
-					emptyRenderer={() => (
-						<div className="flex min-h-[150px] flex-col items-center justify-center gap-2">
-							<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-foreground-muted" />
-							<div className="text-center">
-								<Heading size="sm">{t(`${LOCALE_BASE}.emptyHeading`)}</Heading>
-								<Text size="sm" variant="muted">
-									{t(`${LOCALE_BASE}.emptySubtitle`)}
-								</Text>
-							</div>
-						</div>
-					)}
 					isZeroBasedPagination
-					cellClassName="bg-background-surface"
+					cellClassName="bg-background"
 				/>
 			</Card>
 		</>

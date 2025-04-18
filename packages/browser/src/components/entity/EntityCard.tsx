@@ -135,6 +135,7 @@ export default function EntityCard({
 						console.error('Failed to load image:', e)
 						setIsImageFailed(true)
 					}}
+					data-testid="entity-card-image"
 				/>
 			)
 		} else {

@@ -1,5 +1,5 @@
 import { invalidateQueries, useSDK } from '@stump/client'
-import { DropdownMenu, IconButton } from '@stump/components'
+import { Button, DropdownMenu } from '@stump/components'
 import { CoreJobOutput, PersistedJob } from '@stump/sdk'
 import { Ban, Database, FileClock, ListX, MoreVertical, Trash2 } from 'lucide-react'
 import { useCallback, useMemo } from 'react'
@@ -151,9 +151,9 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 				},
 			]}
 			trigger={
-				<IconButton size="xs" variant="ghost">
+				<Button size="icon" variant="ghost" className="shrink-0">
 					<MoreVertical className="h-4 w-4" />
-				</IconButton>
+				</Button>
 			}
 			align="end"
 		/>

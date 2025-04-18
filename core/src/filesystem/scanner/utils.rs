@@ -1,5 +1,5 @@
 use std::{
-	collections::VecDeque,
+	collections::{HashMap, VecDeque},
 	path::{Path, PathBuf},
 	pin::pin,
 	sync::{
@@ -27,12 +27,17 @@ use crate::{
 		FileStatus,
 	},
 	error::{CoreError, CoreResult},
-	filesystem::{MediaBuilder, SeriesBuilder},
+	filesystem::{
+		scanner::options::{BookVisitOperation, CustomVisitResult},
+		MediaBuilder, SeriesBuilder,
+	},
 	job::{error::JobError, JobExecuteLog, JobProgress, WorkerCtx, WorkerSendExt},
 	prisma::{media, media_metadata, series, PrismaClient},
 	utils::chain_optional_iter,
 	CoreEvent,
 };
+
+use super::options::BookVisitResult;
 
 pub(crate) fn file_updated_since_scan(
 	entry: &DirEntry,
@@ -67,39 +72,6 @@ pub(crate) fn file_updated_since_scan(
 	}
 }
 
-// TODO(granular-scans): Use this to determine if Full is needed?
-// pub(crate) fn book_updated_since_scan(book: &Media) -> bool {
-// 	let modified_at_result = book
-// 		.modified_at
-// 		.clone()
-// 		.map(|m| m.parse::<DateTime<Utc>>())
-// 		.transpose();
-
-// 	let modified_at = match modified_at_result {
-// 		Ok(Some(modified_at)) => modified_at,
-// 		Ok(None) => {
-// 			tracing::trace!("Modified_at is None");
-// 			return false;
-// 		},
-// 		Err(err) => {
-// 			tracing::error!(error = ?err, "Failed to parse modified_at");
-// 			return false;
-// 		},
-// 	};
-
-// 	let underlying_file = PathBuf::from(&book.path);
-// 	if let Ok(Ok(system_time)) = underlying_file.metadata().map(|m| m.modified()) {
-// 		let system_time_converted: DateTime<Utc> = system_time.into();
-// 		tracing::trace!(?system_time_converted, ?modified_at, "Comparing dates");
-
-// 		if system_time_converted > modified_at {
-// 			return true;
-// 		}
-// 	}
-
-// 	false
-// }
-
 pub(crate) async fn create_media(
 	db: &PrismaClient,
 	generated: Media,
@@ -118,6 +90,16 @@ pub(crate) async fn create_media(
 				None
 			};
 
+			let modified_at = generated.modified_at.as_deref().and_then(|date| {
+				match DateTime::parse_from_rfc3339(date) {
+					Ok(dt) => Some(dt), // Successfully parsed
+					Err(e) => {
+						tracing::error!(?e, "Failed to parse modified_at date");
+						None
+					},
+				}
+			});
+
 			let created_media = client
 				.media()
 				.create(
@@ -130,6 +112,7 @@ pub(crate) async fn create_media(
 						media::hash::set(generated.hash),
 						media::koreader_hash::set(generated.koreader_hash),
 						media::series::connect(series::id::equals(generated.series_id)),
+						media::modified_at::set(modified_at),
 					],
 				)
 				.exec()
@@ -217,6 +200,73 @@ pub(crate) async fn update_media(db: &PrismaClient, media: Media) -> CoreResult<
 		.await;
 
 	Ok(result?)
+}
+
+pub(crate) async fn handle_book_visit_operation(
+	db: &PrismaClient,
+	result: BookVisitResult,
+) -> CoreResult<()> {
+	match result {
+		BookVisitResult::Custom(custom) => {
+			if let Some(meta) = custom.meta {
+				let params = meta
+					.into_prisma()
+					.into_iter()
+					.chain(vec![media_metadata::media_id::set(Some(custom.id.clone()))])
+					.collect::<Vec<_>>();
+				let id = custom.id.clone();
+
+				let updated_meta = db
+					._transaction()
+					.run(|client| async move {
+						let meta = client
+							.media_metadata()
+							.upsert(
+								media_metadata::media_id::equals(id.clone()),
+								params.clone(),
+								params,
+							)
+							.exec()
+							.await?;
+						client
+							.media()
+							.update(
+								media::id::equals(id),
+								vec![media::metadata::connect(
+									media_metadata::id::equals(meta.id.clone()),
+								)],
+							)
+							.with(media::metadata::fetch())
+							.exec()
+							.await
+							.map(|_| meta)
+					})
+					.await;
+				tracing::trace!(?updated_meta, "Metadata upserted");
+			}
+
+			if let Some(hashes) = custom.hashes {
+				let updated_book = db
+					.media()
+					.update(
+						media::id::equals(custom.id),
+						vec![
+							media::hash::set(hashes.hash),
+							media::koreader_hash::set(hashes.koreader_hash),
+						],
+					)
+					.exec()
+					.await?;
+				tracing::trace!(?updated_book, "Book updated with new hashes");
+			}
+		},
+		BookVisitResult::Built(book) => {
+			let updated_book = update_media(db, *book).await?;
+			tracing::trace!(?updated_book, "Book updated");
+		},
+	}
+
+	Ok(())
 }
 
 #[derive(Default)]
@@ -514,31 +564,6 @@ pub(crate) struct MediaBuildOperation {
 	pub max_concurrency: usize,
 }
 
-// TODO(granular-scans): build_book_partial? build_partial_book?
-/*
-	A suboptimal approach could be:
-	```rust
-	struct PartialBook {
-		book: Media,
-		fields_to_update: Option<Vec<String>>, // None means full update, 0 len is err(?)
-	}
-	```
-	This would be the easiest, but would involve some wasted work. Maybe an emum?
-	```rust
-	enum BookUpdate {
-		Full(Media),
-		// TODO(granular-scans): Legacy metadata doesn't strictly set the ID to the associated
-		// media's ID. This is a problem in that the book's id would need to be provided.
-		Metadata(MediaMetadata),
-		Hashes {
-			id: String,
-			hash: Option<String>,
-			koreader_hash: Option<String>,
-		},
-	}
-	```
-*/
-
 /// Builds a media from the given path
 ///
 /// # Arguments
@@ -591,6 +616,72 @@ async fn build_book(
 	Ok(build_result)
 }
 
+struct BookVisitCtx {
+	operation: BookVisitOperation,
+	path: PathBuf,
+	series_id: String,
+	existing_book: Option<Media>,
+}
+
+async fn handle_book(
+	BookVisitCtx {
+		path,
+		operation,
+		series_id,
+		existing_book,
+	}: BookVisitCtx,
+	library_config: LibraryConfig,
+	config: &StumpConfig,
+) -> CoreResult<BookVisitResult> {
+	let (tx, rx) = oneshot::channel();
+
+	// Spawn a blocking task to handle the IO-intensive operations:
+	let handle = spawn_blocking({
+		let path = path.to_path_buf();
+		let series_id = series_id.to_string();
+		let library_config = library_config.clone();
+		let config = config.clone();
+
+		move || {
+			let builder = MediaBuilder::new(&path, &series_id, library_config, &config);
+			let send_result = tx.send(match (operation, existing_book) {
+				(BookVisitOperation::Rebuild, Some(book)) => builder
+					.rebuild(&book)
+					.map(|b| BookVisitResult::Built(Box::new(b))),
+				(BookVisitOperation::Custom(custom), Some(book)) => {
+					builder.custom_visit(custom).map(|result| {
+						BookVisitResult::Custom(CustomVisitResult {
+							id: book.id,
+							..result
+						})
+					})
+				},
+				// If the existing book is None, it means the book doesn't yet exist so we
+				// always just do a full build. However, we really shouldn't be in this state
+				// since media creation is handled in a separate flow than visit
+				(_, None) => builder.build().map(|b| BookVisitResult::Built(Box::new(b))),
+			});
+			tracing::trace!(
+				is_err = send_result.is_err(),
+				"Sending build result to channel"
+			);
+		}
+	});
+
+	let build_result = if let Ok(recv) = rx.await {
+		recv?
+	} else {
+		handle
+			.await
+			.map_err(|e| CoreError::Unknown(e.to_string()))?;
+		return Err(CoreError::Unknown(
+			"Failed to receive build result".to_string(),
+		));
+	};
+
+	Ok(build_result)
+}
+
 /// Safely builds media from a list of paths concurrently, with a maximum concurrency limit
 /// as defined by the core configuration. The media is then inserted into the database.
 ///
@@ -613,7 +704,6 @@ pub(crate) async fn safely_build_and_insert_media(
 	}
 
 	let mut output = MediaOperationOutput::default();
-	let mut logs = vec![];
 
 	let semaphore = Arc::new(Semaphore::new(max_concurrency));
 	tracing::debug!(max_concurrency, "Semaphore created for media creation");
@@ -659,7 +749,8 @@ pub(crate) async fn safely_build_and_insert_media(
 				books.push_back(book);
 			},
 			Err((error, path)) => {
-				logs.push(
+				tracing::error!(error = ?error, ?path, "Failed to build book");
+				output.logs.push(
 					JobExecuteLog::error(format!(
 						"Failed to build book: {:?}",
 						error.to_string()
@@ -675,7 +766,7 @@ pub(crate) async fn safely_build_and_insert_media(
 	}
 
 	let success_count = books.len();
-	let error_count = logs.len();
+	let error_count = output.logs.len();
 	tracing::debug!(
 		elapsed = ?start.elapsed(),
 		success_count, error_count,
@@ -713,7 +804,7 @@ pub(crate) async fn safely_build_and_insert_media(
 					task_count,
 				));
 				tracing::error!(error = ?e, ?path, "Failed to create media");
-				logs.push(
+				output.logs.push(
 					JobExecuteLog::error(format!(
 						"Failed to create media: {:?}",
 						e.to_string()
@@ -725,7 +816,7 @@ pub(crate) async fn safely_build_and_insert_media(
 	}
 
 	let success_count = output.created_media;
-	let error_count = logs.len() - error_count; // Subtract the errors from the previous step
+	let error_count = output.logs.len() - error_count; // Subtract the errors from the previous step
 	tracing::debug!(success_count, error_count, elapsed = ?start.elapsed(), "Inserted books into database");
 
 	Ok(output)
@@ -737,7 +828,7 @@ pub(crate) async fn safely_build_and_insert_media(
 /// # Arguments
 /// * `MediaBuildOperation` - The operation configuration for visiting media
 /// * `worker_ctx` - The worker context
-/// * `paths` - A list of paths to visit media from
+/// * `params` - A list of paths and operations to visit
 pub(crate) async fn visit_and_update_media(
 	MediaBuildOperation {
 		series_id,
@@ -745,25 +836,27 @@ pub(crate) async fn visit_and_update_media(
 		max_concurrency,
 	}: MediaBuildOperation,
 	worker_ctx: &WorkerCtx,
-	paths: Vec<PathBuf>,
+	params: Vec<(PathBuf, BookVisitOperation)>,
 ) -> Result<MediaOperationOutput, JobError> {
-	if paths.is_empty() {
+	let mut output = MediaOperationOutput::default();
+
+	if params.is_empty() {
 		tracing::trace!("No media to visit?");
-		return Ok(MediaOperationOutput::default());
+		return Ok(output);
 	}
 
 	let client = &worker_ctx.db;
-	let mut output = MediaOperationOutput::default();
+	let paths_to_operation = params
+		.iter()
+		.map(|(p, o)| (p.to_string_lossy().to_string(), *o))
+		.collect::<HashMap<_, _>>();
+	let paths = paths_to_operation.keys().cloned().collect::<Vec<String>>();
+	let paths_len = paths.len();
 
 	let media = client
 		.media()
 		.find_many(vec![
-			media::path::in_vec(
-				paths
-					.iter()
-					.map(|e| e.to_string_lossy().to_string())
-					.collect::<Vec<String>>(),
-			),
+			media::path::in_vec(paths),
 			media::series_id::equals(Some(series_id.clone())),
 		])
 		.exec()
@@ -772,7 +865,7 @@ pub(crate) async fn visit_and_update_media(
 		.map(Media::from)
 		.collect::<Vec<Media>>();
 
-	if media.len() != paths.len() {
+	if media.len() != paths_len {
 		output.logs.push(JobExecuteLog::warn(
 			"Not all media paths were found in the database",
 		));
@@ -785,36 +878,38 @@ pub(crate) async fn visit_and_update_media(
 	let task_count = media.len() as i32;
 	let start = Instant::now();
 
-	// TODO(granular-scans): This needs to be aware of ScanOptions and build books more selectively.
-	// For example, if regen_hashes is the only option set, and the book wasn't updated,
-	// we don't need to rebuild it. We would just need to regen the hash. The only time
-	// we would need a full rebuild is if the book was updated on disk?
 	let futures = media
 		.into_iter()
-		.map(|existing_book| {
+		.filter_map(|book| {
+			paths_to_operation.get(&book.path).map(|operation| {
+				let path = book.path.clone();
+				BookVisitCtx {
+					operation: *operation,
+					existing_book: Some(book),
+					series_id: series_id.clone(),
+					path: PathBuf::from(path.as_str()),
+				}
+			})
+		})
+		.map(|ctx| {
 			let semaphore = semaphore.clone();
-			let series_id = series_id.clone();
-			let library_config = library_config.clone();
-			let path = PathBuf::from(existing_book.path.as_str());
+			let path = ctx.path.clone();
+			let config = library_config.clone();
 
 			async move {
 				if semaphore.available_permits() == 0 {
 					tracing::debug!(?path, "No permits available, waiting for one");
 				}
-				let _permit = semaphore
+
+				let permit = semaphore
 					.acquire()
 					.await
 					.map_err(|e| (CoreError::Unknown(e.to_string()), path.clone()))?;
-				tracing::trace!(?path, "Acquired permit for media visit");
-				build_book(
-					path.as_path(),
-					&series_id,
-					Some(existing_book),
-					library_config,
-					&worker_ctx.config,
-				)
-				.await
-				.map_err(|e| (e, path))
+				tracing::trace!(?permit, ?path, "Acquired permit for media visit");
+
+				handle_book(ctx, config, &worker_ctx.config)
+					.await
+					.map_err(|e| (e, path))
 			}
 		})
 		.collect::<FuturesUnordered<_>>();
@@ -824,17 +919,17 @@ pub(crate) async fn visit_and_update_media(
 	let atomic_cursor = Arc::new(AtomicUsize::new(1));
 
 	let mut futures = pin!(futures);
-	let mut books = VecDeque::with_capacity(paths.len());
+	let mut build_results = VecDeque::with_capacity(paths_len);
 
-	while let Some(result) = futures.next().await {
-		match result {
-			Ok(book) => {
-				books.push_back(book);
+	while let Some(future_result) = futures.next().await {
+		match future_result {
+			Ok(result) => {
+				build_results.push_back(result);
 			},
 			Err((error, path)) => {
 				output.logs.push(
 					JobExecuteLog::error(format!(
-						"Failed to build book: {:?}",
+						"Failed to handle book: {:?}",
 						error.to_string()
 					))
 					.with_ctx(format!("Path: {path:?}")),
@@ -847,31 +942,30 @@ pub(crate) async fn visit_and_update_media(
 		));
 	}
 
-	let success_count = books.len();
+	let success_count = build_results.len();
 	let error_count = output.logs.len();
-	tracing::debug!(elapsed = ?start.elapsed(), success_count, error_count, "Rebuilt books from disk");
+	tracing::debug!(elapsed = ?start.elapsed(), success_count, error_count, "Handled books from disk");
 
 	worker_ctx.report_progress(JobProgress::msg("Updating media in database"));
-	let task_count = books.len() as i32;
+	let task_count = build_results.len() as i32;
 	let start = Instant::now();
 
 	let atomic_cursor = Arc::new(AtomicUsize::new(1));
 
-	// TODO: We don't use the updated book, so chunk these and update_many?
-	while let Some(book) = books.pop_front() {
-		let path = book.path.clone();
-		match update_media(&worker_ctx.db, book).await {
+	while let Some(result) = build_results.pop_front() {
+		let error_ctx = result.error_ctx();
+		match handle_book_visit_operation(&worker_ctx.db, result).await {
 			Ok(_) => {
 				output.updated_media += 1;
 			},
 			Err(e) => {
-				tracing::error!(error = ?e, ?path, "Failed to update media");
+				tracing::error!(error = ?e, ?error_ctx, "Failed to update media");
 				output.logs.push(
 					JobExecuteLog::error(format!(
 						"Failed to update media: {:?}",
 						e.to_string()
 					))
-					.with_ctx(path),
+					.with_ctx(error_ctx),
 				);
 			},
 		}

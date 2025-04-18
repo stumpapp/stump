@@ -111,7 +111,7 @@ export class SeriesAPI extends APIBase {
 	 * Patch the thumbnail of a series
 	 */
 	async patchThumbnail(id: string, payload: PatchSeriesThumbnail): Promise<void> {
-		this.axios.patch(this.thumbnailURL(id), payload)
+		return this.axios.patch(this.thumbnailURL(id), payload)
 	}
 
 	/**

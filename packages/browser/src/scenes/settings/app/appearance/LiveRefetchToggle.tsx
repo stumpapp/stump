@@ -1,8 +1,7 @@
 import { useUpdatePreferences } from '@stump/client'
+import { WideSwitch } from '@stump/components'
 
 import { useUserStore } from '@/stores'
-
-import PreferenceToggle from '../../PreferenceToggle'
 
 export default function LiveRefetchToggle() {
 	const { preferences, setPreferences } = useUserStore((state) => ({
@@ -24,12 +23,12 @@ export default function LiveRefetchToggle() {
 	}
 
 	return (
-		<PreferenceToggle
+		<WideSwitch
 			formId="enable_live_refetch"
 			label="Live refetch"
 			description="Refetch queries on the fly to hydrate the UI with new data as it comes in. This can be resource intensive"
-			isChecked={preferences?.enable_live_refetch}
-			onToggle={handleChange}
+			checked={preferences?.enable_live_refetch}
+			onCheckedChange={handleChange}
 		/>
 	)
 }

@@ -1,5 +1,7 @@
 pub(crate) mod auth;
-mod media;
+pub(crate) mod library;
+pub(crate) mod media;
+pub(crate) mod series;
 
 use axum::{
 	extract::State,
@@ -14,21 +16,16 @@ use crate::{
 	errors::{APIError, APIResult},
 };
 
-pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
-	let router = Router::new()
+pub(crate) fn mount(_app_state: AppState) -> Router<AppState> {
+	Router::new()
 		.merge(auth::mount())
-		.merge(media::mount(app_state))
+		.merge(media::mount())
+		.merge(series::mount())
+		.merge(library::mount())
 		.route("/claim", get(claim))
 		.route("/ping", get(ping))
 		.route("/version", post(version))
-		.route("/check-for-update", get(check_for_updates));
-
-	// Conditionally attach upload routes based on settings.
-	// if app_state.config.enable_upload {
-	// 	router = router.merge(upload::mount(app_state.clone()));
-	// }
-
-	router
+		.route("/check-for-update", get(check_for_updates))
 }
 
 #[derive(Serialize)]

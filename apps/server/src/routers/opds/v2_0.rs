@@ -16,7 +16,7 @@ use models::{
 	},
 	shared::enums::UserPermission,
 };
-use sea_orm::{prelude::*, Condition, JoinType, Order, QueryOrder, QueryTrait};
+use sea_orm::{prelude::*, Condition, Order, QueryOrder, QueryTrait};
 use sea_orm::{PaginatorTrait, QuerySelect};
 use serde::{Deserialize, Serialize};
 use stump_core::{
@@ -45,7 +45,7 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	middleware::{auth::auth_middleware, host::HostExtractor},
-	routers::relative_favicon_path,
+	routers::{api::v2::media::get_media_thumbnail_by_id, relative_favicon_path},
 	utils::http::{ImageResponse, NamedFile},
 };
 
@@ -1086,7 +1086,9 @@ async fn get_book_thumbnail(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<RequestContext>,
 ) -> APIResult<ImageResponse> {
-	fetch_book_page_for_user(&ctx, &req.user(), id, 1).await
+	let (content_type, image_buffer) =
+		get_media_thumbnail_by_id(&ctx, &req.user(), id).await?;
+	Ok(ImageResponse::new(content_type, image_buffer))
 }
 
 /// A route handler which returns a single page of a book for a user as a valid image

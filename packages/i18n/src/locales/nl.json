@@ -1284,6 +1284,14 @@
 			"title": "Lezer instellingen",
 			"description": "Standaard instellingen voor Stump lezers. Deze zijn alleen gebonden aan je huidige apparaat",
 			"sections": {
+				"universal": {
+					"sections": {
+						"readingDirection": {
+							"label": "Reading direction",
+							"description": "The direction in which the reader will progress through pages"
+						}
+					}
+				},
 				"imageBasedBooks": {
 					"label": "Op afbeelding gebaseerde boeken",
 					"description": "Strips, manga en andere op afbeeldingen gebaseerde boeken",
@@ -1295,6 +1303,29 @@
 						"preloadBehindCount": {
 							"label": "Achter vooruit laden aantal",
 							"description": "Het aantal vooraf te laden pagina's voor de huidige pagina"
+						}
+					}
+				},
+				"textBasedBooks": {
+					"label": "Ebook reader",
+					"description": "Default settings for text-based books",
+					"sections": {
+						"fontSize": {
+							"label": "Font size",
+							"description": "The size of the font used in the reader"
+						},
+						"fontFamily": {
+							"label": "Font family",
+							"description": "The font used in the reader"
+						}
+					}
+				},
+				"data": {
+					"sections": {
+						"clearStore": {
+							"label": "Clear preferences",
+							"description": "Reset all individual book settings that override the defaults",
+							"button": "Clear preferences"
 						}
 					}
 				}

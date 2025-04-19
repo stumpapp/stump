@@ -1325,7 +1325,7 @@
 						}
 					}
 				},
-				"data":{
+				"data": {
 					"sections": {
 						"clearStore": {
 							"label": "Clear preferences",

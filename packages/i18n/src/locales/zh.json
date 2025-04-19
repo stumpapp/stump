@@ -1930,7 +1930,7 @@
 	},
 	"thumbnailDropdown": {
 		"label": "编辑缩略图",
-		"options": {  
+		"options": {
 			"selectFromBooks": "从书籍中选择",
 			"uploadImage": "上传图片"
 		},
@@ -1963,7 +1963,7 @@
 		"goToServers": "前往服务器",
 		"notReady": "此功能尚未就绪",
 		"notUsedYet": "尚未使用",
-		"never": "永不"
+		"never": "永不",
 		"scan": "Scan"
 	}
 }

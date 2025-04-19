@@ -1,7 +1,6 @@
 use chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use utoipa::ToSchema;
 
 use crate::{
 	filesystem::media::{BuiltMedia, ProcessedFileHashes, ProcessedMediaMetadata},
@@ -9,9 +8,7 @@ use crate::{
 	CoreError,
 };
 
-#[derive(
-	Debug, Default, Clone, Copy, Deserialize, Serialize, PartialEq, Type, ToSchema,
-)]
+#[derive(Debug, Default, Clone, Copy, Deserialize, Serialize, PartialEq, Type)]
 #[serde(default)]
 pub struct CustomVisit {
 	pub regen_meta: bool,
@@ -69,13 +66,13 @@ impl BookVisitResult {
 /// The override options for a scan job. These options are used to override the default behavior, which generally
 /// means that the scanner will visit books it otherwise would not. How much extra work is done depends on the
 /// specific options.
-#[derive(Debug, Default, Clone, Copy, Deserialize, Serialize, Type, ToSchema)]
+#[derive(Debug, Default, Clone, Copy, Deserialize, Serialize, Type)]
 pub struct ScanOptions {
 	#[serde(default)]
 	pub config: ScanConfig,
 }
 
-#[derive(Default, Debug, Clone, Copy, Deserialize, Serialize, Type, ToSchema)]
+#[derive(Default, Debug, Clone, Copy, Deserialize, Serialize, Type)]
 #[serde(untagged)]
 pub enum ScanConfig {
 	#[default]
@@ -120,7 +117,7 @@ impl ScanOptions {
 	}
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type)]
 pub struct LibraryScanRecord {
 	id: i32,
 	options: Option<ScanOptions>,

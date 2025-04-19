@@ -16,7 +16,6 @@ use specta::Type;
 use std::path;
 use tokio::fs;
 use tracing::{debug, error, trace};
-use utoipa::ToSchema;
 
 use stump_core::{
 	config::StumpConfig,

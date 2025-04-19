@@ -1,13 +1,12 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use utoipa::ToSchema;
 
 use crate::{
 	error::CoreError,
 	prisma::{job, library, log, media, series},
 };
 
-#[derive(Debug, Default, Serialize, Deserialize, Clone, Type, ToSchema)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Type)]
 pub enum Direction {
 	#[serde(rename = "asc")]
 	Asc,
@@ -26,7 +25,7 @@ impl From<Direction> for prisma_client_rust::Direction {
 }
 
 /// Model used in media API to alter sorting/ordering of queried media
-#[derive(Debug, Deserialize, Serialize, Type, ToSchema)]
+#[derive(Debug, Deserialize, Serialize, Type)]
 #[serde(default)]
 pub struct QueryOrder {
 	/// The field to order by. Defaults to "name"

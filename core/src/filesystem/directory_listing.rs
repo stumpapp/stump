@@ -2,7 +2,6 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use utoipa::ToSchema;
 
 use crate::filesystem::PathUtils;
 
@@ -10,14 +9,14 @@ fn default_true() -> bool {
 	true
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type)]
 pub struct DirectoryListingInput {
 	pub path: Option<String>,
 	#[serde(flatten, default)]
 	pub ignore_params: DirectoryListingIgnoreParams,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type)]
 pub struct DirectoryListingIgnoreParams {
 	#[serde(default = "default_true")]
 	pub ignore_hidden: bool,
@@ -46,17 +45,16 @@ impl Default for DirectoryListingInput {
 	}
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type)]
 pub struct DirectoryListing {
 	pub parent: Option<String>,
 	pub files: Vec<DirectoryListingFile>,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type)]
 pub struct DirectoryListingFile {
 	pub is_directory: bool,
 	pub name: String,
-	#[schema(value_type = String)]
 	pub path: PathBuf,
 }
 

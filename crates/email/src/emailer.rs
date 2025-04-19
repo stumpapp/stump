@@ -12,12 +12,11 @@ use lettre::{
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use specta::Type;
-use utoipa::ToSchema;
 
 use crate::{render_template, EmailError, EmailResult, EmailTemplate};
 
 /// The configuration for an [EmailerClient]
-#[derive(Serialize, Deserialize, ToSchema, Type)]
+#[derive(Serialize, Deserialize, Type)]
 pub struct EmailerClientConfig {
 	/// The email address to send from
 	pub sender_email: String,

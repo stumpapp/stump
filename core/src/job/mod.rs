@@ -38,7 +38,6 @@ pub use progress::*;
 pub use scheduler::JobScheduler;
 pub use task::JobTaskOutput;
 use task::{job_task_handler, JobTaskHandlerOutput};
-use utoipa::ToSchema;
 pub use worker::*;
 
 pub use controller::*;

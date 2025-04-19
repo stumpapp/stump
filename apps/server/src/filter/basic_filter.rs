@@ -5,7 +5,6 @@ use serde_untagged::UntaggedEnumVisitor;
 use serde_with::skip_serializing_none;
 use specta::Type;
 use stump_core::db::query::ordering::QueryOrder;
-use utoipa::ToSchema;
 
 use crate::errors::APIError;
 

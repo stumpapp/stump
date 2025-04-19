@@ -7,7 +7,6 @@ use models::{
 use sea_orm::{prelude::*, sea_query::Query, Set, TransactionTrait};
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use utoipa::ToSchema;
 
 // TODO: hone the progress messages, they are a little noisy and unhelpful (e.g. 'Starting task')
 // TODO: Refactor rayon usage to use tokio instead. I am trying to learn more about IO-bound operations in an
@@ -86,7 +85,7 @@ impl LibraryScanJob {
 }
 
 /// The data that is collected and updated during the execution of a library scan job
-#[derive(Clone, Serialize, Deserialize, Default, Debug, Type, ToSchema)]
+#[derive(Clone, Serialize, Deserialize, Default, Debug, Type)]
 pub struct LibraryScanOutput {
 	/// The number of files visited during the scan
 	total_files: u64,

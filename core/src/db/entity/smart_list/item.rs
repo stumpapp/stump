@@ -59,17 +59,16 @@ impl From<&str> for SmartListItemGrouping {
 #[derive(Debug, Deserialize, Serialize, Type, ToSchema)]
 pub struct SmartListItemGroup<E> {
 	pub entity: E,
-	#[schema(no_recursion)]
+
 	pub books: Vec<Media>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Type, ToSchema)]
 #[serde(tag = "type", content = "items")]
 pub enum SmartListItems {
-	#[schema(no_recursion)]
 	Books(Vec<Media>),
-	#[schema(no_recursion)]
+
 	Series(Vec<SmartListItemGroup<Series>>),
-	#[schema(no_recursion)]
+
 	Library(Vec<SmartListItemGroup<Library>>),
 }

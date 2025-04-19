@@ -21,7 +21,6 @@ use stump_core::{
 };
 use tokio::sync::mpsc;
 use tower_sessions::session::Error as SessionError;
-use utoipa::ToSchema;
 
 use std::{net, num::TryFromIntError};
 use thiserror::Error;
@@ -107,7 +106,7 @@ impl IntoResponse for AuthError {
 /// The error representation for API errors. This is a simple enum which will be converted into a
 /// JSON response containing the status code and the error message.
 #[allow(unused)]
-#[derive(Debug, Error, ToSchema)]
+#[derive(Debug, Error)]
 pub enum APIError {
 	#[error("{0}")]
 	BadRequest(String),
@@ -132,13 +131,10 @@ pub enum APIError {
 	#[error("{0}")]
 	Redirect(String),
 	#[error("{0}")]
-	#[schema(value_type = String)]
 	SessionFetchError(#[from] SessionError),
 	#[error("{0}")]
-	#[schema(value_type = Box<String>)]
 	PrismaError(#[from] Box<QueryError>),
 	#[error("{0}")]
-	#[schema(value_type = String)]
 	DbError(#[from] sea_orm::error::DbErr),
 }
 

@@ -50,7 +50,6 @@ tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 tracing-appender = "0.2.3"
 unrar = { version = "0.5.6" }
 urlencoding.workspace = true
-utoipa = { version = "5.3.1", features = ["chrono"] }
 uuid.workspace = true
 walkdir = "2.5.0"
 webp = "0.3.0"

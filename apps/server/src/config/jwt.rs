@@ -4,9 +4,7 @@ use once_cell::sync::Lazy;
 use prisma_client_rust::chrono::{Duration, Utc};
 use rand::distributions::{Alphanumeric, DistString};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use stump_core::config::StumpConfig;
-use utoipa::ToSchema;
 
 use crate::errors::{APIError, APIResult};
 
@@ -26,7 +24,7 @@ struct Claims {
 	exp: usize,
 }
 
-#[derive(Debug, Serialize, Type, ToSchema)]
+#[derive(Debug, Serialize)]
 pub struct CreatedToken {
 	pub access_token: String,
 	pub expires_at: DateTime<FixedOffset>,

@@ -27,7 +27,6 @@ pub struct Bookmark {
 	/// always be returned in the API response
 	#[serde(skip_serializing_if = "Option::is_none")]
 	#[specta(optional)]
-	#[schema(no_recursion)]
 	book: Option<Media>,
 
 	/// The id of the associated user. This relationship will always exist in the DB, however will not
@@ -38,7 +37,6 @@ pub struct Bookmark {
 	/// The associated user
 	#[serde(skip_serializing_if = "Option::is_none")]
 	#[specta(optional)]
-	#[schema(no_recursion)]
 	user: Option<User>,
 }
 

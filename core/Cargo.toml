@@ -11,6 +11,7 @@ async-trait.workspace = true
 chrono.workspace = true
 cuid = "1.3.2"
 data-encoding = "2.5.0"
+rust_decimal.workspace = true
 derive_builder.workspace = true
 derivative.workspace = true
 dirs = "5.0.1"
@@ -40,7 +41,7 @@ pdf = { git = "https://github.com/pdf-rs/pdf", rev = "3bc9e636d31b1846e51b58c742
 pdfium-render = "0.8.24"
 prefixed-api-key = { workspace = true}
 rayon = "1.10.0"
-regex = "1.10.6"
+regex.workspace = true
 ring = "0.17.8"
 smart-filter-gen = { path = "../crates/smart-filter-gen"}
 thiserror.workspace = true
@@ -49,7 +50,6 @@ tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 tracing-appender = "0.2.3"
 unrar = { version = "0.5.6" }
 urlencoding.workspace = true
-utoipa = { version = "5.3.1", features = ["chrono"] }
 uuid.workspace = true
 walkdir = "2.5.0"
 webp = "0.3.0"

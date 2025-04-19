@@ -7,7 +7,6 @@ use prisma_client_rust::{
 };
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use utoipa::ToSchema;
 
 use crate::prisma::{library, media, media_metadata, series, series_metadata};
 use smart_filter_gen::generate_smart_filter;
@@ -20,7 +19,7 @@ use smart_filter_gen::generate_smart_filter;
 //    which means for relation filters we will have an `is` call each time. I don't yet know how this actually affects
 //    performance in real-world scenarios, but it's something to keep in mind.
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, ToSchema, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
 #[serde(untagged)]
 /// A filter for a single value, e.g. `name = "test"`
 pub enum Filter<T> {
@@ -42,7 +41,7 @@ pub enum Filter<T> {
 	NumericFilter(NumericFilter<T>),
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
 pub struct NumericRange<T> {
 	pub from: T,
 	pub to: T,
@@ -50,7 +49,7 @@ pub struct NumericRange<T> {
 	pub inclusive: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, ToSchema, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
 #[serde(untagged)]
 pub enum NumericFilter<T> {
 	Gt { gt: T },
@@ -167,7 +166,7 @@ impl<T> Filter<T> {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
 #[serde(untagged)]
 /// A list of filters that are being combined with a logical operator, e.g. `and` or `or`
 pub enum FilterGroup<T> {
@@ -176,7 +175,7 @@ pub enum FilterGroup<T> {
 	Not { not: Vec<T> },
 }
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize, Type)]
 pub enum FilterJoin {
 	#[default]
 	#[serde(rename = "AND")]
@@ -216,7 +215,7 @@ impl From<&str> for FilterJoin {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
 pub struct SmartFilter<T> {
 	pub groups: Vec<FilterGroup<T>>,
 }
@@ -224,7 +223,7 @@ pub struct SmartFilter<T> {
 pub type SmartFilterSchema = SmartFilter<MediaSmartFilter>;
 
 #[generate_smart_filter]
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
 #[serde(untagged)]
 #[prisma_table("library")]
 pub enum LibrarySmartFilter {
@@ -233,7 +232,7 @@ pub enum LibrarySmartFilter {
 }
 
 #[generate_smart_filter]
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
 #[serde(untagged)]
 #[prisma_table("series_metadata")]
 pub enum SeriesMetadataSmartFilter {
@@ -278,7 +277,7 @@ pub enum SeriesMetadataSmartFilter {
 	},
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
 #[serde(untagged)]
 pub enum SeriesSmartFilter {
 	Name { name: Filter<String> },
@@ -323,7 +322,7 @@ impl SeriesSmartFilter {
 }
 
 #[generate_smart_filter]
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
 #[serde(untagged)]
 #[prisma_table("media_metadata")]
 pub enum MediaMetadataSmartFilter {
@@ -356,7 +355,7 @@ pub enum MediaMetadataSmartFilter {
 }
 
 #[generate_smart_filter]
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
 #[serde(untagged)]
 #[prisma_table("media")]
 pub enum MediaSmartFilter {

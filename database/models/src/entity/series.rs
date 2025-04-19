@@ -56,7 +56,9 @@ impl Entity {
 			.filter(Column::LibraryId.not_in_subquery(
 				library_hidden_to_user::Entity::library_hidden_to_user_query(user),
 			))
-			.apply_if(age_restriction_filter, |query, filter| query.filter(filter))
+			.apply_if(age_restriction_filter, |query, filter| {
+				query.left_join(series_metadata::Entity).filter(filter)
+			})
 	}
 
 	pub fn find_series_ident_for_user_and_id(

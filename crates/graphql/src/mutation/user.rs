@@ -6,7 +6,11 @@ use crate::{
 };
 use async_graphql::{Context, Object, Result, SimpleObject, ID};
 use models::{
-	entity::{user, user::AuthUser, user_login_activity},
+	entity::{
+		age_restriction,
+		user::{self, AuthUser},
+		user_login_activity,
+	},
 	shared::{enums::UserPermission, permission_set::PermissionSet},
 };
 use sea_orm::{
@@ -28,7 +32,7 @@ impl UserMutation {
 			.await?;
 		tracing::debug!("Deleted login activity entries");
 
-		Ok(deleted_rows.rows_affected.try_into()?)
+		Ok(deleted_rows.rows_affected)
 	}
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageUsers)")]
@@ -57,22 +61,40 @@ impl UserMutation {
 		};
 
 		let txn = conn.begin().await?;
-		let user_model = user.save(&txn).await.map_err(|e| {
-			tracing::error!("Failed to create user: {:?}", e);
-			"Failed to create user"
-		})?;
-		tracing::debug!("Created user: {:?}", user_model);
+		let user_model = user
+			.save(&txn)
+			.await
+			.map_err(|e| {
+				tracing::error!("Failed to create user: {:?}", e);
+				"Failed to create user"
+			})?
+			.try_into_model()?;
+		tracing::debug!(?user_model, "Created user");
 
-		// TODO(graphql): Implement for age_restriction
+		if let Some(ar) = input.age_restriction {
+			let created_restriction = age_restriction::ActiveModel {
+				id: NotSet,
+				user_id: Set(user_model.id.clone()),
+				age: Set(ar.age),
+				restrict_on_unset: Set(ar.restrict_on_unset),
+			}
+			.save(&txn)
+			.await
+			.map_err(|e| {
+				tracing::error!("Failed to create age restriction: {:?}", e);
+				"Failed to create age restriction"
+			})?;
+			tracing::trace!(?created_restriction, "Created age restriction");
+		}
 
 		let user_preferences = models::entity::user_preferences::ActiveModel {
 			id: NotSet,
-			user_id: Set(Some(user_model.id.clone().unwrap())),
+			user_id: Set(Some(user_model.id.clone())),
 			..Default::default()
 		};
 
 		user_preferences.save(&txn).await.map_err(|e| {
-			tracing::error!("Failed to create user preferences: {:?}", e);
+			tracing::error!(error = ?e, "Failed to create user preferences");
 			"Failed to create user preferences"
 		})?;
 

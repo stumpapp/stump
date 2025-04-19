@@ -11,6 +11,12 @@ use crate::error_message;
 
 pub type CoreContext = Arc<Ctx>;
 
+/// A struct to represent the authenticated user in the current request context. A user is
+/// authenticated if they meet one of the following criteria:
+/// - They have a valid session
+/// - They have a valid bearer token (session may not exist)
+/// - They have valid basic auth credentials (session is created after successful authentication)
+#[derive(Clone, Debug)]
 pub struct RequestContext {
 	pub user: AuthUser,
 	pub api_key: Option<String>,

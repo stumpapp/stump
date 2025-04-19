@@ -11,7 +11,10 @@ use std::{
 
 use chrono::{DateTime, Utc};
 use futures::{stream::FuturesUnordered, StreamExt};
-use models::entity::{library_config, media, media_metadata, series, series_metadata};
+use models::{
+	entity::{library_config, media, media_metadata, series, series_metadata},
+	shared::enums::FileStatus,
+};
 use sea_orm::{
 	prelude::*,
 	sea_query::{OnConflict, Query},
@@ -25,7 +28,6 @@ use walkdir::DirEntry;
 
 use crate::{
 	config::StumpConfig,
-	db::FileStatus,
 	error::{CoreError, CoreResult},
 	filesystem::{
 		media::{BuiltMedia, MediaBuilder},

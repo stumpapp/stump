@@ -19,7 +19,6 @@ use stump_core::{
 		media_annotation, user,
 	},
 };
-use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
@@ -180,7 +179,7 @@ async fn get_bookmarks(
 	))
 }
 
-#[derive(Deserialize, Type, ToSchema)]
+#[derive(Deserialize, Type)]
 pub struct CreateOrUpdateBookmark {
 	/// The position of the bookmark in the epub, represented by an epubcfi
 	epubcfi: String,
@@ -229,7 +228,7 @@ async fn create_or_update_bookmark(
 	Ok(Json(Bookmark::from(bookmark)))
 }
 
-#[derive(Deserialize, Type, ToSchema)]
+#[derive(Deserialize, Type)]
 pub struct DeleteBookmark {
 	/// The position of the bookmark in the epub, represented by an epubcfi
 	epubcfi: String,

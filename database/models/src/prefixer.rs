@@ -28,6 +28,22 @@ impl<S: QueryTrait<QueryStatement = SelectStatement>> Prefixer<S> {
 		}
 		self
 	}
+
+	pub fn add_named_columns<T: ColumnTrait>(
+		mut self,
+		columns: &[T],
+		prefix: &str,
+	) -> Self {
+		for col in columns {
+			let alias = format!("{}{}", prefix, col.to_string());
+			self.selector.query().expr(SelectExpr {
+				expr: col.select_as(col.into_expr()),
+				alias: Some(Alias::new(&alias).into_iden()),
+				window: None,
+			});
+		}
+		self
+	}
 }
 
 /// Parse a model from a query result

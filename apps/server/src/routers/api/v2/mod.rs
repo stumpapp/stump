@@ -1,8 +1,7 @@
-// TODO(sea-orm): Consiser v2 API for some things that are difficult to express in grapqhl
-// v1 would be retain for archival purposes? Since it wouldn't be functional or accessible,
-// maybe just remove it entirely? In that case, we can just gut and rewrite v1
-
-mod media;
+pub(crate) mod auth;
+pub(crate) mod library;
+pub(crate) mod media;
+pub(crate) mod series;
 
 use axum::{
 	extract::State,
@@ -18,20 +17,15 @@ use crate::{
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
-	let mut router = Router::new()
-		// .merge(auth::mount(app_state.clone()))
+	Router::new()
+		.merge(auth::mount())
 		.merge(media::mount(app_state.clone()))
+		.merge(series::mount(app_state.clone()))
+		.merge(library::mount(app_state))
 		.route("/claim", get(claim))
 		.route("/ping", get(ping))
 		.route("/version", post(version))
-		.route("/check-for-update", get(check_for_updates));
-
-	// Conditionally attach upload routes based on settings.
-	// if app_state.config.enable_upload {
-	// 	router = router.merge(upload::mount(app_state.clone()));
-	// }
-
-	router
+		.route("/check-for-update", get(check_for_updates))
 }
 
 #[derive(Serialize)]

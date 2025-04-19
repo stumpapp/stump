@@ -22,7 +22,6 @@ use stump_core::{
 	},
 };
 use tokio::sync::oneshot;
-use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
@@ -53,7 +52,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
-#[derive(Deserialize, Serialize, ToSchema, Type)]
+#[derive(Deserialize, Serialize, Type)]
 pub struct GetJobsParams {
 	#[serde(default)]
 	pub load_logs: bool,
@@ -289,7 +288,7 @@ async fn get_scheduler_config(
 	Ok(Json(JobSchedulerConfig::from(config)))
 }
 
-#[derive(Debug, Deserialize, Serialize, ToSchema, specta::Type)]
+#[derive(Debug, Deserialize, Serialize, specta::Type)]
 pub struct UpdateSchedulerConfig {
 	pub interval_secs: Option<i32>,
 	pub excluded_library_ids: Option<Vec<String>>,

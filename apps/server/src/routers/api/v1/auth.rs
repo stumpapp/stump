@@ -17,7 +17,6 @@ use stump_core::{
 };
 use tower_sessions::Session;
 use tracing::error;
-use utoipa::ToSchema;
 
 use crate::{
 	config::{
@@ -75,13 +74,13 @@ pub async fn enforce_max_sessions(
 	Ok(())
 }
 
-#[derive(Deserialize, Type, ToSchema)]
+#[derive(Deserialize, Type)]
 pub struct LoginOrRegisterArgs {
 	pub username: String,
 	pub password: String,
 }
 
-#[derive(Debug, Deserialize, Type, ToSchema)]
+#[derive(Debug, Deserialize, Type)]
 pub struct AuthenticationOptions {
 	#[serde(default)]
 	generate_token: bool,
@@ -149,7 +148,7 @@ async fn handle_remove_earliest_session(
 	}
 }
 
-#[derive(Debug, Serialize, Type, ToSchema)]
+#[derive(Debug, Serialize, Type)]
 #[serde(untagged)]
 pub enum LoginResponse {
 	User(User),

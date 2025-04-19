@@ -1,6 +1,6 @@
 use async_graphql::SimpleObject;
 use sea_orm::{
-	entity::prelude::*, prelude::async_trait::async_trait, sea_query::Query, ActiveValue,
+	entity::prelude::*, prelude::async_trait::async_trait, ActiveValue,
 	DerivePartialModel, FromQueryResult,
 };
 
@@ -45,7 +45,15 @@ impl Entity {
 #[sea_orm(entity = "<Model as ModelTrait>::Entity")]
 pub struct LibraryIdentSelect {
 	pub id: String,
+	pub name: String,
 	pub path: String,
+}
+
+impl LibraryIdentSelect {
+	// TODO: make a trait
+	pub fn columns() -> Vec<Column> {
+		vec![Column::Id, Column::Name, Column::Path]
+	}
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

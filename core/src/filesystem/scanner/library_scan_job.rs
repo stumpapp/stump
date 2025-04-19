@@ -1,10 +1,12 @@
 use std::{collections::VecDeque, path::PathBuf};
 
-use models::entity::{library, library_config, library_scan_record, media, series};
+use models::{
+	entity::{library, library_config, library_scan_record, media, series},
+	shared::enums::FileStatus,
+};
 use sea_orm::{prelude::*, sea_query::Query, Set, TransactionTrait};
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use utoipa::ToSchema;
 
 // TODO: hone the progress messages, they are a little noisy and unhelpful (e.g. 'Starting task')
 // TODO: Refactor rayon usage to use tokio instead. I am trying to learn more about IO-bound operations in an
@@ -12,14 +14,13 @@ use utoipa::ToSchema;
 // Also perhaps experiment with https://docs.rs/tokio-uring/latest/tokio_uring/index.html
 
 use crate::{
-	db::{entity::CoreJobOutput, FileStatus},
 	filesystem::{
 		image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
 		scanner::utils::safely_insert_series,
 	},
 	job::{
-		error::JobError, Executor, JobExecuteLog, JobExt, JobOutputExt, JobProgress,
-		JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
+		error::JobError, CoreJobOutput, Executor, JobExecuteLog, JobExt, JobOutputExt,
+		JobProgress, JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
 	utils::chain_optional_iter,
 	CoreEvent,
@@ -84,7 +85,7 @@ impl LibraryScanJob {
 }
 
 /// The data that is collected and updated during the execution of a library scan job
-#[derive(Clone, Serialize, Deserialize, Default, Debug, Type, ToSchema)]
+#[derive(Clone, Serialize, Deserialize, Default, Debug, Type)]
 pub struct LibraryScanOutput {
 	/// The number of files visited during the scan
 	total_files: u64,

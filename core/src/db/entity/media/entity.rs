@@ -54,7 +54,6 @@ pub struct Media {
 	pub metadata: Option<MediaMetadata>,
 	// The series this media belongs to. Will be `None` only if the relation is not loaded.
 	#[serde(skip_serializing_if = "Option::is_none")]
-	#[schema(no_recursion)]
 	pub series: Option<Series>,
 	/// The active reading sessions for the media. Will be `None` only if the relation is not loaded.
 	///
@@ -81,7 +80,6 @@ pub struct Media {
 	pub tags: Option<Vec<Tag>>,
 	/// Bookmarks for the media. Will be `None` only if the relation is not loaded.
 	#[serde(skip_serializing_if = "Option::is_none")]
-	#[schema(no_recursion)]
 	pub bookmarks: Option<Vec<Bookmark>>,
 }
 

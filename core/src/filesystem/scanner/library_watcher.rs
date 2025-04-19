@@ -395,6 +395,7 @@ mod tests {
 	fn create_test_libraries(base_dir: String) -> Vec<library::LibraryIdentSelect> {
 		vec![library::LibraryIdentSelect {
 			id: "42".to_string(),
+			name: "Test Library".to_string(),
 			path: base_dir,
 		}]
 	}

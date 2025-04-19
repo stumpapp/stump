@@ -1,17 +1,18 @@
 use std::{collections::VecDeque, path::PathBuf};
 
-use models::entity::{library, library_config, media, series};
+use models::{
+	entity::{library, library_config, media, series},
+	shared::enums::FileStatus,
+};
 use sea_orm::{prelude::*, sea_query::Query, Condition, UpdateResult};
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use utoipa::ToSchema;
 
 use crate::{
-	db::{entity::CoreJobOutput, FileStatus},
 	filesystem::image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
 	job::{
-		error::JobError, Executor, JobExt, JobOutputExt, JobProgress, JobTaskOutput,
-		WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
+		error::JobError, CoreJobOutput, Executor, JobExt, JobOutputExt, JobProgress,
+		JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
 	utils::chain_optional_iter,
 	CoreEvent,
@@ -60,7 +61,7 @@ impl SeriesScanJob {
 
 // TODO: emit progress events. This job isn't exposed in the UI yet, so it's not a big deal for now
 
-#[derive(Clone, Serialize, Deserialize, Default, Debug, Type, ToSchema)]
+#[derive(Clone, Serialize, Deserialize, Default, Debug, Type)]
 pub struct SeriesScanOutput {
 	/// The number of files to scan relative to the series root
 	total_files: u64,

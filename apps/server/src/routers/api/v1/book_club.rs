@@ -28,7 +28,6 @@ use stump_core::{
 		book_club_schedule, media, user, PrismaClient,
 	},
 };
-use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
@@ -156,7 +155,7 @@ pub(crate) fn book_club_member_access_for_user(
 	)
 }
 
-#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Type)]
 pub struct GetBookClubsParams {
 	#[serde(default)]
 	all: bool,
@@ -202,7 +201,7 @@ async fn get_book_clubs(
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Type)]
 pub struct CreateBookClub {
 	pub name: String,
 	#[serde(default)]
@@ -313,7 +312,7 @@ async fn get_book_club(
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Type)]
 pub struct UpdateBookClub {
 	pub name: Option<String>,
 	pub description: Option<String>,
@@ -382,7 +381,7 @@ async fn update_book_club(
 	Ok(Json(BookClub::from(updated_book_club)))
 }
 
-#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Type)]
 pub struct UpdateBookClubSchedule {}
 
 async fn get_book_club_invitations() -> APIResult<Json<Vec<BookClubInvitation>>> {
@@ -390,7 +389,7 @@ async fn get_book_club_invitations() -> APIResult<Json<Vec<BookClubInvitation>>>
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Type)]
 pub struct CreateBookClubInvitation {
 	pub user_id: String,
 	pub role: Option<BookClubMemberRole>,
@@ -494,7 +493,7 @@ async fn get_book_club_members(
 	))
 }
 
-#[derive(Serialize, Deserialize, Debug, Type, ToSchema, Default)]
+#[derive(Serialize, Deserialize, Debug, Type, Default)]
 pub struct CreateBookClubMember {
 	pub user_id: String,
 	pub display_name: Option<String>,
@@ -521,7 +520,7 @@ async fn create_book_club_member(
 	Ok(BookClubMember::from(created_member))
 }
 
-#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Type)]
 pub struct BookClubInvitationAnswer {
 	pub accept: bool,
 	pub member_details: Option<CreateBookClubMember>,
@@ -647,7 +646,7 @@ async fn get_book_club_member(
 	Ok(Json(BookClubMember::from(book_club_member)))
 }
 
-#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Type)]
 #[skip_serializing_none]
 pub struct UpdateBookClubMember {
 	pub display_name: Option<String>,
@@ -736,7 +735,7 @@ async fn delete_book_club_member(
 /// - A book that is not stored in the database
 ///
 /// This provides some flexibility for book clubs to add books that perhaps are not on the server
-#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Type)]
 #[serde(untagged)]
 pub enum CreateBookClubScheduleBookOption {
 	/// A book that is stored in the database
@@ -771,7 +770,7 @@ impl CreateBookClubScheduleBookOption {
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Type)]
 pub struct CreateBookClubScheduleBook {
 	pub book: CreateBookClubScheduleBookOption,
 	pub start_at: Option<String>,
@@ -780,7 +779,7 @@ pub struct CreateBookClubScheduleBook {
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Type)]
 pub struct CreateBookClubSchedule {
 	pub default_interval_days: Option<i32>,
 	pub books: Vec<CreateBookClubScheduleBook>,
@@ -945,7 +944,7 @@ async fn get_book_club_schedule(
 	Ok(Json(BookClubSchedule::from(book_club_schedule)))
 }
 
-#[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Type)]
 pub struct AddBooksToBookClubSchedule {
 	pub books: Vec<CreateBookClubScheduleBook>,
 }

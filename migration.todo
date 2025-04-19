@@ -2,14 +2,17 @@ Backend / Core:
 - [ ] Typed GraphQL filter objects
 - [ ] Dynamic GraphQL ordering (e.g., `media(order_by: { title: ASC })`)
 - [ ] Finalize and test intial migration
-- [ ] Unify `RequestContext` between REST and GraphQL APIs
-  - [ ] Port all middleware to work with updated types/structs/etc
-- [ ] Develop (port) GET thumbnail and/or page API for:
-  - [ ] media
-  - [ ] series
-  - [ ] library
-- [ ] Move all the deserializer utils (e.g., age_rating_deserializer)
+- [x] Unify `RequestContext` between REST and GraphQL APIs
+  - [x] Port all middleware to work with updated types/structs/etc
+- [x] Develop (port) GET thumbnail and/or page API for:
+  - [x] media
+  - [x] series
+  - [x] library
+- [x] Move all the deserializer utils (e.g., age_rating_deserializer)
 - [ ] Remove sse and ws from REST, move to GraphQL
+  - [ ] Port SSE to GraphQL
+  - [ ] Remove SSE from REST
+  - [x] Remove WS from REST
 - [ ] Port other remaining RESTful APIs:
   - [ ] smart-lists
   - [ ] notifier
@@ -17,6 +20,10 @@ Backend / Core:
   - [ ] config
   - [ ] api_key
   - [ ] user
+  - [x] OPDS
+    - [x] OPDS 1.2
+    - [x] OPDS 2.0
+  - [x] KoReader
 - [ ] Develop migration system according to SeaORM standards
 - [ ] Investigate whether `init_journal_mode` is needed
 - [ ] Address any remaining SeaORM issues (see `TODO(sea-orm)` or `TODO(graphql)` comments)

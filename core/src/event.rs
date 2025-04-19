@@ -1,13 +1,9 @@
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
-use crate::{
-	db::entity::CoreJobOutput,
-	job::{JobUpdate, WorkerSend, WorkerSendExt},
-};
+use crate::job::{CoreJobOutput, JobUpdate, WorkerSend, WorkerSendExt};
 
 /// An event that is emitted by the core and consumed by a client
-#[derive(Clone, Serialize, Deserialize, Debug, Type)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 #[serde(tag = "__typename")]
 pub enum CoreEvent {
 	JobStarted(String),

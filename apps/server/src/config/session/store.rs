@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use models::entity::session;
+use models::entity::{session, user::AuthUser};
 use prisma_client_rust::chrono::{DateTime, Duration, FixedOffset, Utc};
 use sea_orm::{prelude::*, sea_query::OnConflict, DatabaseConnection, Iterable, Set};
-use stump_core::{config::StumpConfig, db::entity::User, Ctx};
+use stump_core::{config::StumpConfig, Ctx};
 use tokio::time::MissedTickBehavior;
 use tower_sessions::{
 	session::{Id, Record},
@@ -105,8 +105,7 @@ impl SessionStore for StumpSessionStore {
 			.ok_or(SessionError::NotFound)?;
 		let session_data =
 			serde_json::to_vec(&record).map_err(SessionError::SerdeError)?;
-		// TODO(sea-orm): use User model
-		let user = serde_json::from_value::<User>(session_user.clone())
+		let user = serde_json::from_value::<AuthUser>(session_user.clone())
 			.map_err(SessionError::SerdeError)?;
 		let session_id = record.id.to_string();
 

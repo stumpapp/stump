@@ -1,4 +1,4 @@
-use crate::{db::entity::age_rating_deserializer, filesystem::FileError};
+use crate::{filesystem::FileError, utils::serde::age_rating_deserializer};
 use models::entity::series_metadata;
 use sea_orm::Set;
 use serde::{Deserialize, Serialize};

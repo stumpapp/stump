@@ -16,7 +16,6 @@ pub struct ServerConfig {
 pub struct JobSchedulerConfig {
 	id: String,
 	interval_secs: i32,
-	#[schema(no_recursion)]
 	excluded_libraries: Vec<Library>,
 }
 

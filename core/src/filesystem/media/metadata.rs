@@ -10,7 +10,7 @@ use sea_orm::{prelude::*, Set};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use crate::db::entity::{
+use crate::utils::serde::{
 	age_rating_deserializer, parse_age_restriction, string_list_deserializer,
 };
 

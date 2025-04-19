@@ -10,7 +10,6 @@ use futures::{stream::FuturesUnordered, StreamExt};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use tokio::sync::Semaphore;
-use utoipa::ToSchema;
 
 use models::{
 	entity::{media, series},
@@ -74,7 +73,7 @@ pub enum ThumbnailGenerationTask {
 	GenerateBatch(MediaIds),
 }
 
-#[derive(Clone, Serialize, Deserialize, Default, Debug, Type, ToSchema)]
+#[derive(Clone, Serialize, Deserialize, Default, Debug, Type)]
 // Note: This container attribute is used to ensure future additions to the struct do not break deserialization
 #[serde(default)]
 pub struct ThumbnailGenerationOutput {

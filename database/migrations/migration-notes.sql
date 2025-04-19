@@ -313,5 +313,53 @@ DROP TABLE "series";
 ALTER TABLE "new_series"
     RENAME TO "series";
 -- TODO: book club schedule (and possibly others) id
+-- Changes:
+-- 1. id is now an autoincrementing integer
+CREATE TABLE "new_user_login_activity" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "ip_address" TEXT NOT NULL,
+    "user_agent" TEXT NOT NULL,
+    "authentication_successful" BOOLEAN NOT NULL,
+    "timestamp" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "user_id" TEXT NOT NULL,
+    CONSTRAINT "user_login_activity_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+INSERT INTO "new_user_login_activity"(
+        "ip_address",
+        "user_agent",
+        "authentication_successful",
+        "timestamp",
+        "user_id"
+    )
+SELECT "ip_address",
+    "user_agent",
+    "authentication_successful",
+    "timestamp",
+    "user_id"
+FROM "user_login_activity";
+DROP TABLE "user_login_activity";
+ALTER TABLE "new_user_login_activity"
+    RENAME TO "user_login_activity";
+-- Changes:
+-- 1. id is now an autoincrementing integer
+CREATE TABLE "new_age_restrictions" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "age" INTEGER NOT NULL,
+    "restrict_on_unset" BOOLEAN NOT NULL DEFAULT false,
+    "user_id" TEXT NOT NULL,
+    CONSTRAINT "age_restrictions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+INSERT INTO "new_age_restrictions"(
+        "age",
+        "restrict_on_unset",
+        "user_id"
+    )
+SELECT "age",
+    "restrict_on_unset",
+    "user_id"
+FROM "age_restrictions";
+DROP TABLE "age_restrictions";
+ALTER TABLE "new_age_restrictions"
+    RENAME TO "age_restrictions";
 PRAGMA foreign_keys = ON;
 COMMIT;

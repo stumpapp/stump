@@ -7,6 +7,7 @@ use async_graphql::{
 	SimpleObject, Union,
 };
 use sea_orm::{prelude::*, FromQueryResult, QuerySelect, Select};
+use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 
 /// A simple cursor-based pagination input object
@@ -14,6 +15,10 @@ use std::fmt::Debug;
 pub struct CursorPagination {
 	pub after: Option<String>,
 	pub limit: u64,
+}
+
+fn default_restful_page() -> u64 {
+	1
 }
 
 fn default_page_size() -> Option<u64> {
@@ -25,12 +30,19 @@ fn default_zero_based() -> Option<bool> {
 }
 
 /// A simple offset-based pagination input object
-#[derive(Debug, Clone, InputObject)]
+#[derive(Debug, Clone, InputObject, Serialize, Deserialize)]
 pub struct OffsetPagination {
+	/// The page to start from. This is 1-based by default, but can be
+	/// changed to 0-based by setting the `zero_based` field to true.
+	#[serde(default = "default_restful_page")]
 	pub page: u64,
+	/// The number of items to return per page. This is 20 by default.
 	#[graphql(default_with = "default_page_size()")]
+	#[serde(default = "default_page_size")]
 	pub page_size: Option<u64>,
+	/// Whether or not the page is zero-based. This is false by default.
 	#[graphql(default_with = "default_zero_based()")]
+	#[serde(default = "default_zero_based")]
 	pub zero_based: Option<bool>,
 }
 
@@ -55,6 +67,28 @@ impl OffsetPagination {
 
 	pub fn limit(&self) -> u64 {
 		self.page_size.unwrap_or(20)
+	}
+
+	pub fn next_page(&self) -> u64 {
+		if self.zero_based.unwrap_or(false) {
+			self.page + 1
+		} else {
+			self.page
+		}
+	}
+
+	pub fn previous_page(&self) -> Option<u64> {
+		if self.zero_based.unwrap_or(false) {
+			if self.page > 0 {
+				Some(self.page - 1)
+			} else {
+				None
+			}
+		} else if self.page > 1 {
+			Some(self.page - 1)
+		} else {
+			None
+		}
 	}
 }
 

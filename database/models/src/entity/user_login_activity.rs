@@ -5,15 +5,15 @@ use sea_orm::entity::prelude::*;
 #[sea_orm(table_name = "user_login_activity")]
 #[graphql(name = "UserLoginActivityModel")]
 pub struct Model {
-	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
-	pub id: String,
+	#[sea_orm(primary_key, auto_increment = true)]
+	pub id: i64,
 	#[sea_orm(column_type = "Text")]
 	pub ip_address: String,
 	#[sea_orm(column_type = "Text")]
 	pub user_agent: String,
 	pub authentication_successful: bool,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub timestamp: String,
+	pub timestamp: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "Text")]
 	pub user_id: String,
 }

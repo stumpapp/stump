@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use utoipa::ToSchema;
+use utoipa;
 
 use crate::{
 	db::entity::Media,
@@ -15,7 +15,7 @@ use super::common::Cursor;
 //////////////////// MODELS ///////////////////
 ///////////////////////////////////////////////
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize, Type)]
 pub enum ReadingListVisibility {
 	#[serde(rename = "PUBLIC")]
 	Public,
@@ -49,16 +49,15 @@ impl std::fmt::Display for ReadingListVisibility {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Default)]
 pub struct ReadingListItem {
 	pub display_order: i32,
 	pub media_id: String,
 	pub reading_list_id: String,
-	#[schema(no_recursion)]
 	pub media: Option<Media>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Default)]
 pub struct ReadingList {
 	pub id: String,
 	pub name: String,
@@ -94,7 +93,7 @@ impl From<reading_list_item::Data> for ReadingListItem {
 //////////////////// INPUTS //////////////////
 //////////////////////////////////////////////
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
 pub struct CreateReadingList {
 	pub id: String,
 	pub media_ids: Vec<String>,

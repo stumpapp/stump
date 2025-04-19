@@ -1,18 +1,5 @@
-use simple_crypt::{decrypt, encrypt};
-
 use crate::{CoreError, CoreResult};
-
-pub fn chain_optional_iter<T>(
-	required: impl IntoIterator<Item = T>,
-	optional: impl IntoIterator<Item = Option<T>>,
-) -> Vec<T> {
-	required
-		.into_iter()
-		.map(Some)
-		.chain(optional)
-		.flatten()
-		.collect()
-}
+use simple_crypt::{decrypt, encrypt};
 
 pub fn create_encryption_key() -> CoreResult<String> {
 	let random_bytes = rand::random::<[u8; 32]>();
@@ -42,15 +29,6 @@ pub fn decrypt_string(
 #[cfg(test)]
 mod tests {
 	use super::*;
-
-	#[test]
-	fn test_chain_optional_iter() {
-		let required = vec![1, 2, 3];
-		let optional = vec![Some(4), None, Some(5)];
-
-		let res = chain_optional_iter(required, optional);
-		assert_eq!(res, vec![1, 2, 3, 4, 5]);
-	}
 
 	#[test]
 	fn test_create_encryption_key() {

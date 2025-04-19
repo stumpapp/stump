@@ -1,5 +1,5 @@
 use async_graphql::SimpleObject;
-use sea_orm::entity::prelude::*;
+use sea_orm::{entity::prelude::*, FromQueryResult};
 
 use crate::shared::{
 	enums::{LibraryPattern, ReadingDirection, ReadingImageScaleFit, ReadingMode},
@@ -45,6 +45,11 @@ impl Model {
 	pub fn ignore_rules(&self) -> IgnoreRules {
 		self.ignore_rules.clone().unwrap_or_default()
 	}
+}
+
+#[derive(Clone, Debug, FromQueryResult)]
+pub struct LibraryConfigThumbnailConfig {
+	pub thumbnail_config: Option<ImageProcessorOptions>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

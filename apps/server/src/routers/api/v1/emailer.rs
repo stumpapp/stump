@@ -21,7 +21,6 @@ use stump_core::{
 	AttachmentPayload, EmailContentType,
 };
 use tokio::fs;
-use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
@@ -72,7 +71,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
-#[derive(Deserialize, ToSchema, Type)]
+#[derive(Deserialize, Type)]
 pub struct EmailerIncludeParams {
 	#[serde(default)]
 	pub include_send_history: bool,
@@ -150,7 +149,7 @@ async fn get_emailer_by_id(
 }
 
 /// Input object for creating or updating an emailer
-#[derive(Deserialize, ToSchema, Type)]
+#[derive(Deserialize, Type)]
 pub struct CreateOrUpdateEmailer {
 	/// The friendly name for the emailer
 	name: String,
@@ -268,7 +267,7 @@ async fn update_emailer(
 	Ok(Json(SMTPEmailer::try_from(updated_emailer)?))
 }
 
-// #[derive(Deserialize, ToSchema, Type)]
+// #[derive(Deserialize, Type)]
 // pub struct PatchEmailer {}
 
 // #[utoipa::path(
@@ -334,7 +333,7 @@ async fn delete_emailer(
 	Ok(Json(SMTPEmailer::try_from(deleted_emailer)?))
 }
 
-#[derive(Debug, Deserialize, ToSchema, Type)]
+#[derive(Debug, Deserialize, Type)]
 pub struct EmailerSendRecordIncludeParams {
 	#[serde(default)]
 	include_sent_by: bool,
@@ -388,13 +387,13 @@ async fn get_emailer_send_history(
 	))
 }
 
-#[derive(Deserialize, ToSchema, Type)]
+#[derive(Deserialize, Type)]
 pub struct SendAttachmentEmailsPayload {
 	media_ids: Vec<String>,
 	send_to: Vec<EmailerSendTo>,
 }
 
-#[derive(Serialize, ToSchema, Type)]
+#[derive(Serialize, Type)]
 pub struct SendAttachmentEmailResponse {
 	sent_emails_count: i32,
 	errors: Vec<String>,
@@ -703,7 +702,7 @@ async fn get_email_device_by_id(
 }
 
 /// Input object for creating or updating an email device
-#[derive(Deserialize, ToSchema, Type)]
+#[derive(Deserialize, Type)]
 pub struct CreateOrUpdateEmailDevice {
 	/// The friendly name of the email device, e.g. "Aaron's Kobo"
 	name: String,
@@ -790,7 +789,7 @@ async fn update_email_device(
 }
 
 /// Patch an existing email device by its ID
-#[derive(Deserialize, ToSchema, Type)]
+#[derive(Deserialize, Type)]
 pub struct PatchEmailDevice {
 	/// The friendly name of the email device, e.g. "Aaron's Kobo"
 	pub name: Option<String>,

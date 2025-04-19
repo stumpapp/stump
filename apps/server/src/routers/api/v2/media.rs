@@ -1,5 +1,6 @@
 use axum::{
 	extract::{Path, State},
+	middleware,
 	routing::get,
 	Extension, Router,
 };
@@ -11,23 +12,27 @@ use models::{
 use sea_orm::{prelude::*, sea_query::Query, QuerySelect};
 use stump_core::{
 	config::StumpConfig,
-	filesystem::{get_thumbnail, media::get_page_async, ContentType},
+	filesystem::{get_thumbnail, media::get_page_async, ContentType, FileError},
 	Ctx,
 };
 
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
+	middleware::auth::auth_middleware,
 	utils::http::{ImageResponse, NamedFile},
 };
 
-pub(crate) fn mount() -> Router<AppState> {
-	Router::new().nest(
-		"/media/{id}",
-		Router::new()
-			.route("/thumbnail", get(get_media_thumbnail_handler))
-			.route("/file", get(get_media_file)),
-	)
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
+	Router::new()
+		.nest(
+			"/media/{id}",
+			Router::new()
+				.route("/thumbnail", get(get_media_thumbnail_handler))
+				.route("/page/{page}", get(get_media_page))
+				.route("/file", get(get_media_file)),
+		)
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 /// Download the file associated with the media.
@@ -117,4 +122,30 @@ pub(crate) async fn get_media_thumbnail_handler(
 	get_media_thumbnail_by_id(&ctx, &req.user(), id)
 		.await
 		.map(ImageResponse::from)
+}
+
+async fn get_media_page(
+	Path((id, page)): Path<(String, u32)>,
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+) -> APIResult<ImageResponse> {
+	let book = media::Entity::find_for_user(&req.user())
+		.filter(media::Column::Id.eq(id.clone()))
+		.into_model::<media::MediaIdentSelect>()
+		.one(ctx.conn.as_ref())
+		.await?
+		.ok_or(APIError::NotFound("Book not found".to_string()))?;
+
+	let content =
+		match get_page_async(&book.path, page.try_into()?, ctx.config.as_ref()).await {
+			Ok(result) => result,
+			Err(e) => {
+				if matches!(e, FileError::NoImageError) {
+					return Err(APIError::NotFound("Page not found".to_string()));
+				}
+				return Err(APIError::InternalServerError(e.to_string()));
+			},
+		};
+
+	Ok(ImageResponse::from(content))
 }

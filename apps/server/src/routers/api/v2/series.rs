@@ -1,5 +1,6 @@
 use axum::{
 	extract::{Path, State},
+	middleware,
 	routing::get,
 	Extension, Router,
 };
@@ -17,16 +18,19 @@ use stump_core::{
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
+	middleware::auth::auth_middleware,
 	utils::http::ImageResponse,
 };
 
 use super::media::get_media_thumbnail;
 
-pub(crate) fn mount() -> Router<AppState> {
-	Router::new().nest(
-		"/series/{id}",
-		Router::new().route("/thumbnail", get(get_series_thumbnail_handler)),
-	)
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
+	Router::new()
+		.nest(
+			"/series/{id}",
+			Router::new().route("/thumbnail", get(get_series_thumbnail_handler)),
+		)
+		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
 pub(crate) async fn get_series_thumbnail(

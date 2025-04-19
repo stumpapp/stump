@@ -16,12 +16,12 @@ use crate::{
 	errors::{APIError, APIResult},
 };
 
-pub(crate) fn mount(_app_state: AppState) -> Router<AppState> {
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.merge(auth::mount())
-		.merge(media::mount())
-		.merge(series::mount())
-		.merge(library::mount())
+		.merge(media::mount(app_state.clone()))
+		.merge(series::mount(app_state.clone()))
+		.merge(library::mount(app_state))
 		.route("/claim", get(claim))
 		.route("/ping", get(ping))
 		.route("/version", post(version))

@@ -181,7 +181,7 @@
 				"label": "Scheduling"
 			},
 			"danger-zone": {
-				"delete": "Deletion",
+				"delete": "Borrado",
 				"label": "Danger Zone"
 			}
 		},

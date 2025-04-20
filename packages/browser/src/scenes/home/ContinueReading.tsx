@@ -14,7 +14,7 @@ import {
 import { ContinueReadingMediaQuery } from './__generated__/ContinueReadingMediaQuery.graphql'
 import { ContinueReadingMediaFragment$key } from './__generated__/ContinueReadingMediaFragment.graphql'
 import HorizontalCardList_ from '@/components/HorizontalCardList'
-import { gql, useSuspenseQuery } from '@apollo/client'
+import { gql, useQuery, useSuspenseQuery } from '@apollo/client'
 
 // const fragment = graphql`
 // 	fragment ContinueReadingMediaFragment on Query
@@ -95,7 +95,7 @@ function ContinueReadingMedia() {
 			media: { nodes: books, pageInfo },
 		},
 		fetchMore,
-	} = useSuspenseQuery(query, {
+	} = useQuery(query, {
 		variables: {
 			pagination: { cursor: { limit: 20 } },
 		},
@@ -145,6 +145,16 @@ function ContinueReadingMedia() {
 						after: pageInfo.nextCursor,
 					},
 				},
+			},
+			updateQuery: (prev, { fetchMoreResult }) => {
+				const newEntries = fetchMoreResult?.media?.nodes || []
+				const newPageInfo = fetchMoreResult?.media?.pageInfo
+				return {
+					media: {
+						nodes: [...prev.media.nodes, ...newEntries],
+						pageInfo,
+					},
+				}
 			},
 		})
 	}, [])

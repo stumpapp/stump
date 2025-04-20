@@ -14,11 +14,35 @@ import {
 import { ContinueReadingMediaQuery } from './__generated__/ContinueReadingMediaQuery.graphql'
 import { ContinueReadingMediaFragment$key } from './__generated__/ContinueReadingMediaFragment.graphql'
 import HorizontalCardList_ from '@/components/HorizontalCardList'
+import { gql, useSuspenseQuery } from '@apollo/client'
 
-const fragment = graphql`
-	fragment ContinueReadingMediaFragment on Query
-	@refetchable(queryName: "ContinueReadingMediaRefetchQuery")
-	@argumentDefinitions(pagination: { type: "Pagination", defaultValue: { offset: { page: 1 } } }) {
+// const fragment = graphql`
+// 	fragment ContinueReadingMediaFragment on Query
+// 	@refetchable(queryName: "ContinueReadingMediaRefetchQuery")
+// 	@argumentDefinitions(pagination: { type: "Pagination", defaultValue: { offset: { page: 1 } } }) {
+// 		media(pagination: $pagination) {
+// 			nodes {
+// 				id
+// 			}
+// 			pageInfo {
+// 				__typename
+// 				... on CursorPaginationInfo {
+// 					currentCursor
+// 					nextCursor
+// 				}
+// 			}
+// 		}
+// 	}
+// `
+
+// const query = graphql`
+// 	query ContinueReadingMediaQuery($pagination: Pagination!) {
+// 		...ContinueReadingMediaFragment @arguments(pagination: $pagination)
+// 	}
+// `
+
+const query = gql`
+	query ContinueReadingMediaQuery($pagination: Pagination!) {
 		media(pagination: $pagination) {
 			nodes {
 				id
@@ -34,84 +58,96 @@ const fragment = graphql`
 	}
 `
 
-const query = graphql`
-	query ContinueReadingMediaQuery($pagination: Pagination!) {
-		...ContinueReadingMediaFragment @arguments(pagination: $pagination)
-	}
-`
-
 export default function ContinueReadingMediaContainer() {
-	const [queryRef, loadQuery] = useQueryLoader<ContinueReadingMediaQuery>(query)
-
-	useEffect(() => {
-		loadQuery({
-			pagination: {
-				offset: {
-					page: 1,
-				},
-			},
-		})
-	}, [loadQuery])
-
-	if (!queryRef) {
-		return null
-	}
+	// const [queryRef, loadQuery] = useQueryLoader<ContinueReadingMediaQuery>(query)
+	// useEffect(() => {
+	// 	loadQuery({
+	// 		pagination: {
+	// 			offset: {
+	// 				page: 1,
+	// 			},
+	// 		},
+	// 	})
+	// }, [loadQuery])
+	// if (!queryRef) {
+	// 	return null
+	// }
+	// return (
+	// 	<Suspense>
+	// 		<ContinueReadingMedia queryRef={queryRef} />
+	// 	</Suspense>
+	// )
 
 	return (
 		<Suspense>
-			<ContinueReadingMedia queryRef={queryRef} />
+			<ContinueReadingMedia />
 		</Suspense>
 	)
 }
 
 type Props = {
-	queryRef: PreloadedQuery<ContinueReadingMediaQuery>
+	// queryRef: PreloadedQuery<ContinueReadingMediaQuery>
 }
 
-function ContinueReadingMedia({ queryRef }: Props) {
-	const node = usePreloadedQuery(query, queryRef)
-	// const node = useLazyLoadQuery<ContinueReadingMediaQuery>(query, {
-	// 	pagination: { offset: { page: 1 } },
-	// })
-	// const [data, refetch] = useRefetchableFragment(fragment, node)
+function ContinueReadingMedia() {
 	const {
 		data: {
-			media: { nodes: books },
+			media: { nodes: books, pageInfo },
 		},
-		hasNext,
-		loadNext,
-	} = usePaginationFragment<ContinueReadingMediaQuery, ContinueReadingMediaFragment$key>(
-		fragment,
-		node,
-	)
+		fetchMore,
+	} = useSuspenseQuery(query, {
+		variables: {
+			pagination: { cursor: { limit: 20 } },
+		},
+	})
 
-	// const { data:, hasNext, loadNext } = useRelayPaginationFragment<
-	// 	ContinueReadingMediaQuery,
-	// 	ContinueReadingMediaFragment$key
-	// >(fragment, node)
-
+	// const node = usePreloadedQuery(query, queryRef)
+	// // const node = useLazyLoadQuery<ContinueReadingMediaQuery>(query, {
+	// // 	pagination: { offset: { page: 1 } },
+	// // })
+	// // const [data, refetch] = useRefetchableFragment(fragment, node)
+	// const {
+	// 	data: {
+	// 		media: { nodes: books },
+	// 	},
+	// 	hasNext,
+	// 	loadNext,
+	// } = usePaginationFragment<ContinueReadingMediaQuery, ContinueReadingMediaFragment$key>(
+	// 	fragment,
+	// 	node,
+	// )
+	// // const { data:, hasNext, loadNext } = useRelayPaginationFragment<
+	// // 	ContinueReadingMediaQuery,
+	// // 	ContinueReadingMediaFragment$key
+	// // >(fragment, node)
 	const { t } = useLocaleContext()
-
-	console.log({ hasNext })
-
-	// const cards = media.map((media) => <MediaCard media={media} key={media.id} fullWidth={false} />)
-
-	// const handleFetchMore = useCallback(() => {
-	// 	if (!hasNextPage || isFetching) {
-	// 		return
-	// 	} else {
-	// 		fetchNextPage()
-	// 	}
-	// }, [fetchNextPage, hasNextPage, isFetching])
-
+	// console.log({ hasNext })
+	// // const cards = media.map((media) => <MediaCard media={media} key={media.id} fullWidth={false} />)
+	// // const handleFetchMore = useCallback(() => {
+	// // 	if (!hasNextPage || isFetching) {
+	// // 		return
+	// // 	} else {
+	// // 		fetchNextPage()
+	// // 	}
+	// // }, [fetchNextPage, hasNextPage, isFetching])
 	const handleFetchMore = useCallback(() => {
-		if (!hasNext) {
-			return
-		} else {
-			console.log('loading next page')
-			loadNext()
-		}
-	}, [loadNext, hasNext])
+		// if (!hasNext) {
+		// 	return
+		// } else {
+		// 	console.log('loading next page')
+		// 	loadNext()
+		// }
+		fetchMore({
+			variables: {
+				pagination: {
+					cursor: {
+						limit: 20,
+						after: pageInfo.nextCursor,
+					},
+				},
+			},
+		})
+	}, [])
 
 	return (
 		<HorizontalCardList_

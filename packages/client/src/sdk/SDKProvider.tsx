@@ -6,6 +6,8 @@ import { createEnvironment } from '@/relay'
 
 import { useClientContext } from '../context'
 import { SDKContext } from './context'
+import { ApolloProvider } from '@apollo/client'
+import { createClient } from '@/apollo'
 
 type SDKProviderProps = {
 	baseURL: string
@@ -62,8 +64,10 @@ export function SDKProvider({
 	}
 
 	return (
-		<RelayEnvironmentProvider environment={createEnvironment(sdk)}>
-			<SDKContext.Provider value={{ sdk, setSDK }}>{children}</SDKContext.Provider>
-		</RelayEnvironmentProvider>
+		<ApolloProvider client={createClient(sdk)}>
+			<RelayEnvironmentProvider environment={createEnvironment(sdk)}>
+				<SDKContext.Provider value={{ sdk, setSDK }}>{children}</SDKContext.Provider>
+			</RelayEnvironmentProvider>
+		</ApolloProvider>
 	)
 }

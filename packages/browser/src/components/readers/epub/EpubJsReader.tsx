@@ -306,6 +306,8 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	useEffect(
 		() => {
 			return () => {
+				queryClient.cancelQueries({ queryKey: [sdk.media.keys.getByID, id], exact: false })
+				queryClient.cancelQueries({ queryKey: [sdk.media.keys.inProgress], exact: false })
 				queryClient.refetchQueries({ queryKey: [sdk.media.keys.getByID, id], exact: false })
 				queryClient.refetchQueries({ queryKey: [sdk.media.keys.inProgress], exact: false })
 			}

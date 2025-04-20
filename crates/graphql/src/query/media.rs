@@ -1,4 +1,7 @@
-use async_graphql::{Context, Json, Object, Result, ID};
+use async_graphql::{
+	connection::{query, Connection, Edge, EmptyFields},
+	Context, Json, Object, Result, ID,
+};
 use models::entity::{media, reading_session};
 use sea_orm::{
 	prelude::*,
@@ -11,8 +14,8 @@ use crate::{
 	filter::{IntoFilter, MediaFilterInput},
 	object::media::Media,
 	pagination::{
-		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
-		PaginationValidator,
+		CursorPagination, CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse,
+		Pagination, PaginationValidator,
 	},
 };
 
@@ -97,6 +100,70 @@ impl MediaQuery {
 				})
 			},
 		}
+	}
+
+	async fn media_connection(
+		&self,
+		ctx: &Context<'_>,
+		#[graphql(default)] filter: Json<MediaFilterInput>,
+		// #[graphql(default, validator(custom = "PaginationValidator"))]
+		pagination: CursorPagination,
+	) -> Result<Connection<String, Media, EmptyFields, EmptyFields>> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let conditions = filter.0.into_filter();
+		let query = media::ModelWithMetadata::find_for_user(user).filter(conditions);
+
+		let mut cursor = query.cursor_by(media::Column::Name);
+		if let Some(ref id) = pagination.after {
+			let media = media::Entity::find_for_user(user)
+				.select_only()
+				.column(media::Column::Name)
+				.filter(media::Column::Id.eq(id.clone()))
+				.into_model::<media::MediaNameCmpSelect>()
+				.one(conn)
+				.await?
+				.ok_or("Cursor not found")?;
+			cursor.after(media.name);
+		}
+		cursor.first(pagination.limit);
+
+		let models = cursor
+			.into_model::<media::ModelWithMetadata>()
+			.all(conn)
+			.await?;
+
+		let current_cursor = pagination
+			.after
+			.clone()
+			.or_else(|| models.first().map(|m| m.media.id.clone()));
+		let next_cursor = match models.last() {
+			Some(last) if (models.len() as u64) >= pagination.limit => {
+				Some(last.media.id.clone())
+			},
+			_ => None,
+		};
+
+		let page_info = CursorPaginationInfo {
+			current_cursor,
+			next_cursor,
+		};
+
+		let edges = models
+			.into_iter()
+			.map(|model| {
+				let cursor = model.media.id.clone();
+				let node = Media::from(model);
+				Edge::new(cursor, node)
+			})
+			.collect::<Vec<_>>();
+
+		let mut connection =
+			Connection::new(pagination.after.is_some(), page_info.next_cursor.is_some());
+		connection.edges.extend(edges);
+
+		Ok(connection)
 	}
 
 	async fn media_by_id(&self, ctx: &Context<'_>, id: ID) -> Result<Option<Media>> {

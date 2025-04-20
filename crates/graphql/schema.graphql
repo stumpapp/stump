@@ -194,7 +194,7 @@ input CreateUserInput {
 "A simple cursor-based pagination input object"
 input CursorPagination {
 	after: String
-	limit: Int!
+	limit: Int! = 20
 }
 
 "Information about the current cursor pagination state"
@@ -485,6 +485,23 @@ type MediaAnnotationsModel {
 	mediaId: String!
 }
 
+type MediaConnection {
+	"Information to aid in pagination."
+	pageInfo: PageInfo!
+	"A list of edges."
+	edges: [MediaEdge!]!
+	"A list of nodes."
+	nodes: [Media!]!
+}
+
+"An edge in a connection."
+type MediaEdge {
+	"The item at the end of the edge"
+	node: Media!
+	"A cursor for use in pagination"
+	cursor: String!
+}
+
 type MediaMetadataModel {
 	id: Int!
 	mediaId: String
@@ -693,6 +710,18 @@ type PageDimension {
 	width: Int!
 }
 
+"Information about pagination in a connection"
+type PageInfo {
+	"When paginating backwards, are there more items?"
+	hasPreviousPage: Boolean!
+	"When paginating forwards, are there more items?"
+	hasNextPage: Boolean!
+	"When paginating backwards, the cursor to continue."
+	startCursor: String
+	"When paginating forwards, the cursor to continue."
+	endCursor: String
+}
+
 type PaginatedLogResponse {
 	nodes: [Log!]!
 	pageInfo: PaginationInfo!
@@ -746,6 +775,7 @@ type Query {
 	emailers: [Emailer!]!
 	emailerById(id: ID!): Emailer
 	media(filter: JSON! = "{}", pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	mediaConnection(filter: JSON! = "{}", pagination: CursorPagination!): MediaConnection!
 	mediaById(id: ID!): Media
 	keepReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	recentlyAddedMedia(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<3eace8aaa7b76fd9784d293bd3233281>>
+ * @generated SignedSource<<2889c95d323c3d31955fc186fa1c38f7>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -11,12 +11,18 @@
 import { ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type ContinueReadingMediaFragment$data = {
-  readonly keepReading: {
+  readonly media: {
     readonly nodes: ReadonlyArray<{
       readonly id: string;
     }>;
     readonly pageInfo: {
-      readonly totalPages?: number;
+      readonly __typename: "CursorPaginationInfo";
+      readonly currentCursor: string | null | undefined;
+      readonly nextCursor: string | null | undefined;
+    } | {
+      // This will never be '%other', but we need some
+      // value in case none of the concrete values match.
+      readonly __typename: "%other";
     };
   };
   readonly " $fragmentType": "ContinueReadingMediaFragment";
@@ -61,7 +67,7 @@ const node: ReaderFragment = {
       ],
       "concreteType": "PaginatedMediaResponse",
       "kind": "LinkedField",
-      "name": "keepReading",
+      "name": "media",
       "plural": false,
       "selections": [
         {
@@ -91,17 +97,31 @@ const node: ReaderFragment = {
           "plural": false,
           "selections": [
             {
+              "alias": null,
+              "args": null,
+              "kind": "ScalarField",
+              "name": "__typename",
+              "storageKey": null
+            },
+            {
               "kind": "InlineFragment",
               "selections": [
                 {
                   "alias": null,
                   "args": null,
                   "kind": "ScalarField",
-                  "name": "totalPages",
+                  "name": "currentCursor",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "nextCursor",
                   "storageKey": null
                 }
               ],
-              "type": "OffsetPaginationInfo",
+              "type": "CursorPaginationInfo",
               "abstractKey": null
             }
           ],
@@ -115,6 +135,6 @@ const node: ReaderFragment = {
   "abstractKey": null
 };
 
-(node as any).hash = "5e694e32bb6f4639c91f8880a555d92e";
+(node as any).hash = "01f466d98875e37f9b625118341b229c";
 
 export default node;

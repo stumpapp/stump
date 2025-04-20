@@ -20,6 +20,7 @@
 		"react-relay": "^18.2.0",
 		"react-use-websocket": "^4.8.1",
 		"relay-runtime": "^18.2.0",
+		"ts-pattern": "^5.7.0",
 		"zustand": "^4.5.2"
 	},
 	"devDependencies": {

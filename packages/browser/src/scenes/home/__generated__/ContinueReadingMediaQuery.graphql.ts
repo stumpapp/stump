@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<42219e5c6b76be77f6f5d3026307eaca>>
+ * @generated SignedSource<<e16891bbef8cf4b4cf1fb43a2082413d>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -17,7 +17,7 @@ export type Pagination = {
 };
 export type CursorPagination = {
   after?: string | null | undefined;
-  limit: number;
+  limit?: number;
 };
 export type OffsetPagination = {
   page: number;
@@ -80,7 +80,7 @@ return {
         "args": (v1/*: any*/),
         "concreteType": "PaginatedMediaResponse",
         "kind": "LinkedField",
-        "name": "keepReading",
+        "name": "media",
         "plural": false,
         "selections": [
           {
@@ -123,11 +123,18 @@ return {
                     "alias": null,
                     "args": null,
                     "kind": "ScalarField",
-                    "name": "totalPages",
+                    "name": "currentCursor",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "nextCursor",
                     "storageKey": null
                   }
                 ],
-                "type": "OffsetPaginationInfo",
+                "type": "CursorPaginationInfo",
                 "abstractKey": null
               }
             ],
@@ -139,12 +146,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "eb669da19f98ee3a94683844289cac50",
+    "cacheID": "a3f0719a867d041d4fa33b579caa42d9",
     "id": null,
     "metadata": {},
     "name": "ContinueReadingMediaQuery",
     "operationKind": "query",
-    "text": "query ContinueReadingMediaQuery(\n  $pagination: Pagination!\n) {\n  ...ContinueReadingMediaFragment_5qyiy\n}\n\nfragment ContinueReadingMediaFragment_5qyiy on Query {\n  keepReading(pagination: $pagination) {\n    nodes {\n      id\n    }\n    pageInfo {\n      __typename\n      ... on OffsetPaginationInfo {\n        totalPages\n      }\n    }\n  }\n}\n"
+    "text": "query ContinueReadingMediaQuery(\n  $pagination: Pagination!\n) {\n  ...ContinueReadingMediaFragment_5qyiy\n}\n\nfragment ContinueReadingMediaFragment_5qyiy on Query {\n  media(pagination: $pagination) {\n    nodes {\n      id\n    }\n    pageInfo {\n      __typename\n      ... on CursorPaginationInfo {\n        currentCursor\n        nextCursor\n      }\n    }\n  }\n}\n"
   }
 };
 })();

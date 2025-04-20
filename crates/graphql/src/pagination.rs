@@ -14,6 +14,7 @@ use std::fmt::Debug;
 #[derive(Debug, Clone, InputObject)]
 pub struct CursorPagination {
 	pub after: Option<String>,
+	#[graphql(default_with = "default_limit()")]
 	pub limit: u64,
 }
 
@@ -23,6 +24,10 @@ fn default_restful_page() -> u64 {
 
 fn default_page_size() -> Option<u64> {
 	Some(20)
+}
+
+fn default_limit() -> u64 {
+	20
 }
 
 fn default_zero_based() -> Option<bool> {

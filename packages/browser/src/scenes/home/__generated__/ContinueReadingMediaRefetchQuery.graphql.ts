@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<00e23cc7a5c7e5c4520a0cb7c731d5f6>>
+ * @generated SignedSource<<90839bcc8dde7a6a391b360cb9568925>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -17,7 +17,7 @@ export type Pagination = {
 };
 export type CursorPagination = {
   after?: string | null | undefined;
-  limit: number;
+  limit?: number;
 };
 export type OffsetPagination = {
   page: number;
@@ -84,7 +84,7 @@ return {
         "args": (v1/*: any*/),
         "concreteType": "PaginatedMediaResponse",
         "kind": "LinkedField",
-        "name": "keepReading",
+        "name": "media",
         "plural": false,
         "selections": [
           {
@@ -127,11 +127,18 @@ return {
                     "alias": null,
                     "args": null,
                     "kind": "ScalarField",
-                    "name": "totalPages",
+                    "name": "currentCursor",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "nextCursor",
                     "storageKey": null
                   }
                 ],
-                "type": "OffsetPaginationInfo",
+                "type": "CursorPaginationInfo",
                 "abstractKey": null
               }
             ],
@@ -143,16 +150,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "8e14ac2c5bf82b4c7cbe882ee1d925d1",
+    "cacheID": "a94af554e46e4e52a5849fd6f9e4d340",
     "id": null,
     "metadata": {},
     "name": "ContinueReadingMediaRefetchQuery",
     "operationKind": "query",
-    "text": "query ContinueReadingMediaRefetchQuery(\n  $pagination: Pagination = {offset: {page: 1}}\n) {\n  ...ContinueReadingMediaFragment_5qyiy\n}\n\nfragment ContinueReadingMediaFragment_5qyiy on Query {\n  keepReading(pagination: $pagination) {\n    nodes {\n      id\n    }\n    pageInfo {\n      __typename\n      ... on OffsetPaginationInfo {\n        totalPages\n      }\n    }\n  }\n}\n"
+    "text": "query ContinueReadingMediaRefetchQuery(\n  $pagination: Pagination = {offset: {page: 1}}\n) {\n  ...ContinueReadingMediaFragment_5qyiy\n}\n\nfragment ContinueReadingMediaFragment_5qyiy on Query {\n  media(pagination: $pagination) {\n    nodes {\n      id\n    }\n    pageInfo {\n      __typename\n      ... on CursorPaginationInfo {\n        currentCursor\n        nextCursor\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "5e694e32bb6f4639c91f8880a555d92e";
+(node as any).hash = "01f466d98875e37f9b625118341b229c";
 
 export default node;

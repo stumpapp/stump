@@ -18,7 +18,7 @@ use crate::{
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
-		.merge(auth::mount())
+		.merge(auth::mount(app_state.clone()))
 		.merge(media::mount(app_state.clone()))
 		.merge(series::mount(app_state.clone()))
 		.merge(library::mount(app_state))

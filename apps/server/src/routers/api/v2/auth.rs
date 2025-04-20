@@ -1,12 +1,14 @@
 use axum::{
 	extract::{ConnectInfo, Query, State},
 	http::{Response, StatusCode},
+	middleware,
 	response::IntoResponse,
-	routing::post,
-	Json, Router,
+	routing::{get, post},
+	Extension, Json, Router,
 };
 use axum_extra::{headers::UserAgent, TypedHeader};
 use chrono::{DateTime, Duration, FixedOffset, Utc};
+use graphql::data::RequestContext;
 use models::entity::{
 	session,
 	user::{self, AuthUser},
@@ -26,17 +28,27 @@ use crate::{
 	},
 	errors::{api_error_message, APIError, APIResult},
 	http_server::StumpRequestInfo,
+	middleware::auth::auth_middleware,
 	utils::{default_true, get_session_user, hash_password, verify_password},
 };
 
-pub(crate) fn mount() -> Router<AppState> {
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new().nest(
 		"/auth",
 		Router::new()
+			.route(
+				"/me",
+				get(viewer)
+					.layer(middleware::from_fn_with_state(app_state, auth_middleware)),
+			)
 			.route("/login", post(login))
 			.route("/logout", post(logout))
 			.route("/register", post(register)),
 	)
+}
+
+async fn viewer(Extension(req): Extension<RequestContext>) -> APIResult<Json<AuthUser>> {
+	Ok(Json(req.user()))
 }
 
 pub async fn enforce_max_sessions(

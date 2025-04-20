@@ -9,7 +9,7 @@ import StumpWebClient from './App'
 window.global ||= window
 
 export const DEBUG_ENV = import.meta.env.DEV
-export const API_VERSION = import.meta.env.API_VERSION ?? 'v1'
+export const API_VERSION = import.meta.env.API_VERSION ?? 'v2'
 
 dayjs.extend(LocalizedFormat)
 

@@ -28,7 +28,7 @@ export default function ServerConnectionErrorScene() {
 	useEffect(() => {
 		async function checkServer() {
 			try {
-				const res = await fetch(`${baseURL}/v1/ping`)
+				const res = await fetch(`${baseURL}/v2/ping`)
 				if (res.ok) {
 					const data = await res.text()
 					if (data === 'pong') {

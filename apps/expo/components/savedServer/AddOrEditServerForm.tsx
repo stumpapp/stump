@@ -39,7 +39,7 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 	const [didConnect, setDidConnect] = useState(false)
 	const url = form.watch('url')
 	const checkConnection = useCallback(async () => {
-		const isValid = await checkUrl(formatApiURL(url, 'v1'))
+		const isValid = await checkUrl(formatApiURL(url, 'v2'))
 		if (!isValid) {
 			form.setError('url', {
 				type: 'manual',

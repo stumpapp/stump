@@ -23,7 +23,7 @@ import {
 } from './controllers'
 import { formatApiURL } from './utils'
 
-export type ApiVersion = 'v1'
+export type ApiVersion = 'v1' | 'v2'
 
 export type ApiParams = {
 	baseURL: string

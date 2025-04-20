@@ -12,6 +12,23 @@ type ActiveReadingSession {
 	elapsedSeconds: Int
 }
 
+input AgeRestrictionInput {
+	age: Int!
+	restrictOnUnset: Boolean!
+}
+
+type Arrangement {
+	locked: Boolean!
+	sections: [ArrangementSection!]!
+}
+
+union ArrangementConfig = SystemArrangmentConfig | InProgressBooks | RecentlyAdded | CustomArrangementConfig
+
+type ArrangementSection {
+	config: ArrangementConfig!
+	visible: Boolean!
+}
+
 type BookClub {
 	id: String!
 	name: String!
@@ -166,6 +183,14 @@ input CreateOrUpdateLibraryInput {
 	scanAfterPersist: Boolean!
 }
 
+input CreateUserInput {
+	username: String!
+	password: String!
+	permissions: [UserPermission!]!
+	ageRestriction: AgeRestrictionInput = null
+	maxSessionsAllowed: Int
+}
+
 "A simple cursor-based pagination input object"
 input CursorPagination {
 	after: String
@@ -182,6 +207,14 @@ type CursorPaginationInfo {
 	currentCursor: String
 	"The cursor the next page should use, if it exists."
 	nextCursor: String
+}
+
+type CustomArrangementConfig {
+	entity: FilterableArrangementEntity!
+	name: String
+	filter: JSON
+	orderBy: String
+	links: [FilterableArrangementEntityLink!]!
 }
 
 """
@@ -246,11 +279,6 @@ input EpubProgressInput {
 	isComplete: Boolean
 }
 
-type EpubProgressOutput {
-	activeSession: ActiveReadingSession
-	finishedSession: FinishedReadingSession
-}
-
 "The different statuses a file reference can have"
 enum FileStatus {
 	UNKNOWN
@@ -258,6 +286,19 @@ enum FileStatus {
 	UNSUPPORTED
 	ERROR
 	MISSING
+}
+
+enum FilterableArrangementEntity {
+	BOOKS
+	LIBRARIES
+	SERIES
+	SMART_LISTS
+	BOOK_CLUBS
+}
+
+enum FilterableArrangementEntityLink {
+	CREATE
+	SHOW_ALL
 }
 
 type FinishedReadingSession {
@@ -271,6 +312,11 @@ type FinishedReadingSession {
 }
 
 
+
+type InProgressBooks {
+	name: String
+	links: [FilterableArrangementEntityLink!]!
+}
 
 
 "A scalar that can represent any JSON value."
@@ -496,7 +542,7 @@ type Mutation {
 	If the epub is already finished and the percentage is 1 or greater, the old finished
 	session is deleted and a new one is created.
 	"""
-	updateEpubProgress(input: EpubProgressInput!): EpubProgressOutput!
+	updateEpubProgress(input: EpubProgressInput!): ReadingProgressOutput!
 	"""
 	Create or update a bookmark for a user. If a bookmark already exists for the given media
 	and epubcfi, the preview content is updated.
@@ -504,6 +550,10 @@ type Mutation {
 	createOrUpdateBookmark(input: BookmarkInput!): Bookmark!
 	"Delete a bookmark by ID. The user must be the owner of the bookmark."
 	deleteBookmark(id: ID!): Bookmark!
+	analyzeMedia(id: ID!): Boolean!
+	convertMedia(id: ID!): Boolean!
+	deleteMediaProgress(id: ID!): Media!
+	updateMediaProgress(id: ID!, page: Int): ReadingProgressOutput!
 	"""
 	Delete media and series from a library that match one of the following conditions:
 	
@@ -594,12 +644,20 @@ type Mutation {
 	deleteTags(tags: [String!]!): [Tag!]!
 	uploadBooks(input: UploadBooksInput!): Boolean!
 	uploadSeries(input: UploadSeriesInput!): Boolean!
+	deleteLoginActivity: Int!
+	createUser(input: CreateUserInput!): User!
 }
 
 "A simple offset-based pagination input object"
 input OffsetPagination {
+	"""
+	The page to start from. This is 1-based by default, but can be
+	changed to 0-based by setting the `zero_based` field to true.
+	"""
 	page: Int!
+	"The number of items to return per page. This is 20 by default."
 	pageSize: Int = 20
+	"Whether or not the page is zero-based. This is false by default."
 	zeroBased: Boolean = false
 }
 
@@ -695,6 +753,8 @@ type Query {
 	me: User!
 	users: [User!]!
 	userById(id: ID!): User!
+	loginActivity: [UserLoginActivity!]!
+	loginActivityById(id: ID!): [UserLoginActivity!]!
 	"""
 	Retrieves a paginated list of reading lists for the current user.
 	
@@ -762,6 +822,17 @@ enum ReadingMode {
 	CONTINUOUS_HORIZONTAL
 }
 
+type ReadingProgressOutput {
+	activeSession: ActiveReadingSession
+	finishedSession: FinishedReadingSession
+}
+
+type RecentlyAdded {
+	entity: FilterableArrangementEntity!
+	name: String
+	links: [FilterableArrangementEntityLink!]!
+}
+
 type Series {
 	id: String!
 	name: String!
@@ -803,6 +874,15 @@ type SpineItem {
 
 type Subscription {
 	tailLogFile: String!
+}
+
+enum SystemArrangment {
+	HOME
+	EXPLORE
+}
+
+type SystemArrangmentConfig {
+	variant: SystemArrangment!
 }
 
 type Tag {
@@ -855,6 +935,16 @@ type User {
 	continueReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	permissions: [UserPermission!]!
 	preferences: UserPreferences!
+}
+
+type UserLoginActivity {
+	id: Int!
+	ipAddress: String!
+	userAgent: String!
+	authenticationSuccessful: Boolean!
+	timestamp: DateTime!
+	userId: String!
+	user: User!
 }
 
 "The permissions a user may be granted"
@@ -938,9 +1028,9 @@ type UserPreferences {
 	showThumbnailsInHeaders: Boolean!
 	enableJobOverlay: Boolean!
 	enableAlphabetSelect: Boolean!
-	navigationArrangement: [Int!]
-	homeArrangement: [Int!]
 	userId: String
+	homeArrangement: Arrangement!
+	navigationArrangement: Arrangement!
 }
 
 directive @include(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT

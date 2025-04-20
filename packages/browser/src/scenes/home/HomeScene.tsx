@@ -23,22 +23,22 @@ export default function HomeScene() {
 		return <></>
 	}
 
-	if (!libraries?.length) {
-		return (
-			<>
-				{helmet}
-				<NoLibraries />
-			</>
-		)
-	}
+	// if (!libraries?.length) {
+	// 	return (
+	// 		<>
+	// 			{helmet}
+	// 			<NoLibraries />
+	// 		</>
+	// 	)
+	// }
 
 	return (
 		<SceneContainer className="flex flex-col gap-4">
 			{helmet}
 			<ContinueReadingMedia />
-			<RecentlyAddedMedia />
+			{/* <RecentlyAddedMedia />
 			<RecentlyAddedSeries />
-			<div className="pb-5 sm:pb-0" />
+			<div className="pb-5 sm:pb-0" /> */}
 		</SceneContainer>
 	)
 }

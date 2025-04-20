@@ -199,6 +199,10 @@ export class Api {
 		return `${this.baseURL.replace(/\/api(\/v\d)?$/, '')}/sse`
 	}
 
+	get rootURL(): string {
+		return `${this.baseURL.replace(/\/api(\/v\d)?$/, '')}`
+	}
+
 	/**
 	 * Get the current access token for the API formatted as a Bearer token
 	 */

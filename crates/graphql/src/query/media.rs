@@ -121,7 +121,6 @@ impl MediaQuery {
 
 		let user_id = user.id.clone();
 		let query = media::ModelWithMetadata::find_for_user(user)
-			.left_join(reading_session::Entity)
 			.join_rev(
 				JoinType::InnerJoin,
 				reading_session::Entity::belongs_to(media::Entity)

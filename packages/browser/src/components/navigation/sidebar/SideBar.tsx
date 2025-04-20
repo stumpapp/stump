@@ -4,7 +4,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { NavigationItem } from '@stump/sdk'
 import { motion } from 'framer-motion'
 import { Book, Home } from 'lucide-react'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 import { match } from 'ts-pattern'
@@ -19,17 +19,64 @@ import NavigationButtons from '../mobile/NavigationButtons'
 import { BookClubSideBarSection, LibrarySideBarSection, SmartListSideBarSection } from './sections'
 import SideBarButtonLink from './SideBarButtonLink'
 import SideBarFooter from './SideBarFooter'
+import { graphql } from 'relay-runtime'
+import { PreloadedQuery, usePreloadedQuery, useQueryLoader } from 'react-relay'
+import { SideBarQuery } from './__generated__/SideBarQuery.graphql'
 
-type Props = {
+const query = graphql`
+	query SideBarQuery {
+		me {
+			id
+			preferences {
+				navigationArrangement {
+					locked
+					sections {
+						config {
+							__typename
+						}
+					}
+				}
+			}
+		}
+	}
+`
+
+type ContainerProps = {
 	asChild?: boolean
 	hidden?: boolean
 }
 
-export default function SideBar({ asChild, hidden }: Props) {
+export default function SideBarContainer(props: ContainerProps) {
+	const [queryRef, loadQuery] = useQueryLoader<SideBarQuery>(query)
+
+	useEffect(() => {
+		loadQuery({})
+	}, [loadQuery])
+
+	if (!queryRef) {
+		return null
+	}
+
+	return <SideBar queryRef={queryRef} {...props} />
+}
+
+type Props = {
+	queryRef: PreloadedQuery<SideBarQuery>
+} & ContainerProps
+
+function SideBar({ asChild, hidden, queryRef }: Props) {
 	const location = useLocation()
 	const platform = useAppStore((store) => store.platform)
 
 	const { t } = useLocaleContext()
+
+	const {
+		me: {
+			preferences: { navigationArrangement },
+		},
+	} = usePreloadedQuery(query, queryRef)
+
+	console.log('navigationArrangement', navigationArrangement)
 
 	const { checkPermission } = useAppContext()
 	const {
@@ -71,60 +118,60 @@ export default function SideBar({ asChild, hidden }: Props) {
 		[checkPermission],
 	)
 
-	const sections = useMemo(
-		() =>
-			arrangement.items
-				.filter(({ item: { type }, visible }) => checkSectionPermission(type) && visible)
-				.map(({ item }) =>
-					match(item)
-						.with({ type: 'Home' }, () => (
-							<SideBarButtonLink
-								key="home-sidebar-navlink"
-								to={paths.home()}
-								isActive={location.pathname === '/'}
-							>
-								<Home className="mr-2 h-4 w-4 shrink-0" />
-								{t('sidebar.buttons.home')}
-							</SideBarButtonLink>
-						))
-						.with({ type: 'Explore' }, () => (
-							<SideBarButtonLink
-								key="explore-sidebar-navlink"
-								to={paths.bookSearch()}
-								isActive={location.pathname === paths.bookSearch()}
-							>
-								<Book className="mr-2 h-4 w-4 shrink-0" />
-								{t('sidebar.buttons.books')}
-							</SideBarButtonLink>
-						))
-						.with({ type: 'Libraries' }, (ctx) => (
-							<LibrarySideBarSection
-								key="libraries-sidebar-navlink"
-								isMobile={isMobile}
-								showCreate={ctx.show_create_action}
-								showLinkToAll={ctx.show_link_to_all}
-							/>
-						))
-						.with({ type: 'SmartLists' }, (ctx) => (
-							<SmartListSideBarSection
-								key="smartlists-sidebar-navlink"
-								showCreate={ctx.show_create_action}
-								showLinkToAll={ctx.show_link_to_all}
-							/>
-						))
-						.with({ type: 'BookClubs' }, (ctx) => (
-							<BookClubSideBarSection
-								key="book-clubs-sidebar-navlink"
-								isMobile={isMobile}
-								showCreate={ctx.show_create_action}
-								showLinkToAll={ctx.show_link_to_all}
-							/>
-						))
-						.otherwise(() => null),
-				)
-				.filter(Boolean),
-		[arrangement, checkSectionPermission, location, t, isMobile],
-	)
+	// const sections = useMemo(
+	// 	() =>
+	// 		arrangement.items
+	// 			.filter(({ item: { type }, visible }) => checkSectionPermission(type) && visible)
+	// 			.map(({ item }) =>
+	// 				match(item)
+	// 					.with({ type: 'Home' }, () => (
+	// 						<SideBarButtonLink
+	// 							key="home-sidebar-navlink"
+	// 							to={paths.home()}
+	// 							isActive={location.pathname === '/'}
+	// 						>
+	// 							<Home className="mr-2 h-4 w-4 shrink-0" />
+	// 							{t('sidebar.buttons.home')}
+	// 						</SideBarButtonLink>
+	// 					))
+	// 					.with({ type: 'Explore' }, () => (
+	// 						<SideBarButtonLink
+	// 							key="explore-sidebar-navlink"
+	// 							to={paths.bookSearch()}
+	// 							isActive={location.pathname === paths.bookSearch()}
+	// 						>
+	// 							<Book className="mr-2 h-4 w-4 shrink-0" />
+	// 							{t('sidebar.buttons.books')}
+	// 						</SideBarButtonLink>
+	// 					))
+	// 					.with({ type: 'Libraries' }, (ctx) => (
+	// 						<LibrarySideBarSection
+	// 							key="libraries-sidebar-navlink"
+	// 							isMobile={isMobile}
+	// 							showCreate={ctx.show_create_action}
+	// 							showLinkToAll={ctx.show_link_to_all}
+	// 						/>
+	// 					))
+	// 					.with({ type: 'SmartLists' }, (ctx) => (
+	// 						<SmartListSideBarSection
+	// 							key="smartlists-sidebar-navlink"
+	// 							showCreate={ctx.show_create_action}
+	// 							showLinkToAll={ctx.show_link_to_all}
+	// 						/>
+	// 					))
+	// 					.with({ type: 'BookClubs' }, (ctx) => (
+	// 						<BookClubSideBarSection
+	// 							key="book-clubs-sidebar-navlink"
+	// 							isMobile={isMobile}
+	// 							showCreate={ctx.show_create_action}
+	// 							showLinkToAll={ctx.show_link_to_all}
+	// 						/>
+	// 					))
+	// 					.otherwise(() => null),
+	// 			)
+	// 			.filter(Boolean),
+	// 	[arrangement, checkSectionPermission, location, t, isMobile],
+	// )
 
 	const renderContent = () => {
 		return (
@@ -133,7 +180,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 
 				<div className="flex max-h-full grow flex-col gap-2 overflow-y-auto p-1 scrollbar-hide">
 					{isAtLeastMedium && isBrowser && <UserMenu />}
-					{sections}
+					{/* {sections} */}
 				</div>
 				<Spacer />
 

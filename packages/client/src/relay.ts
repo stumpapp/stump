@@ -6,10 +6,16 @@ export const createEnvironment = (sdk: Api): Environment =>
 		network: Network.create((params, variables) =>
 			Observable.create((sink) => {
 				sdk.axios
-					.post('/api/graphql', {
-						query: params.text,
-						variables,
-					})
+					.post(
+						'/api/graphql',
+						{
+							query: params.text,
+							variables,
+						},
+						{
+							baseURL: sdk.rootURL,
+						},
+					)
 					.then((response) => {
 						sink.next(response.data)
 						sink.complete()

@@ -234,6 +234,7 @@ export function AppLayout() {
 					</main>
 				</div>
 
+				{/* TODO(relay): Restore */}
 				{/* {platform !== 'browser' && <ServerStatusOverlay />} */}
 				{showJobOverlay && <JobOverlay />}
 			</Suspense>

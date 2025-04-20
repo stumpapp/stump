@@ -79,5 +79,11 @@
 			]
 		}
 	},
+	"relay": {
+		"src": "./packages/browser/src",
+		"schema": "./crates/graphql/schema.graphql",
+		"language": "typescript",
+		"eagerEsModules": true
+	},
 	"dependencies": {}
 }

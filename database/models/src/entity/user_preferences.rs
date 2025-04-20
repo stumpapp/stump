@@ -1,6 +1,8 @@
 use async_graphql::SimpleObject;
 use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue};
 
+use crate::shared::arrangement::Arrangement;
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "UserPreferencesModel")]
 #[sea_orm(table_name = "user_preferences")]
@@ -30,10 +32,12 @@ pub struct Model {
 	pub show_thumbnails_in_headers: bool,
 	pub enable_job_overlay: bool,
 	pub enable_alphabet_select: bool,
-	#[sea_orm(column_type = "Blob", nullable)]
-	pub navigation_arrangement: Option<Vec<u8>>,
-	#[sea_orm(column_type = "Blob", nullable)]
-	pub home_arrangement: Option<Vec<u8>>,
+	#[graphql(skip)]
+	#[sea_orm(column_type = "Json", nullable)]
+	pub navigation_arrangement: Option<Arrangement>,
+	#[sea_orm(column_type = "Json", nullable)]
+	#[graphql(skip)]
+	pub home_arrangement: Option<Arrangement>,
 	#[sea_orm(column_type = "Text", nullable, unique)]
 	pub user_id: Option<String>,
 }

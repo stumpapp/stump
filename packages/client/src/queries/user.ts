@@ -16,11 +16,11 @@ import {
 	PageQueryOptions,
 	queryClient,
 	QueryOptions,
-	useMutation,
 	usePageQuery,
 	useQuery,
 } from '../client'
 import { useSDK } from '../sdk'
+import { useMutation } from '@tanstack/react-query'
 
 type UseUsersQueryParams = PageQueryOptions<User> & {
 	params?: Record<string, unknown>
@@ -102,16 +102,22 @@ export function useUserPreferences(
 type UseUpdateUserParams = MutationOptions<User, AxiosError, UpdateUser>
 export function useUpdateUser(id?: string, params: UseUpdateUserParams = {}) {
 	const { sdk } = useSDK()
-	const { mutateAsync, isLoading, error } = useMutation(
-		[sdk.user.keys.update, id],
-		async (params: UpdateUser) =>
-			id ? await sdk.user.update(id, params) : await sdk.user.updateViewer(params),
-		params,
+	const { mutateAsync, error, isPending } = useMutation(
+		// [sdk.user.keys.update, id],
+		// async (params: UpdateUser) =>
+		// 	id ? await sdk.user.update(id, params) : await sdk.user.updateViewer(params),
+		// params,
+		{
+			mutationKey: [sdk.user.keys.update, id],
+			mutationFn: async (params: UpdateUser) =>
+				id ? await sdk.user.update(id, params) : await sdk.user.updateViewer(params),
+			...params,
+		},
 	)
 
 	return {
 		error,
-		isLoading,
+		isLoading: isPending,
 		updateAsync: mutateAsync,
 	}
 }
@@ -120,10 +126,16 @@ type UseUpdatePreferencesParams = MutationOptions<UserPreferences, AxiosError, U
 
 export function useUpdatePreferences(params: UseUpdatePreferencesParams = {}) {
 	const { sdk } = useSDK()
-	const { mutateAsync: update, isLoading } = useMutation(
-		[sdk.user.keys.updateUserPreferences],
-		async (preferences: UpdateUserPreferences) => sdk.user.updatePreferences(preferences),
-		params,
+	const { mutateAsync: update, isPending } = useMutation(
+		// [sdk.user.keys.updateUserPreferences],
+		// async (preferences: UpdateUserPreferences) => sdk.user.updatePreferences(preferences),
+		// params,
+		{
+			mutationKey: [sdk.user.keys.updateUserPreferences],
+			mutationFn: async (preferences: UpdateUserPreferences) =>
+				sdk.user.updatePreferences(preferences),
+			// ...params,
+		},
 	)
 
 	// TODO: This ~should~ be safe, but the type generation is misleading. Any field with a default
@@ -133,7 +145,7 @@ export function useUpdatePreferences(params: UseUpdatePreferencesParams = {}) {
 		update(input as UpdateUserPreferences)
 
 	return {
-		isLoading,
+		isLoading: isPending,
 		unsafePatch,
 		update,
 	}

@@ -15,6 +15,7 @@
 	],
 	"tailwindCSS.classAttributes": ["class", "className", ".*ClassName", ".*CLASSES", ".*VARIANTS"],
 	"typescript.tsdk": "node_modules/typescript/lib",
+	"typescript.enablePromptUseWorkspaceTsdk": true,
 	"[json]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	}

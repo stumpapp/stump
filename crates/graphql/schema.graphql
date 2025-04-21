@@ -207,6 +207,8 @@ type CursorPaginationInfo {
 	currentCursor: String
 	"The cursor the next page should use, if it exists."
 	nextCursor: String
+	"The limit used when querying the database"
+	limit: Int!
 }
 
 type CustomArrangementConfig {

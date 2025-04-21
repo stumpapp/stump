@@ -6,8 +6,16 @@
 		"composite": true,
 		"skipLibCheck": true,
 		"emitDeclarationOnly": true,
-		"outDir": "dist"
+		"outDir": "dist",
+		"paths": {
+			"@stump/graphql": ["../graphql/src/index.ts"]
+		}
 	},
 	"include": ["src"],
-	"exclude": ["node_modules"]
+	"exclude": ["node_modules"],
+	"references": [
+		{
+			"path": "../graphql"
+		}
+	]
 }

@@ -193,6 +193,8 @@ pub struct CursorPaginationInfo {
 	pub current_cursor: Option<String>,
 	/// The cursor the next page should use, if it exists.
 	pub next_cursor: Option<String>,
+	/// The limit used when querying the database
+	pub limit: u64,
 }
 
 /// Information about the current offset pagination state
@@ -341,6 +343,7 @@ async fn get_paginated_cursor_results<
 		page_info: CursorPaginationInfo {
 			current_cursor,
 			next_cursor,
+			limit: info.limit,
 		}
 		.into(),
 	})

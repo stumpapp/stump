@@ -14,7 +14,7 @@
 	"dependencies": {
 		"@apollo/client": "^3.13.8",
 		"@stump/sdk": "*",
-		"@tanstack/react-query": "^4.36.1",
+		"@tanstack/react-query": "^5.74.4",
 		"axios": "^1.6.8",
 		"deep-equal": "^2.2.3",
 		"immer": "^10.0.4",

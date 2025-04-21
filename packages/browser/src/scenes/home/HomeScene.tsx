@@ -10,7 +10,7 @@ import RecentlyAddedSeries from './RecentlyAddedSeries'
 
 // TODO: account for new accounts, i.e. no media at all
 export default function HomeScene() {
-	const { libraries, isLoading } = useLibraries()
+	// const { libraries, isLoading } = useLibraries()
 
 	const helmet = (
 		<Helmet>
@@ -19,9 +19,9 @@ export default function HomeScene() {
 		</Helmet>
 	)
 
-	if (isLoading) {
-		return <></>
-	}
+	// if (isLoading) {
+	// 	return <></>
+	// }
 
 	// if (!libraries?.length) {
 	// 	return (

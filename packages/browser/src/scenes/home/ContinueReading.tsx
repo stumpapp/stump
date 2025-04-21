@@ -1,10 +1,15 @@
-import { useContinueReading, usePaginationFragment } from '@stump/client'
+import {
+	useContinueReading,
+	useGraphQL,
+	useInfiniteGraphQL,
+	usePaginationFragment,
+	useSuspenseGraphQL,
+} from '@stump/client'
 import { Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { BookMarked } from 'lucide-react'
 import { Suspense, useCallback, useEffect } from 'react'
 
-import { graphql } from 'relay-runtime'
 import {
 	PreloadedQuery,
 	usePreloadedQuery,
@@ -14,7 +19,9 @@ import {
 import { ContinueReadingMediaQuery } from './__generated__/ContinueReadingMediaQuery.graphql'
 import { ContinueReadingMediaFragment$key } from './__generated__/ContinueReadingMediaFragment.graphql'
 import HorizontalCardList_ from '@/components/HorizontalCardList'
-import { gql, useQuery, useSuspenseQuery } from '@apollo/client'
+// import { gql, useQuery, useSuspenseQuery } from '@apollo/client'
+
+import { graphql } from '@stump/graphql'
 
 // const fragment = graphql`
 // 	fragment ContinueReadingMediaFragment on Query
@@ -41,7 +48,7 @@ import { gql, useQuery, useSuspenseQuery } from '@apollo/client'
 // 	}
 // `
 
-const query = gql`
+const query = graphql(`
 	query ContinueReadingMediaQuery($pagination: Pagination!) {
 		media(pagination: $pagination) {
 			nodes {
@@ -56,28 +63,9 @@ const query = gql`
 			}
 		}
 	}
-`
+`)
 
 export default function ContinueReadingMediaContainer() {
-	// const [queryRef, loadQuery] = useQueryLoader<ContinueReadingMediaQuery>(query)
-	// useEffect(() => {
-	// 	loadQuery({
-	// 		pagination: {
-	// 			offset: {
-	// 				page: 1,
-	// 			},
-	// 		},
-	// 	})
-	// }, [loadQuery])
-	// if (!queryRef) {
-	// 	return null
-	// }
-	// return (
-	// 	<Suspense>
-	// 		<ContinueReadingMedia queryRef={queryRef} />
-	// 	</Suspense>
-	// )
-
 	return (
 		<Suspense>
 			<ContinueReadingMedia />
@@ -85,21 +73,27 @@ export default function ContinueReadingMediaContainer() {
 	)
 }
 
-type Props = {
-	// queryRef: PreloadedQuery<ContinueReadingMediaQuery>
-}
-
 function ContinueReadingMedia() {
-	const {
-		data: {
-			media: { nodes: books, pageInfo },
-		},
-		fetchMore,
-	} = useQuery(query, {
-		variables: {
-			pagination: { cursor: { limit: 20 } },
+	const { data, fetchNextPage, isFetchingNextPage, hasNextPage } = useInfiniteGraphQL(query, {
+		pagination: {
+			cursor: {
+				limit: 20,
+			},
 		},
 	})
+
+	const books = data.pages.flatMap((page) => page.media.nodes)
+
+	// const {
+	// 	data: {
+	// 		media: { nodes: books, pageInfo },
+	// 	},
+	// 	fetchMore,
+	// } = useQuery(query, {
+	// 	variables: {
+	// 		pagination: { cursor: { limit: 20 } },
+	// 	},
+	// })
 
 	// const node = usePreloadedQuery(query, queryRef)
 	// // const node = useLazyLoadQuery<ContinueReadingMediaQuery>(query, {
@@ -131,33 +125,10 @@ function ContinueReadingMedia() {
 	// // 	}
 	// // }, [fetchNextPage, hasNextPage, isFetching])
 	const handleFetchMore = useCallback(() => {
-		// if (!hasNext) {
-		// 	return
-		// } else {
-		// 	console.log('loading next page')
-		// 	loadNext()
-		// }
-		fetchMore({
-			variables: {
-				pagination: {
-					cursor: {
-						limit: 20,
-						after: pageInfo.nextCursor,
-					},
-				},
-			},
-			updateQuery: (prev, { fetchMoreResult }) => {
-				const newEntries = fetchMoreResult?.media?.nodes || []
-				const newPageInfo = fetchMoreResult?.media?.pageInfo
-				return {
-					media: {
-						nodes: [...prev.media.nodes, ...newEntries],
-						pageInfo,
-					},
-				}
-			},
-		})
-	}, [])
+		if (!isFetchingNextPage && hasNextPage) {
+			fetchNextPage()
+		}
+	}, [fetchNextPage, hasNextPage, isFetchingNextPage])
 
 	return (
 		<HorizontalCardList_

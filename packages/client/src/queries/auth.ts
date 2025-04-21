@@ -1,9 +1,10 @@
 import { isAxiosError, isUser, LoginOrRegisterArgs, type User } from '@stump/sdk'
 import { useEffect, useState } from 'react'
 
-import { queryClient, QueryOptions, useMutation, useQuery } from '../client'
+import { queryClient, QueryOptions, useMutation } from '../client'
 import { useClientContext } from '../context'
 import { useSDK } from '../sdk'
+import { useQuery } from '@tanstack/react-query'
 
 type Params = QueryOptions<User> & {
 	additionalKeys?: string[]
@@ -11,17 +12,30 @@ type Params = QueryOptions<User> & {
 export function useAuthQuery({ additionalKeys, ...options }: Params = {}) {
 	const { sdk } = useSDK()
 	const { data, error, isLoading, isFetching, isRefetching } = useQuery(
-		[sdk.auth.keys.me, ...(additionalKeys || [])],
-		async () => {
-			const data = await sdk.auth.me()
-			if (!isUser(data)) {
-				console.warn('Malformed response received from server', data)
-				throw new Error('Malformed response received from server')
-			}
-			return data
-		},
+		// [sdk.auth.keys.me, ...(additionalKeys || [])],
+		// async () => {
+		// 	const data = await sdk.auth.me()
+		// 	if (!isUser(data)) {
+		// 		console.warn('Malformed response received from server', data)
+		// 		throw new Error('Malformed response received from server')
+		// 	}
+		// 	return data
+		// },
+		// {
+		// 	useErrorBoundary: false,
+		// 	...options,
+		// },
 		{
-			useErrorBoundary: false,
+			queryKey: [sdk.auth.keys.me, ...(additionalKeys || [])],
+			queryFn: async () => {
+				const data = await sdk.auth.me()
+				if (!isUser(data)) {
+					console.warn('Malformed response received from server', data)
+					throw new Error('Malformed response received from server')
+				}
+				return data
+			},
+			// useErrorBoundary: false,
 			...options,
 		},
 	)

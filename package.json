@@ -31,6 +31,7 @@
 		"nuke": "concurrently -n root,monorepo -c green.bold,blue.bold \"yarn exec rimraf node_modules\" \"lerna run nuke\""
 	},
 	"devDependencies": {
+		"@0no-co/graphqlsp": "^1.12.16",
 		"@babel/core": "^7.25.8",
 		"@babel/traverse": "^7.25.7",
 		"@eslint/js": "^9.13.0",

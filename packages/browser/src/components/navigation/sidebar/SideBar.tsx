@@ -82,10 +82,10 @@ function SideBar({ asChild, hidden, queryRef }: Props) {
 	const {
 		preferences: { navigation_arrangement },
 	} = usePreferences()
-	const { arrangement } = useNavigationArrangement({
-		defaultArrangement: navigation_arrangement,
-		suspense: false,
-	})
+	// const { arrangement } = useNavigationArrangement({
+	// 	defaultArrangement: navigation_arrangement,
+	// 	suspense: false,
+	// })
 	const { shouldUseGradient } = useTheme()
 
 	const isBrowser = platform === 'browser'

@@ -9,6 +9,13 @@ import { formatBookName, formatBytes } from '@/utils/format'
 import { prefetchMediaPage } from '@/utils/prefetch'
 
 import { EntityCard } from '../entity'
+import { graphql } from '@stump/graphql'
+
+export const BookCardFragment = graphql(/* GraphQL */ `
+	fragment BookCardFragment on Media {
+		id
+	}
+`)
 
 export type BookCardProps = {
 	media: Media

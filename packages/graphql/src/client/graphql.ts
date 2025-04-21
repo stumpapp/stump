@@ -1,0 +1,1468 @@
+/* eslint-disable */
+import { DocumentTypeDecoration } from '@graphql-typed-document-node/core';
+export type Maybe<T> = T | null;
+export type InputMaybe<T> = Maybe<T>;
+export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+/** All built-in and custom scalars, mapped to their actual values */
+export type Scalars = {
+  ID: { input: string; output: string; }
+  String: { input: string; output: string; }
+  Boolean: { input: boolean; output: boolean; }
+  Int: { input: number; output: number; }
+  Float: { input: number; output: number; }
+  /**
+   * Implement the DateTime<FixedOffset> scalar
+   *
+   * The input/output is a string in RFC3339 format.
+   */
+  DateTime: { input: any; output: any; }
+  Decimal: { input: any; output: any; }
+  /** A scalar that can represent any JSON value. */
+  JSON: { input: any; output: any; }
+  /** A scalar that can represent any JSON Object value. */
+  JSONObject: { input: any; output: any; }
+  Upload: { input: any; output: any; }
+};
+
+export type ActiveReadingSession = {
+  __typename?: 'ActiveReadingSession';
+  deviceId?: Maybe<Scalars['String']['output']>;
+  elapsedSeconds?: Maybe<Scalars['Int']['output']>;
+  epubcfi?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  koreaderProgress?: Maybe<Scalars['String']['output']>;
+  mediaId: Scalars['String']['output'];
+  page?: Maybe<Scalars['Int']['output']>;
+  percentageCompleted?: Maybe<Scalars['Decimal']['output']>;
+  startedAt: Scalars['DateTime']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  userId: Scalars['String']['output'];
+};
+
+export type AgeRestrictionInput = {
+  age: Scalars['Int']['input'];
+  restrictOnUnset: Scalars['Boolean']['input'];
+};
+
+export type Arrangement = {
+  __typename?: 'Arrangement';
+  locked: Scalars['Boolean']['output'];
+  sections: Array<ArrangementSection>;
+};
+
+export type ArrangementConfig = CustomArrangementConfig | InProgressBooks | RecentlyAdded | SystemArrangmentConfig;
+
+export type ArrangementSection = {
+  __typename?: 'ArrangementSection';
+  config: ArrangementConfig;
+  visible: Scalars['Boolean']['output'];
+};
+
+export type BookClub = {
+  __typename?: 'BookClub';
+  createdAt: Scalars['DateTime']['output'];
+  currentBook?: Maybe<BookClubBook>;
+  description?: Maybe<Scalars['String']['output']>;
+  emoji?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  invitations: Array<BookClubInvitation>;
+  isPrivate: Scalars['Boolean']['output'];
+  members: Array<BookClubMember>;
+  name: Scalars['String']['output'];
+  schedule?: Maybe<BookClubSchedule>;
+};
+
+export type BookClubBook = BookClubExternalBook | BookClubInternalBook;
+
+export type BookClubBookInput =
+  { external: BookClubExternalBookInput; stored?: never; }
+  |  { external?: never; stored: BookClubInternalBookInput; };
+
+export type BookClubExternalBook = {
+  __typename?: 'BookClubExternalBook';
+  author: Scalars['String']['output'];
+  imageUrl?: Maybe<Scalars['String']['output']>;
+  title: Scalars['String']['output'];
+  url?: Maybe<Scalars['String']['output']>;
+};
+
+export type BookClubExternalBookInput = {
+  author: Scalars['String']['input'];
+  imageUrl?: InputMaybe<Scalars['String']['input']>;
+  title: Scalars['String']['input'];
+  url?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type BookClubInternalBook = {
+  __typename?: 'BookClubInternalBook';
+  id: Scalars['String']['output'];
+};
+
+export type BookClubInternalBookInput = {
+  id: Scalars['String']['input'];
+};
+
+export type BookClubInvitation = {
+  __typename?: 'BookClubInvitation';
+  /** The book club that the user was invited to */
+  bookClub: BookClub;
+  bookClubId: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  role: BookClubMemberRole;
+  /** The user who was invited to the book club */
+  user: User;
+  userId: Scalars['String']['output'];
+};
+
+export type BookClubInvitationInput = {
+  role?: InputMaybe<BookClubMemberRole>;
+  userId: Scalars['String']['input'];
+};
+
+export type BookClubInvitationResponseInput = {
+  accept: Scalars['Boolean']['input'];
+  member?: InputMaybe<BookClubMemberInput>;
+};
+
+export type BookClubMember = {
+  __typename?: 'BookClubMember';
+  bookClubId: Scalars['String']['output'];
+  displayName?: Maybe<Scalars['String']['output']>;
+  hideProgress: Scalars['Boolean']['output'];
+  id: Scalars['String']['output'];
+  isCreator: Scalars['Boolean']['output'];
+  privateMembership: Scalars['Boolean']['output'];
+  role: BookClubMemberRole;
+  userId: Scalars['String']['output'];
+};
+
+export type BookClubMemberInput = {
+  displayName?: InputMaybe<Scalars['String']['input']>;
+  privateMembership?: InputMaybe<Scalars['Boolean']['input']>;
+  userId: Scalars['String']['input'];
+};
+
+/** The visibility of a shareable entity */
+export enum BookClubMemberRole {
+  Admin = 'ADMIN',
+  Creator = 'CREATOR',
+  Member = 'MEMBER',
+  Moderator = 'MODERATOR'
+}
+
+export type BookClubSchedule = {
+  __typename?: 'BookClubSchedule';
+  bookClubId: Scalars['String']['output'];
+  books: Array<BookClubBook>;
+  defaultIntervalDays?: Maybe<Scalars['Int']['output']>;
+  id: Scalars['Int']['output'];
+};
+
+export type Bookmark = {
+  __typename?: 'Bookmark';
+  epubcfi?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  mediaId: Scalars['String']['output'];
+  page?: Maybe<Scalars['Int']['output']>;
+  previewContent?: Maybe<Scalars['String']['output']>;
+  userId: Scalars['String']['output'];
+};
+
+export type BookmarkInput = {
+  epubcfi: Scalars['String']['input'];
+  mediaId: Scalars['String']['input'];
+  previewContent?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type CleanLibraryResponse = {
+  __typename?: 'CleanLibraryResponse';
+  deletedMediaCount: Scalars['Int']['output'];
+  deletedSeriesCount: Scalars['Int']['output'];
+  isEmpty: Scalars['Boolean']['output'];
+};
+
+export type CreateBookClubInput = {
+  creatorDisplayName?: InputMaybe<Scalars['String']['input']>;
+  creatorHideProgress: Scalars['Boolean']['input'];
+  isPrivate?: Scalars['Boolean']['input'];
+  memberRoleSpec?: InputMaybe<Scalars['JSON']['input']>;
+  name: Scalars['String']['input'];
+};
+
+export type CreateBookClubMemberInput = {
+  displayName?: InputMaybe<Scalars['String']['input']>;
+  privateMembership?: InputMaybe<Scalars['Boolean']['input']>;
+  role: BookClubMemberRole;
+  userId: Scalars['String']['input'];
+};
+
+export type CreateBookClubScheduleBook = {
+  book: BookClubBookInput;
+  discussionDurationDays?: InputMaybe<Scalars['Int']['input']>;
+  endAt?: InputMaybe<Scalars['DateTime']['input']>;
+  startAt?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+export type CreateBookClubScheduleInput = {
+  books: Array<CreateBookClubScheduleBook>;
+  defaultIntervalDays?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type CreateOrUpdateLibraryInput = {
+  config?: InputMaybe<LibraryConfigInput>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  emoji?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  path: Scalars['String']['input'];
+  scanAfterPersist: Scalars['Boolean']['input'];
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+export type CreateUserInput = {
+  ageRestriction?: InputMaybe<AgeRestrictionInput>;
+  maxSessionsAllowed?: InputMaybe<Scalars['Int']['input']>;
+  password: Scalars['String']['input'];
+  permissions: Array<UserPermission>;
+  username: Scalars['String']['input'];
+};
+
+/** A simple cursor-based pagination input object */
+export type CursorPagination = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  limit?: Scalars['Int']['input'];
+};
+
+/** Information about the current cursor pagination state */
+export type CursorPaginationInfo = {
+  __typename?: 'CursorPaginationInfo';
+  /**
+   * The cursor of the current page. This should only be None if there are no results,
+   * since there is no cursor present to pull from. This technically deviates from
+   * popular (read: Relay) specs, but it works better for Stump
+   */
+  currentCursor?: Maybe<Scalars['String']['output']>;
+  /** The limit used when querying the database */
+  limit: Scalars['Int']['output'];
+  /** The cursor the next page should use, if it exists. */
+  nextCursor?: Maybe<Scalars['String']['output']>;
+};
+
+export type CustomArrangementConfig = {
+  __typename?: 'CustomArrangementConfig';
+  entity: FilterableArrangementEntity;
+  filter?: Maybe<Scalars['JSON']['output']>;
+  links: Array<FilterableArrangementEntityLink>;
+  name?: Maybe<Scalars['String']['output']>;
+  orderBy?: Maybe<Scalars['String']['output']>;
+};
+
+export type Emailer = {
+  __typename?: 'Emailer';
+  id: Scalars['Int']['output'];
+  isPrimary: Scalars['Boolean']['output'];
+  lastUsedAt?: Maybe<Scalars['DateTime']['output']>;
+  maxAttachmentSizeBytes?: Maybe<Scalars['Int']['output']>;
+  maxNumAttachments?: Maybe<Scalars['Int']['output']>;
+  name: Scalars['String']['output'];
+  sendHistory: Array<EmailerSendRecord>;
+  senderDisplayName: Scalars['String']['output'];
+  senderEmail: Scalars['String']['output'];
+  smtpHost: Scalars['String']['output'];
+  smtpPort: Scalars['Int']['output'];
+  tlsEnabled: Scalars['Boolean']['output'];
+  username: Scalars['String']['output'];
+};
+
+export type EmailerSendRecord = {
+  __typename?: 'EmailerSendRecord';
+  attachmentMeta?: Maybe<Array<Scalars['Int']['output']>>;
+  emailerId: Scalars['Int']['output'];
+  id: Scalars['Int']['output'];
+  recipientEmail: Scalars['String']['output'];
+  sentAt: Scalars['String']['output'];
+  sentBy?: Maybe<User>;
+  sentByUserId?: Maybe<Scalars['String']['output']>;
+};
+
+/** The visibility of a shareable entity */
+export enum EntityVisibility {
+  Private = 'PRIVATE',
+  Public = 'PUBLIC',
+  Shared = 'SHARED'
+}
+
+export type Epub = {
+  __typename?: 'Epub';
+  annotations: Array<MediaAnnotationsModel>;
+  extraCss: Array<Scalars['String']['output']>;
+  media: Media;
+  mediaId: Scalars['String']['output'];
+  metadata: Scalars['JSONObject']['output'];
+  resources: Scalars['JSONObject']['output'];
+  rootBase: Scalars['String']['output'];
+  rootFile: Scalars['String']['output'];
+  spine: Array<SpineItem>;
+  toc: Array<Scalars['String']['output']>;
+};
+
+export type EpubProgressInput = {
+  epubcfi: Scalars['String']['input'];
+  isComplete?: InputMaybe<Scalars['Boolean']['input']>;
+  mediaId: Scalars['String']['input'];
+  percentage: Scalars['Decimal']['input'];
+};
+
+/** The different statuses a file reference can have */
+export enum FileStatus {
+  Error = 'ERROR',
+  Missing = 'MISSING',
+  Ready = 'READY',
+  Unknown = 'UNKNOWN',
+  Unsupported = 'UNSUPPORTED'
+}
+
+export enum FilterableArrangementEntity {
+  Books = 'BOOKS',
+  BookClubs = 'BOOK_CLUBS',
+  Libraries = 'LIBRARIES',
+  Series = 'SERIES',
+  SmartLists = 'SMART_LISTS'
+}
+
+export enum FilterableArrangementEntityLink {
+  Create = 'CREATE',
+  ShowAll = 'SHOW_ALL'
+}
+
+export type FinishedReadingSession = {
+  __typename?: 'FinishedReadingSession';
+  completedAt: Scalars['DateTime']['output'];
+  deviceId?: Maybe<Scalars['String']['output']>;
+  elapsedSeconds?: Maybe<Scalars['Int']['output']>;
+  id: Scalars['String']['output'];
+  mediaId: Scalars['String']['output'];
+  startedAt: Scalars['DateTime']['output'];
+  userId: Scalars['String']['output'];
+};
+
+export type InProgressBooks = {
+  __typename?: 'InProgressBooks';
+  links: Array<FilterableArrangementEntityLink>;
+  name?: Maybe<Scalars['String']['output']>;
+};
+
+export type Library = {
+  __typename?: 'Library';
+  config: LibraryConfig;
+  configId: Scalars['Int']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  emoji?: Maybe<Scalars['String']['output']>;
+  excludedUsers: Array<User>;
+  id: Scalars['String']['output'];
+  jobScheduleConfigId?: Maybe<Scalars['String']['output']>;
+  /** Get the details of the last scan job for this library, if any exists. */
+  lastScan?: Maybe<LibraryScanRecordModel>;
+  lastScannedAt?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  path: Scalars['String']['output'];
+  /** Get the full history of scan jobs for this library. */
+  scanHistory: Array<LibraryScanRecordModel>;
+  series: Array<Series>;
+  stats: LibraryStats;
+  status: Scalars['String']['output'];
+  tags: Array<Scalars['String']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+
+export type LibraryStatsArgs = {
+  allUsers?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type LibraryConfig = {
+  __typename?: 'LibraryConfig';
+  convertRarToZip: Scalars['Boolean']['output'];
+  defaultReadingDir: ReadingDirection;
+  defaultReadingImageScaleFit: ReadingImageScaleFit;
+  defaultReadingMode: ReadingMode;
+  generateFileHashes: Scalars['Boolean']['output'];
+  generateKoreaderHashes: Scalars['Boolean']['output'];
+  hardDeleteConversions: Scalars['Boolean']['output'];
+  id: Scalars['Int']['output'];
+  ignoreRules?: Maybe<Array<Scalars['String']['output']>>;
+  imageProcessorOptions?: Maybe<Scalars['JSON']['output']>;
+  libraryId?: Maybe<Scalars['String']['output']>;
+  libraryPattern: LibraryPattern;
+  processMetadata: Scalars['Boolean']['output'];
+  watch: Scalars['Boolean']['output'];
+};
+
+export type LibraryConfigInput = {
+  convertRarToZip: Scalars['Boolean']['input'];
+  defaultReadingDir: ReadingDirection;
+  defaultReadingImageScaleFit: ReadingImageScaleFit;
+  defaultReadingMode: ReadingMode;
+  generateFileHashes: Scalars['Boolean']['input'];
+  generateKoreaderHashes: Scalars['Boolean']['input'];
+  hardDeleteConversions: Scalars['Boolean']['input'];
+  ignoreRules?: InputMaybe<Array<Scalars['String']['input']>>;
+  libraryPattern: LibraryPattern;
+  processMetadata: Scalars['Boolean']['input'];
+  thumbnailConfig?: InputMaybe<Scalars['JSON']['input']>;
+  watch: Scalars['Boolean']['input'];
+};
+
+/** The different patterns a library may be organized by */
+export enum LibraryPattern {
+  CollectionBased = 'COLLECTION_BASED',
+  SeriesBased = 'SERIES_BASED'
+}
+
+export type LibraryScanRecordModel = {
+  __typename?: 'LibraryScanRecordModel';
+  id: Scalars['Int']['output'];
+  jobId?: Maybe<Scalars['String']['output']>;
+  libraryId: Scalars['String']['output'];
+  options?: Maybe<Array<Scalars['Int']['output']>>;
+  timestamp: Scalars['DateTime']['output'];
+};
+
+export type LibraryStats = {
+  __typename?: 'LibraryStats';
+  bookCount: Scalars['Int']['output'];
+  completedBooks: Scalars['Int']['output'];
+  inProgressBooks: Scalars['Int']['output'];
+  seriesCount: Scalars['Int']['output'];
+  totalBytes: Scalars['Int']['output'];
+};
+
+export type Log = {
+  __typename?: 'Log';
+  context?: Maybe<Scalars['String']['output']>;
+  id: Scalars['Int']['output'];
+  jobId?: Maybe<Scalars['String']['output']>;
+  level: Scalars['String']['output'];
+  message: Scalars['String']['output'];
+  timestamp: Scalars['DateTime']['output'];
+};
+
+export type LogDeleteOutput = {
+  __typename?: 'LogDeleteOutput';
+  deleted: Scalars['Int']['output'];
+};
+
+export type LogFileInfo = {
+  __typename?: 'LogFileInfo';
+  modified: Scalars['String']['output'];
+  path: Scalars['String']['output'];
+  size: Scalars['Int']['output'];
+};
+
+export type Media = {
+  __typename?: 'Media';
+  /** The timestamp of the creation of the media */
+  createdAt: Scalars['DateTime']['output'];
+  /** The timestamp of when the media was **soft** deleted. This will act like a trash bin. */
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** The extension of the media file, excluding the leading period */
+  extension: Scalars['String']['output'];
+  /**
+   * A Stump-specific hash of the media file. This is used as a secondary identifier for the media, primarily
+   * in aiding in the identification of duplicate media files
+   */
+  hash?: Maybe<Scalars['String']['output']>;
+  /** The unique identifier for the media */
+  id: Scalars['String']['output'];
+  /**
+   * A hash of the media file that adheres to the KoReader hash algorithm. This is used to identify
+   * books from the KoReader application so progress can be synced between the two applications
+   */
+  koreaderHash?: Maybe<Scalars['String']['output']>;
+  library: Library;
+  metadata?: Maybe<MediaMetadataModel>;
+  /**
+   * The timestamp of when the underlying file was last modified on disk. This will only be set if
+   * a timestamp can be retrieved from the filesystem
+   */
+  modifiedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** The name of the media, derived from the filename and excluding the extension */
+  name: Scalars['String']['output'];
+  nextInSeries: Array<Media>;
+  /** The number of pages in the media, if applicable. Will be -1 for certain media types */
+  pages: Scalars['Int']['output'];
+  /** The path of the underlying media file on disk */
+  path: Scalars['String']['output'];
+  readHistory: Array<FinishedReadingSession>;
+  readProgress?: Maybe<ActiveReadingSession>;
+  series: Series;
+  /**
+   * The unique identifier of the series that the media belongs to. While this is nullable, it is
+   * expected that all media will belong to a series
+   */
+  seriesId?: Maybe<Scalars['String']['output']>;
+  /** The size of the media file in bytes */
+  size: Scalars['Int']['output'];
+  /**
+   * The status of the media. This is used to determine if the media is available for reading (i.e.,
+   * if it is available on disk)
+   */
+  status: FileStatus;
+  /** The timestamp of the last time the media was updated. This will be set during creation, as well */
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+
+export type MediaNextInSeriesArgs = {
+  take?: Scalars['Int']['input'];
+};
+
+export type MediaAnnotationsModel = {
+  __typename?: 'MediaAnnotationsModel';
+  epubcfi?: Maybe<Scalars['String']['output']>;
+  highlightedText?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  mediaId: Scalars['String']['output'];
+  notes?: Maybe<Scalars['String']['output']>;
+  page?: Maybe<Scalars['Int']['output']>;
+  pageCoordinatesX?: Maybe<Scalars['Decimal']['output']>;
+  pageCoordinatesY?: Maybe<Scalars['Decimal']['output']>;
+  userId: Scalars['String']['output'];
+};
+
+export type MediaConnection = {
+  __typename?: 'MediaConnection';
+  /** A list of edges. */
+  edges: Array<MediaEdge>;
+  /** A list of nodes. */
+  nodes: Array<Media>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+};
+
+/** An edge in a connection. */
+export type MediaEdge = {
+  __typename?: 'MediaEdge';
+  /** A cursor for use in pagination */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of the edge */
+  node: Media;
+};
+
+export type MediaMetadataModel = {
+  __typename?: 'MediaMetadataModel';
+  ageRating?: Maybe<Scalars['Int']['output']>;
+  characters?: Maybe<Scalars['String']['output']>;
+  colorists?: Maybe<Scalars['String']['output']>;
+  coverArtists?: Maybe<Scalars['String']['output']>;
+  day?: Maybe<Scalars['Int']['output']>;
+  editors?: Maybe<Scalars['String']['output']>;
+  genre?: Maybe<Scalars['String']['output']>;
+  id: Scalars['Int']['output'];
+  inkers?: Maybe<Scalars['String']['output']>;
+  letterers?: Maybe<Scalars['String']['output']>;
+  links?: Maybe<Scalars['String']['output']>;
+  mediaId?: Maybe<Scalars['String']['output']>;
+  month?: Maybe<Scalars['Int']['output']>;
+  notes?: Maybe<Scalars['String']['output']>;
+  number?: Maybe<Scalars['Decimal']['output']>;
+  pageAnalysis?: Maybe<PageAnalysis>;
+  pageCount?: Maybe<Scalars['Int']['output']>;
+  pencillers?: Maybe<Scalars['String']['output']>;
+  publisher?: Maybe<Scalars['String']['output']>;
+  series?: Maybe<Scalars['String']['output']>;
+  summary?: Maybe<Scalars['String']['output']>;
+  teams?: Maybe<Scalars['String']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
+  volume?: Maybe<Scalars['Int']['output']>;
+  writers?: Maybe<Scalars['String']['output']>;
+  year?: Maybe<Scalars['Int']['output']>;
+};
+
+export type MediaMetadataOverview = {
+  __typename?: 'MediaMetadataOverview';
+  characters: Array<Scalars['String']['output']>;
+  colorists: Array<Scalars['String']['output']>;
+  editors: Array<Scalars['String']['output']>;
+  genres: Array<Scalars['String']['output']>;
+  inkers: Array<Scalars['String']['output']>;
+  letterers: Array<Scalars['String']['output']>;
+  pencillers: Array<Scalars['String']['output']>;
+  publishers: Array<Scalars['String']['output']>;
+  teams: Array<Scalars['String']['output']>;
+  writers: Array<Scalars['String']['output']>;
+};
+
+export type Mutation = {
+  __typename?: 'Mutation';
+  addBooksToBookClubSchedule: BookClub;
+  analyzeMedia: Scalars['Boolean']['output'];
+  analyzeSeries: Scalars['Boolean']['output'];
+  /**
+   * Delete media and series from a library that match one of the following conditions:
+   *
+   * - A series that is missing from disk (status is not `Ready`)
+   * - A media that is missing from disk (status is not `Ready`)
+   * - A series that is not associated with any media (i.e., no media in the series)
+   *
+   * This operation will also remove any associated thumbnails of the deleted media and series.
+   */
+  cleanLibrary: CleanLibraryResponse;
+  convertMedia: Scalars['Boolean']['output'];
+  createBookClub: BookClub;
+  createBookClubInvitation: BookClubInvitation;
+  createBookClubMember: BookClubMember;
+  createBookClubSchedule: BookClub;
+  /**
+   * Create a new library with the provided configuration. If `scan_after_persist` is `true`,
+   * the library will be scanned immediately after creation.
+   */
+  createLibrary: Library;
+  /**
+   * Create or update a bookmark for a user. If a bookmark already exists for the given media
+   * and epubcfi, the preview content is updated.
+   */
+  createOrUpdateBookmark: Bookmark;
+  /**
+   * Creates a new reading list.
+   *
+   * # Returns
+   *
+   * A result containing the newly created reading list, or an error if creation failed.
+   */
+  createReadingList: ReadingList;
+  /**
+   * Returns a list containing the newly created tags, or an error if creation failed.
+   *
+   * If any of the tags already exist an error is returned.
+   *
+   * * `tags` - A non-empty list of tags to create.
+   */
+  createTags: Array<Tag>;
+  createUser: User;
+  /** Delete a bookmark by ID. The user must be the owner of the bookmark. */
+  deleteBookmark: Bookmark;
+  /**
+   * Delete a library, including all associated media and series via cascading deletes. This
+   * operation cannot be undone.
+   */
+  deleteLibrary: Library;
+  deleteLibraryScanHistory: Library;
+  deleteLogFile: Scalars['Boolean']['output'];
+  deleteLoginActivity: Scalars['Int']['output'];
+  deleteLogs: LogDeleteOutput;
+  deleteMediaProgress: Media;
+  /**
+   * Deletes a reading list by ID.
+   *
+   * # Returns
+   *
+   * A result containing the deleted reading list, or an error if deletion failed.
+   */
+  deleteReadingList: ReadingList;
+  /**
+   * Delete tags. Returns a list containing the deleted tags, or an error if deletion failed.
+   *
+   * * `tags` - A non-empty list of tags to create.
+   */
+  deleteTags: Array<Tag>;
+  markSeriesAsComplete: Series;
+  respondToBookClubInvitation: BookClubInvitation;
+  /**
+   * Enqueue a scan job for a library. This will index the filesystem from the library's root path
+   * and update the database accordingly.
+   */
+  scanLibrary: Scalars['Boolean']['output'];
+  scanSeries: Scalars['Boolean']['output'];
+  updateBookClub: BookClub;
+  /**
+   * Update the progress of an epub for a user. If the percentage is 1 or greater, the epub is
+   * considered finished and the active session is deleted and a finished session is created.
+   *
+   * If the epub is already finished and the percentage is 1 or greater, the old finished
+   * session is deleted and a new one is created.
+   */
+  updateEpubProgress: ReadingProgressOutput;
+  /**
+   * Update an existing library with the provided configuration. If `scan_after_persist` is `true`,
+   * the library will be scanned immediately after updating.
+   */
+  updateLibrary: Library;
+  /**
+   * Exclude users from a library, preventing them from seeing the library in the UI. This operates as a
+   * full replacement of the excluded users list, so any users not included in the provided list will be
+   * removed from the exclusion list if they were previously excluded.
+   *
+   * The server owner cannot be excluded from a library, nor can the user performing the action exclude
+   * themselves.
+   */
+  updateLibraryExcludedUsers: Library;
+  updateMediaProgress: ReadingProgressOutput;
+  /**
+   * Updates an existing reading list.
+   *
+   * # Returns
+   *
+   * A result containing the updated reading list, or an error if update failed.
+   */
+  updateReadingList: ReadingList;
+  uploadBooks: Scalars['Boolean']['output'];
+  uploadSeries: Scalars['Boolean']['output'];
+  /**
+   * "Visit" a library, which will upsert a record of the user's last visit to the library.
+   * This is used to inform the UI of the last library which was visited by the user
+   */
+  visitLibrary: Library;
+};
+
+
+export type MutationAddBooksToBookClubScheduleArgs = {
+  books: Array<CreateBookClubScheduleBook>;
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationAnalyzeMediaArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationAnalyzeSeriesArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationCleanLibraryArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationConvertMediaArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationCreateBookClubArgs = {
+  input: CreateBookClubInput;
+};
+
+
+export type MutationCreateBookClubInvitationArgs = {
+  id: Scalars['ID']['input'];
+  input: BookClubInvitationInput;
+};
+
+
+export type MutationCreateBookClubMemberArgs = {
+  bookClubId: Scalars['ID']['input'];
+  input: CreateBookClubMemberInput;
+};
+
+
+export type MutationCreateBookClubScheduleArgs = {
+  id: Scalars['ID']['input'];
+  input: CreateBookClubScheduleInput;
+};
+
+
+export type MutationCreateLibraryArgs = {
+  input: CreateOrUpdateLibraryInput;
+};
+
+
+export type MutationCreateOrUpdateBookmarkArgs = {
+  input: BookmarkInput;
+};
+
+
+export type MutationCreateReadingListArgs = {
+  input: ReadingListInput;
+};
+
+
+export type MutationCreateTagsArgs = {
+  tags: Array<Scalars['String']['input']>;
+};
+
+
+export type MutationCreateUserArgs = {
+  input: CreateUserInput;
+};
+
+
+export type MutationDeleteBookmarkArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteLibraryArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteLibraryScanHistoryArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteMediaProgressArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteReadingListArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteTagsArgs = {
+  tags: Array<Scalars['String']['input']>;
+};
+
+
+export type MutationMarkSeriesAsCompleteArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationRespondToBookClubInvitationArgs = {
+  id: Scalars['ID']['input'];
+  input: BookClubInvitationResponseInput;
+};
+
+
+export type MutationScanLibraryArgs = {
+  id: Scalars['ID']['input'];
+  option?: InputMaybe<Scalars['JSON']['input']>;
+};
+
+
+export type MutationScanSeriesArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationUpdateBookClubArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateBookClubInput;
+};
+
+
+export type MutationUpdateEpubProgressArgs = {
+  input: EpubProgressInput;
+};
+
+
+export type MutationUpdateLibraryArgs = {
+  id: Scalars['ID']['input'];
+  input: CreateOrUpdateLibraryInput;
+};
+
+
+export type MutationUpdateLibraryExcludedUsersArgs = {
+  id: Scalars['ID']['input'];
+  userIds: Array<Scalars['String']['input']>;
+};
+
+
+export type MutationUpdateMediaProgressArgs = {
+  id: Scalars['ID']['input'];
+  page?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type MutationUpdateReadingListArgs = {
+  input: ReadingListInput;
+};
+
+
+export type MutationUploadBooksArgs = {
+  input: UploadBooksInput;
+};
+
+
+export type MutationUploadSeriesArgs = {
+  input: UploadSeriesInput;
+};
+
+
+export type MutationVisitLibraryArgs = {
+  id: Scalars['ID']['input'];
+};
+
+/** A simple offset-based pagination input object */
+export type OffsetPagination = {
+  /**
+   * The page to start from. This is 1-based by default, but can be
+   * changed to 0-based by setting the `zero_based` field to true.
+   */
+  page: Scalars['Int']['input'];
+  /** The number of items to return per page. This is 20 by default. */
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+  /** Whether or not the page is zero-based. This is false by default. */
+  zeroBased?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Information about the current offset pagination state */
+export type OffsetPaginationInfo = {
+  __typename?: 'OffsetPaginationInfo';
+  /** The current page, zero-indexed. */
+  currentPage: Scalars['Int']['output'];
+  /** The offset of the current page. E.g. if current page is 1, and pageSize is 10, the offset is 20. */
+  pageOffset: Scalars['Int']['output'];
+  /** The number of elements per page. */
+  pageSize: Scalars['Int']['output'];
+  /**
+   * The number of pages available. This is **not** affected by the zero-based flag,
+   * so a client requesting zero-based pagination will need to adjust their pagination
+   * logic accordingly.
+   */
+  totalPages: Scalars['Int']['output'];
+  /** Whether or not the page is zero-indexed. */
+  zeroBased: Scalars['Boolean']['output'];
+};
+
+/** A struct containing the various analyses of a book in Stump, e.g., page dimensions. */
+export type PageAnalysis = {
+  __typename?: 'PageAnalysis';
+  dimensions: Array<PageDimension>;
+};
+
+/**
+ * Represents a page dimension for a page of a Stump media item. It consists of a
+ * height and a width.
+ */
+export type PageDimension = {
+  __typename?: 'PageDimension';
+  height: Scalars['Int']['output'];
+  width: Scalars['Int']['output'];
+};
+
+/** Information about pagination in a connection */
+export type PageInfo = {
+  __typename?: 'PageInfo';
+  /** When paginating forwards, the cursor to continue. */
+  endCursor?: Maybe<Scalars['String']['output']>;
+  /** When paginating forwards, are there more items? */
+  hasNextPage: Scalars['Boolean']['output'];
+  /** When paginating backwards, are there more items? */
+  hasPreviousPage: Scalars['Boolean']['output'];
+  /** When paginating backwards, the cursor to continue. */
+  startCursor?: Maybe<Scalars['String']['output']>;
+};
+
+export type PaginatedLogResponse = {
+  __typename?: 'PaginatedLogResponse';
+  nodes: Array<Log>;
+  pageInfo: PaginationInfo;
+};
+
+export type PaginatedMediaResponse = {
+  __typename?: 'PaginatedMediaResponse';
+  nodes: Array<Media>;
+  pageInfo: PaginationInfo;
+};
+
+export type PaginatedReadingListResponse = {
+  __typename?: 'PaginatedReadingListResponse';
+  nodes: Array<ReadingList>;
+  pageInfo: PaginationInfo;
+};
+
+/**
+ * A union of the supported pagination flavors which Stump supports. The resulting
+ * response will be dependent on the pagination type used, e.g. a [CursorPaginatedResponse]
+ * will be returned if the [CursorPagination] type is used.
+ *
+ * You may use a conditional fragment in your GraphQL query for type-specific fields:
+ * ```graphql
+ * query MyQuery {
+ * media(pagination: { offset: { page: 1, pageSize: 20 } }) {
+ * ... on OffsetPaginationInfo {
+ * totalPages
+ * currentPage
+ * }
+ * }
+ * }
+ * ```
+ *
+ * A special case is the `None` variant, which will return an offset-based pagination info
+ * object based on the size of the result set. This will not paginate the results, so be
+ * cautious when using this with large result sets.
+ *
+ * **Note**: Be sure to call [Pagination::resolve] before using the pagination object
+ * to ensure that the pagination object is in a valid state.
+ */
+export type Pagination =
+  { cursor: CursorPagination; none?: never; offset?: never; }
+  |  { cursor?: never; none: Unpaginated; offset?: never; }
+  |  { cursor?: never; none?: never; offset: OffsetPagination; };
+
+export type PaginationInfo = CursorPaginationInfo | OffsetPaginationInfo;
+
+export type Query = {
+  __typename?: 'Query';
+  bookClubById?: Maybe<BookClub>;
+  bookClubs: Array<BookClub>;
+  /** Get all bookmarks for a single epub by its media ID */
+  bookmarksByMediaId: Array<Bookmark>;
+  duplicateMedia: Array<Media>;
+  emailerById?: Maybe<Emailer>;
+  emailers: Array<Emailer>;
+  /** Get a single epub by its media ID */
+  epubById: Epub;
+  keepReading: PaginatedMediaResponse;
+  /**
+   * Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
+   * ~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
+   */
+  logfileInfo: LogFileInfo;
+  loginActivity: Array<UserLoginActivity>;
+  loginActivityById: Array<UserLoginActivity>;
+  logs: PaginatedLogResponse;
+  me: User;
+  media: PaginatedMediaResponse;
+  mediaById?: Maybe<Media>;
+  mediaConnection: MediaConnection;
+  mediaMetadataOverview: MediaMetadataOverview;
+  /**
+   * Retrieves a reading list by ID for the current user.
+   *
+   * # Returns
+   * A reading list with the given ID. If no reading list with this ID exists for the current user, an error will be returned.
+   */
+  readingListById: ReadingList;
+  /**
+   * Retrieves a paginated list of reading lists for the current user.
+   *
+   * # Returns
+   *
+   * A paginated list of reading lists.
+   */
+  readingLists: PaginatedReadingListResponse;
+  recentlyAddedMedia: PaginatedMediaResponse;
+  /** Returns a list of all tags. */
+  tags: Array<Tag>;
+  userById: User;
+  users: Array<User>;
+};
+
+
+export type QueryBookClubByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryBookClubsArgs = {
+  all?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+export type QueryBookmarksByMediaIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryEmailerByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryEpubByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryKeepReadingArgs = {
+  pagination?: Pagination;
+};
+
+
+export type QueryLoginActivityByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryLogsArgs = {
+  pagination?: Pagination;
+};
+
+
+export type QueryMediaArgs = {
+  filter?: Scalars['JSON']['input'];
+  pagination?: Pagination;
+};
+
+
+export type QueryMediaByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryMediaConnectionArgs = {
+  filter?: Scalars['JSON']['input'];
+  pagination: CursorPagination;
+};
+
+
+export type QueryReadingListByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryReadingListsArgs = {
+  pagination?: Pagination;
+};
+
+
+export type QueryRecentlyAddedMediaArgs = {
+  pagination?: Pagination;
+};
+
+
+export type QueryUserByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+/** The different reading directions supported by any Stump reader */
+export enum ReadingDirection {
+  Ltr = 'LTR',
+  Rtl = 'RTL'
+}
+
+/** The different ways an image may be scaled to fit a reader's viewport */
+export enum ReadingImageScaleFit {
+  Height = 'HEIGHT',
+  None = 'NONE',
+  Width = 'WIDTH'
+}
+
+export type ReadingList = {
+  __typename?: 'ReadingList';
+  creatingUserId: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  ordering: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  visibility: Scalars['String']['output'];
+};
+
+export type ReadingListInput = {
+  id: Scalars['String']['input'];
+  mediaIds: Array<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  visibility?: InputMaybe<EntityVisibility>;
+};
+
+/** The different reading modes supported by any Stump reader */
+export enum ReadingMode {
+  ContinuousHorizontal = 'CONTINUOUS_HORIZONTAL',
+  ContinuousVertical = 'CONTINUOUS_VERTICAL',
+  Paged = 'PAGED'
+}
+
+export type ReadingProgressOutput = {
+  __typename?: 'ReadingProgressOutput';
+  activeSession?: Maybe<ActiveReadingSession>;
+  finishedSession?: Maybe<FinishedReadingSession>;
+};
+
+export type RecentlyAdded = {
+  __typename?: 'RecentlyAdded';
+  entity: FilterableArrangementEntity;
+  links: Array<FilterableArrangementEntityLink>;
+  name?: Maybe<Scalars['String']['output']>;
+};
+
+export type Series = {
+  __typename?: 'Series';
+  createdAt: Scalars['DateTime']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  isComplete: Scalars['Boolean']['output'];
+  library: Library;
+  libraryId?: Maybe<Scalars['String']['output']>;
+  media: Array<Media>;
+  metadata?: Maybe<SeriesMetadataModel>;
+  name: Scalars['String']['output'];
+  path: Scalars['String']['output'];
+  status: Scalars['String']['output'];
+  unreadCount: Scalars['Int']['output'];
+  upNext: Array<Media>;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+
+export type SeriesUpNextArgs = {
+  cursor?: InputMaybe<Scalars['String']['input']>;
+  take?: Scalars['Int']['input'];
+};
+
+export type SeriesMetadataModel = {
+  __typename?: 'SeriesMetadataModel';
+  ageRating?: Maybe<Scalars['Int']['output']>;
+  booktype?: Maybe<Scalars['String']['output']>;
+  comicid?: Maybe<Scalars['Int']['output']>;
+  imprint?: Maybe<Scalars['String']['output']>;
+  metaType: Scalars['String']['output'];
+  publisher?: Maybe<Scalars['String']['output']>;
+  seriesId: Scalars['String']['output'];
+  status?: Maybe<Scalars['String']['output']>;
+  summary?: Maybe<Scalars['String']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
+  volume?: Maybe<Scalars['Int']['output']>;
+};
+
+export type SpineItem = {
+  __typename?: 'SpineItem';
+  id?: Maybe<Scalars['String']['output']>;
+  idref: Scalars['String']['output'];
+  linear: Scalars['Boolean']['output'];
+  properties?: Maybe<Scalars['String']['output']>;
+};
+
+export type Subscription = {
+  __typename?: 'Subscription';
+  tailLogFile: Scalars['String']['output'];
+};
+
+export enum SystemArrangment {
+  Explore = 'EXPLORE',
+  Home = 'HOME'
+}
+
+export type SystemArrangmentConfig = {
+  __typename?: 'SystemArrangmentConfig';
+  variant: SystemArrangment;
+};
+
+export type Tag = {
+  __typename?: 'Tag';
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+};
+
+/**
+ * A simple pagination input object which does not paginate. An explicit struct is
+ * required as a limitation of async_graphql's [OneofObject], which doesn't allow
+ * for empty variants.
+ */
+export type Unpaginated = {
+  unpaginated: Scalars['Boolean']['input'];
+};
+
+export type UpdateBookClubInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  emoji?: InputMaybe<Scalars['String']['input']>;
+  isPrivate?: InputMaybe<Scalars['Boolean']['input']>;
+  memberRoleSpec?: InputMaybe<Scalars['JSON']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UploadBooksInput = {
+  libraryId: Scalars['String']['input'];
+  placeAt: Scalars['String']['input'];
+  uploads: Array<Scalars['Upload']['input']>;
+};
+
+export type UploadSeriesInput = {
+  libraryId: Scalars['String']['input'];
+  placeAt: Scalars['String']['input'];
+  seriesDirName: Scalars['String']['input'];
+  upload: Scalars['Upload']['input'];
+};
+
+export type User = {
+  __typename?: 'User';
+  avatarUrl?: Maybe<Scalars['String']['output']>;
+  continueReading: PaginatedMediaResponse;
+  createdAt: Scalars['DateTime']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  id: Scalars['String']['output'];
+  isLocked: Scalars['Boolean']['output'];
+  isServerOwner: Scalars['Boolean']['output'];
+  lastLogin?: Maybe<Scalars['DateTime']['output']>;
+  maxSessionsAllowed?: Maybe<Scalars['Int']['output']>;
+  permissions: Array<UserPermission>;
+  preferences: UserPreferences;
+  username: Scalars['String']['output'];
+};
+
+
+export type UserContinueReadingArgs = {
+  pagination?: Pagination;
+};
+
+export type UserLoginActivity = {
+  __typename?: 'UserLoginActivity';
+  authenticationSuccessful: Scalars['Boolean']['output'];
+  id: Scalars['Int']['output'];
+  ipAddress: Scalars['String']['output'];
+  timestamp: Scalars['DateTime']['output'];
+  user: User;
+  userAgent: Scalars['String']['output'];
+  userId: Scalars['String']['output'];
+};
+
+/** The permissions a user may be granted */
+export enum UserPermission {
+  /** Grant access to read/create their own API keys */
+  AccessApiKeys = 'ACCESS_API_KEYS',
+  /**
+   * TODO: Expand permissions for bookclub + smartlist
+   * Grant access to the book club feature
+   */
+  AccessBookClub = 'ACCESS_BOOK_CLUB',
+  /** Grant access to the koreader sync feature */
+  AccessKoreaderSync = 'ACCESS_KOREADER_SYNC',
+  /** Grant access to access the smart list feature. This includes the ability to create and edit smart lists */
+  AccessSmartList = 'ACCESS_SMART_LIST',
+  /** Grant access to create a book club (access book club) */
+  CreateBookClub = 'CREATE_BOOK_CLUB',
+  /** Grant access to create a library */
+  CreateLibrary = 'CREATE_LIBRARY',
+  /** Grant access to create a notifier */
+  CreateNotifier = 'CREATE_NOTIFIER',
+  /** Grant access to delete the library (manage library) */
+  DeleteLibrary = 'DELETE_LIBRARY',
+  /** Grant access to delete a notifier */
+  DeleteNotifier = 'DELETE_NOTIFIER',
+  /** Grant access to download files from a library */
+  DownloadFile = 'DOWNLOAD_FILE',
+  /** Grant access to edit basic details about the library */
+  EditLibrary = 'EDIT_LIBRARY',
+  /** Grant access to create an emailer */
+  EmailerCreate = 'EMAILER_CREATE',
+  /** Grant access to manage an emailer */
+  EmailerManage = 'EMAILER_MANAGE',
+  /** Grant access to read any emailers in the system */
+  EmailerRead = 'EMAILER_READ',
+  /** Grant access to send an arbitrary email, bypassing any registered device requirements */
+  EmailArbitrarySend = 'EMAIL_ARBITRARY_SEND',
+  /** Grant access to send an email */
+  EmailSend = 'EMAIL_SEND',
+  /** Grant access to access the file explorer */
+  FileExplorer = 'FILE_EXPLORER',
+  /** Grant access to manage the library (scan,edit,manage relations) */
+  ManageLibrary = 'MANAGE_LIBRARY',
+  /** Grant access to manage a notifier */
+  ManageNotifier = 'MANAGE_NOTIFIER',
+  /** Grant access to manage the server. This is effectively a step below server owner */
+  ManageServer = 'MANAGE_SERVER',
+  /** Grant access to manage users (create,edit,delete) */
+  ManageUsers = 'MANAGE_USERS',
+  ReadNotifier = 'READ_NOTIFIER',
+  /**
+   * Grant access to read users.
+   *
+   * Note that this is explicitly for querying users via user-specific endpoints.
+   * This would not affect relational queries, such as members in a common book club.
+   */
+  ReadUsers = 'READ_USERS',
+  /** Grant access to scan the library for new files */
+  ScanLibrary = 'SCAN_LIBRARY',
+  /** Grant access to upload files to a library */
+  UploadFile = 'UPLOAD_FILE'
+}
+
+export type UserPreferences = {
+  __typename?: 'UserPreferences';
+  appFont: Scalars['String']['output'];
+  appTheme: Scalars['String']['output'];
+  enableAlphabetSelect: Scalars['Boolean']['output'];
+  enableCompactDisplay: Scalars['Boolean']['output'];
+  enableDiscordPresence: Scalars['Boolean']['output'];
+  enableDoubleSidebar: Scalars['Boolean']['output'];
+  enableGradients: Scalars['Boolean']['output'];
+  enableHideScrollbar: Scalars['Boolean']['output'];
+  enableJobOverlay: Scalars['Boolean']['output'];
+  enableLiveRefetch: Scalars['Boolean']['output'];
+  enableReplacePrimarySidebar: Scalars['Boolean']['output'];
+  homeArrangement: Arrangement;
+  id: Scalars['String']['output'];
+  layoutMaxWidthPx?: Maybe<Scalars['Int']['output']>;
+  locale: Scalars['String']['output'];
+  navigationArrangement: Arrangement;
+  preferAccentColor: Scalars['Boolean']['output'];
+  preferredLayoutMode: Scalars['String']['output'];
+  primaryNavigationMode: Scalars['String']['output'];
+  showQueryIndicator: Scalars['Boolean']['output'];
+  showThumbnailsInHeaders: Scalars['Boolean']['output'];
+  userId?: Maybe<Scalars['String']['output']>;
+};
+
+export type BookCardFragmentFragment = { __typename?: 'Media', id: string } & { ' $fragmentName'?: 'BookCardFragmentFragment' };
+
+export type SideBarQueryQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SideBarQueryQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename?: 'ArrangementSection', config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangmentConfig' } }> } } } };
+
+export type ContinueReadingMediaQueryQueryVariables = Exact<{
+  pagination: Pagination;
+}>;
+
+
+export type ContinueReadingMediaQueryQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null } | { __typename: 'OffsetPaginationInfo' } } };
+
+export class TypedDocumentString<TResult, TVariables>
+  extends String
+  implements DocumentTypeDecoration<TResult, TVariables>
+{
+  __apiType?: DocumentTypeDecoration<TResult, TVariables>['__apiType'];
+  private value: string;
+  public __meta__?: Record<string, any> | undefined;
+
+  constructor(value: string, __meta__?: Record<string, any> | undefined) {
+    super(value);
+    this.value = value;
+    this.__meta__ = __meta__;
+  }
+
+  toString(): string & DocumentTypeDecoration<TResult, TVariables> {
+    return this.value;
+  }
+}
+export const BookCardFragmentFragmentDoc = new TypedDocumentString(`
+    fragment BookCardFragment on Media {
+  id
+}
+    `, {"fragmentName":"BookCardFragment"}) as unknown as TypedDocumentString<BookCardFragmentFragment, unknown>;
+export const SideBarQueryDocument = new TypedDocumentString(`
+    query SideBarQuery {
+  me {
+    id
+    preferences {
+      navigationArrangement {
+        locked
+        sections {
+          config {
+            __typename
+          }
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<SideBarQueryQuery, SideBarQueryQueryVariables>;
+export const ContinueReadingMediaQueryDocument = new TypedDocumentString(`
+    query ContinueReadingMediaQuery($pagination: Pagination!) {
+  media(pagination: $pagination) {
+    nodes {
+      id
+    }
+    pageInfo {
+      __typename
+      ... on CursorPaginationInfo {
+        currentCursor
+        nextCursor
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<ContinueReadingMediaQueryQuery, ContinueReadingMediaQueryQueryVariables>;

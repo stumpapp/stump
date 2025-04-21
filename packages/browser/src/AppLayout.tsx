@@ -160,10 +160,15 @@ export function AppLayout() {
 
 	// TODO: platform specific hotkeys?
 
-	const { error } = useAuthQuery({
+	const { error, user } = useAuthQuery({
 		enabled: !storeUser,
-		onSuccess: setUser,
 	})
+
+	useEffect(() => {
+		if (user) {
+			setUser(user)
+		}
+	}, [user])
 
 	// FIXME(desktop): There is a bug somewhere here that causes a network error to be thrown before the auth takes effect.
 	// It happens intermittently, annoyingly. I'm not sure what's causing it, but it would be nice to fix it

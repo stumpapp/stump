@@ -2,7 +2,6 @@ import './styles/index.css'
 import '@stump/components/styles/overrides.css'
 
 import { SDKProvider, StumpClientContextProvider, StumpClientProps } from '@stump/client'
-import { defaultContext } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -103,7 +102,7 @@ function RouterContainer(props: StumpClientProps) {
 			onLogout={props.onLogout}
 		>
 			<SDKProvider baseURL={baseUrl || ''} authMethod={props.authMethod || 'session'}>
-				{IS_DEVELOPMENT && <ReactQueryDevtools position="bottom-right" context={defaultContext} />}
+				{/* {IS_DEVELOPMENT && <ReactQueryDevtools position="bottom-right" />} */}
 				<Helmet defaultTitle="Stump">
 					<title>Stump</title>
 				</Helmet>

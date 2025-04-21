@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios'
 
+import type { TypedDocumentString } from '@stump/graphql'
 import { AuthenticationMethod, Configuration } from './configuration'
 import {
 	APIKeyAPI,
@@ -224,6 +225,27 @@ export class Api {
 			...this.customHeaders,
 			...(this.authorizationHeader ? { Authorization: this.authorizationHeader } : {}),
 		}
+	}
+
+	async execute<TResult, TVariables>(
+		query: TypedDocumentString<TResult, TVariables>,
+		...[variables]: TVariables extends Record<string, never> ? [] : [TVariables]
+	): Promise<TResult> {
+		const response = await this.axiosInstance.post(
+			'/api/graphql',
+			{
+				query,
+				variables,
+			},
+			{
+				headers: {
+					...this.headers,
+				},
+				baseURL: this.rootURL,
+			},
+		)
+
+		return response.data.data
 	}
 
 	/**

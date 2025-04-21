@@ -68,6 +68,7 @@ impl MediaQuery {
 					page_info: CursorPaginationInfo {
 						current_cursor,
 						next_cursor,
+						limit: info.limit,
 					}
 					.into(),
 				})
@@ -148,6 +149,7 @@ impl MediaQuery {
 		let page_info = CursorPaginationInfo {
 			current_cursor,
 			next_cursor,
+			limit: pagination.limit,
 		};
 
 		let edges = models
@@ -249,6 +251,7 @@ impl MediaQuery {
 					page_info: CursorPaginationInfo {
 						current_cursor,
 						next_cursor,
+						limit: info.limit,
 					}
 					.into(),
 				})
@@ -324,6 +327,7 @@ impl MediaQuery {
 					page_info: CursorPaginationInfo {
 						current_cursor,
 						next_cursor,
+						limit: info.limit,
 					}
 					.into(),
 				})

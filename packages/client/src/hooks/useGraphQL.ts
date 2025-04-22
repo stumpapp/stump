@@ -1,10 +1,9 @@
-import { useClientContext } from '@/context'
+import { IStumpClientContext, useClientContext } from '@/context'
 import { useSDK } from '@/sdk'
 import type { TypedDocumentString, Pagination, PaginationInfo } from '@stump/graphql'
+import { Api } from '@stump/sdk'
 import {
 	useSuspenseInfiniteQuery,
-	useInfiniteQuery,
-	UseInfiniteQueryOptions,
 	UseSuspenseInfiniteQueryResult,
 	useQuery,
 	useSuspenseQuery,
@@ -15,6 +14,30 @@ import {
 import { isAxiosError } from 'axios'
 import { useEffect, useState } from 'react'
 import { match } from 'ts-pattern'
+
+// TODO: fix type errors...
+
+type ErrorHandlerParams = {
+	sdk: Api
+	error: unknown
+} & Pick<IStumpClientContext, 'onUnauthenticatedResponse' | 'onConnectionWithServerChanged'>
+const handleError = ({
+	sdk,
+	error,
+	onUnauthenticatedResponse,
+	onConnectionWithServerChanged,
+}: ErrorHandlerParams) => {
+	if (!error) return
+	const axiosError = isAxiosError(error)
+	const isNetworkError = axiosError && error?.code === 'ERR_NETWORK'
+	const isAuthError = axiosError && error.response?.status === 401
+	if (isAuthError) {
+		sdk.token = undefined
+		onUnauthenticatedResponse?.('/auth', error.response?.data)
+	} else if (isNetworkError) {
+		onConnectionWithServerChanged?.(false)
+	}
+}
 
 export function useGraphQL<TResult, TVariables>(
 	document: TypedDocumentString<TResult, TVariables>,
@@ -33,18 +56,13 @@ export function useGraphQL<TResult, TVariables>(
 
 	useEffect(() => {
 		if (!error) return
-
-		const axiosError = isAxiosError(error)
-		const isNetworkError = axiosError && error?.code === 'ERR_NETWORK'
-		const isAuthError = axiosError && error.response?.status === 401
-
-		if (isAuthError) {
-			sdk.token = undefined
-			onUnauthenticatedResponse?.('/auth', error.response?.data)
-		} else if (isNetworkError) {
-			onConnectionWithServerChanged?.(false)
-		}
-	}, [error])
+		handleError({
+			sdk,
+			error,
+			onUnauthenticatedResponse,
+			onConnectionWithServerChanged,
+		})
+	}, [error, sdk, onUnauthenticatedResponse, onConnectionWithServerChanged])
 
 	return { error, ...rest } as UseQueryResult<TResult>
 }
@@ -66,18 +84,13 @@ export function useSuspenseGraphQL<TResult, TVariables>(
 
 	useEffect(() => {
 		if (!error) return
-
-		const axiosError = isAxiosError(error)
-		const isNetworkError = axiosError && error?.code === 'ERR_NETWORK'
-		const isAuthError = axiosError && error.response?.status === 401
-
-		if (isAuthError) {
-			sdk.token = undefined
-			onUnauthenticatedResponse?.('/auth', error.response?.data)
-		} else if (isNetworkError) {
-			onConnectionWithServerChanged?.(false)
-		}
-	}, [error])
+		handleError({
+			sdk,
+			error,
+			onUnauthenticatedResponse,
+			onConnectionWithServerChanged,
+		})
+	}, [error, sdk, onUnauthenticatedResponse, onConnectionWithServerChanged])
 
 	return { error, ...rest } as UseSuspenseQueryResult<TResult>
 }
@@ -113,9 +126,19 @@ export function useInfiniteGraphQL<TResult, TVariables>(
 			return response
 		},
 		initialPageParam,
-		getNextPageParam: (lastPage, _) => buildNextPageParam(extractPageInfo(lastPage)),
+		getNextPageParam: (lastPage, _) => getNextPageParam(extractPageInfo(lastPage)),
 		experimental_prefetchInRender: true,
 	})
+
+	useEffect(() => {
+		if (!error) return
+		handleError({
+			sdk,
+			error,
+			onUnauthenticatedResponse,
+			onConnectionWithServerChanged,
+		})
+	}, [error, sdk, onUnauthenticatedResponse, onConnectionWithServerChanged])
 
 	return {
 		error,
@@ -123,7 +146,7 @@ export function useInfiniteGraphQL<TResult, TVariables>(
 	} as UseSuspenseInfiniteQueryResult<InfiniteData<TResult>>
 }
 
-const buildNextPageParam = (paginationInfo?: PaginationInfo): Pagination | undefined =>
+export const getNextPageParam = (paginationInfo?: PaginationInfo): Pagination | undefined =>
 	match(paginationInfo)
 		.with({ __typename: 'CursorPaginationInfo' }, (info) => {
 			if (!info.nextCursor) return undefined

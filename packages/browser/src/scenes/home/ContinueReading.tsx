@@ -1,64 +1,28 @@
-import {
-	useContinueReading,
-	useGraphQL,
-	useInfiniteGraphQL,
-	usePaginationFragment,
-	useSuspenseGraphQL,
-} from '@stump/client'
+import { getNextPageParam } from '@stump/client'
 import { Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { BookMarked } from 'lucide-react'
-import { Suspense, useCallback, useEffect } from 'react'
+import { Suspense, useCallback, useTransition } from 'react'
 
-import {
-	PreloadedQuery,
-	usePreloadedQuery,
-	useQueryLoader,
-	usePaginationFragment as useRelayPaginationFragment,
-} from 'react-relay'
-import { ContinueReadingMediaQuery } from './__generated__/ContinueReadingMediaQuery.graphql'
-import { ContinueReadingMediaFragment$key } from './__generated__/ContinueReadingMediaFragment.graphql'
 import HorizontalCardList_ from '@/components/HorizontalCardList'
-// import { gql, useQuery, useSuspenseQuery } from '@apollo/client'
 
-import { graphql } from '@stump/graphql'
-
-// const fragment = graphql`
-// 	fragment ContinueReadingMediaFragment on Query
-// 	@refetchable(queryName: "ContinueReadingMediaRefetchQuery")
-// 	@argumentDefinitions(pagination: { type: "Pagination", defaultValue: { offset: { page: 1 } } }) {
-// 		media(pagination: $pagination) {
-// 			nodes {
-// 				id
-// 			}
-// 			pageInfo {
-// 				__typename
-// 				... on CursorPaginationInfo {
-// 					currentCursor
-// 					nextCursor
-// 				}
-// 			}
-// 		}
-// 	}
-// `
-
-// const query = graphql`
-// 	query ContinueReadingMediaQuery($pagination: Pagination!) {
-// 		...ContinueReadingMediaFragment @arguments(pagination: $pagination)
-// 	}
-// `
+import { graphql, PaginationInfo } from '@stump/graphql'
+import { useSuspenseQuery } from '@apollo/client'
+import BookCard from '@/components/book/BookCard'
 
 const query = graphql(`
 	query ContinueReadingMediaQuery($pagination: Pagination!) {
-		media(pagination: $pagination) {
+		keepReading(pagination: $pagination) {
 			nodes {
 				id
+				...BookCard
 			}
 			pageInfo {
 				__typename
 				... on CursorPaginationInfo {
 					currentCursor
 					nextCursor
+					limit
 				}
 			}
 		}
@@ -74,69 +38,50 @@ export default function ContinueReadingMediaContainer() {
 }
 
 function ContinueReadingMedia() {
-	const { data, fetchNextPage, isFetchingNextPage, hasNextPage } = useInfiniteGraphQL(query, {
-		pagination: {
-			cursor: {
-				limit: 20,
-			},
+	const [, startTransition] = useTransition()
+	const {
+		data: {
+			keepReading: { nodes, pageInfo },
 		},
+		fetchMore,
+	} = useSuspenseQuery(query, {
+		variables: {
+			pagination: { cursor: { limit: 20 } },
+		},
+		queryKey: ['continueReading'],
 	})
 
-	const books = data.pages.flatMap((page) => page.media.nodes)
-
-	// const {
-	// 	data: {
-	// 		media: { nodes: books, pageInfo },
-	// 	},
-	// 	fetchMore,
-	// } = useQuery(query, {
-	// 	variables: {
-	// 		pagination: { cursor: { limit: 20 } },
-	// 	},
-	// })
-
-	// const node = usePreloadedQuery(query, queryRef)
-	// // const node = useLazyLoadQuery<ContinueReadingMediaQuery>(query, {
-	// // 	pagination: { offset: { page: 1 } },
-	// // })
-	// // const [data, refetch] = useRefetchableFragment(fragment, node)
-	// const {
-	// 	data: {
-	// 		media: { nodes: books },
-	// 	},
-	// 	hasNext,
-	// 	loadNext,
-	// } = usePaginationFragment<ContinueReadingMediaQuery, ContinueReadingMediaFragment$key>(
-	// 	fragment,
-	// 	node,
-	// )
-	// // const { data:, hasNext, loadNext } = useRelayPaginationFragment<
-	// // 	ContinueReadingMediaQuery,
-	// // 	ContinueReadingMediaFragment$key
-	// // >(fragment, node)
 	const { t } = useLocaleContext()
-	// console.log({ hasNext })
-	// // const cards = media.map((media) => <MediaCard media={media} key={media.id} fullWidth={false} />)
-	// // const handleFetchMore = useCallback(() => {
-	// // 	if (!hasNextPage || isFetching) {
-	// // 		return
-	// // 	} else {
-	// // 		fetchNextPage()
-	// // 	}
-	// // }, [fetchNextPage, hasNextPage, isFetching])
+
 	const handleFetchMore = useCallback(() => {
-		if (!isFetchingNextPage && hasNextPage) {
-			fetchNextPage()
+		const nextPageParam = getNextPageParam(pageInfo as PaginationInfo)
+		if (nextPageParam) {
+			startTransition(() => {
+				fetchMore({
+					variables: {
+						pagination: nextPageParam,
+					},
+					updateQuery: (prev, { fetchMoreResult }) => {
+						if (!fetchMoreResult) return prev
+						return {
+							keepReading: {
+								...prev.keepReading,
+								nodes: [...prev.keepReading.nodes, ...fetchMoreResult.keepReading.nodes],
+								pageInfo: fetchMoreResult.keepReading.pageInfo,
+							},
+						}
+					},
+				})
+			})
 		}
-	}, [fetchNextPage, hasNextPage, isFetchingNextPage])
+	}, [fetchMore, pageInfo])
+
+	const cards = nodes.map((node) => <BookCard key={node.id} id={node.id} fullWidth={false} />)
 
 	return (
 		<HorizontalCardList_
 			title={t('homeScene.continueReading.title')}
-			// items={cards}
-			items={books.map((book) => (
-				<div>{book.id}</div>
-			))}
+			items={cards}
 			onFetchMore={handleFetchMore}
 			emptyState={
 				<div className="flex items-start justify-start space-x-3 rounded-lg border border-dashed border-edge-subtle px-4 py-4">

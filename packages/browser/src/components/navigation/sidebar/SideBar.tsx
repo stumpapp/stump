@@ -4,7 +4,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { NavigationItem } from '@stump/sdk'
 import { motion } from 'framer-motion'
 import { Book, Home } from 'lucide-react'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 import { match } from 'ts-pattern'
@@ -19,11 +19,10 @@ import NavigationButtons from '../mobile/NavigationButtons'
 import { BookClubSideBarSection, LibrarySideBarSection, SmartListSideBarSection } from './sections'
 import SideBarButtonLink from './SideBarButtonLink'
 import SideBarFooter from './SideBarFooter'
-import { graphql } from 'relay-runtime'
-import { PreloadedQuery, usePreloadedQuery, useQueryLoader } from 'react-relay'
-import { SideBarQuery } from './__generated__/SideBarQuery.graphql'
+import { graphql } from '@stump/graphql'
+import { useSuspenseQuery } from '@apollo/client'
 
-const query = graphql`
+const query = graphql(`
 	query SideBarQuery {
 		me {
 			id
@@ -39,42 +38,26 @@ const query = graphql`
 			}
 		}
 	}
-`
+`)
 
-type ContainerProps = {
+type Props = {
 	asChild?: boolean
 	hidden?: boolean
 }
 
-export default function SideBarContainer(props: ContainerProps) {
-	const [queryRef, loadQuery] = useQueryLoader<SideBarQuery>(query)
-
-	useEffect(() => {
-		loadQuery({})
-	}, [loadQuery])
-
-	if (!queryRef) {
-		return null
-	}
-
-	return <SideBar queryRef={queryRef} {...props} />
-}
-
-type Props = {
-	queryRef: PreloadedQuery<SideBarQuery>
-} & ContainerProps
-
-function SideBar({ asChild, hidden, queryRef }: Props) {
+export default function SideBar({ asChild, hidden }: Props) {
 	const location = useLocation()
 	const platform = useAppStore((store) => store.platform)
 
 	const { t } = useLocaleContext()
 
 	const {
-		me: {
-			preferences: { navigationArrangement },
+		data: {
+			me: {
+				preferences: { navigationArrangement },
+			},
 		},
-	} = usePreloadedQuery(query, queryRef)
+	} = useSuspenseQuery(query)
 
 	console.log('navigationArrangement', navigationArrangement)
 

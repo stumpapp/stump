@@ -1,28 +1,75 @@
-import { useRecentlyAddedMediaQuery } from '@stump/client'
+import { getNextPageParam, useRecentlyAddedMediaQuery } from '@stump/client'
 import { Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { BookX } from 'lucide-react'
-import { Suspense, useCallback } from 'react'
+import { Suspense, useCallback, useTransition } from 'react'
 
 import MediaCard from '@/components/book/BookCard'
 import HorizontalCardList from '@/components/HorizontalCardList'
+import { graphql, PaginationInfo } from '@stump/graphql'
+import { useSuspenseQuery } from '@apollo/client'
+
+const query = graphql(`
+	query RecentlyAddedMediaQuery($pagination: Pagination!) {
+		recentlyAddedMedia(pagination: $pagination) {
+			nodes {
+				id
+				...BookCard
+			}
+			pageInfo {
+				__typename
+				... on CursorPaginationInfo {
+					currentCursor
+					nextCursor
+					limit
+				}
+			}
+		}
+	}
+`)
 
 function RecentlyAddedMedia() {
-	const { t } = useLocaleContext()
-	const { media, fetchNextPage, hasNextPage, isFetching } = useRecentlyAddedMediaQuery({
-		limit: 20,
-		suspense: true,
+	const [, startTransition] = useTransition()
+	const {
+		data: {
+			recentlyAddedMedia: { nodes, pageInfo },
+		},
+		fetchMore,
+	} = useSuspenseQuery(query, {
+		variables: {
+			pagination: { cursor: { limit: 20 } },
+		},
+		queryKey: ['recentlyAddedMedia'],
 	})
+	const { t } = useLocaleContext()
 
-	const cards = media.map((media) => <MediaCard media={media} key={media.id} fullWidth={false} />)
+	const cards = nodes.map((media) => <MediaCard key={media.id} id={media.id} fullWidth={false} />)
 
 	const handleFetchMore = useCallback(() => {
-		if (!hasNextPage || isFetching) {
-			return
-		} else {
-			fetchNextPage()
+		const nextPageParam = getNextPageParam(pageInfo as PaginationInfo)
+		if (nextPageParam) {
+			startTransition(() => {
+				fetchMore({
+					variables: {
+						pagination: nextPageParam,
+					},
+					updateQuery: (prev, { fetchMoreResult }) => {
+						if (!fetchMoreResult) return prev
+						return {
+							recentlyAddedMedia: {
+								...prev.recentlyAddedMedia,
+								nodes: [
+									...prev.recentlyAddedMedia.nodes,
+									...fetchMoreResult.recentlyAddedMedia.nodes,
+								],
+								pageInfo: fetchMoreResult.recentlyAddedMedia.pageInfo,
+							},
+						}
+					},
+				})
+			})
 		}
-	}, [fetchNextPage, hasNextPage, isFetching])
+	}, [fetchMore, pageInfo])
 
 	return (
 		<HorizontalCardList

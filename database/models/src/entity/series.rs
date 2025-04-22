@@ -78,6 +78,16 @@ pub struct SeriesIdentSelect {
 	pub path: String,
 }
 
+#[derive(Debug, FromQueryResult)]
+pub struct SeriesNameCmpSelect {
+	pub name: String,
+}
+
+#[derive(Debug, FromQueryResult)]
+pub struct SeriesCreatedAtCmpSelect {
+	pub created_at: DateTimeWithTimeZone,
+}
+
 pub struct ModelWithMetadata {
 	pub series: Model,
 	pub metadata: Option<series_metadata::Model>,

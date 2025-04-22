@@ -1,7 +1,6 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
-import relay from 'vite-plugin-relay'
 import tsconfigPaths from 'vite-plugin-tsconfig-paths'
 
 // https://www.npmjs.com/package/vite-plugin-node-polyfills
@@ -21,7 +20,6 @@ export default defineConfig({
 	plugins: [
 		react(),
 		tsconfigPaths(),
-		relay,
 		VitePWA({
 			registerType: 'autoUpdate',
 			devOptions: {

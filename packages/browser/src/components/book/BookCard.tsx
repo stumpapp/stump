@@ -1,61 +1,89 @@
-import { usePrefetchMediaByID, useSDK } from '@stump/client'
 import { Text } from '@stump/components'
-import { Media } from '@stump/sdk'
 import pluralize from 'pluralize'
 import { type ComponentPropsWithoutRef, useCallback, useMemo } from 'react'
 
 import paths from '@/paths'
-import { formatBookName, formatBytes } from '@/utils/format'
-import { prefetchMediaPage } from '@/utils/prefetch'
+import { formatBytes } from '@/utils/format'
 
 import { EntityCard } from '../entity'
 import { graphql } from '@stump/graphql'
+import { useSuspenseFragment } from '@apollo/client'
 
-export const BookCardFragment = graphql(/* GraphQL */ `
-	fragment BookCardFragment on Media {
+export const BOOK_CARD_FRAGMENT = graphql(`
+	fragment BookCard on Media {
 		id
+		resolvedName
+		pages
+		size
+		status
+		thumbnail {
+			url
+		}
+		readProgress {
+			percentageCompleted
+			epubcfi
+			page
+		}
+		readHistory {
+			__typename
+		}
 	}
 `)
 
 export type BookCardProps = {
-	media: Media
+	id: string
 	readingLink?: boolean
 	fullWidth?: boolean
 	variant?: 'cover' | 'default'
-	onSelect?: (media: Media) => void
+	onSelect?: () => void
 }
 
 type EntityCardProps = ComponentPropsWithoutRef<typeof EntityCard>
 
 export default function BookCard({
-	media,
+	id,
 	readingLink,
 	fullWidth,
 	variant = 'default',
 	onSelect,
 }: BookCardProps) {
-	const { sdk } = useSDK()
-	const { prefetch } = usePrefetchMediaByID(media.id)
+	const { data } = useSuspenseFragment({
+		fragment: BOOK_CARD_FRAGMENT,
+		fragmentName: 'BookCard',
+		from: {
+			__typename: 'Media',
+			id,
+		},
+	})
 
 	const isCoverOnly = variant === 'cover'
 
-	const handleHover = () => {
-		if (!readingLink) {
-			prefetch()
+	const getProgress = useCallback(() => {
+		if (isCoverOnly || (!data.readProgress && !data.readHistory)) {
+			return null
+		} else if (data.readProgress) {
+			const { epubcfi, percentageCompleted, page } = data.readProgress
+			if (epubcfi && percentageCompleted) {
+				return Math.round(percentageCompleted * 100)
+			} else if (page) {
+				const pages = data.pages
+
+				const percent = Math.round((page / pages) * 100)
+				return Math.min(Math.max(percent, 0), 100) // Clamp between 0 and 100
+			}
+		} else if (data.readHistory?.length) {
+			return 100
 		}
 
-		const currentPage = media.current_page || -1
-		if (currentPage > 0) {
-			prefetchMediaPage(sdk, media.id, currentPage)
-		}
-	}
+		return null
+	}, [isCoverOnly, data])
 
-	const getSubtitle = (media: Media) => {
+	const getSubtitle = useCallback(() => {
 		if (isCoverOnly) {
 			return null
 		}
 
-		const isMissing = media.status === 'MISSING'
+		const isMissing = data.status === 'MISSING'
 		if (isMissing) {
 			return (
 				<Text size="xs" className="uppercase text-amber-500">
@@ -66,8 +94,8 @@ export default function BookCard({
 
 		const progressString = getProgress()
 		if (progressString != null) {
-			const isEpubProgress = !!media.current_epubcfi
-			const pagesLeft = media.pages - (media.current_page || 0)
+			const isEpubProgress = !!data.readProgress?.epubcfi
+			const pagesLeft = data.pages - (data.readProgress?.page || 0)
 
 			return (
 				<div className="flex items-center justify-between">
@@ -86,34 +114,11 @@ export default function BookCard({
 		return (
 			<div className="flex items-center justify-between">
 				<Text size="xs" variant="muted">
-					{formatBytes(media.size.valueOf())}
+					{formatBytes(data.size.valueOf())}
 				</Text>
 			</div>
 		)
-	}
-
-	const getProgress = useCallback(() => {
-		const { active_reading_session, finished_reading_sessions } = media
-
-		if (isCoverOnly || (!active_reading_session && !finished_reading_sessions)) {
-			return null
-		} else if (active_reading_session) {
-			const { epubcfi, percentage_completed, page } = active_reading_session
-
-			if (epubcfi && percentage_completed) {
-				return Math.round(percentage_completed * 100)
-			} else if (page) {
-				const pages = media.pages
-
-				const percent = Math.round((page / pages) * 100)
-				return Math.min(Math.max(percent, 0), 100) // Clamp between 0 and 100
-			}
-		} else if (finished_reading_sessions?.length) {
-			return 100
-		}
-
-		return null
-	}, [isCoverOnly, media])
+	}, [getProgress, isCoverOnly, data])
 
 	const href = useMemo(() => {
 		if (onSelect) {
@@ -121,12 +126,12 @@ export default function BookCard({
 		}
 
 		return readingLink
-			? paths.bookReader(media.id, {
-					epubcfi: media.current_epubcfi,
-					page: media.current_page || undefined,
+			? paths.bookReader(id, {
+					epubcfi: data.readProgress?.epubcfi,
+					page: data.readProgress?.page ?? undefined,
 				})
-			: paths.bookOverview(media.id)
-	}, [readingLink, media.id, media.current_epubcfi, media.current_page, onSelect])
+			: paths.bookOverview(id)
+	}, [readingLink, id, onSelect, data.readProgress])
 
 	const propsOverrides = useMemo(() => {
 		let overrides = (
@@ -144,23 +149,22 @@ export default function BookCard({
 		if (onSelect) {
 			overrides = {
 				...overrides,
-				onClick: () => onSelect(media),
+				onClick: () => onSelect(),
 			}
 		}
 
 		return overrides
-	}, [onSelect, isCoverOnly, media])
+	}, [onSelect, isCoverOnly])
 
 	return (
 		<EntityCard
-			key={media.id}
-			title={formatBookName(media)}
+			title={data.resolvedName}
 			href={href}
 			fullWidth={fullWidth}
-			imageUrl={sdk.media.thumbnailURL(media.id)}
+			imageUrl={data.thumbnail.url}
 			progress={getProgress()}
-			subtitle={getSubtitle(media)}
-			onMouseEnter={handleHover}
+			subtitle={getSubtitle()}
+			// onMouseEnter={handleHover}
 			isCover={isCoverOnly}
 			{...propsOverrides}
 		/>

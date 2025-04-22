@@ -1,44 +1,81 @@
-import { useSDK, useSeriesCursorQuery } from '@stump/client'
+import { getNextPageParam } from '@stump/client'
 import { Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { BookCopy } from 'lucide-react'
-import { Suspense, useCallback } from 'react'
+import { Suspense, useCallback, useTransition } from 'react'
 
 import HorizontalCardList from '@/components/HorizontalCardList'
 import SeriesCard from '@/components/series/SeriesCard'
+import { graphql, PaginationInfo } from '@stump/graphql'
+import { useSuspenseQuery } from '@apollo/client'
+
+const query = graphql(`
+	query RecentlyAddedSeriesQuery($pagination: Pagination!) {
+		recentlyAddedSeries(pagination: $pagination) {
+			nodes {
+				id
+			}
+			pageInfo {
+				__typename
+				... on CursorPaginationInfo {
+					currentCursor
+					nextCursor
+					limit
+				}
+			}
+		}
+	}
+`)
 
 function RecentlyAddedSeries() {
-	const { sdk } = useSDK()
-	const { t } = useLocaleContext()
-	const { series, fetchNextPage, hasNextPage, isFetching } = useSeriesCursorQuery({
-		limit: 20,
-		params: {
-			count_media: true,
-			direction: 'desc',
-			order_by: 'created_at',
+	const [, startTransition] = useTransition()
+	const {
+		data: {
+			recentlyAddedSeries: { nodes, pageInfo },
 		},
-		queryKey: [sdk.series.keys.recentlyAdded],
-		suspense: true,
-		useErrorBoundary: false,
-		retry: (attempts) => attempts < 3,
+		fetchMore,
+	} = useSuspenseQuery(query, {
+		variables: {
+			pagination: { cursor: { limit: 20 } },
+		},
+		queryKey: ['recentlyAddedSeries'],
 	})
-
-	const cards = series.map((series) => (
-		<SeriesCard series={series} key={series.id} fullWidth={false} />
-	))
+	const { t } = useLocaleContext()
 
 	const handleFetchMore = useCallback(() => {
-		if (!hasNextPage || isFetching) {
-			return
-		} else {
-			fetchNextPage()
+		const nextPageParam = getNextPageParam(pageInfo as PaginationInfo)
+		if (nextPageParam) {
+			startTransition(() => {
+				fetchMore({
+					variables: {
+						pagination: nextPageParam,
+					},
+					updateQuery: (prev, { fetchMoreResult }) => {
+						if (!fetchMoreResult) return prev
+						return {
+							recentlyAddedSeries: {
+								...prev.recentlyAddedSeries,
+								nodes: [
+									...prev.recentlyAddedSeries.nodes,
+									...fetchMoreResult.recentlyAddedSeries.nodes,
+								],
+								pageInfo: fetchMoreResult.recentlyAddedSeries.pageInfo,
+							},
+						}
+					},
+				})
+			})
 		}
-	}, [fetchNextPage, hasNextPage, isFetching])
+	}, [fetchMore, pageInfo])
+
+	// const cards = series.map((series) => (
+	// 	<SeriesCard series={series} key={series.id} fullWidth={false} />
+	// ))
 
 	return (
 		<HorizontalCardList
 			title={t('homeScene.recentlyAddedSeries.title')}
-			items={cards}
+			items={[]}
 			onFetchMore={handleFetchMore}
 			emptyState={
 				<div className="flex items-start justify-start space-x-3 rounded-lg border border-dashed border-edge-subtle px-4 py-4">

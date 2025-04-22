@@ -78,6 +78,8 @@ impl Media {
 		Ok(Library::from(model))
 	}
 
+	/// A reference to the thumbnail image for the media. This will be a fully
+	/// qualified URL to the image.
 	async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
 		let service = ctx.data::<ServiceContext>()?;
 
@@ -92,6 +94,16 @@ impl Media {
 			height: page_dimension.as_ref().map(|dim| dim.height),
 			width: page_dimension.as_ref().map(|dim| dim.width),
 		})
+	}
+
+	/// The resolved name of the media, which will prioritize the title pulled from
+	/// metatadata, if available, and fallback to the name derived from the file name
+	async fn resolved_name(&self) -> String {
+		self.metadata
+			.as_ref()
+			.and_then(|meta| meta.title.as_ref())
+			.unwrap_or(&self.model.name)
+			.to_string()
 	}
 
 	// TODO(graphql): Create object to query for device

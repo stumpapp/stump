@@ -1,4 +1,3 @@
-import { useLibraries } from '@stump/client'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
@@ -7,10 +6,20 @@ import ContinueReadingMedia from './ContinueReading'
 import NoLibraries from './NoLibraries'
 import RecentlyAddedMedia from './RecentlyAddedMedia'
 import RecentlyAddedSeries from './RecentlyAddedSeries'
+import { graphql } from '@stump/graphql'
+import { useSuspenseQuery } from '@apollo/client'
+
+const query = graphql(`
+	query HomeSceneQuery {
+		numberOfLibraries
+	}
+`)
 
 // TODO: account for new accounts, i.e. no media at all
 export default function HomeScene() {
-	// const { libraries, isLoading } = useLibraries()
+	const {
+		data: { numberOfLibraries },
+	} = useSuspenseQuery(query)
 
 	const helmet = (
 		<Helmet>
@@ -19,26 +28,22 @@ export default function HomeScene() {
 		</Helmet>
 	)
 
-	// if (isLoading) {
-	// 	return <></>
-	// }
-
-	// if (!libraries?.length) {
-	// 	return (
-	// 		<>
-	// 			{helmet}
-	// 			<NoLibraries />
-	// 		</>
-	// 	)
-	// }
+	if (numberOfLibraries === 0) {
+		return (
+			<>
+				{helmet}
+				<NoLibraries />
+			</>
+		)
+	}
 
 	return (
 		<SceneContainer className="flex flex-col gap-4">
 			{helmet}
 			<ContinueReadingMedia />
-			{/* <RecentlyAddedMedia />
+			<RecentlyAddedMedia />
 			<RecentlyAddedSeries />
-			<div className="pb-5 sm:pb-0" /> */}
+			<div className="pb-5 sm:pb-0" />
 		</SceneContainer>
 	)
 }

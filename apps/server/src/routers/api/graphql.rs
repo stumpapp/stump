@@ -1,4 +1,7 @@
-use crate::middleware::{auth::auth_middleware, host::HostDetails};
+use crate::middleware::{
+	auth::auth_middleware,
+	host::{HostDetails, HostExtractor},
+};
 use async_graphql::http::{
 	playground_source, GraphQLPlaygroundConfig, ALL_WEBSOCKET_PROTOCOLS,
 };
@@ -54,7 +57,7 @@ async fn playground(
 async fn graphql_handler(
 	schema: Extension<AppSchema>,
 	Extension(req_ctx): Extension<RequestContext>,
-	Extension(details): Extension<HostDetails>,
+	HostExtractor(details): HostExtractor,
 	req: GraphQLRequest,
 ) -> GraphQLResponse {
 	let mut req = req.into_inner();

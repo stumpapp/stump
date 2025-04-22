@@ -17,7 +17,6 @@
 			"@stump/client/*": ["../client/src/*"],
 			"@stump/components": ["../components/src/index.ts"],
 			"@stump/components/*": ["../components/src/*"],
-			"@stump/graphql/*": ["../graphql/src/*"],
 			"@stump/graphql": ["../graphql/src/index.ts"],
 			"@/components/*": ["./src/components/*"],
 			"@/hooks/*": ["./src/hooks/*"],

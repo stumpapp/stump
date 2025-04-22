@@ -315,6 +315,12 @@ type FinishedReadingSession {
 
 
 
+type ImageRef {
+	url: String!
+	height: Int
+	width: Int
+}
+
 type InProgressBooks {
 	name: String
 	links: [FilterableArrangementEntityLink!]!
@@ -470,6 +476,16 @@ type Media {
 	metadata: MediaMetadataModel
 	series: Series!
 	library: Library!
+	"""
+	A reference to the thumbnail image for the media. This will be a fully
+	qualified URL to the image.
+	"""
+	thumbnail: ImageRef!
+	"""
+	The resolved name of the media, which will prioritize the title pulled from
+	metatadata, if available, and fallback to the name derived from the file name
+	"""
+	resolvedName: String!
 	readProgress: ActiveReadingSession
 	readHistory: [FinishedReadingSession!]!
 	nextInSeries(take: Int! = 1): [Media!]!
@@ -485,23 +501,6 @@ type MediaAnnotationsModel {
 	notes: String
 	userId: String!
 	mediaId: String!
-}
-
-type MediaConnection {
-	"Information to aid in pagination."
-	pageInfo: PageInfo!
-	"A list of edges."
-	edges: [MediaEdge!]!
-	"A list of nodes."
-	nodes: [Media!]!
-}
-
-"An edge in a connection."
-type MediaEdge {
-	"The item at the end of the edge"
-	node: Media!
-	"A cursor for use in pagination"
-	cursor: String!
 }
 
 type MediaMetadataModel {
@@ -712,16 +711,9 @@ type PageDimension {
 	width: Int!
 }
 
-"Information about pagination in a connection"
-type PageInfo {
-	"When paginating backwards, are there more items?"
-	hasPreviousPage: Boolean!
-	"When paginating forwards, are there more items?"
-	hasNextPage: Boolean!
-	"When paginating backwards, the cursor to continue."
-	startCursor: String
-	"When paginating forwards, the cursor to continue."
-	endCursor: String
+type PaginatedLibraryResponse {
+	nodes: [Library!]!
+	pageInfo: PaginationInfo!
 }
 
 type PaginatedLogResponse {
@@ -736,6 +728,11 @@ type PaginatedMediaResponse {
 
 type PaginatedReadingListResponse {
 	nodes: [ReadingList!]!
+	pageInfo: PaginationInfo!
+}
+
+type PaginatedSeriesResponse {
+	nodes: [Series!]!
 	pageInfo: PaginationInfo!
 }
 
@@ -777,7 +774,6 @@ type Query {
 	emailers: [Emailer!]!
 	emailerById(id: ID!): Emailer
 	media(filter: JSON! = "{}", pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
-	mediaConnection(filter: JSON! = "{}", pagination: CursorPagination!): MediaConnection!
 	mediaById(id: ID!): Media
 	keepReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	recentlyAddedMedia(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
@@ -806,7 +802,12 @@ type Query {
 	epubById(id: ID!): Epub!
 	"Get all bookmarks for a single epub by its media ID"
 	bookmarksByMediaId(id: ID!): [Bookmark!]!
+	libraries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLibraryResponse!
+	numberOfLibraries: Int!
 	mediaMetadataOverview: MediaMetadataOverview!
+	series(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
+	numberOfSeries: Int!
+	recentlyAddedSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
 	"Returns a list of all tags."
 	tags: [Tag!]!
 	logs(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLogResponse!

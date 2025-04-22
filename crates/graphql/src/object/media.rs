@@ -2,17 +2,20 @@ use async_graphql::{
 	dataloader::DataLoader, ComplexObject, Context, Result, SimpleObject,
 };
 
-use models::entity::{library, media, media_metadata, series};
+use models::{
+	entity::{library, media, media_metadata, series},
+	shared::image::ImageRef,
+};
 use sea_orm::{prelude::*, sea_query::Query};
 
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{CoreContext, RequestContext, ServiceContext},
 	loader::{
 		reading_session::{
 			ActiveReadingSessionLoaderKey, FinishedReadingSessionLoaderKey,
 			ReadingSessionLoader,
 		},
-		series::{SeriesLoader, SeriesLoaderKey},
+		series::SeriesLoader,
 	},
 };
 
@@ -73,6 +76,22 @@ impl Media {
 			.ok_or("Library not found")?;
 
 		Ok(Library::from(model))
+	}
+
+	async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
+		let service = ctx.data::<ServiceContext>()?;
+
+		let page_dimension = self
+			.metadata
+			.as_ref()
+			.and_then(|meta| meta.page_analysis.as_ref())
+			.and_then(|page_analysis| page_analysis.dimensions.first().cloned());
+
+		Ok(ImageRef {
+			url: service.format_url(format!("/api/v2/media/{}/thumbnail", self.model.id)),
+			height: page_dimension.as_ref().map(|dim| dim.height),
+			width: page_dimension.as_ref().map(|dim| dim.width),
+		})
 	}
 
 	// TODO(graphql): Create object to query for device

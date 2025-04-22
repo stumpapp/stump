@@ -11,6 +11,38 @@ use crate::error_message;
 
 pub type CoreContext = Arc<Ctx>;
 
+#[derive(Debug, Clone)]
+pub struct ServiceContext {
+	pub host: String,
+	pub scheme: String,
+}
+
+impl Default for ServiceContext {
+	fn default() -> Self {
+		ServiceContext {
+			host: "localhost".to_string(),
+			scheme: "http".to_string(),
+		}
+	}
+}
+
+impl ServiceContext {
+	pub fn url(&self) -> String {
+		format!("{}://{}", self.scheme, self.host)
+	}
+
+	pub fn format_url<A: AsRef<str>>(&self, path: A) -> String {
+		let url = path.as_ref();
+		if url.starts_with('/') {
+			format!("{}{}", self.url(), url)
+		} else if url.starts_with("http") {
+			url.to_string()
+		} else {
+			format!("{}/{}", self.url(), url)
+		}
+	}
+}
+
 /// A struct to represent the authenticated user in the current request context. A user is
 /// authenticated if they meet one of the following criteria:
 /// - They have a valid session

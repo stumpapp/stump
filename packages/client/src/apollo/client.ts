@@ -1,15 +1,32 @@
-import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client'
+import { IStumpClientContext } from '@/context'
+import { ApolloClient, from, HttpLink, InMemoryCache } from '@apollo/client'
+import { onError } from '@apollo/client/link/error'
 import { Api } from '@stump/sdk'
 
-export const createClient = (sdk: Api) => {
-	const httpLink = createHttpLink({
+type CreateClientParams = {
+	sdk: Api
+} & Pick<IStumpClientContext, 'onUnauthenticatedResponse' | 'onConnectionWithServerChanged'>
+
+export const createClient = ({
+	sdk,
+	onUnauthenticatedResponse,
+	onConnectionWithServerChanged,
+}: CreateClientParams) => {
+	const httpLink = new HttpLink({
 		uri: '/api/graphql',
 		fetch: buildAxiosFetch(sdk),
 	})
 
+	const errorLink = onError(({ networkError }) => {
+		// TODO(graphql): Handle network errors accordingly
+		if (networkError) {
+			console.log(`[Network error]: ${networkError}`)
+		}
+	})
+
 	return new ApolloClient({
 		cache: new InMemoryCache(),
-		link: httpLink,
+		link: from([errorLink, httpLink]),
 	})
 }
 

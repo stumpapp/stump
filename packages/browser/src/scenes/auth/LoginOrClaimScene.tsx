@@ -15,6 +15,7 @@ import { z } from 'zod'
 import { ConfiguredServersList } from '@/components/savedServer'
 import { useAppStore, useUserStore } from '@/stores'
 
+// TODO: redirect away if the user is already logged in
 export default function LoginOrClaimScene() {
 	const navigate = useNavigate()
 
@@ -39,7 +40,10 @@ export default function LoginOrClaimScene() {
 	} = useLoginOrRegister({
 		onSuccess: async (user) => {
 			setUser(user)
-			await queryClient.refetchQueries([sdk.auth.keys.me], { exact: false })
+			await queryClient.refetchQueries({
+				queryKey: [sdk.auth.keys.me],
+				exact: false,
+			})
 			if (redirect.includes('/swagger') || redirect.includes('/api')) {
 				window.location.href = redirect
 			} else {

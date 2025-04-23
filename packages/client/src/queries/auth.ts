@@ -1,44 +1,29 @@
 import { isAxiosError, isUser, LoginOrRegisterArgs, type User } from '@stump/sdk'
 import { useEffect, useState } from 'react'
 
-import { queryClient, QueryOptions, useMutation } from '../client'
+import { queryClient, QueryOptions } from '../client'
 import { useClientContext } from '../context'
 import { useSDK } from '../sdk'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 
 type Params = QueryOptions<User> & {
 	additionalKeys?: string[]
 }
 export function useAuthQuery({ additionalKeys, ...options }: Params = {}) {
 	const { sdk } = useSDK()
-	const { data, error, isLoading, isFetching, isRefetching } = useQuery(
-		// [sdk.auth.keys.me, ...(additionalKeys || [])],
-		// async () => {
-		// 	const data = await sdk.auth.me()
-		// 	if (!isUser(data)) {
-		// 		console.warn('Malformed response received from server', data)
-		// 		throw new Error('Malformed response received from server')
-		// 	}
-		// 	return data
-		// },
-		// {
-		// 	useErrorBoundary: false,
-		// 	...options,
-		// },
-		{
-			queryKey: [sdk.auth.keys.me, ...(additionalKeys || [])],
-			queryFn: async () => {
-				const data = await sdk.auth.me()
-				if (!isUser(data)) {
-					console.warn('Malformed response received from server', data)
-					throw new Error('Malformed response received from server')
-				}
-				return data
-			},
-			// useErrorBoundary: false,
-			...options,
+	const { data, error, isLoading, isFetching, isRefetching } = useQuery({
+		queryKey: [sdk.auth.keys.me, ...(additionalKeys || [])],
+		queryFn: async () => {
+			const data = await sdk.auth.me()
+			if (!isUser(data)) {
+				console.warn('Malformed response received from server', data)
+				throw new Error('Malformed response received from server')
+			}
+			return data
 		},
-	)
+		// useErrorBoundary: false,
+		...options,
+	})
 
 	return {
 		error,
@@ -62,19 +47,17 @@ export function useLoginOrRegister({
 
 	const { onAuthenticated } = useClientContext()
 	const { sdk } = useSDK()
-	const { data: claimCheck, isLoading: isCheckingClaimed } = useQuery(
-		[sdk.server.keys.claimedStatus, refetchClaimed],
-		() => sdk.server.claimedStatus(),
-		{
-			retry: (failureCount, error) => {
-				if (failureCount > 3) {
-					return false
-				} else {
-					return isAxiosError(error) && error.code === 'ERR_NETWORK'
-				}
-			},
+	const { data: claimCheck, isLoading: isCheckingClaimed } = useQuery({
+		queryKey: [sdk.server.keys.claimedStatus, refetchClaimed],
+		queryFn: () => sdk.server.claimedStatus(),
+		retry: (failureCount, error) => {
+			if (failureCount > 3) {
+				return false
+			} else {
+				return isAxiosError(error) && error.code === 'ERR_NETWORK'
+			}
 		},
-	)
+	})
 
 	useEffect(() => {
 		if (claimCheck?.data) {
@@ -83,10 +66,12 @@ export function useLoginOrRegister({
 	}, [claimCheck])
 
 	const {
-		isLoading: isLoggingIn,
+		isPending: isLoggingIn,
 		mutateAsync: loginUser,
 		error: loginError,
-	} = useMutation([sdk.auth.keys.login], (params: LoginOrRegisterArgs) => sdk.auth.login(params), {
+	} = useMutation({
+		mutationKey: [sdk.auth.keys.login],
+		mutationFn: (params: LoginOrRegisterArgs) => sdk.auth.login(params),
 		onError: (err) => {
 			onError?.(err)
 		},
@@ -102,20 +87,19 @@ export function useLoginOrRegister({
 			} else if (isUser(response)) {
 				onSuccess?.(response)
 			}
-
-			await queryClient.invalidateQueries(['getLibraries'])
 		},
 	})
 
-	const { isLoading: isRegistering, mutateAsync: registerUser } = useMutation(
-		[sdk.auth.register],
-		(params: LoginOrRegisterArgs) => sdk.auth.register(params),
-		{
-			onSuccess: async () => {
-				await queryClient.invalidateQueries([sdk.server.keys.claimedStatus])
-			},
+	const { isPending: isRegistering, mutateAsync: registerUser } = useMutation({
+		mutationKey: [sdk.auth.register],
+		mutationFn: (params: LoginOrRegisterArgs) => sdk.auth.register(params),
+		onSuccess: async () => {
+			await queryClient.invalidateQueries({
+				queryKey: [sdk.server.keys.claimedStatus],
+				exact: false,
+			})
 		},
-	)
+	})
 
 	return {
 		isCheckingClaimed,
@@ -135,17 +119,15 @@ type UseLogoutParams = {
 export function useLogout({ removeStoreUser }: UseLogoutParams = {}) {
 	const { sdk } = useSDK()
 	const { onLogout } = useClientContext()
-	const { mutateAsync: logout, isLoading } = useMutation(
-		[sdk.auth.keys.logout],
-		() => sdk.auth.logout(),
-		{
-			onSuccess: async () => {
-				queryClient.clear()
-				removeStoreUser?.()
-				await onLogout?.()
-			},
+	const { mutateAsync: logout, isPending: isLoading } = useMutation({
+		mutationKey: [sdk.auth.keys.logout],
+		mutationFn: () => sdk.auth.logout(),
+		onSuccess: async () => {
+			queryClient.clear()
+			removeStoreUser?.()
+			await onLogout?.()
 		},
-	)
+	})
 
 	return { isLoggingOut: isLoading, logout }
 }

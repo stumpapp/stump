@@ -100,7 +100,6 @@ impl MediaMutation {
 
 		// upsert reading_session
 		let active_session = reading_session::ActiveModel {
-			id: Set(Uuid::new_v4().to_string()),
 			user_id: Set(user.id.clone()),
 			media_id: Set(id.to_string()),
 			page: Set(page),

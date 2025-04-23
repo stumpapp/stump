@@ -29,6 +29,13 @@ impl From<series::ModelWithMetadata> for Series {
 
 #[ComplexObject]
 impl Series {
+	async fn resolved_name(&self) -> String {
+		self.metadata
+			.as_ref()
+			.and_then(|m| m.title.clone())
+			.unwrap_or_else(|| self.model.name.clone())
+	}
+
 	async fn library(&self, ctx: &Context<'_>) -> Result<Library> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
@@ -53,6 +60,19 @@ impl Series {
 			.await?;
 
 		Ok(models.into_iter().map(Media::from).collect())
+	}
+
+	// TODO: put behind data loader
+
+	async fn media_count(&self, ctx: &Context<'_>) -> Result<u64> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let media_count = media::Entity::find_for_series_id(user, self.model.id.clone())
+			.count(conn)
+			.await?;
+
+		Ok(media_count)
 	}
 
 	async fn up_next(
@@ -150,6 +170,37 @@ impl Series {
 			get_series_progress(user, self.model.id.clone(), conn).await?;
 
 		Ok(finished_count >= media_count)
+	}
+
+	// TODO: put behind data loader
+	async fn percentage_completed(&self, ctx: &Context<'_>) -> Result<f32> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let (media_count, finished_count) =
+			get_series_progress(user, self.model.id.clone(), conn).await?;
+
+		if media_count == 0 {
+			return Ok(0.0);
+		}
+
+		let percentage = (finished_count as f32 / media_count as f32) * 100.0;
+
+		Ok(percentage)
+	}
+
+	async fn read_count(&self, ctx: &Context<'_>) -> Result<u64> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let finished_count = finished_reading_session::Entity::find_finished_in_series(
+			user,
+			self.model.id.clone(),
+		)
+		.count(conn)
+		.await?;
+
+		Ok(finished_count)
 	}
 
 	async fn unread_count(&self, ctx: &Context<'_>) -> Result<u64> {

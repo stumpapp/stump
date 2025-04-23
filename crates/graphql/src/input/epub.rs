@@ -40,8 +40,6 @@ impl EpubProgressInput {
 		user: &AuthUser,
 	) -> reading_session::ActiveModel {
 		reading_session::ActiveModel {
-			// TODO: Consider i32 for ID
-			id: Set(Uuid::new_v4().to_string()),
 			epubcfi: Set(Some(self.epubcfi.clone())),
 			percentage_completed: Set(Some(self.percentage)),
 			media_id: Set(self.media_id.clone()),
@@ -55,13 +53,12 @@ impl EpubProgressInput {
 impl BookmarkInput {
 	pub fn into_active_model(&self, user: &AuthUser) -> bookmark::ActiveModel {
 		bookmark::ActiveModel {
-			// TODO(sea-orm): Consider i32 for ID
-			id: Set(Uuid::new_v4().to_string()),
 			epubcfi: Set(Some(self.epubcfi.clone())),
 			preview_content: Set(self.preview_content.clone()),
 			media_id: Set(self.media_id.clone()),
 			user_id: Set(user.id.clone()),
 			page: Set(Some(-1)),
+			..Default::default()
 		}
 	}
 }
@@ -83,7 +80,6 @@ mod tests {
 			is_complete: Some(true),
 		};
 		let active_model = input.into_reading_session_active_model(&user);
-		assert!(Uuid::parse_str(&active_model.id.unwrap()).is_ok());
 		assert_eq!(active_model.media_id.unwrap(), "media_id");
 		assert_eq!(active_model.epubcfi.unwrap(), Some("epubcfi".to_string()));
 		assert_eq!(
@@ -105,7 +101,6 @@ mod tests {
 		let active_model =
 			input.into_finished_session_active_model(&user, chrono::Utc::now().into());
 		let active_model = active_model.before_save(&db, true).await.unwrap();
-		assert!(Uuid::parse_str(&active_model.id.unwrap()).is_ok());
 		assert_eq!(active_model.media_id.unwrap(), "media_id");
 		assert!(is_close_to_now(active_model.completed_at.unwrap().into()));
 	}

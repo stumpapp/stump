@@ -50,7 +50,11 @@ impl SeriesQuery {
 				let current_cursor = info
 					.after
 					.or_else(|| models.first().map(|result| result.series.id.clone()));
-				let next_cursor = models.last().map(|result| result.series.id.clone());
+				let next_cursor =
+					match models.last().map(|result| result.series.id.clone()) {
+						Some(id) if models.len() == info.limit as usize => Some(id),
+						_ => None,
+					};
 
 				Ok(PaginatedResponse {
 					nodes: models.into_iter().map(Series::from).collect(),
@@ -132,7 +136,11 @@ impl SeriesQuery {
 				let current_cursor = info
 					.after
 					.or_else(|| models.first().map(|m| m.series.id.clone()));
-				let next_cursor = models.last().map(|m| m.series.id.clone());
+				let next_cursor =
+					match models.last().map(|result| result.series.id.clone()) {
+						Some(id) if models.len() == info.limit as usize => Some(id),
+						_ => None,
+					};
 
 				Ok(PaginatedResponse {
 					nodes: models.into_iter().map(Series::from).collect(),

@@ -361,5 +361,82 @@ FROM "age_restrictions";
 DROP TABLE "age_restrictions";
 ALTER TABLE "new_age_restrictions"
     RENAME TO "age_restrictions";
+-- Changes:
+-- 1. id is now an autoincrementing integer
+-- 2. updated_at column default to current timestamp
+CREATE TABLE "new_reading_sessions" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "page" INTEGER,
+    "percentage_completed" REAL,
+    "epubcfi" TEXT,
+    "koreader_progress" TEXT,
+    "started_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "media_id" TEXT NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "device_id" TEXT,
+    "elapsed_seconds" BIGINT,
+    CONSTRAINT "reading_sessions_media_id_fkey" FOREIGN KEY ("media_id") REFERENCES "media" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "reading_sessions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "reading_sessions_device_id_fkey" FOREIGN KEY ("device_id") REFERENCES "registered_reading_devices" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+INSERT INTO "new_reading_sessions"(
+        "page",
+        "percentage_completed",
+        "epubcfi",
+        "koreader_progress",
+        "started_at",
+        "updated_at",
+        "media_id",
+        "user_id",
+        "device_id",
+        "elapsed_seconds"
+    )
+SELECT "page",
+    "percentage_completed",
+    "epubcfi",
+    "koreader_progress",
+    "started_at",
+    "updated_at",
+    "media_id",
+    "user_id",
+    "device_id",
+    "elapsed_seconds"
+FROM "reading_sessions";
+DROP TABLE "reading_sessions";
+ALTER TABLE "new_reading_sessions"
+    RENAME TO "reading_sessions";
+-- Changes:
+-- 1. id is now an autoincrementing integer
+CREATE TABLE "new_finshed_reading_sessions" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "started_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "completed_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "media_id" TEXT NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "device_id" TEXT,
+    "elapsed_seconds" BIGINT,
+    CONSTRAINT "finished_reading_sessions_media_id_fkey" FOREIGN KEY ("media_id") REFERENCES "media" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "finished_reading_sessions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "finished_reading_sessions_device_id_fkey" FOREIGN KEY ("device_id") REFERENCES "registered_reading_devices" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+INSERT INTO "new_finshed_reading_sessions"(
+        "started_at",
+        "completed_at",
+        "media_id",
+        "user_id",
+        "device_id",
+        "elapsed_seconds"
+    )
+SELECT "started_at",
+    "completed_at",
+    "media_id",
+    "user_id",
+    "device_id",
+    "elapsed_seconds"
+FROM "finished_reading_sessions";
+DROP TABLE "finished_reading_sessions";
+ALTER TABLE "new_finshed_reading_sessions"
+    RENAME TO "finished_reading_sessions";
 PRAGMA foreign_keys = ON;
 COMMIT;

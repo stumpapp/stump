@@ -92,15 +92,15 @@ export default function BookCard({
 			)
 		}
 
-		const progressString = getProgress()
-		if (progressString != null) {
+		const percentage = getProgress()
+		if (percentage != null && percentage < 100.0) {
 			const isEpubProgress = !!data.readProgress?.epubcfi
 			const pagesLeft = data.pages - (data.readProgress?.page || 0)
 
 			return (
 				<div className="flex items-center justify-between">
 					<Text size="xs" variant="muted">
-						{getProgress()}%
+						{percentage}%
 					</Text>
 					{!isEpubProgress && (
 						<Text size="xs" variant="muted">
@@ -108,6 +108,12 @@ export default function BookCard({
 						</Text>
 					)}
 				</div>
+			)
+		} else if (percentage === 100.0) {
+			return (
+				<Text size="xs" variant="muted">
+					Completed
+				</Text>
 			)
 		}
 

@@ -58,7 +58,10 @@ impl MediaQuery {
 				let current_cursor = info
 					.after
 					.or_else(|| models.first().map(|m| m.media.id.clone()));
-				let next_cursor = models.last().map(|m| m.media.id.clone());
+				let next_cursor = match models.last().map(|m| m.media.id.clone()) {
+					Some(id) if models.len() == info.limit as usize => Some(id),
+					_ => None,
+				};
 
 				Ok(PaginatedResponse {
 					nodes: models.into_iter().map(Media::from).collect(),
@@ -170,13 +173,17 @@ impl MediaQuery {
 				cursor.first(info.limit);
 
 				let models = cursor
+					.group_by(media::Column::Id)
 					.into_model::<media::ModelWithMetadata>()
 					.all(conn)
 					.await?;
 				let current_cursor = info
 					.after
 					.or_else(|| models.first().map(|m| m.media.id.clone()));
-				let next_cursor = models.last().map(|m| m.media.id.clone());
+				let next_cursor = match models.last().map(|m| m.media.id.clone()) {
+					Some(id) if models.len() == info.limit as usize => Some(id),
+					_ => None,
+				};
 
 				Ok(PaginatedResponse {
 					nodes: models.into_iter().map(Media::from).collect(),
@@ -252,7 +259,10 @@ impl MediaQuery {
 				let current_cursor = info
 					.after
 					.or_else(|| models.first().map(|m| m.media.id.clone()));
-				let next_cursor = models.last().map(|m| m.media.id.clone());
+				let next_cursor = match models.last().map(|m| m.media.id.clone()) {
+					Some(id) if models.len() == info.limit as usize => Some(id),
+					_ => None,
+				};
 
 				Ok(PaginatedResponse {
 					nodes: models.into_iter().map(Media::from).collect(),

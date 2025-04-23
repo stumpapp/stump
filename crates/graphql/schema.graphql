@@ -876,10 +876,14 @@ type Series {
 	status: String!
 	libraryId: String
 	metadata: SeriesMetadataModel
+	resolvedName: String!
 	library: Library!
 	media: [Media!]!
+	mediaCount: Int!
 	upNext(take: Int! = 1, cursor: String): [Media!]!
 	isComplete: Boolean!
+	percentageCompleted: Float!
+	readCount: Int!
 	unreadCount: Int!
 }
 

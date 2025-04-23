@@ -1,21 +1,16 @@
 use async_graphql::SimpleObject;
-use sea_orm::{
-	entity::prelude::*, prelude::async_trait::async_trait, ActiveValue, FromQueryResult,
-	JoinType, QuerySelect,
-};
+use sea_orm::{entity::prelude::*, FromQueryResult, QuerySelect};
 
 use crate::prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer};
 
 use super::{registered_reading_device, user::AuthUser};
 
-// TODO(sea-orm): Consider i32 for ID
-
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "ReadingSessionModel")]
 #[sea_orm(table_name = "reading_sessions")]
 pub struct Model {
-	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
-	pub id: String,
+	#[sea_orm(primary_key, auto_increment = true)]
+	pub id: i32,
 	pub page: Option<i32>,
 	pub percentage_completed: Option<Decimal>,
 	#[sea_orm(column_type = "Text", nullable)]
@@ -110,19 +105,7 @@ impl Related<super::user::Entity> for Entity {
 	}
 }
 
-#[async_trait]
-impl ActiveModelBehavior for ActiveModel {
-	async fn before_save<C>(mut self, _db: &C, insert: bool) -> Result<Self, DbErr>
-	where
-		C: ConnectionTrait,
-	{
-		if insert && self.id.is_not_set() {
-			self.id = ActiveValue::Set(Uuid::new_v4().to_string());
-		}
-
-		Ok(self)
-	}
-}
+impl ActiveModelBehavior for ActiveModel {}
 
 impl Entity {
 	pub fn find_for_user_and_media_id(user: &AuthUser, media_id: &str) -> Select<Entity> {

@@ -46,7 +46,10 @@ impl LibraryQuery {
 				let models = cursor.all(conn).await?;
 				let current_cursor =
 					info.after.or_else(|| models.first().map(|l| l.id.clone()));
-				let next_cursor = models.last().map(|l| l.id.clone());
+				let next_cursor = match models.last().map(|l| l.id.clone()) {
+					Some(id) if models.len() == info.limit as usize => Some(id),
+					_ => None,
+				};
 
 				Ok(PaginatedResponse {
 					nodes: models.into_iter().map(Library::from).collect(),

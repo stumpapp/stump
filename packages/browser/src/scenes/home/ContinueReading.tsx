@@ -1,4 +1,4 @@
-import { getNextPageParam } from '@stump/client'
+import { getNextPageParam, updateQuery } from '@stump/client'
 import { Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { BookMarked } from 'lucide-react'
@@ -61,16 +61,7 @@ function ContinueReadingMedia() {
 					variables: {
 						pagination: nextPageParam,
 					},
-					updateQuery: (prev, { fetchMoreResult }) => {
-						if (!fetchMoreResult) return prev
-						return {
-							keepReading: {
-								...prev.keepReading,
-								nodes: [...prev.keepReading.nodes, ...fetchMoreResult.keepReading.nodes],
-								pageInfo: fetchMoreResult.keepReading.pageInfo,
-							},
-						}
-					},
+					updateQuery,
 				})
 			})
 		}

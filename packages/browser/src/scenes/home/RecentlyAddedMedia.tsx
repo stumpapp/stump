@@ -1,4 +1,4 @@
-import { getNextPageParam, useRecentlyAddedMediaQuery } from '@stump/client'
+import { getNextPageParam, updateQuery } from '@stump/client'
 import { Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { BookX } from 'lucide-react'
@@ -53,19 +53,7 @@ function RecentlyAddedMedia() {
 					variables: {
 						pagination: nextPageParam,
 					},
-					updateQuery: (prev, { fetchMoreResult }) => {
-						if (!fetchMoreResult) return prev
-						return {
-							recentlyAddedMedia: {
-								...prev.recentlyAddedMedia,
-								nodes: [
-									...prev.recentlyAddedMedia.nodes,
-									...fetchMoreResult.recentlyAddedMedia.nodes,
-								],
-								pageInfo: fetchMoreResult.recentlyAddedMedia.pageInfo,
-							},
-						}
-					},
+					updateQuery,
 				})
 			})
 		}

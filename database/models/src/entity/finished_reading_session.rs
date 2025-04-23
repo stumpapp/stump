@@ -7,14 +7,12 @@ use sea_orm::{
 	QuerySelect,
 };
 
-// TODO(sea-orm): Consider i32 for ID
-
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "FinishedReadingSessionModel")]
 #[sea_orm(table_name = "finished_reading_sessions")]
 pub struct Model {
-	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
-	pub id: String,
+	#[sea_orm(primary_key, auto_increment = true)]
+	pub id: i32,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub started_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
@@ -103,19 +101,7 @@ impl Related<super::user::Entity> for Entity {
 	}
 }
 
-#[async_trait]
-impl ActiveModelBehavior for ActiveModel {
-	async fn before_save<C>(mut self, _db: &C, insert: bool) -> Result<Self, DbErr>
-	where
-		C: ConnectionTrait,
-	{
-		if insert && self.id.is_not_set() {
-			self.id = ActiveValue::Set(Uuid::new_v4().to_string());
-		}
-
-		Ok(self)
-	}
-}
+impl ActiveModelBehavior for ActiveModel {}
 
 impl Entity {
 	pub fn find_finished_in_series(user: &AuthUser, series_id: String) -> Select<Self> {

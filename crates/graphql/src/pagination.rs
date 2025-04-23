@@ -338,7 +338,10 @@ async fn get_paginated_cursor_results<
 
 	let models = cursor.into_model::<EntityType::Model>().all(conn).await?;
 	let current_cursor = info.after.or_else(|| models.first().map(&get_cursor));
-	let next_cursor = models.last().map(get_cursor);
+	let next_cursor = match models.last().map(get_cursor) {
+		Some(cursor) if models.len() == info.limit as usize => Some(cursor),
+		_ => None,
+	};
 
 	Ok(PaginatedResponse {
 		nodes: models.into_iter().map(GraphqlOutputType::from).collect(),

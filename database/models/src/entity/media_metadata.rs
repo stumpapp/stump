@@ -31,26 +31,37 @@ pub struct Model {
 	pub month: Option<i32>,
 	pub day: Option<i32>,
 	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
 	pub writers: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
 	pub pencillers: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
 	pub inkers: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
 	pub colorists: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
 	pub letterers: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
 	pub cover_artists: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
 	pub editors: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
 	pub publisher: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
 	pub links: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
 	pub characters: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
 	pub teams: Option<String>,
 	pub page_count: Option<i32>,
 	pub age_rating: Option<i32>,

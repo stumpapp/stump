@@ -3,10 +3,10 @@ use async_graphql::{
 };
 
 use models::{
-	entity::{library, media, media_metadata, series},
+	entity::{library, media, series},
 	shared::image::ImageRef,
 };
-use sea_orm::{prelude::*, sea_query::Query};
+use sea_orm::{prelude::*, sea_query::Query, QuerySelect};
 
 use crate::{
 	data::{CoreContext, RequestContext, ServiceContext},
@@ -17,10 +17,12 @@ use crate::{
 		},
 		series::SeriesLoader,
 	},
+	pagination::{CursorPagination, CursorPaginationInfo, PaginatedResponse},
 };
 
 use super::{
 	library::Library,
+	media_metadata::MediaMetadata,
 	reading_session::{ActiveReadingSession, FinishedReadingSession},
 	series::Series,
 };
@@ -30,14 +32,23 @@ use super::{
 pub struct Media {
 	#[graphql(flatten)]
 	pub model: media::Model,
-	pub metadata: Option<media_metadata::Model>,
+	pub metadata: Option<MediaMetadata>,
 }
 
 impl From<media::ModelWithMetadata> for Media {
 	fn from(entity: media::ModelWithMetadata) -> Self {
 		Self {
 			model: entity.media,
-			metadata: entity.metadata,
+			metadata: entity.metadata.map(MediaMetadata::from),
+		}
+	}
+}
+
+impl Media {
+	pub fn self_cursor_params(&self) -> CursorPagination {
+		CursorPagination {
+			after: Some(self.model.name.clone()),
+			limit: 1,
 		}
 	}
 }
@@ -86,7 +97,7 @@ impl Media {
 		let page_dimension = self
 			.metadata
 			.as_ref()
-			.and_then(|meta| meta.page_analysis.as_ref())
+			.and_then(|meta| meta.model.page_analysis.as_ref())
 			.and_then(|page_analysis| page_analysis.dimensions.first().cloned());
 
 		Ok(ImageRef {
@@ -101,7 +112,7 @@ impl Media {
 	async fn resolved_name(&self) -> String {
 		self.metadata
 			.as_ref()
-			.and_then(|meta| meta.title.as_ref())
+			.and_then(|meta| meta.model.title.as_ref())
 			.unwrap_or(&self.model.name)
 			.to_string()
 	}
@@ -146,22 +157,55 @@ impl Media {
 	async fn next_in_series(
 		&self,
 		ctx: &Context<'_>,
-		#[graphql(default = 1, validator(minimum = 1))] take: u64,
-	) -> Result<Vec<Media>> {
+		#[graphql(default)] pagination: CursorPagination,
+	) -> Result<PaginatedResponse<Media>> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
 		let mut cursor = media::ModelWithMetadata::find_for_user(user)
-			.filter(media::Column::SeriesId.eq(series_id))
+			.filter(media::Column::SeriesId.eq(self.model.series_id.clone()))
 			.cursor_by(media::Column::Name);
-		cursor.after(&self.model.name).first(take);
+
+		let after = match pagination.after.clone() {
+			Some(after) if after != self.model.id => {
+				let media =
+					media::Entity::find_for_user(user)
+						.select_only()
+						.column(media::Column::Name)
+						.filter(media::Column::Id.eq(after).and(
+							media::Column::SeriesId.eq(self.model.series_id.clone()),
+						))
+						.into_model::<media::MediaNameCmpSelect>()
+						.one(conn)
+						.await?
+						.ok_or("Cursor not found")?;
+				media.name
+			},
+			_ => self.model.name.clone(),
+		};
+
+		cursor.after(after).first(pagination.limit);
 
 		let next = cursor
 			.into_model::<media::ModelWithMetadata>()
 			.all(conn)
 			.await?;
+		let current_cursor = pagination
+			.after
+			.or_else(|| next.first().map(|m| m.media.id.clone()));
+		let next_cursor = match next.last().map(|m| m.media.id.clone()) {
+			Some(id) if next.len() == pagination.limit as usize => Some(id),
+			_ => None,
+		};
 
-		Ok(next.into_iter().map(Media::from).collect())
+		Ok(PaginatedResponse {
+			nodes: next.into_iter().map(Media::from).collect(),
+			page_info: CursorPaginationInfo {
+				current_cursor,
+				next_cursor,
+				limit: pagination.limit,
+			}
+			.into(),
+		})
 	}
 }

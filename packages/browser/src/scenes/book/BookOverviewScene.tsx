@@ -23,8 +23,36 @@ import BookReaderDropdown from './BookReaderDropdown'
 import BooksAfterCursor from './BooksAfterCursor'
 import DownloadMediaButton from './DownloadMediaButton'
 import EmailBookDropdown from './EmailBookDropdown'
+import { graphql } from '@stump/graphql'
+import { useSuspenseQuery } from '@apollo/client'
+
+const query = graphql(`
+	query BookOverviewSceneQuery($id: ID!) {
+		mediaById(id: $id) {
+			id
+			...BookCard
+			extension
+			metadata {
+				links
+				summary
+			}
+			readHistory {
+				completedAt
+			}
+			resolvedName
+		}
+	}
+`)
 
 export default function BookOverviewScene() {
+	const { id } = useParams()
+	const {
+		data: { mediaById: media },
+	} = useSuspenseQuery(query, {
+		variables: {
+			id: id || '',
+		},
+	})
 	const { checkPermission, isServerOwner } = useAppContext()
 
 	const canDownload = useMemo(() => checkPermission('file:download'), [checkPermission])
@@ -32,42 +60,28 @@ export default function BookOverviewScene() {
 
 	const isAtLeastTablet = useMediaMatch('(min-width: 640px)')
 
-	const { id } = useParams()
-	if (!id) {
-		throw new Error('Book id is required for this route.')
+	if (!media) {
+		throw new Error('Book not found')
 	}
 
-	const { media, isLoading, remove } = useMediaByIdQuery(id)
-
-	useEffect(() => {
-		return () => {
-			remove()
-		}
-	}, [remove])
-
-	if (isLoading) {
-		return null
-	} else if (!media) {
-		throw new Error('Media not found')
-	}
-
-	const completedAt = sortBy(media.finished_reading_sessions, ({ completed_at }) =>
-		dayjs(completed_at).toDate(),
-	).at(-1)?.completed_at
-	const links = media.metadata?.links?.filter((l) => !!l) ?? []
+	const completedAt = sortBy(media.readHistory, ({ completedAt }) =>
+		dayjs(completedAt).toDate(),
+	).at(-1)?.completedAt
+	const links = media.metadata?.links.filter((l) => !!l) ?? []
 
 	return (
 		<SceneContainer>
 			<Suspense>
 				<Helmet>
-					<title>Stump | {formatBookName(media)}</title>
+					<title>Stump | {media.resolvedName}</title>
 				</Helmet>
 
 				<div className="flex h-full w-full flex-col gap-4">
 					<div className="flex flex-col items-center gap-3 tablet:mb-2 tablet:flex-row tablet:items-start">
-						<MediaCard media={media} readingLink variant="cover" />
+						<MediaCard id={media.id} readingLink variant="cover" />
 						<div className="flex h-full w-full flex-col gap-2 tablet:gap-4">
-							<BookOverviewSceneHeader media={media} />
+							{/* <BookOverviewSceneHeader media={media} /> */}
+							<Heading size="sm">{media.resolvedName}</Heading>
 							{completedAt && (
 								<Text size="xs" variant="muted">
 									Completed on {dayjs(completedAt).format('LLL')}
@@ -77,8 +91,8 @@ export default function BookOverviewScene() {
 							{!isAtLeastTablet && <Spacer />}
 
 							<div className="flex w-full flex-col gap-2 md:flex-row md:items-center">
-								<BookReaderDropdown book={media} />
-								<BookCompletionToggleButton book={media} />
+								{/* <BookReaderDropdown book={media} /> */}
+								{/* <BookCompletionToggleButton book={media} /> */}
 								{media.extension?.match(PDF_EXTENSION) && (
 									<ButtonOrLink
 										variant="outline"
@@ -94,8 +108,8 @@ export default function BookOverviewScene() {
 										Manage
 									</ButtonOrLink>
 								)}
-								{canDownload && <DownloadMediaButton media={media} />}
-								<EmailBookDropdown mediaId={media.id} />
+								{/* {canDownload && <DownloadMediaButton media={media} />} */}
+								{/* <EmailBookDropdown mediaId={media.id} /> */}
 							</div>
 
 							{!isAtLeastTablet && !!media.metadata?.summary && (
@@ -117,8 +131,8 @@ export default function BookOverviewScene() {
 						</div>
 					)}
 
-					{isServerOwner && <BookFileInformation media={media} />}
-					<BooksAfterCursor cursor={media} />
+					{/* {isServerOwner && <BookFileInformation media={media} />} */}
+					<BooksAfterCursor cursor={media.id} />
 				</div>
 			</Suspense>
 		</SceneContainer>

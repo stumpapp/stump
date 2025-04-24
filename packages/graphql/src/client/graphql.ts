@@ -33,7 +33,7 @@ export type ActiveReadingSession = {
   deviceId?: Maybe<Scalars['String']['output']>;
   elapsedSeconds?: Maybe<Scalars['Int']['output']>;
   epubcfi?: Maybe<Scalars['String']['output']>;
-  id: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
   koreaderProgress?: Maybe<Scalars['String']['output']>;
   mediaId: Scalars['String']['output'];
   page?: Maybe<Scalars['Int']['output']>;
@@ -343,7 +343,7 @@ export type FinishedReadingSession = {
   completedAt: Scalars['DateTime']['output'];
   deviceId?: Maybe<Scalars['String']['output']>;
   elapsedSeconds?: Maybe<Scalars['Int']['output']>;
-  id: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
   mediaId: Scalars['String']['output'];
   startedAt: Scalars['DateTime']['output'];
   userId: Scalars['String']['output'];
@@ -491,7 +491,7 @@ export type Media = {
    */
   koreaderHash?: Maybe<Scalars['String']['output']>;
   library: Library;
-  metadata?: Maybe<MediaMetadataModel>;
+  metadata?: Maybe<MediaMetadata>;
   /**
    * The timestamp of when the underlying file was last modified on disk. This will only be set if
    * a timestamp can be retrieved from the filesystem
@@ -499,7 +499,7 @@ export type Media = {
   modifiedAt?: Maybe<Scalars['DateTime']['output']>;
   /** The name of the media, derived from the filename and excluding the extension */
   name: Scalars['String']['output'];
-  nextInSeries: Array<Media>;
+  nextInSeries: PaginatedMediaResponse;
   /** The number of pages in the media, if applicable. Will be -1 for certain media types */
   pages: Scalars['Int']['output'];
   /** The path of the underlying media file on disk */
@@ -535,7 +535,7 @@ export type Media = {
 
 
 export type MediaNextInSeriesArgs = {
-  take?: Scalars['Int']['input'];
+  pagination?: CursorPagination;
 };
 
 export type MediaAnnotationsModel = {
@@ -551,33 +551,31 @@ export type MediaAnnotationsModel = {
   userId: Scalars['String']['output'];
 };
 
-export type MediaMetadataModel = {
-  __typename?: 'MediaMetadataModel';
+export type MediaMetadata = {
+  __typename?: 'MediaMetadata';
   ageRating?: Maybe<Scalars['Int']['output']>;
-  characters?: Maybe<Scalars['String']['output']>;
-  colorists?: Maybe<Scalars['String']['output']>;
-  coverArtists?: Maybe<Scalars['String']['output']>;
+  characters: Array<Scalars['String']['output']>;
+  colorists: Array<Scalars['String']['output']>;
+  coverArtists: Array<Scalars['String']['output']>;
   day?: Maybe<Scalars['Int']['output']>;
-  editors?: Maybe<Scalars['String']['output']>;
+  editors: Array<Scalars['String']['output']>;
   genre?: Maybe<Scalars['String']['output']>;
   id: Scalars['Int']['output'];
-  inkers?: Maybe<Scalars['String']['output']>;
-  letterers?: Maybe<Scalars['String']['output']>;
-  links?: Maybe<Scalars['String']['output']>;
+  inkers: Array<Scalars['String']['output']>;
+  letterers: Array<Scalars['String']['output']>;
+  links: Array<Scalars['String']['output']>;
   mediaId?: Maybe<Scalars['String']['output']>;
   month?: Maybe<Scalars['Int']['output']>;
   notes?: Maybe<Scalars['String']['output']>;
   number?: Maybe<Scalars['Decimal']['output']>;
   pageAnalysis?: Maybe<PageAnalysis>;
   pageCount?: Maybe<Scalars['Int']['output']>;
-  pencillers?: Maybe<Scalars['String']['output']>;
-  publisher?: Maybe<Scalars['String']['output']>;
+  pencillers: Array<Scalars['String']['output']>;
   series?: Maybe<Scalars['String']['output']>;
   summary?: Maybe<Scalars['String']['output']>;
-  teams?: Maybe<Scalars['String']['output']>;
+  teams: Array<Scalars['String']['output']>;
   title?: Maybe<Scalars['String']['output']>;
   volume?: Maybe<Scalars['Int']['output']>;
-  writers?: Maybe<Scalars['String']['output']>;
   year?: Maybe<Scalars['Int']['output']>;
 };
 
@@ -1419,6 +1417,29 @@ export type SideBarQueryQuery = { __typename?: 'Query', me: { __typename?: 'User
 
 export type SeriesCardFragment = { __typename?: 'Series', id: string, resolvedName: string, mediaCount: number, percentageCompleted: number, status: string } & { ' $fragmentName'?: 'SeriesCardFragment' };
 
+export type BookOverviewSceneQueryQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type BookOverviewSceneQueryQuery = { __typename?: 'Query', mediaById?: (
+    { __typename?: 'Media', id: string, extension: string, resolvedName: string, metadata?: { __typename?: 'MediaMetadata', links: Array<string>, summary?: string | null } | null, readHistory: Array<{ __typename?: 'FinishedReadingSession', completedAt: any }> }
+    & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
+  ) | null };
+
+export type BookOverviewHeaderFragment = { __typename?: 'Media', metadata?: { __typename?: 'MediaMetadata', characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, editors: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, pencillers: Array<string>, teams: Array<string> } | null } & { ' $fragmentName'?: 'BookOverviewHeaderFragment' };
+
+export type BooksAfterCurrentQueryQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  pagination?: InputMaybe<CursorPagination>;
+}>;
+
+
+export type BooksAfterCurrentQueryQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', nextInSeries: { __typename?: 'PaginatedMediaResponse', nodes: Array<(
+        { __typename?: 'Media', id: string }
+        & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
+      )>, pageInfo: { __typename?: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename?: 'OffsetPaginationInfo' } } } | null };
+
 export type ContinueReadingMediaQueryQueryVariables = Exact<{
   pagination: Pagination;
 }>;
@@ -1456,7 +1477,10 @@ export type RecentlyAddedSeriesQueryQuery = { __typename?: 'Query', recentlyAdde
 
 export const BookCardFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"BookCard"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Media"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"resolvedName"}},{"kind":"Field","name":{"kind":"Name","value":"pages"}},{"kind":"Field","name":{"kind":"Name","value":"size"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"thumbnail"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"readProgress"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"percentageCompleted"}},{"kind":"Field","name":{"kind":"Name","value":"epubcfi"}},{"kind":"Field","name":{"kind":"Name","value":"page"}}]}},{"kind":"Field","name":{"kind":"Name","value":"readHistory"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}}]}}]}}]} as unknown as DocumentNode<BookCardFragment, unknown>;
 export const SeriesCardFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SeriesCard"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Series"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"resolvedName"}},{"kind":"Field","name":{"kind":"Name","value":"mediaCount"}},{"kind":"Field","name":{"kind":"Name","value":"percentageCompleted"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]} as unknown as DocumentNode<SeriesCardFragment, unknown>;
+export const BookOverviewHeaderFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"BookOverviewHeader"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Media"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"metadata"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"characters"}},{"kind":"Field","name":{"kind":"Name","value":"colorists"}},{"kind":"Field","name":{"kind":"Name","value":"coverArtists"}},{"kind":"Field","name":{"kind":"Name","value":"editors"}},{"kind":"Field","name":{"kind":"Name","value":"inkers"}},{"kind":"Field","name":{"kind":"Name","value":"letterers"}},{"kind":"Field","name":{"kind":"Name","value":"links"}},{"kind":"Field","name":{"kind":"Name","value":"pencillers"}},{"kind":"Field","name":{"kind":"Name","value":"teams"}}]}}]}}]} as unknown as DocumentNode<BookOverviewHeaderFragment, unknown>;
 export const SideBarQueryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"SideBarQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"me"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"preferences"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"navigationArrangement"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locked"}},{"kind":"Field","name":{"kind":"Name","value":"sections"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"config"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}}]}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<SideBarQueryQuery, SideBarQueryQueryVariables>;
+export const BookOverviewSceneQueryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"BookOverviewSceneQuery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"mediaById"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"BookCard"}},{"kind":"Field","name":{"kind":"Name","value":"extension"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"links"}},{"kind":"Field","name":{"kind":"Name","value":"summary"}}]}},{"kind":"Field","name":{"kind":"Name","value":"readHistory"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"completedAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"resolvedName"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"BookCard"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Media"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"resolvedName"}},{"kind":"Field","name":{"kind":"Name","value":"pages"}},{"kind":"Field","name":{"kind":"Name","value":"size"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"thumbnail"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"readProgress"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"percentageCompleted"}},{"kind":"Field","name":{"kind":"Name","value":"epubcfi"}},{"kind":"Field","name":{"kind":"Name","value":"page"}}]}},{"kind":"Field","name":{"kind":"Name","value":"readHistory"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}}]}}]}}]} as unknown as DocumentNode<BookOverviewSceneQueryQuery, BookOverviewSceneQueryQueryVariables>;
+export const BooksAfterCurrentQueryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"BooksAfterCurrentQuery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"CursorPagination"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"mediaById"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nextInSeries"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"BookCard"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pageInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"CursorPaginationInfo"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"currentCursor"}},{"kind":"Field","name":{"kind":"Name","value":"nextCursor"}},{"kind":"Field","name":{"kind":"Name","value":"limit"}}]}}]}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"BookCard"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Media"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"resolvedName"}},{"kind":"Field","name":{"kind":"Name","value":"pages"}},{"kind":"Field","name":{"kind":"Name","value":"size"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"thumbnail"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"readProgress"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"percentageCompleted"}},{"kind":"Field","name":{"kind":"Name","value":"epubcfi"}},{"kind":"Field","name":{"kind":"Name","value":"page"}}]}},{"kind":"Field","name":{"kind":"Name","value":"readHistory"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}}]}}]}}]} as unknown as DocumentNode<BooksAfterCurrentQueryQuery, BooksAfterCurrentQueryQueryVariables>;
 export const ContinueReadingMediaQueryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ContinueReadingMediaQuery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Pagination"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"keepReading"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"BookCard"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pageInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"CursorPaginationInfo"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"currentCursor"}},{"kind":"Field","name":{"kind":"Name","value":"nextCursor"}},{"kind":"Field","name":{"kind":"Name","value":"limit"}}]}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"BookCard"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Media"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"resolvedName"}},{"kind":"Field","name":{"kind":"Name","value":"pages"}},{"kind":"Field","name":{"kind":"Name","value":"size"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"thumbnail"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"readProgress"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"percentageCompleted"}},{"kind":"Field","name":{"kind":"Name","value":"epubcfi"}},{"kind":"Field","name":{"kind":"Name","value":"page"}}]}},{"kind":"Field","name":{"kind":"Name","value":"readHistory"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}}]}}]}}]} as unknown as DocumentNode<ContinueReadingMediaQueryQuery, ContinueReadingMediaQueryQueryVariables>;
 export const HomeSceneQueryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"HomeSceneQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"numberOfLibraries"}}]}}]} as unknown as DocumentNode<HomeSceneQueryQuery, HomeSceneQueryQueryVariables>;
 export const RecentlyAddedMediaQueryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"RecentlyAddedMediaQuery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Pagination"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"recentlyAddedMedia"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"BookCard"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pageInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"CursorPaginationInfo"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"currentCursor"}},{"kind":"Field","name":{"kind":"Name","value":"nextCursor"}},{"kind":"Field","name":{"kind":"Name","value":"limit"}}]}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"BookCard"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Media"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"resolvedName"}},{"kind":"Field","name":{"kind":"Name","value":"pages"}},{"kind":"Field","name":{"kind":"Name","value":"size"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"thumbnail"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"readProgress"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"percentageCompleted"}},{"kind":"Field","name":{"kind":"Name","value":"epubcfi"}},{"kind":"Field","name":{"kind":"Name","value":"page"}}]}},{"kind":"Field","name":{"kind":"Name","value":"readHistory"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}}]}}]}}]} as unknown as DocumentNode<RecentlyAddedMediaQueryQuery, RecentlyAddedMediaQueryQueryVariables>;

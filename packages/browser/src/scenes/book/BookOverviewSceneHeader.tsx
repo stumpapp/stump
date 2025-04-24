@@ -7,6 +7,23 @@ import { formatBookName } from '@/utils/format'
 
 import paths from '../../paths'
 import BookLibrarySeriesLinks from './BookLibrarySeriesLinks'
+import { graphql } from '@stump/graphql'
+
+export const BOOK_OVERVIEW_SCENE_HEADER_FRAGMENT = graphql(`
+	fragment BookOverviewHeader on Media {
+		metadata {
+			characters
+			colorists
+			coverArtists
+			editors
+			inkers
+			letterers
+			links
+			pencillers
+			teams
+		}
+	}
+`)
 
 interface MetadataTableItem {
 	keynameBase: string
@@ -73,45 +90,37 @@ function build_metadata_table(metadata: MediaMetadata) {
 	return table
 }
 
-type Props = {
-	media: Media | null
-}
-export default function BookOverviewSceneHeader({ media }: Props) {
-	if (!media) {
-		return null
-	}
+type Props = {}
 
-	const metadata_table = build_metadata_table(media?.metadata ?? {})
+export default function BookOverviewSceneHeader({}: Props) {
+	// const metadata_table = build_metadata_table(media?.metadata ?? {})
 
 	return (
 		<div className="flex flex-col items-center text-center tablet:items-start tablet:text-left">
-			<Heading size="sm">{formatBookName(media)}</Heading>
+			{/* <Heading size="sm">{formatBookName(media)}</Heading> */}
 
-			{!!metadata_table.length && (
+			{/* {!!metadata_table.length && (
 				<div>
 					{metadata_table.map((metadata_row) => (
 						<div key={metadata_row.keynameBase} className="flex flex-row gap-1 space-x-2">
 							<Text>{metadata_row.prefix}</Text>
 							{metadata_row.values.map((element, index) => (
 								<div key={metadata_row.keynameBase + index}>
-									<SearchLinkBadge
-										searchKey={metadata_row.searchKey}
-										text={element}
-									></SearchLinkBadge>
+									<SearchLinkBadge searchKey={metadata_row.searchKey} text={element} />
 								</div>
 							))}
 						</div>
 					))}
 				</div>
-			)}
+			)} */}
 
-			<BookLibrarySeriesLinks
+			{/* <BookLibrarySeriesLinks
 				libraryId={media.series?.library_id}
 				seriesId={media.series_id}
 				series={media.series}
 			/>
 
-			<TagList tags={media.tags || null} baseUrl={paths.bookSearch()} />
+			<TagList tags={media.tags || null} baseUrl={paths.bookSearch()} /> */}
 		</div>
 	)
 }

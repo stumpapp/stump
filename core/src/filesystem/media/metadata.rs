@@ -19,6 +19,8 @@ const NAIVE_DATE_FORMATS: [&str; 2] = ["%Y-%m-%d", "%m-%d-%Y"];
 // NOTE: alias is used primarily to support ComicInfo.xml files, as that metadata
 // is formatted in PascalCase
 
+// TODO: Intake tags
+
 /// Struct representing the metadata for a processed file.
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize, Default, Merge)]

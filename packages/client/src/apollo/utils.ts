@@ -14,6 +14,7 @@ type UpdateQueryOptions = {
 }
 
 // TODO: Probably would be good to make a bit more type safe
+// FIXME: This won't work for nested queries
 
 /**
  * A utility function to update the query result when fetching more data

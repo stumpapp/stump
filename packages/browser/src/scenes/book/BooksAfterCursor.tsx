@@ -1,47 +1,105 @@
-import { useMediaCursorQuery } from '@stump/client'
+import { getNextPageParam, useMediaCursorQuery } from '@stump/client'
 import { Text } from '@stump/components'
 import { Media } from '@stump/sdk'
 import { BookX } from 'lucide-react'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useTransition } from 'react'
 
 import MediaCard from '@/components/book/BookCard'
 import HorizontalCardList from '@/components/HorizontalCardList'
+import { CursorPagination, graphql, PaginationInfo } from '@stump/graphql'
+import { useSuspenseQuery } from '@apollo/client'
+
+const query = graphql(`
+	query BooksAfterCurrentQuery($id: ID!, $pagination: CursorPagination) {
+		mediaById(id: $id) {
+			nextInSeries(pagination: $pagination) {
+				nodes {
+					id
+					...BookCard
+				}
+				pageInfo {
+					... on CursorPaginationInfo {
+						currentCursor
+						nextCursor
+						limit
+					}
+				}
+			}
+		}
+	}
+`)
 
 type Props = {
-	cursor: Media
+	cursor: string
+}
+
+export default function BooksAfterCurrentContainer({ cursor }: Props) {
+	return <BooksAfterCurrent cursor={cursor} />
 }
 
 function BooksAfterCurrent({ cursor }: Props) {
-	const { media, fetchNextPage, hasNextPage, remove, isFetching } = useMediaCursorQuery({
-		initialCursor: cursor.id,
-		limit: 20,
-		params: {
-			series: {
-				id: cursor.series_id,
-			},
+	// const { media, fetchNextPage, hasNextPage, remove, isFetching } = useMediaCursorQuery({
+	// 	initialCursor: cursor.id,
+	// 	limit: 20,
+	// 	params: {
+	// 		series: {
+	// 			id: cursor.series_id,
+	// 		},
+	// 	},
+	// 	suspense: true,
+	// 	useErrorBoundary: false,
+	// })
+	const [, startTransition] = useTransition()
+	const {
+		data: { mediaById },
+		fetchMore,
+	} = useSuspenseQuery(query, {
+		variables: {
+			id: cursor,
 		},
-		suspense: true,
-		useErrorBoundary: false,
 	})
 
-	const cards = media.map((media) => <MediaCard media={media} key={media.id} fullWidth={false} />)
+	if (!mediaById) {
+		return null
+	}
 
-	useEffect(() => {
-		// NOTE: I'm honestly not sure why this is even required... Without this, no matter WHAT I do,
-		// previous data seems to stick around. Manually removing from the cache on unmount seems to
-		// fix it...
-		return () => {
-			remove()
-		}
-	}, [remove])
+	const {
+		nextInSeries: { nodes, pageInfo },
+	} = mediaById
+
+	const cards = nodes.map((node) => <MediaCard id={node.id} key={node.id} fullWidth={false} />)
 
 	const handleFetchMore = useCallback(() => {
-		if (!hasNextPage || isFetching) {
-			return
-		} else {
-			fetchNextPage()
+		const nextPageParam = getNextPageParam(pageInfo as PaginationInfo)
+		if (nextPageParam) {
+			startTransition(() => {
+				fetchMore({
+					variables: {
+						id: cursor,
+						pagination: nextPageParam as CursorPagination,
+					},
+					updateQuery: (prev, { fetchMoreResult }) => {
+						if (!fetchMoreResult) return prev
+						const pageInfo = fetchMoreResult.mediaById?.nextInSeries.pageInfo
+						if (!pageInfo) return prev
+						return {
+							mediaById: {
+								...prev.mediaById,
+								nextInSeries: {
+									...prev.mediaById?.nextInSeries,
+									nodes: [
+										...(prev.mediaById?.nextInSeries.nodes || []),
+										...(fetchMoreResult.mediaById?.nextInSeries.nodes || []),
+									],
+									pageInfo,
+								},
+							},
+						}
+					},
+				})
+			})
 		}
-	}, [fetchNextPage, hasNextPage, isFetching])
+	}, [])
 
 	return (
 		<HorizontalCardList
@@ -63,8 +121,4 @@ function BooksAfterCurrent({ cursor }: Props) {
 			}
 		/>
 	)
-}
-
-export default function BooksAfterCurrentContainer({ cursor }: Props) {
-	return <BooksAfterCurrent cursor={cursor} />
 }

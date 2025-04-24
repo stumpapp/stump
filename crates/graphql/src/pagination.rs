@@ -18,6 +18,15 @@ pub struct CursorPagination {
 	pub limit: u64,
 }
 
+impl Default for CursorPagination {
+	fn default() -> Self {
+		Self {
+			after: None,
+			limit: 20,
+		}
+	}
+}
+
 fn default_restful_page() -> u64 {
 	1
 }
@@ -246,6 +255,7 @@ impl OffsetPaginationInfo {
 }
 
 #[derive(Debug, SimpleObject)]
+#[graphql(concrete(name = "CursorPaginatedMediaResponse", params(Media)))]
 pub struct CursorPaginatedResponse<T>
 where
 	T: OutputType,

@@ -1,5 +1,5 @@
 type ActiveReadingSession {
-	id: String!
+	id: Int!
 	page: Int
 	percentageCompleted: Decimal
 	epubcfi: String
@@ -304,7 +304,7 @@ enum FilterableArrangementEntityLink {
 }
 
 type FinishedReadingSession {
-	id: String!
+	id: Int!
 	startedAt: DateTime!
 	completedAt: DateTime!
 	mediaId: String!
@@ -473,7 +473,7 @@ type Media {
 	seriesId: String
 	"The timestamp of when the media was **soft** deleted. This will act like a trash bin."
 	deletedAt: DateTime
-	metadata: MediaMetadataModel
+	metadata: MediaMetadata
 	series: Series!
 	library: Library!
 	"""
@@ -488,7 +488,7 @@ type Media {
 	resolvedName: String!
 	readProgress: ActiveReadingSession
 	readHistory: [FinishedReadingSession!]!
-	nextInSeries(take: Int! = 1): [Media!]!
+	nextInSeries(pagination: CursorPagination! = {after: null, limit: 20}): PaginatedMediaResponse!
 }
 
 type MediaAnnotationsModel {
@@ -503,7 +503,7 @@ type MediaAnnotationsModel {
 	mediaId: String!
 }
 
-type MediaMetadataModel {
+type MediaMetadata {
 	id: Int!
 	mediaId: String
 	title: String
@@ -516,20 +516,18 @@ type MediaMetadataModel {
 	year: Int
 	month: Int
 	day: Int
-	writers: String
-	pencillers: String
-	inkers: String
-	colorists: String
-	letterers: String
-	coverArtists: String
-	editors: String
-	publisher: String
-	links: String
-	characters: String
-	teams: String
 	pageCount: Int
 	ageRating: Int
 	pageAnalysis: PageAnalysis
+	characters: [String!]!
+	colorists: [String!]!
+	coverArtists: [String!]!
+	editors: [String!]!
+	inkers: [String!]!
+	letterers: [String!]!
+	links: [String!]!
+	pencillers: [String!]!
+	teams: [String!]!
 }
 
 type MediaMetadataOverview {

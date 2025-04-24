@@ -38,17 +38,6 @@ export default function BooksAfterCurrentContainer({ cursor }: Props) {
 }
 
 function BooksAfterCurrent({ cursor }: Props) {
-	// const { media, fetchNextPage, hasNextPage, remove, isFetching } = useMediaCursorQuery({
-	// 	initialCursor: cursor.id,
-	// 	limit: 20,
-	// 	params: {
-	// 		series: {
-	// 			id: cursor.series_id,
-	// 		},
-	// 	},
-	// 	suspense: true,
-	// 	useErrorBoundary: false,
-	// })
 	const [, startTransition] = useTransition()
 	const {
 		data: { mediaById },
@@ -56,6 +45,9 @@ function BooksAfterCurrent({ cursor }: Props) {
 	} = useSuspenseQuery(query, {
 		variables: {
 			id: cursor,
+			pagination: {
+				limit: 20,
+			},
 		},
 	})
 

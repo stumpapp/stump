@@ -1,22 +1,28 @@
 use crate::{
 	data::{CoreContext, RequestContext},
-	guard::{PermissionGuard, SelfGuard, ServerOwnerGuard},
-	input::user::CreateUserInput,
-	object::user::User,
+	error_message::FORBIDDEN_ACTION,
+	guard::{PermissionGuard, ServerOwnerGuard},
+	input::user::{
+		AgeRestrictionInput, CreateUserInput, UpdateUserInput, UpdateUserPreferencesInput,
+	},
+	object::{user::User, user_preferences::UserPreferences},
 };
-use async_graphql::{Context, Object, Result, SimpleObject, ID};
+use async_graphql::{Context, Object, Result};
 use models::{
 	entity::{
-		age_restriction,
+		age_restriction, session,
 		user::{self, AuthUser},
-		user_login_activity,
+		user_login_activity, user_preferences,
 	},
-	shared::{enums::UserPermission, permission_set::PermissionSet},
+	shared::{
+		arrangement::Arrangement, enums::UserPermission, permission_set::PermissionSet,
+	},
 };
 use sea_orm::{
-	prelude::*, sea_query::OnConflict, ActiveValue::NotSet, Set, TransactionTrait,
-	TryIntoModel,
+	prelude::*, ActiveValue::NotSet, DatabaseTransaction, IntoActiveModel, Set,
+	TransactionTrait, TryIntoModel,
 };
+use stump_core::config::StumpConfig;
 
 #[derive(Default)]
 pub struct UserMutation;
@@ -103,14 +109,438 @@ impl UserMutation {
 		Ok(User::from(user_model.try_into_model()?))
 	}
 
-	// TODO(graphql): Implement the following mutations
-	// create_user
-	// update_current_user
-	// update_current_user_preferences
-	// update_user_preferences
-	// update_current_user_navigation_arrangement
-	// update_user_handle
-	// delete_user_session
-	// update_user_lock_status
-	// delete_user_by_id
+	async fn me_update_user(
+		&self,
+		ctx: &Context<'_>,
+		input: UpdateUserInput,
+	) -> Result<User> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let core_ctx = ctx.data::<CoreContext>()?;
+		let config = core_ctx.config.as_ref();
+		let conn = core_ctx.conn.as_ref();
+
+		let updated_user =
+			update_user(user, user.id.clone(), conn, config, &input).await?;
+
+		// TODO(graphql): Insert user session
+
+		Ok(updated_user)
+	}
+
+	async fn me_update_user_preferences(
+		&self,
+		ctx: &Context<'_>,
+		input: UpdateUserPreferencesInput,
+	) -> Result<UserPreferences> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let core_ctx = ctx.data::<CoreContext>()?;
+		let conn = core_ctx.conn.as_ref();
+
+		let user_preferences = user_preferences::Entity::find()
+			.filter(user_preferences::Column::UserId.eq(user.id.clone()))
+			.one(conn)
+			.await?;
+
+		// TODO(graphql): update user session
+
+		if let Some(user_preferences_model) = user_preferences {
+			tracing::trace!(user_id = ?user.id, ?user_preferences_model, updates = ?input, "Updating viewer's preferences");
+
+			let updated_user_preferences = update_user_preferences_by_id(
+				user_preferences_model.id,
+				user.id.clone(),
+				input,
+				conn,
+			)
+			.await?;
+			Ok(UserPreferences::from(updated_user_preferences))
+		} else {
+			Err("User preferences not found".into())
+		}
+	}
+
+	async fn update_user(
+		&self,
+		ctx: &Context<'_>,
+		user_id: String,
+		input: UpdateUserInput,
+	) -> Result<User> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let core_ctx = ctx.data::<CoreContext>()?;
+		let config = core_ctx.config.as_ref();
+		let conn = core_ctx.conn.as_ref();
+
+		if user.id != user_id && !user.is_server_owner {
+			return Err(FORBIDDEN_ACTION.into());
+		}
+
+		let updated_user =
+			update_user(user, user_id.clone(), conn, config, &input).await?;
+		tracing::debug!(?updated_user, "Updated user");
+
+		if user.id != user_id {
+			// TODO(graphql): Insert user session
+		} else {
+			// When a server owner updates another user, we need to delete all sessions for that user
+			// because the user's permissions may have changed. This is a bit lazy but it works.
+			remove_all_session_for_user_id(user_id.clone(), conn).await?;
+		}
+
+		Ok(updated_user)
+	}
+
+	#[graphql(guard = "ServerOwnerGuard")]
+	async fn delete_user_by_id(
+		&self,
+		ctx: &Context<'_>,
+		user_id: String,
+		hard_delete: Option<bool>,
+	) -> Result<User> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let core_ctx = ctx.data::<CoreContext>()?;
+		let conn = core_ctx.conn.as_ref();
+
+		if user_id == user.id {
+			return Err("You cannot delete your own account".into());
+		}
+
+		let hard_delete = hard_delete.unwrap_or(false);
+
+		let deleted_user = if hard_delete {
+			user::Entity::delete_by_id(user_id.clone())
+				.exec_with_returning(conn)
+				.await?
+				.first()
+				.ok_or("Failed to delete user".to_string())?
+				.clone()
+		} else {
+			let active_model = user::ActiveModel {
+				id: Set(user_id.clone()),
+				deleted_at: Set(Some(chrono::Utc::now().into())),
+				..Default::default()
+			};
+
+			active_model.update(conn).await?.try_into_model()?
+		};
+
+		tracing::debug!(?deleted_user, "Deleted user");
+		Ok(User::from(deleted_user))
+	}
+
+	#[graphql(guard = "ServerOwnerGuard")]
+	async fn delete_user_sessions(
+		&self,
+		ctx: &Context<'_>,
+		user_id: String,
+	) -> Result<u64> {
+		let core_ctx = ctx.data::<CoreContext>()?;
+		let conn = core_ctx.conn.as_ref();
+
+		let removed_sessions =
+			remove_all_session_for_user_id(user_id.clone(), conn).await?;
+		Ok(removed_sessions.len().try_into()?)
+	}
+
+	#[graphql(guard = "ServerOwnerGuard")]
+	async fn update_user_lock_status(
+		&self,
+		ctx: &Context<'_>,
+		user_id: String,
+		lock: bool,
+	) -> Result<User> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let core_ctx = ctx.data::<CoreContext>()?;
+		let conn = core_ctx.conn.as_ref();
+
+		if user_id == user.id {
+			return Err("You cannot lock your own account".into());
+		}
+
+		let active_model = user::ActiveModel {
+			id: Set(user_id.clone()),
+			is_locked: Set(lock),
+			..Default::default()
+		};
+
+		let updated_user = active_model.update(conn).await?.try_into_model()?;
+
+		if lock {
+			// Delete all sessions for this user if they are being locked
+			remove_all_session_for_user_id(user_id.clone(), conn).await?;
+		}
+
+		Ok(User::from(updated_user))
+	}
+
+	// TODO(graphql): update_current_user_navigation_arrangement
+}
+
+async fn remove_all_session_for_user_id(
+	user_id: String,
+	conn: &DatabaseConnection,
+) -> Result<Vec<session::Model>> {
+	let removed_sessions = session::Entity::delete_many()
+		.filter(session::Column::UserId.eq(user_id.clone()))
+		.exec_with_returning(conn)
+		.await?;
+
+	tracing::debug!(?removed_sessions, "Removed sessions for user");
+	Ok(removed_sessions)
+}
+
+async fn update_user_preferences_by_id(
+	id: String,
+	user_id: String,
+	user_preferences: UpdateUserPreferencesInput,
+	conn: &DatabaseConnection,
+) -> Result<UserPreferences> {
+	let app_font_str =
+		serde_json::to_string(&user_preferences.app_font).map_err(|e| {
+			tracing::error!("Failed to serialize app font: {:?}", e);
+			"Failed to serialize app font"
+		})?;
+	let updated_user_preferences = user_preferences::ActiveModel {
+		id: Set(id),
+		user_id: Set(Some(user_id)),
+		locale: Set(user_preferences.locale),
+		preferred_layout_mode: Set(user_preferences.preferred_layout_mode),
+		app_theme: Set(user_preferences.app_theme),
+		enable_gradients: Set(user_preferences.enable_gradients),
+		app_font: Set(app_font_str),
+		primary_navigation_mode: Set(user_preferences.primary_navigation_mode),
+		layout_max_width_px: Set(user_preferences.layout_max_width_px),
+		show_query_indicator: Set(user_preferences.show_query_indicator),
+		enable_live_refetch: Set(user_preferences.enable_live_refetch),
+		enable_discord_presence: Set(user_preferences.enable_discord_presence),
+		enable_compact_display: Set(user_preferences.enable_compact_display),
+		enable_double_sidebar: Set(user_preferences.enable_double_sidebar),
+		enable_replace_primary_sidebar: Set(
+			user_preferences.enable_replace_primary_sidebar
+		),
+		enable_hide_scrollbar: Set(user_preferences.enable_hide_scrollbar),
+		enable_job_overlay: Set(user_preferences.enable_job_overlay),
+		prefer_accent_color: Set(user_preferences.prefer_accent_color),
+		show_thumbnails_in_headers: Set(user_preferences.show_thumbnails_in_headers),
+		enable_alphabet_select: NotSet,
+		home_arrangement: NotSet,
+		navigation_arrangement: NotSet,
+	};
+
+	let updated_user_prefs = updated_user_preferences.update(conn).await?;
+
+	Ok(UserPreferences::from(updated_user_prefs))
+}
+
+async fn update_user(
+	by_user: &AuthUser,
+	for_user_id: String,
+	conn: &DatabaseConnection,
+	config: &StumpConfig,
+	input: &UpdateUserInput,
+) -> Result<User> {
+	// NOTE: there are other mechanisms in place to effectively disable logging in,
+	// so I am making this a bad request. In the future, perhaps this can change.
+	match input.max_sessions_allowed {
+		Some(max_sessions_allowed) if max_sessions_allowed <= 0 => {
+			return Err("max_sessions_allowed must be greater than 0 when set".into());
+		},
+		Some(max_sessions_allowed) => {
+			tracing::trace!(?max_sessions_allowed, "The max sessions allowed is set");
+		},
+		_ => {},
+	}
+
+	let mut update_user = user::ActiveModel {
+		id: Set(for_user_id.clone()),
+		username: Set(input.username.clone()),
+		avatar_url: Set(input.avatar_url.clone()),
+		max_sessions_allowed: Set(input.max_sessions_allowed),
+		..Default::default()
+	};
+
+	if let Some(password) = input.password.clone() {
+		let hashed_password = bcrypt::hash(password, config.password_hash_cost)?;
+		update_user.hashed_password = Set(hashed_password);
+	}
+
+	let txn = conn.begin().await?;
+
+	let is_updating_server_owner = by_user.is_server_owner && by_user.id == for_user_id;
+	if !is_updating_server_owner {
+		update_user_age_restriction(&for_user_id, &input.age_restriction, &txn).await?;
+
+		let permissions = PermissionSet::new(input.permissions.clone());
+		update_user.permissions = Set(permissions.resolve_into_string());
+	}
+
+	let updated_user_entity = update_user.update(&txn).await?;
+
+	txn.commit().await?;
+
+	Ok(User::from(updated_user_entity))
+}
+
+async fn update_user_age_restriction(
+	user_id: &str,
+	age_restriction: &Option<AgeRestrictionInput>,
+	txn: &DatabaseTransaction,
+) -> Result<()> {
+	let existing_age_restriction = age_restriction::Entity::find()
+		.filter(age_restriction::Column::UserId.eq(user_id))
+		.one(txn)
+		.await?;
+
+	if let Some(age_restriction) = age_restriction {
+		let set_age_restriction_id = if existing_age_restriction.is_some() {
+			Set(existing_age_restriction.unwrap().id)
+		} else {
+			NotSet
+		};
+
+		let _ = age_restriction::ActiveModel {
+			id: set_age_restriction_id,
+			user_id: Set(user_id.to_string()),
+			age: Set(age_restriction.age),
+			restrict_on_unset: Set(age_restriction.restrict_on_unset),
+		}
+		.save(txn)
+		.await
+		.map_err(|e| {
+			tracing::error!("Failed to save age restriction: {:?}", e);
+			"Failed to save age restriction"
+		})?;
+
+		Ok(())
+	} else if let Some(existing_restriction) = existing_age_restriction {
+		// delete age restriction
+		let result = age_restriction::Entity::delete_by_id(existing_restriction.id)
+			.exec(txn)
+			.await
+			.map_err(|e| {
+				tracing::error!("Failed to delete age restriction: {:?}", e);
+				"Failed to delete age restriction"
+			})?;
+
+		if result.rows_affected != 1 {
+			return Err("Failed to delete age restriction".into());
+		}
+
+		Ok(())
+	} else {
+		Ok(())
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::tests::common::*;
+	use sea_orm::{DatabaseBackend::Sqlite, MockDatabase};
+
+	#[tokio::test]
+	async fn test_update_age_restriction() {
+		let conn = MockDatabase::new(Sqlite)
+			.append_query_results::<age_restriction::Model, Vec<_>, Vec<Vec<_>>>(vec![
+				vec![],
+			])
+			.append_exec_results(vec![sea_orm::MockExecResult {
+				last_insert_id: 0,
+				rows_affected: 1,
+			}])
+			.into_connection();
+		let txn = conn.begin().await.unwrap();
+		let _ = update_user_age_restriction("42", &None, &txn)
+			.await
+			.unwrap();
+		txn.commit().await.unwrap();
+
+		let txns = conn.into_transaction_log();
+		assert_eq!(txns.len(), 1);
+		let txn = &txns[0];
+		assert_eq!(txn.statements().len(), 3); // begin commit, select, commit
+		let stmt = &txn.statements()[1];
+		assert_eq!(
+			stmt.to_string(),
+			r#"SELECT "age_restrictions"."id", "age_restrictions"."age", "age_restrictions"."restrict_on_unset", "age_restrictions"."user_id" FROM "age_restrictions" WHERE "age_restrictions"."user_id" = '42' LIMIT 1"#.to_string()
+		);
+	}
+
+	#[tokio::test]
+	async fn test_update_age_restriction_delete_existing() {
+		let conn = MockDatabase::new(Sqlite)
+			.append_query_results::<age_restriction::Model, Vec<_>, Vec<Vec<_>>>(vec![
+				vec![age_restriction::Model {
+					id: 1337,
+					user_id: "42".to_string(),
+					age: 18,
+					restrict_on_unset: true,
+				}],
+			])
+			.append_exec_results(vec![sea_orm::MockExecResult {
+				last_insert_id: 0,
+				rows_affected: 1,
+			}])
+			.into_connection();
+		let txn = conn.begin().await.unwrap();
+		let _ = update_user_age_restriction("42", &None, &txn)
+			.await
+			.unwrap();
+		txn.commit().await.unwrap();
+
+		let delete_stmt = conn.into_transaction_log()[0].statements()[2].clone();
+		assert_eq!(
+			delete_stmt.to_string(),
+			r#"DELETE FROM "age_restrictions" WHERE "age_restrictions"."id" = 1337"#
+				.to_string()
+		);
+	}
+
+	#[tokio::test]
+	async fn test_update_user_server_owner() {
+		let conn = MockDatabase::new(Sqlite)
+			.append_query_results::<user::Model, Vec<_>, Vec<Vec<_>>>(vec![vec![
+				user::Model {
+					id: "42".to_string(),
+					username: "test_user".to_string(),
+					hashed_password: "hashed_password".to_string(),
+					is_server_owner: false,
+					is_locked: false,
+					permissions: None,
+					max_sessions_allowed: None,
+					avatar_url: None,
+					last_login: None,
+					created_at: chrono::Utc::now().into(),
+					deleted_at: None,
+					user_preferences_id: None,
+				},
+			]])
+			.into_connection();
+		let config = StumpConfig::debug();
+
+		let input = UpdateUserInput {
+			username: "test_user".to_string(),
+			password: None,
+			max_sessions_allowed: Some(5),
+			avatar_url: Some("http://example.com/avatar.png".to_string()),
+			permissions: vec![],
+			age_restriction: None,
+		};
+
+		let user = get_default_user();
+
+		let updated_user = update_user(&user, user.id.clone(), &conn, &config, &input)
+			.await
+			.unwrap();
+
+		assert_eq!(updated_user.model.username, "test_user");
+		let txns = conn.into_transaction_log();
+		assert_eq!(txns.len(), 1);
+		let txn = txns.first().unwrap();
+		assert_eq!(txn.statements().len(), 3);
+		let stmt = &txn.statements()[1];
+		assert_eq!(
+			stmt.to_string(),
+			r#"UPDATE "users" SET "username" = 'test_user', "avatar_url" = 'http://example.com/avatar.png', "max_sessions_allowed" = 5 WHERE "users"."id" = '42' RETURNING "id", "username", "hashed_password", "is_server_owner", "avatar_url", "last_login", "created_at", "deleted_at", "is_locked", "max_sessions_allowed", "permissions", "user_preferences_id""#
+		);
+	}
 }

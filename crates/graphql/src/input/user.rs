@@ -1,10 +1,5 @@
 use async_graphql::InputObject;
-use chrono::{DateTime, FixedOffset};
-use models::{
-	entity::{user, user::AuthUser},
-	shared::enums::UserPermission,
-};
-use sea_orm::{prelude::*, ActiveValue::Set};
+use models::shared::enums::{SupportedFont, UserPermission};
 
 #[derive(InputObject)]
 pub struct AgeRestrictionInput {
@@ -20,4 +15,36 @@ pub struct CreateUserInput {
 	#[graphql(default)]
 	pub age_restriction: Option<AgeRestrictionInput>,
 	pub max_sessions_allowed: Option<i32>,
+}
+
+#[derive(InputObject)]
+pub struct UpdateUserInput {
+	pub username: String,
+	pub password: Option<String>,
+	pub avatar_url: Option<String>,
+	pub permissions: Vec<UserPermission>,
+	#[graphql(default)]
+	pub age_restriction: Option<AgeRestrictionInput>,
+	pub max_sessions_allowed: Option<i32>,
+}
+
+#[derive(InputObject, Debug)]
+pub struct UpdateUserPreferencesInput {
+	pub locale: String,
+	pub preferred_layout_mode: String,
+	pub primary_navigation_mode: String,
+	pub layout_max_width_px: Option<i32>,
+	pub app_theme: String,
+	pub enable_gradients: bool,
+	pub app_font: SupportedFont,
+	pub show_query_indicator: bool,
+	pub enable_live_refetch: bool,
+	pub enable_discord_presence: bool,
+	pub enable_compact_display: bool,
+	pub enable_double_sidebar: bool,
+	pub enable_replace_primary_sidebar: bool,
+	pub enable_hide_scrollbar: bool,
+	pub enable_job_overlay: bool,
+	pub prefer_accent_color: bool,
+	pub show_thumbnails_in_headers: bool,
 }

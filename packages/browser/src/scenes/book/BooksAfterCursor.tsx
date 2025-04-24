@@ -68,7 +68,7 @@ function BooksAfterCurrent({ cursor }: Props) {
 				fetchMore({
 					variables: {
 						id: cursor,
-						pagination: nextPageParam as CursorPagination,
+						pagination: nextPageParam.cursor,
 					},
 					updateQuery: (prev, { fetchMoreResult }) => {
 						if (!fetchMoreResult) return prev

@@ -1,12 +1,11 @@
-import { getNextPageParam, useMediaCursorQuery } from '@stump/client'
+import { getNextPageParam } from '@stump/client'
 import { Text } from '@stump/components'
-import { Media } from '@stump/sdk'
 import { BookX } from 'lucide-react'
-import { useCallback, useEffect, useTransition } from 'react'
+import { Suspense, useCallback, useTransition } from 'react'
 
 import MediaCard from '@/components/book/BookCard'
 import HorizontalCardList from '@/components/HorizontalCardList'
-import { CursorPagination, graphql, PaginationInfo } from '@stump/graphql'
+import { graphql, PaginationInfo } from '@stump/graphql'
 import { useSuspenseQuery } from '@apollo/client'
 
 const query = graphql(`
@@ -34,7 +33,11 @@ type Props = {
 }
 
 export default function BooksAfterCurrentContainer({ cursor }: Props) {
-	return <BooksAfterCurrent cursor={cursor} />
+	return (
+		<Suspense>
+			<BooksAfterCurrent cursor={cursor} />
+		</Suspense>
+	)
 }
 
 function BooksAfterCurrent({ cursor }: Props) {
@@ -95,7 +98,7 @@ function BooksAfterCurrent({ cursor }: Props) {
 
 	return (
 		<HorizontalCardList
-			title="Up next"
+			title="Next in series"
 			items={cards}
 			onFetchMore={handleFetchMore}
 			emptyState={

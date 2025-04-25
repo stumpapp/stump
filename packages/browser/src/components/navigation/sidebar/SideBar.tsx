@@ -20,7 +20,9 @@ import { BookClubSideBarSection, LibrarySideBarSection, SmartListSideBarSection 
 import SideBarButtonLink from './SideBarButtonLink'
 import SideBarFooter from './SideBarFooter'
 import { graphql } from '@stump/graphql'
-import { useSuspenseQuery } from '@apollo/client'
+import { useQuery, useSuspenseQuery } from '@apollo/client'
+import { useQuery as useUrqlQuery } from 'urql'
+import { useSuspenseQuery as useRQSuspenseQuery } from '@tanstack/react-query'
 
 const query = graphql(`
 	query SideBarQuery {
@@ -51,20 +53,29 @@ export default function SideBar({ asChild, hidden }: Props) {
 
 	const { t } = useLocaleContext()
 
-	const {
-		data: {
-			me: {
-				preferences: { navigationArrangement },
-			},
-		},
-	} = useSuspenseQuery(query)
+	// const { data } = useQuery(query, {
+	// 	// fetchPolicy: 'cache-only',
+	// 	// onCompleted: () => {
+	// 	// 	console.log('gql fetched me')
+	// 	// },
+	// })
 
-	console.log('navigationArrangement', navigationArrangement)
+	// const [{ data }] = useUrqlQuery({
+	// 	query,
+	// })
+
+	const test = useRQSuspenseQuery({
+		queryKey: ['me'],
+		queryFn: async () => {
+			console.log('fetching me')
+			return {}
+		},
+	})
 
 	const { checkPermission } = useAppContext()
-	const {
-		preferences: { navigation_arrangement },
-	} = usePreferences()
+	// const {
+	// 	preferences: { navigation_arrangement },
+	// } = usePreferences()
 	// const { arrangement } = useNavigationArrangement({
 	// 	defaultArrangement: navigation_arrangement,
 	// 	suspense: false,

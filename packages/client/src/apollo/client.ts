@@ -31,6 +31,11 @@ export const createClient = ({
 	return new ApolloClient({
 		cache: new InMemoryCache(),
 		link: from([errorLink, httpLink]),
+		defaultOptions: {
+			query: {
+				fetchPolicy: 'cache-first',
+			},
+		},
 	})
 }
 

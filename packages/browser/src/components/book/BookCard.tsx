@@ -1,13 +1,14 @@
+import { useSuspenseFragment } from '@apollo/client'
 import { Text } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import pluralize from 'pluralize'
 import { type ComponentPropsWithoutRef, useCallback, useMemo } from 'react'
 
 import paths from '@/paths'
+import { usePrefetchBook } from '@/scenes/book'
 import { formatBytes } from '@/utils/format'
 
 import { EntityCard } from '../entity'
-import { graphql } from '@stump/graphql'
-import { useSuspenseFragment } from '@apollo/client'
 
 export const BOOK_CARD_FRAGMENT = graphql(`
 	fragment BookCard on Media {
@@ -57,6 +58,8 @@ export default function BookCard({
 	})
 
 	const isCoverOnly = variant === 'cover'
+
+	const prefetchBook = usePrefetchBook(id)
 
 	const getProgress = useCallback(() => {
 		if (isCoverOnly || (!data.readProgress && !data.readHistory)) {
@@ -170,7 +173,7 @@ export default function BookCard({
 			imageUrl={data.thumbnail.url}
 			progress={getProgress()}
 			subtitle={getSubtitle()}
-			// onMouseEnter={handleHover}
+			onMouseEnter={prefetchBook}
 			isCover={isCoverOnly}
 			{...propsOverrides}
 		/>

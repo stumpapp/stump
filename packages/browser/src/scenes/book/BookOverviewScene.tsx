@@ -1,5 +1,7 @@
+import { useApolloClient, useSuspenseQuery } from '@apollo/client'
 import { useMediaByIdQuery } from '@stump/client'
 import { ButtonOrLink, Heading, Spacer, Text } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import dayjs from 'dayjs'
 import sortBy from 'lodash/sortBy'
 import { Suspense, useEffect, useMemo } from 'react'
@@ -23,8 +25,6 @@ import BookReaderDropdown from './BookReaderDropdown'
 import BooksAfterCursor from './BooksAfterCursor'
 import DownloadMediaButton from './DownloadMediaButton'
 import EmailBookDropdown from './EmailBookDropdown'
-import { graphql } from '@stump/graphql'
-import { useSuspenseQuery } from '@apollo/client'
 
 const query = graphql(`
 	query BookOverviewSceneQuery($id: ID!) {
@@ -43,6 +43,11 @@ const query = graphql(`
 		}
 	}
 `)
+
+export const usePrefetchBook = (id: string) => {
+	const client = useApolloClient()
+	return () => client.query({ query, variables: { id } })
+}
 
 export default function BookOverviewScene() {
 	const { id } = useParams()

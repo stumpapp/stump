@@ -1,13 +1,17 @@
+import { useQuery, useSuspenseQuery } from '@apollo/client'
 import { useNavigationArrangement } from '@stump/client'
 import { cn, Spacer } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { NavigationItem } from '@stump/sdk'
+import { useSuspenseQuery as useRQSuspenseQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { Book, Home } from 'lucide-react'
 import { useCallback, useEffect } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 import { match } from 'ts-pattern'
+import { useQuery as useUrqlQuery } from 'urql'
 
 import { useAppContext } from '@/context'
 import { usePreferences, useTheme } from '@/hooks'
@@ -19,10 +23,6 @@ import NavigationButtons from '../mobile/NavigationButtons'
 import { BookClubSideBarSection, LibrarySideBarSection, SmartListSideBarSection } from './sections'
 import SideBarButtonLink from './SideBarButtonLink'
 import SideBarFooter from './SideBarFooter'
-import { graphql } from '@stump/graphql'
-import { useQuery, useSuspenseQuery } from '@apollo/client'
-import { useQuery as useUrqlQuery } from 'urql'
-import { useSuspenseQuery as useRQSuspenseQuery } from '@tanstack/react-query'
 
 const query = graphql(`
 	query SideBarQuery {
@@ -53,12 +53,12 @@ export default function SideBar({ asChild, hidden }: Props) {
 
 	const { t } = useLocaleContext()
 
-	// const { data } = useQuery(query, {
-	// 	// fetchPolicy: 'cache-only',
-	// 	// onCompleted: () => {
-	// 	// 	console.log('gql fetched me')
-	// 	// },
-	// })
+	const { data } = useQuery(query, {
+		// fetchPolicy: 'cache-only',
+		// onCompleted: () => {
+		// 	console.log('gql fetched me')
+		// },
+	})
 
 	// const [{ data }] = useUrqlQuery({
 	// 	query,
@@ -175,6 +175,15 @@ export default function SideBar({ asChild, hidden }: Props) {
 				<div className="flex max-h-full grow flex-col gap-2 overflow-y-auto p-1 scrollbar-hide">
 					{isAtLeastMedium && isBrowser && <UserMenu />}
 					{/* {sections} */}
+
+					<SideBarButtonLink
+						key="home-sidebar-navlink"
+						to={paths.home()}
+						isActive={location.pathname === '/'}
+					>
+						<Home className="mr-2 h-4 w-4 shrink-0" />
+						{t('sidebar.buttons.home')}
+					</SideBarButtonLink>
 				</div>
 				<Spacer />
 

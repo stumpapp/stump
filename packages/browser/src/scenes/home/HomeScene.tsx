@@ -1,3 +1,5 @@
+import { useSuspenseQuery } from '@apollo/client'
+import { graphql } from '@stump/graphql'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
@@ -6,8 +8,6 @@ import ContinueReadingMedia from './ContinueReading'
 import NoLibraries from './NoLibraries'
 import RecentlyAddedMedia from './RecentlyAddedMedia'
 import RecentlyAddedSeries from './RecentlyAddedSeries'
-import { graphql } from '@stump/graphql'
-import { useSuspenseQuery } from '@apollo/client'
 
 const query = graphql(`
 	query HomeSceneQuery {

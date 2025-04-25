@@ -5,7 +5,7 @@ import pluralize from 'pluralize'
 import { type ComponentPropsWithoutRef, useCallback, useMemo } from 'react'
 
 import paths from '@/paths'
-import { usePrefetchBook } from '@/scenes/book'
+import { usePrefetchBook, usePrefetchBooksAfterCursor } from '@/scenes/book'
 import { formatBytes } from '@/utils/format'
 
 import { EntityCard } from '../entity'
@@ -60,6 +60,12 @@ export default function BookCard({
 	const isCoverOnly = variant === 'cover'
 
 	const prefetchBook = usePrefetchBook(id)
+	const prefetchNextInSeries = usePrefetchBooksAfterCursor(id)
+
+	const prefetch = useCallback(
+		() => Promise.all([prefetchBook(), prefetchNextInSeries()]),
+		[prefetchBook, prefetchNextInSeries],
+	)
 
 	const getProgress = useCallback(() => {
 		if (isCoverOnly || (!data.readProgress && !data.readHistory)) {
@@ -173,7 +179,7 @@ export default function BookCard({
 			imageUrl={data.thumbnail.url}
 			progress={getProgress()}
 			subtitle={getSubtitle()}
-			onMouseEnter={prefetchBook}
+			onMouseEnter={prefetch}
 			isCover={isCoverOnly}
 			{...propsOverrides}
 		/>

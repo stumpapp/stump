@@ -1,14 +1,14 @@
+import { useSuspenseQuery } from '@apollo/client'
 import { getNextPageParam } from '@stump/client'
+import { updateQuery } from '@stump/client'
 import { Text } from '@stump/components'
+import { graphql, PaginationInfo } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { BookCopy } from 'lucide-react'
 import { Suspense, useCallback, useTransition } from 'react'
 
 import HorizontalCardList from '@/components/HorizontalCardList'
 import SeriesCard from '@/components/series/SeriesCard'
-import { graphql, PaginationInfo } from '@stump/graphql'
-import { useSuspenseQuery } from '@apollo/client'
-import { updateQuery } from '@stump/client'
 
 const query = graphql(`
 	query RecentlyAddedSeriesQuery($pagination: Pagination!) {

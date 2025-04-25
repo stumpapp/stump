@@ -1,12 +1,12 @@
+import { useApolloClient, useSuspenseQuery } from '@apollo/client'
 import { getNextPageParam } from '@stump/client'
 import { Text } from '@stump/components'
+import { graphql, PaginationInfo } from '@stump/graphql'
 import { BookX } from 'lucide-react'
 import { Suspense, useCallback, useTransition } from 'react'
 
 import MediaCard from '@/components/book/BookCard'
 import HorizontalCardList from '@/components/HorizontalCardList'
-import { graphql, PaginationInfo } from '@stump/graphql'
-import { useSuspenseQuery } from '@apollo/client'
 
 const query = graphql(`
 	query BooksAfterCurrentQuery($id: ID!, $pagination: CursorPagination) {
@@ -27,6 +27,20 @@ const query = graphql(`
 		}
 	}
 `)
+
+export const usePrefetchBooksAfterCursor = (id: string) => {
+	const client = useApolloClient()
+	return () =>
+		client.query({
+			query,
+			variables: {
+				id,
+				pagination: {
+					limit: 20,
+				},
+			},
+		})
+}
 
 type Props = {
 	cursor: string
@@ -55,7 +69,7 @@ function BooksAfterCurrent({ cursor }: Props) {
 	})
 
 	if (!mediaById) {
-		return null
+		throw new Error('Book not found')
 	}
 
 	const {

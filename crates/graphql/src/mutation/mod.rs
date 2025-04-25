@@ -6,6 +6,7 @@ mod epub;
 mod library;
 mod log;
 mod media;
+mod notifier;
 mod reading_list;
 mod series;
 mod tag;
@@ -20,6 +21,7 @@ use epub::EpubMutation;
 use library::LibraryMutation;
 use log::LogMutation;
 use media::MediaMutation;
+use notifier::NotifierMutation;
 use reading_list::ReadingListMutation;
 use series::SeriesMutation;
 use tag::TagMutation;
@@ -32,6 +34,7 @@ pub struct Mutation(
 	BookClubInvitationMutation,
 	BookClubMemberMutation,
 	BookClubScheduleMutation,
+	NotifierMutation,
 	EpubMutation,
 	MediaMutation,
 	LibraryMutation,

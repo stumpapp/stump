@@ -23,6 +23,7 @@ axum = { version = "0.8.1", features = [
   "multipart",
 ] }
 base64 = "0.22.1"
+data-encoding = "2.5.0"
 bcrypt = "0.15.1"
 rust_decimal = "1.37.1"
 derive_builder = "0.20.0"

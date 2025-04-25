@@ -6,6 +6,7 @@ mod library;
 mod log;
 pub(crate) mod media;
 mod media_metadata_overview;
+mod notifier;
 pub(crate) mod reading_list;
 mod series;
 mod tag;
@@ -18,6 +19,7 @@ use library::LibraryQuery;
 use log::LogQuery;
 use media::MediaQuery;
 use media_metadata_overview::MediaMetadataOverviewQuery;
+use notifier::NotifierQuery;
 use reading_list::ReadingListQuery;
 use series::SeriesQuery;
 use tag::TagQuery;
@@ -29,6 +31,7 @@ pub struct Query(
 	EmailerQuery,
 	MediaQuery,
 	UserQuery,
+	NotifierQuery,
 	ReadingListQuery,
 	EpubQuery,
 	LibraryQuery,

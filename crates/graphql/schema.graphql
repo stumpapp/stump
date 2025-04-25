@@ -496,7 +496,14 @@ type Media {
 	resolvedName: String!
 	readProgress: ActiveReadingSession
 	readHistory: [FinishedReadingSession!]!
+	"The next media in the series, ordered by name"
 	nextInSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	"""
+	The path to the media file **relative** to the library path. This is only useful for
+	displaying a truncated path when in the context of a library, e.g. limited space
+	on a mobile device.
+	"""
+	relativeLibraryPath: String!
 }
 
 type MediaAnnotationsModel {

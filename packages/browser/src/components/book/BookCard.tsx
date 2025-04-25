@@ -1,34 +1,27 @@
 import { Text } from '@stump/components'
+import { Media } from '@stump/graphql'
 import pluralize from 'pluralize'
 import { type ComponentPropsWithoutRef, useCallback, useMemo } from 'react'
 
 import paths from '@/paths'
+import { usePrefetchBook, usePrefetchBooksAfterCursor } from '@/scenes/book'
 import { formatBytes } from '@/utils/format'
 
 import { EntityCard } from '../entity'
-import { usePrefetchBook } from '@/scenes/book'
 
-interface BookCardFragment {
-	id: string
-	resolvedName: string
-	pages: number
-	size: number
-	status: string
-	thumbnail: {
-		url: string
-	}
-	readProgress?: {
-		percentageCompleted?: number | null
-		epubcfi?: string | null
-		page?: number | null
-	} | null
+export type BookCardData = Pick<Media, 'id' | 'resolvedName' | 'pages' | 'size' | 'status'> & {
+	thumbnail: Pick<Media['thumbnail'], 'url'>
+	readProgress?: Pick<
+		NonNullable<Media['readProgress']>,
+		'percentageCompleted' | 'epubcfi' | 'page'
+	> | null
 	readHistory?: Array<{
 		__typename: string
 	}> | null
 }
 
 export type BookCardProps = {
-	data: BookCardFragment
+	data: BookCardData
 	readingLink?: boolean
 	fullWidth?: boolean
 	variant?: 'cover' | 'default'
@@ -44,9 +37,15 @@ export default function BookCard({
 	variant = 'default',
 	onSelect,
 }: BookCardProps) {
-	const prefetchBook = usePrefetchBook(data.id)
-
 	const isCoverOnly = variant === 'cover'
+
+	const prefetchBook = usePrefetchBook(data.id)
+	const prefetchBooksAfterCursor = usePrefetchBooksAfterCursor(data.id)
+
+	const prefetch = useCallback(
+		() => Promise.all([prefetchBook(), prefetchBooksAfterCursor()]),
+		[prefetchBook, prefetchBooksAfterCursor],
+	)
 
 	const getProgress = useCallback(() => {
 		if (isCoverOnly || (!data.readProgress && !data.readHistory)) {
@@ -160,7 +159,7 @@ export default function BookCard({
 			imageUrl={data.thumbnail.url}
 			progress={getProgress()}
 			subtitle={getSubtitle()}
-			onMouseEnter={prefetchBook}
+			onMouseEnter={prefetch}
 			isCover={isCoverOnly}
 			{...propsOverrides}
 		/>

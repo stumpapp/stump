@@ -1,13 +1,13 @@
-import { useNavigationArrangement } from '@stump/client'
+import { useSuspenseGraphQL } from '@stump/client'
 import { cn, Spacer } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { NavigationItem } from '@stump/sdk'
 import { motion } from 'framer-motion'
 import { Book, Home } from 'lucide-react'
-import { useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
-import { match } from 'ts-pattern'
 
 import { useAppContext } from '@/context'
 import { usePreferences, useTheme } from '@/hooks'
@@ -19,10 +19,6 @@ import NavigationButtons from '../mobile/NavigationButtons'
 import { BookClubSideBarSection, LibrarySideBarSection, SmartListSideBarSection } from './sections'
 import SideBarButtonLink from './SideBarButtonLink'
 import SideBarFooter from './SideBarFooter'
-import { graphql } from '@stump/graphql'
-import { useQuery, useSuspenseQuery } from '@apollo/client'
-import { useQuery as useUrqlQuery } from 'urql'
-import { useSuspenseQuery as useRQSuspenseQuery } from '@tanstack/react-query'
 
 const query = graphql(`
 	query SideBarQuery {
@@ -53,22 +49,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 
 	const { t } = useLocaleContext()
 
-	// const { data } = useQuery(query, {
-	// 	// fetchPolicy: 'cache-only',
-	// 	// onCompleted: () => {
-	// 	// 	console.log('gql fetched me')
-	// 	// },
-	// })
-
-	// const fuck = useQuery(query)
-
-	// const test = useRQSuspenseQuery({
-	// 	queryKey: ['me'],
-	// 	queryFn: async () => {
-	// 		console.log('fetching me')
-	// 		return {}
-	// 	},
-	// })
+	const { data } = useSuspenseGraphQL(query, ['sidebarQuery'])
 
 	const { checkPermission } = useAppContext()
 	// const {

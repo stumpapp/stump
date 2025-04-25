@@ -154,6 +154,7 @@ impl Media {
 		Ok(history)
 	}
 
+	/// The next media in the series, ordered by name
 	async fn next_in_series(
 		&self,
 		ctx: &Context<'_>,
@@ -216,5 +217,31 @@ impl Media {
 			}
 			.into(),
 		})
+	}
+
+	/// The path to the media file **relative** to the library path. This is only useful for
+	/// displaying a truncated path when in the context of a library, e.g. limited space
+	/// on a mobile device.
+	async fn relative_library_path(&self, ctx: &Context<'_>) -> Result<String> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let (library_path,) = library::Entity::find()
+			.select_only()
+			.column(library::Column::Path)
+			.filter(
+				library::Column::Id.in_subquery(
+					Query::select()
+						.column(series::Column::LibraryId)
+						.from(series::Entity)
+						.and_where(series::Column::Id.eq(self.model.series_id.clone()))
+						.to_owned(),
+				),
+			)
+			.into_tuple::<(String,)>()
+			.one(conn)
+			.await?
+			.ok_or("Library not found")?;
+
+		Ok(self.model.path.replace(&library_path, ""))
 	}
 }

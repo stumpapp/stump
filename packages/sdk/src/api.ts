@@ -1,6 +1,6 @@
+import type { TypedDocumentString } from '@stump/graphql'
 import axios, { AxiosInstance } from 'axios'
 
-import type { TypedDocumentString } from '@stump/graphql'
 import { AuthenticationMethod, Configuration } from './configuration'
 import {
 	APIKeyAPI,
@@ -22,6 +22,7 @@ import {
 	UploadAPI,
 	UserAPI,
 } from './controllers'
+import { GraphQLResponse } from './types/graphql'
 import { formatApiURL } from './utils'
 
 export type ApiVersion = 'v1' | 'v2'
@@ -229,9 +230,9 @@ export class Api {
 
 	async execute<TResult, TVariables>(
 		query: TypedDocumentString<TResult, TVariables>,
-		...[variables]: TVariables extends Record<string, never> ? [] : [TVariables]
+		variables?: TVariables extends Record<string, never> ? never : TVariables,
 	): Promise<TResult> {
-		const response = await this.axiosInstance.post(
+		const response = await this.axiosInstance.post<GraphQLResponse<TResult>>(
 			'/api/graphql',
 			{
 				query,
@@ -245,7 +246,14 @@ export class Api {
 			},
 		)
 
-		return response.data.data
+		const { data, errors } = response.data
+
+		if (errors) {
+			// TODO: Create specialized error to handle this better
+			throw new Error(errors.map((error) => error.message).join(', '))
+		}
+
+		return data
 	}
 
 	/**

@@ -508,6 +508,7 @@ export type Media = {
   modifiedAt?: Maybe<Scalars['DateTime']['output']>;
   /** The name of the media, derived from the filename and excluding the extension */
   name: Scalars['String']['output'];
+  /** The next media in the series, ordered by name */
   nextInSeries: PaginatedMediaResponse;
   /** The number of pages in the media, if applicable. Will be -1 for certain media types */
   pages: Scalars['Int']['output'];
@@ -515,6 +516,12 @@ export type Media = {
   path: Scalars['String']['output'];
   readHistory: Array<FinishedReadingSession>;
   readProgress?: Maybe<ActiveReadingSession>;
+  /**
+   * The path to the media file **relative** to the library path. This is only useful for
+   * displaying a truncated path when in the context of a library, e.g. limited space
+   * on a mobile device.
+   */
+  relativeLibraryPath: Scalars['String']['output'];
   /**
    * The resolved name of the media, which will prioritize the title pulled from
    * metatadata, if available, and fallback to the name derived from the file name
@@ -1551,12 +1558,12 @@ export type SideBarQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type SideBarQueryQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename?: 'ArrangementSection', config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangmentConfig' } }> } } } };
 
-export type BookOverviewSceneQueryQueryVariables = Exact<{
+export type BookOverviewSceneQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type BookOverviewSceneQueryQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, extension: string, resolvedName: string, pages: number, size: number, status: FileStatus, metadata?: { __typename?: 'MediaMetadata', links: Array<string>, summary?: string | null } | null, thumbnail: { __typename?: 'ImageRef', url: string }, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null } | null, readHistory: Array<{ __typename: 'FinishedReadingSession', completedAt: any }> } | null };
+export type BookOverviewSceneQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, extension: string, resolvedName: string, hash?: string | null, pages: number, size: number, status: FileStatus, relativeLibraryPath: string, metadata?: { __typename?: 'MediaMetadata', links: Array<string>, summary?: string | null } | null, thumbnail: { __typename?: 'ImageRef', url: string }, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null } | null, readHistory: Array<{ __typename: 'FinishedReadingSession', completedAt: any }> } | null };
 
 export type BookOverviewHeaderFragment = { __typename?: 'Media', metadata?: { __typename?: 'MediaMetadata', characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, editors: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, pencillers: Array<string>, teams: Array<string> } | null } & { ' $fragmentName'?: 'BookOverviewHeaderFragment' };
 
@@ -1644,19 +1651,21 @@ export const SideBarQueryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SideBarQueryQuery, SideBarQueryQueryVariables>;
-export const BookOverviewSceneQueryDocument = new TypedDocumentString(`
-    query BookOverviewSceneQuery($id: ID!) {
+export const BookOverviewSceneDocument = new TypedDocumentString(`
+    query BookOverviewScene($id: ID!) {
   mediaById(id: $id) {
     id
     extension
+    resolvedName
+    hash
+    pages
+    size
+    status
+    relativeLibraryPath
     metadata {
       links
       summary
     }
-    resolvedName
-    pages
-    size
-    status
     thumbnail {
       url
     }
@@ -1671,7 +1680,7 @@ export const BookOverviewSceneQueryDocument = new TypedDocumentString(`
     }
   }
 }
-    `) as unknown as TypedDocumentString<BookOverviewSceneQueryQuery, BookOverviewSceneQueryQueryVariables>;
+    `) as unknown as TypedDocumentString<BookOverviewSceneQuery, BookOverviewSceneQueryVariables>;
 export const BooksAfterCurrentQueryDocument = new TypedDocumentString(`
     query BooksAfterCurrentQuery($id: ID!, $pagination: Pagination) {
   mediaById(id: $id) {

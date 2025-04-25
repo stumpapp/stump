@@ -1,22 +1,22 @@
-import { IStumpClientContext, useClientContext } from '@/context'
-import { useSDK } from '@/sdk'
-import type { TypedDocumentString, Pagination, PaginationInfo } from '@stump/graphql'
+import type { Pagination, PaginationInfo, TypedDocumentString } from '@stump/graphql'
 import { Api } from '@stump/sdk'
 import {
-	useSuspenseInfiniteQuery,
-	UseSuspenseInfiniteQueryResult,
-	useQuery,
-	useSuspenseQuery,
-	UseSuspenseQueryResult,
-	type UseQueryResult,
 	InfiniteData,
 	QueryKey,
+	useQuery,
+	type UseQueryResult,
+	useSuspenseInfiniteQuery,
+	UseSuspenseInfiniteQueryOptions,
+	UseSuspenseInfiniteQueryResult,
+	useSuspenseQuery,
+	UseSuspenseQueryResult,
 } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { match } from 'ts-pattern'
 
-// TODO: fix type errors...
+import { IStumpClientContext, useClientContext } from '@/context'
+import { useSDK } from '@/sdk'
 
 type ErrorHandlerParams = {
 	sdk: Api
@@ -43,7 +43,7 @@ const handleError = ({
 export function useGraphQL<TResult, TVariables>(
 	document: TypedDocumentString<TResult, TVariables>,
 	queryKey: QueryKey,
-	...[variables]: TVariables extends Record<string, never> ? [] : [TVariables]
+	variables?: TVariables extends Record<string, never> ? never : TVariables,
 ): UseQueryResult<TResult> {
 	const { sdk } = useSDK()
 	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
@@ -72,7 +72,7 @@ export function useGraphQL<TResult, TVariables>(
 export function useSuspenseGraphQL<TResult, TVariables>(
 	document: TypedDocumentString<TResult, TVariables>,
 	queryKey: QueryKey,
-	...[variables]: TVariables extends Record<string, never> ? [] : [TVariables]
+	variables?: TVariables extends Record<string, never> ? never : TVariables,
 ): UseSuspenseQueryResult<TResult> {
 	const { sdk } = useSDK()
 	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
@@ -98,28 +98,46 @@ export function useSuspenseGraphQL<TResult, TVariables>(
 	return { error, ...rest } as UseSuspenseQueryResult<TResult>
 }
 
-type TVariablesWithPagination<T> = T extends Pagination ? T : never
-
 export function useInfiniteGraphQL<TResult, TVariables>(
 	document: TypedDocumentString<TResult, TVariables>,
 	queryKey: QueryKey,
-	...[variables]: TVariables extends TVariablesWithPagination<TVariables> ? [] : [TVariables]
+	variables?: TVariables extends Record<string, never> ? never : TVariables,
+	options?: Omit<
+		UseSuspenseInfiniteQueryOptions<
+			TResult,
+			Error,
+			TResult,
+			TResult,
+			readonly unknown[],
+			Pagination
+		>,
+		'queryKey' | 'queryFn'
+	>,
 ): UseSuspenseInfiniteQueryResult<InfiniteData<TResult>> {
 	const { sdk } = useSDK()
 	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
 
-	const [initialPageParam] = useState<Pagination>(() => variables?.pagination ?? undefined)
+	const [initialPageParam] = useState<Pagination>(() => extractInitialPageParam(variables))
+
+	const constructVariables = useCallback(
+		(pageParam: Pagination) =>
+			({
+				...variables,
+				pagination: pageParam,
+			}) as TVariables extends Record<string, never> ? never : TVariables,
+		[variables],
+	)
 
 	const { error, ...rest } = useSuspenseInfiniteQuery({
 		queryKey,
 		queryFn: async ({ pageParam }) => {
-			const response = await sdk.execute(document, { ...variables, pagination: pageParam })
-			console.log('response', response)
+			const response = await sdk.execute(document, constructVariables(pageParam))
 			return response
 		},
 		initialPageParam,
-		getNextPageParam: (lastPage, _) => getNextPageParam(extractPageInfo(lastPage)),
+		getNextPageParam: (lastPage) => getNextPageParam(extractPageInfo(lastPage)),
 		experimental_prefetchInRender: true,
+		...options,
 	})
 
 	useEffect(() => {
@@ -136,6 +154,17 @@ export function useInfiniteGraphQL<TResult, TVariables>(
 		error,
 		...rest,
 	} as UseSuspenseInfiniteQueryResult<InfiniteData<TResult>>
+}
+
+const extractInitialPageParam = <TVariables>(variables: TVariables): Pagination => {
+	if (typeof variables !== 'object' || !variables) return { cursor: { limit: 20 } }
+	if ('pagination' in variables) {
+		const pagination = variables.pagination as Pagination
+		if (pagination) {
+			return pagination
+		}
+	}
+	return { cursor: { limit: 20 } }
 }
 
 export const extractPageInfo = (data: unknown): PaginationInfo | undefined => {
@@ -162,7 +191,6 @@ export const extractPageInfo = (data: unknown): PaginationInfo | undefined => {
 export const getNextPageParam = (paginationInfo?: PaginationInfo): Pagination | undefined =>
 	match(paginationInfo)
 		.with({ __typename: 'CursorPaginationInfo' }, (info) => {
-			console.log('info', info)
 			if (!info.nextCursor) return undefined
 			return {
 				cursor: {
@@ -184,7 +212,4 @@ export const getNextPageParam = (paginationInfo?: PaginationInfo): Pagination | 
 				},
 			} satisfies Pagination
 		})
-		.otherwise(() => {
-			console.log('No pagination info found', paginationInfo)
-			return undefined
-		})
+		.otherwise(() => undefined)

@@ -1,8 +1,9 @@
-import { queryClient, useMediaByIdQuery, useSDK, useSuspenseGraphQL } from '@stump/client'
+import { queryClient, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { ButtonOrLink, Heading, Spacer, Text } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import dayjs from 'dayjs'
 import sortBy from 'lodash/sortBy'
-import { Suspense, useEffect, useMemo } from 'react'
+import { Suspense, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
@@ -11,26 +12,29 @@ import MediaCard from '@/components/book/BookCard'
 import { SceneContainer } from '@/components/container'
 import LinkBadge from '@/components/LinkBadge'
 import ReadMore from '@/components/ReadMore'
+import { useAppContext } from '@/context'
+import paths from '@/paths'
+import { PDF_EXTENSION } from '@/utils/patterns'
 
-import { useAppContext } from '../../context'
-import paths from '../../paths'
-import { PDF_EXTENSION } from '../../utils/patterns'
+import BookFileInformation from './BookFileInformation'
 import BooksAfterCursor from './BooksAfterCursor'
-import { graphql } from '@stump/graphql'
+import DownloadMediaButton from './DownloadMediaButton'
 
 const query = graphql(`
-	query BookOverviewSceneQuery($id: ID!) {
+	query BookOverviewScene($id: ID!) {
 		mediaById(id: $id) {
 			id
 			extension
+			resolvedName
+			hash
+			pages
+			size
+			status
+			relativeLibraryPath
 			metadata {
 				links
 				summary
 			}
-			resolvedName
-			pages
-			size
-			status
 			thumbnail {
 				url
 			}
@@ -121,7 +125,7 @@ export default function BookOverviewScene() {
 										Manage
 									</ButtonOrLink>
 								)}
-								{/* {canDownload && <DownloadMediaButton media={media} />} */}
+								{canDownload && <DownloadMediaButton id={media.id} name={media.resolvedName} />}
 								{/* <EmailBookDropdown mediaId={media.id} /> */}
 							</div>
 
@@ -144,7 +148,7 @@ export default function BookOverviewScene() {
 						</div>
 					)}
 
-					{/* {isServerOwner && <BookFileInformation media={media} />} */}
+					{isServerOwner && <BookFileInformation data={media} />}
 					<BooksAfterCursor cursor={media.id} />
 				</div>
 			</Suspense>

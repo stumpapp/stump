@@ -1,8 +1,9 @@
-import { IStumpClientContext } from '@/context'
 import { ApolloClient, from, HttpLink, InMemoryCache } from '@apollo/client'
 import { onError } from '@apollo/client/link/error'
 import { Api } from '@stump/sdk'
 import { isAxiosError } from 'axios'
+
+import { IStumpClientContext } from '@/context'
 
 type CreateClientParams = {
 	sdk: Api

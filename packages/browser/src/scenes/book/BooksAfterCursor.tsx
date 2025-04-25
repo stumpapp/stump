@@ -1,11 +1,11 @@
-import { useInfiniteGraphQL } from '@stump/client'
+import { queryClient, useInfiniteGraphQL, useSDK } from '@stump/client'
 import { Text } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { BookX } from 'lucide-react'
 import { Suspense, useCallback } from 'react'
 
 import MediaCard from '@/components/book/BookCard'
 import HorizontalCardList from '@/components/HorizontalCardList'
-import { graphql } from '@stump/graphql'
 
 const query = graphql(`
 	query BooksAfterCurrentQuery($id: ID!, $pagination: Pagination) {
@@ -41,6 +41,24 @@ const query = graphql(`
 		}
 	}
 `)
+
+export const usePrefetchBooksAfterCursor = (id: string) => {
+	const { sdk } = useSDK()
+	return () =>
+		queryClient.prefetchInfiniteQuery({
+			queryKey: ['booksAfterCursor', id],
+			initialPageParam: {
+				id,
+				pagination: {
+					cursor: { limit: 20 },
+				},
+			},
+			queryFn: async ({ pageParam }) => {
+				const response = await sdk.execute(query, pageParam)
+				return response
+			},
+		})
+}
 
 type Props = {
 	cursor: string

@@ -244,7 +244,7 @@ mod tests {
 		let stmt_str = select_no_cols_to_string(select);
 		assert_eq!(
 			stmt_str,
-			r#"SELECT  FROM "series" WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42') AND "series_metadata"."age_rating" IS NOT NULL AND "series_metadata"."age_rating" <= 18"#
+			r#"SELECT  FROM "series" LEFT JOIN "series_metadata" ON "series"."id" = "series_metadata"."series_id" WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42') AND "series_metadata"."age_rating" IS NOT NULL AND "series_metadata"."age_rating" <= 18"#
 		);
 	}
 

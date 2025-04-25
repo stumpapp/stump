@@ -285,9 +285,11 @@ mod tests {
 		let filter = r#"{"_and":[{"name":{"eq":"test"}},{"metadata":{"_and":[{"title":{"eq":"test"}},{"series":{"eq":"theseries"}}]}}]}"#;
 		let deserialized: MediaFilterInput = serde_json::from_str(filter).unwrap();
 		assert!(deserialized._and.is_some());
-		assert_eq!(deserialized._and.unwrap().len(), 2);
-		assert!(deserialized.metadata.is_some());
-		let metadata = deserialized.metadata.unwrap();
+		let and_vec = deserialized._and.clone().unwrap();
+		assert_eq!(and_vec.len(), 2);
+		let second_input = and_vec.get(1).unwrap().clone();
+		assert!(second_input.metadata.is_some());
+		let metadata = second_input.metadata.unwrap();
 		assert!(metadata._and.is_some());
 		assert_eq!(metadata._and.unwrap().len(), 2);
 	}

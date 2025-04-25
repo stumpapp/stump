@@ -40,7 +40,7 @@ mod tests {
 	#[test]
 	fn test_deserialize_api_key_permissions() {
 		let inherit = r#""inherit""#;
-		let custom = r#"["feature:api_keys"]"#;
+		let custom = r#"["access_a_p_i_keys"]"#;
 
 		let inherit: APIKeyPermissions =
 			serde_json::from_str(inherit).expect("Failed to deserialize inherit");
@@ -61,6 +61,6 @@ mod tests {
 		let custom = serde_json::to_string(&custom).expect("Failed to serialize custom");
 
 		assert_eq!(inherit, r#""inherit""#);
-		assert_eq!(custom, r#"["feature:api_keys"]"#);
+		assert_eq!(custom, r#"["access_a_p_i_keys"]"#);
 	}
 }

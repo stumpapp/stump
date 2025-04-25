@@ -7,7 +7,7 @@ const config: CodegenConfig = {
 		'./src/client/': {
 			preset: 'client',
 			config: {
-				// documentMode: 'string',
+				documentMode: 'string',
 			},
 		},
 	},

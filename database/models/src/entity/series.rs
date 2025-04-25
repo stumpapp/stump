@@ -4,7 +4,10 @@ use sea_orm::{
 	Condition, FromQueryResult, QuerySelect, QueryTrait,
 };
 
-use crate::prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer};
+use crate::{
+	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
+	shared::enums::FileStatus,
+};
 
 use super::{library_hidden_to_user, series_metadata, user::AuthUser};
 
@@ -25,7 +28,7 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	pub path: String,
 	#[sea_orm(column_type = "Text")]
-	pub status: String,
+	pub status: FileStatus,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub library_id: Option<String>,
 }

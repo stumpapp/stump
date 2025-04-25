@@ -6,32 +6,29 @@ import paths from '@/paths'
 import { formatBytes } from '@/utils/format'
 
 import { EntityCard } from '../entity'
-import { graphql } from '@stump/graphql'
-import { useSuspenseFragment } from '@apollo/client'
+import { usePrefetchBook } from '@/scenes/book'
 
-export const BOOK_CARD_FRAGMENT = graphql(`
-	fragment BookCard on Media {
-		id
-		resolvedName
-		pages
-		size
-		status
-		thumbnail {
-			url
-		}
-		readProgress {
-			percentageCompleted
-			epubcfi
-			page
-		}
-		readHistory {
-			__typename
-		}
+interface BookCardFragment {
+	id: string
+	resolvedName: string
+	pages: number
+	size: number
+	status: string
+	thumbnail: {
+		url: string
 	}
-`)
+	readProgress?: {
+		percentageCompleted?: number | null
+		epubcfi?: string | null
+		page?: number | null
+	} | null
+	readHistory?: Array<{
+		__typename: string
+	}> | null
+}
 
 export type BookCardProps = {
-	id: string
+	data: BookCardFragment
 	readingLink?: boolean
 	fullWidth?: boolean
 	variant?: 'cover' | 'default'
@@ -41,20 +38,13 @@ export type BookCardProps = {
 type EntityCardProps = ComponentPropsWithoutRef<typeof EntityCard>
 
 export default function BookCard({
-	id,
+	data,
 	readingLink,
 	fullWidth,
 	variant = 'default',
 	onSelect,
 }: BookCardProps) {
-	const { data } = useSuspenseFragment({
-		fragment: BOOK_CARD_FRAGMENT,
-		fragmentName: 'BookCard',
-		from: {
-			__typename: 'Media',
-			id,
-		},
-	})
+	const prefetchBook = usePrefetchBook(data.id)
 
 	const isCoverOnly = variant === 'cover'
 
@@ -132,12 +122,12 @@ export default function BookCard({
 		}
 
 		return readingLink
-			? paths.bookReader(id, {
+			? paths.bookReader(data.id, {
 					epubcfi: data.readProgress?.epubcfi,
 					page: data.readProgress?.page ?? undefined,
 				})
-			: paths.bookOverview(id)
-	}, [readingLink, id, onSelect, data.readProgress])
+			: paths.bookOverview(data.id)
+	}, [readingLink, data.id, onSelect, data.readProgress])
 
 	const propsOverrides = useMemo(() => {
 		let overrides = (
@@ -170,7 +160,7 @@ export default function BookCard({
 			imageUrl={data.thumbnail.url}
 			progress={getProgress()}
 			subtitle={getSubtitle()}
-			// onMouseEnter={handleHover}
+			onMouseEnter={prefetchBook}
 			isCover={isCoverOnly}
 			{...propsOverrides}
 		/>

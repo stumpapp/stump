@@ -175,8 +175,7 @@ pub async fn walk_library(
 			let recovered_series = existing_records
 				.into_iter()
 				.filter(|s| {
-					s.status == FileStatus::Missing.to_string()
-						&& PathBuf::from(path).exists()
+					s.status == FileStatus::Missing && PathBuf::from(path).exists()
 				})
 				.map(|s| s.id)
 				.collect::<Vec<String>>();

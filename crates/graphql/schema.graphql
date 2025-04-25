@@ -228,6 +228,14 @@ scalar DateTime
 
 scalar Decimal
 
+type DiscordConfig {
+	webhookUrl: String!
+}
+
+input DiscordConfigInput {
+	webhookUrl: String!
+}
+
 type Emailer {
 	id: Int!
 	name: String!
@@ -338,7 +346,7 @@ type Library {
 	name: String!
 	description: String
 	path: String!
-	status: String!
+	status: FileStatus!
 	updatedAt: DateTime!
 	createdAt: DateTime!
 	emoji: String
@@ -488,7 +496,7 @@ type Media {
 	resolvedName: String!
 	readProgress: ActiveReadingSession
 	readHistory: [FinishedReadingSession!]!
-	nextInSeries(pagination: CursorPagination! = {after: null, limit: 20}): PaginatedMediaResponse!
+	nextInSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 }
 
 type MediaAnnotationsModel {
@@ -551,6 +559,9 @@ type Mutation {
 	createBookClubMember(bookClubId: ID!, input: CreateBookClubMemberInput!): BookClubMember!
 	createBookClubSchedule(id: ID!, input: CreateBookClubScheduleInput!): BookClub!
 	addBooksToBookClubSchedule(id: ID!, books: [CreateBookClubScheduleBook!]!): BookClub!
+	createNotifier(input: NotifierInput!): Notifier!
+	updateNotifier(id: Int!, input: NotifierInput!): Notifier!
+	deleteNotifier(id: Int!): Notifier!
 	"""
 	Update the progress of an epub for a user. If the percentage is 1 or greater, the epub is
 	considered finished and the active session is deleted and a finished session is created.
@@ -662,6 +673,25 @@ type Mutation {
 	uploadSeries(input: UploadSeriesInput!): Boolean!
 	deleteLoginActivity: Int!
 	createUser(input: CreateUserInput!): User!
+	meUpdateUser(input: UpdateUserInput!): User!
+	meUpdateUserPreferences(input: UpdateUserPreferencesInput!): UserPreferences!
+	updateUser(userId: String!, input: UpdateUserInput!): User!
+	deleteUserById(userId: String!, hardDelete: Boolean): User!
+	deleteUserSessions(userId: String!): Int!
+	updateUserLockStatus(userId: String!, lock: Boolean!): User!
+}
+
+type Notifier {
+	id: Int!
+	type: String!
+	config: NotifierConfig!
+}
+
+union NotifierConfig = DiscordConfig | TelegramConfig
+
+input NotifierInput @oneOf {
+	discord: DiscordConfigInput
+	telegram: TelegramConfigInput
 }
 
 "A simple offset-based pagination input object"
@@ -781,6 +811,8 @@ type Query {
 	userById(id: ID!): User!
 	loginActivity: [UserLoginActivity!]!
 	loginActivityById(id: ID!): [UserLoginActivity!]!
+	getNotifiers: [Notifier!]!
+	getNotifierById(id: Int!): Notifier!
 	"""
 	Retrieves a paginated list of reading lists for the current user.
 	
@@ -871,7 +903,7 @@ type Series {
 	updatedAt: DateTime!
 	createdAt: DateTime!
 	path: String!
-	status: String!
+	status: FileStatus!
 	libraryId: String
 	metadata: SeriesMetadataModel
 	resolvedName: String!
@@ -911,6 +943,17 @@ type Subscription {
 	tailLogFile: String!
 }
 
+enum SupportedFont {
+	ATKINSON_HYPERLEGIBLE
+	BITTER
+	CHARIS
+	INTER
+	LIBRE_BASKERVILLE
+	LITERATA
+	NUNITO
+	OPEN_DYSLEXIC
+}
+
 enum SystemArrangment {
 	HOME
 	EXPLORE
@@ -923,6 +966,16 @@ type SystemArrangmentConfig {
 type Tag {
 	id: String!
 	name: String!
+}
+
+type TelegramConfig {
+	encryptedToken: String!
+	chatId: String!
+}
+
+input TelegramConfigInput {
+	token: String!
+	chatId: String!
 }
 
 """
@@ -940,6 +993,35 @@ input UpdateBookClubInput {
 	isPrivate: Boolean
 	memberRoleSpec: JSON
 	emoji: String
+}
+
+input UpdateUserInput {
+	username: String!
+	password: String
+	avatarUrl: String
+	permissions: [UserPermission!]!
+	ageRestriction: AgeRestrictionInput = null
+	maxSessionsAllowed: Int
+}
+
+input UpdateUserPreferencesInput {
+	locale: String!
+	preferredLayoutMode: String!
+	primaryNavigationMode: String!
+	layoutMaxWidthPx: Int
+	appTheme: String!
+	enableGradients: Boolean!
+	appFont: SupportedFont!
+	showQueryIndicator: Boolean!
+	enableLiveRefetch: Boolean!
+	enableDiscordPresence: Boolean!
+	enableCompactDisplay: Boolean!
+	enableDoubleSidebar: Boolean!
+	enableReplacePrimarySidebar: Boolean!
+	enableHideScrollbar: Boolean!
+	enableJobOverlay: Boolean!
+	preferAccentColor: Boolean!
+	showThumbnailsInHeaders: Boolean!
 }
 
 scalar Upload

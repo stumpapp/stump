@@ -17,7 +17,7 @@ use crate::{
 		},
 		series::SeriesLoader,
 	},
-	pagination::{CursorPagination, CursorPaginationInfo, PaginatedResponse},
+	pagination::{CursorPagination, CursorPaginationInfo, PaginatedResponse, Pagination},
 };
 
 use super::{
@@ -157,10 +157,19 @@ impl Media {
 	async fn next_in_series(
 		&self,
 		ctx: &Context<'_>,
-		#[graphql(default)] pagination: CursorPagination,
+		#[graphql(default)] pagination: Pagination,
 	) -> Result<PaginatedResponse<Media>> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let pagination = match pagination {
+			Pagination::Cursor(pagination) => pagination,
+			_ => {
+				return Err(
+					"Only cursor pagination is supported for this operation".into()
+				)
+			},
+		};
 
 		let mut cursor = media::ModelWithMetadata::find_for_user(user)
 			.filter(media::Column::SeriesId.eq(self.model.series_id.clone()))

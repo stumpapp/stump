@@ -1,22 +1,36 @@
-import { getNextPageParam } from '@stump/client'
+import { useInfiniteGraphQL } from '@stump/client'
 import { Text } from '@stump/components'
 import { BookX } from 'lucide-react'
-import { Suspense, useCallback, useTransition } from 'react'
+import { Suspense, useCallback } from 'react'
 
 import MediaCard from '@/components/book/BookCard'
 import HorizontalCardList from '@/components/HorizontalCardList'
-import { graphql, PaginationInfo } from '@stump/graphql'
-import { useSuspenseQuery } from '@apollo/client'
+import { graphql } from '@stump/graphql'
 
 const query = graphql(`
-	query BooksAfterCurrentQuery($id: ID!, $pagination: CursorPagination) {
+	query BooksAfterCurrentQuery($id: ID!, $pagination: Pagination) {
 		mediaById(id: $id) {
 			nextInSeries(pagination: $pagination) {
 				nodes {
 					id
-					...BookCard
+					resolvedName
+					pages
+					size
+					status
+					thumbnail {
+						url
+					}
+					readProgress {
+						percentageCompleted
+						epubcfi
+						page
+					}
+					readHistory {
+						__typename
+					}
 				}
 				pageInfo {
+					__typename
 					... on CursorPaginationInfo {
 						currentCursor
 						nextCursor
@@ -41,60 +55,26 @@ export default function BooksAfterCurrentContainer({ cursor }: Props) {
 }
 
 function BooksAfterCurrent({ cursor }: Props) {
-	const [, startTransition] = useTransition()
-	const {
-		data: { mediaById },
-		fetchMore,
-	} = useSuspenseQuery(query, {
-		variables: {
+	const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteGraphQL(
+		query,
+		['booksAfterCursor', cursor],
+		{
 			id: cursor,
 			pagination: {
-				limit: 20,
+				cursor: { limit: 20 },
 			},
 		},
-	})
+	)
 
-	if (!mediaById) {
-		return null
-	}
+	const nodes = data.pages.flatMap((page) => page.mediaById?.nextInSeries.nodes || [])
 
-	const {
-		nextInSeries: { nodes, pageInfo },
-	} = mediaById
-
-	const cards = nodes.map((node) => <MediaCard id={node.id} key={node.id} fullWidth={false} />)
+	const cards = nodes.map((node) => <MediaCard data={node} key={node.id} fullWidth={false} />)
 
 	const handleFetchMore = useCallback(() => {
-		const nextPageParam = getNextPageParam(pageInfo as PaginationInfo)
-		if (nextPageParam) {
-			startTransition(() => {
-				fetchMore({
-					variables: {
-						id: cursor,
-						pagination: nextPageParam.cursor,
-					},
-					updateQuery: (prev, { fetchMoreResult }) => {
-						if (!fetchMoreResult) return prev
-						const pageInfo = fetchMoreResult.mediaById?.nextInSeries.pageInfo
-						if (!pageInfo) return prev
-						return {
-							mediaById: {
-								...prev.mediaById,
-								nextInSeries: {
-									...prev.mediaById?.nextInSeries,
-									nodes: [
-										...(prev.mediaById?.nextInSeries.nodes || []),
-										...(fetchMoreResult.mediaById?.nextInSeries.nodes || []),
-									],
-									pageInfo,
-								},
-							},
-						}
-					},
-				})
-			})
+		if (hasNextPage && !isFetchingNextPage) {
+			fetchNextPage()
 		}
-	}, [])
+	}, [fetchNextPage, hasNextPage, isFetchingNextPage])
 
 	return (
 		<HorizontalCardList

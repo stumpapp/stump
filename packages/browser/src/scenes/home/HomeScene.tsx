@@ -2,12 +2,12 @@ import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
 
-import ContinueReadingMedia from './ContinueReading'
 import NoLibraries from './NoLibraries'
+import { graphql } from '@stump/graphql'
+import { useSuspenseGraphQL } from '@stump/client'
+import ContinueReadingMedia from './ContinueReading'
 import RecentlyAddedMedia from './RecentlyAddedMedia'
 import RecentlyAddedSeries from './RecentlyAddedSeries'
-import { graphql } from '@stump/graphql'
-import { useSuspenseQuery } from '@apollo/client'
 
 const query = graphql(`
 	query HomeSceneQuery {
@@ -17,9 +17,7 @@ const query = graphql(`
 
 // TODO: account for new accounts, i.e. no media at all
 export default function HomeScene() {
-	const {
-		data: { numberOfLibraries },
-	} = useSuspenseQuery(query)
+	const { data } = useSuspenseGraphQL(query, ['numberOfLibraries'])
 
 	const helmet = (
 		<Helmet>
@@ -27,6 +25,12 @@ export default function HomeScene() {
 			<title>Stump | {'Home'}</title>
 		</Helmet>
 	)
+
+	if (!data) {
+		return null
+	}
+
+	const { numberOfLibraries } = data
 
 	if (numberOfLibraries === 0) {
 		return (
@@ -40,6 +44,7 @@ export default function HomeScene() {
 	return (
 		<SceneContainer className="flex flex-col gap-4">
 			{helmet}
+
 			<ContinueReadingMedia />
 			<RecentlyAddedMedia />
 			<RecentlyAddedSeries />

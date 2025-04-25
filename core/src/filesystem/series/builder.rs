@@ -50,7 +50,7 @@ impl SeriesBuilder {
 			path: Set(path_str),
 			name: Set(file_name),
 			library_id: Set(Some(self.library_id)),
-			status: Set(FileStatus::Ready.to_string()),
+			status: Set(FileStatus::Ready),
 			..Default::default()
 		};
 

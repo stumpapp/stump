@@ -2,8 +2,7 @@ use crate::entity::age_restriction;
 use async_graphql::SimpleObject;
 use async_trait::async_trait;
 use sea_orm::{
-	prelude::*, sea_query::Query, ActiveValue, Condition, FromQueryResult, JoinType,
-	QuerySelect,
+	prelude::*, ActiveValue, Condition, FromQueryResult, JoinType, QuerySelect,
 };
 
 use crate::{

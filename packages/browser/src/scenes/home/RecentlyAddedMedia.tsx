@@ -1,20 +1,33 @@
-import { getNextPageParam, updateQuery } from '@stump/client'
+import { useInfiniteGraphQL } from '@stump/client'
 import { Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { BookX } from 'lucide-react'
-import { Suspense, useCallback, useTransition } from 'react'
+import { Suspense, useCallback } from 'react'
 
 import MediaCard from '@/components/book/BookCard'
 import HorizontalCardList from '@/components/HorizontalCardList'
-import { graphql, PaginationInfo } from '@stump/graphql'
-import { useSuspenseQuery } from '@apollo/client'
+import { graphql } from '@stump/graphql'
 
 const query = graphql(`
 	query RecentlyAddedMediaQuery($pagination: Pagination!) {
 		recentlyAddedMedia(pagination: $pagination) {
 			nodes {
 				id
-				...BookCard
+				resolvedName
+				pages
+				size
+				status
+				thumbnail {
+					url
+				}
+				readProgress {
+					percentageCompleted
+					epubcfi
+					page
+				}
+				readHistory {
+					__typename
+				}
 			}
 			pageInfo {
 				__typename
@@ -29,35 +42,24 @@ const query = graphql(`
 `)
 
 function RecentlyAddedMedia() {
-	const [, startTransition] = useTransition()
-	const {
-		data: {
-			recentlyAddedMedia: { nodes, pageInfo },
-		},
-		fetchMore,
-	} = useSuspenseQuery(query, {
-		variables: {
+	const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteGraphQL(
+		query,
+		['recentlyAddedMedia'],
+		{
 			pagination: { cursor: { limit: 20 } },
 		},
-		queryKey: ['recentlyAddedMedia'],
-	})
+	)
+	const nodes = data.pages.flatMap((page) => page.recentlyAddedMedia.nodes)
+
 	const { t } = useLocaleContext()
 
-	const cards = nodes.map((media) => <MediaCard key={media.id} id={media.id} fullWidth={false} />)
+	const cards = nodes.map((node) => <MediaCard key={node.id} data={node} fullWidth={false} />)
 
 	const handleFetchMore = useCallback(() => {
-		const nextPageParam = getNextPageParam(pageInfo as PaginationInfo)
-		if (nextPageParam) {
-			startTransition(() => {
-				fetchMore({
-					variables: {
-						pagination: nextPageParam,
-					},
-					updateQuery,
-				})
-			})
+		if (hasNextPage && !isFetchingNextPage) {
+			fetchNextPage()
 		}
-	}, [fetchMore, pageInfo])
+	}, [fetchNextPage, hasNextPage, isFetchingNextPage])
 
 	return (
 		<HorizontalCardList

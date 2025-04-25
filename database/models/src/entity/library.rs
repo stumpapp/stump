@@ -4,6 +4,8 @@ use sea_orm::{
 	DerivePartialModel, FromQueryResult,
 };
 
+use crate::shared::enums::FileStatus;
+
 use super::{library_hidden_to_user, user::AuthUser};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
@@ -19,7 +21,7 @@ pub struct Model {
 	#[sea_orm(column_type = "Text", unique)]
 	pub path: String,
 	#[sea_orm(column_type = "Text")]
-	pub status: String,
+	pub status: FileStatus,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub updated_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]

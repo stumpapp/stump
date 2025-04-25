@@ -10,6 +10,7 @@ import {
 	UseSuspenseQueryResult,
 	type UseQueryResult,
 	InfiniteData,
+	QueryKey,
 } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { useEffect, useState } from 'react'
@@ -41,13 +42,14 @@ const handleError = ({
 
 export function useGraphQL<TResult, TVariables>(
 	document: TypedDocumentString<TResult, TVariables>,
+	queryKey: QueryKey,
 	...[variables]: TVariables extends Record<string, never> ? [] : [TVariables]
 ): UseQueryResult<TResult> {
 	const { sdk } = useSDK()
 	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
 
 	const { error, ...rest } = useQuery({
-		queryKey: ['foo'],
+		queryKey,
 		queryFn: async () => {
 			const response = await sdk.execute(document, variables)
 			return response
@@ -69,13 +71,14 @@ export function useGraphQL<TResult, TVariables>(
 
 export function useSuspenseGraphQL<TResult, TVariables>(
 	document: TypedDocumentString<TResult, TVariables>,
+	queryKey: QueryKey,
 	...[variables]: TVariables extends Record<string, never> ? [] : [TVariables]
 ): UseSuspenseQueryResult<TResult> {
 	const { sdk } = useSDK()
 	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
 
 	const { error, ...rest } = useSuspenseQuery({
-		queryKey: ['foo'],
+		queryKey,
 		queryFn: async () => {
 			const response = await sdk.execute(document, variables)
 			return response
@@ -99,6 +102,7 @@ type TVariablesWithPagination<T> = T extends Pagination ? T : never
 
 export function useInfiniteGraphQL<TResult, TVariables>(
 	document: TypedDocumentString<TResult, TVariables>,
+	queryKey: QueryKey,
 	...[variables]: TVariables extends TVariablesWithPagination<TVariables> ? [] : [TVariables]
 ): UseSuspenseInfiniteQueryResult<InfiniteData<TResult>> {
 	const { sdk } = useSDK()
@@ -106,20 +110,8 @@ export function useInfiniteGraphQL<TResult, TVariables>(
 
 	const [initialPageParam] = useState<Pagination>(() => variables?.pagination ?? undefined)
 
-	const extractPageInfo = (lastPage: TResult) => {
-		if (!lastPage || typeof lastPage !== 'object') {
-			return undefined
-		}
-		// GraphQL response will embed the pageInfo in the selection being
-		// paginated. This is a bit of a hack, but it works for now.
-		const pageInfo = Object.values(lastPage).find(
-			(value) => typeof value === 'object' && value !== null && 'pageInfo' in value,
-		)?.pageInfo as PaginationInfo | undefined
-		return pageInfo
-	}
-
 	const { error, ...rest } = useSuspenseInfiniteQuery({
-		queryKey: ['foo-infinite'],
+		queryKey,
 		queryFn: async ({ pageParam }) => {
 			const response = await sdk.execute(document, { ...variables, pagination: pageParam })
 			console.log('response', response)
@@ -146,9 +138,31 @@ export function useInfiniteGraphQL<TResult, TVariables>(
 	} as UseSuspenseInfiniteQueryResult<InfiniteData<TResult>>
 }
 
+export const extractPageInfo = (data: unknown): PaginationInfo | undefined => {
+	if (!data || Array.isArray(data)) return undefined
+	if (typeof data === 'object' && 'pageInfo' in data) {
+		return data.pageInfo as PaginationInfo
+	}
+
+	// We need to recursively check each property of the object and any nested objects
+	for (const key in data) {
+		const value = data[key as keyof typeof data]
+		if (typeof value === 'object' && value !== null) {
+			const pageInfo = extractPageInfo(value)
+
+			if (pageInfo) {
+				return pageInfo
+			}
+		}
+	}
+
+	return undefined
+}
+
 export const getNextPageParam = (paginationInfo?: PaginationInfo): Pagination | undefined =>
 	match(paginationInfo)
 		.with({ __typename: 'CursorPaginationInfo' }, (info) => {
+			console.log('info', info)
 			if (!info.nextCursor) return undefined
 			return {
 				cursor: {
@@ -170,4 +184,7 @@ export const getNextPageParam = (paginationInfo?: PaginationInfo): Pagination | 
 				},
 			} satisfies Pagination
 		})
-		.otherwise(() => undefined)
+		.otherwise(() => {
+			console.log('No pagination info found', paginationInfo)
+			return undefined
+		})

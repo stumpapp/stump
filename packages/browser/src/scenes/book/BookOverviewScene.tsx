@@ -1,4 +1,4 @@
-import { useMediaByIdQuery } from '@stump/client'
+import { queryClient, useMediaByIdQuery, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { ButtonOrLink, Heading, Spacer, Text } from '@stump/components'
 import dayjs from 'dayjs'
 import sortBy from 'lodash/sortBy'
@@ -11,47 +11,60 @@ import MediaCard from '@/components/book/BookCard'
 import { SceneContainer } from '@/components/container'
 import LinkBadge from '@/components/LinkBadge'
 import ReadMore from '@/components/ReadMore'
-import { formatBookName } from '@/utils/format'
 
 import { useAppContext } from '../../context'
 import paths from '../../paths'
 import { PDF_EXTENSION } from '../../utils/patterns'
-import BookCompletionToggleButton from './BookCompletionToggleButton'
-import BookFileInformation from './BookFileInformation'
-import BookOverviewSceneHeader from './BookOverviewSceneHeader'
-import BookReaderDropdown from './BookReaderDropdown'
 import BooksAfterCursor from './BooksAfterCursor'
-import DownloadMediaButton from './DownloadMediaButton'
-import EmailBookDropdown from './EmailBookDropdown'
 import { graphql } from '@stump/graphql'
-import { useSuspenseQuery } from '@apollo/client'
 
 const query = graphql(`
 	query BookOverviewSceneQuery($id: ID!) {
 		mediaById(id: $id) {
 			id
-			...BookCard
 			extension
 			metadata {
 				links
 				summary
 			}
+			resolvedName
+			pages
+			size
+			status
+			thumbnail {
+				url
+			}
+			readProgress {
+				percentageCompleted
+				epubcfi
+				page
+			}
 			readHistory {
+				__typename
 				completedAt
 			}
-			resolvedName
 		}
 	}
 `)
+
+export const usePrefetchBook = (id: string) => {
+	const { sdk } = useSDK()
+	return () =>
+		queryClient.prefetchQuery({
+			queryKey: ['bookOverview', id],
+			queryFn: async () => {
+				const response = await sdk.execute(query, { id })
+				return response
+			},
+		})
+}
 
 export default function BookOverviewScene() {
 	const { id } = useParams()
 	const {
 		data: { mediaById: media },
-	} = useSuspenseQuery(query, {
-		variables: {
-			id: id || '',
-		},
+	} = useSuspenseGraphQL(query, ['bookOverview', id], {
+		id: id || '',
 	})
 	const { checkPermission, isServerOwner } = useAppContext()
 
@@ -78,7 +91,7 @@ export default function BookOverviewScene() {
 
 				<div className="flex h-full w-full flex-col gap-4">
 					<div className="flex flex-col items-center gap-3 tablet:mb-2 tablet:flex-row tablet:items-start">
-						<MediaCard id={media.id} readingLink variant="cover" />
+						<MediaCard data={media} readingLink variant="cover" />
 						<div className="flex h-full w-full flex-col gap-2 tablet:gap-4">
 							{/* <BookOverviewSceneHeader media={media} /> */}
 							<Heading size="sm">{media.resolvedName}</Heading>

@@ -4,42 +4,28 @@ import { Text } from '@stump/components'
 import paths from '../../paths'
 import pluralizeStat from '../../utils/pluralize'
 import { EntityCard } from '../entity'
-import { graphql } from '@stump/graphql'
-import { useSuspenseFragment } from '@apollo/client'
+import { FileStatus } from '@stump/graphql'
 import { useCallback } from 'react'
 
-export const SERIES_CARD_FRAGMENT = graphql(`
-	fragment SeriesCard on Series {
-		id
-		resolvedName
-		mediaCount
-		percentageCompleted
-		status
-	}
-`)
+export interface SeriesCardFragment {
+	id: string
+	resolvedName: string
+	mediaCount: number
+	percentageCompleted: number
+	status: FileStatus
+}
 
 export type SeriesCardProps = {
-	// series: Series
-	id: string
+	data: SeriesCardFragment
 	fullWidth?: boolean
 	variant?: 'cover' | 'default'
 }
 
-export default function SeriesCard({ id, fullWidth, variant = 'default' }: SeriesCardProps) {
+export default function SeriesCard({ data, fullWidth, variant = 'default' }: SeriesCardProps) {
 	const { sdk } = useSDK()
-	const { data } = useSuspenseFragment({
-		fragment: SERIES_CARD_FRAGMENT,
-		fragmentName: 'SeriesCard',
-		from: {
-			__typename: 'Series',
-			id,
-		},
-	})
 
 	const isCoverOnly = variant === 'cover'
 
-	// const bookCount = Number(series.media ? series.media.length : series.media_count ?? 0)
-	// const booksUnread = series.unread_media_count
 	// const { prefetch } = usePrefetchSeries({ id: series.id })
 
 	// const handleHover = () => prefetch()
@@ -88,8 +74,8 @@ export default function SeriesCard({ id, fullWidth, variant = 'default' }: Serie
 	return (
 		<EntityCard
 			title={data.resolvedName}
-			href={paths.seriesOverview(id)}
-			imageUrl={sdk.series.thumbnailURL(id)}
+			href={paths.seriesOverview(data.id)}
+			imageUrl={sdk.series.thumbnailURL(data.id)}
 			progress={getProgress()}
 			subtitle={getSubtitle()}
 			// onMouseEnter={handleHover}

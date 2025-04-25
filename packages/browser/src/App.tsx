@@ -3,7 +3,7 @@ import '@stump/components/styles/overrides.css'
 
 import { SDKProvider, StumpClientContextProvider, StumpClientProps } from '@stump/client'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Helmet } from 'react-helmet'
 import { BrowserRouter, createSearchParams, useLocation, useNavigate } from 'react-router-dom'
@@ -27,7 +27,7 @@ export default function StumpWebClient(props: StumpClientProps) {
 	)
 }
 
-function RouterContainer(props: StumpClientProps) {
+const RouterContainer = React.memo((props: StumpClientProps) => {
 	const location = useLocation()
 	const navigate = useNavigate()
 
@@ -68,12 +68,12 @@ function RouterContainer(props: StumpClientProps) {
 	}, [setUseDiscordPresence, setDiscordPresence, discordPresenceEnabled])
 
 	const handleRedirect = (url: string) => {
-		navigate({
-			pathname: url,
-			search: createSearchParams({
-				redirect: location.pathname,
-			}).toString(),
-		})
+		// navigate({
+		// 	pathname: url,
+		// 	search: createSearchParams({
+		// 		redirect: location.pathname,
+		// 	}).toString(),
+		// })
 	}
 
 	const handleUnauthenticatedResponse = (redirectUrl?: string) => {
@@ -86,7 +86,7 @@ function RouterContainer(props: StumpClientProps) {
 
 	const handleConnectionWithServerChanged = (wasReached: boolean) => {
 		setIsConnectedWithServer(wasReached)
-		navigate('/server-connection-error')
+		// navigate('/server-connection-error')
 	}
 
 	if (!mounted) {
@@ -111,4 +111,4 @@ function RouterContainer(props: StumpClientProps) {
 			</SDKProvider>
 		</StumpClientContextProvider>
 	)
-}
+})

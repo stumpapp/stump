@@ -1,21 +1,22 @@
-import { getNextPageParam } from '@stump/client'
+import { useInfiniteGraphQL } from '@stump/client'
 import { Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { BookCopy } from 'lucide-react'
-import { Suspense, useCallback, useTransition } from 'react'
+import { Suspense, useCallback } from 'react'
 
 import HorizontalCardList from '@/components/HorizontalCardList'
 import SeriesCard from '@/components/series/SeriesCard'
-import { graphql, PaginationInfo } from '@stump/graphql'
-import { useSuspenseQuery } from '@apollo/client'
-import { updateQuery } from '@stump/client'
+import { graphql } from '@stump/graphql'
 
 const query = graphql(`
 	query RecentlyAddedSeriesQuery($pagination: Pagination!) {
 		recentlyAddedSeries(pagination: $pagination) {
 			nodes {
 				id
-				...SeriesCard
+				resolvedName
+				mediaCount
+				percentageCompleted
+				status
 			}
 			pageInfo {
 				__typename
@@ -30,39 +31,23 @@ const query = graphql(`
 `)
 
 function RecentlyAddedSeries() {
-	const [, startTransition] = useTransition()
-	const {
-		data: {
-			recentlyAddedSeries: { nodes, pageInfo },
-		},
-		fetchMore,
-	} = useSuspenseQuery(query, {
-		variables: {
+	const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteGraphQL(
+		query,
+		['recentlyAddedSeries'],
+		{
 			pagination: { cursor: { limit: 20 } },
 		},
-		queryKey: ['recentlyAddedSeries'],
-	})
+	)
+	const nodes = data.pages.flatMap((page) => page.recentlyAddedSeries.nodes)
 	const { t } = useLocaleContext()
 
 	const handleFetchMore = useCallback(() => {
-		const nextPageParam = getNextPageParam(pageInfo as PaginationInfo)
-		if (nextPageParam) {
-			startTransition(() => {
-				fetchMore({
-					variables: {
-						pagination: nextPageParam,
-					},
-					updateQuery,
-				})
-			})
+		if (hasNextPage && !isFetchingNextPage) {
+			fetchNextPage()
 		}
-	}, [fetchMore, pageInfo])
+	}, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
-	const cards = nodes.map((node) => (
-		<Suspense key={node.id}>
-			<SeriesCard id={node.id} fullWidth={false} />
-		</Suspense>
-	))
+	const cards = nodes.map((node) => <SeriesCard key={node.id} data={node} fullWidth={false} />)
 
 	return (
 		<HorizontalCardList

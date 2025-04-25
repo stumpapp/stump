@@ -60,17 +60,15 @@ export default function SideBar({ asChild, hidden }: Props) {
 	// 	// },
 	// })
 
-	// const [{ data }] = useUrqlQuery({
-	// 	query,
-	// })
+	// const fuck = useQuery(query)
 
-	const test = useRQSuspenseQuery({
-		queryKey: ['me'],
-		queryFn: async () => {
-			console.log('fetching me')
-			return {}
-		},
-	})
+	// const test = useRQSuspenseQuery({
+	// 	queryKey: ['me'],
+	// 	queryFn: async () => {
+	// 		console.log('fetching me')
+	// 		return {}
+	// 	},
+	// })
 
 	const { checkPermission } = useAppContext()
 	// const {
@@ -175,6 +173,15 @@ export default function SideBar({ asChild, hidden }: Props) {
 				<div className="flex max-h-full grow flex-col gap-2 overflow-y-auto p-1 scrollbar-hide">
 					{isAtLeastMedium && isBrowser && <UserMenu />}
 					{/* {sections} */}
+
+					<SideBarButtonLink
+						key="home-sidebar-navlink"
+						to={paths.home()}
+						isActive={location.pathname === '/'}
+					>
+						<Home className="mr-2 h-4 w-4 shrink-0" />
+						{t('sidebar.buttons.home')}
+					</SideBarButtonLink>
 				</div>
 				<Spacer />
 

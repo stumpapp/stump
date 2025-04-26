@@ -1,3 +1,4 @@
+use async_graphql::SimpleObject;
 use sea_orm::{entity::prelude::*, FromQueryResult, JoinType, QuerySelect};
 
 use crate::{
@@ -5,9 +6,13 @@ use crate::{
 	shared::api_key::APIKeyPermissions,
 };
 
-use super::{age_restriction, user};
+use super::{
+	age_restriction,
+	user::{self, AuthUser},
+};
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
+#[graphql(name = "APIKeyModel")]
 #[sea_orm(table_name = "api_keys")]
 pub struct Model {
 	#[sea_orm(primary_key)]
@@ -19,6 +24,7 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	pub long_token_hash: String,
 	#[sea_orm(column_type = "Json", nullable)]
+	#[graphql(skip)]
 	pub permissions: APIKeyPermissions,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub created_at: DateTimeWithTimeZone,
@@ -28,6 +34,12 @@ pub struct Model {
 	pub expires_at: Option<DateTimeWithTimeZone>,
 	#[sea_orm(column_type = "Text")]
 	pub user_id: String,
+}
+
+impl Entity {
+	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
+		Entity::find().filter(Column::UserId.eq(user.id.clone()))
+	}
 }
 
 pub struct APIKeyWithUser {

@@ -31,9 +31,6 @@ tokio.workspace = true
 tracing.workspace = true
 zip.workspace = true
 bcrypt.workspace = true
-simple_crypt.workspace = true
-base64.workspace = true
-data-encoding.workspace = true
 
 [dev-dependencies]
 maplit.workspace = true

@@ -1,7 +1,7 @@
 use async_graphql::{InputObject, OneofObject, Result};
 use models::entity::notifier::{self, NotifierConfig, NotifierType};
 use sea_orm::{ActiveValue::NotSet, Set};
-use simple_crypt::encrypt;
+use stump_core::utils::encryption::encrypt_string;
 
 #[derive(InputObject)]
 pub struct DiscordConfigInput {
@@ -44,11 +44,4 @@ impl NotifierInput {
 			config: Set(notifier_config.into_bytes()?),
 		})
 	}
-}
-
-// TODO(graphql): move this to a common place?
-fn encrypt_string(str: &str, encryption_key: &String) -> Result<String> {
-	let encrypted_bytes =
-		encrypt(str.as_bytes(), encryption_key.as_bytes()).map_err(|e| e.to_string())?;
-	Ok(data_encoding::BASE64.encode(&encrypted_bytes))
 }

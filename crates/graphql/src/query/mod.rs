@@ -1,3 +1,4 @@
+mod api_key;
 mod book_club;
 mod emailer;
 mod epub;
@@ -12,6 +13,7 @@ mod series;
 mod tag;
 pub(crate) mod user;
 
+use api_key::APIKeyQuery;
 use book_club::BookClubQuery;
 use emailer::EmailerQuery;
 use epub::EpubQuery;
@@ -27,6 +29,7 @@ use user::UserQuery;
 
 #[derive(async_graphql::MergedObject, Default)]
 pub struct Query(
+	APIKeyQuery,
 	BookClubQuery,
 	EmailerQuery,
 	MediaQuery,

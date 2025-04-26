@@ -1,3 +1,4 @@
+use async_graphql::{Enum, OneofObject};
 use sea_orm::FromJsonQueryResult;
 use serde::{Deserialize, Serialize};
 
@@ -8,13 +9,15 @@ use super::enums::UserPermission;
 pub const API_KEY_PREFIX: &str = "stump";
 
 // Note: This is a hack to get untagged unit enums to work with serde/specta. See https://github.com/serde-rs/serde/issues/1560
-#[derive(Debug, Clone, Serialize, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Copy, Clone, Serialize, PartialEq, Eq, Deserialize, Enum)]
 pub enum InheritPermissionValue {
 	#[serde(rename = "inherit")]
 	Inherit,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, FromJsonQueryResult)]
+#[derive(
+	Debug, Clone, Serialize, Deserialize, PartialEq, Eq, FromJsonQueryResult, OneofObject,
+)]
 #[serde(untagged)]
 pub enum APIKeyPermissions {
 	Inherit(InheritPermissionValue),

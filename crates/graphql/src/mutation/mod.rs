@@ -1,3 +1,4 @@
+mod api_key;
 mod book_club;
 mod book_club_invitation;
 mod book_club_member;
@@ -13,6 +14,7 @@ mod tag;
 mod upload;
 mod user;
 
+use api_key::APIKeyMutation;
 use book_club::BookClubMutation;
 use book_club_invitation::BookClubInvitationMutation;
 use book_club_member::BookClubMemberMutation;
@@ -30,6 +32,7 @@ use user::UserMutation;
 
 #[derive(async_graphql::MergedObject, Default)]
 pub struct Mutation(
+	APIKeyMutation,
 	BookClubMutation,
 	BookClubInvitationMutation,
 	BookClubMemberMutation,

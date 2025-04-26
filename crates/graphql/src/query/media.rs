@@ -77,6 +77,7 @@ impl MediaQuery {
 				let count = query.clone().count(conn).await?;
 
 				let models = query
+					.order_by_asc(media::Column::Name)
 					.offset(info.offset())
 					.limit(info.limit())
 					.into_model::<media::ModelWithMetadata>()

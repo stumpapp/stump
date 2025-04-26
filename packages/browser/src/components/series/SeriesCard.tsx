@@ -1,11 +1,13 @@
-import { usePrefetchSeries, useSDK } from '@stump/client'
+import { useSDK } from '@stump/client'
 import { Text } from '@stump/components'
+import { FileStatus } from '@stump/graphql'
+import { useCallback } from 'react'
+
+import { usePrefetchSeries, usePrefetchSeriesBooks } from '@/scenes/series'
 
 import paths from '../../paths'
 import pluralizeStat from '../../utils/pluralize'
 import { EntityCard } from '../entity'
-import { FileStatus } from '@stump/graphql'
-import { useCallback } from 'react'
 
 export interface SeriesCardFragment {
 	id: string
@@ -26,9 +28,12 @@ export default function SeriesCard({ data, fullWidth, variant = 'default' }: Ser
 
 	const isCoverOnly = variant === 'cover'
 
-	// const { prefetch } = usePrefetchSeries({ id: series.id })
-
-	// const handleHover = () => prefetch()
+	const prefetchSeries = usePrefetchSeries(data.id)
+	const prefetchSeriesBooks = usePrefetchSeriesBooks(data.id)
+	const prefetch = useCallback(
+		() => Promise.all([prefetchSeries(), prefetchSeriesBooks()]),
+		[prefetchSeries, prefetchSeriesBooks],
+	)
 
 	function getProgress() {
 		if (isCoverOnly || data.percentageCompleted <= 0.0) {
@@ -78,7 +83,7 @@ export default function SeriesCard({ data, fullWidth, variant = 'default' }: Ser
 			imageUrl={sdk.series.thumbnailURL(data.id)}
 			progress={getProgress()}
 			subtitle={getSubtitle()}
-			// onMouseEnter={handleHover}
+			onMouseEnter={prefetch}
 			fullWidth={fullWidth}
 			isCover={isCoverOnly}
 			{...overrides}

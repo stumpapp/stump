@@ -391,7 +391,7 @@ export type Library = {
   series: Array<Series>;
   stats: LibraryStats;
   status: FileStatus;
-  tags: Array<Scalars['String']['output']>;
+  tags: Array<Tag>;
   updatedAt: Scalars['DateTime']['output'];
 };
 
@@ -1101,6 +1101,7 @@ export type Query = {
   getNotifiers: Array<Notifier>;
   keepReading: PaginatedMediaResponse;
   libraries: PaginatedLibraryResponse;
+  libraryById?: Maybe<Library>;
   /**
    * Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
    * ~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
@@ -1133,6 +1134,7 @@ export type Query = {
   recentlyAddedMedia: PaginatedMediaResponse;
   recentlyAddedSeries: PaginatedSeriesResponse;
   series: PaginatedSeriesResponse;
+  seriesById?: Maybe<Series>;
   /** Returns a list of all tags. */
   tags: Array<Tag>;
   userById: User;
@@ -1180,6 +1182,11 @@ export type QueryLibrariesArgs = {
 };
 
 
+export type QueryLibraryByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type QueryLoginActivityByIdArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1223,6 +1230,11 @@ export type QueryRecentlyAddedSeriesArgs = {
 
 export type QuerySeriesArgs = {
   pagination?: Pagination;
+};
+
+
+export type QuerySeriesByIdArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -1296,8 +1308,10 @@ export type Series = {
   path: Scalars['String']['output'];
   percentageCompleted: Scalars['Float']['output'];
   readCount: Scalars['Int']['output'];
+  resolvedDescription?: Maybe<Scalars['String']['output']>;
   resolvedName: Scalars['String']['output'];
   status: FileStatus;
+  tags: Array<Tag>;
   unreadCount: Scalars['Int']['output'];
   upNext: Array<Media>;
   updatedAt: Scalars['DateTime']['output'];
@@ -1587,11 +1601,6 @@ export type HomeSceneQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type HomeSceneQueryQuery = { __typename?: 'Query', numberOfLibraries: number };
 
-export type HomeSceneSubscriptionSubscriptionVariables = Exact<{ [key: string]: never; }>;
-
-
-export type HomeSceneSubscriptionSubscription = { __typename?: 'Subscription', tailLogFile: string };
-
 export type RecentlyAddedMediaQueryQueryVariables = Exact<{
   pagination: Pagination;
 }>;
@@ -1605,6 +1614,21 @@ export type RecentlyAddedSeriesQueryQueryVariables = Exact<{
 
 
 export type RecentlyAddedSeriesQueryQuery = { __typename?: 'Query', recentlyAddedSeries: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, resolvedName: string, mediaCount: number, percentageCompleted: number, status: FileStatus }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
+
+export type SeriesLayoutQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SeriesLayoutQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, path: string, resolvedName: string, resolvedDescription?: string | null, library: { __typename?: 'Library', id: string, name: string }, tags: Array<{ __typename?: 'Tag', id: string, name: string }> } | null };
+
+export type SeriesBooksSceneQueryVariables = Exact<{
+  filter: Scalars['JSON']['input'];
+  pagination: Pagination;
+}>;
+
+
+export type SeriesBooksSceneQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, resolvedName: string, pages: number, size: number, status: FileStatus, thumbnail: { __typename?: 'ImageRef', url: string }, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null } | null, readHistory: Array<{ __typename: 'FinishedReadingSession' }> }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String
@@ -1757,11 +1781,6 @@ export const HomeSceneQueryDocument = new TypedDocumentString(`
   numberOfLibraries
 }
     `) as unknown as TypedDocumentString<HomeSceneQueryQuery, HomeSceneQueryQueryVariables>;
-export const HomeSceneSubscriptionDocument = new TypedDocumentString(`
-    subscription HomeSceneSubscription {
-  tailLogFile
-}
-    `) as unknown as TypedDocumentString<HomeSceneSubscriptionSubscription, HomeSceneSubscriptionSubscriptionVariables>;
 export const RecentlyAddedMediaQueryDocument = new TypedDocumentString(`
     query RecentlyAddedMediaQuery($pagination: Pagination!) {
   recentlyAddedMedia(pagination: $pagination) {
@@ -1815,3 +1834,55 @@ export const RecentlyAddedSeriesQueryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<RecentlyAddedSeriesQueryQuery, RecentlyAddedSeriesQueryQueryVariables>;
+export const SeriesLayoutDocument = new TypedDocumentString(`
+    query SeriesLayout($id: ID!) {
+  seriesById(id: $id) {
+    id
+    path
+    library {
+      id
+      name
+    }
+    resolvedName
+    resolvedDescription
+    tags {
+      id
+      name
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesLayoutQuery, SeriesLayoutQueryVariables>;
+export const SeriesBooksSceneDocument = new TypedDocumentString(`
+    query SeriesBooksScene($filter: JSON!, $pagination: Pagination!) {
+  media(filter: $filter, pagination: $pagination) {
+    nodes {
+      id
+      resolvedName
+      pages
+      size
+      status
+      thumbnail {
+        url
+      }
+      readProgress {
+        percentageCompleted
+        epubcfi
+        page
+      }
+      readHistory {
+        __typename
+      }
+    }
+    pageInfo {
+      __typename
+      ... on OffsetPaginationInfo {
+        currentPage
+        totalPages
+        pageSize
+        pageOffset
+        zeroBased
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesBooksSceneQuery, SeriesBooksSceneQueryVariables>;

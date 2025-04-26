@@ -1,13 +1,12 @@
 import { useInfiniteGraphQL } from '@stump/client'
 import { Text } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { BookMarked } from 'lucide-react'
 import { Suspense, useCallback } from 'react'
 
-import HorizontalCardList_ from '@/components/HorizontalCardList'
-
-import { graphql } from '@stump/graphql'
 import BookCard from '@/components/book/BookCard'
+import HorizontalCardList_ from '@/components/HorizontalCardList'
 
 const query = graphql(`
 	query ContinueReadingMediaQuery($pagination: Pagination!) {

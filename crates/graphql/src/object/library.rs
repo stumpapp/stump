@@ -16,7 +16,7 @@ use crate::{
 	guard::PermissionGuard,
 };
 
-use super::{library_config::LibraryConfig, series::Series, user::User};
+use super::{library_config::LibraryConfig, series::Series, tag::Tag, user::User};
 
 #[derive(Clone, Debug, SimpleObject)]
 #[graphql(complex)]
@@ -166,10 +166,10 @@ impl Library {
 		Ok(LibraryStats::from_query_result(&result, "")?)
 	}
 
-	async fn tags(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
+	async fn tags(&self, ctx: &Context<'_>) -> Result<Vec<Tag>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let tags = tag::Entity::find()
+		let models = tag::Entity::find()
 			.filter(
 				tag::Column::Id.in_subquery(
 					Query::select()
@@ -184,7 +184,7 @@ impl Library {
 			.all(conn)
 			.await?;
 
-		Ok(tags.into_iter().map(|t| t.name).collect())
+		Ok(models.into_iter().map(Tag::from).collect())
 	}
 }
 

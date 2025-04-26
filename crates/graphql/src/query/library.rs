@@ -1,4 +1,4 @@
-use async_graphql::{Context, Object, Result};
+use async_graphql::{Context, Object, Result, ID};
 use models::entity::library;
 use sea_orm::{prelude::*, QuerySelect};
 
@@ -84,6 +84,18 @@ impl LibraryQuery {
 				})
 			},
 		}
+	}
+
+	async fn library_by_id(&self, ctx: &Context<'_>, id: ID) -> Result<Option<Library>> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let model = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.one(conn)
+			.await?;
+
+		Ok(model.map(Library::from))
 	}
 
 	async fn number_of_libraries(&self, ctx: &Context<'_>) -> Result<u64> {

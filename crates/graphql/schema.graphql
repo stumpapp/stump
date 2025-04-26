@@ -361,7 +361,7 @@ type Library {
 	scanHistory: [LibraryScanRecordModel!]!
 	series: [Series!]!
 	stats(allUsers: Boolean): LibraryStats!
-	tags: [String!]!
+	tags: [Tag!]!
 }
 
 type LibraryConfig {
@@ -840,9 +840,11 @@ type Query {
 	"Get all bookmarks for a single epub by its media ID"
 	bookmarksByMediaId(id: ID!): [Bookmark!]!
 	libraries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLibraryResponse!
+	libraryById(id: ID!): Library
 	numberOfLibraries: Int!
 	mediaMetadataOverview: MediaMetadataOverview!
 	series(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
+	seriesById(id: ID!): Series
 	numberOfSeries: Int!
 	recentlyAddedSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
 	"Returns a list of all tags."
@@ -914,6 +916,7 @@ type Series {
 	libraryId: String
 	metadata: SeriesMetadataModel
 	resolvedName: String!
+	resolvedDescription: String
 	library: Library!
 	media: [Media!]!
 	mediaCount: Int!
@@ -922,6 +925,7 @@ type Series {
 	percentageCompleted: Float!
 	readCount: Int!
 	unreadCount: Int!
+	tags: [Tag!]!
 }
 
 type SeriesMetadataModel {

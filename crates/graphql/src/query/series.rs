@@ -1,4 +1,4 @@
-use async_graphql::{Context, Object, Result};
+use async_graphql::{Context, Object, Result, ID};
 use models::entity::series;
 use sea_orm::{prelude::*, QueryOrder, QuerySelect};
 
@@ -93,6 +93,18 @@ impl SeriesQuery {
 				})
 			},
 		}
+	}
+
+	async fn series_by_id(&self, ctx: &Context<'_>, id: ID) -> Result<Option<Series>> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let model = series::ModelWithMetadata::find_for_user(user)
+			.filter(series::Column::Id.eq(id.to_string()))
+			.into_model::<series::ModelWithMetadata>()
+			.one(conn)
+			.await?;
+
+		Ok(model.map(Series::from))
 	}
 
 	async fn number_of_series(&self, ctx: &Context<'_>) -> Result<u64> {

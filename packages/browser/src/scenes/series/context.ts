@@ -1,8 +1,8 @@
-import { Series } from '@stump/sdk'
+import { SeriesLayoutQuery } from '@stump/graphql'
 import { createContext, useContext } from 'react'
 
 export type ISeriesContext = {
-	series: Series
+	series: NonNullable<SeriesLayoutQuery['seriesById']>
 }
 
 export const SeriesContext = createContext<ISeriesContext | null>(null)

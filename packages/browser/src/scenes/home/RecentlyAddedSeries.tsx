@@ -31,6 +31,7 @@ const query = graphql(`
 `)
 
 function RecentlyAddedSeries() {
+	const { t } = useLocaleContext()
 	const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteGraphQL(
 		query,
 		['recentlyAddedSeries'],
@@ -39,7 +40,6 @@ function RecentlyAddedSeries() {
 		},
 	)
 	const nodes = data.pages.flatMap((page) => page.recentlyAddedSeries.nodes)
-	const { t } = useLocaleContext()
 
 	const handleFetchMore = useCallback(() => {
 		if (hasNextPage && !isFetchingNextPage) {

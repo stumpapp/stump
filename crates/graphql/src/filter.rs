@@ -79,6 +79,8 @@ pub struct MediaFilterInput {
 	pub created_at: Option<FieldFilter<DateTimeWithTimeZone>>,
 	#[field_column("models::entity::media::Column::UpdatedAt")]
 	pub updated_at: Option<FieldFilter<DateTimeWithTimeZone>>,
+	#[field_column("models::entity::media::Column::SeriesId")]
+	pub series_id: Option<FieldFilter<String>>,
 	#[field_column("models::entity::media::Column::Status")]
 	pub status: Option<FieldFilter<String>>,
 	#[field_column("models::entity::media::Column::Path")]

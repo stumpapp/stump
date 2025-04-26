@@ -2,13 +2,15 @@ use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
 use models::entity::{
 	finished_reading_session, library, media, reading_session, series, series_metadata,
-	user::AuthUser,
+	series_to_tag, tag, user::AuthUser,
 };
-use sea_orm::{prelude::*, Condition, JoinType, QueryOrder, QuerySelect};
+use sea_orm::{
+	prelude::*, sea_query::Query, Condition, JoinType, QueryOrder, QuerySelect,
+};
 
 use crate::data::{CoreContext, RequestContext};
 
-use super::{library::Library, media::Media};
+use super::{library::Library, media::Media, tag::Tag};
 
 #[derive(Clone, Debug, SimpleObject)]
 #[graphql(complex)]
@@ -34,6 +36,13 @@ impl Series {
 			.as_ref()
 			.and_then(|m| m.title.clone())
 			.unwrap_or_else(|| self.model.name.clone())
+	}
+
+	async fn resolved_description(&self) -> Option<String> {
+		self.metadata
+			.as_ref()
+			.and_then(|m| m.summary.clone())
+			.or_else(|| self.model.description.clone())
 	}
 
 	async fn library(&self, ctx: &Context<'_>) -> Result<Library> {
@@ -211,6 +220,27 @@ impl Series {
 			get_series_progress(user, self.model.id.clone(), conn).await?;
 
 		Ok(std::cmp::max(0, media_count - finished_count))
+	}
+
+	async fn tags(&self, ctx: &Context<'_>) -> Result<Vec<Tag>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let models = tag::Entity::find()
+			.filter(
+				tag::Column::Id.in_subquery(
+					Query::select()
+						.column(series_to_tag::Column::TagId)
+						.from(series_to_tag::Entity)
+						.and_where(
+							series_to_tag::Column::SeriesId.eq(self.model.id.clone()),
+						)
+						.to_owned(),
+				),
+			)
+			.all(conn)
+			.await?;
+
+		Ok(models.into_iter().map(Tag::from).collect())
 	}
 }
 

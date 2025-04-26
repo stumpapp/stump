@@ -3,11 +3,11 @@ import type { Media } from '@stump/sdk'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
 
-import BookCard from './BookCard'
+import BookCard, { BookCardData } from './BookCard'
 
 type Props = {
 	isLoading: boolean
-	books?: Media[]
+	books?: BookCardData[]
 	hasFilters?: boolean
 	onSelect?: (media: Media) => void
 }
@@ -37,7 +37,7 @@ export default function BookGrid({ books, isLoading, hasFilters, onSelect }: Pro
 	return (
 		<CardGrid>
 			{books.map((m) => (
-				<BookCard key={m.id} media={m} onSelect={onSelect} />
+				<BookCard key={m.id} data={m} />
 			))}
 		</CardGrid>
 	)

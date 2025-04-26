@@ -40,6 +40,7 @@ pub mod registered_reading_device;
 pub mod review;
 pub mod series;
 pub mod series_metadata;
+pub mod series_to_tag;
 pub mod server_config;
 pub mod server_invitation;
 pub mod session;

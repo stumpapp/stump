@@ -8,6 +8,25 @@ import { EXCLUDED_FILTER_KEYS } from './utils'
 
 type Return = IFilterContext
 
+export const useURLPageParams = () => {
+	const [searchParams] = useSearchParams()
+
+	const is3XLScreenOrBigger = useMediaMatch('(min-width: 1600px)')
+	const defaultPageSize = is3XLScreenOrBigger ? 40 : 20
+
+	const pagination = useMemo(
+		() => ({
+			page: searchParams.get('page') ? parseInt(searchParams.get('page') as string) : 1,
+			pageSize: searchParams.get('pageSize')
+				? parseInt(searchParams.get('pageSize') as string)
+				: defaultPageSize,
+		}),
+		[searchParams, defaultPageSize],
+	)
+
+	return pagination
+}
+
 export function useFilterScene(): Return {
 	const [searchParams, setSearchParams] = useSearchParams()
 

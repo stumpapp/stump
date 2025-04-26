@@ -18,11 +18,18 @@ fi
 
 # TODO(distroless) ensure that the following checks don't cause issues after moving to distroless
 ## Add stump group if it doesn't already exist
-if ! grep -q "^${GROUP}:" /etc/group; then
-    echo "Adding group $GROUP with gid $PGID"
-    addgroup -g $PGID $GROUP
-fi
+if [ "$PGID" -gt 60000 ]; then
+    echo "Warning: PGID $PGID is too large for BusyBox's addgroup (limit is 60000)"
+    echo "Using fallback method to add group..."
 
+    echo "$GROUP:x:$PGID:" >> /etc/group
+else
+    # ... Exiting logic ... #
+    if ! grep -q "^${GROUP}:" /etc/group; then
+        echo "Adding group $GROUP with gid $PGID"
+        addgroup -g $PGID $GROUP
+    fi
+fi
 ## Add stump user if it doesn't already exist
 if ! grep -q "^${USER}:" /etc/passwd; then
     echo "Adding user $USER with uid $PUID"

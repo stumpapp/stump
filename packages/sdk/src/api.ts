@@ -22,6 +22,11 @@ import {
 	UploadAPI,
 	UserAPI,
 } from './controllers'
+import {
+	attemptWebsocketConnect,
+	GraphQLWebsocketConnectEventHandlers,
+	GraphQLWebsocketConnectReturn,
+} from './socket'
 import { GraphQLResponse } from './types/graphql'
 import { formatApiURL } from './utils'
 
@@ -254,6 +259,19 @@ export class Api {
 		}
 
 		return data
+	}
+
+	async connect<TResult, TVariables>(
+		query: TypedDocumentString<TResult, TVariables>,
+		variables?: TVariables extends Record<string, never> ? never : TVariables,
+		options: Partial<GraphQLWebsocketConnectEventHandlers<TResult>> = {},
+	): Promise<GraphQLWebsocketConnectReturn> {
+		return attemptWebsocketConnect<TResult, TVariables>({
+			query,
+			variables,
+			sdk: this,
+			...options,
+		})
 	}
 
 	/**

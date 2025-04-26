@@ -1,11 +1,11 @@
+import { useGraphQLSubscription, useSDK, useSuspenseGraphQL } from '@stump/client'
+import { graphql } from '@stump/graphql'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
 
-import NoLibraries from './NoLibraries'
-import { graphql } from '@stump/graphql'
-import { useSuspenseGraphQL } from '@stump/client'
 import ContinueReadingMedia from './ContinueReading'
+import NoLibraries from './NoLibraries'
 import RecentlyAddedMedia from './RecentlyAddedMedia'
 import RecentlyAddedSeries from './RecentlyAddedSeries'
 
@@ -15,9 +15,20 @@ const query = graphql(`
 	}
 `)
 
+const sub = graphql(`
+	subscription HomeSceneSubscription {
+		tailLogFile
+	}
+`)
+
 // TODO: account for new accounts, i.e. no media at all
 export default function HomeScene() {
+	const { sdk } = useSDK()
 	const { data } = useSuspenseGraphQL(query, ['numberOfLibraries'])
+
+	const [subData] = useGraphQLSubscription(sub)
+
+	console.log(subData)
 
 	const helmet = (
 		<Helmet>
@@ -44,6 +55,8 @@ export default function HomeScene() {
 	return (
 		<SceneContainer className="flex flex-col gap-4">
 			{helmet}
+
+			<button onClick={() => sdk.connect(sub)}>Try sub</button>
 
 			<ContinueReadingMedia />
 			<RecentlyAddedMedia />

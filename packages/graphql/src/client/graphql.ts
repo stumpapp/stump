@@ -1587,6 +1587,11 @@ export type HomeSceneQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type HomeSceneQueryQuery = { __typename?: 'Query', numberOfLibraries: number };
 
+export type HomeSceneSubscriptionSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type HomeSceneSubscriptionSubscription = { __typename?: 'Subscription', tailLogFile: string };
+
 export type RecentlyAddedMediaQueryQueryVariables = Exact<{
   pagination: Pagination;
 }>;
@@ -1752,6 +1757,11 @@ export const HomeSceneQueryDocument = new TypedDocumentString(`
   numberOfLibraries
 }
     `) as unknown as TypedDocumentString<HomeSceneQueryQuery, HomeSceneQueryQueryVariables>;
+export const HomeSceneSubscriptionDocument = new TypedDocumentString(`
+    subscription HomeSceneSubscription {
+  tailLogFile
+}
+    `) as unknown as TypedDocumentString<HomeSceneSubscriptionSubscription, HomeSceneSubscriptionSubscriptionVariables>;
 export const RecentlyAddedMediaQueryDocument = new TypedDocumentString(`
     query RecentlyAddedMediaQuery($pagination: Pagination!) {
   recentlyAddedMedia(pagination: $pagination) {

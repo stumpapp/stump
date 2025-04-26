@@ -1,5 +1,6 @@
 import type { Pagination, PaginationInfo, TypedDocumentString } from '@stump/graphql'
 import { Api } from '@stump/sdk'
+import { GraphQLWebsocketConnectEventHandlers } from '@stump/sdk/socket'
 import {
 	InfiniteData,
 	QueryKey,
@@ -12,7 +13,7 @@ import {
 	UseSuspenseQueryResult,
 } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { match } from 'ts-pattern'
 
 import { IStumpClientContext, useClientContext } from '@/context'
@@ -156,6 +157,12 @@ export function useInfiniteGraphQL<TResult, TVariables>(
 	} as UseSuspenseInfiniteQueryResult<InfiniteData<TResult>>
 }
 
+/**
+ * Extract the initial page param from the variables object, if any exist
+ *
+ * @param variables The variables object to extract the pagination info from
+ * @returns The initial page param object, or undefined if not found
+ */
 const extractInitialPageParam = <TVariables>(variables: TVariables): Pagination => {
 	if (typeof variables !== 'object' || !variables) return { cursor: { limit: 20 } }
 	if ('pagination' in variables) {
@@ -167,6 +174,14 @@ const extractInitialPageParam = <TVariables>(variables: TVariables): Pagination 
 	return { cursor: { limit: 20 } }
 }
 
+/**
+ * Extract the pagination info from an unknown object. This is primarily used to extract
+ * the pagination params from a GraphQL result. It aims to be flexible enough to support
+ * nested selections with pagination arguments (via recursion).
+ *
+ * @param data The object to extract the pagination info from
+ * @returns The pagination info object, or undefined if not found
+ */
 export const extractPageInfo = (data: unknown): PaginationInfo | undefined => {
 	if (!data || Array.isArray(data)) return undefined
 	if (typeof data === 'object' && 'pageInfo' in data) {
@@ -188,6 +203,13 @@ export const extractPageInfo = (data: unknown): PaginationInfo | undefined => {
 	return undefined
 }
 
+/**
+ * Get the next page param from the pagination info object. If the pagination info is not
+ * present, or if there is no next page, this function will return undefined.
+ *
+ * @param paginationInfo The pagination info object returned from the GraphQL result
+ * @returns A {@link Pagination} object that can be used to fetch the next page of results
+ */
 export const getNextPageParam = (paginationInfo?: PaginationInfo): Pagination | undefined =>
 	match(paginationInfo)
 		.with({ __typename: 'CursorPaginationInfo' }, (info) => {
@@ -213,3 +235,111 @@ export const getNextPageParam = (paginationInfo?: PaginationInfo): Pagination | 
 			} satisfies Pagination
 		})
 		.otherwise(() => undefined)
+
+export type UseGraphQLSubscriptionParams<TResult, TVariables> = {
+	variables?: TVariables extends Record<string, never> ? never : TVariables
+	/**
+	 * An optional function that is called when the data changes to override how the hook
+	 * manages its internal state.
+	 */
+	onDataChangeCapture?: (oldData: TResult[], newData: TResult) => TResult[]
+	/**
+	 * The maximum number of items to keep in the cache. If not provided, the default is 10,000.
+	 */
+	maxCacheSize?: number
+}
+
+export type UseGraphQLSubscriptionReturn<TResult> = [
+	TResult[] | undefined,
+	WebSocket | null,
+	() => void,
+]
+
+export function useGraphQLSubscription<TResult, TVariables>(
+	document: TypedDocumentString<TResult, TVariables>,
+	{
+		variables,
+		onDataChangeCapture,
+		maxCacheSize = 10_000,
+	}: UseGraphQLSubscriptionParams<TResult, TVariables> = {},
+): UseGraphQLSubscriptionReturn<TResult> {
+	const { sdk } = useSDK()
+	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
+
+	const [socket, setSocket] = useState<WebSocket | null>(null)
+	const [dispose, setDispose] = useState<() => void>(() => () => {})
+
+	const [data, setData] = useState<TResult[] | undefined>(undefined)
+
+	if (maxCacheSize <= 10) {
+		throw new Error('maxCacheSize must be greater than 10')
+	}
+
+	const events = useMemo<Partial<GraphQLWebsocketConnectEventHandlers<TResult>>>(
+		() => ({
+			onMessage: (payload) => {
+				setData((prevData) => {
+					if (onDataChangeCapture) {
+						return onDataChangeCapture(prevData || [], payload)
+					} else {
+						const newData = [...(prevData || []), payload]
+						if (newData.length > maxCacheSize) {
+							return newData.slice(newData.length - maxCacheSize)
+						}
+						return newData
+					}
+				})
+			},
+			onError: (error) => {
+				handleError({
+					sdk,
+					error,
+					onUnauthenticatedResponse,
+					onConnectionWithServerChanged,
+				})
+			},
+		}),
+		[
+			sdk,
+			onUnauthenticatedResponse,
+			onConnectionWithServerChanged,
+			onDataChangeCapture,
+			maxCacheSize,
+		],
+	)
+
+	const didConfigure = useRef(false)
+	/**
+	 * An effect responsible for kicking off the socket connection and managing the
+	 * lifecycle of the socket. It will only run once, and will clean up the socket when
+	 * the component unmounts or when the socket is closed.
+	 */
+	useEffect(() => {
+		if (socket || didConfigure.current) return
+
+		didConfigure.current = true
+		const configureSocket = async () => {
+			const { socket, unsubscribe } = await sdk.connect<TResult, TVariables>(
+				document,
+				variables,
+				events,
+			)
+
+			setSocket(socket)
+			setDispose(() => () => {
+				unsubscribe()
+				socket.close()
+				setSocket(null)
+				didConfigure.current = false
+			})
+		}
+
+		configureSocket()
+
+		return () => {
+			dispose()
+		}
+	}, [socket, sdk, document, variables, events, dispose])
+
+	return [data, socket, dispose] as const
+}

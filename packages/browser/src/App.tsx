@@ -27,7 +27,7 @@ export default function StumpWebClient(props: StumpClientProps) {
 	)
 }
 
-const RouterContainer = React.memo((props: StumpClientProps) => {
+const RouterContainer = (props: StumpClientProps) => {
 	const location = useLocation()
 	const navigate = useNavigate()
 
@@ -102,7 +102,7 @@ const RouterContainer = React.memo((props: StumpClientProps) => {
 			onLogout={props.onLogout}
 		>
 			<SDKProvider baseURL={baseUrl || ''} authMethod={props.authMethod || 'session'}>
-				{/* {IS_DEVELOPMENT && <ReactQueryDevtools position="bottom-right" />} */}
+				{IS_DEVELOPMENT && <ReactQueryDevtools position="right" />}
 				<Helmet defaultTitle="Stump">
 					<title>Stump</title>
 				</Helmet>
@@ -111,4 +111,4 @@ const RouterContainer = React.memo((props: StumpClientProps) => {
 			</SDKProvider>
 		</StumpClientContextProvider>
 	)
-})
+}

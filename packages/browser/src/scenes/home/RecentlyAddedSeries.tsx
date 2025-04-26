@@ -1,12 +1,12 @@
 import { useInfiniteGraphQL } from '@stump/client'
 import { Text } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { BookCopy } from 'lucide-react'
 import { Suspense, useCallback } from 'react'
 
 import HorizontalCardList from '@/components/HorizontalCardList'
 import SeriesCard from '@/components/series/SeriesCard'
-import { graphql } from '@stump/graphql'
 
 const query = graphql(`
 	query RecentlyAddedSeriesQuery($pagination: Pagination!) {

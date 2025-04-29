@@ -8828,6 +8828,7 @@ version = "0.0.10"
 dependencies = [
  "alphanumeric-sort",
  "async-channel",
+ "async-graphql",
  "async-trait",
  "chrono",
  "criterion",

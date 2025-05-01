@@ -21,6 +21,7 @@ infer.workspace = true
 itertools.workspace = true
 linemux = { git = "https://github.com/jmagnuson/linemux.git", rev = "acaafc602afac5d7a9cd3e087dafc937cac1e364" }
 models = { path = "../../database/models" }
+email = { path = "../email" }
 sea-orm.workspace = true
 serde.workspace = true
 serde_json.workspace = true

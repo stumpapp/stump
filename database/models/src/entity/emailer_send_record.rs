@@ -1,5 +1,6 @@
 use async_graphql::SimpleObject;
 use sea_orm::entity::prelude::*;
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "EmailerSendRecordModel")]
@@ -11,9 +12,10 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	pub recipient_email: String,
 	#[sea_orm(column_type = "Blob", nullable)]
+	#[graphql(skip)]
 	pub attachment_meta: Option<Vec<u8>>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub sent_at: String,
+	pub sent_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub sent_by_user_id: Option<String>,
 }
@@ -51,3 +53,43 @@ impl Related<super::user::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+/// The metadata of an attachment that was sent with an email
+#[derive(Serialize, Deserialize, SimpleObject)]
+pub struct AttachmentMeta {
+	/// The filename of the attachment
+	pub filename: String,
+	/// The associated media ID of the attachment, if there is one
+	pub media_id: Option<String>,
+	/// The size of the attachment in bytes
+	pub size: i32,
+}
+
+impl AttachmentMeta {
+	/// Create a new attachment meta
+	pub fn new(filename: String, media_id: Option<String>, size: i32) -> Self {
+		Self {
+			filename,
+			media_id,
+			size,
+		}
+	}
+
+	pub fn try_from_data(data: &Vec<u8>) -> Result<Vec<AttachmentMeta>, sea_orm::DbErr> {
+		serde_json::from_slice(data).map_err(|e| {
+			sea_orm::DbErr::Custom(format!(
+				"Failed to deserialize attachment meta: {}",
+				e
+			))
+		})
+	}
+
+	/// Convert the attachment meta into a byte array, wrapped in a vec
+	pub fn into_data(
+		attachment_metas: &Vec<AttachmentMeta>,
+	) -> Result<Vec<u8>, sea_orm::DbErr> {
+		serde_json::to_vec(attachment_metas).map_err(|e| {
+			sea_orm::DbErr::Custom(format!("Failed to serialize attachment meta: {}", e))
+		})
+	}
+}

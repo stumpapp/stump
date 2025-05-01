@@ -1,6 +1,7 @@
 mod api_key;
 mod book_club;
 mod config;
+mod email_device;
 mod emailer;
 mod epub;
 mod filesystem;
@@ -17,6 +18,7 @@ pub(crate) mod user;
 use api_key::APIKeyQuery;
 use book_club::BookClubQuery;
 use config::ConfigQuery;
+use email_device::EmailDeviceQuery;
 use emailer::EmailerQuery;
 use epub::EpubQuery;
 use library::LibraryQuery;
@@ -34,6 +36,7 @@ pub struct Query(
 	APIKeyQuery,
 	BookClubQuery,
 	EmailerQuery,
+	EmailDeviceQuery,
 	MediaQuery,
 	UserQuery,
 	NotifierQuery,

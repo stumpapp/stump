@@ -3,6 +3,8 @@ use sea_orm::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
+pub mod next;
+
 // TODO: This probably needs a rewrite to make it more compatible with async-graphql. The big issue is generics
 // with input objects. Look at and yoink from seaography for how they are doing things
 

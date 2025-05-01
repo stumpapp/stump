@@ -396,6 +396,14 @@ input EpubProgressInput {
 	isComplete: Boolean
 }
 
+input EqualsString {
+	eq: String!
+}
+
+input FieldFilterString @oneOf {
+	eq: EqualsString
+}
+
 "The different statuses a file reference can have"
 enum FileStatus {
 	UNKNOWN
@@ -631,6 +639,10 @@ type MediaAnnotationsModel {
 	notes: String
 	userId: String!
 	mediaId: String!
+}
+
+input MediaFilterInputTest {
+	name: FieldFilterString
 }
 
 type MediaMetadata {
@@ -944,6 +956,7 @@ type Query {
 	emailDevices: [RegisteredEmailDevice!]!
 	emailDeviceById(id: Int!): RegisteredEmailDevice
 	listDirectory(pagination: Pagination!, input: DirectoryListingInput): PaginatedDirectoryListingResponse!
+	test(filter: MediaFilterInputTest!): String!
 	media(filter: JSON! = "{}", pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	mediaById(id: ID!): Media
 	mediaByPath(path: String!): Media

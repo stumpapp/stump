@@ -1,14 +1,14 @@
 use async_graphql::{Context, Json, Object, Result, ID};
-use models::entity::{media, reading_session};
+use models::entity::{finished_reading_session, media, reading_session, user::AuthUser};
 use sea_orm::{
 	prelude::*,
 	sea_query::{ExprTrait, Query},
-	Condition, JoinType, QueryOrder, QuerySelect,
+	Condition, JoinType, QueryOrder, QuerySelect, QueryTrait,
 };
 
 use crate::{
 	data::{CoreContext, RequestContext},
-	filter::{IntoFilter, MediaFilterInput},
+	filter::{next::MediaFilterInputNext, IntoFilter, MediaFilterInput},
 	object::media::Media,
 	pagination::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
@@ -21,6 +21,125 @@ pub struct MediaQuery;
 
 #[Object]
 impl MediaQuery {
+	async fn test(
+		&self,
+		ctx: &Context<'_>,
+		filter: MediaFilterInputNext,
+		#[graphql(default, validator(custom = "PaginationValidator"))]
+		pagination: Pagination,
+	) -> Result<PaginatedResponse<Media>> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let should_join_sessions = filter.reading_status.is_some()
+			|| [&filter._and, &filter._or, &filter._not]
+				.iter()
+				.filter_map(|opt| opt.as_ref())
+				.any(|filters| filters.iter().any(|f| f.reading_status.is_some()));
+
+		let conditions = filter.into_filter();
+		let mut query = media::ModelWithMetadata::find_for_user(user).filter(conditions);
+
+		if should_join_sessions {
+			let user_id = user.id.clone();
+			let user_id_cpy = user_id.clone();
+			query = query
+				.join_rev(
+					JoinType::LeftJoin,
+					reading_session::Entity::belongs_to(media::Entity)
+						.from(reading_session::Column::MediaId)
+						.to(media::Column::Id)
+						.on_condition(move |_left, _right| {
+							Condition::all()
+								.add(reading_session::Column::UserId.eq(user_id.clone()))
+						})
+						.into(),
+				)
+				.join_rev(
+					JoinType::LeftJoin,
+					finished_reading_session::Entity::belongs_to(media::Entity)
+						.from(finished_reading_session::Column::MediaId)
+						.to(media::Column::Id)
+						.on_condition(move |_left, _right| {
+							Condition::all().add(
+								finished_reading_session::Column::UserId
+									.eq(user_id_cpy.clone()),
+							)
+						})
+						.into(),
+				)
+				.group_by(media::Column::Id)
+		}
+
+		match pagination.resolve() {
+			Pagination::Cursor(info) => {
+				let mut cursor = query.cursor_by(media::Column::Name);
+				if let Some(ref id) = info.after {
+					let media = media::Entity::find_for_user(user)
+						.select_only()
+						.column(media::Column::Name)
+						.filter(media::Column::Id.eq(id.clone()))
+						.into_model::<media::MediaNameCmpSelect>()
+						.one(conn)
+						.await?
+						.ok_or("Cursor not found")?;
+					cursor.after(media.name);
+				}
+				cursor.first(info.limit);
+
+				let models = cursor
+					.into_model::<media::ModelWithMetadata>()
+					.all(conn)
+					.await?;
+				let current_cursor = info
+					.after
+					.or_else(|| models.first().map(|m| m.media.id.clone()));
+				let next_cursor = match models.last().map(|m| m.media.id.clone()) {
+					Some(id) if models.len() == info.limit as usize => Some(id),
+					_ => None,
+				};
+
+				Ok(PaginatedResponse {
+					nodes: models.into_iter().map(Media::from).collect(),
+					page_info: CursorPaginationInfo {
+						current_cursor,
+						next_cursor,
+						limit: info.limit,
+					}
+					.into(),
+				})
+			},
+			Pagination::Offset(info) => {
+				let count = query.clone().count(conn).await?;
+
+				let models = query
+					.order_by_asc(media::Column::Name)
+					.offset(info.offset())
+					.limit(info.limit())
+					.into_model::<media::ModelWithMetadata>()
+					.all(conn)
+					.await?;
+
+				Ok(PaginatedResponse {
+					nodes: models.into_iter().map(Media::from).collect(),
+					page_info: OffsetPaginationInfo::new(info, count).into(),
+				})
+			},
+			Pagination::None(_) => {
+				let models = query
+					.into_model::<media::ModelWithMetadata>()
+					.all(conn)
+					.await?;
+				let count = models.len().try_into()?;
+
+				Ok(PaginatedResponse {
+					nodes: models.into_iter().map(Media::from).collect(),
+					page_info: OffsetPaginationInfo::unpaged(count).into(),
+				})
+			},
+		}
+	}
+
 	// TODO(graphql): Typed filters
 	async fn media(
 		&self,

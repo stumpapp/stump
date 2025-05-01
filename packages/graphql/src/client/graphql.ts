@@ -434,6 +434,13 @@ export type EpubProgressInput = {
   percentage: Scalars['Decimal']['input'];
 };
 
+export type EqualsString = {
+  eq: Scalars['String']['input'];
+};
+
+export type FieldFilterString =
+  { eq: EqualsString; };
+
 /** The different statuses a file reference can have */
 export enum FileStatus {
   Error = 'ERROR',
@@ -683,6 +690,10 @@ export type MediaAnnotationsModel = {
   pageCoordinatesX?: Maybe<Scalars['Decimal']['output']>;
   pageCoordinatesY?: Maybe<Scalars['Decimal']['output']>;
   userId: Scalars['String']['output'];
+};
+
+export type MediaFilterInputTest = {
+  name?: InputMaybe<FieldFilterString>;
 };
 
 export type MediaMetadata = {
@@ -1338,6 +1349,7 @@ export type Query = {
   stumpConfig: StumpConfig;
   /** Returns a list of all tags. */
   tags: Array<Tag>;
+  test: Scalars['String']['output'];
   uploadConfig: UploadConfig;
   userById: User;
   users: Array<User>;
@@ -1458,6 +1470,11 @@ export type QuerySeriesArgs = {
 
 export type QuerySeriesByIdArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryTestArgs = {
+  filter: MediaFilterInputTest;
 };
 
 

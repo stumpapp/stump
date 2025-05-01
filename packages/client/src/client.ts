@@ -10,7 +10,6 @@ import {
 	QueryKey,
 	useInfiniteQuery as useReactInfiniteQuery,
 	UseInfiniteQueryOptions,
-	useIsFetching as useReactIsFetching,
 	useMutation as useReactMutation,
 	UseMutationOptions,
 	useQueries as useReactQueries,
@@ -35,9 +34,7 @@ export const queryClient = new QueryClient({
 
 export const PREFETCH_STALE_TIME = 1000 * 60 * 1 // 1 minutes
 
-export function useIsFetching(filters?: QueryFilters) {
-	return useReactIsFetching(filters)
-}
+// TODO: REMOVE ALL THIS MUAHAHAHAAA
 
 // TODO: it is a bit annoying, but the onError callback will be removed in the next
 // major version of react-query. I believe it just means I need to create an effect to invoke

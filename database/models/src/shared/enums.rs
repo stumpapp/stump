@@ -92,6 +92,12 @@ pub enum FileStatus {
 	Missing,
 }
 
+impl From<FileStatus> for String {
+	fn from(val: FileStatus) -> Self {
+		val.to_string()
+	}
+}
+
 /// The different types of layouts a client-side interface might present to a user
 /// for a collection of items
 #[derive(
@@ -259,6 +265,41 @@ pub enum ReadingDirection {
 	#[default]
 	Ltr,
 	Rtl,
+}
+
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Clone,
+	Default,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+	Enum,
+	Display,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum ReadingStatus {
+	#[default]
+	Reading,
+	Finished,
+	Abandoned,
+	NotStarted,
+}
+
+impl From<ReadingStatus> for String {
+	fn from(val: ReadingStatus) -> Self {
+		val.to_string()
+	}
 }
 
 /// The different ways an image may be scaled to fit a reader's viewport

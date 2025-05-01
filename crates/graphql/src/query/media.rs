@@ -1,14 +1,14 @@
-use async_graphql::{Context, Json, Object, Result, ID};
-use models::entity::{finished_reading_session, media, reading_session, user::AuthUser};
+use async_graphql::{Context, Object, Result, ID};
+use models::entity::{finished_reading_session, media, reading_session};
 use sea_orm::{
 	prelude::*,
 	sea_query::{ExprTrait, Query},
-	Condition, JoinType, QueryOrder, QuerySelect, QueryTrait,
+	Condition, JoinType, QueryOrder, QuerySelect,
 };
 
 use crate::{
 	data::{CoreContext, RequestContext},
-	filter::{next::MediaFilterInputNext, IntoFilter, MediaFilterInput},
+	filter::{media::MediaFilterInput, IntoFilter},
 	object::media::Media,
 	pagination::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
@@ -21,10 +21,10 @@ pub struct MediaQuery;
 
 #[Object]
 impl MediaQuery {
-	async fn test(
+	async fn media(
 		&self,
 		ctx: &Context<'_>,
-		filter: MediaFilterInputNext,
+		filter: MediaFilterInput,
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<Media>> {
@@ -70,89 +70,6 @@ impl MediaQuery {
 				)
 				.group_by(media::Column::Id)
 		}
-
-		match pagination.resolve() {
-			Pagination::Cursor(info) => {
-				let mut cursor = query.cursor_by(media::Column::Name);
-				if let Some(ref id) = info.after {
-					let media = media::Entity::find_for_user(user)
-						.select_only()
-						.column(media::Column::Name)
-						.filter(media::Column::Id.eq(id.clone()))
-						.into_model::<media::MediaNameCmpSelect>()
-						.one(conn)
-						.await?
-						.ok_or("Cursor not found")?;
-					cursor.after(media.name);
-				}
-				cursor.first(info.limit);
-
-				let models = cursor
-					.into_model::<media::ModelWithMetadata>()
-					.all(conn)
-					.await?;
-				let current_cursor = info
-					.after
-					.or_else(|| models.first().map(|m| m.media.id.clone()));
-				let next_cursor = match models.last().map(|m| m.media.id.clone()) {
-					Some(id) if models.len() == info.limit as usize => Some(id),
-					_ => None,
-				};
-
-				Ok(PaginatedResponse {
-					nodes: models.into_iter().map(Media::from).collect(),
-					page_info: CursorPaginationInfo {
-						current_cursor,
-						next_cursor,
-						limit: info.limit,
-					}
-					.into(),
-				})
-			},
-			Pagination::Offset(info) => {
-				let count = query.clone().count(conn).await?;
-
-				let models = query
-					.order_by_asc(media::Column::Name)
-					.offset(info.offset())
-					.limit(info.limit())
-					.into_model::<media::ModelWithMetadata>()
-					.all(conn)
-					.await?;
-
-				Ok(PaginatedResponse {
-					nodes: models.into_iter().map(Media::from).collect(),
-					page_info: OffsetPaginationInfo::new(info, count).into(),
-				})
-			},
-			Pagination::None(_) => {
-				let models = query
-					.into_model::<media::ModelWithMetadata>()
-					.all(conn)
-					.await?;
-				let count = models.len().try_into()?;
-
-				Ok(PaginatedResponse {
-					nodes: models.into_iter().map(Media::from).collect(),
-					page_info: OffsetPaginationInfo::unpaged(count).into(),
-				})
-			},
-		}
-	}
-
-	// TODO(graphql): Typed filters
-	async fn media(
-		&self,
-		ctx: &Context<'_>,
-		#[graphql(default)] filter: Json<MediaFilterInput>,
-		#[graphql(default, validator(custom = "PaginationValidator"))]
-		pagination: Pagination,
-	) -> Result<PaginatedResponse<Media>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-
-		let conditions = filter.0.into_filter();
-		let query = media::ModelWithMetadata::find_for_user(user).filter(conditions);
 
 		match pagination.resolve() {
 			Pagination::Cursor(info) => {

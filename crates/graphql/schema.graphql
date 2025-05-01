@@ -184,6 +184,11 @@ type CleanLibraryResponse {
 	isEmpty: Boolean!
 }
 
+input ComputedFilterReadingStatus @oneOf {
+	is: ReadingStatus
+	isNot: ReadingStatus
+}
+
 input CreateBookClubInput {
 	name: String!
 	isPrivate: Boolean! = false
@@ -396,12 +401,28 @@ input EpubProgressInput {
 	isComplete: Boolean
 }
 
-input EqualsString {
-	eq: String!
+input FieldFilterFileStatus @oneOf {
+	eq: FileStatus
+	neq: FileStatus
+	anyOf: [FileStatus!]
+	noneOf: [FileStatus!]
+	like: FileStatus
+	contains: FileStatus
+	excludes: FileStatus
+	startsWith: FileStatus
+	endsWith: FileStatus
 }
 
 input FieldFilterString @oneOf {
-	eq: EqualsString
+	eq: String
+	neq: String
+	anyOf: [String!]
+	noneOf: [String!]
+	like: String
+	contains: String
+	excludes: String
+	startsWith: String
+	endsWith: String
 }
 
 "The different statuses a file reference can have"
@@ -641,8 +662,21 @@ type MediaAnnotationsModel {
 	mediaId: String!
 }
 
-input MediaFilterInputTest {
-	name: FieldFilterString
+input MediaFilterInput {
+	name: FieldFilterString = null
+	size: NumericFilterI64 = null
+	extension: FieldFilterString = null
+	createdAt: NumericFilterDateTime = null
+	updatedAt: NumericFilterDateTime = null
+	seriesId: FieldFilterString = null
+	status: FieldFilterFileStatus = null
+	path: FieldFilterString = null
+	pages: NumericFilterI32 = null
+	readingStatus: ComputedFilterReadingStatus = null
+	metadata: MediaMetadataFilterInput = null
+	_and: [MediaFilterInput!] = null
+	_not: [MediaFilterInput!] = null
+	_or: [MediaFilterInput!] = null
 }
 
 type MediaMetadata {
@@ -670,6 +704,31 @@ type MediaMetadata {
 	links: [String!]!
 	pencillers: [String!]!
 	teams: [String!]!
+}
+
+input MediaMetadataFilterInput {
+	title: FieldFilterString = null
+	publisher: FieldFilterString = null
+	genre: FieldFilterString = null
+	characters: FieldFilterString = null
+	colorists: FieldFilterString = null
+	writers: FieldFilterString = null
+	pencillers: FieldFilterString = null
+	letterers: FieldFilterString = null
+	coverArtists: FieldFilterString = null
+	inkers: FieldFilterString = null
+	editors: FieldFilterString = null
+	ageRating: NumericFilterI32 = null
+	year: NumericFilterI32 = null
+	month: NumericFilterI32 = null
+	day: NumericFilterI32 = null
+	links: FieldFilterString = null
+	teams: FieldFilterString = null
+	summary: FieldFilterString = null
+	series: NumericFilterI32 = null
+	_and: [MediaMetadataFilterInput!] = null
+	_not: [MediaMetadataFilterInput!] = null
+	_or: [MediaMetadataFilterInput!] = null
 }
 
 type MediaMetadataOverview {
@@ -839,6 +898,60 @@ input NotifierInput @oneOf {
 	telegram: TelegramConfigInput
 }
 
+input NumericFilterDateTime @oneOf {
+	eq: DateTime
+	neq: DateTime
+	anyOf: [DateTime!]
+	noneOf: [DateTime!]
+	gt: DateTime
+	gte: DateTime
+	lt: DateTime
+	lte: DateTime
+	range: NumericRangeDateTime
+}
+
+input NumericFilterI32 @oneOf {
+	eq: Int
+	neq: Int
+	anyOf: [Int!]
+	noneOf: [Int!]
+	gt: Int
+	gte: Int
+	lt: Int
+	lte: Int
+	range: NumericRangeI32
+}
+
+input NumericFilterI64 @oneOf {
+	eq: Int
+	neq: Int
+	anyOf: [Int!]
+	noneOf: [Int!]
+	gt: Int
+	gte: Int
+	lt: Int
+	lte: Int
+	range: NumericRangeI64
+}
+
+input NumericRangeDateTime {
+	from: DateTime!
+	to: DateTime!
+	inclusive: Boolean!
+}
+
+input NumericRangeI32 {
+	from: Int!
+	to: Int!
+	inclusive: Boolean!
+}
+
+input NumericRangeI64 {
+	from: Int!
+	to: Int!
+	inclusive: Boolean!
+}
+
 "A simple offset-based pagination input object"
 input OffsetPagination {
 	"""
@@ -956,8 +1069,7 @@ type Query {
 	emailDevices: [RegisteredEmailDevice!]!
 	emailDeviceById(id: Int!): RegisteredEmailDevice
 	listDirectory(pagination: Pagination!, input: DirectoryListingInput): PaginatedDirectoryListingResponse!
-	test(filter: MediaFilterInputTest!): String!
-	media(filter: JSON! = "{}", pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	media(filter: MediaFilterInput!, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	mediaById(id: ID!): Media
 	mediaByPath(path: String!): Media
 	keepReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
@@ -1049,6 +1161,13 @@ enum ReadingMode {
 type ReadingProgressOutput {
 	activeSession: ActiveReadingSession
 	finishedSession: FinishedReadingSession
+}
+
+enum ReadingStatus {
+	READING
+	FINISHED
+	ABANDONED
+	NOT_STARTED
 }
 
 type RecentlyAdded {

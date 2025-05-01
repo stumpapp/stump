@@ -12,6 +12,7 @@ import { useMediaMatch } from 'rooks'
 import { useAppContext } from '@/context'
 import { usePreferences, useTheme } from '@/hooks'
 import paths from '@/paths'
+import { usePrefetchHomeScene } from '@/scenes/home'
 import { useAppStore } from '@/stores'
 
 import UserMenu from '../../UserMenu'
@@ -146,6 +147,8 @@ export default function SideBar({ asChild, hidden }: Props) {
 	// 	[arrangement, checkSectionPermission, location, t, isMobile],
 	// )
 
+	const prefetchHome = usePrefetchHomeScene()
+
 	const renderContent = () => {
 		return (
 			<>
@@ -159,6 +162,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 						key="home-sidebar-navlink"
 						to={paths.home()}
 						isActive={location.pathname === '/'}
+						onMouseEnter={prefetchHome}
 					>
 						<Home className="mr-2 h-4 w-4 shrink-0" />
 						{t('sidebar.buttons.home')}

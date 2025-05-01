@@ -1,7 +1,8 @@
-import { useInfiniteGraphQL } from '@stump/client'
+import { PREFETCH_STALE_TIME, useInfiniteGraphQL, useSDK } from '@stump/client'
 import { Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
+import { useQueryClient } from '@tanstack/react-query'
 import { BookMarked } from 'lucide-react'
 import { Suspense, useCallback } from 'react'
 
@@ -40,6 +41,27 @@ const query = graphql(`
 		}
 	}
 `)
+
+export const usePrefetchContinueReading = () => {
+	const { sdk } = useSDK()
+	const client = useQueryClient()
+	return useCallback(() => {
+		client.prefetchInfiniteQuery({
+			queryKey: ['keepReading'],
+			initialPageParam: {
+				cursor: {
+					limit: 20,
+				},
+			},
+			queryFn: ({ pageParam }) => {
+				return sdk.execute(query, {
+					pagination: pageParam,
+				})
+			},
+			staleTime: PREFETCH_STALE_TIME,
+		})
+	}, [sdk, client])
+}
 
 export default function ContinueReadingMediaContainer() {
 	return (

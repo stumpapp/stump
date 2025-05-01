@@ -1,4 +1,4 @@
-import { queryClient, useSDK, useSuspenseGraphQL } from '@stump/client'
+import { PREFETCH_STALE_TIME, queryClient, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { ButtonOrLink, Heading, Spacer, Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import dayjs from 'dayjs'
@@ -60,6 +60,7 @@ export const usePrefetchBook = (id: string) => {
 				const response = await sdk.execute(query, { id })
 				return response
 			},
+			staleTime: PREFETCH_STALE_TIME,
 		})
 }
 

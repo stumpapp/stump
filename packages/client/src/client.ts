@@ -33,7 +33,7 @@ export const queryClient = new QueryClient({
 	},
 })
 
-export const PREFETCH_STALE_TIME = 1000 * 60 * 5 // 5 minutes
+export const PREFETCH_STALE_TIME = 1000 * 60 * 1 // 1 minutes
 
 export function useIsFetching(filters?: QueryFilters) {
 	return useReactIsFetching(filters)

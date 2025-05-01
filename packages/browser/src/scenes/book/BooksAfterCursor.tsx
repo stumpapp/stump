@@ -1,4 +1,4 @@
-import { queryClient, useInfiniteGraphQL, useSDK } from '@stump/client'
+import { PREFETCH_STALE_TIME, queryClient, useInfiniteGraphQL, useSDK } from '@stump/client'
 import { Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { BookX } from 'lucide-react'
@@ -57,6 +57,7 @@ export const usePrefetchBooksAfterCursor = (id: string) => {
 				const response = await sdk.execute(query, pageParam)
 				return response
 			},
+			staleTime: PREFETCH_STALE_TIME,
 		})
 }
 

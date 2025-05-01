@@ -1,12 +1,13 @@
-import { useInfiniteGraphQL } from '@stump/client'
+import { PREFETCH_STALE_TIME, useInfiniteGraphQL, useSDK } from '@stump/client'
 import { Text } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
+import { useQueryClient } from '@tanstack/react-query'
 import { BookX } from 'lucide-react'
 import { Suspense, useCallback } from 'react'
 
 import MediaCard from '@/components/book/BookCard'
 import HorizontalCardList from '@/components/HorizontalCardList'
-import { graphql } from '@stump/graphql'
 
 const query = graphql(`
 	query RecentlyAddedMediaQuery($pagination: Pagination!) {
@@ -40,6 +41,27 @@ const query = graphql(`
 		}
 	}
 `)
+
+export const usePrefetchRecentlyAddedMedia = () => {
+	const { sdk } = useSDK()
+	const client = useQueryClient()
+	return useCallback(() => {
+		client.prefetchInfiniteQuery({
+			queryKey: ['recentlyAddedMedia'],
+			initialPageParam: {
+				cursor: {
+					limit: 20,
+				},
+			},
+			queryFn: ({ pageParam }) => {
+				return sdk.execute(query, {
+					pagination: pageParam,
+				})
+			},
+			staleTime: PREFETCH_STALE_TIME,
+		})
+	}, [sdk, client])
+}
 
 function RecentlyAddedMedia() {
 	const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteGraphQL(

@@ -5,6 +5,7 @@ import {
 	InfiniteData,
 	QueryKey,
 	useQuery,
+	useQueryClient,
 	type UseQueryResult,
 	useSuspenseInfiniteQuery,
 	UseSuspenseInfiniteQueryOptions,
@@ -39,6 +40,35 @@ const handleError = ({
 	} else if (isNetworkError) {
 		onConnectionWithServerChanged?.(false)
 	}
+}
+
+export function usePrefetchGraphQL() {
+	const { sdk } = useSDK()
+	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
+
+	const onError = useCallback(
+		(error: unknown) => {
+			handleError({
+				sdk,
+				error,
+				onUnauthenticatedResponse,
+				onConnectionWithServerChanged,
+			})
+		},
+		[sdk, onUnauthenticatedResponse, onConnectionWithServerChanged],
+	)
+
+	const execute = useCallback(
+		<TResult, TVariables>(
+			document: TypedDocumentString<TResult, TVariables>,
+			variables?: TVariables extends Record<string, never> ? never : TVariables,
+		) => sdk.execute(document, variables),
+		[sdk],
+	)
+
+	const client = useQueryClient()
+
+	return { execute, client, onError }
 }
 
 export function useGraphQL<TResult, TVariables>(

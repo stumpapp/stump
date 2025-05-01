@@ -1,55 +1,86 @@
-import { DirectoryListingInput } from '@stump/sdk'
+import { DirectoryListingInput, graphql } from '@stump/graphql'
+import { useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { queryClient, useInfiniteQuery, useQuery } from '../client'
+import { PREFETCH_STALE_TIME } from '@/client'
+import { useGraphQL, useInfiniteGraphQL } from '@/hooks'
+
 import { useSDK } from '../sdk'
 
-type PrefetchFileParams = {
+const query = graphql(`
+	query DirectoryListing($input: DirectoryListingInput!, $pagination: Pagination!) {
+		listDirectory(input: $input, pagination: $pagination) {
+			nodes {
+				parent
+				files {
+					name
+					path
+					isDirectory
+				}
+			}
+			pageInfo {
+				__typename
+				... on OffsetPaginationInfo {
+					currentPage
+					totalPages
+					pageSize
+					pageOffset
+					zeroBased
+				}
+			}
+		}
+	}
+`)
+
+type PrefetchFilesParams = {
 	path: string
+	ignoreParams?: Omit<DirectoryListingInput, 'path'>
 	fetchConfig?: boolean
 }
 
-export const usePrefetchFiles = ({ path, fetchConfig }: PrefetchFileParams) => {
+export const usePrefetchFiles = () => {
 	const { sdk } = useSDK()
 
+	const client = useQueryClient()
 	const prefetch = useCallback(
-		() =>
+		({ path, ignoreParams = { ignoreHidden: true }, fetchConfig }: PrefetchFilesParams) =>
 			Promise.all([
-				queryClient.prefetchQuery([sdk.filesystem.keys.listDirectory, path], () =>
-					sdk.filesystem.listDirectory(),
-				),
+				client.prefetchInfiniteQuery({
+					queryKey: ['listDirectory', path, ignoreParams, 1],
+					initialPageParam: {
+						offset: {
+							page: 1,
+							pageSize: 100,
+						},
+					},
+					queryFn: ({ pageParam }) =>
+						sdk.execute(query, {
+							input: {
+								path,
+								...ignoreParams,
+							},
+							pagination: pageParam,
+						}),
+					staleTime: PREFETCH_STALE_TIME,
+				}),
 				...(fetchConfig
-					? [queryClient.prefetchQuery([sdk.upload.keys.config], () => sdk.upload.config())]
+					? [
+							client.prefetchQuery({
+								queryKey: ['uploadConfig'],
+								queryFn: () => sdk.execute(uploadConfigQuery),
+								staleTime: PREFETCH_STALE_TIME,
+							}),
+						]
 					: []),
 			]),
-		[sdk, path, fetchConfig],
+		[client, sdk],
 	)
 
-	return { prefetch }
-}
-
-export const usePrefetchLibraryFiles = ({ path, fetchConfig }: PrefetchFileParams) => {
-	const { sdk } = useSDK()
-
-	const prefetch = useCallback(
-		() =>
-			Promise.all([
-				queryClient.prefetchQuery([sdk.filesystem.keys.listDirectory, path], () =>
-					sdk.filesystem.listDirectory(),
-				),
-				...(fetchConfig
-					? [queryClient.prefetchQuery([sdk.upload.keys.config], () => sdk.upload.config())]
-					: []),
-			]),
-		[sdk, path, fetchConfig],
-	)
-
-	return { prefetch }
+	return prefetch
 }
 
 export type DirectoryListingQueryParams = {
-	enabled: boolean
 	/**
 	 * The initial path to query for. If not provided, the root directory will be queried for.
 	 */
@@ -79,44 +110,32 @@ export type DirectoryListingQueryParams = {
 }
 
 export function useDirectoryListing({
-	enabled,
 	initialPath,
-	ignoreParams = { ignore_hidden: true },
+	ignoreParams = { ignoreHidden: true },
 	enforcedRoot,
 	page = 1,
 	onGoForward,
 	onGoBack,
 }: DirectoryListingQueryParams) {
-	const { sdk } = useSDK()
 	const [currentPath, setCurrentPath] = useState(initialPath || null)
 	const [history, setHistory] = useState(currentPath ? [currentPath] : [])
 	const [currentIndex, setCurrentIndex] = useState(0)
 
 	const [initialPage, setInitialPage] = useState(() => page)
 
-	const { isLoading, error, data, refetch, ...rest } = useInfiniteQuery(
-		[sdk.filesystem.keys.listDirectory, currentPath, ignoreParams, initialPage],
-		async ({ pageParam }) =>
-			sdk.filesystem.listDirectory({ page: pageParam, path: currentPath, ...ignoreParams }),
+	const { isLoading, error, data, refetch, ...rest } = useInfiniteGraphQL(
+		query,
+		['listDirectory', currentPath, ignoreParams, initialPage],
 		{
-			// Do not run query until `enabled` aka modal is opened.
-			enabled,
-			keepPreviousData: true,
-			suspense: false,
-			getNextPageParam: (lastPage) => {
-				const totalPages = lastPage?._page?.total_pages
-				const currentPage = lastPage?._page?.current_page
-				if (totalPages == null || currentPage == null) {
-					return undefined
-				}
-				return currentPage < totalPages ? currentPage + 1 : undefined
+			input: {
+				path: currentPath,
+				...ignoreParams,
 			},
-			getPreviousPageParam: (firstPage) => {
-				const currentPage = firstPage?._page?.current_page
-				if (currentPage == null) {
-					return undefined
-				}
-				return currentPage > 1 ? currentPage - 1 : undefined
+			pagination: {
+				offset: {
+					page: initialPage,
+					pageSize: 100,
+				},
 			},
 		},
 	)
@@ -132,7 +151,7 @@ export function useDirectoryListing({
 	}, [currentPath])
 
 	const directoryListing = data?.pages
-		.flatMap((page) => page.data)
+		.flatMap((page) => page.listDirectory.nodes)
 		.reduce(
 			(acc, curr) => ({
 				files: [...acc.files, ...curr.files],
@@ -281,7 +300,7 @@ export function useDirectoryListing({
 	return {
 		canGoBack,
 		canGoForward,
-		directories: directoryListing?.files.filter((f) => f.is_directory) ?? [],
+		directories: directoryListing?.files.filter((f) => f.isDirectory) ?? [],
 		entries: directoryListing?.files ?? [],
 		error,
 		errorMessage,
@@ -298,19 +317,22 @@ export function useDirectoryListing({
 	}
 }
 
+const uploadConfigQuery = graphql(`
+	query UploadConfig {
+		uploadConfig {
+			enabled
+			maxFileUploadSize
+		}
+	}
+`)
+
 type UploadConfigQueryParams = {
 	enabled?: boolean
 }
-export const useUploadConfig = ({ enabled }: UploadConfigQueryParams) => {
-	const { sdk } = useSDK()
-	const { data: uploadConfig, ...restRet } = useQuery(
-		[sdk.upload.keys.config],
-		() => sdk.upload.config(),
-		{
-			suspense: true,
-			enabled,
-		},
-	)
 
-	return { uploadConfig, ...restRet }
+export const useUploadConfig = ({ enabled }: UploadConfigQueryParams) => {
+	const { data, ...restRet } = useGraphQL(uploadConfigQuery, ['uploadConfig'], undefined, {
+		enabled,
+	})
+	return { uploadConfig: data?.uploadConfig, ...restRet }
 }

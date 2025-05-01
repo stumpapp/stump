@@ -48,6 +48,34 @@ export type AgeRestrictionInput = {
   restrictOnUnset: Scalars['Boolean']['input'];
 };
 
+export type Apikey = {
+  __typename?: 'Apikey';
+  createdAt: Scalars['DateTime']['output'];
+  expiresAt?: Maybe<Scalars['DateTime']['output']>;
+  id: Scalars['Int']['output'];
+  lastUsedAt?: Maybe<Scalars['DateTime']['output']>;
+  longTokenHash: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  permissions: ApikeyPermissionsOutput;
+  shortToken: Scalars['String']['output'];
+  userId: Scalars['String']['output'];
+};
+
+export type ApikeyInput = {
+  /** The expiration date for the API key, if any */
+  expiresAt?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The name of the API key */
+  name: Scalars['String']['input'];
+  /** The permissions that the API key should have */
+  permissions: ApikeyPermissions;
+};
+
+export type ApikeyPermissions =
+  { custom: Array<UserPermission>; inherit?: never; }
+  |  { custom?: never; inherit: InheritPermissionValue; };
+
+export type ApikeyPermissionsOutput = InheritPermissionStruct | UserPermissionStruct;
+
 export type Arrangement = {
   __typename?: 'Arrangement';
   locked: Scalars['Boolean']['output'];
@@ -60,6 +88,17 @@ export type ArrangementSection = {
   __typename?: 'ArrangementSection';
   config: ArrangementConfig;
   visible: Scalars['Boolean']['output'];
+};
+
+/** The metadata of an attachment that was sent with an email */
+export type AttachmentMeta = {
+  __typename?: 'AttachmentMeta';
+  /** The filename of the attachment */
+  filename: Scalars['String']['output'];
+  /** The associated media ID of the attachment, if there is one */
+  mediaId?: Maybe<Scalars['String']['output']>;
+  /** The size of the attachment in bytes */
+  size: Scalars['Int']['output'];
 };
 
 export type BookClub = {
@@ -260,6 +299,26 @@ export type CustomArrangementConfig = {
   orderBy?: Maybe<Scalars['String']['output']>;
 };
 
+export type DirectoryListing = {
+  __typename?: 'DirectoryListing';
+  files: Array<DirectoryListingFile>;
+  parent?: Maybe<Scalars['String']['output']>;
+};
+
+export type DirectoryListingFile = {
+  __typename?: 'DirectoryListingFile';
+  isDirectory: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  path: Scalars['String']['output'];
+};
+
+export type DirectoryListingInput = {
+  ignoreDirectories?: Scalars['Boolean']['input'];
+  ignoreFiles?: Scalars['Boolean']['input'];
+  ignoreHidden?: Scalars['Boolean']['input'];
+  path?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type DiscordConfig = {
   __typename?: 'DiscordConfig';
   webhookUrl: Scalars['String']['output'];
@@ -267,6 +326,16 @@ export type DiscordConfig = {
 
 export type DiscordConfigInput = {
   webhookUrl: Scalars['String']['input'];
+};
+
+/** Input object for creating or updating an email device */
+export type EmailDeviceInput = {
+  /** The email address of the device */
+  email: Scalars['String']['input'];
+  /** Whether the device is forbidden from receiving emails from the server. */
+  forbidden: Scalars['Boolean']['input'];
+  /** The friendly name of the email device, e.g. "Aaron's Kobo" */
+  name: Scalars['String']['input'];
 };
 
 export type Emailer = {
@@ -286,16 +355,56 @@ export type Emailer = {
   username: Scalars['String']['output'];
 };
 
+/** The configuration for an [EmailerClient] */
+export type EmailerClientConfig = {
+  /** The SMTP host to use */
+  host: Scalars['String']['input'];
+  /** The maximum size of an attachment in bytes */
+  maxAttachmentSizeBytes?: InputMaybe<Scalars['Int']['input']>;
+  /** The maximum number of attachments that can be sent in a single email */
+  maxNumAttachments?: InputMaybe<Scalars['Int']['input']>;
+  /**
+   * The plaintext password to use for the SMTP server, which will be encrypted before being stored.
+   * This field is optional to support reusing the config for emailer config updates. If the password is not
+   * set, it will error when trying to send an email.
+   */
+  password?: InputMaybe<Scalars['String']['input']>;
+  /** The SMTP port to use */
+  port: Scalars['Int']['input'];
+  /** The display name to use for the sender */
+  senderDisplayName: Scalars['String']['input'];
+  /** The email address to send from */
+  senderEmail: Scalars['String']['input'];
+  /** Whether to use TLS for the SMTP connection */
+  tlsEnabled: Scalars['Boolean']['input'];
+  /** The username to use for the SMTP server, typically the same as the sender email */
+  username: Scalars['String']['input'];
+};
+
+/** Input object for creating or updating an emailer */
+export type EmailerInput = {
+  /** The emailer configuration */
+  config: EmailerClientConfig;
+  /** Whether the emailer is the primary emailer */
+  isPrimary: Scalars['Boolean']['input'];
+  /** The friendly name of the emailer, e.g. "Aaron's Kobo" */
+  name: Scalars['String']['input'];
+};
+
 export type EmailerSendRecord = {
   __typename?: 'EmailerSendRecord';
-  attachmentMeta?: Maybe<Array<Scalars['Int']['output']>>;
+  attachmentMeta: Array<AttachmentMeta>;
   emailerId: Scalars['Int']['output'];
   id: Scalars['Int']['output'];
   recipientEmail: Scalars['String']['output'];
-  sentAt: Scalars['String']['output'];
+  sentAt: Scalars['DateTime']['output'];
   sentBy?: Maybe<User>;
   sentByUserId?: Maybe<Scalars['String']['output']>;
 };
+
+export type EmailerSendTo =
+  { anonymous: SendToEmail; device?: never; }
+  |  { anonymous?: never; device: SendToDevice; };
 
 /** The visibility of a shareable entity */
 export enum EntityVisibility {
@@ -370,6 +479,15 @@ export type InProgressBooks = {
   links: Array<FilterableArrangementEntityLink>;
   name?: Maybe<Scalars['String']['output']>;
 };
+
+export type InheritPermissionStruct = {
+  __typename?: 'InheritPermissionStruct';
+  value: InheritPermissionValue;
+};
+
+export enum InheritPermissionValue {
+  Inherit = 'INHERIT'
+}
 
 export type Library = {
   __typename?: 'Library';
@@ -625,10 +743,13 @@ export type Mutation = {
    */
   cleanLibrary: CleanLibraryResponse;
   convertMedia: Scalars['Boolean']['output'];
+  createApiKey: Apikey;
   createBookClub: BookClub;
   createBookClubInvitation: BookClubInvitation;
   createBookClubMember: BookClubMember;
   createBookClubSchedule: BookClub;
+  createEmailDevice: RegisteredEmailDevice;
+  createEmailer: Emailer;
   /**
    * Create a new library with the provided configuration. If `scan_after_persist` is `true`,
    * the library will be scanned immediately after creation.
@@ -657,8 +778,11 @@ export type Mutation = {
    */
   createTags: Array<Tag>;
   createUser: User;
+  deleteApiKey: Apikey;
   /** Delete a bookmark by ID. The user must be the owner of the bookmark. */
   deleteBookmark: Bookmark;
+  deleteEmailDevice: RegisteredEmailDevice;
+  deleteEmailer: Emailer;
   /**
    * Delete a library, including all associated media and series via cascading deletes. This
    * operation cannot be undone.
@@ -689,6 +813,7 @@ export type Mutation = {
   markSeriesAsComplete: Series;
   meUpdateUser: User;
   meUpdateUserPreferences: UserPreferences;
+  patchEmailDevice: Scalars['Int']['output'];
   respondToBookClubInvitation: BookClubInvitation;
   /**
    * Enqueue a scan job for a library. This will index the filesystem from the library's root path
@@ -696,7 +821,11 @@ export type Mutation = {
    */
   scanLibrary: Scalars['Boolean']['output'];
   scanSeries: Scalars['Boolean']['output'];
+  sendAttachmentEmail: SendAttachmentEmailOutput;
+  updateApiKey: Apikey;
   updateBookClub: BookClub;
+  updateEmailDevice: RegisteredEmailDevice;
+  updateEmailer: Emailer;
   /**
    * Update the progress of an epub for a user. If the percentage is 1 or greater, the epub is
    * considered finished and the active session is deleted and a finished session is created.
@@ -767,6 +896,11 @@ export type MutationConvertMediaArgs = {
 };
 
 
+export type MutationCreateApiKeyArgs = {
+  input: ApikeyInput;
+};
+
+
 export type MutationCreateBookClubArgs = {
   input: CreateBookClubInput;
 };
@@ -787,6 +921,16 @@ export type MutationCreateBookClubMemberArgs = {
 export type MutationCreateBookClubScheduleArgs = {
   id: Scalars['ID']['input'];
   input: CreateBookClubScheduleInput;
+};
+
+
+export type MutationCreateEmailDeviceArgs = {
+  input: EmailDeviceInput;
+};
+
+
+export type MutationCreateEmailerArgs = {
+  input: EmailerInput;
 };
 
 
@@ -820,8 +964,23 @@ export type MutationCreateUserArgs = {
 };
 
 
+export type MutationDeleteApiKeyArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
 export type MutationDeleteBookmarkArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteEmailDeviceArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationDeleteEmailerArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -881,6 +1040,12 @@ export type MutationMeUpdateUserPreferencesArgs = {
 };
 
 
+export type MutationPatchEmailDeviceArgs = {
+  id: Scalars['Int']['input'];
+  input: EmailDeviceInput;
+};
+
+
 export type MutationRespondToBookClubInvitationArgs = {
   id: Scalars['ID']['input'];
   input: BookClubInvitationResponseInput;
@@ -898,9 +1063,32 @@ export type MutationScanSeriesArgs = {
 };
 
 
+export type MutationSendAttachmentEmailArgs = {
+  input: SendAttachmentEmailsInput;
+};
+
+
+export type MutationUpdateApiKeyArgs = {
+  id: Scalars['Int']['input'];
+  input: ApikeyInput;
+};
+
+
 export type MutationUpdateBookClubArgs = {
   id: Scalars['ID']['input'];
   input: UpdateBookClubInput;
+};
+
+
+export type MutationUpdateEmailDeviceArgs = {
+  id: Scalars['Int']['input'];
+  input: EmailDeviceInput;
+};
+
+
+export type MutationUpdateEmailerArgs = {
+  id: Scalars['Int']['input'];
+  input: EmailerInput;
 };
 
 
@@ -1025,6 +1213,12 @@ export type PageDimension = {
   width: Scalars['Int']['output'];
 };
 
+export type PaginatedDirectoryListingResponse = {
+  __typename?: 'PaginatedDirectoryListingResponse';
+  nodes: Array<DirectoryListing>;
+  pageInfo: PaginationInfo;
+};
+
 export type PaginatedLibraryResponse = {
   __typename?: 'PaginatedLibraryResponse';
   nodes: Array<Library>;
@@ -1093,15 +1287,20 @@ export type Query = {
   /** Get all bookmarks for a single epub by its media ID */
   bookmarksByMediaId: Array<Bookmark>;
   duplicateMedia: Array<Media>;
+  emailDeviceById?: Maybe<RegisteredEmailDevice>;
+  emailDevices: Array<RegisteredEmailDevice>;
   emailerById?: Maybe<Emailer>;
   emailers: Array<Emailer>;
   /** Get a single epub by its media ID */
   epubById: Epub;
+  getApiKeyById: Apikey;
+  getApiKeys: Array<Apikey>;
   getNotifierById: Notifier;
   getNotifiers: Array<Notifier>;
   keepReading: PaginatedMediaResponse;
   libraries: PaginatedLibraryResponse;
   libraryById?: Maybe<Library>;
+  listDirectory: PaginatedDirectoryListingResponse;
   /**
    * Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
    * ~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
@@ -1113,6 +1312,7 @@ export type Query = {
   me: User;
   media: PaginatedMediaResponse;
   mediaById?: Maybe<Media>;
+  mediaByPath?: Maybe<Media>;
   mediaMetadataOverview: MediaMetadataOverview;
   numberOfLibraries: Scalars['Int']['output'];
   numberOfSeries: Scalars['Int']['output'];
@@ -1135,8 +1335,10 @@ export type Query = {
   recentlyAddedSeries: PaginatedSeriesResponse;
   series: PaginatedSeriesResponse;
   seriesById?: Maybe<Series>;
+  stumpConfig: StumpConfig;
   /** Returns a list of all tags. */
   tags: Array<Tag>;
+  uploadConfig: UploadConfig;
   userById: User;
   users: Array<User>;
 };
@@ -1157,6 +1359,11 @@ export type QueryBookmarksByMediaIdArgs = {
 };
 
 
+export type QueryEmailDeviceByIdArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
 export type QueryEmailerByIdArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1164,6 +1371,11 @@ export type QueryEmailerByIdArgs = {
 
 export type QueryEpubByIdArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetApiKeyByIdArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -1187,6 +1399,12 @@ export type QueryLibraryByIdArgs = {
 };
 
 
+export type QueryListDirectoryArgs = {
+  input?: InputMaybe<DirectoryListingInput>;
+  pagination: Pagination;
+};
+
+
 export type QueryLoginActivityByIdArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1205,6 +1423,11 @@ export type QueryMediaArgs = {
 
 export type QueryMediaByIdArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryMediaByPathArgs = {
+  path: Scalars['String']['input'];
 };
 
 
@@ -1293,6 +1516,34 @@ export type RecentlyAdded = {
   name?: Maybe<Scalars['String']['output']>;
 };
 
+export type RegisteredEmailDevice = {
+  __typename?: 'RegisteredEmailDevice';
+  email: Scalars['String']['output'];
+  forbidden: Scalars['Boolean']['output'];
+  id: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+  sendHistory: Array<EmailerSendRecord>;
+};
+
+export type SendAttachmentEmailOutput = {
+  __typename?: 'SendAttachmentEmailOutput';
+  errors: Array<Scalars['String']['output']>;
+  sentCount: Scalars['Int']['output'];
+};
+
+export type SendAttachmentEmailsInput = {
+  mediaIds: Array<Scalars['String']['input']>;
+  sendTo: Array<EmailerSendTo>;
+};
+
+export type SendToDevice = {
+  id: Scalars['Int']['input'];
+};
+
+export type SendToEmail = {
+  email: Scalars['String']['input'];
+};
+
 export type Series = {
   __typename?: 'Series';
   createdAt: Scalars['DateTime']['output'];
@@ -1344,6 +1595,91 @@ export type SpineItem = {
   idref: Scalars['String']['output'];
   linear: Scalars['Boolean']['output'];
   properties?: Maybe<Scalars['String']['output']>;
+};
+
+/**
+ * Represents the configuration of a Stump application. This struct is generated at startup
+ * using a TOML file, environment variables, or both and is input when creating a `StumpCore`
+ * instance.
+ *
+ * Example:
+ * ```
+ * use stump_core::{config::{self, StumpConfig}, StumpCore};
+ *
+ * #[tokio::main]
+ * async fn main() {
+ * /// Get config dir from environment variables.
+ * let config_dir = config::bootstrap_config_dir();
+ *
+ * // Create a StumpConfig using the config file and environment variables.
+ * let config = StumpConfig::new(config_dir)
+ * // Load Stump.toml file (if any)
+ * .with_config_file().unwrap()
+ * // Overlay environment variables
+ * .with_environment().unwrap();
+ *
+ * // Ensure that config directory exists and write Stump.toml.
+ * config.write_config_dir().unwrap();
+ * // Create an instance of the stump core.
+ * let core = StumpCore::new(config).await;
+ * }
+ * ```
+ */
+export type StumpConfig = {
+  __typename?: 'StumpConfig';
+  accessTokenTtl: Scalars['Int']['output'];
+  /** A list of origins for CORS. */
+  allowedOrigins: Array<Scalars['String']['output']>;
+  /** The client directory. */
+  clientDir: Scalars['String']['output'];
+  /** The configuration root for the Stump application, contains thumbnails, cache, and logs. */
+  configDir: Scalars['String']['output'];
+  /** An optional custom path for the templates directory. */
+  customTemplatesDir?: Maybe<Scalars['String']['output']>;
+  /** An optional custom path for the database. */
+  dbPath?: Maybe<Scalars['String']['output']>;
+  /** Indicates if the KoReader sync feature should be enabled. */
+  enableKoreaderSync: Scalars['Boolean']['output'];
+  /** Indicates if the Swagger UI should be disabled. */
+  enableSwagger: Scalars['Boolean']['output'];
+  /** Whether or not the server will allow users with the appropriate permissions to upload books and series. */
+  enableUpload: Scalars['Boolean']['output'];
+  /** The interval at which automatic deleted session cleanup is performed. */
+  expiredSessionCleanupInterval: Scalars['Int']['output'];
+  /** The maximum size, in bytes, of files that can be uploaded to be included in libraries. */
+  maxFileUploadSize: Scalars['Int']['output'];
+  /**
+   * The maximum file size, in bytes, of images that can be uploaded, e.g., as thumbnails for users,
+   * libraries, series, or media.
+   */
+  maxImageUploadSize: Scalars['Int']['output'];
+  /**
+   * The maximum number of concurrent files which may be processed by a scanner. This is used
+   * to limit/increase the number of files that are processed at once. This may be useful for those
+   * with high or low performance systems to configure to their needs.
+   */
+  maxScannerConcurrency: Scalars['Int']['output'];
+  /**
+   * The maximum number of concurrent files which may be processed by a thumbnail generator. This is used
+   * to limit/increase the number of images that are processed at once. Image generation can be
+   * resource intensive, so this may be useful for those with high or low performance systems to
+   * configure to their needs.
+   */
+  maxThumbnailConcurrency: Scalars['Int']['output'];
+  /** Password hash cost */
+  passwordHashCost: Scalars['Int']['output'];
+  /** Path to the PDFium binary for PDF support. */
+  pdfiumPath?: Maybe<Scalars['String']['output']>;
+  /** The port from which to serve the application (default: 10801). */
+  port: Scalars['Int']['output'];
+  /** Whether or not to pretty print logs. */
+  prettyLogs: Scalars['Boolean']['output'];
+  /** The "release" | "debug" profile with which the application is running. */
+  profile: Scalars['String']['output'];
+  /** The time in seconds that a login session will be valid for. */
+  sessionTtl: Scalars['Int']['output'];
+  /** The verbosity with which to log errors (default: 0). */
+  verbosity: Scalars['Int']['output'];
 };
 
 export type Subscription = {
@@ -1439,6 +1775,12 @@ export type UploadBooksInput = {
   libraryId: Scalars['String']['input'];
   placeAt: Scalars['String']['input'];
   uploads: Array<Scalars['Upload']['input']>;
+};
+
+export type UploadConfig = {
+  __typename?: 'UploadConfig';
+  enabled: Scalars['Boolean']['output'];
+  maxFileUploadSize: Scalars['Int']['output'];
 };
 
 export type UploadSeriesInput = {
@@ -1541,6 +1883,11 @@ export enum UserPermission {
   UploadFile = 'UPLOAD_FILE'
 }
 
+export type UserPermissionStruct = {
+  __typename?: 'UserPermissionStruct';
+  value: Array<UserPermission>;
+};
+
 export type UserPreferences = {
   __typename?: 'UserPreferences';
   appFont: Scalars['String']['output'];
@@ -1566,6 +1913,27 @@ export type UserPreferences = {
   showThumbnailsInHeaders: Scalars['Boolean']['output'];
   userId?: Maybe<Scalars['String']['output']>;
 };
+
+export type MediaAtPathQueryVariables = Exact<{
+  path: Scalars['String']['input'];
+}>;
+
+
+export type MediaAtPathQuery = { __typename?: 'Query', mediaByPath?: { __typename?: 'Media', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string } } | null };
+
+export type UploadLibraryBooksMutationVariables = Exact<{
+  input: UploadBooksInput;
+}>;
+
+
+export type UploadLibraryBooksMutation = { __typename?: 'Mutation', uploadBooks: boolean };
+
+export type UploadLibrarySeriesMutationVariables = Exact<{
+  input: UploadSeriesInput;
+}>;
+
+
+export type UploadLibrarySeriesMutation = { __typename?: 'Mutation', uploadSeries: boolean };
 
 export type SideBarQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1630,6 +1998,19 @@ export type SeriesBooksSceneQueryVariables = Exact<{
 
 export type SeriesBooksSceneQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, resolvedName: string, pages: number, size: number, status: FileStatus, thumbnail: { __typename?: 'ImageRef', url: string }, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null } | null, readHistory: Array<{ __typename: 'FinishedReadingSession' }> }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
+export type DirectoryListingQueryVariables = Exact<{
+  input: DirectoryListingInput;
+  pagination: Pagination;
+}>;
+
+
+export type DirectoryListingQuery = { __typename?: 'Query', listDirectory: { __typename?: 'PaginatedDirectoryListingResponse', nodes: Array<{ __typename?: 'DirectoryListing', parent?: string | null, files: Array<{ __typename?: 'DirectoryListingFile', name: string, path: string, isDirectory: boolean }> }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+
+export type UploadConfigQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UploadConfigQuery = { __typename?: 'Query', uploadConfig: { __typename?: 'UploadConfig', enabled: boolean, maxFileUploadSize: number } };
+
 export class TypedDocumentString<TResult, TVariables>
   extends String
   implements DocumentTypeDecoration<TResult, TVariables>
@@ -1663,6 +2044,27 @@ export const BookOverviewHeaderFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"BookOverviewHeader"}) as unknown as TypedDocumentString<BookOverviewHeaderFragment, unknown>;
+export const MediaAtPathDocument = new TypedDocumentString(`
+    query MediaAtPath($path: String!) {
+  mediaByPath(path: $path) {
+    id
+    resolvedName
+    thumbnail {
+      url
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<MediaAtPathQuery, MediaAtPathQueryVariables>;
+export const UploadLibraryBooksDocument = new TypedDocumentString(`
+    mutation UploadLibraryBooks($input: UploadBooksInput!) {
+  uploadBooks(input: $input)
+}
+    `) as unknown as TypedDocumentString<UploadLibraryBooksMutation, UploadLibraryBooksMutationVariables>;
+export const UploadLibrarySeriesDocument = new TypedDocumentString(`
+    mutation UploadLibrarySeries($input: UploadSeriesInput!) {
+  uploadSeries(input: $input)
+}
+    `) as unknown as TypedDocumentString<UploadLibrarySeriesMutation, UploadLibrarySeriesMutationVariables>;
 export const SideBarQueryDocument = new TypedDocumentString(`
     query SideBarQuery {
   me {
@@ -1886,3 +2288,35 @@ export const SeriesBooksSceneDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SeriesBooksSceneQuery, SeriesBooksSceneQueryVariables>;
+export const DirectoryListingDocument = new TypedDocumentString(`
+    query DirectoryListing($input: DirectoryListingInput!, $pagination: Pagination!) {
+  listDirectory(input: $input, pagination: $pagination) {
+    nodes {
+      parent
+      files {
+        name
+        path
+        isDirectory
+      }
+    }
+    pageInfo {
+      __typename
+      ... on OffsetPaginationInfo {
+        currentPage
+        totalPages
+        pageSize
+        pageOffset
+        zeroBased
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<DirectoryListingQuery, DirectoryListingQueryVariables>;
+export const UploadConfigDocument = new TypedDocumentString(`
+    query UploadConfig {
+  uploadConfig {
+    enabled
+    maxFileUploadSize
+  }
+}
+    `) as unknown as TypedDocumentString<UploadConfigQuery, UploadConfigQueryVariables>;

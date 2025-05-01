@@ -21,6 +21,7 @@ use config::ConfigQuery;
 use email_device::EmailDeviceQuery;
 use emailer::EmailerQuery;
 use epub::EpubQuery;
+use filesystem::FilesystemQuery;
 use library::LibraryQuery;
 use log::LogQuery;
 use media::MediaQuery;
@@ -37,6 +38,7 @@ pub struct Query(
 	BookClubQuery,
 	EmailerQuery,
 	EmailDeviceQuery,
+	FilesystemQuery,
 	MediaQuery,
 	UserQuery,
 	NotifierQuery,

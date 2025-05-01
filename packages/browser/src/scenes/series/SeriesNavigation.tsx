@@ -1,6 +1,6 @@
 import { usePrefetchFiles, usePrefetchSeriesBooks } from '@stump/client'
 import { cn, Link, useSticky } from '@stump/components'
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
@@ -21,10 +21,12 @@ export default function SeriesNavigation() {
 	const { checkPermission } = useAppContext()
 	const { ref, isSticky } = useSticky<HTMLDivElement>({ extraOffset: isMobile ? 56 : 0 })
 	const { prefetch: prefetchBooks } = usePrefetchSeriesBooks({ id })
-	const { prefetch: prefetchFiles } = usePrefetchFiles({
-		path,
-		fetchConfig: checkPermission('file:upload'),
-	})
+
+	const prefetchFiles = usePrefetchFiles()
+	const handlePrefetchFiles = useCallback(
+		() => prefetchFiles({ path, fetchConfig: checkPermission('file:upload') }),
+		[path, checkPermission, prefetchFiles],
+	)
 
 	const canAccessFiles = checkPermission('file:explorer')
 	const tabs = useMemo(
@@ -40,7 +42,7 @@ export default function SeriesNavigation() {
 						{
 							isActive: location.pathname.match(/\/series\/[^/]+\/files(\/.*)?$/),
 							label: 'Files',
-							onHover: () => prefetchFiles(),
+							onHover: () => handlePrefetchFiles(),
 							to: 'files',
 						},
 					]
@@ -51,7 +53,7 @@ export default function SeriesNavigation() {
 				to: 'settings',
 			},
 		],
-		[location, canAccessFiles, prefetchBooks, prefetchFiles],
+		[location, canAccessFiles, prefetchBooks, handlePrefetchFiles],
 	)
 
 	const preferTopBar = primary_navigation_mode === 'TOPBAR'

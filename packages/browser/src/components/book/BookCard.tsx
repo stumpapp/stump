@@ -39,12 +39,12 @@ export default function BookCard({
 }: BookCardProps) {
 	const isCoverOnly = variant === 'cover'
 
-	const prefetchBook = usePrefetchBook(data.id)
-	const prefetchBooksAfterCursor = usePrefetchBooksAfterCursor(data.id)
+	const prefetchBook = usePrefetchBook()
+	const prefetchBooksAfterCursor = usePrefetchBooksAfterCursor()
 
 	const prefetch = useCallback(
-		() => Promise.all([prefetchBook(), prefetchBooksAfterCursor()]),
-		[prefetchBook, prefetchBooksAfterCursor],
+		() => Promise.all([prefetchBook(data.id), prefetchBooksAfterCursor(data.id)]),
+		[prefetchBook, prefetchBooksAfterCursor, data.id],
 	)
 
 	const getProgress = useCallback(() => {

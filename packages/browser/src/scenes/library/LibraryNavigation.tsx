@@ -1,10 +1,11 @@
 import {
+	usePrefetchFiles,
 	usePrefetchLibraryBooks,
 	usePrefetchLibraryFiles,
 	usePrefetchLibrarySeries,
 } from '@stump/client'
 import { cn, Link, useSticky } from '@stump/components'
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
@@ -23,12 +24,18 @@ export default function LibraryNavigation() {
 		library: { id, path },
 	} = useLibraryContext()
 	const { checkPermission } = useAppContext()
-	const { prefetch: prefetchBooks } = usePrefetchLibraryBooks({ id })
-	const { prefetch: prefetchFiles } = usePrefetchLibraryFiles({
-		path,
-		fetchConfig: checkPermission('file:upload'),
-	})
+	// const { prefetch: prefetchBooks } = usePrefetchLibraryBooks({ id })
+	// const { prefetch: prefetchFiles } = usePrefetchLibraryFiles({
+	// 	path,
+	// 	fetchConfig: checkPermission('file:upload'),
+	// })
 	const { prefetch: prefetchSeries } = usePrefetchLibrarySeries({ id })
+
+	const prefetchFiles = usePrefetchFiles()
+	const handlePrefetchFiles = useCallback(
+		() => prefetchFiles({ path, fetchConfig: checkPermission('file:upload') }),
+		[path, checkPermission, prefetchFiles],
+	)
 
 	const { ref, isSticky } = useSticky<HTMLDivElement>({
 		extraOffset: isMobile || primary_navigation_mode === 'TOPBAR' ? 56 : 0,
@@ -46,7 +53,7 @@ export default function LibraryNavigation() {
 			{
 				isActive: location.pathname.match(/\/libraries\/[^/]+\/books(\/.*)?$/),
 				label: 'Books',
-				onHover: () => prefetchBooks(),
+				// onHover: () => prefetchBooks(),
 				to: 'books',
 			},
 			...(canAccessFiles
@@ -54,7 +61,7 @@ export default function LibraryNavigation() {
 						{
 							isActive: location.pathname.match(/\/libraries\/[^/]+\/files(\/.*)?$/),
 							label: 'Files',
-							onHover: () => prefetchFiles(),
+							onHover: () => handlePrefetchFiles(),
 							to: 'files',
 						},
 					]
@@ -65,7 +72,7 @@ export default function LibraryNavigation() {
 				to: 'settings',
 			},
 		],
-		[location, canAccessFiles, prefetchBooks, prefetchFiles, prefetchSeries],
+		[location, canAccessFiles, prefetchSeries],
 	)
 
 	const preferTopBar = primary_navigation_mode === 'TOPBAR'

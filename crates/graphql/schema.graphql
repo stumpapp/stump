@@ -17,6 +17,34 @@ input AgeRestrictionInput {
 	restrictOnUnset: Boolean!
 }
 
+type Apikey {
+	id: Int!
+	name: String!
+	shortToken: String!
+	longTokenHash: String!
+	createdAt: DateTime!
+	lastUsedAt: DateTime
+	expiresAt: DateTime
+	userId: String!
+	permissions: ApikeyPermissionsOutput!
+}
+
+input ApikeyInput {
+	"The name of the API key"
+	name: String!
+	"The permissions that the API key should have"
+	permissions: ApikeyPermissions!
+	"The expiration date for the API key, if any"
+	expiresAt: DateTime
+}
+
+input ApikeyPermissions @oneOf {
+	inherit: InheritPermissionValue
+	custom: [UserPermission!]
+}
+
+union ApikeyPermissionsOutput = InheritPermissionStruct | UserPermissionStruct
+
 type Arrangement {
 	locked: Boolean!
 	sections: [ArrangementSection!]!
@@ -27,6 +55,16 @@ union ArrangementConfig = SystemArrangmentConfig | InProgressBooks | RecentlyAdd
 type ArrangementSection {
 	config: ArrangementConfig!
 	visible: Boolean!
+}
+
+"The metadata of an attachment that was sent with an email"
+type AttachmentMeta {
+	"The filename of the attachment"
+	filename: String!
+	"The associated media ID of the attachment, if there is one"
+	mediaId: String
+	"The size of the attachment in bytes"
+	size: Int!
 }
 
 type BookClub {
@@ -228,12 +266,40 @@ scalar DateTime
 
 scalar Decimal
 
+type DirectoryListing {
+	parent: String
+	files: [DirectoryListingFile!]!
+}
+
+type DirectoryListingFile {
+	isDirectory: Boolean!
+	name: String!
+	path: String!
+}
+
+input DirectoryListingInput {
+	path: String
+	ignoreHidden: Boolean! = true
+	ignoreFiles: Boolean! = false
+	ignoreDirectories: Boolean! = false
+}
+
 type DiscordConfig {
 	webhookUrl: String!
 }
 
 input DiscordConfigInput {
 	webhookUrl: String!
+}
+
+"Input object for creating or updating an email device"
+input EmailDeviceInput {
+	"The friendly name of the email device, e.g. \"Aaron's Kobo\""
+	name: String!
+	"The email address of the device"
+	email: String!
+	"Whether the device is forbidden from receiving emails from the server."
+	forbidden: Boolean!
 }
 
 type Emailer {
@@ -252,14 +318,55 @@ type Emailer {
 	sendHistory: [EmailerSendRecord!]!
 }
 
+"The configuration for an [EmailerClient]"
+input EmailerClientConfig {
+	"The email address to send from"
+	senderEmail: String!
+	"The display name to use for the sender"
+	senderDisplayName: String!
+	"The username to use for the SMTP server, typically the same as the sender email"
+	username: String!
+	"""
+	The plaintext password to use for the SMTP server, which will be encrypted before being stored.
+	This field is optional to support reusing the config for emailer config updates. If the password is not
+	set, it will error when trying to send an email.
+	"""
+	password: String
+	"The SMTP host to use"
+	host: String!
+	"The SMTP port to use"
+	port: Int!
+	"Whether to use TLS for the SMTP connection"
+	tlsEnabled: Boolean!
+	"The maximum size of an attachment in bytes"
+	maxAttachmentSizeBytes: Int
+	"The maximum number of attachments that can be sent in a single email"
+	maxNumAttachments: Int
+}
+
+"Input object for creating or updating an emailer"
+input EmailerInput {
+	"The friendly name of the emailer, e.g. \"Aaron's Kobo\""
+	name: String!
+	"Whether the emailer is the primary emailer"
+	isPrimary: Boolean!
+	"The emailer configuration"
+	config: EmailerClientConfig!
+}
+
 type EmailerSendRecord {
 	id: Int!
 	emailerId: Int!
 	recipientEmail: String!
-	attachmentMeta: [Int!]
-	sentAt: String!
+	sentAt: DateTime!
 	sentByUserId: String
 	sentBy: User
+	attachmentMeta: [AttachmentMeta!]!
+}
+
+input EmailerSendTo @oneOf {
+	device: SendToDevice
+	anonymous: SendToEmail
 }
 
 "The visibility of a shareable entity"
@@ -332,6 +439,14 @@ type ImageRef {
 type InProgressBooks {
 	name: String
 	links: [FilterableArrangementEntityLink!]!
+}
+
+type InheritPermissionStruct {
+	value: InheritPermissionValue!
+}
+
+enum InheritPermissionValue {
+	INHERIT
 }
 
 
@@ -559,6 +674,9 @@ type MediaMetadataOverview {
 }
 
 type Mutation {
+	createApiKey(input: ApikeyInput!): Apikey!
+	updateApiKey(id: Int!, input: ApikeyInput!): Apikey!
+	deleteApiKey(id: Int!): Apikey!
 	createBookClub(input: CreateBookClubInput!): BookClub!
 	updateBookClub(id: ID!, input: UpdateBookClubInput!): BookClub!
 	createBookClubInvitation(id: ID!, input: BookClubInvitationInput!): BookClubInvitation!
@@ -686,6 +804,14 @@ type Mutation {
 	deleteUserById(userId: String!, hardDelete: Boolean): User!
 	deleteUserSessions(userId: String!): Int!
 	updateUserLockStatus(userId: String!, lock: Boolean!): User!
+	createEmailer(input: EmailerInput!): Emailer!
+	updateEmailer(id: Int!, input: EmailerInput!): Emailer!
+	deleteEmailer(id: Int!): Emailer!
+	sendAttachmentEmail(input: SendAttachmentEmailsInput!): SendAttachmentEmailOutput!
+	createEmailDevice(input: EmailDeviceInput!): RegisteredEmailDevice!
+	updateEmailDevice(id: Int!, input: EmailDeviceInput!): RegisteredEmailDevice!
+	patchEmailDevice(id: Int!, input: EmailDeviceInput!): Int!
+	deleteEmailDevice(id: Int!): RegisteredEmailDevice!
 }
 
 type Notifier {
@@ -746,6 +872,11 @@ type PageDimension {
 	width: Int!
 }
 
+type PaginatedDirectoryListingResponse {
+	nodes: [DirectoryListing!]!
+	pageInfo: PaginationInfo!
+}
+
 type PaginatedLibraryResponse {
 	nodes: [Library!]!
 	pageInfo: PaginationInfo!
@@ -804,12 +935,18 @@ input Pagination @oneOf {
 union PaginationInfo = CursorPaginationInfo | OffsetPaginationInfo
 
 type Query {
+	getApiKeys: [Apikey!]!
+	getApiKeyById(id: Int!): Apikey!
 	bookClubs(all: Boolean = null): [BookClub!]!
 	bookClubById(id: ID!): BookClub
 	emailers: [Emailer!]!
 	emailerById(id: ID!): Emailer
+	emailDevices: [RegisteredEmailDevice!]!
+	emailDeviceById(id: Int!): RegisteredEmailDevice
+	listDirectory(pagination: Pagination!, input: DirectoryListingInput): PaginatedDirectoryListingResponse!
 	media(filter: JSON! = "{}", pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	mediaById(id: ID!): Media
+	mediaByPath(path: String!): Media
 	keepReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	recentlyAddedMedia(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	duplicateMedia: [Media!]!
@@ -855,6 +992,8 @@ type Query {
 	~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
 	"""
 	logfileInfo: LogFileInfo!
+	stumpConfig: StumpConfig!
+	uploadConfig: UploadConfig!
 }
 
 "The different reading directions supported by any Stump reader"
@@ -905,6 +1044,32 @@ type RecentlyAdded {
 	links: [FilterableArrangementEntityLink!]!
 }
 
+type RegisteredEmailDevice {
+	id: Int!
+	name: String!
+	email: String!
+	forbidden: Boolean!
+	sendHistory: [EmailerSendRecord!]!
+}
+
+type SendAttachmentEmailOutput {
+	sentCount: Int!
+	errors: [String!]!
+}
+
+input SendAttachmentEmailsInput {
+	mediaIds: [String!]!
+	sendTo: [EmailerSendTo!]!
+}
+
+input SendToDevice {
+	id: Int!
+}
+
+input SendToEmail {
+	email: String!
+}
+
 type Series {
 	id: String!
 	name: String!
@@ -949,6 +1114,90 @@ type SpineItem {
 	linear: Boolean!
 }
 
+
+"""
+Represents the configuration of a Stump application. This struct is generated at startup
+using a TOML file, environment variables, or both and is input when creating a `StumpCore`
+instance.
+
+Example:
+```
+use stump_core::{config::{self, StumpConfig}, StumpCore};
+
+#[tokio::main]
+async fn main() {
+/// Get config dir from environment variables.
+let config_dir = config::bootstrap_config_dir();
+
+// Create a StumpConfig using the config file and environment variables.
+let config = StumpConfig::new(config_dir)
+// Load Stump.toml file (if any)
+.with_config_file().unwrap()
+// Overlay environment variables
+.with_environment().unwrap();
+
+// Ensure that config directory exists and write Stump.toml.
+config.write_config_dir().unwrap();
+// Create an instance of the stump core.
+let core = StumpCore::new(config).await;
+}
+```
+"""
+type StumpConfig {
+	"The \"release\" | \"debug\" profile with which the application is running."
+	profile: String!
+	"The port from which to serve the application (default: 10801)."
+	port: Int!
+	"The verbosity with which to log errors (default: 0)."
+	verbosity: Int!
+	"Whether or not to pretty print logs."
+	prettyLogs: Boolean!
+	"An optional custom path for the database."
+	dbPath: String
+	"The client directory."
+	clientDir: String!
+	"An optional custom path for the templates directory."
+	customTemplatesDir: String
+	"The configuration root for the Stump application, contains thumbnails, cache, and logs."
+	configDir: String!
+	"A list of origins for CORS."
+	allowedOrigins: [String!]!
+	"Path to the PDFium binary for PDF support."
+	pdfiumPath: String
+	"Indicates if the Swagger UI should be disabled."
+	enableSwagger: Boolean!
+	"Indicates if the KoReader sync feature should be enabled."
+	enableKoreaderSync: Boolean!
+	"Password hash cost"
+	passwordHashCost: Int!
+	"The time in seconds that a login session will be valid for."
+	sessionTtl: Int!
+	accessTokenTtl: Int!
+	"The interval at which automatic deleted session cleanup is performed."
+	expiredSessionCleanupInterval: Int!
+	"""
+	The maximum number of concurrent files which may be processed by a scanner. This is used
+	to limit/increase the number of files that are processed at once. This may be useful for those
+	with high or low performance systems to configure to their needs.
+	"""
+	maxScannerConcurrency: Int!
+	"""
+	The maximum number of concurrent files which may be processed by a thumbnail generator. This is used
+	to limit/increase the number of images that are processed at once. Image generation can be
+	resource intensive, so this may be useful for those with high or low performance systems to
+	configure to their needs.
+	"""
+	maxThumbnailConcurrency: Int!
+	"""
+	The maximum file size, in bytes, of images that can be uploaded, e.g., as thumbnails for users,
+	libraries, series, or media.
+	"""
+	maxImageUploadSize: Int!
+	"Whether or not the server will allow users with the appropriate permissions to upload books and series."
+	enableUpload: Boolean!
+	"The maximum size, in bytes, of files that can be uploaded to be included in libraries."
+	maxFileUploadSize: Int!
+}
 
 type Subscription {
 	tailLogFile: String!
@@ -1043,6 +1292,11 @@ input UploadBooksInput {
 	uploads: [Upload!]!
 }
 
+type UploadConfig {
+	enabled: Boolean!
+	maxFileUploadSize: Int!
+}
+
 input UploadSeriesInput {
 	libraryId: String!
 	placeAt: String!
@@ -1134,6 +1388,10 @@ enum UserPermission {
 	DELETE_NOTIFIER
 	"Grant access to manage the server. This is effectively a step below server owner"
 	MANAGE_SERVER
+}
+
+type UserPermissionStruct {
+	value: [UserPermission!]!
 }
 
 type UserPreferences {

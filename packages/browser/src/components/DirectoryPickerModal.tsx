@@ -25,11 +25,10 @@ export default function DirectoryPickerModal({
 
 	const { errorMessage, path, directories, canGoBack, setPath, goBack, canLoadMore, loadMore } =
 		useDirectoryListing({
-			enabled: isOpen,
 			initialPath: startingPath,
 			ignoreParams: {
-				ignore_files: true,
-				ignore_hidden: !showHidden,
+				ignoreFiles: true,
+				ignoreHidden: !showHidden,
 			},
 		})
 

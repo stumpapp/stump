@@ -4,7 +4,7 @@ use crate::guard::PermissionGuard;
 use crate::input::filesystem::{DirectoryListingIgnoreParams, DirectoryListingInput};
 use crate::object::directory_listing::{DirectoryListing, DirectoryListingFile};
 use crate::pagination::{
-	OffsetPaginatedResponse, OffsetPagination, OffsetPaginationInfo,
+	OffsetPagination, OffsetPaginationInfo, PaginatedResponse, Pagination, PaginationInfo,
 };
 use async_graphql::{Object, Result};
 use itertools::Itertools;
@@ -20,11 +20,17 @@ impl FilesystemQuery {
 	#[graphql(guard = "PermissionGuard::one(UserPermission::FileExplorer)")]
 	async fn list_directory(
 		&self,
-		pagination: OffsetPagination,
+		pagination: Pagination,
 		input: Option<DirectoryListingInput>,
-	) -> Result<OffsetPaginatedResponse<DirectoryListing>> {
+	) -> Result<PaginatedResponse<DirectoryListing>> {
 		let params = input.unwrap_or_default();
 		let list_root = params.path.clone().map(PathBuf::from);
+
+		let pagination = match pagination {
+			Pagination::Offset(p) => p,
+			_ => return Err("Pagination must be offset".into()),
+		};
+
 		let start_path = match list_root {
 			Some(path) => path,
 			#[cfg(unix)]
@@ -69,7 +75,7 @@ fn into_paginated_response(
 	parent: Option<&Path>,
 	files: Vec<DirectoryListingFile>,
 	pagination: OffsetPagination,
-) -> OffsetPaginatedResponse<DirectoryListing> {
+) -> PaginatedResponse<DirectoryListing> {
 	let offset_info = OffsetPaginationInfo::new(pagination, files.len() as u64);
 
 	let mut truncated_files = files;
@@ -91,12 +97,12 @@ fn into_paginated_response(
 			.to_vec();
 	}
 
-	OffsetPaginatedResponse {
+	PaginatedResponse {
 		nodes: vec![DirectoryListing {
 			parent: parent.map(|p| p.to_string_lossy().to_string()),
 			files: truncated_files,
 		}],
-		offset_info,
+		page_info: PaginationInfo::Offset(offset_info),
 	}
 }
 
@@ -146,7 +152,7 @@ mod windows_fs {
 
 	pub fn get_drive_listing(
 		pagination: OffsetPagination,
-	) -> Result<OffsetPaginatedResponse<DirectoryListing>> {
+	) -> Result<PaginatedResponse<DirectoryListing>> {
 		// Microsoft provides an unsafe interface to get a list of logical drive letters
 		// docs: https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getlogicaldrivestringsw
 		let mut buffer: [u16; 256] = [0; 256];

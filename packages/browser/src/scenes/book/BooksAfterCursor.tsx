@@ -42,9 +42,9 @@ const query = graphql(`
 	}
 `)
 
-export const usePrefetchBooksAfterCursor = (id: string) => {
+export const usePrefetchBooksAfterCursor = () => {
 	const { sdk } = useSDK()
-	return () =>
+	return (id: string) =>
 		queryClient.prefetchInfiniteQuery({
 			queryKey: ['booksAfterCursor', id],
 			initialPageParam: {

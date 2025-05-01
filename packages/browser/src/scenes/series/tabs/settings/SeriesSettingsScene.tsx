@@ -28,7 +28,7 @@ export default function SeriesSettingsScene() {
 					Analyze Media
 				</Button>
 
-				<SeriesThumbnailSelector series={series} />
+				{/* <SeriesThumbnailSelector series={series} /> */}
 			</div>
 		</SceneContainer>
 	)

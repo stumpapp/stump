@@ -1,7 +1,7 @@
 import { queryClient, useSDK } from '@stump/client'
 import { cn } from '@stump/components'
+import { graphql, MediaAtPathQuery } from '@stump/graphql'
 import { Api } from '@stump/sdk'
-import { Media } from '@stump/sdk'
 import { Book, Folder } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -29,7 +29,7 @@ export default function FileThumbnail({
 	/**
 	 * The book associated with the file, if any exists
 	 */
-	const [book, setBook] = useState<Media | null>(null)
+	const [book, setBook] = useState<MediaAtPath>(null)
 	/**
 	 * A naive ref to keep track of whether or not we have fetched the book
 	 */
@@ -54,7 +54,7 @@ export default function FileThumbnail({
 		if (book) {
 			const image = new Image()
 			return new Promise((resolve, reject) => {
-				image.src = sdk.media.thumbnailURL(book.id)
+				image.src = book.thumbnail.url
 				image.onload = () => resolve(image)
 				image.onerror = (e) => {
 					console.error('Image failed to load:', e)
@@ -64,7 +64,7 @@ export default function FileThumbnail({
 		} else {
 			return Promise.reject('No book found')
 		}
-	}, [book, sdk.media])
+	}, [book])
 
 	/**
 	 * A function that attempts to reload the image
@@ -111,24 +111,34 @@ export default function FileThumbnail({
 	)
 }
 
+const query = graphql(`
+	query MediaAtPath($path: String!) {
+		mediaByPath(path: $path) {
+			id
+			resolvedName
+			thumbnail {
+				url
+			}
+		}
+	}
+`)
+
+export type MediaAtPath = MediaAtPathQuery['mediaByPath']
 /**
  * A function that attempts to fetch the book associated with the file, if any exists.
  * The queryClient is used in order to properly cache the result.
  */
 export const getBook = async (path: string, sdk: Api) => {
 	try {
-		const response = await queryClient.fetchQuery(
-			[sdk.media.keys.get, { path }],
-			() =>
-				sdk.media.get({
-					path: [path],
-				}),
-			{
-				// 15 minutes
-				cacheTime: 1000 * 60 * 15,
+		const response = await queryClient.fetchQuery({
+			queryKey: ['getMediaByPath', path],
+			queryFn: async () => {
+				return sdk.execute(query, { path })
 			},
-		)
-		return response.data?.at(0) ?? null
+			// 15 minutes
+			staleTime: 1000 * 60 * 15,
+		})
+		return response.mediaByPath ?? null
 	} catch (error) {
 		console.error(error)
 		return null

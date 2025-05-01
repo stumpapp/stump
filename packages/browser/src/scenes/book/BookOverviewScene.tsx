@@ -51,9 +51,9 @@ const query = graphql(`
 	}
 `)
 
-export const usePrefetchBook = (id: string) => {
+export const usePrefetchBook = () => {
 	const { sdk } = useSDK()
-	return () =>
+	return (id: string) =>
 		queryClient.prefetchQuery({
 			queryKey: ['bookOverview', id],
 			queryFn: async () => {

@@ -1,5 +1,5 @@
 import type { TypedDocumentString } from '@stump/graphql'
-import axios, { AxiosInstance } from 'axios'
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 
 import { AuthenticationMethod, Configuration } from './configuration'
 import {
@@ -236,6 +236,7 @@ export class Api {
 	async execute<TResult, TVariables>(
 		query: TypedDocumentString<TResult, TVariables>,
 		variables?: TVariables extends Record<string, never> ? never : TVariables,
+		config?: Pick<AxiosRequestConfig, 'onUploadProgress'>,
 	): Promise<TResult> {
 		const response = await this.axiosInstance.post<GraphQLResponse<TResult>>(
 			'/api/graphql',
@@ -248,6 +249,7 @@ export class Api {
 					...this.headers,
 				},
 				baseURL: this.rootURL,
+				...config,
 			},
 		)
 

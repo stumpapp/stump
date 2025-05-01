@@ -8,7 +8,7 @@ import {
 	useSuspenseGraphQL,
 } from '@stump/client'
 import { usePrevious, usePreviousIsDifferent } from '@stump/components'
-import { graphql, OffsetPaginationInfo } from '@stump/graphql'
+import { graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Helmet } from 'react-helmet'

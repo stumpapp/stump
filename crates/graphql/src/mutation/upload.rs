@@ -35,6 +35,8 @@ struct UploadSeriesInput {
 
 // TODO: consider thumbnail upload for this mutation object, e.g. `upload_media_thumbnail`
 
+// TODO: Might need to consider making these restful if we cannot hook into progress callbacks on the client
+
 #[Object]
 impl UploadMutation {
 	#[graphql(

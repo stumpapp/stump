@@ -1,4 +1,4 @@
-import { useMutation, useSDK } from '@stump/client'
+import { useGraphQLMutation } from '@stump/client'
 import {
 	Accordion,
 	Button,
@@ -10,10 +10,11 @@ import {
 	ProgressSpinner,
 	Text,
 } from '@stump/components'
+import { graphql, UploadBooksInput } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { UploaderParams, UploadLibraryBooks, UploadLibrarySeries } from '@stump/sdk'
+import { AxiosProgressEvent } from 'axios'
 import { Book, FolderArchive } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { FileRejection, useDropzone } from 'react-dropzone'
 import toast from 'react-hot-toast'
 
@@ -24,6 +25,18 @@ import { formatBytes } from '@/utils/format'
 import { useFileExplorerContext } from '../context'
 import UploadMenu from './UploadMenu'
 
+const uploadBooksMutation = graphql(`
+	mutation UploadLibraryBooks($input: UploadBooksInput!) {
+		uploadBooks(input: $input)
+	}
+`)
+
+const uploadSeriesMutation = graphql(`
+	mutation UploadLibrarySeries($input: UploadSeriesInput!) {
+		uploadSeries(input: $input)
+	}
+`)
+
 export default function UploadModal() {
 	const [uploadType, setUploadType] = useState<'books' | 'series'>()
 
@@ -33,24 +46,31 @@ export default function UploadModal() {
 	const { t } = useLocaleContext()
 
 	const { currentPath, refetch, uploadConfig, libraryID } = useFileExplorerContext()
-	const { sdk } = useSDK()
 
 	const [uploadProgress, setUploadProgress] = useState(0)
 
-	const { mutateAsync: uploadBooks, isLoading: isUploadingBooks } = useMutation(
-		[sdk.upload.keys.uploadLibraryBooks],
-		(params: UploaderParams<UploadLibraryBooks>) =>
-			sdk.upload.uploadLibraryBooks({ ...params, onProgress: setUploadProgress }),
+	const config = useMemo(
+		() => ({
+			onUploadProgress: ({ loaded, total }: AxiosProgressEvent) => {
+				const progress = Math.round((loaded * 100) / (total || 0))
+				setUploadProgress(progress)
+			},
+		}),
+		[],
+	)
+
+	const { mutateAsync: uploadBooks, isPending: isUploadingBooks } = useGraphQLMutation(
+		uploadBooksMutation,
 		{
 			onSuccess: () => refetch(),
+			config,
 		},
 	)
-	const { mutateAsync: uploadSeries, isLoading: isUploadingSeries } = useMutation(
-		[sdk.upload.keys.uploadLibrarySeries],
-		(params: UploaderParams<UploadLibrarySeries>) =>
-			sdk.upload.uploadLibrarySeries({ ...params, onProgress: setUploadProgress }),
+	const { mutateAsync: uploadSeries, isPending: isUploadingSeries } = useGraphQLMutation(
+		uploadSeriesMutation,
 		{
 			onSuccess: () => refetch(),
+			config,
 		},
 	)
 
@@ -81,7 +101,7 @@ export default function UploadModal() {
 					}
 				: {}),
 		},
-		maxSize: uploadConfig?.max_file_upload_size ?? 0,
+		maxSize: uploadConfig?.maxFileUploadSize ?? 0,
 		multiple: uploadType === 'books',
 		onDrop: handleDrop,
 	})
@@ -93,9 +113,9 @@ export default function UploadModal() {
 	}
 
 	const doUploadBooks = useCallback(
-		async (params: UploaderParams<UploadLibraryBooks>) => {
+		async (params: UploadBooksInput) => {
 			try {
-				await uploadBooks(params)
+				await uploadBooks({ input: params })
 				toast.success('Successfully uploaded file(s)')
 			} catch (error) {
 				console.error(error)
@@ -115,10 +135,12 @@ export default function UploadModal() {
 
 		try {
 			await uploadSeries({
-				file: firstFile,
-				place_at: currentPath,
-				library_id: libraryID,
-				series_dir_name: seriesDirName,
+				input: {
+					upload: firstFile,
+					placeAt: currentPath,
+					libraryId: libraryID,
+					seriesDirName,
+				},
 			})
 			toast.success('Successfully uploaded series')
 		} catch (error) {
@@ -141,9 +163,9 @@ export default function UploadModal() {
 		// Handle books/series upload paths
 		if (uploadType == 'books') {
 			doUploadBooks({
-				files,
-				place_at: currentPath,
-				library_id: libraryID,
+				uploads: files,
+				placeAt: currentPath,
+				libraryId: libraryID,
 			})
 		} else {
 			await doUploadSeries()

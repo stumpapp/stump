@@ -105,9 +105,27 @@ impl MediaQuery {
 	}
 
 	async fn media_by_id(&self, ctx: &Context<'_>, id: ID) -> Result<Option<Media>> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let model = media::ModelWithMetadata::find_by_id(id.to_string())
+		let model = media::ModelWithMetadata::find_by_id_for_user(id.to_string(), user)
+			.into_model::<media::ModelWithMetadata>()
+			.one(conn)
+			.await?;
+
+		Ok(model.map(Media::from))
+	}
+
+	async fn media_by_path(
+		&self,
+		ctx: &Context<'_>,
+		path: String,
+	) -> Result<Option<Media>> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let model = media::ModelWithMetadata::find_for_user(user)
+			.filter(media::Column::Path.eq(path))
 			.into_model::<media::ModelWithMetadata>()
 			.one(conn)
 			.await?;

@@ -4,8 +4,12 @@ import { GraphQLWebsocketConnectEventHandlers } from '@stump/sdk/socket'
 import {
 	InfiniteData,
 	QueryKey,
+	useMutation,
+	UseMutationOptions,
+	UseMutationResult,
 	useQuery,
 	useQueryClient,
+	UseQueryOptions,
 	type UseQueryResult,
 	useSuspenseInfiniteQuery,
 	UseSuspenseInfiniteQueryOptions,
@@ -13,7 +17,7 @@ import {
 	useSuspenseQuery,
 	UseSuspenseQueryResult,
 } from '@tanstack/react-query'
-import { isAxiosError } from 'axios'
+import { AxiosRequestConfig, isAxiosError } from 'axios'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { match } from 'ts-pattern'
 
@@ -75,6 +79,7 @@ export function useGraphQL<TResult, TVariables>(
 	document: TypedDocumentString<TResult, TVariables>,
 	queryKey: QueryKey,
 	variables?: TVariables extends Record<string, never> ? never : TVariables,
+	options?: Omit<UseQueryOptions<TResult, Error, TResult, QueryKey>, 'queryKey' | 'queryFn'>,
 ): UseQueryResult<TResult> {
 	const { sdk } = useSDK()
 	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
@@ -85,6 +90,7 @@ export function useGraphQL<TResult, TVariables>(
 			const response = await sdk.execute(document, variables)
 			return response
 		},
+		...options,
 	})
 
 	useEffect(() => {
@@ -100,6 +106,51 @@ export function useGraphQL<TResult, TVariables>(
 	return { error, ...rest } as UseQueryResult<TResult>
 }
 
+type UseGraphQLMutationOptions<TResult, TVariables> = Omit<
+	UseMutationOptions<
+		TResult,
+		unknown,
+		TVariables extends Record<string, never> ? never : TVariables,
+		unknown
+	>,
+	'mutationFn'
+> & {
+	config?: Pick<AxiosRequestConfig, 'onUploadProgress'>
+}
+
+export function useGraphQLMutation<TResult, TVariables>(
+	document: TypedDocumentString<TResult, TVariables>,
+	{ config, ...options }: UseGraphQLMutationOptions<TResult, TVariables> = {},
+) {
+	const { sdk } = useSDK()
+	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
+
+	const mutationFn = useCallback(
+		async (variables?: TVariables extends Record<string, never> ? never : TVariables) =>
+			sdk.execute(document, variables),
+		[sdk, document],
+	)
+	const { error, ...rest } = useMutation({
+		...options,
+		mutationFn,
+		onError: (error, variables, context) => {
+			handleError({
+				sdk,
+				error,
+				onUnauthenticatedResponse,
+				onConnectionWithServerChanged,
+			})
+			options?.onError?.(error, variables, context)
+		},
+	})
+
+	return { error, ...rest } as UseMutationResult<
+		TResult,
+		unknown,
+		TVariables extends Record<string, never> ? never : TVariables,
+		unknown
+	>
+}
 export function useSuspenseGraphQL<TResult, TVariables>(
 	document: TypedDocumentString<TResult, TVariables>,
 	queryKey: QueryKey,

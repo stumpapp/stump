@@ -1,4 +1,4 @@
-import { DirectoryListingFile, UploadConfig } from '@stump/sdk'
+import { DirectoryListingFile, UploadConfig } from '@stump/graphql'
 import { createContext, useContext } from 'react'
 
 export type ExplorerLayout = 'grid' | 'table'

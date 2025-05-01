@@ -17,14 +17,14 @@ pub struct ConfigQuery;
 #[Object]
 impl ConfigQuery {
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageServer)")]
-	async fn get_config(&self, ctx: &Context<'_>) -> Result<StumpConfig> {
+	async fn stump_config(&self, ctx: &Context<'_>) -> Result<StumpConfig> {
 		let config = ctx.data::<CoreContext>()?.config.as_ref();
 
 		Ok(config.clone())
 	}
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::UploadFile)")]
-	async fn get_upload_config(&self, ctx: &Context<'_>) -> Result<UploadConfig> {
+	async fn upload_config(&self, ctx: &Context<'_>) -> Result<UploadConfig> {
 		let config = ctx.data::<CoreContext>()?.config.as_ref();
 		Ok(UploadConfig {
 			enabled: config.enable_upload,

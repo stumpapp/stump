@@ -52,7 +52,7 @@ export default function FilterHeader({
 		extraOffset: isMobile || primary_navigation_mode === 'TOPBAR' ? 56 : 0,
 	})
 
-	const { filters, setFilter, removeFilter } = useFilterContext()
+	// const { filters, setFilter, removeFilter } = useFilterContext()
 
 	return (
 		<header
@@ -66,14 +66,14 @@ export default function FilterHeader({
 			)}
 		>
 			<Search
-				initialValue={filters?.search as string}
+				// initialValue={filters?.search as string}
 				placeholder={searchPlaceholder}
 				onChange={(value) => {
-					if (value) {
-						setFilter('search', value)
-					} else {
-						removeFilter('search')
-					}
+					// if (value) {
+					// 	setFilter('search', value)
+					// } else {
+					// 	removeFilter('search')
+					// }
 				}}
 				isLoading={isSearching}
 				isDisabled={isSearchDisabled}

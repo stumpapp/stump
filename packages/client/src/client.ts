@@ -33,8 +33,10 @@ export const queryClient = new QueryClient({
 	},
 })
 
+export const PREFETCH_STALE_TIME = 1000 * 60 * 5 // 5 minutes
+
 export function useIsFetching(filters?: QueryFilters) {
-	return useReactIsFetching(filters, { context: QueryClientContext })
+	return useReactIsFetching(filters)
 }
 
 // TODO: it is a bit annoying, but the onError callback will be removed in the next

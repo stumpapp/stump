@@ -1,12 +1,14 @@
 import {
+	PREFETCH_STALE_TIME,
 	useGraphQL,
 	useInfiniteGraphQL,
 	usePagedMediaQuery,
 	usePrefetchMediaPaged,
 	useSDK,
+	useSuspenseGraphQL,
 } from '@stump/client'
 import { usePrevious, usePreviousIsDifferent } from '@stump/components'
-import { graphql } from '@stump/graphql'
+import { graphql, OffsetPaginationInfo } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Helmet } from 'react-helmet'
@@ -22,7 +24,7 @@ import {
 	URLOrdering,
 	useFilterScene,
 } from '@/components/filters'
-import { useURLPageParams } from '@/components/filters/useFilterScene'
+import { useURLKeywordSearch, useURLPageParams } from '@/components/filters/useFilterScene'
 import EntityTableColumnConfiguration from '@/components/table/EntityTableColumnConfiguration'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
@@ -213,29 +215,42 @@ const query = graphql(`
 	}
 `)
 
+export type UsePrefetchSeriesBooksParams = {
+	page?: number
+	pageSize?: number
+}
+
 export const usePrefetchSeriesBooks = (id: string) => {
 	const { sdk } = useSDK()
 	const { pageSize } = useURLPageParams()
 
 	const client = useQueryClient()
-	return () =>
-		client.prefetchQuery({
-			queryKey: ['seriesBooks', id],
-			queryFn: async () => {
-				const response = await sdk.execute(query, {
-					filter: {
-						seriesId: { eq: id },
-					},
-					pagination: {
-						offset: {
-							page: 1,
-							pageSize,
+
+	const prefetch = useCallback(
+		(params: UsePrefetchSeriesBooksParams = {}) => {
+			const pageParams = { page: params.page || 1, pageSize: params.pageSize || pageSize }
+			return client.prefetchQuery({
+				queryKey: ['seriesBooks', id, pageParams],
+				queryFn: async () => {
+					const response = await sdk.execute(query, {
+						filter: {
+							seriesId: { eq: id },
 						},
-					},
-				})
-				return response
-			},
-		})
+						pagination: {
+							offset: {
+								...pageParams,
+							},
+						},
+					})
+					return response
+				},
+				staleTime: PREFETCH_STALE_TIME,
+			})
+		},
+		[client, id, pageSize, sdk],
+	)
+
+	return prefetch
 }
 
 export default function SeriesBooksSceneContainer() {
@@ -248,9 +263,16 @@ export default function SeriesBooksSceneContainer() {
 
 function SeriesBooksScene() {
 	const { series } = useSeriesContext()
-	const { page, pageSize } = useURLPageParams()
+	const { page, pageSize, setPage } = useURLPageParams()
 
-	const { data, isLoading } = useGraphQL(query, ['seriesBooks', series.id], {
+	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
+
+	const {
+		data: {
+			media: { nodes, pageInfo },
+		},
+		isLoading,
+	} = useSuspenseGraphQL(query, ['seriesBooks', series.id, { page, pageSize }], {
 		filter: {
 			seriesId: { eq: series.id },
 		},
@@ -262,20 +284,64 @@ function SeriesBooksScene() {
 		},
 	})
 
+	const prefetch = usePrefetchSeriesBooks(series.id)
+
+	if (pageInfo.__typename !== 'OffsetPaginationInfo') {
+		throw new Error('Invalid pagination type, expected OffsetPaginationInfo')
+	}
+
+	const previousPage = usePrevious(pageInfo.currentPage)
+	const shouldScroll = !!previousPage && previousPage !== pageInfo.currentPage
+	useEffect(
+		() => {
+			if (!isInView && shouldScroll) {
+				containerRef.current?.scrollIntoView({
+					behavior: 'smooth',
+					block: 'nearest',
+					inline: 'start',
+				})
+			}
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[shouldScroll, isInView],
+	)
+
 	return (
 		<div className="flex flex-1 flex-col pb-4 md:pb-0">
 			<Helmet>
 				<title>Stump | {series.resolvedName || ''}</title>
 			</Helmet>
-			{/* <section ref={containerRef} id="grid-top-indicator" className="h-0" /> */}
 
-			<div className="flex flex-1 px-4 pb-2 pt-4 md:pb-4">
-				<BookGrid
-					isLoading={isLoading}
-					books={data?.media.nodes}
-					// hasFilters={Object.keys(filters || {}).length > 0}
-				/>
-			</div>
+			<section ref={containerRef} id="grid-top-indicator" className="h-0" />
+
+			<FilterHeader
+				// layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
+				// orderControls={<URLOrdering entity="media" />}
+				// filterControls={<URLFilterDrawer entity="media" />}
+				navOffset
+			/>
+
+			<URLFilterContainer
+				currentPage={pageInfo.currentPage || 1}
+				pages={pageInfo.totalPages || 1}
+				onChangePage={(page) => {
+					setPage(page)
+				}}
+				onPrefetchPage={(page) => {
+					prefetch({
+						page,
+						pageSize,
+					})
+				}}
+			>
+				<div className="flex flex-1 px-4 pb-2 pt-4 md:pb-4">
+					<BookGrid
+						isLoading={isLoading}
+						books={nodes}
+						// hasFilters={Object.keys(filters || {}).length > 0}
+					/>
+				</div>
+			</URLFilterContainer>
 		</div>
 	)
 }

@@ -9,7 +9,7 @@ import { EXCLUDED_FILTER_KEYS } from './utils'
 type Return = IFilterContext
 
 export const useURLPageParams = () => {
-	const [searchParams] = useSearchParams()
+	const [searchParams, setSearchParams] = useSearchParams()
 
 	const is3XLScreenOrBigger = useMediaMatch('(min-width: 1600px)')
 	const defaultPageSize = is3XLScreenOrBigger ? 40 : 20
@@ -24,7 +24,59 @@ export const useURLPageParams = () => {
 		[searchParams, defaultPageSize],
 	)
 
-	return pagination
+	const setPage = useCallback(
+		(page: number) => {
+			setSearchParams((prev) => {
+				prev.set('page', page.toString())
+				return prev
+			})
+		},
+		[setSearchParams],
+	)
+
+	const setPageSize = useCallback(
+		(pageSize: number) => {
+			setSearchParams((prev) => {
+				prev.set('pageSize', pageSize.toString())
+				return prev
+			})
+		},
+		[setSearchParams],
+	)
+
+	return { ...pagination, setPage, setPageSize }
+}
+
+export const useURLKeywordSearch = () => {
+	const [searchParams, setSearchParams] = useSearchParams()
+
+	const search = useMemo(() => {
+		const searchValue = searchParams.get('search')
+		return searchValue ? decodeURIComponent(searchValue) : ''
+	}, [searchParams])
+
+	const setSearch = useCallback(
+		(newSearch: string) => {
+			setSearchParams((prev) => {
+				if (newSearch) {
+					prev.set('search', encodeURIComponent(newSearch))
+				} else {
+					prev.delete('search')
+				}
+				return prev
+			})
+		},
+		[setSearchParams],
+	)
+
+	const removeSearch = useCallback(() => {
+		setSearchParams((prev) => {
+			prev.delete('search')
+			return prev
+		})
+	}, [setSearchParams])
+
+	return { search, setSearch, removeSearch }
 }
 
 export function useFilterScene(): Return {

@@ -1,22 +1,5 @@
-export {
-	type CursorQueryCursorOptions,
-	type CursorQueryOptions,
-	type InfiniteQueryOptions,
-	type MutationOptions,
-	type PageQueryFunction,
-	type PageQueryOptions,
-	queryClient,
-	QueryClientProvider,
-	type QueryOptions,
-	useCursorQuery,
-	type UseCursorQueryFunction,
-	useInfiniteQuery,
-	useIsFetching,
-	useMutation,
-	usePageQuery,
-	useQueries,
-	useQuery,
-} from './client'
+export * from './apollo'
+export * from './client'
 export * from './context'
 export * from './desktop'
 export * from './hooks'
@@ -26,4 +9,3 @@ export * from './queries'
 export * from './sdk'
 export * from './stores'
 export * from './utils'
-export * from './apollo'

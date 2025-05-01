@@ -1,4 +1,4 @@
-import { useSDK, useSuspenseGraphQL } from '@stump/client'
+import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { cn } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
@@ -31,11 +31,11 @@ const query = graphql(`
 	}
 `)
 
-export const usePrefetchSeries = (id: string) => {
+export const usePrefetchSeries = () => {
 	const { sdk } = useSDK()
 
 	const client = useQueryClient()
-	return () =>
+	return (id: string) =>
 		client.prefetchQuery({
 			queryKey: ['seriesById', id],
 			queryFn: async () => {
@@ -44,6 +44,7 @@ export const usePrefetchSeries = (id: string) => {
 				})
 				return response
 			},
+			staleTime: PREFETCH_STALE_TIME,
 		})
 }
 

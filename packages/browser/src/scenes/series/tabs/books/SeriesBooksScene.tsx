@@ -220,14 +220,14 @@ export type UsePrefetchSeriesBooksParams = {
 	pageSize?: number
 }
 
-export const usePrefetchSeriesBooks = (id: string) => {
+export const usePrefetchSeriesBooks = () => {
 	const { sdk } = useSDK()
 	const { pageSize } = useURLPageParams()
 
 	const client = useQueryClient()
 
 	const prefetch = useCallback(
-		(params: UsePrefetchSeriesBooksParams = {}) => {
+		(id: string, params: UsePrefetchSeriesBooksParams = {}) => {
 			const pageParams = { page: params.page || 1, pageSize: params.pageSize || pageSize }
 			return client.prefetchQuery({
 				queryKey: ['seriesBooks', id, pageParams],
@@ -247,7 +247,7 @@ export const usePrefetchSeriesBooks = (id: string) => {
 				staleTime: PREFETCH_STALE_TIME,
 			})
 		},
-		[client, id, pageSize, sdk],
+		[client, pageSize, sdk],
 	)
 
 	return prefetch

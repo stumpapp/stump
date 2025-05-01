@@ -28,11 +28,11 @@ export default function SeriesCard({ data, fullWidth, variant = 'default' }: Ser
 
 	const isCoverOnly = variant === 'cover'
 
-	const prefetchSeries = usePrefetchSeries(data.id)
-	const prefetchSeriesBooks = usePrefetchSeriesBooks(data.id)
+	const prefetchSeries = usePrefetchSeries()
+	const prefetchSeriesBooks = usePrefetchSeriesBooks()
 	const prefetch = useCallback(
-		() => Promise.all([prefetchSeries(), prefetchSeriesBooks()]),
-		[prefetchSeries, prefetchSeriesBooks],
+		() => Promise.all([prefetchSeries(data.id), prefetchSeriesBooks(data.id)]),
+		[prefetchSeries, prefetchSeriesBooks, data.id],
 	)
 
 	function getProgress() {

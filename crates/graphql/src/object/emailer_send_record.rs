@@ -1,7 +1,10 @@
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
 use models::{
-	entity::{emailer_send_record, user},
+	entity::{
+		emailer_send_record::{self, AttachmentMeta},
+		user,
+	},
 	shared::enums::UserPermission,
 };
 use sea_orm::prelude::*;
@@ -37,6 +40,14 @@ impl EmailerSendRecord {
 			Ok(Some(user.into()))
 		} else {
 			Ok(None)
+		}
+	}
+
+	async fn attachment_meta(&self, _ctx: &Context<'_>) -> Result<Vec<AttachmentMeta>> {
+		match self.model.attachment_meta {
+			None => return Ok(vec![]),
+			Some(ref meta) => Ok(AttachmentMeta::try_from_data(meta)
+				.map_err(|_| "Failed to parse attachment meta")?),
 		}
 	}
 }

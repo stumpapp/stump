@@ -3,7 +3,7 @@ use async_graphql::{EmptyMutation, EmptySubscription, ObjectType, Request, Schem
 use chrono::{DateTime, Duration, Utc};
 use models::entity::user::AuthUser;
 use sea_orm::{DatabaseBackend::Sqlite, MockDatabase, ModelTrait};
-use std::sync::Arc;
+use std::{path::PathBuf, sync::Arc};
 use stump_core::Ctx;
 
 pub fn is_close_to_now(time: DateTime<Utc>) -> bool {
@@ -52,4 +52,11 @@ pub async fn get_graphql_query_response<QueryType: ObjectType + 'static>(
 
 	let response = schema.execute(req).await;
 	serde_json::to_string_pretty(&response).unwrap()
+}
+
+pub fn get_test_epub_path() -> String {
+	PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+		.join("../../core/integration-tests/data/book.epub")
+		.to_string_lossy()
+		.to_string()
 }

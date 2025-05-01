@@ -32,7 +32,7 @@ impl NotifierInput {
 			NotifierInput::Telegram(config) => (
 				NotifierType::Telegram,
 				NotifierConfig::Telegram(notifier::TelegramConfig {
-					encrypted_token: encrypt_string(key, &config.token)?,
+					encrypted_token: encrypt_string(&config.token, key)?,
 					chat_id: config.chat_id,
 				}),
 			),

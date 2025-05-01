@@ -2326,6 +2326,7 @@ dependencies = [
 name = "email"
 version = "0.0.10"
 dependencies = [
+ "async-graphql",
  "handlebars",
  "lettre",
  "serde",
@@ -3172,6 +3173,7 @@ dependencies = [
  "bcrypt",
  "chrono",
  "clap",
+ "email",
  "epub",
  "filter-gen",
  "futures-util",
@@ -8828,6 +8830,7 @@ version = "0.0.10"
 dependencies = [
  "alphanumeric-sort",
  "async-channel",
+ "async-graphql",
  "async-trait",
  "chrono",
  "criterion",

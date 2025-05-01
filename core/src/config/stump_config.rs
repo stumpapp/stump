@@ -8,6 +8,7 @@
 
 use std::{env, path::PathBuf};
 
+use async_graphql::SimpleObject;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -78,8 +79,16 @@ use defaults::*;
 /// }
 /// ```
 #[derive(
-	StumpConfigGenerator, Serialize, Deserialize, Debug, Clone, PartialEq, specta::Type,
+	StumpConfigGenerator,
+	Serialize,
+	Deserialize,
+	Debug,
+	Clone,
+	PartialEq,
+	specta::Type,
+	SimpleObject,
 )]
+#[graphql(name = "StumpConfig")]
 #[config_file_location(self.get_config_dir().join("Stump.toml"))]
 pub struct StumpConfig {
 	/// The "release" | "debug" profile with which the application is running.

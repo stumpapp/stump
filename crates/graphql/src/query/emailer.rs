@@ -4,8 +4,6 @@ use async_graphql::{Context, Object, Result, ID};
 use models::{entity::emailer, shared::enums::UserPermission};
 use sea_orm::prelude::*;
 
-// TODO(graphql): Mutations
-
 #[derive(Default)]
 pub struct EmailerQuery;
 

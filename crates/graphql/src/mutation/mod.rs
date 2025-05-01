@@ -3,6 +3,8 @@ mod book_club;
 mod book_club_invitation;
 mod book_club_member;
 mod book_club_schedule;
+mod email_device;
+mod emailer;
 mod epub;
 mod library;
 mod log;
@@ -19,6 +21,8 @@ use book_club::BookClubMutation;
 use book_club_invitation::BookClubInvitationMutation;
 use book_club_member::BookClubMemberMutation;
 use book_club_schedule::BookClubScheduleMutation;
+use email_device::EmailDeviceMutation;
+use emailer::EmailerMutation;
 use epub::EpubMutation;
 use library::LibraryMutation;
 use log::LogMutation;
@@ -47,4 +51,6 @@ pub struct Mutation(
 	TagMutation,
 	UploadMutation,
 	UserMutation,
+	EmailerMutation,
+	EmailDeviceMutation,
 );

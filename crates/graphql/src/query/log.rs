@@ -1,11 +1,11 @@
-use crate::filter::log::LogFilterInput;
-use crate::filter::IntoFilter;
-use crate::guard::PermissionGuard;
-use crate::pagination::get_paginated_results;
 use crate::{
 	data::CoreContext,
+	filter::{log::LogFilterInput, IntoFilter},
+	guard::PermissionGuard,
 	object::log::{Log, LogFileInfo},
-	pagination::{PaginatedResponse, Pagination, PaginationValidator},
+	pagination::{
+		get_paginated_results, PaginatedResponse, Pagination, PaginationValidator,
+	},
 };
 use async_graphql::{Context, Object, Result};
 use models::{entity::log, shared::enums::UserPermission};

@@ -830,7 +830,7 @@ type Mutation {
 	This is used to inform the UI of the last library which was visited by the user
 	"""
 	visitLibrary(id: ID!): Library!
-	deleteLogs: LogDeleteOutput!
+	deleteLogs(filter: LogFilterInput!): LogDeleteOutput!
 	deleteLogFile: Boolean!
 	"""
 	Creates a new reading list.

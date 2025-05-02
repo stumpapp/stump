@@ -581,6 +581,14 @@ type LogFileInfo {
 	modified: String!
 }
 
+input LogFilterInput {
+	level: FieldFilterString = null
+	jobId: FieldFilterString = null
+	_and: [LogFilterInput!] = null
+	_not: [LogFilterInput!] = null
+	_or: [LogFilterInput!] = null
+}
+
 type Media {
 	"The unique identifier for the media"
 	id: String!
@@ -1111,7 +1119,7 @@ type Query {
 	recentlyAddedSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
 	"Returns a list of all tags."
 	tags: [Tag!]!
-	logs(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLogResponse!
+	logs(filter: LogFilterInput!, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLogResponse!
 	"""
 	Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
 	~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.

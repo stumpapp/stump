@@ -1,3 +1,5 @@
+use crate::filter::log::LogFilterInput;
+use crate::filter::IntoFilter;
 use crate::guard::PermissionGuard;
 use crate::pagination::get_paginated_results;
 use crate::{
@@ -18,14 +20,17 @@ impl LogQuery {
 	async fn logs(
 		&self,
 		ctx: &Context<'_>,
+		filter: LogFilterInput,
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<Log>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		// TODO(graphql): implement order by param
-		// TODO(graphql): implement filters
-		let query = log::Entity::find().order_by_asc(log::Column::Id);
+		let filter = filter.into_filter();
+		let query = log::Entity::find()
+			.filter(filter)
+			.order_by_asc(log::Column::Id);
 		let get_cursor = |m: &log::Model| m.id.to_string();
 		get_paginated_results(query, log::Column::Id, conn, pagination, get_cursor).await
 	}

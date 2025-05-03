@@ -10,6 +10,8 @@ use sea_orm::{
 pub mod log;
 pub mod media;
 pub mod media_metadata;
+pub mod series;
+pub mod series_metadata;
 
 // TODO: This probably needs a rewrite to make it more compatible with async-graphql. The big issue is generics
 // with input objects. Look at and yoink from seaography for how they are doing things

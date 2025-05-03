@@ -623,6 +623,14 @@ export type LogFileInfo = {
   size: Scalars['Int']['output'];
 };
 
+export type LogFilterInput = {
+  _and?: InputMaybe<Array<LogFilterInput>>;
+  _not?: InputMaybe<Array<LogFilterInput>>;
+  _or?: InputMaybe<Array<LogFilterInput>>;
+  jobId?: InputMaybe<FieldFilterString>;
+  level?: InputMaybe<FieldFilterString>;
+};
+
 export type Media = {
   __typename?: 'Media';
   /** The timestamp of the creation of the media */
@@ -1059,6 +1067,11 @@ export type MutationDeleteLibraryArgs = {
 
 export type MutationDeleteLibraryScanHistoryArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteLogsArgs = {
+  filter: LogFilterInput;
 };
 
 
@@ -1530,6 +1543,7 @@ export type QueryLoginActivityByIdArgs = {
 
 
 export type QueryLogsArgs = {
+  filter: LogFilterInput;
   pagination?: Pagination;
 };
 

@@ -1,5 +1,6 @@
 use std::{collections::VecDeque, path::PathBuf};
 
+use async_graphql::SimpleObject;
 use models::{
 	entity::{library, library_config, media, series},
 	shared::enums::FileStatus,
@@ -9,6 +10,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 
 use crate::{
+	event,
 	filesystem::image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
 	job::{
 		error::JobError, CoreJobOutput, Executor, JobExt, JobOutputExt, JobProgress,
@@ -61,7 +63,7 @@ impl SeriesScanJob {
 
 // TODO: emit progress events. This job isn't exposed in the UI yet, so it's not a big deal for now
 
-#[derive(Clone, Serialize, Deserialize, Default, Debug, Type)]
+#[derive(Clone, Serialize, Deserialize, Default, Debug, Type, SimpleObject)]
 pub struct SeriesScanOutput {
 	/// The number of files to scan relative to the series root
 	total_files: u64,
@@ -206,10 +208,10 @@ impl JobExt for SeriesScanJob {
 		ctx: &WorkerCtx,
 		output: &Self::Output,
 	) -> Result<Option<Box<dyn Executor>>, JobError> {
-		ctx.send_core_event(CoreEvent::JobOutput {
+		ctx.send_core_event(CoreEvent::JobOutput(event::JobOutput {
 			id: ctx.job_id.clone(),
 			output: CoreJobOutput::SeriesScan(output.clone()),
-		});
+		}));
 		let did_create = output.created_media > 0;
 		let did_update = output.updated_media > 0;
 		let image_options = self
@@ -255,10 +257,12 @@ impl JobExt for SeriesScanJob {
 				} = handle_restored_media(ctx, &self.id, ids).await;
 				ctx.send_batch(vec![
 					JobProgress::msg("Restored media entities").into_worker_send(),
-					CoreEvent::CreatedOrUpdatedManyMedia {
-						count: updated_media,
-						series_id: self.id.clone(),
-					}
+					CoreEvent::CreatedOrUpdatedManyMedia(
+						event::CreatedOrUpdatedManyMedia {
+							count: updated_media,
+							series_id: self.id.clone(),
+						},
+					)
 					.into_worker_send(),
 				]);
 				output.updated_media += updated_media;
@@ -273,10 +277,12 @@ impl JobExt for SeriesScanJob {
 				} = handle_missing_media(ctx, &self.id, paths).await;
 				ctx.send_batch(vec![
 					JobProgress::msg("Handled missing media").into_worker_send(),
-					CoreEvent::CreatedOrUpdatedManyMedia {
-						count: updated_media,
-						series_id: self.id.clone(),
-					}
+					CoreEvent::CreatedOrUpdatedManyMedia(
+						event::CreatedOrUpdatedManyMedia {
+							count: updated_media,
+							series_id: self.id.clone(),
+						},
+					)
 					.into_worker_send(),
 				]);
 				output.updated_media += updated_media;
@@ -306,10 +312,12 @@ impl JobExt for SeriesScanJob {
 				.await?;
 				ctx.send_batch(vec![
 					JobProgress::msg("Created new media").into_worker_send(),
-					CoreEvent::CreatedOrUpdatedManyMedia {
-						count: created_media,
-						series_id: self.id.clone(),
-					}
+					CoreEvent::CreatedOrUpdatedManyMedia(
+						event::CreatedOrUpdatedManyMedia {
+							count: created_media,
+							series_id: self.id.clone(),
+						},
+					)
 					.into_worker_send(),
 				]);
 				output.created_media += created_media;
@@ -339,10 +347,12 @@ impl JobExt for SeriesScanJob {
 				.await?;
 				ctx.send_batch(vec![
 					JobProgress::msg("Visited all media").into_worker_send(),
-					CoreEvent::CreatedOrUpdatedManyMedia {
-						count: updated_media,
-						series_id: self.id.clone(),
-					}
+					CoreEvent::CreatedOrUpdatedManyMedia(
+						event::CreatedOrUpdatedManyMedia {
+							count: updated_media,
+							series_id: self.id.clone(),
+						},
+					)
 					.into_worker_send(),
 				]);
 				output.updated_media += updated_media;

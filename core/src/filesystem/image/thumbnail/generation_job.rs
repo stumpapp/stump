@@ -6,6 +6,7 @@ use std::{
 	},
 };
 
+use async_graphql::SimpleObject;
 use futures::{stream::FuturesUnordered, StreamExt};
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -73,7 +74,7 @@ pub enum ThumbnailGenerationTask {
 	GenerateBatch(MediaIds),
 }
 
-#[derive(Clone, Serialize, Deserialize, Default, Debug, Type)]
+#[derive(Clone, Serialize, Deserialize, Default, Debug, Type, SimpleObject)]
 // Note: This container attribute is used to ensure future additions to the struct do not break deserialization
 #[serde(default)]
 pub struct ThumbnailGenerationOutput {

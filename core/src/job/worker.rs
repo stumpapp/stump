@@ -9,9 +9,8 @@ use tokio::sync::{broadcast, mpsc, oneshot};
 
 use crate::{
 	config::StumpConfig,
-	event::CoreEvent,
+	event::{self, CoreEvent},
 	job::{JobError, JobStatus},
-	prisma::PrismaClient,
 };
 
 use super::{Executor, JobControllerCommand, JobManager, JobProgress, JobUpdate};
@@ -79,9 +78,11 @@ pub struct WorkerCtx {
 impl WorkerCtx {
 	/// Emit a [`CoreEvent`] to any clients listening to the server that a job has started
 	pub fn report_started(&self) {
-		let send_result = self
-			.core_event_tx
-			.send(CoreEvent::JobStarted(self.job_id.clone()));
+		let send_result =
+			self.core_event_tx
+				.send(CoreEvent::JobStarted(event::JobStarted {
+					id: self.job_id.clone(),
+				}));
 		if let Err(send_error) = send_result {
 			tracing::error!(?send_error, "Failed to send started event");
 		}

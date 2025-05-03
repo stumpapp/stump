@@ -29,6 +29,7 @@ use walkdir::DirEntry;
 use crate::{
 	config::StumpConfig,
 	error::{CoreError, CoreResult},
+	event::CreatedMedia,
 	filesystem::{
 		media::{BuiltMedia, MediaBuilder},
 		scanner::options::{BookVisitOperation, CustomVisitResult},
@@ -712,10 +713,10 @@ pub(crate) async fn safely_build_and_insert_media(
 						task_count,
 					)
 					.into_worker_send(),
-					CoreEvent::CreatedMedia {
+					CoreEvent::CreatedMedia(CreatedMedia {
 						id: created_media.id,
 						series_id: series_id.clone(),
-					}
+					})
 					.into_worker_send(),
 				]);
 			},

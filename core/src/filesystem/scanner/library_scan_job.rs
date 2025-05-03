@@ -1,5 +1,6 @@
 use std::{collections::VecDeque, path::PathBuf};
 
+use async_graphql::SimpleObject;
 use models::{
 	entity::{library, library_config, library_scan_record, media, series},
 	shared::enums::FileStatus,
@@ -14,6 +15,7 @@ use specta::Type;
 // Also perhaps experiment with https://docs.rs/tokio-uring/latest/tokio_uring/index.html
 
 use crate::{
+	event,
 	filesystem::{
 		image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
 		scanner::utils::safely_insert_series,
@@ -85,7 +87,7 @@ impl LibraryScanJob {
 }
 
 /// The data that is collected and updated during the execution of a library scan job
-#[derive(Clone, Serialize, Deserialize, Default, Debug, Type)]
+#[derive(Clone, Serialize, Deserialize, Default, Debug, Type, SimpleObject)]
 pub struct LibraryScanOutput {
 	/// The number of files visited during the scan
 	total_files: u64,
@@ -189,7 +191,10 @@ impl JobExt for LibraryScanJob {
 			handle_missing_library(&ctx.conn, self.id.as_str()).await?;
 			ctx.send_batch(vec![
 				JobProgress::msg("Failed to find library on disk").into_worker_send(),
-				CoreEvent::DiscoveredMissingLibrary(self.id.clone()).into_worker_send(),
+				CoreEvent::DiscoveredMissingLibrary(event::DiscoveredMissingLibrary {
+					id: self.id.clone(),
+				})
+				.into_worker_send(),
 			]);
 			return Err(JobError::InitFailed(
 				"Library could not be found on disk".to_string(),
@@ -236,10 +241,10 @@ impl JobExt for LibraryScanJob {
 		ctx: &WorkerCtx,
 		output: &Self::Output,
 	) -> Result<Option<Box<dyn Executor>>, JobError> {
-		ctx.send_core_event(CoreEvent::JobOutput {
+		ctx.send_core_event(CoreEvent::JobOutput(event::JobOutput {
 			id: ctx.job_id.clone(),
 			output: CoreJobOutput::LibraryScan(output.clone()),
-		});
+		}));
 
 		let did_create = output.created_series > 0 || output.created_media > 0;
 		let did_update = output.updated_series > 0 || output.updated_media > 0;
@@ -418,10 +423,12 @@ impl JobExt for LibraryScanJob {
 						{
 							Ok(created_series) => {
 								output.created_series += created_series.len() as u64;
-								ctx.send_core_event(CoreEvent::CreatedManySeries {
-									count: created_series.len() as u64,
-									library_id: self.id.clone(),
-								});
+								ctx.send_core_event(CoreEvent::CreatedManySeries(
+									event::CreatedManySeries {
+										count: created_series.len() as u64,
+										library_id: self.id.clone(),
+									},
+								));
 							},
 							Err(e) => {
 								tracing::error!(error = ?e, "Failed to batch insert series");
@@ -597,10 +604,12 @@ impl JobExt for LibraryScanJob {
 					} = handle_restored_media(ctx, &series_id, ids).await;
 					ctx.send_batch(vec![
 						JobProgress::msg("Restored media entities").into_worker_send(),
-						CoreEvent::CreatedOrUpdatedManyMedia {
-							count: updated_media,
-							series_id,
-						}
+						CoreEvent::CreatedOrUpdatedManyMedia(
+							event::CreatedOrUpdatedManyMedia {
+								count: updated_media,
+								series_id,
+							},
+						)
 						.into_worker_send(),
 					]);
 					output.updated_media += updated_media;
@@ -615,10 +624,12 @@ impl JobExt for LibraryScanJob {
 					} = handle_missing_media(ctx, &series_id, paths).await;
 					ctx.send_batch(vec![
 						JobProgress::msg("Handled missing media").into_worker_send(),
-						CoreEvent::CreatedOrUpdatedManyMedia {
-							count: updated_media,
-							series_id,
-						}
+						CoreEvent::CreatedOrUpdatedManyMedia(
+							event::CreatedOrUpdatedManyMedia {
+								count: updated_media,
+								series_id,
+							},
+						)
 						.into_worker_send(),
 					]);
 					output.updated_media += updated_media;
@@ -648,10 +659,12 @@ impl JobExt for LibraryScanJob {
 					.await?;
 					ctx.send_batch(vec![
 						JobProgress::msg("Created new media").into_worker_send(),
-						CoreEvent::CreatedOrUpdatedManyMedia {
-							count: created_media,
-							series_id,
-						}
+						CoreEvent::CreatedOrUpdatedManyMedia(
+							event::CreatedOrUpdatedManyMedia {
+								count: created_media,
+								series_id,
+							},
+						)
 						.into_worker_send(),
 					]);
 					output.created_media += created_media;
@@ -682,10 +695,12 @@ impl JobExt for LibraryScanJob {
 					.await?;
 					ctx.send_batch(vec![
 						JobProgress::msg("Visited all media").into_worker_send(),
-						CoreEvent::CreatedOrUpdatedManyMedia {
-							count: updated_media,
-							series_id,
-						}
+						CoreEvent::CreatedOrUpdatedManyMedia(
+							event::CreatedOrUpdatedManyMedia {
+								count: updated_media,
+								series_id,
+							},
+						)
 						.into_worker_send(),
 					]);
 					output.updated_media += updated_media;

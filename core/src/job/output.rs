@@ -1,5 +1,6 @@
 use std::fmt::Debug;
 
+use async_graphql::Union;
 use serde::{de, Deserialize, Serialize};
 
 use crate::filesystem::{
@@ -12,13 +13,13 @@ use crate::filesystem::{
 // should be fixed. In the meantime, this type represents a generic object
 pub type ExternalJobOutput = serde_json::Value;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Union)]
 #[serde(untagged)]
 pub enum CoreJobOutput {
 	LibraryScan(LibraryScanOutput),
 	SeriesScan(SeriesScanOutput),
 	ThumbnailGeneration(ThumbnailGenerationOutput),
-	External(ExternalJobOutput),
+	// External(ExternalJobOutput), TODO:(graphql) re-enable
 }
 
 /// A trait to extend the output type for a job with a common interface. Job output starts

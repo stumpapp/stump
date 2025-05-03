@@ -224,6 +224,10 @@ export type CleanLibraryResponse = {
   isEmpty: Scalars['Boolean']['output'];
 };
 
+export type ComputedFilterReadingStatus =
+  { is: ReadingStatus; isNot?: never; }
+  |  { is?: never; isNot: ReadingStatus; };
+
 export type CreateBookClubInput = {
   creatorDisplayName?: InputMaybe<Scalars['String']['input']>;
   creatorHideProgress: Scalars['Boolean']['input'];
@@ -434,12 +438,27 @@ export type EpubProgressInput = {
   percentage: Scalars['Decimal']['input'];
 };
 
-export type EqualsString = {
-  eq: Scalars['String']['input'];
-};
+export type FieldFilterFileStatus =
+  { anyOf: Array<FileStatus>; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains: FileStatus; endsWith?: never; eq?: never; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith: FileStatus; eq?: never; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq: FileStatus; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes: FileStatus; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like: FileStatus; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; neq: FileStatus; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; neq?: never; noneOf: Array<FileStatus>; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith: FileStatus; };
 
 export type FieldFilterString =
-  { eq: EqualsString; };
+  { anyOf: Array<Scalars['String']['input']>; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains: Scalars['String']['input']; endsWith?: never; eq?: never; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith: Scalars['String']['input']; eq?: never; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq: Scalars['String']['input']; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes: Scalars['String']['input']; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like: Scalars['String']['input']; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; neq: Scalars['String']['input']; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; neq?: never; noneOf: Array<Scalars['String']['input']>; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith: Scalars['String']['input']; };
 
 /** The different statuses a file reference can have */
 export enum FileStatus {
@@ -692,8 +711,21 @@ export type MediaAnnotationsModel = {
   userId: Scalars['String']['output'];
 };
 
-export type MediaFilterInputTest = {
+export type MediaFilterInput = {
+  _and?: InputMaybe<Array<MediaFilterInput>>;
+  _not?: InputMaybe<Array<MediaFilterInput>>;
+  _or?: InputMaybe<Array<MediaFilterInput>>;
+  createdAt?: InputMaybe<NumericFilterDateTime>;
+  extension?: InputMaybe<FieldFilterString>;
+  metadata?: InputMaybe<MediaMetadataFilterInput>;
   name?: InputMaybe<FieldFilterString>;
+  pages?: InputMaybe<NumericFilterI32>;
+  path?: InputMaybe<FieldFilterString>;
+  readingStatus?: InputMaybe<ComputedFilterReadingStatus>;
+  seriesId?: InputMaybe<FieldFilterString>;
+  size?: InputMaybe<NumericFilterI64>;
+  status?: InputMaybe<FieldFilterFileStatus>;
+  updatedAt?: InputMaybe<NumericFilterDateTime>;
 };
 
 export type MediaMetadata = {
@@ -722,6 +754,31 @@ export type MediaMetadata = {
   title?: Maybe<Scalars['String']['output']>;
   volume?: Maybe<Scalars['Int']['output']>;
   year?: Maybe<Scalars['Int']['output']>;
+};
+
+export type MediaMetadataFilterInput = {
+  _and?: InputMaybe<Array<MediaMetadataFilterInput>>;
+  _not?: InputMaybe<Array<MediaMetadataFilterInput>>;
+  _or?: InputMaybe<Array<MediaMetadataFilterInput>>;
+  ageRating?: InputMaybe<NumericFilterI32>;
+  characters?: InputMaybe<FieldFilterString>;
+  colorists?: InputMaybe<FieldFilterString>;
+  coverArtists?: InputMaybe<FieldFilterString>;
+  day?: InputMaybe<NumericFilterI32>;
+  editors?: InputMaybe<FieldFilterString>;
+  genre?: InputMaybe<FieldFilterString>;
+  inkers?: InputMaybe<FieldFilterString>;
+  letterers?: InputMaybe<FieldFilterString>;
+  links?: InputMaybe<FieldFilterString>;
+  month?: InputMaybe<NumericFilterI32>;
+  pencillers?: InputMaybe<FieldFilterString>;
+  publisher?: InputMaybe<FieldFilterString>;
+  series?: InputMaybe<NumericFilterI32>;
+  summary?: InputMaybe<FieldFilterString>;
+  teams?: InputMaybe<FieldFilterString>;
+  title?: InputMaybe<FieldFilterString>;
+  writers?: InputMaybe<FieldFilterString>;
+  year?: InputMaybe<NumericFilterI32>;
 };
 
 export type MediaMetadataOverview = {
@@ -1176,6 +1233,57 @@ export type NotifierInput =
   { discord: DiscordConfigInput; telegram?: never; }
   |  { discord?: never; telegram: TelegramConfigInput; };
 
+export type NumericFilterDateTime =
+  { anyOf: Array<Scalars['DateTime']['input']>; eq?: never; gt?: never; gte?: never; lt?: never; lte?: never; neq?: never; noneOf?: never; range?: never; }
+  |  { anyOf?: never; eq: Scalars['DateTime']['input']; gt?: never; gte?: never; lt?: never; lte?: never; neq?: never; noneOf?: never; range?: never; }
+  |  { anyOf?: never; eq?: never; gt: Scalars['DateTime']['input']; gte?: never; lt?: never; lte?: never; neq?: never; noneOf?: never; range?: never; }
+  |  { anyOf?: never; eq?: never; gt?: never; gte: Scalars['DateTime']['input']; lt?: never; lte?: never; neq?: never; noneOf?: never; range?: never; }
+  |  { anyOf?: never; eq?: never; gt?: never; gte?: never; lt: Scalars['DateTime']['input']; lte?: never; neq?: never; noneOf?: never; range?: never; }
+  |  { anyOf?: never; eq?: never; gt?: never; gte?: never; lt?: never; lte: Scalars['DateTime']['input']; neq?: never; noneOf?: never; range?: never; }
+  |  { anyOf?: never; eq?: never; gt?: never; gte?: never; lt?: never; lte?: never; neq: Scalars['DateTime']['input']; noneOf?: never; range?: never; }
+  |  { anyOf?: never; eq?: never; gt?: never; gte?: never; lt?: never; lte?: never; neq?: never; noneOf: Array<Scalars['DateTime']['input']>; range?: never; }
+  |  { anyOf?: never; eq?: never; gt?: never; gte?: never; lt?: never; lte?: never; neq?: never; noneOf?: never; range: NumericRangeDateTime; };
+
+export type NumericFilterI32 =
+  { anyOf: Array<Scalars['Int']['input']>; eq?: never; gt?: never; gte?: never; lt?: never; lte?: never; neq?: never; noneOf?: never; range?: never; }
+  |  { anyOf?: never; eq: Scalars['Int']['input']; gt?: never; gte?: never; lt?: never; lte?: never; neq?: never; noneOf?: never; range?: never; }
+  |  { anyOf?: never; eq?: never; gt: Scalars['Int']['input']; gte?: never; lt?: never; lte?: never; neq?: never; noneOf?: never; range?: never; }
+  |  { anyOf?: never; eq?: never; gt?: never; gte: Scalars['Int']['input']; lt?: never; lte?: never; neq?: never; noneOf?: never; range?: never; }
+  |  { anyOf?: never; eq?: never; gt?: never; gte?: never; lt: Scalars['Int']['input']; lte?: never; neq?: never; noneOf?: never; range?: never; }
+  |  { anyOf?: never; eq?: never; gt?: never; gte?: never; lt?: never; lte: Scalars['Int']['input']; neq?: never; noneOf?: never; range?: never; }
+  |  { anyOf?: never; eq?: never; gt?: never; gte?: never; lt?: never; lte?: never; neq: Scalars['Int']['input']; noneOf?: never; range?: never; }
+  |  { anyOf?: never; eq?: never; gt?: never; gte?: never; lt?: never; lte?: never; neq?: never; noneOf: Array<Scalars['Int']['input']>; range?: never; }
+  |  { anyOf?: never; eq?: never; gt?: never; gte?: never; lt?: never; lte?: never; neq?: never; noneOf?: never; range: NumericRangeI32; };
+
+export type NumericFilterI64 =
+  { anyOf: Array<Scalars['Int']['input']>; eq?: never; gt?: never; gte?: never; lt?: never; lte?: never; neq?: never; noneOf?: never; range?: never; }
+  |  { anyOf?: never; eq: Scalars['Int']['input']; gt?: never; gte?: never; lt?: never; lte?: never; neq?: never; noneOf?: never; range?: never; }
+  |  { anyOf?: never; eq?: never; gt: Scalars['Int']['input']; gte?: never; lt?: never; lte?: never; neq?: never; noneOf?: never; range?: never; }
+  |  { anyOf?: never; eq?: never; gt?: never; gte: Scalars['Int']['input']; lt?: never; lte?: never; neq?: never; noneOf?: never; range?: never; }
+  |  { anyOf?: never; eq?: never; gt?: never; gte?: never; lt: Scalars['Int']['input']; lte?: never; neq?: never; noneOf?: never; range?: never; }
+  |  { anyOf?: never; eq?: never; gt?: never; gte?: never; lt?: never; lte: Scalars['Int']['input']; neq?: never; noneOf?: never; range?: never; }
+  |  { anyOf?: never; eq?: never; gt?: never; gte?: never; lt?: never; lte?: never; neq: Scalars['Int']['input']; noneOf?: never; range?: never; }
+  |  { anyOf?: never; eq?: never; gt?: never; gte?: never; lt?: never; lte?: never; neq?: never; noneOf: Array<Scalars['Int']['input']>; range?: never; }
+  |  { anyOf?: never; eq?: never; gt?: never; gte?: never; lt?: never; lte?: never; neq?: never; noneOf?: never; range: NumericRangeI64; };
+
+export type NumericRangeDateTime = {
+  from: Scalars['DateTime']['input'];
+  inclusive: Scalars['Boolean']['input'];
+  to: Scalars['DateTime']['input'];
+};
+
+export type NumericRangeI32 = {
+  from: Scalars['Int']['input'];
+  inclusive: Scalars['Boolean']['input'];
+  to: Scalars['Int']['input'];
+};
+
+export type NumericRangeI64 = {
+  from: Scalars['Int']['input'];
+  inclusive: Scalars['Boolean']['input'];
+  to: Scalars['Int']['input'];
+};
+
 /** A simple offset-based pagination input object */
 export type OffsetPagination = {
   /**
@@ -1349,7 +1457,6 @@ export type Query = {
   stumpConfig: StumpConfig;
   /** Returns a list of all tags. */
   tags: Array<Tag>;
-  test: Scalars['String']['output'];
   uploadConfig: UploadConfig;
   userById: User;
   users: Array<User>;
@@ -1428,7 +1535,7 @@ export type QueryLogsArgs = {
 
 
 export type QueryMediaArgs = {
-  filter?: Scalars['JSON']['input'];
+  filter: MediaFilterInput;
   pagination?: Pagination;
 };
 
@@ -1470,11 +1577,6 @@ export type QuerySeriesArgs = {
 
 export type QuerySeriesByIdArgs = {
   id: Scalars['ID']['input'];
-};
-
-
-export type QueryTestArgs = {
-  filter: MediaFilterInputTest;
 };
 
 
@@ -1525,6 +1627,13 @@ export type ReadingProgressOutput = {
   activeSession?: Maybe<ActiveReadingSession>;
   finishedSession?: Maybe<FinishedReadingSession>;
 };
+
+export enum ReadingStatus {
+  Abandoned = 'ABANDONED',
+  Finished = 'FINISHED',
+  NotStarted = 'NOT_STARTED',
+  Reading = 'READING'
+}
 
 export type RecentlyAdded = {
   __typename?: 'RecentlyAdded';
@@ -2008,7 +2117,7 @@ export type SeriesLayoutQueryVariables = Exact<{
 export type SeriesLayoutQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, path: string, resolvedName: string, resolvedDescription?: string | null, library: { __typename?: 'Library', id: string, name: string }, tags: Array<{ __typename?: 'Tag', id: string, name: string }> } | null };
 
 export type SeriesBooksSceneQueryVariables = Exact<{
-  filter: Scalars['JSON']['input'];
+  filter: MediaFilterInput;
   pagination: Pagination;
 }>;
 
@@ -2272,7 +2381,7 @@ export const SeriesLayoutDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<SeriesLayoutQuery, SeriesLayoutQueryVariables>;
 export const SeriesBooksSceneDocument = new TypedDocumentString(`
-    query SeriesBooksScene($filter: JSON!, $pagination: Pagination!) {
+    query SeriesBooksScene($filter: MediaFilterInput!, $pagination: Pagination!) {
   media(filter: $filter, pagination: $pagination) {
     nodes {
       id

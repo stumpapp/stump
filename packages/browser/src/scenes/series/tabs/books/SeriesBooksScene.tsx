@@ -181,7 +181,7 @@ import { useSeriesContext } from '../../context'
 // }
 
 const query = graphql(`
-	query SeriesBooksScene($filter: JSON!, $pagination: Pagination!) {
+	query SeriesBooksScene($filter: MediaFilterInput!, $pagination: Pagination!) {
 		media(filter: $filter, pagination: $pagination) {
 			nodes {
 				id

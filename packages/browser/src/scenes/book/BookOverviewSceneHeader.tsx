@@ -1,4 +1,5 @@
 import { Heading, Text } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { Media, MediaMetadata } from '@stump/sdk'
 
 import SearchLinkBadge from '@/components/SearchLinkBadge'
@@ -7,7 +8,6 @@ import { formatBookName } from '@/utils/format'
 
 import paths from '../../paths'
 import BookLibrarySeriesLinks from './BookLibrarySeriesLinks'
-import { graphql } from '@stump/graphql'
 
 export const BOOK_OVERVIEW_SCENE_HEADER_FRAGMENT = graphql(`
 	fragment BookOverviewHeader on Media {

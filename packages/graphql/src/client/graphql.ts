@@ -228,6 +228,11 @@ export type ComputedFilterReadingStatus =
   { is: ReadingStatus; isNot?: never; }
   |  { is?: never; isNot: ReadingStatus; };
 
+/** An event that is emitted by the core and consumed by a client */
+export type CoreEvent = CreatedManySeries | CreatedMedia | CreatedOrUpdatedManyMedia | DiscoveredMissingLibrary | JobOutput | JobStarted | JobUpdate;
+
+export type CoreJobOutput = ExternalJobOutput | LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput;
+
 export type CreateBookClubInput = {
   creatorDisplayName?: InputMaybe<Scalars['String']['input']>;
   creatorHideProgress: Scalars['Boolean']['input'];
@@ -271,6 +276,24 @@ export type CreateUserInput = {
   password: Scalars['String']['input'];
   permissions: Array<UserPermission>;
   username: Scalars['String']['input'];
+};
+
+export type CreatedManySeries = {
+  __typename?: 'CreatedManySeries';
+  count: Scalars['Int']['output'];
+  libraryId: Scalars['String']['output'];
+};
+
+export type CreatedMedia = {
+  __typename?: 'CreatedMedia';
+  id: Scalars['String']['output'];
+  seriesId: Scalars['String']['output'];
+};
+
+export type CreatedOrUpdatedManyMedia = {
+  __typename?: 'CreatedOrUpdatedManyMedia';
+  count: Scalars['Int']['output'];
+  seriesId: Scalars['String']['output'];
 };
 
 /** A simple cursor-based pagination input object */
@@ -330,6 +353,11 @@ export type DiscordConfig = {
 
 export type DiscordConfigInput = {
   webhookUrl: Scalars['String']['input'];
+};
+
+export type DiscoveredMissingLibrary = {
+  __typename?: 'DiscoveredMissingLibrary';
+  id: Scalars['String']['output'];
 };
 
 /** Input object for creating or updating an email device */
@@ -438,6 +466,11 @@ export type EpubProgressInput = {
   percentage: Scalars['Decimal']['input'];
 };
 
+export type ExternalJobOutput = {
+  __typename?: 'ExternalJobOutput';
+  val: Scalars['JSON']['output'];
+};
+
 export type FieldFilterFileStatus =
   { anyOf: Array<FileStatus>; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
   |  { anyOf?: never; contains: FileStatus; endsWith?: never; eq?: never; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
@@ -515,6 +548,57 @@ export enum InheritPermissionValue {
   Inherit = 'INHERIT'
 }
 
+export type JobOutput = {
+  __typename?: 'JobOutput';
+  id: Scalars['String']['output'];
+  output: CoreJobOutput;
+};
+
+/**
+ * A struct that represents a progress event that is emitted by a job. This behaves like a patch,
+ * where the client will ignore any fields that are not present. This is done so all internal ops
+ * can be done without needing to know the full state of the job.
+ */
+export type JobProgress = {
+  __typename?: 'JobProgress';
+  /** The current subtask being worked on */
+  completedSubtasks?: Maybe<Scalars['Int']['output']>;
+  /** The current task being worked on */
+  completedTasks?: Maybe<Scalars['Int']['output']>;
+  /** The message to display */
+  message?: Maybe<Scalars['String']['output']>;
+  /**
+   * The number of tasks for the job. This number can change as
+   * subtasks get added/converted to tasks
+   */
+  remainingTasks?: Maybe<Scalars['Int']['output']>;
+  /** The status of the job */
+  status?: Maybe<JobStatus>;
+  /** The number of subtasks that exist in the current task */
+  totalSubtasks?: Maybe<Scalars['Int']['output']>;
+};
+
+export type JobStarted = {
+  __typename?: 'JobStarted';
+  id: Scalars['String']['output'];
+};
+
+export enum JobStatus {
+  Cancelled = 'CANCELLED',
+  Completed = 'COMPLETED',
+  Failed = 'FAILED',
+  Paused = 'PAUSED',
+  Queued = 'QUEUED',
+  Running = 'RUNNING'
+}
+
+/** An update event that is emitted by a job */
+export type JobUpdate = {
+  __typename?: 'JobUpdate';
+  id: Scalars['String']['output'];
+  payload: JobProgress;
+};
+
 export type Library = {
   __typename?: 'Library';
   config: LibraryConfig;
@@ -577,11 +661,45 @@ export type LibraryConfigInput = {
   watch: Scalars['Boolean']['input'];
 };
 
+export type LibraryFilterInput = {
+  _and?: InputMaybe<Array<LibraryFilterInput>>;
+  _not?: InputMaybe<Array<LibraryFilterInput>>;
+  _or?: InputMaybe<Array<LibraryFilterInput>>;
+  name?: InputMaybe<FieldFilterString>;
+  path?: InputMaybe<FieldFilterString>;
+};
+
 /** The different patterns a library may be organized by */
 export enum LibraryPattern {
   CollectionBased = 'COLLECTION_BASED',
   SeriesBased = 'SERIES_BASED'
 }
+
+/** The data that is collected and updated during the execution of a library scan job */
+export type LibraryScanOutput = {
+  __typename?: 'LibraryScanOutput';
+  /** The number of media entities created */
+  createdMedia: Scalars['Int']['output'];
+  /** The number of series entities created */
+  createdSeries: Scalars['Int']['output'];
+  /** The number of ignored directories during the scan */
+  ignoredDirectories: Scalars['Int']['output'];
+  /** The number of files that were ignored during the scan */
+  ignoredFiles: Scalars['Int']['output'];
+  /**
+   * The number of files that were deemed to be skipped during the scan, e.g. it
+   * exists in the database but has not been modified since the last scan
+   */
+  skippedFiles: Scalars['Int']['output'];
+  /** The number of directories visited during the scan */
+  totalDirectories: Scalars['Int']['output'];
+  /** The number of files visited during the scan */
+  totalFiles: Scalars['Int']['output'];
+  /** The number of media entities updated */
+  updatedMedia: Scalars['Int']['output'];
+  /** The number of series entities updated */
+  updatedSeries: Scalars['Int']['output'];
+};
 
 export type LibraryScanRecordModel = {
   __typename?: 'LibraryScanRecordModel';
@@ -730,6 +848,7 @@ export type MediaFilterInput = {
   pages?: InputMaybe<NumericFilterI32>;
   path?: InputMaybe<FieldFilterString>;
   readingStatus?: InputMaybe<ComputedFilterReadingStatus>;
+  series?: InputMaybe<SeriesFilterInput>;
   seriesId?: InputMaybe<FieldFilterString>;
   size?: InputMaybe<NumericFilterI64>;
   status?: InputMaybe<FieldFilterFileStatus>;
@@ -1714,6 +1833,32 @@ export type SeriesUpNextArgs = {
   take?: Scalars['Int']['input'];
 };
 
+export type SeriesFilterInput = {
+  _and?: InputMaybe<Array<SeriesFilterInput>>;
+  _not?: InputMaybe<Array<SeriesFilterInput>>;
+  _or?: InputMaybe<Array<SeriesFilterInput>>;
+  library?: InputMaybe<LibraryFilterInput>;
+  metadata?: InputMaybe<SeriesMetadataFilterInput>;
+  name?: InputMaybe<FieldFilterString>;
+  path?: InputMaybe<FieldFilterString>;
+};
+
+export type SeriesMetadataFilterInput = {
+  _and?: InputMaybe<Array<SeriesMetadataFilterInput>>;
+  _not?: InputMaybe<Array<SeriesMetadataFilterInput>>;
+  _or?: InputMaybe<Array<SeriesMetadataFilterInput>>;
+  ageRating?: InputMaybe<NumericFilterI32>;
+  booktype?: InputMaybe<FieldFilterString>;
+  comicid?: InputMaybe<NumericFilterI32>;
+  imprint?: InputMaybe<FieldFilterString>;
+  metaType?: InputMaybe<FieldFilterString>;
+  publisher?: InputMaybe<FieldFilterString>;
+  status?: InputMaybe<FieldFilterString>;
+  summary?: InputMaybe<FieldFilterString>;
+  title?: InputMaybe<FieldFilterString>;
+  volume?: InputMaybe<NumericFilterI32>;
+};
+
 export type SeriesMetadataModel = {
   __typename?: 'SeriesMetadataModel';
   ageRating?: Maybe<Scalars['Int']['output']>;
@@ -1727,6 +1872,23 @@ export type SeriesMetadataModel = {
   summary?: Maybe<Scalars['String']['output']>;
   title?: Maybe<Scalars['String']['output']>;
   volume?: Maybe<Scalars['Int']['output']>;
+};
+
+export type SeriesScanOutput = {
+  __typename?: 'SeriesScanOutput';
+  /** The number of media entities that were created */
+  createdMedia: Scalars['Int']['output'];
+  /** The number of files that were ignored during the scan */
+  ignoredFiles: Scalars['Int']['output'];
+  /**
+   * The number of files that were deemed to be skipped during the scan, e.g. it
+   * exists in the database but has not been modified since the last scan
+   */
+  skippedFiles: Scalars['Int']['output'];
+  /** The number of files to scan relative to the series root */
+  totalFiles: Scalars['Int']['output'];
+  /** The number of media entities that were updated */
+  updatedMedia: Scalars['Int']['output'];
 };
 
 export type SpineItem = {
@@ -1824,6 +1986,7 @@ export type StumpConfig = {
 
 export type Subscription = {
   __typename?: 'Subscription';
+  readEvents: CoreEvent;
   tailLogFile: Scalars['String']['output'];
 };
 
@@ -1863,6 +2026,18 @@ export type TelegramConfig = {
 export type TelegramConfigInput = {
   chatId: Scalars['String']['input'];
   token: Scalars['String']['input'];
+};
+
+export type ThumbnailGenerationOutput = {
+  __typename?: 'ThumbnailGenerationOutput';
+  /** The number of thumbnails that were generated */
+  generatedThumbnails: Scalars['Int']['output'];
+  /** The number of thumbnails that were removed */
+  removedThumbnails: Scalars['Int']['output'];
+  /** The number of thumbnails that were skipped (already existed and not force regenerated) */
+  skippedFiles: Scalars['Int']['output'];
+  /** The total number of files that were visited during the thumbnail generation */
+  visitedFiles: Scalars['Int']['output'];
 };
 
 /**

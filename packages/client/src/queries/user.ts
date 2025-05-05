@@ -8,6 +8,7 @@ import type {
 	User,
 	UserPreferences,
 } from '@stump/sdk'
+import { useMutation } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import { useMemo } from 'react'
 
@@ -20,7 +21,6 @@ import {
 	useQuery,
 } from '../client'
 import { useSDK } from '../sdk'
-import { useMutation } from '@tanstack/react-query'
 
 type UseUsersQueryParams = PageQueryOptions<User> & {
 	params?: Record<string, unknown>

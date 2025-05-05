@@ -615,6 +615,14 @@ input LibraryConfigInput {
 	ignoreRules: [String!]
 }
 
+input LibraryFilterInput {
+	name: FieldFilterString = null
+	path: FieldFilterString = null
+	_and: [LibraryFilterInput!] = null
+	_not: [LibraryFilterInput!] = null
+	_or: [LibraryFilterInput!] = null
+}
+
 "The different patterns a library may be organized by"
 enum LibraryPattern {
 	SERIES_BASED
@@ -782,6 +790,7 @@ input MediaFilterInput {
 	pages: NumericFilterI32 = null
 	readingStatus: ComputedFilterReadingStatus = null
 	metadata: MediaMetadataFilterInput = null
+	series: SeriesFilterInput = null
 	_and: [MediaFilterInput!] = null
 	_not: [MediaFilterInput!] = null
 	_or: [MediaFilterInput!] = null
@@ -1331,6 +1340,32 @@ type Series {
 	readCount: Int!
 	unreadCount: Int!
 	tags: [Tag!]!
+}
+
+input SeriesFilterInput {
+	name: FieldFilterString = null
+	path: FieldFilterString = null
+	metadata: SeriesMetadataFilterInput = null
+	library: LibraryFilterInput = null
+	_and: [SeriesFilterInput!] = null
+	_not: [SeriesFilterInput!] = null
+	_or: [SeriesFilterInput!] = null
+}
+
+input SeriesMetadataFilterInput {
+	ageRating: NumericFilterI32 = null
+	metaType: FieldFilterString = null
+	title: FieldFilterString = null
+	summary: FieldFilterString = null
+	publisher: FieldFilterString = null
+	imprint: FieldFilterString = null
+	comicid: NumericFilterI32 = null
+	booktype: FieldFilterString = null
+	volume: NumericFilterI32 = null
+	status: FieldFilterString = null
+	_and: [SeriesMetadataFilterInput!] = null
+	_not: [SeriesMetadataFilterInput!] = null
+	_or: [SeriesMetadataFilterInput!] = null
 }
 
 type SeriesMetadataModel {

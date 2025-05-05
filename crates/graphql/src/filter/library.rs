@@ -1,34 +1,26 @@
 use async_graphql::InputObject;
 use models::entity::series;
 
-use super::{
-	apply_string_filter, library::LibraryFilterInput,
-	series_metadata::SeriesMetadataFilterInput, IntoFilter, StringLikeFilter,
-};
+use super::{apply_string_filter, IntoFilter, StringLikeFilter};
 
 // TODO: Support filter by tags (requires join logic)
 
 #[derive(InputObject, Clone)]
-pub struct SeriesFilterInput {
+pub struct LibraryFilterInput {
 	#[graphql(default)]
 	pub name: Option<StringLikeFilter<String>>,
 	#[graphql(default)]
 	pub path: Option<StringLikeFilter<String>>,
 
-	#[graphql(default)]
-	pub metadata: Option<SeriesMetadataFilterInput>,
-	#[graphql(default)]
-	pub library: Option<LibraryFilterInput>,
-
 	#[graphql(name = "_and", default)]
-	pub _and: Option<Vec<SeriesFilterInput>>,
+	pub _and: Option<Vec<LibraryFilterInput>>,
 	#[graphql(name = "_not", default)]
-	pub _not: Option<Vec<SeriesFilterInput>>,
+	pub _not: Option<Vec<LibraryFilterInput>>,
 	#[graphql(name = "_or", default)]
-	pub _or: Option<Vec<SeriesFilterInput>>,
+	pub _or: Option<Vec<LibraryFilterInput>>,
 }
 
-impl IntoFilter for SeriesFilterInput {
+impl IntoFilter for LibraryFilterInput {
 	fn into_filter(self) -> sea_orm::Condition {
 		sea_orm::Condition::all()
 			.add_option(self._and.map(|f| {
@@ -60,7 +52,5 @@ impl IntoFilter for SeriesFilterInput {
 				self.path
 					.map(|f| apply_string_filter(series::Column::Path, f)),
 			)
-			.add_option(self.metadata.map(|f| f.into_filter()))
-			.add_option(self.library.map(|f| f.into_filter()))
 	}
 }

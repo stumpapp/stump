@@ -1,10 +1,11 @@
+import { ApolloProvider } from '@apollo/client'
 import { Api, AuthenticationMethod } from '@stump/sdk'
 import { PropsWithChildren, useEffect, useState } from 'react'
 
+import { createClient } from '@/apollo'
+
 import { useClientContext } from '../context'
 import { SDKContext } from './context'
-import { ApolloProvider } from '@apollo/client'
-import { createClient } from '@/apollo'
 
 type SDKProviderProps = {
 	baseURL: string

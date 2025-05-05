@@ -1,10 +1,10 @@
 import { isAxiosError, isUser, LoginOrRegisterArgs, type User } from '@stump/sdk'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 
 import { queryClient, QueryOptions } from '../client'
 import { useClientContext } from '../context'
 import { useSDK } from '../sdk'
-import { useMutation, useQuery } from '@tanstack/react-query'
 
 type Params = QueryOptions<User> & {
 	additionalKeys?: string[]

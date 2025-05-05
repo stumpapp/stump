@@ -1,4 +1,10 @@
-import { MediaFilterInput, MediaMetadataFilterInput } from '@stump/graphql'
+import {
+	LibraryFilterInput,
+	MediaFilterInput,
+	MediaMetadataFilterInput,
+	SeriesFilterInput,
+	SeriesMetadataFilterInput,
+} from '@stump/graphql'
 import getProperty from 'lodash/get'
 import { match, P } from 'ts-pattern'
 import { z } from 'zod'
@@ -81,7 +87,7 @@ export const filter = z
 	.object({
 		field: z.string(),
 		operator,
-		source: z.enum(['book', 'book_meta' /*'series', 'series_meta', 'library'*/]),
+		source: z.enum(['book', 'book_meta', 'series', 'series_meta', 'library']),
 		value: z.union([
 			z.string(),
 			z.string().array(),
@@ -123,25 +129,25 @@ export const intoAPIFilter = (input: z.infer<typeof filter>): MediaFilterInput =
 				[input.field]: fieldValue,
 			} as MediaMetadataFilterInput,
 		}))
-		// .with('series', () => ({
-		//   series: {
-		//     [input.field]: fieldValue,
-		//   } as SeriesSmartFilter,
-		// }))
-		// .with('series_meta', () => ({
-		//   series: {
-		//     metadata: {
-		//       [input.field]: fieldValue,
-		//     },
-		//   } as SeriesSmartFilter,
-		// }))
-		// .with('library', () => ({
-		//   series: {
-		//     library: {
-		//       [input.field]: fieldValue,
-		//     },
-		//   } as SeriesSmartFilter,
-		// }))
+		.with('series', () => ({
+			series: {
+				[input.field]: fieldValue,
+			} as SeriesFilterInput,
+		}))
+		.with('series_meta', () => ({
+			series: {
+				metadata: {
+					[input.field]: fieldValue,
+				},
+			} as SeriesMetadataFilterInput,
+		}))
+		.with('library', () => ({
+			series: {
+				library: {
+					[input.field]: fieldValue,
+				} as LibraryFilterInput,
+			} as SeriesFilterInput,
+		}))
 		.exhaustive()
 
 	return converted

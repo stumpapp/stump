@@ -7,6 +7,7 @@ use sea_orm::{
 	Value,
 };
 
+pub mod library;
 pub mod log;
 pub mod media;
 pub mod media_metadata;

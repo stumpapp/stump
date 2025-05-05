@@ -10,7 +10,8 @@ use sea_orm::{
 
 use super::{
 	apply_numeric_filter, apply_string_filter, media_metadata::MediaMetadataFilterInput,
-	ConceptualFilter, IntoFilter, NumericFilter, StringLikeFilter,
+	series::SeriesFilterInput, ConceptualFilter, IntoFilter, NumericFilter,
+	StringLikeFilter,
 };
 
 // TODO: Probably not correct....
@@ -34,6 +35,8 @@ fn apply_reading_status_filter(
 		base_filter
 	}
 }
+
+// TODO: Support filter by tags (requires join logic)
 
 #[derive(InputObject, Clone)]
 pub struct MediaFilterInput {
@@ -61,6 +64,8 @@ pub struct MediaFilterInput {
 
 	#[graphql(default)]
 	pub metadata: Option<MediaMetadataFilterInput>,
+	#[graphql(default)]
+	pub series: Option<SeriesFilterInput>,
 
 	#[graphql(name = "_and", default)]
 	pub _and: Option<Vec<MediaFilterInput>>,
@@ -137,6 +142,7 @@ impl IntoFilter for MediaFilterInput {
 				},
 			}))
 			.add_option(self.metadata.map(|f| f.into_filter()))
+			.add_option(self.series.map(|f| f.into_filter()))
 	}
 }
 

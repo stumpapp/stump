@@ -189,6 +189,11 @@ input ComputedFilterReadingStatus @oneOf {
 	isNot: ReadingStatus
 }
 
+"An event that is emitted by the core and consumed by a client"
+union CoreEvent = JobStarted | JobUpdate | JobOutput | DiscoveredMissingLibrary | CreatedMedia | CreatedManySeries | CreatedOrUpdatedManyMedia
+
+union CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput | ExternalJobOutput
+
 input CreateBookClubInput {
 	name: String!
 	isPrivate: Boolean! = false
@@ -232,6 +237,21 @@ input CreateUserInput {
 	permissions: [UserPermission!]!
 	ageRestriction: AgeRestrictionInput = null
 	maxSessionsAllowed: Int
+}
+
+type CreatedManySeries {
+	count: Int!
+	libraryId: String!
+}
+
+type CreatedMedia {
+	id: String!
+	seriesId: String!
+}
+
+type CreatedOrUpdatedManyMedia {
+	count: Int!
+	seriesId: String!
 }
 
 "A simple cursor-based pagination input object"
@@ -295,6 +315,10 @@ type DiscordConfig {
 
 input DiscordConfigInput {
 	webhookUrl: String!
+}
+
+type DiscoveredMissingLibrary {
+	id: String!
 }
 
 "Input object for creating or updating an email device"
@@ -401,6 +425,10 @@ input EpubProgressInput {
 	isComplete: Boolean
 }
 
+type ExternalJobOutput {
+	val: JSON!
+}
+
 input FieldFilterFileStatus @oneOf {
 	eq: FileStatus
 	neq: FileStatus
@@ -485,6 +513,53 @@ scalar JSON
 "A scalar that can represent any JSON Object value."
 scalar JSONObject
 
+type JobOutput {
+	id: String!
+	output: CoreJobOutput!
+}
+
+"""
+A struct that represents a progress event that is emitted by a job. This behaves like a patch,
+where the client will ignore any fields that are not present. This is done so all internal ops
+can be done without needing to know the full state of the job.
+"""
+type JobProgress {
+	"The status of the job"
+	status: JobStatus
+	"The message to display"
+	message: String
+	"The current task being worked on"
+	completedTasks: Int
+	"""
+	The number of tasks for the job. This number can change as
+	subtasks get added/converted to tasks
+	"""
+	remainingTasks: Int
+	"The current subtask being worked on"
+	completedSubtasks: Int
+	"The number of subtasks that exist in the current task"
+	totalSubtasks: Int
+}
+
+type JobStarted {
+	id: String!
+}
+
+enum JobStatus {
+	RUNNING
+	PAUSED
+	COMPLETED
+	CANCELLED
+	FAILED
+	QUEUED
+}
+
+"An update event that is emitted by a job"
+type JobUpdate {
+	id: String!
+	payload: JobProgress!
+}
+
 type Library {
 	id: String!
 	name: String!
@@ -544,6 +619,31 @@ input LibraryConfigInput {
 enum LibraryPattern {
 	SERIES_BASED
 	COLLECTION_BASED
+}
+
+"The data that is collected and updated during the execution of a library scan job"
+type LibraryScanOutput {
+	"The number of files visited during the scan"
+	totalFiles: Int!
+	"The number of directories visited during the scan"
+	totalDirectories: Int!
+	"The number of files that were ignored during the scan"
+	ignoredFiles: Int!
+	"""
+	The number of files that were deemed to be skipped during the scan, e.g. it
+	exists in the database but has not been modified since the last scan
+	"""
+	skippedFiles: Int!
+	"The number of ignored directories during the scan"
+	ignoredDirectories: Int!
+	"The number of media entities created"
+	createdMedia: Int!
+	"The number of media entities updated"
+	updatedMedia: Int!
+	"The number of series entities created"
+	createdSeries: Int!
+	"The number of series entities updated"
+	updatedSeries: Int!
 }
 
 type LibraryScanRecordModel {
@@ -1247,6 +1347,22 @@ type SeriesMetadataModel {
 	seriesId: String!
 }
 
+type SeriesScanOutput {
+	"The number of files to scan relative to the series root"
+	totalFiles: Int!
+	"The number of files that were ignored during the scan"
+	ignoredFiles: Int!
+	"""
+	The number of files that were deemed to be skipped during the scan, e.g. it
+	exists in the database but has not been modified since the last scan
+	"""
+	skippedFiles: Int!
+	"The number of media entities that were created"
+	createdMedia: Int!
+	"The number of media entities that were updated"
+	updatedMedia: Int!
+}
+
 type SpineItem {
 	idref: String!
 	id: String
@@ -1341,6 +1457,7 @@ type StumpConfig {
 
 type Subscription {
 	tailLogFile: String!
+	readEvents: CoreEvent!
 }
 
 enum SupportedFont {
@@ -1376,6 +1493,17 @@ type TelegramConfig {
 input TelegramConfigInput {
 	token: String!
 	chatId: String!
+}
+
+type ThumbnailGenerationOutput {
+	"The total number of files that were visited during the thumbnail generation"
+	visitedFiles: Int!
+	"The number of thumbnails that were skipped (already existed and not force regenerated)"
+	skippedFiles: Int!
+	"The number of thumbnails that were generated"
+	generatedThumbnails: Int!
+	"The number of thumbnails that were removed"
+	removedThumbnails: Int!
 }
 
 """

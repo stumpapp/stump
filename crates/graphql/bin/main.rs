@@ -1,4 +1,7 @@
-use std::{fs::OpenOptions, io::Write};
+use std::{
+	fs::{self, OpenOptions},
+	io::Write,
+};
 
 use async_graphql::SDLExportOptions;
 use clap::Parser;
@@ -12,24 +15,47 @@ struct Config {
 	/// Write the schema to a specified file
 	#[clap(long, default_value = "./crates/graphql/schema.graphql")]
 	path: String,
+
+	#[clap(long, default_value = "false")]
+	check: bool,
 }
 
-fn main() {
-	let config = Config::parse();
-
+fn get_schema_string() -> String {
 	let schema = build_schema_bare();
 	let sdl_export_options =
 		SDLExportOptions::default().prefer_single_line_descriptions();
-	let sdl = schema.sdl_with_options(sdl_export_options);
+	schema.sdl_with_options(sdl_export_options)
+}
 
+fn check_schema(path: &str, sdl: &str) {
+	let contents = fs::read_to_string(path).expect("Unable to read file");
+	if contents != sdl {
+		panic!("\n\x1b[93mSchema mismatch! Please run 'cargo dump-schema' to update the schema.\n\x1b[0m");
+	}
+}
+
+fn write_schema(path: &str, sdl: &str) {
 	let mut file = OpenOptions::new()
 		.read(true)
 		.write(true)
 		.create(true)
 		.truncate(true)
-		.open(config.path.clone())
+		.open(path)
 		.expect("Unable to open file");
+
 	file.write_all(sdl.as_bytes())
 		.expect("Failed to write to file");
-	println!("GraphQL schema written to {}", config.path);
+
+	println!("GraphQL schema written to {}", path);
+}
+
+fn main() {
+	let config = Config::parse();
+	let sdl = get_schema_string();
+
+	if config.check {
+		check_schema(&config.path, &sdl);
+	} else {
+		write_schema(&config.path, &sdl)
+	}
 }

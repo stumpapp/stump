@@ -364,6 +364,10 @@
 					"label": "Przetwarzaj metadane",
 					"description": "Wyodrębnij metadane z plików biblioteki i zapisz wyniki w bazie danych"
 				},
+				"watch": {
+					"label": "Watch",
+					"description": "Watch the library directory for changes and update the database accordingly"
+				},
 				"generateFileHashes": {
 					"label": "Generuj skróty plików",
 					"description": "Generuj skrót dla każdego pliku w bibliotece w celu wykrycia duplikatów"
@@ -452,6 +456,7 @@
 					"ignoreRules": "Reguły pomijania",
 					"convertRar": "Konwertuj RAR/CBR",
 					"deleteConversions": "Usuń przekonwertowane pliki",
+					"watch": "Watch directory for changes",
 					"processMetadata": "Przetwarzaj metadane",
 					"generateFileHashes": "Generuj skróty plików"
 				}

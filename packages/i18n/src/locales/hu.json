@@ -364,6 +364,10 @@
 					"label": "Metaadatok feldolgozása",
 					"description": "Minden metaadat kinyerése a könyvtár fájljaiból, és eredmények tárolása az adatbázisban"
 				},
+				"watch": {
+					"label": "Watch",
+					"description": "Watch the library directory for changes and update the database accordingly"
+				},
 				"generateFileHashes": {
 					"label": "Fájl hash-ek generálása",
 					"description": "Fájl hash-ek generálása minden fájlhoz a könyvtárban, duplikák megtalálása érdekében"
@@ -452,6 +456,7 @@
 					"ignoreRules": "Szabályok mellőzése",
 					"convertRar": "RAR/CBR átalakítása",
 					"deleteConversions": "Átalakított fájlok törlése",
+					"watch": "Watch directory for changes",
 					"processMetadata": "Metaadatok feldolgozása",
 					"generateFileHashes": "Fájl hash-ek generálása"
 				}

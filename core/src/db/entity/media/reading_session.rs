@@ -26,10 +26,12 @@ pub struct ActiveReadingSession {
 	/// The ID of the media which has progress.
 	pub media_id: String,
 	/// The media which has progress. Will be `None` if the relation is not loaded.
+	#[schema(no_recursion)]
 	pub media: Option<Box<Media>>,
 	/// The ID of the user who this progress belongs to.
 	pub user_id: String,
 	/// The user who this progress belongs to. Will be `None` if the relation is not loaded.
+	#[schema(no_recursion)]
 	pub user: Option<Box<User>>,
 }
 
@@ -47,10 +49,12 @@ pub struct FinishedReadingSession {
 	/// The ID of the media which has progress.
 	pub media_id: String,
 	/// The media which has progress. Will be `None` if the relation is not loaded.
+	#[schema(no_recursion)]
 	pub media: Option<Media>,
 	/// The ID of the user who this progress belongs to.
 	pub user_id: String,
 	/// The user who this progress belongs to. Will be `None` if the relation is not loaded.
+	#[schema(no_recursion)]
 	pub user: Option<User>,
 }
 

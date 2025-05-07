@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import { FlatList } from 'react-native-gesture-handler'
+import { FlatList } from 'react-native'
 
 export type ImageBasedBookRef = {
 	id: string
@@ -15,12 +15,16 @@ export type ImageBasedBookPageRef = {
 
 export type IImageBasedReaderContext = {
 	flatListRef: React.RefObject<FlatList>
+	// flatListRef: React.RefObject<FlashList<number>>
 	book: ImageBasedBookRef
-	imageSizes?: ImageBasedBookPageRef[]
+	imageSizes?: Record<number, ImageBasedBookPageRef>
+	setImageSizes: React.Dispatch<React.SetStateAction<Record<number, ImageBasedBookPageRef>>>
+	pageSets: number[][]
 	pageURL: (page: number) => string
 	pageThumbnailURL?: (page: number) => string
 	currentPage?: number
 	onPageChanged?: (page: number) => void
+	resetTimer?: () => void
 }
 
 export const ImageBasedReaderContext = createContext<IImageBasedReaderContext | null>(null)

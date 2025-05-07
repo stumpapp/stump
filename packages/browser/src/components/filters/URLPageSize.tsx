@@ -36,7 +36,7 @@ export default function URLPageSize() {
 				variant="activeGhost"
 				size="sm"
 				className="h-7 w-7 p-0 text-center text-xs [appearance:textfield] sm:h-6 sm:w-6 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-				value={inputPageSize || page_size}
+				value={inputPageSize}
 				onChange={handleInputChange}
 				min={1}
 			/>

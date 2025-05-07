@@ -1,23 +1,43 @@
 import { useSDK } from '@stump/client'
-import { forwardRef, Suspense } from 'react'
+import { forwardRef, Suspense, useCallback } from 'react'
 
 import { AuthImage } from './AuthImage'
 
-const EntityImage = forwardRef<HTMLImageElement, React.ImgHTMLAttributes<HTMLImageElement>>(
-	({ src, ...props }, ref) => {
-		const { sdk } = useSDK()
+type Props = {
+	onLoad?: ({ height, width }: { height: number; width: number }) => void
+} & Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'onLoad'>
 
-		const renderImage = () => {
-			if (sdk.isTokenAuth) {
-				return <AuthImage src={src || ''} token={sdk.token || ''} {...props} ref={ref} />
-			} else {
-				return <img src={src} {...props} ref={ref} />
+const EntityImage = forwardRef<HTMLImageElement, Props>(({ src, onLoad, ...props }, ref) => {
+	const { sdk } = useSDK()
+
+	const handleImageLoad = useCallback(
+		(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+			const img = e.target as HTMLImageElement
+			if (img.height && img.width) {
+				onLoad?.({ height: img.height, width: img.width })
 			}
-		}
+		},
+		[onLoad],
+	)
 
-		return <Suspense>{renderImage()}</Suspense>
-	},
-)
+	const renderImage = () => {
+		if (sdk.isTokenAuth) {
+			return (
+				<AuthImage
+					src={src || ''}
+					token={sdk.token || ''}
+					{...props}
+					ref={ref}
+					onLoad={handleImageLoad}
+				/>
+			)
+		} else {
+			return <img src={src} {...props} ref={ref} onLoad={handleImageLoad} />
+		}
+	}
+
+	return <Suspense>{renderImage()}</Suspense>
+})
 EntityImage.displayName = 'EntityImage'
 
 export { EntityImage }

@@ -186,6 +186,12 @@ impl FileProcessor for RarProcessor {
 		while let Ok(Some(header)) = archive.read_header() {
 			let entry = header.entry();
 
+			let Some(filename) = entry.filename.as_path().file_name() else {
+				tracing::warn!(?entry.filename, "Failed to get filename from entry");
+				archive = header.skip()?;
+				continue;
+			};
+
 			if entry.is_directory() {
 				archive = header.skip()?;
 				continue;
@@ -196,7 +202,7 @@ impl FileProcessor for RarProcessor {
 				continue;
 			}
 
-			if entry.filename.as_os_str() == "ComicInfo.xml" && options.process_metadata {
+			if filename == "ComicInfo.xml" && options.process_metadata {
 				let (data, rest) = header.read()?;
 				metadata_buf = Some(data);
 				archive = rest;
@@ -386,7 +392,10 @@ impl FileConverter for RarProcessor {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::filesystem::media::tests::{get_test_rar_file_data, get_test_rar_path};
+	use crate::filesystem::{
+		media::tests::{get_test_rar_file_data, get_test_rar_path},
+		tests::get_test_complex_rar_path,
+	};
 
 	use std::fs;
 
@@ -447,5 +456,24 @@ mod tests {
 
 		let content_types = RarProcessor::get_page_content_types(&path, vec![1]);
 		assert!(content_types.is_ok());
+	}
+
+	#[test]
+	fn test_rar_with_complex_file_tree() {
+		let path = get_test_complex_rar_path();
+
+		let config = StumpConfig::debug();
+		let processed_file = RarProcessor::process(
+			&path,
+			FileProcessorOptions {
+				process_metadata: true,
+				..Default::default()
+			},
+			&config,
+		)
+		.expect("Failed to process RAR file");
+
+		// See https://github.com/stumpapp/stump/issues/641
+		assert!(processed_file.metadata.is_some());
 	}
 }

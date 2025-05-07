@@ -8,10 +8,7 @@ import { cn } from '~/lib/utils'
 const Card = React.forwardRef<ViewRef, ViewProps>(({ className, ...props }, ref) => (
 	<View
 		ref={ref}
-		className={cn(
-			'border-border rounded-lg border bg-background shadow-sm shadow-foreground/10',
-			className,
-		)}
+		className={cn('rounded-lg border border-edge bg-background', className)}
 		{...props}
 	/>
 ))

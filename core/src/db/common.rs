@@ -162,7 +162,7 @@ impl DBPragma for PrismaClient {
 			._query_raw::<JournalModeQueryResult>(raw!("PRAGMA journal_mode;"))
 			.exec()
 			.await?;
-		let result = result_vec.first().take();
+		let result = result_vec.first();
 
 		if let Some(record) = result {
 			Ok(record.journal_mode)

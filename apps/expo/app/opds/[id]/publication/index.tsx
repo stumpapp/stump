@@ -1,7 +1,5 @@
 import { useSDK } from '@stump/client'
-import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
-import omit from 'lodash/omit'
 import { Fragment } from 'react'
 import { Pressable, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -9,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
 import { BookDescription, InfoRow, InfoSection } from '~/components/book/overview'
+import { FasterImage } from '~/components/Image'
 import {
 	getDateField,
 	getNumberField,
@@ -31,9 +30,22 @@ export default function Screen() {
 		publication: { metadata, images, readingOrder, links, resources },
 		url,
 	} = usePublicationContext()
-	const { title, identifier, belongsTo, ...rest } = metadata || {}
+	const { title, identifier, belongsTo } = metadata || {}
 
 	const router = useRouter()
+
+	// TODO: once I sort out progress sync, prefetch the current page
+	// TODO: prefetch the first page of the publication, see https://github.com/candlefinance/faster-image/issues/73
+	// const firstPageURL = readingOrder?.[0]?.href
+	// useEffect(() => {
+	// 	if (firstPageURL) {
+	// 		EImage.prefetch(firstPageURL, {
+	// 			headers: {
+	// 				Authorization: sdk.authorizationHeader || '',
+	// 			},
+	// 		})
+	// 	}
+	// }, [sdk, firstPageURL])
 
 	const thumbnailURL = getPublicationThumbnailURL({
 		images,
@@ -55,7 +67,7 @@ export default function Screen() {
 	const isSupportedStream = readingOrder?.every((link) => link.type?.startsWith('image/'))
 
 	// TODO: dump the rest of the metadata? Or enforce servers to conform to a standard?
-	const restMeta = omit(rest, ['numberOfPages', 'modified'])
+	// const restMeta = omit(rest, ['numberOfPages', 'modified'])
 
 	return (
 		<SafeAreaView className="flex-1 bg-background">
@@ -66,14 +78,14 @@ export default function Screen() {
 							{title || 'Publication'}
 						</Heading>
 						<View className="aspect-[2/3] self-center overflow-hidden rounded-lg">
-							<Image
+							<FasterImage
 								source={{
-									uri: thumbnailURL,
+									url: thumbnailURL || '',
 									headers: {
-										Authorization: sdk.authorizationHeader,
+										Authorization: sdk.authorizationHeader || '',
 									},
+									resizeMode: 'fill',
 								}}
-								contentFit="fill"
 								style={{ height: 350, width: 'auto' }}
 							/>
 						</View>

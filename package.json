@@ -28,7 +28,9 @@
 		"dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"cargo watch --ignore core/prisma -x run -p stump_server\" \"yarn expo dev\"",
 		"prisma-studio": "npx prisma studio --schema core/prisma/schema.prisma",
 		"format": "lerna run format --stream --parallel",
-		"nuke": "concurrently -n root,monorepo -c green.bold,blue.bold \"yarn exec rimraf node_modules\" \"lerna run nuke\""
+		"nuke": "lerna run nuke",
+		"android": "expo run:android",
+		"ios": "expo run:ios"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.25.8",
@@ -79,5 +81,8 @@
 			]
 		}
 	},
-	"dependencies": {}
+	"dependencies": {
+		"expo": "~52.0.37",
+		"react": "18.3.1"
+	}
 }

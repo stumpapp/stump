@@ -14,10 +14,9 @@ const buttonVariants = cva('group flex items-center justify-center rounded-lg', 
 			outline: 'border border-edge bg-background active:bg-background-surface',
 			secondary: 'bg-background-inverse',
 			ghost: 'active:bg-accent',
-			link: 'web:underline-offset-4 web:hover:underline web:focus:underline ',
 		},
 		size: {
-			default: 'h-10 px-4 py-2 native:h-12 native:px-5 native:py-3',
+			default: 'h-10 px-4 py-2 native:h-12 native:px-5 native:py-3 tablet:h-14',
 			sm: 'h-9 rounded-lg px-3',
 			md: 'h-10 rounded-lg px-4',
 			lg: 'h-11 rounded-lg px-8 native:h-14',
@@ -39,11 +38,11 @@ const buttonTextVariants = cva('text-base font-medium text-foreground', {
 			outline: 'group-active:text-fill-info',
 			secondary: 'text-secondary-foreground group-active:text-secondary-foreground',
 			ghost: 'group-active:text-fill-info',
-			link: 'text-primary group-active:underline',
 		},
 		size: {
 			default: '',
 			sm: '',
+			md: '',
 			lg: 'text-lg',
 			icon: '',
 		},
@@ -74,6 +73,7 @@ const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>
 					ref={ref}
 					role="button"
 					{...props}
+					// style={[props.style || {}, { height: '40px' }]}
 				/>
 			</TextClassContext.Provider>
 		)

@@ -8,13 +8,13 @@ default-run = "stump_server"
 alphanumeric-sort = { workspace = true }
 async-stream = { workspace = true }
 async-trait = { workspace = true }
-axum = { version = "0.7.5", features = [
+axum = { version = "0.8.1", features = [
   "ws", 
   "multipart",
 ] }
-axum-macros = "0.4.1"
-axum_typed_multipart = "0.13.1"
-axum-extra = { version = "0.9.3", features = [
+axum-macros = "0.5.0"
+axum_typed_multipart = "0.15.1"
+axum-extra = { version = "0.10.0", features = [
   "typed-header",
   "query",
 ] }
@@ -36,7 +36,7 @@ rand = "0.8.5"
 reqwest = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-serde_qs = { version = "0.13.0", features = ["axum"] }
+serde_qs = { version = "0.14.0", features = ["axum"] }
 serde-untagged = "0.1.2"
 serde_with = { workspace = true }
 specta = { workspace = true }
@@ -53,15 +53,15 @@ time = "0.3.36"
 tokio = { workspace = true }
 tokio-util = "0.7.10"
 tower = "0.4.13"
-tower-sessions = "0.12.2"
+tower-sessions = "0.14.0"
 tracing = { workspace = true }
 urlencoding = { workspace = true }
-utoipa = { version = "4.2.3", features = ["axum_extras"] }
-utoipa-swagger-ui = { version = "7.1.0", features = ["axum"] }
+utoipa = { version = "5.3.1", features = ["axum_extras", "chrono"] }
+utoipa-swagger-ui = { version = "9.0.0", features = ["axum"] }
 zip = { workspace = true }
 
 [dev-dependencies]
-axum-test = "15.3.1"
+axum-test = "17.2.0"
 tokio = { workspace = true, features = ["full", "test-util"] }
 
 [build-dependencies]

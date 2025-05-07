@@ -3,7 +3,6 @@ import { ActiveReadingSession } from '@stump/sdk'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -12,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useActiveServer } from '~/components/activeServer'
 import { BookMetaLink } from '~/components/book'
 import { BookDescription, InfoRow, InfoStat } from '~/components/book/overview'
+import { FasterImage } from '~/components/Image'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Heading, Text } from '~/components/ui'
 import { formatBytes } from '~/lib/format'
@@ -28,6 +28,17 @@ export default function Screen() {
 	const { media, refetch, isRefetching } = useMediaByIdQuery(bookID, { suspense: true })
 
 	const router = useRouter()
+
+	// TODO: prefetch, see https://github.com/candlefinance/faster-image/issues/73
+	// useEffect(() => {
+	// 	if (media?.current_page) {
+	// 		ExpoImage.prefetch(sdk.media.bookPageURL(media.id, media.current_page), {
+	// 			headers: {
+	// 				Authorization: sdk.authorizationHeader || '',
+	// 			},
+	// 		})
+	// 	}
+	// }, [sdk, media?.current_page, media?.id])
 
 	if (!media) return null
 
@@ -101,20 +112,20 @@ export default function Screen() {
 							{media.metadata?.title || media.name}
 						</Heading>
 						<View className="aspect-[2/3] self-center overflow-hidden rounded-lg">
-							<Image
+							<FasterImage
 								source={{
-									uri: sdk.media.thumbnailURL(media.id),
+									url: sdk.media.thumbnailURL(media.id),
 									headers: {
-										Authorization: sdk.authorizationHeader,
+										Authorization: sdk.authorizationHeader || '',
 									},
+									resizeMode: 'fill',
 								}}
-								contentFit="fill"
 								style={{ height: 350, width: 'auto' }}
 							/>
 						</View>
 					</View>
 
-					<View className="flex w-full flex-row items-center gap-2 tablet:max-w-sm tablet:self-center">
+					<View className="flex w-full flex-row items-center gap-x-2 tablet:max-w-sm tablet:self-center">
 						<Button
 							className="flex-1 border border-edge"
 							onPress={() =>

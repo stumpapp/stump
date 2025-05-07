@@ -53,7 +53,7 @@ Archive formats, aside from EPUB files, are primarily assumed to be comic books.
 
 #### EPUB
 
-EPUB files typically store their metadata in an `OPF` file, but it is more limited than what can be found in a typical `ComicInfo.xml` file.
+EPUB files typically store their metadata in an `OPF` file, but it is more limited than what can be found in a typical `ComicInfo.xml` file. Stump will prioritize any metadata found in an `OPF` file matching the name of the EPUB in the same directory.
 
 #### PDF
 

@@ -8,8 +8,9 @@ import {
 	useUpdateMediaProgress,
 } from '@stump/client'
 import { useKeepAwake } from 'expo-keep-awake'
+import * as NavigationBar from 'expo-navigation-bar'
 import { useLocalSearchParams } from 'expo-router'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 
 import { EpubJSReader, ImageBasedReader, UnsupportedReader } from '~/components/book/reader'
 import { useAppState } from '~/lib/hooks'
@@ -31,12 +32,13 @@ export default function Screen() {
 			load_pages: true,
 		},
 	})
-	const { pause, resume, totalSeconds, isRunning } = useBookTimer(book?.id || '', {
-		initial: book?.active_reading_session?.elapsed_seconds,
-	})
 	const {
-		preferences: { preferSmallImages },
+		preferences: { preferSmallImages, trackElapsedTime },
 	} = useBookPreferences(book?.id || '')
+	const { pause, resume, totalSeconds, isRunning, reset } = useBookTimer(book?.id || '', {
+		initial: book?.active_reading_session?.elapsed_seconds,
+		enabled: trackElapsedTime,
+	})
 
 	const { updateReadProgressAsync } = useUpdateMediaProgress(book?.id || '', {
 		retry: (attempts) => attempts < 3,
@@ -96,13 +98,33 @@ export default function Screen() {
 	 */
 	useEffect(
 		() => {
+			NavigationBar.setVisibilityAsync('hidden')
 			return () => {
+				NavigationBar.setVisibilityAsync('visible')
 				queryClient.refetchQueries({ queryKey: [sdk.media.keys.getByID, bookID], exact: false })
 				queryClient.refetchQueries({ queryKey: [sdk.media.keys.inProgress], exact: false })
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[],
+	)
+
+	const imageSizes = useMemo(
+		() =>
+			book?.metadata?.page_dimensions?.dimensions
+				?.map(({ height, width }) => ({
+					height,
+					width,
+					ratio: width / height,
+				}))
+				.reduce(
+					(acc, ref, index) => {
+						acc[index] = ref
+						return acc
+					},
+					{} as Record<number, { height: number; width: number; ratio: number }>,
+				),
+		[book?.metadata?.page_dimensions?.dimensions],
 	)
 
 	if (!book) return null
@@ -128,12 +150,9 @@ export default function Screen() {
 								})
 						: undefined
 				}
-				imageSizes={book.metadata?.page_dimensions?.dimensions?.map(({ height, width }) => ({
-					height,
-					width,
-					ratio: width / height,
-				}))}
+				imageSizes={imageSizes}
 				onPageChanged={onPageChanged}
+				resetTimer={reset}
 			/>
 		)
 	}

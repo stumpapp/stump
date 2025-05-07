@@ -72,6 +72,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 						'ignore_rules',
 						'convert_rar_to_zip',
 						'hard_delete_conversions',
+						'watch',
 					])
 					break
 				case 3:

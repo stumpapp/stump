@@ -35,6 +35,19 @@ The following clients have been tested with Stump:
 
 If you have any experiences, good or bad, using any of these clients or another client not listed here, please consider updating this page with your findings.
 
+#### Using an API Key
+
+<Callout emoji="🔐">
+	This functionality is gated behind the `feature:api_keys` user permission. To learn more about
+	permissions, see the [permissions](/guides/access-control/permissions) guide.
+</Callout>
+
+There is a special router for OPDS v1.2 that allows you to embed an API key in the URL directly. This is primarily only done to support clients which do not support passing auth credentials in the request headers. The URL structure for this is:
+
+`http(s)://your-server(:10801)(/baseUrl)/opds/(api_key)/v1.2/catalog`
+
+For additional information on API keys, see the [API keys](/guides/features/api-keys) guide.
+
 ### OPDS 2.0
 
 The general structure of the URL to connect to your Stump server is:
@@ -50,23 +63,11 @@ The general structure of the URL to connect to your Stump server is:
 
 The following clients have been tested with Stump:
 
-| OS      |                                      Application                                      | Page Streaming |                                                                                                                         Issues/Notes |
-| ------- | :-----------------------------------------------------------------------------------: | -------------: | -----------------------------------------------------------------------------------------------------------------------------------: |
-| iOS     |   [Cantook by Aldiko](https://apps.apple.com/us/app/cantook-by-aldiko/id1476410111)   |             ❓ | Supports catalog traversal and media downloads. Issues with rendering media covers, however this appears to be an issue on their end |
-| Android | [Cantook by Aldiko](https://play.google.com/store/apps/details?id=com.aldiko.android) |             ❓ | Supports catalog traversal and media downloads. Issues with rendering media covers, however this appears to be an issue on their end |
-| Android |    [Librera](https://play.google.com/store/apps/details?id=com.foobnix.pdf.reader)    |             ❓ |                                                                                       Does not work. Likely lacking OPDS 2.0 support |
-| Linux   |                  [Foliate](https://johnfactotum.github.io/foliate/)                   |             ❌ |                                                                           Loads cover previews, book names, publisher and categories |
-| Windows |                      [Thorium 3](https://thorium.edrlab.org/en/)                      |             ❌ |                                                                Loads covers and their previews, book names, publisher and categories |
-
-## Using an API Key
-
-<Callout emoji="🔐">
-	This functionality is gated behind the `feature:api_keys` user permission. To learn more about
-	permissions, see the [permissions](/guides/access-control/permissions) guide.
-</Callout>
-
-There is a special router for OPDS v1.2 that allows you to embed an API key in the URL directly. This is primarily only done to support clients which do not support passing auth credentials in the request headers. The URL structure for this is:
-
-`http(s)://your-server(:10801)(/baseUrl)/opds/(api_key)/v1.2/catalog`
-
-For additional information on API keys, see the [API keys](/guides/features/api-keys) guide.
+| OS            |                                      Application                                      | Page Streaming |                                                                                                                         Issues/Notes |
+| ------------- | :-----------------------------------------------------------------------------------: | -------------: | -----------------------------------------------------------------------------------------------------------------------------------: |
+| iOS & Android |                              [Stump](/guides/mobile/app)                              |             ✅ |                                                                                               Actively being developed, experimental |
+| iOS           |   [Cantook by Aldiko](https://apps.apple.com/us/app/cantook-by-aldiko/id1476410111)   |             ❓ | Supports catalog traversal and media downloads. Issues with rendering media covers, however this appears to be an issue on their end |
+| Android       | [Cantook by Aldiko](https://play.google.com/store/apps/details?id=com.aldiko.android) |             ❓ | Supports catalog traversal and media downloads. Issues with rendering media covers, however this appears to be an issue on their end |
+| Android       |    [Librera](https://play.google.com/store/apps/details?id=com.foobnix.pdf.reader)    |             ❓ |                                                                                       Does not work. Likely lacking OPDS 2.0 support |
+| Linux         |                  [Foliate](https://johnfactotum.github.io/foliate/)                   |             ❌ |                                                                           Loads cover previews, book names, publisher and categories |
+| Windows       |                      [Thorium 3](https://thorium.edrlab.org/en/)                      |             ❌ |                                                                Loads covers and their previews, book names, publisher and categories |

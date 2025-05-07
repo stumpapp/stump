@@ -57,17 +57,17 @@ export default function BookCard({
 			)
 		}
 
-		const progressString = getProgress()
-		if (progressString != null) {
+		const percentageComplete = getProgress()
+		if (percentageComplete != null) {
 			const isEpubProgress = !!media.current_epubcfi
 			const pagesLeft = media.pages - (media.current_page || 0)
 
 			return (
 				<div className="flex items-center justify-between">
 					<Text size="xs" variant="muted">
-						{getProgress()}%
+						{percentageComplete}%
 					</Text>
-					{!isEpubProgress && (
+					{!isEpubProgress && percentageComplete < 100 && (
 						<Text size="xs" variant="muted">
 							{pagesLeft} {pluralize('page', pagesLeft)} left
 						</Text>

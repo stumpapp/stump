@@ -90,27 +90,6 @@ fn find_attr(
 
 const RAW_IDENTIFIER: &str = "r#";
 
-const RUST_KEYWORDS: [&str; 49] = [
-	"as", "async", "await", "break", "const", "continue", "dyn", "else", "enum",
-	"extern", "false", "fn", "for", "if", "impl", "in", "let", "loop", "match", "mod",
-	"move", "mut", "pub", "ref", "return", "static", "struct", "super", "trait", "true",
-	"type", "union", "unsafe", "use", "where", "while", "abstract", "become", "box",
-	"do", "final", "macro", "override", "priv", "try", "typeof", "unsized", "virtual",
-	"yield",
-];
-
-const RUST_SPECIAL_KEYWORDS: [&str; 3] = ["crate", "Self", "self"];
-
-fn escape_rust_keyword(string: String) -> String {
-	if RUST_KEYWORDS.iter().any(|s| s.eq(&string)) {
-		format!("r#{string}")
-	} else if RUST_SPECIAL_KEYWORDS.iter().any(|s| s.eq(&string)) {
-		format!("{string}_")
-	} else {
-		string
-	}
-}
-
 fn build_field_to_sea_orm_col_map(
 	input: &syn::DeriveInput,
 ) -> Result<HashMap<syn::Ident, syn::Ident>, syn::Error> {
@@ -131,10 +110,8 @@ fn build_field_to_sea_orm_col_map(
 							.to_upper_camel_case()
 					};
 
-					let sea_orm_field_ident = syn::Ident::new(
-						&escape_rust_keyword(sea_orm_field_ident),
-						ident.span(),
-					);
+					let sea_orm_field_ident =
+						syn::Ident::new(&sea_orm_field_ident, ident.span());
 					field_to_sea_orm_col_map.insert(ident.clone(), sea_orm_field_ident);
 				}
 			}
@@ -164,15 +141,15 @@ fn generate_order_by_impl(
 
 	let order_by_impl = quote! {
 		impl OrderBy<Entity, #order_by_ident> for #order_by_ident {
-			fn add_order_bys(
-				order_bys: &Vec<#order_by_ident>,
+			fn add_order_by(
+				order_by: &Vec<#order_by_ident>,
 				query: sea_orm::Select<Entity>,
 			) -> Result<sea_orm::Select<Entity>, sea_orm::ColumnFromStrErr> {
-				if order_bys.is_empty() {
+				if order_by.is_empty() {
 					return Ok(query);
 				}
 
-				order_bys
+				order_by
 					.iter()
 					.try_fold(query, |query, order_by|  {
 						let order = sea_orm::Order::from(order_by.direction);
@@ -596,14 +573,14 @@ mod tests {
 				pub direction: OrderDirection,
 			}
 			impl OrderBy<Entity, FooOrderBy> for FooOrderBy {
-				fn add_order_bys(
-					order_bys: &Vec<FooOrderBy>,
+				fn add_order_by(
+					order_by: &Vec<FooOrderBy>,
 					query: sea_orm::Select<Entity>,
 				) -> Result<sea_orm::Select<Entity>, sea_orm::ColumnFromStrErr> {
-					if order_bys.is_empty() {
+					if order_by.is_empty() {
 						return Ok(query);
 					}
-					order_bys.iter().try_fold(query, |query, order_by| {
+					order_by.iter().try_fold(query, |query, order_by| {
 						let order = sea_orm::Order::from(order_by.direction);
 						let field = match order_by.field {
 							FooOrdering::A => Column::A,
@@ -644,14 +621,14 @@ mod tests {
 				pub direction: OrderDirection,
 			}
 			impl OrderBy<Entity, FooGraphQLOrderBy> for FooGraphQLOrderBy {
-				fn add_order_bys(
-					order_bys: &Vec<FooGraphQLOrderBy>,
+				fn add_order_by(
+					order_by: &Vec<FooGraphQLOrderBy>,
 					query: sea_orm::Select<Entity>,
 				) -> Result<sea_orm::Select<Entity>, sea_orm::ColumnFromStrErr> {
-					if order_bys.is_empty() {
+					if order_by.is_empty() {
 						return Ok(query);
 					}
-					order_bys.iter().try_fold(query, |query, order_by| {
+					order_by.iter().try_fold(query, |query, order_by| {
 						let order = sea_orm::Order::from(order_by.direction);
 						let field = match order_by.field {
 							FooGraphQLOrdering::A => Column::A,

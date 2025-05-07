@@ -15,6 +15,7 @@ axum.workspace = true
 chrono.workspace = true
 clap.workspace = true
 epub.workspace = true
+heck.workspace = true
 filter-gen = { path = "../filter-gen" }
 futures-util.workspace = true
 infer.workspace = true

@@ -3178,6 +3178,7 @@ dependencies = [
  "epub",
  "filter-gen",
  "futures-util",
+ "heck 0.5.0",
  "infer",
  "itertools 0.13.0",
  "linemux",

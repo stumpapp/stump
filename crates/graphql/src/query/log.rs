@@ -24,7 +24,7 @@ impl LogQuery {
 		&self,
 		ctx: &Context<'_>,
 		filter: LogFilterInput,
-		order_bys: Vec<log::LogModelOrderBy>,
+		order_by: Vec<log::LogModelOrderBy>,
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<Log>> {
@@ -32,7 +32,7 @@ impl LogQuery {
 
 		let filter = filter.into_filter();
 		let query = log::Entity::find().filter(filter);
-		let query = log::LogModelOrderBy::add_order_bys(&order_bys, query)?;
+		let query = log::LogModelOrderBy::add_order_by(&order_by, query)?;
 
 		let get_cursor = |m: &log::Model| m.id.to_string();
 		get_paginated_results(query, log::Column::Id, conn, pagination, get_cursor).await

@@ -12,7 +12,7 @@ use models::{
 	entity::log,
 	shared::{enums::UserPermission, ordering::OrderBy},
 };
-use sea_orm::{prelude::*, QueryOrder};
+use sea_orm::prelude::*;
 
 #[derive(Default)]
 pub struct LogQuery;
@@ -24,7 +24,7 @@ impl LogQuery {
 		&self,
 		ctx: &Context<'_>,
 		filter: LogFilterInput,
-		order_by: Option<log::LogModelOrderBy>,
+		order_bys: Vec<log::LogModelOrderBy>,
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<Log>> {
@@ -32,11 +32,7 @@ impl LogQuery {
 
 		let filter = filter.into_filter();
 		let query = log::Entity::find().filter(filter);
-		let query = if let Some(order_by) = order_by {
-			order_by.add_order_bys(query)?
-		} else {
-			query.order_by_asc(log::Column::Id)
-		};
+		let query = log::LogModelOrderBy::add_order_bys(&order_bys, query)?;
 
 		let get_cursor = |m: &log::Model| m.id.to_string();
 		get_paginated_results(query, log::Column::Id, conn, pagination, get_cursor).await

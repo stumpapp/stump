@@ -42,35 +42,32 @@ pub enum CombinedOrderByField {
 	MediaMetadataOrderBy(OrderByField<media_metadata::MediaMetadataModelOrdering>),
 }
 
-impl OrderBy<media::Entity> for MediaWithMetadataOrderBy {
-	fn add_order_bys(
-		&self,
-		query: sea_orm::Select<media::Entity>,
-	) -> Result<sea_orm::Select<media::Entity>, sea_orm::ColumnFromStrErr> {
-		if self.order_bys.is_empty() {
-			return Ok(query);
-		}
-
-		// TODO:(graphql) this is hacky, it should done as a direct column match
-		self.order_bys
-			.iter()
-			.try_fold(query, |query, order_by| match order_by {
-				CombinedOrderByField::MediaOrderBy(order_by) => {
-					let order = sea_orm::Order::from(order_by.direction);
-					let field = media::Column::from_str(
-						&order_by.field.to_string().to_lowercase(),
-					)?;
-					Ok(query.order_by(field, order))
-				},
-				CombinedOrderByField::MediaMetadataOrderBy(order_by) => {
-					let order = sea_orm::Order::from(order_by.direction);
-					let field = media_metadata::Column::from_str(
-						&order_by.field.to_string().to_lowercase(),
-					)?;
-					Ok(query.order_by(field, order))
-				},
-			})
+fn add_order_bys(
+	order_bys: &Vec<CombinedOrderByField>,
+	query: sea_orm::Select<media::Entity>,
+) -> Result<sea_orm::Select<media::Entity>, sea_orm::ColumnFromStrErr> {
+	if order_bys.is_empty() {
+		return Ok(query);
 	}
+
+	// TODO:(graphql) this is hacky, it should done as a direct column match
+	order_bys
+		.iter()
+		.try_fold(query, |query, order_by| match order_by {
+			CombinedOrderByField::MediaOrderBy(order_by) => {
+				let order = sea_orm::Order::from(order_by.direction);
+				let field =
+					media::Column::from_str(&order_by.field.to_string().to_lowercase())?;
+				Ok(query.order_by(field, order))
+			},
+			CombinedOrderByField::MediaMetadataOrderBy(order_by) => {
+				let order = sea_orm::Order::from(order_by.direction);
+				let field = media_metadata::Column::from_str(
+					&order_by.field.to_string().to_lowercase(),
+				)?;
+				Ok(query.order_by(field, order))
+			},
+		})
 }
 
 #[derive(Default)]
@@ -82,7 +79,7 @@ impl MediaQuery {
 		&self,
 		ctx: &Context<'_>,
 		filter: MediaFilterInput,
-		order_by: Option<MediaWithMetadataOrderBy>,
+		order_bys: Vec<CombinedOrderByField>,
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<Media>> {
@@ -97,12 +94,8 @@ impl MediaQuery {
 
 		let conditions = filter.into_filter();
 		let mut query = media::ModelWithMetadata::find_for_user(user).filter(conditions);
-		query = if let Some(order_by) = order_by {
-			order_by.add_order_bys(query)?
-		} else {
-			// TODO:(graphql) default order by?
-			query
-		};
+		// TODO:(graphql) default order by?
+		query = add_order_bys(&order_bys, query)?;
 
 		if should_join_sessions {
 			let user_id = user.id.clone();

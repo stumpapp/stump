@@ -703,10 +703,6 @@ input LogFilterInput {
 }
 
 input LogModelOrderBy {
-	orderBys: [LogModelOrderByField!]!
-}
-
-input LogModelOrderByField {
 	field: LogModelOrdering!
 	direction: OrderDirection!
 }
@@ -938,10 +934,6 @@ enum MediaModelOrdering {
 input MediaOrderBy {
 	field: MediaModelOrdering!
 	direction: OrderDirection!
-}
-
-input MediaWithMetadataOrderBy {
-	orderBys: [CombinedOrderByField!]!
 }
 
 type Mutation {
@@ -1274,7 +1266,7 @@ type Query {
 	emailDevices: [RegisteredEmailDevice!]!
 	emailDeviceById(id: Int!): RegisteredEmailDevice
 	listDirectory(pagination: Pagination!, input: DirectoryListingInput): PaginatedDirectoryListingResponse!
-	media(filter: MediaFilterInput!, orderBy: MediaWithMetadataOrderBy, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	media(filter: MediaFilterInput!, orderBys: [CombinedOrderByField!]!, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	mediaById(id: ID!): Media
 	mediaByPath(path: String!): Media
 	keepReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
@@ -1316,7 +1308,7 @@ type Query {
 	recentlyAddedSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
 	"Returns a list of all tags."
 	tags: [Tag!]!
-	logs(filter: LogFilterInput!, orderBy: LogModelOrderBy, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLogResponse!
+	logs(filter: LogFilterInput!, orderBys: [LogModelOrderBy!]!, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLogResponse!
 	"""
 	Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
 	~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.

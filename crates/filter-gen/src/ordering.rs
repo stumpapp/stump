@@ -43,7 +43,7 @@ pub fn ordering_impl(input: TokenStream) -> Result<TokenStream, syn::Error> {
 	// generates the input objects for the order bys
 	let order_by_ident = syn::Ident::new(&format!("{}OrderBy", ident), ident.span());
 	let order_by_structs_def =
-		generate_order_by_structs_def(&ident, &enum_ident, &order_by_ident)?;
+		generate_order_by_structs_def(&order_by_ident, &enum_ident)?;
 
 	// generates the impl that converts from graphql to sea_orm order bys
 	let order_by_impl = generate_order_by_impl(&order_by_ident, &enum_ident, &col_map)?;
@@ -163,16 +163,16 @@ fn generate_order_by_impl(
 	}
 
 	let order_by_impl = quote! {
-		impl OrderBy<Entity> for #order_by_ident {
+		impl OrderBy<Entity, #order_by_ident> for #order_by_ident {
 			fn add_order_bys(
-				&self,
+				order_bys: &Vec<#order_by_ident>,
 				query: sea_orm::Select<Entity>,
 			) -> Result<sea_orm::Select<Entity>, sea_orm::ColumnFromStrErr> {
-				if self.order_bys.is_empty() {
+				if order_bys.is_empty() {
 					return Ok(query);
 				}
 
-				self.order_bys
+				order_bys
 					.iter()
 					.try_fold(query, |query, order_by|  {
 						let order = sea_orm::Order::from(order_by.direction);
@@ -189,23 +189,14 @@ fn generate_order_by_impl(
 }
 
 fn generate_order_by_structs_def(
-	ident: &syn::Ident,
-	enum_ident: &syn::Ident,
 	order_by_ident: &syn::Ident,
+	enum_ident: &syn::Ident,
 ) -> Result<TokenStream, syn::Error> {
-	let order_by_field_ident =
-		syn::Ident::new(&format!("{}OrderByField", ident), ident.span());
-
 	let order_by_structs_def = quote! {
 		#[derive(async_graphql::InputObject, Clone)]
-		pub struct #order_by_field_ident {
+		pub struct #order_by_ident {
 			pub field: #enum_ident,
 			pub direction: OrderDirection,
-		}
-
-		#[derive(async_graphql::InputObject)]
-		pub struct #order_by_ident {
-			order_bys: Vec<#order_by_field_ident>,
 		}
 	};
 
@@ -600,23 +591,19 @@ mod tests {
 				B
 			}
 			#[derive(async_graphql::InputObject, Clone)]
-			pub struct FooOrderByField {
+			pub struct FooOrderBy {
 				pub field: FooOrdering,
 				pub direction: OrderDirection,
 			}
-			#[derive(async_graphql::InputObject)]
-			pub struct FooOrderBy {
-				order_bys: Vec<FooOrderByField>,
-			}
-			impl OrderBy<Entity> for FooOrderBy {
+			impl OrderBy<Entity, FooOrderBy> for FooOrderBy {
 				fn add_order_bys(
-					&self,
+					order_bys: &Vec<FooOrderBy>,
 					query: sea_orm::Select<Entity>,
 				) -> Result<sea_orm::Select<Entity>, sea_orm::ColumnFromStrErr> {
-					if self.order_bys.is_empty() {
+					if order_bys.is_empty() {
 						return Ok(query);
 					}
-					self.order_bys.iter().try_fold(query, |query, order_by| {
+					order_bys.iter().try_fold(query, |query, order_by| {
 						let order = sea_orm::Order::from(order_by.direction);
 						let field = match order_by.field {
 							FooOrdering::A => Column::A,
@@ -652,23 +639,19 @@ mod tests {
 				B
 			}
 			#[derive(async_graphql::InputObject, Clone)]
-			pub struct FooGraphQLOrderByField {
+			pub struct FooGraphQLOrderBy {
 				pub field: FooGraphQLOrdering,
 				pub direction: OrderDirection,
 			}
-			#[derive(async_graphql::InputObject)]
-			pub struct FooGraphQLOrderBy {
-				order_bys: Vec<FooGraphQLOrderByField>,
-			}
-			impl OrderBy<Entity> for FooGraphQLOrderBy {
+			impl OrderBy<Entity, FooGraphQLOrderBy> for FooGraphQLOrderBy {
 				fn add_order_bys(
-					&self,
+					order_bys: &Vec<FooGraphQLOrderBy>,
 					query: sea_orm::Select<Entity>,
 				) -> Result<sea_orm::Select<Entity>, sea_orm::ColumnFromStrErr> {
-					if self.order_bys.is_empty() {
+					if order_bys.is_empty() {
 						return Ok(query);
 					}
-					self.order_bys.iter().try_fold(query, |query, order_by| {
+					order_bys.iter().try_fold(query, |query, order_by| {
 						let order = sea_orm::Order::from(order_by.direction);
 						let field = match order_by.field {
 							FooGraphQLOrdering::A => Column::A,

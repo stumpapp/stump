@@ -2599,6 +2599,7 @@ dependencies = [
 name = "filter-gen"
 version = "0.0.0"
 dependencies = [
+ "heck 0.5.0",
  "itertools 0.13.0",
  "proc-macro2",
  "quote",
@@ -4886,6 +4887,7 @@ version = "0.0.0"
 dependencies = [
  "async-graphql",
  "chrono",
+ "filter-gen",
  "globset",
  "itertools 0.13.0",
  "pretty_assertions",

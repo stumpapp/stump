@@ -1,10 +1,14 @@
-use async_graphql::{Context, Object, Result, ID};
-use models::entity::{finished_reading_session, media, reading_session};
+use async_graphql::{Context, InputObject, Object, OneofObject, Result, ID};
+use models::{
+	entity::{finished_reading_session, media, media_metadata, reading_session},
+	shared::ordering::{OrderBy, OrderDirection},
+};
 use sea_orm::{
 	prelude::*,
 	sea_query::{ExprTrait, Query},
 	Condition, JoinType, QueryOrder, QuerySelect,
 };
+use std::str::FromStr;
 
 use crate::{
 	data::{CoreContext, RequestContext},
@@ -16,6 +20,59 @@ use crate::{
 	},
 };
 
+#[derive(InputObject, Clone)]
+#[graphql(concrete(name = "MediaOrderBy", params(media::MediaModelOrdering)))]
+#[graphql(concrete(
+	name = "MediaMetadataOrderBy",
+	params(media_metadata::MediaMetadataModelOrdering)
+))]
+pub struct OrderByField<OrderBy: Send + Sync + async_graphql::InputType> {
+	pub field: OrderBy,
+	pub direction: OrderDirection,
+}
+
+#[derive(InputObject)]
+pub struct MediaWithMetadataOrderBy {
+	order_bys: Vec<CombinedOrderByField>,
+}
+
+#[derive(OneofObject, Clone)]
+pub enum CombinedOrderByField {
+	MediaOrderBy(OrderByField<media::MediaModelOrdering>),
+	MediaMetadataOrderBy(OrderByField<media_metadata::MediaMetadataModelOrdering>),
+}
+
+impl OrderBy<media::Entity> for MediaWithMetadataOrderBy {
+	fn add_order_bys(
+		&self,
+		query: sea_orm::Select<media::Entity>,
+	) -> Result<sea_orm::Select<media::Entity>, sea_orm::ColumnFromStrErr> {
+		if self.order_bys.is_empty() {
+			return Ok(query);
+		}
+
+		// TODO:(graphql) this is hacky, it should done as a direct column match
+		self.order_bys
+			.iter()
+			.try_fold(query, |query, order_by| match order_by {
+				CombinedOrderByField::MediaOrderBy(order_by) => {
+					let order = sea_orm::Order::from(order_by.direction);
+					let field = media::Column::from_str(
+						&order_by.field.to_string().to_lowercase(),
+					)?;
+					Ok(query.order_by(field, order))
+				},
+				CombinedOrderByField::MediaMetadataOrderBy(order_by) => {
+					let order = sea_orm::Order::from(order_by.direction);
+					let field = media_metadata::Column::from_str(
+						&order_by.field.to_string().to_lowercase(),
+					)?;
+					Ok(query.order_by(field, order))
+				},
+			})
+	}
+}
+
 #[derive(Default)]
 pub struct MediaQuery;
 
@@ -25,6 +82,7 @@ impl MediaQuery {
 		&self,
 		ctx: &Context<'_>,
 		filter: MediaFilterInput,
+		order_by: Option<MediaWithMetadataOrderBy>,
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<Media>> {
@@ -39,6 +97,12 @@ impl MediaQuery {
 
 		let conditions = filter.into_filter();
 		let mut query = media::ModelWithMetadata::find_for_user(user).filter(conditions);
+		query = if let Some(order_by) = order_by {
+			order_by.add_order_bys(query)?
+		} else {
+			// TODO:(graphql) default order by?
+			query
+		};
 
 		if should_join_sessions {
 			let user_id = user.id.clone();
@@ -113,7 +177,6 @@ impl MediaQuery {
 				let count = query.clone().count(conn).await?;
 
 				let models = query
-					.order_by_asc(media::Column::Name)
 					.offset(info.offset())
 					.limit(info.limit())
 					.into_model::<media::ModelWithMetadata>()

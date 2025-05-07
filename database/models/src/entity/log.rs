@@ -1,7 +1,10 @@
 use async_graphql::SimpleObject;
-use sea_orm::entity::prelude::*;
+use filter_gen::Ordering;
+use sea_orm::{prelude::*, QueryOrder};
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
+use crate::shared::ordering::{OrderBy, OrderDirection};
+
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Ordering)]
 #[graphql(name = "LogModel")]
 #[sea_orm(table_name = "logs")]
 pub struct Model {

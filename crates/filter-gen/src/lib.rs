@@ -2,6 +2,16 @@ use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::{parse_macro_input, DeriveInput};
 
+mod ordering;
+
+#[proc_macro_derive(Ordering)]
+pub fn ordering(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+	let input = parse_macro_input!(input);
+	ordering::ordering_impl(input)
+		.unwrap_or_else(|e| e.to_compile_error())
+		.into()
+}
+
 #[proc_macro_derive(IntoFilter, attributes(field_column, nested_filter))]
 pub fn derive_into_filter(input: TokenStream) -> TokenStream {
 	let input = parse_macro_input!(input as DeriveInput);

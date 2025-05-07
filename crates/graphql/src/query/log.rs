@@ -8,7 +8,10 @@ use crate::{
 	},
 };
 use async_graphql::{Context, Object, Result};
-use models::{entity::log, shared::enums::UserPermission};
+use models::{
+	entity::log,
+	shared::{enums::UserPermission, ordering::OrderBy},
+};
 use sea_orm::{prelude::*, QueryOrder};
 
 #[derive(Default)]
@@ -21,16 +24,20 @@ impl LogQuery {
 		&self,
 		ctx: &Context<'_>,
 		filter: LogFilterInput,
+		order_by: Option<log::LogModelOrderBy>,
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<Log>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		// TODO(graphql): implement order by param
 		let filter = filter.into_filter();
-		let query = log::Entity::find()
-			.filter(filter)
-			.order_by_asc(log::Column::Id);
+		let query = log::Entity::find().filter(filter);
+		let query = if let Some(order_by) = order_by {
+			order_by.add_order_bys(query)?
+		} else {
+			query.order_by_asc(log::Column::Id)
+		};
+
 		let get_cursor = |m: &log::Model| m.id.to_string();
 		get_paginated_results(query, log::Column::Id, conn, pagination, get_cursor).await
 	}

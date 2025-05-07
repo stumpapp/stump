@@ -13,6 +13,7 @@ strum.workspace = true
 thiserror.workspace = true
 uuid.workspace = true
 chrono.workspace = true
+filter-gen = { path = "../../crates/filter-gen" }
 
 [dev-dependencies]
 tokio-test.workspace = true

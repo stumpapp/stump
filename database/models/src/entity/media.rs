@@ -1,20 +1,25 @@
 use crate::entity::age_restriction;
 use async_graphql::SimpleObject;
 use async_trait::async_trait;
+use filter_gen::Ordering;
 use sea_orm::{
-	prelude::*, ActiveValue, Condition, FromQueryResult, JoinType, QuerySelect,
+	prelude::*, ActiveValue, Condition, FromQueryResult, JoinType, QueryOrder,
+	QuerySelect,
 };
 
 use crate::{
 	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
-	shared::enums::FileStatus,
+	shared::{
+		enums::FileStatus,
+		ordering::{OrderBy, OrderDirection},
+	},
 };
 
 use super::{
 	library_hidden_to_user, media_metadata, series, series_metadata, user::AuthUser,
 };
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Ordering)]
 #[graphql(name = "MediaModel")]
 #[sea_orm(table_name = "media")]
 pub struct Model {

@@ -1,11 +1,23 @@
 use async_graphql::SimpleObject;
+use filter_gen::Ordering;
 use sea_orm::{prelude::*, QueryOrder, QuerySelect};
 use serde::Serialize;
 
-use crate::shared::page_dimension::PageAnalysis;
+use crate::shared::{
+	ordering::{OrderBy, OrderDirection},
+	page_dimension::PageAnalysis,
+};
 
 #[derive(
-	Clone, Default, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Serialize,
+	Clone,
+	Default,
+	Debug,
+	PartialEq,
+	DeriveEntityModel,
+	Eq,
+	SimpleObject,
+	Serialize,
+	Ordering,
 )]
 #[graphql(name = "MediaMetadataModel")]
 #[sea_orm(table_name = "media_metadata")]

@@ -184,6 +184,11 @@ type CleanLibraryResponse {
 	isEmpty: Boolean!
 }
 
+input CombinedOrderByField @oneOf {
+	mediaOrderBy: MediaOrderBy
+	mediaMetadataOrderBy: MediaMetadataOrderBy
+}
+
 input ComputedFilterReadingStatus @oneOf {
 	is: ReadingStatus
 	isNot: ReadingStatus
@@ -697,6 +702,24 @@ input LogFilterInput {
 	_or: [LogFilterInput!] = null
 }
 
+input LogModelOrderBy {
+	orderBys: [LogModelOrderByField!]!
+}
+
+input LogModelOrderByField {
+	field: LogModelOrdering!
+	direction: OrderDirection!
+}
+
+enum LogModelOrdering {
+	ID
+	LEVEL
+	MESSAGE
+	TIMESTAMP
+	JOB_ID
+	CONTEXT
+}
+
 type Media {
 	"The unique identifier for the media"
 	id: String!
@@ -848,6 +871,40 @@ input MediaMetadataFilterInput {
 	_or: [MediaMetadataFilterInput!] = null
 }
 
+enum MediaMetadataModelOrdering {
+	ID
+	MEDIA_ID
+	TITLE
+	SERIES
+	NUMBER
+	VOLUME
+	SUMMARY
+	NOTES
+	GENRE
+	YEAR
+	MONTH
+	DAY
+	WRITERS
+	PENCILLERS
+	INKERS
+	COLORISTS
+	LETTERERS
+	COVER_ARTISTS
+	EDITORS
+	PUBLISHER
+	LINKS
+	CHARACTERS
+	TEAMS
+	PAGE_COUNT
+	AGE_RATING
+	PAGE_ANALYSIS
+}
+
+input MediaMetadataOrderBy {
+	field: MediaMetadataModelOrdering!
+	direction: OrderDirection!
+}
+
 type MediaMetadataOverview {
 	genres: [String!]!
 	writers: [String!]!
@@ -859,6 +916,32 @@ type MediaMetadataOverview {
 	publishers: [String!]!
 	characters: [String!]!
 	teams: [String!]!
+}
+
+enum MediaModelOrdering {
+	ID
+	NAME
+	SIZE
+	EXTENSION
+	PAGES
+	UPDATED_AT
+	CREATED_AT
+	MODIFIED_AT
+	HASH
+	KOREADER_HASH
+	PATH
+	STATUS
+	SERIES_ID
+	DELETED_AT
+}
+
+input MediaOrderBy {
+	field: MediaModelOrdering!
+	direction: OrderDirection!
+}
+
+input MediaWithMetadataOrderBy {
+	orderBys: [CombinedOrderByField!]!
 }
 
 type Mutation {
@@ -1100,6 +1183,11 @@ type OffsetPaginationInfo {
 	zeroBased: Boolean!
 }
 
+enum OrderDirection {
+	ASC
+	DESC
+}
+
 "A struct containing the various analyses of a book in Stump, e.g., page dimensions."
 type PageAnalysis {
 	dimensions: [PageDimension!]!
@@ -1186,7 +1274,7 @@ type Query {
 	emailDevices: [RegisteredEmailDevice!]!
 	emailDeviceById(id: Int!): RegisteredEmailDevice
 	listDirectory(pagination: Pagination!, input: DirectoryListingInput): PaginatedDirectoryListingResponse!
-	media(filter: MediaFilterInput!, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	media(filter: MediaFilterInput!, orderBy: MediaWithMetadataOrderBy, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	mediaById(id: ID!): Media
 	mediaByPath(path: String!): Media
 	keepReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
@@ -1228,7 +1316,7 @@ type Query {
 	recentlyAddedSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
 	"Returns a list of all tags."
 	tags: [Tag!]!
-	logs(filter: LogFilterInput!, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLogResponse!
+	logs(filter: LogFilterInput!, orderBy: LogModelOrderBy, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLogResponse!
 	"""
 	Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
 	~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.

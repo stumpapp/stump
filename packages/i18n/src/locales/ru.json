@@ -364,6 +364,10 @@
 					"label": "Обработка метаданных",
 					"description": "Извлечь любые метаданные из файлов библиотеки и сохранить результаты в базе данных"
 				},
+				"watch": {
+					"label": "Watch",
+					"description": "Watch the library directory for changes and update the database accordingly"
+				},
 				"generateFileHashes": {
 					"label": "Генерировать хэши файлов",
 					"description": "Сгенерировать хэш каждого файла в библиотеке для обнаружения дубликатов"
@@ -452,6 +456,7 @@
 					"ignoreRules": "Правила игнорирования",
 					"convertRar": "Преобразование RAR/CBR",
 					"deleteConversions": "Удалить преобразованные файлы",
+					"watch": "Watch directory for changes",
 					"processMetadata": "Обработка метаданных",
 					"generateFileHashes": "Генерировать хэши файлов"
 				}

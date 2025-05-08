@@ -90,6 +90,23 @@ fn find_attr(
 
 const RAW_IDENTIFIER: &str = "r#";
 
+fn is_skip_column(attrs: &Vec<syn::Attribute>) -> bool {
+	attrs
+		.iter()
+		.filter(|attr| attr.path().is_ident("ordering"))
+		.any(|attr| {
+			let mut is_skip = false;
+			let _ = attr.parse_nested_meta(|meta| {
+				if meta.path.is_ident("skip") {
+					is_skip = true;
+					return Ok(());
+				}
+				Ok(())
+			});
+			is_skip
+		})
+}
+
 fn build_field_to_sea_orm_col_map(
 	input: &syn::DeriveInput,
 ) -> Result<HashMap<syn::Ident, syn::Ident>, syn::Error> {
@@ -99,6 +116,11 @@ fn build_field_to_sea_orm_col_map(
 		if let syn::Fields::Named(fields) = &item_struct.fields {
 			for field in &fields.named {
 				if let Some(ident) = &field.ident {
+					// Skip fields with the `ordering(skip)` attribute
+					if is_skip_column(&field.attrs) {
+						continue;
+					}
+
 					let enum_name = find_attr("sea_orm", "enum_name", &field.attrs)?;
 					let sea_orm_field_ident = if let Some(enum_name) = enum_name {
 						enum_name
@@ -252,6 +274,12 @@ fn get_enum_variants(
 				"Field must have an identifier to be used in ordering",
 			)
 		})?;
+
+		// Skip fields with the `ordering(skip)` attribute
+		if is_skip_column(&field.attrs) {
+			continue;
+		}
+
 		let variant_ident = col_map.get(&field_ident).ok_or(Error::new(
 			field.span(),
 			format!("Field {} not found in sea_orm column map", field_ident),
@@ -268,6 +296,44 @@ mod tests {
 
 	fn str_to_ident(s: &str) -> syn::Ident {
 		syn::Ident::new(s, proc_macro2::Span::call_site())
+	}
+
+	#[test]
+	fn test_skip() {
+		let input = quote! {
+			struct Foo {
+				#[ordering(skip)]
+				a: i32,
+				b: String,
+			}
+		};
+
+		let input = parse2::<syn::DeriveInput>(input).unwrap();
+
+		let col_map = build_field_to_sea_orm_col_map(&input).unwrap();
+		assert_eq!(col_map.len(), 1);
+		assert_eq!(*col_map.get(&str_to_ident("b")).unwrap(), str_to_ident("B"));
+
+		let fields = match input.data {
+			syn::Data::Struct(data) => data.fields,
+			_ => panic!("Expected a struct"),
+		};
+
+		let enum_def = generate_enum_def(
+			&str_to_ident("Foo"),
+			&str_to_ident("FooOrdering"),
+			&fields,
+			&col_map,
+		)
+		.unwrap();
+
+		let enum_def_expected = quote! {
+			#[derive(Debug, Clone, Copy, PartialEq, Eq, strum::EnumString, strum::Display, async_graphql::Enum)]
+			pub enum FooOrdering {
+				B
+			}
+		};
+		assert_eq!(enum_def.to_string(), enum_def_expected.to_string());
 	}
 
 	#[test]

@@ -365,8 +365,8 @@
 					"description": "Extrahovat metadata ze souborů knihovny a ukládat výsledky v databázi"
 				},
 				"watch": {
-					"label": "Watch",
-					"description": "Watch the library directory for changes and update the database accordingly"
+					"label": "Sledování",
+					"description": "Sledujte adresář knihovny pro změny a podle toho aktualizujte databázi"
 				},
 				"generateFileHashes": {
 					"label": "Generovat hash souborů",
@@ -456,7 +456,7 @@
 					"ignoreRules": "Pravidla Ignorování",
 					"convertRar": "Konverze RAR/CBR",
 					"deleteConversions": "Smazat převedené soubory",
-					"watch": "Watch directory for changes",
+					"watch": "Sledovaný adresář pro změny",
 					"processMetadata": "Zpracování metadat",
 					"generateFileHashes": "Generovat hash souborů"
 				}

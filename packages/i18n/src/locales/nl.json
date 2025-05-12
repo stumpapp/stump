@@ -76,7 +76,7 @@
 				"description": "The name of your book club"
 			},
 			"description": {
-				"label": "Description",
+				"label": "Omschrijving",
 				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
 				"description": "An optional, short description of your book club"
 			},

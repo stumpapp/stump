@@ -42,6 +42,10 @@ export type BookPreferences = {
 	 */
 	fontFamily?: string
 	/**
+	 * The line height to use for the book. This will have no effect if the book is image-based
+	 */
+	lineHeight?: number
+	/**
 	 * The theme to use for the book. This will have no effect if the book is image-based
 	 */
 	theme?: string
@@ -151,6 +155,7 @@ export const createReaderStore = (storage?: StateStorage) =>
 							},
 							showToolBar: false,
 							fontSize: 13,
+							lineHeight: 1.5,
 							brightness: 1,
 							readingMode: 'paged',
 							readingDirection: 'ltr',

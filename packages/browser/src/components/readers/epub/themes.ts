@@ -29,6 +29,7 @@ export const applyTheme = (theme: EpubTheme, preferences: BookPreferences) => {
 		: undefined
 	const fontStyles = {
 		...(fontFamily ? { 'font-family': fontFamily } : {}),
+		...(preferences.lineHeight ? { 'line-height': `${preferences.lineHeight}` } : {}),
 	}
 
 	return {

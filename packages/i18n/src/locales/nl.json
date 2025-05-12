@@ -71,7 +71,7 @@
 	"createOrUpdateBookClubForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
+				"label": "Naam",
 				"placeholder": "My book club",
 				"description": "The name of your book club"
 			},

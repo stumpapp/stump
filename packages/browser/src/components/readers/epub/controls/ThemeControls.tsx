@@ -6,6 +6,7 @@ import FontFamily from './FontFamily'
 import FontSizeControl from './FontSizeControl'
 import LineHeightControl from './LineHeightControl'
 import ReadingDirection from './ReadingDirection'
+import ReadingMode from './ReadingMode'
 
 export default function ThemeControls() {
 	return (
@@ -23,6 +24,7 @@ export default function ThemeControls() {
 				<FontSizeControl />
 				<LineHeightControl />
 				<ReadingDirection />
+				<ReadingMode />
 			</Dialog.Content>
 		</Dialog>
 	)
@@ -43,6 +45,7 @@ export default function ThemeControls() {
 				<FontSizeControl />
 				<LineHeightControl />
 				<ReadingDirection />
+				<ReadingMode />
 			</Popover.Content>
 		</Popover>
 	)

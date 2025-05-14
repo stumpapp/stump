@@ -42,6 +42,9 @@ export default {
 			fontSize: {
 				xxs: '0.65rem',
 			},
+			lineHeight: {
+				none: '1',
+			},
 			keyframes: {
 				'accordion-down': {
 					from: { height: '0' },

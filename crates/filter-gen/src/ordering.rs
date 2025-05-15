@@ -164,7 +164,7 @@ fn generate_order_by_impl(
 	let order_by_impl = quote! {
 		impl OrderBy<Entity, #order_by_ident> for #order_by_ident {
 			fn add_order_by(
-				order_by: &Vec<#order_by_ident>,
+				order_by: &[#order_by_ident],
 				query: sea_orm::Select<Entity>,
 			) -> Result<sea_orm::Select<Entity>, sea_orm::ColumnFromStrErr> {
 				if order_by.is_empty() {

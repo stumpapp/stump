@@ -184,11 +184,6 @@ type CleanLibraryResponse {
 	isEmpty: Boolean!
 }
 
-input CombinedOrderByField @oneOf {
-	mediaOrderBy: MediaOrderBy
-	mediaMetadataOrderBy: MediaMetadataOrderBy
-}
-
 input ComputedFilterReadingStatus @oneOf {
 	is: ReadingStatus
 	isNot: ReadingStatus
@@ -896,7 +891,7 @@ enum MediaMetadataModelOrdering {
 	PAGE_ANALYSIS
 }
 
-input MediaMetadataOrderBy {
+input MediaMetadataOrderByField {
 	field: MediaMetadataModelOrdering!
 	direction: OrderDirection!
 }
@@ -931,7 +926,12 @@ enum MediaModelOrdering {
 	DELETED_AT
 }
 
-input MediaOrderBy {
+input MediaOrderBy @oneOf {
+	media: MediaOrderByField
+	metadata: MediaMetadataOrderByField
+}
+
+input MediaOrderByField {
 	field: MediaModelOrdering!
 	direction: OrderDirection!
 }
@@ -1266,7 +1266,7 @@ type Query {
 	emailDevices: [RegisteredEmailDevice!]!
 	emailDeviceById(id: Int!): RegisteredEmailDevice
 	listDirectory(pagination: Pagination!, input: DirectoryListingInput): PaginatedDirectoryListingResponse!
-	media(filter: MediaFilterInput!, orderBy: [CombinedOrderByField!]!, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	media(filter: MediaFilterInput!, orderBy: [MediaOrderBy!]! = [{media: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	mediaById(id: ID!): Media
 	mediaByPath(path: String!): Media
 	keepReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!

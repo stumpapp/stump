@@ -6,6 +6,7 @@ pub mod input;
 pub mod loader;
 pub mod mutation;
 pub mod object;
+pub mod order;
 pub mod pagination;
 pub mod query;
 pub mod schema;

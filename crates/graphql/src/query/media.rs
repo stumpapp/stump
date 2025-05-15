@@ -1,70 +1,24 @@
-use async_graphql::{Context, InputObject, Object, OneofObject, Result, ID};
-use heck::ToSnakeCase;
+use async_graphql::{Context, Object, Result, ID};
 use models::{
-	entity::{finished_reading_session, media, media_metadata, reading_session},
-	shared::ordering::{OrderBy, OrderDirection},
+	entity::{finished_reading_session, media, reading_session},
+	shared::ordering::OrderBy,
 };
 use sea_orm::{
 	prelude::*,
 	sea_query::{ExprTrait, Query},
 	Condition, JoinType, QueryOrder, QuerySelect,
 };
-use std::str::FromStr;
 
 use crate::{
 	data::{CoreContext, RequestContext},
 	filter::{media::MediaFilterInput, IntoFilter},
 	object::media::Media,
+	order::MediaOrderBy,
 	pagination::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
 		PaginationValidator,
 	},
 };
-
-#[derive(InputObject, Clone)]
-#[graphql(concrete(name = "MediaOrderBy", params(media::MediaModelOrdering)))]
-#[graphql(concrete(
-	name = "MediaMetadataOrderBy",
-	params(media_metadata::MediaMetadataModelOrdering)
-))]
-pub struct OrderByField<OrderBy: Send + Sync + async_graphql::InputType> {
-	pub field: OrderBy,
-	pub direction: OrderDirection,
-}
-
-#[derive(OneofObject, Clone)]
-pub enum CombinedOrderByField {
-	MediaOrderBy(OrderByField<media::MediaModelOrdering>),
-	MediaMetadataOrderBy(OrderByField<media_metadata::MediaMetadataModelOrdering>),
-}
-
-fn add_order_by(
-	order_by: &Vec<CombinedOrderByField>,
-	query: sea_orm::Select<media::Entity>,
-) -> Result<sea_orm::Select<media::Entity>, sea_orm::ColumnFromStrErr> {
-	if order_by.is_empty() {
-		return Ok(query);
-	}
-
-	// TODO:(graphql) this is hacky, it should done as a direct column match
-	order_by
-		.iter()
-		.try_fold(query, |query, order_by| match order_by {
-			CombinedOrderByField::MediaOrderBy(order_by) => {
-				let order = sea_orm::Order::from(order_by.direction);
-				let field =
-					media::Column::from_str(&order_by.field.to_string().to_snake_case())?;
-				Ok(query.order_by(field, order))
-			},
-			CombinedOrderByField::MediaMetadataOrderBy(order_by) => {
-				let order = sea_orm::Order::from(order_by.direction);
-				let field = media_metadata::Column::from_str(
-					&order_by.field.to_string().to_snake_case(),
-				)?;
-				Ok(query.order_by(field, order))
-			},
-		})
-}
 
 #[derive(Default)]
 pub struct MediaQuery;
@@ -75,7 +29,9 @@ impl MediaQuery {
 		&self,
 		ctx: &Context<'_>,
 		filter: MediaFilterInput,
-		order_by: Vec<CombinedOrderByField>,
+		#[graphql(default_with = "MediaOrderBy::default_vec()")] order_by: Vec<
+			MediaOrderBy,
+		>,
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<Media>> {
@@ -90,8 +46,7 @@ impl MediaQuery {
 
 		let conditions = filter.into_filter();
 		let mut query = media::ModelWithMetadata::find_for_user(user).filter(conditions);
-		// TODO:(graphql) default order by?
-		query = add_order_by(&order_by, query)?;
+		query = MediaOrderBy::add_order_by(&order_by, query)?;
 
 		if should_join_sessions {
 			let user_id = user.id.clone();
@@ -439,7 +394,8 @@ impl MediaQuery {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::tests::common::*;
+	use crate::{order::OrderByField, tests::common::*};
+	use models::{entity::media_metadata, shared::ordering::OrderDirection};
 	use pretty_assertions::assert_eq;
 	use sea_orm::{sea_query::SqliteQueryBuilder, QuerySelect, QueryTrait};
 
@@ -448,17 +404,17 @@ mod tests {
 		let user = get_default_user();
 		let query = media::ModelWithMetadata::find_for_user(&user);
 		let order_by = vec![
-			CombinedOrderByField::MediaOrderBy(OrderByField {
+			MediaOrderBy::Media(OrderByField {
 				field: media::MediaModelOrdering::Name,
 				direction: OrderDirection::Asc,
 			}),
-			CombinedOrderByField::MediaMetadataOrderBy(OrderByField {
+			MediaOrderBy::Metadata(OrderByField {
 				field: media_metadata::MediaMetadataModelOrdering::MediaId,
 				direction: OrderDirection::Desc,
 			}),
 		];
 
-		let query = add_order_by(&order_by, query).unwrap();
+		let query = MediaOrderBy::add_order_by(&order_by, query).unwrap();
 		let query = query
 			.select_only()
 			.into_query()

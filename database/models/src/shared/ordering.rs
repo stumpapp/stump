@@ -18,7 +18,7 @@ impl From<OrderDirection> for sea_orm::Order {
 
 pub trait OrderBy<ModelType: sea_orm::EntityTrait, OrderByType> {
 	fn add_order_by(
-		order_by: &Vec<OrderByType>,
+		order_by: &[OrderByType],
 		query: sea_orm::Select<ModelType>,
 	) -> Result<sea_orm::Select<ModelType>, sea_orm::ColumnFromStrErr>;
 }

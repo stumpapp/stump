@@ -66,6 +66,10 @@ jobs:
             (echo "Please generate updated typescript bindings with \`cargo codegen -- --skip-prisma\`" \
             && exit 1)
 
+      - name: Verify GraphQL schema
+        run: |
+          cargo dump-schema -- --check
+
       - name: Run tests
         run: cargo test
 

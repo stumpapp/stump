@@ -749,6 +749,20 @@ export type LogFilterInput = {
   level?: InputMaybe<FieldFilterString>;
 };
 
+export type LogModelOrderBy = {
+  direction: OrderDirection;
+  field: LogModelOrdering;
+};
+
+export enum LogModelOrdering {
+  Context = 'CONTEXT',
+  Id = 'ID',
+  JobId = 'JOB_ID',
+  Level = 'LEVEL',
+  Message = 'MESSAGE',
+  Timestamp = 'TIMESTAMP'
+}
+
 export type Media = {
   __typename?: 'Media';
   /** The timestamp of the creation of the media */
@@ -908,6 +922,40 @@ export type MediaMetadataFilterInput = {
   year?: InputMaybe<NumericFilterI32>;
 };
 
+export enum MediaMetadataModelOrdering {
+  AgeRating = 'AGE_RATING',
+  Characters = 'CHARACTERS',
+  Colorists = 'COLORISTS',
+  CoverArtists = 'COVER_ARTISTS',
+  Day = 'DAY',
+  Editors = 'EDITORS',
+  Genre = 'GENRE',
+  Id = 'ID',
+  Inkers = 'INKERS',
+  Letterers = 'LETTERERS',
+  Links = 'LINKS',
+  MediaId = 'MEDIA_ID',
+  Month = 'MONTH',
+  Notes = 'NOTES',
+  Number = 'NUMBER',
+  PageAnalysis = 'PAGE_ANALYSIS',
+  PageCount = 'PAGE_COUNT',
+  Pencillers = 'PENCILLERS',
+  Publisher = 'PUBLISHER',
+  Series = 'SERIES',
+  Summary = 'SUMMARY',
+  Teams = 'TEAMS',
+  Title = 'TITLE',
+  Volume = 'VOLUME',
+  Writers = 'WRITERS',
+  Year = 'YEAR'
+}
+
+export type MediaMetadataOrderByField = {
+  direction: OrderDirection;
+  field: MediaMetadataModelOrdering;
+};
+
 export type MediaMetadataOverview = {
   __typename?: 'MediaMetadataOverview';
   characters: Array<Scalars['String']['output']>;
@@ -920,6 +968,32 @@ export type MediaMetadataOverview = {
   publishers: Array<Scalars['String']['output']>;
   teams: Array<Scalars['String']['output']>;
   writers: Array<Scalars['String']['output']>;
+};
+
+export enum MediaModelOrdering {
+  CreatedAt = 'CREATED_AT',
+  DeletedAt = 'DELETED_AT',
+  Extension = 'EXTENSION',
+  Hash = 'HASH',
+  Id = 'ID',
+  KoreaderHash = 'KOREADER_HASH',
+  ModifiedAt = 'MODIFIED_AT',
+  Name = 'NAME',
+  Pages = 'PAGES',
+  Path = 'PATH',
+  SeriesId = 'SERIES_ID',
+  Size = 'SIZE',
+  Status = 'STATUS',
+  UpdatedAt = 'UPDATED_AT'
+}
+
+export type MediaOrderBy =
+  { media: MediaOrderByField; metadata?: never; }
+  |  { media?: never; metadata: MediaMetadataOrderByField; };
+
+export type MediaOrderByField = {
+  direction: OrderDirection;
+  field: MediaModelOrdering;
 };
 
 export type Mutation = {
@@ -1448,6 +1522,11 @@ export type OffsetPaginationInfo = {
   zeroBased: Scalars['Boolean']['output'];
 };
 
+export enum OrderDirection {
+  Asc = 'ASC',
+  Desc = 'DESC'
+}
+
 /** A struct containing the various analyses of a book in Stump, e.g., page dimensions. */
 export type PageAnalysis = {
   __typename?: 'PageAnalysis';
@@ -1663,12 +1742,14 @@ export type QueryLoginActivityByIdArgs = {
 
 export type QueryLogsArgs = {
   filter: LogFilterInput;
+  orderBy: Array<LogModelOrderBy>;
   pagination?: Pagination;
 };
 
 
 export type QueryMediaArgs = {
   filter: MediaFilterInput;
+  orderBy?: Array<MediaOrderBy>;
   pagination?: Pagination;
 };
 

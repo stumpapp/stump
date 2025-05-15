@@ -1,10 +1,9 @@
-import type { ReadingDirection, ReadingMode } from '@stump/sdk'
+import { ReadingDirection, ReadingImageScaleFit, ReadingMode } from '@stump/graphql'
 import { create } from 'zustand'
 import { createJSONStorage, devtools, persist, StateStorage } from 'zustand/middleware'
 
-export type BookImageScalingFit = 'width' | 'height' | 'none'
 export type BookImageScaling = {
-	scaleToFit: BookImageScalingFit
+	scaleToFit: ReadingImageScaleFit
 }
 
 /**
@@ -131,17 +130,17 @@ export const createReaderStore = (storage?: StateStorage) =>
 							showToolBar: false,
 							fontSize: 13,
 							brightness: 1,
-							readingMode: 'paged',
-							readingDirection: 'ltr',
+							readingMode: ReadingMode.Paged,
+							readingDirection: ReadingDirection.Ltr,
 							imageScaling: {
-								scaleToFit: 'height',
+								scaleToFit: ReadingImageScaleFit.Height,
 							},
 						},
 					}) as ReaderStore,
 				{
 					name: 'stump-new-reader-store',
 					storage: storage ? createJSONStorage(() => storage) : undefined,
-					version: 3,
+					version: 4,
 				},
 			),
 		),

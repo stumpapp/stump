@@ -758,6 +758,7 @@ type Media {
 	metadata: MediaMetadata
 	series: Series!
 	library: Library!
+	libraryConfig: LibraryConfig!
 	"""
 	A reference to the thumbnail image for the media. This will be a fully
 	qualified URL to the image.

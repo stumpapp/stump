@@ -3,7 +3,7 @@ use async_graphql::{
 };
 
 use models::{
-	entity::{library, media, series},
+	entity::{library, library_config, media, series},
 	shared::image::ImageRef,
 };
 use sea_orm::{prelude::*, sea_query::Query, QuerySelect};
@@ -22,6 +22,7 @@ use crate::{
 
 use super::{
 	library::Library,
+	library_config::LibraryConfig,
 	media_metadata::MediaMetadata,
 	reading_session::{ActiveReadingSession, FinishedReadingSession},
 	series::Series,
@@ -87,6 +88,27 @@ impl Media {
 			.ok_or("Library not found")?;
 
 		Ok(Library::from(model))
+	}
+
+	async fn library_config(&self, ctx: &Context<'_>) -> Result<LibraryConfig> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
+		let model = library_config::Entity::find()
+			.filter(
+				library_config::Column::LibraryId.in_subquery(
+					Query::select()
+						.column(series::Column::LibraryId)
+						.from(series::Entity)
+						.and_where(series::Column::Id.eq(series_id))
+						.to_owned(),
+				),
+			)
+			.one(conn)
+			.await?
+			.ok_or("Library config not found")?;
+
+		Ok(LibraryConfig::from(model))
 	}
 
 	/// A reference to the thumbnail image for the media. This will be a fully

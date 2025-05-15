@@ -17,6 +17,7 @@ import paths from '@/paths'
 import { PDF_EXTENSION } from '@/utils/patterns'
 
 import BookFileInformation from './BookFileInformation'
+import BookReaderDropdown from './BookReaderDropdown'
 import BooksAfterCursor from './BooksAfterCursor'
 import DownloadMediaButton from './DownloadMediaButton'
 
@@ -109,7 +110,7 @@ export default function BookOverviewScene() {
 							{!isAtLeastTablet && <Spacer />}
 
 							<div className="flex w-full flex-col gap-2 md:flex-row md:items-center">
-								{/* <BookReaderDropdown book={media} /> */}
+								<BookReaderDropdown book={media} />
 								{/* <BookCompletionToggleButton book={media} /> */}
 								{media.extension?.match(PDF_EXTENSION) && (
 									<ButtonOrLink

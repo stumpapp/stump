@@ -784,6 +784,7 @@ export type Media = {
    */
   koreaderHash?: Maybe<Scalars['String']['output']>;
   library: Library;
+  libraryConfig: LibraryConfig;
   metadata?: Maybe<MediaMetadata>;
   /**
    * The timestamp of when the underlying file was last modified on disk. This will only be set if
@@ -2353,6 +2354,21 @@ export type BooksAfterCurrentQueryQueryVariables = Exact<{
 
 export type BooksAfterCurrentQueryQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', nextInSeries: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, resolvedName: string, pages: number, size: number, status: FileStatus, thumbnail: { __typename?: 'ImageRef', url: string }, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null } | null, readHistory: Array<{ __typename: 'FinishedReadingSession' }> }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } } | null };
 
+export type BookReaderSceneQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type BookReaderSceneQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, resolvedName: string, pages: number, extension: string, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null } | null, libraryConfig: { __typename?: 'LibraryConfig', defaultReadingImageScaleFit: ReadingImageScaleFit, defaultReadingMode: ReadingMode, defaultReadingDir: ReadingDirection } } | null };
+
+export type UpdateReadProgressMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  page: Scalars['Int']['input'];
+}>;
+
+
+export type UpdateReadProgressMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename: 'ReadingProgressOutput' } };
+
 export type ContinueReadingMediaQueryQueryVariables = Exact<{
   pagination: Pagination;
 }>;
@@ -2542,6 +2558,33 @@ export const BooksAfterCurrentQueryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<BooksAfterCurrentQueryQuery, BooksAfterCurrentQueryQueryVariables>;
+export const BookReaderSceneDocument = new TypedDocumentString(`
+    query BookReaderScene($id: ID!) {
+  mediaById(id: $id) {
+    id
+    resolvedName
+    pages
+    extension
+    readProgress {
+      percentageCompleted
+      epubcfi
+      page
+    }
+    libraryConfig {
+      defaultReadingImageScaleFit
+      defaultReadingMode
+      defaultReadingDir
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<BookReaderSceneQuery, BookReaderSceneQueryVariables>;
+export const UpdateReadProgressDocument = new TypedDocumentString(`
+    mutation UpdateReadProgress($id: ID!, $page: Int!) {
+  updateMediaProgress(id: $id, page: $page) {
+    __typename
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateReadProgressMutation, UpdateReadProgressMutationVariables>;
 export const ContinueReadingMediaQueryDocument = new TypedDocumentString(`
     query ContinueReadingMediaQuery($pagination: Pagination!) {
   keepReading(pagination: $pagination) {

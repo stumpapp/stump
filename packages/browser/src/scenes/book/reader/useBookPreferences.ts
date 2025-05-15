@@ -1,11 +1,17 @@
 import { BookPreferences, ReaderSettings, ReaderStore } from '@stump/client'
-import type { LibraryConfig, Media } from '@stump/sdk'
+import { PickSelect } from '@stump/components'
+import {
+	BookReaderSceneQuery,
+	ReadingDirection,
+	ReadingImageScaleFit,
+	ReadingMode,
+} from '@stump/graphql'
 import { useCallback, useMemo } from 'react'
 
 import { useReaderStore } from '@/stores'
 
 type Params = {
-	book: Media
+	book: NonNullable<BookReaderSceneQuery['mediaById']>
 }
 
 type Return = Omit<ReaderStore, 'bookPreferences' | 'setBookPreferences' | 'clearStore'> & {
@@ -32,7 +38,7 @@ export function useBookPreferences({ book }: Params): Return {
 	 * The library configuration, used for picking default reader settings. This realistically
 	 * should never be null once the query resolves
 	 */
-	const libraryConfig = useMemo(() => book?.series?.library?.config, [book])
+	const libraryConfig = useMemo(() => book.libraryConfig, [book])
 
 	const bookPreferences = useMemo(
 		() => buildPreferences(storedBookPreferences ?? {}, settings, libraryConfig),
@@ -57,20 +63,22 @@ export function useBookPreferences({ book }: Params): Return {
 	}
 }
 
-const defaultsFromLibraryConfig = (libraryConfig?: LibraryConfig): BookPreferences =>
+const defaultsFromLibraryConfig = (
+	libraryConfig?: PickSelect<NonNullable<BookReaderSceneQuery['mediaById']>, 'libraryConfig'>,
+): BookPreferences =>
 	({
 		brightness: 1,
 		imageScaling: {
-			scaleToFit: libraryConfig?.default_reading_image_scale_fit || 'height',
+			scaleToFit: libraryConfig?.defaultReadingImageScaleFit || ReadingImageScaleFit.Height,
 		},
-		readingDirection: libraryConfig?.default_reading_dir || 'ltr',
-		readingMode: libraryConfig?.default_reading_mode || 'paged',
+		readingDirection: libraryConfig?.defaultReadingDir || ReadingDirection.Ltr,
+		readingMode: libraryConfig?.defaultReadingMode || ReadingMode.Paged,
 	}) as BookPreferences
 
 const buildPreferences = (
 	preferences: Partial<BookPreferences>,
 	settings: ReaderSettings,
-	libraryConfig?: LibraryConfig,
+	libraryConfig?: PickSelect<NonNullable<BookReaderSceneQuery['mediaById']>, 'libraryConfig'>,
 ): BookPreferences => ({
 	...settings,
 	...defaultsFromLibraryConfig(libraryConfig),

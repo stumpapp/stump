@@ -29,7 +29,8 @@ export default function DefaultLineHeight() {
 				value={lineHeight ?? 1.5}
 				onChange={onValueChange}
 				type="number"
-				min={0}
+				min={1.0}
+				max={3.0}
 				step={0.1}
 				variant="primary"
 			/>

@@ -1,4 +1,5 @@
 import { Label, NativeSelect } from '@stump/components'
+import { ReadingMode as ReadingModeType } from '@stump/sdk'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
@@ -14,7 +15,7 @@ export default function ReadingMode() {
 	} = useBookPreferences({ book })
 
 	const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		setBookPreferences({ readingMode: e.target.value as any })
+		setBookPreferences({ readingMode: e.target.value as ReadingModeType })
 	}
 
 	return (

@@ -22,13 +22,8 @@ export default function LineHeightControl() {
 
 	const handleSetLineHeight = useCallback(
 		(newHeight: number) => {
-			// Limit to a reasonable minimum of 1.0
-			if (newHeight < 1.0) {
-				return
-				// Limit to a reasonable maximum of 3.0
-			} else if (newHeight > 3.0) {
-				return
-			} else {
+			// Limit to reasonable minimum and maximum
+			if (newHeight >= 1.0 && newHeight <= 3.0) {
 				// Round to 1 decimal place for clean display
 				setBookPreferences({ lineHeight: Math.round(newHeight * 10) / 10 })
 			}

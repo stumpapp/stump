@@ -122,11 +122,12 @@ export const intoAPIFilter = (input: z.infer<typeof filter>): MediaSmartFilter =
 		// smart filter solution is in place.
 		.when(
 			(x) => x === 'book' && input.field === 'tags',
-			() => ({
-				tags: {
-					name: fieldValue,
-				} as MediaSmartFilter,
-			}),
+			() =>
+				({
+					tags: {
+						name: fieldValue,
+					},
+				}) as MediaSmartFilter,
 		)
 		.with(
 			'book',
@@ -208,7 +209,12 @@ export const intoFormFilter = (input: MediaSmartFilter): z.infer<typeof filter> 
 	const conversion = match(source)
 		.with('book', () => {
 			const castedInput = input as MediaSmartFilter
-			const filterValue = getProperty(castedInput, field || '') // { [operation]: value }
+			const filterValue =
+				// Note: This is a temporary hack until the migration to SeaORM is complete and a better
+				// smart filter solution is in place.
+				'tags' in castedInput
+					? getProperty(castedInput.tags, 'name')
+					: getProperty(castedInput, field || '') // { [operation]: value }
 			const operation = 'from' in filterValue ? 'range' : Object.keys(filterValue || {})[0]
 			const value = match(operation)
 				.with('range', () => filterValue)

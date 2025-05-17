@@ -118,6 +118,16 @@ export const intoAPIFilter = (input: z.infer<typeof filter>): MediaSmartFilter =
 		.otherwise(() => ({ [input.operation]: input.value }))
 
 	const converted = match(input.source)
+		// Note: This is a temporary hack until the migration to SeaORM is complete and a better
+		// smart filter solution is in place.
+		.when(
+			(x) => x === 'book' && input.field === 'tags',
+			() => ({
+				tags: {
+					name: fieldValue,
+				} as MediaSmartFilter,
+			}),
+		)
 		.with(
 			'book',
 			() =>

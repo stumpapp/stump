@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::prisma::{library, media, media_metadata, series, series_metadata};
+use crate::prisma::{library, media, media_metadata, series, series_metadata, tag};
 use smart_filter_gen::generate_smart_filter;
 
 // TODO: This rough implementation is not very great. It is very verbose and not very ergonomic. It _technically_
@@ -358,6 +358,14 @@ pub enum MediaMetadataSmartFilter {
 #[generate_smart_filter]
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
 #[serde(untagged)]
+#[prisma_table("tag")]
+pub enum TagSmartFilter {
+	Name { name: String },
+}
+
+#[generate_smart_filter]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
+#[serde(untagged)]
 #[prisma_table("media")]
 pub enum MediaSmartFilter {
 	Name { name: String },
@@ -370,6 +378,7 @@ pub enum MediaSmartFilter {
 	Pages { pages: i32 },
 	Metadata { metadata: MediaMetadataSmartFilter },
 	Series { series: SeriesSmartFilter },
+	Tags { tags: TagSmartFilter },
 }
 
 #[cfg(test)]

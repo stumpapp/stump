@@ -1322,6 +1322,10 @@
 						"fontFamily": {
 							"label": "Семейство шрифтов",
 							"description": "Шрифт, используемый в читалке"
+						},
+						"lineHeight": {
+							"label": "Line height",
+							"description": "The height of the lines in the reader"
 						}
 					}
 				},

@@ -186,6 +186,15 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			rendition.themes.select('stump-light')
 		}
 		rendition.direction(preferences.readingDirection)
+
+		// Set flow based on reading mode
+		if (preferences.readingMode === 'continuous:vertical') {
+			rendition.flow('scrolled-doc')
+		} else {
+			// Default to paginated for 'paged' mode
+			rendition.flow('paginated')
+		}
+
 		if (preferences.fontSize) {
 			rendition.themes.fontSize(`${preferences.fontSize}px`)
 		}

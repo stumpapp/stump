@@ -1322,6 +1322,10 @@
 						"fontFamily": {
 							"label": "Typsnittsfamilj",
 							"description": "Typsnittet som används i läsaren"
+						},
+						"lineHeight": {
+							"label": "Line height",
+							"description": "The height of the lines in the reader"
 						}
 					}
 				},

@@ -8,6 +8,7 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { useTheme } from '@/hooks'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
+import { FontFamilyKey, getFontFamily, getFontPath, getFontCssPath } from '@/utils/fonts'
 
 import EpubReaderContainer from './EpubReaderContainer'
 import { applyTheme, stumpDark } from './themes'
@@ -178,10 +179,9 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	 * @param preferences The epub reader preferences
 	 */
 	const applyEpubPreferences = (rendition: Rendition, preferences: BookPreferences) => {
-		// Register a theme with OpenDyslexic font
-		rendition.themes.registerRules('open-dyslexic-test', {
-			'*': { 'font-family': 'OpenDyslexic, Arial, sans-serif !important' },
-		})
+		// rendition.themes.registerRules('open-dyslexic-test', {
+		// 	'*': { 'font-family': 'OpenDyslexic, Arial, sans-serif !important' },
+		// })
 
 		if (theme === 'dark') {
 			rendition.themes.register('stump-dark', applyTheme(stumpDark, preferences))
@@ -191,12 +191,20 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			rendition.themes.select('stump-light')
 		}
 
+		// Register the font theme for the reader's frame
+		rendition.themes.registerRules('reader-font', {
+			'*': {
+				'font-family': `${getFontFamily(preferences.fontFamily || '')} !important`,
+			},
+		})
+
 		// Select the OpenDyslexic theme after the regular theme
-		rendition.themes.select('open-dyslexic-test')
+		// rendition.themes.select('open-dyslexic-test')
 
-		// Also try setting font directly
-		rendition.themes.font('OpenDyslexic')
+		// Select the font theme for the reader's frame
+		rendition.themes.select('reader-font')
 
+		// Left to right or right to left
 		rendition.direction(preferences.readingDirection)
 
 		// Set flow based on reading mode
@@ -262,20 +270,21 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 					// Get contents to inject font-face declaration
 					const contents = rendition_.getContents()
 					if (contents && Array.isArray(contents) && contents.length > 0) {
-						// Add the OpenDyslexic font-face declaration directly to each rendered section
 						const currentContents = contents[0]
 
-						// Get the base URL for assets in the same context as the page
+						// Get the base url for the assets in the same context as the page
 						const baseUrl = window.location.origin
-						// The stylesheet for opendyslexic at ${baseUrl}/assets/font/opendyslexic/opendyslexic.css
-						const opendyslexicCSSPath = `${baseUrl}/assets/font/opendyslexic/opendyslexic.css`
+
+						// Generate path for the font CSS file
+						const fontKey = (bookPreferences.fontFamily as FontFamilyKey) || 'inter'
+						const fontCSSPath = getFontCssPath(fontKey, true)
 
 						// Fetch and use the CSS content from the file
-						fetch(opendyslexicCSSPath)
+						fetch(fontCSSPath)
 							.then((response) => response.text())
 							.then((cssContent) => {
 								// Replace relative paths with absolute paths
-								const fontDir = `${baseUrl}/assets/font/opendyslexic/`
+								const fontDir = getFontPath(fontKey, '', true)
 								const modifiedCss = cssContent.replace(
 									/url\(['"]?([^'")]+)['"]?\)/g,
 									(match, p1) => {
@@ -284,7 +293,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 											return match
 										}
 										// Otherwise, make it absolute
-										return `url('${fontDir}${p1}')`
+										return `url('${fontDir}/${p1}')`
 									},
 								)
 
@@ -297,66 +306,37 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 								}
 							})
 							.catch((error) => {
-								console.error('Failed to load OpenDyslexic CSS file:', error)
-								// Fallback to hardcoded CSS if fetch fails
+								console.error(`Failed to load ${fontKey} CSS file:`, error)
+								const fontDir = getFontPath(fontKey, '', true)
 								const fontFaceCSS = `
 									@font-face {
-										font-family: 'OpenDyslexic';
-										src: url(${baseUrl}/assets/font/opendyslexic/OpenDyslexic-Regular.woff) format('woff');
-										font-weight: normal;
-										font-style: normal;
-										font-display: swap;
-									}
-									
-									@font-face {
-										font-family: 'OpenDyslexic';
-										src: url(${baseUrl}/assets/font/opendyslexic/OpenDyslexic-Bold.woff) format('woff');
-										font-weight: bold;
-										font-style: normal;
-										font-display: swap;
-									}
-
-									@font-face {
-										font-family: 'OpenDyslexic';
-										src: url('${baseUrl}/assets/font/opendyslexic/OpenDyslexic-Italic.woff') format('woff');
-										font-weight: normal;
-										font-style: italic;
-										font-display: swap;
-									}
-
-									@font-face {
-										font-family: 'OpenDyslexic';
-										src: url('${baseUrl}/assets/font/opendyslexic/OpenDyslexic-BoldItalic.woff') format('woff');
-										font-weight: bold;
-										font-style: italic;
-										font-display: swap;
+										font-family: '${fontKey}';
+										src: url('${fontDir}/${fontKey}-Regular.woff') format('woff');
 									}
 								`
 								if (currentContents.document && currentContents.document.head) {
 									const styleEl = currentContents.document.createElement('style')
 									styleEl.innerHTML = fontFaceCSS
 									currentContents.document.head.appendChild(styleEl)
-									console.log(
-										'Injected fallback OpenDyslexic @font-face via style element using local font files',
-									)
 								}
 							})
 
-						// Use proper theme management to apply OpenDyslexic
-						rendition_.themes.registerRules('open-dyslexic-font', {
-							body: {
-								'font-family': 'OpenDyslexicRegular, Arial, sans-serif !important',
-							},
-							'p, div, span, h1, h2, h3, h4, h5, h6': {
-								'font-family': 'OpenDyslexicRegular, Arial, sans-serif !important',
-							},
-							'*': {
-								'font-family': 'OpenDyslexicRegular, Arial, sans-serif !important',
-							},
-						})
+						// Use proper theme management to apply the selected font
+						// const fontFamilyValue = getFontFamily(fontKey)
+						// rendition_.themes.registerRules(`${fontKey}-font-theme`, {
+						// 	body: {
+						// 		'font-family': `${fontFamilyValue} !important`,
+						// 	},
+						// 	'p, div, span, h1, h2, h3, h4, h5, h6': {
+						// 		'font-family': `${fontFamilyValue} !important`,
+						// 	},
+						// 	'*': {
+						// 		'font-family': `${fontFamilyValue} !important`,
+						// 	},
+						// })
 
 						// Select the theme
-						rendition_.themes.select('open-dyslexic-font')
+						// rendition_.themes.select(`${fontKey}-font-theme`)
 					}
 				})
 

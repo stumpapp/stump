@@ -108,9 +108,19 @@ fn generate_filter_match_arm(
 		format_ident!("into_params")
 	};
 
+	let inner_name_str = inner_name.to_string();
+
+	// Note: This is a temporary hack until the migration to SeaORM is complete and a better
+	// smart filter solution is in place.
+	let method = if inner_name_str == "tags" {
+		format_ident!("some")
+	} else {
+		format_ident!("is")
+	};
+
 	quote! {
 	  #ident::#name { #inner_name } => {
-	  #prisma_table::#inner_name::is(vec![#inner_name.#into_fn()])
+	  #prisma_table::#inner_name::#method(vec![#inner_name.#into_fn()])
 	}
 	}
 }

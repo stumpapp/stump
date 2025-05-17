@@ -413,6 +413,7 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<SmartListItems>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<SmartList>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<SmartFilter<()>>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<TagSmartFilter>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<MediaSmartFilter>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<MediaMetadataSmartFilter>()?).as_bytes(),

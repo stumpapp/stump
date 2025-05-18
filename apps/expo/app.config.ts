@@ -22,6 +22,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 			},
 			infoPlist: {
 				ITSAppUsesNonExemptEncryption: false,
+				NSAppTransportSecurity: {
+					NSAllowsArbitraryLoads: true,
+				},
 			},
 		},
 		android: {

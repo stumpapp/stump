@@ -24,8 +24,8 @@
 		"docs": "lerna run --scope @stump/docs",
 		"start:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"cargo run -p stump_server\" \"yarn desktop start\"",
 		"dev:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"cargo run -p stump_server\" \"yarn desktop dev\"",
-		"dev:web": "concurrently -n server,web -c green.bold,blue.bold \"cargo watch --ignore core/prisma -x run -p stump_server\" \"yarn web dev\"",
-		"dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"cargo watch --ignore core/prisma -x run -p stump_server\" \"yarn expo dev\"",
+		"dev:web": "concurrently -n server,web -c green.bold,blue.bold \"bacon run-server --headless\" \"yarn web dev\"",
+		"dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"bacon run-server --headless\" \"yarn expo dev\"",
 		"prisma-studio": "npx prisma studio --schema core/prisma/schema.prisma",
 		"format": "lerna run format --stream --parallel",
 		"nuke": "concurrently -n root,monorepo -c green.bold,blue.bold \"yarn exec rimraf node_modules\" \"lerna run nuke\""
@@ -49,12 +49,14 @@
 		"husky": "^9.1.6",
 		"lerna": "^8.1.8",
 		"lint-staged": "^15.2.10",
-		"prettier": "=3.3.2",
+		"prettier": "^3.3.2",
 		"prettier-eslint": "^16.3.0",
 		"prettier-plugin-tailwindcss": "^0.6.8",
 		"rimraf": "^5.0.5",
 		"typescript": "^5.6.3",
-		"typescript-eslint": "^8.10.0"
+		"typescript-eslint": "^8.10.0",
+		"vile": "^0.19.3",
+		"vile-rubocop": "^0.2.4"
 	},
 	"resolutions": {
 		"@types/react": "=18.3.12"
@@ -79,6 +81,5 @@
 				"@babel/core"
 			]
 		}
-	},
-	"dependencies": {}
+	}
 }

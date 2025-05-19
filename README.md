@@ -31,7 +31,7 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 - [Roadmap 🗺](#roadmap-)
 - [Getting Started 🚀](#getting-started-)
 - [Developer Guide 💻](#developer-guide-)
-    - [Where to start?](#where-to-start)
+  - [Where to start?](#where-to-start)
 - [Project Structure 📦](#project-structure-)
   - [Apps](#apps)
   - [Core](#core)
@@ -84,7 +84,7 @@ A quick summary of the steps required to get going:
 1. Install [yarn](https://yarnpkg.com/), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/).
    - If you're running Windows, you will need [Visual C++](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170)
    - If you're running macOS on Apple Silicon, you'll need to install [Rosetta](https://support.apple.com/en-us/HT211861)
-2. Install [cargo-watch](https://crates.io/crates/cargo-watch)
+2. Install [bacon](https://crates.io/crates/bacon)
 3. Run the setup script:
 
    ```bash
@@ -138,7 +138,7 @@ In general, the following areas are good places to start:
 
 <details>
   <summary><b>Click to expand</b></summary>
-  
+
 Stump has a monorepo structure managed by [yarn workspaces](https://yarnpkg.com/features/workspaces) and [cargo workspaces](https://doc.rust-lang.org/cargo/reference/workspaces.html). The project is split into a number of different packages and crates, each with their own purpose:
 
 ### Apps

@@ -640,7 +640,7 @@ mod tests {
 			}
 			impl OrderBy<Entity, FooOrderBy> for FooOrderBy {
 				fn add_order_by(
-					order_by: &Vec<FooOrderBy>,
+					order_by: &[FooOrderBy],
 					query: sea_orm::Select<Entity>,
 				) -> Result<sea_orm::Select<Entity>, sea_orm::ColumnFromStrErr> {
 					if order_by.is_empty() {
@@ -688,7 +688,7 @@ mod tests {
 			}
 			impl OrderBy<Entity, FooGraphQLOrderBy> for FooGraphQLOrderBy {
 				fn add_order_by(
-					order_by: &Vec<FooGraphQLOrderBy>,
+					order_by: &[FooGraphQLOrderBy],
 					query: sea_orm::Select<Entity>,
 				) -> Result<sea_orm::Select<Entity>, sea_orm::ColumnFromStrErr> {
 					if order_by.is_empty() {

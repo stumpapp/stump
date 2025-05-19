@@ -11,7 +11,7 @@ _FORCE_INSTALL_YARN=${INSTALL_YARN:=0}
 
 dev_setup() {
   set -ex; \
-    cargo install cargo-watch; \
+    cargo install --locked bacon; \
     cargo install cargo-workspaces; \
     yarn run setup; \
     set +x
@@ -49,7 +49,7 @@ if [ ${_CHECK_NODE} == 1 ]; then
       until [ $can_continue = true ]; do
               read -p "Choice: " choice
 
-              case $choice in 
+              case $choice in
                 y)
                   echo "Attempting to install 'yarn'..."
                   npm install -g yarn
@@ -76,7 +76,7 @@ if [ ${_CHECK_NODE} == 1 ]; then
               echo "Would you like for this script to attempt to install 'yarn'? (y/n)"
       done
     fi
-  else 
+  else
     echo "yarn requirement met!"
   fi
 fi
@@ -144,7 +144,7 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
 
   if [ {$_DEV_SETUP} == 1 ]; then
     dev_setup
-  fi 
+  fi
 else
   log_error "Your OS '$OSTYPE' is not supported by the system-setup script. $ASK_FOR_CONTRIB"
 fi
@@ -153,7 +153,7 @@ if [ ${_CHECK_DAV1D} == 1 ]; then
   which dav1d &> /dev/null
   if [ $? -ne 0 ]; then
       echo "Dav1d requirement is not met. Visit https://code.videolan.org/videolan/dav1d"
-  else 
+  else
     curver="$(dav1d --version)"
     cutoffver="1.3.0"
     # Note: We sort -V and take the first line to get the highest version, so we need to assert that the first

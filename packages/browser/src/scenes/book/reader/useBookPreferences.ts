@@ -29,7 +29,16 @@ export function useBookPreferences({ book }: Params): Return {
 		setBookPreferences: state.setBookPreferences,
 	}))
 
-	const storedBookPreferences = useMemo(() => allPreferences[book.id], [allPreferences, book.id])
+	const storedBookPreferences = useMemo(() => {
+		const prefs = allPreferences[book.id]
+		console.log(
+			'[FONT DEBUG] Retrieved stored bookPreferences for book:',
+			book.id,
+			'preferences:',
+			prefs,
+		)
+		return prefs
+	}, [allPreferences, book.id])
 
 	/**
 	 * The library configuration, used for picking default reader settings. This realistically
@@ -37,14 +46,20 @@ export function useBookPreferences({ book }: Params): Return {
 	 */
 	const libraryConfig = useMemo(() => book?.series?.library?.config, [book])
 
-	const bookPreferences = useMemo(
-		() => buildPreferences(storedBookPreferences ?? {}, settings, libraryConfig),
-		[storedBookPreferences, libraryConfig],
-	)
+	const bookPreferences = useMemo(() => {
+		const prefs = buildPreferences(storedBookPreferences ?? {}, settings, libraryConfig)
+		console.log('[FONT DEBUG] Built bookPreferences:', prefs, 'with fontFamily:', prefs.fontFamily)
+		return prefs
+	}, [storedBookPreferences, libraryConfig])
 
 	const setBookPreferences = useCallback(
 		(preferences: Partial<typeof bookPreferences>) => {
+			console.log('[FONT DEBUG] setBookPreferences called with:', preferences)
 			storedSetBookPreferences(book.id, {
+				...bookPreferences,
+				...preferences,
+			})
+			console.log('[FONT DEBUG] bookPreferences updated:', {
 				...bookPreferences,
 				...preferences,
 			})
@@ -60,22 +75,38 @@ export function useBookPreferences({ book }: Params): Return {
 	}
 }
 
-const defaultsFromLibraryConfig = (libraryConfig?: LibraryConfig): BookPreferences =>
-	({
+const defaultsFromLibraryConfig = (libraryConfig?: LibraryConfig): BookPreferences => {
+	const defaults = {
 		brightness: 1,
 		imageScaling: {
 			scaleToFit: libraryConfig?.default_reading_image_scale_fit || 'height',
 		},
 		readingDirection: libraryConfig?.default_reading_dir || 'ltr',
 		readingMode: libraryConfig?.default_reading_mode || 'paged',
-	}) as BookPreferences
+	} as BookPreferences
+
+	console.log('[FONT DEBUG] defaultsFromLibraryConfig called, returning:', defaults)
+	return defaults
+}
 
 const buildPreferences = (
 	preferences: Partial<BookPreferences>,
 	settings: ReaderSettings,
 	libraryConfig?: LibraryConfig,
-): BookPreferences => ({
-	...defaultsFromLibraryConfig(libraryConfig),
-	...settings,
-	...preferences,
-})
+): BookPreferences => {
+	console.log('[FONT DEBUG] buildPreferences called with:', {
+		preferences,
+		settings,
+		hasLibraryConfig: !!libraryConfig,
+	})
+
+	const defaults = defaultsFromLibraryConfig(libraryConfig)
+	const result = {
+		...defaults,
+		...settings,
+		...preferences,
+	}
+
+	console.log('[FONT DEBUG] buildPreferences result:', result, 'fontFamily:', result.fontFamily)
+	return result
+}

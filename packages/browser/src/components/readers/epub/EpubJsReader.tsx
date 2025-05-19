@@ -70,6 +70,8 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	const { epub, isLoading } = useEpubLazy(id)
 
 	const ref = useRef<HTMLDivElement>(null)
+	// Add a force remount key that changes when fonts change
+	const [remountKey, setRemountKey] = useState<number>(0)
 
 	const [book, setBook] = useState<Book | null>(null)
 	const [rendition, setRendition] = useState<Rendition | null>(null)
@@ -78,6 +80,9 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	const [currentLocation, setCurrentLocation] = useState<EpubLocationState>()
 
 	const { bookPreferences } = useBookPreferences({ book: epub?.media_entity || ({} as Media) })
+
+	// Track previous font family to detect changes
+	const previousFontFamilyRef = useRef<string | undefined>(bookPreferences.fontFamily)
 
 	const { data: bookmarks } = useQuery([sdk.epub.keys.getBookmarks, id], () =>
 		sdk.epub.getBookmarks(id),
@@ -179,6 +184,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	 * @param preferences The epub reader preferences
 	 */
 	const applyEpubPreferences = (rendition: Rendition, preferences: BookPreferences) => {
+		console.log('[FONT DEBUG] applyEpubPreferences called', { fontFamily: preferences.fontFamily })
 		if (theme === 'dark') {
 			rendition.themes.register('stump-dark', applyTheme(stumpDark, preferences))
 			rendition.themes.select('stump-dark')
@@ -190,7 +196,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		// Get the actual font family value to use
 		const fontFamilyValue = getFontFamily(preferences.fontFamily || '')
 
-		console.log('fontFamilyValue', fontFamilyValue)
+		console.log('[FONT DEBUG] fontFamilyValue', fontFamilyValue, 'from:', preferences.fontFamily)
 
 		// Register the font theme for the reader's frame with the specific font family
 		rendition.themes.registerRules('reader-font', {
@@ -263,10 +269,11 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 
 				// Add rendered event to apply styles after content is actually rendered
 				rendition_.on('rendered', (section: any) => {
-					console.log('Section rendered:', section)
+					console.log('[FONT DEBUG] Section rendered event triggered:', section)
 					// We still need a handler here to inject fonts for newly rendered sections
 					// But we'll use a function that reads from the latest preferences
 					const contents = rendition_.getContents()
+					console.log('[FONT DEBUG] Got contents in rendered event:', !!contents)
 					if (contents) {
 						injectFontToContents(contents, bookPreferences)
 					}
@@ -331,23 +338,35 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	 * This can be called both from the effect and from the 'rendered' event handler
 	 */
 	const injectFontToContents = useCallback((contents: any, preferences: BookPreferences) => {
+		console.log('[FONT DEBUG] injectFontToContents called', {
+			hasContents: !!contents,
+			isArray: Array.isArray(contents),
+			contentsLength: Array.isArray(contents) ? contents.length : 0,
+		})
+
 		if (!contents || !Array.isArray(contents) || contents.length === 0) return
 
 		// Get the font key from the current preferences (not stale closure)
 		const fontKey = (preferences.fontFamily as FontFamilyKey) || 'inter'
-		console.log('Injecting font:', fontKey)
-		console.log('bookPreferences', preferences)
+		console.log('[FONT DEBUG] Injecting font:', fontKey, 'preferences:', preferences)
 
 		contents.forEach((currentContents) => {
 			// Generate path for the font CSS file
 			const fontCSSPath = getFontCssPath(fontKey, true)
+			console.log('[FONT DEBUG] fontCSSPath generated:', fontCSSPath)
 
 			// Fetch and use the CSS content from the file
 			fetch(fontCSSPath)
-				.then((response) => response.text())
+				.then((response) => {
+					console.log('[FONT DEBUG] Font CSS fetch response:', response.status)
+					return response.text()
+				})
 				.then((cssContent) => {
+					console.log('[FONT DEBUG] CSS content fetched, length:', cssContent.length)
 					// Replace relative paths with absolute paths
 					const fontDir = getFontPath(fontKey, '', true)
+					console.log('[FONT DEBUG] fontDir:', fontDir)
+
 					const modifiedCss = cssContent.replace(/url\(['"]?([^'")]+)['"]?\)/g, (match, p1) => {
 						// If the URL is already absolute, don't modify it
 						if (p1.startsWith('http') || p1.startsWith('/')) {
@@ -355,6 +374,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 						}
 						// Otherwise, make it absolute
 						const newPath = `url('${fontDir}/${p1}')`
+						// console.log('[FONT DEBUG] Replaced font path:', p1, 'with:', newPath)
 						return newPath
 					})
 
@@ -363,6 +383,10 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 						// First, remove any previous font style elements to prevent duplicates
 						const existingFontStyles =
 							currentContents.document.head.querySelectorAll('style[data-stump-font]')
+						console.log(
+							'[FONT DEBUG] Removed existing font styles count:',
+							existingFontStyles.length,
+						)
 						existingFontStyles.forEach((el: Element) => el.remove())
 
 						// Add new style with a data attribute for future identification
@@ -370,28 +394,13 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 						styleEl.setAttribute('data-stump-font', fontKey)
 						styleEl.innerHTML = modifiedCss
 						currentContents.document.head.appendChild(styleEl)
+						console.log('[FONT DEBUG] Added new font style element to head')
+					} else {
+						console.log('[FONT DEBUG] Failed to find document or head in contents')
 					}
 				})
 				.catch((error) => {
-					console.error(`Failed to load ${fontKey} CSS file:`, error)
-					const fontDir = getFontPath(fontKey, '', true)
-					const fontFaceCSS = `
-						@font-face {
-							font-family: '${fontKey}';
-							src: url('${fontDir}/${fontKey}-Regular.woff') format('woff');
-						}
-					`
-					if (currentContents.document && currentContents.document.head) {
-						// First, remove any previous font style elements
-						const existingFontStyles =
-							currentContents.document.head.querySelectorAll('style[data-stump-font]')
-						existingFontStyles.forEach((el: Element) => el.remove())
-
-						const styleEl = currentContents.document.createElement('style')
-						styleEl.setAttribute('data-stump-font', fontKey)
-						styleEl.innerHTML = fontFaceCSS
-						currentContents.document.head.appendChild(styleEl)
-					}
+					console.error(`[FONT DEBUG] Failed to load ${fontKey} CSS file:`, error)
 				})
 		})
 	}, [])
@@ -412,6 +421,75 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			}
 		}
 	}, [rendition, bookPreferences, theme, injectFontToContents])
+
+	/**
+	 * Helper function to completely destroy the current reader instance
+	 * to ensure proper cleanup before remounting
+	 */
+	const destroyCurrentReader = useCallback(() => {
+		console.log('[FONT DEBUG] Destroying current reader for remount')
+
+		// Clean up the rendition
+		if (rendition) {
+			// Remove event listeners
+			rendition.off('relocated', handleLocationChange)
+
+			// Try to destroy rendition properly
+			try {
+				// @ts-ignore: destroy method exists but isn't properly typed in epub.js
+				rendition.destroy?.()
+			} catch (e) {
+				console.error('[FONT DEBUG] Error destroying rendition:', e)
+			}
+
+			setRendition(null)
+		}
+
+		// Clean up the book
+		if (book) {
+			try {
+				// @ts-ignore: destroy method exists but isn't properly typed in epub.js
+				book.destroy?.()
+			} catch (e) {
+				console.error('[FONT DEBUG] Error destroying book:', e)
+			}
+
+			setBook(null)
+		}
+
+		// Clean up the DOM
+		if (ref.current) {
+			// Remove all child elements
+			while (ref.current.firstChild) {
+				ref.current.removeChild(ref.current.firstChild)
+			}
+		}
+
+		// Force a remount by updating the key
+		setRemountKey((prev) => prev + 1)
+	}, [book, rendition])
+
+	/**
+	 * This effect watches for font family changes and remounts the reader when needed
+	 */
+	useEffect(() => {
+		// If font family has changed, we need to completely remount the reader
+		if (previousFontFamilyRef.current !== bookPreferences.fontFamily) {
+			console.log(
+				'[FONT DEBUG] Font family changed from',
+				previousFontFamilyRef.current,
+				'to',
+				bookPreferences.fontFamily,
+				'- remounting reader',
+			)
+			previousFontFamilyRef.current = bookPreferences.fontFamily
+
+			// If we have a current rendition, destroy it completely
+			if (rendition) {
+				destroyCurrentReader()
+			}
+		}
+	}, [bookPreferences.fontFamily, destroyCurrentReader, rendition])
 
 	/**
 	 * Invalidate the book query when a reader is unmounted so that the book overview
@@ -756,7 +834,13 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			<div className="h-full w-full">
 				<AutoSizer>
 					{({ height, width }) => {
-						return <div ref={ref} key={epub.media_entity.id} style={{ height, width }} />
+						return (
+							<div
+								ref={ref}
+								key={`${epub.media_entity.id}-${remountKey}`}
+								style={{ height, width }}
+							/>
+						)
 					}}
 				</AutoSizer>
 			</div>

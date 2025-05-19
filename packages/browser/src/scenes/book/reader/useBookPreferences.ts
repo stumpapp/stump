@@ -31,12 +31,6 @@ export function useBookPreferences({ book }: Params): Return {
 
 	const storedBookPreferences = useMemo(() => {
 		const prefs = allPreferences[book.id]
-		console.log(
-			'[FONT DEBUG] Retrieved stored bookPreferences for book:',
-			book.id,
-			'preferences:',
-			prefs,
-		)
 		return prefs
 	}, [allPreferences, book.id])
 
@@ -48,18 +42,12 @@ export function useBookPreferences({ book }: Params): Return {
 
 	const bookPreferences = useMemo(() => {
 		const prefs = buildPreferences(storedBookPreferences ?? {}, settings, libraryConfig)
-		console.log('[FONT DEBUG] Built bookPreferences:', prefs, 'with fontFamily:', prefs.fontFamily)
 		return prefs
 	}, [storedBookPreferences, libraryConfig])
 
 	const setBookPreferences = useCallback(
 		(preferences: Partial<typeof bookPreferences>) => {
-			console.log('[FONT DEBUG] setBookPreferences called with:', preferences)
 			storedSetBookPreferences(book.id, {
-				...bookPreferences,
-				...preferences,
-			})
-			console.log('[FONT DEBUG] bookPreferences updated:', {
 				...bookPreferences,
 				...preferences,
 			})
@@ -85,7 +73,6 @@ const defaultsFromLibraryConfig = (libraryConfig?: LibraryConfig): BookPreferenc
 		readingMode: libraryConfig?.default_reading_mode || 'paged',
 	} as BookPreferences
 
-	console.log('[FONT DEBUG] defaultsFromLibraryConfig called, returning:', defaults)
 	return defaults
 }
 
@@ -94,12 +81,6 @@ const buildPreferences = (
 	settings: ReaderSettings,
 	libraryConfig?: LibraryConfig,
 ): BookPreferences => {
-	console.log('[FONT DEBUG] buildPreferences called with:', {
-		preferences,
-		settings,
-		hasLibraryConfig: !!libraryConfig,
-	})
-
 	const defaults = defaultsFromLibraryConfig(libraryConfig)
 	const result = {
 		...defaults,
@@ -107,6 +88,5 @@ const buildPreferences = (
 		...preferences,
 	}
 
-	console.log('[FONT DEBUG] buildPreferences result:', result, 'fontFamily:', result.fontFamily)
 	return result
 }

@@ -19,17 +19,12 @@ export default function FontFamily() {
 
 	const changeFont = useCallback(
 		(font: string) => {
-			console.log('[FONT DEBUG] changeFont called with:', font)
 			if (!font) {
-				console.log('[FONT DEBUG] Setting fontFamily to undefined (default)')
 				setBookPreferences({ fontFamily: undefined })
 			} else if (SUPPORTED_FONT_OPTIONS.some((option) => option.value === font)) {
 				// Note: useApplyTheme will apply the font to the body element after the preferences are updated
-				console.log('[FONT DEBUG] Setting fontFamily to:', font)
 				setBookPreferences({ fontFamily: font as FontFamilyKey })
-				console.log('[FONT DEBUG] fontFamily updated to:', font)
 			} else {
-				console.log('[FONT DEBUG] Invalid font option:', font)
 			}
 		},
 		[setBookPreferences],

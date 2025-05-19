@@ -234,7 +234,9 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	useEffect(() => {
 		if (!book) return
 
+		let cancelled = false
 		book.ready.then(() => {
+			if (cancelled) return
 			if (book.spine) {
 				const defaultLoc = book.rendition?.location?.start?.cfi
 
@@ -296,6 +298,11 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				createSectionLengths(book, setSectionLengths)
 			}
 		})
+
+		return () => {
+			cancelled = true
+			rendition?.destroy?.()
+		}
 	}, [book, bookPreferences])
 
 	// TODO: this needs to have fullscreen as an effect dependency
@@ -469,6 +476,10 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			const contents = rendition.getContents()
 			if (contents) {
 				injectFontToContents(contents, bookPreferences)
+			}
+
+			return () => {
+				rendition.destroy?.()
 			}
 		}
 	}, [rendition, bookPreferences, theme, injectFontToContents])

@@ -72,6 +72,8 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	const ref = useRef<HTMLDivElement>(null)
 	// Add a force remount key that changes when fonts change
 	const [remountKey, setRemountKey] = useState<number>(0)
+	// Reference to store the cached font CSS
+	const fontCssRef = useRef<Record<string, string>>({})
 
 	const [book, setBook] = useState<Book | null>(null)
 	const [rendition, setRendition] = useState<Rendition | null>(null)
@@ -178,7 +180,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	}, [book, epub, id, sdk.media])
 
 	/**
-	 *	A function for applying the epub reader preferences to the epubjs rendition instance
+	 *	A function for applying the epub reader preferences to the epubjs renFdition instance
 	 *
 	 * @param rendition: The epubjs rendition instance
 	 * @param preferences The epub reader preferences
@@ -334,76 +336,125 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	}, [rendition])
 
 	/**
-	 * Helper function to inject font CSS to rendered contents
-	 * This can be called both from the effect and from the 'rendered' event handler
+	 * Helper function to load and cache the font CSS for a specific font
 	 */
-	const injectFontToContents = useCallback((contents: any, preferences: BookPreferences) => {
-		console.log('[FONT DEBUG] injectFontToContents called', {
-			hasContents: !!contents,
-			isArray: Array.isArray(contents),
-			contentsLength: Array.isArray(contents) ? contents.length : 0,
-		})
+	const loadFontCss = useCallback(async (fontKey: FontFamilyKey): Promise<string | null> => {
+		console.log('[FONT DEBUG] Loading font CSS for:', fontKey)
 
-		if (!contents || !Array.isArray(contents) || contents.length === 0) return
+		// Check if we already have this font CSS cached
+		if (fontCssRef.current[fontKey]) {
+			console.log('[FONT DEBUG] Using cached CSS for font:', fontKey)
+			return fontCssRef.current[fontKey]
+		}
 
-		// Get the font key from the current preferences (not stale closure)
-		const fontKey = (preferences.fontFamily as FontFamilyKey) || 'inter'
-		console.log('[FONT DEBUG] Injecting font:', fontKey, 'preferences:', preferences)
-
-		contents.forEach((currentContents) => {
+		try {
 			// Generate path for the font CSS file
 			const fontCSSPath = getFontCssPath(fontKey, true)
 			console.log('[FONT DEBUG] fontCSSPath generated:', fontCSSPath)
 
-			// Fetch and use the CSS content from the file
-			fetch(fontCSSPath)
-				.then((response) => {
-					console.log('[FONT DEBUG] Font CSS fetch response:', response.status)
-					return response.text()
-				})
-				.then((cssContent) => {
-					console.log('[FONT DEBUG] CSS content fetched, length:', cssContent.length)
-					// Replace relative paths with absolute paths
-					const fontDir = getFontPath(fontKey, '', true)
-					console.log('[FONT DEBUG] fontDir:', fontDir)
+			// Fetch the CSS content
+			const response = await fetch(fontCSSPath)
+			console.log('[FONT DEBUG] Font CSS fetch response:', response.status)
 
-					const modifiedCss = cssContent.replace(/url\(['"]?([^'")]+)['"]?\)/g, (match, p1) => {
-						// If the URL is already absolute, don't modify it
-						if (p1.startsWith('http') || p1.startsWith('/')) {
-							return match
-						}
-						// Otherwise, make it absolute
-						const newPath = `url('${fontDir}/${p1}')`
-						// console.log('[FONT DEBUG] Replaced font path:', p1, 'with:', newPath)
-						return newPath
-					})
+			if (!response.ok) {
+				throw new Error(`Failed to load font CSS: ${response.status}`)
+			}
 
-					// Insert the modified CSS content via a style element
-					if (currentContents.document && currentContents.document.head) {
-						// First, remove any previous font style elements to prevent duplicates
-						const existingFontStyles =
-							currentContents.document.head.querySelectorAll('style[data-stump-font]')
-						console.log(
-							'[FONT DEBUG] Removed existing font styles count:',
-							existingFontStyles.length,
-						)
-						existingFontStyles.forEach((el: Element) => el.remove())
+			const cssContent = await response.text()
+			console.log('[FONT DEBUG] CSS content fetched, length:', cssContent.length)
 
-						// Add new style with a data attribute for future identification
-						const styleEl = currentContents.document.createElement('style')
-						styleEl.setAttribute('data-stump-font', fontKey)
-						styleEl.innerHTML = modifiedCss
-						currentContents.document.head.appendChild(styleEl)
-						console.log('[FONT DEBUG] Added new font style element to head')
-					} else {
-						console.log('[FONT DEBUG] Failed to find document or head in contents')
+			// Replace relative paths with absolute paths
+			const fontDir = getFontPath(fontKey, '', true)
+			console.log('[FONT DEBUG] fontDir:', fontDir)
+
+			const modifiedCss = cssContent.replace(/url\(['"]?([^'")]+)['"]?\)/g, (match, p1) => {
+				// If the URL is already absolute, don't modify it
+				if (p1.startsWith('http') || p1.startsWith('/')) {
+					return match
+				}
+				// Otherwise, make it absolute
+				return `url('${fontDir}/${p1}')`
+			})
+
+			// Cache the modified CSS
+			fontCssRef.current[fontKey] = modifiedCss
+			return modifiedCss
+		} catch (error) {
+			console.error(`[FONT DEBUG] Failed to load ${fontKey} CSS file:`, error)
+			return null
+		}
+	}, [])
+
+	/**
+	 * Effect to preload font CSS when font family changes
+	 */
+	useEffect(() => {
+		if (bookPreferences.fontFamily) {
+			const fontKey = bookPreferences.fontFamily as FontFamilyKey
+			console.log('[FONT DEBUG] Font family changed, preloading CSS for:', fontKey)
+			loadFontCss(fontKey)
+		}
+	}, [bookPreferences.fontFamily, loadFontCss])
+
+	/**
+	 * Helper function to inject font CSS to rendered contents
+	 * This can be called both from the effect and from the 'rendered' event handler
+	 */
+	const injectFontToContents = useCallback(
+		(contents: any, preferences: BookPreferences) => {
+			console.log('[FONT DEBUG] injectFontToContents called', {
+				hasContents: !!contents,
+				isArray: Array.isArray(contents),
+				contentsLength: Array.isArray(contents) ? contents.length : 0,
+			})
+
+			if (!contents || !Array.isArray(contents) || contents.length === 0) return
+
+			// Get the font key from the current preferences (not stale closure)
+			const fontKey = (preferences.fontFamily as FontFamilyKey) || 'inter'
+			console.log('[FONT DEBUG] Injecting font:', fontKey, 'preferences:', preferences)
+
+			// Use the cached CSS if available
+			const cachedCss = fontCssRef.current[fontKey]
+			if (!cachedCss) {
+				console.log('[FONT DEBUG] No cached CSS found for', fontKey, 'loading it now')
+				loadFontCss(fontKey).then((css) => {
+					if (css && contents) {
+						applyFontCssToContents(contents, css, fontKey)
 					}
 				})
-				.catch((error) => {
-					console.error(`[FONT DEBUG] Failed to load ${fontKey} CSS file:`, error)
-				})
+				return
+			}
+
+			// Apply the cached CSS directly
+			applyFontCssToContents(contents, cachedCss, fontKey)
+		},
+		[loadFontCss],
+	)
+
+	/**
+	 * Helper function to apply CSS to contents
+	 */
+	const applyFontCssToContents = (contents: any[], css: string, fontKey: string) => {
+		contents.forEach((currentContents) => {
+			if (currentContents.document && currentContents.document.head) {
+				// First, remove any previous font style elements to prevent duplicates
+				const existingFontStyles =
+					currentContents.document.head.querySelectorAll('style[data-stump-font]')
+				console.log('[FONT DEBUG] Removed existing font styles count:', existingFontStyles.length)
+				existingFontStyles.forEach((el: Element) => el.remove())
+
+				// Add new style with a data attribute for future identification
+				const styleEl = currentContents.document.createElement('style')
+				styleEl.setAttribute('data-stump-font', fontKey)
+				styleEl.innerHTML = css
+				currentContents.document.head.appendChild(styleEl)
+				console.log('[FONT DEBUG] Added new font style element to head')
+			} else {
+				console.log('[FONT DEBUG] Failed to find document or head in contents')
+			}
 		})
-	}, [])
+	}
 
 	/**
 	 * This effect is responsible for updating the epub theme options whenever the epub

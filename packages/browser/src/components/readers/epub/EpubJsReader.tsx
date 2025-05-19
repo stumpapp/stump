@@ -179,10 +179,6 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	 * @param preferences The epub reader preferences
 	 */
 	const applyEpubPreferences = (rendition: Rendition, preferences: BookPreferences) => {
-		// rendition.themes.registerRules('open-dyslexic-test', {
-		// 	'*': { 'font-family': 'OpenDyslexic, Arial, sans-serif !important' },
-		// })
-
 		if (theme === 'dark') {
 			rendition.themes.register('stump-dark', applyTheme(stumpDark, preferences))
 			rendition.themes.select('stump-dark')
@@ -191,15 +187,17 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			rendition.themes.select('stump-light')
 		}
 
-		// Register the font theme for the reader's frame
+		// Get the actual font family value to use
+		const fontFamilyValue = getFontFamily(preferences.fontFamily || '')
+
+		console.log('fontFamilyValue', fontFamilyValue)
+
+		// Register the font theme for the reader's frame with the specific font family
 		rendition.themes.registerRules('reader-font', {
 			'*': {
-				'font-family': `${getFontFamily(preferences.fontFamily || '')} !important`,
+				'font-family': `${fontFamilyValue} !important`,
 			},
 		})
-
-		// Select the OpenDyslexic theme after the regular theme
-		// rendition.themes.select('open-dyslexic-test')
 
 		// Select the font theme for the reader's frame
 		rendition.themes.select('reader-font')
@@ -266,77 +264,11 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				// Add rendered event to apply styles after content is actually rendered
 				rendition_.on('rendered', (section: any) => {
 					console.log('Section rendered:', section)
-
-					// Get contents to inject font-face declaration
+					// We still need a handler here to inject fonts for newly rendered sections
+					// But we'll use a function that reads from the latest preferences
 					const contents = rendition_.getContents()
-					if (contents && Array.isArray(contents) && contents.length > 0) {
-						const currentContents = contents[0]
-
-						// Get the base url for the assets in the same context as the page
-						const baseUrl = window.location.origin
-
-						// Generate path for the font CSS file
-						const fontKey = (bookPreferences.fontFamily as FontFamilyKey) || 'inter'
-						const fontCSSPath = getFontCssPath(fontKey, true)
-
-						// Fetch and use the CSS content from the file
-						fetch(fontCSSPath)
-							.then((response) => response.text())
-							.then((cssContent) => {
-								// Replace relative paths with absolute paths
-								const fontDir = getFontPath(fontKey, '', true)
-								const modifiedCss = cssContent.replace(
-									/url\(['"]?([^'")]+)['"]?\)/g,
-									(match, p1) => {
-										// If the URL is already absolute, don't modify it
-										if (p1.startsWith('http') || p1.startsWith('/')) {
-											return match
-										}
-										// Otherwise, make it absolute
-										return `url('${fontDir}/${p1}')`
-									},
-								)
-
-								// Insert the modified CSS content via a style element
-								if (currentContents.document && currentContents.document.head) {
-									const styleEl = currentContents.document.createElement('style')
-									styleEl.innerHTML = modifiedCss
-									currentContents.document.head.appendChild(styleEl)
-									console.log('Injected OpenDyslexic @font-face with absolute paths')
-								}
-							})
-							.catch((error) => {
-								console.error(`Failed to load ${fontKey} CSS file:`, error)
-								const fontDir = getFontPath(fontKey, '', true)
-								const fontFaceCSS = `
-									@font-face {
-										font-family: '${fontKey}';
-										src: url('${fontDir}/${fontKey}-Regular.woff') format('woff');
-									}
-								`
-								if (currentContents.document && currentContents.document.head) {
-									const styleEl = currentContents.document.createElement('style')
-									styleEl.innerHTML = fontFaceCSS
-									currentContents.document.head.appendChild(styleEl)
-								}
-							})
-
-						// Use proper theme management to apply the selected font
-						// const fontFamilyValue = getFontFamily(fontKey)
-						// rendition_.themes.registerRules(`${fontKey}-font-theme`, {
-						// 	body: {
-						// 		'font-family': `${fontFamilyValue} !important`,
-						// 	},
-						// 	'p, div, span, h1, h2, h3, h4, h5, h6': {
-						// 		'font-family': `${fontFamilyValue} !important`,
-						// 	},
-						// 	'*': {
-						// 		'font-family': `${fontFamilyValue} !important`,
-						// 	},
-						// })
-
-						// Select the theme
-						// rendition_.themes.select(`${fontKey}-font-theme`)
+					if (contents) {
+						injectFontToContents(contents, bookPreferences)
 					}
 				})
 
@@ -355,7 +287,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				createSectionLengths(book, setSectionLengths)
 			}
 		})
-	}, [book])
+	}, [book, bookPreferences])
 
 	// TODO: this needs to have fullscreen as an effect dependency
 	/**
@@ -395,6 +327,76 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	}, [rendition])
 
 	/**
+	 * Helper function to inject font CSS to rendered contents
+	 * This can be called both from the effect and from the 'rendered' event handler
+	 */
+	const injectFontToContents = useCallback((contents: any, preferences: BookPreferences) => {
+		if (!contents || !Array.isArray(contents) || contents.length === 0) return
+
+		// Get the font key from the current preferences (not stale closure)
+		const fontKey = (preferences.fontFamily as FontFamilyKey) || 'inter'
+		console.log('Injecting font:', fontKey)
+		console.log('bookPreferences', preferences)
+
+		contents.forEach((currentContents) => {
+			// Generate path for the font CSS file
+			const fontCSSPath = getFontCssPath(fontKey, true)
+
+			// Fetch and use the CSS content from the file
+			fetch(fontCSSPath)
+				.then((response) => response.text())
+				.then((cssContent) => {
+					// Replace relative paths with absolute paths
+					const fontDir = getFontPath(fontKey, '', true)
+					const modifiedCss = cssContent.replace(/url\(['"]?([^'")]+)['"]?\)/g, (match, p1) => {
+						// If the URL is already absolute, don't modify it
+						if (p1.startsWith('http') || p1.startsWith('/')) {
+							return match
+						}
+						// Otherwise, make it absolute
+						const newPath = `url('${fontDir}/${p1}')`
+						return newPath
+					})
+
+					// Insert the modified CSS content via a style element
+					if (currentContents.document && currentContents.document.head) {
+						// First, remove any previous font style elements to prevent duplicates
+						const existingFontStyles =
+							currentContents.document.head.querySelectorAll('style[data-stump-font]')
+						existingFontStyles.forEach((el: Element) => el.remove())
+
+						// Add new style with a data attribute for future identification
+						const styleEl = currentContents.document.createElement('style')
+						styleEl.setAttribute('data-stump-font', fontKey)
+						styleEl.innerHTML = modifiedCss
+						currentContents.document.head.appendChild(styleEl)
+					}
+				})
+				.catch((error) => {
+					console.error(`Failed to load ${fontKey} CSS file:`, error)
+					const fontDir = getFontPath(fontKey, '', true)
+					const fontFaceCSS = `
+						@font-face {
+							font-family: '${fontKey}';
+							src: url('${fontDir}/${fontKey}-Regular.woff') format('woff');
+						}
+					`
+					if (currentContents.document && currentContents.document.head) {
+						// First, remove any previous font style elements
+						const existingFontStyles =
+							currentContents.document.head.querySelectorAll('style[data-stump-font]')
+						existingFontStyles.forEach((el: Element) => el.remove())
+
+						const styleEl = currentContents.document.createElement('style')
+						styleEl.setAttribute('data-stump-font', fontKey)
+						styleEl.innerHTML = fontFaceCSS
+						currentContents.document.head.appendChild(styleEl)
+					}
+				})
+		})
+	}, [])
+
+	/**
 	 * This effect is responsible for updating the epub theme options whenever the epub
 	 * preferences change. It will only run when the epub preferences change and the
 	 * rendition instance is set.
@@ -402,8 +404,14 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	useEffect(() => {
 		if (rendition) {
 			applyEpubPreferences(rendition, bookPreferences)
+
+			// Get contents to inject font-face declaration for already rendered sections
+			const contents = rendition.getContents()
+			if (contents) {
+				injectFontToContents(contents, bookPreferences)
+			}
 		}
-	}, [rendition, bookPreferences, theme])
+	}, [rendition, bookPreferences, theme, injectFontToContents])
 
 	/**
 	 * Invalidate the book query when a reader is unmounted so that the book overview

@@ -23,10 +23,10 @@ export function useBookPreferences({ book }: Params): Return {
 		settings,
 		setSettings,
 	} = useReaderStore((state) => ({
-		bookPreferences: state.bookPreferences,
-		setBookPreferences: state.setBookPreferences,
 		setSettings: state.setSettings,
 		settings: state.settings,
+		bookPreferences: state.bookPreferences,
+		setBookPreferences: state.setBookPreferences,
 	}))
 
 	const storedBookPreferences = useMemo(() => allPreferences[book.id], [allPreferences, book.id])
@@ -75,7 +75,7 @@ const buildPreferences = (
 	settings: ReaderSettings,
 	libraryConfig?: LibraryConfig,
 ): BookPreferences => ({
-	...settings,
 	...defaultsFromLibraryConfig(libraryConfig),
+	...settings,
 	...preferences,
 })

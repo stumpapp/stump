@@ -1,10 +1,9 @@
 import { Label, NativeSelect } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { isSupportedFont } from '@stump/sdk'
 import { useCallback } from 'react'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
-import { SUPPORTED_FONT_OPTIONS } from '@/utils/fonts'
+import { SUPPORTED_FONT_OPTIONS, FontFamilyKey } from '@/utils/fonts'
 
 import { useEpubReaderContext } from '../context'
 
@@ -22,9 +21,10 @@ export default function FontFamily() {
 		(font: string) => {
 			if (!font) {
 				setBookPreferences({ fontFamily: undefined })
-			} else if (isSupportedFont(font)) {
+			} else if (SUPPORTED_FONT_OPTIONS.some((option) => option.value === font)) {
 				// Note: useApplyTheme will apply the font to the body element after the preferences are updated
-				setBookPreferences({ fontFamily: font })
+				setBookPreferences({ fontFamily: font as FontFamilyKey })
+				console.log('updated fontFamily', font)
 			}
 		},
 		[setBookPreferences],

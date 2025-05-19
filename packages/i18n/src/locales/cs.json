@@ -1324,8 +1324,8 @@
 							"description": "Písmo použité v čtečce"
 						},
 						"lineHeight": {
-							"label": "Line height",
-							"description": "The height of the lines in the reader"
+							"label": "Výška řádku",
+							"description": "Výška řádků ve čtečce"
 						}
 					}
 				},

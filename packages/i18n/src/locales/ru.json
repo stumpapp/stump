@@ -365,8 +365,8 @@
 					"description": "Извлечь любые метаданные из файлов библиотеки и сохранить результаты в базе данных"
 				},
 				"watch": {
-					"label": "Watch",
-					"description": "Watch the library directory for changes and update the database accordingly"
+					"label": "Отслеживание",
+					"description": "Отслеживание изменений в каталоге библиотеки и актуализация их в базе данных"
 				},
 				"generateFileHashes": {
 					"label": "Генерировать хэши файлов",
@@ -456,7 +456,7 @@
 					"ignoreRules": "Правила игнорирования",
 					"convertRar": "Преобразование RAR/CBR",
 					"deleteConversions": "Удалить преобразованные файлы",
-					"watch": "Watch directory for changes",
+					"watch": "Следить за изменениями в каталоге",
 					"processMetadata": "Обработка метаданных",
 					"generateFileHashes": "Генерировать хэши файлов"
 				}
@@ -1324,8 +1324,8 @@
 							"description": "Шрифт, используемый в читалке"
 						},
 						"lineHeight": {
-							"label": "Line height",
-							"description": "The height of the lines in the reader"
+							"label": "Высота строки",
+							"description": "Высота строк в читалке"
 						}
 					}
 				},

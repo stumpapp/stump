@@ -1,5 +1,5 @@
-import { queryClient, useSDK, useUpdateMediaProgress } from '@stump/client'
-import { Media } from '@stump/sdk'
+import { useSDK } from '@stump/client'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 
@@ -8,15 +8,15 @@ import paths from '@/paths'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import ReaderContainer from './container'
-import { ImageBaseReaderContext, ImagePageDimensionRef } from './context'
+import { ImageBaseReaderContext, ImagePageDimensionRef, ImageReaderBookRef } from './context'
 import { ContinuousScrollReader } from './continuous'
-import { AnimatedPagedReader, PagedReader } from './paged'
+import { PagedReader } from './paged'
 
 type Props = {
 	/**
 	 * The media which is being read
 	 */
-	media: Media
+	media: ImageReaderBookRef
 	/**
 	 * Whether or not the reader(s) should be animated
 	 *
@@ -32,6 +32,7 @@ type Props = {
 	 * The initial page to start on, if any. This is 1-indexed, and defaults to 1 if not provided.
 	 */
 	initialPage?: number
+	onProgress?: (page: number) => void
 }
 
 // TODO: support read time
@@ -40,8 +41,11 @@ export default function ImageBasedReader({
 	isAnimated = false,
 	isIncognito,
 	initialPage,
+	onProgress,
 }: Props) {
 	const { sdk } = useSDK()
+
+	const client = useQueryClient()
 	const navigate = useNavigate()
 
 	/**
@@ -56,21 +60,16 @@ export default function ImageBasedReader({
 		setSettings,
 	} = useBookPreferences({ book: media })
 
-	const { updateReadProgress } = useUpdateMediaProgress(media.id, {
-		onError(err) {
-			console.error(err)
-		},
-	})
 	/**
 	 * A callback to update the read progress, if the reader is not in incognito mode.
 	 */
 	const handleUpdateProgress = useCallback(
 		(page: number) => {
 			if (!isIncognito) {
-				updateReadProgress({ page })
+				onProgress?.(page)
 			}
 		},
-		[updateReadProgress, isIncognito],
+		[onProgress, isIncognito],
 	)
 
 	/**
@@ -136,7 +135,8 @@ export default function ImageBasedReader({
 				setSettings({
 					showToolBar: false,
 				})
-				queryClient.invalidateQueries([sdk.media.keys.inProgress], { exact: false })
+				client.invalidateQueries({ exact: false, queryKey: ['keepReading'] })
+				client.invalidateQueries({ queryKey: ['bookOverview', media.id], exact: false })
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -144,7 +144,7 @@ export default function ImageBasedReader({
 	)
 
 	const renderReader = () => {
-		if (readingMode.startsWith('continuous')) {
+		if (readingMode.startsWith('CONTINUOUS')) {
 			return (
 				<ContinuousScrollReader
 					media={media}
@@ -152,13 +152,14 @@ export default function ImageBasedReader({
 					getPageUrl={getPageUrl}
 					onProgressUpdate={handleUpdateProgress}
 					onPageChanged={handleChangePage}
-					orientation={(readingMode.split(':')[1] as 'vertical' | 'horizontal') || 'vertical'}
+					orientation={
+						(readingMode.split('_')[1]?.toLowerCase() as 'vertical' | 'horizontal') || 'vertical'
+					}
 				/>
 			)
 		} else {
-			const Component = isAnimated ? AnimatedPagedReader : PagedReader
 			return (
-				<Component
+				<PagedReader
 					media={media}
 					currentPage={initialPage || 1}
 					getPageUrl={(pageNumber) => sdk.media.bookPageURL(media.id, pageNumber)}

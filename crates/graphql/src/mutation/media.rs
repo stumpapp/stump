@@ -125,7 +125,7 @@ impl MediaMutation {
 		let is_complete =
 			is_progress_complete(active_session.media_id.clone(), page, conn).await?;
 
-		if is_complete {
+		if !is_complete {
 			Ok(ReadingProgressOutput::new(
 				Some(active_session.into()),
 				None,

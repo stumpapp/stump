@@ -406,6 +406,7 @@ FROM "reading_sessions";
 DROP TABLE "reading_sessions";
 ALTER TABLE "new_reading_sessions"
     RENAME TO "reading_sessions";
+CREATE UNIQUE INDEX IF NOT EXISTS "reading_sessions_user_id_media_id_key" ON "reading_sessions" ("user_id", "media_id");
 -- Changes:
 -- 1. id is now an autoincrementing integer
 CREATE TABLE "new_finshed_reading_sessions" (

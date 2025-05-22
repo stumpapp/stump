@@ -155,6 +155,7 @@ function BookReaderScene({ book }: Props) {
 					isAnimated={isAnimated}
 					isIncognito={isIncognito}
 					initialPage={initialPage}
+					onProgress={updateProgress}
 				/>
 			)
 		}

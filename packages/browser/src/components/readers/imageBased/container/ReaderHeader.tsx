@@ -1,7 +1,6 @@
 import { Link, Text } from '@stump/components'
 import { motion } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
-import { useMemo } from 'react'
 
 import paths from '@/paths'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
@@ -15,9 +14,7 @@ export default function ReaderHeader() {
 		settings: { showToolBar },
 	} = useBookPreferences({ book })
 
-	const { id, name, metadata } = book
-
-	const title = useMemo(() => metadata?.title || name, [metadata, name])
+	const { id, resolvedName } = book
 
 	return (
 		<motion.nav
@@ -38,7 +35,7 @@ export default function ReaderHeader() {
 					</Link>
 				</div>
 
-				<Text>{title}</Text>
+				<Text>{resolvedName}</Text>
 
 				<div className="flex items-center space-x-2">
 					<LayoutMenu />

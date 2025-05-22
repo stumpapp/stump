@@ -1,3 +1,4 @@
+import { ReadingMode } from '@stump/graphql'
 import { Fragment, PropsWithChildren } from 'react'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
@@ -12,7 +13,7 @@ const ReaderContainer = ({ children }: PropsWithChildren) => {
 		bookPreferences: { readingMode },
 	} = useBookPreferences({ book })
 
-	const showBottomToolbar = readingMode === 'paged'
+	const showBottomToolbar = readingMode === ReadingMode.Paged
 
 	return (
 		<Fragment>

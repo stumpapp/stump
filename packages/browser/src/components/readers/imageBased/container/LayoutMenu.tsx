@@ -1,4 +1,5 @@
 import { Popover, ToolTip } from '@stump/components'
+import { ReadingMode } from '@stump/graphql'
 import { Settings2 } from 'lucide-react'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
@@ -19,7 +20,10 @@ export default function LayoutMenu() {
 
 	const renderDoubleSpreadOption = () => {
 		// TODO(readers): Support double spread for horizontal scrolling
-		if (readingMode.startsWith('continuous')) {
+		if (
+			readingMode === ReadingMode.ContinuousHorizontal ||
+			readingMode === ReadingMode.ContinuousVertical
+		) {
 			return null
 		} else {
 			return <DoubleSpreadToggle />
@@ -28,7 +32,10 @@ export default function LayoutMenu() {
 
 	const renderDirectionalOptions = () => {
 		// TODO(readers): Support rtl reading direction for horizontal scrolling
-		if (readingMode.startsWith('continuous')) {
+		if (
+			readingMode === ReadingMode.ContinuousHorizontal ||
+			readingMode === ReadingMode.ContinuousVertical
+		) {
 			return null
 		} else {
 			return <ReadingDirectionSelect />

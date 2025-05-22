@@ -1,5 +1,6 @@
 import { useSDK } from '@stump/client'
 import { AspectRatio, cn, usePrevious } from '@stump/components'
+import { ReadingDirection } from '@stump/graphql'
 import { motion } from 'framer-motion'
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
@@ -35,7 +36,7 @@ export default function ReaderFooter() {
 	const pageArray = useMemo(
 		() =>
 			Array.from({ length: book.pages }).map((_, index) =>
-				readingDirection === 'rtl' ? book.pages - index : index + 1,
+				readingDirection === ReadingDirection.Rtl ? book.pages - index : index + 1,
 			),
 		[book.pages, readingDirection],
 	)
@@ -101,7 +102,7 @@ export default function ReaderFooter() {
 				}}
 				overscan={{ main: preload.ahead || 1, reverse: preload.behind || 1 }}
 				initialTopMostItemIndex={
-					readingDirection === 'rtl' ? book.pages - currentPage : currentPage
+					readingDirection === ReadingDirection.Rtl ? book.pages - currentPage : currentPage
 				}
 			/>
 		</motion.nav>

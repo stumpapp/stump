@@ -1,5 +1,7 @@
-import { Media } from '@stump/sdk'
+import { BookReaderSceneQuery } from '@stump/graphql'
 import { createContext, useContext } from 'react'
+
+export type ImageReaderBookRef = NonNullable<BookReaderSceneQuery['mediaById']>
 
 export type ImagePageDimensionRef = {
 	height: number
@@ -11,7 +13,7 @@ export type IImageBaseReaderContext = {
 	/**
 	 * The media entity associated with the reader
 	 */
-	book: Media
+	book: ImageReaderBookRef
 	/**
 	 * The current page of the reader
 	 */

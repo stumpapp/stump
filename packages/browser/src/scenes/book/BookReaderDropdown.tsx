@@ -91,9 +91,8 @@ export default function BookReaderDropdown({ book }: Props) {
 	 */
 	const readUrl = useMemo(() => {
 		const { id, readProgress, extension } = book
-		if (!readProgress) return undefined
 
-		const { epubcfi, page } = readProgress
+		const { epubcfi, page } = readProgress || {}
 
 		if (epubcfi || extension.match(EBOOK_EXTENSION)) {
 			return paths.bookReader(id, {

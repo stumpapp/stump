@@ -8,10 +8,11 @@ import {
 } from '@stump/graphql'
 import { useCallback, useMemo } from 'react'
 
+import { ImageReaderBookRef } from '@/components/readers/imageBased/context'
 import { useReaderStore } from '@/stores'
 
 type Params = {
-	book: NonNullable<BookReaderSceneQuery['mediaById']>
+	book: ImageReaderBookRef
 }
 
 type Return = Omit<ReaderStore, 'bookPreferences' | 'setBookPreferences' | 'clearStore'> & {
@@ -42,7 +43,7 @@ export function useBookPreferences({ book }: Params): Return {
 
 	const bookPreferences = useMemo(
 		() => buildPreferences(storedBookPreferences ?? {}, settings, libraryConfig),
-		[storedBookPreferences, libraryConfig],
+		[storedBookPreferences, libraryConfig, settings],
 	)
 
 	const setBookPreferences = useCallback(

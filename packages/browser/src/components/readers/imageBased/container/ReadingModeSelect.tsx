@@ -1,5 +1,5 @@
 import { Label, NativeSelect } from '@stump/components'
-import { ReadingMode } from '@stump/sdk'
+import { ReadingMode } from '@stump/graphql'
 import { useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
@@ -25,7 +25,9 @@ export default function ReadingModeSelect() {
 		(mode: ReadingMode) => {
 			// We need to set the page in the URL for the paged reader to start at the correct
 			// page but remove the page from the URL for the continuous readers
-			const urlPage = currentMode.startsWith('continuous') ? currentPage.toString() : null
+			const isCurrentlyScroll = currentMode !== ReadingMode.Paged
+			const urlPage = isCurrentlyScroll ? currentPage.toString() : null
+
 			if (urlPage) {
 				search.set('page', urlPage)
 			} else {
@@ -59,9 +61,9 @@ export default function ReadingModeSelect() {
 				id="reading-mode"
 				size="sm"
 				options={[
-					{ label: 'Vertical scroll', value: 'continuous:vertical' },
-					{ label: 'Horizontal scroll', value: 'continuous:horizontal' },
-					{ label: 'Paged', value: 'paged' },
+					{ label: 'Vertical scroll', value: 'CONTINUOUS_VERTICAL' },
+					{ label: 'Horizontal scroll', value: 'CONTINUOUS_HORIZONTAL' },
+					{ label: 'Paged', value: 'PAGED' },
 				]}
 				value={currentMode}
 				onChange={handleChange}
@@ -75,4 +77,6 @@ export default function ReadingModeSelect() {
  * A type guard to ensure that the provided string is a valid {@link ReadingMode}.
  */
 const isReadingMode = (mode: string): mode is ReadingMode =>
-	mode === 'continuous:vertical' || mode === 'continuous:horizontal' || mode === 'paged'
+	mode === ReadingMode.Paged ||
+	mode === ReadingMode.ContinuousHorizontal ||
+	mode === ReadingMode.ContinuousVertical

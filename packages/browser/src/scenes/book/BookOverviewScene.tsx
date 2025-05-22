@@ -103,7 +103,8 @@ export default function BookOverviewScene() {
 							<Heading size="sm">{media.resolvedName}</Heading>
 							{completedAt && (
 								<Text size="xs" variant="muted">
-									Completed on {dayjs(completedAt).format('LLL')}
+									{media.readHistory.length > 1 ? 'Last completed' : 'Completed'} on{' '}
+									{dayjs(completedAt).format('LLL')}
 								</Text>
 							)}
 							{isAtLeastTablet && <ReadMore text={media.metadata?.summary} />}

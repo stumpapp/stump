@@ -1,4 +1,4 @@
-import type { Media } from '@stump/sdk'
+import { ReadingDirection } from '@stump/graphql'
 import clsx from 'clsx'
 import { memo, useCallback, useMemo, useRef } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
@@ -9,14 +9,14 @@ import { useMediaMatch, useWindowSize } from 'rooks'
 import { useDetectZoom } from '@/hooks/useDetectZoom'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
-import { ImagePageDimensionRef, useImageBaseReaderContext } from '../context'
+import { ImagePageDimensionRef, ImageReaderBookRef, useImageBaseReaderContext } from '../context'
 import PageSet from './PageSet'
 
 export type PagedReaderProps = {
 	/** The current page which the reader should render */
 	currentPage: number
 	/** The media entity associated with the reader */
-	media: Media
+	media: ImageReaderBookRef
 	/** A callback that is called in order to change the page */
 	onPageChange: (page: number) => void
 	/** A function that returns the url for a given page */
@@ -52,7 +52,7 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 
 	// TODO: this needs to be aware of overflow / if the page is too small to render double spread
 	const displayedPages = useMemo(() => {
-		if (readingDirection === 'ltr') {
+		if (readingDirection === ReadingDirection.Ltr) {
 			return doubleSpread
 				? [currentPage, currentPage + 1].filter((p) => p <= media.pages)
 				: [currentPage]
@@ -61,7 +61,7 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 				? [currentPage + 1, currentPage].filter((p) => p <= media.pages)
 				: [currentPage]
 		}
-	}, [currentPage, doubleSpread, media.pages])
+	}, [currentPage, doubleSpread, media.pages, readingDirection])
 
 	/**
 	 * If the image parts are collective >= 80% of the screen width, we want to fix the side navigation
@@ -96,8 +96,8 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	 * and the double spread setting.
 	 */
 	const handleLeftwardPageChange = useCallback(() => {
-		const direction = readingDirection === 'ltr' ? -1 : 1
-		const skip = readingDirection === 'ltr' ? 2 : 1
+		const direction = readingDirection === ReadingDirection.Ltr ? -1 : 1
+		const skip = readingDirection === ReadingDirection.Ltr ? 2 : 1
 		if (doubleSpread && currentPage > skip) {
 			const adjustedForBounds = currentPage + direction * 2 < 1 ? 1 : currentPage + direction * 2
 			doChangePage(adjustedForBounds)
@@ -110,8 +110,8 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	 * and the double spread setting.
 	 */
 	const handleRightwardPageChange = useCallback(() => {
-		const direction = readingDirection === 'ltr' ? 1 : -1
-		const skip = readingDirection === 'ltr' ? 1 : 2
+		const direction = readingDirection === ReadingDirection.Ltr ? 1 : -1
+		const skip = readingDirection === ReadingDirection.Ltr ? 1 : 2
 		if (doubleSpread && currentPage > skip) {
 			const adjustedForBounds =
 				currentPage + direction * 2 > media.pages ? media.pages : currentPage + direction * 2

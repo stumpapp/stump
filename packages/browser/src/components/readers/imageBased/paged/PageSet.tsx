@@ -1,5 +1,6 @@
 import { BookImageScaling } from '@stump/client'
 import { cn } from '@stump/components'
+import { ReadingImageScaleFit } from '@stump/graphql'
 import React, { forwardRef, useCallback, useMemo } from 'react'
 
 import { EntityImage } from '@/components/entity'
@@ -113,13 +114,14 @@ const _Page = ({
 			className={cn(
 				'z-30 select-none',
 				{
-					'mx-auto my-0 w-auto self-center': scaleToFit === 'none',
+					'mx-auto my-0 w-auto self-center': scaleToFit === ReadingImageScaleFit.None,
 				},
 				{
-					'm-auto h-full max-h-screen w-auto object-cover': scaleToFit === 'height',
+					'm-auto h-full max-h-screen w-auto object-cover':
+						scaleToFit === ReadingImageScaleFit.Height,
 				},
 				{
-					'mx-auto my-0 w-full object-contain': scaleToFit === 'width',
+					'mx-auto my-0 w-full object-contain': scaleToFit === ReadingImageScaleFit.Width,
 				},
 			)}
 			src={getPageUrl(page)}

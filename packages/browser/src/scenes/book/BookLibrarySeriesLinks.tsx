@@ -1,15 +1,23 @@
-import { useSeriesByID } from '@stump/client'
+import { useSuspenseGraphQL } from '@stump/client'
+import { graphql } from '@stump/graphql'
 import { cx, Link, Text } from '@stump/components'
-import { Series } from '@stump/sdk'
 import { Fragment } from 'react'
 
 import paths from '../../paths'
 import SeriesLibraryLink from '../series/SeriesLibraryLink'
 
+const query = graphql(`
+	query BookLibrarySeriesLinks($id: ID!) {
+		seriesById(id: $id) {
+			id
+			name
+			libraryId
+		}
+	}
+`)
+
 type Props = {
-	libraryId?: string
-	series?: Series | null
-	seriesId: string
+	series_id?: string
 	linkSegments?: {
 		to?: string
 		label: string
@@ -17,27 +25,22 @@ type Props = {
 	}[]
 }
 
-export default function BookLibrarySeriesLinks({
-	libraryId,
-	seriesId,
-	series,
-	linkSegments,
-}: Props) {
-	const { series: fetchedSeries } = useSeriesByID(seriesId, { enabled: !!series })
-
-	const resolvedSeries = series || fetchedSeries
-	const resolvedLibraryId = libraryId || resolvedSeries?.library_id
-
+export default function BookLibrarySeriesLinks({ series_id, linkSegments }: Props) {
+	const {
+		data: { seriesById: series },
+	} = useSuspenseGraphQL(query, ['seriesLinks', series_id], {
+		id: series_id || '',
+	})
 	const renderSeriesLink = () => {
-		if (!resolvedSeries) {
+		if (!series) {
 			return null
 		}
 
 		return (
 			<>
 				<span className="mx-2 text-foreground-muted">/</span>
-				<Link to={paths.seriesOverview(resolvedSeries.id)} className="line-clamp-1">
-					{resolvedSeries.name}
+				<Link to={paths.seriesOverview(series.id)} className="line-clamp-1">
+					{series.name}
 				</Link>
 			</>
 		)
@@ -45,7 +48,7 @@ export default function BookLibrarySeriesLinks({
 
 	return (
 		<div className="flex items-center text-sm md:text-base">
-			{resolvedLibraryId && <SeriesLibraryLink id={resolvedLibraryId} />}
+			{series?.libraryId && <SeriesLibraryLink id={series?.libraryId} />}
 			{renderSeriesLink()}
 			{linkSegments?.map((segment) => {
 				const Component = segment.to ? Link : Text

@@ -83,7 +83,7 @@ type SeriesByIdOptions = {
 } & QueryOptions<Series, AxiosError>
 export function useSeriesByID(id: string, { params, ...options }: SeriesByIdOptions = {}) {
 	const { sdk } = useSDK()
-	const { data, ...ret } = useQuery(
+	const { data, ...ret } = useGraphQL(
 		[sdk.series.keys.getByID, id, params],
 		() => sdk.series.getByID(id, params),
 		options,

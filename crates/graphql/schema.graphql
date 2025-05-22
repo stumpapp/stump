@@ -756,6 +756,7 @@ type Media {
 	"The timestamp of when the media was **soft** deleted. This will act like a trash bin."
 	deletedAt: DateTime
 	metadata: MediaMetadata
+	tags: [Tag!]!
 	series: Series!
 	library: Library!
 	libraryConfig: LibraryConfig!
@@ -824,9 +825,12 @@ type MediaMetadata {
 	year: Int
 	month: Int
 	day: Int
+	publisher: String
 	pageCount: Int
 	ageRating: Int
 	pageAnalysis: PageAnalysis
+	writers: [String!]!
+	genres: [String!]!
 	characters: [String!]!
 	colorists: [String!]!
 	coverArtists: [String!]!

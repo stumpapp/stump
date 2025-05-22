@@ -17,6 +17,22 @@ impl From<media_metadata::Model> for MediaMetadata {
 
 #[ComplexObject]
 impl MediaMetadata {
+	async fn writers(&self) -> Vec<String> {
+		self.model
+			.writers
+			.clone()
+			.map(comma_separated_list_to_vec)
+			.unwrap_or_default()
+	}
+
+	async fn genres(&self) -> Vec<String> {
+		self.model
+			.genre
+			.clone()
+			.map(comma_separated_list_to_vec)
+			.unwrap_or_default()
+	}
+
 	async fn characters(&self) -> Vec<String> {
 		self.model
 			.characters

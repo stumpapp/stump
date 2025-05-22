@@ -1,29 +1,47 @@
 import { Heading, Text } from '@stump/components'
+import { BookOverviewHeaderFragment } from '@stump/graphql'
 import { graphql } from '@stump/graphql'
-import { Media, MediaMetadata } from '@stump/sdk'
 
 import SearchLinkBadge from '@/components/SearchLinkBadge'
 import TagList from '@/components/tags/TagList'
-import { formatBookName } from '@/utils/format'
 
 import paths from '../../paths'
 import BookLibrarySeriesLinks from './BookLibrarySeriesLinks'
 
 export const BOOK_OVERVIEW_SCENE_HEADER_FRAGMENT = graphql(`
 	fragment BookOverviewHeader on Media {
+		id
+		resolvedName
+		pages
+		size
+		status
+		seriesId
 		metadata {
+			ageRating
 			characters
 			colorists
 			coverArtists
 			editors
+			genres
 			inkers
 			letterers
 			links
 			pencillers
+			publisher
 			teams
+			writers
+			year
+		}
+		tags {
+			id
+			name
 		}
 	}
 `)
+
+type Props = {
+	media: BookOverviewHeaderFragment
+}
 
 interface MetadataTableItem {
 	keynameBase: string
@@ -32,7 +50,9 @@ interface MetadataTableItem {
 	searchKey: string
 }
 
-function build_metadata_table(metadata: MediaMetadata) {
+function build_metadata_table(
+	metadata: BookOverviewHeaderFragment['metadata'] | null,
+): MetadataTableItem[] {
 	const table: MetadataTableItem[] = []
 
 	if (!metadata) {
@@ -60,7 +80,7 @@ function build_metadata_table(metadata: MediaMetadata) {
 		}
 	}
 
-	const age_rating_num = metadata.age_rating ?? 0
+	const age_rating_num = metadata.ageRating ?? 0
 	const year_num = metadata.year ?? 0
 
 	const publishers = [metadata.publisher ?? '']
@@ -71,7 +91,7 @@ function build_metadata_table(metadata: MediaMetadata) {
 	const inkers = metadata.inkers?.filter((i) => !!i) ?? []
 	const letterers = metadata.letterers?.filter((l) => !!l) ?? []
 	const editors = metadata.editors?.filter((e) => !!e) ?? []
-	const genres = metadata.genre?.filter((g) => !!g) ?? []
+	const genres = metadata.genres?.filter((g) => !!g) ?? []
 	const age_rating = age_rating_num > 0 ? [age_rating_num.toString()] : []
 	const year = year_num > 0 ? [year_num.toString()] : []
 
@@ -90,16 +110,14 @@ function build_metadata_table(metadata: MediaMetadata) {
 	return table
 }
 
-type Props = {}
-
-export default function BookOverviewSceneHeader({}: Props) {
-	// const metadata_table = build_metadata_table(media?.metadata ?? {})
+export default function BookOverviewSceneHeader({ media }: Props) {
+	const metadata_table = build_metadata_table(media.metadata)
 
 	return (
 		<div className="flex flex-col items-center text-center tablet:items-start tablet:text-left">
-			{/* <Heading size="sm">{formatBookName(media)}</Heading> */}
+			{<Heading size="sm">{media.resolvedName}</Heading>}
 
-			{/* {!!metadata_table.length && (
+			{!!metadata_table.length && (
 				<div>
 					{metadata_table.map((metadata_row) => (
 						<div key={metadata_row.keynameBase} className="flex flex-row gap-1 space-x-2">
@@ -112,15 +130,11 @@ export default function BookOverviewSceneHeader({}: Props) {
 						</div>
 					))}
 				</div>
-			)} */}
+			)}
 
-			{/* <BookLibrarySeriesLinks
-				libraryId={media.series?.library_id}
-				seriesId={media.series_id}
-				series={media.series}
-			/>
+			{media.seriesId && <BookLibrarySeriesLinks series_id={media.seriesId} />}
 
-			<TagList tags={media.tags || null} baseUrl={paths.bookSearch()} /> */}
+			<TagList tags={media.tags || null} baseUrl={paths.bookSearch()} />
 		</div>
 	)
 }

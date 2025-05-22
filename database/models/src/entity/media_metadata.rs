@@ -64,7 +64,6 @@ pub struct Model {
 	#[graphql(skip)]
 	pub editors: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
-	#[graphql(skip)]
 	pub publisher: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
 	#[graphql(skip)]

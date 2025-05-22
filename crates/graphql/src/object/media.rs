@@ -3,10 +3,10 @@ use async_graphql::{
 };
 
 use models::{
-	entity::{library, library_config, media, series},
+	entity::{library, library_config, media, media_to_tag, series, tag},
 	shared::image::ImageRef,
 };
-use sea_orm::{prelude::*, sea_query::Query, QuerySelect};
+use sea_orm::{prelude::*, sea_query::Query, JoinType, QuerySelect};
 
 use crate::{
 	data::{CoreContext, RequestContext, ServiceContext},
@@ -26,6 +26,7 @@ use super::{
 	media_metadata::MediaMetadata,
 	reading_session::{ActiveReadingSession, FinishedReadingSession},
 	series::Series,
+	tag::Tag,
 };
 
 #[derive(Debug, SimpleObject)]
@@ -56,6 +57,14 @@ impl Media {
 
 #[ComplexObject]
 impl Media {
+	async fn tags(&self, ctx: &Context<'_>) -> Result<Vec<Tag>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let model = tag::Entity::find_for_media_id(&self.model.id.clone())
+			.all(conn)
+			.await?;
+		Ok(model.into_iter().map(Tag::from).collect())
+	}
+
 	async fn series(&self, ctx: &Context<'_>) -> Result<Series> {
 		let loader = ctx.data::<DataLoader<SeriesLoader>>()?;
 

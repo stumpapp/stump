@@ -17,6 +17,7 @@ import paths from '@/paths'
 import { PDF_EXTENSION } from '@/utils/patterns'
 
 import BookFileInformation from './BookFileInformation'
+import BookOverviewSceneHeader from './BookOverviewSceneHeader'
 import BookReaderDropdown from './BookReaderDropdown'
 import BooksAfterCursor from './BooksAfterCursor'
 import DownloadMediaButton from './DownloadMediaButton'
@@ -36,6 +37,7 @@ const query = graphql(`
 				links
 				summary
 			}
+			...BookOverviewHeader
 			thumbnail {
 				url
 			}
@@ -99,8 +101,7 @@ export default function BookOverviewScene() {
 					<div className="flex flex-col items-center gap-3 tablet:mb-2 tablet:flex-row tablet:items-start">
 						<MediaCard data={media} readingLink variant="cover" />
 						<div className="flex h-full w-full flex-col gap-2 tablet:gap-4">
-							{/* <BookOverviewSceneHeader media={media} /> */}
-							<Heading size="sm">{media.resolvedName}</Heading>
+							{<BookOverviewSceneHeader media={media} />}
 							{completedAt && (
 								<Text size="xs" variant="muted">
 									{media.readHistory.length > 1 ? 'Last completed' : 'Completed'} on{' '}
@@ -129,7 +130,7 @@ export default function BookOverviewScene() {
 									</ButtonOrLink>
 								)}
 								{canDownload && <DownloadMediaButton id={media.id} name={media.resolvedName} />}
-								{/* <EmailBookDropdown mediaId={media.id} /> */}
+								{/*<EmailBookDropdown mediaId={media.id} />*/}
 							</div>
 
 							{!isAtLeastTablet && !!media.metadata?.summary && (

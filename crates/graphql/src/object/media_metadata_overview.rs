@@ -71,7 +71,12 @@ impl MediaMetadataOverview {
 
 	async fn publishers(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
-		get_unique_values_inner!(Publisher, conn)
+		let values: Vec<String> =
+			media_metadata::Entity::find_for_column(media_metadata::Column::Publisher)
+				.into_tuple()
+				.all(conn)
+				.await?;
+		Ok(values)
 	}
 
 	async fn characters(&self, ctx: &Context<'_>) -> Result<Vec<String>> {

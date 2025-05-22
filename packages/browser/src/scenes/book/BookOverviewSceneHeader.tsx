@@ -1,6 +1,6 @@
+import { useSuspenseGraphQL } from '@stump/client'
 import { Heading, Text } from '@stump/components'
-import { BookOverviewHeaderFragment } from '@stump/graphql'
-import { graphql } from '@stump/graphql'
+import { BookOverviewHeaderQuery, graphql } from '@stump/graphql'
 
 import SearchLinkBadge from '@/components/SearchLinkBadge'
 import TagList from '@/components/tags/TagList'
@@ -8,39 +8,38 @@ import TagList from '@/components/tags/TagList'
 import paths from '../../paths'
 import BookLibrarySeriesLinks from './BookLibrarySeriesLinks'
 
-export const BOOK_OVERVIEW_SCENE_HEADER_FRAGMENT = graphql(`
-	fragment BookOverviewHeader on Media {
-		id
-		resolvedName
-		pages
-		size
-		status
-		seriesId
-		metadata {
-			ageRating
-			characters
-			colorists
-			coverArtists
-			editors
-			genres
-			inkers
-			letterers
-			links
-			pencillers
-			publisher
-			teams
-			writers
-			year
-		}
-		tags {
+export const query = graphql(`
+	query BookOverviewHeader($id: ID!) {
+		mediaById(id: $id) {
 			id
-			name
+			resolvedName
+			seriesId
+			metadata {
+				ageRating
+				characters
+				colorists
+				coverArtists
+				editors
+				genres
+				inkers
+				letterers
+				links
+				pencillers
+				publisher
+				teams
+				writers
+				year
+			}
+			tags {
+				id
+				name
+			}
 		}
 	}
 `)
 
 type Props = {
-	media: BookOverviewHeaderFragment
+	id: string
 }
 
 interface MetadataTableItem {
@@ -51,7 +50,7 @@ interface MetadataTableItem {
 }
 
 function build_metadata_table(
-	metadata: BookOverviewHeaderFragment['metadata'] | null,
+	metadata: NonNullable<BookOverviewHeaderQuery['mediaById']>['metadata'] | null,
 ): MetadataTableItem[] {
 	const table: MetadataTableItem[] = []
 
@@ -110,7 +109,17 @@ function build_metadata_table(
 	return table
 }
 
-export default function BookOverviewSceneHeader({ media }: Props) {
+export default function BookOverviewSceneHeader({ id }: Props) {
+	const {
+		data: { mediaById: media },
+	} = useSuspenseGraphQL(query, ['bookOverviewHeader', id], {
+		id: id || '',
+	})
+
+	if (!media) {
+		throw new Error('Book not found')
+	}
+
 	const metadata_table = build_metadata_table(media.metadata)
 
 	return (

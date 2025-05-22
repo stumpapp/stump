@@ -37,7 +37,6 @@ const query = graphql(`
 				links
 				summary
 			}
-			...BookOverviewHeader
 			thumbnail {
 				url
 			}
@@ -101,7 +100,9 @@ export default function BookOverviewScene() {
 					<div className="flex flex-col items-center gap-3 tablet:mb-2 tablet:flex-row tablet:items-start">
 						<MediaCard data={media} readingLink variant="cover" />
 						<div className="flex h-full w-full flex-col gap-2 tablet:gap-4">
-							{<BookOverviewSceneHeader media={media} />}
+							<Suspense>
+								<BookOverviewSceneHeader id={media.id} />
+							</Suspense>
 							{completedAt && (
 								<Text size="xs" variant="muted">
 									{media.readHistory.length > 1 ? 'Last completed' : 'Completed'} on{' '}

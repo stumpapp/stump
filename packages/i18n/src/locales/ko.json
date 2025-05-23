@@ -16,16 +16,16 @@
 			},
 			"labels": {
 				"username": "Username",
-				"password": "Password"
+				"password": "암호"
 			},
 			"buttons": {
-				"createAccount": "Create Account",
-				"login": "Log in"
+				"createAccount": "계정 생성",
+				"login": "로그인"
 			}
 		},
 		"toasts": {
-			"loggingIn": "Logging in...",
-			"loggedIn": "Welcome back!",
+			"loggingIn": "로그인 중...",
+			"loggedIn": "다시 오신 것을 환영합니다!",
 			"loggedInFirstTime": "Welcome!",
 			"registering": "Registering...",
 			"registered": "Registered!",
@@ -44,9 +44,9 @@
 		"fileInformation": {
 			"heading": "File Information",
 			"labels": {
-				"fileSize": "File Size",
-				"fileType": "File Type",
-				"fileLocation": "File Location",
+				"fileSize": "파일 크기",
+				"fileType": "파일 형식",
+				"fileLocation": "파일 위치",
 				"fileChecksum": "Checksum"
 			}
 		},
@@ -1179,7 +1179,7 @@
 			"description": "Customize the look and feel of the application",
 			"sections": {
 				"themeSelect": {
-					"label": "Theme",
+					"label": "테마",
 					"description": [
 						"If you're interested in creating your own custom theme, check out the",
 						"documentation"

@@ -365,8 +365,8 @@
 					"description": "Wyodrębnij metadane z plików biblioteki i zapisz wyniki w bazie danych"
 				},
 				"watch": {
-					"label": "Watch",
-					"description": "Watch the library directory for changes and update the database accordingly"
+					"label": "Obserwuj",
+					"description": "Obserwuj zmiany w katalogu biblioteki i zaktualizuj odpowiednio bazę danych"
 				},
 				"generateFileHashes": {
 					"label": "Generuj skróty plików",
@@ -425,7 +425,7 @@
 				},
 				{
 					"label": "Skanowanie",
-					"heading": "Scanning",
+					"heading": "Skanowanie",
 					"description": "Ustawienia związane z tym, jak Stump skanuje tę bibliotekę"
 				},
 				{
@@ -456,7 +456,7 @@
 					"ignoreRules": "Reguły pomijania",
 					"convertRar": "Konwertuj RAR/CBR",
 					"deleteConversions": "Usuń przekonwertowane pliki",
-					"watch": "Watch directory for changes",
+					"watch": "Obserwuj zmiany w katalogu",
 					"processMetadata": "Przetwarzaj metadane",
 					"generateFileHashes": "Generuj skróty plików"
 				}
@@ -522,70 +522,70 @@
 			"description": "Domyślne ustawienia czytnika dla książek w tej bibliotece. Każda książka może nadpisać te ustawienia"
 		},
 		"options/scanning": {
-			"title": "Scanning",
+			"title": "Skanowanie",
 			"description": "Ustawienia związane z tym, jak Stump skanuje tę bibliotekę",
 			"sections": {
 				"configureScan": {
-					"heading": "Configure scan",
-					"description": "A scan with additional options for more fine-grained control",
+					"heading": "Skonfiguruj skanowanie",
+					"description": "Skanowanie z dodatkowymi opcjami dla bardziej precyzyjnej kontroli",
 					"form": {
-						"alert": "These will override corresponding library-wide settings",
+						"alert": "Opcje te zastąpią analogiczne ustawienia globalne biblioteki",
 						"options": {
 							"forceRebuild": {
-								"label": "Force rebuild",
-								"description": "Rebuild every book in the library on disk",
-								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
+								"label": "Wymuś odbudowę",
+								"description": "Odbuduj każdą książkę w bibliotece na dysku",
+								"alert": "Spowoduje odbudowę każdej książki w bibliotece od zera, w tym jej metadane i skrót pliku"
 							},
 							"custom": {
-								"label": "Custom",
-								"description": "Customize the scan configuration",
+								"label": "Niestandardowe",
+								"description": "Dostosuj konfigurację skanowania",
 								"validation": {
-									"noSelection": "At least one option must be enabled"
+									"noSelection": "Przynajmniej jedna z opcji musi być włączona"
 								}
 							},
 							"rebuildMeta": {
-								"label": "Rebuild metadata",
-								"description": "Rebuild metadata for books in the library"
+								"label": "Odbuduj metadane",
+								"description": "Odbuduj metadane książek w bibliotece"
 							},
 							"regenHashes": {
-								"label": "Regenerate hashes",
-								"description": "Recreate hashes for books in the library"
+								"label": "Wygeneruj ponownie skróty plików",
+								"description": "Wygeneruj ponownie skrót pliku dla książek w bibliotece"
 							}
 						}
 					}
 				},
 				"defaultScan": {
-					"heading": "Default scan",
-					"description": "A standard scan to index your library for new content"
+					"heading": "Skanowanie domyślne",
+					"description": "Standardowy skan w celu zindeksowania nowej zawartości w bibliotece"
 				},
 				"history": {
-					"heading": "Scan history",
-					"description": "The history of all scans recorded for this library",
-					"empty": "There are no scans recorded for this library",
-					"runScan": "Run scan",
-					"inspect": "See details",
+					"heading": "Historia skanowania",
+					"description": "Historia wszystkich skanów zapisanych dla tej biblioteki",
+					"empty": "Brak zapisanych skanów dla tej biblioteki",
+					"runScan": "Rozpocznij skanowanie",
+					"inspect": "Zobacz szczegóły",
 					"inspector": {
-						"title": "Scan record",
-						"description": "A detailed view of this scan record",
+						"title": "Rejestr skanów",
+						"description": "Szczegółowy widok tego zapisu skanu",
 						"fields": {
-							"library": "Library",
-							"date": "Date",
-							"config": "Config",
-							"jobOutput": "Job output",
-							"logs": "Logs"
+							"library": "Biblioteka",
+							"date": "Data",
+							"config": "Konfiguracja",
+							"jobOutput": "Dane wyjściowe zadania",
+							"logs": "Logi"
 						},
-						"logsPresent": "Logs were persisted for this job",
-						"seeLogs": "See logs"
+						"logsPresent": "Logi dla tego zadania zostały zapisane",
+						"seeLogs": "Zobacz logi"
 					},
 					"table": {
 						"columns": {
-							"timestamp": "Scanned at",
-							"config": "Config"
+							"timestamp": "Zeskanowano o",
+							"config": "Konfiguracja"
 						},
-						"default": "Default",
-						"custom": "Custom"
+						"default": "Domyślne",
+						"custom": "Niestandardowe"
 					},
-					"clearHistory": "Delete scan history"
+					"clearHistory": "Usuń historię skanowania"
 				}
 			}
 		},
@@ -1292,8 +1292,8 @@
 				"universal": {
 					"sections": {
 						"readingDirection": {
-							"label": "Reading direction",
-							"description": "The direction in which the reader will progress through pages"
+							"label": "Kierunek czytania",
+							"description": "Kierunek, w jakim czytelnik będzie przechodził przez strony"
 						}
 					}
 				},
@@ -1312,29 +1312,29 @@
 					}
 				},
 				"textBasedBooks": {
-					"label": "Ebook reader",
-					"description": "Default settings for text-based books",
+					"label": "Czytnik e-book",
+					"description": "Ustawienia domyślne dla książek tekstowych",
 					"sections": {
 						"fontSize": {
-							"label": "Font size",
-							"description": "The size of the font used in the reader"
+							"label": "Rozmiar czcionki",
+							"description": "Rozmiar czcionki używanej w czytniku"
 						},
 						"fontFamily": {
-							"label": "Font family",
-							"description": "The font used in the reader"
+							"label": "Krój czcionki",
+							"description": "Czcionka używana w czytniku"
 						},
 						"lineHeight": {
-							"label": "Line height",
-							"description": "The height of the lines in the reader"
+							"label": "Wysokość wiersza",
+							"description": "Wysokość wierszy w czytniku"
 						}
 					}
 				},
 				"data": {
 					"sections": {
 						"clearStore": {
-							"label": "Clear preferences",
-							"description": "Reset all individual book settings that override the defaults",
-							"button": "Clear preferences"
+							"label": "Wyczyść preferencje",
+							"description": "Zresetuj wszystkie indywidualne ustawienia książki, które nadpisują ustawienia domyślne",
+							"button": "Wyczyść preferencje"
 						}
 					}
 				}
@@ -1494,10 +1494,10 @@
 						"emptySubtitle": "Twój serwer jest bardzo zdrowy lub bardzo niezdrowy"
 					},
 					"deleteLogs": {
-						"title": "Delete logs",
-						"description": "Permanently delete all persisted logs from the database",
-						"disclaimer": "This action cannot be undone",
-						"confirm": "Delete logs"
+						"title": "Usuń logi",
+						"description": "Trwale usuń wszystkie zachowane logi z bazy danych",
+						"disclaimer": "Tej czynności nie można cofnąć",
+						"confirm": "Usuń logi"
 					}
 				},
 				"liveLogs": {
@@ -1973,6 +1973,6 @@
 		"notReady": "Ta funkcja nie jest jeszcze gotowa",
 		"notUsedYet": "Jeszcze nieużywane",
 		"never": "Nigdy",
-		"scan": "Scan"
+		"scan": "Skanuj"
 	}
 }

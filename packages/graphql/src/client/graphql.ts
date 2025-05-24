@@ -2743,11 +2743,17 @@ export type SideBarQueryQuery = {
 				locked: boolean
 				sections: Array<{
 					__typename?: 'ArrangementSection'
+					visible: boolean
 					config:
-						| { __typename: 'CustomArrangementConfig' }
+						| {
+								__typename: 'CustomArrangementConfig'
+								name?: string | null
+								entity: FilterableArrangementEntity
+								links: Array<FilterableArrangementEntityLink>
+						  }
 						| { __typename: 'InProgressBooks' }
 						| { __typename: 'RecentlyAdded' }
-						| { __typename: 'SystemArrangmentConfig' }
+						| { __typename: 'SystemArrangmentConfig'; variant: SystemArrangment }
 				}>
 			}
 		}
@@ -3222,7 +3228,16 @@ export const SideBarQueryDocument = new TypedDocumentString(`
         sections {
           config {
             __typename
+            ... on SystemArrangmentConfig {
+              variant
+            }
+            ... on CustomArrangementConfig {
+              name
+              entity
+              links
+            }
           }
+          visible
         }
       }
     }

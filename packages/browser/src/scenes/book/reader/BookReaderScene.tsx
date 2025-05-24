@@ -9,7 +9,7 @@ import paths from '@/paths'
 import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION } from '../../../utils/patterns'
 import { useBookPreferences } from './useBookPreferences'
 
-const query = graphql(`
+export const BOOK_READER_SCENE_QUERY = graphql(`
 	query BookReaderScene($id: ID!) {
 		mediaById(id: $id) {
 			id
@@ -35,7 +35,7 @@ export default function BookReaderSceneContainer() {
 
 	const {
 		data: { mediaById: media },
-	} = useSuspenseGraphQL(query, ['bookReader', id], {
+	} = useSuspenseGraphQL(BOOK_READER_SCENE_QUERY, ['bookReader', id], {
 		id: id || '',
 	})
 

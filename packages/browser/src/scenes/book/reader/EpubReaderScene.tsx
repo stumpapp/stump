@@ -1,4 +1,4 @@
-import { useMediaByIdQuery } from '@stump/client'
+import { graphql } from '@stump/graphql'
 import { useEffect, useState } from 'react'
 import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 
@@ -33,13 +33,8 @@ export default function EpubReaderScene() {
 		}
 	}, [initialCfi, startOver, search, setSearch])
 
-	const { isLoading: fetchingBook, media } = useMediaByIdQuery(id)
-
-	if (fetchingBook || !media) {
-		return null
-	} else if (lazyReader) {
-		const resolvedCfi = (initialCfi || media?.current_epubcfi) ?? null
-		return <EpubJsReader id={id} initialCfi={isIncognito ? null : resolvedCfi} />
+	if (lazyReader) {
+		return <EpubJsReader id={id} isIncognito={isIncognito} />
 	} else {
 		search.set('stream', 'true')
 		setSearch(search)

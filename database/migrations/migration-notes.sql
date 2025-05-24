@@ -364,6 +364,7 @@ ALTER TABLE "new_age_restrictions"
 -- Changes:
 -- 1. id is now an autoincrementing integer
 -- 2. updated_at column default to current timestamp
+-- 3. unique constraint on user_id and media_id
 CREATE TABLE "new_reading_sessions" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "page" INTEGER,
@@ -378,7 +379,8 @@ CREATE TABLE "new_reading_sessions" (
     "elapsed_seconds" BIGINT,
     CONSTRAINT "reading_sessions_media_id_fkey" FOREIGN KEY ("media_id") REFERENCES "media" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "reading_sessions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "reading_sessions_device_id_fkey" FOREIGN KEY ("device_id") REFERENCES "registered_reading_devices" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT "reading_sessions_device_id_fkey" FOREIGN KEY ("device_id") REFERENCES "registered_reading_devices" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT user_media_unique UNIQUE (user_id, media_id)
 );
 INSERT INTO "new_reading_sessions"(
         "page",

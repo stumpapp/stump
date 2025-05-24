@@ -1,12 +1,13 @@
 use crate::data::{CoreContext, RequestContext};
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 use epub::doc::{EpubDoc, NavPoint};
-use models::entity::{media, media_annotation};
+use models::entity::{bookmark, media, media_annotation};
 use sea_orm::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::io::{Read, Seek};
 use std::{collections::HashMap, path::PathBuf};
 
+use super::bookmark::Bookmark;
 use super::media::Media;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -129,6 +130,26 @@ impl Epub {
 			.await?;
 
 		Ok(sessions)
+	}
+
+	async fn bookmarks(&self, ctx: &Context<'_>) -> Result<Vec<Bookmark>> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		if self.media_id.is_empty() {
+			return Err("Media ID not set".into());
+		}
+
+		let id = self.media_id.clone();
+
+		Ok(
+			bookmark::Entity::find_for_user_and_media_id(&user, id.as_ref())
+				.into_model::<bookmark::Model>()
+				.all(conn)
+				.await?
+				.into_iter()
+				.map(Bookmark::from)
+				.collect(),
+		)
 	}
 
 	async fn media(&self, ctx: &Context<'_>) -> Result<Media> {

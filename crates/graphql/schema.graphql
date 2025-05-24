@@ -415,6 +415,7 @@ type Epub {
 	rootFile: String!
 	extraCss: [String!]!
 	annotations: [MediaAnnotationsModel!]!
+	bookmarks: [Bookmark!]!
 	media: Media!
 }
 
@@ -969,7 +970,7 @@ type Mutation {
 	"""
 	createOrUpdateBookmark(input: BookmarkInput!): Bookmark!
 	"Delete a bookmark by ID. The user must be the owner of the bookmark."
-	deleteBookmark(id: ID!): Bookmark!
+	deleteBookmark(epubcfi: String!): Bookmark!
 	analyzeMedia(id: ID!): Boolean!
 	convertMedia(id: ID!): Boolean!
 	deleteMediaProgress(id: ID!): Media!

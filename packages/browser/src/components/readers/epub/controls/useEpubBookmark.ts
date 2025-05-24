@@ -1,8 +1,24 @@
-import { queryClient, useMutation, useSDK } from '@stump/client'
-import { CreateOrUpdateBookmark, DeleteBookmark } from '@stump/sdk'
+import { queryClient, useGraphQLMutation, useSDK } from '@stump/client'
 import { useCallback, useMemo } from 'react'
 
 import { useEpubReaderContext } from '../context'
+import { BookmarkInput, graphql } from '@stump/graphql'
+
+const create_mutation = graphql(`
+	mutation CreateOrUpdateBookmark($input: BookmarkInput!) {
+		createOrUpdateBookmark(input: $input) {
+			__typename
+		}
+	}
+`)
+
+const delete_mutation = graphql(`
+	mutation DeleteBookmark($epubcfi: String!) {
+		deleteBookmark(epubcfi: $epubcfi) {
+			__typename
+		}
+	}
+`)
 
 /**
  * A hook for creating and deleting bookmarks within an epub reader
@@ -34,10 +50,16 @@ export function useEpubBookmark() {
 	 * A callback to invalidate the bookmarks query after a bookmark is created or deleted
 	 */
 	const onSuccess = useCallback(
+		// TODO(graphql): invalid graphql queries
 		() => queryClient.invalidateQueries({ queryKey: [sdk.epub.keys.getBookmarks, bookId] }),
 		[bookId, sdk.epub],
 	)
 
+	const { mutate: createMutation, isPending: isCreating } = useGraphQLMutation(create_mutation, {
+		onSuccess: (_) => {
+			onSuccess()
+		},
+	})
 	/**
 	 * Create a payload for creating or deleting a bookmark based on the current
 	 * chapter's cfi range.
@@ -45,41 +67,34 @@ export function useEpubBookmark() {
 	const createPayload = useCallback(async () => {
 		const epubcfi = cfiRange[0] ?? cfiRange[1] ?? ''
 		const preview = await getCfiPreviewText(epubcfi)
-		return {
-			epubcfi,
-			preview_content: preview,
+		const payload: BookmarkInput = {
+			epubcfi: epubcfi,
+			mediaId: bookId,
+			previewContent: preview,
 		}
-	}, [cfiRange, getCfiPreviewText])
 
-	const { mutate: createMutation, isLoading: isCreating } = useMutation(
-		[sdk.epub.keys.createBookmark, bookId],
-		async (payload: CreateOrUpdateBookmark) => sdk.epub.createBookmark(bookId, payload),
-		{
-			onSuccess,
-		},
-	)
+		return payload
+	}, [cfiRange, getCfiPreviewText])
 
 	/**
 	 * Create a bookmark for a specific epubcfi. If no epubcfi payload is provided,
 	 * the current chapter's cfi range will be used.
 	 */
 	const createBookmark = useCallback(
-		async (payload?: CreateOrUpdateBookmark) => {
+		async (payload?: BookmarkInput) => {
+			if (!createMutation) {
+				return
+			}
+
 			const resolvedPayload = payload ?? (await createPayload())
 			if (resolvedPayload.epubcfi) {
-				createMutation(resolvedPayload)
+				createMutation({ input: resolvedPayload })
 			}
 		},
 		[createMutation, createPayload],
 	)
 
-	const { mutate: deleteMutation, isLoading: isDeleting } = useMutation(
-		[sdk.epub.keys.deleteBookmark, bookId],
-		async (payload: DeleteBookmark) => sdk.epub.deleteBookmark(bookId, payload),
-		{
-			onSuccess,
-		},
-	)
+	const { mutate: deleteMutation, isPending: isDeleting } = useGraphQLMutation(delete_mutation)
 
 	/**
 	 * Create a payload for creating or deleting a bookmark based on the current

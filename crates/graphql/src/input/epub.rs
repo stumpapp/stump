@@ -53,12 +53,12 @@ impl EpubProgressInput {
 impl BookmarkInput {
 	pub fn into_active_model(&self, user: &AuthUser) -> bookmark::ActiveModel {
 		bookmark::ActiveModel {
+			id: Set(Uuid::new_v4().to_string()),
 			epubcfi: Set(Some(self.epubcfi.clone())),
 			preview_content: Set(self.preview_content.clone()),
 			media_id: Set(self.media_id.clone()),
 			user_id: Set(user.id.clone()),
 			page: Set(Some(-1)),
-			..Default::default()
 		}
 	}
 }

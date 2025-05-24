@@ -3,7 +3,6 @@ import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
-import { formatBookName } from '@/utils/format'
 
 import paths from '../../../paths'
 import { useEpubReaderContext } from './context'
@@ -25,8 +24,6 @@ export default function EpubReaderHeader() {
 		bookPreferences: { fontFamily },
 	} = useBookPreferences({ book: bookEntity })
 
-	const bookName = formatBookName(bookEntity)
-
 	return (
 		<ControlsContainer position="top">
 			<div className="flex items-center gap-x-2">
@@ -47,7 +44,7 @@ export default function EpubReaderHeader() {
 					[`font-${fontFamily}`]: !!fontFamily,
 				})}
 			>
-				{bookName}
+				{bookEntity.resolvedName}
 			</Text>
 
 			<Spacer />

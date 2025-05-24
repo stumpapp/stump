@@ -1,16 +1,19 @@
-import { BookPreferences, queryClient, useEpubLazy, useQuery, useSDK } from '@stump/client'
-import { Bookmark, Media, UpdateEpubProgress } from '@stump/sdk'
+import { BookPreferences, useGraphQLMutation, queryClient, useGraphQL, useSDK } from '@stump/client'
+import { EpubContent } from '@stump/sdk'
 import { Book, Rendition } from 'epubjs'
 import uniqby from 'lodash/uniqBy'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import AutoSizer from 'react-virtualized-auto-sizer'
+import { ImageReaderBookRef } from '@/components/readers/imageBased/context'
 
 import { useTheme } from '@/hooks'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import EpubReaderContainer from './EpubReaderContainer'
 import { applyTheme, stumpDark } from './themes'
+import { Bookmark, EpubJsReaderQuery, EpubProgressInput, graphql } from '@stump/graphql'
+import { BOOK_READER_SCENE_QUERY } from '../../../scenes/book/reader/BookReaderScene'
 
 // NOTE: http://epubjs.org/documentation/0.3/ for epubjs documentation overview
 
@@ -18,8 +21,8 @@ import { applyTheme, stumpDark } from './themes'
 type EpubJsReaderProps = {
 	/** The ID of the associated media entity for this epub */
 	id: string
-	/** The initial cfi to start the reader at, i.e. where the read left off */
-	initialCfi: string | null
+	/** If true, starts progress at the start of the book, or the default location if set */
+	isIncognito: boolean
 }
 
 /** Location information as it is structured internally in epubjs */
@@ -55,6 +58,39 @@ class SectionLengths {
 	public lengths: { [key: number]: number } = {}
 }
 
+const query = graphql(`
+	query EpubJsReader($id: ID!) {
+		epubById(id: $id) {
+			mediaId
+			rootBase
+			rootFile
+			extraCss
+			toc
+			resources
+			metadata
+			spine {
+				id
+				idref
+				properties
+				linear
+			}
+			bookmarks {
+				id
+				userId
+				epubcfi
+				mediaId
+			}
+		}
+	}
+`)
+
+const mutation = graphql(`
+	mutation UpdateEpubProgress($input: EpubProgressInput!) {
+		updateEpubProgress(input: $input) {
+			__typename
+		}
+	}
+`)
 /**
  * A component for rendering a reader capable of reading epub files. This component uses
  * epubjs internally for the main rendering logic.
@@ -62,11 +98,20 @@ class SectionLengths {
  * Note: At some point in the future, I will be prioritizing some sort of streamable
  * epub reader as an additional option.
  */
-export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
+export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	const { sdk } = useSDK()
 	const { theme } = useTheme()
 
-	const { epub, isLoading } = useEpubLazy(id)
+	const { data: epub, isLoading } = useGraphQL(query, ['epubJsReader', id], {
+		id: id || '',
+	})
+	const { data: media, isLoading: isPreferencesLoading } = useGraphQL(
+		BOOK_READER_SCENE_QUERY,
+		['bookReader', id],
+		{
+			id: id || '',
+		},
+	)
 
 	const ref = useRef<HTMLDivElement>(null)
 
@@ -76,15 +121,14 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 
 	const [currentLocation, setCurrentLocation] = useState<EpubLocationState>()
 
-	const { bookPreferences } = useBookPreferences({ book: epub?.media_entity || ({} as Media) })
+	const { bookPreferences } = useBookPreferences({
+		book: media?.mediaById || ({} as ImageReaderBookRef),
+	})
 
-	const { data: bookmarks } = useQuery([sdk.epub.keys.getBookmarks, id], () =>
-		sdk.epub.getBookmarks(id),
-	)
 	const existingBookmarks = useMemo(
 		() =>
-			(bookmarks ?? []).reduce(
-				(acc, bookmark) => {
+			(epub?.epubById?.bookmarks ?? []).reduce(
+				(acc: Record<string, Bookmark>, bookmark: Bookmark) => {
 					if (!bookmark.epubcfi) {
 						return acc
 					} else {
@@ -95,7 +139,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				{} as Record<string, Bookmark>,
 			),
 
-		[bookmarks],
+		[epub],
 	)
 
 	//* Note: some books have entries in the spine for each href, some don't. It seems
@@ -160,7 +204,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	 * otherwise not be able to authenticate with the server.
 	 */
 	useEffect(() => {
-		if (!book) {
+		if (!book && epub && media) {
 			setBook(
 				new Book(sdk.media.downloadURL(id), {
 					openAs: 'epub',
@@ -169,7 +213,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				}),
 			)
 		}
-	}, [book, epub, id, sdk.media])
+	}, [book, epub, id, media])
 
 	/**
 	 *	A function for applying the epub reader preferences to the epubjs rendition instance
@@ -237,8 +281,8 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				applyEpubPreferences(rendition_, bookPreferences)
 				setRendition(rendition_)
 
-				const targetCfi = epub?.media_entity.active_reading_session?.epubcfi ?? initialCfi
-				if (targetCfi) {
+				const targetCfi = media?.mediaById?.readProgress?.epubcfi
+				if (targetCfi && !isIncognito) {
 					rendition_.display(targetCfi)
 				} else if (defaultLoc) {
 					rendition_.display(defaultLoc)
@@ -306,6 +350,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	useEffect(
 		() => {
 			return () => {
+				// TODO(graphql): invalidate graphql equivalent queries
 				queryClient.refetchQueries({ queryKey: [sdk.media.keys.getByID, id], exact: false })
 				queryClient.refetchQueries({ queryKey: [sdk.media.keys.inProgress], exact: false })
 			}
@@ -427,8 +472,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		[book, rendition],
 	)
 
-	// TODO: support incognito mode that doesn't sync progress...
-	const spineSize = epub?.spine.length
+	const { mutate } = useGraphQLMutation(mutation)
 	/**
 	 * This effect is responsible for syncing the current epub progress information to
 	 * the Stump server. If not location information is available, this effect will do nothing.
@@ -441,20 +485,13 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	useEffect(() => {
 		//* We can't do anything without the entity, so short circuit. This shouldn't
 		//* really happen, though.
-		if (!epub) return
+		if (!epub || !media) return
 
-		/**
-		 *
-		 * @param payload The payload to send to the server. Contains all of the information
-		 * needed to update the progress of the epub.
-		 * @returns A promise which resolves to the updated progress information.
-		 */
-		const handleUpdateProgress = async (payload: UpdateEpubProgress) => {
-			try {
-				await sdk.epub.updateProgress({ ...payload, id: epub.media_entity.id })
-			} catch (err) {
-				console.error(err)
-			}
+		const updateProgress = (input: EpubProgressInput) => {
+			if (!book) return
+			if (isIncognito) return
+			if (media?.mediaById?.readProgress?.epubcfi === input.epubcfi) return
+			mutate({ input: input })
 		}
 
 		if (!currentLocation) {
@@ -469,6 +506,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 
 		let percentage: number | null = null
 
+		const spineSize = epub?.epubById?.spine.length
 		if (spineSize) {
 			const currentChapterPage = start.displayed.page
 			const pagesInChapter = start.displayed.total
@@ -494,13 +532,16 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				percentage = naiveTotal
 			}
 
-			handleUpdateProgress({
-				epubcfi: start.cfi,
-				is_complete: atEnd ?? percentage === 1.0,
-				percentage,
-			})
+			if (media?.mediaById?.id) {
+				updateProgress({
+					mediaId: media?.mediaById?.id,
+					epubcfi: start.cfi,
+					isComplete: atEnd ?? percentage === 1.0,
+					percentage,
+				})
+			}
 		}
-	}, [currentLocation, spineSize, epub, sdk.epub])
+	}, [currentLocation, epub, media])
 
 	/**
 	 * A callback for attempting to extract preview text from a given cfi. This is used for bookmarks,
@@ -601,14 +642,16 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	// 	'epubcfi(/6/12!/4[3Q280-a9efbf2f573d4345819e3829f80e5dbc]/2[prologue]/4[prologue-text]/8/1:56)',
 	// ).then((res) => console.log('cfiWithinAnother', res))
 
-	if (isLoading || !epub?.media_entity) {
+	if (isLoading || isPreferencesLoading || !media?.mediaById || !epub?.epubById) {
 		return null
 	}
+
+	const toc = parseToc(epub?.epubById?.toc)
 
 	return (
 		<EpubReaderContainer
 			readerMeta={{
-				bookEntity: epub.media_entity,
+				bookEntity: media?.mediaById,
 				bookMeta: {
 					bookmarks: existingBookmarks,
 					chapter: {
@@ -622,10 +665,10 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 						position: chapter,
 						totalPages: currentLocation?.start.displayed.total,
 					},
-					toc: epub.toc,
+					toc: toc,
 					sectionLengths: sectionsLengths?.lengths ?? {},
 				},
-				progress: epub.media_entity.active_reading_session?.percentage_completed || null,
+				progress: media?.mediaById?.readProgress?.percentageCompleted || null,
 			}}
 			controls={{
 				getCfiPreviewText,
@@ -640,12 +683,30 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			<div className="h-full w-full">
 				<AutoSizer>
 					{({ height, width }) => {
-						return <div ref={ref} key={epub.media_entity.id} style={{ height, width }} />
+						return <div ref={ref} key={media?.mediaById?.id} style={{ height, width }} />
 					}}
 				</AutoSizer>
 			</div>
 		</EpubReaderContainer>
 	)
+}
+
+function parseToc(toc: EpubJsReaderQuery['epubById']['toc']): EpubContent[] {
+	if (!toc) return []
+
+	// epub toc is an array of json strings of EpubContent, so we need to parse them
+	const parsedToc = toc
+		.map((item) => {
+			try {
+				return JSON.parse(item) as EpubContent
+			} catch (e) {
+				console.error('Failed to parse toc item', item, e)
+				return null
+			}
+		})
+		.filter((item) => item !== null) as EpubContent[]
+
+	return parsedToc
 }
 
 async function createSectionLengths(

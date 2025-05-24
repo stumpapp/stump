@@ -10,5 +10,8 @@
 		"@graphql-codegen/cli": "^5.0.5",
 		"@parcel/watcher": "^2.5.1",
 		"typescript": "^5.8.3"
+	},
+	"scripts": {
+		"codegen": "graphql-codegen"
 	}
 }

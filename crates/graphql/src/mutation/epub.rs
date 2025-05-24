@@ -166,16 +166,20 @@ impl EpubMutation {
 		})
 	}
 
-	/// Delete a bookmark by ID. The user must be the owner of the bookmark.
-	async fn delete_bookmark(&self, ctx: &Context<'_>, id: ID) -> Result<Bookmark> {
+	/// Delete a bookmark by epubcfi. The user must be the owner of the bookmark.
+	async fn delete_bookmark(
+		&self,
+		ctx: &Context<'_>,
+		epubcfi: String,
+	) -> Result<Bookmark> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let bookmark =
-			bookmark::Entity::find_for_user_and_media_id(&user, &id.to_string())
-				.one(conn)
-				.await?
-				.ok_or("Bookmark not found")?;
+		let bookmark = bookmark::Entity::find_for_user(&user)
+			.filter(bookmark::Column::Epubcfi.eq(epubcfi))
+			.one(conn)
+			.await?
+			.ok_or("Bookmark not found")?;
 
 		let _ = bookmark.clone().delete(conn).await?;
 		Ok(Bookmark { model: bookmark })

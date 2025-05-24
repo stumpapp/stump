@@ -69,6 +69,10 @@ impl ActiveModelBehavior for ActiveModel {
 }
 
 impl Entity {
+	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
+		Entity::find().filter(Column::UserId.eq(&user.id))
+	}
+
 	pub fn find_for_user_and_media_id(user: &AuthUser, media_id: &str) -> Select<Entity> {
 		Entity::find()
 			.filter(Column::UserId.eq(&user.id))

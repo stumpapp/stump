@@ -1,7 +1,9 @@
-import { Bookmark, EpubContent, Media } from '@stump/sdk'
+import { EpubContent } from '@stump/sdk'
+import { ImageReaderBookRef } from '@/components/readers/imageBased/context'
 import { createContext, useContext } from 'react'
 
 import { noop } from '../../../utils/misc'
+import { Bookmark } from '@stump/graphql'
 
 export type EpubReaderChapterMeta = {
 	/** The chapter's title. */
@@ -31,7 +33,7 @@ export type EpubReaderBookMeta = {
 }
 
 export type EpubReaderMeta = {
-	bookEntity: Media
+	bookEntity: ImageReaderBookRef
 	bookMeta: EpubReaderBookMeta | null
 	progress: number | null
 }
@@ -84,7 +86,7 @@ export const EpubReaderContext = createContext<EpubReaderContextProps>({
 		visible: false,
 	},
 	readerMeta: {
-		bookEntity: {} as Media,
+		bookEntity: {} as ImageReaderBookRef,
 		bookMeta: null,
 		progress: null,
 	},

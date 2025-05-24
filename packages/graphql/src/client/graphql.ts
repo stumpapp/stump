@@ -2339,7 +2339,7 @@ export type UploadLibrarySeriesMutation = { __typename?: 'Mutation', uploadSerie
 export type SideBarQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type SideBarQueryQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename?: 'ArrangementSection', config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangmentConfig' } }> } } } };
+export type SideBarQueryQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig', name?: string | null, entity: FilterableArrangementEntity, links: Array<FilterableArrangementEntityLink> } | { __typename: 'InProgressBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangmentConfig', variant: SystemArrangment } }> } } } };
 
 export type BookLibrarySeriesLinksQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -2496,7 +2496,16 @@ export const SideBarQueryDocument = new TypedDocumentString(`
         sections {
           config {
             __typename
+            ... on SystemArrangmentConfig {
+              variant
+            }
+            ... on CustomArrangementConfig {
+              name
+              entity
+              links
+            }
           }
+          visible
         }
       }
     }

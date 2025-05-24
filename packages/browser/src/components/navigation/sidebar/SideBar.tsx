@@ -1,13 +1,14 @@
 import { useSuspenseGraphQL } from '@stump/client'
 import { cn, Spacer } from '@stump/components'
-import { graphql } from '@stump/graphql'
+import { graphql, SystemArrangment } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { NavigationItem } from '@stump/sdk'
 import { motion } from 'framer-motion'
 import { Book, Home } from 'lucide-react'
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
+import { match } from 'ts-pattern'
 
 import { useAppContext } from '@/context'
 import { usePreferences, useTheme } from '@/hooks'
@@ -31,7 +32,16 @@ const query = graphql(`
 					sections {
 						config {
 							__typename
+							... on SystemArrangmentConfig {
+								variant
+							}
+							... on CustomArrangementConfig {
+								name
+								entity
+								links
+							}
 						}
+						visible
 					}
 				}
 			}
@@ -50,16 +60,16 @@ export default function SideBar({ asChild, hidden }: Props) {
 
 	const { t } = useLocaleContext()
 
-	const { data } = useSuspenseGraphQL(query, ['sidebarQuery'])
+	const {
+		data: {
+			me: {
+				preferences: { navigationArrangement },
+			},
+		},
+	} = useSuspenseGraphQL(query, ['sidebarQuery'])
+	console.log('navigationArrangement', navigationArrangement)
 
 	const { checkPermission } = useAppContext()
-	// const {
-	// 	preferences: { navigation_arrangement },
-	// } = usePreferences()
-	// const { arrangement } = useNavigationArrangement({
-	// 	defaultArrangement: navigation_arrangement,
-	// 	suspense: false,
-	// })
 	const { shouldUseGradient } = useTheme()
 
 	const isBrowser = platform === 'browser'
@@ -90,6 +100,53 @@ export default function SideBar({ asChild, hidden }: Props) {
 			}
 		},
 		[checkPermission],
+	)
+
+	const prefetchHome = usePrefetchHomeScene()
+
+	const renderSystemSection = useCallback(
+		(variant: SystemArrangment) => {
+			if (variant === SystemArrangment.Home) {
+				return (
+					<SideBarButtonLink
+						key="home-sidebar-navlink"
+						to={paths.home()}
+						isActive={location.pathname === '/'}
+						onMouseEnter={() => prefetchHome()}
+					>
+						<Home className="mr-2 h-4 w-4 shrink-0" />
+						{t('sidebar.buttons.home')}
+					</SideBarButtonLink>
+				)
+			} else if (variant === SystemArrangment.Explore) {
+				return (
+					<SideBarButtonLink
+						key="explore-sidebar-navlink"
+						to={paths.bookSearch()}
+						isActive={location.pathname === paths.bookSearch()}
+					>
+						<Book className="mr-2 h-4 w-4 shrink-0" />
+						{t('sidebar.buttons.books')}
+					</SideBarButtonLink>
+				)
+			}
+		},
+		[t, location.pathname, prefetchHome],
+	)
+
+	const sections = useMemo(
+		() =>
+			navigationArrangement.sections
+				.filter(({ visible }) => visible)
+				.map(({ config }) =>
+					match(config)
+						.with({ __typename: 'SystemArrangmentConfig' }, ({ variant }) =>
+							renderSystemSection(variant),
+						)
+						.otherwise(() => null),
+				)
+				.filter(Boolean),
+		[navigationArrangement, renderSystemSection],
 	)
 
 	// const sections = useMemo(
@@ -147,8 +204,6 @@ export default function SideBar({ asChild, hidden }: Props) {
 	// 	[arrangement, checkSectionPermission, location, t, isMobile],
 	// )
 
-	const prefetchHome = usePrefetchHomeScene()
-
 	const renderContent = () => {
 		return (
 			<>
@@ -156,17 +211,8 @@ export default function SideBar({ asChild, hidden }: Props) {
 
 				<div className="flex max-h-full grow flex-col gap-2 overflow-y-auto p-1 scrollbar-hide">
 					{isAtLeastMedium && isBrowser && <UserMenu />}
-					{/* {sections} */}
 
-					<SideBarButtonLink
-						key="home-sidebar-navlink"
-						to={paths.home()}
-						isActive={location.pathname === '/'}
-						onMouseEnter={prefetchHome}
-					>
-						<Home className="mr-2 h-4 w-4 shrink-0" />
-						{t('sidebar.buttons.home')}
-					</SideBarButtonLink>
+					{sections}
 				</div>
 				<Spacer />
 

@@ -196,6 +196,7 @@ impl Arrangement {
 				},
 				ArrangementSection {
 					config: ArrangementConfig::Custom(CustomArrangementConfig {
+						name: Some("Libraries".to_string()),
 						entity: FilterableArrangementEntity::Libraries,
 						links: vec![FilterableArrangementEntityLink::Create],
 						..Default::default()
@@ -204,6 +205,7 @@ impl Arrangement {
 				},
 				ArrangementSection {
 					config: ArrangementConfig::Custom(CustomArrangementConfig {
+						name: Some("Smart Lists".to_string()),
 						entity: FilterableArrangementEntity::SmartLists,
 						links: vec![FilterableArrangementEntityLink::Create],
 						..Default::default()
@@ -212,6 +214,7 @@ impl Arrangement {
 				},
 				ArrangementSection {
 					config: ArrangementConfig::Custom(CustomArrangementConfig {
+						name: Some("Book Clubs".to_string()),
 						entity: FilterableArrangementEntity::BookClubs,
 						links: vec![FilterableArrangementEntityLink::Create],
 						..Default::default()

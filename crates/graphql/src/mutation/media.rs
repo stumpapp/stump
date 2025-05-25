@@ -1,6 +1,9 @@
-use async_graphql::{Context, Object, Result, ID};
-use models::entity::{finished_reading_session, media, reading_session};
-use sea_orm::{prelude::*, sea_query::OnConflict, QuerySelect, Set};
+use async_graphql::{Context, Object, Result, SimpleObject, ID};
+use models::entity::{finished_reading_session, media, reading_session, user::AuthUser};
+use sea_orm::{
+	prelude::*, sea_query::OnConflict, DatabaseTransaction, QuerySelect, Set,
+	TransactionTrait,
+};
 use stump_core::filesystem::media::analyze_media_job::AnalyzeMediaJob;
 
 use crate::{
@@ -139,12 +142,14 @@ impl MediaMutation {
 				..Default::default()
 			};
 
+			let txn = conn.begin().await?;
 			let finished_reading_session = insert_finished_reading_session(
 				Some(active_session),
 				finished_reading_session,
-				conn,
+				&txn,
 			)
 			.await?;
+			txn.commit().await?;
 
 			Ok(ReadingProgressOutput::new(
 				None,
@@ -153,10 +158,102 @@ impl MediaMutation {
 		}
 	}
 
-	// mark_as_completed (put_media_complete_status)
+	async fn mark_media_as_complete(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		is_complete: bool,
+		page: Option<i32>,
+	) -> Result<Option<finished_reading_session::Model>> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let model = media::ModelWithMetadata::find_for_user(user)
+			.filter(media::Column::Id.eq(id.to_string()))
+			.into_model::<media::ModelWithMetadata>()
+			.one(conn)
+			.await?
+			.ok_or("Media not found")?;
+
+		if is_complete {
+			let txn = conn.begin().await?;
+			let finished_reading_session =
+				set_completed_media(user, &txn, &model).await?;
+			txn.commit().await?;
+			Ok(Some(finished_reading_session))
+		} else {
+			let _active_session =
+				update_active_reading_session(user, conn, &model, page).await?;
+			Ok(None)
+		}
+	}
 
 	// TODO: consider separate mutation object for media metadata?
 	// update_media_metadata (put_media_metadata)
+}
+
+async fn update_active_reading_session(
+	user: &AuthUser,
+	conn: &DatabaseConnection,
+	model: &media::ModelWithMetadata,
+	page: Option<i32>,
+) -> Result<reading_session::Model> {
+	let page = match model.media.extension.as_str() {
+		"epub" => -1,
+		_ => page.unwrap_or(model.media.pages),
+	};
+
+	// upsert reading_session
+	let active_session = reading_session::ActiveModel {
+		user_id: Set(user.id.clone()),
+		media_id: Set(model.media.id.to_string()),
+		page: Set(Some(page)),
+		updated_at: Set(chrono::Utc::now().into()),
+		..Default::default()
+	};
+
+	let active_session = reading_session::Entity::insert(active_session.clone())
+		.on_conflict(
+			OnConflict::columns(vec![
+				reading_session::Column::MediaId,
+				reading_session::Column::UserId,
+			])
+			.update_columns(vec![reading_session::Column::Page])
+			.to_owned(),
+		)
+		.exec_with_returning(conn)
+		.await?;
+
+	Ok(active_session)
+}
+
+async fn set_completed_media(
+	user: &AuthUser,
+	txn: &DatabaseTransaction,
+	model: &media::ModelWithMetadata,
+) -> Result<finished_reading_session::Model> {
+	let active_session =
+		reading_session::Entity::find_for_user_and_media_id(user, &model.media.id)
+			.one(txn)
+			.await?;
+
+	let started_at = active_session
+		.as_ref()
+		.map(|s| s.started_at)
+		.unwrap_or_default();
+
+	let finished_reading_session = finished_reading_session::ActiveModel {
+		user_id: Set(user.id.clone()),
+		media_id: Set(model.media.id.to_string()),
+		started_at: Set(started_at),
+		completed_at: Set(chrono::Utc::now().into()),
+		..Default::default()
+	};
+
+	let finished_reading_session =
+		insert_finished_reading_session(active_session, finished_reading_session, txn)
+			.await?;
+	Ok(finished_reading_session)
 }
 
 async fn is_progress_complete(

@@ -21,6 +21,8 @@ import BookOverviewSceneHeader from './BookOverviewSceneHeader'
 import BookReaderDropdown from './BookReaderDropdown'
 import BooksAfterCursor from './BooksAfterCursor'
 import DownloadMediaButton from './DownloadMediaButton'
+import BookCompletionToggleButton from './BookCompletionToggleButton'
+import EmailBookDropdown from './EmailBookDropdown'
 
 const query = graphql(`
 	query BookOverviewScene($id: ID!) {
@@ -114,7 +116,7 @@ export default function BookOverviewScene() {
 
 							<div className="flex w-full flex-col gap-2 md:flex-row md:items-center">
 								<BookReaderDropdown book={media} />
-								{/* <BookCompletionToggleButton book={media} /> */}
+								<BookCompletionToggleButton book={media} />
 								{media.extension?.match(PDF_EXTENSION) && (
 									<ButtonOrLink
 										variant="outline"
@@ -131,7 +133,7 @@ export default function BookOverviewScene() {
 									</ButtonOrLink>
 								)}
 								{canDownload && <DownloadMediaButton id={media.id} name={media.resolvedName} />}
-								{/*<EmailBookDropdown mediaId={media.id} />*/}
+								<EmailBookDropdown mediaId={media.id} />
 							</div>
 
 							{!isAtLeastTablet && !!media.metadata?.summary && (

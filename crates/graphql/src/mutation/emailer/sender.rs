@@ -81,7 +81,12 @@ async fn send_attachment_email_for_emailer<Sender>(
 where
 	Sender: AttachmentSender,
 {
-	let books = get_books(&user, conn, &input.media_ids).await?;
+	let media_ids = input
+		.media_ids
+		.iter()
+		.map(|id| id.to_string())
+		.collect::<Vec<_>>();
+	let books = get_books(&user, conn, &media_ids).await?;
 	let recipients = get_and_validate_recipients(user, conn, &input.send_to).await?;
 
 	let mut errors = Vec::new();
@@ -450,7 +455,7 @@ mod tests {
 		let sender = MockEmailerSender { is_error: true };
 		let user = get_default_user();
 		let input = SendAttachmentEmailsInput {
-			media_ids: vec!["1".to_string(), "2".to_string()],
+			media_ids: vec!["1".to_string().into(), "2".to_string().into()],
 			send_to: vec![
 				EmailerSendTo::Device(SendToDevice { id: 1 }),
 				EmailerSendTo::Anonymous(SendToEmail {
@@ -496,7 +501,7 @@ mod tests {
 		let sender = MockEmailerSender { is_error: false };
 		let user = get_default_user();
 		let input = SendAttachmentEmailsInput {
-			media_ids: vec!["1".to_string(), "2".to_string()],
+			media_ids: vec!["1".to_string().into(), "2".to_string().into()],
 			send_to: vec![
 				EmailerSendTo::Device(SendToDevice { id: 1 }),
 				EmailerSendTo::Anonymous(SendToEmail {
@@ -542,7 +547,7 @@ mod tests {
 		let sender = MockEmailerSender { is_error: false };
 		let user = get_default_user();
 		let input = SendAttachmentEmailsInput {
-			media_ids: vec!["1".to_string(), "2".to_string()],
+			media_ids: vec!["1".to_string().into(), "2".to_string().into()],
 			send_to: vec![
 				EmailerSendTo::Device(SendToDevice { id: 1 }),
 				EmailerSendTo::Anonymous(SendToEmail {

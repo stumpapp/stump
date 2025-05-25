@@ -1,4 +1,4 @@
-use async_graphql::{InputObject, OneofObject, Result};
+use async_graphql::{InputObject, OneofObject, Result, ID};
 use email::EmailerClientConfig;
 use models::entity::emailer;
 use sea_orm::{ActiveValue::NotSet, Set};
@@ -64,6 +64,6 @@ pub enum EmailerSendTo {
 
 #[derive(InputObject)]
 pub struct SendAttachmentEmailsInput {
-	pub media_ids: Vec<String>,
+	pub media_ids: Vec<ID>,
 	pub send_to: Vec<EmailerSendTo>,
 }

@@ -486,6 +486,16 @@ type FinishedReadingSession {
 	elapsedSeconds: Int
 }
 
+type FinishedReadingSessionModel {
+	id: Int!
+	startedAt: DateTime!
+	completedAt: DateTime!
+	mediaId: String!
+	userId: String!
+	deviceId: String
+	elapsedSeconds: Int
+}
+
 
 
 type ImageRef {
@@ -969,12 +979,13 @@ type Mutation {
 	and epubcfi, the preview content is updated.
 	"""
 	createOrUpdateBookmark(input: BookmarkInput!): Bookmark!
-	"Delete a bookmark by ID. The user must be the owner of the bookmark."
+	"Delete a bookmark by epubcfi. The user must be the owner of the bookmark."
 	deleteBookmark(epubcfi: String!): Bookmark!
 	analyzeMedia(id: ID!): Boolean!
 	convertMedia(id: ID!): Boolean!
 	deleteMediaProgress(id: ID!): Media!
 	updateMediaProgress(id: ID!, page: Int): ReadingProgressOutput!
+	markMediaAsComplete(id: ID!, isComplete: Boolean!, page: Int): FinishedReadingSessionModel
 	"""
 	Delete media and series from a library that match one of the following conditions:
 	
@@ -1393,7 +1404,7 @@ type SendAttachmentEmailOutput {
 }
 
 input SendAttachmentEmailsInput {
-	mediaIds: [String!]!
+	mediaIds: [ID!]!
 	sendTo: [EmailerSendTo!]!
 }
 

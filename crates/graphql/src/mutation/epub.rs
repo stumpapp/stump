@@ -6,11 +6,11 @@ use crate::{
 		reading_session::{ActiveReadingSession, FinishedReadingSession},
 	},
 };
-use async_graphql::{Context, Object, Result, SimpleObject, ID};
+use async_graphql::{Context, Object, Result, SimpleObject};
 use models::entity::{
 	bookmark, finished_reading_session, reading_session, user::AuthUser,
 };
-use sea_orm::{prelude::*, sea_query::OnConflict, TransactionTrait};
+use sea_orm::{prelude::*, sea_query::OnConflict, DatabaseTransaction, TransactionTrait};
 
 #[derive(Default)]
 pub struct EpubMutation;
@@ -51,9 +51,11 @@ async fn update_epub_progress_finished(
 	let finished_reading_session =
 		input.into_finished_session_active_model(user, started_at);
 
+	let txn = conn.begin().await?;
 	let finished_reading_session =
-		insert_finished_reading_session(active_session, finished_reading_session, conn)
+		insert_finished_reading_session(active_session, finished_reading_session, &txn)
 			.await?;
+	txn.commit().await?;
 
 	Ok(ReadingProgressOutput {
 		active_session: None,
@@ -64,19 +66,15 @@ async fn update_epub_progress_finished(
 pub async fn insert_finished_reading_session(
 	active_session: Option<reading_session::Model>,
 	finished_reading_session: finished_reading_session::ActiveModel,
-	conn: &DatabaseConnection,
+	txn: &DatabaseTransaction,
 ) -> Result<finished_reading_session::Model> {
-	let txn = conn.begin().await?;
-
 	// Note that finished reading session is used as a read history, so we don't
 	// clean up existing ones. The active reading session is deleted, though.
-	let finished_reading_session = finished_reading_session.insert(&txn).await?;
+	let finished_reading_session = finished_reading_session.insert(txn).await?;
 
 	if let Some(active_session) = active_session.clone() {
-		let _ = active_session.delete(&txn).await?;
+		let _ = active_session.delete(txn).await?;
 	}
-
-	txn.commit().await?;
 
 	Ok(finished_reading_session.into())
 }

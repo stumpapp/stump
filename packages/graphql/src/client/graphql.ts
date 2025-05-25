@@ -726,6 +726,17 @@ export type FinishedReadingSession = {
 	userId: Scalars['String']['output']
 }
 
+export type FinishedReadingSessionModel = {
+	__typename?: 'FinishedReadingSessionModel'
+	completedAt: Scalars['DateTime']['output']
+	deviceId?: Maybe<Scalars['String']['output']>
+	elapsedSeconds?: Maybe<Scalars['Int']['output']>
+	id: Scalars['Int']['output']
+	mediaId: Scalars['String']['output']
+	startedAt: Scalars['DateTime']['output']
+	userId: Scalars['String']['output']
+}
+
 export type ImageRef = {
 	__typename?: 'ImageRef'
 	height?: Maybe<Scalars['Int']['output']>
@@ -1251,7 +1262,7 @@ export type Mutation = {
 	createTags: Array<Tag>
 	createUser: User
 	deleteApiKey: Apikey
-	/** Delete a bookmark by ID. The user must be the owner of the bookmark. */
+	/** Delete a bookmark by epubcfi. The user must be the owner of the bookmark. */
 	deleteBookmark: Bookmark
 	deleteEmailDevice: RegisteredEmailDevice
 	deleteEmailer: Emailer
@@ -1282,6 +1293,7 @@ export type Mutation = {
 	deleteTags: Array<Tag>
 	deleteUserById: User
 	deleteUserSessions: Scalars['Int']['output']
+	markMediaAsComplete?: Maybe<FinishedReadingSessionModel>
 	markSeriesAsComplete: Series
 	meUpdateUser: User
 	meUpdateUserPreferences: UserPreferences
@@ -1468,6 +1480,12 @@ export type MutationDeleteUserByIdArgs = {
 
 export type MutationDeleteUserSessionsArgs = {
 	userId: Scalars['String']['input']
+}
+
+export type MutationMarkMediaAsCompleteArgs = {
+	id: Scalars['ID']['input']
+	isComplete: Scalars['Boolean']['input']
+	page?: InputMaybe<Scalars['Int']['input']>
 }
 
 export type MutationMarkSeriesAsCompleteArgs = {
@@ -2267,7 +2285,7 @@ export type SendAttachmentEmailOutput = {
 }
 
 export type SendAttachmentEmailsInput = {
-	mediaIds: Array<Scalars['String']['input']>
+	mediaIds: Array<Scalars['ID']['input']>
 	sendTo: Array<EmailerSendTo>
 }
 
@@ -2819,6 +2837,26 @@ export type DeleteBookmarkMutation = {
 	deleteBookmark: { __typename: 'Bookmark' }
 }
 
+export type BookCompletionToggleButtonCompleteMutationVariables = Exact<{
+	id: Scalars['ID']['input']
+	isComplete: Scalars['Boolean']['input']
+	page?: InputMaybe<Scalars['Int']['input']>
+}>
+
+export type BookCompletionToggleButtonCompleteMutation = {
+	__typename?: 'Mutation'
+	markMediaAsComplete?: { __typename?: 'FinishedReadingSessionModel'; completedAt: any } | null
+}
+
+export type BookCompletionToggleButtonDeleteSessionMutationVariables = Exact<{
+	id: Scalars['ID']['input']
+}>
+
+export type BookCompletionToggleButtonDeleteSessionMutation = {
+	__typename?: 'Mutation'
+	deleteMediaProgress: { __typename: 'Media' }
+}
+
 export type BookLibrarySeriesLinksQueryVariables = Exact<{
 	id: Scalars['ID']['input']
 }>
@@ -2929,6 +2967,27 @@ export type BooksAfterCurrentQueryQuery = {
 				| { __typename: 'OffsetPaginationInfo' }
 		}
 	} | null
+}
+
+export type EmailBookDropdownDeviceQueryVariables = Exact<{ [key: string]: never }>
+
+export type EmailBookDropdownDeviceQuery = {
+	__typename?: 'Query'
+	emailDevices: Array<{ __typename?: 'RegisteredEmailDevice'; id: number; name: string }>
+}
+
+export type SendEmailAttachmentMutationVariables = Exact<{
+	id: Scalars['ID']['input']
+	sendTo: Array<EmailerSendTo> | EmailerSendTo
+}>
+
+export type SendEmailAttachmentMutation = {
+	__typename?: 'Mutation'
+	sendAttachmentEmail: {
+		__typename?: 'SendAttachmentEmailOutput'
+		sentCount: number
+		errors: Array<string>
+	}
 }
 
 export type BookReaderSceneQueryVariables = Exact<{
@@ -3296,6 +3355,26 @@ export const DeleteBookmarkDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<DeleteBookmarkMutation, DeleteBookmarkMutationVariables>
+export const BookCompletionToggleButtonCompleteDocument = new TypedDocumentString(`
+    mutation BookCompletionToggleButtonComplete($id: ID!, $isComplete: Boolean!, $page: Int) {
+  markMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {
+    completedAt
+  }
+}
+    `) as unknown as TypedDocumentString<
+	BookCompletionToggleButtonCompleteMutation,
+	BookCompletionToggleButtonCompleteMutationVariables
+>
+export const BookCompletionToggleButtonDeleteSessionDocument = new TypedDocumentString(`
+    mutation BookCompletionToggleButtonDeleteSession($id: ID!) {
+  deleteMediaProgress(id: $id) {
+    __typename
+  }
+}
+    `) as unknown as TypedDocumentString<
+	BookCompletionToggleButtonDeleteSessionMutation,
+	BookCompletionToggleButtonDeleteSessionMutationVariables
+>
 export const BookLibrarySeriesLinksDocument = new TypedDocumentString(`
     query BookLibrarySeriesLinks($id: ID!) {
   seriesById(id: $id) {
@@ -3403,6 +3482,28 @@ export const BooksAfterCurrentQueryDocument = new TypedDocumentString(`
     `) as unknown as TypedDocumentString<
 	BooksAfterCurrentQueryQuery,
 	BooksAfterCurrentQueryQueryVariables
+>
+export const EmailBookDropdownDeviceDocument = new TypedDocumentString(`
+    query EmailBookDropdownDevice {
+  emailDevices {
+    id
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<
+	EmailBookDropdownDeviceQuery,
+	EmailBookDropdownDeviceQueryVariables
+>
+export const SendEmailAttachmentDocument = new TypedDocumentString(`
+    mutation SendEmailAttachment($id: ID!, $sendTo: [EmailerSendTo!]!) {
+  sendAttachmentEmail(input: {mediaIds: [$id], sendTo: $sendTo}) {
+    sentCount
+    errors
+  }
+}
+    `) as unknown as TypedDocumentString<
+	SendEmailAttachmentMutation,
+	SendEmailAttachmentMutationVariables
 >
 export const BookReaderSceneDocument = new TypedDocumentString(`
     query BookReaderScene($id: ID!) {

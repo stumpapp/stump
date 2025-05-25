@@ -1,4 +1,5 @@
-import { useEmailDevicesQuery, useSendAttachmentEmail } from '@stump/client'
+import { useGraphQLMutation, useSuspenseGraphQL } from '@stump/client'
+import { EmailerSendTo, SendToDevice, SendToEmail, graphql } from '@stump/graphql'
 import { Badge, Button, ComboBox, Dialog, IconButton, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Send } from 'lucide-react'
@@ -6,6 +7,25 @@ import { Suspense, useCallback, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 
 import { useAppContext } from '@/context'
+import { useMutationState } from '@tanstack/react-query'
+
+const query_email_devices = graphql(`
+	query EmailBookDropdownDevice {
+		emailDevices {
+			id
+			name
+		}
+	}
+`)
+
+const mutation = graphql(`
+	mutation SendEmailAttachment($id: ID!, $sendTo: [EmailerSendTo!]!) {
+		sendAttachmentEmail(input: { mediaIds: [$id], sendTo: $sendTo }) {
+			sentCount
+			errors
+		}
+	}
+`)
 
 type ContainerProps = {
 	mediaId: string
@@ -36,8 +56,31 @@ type Props = {
 
 function EmailBookDropdown({ mediaId, canArbitrarySendEmail }: Props) {
 	const { t } = useLocaleContext()
-	const { devices } = useEmailDevicesQuery()
-	const { sendAsync: sendEmail, isSending } = useSendAttachmentEmail()
+	const {
+		data: { emailDevices: devices },
+	} = useSuspenseGraphQL(query_email_devices, ['emailDevices'])
+
+	const mutationKey = ['sendEmailAttachment', mediaId]
+
+	const { mutate } = useGraphQLMutation(mutation, {
+		mutationKey,
+		onSettled: (data, error) => {
+			if (error) {
+				console.error('Error sending email:', error)
+			}
+			const errors = data?.sendAttachmentEmail?.errors || []
+			setIsOpen(errors.length > 0)
+			if (errors.length > 0) {
+				console.warn(errors)
+				toast.error('Some errors occurred while sending email(s). Check the logs for more detail')
+			}
+		},
+	})
+
+	const isSending = useMutationState({
+		filters: { mutationKey },
+		select: (mutation) => mutation.state.status === 'pending',
+	})?.some(Boolean)
 
 	const [isOpen, setIsOpen] = useState(false)
 	const [deviceIds, setDeviceIds] = useState<number[]>([])
@@ -50,26 +93,21 @@ function EmailBookDropdown({ mediaId, canArbitrarySendEmail }: Props) {
 			return
 		}
 
-		const payload = {
-			media_ids: [mediaId],
-			send_to: [
-				...deviceIds.map((id) => ({ device_id: id })),
-				...(canArbitrarySendEmail ? emails.map((email) => ({ email })) : []),
-			],
+		const sendTo: EmailerSendTo[] = []
+		if (deviceIds.length > 0) {
+			sendTo.push(...deviceIds.map((id) => ({ device: { id: id } })))
+		}
+		if (canArbitrarySendEmail && emails.length > 0) {
+			sendTo.push(...emails.map((email) => ({ anonymous: { email: email } })))
 		}
 
 		try {
-			const { errors } = await sendEmail(payload)
-			setIsOpen(errors.length > 0)
-			if (errors.length > 0) {
-				console.warn(errors)
-				toast.error('Some errors occurred while sending email(s). Check the logs for more detail')
-			}
+			mutate({ id: mediaId, sendTo })
 		} catch (error) {
 			console.error(error)
 			toast.error('Failed to send email')
 		}
-	}, [sendEmail, deviceIds, emails, canArbitrarySendEmail, mediaId])
+	}, [mutate, deviceIds, emails, canArbitrarySendEmail, mediaId])
 
 	const renderArbitraryEmails = () => {
 		if (!canArbitrarySendEmail) {

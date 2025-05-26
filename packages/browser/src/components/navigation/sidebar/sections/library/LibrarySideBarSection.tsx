@@ -37,7 +37,6 @@ export default function LibrarySideBarSection({
 	const location = useLocation()
 
 	const { t } = useLocaleContext()
-	// const { libraries } = useLibraries()
 	const {
 		data: {
 			libraries: { nodes: libraries },
@@ -78,7 +77,7 @@ export default function LibrarySideBarSection({
 					isActive={isCurrentLibrary(library.id)}
 					className="pl-2 pr-0"
 					leftContent={canChange ? leftContent : undefined}
-					// rightContent={<LibraryOptionsMenu library={library} />}
+					rightContent={<LibraryOptionsMenu library={library} />}
 					// onMouseEnter={() => prefetchLibrarySeries(library.id)}
 				>
 					{!canChange && leftContent}

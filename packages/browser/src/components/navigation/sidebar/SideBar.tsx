@@ -1,11 +1,6 @@
 import { useSuspenseGraphQL } from '@stump/client'
 import { cn, Spacer } from '@stump/components'
-import {
-	Arrangement,
-	FilterableArrangementEntityLink,
-	graphql,
-	SystemArrangment,
-} from '@stump/graphql'
+import { FilterableArrangementEntityLink, graphql, SystemArrangment } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { NavigationItem } from '@stump/sdk'
 import { motion } from 'framer-motion'
@@ -16,7 +11,7 @@ import { useMediaMatch } from 'rooks'
 import { match } from 'ts-pattern'
 
 import { useAppContext } from '@/context'
-import { usePreferences, useTheme } from '@/hooks'
+import { useTheme } from '@/hooks'
 import paths from '@/paths'
 import { usePrefetchHomeScene } from '@/scenes/home'
 import { useAppStore } from '@/stores'
@@ -68,7 +63,6 @@ export default function SideBar({ asChild, hidden }: Props) {
 			},
 		},
 	} = useSuspenseGraphQL(query, ['sidebarQuery'])
-	console.log('navigationArrangement', navigationArrangement)
 
 	const { checkPermission } = useAppContext()
 	const { shouldUseGradient } = useTheme()
@@ -153,40 +147,6 @@ export default function SideBar({ asChild, hidden }: Props) {
 		[navigationArrangement, renderSystemSection],
 	)
 
-	// const sections = useMemo(
-	// 	() =>
-	// 		arrangement.items
-	// 			.filter(({ item: { type }, visible }) => checkSectionPermission(type) && visible)
-	// 			.map(({ item }) =>
-	// 				match(item)
-	// 					.with({ type: 'Home' }, () => (
-	// 						<SideBarButtonLink
-	// 							key="home-sidebar-navlink"
-	// 							to={paths.home()}
-	// 							isActive={location.pathname === '/'}
-	// 						>
-	// 							<Home className="mr-2 h-4 w-4 shrink-0" />
-	// 							{t('sidebar.buttons.home')}
-	// 						</SideBarButtonLink>
-	// 					))
-	// 					.with({ type: 'Explore' }, () => (
-	// 						<SideBarButtonLink
-	// 							key="explore-sidebar-navlink"
-	// 							to={paths.bookSearch()}
-	// 							isActive={location.pathname === paths.bookSearch()}
-	// 						>
-	// 							<Book className="mr-2 h-4 w-4 shrink-0" />
-	// 							{t('sidebar.buttons.books')}
-	// 						</SideBarButtonLink>
-	// 					))
-	// 					.with({ type: 'Libraries' }, (ctx) => (
-	// 						<LibrarySideBarSection
-	// 							key="libraries-sidebar-navlink"
-	// 							isMobile={isMobile}
-	// 							showCreate={ctx.show_create_action}
-	// 							showLinkToAll={ctx.show_link_to_all}
-	// 						/>
-	// 					))
 	// 					.with({ type: 'SmartLists' }, (ctx) => (
 	// 						<SmartListSideBarSection
 	// 							key="smartlists-sidebar-navlink"

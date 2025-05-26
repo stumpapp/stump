@@ -1,7 +1,7 @@
-import { queryClient, useScanLibrary } from '@stump/client'
+import { queryClient, useGraphQLMutation } from '@stump/client'
 import { DropdownMenu } from '@stump/components'
+import { graphql, LibrarySideBarSectionQuery } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import type { Library } from '@stump/sdk'
 import { FolderSearch2, MoreHorizontal, ScanLine, Settings, Trash } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 import { useLocation } from 'react-router'
@@ -11,8 +11,14 @@ import DeleteLibraryConfirmation from '@/components/library/DeleteLibraryConfirm
 import { useAppContext } from '@/context'
 import paths from '@/paths'
 
+const mutation = graphql(`
+	mutation ScanLibraryMutation($id: ID!) {
+		scanLibrary(id: $id)
+	}
+`)
+
 type Props = {
-	library: Library
+	library: LibrarySideBarSectionQuery['libraries']['nodes'][number]
 }
 
 const LOCALE_KEY = 'sidebar.libraryOptions'
@@ -20,10 +26,10 @@ const getLocaleKey = (path: string) => `${LOCALE_KEY}.${path}`
 
 export default function LibraryOptionsMenu({ library }: Props) {
 	const [isDeleting, setIsDeleting] = useState(false)
-	const { scanAsync } = useScanLibrary()
 
 	const { t } = useLocaleContext()
 	const { checkPermission } = useAppContext()
+	const { mutate: startScan } = useGraphQLMutation(mutation)
 
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
@@ -35,19 +41,14 @@ export default function LibraryOptionsMenu({ library }: Props) {
 	const canDelete = useMemo(() => checkPermission('library:delete'), [checkPermission])
 	const canUseExplorer = useMemo(() => checkPermission('file:explorer'), [checkPermission])
 
-	const handleScan = useCallback(() => {
+	const handleScan = useCallback(async () => {
 		// extra protection, should not be possible to reach this.
 		if (!canScan) {
 			throw new Error('You do not have permission to scan libraries.')
 		}
-
-		// The UI will receive updates from SSE in fractions of ms lol and it can get bogged down.
-		// So, add a slight delay so the close animation of the menu can finish cleanly.
-		setTimeout(async () => {
-			await scanAsync({ id: library.id })
-			await queryClient.invalidateQueries(['getJobReports'])
-		}, 50)
-	}, [canScan, library.id, scanAsync])
+		await startScan({ id: library.id })
+		await queryClient.invalidateQueries({ queryKey: ['getJobReports'], exact: false })
+	}, [canScan, library.id, startScan])
 
 	const iconStyle = 'mr-2 h-4 w-4'
 
@@ -61,6 +62,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 				onClose={() => setIsDeleting(false)}
 				libraryId={library.id}
 			/>
+
 			<DropdownMenu
 				modal={isMobile}
 				trigger={

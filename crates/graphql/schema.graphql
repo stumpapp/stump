@@ -1006,6 +1006,7 @@ type Mutation {
 	the library will be scanned immediately after updating.
 	"""
 	updateLibrary(id: ID!, input: CreateOrUpdateLibraryInput!): Library!
+	updateLibraryEmoji(id: ID!, emoji: String): Library!
 	"""
 	Exclude users from a library, preventing them from seeing the library in the UI. This operates as a
 	full replacement of the excluded users list, so any users not included in the provided list will be

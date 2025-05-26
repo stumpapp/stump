@@ -10,7 +10,7 @@ use models::{
 use sea_orm::{
 	prelude::*,
 	sea_query::{OnConflict, Query},
-	Condition, QuerySelect, Set, TransactionTrait,
+	Condition, IntoActiveModel, QuerySelect, Set, TransactionTrait,
 };
 use stump_core::filesystem::{
 	image::remove_thumbnails,
@@ -387,6 +387,27 @@ impl LibraryMutation {
 		}
 
 		Ok(Library::from(updated_library))
+	}
+	#[graphql(guard = "PermissionGuard::new(&[UserPermission::ManageLibrary])")]
+	async fn update_library_emoji(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		emoji: Option<String>,
+	) -> Result<Library> {
+		let core = ctx.data::<CoreContext>()?;
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+
+		let existing_library = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+
+		let mut active_model = existing_library.into_active_model();
+		active_model.emoji = Set(emoji);
+		let updated_library = active_model.update(core.conn.as_ref()).await?;
+		Ok(updated_library.into())
 	}
 
 	// TODO(graphql): (thumbnail API remains RESTful). This serves as a reminder, it won't live here

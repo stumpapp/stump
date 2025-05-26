@@ -1126,6 +1126,7 @@ export type Mutation = {
    * the library will be scanned immediately after updating.
    */
   updateLibrary: Library;
+  updateLibraryEmoji: Library;
   /**
    * Exclude users from a library, preventing them from seeing the library in the UI. This operates as a
    * full replacement of the excluded users list, so any users not included in the provided list will be
@@ -1399,6 +1400,12 @@ export type MutationUpdateEpubProgressArgs = {
 export type MutationUpdateLibraryArgs = {
   id: Scalars['ID']['input'];
   input: CreateOrUpdateLibraryInput;
+};
+
+
+export type MutationUpdateLibraryEmojiArgs = {
+  emoji?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['ID']['input'];
 };
 
 
@@ -2360,10 +2367,32 @@ export type UploadLibrarySeriesMutationVariables = Exact<{
 
 export type UploadLibrarySeriesMutation = { __typename?: 'Mutation', uploadSeries: boolean };
 
+export type DeleteLibraryMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteLibraryMutation = { __typename?: 'Mutation', deleteLibrary: { __typename?: 'Library', id: string } };
+
 export type SideBarQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type SideBarQueryQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangmentConfig', variant: SystemArrangment, links: Array<FilterableArrangementEntityLink> } }> } } } };
+
+export type UpdateLibraryEmojiMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  emoji?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type UpdateLibraryEmojiMutation = { __typename?: 'Mutation', updateLibraryEmoji: { __typename?: 'Library', id: string } };
+
+export type ScanLibraryMutationMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ScanLibraryMutationMutation = { __typename?: 'Mutation', scanLibrary: boolean };
 
 export type LibrarySideBarSectionQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2572,6 +2601,13 @@ export const UploadLibrarySeriesDocument = new TypedDocumentString(`
   uploadSeries(input: $input)
 }
     `) as unknown as TypedDocumentString<UploadLibrarySeriesMutation, UploadLibrarySeriesMutationVariables>;
+export const DeleteLibraryDocument = new TypedDocumentString(`
+    mutation DeleteLibrary($id: ID!) {
+  deleteLibrary(id: $id) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteLibraryMutation, DeleteLibraryMutationVariables>;
 export const SideBarQueryDocument = new TypedDocumentString(`
     query SideBarQuery {
   me {
@@ -2594,6 +2630,18 @@ export const SideBarQueryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SideBarQueryQuery, SideBarQueryQueryVariables>;
+export const UpdateLibraryEmojiDocument = new TypedDocumentString(`
+    mutation UpdateLibraryEmoji($id: ID!, $emoji: String) {
+  updateLibraryEmoji(id: $id, emoji: $emoji) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateLibraryEmojiMutation, UpdateLibraryEmojiMutationVariables>;
+export const ScanLibraryMutationDocument = new TypedDocumentString(`
+    mutation ScanLibraryMutation($id: ID!) {
+  scanLibrary(id: $id)
+}
+    `) as unknown as TypedDocumentString<ScanLibraryMutationMutation, ScanLibraryMutationMutationVariables>;
 export const LibrarySideBarSectionDocument = new TypedDocumentString(`
     query LibrarySideBarSection {
   libraries(pagination: {none: {unpaginated: true}}) {

@@ -1,10 +1,9 @@
-import { Library, LibraryStats } from '@stump/sdk'
+import { LibraryLayoutQuery } from '@stump/graphql'
 import { createContext, useContext } from 'react'
 
 // TODO: add derived meta (book_count, series_count, etc)
 export type ILibraryContext = {
-	library: Library
-	stats?: LibraryStats
+	library: NonNullable<LibraryLayoutQuery['libraryById']>
 }
 /**
  * A context to hold the state while navigating any library-related pages.

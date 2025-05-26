@@ -188,11 +188,13 @@ impl Library {
 	}
 }
 
+// Note: SQLx does not support u64 :'(
+// See https://github.com/launchbadge/sqlx/issues/499
 #[derive(Debug, FromQueryResult, SimpleObject)]
 pub struct LibraryStats {
-	series_count: u32,
-	book_count: u32,
-	total_bytes: u32,
-	completed_books: u32,
-	in_progress_books: u32,
+	series_count: i64,
+	book_count: i64,
+	total_bytes: i64,
+	completed_books: i64,
+	in_progress_books: i64,
 }

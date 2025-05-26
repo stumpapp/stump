@@ -2526,6 +2526,20 @@ export type RecentlyAddedSeriesQueryQueryVariables = Exact<{
 
 export type RecentlyAddedSeriesQueryQuery = { __typename?: 'Query', recentlyAddedSeries: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, resolvedName: string, mediaCount: number, percentageCompleted: number, status: FileStatus }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
+export type LibraryLayoutQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type LibraryLayoutQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', bookCount: number, completedBooks: number, inProgressBooks: number }, tags: Array<{ __typename?: 'Tag', id: string, name: string }> } | null };
+
+export type VisitLibraryMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type VisitLibraryMutation = { __typename?: 'Mutation', visitLibrary: { __typename?: 'Library', id: string } };
+
 export type SeriesLayoutQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -2948,6 +2962,32 @@ export const RecentlyAddedSeriesQueryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<RecentlyAddedSeriesQueryQuery, RecentlyAddedSeriesQueryQueryVariables>;
+export const LibraryLayoutDocument = new TypedDocumentString(`
+    query LibraryLayout($id: ID!) {
+  libraryById(id: $id) {
+    id
+    name
+    description
+    path
+    stats {
+      bookCount
+      completedBooks
+      inProgressBooks
+    }
+    tags {
+      id
+      name
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LibraryLayoutQuery, LibraryLayoutQueryVariables>;
+export const VisitLibraryDocument = new TypedDocumentString(`
+    mutation VisitLibrary($id: ID!) {
+  visitLibrary(id: $id) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<VisitLibraryMutation, VisitLibraryMutationVariables>;
 export const SeriesLayoutDocument = new TypedDocumentString(`
     query SeriesLayout($id: ID!) {
   seriesById(id: $id) {

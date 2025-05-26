@@ -13,17 +13,16 @@ export default function LibraryHeader() {
 	const {
 		preferences: { primary_navigation_mode, layout_max_width_px, show_thumbnails_in_headers },
 	} = usePreferences()
-	const { library, stats } = useLibraryContext()
+	const {
+		library: { id, name, description, stats, tags },
+	} = useLibraryContext()
 
-	const summary = library.description
 	const preferTopBar = primary_navigation_mode === 'TOPBAR'
 
 	const renderStats = () => {
 		if (!stats) return null
 
-		const bookCount = Number(stats.book_count)
-		const completedBooks = Number(stats.completed_books)
-		const inProgressBooks = Number(stats.in_progress_books)
+		const { bookCount, completedBooks, inProgressBooks } = stats
 
 		const rawPercentageComplete = (completedBooks / bookCount) * 100
 		const percentageComplete = completedBooks > 0 ? rawPercentageComplete.toFixed(2) : 0
@@ -59,10 +58,7 @@ export default function LibraryHeader() {
 				{show_thumbnails_in_headers && (
 					<div className="w-[200px]">
 						<AspectRatio ratio={2 / 3}>
-							<EntityImage
-								src={sdk.library.thumbnailURL(library.id)}
-								className="rounded-md object-cover"
-							/>
+							<EntityImage src={sdk.library.thumbnailURL(id)} className="rounded-md object-cover" />
 						</AspectRatio>
 					</div>
 				)}
@@ -70,16 +66,16 @@ export default function LibraryHeader() {
 				<div className="flex h-full w-full flex-col gap-2 md:gap-4">
 					<div className="flex w-full justify-between">
 						<div className="flex w-full flex-col items-start">
-							<Heading size="lg">{library.name}</Heading>
-							<TagList tags={library.tags} />
+							<Heading size="lg">{name}</Heading>
+							<TagList tags={tags} />
 						</div>
 
 						<div className="flex shrink-0 flex-col items-end">{renderStats()}</div>
 					</div>
 
-					{!!summary && (
+					{!!description && (
 						<div className="max-w-3xl">
-							<ReadMore text={summary} />
+							<ReadMore text={description} />
 						</div>
 					)}
 				</div>

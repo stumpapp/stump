@@ -1,15 +1,14 @@
 import { useGraphQLMutation, useSuspenseGraphQL } from '@stump/client'
-import { EmailerSendTo, SendToDevice, SendToEmail, graphql } from '@stump/graphql'
 import { Badge, Button, ComboBox, Dialog, IconButton, Input } from '@stump/components'
+import { EmailerSendTo, graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Send } from 'lucide-react'
 import { Suspense, useCallback, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 
 import { useAppContext } from '@/context'
-import { useMutationState } from '@tanstack/react-query'
 
-const query_email_devices = graphql(`
+const query = graphql(`
 	query EmailBookDropdownDevice {
 		emailDevices {
 			id
@@ -58,11 +57,11 @@ function EmailBookDropdown({ mediaId, canArbitrarySendEmail }: Props) {
 	const { t } = useLocaleContext()
 	const {
 		data: { emailDevices: devices },
-	} = useSuspenseGraphQL(query_email_devices, ['emailDevices'])
+	} = useSuspenseGraphQL(query, ['emailDevices'])
 
 	const mutationKey = ['sendEmailAttachment', mediaId]
 
-	const { mutate } = useGraphQLMutation(mutation, {
+	const { mutate, status } = useGraphQLMutation(mutation, {
 		mutationKey,
 		onSettled: (data, error) => {
 			if (error) {
@@ -76,11 +75,7 @@ function EmailBookDropdown({ mediaId, canArbitrarySendEmail }: Props) {
 			}
 		},
 	})
-
-	const isSending = useMutationState({
-		filters: { mutationKey },
-		select: (mutation) => mutation.state.status === 'pending',
-	})?.some(Boolean)
+	const isSending = status === 'pending'
 
 	const [isOpen, setIsOpen] = useState(false)
 	const [deviceIds, setDeviceIds] = useState<number[]>([])

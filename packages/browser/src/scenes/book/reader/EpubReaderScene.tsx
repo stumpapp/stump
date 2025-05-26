@@ -1,4 +1,3 @@
-import { graphql } from '@stump/graphql'
 import { useEffect, useState } from 'react'
 import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 
@@ -9,6 +8,7 @@ import paths from '../../../paths'
 //! NOTE: Only the epub.js reader is supported for now :sob:
 export default function EpubReaderScene() {
 	const { id } = useParams()
+
 	if (!id) {
 		throw new Error('Media id is required')
 	}

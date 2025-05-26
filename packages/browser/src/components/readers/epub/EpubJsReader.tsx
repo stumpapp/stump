@@ -1,19 +1,21 @@
-import { BookPreferences, useGraphQLMutation, queryClient, useGraphQL, useSDK } from '@stump/client'
+import { BookPreferences, queryClient, useGraphQL, useGraphQLMutation, useSDK } from '@stump/client'
+import { Bookmark, EpubJsReaderQuery, EpubProgressInput, graphql } from '@stump/graphql'
 import { EpubContent } from '@stump/sdk'
 import { Book, Rendition } from 'epubjs'
 import uniqby from 'lodash/uniqBy'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import AutoSizer from 'react-virtualized-auto-sizer'
-import { ImageReaderBookRef } from '@/components/readers/imageBased/context'
 
+import { ImageReaderBookRef } from '@/components/readers/imageBased/context'
 import { useTheme } from '@/hooks'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
+import { BOOK_READER_SCENE_QUERY } from '../../../scenes/book/reader/BookReaderScene'
 import EpubReaderContainer from './EpubReaderContainer'
 import { applyTheme, stumpDark } from './themes'
-import { Bookmark, EpubJsReaderQuery, EpubProgressInput, graphql } from '@stump/graphql'
-import { BOOK_READER_SCENE_QUERY } from '../../../scenes/book/reader/BookReaderScene'
+
+// TODO: Fix all lifecycle lints
 
 // NOTE: http://epubjs.org/documentation/0.3/ for epubjs documentation overview
 
@@ -107,7 +109,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	})
 	const { data: media, isLoading: isPreferencesLoading } = useGraphQL(
 		BOOK_READER_SCENE_QUERY,
-		['bookReader', id],
+		['epubJsReader', id],
 		{
 			id: id || '',
 		},
@@ -213,7 +215,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				}),
 			)
 		}
-	}, [book, epub, id, media])
+	}, [book, epub, id, media, sdk])
 
 	/**
 	 *	A function for applying the epub reader preferences to the epubjs rendition instance
@@ -350,9 +352,10 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	useEffect(
 		() => {
 			return () => {
-				// TODO(graphql): invalidate graphql equivalent queries
-				queryClient.refetchQueries({ queryKey: [sdk.media.keys.getByID, id], exact: false })
-				queryClient.refetchQueries({ queryKey: [sdk.media.keys.inProgress], exact: false })
+				Promise.all([
+					queryClient.refetchQueries({ queryKey: ['bookOverview', id], exact: false }),
+					queryClient.refetchQueries({ queryKey: ['keepReading'], exact: false }),
+				])
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps

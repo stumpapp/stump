@@ -1,6 +1,6 @@
-import { useGraphQLMutation, useSDK } from '@stump/client'
-import { BookOverviewSceneQuery, graphql } from '@stump/graphql'
+import { useGraphQLMutation } from '@stump/client'
 import { Button } from '@stump/components'
+import { BookOverviewSceneQuery, graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
 import toast from 'react-hot-toast'
@@ -9,7 +9,7 @@ import { EBOOK_EXTENSION } from '@/utils/patterns'
 
 import { isReadAgainPrompt } from './BookReaderDropdown'
 
-const completed_mutation = graphql(`
+const completedMutation = graphql(`
 	mutation BookCompletionToggleButtonComplete($id: ID!, $isComplete: Boolean!, $page: Int) {
 		markMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {
 			completedAt
@@ -17,7 +17,7 @@ const completed_mutation = graphql(`
 	}
 `)
 
-const delete_mutation = graphql(`
+const deleteMutation = graphql(`
 	mutation BookCompletionToggleButtonDeleteSession($id: ID!) {
 		deleteMediaProgress(id: $id) {
 			__typename
@@ -34,9 +34,10 @@ type Props = {
 	book: BookCompletionToggleFragment
 }
 export default function BookCompletionToggleButton({ book }: Props) {
-	const { mutate: completeBook } = useGraphQLMutation(completed_mutation)
-	const { mutate: deleteCurrentSession } = useGraphQLMutation(delete_mutation)
+	const { mutate: completeBook } = useGraphQLMutation(completedMutation)
+	const { mutate: deleteCurrentSession } = useGraphQLMutation(deleteMutation)
 
+	const client = useQueryClient()
 	const isCompleted = useMemo(() => isReadAgainPrompt(book), [book])
 	const hasProgress = useMemo(() => !!book.readProgress, [book])
 	const isEpub = useMemo(() => book.extension.match(EBOOK_EXTENSION), [book])
@@ -47,8 +48,7 @@ export default function BookCompletionToggleButton({ book }: Props) {
 		if (hasProgress && isCompleted) {
 			try {
 				deleteCurrentSession({ id: book.id })
-				// TODO(graphql): invalidate the book overview query
-				// client.invalidateQueries({ queryKey: ['bookOverview', book.id] })
+				await client.invalidateQueries({ queryKey: ['bookOverview', book.id], exact: false })
 			} catch (error) {
 				console.error(error)
 				toast.error('Failed to clear progress')
@@ -58,14 +58,13 @@ export default function BookCompletionToggleButton({ book }: Props) {
 			const page = isEpub ? undefined : willBeComplete ? book.pages : 0
 			try {
 				completeBook({ isComplete: willBeComplete, id: book.id, page })
-				// TODO(graphql): invalidate the book overview query
-				// client.invalidateQueries({ queryKey: ['bookOverview', book.id] })
+				await client.invalidateQueries({ queryKey: ['bookOverview', book.id] })
 			} catch (error) {
 				console.error(error)
 				toast.error('Failed to update book completion status')
 			}
 		}
-	}, [book, completeBook, isCompleted, isEpub, hasProgress, deleteCurrentSession])
+	}, [book, completeBook, isCompleted, isEpub, hasProgress, deleteCurrentSession, client])
 
 	// There really isn't anything to do here if the book is completed and has no progress. Eventually,
 	// we will support clearing the completion history.

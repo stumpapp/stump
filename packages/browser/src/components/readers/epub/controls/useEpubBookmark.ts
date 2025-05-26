@@ -1,10 +1,10 @@
-import { queryClient, useGraphQLMutation, useSDK } from '@stump/client'
+import { queryClient, useGraphQLMutation } from '@stump/client'
+import { BookmarkInput, graphql } from '@stump/graphql'
 import { useCallback, useMemo } from 'react'
 
 import { useEpubReaderContext } from '../context'
-import { BookmarkInput, graphql } from '@stump/graphql'
 
-const create_mutation = graphql(`
+const _createMutation = graphql(`
 	mutation CreateOrUpdateBookmark($input: BookmarkInput!) {
 		createOrUpdateBookmark(input: $input) {
 			__typename
@@ -12,7 +12,7 @@ const create_mutation = graphql(`
 	}
 `)
 
-const delete_mutation = graphql(`
+const _deleteMutation = graphql(`
 	mutation DeleteBookmark($epubcfi: String!) {
 		deleteBookmark(epubcfi: $epubcfi) {
 			__typename
@@ -24,7 +24,6 @@ const delete_mutation = graphql(`
  * A hook for creating and deleting bookmarks within an epub reader
  */
 export function useEpubBookmark() {
-	const { sdk } = useSDK()
 	const {
 		readerMeta: {
 			bookEntity: { id: bookId },
@@ -47,16 +46,15 @@ export function useEpubBookmark() {
 	)
 
 	/**
-	 * A callback to invalidate the bookmarks query after a bookmark is created or deleted
+	 * A callback to invalidate the parent query after a bookmark is created or deleted
 	 */
 	const onSuccess = useCallback(
-		// TODO(graphql): invalid graphql queries
-		() => queryClient.invalidateQueries({ queryKey: [sdk.epub.keys.getBookmarks, bookId] }),
-		[bookId, sdk.epub],
+		() => queryClient.invalidateQueries({ queryKey: ['epubJsReader', bookId], exact: false }),
+		[bookId],
 	)
 
-	const { mutate: createMutation, isPending: isCreating } = useGraphQLMutation(create_mutation, {
-		onSuccess: (_) => {
+	const { mutate: createMutation, isPending: isCreating } = useGraphQLMutation(_createMutation, {
+		onSuccess: () => {
 			onSuccess()
 		},
 	})
@@ -74,7 +72,7 @@ export function useEpubBookmark() {
 		}
 
 		return payload
-	}, [cfiRange, getCfiPreviewText])
+	}, [cfiRange, getCfiPreviewText, bookId])
 
 	/**
 	 * Create a bookmark for a specific epubcfi. If no epubcfi payload is provided,
@@ -94,7 +92,7 @@ export function useEpubBookmark() {
 		[createMutation, createPayload],
 	)
 
-	const { mutate: deleteMutation, isPending: isDeleting } = useGraphQLMutation(delete_mutation)
+	const { mutate: deleteMutation, isPending: isDeleting } = useGraphQLMutation(_deleteMutation)
 
 	/**
 	 * Create a payload for creating or deleting a bookmark based on the current

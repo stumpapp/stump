@@ -1,27 +1,29 @@
 import { useUpdateLibrary } from '@stump/client'
 import { EmojiPicker } from '@stump/components'
+import { LibrarySideBarSectionQuery } from '@stump/graphql'
 import { Library } from '@stump/sdk'
 
 type Props = {
 	emoji?: string
 	placeholder?: string | React.ReactNode
-	library: Library
+	library: LibrarySideBarSectionQuery['libraries']['nodes'][number]
 	disabled?: boolean
 }
 export default function LibraryEmoji({ emoji, placeholder, library, disabled }: Props) {
-	const { editLibraryAsync } = useUpdateLibrary({ id: library.id })
+	// const { editLibraryAsync } = useUpdateLibrary({ id: library.id })
 
+	// TODO(graphql): Fix mutation
 	const handleEmojiSelect = (emoji?: { native: string }) => {
 		if (disabled) {
 			return
 		}
 
-		editLibraryAsync({
-			...library,
-			emoji: emoji?.native ?? null,
-			scan_mode: 'NONE',
-			tags: library.tags?.map((tag) => tag.name) ?? [],
-		})
+		// editLibraryAsync({
+		// 	...library,
+		// 	emoji: emoji?.native ?? null,
+		// 	scan_mode: 'NONE',
+		// 	tags: library.tags?.map((tag) => tag.name) ?? [],
+		// })
 	}
 
 	if (disabled) {

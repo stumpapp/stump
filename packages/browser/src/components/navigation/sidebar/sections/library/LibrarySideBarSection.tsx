@@ -1,5 +1,6 @@
-import { useLibraries } from '@stump/client'
+import { useSuspenseGraphQL } from '@stump/client'
 import { Accordion, Text } from '@stump/components'
+import { FilterableArrangementEntityLink, graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Library } from 'lucide-react'
 import { useMemo } from 'react'
@@ -13,25 +14,42 @@ import SideBarButtonLink from '../../SideBarButtonLink'
 import LibraryEmoji from './LibraryEmoji'
 import LibraryOptionsMenu from './LibraryOptionsMenu'
 
+const query = graphql(`
+	query LibrarySideBarSection {
+		libraries(pagination: { none: { unpaginated: true } }) {
+			nodes {
+				id
+				name
+				emoji
+			}
+		}
+	}
+`)
+
 type Props = {
 	isMobile?: boolean
 } & EntityOptionProps
 
 export default function LibrarySideBarSection({
 	isMobile,
-	showCreate = true,
-	showLinkToAll = false,
+	links = [FilterableArrangementEntityLink.Create],
 }: Props) {
 	const location = useLocation()
 
 	const { t } = useLocaleContext()
-	const { libraries } = useLibraries()
+	// const { libraries } = useLibraries()
+	const {
+		data: {
+			libraries: { nodes: libraries },
+		},
+	} = useSuspenseGraphQL(query, ['libraries'])
+
 	const { checkPermission } = useAppContext()
 
 	const isCurrentLibrary = (id: string) => location.pathname.startsWith(paths.librarySeries(id))
 
 	const canCreateLibrary = useMemo(() => checkPermission('library:create'), [checkPermission])
-	const showCreateLink = canCreateLibrary && showCreate
+	const showCreateLink = canCreateLibrary && links.includes(FilterableArrangementEntityLink.Create)
 
 	const renderLibraries = () => {
 		if (!libraries || !libraries.length) {
@@ -60,7 +78,7 @@ export default function LibrarySideBarSection({
 					isActive={isCurrentLibrary(library.id)}
 					className="pl-2 pr-0"
 					leftContent={canChange ? leftContent : undefined}
-					rightContent={<LibraryOptionsMenu library={library} />}
+					// rightContent={<LibraryOptionsMenu library={library} />}
 					// onMouseEnter={() => prefetchLibrarySeries(library.id)}
 				>
 					{!canChange && leftContent}
@@ -77,7 +95,7 @@ export default function LibrarySideBarSection({
 					{t('sidebar.buttons.libraries')}
 				</Accordion.Trigger>
 				<Accordion.Content containerClassName="flex flex-col gap-y-1.5">
-					{showLinkToAll && (
+					{links.includes(FilterableArrangementEntityLink.ShowAll) && (
 						<SideBarButtonLink
 							to={paths.libraries()}
 							isActive={location.pathname === paths.libraries()}

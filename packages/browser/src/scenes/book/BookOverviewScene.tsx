@@ -16,12 +16,12 @@ import { useAppContext } from '@/context'
 import paths from '@/paths'
 import { PDF_EXTENSION } from '@/utils/patterns'
 
+import BookCompletionToggleButton from './BookCompletionToggleButton'
 import BookFileInformation from './BookFileInformation'
 import BookOverviewSceneHeader from './BookOverviewSceneHeader'
 import BookReaderDropdown from './BookReaderDropdown'
 import BooksAfterCursor from './BooksAfterCursor'
 import DownloadMediaButton from './DownloadMediaButton'
-import BookCompletionToggleButton from './BookCompletionToggleButton'
 import EmailBookDropdown from './EmailBookDropdown'
 
 const query = graphql(`

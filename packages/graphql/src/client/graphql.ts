@@ -2108,12 +2108,16 @@ export enum SupportedFont {
 }
 
 export enum SystemArrangment {
+  BookClubs = 'BOOK_CLUBS',
   Explore = 'EXPLORE',
-  Home = 'HOME'
+  Home = 'HOME',
+  Libraries = 'LIBRARIES',
+  SmartLists = 'SMART_LISTS'
 }
 
 export type SystemArrangmentConfig = {
   __typename?: 'SystemArrangmentConfig';
+  links: Array<FilterableArrangementEntityLink>;
   variant: SystemArrangment;
 };
 
@@ -2359,7 +2363,12 @@ export type UploadLibrarySeriesMutation = { __typename?: 'Mutation', uploadSerie
 export type SideBarQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type SideBarQueryQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig', name?: string | null, entity: FilterableArrangementEntity, links: Array<FilterableArrangementEntityLink> } | { __typename: 'InProgressBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangmentConfig', variant: SystemArrangment } }> } } } };
+export type SideBarQueryQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangmentConfig', variant: SystemArrangment, links: Array<FilterableArrangementEntityLink> } }> } } } };
+
+export type LibrarySideBarSectionQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LibrarySideBarSectionQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, emoji?: string | null }> } };
 
 export type EpubJsReaderQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -2575,10 +2584,6 @@ export const SideBarQueryDocument = new TypedDocumentString(`
             __typename
             ... on SystemArrangmentConfig {
               variant
-            }
-            ... on CustomArrangementConfig {
-              name
-              entity
               links
             }
           }
@@ -2589,6 +2594,17 @@ export const SideBarQueryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SideBarQueryQuery, SideBarQueryQueryVariables>;
+export const LibrarySideBarSectionDocument = new TypedDocumentString(`
+    query LibrarySideBarSection {
+  libraries(pagination: {none: {unpaginated: true}}) {
+    nodes {
+      id
+      name
+      emoji
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LibrarySideBarSectionQuery, LibrarySideBarSectionQueryVariables>;
 export const EpubJsReaderDocument = new TypedDocumentString(`
     query EpubJsReader($id: ID!) {
   epubById(id: $id) {

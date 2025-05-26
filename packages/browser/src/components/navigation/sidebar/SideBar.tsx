@@ -1,6 +1,11 @@
 import { useSuspenseGraphQL } from '@stump/client'
 import { cn, Spacer } from '@stump/components'
-import { graphql, SystemArrangment } from '@stump/graphql'
+import {
+	Arrangement,
+	FilterableArrangementEntityLink,
+	graphql,
+	SystemArrangment,
+} from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { NavigationItem } from '@stump/sdk'
 import { motion } from 'framer-motion'
@@ -34,10 +39,6 @@ const query = graphql(`
 							__typename
 							... on SystemArrangmentConfig {
 								variant
-							}
-							... on CustomArrangementConfig {
-								name
-								entity
 								links
 							}
 						}
@@ -105,9 +106,9 @@ export default function SideBar({ asChild, hidden }: Props) {
 	const prefetchHome = usePrefetchHomeScene()
 
 	const renderSystemSection = useCallback(
-		(variant: SystemArrangment) => {
-			if (variant === SystemArrangment.Home) {
-				return (
+		(config: { variant: SystemArrangment; links: Array<FilterableArrangementEntityLink> }) =>
+			match(config.variant)
+				.with(SystemArrangment.Home, () => (
 					<SideBarButtonLink
 						key="home-sidebar-navlink"
 						to={paths.home()}
@@ -117,9 +118,8 @@ export default function SideBar({ asChild, hidden }: Props) {
 						<Home className="mr-2 h-4 w-4 shrink-0" />
 						{t('sidebar.buttons.home')}
 					</SideBarButtonLink>
-				)
-			} else if (variant === SystemArrangment.Explore) {
-				return (
+				))
+				.with(SystemArrangment.Explore, () => (
 					<SideBarButtonLink
 						key="explore-sidebar-navlink"
 						to={paths.bookSearch()}
@@ -128,10 +128,16 @@ export default function SideBar({ asChild, hidden }: Props) {
 						<Book className="mr-2 h-4 w-4 shrink-0" />
 						{t('sidebar.buttons.books')}
 					</SideBarButtonLink>
-				)
-			}
-		},
-		[t, location.pathname, prefetchHome],
+				))
+				.with(SystemArrangment.Libraries, () => (
+					<LibrarySideBarSection
+						key="libraries-sidebar-navlink"
+						isMobile={isMobile}
+						links={config.links}
+					/>
+				))
+				.otherwise(() => null),
+		[t, location.pathname, prefetchHome, isMobile],
 	)
 
 	const sections = useMemo(
@@ -140,9 +146,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 				.filter(({ visible }) => visible)
 				.map(({ config }) =>
 					match(config)
-						.with({ __typename: 'SystemArrangmentConfig' }, ({ variant }) =>
-							renderSystemSection(variant),
-						)
+						.with({ __typename: 'SystemArrangmentConfig' }, (config) => renderSystemSection(config))
 						.otherwise(() => null),
 				)
 				.filter(Boolean),

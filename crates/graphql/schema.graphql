@@ -1606,10 +1606,14 @@ enum SupportedFont {
 enum SystemArrangment {
 	HOME
 	EXPLORE
+	LIBRARIES
+	SMART_LISTS
+	BOOK_CLUBS
 }
 
 type SystemArrangmentConfig {
 	variant: SystemArrangment!
+	links: [FilterableArrangementEntityLink!]!
 }
 
 type Tag {

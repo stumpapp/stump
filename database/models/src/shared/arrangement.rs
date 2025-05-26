@@ -32,11 +32,16 @@ fn default_true() -> bool {
 pub enum SystemArrangment {
 	Home,
 	Explore,
+	Libraries,
+	SmartLists,
+	BookClubs,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, SimpleObject)]
 pub struct SystemArrangmentConfig {
 	variant: SystemArrangment,
+	#[graphql(default)]
+	links: Vec<FilterableArrangementEntityLink>,
 }
 
 #[derive(
@@ -71,6 +76,7 @@ pub enum FilterableArrangementEntity {
 	BookClubs,
 }
 
+// TODO: Rename since I am now using this for both home and navigation arrangements.
 #[derive(
 	Eq,
 	Copy,
@@ -143,6 +149,9 @@ pub struct ArrangementSection {
 	visible: bool,
 }
 
+// TODO(graphql): There is enough distinction between sidebar/navigation and home arrangements that they should just be separate types.
+// I'll aim to tackle this one I am closer to the end of the migration, as it is not the most important thing right now.
+
 #[derive(
 	Debug, Clone, SimpleObject, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult,
 )]
@@ -185,39 +194,28 @@ impl Arrangement {
 				ArrangementSection {
 					config: ArrangementConfig::System(SystemArrangmentConfig {
 						variant: SystemArrangment::Home,
+						links: vec![],
 					}),
 					visible: true,
 				},
 				ArrangementSection {
 					config: ArrangementConfig::System(SystemArrangmentConfig {
 						variant: SystemArrangment::Explore,
+						links: vec![],
 					}),
 					visible: true,
 				},
 				ArrangementSection {
-					config: ArrangementConfig::Custom(CustomArrangementConfig {
-						name: Some("Libraries".to_string()),
-						entity: FilterableArrangementEntity::Libraries,
+					config: ArrangementConfig::System(SystemArrangmentConfig {
+						variant: SystemArrangment::Libraries,
 						links: vec![FilterableArrangementEntityLink::Create],
-						..Default::default()
 					}),
 					visible: true,
 				},
 				ArrangementSection {
-					config: ArrangementConfig::Custom(CustomArrangementConfig {
-						name: Some("Smart Lists".to_string()),
-						entity: FilterableArrangementEntity::SmartLists,
+					config: ArrangementConfig::System(SystemArrangmentConfig {
+						variant: SystemArrangment::SmartLists,
 						links: vec![FilterableArrangementEntityLink::Create],
-						..Default::default()
-					}),
-					visible: true,
-				},
-				ArrangementSection {
-					config: ArrangementConfig::Custom(CustomArrangementConfig {
-						name: Some("Book Clubs".to_string()),
-						entity: FilterableArrangementEntity::BookClubs,
-						links: vec![FilterableArrangementEntityLink::Create],
-						..Default::default()
 					}),
 					visible: true,
 				},

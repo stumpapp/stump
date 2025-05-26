@@ -1,13 +1,13 @@
-import { useGraphQLMutation, invalidateGraphQLQuery } from '@stump/client'
+import { useGraphQLMutation, useSDK } from '@stump/client'
 import { BookOverviewSceneQuery, graphql } from '@stump/graphql'
 import { Button } from '@stump/components'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
 import toast from 'react-hot-toast'
 
 import { EBOOK_EXTENSION } from '@/utils/patterns'
 
 import { isReadAgainPrompt } from './BookReaderDropdown'
-import { QueryKey } from '@tanstack/react-query'
 
 const completed_mutation = graphql(`
 	mutation BookCompletionToggleButtonComplete($id: ID!, $isComplete: Boolean!, $page: Int) {
@@ -47,7 +47,8 @@ export default function BookCompletionToggleButton({ book }: Props) {
 		if (hasProgress && isCompleted) {
 			try {
 				deleteCurrentSession({ id: book.id })
-				invalidateGraphQLQuery({ queryKey: ['bookOverview', book.id] })
+				// TODO(graphql): invalidate the book overview query
+				// client.invalidateQueries({ queryKey: ['bookOverview', book.id] })
 			} catch (error) {
 				console.error(error)
 				toast.error('Failed to clear progress')
@@ -57,7 +58,8 @@ export default function BookCompletionToggleButton({ book }: Props) {
 			const page = isEpub ? undefined : willBeComplete ? book.pages : 0
 			try {
 				completeBook({ isComplete: willBeComplete, id: book.id, page })
-				invalidateGraphQLQuery({ queryKey: ['bookOverview', book.id] })
+				// TODO(graphql): invalidate the book overview query
+				// client.invalidateQueries({ queryKey: ['bookOverview', book.id] })
 			} catch (error) {
 				console.error(error)
 				toast.error('Failed to update book completion status')

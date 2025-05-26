@@ -424,18 +424,3 @@ export function useGraphQLSubscription<TResult, TVariables>(
 
 	return [data, socket, dispose] as const
 }
-
-export function invalidateGraphQLQuery({
-	exact = true,
-	queryKey,
-}: {
-	exact?: boolean
-	queryKey: QueryKey
-}) {
-	const client = useQueryClient()
-	if (exact) {
-		client.invalidateQueries({ queryKey })
-	} else {
-		client.invalidateQueries({ exact, queryKey })
-	}
-}

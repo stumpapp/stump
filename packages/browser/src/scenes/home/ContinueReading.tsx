@@ -14,21 +14,7 @@ const query = graphql(`
 		keepReading(pagination: $pagination) {
 			nodes {
 				id
-				resolvedName
-				pages
-				size
-				status
-				thumbnail {
-					url
-				}
-				readProgress {
-					percentageCompleted
-					epubcfi
-					page
-				}
-				readHistory {
-					__typename
-				}
+				...BookCard
 			}
 			pageInfo {
 				__typename
@@ -89,7 +75,7 @@ function ContinueReadingMedia() {
 		}
 	}, [fetchNextPage, hasNextPage, isFetchingNextPage])
 
-	const cards = nodes.map((node) => <BookCard key={node.id} data={node} fullWidth={false} />)
+	const cards = nodes.map((node) => <BookCard key={node.id} fragment={node} fullWidth={false} />)
 
 	return (
 		<HorizontalCardList_

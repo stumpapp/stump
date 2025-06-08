@@ -1,13 +1,14 @@
 import { CardGrid } from '@stump/components'
+import { FragmentType } from '@stump/graphql'
 import type { Media } from '@stump/sdk'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
 
-import BookCard, { BookCardData } from './BookCard'
+import BookCard, { BookCardFragment } from './BookCard'
 
 type Props = {
 	isLoading: boolean
-	books?: BookCardData[]
+	books?: (FragmentType<typeof BookCardFragment> & { id: string })[]
 	hasFilters?: boolean
 	onSelect?: (media: Media) => void
 }
@@ -37,7 +38,7 @@ export default function BookGrid({ books, isLoading, hasFilters, onSelect }: Pro
 	return (
 		<CardGrid>
 			{books.map((m) => (
-				<BookCard key={m.id} data={m} />
+				<BookCard key={m.id} fragment={m} />
 			))}
 		</CardGrid>
 	)

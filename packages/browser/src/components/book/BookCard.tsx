@@ -1,5 +1,5 @@
 import { Text } from '@stump/components'
-import { Media } from '@stump/graphql'
+import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import pluralize from 'pluralize'
 import { type ComponentPropsWithoutRef, useCallback, useMemo } from 'react'
 
@@ -9,19 +9,29 @@ import { formatBytes } from '@/utils/format'
 
 import { EntityCard } from '../entity'
 
-export type BookCardData = Pick<Media, 'id' | 'resolvedName' | 'pages' | 'size' | 'status'> & {
-	thumbnail: Pick<Media['thumbnail'], 'url'>
-	readProgress?: Pick<
-		NonNullable<Media['readProgress']>,
-		'percentageCompleted' | 'epubcfi' | 'page'
-	> | null
-	readHistory?: Array<{
-		__typename: string
-	}> | null
-}
+export const BookCardFragment = graphql(`
+	fragment BookCard on Media {
+		id
+		resolvedName
+		pages
+		size
+		status
+		thumbnail {
+			url
+		}
+		readProgress {
+			percentageCompleted
+			epubcfi
+			page
+		}
+		readHistory {
+			__typename
+		}
+	}
+`)
 
 export type BookCardProps = {
-	data: BookCardData
+	fragment: FragmentType<typeof BookCardFragment>
 	readingLink?: boolean
 	fullWidth?: boolean
 	variant?: 'cover' | 'default'
@@ -31,12 +41,13 @@ export type BookCardProps = {
 type EntityCardProps = ComponentPropsWithoutRef<typeof EntityCard>
 
 export default function BookCard({
-	data,
+	fragment,
 	readingLink,
 	fullWidth,
 	variant = 'default',
 	onSelect,
 }: BookCardProps) {
+	const data = useFragment(BookCardFragment, fragment)
 	const isCoverOnly = variant === 'cover'
 
 	const prefetchBook = usePrefetchBook()

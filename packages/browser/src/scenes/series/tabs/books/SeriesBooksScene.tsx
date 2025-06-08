@@ -185,21 +185,7 @@ const query = graphql(`
 		media(filter: $filter, pagination: $pagination) {
 			nodes {
 				id
-				resolvedName
-				pages
-				size
-				status
-				thumbnail {
-					url
-				}
-				readProgress {
-					percentageCompleted
-					epubcfi
-					page
-				}
-				readHistory {
-					__typename
-				}
+				...BookCard
 			}
 			pageInfo {
 				__typename

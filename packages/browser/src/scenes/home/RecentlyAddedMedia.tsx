@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { BookX } from 'lucide-react'
 import { Suspense, useCallback } from 'react'
 
-import MediaCard from '@/components/book/BookCard'
+import BookCard from '@/components/book/BookCard'
 import HorizontalCardList from '@/components/HorizontalCardList'
 
 const query = graphql(`
@@ -14,21 +14,7 @@ const query = graphql(`
 		recentlyAddedMedia(pagination: $pagination) {
 			nodes {
 				id
-				resolvedName
-				pages
-				size
-				status
-				thumbnail {
-					url
-				}
-				readProgress {
-					percentageCompleted
-					epubcfi
-					page
-				}
-				readHistory {
-					__typename
-				}
+				...BookCard
 			}
 			pageInfo {
 				__typename
@@ -75,7 +61,7 @@ function RecentlyAddedMedia() {
 
 	const { t } = useLocaleContext()
 
-	const cards = nodes.map((node) => <MediaCard key={node.id} data={node} fullWidth={false} />)
+	const cards = nodes.map((node) => <BookCard key={node.id} fragment={node} fullWidth={false} />)
 
 	const handleFetchMore = useCallback(() => {
 		if (hasNextPage && !isFetchingNextPage) {

@@ -627,6 +627,7 @@ input LibraryConfigInput {
 }
 
 input LibraryFilterInput {
+	id: FieldFilterString = null
 	name: FieldFilterString = null
 	path: FieldFilterString = null
 	_and: [LibraryFilterInput!] = null
@@ -1320,7 +1321,7 @@ type Query {
 	libraryById(id: ID!): Library
 	numberOfLibraries: Int!
 	mediaMetadataOverview: MediaMetadataOverview!
-	series(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
+	series(filter: SeriesFilterInput!, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
 	seriesById(id: ID!): Series
 	numberOfSeries: Int!
 	recentlyAddedSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
@@ -1443,6 +1444,7 @@ type Series {
 input SeriesFilterInput {
 	name: FieldFilterString = null
 	path: FieldFilterString = null
+	libraryId: FieldFilterString = null
 	metadata: SeriesMetadataFilterInput = null
 	library: LibraryFilterInput = null
 	_and: [SeriesFilterInput!] = null

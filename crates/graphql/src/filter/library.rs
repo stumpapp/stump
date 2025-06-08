@@ -8,6 +8,8 @@ use super::{apply_string_filter, IntoFilter, StringLikeFilter};
 #[derive(InputObject, Clone)]
 pub struct LibraryFilterInput {
 	#[graphql(default)]
+	pub id: Option<StringLikeFilter<String>>,
+	#[graphql(default)]
 	pub name: Option<StringLikeFilter<String>>,
 	#[graphql(default)]
 	pub path: Option<StringLikeFilter<String>>,

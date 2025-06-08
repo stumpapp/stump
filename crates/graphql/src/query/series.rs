@@ -4,6 +4,7 @@ use sea_orm::{prelude::*, QueryOrder, QuerySelect};
 
 use crate::{
 	data::{CoreContext, RequestContext},
+	filter::{series::SeriesFilterInput, IntoFilter},
 	object::series::Series,
 	pagination::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
@@ -19,13 +20,15 @@ impl SeriesQuery {
 	async fn series(
 		&self,
 		ctx: &Context<'_>,
+		filter: SeriesFilterInput,
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<Series>> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let query = series::ModelWithMetadata::find_for_user(user);
+		let conditions = filter.into_filter();
+		let query = series::ModelWithMetadata::find_for_user(user).filter(conditions);
 
 		match pagination.resolve() {
 			Pagination::Cursor(info) => {

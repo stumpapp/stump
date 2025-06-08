@@ -677,6 +677,7 @@ export type LibraryFilterInput = {
   _and?: InputMaybe<Array<LibraryFilterInput>>;
   _not?: InputMaybe<Array<LibraryFilterInput>>;
   _or?: InputMaybe<Array<LibraryFilterInput>>;
+  id?: InputMaybe<FieldFilterString>;
   name?: InputMaybe<FieldFilterString>;
   path?: InputMaybe<FieldFilterString>;
 };
@@ -1817,6 +1818,7 @@ export type QueryRecentlyAddedSeriesArgs = {
 
 
 export type QuerySeriesArgs = {
+  filter: SeriesFilterInput;
   pagination?: Pagination;
 };
 
@@ -1951,6 +1953,7 @@ export type SeriesFilterInput = {
   _not?: InputMaybe<Array<SeriesFilterInput>>;
   _or?: InputMaybe<Array<SeriesFilterInput>>;
   library?: InputMaybe<LibraryFilterInput>;
+  libraryId?: InputMaybe<FieldFilterString>;
   metadata?: InputMaybe<SeriesMetadataFilterInput>;
   name?: InputMaybe<FieldFilterString>;
   path?: InputMaybe<FieldFilterString>;
@@ -2540,6 +2543,14 @@ export type VisitLibraryMutationVariables = Exact<{
 
 export type VisitLibraryMutation = { __typename?: 'Mutation', visitLibrary: { __typename?: 'Library', id: string } };
 
+export type LibrarySeriesQueryVariables = Exact<{
+  filter: SeriesFilterInput;
+  pagination: Pagination;
+}>;
+
+
+export type LibrarySeriesQuery = { __typename?: 'Query', series: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, resolvedName: string, mediaCount: number, percentageCompleted: number, status: FileStatus }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+
 export type SeriesLayoutQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -2988,6 +2999,29 @@ export const VisitLibraryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<VisitLibraryMutation, VisitLibraryMutationVariables>;
+export const LibrarySeriesDocument = new TypedDocumentString(`
+    query LibrarySeries($filter: SeriesFilterInput!, $pagination: Pagination!) {
+  series(filter: $filter, pagination: $pagination) {
+    nodes {
+      id
+      resolvedName
+      mediaCount
+      percentageCompleted
+      status
+    }
+    pageInfo {
+      __typename
+      ... on OffsetPaginationInfo {
+        totalPages
+        currentPage
+        pageSize
+        pageOffset
+        zeroBased
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LibrarySeriesQuery, LibrarySeriesQueryVariables>;
 export const SeriesLayoutDocument = new TypedDocumentString(`
     query SeriesLayout($id: ID!) {
   seriesById(id: $id) {

@@ -1,9 +1,9 @@
-import {
-	usePrefetchFiles,
-	usePrefetchLibraryBooks,
-	usePrefetchLibraryFiles,
-	usePrefetchLibrarySeries,
-} from '@stump/client'
+// import {
+// 	usePrefetchFiles,
+// 	usePrefetchLibraryBooks,
+// 	usePrefetchLibraryFiles,
+// 	usePrefetchLibrarySeries,
+// } from '@stump/client'
 import { cn, Link, useSticky } from '@stump/components'
 import { useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router'
@@ -13,6 +13,7 @@ import { useAppContext } from '@/context'
 import { usePreferences } from '@/hooks'
 
 import { useLibraryContext } from './context'
+import { usePrefetchLibrarySeries } from './tabs/series'
 
 export default function LibraryNavigation() {
 	const location = useLocation()
@@ -29,13 +30,14 @@ export default function LibraryNavigation() {
 	// 	path,
 	// 	fetchConfig: checkPermission('file:upload'),
 	// })
-	const { prefetch: prefetchSeries } = usePrefetchLibrarySeries({ id })
+	// const { prefetch: prefetchSeries } = usePrefetchLibrarySeries({ id })
 
-	const prefetchFiles = usePrefetchFiles()
-	const handlePrefetchFiles = useCallback(
-		() => prefetchFiles({ path, fetchConfig: checkPermission('file:upload') }),
-		[path, checkPermission, prefetchFiles],
-	)
+	const prefetchSeries = usePrefetchLibrarySeries()
+
+	// const prefetchFiles = usePrefetchFiles()
+	const handlePrefetchFiles = useCallback(() => {
+		// prefetchFiles({ path, fetchConfig: checkPermission('file:upload') })
+	}, [path, checkPermission])
 
 	const { ref, isSticky } = useSticky<HTMLDivElement>({
 		extraOffset: isMobile || primary_navigation_mode === 'TOPBAR' ? 56 : 0,
@@ -47,7 +49,7 @@ export default function LibraryNavigation() {
 			{
 				isActive: location.pathname.match(/\/libraries\/[^/]+\/?(series)?$/),
 				label: 'Series',
-				onHover: () => prefetchSeries(),
+				onHover: () => prefetchSeries(id),
 				to: 'series',
 			},
 			{

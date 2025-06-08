@@ -14,6 +14,8 @@ pub struct SeriesFilterInput {
 	pub name: Option<StringLikeFilter<String>>,
 	#[graphql(default)]
 	pub path: Option<StringLikeFilter<String>>,
+	#[graphql(default)]
+	pub library_id: Option<StringLikeFilter<String>>,
 
 	#[graphql(default)]
 	pub metadata: Option<SeriesMetadataFilterInput>,
@@ -59,6 +61,10 @@ impl IntoFilter for SeriesFilterInput {
 			.add_option(
 				self.path
 					.map(|f| apply_string_filter(series::Column::Path, f)),
+			)
+			.add_option(
+				self.library_id
+					.map(|f| apply_string_filter(series::Column::LibraryId, f)),
 			)
 			.add_option(self.metadata.map(|f| f.into_filter()))
 			.add_option(self.library.map(|f| f.into_filter()))

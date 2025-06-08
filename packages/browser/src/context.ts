@@ -6,8 +6,10 @@ export type PermissionEnforcerOptions = {
 }
 
 export type IAppContext = {
+	// TODO(graphql): Swap User to GraphQL user
 	user: User
 	isServerOwner: boolean
+	// TODO(graphql): Swap UserPermission to GraphQL enum
 	checkPermission: (permission: UserPermission) => boolean
 	enforcePermission: (permission: UserPermission, options?: PermissionEnforcerOptions) => void
 }

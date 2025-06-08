@@ -9,7 +9,7 @@ import paths from '../../paths'
 import pluralizeStat from '../../utils/pluralize'
 import { EntityCard } from '../entity'
 
-export interface SeriesCardFragment {
+export interface SeriesCardData {
 	id: string
 	resolvedName: string
 	mediaCount: number
@@ -18,7 +18,7 @@ export interface SeriesCardFragment {
 }
 
 export type SeriesCardProps = {
-	data: SeriesCardFragment
+	data: SeriesCardData
 	fullWidth?: boolean
 	variant?: 'cover' | 'default'
 }

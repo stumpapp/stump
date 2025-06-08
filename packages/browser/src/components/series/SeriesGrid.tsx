@@ -1,12 +1,11 @@
 import { CardGrid } from '@stump/components'
-import { type Series } from '@stump/sdk'
 
 import GenericEmptyState from '../GenericEmptyState'
-import SeriesCard from './SeriesCard'
+import SeriesCard, { SeriesCardData } from './SeriesCard'
 
 interface Props {
 	isLoading: boolean
-	series?: Series[]
+	series?: SeriesCardData[]
 	hasFilters?: boolean
 }
 
@@ -35,7 +34,7 @@ export default function SeriesGrid({ series, isLoading, hasFilters }: Props) {
 	return (
 		<CardGrid>
 			{series.map((s) => (
-				<SeriesCard key={s.id} series={s} />
+				<SeriesCard key={s.id} data={s} />
 			))}
 		</CardGrid>
 	)

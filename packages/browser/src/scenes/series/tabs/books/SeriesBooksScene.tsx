@@ -284,7 +284,7 @@ function SeriesBooksScene() {
 		},
 	})
 
-	const prefetch = usePrefetchSeriesBooks(series.id)
+	const prefetch = usePrefetchSeriesBooks()
 
 	if (pageInfo.__typename !== 'OffsetPaginationInfo') {
 		throw new Error('Invalid pagination type, expected OffsetPaginationInfo')
@@ -328,7 +328,7 @@ function SeriesBooksScene() {
 					setPage(page)
 				}}
 				onPrefetchPage={(page) => {
-					prefetch({
+					prefetch(series.id, {
 						page,
 						pageSize,
 					})

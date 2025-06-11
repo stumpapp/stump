@@ -6,10 +6,8 @@ import { Suspense, useCallback, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 import { useSearchParams } from 'react-router-dom'
 
-import { BookTable } from '@/components/book'
 import BookCard from '@/components/book/BookCard'
 import BookGrid from '@/components/book/BookGrid'
-import { defaultBookColumnSort } from '@/components/book/table'
 import {
 	FilterHeader,
 	URLFilterContainer,
@@ -17,7 +15,6 @@ import {
 	URLMediaOrderBy,
 } from '@/components/filters'
 import { useURLPageParams } from '@/components/filters/useFilterScene'
-import { EntityTableColumnConfiguration } from '@/components/table'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
 import { useBooksLayout } from '@/stores/layout'
@@ -61,24 +58,24 @@ const query = graphql(`
 export type UsePrefetchBookSearchParams = {
 	page?: number
 	pageSize?: number
-	orderBy?: MediaOrderBy[]
+	orderBy: MediaOrderBy[]
 }
 
-export const usePrefetchBookSearch = (orderBy: MediaOrderBy[]) => {
+export const usePrefetchBookSearch = () => {
 	const { sdk } = useSDK()
 	const { pageSize } = useURLPageParams()
 
 	const client = useQueryClient()
 
 	const prefetch = useCallback(
-		(params: UsePrefetchBookSearchParams = {}) => {
+		(params: UsePrefetchBookSearchParams = { orderBy: [] }) => {
 			const pageParams = { page: params.page || 1, pageSize: params.pageSize || pageSize }
 			return client.prefetchQuery({
-				queryKey: getQueryKey(pageParams.page, pageParams.pageSize, orderBy),
+				queryKey: getQueryKey(pageParams.page, pageParams.pageSize, params.orderBy),
 				queryFn: async () => {
 					const response = await sdk.execute(query, {
 						filter: {},
-						orderBy: orderBy,
+						orderBy: params.orderBy,
 						pagination: {
 							offset: {
 								...pageParams,
@@ -90,7 +87,7 @@ export const usePrefetchBookSearch = (orderBy: MediaOrderBy[]) => {
 				staleTime: PREFETCH_STALE_TIME,
 			})
 		},
-		[client, orderBy, pageSize, sdk],
+		[client, pageSize, sdk],
 	)
 
 	return prefetch
@@ -166,7 +163,7 @@ function BookSearchScene() {
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
 	const { page, pageSize, setPage } = useURLPageParams()
 	const { orderBy, setOrderBy } = useMediaURLOrderBy()
-	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout((state) => ({
+	const { layoutMode, setLayout } = useBooksLayout((state) => ({
 		columns: state.columns,
 		layoutMode: state.layout,
 		setColumns: state.setColumns,
@@ -188,7 +185,7 @@ function BookSearchScene() {
 		},
 	})
 	const cards = nodes.map((node) => <BookCard key={node.id} fragment={node} fullWidth={false} />)
-	const prefetch = usePrefetchBookSearch(orderBy)
+	const prefetch = usePrefetchBookSearch()
 	if (pageInfo.__typename !== 'OffsetPaginationInfo') {
 		throw new Error('Invalid pagination type, expected OffsetPaginationInfo')
 	}
@@ -220,6 +217,7 @@ function BookSearchScene() {
 						prefetch({
 							page,
 							pageSize,
+							orderBy,
 						})
 					}}
 				>

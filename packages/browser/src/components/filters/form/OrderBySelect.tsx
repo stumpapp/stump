@@ -1,25 +1,23 @@
 import { Label, NativeSelect } from '@stump/components'
 import { useMemo } from 'react'
 
-import { FilterableEntity } from '.'
-
-const commonOptions = ['name', 'status', 'created_at', 'path']
-const options: Record<FilterableEntity, string[]> = {
-	library: commonOptions,
-	media: [...commonOptions, 'size', 'extension', 'pages', 'series_id', 'modified_at'],
-	series: [...commonOptions, 'description', 'library_id'],
-}
+// const commonOptions = ['name', 'status', 'created_at', 'path']
+// const options: Record<FilterableEntity, string[]> = {
+// 	library: commonOptions,
+// 	media: [...commonOptions, 'size', 'extension', 'pages', 'series_id', 'modified_at'],
+// 	series: [...commonOptions, 'description', 'library_id'],
+// }
 
 // TODO: accept a default value which, if value equals, do an onChange with an empty string
 type Props = {
-	entity: FilterableEntity
+	sortableFields: string[]
 	value?: string
 	onChange?: (value: string) => void
 }
-export default function OrderBySelect({ entity, value, onChange }: Props) {
+export default function OrderBySelect({ sortableFields, value, onChange }: Props) {
 	const entityOptions = useMemo(
-		() => options[entity].map((option) => ({ label: option, value: option })),
-		[entity],
+		() => sortableFields.map((option) => ({ label: option, value: option })),
+		[sortableFields],
 	)
 
 	return (

@@ -1,80 +1,206 @@
-import { usePagedMediaQuery, usePrefetchMediaPaged } from '@stump/client'
-import { usePrevious, usePreviousIsDifferent } from '@stump/components'
-import { useCallback, useEffect, useMemo } from 'react'
+import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
+import { usePrevious } from '@stump/components'
+import { graphql, MediaModelOrdering, MediaOrderBy, OrderDirection } from '@stump/graphql'
+import { useQueryClient } from '@tanstack/react-query'
+import { Suspense, useCallback, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
+import { useSearchParams } from 'react-router-dom'
 
-import { BookTable } from '@/components/book'
 import BookGrid from '@/components/book/BookGrid'
-import { defaultBookColumnSort } from '@/components/book/table'
-import {
-	FilterContext,
-	FilterHeader,
-	URLFilterContainer,
-	URLFilterDrawer,
-	URLOrdering,
-	useFilterScene,
-} from '@/components/filters'
-import { EntityTableColumnConfiguration } from '@/components/table'
+import { FilterHeader, URLFilterContainer, URLFilterDrawer, URLOrderBy } from '@/components/filters'
+import { useURLPageParams } from '@/components/filters/useFilterScene'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
 import { useBooksLayout } from '@/stores/layout'
 
-export default function BookSearchScene() {
-	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
+const ORDER_BY_WHITELIST: MediaModelOrdering[] = [
+	MediaModelOrdering.Name,
+	MediaModelOrdering.Status,
+	MediaModelOrdering.CreatedAt,
+	MediaModelOrdering.Path,
+	MediaModelOrdering.Size,
+	MediaModelOrdering.Extension,
+	MediaModelOrdering.Pages,
+	MediaModelOrdering.SeriesId,
+	MediaModelOrdering.ModifiedAt,
+]
 
-	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout((state) => ({
+const query = graphql(`
+	query BookSearchScene(
+		$filter: MediaFilterInput!
+		$orderBy: [MediaOrderBy!]!
+		$pagination: Pagination!
+	) {
+		media(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
+			nodes {
+				id
+				resolvedName
+				pages
+				size
+				status
+				thumbnail {
+					url
+				}
+				readProgress {
+					percentageCompleted
+					epubcfi
+					page
+				}
+				readHistory {
+					__typename
+				}
+			}
+			pageInfo {
+				__typename
+				... on OffsetPaginationInfo {
+					currentPage
+					totalPages
+					pageSize
+					pageOffset
+					zeroBased
+				}
+			}
+		}
+	}
+`)
+
+export type UsePrefetchBookSearchParams = {
+	page?: number
+	pageSize?: number
+	orderBy?: MediaOrderBy[]
+}
+
+export const usePrefetchBookSearch = (orderBy: MediaOrderBy[]) => {
+	const { sdk } = useSDK()
+	const { pageSize } = useURLPageParams()
+
+	const client = useQueryClient()
+
+	const prefetch = useCallback(
+		(params: UsePrefetchBookSearchParams = {}) => {
+			const pageParams = { page: params.page || 1, pageSize: params.pageSize || pageSize }
+			return client.prefetchQuery({
+				queryKey: getQueryKey(pageParams.page, pageParams.pageSize, orderBy),
+				queryFn: async () => {
+					const response = await sdk.execute(query, {
+						filter: {},
+						orderBy: orderBy,
+						pagination: {
+							offset: {
+								...pageParams,
+							},
+						},
+					})
+					return response
+				},
+				staleTime: PREFETCH_STALE_TIME,
+			})
+		},
+		[client, orderBy, pageSize, sdk],
+	)
+
+	return prefetch
+}
+
+const DEFAULT_SORT: MediaOrderBy[] = [
+	{
+		media: {
+			field: MediaModelOrdering.Name,
+			direction: OrderDirection.Asc,
+		},
+	},
+]
+
+function useMediaURLOrderBy(): {
+	orderBy: MediaOrderBy[]
+	setOrderBy: (orderBy: MediaOrderBy[]) => void
+} {
+	const client = useQueryClient()
+	const [searchParams, setSearchParams] = useSearchParams()
+	const { page, pageSize } = useURLPageParams()
+
+	const orderBy = useMemo(() => {
+		// order by is a json array of serialized GraphQL object
+		const orderByValue = searchParams.get('order_by')
+		if (orderByValue) {
+			try {
+				return JSON.parse(orderByValue) as MediaOrderBy[]
+			} catch (e) {
+				console.error('Failed to parse order_by from URL', e)
+			}
+		}
+
+		return DEFAULT_SORT
+	}, [searchParams])
+
+	const setOrderBy = useCallback(
+		(orderBy: Array<MediaOrderBy>) => {
+			setSearchParams((prev) => {
+				if (orderBy) {
+					prev.set('order_by', JSON.stringify(orderBy))
+				} else {
+					prev.delete('order_by')
+				}
+				const pageParams = {
+					page,
+					pageSize,
+					orderBy: orderBy,
+				}
+				client.invalidateQueries({ queryKey: ['booksSearch', pageParams] })
+				return prev
+			})
+		},
+		[setSearchParams, client, page, pageSize],
+	)
+
+	return { orderBy, setOrderBy }
+}
+
+export default function BookSearchSceneContainer() {
+	return (
+		<Suspense fallback={null}>
+			<BookSearchScene />
+		</Suspense>
+	)
+}
+
+function getQueryKey(page: number, pageSize: number, orderBy: MediaOrderBy[]) {
+	return ['booksSearch', { page, pageSize, orderBy }]
+}
+
+function BookSearchScene() {
+	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
+	const { page, pageSize, setPage } = useURLPageParams()
+	const { orderBy, setOrderBy } = useMediaURLOrderBy()
+	const { layoutMode, setLayout } = useBooksLayout((state) => ({
 		columns: state.columns,
 		layoutMode: state.layout,
 		setColumns: state.setColumns,
 		setLayout: state.setLayout,
 	}))
+
 	const {
-		filters,
-		ordering,
-		pagination: { page, page_size },
-		setPage,
-		...rest
-	} = useFilterScene()
-	const { prefetch } = usePrefetchMediaPaged()
-
-	const params = useMemo(
-		() => ({
-			page,
-			page_size,
-			params: {
-				...filters,
-				...ordering,
-			},
-		}),
-		[page, page_size, ordering, filters],
-	)
-	const {
-		isLoading: isLoadingMedia,
-		isRefetching: isRefetchingMedia,
-		media,
-		pageData,
-	} = usePagedMediaQuery(params)
-	const { current_page, total_pages } = pageData || {}
-
-	const differentSearch = usePreviousIsDifferent(filters?.search as string)
-	useEffect(() => {
-		if (differentSearch) {
-			setPage(1)
-		}
-	}, [differentSearch, setPage])
-
-	const handlePrefetchPage = useCallback(
-		(page: number) => {
-			prefetch({
-				...params,
-				page,
-			})
+		data: {
+			media: { nodes, pageInfo },
 		},
-		[params, prefetch],
-	)
+		isLoading,
+	} = useSuspenseGraphQL(query, getQueryKey(page, pageSize, orderBy), {
+		filter: {},
+		orderBy: orderBy,
+		pagination: {
+			offset: {
+				page,
+				pageSize,
+			},
+		},
+	})
+	const prefetch = usePrefetchBookSearch(orderBy)
+	if (pageInfo.__typename !== 'OffsetPaginationInfo') {
+		throw new Error('Invalid pagination type, expected OffsetPaginationInfo')
+	}
 
-	const previousPage = usePrevious(current_page)
-	const shouldScroll = !!previousPage && previousPage !== current_page
+	const previousPage = usePrevious(pageInfo.currentPage)
+	const shouldScroll = !!previousPage && previousPage !== pageInfo.currentPage
 	useEffect(
 		() => {
 			if (!isInView && shouldScroll) {
@@ -86,78 +212,49 @@ export default function BookSearchScene() {
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[isInView, shouldScroll],
+		[shouldScroll, isInView],
 	)
 
-	const renderContent = () => {
-		if (layoutMode === 'GRID') {
-			return (
-				<URLFilterContainer
-					currentPage={current_page || 1}
-					pages={total_pages || 1}
-					onChangePage={setPage}
-					onPrefetchPage={handlePrefetchPage}
-				>
-					<div className="flex flex-1 px-4 pb-2 pt-4 md:pb-4">
-						<BookGrid
-							isLoading={isLoadingMedia}
-							books={media}
-							hasFilters={Object.keys(filters || {}).length > 0}
-						/>
-					</div>
-				</URLFilterContainer>
-			)
-		} else {
-			return (
-				<BookTable
-					items={media || []}
-					render={(props) => (
-						<URLFilterContainer
-							currentPage={current_page || 1}
-							pages={total_pages || 1}
-							onChangePage={setPage}
-							onPrefetchPage={handlePrefetchPage}
-							tableControls={
-								<EntityTableColumnConfiguration
-									entity="media"
-									configuration={columns || defaultBookColumnSort}
-									onSave={setColumns}
-								/>
-							}
-							{...props}
-						/>
-					)}
-				/>
-			)
-		}
-	}
-
 	return (
-		<FilterContext.Provider
-			value={{
-				filters,
-				ordering,
-				pagination: { page, page_size },
-				setPage,
-				...rest,
-			}}
-		>
-			<div className="flex flex-1 flex-col pb-4 md:pb-0">
-				<Helmet>
-					<title>Stump | Books</title>
-				</Helmet>
+		<div className="flex flex-1 flex-col pb-4 md:pb-0">
+			<Helmet>
+				<title>Stump | Books</title>
+			</Helmet>
 
-				<section ref={containerRef} id="grid-top-indicator" className="h-0" />
+			<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 
-				<FilterHeader
-					isSearching={isRefetchingMedia}
-					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
-					orderControls={<URLOrdering entity="media" />}
-					filterControls={<URLFilterDrawer entity="media" />}
-				/>
+			<FilterHeader
+				isSearching={isLoading}
+				layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
+				orderControls={
+					<URLOrderBy
+						sortableFields={ORDER_BY_WHITELIST}
+						orderBy={orderBy}
+						setOrderBy={setOrderBy}
+					/>
+				}
+				filterControls={<URLFilterDrawer entity="media" />}
+			/>
 
-				{renderContent()}
-			</div>
-		</FilterContext.Provider>
+			<URLFilterContainer
+				currentPage={pageInfo.currentPage || 1}
+				pages={pageInfo.totalPages || 1}
+				onChangePage={setPage}
+				onPrefetchPage={(page) => {
+					prefetch({
+						page,
+						pageSize,
+					})
+				}}
+			>
+				<div className="flex flex-1 px-4 pb-2 pt-4 md:pb-4">
+					<BookGrid
+						isLoading={isLoading}
+						books={nodes}
+						// hasFilters={Object.keys(filters || {}).length > 0}
+					/>
+				</div>
+			</URLFilterContainer>
+		</div>
 	)
 }

@@ -8,7 +8,7 @@ import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
-import MediaCard from '@/components/book/BookCard'
+import BookCard from '@/components/book/BookCard'
 import { SceneContainer } from '@/components/container'
 import LinkBadge from '@/components/LinkBadge'
 import ReadMore from '@/components/ReadMore'
@@ -27,29 +27,11 @@ import EmailBookDropdown from './EmailBookDropdown'
 const query = graphql(`
 	query BookOverviewScene($id: ID!) {
 		mediaById(id: $id) {
-			id
+			...BookCard
 			extension
-			resolvedName
-			hash
-			pages
-			size
-			status
-			relativeLibraryPath
 			metadata {
 				links
 				summary
-			}
-			thumbnail {
-				url
-			}
-			readProgress {
-				percentageCompleted
-				epubcfi
-				page
-			}
-			readHistory {
-				__typename
-				completedAt
 			}
 		}
 	}
@@ -100,7 +82,7 @@ export default function BookOverviewScene() {
 
 				<div className="flex h-full w-full flex-col gap-4">
 					<div className="flex flex-col items-center gap-3 tablet:mb-2 tablet:flex-row tablet:items-start">
-						<MediaCard data={media} readingLink variant="cover" />
+						<BookCard key={media.id} fragment={media} readingLink variant="cover" />
 						<div className="flex h-full w-full flex-col gap-2 tablet:gap-4">
 							<Suspense>
 								<BookOverviewSceneHeader id={media.id} />

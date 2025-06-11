@@ -4,7 +4,7 @@ import { graphql } from '@stump/graphql'
 import { BookX } from 'lucide-react'
 import { Suspense, useCallback } from 'react'
 
-import MediaCard from '@/components/book/BookCard'
+import BookCard from '@/components/book/BookCard'
 import HorizontalCardList from '@/components/HorizontalCardList'
 
 const query = graphql(`
@@ -12,22 +12,7 @@ const query = graphql(`
 		mediaById(id: $id) {
 			nextInSeries(pagination: $pagination) {
 				nodes {
-					id
-					resolvedName
-					pages
-					size
-					status
-					thumbnail {
-						url
-					}
-					readProgress {
-						percentageCompleted
-						epubcfi
-						page
-					}
-					readHistory {
-						__typename
-					}
+					...BookCard
 				}
 				pageInfo {
 					__typename
@@ -87,7 +72,7 @@ function BooksAfterCurrent({ cursor }: Props) {
 
 	const nodes = data.pages.flatMap((page) => page.mediaById?.nextInSeries.nodes || [])
 
-	const cards = nodes.map((node) => <MediaCard data={node} key={node.id} fullWidth={false} />)
+	const cards = nodes.map((node) => <BookCard key={node.id} fragment={node} fullWidth={false} />)
 
 	const handleFetchMore = useCallback(() => {
 		if (hasNextPage && !isFetchingNextPage) {

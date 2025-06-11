@@ -2936,30 +2936,17 @@ export type BookOverviewSceneQueryVariables = Exact<{
 
 export type BookOverviewSceneQuery = {
 	__typename?: 'Query'
-	mediaById?: {
-		__typename?: 'Media'
-		id: string
-		extension: string
-		resolvedName: string
-		hash?: string | null
-		pages: number
-		size: number
-		status: FileStatus
-		relativeLibraryPath: string
-		metadata?: {
-			__typename?: 'MediaMetadata'
-			links: Array<string>
-			summary?: string | null
-		} | null
-		thumbnail: { __typename?: 'ImageRef'; url: string }
-		readProgress?: {
-			__typename?: 'ActiveReadingSession'
-			percentageCompleted?: any | null
-			epubcfi?: string | null
-			page?: number | null
-		} | null
-		readHistory: Array<{ __typename: 'FinishedReadingSession'; completedAt: any }>
-	} | null
+	mediaById?:
+		| ({
+				__typename?: 'Media'
+				extension: string
+				metadata?: {
+					__typename?: 'MediaMetadata'
+					links: Array<string>
+					summary?: string | null
+				} | null
+		  } & { ' $fragmentRefs'?: { BookCardFragment: BookCardFragment } })
+		| null
 }
 
 export type BookOverviewHeaderQueryVariables = Exact<{
@@ -3005,22 +2992,9 @@ export type BooksAfterCurrentQueryQuery = {
 		__typename?: 'Media'
 		nextInSeries: {
 			__typename?: 'PaginatedMediaResponse'
-			nodes: Array<{
-				__typename?: 'Media'
-				id: string
-				resolvedName: string
-				pages: number
-				size: number
-				status: FileStatus
-				thumbnail: { __typename?: 'ImageRef'; url: string }
-				readProgress?: {
-					__typename?: 'ActiveReadingSession'
-					percentageCompleted?: any | null
-					epubcfi?: string | null
-					page?: number | null
-				} | null
-				readHistory: Array<{ __typename: 'FinishedReadingSession' }>
-			}>
+			nodes: Array<
+				{ __typename?: 'Media' } & { ' $fragmentRefs'?: { BookCardFragment: BookCardFragment } }
+			>
 			pageInfo:
 				| {
 						__typename: 'CursorPaginationInfo'
@@ -3102,9 +3076,7 @@ export type BookSearchSceneQuery = {
 	media: {
 		__typename?: 'PaginatedMediaResponse'
 		nodes: Array<
-			{ __typename?: 'Media'; id: string } & {
-				' $fragmentRefs'?: { BookCardFragment: BookCardFragment }
-			}
+			{ __typename?: 'Media' } & { ' $fragmentRefs'?: { BookCardFragment: BookCardFragment } }
 		>
 		pageInfo:
 			| { __typename: 'CursorPaginationInfo' }
@@ -3567,33 +3539,32 @@ export const BookLibrarySeriesLinksDocument = new TypedDocumentString(`
 export const BookOverviewSceneDocument = new TypedDocumentString(`
     query BookOverviewScene($id: ID!) {
   mediaById(id: $id) {
-    id
+    ...BookCard
     extension
-    resolvedName
-    hash
-    pages
-    size
-    status
-    relativeLibraryPath
     metadata {
       links
       summary
     }
-    thumbnail {
-      url
-    }
-    readProgress {
-      percentageCompleted
-      epubcfi
-      page
-    }
-    readHistory {
-      __typename
-      completedAt
-    }
   }
 }
-    `) as unknown as TypedDocumentString<BookOverviewSceneQuery, BookOverviewSceneQueryVariables>
+    fragment BookCard on Media {
+  id
+  resolvedName
+  pages
+  size
+  status
+  thumbnail {
+    url
+  }
+  readProgress {
+    percentageCompleted
+    epubcfi
+    page
+  }
+  readHistory {
+    __typename
+  }
+}`) as unknown as TypedDocumentString<BookOverviewSceneQuery, BookOverviewSceneQueryVariables>
 export const BookOverviewHeaderDocument = new TypedDocumentString(`
     query BookOverviewHeader($id: ID!) {
   mediaById(id: $id) {
@@ -3628,22 +3599,7 @@ export const BooksAfterCurrentQueryDocument = new TypedDocumentString(`
   mediaById(id: $id) {
     nextInSeries(pagination: $pagination) {
       nodes {
-        id
-        resolvedName
-        pages
-        size
-        status
-        thumbnail {
-          url
-        }
-        readProgress {
-          percentageCompleted
-          epubcfi
-          page
-        }
-        readHistory {
-          __typename
-        }
+        ...BookCard
       }
       pageInfo {
         __typename
@@ -3656,7 +3612,24 @@ export const BooksAfterCurrentQueryDocument = new TypedDocumentString(`
     }
   }
 }
-    `) as unknown as TypedDocumentString<
+    fragment BookCard on Media {
+  id
+  resolvedName
+  pages
+  size
+  status
+  thumbnail {
+    url
+  }
+  readProgress {
+    percentageCompleted
+    epubcfi
+    page
+  }
+  readHistory {
+    __typename
+  }
+}`) as unknown as TypedDocumentString<
 	BooksAfterCurrentQueryQuery,
 	BooksAfterCurrentQueryQueryVariables
 >
@@ -3716,7 +3689,6 @@ export const BookSearchSceneDocument = new TypedDocumentString(`
     query BookSearchScene($filter: MediaFilterInput!, $orderBy: [MediaOrderBy!]!, $pagination: Pagination!) {
   media(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
     nodes {
-      id
       ...BookCard
     }
     pageInfo {

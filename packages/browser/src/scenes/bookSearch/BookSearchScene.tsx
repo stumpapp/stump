@@ -42,7 +42,6 @@ const query = graphql(`
 	) {
 		media(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
 			nodes {
-				id
 				...BookCard
 			}
 			pageInfo {

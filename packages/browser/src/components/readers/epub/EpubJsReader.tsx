@@ -109,7 +109,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	})
 	const { data: media, isLoading: isPreferencesLoading } = useGraphQL(
 		BOOK_READER_SCENE_QUERY,
-		['epubJsReader', id],
+		['epubJsReaderBook', id],
 		{
 			id: id || '',
 		},
@@ -183,18 +183,16 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	 *
 	 * @param changeState The new location state of the epub
 	 */
-	function handleLocationChange(changeState: EpubLocationState) {
+	const handleLocationChange = useCallback((changeState: EpubLocationState) => {
 		const start = changeState.start
-
 		//* NOTE: this shouldn't happen, but the types are so unreliable that I am
 		//* adding this extra check as a precaution.
 		if (!start) {
 			return
 		}
-
 		setCurrentLocation(changeState)
 		focusIframe()
-	}
+	}, [])
 
 	/**
 	 * This effect is responsible for initializing the epubjs book, which gets stored in
@@ -223,19 +221,22 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	 * @param rendition: The epubjs rendition instance
 	 * @param preferences The epub reader preferences
 	 */
-	const applyEpubPreferences = (rendition: Rendition, preferences: BookPreferences) => {
-		if (theme === 'dark') {
-			rendition.themes.register('stump-dark', applyTheme(stumpDark, preferences))
-			rendition.themes.select('stump-dark')
-		} else {
-			rendition.themes.register('stump-light', applyTheme({}, preferences))
-			rendition.themes.select('stump-light')
-		}
-		rendition.direction(preferences.readingDirection)
-		if (preferences.fontSize) {
-			rendition.themes.fontSize(`${preferences.fontSize}px`)
-		}
-	}
+	const applyEpubPreferences = useCallback(
+		(rendition: Rendition, preferences: BookPreferences) => {
+			if (theme === 'dark') {
+				rendition.themes.register('stump-dark', applyTheme(stumpDark, preferences))
+				rendition.themes.select('stump-dark')
+			} else {
+				rendition.themes.register('stump-light', applyTheme({}, preferences))
+				rendition.themes.select('stump-light')
+			}
+			rendition.direction(preferences.readingDirection)
+			if (preferences.fontSize) {
+				rendition.themes.fontSize(`${preferences.fontSize}px`)
+			}
+		},
+		[theme],
+	)
 
 	/**
 	 * This effect is responsible for rendering the epub to the screen. It will only run once
@@ -243,7 +244,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	 * for the rendition.
 	 */
 	useEffect(() => {
-		if (!book) return
+		if (!book || !ref.current) return
 
 		book.ready.then(() => {
 			if (book.spine) {
@@ -295,7 +296,14 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				createSectionLengths(book, setSectionLengths)
 			}
 		})
-	}, [book])
+	}, [
+		book,
+		applyEpubPreferences,
+		bookPreferences,
+		handleLocationChange,
+		isIncognito,
+		media?.mediaById?.readProgress?.epubcfi,
+	])
 
 	// TODO: this needs to have fullscreen as an effect dependency
 	/**
@@ -343,7 +351,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 		if (rendition) {
 			applyEpubPreferences(rendition, bookPreferences)
 		}
-	}, [rendition, bookPreferences, theme])
+	}, [rendition, bookPreferences, theme, applyEpubPreferences])
 
 	/**
 	 * Invalidate the book query when a reader is unmounted so that the book overview
@@ -544,7 +552,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				})
 			}
 		}
-	}, [currentLocation, epub, media])
+	}, [currentLocation, epub, media, book, isIncognito, mutate])
 
 	/**
 	 * A callback for attempting to extract preview text from a given cfi. This is used for bookmarks,

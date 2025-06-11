@@ -54,14 +54,14 @@ export default function BookCard({
 	const prefetchBooksAfterCursor = usePrefetchBooksAfterCursor()
 
 	const prefetch = useCallback(
-		() => Promise.all([prefetchBook(data?.id), prefetchBooksAfterCursor(data?.id)]),
-		[prefetchBook, prefetchBooksAfterCursor, data?.id],
+		() => Promise.all([prefetchBook(data.id), prefetchBooksAfterCursor(data.id)]),
+		[prefetchBook, prefetchBooksAfterCursor, data.id],
 	)
 
 	const getProgress = useCallback(() => {
-		if (isCoverOnly || (!data?.readProgress && !data?.readHistory)) {
+		if (isCoverOnly || (!data.readProgress && !data.readHistory)) {
 			return null
-		} else if (data?.readProgress) {
+		} else if (data.readProgress) {
 			const { epubcfi, percentageCompleted, page } = data.readProgress
 			if (epubcfi && percentageCompleted) {
 				return Math.round(percentageCompleted * 100)
@@ -71,7 +71,7 @@ export default function BookCard({
 				const percent = Math.round((page / pages) * 100)
 				return Math.min(Math.max(percent, 0), 100) // Clamp between 0 and 100
 			}
-		} else if (data?.readHistory?.length) {
+		} else if (data.readHistory?.length) {
 			return 100
 		}
 
@@ -83,7 +83,7 @@ export default function BookCard({
 			return null
 		}
 
-		const isMissing = data?.status === 'MISSING'
+		const isMissing = data.status === 'MISSING'
 		if (isMissing) {
 			return (
 				<Text size="xs" className="uppercase text-amber-500">
@@ -94,8 +94,8 @@ export default function BookCard({
 
 		const percentage = getProgress()
 		if (percentage != null && percentage < 100.0) {
-			const isEpubProgress = !!data?.readProgress?.epubcfi
-			const pagesLeft = data?.pages - (data?.readProgress?.page || 0)
+			const isEpubProgress = !!data.readProgress?.epubcfi
+			const pagesLeft = data.pages - (data.readProgress?.page || 0)
 
 			return (
 				<div className="flex items-center justify-between">
@@ -120,7 +120,7 @@ export default function BookCard({
 		return (
 			<div className="flex items-center justify-between">
 				<Text size="xs" variant="muted">
-					{formatBytes(data?.size.valueOf())}
+					{formatBytes(data.size.valueOf())}
 				</Text>
 			</div>
 		)
@@ -132,12 +132,12 @@ export default function BookCard({
 		}
 
 		return readingLink
-			? paths.bookReader(data?.id, {
-					epubcfi: data?.readProgress?.epubcfi,
-					page: data?.readProgress?.page ?? undefined,
+			? paths.bookReader(data.id, {
+					epubcfi: data.readProgress?.epubcfi,
+					page: data.readProgress?.page ?? undefined,
 				})
-			: paths.bookOverview(data?.id)
-	}, [readingLink, data?.id, onSelect, data?.readProgress])
+			: paths.bookOverview(data.id)
+	}, [readingLink, data.id, onSelect, data.readProgress])
 
 	const propsOverrides = useMemo(() => {
 		let overrides = (
@@ -164,10 +164,10 @@ export default function BookCard({
 
 	return (
 		<EntityCard
-			title={data?.resolvedName}
+			title={data.resolvedName}
 			href={href}
 			fullWidth={fullWidth}
-			imageUrl={data?.thumbnail.url}
+			imageUrl={data.thumbnail.url}
 			progress={getProgress()}
 			subtitle={getSubtitle()}
 			onMouseEnter={prefetch}

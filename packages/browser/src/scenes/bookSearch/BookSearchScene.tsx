@@ -7,7 +7,9 @@ import { Helmet } from 'react-helmet'
 import { useSearchParams } from 'react-router-dom'
 
 import { BookTable } from '@/components/book'
+import BookCard from '@/components/book/BookCard'
 import BookGrid from '@/components/book/BookGrid'
+import { defaultBookColumnSort } from '@/components/book/table'
 import {
 	FilterHeader,
 	URLFilterContainer,
@@ -41,21 +43,7 @@ const query = graphql(`
 		media(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
 			nodes {
 				id
-				resolvedName
-				pages
-				size
-				status
-				thumbnail {
-					url
-				}
-				readProgress {
-					percentageCompleted
-					epubcfi
-					page
-				}
-				readHistory {
-					__typename
-				}
+				...BookCard
 			}
 			pageInfo {
 				__typename
@@ -179,13 +167,12 @@ function BookSearchScene() {
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
 	const { page, pageSize, setPage } = useURLPageParams()
 	const { orderBy, setOrderBy } = useMediaURLOrderBy()
-	const { layoutMode, setLayout } = useBooksLayout((state) => ({
+	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout((state) => ({
 		columns: state.columns,
 		layoutMode: state.layout,
 		setColumns: state.setColumns,
 		setLayout: state.setLayout,
 	}))
-
 	const {
 		data: {
 			media: { nodes, pageInfo },
@@ -201,6 +188,7 @@ function BookSearchScene() {
 			},
 		},
 	})
+	const cards = nodes.map((node) => <BookCard key={node.id} fragment={node} fullWidth={false} />)
 	const prefetch = usePrefetchBookSearch(orderBy)
 	if (pageInfo.__typename !== 'OffsetPaginationInfo') {
 		throw new Error('Invalid pagination type, expected OffsetPaginationInfo')
@@ -239,7 +227,7 @@ function BookSearchScene() {
 					<div className="flex flex-1 px-4 pb-2 pt-4 md:pb-4">
 						<BookGrid
 							isLoading={isLoading}
-							books={nodes}
+							items={cards}
 							// hasFilters={Object.keys(filters || {}).length > 0}
 						/>
 					</div>
@@ -247,10 +235,9 @@ function BookSearchScene() {
 			)
 		} else {
 			return null
-			// TODO(graphql): migrate BookTable
 			// return (
 			// 	<BookTable
-			// 		books={nodes}
+			// 		items={cards}
 			// 		render={(props) => (
 			// 			<URLFilterContainer
 			// 				currentPage={pageInfo.currentPage || 1}

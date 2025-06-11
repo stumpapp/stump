@@ -1,22 +1,18 @@
 import { CardGrid } from '@stump/components'
-import { FragmentType } from '@stump/graphql'
-import type { Media } from '@stump/sdk'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
 
-import BookCard, { BookCardFragment } from './BookCard'
-
 type Props = {
 	isLoading: boolean
-	books?: (FragmentType<typeof BookCardFragment> & { id: string })[]
+	items?: JSX.Element[]
 	hasFilters?: boolean
-	onSelect?: (media: Media) => void
+	onSelect?: (item: JSX.Element) => void
 }
 // TODO: translate
-export default function BookGrid({ books, isLoading, hasFilters, onSelect }: Props) {
+export default function BookGrid({ items, isLoading, hasFilters, onSelect }: Props) {
 	if (isLoading) {
 		return null
-	} else if (!books || !books.length) {
+	} else if (!items || !items.length) {
 		return (
 			<div className="grid flex-1 place-self-center">
 				<GenericEmptyState
@@ -35,11 +31,5 @@ export default function BookGrid({ books, isLoading, hasFilters, onSelect }: Pro
 		)
 	}
 
-	return (
-		<CardGrid>
-			{books.map((m) => (
-				<BookCard key={m.id} fragment={m} />
-			))}
-		</CardGrid>
-	)
+	return <CardGrid>{items}</CardGrid>
 }

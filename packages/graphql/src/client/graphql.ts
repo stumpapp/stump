@@ -3101,22 +3101,11 @@ export type BookSearchSceneQuery = {
 	__typename?: 'Query'
 	media: {
 		__typename?: 'PaginatedMediaResponse'
-		nodes: Array<{
-			__typename?: 'Media'
-			id: string
-			resolvedName: string
-			pages: number
-			size: number
-			status: FileStatus
-			thumbnail: { __typename?: 'ImageRef'; url: string }
-			readProgress?: {
-				__typename?: 'ActiveReadingSession'
-				percentageCompleted?: any | null
-				epubcfi?: string | null
-				page?: number | null
-			} | null
-			readHistory: Array<{ __typename: 'FinishedReadingSession' }>
-		}>
+		nodes: Array<
+			{ __typename?: 'Media'; id: string } & {
+				' $fragmentRefs'?: { BookCardFragment: BookCardFragment }
+			}
+		>
 		pageInfo:
 			| { __typename: 'CursorPaginationInfo' }
 			| {
@@ -3728,21 +3717,7 @@ export const BookSearchSceneDocument = new TypedDocumentString(`
   media(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
     nodes {
       id
-      resolvedName
-      pages
-      size
-      status
-      thumbnail {
-        url
-      }
-      readProgress {
-        percentageCompleted
-        epubcfi
-        page
-      }
-      readHistory {
-        __typename
-      }
+      ...BookCard
     }
     pageInfo {
       __typename
@@ -3756,7 +3731,24 @@ export const BookSearchSceneDocument = new TypedDocumentString(`
     }
   }
 }
-    `) as unknown as TypedDocumentString<BookSearchSceneQuery, BookSearchSceneQueryVariables>
+    fragment BookCard on Media {
+  id
+  resolvedName
+  pages
+  size
+  status
+  thumbnail {
+    url
+  }
+  readProgress {
+    percentageCompleted
+    epubcfi
+    page
+  }
+  readHistory {
+    __typename
+  }
+}`) as unknown as TypedDocumentString<BookSearchSceneQuery, BookSearchSceneQueryVariables>
 export const ContinueReadingMediaQueryDocument = new TypedDocumentString(`
     query ContinueReadingMediaQuery($pagination: Pagination!) {
   keepReading(pagination: $pagination) {

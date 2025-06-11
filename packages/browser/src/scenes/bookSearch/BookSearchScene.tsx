@@ -8,7 +8,12 @@ import { useSearchParams } from 'react-router-dom'
 
 import { BookTable } from '@/components/book'
 import BookGrid from '@/components/book/BookGrid'
-import { FilterHeader, URLFilterContainer, URLFilterDrawer, URLOrderBy } from '@/components/filters'
+import {
+	FilterHeader,
+	URLFilterContainer,
+	URLFilterDrawer,
+	URLMediaOrderBy,
+} from '@/components/filters'
 import { useURLPageParams } from '@/components/filters/useFilterScene'
 import { EntityTableColumnConfiguration } from '@/components/table'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
@@ -284,7 +289,7 @@ function BookSearchScene() {
 				isSearching={isLoading}
 				layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
 				orderControls={
-					<URLOrderBy
+					<URLMediaOrderBy
 						sortableFields={ORDER_BY_WHITELIST}
 						orderBy={orderBy}
 						setOrderBy={setOrderBy}

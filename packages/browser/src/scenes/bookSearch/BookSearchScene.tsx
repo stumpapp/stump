@@ -6,9 +6,11 @@ import { Suspense, useCallback, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 import { useSearchParams } from 'react-router-dom'
 
+import { BookTable } from '@/components/book'
 import BookGrid from '@/components/book/BookGrid'
 import { FilterHeader, URLFilterContainer, URLFilterDrawer, URLOrderBy } from '@/components/filters'
 import { useURLPageParams } from '@/components/filters/useFilterScene'
+import { EntityTableColumnConfiguration } from '@/components/table'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
 import { useBooksLayout } from '@/stores/layout'
@@ -215,6 +217,61 @@ function BookSearchScene() {
 		[shouldScroll, isInView],
 	)
 
+	const renderContent = () => {
+		if (layoutMode === 'GRID') {
+			return (
+				<URLFilterContainer
+					currentPage={pageInfo.currentPage || 1}
+					pages={pageInfo.totalPages || 1}
+					onChangePage={setPage}
+					onPrefetchPage={(page) => {
+						prefetch({
+							page,
+							pageSize,
+						})
+					}}
+				>
+					<div className="flex flex-1 px-4 pb-2 pt-4 md:pb-4">
+						<BookGrid
+							isLoading={isLoading}
+							books={nodes}
+							// hasFilters={Object.keys(filters || {}).length > 0}
+						/>
+					</div>
+				</URLFilterContainer>
+			)
+		} else {
+			return null
+			// TODO(graphql): migrate BookTable
+			// return (
+			// 	<BookTable
+			// 		books={nodes}
+			// 		render={(props) => (
+			// 			<URLFilterContainer
+			// 				currentPage={pageInfo.currentPage || 1}
+			// 				pages={pageInfo.totalPages || 1}
+			// 				onChangePage={setPage}
+			// 				onPrefetchPage={(page) => {
+			// 					prefetch({
+			// 						page,
+			// 						pageSize,
+			// 					})
+			// 				}}
+			// 				tableControls={
+			// 					<EntityTableColumnConfiguration
+			// 						entity="media"
+			// 						configuration={columns || defaultBookColumnSort}
+			// 						onSave={setColumns}
+			// 					/>
+			// 				}
+			// 				{...props}
+			// 			/>
+			// 		)}
+			// 	/>
+			// )
+		}
+	}
+
 	return (
 		<div className="flex flex-1 flex-col pb-4 md:pb-0">
 			<Helmet>
@@ -236,25 +293,7 @@ function BookSearchScene() {
 				filterControls={<URLFilterDrawer entity="media" />}
 			/>
 
-			<URLFilterContainer
-				currentPage={pageInfo.currentPage || 1}
-				pages={pageInfo.totalPages || 1}
-				onChangePage={setPage}
-				onPrefetchPage={(page) => {
-					prefetch({
-						page,
-						pageSize,
-					})
-				}}
-			>
-				<div className="flex flex-1 px-4 pb-2 pt-4 md:pb-4">
-					<BookGrid
-						isLoading={isLoading}
-						books={nodes}
-						// hasFilters={Object.keys(filters || {}).length > 0}
-					/>
-				</div>
-			</URLFilterContainer>
+			{renderContent()}
 		</div>
 	)
 }

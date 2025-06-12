@@ -14,6 +14,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Helmet } from 'react-helmet'
 
 import { BookTable } from '@/components/book'
+import BookCard from '@/components/book/BookCard'
 import BookGrid from '@/components/book/BookGrid'
 import { defaultBookColumnSort } from '@/components/book/table'
 import {
@@ -323,7 +324,9 @@ function SeriesBooksScene() {
 				<div className="flex flex-1 px-4 pb-2 pt-4 md:pb-4">
 					<BookGrid
 						isLoading={isLoading}
-						books={nodes}
+						items={nodes.map((node) => (
+							<BookCard key={node.id} fragment={node} />
+						))}
 						// hasFilters={Object.keys(filters || {}).length > 0}
 					/>
 				</div>

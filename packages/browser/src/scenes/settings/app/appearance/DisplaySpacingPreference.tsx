@@ -5,15 +5,15 @@ import { usePreferences, useTheme } from '@/hooks'
 
 export default function DisplaySpacingPreference() {
 	const {
-		preferences: { enable_compact_display },
+		preferences: { enableCompactDisplay },
 		update,
 	} = usePreferences()
 
 	const handleChange = async (enable_compact: boolean) => {
-		if (enable_compact === enable_compact_display) return
+		if (enable_compact === enableCompactDisplay) return
 
 		try {
-			await update({ enable_compact_display: enable_compact })
+			await update({ enableCompactDisplay: enable_compact })
 		} catch (error) {
 			console.error(error)
 		}
@@ -28,12 +28,12 @@ export default function DisplaySpacingPreference() {
 			<div className="flex items-center gap-x-4">
 				<AppearanceOption
 					label="Default"
-					isSelected={!enable_compact_display}
+					isSelected={!enableCompactDisplay}
 					onSelect={() => handleChange(false)}
 				/>
 				<AppearanceOption
 					label="Compact"
-					isSelected={!!enable_compact_display}
+					isSelected={!!enableCompactDisplay}
 					onSelect={() => handleChange(true)}
 					isDisabled
 				/>

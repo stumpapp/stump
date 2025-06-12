@@ -17,6 +17,7 @@ pub struct CreateOrUpdateLibraryInput {
 	pub emoji: Option<String>,
 	pub tags: Option<Vec<String>>,
 	pub config: Option<LibraryConfigInput>,
+	#[graphql(default = true)]
 	pub scan_after_persist: bool,
 }
 

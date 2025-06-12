@@ -27,7 +27,7 @@ type Props = {
 // TODO: virtualization
 export default function SmartListBookTable({ books, isIsolatedTable = true }: Props) {
 	const {
-		preferences: { enable_hide_scrollbar },
+		preferences: { enableHideScrollbar },
 	} = usePreferences()
 	const { workingView, updateWorkingView } = useSmartListContext()
 	const {
@@ -98,7 +98,7 @@ export default function SmartListBookTable({ books, isIsolatedTable = true }: Pr
 				{({ width }) => (
 					<div
 						className={cn('h-full min-w-full overflow-x-auto', {
-							'scrollbar-hide': enable_hide_scrollbar,
+							'scrollbar-hide': enableHideScrollbar,
 						})}
 						style={{
 							width,

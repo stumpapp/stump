@@ -1,5 +1,6 @@
 import { usePrefetchFiles } from '@stump/client'
 import { cn, Link, useSticky } from '@stump/components'
+import { UserPermission } from '@stump/graphql'
 import { useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
@@ -14,7 +15,7 @@ export default function SeriesNavigation() {
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const location = useLocation()
 	const {
-		preferences: { primary_navigation_mode, layout_max_width_px },
+		preferences: { primaryNavigationMode, layoutMaxWidthPx },
 	} = usePreferences()
 	const {
 		series: { id, path },
@@ -27,11 +28,11 @@ export default function SeriesNavigation() {
 
 	const prefetchFiles = usePrefetchFiles()
 	const handlePrefetchFiles = useCallback(
-		() => prefetchFiles({ path, fetchConfig: checkPermission('file:upload') }),
+		() => prefetchFiles({ path, fetchConfig: checkPermission(UserPermission.UploadFile) }),
 		[path, checkPermission, prefetchFiles],
 	)
 
-	const canAccessFiles = checkPermission('file:explorer')
+	const canAccessFiles = checkPermission(UserPermission.FileExplorer)
 	const tabs = useMemo(
 		() => [
 			{
@@ -59,7 +60,7 @@ export default function SeriesNavigation() {
 		[location, canAccessFiles, handlePrefetchBooks, handlePrefetchFiles],
 	)
 
-	const preferTopBar = primary_navigation_mode === 'TOPBAR'
+	const preferTopBar = primaryNavigationMode == 'TOPBAR'
 
 	return (
 		<div
@@ -73,10 +74,10 @@ export default function SeriesNavigation() {
 				className={cn(
 					'-mb-px flex h-12 gap-x-6 overflow-x-scroll px-3 scrollbar-hide md:overflow-x-hidden',
 					{
-						'mx-auto': preferTopBar && !!layout_max_width_px,
+						'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 					},
 				)}
-				style={{ maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined }}
+				style={{ maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined }}
 			>
 				{tabs.map((tab) => (
 					<Link

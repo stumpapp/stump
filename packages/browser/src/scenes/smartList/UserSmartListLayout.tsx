@@ -38,18 +38,18 @@ export default function UserSmartListLayout() {
 
 	const {
 		preferences: {
-			enable_double_sidebar,
-			primary_navigation_mode,
-			layout_max_width_px,
-			enable_hide_scrollbar,
+			enableDoubleSidebar,
+			primaryNavigationMode,
+			layoutMaxWidthPx,
+			enableHideScrollbar,
 		},
 	} = usePreferences()
 
 	const isSettings = useMemo(() => location.pathname.includes('settings'), [location.pathname])
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
-	const displaySideBar = !!enable_double_sidebar && !isMobile && isSettings
-	const preferTopBar = primary_navigation_mode === 'TOPBAR'
+	const displaySideBar = !!enableDoubleSidebar && !isMobile && isSettings
+	const preferTopBar = primaryNavigationMode === 'TOPBAR'
 
 	useEffect(() => {
 		localStorage.setItem(LAYOUT_PREFERENCE_KEY, layout)
@@ -95,8 +95,8 @@ export default function UserSmartListLayout() {
 	 * TODO: Support actual roles from the backend, i.e. Writer, CoCreator, Creator, Reader
 	 */
 	const viewerRole = useMemo<AccessRole>(
-		() => (isCreator || user.is_server_owner ? 'CoCreator' : 'Reader'),
-		[isCreator, user.is_server_owner],
+		() => (isCreator || user.isServerOwner ? 'CoCreator' : 'Reader'),
+		[isCreator, user.isServerOwner],
 	)
 
 	const patchSmartList = useCallback(
@@ -228,10 +228,10 @@ export default function UserSmartListLayout() {
 		>
 			<div
 				className={cn('relative flex flex-1 flex-col', {
-					'mx-auto w-full': preferTopBar && !!layout_max_width_px,
+					'mx-auto w-full': preferTopBar && !!layoutMaxWidthPx,
 				})}
 				style={{
-					maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined,
+					maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
 				}}
 			>
 				{renderHeader()}
@@ -240,7 +240,7 @@ export default function UserSmartListLayout() {
 
 				<SceneContainer
 					className={cn('relative flex flex-1 flex-col gap-4 md:pb-0', {
-						'md:hide-scrollbar': !!enable_hide_scrollbar,
+						'md:hide-scrollbar': !!enableHideScrollbar,
 						'p-0': !isSettings,
 						// pl-48 is for the sidebar, plus pl-4 for the padding
 						'pl-52': displaySideBar,

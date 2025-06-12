@@ -1,13 +1,15 @@
 export * from './generated'
+export * from './graphql'
 export * from './opds'
 export * from './type-guards'
 import { z } from 'zod'
 
-import { CursorInfo, Library, Media, PageInfo, Series, SupportedFont, User } from './generated'
+import { CursorInfo, Library, Media, PageInfo, Series, SupportedFont } from './generated'
+import { AuthUser } from './graphql'
 
-export const isUser = (data: unknown): data is User => {
-	const casted = data as User
-	return casted?.id !== undefined && casted?.is_server_owner !== undefined
+export const isUser = (data: unknown): data is AuthUser => {
+	const casted = data as AuthUser
+	return casted?.id !== undefined && casted?.isServerOwner !== undefined
 }
 
 const fontSchema = z.enum([

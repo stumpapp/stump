@@ -14,7 +14,7 @@ import TopBarNavLink from '../../TopBarNavLink'
 export default function SettingsNavigationItem() {
 	const { t } = useLocaleContext()
 	const {
-		preferences: { enable_double_sidebar },
+		preferences: { enableDoubleSidebar },
 	} = usePreferences()
 	const platform = useAppStore((store) => store.platform)
 
@@ -29,13 +29,13 @@ export default function SettingsNavigationItem() {
 			'border-edge-subtle border-opacity-100 bg-background-surface/50': isInSettingsSomewhere,
 		},
 		{
-			'h-[2.35rem] w-[2.35rem] p-0 px-0 py-0': enable_double_sidebar,
+			'h-[2.35rem] w-[2.35rem] p-0 px-0 py-0': enableDoubleSidebar,
 		},
 	)
 
 	// If the user has the settings sidebar enabled, they likely don't need a complex
 	// sub-navigation item for settings
-	if (enable_double_sidebar) {
+	if (enableDoubleSidebar) {
 		return (
 			<TopBarNavLink to={paths.settings()} isActive={isInSettingsSomewhere} className={classes}>
 				<Cog className="h-4 w-4" />

@@ -9,6 +9,7 @@ use crate::{
 use super::{
 	age_restriction,
 	user::{self, AuthUser},
+	user_preferences,
 };
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
@@ -53,6 +54,7 @@ impl APIKeyWithUser {
 			.add_columns(Entity)
 			.add_columns(user::Entity)
 			.add_columns(age_restriction::Entity)
+			.add_columns(user_preferences::Entity)
 			.selector
 			.inner_join(user::Entity)
 			.filter(user::Column::DeletedAt.is_null())
@@ -60,6 +62,13 @@ impl APIKeyWithUser {
 				JoinType::LeftJoin,
 				age_restriction::Entity::belongs_to(user::Entity)
 					.from(age_restriction::Column::UserId)
+					.to(user::Column::Id)
+					.into(),
+			)
+			.join_rev(
+				JoinType::LeftJoin,
+				user_preferences::Entity::belongs_to(user::Entity)
+					.from(user_preferences::Column::UserId)
 					.to(user::Column::Id)
 					.into(),
 			)

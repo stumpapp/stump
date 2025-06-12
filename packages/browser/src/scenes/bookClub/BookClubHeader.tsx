@@ -7,7 +7,7 @@ import { usePreferences } from '@/hooks'
 
 export default function BookClubHeader() {
 	const {
-		preferences: { primary_navigation_mode, layout_max_width_px },
+		preferences: { primaryNavigationMode, layoutMaxWidthPx },
 	} = usePreferences()
 	const { bookClub } = useBookClubContext()
 
@@ -34,18 +34,18 @@ export default function BookClubHeader() {
 		)
 	}
 
-	const preferTopBar = primary_navigation_mode === 'TOPBAR'
+	const preferTopBar = primaryNavigationMode === 'TOPBAR'
 
 	return (
 		<header
 			className={cn(
 				'flex w-full flex-col gap-4 p-4 md:flex-row md:items-start md:justify-between md:gap-0',
 				{
-					'mx-auto': preferTopBar && !!layout_max_width_px,
+					'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 				},
 			)}
 			style={{
-				maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined,
+				maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
 			}}
 		>
 			<div className="md:max-w-xl">

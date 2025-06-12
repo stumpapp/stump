@@ -12,6 +12,13 @@ type ActiveReadingSession {
 	elapsedSeconds: Int
 }
 
+type AgeRestriction {
+	id: Int!
+	age: Int!
+	restrictOnUnset: Boolean!
+	userId: String!
+}
+
 input AgeRestrictionInput {
 	age: Int!
 	restrictOnUnset: Boolean!
@@ -228,7 +235,7 @@ input CreateOrUpdateLibraryInput {
 	emoji: String
 	tags: [String!]
 	config: LibraryConfigInput
-	scanAfterPersist: Boolean!
+	scanAfterPersist: Boolean! = true
 }
 
 input CreateUserInput {
@@ -1027,7 +1034,7 @@ type Mutation {
 	Enqueue a scan job for a library. This will index the filesystem from the library's root path
 	and update the database accordingly.
 	"""
-	scanLibrary(id: ID!, option: JSON): Boolean!
+	scanLibrary(id: ID!, options: JSON): Boolean!
 	"""
 	"Visit" a library, which will upsert a record of the user's last visit to the library.
 	This is used to inform the UI of the last library which was visited by the user
@@ -1721,6 +1728,7 @@ type User {
 	deletedAt: DateTime
 	isLocked: Boolean!
 	maxSessionsAllowed: Int
+	ageRestriction: AgeRestriction
 	continueReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	permissions: [UserPermission!]!
 	preferences: UserPreferences!

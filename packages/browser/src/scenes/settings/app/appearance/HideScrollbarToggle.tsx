@@ -5,27 +5,27 @@ import { usePreferences } from '@/hooks'
 
 export default function HideScrollbarToggle() {
 	const {
-		preferences: { enable_hide_scrollbar },
+		preferences: { enableHideScrollbar },
 		update,
 	} = usePreferences()
 
 	const handleToggle = useCallback(async () => {
 		try {
-			await update({ enable_hide_scrollbar: !enable_hide_scrollbar })
+			await update({ enableHideScrollbar: !enableHideScrollbar })
 		} catch (error) {
 			console.error(error)
 		}
-	}, [enable_hide_scrollbar, update])
+	}, [enableHideScrollbar, update])
 
 	return (
 		<WideSwitch
 			label="Hide scrollbar"
 			description="Some pages simply look better without a scrollbar, this setting will hide it when possible"
-			checked={enable_hide_scrollbar}
+			checked={enableHideScrollbar}
 			onCheckedChange={handleToggle}
-			formId="enable_hide_scrollbar"
+			formId="enableHideScrollbar"
 			title={
-				enable_hide_scrollbar
+				enableHideScrollbar
 					? 'This setting will hide the scrollbar on some pages'
 					: 'This setting will show the scrollbar on some pages'
 			}

@@ -1,25 +1,29 @@
 import { PickSelect } from '@stump/components'
-import { IgnoreRules, Library, LibraryPattern, LibraryScanMode } from '@stump/sdk'
+import {
+	LibraryPattern,
+	LibrarySettingsConfigFragment,
+	ReadingDirection,
+	ReadingImageScaleFit,
+	ReadingMode,
+} from '@stump/graphql'
 import isValidGlob from 'is-valid-glob'
 import { z } from 'zod'
 
-/**
- * A type guard to check if the input is a valid {@link LibraryScanMode}
- */
-const isLibraryScanMode = (input: string): input is LibraryScanMode => {
-	return input === 'DEFAULT' || input === 'QUICK' || input === 'NONE' || !input
-}
+import { ILibraryContext } from '@/scenes/library/context'
+
+type Library = ILibraryContext['library']
 
 /**
  * A type guard to check if the input is a valid {@link LibraryPattern}
  */
 const isLibraryPattern = (input: string): input is LibraryPattern => {
-	return input === 'SERIES_BASED' || input === 'COLLECTION_BASED' || !input
+	return input === LibraryPattern.SeriesBased || input === LibraryPattern.CollectionBased
 }
+
 /**
  * A helper function to convert persisted ignore rules to the form format
  */
-export const toFormIgnoreRules = (ignoreRules: IgnoreRules = []) =>
+export const toFormIgnoreRules = (ignoreRules: string[] = []) =>
 	ignoreRules.map((rule) => ({
 		glob: rule,
 		ignore_parents: rule.match(/\/\*$/) !== null,
@@ -60,22 +64,19 @@ const resizeOptionsSchema = z
  */
 export const buildSchema = (existingLibraries: Library[], library?: Library) =>
 	z.object({
-		convert_rar_to_zip: z.boolean().default(false),
-		default_reading_dir: z.enum(['ltr', 'rtl']).default('ltr').optional(),
-		default_reading_image_scale_fit: z
-			.enum(['height', 'width', 'none'])
-			.default('height')
-			.optional(),
-		default_reading_mode: z
-			.enum(['paged', 'continuous:vertical', 'continuous:horizontal'])
-			.default('paged')
+		convertRarToZip: z.boolean().default(false),
+		defaultReadingDir: z.enum(['LTR', 'RTL']).default('LTR').optional(),
+		defaultReadingImageScaleFit: z.enum(['HEIGHT', 'WIDTH', 'NONE']).default('HEIGHT').optional(),
+		defaultReadingMode: z
+			.enum(['PAGED', 'CONTINUOUS_VERTICAL', 'CONTINUOUS_HORIZONTAL'])
+			.default('PAGED')
 			.optional(),
 		description: z.string().nullable().optional(),
-		generate_file_hashes: z.boolean().default(false),
-		generate_koreader_hashes: z.boolean().default(false),
-		hard_delete_conversions: z.boolean().default(false),
+		generateFileHashes: z.boolean().default(false),
+		generateKoreaderHashes: z.boolean().default(false),
+		hardDeleteConversions: z.boolean().default(false),
 		watch: z.boolean().default(true),
-		ignore_rules: z
+		ignoreRules: z
 			.array(
 				z.object({
 					glob: z.string().refine(isValidGlob, { message: 'Invalid glob pattern' }),
@@ -84,7 +85,7 @@ export const buildSchema = (existingLibraries: Library[], library?: Library) =>
 				}),
 			)
 			.default([]),
-		library_pattern: z.string().refine(isLibraryPattern).default('SERIES_BASED'),
+		libraryPattern: z.string().refine(isLibraryPattern).default('SERIES_BASED'),
 		name: z
 			.string()
 			.min(1, { message: 'Library name is required' })
@@ -107,8 +108,8 @@ export const buildSchema = (existingLibraries: Library[], library?: Library) =>
 					message: 'Invalid library, parent directory already exists as library.',
 				}),
 			),
-		process_metadata: z.boolean().default(true),
-		scan_mode: z.string().refine(isLibraryScanMode).default('DEFAULT'),
+		processMetadata: z.boolean().default(true),
+		scanAfterPersist: z.boolean().default(true),
 		tags: z
 			.array(
 				z.object({
@@ -117,7 +118,7 @@ export const buildSchema = (existingLibraries: Library[], library?: Library) =>
 				}),
 			)
 			.optional(),
-		thumbnail_config: z.object({
+		imageProcessorOptions: z.object({
 			enabled: z.boolean().default(false),
 			format: imageFormatSchema.default('Webp'),
 			quality: z
@@ -130,7 +131,7 @@ export const buildSchema = (existingLibraries: Library[], library?: Library) =>
 						message: 'Thumbnail quality must be between 0 and 1.0',
 					}),
 				),
-			resize_options: resizeOptionsSchema.nullable().optional(),
+			resizeMethod: resizeOptionsSchema.nullable().optional(),
 		}),
 	})
 export type CreateOrUpdateLibrarySchema = z.infer<ReturnType<typeof buildSchema>>
@@ -139,33 +140,36 @@ export type CreateOrUpdateLibrarySchema = z.infer<ReturnType<typeof buildSchema>
  * A function to create the default values for the form which creates or updates a library,
  * provided an existing library (if editing)
  */
-export const formDefaults = (library?: Library): CreateOrUpdateLibrarySchema => ({
-	convert_rar_to_zip: library?.config.convert_rar_to_zip ?? false,
-	default_reading_dir: library?.config.default_reading_dir || 'ltr',
-	default_reading_image_scale_fit: library?.config.default_reading_image_scale_fit || 'height',
-	default_reading_mode: library?.config.default_reading_mode || 'paged',
+export const formDefaults = (
+	library?: Library & LibrarySettingsConfigFragment,
+): CreateOrUpdateLibrarySchema => ({
+	convertRarToZip: library?.config.convertRarToZip ?? false,
+	defaultReadingDir: library?.config.defaultReadingDir || ReadingDirection.Ltr,
+	defaultReadingImageScaleFit:
+		library?.config.defaultReadingImageScaleFit || ReadingImageScaleFit.Height,
+	defaultReadingMode: library?.config.defaultReadingMode || ReadingMode.Paged,
 	description: library?.description,
-	generate_file_hashes: library?.config.generate_file_hashes ?? false,
-	generate_koreader_hashes: library?.config.generate_koreader_hashes ?? false,
-	hard_delete_conversions: library?.config.hard_delete_conversions ?? false,
+	generateFileHashes: library?.config.generateFileHashes ?? false,
+	generateKoreaderHashes: library?.config.generateKoreaderHashes ?? false,
+	hardDeleteConversions: library?.config.hardDeleteConversions ?? false,
 	watch: library?.config.watch ?? true,
-	ignore_rules: toFormIgnoreRules(library?.config.ignore_rules),
-	library_pattern: library?.config.library_pattern || 'SERIES_BASED',
+	ignoreRules: toFormIgnoreRules(library?.config.ignoreRules || []),
+	libraryPattern: library?.config.libraryPattern || LibraryPattern.SeriesBased,
 	name: library?.name || '',
 	path: library?.path || '',
-	process_metadata: library?.config.process_metadata ?? true,
-	scan_mode: 'DEFAULT',
+	processMetadata: library?.config.processMetadata ?? true,
+	scanAfterPersist: true,
 	tags: library?.tags?.map((t) => ({ label: t.name, value: t.name.toLowerCase() })),
-	thumbnail_config: library?.config.thumbnail_config
+	imageProcessorOptions: library?.config.imageProcessorOptions
 		? {
 				enabled: true,
-				...library?.config.thumbnail_config,
+				...library?.config.imageProcessorOptions,
 			}
 		: {
 				enabled: false,
 				format: 'Webp',
 				quality: undefined,
-				resize_options: undefined,
+				resizeMethod: undefined,
 			},
 })
 
@@ -173,14 +177,14 @@ export const formDefaults = (library?: Library): CreateOrUpdateLibrarySchema => 
  * A function to ensure that the thumbnail config is valid before returning it
  */
 export const ensureValidThumbnailConfig = (
-	thumbnail_config: PickSelect<CreateOrUpdateLibrarySchema, 'thumbnail_config'>,
+	imageProcessorOptions: PickSelect<CreateOrUpdateLibrarySchema, 'imageProcessorOptions'>,
 ) => {
 	const invalidDimensions =
-		!thumbnail_config.resize_options?.height || !thumbnail_config.resize_options?.width
+		!imageProcessorOptions.resizeMethod?.height || !imageProcessorOptions.resizeMethod?.width
 
-	if (!thumbnail_config.enabled || invalidDimensions) {
+	if (!imageProcessorOptions.enabled || invalidDimensions) {
 		return null
 	} else {
-		return thumbnail_config
+		return imageProcessorOptions
 	}
 }

@@ -9,17 +9,17 @@ type SceneContainerProps = {
 const SceneContainer = forwardRef<HTMLDivElement, SceneContainerProps>(
 	({ className, unsetConstraints = false, ...props }, ref) => {
 		const {
-			preferences: { primary_navigation_mode, layout_max_width_px },
+			preferences: { primaryNavigationMode, layoutMaxWidthPx },
 		} = usePreferences()
 
-		const preferTopBar = primary_navigation_mode === 'TOPBAR'
+		const preferTopBar = primaryNavigationMode === 'TOPBAR'
 		const maxWidth = useMemo(() => {
 			if (unsetConstraints) {
 				return undefined
 			}
 
-			return preferTopBar ? layout_max_width_px || undefined : undefined
-		}, [preferTopBar, layout_max_width_px, unsetConstraints])
+			return preferTopBar ? layoutMaxWidthPx || undefined : undefined
+		}, [preferTopBar, layoutMaxWidthPx, unsetConstraints])
 
 		return (
 			<div

@@ -5,13 +5,13 @@ import { usePreferences, useTheme } from '@/hooks'
 
 export default function PrimaryNavigationPreference() {
 	const {
-		preferences: { primary_navigation_mode },
+		preferences: { primaryNavigationMode },
 		update,
 	} = usePreferences()
 
 	const handleChange = async (mode: 'SIDEBAR' | 'TOPBAR') => {
 		try {
-			await update({ primary_navigation_mode: mode })
+			await update({ primaryNavigationMode: mode })
 		} catch (error) {
 			console.error(error)
 		}
@@ -26,12 +26,12 @@ export default function PrimaryNavigationPreference() {
 			<div className="flex items-center gap-x-4">
 				<AppearanceOption
 					label="Sidebar"
-					isSelected={primary_navigation_mode === 'SIDEBAR'}
+					isSelected={primaryNavigationMode === 'SIDEBAR'}
 					onSelect={() => handleChange('SIDEBAR')}
 				/>
 				<AppearanceOption
 					label="Topbar"
-					isSelected={primary_navigation_mode === 'TOPBAR'}
+					isSelected={primaryNavigationMode === 'TOPBAR'}
 					onSelect={() => handleChange('TOPBAR')}
 				/>
 			</div>

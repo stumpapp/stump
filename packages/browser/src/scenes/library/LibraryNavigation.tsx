@@ -5,6 +5,7 @@
 // 	usePrefetchLibrarySeries,
 // } from '@stump/client'
 import { cn, Link, useSticky } from '@stump/components'
+import { UserPermission } from '@stump/graphql'
 import { useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
@@ -19,7 +20,7 @@ export default function LibraryNavigation() {
 	const location = useLocation()
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const {
-		preferences: { primary_navigation_mode, layout_max_width_px },
+		preferences: { primaryNavigationMode, layoutMaxWidthPx },
 	} = usePreferences()
 	const {
 		library: { id, path },
@@ -40,10 +41,10 @@ export default function LibraryNavigation() {
 	}, [path, checkPermission])
 
 	const { ref, isSticky } = useSticky<HTMLDivElement>({
-		extraOffset: isMobile || primary_navigation_mode === 'TOPBAR' ? 56 : 0,
+		extraOffset: isMobile || primaryNavigationMode === 'TOPBAR' ? 56 : 0,
 	})
 
-	const canAccessFiles = checkPermission('file:explorer')
+	const canAccessFiles = checkPermission(UserPermission.FileExplorer)
 	const tabs = useMemo(
 		() => [
 			{
@@ -77,7 +78,7 @@ export default function LibraryNavigation() {
 		[location, canAccessFiles, prefetchSeries],
 	)
 
-	const preferTopBar = primary_navigation_mode === 'TOPBAR'
+	const preferTopBar = primaryNavigationMode === 'TOPBAR'
 
 	return (
 		<div
@@ -91,10 +92,10 @@ export default function LibraryNavigation() {
 				className={cn(
 					'-mb-px flex h-12 gap-x-6 overflow-x-scroll px-3 scrollbar-hide md:overflow-x-hidden',
 					{
-						'mx-auto': preferTopBar && !!layout_max_width_px,
+						'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 					},
 				)}
-				style={{ maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined }}
+				style={{ maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined }}
 			>
 				{tabs.map((tab) => (
 					<Link

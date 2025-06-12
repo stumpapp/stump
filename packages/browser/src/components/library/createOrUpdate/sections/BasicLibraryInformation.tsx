@@ -1,6 +1,7 @@
 import { Button, Input, TextArea } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Folder } from 'lucide-react'
+import { Suspense } from 'react'
 import { useFormContext, useFormState } from 'react-hook-form'
 
 import TagSelect from '@/components/TagSelect'
@@ -69,12 +70,14 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 				{...form.register('description')}
 			/>
 
-			<TagSelect
-				label={t(getKey('tags.label'))}
-				description={t(getKey('tags.description'))}
-				selected={tags}
-				onChange={(value) => form.setValue('tags', value)}
-			/>
+			<Suspense fallback={null}>
+				<TagSelect
+					label={t(getKey('tags.label'))}
+					description={t(getKey('tags.description'))}
+					selected={tags}
+					onChange={(value) => form.setValue('tags', value)}
+				/>
+			</Suspense>
 		</div>
 	)
 }

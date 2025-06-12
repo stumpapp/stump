@@ -12,7 +12,7 @@ import { usePreferences } from '@/hooks/usePreferences'
 export default function FontSelect() {
 	const { t } = useLocaleContext()
 	const {
-		preferences: { app_font },
+		preferences: { appFont },
 		update,
 	} = usePreferences()
 
@@ -22,12 +22,13 @@ export default function FontSelect() {
 	 *
 	 * TODO(383): support custom fonts
 	 */
+	// TODO(graphql): Fix type
 	const changeFont = useCallback(
 		async (font: string) => {
 			if (isSupportedFont(font)) {
 				// Note: useApplyTheme will apply the font to the body element after the preferences are updated
 				try {
-					await update({ app_font: font })
+					await update({ appFont: font })
 				} catch (e) {
 					console.error('Failed to persist font preference', e)
 				}
@@ -43,7 +44,7 @@ export default function FontSelect() {
 			</Label>
 			{/* TODO: don't use a native select, instead some combobox which renders each option in the font */}
 			<NativeSelect
-				value={app_font || 'inter'}
+				value={appFont || 'inter'}
 				options={SUPPORTED_FONT_OPTIONS}
 				onChange={(e) => changeFont(e.target.value)}
 			/>

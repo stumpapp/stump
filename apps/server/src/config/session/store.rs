@@ -120,10 +120,10 @@ impl SessionStore for StumpSessionStore {
 		};
 
 		let on_conflict = OnConflict::new()
-			.update_columns(session::Column::iter().filter(|col| match col {
-				session::Column::CreatedAt => false,
-				_ => true,
-			}))
+			.update_columns(
+				session::Column::iter()
+					.filter(|col| !matches!(col, session::Column::CreatedAt)),
+			)
 			.to_owned();
 
 		let _result = session::Entity::insert(active_model)

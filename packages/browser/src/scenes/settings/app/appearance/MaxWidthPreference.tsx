@@ -28,7 +28,7 @@ const OPTIONS = [
 
 export default function MaxWidthPreference() {
 	const {
-		preferences: { layout_max_width_px, primary_navigation_mode },
+		preferences: { layoutMaxWidthPx, primaryNavigationMode },
 		update,
 	} = usePreferences()
 
@@ -36,13 +36,13 @@ export default function MaxWidthPreference() {
 		const value = e.target.value
 
 		if (!value) {
-			return update({ layout_max_width_px: null })
+			return update({ layoutMaxWidthPx: null })
 		}
 
 		// TODO: support custom
 		const parsed = parseInt(value)
 		if (!isNaN(parsed) && OPTIONS.some((opt) => opt.value === parsed)) {
-			return update({ layout_max_width_px: parsed })
+			return update({ layoutMaxWidthPx: parsed })
 		}
 
 		return null
@@ -52,25 +52,25 @@ export default function MaxWidthPreference() {
 		<div
 			className="flex flex-col gap-y-1.5 md:max-w-md"
 			title={
-				primary_navigation_mode === 'SIDEBAR'
+				primaryNavigationMode === 'SIDEBAR'
 					? // TODO: support it
 						'This setting is not currently supported when the primary navigation is set to sidebar'
 					: undefined
 			}
 		>
-			<Label className={cx({ 'text-opacity-50': primary_navigation_mode === 'SIDEBAR' })}>
+			<Label className={cx({ 'text-opacity-50': primaryNavigationMode === 'SIDEBAR' })}>
 				Adjusted width
 			</Label>
 			<NativeSelect
-				value={layout_max_width_px || undefined}
+				value={layoutMaxWidthPx || undefined}
 				options={OPTIONS}
 				onChange={handleChange}
-				disabled={primary_navigation_mode === 'SIDEBAR'}
+				disabled={primaryNavigationMode === 'SIDEBAR'}
 			/>
 			<Text
 				size="xs"
 				variant="muted"
-				className={cx({ 'text-opacity-50': primary_navigation_mode === 'SIDEBAR' })}
+				className={cx({ 'text-opacity-50': primaryNavigationMode === 'SIDEBAR' })}
 			>
 				Stump applies a max-width to the viewport. This setting allows you to adjust or remove this
 				limit

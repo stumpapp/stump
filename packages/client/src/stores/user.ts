@@ -1,4 +1,5 @@
-import type { User, UserPermission, UserPreferences } from '@stump/sdk'
+import { UserPermission, UserPreferences } from '@stump/graphql'
+import type { AuthUser } from '@stump/sdk'
 import { produce } from 'immer'
 import { create } from 'zustand'
 import { createJSONStorage, devtools, persist, StateStorage } from 'zustand/middleware'
@@ -7,9 +8,9 @@ import { createJSONStorage, devtools, persist, StateStorage } from 'zustand/midd
 
 // https://github.com/cmlarsen/zustand-middleware-computed-state
 type UserStore = {
-	user?: User | null
+	user?: AuthUser | null
 	userPreferences?: UserPreferences | null
-	setUser: (user?: User | null) => void
+	setUser: (user?: AuthUser | null) => void
 	setUserPreferences: (userPreferences: UserPreferences | null) => void
 	checkUserPermission: (permission: UserPermission) => boolean
 }
@@ -22,20 +23,20 @@ export const createUserStore = (storage?: StateStorage) =>
 					checkUserPermission(permission: UserPermission) {
 						const user = get().user
 						if (!user) return false
-						return user.is_server_owner || user.permissions.includes(permission)
+						return user.isServerOwner || user.permissions.includes(permission)
 					},
 					reset() {
 						set(() => ({}))
 					},
-					setUser(user?: User | null) {
+					setUser(user?: AuthUser | null) {
 						set((state) =>
 							produce(state, (draft) => {
 								draft.user = user
-								if (user?.user_preferences) {
+								if (user?.preferences) {
 									// NOTE: I am not killing the user preferences when a user logs out. This ensures
 									// certain things like locality, theme, etc. will be lost. Nothing sensitive is
 									// stored in user preferences, so I think this is fine.
-									draft.userPreferences = user.user_preferences
+									draft.userPreferences = user.preferences
 								}
 							}),
 						)
@@ -47,7 +48,7 @@ export const createUserStore = (storage?: StateStorage) =>
 								if (state.user) {
 									draft.user = {
 										...state.user,
-										user_preferences: userPreferences,
+										...(userPreferences ? { preferences: userPreferences } : {}),
 									}
 								}
 							}),
@@ -71,6 +72,6 @@ export const createUserStore = (storage?: StateStorage) =>
 	)
 
 export const defaultPreferences = {
-	enable_live_refetch: false,
-	show_query_indicator: false,
+	enableLiveRefetch: false,
+	showQueryIndicator: false,
 } as UserPreferences

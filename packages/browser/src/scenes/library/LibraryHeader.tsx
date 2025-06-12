@@ -11,13 +11,13 @@ import { useLibraryContext } from './context'
 export default function LibraryHeader() {
 	const { sdk } = useSDK()
 	const {
-		preferences: { primary_navigation_mode, layout_max_width_px, show_thumbnails_in_headers },
+		preferences: { primaryNavigationMode, layoutMaxWidthPx, showThumbnailsInHeaders },
 	} = usePreferences()
 	const {
 		library: { id, name, description, stats, tags },
 	} = useLibraryContext()
 
-	const preferTopBar = primary_navigation_mode === 'TOPBAR'
+	const preferTopBar = primaryNavigationMode === 'TOPBAR'
 
 	const renderStats = () => {
 		if (!stats) return null
@@ -47,15 +47,15 @@ export default function LibraryHeader() {
 			className={cn(
 				'flex w-full flex-col gap-4 p-4 md:flex-row md:items-start md:justify-between md:gap-0',
 				{
-					'mx-auto': preferTopBar && !!layout_max_width_px,
+					'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 				},
 			)}
 			style={{
-				maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined,
+				maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
 			}}
 		>
 			<div className="flex w-full flex-col items-center gap-4 md:mb-2 md:flex-row md:items-start">
-				{show_thumbnails_in_headers && (
+				{showThumbnailsInHeaders && (
 					<div className="w-[200px]">
 						<AspectRatio ratio={2 / 3}>
 							<EntityImage src={sdk.library.thumbnailURL(id)} className="rounded-md object-cover" />

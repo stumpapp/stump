@@ -1,4 +1,4 @@
-import { isAxiosError, isUser, LoginOrRegisterArgs, type User } from '@stump/sdk'
+import { AuthUser, isAxiosError, isUser, LoginOrRegisterArgs } from '@stump/sdk'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 
@@ -6,16 +6,19 @@ import { queryClient, QueryOptions } from '../client'
 import { useClientContext } from '../context'
 import { useSDK } from '../sdk'
 
-type Params = QueryOptions<User> & {
+// TODO(graphql): Fix all the user types...
+
+type Params = QueryOptions<AuthUser> & {
 	additionalKeys?: string[]
 }
+
 export function useAuthQuery({ additionalKeys, ...options }: Params = {}) {
 	const { sdk } = useSDK()
 	const { data, error, isLoading, isFetching, isRefetching } = useQuery({
 		queryKey: [sdk.auth.keys.me, ...(additionalKeys || [])],
 		queryFn: async () => {
 			const data = await sdk.auth.me()
-			if (!isUser(data)) {
+			if (!data.id) {
 				console.warn('Malformed response received from server', data)
 				throw new Error('Malformed response received from server')
 			}
@@ -33,7 +36,7 @@ export function useAuthQuery({ additionalKeys, ...options }: Params = {}) {
 }
 
 type UseLoginOrRegisterOptions = {
-	onSuccess?: (data?: User | null | undefined) => void
+	onSuccess?: (data?: AuthUser | null | undefined) => void
 	onError?: (data: unknown) => void
 	refetchClaimed?: boolean
 }

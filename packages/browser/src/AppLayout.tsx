@@ -1,7 +1,7 @@
 import { useAuthQuery, useCoreEventHandler } from '@stump/client'
 import { cn, cx } from '@stump/components'
+import { UserPermission, UserPreferences } from '@stump/graphql'
 import { isAxiosError } from '@stump/sdk'
-import { UserPermission, UserPreferences } from '@stump/sdk'
 import { useOverlayScrollbars } from 'overlayscrollbars-react'
 import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
 import Confetti from 'react-confetti'
@@ -49,8 +49,8 @@ export function AppLayout() {
 		},
 	})
 
-	const hideScrollBar = storeUser?.user_preferences?.enable_hide_scrollbar ?? false
-	const jobOverlayEnabled = storeUser?.user_preferences?.enable_job_overlay ?? true
+	const hideScrollBar = storeUser?.preferences?.enableHideScrollbar ?? false
+	const jobOverlayEnabled = storeUser?.preferences?.enableJobOverlay ?? true
 	const showJobOverlay = jobOverlayEnabled && !location.pathname.match(/\/settings\/jobs/)
 
 	const isRefSet = !!mainRef.current
@@ -96,8 +96,8 @@ export function AppLayout() {
 	 * If the user prefers the top bar, we hide the sidebar
 	 */
 	const preferTopBar = useMemo(() => {
-		const userPreferences = storeUser?.user_preferences ?? ({} as UserPreferences)
-		return userPreferences?.primary_navigation_mode === 'TOPBAR'
+		const userPreferences = storeUser?.preferences ?? ({} as UserPreferences)
+		return userPreferences?.primaryNavigationMode === 'TOPBAR'
 	}, [storeUser])
 
 	/**
@@ -105,12 +105,12 @@ export function AppLayout() {
 	 * stacking preference
 	 */
 	const softHideSidebar = useMemo(() => {
-		const userPreferences = storeUser?.user_preferences ?? ({} as UserPreferences)
-		const { enable_double_sidebar, enable_replace_primary_sidebar } = userPreferences
+		const userPreferences = storeUser?.preferences ?? ({} as UserPreferences)
+		const { enableDoubleSidebar, enableReplacePrimarySidebar } = userPreferences
 
 		// hide sidebar when double sidebar is enabled and replace primary sidebar is enabled and on a route where
 		// a secondary sidebar is displayed (right now, just settings/*)
-		if (enable_double_sidebar && enable_replace_primary_sidebar) {
+		if (enableDoubleSidebar && enableReplacePrimarySidebar) {
 			return (location.pathname.match(/\/settings\/.+/) ?? []).length > 0
 		} else {
 			return false
@@ -123,7 +123,7 @@ export function AppLayout() {
 	 * what data to refetch.
 	 */
 	const liveRefetch = useMemo(
-		() => (storeUser?.user_preferences ?? ({} as UserPreferences)).enable_live_refetch || false,
+		() => (storeUser?.preferences ?? ({} as UserPreferences)).enableLiveRefetch || false,
 		[storeUser],
 	)
 
@@ -168,7 +168,7 @@ export function AppLayout() {
 		if (user) {
 			setUser(user)
 		}
-	}, [user])
+	}, [user, setUser])
 
 	// FIXME(desktop): There is a bug somewhere here that causes a network error to be thrown before the auth takes effect.
 	// It happens intermittently, annoyingly. I'm not sure what's causing it, but it would be nice to fix it
@@ -195,7 +195,7 @@ export function AppLayout() {
 			value={{
 				checkPermission: checkUserPermission,
 				enforcePermission,
-				isServerOwner: storeUser.is_server_owner,
+				isServerOwner: storeUser.isServerOwner,
 				user: storeUser,
 			}}
 		>
@@ -221,7 +221,7 @@ export function AppLayout() {
 						className={cn(
 							'flex w-full flex-1 flex-col overflow-y-auto overflow-x-hidden bg-background',
 							{
-								'scrollbar-hide': storeUser.user_preferences?.enable_hide_scrollbar,
+								'scrollbar-hide': storeUser.preferences?.enableHideScrollbar,
 							},
 							{
 								'bg-gradient-to-br from-background-gradient-from to-background-gradient-to':
@@ -231,7 +231,7 @@ export function AppLayout() {
 						ref={mainRef}
 					>
 						<div className="relative flex flex-1 flex-col">
-							{!!storeUser.user_preferences?.show_query_indicator && <BackgroundFetchIndicator />}
+							{!!storeUser.preferences?.showQueryIndicator && <BackgroundFetchIndicator />}
 							<Suspense fallback={<RouteLoadingIndicator />}>
 								<Outlet />
 							</Suspense>

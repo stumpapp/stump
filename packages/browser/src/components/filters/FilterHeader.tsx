@@ -46,10 +46,10 @@ export default function FilterHeader({
 }: Props) {
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const {
-		preferences: { primary_navigation_mode },
+		preferences: { primaryNavigationMode },
 	} = usePreferences()
 	const { ref, isSticky } = useSticky<HTMLDivElement>({
-		extraOffset: isMobile || primary_navigation_mode === 'TOPBAR' ? 56 : 0,
+		extraOffset: isMobile || primaryNavigationMode === 'TOPBAR' ? 56 : 0,
 	})
 
 	// const { filters, setFilter, removeFilter } = useFilterContext()

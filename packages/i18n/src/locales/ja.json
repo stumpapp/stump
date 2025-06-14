@@ -364,6 +364,10 @@
 					"label": "メタデータ処理",
 					"description": "ライブラリファイルからメタデータを抽出し、結果をデータベースに保存します"
 				},
+				"watch": {
+					"label": "Watch",
+					"description": "Watch the library directory for changes and update the database accordingly"
+				},
 				"generateFileHashes": {
 					"label": "ファイルハッシュの生成",
 					"description": "ライブラリ内の各ファイルのハッシュを生成して重複を検出します"
@@ -452,6 +456,7 @@
 					"ignoreRules": "無視ルール",
 					"convertRar": "RAR/CBR 変換",
 					"deleteConversions": "変換されたファイルを削除",
+					"watch": "Watch directory for changes",
 					"processMetadata": "プロセスメタデータ",
 					"generateFileHashes": "ファイルハッシュを生成"
 				}
@@ -1317,6 +1322,10 @@
 						"fontFamily": {
 							"label": "Font family",
 							"description": "The font used in the reader"
+						},
+						"lineHeight": {
+							"label": "Line height",
+							"description": "The height of the lines in the reader"
 						}
 					}
 				},

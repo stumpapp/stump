@@ -181,7 +181,7 @@
 				"label": "Scheduling"
 			},
 			"danger-zone": {
-				"delete": "Deletion",
+				"delete": "Borrado",
 				"label": "Danger Zone"
 			}
 		},
@@ -364,6 +364,10 @@
 					"label": "Process metadata",
 					"description": "Extract any metadata from library files and store the results in the database"
 				},
+				"watch": {
+					"label": "Watch",
+					"description": "Watch the library directory for changes and update the database accordingly"
+				},
 				"generateFileHashes": {
 					"label": "Generar hash de archivos",
 					"description": "Generate a hash for each file in the library to detect duplicates"
@@ -452,6 +456,7 @@
 					"ignoreRules": "Reglas de exclusión",
 					"convertRar": "Convertir RAR/CBR",
 					"deleteConversions": "Eliminar archivos convertidos",
+					"watch": "Watch directory for changes",
 					"processMetadata": "Procesar metadatos",
 					"generateFileHashes": "Generar hash de archivos"
 				}
@@ -1317,6 +1322,10 @@
 						"fontFamily": {
 							"label": "Font family",
 							"description": "The font used in the reader"
+						},
+						"lineHeight": {
+							"label": "Line height",
+							"description": "The height of the lines in the reader"
 						}
 					}
 				},

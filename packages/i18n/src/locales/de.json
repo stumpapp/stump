@@ -364,6 +364,10 @@
 					"label": "Metadaten verarbeiten",
 					"description": "Extrahiere Metadaten aus Bibliotheksdateien und speichere diese in der Datenbank"
 				},
+				"watch": {
+					"label": "Watch",
+					"description": "Watch the library directory for changes and update the database accordingly"
+				},
 				"generateFileHashes": {
 					"label": "Datei-Hashes generieren",
 					"description": "Generiert einen Hash für jede Datei in der Bibliothek, um Duplikate zu erkennen"
@@ -452,6 +456,7 @@
 					"ignoreRules": "Dateien ignorieren",
 					"convertRar": "Konvertiere RAR/CBR",
 					"deleteConversions": "Konvertierte Dateien löschen",
+					"watch": "Watch directory for changes",
 					"processMetadata": "Metadaten verarbeiten",
 					"generateFileHashes": "Datei-Hashes generieren"
 				}
@@ -1317,6 +1322,10 @@
 						"fontFamily": {
 							"label": "Font family",
 							"description": "The font used in the reader"
+						},
+						"lineHeight": {
+							"label": "Line height",
+							"description": "The height of the lines in the reader"
 						}
 					}
 				},

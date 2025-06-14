@@ -364,6 +364,10 @@
 					"label": "Zpracování metadat",
 					"description": "Extrahovat metadata ze souborů knihovny a ukládat výsledky v databázi"
 				},
+				"watch": {
+					"label": "Sledování",
+					"description": "Sledujte adresář knihovny pro změny a podle toho aktualizujte databázi"
+				},
 				"generateFileHashes": {
 					"label": "Generovat hash souborů",
 					"description": "Generovat hash pro každý soubor v knihovně pro detekci duplicit"
@@ -452,6 +456,7 @@
 					"ignoreRules": "Pravidla Ignorování",
 					"convertRar": "Konverze RAR/CBR",
 					"deleteConversions": "Smazat převedené soubory",
+					"watch": "Sledovaný adresář pro změny",
 					"processMetadata": "Zpracování metadat",
 					"generateFileHashes": "Generovat hash souborů"
 				}
@@ -528,59 +533,59 @@
 						"options": {
 							"forceRebuild": {
 								"label": "Vynutit obnovu",
-								"description": "Rebuild every book in the library on disk",
-								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
+								"description": "Znovu sestavit každou knihu v knihovně na disku",
+								"alert": "Toto obnoví každou knihu v knihovně od začátku, včetně metadat a hashů"
 							},
 							"custom": {
-								"label": "Custom",
-								"description": "Customize the scan configuration",
+								"label": "Vlastní",
+								"description": "Přizpůsobit nastavení skenování",
 								"validation": {
-									"noSelection": "At least one option must be enabled"
+									"noSelection": "Alespoň jedna možnost musí být povolena"
 								}
 							},
 							"rebuildMeta": {
-								"label": "Rebuild metadata",
-								"description": "Rebuild metadata for books in the library"
+								"label": "Obnovit metadata",
+								"description": "Obnovit metadata pro knihy v knihovně"
 							},
 							"regenHashes": {
-								"label": "Regenerate hashes",
-								"description": "Recreate hashes for books in the library"
+								"label": "Regenerovat kontrolní součty",
+								"description": "Regenerovat kontrolní součty pro knihy v knihovně"
 							}
 						}
 					}
 				},
 				"defaultScan": {
-					"heading": "Default scan",
-					"description": "A standard scan to index your library for new content"
+					"heading": "Výchozí sken",
+					"description": "Výchozí sken vyhledává nový obsah ve vaší knihovně"
 				},
 				"history": {
-					"heading": "Scan history",
-					"description": "The history of all scans recorded for this library",
-					"empty": "There are no scans recorded for this library",
-					"runScan": "Run scan",
-					"inspect": "See details",
+					"heading": "Historie skenů",
+					"description": "Historie všech skenů zaznamenaných pro tuto knihovnu",
+					"empty": "Pro tuto knihovnu nejsou zaznamenány žádné skeny",
+					"runScan": "Spustit skenování",
+					"inspect": "Zobrazit detaily",
 					"inspector": {
-						"title": "Scan record",
-						"description": "A detailed view of this scan record",
+						"title": "Záznam skenu",
+						"description": "Podrobný náhled tohoto záznamu skenu",
 						"fields": {
-							"library": "Library",
-							"date": "Date",
-							"config": "Config",
-							"jobOutput": "Job output",
-							"logs": "Logs"
+							"library": "Knihovna",
+							"date": "Datum",
+							"config": "Nastavení",
+							"jobOutput": "Výstup",
+							"logs": "Logy"
 						},
-						"logsPresent": "Logs were persisted for this job",
-						"seeLogs": "See logs"
+						"logsPresent": "Logy pro tento výstup jsou perzistentní",
+						"seeLogs": "Zobrazit logy"
 					},
 					"table": {
 						"columns": {
-							"timestamp": "Scanned at",
-							"config": "Config"
+							"timestamp": "Skenováno",
+							"config": "Nastavení"
 						},
-						"default": "Default",
-						"custom": "Custom"
+						"default": "Výchozí",
+						"custom": "Vlastní"
 					},
-					"clearHistory": "Delete scan history"
+					"clearHistory": "Smazat historii skenování"
 				}
 			}
 		},
@@ -1287,8 +1292,8 @@
 				"universal": {
 					"sections": {
 						"readingDirection": {
-							"label": "Reading direction",
-							"description": "The direction in which the reader will progress through pages"
+							"label": "Směr čtení",
+							"description": "Směr, ve kterém bude čtečka pokračovat přes stránky"
 						}
 					}
 				},
@@ -1307,25 +1312,29 @@
 					}
 				},
 				"textBasedBooks": {
-					"label": "Ebook reader",
-					"description": "Default settings for text-based books",
+					"label": "Čtečka e-knih",
+					"description": "Výchozí nastavení pro textové knihy",
 					"sections": {
 						"fontSize": {
-							"label": "Font size",
-							"description": "The size of the font used in the reader"
+							"label": "Velikost písma",
+							"description": "Velikost písma použitého v čtečce"
 						},
 						"fontFamily": {
-							"label": "Font family",
-							"description": "The font used in the reader"
+							"label": "Rodina písem",
+							"description": "Písmo použité v čtečce"
+						},
+						"lineHeight": {
+							"label": "Výška řádku",
+							"description": "Výška řádků ve čtečce"
 						}
 					}
 				},
 				"data": {
 					"sections": {
 						"clearStore": {
-							"label": "Clear preferences",
-							"description": "Reset all individual book settings that override the defaults",
-							"button": "Clear preferences"
+							"label": "Vymazat nastavení",
+							"description": "Resetovat všechna individuální nastavení knihy, která přepíší výchozí hodnoty",
+							"button": "Vymazat nastavení"
 						}
 					}
 				}
@@ -1485,10 +1494,10 @@
 						"emptySubtitle": "Váš server je buď velmi zdravý, nebo velmi nezdravý"
 					},
 					"deleteLogs": {
-						"title": "Delete logs",
-						"description": "Permanently delete all persisted logs from the database",
-						"disclaimer": "This action cannot be undone",
-						"confirm": "Delete logs"
+						"title": "Smazat logy",
+						"description": "Trvale odstranit všechny perzistentní logy z databáze",
+						"disclaimer": "Tuto akci nelze vrátit zpět",
+						"confirm": "Smazat logy"
 					}
 				},
 				"liveLogs": {
@@ -1964,6 +1973,6 @@
 		"notReady": "Tato funkce není připravena",
 		"notUsedYet": "Zatím nepoužito",
 		"never": "Nikdy",
-		"scan": "Scan"
+		"scan": "Skenovat"
 	}
 }

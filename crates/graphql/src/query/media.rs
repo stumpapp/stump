@@ -1,6 +1,6 @@
 use async_graphql::{Context, Object, Result, ID};
 use models::{
-	entity::{finished_reading_session, media, reading_session},
+	entity::{finished_reading_session, media, reading_session, user::AuthUser},
 	shared::ordering::OrderBy,
 };
 use sea_orm::{
@@ -23,6 +23,55 @@ use crate::{
 #[derive(Default)]
 pub struct MediaQuery;
 
+pub fn should_add_sessions_join_for_filter(filter: &MediaFilterInput) -> bool {
+	filter.reading_status.is_some()
+		|| [&filter._and, &filter._or, &filter._not]
+			.iter()
+			.filter_map(|opt| opt.as_ref())
+			.any(|filters| filters.iter().any(|f| f.reading_status.is_some()))
+}
+
+pub fn add_sessions_join_for_filter(
+	user: &AuthUser,
+	filter: &MediaFilterInput,
+	query: Select<media::Entity>,
+) -> Select<media::Entity> {
+	let should_join_sessions = should_add_sessions_join_for_filter(filter);
+
+	if should_join_sessions {
+		let user_id = user.id.clone();
+		let user_id_cpy = user_id.clone();
+		query
+			.join_rev(
+				JoinType::LeftJoin,
+				reading_session::Entity::belongs_to(media::Entity)
+					.from(reading_session::Column::MediaId)
+					.to(media::Column::Id)
+					.on_condition(move |_left, _right| {
+						Condition::all()
+							.add(reading_session::Column::UserId.eq(user_id.clone()))
+					})
+					.into(),
+			)
+			.join_rev(
+				JoinType::LeftJoin,
+				finished_reading_session::Entity::belongs_to(media::Entity)
+					.from(finished_reading_session::Column::MediaId)
+					.to(media::Column::Id)
+					.on_condition(move |_left, _right| {
+						Condition::all().add(
+							finished_reading_session::Column::UserId
+								.eq(user_id_cpy.clone()),
+						)
+					})
+					.into(),
+			)
+			.group_by(media::Column::Id)
+	} else {
+		query
+	}
+}
+
 #[Object]
 impl MediaQuery {
 	async fn media(
@@ -38,46 +87,10 @@ impl MediaQuery {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let should_join_sessions = filter.reading_status.is_some()
-			|| [&filter._and, &filter._or, &filter._not]
-				.iter()
-				.filter_map(|opt| opt.as_ref())
-				.any(|filters| filters.iter().any(|f| f.reading_status.is_some()));
-
-		let conditions = filter.into_filter();
-		let mut query = media::ModelWithMetadata::find_for_user(user).filter(conditions);
+		let mut query = media::ModelWithMetadata::find_for_user(user);
 		query = MediaOrderBy::add_order_by(&order_by, query)?;
-
-		if should_join_sessions {
-			let user_id = user.id.clone();
-			let user_id_cpy = user_id.clone();
-			query = query
-				.join_rev(
-					JoinType::LeftJoin,
-					reading_session::Entity::belongs_to(media::Entity)
-						.from(reading_session::Column::MediaId)
-						.to(media::Column::Id)
-						.on_condition(move |_left, _right| {
-							Condition::all()
-								.add(reading_session::Column::UserId.eq(user_id.clone()))
-						})
-						.into(),
-				)
-				.join_rev(
-					JoinType::LeftJoin,
-					finished_reading_session::Entity::belongs_to(media::Entity)
-						.from(finished_reading_session::Column::MediaId)
-						.to(media::Column::Id)
-						.on_condition(move |_left, _right| {
-							Condition::all().add(
-								finished_reading_session::Column::UserId
-									.eq(user_id_cpy.clone()),
-							)
-						})
-						.into(),
-				)
-				.group_by(media::Column::Id)
-		}
+		query = add_sessions_join_for_filter(user, &filter, query)
+			.filter(filter.into_filter());
 
 		match pagination.resolve() {
 			Pagination::Cursor(info) => {

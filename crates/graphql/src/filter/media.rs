@@ -7,6 +7,7 @@ use sea_orm::{
 	prelude::{DateTimeWithTimeZone, *},
 	sea_query::ConditionExpression,
 };
+use serde::{Deserialize, Serialize};
 
 use super::{
 	apply_numeric_filter, apply_string_filter, media_metadata::MediaMetadataFilterInput,
@@ -38,7 +39,7 @@ fn apply_reading_status_filter(
 
 // TODO: Support filter by tags (requires join logic)
 
-#[derive(InputObject, Clone)]
+#[derive(InputObject, Clone, Serialize, Deserialize, Debug)]
 pub struct MediaFilterInput {
 	#[graphql(default)]
 	pub name: Option<StringLikeFilter<String>>,

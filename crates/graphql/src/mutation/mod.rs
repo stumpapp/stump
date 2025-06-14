@@ -12,6 +12,8 @@ mod media;
 mod notifier;
 mod reading_list;
 mod series;
+mod smart_list_view;
+mod smart_lists;
 mod tag;
 mod upload;
 mod user;
@@ -30,6 +32,8 @@ use media::MediaMutation;
 use notifier::NotifierMutation;
 use reading_list::ReadingListMutation;
 use series::SeriesMutation;
+use smart_list_view::SmartListViewMutation;
+use smart_lists::SmartListMutation;
 use tag::TagMutation;
 use upload::UploadMutation;
 use user::UserMutation;
@@ -37,6 +41,7 @@ use user::UserMutation;
 #[derive(async_graphql::MergedObject, Default)]
 pub struct Mutation(
 	APIKeyMutation,
+	SmartListMutation,
 	BookClubMutation,
 	BookClubInvitationMutation,
 	BookClubMemberMutation,
@@ -53,4 +58,5 @@ pub struct Mutation(
 	UserMutation,
 	EmailerMutation,
 	EmailDeviceMutation,
+	SmartListViewMutation,
 );

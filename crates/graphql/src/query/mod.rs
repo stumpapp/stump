@@ -12,6 +12,8 @@ mod media_metadata_overview;
 mod notifier;
 pub(crate) mod reading_list;
 mod series;
+mod smart_list_view;
+mod smart_lists;
 mod tag;
 pub(crate) mod user;
 
@@ -29,6 +31,8 @@ use media_metadata_overview::MediaMetadataOverviewQuery;
 use notifier::NotifierQuery;
 use reading_list::ReadingListQuery;
 use series::SeriesQuery;
+use smart_list_view::SmartListViewQuery;
+use smart_lists::SmartListsQuery;
 use tag::TagQuery;
 use user::UserQuery;
 
@@ -46,8 +50,10 @@ pub struct Query(
 	EpubQuery,
 	LibraryQuery,
 	MediaMetadataOverviewQuery,
+	SmartListViewQuery,
 	SeriesQuery,
 	TagQuery,
 	LogQuery,
 	ConfigQuery,
+	SmartListsQuery,
 );

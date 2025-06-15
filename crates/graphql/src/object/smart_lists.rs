@@ -1,5 +1,5 @@
 use crate::{
-	data::CoreContext, input::smart_lists::SmartListFilterInput,
+	data::CoreContext, input::smart_lists::SmartListFilterGroupInput,
 	object::smart_list_view::SmartListView,
 };
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
@@ -21,7 +21,7 @@ impl From<smart_list::Model> for SmartList {
 #[ComplexObject]
 impl SmartList {
 	async fn filters(&self) -> Result<String> {
-		let filters: Vec<SmartListFilterInput> =
+		let filters: Vec<SmartListFilterGroupInput> =
 			serde_json::from_slice(&self.model.filters)?;
 		Ok(serde_json::to_string(&filters)?)
 	}

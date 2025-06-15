@@ -1,5 +1,5 @@
 use async_graphql::InputObject;
-use models::entity::series;
+use models::entity::library;
 use serde::{Deserialize, Serialize};
 
 use super::{apply_string_filter, IntoFilter, StringLikeFilter};
@@ -49,11 +49,11 @@ impl IntoFilter for LibraryFilterInput {
 			}))
 			.add_option(
 				self.name
-					.map(|f| apply_string_filter(series::Column::Name, f)),
+					.map(|f| apply_string_filter(library::Column::Name, f)),
 			)
 			.add_option(
 				self.path
-					.map(|f| apply_string_filter(series::Column::Path, f)),
+					.map(|f| apply_string_filter(library::Column::Path, f)),
 			)
 	}
 }

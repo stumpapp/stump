@@ -1,4 +1,4 @@
-use async_graphql::{InputObject, Result};
+use async_graphql::{Enum, InputObject, OneofObject, Result};
 use models::{
 	entity::smart_list::{SmartListGrouping, SmartListJoiner},
 	shared::enums::EntityVisibility,
@@ -19,18 +19,35 @@ pub struct SmartListsInput {
 	pub search: Option<String>,
 }
 
-#[derive(Default, InputObject, Clone, Serialize, Deserialize)]
-pub struct SmartListFilterInput {
-	pub media: Option<MediaFilterInput>,
-	pub media_metadata: Option<MediaMetadataFilterInput>,
-	pub series: Option<SeriesFilterInput>,
-	pub series_metadata: Option<SeriesMetadataFilterInput>,
-	pub library: Option<LibraryFilterInput>,
+/// The different filter joiners that can be used in smart lists
+#[derive(
+	PartialEq, Eq, Copy, Hash, Debug, Clone, Default, Enum, Serialize, Deserialize,
+)]
+pub enum SmartListGroupJoiner {
+	#[default]
+	And,
+	Or,
+	Not,
 }
 
-#[derive(Default, Clone, InputObject)]
+#[derive(OneofObject, Clone, Serialize, Deserialize)]
+pub enum SmartListFilterInput {
+	Media(MediaFilterInput),
+	MediaMetadata(MediaMetadataFilterInput),
+	Series(SeriesFilterInput),
+	SeriesMetadata(SeriesMetadataFilterInput),
+	Library(LibraryFilterInput),
+}
+
+#[derive(InputObject, Clone, Serialize, Deserialize)]
+pub struct SmartListFilterGroupInput {
+	pub groups: Vec<SmartListFilterInput>,
+	pub joiner: SmartListGroupJoiner,
+}
+
+#[derive(Clone, InputObject)]
 pub struct SaveSmartListInput {
-	pub filters: Vec<SmartListFilterInput>,
+	pub filters: Vec<SmartListFilterGroupInput>,
 	pub name: String,
 	pub description: Option<String>,
 	pub joiner: SmartListJoiner,

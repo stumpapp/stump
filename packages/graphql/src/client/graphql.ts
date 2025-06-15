@@ -1253,6 +1253,8 @@ export type Mutation = {
 	 * A result containing the newly created reading list, or an error if creation failed.
 	 */
 	createReadingList: ReadingList
+	createSmartList: SmartList
+	createSmartListView: SmartListView
 	/**
 	 * Returns a list containing the newly created tags, or an error if creation failed.
 	 *
@@ -1286,6 +1288,8 @@ export type Mutation = {
 	 * A result containing the deleted reading list, or an error if deletion failed.
 	 */
 	deleteReadingList: ReadingList
+	deleteSmartList: SmartList
+	deleteSmartListView: SmartListView
 	/**
 	 * Delete tags. Returns a list containing the deleted tags, or an error if deletion failed.
 	 *
@@ -1344,6 +1348,8 @@ export type Mutation = {
 	 * A result containing the updated reading list, or an error if update failed.
 	 */
 	updateReadingList: ReadingList
+	updateSmartList: SmartList
+	updateSmartListView: SmartListView
 	updateUser: User
 	updateUserLockStatus: User
 	uploadBooks: Scalars['Boolean']['output']
@@ -1423,6 +1429,14 @@ export type MutationCreateReadingListArgs = {
 	input: ReadingListInput
 }
 
+export type MutationCreateSmartListArgs = {
+	input: SaveSmartListInput
+}
+
+export type MutationCreateSmartListViewArgs = {
+	input: SaveSmartListViewInput
+}
+
 export type MutationCreateTagsArgs = {
 	tags: Array<Scalars['String']['input']>
 }
@@ -1469,6 +1483,15 @@ export type MutationDeleteNotifierArgs = {
 
 export type MutationDeleteReadingListArgs = {
 	id: Scalars['String']['input']
+}
+
+export type MutationDeleteSmartListArgs = {
+	id: Scalars['ID']['input']
+}
+
+export type MutationDeleteSmartListViewArgs = {
+	id: Scalars['ID']['input']
+	name: Scalars['String']['input']
 }
 
 export type MutationDeleteTagsArgs = {
@@ -1576,6 +1599,15 @@ export type MutationUpdateNotifierArgs = {
 
 export type MutationUpdateReadingListArgs = {
 	input: ReadingListInput
+}
+
+export type MutationUpdateSmartListArgs = {
+	id: Scalars['ID']['input']
+	input: SaveSmartListInput
+}
+
+export type MutationUpdateSmartListViewArgs = {
+	input: SaveSmartListViewInput
 }
 
 export type MutationUpdateUserArgs = {
@@ -2109,6 +2141,11 @@ export type Query = {
 	recentlyAddedSeries: PaginatedSeriesResponse
 	series: PaginatedSeriesResponse
 	seriesById?: Maybe<Series>
+	smartListById?: Maybe<SmartList>
+	smartListItems: SmartListItems
+	smartListMeta?: Maybe<SmartListMeta>
+	smartListViews: Array<SmartListView>
+	smartLists: Array<SmartList>
 	stumpConfig: StumpConfig
 	/** Returns a list of all tags. */
 	tags: Array<Tag>
@@ -2215,6 +2252,22 @@ export type QuerySeriesByIdArgs = {
 	id: Scalars['ID']['input']
 }
 
+export type QuerySmartListByIdArgs = {
+	id: Scalars['ID']['input']
+}
+
+export type QuerySmartListItemsArgs = {
+	id: Scalars['ID']['input']
+}
+
+export type QuerySmartListMetaArgs = {
+	id: Scalars['ID']['input']
+}
+
+export type QuerySmartListsArgs = {
+	input: SmartListsInput
+}
+
 export type QueryUserByIdArgs = {
 	id: Scalars['ID']['input']
 }
@@ -2284,6 +2337,21 @@ export type RegisteredEmailDevice = {
 	id: Scalars['Int']['output']
 	name: Scalars['String']['output']
 	sendHistory: Array<EmailerSendRecord>
+}
+
+export type SaveSmartListInput = {
+	defaultGrouping: SmartListGrouping
+	description?: InputMaybe<Scalars['String']['input']>
+	filters: Array<SmartListFilterGroupInput>
+	joiner: SmartListJoiner
+	name: Scalars['String']['input']
+	visibility: EntityVisibility
+}
+
+export type SaveSmartListViewInput = {
+	config: Scalars['String']['input']
+	listId: Scalars['ID']['input']
+	name: Scalars['String']['input']
 }
 
 export type SendAttachmentEmailOutput = {
@@ -2391,6 +2459,122 @@ export type SeriesScanOutput = {
 	totalFiles: Scalars['Int']['output']
 	/** The number of media entities that were updated */
 	updatedMedia: Scalars['Int']['output']
+}
+
+export type SmartList = {
+	__typename?: 'SmartList'
+	creatorId: Scalars['String']['output']
+	defaultGrouping: SmartListGrouping
+	description?: Maybe<Scalars['String']['output']>
+	filters: Scalars['String']['output']
+	id: Scalars['String']['output']
+	joiner: SmartListJoiner
+	name: Scalars['String']['output']
+	views: Array<SmartListView>
+	visibility: EntityVisibility
+}
+
+export type SmartListFilterGroupInput = {
+	groups: Array<SmartListFilterInput>
+	joiner: SmartListGroupJoiner
+}
+
+export type SmartListFilterInput =
+	| {
+			library: LibraryFilterInput
+			media?: never
+			mediaMetadata?: never
+			series?: never
+			seriesMetadata?: never
+	  }
+	| {
+			library?: never
+			media: MediaFilterInput
+			mediaMetadata?: never
+			series?: never
+			seriesMetadata?: never
+	  }
+	| {
+			library?: never
+			media?: never
+			mediaMetadata: MediaMetadataFilterInput
+			series?: never
+			seriesMetadata?: never
+	  }
+	| {
+			library?: never
+			media?: never
+			mediaMetadata?: never
+			series: SeriesFilterInput
+			seriesMetadata?: never
+	  }
+	| {
+			library?: never
+			media?: never
+			mediaMetadata?: never
+			series?: never
+			seriesMetadata: SeriesMetadataFilterInput
+	  }
+
+/** The different filter joiners that can be used in smart lists */
+export enum SmartListGroupJoiner {
+	And = 'AND',
+	Not = 'NOT',
+	Or = 'OR',
+}
+
+export type SmartListGrouped = {
+	__typename?: 'SmartListGrouped'
+	items: Array<SmartListGroupedItem>
+}
+
+export type SmartListGroupedItem = {
+	__typename?: 'SmartListGroupedItem'
+	books: Array<Media>
+	entity: SmartListItemEntity
+}
+
+/** The different grouping options for smart lists */
+export enum SmartListGrouping {
+	ByBooks = 'BY_BOOKS',
+	ByLibrary = 'BY_LIBRARY',
+	BySeries = 'BY_SERIES',
+}
+
+export type SmartListItemEntity = Library | Series
+
+export type SmartListItems = SmartListGrouped | SmartListUngrouped
+
+/** The different filter joiners that can be used in smart lists */
+export enum SmartListJoiner {
+	And = 'AND',
+	Or = 'OR',
+}
+
+export type SmartListMeta = {
+	__typename?: 'SmartListMeta'
+	matchedBooks: Scalars['Int']['output']
+	matchedLibraries: Scalars['Int']['output']
+	matchedSeries: Scalars['Int']['output']
+}
+
+export type SmartListUngrouped = {
+	__typename?: 'SmartListUngrouped'
+	books: Array<Media>
+}
+
+export type SmartListView = {
+	__typename?: 'SmartListView'
+	config: Scalars['String']['output']
+	id: Scalars['Int']['output']
+	listId: Scalars['String']['output']
+	name: Scalars['String']['output']
+}
+
+export type SmartListsInput = {
+	all?: InputMaybe<Scalars['Boolean']['input']>
+	mine?: InputMaybe<Scalars['Boolean']['input']>
+	search?: InputMaybe<Scalars['String']['input']>
 }
 
 export type SpineItem = {

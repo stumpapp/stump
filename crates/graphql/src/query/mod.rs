@@ -14,6 +14,7 @@ pub(crate) mod reading_list;
 mod series;
 mod smart_list_view;
 mod smart_lists;
+pub(crate) mod smart_lists_builder;
 mod tag;
 pub(crate) mod user;
 

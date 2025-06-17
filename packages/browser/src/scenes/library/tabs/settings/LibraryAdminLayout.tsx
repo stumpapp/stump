@@ -1,3 +1,4 @@
+import { UserPermission } from '@stump/graphql'
 import { cx } from 'class-variance-authority'
 import { Suspense, useEffect, useMemo } from 'react'
 import { Outlet, useNavigate } from 'react-router'
@@ -16,11 +17,11 @@ type Props = {
 export default function LibraryAdminLayout({ applySceneDefaults = true }: Props) {
 	const { checkPermission } = useAppContext()
 	const {
-		preferences: { primary_navigation_mode },
+		preferences: { primaryNavigationMode },
 	} = usePreferences()
 
 	const navigate = useNavigate()
-	const canManage = useMemo(() => checkPermission('library:manage'), [checkPermission])
+	const canManage = useMemo(() => checkPermission(UserPermission.ManageLibrary), [checkPermission])
 	useEffect(() => {
 		if (!canManage) {
 			navigate('..')
@@ -36,7 +37,7 @@ export default function LibraryAdminLayout({ applySceneDefaults = true }: Props)
 			return (
 				<SceneContainer
 					className={cx('flex min-h-full w-full flex-grow flex-col space-y-6', {
-						'max-w-4xl': primary_navigation_mode === 'SIDEBAR',
+						'max-w-4xl': primaryNavigationMode === 'SIDEBAR',
 					})}
 				>
 					<Suspense>

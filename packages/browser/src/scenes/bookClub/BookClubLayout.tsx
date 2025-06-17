@@ -28,26 +28,26 @@ export default function BookClubLayout() {
 	const user = useUserStore((store) => store.user)
 	const {
 		preferences: {
-			enable_double_sidebar,
-			primary_navigation_mode,
-			layout_max_width_px,
-			enable_hide_scrollbar,
+			enableDoubleSidebar,
+			primaryNavigationMode,
+			layoutMaxWidthPx,
+			enableHideScrollbar,
 		},
 	} = usePreferences()
 
 	const isSettings = useMemo(() => location.pathname.includes('settings'), [location.pathname])
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
-	const displaySideBar = !!enable_double_sidebar && !isMobile && isSettings
-	const preferTopBar = primary_navigation_mode === 'TOPBAR'
+	const displaySideBar = !!enableDoubleSidebar && !isMobile && isSettings
+	const preferTopBar = primaryNavigationMode === 'TOPBAR'
 
 	const viewerMember = useMemo(
 		() => mockBookClub.members?.find((member) => !!member.user?.id && member.user.id === user?.id),
 		[user],
 	)
 	const viewerCanManage =
-		user?.is_server_owner || viewerMember?.is_creator || viewerMember?.role === 'ADMIN'
-	const viewerIsMember = !!viewerMember || !!user?.is_server_owner
+		user?.isServerOwner || viewerMember?.is_creator || viewerMember?.role === 'ADMIN'
+	const viewerIsMember = !!viewerMember || !!user?.isServerOwner
 
 	const renderHeader = () =>
 		isSettings ? (
@@ -83,10 +83,10 @@ export default function BookClubLayout() {
 		>
 			<div
 				className={cn('relative flex flex-1 flex-col', {
-					'mx-auto w-full': preferTopBar && !!layout_max_width_px,
+					'mx-auto w-full': preferTopBar && !!layoutMaxWidthPx,
 				})}
 				style={{
-					maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined,
+					maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
 				}}
 			>
 				{renderHeader()}
@@ -95,7 +95,7 @@ export default function BookClubLayout() {
 
 				<SceneContainer
 					className={cn('relative flex flex-1 flex-col gap-4 md:pb-0', {
-						'md:hide-scrollbar': !!enable_hide_scrollbar,
+						'md:hide-scrollbar': !!enableHideScrollbar,
 						// pl-48 is for the sidebar, plus pl-4 for the padding
 						'pl-52': displaySideBar,
 					})}

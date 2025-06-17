@@ -1,6 +1,16 @@
-import { TagOption, useTags } from '@stump/client'
+import { TagOption, useSuspenseGraphQL } from '@stump/client'
 import { ComboBox } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useCallback, useEffect, useState } from 'react'
+
+const query = graphql(`
+	query TagSelectQuery {
+		tags {
+			id
+			name
+		}
+	}
+`)
 
 type Props = {
 	label?: string
@@ -10,7 +20,9 @@ type Props = {
 }
 
 export default function TagSelect({ label, description, selected = [], onChange }: Props) {
-	const { tags } = useTags()
+	const {
+		data: { tags },
+	} = useSuspenseGraphQL(query, ['tags'])
 
 	const [options, setOptions] = useState<TagOption[]>(
 		tags.map((tag) => ({ label: tag.name, value: tag.name.toLowerCase() })),

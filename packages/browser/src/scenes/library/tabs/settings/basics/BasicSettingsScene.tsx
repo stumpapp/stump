@@ -45,7 +45,7 @@ export default function BasicSettingsScene() {
 				description: values.description,
 				name: values.name,
 				path: values.path,
-				scan_mode: library.path !== values.path ? 'DEFAULT' : 'NONE',
+				scanAfterPersist: library.path !== values.path,
 				tags: values.tags?.map(({ label }) => label),
 			})
 		},

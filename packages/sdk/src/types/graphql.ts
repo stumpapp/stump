@@ -1,3 +1,5 @@
+import { User } from '@stump/graphql'
+
 export type GraphQLError = {
 	message: string
 	locations: Array<{
@@ -12,3 +14,5 @@ export type GraphQLResponse<T> = {
 	data: T
 	errors?: Array<GraphQLError>
 }
+
+export type AuthUser = Omit<User, 'continueReading'>

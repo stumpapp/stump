@@ -26,7 +26,7 @@ type Props = {
 }
 export default function GroupedSmartListItemList({ items }: Props) {
 	const {
-		preferences: { enable_hide_scrollbar },
+		preferences: { enableHideScrollbar },
 	} = usePreferences()
 
 	const [accordionState, setAccordionState] = useState<AccordionState>(() =>
@@ -104,7 +104,7 @@ export default function GroupedSmartListItemList({ items }: Props) {
 					<div
 						ref={scrollRef}
 						className={cn('overflow-y-auto overflow-x-hidden', {
-							'scrollbar-hide': enable_hide_scrollbar,
+							'scrollbar-hide': enableHideScrollbar,
 						})}
 						style={{
 							height,

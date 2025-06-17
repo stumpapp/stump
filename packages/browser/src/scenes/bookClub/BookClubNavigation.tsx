@@ -10,7 +10,7 @@ import { usePreferences } from '@/hooks'
 export default function BookClubNavigation() {
 	const location = useLocation()
 	const {
-		preferences: { primary_navigation_mode, layout_max_width_px },
+		preferences: { primaryNavigationMode, layoutMaxWidthPx },
 	} = usePreferences()
 	const {
 		bookClub: { id },
@@ -52,7 +52,7 @@ export default function BookClubNavigation() {
 		]
 	}, [location, viewerIsMember, prefetch])
 
-	const preferTopBar = primary_navigation_mode === 'TOPBAR'
+	const preferTopBar = primaryNavigationMode === 'TOPBAR'
 
 	// Don't bother rendering navigation if the user doesn't have access to any other tabs
 	if (tabs.length <= 1) {
@@ -65,10 +65,10 @@ export default function BookClubNavigation() {
 				className={cn(
 					'-mb-px flex gap-x-6 overflow-x-scroll px-3 scrollbar-hide md:overflow-x-hidden',
 					{
-						'mx-auto': preferTopBar && !!layout_max_width_px,
+						'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 					},
 				)}
-				style={{ maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined }}
+				style={{ maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined }}
 			>
 				{tabs.map((tab) => (
 					<Link

@@ -15,7 +15,7 @@ export default function UserSmartListNavigation() {
 	const location = useLocation()
 	const { t } = useLocaleContext()
 	const {
-		preferences: { primary_navigation_mode, layout_max_width_px },
+		preferences: { primaryNavigationMode, layoutMaxWidthPx },
 	} = usePreferences()
 	const {
 		list: { id },
@@ -40,7 +40,7 @@ export default function UserSmartListNavigation() {
 		[location, prefetch, t],
 	)
 
-	const preferTopBar = primary_navigation_mode === 'TOPBAR'
+	const preferTopBar = primaryNavigationMode === 'TOPBAR'
 
 	return (
 		<div className="relative z-10 w-full border-b border-edge-subtle bg-background">
@@ -48,10 +48,10 @@ export default function UserSmartListNavigation() {
 				className={cn(
 					'-mb-px flex gap-x-4 overflow-x-scroll px-3 transition-colors duration-150 scrollbar-hide md:overflow-x-hidden',
 					{
-						'mx-auto': preferTopBar && !!layout_max_width_px,
+						'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 					},
 				)}
-				style={{ maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined }}
+				style={{ maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined }}
 			>
 				{tabs.map((tab) => (
 					<Link

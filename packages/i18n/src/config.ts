@@ -126,8 +126,9 @@ function parseMissingKeyHandler(missingKey: string) {
 	try {
 		const translation = (missingKey ?? '')
 			.split('.')
-			// @ts-expect-error: its fine
-			.reduce((previous, current) => previous[current], resources.en.en)
+			.filter(Boolean)
+			// @ts-expect-error: This is a complicated type, but we know it will work
+			.reduce((previous, current) => previous?.[current], resources.en.en)
 
 		if (typeof translation === 'string') {
 			return translation

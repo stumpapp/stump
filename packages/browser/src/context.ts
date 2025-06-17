@@ -1,4 +1,5 @@
-import { User, UserPermission } from '@stump/sdk'
+import { UserPermission } from '@stump/graphql'
+import { AuthUser } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
 export type PermissionEnforcerOptions = {
@@ -6,10 +7,8 @@ export type PermissionEnforcerOptions = {
 }
 
 export type IAppContext = {
-	// TODO(graphql): Swap User to GraphQL user
-	user: User
+	user: AuthUser
 	isServerOwner: boolean
-	// TODO(graphql): Swap UserPermission to GraphQL enum
 	checkPermission: (permission: UserPermission) => boolean
 	enforcePermission: (permission: UserPermission, options?: PermissionEnforcerOptions) => void
 }

@@ -36,6 +36,8 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new().nest(
 		"/auth",
 		Router::new()
+			// TODO(graphql): Just remove this and use GraphQL for anything outside of
+			// login/logout/register. It is causing more headaches than it is worth.
 			.route(
 				"/me",
 				get(viewer)

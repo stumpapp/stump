@@ -29,14 +29,14 @@ export default function GroupedSmartListItemListGroupContent({ books }: Props) {
 	})
 
 	const {
-		preferences: { enable_hide_scrollbar },
+		preferences: { enableHideScrollbar },
 	} = usePreferences()
 
 	return (
 		<Accordion.Content>
 			<div
 				ref={scrollRef}
-				className={cn('h-full w-full overflow-y-auto', { 'scrollbar-hide': enable_hide_scrollbar })}
+				className={cn('h-full w-full overflow-y-auto', { 'scrollbar-hide': enableHideScrollbar })}
 				// FIXME: this will virtualize the inner content, but the parent size is not being calculated correctly
 				// style={{
 				// 	height: maxHeight,

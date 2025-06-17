@@ -1,5 +1,8 @@
+import { User } from '@stump/graphql'
+
 import { APIBase } from '../base'
-import { LoginOrRegisterArgs, LoginResponse, User } from '../types'
+import { LoginOrRegisterArgs, LoginResponse } from '../types'
+import { AuthUser } from '../types/graphql'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 
@@ -19,8 +22,8 @@ export class AuthAPI extends APIBase {
 	/**
 	 * Fetch the currently authenticated user, if any. This will throw an error if unauthenticated.
 	 */
-	async me(): Promise<User> {
-		const { data: user } = await this.api.axios.get<User>(authURL('/me'))
+	async me(): Promise<AuthUser> {
+		const { data: user } = await this.api.axios.get<AuthUser>(authURL('/me'))
 		return user
 	}
 

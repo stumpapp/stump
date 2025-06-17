@@ -24,10 +24,10 @@ export default function TopNavigation() {
 	const { t } = useLocaleContext()
 	const { checkPermission } = useAppContext()
 	const {
-		preferences: { layout_max_width_px, navigation_arrangement },
+		preferences: { layoutMaxWidthPx, navigationArrangement },
 	} = usePreferences()
 	const { arrangement } = useNavigationArrangement({
-		defaultArrangement: navigation_arrangement,
+		defaultArrangement: navigationArrangement,
 		suspense: false,
 	})
 
@@ -101,7 +101,7 @@ export default function TopNavigation() {
 			<div
 				className="mx-auto flex h-12 items-center justify-between"
 				style={{
-					maxWidth: layout_max_width_px ? `${layout_max_width_px}px` : undefined,
+					maxWidth: layoutMaxWidthPx ? `${layoutMaxWidthPx}px` : undefined,
 				}}
 			>
 				<NavigationMenu className="z-[100] h-full">

@@ -1,7 +1,7 @@
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
 use models::{
-	entity::{user, user_preferences},
+	entity::{age_restriction, user, user_preferences},
 	shared::{enums::UserPermission, permission_set::PermissionSet},
 };
 use sea_orm::prelude::*;
@@ -30,6 +30,21 @@ impl From<user::Model> for User {
 
 #[ComplexObject]
 impl User {
+	#[graphql(guard = "SelfGuard::new(&self.model.id).or(ServerOwnerGuard)")]
+	async fn age_restriction(
+		&self,
+		ctx: &Context<'_>,
+	) -> Result<Option<age_restriction::Model>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let age_restriction = age_restriction::Entity::find()
+			.filter(age_restriction::Column::UserId.eq(&self.model.id))
+			.one(conn)
+			.await?;
+
+		Ok(age_restriction)
+	}
+
 	#[graphql(guard = "SelfGuard::new(&self.model.id).or(ServerOwnerGuard)")]
 	async fn continue_reading(
 		&self,

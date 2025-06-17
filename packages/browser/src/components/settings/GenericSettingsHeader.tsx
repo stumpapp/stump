@@ -17,12 +17,12 @@ type Props = {
 export default function GenericSettingsHeader({ localeBase, routeGroups }: Props) {
 	const location = useLocation()
 	const {
-		preferences: { primary_navigation_mode, layout_max_width_px },
+		preferences: { primaryNavigationMode, layoutMaxWidthPx },
 	} = usePreferences()
 	const { t } = useLocaleContext()
 
 	const isMobile = useMediaMatch('(max-width: 768px)')
-	const preferTopBar = primary_navigation_mode === 'TOPBAR'
+	const preferTopBar = primaryNavigationMode === 'TOPBAR'
 
 	/**
 	 * The active route based on the current location
@@ -59,10 +59,10 @@ export default function GenericSettingsHeader({ localeBase, routeGroups }: Props
 		<header
 			className={cn('flex w-full flex-col space-y-4 border-b border-b-edge p-4 md:pl-52', {
 				// Note: We make the border transparent because the width constraint when using a top bar
-				'mx-auto border-b-transparent': preferTopBar && !!layout_max_width_px,
+				'mx-auto border-b-transparent': preferTopBar && !!layoutMaxWidthPx,
 			})}
 			style={{
-				maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined,
+				maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
 			}}
 		>
 			<div>

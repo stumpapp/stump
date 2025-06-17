@@ -58,7 +58,7 @@ export default function SeriesLayout() {
 	// TODO: stats
 	// const { stats } = useSeriesStats({ cacheTime: 1000 * 60 * 5, id })
 	const {
-		preferences: { enable_hide_scrollbar },
+		preferences: { enableHideScrollbar },
 	} = usePreferences()
 
 	useEffect(() => {
@@ -77,7 +77,7 @@ export default function SeriesLayout() {
 
 				<SceneContainer
 					className={cn('relative flex flex-1 flex-col gap-4 p-0 md:pb-0', {
-						'md:hide-scrollbar': !!enable_hide_scrollbar,
+						'md:hide-scrollbar': !!enableHideScrollbar,
 					})}
 				>
 					<Suspense fallback={null}>

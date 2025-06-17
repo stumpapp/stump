@@ -566,7 +566,7 @@ impl LibraryMutation {
 		// TODO(graphql): Investigate not using a JSON wrapper for this. async_graphql doesn't support
 		// non-unit enums, so it might just be a limitation. It does degrate the DX a bit missing
 		// out on the types.
-		option: Option<Json<ScanOptions>>,
+		options: Option<Json<ScanOptions>>,
 	) -> Result<bool> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let core = ctx.data::<CoreContext>()?;
@@ -581,7 +581,7 @@ impl LibraryMutation {
 		core.enqueue_job(LibraryScanJob::new(
 			library.id,
 			library.path,
-			option.map(|o| o.0),
+			options.map(|o| o.0),
 		))?;
 		tracing::debug!("Enqueued library scan job");
 

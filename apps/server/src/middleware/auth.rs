@@ -259,7 +259,7 @@ pub async fn validate_api_key(
 				)
 				.add(
 					Condition::any()
-						.add(api_key::Column::ExpiresAt.gte(validation_start.clone()))
+						.add(api_key::Column::ExpiresAt.gte(validation_start))
 						.add(api_key::Column::ExpiresAt.is_null()),
 				),
 		)
@@ -282,7 +282,7 @@ pub async fn validate_api_key(
 	}
 
 	let update_result = api_key::Entity::update_many()
-		.filter(api_key::Column::Id.eq(api_key.id.clone()))
+		.filter(api_key::Column::Id.eq(api_key.id))
 		.col_expr(api_key::Column::LastUsedAt, Expr::value(validation_start))
 		.exec(conn)
 		.await;

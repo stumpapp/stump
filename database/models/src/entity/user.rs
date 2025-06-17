@@ -11,7 +11,7 @@ use crate::{
 	shared::{enums::UserPermission, permission_set::PermissionSet},
 };
 
-use super::age_restriction;
+use super::{age_restriction, user_preferences};
 
 // TODO: skip fields which most users shouldn't see
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
@@ -45,6 +45,7 @@ pub struct Model {
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AuthUser {
 	pub id: String,
 	pub username: String,
@@ -52,6 +53,7 @@ pub struct AuthUser {
 	pub is_locked: bool,
 	pub permissions: Vec<UserPermission>,
 	pub age_restriction: Option<super::age_restriction::Model>,
+	pub preferences: Option<user_preferences::Model>,
 }
 
 impl AuthUser {
@@ -76,6 +78,8 @@ impl FromQueryResult for AuthUser {
 			Err(sea_orm::DbErr::RecordNotFound(_)) => None,
 			Err(err) => return Err(err),
 		};
+		let preferences = user_preferences::Model::from_query_result_optional(res, "")
+			.unwrap_or_default();
 
 		Ok(AuthUser {
 			id,
@@ -84,6 +88,7 @@ impl FromQueryResult for AuthUser {
 			is_locked,
 			permissions,
 			age_restriction,
+			preferences,
 		})
 	}
 }
@@ -98,6 +103,7 @@ pub struct LoginUser {
 	pub max_sessions_allowed: Option<i32>,
 	pub permissions: Vec<UserPermission>,
 	pub age_restriction: Option<super::age_restriction::Model>,
+	pub preferences: Option<user_preferences::Model>,
 }
 
 impl LoginUser {
@@ -105,8 +111,10 @@ impl LoginUser {
 		Prefixer::new(Entity::find().select_only())
 			.add_columns(Entity)
 			.add_columns(age_restriction::Entity)
+			.add_columns(user_preferences::Entity)
 			.selector
 			.left_join(age_restriction::Entity)
+			.left_join(user_preferences::Entity)
 	}
 }
 
@@ -120,6 +128,10 @@ impl FromQueryResult for LoginUser {
 			age_restriction::Model,
 			age_restriction::Entity,
 		>(res)?;
+		let preferences = parse_query_to_model_optional::<
+			user_preferences::Model,
+			user_preferences::Entity,
+		>(res)?;
 
 		Ok(LoginUser {
 			id: user.id,
@@ -131,6 +143,7 @@ impl FromQueryResult for LoginUser {
 			permissions: PermissionSet::from(user.permissions.unwrap_or_default())
 				.resolve_into_vec(),
 			age_restriction,
+			preferences,
 		})
 	}
 }
@@ -144,6 +157,7 @@ impl From<LoginUser> for AuthUser {
 			is_locked: user.is_locked,
 			permissions: user.permissions,
 			age_restriction: user.age_restriction,
+			preferences: user.preferences,
 		}
 	}
 }

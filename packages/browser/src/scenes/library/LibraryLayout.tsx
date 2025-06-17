@@ -30,6 +30,7 @@ const query = graphql(`
 				id
 				name
 			}
+			...LibrarySettingsConfig
 		}
 	}
 `)
@@ -58,10 +59,10 @@ export default function LibraryLayout() {
 	})
 	const {
 		preferences: {
-			enable_double_sidebar,
-			primary_navigation_mode,
-			layout_max_width_px,
-			enable_hide_scrollbar,
+			enableDoubleSidebar,
+			primaryNavigationMode,
+			layoutMaxWidthPx,
+			enableHideScrollbar,
 		},
 	} = usePreferences()
 	const { mutate: visitLibrary } = useGraphQLMutation(visitMutation)
@@ -69,8 +70,8 @@ export default function LibraryLayout() {
 	const isSettings = useMemo(() => location.pathname.includes('settings'), [location.pathname])
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
-	const displaySideBar = !!enable_double_sidebar && !isMobile && isSettings
-	const preferTopBar = primary_navigation_mode === 'TOPBAR'
+	const displaySideBar = !!enableDoubleSidebar && !isMobile && isSettings
+	const preferTopBar = primaryNavigationMode === 'TOPBAR'
 
 	useEffect(() => {
 		if (!library) {
@@ -94,10 +95,10 @@ export default function LibraryLayout() {
 		<LibraryContext.Provider value={{ library }}>
 			<div
 				className={cn('relative flex flex-1 flex-col', {
-					'mx-auto w-full': preferTopBar && !!layout_max_width_px,
+					'mx-auto w-full': preferTopBar && !!layoutMaxWidthPx,
 				})}
 				style={{
-					maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined,
+					maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
 				}}
 			>
 				{renderHeader()}
@@ -108,7 +109,7 @@ export default function LibraryLayout() {
 
 				<SceneContainer
 					className={cn('relative flex flex-1 flex-col gap-4 p-0 md:pb-0', {
-						'md:hide-scrollbar': !!enable_hide_scrollbar,
+						'md:hide-scrollbar': !!enableHideScrollbar,
 						'pl-48': displaySideBar,
 					})}
 				>

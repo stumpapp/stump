@@ -32,7 +32,7 @@ export default function NavigationArrangement() {
 	const { t } = useLocaleContext()
 	const { checkPermission } = useAppContext()
 	const {
-		preferences: { primary_navigation_mode },
+		preferences: { primaryNavigationMode },
 	} = usePreferences()
 	const { arrangement, updateArrangement } = useNavigationArrangement()
 
@@ -198,7 +198,7 @@ export default function NavigationArrangement() {
 				<div>
 					<Label>{t(getKey('label'))}</Label>
 					<Text size="sm" variant="muted" className="mt-1.5">
-						{t(getKey(`description.${primary_navigation_mode?.toLowerCase() || 'sidebar'}`))}
+						{t(getKey(`description.${primaryNavigationMode?.toLowerCase() || 'sidebar'}`))}
 					</Text>
 				</div>
 

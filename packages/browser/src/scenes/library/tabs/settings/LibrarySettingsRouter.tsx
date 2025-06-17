@@ -1,5 +1,8 @@
-import { queryClient, useScanLibrary, useSDK, useUpdateLibrary } from '@stump/client'
-import { ScanOptions, UpdateLibrary } from '@stump/sdk'
+import { useGraphQLMutation } from '@stump/client'
+import { CreateOrUpdateLibraryInput, graphql, useFragment } from '@stump/graphql'
+import { ScanOptions } from '@stump/sdk'
+import { useQueryClient } from '@tanstack/react-query'
+import omit from 'lodash/omit'
 import { lazy, Suspense, useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
@@ -17,21 +20,70 @@ const LibraryReadingDefaultsScene = lazy(() => import('./options/readingDefaults
 const AccessControlScene = lazy(() => import('./danger/accessControl'))
 const DeletionScene = lazy(() => import('./danger/deletion'))
 
+export const LibrarySettingsConfig = graphql(`
+	fragment LibrarySettingsConfig on Library {
+		config {
+			id
+			convertRarToZip
+			hardDeleteConversions
+			defaultReadingDir
+			defaultReadingMode
+			defaultReadingImageScaleFit
+			generateFileHashes
+			generateKoreaderHashes
+			processMetadata
+			watch
+			libraryPattern
+			libraryId
+			imageProcessorOptions
+			ignoreRules
+		}
+	}
+`)
+
+const editMutation = graphql(`
+	mutation LibrarySettingsRouterEditLibraryMutation($id: ID!, $input: CreateOrUpdateLibraryInput!) {
+		updateLibrary(id: $id, input: $input) {
+			id
+		}
+	}
+`)
+
+const scanMutation = graphql(`
+	mutation LibrarySettingsRouterScanLibraryMutation($id: ID!, $options: JSON) {
+		scanLibrary(id: $id, options: $options)
+	}
+`)
+
 // Note: library:manage permission is enforced in the parent router
 export default function LibrarySettingsRouter() {
 	const { checkPermission } = useAppContext()
 	const { library } = useLibraryContext()
-	const { sdk } = useSDK()
-	const { editLibrary } = useUpdateLibrary({
-		id: library.id,
-		onSuccess: async ({ id }) => {
-			await queryClient.refetchQueries([sdk.library.keys.getByID, id], { exact: false })
+	const { config } = useFragment(LibrarySettingsConfig, library)
+
+	const client = useQueryClient()
+
+	const { mutate: editLibrary } = useGraphQLMutation(editMutation, {
+		onSuccess: async () => {
+			client.invalidateQueries({
+				predicate: ({ queryKey }) =>
+					queryKey.some(
+						(key) =>
+							typeof key === 'string' &&
+							[
+								'libraryById',
+								// sdk.job.keys.get,
+								// sdk.library.keys.getByID,
+							].includes(key),
+					),
+			})
 		},
 	})
 
-	const { scan } = useScanLibrary()
+	const { mutate: scan } = useGraphQLMutation(scanMutation)
+
 	const scanLibrary = useCallback(
-		(options: ScanOptions = {}) => scan({ id: library.id, ...options }),
+		(options?: ScanOptions) => scan({ id: library.id, options }),
 		[library.id, scan],
 	)
 
@@ -44,21 +96,26 @@ export default function LibrarySettingsRouter() {
 	 * with the updates provided.
 	 */
 	const patch = useCallback(
-		(updates: Partial<UpdateLibrary>) => {
-			const payload: UpdateLibrary = {
-				...library,
+		(updates: Partial<CreateOrUpdateLibraryInput>) => {
+			const payload = {
+				// Note: omit returns a deep partial for whatever reason, so we cast it. This should be safe
+				...(omit(library, ['stats', '__typename', 'config', ' $fragmentRefs']) as typeof library),
 				...updates,
-				config: updates.config ? { ...library.config, ...updates.config } : library.config,
+				config: updates.config ? { ...config, ...updates.config } : config,
 				tags: updates.tags ? updates.tags : library?.tags?.map(({ name }) => name),
-			}
-			editLibrary(payload)
+			} satisfies CreateOrUpdateLibraryInput
+			editLibrary({ id: library.id, input: payload })
 		},
-		[editLibrary, library],
+		[editLibrary, library, config],
 	)
 
 	return (
 		<LibraryManagementContext.Provider
 			value={{
+				library: {
+					...library,
+					config,
+				},
 				patch,
 				scan: canScan ? scanLibrary : undefined,
 			}}

@@ -7,33 +7,33 @@ import { usePreferences } from './usePreferences'
  **/
 export function useTheme() {
 	const {
-		preferences: { app_theme, enable_gradients },
+		preferences: { appTheme, enableGradients },
 		update,
 	} = usePreferences()
 
 	const changeTheme = (theme: string) =>
 		update({
-			app_theme: theme,
+			appTheme: theme,
 		})
 
 	/**
 	 * Whether the current theme is a dark variant
 	 */
-	const isDarkVariant = useMemo(() => DARK_THEMES.includes(app_theme || 'light'), [app_theme])
+	const isDarkVariant = useMemo(() => DARK_THEMES.includes(appTheme || 'light'), [appTheme])
 	/**
 	 * Whether the current theme supports gradients
 	 */
 	const isGradientSupported = useMemo(
-		() => THEMES_WITH_GRADIENTS.includes(app_theme || 'light'),
-		[app_theme],
+		() => THEMES_WITH_GRADIENTS.includes(appTheme || 'light'),
+		[appTheme],
 	)
 	/**
 	 * If the user has gradients enabled and the theme supports gradients, we will
 	 * use a gradient background instead of a solid color where possible
 	 */
 	const shouldUseGradient = useMemo(
-		() => enable_gradients && isGradientSupported,
-		[enable_gradients, isGradientSupported],
+		() => enableGradients && isGradientSupported,
+		[enableGradients, isGradientSupported],
 	)
 
 	return {
@@ -41,7 +41,7 @@ export function useTheme() {
 		isDarkVariant,
 		isGradientSupported,
 		shouldUseGradient,
-		theme: app_theme || 'light',
+		theme: appTheme || 'light',
 	}
 }
 

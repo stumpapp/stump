@@ -47,6 +47,14 @@ export type ActiveReadingSession = {
 	userId: Scalars['String']['output']
 }
 
+export type AgeRestriction = {
+	__typename?: 'AgeRestriction'
+	age: Scalars['Int']['output']
+	id: Scalars['Int']['output']
+	restrictOnUnset: Scalars['Boolean']['output']
+	userId: Scalars['String']['output']
+}
+
 export type AgeRestrictionInput = {
 	age: Scalars['Int']['input']
 	restrictOnUnset: Scalars['Boolean']['input']
@@ -285,7 +293,7 @@ export type CreateOrUpdateLibraryInput = {
 	emoji?: InputMaybe<Scalars['String']['input']>
 	name: Scalars['String']['input']
 	path: Scalars['String']['input']
-	scanAfterPersist: Scalars['Boolean']['input']
+	scanAfterPersist?: Scalars['Boolean']['input']
 	tags?: InputMaybe<Array<Scalars['String']['input']>>
 }
 
@@ -1537,7 +1545,7 @@ export type MutationRespondToBookClubInvitationArgs = {
 
 export type MutationScanLibraryArgs = {
 	id: Scalars['ID']['input']
-	option?: InputMaybe<Scalars['JSON']['input']>
+	options?: InputMaybe<Scalars['JSON']['input']>
 }
 
 export type MutationScanSeriesArgs = {
@@ -2797,6 +2805,7 @@ export type UploadSeriesInput = {
 
 export type User = {
 	__typename?: 'User'
+	ageRestriction?: Maybe<AgeRestriction>
 	avatarUrl?: Maybe<Scalars['String']['output']>
 	continueReading: PaginatedMediaResponse
 	createdAt: Scalars['DateTime']['output']
@@ -2916,6 +2925,13 @@ export type UserPreferences = {
 	showQueryIndicator: Scalars['Boolean']['output']
 	showThumbnailsInHeaders: Scalars['Boolean']['output']
 	userId?: Maybe<Scalars['String']['output']>
+}
+
+export type TagSelectQueryQueryVariables = Exact<{ [key: string]: never }>
+
+export type TagSelectQueryQuery = {
+	__typename?: 'Query'
+	tags: Array<{ __typename?: 'Tag'; id: string; name: string }>
 }
 
 export type BookCardFragment = {
@@ -3260,7 +3276,9 @@ export type BookSearchSceneQuery = {
 	media: {
 		__typename?: 'PaginatedMediaResponse'
 		nodes: Array<
-			{ __typename?: 'Media' } & { ' $fragmentRefs'?: { BookCardFragment: BookCardFragment } }
+			{ __typename?: 'Media'; id: string } & {
+				' $fragmentRefs'?: { BookCardFragment: BookCardFragment }
+			}
 		>
 		pageInfo:
 			| { __typename: 'CursorPaginationInfo' }
@@ -3360,20 +3378,22 @@ export type LibraryLayoutQueryVariables = Exact<{
 
 export type LibraryLayoutQuery = {
 	__typename?: 'Query'
-	libraryById?: {
-		__typename?: 'Library'
-		id: string
-		name: string
-		description?: string | null
-		path: string
-		stats: {
-			__typename?: 'LibraryStats'
-			bookCount: number
-			completedBooks: number
-			inProgressBooks: number
-		}
-		tags: Array<{ __typename?: 'Tag'; id: string; name: string }>
-	} | null
+	libraryById?:
+		| ({
+				__typename?: 'Library'
+				id: string
+				name: string
+				description?: string | null
+				path: string
+				stats: {
+					__typename?: 'LibraryStats'
+					bookCount: number
+					completedBooks: number
+					inProgressBooks: number
+				}
+				tags: Array<{ __typename?: 'Tag'; id: string; name: string }>
+		  } & { ' $fragmentRefs'?: { LibrarySettingsConfigFragment: LibrarySettingsConfigFragment } })
+		| null
 }
 
 export type VisitLibraryMutationVariables = Exact<{
@@ -3383,6 +3403,33 @@ export type VisitLibraryMutationVariables = Exact<{
 export type VisitLibraryMutation = {
 	__typename?: 'Mutation'
 	visitLibrary: { __typename?: 'Library'; id: string }
+}
+
+export type LibraryBooksSceneQueryVariables = Exact<{
+	filter: MediaFilterInput
+	pagination: Pagination
+}>
+
+export type LibraryBooksSceneQuery = {
+	__typename?: 'Query'
+	media: {
+		__typename?: 'PaginatedMediaResponse'
+		nodes: Array<
+			{ __typename?: 'Media'; id: string } & {
+				' $fragmentRefs'?: { BookCardFragment: BookCardFragment }
+			}
+		>
+		pageInfo:
+			| { __typename: 'CursorPaginationInfo' }
+			| {
+					__typename: 'OffsetPaginationInfo'
+					currentPage: number
+					totalPages: number
+					pageSize: number
+					pageOffset: number
+					zeroBased: boolean
+			  }
+	}
 }
 
 export type LibrarySeriesQueryVariables = Exact<{
@@ -3413,6 +3460,47 @@ export type LibrarySeriesQuery = {
 					zeroBased: boolean
 			  }
 	}
+}
+
+export type LibrarySettingsConfigFragment = {
+	__typename?: 'Library'
+	config: {
+		__typename?: 'LibraryConfig'
+		id: number
+		convertRarToZip: boolean
+		hardDeleteConversions: boolean
+		defaultReadingDir: ReadingDirection
+		defaultReadingMode: ReadingMode
+		defaultReadingImageScaleFit: ReadingImageScaleFit
+		generateFileHashes: boolean
+		generateKoreaderHashes: boolean
+		processMetadata: boolean
+		watch: boolean
+		libraryPattern: LibraryPattern
+		libraryId?: string | null
+		imageProcessorOptions?: any | null
+		ignoreRules?: Array<string> | null
+	}
+} & { ' $fragmentName'?: 'LibrarySettingsConfigFragment' }
+
+export type LibrarySettingsRouterEditLibraryMutationMutationVariables = Exact<{
+	id: Scalars['ID']['input']
+	input: CreateOrUpdateLibraryInput
+}>
+
+export type LibrarySettingsRouterEditLibraryMutationMutation = {
+	__typename?: 'Mutation'
+	updateLibrary: { __typename?: 'Library'; id: string }
+}
+
+export type LibrarySettingsRouterScanLibraryMutationMutationVariables = Exact<{
+	id: Scalars['ID']['input']
+	options?: InputMaybe<Scalars['JSON']['input']>
+}>
+
+export type LibrarySettingsRouterScanLibraryMutationMutation = {
+	__typename?: 'Mutation'
+	scanLibrary: boolean
 }
 
 export type SeriesLayoutQueryVariables = Exact<{
@@ -3548,6 +3636,37 @@ export const BookCardFragmentDoc = new TypedDocumentString(
     `,
 	{ fragmentName: 'BookCard' },
 ) as unknown as TypedDocumentString<BookCardFragment, unknown>
+export const LibrarySettingsConfigFragmentDoc = new TypedDocumentString(
+	`
+    fragment LibrarySettingsConfig on Library {
+  config {
+    id
+    convertRarToZip
+    hardDeleteConversions
+    defaultReadingDir
+    defaultReadingMode
+    defaultReadingImageScaleFit
+    generateFileHashes
+    generateKoreaderHashes
+    processMetadata
+    watch
+    libraryPattern
+    libraryId
+    imageProcessorOptions
+    ignoreRules
+  }
+}
+    `,
+	{ fragmentName: 'LibrarySettingsConfig' },
+) as unknown as TypedDocumentString<LibrarySettingsConfigFragment, unknown>
+export const TagSelectQueryDocument = new TypedDocumentString(`
+    query TagSelectQuery {
+  tags {
+    id
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<TagSelectQueryQuery, TagSelectQueryQueryVariables>
 export const MediaAtPathDocument = new TypedDocumentString(`
     query MediaAtPath($path: String!) {
   mediaByPath(path: $path) {
@@ -3873,6 +3992,7 @@ export const BookSearchSceneDocument = new TypedDocumentString(`
     query BookSearchScene($filter: MediaFilterInput!, $orderBy: [MediaOrderBy!]!, $pagination: Pagination!) {
   media(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
     nodes {
+      id
       ...BookCard
     }
     pageInfo {
@@ -4026,9 +4146,27 @@ export const LibraryLayoutDocument = new TypedDocumentString(`
       id
       name
     }
+    ...LibrarySettingsConfig
   }
 }
-    `) as unknown as TypedDocumentString<LibraryLayoutQuery, LibraryLayoutQueryVariables>
+    fragment LibrarySettingsConfig on Library {
+  config {
+    id
+    convertRarToZip
+    hardDeleteConversions
+    defaultReadingDir
+    defaultReadingMode
+    defaultReadingImageScaleFit
+    generateFileHashes
+    generateKoreaderHashes
+    processMetadata
+    watch
+    libraryPattern
+    libraryId
+    imageProcessorOptions
+    ignoreRules
+  }
+}`) as unknown as TypedDocumentString<LibraryLayoutQuery, LibraryLayoutQueryVariables>
 export const VisitLibraryDocument = new TypedDocumentString(`
     mutation VisitLibrary($id: ID!) {
   visitLibrary(id: $id) {
@@ -4036,6 +4174,43 @@ export const VisitLibraryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<VisitLibraryMutation, VisitLibraryMutationVariables>
+export const LibraryBooksSceneDocument = new TypedDocumentString(`
+    query LibraryBooksScene($filter: MediaFilterInput!, $pagination: Pagination!) {
+  media(filter: $filter, pagination: $pagination) {
+    nodes {
+      id
+      ...BookCard
+    }
+    pageInfo {
+      __typename
+      ... on OffsetPaginationInfo {
+        currentPage
+        totalPages
+        pageSize
+        pageOffset
+        zeroBased
+      }
+    }
+  }
+}
+    fragment BookCard on Media {
+  id
+  resolvedName
+  pages
+  size
+  status
+  thumbnail {
+    url
+  }
+  readProgress {
+    percentageCompleted
+    epubcfi
+    page
+  }
+  readHistory {
+    __typename
+  }
+}`) as unknown as TypedDocumentString<LibraryBooksSceneQuery, LibraryBooksSceneQueryVariables>
 export const LibrarySeriesDocument = new TypedDocumentString(`
     query LibrarySeries($filter: SeriesFilterInput!, $pagination: Pagination!) {
   series(filter: $filter, pagination: $pagination) {
@@ -4059,6 +4234,24 @@ export const LibrarySeriesDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<LibrarySeriesQuery, LibrarySeriesQueryVariables>
+export const LibrarySettingsRouterEditLibraryMutationDocument = new TypedDocumentString(`
+    mutation LibrarySettingsRouterEditLibraryMutation($id: ID!, $input: CreateOrUpdateLibraryInput!) {
+  updateLibrary(id: $id, input: $input) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<
+	LibrarySettingsRouterEditLibraryMutationMutation,
+	LibrarySettingsRouterEditLibraryMutationMutationVariables
+>
+export const LibrarySettingsRouterScanLibraryMutationDocument = new TypedDocumentString(`
+    mutation LibrarySettingsRouterScanLibraryMutation($id: ID!, $options: JSON) {
+  scanLibrary(id: $id, options: $options)
+}
+    `) as unknown as TypedDocumentString<
+	LibrarySettingsRouterScanLibraryMutationMutation,
+	LibrarySettingsRouterScanLibraryMutationMutationVariables
+>
 export const SeriesLayoutDocument = new TypedDocumentString(`
     query SeriesLayout($id: ID!) {
   seriesById(id: $id) {

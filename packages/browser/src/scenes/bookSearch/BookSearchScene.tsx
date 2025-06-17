@@ -39,6 +39,7 @@ const query = graphql(`
 	) {
 		media(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
 			nodes {
+				id
 				...BookCard
 			}
 			pageInfo {
@@ -184,7 +185,7 @@ function BookSearchScene() {
 			},
 		},
 	})
-	const cards = nodes.map((node) => <BookCard key={node.id} fragment={node} fullWidth={false} />)
+	const cards = nodes.map((node) => <BookCard key={node.id} fragment={node} />)
 	const prefetch = usePrefetchBookSearch()
 	if (pageInfo.__typename !== 'OffsetPaginationInfo') {
 		throw new Error('Invalid pagination type, expected OffsetPaginationInfo')

@@ -48,6 +48,14 @@ Or `cargo` for the server:
 cargo run --package stump_server --bin stump_server
 ```
 
+#### GraphQL
+
+If you plan to update or add any GraphQL queries or mutations, you'll likely want to keep a process running to watch for changes and automatically generate the TypeScript types. You can do this by running the following in the `packages/graphql` directory:
+
+```bash
+yarn graphql-codegen --watch
+```
+
 ## Notes and Tips
 
 Stump has gotten quite large and complex, so I've put together a few notes and tips to help you get started.

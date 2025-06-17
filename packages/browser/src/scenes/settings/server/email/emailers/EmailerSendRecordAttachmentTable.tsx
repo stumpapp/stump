@@ -19,7 +19,7 @@ type Props = {
 }
 export default function EmailerSendRecordAttachmentTable({ attachments }: Props) {
 	const {
-		preferences: { enable_hide_scrollbar },
+		preferences: { enableHideScrollbar },
 	} = usePreferences()
 
 	const [sorting, setSorting] = useState<SortingState>([])
@@ -41,7 +41,7 @@ export default function EmailerSendRecordAttachmentTable({ attachments }: Props)
 			{({ width }) => (
 				<div
 					className={cn('h-full min-w-full overflow-x-auto', {
-						'scrollbar-hide': enable_hide_scrollbar,
+						'scrollbar-hide': enableHideScrollbar,
 					})}
 					style={{
 						width,

@@ -393,6 +393,11 @@ pub enum SupportedFont {
 	// Custom(String),
 }
 
+// TODO(permissions): Consider adding the following:
+// - Access to library logs
+// - Access to system logs
+// - Access to jobs and job management
+
 /// The permissions a user may be granted
 #[derive(
 	Eq,
@@ -468,6 +473,12 @@ pub enum UserPermission {
 	ManageNotifier,
 	/// Grant access to delete a notifier
 	DeleteNotifier,
+	/// Grant access to read jobs
+	ReadJobs,
+	/// Grant access to read application-level logs, e.g. job logs
+	ReadPersistedLogs,
+	/// Grant access to read system logs
+	ReadSystemLogs,
 	/// Grant access to manage the server. This is effectively a step below server owner
 	ManageServer,
 }

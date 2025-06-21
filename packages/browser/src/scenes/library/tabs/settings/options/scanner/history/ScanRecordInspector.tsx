@@ -1,10 +1,31 @@
-import { useLibraryByID, useQuery, useSDK } from '@stump/client'
+import { useGraphQL } from '@stump/client'
 import { Alert, ButtonOrLink, Label, Sheet, Text } from '@stump/components'
+import { graphql, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { LibraryScanRecord } from '@stump/sdk'
 import dayjs from 'dayjs'
+import { useMemo } from 'react'
 
+import { useAppContext } from '@/context'
 import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
+
+import { useLibraryManagement } from '../../../context'
+import { LibraryScanRecord } from './ScanHistoryTable'
+
+// TODO: finish selection for outputData
+
+const query = graphql(`
+	query ScanRecordInspectorJobs($id: ID!, $loadLogs: Boolean!) {
+		jobById(id: $id) {
+			id
+			outputData {
+				__typename
+			}
+			logs @include(if: $loadLogs) {
+				id
+			}
+		}
+	}
+`)
 
 type Props = {
 	record: LibraryScanRecord | null
@@ -13,17 +34,31 @@ type Props = {
 
 export default function ScanRecordInspector({ record, onClose }: Props) {
 	const { t } = useLocaleContext()
-	const { sdk } = useSDK()
-	const { library } = useLibraryByID(record?.library_id || '', {
-		enabled: !!record,
-	})
-	const { data: job } = useQuery(
-		[sdk.job.keys.getByID, record?.job_id],
-		() => sdk.job.getByID(record?.job_id || ''),
+	const { checkPermission } = useAppContext()
+	const {
+		library: { name },
+	} = useLibraryManagement()
+
+	const loadAssociatedJob = useMemo(
+		() => checkPermission(UserPermission.ReadJobs),
+		[checkPermission],
+	)
+	const loadJobLogs = useMemo(
+		() => loadAssociatedJob && checkPermission(UserPermission.ReadPersistedLogs),
+		[loadAssociatedJob, checkPermission],
+	)
+	const { data } = useGraphQL(
+		query,
+		['jobById', record?.jobId],
 		{
-			enabled: !!record?.job_id,
+			id: record?.jobId || '',
+			loadLogs: loadJobLogs,
+		},
+		{
+			enabled: !!record?.jobId && loadAssociatedJob,
 		},
 	)
+	const associatedJob = useMemo(() => data?.jobById, [data])
 
 	const displayedData = useCurrentOrPrevious(record)
 
@@ -39,8 +74,8 @@ export default function ScanRecordInspector({ record, onClose }: Props) {
 			<div className="flex flex-col">
 				<div className="px-4 py-2" data-testid="lib-meta">
 					<Label className="text-foreground-muted">{t(getFieldKey('library'))}</Label>
-					{library ? (
-						<Text size="sm">{library.name}</Text>
+					{record ? (
+						<Text size="sm">{name}</Text>
 					) : (
 						<div className="h-6 w-32 animate-pulse rounded-md bg-background-surface-hover" />
 					)}
@@ -62,29 +97,32 @@ export default function ScanRecordInspector({ record, onClose }: Props) {
 					</div>
 				)}
 
-				{job?.output_data && (
+				{associatedJob?.outputData && (
 					<div className="flex flex-col gap-y-3 px-4 py-2">
 						<Label className="text-foreground-muted">{t(getFieldKey('jobOutput'))}</Label>
 						<div className="rounded-xl bg-background-surface p-4">
 							<pre className="text-xs text-foreground-muted">
-								{JSON.stringify(job.output_data, null, 2)}
+								{JSON.stringify(associatedJob.outputData, null, 2)}
 							</pre>
 						</div>
 					</div>
 				)}
 
-				{!!job?.logs?.length && (
+				{!!associatedJob?.logs?.length && (
 					<div className="flex flex-col gap-y-3 px-4 py-2">
 						<Label className="text-foreground-muted">{t(getFieldKey('logs'))}</Label>
 
 						<Alert level="warning" className="p-2">
 							<Alert.Content className="text-sm text-foreground-subtle">
-								{t(getKey('logsPresent'))} ({job.logs.length})
+								{t(getKey('logsPresent'))} ({associatedJob.logs.length})
 							</Alert.Content>
 						</Alert>
 
 						<div>
-							<ButtonOrLink href={`/settings/server/logs?job_id=${job.id}`} variant="secondary">
+							<ButtonOrLink
+								href={`/settings/server/logs?job_id=${associatedJob.id}`}
+								variant="secondary"
+							>
 								{t(getFieldKey('seeLogs'))}
 							</ButtonOrLink>
 						</div>

@@ -531,6 +531,19 @@ scalar JSON
 "A scalar that can represent any JSON Object value."
 scalar JSONObject
 
+type Job {
+	id: String!
+	name: String!
+	description: String
+	status: String!
+	saveState: [Int!]
+	outputData: CoreJobOutput
+	msElapsed: Int!
+	createdAt: DateTime!
+	completedAt: String
+	logs: [Log!]!
+}
+
 type JobOutput {
 	id: String!
 	output: CoreJobOutput!
@@ -593,9 +606,9 @@ type Library {
 	config: LibraryConfig!
 	excludedUsers: [User!]!
 	"Get the details of the last scan job for this library, if any exists."
-	lastScan: LibraryScanRecordModel
+	lastScan: LibraryScanRecord
 	"Get the full history of scan jobs for this library."
-	scanHistory: [LibraryScanRecordModel!]!
+	scanHistory: [LibraryScanRecord!]!
 	series: [Series!]!
 	stats(allUsers: Boolean): LibraryStats!
 	tags: [Tag!]!
@@ -673,9 +686,9 @@ type LibraryScanOutput {
 	updatedSeries: Int!
 }
 
-type LibraryScanRecordModel {
+type LibraryScanRecord {
 	id: Int!
-	options: [Int!]
+	options: JSON
 	timestamp: DateTime!
 	libraryId: String!
 	jobId: String
@@ -1004,6 +1017,8 @@ type Mutation {
 	This operation will also remove any associated thumbnails of the deleted media and series.
 	"""
 	cleanLibrary(id: ID!): CleanLibraryResponse!
+	"Clear the scan history for a specific library"
+	clearScanHistory(id: ID!): Int!
 	"""
 	Create a new library with the provided configuration. If `scan_after_persist` is `true`,
 	the library will be scanned immediately after creation.
@@ -1292,6 +1307,8 @@ type Query {
 	emailDevices: [RegisteredEmailDevice!]!
 	emailDeviceById(id: Int!): RegisteredEmailDevice
 	listDirectory(pagination: Pagination!, input: DirectoryListingInput): PaginatedDirectoryListingResponse!
+	jobs: [Job!]!
+	jobById(id: ID!): Job
 	media(filter: MediaFilterInput!, orderBy: [MediaOrderBy!]! = [{media: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	mediaById(id: ID!): Media
 	mediaByPath(path: String!): Media
@@ -1627,7 +1644,7 @@ type SystemArrangmentConfig {
 }
 
 type Tag {
-	id: String!
+	id: Int!
 	name: String!
 }
 
@@ -1801,6 +1818,12 @@ enum UserPermission {
 	MANAGE_NOTIFIER
 	"Grant access to delete a notifier"
 	DELETE_NOTIFIER
+	"Grant access to read jobs"
+	READ_JOBS
+	"Grant access to read application-level logs, e.g. job logs"
+	READ_PERSISTED_LOGS
+	"Grant access to read system logs"
+	READ_SYSTEM_LOGS
 	"Grant access to manage the server. This is effectively a step below server owner"
 	MANAGE_SERVER
 }

@@ -568,6 +568,20 @@ export enum InheritPermissionValue {
   Inherit = 'INHERIT'
 }
 
+export type Job = {
+  __typename?: 'Job';
+  completedAt?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  logs: Array<Log>;
+  msElapsed: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+  outputData?: Maybe<CoreJobOutput>;
+  saveState?: Maybe<Array<Scalars['Int']['output']>>;
+  status: Scalars['String']['output'];
+};
+
 export type JobOutput = {
   __typename?: 'JobOutput';
   id: Scalars['String']['output'];
@@ -630,12 +644,12 @@ export type Library = {
   id: Scalars['String']['output'];
   jobScheduleConfigId?: Maybe<Scalars['String']['output']>;
   /** Get the details of the last scan job for this library, if any exists. */
-  lastScan?: Maybe<LibraryScanRecordModel>;
+  lastScan?: Maybe<LibraryScanRecord>;
   lastScannedAt?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   path: Scalars['String']['output'];
   /** Get the full history of scan jobs for this library. */
-  scanHistory: Array<LibraryScanRecordModel>;
+  scanHistory: Array<LibraryScanRecord>;
   series: Array<Series>;
   stats: LibraryStats;
   status: FileStatus;
@@ -722,12 +736,12 @@ export type LibraryScanOutput = {
   updatedSeries: Scalars['Int']['output'];
 };
 
-export type LibraryScanRecordModel = {
-  __typename?: 'LibraryScanRecordModel';
+export type LibraryScanRecord = {
+  __typename?: 'LibraryScanRecord';
   id: Scalars['Int']['output'];
   jobId?: Maybe<Scalars['String']['output']>;
   libraryId: Scalars['String']['output'];
-  options?: Maybe<Array<Scalars['Int']['output']>>;
+  options?: Maybe<Scalars['JSON']['output']>;
   timestamp: Scalars['DateTime']['output'];
 };
 
@@ -1037,6 +1051,8 @@ export type Mutation = {
    * This operation will also remove any associated thumbnails of the deleted media and series.
    */
   cleanLibrary: CleanLibraryResponse;
+  /** Clear the scan history for a specific library */
+  clearScanHistory: Scalars['Int']['output'];
   convertMedia: Scalars['Boolean']['output'];
   createApiKey: Apikey;
   createBookClub: BookClub;
@@ -1184,6 +1200,11 @@ export type MutationAnalyzeSeriesArgs = {
 
 
 export type MutationCleanLibraryArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationClearScanHistoryArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -1668,6 +1689,8 @@ export type Query = {
   getApiKeys: Array<Apikey>;
   getNotifierById: Notifier;
   getNotifiers: Array<Notifier>;
+  jobById?: Maybe<Job>;
+  jobs: Array<Job>;
   keepReading: PaginatedMediaResponse;
   libraries: PaginatedLibraryResponse;
   libraryById?: Maybe<Library>;
@@ -1752,6 +1775,11 @@ export type QueryGetApiKeyByIdArgs = {
 
 export type QueryGetNotifierByIdArgs = {
   id: Scalars['Int']['input'];
+};
+
+
+export type QueryJobByIdArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -2141,7 +2169,7 @@ export type SystemArrangmentConfig = {
 
 export type Tag = {
   __typename?: 'Tag';
-  id: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
   name: Scalars['String']['output'];
 };
 
@@ -2313,7 +2341,13 @@ export enum UserPermission {
   ManageServer = 'MANAGE_SERVER',
   /** Grant access to manage users (create,edit,delete) */
   ManageUsers = 'MANAGE_USERS',
+  /** Grant access to read jobs */
+  ReadJobs = 'READ_JOBS',
   ReadNotifier = 'READ_NOTIFIER',
+  /** Grant access to read application-level logs, e.g. job logs */
+  ReadPersistedLogs = 'READ_PERSISTED_LOGS',
+  /** Grant access to read system logs */
+  ReadSystemLogs = 'READ_SYSTEM_LOGS',
   /**
    * Grant access to read users.
    *
@@ -2361,7 +2395,7 @@ export type UserPreferences = {
 export type TagSelectQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type TagSelectQueryQuery = { __typename?: 'Query', tags: Array<{ __typename?: 'Tag', id: string, name: string }> };
+export type TagSelectQueryQuery = { __typename?: 'Query', tags: Array<{ __typename?: 'Tag', id: number, name: string }> };
 
 export type BookCardFragment = { __typename?: 'Media', id: string, resolvedName: string, pages: number, size: number, status: FileStatus, thumbnail: { __typename?: 'ImageRef', url: string }, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null } | null, readHistory: Array<{ __typename: 'FinishedReadingSession' }> } & { ' $fragmentName'?: 'BookCardFragment' };
 
@@ -2484,7 +2518,7 @@ export type BookOverviewHeaderQueryVariables = Exact<{
 }>;
 
 
-export type BookOverviewHeaderQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, resolvedName: string, seriesId?: string | null, metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, editors: Array<string>, genres: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, pencillers: Array<string>, publisher?: string | null, teams: Array<string>, writers: Array<string>, year?: number | null } | null, tags: Array<{ __typename?: 'Tag', id: string, name: string }> } | null };
+export type BookOverviewHeaderQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, resolvedName: string, seriesId?: string | null, metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, editors: Array<string>, genres: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, pencillers: Array<string>, publisher?: string | null, teams: Array<string>, writers: Array<string>, year?: number | null } | null, tags: Array<{ __typename?: 'Tag', id: number, name: string }> } | null };
 
 export type BooksAfterCurrentQueryQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -2575,7 +2609,7 @@ export type LibraryLayoutQueryVariables = Exact<{
 
 
 export type LibraryLayoutQuery = { __typename?: 'Query', libraryById?: (
-    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', bookCount: number, completedBooks: number, inProgressBooks: number }, tags: Array<{ __typename?: 'Tag', id: string, name: string }> }
+    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', bookCount: number, completedBooks: number, inProgressBooks: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }> }
     & { ' $fragmentRefs'?: { 'LibrarySettingsConfigFragment': LibrarySettingsConfigFragment } }
   ) | null };
 
@@ -2623,12 +2657,34 @@ export type LibrarySettingsRouterScanLibraryMutationMutationVariables = Exact<{
 
 export type LibrarySettingsRouterScanLibraryMutationMutation = { __typename?: 'Mutation', scanLibrary: boolean };
 
+export type ScanHistorySectionClearHistoryMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ScanHistorySectionClearHistoryMutation = { __typename?: 'Mutation', clearScanHistory: number };
+
+export type ScanHistoryTableQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ScanHistoryTableQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', id: string, scanHistory: Array<{ __typename?: 'LibraryScanRecord', id: number, jobId?: string | null, timestamp: any, options?: any | null }> } | null };
+
+export type ScanRecordInspectorJobsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  loadLogs: Scalars['Boolean']['input'];
+}>;
+
+
+export type ScanRecordInspectorJobsQuery = { __typename?: 'Query', jobById?: { __typename?: 'Job', id: string, outputData?: { __typename: 'ExternalJobOutput' } | { __typename: 'LibraryScanOutput' } | { __typename: 'SeriesScanOutput' } | { __typename: 'ThumbnailGenerationOutput' } | null, logs?: Array<{ __typename?: 'Log', id: number }> } | null };
+
 export type SeriesLayoutQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type SeriesLayoutQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, path: string, resolvedName: string, resolvedDescription?: string | null, library: { __typename?: 'Library', id: string, name: string }, tags: Array<{ __typename?: 'Tag', id: string, name: string }> } | null };
+export type SeriesLayoutQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, path: string, resolvedName: string, resolvedDescription?: string | null, library: { __typename?: 'Library', id: string, name: string }, tags: Array<{ __typename?: 'Tag', id: number, name: string }> } | null };
 
 export type SeriesLibrayLinkQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3253,6 +3309,37 @@ export const LibrarySettingsRouterScanLibraryMutationDocument = new TypedDocumen
   scanLibrary(id: $id, options: $options)
 }
     `) as unknown as TypedDocumentString<LibrarySettingsRouterScanLibraryMutationMutation, LibrarySettingsRouterScanLibraryMutationMutationVariables>;
+export const ScanHistorySectionClearHistoryDocument = new TypedDocumentString(`
+    mutation ScanHistorySectionClearHistory($id: ID!) {
+  clearScanHistory(id: $id)
+}
+    `) as unknown as TypedDocumentString<ScanHistorySectionClearHistoryMutation, ScanHistorySectionClearHistoryMutationVariables>;
+export const ScanHistoryTableDocument = new TypedDocumentString(`
+    query ScanHistoryTable($id: ID!) {
+  libraryById(id: $id) {
+    id
+    scanHistory {
+      id
+      jobId
+      timestamp
+      options
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<ScanHistoryTableQuery, ScanHistoryTableQueryVariables>;
+export const ScanRecordInspectorJobsDocument = new TypedDocumentString(`
+    query ScanRecordInspectorJobs($id: ID!, $loadLogs: Boolean!) {
+  jobById(id: $id) {
+    id
+    outputData {
+      __typename
+    }
+    logs @include(if: $loadLogs) {
+      id
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<ScanRecordInspectorJobsQuery, ScanRecordInspectorJobsQueryVariables>;
 export const SeriesLayoutDocument = new TypedDocumentString(`
     query SeriesLayout($id: ID!) {
   seriesById(id: $id) {

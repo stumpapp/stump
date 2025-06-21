@@ -33,7 +33,7 @@ mod tests {
 	async fn test_find_tags() {
 		let mock_db = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
 			.append_query_results(vec![vec![tag::Model {
-				id: "123".to_string(),
+				id: 123,
 				name: "hello".to_string(),
 			}]])
 			.into_connection();
@@ -41,7 +41,7 @@ mod tests {
 		let tags = get_tags(&mock_db).await.unwrap();
 
 		assert_eq!(tags.len(), 1);
-		assert_eq!(tags[0].model.id, "123");
+		assert_eq!(tags[0].model.id, 123);
 		assert_eq!(tags[0].model.name, "hello");
 	}
 

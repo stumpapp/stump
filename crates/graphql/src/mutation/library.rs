@@ -138,6 +138,31 @@ impl LibraryMutation {
 		})
 	}
 
+	/// Clear the scan history for a specific library
+	#[graphql(
+		guard = "PermissionGuard::new(&[UserPermission::ReadJobs, UserPermission::ManageLibrary])"
+	)]
+	async fn clear_scan_history(&self, ctx: &Context<'_>, id: ID) -> Result<u64> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		// This is primarily for access control assertion
+		let library = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.into_model::<library::LibraryIdentSelect>()
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+
+		let affected_records = library_scan_record::Entity::delete_many()
+			.filter(library_scan_record::Column::LibraryId.eq(library.id.clone()))
+			.exec(core.conn.as_ref())
+			.await?
+			.rows_affected;
+
+		Ok(affected_records)
+	}
+
 	/// Create a new library with the provided configuration. If `scan_after_persist` is `true`,
 	/// the library will be scanned immediately after creation.
 	#[graphql(guard = "PermissionGuard::one(UserPermission::CreateLibrary)")]

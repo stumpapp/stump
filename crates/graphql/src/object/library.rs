@@ -14,6 +14,7 @@ use sea_orm::{
 use crate::{
 	data::{CoreContext, RequestContext},
 	guard::PermissionGuard,
+	object::library_scan_record::LibraryScanRecord,
 };
 
 use super::{library_config::LibraryConfig, series::Series, tag::Tag, user::User};
@@ -70,12 +71,8 @@ impl Library {
 		Ok(users.into_iter().map(User::from).collect())
 	}
 
-	// TODO(graphql): object type to load job details
 	/// Get the details of the last scan job for this library, if any exists.
-	async fn last_scan(
-		&self,
-		ctx: &Context<'_>,
-	) -> Result<Option<library_scan_record::Model>> {
+	async fn last_scan(&self, ctx: &Context<'_>) -> Result<Option<LibraryScanRecord>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let record = library_scan_record::Entity::find()
@@ -84,15 +81,11 @@ impl Library {
 			.one(conn)
 			.await?;
 
-		Ok(record)
+		Ok(record.map(LibraryScanRecord::from))
 	}
 
-	// TODO(graphql): object type to load job details
 	/// Get the full history of scan jobs for this library.
-	async fn scan_history(
-		&self,
-		ctx: &Context<'_>,
-	) -> Result<Vec<library_scan_record::Model>> {
+	async fn scan_history(&self, ctx: &Context<'_>) -> Result<Vec<LibraryScanRecord>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let records = library_scan_record::Entity::find()
@@ -101,7 +94,7 @@ impl Library {
 			.all(conn)
 			.await?;
 
-		Ok(records)
+		Ok(records.into_iter().map(LibraryScanRecord::from).collect())
 	}
 
 	// TODO(graphql): Pagination

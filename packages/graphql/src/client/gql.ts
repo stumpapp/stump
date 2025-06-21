@@ -51,6 +51,9 @@ type Documents = {
     "\n\tfragment LibrarySettingsConfig on Library {\n\t\tconfig {\n\t\t\tid\n\t\t\tconvertRarToZip\n\t\t\thardDeleteConversions\n\t\t\tdefaultReadingDir\n\t\t\tdefaultReadingMode\n\t\t\tdefaultReadingImageScaleFit\n\t\t\tgenerateFileHashes\n\t\t\tgenerateKoreaderHashes\n\t\t\tprocessMetadata\n\t\t\twatch\n\t\t\tlibraryPattern\n\t\t\tthumbnailConfig\n\t\t\tignoreRules\n\t\t}\n\t}\n": typeof types.LibrarySettingsConfigFragmentDoc,
     "\n\tmutation LibrarySettingsRouterEditLibraryMutation($id: ID!, $input: CreateOrUpdateLibraryInput!) {\n\t\tupdateLibrary(id: $id, input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.LibrarySettingsRouterEditLibraryMutationDocument,
     "\n\tmutation LibrarySettingsRouterScanLibraryMutation($id: ID!, $options: JSON) {\n\t\tscanLibrary(id: $id, options: $options)\n\t}\n": typeof types.LibrarySettingsRouterScanLibraryMutationDocument,
+    "\n\tmutation ScanHistorySectionClearHistory($id: ID!) {\n\t\tclearScanHistory(id: $id)\n\t}\n": typeof types.ScanHistorySectionClearHistoryDocument,
+    "\n\tquery ScanHistoryTable($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tscanHistory {\n\t\t\t\tid\n\t\t\t\tjobId\n\t\t\t\ttimestamp\n\t\t\t\toptions\n\t\t\t}\n\t\t}\n\t}\n": typeof types.ScanHistoryTableDocument,
+    "\n\tquery ScanRecordInspectorJobs($id: ID!, $loadLogs: Boolean!) {\n\t\tjobById(id: $id) {\n\t\t\tid\n\t\t\toutputData {\n\t\t\t\t__typename\n\t\t\t}\n\t\t\tlogs @include(if: $loadLogs) {\n\t\t\t\tid\n\t\t\t}\n\t\t}\n\t}\n": typeof types.ScanRecordInspectorJobsDocument,
     "\n\tquery SeriesLayout($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tpath\n\t\t\tlibrary {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tresolvedName\n\t\t\tresolvedDescription\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesLayoutDocument,
     "\n\tquery SeriesLibrayLink($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": typeof types.SeriesLibrayLinkDocument,
     "\n\tquery SeriesBooksScene($filter: MediaFilterInput!, $pagination: Pagination!) {\n\t\tmedia(filter: $filter, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesBooksSceneDocument,
@@ -94,6 +97,9 @@ const documents: Documents = {
     "\n\tfragment LibrarySettingsConfig on Library {\n\t\tconfig {\n\t\t\tid\n\t\t\tconvertRarToZip\n\t\t\thardDeleteConversions\n\t\t\tdefaultReadingDir\n\t\t\tdefaultReadingMode\n\t\t\tdefaultReadingImageScaleFit\n\t\t\tgenerateFileHashes\n\t\t\tgenerateKoreaderHashes\n\t\t\tprocessMetadata\n\t\t\twatch\n\t\t\tlibraryPattern\n\t\t\tthumbnailConfig\n\t\t\tignoreRules\n\t\t}\n\t}\n": types.LibrarySettingsConfigFragmentDoc,
     "\n\tmutation LibrarySettingsRouterEditLibraryMutation($id: ID!, $input: CreateOrUpdateLibraryInput!) {\n\t\tupdateLibrary(id: $id, input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": types.LibrarySettingsRouterEditLibraryMutationDocument,
     "\n\tmutation LibrarySettingsRouterScanLibraryMutation($id: ID!, $options: JSON) {\n\t\tscanLibrary(id: $id, options: $options)\n\t}\n": types.LibrarySettingsRouterScanLibraryMutationDocument,
+    "\n\tmutation ScanHistorySectionClearHistory($id: ID!) {\n\t\tclearScanHistory(id: $id)\n\t}\n": types.ScanHistorySectionClearHistoryDocument,
+    "\n\tquery ScanHistoryTable($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tscanHistory {\n\t\t\t\tid\n\t\t\t\tjobId\n\t\t\t\ttimestamp\n\t\t\t\toptions\n\t\t\t}\n\t\t}\n\t}\n": types.ScanHistoryTableDocument,
+    "\n\tquery ScanRecordInspectorJobs($id: ID!, $loadLogs: Boolean!) {\n\t\tjobById(id: $id) {\n\t\t\tid\n\t\t\toutputData {\n\t\t\t\t__typename\n\t\t\t}\n\t\t\tlogs @include(if: $loadLogs) {\n\t\t\t\tid\n\t\t\t}\n\t\t}\n\t}\n": types.ScanRecordInspectorJobsDocument,
     "\n\tquery SeriesLayout($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tpath\n\t\t\tlibrary {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tresolvedName\n\t\t\tresolvedDescription\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesLayoutDocument,
     "\n\tquery SeriesLibrayLink($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": types.SeriesLibrayLinkDocument,
     "\n\tquery SeriesBooksScene($filter: MediaFilterInput!, $pagination: Pagination!) {\n\t\tmedia(filter: $filter, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesBooksSceneDocument,
@@ -245,6 +251,18 @@ export function graphql(source: "\n\tmutation LibrarySettingsRouterEditLibraryMu
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tmutation LibrarySettingsRouterScanLibraryMutation($id: ID!, $options: JSON) {\n\t\tscanLibrary(id: $id, options: $options)\n\t}\n"): typeof import('./graphql').LibrarySettingsRouterScanLibraryMutationDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation ScanHistorySectionClearHistory($id: ID!) {\n\t\tclearScanHistory(id: $id)\n\t}\n"): typeof import('./graphql').ScanHistorySectionClearHistoryDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery ScanHistoryTable($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tscanHistory {\n\t\t\t\tid\n\t\t\t\tjobId\n\t\t\t\ttimestamp\n\t\t\t\toptions\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').ScanHistoryTableDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery ScanRecordInspectorJobs($id: ID!, $loadLogs: Boolean!) {\n\t\tjobById(id: $id) {\n\t\t\tid\n\t\t\toutputData {\n\t\t\t\t__typename\n\t\t\t}\n\t\t\tlogs @include(if: $loadLogs) {\n\t\t\t\tid\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').ScanRecordInspectorJobsDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

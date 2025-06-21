@@ -14,9 +14,10 @@ export default function GeneralFileOptionsScene() {
 
 			<ScanHistorySection />
 
+			{/* 
 			<ScannerFeaturesPatchForm />
 			<FileConversionOptionsPatchForm />
-			<IgnoreRulesPatchForm />
+			<IgnoreRulesPatchForm /> */}
 		</div>
 	)
 }

@@ -7,8 +7,7 @@ pub struct Model {
 	pub id: i32,
 	#[sea_orm(column_type = "Text")]
 	pub series_id: String,
-	#[sea_orm(column_type = "Text")]
-	pub tag_id: String,
+	pub tag_id: i32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

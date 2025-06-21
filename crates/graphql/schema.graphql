@@ -614,7 +614,7 @@ type LibraryConfig {
 	watch: Boolean!
 	libraryPattern: LibraryPattern!
 	libraryId: String
-	imageProcessorOptions: JSON
+	thumbnailConfig: JSON
 	ignoreRules: [String!]
 }
 

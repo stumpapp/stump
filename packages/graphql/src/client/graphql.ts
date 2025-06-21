@@ -659,10 +659,10 @@ export type LibraryConfig = {
   hardDeleteConversions: Scalars['Boolean']['output'];
   id: Scalars['Int']['output'];
   ignoreRules?: Maybe<Array<Scalars['String']['output']>>;
-  imageProcessorOptions?: Maybe<Scalars['JSON']['output']>;
   libraryId?: Maybe<Scalars['String']['output']>;
   libraryPattern: LibraryPattern;
   processMetadata: Scalars['Boolean']['output'];
+  thumbnailConfig?: Maybe<Scalars['JSON']['output']>;
   watch: Scalars['Boolean']['output'];
 };
 
@@ -2605,7 +2605,7 @@ export type LibrarySeriesQueryVariables = Exact<{
 
 export type LibrarySeriesQuery = { __typename?: 'Query', series: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, resolvedName: string, mediaCount: number, percentageCompleted: number, status: FileStatus }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
-export type LibrarySettingsConfigFragment = { __typename?: 'Library', config: { __typename?: 'LibraryConfig', id: number, convertRarToZip: boolean, hardDeleteConversions: boolean, defaultReadingDir: ReadingDirection, defaultReadingMode: ReadingMode, defaultReadingImageScaleFit: ReadingImageScaleFit, generateFileHashes: boolean, generateKoreaderHashes: boolean, processMetadata: boolean, watch: boolean, libraryPattern: LibraryPattern, libraryId?: string | null, imageProcessorOptions?: any | null, ignoreRules?: Array<string> | null } } & { ' $fragmentName'?: 'LibrarySettingsConfigFragment' };
+export type LibrarySettingsConfigFragment = { __typename?: 'Library', config: { __typename?: 'LibraryConfig', id: number, convertRarToZip: boolean, hardDeleteConversions: boolean, defaultReadingDir: ReadingDirection, defaultReadingMode: ReadingMode, defaultReadingImageScaleFit: ReadingImageScaleFit, generateFileHashes: boolean, generateKoreaderHashes: boolean, processMetadata: boolean, watch: boolean, libraryPattern: LibraryPattern, thumbnailConfig?: any | null, ignoreRules?: Array<string> | null } } & { ' $fragmentName'?: 'LibrarySettingsConfigFragment' };
 
 export type LibrarySettingsRouterEditLibraryMutationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -2713,8 +2713,7 @@ export const LibrarySettingsConfigFragmentDoc = new TypedDocumentString(`
     processMetadata
     watch
     libraryPattern
-    libraryId
-    imageProcessorOptions
+    thumbnailConfig
     ignoreRules
   }
 }
@@ -3171,8 +3170,7 @@ export const LibraryLayoutDocument = new TypedDocumentString(`
     processMetadata
     watch
     libraryPattern
-    libraryId
-    imageProcessorOptions
+    thumbnailConfig
     ignoreRules
   }
 }`) as unknown as TypedDocumentString<LibraryLayoutQuery, LibraryLayoutQueryVariables>;

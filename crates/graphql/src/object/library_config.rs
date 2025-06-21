@@ -19,7 +19,9 @@ impl From<library_config::Model> for LibraryConfig {
 
 #[ComplexObject]
 impl LibraryConfig {
-	async fn image_processor_options(&self) -> Option<Json<ImageProcessorOptions>> {
+	// Note: We wrap in Json since the ImageProcessorOptions struct doesn't properly
+	// implement GraphQL serialization yet. This should be fixed in the future.
+	async fn thumbnail_config(&self) -> Option<Json<ImageProcessorOptions>> {
 		self.model.thumbnail_config.clone().map(Json)
 	}
 

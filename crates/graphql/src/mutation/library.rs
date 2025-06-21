@@ -251,6 +251,13 @@ impl LibraryMutation {
 			return Err("Library is missing associated config!".into());
 		};
 
+		enforce_valid_library_path(
+			core.conn.as_ref(),
+			&input.path,
+			Some(&existing_library.path),
+		)
+		.await?;
+
 		let existing_tags = tag::Entity::find()
 			.filter(
 				tag::Column::Id.in_subquery(
@@ -266,13 +273,6 @@ impl LibraryMutation {
 			)
 			.all(core.conn.as_ref())
 			.await?;
-
-		enforce_valid_library_path(
-			core.conn.as_ref(),
-			&input.path,
-			Some(&existing_library.path),
-		)
-		.await?;
 
 		let scan_after_update = input.scan_after_persist;
 		let add_watcher = input.config.as_ref().is_some_and(|config| config.watch);
@@ -297,74 +297,91 @@ impl LibraryMutation {
 		.update(&txn)
 		.await?;
 
-		if let Some(tags) = tags {
-			let tags_not_in_existing = tags
-				.iter()
-				.filter(|tag| !existing_tags.iter().any(|t| t.name == **tag))
-				.collect::<Vec<_>>();
+		match tags {
+			Some(tags) if tags.is_empty() && existing_tags.is_empty() => {
+				tracing::debug!("No change in tags, skipping tag update");
+			},
+			Some(tags) => {
+				let tags_not_in_existing = tags
+					.iter()
+					.filter(|tag| !existing_tags.iter().any(|t| t.name == **tag))
+					.collect::<Vec<_>>();
 
-			let tags_to_add_which_already_exist = tag::Entity::find()
-				.filter(tag::Column::Name.is_in(tags_not_in_existing.clone()))
-				.all(&txn)
-				.await?;
+				let tags_to_add_which_already_exist = tag::Entity::find()
+					.filter(tag::Column::Name.is_in(tags_not_in_existing.clone()))
+					.all(&txn)
+					.await?;
 
-			let tags_to_create = tags_not_in_existing
-				.iter()
-				.filter(|tag| {
-					!tags_to_add_which_already_exist
-						.iter()
-						.any(|t| t.name == ***tag)
-				})
-				.map(|tag| tag::ActiveModel {
-					name: Set(tag.to_string()),
-					..Default::default()
-				})
-				.collect::<Vec<_>>();
-
-			let created_tags = tag::Entity::insert_many(tags_to_create)
-				.exec_with_returning_many(&txn)
-				.await?;
-
-			let tags_to_connect = tags_to_add_which_already_exist
-				.iter()
-				.chain(created_tags.iter())
-				.map(|tag| tag.id.clone())
-				.collect::<Vec<_>>();
-
-			let tags_to_disconnect = existing_tags
-				.iter()
-				.filter(|tag| !tags.iter().any(|t| t == &tag.name))
-				.map(|tag| tag.id.clone())
-				.collect::<Vec<_>>();
-
-			if !tags_to_disconnect.is_empty() {
-				let affected_rows = library_to_tag::Entity::delete_many()
-					.filter(library_to_tag::Column::Id.is_in(tags_to_disconnect).and(
-						library_to_tag::Column::LibraryId.eq(updated_library.id.clone()),
-					))
-					.exec(&txn)
-					.await?
-					.rows_affected;
-				tracing::debug!(affected_rows, "Deleted tags from library");
-			}
-
-			if !tags_to_connect.is_empty() {
-				let library_id = updated_library.id.clone();
-				let to_link = tags_to_connect
-					.into_iter()
-					.map(|tag_id| library_to_tag::ActiveModel {
-						library_id: Set(library_id.clone()),
-						tag_id: Set(tag_id),
+				let tags_to_create = tags_not_in_existing
+					.iter()
+					.filter(|tag| {
+						!tags_to_add_which_already_exist
+							.iter()
+							.any(|t| t.name == ***tag)
+					})
+					.map(|tag| tag::ActiveModel {
+						name: Set(tag.to_string()),
 						..Default::default()
 					})
-					.collect::<Vec<library_to_tag::ActiveModel>>();
+					.collect::<Vec<_>>();
 
-				library_to_tag::Entity::insert_many(to_link)
-					.on_conflict_do_nothing()
-					.exec(&txn)
+				tracing::trace!(
+					to_create = tags_to_create.len(),
+					to_link = tags_to_add_which_already_exist.len(),
+					"Creating and linking tags to library",
+				);
+
+				let created_tags = tag::Entity::insert_many(tags_to_create)
+					.exec_with_returning_many(&txn)
 					.await?;
-			}
-		}
+
+				let tags_to_connect = tags_to_add_which_already_exist
+					.iter()
+					.chain(created_tags.iter())
+					.map(|tag| tag.id)
+					.collect::<Vec<_>>();
+
+				let tags_to_disconnect = existing_tags
+					.iter()
+					.filter(|tag| !tags.iter().any(|t| t == &tag.name))
+					.map(|tag| tag.id)
+					.collect::<Vec<_>>();
+
+				if !tags_to_disconnect.is_empty() {
+					let affected_rows = library_to_tag::Entity::delete_many()
+						.filter(
+							library_to_tag::Column::Id.is_in(tags_to_disconnect).and(
+								library_to_tag::Column::LibraryId
+									.eq(updated_library.id.clone()),
+							),
+						)
+						.exec(&txn)
+						.await?
+						.rows_affected;
+					tracing::debug!(affected_rows, "Deleted tags from library");
+				}
+
+				if !tags_to_connect.is_empty() {
+					let library_id = updated_library.id.clone();
+					let to_link = tags_to_connect
+						.into_iter()
+						.map(|tag_id| library_to_tag::ActiveModel {
+							library_id: Set(library_id.clone()),
+							tag_id: Set(tag_id),
+							..Default::default()
+						})
+						.collect::<Vec<library_to_tag::ActiveModel>>();
+
+					library_to_tag::Entity::insert_many(to_link)
+						.on_conflict_do_nothing()
+						.exec(&txn)
+						.await?;
+				}
+			},
+			_ => {
+				tracing::warn!("No tags provided, skipping tag update");
+			},
+		};
 
 		txn.commit().await?;
 

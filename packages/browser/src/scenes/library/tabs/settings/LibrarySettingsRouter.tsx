@@ -1,8 +1,9 @@
 import { useGraphQLMutation } from '@stump/client'
-import { CreateOrUpdateLibraryInput, graphql, useFragment } from '@stump/graphql'
+import { CreateOrUpdateLibraryInput, graphql, useFragment, UserPermission } from '@stump/graphql'
 import { ScanOptions } from '@stump/sdk'
 import { useQueryClient } from '@tanstack/react-query'
 import omit from 'lodash/omit'
+import pick from 'lodash/pick'
 import { lazy, Suspense, useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
@@ -34,8 +35,7 @@ export const LibrarySettingsConfig = graphql(`
 			processMetadata
 			watch
 			libraryPattern
-			libraryId
-			imageProcessorOptions
+			thumbnailConfig
 			ignoreRules
 		}
 	}
@@ -87,7 +87,7 @@ export default function LibrarySettingsRouter() {
 		[library.id, scan],
 	)
 
-	const canScan = checkPermission('library:scan')
+	const canScan = checkPermission(UserPermission.ScanLibrary)
 
 	// TODO: This is particularly fallible. It would be a lot wiser to eventually just.. y'know, literally
 	// implement a patch endpoint lol. I'm being very lazy but I'll get to it. I'm tired!
@@ -97,11 +97,12 @@ export default function LibrarySettingsRouter() {
 	 */
 	const patch = useCallback(
 		(updates: Partial<CreateOrUpdateLibraryInput>) => {
+			const configWithoutId = omit(config, 'id') as CreateOrUpdateLibraryInput['config']
 			const payload = {
-				// Note: omit returns a deep partial for whatever reason, so we cast it. This should be safe
-				...(omit(library, ['stats', '__typename', 'config', ' $fragmentRefs']) as typeof library),
+				// Note: pick returns a deep partial for whatever reason, so we cast it. This should be safe
+				...(pick(library, ['name', 'description', 'emoji', 'path']) as typeof library),
 				...updates,
-				config: updates.config ? { ...config, ...updates.config } : config,
+				config: updates.config ? { ...configWithoutId, ...updates.config } : configWithoutId,
 				tags: updates.tags ? updates.tags : library?.tags?.map(({ name }) => name),
 			} satisfies CreateOrUpdateLibraryInput
 			editLibrary({ id: library.id, input: payload })

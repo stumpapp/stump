@@ -49,6 +49,84 @@ SELECT "A",
     "B"
 FROM "_SeriesToTag";
 DROP TABLE "_SeriesToTag";
+-- The next step is to convert the tag ID to be an autoincrementing integer, but
+-- we need to try and preserve the existing links to the entities:
+-- A temporary mapping table to track old tag IDs to new ones
+CREATE TABLE "_tag_id_map" (
+    "old_id" TEXT NOT NULL,
+    "new_id" INTEGER NOT NULL,
+    PRIMARY KEY ("old_id")
+);
+-- A new tags table with an autoincrementing integer ID
+CREATE TABLE "new_tags" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "name" TEXT NOT NULL,
+    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+-- Insert the existing tags into the new table
+INSERT INTO "new_tags" ("name", "created_at")
+SELECT "name",
+    "created_at"
+FROM "tags";
+-- Step 4: Create a mapping of old tag IDs to new tag IDs
+INSERT INTO "_tag_id_map" ("old_id", "new_id")
+SELECT t_old."id",
+    t_new."id"
+FROM "tags" t_old
+    JOIN "new_tags" t_new ON t_old."name" = t_new."name";
+-- We need to redefine the relationship tables to use the new integer IDs:
+-- Update the media mapping
+CREATE TABLE "new_media_to_tag" (
+    "media_id" TEXT NOT NULL,
+    "tag_id" INTEGER NOT NULL,
+    CONSTRAINT "_media_to_tag_media_id_fkey" FOREIGN KEY ("media_id") REFERENCES "media" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "_media_to_tag_tag_id_fkey" FOREIGN KEY ("tag_id") REFERENCES "tags" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+INSERT INTO "new_media_to_tag" ("media_id", "tag_id")
+SELECT mtg."media_id",
+    map."new_id"
+FROM "_media_to_tag" mtg
+    JOIN "_tag_id_map" map ON mtg."tag_id" = map."old_id";
+-- Update the series mapping
+CREATE TABLE "new_series_to_tag" (
+    "series_id" TEXT NOT NULL,
+    "tag_id" INTEGER NOT NULL,
+    CONSTRAINT "_series_to_tag_series_id_fkey" FOREIGN KEY ("series_id") REFERENCES "series" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "_series_to_tag_tag_id_fkey" FOREIGN KEY ("tag_id") REFERENCES "tags" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+INSERT INTO "new_series_to_tag" ("series_id", "tag_id")
+SELECT stg."series_id",
+    map."new_id"
+FROM "_series_to_tag" stg
+    JOIN "_tag_id_map" map ON stg."tag_id" = map."old_id";
+-- Update the library mapping
+CREATE TABLE "new_library_to_tag" (
+    "library_id" TEXT NOT NULL,
+    "tag_id" INTEGER NOT NULL,
+    CONSTRAINT "_library_to_tag_library_id_fkey" FOREIGN KEY ("library_id") REFERENCES "libraries" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "_library_to_tag_tag_id_fkey" FOREIGN KEY ("tag_id") REFERENCES "tags" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+INSERT INTO "new_library_to_tag" ("library_id", "tag_id")
+SELECT ltg."library_id",
+    map."new_id"
+FROM "_library_to_tag" ltg
+    JOIN "_tag_id_map" map ON ltg."tag_id" = map."old_id";
+-- At this point, we should be good to drop the old tables and rename the new ones:
+DROP TABLE "_media_to_tag";
+DROP TABLE "_series_to_tag";
+DROP TABLE "_library_to_tag";
+DROP TABLE "tags";
+-- Step 10: Rename new tables
+ALTER TABLE "new_media_to_tag"
+    RENAME TO "_media_to_tag";
+ALTER TABLE "new_series_to_tag"
+    RENAME TO "_series_to_tag";
+ALTER TABLE "new_library_to_tag"
+    RENAME TO "_library_to_tag";
+ALTER TABLE "new_tags"
+    RENAME TO "tags";
+-- And drop the temporary mapping table
+DROP TABLE "_tag_id_map";
 -- Prisma seemed to handle some non-nullable cols strangely (e.g., like setting `updated_at` on insert) _without_ default values on the column. So we need to adjust those:
 CREATE TABLE "new_media" (
     "id" TEXT NOT NULL PRIMARY KEY,

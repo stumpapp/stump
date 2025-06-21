@@ -1,7 +1,9 @@
+use crate::shared::ordering::{OrderBy, OrderDirection};
 use async_graphql::SimpleObject;
-use sea_orm::entity::prelude::*;
+use filter_gen::Ordering;
+use sea_orm::{entity::prelude::*, QueryOrder};
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Ordering)]
 #[graphql(name = "SeriesMetadataModel")]
 #[sea_orm(table_name = "series_metadata")]
 pub struct Model {

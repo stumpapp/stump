@@ -241,8 +241,10 @@ export type CleanLibraryResponse = {
 }
 
 export type ComputedFilterReadingStatus =
-	| { is: ReadingStatus; isNot?: never }
-	| { is?: never; isNot: ReadingStatus }
+	| { is: ReadingStatus; isAnyOf?: never; isNoneOf?: never; isNot?: never }
+	| { is?: never; isAnyOf: Array<ReadingStatus>; isNoneOf?: never; isNot?: never }
+	| { is?: never; isAnyOf?: never; isNoneOf: Array<ReadingStatus>; isNot?: never }
+	| { is?: never; isAnyOf?: never; isNoneOf?: never; isNot: ReadingStatus }
 
 /** An event that is emitted by the core and consumed by a client */
 export type CoreEvent =
@@ -507,6 +509,8 @@ export type FieldFilterFileStatus =
 			eq?: never
 			excludes?: never
 			like?: never
+			likeAnyOf?: never
+			likeNoneOf?: never
 			neq?: never
 			noneOf?: never
 			startsWith?: never
@@ -518,6 +522,8 @@ export type FieldFilterFileStatus =
 			eq?: never
 			excludes?: never
 			like?: never
+			likeAnyOf?: never
+			likeNoneOf?: never
 			neq?: never
 			noneOf?: never
 			startsWith?: never
@@ -529,6 +535,8 @@ export type FieldFilterFileStatus =
 			eq?: never
 			excludes?: never
 			like?: never
+			likeAnyOf?: never
+			likeNoneOf?: never
 			neq?: never
 			noneOf?: never
 			startsWith?: never
@@ -540,6 +548,8 @@ export type FieldFilterFileStatus =
 			eq: FileStatus
 			excludes?: never
 			like?: never
+			likeAnyOf?: never
+			likeNoneOf?: never
 			neq?: never
 			noneOf?: never
 			startsWith?: never
@@ -551,6 +561,8 @@ export type FieldFilterFileStatus =
 			eq?: never
 			excludes: FileStatus
 			like?: never
+			likeAnyOf?: never
+			likeNoneOf?: never
 			neq?: never
 			noneOf?: never
 			startsWith?: never
@@ -562,6 +574,8 @@ export type FieldFilterFileStatus =
 			eq?: never
 			excludes?: never
 			like: FileStatus
+			likeAnyOf?: never
+			likeNoneOf?: never
 			neq?: never
 			noneOf?: never
 			startsWith?: never
@@ -573,6 +587,34 @@ export type FieldFilterFileStatus =
 			eq?: never
 			excludes?: never
 			like?: never
+			likeAnyOf: Array<FileStatus>
+			likeNoneOf?: never
+			neq?: never
+			noneOf?: never
+			startsWith?: never
+	  }
+	| {
+			anyOf?: never
+			contains?: never
+			endsWith?: never
+			eq?: never
+			excludes?: never
+			like?: never
+			likeAnyOf?: never
+			likeNoneOf: Array<FileStatus>
+			neq?: never
+			noneOf?: never
+			startsWith?: never
+	  }
+	| {
+			anyOf?: never
+			contains?: never
+			endsWith?: never
+			eq?: never
+			excludes?: never
+			like?: never
+			likeAnyOf?: never
+			likeNoneOf?: never
 			neq: FileStatus
 			noneOf?: never
 			startsWith?: never
@@ -584,6 +626,8 @@ export type FieldFilterFileStatus =
 			eq?: never
 			excludes?: never
 			like?: never
+			likeAnyOf?: never
+			likeNoneOf?: never
 			neq?: never
 			noneOf: Array<FileStatus>
 			startsWith?: never
@@ -595,6 +639,8 @@ export type FieldFilterFileStatus =
 			eq?: never
 			excludes?: never
 			like?: never
+			likeAnyOf?: never
+			likeNoneOf?: never
 			neq?: never
 			noneOf?: never
 			startsWith: FileStatus
@@ -608,6 +654,8 @@ export type FieldFilterString =
 			eq?: never
 			excludes?: never
 			like?: never
+			likeAnyOf?: never
+			likeNoneOf?: never
 			neq?: never
 			noneOf?: never
 			startsWith?: never
@@ -619,6 +667,8 @@ export type FieldFilterString =
 			eq?: never
 			excludes?: never
 			like?: never
+			likeAnyOf?: never
+			likeNoneOf?: never
 			neq?: never
 			noneOf?: never
 			startsWith?: never
@@ -630,6 +680,8 @@ export type FieldFilterString =
 			eq?: never
 			excludes?: never
 			like?: never
+			likeAnyOf?: never
+			likeNoneOf?: never
 			neq?: never
 			noneOf?: never
 			startsWith?: never
@@ -641,6 +693,8 @@ export type FieldFilterString =
 			eq: Scalars['String']['input']
 			excludes?: never
 			like?: never
+			likeAnyOf?: never
+			likeNoneOf?: never
 			neq?: never
 			noneOf?: never
 			startsWith?: never
@@ -652,6 +706,8 @@ export type FieldFilterString =
 			eq?: never
 			excludes: Scalars['String']['input']
 			like?: never
+			likeAnyOf?: never
+			likeNoneOf?: never
 			neq?: never
 			noneOf?: never
 			startsWith?: never
@@ -663,6 +719,8 @@ export type FieldFilterString =
 			eq?: never
 			excludes?: never
 			like: Scalars['String']['input']
+			likeAnyOf?: never
+			likeNoneOf?: never
 			neq?: never
 			noneOf?: never
 			startsWith?: never
@@ -674,6 +732,34 @@ export type FieldFilterString =
 			eq?: never
 			excludes?: never
 			like?: never
+			likeAnyOf: Array<Scalars['String']['input']>
+			likeNoneOf?: never
+			neq?: never
+			noneOf?: never
+			startsWith?: never
+	  }
+	| {
+			anyOf?: never
+			contains?: never
+			endsWith?: never
+			eq?: never
+			excludes?: never
+			like?: never
+			likeAnyOf?: never
+			likeNoneOf: Array<Scalars['String']['input']>
+			neq?: never
+			noneOf?: never
+			startsWith?: never
+	  }
+	| {
+			anyOf?: never
+			contains?: never
+			endsWith?: never
+			eq?: never
+			excludes?: never
+			like?: never
+			likeAnyOf?: never
+			likeNoneOf?: never
 			neq: Scalars['String']['input']
 			noneOf?: never
 			startsWith?: never
@@ -685,6 +771,8 @@ export type FieldFilterString =
 			eq?: never
 			excludes?: never
 			like?: never
+			likeAnyOf?: never
+			likeNoneOf?: never
 			neq?: never
 			noneOf: Array<Scalars['String']['input']>
 			startsWith?: never
@@ -696,6 +784,8 @@ export type FieldFilterString =
 			eq?: never
 			excludes?: never
 			like?: never
+			likeAnyOf?: never
+			likeNoneOf?: never
 			neq?: never
 			noneOf?: never
 			startsWith: Scalars['String']['input']
@@ -886,6 +976,25 @@ export type LibraryFilterInput = {
 	id?: InputMaybe<FieldFilterString>
 	name?: InputMaybe<FieldFilterString>
 	path?: InputMaybe<FieldFilterString>
+}
+
+export type LibraryModelOrderBy = {
+	direction: OrderDirection
+	field: LibraryModelOrdering
+}
+
+export enum LibraryModelOrdering {
+	ConfigId = 'CONFIG_ID',
+	CreatedAt = 'CREATED_AT',
+	Description = 'DESCRIPTION',
+	Emoji = 'EMOJI',
+	Id = 'ID',
+	JobScheduleConfigId = 'JOB_SCHEDULE_CONFIG_ID',
+	LastScannedAt = 'LAST_SCANNED_AT',
+	Name = 'NAME',
+	Path = 'PATH',
+	Status = 'STATUS',
+	UpdatedAt = 'UPDATED_AT',
 }
 
 /** The different patterns a library may be organized by */
@@ -2199,6 +2308,7 @@ export type QueryKeepReadingArgs = {
 }
 
 export type QueryLibrariesArgs = {
+	orderBy?: Array<LibraryModelOrderBy>
 	pagination?: Pagination
 }
 
@@ -2235,6 +2345,10 @@ export type QueryMediaByPathArgs = {
 	path: Scalars['String']['input']
 }
 
+export type QueryMediaMetadataOverviewArgs = {
+	seriesId?: InputMaybe<Scalars['ID']['input']>
+}
+
 export type QueryReadingListByIdArgs = {
 	id: Scalars['ID']['input']
 }
@@ -2253,6 +2367,7 @@ export type QueryRecentlyAddedSeriesArgs = {
 
 export type QuerySeriesArgs = {
 	filter: SeriesFilterInput
+	orderBy?: Array<SeriesOrderBy>
 	pagination?: Pagination
 }
 
@@ -2450,6 +2565,45 @@ export type SeriesMetadataModel = {
 	summary?: Maybe<Scalars['String']['output']>
 	title?: Maybe<Scalars['String']['output']>
 	volume?: Maybe<Scalars['Int']['output']>
+}
+
+export enum SeriesMetadataModelOrdering {
+	AgeRating = 'AGE_RATING',
+	Booktype = 'BOOKTYPE',
+	Comicid = 'COMICID',
+	Imprint = 'IMPRINT',
+	MetaType = 'META_TYPE',
+	Publisher = 'PUBLISHER',
+	SeriesId = 'SERIES_ID',
+	Status = 'STATUS',
+	Summary = 'SUMMARY',
+	Title = 'TITLE',
+	Volume = 'VOLUME',
+}
+
+export type SeriesMetadataOrderByField = {
+	direction: OrderDirection
+	field: SeriesMetadataModelOrdering
+}
+
+export enum SeriesModelOrdering {
+	CreatedAt = 'CREATED_AT',
+	Description = 'DESCRIPTION',
+	Id = 'ID',
+	LibraryId = 'LIBRARY_ID',
+	Name = 'NAME',
+	Path = 'PATH',
+	Status = 'STATUS',
+	UpdatedAt = 'UPDATED_AT',
+}
+
+export type SeriesOrderBy =
+	| { metadata: SeriesMetadataOrderByField; series?: never }
+	| { metadata?: never; series: SeriesOrderByField }
+
+export type SeriesOrderByField = {
+	direction: OrderDirection
+	field: SeriesModelOrdering
 }
 
 export type SeriesScanOutput = {
@@ -2976,6 +3130,26 @@ export type UploadLibrarySeriesMutationVariables = Exact<{
 }>
 
 export type UploadLibrarySeriesMutation = { __typename?: 'Mutation'; uploadSeries: boolean }
+
+export type MediaFilterFormQueryVariables = Exact<{
+	seriesId?: InputMaybe<Scalars['ID']['input']>
+}>
+
+export type MediaFilterFormQuery = {
+	__typename?: 'Query'
+	mediaMetadataOverview: {
+		__typename?: 'MediaMetadataOverview'
+		genres: Array<string>
+		writers: Array<string>
+		pencillers: Array<string>
+		colorists: Array<string>
+		letterers: Array<string>
+		inkers: Array<string>
+		publishers: Array<string>
+		editors: Array<string>
+		characters: Array<string>
+	}
+}
 
 export type DeleteLibraryMutationVariables = Exact<{
 	id: Scalars['ID']['input']
@@ -3694,6 +3868,21 @@ export const UploadLibrarySeriesDocument = new TypedDocumentString(`
 	UploadLibrarySeriesMutation,
 	UploadLibrarySeriesMutationVariables
 >
+export const MediaFilterFormDocument = new TypedDocumentString(`
+    query MediaFilterForm($seriesId: ID) {
+  mediaMetadataOverview(seriesId: $seriesId) {
+    genres
+    writers
+    pencillers
+    colorists
+    letterers
+    inkers
+    publishers
+    editors
+    characters
+  }
+}
+    `) as unknown as TypedDocumentString<MediaFilterFormQuery, MediaFilterFormQueryVariables>
 export const DeleteLibraryDocument = new TypedDocumentString(`
     mutation DeleteLibrary($id: ID!) {
   deleteLibrary(id: $id) {

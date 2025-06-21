@@ -1,23 +1,31 @@
+import {
+	LibraryFilterInput,
+	LibraryModelOrdering,
+	MediaFilterInput,
+	MediaModelOrdering,
+	OffsetPagination,
+	OrderDirection,
+	SeriesFilterInput,
+	SeriesModelOrdering,
+} from '@stump/graphql'
 import { createContext, useContext } from 'react'
 
 import { noop } from '../../utils/misc'
 
-export type Ordering = {
-	direction?: 'asc' | 'desc'
-	order_by?: string
-}
+export type OrderingField = MediaModelOrdering | SeriesModelOrdering | LibraryModelOrdering
+export type FilterInput = MediaFilterInput | SeriesFilterInput | LibraryFilterInput
 
-export type Pagination = {
-	page: number
-	page_size: number
+export type Ordering = {
+	direction?: OrderDirection
+	order_by?: OrderingField
 }
 
 export type IFilterContext = {
-	filters?: Record<string, unknown>
+	filters?: FilterInput
 	ordering: Ordering
-	pagination: Pagination
+	pagination: OffsetPagination
 	setPage: (page: number) => void
-	setFilters: (filters: Record<string, unknown>) => void
+	setFilters: (filters: FilterInput) => void
 	setFilter: (key: string, value: unknown) => void
 	setOrdering: (ordering: Ordering) => void
 	removeFilter: (key: string) => void
@@ -26,7 +34,7 @@ export type IFilterContext = {
 export const FilterContext = createContext<IFilterContext>({
 	filters: {},
 	ordering: {},
-	pagination: { page: 1, page_size: 20 },
+	pagination: { page: 1, pageSize: 20 },
 	removeFilter: noop,
 	setFilter: noop,
 	setFilters: noop,

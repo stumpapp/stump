@@ -577,3 +577,11 @@ export type DesktopAppStore = { run_bundled_server: boolean; active_server?: Sav
 
 export type CredentialStoreTokenState = { [key: string]: boolean }
 
+// DESKTOP TYPE GENERATION
+
+export type SavedServer = { name: string; uri: string }
+
+export type DesktopAppStore = { run_bundled_server: boolean; active_server?: SavedServer | null; connected_servers: SavedServer[] }
+
+export type CredentialStoreTokenState = { [key: string]: boolean }
+

@@ -194,6 +194,8 @@ type CleanLibraryResponse {
 input ComputedFilterReadingStatus @oneOf {
 	is: ReadingStatus
 	isNot: ReadingStatus
+	isAnyOf: [ReadingStatus!]
+	isNoneOf: [ReadingStatus!]
 }
 
 "An event that is emitted by the core and consumed by a client"
@@ -443,6 +445,8 @@ input FieldFilterFileStatus @oneOf {
 	anyOf: [FileStatus!]
 	noneOf: [FileStatus!]
 	like: FileStatus
+	likeAnyOf: [FileStatus!]
+	likeNoneOf: [FileStatus!]
 	contains: FileStatus
 	excludes: FileStatus
 	startsWith: FileStatus
@@ -455,6 +459,8 @@ input FieldFilterString @oneOf {
 	anyOf: [String!]
 	noneOf: [String!]
 	like: String
+	likeAnyOf: [String!]
+	likeNoneOf: [String!]
 	contains: String
 	excludes: String
 	startsWith: String
@@ -640,6 +646,25 @@ input LibraryFilterInput {
 	_and: [LibraryFilterInput!] = null
 	_not: [LibraryFilterInput!] = null
 	_or: [LibraryFilterInput!] = null
+}
+
+input LibraryModelOrderBy {
+	field: LibraryModelOrdering!
+	direction: OrderDirection!
+}
+
+enum LibraryModelOrdering {
+	ID
+	NAME
+	DESCRIPTION
+	PATH
+	STATUS
+	UPDATED_AT
+	CREATED_AT
+	EMOJI
+	CONFIG_ID
+	JOB_SCHEDULE_CONFIG_ID
+	LAST_SCANNED_AT
 }
 
 "The different patterns a library may be organized by"
@@ -1330,12 +1355,12 @@ type Query {
 	epubById(id: ID!): Epub!
 	"Get all bookmarks for a single epub by its media ID"
 	bookmarksByMediaId(id: ID!): [Bookmark!]!
-	libraries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLibraryResponse!
+	libraries(orderBy: [LibraryModelOrderBy!]! = [{field: NAME, direction: ASC}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLibraryResponse!
 	libraryById(id: ID!): Library
 	numberOfLibraries: Int!
-	mediaMetadataOverview: MediaMetadataOverview!
+	mediaMetadataOverview(seriesId: ID): MediaMetadataOverview!
 	smartListViews: [SmartListView!]!
-	series(filter: SeriesFilterInput!, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
+	series(filter: SeriesFilterInput!, orderBy: [SeriesOrderBy!]! = [{series: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
 	seriesById(id: ID!): Series
 	numberOfSeries: Int!
 	recentlyAddedSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
@@ -1513,6 +1538,46 @@ type SeriesMetadataModel {
 	ageRating: Int
 	status: String
 	seriesId: String!
+}
+
+enum SeriesMetadataModelOrdering {
+	META_TYPE
+	TITLE
+	SUMMARY
+	PUBLISHER
+	IMPRINT
+	COMICID
+	VOLUME
+	BOOKTYPE
+	AGE_RATING
+	STATUS
+	SERIES_ID
+}
+
+input SeriesMetadataOrderByField {
+	field: SeriesMetadataModelOrdering!
+	direction: OrderDirection!
+}
+
+enum SeriesModelOrdering {
+	ID
+	NAME
+	DESCRIPTION
+	UPDATED_AT
+	CREATED_AT
+	PATH
+	STATUS
+	LIBRARY_ID
+}
+
+input SeriesOrderBy @oneOf {
+	series: SeriesOrderByField
+	metadata: SeriesMetadataOrderByField
+}
+
+input SeriesOrderByField {
+	field: SeriesModelOrdering!
+	direction: OrderDirection!
 }
 
 type SeriesScanOutput {

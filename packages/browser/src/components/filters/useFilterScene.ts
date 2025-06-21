@@ -1,9 +1,10 @@
+import { MediaFilterInput, OrderDirection } from '@stump/graphql'
 import { toObjectParams, toUrlParams } from '@stump/sdk'
 import { useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useMediaMatch } from 'rooks'
 
-import { IFilterContext, Ordering } from './context'
+import { FilterInput, IFilterContext, Ordering, OrderingField } from './context'
 import { EXCLUDED_FILTER_KEYS } from './utils'
 
 type Return = IFilterContext
@@ -91,7 +92,7 @@ export function useFilterScene(): Return {
 	 */
 	const filters = useMemo(
 		() =>
-			toObjectParams<Record<string, unknown>>(searchParams, {
+			toObjectParams<MediaFilterInput>(searchParams, {
 				ignoreKeys: EXCLUDED_FILTER_KEYS,
 				removeEmpty: true,
 			}),
@@ -102,11 +103,10 @@ export function useFilterScene(): Return {
 	 * An object representation of the ordering params
 	 */
 	const ordering = useMemo(
-		() =>
-			objectWithoutEmptyValues({
-				direction: searchParams.get('direction') as 'asc' | 'desc' | undefined,
-				order_by: searchParams.get('order_by') as string | undefined,
-			}),
+		() => ({
+			order_by: searchParams.get('order_by') as OrderingField,
+			direction: searchParams.get('direction') as OrderDirection,
+		}),
 		[searchParams],
 	)
 
@@ -154,7 +154,7 @@ export function useFilterScene(): Return {
 	 * Replace the current filters with the provided filters
 	 */
 	const handleSetFilters = useCallback(
-		(newFilters: Record<string, unknown>) => {
+		(newFilters: FilterInput) => {
 			// setFilters(toUrlParams(newFilters, undefined, { removeEmpty: true }))
 			setSearchParams(
 				toUrlParams(
@@ -209,14 +209,3 @@ export function useFilterScene(): Return {
 		setPage,
 	}
 }
-
-const objectWithoutEmptyValues = (obj: Record<string, unknown>) =>
-	Object.entries(obj).reduce(
-		(acc, [key, value]) => {
-			if (value) {
-				acc[key] = value
-			}
-			return acc
-		},
-		{} as Record<string, unknown>,
-	)

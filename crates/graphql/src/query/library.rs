@@ -1,5 +1,8 @@
 use async_graphql::{Context, Object, Result, ID};
-use models::entity::library;
+use models::{
+	entity::library::{self, LibraryModelOrderBy},
+	shared::ordering::{OrderBy, OrderDirection},
+};
 use sea_orm::{prelude::*, QuerySelect};
 
 use crate::{
@@ -14,18 +17,32 @@ use crate::{
 #[derive(Default)]
 pub struct LibraryQuery;
 
+fn default_order_by_vec() -> Vec<LibraryModelOrderBy> {
+	// Default ordering for libraries, can be customized as needed
+	vec![LibraryModelOrderBy {
+		field: library::LibraryModelOrdering::Name,
+		direction: OrderDirection::Asc,
+	}]
+}
+
 #[Object]
 impl LibraryQuery {
 	async fn libraries(
 		&self,
 		ctx: &Context<'_>,
+		#[graphql(default_with = "default_order_by_vec()")] order_by: Vec<
+			LibraryModelOrderBy,
+		>,
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<Library>> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let query = library::Entity::find_for_user(user);
+		let query = LibraryModelOrderBy::add_order_by(
+			&order_by,
+			library::Entity::find_for_user(user),
+		)?;
 
 		match pagination.resolve() {
 			Pagination::Cursor(info) => {

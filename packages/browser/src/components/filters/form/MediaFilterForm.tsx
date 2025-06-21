@@ -50,7 +50,7 @@ const schema = z.object({
 			writer: z.array(z.string()).optional(),
 		})
 		.optional(),
-	read_status: z.array(z.nativeEnum(ReadingStatus)).optional(),
+	read_status: z.array(z.enum(['finished', 'reading', 'not_started'])).optional(),
 })
 export type MediaFilterFormSchema = z.infer<typeof schema>
 
@@ -90,7 +90,7 @@ export default function MediaFilterForm() {
 		return {
 			extension: filters?.extension?.eq as string,
 			metadata: flattenMetadata,
-			read_status: filters?.readingStatus?.isAnyOf.map((elem) => (elem as string).toLowerCase()),
+			read_status: filters?.readingStatus?.isAnyOf?.map((elem) => (elem as string).toLowerCase()),
 		}
 	}, [filters])
 
@@ -115,7 +115,7 @@ export default function MediaFilterForm() {
 			readingStatus: values.read_status
 				? {
 						isAnyOf: values.read_status?.map(
-							(elem) => (elem as string).toUpperCase() as ReadingStatus,
+							(elem: string) => (elem as string).toUpperCase() as ReadingStatus,
 						),
 					}
 				: null,

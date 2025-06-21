@@ -1,4 +1,4 @@
-import { MediaFilterInput, OrderDirection } from '@stump/graphql'
+import { OrderDirection } from '@stump/graphql'
 import { toObjectParams, toUrlParams } from '@stump/sdk'
 import { useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
@@ -92,7 +92,7 @@ export function useFilterScene(): Return {
 	 */
 	const filters = useMemo(
 		() =>
-			toObjectParams<MediaFilterInput>(searchParams, {
+			toObjectParams<FilterInput>(searchParams, {
 				ignoreKeys: EXCLUDED_FILTER_KEYS,
 				removeEmpty: true,
 			}),

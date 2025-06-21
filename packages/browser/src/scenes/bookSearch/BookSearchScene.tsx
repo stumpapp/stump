@@ -71,7 +71,7 @@ export const usePrefetchBookSearch = () => {
 				queryKey: getQueryKey(pageParams.page, pageParams.pageSize, params.filters, params.orderBy),
 				queryFn: async () => {
 					const response = await sdk.execute(query, {
-						filter: {},
+						filter: params.filters,
 						orderBy: params.orderBy,
 						pagination: {
 							offset: {
@@ -128,12 +128,13 @@ function useMediaURLOrderBy(ordering: Ordering): MediaOrderBy[] {
 function BookSearchScene() {
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
 	const {
-		filters,
+		filters: mediaFilters,
 		ordering,
 		pagination: { page, pageSize: pageSizeMaybeUndefined },
 		setPage,
 		...rest
 	} = useFilterScene()
+	const filters = mediaFilters as MediaFilterInput
 
 	const { layoutMode, setLayout } = useBooksLayout((state) => ({
 		columns: state.columns,
@@ -144,15 +145,14 @@ function BookSearchScene() {
 
 	const pageSize = pageSizeMaybeUndefined || 20 // Fallback to 20 if pageSize is undefined, this should never happen since we set a default in the useFilterScene hook
 	const orderBy = useMediaURLOrderBy(ordering)
-	const mediaFilters = filters ? (filters as MediaFilterInput) : {}
 
 	const {
 		data: {
 			media: { nodes, pageInfo },
 		},
 		isLoading,
-	} = useSuspenseGraphQL(query, getQueryKey(page, pageSize, mediaFilters, orderBy), {
-		filter: mediaFilters,
+	} = useSuspenseGraphQL(query, getQueryKey(page, pageSize, filters, orderBy), {
+		filter: filters,
 		orderBy: orderBy,
 		pagination: {
 			offset: {
@@ -194,7 +194,7 @@ function BookSearchScene() {
 						prefetch({
 							page,
 							pageSize,
-							filters: mediaFilters,
+							filters,
 							orderBy,
 						})
 					}}
@@ -204,8 +204,7 @@ function BookSearchScene() {
 							isLoading={isLoading}
 							items={cards}
 							hasFilters={
-								Object.keys(mediaFilters).length > 0 ||
-								Object.keys(mediaFilters?.metadata || {}).length > 0
+								Object.keys(filters).length > 0 || Object.keys(filters?.metadata || {}).length > 0
 							}
 						/>
 					</div>

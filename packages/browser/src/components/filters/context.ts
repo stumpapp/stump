@@ -21,7 +21,7 @@ export type Ordering = {
 }
 
 export type IFilterContext = {
-	filters?: FilterInput
+	filters: FilterInput
 	ordering: Ordering
 	pagination: OffsetPagination
 	setPage: (page: number) => void

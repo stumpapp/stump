@@ -1,5 +1,5 @@
 import { useGraphQL } from '@stump/client'
-import { Alert, ButtonOrLink, Label, Sheet, Text } from '@stump/components'
+import { Alert, ButtonOrLink, cn, Label, Sheet, Text } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import dayjs from 'dayjs'
@@ -7,6 +7,7 @@ import { useMemo } from 'react'
 
 import { useAppContext } from '@/context'
 import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
+import { usePreferences } from '@/hooks/usePreferences'
 
 import { useLibraryManagement } from '../../../context'
 import { LibraryScanRecord } from './ScanHistoryTable'
@@ -19,6 +20,17 @@ const query = graphql(`
 			id
 			outputData {
 				__typename
+				... on LibraryScanOutput {
+					totalFiles
+					totalDirectories
+					ignoredFiles
+					skippedFiles
+					ignoredDirectories
+					createdMedia
+					updatedMedia
+					createdSeries
+					updatedSeries
+				}
 			}
 			logs @include(if: $loadLogs) {
 				id
@@ -35,6 +47,9 @@ type Props = {
 export default function ScanRecordInspector({ record, onClose }: Props) {
 	const { t } = useLocaleContext()
 	const { checkPermission } = useAppContext()
+	const {
+		preferences: { enableHideScrollbar },
+	} = usePreferences()
 	const {
 		library: { name },
 	} = useLibraryManagement()
@@ -71,7 +86,11 @@ export default function ScanRecordInspector({ record, onClose }: Props) {
 			title={t(getKey('title'))}
 			description={t(getKey('description'))}
 		>
-			<div className="flex flex-col">
+			<div
+				className={cn('flex flex-col overflow-y-auto', {
+					'scrollbar-hide': enableHideScrollbar,
+				})}
+			>
 				<div className="px-4 py-2" data-testid="lib-meta">
 					<Label className="text-foreground-muted">{t(getFieldKey('library'))}</Label>
 					{record ? (
@@ -120,7 +139,7 @@ export default function ScanRecordInspector({ record, onClose }: Props) {
 
 						<div>
 							<ButtonOrLink
-								href={`/settings/server/logs?job_id=${associatedJob.id}`}
+								href={`/settings/server/logs?jobId=${associatedJob.id}`}
 								variant="secondary"
 							>
 								{t(getFieldKey('seeLogs'))}

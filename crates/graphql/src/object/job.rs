@@ -1,4 +1,4 @@
-use async_graphql::{ComplexObject, Result, SimpleObject};
+use async_graphql::{ComplexObject, Json, Result, SimpleObject};
 use models::{entity::job, shared::enums::UserPermission};
 use stump_core::job::CoreJobOutput;
 
@@ -24,6 +24,19 @@ impl Job {
 			Some(data) => serde_json::from_slice(data.as_ref())
 				.map_err(|error| {
 					tracing::error!(?error, "Failed to parse job output data");
+					error
+				})
+				.ok(),
+			None => None,
+		}
+	}
+
+	async fn save_state(&self) -> Option<Json<serde_json::Value>> {
+		match &self.model.save_state {
+			Some(data) => serde_json::from_slice(data.as_ref())
+				.map(Json)
+				.map_err(|error| {
+					tracing::error!(?error, "Failed to parse job save state");
 					error
 				})
 				.ok(),

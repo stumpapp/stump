@@ -14,8 +14,10 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	pub status: String,
 	#[sea_orm(column_type = "Blob", nullable)]
+	#[graphql(skip)]
 	pub save_state: Option<Vec<u8>>,
 	#[sea_orm(column_type = "Blob", nullable)]
+	#[graphql(skip)]
 	pub output_data: Option<Vec<u8>>,
 	pub ms_elapsed: i64,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]

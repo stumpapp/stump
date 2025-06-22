@@ -1,4 +1,4 @@
-import { useGraphQLMutation } from '@stump/client'
+import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Button, Heading, Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
@@ -17,6 +17,7 @@ const mutation = graphql(`
 
 export default function ScanningSection() {
 	const { t } = useLocaleContext()
+	const { sdk } = useSDK()
 	const {
 		library: { id },
 	} = useLibraryManagement()
@@ -24,7 +25,7 @@ export default function ScanningSection() {
 	const client = useQueryClient()
 
 	const { mutate: clearHistory } = useGraphQLMutation(mutation, {
-		onSuccess: () => client.invalidateQueries({ queryKey: ['scanHistory', id] }),
+		onSuccess: () => client.refetchQueries({ queryKey: sdk.cacheKey('scanHistory', [id]) }),
 	})
 
 	const [isNoHistory, setIsNoHistory] = useState(false)

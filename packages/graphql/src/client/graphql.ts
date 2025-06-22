@@ -2669,7 +2669,7 @@ export type ScanRecordInspectorJobsQueryVariables = Exact<{
 }>;
 
 
-export type ScanRecordInspectorJobsQuery = { __typename?: 'Query', jobById?: { __typename?: 'Job', id: string, outputData?: { __typename: 'ExternalJobOutput' } | { __typename: 'LibraryScanOutput' } | { __typename: 'SeriesScanOutput' } | { __typename: 'ThumbnailGenerationOutput' } | null, logs?: Array<{ __typename?: 'Log', id: number }> } | null };
+export type ScanRecordInspectorJobsQuery = { __typename?: 'Query', jobById?: { __typename?: 'Job', id: string, outputData?: { __typename: 'ExternalJobOutput' } | { __typename: 'LibraryScanOutput', totalFiles: number, totalDirectories: number, ignoredFiles: number, skippedFiles: number, ignoredDirectories: number, createdMedia: number, updatedMedia: number, createdSeries: number, updatedSeries: number } | { __typename: 'SeriesScanOutput' } | { __typename: 'ThumbnailGenerationOutput' } | null, logs?: Array<{ __typename?: 'Log', id: number }> } | null };
 
 export type SeriesLayoutQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3361,6 +3361,17 @@ export const ScanRecordInspectorJobsDocument = new TypedDocumentString(`
     id
     outputData {
       __typename
+      ... on LibraryScanOutput {
+        totalFiles
+        totalDirectories
+        ignoredFiles
+        skippedFiles
+        ignoredDirectories
+        createdMedia
+        updatedMedia
+        createdSeries
+        updatedSeries
+      }
     }
     logs @include(if: $loadLogs) {
       id

@@ -1,6 +1,6 @@
 import { useGraphQLMutation } from '@stump/client'
 import { Button } from '@stump/components'
-import { BookOverviewSceneQuery, graphql } from '@stump/graphql'
+import { BookCardFragment, graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
 import toast from 'react-hot-toast'
@@ -25,13 +25,8 @@ const deleteMutation = graphql(`
 	}
 `)
 
-type BookCompletionToggleFragment = Pick<
-	NonNullable<BookOverviewSceneQuery['mediaById']>,
-	'id' | 'readHistory' | 'readProgress' | 'extension' | 'pages'
->
-
 type Props = {
-	book: BookCompletionToggleFragment
+	book: BookCardFragment
 }
 export default function BookCompletionToggleButton({ book }: Props) {
 	const { mutate: completeBook } = useGraphQLMutation(completedMutation)

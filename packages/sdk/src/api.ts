@@ -2,6 +2,7 @@ import type { TypedDocumentString } from '@stump/graphql'
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 
 import { AuthenticationMethod, Configuration } from './configuration'
+import { cacheKeys } from './constants'
 import {
 	APIKeyAPI,
 	AuthAPI,
@@ -279,6 +280,17 @@ export class Api {
 			sdk: this,
 			...options,
 		})
+	}
+
+	/**
+	 * A convenience method to generate a cache key for a given API call. This is intended to be used
+	 * with `@tanstack/react-query` to ensure that cache keys are consistent across the application
+	 *
+	 * @param key The prefix key for the cache key
+	 * @param args Any additional arguments to be included in the cache key
+	 */
+	cacheKey(key: keyof typeof cacheKeys, args?: unknown[]): readonly unknown[] {
+		return [cacheKeys[key], ...(args || [])]
 	}
 
 	/**

@@ -1,6 +1,6 @@
-import { useSuspenseGraphQL } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Accordion, Text } from '@stump/components'
-import { FilterableArrangementEntityLink, graphql } from '@stump/graphql'
+import { FilterableArrangementEntityLink, graphql, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Library } from 'lucide-react'
 import { useMemo } from 'react'
@@ -37,17 +37,21 @@ export default function LibrarySideBarSection({
 	const location = useLocation()
 
 	const { t } = useLocaleContext()
+	const { sdk } = useSDK()
 	const {
 		data: {
 			libraries: { nodes: libraries },
 		},
-	} = useSuspenseGraphQL(query, ['libraries'])
+	} = useSuspenseGraphQL(query, sdk.cacheKey('libraries'))
 
 	const { checkPermission } = useAppContext()
 
 	const isCurrentLibrary = (id: string) => location.pathname.startsWith(paths.librarySeries(id))
 
-	const canCreateLibrary = useMemo(() => checkPermission('library:create'), [checkPermission])
+	const canCreateLibrary = useMemo(
+		() => checkPermission(UserPermission.CreateLibrary),
+		[checkPermission],
+	)
 	const showCreateLink = canCreateLibrary && links.includes(FilterableArrangementEntityLink.Create)
 
 	const renderLibraries = () => {
@@ -60,7 +64,7 @@ export default function LibrarySideBarSection({
 		}
 
 		return libraries.map((library) => {
-			const canChange = checkPermission('library:manage') && !isMobile
+			const canChange = checkPermission(UserPermission.ManageLibrary) && !isMobile
 			const leftContent = (
 				<LibraryEmoji
 					emoji={library.emoji || undefined}

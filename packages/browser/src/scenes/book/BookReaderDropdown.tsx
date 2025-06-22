@@ -1,5 +1,5 @@
 import { ButtonOrLink, DropdownMenu, IconButton } from '@stump/components'
-import { BookOverviewSceneQuery } from '@stump/graphql'
+import { BookCardFragment } from '@stump/graphql'
 import { ChevronDown } from 'lucide-react'
 import { useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router'
@@ -7,13 +7,8 @@ import { useNavigate } from 'react-router'
 import paths from '@/paths'
 import { EBOOK_EXTENSION } from '@/utils/patterns'
 
-type BookReaderDropdownFragment = Pick<
-	NonNullable<BookOverviewSceneQuery['mediaById']>,
-	'id' | 'readHistory' | 'readProgress' | 'extension' | 'pages'
->
-
 type Props = {
-	book: BookReaderDropdownFragment
+	book: BookCardFragment
 }
 
 export default function BookReaderDropdown({ book }: Props) {
@@ -146,7 +141,9 @@ export default function BookReaderDropdown({ book }: Props) {
 	)
 }
 
-export const isReadAgainPrompt = (book: BookReaderDropdownFragment) => {
+export const isReadAgainPrompt = (
+	book: Pick<BookCardFragment, 'pages' | 'readProgress' | 'readHistory' | 'extension'>,
+) => {
 	const { pages, readProgress, readHistory, extension } = book
 	const { page, epubcfi } = readProgress || {}
 

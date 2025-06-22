@@ -1,4 +1,4 @@
-import { useSuspenseGraphQL } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Heading, Text } from '@stump/components'
 import { BookOverviewHeaderQuery, graphql } from '@stump/graphql'
 
@@ -110,9 +110,10 @@ function build_metadata_table(
 }
 
 export default function BookOverviewSceneHeader({ id }: Props) {
+	const { sdk } = useSDK()
 	const {
 		data: { mediaById: media },
-	} = useSuspenseGraphQL(query, ['bookOverviewHeader', id], {
+	} = useSuspenseGraphQL(query, sdk.cacheKey('bookOverviewHeader', [id]), {
 		id: id || '',
 	})
 

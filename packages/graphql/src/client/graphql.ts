@@ -2397,7 +2397,7 @@ export type TagSelectQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type TagSelectQueryQuery = { __typename?: 'Query', tags: Array<{ __typename?: 'Tag', id: number, name: string }> };
 
-export type BookCardFragment = { __typename?: 'Media', id: string, resolvedName: string, pages: number, size: number, status: FileStatus, thumbnail: { __typename?: 'ImageRef', url: string }, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null } | null, readHistory: Array<{ __typename: 'FinishedReadingSession' }> } & { ' $fragmentName'?: 'BookCardFragment' };
+export type BookCardFragment = { __typename?: 'Media', id: string, resolvedName: string, extension: string, pages: number, size: number, status: FileStatus, thumbnail: { __typename?: 'ImageRef', url: string }, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null } | null, readHistory: Array<{ __typename: 'FinishedReadingSession', completedAt: any }> } & { ' $fragmentName'?: 'BookCardFragment' };
 
 export type MediaAtPathQueryVariables = Exact<{
   path: Scalars['String']['input'];
@@ -2496,6 +2496,8 @@ export type BookCompletionToggleButtonDeleteSessionMutationVariables = Exact<{
 
 export type BookCompletionToggleButtonDeleteSessionMutation = { __typename?: 'Mutation', deleteMediaProgress: { __typename: 'Media' } };
 
+export type BookFileInformationFragment = { __typename?: 'Media', id: string, size: number, extension: string, hash?: string | null, relativeLibraryPath: string } & { ' $fragmentName'?: 'BookFileInformationFragment' };
+
 export type BookLibrarySeriesLinksQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -2509,8 +2511,8 @@ export type BookOverviewSceneQueryVariables = Exact<{
 
 
 export type BookOverviewSceneQuery = { __typename?: 'Query', mediaById?: (
-    { __typename?: 'Media', extension: string, metadata?: { __typename?: 'MediaMetadata', links: Array<string>, summary?: string | null } | null }
-    & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
+    { __typename?: 'Media', id: string, resolvedName: string, extension: string, metadata?: { __typename?: 'MediaMetadata', links: Array<string>, summary?: string | null } | null, readHistory: Array<{ __typename?: 'FinishedReadingSession', completedAt: any }> }
+    & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookFileInformationFragment': BookFileInformationFragment } }
   ) | null };
 
 export type BookOverviewHeaderQueryVariables = Exact<{
@@ -2739,6 +2741,7 @@ export const BookCardFragmentDoc = new TypedDocumentString(`
     fragment BookCard on Media {
   id
   resolvedName
+  extension
   pages
   size
   status
@@ -2752,9 +2755,19 @@ export const BookCardFragmentDoc = new TypedDocumentString(`
   }
   readHistory {
     __typename
+    completedAt
   }
 }
     `, {"fragmentName":"BookCard"}) as unknown as TypedDocumentString<BookCardFragment, unknown>;
+export const BookFileInformationFragmentDoc = new TypedDocumentString(`
+    fragment BookFileInformation on Media {
+  id
+  size
+  extension
+  hash
+  relativeLibraryPath
+}
+    `, {"fragmentName":"BookFileInformation"}) as unknown as TypedDocumentString<BookFileInformationFragment, unknown>;
 export const LibrarySettingsConfigFragmentDoc = new TypedDocumentString(`
     fragment LibrarySettingsConfig on Library {
   config {
@@ -2927,17 +2940,24 @@ export const BookLibrarySeriesLinksDocument = new TypedDocumentString(`
 export const BookOverviewSceneDocument = new TypedDocumentString(`
     query BookOverviewScene($id: ID!) {
   mediaById(id: $id) {
+    id
     ...BookCard
+    ...BookFileInformation
+    resolvedName
     extension
     metadata {
       links
       summary
+    }
+    readHistory {
+      completedAt
     }
   }
 }
     fragment BookCard on Media {
   id
   resolvedName
+  extension
   pages
   size
   status
@@ -2951,7 +2971,15 @@ export const BookOverviewSceneDocument = new TypedDocumentString(`
   }
   readHistory {
     __typename
+    completedAt
   }
+}
+fragment BookFileInformation on Media {
+  id
+  size
+  extension
+  hash
+  relativeLibraryPath
 }`) as unknown as TypedDocumentString<BookOverviewSceneQuery, BookOverviewSceneQueryVariables>;
 export const BookOverviewHeaderDocument = new TypedDocumentString(`
     query BookOverviewHeader($id: ID!) {
@@ -3003,6 +3031,7 @@ export const BooksAfterCurrentQueryDocument = new TypedDocumentString(`
     fragment BookCard on Media {
   id
   resolvedName
+  extension
   pages
   size
   status
@@ -3016,6 +3045,7 @@ export const BooksAfterCurrentQueryDocument = new TypedDocumentString(`
   }
   readHistory {
     __typename
+    completedAt
   }
 }`) as unknown as TypedDocumentString<BooksAfterCurrentQueryQuery, BooksAfterCurrentQueryQueryVariables>;
 export const EmailBookDropdownDeviceDocument = new TypedDocumentString(`
@@ -3083,6 +3113,7 @@ export const BookSearchSceneDocument = new TypedDocumentString(`
     fragment BookCard on Media {
   id
   resolvedName
+  extension
   pages
   size
   status
@@ -3096,6 +3127,7 @@ export const BookSearchSceneDocument = new TypedDocumentString(`
   }
   readHistory {
     __typename
+    completedAt
   }
 }`) as unknown as TypedDocumentString<BookSearchSceneQuery, BookSearchSceneQueryVariables>;
 export const ContinueReadingMediaQueryDocument = new TypedDocumentString(`
@@ -3118,6 +3150,7 @@ export const ContinueReadingMediaQueryDocument = new TypedDocumentString(`
     fragment BookCard on Media {
   id
   resolvedName
+  extension
   pages
   size
   status
@@ -3131,6 +3164,7 @@ export const ContinueReadingMediaQueryDocument = new TypedDocumentString(`
   }
   readHistory {
     __typename
+    completedAt
   }
 }`) as unknown as TypedDocumentString<ContinueReadingMediaQueryQuery, ContinueReadingMediaQueryQueryVariables>;
 export const HomeSceneQueryDocument = new TypedDocumentString(`
@@ -3158,6 +3192,7 @@ export const RecentlyAddedMediaQueryDocument = new TypedDocumentString(`
     fragment BookCard on Media {
   id
   resolvedName
+  extension
   pages
   size
   status
@@ -3171,6 +3206,7 @@ export const RecentlyAddedMediaQueryDocument = new TypedDocumentString(`
   }
   readHistory {
     __typename
+    completedAt
   }
 }`) as unknown as TypedDocumentString<RecentlyAddedMediaQueryQuery, RecentlyAddedMediaQueryQueryVariables>;
 export const RecentlyAddedSeriesQueryDocument = new TypedDocumentString(`
@@ -3259,6 +3295,7 @@ export const LibraryBooksSceneDocument = new TypedDocumentString(`
     fragment BookCard on Media {
   id
   resolvedName
+  extension
   pages
   size
   status
@@ -3272,6 +3309,7 @@ export const LibraryBooksSceneDocument = new TypedDocumentString(`
   }
   readHistory {
     __typename
+    completedAt
   }
 }`) as unknown as TypedDocumentString<LibraryBooksSceneQuery, LibraryBooksSceneQueryVariables>;
 export const LibrarySeriesDocument = new TypedDocumentString(`
@@ -3388,6 +3426,7 @@ export const SeriesBooksSceneDocument = new TypedDocumentString(`
     fragment BookCard on Media {
   id
   resolvedName
+  extension
   pages
   size
   status
@@ -3401,6 +3440,7 @@ export const SeriesBooksSceneDocument = new TypedDocumentString(`
   }
   readHistory {
     __typename
+    completedAt
   }
 }`) as unknown as TypedDocumentString<SeriesBooksSceneQuery, SeriesBooksSceneQueryVariables>;
 export const DirectoryListingDocument = new TypedDocumentString(`

@@ -1,19 +1,26 @@
 import { Heading, Text } from '@stump/components'
-import { BookOverviewSceneQuery } from '@stump/graphql'
+import { FragmentType, graphql, useFragment } from '@stump/graphql'
 
 import { formatBytes } from '../../utils/format'
 
-type BookFileInformationFragment = Pick<
-	NonNullable<BookOverviewSceneQuery['mediaById']>,
-	'hash' | 'extension' | 'size' | 'relativeLibraryPath'
->
+export const BookFileInformationFragment = graphql(`
+	fragment BookFileInformation on Media {
+		id
+		size
+		extension
+		hash
+		relativeLibraryPath
+	}
+`)
 
 type Props = {
-	data: BookFileInformationFragment
+	fragment: FragmentType<typeof BookFileInformationFragment>
 }
 
 // TODO: redesign!!
-export default function BookFileInformation({ data }: Props) {
+export default function BookFileInformation({ fragment }: Props) {
+	const data = useFragment(BookFileInformationFragment, fragment)
+
 	/**
 	 * A function to format a long string to something more readable.
 	 *

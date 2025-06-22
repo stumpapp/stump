@@ -1,4 +1,4 @@
-import { useSuspenseGraphQL } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import { Helmet } from 'react-helmet'
 
@@ -26,7 +26,8 @@ export const usePrefetchHomeScene = () => {
 
 // TODO: account for new accounts, i.e. no media at all
 export default function HomeScene() {
-	const { data } = useSuspenseGraphQL(query, ['numberOfLibraries'])
+	const { sdk } = useSDK()
+	const { data } = useSuspenseGraphQL(query, sdk.cacheKey('numberOfLibraries'))
 
 	const helmet = (
 		<Helmet>

@@ -32,10 +32,10 @@ export const BOOK_READER_SCENE_QUERY = graphql(`
 
 export default function BookReaderSceneContainer() {
 	const { id } = useParams()
-
+	const { sdk } = useSDK()
 	const {
 		data: { mediaById: media },
-	} = useSuspenseGraphQL(BOOK_READER_SCENE_QUERY, ['bookReader', id], {
+	} = useSuspenseGraphQL(BOOK_READER_SCENE_QUERY, sdk.cacheKey('bookReader', [id]), {
 		id: id || '',
 	})
 

@@ -1,6 +1,6 @@
-import { useGraphQLMutation, useSuspenseGraphQL } from '@stump/client'
+import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Badge, Button, ComboBox, Dialog, IconButton, Input } from '@stump/components'
-import { EmailerSendTo, graphql } from '@stump/graphql'
+import { EmailerSendTo, graphql, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Send } from 'lucide-react'
 import { Suspense, useCallback, useMemo, useState } from 'react'
@@ -32,9 +32,9 @@ type ContainerProps = {
 export default function EmailBookDropdownContainer({ mediaId }: ContainerProps) {
 	const { checkPermission } = useAppContext()
 
-	const canSendEmail = useMemo(() => checkPermission('email:send'), [checkPermission])
+	const canSendEmail = useMemo(() => checkPermission(UserPermission.EmailSend), [checkPermission])
 	const canArbitrarySendEmail = useMemo(
-		() => checkPermission('email:arbitrary_send'),
+		() => checkPermission(UserPermission.EmailArbitrarySend),
 		[checkPermission],
 	)
 
@@ -55,9 +55,10 @@ type Props = {
 
 function EmailBookDropdown({ mediaId, canArbitrarySendEmail }: Props) {
 	const { t } = useLocaleContext()
+	const { sdk } = useSDK()
 	const {
 		data: { emailDevices: devices },
-	} = useSuspenseGraphQL(query, ['emailDevices'])
+	} = useSuspenseGraphQL(query, sdk.cacheKey('emailDevices'))
 
 	const mutationKey = ['sendEmailAttachment', mediaId]
 

@@ -1,4 +1,4 @@
-import { useSuspenseGraphQL } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Badge, Button, Card, Dropdown, Text } from '@stump/components'
 import { graphql, ScanHistoryTableQuery } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
@@ -61,10 +61,10 @@ export default function ScanHistoryTable() {
 		library: { id },
 		scan,
 	} = useLibraryManagement()
-
+	const { sdk } = useSDK()
 	const {
 		data: { libraryById },
-	} = useSuspenseGraphQL(query, ['scanHistory', id], { id })
+	} = useSuspenseGraphQL(query, sdk.cacheKey('scanHistory', [id]), { id })
 	const scanHistory = libraryById?.scanHistory || []
 
 	const { t } = useLocaleContext()

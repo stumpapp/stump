@@ -1,4 +1,3 @@
-export * from './apollo'
 export * from './client'
 export * from './context'
 export * from './desktop'

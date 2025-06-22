@@ -1,8 +1,5 @@
-import { ApolloProvider } from '@apollo/client'
 import { Api, AuthenticationMethod } from '@stump/sdk'
 import { PropsWithChildren, useEffect, useState } from 'react'
-
-import { createClient } from '@/apollo'
 
 import { useClientContext } from '../context'
 import { SDKContext } from './context'
@@ -18,7 +15,7 @@ export function SDKProvider({
 	children,
 }: PropsWithChildren<SDKProviderProps>) {
 	const [sdk, setSDK] = useState<Api | null>(null)
-	const { tauriRPC, onConnectionWithServerChanged, onUnauthenticatedResponse } = useClientContext()
+	const { tauriRPC } = useClientContext()
 
 	useEffect(() => {
 		if (!baseURL && !tauriRPC) {
@@ -61,11 +58,5 @@ export function SDKProvider({
 		return null
 	}
 
-	return (
-		<ApolloProvider
-			client={createClient({ sdk, onUnauthenticatedResponse, onConnectionWithServerChanged })}
-		>
-			<SDKContext.Provider value={{ sdk, setSDK }}>{children}</SDKContext.Provider>
-		</ApolloProvider>
-	)
+	return <SDKContext.Provider value={{ sdk, setSDK }}>{children}</SDKContext.Provider>
 }

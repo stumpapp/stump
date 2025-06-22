@@ -12,7 +12,6 @@
 		"nuke": "yarn exec rimraf node_modules"
 	},
 	"dependencies": {
-		"@apollo/client": "^3.13.8",
 		"@stump/sdk": "*",
 		"@tanstack/react-query": "^5.74.4",
 		"axios": "^1.6.8",

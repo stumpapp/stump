@@ -47,6 +47,11 @@ export type ApiParams = {
 	  }
 )
 
+// TODO(graphql): Add cacheKeys for centralized cache invalidation features. Previously, this
+// was the responsibility of any given controller, but now that we aren't using REST and the
+// majority of API calls using this class will be routed through `execute`, it makes sense to
+// centralize this functionality somewhere else
+
 /**
  * A class representing the Stump API
  */

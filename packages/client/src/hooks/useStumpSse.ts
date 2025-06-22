@@ -1,4 +1,4 @@
-import type { CoreEvent } from '@stump/sdk'
+import { CoreEvent } from '@stump/graphql'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { useSDK } from '../sdk'
@@ -49,16 +49,20 @@ function useSse(url: string, { onOpen, onClose, onMessage }: SseOptions = {}) {
 		}
 	}, [onClose, onMessage, onOpen, url])
 
-	useEffect(() => {
-		initEventSource()
+	useEffect(
+		() => {
+			initEventSource()
 
-		return () => {
-			sse?.close()
-			if (timeoutRef.current) {
-				clearTimeout(timeoutRef.current)
+			return () => {
+				sse?.close()
+				if (timeoutRef.current) {
+					clearTimeout(timeoutRef.current)
+				}
 			}
-		}
-	}, [url])
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[url],
+	)
 
 	return {
 		readyState: sse?.readyState,

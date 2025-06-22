@@ -52,6 +52,10 @@ type Documents = {
     "\n\tfragment LibrarySettingsConfig on Library {\n\t\tconfig {\n\t\t\tid\n\t\t\tconvertRarToZip\n\t\t\thardDeleteConversions\n\t\t\tdefaultReadingDir\n\t\t\tdefaultReadingMode\n\t\t\tdefaultReadingImageScaleFit\n\t\t\tgenerateFileHashes\n\t\t\tgenerateKoreaderHashes\n\t\t\tprocessMetadata\n\t\t\twatch\n\t\t\tlibraryPattern\n\t\t\tthumbnailConfig\n\t\t\tignoreRules\n\t\t}\n\t}\n": typeof types.LibrarySettingsConfigFragmentDoc,
     "\n\tmutation LibrarySettingsRouterEditLibraryMutation($id: ID!, $input: CreateOrUpdateLibraryInput!) {\n\t\tupdateLibrary(id: $id, input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.LibrarySettingsRouterEditLibraryMutationDocument,
     "\n\tmutation LibrarySettingsRouterScanLibraryMutation($id: ID!, $options: JSON) {\n\t\tscanLibrary(id: $id, options: $options)\n\t}\n": typeof types.LibrarySettingsRouterScanLibraryMutationDocument,
+    "\n\tquery LibraryExclusionsUsersQuery {\n\t\tusers {\n\t\t\tid\n\t\t\tusername\n\t\t}\n\t}\n": typeof types.LibraryExclusionsUsersQueryDocument,
+    "\n\tquery LibraryExclusionsQuery($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\texcludedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibraryExclusionsQueryDocument,
+    "\n\tmutation UpdateLibraryExclusions($id: ID!, $userIds: [String!]!) {\n\t\tupdateLibraryExcludedUsers(id: $id, userIds: $userIds) {\n\t\t\tid\n\t\t\texcludedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": typeof types.UpdateLibraryExclusionsDocument,
+    "\n\tmutation AnalyzeLibraryMedia($id: ID!) {\n\t\tanalyzeMedia(id: $id)\n\t}\n": typeof types.AnalyzeLibraryMediaDocument,
     "\n\tmutation ScanHistorySectionClearHistory($id: ID!) {\n\t\tclearScanHistory(id: $id)\n\t}\n": typeof types.ScanHistorySectionClearHistoryDocument,
     "\n\tquery ScanHistoryTable($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tscanHistory {\n\t\t\t\tid\n\t\t\t\tjobId\n\t\t\t\ttimestamp\n\t\t\t\toptions\n\t\t\t}\n\t\t}\n\t}\n": typeof types.ScanHistoryTableDocument,
     "\n\tquery ScanRecordInspectorJobs($id: ID!, $loadLogs: Boolean!) {\n\t\tjobById(id: $id) {\n\t\t\tid\n\t\t\toutputData {\n\t\t\t\t__typename\n\t\t\t\t... on LibraryScanOutput {\n\t\t\t\t\ttotalFiles\n\t\t\t\t\ttotalDirectories\n\t\t\t\t\tignoredFiles\n\t\t\t\t\tskippedFiles\n\t\t\t\t\tignoredDirectories\n\t\t\t\t\tcreatedMedia\n\t\t\t\t\tupdatedMedia\n\t\t\t\t\tcreatedSeries\n\t\t\t\t\tupdatedSeries\n\t\t\t\t}\n\t\t\t}\n\t\t\tlogs @include(if: $loadLogs) {\n\t\t\t\tid\n\t\t\t}\n\t\t}\n\t}\n": typeof types.ScanRecordInspectorJobsDocument,
@@ -99,6 +103,10 @@ const documents: Documents = {
     "\n\tfragment LibrarySettingsConfig on Library {\n\t\tconfig {\n\t\t\tid\n\t\t\tconvertRarToZip\n\t\t\thardDeleteConversions\n\t\t\tdefaultReadingDir\n\t\t\tdefaultReadingMode\n\t\t\tdefaultReadingImageScaleFit\n\t\t\tgenerateFileHashes\n\t\t\tgenerateKoreaderHashes\n\t\t\tprocessMetadata\n\t\t\twatch\n\t\t\tlibraryPattern\n\t\t\tthumbnailConfig\n\t\t\tignoreRules\n\t\t}\n\t}\n": types.LibrarySettingsConfigFragmentDoc,
     "\n\tmutation LibrarySettingsRouterEditLibraryMutation($id: ID!, $input: CreateOrUpdateLibraryInput!) {\n\t\tupdateLibrary(id: $id, input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": types.LibrarySettingsRouterEditLibraryMutationDocument,
     "\n\tmutation LibrarySettingsRouterScanLibraryMutation($id: ID!, $options: JSON) {\n\t\tscanLibrary(id: $id, options: $options)\n\t}\n": types.LibrarySettingsRouterScanLibraryMutationDocument,
+    "\n\tquery LibraryExclusionsUsersQuery {\n\t\tusers {\n\t\t\tid\n\t\t\tusername\n\t\t}\n\t}\n": types.LibraryExclusionsUsersQueryDocument,
+    "\n\tquery LibraryExclusionsQuery($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\texcludedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": types.LibraryExclusionsQueryDocument,
+    "\n\tmutation UpdateLibraryExclusions($id: ID!, $userIds: [String!]!) {\n\t\tupdateLibraryExcludedUsers(id: $id, userIds: $userIds) {\n\t\t\tid\n\t\t\texcludedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": types.UpdateLibraryExclusionsDocument,
+    "\n\tmutation AnalyzeLibraryMedia($id: ID!) {\n\t\tanalyzeMedia(id: $id)\n\t}\n": types.AnalyzeLibraryMediaDocument,
     "\n\tmutation ScanHistorySectionClearHistory($id: ID!) {\n\t\tclearScanHistory(id: $id)\n\t}\n": types.ScanHistorySectionClearHistoryDocument,
     "\n\tquery ScanHistoryTable($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tscanHistory {\n\t\t\t\tid\n\t\t\t\tjobId\n\t\t\t\ttimestamp\n\t\t\t\toptions\n\t\t\t}\n\t\t}\n\t}\n": types.ScanHistoryTableDocument,
     "\n\tquery ScanRecordInspectorJobs($id: ID!, $loadLogs: Boolean!) {\n\t\tjobById(id: $id) {\n\t\t\tid\n\t\t\toutputData {\n\t\t\t\t__typename\n\t\t\t\t... on LibraryScanOutput {\n\t\t\t\t\ttotalFiles\n\t\t\t\t\ttotalDirectories\n\t\t\t\t\tignoredFiles\n\t\t\t\t\tskippedFiles\n\t\t\t\t\tignoredDirectories\n\t\t\t\t\tcreatedMedia\n\t\t\t\t\tupdatedMedia\n\t\t\t\t\tcreatedSeries\n\t\t\t\t\tupdatedSeries\n\t\t\t\t}\n\t\t\t}\n\t\t\tlogs @include(if: $loadLogs) {\n\t\t\t\tid\n\t\t\t}\n\t\t}\n\t}\n": types.ScanRecordInspectorJobsDocument,
@@ -257,6 +265,22 @@ export function graphql(source: "\n\tmutation LibrarySettingsRouterEditLibraryMu
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tmutation LibrarySettingsRouterScanLibraryMutation($id: ID!, $options: JSON) {\n\t\tscanLibrary(id: $id, options: $options)\n\t}\n"): typeof import('./graphql').LibrarySettingsRouterScanLibraryMutationDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery LibraryExclusionsUsersQuery {\n\t\tusers {\n\t\t\tid\n\t\t\tusername\n\t\t}\n\t}\n"): typeof import('./graphql').LibraryExclusionsUsersQueryDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery LibraryExclusionsQuery($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\texcludedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').LibraryExclusionsQueryDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation UpdateLibraryExclusions($id: ID!, $userIds: [String!]!) {\n\t\tupdateLibraryExcludedUsers(id: $id, userIds: $userIds) {\n\t\t\tid\n\t\t\texcludedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').UpdateLibraryExclusionsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation AnalyzeLibraryMedia($id: ID!) {\n\t\tanalyzeMedia(id: $id)\n\t}\n"): typeof import('./graphql').AnalyzeLibraryMediaDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

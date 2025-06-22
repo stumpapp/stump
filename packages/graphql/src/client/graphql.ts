@@ -2649,6 +2649,33 @@ export type LibrarySettingsRouterScanLibraryMutationMutationVariables = Exact<{
 
 export type LibrarySettingsRouterScanLibraryMutationMutation = { __typename?: 'Mutation', scanLibrary: boolean };
 
+export type LibraryExclusionsUsersQueryQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LibraryExclusionsUsersQueryQuery = { __typename?: 'Query', users: Array<{ __typename?: 'User', id: string, username: string }> };
+
+export type LibraryExclusionsQueryQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type LibraryExclusionsQueryQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', excludedUsers: Array<{ __typename?: 'User', id: string, username: string }> } | null };
+
+export type UpdateLibraryExclusionsMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  userIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type UpdateLibraryExclusionsMutation = { __typename?: 'Mutation', updateLibraryExcludedUsers: { __typename?: 'Library', id: string, excludedUsers: Array<{ __typename?: 'User', id: string, username: string }> } };
+
+export type AnalyzeLibraryMediaMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type AnalyzeLibraryMediaMutation = { __typename?: 'Mutation', analyzeMedia: boolean };
+
 export type ScanHistorySectionClearHistoryMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -3337,6 +3364,40 @@ export const LibrarySettingsRouterScanLibraryMutationDocument = new TypedDocumen
   scanLibrary(id: $id, options: $options)
 }
     `) as unknown as TypedDocumentString<LibrarySettingsRouterScanLibraryMutationMutation, LibrarySettingsRouterScanLibraryMutationMutationVariables>;
+export const LibraryExclusionsUsersQueryDocument = new TypedDocumentString(`
+    query LibraryExclusionsUsersQuery {
+  users {
+    id
+    username
+  }
+}
+    `) as unknown as TypedDocumentString<LibraryExclusionsUsersQueryQuery, LibraryExclusionsUsersQueryQueryVariables>;
+export const LibraryExclusionsQueryDocument = new TypedDocumentString(`
+    query LibraryExclusionsQuery($id: ID!) {
+  libraryById(id: $id) {
+    excludedUsers {
+      id
+      username
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LibraryExclusionsQueryQuery, LibraryExclusionsQueryQueryVariables>;
+export const UpdateLibraryExclusionsDocument = new TypedDocumentString(`
+    mutation UpdateLibraryExclusions($id: ID!, $userIds: [String!]!) {
+  updateLibraryExcludedUsers(id: $id, userIds: $userIds) {
+    id
+    excludedUsers {
+      id
+      username
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateLibraryExclusionsMutation, UpdateLibraryExclusionsMutationVariables>;
+export const AnalyzeLibraryMediaDocument = new TypedDocumentString(`
+    mutation AnalyzeLibraryMedia($id: ID!) {
+  analyzeMedia(id: $id)
+}
+    `) as unknown as TypedDocumentString<AnalyzeLibraryMediaMutation, AnalyzeLibraryMediaMutationVariables>;
 export const ScanHistorySectionClearHistoryDocument = new TypedDocumentString(`
     mutation ScanHistorySectionClearHistory($id: ID!) {
   clearScanHistory(id: $id)

@@ -14,6 +14,7 @@ import {
 	useSuspenseInfiniteQuery,
 	UseSuspenseInfiniteQueryOptions,
 	UseSuspenseInfiniteQueryResult,
+	useSuspenseQueries,
 	useSuspenseQuery,
 	UseSuspenseQueryResult,
 } from '@tanstack/react-query'
@@ -178,6 +179,68 @@ export function useSuspenseGraphQL<TResult, TVariables>(
 	}, [error, sdk, onUnauthenticatedResponse, onConnectionWithServerChanged])
 
 	return { error, ...rest } as UseSuspenseQueryResult<TResult>
+}
+
+// TODO(graphql): Fix the type inference for query variables
+/**
+ * Executes multiple GraphQL queries in parallel using tanstack's useQueries
+ *
+ * @param queries Array of query configurations
+ * @returns Results for each query in the same order
+ */
+export function useGraphQLQueries<TQueries extends readonly unknown[]>(queries: {
+	[TQueryIndex in keyof TQueries]: {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		document: TypedDocumentString<TQueries[TQueryIndex], any>
+		queryKey: QueryKey
+		// @ts-expect-error: This is OK
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		variables?: TQueries[TQueryIndex]['document'] extends TypedDocumentString<any, infer TVar>
+			? TVar extends Record<string, never>
+				? never
+				: TVar
+			: never
+		options?: Omit<
+			UseQueryOptions<TQueries[TQueryIndex], Error, TQueries[TQueryIndex], QueryKey>,
+			'queryKey' | 'queryFn'
+		>
+	}
+}): { [TQueryIndex in keyof TQueries]: UseSuspenseQueryResult<TQueries[TQueryIndex], Error> } {
+	const { sdk } = useSDK()
+	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
+
+	type QueryConfig<T> = {
+		queryKey: QueryKey
+		queryFn: () => Promise<T>
+	} & Omit<UseQueryOptions<T, Error, T, QueryKey>, 'queryKey' | 'queryFn'>
+
+	const queryConfigs = queries.map(({ document, queryKey, variables, options }) => ({
+		queryKey,
+		queryFn: async () => {
+			const response = await sdk.execute(document, variables)
+			return response
+		},
+		...options,
+	})) as { [TQueryIndex in keyof TQueries]: QueryConfig<TQueries[TQueryIndex]> }
+
+	const results = useSuspenseQueries({ queries: queryConfigs }) as {
+		[TQueryIndex in keyof TQueries]: UseSuspenseQueryResult<TQueries[TQueryIndex], Error>
+	}
+
+	useEffect(() => {
+		results.forEach((result) => {
+			if (result.error) {
+				handleError({
+					sdk,
+					error: result.error,
+					onUnauthenticatedResponse,
+					onConnectionWithServerChanged,
+				})
+			}
+		})
+	}, [results, sdk, onUnauthenticatedResponse, onConnectionWithServerChanged])
+
+	return results
 }
 
 export function useInfiniteGraphQL<TResult, TVariables>(

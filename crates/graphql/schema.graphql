@@ -549,29 +549,6 @@ type JobOutput {
 	output: CoreJobOutput!
 }
 
-"""
-A struct that represents a progress event that is emitted by a job. This behaves like a patch,
-where the client will ignore any fields that are not present. This is done so all internal ops
-can be done without needing to know the full state of the job.
-"""
-type JobProgress {
-	"The status of the job"
-	status: JobStatus
-	"The message to display"
-	message: String
-	"The current task being worked on"
-	completedTasks: Int
-	"""
-	The number of tasks for the job. This number can change as
-	subtasks get added/converted to tasks
-	"""
-	remainingTasks: Int
-	"The current subtask being worked on"
-	completedSubtasks: Int
-	"The number of subtasks that exist in the current task"
-	totalSubtasks: Int
-}
-
 type JobStarted {
 	id: String!
 }
@@ -588,7 +565,21 @@ enum JobStatus {
 "An update event that is emitted by a job"
 type JobUpdate {
 	id: String!
-	payload: JobProgress!
+	"The status of the job"
+	status: JobStatus
+	"The message to display"
+	message: String
+	"The current task being worked on"
+	completedTasks: Int
+	"""
+	The number of tasks for the job. This number can change as
+	subtasks get added/converted to tasks
+	"""
+	remainingTasks: Int
+	"The current subtask being worked on"
+	completedSubtasks: Int
+	"The number of subtasks that exist in the current task"
+	totalSubtasks: Int
 }
 
 type Library {

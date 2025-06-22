@@ -282,6 +282,10 @@ export class Api {
 		})
 	}
 
+	get cacheKeys(): typeof cacheKeys {
+		return cacheKeys
+	}
+
 	/**
 	 * A convenience method to generate a cache key for a given API call. This is intended to be used
 	 * with `@tanstack/react-query` to ensure that cache keys are consistent across the application

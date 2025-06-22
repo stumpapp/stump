@@ -588,30 +588,6 @@ export type JobOutput = {
   output: CoreJobOutput;
 };
 
-/**
- * A struct that represents a progress event that is emitted by a job. This behaves like a patch,
- * where the client will ignore any fields that are not present. This is done so all internal ops
- * can be done without needing to know the full state of the job.
- */
-export type JobProgress = {
-  __typename?: 'JobProgress';
-  /** The current subtask being worked on */
-  completedSubtasks?: Maybe<Scalars['Int']['output']>;
-  /** The current task being worked on */
-  completedTasks?: Maybe<Scalars['Int']['output']>;
-  /** The message to display */
-  message?: Maybe<Scalars['String']['output']>;
-  /**
-   * The number of tasks for the job. This number can change as
-   * subtasks get added/converted to tasks
-   */
-  remainingTasks?: Maybe<Scalars['Int']['output']>;
-  /** The status of the job */
-  status?: Maybe<JobStatus>;
-  /** The number of subtasks that exist in the current task */
-  totalSubtasks?: Maybe<Scalars['Int']['output']>;
-};
-
 export type JobStarted = {
   __typename?: 'JobStarted';
   id: Scalars['String']['output'];
@@ -629,8 +605,22 @@ export enum JobStatus {
 /** An update event that is emitted by a job */
 export type JobUpdate = {
   __typename?: 'JobUpdate';
+  /** The current subtask being worked on */
+  completedSubtasks?: Maybe<Scalars['Int']['output']>;
+  /** The current task being worked on */
+  completedTasks?: Maybe<Scalars['Int']['output']>;
   id: Scalars['String']['output'];
-  payload: JobProgress;
+  /** The message to display */
+  message?: Maybe<Scalars['String']['output']>;
+  /**
+   * The number of tasks for the job. This number can change as
+   * subtasks get added/converted to tasks
+   */
+  remainingTasks?: Maybe<Scalars['Int']['output']>;
+  /** The status of the job */
+  status?: Maybe<JobStatus>;
+  /** The number of subtasks that exist in the current task */
+  totalSubtasks?: Maybe<Scalars['Int']['output']>;
 };
 
 export type Library = {

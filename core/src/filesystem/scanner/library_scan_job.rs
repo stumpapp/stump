@@ -88,6 +88,7 @@ impl LibraryScanJob {
 
 /// The data that is collected and updated during the execution of a library scan job
 #[derive(Clone, Serialize, Deserialize, Default, Debug, Type, SimpleObject)]
+#[serde(rename_all = "camelCase")]
 pub struct LibraryScanOutput {
 	/// The number of files visited during the scan
 	total_files: u64,

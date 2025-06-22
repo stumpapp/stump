@@ -41,48 +41,55 @@ export function useCoreEventHandler({ liveRefetch, onConnectionWithServerChanged
 
 	const handleCoreEvent = useCallback(
 		async (event: CoreEvent) => {
-			const { __typename } = event
+			try {
+				const { __typename } = event
 
-			switch (__typename) {
-				case 'JobStarted':
-					await handleInvalidate([sdk.job.keys.get])
-					addJob(event.id)
-					break
-				case 'JobUpdate':
-					if (!!event.payload.status && event.payload.status !== 'RUNNING') {
-						await new Promise((resolve) => setTimeout(resolve, 1000))
-						removeJob(event.id)
+				switch (__typename) {
+					case 'JobStarted':
 						await handleInvalidate([sdk.job.keys.get])
-					} else {
-						upsertJob(event)
-					}
-					break
-				case 'JobOutput':
-					await handleJobOutput(event.output, sdk, client)
-					break
-				case 'DiscoveredMissingLibrary':
-					await handleInvalidate(['library', 'series', 'media'])
-					break
-				case 'CreatedManySeries':
-					if (liveRefetch) {
-						await handleInvalidate([sdk.library.keys.getStats, 'series', 'media'])
-					}
-					break
-				case 'CreatedOrUpdatedManyMedia':
-					if (liveRefetch) {
-						await handleInvalidate([
-							'series',
-							'media',
-							sdk.library.keys.getStats,
-							sdk.library.keys.getByID,
-						])
-					}
-					break
-				case 'CreatedMedia':
-					// We don't really care, should honestly remove this...
-					break
-				default:
-					console.warn('Unhandled core event', event)
+						addJob(event.id)
+						break
+					case 'JobUpdate':
+						if (!!event.status && event.status !== 'RUNNING') {
+							await new Promise((resolve) => setTimeout(resolve, 1000))
+							removeJob(event.id)
+							await handleInvalidate([sdk.job.keys.get])
+						} else {
+							upsertJob(event)
+						}
+						break
+					case 'JobOutput':
+						await handleJobOutput(event.output, sdk, client)
+						break
+					case 'DiscoveredMissingLibrary':
+						await handleInvalidate(['library', 'series', 'media'])
+						break
+					case 'CreatedManySeries':
+						if (liveRefetch) {
+							await handleInvalidate([sdk.library.keys.getStats, 'series', 'media'])
+						}
+						break
+					case 'CreatedOrUpdatedManyMedia':
+						if (liveRefetch) {
+							await handleInvalidate([
+								'series',
+								'media',
+								sdk.library.keys.getStats,
+								sdk.library.keys.getByID,
+							])
+						}
+						break
+					case 'CreatedMedia':
+						// We don't really care, should honestly remove this...
+						break
+					default:
+						console.warn('Unhandled core event', event)
+				}
+			} catch (error) {
+				console.error('Failed to handle core event', {
+					event,
+					error,
+				})
 			}
 		},
 		[addJob, handleInvalidate, liveRefetch, removeJob, upsertJob, sdk, client],
@@ -96,14 +103,18 @@ const handleJobOutput = async (output: CoreJobOutput, sdk: Api, client: QueryCli
 		const requeryBooks = output.createdMedia.valueOf() + output.updatedMedia.valueOf() > 0
 		const requerySeries = output.createdSeries.valueOf() + output.updatedSeries.valueOf() > 0
 
-		const keys = [sdk.library.keys.scanHistory, sdk.library.keys.getStats]
+		const keys: string[] = [
+			sdk.cacheKeys.scanHistory,
+			sdk.cacheKeys.scanHistory,
+			sdk.cacheKeys.getStats,
+		]
 
 		if (requeryBooks) {
-			keys.push(sdk.media.keys.recentlyAdded, sdk.media.keys.get)
+			keys.push(sdk.cacheKeys.recentlyAddedMedia, sdk.cacheKeys.media)
 		}
 
 		if (requerySeries) {
-			keys.push(...[sdk.series.keys.recentlyAdded, sdk.series.keys.get])
+			keys.push(...[sdk.cacheKeys.recentlyAddedSeries, sdk.cacheKeys.series])
 		}
 
 		try {

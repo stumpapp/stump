@@ -9,6 +9,7 @@ use async_graphql::SimpleObject;
 pub struct JobUpdate {
 	pub id: String,
 	#[serde(flatten)]
+	#[graphql(flatten)]
 	pub payload: JobProgress,
 }
 
@@ -17,6 +18,7 @@ pub struct JobUpdate {
 /// can be done without needing to know the full state of the job.
 #[skip_serializing_none]
 #[derive(Debug, Clone, Default, Deserialize, Serialize, SimpleObject)]
+#[serde(rename_all = "camelCase")]
 pub struct JobProgress {
 	/// The status of the job
 	pub status: Option<JobStatus>,

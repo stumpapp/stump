@@ -20,18 +20,21 @@ pub struct DiscoveredMissingLibrary {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, SimpleObject)]
+#[serde(rename_all = "camelCase")]
 pub struct CreatedMedia {
 	pub id: String,
 	pub series_id: String,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, SimpleObject)]
+#[serde(rename_all = "camelCase")]
 pub struct CreatedManySeries {
 	pub count: u64,
 	pub library_id: String,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, SimpleObject)]
+#[serde(rename_all = "camelCase")]
 pub struct CreatedOrUpdatedManyMedia {
 	pub count: u64,
 	pub series_id: String,

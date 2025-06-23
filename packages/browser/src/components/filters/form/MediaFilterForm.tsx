@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useQuery, useSDK } from '@stump/client'
+import { useSuspenseGraphQL } from '@stump/client'
 import { CheckBox, Form } from '@stump/components'
-import { MediaMetadataFilter } from '@stump/sdk'
+import { graphql, MediaFilterInput, MediaMetadataFilterInput, ReadingStatus } from '@stump/graphql'
 import { useEffect, useMemo, useState } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import z from 'zod'
@@ -13,7 +13,22 @@ import AgeRatingFilter from './AgeRatingFilter'
 import ExtensionSelect from './ExtensionSelect'
 import GenericFilterMultiselect from './GenericFilterMultiselect'
 import ReadStatusSelect from './ReadStatusSelect'
-import { removeEmpty } from './utils'
+
+const query = graphql(`
+	query MediaFilterForm($seriesId: ID) {
+		mediaMetadataOverview(seriesId: $seriesId) {
+			genres
+			writers
+			pencillers
+			colorists
+			letterers
+			inkers
+			publishers
+			editors
+			characters
+		}
+	}
+`)
 
 const schema = z.object({
 	extension: z.string().optional(),
@@ -35,14 +50,13 @@ const schema = z.object({
 			writer: z.array(z.string()).optional(),
 		})
 		.optional(),
-	read_status: z.array(z.enum(['completed', 'reading', 'unread'])).optional(),
+	read_status: z.array(z.enum(['finished', 'reading', 'not_started'])).optional(),
 })
 export type MediaFilterFormSchema = z.infer<typeof schema>
-type ReadStatus = NonNullable<Pick<MediaFilterFormSchema, 'read_status'>['read_status']>[number]
 
 export default function MediaFilterForm() {
-	const { sdk } = useSDK()
-	const { filters, setFilters } = useFilterContext()
+	const { filters: filtersInput, setFilters } = useFilterContext()
+	const filters = useMemo(() => (filtersInput || {}) as MediaFilterInput, [filtersInput])
 
 	const seriesContext = useSeriesContextSafe()
 	const [onlyFromSeries, setOnlyFromSeries] = useState(false)
@@ -50,43 +64,45 @@ export default function MediaFilterForm() {
 	const params = useMemo(() => {
 		if (onlyFromSeries && !!seriesContext?.series.id) {
 			return {
-				media: {
-					series: {
-						id: [seriesContext.series.id],
-					},
-				},
-			} satisfies MediaMetadataFilter
+				seriesId: seriesContext.series.id,
+			}
 		}
-		return undefined
+		return {}
 	}, [onlyFromSeries, seriesContext])
 
-	const { data } = useQuery([sdk.metadata.keys.overview, params], () =>
-		sdk.metadata.overview(params),
-	)
+	const {
+		data: { mediaMetadataOverview: data },
+	} = useSuspenseGraphQL(query, ['mediaFilterForm', params], params)
+
+	const defaultValue = useMemo(() => {
+		const flattenMetadata = {
+			age_rating: (filters?.metadata as MediaMetadataFilterInput)?.ageRating?.eq ?? null,
+			character: (filters?.metadata as MediaMetadataFilterInput)?.characters?.likeAnyOf ?? [],
+			colorist: (filters?.metadata as MediaMetadataFilterInput)?.colorists?.likeAnyOf ?? [],
+			editor: (filters?.metadata as MediaMetadataFilterInput)?.editors?.likeAnyOf ?? [],
+			genre: (filters?.metadata as MediaMetadataFilterInput)?.genre?.likeAnyOf ?? [],
+			inker: (filters?.metadata as MediaMetadataFilterInput)?.inkers?.likeAnyOf ?? [],
+			letterer: (filters?.metadata as MediaMetadataFilterInput)?.letterers?.likeAnyOf ?? [],
+			penciller: (filters?.metadata as MediaMetadataFilterInput)?.pencillers?.likeAnyOf ?? [],
+			publisher: (filters?.metadata as MediaMetadataFilterInput)?.publisher?.likeAnyOf ?? [],
+			writer: (filters?.metadata as MediaMetadataFilterInput)?.writers?.likeAnyOf ?? [],
+		}
+		return {
+			extension: filters?.extension?.eq as string,
+			metadata: flattenMetadata,
+			read_status: filters?.readingStatus?.isAnyOf?.map((elem) => (elem as string).toLowerCase()),
+		}
+	}, [filters])
 
 	const form = useForm({
-		defaultValues: {
-			extension: filters?.extension as string,
-			metadata: {
-				...((filters?.metadata as Record<string, string[]>) || {}),
-				age_rating: (filters?.metadata as Record<string, unknown>)?.age_rating ?? null,
-			},
-			read_status: filters?.read_status as ReadStatus[],
-		},
+		defaultValues: defaultValue,
 		resolver: zodResolver(schema),
 	})
 	const { reset } = form
 
 	useEffect(() => {
-		reset({
-			extension: filters?.extension as string,
-			metadata: {
-				...((filters?.metadata as Record<string, string[]>) || {}),
-				age_rating: (filters?.metadata as Record<string, unknown>)?.age_rating ?? null,
-			},
-			read_status: filters?.read_status as ReadStatus[],
-		})
-	}, [reset, filters])
+		reset(defaultValue)
+	}, [defaultValue, reset])
 
 	/**
 	 * A function that handles the form submission. This function merges the form
@@ -94,13 +110,29 @@ export default function MediaFilterForm() {
 	 * @param values The values from the form.
 	 */
 	const handleSubmit = (values: FieldValues) => {
-		const adjustedValues = removeEmpty(values)
-		const merged = {
-			...filters,
-			...adjustedValues,
-			metadata: { ...(filters?.metadata || {}), ...(adjustedValues?.metadata || {}) },
+		const newFilters: MediaFilterInput = {
+			extension: values.extension ? { eq: values.extension } : null,
+			readingStatus: values.read_status
+				? {
+						isAnyOf: values.read_status?.map(
+							(elem: string) => (elem as string).toUpperCase() as ReadingStatus,
+						),
+					}
+				: null,
+			metadata: {
+				ageRating: values.metadata?.age_rating ? { lte: values.metadata.age_rating } : null,
+				characters: values.metadata?.character ? { likeAnyOf: values.metadata.character } : null,
+				colorists: values.metadata?.colorist ? { likeAnyOf: values.metadata.colorist } : null,
+				editors: values.metadata?.editor ? { likeAnyOf: values.metadata.editor } : null,
+				genre: values.metadata?.genre ? { likeAnyOf: values.metadata.genre } : null,
+				inkers: values.metadata?.inker ? { likeAnyOf: values.metadata.inker } : null,
+				letterers: values.metadata?.letterer ? { likeAnyOf: values.metadata.letterer } : null,
+				pencillers: values.metadata?.penciller ? { likeAnyOf: values.metadata.penciller } : null,
+				publisher: values.metadata?.publisher ? { likeAnyOf: values.metadata.publisher } : null,
+				writers: values.metadata?.writer ? { likeAnyOf: values.metadata.writer } : null,
+			},
 		}
-		setFilters(merged)
+		setFilters(newFilters)
 	}
 
 	return (

@@ -1,5 +1,6 @@
 use async_graphql::InputObject;
 use models::entity::series;
+use serde::{Deserialize, Serialize};
 
 use super::{
 	apply_string_filter, library::LibraryFilterInput,
@@ -8,7 +9,7 @@ use super::{
 
 // TODO: Support filter by tags (requires join logic)
 
-#[derive(InputObject, Clone)]
+#[derive(InputObject, Clone, Debug, Serialize, Deserialize)]
 pub struct SeriesFilterInput {
 	#[graphql(default)]
 	pub name: Option<StringLikeFilter<String>>,

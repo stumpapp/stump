@@ -82,14 +82,7 @@ mod tests {
 
 	#[test]
 	fn test_find_for_user_and_id() {
-		let user = AuthUser {
-			id: "42".to_string(),
-			username: "".to_string(),
-			is_server_owner: true,
-			is_locked: false,
-			permissions: vec![],
-			age_restriction: None,
-		};
+		let user = get_default_user();
 		let select = Entity::find_for_user_and_id(&user, "123");
 		assert_eq!(
 			select_no_cols_to_string(select),

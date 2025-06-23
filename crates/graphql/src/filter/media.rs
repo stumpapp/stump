@@ -6,7 +6,9 @@ use models::{
 use sea_orm::{
 	prelude::{DateTimeWithTimeZone, *},
 	sea_query::ConditionExpression,
+	Condition,
 };
+use serde::{Deserialize, Serialize};
 
 use super::{
 	apply_numeric_filter, apply_string_filter, media_metadata::MediaMetadataFilterInput,
@@ -21,7 +23,7 @@ fn apply_reading_status_filter(
 ) -> impl Into<ConditionExpression> {
 	let base_filter = match value {
 		ReadingStatus::Reading => reading_session::Column::Id.is_not_null(),
-		ReadingStatus::Finished => finished_reading_session::Column::Id.is_null(),
+		ReadingStatus::Finished => finished_reading_session::Column::Id.is_not_null(),
 		// TODO: add a field to reading_session for marking DNF
 		ReadingStatus::Abandoned => unimplemented!("Abandoned filter not implemented"),
 		ReadingStatus::NotStarted => reading_session::Column::Id
@@ -38,7 +40,7 @@ fn apply_reading_status_filter(
 
 // TODO: Support filter by tags (requires join logic)
 
-#[derive(InputObject, Clone)]
+#[derive(InputObject, Clone, Serialize, Deserialize, Debug)]
 pub struct MediaFilterInput {
 	#[graphql(default)]
 	pub name: Option<StringLikeFilter<String>>,
@@ -135,14 +137,120 @@ impl IntoFilter for MediaFilterInput {
 				self.pages
 					.map(|f| apply_numeric_filter(media::Column::Pages, f)),
 			)
-			.add_option(self.reading_status.map(|f| match f {
-				ConceptualFilter::Is(value) => apply_reading_status_filter(value, false),
-				ConceptualFilter::IsNot(value) => {
-					apply_reading_status_filter(value, true)
-				},
+			.add_option(self.reading_status.map(|f| {
+				match f {
+					ConceptualFilter::Is(value) => {
+						Condition::all().add(apply_reading_status_filter(value, false))
+					},
+					ConceptualFilter::IsNot(value) => {
+						Condition::all().add(apply_reading_status_filter(value, true))
+					},
+					ConceptualFilter::IsAnyOf(values) => {
+						values.into_iter().fold(Condition::any(), |cond, v| {
+							cond.add(apply_reading_status_filter(v, false))
+						})
+					},
+					ConceptualFilter::IsNoneOf(values) => values
+						.into_iter()
+						.fold(Condition::any(), |cond, v| {
+							cond.add(apply_reading_status_filter(v, false))
+						})
+						.not(),
+				}
 			}))
 			.add_option(self.metadata.map(|f| f.into_filter()))
 			.add_option(self.series.map(|f| f.into_filter()))
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use models::entity::media;
+	use pretty_assertions::assert_eq;
+	use sea_orm::{sea_query::SqliteQueryBuilder, Condition, QuerySelect, QueryTrait};
+
+	#[test]
+	fn test_reading_status() {
+		let condition = apply_reading_status_filter(ReadingStatus::Reading, false);
+		let query = media::Entity::find().filter(Condition::all().add(condition));
+		let sql = query
+			.select_only()
+			.into_query()
+			.to_string(SqliteQueryBuilder);
+
+		assert_eq!(
+			sql,
+			r#"SELECT  FROM "media" WHERE "reading_sessions"."id" IS NOT NULL"#
+		);
+	}
+
+	#[test]
+	fn test_reading_status_in() {
+		let filter = MediaFilterInput {
+			_and: None,
+			created_at: None,
+			extension: None,
+			metadata: None,
+			name: None,
+			_not: None,
+			_or: None,
+			pages: None,
+			path: None,
+			reading_status: Some(ConceptualFilter::IsAnyOf(vec![
+				ReadingStatus::Reading,
+				ReadingStatus::Finished,
+			])),
+			series_id: None,
+			series: None,
+			size: None,
+			status: None,
+			updated_at: None,
+		};
+		let query = media::Entity::find().filter(filter.into_filter());
+		let sql = query
+			.select_only()
+			.into_query()
+			.to_string(SqliteQueryBuilder);
+
+		assert_eq!(
+			sql,
+			r#"SELECT  FROM "media" WHERE "reading_sessions"."id" IS NOT NULL OR "finished_reading_sessions"."id" IS NOT NULL"#
+		);
+	}
+
+	#[test]
+	fn test_reading_status_not_in() {
+		let filter = MediaFilterInput {
+			_and: None,
+			created_at: None,
+			extension: None,
+			metadata: None,
+			name: None,
+			_not: None,
+			_or: None,
+			pages: None,
+			path: None,
+			reading_status: Some(ConceptualFilter::IsNoneOf(vec![
+				ReadingStatus::Reading,
+				ReadingStatus::Finished,
+			])),
+			series_id: None,
+			series: None,
+			size: None,
+			status: None,
+			updated_at: None,
+		};
+		let query = media::Entity::find().filter(filter.into_filter());
+		let sql = query
+			.select_only()
+			.into_query()
+			.to_string(SqliteQueryBuilder);
+
+		assert_eq!(
+			sql,
+			r#"SELECT  FROM "media" WHERE NOT ("reading_sessions"."id" IS NOT NULL OR "finished_reading_sessions"."id" IS NOT NULL)"#
+		);
 	}
 }
 

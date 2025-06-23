@@ -233,8 +233,10 @@ export type CleanLibraryResponse = {
 };
 
 export type ComputedFilterReadingStatus =
-  { is: ReadingStatus; isNot?: never; }
-  |  { is?: never; isNot: ReadingStatus; };
+  { is: ReadingStatus; isAnyOf?: never; isNoneOf?: never; isNot?: never; }
+  |  { is?: never; isAnyOf: Array<ReadingStatus>; isNoneOf?: never; isNot?: never; }
+  |  { is?: never; isAnyOf?: never; isNoneOf: Array<ReadingStatus>; isNot?: never; }
+  |  { is?: never; isAnyOf?: never; isNoneOf?: never; isNot: ReadingStatus; };
 
 /** An event that is emitted by the core and consumed by a client */
 export type CoreEvent = CreatedManySeries | CreatedMedia | CreatedOrUpdatedManyMedia | DiscoveredMissingLibrary | JobOutput | JobStarted | JobUpdate;
@@ -481,26 +483,30 @@ export type ExternalJobOutput = {
 };
 
 export type FieldFilterFileStatus =
-  { anyOf: Array<FileStatus>; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
-  |  { anyOf?: never; contains: FileStatus; endsWith?: never; eq?: never; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
-  |  { anyOf?: never; contains?: never; endsWith: FileStatus; eq?: never; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
-  |  { anyOf?: never; contains?: never; endsWith?: never; eq: FileStatus; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
-  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes: FileStatus; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
-  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like: FileStatus; neq?: never; noneOf?: never; startsWith?: never; }
-  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; neq: FileStatus; noneOf?: never; startsWith?: never; }
-  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; neq?: never; noneOf: Array<FileStatus>; startsWith?: never; }
-  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith: FileStatus; };
+  { anyOf: Array<FileStatus>; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; likeAnyOf?: never; likeNoneOf?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains: FileStatus; endsWith?: never; eq?: never; excludes?: never; like?: never; likeAnyOf?: never; likeNoneOf?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith: FileStatus; eq?: never; excludes?: never; like?: never; likeAnyOf?: never; likeNoneOf?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq: FileStatus; excludes?: never; like?: never; likeAnyOf?: never; likeNoneOf?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes: FileStatus; like?: never; likeAnyOf?: never; likeNoneOf?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like: FileStatus; likeAnyOf?: never; likeNoneOf?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; likeAnyOf: Array<FileStatus>; likeNoneOf?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; likeAnyOf?: never; likeNoneOf: Array<FileStatus>; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; likeAnyOf?: never; likeNoneOf?: never; neq: FileStatus; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; likeAnyOf?: never; likeNoneOf?: never; neq?: never; noneOf: Array<FileStatus>; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; likeAnyOf?: never; likeNoneOf?: never; neq?: never; noneOf?: never; startsWith: FileStatus; };
 
 export type FieldFilterString =
-  { anyOf: Array<Scalars['String']['input']>; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
-  |  { anyOf?: never; contains: Scalars['String']['input']; endsWith?: never; eq?: never; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
-  |  { anyOf?: never; contains?: never; endsWith: Scalars['String']['input']; eq?: never; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
-  |  { anyOf?: never; contains?: never; endsWith?: never; eq: Scalars['String']['input']; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
-  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes: Scalars['String']['input']; like?: never; neq?: never; noneOf?: never; startsWith?: never; }
-  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like: Scalars['String']['input']; neq?: never; noneOf?: never; startsWith?: never; }
-  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; neq: Scalars['String']['input']; noneOf?: never; startsWith?: never; }
-  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; neq?: never; noneOf: Array<Scalars['String']['input']>; startsWith?: never; }
-  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; neq?: never; noneOf?: never; startsWith: Scalars['String']['input']; };
+  { anyOf: Array<Scalars['String']['input']>; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; likeAnyOf?: never; likeNoneOf?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains: Scalars['String']['input']; endsWith?: never; eq?: never; excludes?: never; like?: never; likeAnyOf?: never; likeNoneOf?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith: Scalars['String']['input']; eq?: never; excludes?: never; like?: never; likeAnyOf?: never; likeNoneOf?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq: Scalars['String']['input']; excludes?: never; like?: never; likeAnyOf?: never; likeNoneOf?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes: Scalars['String']['input']; like?: never; likeAnyOf?: never; likeNoneOf?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like: Scalars['String']['input']; likeAnyOf?: never; likeNoneOf?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; likeAnyOf: Array<Scalars['String']['input']>; likeNoneOf?: never; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; likeAnyOf?: never; likeNoneOf: Array<Scalars['String']['input']>; neq?: never; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; likeAnyOf?: never; likeNoneOf?: never; neq: Scalars['String']['input']; noneOf?: never; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; likeAnyOf?: never; likeNoneOf?: never; neq?: never; noneOf: Array<Scalars['String']['input']>; startsWith?: never; }
+  |  { anyOf?: never; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; likeAnyOf?: never; likeNoneOf?: never; neq?: never; noneOf?: never; startsWith: Scalars['String']['input']; };
 
 /** The different statuses a file reference can have */
 export enum FileStatus {
@@ -693,6 +699,25 @@ export type LibraryFilterInput = {
   name?: InputMaybe<FieldFilterString>;
   path?: InputMaybe<FieldFilterString>;
 };
+
+export type LibraryModelOrderBy = {
+  direction: OrderDirection;
+  field: LibraryModelOrdering;
+};
+
+export enum LibraryModelOrdering {
+  ConfigId = 'CONFIG_ID',
+  CreatedAt = 'CREATED_AT',
+  Description = 'DESCRIPTION',
+  Emoji = 'EMOJI',
+  Id = 'ID',
+  JobScheduleConfigId = 'JOB_SCHEDULE_CONFIG_ID',
+  LastScannedAt = 'LAST_SCANNED_AT',
+  Name = 'NAME',
+  Path = 'PATH',
+  Status = 'STATUS',
+  UpdatedAt = 'UPDATED_AT'
+}
 
 /** The different patterns a library may be organized by */
 export enum LibraryPattern {
@@ -1070,6 +1095,8 @@ export type Mutation = {
    * A result containing the newly created reading list, or an error if creation failed.
    */
   createReadingList: ReadingList;
+  createSmartList: SmartList;
+  createSmartListView: SmartListView;
   /**
    * Returns a list containing the newly created tags, or an error if creation failed.
    *
@@ -1103,6 +1130,8 @@ export type Mutation = {
    * A result containing the deleted reading list, or an error if deletion failed.
    */
   deleteReadingList: ReadingList;
+  deleteSmartList: SmartList;
+  deleteSmartListView: SmartListView;
   /**
    * Delete tags. Returns a list containing the deleted tags, or an error if deletion failed.
    *
@@ -1161,6 +1190,8 @@ export type Mutation = {
    * A result containing the updated reading list, or an error if update failed.
    */
   updateReadingList: ReadingList;
+  updateSmartList: SmartList;
+  updateSmartListView: SmartListView;
   updateUser: User;
   updateUserLockStatus: User;
   uploadBooks: Scalars['Boolean']['output'];
@@ -1262,6 +1293,16 @@ export type MutationCreateReadingListArgs = {
 };
 
 
+export type MutationCreateSmartListArgs = {
+  input: SaveSmartListInput;
+};
+
+
+export type MutationCreateSmartListViewArgs = {
+  input: SaveSmartListViewInput;
+};
+
+
 export type MutationCreateTagsArgs = {
   tags: Array<Scalars['String']['input']>;
 };
@@ -1319,6 +1360,17 @@ export type MutationDeleteNotifierArgs = {
 
 export type MutationDeleteReadingListArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteSmartListArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteSmartListViewArgs = {
+  id: Scalars['ID']['input'];
+  name: Scalars['String']['input'];
 };
 
 
@@ -1449,6 +1501,17 @@ export type MutationUpdateNotifierArgs = {
 
 export type MutationUpdateReadingListArgs = {
   input: ReadingListInput;
+};
+
+
+export type MutationUpdateSmartListArgs = {
+  id: Scalars['ID']['input'];
+  input: SaveSmartListInput;
+};
+
+
+export type MutationUpdateSmartListViewArgs = {
+  input: SaveSmartListViewInput;
 };
 
 
@@ -1719,6 +1782,11 @@ export type Query = {
   recentlyAddedSeries: PaginatedSeriesResponse;
   series: PaginatedSeriesResponse;
   seriesById?: Maybe<Series>;
+  smartListById?: Maybe<SmartList>;
+  smartListItems: SmartListItems;
+  smartListMeta?: Maybe<SmartListMeta>;
+  smartListViews: Array<SmartListView>;
+  smartLists: Array<SmartList>;
   stumpConfig: StumpConfig;
   /** Returns a list of all tags. */
   tags: Array<Tag>;
@@ -1779,6 +1847,7 @@ export type QueryKeepReadingArgs = {
 
 
 export type QueryLibrariesArgs = {
+  orderBy?: Array<LibraryModelOrderBy>;
   pagination?: Pagination;
 };
 
@@ -1823,6 +1892,11 @@ export type QueryMediaByPathArgs = {
 };
 
 
+export type QueryMediaMetadataOverviewArgs = {
+  seriesId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type QueryReadingListByIdArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1845,12 +1919,33 @@ export type QueryRecentlyAddedSeriesArgs = {
 
 export type QuerySeriesArgs = {
   filter: SeriesFilterInput;
+  orderBy?: Array<SeriesOrderBy>;
   pagination?: Pagination;
 };
 
 
 export type QuerySeriesByIdArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QuerySmartListByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QuerySmartListItemsArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QuerySmartListMetaArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QuerySmartListsArgs = {
+  input: SmartListsInput;
 };
 
 
@@ -1923,6 +2018,21 @@ export type RegisteredEmailDevice = {
   id: Scalars['Int']['output'];
   name: Scalars['String']['output'];
   sendHistory: Array<EmailerSendRecord>;
+};
+
+export type SaveSmartListInput = {
+  defaultGrouping: SmartListGrouping;
+  description?: InputMaybe<Scalars['String']['input']>;
+  filters: Array<SmartListFilterGroupInput>;
+  joiner: SmartListJoiner;
+  name: Scalars['String']['input'];
+  visibility: EntityVisibility;
+};
+
+export type SaveSmartListViewInput = {
+  config: Scalars['String']['input'];
+  listId: Scalars['ID']['input'];
+  name: Scalars['String']['input'];
 };
 
 export type SendAttachmentEmailOutput = {
@@ -2016,6 +2126,45 @@ export type SeriesMetadataModel = {
   volume?: Maybe<Scalars['Int']['output']>;
 };
 
+export enum SeriesMetadataModelOrdering {
+  AgeRating = 'AGE_RATING',
+  Booktype = 'BOOKTYPE',
+  Comicid = 'COMICID',
+  Imprint = 'IMPRINT',
+  MetaType = 'META_TYPE',
+  Publisher = 'PUBLISHER',
+  SeriesId = 'SERIES_ID',
+  Status = 'STATUS',
+  Summary = 'SUMMARY',
+  Title = 'TITLE',
+  Volume = 'VOLUME'
+}
+
+export type SeriesMetadataOrderByField = {
+  direction: OrderDirection;
+  field: SeriesMetadataModelOrdering;
+};
+
+export enum SeriesModelOrdering {
+  CreatedAt = 'CREATED_AT',
+  Description = 'DESCRIPTION',
+  Id = 'ID',
+  LibraryId = 'LIBRARY_ID',
+  Name = 'NAME',
+  Path = 'PATH',
+  Status = 'STATUS',
+  UpdatedAt = 'UPDATED_AT'
+}
+
+export type SeriesOrderBy =
+  { metadata: SeriesMetadataOrderByField; series?: never; }
+  |  { metadata?: never; series: SeriesOrderByField; };
+
+export type SeriesOrderByField = {
+  direction: OrderDirection;
+  field: SeriesModelOrdering;
+};
+
 export type SeriesScanOutput = {
   __typename?: 'SeriesScanOutput';
   /** The number of media entities that were created */
@@ -2031,6 +2180,92 @@ export type SeriesScanOutput = {
   totalFiles: Scalars['Int']['output'];
   /** The number of media entities that were updated */
   updatedMedia: Scalars['Int']['output'];
+};
+
+export type SmartList = {
+  __typename?: 'SmartList';
+  creatorId: Scalars['String']['output'];
+  defaultGrouping: SmartListGrouping;
+  description?: Maybe<Scalars['String']['output']>;
+  filters: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  joiner: SmartListJoiner;
+  name: Scalars['String']['output'];
+  views: Array<SmartListView>;
+  visibility: EntityVisibility;
+};
+
+export type SmartListFilterGroupInput = {
+  groups: Array<SmartListFilterInput>;
+  joiner: SmartListGroupJoiner;
+};
+
+export type SmartListFilterInput =
+  { library: LibraryFilterInput; media?: never; mediaMetadata?: never; series?: never; seriesMetadata?: never; }
+  |  { library?: never; media: MediaFilterInput; mediaMetadata?: never; series?: never; seriesMetadata?: never; }
+  |  { library?: never; media?: never; mediaMetadata: MediaMetadataFilterInput; series?: never; seriesMetadata?: never; }
+  |  { library?: never; media?: never; mediaMetadata?: never; series: SeriesFilterInput; seriesMetadata?: never; }
+  |  { library?: never; media?: never; mediaMetadata?: never; series?: never; seriesMetadata: SeriesMetadataFilterInput; };
+
+/** The different filter joiners that can be used in smart lists */
+export enum SmartListGroupJoiner {
+  And = 'AND',
+  Not = 'NOT',
+  Or = 'OR'
+}
+
+export type SmartListGrouped = {
+  __typename?: 'SmartListGrouped';
+  items: Array<SmartListGroupedItem>;
+};
+
+export type SmartListGroupedItem = {
+  __typename?: 'SmartListGroupedItem';
+  books: Array<Media>;
+  entity: SmartListItemEntity;
+};
+
+/** The different grouping options for smart lists */
+export enum SmartListGrouping {
+  ByBooks = 'BY_BOOKS',
+  ByLibrary = 'BY_LIBRARY',
+  BySeries = 'BY_SERIES'
+}
+
+export type SmartListItemEntity = Library | Series;
+
+export type SmartListItems = SmartListGrouped | SmartListUngrouped;
+
+/** The different filter joiners that can be used in smart lists */
+export enum SmartListJoiner {
+  And = 'AND',
+  Or = 'OR'
+}
+
+export type SmartListMeta = {
+  __typename?: 'SmartListMeta';
+  matchedBooks: Scalars['Int']['output'];
+  matchedLibraries: Scalars['Int']['output'];
+  matchedSeries: Scalars['Int']['output'];
+};
+
+export type SmartListUngrouped = {
+  __typename?: 'SmartListUngrouped';
+  books: Array<Media>;
+};
+
+export type SmartListView = {
+  __typename?: 'SmartListView';
+  config: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
+  listId: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type SmartListsInput = {
+  all?: InputMaybe<Scalars['Boolean']['input']>;
+  mine?: InputMaybe<Scalars['Boolean']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type SpineItem = {
@@ -2409,6 +2644,13 @@ export type UploadLibrarySeriesMutationVariables = Exact<{
 
 
 export type UploadLibrarySeriesMutation = { __typename?: 'Mutation', uploadSeries: boolean };
+
+export type MediaFilterFormQueryVariables = Exact<{
+  seriesId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type MediaFilterFormQuery = { __typename?: 'Query', mediaMetadataOverview: { __typename?: 'MediaMetadataOverview', genres: Array<string>, writers: Array<string>, pencillers: Array<string>, colorists: Array<string>, letterers: Array<string>, inkers: Array<string>, publishers: Array<string>, editors: Array<string>, characters: Array<string> } };
 
 export type DeleteLibraryMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -2833,6 +3075,21 @@ export const UploadLibrarySeriesDocument = new TypedDocumentString(`
   uploadSeries(input: $input)
 }
     `) as unknown as TypedDocumentString<UploadLibrarySeriesMutation, UploadLibrarySeriesMutationVariables>;
+export const MediaFilterFormDocument = new TypedDocumentString(`
+    query MediaFilterForm($seriesId: ID) {
+  mediaMetadataOverview(seriesId: $seriesId) {
+    genres
+    writers
+    pencillers
+    colorists
+    letterers
+    inkers
+    publishers
+    editors
+    characters
+  }
+}
+    `) as unknown as TypedDocumentString<MediaFilterFormQuery, MediaFilterFormQueryVariables>;
 export const DeleteLibraryDocument = new TypedDocumentString(`
     mutation DeleteLibrary($id: ID!) {
   deleteLibrary(id: $id) {

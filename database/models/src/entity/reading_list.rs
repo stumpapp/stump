@@ -120,17 +120,6 @@ mod tests {
 	use crate::tests::common::*;
 	use pretty_assertions::assert_eq;
 
-	fn get_default_user() -> AuthUser {
-		AuthUser {
-			id: "42".to_string(),
-			username: "test".to_string(),
-			is_server_owner: true,
-			is_locked: false,
-			permissions: vec![],
-			age_restriction: None,
-		}
-	}
-
 	#[test]
 	fn test_reading_list_rbac() {
 		let condition = get_reading_list_rbac_for_user(&"42".to_string(), 1);

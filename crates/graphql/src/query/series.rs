@@ -1,11 +1,12 @@
 use async_graphql::{Context, Object, Result, ID};
-use models::entity::series;
+use models::{entity::series, shared::ordering::OrderBy};
 use sea_orm::{prelude::*, QueryOrder, QuerySelect};
 
 use crate::{
 	data::{CoreContext, RequestContext},
 	filter::{series::SeriesFilterInput, IntoFilter},
 	object::series::Series,
+	order::SeriesOrderBy,
 	pagination::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
 		PaginationValidator,
@@ -21,6 +22,9 @@ impl SeriesQuery {
 		&self,
 		ctx: &Context<'_>,
 		filter: SeriesFilterInput,
+		#[graphql(default_with = "SeriesOrderBy::default_vec()")] order_by: Vec<
+			SeriesOrderBy,
+		>,
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<Series>> {
@@ -28,7 +32,10 @@ impl SeriesQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let conditions = filter.into_filter();
-		let query = series::ModelWithMetadata::find_for_user(user).filter(conditions);
+		let query = SeriesOrderBy::add_order_by(
+			&order_by,
+			series::ModelWithMetadata::find_for_user(user).filter(conditions),
+		)?;
 
 		match pagination.resolve() {
 			Pagination::Cursor(info) => {

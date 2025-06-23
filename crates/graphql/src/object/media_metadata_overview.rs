@@ -1,7 +1,7 @@
 use crate::data::CoreContext;
 use async_graphql::{Context, Object, Result};
-use models::entity::media_metadata;
-use sea_orm::DatabaseConnection;
+use models::entity::{media, media_metadata};
+use sea_orm::{prelude::*, DatabaseConnection, QuerySelect, Select};
 use std::collections::BTreeSet;
 
 static VALUE_SEPERATOR: char = ',';
@@ -18,61 +18,89 @@ fn list_str_to_vec(list: String) -> Vec<String> {
 		.collect()
 }
 
+fn get_base_query(
+	column: media_metadata::Column,
+	series_id: Option<String>,
+) -> Select<media_metadata::Entity> {
+	let query = media_metadata::Entity::find_for_column(column);
+
+	if let Some(series_id) = series_id {
+		query
+			.join_rev(
+				sea_orm::JoinType::InnerJoin,
+				media::Entity::belongs_to(media_metadata::Entity)
+					.from(models::entity::media::Column::Id)
+					.to(models::entity::media_metadata::Column::MediaId)
+					.into(),
+			)
+			.filter(media::Column::SeriesId.eq(series_id))
+	} else {
+		query
+	}
+}
+
 macro_rules! get_unique_values_inner {
-	($column:ident, $conn:ident) => {{
-		let values: Vec<String> =
-			media_metadata::Entity::find_for_column(media_metadata::Column::$column)
-				.into_tuple()
-				.all($conn)
-				.await?;
+	($column:ident, $conn:ident, $series_id:ident) => {{
+		let query = get_base_query(media_metadata::Column::$column, $series_id);
+		let values: Vec<String> = query.into_tuple().all($conn).await?;
 		Ok(make_unique(values.into_iter().flat_map(list_str_to_vec)))
 	}};
 }
 
 #[derive(Default, Debug, Clone)]
-pub struct MediaMetadataOverview {}
+pub struct MediaMetadataOverview {
+	pub series_id: Option<String>,
+}
 
 #[Object]
 impl MediaMetadataOverview {
 	async fn genres(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
-		get_unique_values_inner!(Genre, conn)
+		let series_id = self.series_id.clone();
+		get_unique_values_inner!(Genre, conn, series_id)
 	}
 
 	async fn writers(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
-		get_unique_values_inner!(Writers, conn)
+		let series_id = self.series_id.clone();
+		get_unique_values_inner!(Writers, conn, series_id)
 	}
 
 	async fn pencillers(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
-		get_unique_values_inner!(Pencillers, conn)
+		let series_id = self.series_id.clone();
+		get_unique_values_inner!(Pencillers, conn, series_id)
 	}
 
 	async fn inkers(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
-		get_unique_values_inner!(Inkers, conn)
+		let series_id = self.series_id.clone();
+		get_unique_values_inner!(Inkers, conn, series_id)
 	}
 
 	async fn colorists(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
-		get_unique_values_inner!(Colorists, conn)
+		let series_id = self.series_id.clone();
+		get_unique_values_inner!(Colorists, conn, series_id)
 	}
 
 	async fn letterers(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
-		get_unique_values_inner!(Letterers, conn)
+		let series_id = self.series_id.clone();
+		get_unique_values_inner!(Letterers, conn, series_id)
 	}
 
 	async fn editors(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
-		get_unique_values_inner!(Editors, conn)
+		let series_id = self.series_id.clone();
+		get_unique_values_inner!(Editors, conn, series_id)
 	}
 
 	async fn publishers(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
+		let series_id = self.series_id.clone();
 		let values: Vec<String> =
-			media_metadata::Entity::find_for_column(media_metadata::Column::Publisher)
+			get_base_query(media_metadata::Column::Publisher, series_id)
 				.into_tuple()
 				.all(conn)
 				.await?;
@@ -81,24 +109,39 @@ impl MediaMetadataOverview {
 
 	async fn characters(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
-		get_unique_values_inner!(Characters, conn)
+		let series_id = self.series_id.clone();
+		get_unique_values_inner!(Characters, conn, series_id)
 	}
 
 	async fn teams(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
-		get_unique_values_inner!(Teams, conn)
+		let series_id = self.series_id.clone();
+		get_unique_values_inner!(Teams, conn, series_id)
 	}
 }
 
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use sea_orm::{MockDatabase, Value};
+	use sea_orm::{sea_query::SqliteQueryBuilder, MockDatabase, QueryTrait, Value};
 
 	async fn get_unique_values_inner_test(
 		conn: &DatabaseConnection,
 	) -> Result<Vec<String>> {
-		get_unique_values_inner!(Genre, conn)
+		get_unique_values_inner!(Genre, conn, None)
+	}
+
+	#[test]
+	fn get_base_query_test() {
+		let series_id = Some("test_series".to_string());
+		let query = get_base_query(media_metadata::Column::Genre, series_id);
+		assert_eq!(
+			query.to_owned().into_query().to_string(SqliteQueryBuilder),
+			r#"SELECT DISTINCT "media_metadata"."genre" FROM "media_metadata" "#
+				.to_string() + r#"INNER JOIN "media" ON "media"."id" = "media_metadata"."media_id" "#
+				+ r#"WHERE "media_metadata"."genre" IS NOT NULL AND "media"."series_id" = 'test_series' "#
+				+ r#"ORDER BY "media_metadata"."genre" ASC"#
+		);
 	}
 
 	#[tokio::test]

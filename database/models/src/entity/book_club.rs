@@ -157,17 +157,6 @@ mod tests {
 	use crate::tests::common::*;
 	use pretty_assertions::assert_eq;
 
-	fn get_default_user() -> AuthUser {
-		AuthUser {
-			id: "42".to_string(),
-			username: "test".to_string(),
-			is_server_owner: true,
-			is_locked: false,
-			permissions: vec![],
-			age_restriction: None,
-		}
-	}
-
 	#[test]
 	fn test_all_for_user_server_owner() {
 		let user = get_default_user();

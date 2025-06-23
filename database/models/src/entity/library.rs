@@ -1,14 +1,18 @@
 use async_graphql::SimpleObject;
+use filter_gen::Ordering;
 use sea_orm::{
 	entity::prelude::*, prelude::async_trait::async_trait, ActiveValue,
-	DerivePartialModel, FromQueryResult,
+	DerivePartialModel, FromQueryResult, QueryOrder,
 };
 
-use crate::shared::enums::FileStatus;
+use crate::shared::{
+	enums::FileStatus,
+	ordering::{OrderBy, OrderDirection},
+};
 
 use super::{library_hidden_to_user, user::AuthUser};
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Ordering)]
 #[graphql(name = "LibraryModel")]
 #[sea_orm(table_name = "libraries")]
 pub struct Model {

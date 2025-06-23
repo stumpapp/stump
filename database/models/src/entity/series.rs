@@ -1,7 +1,7 @@
 use async_graphql::SimpleObject;
 use sea_orm::{
 	entity::prelude::*, prelude::async_trait::async_trait, sea_query::Query, ActiveValue,
-	Condition, FromQueryResult, QuerySelect, QueryTrait,
+	Condition, FromQueryResult, Linked, QuerySelect, QueryTrait,
 };
 
 use crate::{
@@ -198,6 +198,16 @@ impl Related<super::media::Entity> for Entity {
 impl Related<super::series_metadata::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::SeriesMetadata.def()
+	}
+}
+
+impl Linked for Entity {
+	type FromEntity = super::media::Entity;
+
+	type ToEntity = super::library::Entity;
+
+	fn link(&self) -> Vec<RelationDef> {
+		vec![Relation::Media.def().rev(), Relation::Library.def()]
 	}
 }
 

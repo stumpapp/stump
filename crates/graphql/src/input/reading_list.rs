@@ -1,6 +1,6 @@
 use async_graphql::InputObject;
 use models::{entity::reading_list, shared::enums::EntityVisibility};
-use sea_orm::Set;
+use sea_orm::ActiveValue::Set;
 
 #[derive(InputObject)]
 pub struct ReadingListInput {

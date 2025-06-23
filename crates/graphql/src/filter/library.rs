@@ -1,11 +1,12 @@
 use async_graphql::InputObject;
-use models::entity::series;
+use models::entity::library;
+use serde::{Deserialize, Serialize};
 
 use super::{apply_string_filter, IntoFilter, StringLikeFilter};
 
 // TODO: Support filter by tags (requires join logic)
 
-#[derive(InputObject, Clone)]
+#[derive(InputObject, Clone, Debug, Serialize, Deserialize)]
 pub struct LibraryFilterInput {
 	#[graphql(default)]
 	pub id: Option<StringLikeFilter<String>>,
@@ -48,11 +49,11 @@ impl IntoFilter for LibraryFilterInput {
 			}))
 			.add_option(
 				self.name
-					.map(|f| apply_string_filter(series::Column::Name, f)),
+					.map(|f| apply_string_filter(library::Column::Name, f)),
 			)
 			.add_option(
 				self.path
-					.map(|f| apply_string_filter(series::Column::Path, f)),
+					.map(|f| apply_string_filter(library::Column::Path, f)),
 			)
 	}
 }

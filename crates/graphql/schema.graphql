@@ -964,6 +964,9 @@ type Mutation {
 	createApiKey(input: ApikeyInput!): Apikey!
 	updateApiKey(id: Int!, input: ApikeyInput!): Apikey!
 	deleteApiKey(id: Int!): Apikey!
+	createSmartList(input: SaveSmartListInput!): SmartList!
+	updateSmartList(id: ID!, input: SaveSmartListInput!): SmartList!
+	deleteSmartList(id: ID!): SmartList!
 	createBookClub(input: CreateBookClubInput!): BookClub!
 	updateBookClub(id: ID!, input: UpdateBookClubInput!): BookClub!
 	createBookClubInvitation(id: ID!, input: BookClubInvitationInput!): BookClubInvitation!
@@ -1101,6 +1104,9 @@ type Mutation {
 	updateEmailDevice(id: Int!, input: EmailDeviceInput!): RegisteredEmailDevice!
 	patchEmailDevice(id: Int!, input: EmailDeviceInput!): Int!
 	deleteEmailDevice(id: Int!): RegisteredEmailDevice!
+	createSmartListView(input: SaveSmartListViewInput!): SmartListView!
+	updateSmartListView(input: SaveSmartListViewInput!): SmartListView!
+	deleteSmartListView(id: ID!, name: String!): SmartListView!
 }
 
 type Notifier {
@@ -1328,6 +1334,7 @@ type Query {
 	libraryById(id: ID!): Library
 	numberOfLibraries: Int!
 	mediaMetadataOverview: MediaMetadataOverview!
+	smartListViews: [SmartListView!]!
 	series(filter: SeriesFilterInput!, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
 	seriesById(id: ID!): Series
 	numberOfSeries: Int!
@@ -1342,6 +1349,10 @@ type Query {
 	logfileInfo: LogFileInfo!
 	stumpConfig: StumpConfig!
 	uploadConfig: UploadConfig!
+	smartLists(input: SmartListsInput!): [SmartList!]!
+	smartListById(id: ID!): SmartList
+	smartListMeta(id: ID!): SmartListMeta
+	smartListItems(id: ID!): SmartListItems!
 }
 
 "The different reading directions supported by any Stump reader"
@@ -1405,6 +1416,21 @@ type RegisteredEmailDevice {
 	email: String!
 	forbidden: Boolean!
 	sendHistory: [EmailerSendRecord!]!
+}
+
+input SaveSmartListInput {
+	filters: [SmartListFilterGroupInput!]!
+	name: String!
+	description: String
+	joiner: SmartListJoiner!
+	defaultGrouping: SmartListGrouping!
+	visibility: EntityVisibility!
+}
+
+input SaveSmartListViewInput {
+	name: String!
+	listId: ID!
+	config: String!
 }
 
 type SendAttachmentEmailOutput {
@@ -1503,6 +1529,87 @@ type SeriesScanOutput {
 	createdMedia: Int!
 	"The number of media entities that were updated"
 	updatedMedia: Int!
+}
+
+type SmartList {
+	id: String!
+	name: String!
+	description: String
+	joiner: SmartListJoiner!
+	defaultGrouping: SmartListGrouping!
+	visibility: EntityVisibility!
+	creatorId: String!
+	filters: String!
+	views: [SmartListView!]!
+}
+
+input SmartListFilterGroupInput {
+	groups: [SmartListFilterInput!]!
+	joiner: SmartListGroupJoiner!
+}
+
+input SmartListFilterInput @oneOf {
+	media: MediaFilterInput
+	mediaMetadata: MediaMetadataFilterInput
+	series: SeriesFilterInput
+	seriesMetadata: SeriesMetadataFilterInput
+	library: LibraryFilterInput
+}
+
+"The different filter joiners that can be used in smart lists"
+enum SmartListGroupJoiner {
+	AND
+	OR
+	NOT
+}
+
+type SmartListGrouped {
+	items: [SmartListGroupedItem!]!
+}
+
+type SmartListGroupedItem {
+	entity: SmartListItemEntity!
+	books: [Media!]!
+}
+
+"The different grouping options for smart lists"
+enum SmartListGrouping {
+	BY_BOOKS
+	BY_SERIES
+	BY_LIBRARY
+}
+
+union SmartListItemEntity = Series | Library
+
+union SmartListItems = SmartListGrouped | SmartListUngrouped
+
+"The different filter joiners that can be used in smart lists"
+enum SmartListJoiner {
+	AND
+	OR
+}
+
+type SmartListMeta {
+	matchedBooks: Int!
+	matchedSeries: Int!
+	matchedLibraries: Int!
+}
+
+type SmartListUngrouped {
+	books: [Media!]!
+}
+
+type SmartListView {
+	id: Int!
+	name: String!
+	listId: String!
+	config: String!
+}
+
+input SmartListsInput {
+	all: Boolean
+	mine: Boolean
+	search: String
 }
 
 type SpineItem {

@@ -6,6 +6,7 @@ use sea_orm::{
 	sea_query::ConditionExpression,
 	Value,
 };
+use serde::{Deserialize, Serialize};
 
 pub mod library;
 pub mod log;
@@ -25,7 +26,7 @@ pub trait IntoFilter {
 	fn into_filter(self) -> sea_orm::Condition;
 }
 
-#[derive(OneofObject, Clone)]
+#[derive(OneofObject, Clone, Debug, Serialize, Deserialize)]
 #[graphql(concrete(name = "FieldFilterString", params(String)))]
 #[graphql(concrete(name = "FieldFilterFileStatus", params(FileStatus)))]
 pub enum StringLikeFilter<T>
@@ -64,7 +65,7 @@ where
 	}
 }
 
-#[derive(InputObject, Clone)]
+#[derive(InputObject, Clone, Debug, Serialize, Deserialize)]
 #[graphql(concrete(name = "NumericRangeF32", params(f32)))]
 #[graphql(concrete(name = "NumericRangeI32", params(i32)))]
 #[graphql(concrete(name = "NumericRangeI64", params(i64)))]
@@ -80,7 +81,7 @@ where
 	pub inclusive: bool,
 }
 
-#[derive(OneofObject, Clone)]
+#[derive(OneofObject, Clone, Debug, Serialize, Deserialize)]
 #[graphql(concrete(name = "NumericFilterF32", params(f32)))]
 #[graphql(concrete(name = "NumericFilterI32", params(i32)))]
 #[graphql(concrete(name = "NumericFilterI64", params(i64)))]
@@ -131,7 +132,7 @@ where
 	}
 }
 
-#[derive(OneofObject, Clone)]
+#[derive(OneofObject, Clone, Debug, Serialize, Deserialize)]
 #[graphql(concrete(name = "ComputedFilterReadingStatus", params(ReadingStatus)))]
 pub enum ConceptualFilter<T>
 where

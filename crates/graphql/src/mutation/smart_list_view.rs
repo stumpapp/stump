@@ -1,0 +1,94 @@
+use crate::{
+	data::{CoreContext, RequestContext},
+	guard::PermissionGuard,
+	input::smart_list_view::SaveSmartListViewInput,
+	object::smart_list_view::SmartListView,
+};
+use async_graphql::{Context, Object, Result, ID};
+use models::{
+	entity::{smart_list, smart_list_view},
+	shared::enums::UserPermission,
+};
+use sea_orm::{prelude::*, ActiveModelTrait, TransactionTrait};
+
+#[derive(Default)]
+pub struct SmartListViewMutation;
+
+#[Object]
+impl SmartListViewMutation {
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessSmartList)")]
+	async fn create_smart_list_view(
+		&self,
+		ctx: &Context<'_>,
+		input: SaveSmartListViewInput,
+	) -> Result<SmartListView> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let txn = conn.begin().await?;
+
+		// Ensure the user has access to the smart list
+		let _ = smart_list::Entity::find_by_id(user, input.list_id.clone())
+			.one(&txn)
+			.await?
+			.ok_or("Smart list not found".to_string())?;
+
+		let active_model = input.into_active_model()?;
+		let inserted_smart_list_view = smart_list_view::Entity::insert(active_model)
+			.exec_with_returning(&txn)
+			.await?;
+
+		txn.commit().await?;
+
+		return Ok(inserted_smart_list_view.into());
+	}
+
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessSmartList)")]
+	async fn update_smart_list_view(
+		&self,
+		ctx: &Context<'_>,
+		input: SaveSmartListViewInput,
+	) -> Result<SmartListView> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let txn = conn.begin().await?;
+
+		let smart_list_view = smart_list_view::Entity::find_by_user_list_id_name(
+			user,
+			&input.list_id,
+			&input.name,
+		)
+		.one(&txn)
+		.await?
+		.ok_or("Smart list view not found".to_string())?;
+
+		let mut active_model: smart_list_view::ActiveModel = smart_list_view.into();
+		// TODO(graphql): update config here
+		let updated = active_model.update(&txn).await?;
+		txn.commit().await?;
+
+		Ok(updated.into())
+	}
+
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessSmartList)")]
+	async fn delete_smart_list_view(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		name: String,
+	) -> Result<SmartListView> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let txn = conn.begin().await?;
+
+		let smart_list_view =
+			smart_list_view::Entity::find_by_user_list_id_name(user, &id, &name)
+				.one(&txn)
+				.await?
+				.ok_or("Smart list view not found".to_string())?;
+
+		smart_list_view.clone().delete(&txn).await?;
+		txn.commit().await?;
+
+		Ok(smart_list_view.into())
+	}
+}

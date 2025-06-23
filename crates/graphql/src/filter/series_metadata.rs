@@ -1,12 +1,13 @@
 use async_graphql::InputObject;
 use models::entity::series_metadata;
+use serde::{Deserialize, Serialize};
 
 use super::{
 	apply_numeric_filter, apply_string_filter, IntoFilter, NumericFilter,
 	StringLikeFilter,
 };
 
-#[derive(InputObject, Clone)]
+#[derive(InputObject, Clone, Debug, Serialize, Deserialize)]
 pub struct SeriesMetadataFilterInput {
 	#[graphql(default)]
 	pub age_rating: Option<NumericFilter<i32>>,

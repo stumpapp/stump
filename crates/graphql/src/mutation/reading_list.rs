@@ -1,8 +1,10 @@
 use async_graphql::{Context, Object, Result};
 use models::entity::{reading_list, reading_list_item};
-use sea_orm::ActiveValue::Set;
-use sea_orm::TransactionTrait;
-use sea_orm::{prelude::*, DatabaseTransaction};
+use sea_orm::{
+	ActiveValue::Set,
+	TransactionTrait,
+	{prelude::*, DatabaseTransaction},
+};
 
 use crate::{
 	data::{CoreContext, RequestContext},

@@ -2911,6 +2911,13 @@ export type UpdateLibraryExclusionsMutationVariables = Exact<{
 
 export type UpdateLibraryExclusionsMutation = { __typename?: 'Mutation', updateLibraryExcludedUsers: { __typename?: 'Library', id: string, excludedUsers: Array<{ __typename?: 'User', id: string, username: string }> } };
 
+export type CleanLibraryMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type CleanLibraryMutation = { __typename?: 'Mutation', cleanLibrary: { __typename?: 'CleanLibraryResponse', deletedMediaCount: number, deletedSeriesCount: number, isEmpty: boolean } };
+
 export type AnalyzeLibraryMediaMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -3650,6 +3657,15 @@ export const UpdateLibraryExclusionsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UpdateLibraryExclusionsMutation, UpdateLibraryExclusionsMutationVariables>;
+export const CleanLibraryDocument = new TypedDocumentString(`
+    mutation CleanLibrary($id: ID!) {
+  cleanLibrary(id: $id) {
+    deletedMediaCount
+    deletedSeriesCount
+    isEmpty
+  }
+}
+    `) as unknown as TypedDocumentString<CleanLibraryMutation, CleanLibraryMutationVariables>;
 export const AnalyzeLibraryMediaDocument = new TypedDocumentString(`
     mutation AnalyzeLibraryMedia($id: ID!) {
   analyzeMedia(id: $id)

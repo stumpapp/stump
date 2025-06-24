@@ -1,6 +1,6 @@
 import { useGraphQLMutation } from '@stump/client'
 import { ConfirmationModal } from '@stump/components'
-import { graphql } from '@stump/graphql'
+import { graphql, UserPermission } from '@stump/graphql'
 import { isAxiosError } from '@stump/sdk'
 import { useCallback, useEffect, useMemo } from 'react'
 import { toast } from 'react-hot-toast'
@@ -36,7 +36,10 @@ export default function DeleteLibraryConfirmation({ isOpen, libraryId, onClose, 
 	})
 	const { checkPermission } = useAppContext()
 
-	const isPermitted = useMemo(() => checkPermission('library:scan'), [checkPermission])
+	const isPermitted = useMemo(
+		() => checkPermission(UserPermission.DeleteLibrary),
+		[checkPermission],
+	)
 
 	const handleDelete = useCallback(() => {
 		if (isPermitted) {

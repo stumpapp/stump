@@ -56,6 +56,7 @@ type Documents = {
     "\n\tquery LibraryExclusionsUsersQuery {\n\t\tusers {\n\t\t\tid\n\t\t\tusername\n\t\t}\n\t}\n": typeof types.LibraryExclusionsUsersQueryDocument,
     "\n\tquery LibraryExclusionsQuery($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\texcludedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibraryExclusionsQueryDocument,
     "\n\tmutation UpdateLibraryExclusions($id: ID!, $userIds: [String!]!) {\n\t\tupdateLibraryExcludedUsers(id: $id, userIds: $userIds) {\n\t\t\tid\n\t\t\texcludedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": typeof types.UpdateLibraryExclusionsDocument,
+    "\n\tmutation CleanLibrary($id: ID!) {\n\t\tcleanLibrary(id: $id) {\n\t\t\tdeletedMediaCount\n\t\t\tdeletedSeriesCount\n\t\t\tisEmpty\n\t\t}\n\t}\n": typeof types.CleanLibraryDocument,
     "\n\tmutation AnalyzeLibraryMedia($id: ID!) {\n\t\tanalyzeMedia(id: $id)\n\t}\n": typeof types.AnalyzeLibraryMediaDocument,
     "\n\tmutation ScanHistorySectionClearHistory($id: ID!) {\n\t\tclearScanHistory(id: $id)\n\t}\n": typeof types.ScanHistorySectionClearHistoryDocument,
     "\n\tquery ScanHistoryTable($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tscanHistory {\n\t\t\t\tid\n\t\t\t\tjobId\n\t\t\t\ttimestamp\n\t\t\t\toptions\n\t\t\t}\n\t\t}\n\t}\n": typeof types.ScanHistoryTableDocument,
@@ -108,6 +109,7 @@ const documents: Documents = {
     "\n\tquery LibraryExclusionsUsersQuery {\n\t\tusers {\n\t\t\tid\n\t\t\tusername\n\t\t}\n\t}\n": types.LibraryExclusionsUsersQueryDocument,
     "\n\tquery LibraryExclusionsQuery($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\texcludedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": types.LibraryExclusionsQueryDocument,
     "\n\tmutation UpdateLibraryExclusions($id: ID!, $userIds: [String!]!) {\n\t\tupdateLibraryExcludedUsers(id: $id, userIds: $userIds) {\n\t\t\tid\n\t\t\texcludedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": types.UpdateLibraryExclusionsDocument,
+    "\n\tmutation CleanLibrary($id: ID!) {\n\t\tcleanLibrary(id: $id) {\n\t\t\tdeletedMediaCount\n\t\t\tdeletedSeriesCount\n\t\t\tisEmpty\n\t\t}\n\t}\n": types.CleanLibraryDocument,
     "\n\tmutation AnalyzeLibraryMedia($id: ID!) {\n\t\tanalyzeMedia(id: $id)\n\t}\n": types.AnalyzeLibraryMediaDocument,
     "\n\tmutation ScanHistorySectionClearHistory($id: ID!) {\n\t\tclearScanHistory(id: $id)\n\t}\n": types.ScanHistorySectionClearHistoryDocument,
     "\n\tquery ScanHistoryTable($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tscanHistory {\n\t\t\t\tid\n\t\t\t\tjobId\n\t\t\t\ttimestamp\n\t\t\t\toptions\n\t\t\t}\n\t\t}\n\t}\n": types.ScanHistoryTableDocument,
@@ -283,6 +285,10 @@ export function graphql(source: "\n\tquery LibraryExclusionsQuery($id: ID!) {\n\
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tmutation UpdateLibraryExclusions($id: ID!, $userIds: [String!]!) {\n\t\tupdateLibraryExcludedUsers(id: $id, userIds: $userIds) {\n\t\t\tid\n\t\t\texcludedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').UpdateLibraryExclusionsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation CleanLibrary($id: ID!) {\n\t\tcleanLibrary(id: $id) {\n\t\t\tdeletedMediaCount\n\t\t\tdeletedSeriesCount\n\t\t\tisEmpty\n\t\t}\n\t}\n"): typeof import('./graphql').CleanLibraryDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

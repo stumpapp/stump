@@ -6,6 +6,7 @@ PRAGMA foreign_keys = OFF;
 -- _MediaToTag -> _media_to_tag
 -- _SeriesToTag -> _series_to_tag
 CREATE TABLE "_library_hidden_to_user" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "library_id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
     CONSTRAINT "_library_hidden_to_user_library_id_fkey" FOREIGN KEY ("library_id") REFERENCES "libraries" ("id") ON DELETE CASCADE ON UPDATE CASCADE,

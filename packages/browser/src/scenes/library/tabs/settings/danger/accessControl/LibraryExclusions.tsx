@@ -1,4 +1,4 @@
-import { useGraphQLMutation, useGraphQLQueries, useUpdateLibraryExclusions } from '@stump/client'
+import { useGraphQLMutation, useSuspenseGraphQLQueries } from '@stump/client'
 import { Alert, ComboBox, Heading, Text, usePrevious } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
@@ -54,7 +54,7 @@ export default function LibraryExclusions() {
 		{
 			data: { libraryById },
 		},
-	] = useGraphQLQueries([
+	] = useSuspenseGraphQLQueries([
 		{
 			document: usersQuery,
 			queryKey: ['users'],

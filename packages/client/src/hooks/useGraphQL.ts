@@ -188,7 +188,7 @@ export function useSuspenseGraphQL<TResult, TVariables>(
  * @param queries Array of query configurations
  * @returns Results for each query in the same order
  */
-export function useGraphQLQueries<TQueries extends readonly unknown[]>(queries: {
+export function useSuspenseGraphQLQueries<TQueries extends readonly unknown[]>(queries: {
 	[TQueryIndex in keyof TQueries]: {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		document: TypedDocumentString<TQueries[TQueryIndex], any>

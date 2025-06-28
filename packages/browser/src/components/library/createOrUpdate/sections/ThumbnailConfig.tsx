@@ -1,5 +1,6 @@
 import {
 	Button,
+	Card,
 	cx,
 	Heading,
 	Input,
@@ -10,8 +11,8 @@ import {
 	WideSwitch,
 } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { ImageResizeMode, ImageResizeOptions } from '@stump/sdk'
 import { AnimatePresence, motion } from 'framer-motion'
+import { Check } from 'lucide-react'
 import { useCallback, useMemo } from 'react'
 import { useFormContext, useFormState } from 'react-hook-form'
 
@@ -19,30 +20,51 @@ import { useLibraryContextSafe } from '@/scenes/library/context'
 
 import { CreateOrUpdateLibrarySchema } from '../schema'
 
+type Option =
+	| NonNullable<CreateOrUpdateLibrarySchema['thumbnailConfig']['resizeMethod']>['mode']
+	| 'none'
+
 const formatOptions = [
-	{ label: 'WebP', value: 'Webp' },
-	{ label: 'JPEG', value: 'Jpeg' },
-	{ label: 'PNG', value: 'Png' },
+	{ label: 'WebP', value: 'WEBP' },
+	{ label: 'JPEG', value: 'JPEG' },
+	{ label: 'PNG', value: 'PNG' },
 ]
 
 export default function ThumbnailConfigForm() {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 	const ctx = useLibraryContextSafe()
+
 	const { errors, dirtyFields } = useFormState({ control: form.control })
 	const { t } = useLocaleContext()
 
+	const [resizeMethod, enabled] = form.watch([
+		'thumbnailConfig.resizeMethod',
+		'thumbnailConfig.enabled',
+	])
 	const isCreating = !ctx?.library
-	const resizeMethod = form.watch('thumbnailConfig.resizeMethod')
 
-	const handleSelection = useCallback(
-		(option: ImageResizeMode | 'disabled') => {
-			if (option === 'disabled' || option === resizeMethod?.mode) {
-				form.setValue('thumbnailConfig.enabled', false)
-				form.setValue('thumbnailConfig.resizeMethod', undefined)
+	const handleEnabledChange = useCallback(
+		(checked: boolean) => {
+			form.setValue('thumbnailConfig.enabled', checked)
+			if (checked && !resizeMethod) {
+				form.setValue('thumbnailConfig.resizeMethod', {
+					mode: 'scaleEvenlyByFactor',
+					factor: 0.65,
+				})
+				form.setValue('thumbnailConfig.quality', 0.75)
+			}
+		},
+		[form, resizeMethod],
+	)
+
+	const handleResizeMethodChange = useCallback(
+		(value: Option) => {
+			if (value === 'none' || value === resizeMethod?.mode) {
+				form.setValue('thumbnailConfig.resizeMethod', null)
 			} else {
 				const newOptions = {
-					mode: option,
-				} as ImageResizeOptions
+					mode: value,
+				} as NonNullable<CreateOrUpdateLibrarySchema['thumbnailConfig']>['resizeMethod']
 				const currentQuality = form.getValues('thumbnailConfig.quality')
 				form.setValue('thumbnailConfig.resizeMethod', newOptions)
 				form.setValue('thumbnailConfig.enabled', true)
@@ -89,6 +111,9 @@ export default function ThumbnailConfigForm() {
 		[errors],
 	)
 
+	// TODO: I actually can't tell if I hate this animation or not. I think it might just
+	// be doing too much, yknow
+
 	return (
 		<div className="flex flex-grow flex-col gap-6">
 			<div>
@@ -104,32 +129,175 @@ export default function ThumbnailConfigForm() {
 				<WideSwitch
 					description="Generate thumbnail images for this library"
 					label="Enabled"
-					checked={!!resizeMethod}
-					onCheckedChange={() => handleSelection(resizeMethod ? 'disabled' : 'Scaled')}
+					checked={enabled}
+					onCheckedChange={() => handleEnabledChange(!enabled)}
 				/>
 
-				<AnimatePresence>
-					{!!resizeMethod && (
+				<AnimatePresence mode="wait">
+					{!enabled && (
 						<motion.div
+							key="no-thumbnail-config"
+							initial={{ height: 0, opacity: 0, y: -10 }}
+							animate={{
+								height: 'auto',
+								opacity: 1,
+								y: 0,
+								transition: {
+									height: { duration: 0.25, ease: [0.4, 0, 0.2, 1] },
+									opacity: { duration: 0.2, ease: 'easeOut' },
+									y: { duration: 0.2, ease: 'easeOut' },
+								},
+							}}
+							exit={{
+								height: 0,
+								opacity: 0,
+								y: -10,
+								transition: {
+									height: { duration: 0.2, ease: [0.4, 0, 0.2, 1] },
+									opacity: { duration: 0.15, ease: 'easeIn' },
+									y: { duration: 0.15, ease: 'easeIn' },
+								},
+							}}
+						>
+							<Card className="flex flex-col items-center gap-y-4 border-dashed p-6">
+								<span className="rounded-full border border-fill-brand-secondary bg-fill-brand p-1">
+									<Check className="text-foreground" />
+								</span>
+								<Text size="sm" variant="muted">
+									No additional configuration is required when thumbnail generation is disabled
+								</Text>
+							</Card>
+						</motion.div>
+					)}
+
+					{enabled && resizeMethod && (
+						<motion.div
+							key="thumbnail-config"
 							className="flex flex-col gap-4"
-							initial={{ height: 0, opacity: 0 }}
-							animate={{ height: 'auto', opacity: 1 }}
-							exit={{ height: 0, opacity: 0 }}
-							transition={{ duration: 0.15 }}
+							initial={{ height: 0, opacity: 0, y: 10 }}
+							animate={{
+								height: 'auto',
+								opacity: 1,
+								y: 0,
+								transition: {
+									height: { duration: 0.25, ease: [0.4, 0, 0.2, 1] },
+									opacity: { duration: 0.2, ease: 'easeOut' },
+									y: { duration: 0.2, ease: 'easeOut' },
+								},
+							}}
+							exit={{
+								height: 0,
+								opacity: 0,
+								y: 10,
+								transition: {
+									height: { duration: 0.2, ease: [0.4, 0, 0.2, 1] },
+									opacity: { duration: 0.15, ease: 'easeIn' },
+									y: { duration: 0.15, ease: 'easeIn' },
+								},
+							}}
 						>
 							<Label>Resize Method</Label>
 							<NativeSelect
 								options={[
-									{ label: 'Evenly Scale', value: 'ScaleEvenlyByFactor' },
-									{ label: 'Exact Size', value: 'Exact' },
-									{ label: 'Scale Dimension', value: 'ScaleDimension' },
-									{ label: 'None', value: 'None' },
+									{ label: 'Evenly Scale', value: 'scaleEvenlyByFactor' },
+									{ label: 'Exact Size', value: 'exact' },
+									{ label: 'Scale Dimension', value: 'scaleDimension' },
+									{ label: 'None', value: 'none' },
 								]}
+								value={resizeMethod.mode}
+								onChange={(e) => handleResizeMethodChange(e.target.value as Option)}
 							/>
 
+							{resizeMethod.mode === 'scaleEvenlyByFactor' && (
+								<>
+									<Text size="xs" variant="muted">
+										Scale the thumbnail by a factor of the original size. For example, a scale
+										factor of 0.65 will result in a thumbnail that is 65% of the original size
+									</Text>
+									<div className="flex flex-col gap-2">
+										<Label>Scale Factor</Label>
+										<Input
+											contrast
+											variant="primary"
+											placeholder="0.65"
+											{...form.register('thumbnailConfig.resizeMethod.factor', {
+												valueAsNumber: true,
+											})}
+											errorMessage={form.formState.errors.thumbnailConfig?.resizeMethod?.message}
+										/>
+									</div>
+								</>
+							)}
+
+							{resizeMethod.mode === 'exact' && (
+								<>
+									<Text size="xs" variant="muted">
+										Resize the thumbnail to an exact size. If the original image is smaller than the
+										specified size, it will be upscaled
+									</Text>
+									<Input
+										contrast
+										variant="primary"
+										label="Width"
+										placeholder="200"
+										{...form.register('thumbnailConfig.resizeMethod.width', {
+											valueAsNumber: true,
+										})}
+										// errorMessage={form.formState.errors.thumbnailConfig?.resizeMethod?.width?.message}
+									/>
+									<Input
+										contrast
+										variant="primary"
+										label="Height"
+										placeholder="350"
+										{...form.register('thumbnailConfig.resizeMethod.height', {
+											valueAsNumber: true,
+										})}
+										// errorMessage={
+										// 	form.formState.errors.thumbnailConfig?.resizeMethod?.height?.message
+										// }
+									/>
+								</>
+							)}
+
+							{resizeMethod.mode === 'scaleDimension' && (
+								<>
+									<Text size="xs" variant="muted">
+										Set either the width or height of the thumbnail and auto-scale the other to keep
+										the original aspect ratio
+									</Text>
+
+									<div className="flex flex-col gap-2">
+										<Label>Dimension</Label>
+										<NativeSelect
+											options={[
+												{ label: 'Width', value: 'WIDTH' },
+												{ label: 'Height', value: 'HEIGHT' },
+											]}
+											{...form.register('thumbnailConfig.resizeMethod.dimension')}
+											defaultValue="WIDTH"
+										/>
+									</div>
+
+									<Input
+										contrast
+										variant="primary"
+										label="Size"
+										placeholder="350"
+										{...form.register('thumbnailConfig.resizeMethod.size', {
+											valueAsNumber: true,
+										})}
+										// errorMessage={
+										// 	form.formState.errors.thumbnailConfig?.resizeMethod?.height?.message
+										// }
+									/>
+								</>
+							)}
+
 							{/* <RadioGroup
-								value={resizeMethod?.mode}
-								onValueChange={handleSelection}
+								value={!resizeMethod && (
+								?.mode}
+								onValueChange={handleResizeMethodChange}
 								className="gap-4"
 							>
 								<RadioGroup.CardItem

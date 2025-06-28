@@ -1,7 +1,9 @@
 use std::fs;
 
 use image::{imageops, DynamicImage, EncodableLayout, GenericImageView};
-use models::shared::image_processor_options::{ImageProcessorOptions, ImageResizeMethod};
+use models::shared::image_processor_options::{
+	Dimension, ImageProcessorOptions, ImageResizeMethod,
+};
 use webp::Encoder;
 
 use crate::filesystem::{
@@ -21,13 +23,9 @@ impl ImageProcessor for WebpProcessor {
 	) -> Result<Vec<u8>, ProcessorError> {
 		let mut image = image::load_from_memory(buffer)?;
 
-		match options.resize_method {
-			ImageResizeMethod::None => {},
-			_ => {
-				let resized_image =
-					WebpProcessor::resize_image(image, options.resize_method);
-				image = resized_image;
-			},
+		if let Some(method) = options.resize_method {
+			let resized_image = WebpProcessor::resize_image(image, method);
+			image = resized_image;
 		}
 
 		let encoder = Encoder::from_image(&image)
@@ -47,22 +45,22 @@ impl ImageProcessor for WebpProcessor {
 
 	fn resize_scaled(
 		buf: &[u8],
-		dimension: ScaledDimensionResize,
+		config: ScaledDimensionResize,
 	) -> Result<Vec<u8>, ProcessorError> {
 		let image = image::load_from_memory(buf)?;
 
 		let (current_width, current_height) = image.dimensions();
 
-		let (width, height) = match dimension {
-			ScaledDimensionResize::Width(width) => scale_height_dimension(
+		let (width, height) = match config.dimension {
+			Dimension::Width => scale_height_dimension(
 				current_width as f32,
 				current_height as f32,
-				width as f32,
+				config.size as f32,
 			),
-			ScaledDimensionResize::Height(height) => scale_width_dimension(
+			Dimension::Height => scale_width_dimension(
 				current_width as f32,
 				current_height as f32,
-				height as f32,
+				config.size as f32,
 			),
 		};
 

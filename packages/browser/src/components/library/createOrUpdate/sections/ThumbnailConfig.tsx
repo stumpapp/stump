@@ -117,7 +117,17 @@ export default function ThumbnailConfigForm() {
 							exit={{ height: 0, opacity: 0 }}
 							transition={{ duration: 0.15 }}
 						>
-							<RadioGroup
+							<Label>Resize Method</Label>
+							<NativeSelect
+								options={[
+									{ label: 'Evenly Scale', value: 'ScaleEvenlyByFactor' },
+									{ label: 'Exact Size', value: 'Exact' },
+									{ label: 'Scale Dimension', value: 'ScaleDimension' },
+									{ label: 'None', value: 'None' },
+								]}
+							/>
+
+							{/* <RadioGroup
 								value={resizeMethod?.mode}
 								onValueChange={handleSelection}
 								className="gap-4"
@@ -247,7 +257,7 @@ export default function ThumbnailConfigForm() {
 									placeholder="0.75"
 									{...form.register('thumbnailConfig.quality', { valueAsNumber: true })}
 								/>
-							</div>
+							</div> */}
 						</motion.div>
 					)}
 				</AnimatePresence>

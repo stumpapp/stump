@@ -282,8 +282,18 @@
 					"description": "Generate thumbnail images for this library"
 				},
 				"scaled": {
-					"label": "Scaled",
-					"description": "Scale the image by a custom factor per dimension",
+					"label": "Explicitly Scaled",
+					"description": "Scale each dimension of the thumbnail by a factor",
+					"width": {
+						"label": "Width scale"
+					},
+					"height": {
+						"label": "Height scale"
+					}
+				},
+				"autoScaled": {
+					"label": "Auto Scaled",
+					"description": "Set the factor for one dimension and automatically scale the other dimension to maintain aspect ratio",
 					"width": {
 						"label": "Width scale"
 					},

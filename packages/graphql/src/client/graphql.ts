@@ -336,6 +336,11 @@ export type CustomArrangementConfig = {
   orderBy?: Maybe<Scalars['String']['output']>;
 };
 
+export enum Dimension {
+  Height = 'HEIGHT',
+  Width = 'WIDTH'
+}
+
 export type DirectoryListing = {
   __typename?: 'DirectoryListing';
   files: Array<DirectoryListingFile>;
@@ -477,6 +482,17 @@ export type EpubProgressInput = {
   percentage: Scalars['Decimal']['input'];
 };
 
+/**
+ * A resize option which will resize the image to the given dimensions, without
+ * maintaining the aspect ratio.
+ */
+export type ExactDimensionResize = {
+  /** The height (in pixels) the resulting image should be resized to */
+  height: Scalars['Int']['input'];
+  /** The width (in pixels) the resulting image should be resized to */
+  width: Scalars['Int']['input'];
+};
+
 export type ExternalJobOutput = {
   __typename?: 'ExternalJobOutput';
   val: Scalars['JSON']['output'];
@@ -552,12 +568,34 @@ export type FinishedReadingSessionModel = {
   userId: Scalars['String']['output'];
 };
 
+/** Options for processing images throughout Stump. */
+export type ImageProcessorOptionsInput = {
+  /** The format to use when generating an image. See [`SupportedImageFormat`] */
+  format: SupportedImageFormat;
+  /** The page to use when generating an image. This is not applicable to all media formats. */
+  page?: InputMaybe<Scalars['Int']['input']>;
+  /**
+   * The quality to use when generating an image. This is a number between 1 and 100,
+   * where 100 is the highest quality. Omitting this value will use the default quality
+   * of 100.
+   */
+  quality?: InputMaybe<Scalars['Int']['input']>;
+  /** The size factor to use when generating an image. See [`ImageResizeOptions`] */
+  resizeMethod?: InputMaybe<ImageResizeMethod>;
+};
+
 export type ImageRef = {
   __typename?: 'ImageRef';
   height?: Maybe<Scalars['Int']['output']>;
   url: Scalars['String']['output'];
   width?: Maybe<Scalars['Int']['output']>;
 };
+
+/** The resize options to use when generating an image */
+export type ImageResizeMethod =
+  { exact: ExactDimensionResize; scaleDimension?: never; scaleEvenlyByFactor?: never; }
+  |  { exact?: never; scaleDimension: ScaledDimensionResize; scaleEvenlyByFactor?: never; }
+  |  { exact?: never; scaleDimension?: never; scaleEvenlyByFactor: ScaleEvenlyByFactor; };
 
 export type InProgressBooks = {
   __typename?: 'InProgressBooks';
@@ -692,7 +730,7 @@ export type LibraryConfigInput = {
   ignoreRules?: InputMaybe<Array<Scalars['String']['input']>>;
   libraryPattern: LibraryPattern;
   processMetadata: Scalars['Boolean']['input'];
-  thumbnailConfig?: InputMaybe<Scalars['JSON']['input']>;
+  thumbnailConfig?: InputMaybe<ImageProcessorOptionsInput>;
   watch: Scalars['Boolean']['input'];
 };
 
@@ -2073,6 +2111,22 @@ export type SaveSmartListViewInput = {
   name: Scalars['String']['input'];
 };
 
+export type ScaleEvenlyByFactor = {
+  /** The factor to scale the image by */
+  factor: Scalars['Float']['input'];
+};
+
+/**
+ * A resize option which will resize the image while maintaining the aspect ratio.
+ * The dimension *not* specified will be calculated based on the aspect ratio.
+ */
+export type ScaledDimensionResize = {
+  /** The dimension to set with the given size, e.g. `Height` or `Width`. */
+  dimension: Dimension;
+  /** The size (in pixels) to set the specified dimension to. */
+  size: Scalars['Int']['input'];
+};
+
 export type SendAttachmentEmailOutput = {
   __typename?: 'SendAttachmentEmailOutput';
   errors: Array<Scalars['String']['output']>;
@@ -2419,6 +2473,13 @@ export enum SupportedFont {
   Literata = 'LITERATA',
   Nunito = 'NUNITO',
   OpenDyslexic = 'OPEN_DYSLEXIC'
+}
+
+/** Supported image formats for processing images throughout Stump */
+export enum SupportedImageFormat {
+  Jpeg = 'JPEG',
+  Png = 'PNG',
+  Webp = 'WEBP'
 }
 
 export enum SystemArrangment {

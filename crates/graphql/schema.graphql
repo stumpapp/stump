@@ -300,6 +300,11 @@ scalar DateTime
 
 scalar Decimal
 
+enum Dimension {
+	HEIGHT
+	WIDTH
+}
+
 type DirectoryListing {
 	parent: String
 	files: [DirectoryListingFile!]!
@@ -435,6 +440,17 @@ input EpubProgressInput {
 	isComplete: Boolean
 }
 
+"""
+A resize option which will resize the image to the given dimensions, without
+maintaining the aspect ratio.
+"""
+input ExactDimensionResize {
+	"The width (in pixels) the resulting image should be resized to"
+	width: Int!
+	"The height (in pixels) the resulting image should be resized to"
+	height: Int!
+}
+
 type ExternalJobOutput {
 	val: JSON!
 }
@@ -511,10 +527,33 @@ type FinishedReadingSessionModel {
 
 
 
+"Options for processing images throughout Stump."
+input ImageProcessorOptionsInput {
+	"The size factor to use when generating an image. See [`ImageResizeOptions`]"
+	resizeMethod: ImageResizeMethod
+	"The format to use when generating an image. See [`SupportedImageFormat`]"
+	format: SupportedImageFormat!
+	"""
+	The quality to use when generating an image. This is a number between 1 and 100,
+	where 100 is the highest quality. Omitting this value will use the default quality
+	of 100.
+	"""
+	quality: Int
+	"The page to use when generating an image. This is not applicable to all media formats."
+	page: Int
+}
+
 type ImageRef {
 	url: String!
 	height: Int
 	width: Int
+}
+
+"The resize options to use when generating an image"
+input ImageResizeMethod @oneOf {
+	exact: ExactDimensionResize
+	scaleEvenlyByFactor: ScaleEvenlyByFactor
+	scaleDimension: ScaledDimensionResize
 }
 
 type InProgressBooks {
@@ -641,7 +680,7 @@ input LibraryConfigInput {
 	processMetadata: Boolean!
 	watch: Boolean!
 	libraryPattern: LibraryPattern!
-	thumbnailConfig: JSON
+	thumbnailConfig: ImageProcessorOptionsInput
 	defaultReadingDir: ReadingDirection!
 	defaultReadingMode: ReadingMode!
 	defaultReadingImageScaleFit: ReadingImageScaleFit!
@@ -1481,6 +1520,22 @@ input SaveSmartListViewInput {
 	config: String!
 }
 
+input ScaleEvenlyByFactor {
+	"The factor to scale the image by"
+	factor: Float!
+}
+
+"""
+A resize option which will resize the image while maintaining the aspect ratio.
+The dimension *not* specified will be calculated based on the aspect ratio.
+"""
+input ScaledDimensionResize {
+	"The dimension to set with the given size, e.g. `Height` or `Width`."
+	dimension: Dimension!
+	"The size (in pixels) to set the specified dimension to."
+	size: Int!
+}
+
 type SendAttachmentEmailOutput {
 	sentCount: Int!
 	errors: [String!]!
@@ -1811,6 +1866,13 @@ enum SupportedFont {
 	LITERATA
 	NUNITO
 	OPEN_DYSLEXIC
+}
+
+"Supported image formats for processing images throughout Stump"
+enum SupportedImageFormat {
+	WEBP
+	JPEG
+	PNG
 }
 
 enum SystemArrangment {

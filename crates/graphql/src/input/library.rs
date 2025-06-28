@@ -62,7 +62,7 @@ pub struct LibraryConfigInput {
 	pub process_metadata: bool,
 	pub watch: bool,
 	pub library_pattern: LibraryPattern,
-	pub thumbnail_config: Option<Json<ImageProcessorOptions>>,
+	pub thumbnail_config: Option<ImageProcessorOptions>,
 	pub default_reading_dir: ReadingDirection,
 	pub default_reading_mode: ReadingMode,
 	pub default_reading_image_scale_fit: ReadingImageScaleFit,
@@ -85,8 +85,6 @@ impl LibraryConfigInput {
 			default_reading_image_scale_fit,
 			ignore_rules,
 		} = self;
-
-		let thumbnail_config = thumbnail_config.map(|config| config.0);
 
 		let ignore_rules = ignore_rules
 			.map(IgnoreRules::new)

@@ -2,7 +2,7 @@ use std::{fs, io::Cursor};
 
 use image::{imageops, GenericImageView, ImageFormat};
 use models::shared::image_processor_options::{
-	ImageProcessorOptions, ImageResizeMethod, ScaledDimensionResize, SupportedImageFormat,
+	Dimension, ImageProcessorOptions, ScaledDimensionResize, SupportedImageFormat,
 };
 
 use crate::filesystem::{image::process::resized_dimensions, FileError};
@@ -23,17 +23,11 @@ impl ImageProcessor for GenericImageProcessor {
 	) -> Result<Vec<u8>, ProcessorError> {
 		let mut image = image::load_from_memory(buffer)?;
 
-		match options.resize_method {
-			ImageResizeMethod::None => {},
-			_ => {
-				let (current_width, current_height) = image.dimensions();
-				let (height, width) = resized_dimensions(
-					current_height,
-					current_width,
-					options.resize_method,
-				);
-				image = image.resize_exact(width, height, imageops::FilterType::Triangle);
-			},
+		if let Some(method) = options.resize_method {
+			let (current_width, current_height) = image.dimensions();
+			let (height, width) =
+				resized_dimensions(current_height, current_width, method);
+			image = image.resize_exact(width, height, imageops::FilterType::Triangle);
 		}
 
 		let format = match options.format {
@@ -67,7 +61,7 @@ impl ImageProcessor for GenericImageProcessor {
 
 	fn resize_scaled(
 		buf: &[u8],
-		dimension: ScaledDimensionResize,
+		config: ScaledDimensionResize,
 	) -> Result<Vec<u8>, ProcessorError> {
 		let mut image = image::load_from_memory(buf)?;
 
@@ -89,20 +83,20 @@ impl ImageProcessor for GenericImageProcessor {
 
 		let (current_width, current_height) = image.dimensions();
 
-		match dimension {
-			ScaledDimensionResize::Width(width) => {
+		match config.dimension {
+			Dimension::Width => {
 				let (width, height) = scale_height_dimension(
 					current_width as f32,
 					current_height as f32,
-					width as f32,
+					config.size as f32,
 				);
 				image = image.resize_exact(width, height, imageops::FilterType::Triangle);
 			},
-			ScaledDimensionResize::Height(height) => {
+			Dimension::Height => {
 				let (width, height) = scale_width_dimension(
 					current_width as f32,
 					current_height as f32,
-					height as f32,
+					config.size as f32,
 				);
 				image = image.resize_exact(width, height, imageops::FilterType::Triangle);
 			},

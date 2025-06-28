@@ -458,7 +458,8 @@
 					"deleteConversions": "Delete converted files",
 					"watch": "Watch directory for changes",
 					"processMetadata": "Process metadata",
-					"generateFileHashes": "Generate file hashes"
+					"generateFileHashes": "Generate file hashes",
+					"generateKoreaderHashes": "Generate KoReader hashes"
 				}
 			},
 			"buttons": {

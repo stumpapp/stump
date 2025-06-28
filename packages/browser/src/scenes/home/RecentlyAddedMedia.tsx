@@ -1,4 +1,4 @@
-import { PREFETCH_STALE_TIME, useInfiniteGraphQL, useSDK } from '@stump/client'
+import { PREFETCH_STALE_TIME, useInfiniteSuspenseGraphQL, useSDK } from '@stump/client'
 import { Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
@@ -50,7 +50,7 @@ export const usePrefetchRecentlyAddedMedia = () => {
 }
 
 function RecentlyAddedMedia() {
-	const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteGraphQL(
+	const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteSuspenseGraphQL(
 		query,
 		['recentlyAddedMedia'],
 		{

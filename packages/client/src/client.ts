@@ -5,7 +5,6 @@ import {
 	MutationKey,
 	QueriesOptions as UseQueriesOptions,
 	QueryClient,
-	QueryFilters,
 	QueryFunction,
 	QueryKey,
 	useInfiniteQuery as useReactInfiniteQuery,

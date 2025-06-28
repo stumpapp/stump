@@ -13,7 +13,7 @@ export default function LibraryReview() {
 	const { t } = useLocaleContext()
 
 	const renderThumbnailSettings = () => {
-		if (!state.thumbnail_config.enabled || !state.thumbnail_config.resize_options) {
+		if (!state.thumbnailConfig.enabled || !state.thumbnailConfig.resizeMethod) {
 			return (
 				<div>
 					<Label>{t(getLabelKey('generateThumbnails'))}</Label>
@@ -23,7 +23,7 @@ export default function LibraryReview() {
 				</div>
 			)
 		} else {
-			const dimensionUnit = state.thumbnail_config.resize_options.mode === 'Scaled' ? 'x' : 'px'
+			const dimensionUnit = state.thumbnailConfig.resizeMethod.mode === 'Scaled' ? 'x' : 'px'
 
 			return (
 				<>
@@ -37,8 +37,8 @@ export default function LibraryReview() {
 					<div>
 						<Label>{t(getLabelKey('mode'))}</Label>
 						<Text variant="muted" size="sm">
-							{state.thumbnail_config.resize_options.mode} (
-							{`${state.thumbnail_config.resize_options.width}${dimensionUnit}:${state.thumbnail_config.resize_options.height}${dimensionUnit}`}
+							{state.thumbnailConfig.resizeMethod.mode} (
+							{`${state.thumbnailConfig.resizeMethod.width}${dimensionUnit}:${state.thumbnailConfig.resizeMethod.height}${dimensionUnit}`}
 							)
 						</Text>
 					</div>
@@ -46,14 +46,14 @@ export default function LibraryReview() {
 					<div>
 						<Label>{t(getLabelKey('format'))}</Label>
 						<Text variant="muted" size="sm">
-							{state.thumbnail_config.format}
+							{state.thumbnailConfig.format}
 						</Text>
 					</div>
 
 					<div>
 						<Label>{t(getLabelKey('quality'))}</Label>
 						<Text variant="muted" size="sm">
-							{state.thumbnail_config.quality || 'Default'}
+							{state.thumbnailConfig.quality || 'Default'}
 						</Text>
 					</div>
 				</>
@@ -112,7 +112,7 @@ export default function LibraryReview() {
 				<div>
 					<Label>{t(getLabelKey('pattern'))}</Label>
 					<Text variant="muted" size="sm">
-						{state.library_pattern === 'COLLECTION_BASED'
+						{state.libraryPattern === 'COLLECTION_BASED'
 							? t(getPatternKey('collectionPriority.label'))
 							: t(getPatternKey('seriesPriority.label'))}
 					</Text>
@@ -121,14 +121,14 @@ export default function LibraryReview() {
 				<div>
 					<Label>{t(getLabelKey('ignoreRules'))}</Label>
 					<div className="flex flex-wrap gap-1">
-						{!state.ignore_rules?.length && (
+						{!state.ignoreRules?.length && (
 							<Text variant="muted" size="sm">
 								{t(getKey('none'))}
 							</Text>
 						)}
-						{!!state.ignore_rules?.length && (
+						{!!state.ignoreRules?.length && (
 							<Text variant="muted" size="sm">
-								{state.ignore_rules.length} {pluralize('rule', state.ignore_rules.length)}
+								{state.ignoreRules.length} {pluralize('rule', state.ignoreRules.length)}
 							</Text>
 						)}
 					</div>
@@ -136,12 +136,12 @@ export default function LibraryReview() {
 					<div>
 						<Label>{t(getLabelKey('processMetadata'))}</Label>
 						<Text variant="muted" size="sm">
-							{state.process_metadata ? 'Yes' : 'No'}
+							{state.processMetadata ? 'Yes' : 'No'}
 						</Text>
 					</div>
 
 					<div>
-						<Label>{t(getLabelKey('dirWatch'))}</Label>
+						<Label>{t(getLabelKey('watch'))}</Label>
 						<Text variant="muted" size="sm">
 							{state.watch ? 'Yes' : 'No'}
 						</Text>
@@ -150,21 +150,28 @@ export default function LibraryReview() {
 					<div>
 						<Label>{t(getLabelKey('generateFileHashes'))}</Label>
 						<Text variant="muted" size="sm">
-							{state.generate_file_hashes ? 'Yes' : 'No'}
+							{state.generateFileHashes ? 'Yes' : 'No'}
+						</Text>
+					</div>
+
+					<div>
+						<Label>{t(getLabelKey('generateKoreaderHashes'))}</Label>
+						<Text variant="muted" size="sm">
+							{state.generateKoreaderHashes ? 'Yes' : 'No'}
 						</Text>
 					</div>
 
 					<div>
 						<Label>{t(getLabelKey('convertRar'))}</Label>
 						<Text variant="muted" size="sm">
-							{state.convert_rar_to_zip ? 'Yes' : 'No'}
+							{state.convertRarToZip ? 'Yes' : 'No'}
 						</Text>
 					</div>
 
 					<div>
 						<Label>{t(getLabelKey('deleteConversions'))}</Label>
 						<Text variant="muted" size="sm">
-							{state.hard_delete_conversions ? 'Yes' : 'No'}
+							{state.hardDeleteConversions ? 'Yes' : 'No'}
 						</Text>
 					</div>
 				</div>

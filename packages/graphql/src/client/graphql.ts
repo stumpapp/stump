@@ -2857,6 +2857,18 @@ export type BookSearchSceneQuery = { __typename?: 'Query', media: { __typename?:
       & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
+export type CreateLibrarySceneExistingLibrariesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CreateLibrarySceneExistingLibrariesQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, path: string }> } };
+
+export type CreateLibrarySceneCreateLibraryMutationVariables = Exact<{
+  input: CreateOrUpdateLibraryInput;
+}>;
+
+
+export type CreateLibrarySceneCreateLibraryMutation = { __typename?: 'Mutation', createLibrary: { __typename?: 'Library', id: string } };
+
 export type ContinueReadingMediaQueryQueryVariables = Exact<{
   pagination: Pagination;
 }>;
@@ -3511,6 +3523,24 @@ export const BookSearchSceneDocument = new TypedDocumentString(`
     completedAt
   }
 }`) as unknown as TypedDocumentString<BookSearchSceneQuery, BookSearchSceneQueryVariables>;
+export const CreateLibrarySceneExistingLibrariesDocument = new TypedDocumentString(`
+    query CreateLibrarySceneExistingLibraries {
+  libraries(pagination: {none: {unpaginated: true}}) {
+    nodes {
+      id
+      name
+      path
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<CreateLibrarySceneExistingLibrariesQuery, CreateLibrarySceneExistingLibrariesQueryVariables>;
+export const CreateLibrarySceneCreateLibraryDocument = new TypedDocumentString(`
+    mutation CreateLibrarySceneCreateLibrary($input: CreateOrUpdateLibraryInput!) {
+  createLibrary(input: $input) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<CreateLibrarySceneCreateLibraryMutation, CreateLibrarySceneCreateLibraryMutationVariables>;
 export const ContinueReadingMediaQueryDocument = new TypedDocumentString(`
     query ContinueReadingMediaQuery($pagination: Pagination!) {
   keepReading(pagination: $pagination) {

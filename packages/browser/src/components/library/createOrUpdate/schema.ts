@@ -1,5 +1,6 @@
 import { PickSelect } from '@stump/components'
 import {
+	CreateLibrarySceneExistingLibrariesQuery,
 	LibraryPattern,
 	LibrarySettingsConfigFragment,
 	ReadingDirection,
@@ -62,7 +63,10 @@ const resizeOptionsSchema = z
 /**
  * A function which builds a schema used for validating form data when creating or updating a library
  */
-export const buildSchema = (existingLibraries: Library[], library?: Library) =>
+export const buildSchema = (
+	existingLibraries: CreateLibrarySceneExistingLibrariesQuery['libraries']['nodes'],
+	library?: Library,
+) =>
 	z.object({
 		convertRarToZip: z.boolean().default(false),
 		defaultReadingDir: z.enum(['LTR', 'RTL']).default('LTR').optional(),

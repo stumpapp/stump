@@ -4,6 +4,9 @@ import { GraphQLWebsocketConnectEventHandlers } from '@stump/sdk/socket'
 import {
 	InfiniteData,
 	QueryKey,
+	useInfiniteQuery,
+	UseInfiniteQueryOptions,
+	UseInfiniteQueryResult,
 	useMutation,
 	UseMutationOptions,
 	UseMutationResult,
@@ -243,7 +246,7 @@ export function useSuspenseGraphQLQueries<TQueries extends readonly unknown[]>(q
 	return results
 }
 
-export function useInfiniteGraphQL<TResult, TVariables>(
+export function useInfiniteSuspenseGraphQL<TResult, TVariables>(
 	document: TypedDocumentString<TResult, TVariables>,
 	queryKey: QueryKey,
 	variables?: TVariables extends Record<string, never> ? never : TVariables,
@@ -299,6 +302,57 @@ export function useInfiniteGraphQL<TResult, TVariables>(
 		error,
 		...rest,
 	} as UseSuspenseInfiniteQueryResult<InfiniteData<TResult>>
+}
+
+export function useInfiniteGraphQL<TResult, TVariables>(
+	document: TypedDocumentString<TResult, TVariables>,
+	queryKey: QueryKey,
+	variables?: TVariables extends Record<string, never> ? never : TVariables,
+	options?: Omit<
+		UseInfiniteQueryOptions<TResult, Error, TResult, TResult, readonly unknown[], Pagination>,
+		'queryKey' | 'queryFn'
+	>,
+): UseInfiniteQueryResult<InfiniteData<TResult>> {
+	const { sdk } = useSDK()
+	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
+
+	const [initialPageParam] = useState<Pagination>(() => extractInitialPageParam(variables))
+
+	const constructVariables = useCallback(
+		(pageParam: Pagination) =>
+			({
+				...variables,
+				pagination: pageParam,
+			}) as TVariables extends Record<string, never> ? never : TVariables,
+		[variables],
+	)
+
+	const { error, ...rest } = useInfiniteQuery({
+		queryKey,
+		queryFn: async ({ pageParam }) => {
+			const response = await sdk.execute(document, constructVariables(pageParam))
+			return response
+		},
+		initialPageParam,
+		getNextPageParam: (lastPage) => getNextPageParam(extractPageInfo(lastPage)),
+		experimental_prefetchInRender: true,
+		...options,
+	})
+
+	useEffect(() => {
+		if (!error) return
+		handleError({
+			sdk,
+			error,
+			onUnauthenticatedResponse,
+			onConnectionWithServerChanged,
+		})
+	}, [error, sdk, onUnauthenticatedResponse, onConnectionWithServerChanged])
+
+	return {
+		error,
+		...rest,
+	} as UseInfiniteQueryResult<InfiniteData<TResult>>
 }
 
 /**

@@ -1,4 +1,4 @@
-import { useInfiniteGraphQL } from '@stump/client'
+import { useInfiniteSuspenseGraphQL } from '@stump/client'
 import { graphql, LibrarySeriesGridQuery } from '@stump/graphql'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { Fragment, useCallback, useEffect, useRef } from 'react'
@@ -35,7 +35,7 @@ type Props = {
 
 // TODO: Create generalized VirtualizedGrid component and trim the reused logic
 export default function LibrarySeriesGrid({ libraryId, onSelectSeries }: Props) {
-	const { data, fetchNextPage, hasNextPage } = useInfiniteGraphQL(
+	const { data, fetchNextPage, hasNextPage } = useInfiniteSuspenseGraphQL(
 		query,
 		['librarySeriesGrid', libraryId],
 		{

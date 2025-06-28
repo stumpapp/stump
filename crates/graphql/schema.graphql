@@ -542,11 +542,11 @@ type Job {
 	name: String!
 	description: String
 	status: String!
-	saveState: [Int!]
-	outputData: CoreJobOutput
 	msElapsed: Int!
 	createdAt: DateTime!
 	completedAt: String
+	outputData: CoreJobOutput
+	saveState: JSON
 	logs: [Log!]!
 }
 
@@ -609,6 +609,11 @@ type Library {
 	series: [Series!]!
 	stats(allUsers: Boolean): LibraryStats!
 	tags: [Tag!]!
+	"""
+	A reference to the thumbnail image for the thumbnail. This will be a fully
+	qualified URL to the image.
+	"""
+	thumbnail: ImageRef!
 }
 
 type LibraryConfig {
@@ -1048,7 +1053,14 @@ type Mutation {
 	the library will be scanned immediately after updating.
 	"""
 	updateLibrary(id: ID!, input: CreateOrUpdateLibraryInput!): Library!
+	"Update the emoji for a library"
 	updateLibraryEmoji(id: ID!, emoji: String): Library!
+	"""
+	Update the thumbnail for a library. This will replace the existing thumbnail with the the one
+	associated with the provided input (book). If the book does not have a thumbnail, one
+	will be generated based on the library's thumbnail configuration.
+	"""
+	updateLibraryThumbnail(id: ID!, input: UpdateLibraryThumbnailInput!): Library!
 	"""
 	Exclude users from a library, preventing them from seeing the library in the UI. This operates as a
 	full replacement of the excluded users list, so any users not included in the provided list will be
@@ -1064,6 +1076,8 @@ type Mutation {
 	operation cannot be undone.
 	"""
 	deleteLibrary(id: ID!): Library!
+	generateLibraryThumbnails(id: ID!, forceRegenerate: Boolean! = false): Boolean!
+	deleteLibraryThumbnails(id: ID!): Boolean!
 	"""
 	Enqueue a scan job for a library. This will index the filesystem from the library's root path
 	and update the database accordingly.
@@ -1119,6 +1133,7 @@ type Mutation {
 	deleteTags(tags: [String!]!): [Tag!]!
 	uploadBooks(input: UploadBooksInput!): Boolean!
 	uploadSeries(input: UploadSeriesInput!): Boolean!
+	uploadLibraryThumbnail(id: ID!, file: Upload!): Library!
 	deleteLoginActivity: Int!
 	createUser(input: CreateUserInput!): User!
 	meUpdateUser(input: UpdateUserInput!): User!
@@ -1505,6 +1520,11 @@ type Series {
 	readCount: Int!
 	unreadCount: Int!
 	tags: [Tag!]!
+	"""
+	A reference to the thumbnail image for the thumbnail. This will be a fully
+	qualified URL to the image.
+	"""
+	thumbnail: ImageRef!
 }
 
 input SeriesFilterInput {
@@ -1847,6 +1867,15 @@ input UpdateBookClubInput {
 	isPrivate: Boolean
 	memberRoleSpec: JSON
 	emoji: String
+}
+
+input UpdateLibraryThumbnailInput {
+	"The ID of the media inside the series to fetch"
+	mediaId: String!
+	"The page of the media to use for the thumbnail"
+	page: Int!
+	"A flag indicating whether the page is zero based"
+	isZeroBased: Boolean = null
 }
 
 input UpdateUserInput {

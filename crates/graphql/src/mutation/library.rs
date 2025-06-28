@@ -1,9 +1,12 @@
 use async_graphql::{Context, Json, Object, Result, SimpleObject, ID};
 use chrono::Utc;
+use itertools::chain;
 use models::{
 	entity::{
-		last_library_visit, library, library_config, library_hidden_to_user,
-		library_scan_record, library_to_tag, media, series, tag, user,
+		last_library_visit,
+		library::{self, LibraryIdentSelect},
+		library_config, library_hidden_to_user, library_scan_record, library_to_tag,
+		media, series, tag, user,
 	},
 	shared::enums::{FileStatus, UserPermission},
 };
@@ -13,7 +16,10 @@ use sea_orm::{
 	Condition, IntoActiveModel, QuerySelect, Set, TransactionTrait,
 };
 use stump_core::filesystem::{
-	image::remove_thumbnails,
+	image::{
+		generate_book_thumbnail, remove_thumbnails, GenerateThumbnailOptions,
+		ThumbnailGenerationJob, ThumbnailGenerationJobParams,
+	},
 	scanner::{LibraryScanJob, ScanOptions},
 };
 use tokio::fs;
@@ -22,7 +28,7 @@ use crate::{
 	data::{CoreContext, RequestContext},
 	error_message,
 	guard::PermissionGuard,
-	input::library::CreateOrUpdateLibraryInput,
+	input::library::{CreateOrUpdateLibraryInput, UpdateLibraryThumbnailInput},
 	object::library::Library,
 };
 
@@ -430,7 +436,9 @@ impl LibraryMutation {
 
 		Ok(Library::from(updated_library))
 	}
-	#[graphql(guard = "PermissionGuard::new(&[UserPermission::ManageLibrary])")]
+
+	/// Update the emoji for a library
+	#[graphql(guard = "PermissionGuard::new(&[UserPermission::EditLibrary])")]
 	async fn update_library_emoji(
 		&self,
 		ctx: &Context<'_>,
@@ -452,7 +460,60 @@ impl LibraryMutation {
 		Ok(updated_library.into())
 	}
 
-	// TODO(graphql): (thumbnail API remains RESTful). This serves as a reminder, it won't live here
+	/// Update the thumbnail for a library. This will replace the existing thumbnail with the the one
+	/// associated with the provided input (book). If the book does not have a thumbnail, one
+	/// will be generated based on the library's thumbnail configuration.
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditLibrary)")]
+	async fn update_library_thumbnail(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		input: UpdateLibraryThumbnailInput,
+	) -> Result<Library> {
+		let core = ctx.data::<CoreContext>()?;
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+
+		let (library, config) = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.find_also_related(library_config::Entity)
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+
+		let page = input.page();
+
+		// TODO: Does it really matter to enforce the book belongs to library? I
+		// have omitted it for now, but v1 API did that
+		let book = media::Entity::find_for_user(user)
+			.filter(media::Column::Id.eq(input.media_id))
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Book not found")?;
+
+		if book.extension == "epub" && page > 1 {
+			return Err("Cannot set thumbnail from EPUB chapter".into());
+		}
+
+		let image_options = config
+			.ok_or("Library config not found")?
+			.thumbnail_config
+			.unwrap_or_default()
+			.with_page(page);
+
+		let (_, path_buf, _) = generate_book_thumbnail(
+			&book.into(),
+			GenerateThumbnailOptions {
+				image_options,
+				core_config: core.config.as_ref().clone(),
+				force_regen: true,
+				filename: Some(id.to_string()),
+			},
+		)
+		.await?;
+		tracing::debug!(path = ?path_buf, "Generated library thumbnail");
+
+		Ok(library.into())
+	}
 
 	/// Exclude users from a library, preventing them from seeing the library in the UI. This operates as a
 	/// full replacement of the excluded users list, so any users not included in the provided list will be
@@ -596,6 +657,89 @@ impl LibraryMutation {
 		// Note: We return the full node so the ID may be pulled to properly update the cache.
 		// For obvious reasons, certain fields will error if accessed.
 		Ok(Library::from(library))
+	}
+
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
+	async fn generate_library_thumbnails(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		#[graphql(default = false)] force_regenerate: bool,
+	) -> Result<bool> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let (library, config) = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.find_also_related(library_config::Entity)
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+		let config = config.ok_or("Library config not found")?;
+
+		let job_config =
+			ThumbnailGenerationJobParams::single_library(library.id, force_regenerate);
+		core.enqueue_job(ThumbnailGenerationJob::new(
+			config.thumbnail_config.unwrap_or_default(),
+			job_config,
+		))
+		.map_err(|error| {
+			tracing::error!(?error, "Failed to enqueue thumbnail generation job");
+			error
+		})?;
+
+		Ok(true)
+	}
+
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
+	async fn delete_library_thumbnails(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let library = library::Entity::find_for_user(user)
+			.select_only()
+			.columns(LibraryIdentSelect::columns())
+			.filter(library::Column::Id.eq(id.to_string()))
+			.into_model::<library::LibraryIdentSelect>()
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+
+		let series = series::Entity::find_for_user(user)
+			.filter(series::Column::LibraryId.eq(library.id.clone()))
+			.select_only()
+			.columns(series::SeriesIdentSelect::columns())
+			.into_model::<series::SeriesIdentSelect>()
+			.all(core.conn.as_ref())
+			.await?;
+
+		let books = media::Entity::find()
+			.filter(
+				media::Column::SeriesId
+					.is_in(series.iter().map(|s| s.id.clone()).collect::<Vec<_>>()),
+			)
+			.select_only()
+			.columns(media::MediaIdentSelect::columns())
+			.into_model::<media::MediaIdentSelect>()
+			.all(core.conn.as_ref())
+			.await?;
+
+		let ids = chain(
+			[library.id],
+			series
+				.iter()
+				.map(|s| s.id.clone())
+				.chain(books.iter().map(|b| b.id.clone())),
+		)
+		.collect::<Vec<_>>();
+
+		let thumbnails_dir = core.config.get_thumbnails_dir();
+		if let Err(error) = remove_thumbnails(&ids, &thumbnails_dir).await {
+			tracing::error!(?error, "Failed to remove library thumbnails");
+			return Err(error.into());
+		}
+
+		Ok(true)
 	}
 
 	/// Enqueue a scan job for a library. This will index the filesystem from the library's root path

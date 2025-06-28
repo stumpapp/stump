@@ -118,7 +118,7 @@ export const buildSchema = (existingLibraries: Library[], library?: Library) =>
 				}),
 			)
 			.optional(),
-		imageProcessorOptions: z.object({
+		thumbnailConfig: z.object({
 			enabled: z.boolean().default(false),
 			format: imageFormatSchema.default('Webp'),
 			quality: z
@@ -160,10 +160,10 @@ export const formDefaults = (
 	processMetadata: library?.config.processMetadata ?? true,
 	scanAfterPersist: true,
 	tags: library?.tags?.map((t) => ({ label: t.name, value: t.name.toLowerCase() })),
-	imageProcessorOptions: library?.config.imageProcessorOptions
+	thumbnailConfig: library?.config.thumbnailConfig
 		? {
 				enabled: true,
-				...library?.config.imageProcessorOptions,
+				...library?.config.thumbnailConfig,
 			}
 		: {
 				enabled: false,
@@ -177,14 +177,14 @@ export const formDefaults = (
  * A function to ensure that the thumbnail config is valid before returning it
  */
 export const ensureValidThumbnailConfig = (
-	imageProcessorOptions: PickSelect<CreateOrUpdateLibrarySchema, 'imageProcessorOptions'>,
+	thumbnailConfig: PickSelect<CreateOrUpdateLibrarySchema, 'thumbnailConfig'>,
 ) => {
 	const invalidDimensions =
-		!imageProcessorOptions.resizeMethod?.height || !imageProcessorOptions.resizeMethod?.width
+		!thumbnailConfig.resizeMethod?.height || !thumbnailConfig.resizeMethod?.width
 
-	if (!imageProcessorOptions.enabled || invalidDimensions) {
+	if (!thumbnailConfig.enabled || invalidDimensions) {
 		return null
 	} else {
-		return imageProcessorOptions
+		return thumbnailConfig
 	}
 }

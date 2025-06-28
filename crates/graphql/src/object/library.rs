@@ -5,14 +5,14 @@ use models::{
 		library, library_config, library_hidden_to_user, library_scan_record,
 		library_to_tag, series, tag, user,
 	},
-	shared::enums::UserPermission,
+	shared::{enums::UserPermission, image::ImageRef},
 };
 use sea_orm::{
 	prelude::*, sea_query::Query, DatabaseBackend, FromQueryResult, QueryOrder, Statement,
 };
 
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{CoreContext, RequestContext, ServiceContext},
 	guard::PermissionGuard,
 	object::library_scan_record::LibraryScanRecord,
 };
@@ -178,6 +178,23 @@ impl Library {
 			.await?;
 
 		Ok(models.into_iter().map(Tag::from).collect())
+	}
+
+	/// A reference to the thumbnail image for the thumbnail. This will be a fully
+	/// qualified URL to the image.
+	async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
+		let service = ctx.data::<ServiceContext>()?;
+
+		// TODO: Spawn a blocking task to get the image dimensions
+		// Use a cache as to not read the file system every time
+
+		Ok(ImageRef {
+			url: service
+				.format_url(format!("/api/v2/library/{}/thumbnail", self.model.id)),
+			// height: page_dimension.as_ref().map(|dim| dim.height),
+			// width: page_dimension.as_ref().map(|dim| dim.width),
+			..Default::default()
+		})
 	}
 }
 

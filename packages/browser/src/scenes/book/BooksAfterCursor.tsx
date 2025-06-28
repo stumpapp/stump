@@ -12,6 +12,7 @@ const query = graphql(`
 		mediaById(id: $id) {
 			nextInSeries(pagination: $pagination) {
 				nodes {
+					id
 					...BookCard
 				}
 				pageInfo {

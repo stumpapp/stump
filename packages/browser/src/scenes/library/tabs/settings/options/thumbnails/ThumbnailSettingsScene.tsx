@@ -25,13 +25,13 @@ export default function ThumbnailSettingsScene() {
 	})
 
 	const handleSubmit = useCallback(
-		({ thumbnail_config }: Pick<CreateOrUpdateLibrarySchema, 'thumbnail_config'>) => {
+		({ thumbnailConfig }: Pick<CreateOrUpdateLibrarySchema, 'thumbnailConfig'>) => {
 			patch({
 				config: {
 					...library.config,
-					thumbnail_config: ensureValidThumbnailConfig(thumbnail_config),
+					thumbnailConfig: ensureValidThumbnailConfig(thumbnailConfig),
 				},
-				scan_mode: 'NONE',
+				scanAfterPersist: false,
 			})
 		},
 		[patch, library.config],

@@ -81,3 +81,12 @@ pub struct ImageProcessorOptions {
 	/// The page to use when generating an image. This is not applicable to all media formats.
 	pub page: Option<i32>,
 }
+
+impl ImageProcessorOptions {
+	pub fn with_page(self, page: i32) -> Self {
+		Self {
+			page: Some(page),
+			..self
+		}
+	}
+}

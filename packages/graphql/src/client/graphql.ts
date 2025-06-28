@@ -584,7 +584,7 @@ export type Job = {
   msElapsed: Scalars['Int']['output'];
   name: Scalars['String']['output'];
   outputData?: Maybe<CoreJobOutput>;
-  saveState?: Maybe<Array<Scalars['Int']['output']>>;
+  saveState?: Maybe<Scalars['JSON']['output']>;
   status: Scalars['String']['output'];
 };
 
@@ -650,6 +650,11 @@ export type Library = {
   stats: LibraryStats;
   status: FileStatus;
   tags: Array<Tag>;
+  /**
+   * A reference to the thumbnail image for the thumbnail. This will be a fully
+   * qualified URL to the image.
+   */
+  thumbnail: ImageRef;
   updatedAt: Scalars['DateTime']['output'];
 };
 
@@ -1117,6 +1122,7 @@ export type Mutation = {
    */
   deleteLibrary: Library;
   deleteLibraryScanHistory: Library;
+  deleteLibraryThumbnails: Scalars['Boolean']['output'];
   deleteLogFile: Scalars['Boolean']['output'];
   deleteLoginActivity: Scalars['Int']['output'];
   deleteLogs: LogDeleteOutput;
@@ -1140,6 +1146,7 @@ export type Mutation = {
   deleteTags: Array<Tag>;
   deleteUserById: User;
   deleteUserSessions: Scalars['Int']['output'];
+  generateLibraryThumbnails: Scalars['Boolean']['output'];
   markMediaAsComplete?: Maybe<FinishedReadingSessionModel>;
   markSeriesAsComplete: Series;
   meUpdateUser: User;
@@ -1170,6 +1177,7 @@ export type Mutation = {
    * the library will be scanned immediately after updating.
    */
   updateLibrary: Library;
+  /** Update the emoji for a library */
   updateLibraryEmoji: Library;
   /**
    * Exclude users from a library, preventing them from seeing the library in the UI. This operates as a
@@ -1180,6 +1188,12 @@ export type Mutation = {
    * themselves.
    */
   updateLibraryExcludedUsers: Library;
+  /**
+   * Update the thumbnail for a library. This will replace the existing thumbnail with the the one
+   * associated with the provided input (book). If the book does not have a thumbnail, one
+   * will be generated based on the library's thumbnail configuration.
+   */
+  updateLibraryThumbnail: Library;
   updateMediaProgress: ReadingProgressOutput;
   updateNotifier: Notifier;
   /**
@@ -1195,6 +1209,7 @@ export type Mutation = {
   updateUser: User;
   updateUserLockStatus: User;
   uploadBooks: Scalars['Boolean']['output'];
+  uploadLibraryThumbnail: Library;
   uploadSeries: Scalars['Boolean']['output'];
   /**
    * "Visit" a library, which will upsert a record of the user's last visit to the library.
@@ -1343,6 +1358,11 @@ export type MutationDeleteLibraryScanHistoryArgs = {
 };
 
 
+export type MutationDeleteLibraryThumbnailsArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationDeleteLogsArgs = {
   filter: LogFilterInput;
 };
@@ -1387,6 +1407,12 @@ export type MutationDeleteUserByIdArgs = {
 
 export type MutationDeleteUserSessionsArgs = {
   userId: Scalars['String']['input'];
+};
+
+
+export type MutationGenerateLibraryThumbnailsArgs = {
+  forceRegenerate?: Scalars['Boolean']['input'];
+  id: Scalars['ID']['input'];
 };
 
 
@@ -1487,6 +1513,12 @@ export type MutationUpdateLibraryExcludedUsersArgs = {
 };
 
 
+export type MutationUpdateLibraryThumbnailArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateLibraryThumbnailInput;
+};
+
+
 export type MutationUpdateMediaProgressArgs = {
   id: Scalars['ID']['input'];
   page?: InputMaybe<Scalars['Int']['input']>;
@@ -1529,6 +1561,12 @@ export type MutationUpdateUserLockStatusArgs = {
 
 export type MutationUploadBooksArgs = {
   input: UploadBooksInput;
+};
+
+
+export type MutationUploadLibraryThumbnailArgs = {
+  file: Scalars['Upload']['input'];
+  id: Scalars['ID']['input'];
 };
 
 
@@ -2073,6 +2111,11 @@ export type Series = {
   resolvedName: Scalars['String']['output'];
   status: FileStatus;
   tags: Array<Tag>;
+  /**
+   * A reference to the thumbnail image for the thumbnail. This will be a fully
+   * qualified URL to the image.
+   */
+  thumbnail: ImageRef;
   unreadCount: Scalars['Int']['output'];
   upNext: Array<Media>;
   updatedAt: Scalars['DateTime']['output'];
@@ -2438,6 +2481,15 @@ export type UpdateBookClubInput = {
   name?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type UpdateLibraryThumbnailInput = {
+  /** A flag indicating whether the page is zero based */
+  isZeroBased?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The ID of the media inside the series to fetch */
+  mediaId: Scalars['String']['input'];
+  /** The page of the media to use for the thumbnail */
+  page: Scalars['Int']['input'];
+};
+
 export type UpdateUserInput = {
   ageRestriction?: InputMaybe<AgeRestrictionInput>;
   avatarUrl?: InputMaybe<Scalars['String']['input']>;
@@ -2761,7 +2813,7 @@ export type BooksAfterCurrentQueryQueryVariables = Exact<{
 
 
 export type BooksAfterCurrentQueryQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', nextInSeries: { __typename?: 'PaginatedMediaResponse', nodes: Array<(
-        { __typename?: 'Media' }
+        { __typename?: 'Media', id: string }
         & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
       )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } } | null };
 
@@ -2873,6 +2925,14 @@ export type LibrarySeriesQueryVariables = Exact<{
 
 export type LibrarySeriesQuery = { __typename?: 'Query', series: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, resolvedName: string, mediaCount: number, percentageCompleted: number, status: FileStatus }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
+export type LibrarySeriesGridQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+  pagination?: InputMaybe<Pagination>;
+}>;
+
+
+export type LibrarySeriesGridQuery = { __typename?: 'Query', series: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, thumbnail: { __typename?: 'ImageRef', url: string } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
+
 export type LibrarySettingsConfigFragment = { __typename?: 'Library', config: { __typename?: 'LibraryConfig', id: number, convertRarToZip: boolean, hardDeleteConversions: boolean, defaultReadingDir: ReadingDirection, defaultReadingMode: ReadingMode, defaultReadingImageScaleFit: ReadingImageScaleFit, generateFileHashes: boolean, generateKoreaderHashes: boolean, processMetadata: boolean, watch: boolean, libraryPattern: LibraryPattern, thumbnailConfig?: any | null, ignoreRules?: Array<string> | null } } & { ' $fragmentName'?: 'LibrarySettingsConfigFragment' };
 
 export type LibrarySettingsRouterEditLibraryMutationMutationVariables = Exact<{
@@ -2947,6 +3007,37 @@ export type ScanRecordInspectorJobsQueryVariables = Exact<{
 
 export type ScanRecordInspectorJobsQuery = { __typename?: 'Query', jobById?: { __typename?: 'Job', id: string, outputData?: { __typename: 'ExternalJobOutput' } | { __typename: 'LibraryScanOutput', totalFiles: number, totalDirectories: number, ignoredFiles: number, skippedFiles: number, ignoredDirectories: number, createdMedia: number, updatedMedia: number, createdSeries: number, updatedSeries: number } | { __typename: 'SeriesScanOutput' } | { __typename: 'ThumbnailGenerationOutput' } | null, logs?: Array<{ __typename?: 'Log', id: number }> } | null };
 
+export type DeleteLibraryThumbnailsMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteLibraryThumbnailsMutation = { __typename?: 'Mutation', deleteLibraryThumbnails: boolean };
+
+export type LibraryThumbnailSelectorUpdateMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: UpdateLibraryThumbnailInput;
+}>;
+
+
+export type LibraryThumbnailSelectorUpdateMutation = { __typename?: 'Mutation', updateLibraryThumbnail: { __typename?: 'Library', id: string, thumbnail: { __typename?: 'ImageRef', url: string } } };
+
+export type LibraryThumbnailSelectorUploadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  file: Scalars['Upload']['input'];
+}>;
+
+
+export type LibraryThumbnailSelectorUploadMutation = { __typename?: 'Mutation', uploadLibraryThumbnail: { __typename?: 'Library', id: string, thumbnail: { __typename?: 'ImageRef', url: string } } };
+
+export type RegenerateThumbnailsMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  forceRegenerate: Scalars['Boolean']['input'];
+}>;
+
+
+export type RegenerateThumbnailsMutation = { __typename?: 'Mutation', generateLibraryThumbnails: boolean };
+
 export type SeriesLayoutQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -2971,6 +3062,14 @@ export type SeriesBooksSceneQuery = { __typename?: 'Query', media: { __typename?
       { __typename?: 'Media', id: string }
       & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+
+export type SeriesBookGridQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+  pagination?: InputMaybe<Pagination>;
+}>;
+
+
+export type SeriesBookGridQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
 export type DirectoryListingQueryVariables = Exact<{
   input: DirectoryListingInput;
@@ -3296,6 +3395,7 @@ export const BooksAfterCurrentQueryDocument = new TypedDocumentString(`
   mediaById(id: $id) {
     nextInSeries(pagination: $pagination) {
       nodes {
+        id
         ...BookCard
       }
       pageInfo {
@@ -3616,6 +3716,26 @@ export const LibrarySeriesDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<LibrarySeriesQuery, LibrarySeriesQueryVariables>;
+export const LibrarySeriesGridDocument = new TypedDocumentString(`
+    query LibrarySeriesGrid($id: String!, $pagination: Pagination) {
+  series(filter: {libraryId: {eq: $id}}, pagination: $pagination) {
+    nodes {
+      id
+      thumbnail {
+        url
+      }
+    }
+    pageInfo {
+      __typename
+      ... on CursorPaginationInfo {
+        currentCursor
+        nextCursor
+        limit
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LibrarySeriesGridQuery, LibrarySeriesGridQueryVariables>;
 export const LibrarySettingsRouterEditLibraryMutationDocument = new TypedDocumentString(`
     mutation LibrarySettingsRouterEditLibraryMutation($id: ID!, $input: CreateOrUpdateLibraryInput!) {
   updateLibrary(id: $id, input: $input) {
@@ -3713,6 +3833,36 @@ export const ScanRecordInspectorJobsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<ScanRecordInspectorJobsQuery, ScanRecordInspectorJobsQueryVariables>;
+export const DeleteLibraryThumbnailsDocument = new TypedDocumentString(`
+    mutation DeleteLibraryThumbnails($id: ID!) {
+  deleteLibraryThumbnails(id: $id)
+}
+    `) as unknown as TypedDocumentString<DeleteLibraryThumbnailsMutation, DeleteLibraryThumbnailsMutationVariables>;
+export const LibraryThumbnailSelectorUpdateDocument = new TypedDocumentString(`
+    mutation LibraryThumbnailSelectorUpdate($id: ID!, $input: UpdateLibraryThumbnailInput!) {
+  updateLibraryThumbnail(id: $id, input: $input) {
+    id
+    thumbnail {
+      url
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LibraryThumbnailSelectorUpdateMutation, LibraryThumbnailSelectorUpdateMutationVariables>;
+export const LibraryThumbnailSelectorUploadDocument = new TypedDocumentString(`
+    mutation LibraryThumbnailSelectorUpload($id: ID!, $file: Upload!) {
+  uploadLibraryThumbnail(id: $id, file: $file) {
+    id
+    thumbnail {
+      url
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LibraryThumbnailSelectorUploadMutation, LibraryThumbnailSelectorUploadMutationVariables>;
+export const RegenerateThumbnailsDocument = new TypedDocumentString(`
+    mutation RegenerateThumbnails($id: ID!, $forceRegenerate: Boolean!) {
+  generateLibraryThumbnails(id: $id, forceRegenerate: $forceRegenerate)
+}
+    `) as unknown as TypedDocumentString<RegenerateThumbnailsMutation, RegenerateThumbnailsMutationVariables>;
 export const SeriesLayoutDocument = new TypedDocumentString(`
     query SeriesLayout($id: ID!) {
   seriesById(id: $id) {
@@ -3778,6 +3928,27 @@ export const SeriesBooksSceneDocument = new TypedDocumentString(`
     completedAt
   }
 }`) as unknown as TypedDocumentString<SeriesBooksSceneQuery, SeriesBooksSceneQueryVariables>;
+export const SeriesBookGridDocument = new TypedDocumentString(`
+    query SeriesBookGrid($id: String!, $pagination: Pagination) {
+  media(filter: {seriesId: {eq: $id}}, pagination: $pagination) {
+    nodes {
+      id
+      thumbnail {
+        url
+      }
+      pages
+    }
+    pageInfo {
+      __typename
+      ... on CursorPaginationInfo {
+        currentCursor
+        nextCursor
+        limit
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesBookGridQuery, SeriesBookGridQueryVariables>;
 export const DirectoryListingDocument = new TypedDocumentString(`
     query DirectoryListing($input: DirectoryListingInput!, $pagination: Pagination!) {
   listDirectory(input: $input, pagination: $pagination) {

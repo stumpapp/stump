@@ -3,16 +3,23 @@ use std::{
 	path::{Path, PathBuf},
 };
 
-use async_graphql::{Context, Error, InputObject, Object, Result, Upload, UploadValue};
+use async_graphql::{
+	Context, Error, InputObject, Object, Result, Upload, UploadValue, ID,
+};
 use models::{entity::library, shared::enums::UserPermission};
-use sea_orm::prelude::*;
-use stump_core::filesystem::scanner::LibraryScanJob;
+use sea_orm::{prelude::*, QuerySelect};
+use stump_core::filesystem::{
+	image::{place_thumbnail, remove_thumbnails},
+	scanner::LibraryScanJob,
+	ContentType,
+};
 use tokio::fs;
 use zip::{read::ZipFile, ZipArchive};
 
 use crate::{
 	data::{CoreContext, RequestContext},
 	guard::{OptionalFeature, OptionalFeatureGuard, PermissionGuard},
+	object::library::Library,
 };
 
 #[derive(Default)]
@@ -36,6 +43,8 @@ struct UploadSeriesInput {
 // TODO: consider thumbnail upload for this mutation object, e.g. `upload_media_thumbnail`
 
 // TODO: Might need to consider making these restful if we cannot hook into progress callbacks on the client
+
+// TODO(graphql): Enforce upload limits, e.g. max file size
 
 #[Object]
 impl UploadMutation {
@@ -153,6 +162,82 @@ impl UploadMutation {
 			})?;
 
 		Ok(true)
+	}
+
+	#[graphql(
+		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditLibrary]))"
+	)]
+	async fn upload_library_thumbnail(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		file: Upload,
+	) -> Result<Library> {
+		let RequestContext { user, .. } = ctx.data()?;
+		let core = ctx.data::<CoreContext>()?;
+		let conn = core.conn.as_ref();
+
+		let library = library::Entity::find_for_user(user)
+			.select_only()
+			.filter(library::Column::Id.eq(id.to_string()))
+			.one(conn)
+			.await?
+			.ok_or("Library not found")?;
+
+		let value = file.value(ctx)?;
+		match value.size() {
+			Ok(size) if size as usize > core.config.max_file_upload_size => {
+				return Err(format!(
+					"File size exceeds maximum upload size of {} bytes",
+					core.config.max_file_upload_size
+				)
+				.into());
+			},
+			Err(e) => {
+				tracing::error!(?e, "Error getting file size");
+				return Err(format!("Error getting file size: {e}").into());
+			},
+			_ => {},
+		}
+
+		let mut image_buf = Vec::new();
+		let mut file = value.content;
+		file.read_to_end(&mut image_buf)?;
+
+		let content_type = value
+			.content_type
+			.clone()
+			.as_deref()
+			.map(ContentType::from)
+			.ok_or("Could not verify content of file".to_string())?;
+
+		if !content_type.is_image() {
+			return Err("Uploaded file is not an image".into());
+		}
+
+		let extension = Path::new(&value.filename)
+			.extension()
+			.and_then(|ext| ext.to_str())
+			.map(str::to_ascii_lowercase)
+			.ok_or("Expected file to have an extension")?;
+
+		// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
+		// user testing I'd like to see if this becomes a problem. We'll see!
+		match remove_thumbnails(&[library.id.clone()], &core.config.get_thumbnails_dir())
+			.await
+		{
+			Ok(count) => tracing::info!("Removed {} thumbnails!", count),
+			Err(e) => tracing::error!(
+				?e,
+				"Failed to remove existing library thumbnail before replacing!"
+			),
+		}
+
+		let path_buf =
+			place_thumbnail(&library.id, &extension, &image_buf, &core.config).await?;
+		tracing::debug!(?path_buf, "Placed library thumbnail");
+
+		Ok(library.into())
 	}
 }
 

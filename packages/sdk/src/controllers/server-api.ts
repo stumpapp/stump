@@ -43,7 +43,11 @@ export class ServerAPI extends APIBase {
 	 * Check if the Stump instance has been claimed (at least one user who is the owner)
 	 */
 	async claimedStatus(): Promise<APIResult<ClaimResponse>> {
-		return this.axios.get('/claim')
+		const { data, ...response } = await this.axios.get('/claim')
+		if (typeof data !== 'object' && !('is_claimed' in data)) {
+			throw new Error('Malformed response received from server')
+		}
+		return { data, ...response }
 	}
 
 	get keys(): ClassQueryKeys<InstanceType<typeof ServerAPI>> {

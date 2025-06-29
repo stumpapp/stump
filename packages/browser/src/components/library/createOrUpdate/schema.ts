@@ -218,7 +218,7 @@ export const intoThumbnailConfig = (
 }
 
 export const intoFormThumbnailConfig = (
-	config: LibraryConfigInput['thumbnailConfig'],
+	config: LibrarySettingsConfigFragment['config']['thumbnailConfig'],
 ): CreateOrUpdateLibrarySchema['thumbnailConfig'] => {
 	if (!config) {
 		return {
@@ -239,34 +239,34 @@ export const intoFormThumbnailConfig = (
 		return baseConfig
 	}
 
-	if ('scaleEvenlyByFactor' in config.resizeMethod && !!config.resizeMethod.scaleEvenlyByFactor) {
+	if (config.resizeMethod.__typename === 'ScaleEvenlyByFactor') {
 		return {
 			...baseConfig,
 			resizeMethod: {
 				mode: 'scaleEvenlyByFactor',
-				factor: config.resizeMethod.scaleEvenlyByFactor.factor,
+				factor: config.resizeMethod.factor,
 			},
 		}
 	}
 
-	if ('scaleDimension' in config.resizeMethod && !!config.resizeMethod.scaleDimension) {
+	if (config.resizeMethod.__typename === 'ScaledDimensionResize') {
 		return {
 			...baseConfig,
 			resizeMethod: {
 				mode: 'scaleDimension',
-				dimension: config.resizeMethod.scaleDimension.dimension,
-				size: config.resizeMethod.scaleDimension.size,
+				dimension: config.resizeMethod.dimension,
+				size: config.resizeMethod.size,
 			},
 		}
 	}
 
-	if ('exact' in config.resizeMethod && !!config.resizeMethod.exact) {
+	if (config.resizeMethod.__typename === 'ExactDimensionResize') {
 		return {
 			...baseConfig,
 			resizeMethod: {
 				mode: 'exact',
-				height: config.resizeMethod.exact.height,
-				width: config.resizeMethod.exact.width,
+				height: config.resizeMethod.height,
+				width: config.resizeMethod.width,
 			},
 		}
 	}

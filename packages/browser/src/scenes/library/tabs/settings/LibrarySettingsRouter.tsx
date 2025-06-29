@@ -36,7 +36,9 @@ export const LibrarySettingsConfig = graphql(`
 			watch
 			libraryPattern
 			thumbnailConfig {
+				__typename
 				resizeMethod {
+					__typename
 					... on ScaleEvenlyByFactor {
 						factor
 					}

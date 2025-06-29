@@ -232,17 +232,7 @@ export const formDefaults = (
 	processMetadata: library?.config.processMetadata ?? true,
 	scanAfterPersist: true,
 	tags: library?.tags?.map((t) => ({ label: t.name, value: t.name.toLowerCase() })),
-	thumbnailConfig: library?.config.thumbnailConfig
-		? {
-				enabled: true,
-				...library?.config.thumbnailConfig,
-			}
-		: {
-				enabled: false,
-				format: 'Webp',
-				quality: undefined,
-				resizeMethod: undefined,
-			},
+	thumbnailConfig: intoFormThumbnailConfig(library?.config.thumbnailConfig),
 })
 
 // TODO: Investigate https://the-guild.dev/graphql/codegen/plugins/typescript/typescript-validation-schema

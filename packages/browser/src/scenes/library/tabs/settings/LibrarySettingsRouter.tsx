@@ -97,12 +97,15 @@ export default function LibrarySettingsRouter() {
 	 */
 	const patch = useCallback(
 		(updates: Partial<CreateOrUpdateLibraryInput>) => {
-			const configWithoutId = omit(config, 'id') as CreateOrUpdateLibraryInput['config']
+			const configWithoutId = omit(
+				updates.config ? { ...config, ...updates.config } : config,
+				'id',
+			) as CreateOrUpdateLibraryInput['config']
 			const payload = {
 				// Note: pick returns a deep partial for whatever reason, so we cast it. This should be safe
 				...(pick(library, ['name', 'description', 'emoji', 'path']) as typeof library),
 				...updates,
-				config: updates.config ? { ...configWithoutId, ...updates.config } : configWithoutId,
+				config: configWithoutId,
 				tags: updates.tags ? updates.tags : library?.tags?.map(({ name }) => name),
 			} satisfies CreateOrUpdateLibraryInput
 			editLibrary({ id: library.id, input: payload })

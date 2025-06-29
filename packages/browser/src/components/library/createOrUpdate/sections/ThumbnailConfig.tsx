@@ -6,19 +6,19 @@ import {
 	Input,
 	Label,
 	NativeSelect,
-	RadioGroup,
 	Text,
 	WideSwitch,
 } from '@stump/components'
+import { SupportedImageFormat } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { AnimatePresence, motion } from 'framer-motion'
+import isEqual from 'lodash/isEqual'
 import { Check } from 'lucide-react'
-import { useCallback, useMemo } from 'react'
-import { useFormContext, useFormState } from 'react-hook-form'
+import { useCallback } from 'react'
+import { useFormContext } from 'react-hook-form'
 
-import { useLibraryContextSafe } from '@/scenes/library/context'
+import { useLibraryManagementSafe } from '@/scenes/library/tabs/settings/context'
 
-import { CreateOrUpdateLibrarySchema } from '../schema'
+import { CreateOrUpdateLibrarySchema, intoFormThumbnailConfig } from '../schema'
 
 type Option =
 	| NonNullable<CreateOrUpdateLibrarySchema['thumbnailConfig']['resizeMethod']>['mode']
@@ -32,9 +32,8 @@ const formatOptions = [
 
 export default function ThumbnailConfigForm() {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
-	const ctx = useLibraryContextSafe()
+	const ctx = useLibraryManagementSafe()
 
-	const { errors, dirtyFields } = useFormState({ control: form.control })
 	const { t } = useLocaleContext()
 
 	const [resizeMethod, enabled] = form.watch([
@@ -52,9 +51,13 @@ export default function ThumbnailConfigForm() {
 					factor: 0.65,
 				})
 				form.setValue('thumbnailConfig.quality', 0.75)
+				form.setValue('thumbnailConfig.format', SupportedImageFormat.Webp)
+			} else if (!checked) {
+				const existingConfig = intoFormThumbnailConfig(ctx?.library.config.thumbnailConfig)
+				form.setValue('thumbnailConfig', existingConfig)
 			}
 		},
-		[form, resizeMethod],
+		[form, resizeMethod, ctx?.library],
 	)
 
 	const handleResizeMethodChange = useCallback(
@@ -62,16 +65,16 @@ export default function ThumbnailConfigForm() {
 			if (value === 'none' || value === resizeMethod?.mode) {
 				form.setValue('thumbnailConfig.resizeMethod', null)
 			} else {
+				const existingConfig = intoFormThumbnailConfig(ctx?.library.config.thumbnailConfig)
 				const newOptions = {
+					...existingConfig?.resizeMethod,
 					mode: value,
 				} as NonNullable<CreateOrUpdateLibrarySchema['thumbnailConfig']>['resizeMethod']
-				const currentQuality = form.getValues('thumbnailConfig.quality')
 				form.setValue('thumbnailConfig.resizeMethod', newOptions)
 				form.setValue('thumbnailConfig.enabled', true)
-				form.setValue('thumbnailConfig.quality', currentQuality ?? 0.75)
 			}
 		},
-		[form, resizeMethod?.mode],
+		[form, resizeMethod?.mode, ctx?.library],
 	)
 
 	/**
@@ -83,14 +86,17 @@ export default function ThumbnailConfigForm() {
 			return null
 		}
 
-		const hasChanges = Object.keys(dirtyFields).length > 0
+		const existingConfig = intoFormThumbnailConfig(ctx.library.config.thumbnailConfig)
+		const formConfig = form.getValues('thumbnailConfig')
+
+		const isDifferent = !isEqual(formConfig, existingConfig)
 
 		return (
 			<div>
 				<Button
-					title={hasChanges ? undefined : t('common.noChanges')}
+					title={isDifferent ? undefined : t('common.noChanges')}
 					type="submit"
-					disabled={!hasChanges}
+					disabled={!isDifferent}
 					variant="primary"
 					className="mt-4"
 				>
@@ -98,21 +104,18 @@ export default function ThumbnailConfigForm() {
 				</Button>
 			</div>
 		)
-	}, [ctx, t, dirtyFields])
+	}, [ctx, t, form])
 
-	/**
-	 * This is an awkward way to get the error message for the resize options. Because of the the
-	 * intersection types in the zod schema, the error message is nested in a few different places.
-	 */
-	const resizeOptionsError = useMemo(
-		() =>
-			errors.thumbnailConfig?.resizeMethod?.message ||
-			errors.thumbnailConfig?.resizeMethod?.root?.message,
-		[errors],
-	)
-
-	// TODO: I actually can't tell if I hate this animation or not. I think it might just
-	// be doing too much, yknow
+	// /**
+	//  * This is an awkward way to get the error message for the resize options. Because of the the
+	//  * intersection types in the zod schema, the error message is nested in a few different places.
+	//  */
+	// const resizeOptionsError = useMemo(
+	// 	() =>
+	// 		errors.thumbnailConfig?.resizeMethod?.message ||
+	// 		errors.thumbnailConfig?.resizeMethod?.root?.message,
+	// 	[errors],
+	// )
 
 	return (
 		<div className="flex flex-grow flex-col gap-6">
@@ -133,69 +136,22 @@ export default function ThumbnailConfigForm() {
 					onCheckedChange={() => handleEnabledChange(!enabled)}
 				/>
 
-				<AnimatePresence mode="wait">
-					{!enabled && (
-						<motion.div
-							key="no-thumbnail-config"
-							initial={{ height: 0, opacity: 0, y: -10 }}
-							animate={{
-								height: 'auto',
-								opacity: 1,
-								y: 0,
-								transition: {
-									height: { duration: 0.25, ease: [0.4, 0, 0.2, 1] },
-									opacity: { duration: 0.2, ease: 'easeOut' },
-									y: { duration: 0.2, ease: 'easeOut' },
-								},
-							}}
-							exit={{
-								height: 0,
-								opacity: 0,
-								y: -10,
-								transition: {
-									height: { duration: 0.2, ease: [0.4, 0, 0.2, 1] },
-									opacity: { duration: 0.15, ease: 'easeIn' },
-									y: { duration: 0.15, ease: 'easeIn' },
-								},
-							}}
-						>
-							<Card className="flex flex-col items-center gap-y-4 border-dashed p-6">
-								<span className="rounded-full border border-fill-brand-secondary bg-fill-brand p-1">
-									<Check className="text-foreground" />
-								</span>
-								<Text size="sm" variant="muted">
-									No additional configuration is required when thumbnail generation is disabled
-								</Text>
-							</Card>
-						</motion.div>
-					)}
+				{!enabled && (
+					<div key="no-thumbnail-config">
+						<Card className="flex flex-col items-center gap-y-4 border-dashed p-6">
+							<span className="rounded-full border border-fill-brand-secondary bg-fill-brand p-1">
+								<Check className="text-foreground" />
+							</span>
+							<Text size="sm" variant="muted">
+								No additional configuration is required when thumbnail generation is disabled
+							</Text>
+						</Card>
+					</div>
+				)}
 
-					{enabled && resizeMethod && (
-						<motion.div
-							key="thumbnail-config"
-							className="flex flex-col gap-4"
-							initial={{ height: 0, opacity: 0, y: 10 }}
-							animate={{
-								height: 'auto',
-								opacity: 1,
-								y: 0,
-								transition: {
-									height: { duration: 0.25, ease: [0.4, 0, 0.2, 1] },
-									opacity: { duration: 0.2, ease: 'easeOut' },
-									y: { duration: 0.2, ease: 'easeOut' },
-								},
-							}}
-							exit={{
-								height: 0,
-								opacity: 0,
-								y: 10,
-								transition: {
-									height: { duration: 0.2, ease: [0.4, 0, 0.2, 1] },
-									opacity: { duration: 0.15, ease: 'easeIn' },
-									y: { duration: 0.15, ease: 'easeIn' },
-								},
-							}}
-						>
+				{enabled && (
+					<div key="thumbnail-config" className="flex flex-col gap-4">
+						<div className="grid w-full max-w-sm items-center gap-2">
 							<Label>Resize Method</Label>
 							<NativeSelect
 								options={[
@@ -204,231 +160,139 @@ export default function ThumbnailConfigForm() {
 									{ label: 'Scale Dimension', value: 'scaleDimension' },
 									{ label: 'None', value: 'none' },
 								]}
-								value={resizeMethod.mode}
+								value={resizeMethod?.mode || 'none'}
 								onChange={(e) => handleResizeMethodChange(e.target.value as Option)}
 							/>
+						</div>
 
-							{resizeMethod.mode === 'scaleEvenlyByFactor' && (
-								<>
-									<Text size="xs" variant="muted">
-										Scale the thumbnail by a factor of the original size. For example, a scale
-										factor of 0.65 will result in a thumbnail that is 65% of the original size
-									</Text>
-									<div className="flex flex-col gap-2">
-										<Label>Scale Factor</Label>
-										<Input
-											contrast
-											variant="primary"
-											placeholder="0.65"
-											{...form.register('thumbnailConfig.resizeMethod.factor', {
-												valueAsNumber: true,
-											})}
-											errorMessage={form.formState.errors.thumbnailConfig?.resizeMethod?.message}
-										/>
-									</div>
-								</>
-							)}
-
-							{resizeMethod.mode === 'exact' && (
-								<>
-									<Text size="xs" variant="muted">
-										Resize the thumbnail to an exact size. If the original image is smaller than the
-										specified size, it will be upscaled
-									</Text>
-									<Input
-										contrast
-										variant="primary"
-										label="Width"
-										placeholder="200"
-										{...form.register('thumbnailConfig.resizeMethod.width', {
-											valueAsNumber: true,
-										})}
-										// errorMessage={form.formState.errors.thumbnailConfig?.resizeMethod?.width?.message}
-									/>
-									<Input
-										contrast
-										variant="primary"
-										label="Height"
-										placeholder="350"
-										{...form.register('thumbnailConfig.resizeMethod.height', {
-											valueAsNumber: true,
-										})}
-										// errorMessage={
-										// 	form.formState.errors.thumbnailConfig?.resizeMethod?.height?.message
-										// }
-									/>
-								</>
-							)}
-
-							{resizeMethod.mode === 'scaleDimension' && (
-								<>
-									<Text size="xs" variant="muted">
-										Set either the width or height of the thumbnail and auto-scale the other to keep
-										the original aspect ratio
-									</Text>
-
-									<div className="flex flex-col gap-2">
-										<Label>Dimension</Label>
-										<NativeSelect
-											options={[
-												{ label: 'Width', value: 'WIDTH' },
-												{ label: 'Height', value: 'HEIGHT' },
-											]}
-											{...form.register('thumbnailConfig.resizeMethod.dimension')}
-											defaultValue="WIDTH"
-										/>
-									</div>
-
-									<Input
-										contrast
-										variant="primary"
-										label="Size"
-										placeholder="350"
-										{...form.register('thumbnailConfig.resizeMethod.size', {
-											valueAsNumber: true,
-										})}
-										// errorMessage={
-										// 	form.formState.errors.thumbnailConfig?.resizeMethod?.height?.message
-										// }
-									/>
-								</>
-							)}
-
-							{/* <RadioGroup
-								value={!resizeMethod && (
-								?.mode}
-								onValueChange={handleResizeMethodChange}
-								className="gap-4"
-							>
-								<RadioGroup.CardItem
-									isActive={resizeMethod?.mode === 'Scaled'}
-									label={t(getKey('scaled.label'))}
-									description={t(getKey('scaled.description'))}
-									value="Scaled"
-								>
-									<fieldset
-										className="flex items-start justify-end gap-2"
-										disabled={resizeMethod?.mode !== 'Scaled'}
-									>
-										<Input
-											contrast
-											variant="primary"
-											label={t(getKey('scaled.width.label'))}
-											placeholder="0.65"
-											{...(resizeMethod?.mode === 'Scaled'
-												? form.register('thumbnailConfig.resizeMethod.width', {
-														valueAsNumber: true,
-													})
-												: {})}
-											{...(resizeMethod?.mode === 'Scaled'
-												? {
-														errorMessage:
-															form.formState.errors.thumbnailConfig?.resizeMethod?.width?.message,
-													}
-												: {})}
-										/>
-										<Input
-											contrast
-											variant="primary"
-											label={t(getKey('scaled.height.label'))}
-											placeholder="0.65"
-											{...(resizeMethod?.mode === 'Scaled'
-												? form.register('thumbnailConfig.resizeMethod.height', {
-														valueAsNumber: true,
-													})
-												: {})}
-										/>
-									</fieldset>
-
-									{resizeOptionsError && resizeMethod?.mode === 'Scaled' && (
-										<Text className="mt-2" size="xs" variant="danger">
-											{resizeOptionsError}
-										</Text>
-									)}
-								</RadioGroup.CardItem>
-
-								<RadioGroup.CardItem
-									isActive={resizeMethod?.mode === 'Sized'}
-									label={t(getKey('sized.label'))}
-									description={t(getKey('sized.description'))}
-									value="Sized"
-								>
-									<fieldset
-										className="flex items-start justify-end gap-2"
-										disabled={resizeMethod?.mode !== 'Sized'}
-									>
-										<Input
-											contrast
-											variant="primary"
-											label={t(getKey('sized.width.label'))}
-											placeholder="200"
-											{...(resizeMethod?.mode === 'Sized'
-												? form.register('thumbnailConfig.resizeMethod.width', {
-														valueAsNumber: true,
-													})
-												: {})}
-											{...(resizeMethod?.mode === 'Sized'
-												? {
-														errorMessage:
-															form.formState.errors.thumbnailConfig?.resizeMethod?.width?.message,
-													}
-												: {})}
-										/>
-										<Input
-											contrast
-											variant="primary"
-											label={t(getKey('sized.height.label'))}
-											placeholder="350"
-											{...(resizeMethod?.mode === 'Sized'
-												? form.register('thumbnailConfig.resizeMethod.height', {
-														valueAsNumber: true,
-													})
-												: {})}
-										/>
-									</fieldset>
-
-									{resizeOptionsError && resizeMethod?.mode === 'Sized' && (
-										<Text className="mt-2" size="xs" variant="danger">
-											{resizeOptionsError}
-										</Text>
-									)}
-								</RadioGroup.CardItem>
-							</RadioGroup>
-
-							<div className="flex flex-col gap-6 py-6">
+						{resizeMethod?.mode === 'scaleEvenlyByFactor' && (
+							<>
+								<Text size="xs" variant="muted">
+									Scale the thumbnail by a factor of the original size. For example, a scale factor
+									of 0.65 will result in a thumbnail that is 65% of the original size
+								</Text>
 								<div className="flex flex-col gap-2">
-									<Label className={cx({ 'cursor-not-allowed text-opacity-50': !resizeMethod })}>
-										{t(getKey('format.label'))}
-									</Label>
-									<NativeSelect
-										options={formatOptions}
-										disabled={!resizeMethod}
-										{...form.register('thumbnailConfig.format')}
+									<Label>Scale Factor</Label>
+									<Input
+										contrast
+										variant="primary"
+										placeholder="0.65"
+										{...form.register('thumbnailConfig.resizeMethod.factor', {
+											valueAsNumber: true,
+										})}
+										errorMessage={form.formState.errors.thumbnailConfig?.resizeMethod?.message}
 									/>
-									<Text
-										size="xs"
-										variant="muted"
-										className={cx({ 'cursor-not-allowed text-opacity-50': !resizeMethod })}
-									>
-										{t(getKey('format.description'))}
-									</Text>
+								</div>
+							</>
+						)}
+
+						{resizeMethod?.mode === 'exact' && (
+							<>
+								<Text size="xs" variant="muted">
+									Resize the thumbnail to an exact size. If the original image is smaller than the
+									specified size, it will be upscaled
+								</Text>
+								<Input
+									contrast
+									variant="primary"
+									label="Width"
+									placeholder="200"
+									{...form.register('thumbnailConfig.resizeMethod.width', {
+										valueAsNumber: true,
+									})}
+									// errorMessage={form.formState.errors.thumbnailConfig?.resizeMethod?.width?.message}
+								/>
+								<Input
+									contrast
+									variant="primary"
+									label="Height"
+									placeholder="350"
+									{...form.register('thumbnailConfig.resizeMethod.height', {
+										valueAsNumber: true,
+									})}
+									// errorMessage={
+									// 	form.formState.errors.thumbnailConfig?.resizeMethod?.height?.message
+									// }
+								/>
+							</>
+						)}
+
+						{resizeMethod?.mode === 'scaleDimension' && (
+							<>
+								<Text size="xs" variant="muted">
+									Set either the width or height of the thumbnail and auto-scale the other to keep
+									the original aspect ratio
+								</Text>
+
+								<div className="flex flex-col gap-2">
+									<Label>Dimension</Label>
+									<NativeSelect
+										options={[
+											{ label: 'Width', value: 'WIDTH' },
+											{ label: 'Height', value: 'HEIGHT' },
+										]}
+										{...form.register('thumbnailConfig.resizeMethod.dimension')}
+										defaultValue="WIDTH"
+									/>
 								</div>
 
 								<Input
 									contrast
 									variant="primary"
-									label={t(getKey('quality.label'))}
-									disabled={!resizeMethod}
-									descriptionProps={{ className: 'text-xs' }}
-									description={t(getKey('quality.description'))}
-									errorMessage={form.formState.errors.thumbnailConfig?.quality?.message}
-									placeholder="0.75"
-									{...form.register('thumbnailConfig.quality', { valueAsNumber: true })}
+									label="Size"
+									placeholder="350"
+									{...form.register('thumbnailConfig.resizeMethod.size', {
+										valueAsNumber: true,
+									})}
+									// errorMessage={
+									// 	form.formState.errors.thumbnailConfig?.resizeMethod?.height?.message
+									// }
 								/>
-							</div> */}
-						</motion.div>
-					)}
-				</AnimatePresence>
+							</>
+						)}
+					</div>
+				)}
+
+				{enabled && (
+					<>
+						<div className="grid w-full max-w-sm items-center gap-4">
+							<Label className={cx({ 'cursor-not-allowed text-opacity-50': !resizeMethod })}>
+								{t(getKey('format.label'))}
+							</Label>
+							<NativeSelect
+								options={formatOptions}
+								disabled={!enabled}
+								{...form.register('thumbnailConfig.format')}
+								// errorMessage={form.formState.errors.thumbnailConfig?.format?.message}
+							/>
+							<Text
+								size="xs"
+								variant="muted"
+								className={cx({ 'cursor-not-allowed text-opacity-50': !enabled })}
+							>
+								{t(getKey('format.description'))}
+							</Text>
+						</div>
+
+						<Input
+							contrast
+							variant="primary"
+							label={t(getKey('quality.label'))}
+							disabled={!enabled}
+							descriptionProps={{ className: 'text-xs' }}
+							description={t(getKey('quality.description'))}
+							errorMessage={form.formState.errors.thumbnailConfig?.quality?.message}
+							placeholder="0.75"
+							{...form.register('thumbnailConfig.quality', { valueAsNumber: true })}
+						/>
+						{/* 
+						{resizeOptionsError && resizeMethod?.mode === 'Scaled' && (
+							<Text className="mt-2" size="xs" variant="danger">
+								{resizeOptionsError}
+							</Text>
+						)} */}
+					</>
+				)}
 
 				{renderSaveButton()}
 			</div>

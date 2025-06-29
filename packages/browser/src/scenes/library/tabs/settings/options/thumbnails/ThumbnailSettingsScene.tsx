@@ -6,8 +6,8 @@ import { useForm } from 'react-hook-form'
 import {
 	buildSchema,
 	CreateOrUpdateLibrarySchema,
-	ensureValidThumbnailConfig,
 	formDefaults,
+	intoThumbnailConfig,
 	ThumbnailConfig,
 } from '@/components/library/createOrUpdate'
 
@@ -29,7 +29,7 @@ export default function ThumbnailSettingsScene() {
 			patch({
 				config: {
 					...library.config,
-					thumbnailConfig: ensureValidThumbnailConfig(thumbnailConfig),
+					thumbnailConfig: intoThumbnailConfig(thumbnailConfig),
 				},
 				scanAfterPersist: false,
 			})

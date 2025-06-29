@@ -2,6 +2,7 @@ import { useGraphQLMutation } from '@stump/client'
 import { ConfirmationModal } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
 import { isAxiosError } from '@stump/sdk'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo } from 'react'
 import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router'
@@ -26,13 +27,20 @@ type Props = {
 
 export default function DeleteLibraryConfirmation({ isOpen, libraryId, onClose, trigger }: Props) {
 	const navigate = useNavigate()
+	const client = useQueryClient()
 
 	const {
 		mutate: deleteLibrary,
 		isPending,
 		error,
 	} = useGraphQLMutation(mutation, {
-		onSuccess: () => navigate(paths.home()),
+		onSuccess: async () => {
+			await client.invalidateQueries({
+				predicate: () => true,
+			})
+			onClose()
+			navigate(paths.home())
+		},
 	})
 	const { checkPermission } = useAppContext()
 

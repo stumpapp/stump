@@ -44,6 +44,7 @@ export default function LibraryPatternRadioGroup() {
 					className="mt-1 flex flex-col sm:flex-row"
 					disabled={!isCreating}
 					title={isCreating ? undefined : t(getKey('section.disabled'))}
+					defaultValue="SERIES_BASED"
 				>
 					<RadioGroup.CardItem
 						label={t(getOptionKey('collectionPriority.label'))}

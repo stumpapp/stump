@@ -3,6 +3,7 @@ import { useLocaleContext } from '@stump/i18n'
 import pluralize from 'pluralize'
 import { PropsWithChildren } from 'react'
 import { useFormContext } from 'react-hook-form'
+import { match } from 'ts-pattern'
 
 import { CreateOrUpdateLibrarySchema } from '@/components/library/createOrUpdate'
 
@@ -23,7 +24,20 @@ export default function LibraryReview() {
 				</div>
 			)
 		} else {
-			const dimensionUnit = state.thumbnailConfig.resizeMethod.mode === 'Scaled' ? 'x' : 'px'
+			const dimensionUnit =
+				state.thumbnailConfig.resizeMethod.mode === 'scaleEvenlyByFactor' ? 'x' : 'px'
+
+			const renderResizeModeDetails = () =>
+				match(state.thumbnailConfig.resizeMethod)
+					.with({ mode: 'scaleEvenlyByFactor' }, ({ factor }) => `${factor}${dimensionUnit}`)
+					.with(
+						{ mode: 'exact' },
+						({ width, height }) => `${width}${dimensionUnit}:${height}${dimensionUnit}`,
+					)
+					.with({ mode: 'scaleDimension' }, ({ dimension, size }) =>
+						dimension === 'WIDTH' ? `${size}${dimensionUnit}:auto` : `auto:${size}${dimensionUnit}`,
+					)
+					.otherwise(() => '')
 
 			return (
 				<>
@@ -37,8 +51,7 @@ export default function LibraryReview() {
 					<div>
 						<Label>{t(getLabelKey('mode'))}</Label>
 						<Text variant="muted" size="sm">
-							{state.thumbnailConfig.resizeMethod.mode} (
-							{`${state.thumbnailConfig.resizeMethod.width}${dimensionUnit}:${state.thumbnailConfig.resizeMethod.height}${dimensionUnit}`}
+							{t(getLabelKey(state.thumbnailConfig.resizeMethod.mode))} ({renderResizeModeDetails()}
 							)
 						</Text>
 					</div>

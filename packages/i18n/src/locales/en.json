@@ -478,7 +478,10 @@
 					"watch": "Watch directory for changes",
 					"processMetadata": "Process metadata",
 					"generateFileHashes": "Generate file hashes",
-					"generateKoreaderHashes": "Generate KoReader hashes"
+					"generateKoreaderHashes": "Generate KoReader hashes",
+					"scaleEvenlyByFactor": "Evenly Scale",
+					"exact": "Exact Size",
+					"scaleDimension": "Explicitly Sized"
 				}
 			},
 			"buttons": {

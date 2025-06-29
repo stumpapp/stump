@@ -6,7 +6,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
-import { CreateOrUpdateLibrarySchema } from '@/components/library/createOrUpdate'
+import {
+	CreateOrUpdateLibrarySchema,
+	intoThumbnailConfig,
+} from '@/components/library/createOrUpdate'
 import { SteppedFormContext } from '@/components/steppedForm'
 import SteppedFormSceneHeader from '@/components/steppedForm/SteppedFormSceneHeader'
 import { useConfetti } from '@/hooks/useConfetti'
@@ -73,14 +76,12 @@ export default function CreateLibraryScene() {
 				...config
 			} = values
 
-			// TODO(graphql): type errors
 			const input: CreateOrUpdateLibraryInput = {
 				config: {
 					...config,
 					ignoreRules: ignoreRules.map(({ glob }) => glob),
-					thumbnailConfig:
-						thumbnailConfig.enabled && !!thumbnailConfig.resizeMethod ? thumbnailConfig : null,
-				},
+					thumbnailConfig: intoThumbnailConfig(thumbnailConfig),
+				} as CreateOrUpdateLibraryInput['config'],
 				description,
 				name,
 				path,

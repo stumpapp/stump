@@ -33,6 +33,8 @@ pub struct ExactDimensionResize {
 	pub height: u32,
 }
 
+// FIXME: There is a floating point precision issue with the factor, so we might need
+// to store as u16 and just do the conversion when using it
 #[derive(
 	Debug,
 	Default,

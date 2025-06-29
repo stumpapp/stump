@@ -11,6 +11,7 @@ import {
 	SupportedImageFormat,
 } from '@stump/graphql'
 import isValidGlob from 'is-valid-glob'
+import omit from 'lodash/omit'
 import { match } from 'ts-pattern'
 import { z } from 'zod'
 
@@ -131,15 +132,15 @@ const thumbnailConfig = z.object({
 	format: imageFormatSchema.default(SupportedImageFormat.Webp),
 	quality: z
 		.number()
-		.nullable()
-		.optional()
+		.int()
+		.nullish()
 		.refine(
-			(value) => value == undefined || (value > 0 && value <= 1.0),
+			(value) => value == undefined || (value > 0 && value <= 100),
 			() => ({
-				message: 'Thumbnail quality must be between 0 and 1.0',
+				message: 'Thumbnail quality must be between 0 and 100',
 			}),
 		),
-	resizeMethod: resizeOptionsSchema.nullable().optional(),
+	resizeMethod: resizeOptionsSchema.nullish(),
 })
 
 /**
@@ -277,7 +278,7 @@ export const intoThumbnailConfig = (
 		})
 		.otherwise(() => null)
 
-	return converted
+	return omit(converted, 'enabled')
 }
 
 export const intoFormThumbnailConfig = (

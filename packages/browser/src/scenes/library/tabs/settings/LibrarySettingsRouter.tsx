@@ -35,7 +35,24 @@ export const LibrarySettingsConfig = graphql(`
 			processMetadata
 			watch
 			libraryPattern
-			thumbnailConfig
+			thumbnailConfig {
+				resizeMethod {
+					... on ScaleEvenlyByFactor {
+						factor
+					}
+					... on ExactDimensionResize {
+						width
+						height
+					}
+					... on ScaledDimensionResize {
+						dimension
+						size
+					}
+				}
+				format
+				quality
+				page
+			}
 			ignoreRules
 		}
 	}

@@ -1,9 +1,10 @@
+import { Bookmark } from '@stump/graphql'
 import { EpubContent } from '@stump/sdk'
-import { ImageReaderBookRef } from '@/components/readers/imageBased/context'
 import { createContext, useContext } from 'react'
 
+import { ImageReaderBookRef } from '@/components/readers/imageBased/context'
+
 import { noop } from '../../../utils/misc'
-import { Bookmark } from '@stump/graphql'
 
 export type EpubReaderChapterMeta = {
 	/** The chapter's title. */

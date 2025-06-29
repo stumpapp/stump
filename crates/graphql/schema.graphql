@@ -444,7 +444,18 @@ input EpubProgressInput {
 A resize option which will resize the image to the given dimensions, without
 maintaining the aspect ratio.
 """
-input ExactDimensionResize {
+type ExactDimensionResize {
+	"The width (in pixels) the resulting image should be resized to"
+	width: Int!
+	"The height (in pixels) the resulting image should be resized to"
+	height: Int!
+}
+
+"""
+A resize option which will resize the image to the given dimensions, without
+maintaining the aspect ratio.
+"""
+input ExactDimensionResizeInput {
 	"The width (in pixels) the resulting image should be resized to"
 	width: Int!
 	"The height (in pixels) the resulting image should be resized to"
@@ -528,9 +539,25 @@ type FinishedReadingSessionModel {
 
 
 "Options for processing images throughout Stump."
-input ImageProcessorOptionsInput {
+type ImageProcessorOptions {
 	"The size factor to use when generating an image. See [`ImageResizeOptions`]"
 	resizeMethod: ImageResizeMethod
+	"The format to use when generating an image. See [`SupportedImageFormat`]"
+	format: SupportedImageFormat!
+	"""
+	The quality to use when generating an image. This is a number between 1 and 100,
+	where 100 is the highest quality. Omitting this value will use the default quality
+	of 100.
+	"""
+	quality: Int
+	"The page to use when generating an image. This is not applicable to all media formats."
+	page: Int
+}
+
+"Options for processing images throughout Stump."
+input ImageProcessorOptionsInput {
+	"The size factor to use when generating an image. See [`ImageResizeOptions`]"
+	resizeMethod: ImageResizeMethodInput
 	"The format to use when generating an image. See [`SupportedImageFormat`]"
 	format: SupportedImageFormat!
 	"""
@@ -550,10 +577,13 @@ type ImageRef {
 }
 
 "The resize options to use when generating an image"
-input ImageResizeMethod @oneOf {
-	exact: ExactDimensionResize
-	scaleEvenlyByFactor: ScaleEvenlyByFactor
-	scaleDimension: ScaledDimensionResize
+union ImageResizeMethod = ExactDimensionResize | ScaleEvenlyByFactor | ScaledDimensionResize
+
+"The resize options to use when generating an image"
+input ImageResizeMethodInput @oneOf {
+	exact: ExactDimensionResizeInput
+	scaleEvenlyByFactor: ScaleEvenlyByFactorInput
+	scaleDimension: ScaledDimensionResizeInput
 }
 
 type InProgressBooks {
@@ -668,7 +698,7 @@ type LibraryConfig {
 	watch: Boolean!
 	libraryPattern: LibraryPattern!
 	libraryId: String
-	thumbnailConfig: JSON
+	thumbnailConfig: ImageProcessorOptions
 	ignoreRules: [String!]
 }
 
@@ -1520,16 +1550,38 @@ input SaveSmartListViewInput {
 	config: String!
 }
 
-input ScaleEvenlyByFactor {
-	"The factor to scale the image by"
-	factor: Float!
+type ScaleEvenlyByFactor {
+	"""
+	The factor to scale the image by. Note that this was made a [Decimal]
+	to correct precision issues
+	"""
+	factor: Decimal!
+}
+
+input ScaleEvenlyByFactorInput {
+	"""
+	The factor to scale the image by. Note that this was made a [Decimal]
+	to correct precision issues
+	"""
+	factor: Decimal!
 }
 
 """
 A resize option which will resize the image while maintaining the aspect ratio.
 The dimension *not* specified will be calculated based on the aspect ratio.
 """
-input ScaledDimensionResize {
+type ScaledDimensionResize {
+	"The dimension to set with the given size, e.g. `Height` or `Width`."
+	dimension: Dimension!
+	"The size (in pixels) to set the specified dimension to."
+	size: Int!
+}
+
+"""
+A resize option which will resize the image while maintaining the aspect ratio.
+The dimension *not* specified will be calculated based on the aspect ratio.
+"""
+input ScaledDimensionResizeInput {
 	"The dimension to set with the given size, e.g. `Height` or `Width`."
 	dimension: Dimension!
 	"The size (in pixels) to set the specified dimension to."

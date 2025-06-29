@@ -54,7 +54,7 @@ export default function ThumbnailConfigForm() {
 				form.setValue('thumbnailConfig.format', SupportedImageFormat.Webp)
 			} else if (!checked) {
 				const existingConfig = intoFormThumbnailConfig(ctx?.library.config.thumbnailConfig)
-				form.setValue('thumbnailConfig', existingConfig)
+				form.setValue('thumbnailConfig', { ...existingConfig, enabled: false })
 			}
 		},
 		[form, resizeMethod, ctx?.library],
@@ -143,7 +143,7 @@ export default function ThumbnailConfigForm() {
 								<Check className="text-foreground" />
 							</span>
 							<Text size="sm" variant="muted">
-								No additional configuration is required when thumbnail generation is disabled
+								{t(getKey('section.disabled'))}
 							</Text>
 						</Card>
 					</div>
@@ -151,14 +151,20 @@ export default function ThumbnailConfigForm() {
 
 				{enabled && (
 					<div key="thumbnail-config" className="flex flex-col gap-4">
-						<div className="grid w-full max-w-sm items-center gap-2">
-							<Label>Resize Method</Label>
+						<div className="grid w-full items-center gap-1.5 lg:max-w-sm">
+							<Label>{t(getKey('resizeMethod.label'))}</Label>
 							<NativeSelect
 								options={[
-									{ label: 'Evenly Scale', value: 'scaleEvenlyByFactor' },
-									{ label: 'Exact Size', value: 'exact' },
-									{ label: 'Scale Dimension', value: 'scaleDimension' },
-									{ label: 'None', value: 'none' },
+									{
+										label: t(getKey('resizeMethod.options.scaleEvenlyByFactor')),
+										value: 'scaleEvenlyByFactor',
+									},
+									{ label: t(getKey('resizeMethod.options.exact')), value: 'exact' },
+									{
+										label: t(getKey('resizeMethod.options.scaleDimension')),
+										value: 'scaleDimension',
+									},
+									{ label: t(getKey('resizeMethod.options.none')), value: 'none' },
 								]}
 								value={resizeMethod?.mode || 'none'}
 								onChange={(e) => handleResizeMethodChange(e.target.value as Option)}
@@ -168,11 +174,10 @@ export default function ThumbnailConfigForm() {
 						{resizeMethod?.mode === 'scaleEvenlyByFactor' && (
 							<>
 								<Text size="xs" variant="muted">
-									Scale the thumbnail by a factor of the original size. For example, a scale factor
-									of 0.65 will result in a thumbnail that is 65% of the original size
+									{t(getKey('scaleEvenlyByFactor.description'))}
 								</Text>
 								<div className="flex flex-col gap-2">
-									<Label>Scale Factor</Label>
+									<Label>{t(getKey('scaleEvenlyByFactor.factor.label'))}</Label>
 									<Input
 										contrast
 										variant="primary"
@@ -189,13 +194,12 @@ export default function ThumbnailConfigForm() {
 						{resizeMethod?.mode === 'exact' && (
 							<>
 								<Text size="xs" variant="muted">
-									Resize the thumbnail to an exact size. If the original image is smaller than the
-									specified size, it will be upscaled
+									{t(getKey('exact.description'))}
 								</Text>
 								<Input
 									contrast
 									variant="primary"
-									label="Width"
+									label={t(getKey('exact.width.label'))}
 									placeholder="200"
 									{...form.register('thumbnailConfig.resizeMethod.width', {
 										valueAsNumber: true,
@@ -205,7 +209,7 @@ export default function ThumbnailConfigForm() {
 								<Input
 									contrast
 									variant="primary"
-									label="Height"
+									label={t(getKey('exact.height.label'))}
 									placeholder="350"
 									{...form.register('thumbnailConfig.resizeMethod.height', {
 										valueAsNumber: true,
@@ -220,16 +224,21 @@ export default function ThumbnailConfigForm() {
 						{resizeMethod?.mode === 'scaleDimension' && (
 							<>
 								<Text size="xs" variant="muted">
-									Set either the width or height of the thumbnail and auto-scale the other to keep
-									the original aspect ratio
+									{t(getKey('scaleDimension.description'))}
 								</Text>
 
-								<div className="flex flex-col gap-2">
-									<Label>Dimension</Label>
+								<div className="grid w-full items-center gap-2 lg:max-w-xs">
+									<Label>{t(getKey('scaleDimension.dimension.label'))}</Label>
 									<NativeSelect
 										options={[
-											{ label: 'Width', value: 'WIDTH' },
-											{ label: 'Height', value: 'HEIGHT' },
+											{
+												label: t(getKey('scaleDimension.dimension.options.width')),
+												value: 'WIDTH',
+											},
+											{
+												label: t(getKey('scaleDimension.dimension.options.height')),
+												value: 'HEIGHT',
+											},
 										]}
 										{...form.register('thumbnailConfig.resizeMethod.dimension')}
 										defaultValue="WIDTH"
@@ -239,7 +248,7 @@ export default function ThumbnailConfigForm() {
 								<Input
 									contrast
 									variant="primary"
-									label="Size"
+									label={t(getKey('scaleDimension.size.label'))}
 									placeholder="350"
 									{...form.register('thumbnailConfig.resizeMethod.size', {
 										valueAsNumber: true,
@@ -255,7 +264,7 @@ export default function ThumbnailConfigForm() {
 
 				{enabled && (
 					<>
-						<div className="grid w-full max-w-sm items-center gap-4">
+						<div className="grid w-full items-center gap-2 lg:max-w-sm">
 							<Label className={cx({ 'cursor-not-allowed text-opacity-50': !resizeMethod })}>
 								{t(getKey('format.label'))}
 							</Label>

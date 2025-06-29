@@ -1,4 +1,4 @@
-use async_graphql::{ComplexObject, Json, SimpleObject};
+use async_graphql::{ComplexObject, SimpleObject};
 
 use models::{
 	entity::library_config, shared::image_processor_options::ImageProcessorOptions,
@@ -21,8 +21,8 @@ impl From<library_config::Model> for LibraryConfig {
 impl LibraryConfig {
 	// Note: We wrap in Json since the ImageProcessorOptions struct doesn't properly
 	// implement GraphQL serialization yet. This should be fixed in the future.
-	async fn thumbnail_config(&self) -> Option<Json<ImageProcessorOptions>> {
-		self.model.thumbnail_config.clone().map(Json)
+	async fn thumbnail_config(&self) -> Option<ImageProcessorOptions> {
+		self.model.thumbnail_config.clone()
 	}
 
 	async fn ignore_rules(&self) -> Option<Vec<String>> {

@@ -487,6 +487,18 @@ export type EpubProgressInput = {
  * maintaining the aspect ratio.
  */
 export type ExactDimensionResize = {
+  __typename?: 'ExactDimensionResize';
+  /** The height (in pixels) the resulting image should be resized to */
+  height: Scalars['Int']['output'];
+  /** The width (in pixels) the resulting image should be resized to */
+  width: Scalars['Int']['output'];
+};
+
+/**
+ * A resize option which will resize the image to the given dimensions, without
+ * maintaining the aspect ratio.
+ */
+export type ExactDimensionResizeInput = {
   /** The height (in pixels) the resulting image should be resized to */
   height: Scalars['Int']['input'];
   /** The width (in pixels) the resulting image should be resized to */
@@ -569,6 +581,23 @@ export type FinishedReadingSessionModel = {
 };
 
 /** Options for processing images throughout Stump. */
+export type ImageProcessorOptions = {
+  __typename?: 'ImageProcessorOptions';
+  /** The format to use when generating an image. See [`SupportedImageFormat`] */
+  format: SupportedImageFormat;
+  /** The page to use when generating an image. This is not applicable to all media formats. */
+  page?: Maybe<Scalars['Int']['output']>;
+  /**
+   * The quality to use when generating an image. This is a number between 1 and 100,
+   * where 100 is the highest quality. Omitting this value will use the default quality
+   * of 100.
+   */
+  quality?: Maybe<Scalars['Int']['output']>;
+  /** The size factor to use when generating an image. See [`ImageResizeOptions`] */
+  resizeMethod?: Maybe<ImageResizeMethod>;
+};
+
+/** Options for processing images throughout Stump. */
 export type ImageProcessorOptionsInput = {
   /** The format to use when generating an image. See [`SupportedImageFormat`] */
   format: SupportedImageFormat;
@@ -581,7 +610,7 @@ export type ImageProcessorOptionsInput = {
    */
   quality?: InputMaybe<Scalars['Int']['input']>;
   /** The size factor to use when generating an image. See [`ImageResizeOptions`] */
-  resizeMethod?: InputMaybe<ImageResizeMethod>;
+  resizeMethod?: InputMaybe<ImageResizeMethodInput>;
 };
 
 export type ImageRef = {
@@ -592,10 +621,13 @@ export type ImageRef = {
 };
 
 /** The resize options to use when generating an image */
-export type ImageResizeMethod =
-  { exact: ExactDimensionResize; scaleDimension?: never; scaleEvenlyByFactor?: never; }
-  |  { exact?: never; scaleDimension: ScaledDimensionResize; scaleEvenlyByFactor?: never; }
-  |  { exact?: never; scaleDimension?: never; scaleEvenlyByFactor: ScaleEvenlyByFactor; };
+export type ImageResizeMethod = ExactDimensionResize | ScaleEvenlyByFactor | ScaledDimensionResize;
+
+/** The resize options to use when generating an image */
+export type ImageResizeMethodInput =
+  { exact: ExactDimensionResizeInput; scaleDimension?: never; scaleEvenlyByFactor?: never; }
+  |  { exact?: never; scaleDimension: ScaledDimensionResizeInput; scaleEvenlyByFactor?: never; }
+  |  { exact?: never; scaleDimension?: never; scaleEvenlyByFactor: ScaleEvenlyByFactorInput; };
 
 export type InProgressBooks = {
   __typename?: 'InProgressBooks';
@@ -715,7 +747,7 @@ export type LibraryConfig = {
   libraryId?: Maybe<Scalars['String']['output']>;
   libraryPattern: LibraryPattern;
   processMetadata: Scalars['Boolean']['output'];
-  thumbnailConfig?: Maybe<Scalars['JSON']['output']>;
+  thumbnailConfig?: Maybe<ImageProcessorOptions>;
   watch: Scalars['Boolean']['output'];
 };
 
@@ -2112,8 +2144,20 @@ export type SaveSmartListViewInput = {
 };
 
 export type ScaleEvenlyByFactor = {
-  /** The factor to scale the image by */
-  factor: Scalars['Float']['input'];
+  __typename?: 'ScaleEvenlyByFactor';
+  /**
+   * The factor to scale the image by. Note that this was made a [Decimal]
+   * to correct precision issues
+   */
+  factor: Scalars['Decimal']['output'];
+};
+
+export type ScaleEvenlyByFactorInput = {
+  /**
+   * The factor to scale the image by. Note that this was made a [Decimal]
+   * to correct precision issues
+   */
+  factor: Scalars['Decimal']['input'];
 };
 
 /**
@@ -2121,6 +2165,18 @@ export type ScaleEvenlyByFactor = {
  * The dimension *not* specified will be calculated based on the aspect ratio.
  */
 export type ScaledDimensionResize = {
+  __typename?: 'ScaledDimensionResize';
+  /** The dimension to set with the given size, e.g. `Height` or `Width`. */
+  dimension: Dimension;
+  /** The size (in pixels) to set the specified dimension to. */
+  size: Scalars['Int']['output'];
+};
+
+/**
+ * A resize option which will resize the image while maintaining the aspect ratio.
+ * The dimension *not* specified will be calculated based on the aspect ratio.
+ */
+export type ScaledDimensionResizeInput = {
   /** The dimension to set with the given size, e.g. `Height` or `Width`. */
   dimension: Dimension;
   /** The size (in pixels) to set the specified dimension to. */
@@ -3006,7 +3062,7 @@ export type LibrarySeriesGridQueryVariables = Exact<{
 
 export type LibrarySeriesGridQuery = { __typename?: 'Query', series: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, thumbnail: { __typename?: 'ImageRef', url: string } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
-export type LibrarySettingsConfigFragment = { __typename?: 'Library', config: { __typename?: 'LibraryConfig', id: number, convertRarToZip: boolean, hardDeleteConversions: boolean, defaultReadingDir: ReadingDirection, defaultReadingMode: ReadingMode, defaultReadingImageScaleFit: ReadingImageScaleFit, generateFileHashes: boolean, generateKoreaderHashes: boolean, processMetadata: boolean, watch: boolean, libraryPattern: LibraryPattern, thumbnailConfig?: any | null, ignoreRules?: Array<string> | null } } & { ' $fragmentName'?: 'LibrarySettingsConfigFragment' };
+export type LibrarySettingsConfigFragment = { __typename?: 'Library', config: { __typename?: 'LibraryConfig', id: number, convertRarToZip: boolean, hardDeleteConversions: boolean, defaultReadingDir: ReadingDirection, defaultReadingMode: ReadingMode, defaultReadingImageScaleFit: ReadingImageScaleFit, generateFileHashes: boolean, generateKoreaderHashes: boolean, processMetadata: boolean, watch: boolean, libraryPattern: LibraryPattern, ignoreRules?: Array<string> | null, thumbnailConfig?: { __typename?: 'ImageProcessorOptions', format: SupportedImageFormat, quality?: number | null, page?: number | null, resizeMethod?: { __typename?: 'ExactDimensionResize', width: number, height: number } | { __typename?: 'ScaleEvenlyByFactor', factor: any } | { __typename?: 'ScaledDimensionResize', dimension: Dimension, size: number } | null } | null } } & { ' $fragmentName'?: 'LibrarySettingsConfigFragment' };
 
 export type LibrarySettingsRouterEditLibraryMutationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3220,7 +3276,24 @@ export const LibrarySettingsConfigFragmentDoc = new TypedDocumentString(`
     processMetadata
     watch
     libraryPattern
-    thumbnailConfig
+    thumbnailConfig {
+      resizeMethod {
+        ... on ScaleEvenlyByFactor {
+          factor
+        }
+        ... on ExactDimensionResize {
+          width
+          height
+        }
+        ... on ScaledDimensionResize {
+          dimension
+          size
+        }
+      }
+      format
+      quality
+      page
+    }
     ignoreRules
   }
 }
@@ -3734,7 +3807,24 @@ export const LibraryLayoutDocument = new TypedDocumentString(`
     processMetadata
     watch
     libraryPattern
-    thumbnailConfig
+    thumbnailConfig {
+      resizeMethod {
+        ... on ScaleEvenlyByFactor {
+          factor
+        }
+        ... on ExactDimensionResize {
+          width
+          height
+        }
+        ... on ScaledDimensionResize {
+          dimension
+          size
+        }
+      }
+      format
+      quality
+      page
+    }
     ignoreRules
   }
 }`) as unknown as TypedDocumentString<LibraryLayoutQuery, LibraryLayoutQueryVariables>;

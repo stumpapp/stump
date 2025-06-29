@@ -1,6 +1,8 @@
 use async_graphql::{Enum, InputObject, OneofObject, SimpleObject, Union};
-use sea_orm::FromJsonQueryResult;
+use sea_orm::{prelude::Decimal, FromJsonQueryResult};
 use serde::{Deserialize, Serialize};
+
+// TODO(graphql): Evaluate serde usage and see if still needed
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Enum)]
 pub enum Dimension {
@@ -14,6 +16,7 @@ pub enum Dimension {
 	Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, SimpleObject, InputObject,
 )]
 #[serde(rename_all = "camelCase")]
+#[graphql(input_name = "ScaledDimensionResizeInput")]
 pub struct ScaledDimensionResize {
 	/// The dimension to set with the given size, e.g. `Height` or `Width`.
 	pub dimension: Dimension,
@@ -26,6 +29,7 @@ pub struct ScaledDimensionResize {
 #[derive(
 	Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, SimpleObject, InputObject,
 )]
+#[graphql(input_name = "ExactDimensionResizeInput")]
 pub struct ExactDimensionResize {
 	/// The width (in pixels) the resulting image should be resized to
 	pub width: u32,
@@ -33,8 +37,6 @@ pub struct ExactDimensionResize {
 	pub height: u32,
 }
 
-// FIXME: There is a floating point precision issue with the factor, so we might need
-// to store as u16 and just do the conversion when using it
 #[derive(
 	Debug,
 	Default,
@@ -46,9 +48,11 @@ pub struct ExactDimensionResize {
 	SimpleObject,
 	InputObject,
 )]
+#[graphql(input_name = "ScaleEvenlyByFactorInput")]
 pub struct ScaleEvenlyByFactor {
-	/// The factor to scale the image by
-	pub factor: f32,
+	/// The factor to scale the image by. Note that this was made a [Decimal]
+	/// to correct precision issues
+	pub factor: Decimal,
 }
 
 impl Eq for ScaleEvenlyByFactor {}
@@ -58,6 +62,7 @@ impl Eq for ScaleEvenlyByFactor {}
 	Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Union, OneofObject,
 )]
 #[serde(rename_all = "camelCase")]
+#[graphql(input_name = "ImageResizeMethodInput")]
 pub enum ImageResizeMethod {
 	Exact(ExactDimensionResize),
 	ScaleEvenlyByFactor(ScaleEvenlyByFactor),

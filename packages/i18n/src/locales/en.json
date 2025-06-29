@@ -275,40 +275,49 @@
 						"create": "Thumbnail configuration",
 						"update": "Generation"
 					},
-					"description": "Improve loading times while browsing your library by generating thumbnails for your books"
+					"description": "Improve loading times while browsing your library by generating thumbnails for your books",
+					"disabled": "No additional configuration is required when thumbnail generation is disabled"
 				},
 				"enableSwitch": {
 					"label": "Enabled",
 					"description": "Generate thumbnail images for this library"
 				},
-				"scaled": {
-					"label": "Explicitly Scaled",
-					"description": "Scale each dimension of the thumbnail by a factor",
-					"width": {
-						"label": "Width scale"
-					},
-					"height": {
-						"label": "Height scale"
+				"resizeMethod": {
+					"label": "Resize Method",
+					"options": {
+						"scaleEvenlyByFactor": "Evenly Scale",
+						"exact": "Exact Size",
+						"scaleDimension": "Explicitly Sized",
+						"none": "None"
 					}
 				},
-				"autoScaled": {
-					"label": "Auto Scaled",
-					"description": "Set the factor for one dimension and automatically scale the other dimension to maintain aspect ratio",
-					"width": {
-						"label": "Width scale"
-					},
-					"height": {
-						"label": "Height scale"
+				"scaleEvenlyByFactor": {
+					"description": "Scale the thumbnail by a factor of the original size. E.g., 0.65 will result in a thumbnail that is 65% of the original size",
+					"factor": {
+						"label": "Scale Factor"
 					}
 				},
-				"sized": {
-					"label": "Explicitly Sized",
-					"description": "Set each dimension of the thumbnail (in pixels)",
+				"exact": {
+					"description": "Resize the thumbnail to an exact size in pixels",
 					"width": {
 						"label": "Width"
 					},
 					"height": {
 						"label": "Height"
+					}
+				},
+				"scaleDimension": {
+					"label": "Explicitly Sized",
+					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
+					"dimension": {
+						"label": "Dimension",
+						"options": {
+							"width": "Width",
+							"height": "Height"
+						}
+					},
+					"size": {
+						"label": "Size"
 					}
 				},
 				"format": {
@@ -317,7 +326,7 @@
 				},
 				"quality": {
 					"label": "Quality",
-					"description": "The quality of the generated thumbnail images, between 0 and 1.0"
+					"description": "The quality of the generated thumbnail images, between 1 and 100"
 				}
 			},
 			"ignoreRules": {

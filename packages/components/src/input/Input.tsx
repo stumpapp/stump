@@ -110,7 +110,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 		return (
 			<div
 				className={cn(
-					'grid w-full items-center gap-1.5',
+					'grid w-full items-center gap-2',
 					{ 'max-w-sm': !fullWidth },
 					containerClassName,
 				)}

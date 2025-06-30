@@ -76,7 +76,7 @@ pub enum ThumbnailGenerationTask {
 
 #[derive(Clone, Serialize, Deserialize, Default, Debug, Type, SimpleObject)]
 // Note: This container attribute is used to ensure future additions to the struct do not break deserialization
-#[serde(default)]
+#[serde(default, rename_all = "camelCase")]
 pub struct ThumbnailGenerationOutput {
 	/// The total number of files that were visited during the thumbnail generation
 	visited_files: u64,

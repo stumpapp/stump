@@ -173,6 +173,9 @@ export function useDirectoryListing({
 					return curr
 				}
 			})
+		} else {
+			setCurrentPath(null)
+			setHistory([])
 		}
 	}, [initialPath])
 

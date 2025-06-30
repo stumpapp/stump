@@ -238,6 +238,21 @@ pub struct MediaIdentSelect {
 	pub path: String,
 }
 
+impl MediaIdentSelect {
+	pub fn columns() -> Vec<Column> {
+		vec![Column::Id, Column::Path]
+	}
+}
+
+impl From<Model> for MediaIdentSelect {
+	fn from(model: Model) -> Self {
+		Self {
+			id: model.id,
+			path: model.path,
+		}
+	}
+}
+
 #[derive(Debug, FromQueryResult)]
 pub struct MediaThumbSelect {
 	pub id: String,

@@ -1,19 +1,24 @@
-import { useSDK } from '@stump/client'
+import { useGraphQLMutation } from '@stump/client'
 import { Alert, Button, Heading, Text } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
 import { useLibraryContext } from '@/scenes/library/context'
 
+const mutation = graphql(`
+	mutation AnalyzeLibraryMedia($id: ID!) {
+		analyzeMedia(id: $id)
+	}
+`)
+
 export default function AnalyzeMedia() {
-	const { sdk } = useSDK()
 	const { library } = useLibraryContext()
 	const { t } = useLocaleContext()
 
-	const handleAnalyze = useCallback(
-		() => sdk.library.analyze(library.id),
-		[library.id, sdk.library],
-	)
+	const { mutate } = useGraphQLMutation(mutation)
+
+	const handleAnalyze = useCallback(() => mutate({ id: library.id }), [library.id, mutate])
 
 	return (
 		<div className="flex flex-col gap-6">

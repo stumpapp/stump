@@ -5,6 +5,7 @@ mod email_device;
 mod emailer;
 mod epub;
 mod filesystem;
+mod job;
 mod library;
 mod log;
 pub(crate) mod media;
@@ -37,6 +38,8 @@ use smart_lists::SmartListsQuery;
 use tag::TagQuery;
 use user::UserQuery;
 
+use crate::query::job::JobQuery;
+
 #[derive(async_graphql::MergedObject, Default)]
 pub struct Query(
 	APIKeyQuery,
@@ -44,6 +47,7 @@ pub struct Query(
 	EmailerQuery,
 	EmailDeviceQuery,
 	FilesystemQuery,
+	JobQuery,
 	MediaQuery,
 	UserQuery,
 	NotifierQuery,

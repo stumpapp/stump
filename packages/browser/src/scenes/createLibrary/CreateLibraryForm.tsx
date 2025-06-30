@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, cn, Form } from '@stump/components'
-import type { Library } from '@stump/sdk'
+import { CreateLibrarySceneExistingLibrariesQuery } from '@stump/graphql'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -25,7 +25,7 @@ import { useSteppedFormContext } from '@/components/steppedForm'
 import LibraryReview from './LibraryReview'
 
 type Props = {
-	existingLibraries: Library[]
+	existingLibraries: CreateLibrarySceneExistingLibrariesQuery['libraries']['nodes']
 	onSubmit: (values: CreateOrUpdateLibrarySchema) => void
 	isLoading?: boolean
 }
@@ -68,16 +68,16 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 					break
 				case 2:
 					isValid = await form.trigger([
-						'library_pattern',
-						'ignore_rules',
-						'convert_rar_to_zip',
-						'hard_delete_conversions',
+						'libraryPattern',
+						'ignoreRules',
+						'convertRarToZip',
+						'hardDeleteConversions',
 						'watch',
 					])
 					break
 				case 3:
 					// TODO: do I need to validate children?
-					isValid = await form.trigger(['thumbnail_config'])
+					isValid = await form.trigger(['thumbnailConfig'])
 					break
 				default:
 					break
@@ -101,6 +101,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 						<BasicLibraryInformation onSetShowDirectoryPicker={setShowDirectoryPicker} />
 						<div className="mt-6 flex w-full md:max-w-sm">
 							<Button
+								type="button"
 								className="w-full md:w-auto"
 								variant="primary"
 								onClick={() => handleChangeStep(2)}

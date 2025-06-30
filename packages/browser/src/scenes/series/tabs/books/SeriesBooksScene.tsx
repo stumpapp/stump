@@ -1,7 +1,7 @@
 import {
 	PREFETCH_STALE_TIME,
 	useGraphQL,
-	useInfiniteGraphQL,
+	useInfiniteSuspenseGraphQL,
 	usePagedMediaQuery,
 	usePrefetchMediaPaged,
 	useSDK,

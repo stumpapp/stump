@@ -85,8 +85,8 @@ async fn insert_tags(
 	let new_tag_models = tags
 		.iter()
 		.map(|t| tag::ActiveModel {
-			id: Set(Uuid::new_v4().to_string()),
 			name: Set(t.clone()),
+			..Default::default()
 		})
 		.collect::<Vec<tag::ActiveModel>>();
 
@@ -114,11 +114,11 @@ mod tests {
 	async fn test_insert() {
 		let tag_models = vec![
 			tag::Model {
-				id: "123".to_string(),
+				id: 123,
 				name: "hello".to_string(),
 			},
 			tag::Model {
-				id: "321".to_string(),
+				id: 321,
 				name: "world".to_string(),
 			},
 		];
@@ -163,11 +163,11 @@ mod tests {
 	async fn test_find_tags_existing() {
 		let tag_models = vec![
 			tag::Model {
-				id: "123".to_string(),
+				id: 123,
 				name: "hello".to_string(),
 			},
 			tag::Model {
-				id: "321".to_string(),
+				id: 321,
 				name: "world".to_string(),
 			},
 		];

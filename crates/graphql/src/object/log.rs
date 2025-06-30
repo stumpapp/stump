@@ -2,7 +2,6 @@ use async_graphql::{Result, SimpleObject};
 use chrono::offset::Utc;
 use chrono::DateTime;
 use models::entity::log;
-use std::fs::File;
 use stump_core::config::StumpConfig;
 
 #[derive(Debug, SimpleObject)]

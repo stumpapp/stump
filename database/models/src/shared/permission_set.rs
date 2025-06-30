@@ -92,6 +92,9 @@ impl AssociatedPermission for UserPermission {
 				vec![UserPermission::ManageNotifier, UserPermission::ReadNotifier]
 			},
 			UserPermission::ManageUsers => vec![UserPermission::ReadUsers],
+			UserPermission::ReadPersistedLogs => {
+				vec![UserPermission::ReadJobs]
+			},
 			_ => vec![],
 		}
 	}

@@ -40,6 +40,7 @@ impl FilesystemQuery {
 		};
 
 		if !start_path.exists() {
+			tracing::error!(?start_path, "Directory does not exist");
 			return Err(
 				format!("Directory does not exist: {}", start_path.display()).into(),
 			);

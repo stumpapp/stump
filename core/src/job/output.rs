@@ -17,7 +17,7 @@ pub struct ExternalJobOutput {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Union)]
-#[serde(untagged)]
+#[serde(untagged, rename_all = "camelCase")]
 pub enum CoreJobOutput {
 	LibraryScan(LibraryScanOutput),
 	SeriesScan(SeriesScanOutput),

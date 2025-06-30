@@ -36,5 +36,5 @@ Frontend / JS-related Packages:
   - [ ] Port any v1 features which are staying to v2
   - [ ] Retain OPDS client sdk impl
 - [ ] Investigate relay vs apollo and select one (lean towards relay)
-  - [ ] Setup generic client to share between web, desktop, mobile
+  - [x] Setup generic client to share between web, desktop, mobile
   - [ ] Port all RESTful API calls to GraphQL (easily one of the biggest tasks)

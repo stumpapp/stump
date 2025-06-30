@@ -1,12 +1,18 @@
 import { PickSelect } from '@stump/components'
 import {
+	CreateLibrarySceneExistingLibrariesQuery,
+	LibraryConfigInput,
 	LibraryPattern,
 	LibrarySettingsConfigFragment,
 	ReadingDirection,
 	ReadingImageScaleFit,
 	ReadingMode,
+	ScaledDimensionResize,
+	SupportedImageFormat,
 } from '@stump/graphql'
 import isValidGlob from 'is-valid-glob'
+import omit from 'lodash/omit'
+import { match } from 'ts-pattern'
 import { z } from 'zod'
 
 import { ILibraryContext } from '@/scenes/library/context'
@@ -30,39 +36,56 @@ export const toFormIgnoreRules = (ignoreRules: string[] = []) =>
 		ignore_subdirs: rule.match(/\*\/$/) !== null,
 	}))
 
-const imageFormatSchema = z.union([z.literal('Webp'), z.literal('Jpeg'), z.literal('Png')])
+const imageFormatSchema = z.union([
+	z.literal(SupportedImageFormat.Webp),
+	z.literal(SupportedImageFormat.Jpeg),
+	z.literal(SupportedImageFormat.Png),
+])
 
-const resizeOptionsSchema = z
-	.object({
-		height: z.number().refine((value) => value > 0, { message: 'Must be greater than 0' }),
-		mode: z.union([z.literal('Scaled'), z.literal('Sized')]),
-		width: z.number().refine((value) => value > 0, { message: 'Must be greater than 0' }),
-	})
-	.refine(
-		(value) => {
-			if (value.mode === 'Scaled') {
-				const isInCorrectRange = (num: number) => num > 0 && num <= 1
-				return isInCorrectRange(value.height) && isInCorrectRange(value.width)
-			} else {
-				return (
-					value.height >= 1 &&
-					value.width >= 1 &&
-					Number.isInteger(value.height) &&
-					Number.isInteger(value.width)
-				)
-			}
-		},
-		(value) => ({
-			message:
-				value.mode === 'Scaled'
-					? 'Height and width must be between 0 and 1'
-					: 'Height and width must be whole numbers greater than 0',
-		}),
-	)
+const exactResize = z.object({
+	mode: z.literal('exact'),
+	height: z.number().int().positive(),
+	width: z.number().int().positive(),
+})
+
+const scaledEventlyByFactor = z.object({
+	mode: z.literal('scaleEvenlyByFactor'),
+	factor: z.number().refine((value) => value > 0 && value <= 1, {
+		message: 'Factor must be between 0 and 1',
+	}),
+})
+
+const scaledDimension = z.object({
+	mode: z.literal('scaleDimension'),
+	dimension: z.enum(['HEIGHT', 'WIDTH']),
+	size: z.number().int().positive(),
+})
+
+const resizeOptionsSchema = z.union([exactResize, scaledEventlyByFactor, scaledDimension])
+
+const thumbnailConfig = z.object({
+	enabled: z.boolean().default(false),
+	format: imageFormatSchema.default(SupportedImageFormat.Webp),
+	quality: z
+		.number()
+		.int()
+		.nullish()
+		.refine(
+			(value) => value == undefined || (value > 0 && value <= 100),
+			() => ({
+				message: 'Thumbnail quality must be between 0 and 100',
+			}),
+		),
+	resizeMethod: resizeOptionsSchema.nullish(),
+})
+
 /**
  * A function which builds a schema used for validating form data when creating or updating a library
  */
-export const buildSchema = (existingLibraries: Library[], library?: Library) =>
+export const buildSchema = (
+	existingLibraries: CreateLibrarySceneExistingLibrariesQuery['libraries']['nodes'],
+	library?: Library,
+) =>
 	z.object({
 		convertRarToZip: z.boolean().default(false),
 		defaultReadingDir: z.enum(['LTR', 'RTL']).default('LTR').optional(),
@@ -118,21 +141,7 @@ export const buildSchema = (existingLibraries: Library[], library?: Library) =>
 				}),
 			)
 			.optional(),
-		imageProcessorOptions: z.object({
-			enabled: z.boolean().default(false),
-			format: imageFormatSchema.default('Webp'),
-			quality: z
-				.number()
-				.nullable()
-				.optional()
-				.refine(
-					(value) => value == undefined || (value > 0 && value <= 1.0),
-					() => ({
-						message: 'Thumbnail quality must be between 0 and 1.0',
-					}),
-				),
-			resizeMethod: resizeOptionsSchema.nullable().optional(),
-		}),
+		thumbnailConfig,
 	})
 export type CreateOrUpdateLibrarySchema = z.infer<ReturnType<typeof buildSchema>>
 
@@ -160,31 +169,128 @@ export const formDefaults = (
 	processMetadata: library?.config.processMetadata ?? true,
 	scanAfterPersist: true,
 	tags: library?.tags?.map((t) => ({ label: t.name, value: t.name.toLowerCase() })),
-	imageProcessorOptions: library?.config.imageProcessorOptions
-		? {
-				enabled: true,
-				...library?.config.imageProcessorOptions,
-			}
-		: {
-				enabled: false,
-				format: 'Webp',
-				quality: undefined,
-				resizeMethod: undefined,
-			},
+	thumbnailConfig: intoFormThumbnailConfig(library?.config.thumbnailConfig),
 })
+
+// TODO: Investigate https://the-guild.dev/graphql/codegen/plugins/typescript/typescript-validation-schema
+
+export const intoThumbnailConfig = (
+	config: CreateOrUpdateLibrarySchema['thumbnailConfig'],
+): LibraryConfigInput['thumbnailConfig'] => {
+	if (!config.enabled) return null
+
+	const converted = match(config.resizeMethod)
+		.with({ mode: 'scaleEvenlyByFactor' }, ({ factor }) => {
+			return {
+				...config,
+				resizeMethod: {
+					scaleEvenlyByFactor: {
+						factor,
+					},
+				},
+			}
+		})
+		.with({ mode: 'scaleDimension' }, ({ dimension, size }) => {
+			return {
+				...config,
+				resizeMethod: {
+					scaleDimension: {
+						dimension: dimension as ScaledDimensionResize['dimension'],
+						size,
+					},
+				},
+			}
+		})
+		.with({ mode: 'exact' }, ({ height, width }) => {
+			return {
+				...config,
+				resizeMethod: {
+					exact: {
+						height,
+						width,
+					},
+				},
+			}
+		})
+		.otherwise(() => null)
+
+	return omit(converted, 'enabled')
+}
+
+export const intoFormThumbnailConfig = (
+	config: LibrarySettingsConfigFragment['config']['thumbnailConfig'],
+): CreateOrUpdateLibrarySchema['thumbnailConfig'] => {
+	if (!config) {
+		return {
+			enabled: false,
+			format: SupportedImageFormat.Webp,
+			quality: undefined,
+			resizeMethod: undefined,
+		}
+	}
+
+	const baseConfig = {
+		enabled: true,
+		format: config.format,
+		quality: config.quality,
+	}
+
+	if (!config.resizeMethod) {
+		return baseConfig
+	}
+
+	if (config.resizeMethod.__typename === 'ScaleEvenlyByFactor') {
+		return {
+			...baseConfig,
+			resizeMethod: {
+				mode: 'scaleEvenlyByFactor',
+				factor: Number(config.resizeMethod.factor),
+			},
+		}
+	}
+
+	if (config.resizeMethod.__typename === 'ScaledDimensionResize') {
+		return {
+			...baseConfig,
+			resizeMethod: {
+				mode: 'scaleDimension',
+				dimension: config.resizeMethod.dimension,
+				size: config.resizeMethod.size,
+			},
+		}
+	}
+
+	if (config.resizeMethod.__typename === 'ExactDimensionResize') {
+		return {
+			...baseConfig,
+			resizeMethod: {
+				mode: 'exact',
+				height: config.resizeMethod.height,
+				width: config.resizeMethod.width,
+			},
+		}
+	}
+
+	console.warn('Unknown thumbnail resize method:', config.resizeMethod)
+
+	return baseConfig
+}
 
 /**
  * A function to ensure that the thumbnail config is valid before returning it
  */
 export const ensureValidThumbnailConfig = (
-	imageProcessorOptions: PickSelect<CreateOrUpdateLibrarySchema, 'imageProcessorOptions'>,
+	config: PickSelect<CreateOrUpdateLibrarySchema, 'thumbnailConfig'>,
 ) => {
-	const invalidDimensions =
-		!imageProcessorOptions.resizeMethod?.height || !imageProcessorOptions.resizeMethod?.width
-
-	if (!imageProcessorOptions.enabled || invalidDimensions) {
+	const { enabled, resizeMethod } = config
+	if (!enabled || !resizeMethod) {
 		return null
-	} else {
-		return imageProcessorOptions
 	}
+
+	const parseResult = thumbnailConfig.safeParse(intoThumbnailConfig(config))
+	if (!parseResult.success) {
+		console.warn('Invalid thumbnail config:', parseResult.error.format())
+		return null
+	}
+	return parseResult.data
 }

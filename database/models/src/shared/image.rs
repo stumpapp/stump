@@ -1,6 +1,6 @@
 use async_graphql::SimpleObject;
 
-#[derive(Debug, Clone, SimpleObject)]
+#[derive(Default, Debug, Clone, SimpleObject)]
 pub struct ImageRef {
 	pub url: String,
 	pub height: Option<u32>,

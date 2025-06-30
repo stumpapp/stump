@@ -1,6 +1,6 @@
 import { PREFETCH_STALE_TIME, queryClient, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { ButtonOrLink, Heading, Spacer, Text } from '@stump/components'
-import { graphql } from '@stump/graphql'
+import { graphql, useFragment, UserPermission } from '@stump/graphql'
 import dayjs from 'dayjs'
 import sortBy from 'lodash/sortBy'
 import { Suspense, useMemo } from 'react'
@@ -8,7 +8,7 @@ import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
-import BookCard from '@/components/book/BookCard'
+import BookCard, { BookCardFragment } from '@/components/book/BookCard'
 import { SceneContainer } from '@/components/container'
 import LinkBadge from '@/components/LinkBadge'
 import ReadMore from '@/components/ReadMore'
@@ -27,11 +27,17 @@ import EmailBookDropdown from './EmailBookDropdown'
 const query = graphql(`
 	query BookOverviewScene($id: ID!) {
 		mediaById(id: $id) {
+			id
 			...BookCard
+			...BookFileInformation
+			resolvedName
 			extension
 			metadata {
 				links
 				summary
+			}
+			readHistory {
+				completedAt
 			}
 		}
 	}
@@ -52,21 +58,24 @@ export const usePrefetchBook = () => {
 
 export default function BookOverviewScene() {
 	const { id } = useParams()
+	const { sdk } = useSDK()
 	const {
 		data: { mediaById: media },
-	} = useSuspenseGraphQL(query, ['bookOverview', id], {
+	} = useSuspenseGraphQL(query, sdk.cacheKey('bookOverview', [id]), {
 		id: id || '',
 	})
 	const { checkPermission, isServerOwner } = useAppContext()
 
-	const canDownload = useMemo(() => checkPermission('file:download'), [checkPermission])
-	const canManage = useMemo(() => checkPermission('library:manage'), [checkPermission])
+	const canDownload = useMemo(() => checkPermission(UserPermission.DownloadFile), [checkPermission])
+	const canManage = useMemo(() => checkPermission(UserPermission.ManageLibrary), [checkPermission])
 
 	const isAtLeastTablet = useMediaMatch('(min-width: 640px)')
 
 	if (!media) {
 		throw new Error('Book not found')
 	}
+
+	const fragmentData = useFragment(BookCardFragment, media)
 
 	const completedAt = sortBy(media.readHistory, ({ completedAt }) =>
 		dayjs(completedAt).toDate(),
@@ -97,8 +106,8 @@ export default function BookOverviewScene() {
 							{!isAtLeastTablet && <Spacer />}
 
 							<div className="flex w-full flex-col gap-2 md:flex-row md:items-center">
-								<BookReaderDropdown book={media} />
-								<BookCompletionToggleButton book={media} />
+								<BookReaderDropdown book={fragmentData} />
+								<BookCompletionToggleButton book={fragmentData} />
 								{media.extension?.match(PDF_EXTENSION) && (
 									<ButtonOrLink
 										variant="outline"
@@ -137,7 +146,7 @@ export default function BookOverviewScene() {
 						</div>
 					)}
 
-					{isServerOwner && <BookFileInformation data={media} />}
+					{isServerOwner && <BookFileInformation fragment={media} />}
 					<BooksAfterCursor cursor={media.id} />
 				</div>
 			</Suspense>

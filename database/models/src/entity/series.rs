@@ -85,6 +85,12 @@ pub struct SeriesIdentSelect {
 	pub path: String,
 }
 
+impl SeriesIdentSelect {
+	pub fn columns() -> Vec<Column> {
+		vec![Column::Id, Column::Path]
+	}
+}
+
 #[derive(Debug, FromQueryResult)]
 pub struct SeriesNameCmpSelect {
 	pub name: String,

@@ -1,4 +1,4 @@
-import { useGraphQLMutation, useSuspenseGraphQL } from '@stump/client'
+import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { cn } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useMemo, useRef } from 'react'
@@ -52,9 +52,10 @@ export default function LibraryLayout() {
 		throw new Error('Library id is required')
 	}
 
+	const { sdk } = useSDK()
 	const {
 		data: { libraryById: library },
-	} = useSuspenseGraphQL(query, ['libraryById', id], {
+	} = useSuspenseGraphQL(query, sdk.cacheKey('libraryById', [id]), {
 		id,
 	})
 	const {

@@ -1,6 +1,6 @@
-import { useSuspenseGraphQL } from '@stump/client'
-import { graphql } from '@stump/graphql'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { cx, Link, Text } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { Fragment } from 'react'
 
 import paths from '../../paths'
@@ -17,7 +17,7 @@ const query = graphql(`
 `)
 
 type Props = {
-	series_id?: string
+	seriesId?: string
 	linkSegments?: {
 		to?: string
 		label: string
@@ -25,11 +25,12 @@ type Props = {
 	}[]
 }
 
-export default function BookLibrarySeriesLinks({ series_id, linkSegments }: Props) {
+export default function BookLibrarySeriesLinks({ seriesId, linkSegments }: Props) {
+	const { sdk } = useSDK()
 	const {
 		data: { seriesById: series },
-	} = useSuspenseGraphQL(query, ['seriesLinks', series_id], {
-		id: series_id || '',
+	} = useSuspenseGraphQL(query, sdk.cacheKey('seriesLinks', [seriesId]), {
+		id: seriesId || '',
 	})
 	const renderSeriesLink = () => {
 		if (!series) {

@@ -25,3 +25,5 @@ export const useLibraryManagement = () => {
 	}
 	return managementCtx
 }
+
+export const useLibraryManagementSafe = () => useContext(LibraryManagementContext)

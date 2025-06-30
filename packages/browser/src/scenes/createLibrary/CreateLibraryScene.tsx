@@ -1,12 +1,15 @@
-import { useCreateLibraryMutation, useLibraries } from '@stump/client'
+import { useGraphQLMutation, useSuspenseGraphQL } from '@stump/client'
 import { Alert } from '@stump/components'
+import { CreateOrUpdateLibraryInput, graphql } from '@stump/graphql'
 import { handleApiError } from '@stump/sdk'
-import { CreateLibrary } from '@stump/sdk'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
-import { CreateOrUpdateLibrarySchema } from '@/components/library/createOrUpdate'
+import {
+	CreateOrUpdateLibrarySchema,
+	intoThumbnailConfig,
+} from '@/components/library/createOrUpdate'
 import { SteppedFormContext } from '@/components/steppedForm'
 import SteppedFormSceneHeader from '@/components/steppedForm/SteppedFormSceneHeader'
 import { useConfetti } from '@/hooks/useConfetti'
@@ -14,13 +17,41 @@ import paths from '@/paths'
 
 import CreateLibraryForm from './CreateLibraryForm'
 
+const query = graphql(`
+	query CreateLibrarySceneExistingLibraries {
+		libraries(pagination: { none: { unpaginated: true } }) {
+			nodes {
+				id
+				name
+				path
+			}
+		}
+	}
+`)
+
+const mutation = graphql(`
+	mutation CreateLibrarySceneCreateLibrary($input: CreateOrUpdateLibraryInput!) {
+		createLibrary(input: $input) {
+			id
+		}
+	}
+`)
+
 export default function CreateLibraryScene() {
 	const navigate = useNavigate()
-
 	const { start: startConfetti } = useConfetti({ duration: 5000 })
-	const { libraries } = useLibraries({ suspense: true })
-	const { createLibrary, isLoading, error } = useCreateLibraryMutation({
-		onSuccess: ({ id }) => {
+	const {
+		data: {
+			libraries: { nodes: libraries },
+		},
+	} = useSuspenseGraphQL(query, ['createLibraryScene'])
+
+	const {
+		mutate: createLibrary,
+		isPending,
+		error,
+	} = useGraphQLMutation(mutation, {
+		onSuccess: ({ createLibrary: { id } }) => {
 			navigate(paths.librarySeries(id))
 			startConfetti()
 		},
@@ -39,27 +70,26 @@ export default function CreateLibraryScene() {
 				path,
 				description,
 				tags,
-				scan_mode,
-				ignore_rules,
-				thumbnail_config,
+				scanAfterPersist,
+				ignoreRules,
+				thumbnailConfig,
 				...config
 			} = values
 
-			const payload: CreateLibrary = {
+			const input: CreateOrUpdateLibraryInput = {
 				config: {
 					...config,
-					ignore_rules: ignore_rules.map(({ glob }) => glob),
-					thumbnail_config:
-						thumbnail_config.enabled && !!thumbnail_config.resize_options ? thumbnail_config : null,
-				},
+					ignoreRules: ignoreRules.map(({ glob }) => glob),
+					thumbnailConfig: intoThumbnailConfig(thumbnailConfig),
+				} as CreateOrUpdateLibraryInput['config'],
 				description,
 				name,
 				path,
-				scan_mode,
+				scanAfterPersist,
 				tags: tags?.map(({ label }) => label),
 			}
 
-			createLibrary(payload)
+			createLibrary({ input })
 		},
 		[createLibrary],
 	)
@@ -94,7 +124,7 @@ export default function CreateLibraryScene() {
 							<CreateLibraryForm
 								existingLibraries={libraries}
 								onSubmit={handleSubmit}
-								isLoading={isLoading}
+								isLoading={isPending}
 							/>
 						)}
 					</div>

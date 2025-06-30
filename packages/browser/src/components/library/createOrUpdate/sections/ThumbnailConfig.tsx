@@ -1,93 +1,110 @@
 import {
 	Button,
+	Card,
 	cx,
 	Heading,
 	Input,
 	Label,
 	NativeSelect,
-	RadioGroup,
 	Text,
 	WideSwitch,
 } from '@stump/components'
+import { SupportedImageFormat } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { ImageResizeMode, ImageResizeOptions } from '@stump/sdk'
-import { AnimatePresence, motion } from 'framer-motion'
-import { useCallback, useMemo } from 'react'
-import { useFormContext, useFormState } from 'react-hook-form'
+import { Check } from 'lucide-react'
+import { useCallback } from 'react'
+import { useFormContext } from 'react-hook-form'
 
-import { useLibraryContextSafe } from '@/scenes/library/context'
+import { useLibraryManagementSafe } from '@/scenes/library/tabs/settings/context'
 
-import { CreateOrUpdateLibrarySchema } from '../schema'
+import { CreateOrUpdateLibrarySchema, intoFormThumbnailConfig } from '../schema'
+
+type Option =
+	| NonNullable<CreateOrUpdateLibrarySchema['thumbnailConfig']['resizeMethod']>['mode']
+	| 'none'
 
 const formatOptions = [
-	{ label: 'WebP', value: 'Webp' },
-	{ label: 'JPEG', value: 'Jpeg' },
-	{ label: 'PNG', value: 'Png' },
+	{ label: 'WebP', value: 'WEBP' },
+	{ label: 'JPEG', value: 'JPEG' },
+	{ label: 'PNG', value: 'PNG' },
 ]
+
+// TODO(graphql): Add appropriate error reporting
 
 export default function ThumbnailConfigForm() {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
-	const ctx = useLibraryContextSafe()
-	const { errors, dirtyFields } = useFormState({ control: form.control })
+	const ctx = useLibraryManagementSafe()
+
 	const { t } = useLocaleContext()
 
+	const [resizeMethod, enabled] = form.watch([
+		'thumbnailConfig.resizeMethod',
+		'thumbnailConfig.enabled',
+	])
 	const isCreating = !ctx?.library
-	const resize_options = form.watch('thumbnail_config.resize_options')
 
-	const handleSelection = useCallback(
-		(option: ImageResizeMode | 'disabled') => {
-			if (option === 'disabled' || option === resize_options?.mode) {
-				form.setValue('thumbnail_config.enabled', false)
-				form.setValue('thumbnail_config.resize_options', undefined)
-			} else {
-				const newOptions = {
-					mode: option,
-				} as ImageResizeOptions
-				const currentQuality = form.getValues('thumbnail_config.quality')
-				form.setValue('thumbnail_config.resize_options', newOptions)
-				form.setValue('thumbnail_config.enabled', true)
-				form.setValue('thumbnail_config.quality', currentQuality ?? 0.75)
+	const handleEnabledChange = useCallback(
+		(checked: boolean) => {
+			form.setValue('thumbnailConfig.enabled', checked)
+			if (checked && !resizeMethod) {
+				form.setValue('thumbnailConfig.resizeMethod', {
+					mode: 'scaleEvenlyByFactor',
+					factor: 0.65,
+				})
+				form.setValue('thumbnailConfig.quality', 0.75)
+				form.setValue('thumbnailConfig.format', SupportedImageFormat.Webp)
+			} else if (!checked) {
+				const existingConfig = intoFormThumbnailConfig(ctx?.library.config.thumbnailConfig)
+				form.setValue('thumbnailConfig', { ...existingConfig, enabled: false })
 			}
 		},
-		[form, resize_options?.mode],
+		[form, resizeMethod, ctx?.library],
 	)
 
-	/**
-	 * A function to render the save button. This will only render if there are changes to the form
-	 * that have not been saved, and if we are editing an existing library
-	 */
-	const renderSaveButton = useCallback(() => {
-		if (!ctx?.library) {
-			return null
-		}
-
-		const hasChanges = Object.keys(dirtyFields).length > 0
-
-		return (
-			<div>
-				<Button
-					title={hasChanges ? undefined : t('common.noChanges')}
-					type="submit"
-					disabled={!hasChanges}
-					variant="primary"
-					className="mt-4"
-				>
-					{t('common.saveChanges')}
-				</Button>
-			</div>
-		)
-	}, [ctx, t, dirtyFields])
-
-	/**
-	 * This is an awkward way to get the error message for the resize options. Because of the the
-	 * intersection types in the zod schema, the error message is nested in a few different places.
-	 */
-	const resizeOptionsError = useMemo(
-		() =>
-			errors.thumbnail_config?.resize_options?.message ||
-			errors.thumbnail_config?.resize_options?.root?.message,
-		[errors],
+	const handleResizeMethodChange = useCallback(
+		(value: Option) => {
+			if (value === 'none' || value === resizeMethod?.mode) {
+				form.setValue('thumbnailConfig.resizeMethod', null)
+			} else {
+				const existingConfig = intoFormThumbnailConfig(ctx?.library.config.thumbnailConfig)
+				const newOptions = {
+					...existingConfig?.resizeMethod,
+					mode: value,
+				} as NonNullable<CreateOrUpdateLibrarySchema['thumbnailConfig']>['resizeMethod']
+				form.setValue('thumbnailConfig.resizeMethod', newOptions)
+				form.setValue('thumbnailConfig.enabled', true)
+			}
+		},
+		[form, resizeMethod?.mode, ctx?.library],
 	)
+
+	// const existingConfig = useMemo(
+	// 	() => intoFormThumbnailConfig(ctx?.library.config.thumbnailConfig),
+	// 	[ctx?.library.config.thumbnailConfig],
+	// )
+	// const formConfig = form.watch('thumbnailConfig')
+
+	// TODO(graphql): Fix this
+	// // FIXME: This very much doesn't work lol
+	// const isDifferent = useMemo(
+	// 	() => !isEqual(formConfig, existingConfig),
+	// 	[formConfig, existingConfig],
+	// )
+	// console.log('isDifferent', isDifferent, {
+	// 	formConfig,
+	// 	existingConfig,
+	// })
+
+	// /**
+	//  * This is an awkward way to get the error message for the resize options. Because of the the
+	//  * intersection types in the zod schema, the error message is nested in a few different places.
+	//  */
+	// const resizeOptionsError = useMemo(
+	// 	() =>
+	// 		errors.thumbnailConfig?.resizeMethod?.message ||
+	// 		errors.thumbnailConfig?.resizeMethod?.root?.message,
+	// 	[errors],
+	// )
 
 	return (
 		<div className="flex flex-grow flex-col gap-6">
@@ -104,157 +121,189 @@ export default function ThumbnailConfigForm() {
 				<WideSwitch
 					description="Generate thumbnail images for this library"
 					label="Enabled"
-					checked={!!resize_options}
-					onCheckedChange={() => handleSelection(resize_options ? 'disabled' : 'Scaled')}
+					checked={enabled}
+					onCheckedChange={() => handleEnabledChange(!enabled)}
 				/>
 
-				<AnimatePresence>
-					{!!resize_options && (
-						<motion.div
-							className="flex flex-col gap-4"
-							initial={{ height: 0, opacity: 0 }}
-							animate={{ height: 'auto', opacity: 1 }}
-							exit={{ height: 0, opacity: 0 }}
-							transition={{ duration: 0.15 }}
-						>
-							<RadioGroup
-								value={resize_options?.mode}
-								onValueChange={handleSelection}
-								className="gap-4"
-							>
-								<RadioGroup.CardItem
-									isActive={resize_options?.mode === 'Scaled'}
-									label={t(getKey('scaled.label'))}
-									description={t(getKey('scaled.description'))}
-									value="Scaled"
-								>
-									<fieldset
-										className="flex items-start justify-end gap-2"
-										disabled={resize_options?.mode !== 'Scaled'}
-									>
-										<Input
-											contrast
-											variant="primary"
-											label={t(getKey('scaled.width.label'))}
-											placeholder="0.65"
-											{...(resize_options?.mode === 'Scaled'
-												? form.register('thumbnail_config.resize_options.width', {
-														valueAsNumber: true,
-													})
-												: {})}
-											{...(resize_options?.mode === 'Scaled'
-												? {
-														errorMessage:
-															form.formState.errors.thumbnail_config?.resize_options?.width
-																?.message,
-													}
-												: {})}
-										/>
-										<Input
-											contrast
-											variant="primary"
-											label={t(getKey('scaled.height.label'))}
-											placeholder="0.65"
-											{...(resize_options?.mode === 'Scaled'
-												? form.register('thumbnail_config.resize_options.height', {
-														valueAsNumber: true,
-													})
-												: {})}
-										/>
-									</fieldset>
+				{!enabled && (
+					<div key="no-thumbnail-config">
+						<Card className="flex flex-col items-center gap-y-4 border-dashed p-6">
+							<span className="rounded-full border border-fill-brand-secondary bg-fill-brand p-1">
+								<Check className="text-foreground" />
+							</span>
+							<Text size="sm" variant="muted">
+								{t(getKey('section.disabled'))}
+							</Text>
+						</Card>
+					</div>
+				)}
 
-									{resizeOptionsError && resize_options?.mode === 'Scaled' && (
-										<Text className="mt-2" size="xs" variant="danger">
-											{resizeOptionsError}
-										</Text>
-									)}
-								</RadioGroup.CardItem>
+				{enabled && (
+					<div key="thumbnail-config" className="flex flex-col gap-4">
+						<div className="grid w-full items-center gap-1.5 lg:max-w-sm">
+							<Label>{t(getKey('resizeMethod.label'))}</Label>
+							<NativeSelect
+								options={[
+									{
+										label: t(getKey('resizeMethod.options.scaleEvenlyByFactor')),
+										value: 'scaleEvenlyByFactor',
+									},
+									{ label: t(getKey('resizeMethod.options.exact')), value: 'exact' },
+									{
+										label: t(getKey('resizeMethod.options.scaleDimension')),
+										value: 'scaleDimension',
+									},
+									{ label: t(getKey('resizeMethod.options.none')), value: 'none' },
+								]}
+								value={resizeMethod?.mode || 'none'}
+								onChange={(e) => handleResizeMethodChange(e.target.value as Option)}
+							/>
+						</div>
 
-								<RadioGroup.CardItem
-									isActive={resize_options?.mode === 'Sized'}
-									label={t(getKey('sized.label'))}
-									description={t(getKey('sized.description'))}
-									value="Sized"
-								>
-									<fieldset
-										className="flex items-start justify-end gap-2"
-										disabled={resize_options?.mode !== 'Sized'}
-									>
-										<Input
-											contrast
-											variant="primary"
-											label={t(getKey('sized.width.label'))}
-											placeholder="200"
-											{...(resize_options?.mode === 'Sized'
-												? form.register('thumbnail_config.resize_options.width', {
-														valueAsNumber: true,
-													})
-												: {})}
-											{...(resize_options?.mode === 'Sized'
-												? {
-														errorMessage:
-															form.formState.errors.thumbnail_config?.resize_options?.width
-																?.message,
-													}
-												: {})}
-										/>
-										<Input
-											contrast
-											variant="primary"
-											label={t(getKey('sized.height.label'))}
-											placeholder="350"
-											{...(resize_options?.mode === 'Sized'
-												? form.register('thumbnail_config.resize_options.height', {
-														valueAsNumber: true,
-													})
-												: {})}
-										/>
-									</fieldset>
-
-									{resizeOptionsError && resize_options?.mode === 'Sized' && (
-										<Text className="mt-2" size="xs" variant="danger">
-											{resizeOptionsError}
-										</Text>
-									)}
-								</RadioGroup.CardItem>
-							</RadioGroup>
-
-							<div className="flex flex-col gap-6 py-6">
+						{resizeMethod?.mode === 'scaleEvenlyByFactor' && (
+							<>
+								<Text size="xs" variant="muted">
+									{t(getKey('scaleEvenlyByFactor.description'))}
+								</Text>
 								<div className="flex flex-col gap-2">
-									<Label className={cx({ 'cursor-not-allowed text-opacity-50': !resize_options })}>
-										{t(getKey('format.label'))}
-									</Label>
-									<NativeSelect
-										options={formatOptions}
-										disabled={!resize_options}
-										{...form.register('thumbnail_config.format')}
+									<Label>{t(getKey('scaleEvenlyByFactor.factor.label'))}</Label>
+									<Input
+										contrast
+										variant="primary"
+										placeholder="0.65"
+										{...form.register('thumbnailConfig.resizeMethod.factor', {
+											valueAsNumber: true,
+										})}
+										errorMessage={form.formState.errors.thumbnailConfig?.resizeMethod?.message}
 									/>
-									<Text
-										size="xs"
-										variant="muted"
-										className={cx({ 'cursor-not-allowed text-opacity-50': !resize_options })}
-									>
-										{t(getKey('format.description'))}
-									</Text>
+								</div>
+							</>
+						)}
+
+						{resizeMethod?.mode === 'exact' && (
+							<>
+								<Text size="xs" variant="muted">
+									{t(getKey('exact.description'))}
+								</Text>
+								<Input
+									contrast
+									variant="primary"
+									label={t(getKey('exact.width.label'))}
+									placeholder="200"
+									{...form.register('thumbnailConfig.resizeMethod.width', {
+										valueAsNumber: true,
+									})}
+									// errorMessage={form.formState.errors.thumbnailConfig?.resizeMethod?.width?.message}
+								/>
+								<Input
+									contrast
+									variant="primary"
+									label={t(getKey('exact.height.label'))}
+									placeholder="350"
+									{...form.register('thumbnailConfig.resizeMethod.height', {
+										valueAsNumber: true,
+									})}
+									// errorMessage={
+									// 	form.formState.errors.thumbnailConfig?.resizeMethod?.height?.message
+									// }
+								/>
+							</>
+						)}
+
+						{resizeMethod?.mode === 'scaleDimension' && (
+							<>
+								<Text size="xs" variant="muted">
+									{t(getKey('scaleDimension.description'))}
+								</Text>
+
+								<div className="grid w-full items-center gap-2 lg:max-w-xs">
+									<Label>{t(getKey('scaleDimension.dimension.label'))}</Label>
+									<NativeSelect
+										options={[
+											{
+												label: t(getKey('scaleDimension.dimension.options.width')),
+												value: 'WIDTH',
+											},
+											{
+												label: t(getKey('scaleDimension.dimension.options.height')),
+												value: 'HEIGHT',
+											},
+										]}
+										{...form.register('thumbnailConfig.resizeMethod.dimension')}
+										defaultValue="WIDTH"
+									/>
 								</div>
 
 								<Input
 									contrast
 									variant="primary"
-									label={t(getKey('quality.label'))}
-									disabled={!resize_options}
-									descriptionProps={{ className: 'text-xs' }}
-									description={t(getKey('quality.description'))}
-									errorMessage={form.formState.errors.thumbnail_config?.quality?.message}
-									placeholder="0.75"
-									{...form.register('thumbnail_config.quality', { valueAsNumber: true })}
+									label={t(getKey('scaleDimension.size.label'))}
+									placeholder="350"
+									{...form.register('thumbnailConfig.resizeMethod.size', {
+										valueAsNumber: true,
+									})}
+									// errorMessage={
+									// 	form.formState.errors.thumbnailConfig?.resizeMethod?.height?.message
+									// }
 								/>
-							</div>
-						</motion.div>
-					)}
-				</AnimatePresence>
+							</>
+						)}
+					</div>
+				)}
 
-				{renderSaveButton()}
+				{enabled && (
+					<>
+						<div className="grid w-full items-center gap-2 lg:max-w-sm">
+							<Label className={cx({ 'cursor-not-allowed text-opacity-50': !resizeMethod })}>
+								{t(getKey('format.label'))}
+							</Label>
+							<NativeSelect
+								options={formatOptions}
+								disabled={!enabled}
+								{...form.register('thumbnailConfig.format')}
+								// errorMessage={form.formState.errors.thumbnailConfig?.format?.message}
+							/>
+							<Text
+								size="xs"
+								variant="muted"
+								className={cx({ 'cursor-not-allowed text-opacity-50': !enabled })}
+							>
+								{t(getKey('format.description'))}
+							</Text>
+						</div>
+
+						<Input
+							contrast
+							variant="primary"
+							label={t(getKey('quality.label'))}
+							disabled={!enabled}
+							descriptionProps={{ className: 'text-xs' }}
+							description={t(getKey('quality.description'))}
+							errorMessage={form.formState.errors.thumbnailConfig?.quality?.message}
+							placeholder="0.75"
+							{...form.register('thumbnailConfig.quality', { valueAsNumber: true })}
+						/>
+						{/* 
+						{resizeOptionsError && resizeMethod?.mode === 'Scaled' && (
+							<Text className="mt-2" size="xs" variant="danger">
+								{resizeOptionsError}
+							</Text>
+						)} */}
+					</>
+				)}
+
+				{!!ctx?.library && (
+					<div className="mt-4">
+						<Button
+							// title={isDifferent ? undefined : t('common.noChanges')}
+							type="submit"
+							// disabled={!isDifferent}
+							variant="primary"
+						>
+							{t('common.saveChanges')}
+						</Button>
+					</div>
+				)}
 			</div>
 		</div>
 	)

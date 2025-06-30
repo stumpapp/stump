@@ -62,7 +62,7 @@ pub struct LibraryConfigInput {
 	pub process_metadata: bool,
 	pub watch: bool,
 	pub library_pattern: LibraryPattern,
-	pub thumbnail_config: Option<Json<ImageProcessorOptions>>,
+	pub thumbnail_config: Option<ImageProcessorOptions>,
 	pub default_reading_dir: ReadingDirection,
 	pub default_reading_mode: ReadingMode,
 	pub default_reading_image_scale_fit: ReadingImageScaleFit,
@@ -86,8 +86,6 @@ impl LibraryConfigInput {
 			ignore_rules,
 		} = self;
 
-		let thumbnail_config = thumbnail_config.map(|config| config.0);
-
 		let ignore_rules = ignore_rules
 			.map(IgnoreRules::new)
 			.transpose()
@@ -108,5 +106,29 @@ impl LibraryConfigInput {
 			ignore_rules: Set(ignore_rules),
 			..Default::default()
 		}
+	}
+}
+
+// TODO: Support using a series thumbnail?
+#[derive(Debug, Default, InputObject)]
+pub struct UpdateLibraryThumbnailInput {
+	/// The ID of the media inside the series to fetch
+	pub media_id: String,
+	/// The page of the media to use for the thumbnail
+	page: i32,
+	#[graphql(default)]
+	/// A flag indicating whether the page is zero based
+	is_zero_based: Option<bool>,
+}
+
+impl UpdateLibraryThumbnailInput {
+	pub fn page(&self) -> i32 {
+		self.is_zero_based.map_or(self.page, |is_zero_based| {
+			if is_zero_based {
+				self.page + 1
+			} else {
+				self.page
+			}
+		})
 	}
 }

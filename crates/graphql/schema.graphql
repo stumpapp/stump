@@ -300,6 +300,11 @@ scalar DateTime
 
 scalar Decimal
 
+enum Dimension {
+	HEIGHT
+	WIDTH
+}
+
 type DirectoryListing {
 	parent: String
 	files: [DirectoryListingFile!]!
@@ -435,6 +440,28 @@ input EpubProgressInput {
 	isComplete: Boolean
 }
 
+"""
+A resize option which will resize the image to the given dimensions, without
+maintaining the aspect ratio.
+"""
+type ExactDimensionResize {
+	"The width (in pixels) the resulting image should be resized to"
+	width: Int!
+	"The height (in pixels) the resulting image should be resized to"
+	height: Int!
+}
+
+"""
+A resize option which will resize the image to the given dimensions, without
+maintaining the aspect ratio.
+"""
+input ExactDimensionResizeInput {
+	"The width (in pixels) the resulting image should be resized to"
+	width: Int!
+	"The height (in pixels) the resulting image should be resized to"
+	height: Int!
+}
+
 type ExternalJobOutput {
 	val: JSON!
 }
@@ -511,10 +538,52 @@ type FinishedReadingSessionModel {
 
 
 
+"Options for processing images throughout Stump."
+type ImageProcessorOptions {
+	"The size factor to use when generating an image. See [`ImageResizeOptions`]"
+	resizeMethod: ImageResizeMethod
+	"The format to use when generating an image. See [`SupportedImageFormat`]"
+	format: SupportedImageFormat!
+	"""
+	The quality to use when generating an image. This is a number between 1 and 100,
+	where 100 is the highest quality. Omitting this value will use the default quality
+	of 100.
+	"""
+	quality: Int
+	"The page to use when generating an image. This is not applicable to all media formats."
+	page: Int
+}
+
+"Options for processing images throughout Stump."
+input ImageProcessorOptionsInput {
+	"The size factor to use when generating an image. See [`ImageResizeOptions`]"
+	resizeMethod: ImageResizeMethodInput
+	"The format to use when generating an image. See [`SupportedImageFormat`]"
+	format: SupportedImageFormat!
+	"""
+	The quality to use when generating an image. This is a number between 1 and 100,
+	where 100 is the highest quality. Omitting this value will use the default quality
+	of 100.
+	"""
+	quality: Int
+	"The page to use when generating an image. This is not applicable to all media formats."
+	page: Int
+}
+
 type ImageRef {
 	url: String!
 	height: Int
 	width: Int
+}
+
+"The resize options to use when generating an image"
+union ImageResizeMethod = ExactDimensionResize | ScaleEvenlyByFactor | ScaledDimensionResize
+
+"The resize options to use when generating an image"
+input ImageResizeMethodInput @oneOf {
+	exact: ExactDimensionResizeInput
+	scaleEvenlyByFactor: ScaleEvenlyByFactorInput
+	scaleDimension: ScaledDimensionResizeInput
 }
 
 type InProgressBooks {
@@ -537,32 +606,22 @@ scalar JSON
 "A scalar that can represent any JSON Object value."
 scalar JSONObject
 
+type Job {
+	id: String!
+	name: String!
+	description: String
+	status: String!
+	msElapsed: Int!
+	createdAt: DateTime!
+	completedAt: String
+	outputData: CoreJobOutput
+	saveState: JSON
+	logs: [Log!]!
+}
+
 type JobOutput {
 	id: String!
 	output: CoreJobOutput!
-}
-
-"""
-A struct that represents a progress event that is emitted by a job. This behaves like a patch,
-where the client will ignore any fields that are not present. This is done so all internal ops
-can be done without needing to know the full state of the job.
-"""
-type JobProgress {
-	"The status of the job"
-	status: JobStatus
-	"The message to display"
-	message: String
-	"The current task being worked on"
-	completedTasks: Int
-	"""
-	The number of tasks for the job. This number can change as
-	subtasks get added/converted to tasks
-	"""
-	remainingTasks: Int
-	"The current subtask being worked on"
-	completedSubtasks: Int
-	"The number of subtasks that exist in the current task"
-	totalSubtasks: Int
 }
 
 type JobStarted {
@@ -581,7 +640,21 @@ enum JobStatus {
 "An update event that is emitted by a job"
 type JobUpdate {
 	id: String!
-	payload: JobProgress!
+	"The status of the job"
+	status: JobStatus
+	"The message to display"
+	message: String
+	"The current task being worked on"
+	completedTasks: Int
+	"""
+	The number of tasks for the job. This number can change as
+	subtasks get added/converted to tasks
+	"""
+	remainingTasks: Int
+	"The current subtask being worked on"
+	completedSubtasks: Int
+	"The number of subtasks that exist in the current task"
+	totalSubtasks: Int
 }
 
 type Library {
@@ -599,12 +672,17 @@ type Library {
 	config: LibraryConfig!
 	excludedUsers: [User!]!
 	"Get the details of the last scan job for this library, if any exists."
-	lastScan: LibraryScanRecordModel
+	lastScan: LibraryScanRecord
 	"Get the full history of scan jobs for this library."
-	scanHistory: [LibraryScanRecordModel!]!
+	scanHistory: [LibraryScanRecord!]!
 	series: [Series!]!
 	stats(allUsers: Boolean): LibraryStats!
 	tags: [Tag!]!
+	"""
+	A reference to the thumbnail image for the thumbnail. This will be a fully
+	qualified URL to the image.
+	"""
+	thumbnail: ImageRef!
 }
 
 type LibraryConfig {
@@ -620,7 +698,7 @@ type LibraryConfig {
 	watch: Boolean!
 	libraryPattern: LibraryPattern!
 	libraryId: String
-	imageProcessorOptions: JSON
+	thumbnailConfig: ImageProcessorOptions
 	ignoreRules: [String!]
 }
 
@@ -632,7 +710,7 @@ input LibraryConfigInput {
 	processMetadata: Boolean!
 	watch: Boolean!
 	libraryPattern: LibraryPattern!
-	thumbnailConfig: JSON
+	thumbnailConfig: ImageProcessorOptionsInput
 	defaultReadingDir: ReadingDirection!
 	defaultReadingMode: ReadingMode!
 	defaultReadingImageScaleFit: ReadingImageScaleFit!
@@ -698,9 +776,9 @@ type LibraryScanOutput {
 	updatedSeries: Int!
 }
 
-type LibraryScanRecordModel {
+type LibraryScanRecord {
 	id: Int!
-	options: [Int!]
+	options: JSON
 	timestamp: DateTime!
 	libraryId: String!
 	jobId: String
@@ -1032,6 +1110,8 @@ type Mutation {
 	This operation will also remove any associated thumbnails of the deleted media and series.
 	"""
 	cleanLibrary(id: ID!): CleanLibraryResponse!
+	"Clear the scan history for a specific library"
+	clearScanHistory(id: ID!): Int!
 	"""
 	Create a new library with the provided configuration. If `scan_after_persist` is `true`,
 	the library will be scanned immediately after creation.
@@ -1042,7 +1122,14 @@ type Mutation {
 	the library will be scanned immediately after updating.
 	"""
 	updateLibrary(id: ID!, input: CreateOrUpdateLibraryInput!): Library!
+	"Update the emoji for a library"
 	updateLibraryEmoji(id: ID!, emoji: String): Library!
+	"""
+	Update the thumbnail for a library. This will replace the existing thumbnail with the the one
+	associated with the provided input (book). If the book does not have a thumbnail, one
+	will be generated based on the library's thumbnail configuration.
+	"""
+	updateLibraryThumbnail(id: ID!, input: UpdateLibraryThumbnailInput!): Library!
 	"""
 	Exclude users from a library, preventing them from seeing the library in the UI. This operates as a
 	full replacement of the excluded users list, so any users not included in the provided list will be
@@ -1058,6 +1145,8 @@ type Mutation {
 	operation cannot be undone.
 	"""
 	deleteLibrary(id: ID!): Library!
+	generateLibraryThumbnails(id: ID!, forceRegenerate: Boolean! = false): Boolean!
+	deleteLibraryThumbnails(id: ID!): Boolean!
 	"""
 	Enqueue a scan job for a library. This will index the filesystem from the library's root path
 	and update the database accordingly.
@@ -1113,6 +1202,7 @@ type Mutation {
 	deleteTags(tags: [String!]!): [Tag!]!
 	uploadBooks(input: UploadBooksInput!): Boolean!
 	uploadSeries(input: UploadSeriesInput!): Boolean!
+	uploadLibraryThumbnail(id: ID!, file: Upload!): Library!
 	deleteLoginActivity: Int!
 	createUser(input: CreateUserInput!): User!
 	meUpdateUser(input: UpdateUserInput!): User!
@@ -1323,6 +1413,8 @@ type Query {
 	emailDevices: [RegisteredEmailDevice!]!
 	emailDeviceById(id: Int!): RegisteredEmailDevice
 	listDirectory(pagination: Pagination!, input: DirectoryListingInput): PaginatedDirectoryListingResponse!
+	jobs: [Job!]!
+	jobById(id: ID!): Job
 	media(filter: MediaFilterInput!, orderBy: [MediaOrderBy!]! = [{media: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	mediaById(id: ID!): Media
 	mediaByPath(path: String!): Media
@@ -1458,6 +1550,44 @@ input SaveSmartListViewInput {
 	config: String!
 }
 
+type ScaleEvenlyByFactor {
+	"""
+	The factor to scale the image by. Note that this was made a [Decimal]
+	to correct precision issues
+	"""
+	factor: Decimal!
+}
+
+input ScaleEvenlyByFactorInput {
+	"""
+	The factor to scale the image by. Note that this was made a [Decimal]
+	to correct precision issues
+	"""
+	factor: Decimal!
+}
+
+"""
+A resize option which will resize the image while maintaining the aspect ratio.
+The dimension *not* specified will be calculated based on the aspect ratio.
+"""
+type ScaledDimensionResize {
+	"The dimension to set with the given size, e.g. `Height` or `Width`."
+	dimension: Dimension!
+	"The size (in pixels) to set the specified dimension to."
+	size: Int!
+}
+
+"""
+A resize option which will resize the image while maintaining the aspect ratio.
+The dimension *not* specified will be calculated based on the aspect ratio.
+"""
+input ScaledDimensionResizeInput {
+	"The dimension to set with the given size, e.g. `Height` or `Width`."
+	dimension: Dimension!
+	"The size (in pixels) to set the specified dimension to."
+	size: Int!
+}
+
 type SendAttachmentEmailOutput {
 	sentCount: Int!
 	errors: [String!]!
@@ -1497,6 +1627,11 @@ type Series {
 	readCount: Int!
 	unreadCount: Int!
 	tags: [Tag!]!
+	"""
+	A reference to the thumbnail image for the thumbnail. This will be a fully
+	qualified URL to the image.
+	"""
+	thumbnail: ImageRef!
 }
 
 input SeriesFilterInput {
@@ -1785,6 +1920,13 @@ enum SupportedFont {
 	OPEN_DYSLEXIC
 }
 
+"Supported image formats for processing images throughout Stump"
+enum SupportedImageFormat {
+	WEBP
+	JPEG
+	PNG
+}
+
 enum SystemArrangment {
 	HOME
 	EXPLORE
@@ -1799,7 +1941,7 @@ type SystemArrangmentConfig {
 }
 
 type Tag {
-	id: String!
+	id: Int!
 	name: String!
 }
 
@@ -1839,6 +1981,15 @@ input UpdateBookClubInput {
 	isPrivate: Boolean
 	memberRoleSpec: JSON
 	emoji: String
+}
+
+input UpdateLibraryThumbnailInput {
+	"The ID of the media inside the series to fetch"
+	mediaId: String!
+	"The page of the media to use for the thumbnail"
+	page: Int!
+	"A flag indicating whether the page is zero based"
+	isZeroBased: Boolean = null
 }
 
 input UpdateUserInput {
@@ -1973,6 +2124,12 @@ enum UserPermission {
 	MANAGE_NOTIFIER
 	"Grant access to delete a notifier"
 	DELETE_NOTIFIER
+	"Grant access to read jobs"
+	READ_JOBS
+	"Grant access to read application-level logs, e.g. job logs"
+	READ_PERSISTED_LOGS
+	"Grant access to read system logs"
+	READ_SYSTEM_LOGS
 	"Grant access to manage the server. This is effectively a step below server owner"
 	MANAGE_SERVER
 }

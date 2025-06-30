@@ -13,3 +13,5 @@ export function App() {
 }
 
 registerRootComponent(App)
+
+// TODO: https://glitchtip.com/

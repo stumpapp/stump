@@ -1,4 +1,4 @@
-import { useSuspenseGraphQL } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { cn, Spacer } from '@stump/components'
 import { FilterableArrangementEntityLink, graphql, SystemArrangment } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
@@ -55,14 +55,14 @@ export default function SideBar({ asChild, hidden }: Props) {
 	const platform = useAppStore((store) => store.platform)
 
 	const { t } = useLocaleContext()
-
+	const { sdk } = useSDK()
 	const {
 		data: {
 			me: {
 				preferences: { navigationArrangement },
 			},
 		},
-	} = useSuspenseGraphQL(query, ['sidebarQuery'])
+	} = useSuspenseGraphQL(query, sdk.cacheKey('sidebar'))
 
 	const { checkPermission } = useAppContext()
 	const { shouldUseGradient } = useTheme()

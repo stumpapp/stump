@@ -1,5 +1,5 @@
 use models::shared::image_processor_options::{
-	ImageProcessorOptions, ImageResizeMethod, ScaleEvenlyByFactor, ScaledDimensionResize,
+	Dimension, ImageProcessorOptions, ImageResizeMethod, ScaledDimensionResize,
 };
 
 use super::{scale_height_dimension, scale_width_dimension, ProcessorError};
@@ -22,13 +22,20 @@ impl ImageProcessorOptionsExt for ImageProcessorOptions {
 		}
 
 		match self.resize_method {
-			ImageResizeMethod::ScaleEvenlyByFactor(scaling) => {
-				if !(0.0..=1.0).contains(&scaling.factor) {
+			None => (),
+			Some(ImageResizeMethod::ScaleEvenlyByFactor(scaling)) => {
+				let factor: f32 = scaling.factor.try_into().map_err(|error| {
+					tracing::error!(?scaling, ?error, "Invalid scaling factor");
+					ProcessorError::InvalidConfiguration(
+						"Scaling factor must be a valid float".to_string(),
+					)
+				})?;
+				if !(0.0..=1.0).contains(&factor) {
 					tracing::error!(?scaling, "Invalid scaling factor");
 					return Err(ProcessorError::InvalidSizedImage);
 				}
 			},
-			ImageResizeMethod::Exact(dimensions) => {
+			Some(ImageResizeMethod::Exact(dimensions)) => {
 				let invalid_height = dimensions.height < 1;
 				let invalid_width = dimensions.width < 1;
 
@@ -37,17 +44,12 @@ impl ImageProcessorOptionsExt for ImageProcessorOptions {
 					return Err(ProcessorError::InvalidSizedImage);
 				}
 			},
-			ImageResizeMethod::ScaleDimension(scaling) => {
-				let is_invalid = match scaling {
-					ScaledDimensionResize::Height(height) => height < 1,
-					ScaledDimensionResize::Width(width) => width < 1,
-				};
-				if is_invalid {
+			Some(ImageResizeMethod::ScaleDimension(scaling)) => {
+				if scaling.size < 1 {
 					tracing::error!(?scaling, "Invalid scaling dimension");
 					return Err(ProcessorError::InvalidSizedImage);
 				}
 			},
-			ImageResizeMethod::None => (),
 		}
 
 		Ok(())
@@ -85,29 +87,38 @@ pub fn resized_dimensions(
 ) -> (u32, u32) {
 	match resize_method {
 		ImageResizeMethod::Exact(dimensions) => (dimensions.height, dimensions.width),
-		ImageResizeMethod::ScaleEvenlyByFactor(ScaleEvenlyByFactor { factor }) => (
-			(current_height as f32 * factor) as u32,
-			(current_width as f32 * factor) as u32,
-		),
-		ImageResizeMethod::ScaleDimension(scaling) => match scaling {
-			ScaledDimensionResize::Width(width) => {
+		ImageResizeMethod::ScaleEvenlyByFactor(scaling) => {
+			let factor: f32 = scaling.factor.try_into().unwrap_or_else(|error| {
+				tracing::warn!(
+					?scaling,
+					?error,
+					"Invalid scaling factor. Falling back to 1.0"
+				);
+				1.0
+			});
+			(
+				(current_height as f32 * factor) as u32,
+				(current_width as f32 * factor) as u32,
+			)
+		},
+		ImageResizeMethod::ScaleDimension(config) => match config.dimension {
+			Dimension::Width => {
 				let (width, height) = scale_height_dimension(
 					current_width as f32,
 					current_height as f32,
-					width as f32,
+					config.size as f32,
 				);
 				(height, width)
 			},
-			ScaledDimensionResize::Height(height) => {
+			Dimension::Height => {
 				let (width, height) = scale_width_dimension(
 					current_width as f32,
 					current_height as f32,
-					height as f32,
+					config.size as f32,
 				);
 				(height, width)
 			},
 		},
-		ImageResizeMethod::None => (current_height, current_width),
 	}
 }
 

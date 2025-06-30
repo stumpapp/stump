@@ -1,36 +1,91 @@
-import { useLibraryExclusions, useUpdateLibraryExclusions, useUsersQuery } from '@stump/client'
+import { useGraphQLMutation, useSuspenseGraphQLQueries } from '@stump/client'
 import { Alert, ComboBox, Heading, Text, usePrevious } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import toast from 'react-hot-toast'
 import { useDebouncedValue } from 'rooks'
 
 import { useAppContext } from '@/context'
 
 import { useLibraryContext } from '../../../../context'
 
+const usersQuery = graphql(`
+	query LibraryExclusionsUsersQuery {
+		users {
+			id
+			username
+		}
+	}
+`)
+
+const excludedUsersQuery = graphql(`
+	query LibraryExclusionsQuery($id: ID!) {
+		libraryById(id: $id) {
+			excludedUsers {
+				id
+				username
+			}
+		}
+	}
+`)
+
+const mutation = graphql(`
+	mutation UpdateLibraryExclusions($id: ID!, $userIds: [String!]!) {
+		updateLibraryExcludedUsers(id: $id, userIds: $userIds) {
+			id
+			excludedUsers {
+				id
+				username
+			}
+		}
+	}
+`)
+
 export default function LibraryExclusions() {
 	const { library } = useLibraryContext()
 	const { user } = useAppContext()
 	const { t } = useLocaleContext()
 
-	const { users: allUsers, isLoading: isLoadingUsers } = useUsersQuery()
-	const { excludedUsers, isLoading: isLoadingExclusions } = useLibraryExclusions({
-		id: library.id,
+	const [
+		{
+			data: { users: allUsers },
+		},
+		{
+			data: { libraryById },
+		},
+	] = useSuspenseGraphQLQueries([
+		{
+			document: usersQuery,
+			queryKey: ['users'],
+		},
+		{
+			document: excludedUsersQuery,
+			queryKey: ['libraryExclusions', library.id],
+			variables: { id: library.id },
+		},
+	])
+	const excludedUsers = useMemo(() => libraryById?.excludedUsers || [], [libraryById])
+
+	const client = useQueryClient()
+
+	const { mutate } = useGraphQLMutation(mutation, {
+		onSuccess: ({ updateLibraryExcludedUsers: { excludedUsers } }) => {
+			// Update without refetching to reduce network
+			client.setQueryData(['libraryExclusions', library.id], {
+				libraryById: {
+					...libraryById,
+					excludedUsers,
+				},
+			})
+		},
 	})
 
-	const { updateExcludedUsersAsync } = useUpdateLibraryExclusions({ id: library.id })
-	const update = useCallback(
-		async (ids: string[]) => {
-			try {
-				await updateExcludedUsersAsync(ids)
-				toast.success(t(getKey('updated')))
-			} catch (e) {
-				console.error(e)
-				toast.error(t(getKey('failure')))
-			}
+	const updateExclusions = useCallback(
+		(ids: string[]) => {
+			mutate({ id: library.id, userIds: ids })
 		},
-		[updateExcludedUsersAsync, t],
+		[mutate, library],
 	)
 
 	const [excludedUserIds, setExcludedUserIds] = useState<string[] | undefined>(() =>
@@ -50,9 +105,9 @@ export default function LibraryExclusions() {
 
 	useEffect(() => {
 		if (shouldCall) {
-			update(debouncedUserIds)
+			updateExclusions(debouncedUserIds)
 		}
-	}, [debouncedUserIds, update, shouldCall])
+	}, [debouncedUserIds, updateExclusions, shouldCall])
 
 	const userOptions = useMemo(
 		() =>
@@ -61,10 +116,6 @@ export default function LibraryExclusions() {
 			),
 		[allUsers, user],
 	)
-
-	if (isLoadingUsers || isLoadingExclusions) {
-		return null
-	}
 
 	// TODO: disabled state if no options
 	return (

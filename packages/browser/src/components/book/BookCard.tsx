@@ -13,6 +13,7 @@ export const BookCardFragment = graphql(`
 	fragment BookCard on Media {
 		id
 		resolvedName
+		extension
 		pages
 		size
 		status
@@ -26,6 +27,7 @@ export const BookCardFragment = graphql(`
 		}
 		readHistory {
 			__typename
+			completedAt
 		}
 	}
 `)

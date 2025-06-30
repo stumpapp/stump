@@ -1,4 +1,4 @@
-import { PREFETCH_STALE_TIME, queryClient, useInfiniteGraphQL, useSDK } from '@stump/client'
+import { PREFETCH_STALE_TIME, queryClient, useInfiniteSuspenseGraphQL, useSDK } from '@stump/client'
 import { Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { BookX } from 'lucide-react'
@@ -12,6 +12,7 @@ const query = graphql(`
 		mediaById(id: $id) {
 			nextInSeries(pagination: $pagination) {
 				nodes {
+					id
 					...BookCard
 				}
 				pageInfo {
@@ -59,7 +60,7 @@ export default function BooksAfterCurrentContainer({ cursor }: Props) {
 }
 
 function BooksAfterCurrent({ cursor }: Props) {
-	const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteGraphQL(
+	const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteSuspenseGraphQL(
 		query,
 		['booksAfterCursor', cursor],
 		{

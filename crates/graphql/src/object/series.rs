@@ -1,14 +1,17 @@
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
-use models::entity::{
-	finished_reading_session, library, media, reading_session, series, series_metadata,
-	series_to_tag, tag, user::AuthUser,
+use models::{
+	entity::{
+		finished_reading_session, library, media, reading_session, series,
+		series_metadata, series_to_tag, tag, user::AuthUser,
+	},
+	shared::image::ImageRef,
 };
 use sea_orm::{
 	prelude::*, sea_query::Query, Condition, JoinType, QueryOrder, QuerySelect,
 };
 
-use crate::data::{CoreContext, RequestContext};
+use crate::data::{CoreContext, RequestContext, ServiceContext};
 
 use super::{library::Library, media::Media, tag::Tag};
 
@@ -241,6 +244,23 @@ impl Series {
 			.await?;
 
 		Ok(models.into_iter().map(Tag::from).collect())
+	}
+
+	/// A reference to the thumbnail image for the thumbnail. This will be a fully
+	/// qualified URL to the image.
+	async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
+		let service = ctx.data::<ServiceContext>()?;
+
+		// TODO: Spawn a blocking task to get the image dimensions
+		// Use a cache as to not read the file system every time
+
+		Ok(ImageRef {
+			url: service
+				.format_url(format!("/api/v2/series/{}/thumbnail", self.model.id)),
+			// height: page_dimension.as_ref().map(|dim| dim.height),
+			// width: page_dimension.as_ref().map(|dim| dim.width),
+			..Default::default()
+		})
 	}
 }
 

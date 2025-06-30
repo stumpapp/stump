@@ -307,7 +307,7 @@
 				},
 				"quality": {
 					"label": "Calidad",
-					"description": "The quality of the generated thumbnail images, between 0 and 1.0"
+					"description": "The quality of the generated thumbnail images, between 1 and 100"
 				}
 			},
 			"ignoreRules": {

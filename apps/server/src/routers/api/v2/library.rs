@@ -5,9 +5,9 @@ use crate::{
 	utils::http::ImageResponse,
 };
 use axum::{
-	extract::{Path, State},
+	extract::{DefaultBodyLimit, Path, State},
 	middleware,
-	routing::get,
+	routing::{get, post},
 	Extension, Router,
 };
 use graphql::data::RequestContext;
@@ -27,6 +27,17 @@ use stump_core::{
 use super::series::get_series_thumbnail;
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
+	// let mut library_router =
+	// 	Router::new().route("/thumbnail", get(get_library_thumbnail_handler));
+
+	// if app_state.config.enable_upload {
+	// 	library_router = library_router
+	// 		.route("/upload", post(upload_library_thumbnail))
+	// 		.layer(DefaultBodyLimit::max(
+	// 			app_state.config.max_image_upload_size,
+	// 		));
+	// }
+
 	Router::new()
 		.nest(
 			"/library/{id}",
@@ -68,7 +79,7 @@ async fn get_library_thumbnail_handler(
 		.into_model::<library::LibraryIdentSelect, library_config::LibraryConfigThumbnailConfig>()
 		.one(ctx.conn.as_ref())
 		.await?
-		.ok_or(APIError::NotFound("Book not found".to_string()))?;
+		.ok_or(APIError::NotFound("Library not found".to_string()))?;
 	let first_series = series::Entity::find_for_user(&user)
 		.filter(series::Column::LibraryId.eq(library.id.clone()))
 		.order_by_asc(series::Column::Name)

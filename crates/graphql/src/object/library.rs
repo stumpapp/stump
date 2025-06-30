@@ -5,15 +5,16 @@ use models::{
 		library, library_config, library_hidden_to_user, library_scan_record,
 		library_to_tag, series, tag, user,
 	},
-	shared::enums::UserPermission,
+	shared::{enums::UserPermission, image::ImageRef},
 };
 use sea_orm::{
 	prelude::*, sea_query::Query, DatabaseBackend, FromQueryResult, QueryOrder, Statement,
 };
 
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{CoreContext, RequestContext, ServiceContext},
 	guard::PermissionGuard,
+	object::library_scan_record::LibraryScanRecord,
 };
 
 use super::{library_config::LibraryConfig, series::Series, tag::Tag, user::User};
@@ -70,12 +71,8 @@ impl Library {
 		Ok(users.into_iter().map(User::from).collect())
 	}
 
-	// TODO(graphql): object type to load job details
 	/// Get the details of the last scan job for this library, if any exists.
-	async fn last_scan(
-		&self,
-		ctx: &Context<'_>,
-	) -> Result<Option<library_scan_record::Model>> {
+	async fn last_scan(&self, ctx: &Context<'_>) -> Result<Option<LibraryScanRecord>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let record = library_scan_record::Entity::find()
@@ -84,15 +81,11 @@ impl Library {
 			.one(conn)
 			.await?;
 
-		Ok(record)
+		Ok(record.map(LibraryScanRecord::from))
 	}
 
-	// TODO(graphql): object type to load job details
 	/// Get the full history of scan jobs for this library.
-	async fn scan_history(
-		&self,
-		ctx: &Context<'_>,
-	) -> Result<Vec<library_scan_record::Model>> {
+	async fn scan_history(&self, ctx: &Context<'_>) -> Result<Vec<LibraryScanRecord>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let records = library_scan_record::Entity::find()
@@ -101,7 +94,7 @@ impl Library {
 			.all(conn)
 			.await?;
 
-		Ok(records)
+		Ok(records.into_iter().map(LibraryScanRecord::from).collect())
 	}
 
 	// TODO(graphql): Pagination
@@ -185,6 +178,23 @@ impl Library {
 			.await?;
 
 		Ok(models.into_iter().map(Tag::from).collect())
+	}
+
+	/// A reference to the thumbnail image for the thumbnail. This will be a fully
+	/// qualified URL to the image.
+	async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
+		let service = ctx.data::<ServiceContext>()?;
+
+		// TODO: Spawn a blocking task to get the image dimensions
+		// Use a cache as to not read the file system every time
+
+		Ok(ImageRef {
+			url: service
+				.format_url(format!("/api/v2/library/{}/thumbnail", self.model.id)),
+			// height: page_dimension.as_ref().map(|dim| dim.height),
+			// width: page_dimension.as_ref().map(|dim| dim.width),
+			..Default::default()
+		})
 	}
 }
 

@@ -11,7 +11,6 @@ import {
 } from '@stump/components'
 import { SupportedImageFormat } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import isEqual from 'lodash/isEqual'
 import { Check } from 'lucide-react'
 import { useCallback } from 'react'
 import { useFormContext } from 'react-hook-form'
@@ -29,6 +28,8 @@ const formatOptions = [
 	{ label: 'JPEG', value: 'JPEG' },
 	{ label: 'PNG', value: 'PNG' },
 ]
+
+// TODO(graphql): Add appropriate error reporting
 
 export default function ThumbnailConfigForm() {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
@@ -77,34 +78,22 @@ export default function ThumbnailConfigForm() {
 		[form, resizeMethod?.mode, ctx?.library],
 	)
 
-	/**
-	 * A function to render the save button. This will only render if there are changes to the form
-	 * that have not been saved, and if we are editing an existing library
-	 */
-	const renderSaveButton = useCallback(() => {
-		if (!ctx?.library) {
-			return null
-		}
+	// const existingConfig = useMemo(
+	// 	() => intoFormThumbnailConfig(ctx?.library.config.thumbnailConfig),
+	// 	[ctx?.library.config.thumbnailConfig],
+	// )
+	// const formConfig = form.watch('thumbnailConfig')
 
-		const existingConfig = intoFormThumbnailConfig(ctx.library.config.thumbnailConfig)
-		const formConfig = form.getValues('thumbnailConfig')
-
-		const isDifferent = !isEqual(formConfig, existingConfig)
-
-		return (
-			<div>
-				<Button
-					title={isDifferent ? undefined : t('common.noChanges')}
-					type="submit"
-					disabled={!isDifferent}
-					variant="primary"
-					className="mt-4"
-				>
-					{t('common.saveChanges')}
-				</Button>
-			</div>
-		)
-	}, [ctx, t, form])
+	// TODO(graphql): Fix this
+	// // FIXME: This very much doesn't work lol
+	// const isDifferent = useMemo(
+	// 	() => !isEqual(formConfig, existingConfig),
+	// 	[formConfig, existingConfig],
+	// )
+	// console.log('isDifferent', isDifferent, {
+	// 	formConfig,
+	// 	existingConfig,
+	// })
 
 	// /**
 	//  * This is an awkward way to get the error message for the resize options. Because of the the
@@ -303,7 +292,18 @@ export default function ThumbnailConfigForm() {
 					</>
 				)}
 
-				{renderSaveButton()}
+				{!!ctx?.library && (
+					<div className="mt-4">
+						<Button
+							// title={isDifferent ? undefined : t('common.noChanges')}
+							type="submit"
+							// disabled={!isDifferent}
+							variant="primary"
+						>
+							{t('common.saveChanges')}
+						</Button>
+					</div>
+				)}
 			</div>
 		</div>
 	)

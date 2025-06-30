@@ -244,7 +244,7 @@ export const intoFormThumbnailConfig = (
 			...baseConfig,
 			resizeMethod: {
 				mode: 'scaleEvenlyByFactor',
-				factor: config.resizeMethod.factor,
+				factor: Number(config.resizeMethod.factor),
 			},
 		}
 	}

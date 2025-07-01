@@ -1,4 +1,3 @@
-import { UserPermission } from '@stump/sdk'
 import { useMemo } from 'react'
 
 import { useAppContext } from '@/context'
@@ -20,7 +19,7 @@ export function useSettingsRoutes() {
 					// Filter out items that the user doesn't have access to. If an item has no
 					// permissions requirement, then it will be included.
 					const filteredItems = group.items.filter(
-						({ permission }) => !permission || checkPermission(permission as UserPermission),
+						({ permission }) => !permission || checkPermission(permission),
 					)
 
 					if (filteredItems.length === 0) {

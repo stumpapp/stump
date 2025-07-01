@@ -109,7 +109,7 @@ impl UserMutation {
 		Ok(User::from(user_model.try_into_model()?))
 	}
 
-	async fn me_update_user(
+	async fn update_viewer(
 		&self,
 		ctx: &Context<'_>,
 		input: UpdateUserInput,
@@ -127,7 +127,7 @@ impl UserMutation {
 		Ok(updated_user)
 	}
 
-	async fn me_update_user_preferences(
+	async fn update_viewer_preferences(
 		&self,
 		ctx: &Context<'_>,
 		input: UpdateUserPreferencesInput,
@@ -153,7 +153,7 @@ impl UserMutation {
 				conn,
 			)
 			.await?;
-			Ok(UserPreferences::from(updated_user_preferences))
+			Ok(updated_user_preferences)
 		} else {
 			Err("User preferences not found".into())
 		}
@@ -294,11 +294,6 @@ async fn update_user_preferences_by_id(
 	user_preferences: UpdateUserPreferencesInput,
 	conn: &DatabaseConnection,
 ) -> Result<UserPreferences> {
-	let app_font_str =
-		serde_json::to_string(&user_preferences.app_font).map_err(|e| {
-			tracing::error!("Failed to serialize app font: {:?}", e);
-			"Failed to serialize app font"
-		})?;
 	let updated_user_preferences = user_preferences::ActiveModel {
 		id: Set(id),
 		user_id: Set(Some(user_id)),
@@ -306,7 +301,7 @@ async fn update_user_preferences_by_id(
 		preferred_layout_mode: Set(user_preferences.preferred_layout_mode),
 		app_theme: Set(user_preferences.app_theme),
 		enable_gradients: Set(user_preferences.enable_gradients),
-		app_font: Set(app_font_str),
+		app_font: Set(user_preferences.app_font),
 		primary_navigation_mode: Set(user_preferences.primary_navigation_mode),
 		layout_max_width_px: Set(user_preferences.layout_max_width_px),
 		show_query_indicator: Set(user_preferences.show_query_indicator),

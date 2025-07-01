@@ -1219,8 +1219,6 @@ export type Mutation = {
   generateLibraryThumbnails: Scalars['Boolean']['output'];
   markMediaAsComplete?: Maybe<FinishedReadingSessionModel>;
   markSeriesAsComplete: Series;
-  meUpdateUser: User;
-  meUpdateUserPreferences: UserPreferences;
   patchEmailDevice: Scalars['Int']['output'];
   respondToBookClubInvitation: BookClubInvitation;
   /**
@@ -1278,6 +1276,8 @@ export type Mutation = {
   updateSmartListView: SmartListView;
   updateUser: User;
   updateUserLockStatus: User;
+  updateViewer: User;
+  updateViewerPreferences: UserPreferences;
   uploadBooks: Scalars['Boolean']['output'];
   uploadLibraryThumbnail: Library;
   uploadSeries: Scalars['Boolean']['output'];
@@ -1498,16 +1498,6 @@ export type MutationMarkSeriesAsCompleteArgs = {
 };
 
 
-export type MutationMeUpdateUserArgs = {
-  input: UpdateUserInput;
-};
-
-
-export type MutationMeUpdateUserPreferencesArgs = {
-  input: UpdateUserPreferencesInput;
-};
-
-
 export type MutationPatchEmailDeviceArgs = {
   id: Scalars['Int']['input'];
   input: EmailDeviceInput;
@@ -1626,6 +1616,16 @@ export type MutationUpdateUserArgs = {
 export type MutationUpdateUserLockStatusArgs = {
   lock: Scalars['Boolean']['input'];
   userId: Scalars['String']['input'];
+};
+
+
+export type MutationUpdateViewerArgs = {
+  input: UpdateUserInput;
+};
+
+
+export type MutationUpdateViewerPreferencesArgs = {
+  input: UpdateUserPreferencesInput;
 };
 
 
@@ -2762,7 +2762,7 @@ export type UserPermissionStruct = {
 
 export type UserPreferences = {
   __typename?: 'UserPreferences';
-  appFont: Scalars['String']['output'];
+  appFont: SupportedFont;
   appTheme: Scalars['String']['output'];
   enableAlphabetSelect: Scalars['Boolean']['output'];
   enableCompactDisplay: Scalars['Boolean']['output'];
@@ -3199,6 +3199,20 @@ export type SeriesBookGridQueryVariables = Exact<{
 
 
 export type SeriesBookGridQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
+
+export type UpdateUserLocaleSelectorMutationVariables = Exact<{
+  input: UpdateUserPreferencesInput;
+}>;
+
+
+export type UpdateUserLocaleSelectorMutation = { __typename?: 'Mutation', updateViewerPreferences: { __typename?: 'UserPreferences', locale: string } };
+
+export type UpdateUserProfileFormMutationVariables = Exact<{
+  input: UpdateUserInput;
+}>;
+
+
+export type UpdateUserProfileFormMutation = { __typename?: 'Mutation', updateViewer: { __typename?: 'User', id: string, username: string, avatarUrl?: string | null } };
 
 export type DirectoryListingQueryVariables = Exact<{
   input: DirectoryListingInput;
@@ -4134,6 +4148,22 @@ export const SeriesBookGridDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SeriesBookGridQuery, SeriesBookGridQueryVariables>;
+export const UpdateUserLocaleSelectorDocument = new TypedDocumentString(`
+    mutation UpdateUserLocaleSelector($input: UpdateUserPreferencesInput!) {
+  updateViewerPreferences(input: $input) {
+    locale
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateUserLocaleSelectorMutation, UpdateUserLocaleSelectorMutationVariables>;
+export const UpdateUserProfileFormDocument = new TypedDocumentString(`
+    mutation UpdateUserProfileForm($input: UpdateUserInput!) {
+  updateViewer(input: $input) {
+    id
+    username
+    avatarUrl
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateUserProfileFormMutation, UpdateUserProfileFormMutationVariables>;
 export const DirectoryListingDocument = new TypedDocumentString(`
     query DirectoryListing($input: DirectoryListingInput!, $pagination: Pagination!) {
   listDirectory(input: $input, pagination: $pagination) {

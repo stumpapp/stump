@@ -1205,8 +1205,8 @@ type Mutation {
 	uploadLibraryThumbnail(id: ID!, file: Upload!): Library!
 	deleteLoginActivity: Int!
 	createUser(input: CreateUserInput!): User!
-	meUpdateUser(input: UpdateUserInput!): User!
-	meUpdateUserPreferences(input: UpdateUserPreferencesInput!): UserPreferences!
+	updateViewer(input: UpdateUserInput!): User!
+	updateViewerPreferences(input: UpdateUserPreferencesInput!): UserPreferences!
 	updateUser(userId: String!, input: UpdateUserInput!): User!
 	deleteUserById(userId: String!, hardDelete: Boolean): User!
 	deleteUserSessions(userId: String!): Int!
@@ -2143,7 +2143,7 @@ type UserPreferences {
 	preferredLayoutMode: String!
 	locale: String!
 	appTheme: String!
-	appFont: String!
+	appFont: SupportedFont!
 	primaryNavigationMode: String!
 	layoutMaxWidthPx: Int
 	showQueryIndicator: Boolean!

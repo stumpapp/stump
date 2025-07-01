@@ -1,8 +1,17 @@
-import { useUpdatePreferences } from '@stump/client'
+import { useGraphQLMutation } from '@stump/client'
 import { ComboBox } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { isLocale, localeNames, useLocaleContext } from '@stump/i18n'
 
 import { useUserStore } from '@/stores'
+
+const mutation = graphql(`
+	mutation UpdateUserLocaleSelector($input: UpdateUserPreferencesInput!) {
+		updateViewerPreferences(input: $input) {
+			locale
+		}
+	}
+`)
 
 const options = Object.entries(localeNames).map(([value, label]) => ({
 	label,
@@ -16,14 +25,24 @@ export default function LocaleSelector() {
 		user: store.user,
 		userPreferences: store.userPreferences,
 	}))
-	const { update } = useUpdatePreferences({
-		onSuccess: (preferences) => setUserPreferences(preferences),
+
+	const { mutate } = useGraphQLMutation(mutation, {
+		onSuccess: ({ updateViewerPreferences: { locale } }) => {
+			if (userPreferences) {
+				setUserPreferences({ ...userPreferences, locale })
+			}
+		},
 	})
 
 	const handleChange = async (selected?: string) => {
-		if (selected && userPreferences && isLocale(selected || '')) {
-			// @ts-expect-error: TODO: fix this
-			await update({ ...userPreferences, locale: selected })
+		if (!selected || !userPreferences) return
+		if (isLocale(selected || '')) {
+			await mutate({
+				input: {
+					...userPreferences,
+					locale: selected,
+				},
+			})
 		}
 	}
 

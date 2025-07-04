@@ -855,7 +855,7 @@ export type Log = {
   context?: Maybe<Scalars['String']['output']>;
   id: Scalars['Int']['output'];
   jobId?: Maybe<Scalars['String']['output']>;
-  level: Scalars['String']['output'];
+  level: LogLevel;
   message: Scalars['String']['output'];
   timestamp: Scalars['DateTime']['output'];
 };
@@ -879,6 +879,13 @@ export type LogFilterInput = {
   jobId?: InputMaybe<FieldFilterString>;
   level?: InputMaybe<FieldFilterString>;
 };
+
+export enum LogLevel {
+  Debug = 'DEBUG',
+  Error = 'ERROR',
+  Info = 'INFO',
+  Warn = 'WARN'
+}
 
 export type LogModelOrderBy = {
   direction: OrderDirection;
@@ -1440,7 +1447,7 @@ export type MutationDeleteLibraryThumbnailsArgs = {
 
 
 export type MutationDeleteLogsArgs = {
-  filter: LogFilterInput;
+  filter?: LogFilterInput;
 };
 
 
@@ -1983,8 +1990,8 @@ export type QueryLoginActivityByIdArgs = {
 
 
 export type QueryLogsArgs = {
-  filter: LogFilterInput;
-  orderBy: Array<LogModelOrderBy>;
+  filter?: LogFilterInput;
+  orderBy?: Array<LogModelOrderBy>;
   pagination?: Pagination;
 };
 
@@ -3226,6 +3233,13 @@ export type CreateApiKeyModalMutationVariables = Exact<{
 
 export type CreateApiKeyModalMutation = { __typename?: 'Mutation', createApiKey: { __typename?: 'CreatedAPIKey', secret: string, apiKey: { __typename?: 'Apikey', id: number } } };
 
+export type DeleteApiKeyConfirmModalMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteApiKeyConfirmModalMutation = { __typename?: 'Mutation', deleteApiKey: { __typename?: 'Apikey', id: number } };
+
 export type UpdateUserLocaleSelectorMutationVariables = Exact<{
   input: UpdateUserPreferencesInput;
 }>;
@@ -3239,6 +3253,20 @@ export type UpdateUserProfileFormMutationVariables = Exact<{
 
 
 export type UpdateUserProfileFormMutation = { __typename?: 'Mutation', updateViewer: { __typename?: 'User', id: string, username: string, avatarUrl?: string | null } };
+
+export type DeleteLogsMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DeleteLogsMutation = { __typename?: 'Mutation', deleteLogs: { __typename?: 'LogDeleteOutput', deleted: number } };
+
+export type PersistedLogsQueryVariables = Exact<{
+  filter: LogFilterInput;
+  pagination: Pagination;
+  orderBy: Array<LogModelOrderBy> | LogModelOrderBy;
+}>;
+
+
+export type PersistedLogsQuery = { __typename?: 'Query', logs: { __typename?: 'PaginatedLogResponse', nodes: Array<{ __typename?: 'Log', id: number, timestamp: any, level: LogLevel, message: string, jobId?: string | null, context?: string | null }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
 export type DirectoryListingQueryVariables = Exact<{
   input: DirectoryListingInput;
@@ -4208,6 +4236,13 @@ export const CreateApiKeyModalDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<CreateApiKeyModalMutation, CreateApiKeyModalMutationVariables>;
+export const DeleteApiKeyConfirmModalDocument = new TypedDocumentString(`
+    mutation DeleteAPIKeyConfirmModal($id: Int!) {
+  deleteApiKey(id: $id) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteApiKeyConfirmModalMutation, DeleteApiKeyConfirmModalMutationVariables>;
 export const UpdateUserLocaleSelectorDocument = new TypedDocumentString(`
     mutation UpdateUserLocaleSelector($input: UpdateUserPreferencesInput!) {
   updateViewerPreferences(input: $input) {
@@ -4224,6 +4259,38 @@ export const UpdateUserProfileFormDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UpdateUserProfileFormMutation, UpdateUserProfileFormMutationVariables>;
+export const DeleteLogsDocument = new TypedDocumentString(`
+    mutation DeleteLogs {
+  deleteLogs {
+    deleted
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteLogsMutation, DeleteLogsMutationVariables>;
+export const PersistedLogsDocument = new TypedDocumentString(`
+    query PersistedLogs($filter: LogFilterInput!, $pagination: Pagination!, $orderBy: [LogModelOrderBy!]!) {
+  logs(filter: $filter, pagination: $pagination, orderBy: $orderBy) {
+    nodes {
+      id
+      timestamp
+      level
+      message
+      jobId
+      context
+    }
+    pageInfo {
+      __typename
+      ... on OffsetPaginationInfo {
+        totalPages
+        currentPage
+        pageSize
+        pageOffset
+        pageOffset
+        zeroBased
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<PersistedLogsQuery, PersistedLogsQueryVariables>;
 export const DirectoryListingDocument = new TypedDocumentString(`
     query DirectoryListing($input: DirectoryListingInput!, $pagination: Pagination!) {
   listDirectory(input: $input, pagination: $pagination) {

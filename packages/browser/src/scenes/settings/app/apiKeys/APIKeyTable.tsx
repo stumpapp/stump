@@ -46,7 +46,7 @@ export default function APIKeyTable() {
 
 	const {
 		data: { apiKeys },
-	} = useSuspenseGraphQL(query, [sdk.cacheKey('apiKeys')])
+	} = useSuspenseGraphQL(query, sdk.cacheKey('apiKeys'))
 
 	const { t } = useLocaleContext()
 
@@ -189,8 +189,7 @@ export default function APIKeyTable() {
 	return (
 		<>
 			<APIKeyInspector apiKey={inspectingKey} onClose={() => setInspectingKey(null)} />
-			{/* 
-			<DeleteAPIKeyConfirmModal apiKey={deletingKey} onClose={() => setDeletingKey(null)} /> */}
+			<DeleteAPIKeyConfirmModal apiKey={deletingKey} onClose={() => setDeletingKey(null)} />
 
 			<Card className="overflow-x-auto">
 				<table

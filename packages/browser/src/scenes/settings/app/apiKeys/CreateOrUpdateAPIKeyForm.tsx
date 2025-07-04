@@ -17,6 +17,7 @@ export const CREATE_OR_UPDATE_API_KEY_FORM_ID = 'create-or-update-api-key-form'
 type Props = {
 	editingKey?: Apikey
 	onSubmit: (values: CreateOrUpdateAPIKeyFormValues) => void
+	onFormFocusStateChanged?: (focused: boolean) => void
 }
 
 const toFormPermissions = (key: Apikey) => {
@@ -39,7 +40,11 @@ const formDefaults = (key?: Apikey) =>
 		expiresAt: key?.expiresAt ? new Date(key.expiresAt) : undefined,
 	}) satisfies CreateOrUpdateAPIKeyFormValues
 
-export default function CreateOrUpdateAPIKeyForm({ onSubmit, editingKey }: Props) {
+export default function CreateOrUpdateAPIKeyForm({
+	onSubmit,
+	editingKey,
+	onFormFocusStateChanged,
+}: Props) {
 	const { t } = useLocaleContext()
 	const { checkPermission } = useAppContext()
 
@@ -70,7 +75,17 @@ export default function CreateOrUpdateAPIKeyForm({ onSubmit, editingKey }: Props
 	const validPermissions = allPermissions.filter(checkPermission)
 
 	return (
-		<Form form={form} onSubmit={onSubmit} id={CREATE_OR_UPDATE_API_KEY_FORM_ID}>
+		<Form
+			form={form}
+			onSubmit={onSubmit}
+			id={CREATE_OR_UPDATE_API_KEY_FORM_ID}
+			onFocus={() => {
+				onFormFocusStateChanged?.(true)
+			}}
+			onBlur={() => {
+				onFormFocusStateChanged?.(false)
+			}}
+		>
 			<Input
 				label="Name"
 				placeholder="Koreader Sync"

@@ -85,3 +85,16 @@ export const libraryOrderByOptions: LibraryOrderByOptions = {
 	status: undefined,
 	updated_at: undefined,
 }
+
+// TODO: Figure out type generation options for this
+export type UpdateCheck = {
+	currentSemver: string
+	latestSemver: string
+	hasUpdateAvailable: boolean
+}
+
+export type StumpVersion = {
+	semver: string
+	rev: string
+	compileTime: string
+}

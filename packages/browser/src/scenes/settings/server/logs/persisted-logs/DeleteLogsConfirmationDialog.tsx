@@ -1,15 +1,32 @@
-import { queryClient, useMutation, useSDK } from '@stump/client'
+import { queryClient, useGraphQLMutation, useSDK } from '@stump/client'
 import { Alert, Button, ConfirmationModal } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Log } from '@stump/sdk'
+import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
+
+const mutation = graphql(`
+	mutation DeleteLogs {
+		deleteLogs {
+			deleted
+		}
+	}
+`)
 
 export default function DeleteLogsConfirmationDialog() {
 	const { t } = useLocaleContext()
-
 	const { sdk } = useSDK()
-	const { mutate: clearLogs } = useMutation([sdk.log.keys.clear], () => sdk.log.clear(), {
-		onSuccess: () => queryClient.invalidateQueries([sdk.log.keys.get]),
+
+	const client = useQueryClient()
+
+	const { mutate: deleteLogs } = useGraphQLMutation(mutation, {
+		onSuccess: () => {
+			client.refetchQueries({
+				predicate: ({ queryKey }) => queryKey.includes(sdk.cacheKeys.logs),
+			})
+			setShowConfirmation(false)
+		},
 	})
 
 	const [isEmptyState, setIsEmptyState] = useState(false)
@@ -36,10 +53,8 @@ export default function DeleteLogsConfirmationDialog() {
 	return (
 		<ConfirmationModal
 			isOpen={showConfirmation}
-			onConfirm={() => {
-				clearLogs()
-				setShowConfirmation(false)
-			}}
+			// @ts-expect-error: useGraphQLMutation types obv need fixing
+			onConfirm={() => deleteLogs()}
 			onClose={() => setShowConfirmation(false)}
 			title={t(getKey('title'))}
 			description={t(getKey('description'))}

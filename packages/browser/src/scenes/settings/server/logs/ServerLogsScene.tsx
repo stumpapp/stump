@@ -18,7 +18,7 @@ export default function ServerLogsScene() {
 
 			<ContentContainer>
 				<PersistedLogsSection />
-				<LiveLogsSection />
+				{/* <LiveLogsSection /> */}
 			</ContentContainer>
 		</SceneContainer>
 	)

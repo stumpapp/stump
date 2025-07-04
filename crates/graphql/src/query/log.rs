@@ -23,8 +23,8 @@ impl LogQuery {
 	async fn logs(
 		&self,
 		ctx: &Context<'_>,
-		filter: LogFilterInput,
-		order_by: Vec<log::LogModelOrderBy>,
+		#[graphql(default)] filter: LogFilterInput,
+		#[graphql(default)] order_by: Vec<log::LogModelOrderBy>,
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<Log>> {

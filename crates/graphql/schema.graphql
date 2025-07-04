@@ -799,7 +799,7 @@ type LibraryStats {
 
 type Log {
 	id: Int!
-	level: String!
+	level: LogLevel!
 	message: String!
 	timestamp: DateTime!
 	jobId: String
@@ -822,6 +822,13 @@ input LogFilterInput {
 	_and: [LogFilterInput!] = null
 	_not: [LogFilterInput!] = null
 	_or: [LogFilterInput!] = null
+}
+
+enum LogLevel {
+	ERROR
+	WARN
+	INFO
+	DEBUG
 }
 
 input LogModelOrderBy {
@@ -1162,7 +1169,7 @@ type Mutation {
 	This is used to inform the UI of the last library which was visited by the user
 	"""
 	visitLibrary(id: ID!): Library!
-	deleteLogs(filter: LogFilterInput!): LogDeleteOutput!
+	deleteLogs(filter: LogFilterInput! = {level: null, jobId: null, _and: null, _not: null, _or: null}): LogDeleteOutput!
 	deleteLogFile: Boolean!
 	"""
 	Creates a new reading list.
@@ -1463,7 +1470,7 @@ type Query {
 	recentlyAddedSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
 	"Returns a list of all tags."
 	tags: [Tag!]!
-	logs(filter: LogFilterInput!, orderBy: [LogModelOrderBy!]!, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLogResponse!
+	logs(filter: LogFilterInput! = {level: null, jobId: null, _and: null, _not: null, _or: null}, orderBy: [LogModelOrderBy!]! = [], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLogResponse!
 	"""
 	Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
 	~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.

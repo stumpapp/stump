@@ -2,7 +2,10 @@ use async_graphql::SimpleObject;
 use filter_gen::Ordering;
 use sea_orm::{prelude::*, QueryOrder};
 
-use crate::shared::ordering::{OrderBy, OrderDirection};
+use crate::shared::{
+	enums::LogLevel,
+	ordering::{OrderBy, OrderDirection},
+};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Ordering)]
 #[graphql(name = "LogModel")]
@@ -11,7 +14,7 @@ pub struct Model {
 	#[sea_orm(primary_key)]
 	pub id: i32,
 	#[sea_orm(column_type = "Text")]
-	pub level: String,
+	pub level: LogLevel,
 	#[sea_orm(column_type = "Text")]
 	pub message: String,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]

@@ -47,6 +47,7 @@ async fn ping() -> APIResult<String> {
 
 // TODO: Add docker-specific version info (e.g. tag) to this struct
 #[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct StumpVersion {
 	pub semver: String,
 	pub rev: String,
@@ -62,6 +63,7 @@ async fn version() -> APIResult<Json<StumpVersion>> {
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct UpdateCheck {
 	current_semver: String,
 	latest_semver: String,

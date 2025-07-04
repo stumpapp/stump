@@ -32,7 +32,7 @@ export default function CreateAPIKeyModal() {
 	const { mutate: createKey, isPending } = useGraphQLMutation(mutation, {
 		onSuccess: ({ createApiKey: { secret } }) => {
 			setApiSecret(secret)
-			client.invalidateQueries({
+			client.refetchQueries({
 				exact: false,
 				predicate: ({ queryKey }) => queryKey.includes(sdk.cacheKeys.apiKeys),
 			})
@@ -81,6 +81,20 @@ export default function CreateAPIKeyModal() {
 	const VisibilityIcon = hideSecret ? Eye : EyeOff
 	const CopyIcon = didCopy ? CopyCheck : Copy
 
+	const [formFocused, setFormFocused] = useState(false)
+
+	const onEscapeKeyDown = useCallback(
+		(e: KeyboardEvent) => {
+			if (!formFocused) return
+
+			if (e.key === 'Escape') {
+				e.preventDefault()
+				e.stopPropagation()
+			}
+		},
+		[formFocused],
+	)
+
 	return (
 		<Dialog open={isOpen} onOpenChange={isPending ? undefined : setIsOpen}>
 			<Dialog.Trigger asChild>
@@ -89,7 +103,7 @@ export default function CreateAPIKeyModal() {
 				</Button>
 			</Dialog.Trigger>
 
-			<Dialog.Content size="md">
+			<Dialog.Content size="md" onEscapeKeyDown={onEscapeKeyDown}>
 				<Dialog.Header>
 					<Dialog.Title>{t(getKey(`heading.${apiSecret ? 'created' : 'creating'}`))}</Dialog.Title>
 					<Dialog.Description>
@@ -124,7 +138,12 @@ export default function CreateAPIKeyModal() {
 						</div>
 					</div>
 				)}
-				{!apiSecret && <CreateOrUpdateAPIKeyForm onSubmit={handleCreate} />}
+				{!apiSecret && (
+					<CreateOrUpdateAPIKeyForm
+						onSubmit={handleCreate}
+						onFormFocusStateChanged={setFormFocused}
+					/>
+				)}
 
 				<Dialog.Footer>
 					{!apiSecret && (

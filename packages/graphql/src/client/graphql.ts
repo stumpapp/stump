@@ -1841,6 +1841,8 @@ export type PaginationInfo = CursorPaginationInfo | OffsetPaginationInfo;
 
 export type Query = {
   __typename?: 'Query';
+  apiKeyById: Apikey;
+  apiKeys: Array<Apikey>;
   bookClubById?: Maybe<BookClub>;
   bookClubs: Array<BookClub>;
   /** Get all bookmarks for a single epub by its media ID */
@@ -1852,8 +1854,6 @@ export type Query = {
   emailers: Array<Emailer>;
   /** Get a single epub by its media ID */
   epubById: Epub;
-  getApiKeyById: Apikey;
-  getApiKeys: Array<Apikey>;
   getNotifierById: Notifier;
   getNotifiers: Array<Notifier>;
   jobById?: Maybe<Job>;
@@ -1910,6 +1910,11 @@ export type Query = {
 };
 
 
+export type QueryApiKeyByIdArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
 export type QueryBookClubByIdArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1937,11 +1942,6 @@ export type QueryEmailerByIdArgs = {
 
 export type QueryEpubByIdArgs = {
   id: Scalars['ID']['input'];
-};
-
-
-export type QueryGetApiKeyByIdArgs = {
-  id: Scalars['Int']['input'];
 };
 
 
@@ -3214,6 +3214,11 @@ export type SeriesBookGridQueryVariables = Exact<{
 
 export type SeriesBookGridQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
+export type ApiKeyTableQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ApiKeyTableQuery = { __typename?: 'Query', apiKeys: Array<{ __typename?: 'Apikey', id: number, name: string, lastUsedAt?: any | null, expiresAt?: any | null, createdAt: any, permissions: { __typename: 'InheritPermissionStruct' } | { __typename: 'UserPermissionStruct', value: Array<UserPermission> } }> };
+
 export type CreateApiKeyModalMutationVariables = Exact<{
   input: ApikeyInput;
 }>;
@@ -4176,6 +4181,23 @@ export const SeriesBookGridDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SeriesBookGridQuery, SeriesBookGridQueryVariables>;
+export const ApiKeyTableDocument = new TypedDocumentString(`
+    query APIKeyTable {
+  apiKeys {
+    id
+    name
+    permissions {
+      __typename
+      ... on UserPermissionStruct {
+        value
+      }
+    }
+    lastUsedAt
+    expiresAt
+    createdAt
+  }
+}
+    `) as unknown as TypedDocumentString<ApiKeyTableQuery, ApiKeyTableQueryVariables>;
 export const CreateApiKeyModalDocument = new TypedDocumentString(`
     mutation CreateAPIKeyModal($input: ApikeyInput!) {
   createApiKey(input: $input) {

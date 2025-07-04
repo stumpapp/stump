@@ -14,7 +14,7 @@ pub struct APIKeyQuery;
 #[Object]
 impl APIKeyQuery {
 	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessAPIKeys)")]
-	async fn get_api_keys(&self, ctx: &Context<'_>) -> Result<Vec<APIKey>> {
+	async fn api_keys(&self, ctx: &Context<'_>) -> Result<Vec<APIKey>> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
@@ -27,7 +27,7 @@ impl APIKeyQuery {
 	}
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessAPIKeys)")]
-	async fn get_api_key_by_id(&self, ctx: &Context<'_>, id: i32) -> Result<APIKey> {
+	async fn api_key_by_id(&self, ctx: &Context<'_>, id: i32) -> Result<APIKey> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 

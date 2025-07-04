@@ -1409,8 +1409,8 @@ input Pagination @oneOf {
 union PaginationInfo = CursorPaginationInfo | OffsetPaginationInfo
 
 type Query {
-	getApiKeys: [Apikey!]!
-	getApiKeyById(id: Int!): Apikey!
+	apiKeys: [Apikey!]!
+	apiKeyById(id: Int!): Apikey!
 	bookClubs(all: Boolean = null): [BookClub!]!
 	bookClubById(id: ID!): BookClub
 	emailers: [Emailer!]!

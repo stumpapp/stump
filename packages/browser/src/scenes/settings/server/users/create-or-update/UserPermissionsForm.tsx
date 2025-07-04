@@ -1,12 +1,12 @@
 import { CheckBox, Heading, Label, Link, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { UserPermission } from '@stump/sdk'
+import { allPermissions, UserPermission } from '@stump/sdk'
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import paths from '@/paths'
 
-import { allPermissions, CreateOrUpdateUserSchema } from './schema'
+import { CreateOrUpdateUserSchema } from './schema'
 
 export const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	'bookclub:create': ['bookclub:read'],

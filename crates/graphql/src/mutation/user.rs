@@ -294,6 +294,8 @@ async fn update_user_preferences_by_id(
 	user_preferences: UpdateUserPreferencesInput,
 	conn: &DatabaseConnection,
 ) -> Result<UserPreferences> {
+	// FIXME(graphql): I think this will overwrite the NotSet values if they are
+	// currently set
 	let updated_user_preferences = user_preferences::ActiveModel {
 		id: Set(id),
 		user_id: Set(Some(user_id)),
@@ -386,8 +388,8 @@ async fn update_user_age_restriction(
 		.await?;
 
 	if let Some(age_restriction) = age_restriction {
-		let set_age_restriction_id = if existing_age_restriction.is_some() {
-			Set(existing_age_restriction.unwrap().id)
+		let set_age_restriction_id = if let Some(restriction) = existing_age_restriction {
+			Set(restriction.id)
 		} else {
 			NotSet
 		};

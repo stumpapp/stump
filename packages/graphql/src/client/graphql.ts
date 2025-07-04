@@ -2881,6 +2881,13 @@ export type DeleteBookmarkMutationVariables = Exact<{
 
 export type DeleteBookmarkMutation = { __typename?: 'Mutation', deleteBookmark: { __typename: 'Bookmark' } };
 
+export type UsePreferencesMutationVariables = Exact<{
+  input: UpdateUserPreferencesInput;
+}>;
+
+
+export type UsePreferencesMutation = { __typename?: 'Mutation', updateViewerPreferences: { __typename: 'UserPreferences' } };
+
 export type BookCompletionToggleButtonCompleteMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   isComplete: Scalars['Boolean']['input'];
@@ -3456,6 +3463,13 @@ export const DeleteBookmarkDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<DeleteBookmarkMutation, DeleteBookmarkMutationVariables>;
+export const UsePreferencesDocument = new TypedDocumentString(`
+    mutation UsePreferences($input: UpdateUserPreferencesInput!) {
+  updateViewerPreferences(input: $input) {
+    __typename
+  }
+}
+    `) as unknown as TypedDocumentString<UsePreferencesMutation, UsePreferencesMutationVariables>;
 export const BookCompletionToggleButtonCompleteDocument = new TypedDocumentString(`
     mutation BookCompletionToggleButtonComplete($id: ID!, $isComplete: Boolean!, $page: Int) {
   markMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {

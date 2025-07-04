@@ -2,6 +2,7 @@ import { useGraphQLMutation } from '@stump/client'
 import { ComboBox } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { isLocale, localeNames, useLocaleContext } from '@stump/i18n'
+import { useCallback } from 'react'
 
 import { useUserStore } from '@/stores'
 
@@ -34,17 +35,20 @@ export default function LocaleSelector() {
 		},
 	})
 
-	const handleChange = async (selected?: string) => {
-		if (!selected || !userPreferences) return
-		if (isLocale(selected || '')) {
-			await mutate({
-				input: {
-					...userPreferences,
-					locale: selected,
-				},
-			})
-		}
-	}
+	const handleChange = useCallback(
+		async (selected?: string) => {
+			if (!selected || !userPreferences) return
+			if (isLocale(selected || '')) {
+				await mutate({
+					input: {
+						...userPreferences,
+						locale: selected,
+					},
+				})
+			}
+		},
+		[mutate, userPreferences],
+	)
 
 	return (
 		<ComboBox

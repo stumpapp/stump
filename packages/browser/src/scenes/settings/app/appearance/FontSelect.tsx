@@ -22,7 +22,6 @@ export default function FontSelect() {
 	 *
 	 * TODO(383): support custom fonts
 	 */
-	// TODO(graphql): Fix type
 	const changeFont = useCallback(
 		async (font: string) => {
 			if (isSupportedFont(font)) {
@@ -44,7 +43,7 @@ export default function FontSelect() {
 			</Label>
 			{/* TODO: don't use a native select, instead some combobox which renders each option in the font */}
 			<NativeSelect
-				value={appFont || 'inter'}
+				value={appFont || 'INTER'}
 				options={SUPPORTED_FONT_OPTIONS}
 				onChange={(e) => changeFont(e.target.value)}
 			/>
@@ -58,12 +57,12 @@ export default function FontSelect() {
 const localeKey = 'settingsScene.app/appearance.sections.fontSelect'
 
 export const SUPPORTED_FONT_OPTIONS = [
-	{ label: 'Atkinson Hyperlegible', value: 'atkinsonhyperlegible' },
-	{ label: 'Bitter', value: 'bitter' },
-	{ label: 'Charis SIL', value: 'charis' },
-	{ label: 'Inter', value: 'inter' },
-	{ label: 'Libre Baskerville', value: 'librebaskerville' },
-	{ label: 'Literata', value: 'literata' },
-	{ label: 'Nunito', value: 'nunito' },
-	{ label: 'OpenDyslexic', value: 'opendyslexic' },
+	{ label: 'Atkinson Hyperlegible', value: 'ATKINSON_HYPERLEGIBLE' },
+	{ label: 'Bitter', value: 'BITTER' },
+	{ label: 'Charis SIL', value: 'CHARIS' },
+	{ label: 'Inter', value: 'INTER' },
+	{ label: 'Libre Baskerville', value: 'LIBRE_BASKERVILLE' },
+	{ label: 'Literata', value: 'LITERATA' },
+	{ label: 'Nunito', value: 'NUNITO' },
+	{ label: 'OpenDyslexic', value: 'OPEN_DYSLEXIC' },
 ]

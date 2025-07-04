@@ -30,6 +30,7 @@ type Documents = {
     "\n\tmutation UpdateEpubProgress($input: EpubProgressInput!) {\n\t\tupdateEpubProgress(input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.UpdateEpubProgressDocument,
     "\n\tmutation CreateOrUpdateBookmark($input: BookmarkInput!) {\n\t\tcreateOrUpdateBookmark(input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.CreateOrUpdateBookmarkDocument,
     "\n\tmutation DeleteBookmark($epubcfi: String!) {\n\t\tdeleteBookmark(epubcfi: $epubcfi) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.DeleteBookmarkDocument,
+    "\n\tmutation UsePreferences($input: UpdateUserPreferencesInput!) {\n\t\tupdateViewerPreferences(input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.UsePreferencesDocument,
     "\n\tmutation BookCompletionToggleButtonComplete($id: ID!, $isComplete: Boolean!, $page: Int) {\n\t\tmarkMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {\n\t\t\tcompletedAt\n\t\t}\n\t}\n": typeof types.BookCompletionToggleButtonCompleteDocument,
     "\n\tmutation BookCompletionToggleButtonDeleteSession($id: ID!) {\n\t\tdeleteMediaProgress(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.BookCompletionToggleButtonDeleteSessionDocument,
     "\n\tfragment BookFileInformation on Media {\n\t\tid\n\t\tsize\n\t\textension\n\t\thash\n\t\trelativeLibraryPath\n\t}\n": typeof types.BookFileInformationFragmentDoc,
@@ -93,6 +94,7 @@ const documents: Documents = {
     "\n\tmutation UpdateEpubProgress($input: EpubProgressInput!) {\n\t\tupdateEpubProgress(input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.UpdateEpubProgressDocument,
     "\n\tmutation CreateOrUpdateBookmark($input: BookmarkInput!) {\n\t\tcreateOrUpdateBookmark(input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.CreateOrUpdateBookmarkDocument,
     "\n\tmutation DeleteBookmark($epubcfi: String!) {\n\t\tdeleteBookmark(epubcfi: $epubcfi) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.DeleteBookmarkDocument,
+    "\n\tmutation UsePreferences($input: UpdateUserPreferencesInput!) {\n\t\tupdateViewerPreferences(input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.UsePreferencesDocument,
     "\n\tmutation BookCompletionToggleButtonComplete($id: ID!, $isComplete: Boolean!, $page: Int) {\n\t\tmarkMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {\n\t\t\tcompletedAt\n\t\t}\n\t}\n": types.BookCompletionToggleButtonCompleteDocument,
     "\n\tmutation BookCompletionToggleButtonDeleteSession($id: ID!) {\n\t\tdeleteMediaProgress(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.BookCompletionToggleButtonDeleteSessionDocument,
     "\n\tfragment BookFileInformation on Media {\n\t\tid\n\t\tsize\n\t\textension\n\t\thash\n\t\trelativeLibraryPath\n\t}\n": types.BookFileInformationFragmentDoc,
@@ -201,6 +203,10 @@ export function graphql(source: "\n\tmutation CreateOrUpdateBookmark($input: Boo
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tmutation DeleteBookmark($epubcfi: String!) {\n\t\tdeleteBookmark(epubcfi: $epubcfi) {\n\t\t\t__typename\n\t\t}\n\t}\n"): typeof import('./graphql').DeleteBookmarkDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation UsePreferences($input: UpdateUserPreferencesInput!) {\n\t\tupdateViewerPreferences(input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n"): typeof import('./graphql').UsePreferencesDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

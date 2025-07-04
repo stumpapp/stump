@@ -1,4 +1,4 @@
-import { SupportedFont } from '@stump/sdk'
+import { SupportedFont } from '@stump/graphql'
 import { useEffect } from 'react'
 
 /**
@@ -21,7 +21,7 @@ type Params = {
  * @param appTheme The theme to apply to the app, applied to the `html` element
  * @param appFont The font to apply to the app, applied to the `body` element
  */
-export function useApplyTheme({ appTheme, appFont = 'inter' }: Params) {
+export function useApplyTheme({ appTheme, appFont = SupportedFont.Inter }: Params) {
 	/**
 	 * The effect responsible for applying the theme to the app. If the `appTheme` is not provided,
 	 * the app will default to the user's system preference or the light theme

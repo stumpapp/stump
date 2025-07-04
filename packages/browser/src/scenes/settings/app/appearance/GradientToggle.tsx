@@ -1,33 +1,26 @@
-import { useUpdatePreferences } from '@stump/client'
 import { WideSwitch } from '@stump/components'
+import { useCallback } from 'react'
 
-import { useUserStore } from '@/stores'
+import { usePreferences } from '@/hooks/usePreferences'
 
 export default function GradientToggle() {
-	const { preferences, setPreferences } = useUserStore((state) => ({
-		preferences: state.userPreferences,
-		setPreferences: state.setUserPreferences,
-	}))
+	const {
+		preferences: { enableGradients },
+		update,
+	} = usePreferences()
 
-	const { unsafePatch } = useUpdatePreferences({
-		onSuccess: setPreferences,
-	})
-
-	const handleChange = () => {
-		if (preferences) {
-			unsafePatch({
-				...preferences,
-				enable_gradients: !preferences.enable_gradients,
-			})
-		}
-	}
+	const handleChange = useCallback(() => {
+		update({
+			enableGradients: !enableGradients,
+		})
+	}, [enableGradients, update])
 
 	return (
 		<WideSwitch
-			formId="enable_gradients"
+			formId="enableGradients"
 			label="Enable gradients"
 			description="Some themes optionally support gradients for a more dynamic look"
-			checked={preferences?.enable_gradients}
+			checked={enableGradients}
 			onCheckedChange={handleChange}
 		/>
 	)

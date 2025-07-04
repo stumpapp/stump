@@ -248,6 +248,11 @@ input CreateUserInput {
 	maxSessionsAllowed: Int
 }
 
+type CreatedAPIKey {
+	apiKey: Apikey!
+	secret: String!
+}
+
 type CreatedManySeries {
 	count: Int!
 	libraryId: String!
@@ -1064,7 +1069,7 @@ input MediaOrderByField {
 }
 
 type Mutation {
-	createApiKey(input: ApikeyInput!): Apikey!
+	createApiKey(input: ApikeyInput!): CreatedAPIKey!
 	updateApiKey(id: Int!, input: ApikeyInput!): Apikey!
 	deleteApiKey(id: Int!): Apikey!
 	createSmartList(input: SaveSmartListInput!): SmartList!
@@ -2019,6 +2024,7 @@ input UpdateUserPreferencesInput {
 	enableJobOverlay: Boolean!
 	preferAccentColor: Boolean!
 	showThumbnailsInHeaders: Boolean!
+	enableAlphabetSelect: Boolean!
 }
 
 scalar Upload

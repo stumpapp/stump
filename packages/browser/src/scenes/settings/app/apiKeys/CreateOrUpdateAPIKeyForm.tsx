@@ -1,7 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert, ComboBox, DatePicker, Form, Input, RadioGroup } from '@stump/components'
+import { Apikey } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { allPermissions, APIKey, isUserPermission } from '@stump/sdk'
+import { allPermissions, isUserPermission } from '@stump/sdk'
 import dayjs from 'dayjs'
 import { useCallback } from 'react'
 import { useForm, useFormState } from 'react-hook-form'
@@ -14,16 +15,28 @@ import { userPermissionSchema } from '../../server/users/create-or-update/schema
 export const CREATE_OR_UPDATE_API_KEY_FORM_ID = 'create-or-update-api-key-form'
 
 type Props = {
-	editingKey?: APIKey
+	editingKey?: Apikey
 	onSubmit: (values: CreateOrUpdateAPIKeyFormValues) => void
 }
 
-const formDefaults = (key?: APIKey) =>
+const toFormPermissions = (key: Apikey) => {
+	if (key.permissions.__typename === 'InheritPermissionStruct') {
+		return { inherit: true, explicitPermissions: [] }
+	} else if (key.permissions.__typename === 'UserPermissionStruct') {
+		return {
+			inherit: false,
+			explicitPermissions: key.permissions.value,
+		}
+	}
+
+	return { inherit: false, explicitPermissions: [] }
+}
+
+const formDefaults = (key?: Apikey) =>
 	({
 		name: key?.name || '',
-		inherit: key?.permissions === 'inherit',
-		explicit_permissions: key?.permissions === 'inherit' ? [] : key?.permissions || [],
-		expires_at: key?.expires_at ? new Date(key.expires_at) : undefined,
+		...(key ? toFormPermissions(key) : { inherit: false, explicitPermissions: [] }),
+		expiresAt: key?.expiresAt ? new Date(key.expiresAt) : undefined,
 	}) satisfies CreateOrUpdateAPIKeyFormValues
 
 export default function CreateOrUpdateAPIKeyForm({ onSubmit, editingKey }: Props) {
@@ -38,17 +51,17 @@ export default function CreateOrUpdateAPIKeyForm({ onSubmit, editingKey }: Props
 
 	const [inherit, permissions, expiresAt] = form.watch([
 		'inherit',
-		'explicit_permissions',
-		'expires_at',
+		'explicitPermissions',
+		'expiresAt',
 	])
 
 	const handleDateChange = useCallback(
 		(date?: Date) => {
 			if (date) {
 				const adjusted = dayjs(date).endOf('day').toDate()
-				form.setValue('expires_at', adjusted)
+				form.setValue('expiresAt', adjusted)
 			} else {
-				form.setValue('expires_at', undefined)
+				form.setValue('expiresAt', undefined)
 			}
 		},
 		[form],
@@ -94,15 +107,13 @@ export default function CreateOrUpdateAPIKeyForm({ onSubmit, editingKey }: Props
 					{!inherit && (
 						<div className="pl-4">
 							<ComboBox
-								// TODO: localize
 								options={validPermissions.map((permission) => ({
 									value: permission,
-									label: permission,
+									label: t(`userPermissions.${permission}.label`),
 								}))}
 								value={permissions}
-								// TODO: typecheck values
 								onChange={(value) =>
-									form.setValue('explicit_permissions', value?.filter(isUserPermission) || [])
+									form.setValue('explicitPermissions', value?.filter(isUserPermission) || [])
 								}
 								isMultiSelect
 								disabled={inherit}
@@ -113,8 +124,8 @@ export default function CreateOrUpdateAPIKeyForm({ onSubmit, editingKey }: Props
 			</RadioGroup>
 
 			<DatePicker
-				label={t(getFieldKey('expires_at.label'))}
-				placeholder={t(getFieldKey('expires_at.placeholder'))}
+				label={t(getFieldKey('expiresAt.label'))}
+				placeholder={t(getFieldKey('expiresAt.placeholder'))}
 				selected={expiresAt}
 				onChange={handleDateChange}
 				minDate={dayjs().add(1, 'day').endOf('day').toDate()}
@@ -127,8 +138,8 @@ export const createSchema = (t: (key: string) => string) =>
 	z.object({
 		name: z.string().min(1),
 		inherit: z.boolean(),
-		explicit_permissions: z.array(userPermissionSchema),
-		expires_at: z
+		explicitPermissions: z.array(userPermissionSchema),
+		expiresAt: z
 			.date()
 			.optional()
 			.refine((value) => value == undefined || value > new Date(), {

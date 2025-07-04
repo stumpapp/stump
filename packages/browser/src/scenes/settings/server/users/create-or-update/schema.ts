@@ -1,34 +1,7 @@
-import { User } from '@stump/sdk'
+import { User, UserPermission } from '@stump/graphql'
 import { z } from 'zod'
 
-export const allPermissions = [
-	'bookclub:read',
-	'bookclub:create',
-	'email:arbitrary_send',
-	'email:send',
-	'emailer:create',
-	'emailer:manage',
-	'emailer:read',
-	'feature:api_keys',
-	'feature:koreader_sync',
-	'file:explorer',
-	'file:upload',
-	'file:download',
-	'library:create',
-	'library:edit',
-	'library:scan',
-	'library:manage',
-	'library:delete',
-	'user:read',
-	'user:manage',
-	'server:manage',
-	'smartlist:read',
-	'notifier:read',
-	'notifier:create',
-	'notifier:delete',
-	'notifier:manage',
-] as const
-export const userPermissionSchema = z.enum(allPermissions)
+export const userPermissionSchema = z.nativeEnum(UserPermission)
 
 export const buildSchema = (
 	t: (key: string) => string,
@@ -36,15 +9,15 @@ export const buildSchema = (
 	editingUser?: User,
 ) =>
 	z.object({
-		age_restriction: z
+		ageRestriction: z
 			.number()
 			.optional()
 			.refine((value) => value == undefined || value >= 0, {
 				message: t('settingsScene.server/users.createOrUpdateForm.validation.ageRestrictionTooLow'),
 			}),
-		age_restriction_on_unset: z.boolean().optional(),
-		forbidden_tags: z.array(z.string()).optional(),
-		max_sessions_allowed: z
+		ageRestrictionOnUnset: z.boolean().optional(),
+		forbiddenTags: z.array(z.string()).optional(),
+		maxSessionsAllowed: z
 			.number()
 			.optional()
 			.refine((value) => value == undefined || value >= 0, {
@@ -83,9 +56,9 @@ export const buildSchema = (
 export type CreateOrUpdateUserSchema = z.infer<ReturnType<typeof buildSchema>>
 
 export const formDefaults = (editingUser?: User): CreateOrUpdateUserSchema => ({
-	age_restriction: editingUser?.age_restriction?.age,
-	age_restriction_on_unset: editingUser?.age_restriction?.restrict_on_unset,
-	max_sessions_allowed: editingUser?.max_sessions_allowed ?? undefined,
+	ageRestriction: editingUser?.ageRestriction?.age,
+	ageRestrictionOnUnset: editingUser?.ageRestriction?.restrictOnUnset,
+	maxSessionsAllowed: editingUser?.maxSessionsAllowed ?? undefined,
 	permissions: editingUser?.permissions ?? [],
 	username: editingUser?.username ?? '',
 })

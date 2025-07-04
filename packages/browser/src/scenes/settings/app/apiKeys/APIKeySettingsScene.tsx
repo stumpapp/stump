@@ -25,9 +25,7 @@ export default function APIKeySettingsScene() {
 						<CreateAPIKeyModal />
 					</div>
 
-					<Suspense>
-						<APIKeyTable />
-					</Suspense>
+					<Suspense>{/* <APIKeyTable /> */}</Suspense>
 				</div>
 			</ContentContainer>
 		</SceneContainer>

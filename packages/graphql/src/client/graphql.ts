@@ -288,6 +288,12 @@ export type CreateUserInput = {
   username: Scalars['String']['input'];
 };
 
+export type CreatedApiKey = {
+  __typename?: 'CreatedAPIKey';
+  apiKey: Apikey;
+  secret: Scalars['String']['output'];
+};
+
 export type CreatedManySeries = {
   __typename?: 'CreatedManySeries';
   count: Scalars['Int']['output'];
@@ -1144,7 +1150,7 @@ export type Mutation = {
   /** Clear the scan history for a specific library */
   clearScanHistory: Scalars['Int']['output'];
   convertMedia: Scalars['Boolean']['output'];
-  createApiKey: Apikey;
+  createApiKey: CreatedApiKey;
   createBookClub: BookClub;
   createBookClubInvitation: BookClubInvitation;
   createBookClubMember: BookClubMember;
@@ -2619,6 +2625,7 @@ export type UpdateUserInput = {
 export type UpdateUserPreferencesInput = {
   appFont: SupportedFont;
   appTheme: Scalars['String']['input'];
+  enableAlphabetSelect: Scalars['Boolean']['input'];
   enableCompactDisplay: Scalars['Boolean']['input'];
   enableDiscordPresence: Scalars['Boolean']['input'];
   enableDoubleSidebar: Scalars['Boolean']['input'];
@@ -3206,6 +3213,13 @@ export type SeriesBookGridQueryVariables = Exact<{
 
 
 export type SeriesBookGridQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
+
+export type CreateApiKeyModalMutationVariables = Exact<{
+  input: ApikeyInput;
+}>;
+
+
+export type CreateApiKeyModalMutation = { __typename?: 'Mutation', createApiKey: { __typename?: 'CreatedAPIKey', secret: string, apiKey: { __typename?: 'Apikey', id: number } } };
 
 export type UpdateUserLocaleSelectorMutationVariables = Exact<{
   input: UpdateUserPreferencesInput;
@@ -4162,6 +4176,16 @@ export const SeriesBookGridDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SeriesBookGridQuery, SeriesBookGridQueryVariables>;
+export const CreateApiKeyModalDocument = new TypedDocumentString(`
+    mutation CreateAPIKeyModal($input: ApikeyInput!) {
+  createApiKey(input: $input) {
+    apiKey {
+      id
+    }
+    secret
+  }
+}
+    `) as unknown as TypedDocumentString<CreateApiKeyModalMutation, CreateApiKeyModalMutationVariables>;
 export const UpdateUserLocaleSelectorDocument = new TypedDocumentString(`
     mutation UpdateUserLocaleSelector($input: UpdateUserPreferencesInput!) {
   updateViewerPreferences(input: $input) {

@@ -1,5 +1,5 @@
 import { Preformatted, Sheet, usePrevious } from '@stump/components'
-import { CoreJobOutput } from '@stump/sdk'
+import { CoreJobOutput } from '@stump/graphql'
 
 type Props = {
 	data?: CoreJobOutput | null

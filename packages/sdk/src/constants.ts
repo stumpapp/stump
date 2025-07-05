@@ -26,4 +26,5 @@ export const cacheKeys = {
 	media: 'media',
 	apiKeys: 'apiKeys',
 	logs: 'logs',
+	jobs: 'jobs',
 } as const

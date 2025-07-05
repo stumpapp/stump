@@ -475,6 +475,8 @@ pub enum UserPermission {
 	DeleteNotifier,
 	/// Grant access to read jobs
 	ReadJobs,
+	/// Grant access to manage jobs, like pausing, resuming, deleting, or cancelling them
+	ManageJobs,
 	/// Grant access to read application-level logs, e.g. job logs
 	ReadPersistedLogs,
 	/// Grant access to read system logs

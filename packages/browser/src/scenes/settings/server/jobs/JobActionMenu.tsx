@@ -1,12 +1,20 @@
 import { invalidateQueries, useSDK } from '@stump/client'
 import { Button, DropdownMenu } from '@stump/components'
-import { CoreJobOutput, PersistedJob } from '@stump/sdk'
+import { CoreJobOutput, graphql } from '@stump/graphql'
 import { Ban, Database, FileClock, ListX, MoreVertical, Trash2 } from 'lucide-react'
 import { useCallback, useMemo } from 'react'
 import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router'
 
 import paths from '@/paths'
+
+import { PersistedJob } from './JobTable'
+
+const cancelMutation = graphql(`
+	mutation JobActionMenuCancelJob($id: ID!) {
+		cancelJob(id: $id)
+	}
+`)
 
 type Props = {
 	job: PersistedJob

@@ -1,6 +1,6 @@
 use crate::object::{
-	directory_listing::DirectoryListing, library::Library, log::Log, media::Media,
-	reading_list::ReadingList, series::Series,
+	directory_listing::DirectoryListing, job::Job, library::Library, log::Log,
+	media::Media, reading_list::ReadingList, series::Series,
 };
 use async_graphql::{
 	CustomValidator, InputObject, InputValueError, OneofObject, OutputType, Result,
@@ -288,6 +288,7 @@ pub enum PaginationInfo {
 	name = "PaginatedDirectoryListingResponse",
 	params(DirectoryListing)
 ))]
+#[graphql(concrete(name = "PaginatedJobResponse", params(Job)))]
 #[graphql(concrete(name = "PaginatedLogResponse", params(Log)))]
 #[graphql(concrete(name = "PaginatedMediaResponse", params(Media)))]
 #[graphql(concrete(name = "PaginatedLibraryResponse", params(Library)))]

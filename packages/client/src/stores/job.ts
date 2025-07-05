@@ -1,4 +1,4 @@
-import { JobUpdate } from '@stump/sdk'
+import { JobStatus, JobUpdate } from '@stump/graphql'
 import deepEqual from 'deep-equal'
 import { produce } from 'immer'
 import { createWithEqualityFn } from 'zustand/traditional'
@@ -36,17 +36,17 @@ export const useJobStore = createWithEqualityFn<JobStore>(
 					if (existingJob) {
 						// There are certain fields which are nullable from the update that we
 						// absolutely do not want to overwrite with null. It behaves similar to
-						// a patch request. The fields are: message, status, completed_tasks, remaining_tasks.
+						// a patch request. The fields are: message, status, completedTasks, remainingTasks.
 						// Subtasks are sent with both always included, so if they are null that means
 						// they are completed and can be overwritten.
-						const { status, completed_tasks, remaining_tasks, message, ...rest } = job
+						const { status, completedTasks, remainingTasks, message, ...rest } = job
 
 						draft.jobs[job.id] = {
 							...existingJob,
 							...rest,
-							completed_tasks: completed_tasks ?? existingJob.completed_tasks,
+							completedTasks: completedTasks ?? existingJob.completedTasks,
 							message: message || existingJob.message,
-							remaining_tasks: remaining_tasks ?? existingJob.remaining_tasks,
+							remainingTasks: remainingTasks ?? existingJob.remainingTasks,
 							status: status || existingJob.status,
 						}
 					} else {
@@ -54,7 +54,7 @@ export const useJobStore = createWithEqualityFn<JobStore>(
 							...job,
 							// This should be a safe assumption, as status events will always have a set status and
 							// the only time other events are sent would be updates to the job itself
-							status: job.status || 'RUNNING',
+							status: job.status || JobStatus.Running,
 						}
 					}
 				}),

@@ -615,10 +615,10 @@ type Job {
 	id: String!
 	name: String!
 	description: String
-	status: String!
+	status: JobStatus!
 	msElapsed: Int!
 	createdAt: DateTime!
-	completedAt: String
+	completedAt: DateTime
 	outputData: CoreJobOutput
 	saveState: JSON
 	logs: [Log!]!
@@ -1358,6 +1358,11 @@ type PaginatedDirectoryListingResponse {
 	pageInfo: PaginationInfo!
 }
 
+type PaginatedJobResponse {
+	nodes: [Job!]!
+	pageInfo: PaginationInfo!
+}
+
 type PaginatedLibraryResponse {
 	nodes: [Library!]!
 	pageInfo: PaginationInfo!
@@ -1425,7 +1430,7 @@ type Query {
 	emailDevices: [RegisteredEmailDevice!]!
 	emailDeviceById(id: Int!): RegisteredEmailDevice
 	listDirectory(pagination: Pagination!, input: DirectoryListingInput): PaginatedDirectoryListingResponse!
-	jobs: [Job!]!
+	jobs(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedJobResponse!
 	jobById(id: ID!): Job
 	media(filter: MediaFilterInput!, orderBy: [MediaOrderBy!]! = [{media: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	mediaById(id: ID!): Media

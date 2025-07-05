@@ -652,7 +652,7 @@ export enum InheritPermissionValue {
 
 export type Job = {
   __typename?: 'Job';
-  completedAt?: Maybe<Scalars['String']['output']>;
+  completedAt?: Maybe<Scalars['DateTime']['output']>;
   createdAt: Scalars['DateTime']['output'];
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
@@ -661,7 +661,7 @@ export type Job = {
   name: Scalars['String']['output'];
   outputData?: Maybe<CoreJobOutput>;
   saveState?: Maybe<Scalars['JSON']['output']>;
-  status: Scalars['String']['output'];
+  status: JobStatus;
 };
 
 export type JobOutput = {
@@ -1785,6 +1785,12 @@ export type PaginatedDirectoryListingResponse = {
   pageInfo: PaginationInfo;
 };
 
+export type PaginatedJobResponse = {
+  __typename?: 'PaginatedJobResponse';
+  nodes: Array<Job>;
+  pageInfo: PaginationInfo;
+};
+
 export type PaginatedLibraryResponse = {
   __typename?: 'PaginatedLibraryResponse';
   nodes: Array<Library>;
@@ -1864,7 +1870,7 @@ export type Query = {
   getNotifierById: Notifier;
   getNotifiers: Array<Notifier>;
   jobById?: Maybe<Job>;
-  jobs: Array<Job>;
+  jobs: PaginatedJobResponse;
   keepReading: PaginatedMediaResponse;
   libraries: PaginatedLibraryResponse;
   libraryById?: Maybe<Library>;
@@ -1959,6 +1965,11 @@ export type QueryGetNotifierByIdArgs = {
 
 export type QueryJobByIdArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryJobsArgs = {
+  pagination?: Pagination;
 };
 
 
@@ -3254,6 +3265,13 @@ export type UpdateUserProfileFormMutationVariables = Exact<{
 
 export type UpdateUserProfileFormMutation = { __typename?: 'Mutation', updateViewer: { __typename?: 'User', id: string, username: string, avatarUrl?: string | null } };
 
+export type JobTableQueryVariables = Exact<{
+  pagination: Pagination;
+}>;
+
+
+export type JobTableQuery = { __typename?: 'Query', jobs: { __typename?: 'PaginatedJobResponse', nodes: Array<{ __typename?: 'Job', id: string, name: string, description?: string | null, status: JobStatus, createdAt: any, completedAt?: any | null, msElapsed: number }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+
 export type LiveLogsFeedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -4264,6 +4282,31 @@ export const UpdateUserProfileFormDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UpdateUserProfileFormMutation, UpdateUserProfileFormMutationVariables>;
+export const JobTableDocument = new TypedDocumentString(`
+    query JobTable($pagination: Pagination!) {
+  jobs(pagination: $pagination) {
+    nodes {
+      id
+      name
+      description
+      status
+      createdAt
+      completedAt
+      msElapsed
+    }
+    pageInfo {
+      __typename
+      ... on OffsetPaginationInfo {
+        currentPage
+        totalPages
+        pageSize
+        pageOffset
+        zeroBased
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<JobTableQuery, JobTableQueryVariables>;
 export const LiveLogsFeedDocument = new TypedDocumentString(`
     subscription LiveLogsFeed {
   tailLogFile

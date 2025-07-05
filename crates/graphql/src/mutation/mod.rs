@@ -6,6 +6,7 @@ mod book_club_schedule;
 mod email_device;
 mod emailer;
 mod epub;
+mod job;
 mod library;
 mod log;
 mod media;
@@ -26,6 +27,7 @@ use book_club_schedule::BookClubScheduleMutation;
 use email_device::EmailDeviceMutation;
 use emailer::EmailerMutation;
 use epub::EpubMutation;
+use job::JobMutation;
 use library::LibraryMutation;
 use log::LogMutation;
 use media::MediaMutation;
@@ -46,6 +48,7 @@ pub struct Mutation(
 	BookClubInvitationMutation,
 	BookClubMemberMutation,
 	BookClubScheduleMutation,
+	JobMutation,
 	NotifierMutation,
 	EpubMutation,
 	MediaMutation,

@@ -107,7 +107,7 @@ impl JobManager {
 			id: Set(job.id().to_string()),
 			name: Set(job.name().to_string()),
 			description: Set(job.description()),
-			status: Set(JobStatus::Queued.to_string()),
+			status: Set(JobStatus::Queued),
 			created_at: Set(Utc::now().into()),
 			..Default::default()
 		};

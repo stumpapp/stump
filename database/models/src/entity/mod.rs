@@ -23,6 +23,7 @@ pub mod library;
 pub mod library_config;
 pub mod library_hidden_to_user;
 pub mod library_scan_record;
+pub mod library_to_schedule_config;
 pub mod library_to_tag;
 pub mod log;
 pub mod media;

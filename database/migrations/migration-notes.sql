@@ -128,6 +128,12 @@ ALTER TABLE "new_tags"
     RENAME TO "tags";
 -- And drop the temporary mapping table
 DROP TABLE "_tag_id_map";
+CREATE _library_to_schedule_config (
+    "library_id" TEXT NOT NULL,
+    "job_schedule_config_id" TEXT NOT NULL,
+    CONSTRAINT "_library_to_schedule_config_library_id_fkey" FOREIGN KEY ("library_id") REFERENCES "libraries" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "_library_to_schedule_config_job_schedule_config_id_fkey" FOREIGN KEY ("job_schedule_config_id") REFERENCES "job_schedule_configs" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
 -- Prisma seemed to handle some non-nullable cols strangely (e.g., like setting `updated_at` on insert) _without_ default values on the column. So we need to adjust those:
 CREATE TABLE "new_media" (
     "id" TEXT NOT NULL PRIMARY KEY,
@@ -322,10 +328,8 @@ CREATE TABLE "new_libraries" (
     "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "emoji" TEXT,
     "config_id" INTEGER NOT NULL,
-    "job_schedule_config_id" TEXT,
     "last_scanned_at" DATETIME,
     CONSTRAINT "libraries_config_id_fkey" FOREIGN KEY ("config_id") REFERENCES "library_configs" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "libraries_job_schedule_config_id_fkey" FOREIGN KEY ("job_schedule_config_id") REFERENCES "job_schedule_configs" ("id") ON DELETE
     SET NULL ON UPDATE CASCADE
 );
 INSERT INTO "new_libraries"(
@@ -338,7 +342,6 @@ INSERT INTO "new_libraries"(
         "created_at",
         "emoji",
         "config_id",
-        "job_schedule_config_id",
         "last_scanned_at"
     )
 SELECT "id",
@@ -350,7 +353,6 @@ SELECT "id",
     "created_at",
     "emoji",
     "config_id",
-    "job_schedule_config_id",
     "last_scanned_at"
 FROM "libraries";
 DROP TABLE "libraries";

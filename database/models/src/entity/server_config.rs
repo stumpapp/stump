@@ -28,12 +28,12 @@ pub enum Relation {
 		on_update = "Cascade",
 		on_delete = "SetNull"
 	)]
-	JobScheduleConfigs,
+	JobScheduleConfig,
 }
 
 impl Related<super::job_schedule_config::Entity> for Entity {
 	fn to() -> RelationDef {
-		Relation::JobScheduleConfigs.def()
+		Relation::JobScheduleConfig.def()
 	}
 }
 

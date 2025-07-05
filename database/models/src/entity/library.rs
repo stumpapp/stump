@@ -33,8 +33,6 @@ pub struct Model {
 	#[sea_orm(column_type = "Text", nullable)]
 	pub emoji: Option<String>,
 	pub config_id: i32,
-	#[sea_orm(column_type = "Text", nullable)]
-	pub job_schedule_config_id: Option<String>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub last_scanned_at: Option<String>,
 }
@@ -69,14 +67,6 @@ pub struct LibraryNameCmpSelect {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-	#[sea_orm(
-		belongs_to = "super::job_schedule_config::Entity",
-		from = "Column::JobScheduleConfigId",
-		to = "super::job_schedule_config::Column::Id",
-		on_update = "Cascade",
-		on_delete = "SetNull"
-	)]
-	JobScheduleConfig,
 	#[sea_orm(has_many = "super::last_library_visit::Entity")]
 	LastLibraryVisit,
 	#[sea_orm(has_many = "super::library_hidden_to_user::Entity")]
@@ -93,12 +83,6 @@ pub enum Relation {
 	LibraryScanRecords,
 	#[sea_orm(has_many = "super::series::Entity")]
 	Series,
-}
-
-impl Related<super::job_schedule_config::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::JobScheduleConfig.def()
-	}
 }
 
 impl Related<super::last_library_visit::Entity> for Entity {

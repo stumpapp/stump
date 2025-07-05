@@ -10,6 +10,7 @@ pub mod emailer;
 pub mod emailer_send_record;
 pub mod epub;
 pub mod job;
+pub mod job_schedule_config;
 pub mod library;
 pub mod library_config;
 pub mod library_scan_record;

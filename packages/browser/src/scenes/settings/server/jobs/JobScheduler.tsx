@@ -8,55 +8,30 @@ import toast from 'react-hot-toast'
 import { useMediaMatch } from 'rooks'
 import z from 'zod'
 
-const schema = z.object({
-	excluded_library_ids: z.array(z.string()).optional(),
-	interval_secs: z
-		.number()
-		.positive()
-		.int()
-		.min(300, 'You cannot set an interval less than five minutes')
-		.optional(),
-})
-type FormValues = z.infer<typeof schema>
-
-const INTERVAL_PRESETS = [
-	{ label: 'Every 6 hours', value: 21600 },
-	{ label: 'Every 12 hours', value: 43200 },
-	{ label: 'Once a day', value: 86400 },
-	{ label: 'Once a week', value: 604800 },
-	{ label: 'Once a month', value: 2592000 },
-]
-
-const getCorrespondingPreset = (seconds: number) =>
-	INTERVAL_PRESETS.find((preset) => preset.value === seconds)
-
 export default function JobScheduler() {
 	const { libraries } = useLibraries()
 	const { config, update } = useJobSchedulerConfig()
 
 	const isSmallViewport = useMediaMatch('(max-width: 768px)')
 	const [intervalPreset, setIntervalPreset] = useState(
-		getCorrespondingPreset(config?.interval_secs || -1)?.value ?? -1,
+		getCorrespondingPreset(config?.intervalSecs || -1)?.value ?? -1,
 	)
 
 	const form = useForm({
 		defaultValues: {
-			excluded_library_ids: config?.excluded_libraries.map((library) => library.id),
-			interval_secs: config?.interval_secs,
+			excludedLibraryIds: config?.excluded_libraries.map((library) => library.id),
+			intervalSecs: config?.intervalSecs,
 		},
 		resolver: zodResolver(schema),
 	})
 
-	const [excluded_library_ids, interval_secs] = form.watch([
-		'excluded_library_ids',
-		'interval_secs',
-	])
+	const [excludedLibraryIds, intervalSecs] = form.watch(['excludedLibraryIds', 'intervalSecs'])
 
-	const handleSubmit = async ({ interval_secs, excluded_library_ids }: FormValues) => {
+	const handleSubmit = async ({ intervalSecs, excludedLibraryIds }: FormValues) => {
 		update(
 			{
-				excluded_library_ids: excluded_library_ids ?? null,
-				interval_secs: interval_secs ?? null,
+				excludedLibraryIds: excludedLibraryIds ?? null,
+				intervalSecs: intervalSecs ?? null,
 			},
 			{
 				onError: (error) => {
@@ -84,24 +59,24 @@ export default function JobScheduler() {
 
 	useEffect(() => {
 		if (intervalPreset !== undefined && intervalPreset !== -1) {
-			form.setValue('interval_secs', intervalPreset)
+			form.setValue('intervalSecs', intervalPreset)
 		}
 	}, [form, intervalPreset])
 
 	useEffect(() => {
 		// if not preset matches the current interval, set it to custom
-		const preset = INTERVAL_PRESETS.find((preset) => preset.value === interval_secs)
+		const preset = INTERVAL_PRESETS.find((preset) => preset.value === intervalSecs)
 		setIntervalPreset(preset?.value ?? -1)
-	}, [interval_secs])
+	}, [intervalSecs])
 
 	useEffect(() => {
 		if (config) {
-			setIntervalPreset(getCorrespondingPreset(config.interval_secs)?.value ?? -1)
+			setIntervalPreset(getCorrespondingPreset(config.intervalSecs)?.value ?? -1)
 			form.setValue(
-				'excluded_library_ids',
+				'excludedLibraryIds',
 				config.excluded_libraries.map(({ id }) => id),
 			)
-			form.setValue('interval_secs', config.interval_secs)
+			form.setValue('intervalSecs', config.intervalSecs)
 		}
 	}, [form, config])
 
@@ -124,7 +99,7 @@ export default function JobScheduler() {
 						descriptionPosition="top"
 						placeholder='e.g. "86400" for once a day'
 						fullWidth
-						{...form.register('interval_secs', {
+						{...form.register('intervalSecs', {
 							valueAsNumber: true,
 						})}
 					/>
@@ -146,12 +121,12 @@ export default function JobScheduler() {
 						description="Libraries that will be excluded from the scheduled scans"
 						descriptionPosition="top"
 						isMultiSelect
-						value={excluded_library_ids}
+						value={excludedLibraryIds}
 						options={(libraries || []).map((library) => ({
 							label: library.name,
 							value: library.id,
 						}))}
-						onChange={(value) => (value ? form.setValue('excluded_library_ids', value) : null)}
+						onChange={(value) => (value ? form.setValue('excludedLibraryIds', value) : null)}
 						size={isSmallViewport ? 'full' : 'default'}
 					/>
 				</div>
@@ -169,3 +144,25 @@ export default function JobScheduler() {
 		</div>
 	)
 }
+
+const schema = z.object({
+	excludedLibraryIds: z.array(z.string()).optional(),
+	intervalSecs: z
+		.number()
+		.positive()
+		.int()
+		.min(300, 'You cannot set an interval less than five minutes')
+		.optional(),
+})
+type FormValues = z.infer<typeof schema>
+
+const INTERVAL_PRESETS = [
+	{ label: 'Every 6 hours', value: 21600 },
+	{ label: 'Every 12 hours', value: 43200 },
+	{ label: 'Once a day', value: 86400 },
+	{ label: 'Once a week', value: 604800 },
+	{ label: 'Once a month', value: 2592000 },
+]
+
+const getCorrespondingPreset = (seconds: number) =>
+	INTERVAL_PRESETS.find((preset) => preset.value === seconds)

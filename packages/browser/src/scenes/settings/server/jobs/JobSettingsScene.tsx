@@ -1,17 +1,22 @@
 import { Heading, Text } from '@stump/components'
+import { UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Suspense } from 'react'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
 import ContentContainer from '@/components/container/ContentContainer.tsx'
+import { useAppContext } from '@/context'
 
-import DeleteAllSection from './DeleteAllSection.tsx'
+import DeleteJobHistoryConfirmation from './DeleteJObHistoryConfirmation.tsx'
 import JobScheduler from './JobScheduler.tsx'
 import JobTable from './JobTable.tsx'
 
 export default function JobSettingsScene() {
 	const { t } = useLocaleContext()
+	const { checkPermission } = useAppContext()
+
+	const canManageJobs = checkPermission(UserPermission.ManageJobs)
 
 	return (
 		<SceneContainer>
@@ -37,19 +42,20 @@ export default function JobSettingsScene() {
 				</div>
 
 				<div className="flex flex-col gap-4">
-					<div>
-						<Heading size="sm">{t('settingsScene.server/jobs.sections.history.title')}</Heading>
-						<Text size="sm" variant="muted" className="mt-1">
-							{t('settingsScene.server/jobs.sections.history.description')}
-						</Text>
+					<div className="flex items-end justify-between">
+						<div>
+							<Heading size="sm">{t('settingsScene.server/jobs.sections.history.title')}</Heading>
+							<Text size="sm" variant="muted" className="mt-1">
+								{t('settingsScene.server/jobs.sections.history.description')}
+							</Text>
+						</div>
+
+						{canManageJobs && <DeleteJobHistoryConfirmation />}
 					</div>
 
 					<Suspense>
 						<JobTable />
 					</Suspense>
-
-					{/* <JobTable />
-						<DeleteAllSection /> */}
 				</div>
 			</ContentContainer>
 		</SceneContainer>

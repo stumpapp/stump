@@ -1548,10 +1548,14 @@
 						},
 						"emptyHeading": "There are no jobs to display",
 						"emptySubtitle": "You can't have a job if you don't have a job",
-						"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
-						"deleteAllConfirmButton": "Clear history",
-						"deleteAllConfirmButtonTitle": "Clear all job history",
-						"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
+						"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone"
+					},
+					"deleteJobHistory": {
+						"title": "Delete job history",
+						"description": "Permanently delete all job history from the database",
+						"confirmText": "Are you sure you want to delete all job history?",
+						"confirm": "Delete",
+						"emptyState": "No jobs to clear"
 					}
 				}
 			}

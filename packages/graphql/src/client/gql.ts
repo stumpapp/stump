@@ -78,7 +78,12 @@ type Documents = {
     "\n\tmutation DeleteAPIKeyConfirmModal($id: Int!) {\n\t\tdeleteApiKey(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.DeleteApiKeyConfirmModalDocument,
     "\n\tmutation UpdateUserLocaleSelector($input: UpdateUserPreferencesInput!) {\n\t\tupdateViewerPreferences(input: $input) {\n\t\t\tlocale\n\t\t}\n\t}\n": typeof types.UpdateUserLocaleSelectorDocument,
     "\n\tmutation UpdateUserProfileForm($input: UpdateUserInput!) {\n\t\tupdateViewer(input: $input) {\n\t\t\tid\n\t\t\tusername\n\t\t\tavatarUrl\n\t\t}\n\t}\n": typeof types.UpdateUserProfileFormDocument,
-    "\n\tquery JobTable($pagination: Pagination!) {\n\t\tjobs(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\tdescription\n\t\t\t\tstatus\n\t\t\t\tcreatedAt\n\t\t\t\tcompletedAt\n\t\t\t\tmsElapsed\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.JobTableDocument,
+    "\n\tmutation DeleteJobHistoryConfirmation {\n\t\tdeleteJobHistory {\n\t\t\taffectedRows\n\t\t}\n\t}\n": typeof types.DeleteJobHistoryConfirmationDocument,
+    "\n\tmutation JobActionMenuCancelJob($id: ID!) {\n\t\tcancelJob(id: $id)\n\t}\n": typeof types.JobActionMenuCancelJobDocument,
+    "\n\tmutation JobActionMenuDeleteJob($id: ID!) {\n\t\tcancelJob(id: $id)\n\t}\n": typeof types.JobActionMenuDeleteJobDocument,
+    "\n\tmutation JobActionMenuDeleteLogs($id: ID!) {\n\t\tdeleteJobLogs(id: $id) {\n\t\t\taffectedRows\n\t\t}\n\t}\n": typeof types.JobActionMenuDeleteLogsDocument,
+    "\n\tfragment JobDataInspector on CoreJobOutput {\n\t\t__typename\n\t\t... on LibraryScanOutput {\n\t\t\ttotalFiles\n\t\t\ttotalDirectories\n\t\t\tignoredFiles\n\t\t\tskippedFiles\n\t\t\tignoredDirectories\n\t\t\tcreatedMedia\n\t\t\tupdatedMedia\n\t\t\tcreatedSeries\n\t\t\tupdatedSeries\n\t\t}\n\t\t... on SeriesScanOutput {\n\t\t\ttotalFiles\n\t\t\tignoredFiles\n\t\t\tskippedFiles\n\t\t\tcreatedMedia\n\t\t\tupdatedMedia\n\t\t}\n\t\t... on ThumbnailGenerationOutput {\n\t\t\tvisitedFiles\n\t\t\tskippedFiles\n\t\t\tgeneratedThumbnails\n\t\t\tremovedThumbnails\n\t\t}\n\t\t... on ExternalJobOutput {\n\t\t\tval\n\t\t}\n\t}\n": typeof types.JobDataInspectorFragmentDoc,
+    "\n\tquery JobTable($pagination: Pagination!) {\n\t\tjobs(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\tdescription\n\t\t\t\tstatus\n\t\t\t\tcreatedAt\n\t\t\t\tcompletedAt\n\t\t\t\tmsElapsed\n\t\t\t\toutputData {\n\t\t\t\t\t...JobDataInspector\n\t\t\t\t}\n\t\t\t\tlogCount\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.JobTableDocument,
     "\n\tsubscription LiveLogsFeed {\n\t\ttailLogFile\n\t}\n": typeof types.LiveLogsFeedDocument,
     "\n\tmutation DeleteLogs {\n\t\tdeleteLogs {\n\t\t\tdeleted\n\t\t}\n\t}\n": typeof types.DeleteLogsDocument,
     "\n\tquery PersistedLogs(\n\t\t$filter: LogFilterInput!\n\t\t$pagination: Pagination!\n\t\t$orderBy: [LogModelOrderBy!]!\n\t) {\n\t\tlogs(filter: $filter, pagination: $pagination, orderBy: $orderBy) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\ttimestamp\n\t\t\t\tlevel\n\t\t\t\tmessage\n\t\t\t\tjobId\n\t\t\t\tcontext\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.PersistedLogsDocument,
@@ -149,7 +154,12 @@ const documents: Documents = {
     "\n\tmutation DeleteAPIKeyConfirmModal($id: Int!) {\n\t\tdeleteApiKey(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": types.DeleteApiKeyConfirmModalDocument,
     "\n\tmutation UpdateUserLocaleSelector($input: UpdateUserPreferencesInput!) {\n\t\tupdateViewerPreferences(input: $input) {\n\t\t\tlocale\n\t\t}\n\t}\n": types.UpdateUserLocaleSelectorDocument,
     "\n\tmutation UpdateUserProfileForm($input: UpdateUserInput!) {\n\t\tupdateViewer(input: $input) {\n\t\t\tid\n\t\t\tusername\n\t\t\tavatarUrl\n\t\t}\n\t}\n": types.UpdateUserProfileFormDocument,
-    "\n\tquery JobTable($pagination: Pagination!) {\n\t\tjobs(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\tdescription\n\t\t\t\tstatus\n\t\t\t\tcreatedAt\n\t\t\t\tcompletedAt\n\t\t\t\tmsElapsed\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.JobTableDocument,
+    "\n\tmutation DeleteJobHistoryConfirmation {\n\t\tdeleteJobHistory {\n\t\t\taffectedRows\n\t\t}\n\t}\n": types.DeleteJobHistoryConfirmationDocument,
+    "\n\tmutation JobActionMenuCancelJob($id: ID!) {\n\t\tcancelJob(id: $id)\n\t}\n": types.JobActionMenuCancelJobDocument,
+    "\n\tmutation JobActionMenuDeleteJob($id: ID!) {\n\t\tcancelJob(id: $id)\n\t}\n": types.JobActionMenuDeleteJobDocument,
+    "\n\tmutation JobActionMenuDeleteLogs($id: ID!) {\n\t\tdeleteJobLogs(id: $id) {\n\t\t\taffectedRows\n\t\t}\n\t}\n": types.JobActionMenuDeleteLogsDocument,
+    "\n\tfragment JobDataInspector on CoreJobOutput {\n\t\t__typename\n\t\t... on LibraryScanOutput {\n\t\t\ttotalFiles\n\t\t\ttotalDirectories\n\t\t\tignoredFiles\n\t\t\tskippedFiles\n\t\t\tignoredDirectories\n\t\t\tcreatedMedia\n\t\t\tupdatedMedia\n\t\t\tcreatedSeries\n\t\t\tupdatedSeries\n\t\t}\n\t\t... on SeriesScanOutput {\n\t\t\ttotalFiles\n\t\t\tignoredFiles\n\t\t\tskippedFiles\n\t\t\tcreatedMedia\n\t\t\tupdatedMedia\n\t\t}\n\t\t... on ThumbnailGenerationOutput {\n\t\t\tvisitedFiles\n\t\t\tskippedFiles\n\t\t\tgeneratedThumbnails\n\t\t\tremovedThumbnails\n\t\t}\n\t\t... on ExternalJobOutput {\n\t\t\tval\n\t\t}\n\t}\n": types.JobDataInspectorFragmentDoc,
+    "\n\tquery JobTable($pagination: Pagination!) {\n\t\tjobs(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\tdescription\n\t\t\t\tstatus\n\t\t\t\tcreatedAt\n\t\t\t\tcompletedAt\n\t\t\t\tmsElapsed\n\t\t\t\toutputData {\n\t\t\t\t\t...JobDataInspector\n\t\t\t\t}\n\t\t\t\tlogCount\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.JobTableDocument,
     "\n\tsubscription LiveLogsFeed {\n\t\ttailLogFile\n\t}\n": types.LiveLogsFeedDocument,
     "\n\tmutation DeleteLogs {\n\t\tdeleteLogs {\n\t\t\tdeleted\n\t\t}\n\t}\n": types.DeleteLogsDocument,
     "\n\tquery PersistedLogs(\n\t\t$filter: LogFilterInput!\n\t\t$pagination: Pagination!\n\t\t$orderBy: [LogModelOrderBy!]!\n\t) {\n\t\tlogs(filter: $filter, pagination: $pagination, orderBy: $orderBy) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\ttimestamp\n\t\t\t\tlevel\n\t\t\t\tmessage\n\t\t\t\tjobId\n\t\t\t\tcontext\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.PersistedLogsDocument,
@@ -412,7 +422,27 @@ export function graphql(source: "\n\tmutation UpdateUserProfileForm($input: Upda
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tquery JobTable($pagination: Pagination!) {\n\t\tjobs(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\tdescription\n\t\t\t\tstatus\n\t\t\t\tcreatedAt\n\t\t\t\tcompletedAt\n\t\t\t\tmsElapsed\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').JobTableDocument;
+export function graphql(source: "\n\tmutation DeleteJobHistoryConfirmation {\n\t\tdeleteJobHistory {\n\t\t\taffectedRows\n\t\t}\n\t}\n"): typeof import('./graphql').DeleteJobHistoryConfirmationDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation JobActionMenuCancelJob($id: ID!) {\n\t\tcancelJob(id: $id)\n\t}\n"): typeof import('./graphql').JobActionMenuCancelJobDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation JobActionMenuDeleteJob($id: ID!) {\n\t\tcancelJob(id: $id)\n\t}\n"): typeof import('./graphql').JobActionMenuDeleteJobDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation JobActionMenuDeleteLogs($id: ID!) {\n\t\tdeleteJobLogs(id: $id) {\n\t\t\taffectedRows\n\t\t}\n\t}\n"): typeof import('./graphql').JobActionMenuDeleteLogsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment JobDataInspector on CoreJobOutput {\n\t\t__typename\n\t\t... on LibraryScanOutput {\n\t\t\ttotalFiles\n\t\t\ttotalDirectories\n\t\t\tignoredFiles\n\t\t\tskippedFiles\n\t\t\tignoredDirectories\n\t\t\tcreatedMedia\n\t\t\tupdatedMedia\n\t\t\tcreatedSeries\n\t\t\tupdatedSeries\n\t\t}\n\t\t... on SeriesScanOutput {\n\t\t\ttotalFiles\n\t\t\tignoredFiles\n\t\t\tskippedFiles\n\t\t\tcreatedMedia\n\t\t\tupdatedMedia\n\t\t}\n\t\t... on ThumbnailGenerationOutput {\n\t\t\tvisitedFiles\n\t\t\tskippedFiles\n\t\t\tgeneratedThumbnails\n\t\t\tremovedThumbnails\n\t\t}\n\t\t... on ExternalJobOutput {\n\t\t\tval\n\t\t}\n\t}\n"): typeof import('./graphql').JobDataInspectorFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery JobTable($pagination: Pagination!) {\n\t\tjobs(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\tdescription\n\t\t\t\tstatus\n\t\t\t\tcreatedAt\n\t\t\t\tcompletedAt\n\t\t\t\tmsElapsed\n\t\t\t\toutputData {\n\t\t\t\t\t...JobDataInspector\n\t\t\t\t}\n\t\t\t\tlogCount\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').JobTableDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

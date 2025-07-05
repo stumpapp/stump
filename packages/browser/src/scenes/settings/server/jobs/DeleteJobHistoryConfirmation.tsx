@@ -1,19 +1,19 @@
-import { queryClient, useGraphQLMutation, useSDK } from '@stump/client'
-import { Alert, Button, ConfirmationModal } from '@stump/components'
-import { graphql, PersistedLogsQuery } from '@stump/graphql'
+import { useGraphQLMutation, useSDK } from '@stump/client'
+import { Button, ConfirmationModal, Text } from '@stump/components'
+import { graphql, JobTableQuery } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 
 const mutation = graphql(`
-	mutation DeleteLogs {
-		deleteLogs {
-			deleted
+	mutation DeleteJobHistoryConfirmation {
+		deleteJobHistory {
+			affectedRows
 		}
 	}
 `)
 
-export default function DeleteLogsConfirmationDialog() {
+export default function DeleteJobHistoryConfirmation() {
 	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 
@@ -22,7 +22,7 @@ export default function DeleteLogsConfirmationDialog() {
 	const { mutate: deleteLogs } = useGraphQLMutation(mutation, {
 		onSuccess: () => {
 			client.refetchQueries({
-				predicate: ({ queryKey }) => queryKey.includes(sdk.cacheKeys.logs),
+				predicate: ({ queryKey }) => queryKey.includes(sdk.cacheKeys.jobs),
 			})
 			setShowConfirmation(false)
 		},
@@ -32,10 +32,10 @@ export default function DeleteLogsConfirmationDialog() {
 	const [showConfirmation, setShowConfirmation] = useState(false)
 
 	useEffect(() => {
-		const unsubscribe = queryClient.getQueryCache().subscribe(({ query: { queryKey } }) => {
-			if (queryKey.at(0) === sdk.cacheKeys.logs) {
-				const cache = queryClient.getQueryData<PersistedLogsQuery>(queryKey)
-				if (!cache || !cache.logs.nodes.length) {
+		const unsubscribe = client.getQueryCache().subscribe(({ query: { queryKey } }) => {
+			if (queryKey.at(0) === sdk.cacheKeys.jobs) {
+				const cache = client.getQueryData<JobTableQuery>(queryKey)
+				if (!cache || !cache.jobs.nodes.length) {
 					setIsEmptyState(true)
 				} else {
 					setIsEmptyState(false)
@@ -46,7 +46,7 @@ export default function DeleteLogsConfirmationDialog() {
 		return () => {
 			unsubscribe()
 		}
-	}, [sdk.cacheKeys.logs])
+	}, [sdk.cacheKeys.jobs, client])
 
 	return (
 		<ConfirmationModal
@@ -69,12 +69,10 @@ export default function DeleteLogsConfirmationDialog() {
 			}
 			size="md"
 		>
-			<Alert level="warning" className="p-3 text-sm">
-				<Alert.Content>{t(getKey('disclaimer'))} </Alert.Content>
-			</Alert>
+			<Text>{t(getKey('confirmText'))}</Text>
 		</ConfirmationModal>
 	)
 }
 
-const LOCALE_BASE = 'settingsScene.server/logs.sections.persistedLogs.deleteLogs'
+const LOCALE_BASE = 'settingsScene.server/jobs.sections.history.deleteJobHistory'
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`

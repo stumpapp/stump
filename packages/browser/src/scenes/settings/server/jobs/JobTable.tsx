@@ -1,6 +1,6 @@
 import { useJobStore, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Badge, Card, Heading, Text } from '@stump/components'
-import { CoreJobOutput, graphql, JobStatus, JobTableQuery } from '@stump/graphql'
+import { graphql, JobStatus, JobTableQuery, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { ColumnDef, createColumnHelper, PaginationState } from '@tanstack/react-table'
@@ -14,7 +14,7 @@ import { Table } from '@/components/table'
 import { useAppContext } from '@/context'
 
 import JobActionMenu from './JobActionMenu.tsx'
-import JobDataInspector from './JobDataInspector.tsx'
+import JobDataInspector, { JobDataInspectorFragment } from './JobDataInspector.tsx'
 import RunningJobElapsedTime from './RunningJobElapsedTime.tsx'
 
 dayjs.extend(duration)
@@ -33,6 +33,10 @@ const query = graphql(`
 				createdAt
 				completedAt
 				msElapsed
+				outputData {
+					...JobDataInspector
+				}
+				logCount
 			}
 			pageInfo {
 				__typename
@@ -59,8 +63,10 @@ export default function JobTable() {
 	})
 	const storeJobs = useJobStore((state) => state.jobs)
 
-	const { isServerOwner } = useAppContext()
+	const { checkPermission } = useAppContext()
 	const { t } = useLocaleContext()
+
+	const canManageJobs = checkPermission(UserPermission.ManageJobs)
 
 	const client = useQueryClient()
 	const { sdk } = useSDK()
@@ -121,7 +127,7 @@ export default function JobTable() {
 		})
 	}, [dbJobs, storeJobs])
 
-	const [inspectingData, setInspectingData] = useState<CoreJobOutput | null>()
+	const [inspectingData, setInspectingData] = useState<JobDataInspectorFragment | null>()
 
 	const columns = useMemo<ColumnDef<PersistedJob>[]>(
 		() =>
@@ -220,14 +226,14 @@ export default function JobTable() {
 				}),
 				columnHelper.display({
 					cell: ({ row }) =>
-						isServerOwner ? (
+						canManageJobs ? (
 							<JobActionMenu job={row.original} onInspectData={setInspectingData} />
 						) : null,
 					id: 'actions',
 					size: 28,
 				}),
 			] as ColumnDef<PersistedJob>[],
-		[t, isServerOwner],
+		[t, canManageJobs],
 	)
 
 	const EmptyState = useCallback(

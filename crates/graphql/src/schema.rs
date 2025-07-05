@@ -1,8 +1,8 @@
 use crate::{
 	data::CoreContext,
 	loader::{
-		library::LibraryLoader, reading_session::ReadingSessionLoader,
-		series::SeriesLoader,
+		library::LibraryLoader, log::JobAssociatedLogLoader,
+		reading_session::ReadingSessionLoader, series::SeriesLoader,
 	},
 	mutation::Mutation,
 	query::Query,
@@ -35,6 +35,10 @@ pub fn add_data_loaders<
 	conn: Arc<DatabaseConnection>,
 ) -> SchemaBuilder<QueryType, MutationType, SubscriptionType> {
 	schema
+		.data(DataLoader::new(
+			JobAssociatedLogLoader::new(conn.clone()),
+			tokio::spawn,
+		))
 		.data(DataLoader::new(
 			ReadingSessionLoader::new(conn.clone()),
 			tokio::spawn,

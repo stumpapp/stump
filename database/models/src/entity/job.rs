@@ -35,6 +35,12 @@ pub struct JobCreatedAtSelect {
 }
 
 #[derive(FromQueryResult)]
+pub struct JobStatusSelect {
+	pub id: String,
+	pub status: JobStatus,
+}
+
+#[derive(FromQueryResult)]
 pub struct SaveStateSelect {
 	pub save_state: Option<Vec<u8>>,
 }

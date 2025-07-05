@@ -342,6 +342,18 @@ export type CustomArrangementConfig = {
   orderBy?: Maybe<Scalars['String']['output']>;
 };
 
+export type DeleteJobAssociatedLogs = {
+  __typename?: 'DeleteJobAssociatedLogs';
+  /** The number of logs deleted that were related to a job */
+  affectedRows: Scalars['Int']['output'];
+};
+
+export type DeleteJobHistory = {
+  __typename?: 'DeleteJobHistory';
+  /** The number of logs deleted that were related to a job */
+  affectedRows: Scalars['Int']['output'];
+};
+
 export enum Dimension {
   Height = 'HEIGHT',
   Width = 'WIDTH'
@@ -656,6 +668,7 @@ export type Job = {
   createdAt: Scalars['DateTime']['output'];
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
+  logCount: Scalars['Int']['output'];
   logs: Array<Log>;
   msElapsed: Scalars['Int']['output'];
   name: Scalars['String']['output'];
@@ -1144,6 +1157,7 @@ export type Mutation = {
   addBooksToBookClubSchedule: BookClub;
   analyzeMedia: Scalars['Boolean']['output'];
   analyzeSeries: Scalars['Boolean']['output'];
+  cancelJob: Scalars['Boolean']['output'];
   /**
    * Delete media and series from a library that match one of the following conditions:
    *
@@ -1199,6 +1213,9 @@ export type Mutation = {
   deleteBookmark: Bookmark;
   deleteEmailDevice: RegisteredEmailDevice;
   deleteEmailer: Emailer;
+  deleteJob: Scalars['Boolean']['output'];
+  deleteJobHistory: DeleteJobHistory;
+  deleteJobLogs: DeleteJobAssociatedLogs;
   /**
    * Delete a library, including all associated media and series via cascading deletes. This
    * operation cannot be undone.
@@ -1318,6 +1335,11 @@ export type MutationAnalyzeSeriesArgs = {
 };
 
 
+export type MutationCancelJobArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationCleanLibraryArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1428,6 +1450,17 @@ export type MutationDeleteEmailDeviceArgs = {
 
 export type MutationDeleteEmailerArgs = {
   id: Scalars['Int']['input'];
+};
+
+
+export type MutationDeleteJobArgs = {
+  force?: Scalars['Boolean']['input'];
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteJobLogsArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -2752,6 +2785,8 @@ export enum UserPermission {
   EmailSend = 'EMAIL_SEND',
   /** Grant access to access the file explorer */
   FileExplorer = 'FILE_EXPLORER',
+  /** Grant access to manage jobs, like pausing, resuming, deleting, or cancelling them */
+  ManageJobs = 'MANAGE_JOBS',
   /** Grant access to manage the library (scan,edit,manage relations) */
   ManageLibrary = 'MANAGE_LIBRARY',
   /** Grant access to manage a notifier */
@@ -3265,12 +3300,60 @@ export type UpdateUserProfileFormMutationVariables = Exact<{
 
 export type UpdateUserProfileFormMutation = { __typename?: 'Mutation', updateViewer: { __typename?: 'User', id: string, username: string, avatarUrl?: string | null } };
 
+export type DeleteJobHistoryConfirmationMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DeleteJobHistoryConfirmationMutation = { __typename?: 'Mutation', deleteJobHistory: { __typename?: 'DeleteJobHistory', affectedRows: number } };
+
+export type JobActionMenuCancelJobMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type JobActionMenuCancelJobMutation = { __typename?: 'Mutation', cancelJob: boolean };
+
+export type JobActionMenuDeleteJobMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type JobActionMenuDeleteJobMutation = { __typename?: 'Mutation', cancelJob: boolean };
+
+export type JobActionMenuDeleteLogsMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type JobActionMenuDeleteLogsMutation = { __typename?: 'Mutation', deleteJobLogs: { __typename?: 'DeleteJobAssociatedLogs', affectedRows: number } };
+
+type JobDataInspector_ExternalJobOutput_Fragment = { __typename: 'ExternalJobOutput', val: any } & { ' $fragmentName'?: 'JobDataInspector_ExternalJobOutput_Fragment' };
+
+type JobDataInspector_LibraryScanOutput_Fragment = { __typename: 'LibraryScanOutput', totalFiles: number, totalDirectories: number, ignoredFiles: number, skippedFiles: number, ignoredDirectories: number, createdMedia: number, updatedMedia: number, createdSeries: number, updatedSeries: number } & { ' $fragmentName'?: 'JobDataInspector_LibraryScanOutput_Fragment' };
+
+type JobDataInspector_SeriesScanOutput_Fragment = { __typename: 'SeriesScanOutput', totalFiles: number, ignoredFiles: number, skippedFiles: number, createdMedia: number, updatedMedia: number } & { ' $fragmentName'?: 'JobDataInspector_SeriesScanOutput_Fragment' };
+
+type JobDataInspector_ThumbnailGenerationOutput_Fragment = { __typename: 'ThumbnailGenerationOutput', visitedFiles: number, skippedFiles: number, generatedThumbnails: number, removedThumbnails: number } & { ' $fragmentName'?: 'JobDataInspector_ThumbnailGenerationOutput_Fragment' };
+
+export type JobDataInspectorFragment = JobDataInspector_ExternalJobOutput_Fragment | JobDataInspector_LibraryScanOutput_Fragment | JobDataInspector_SeriesScanOutput_Fragment | JobDataInspector_ThumbnailGenerationOutput_Fragment;
+
 export type JobTableQueryVariables = Exact<{
   pagination: Pagination;
 }>;
 
 
-export type JobTableQuery = { __typename?: 'Query', jobs: { __typename?: 'PaginatedJobResponse', nodes: Array<{ __typename?: 'Job', id: string, name: string, description?: string | null, status: JobStatus, createdAt: any, completedAt?: any | null, msElapsed: number }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+export type JobTableQuery = { __typename?: 'Query', jobs: { __typename?: 'PaginatedJobResponse', nodes: Array<{ __typename?: 'Job', id: string, name: string, description?: string | null, status: JobStatus, createdAt: any, completedAt?: any | null, msElapsed: number, logCount: number, outputData?: (
+        { __typename?: 'ExternalJobOutput' }
+        & { ' $fragmentRefs'?: { 'JobDataInspector_ExternalJobOutput_Fragment': JobDataInspector_ExternalJobOutput_Fragment } }
+      ) | (
+        { __typename?: 'LibraryScanOutput' }
+        & { ' $fragmentRefs'?: { 'JobDataInspector_LibraryScanOutput_Fragment': JobDataInspector_LibraryScanOutput_Fragment } }
+      ) | (
+        { __typename?: 'SeriesScanOutput' }
+        & { ' $fragmentRefs'?: { 'JobDataInspector_SeriesScanOutput_Fragment': JobDataInspector_SeriesScanOutput_Fragment } }
+      ) | (
+        { __typename?: 'ThumbnailGenerationOutput' }
+        & { ' $fragmentRefs'?: { 'JobDataInspector_ThumbnailGenerationOutput_Fragment': JobDataInspector_ThumbnailGenerationOutput_Fragment } }
+      ) | null }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
 export type LiveLogsFeedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
@@ -3391,6 +3474,38 @@ export const LibrarySettingsConfigFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"LibrarySettingsConfig"}) as unknown as TypedDocumentString<LibrarySettingsConfigFragment, unknown>;
+export const JobDataInspectorFragmentDoc = new TypedDocumentString(`
+    fragment JobDataInspector on CoreJobOutput {
+  __typename
+  ... on LibraryScanOutput {
+    totalFiles
+    totalDirectories
+    ignoredFiles
+    skippedFiles
+    ignoredDirectories
+    createdMedia
+    updatedMedia
+    createdSeries
+    updatedSeries
+  }
+  ... on SeriesScanOutput {
+    totalFiles
+    ignoredFiles
+    skippedFiles
+    createdMedia
+    updatedMedia
+  }
+  ... on ThumbnailGenerationOutput {
+    visitedFiles
+    skippedFiles
+    generatedThumbnails
+    removedThumbnails
+  }
+  ... on ExternalJobOutput {
+    val
+  }
+}
+    `, {"fragmentName":"JobDataInspector"}) as unknown as TypedDocumentString<JobDataInspectorFragment, unknown>;
 export const TagSelectQueryDocument = new TypedDocumentString(`
     query TagSelectQuery {
   tags {
@@ -4282,6 +4397,30 @@ export const UpdateUserProfileFormDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UpdateUserProfileFormMutation, UpdateUserProfileFormMutationVariables>;
+export const DeleteJobHistoryConfirmationDocument = new TypedDocumentString(`
+    mutation DeleteJobHistoryConfirmation {
+  deleteJobHistory {
+    affectedRows
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteJobHistoryConfirmationMutation, DeleteJobHistoryConfirmationMutationVariables>;
+export const JobActionMenuCancelJobDocument = new TypedDocumentString(`
+    mutation JobActionMenuCancelJob($id: ID!) {
+  cancelJob(id: $id)
+}
+    `) as unknown as TypedDocumentString<JobActionMenuCancelJobMutation, JobActionMenuCancelJobMutationVariables>;
+export const JobActionMenuDeleteJobDocument = new TypedDocumentString(`
+    mutation JobActionMenuDeleteJob($id: ID!) {
+  cancelJob(id: $id)
+}
+    `) as unknown as TypedDocumentString<JobActionMenuDeleteJobMutation, JobActionMenuDeleteJobMutationVariables>;
+export const JobActionMenuDeleteLogsDocument = new TypedDocumentString(`
+    mutation JobActionMenuDeleteLogs($id: ID!) {
+  deleteJobLogs(id: $id) {
+    affectedRows
+  }
+}
+    `) as unknown as TypedDocumentString<JobActionMenuDeleteLogsMutation, JobActionMenuDeleteLogsMutationVariables>;
 export const JobTableDocument = new TypedDocumentString(`
     query JobTable($pagination: Pagination!) {
   jobs(pagination: $pagination) {
@@ -4293,6 +4432,10 @@ export const JobTableDocument = new TypedDocumentString(`
       createdAt
       completedAt
       msElapsed
+      outputData {
+        ...JobDataInspector
+      }
+      logCount
     }
     pageInfo {
       __typename
@@ -4306,7 +4449,36 @@ export const JobTableDocument = new TypedDocumentString(`
     }
   }
 }
-    `) as unknown as TypedDocumentString<JobTableQuery, JobTableQueryVariables>;
+    fragment JobDataInspector on CoreJobOutput {
+  __typename
+  ... on LibraryScanOutput {
+    totalFiles
+    totalDirectories
+    ignoredFiles
+    skippedFiles
+    ignoredDirectories
+    createdMedia
+    updatedMedia
+    createdSeries
+    updatedSeries
+  }
+  ... on SeriesScanOutput {
+    totalFiles
+    ignoredFiles
+    skippedFiles
+    createdMedia
+    updatedMedia
+  }
+  ... on ThumbnailGenerationOutput {
+    visitedFiles
+    skippedFiles
+    generatedThumbnails
+    removedThumbnails
+  }
+  ... on ExternalJobOutput {
+    val
+  }
+}`) as unknown as TypedDocumentString<JobTableQuery, JobTableQueryVariables>;
 export const LiveLogsFeedDocument = new TypedDocumentString(`
     subscription LiveLogsFeed {
   tailLogFile

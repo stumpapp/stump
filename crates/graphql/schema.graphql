@@ -305,6 +305,16 @@ scalar DateTime
 
 scalar Decimal
 
+type DeleteJobAssociatedLogs {
+	"The number of logs deleted that were related to a job"
+	affectedRows: Int!
+}
+
+type DeleteJobHistory {
+	"The number of logs deleted that were related to a job"
+	affectedRows: Int!
+}
+
 enum Dimension {
 	HEIGHT
 	WIDTH
@@ -621,6 +631,7 @@ type Job {
 	completedAt: DateTime
 	outputData: CoreJobOutput
 	saveState: JSON
+	logCount: Int!
 	logs: [Log!]!
 }
 
@@ -1089,6 +1100,10 @@ type Mutation {
 	createBookClubMember(bookClubId: ID!, input: CreateBookClubMemberInput!): BookClubMember!
 	createBookClubSchedule(id: ID!, input: CreateBookClubScheduleInput!): BookClub!
 	addBooksToBookClubSchedule(id: ID!, books: [CreateBookClubScheduleBook!]!): BookClub!
+	cancelJob(id: ID!): Boolean!
+	deleteJob(id: ID!, force: Boolean! = false): Boolean!
+	deleteJobHistory: DeleteJobHistory!
+	deleteJobLogs(id: ID!): DeleteJobAssociatedLogs!
 	createNotifier(input: NotifierInput!): Notifier!
 	updateNotifier(id: Int!, input: NotifierInput!): Notifier!
 	deleteNotifier(id: Int!): Notifier!
@@ -2144,6 +2159,8 @@ enum UserPermission {
 	DELETE_NOTIFIER
 	"Grant access to read jobs"
 	READ_JOBS
+	"Grant access to manage jobs, like pausing, resuming, deleting, or cancelling them"
+	MANAGE_JOBS
 	"Grant access to read application-level logs, e.g. job logs"
 	READ_PERSISTED_LOGS
 	"Grant access to read system logs"

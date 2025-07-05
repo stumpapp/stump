@@ -68,6 +68,7 @@
 		"remark-directive": "^3.0.0",
 		"remark-directive-rehype": "^0.4.2",
 		"rooks": "^7.14.1",
+		"strip-ansi": "^7.1.0",
 		"ts-pattern": "^5.1.1",
 		"url-join": "^5.0.0",
 		"use-count-up": "^3.0.1",

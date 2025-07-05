@@ -3254,6 +3254,11 @@ export type UpdateUserProfileFormMutationVariables = Exact<{
 
 export type UpdateUserProfileFormMutation = { __typename?: 'Mutation', updateViewer: { __typename?: 'User', id: string, username: string, avatarUrl?: string | null } };
 
+export type LiveLogsFeedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LiveLogsFeedSubscription = { __typename?: 'Subscription', tailLogFile: string };
+
 export type DeleteLogsMutationVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -4259,6 +4264,11 @@ export const UpdateUserProfileFormDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UpdateUserProfileFormMutation, UpdateUserProfileFormMutationVariables>;
+export const LiveLogsFeedDocument = new TypedDocumentString(`
+    subscription LiveLogsFeed {
+  tailLogFile
+}
+    `) as unknown as TypedDocumentString<LiveLogsFeedSubscription, LiveLogsFeedSubscriptionVariables>;
 export const DeleteLogsDocument = new TypedDocumentString(`
     mutation DeleteLogs {
   deleteLogs {

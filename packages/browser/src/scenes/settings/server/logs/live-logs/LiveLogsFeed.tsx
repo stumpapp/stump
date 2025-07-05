@@ -1,59 +1,32 @@
-import { useSDK } from '@stump/client'
-import { useEffect, useRef, useState } from 'react'
+import { useGraphQLSubscription } from '@stump/client'
+import { graphql } from '@stump/graphql'
+import { useEffect, useRef } from 'react'
+import stripAnsi from 'strip-ansi'
 
-const MAX_BUFFER_SIZE = 1000
+const subscription = graphql(`
+	subscription LiveLogsFeed {
+		tailLogFile
+	}
+`)
 
 /**
- * A component that displays a live feed of logs from the server. The feed is served by
- * a SSE (Server-Sent Events) endpoint on the server.
+ * A component that displays a live feed of logs from the server
  */
 export default function LiveLogsFeed() {
-	const { sdk } = useSDK()
-	const [source, setSource] = useState<EventSource | null>(null)
-
-	/**
-	 * The buffer of logs that have been received from the server. There is a limit to the
-	 * number of logs that can be displayed at once, so this buffer will be cleared when
-	 * it reaches a certain size.
-	 */
-	const [logsBuffer, setLogsBuffer] = useState<string[]>([])
+	const [data, , dispose] = useGraphQLSubscription(subscription)
 
 	const scrollRef = useRef<HTMLDivElement>(null)
 	const logContainerRef = useRef<HTMLDivElement>(null)
 
-	useEffect(() => {
-		if (!source) {
-			const URI = sdk.serviceURL
-
-			const newSource = new EventSource(`${URI}/logs/file/tail`, {
-				withCredentials: true,
-			})
-			newSource.onmessage = (event) => {
-				const newLog = event.data as string
-				// remove the " at the first and last character of the string
-				const formattedLog = stripAnsi(newLog.slice(1, newLog.length - 1))
-				setLogsBuffer((prevLogs) => {
-					const newLogs = [...prevLogs, formattedLog]
-					if (newLogs.length > MAX_BUFFER_SIZE) {
-						return newLogs.slice(newLogs.length - MAX_BUFFER_SIZE)
-					}
-					return newLogs
-				})
+	useEffect(
+		() => {
+			return () => {
+				dispose()
 			}
-
-			newSource.onerror = () => {
-				// If the connection is lost, we will attempt to reconnect after a short delay.
-				setTimeout(() => {
-					setSource(null)
-				}, 1000)
-			}
-
-			setSource(newSource)
-		}
-		return () => {
-			source?.close()
-		}
-	}, [source, sdk.serviceURL])
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[],
+	)
 
 	// whenever a new log is added to the buffer, we want to scroll to the bottom of the logs
 	useEffect(() => {
@@ -61,22 +34,19 @@ export default function LiveLogsFeed() {
 			behavior: 'smooth',
 			top: logContainerRef.current.scrollHeight,
 		})
-	}, [logsBuffer])
+	}, [data])
 
-	// TODO: Syntax highlighting for logs
 	return (
 		<div className="h-72 rounded-md bg-background-surface p-4">
 			<div
 				ref={logContainerRef}
 				className="flex max-h-full flex-col gap-y-1.5 overflow-y-auto font-mono text-sm text-foreground-subtle"
 			>
-				{logsBuffer.map((log, index) => (
-					<span key={index}>{log}</span>
+				{data?.map(({ tailLogFile: log }, index) => (
+					<span key={`live-log-${index}`}>{stripAnsi(log)}</span>
 				))}
 				<div ref={scrollRef} />
 			</div>
 		</div>
 	)
 }
-
-const stripAnsi = (str: string) => str.replace(/\\u001b\[[0-9;]*m/g, '')

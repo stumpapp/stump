@@ -1,5 +1,5 @@
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
-use models::entity::{job_schedule_config, library, library_to_schedule_config};
+use models::entity::{library, library_to_scheduled_job_config, scheduled_job_configs};
 use sea_orm::{prelude::*, sea_query::Query};
 
 use crate::{
@@ -9,20 +9,22 @@ use crate::{
 
 #[derive(Debug, SimpleObject)]
 #[graphql(complex)]
-pub struct JobScheduleConfig {
+pub struct ScheduledJobConfig {
 	#[graphql(flatten)]
-	pub model: job_schedule_config::Model,
+	pub model: scheduled_job_configs::Model,
 }
 
-impl From<job_schedule_config::Model> for JobScheduleConfig {
-	fn from(entity: job_schedule_config::Model) -> Self {
+impl From<scheduled_job_configs::Model> for ScheduledJobConfig {
+	fn from(entity: scheduled_job_configs::Model) -> Self {
 		Self { model: entity }
 	}
 }
 
 #[ComplexObject]
-impl JobScheduleConfig {
-	async fn excluded_libraries(&self, ctx: &Context<'_>) -> Result<Vec<Library>> {
+impl ScheduledJobConfig {
+	// TODO(scheduler): This will need to be a complex object in the future to allow for
+	// different configs for different job types
+	async fn scan_configs(&self, ctx: &Context<'_>) -> Result<Vec<Library>> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
@@ -30,10 +32,10 @@ impl JobScheduleConfig {
 			.filter(
 				library::Column::Id.in_subquery(
 					Query::select()
-						.column(library_to_schedule_config::Column::LibraryId)
-						.from(library_to_schedule_config::Entity)
+						.column(library_to_scheduled_job_config::Column::LibraryId)
+						.from(library_to_scheduled_job_config::Entity)
 						.and_where(
-							library_to_schedule_config::Column::ScheduleId
+							library_to_scheduled_job_config::Column::ScheduleId
 								.eq(self.model.id.clone()),
 						)
 						.to_owned(),

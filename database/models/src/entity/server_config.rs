@@ -8,8 +8,6 @@ pub struct Model {
 	#[sea_orm(column_type = "Text", nullable)]
 	pub public_url: Option<String>,
 	pub initial_wal_setup_complete: bool,
-	#[sea_orm(column_type = "Text", nullable, unique)]
-	pub job_schedule_config_id: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub encryption_key: Option<String>,
 }
@@ -20,21 +18,6 @@ pub struct EncryptionKeySelect {
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(
-		belongs_to = "super::job_schedule_config::Entity",
-		from = "Column::JobScheduleConfigId",
-		to = "super::job_schedule_config::Column::Id",
-		on_update = "Cascade",
-		on_delete = "SetNull"
-	)]
-	JobScheduleConfig,
-}
-
-impl Related<super::job_schedule_config::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::JobScheduleConfig.def()
-	}
-}
+pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}

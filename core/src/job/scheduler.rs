@@ -1,12 +1,16 @@
 use std::sync::Arc;
 
 use crate::{filesystem::scanner::LibraryScanJob, job::WrappedJob, CoreResult, Ctx};
-use models::entity::{job_schedule_config, library, library_config};
+use models::entity::{
+	library, library_config, library_to_scheduled_job_config, scheduled_job_configs,
+};
 use sea_orm::{prelude::*, Iterable, QuerySelect};
 
-// TODO: refactor this!
-// 1. Schedule multiple job types (complex config)
-// 2. Last run timestamp, so on boot we don't immediately trigger the scheduled tasks
+// TODO(scheduler): Support multiple scheduled job configs
+// TODO(scheduler): Last run timestamp, so on boot we don't immediately trigger the scheduled tasks
+
+// TODO(graphql): Be sure to add note in release notes about the inverted logic of the scheduler, where
+// libraries are opt-in rather than opt-out. This is a "breaking" change for the scheduler config
 
 pub struct JobScheduler {
 	pub scheduler_handle: Option<tokio::task::JoinHandle<()>>,
@@ -16,23 +20,24 @@ impl JobScheduler {
 	pub async fn init(core_ctx: Arc<Ctx>) -> CoreResult<Arc<Self>> {
 		let conn = core_ctx.conn.as_ref();
 
-		// TODO(sea-orm): Confirm this is OK without a partial model
-		let result = job_schedule_config::Entity::find()
+		let result = scheduled_job_configs::Entity::find()
 			.select_only()
-			.columns(job_schedule_config::Column::iter())
+			.columns(scheduled_job_configs::Column::iter())
 			.column(library::Column::Id)
-			.find_with_related(library::Entity)
+			.find_with_linked(
+				library_to_scheduled_job_config::ScheduledJobConfigsToLibraries,
+			)
 			.all(conn)
 			.await?
 			.pop();
 
-		if let Some((schedule_config, excluded_libraries)) = result {
+		if let Some((schedule_config, included_libraries)) = result {
 			tracing::info!(
 				?schedule_config,
 				"Found schedule config. Initializing scheduler."
 			);
 
-			let excluded_library_ids = excluded_libraries
+			let included_library_ids = included_libraries
 				.into_iter()
 				.map(|library| library.id)
 				.collect::<Vec<_>>();
@@ -66,9 +71,7 @@ impl JobScheduler {
 						.column(library::Column::Id)
 						.column(library::Column::Path)
 						.columns(library_config::Column::iter())
-						.filter(
-							library::Column::Id.is_not_in(excluded_library_ids.clone()),
-						)
+						.filter(library::Column::Id.is_in(included_library_ids.clone()))
 						.find_also_related(library_config::Entity)
 						.all(conn.as_ref())
 						.await

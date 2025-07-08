@@ -1531,8 +1531,33 @@
 			"description": "Background jobs that run on your Stump server instance",
 			"sections": {
 				"scheduling": {
-					"title": "Scheduling",
-					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart"
+					"title": "Scheduled Jobs",
+					"description": "Some jobs can be configured to automatically run on a schedule",
+					"disclaimer": "The job scheduler is really basic and will be improved in the future. Please reach out for feedback or suggestions!",
+					"createOrUpdateConfig": {
+						"fields": {
+							"intervalSecs": {
+								"label": "Interval",
+								"description": "How often the job should run (in seconds)",
+								"placeholder": "e.g. \"86400\" for once a day"
+							},
+							"intervalPreset": {
+								"label": "Preset",
+								"options": {
+									"everySixHours": "Every 6 hours",
+									"everyTwelveHours": "Every 12 hours",
+									"oncePerDay": "Once a day",
+									"oncePerWeek": "Once a week",
+									"oncePerMonth": "Once a month"
+								}
+							},
+							"includedLibraryIds": {
+								"label": "Included libraries",
+								"description": "Choose which libraries are included"
+							}
+						},
+						"restartRequired": "Changes to this configuration will take effect after a server restart"
+					}
 				},
 				"history": {
 					"title": "History",

@@ -38,7 +38,7 @@ export default function JobSettingsScene() {
 						</Text>
 					</div>
 
-					{/* <JobScheduler /> */}
+					<JobScheduler />
 				</div>
 
 				<div className="flex flex-col gap-4">

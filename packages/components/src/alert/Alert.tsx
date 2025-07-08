@@ -1,7 +1,7 @@
 import { cva, VariantProps } from 'class-variance-authority'
-import { AlertCircle, AlertTriangle, CheckCircle, Info, LucideIcon } from 'lucide-react'
+import { AlertCircle, AlertTriangle, CheckCircle, Info, LucideIcon, X } from 'lucide-react'
 import type { ComponentPropsWithoutRef } from 'react'
-import { forwardRef } from 'react'
+import { forwardRef, useCallback, useState } from 'react'
 
 import { cn, cx } from '../utils'
 import { AlertContext } from './context'
@@ -38,15 +38,32 @@ const alertVariants = cva('p-4', {
 	},
 })
 
+type ClosableAlertProps = {
+	closable: boolean
+	id: string
+}
+
+type NonClosableAlertProps = {
+	closable?: never
+	id?: string
+}
+
+type ClosableAlertVariant = ClosableAlertProps | NonClosableAlertProps
+
 export type AlertProps = {
 	icon?: LucideIcon | keyof typeof ALERT_ICONS
 	alignIcon?: 'center' | 'start'
 } & VariantProps<typeof alertVariants> &
-	ComponentPropsWithoutRef<'div'>
+	ComponentPropsWithoutRef<'div'> &
+	ClosableAlertVariant
 
 const Alert = forwardRef<HTMLDivElement, AlertProps>(
-	({ className, level, rounded, icon, alignIcon = 'center', children, ...props }, ref) => {
+	(
+		{ id, className, level, rounded, icon, alignIcon = 'center', children, closable, ...props },
+		ref,
+	) => {
 		// TODO: implement me, inspiration from https://chakra-ui.com/docs/components/alert/usage
+		const [isClosed, setIsClosed] = useState(() => getIsAlertClosed(id))
 
 		const renderIcon = () => {
 			let Icon: LucideIcon | null = null
@@ -73,12 +90,28 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(
 			)
 		}
 
+		const handleCloseClick = useCallback(() => {
+			if (id) {
+				setAlertClosed(id)
+			}
+			setIsClosed(true)
+		}, [id])
+
+		if (isClosed) {
+			return null
+		}
+
 		return (
 			<AlertContext.Provider value={{ level: level || 'info' }}>
 				<div
 					ref={ref}
 					{...props}
-					className={cn(alertVariants({ className, level, rounded }), className)}
+					className={cn(
+						'group relative',
+						alertVariants({ className, level, rounded }),
+						{ 'p-[18px]': closable },
+						className,
+					)}
 				>
 					<div
 						className={cx(
@@ -96,6 +129,16 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(
 						</div>
 						{children}
 					</div>
+
+					{closable && (
+						<button
+							type="button"
+							className="absolute right-1 top-1 hidden text-foreground-muted hover:text-foreground group-hover:block"
+							onClick={handleCloseClick}
+						>
+							<X className="h-4 w-4" aria-hidden="true" />
+						</button>
+					)}
 				</div>
 			</AlertContext.Provider>
 		)
@@ -146,3 +189,37 @@ TypedAlert.Title = AlertTitle
 TypedAlert.Content = AlertContent
 
 export { TypedAlert as Alert }
+
+const getClosedAlerts = () => {
+	try {
+		const closedAlerts = JSON.parse(localStorage.getItem('closedStumpAlerts') || '[]')
+		if (!Array.isArray(closedAlerts)) {
+			return []
+		}
+		return closedAlerts
+	} catch (error) {
+		console.error(`Failed to parse closed alerts from localStorage:`, error)
+		return []
+	}
+}
+
+const getIsAlertClosed = (id: string | undefined) => {
+	if (!id) {
+		return false
+	}
+	const closedAlerts = getClosedAlerts()
+
+	return closedAlerts.includes(id)
+}
+
+const setAlertClosed = (id: string) => {
+	try {
+		const closedAlerts = getClosedAlerts()
+		if (!closedAlerts.includes(id)) {
+			closedAlerts.push(id)
+			localStorage.setItem('closedStumpAlerts', JSON.stringify(closedAlerts))
+		}
+	} catch (error) {
+		console.error(`Failed to set alert as closed:`, error)
+	}
+}

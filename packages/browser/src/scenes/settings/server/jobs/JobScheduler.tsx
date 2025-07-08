@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Alert, Button, ComboBox, Form, Input, Label, NativeSelect } from '@stump/components'
 import { graphql } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { Construction } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -43,7 +44,12 @@ const mutation = graphql(`
 	}
 `)
 
+// TODO: Completely redo this feature to be more robust! I want something like:
+// - Multiple scheduled jobs of varying types
+// - An explicit create vs edit flow in the UI (right now it is derived)
+
 export default function JobScheduler() {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 
 	const {
@@ -81,6 +87,10 @@ export default function JobScheduler() {
 
 	const handleSubmit = useCallback(
 		({ intervalSecs, includedLibraryIds }: FormValues) => {
+			if (!intervalSecs) {
+				// TODO: delete
+			}
+
 			mutate({
 				input: {
 					includedLibraries: includedLibraryIds,
@@ -128,10 +138,9 @@ export default function JobScheduler() {
 
 	return (
 		<div className="my-2 flex flex-col gap-6">
-			<Alert level="warning" icon={Construction}>
+			<Alert id="futureSchedulerFeatures" level="info" icon={Construction} closable>
 				<Alert.Content>
-					Stump currently only supports scheduling scanner jobs. This will be extended to support
-					other job types in the future.
+					{t('settingsScene.server/jobs.sections.scheduling.disclaimer')}
 				</Alert.Content>
 			</Alert>
 
@@ -140,10 +149,10 @@ export default function JobScheduler() {
 					<Input
 						variant="primary"
 						type="number"
-						label="Interval"
-						description="How often the scheduler should initiate scans (in seconds). If left empty, the scheduler will be disabled"
+						label={t(getFieldKey('intervalSecs', 'label'))}
+						description={t(getFieldKey('intervalSecs', 'description'))}
 						descriptionPosition="top"
-						placeholder='e.g. "86400" for once a day'
+						placeholder={t(getFieldKey('intervalSecs', 'placeholder'))}
 						fullWidth
 						{...form.register('intervalSecs', {
 							valueAsNumber: true,
@@ -154,7 +163,10 @@ export default function JobScheduler() {
 						<Label htmlFor="intervalPreset">Interval preset</Label>
 						<NativeSelect
 							value={intervalPreset}
-							options={INTERVAL_PRESETS}
+							options={INTERVAL_PRESETS.map((option) => ({
+								label: t(getFieldKey('intervalPreset.options', option.labelKey)),
+								value: option.value,
+							}))}
 							onChange={(e) => handleIntervalPresetChange(e.target.value)}
 							emptyOption={{ label: 'Custom', value: -1 }}
 						/>
@@ -163,8 +175,8 @@ export default function JobScheduler() {
 
 				<div className="flex w-full flex-col gap-4 md:flex-row md:items-end md:justify-between lg:w-2/3">
 					<ComboBox
-						label="Excluded libraries"
-						description="Libraries that will be excluded from the scheduled scans"
+						label={t(getFieldKey('includedLibraryIds', 'label'))}
+						description={t(getFieldKey('includedLibraryIds', 'description'))}
 						descriptionPosition="top"
 						isMultiSelect
 						value={includedLibraryIds}
@@ -184,7 +196,7 @@ export default function JobScheduler() {
 					disabled={form.formState.isSubmitting}
 					className="flex-shrink-0 md:w-32"
 				>
-					Save changes
+					{t('common.saveChanges')}
 				</Button>
 			</Form>
 		</div>
@@ -203,12 +215,16 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 const INTERVAL_PRESETS = [
-	{ label: 'Every 6 hours', value: 21600 },
-	{ label: 'Every 12 hours', value: 43200 },
-	{ label: 'Once a day', value: 86400 },
-	{ label: 'Once a week', value: 604800 },
-	{ label: 'Once a month', value: 2592000 },
+	{ labelKey: 'everySixHours', value: 21600 },
+	{ labelKey: 'everyTwelveHours', value: 43200 },
+	{ labelKey: 'oncePerDay', value: 86400 },
+	{ labelKey: 'oncePerWeek', value: 604800 },
+	{ labelKey: 'oncePerMonth', value: 2592000 },
 ]
 
 const getCorrespondingPreset = (seconds: number) =>
 	INTERVAL_PRESETS.find((preset) => preset.value === seconds)
+
+const LOCALE_BASE = 'settingsScene.server/jobs.sections.scheduling.createOrUpdateConfig'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`
+const getFieldKey = (field: string, key: string) => getKey(`fields.${field}.${key}`)

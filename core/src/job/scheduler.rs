@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::{filesystem::scanner::LibraryScanJob, job::WrappedJob, CoreResult, Ctx};
 use models::entity::{
-	library, library_config, library_to_scheduled_job_config, scheduled_job_configs,
+	library, library_config, library_to_scheduled_job_config, scheduled_job_config,
 };
 use sea_orm::{prelude::*, Iterable, QuerySelect};
 
@@ -20,11 +20,8 @@ impl JobScheduler {
 	pub async fn init(core_ctx: Arc<Ctx>) -> CoreResult<Arc<Self>> {
 		let conn = core_ctx.conn.as_ref();
 
-		let result = scheduled_job_configs::Entity::find()
-			.select_only()
-			.columns(scheduled_job_configs::Column::iter())
-			.column(library::Column::Id)
-			.find_with_linked(
+		let result = scheduled_job_config::Entity::find()
+			.find_also_linked(
 				library_to_scheduled_job_config::ScheduledJobConfigsToLibraries,
 			)
 			.all(conn)

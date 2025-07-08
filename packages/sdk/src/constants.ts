@@ -27,4 +27,5 @@ export const cacheKeys = {
 	apiKeys: 'apiKeys',
 	logs: 'logs',
 	jobs: 'jobs',
+	scheduler: 'jobScheduler',
 } as const

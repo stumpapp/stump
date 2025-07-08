@@ -727,7 +727,6 @@ export type Library = {
   emoji?: Maybe<Scalars['String']['output']>;
   excludedUsers: Array<User>;
   id: Scalars['String']['output'];
-  jobScheduleConfigId?: Maybe<Scalars['String']['output']>;
   /** Get the details of the last scan job for this library, if any exists. */
   lastScan?: Maybe<LibraryScanRecord>;
   lastScannedAt?: Maybe<Scalars['String']['output']>;
@@ -805,7 +804,6 @@ export enum LibraryModelOrdering {
   Description = 'DESCRIPTION',
   Emoji = 'EMOJI',
   Id = 'ID',
-  JobScheduleConfigId = 'JOB_SCHEDULE_CONFIG_ID',
   LastScannedAt = 'LAST_SCANNED_AT',
   Name = 'NAME',
   Path = 'PATH',
@@ -1302,6 +1300,7 @@ export type Mutation = {
    * A result containing the updated reading list, or an error if update failed.
    */
   updateReadingList: ReadingList;
+  updateScheduledJobConfig: ScheduledJobConfig;
   updateSmartList: SmartList;
   updateSmartListView: SmartListView;
   updateUser: User;
@@ -1642,6 +1641,11 @@ export type MutationUpdateReadingListArgs = {
 };
 
 
+export type MutationUpdateScheduledJobConfigArgs = {
+  input: ScheduledJobConfigInput;
+};
+
+
 export type MutationUpdateSmartListArgs = {
   id: Scalars['ID']['input'];
   input: SaveSmartListInput;
@@ -1940,6 +1944,7 @@ export type Query = {
   readingLists: PaginatedReadingListResponse;
   recentlyAddedMedia: PaginatedMediaResponse;
   recentlyAddedSeries: PaginatedSeriesResponse;
+  scheduledJobConfigs: Array<ScheduledJobConfig>;
   series: PaginatedSeriesResponse;
   seriesById?: Maybe<Series>;
   smartListById?: Maybe<SmartList>;
@@ -2238,6 +2243,18 @@ export type ScaledDimensionResizeInput = {
   dimension: Dimension;
   /** The size (in pixels) to set the specified dimension to. */
   size: Scalars['Int']['input'];
+};
+
+export type ScheduledJobConfig = {
+  __typename?: 'ScheduledJobConfig';
+  id: Scalars['String']['output'];
+  intervalSecs: Scalars['Int']['output'];
+  scanConfigs: Array<Library>;
+};
+
+export type ScheduledJobConfigInput = {
+  includedLibraries: Array<Scalars['String']['input']>;
+  intervalSecs: Scalars['Int']['input'];
 };
 
 export type SendAttachmentEmailOutput = {
@@ -3336,6 +3353,18 @@ type JobDataInspector_ThumbnailGenerationOutput_Fragment = { __typename: 'Thumbn
 
 export type JobDataInspectorFragment = JobDataInspector_ExternalJobOutput_Fragment | JobDataInspector_LibraryScanOutput_Fragment | JobDataInspector_SeriesScanOutput_Fragment | JobDataInspector_ThumbnailGenerationOutput_Fragment;
 
+export type JobSchedulerConfigQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type JobSchedulerConfigQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, emoji?: string | null }> }, scheduledJobConfigs: Array<{ __typename?: 'ScheduledJobConfig', id: string, intervalSecs: number, scanConfigs: Array<{ __typename?: 'Library', id: string, name: string }> }> };
+
+export type JobSchedulerUpdateMutationVariables = Exact<{
+  input: ScheduledJobConfigInput;
+}>;
+
+
+export type JobSchedulerUpdateMutation = { __typename?: 'Mutation', updateScheduledJobConfig: { __typename?: 'ScheduledJobConfig', id: string, intervalSecs: number, scanConfigs: Array<{ __typename?: 'Library', id: string, name: string }> } };
+
 export type JobTableQueryVariables = Exact<{
   pagination: Pagination;
 }>;
@@ -4421,6 +4450,37 @@ export const JobActionMenuDeleteLogsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<JobActionMenuDeleteLogsMutation, JobActionMenuDeleteLogsMutationVariables>;
+export const JobSchedulerConfigDocument = new TypedDocumentString(`
+    query JobSchedulerConfig {
+  libraries(pagination: {none: {unpaginated: true}}) {
+    nodes {
+      id
+      name
+      emoji
+    }
+  }
+  scheduledJobConfigs {
+    id
+    intervalSecs
+    scanConfigs {
+      id
+      name
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<JobSchedulerConfigQuery, JobSchedulerConfigQueryVariables>;
+export const JobSchedulerUpdateDocument = new TypedDocumentString(`
+    mutation JobSchedulerUpdate($input: ScheduledJobConfigInput!) {
+  updateScheduledJobConfig(input: $input) {
+    id
+    intervalSecs
+    scanConfigs {
+      id
+      name
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<JobSchedulerUpdateMutation, JobSchedulerUpdateMutationVariables>;
 export const JobTableDocument = new TypedDocumentString(`
     query JobTable($pagination: Pagination!) {
   jobs(pagination: $pagination) {

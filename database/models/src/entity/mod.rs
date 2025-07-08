@@ -38,7 +38,7 @@ pub mod reading_session;
 pub mod registered_email_device;
 pub mod registered_reading_device;
 pub mod review;
-pub mod scheduled_job_configs;
+pub mod scheduled_job_config;
 pub mod series;
 pub mod series_metadata;
 pub mod series_to_tag;

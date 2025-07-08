@@ -1,5 +1,5 @@
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
-use models::entity::{library, library_to_scheduled_job_config, scheduled_job_configs};
+use models::entity::{library, library_to_scheduled_job_config, scheduled_job_config};
 use sea_orm::{prelude::*, sea_query::Query};
 
 use crate::{
@@ -11,11 +11,11 @@ use crate::{
 #[graphql(complex)]
 pub struct ScheduledJobConfig {
 	#[graphql(flatten)]
-	pub model: scheduled_job_configs::Model,
+	pub model: scheduled_job_config::Model,
 }
 
-impl From<scheduled_job_configs::Model> for ScheduledJobConfig {
-	fn from(entity: scheduled_job_configs::Model) -> Self {
+impl From<scheduled_job_config::Model> for ScheduledJobConfig {
+	fn from(entity: scheduled_job_config::Model) -> Self {
 		Self { model: entity }
 	}
 }

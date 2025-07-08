@@ -22,9 +22,9 @@ pub enum Relation {
 	)]
 	Library,
 	#[sea_orm(
-		belongs_to = "super::scheduled_job_configs::Entity",
+		belongs_to = "super::scheduled_job_config::Entity",
 		from = "Column::ScheduleId",
-		to = "super::scheduled_job_configs::Column::Id",
+		to = "super::scheduled_job_config::Column::Id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
@@ -37,7 +37,7 @@ impl Related<super::library::Entity> for Entity {
 	}
 }
 
-impl Related<super::scheduled_job_configs::Entity> for Entity {
+impl Related<super::scheduled_job_config::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::ScheduleConfig.def()
 	}
@@ -48,17 +48,17 @@ pub struct LibraryToScheduledJobConfigs;
 
 impl Linked for LibraryToScheduledJobConfigs {
 	type FromEntity = super::library::Entity;
-	type ToEntity = super::scheduled_job_configs::Entity;
+	type ToEntity = super::scheduled_job_config::Entity;
 
 	fn link(&self) -> Vec<LinkDef> {
 		vec![
-			Entity::belongs_to(super::library::Entity)
-				.from(Column::LibraryId)
-				.to(super::library::Column::Id)
+			super::library::Entity::belongs_to(Entity)
+				.from(super::library::Column::Id)
+				.to(Column::LibraryId)
 				.into(),
-			Entity::belongs_to(super::scheduled_job_configs::Entity)
+			Entity::belongs_to(super::scheduled_job_config::Entity)
 				.from(Column::ScheduleId)
-				.to(super::scheduled_job_configs::Column::Id)
+				.to(super::scheduled_job_config::Column::Id)
 				.into(),
 		]
 	}
@@ -68,14 +68,14 @@ impl Linked for LibraryToScheduledJobConfigs {
 pub struct ScheduledJobConfigsToLibraries;
 
 impl Linked for ScheduledJobConfigsToLibraries {
-	type FromEntity = super::scheduled_job_configs::Entity;
+	type FromEntity = super::scheduled_job_config::Entity;
 	type ToEntity = super::library::Entity;
 
 	fn link(&self) -> Vec<LinkDef> {
 		vec![
-			Entity::belongs_to(super::scheduled_job_configs::Entity)
-				.from(Column::ScheduleId)
-				.to(super::scheduled_job_configs::Column::Id)
+			super::scheduled_job_config::Entity::belongs_to(Entity)
+				.from(super::scheduled_job_config::Column::Id)
+				.to(Column::ScheduleId)
 				.into(),
 			Entity::belongs_to(super::library::Entity)
 				.from(Column::LibraryId)

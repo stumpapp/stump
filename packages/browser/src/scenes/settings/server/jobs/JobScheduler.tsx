@@ -1,49 +1,95 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useJobSchedulerConfig, useLibraries } from '@stump/client'
+import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Alert, Button, ComboBox, Form, Input, Label, NativeSelect } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { Construction } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { useMediaMatch } from 'rooks'
 import z from 'zod'
 
+const query = graphql(`
+	query JobSchedulerConfig {
+		libraries(pagination: { none: { unpaginated: true } }) {
+			nodes {
+				id
+				name
+				emoji
+			}
+		}
+		scheduledJobConfigs {
+			id
+			intervalSecs
+			# Note: For now scanConfigs are actually just a library node
+			scanConfigs {
+				id
+				name
+			}
+		}
+	}
+`)
+
+const mutation = graphql(`
+	mutation JobSchedulerUpdate($input: ScheduledJobConfigInput!) {
+		updateScheduledJobConfig(input: $input) {
+			id
+			intervalSecs
+			scanConfigs {
+				id
+				name
+			}
+		}
+	}
+`)
+
 export default function JobScheduler() {
-	const { libraries } = useLibraries()
-	const { config, update } = useJobSchedulerConfig()
+	const { sdk } = useSDK()
+
+	const {
+		data: {
+			libraries: { nodes: libraries },
+			scheduledJobConfigs: [config],
+		},
+	} = useSuspenseGraphQL(query, sdk.cacheKey('scheduler'))
 
 	const isSmallViewport = useMediaMatch('(max-width: 768px)')
+
 	const [intervalPreset, setIntervalPreset] = useState(
 		getCorrespondingPreset(config?.intervalSecs || -1)?.value ?? -1,
 	)
 
+	const { mutate } = useGraphQLMutation(mutation, {
+		onError: (error) => {
+			console.error(error)
+			toast.error('Failed to update job scheduler config')
+		},
+		onSuccess: () => {
+			toast.success('Scheduler config updated!')
+		},
+	})
+
 	const form = useForm({
 		defaultValues: {
-			excludedLibraryIds: config?.excluded_libraries.map((library) => library.id),
+			includedLibraryIds: config?.scanConfigs.map((library) => library.id) || [],
 			intervalSecs: config?.intervalSecs,
 		},
 		resolver: zodResolver(schema),
 	})
 
-	const [excludedLibraryIds, intervalSecs] = form.watch(['excludedLibraryIds', 'intervalSecs'])
+	const [includedLibraryIds, intervalSecs] = form.watch(['includedLibraryIds', 'intervalSecs'])
 
-	const handleSubmit = async ({ intervalSecs, excludedLibraryIds }: FormValues) => {
-		update(
-			{
-				excludedLibraryIds: excludedLibraryIds ?? null,
-				intervalSecs: intervalSecs ?? null,
-			},
-			{
-				onError: (error) => {
-					console.error(error)
-					toast.error('Failed to update job scheduler config')
+	const handleSubmit = useCallback(
+		({ intervalSecs, includedLibraryIds }: FormValues) => {
+			mutate({
+				input: {
+					includedLibraries: includedLibraryIds,
+					intervalSecs: intervalSecs ?? config?.intervalSecs ?? 86400,
 				},
-				onSuccess: () => {
-					toast.success('Scheduler config updated!')
-				},
-			},
-		)
-	}
+			})
+		},
+		[mutate, config],
+	)
 
 	const handleIntervalPresetChange = (value?: string) => {
 		if (!value) {
@@ -73,8 +119,8 @@ export default function JobScheduler() {
 		if (config) {
 			setIntervalPreset(getCorrespondingPreset(config.intervalSecs)?.value ?? -1)
 			form.setValue(
-				'excludedLibraryIds',
-				config.excluded_libraries.map(({ id }) => id),
+				'includedLibraryIds',
+				config.scanConfigs.map(({ id }) => id),
 			)
 			form.setValue('intervalSecs', config.intervalSecs)
 		}
@@ -121,12 +167,12 @@ export default function JobScheduler() {
 						description="Libraries that will be excluded from the scheduled scans"
 						descriptionPosition="top"
 						isMultiSelect
-						value={excludedLibraryIds}
+						value={includedLibraryIds}
 						options={(libraries || []).map((library) => ({
 							label: library.name,
 							value: library.id,
 						}))}
-						onChange={(value) => (value ? form.setValue('excludedLibraryIds', value) : null)}
+						onChange={(value) => (value ? form.setValue('includedLibraryIds', value) : null)}
 						size={isSmallViewport ? 'full' : 'default'}
 					/>
 				</div>
@@ -146,7 +192,7 @@ export default function JobScheduler() {
 }
 
 const schema = z.object({
-	excludedLibraryIds: z.array(z.string()).optional(),
+	includedLibraryIds: z.array(z.string()).default([]),
 	intervalSecs: z
 		.number()
 		.positive()

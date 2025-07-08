@@ -6,7 +6,7 @@ use crate::pagination::{
 };
 use crate::{data::CoreContext, object::job::Job};
 use async_graphql::{Context, Object, Result, ID};
-use models::entity::scheduled_job_configs;
+use models::entity::scheduled_job_config;
 use models::{entity::job, shared::enums::UserPermission};
 use sea_orm::{prelude::*, QueryOrder, QuerySelect};
 
@@ -102,7 +102,7 @@ impl JobQuery {
 	) -> Result<Vec<ScheduledJobConfig>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let models = scheduled_job_configs::Entity::find().all(conn).await?;
+		let models = scheduled_job_config::Entity::find().all(conn).await?;
 
 		Ok(models.into_iter().map(ScheduledJobConfig::from).collect())
 	}

@@ -683,7 +683,6 @@ type Library {
 	createdAt: DateTime!
 	emoji: String
 	configId: Int!
-	jobScheduleConfigId: String
 	lastScannedAt: String
 	config: LibraryConfig!
 	excludedUsers: [User!]!
@@ -757,7 +756,6 @@ enum LibraryModelOrdering {
 	CREATED_AT
 	EMOJI
 	CONFIG_ID
-	JOB_SCHEDULE_CONFIG_ID
 	LAST_SCANNED_AT
 }
 
@@ -1249,6 +1247,7 @@ type Mutation {
 	createSmartListView(input: SaveSmartListViewInput!): SmartListView!
 	updateSmartListView(input: SaveSmartListViewInput!): SmartListView!
 	deleteSmartListView(id: ID!, name: String!): SmartListView!
+	updateScheduledJobConfig(input: ScheduledJobConfigInput!): ScheduledJobConfig!
 }
 
 type Notifier {
@@ -1447,6 +1446,7 @@ type Query {
 	listDirectory(pagination: Pagination!, input: DirectoryListingInput): PaginatedDirectoryListingResponse!
 	jobs(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedJobResponse!
 	jobById(id: ID!): Job
+	scheduledJobConfigs: [ScheduledJobConfig!]!
 	media(filter: MediaFilterInput!, orderBy: [MediaOrderBy!]! = [{media: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	mediaById(id: ID!): Media
 	mediaByPath(path: String!): Media
@@ -1618,6 +1618,17 @@ input ScaledDimensionResizeInput {
 	dimension: Dimension!
 	"The size (in pixels) to set the specified dimension to."
 	size: Int!
+}
+
+type ScheduledJobConfig {
+	id: String!
+	intervalSecs: Int!
+	scanConfigs: [Library!]!
+}
+
+input ScheduledJobConfigInput {
+	intervalSecs: Int!
+	includedLibraries: [String!]!
 }
 
 type SendAttachmentEmailOutput {

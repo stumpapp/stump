@@ -36,7 +36,7 @@ impl ScheduledJobConfig {
 						.from(library_to_scheduled_job_config::Entity)
 						.and_where(
 							library_to_scheduled_job_config::Column::ScheduleId
-								.eq(self.model.id.clone()),
+								.eq(self.model.id),
 						)
 						.to_owned(),
 				),

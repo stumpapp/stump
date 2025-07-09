@@ -1,11 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Alert, Button, ComboBox, Form, Input, Label, NativeSelect } from '@stump/components'
-import { graphql } from '@stump/graphql'
+import { graphql, JobSchedulerConfigQuery } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
+import { useQueryClient } from '@tanstack/react-query'
 import { Construction } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useForm, useFormState } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { useMediaMatch } from 'rooks'
 import z from 'zod'
@@ -31,9 +32,28 @@ const query = graphql(`
 	}
 `)
 
-const mutation = graphql(`
-	mutation JobSchedulerUpdate($input: ScheduledJobConfigInput!) {
-		updateScheduledJobConfig(input: $input) {
+const updateMutation = graphql(`
+	mutation JobSchedulerUpdate($id: Int!, $input: ScheduledJobConfigInput!) {
+		updateScheduledJobConfig(id: $id, input: $input) {
+			id
+			intervalSecs
+			scanConfigs {
+				id
+				name
+			}
+		}
+	}
+`)
+
+const deleteMutation = graphql(`
+	mutation JobSchedulerDelete($id: Int!) {
+		deleteScheduledJobConfig(id: $id)
+	}
+`)
+
+const createMutation = graphql(`
+	mutation JobSchedulerCreate($input: ScheduledJobConfigInput!) {
+		createScheduledJobConfig(input: $input) {
 			id
 			intervalSecs
 			scanConfigs {
@@ -64,14 +84,65 @@ export default function JobScheduler() {
 	const [intervalPreset, setIntervalPreset] = useState(
 		getCorrespondingPreset(config?.intervalSecs || -1)?.value ?? -1,
 	)
+	const client = useQueryClient()
 
-	const { mutate } = useGraphQLMutation(mutation, {
+	const { mutate: create } = useGraphQLMutation(createMutation, {
+		onError: (error) => {
+			console.error(error)
+			toast.error('Failed to create job scheduler config')
+		},
+		onSuccess: ({ createScheduledJobConfig: createdConfig }) => {
+			client.setQueryData(sdk.cacheKey('scheduler'), (data?: JobSchedulerConfigQuery) => {
+				if (!data) return data
+				return {
+					...data,
+					scheduledJobConfigs: [...data.scheduledJobConfigs, createdConfig],
+				}
+			})
+		},
+	})
+
+	const { mutate: update } = useGraphQLMutation(updateMutation, {
 		onError: (error) => {
 			console.error(error)
 			toast.error('Failed to update job scheduler config')
 		},
 		onSuccess: () => {
-			toast.success('Scheduler config updated!')
+			client.setQueryData(sdk.cacheKey('scheduler'), (data?: JobSchedulerConfigQuery) => {
+				if (!data) return data
+
+				const adjustedConfigs = data.scheduledJobConfigs.map((c) => {
+					if (c.id === config?.id) {
+						return {
+							...c,
+							intervalSecs,
+							scanConfigs: libraries.filter((lib) => includedLibraryIds.includes(lib.id)),
+						}
+					}
+					return c
+				})
+
+				return {
+					...data,
+					scheduledJobConfigs: adjustedConfigs,
+				}
+			})
+		},
+	})
+
+	const { mutate: deleteConfig } = useGraphQLMutation(deleteMutation, {
+		onError: (error) => {
+			console.error(error)
+			toast.error('Failed to delete job scheduler config')
+		},
+		onSuccess: () => {
+			client.setQueryData(sdk.cacheKey('scheduler'), (data?: JobSchedulerConfigQuery) => {
+				if (!data) return data
+				return {
+					...data,
+					scheduledJobConfigs: data.scheduledJobConfigs.filter((c) => c.id !== config?.id),
+				}
+			})
 		},
 	})
 
@@ -82,23 +153,48 @@ export default function JobScheduler() {
 		},
 		resolver: zodResolver(schema),
 	})
+	const { isSubmitting } = useFormState({ control: form.control })
 
 	const [includedLibraryIds, intervalSecs] = form.watch(['includedLibraryIds', 'intervalSecs'])
 
+	const isConfigDifferent = useMemo(() => {
+		if (!config) return true
+		return (
+			config.intervalSecs !== intervalSecs ||
+			config.scanConfigs
+				.map((lib) => lib.id)
+				.sort()
+				.join(',') !== includedLibraryIds.sort().join(',')
+		)
+	}, [config, includedLibraryIds, intervalSecs])
+
 	const handleSubmit = useCallback(
 		({ intervalSecs, includedLibraryIds }: FormValues) => {
-			if (!intervalSecs) {
-				// TODO: delete
+			if (!intervalSecs && !config) {
+				// Invalid
+				return
 			}
 
-			mutate({
-				input: {
-					includedLibraries: includedLibraryIds,
-					intervalSecs: intervalSecs ?? config?.intervalSecs ?? 86400,
-				},
-			})
+			if (config && intervalSecs) {
+				update({
+					id: config.id,
+					input: {
+						includedLibraryIds,
+						intervalSecs: intervalSecs ?? config?.intervalSecs ?? 86400,
+					},
+				})
+			} else if (config) {
+				deleteConfig({ id: config.id })
+			} else {
+				create({
+					input: {
+						includedLibraryIds,
+						intervalSecs: intervalSecs ?? 86400, // Default to 1 day if not set
+					},
+				})
+			}
 		},
-		[mutate, config],
+		[create, update, deleteConfig, config],
 	)
 
 	const handleIntervalPresetChange = (value?: string) => {
@@ -193,7 +289,7 @@ export default function JobScheduler() {
 					type="submit"
 					variant="primary"
 					size="md"
-					disabled={form.formState.isSubmitting}
+					disabled={!isConfigDifferent || isSubmitting}
 					className="flex-shrink-0 md:w-32"
 				>
 					{t('common.saveChanges')}

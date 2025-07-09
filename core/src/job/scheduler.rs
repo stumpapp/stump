@@ -21,7 +21,7 @@ impl JobScheduler {
 		let conn = core_ctx.conn.as_ref();
 
 		let result = scheduled_job_config::Entity::find()
-			.find_also_linked(
+			.find_with_linked(
 				library_to_scheduled_job_config::ScheduledJobConfigsToLibraries,
 			)
 			.all(conn)

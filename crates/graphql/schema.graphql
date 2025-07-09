@@ -1247,7 +1247,9 @@ type Mutation {
 	createSmartListView(input: SaveSmartListViewInput!): SmartListView!
 	updateSmartListView(input: SaveSmartListViewInput!): SmartListView!
 	deleteSmartListView(id: ID!, name: String!): SmartListView!
-	updateScheduledJobConfig(input: ScheduledJobConfigInput!): ScheduledJobConfig!
+	createScheduledJobConfig(input: ScheduledJobConfigInput!): ScheduledJobConfig!
+	updateScheduledJobConfig(id: Int!, input: ScheduledJobConfigInput!): ScheduledJobConfig!
+	deleteScheduledJobConfig(id: Int!): Boolean!
 }
 
 type Notifier {
@@ -1621,14 +1623,14 @@ input ScaledDimensionResizeInput {
 }
 
 type ScheduledJobConfig {
-	id: String!
+	id: Int!
 	intervalSecs: Int!
 	scanConfigs: [Library!]!
 }
 
 input ScheduledJobConfigInput {
 	intervalSecs: Int!
-	includedLibraries: [String!]!
+	includedLibraryIds: [String!]!
 }
 
 type SendAttachmentEmailOutput {

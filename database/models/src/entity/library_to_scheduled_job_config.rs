@@ -5,8 +5,7 @@ use sea_orm::{entity::prelude::*, LinkDef, Linked};
 pub struct Model {
 	#[sea_orm(primary_key)]
 	pub id: i32,
-	#[sea_orm(column_type = "Text")]
-	pub schedule_id: String,
+	pub schedule_id: i32,
 	#[sea_orm(column_type = "Text")]
 	pub library_id: String,
 }

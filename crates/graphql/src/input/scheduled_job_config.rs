@@ -1,4 +1,4 @@
-use async_graphql::InputObject;
+use async_graphql::{CustomValidator, InputObject, InputValueError, Result};
 
 // TODO(scheduler): Support more complex job configs:
 // enum ScheduledJobConfigType {
@@ -12,6 +12,29 @@ use async_graphql::InputObject;
 
 #[derive(Debug, Clone, InputObject)]
 pub struct ScheduledJobConfigInput {
-	interval_secs: i32,
-	included_libraries: Vec<String>,
+	pub interval_secs: i32,
+	pub included_library_ids: Vec<String>,
+}
+
+/// A custom validator for the ScheduledJobConfigInput enum that ensures that the input is valid:
+/// 1. The interval must be greater than 0
+/// 2. At least one library must be included
+#[derive(Default)]
+pub struct ScheduledJobConfigValidator;
+
+impl CustomValidator<ScheduledJobConfigInput> for ScheduledJobConfigValidator {
+	fn check(
+		&self,
+		input: &ScheduledJobConfigInput,
+	) -> Result<(), InputValueError<ScheduledJobConfigInput>> {
+		if input.interval_secs <= 0 {
+			Err(InputValueError::custom("Interval must be greater than 0"))
+		} else if input.included_library_ids.is_empty() {
+			Err(InputValueError::custom(
+				"At least one library must be included",
+			))
+		} else {
+			Ok(())
+		}
+	}
 }

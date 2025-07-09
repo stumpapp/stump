@@ -1195,6 +1195,7 @@ export type Mutation = {
    * A result containing the newly created reading list, or an error if creation failed.
    */
   createReadingList: ReadingList;
+  createScheduledJobConfig: ScheduledJobConfig;
   createSmartList: SmartList;
   createSmartListView: SmartListView;
   /**
@@ -1234,6 +1235,7 @@ export type Mutation = {
    * A result containing the deleted reading list, or an error if deletion failed.
    */
   deleteReadingList: ReadingList;
+  deleteScheduledJobConfig: Scalars['Boolean']['output'];
   deleteSmartList: SmartList;
   deleteSmartListView: SmartListView;
   /**
@@ -1412,6 +1414,11 @@ export type MutationCreateReadingListArgs = {
 };
 
 
+export type MutationCreateScheduledJobConfigArgs = {
+  input: ScheduledJobConfigInput;
+};
+
+
 export type MutationCreateSmartListArgs = {
   input: SaveSmartListInput;
 };
@@ -1495,6 +1502,11 @@ export type MutationDeleteNotifierArgs = {
 
 export type MutationDeleteReadingListArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteScheduledJobConfigArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -1642,6 +1654,7 @@ export type MutationUpdateReadingListArgs = {
 
 
 export type MutationUpdateScheduledJobConfigArgs = {
+  id: Scalars['Int']['input'];
   input: ScheduledJobConfigInput;
 };
 
@@ -2247,13 +2260,13 @@ export type ScaledDimensionResizeInput = {
 
 export type ScheduledJobConfig = {
   __typename?: 'ScheduledJobConfig';
-  id: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
   intervalSecs: Scalars['Int']['output'];
   scanConfigs: Array<Library>;
 };
 
 export type ScheduledJobConfigInput = {
-  includedLibraries: Array<Scalars['String']['input']>;
+  includedLibraryIds: Array<Scalars['String']['input']>;
   intervalSecs: Scalars['Int']['input'];
 };
 
@@ -3356,14 +3369,29 @@ export type JobDataInspectorFragment = JobDataInspector_ExternalJobOutput_Fragme
 export type JobSchedulerConfigQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type JobSchedulerConfigQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, emoji?: string | null }> }, scheduledJobConfigs: Array<{ __typename?: 'ScheduledJobConfig', id: string, intervalSecs: number, scanConfigs: Array<{ __typename?: 'Library', id: string, name: string }> }> };
+export type JobSchedulerConfigQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, emoji?: string | null }> }, scheduledJobConfigs: Array<{ __typename?: 'ScheduledJobConfig', id: number, intervalSecs: number, scanConfigs: Array<{ __typename?: 'Library', id: string, name: string }> }> };
 
 export type JobSchedulerUpdateMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
   input: ScheduledJobConfigInput;
 }>;
 
 
-export type JobSchedulerUpdateMutation = { __typename?: 'Mutation', updateScheduledJobConfig: { __typename?: 'ScheduledJobConfig', id: string, intervalSecs: number, scanConfigs: Array<{ __typename?: 'Library', id: string, name: string }> } };
+export type JobSchedulerUpdateMutation = { __typename?: 'Mutation', updateScheduledJobConfig: { __typename?: 'ScheduledJobConfig', id: number, intervalSecs: number, scanConfigs: Array<{ __typename?: 'Library', id: string, name: string }> } };
+
+export type JobSchedulerDeleteMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type JobSchedulerDeleteMutation = { __typename?: 'Mutation', deleteScheduledJobConfig: boolean };
+
+export type JobSchedulerCreateMutationVariables = Exact<{
+  input: ScheduledJobConfigInput;
+}>;
+
+
+export type JobSchedulerCreateMutation = { __typename?: 'Mutation', createScheduledJobConfig: { __typename?: 'ScheduledJobConfig', id: number, intervalSecs: number, scanConfigs: Array<{ __typename?: 'Library', id: string, name: string }> } };
 
 export type JobTableQueryVariables = Exact<{
   pagination: Pagination;
@@ -4470,8 +4498,8 @@ export const JobSchedulerConfigDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<JobSchedulerConfigQuery, JobSchedulerConfigQueryVariables>;
 export const JobSchedulerUpdateDocument = new TypedDocumentString(`
-    mutation JobSchedulerUpdate($input: ScheduledJobConfigInput!) {
-  updateScheduledJobConfig(input: $input) {
+    mutation JobSchedulerUpdate($id: Int!, $input: ScheduledJobConfigInput!) {
+  updateScheduledJobConfig(id: $id, input: $input) {
     id
     intervalSecs
     scanConfigs {
@@ -4481,6 +4509,23 @@ export const JobSchedulerUpdateDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<JobSchedulerUpdateMutation, JobSchedulerUpdateMutationVariables>;
+export const JobSchedulerDeleteDocument = new TypedDocumentString(`
+    mutation JobSchedulerDelete($id: Int!) {
+  deleteScheduledJobConfig(id: $id)
+}
+    `) as unknown as TypedDocumentString<JobSchedulerDeleteMutation, JobSchedulerDeleteMutationVariables>;
+export const JobSchedulerCreateDocument = new TypedDocumentString(`
+    mutation JobSchedulerCreate($input: ScheduledJobConfigInput!) {
+  createScheduledJobConfig(input: $input) {
+    id
+    intervalSecs
+    scanConfigs {
+      id
+      name
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<JobSchedulerCreateMutation, JobSchedulerCreateMutationVariables>;
 export const JobTableDocument = new TypedDocumentString(`
     query JobTable($pagination: Pagination!) {
   jobs(pagination: $pagination) {

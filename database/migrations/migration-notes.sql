@@ -138,7 +138,7 @@ CREATE TABLE "scheduled_job_configs" (
 );
 CREATE TABLE _library_to_scheduled_job_config (
     "library_id" TEXT NOT NULL,
-    "schedule_id" TEXT NOT NULL,
+    "schedule_id" INTEGER NOT NULL,
     CONSTRAINT "_library_to_scheduled_job_config_library_id_fkey" FOREIGN KEY ("library_id") REFERENCES "libraries" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "_library_to_scheduled_job_config_schedule_id_fkey" FOREIGN KEY ("schedule_id") REFERENCES "scheduled_job_configs" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );

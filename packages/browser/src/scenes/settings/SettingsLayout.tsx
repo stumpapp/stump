@@ -26,7 +26,7 @@ export default function SettingsLayout() {
 	} = usePreferences()
 
 	if (!user) {
-		return <Navigate to={`/login?redirect=${encodeURIComponent(window.location.pathname)}`} />
+		return <Navigate to={`/auth?redirect=${encodeURIComponent(window.location.pathname)}`} />
 	}
 
 	const displaySideBar = !!enableDoubleSidebar && !isMobile

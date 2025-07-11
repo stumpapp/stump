@@ -24,6 +24,7 @@ pub fn get_default_user() -> AuthUser {
 	AuthUser {
 		id: "42".to_string(),
 		username: "test".to_string(),
+		avatar_url: None,
 		is_server_owner: true,
 		is_locked: false,
 		permissions: vec![],

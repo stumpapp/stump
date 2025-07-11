@@ -6,11 +6,13 @@ mod book_club_schedule;
 mod email_device;
 mod emailer;
 mod epub;
+mod job;
 mod library;
 mod log;
 mod media;
 mod notifier;
 mod reading_list;
+mod scheduled_job_config;
 mod series;
 mod smart_list_view;
 mod smart_lists;
@@ -26,11 +28,13 @@ use book_club_schedule::BookClubScheduleMutation;
 use email_device::EmailDeviceMutation;
 use emailer::EmailerMutation;
 use epub::EpubMutation;
+use job::JobMutation;
 use library::LibraryMutation;
 use log::LogMutation;
 use media::MediaMutation;
 use notifier::NotifierMutation;
 use reading_list::ReadingListMutation;
+use scheduled_job_config::ScheduledJobConfigMutation;
 use series::SeriesMutation;
 use smart_list_view::SmartListViewMutation;
 use smart_lists::SmartListMutation;
@@ -46,6 +50,7 @@ pub struct Mutation(
 	BookClubInvitationMutation,
 	BookClubMemberMutation,
 	BookClubScheduleMutation,
+	JobMutation,
 	NotifierMutation,
 	EpubMutation,
 	MediaMutation,
@@ -59,4 +64,5 @@ pub struct Mutation(
 	EmailerMutation,
 	EmailDeviceMutation,
 	SmartListViewMutation,
+	ScheduledJobConfigMutation,
 );

@@ -4,7 +4,7 @@ use chrono::DateTime;
 use models::entity::log;
 use stump_core::config::StumpConfig;
 
-#[derive(Debug, SimpleObject)]
+#[derive(Clone, Debug, SimpleObject)]
 pub struct Log {
 	#[graphql(flatten)]
 	pub model: log::Model,

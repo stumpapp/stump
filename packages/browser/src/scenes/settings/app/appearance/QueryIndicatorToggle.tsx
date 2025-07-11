@@ -1,34 +1,26 @@
-import { useUpdatePreferences } from '@stump/client'
 import { WideSwitch } from '@stump/components'
-import { UpdateUserPreferences } from '@stump/sdk'
+import { useCallback } from 'react'
 
-import { useUserStore } from '@/stores'
+import { usePreferences } from '@/hooks/usePreferences'
 
 export default function QueryIndicatorToggle() {
-	const { preferences, setPreferences } = useUserStore((state) => ({
-		preferences: state.userPreferences,
-		setPreferences: state.setUserPreferences,
-	}))
+	const {
+		preferences: { showQueryIndicator },
+		update,
+	} = usePreferences()
 
-	const { update } = useUpdatePreferences({
-		onSuccess: setPreferences,
-	})
-
-	const handleChange = () => {
-		if (preferences) {
-			update({
-				...preferences,
-				show_query_indicator: !preferences.show_query_indicator,
-			} as UpdateUserPreferences)
-		}
-	}
+	const handleChange = useCallback(() => {
+		update({
+			showQueryIndicator: !showQueryIndicator,
+		})
+	}, [showQueryIndicator, update])
 
 	return (
 		<WideSwitch
-			formId="show_query_indicator"
+			formId="showQueryIndicator"
 			label="Background fetch indicator"
 			description="Show a loading indicator whenever a query is running in the background"
-			checked={preferences?.show_query_indicator}
+			checked={showQueryIndicator}
 			onCheckedChange={handleChange}
 		/>
 	)

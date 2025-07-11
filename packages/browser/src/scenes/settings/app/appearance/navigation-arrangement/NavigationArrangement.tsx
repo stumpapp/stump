@@ -15,6 +15,7 @@ import {
 } from '@dnd-kit/sortable'
 import { useNavigationArrangement } from '@stump/client'
 import { Button, Card, cn, Label, Text, ToolTip } from '@stump/components'
+import { UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { NavigationItem } from '@stump/sdk'
 import isEqual from 'lodash/isEqual'
@@ -57,9 +58,9 @@ export default function NavigationArrangement() {
 	const checkItemPermission = useCallback(
 		(type: NavigationItem['type']) => {
 			if (type === 'SmartLists') {
-				return checkPermission('smartlist:read')
+				return checkPermission(UserPermission.AccessSmartList)
 			} else if (type === 'BookClubs') {
-				return checkPermission('bookclub:read')
+				return checkPermission(UserPermission.AccessBookClub)
 			} else {
 				return true
 			}

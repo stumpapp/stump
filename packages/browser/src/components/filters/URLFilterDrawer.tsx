@@ -1,6 +1,6 @@
 import { Button, IconButton, Sheet, ToolTip } from '@stump/components'
 import { Bolt } from 'lucide-react'
-import { useCallback, useMemo, useState } from 'react'
+import { Suspense, useCallback, useMemo, useState } from 'react'
 import { useMediaMatch } from 'rooks'
 
 import { clearFilters, getActiveFilterCount, useFilterContext } from '.'
@@ -88,7 +88,7 @@ export default function URLFilterDrawer({ entity }: Props) {
 				</div>
 			}
 		>
-			{renderForm()}
+			<Suspense>{renderForm()}</Suspense>
 		</Sheet>
 	)
 }

@@ -16,7 +16,7 @@ use stump_core::{
 
 use models::entity::{
 	emailer,
-	emailer_send_record::{self, AttachmentMeta},
+	emailer_send_record::{self, AttachmentMetaModel},
 	media, registered_email_device,
 	user::AuthUser,
 };
@@ -171,7 +171,7 @@ async fn get_attachments(
 		attachment_meta.push(meta);
 	}
 
-	let attachments_meta_data = AttachmentMeta::into_data(&attachment_meta)?;
+	let attachments_meta_data = AttachmentMetaModel::into_data(&attachment_meta)?;
 
 	Ok((attachments_meta_data, attachments))
 }
@@ -208,7 +208,7 @@ async fn update_send_records(
 async fn book_to_attachment(
 	book: &media::Model,
 	max_attachment_size_bytes: Option<i32>,
-) -> Result<(AttachmentMeta, AttachmentPayload)> {
+) -> Result<(AttachmentMetaModel, AttachmentPayload)> {
 	let content = tokio::fs::read(&book.path).await?;
 	book_to_attachment_with_content(book, max_attachment_size_bytes, content).await
 }
@@ -217,7 +217,7 @@ async fn book_to_attachment_with_content(
 	book: &media::Model,
 	max_attachment_size_bytes: Option<i32>,
 	content: Vec<u8>,
-) -> Result<(AttachmentMeta, AttachmentPayload)> {
+) -> Result<(AttachmentMetaModel, AttachmentPayload)> {
 	let FileParts {
 		file_name,
 		extension,
@@ -244,7 +244,7 @@ async fn book_to_attachment_with_content(
 			"Failed to parse content type".to_string()
 		})?;
 
-	let attachment_meta = AttachmentMeta::new(
+	let attachment_meta = AttachmentMetaModel::new(
 		file_name.clone(),
 		Some(book.id.clone()),
 		content.len() as i32,
@@ -664,7 +664,7 @@ mod tests {
 	#[tokio::test]
 	async fn test_get_attachments_empty() {
 		let (meta_data, payload) = get_attachments(&vec![], None).await.unwrap();
-		let meta = AttachmentMeta::try_from_data(&meta_data).unwrap();
+		let meta = AttachmentMetaModel::vec_from_data(&meta_data).unwrap();
 		assert_eq!(payload.len(), 0);
 		assert_eq!(meta.len(), 0);
 	}
@@ -674,7 +674,7 @@ mod tests {
 		let mut book = get_default_media();
 		book.path = get_test_epub_path();
 		let (meta_data, payload) = get_attachments(&[book], None).await.unwrap();
-		let meta = AttachmentMeta::try_from_data(&meta_data).unwrap();
+		let meta = AttachmentMetaModel::vec_from_data(&meta_data).unwrap();
 		assert!(payload.len() > 0);
 		assert_eq!(meta.len(), 1);
 		assert_eq!(meta[0].media_id, Some("1".to_string()));

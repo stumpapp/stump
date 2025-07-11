@@ -16,6 +16,7 @@ export const cacheKeys = {
 	scanHistory: 'scanHistory',
 	numberOfLibraries: 'numberOfLibraries',
 	bookReader: 'bookReader',
+	emailers: 'emailers',
 	emailDevices: 'emailDevices',
 	bookOverview: 'bookOverview',
 	bookOverviewHeader: 'bookOverviewHeader',
@@ -24,4 +25,10 @@ export const cacheKeys = {
 	getStats: 'getStats',
 	recentlyAddedMedia: 'recentlyAddedMedia',
 	media: 'media',
+	apiKeys: 'apiKeys',
+	logs: 'logs',
+	jobs: 'jobs',
+	scheduler: 'jobScheduler',
+	users: 'users',
+	user: 'user',
 } as const

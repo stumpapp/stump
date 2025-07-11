@@ -1,7 +1,8 @@
-import { queryClient, useMutation, useSDK } from '@stump/client'
+import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Button, Dialog, Text, useCopyToClipboard } from '@stump/components'
+import { ApikeyInput, graphql, InheritPermissionValue } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { CreateOrUpdateAPIKey } from '@stump/sdk'
+import { useQueryClient } from '@tanstack/react-query'
 import { Copy, CopyCheck, Eye, EyeOff, KeyRound } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -10,18 +11,34 @@ import CreateOrUpdateAPIKeyForm, {
 	CreateOrUpdateAPIKeyFormValues,
 } from './CreateOrUpdateAPIKeyForm'
 
+const mutation = graphql(`
+	mutation CreateAPIKeyModal($input: ApikeyInput!) {
+		createApiKey(input: $input) {
+			apiKey {
+				id
+			}
+			secret
+		}
+	}
+`)
+
 export default function CreateAPIKeyModal() {
 	const [isOpen, setIsOpen] = useState(false)
 
+	const client = useQueryClient()
+
 	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
-	const { mutateAsync: createKey, isLoading: isCreating } = useMutation(
-		[sdk.apiKey.keys.create],
-		(payload: CreateOrUpdateAPIKey) => sdk.apiKey.create(payload),
-		{
-			onSuccess: () => queryClient.invalidateQueries([sdk.apiKey.keys.get], { exact: false }),
+	const { mutate: createKey, isPending } = useGraphQLMutation(mutation, {
+		onSuccess: ({ createApiKey: { secret } }) => {
+			setApiSecret(secret)
+			client.refetchQueries({
+				exact: false,
+				predicate: ({ queryKey }) => queryKey.includes(sdk.cacheKeys.apiKeys),
+			})
 		},
-	)
+	})
+
 	const [apiSecret, setApiSecret] = useState<string | null>(null)
 
 	const [hideSecret, setHideSecret] = useState(true)
@@ -34,14 +51,19 @@ export default function CreateAPIKeyModal() {
 	)
 
 	const handleCreate = useCallback(
-		async ({ name, expires_at, ...permissions }: CreateOrUpdateAPIKeyFormValues) => {
-			const payload: CreateOrUpdateAPIKey = {
+		async ({ name, expiresAt, ...permissions }: CreateOrUpdateAPIKeyFormValues) => {
+			const payload: ApikeyInput = {
 				name,
-				expires_at: expires_at?.toISOString(),
-				permissions: permissions.inherit ? 'inherit' : permissions.explicit_permissions,
+				expiresAt: expiresAt?.toISOString(),
+				permissions: permissions.inherit
+					? {
+							inherit: InheritPermissionValue.Inherit,
+						}
+					: {
+							custom: permissions.explicitPermissions,
+						},
 			}
-			const { api_key } = await createKey(payload)
-			setApiSecret(api_key)
+			createKey({ input: payload })
 		},
 		[createKey],
 	)
@@ -59,15 +81,29 @@ export default function CreateAPIKeyModal() {
 	const VisibilityIcon = hideSecret ? Eye : EyeOff
 	const CopyIcon = didCopy ? CopyCheck : Copy
 
+	const [formFocused, setFormFocused] = useState(false)
+
+	const onEscapeKeyDown = useCallback(
+		(e: KeyboardEvent) => {
+			if (!formFocused) return
+
+			if (e.key === 'Escape') {
+				e.preventDefault()
+				e.stopPropagation()
+			}
+		},
+		[formFocused],
+	)
+
 	return (
-		<Dialog open={isOpen} onOpenChange={isCreating ? undefined : setIsOpen}>
+		<Dialog open={isOpen} onOpenChange={isPending ? undefined : setIsOpen}>
 			<Dialog.Trigger asChild>
 				<Button size="sm" variant="secondary">
 					{t(getKey('trigger'))}
 				</Button>
 			</Dialog.Trigger>
 
-			<Dialog.Content size="md">
+			<Dialog.Content size="md" onEscapeKeyDown={onEscapeKeyDown}>
 				<Dialog.Header>
 					<Dialog.Title>{t(getKey(`heading.${apiSecret ? 'created' : 'creating'}`))}</Dialog.Title>
 					<Dialog.Description>
@@ -102,17 +138,22 @@ export default function CreateAPIKeyModal() {
 						</div>
 					</div>
 				)}
-				{!apiSecret && <CreateOrUpdateAPIKeyForm onSubmit={handleCreate} />}
+				{!apiSecret && (
+					<CreateOrUpdateAPIKeyForm
+						onSubmit={handleCreate}
+						onFormFocusStateChanged={setFormFocused}
+					/>
+				)}
 
 				<Dialog.Footer>
 					{!apiSecret && (
-						<Button disabled={isCreating} onClick={() => setIsOpen(false)} size="sm">
+						<Button disabled={isPending} onClick={() => setIsOpen(false)} size="sm">
 							{t('common.cancel')}
 						</Button>
 					)}
 
 					<Button
-						disabled={isCreating}
+						disabled={isPending}
 						variant="primary"
 						size="sm"
 						type={apiSecret ? 'button' : 'submit'}

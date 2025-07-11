@@ -1,4 +1,4 @@
-import { UserPermission } from '@stump/sdk'
+import { UserPermission } from '@stump/graphql'
 import {
 	AlarmClock,
 	Bell,
@@ -65,7 +65,7 @@ export const routeGroups: RouteGroup[] = [
 				icon: KeyRound,
 				label: 'API keys',
 				localeKey: 'app/apiKeys',
-				permission: 'feature:api_keys',
+				permission: UserPermission.AccessApiKeys,
 				to: '/settings/app/api-keys',
 			},
 			{
@@ -84,28 +84,28 @@ export const routeGroups: RouteGroup[] = [
 				icon: Cog,
 				label: 'General',
 				localeKey: 'server/general',
-				permission: 'server:manage',
+				permission: UserPermission.ManageServer,
 				to: '/settings/server/general',
 			},
 			{
 				icon: ScrollText,
 				label: 'Logs',
 				localeKey: 'server/logs',
-				permission: 'server:manage',
+				permission: UserPermission.ManageServer,
 				to: '/settings/server/logs',
 			},
 			{
 				icon: AlarmClock,
 				label: 'Jobs',
 				localeKey: 'server/jobs',
-				permission: 'server:manage',
+				permission: UserPermission.ReadJobs,
 				to: '/settings/server/jobs',
 			},
 			{
 				icon: Users,
 				label: 'Users',
 				localeKey: 'server/users',
-				permission: 'user:manage',
+				permission: UserPermission.ManageUsers,
 				subItems: [
 					{
 						backlink: {
@@ -141,7 +141,7 @@ export const routeGroups: RouteGroup[] = [
 				icon: Mail,
 				label: 'Email',
 				localeKey: 'server/email',
-				permission: 'emailer:read',
+				permission: UserPermission.EmailerRead,
 				subItems: [
 					{
 						backlink: {
@@ -170,7 +170,7 @@ export const routeGroups: RouteGroup[] = [
 				icon: Bell,
 				label: 'Notifications',
 				localeKey: 'server/notifications',
-				permission: 'server:manage',
+				permission: UserPermission.ReadNotifier,
 				to: '/settings/server/notifications',
 			},
 		],

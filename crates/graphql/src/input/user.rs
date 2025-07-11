@@ -47,4 +47,5 @@ pub struct UpdateUserPreferencesInput {
 	pub enable_job_overlay: bool,
 	pub prefer_accent_color: bool,
 	pub show_thumbnails_in_headers: bool,
+	pub enable_alphabet_select: bool,
 }

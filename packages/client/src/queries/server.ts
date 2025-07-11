@@ -1,12 +1,12 @@
-import { useQuery } from '../client'
+import { useQuery } from '@tanstack/react-query'
+
 import { useSDK } from '../sdk'
 
 export function useStumpVersion() {
 	const { sdk } = useSDK()
-	const { data: version } = useQuery([sdk.server.keys.version], () => sdk.server.version(), {
-		onError(err) {
-			console.error('Failed to fetch Stump API version:', err)
-		},
+	const { data: version } = useQuery({
+		queryKey: [sdk.server.keys.version],
+		queryFn: () => sdk.server.version(),
 	})
 
 	return version
@@ -14,12 +14,13 @@ export function useStumpVersion() {
 
 export function useCheckForServerUpdate() {
 	const { sdk } = useSDK()
-	const { data, isLoading } = useQuery([sdk.server.keys.checkUpdate], () =>
-		sdk.server.checkUpdate(),
-	)
+	const { data, isLoading } = useQuery({
+		queryKey: [sdk.server.keys.checkUpdate],
+		queryFn: () => sdk.server.checkUpdate(),
+	})
 
 	return {
 		isLoading,
-		updateAvailable: data?.has_update_available ?? false,
+		updateAvailable: data?.hasUpdateAvailable ?? false,
 	}
 }

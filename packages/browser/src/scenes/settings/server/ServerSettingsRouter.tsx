@@ -1,3 +1,4 @@
+import { UserPermission } from '@stump/graphql'
 import { lazy, useEffect, useMemo } from 'react'
 import { Route, Routes, useNavigate } from 'react-router'
 
@@ -15,9 +16,18 @@ export default function ServerSettingsRouter() {
 
 	const { checkPermission } = useAppContext()
 
-	const canManageServer = useMemo(() => checkPermission('server:manage'), [checkPermission])
-	const canManageUsers = useMemo(() => checkPermission('user:manage'), [checkPermission])
-	const canManageEmail = useMemo(() => checkPermission('emailer:manage'), [checkPermission])
+	const canManageServer = useMemo(
+		() => checkPermission(UserPermission.ManageServer),
+		[checkPermission],
+	)
+	const canManageUsers = useMemo(
+		() => checkPermission(UserPermission.ManageUsers),
+		[checkPermission],
+	)
+	const canManageEmail = useMemo(
+		() => checkPermission(UserPermission.EmailerManage),
+		[checkPermission],
+	)
 
 	const hasAtLeastOnePermission = canManageServer || canManageUsers || canManageEmail
 	useEffect(() => {

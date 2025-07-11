@@ -15,3 +15,8 @@ export type IAppContext = {
 
 export const AppContext = createContext<IAppContext>({} as IAppContext)
 export const useAppContext = () => useContext(AppContext)
+
+export const useCheckPermission = (permission: UserPermission) => {
+	const { checkPermission } = useAppContext()
+	return checkPermission(permission)
+}

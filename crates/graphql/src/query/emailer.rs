@@ -22,9 +22,8 @@ impl EmailerQuery {
 
 	// TODO(graphql): Determine best practice for return (error vs Option)
 	#[graphql(guard = "PermissionGuard::one(UserPermission::EmailerRead)")]
-	async fn emailer_by_id(&self, ctx: &Context<'_>, id: ID) -> Result<Option<Emailer>> {
+	async fn emailer_by_id(&self, ctx: &Context<'_>, id: i32) -> Result<Option<Emailer>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-		let id: i32 = id.0.parse()?;
 		let emailer = emailer::Entity::find_by_id(id).one(conn).await?;
 		Ok(emailer.map(Emailer::from))
 	}

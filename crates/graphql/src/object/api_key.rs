@@ -6,7 +6,6 @@ use models::{
 		enums::UserPermission,
 	},
 };
-use sea_orm::prelude::*;
 
 #[derive(Debug, Clone, SimpleObject)]
 #[graphql(complex)]
@@ -55,4 +54,10 @@ impl APIKey {
 	pub async fn permissions(&self, _ctx: &Context<'_>) -> APIKeyPermissionsOutput {
 		self.model.permissions.clone().into()
 	}
+}
+
+#[derive(Debug, Clone, SimpleObject)]
+pub struct CreatedAPIKey {
+	pub api_key: APIKey,
+	pub secret: String,
 }

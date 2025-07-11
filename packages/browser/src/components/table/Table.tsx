@@ -35,6 +35,7 @@ export interface TableProps<T = unknown, V = unknown> {
 	emptyRenderer?: () => React.ReactNode
 	isZeroBasedPagination?: boolean
 	cellClassName?: string
+	onPrefetchPage?: (page: number) => void
 }
 
 // TODO: move into components package!
@@ -50,6 +51,7 @@ export default function Table<T, V>({
 	emptyRenderer,
 	isZeroBasedPagination,
 	cellClassName,
+	onPrefetchPage,
 	...props
 }: TableProps<T, V>) {
 	const rootRef = useRef<HTMLDivElement | null>(null)
@@ -277,6 +279,7 @@ export default function Table<T, V>({
 					currentPage={pageIndex + 1}
 					pages={pageCount}
 					onChangePage={handlePageChanged}
+					onPrefetchPage={onPrefetchPage}
 				/>
 			</div>
 		</div>

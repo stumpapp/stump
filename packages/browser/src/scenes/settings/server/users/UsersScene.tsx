@@ -21,9 +21,9 @@ export default function UsersScene() {
 			</Helmet>
 
 			<ContentContainer>
-				<UserManagementStats />
+				{/* <UserManagementStats /> */}
 				<UserTableSection />
-				<LoginActivitySection />
+				{/* <LoginActivitySection /> */}
 			</ContentContainer>
 		</SceneContainer>
 	)

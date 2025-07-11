@@ -2,7 +2,7 @@ use async_graphql::SimpleObject;
 use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue};
 use serde::{Deserialize, Serialize};
 
-use crate::shared::arrangement::Arrangement;
+use crate::shared::{arrangement::Arrangement, enums::SupportedFont};
 
 #[derive(
 	Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Serialize, Deserialize,
@@ -20,7 +20,7 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	pub app_theme: String,
 	#[sea_orm(column_type = "Text")]
-	pub app_font: String,
+	pub app_font: SupportedFont,
 	#[sea_orm(column_type = "Text")]
 	pub primary_navigation_mode: String,
 	pub layout_max_width_px: Option<i32>,

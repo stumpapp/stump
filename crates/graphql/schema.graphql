@@ -64,7 +64,6 @@ type ArrangementSection {
 	visible: Boolean!
 }
 
-"The metadata of an attachment that was sent with an email"
 type AttachmentMeta {
 	"The filename of the attachment"
 	filename: String!
@@ -72,6 +71,7 @@ type AttachmentMeta {
 	mediaId: String
 	"The size of the attachment in bytes"
 	size: Int!
+	media: Media
 }
 
 type BookClub {
@@ -248,6 +248,11 @@ input CreateUserInput {
 	maxSessionsAllowed: Int
 }
 
+type CreatedAPIKey {
+	apiKey: Apikey!
+	secret: String!
+}
+
 type CreatedManySeries {
 	count: Int!
 	libraryId: String!
@@ -299,6 +304,16 @@ The input/output is a string in RFC3339 format.
 scalar DateTime
 
 scalar Decimal
+
+type DeleteJobAssociatedLogs {
+	"The number of logs deleted that were related to a job"
+	affectedRows: Int!
+}
+
+type DeleteJobHistory {
+	"The number of logs deleted that were related to a job"
+	affectedRows: Int!
+}
 
 enum Dimension {
 	HEIGHT
@@ -610,12 +625,13 @@ type Job {
 	id: String!
 	name: String!
 	description: String
-	status: String!
+	status: JobStatus!
 	msElapsed: Int!
 	createdAt: DateTime!
-	completedAt: String
+	completedAt: DateTime
 	outputData: CoreJobOutput
 	saveState: JSON
+	logCount: Int!
 	logs: [Log!]!
 }
 
@@ -667,7 +683,6 @@ type Library {
 	createdAt: DateTime!
 	emoji: String
 	configId: Int!
-	jobScheduleConfigId: String
 	lastScannedAt: String
 	config: LibraryConfig!
 	excludedUsers: [User!]!
@@ -741,7 +756,6 @@ enum LibraryModelOrdering {
 	CREATED_AT
 	EMOJI
 	CONFIG_ID
-	JOB_SCHEDULE_CONFIG_ID
 	LAST_SCANNED_AT
 }
 
@@ -794,7 +808,7 @@ type LibraryStats {
 
 type Log {
 	id: Int!
-	level: String!
+	level: LogLevel!
 	message: String!
 	timestamp: DateTime!
 	jobId: String
@@ -817,6 +831,13 @@ input LogFilterInput {
 	_and: [LogFilterInput!] = null
 	_not: [LogFilterInput!] = null
 	_or: [LogFilterInput!] = null
+}
+
+enum LogLevel {
+	ERROR
+	WARN
+	INFO
+	DEBUG
 }
 
 input LogModelOrderBy {
@@ -1064,7 +1085,7 @@ input MediaOrderByField {
 }
 
 type Mutation {
-	createApiKey(input: ApikeyInput!): Apikey!
+	createApiKey(input: ApikeyInput!): CreatedAPIKey!
 	updateApiKey(id: Int!, input: ApikeyInput!): Apikey!
 	deleteApiKey(id: Int!): Apikey!
 	createSmartList(input: SaveSmartListInput!): SmartList!
@@ -1077,6 +1098,10 @@ type Mutation {
 	createBookClubMember(bookClubId: ID!, input: CreateBookClubMemberInput!): BookClubMember!
 	createBookClubSchedule(id: ID!, input: CreateBookClubScheduleInput!): BookClub!
 	addBooksToBookClubSchedule(id: ID!, books: [CreateBookClubScheduleBook!]!): BookClub!
+	cancelJob(id: ID!): Boolean!
+	deleteJob(id: ID!, force: Boolean! = false): Boolean!
+	deleteJobHistory: DeleteJobHistory!
+	deleteJobLogs(id: ID!): DeleteJobAssociatedLogs!
 	createNotifier(input: NotifierInput!): Notifier!
 	updateNotifier(id: Int!, input: NotifierInput!): Notifier!
 	deleteNotifier(id: Int!): Notifier!
@@ -1157,7 +1182,7 @@ type Mutation {
 	This is used to inform the UI of the last library which was visited by the user
 	"""
 	visitLibrary(id: ID!): Library!
-	deleteLogs(filter: LogFilterInput!): LogDeleteOutput!
+	deleteLogs(filter: LogFilterInput! = {level: null, jobId: null, _and: null, _not: null, _or: null}): LogDeleteOutput!
 	deleteLogFile: Boolean!
 	"""
 	Creates a new reading list.
@@ -1205,12 +1230,12 @@ type Mutation {
 	uploadLibraryThumbnail(id: ID!, file: Upload!): Library!
 	deleteLoginActivity: Int!
 	createUser(input: CreateUserInput!): User!
-	meUpdateUser(input: UpdateUserInput!): User!
-	meUpdateUserPreferences(input: UpdateUserPreferencesInput!): UserPreferences!
-	updateUser(userId: String!, input: UpdateUserInput!): User!
-	deleteUserById(userId: String!, hardDelete: Boolean): User!
-	deleteUserSessions(userId: String!): Int!
-	updateUserLockStatus(userId: String!, lock: Boolean!): User!
+	updateViewer(input: UpdateUserInput!): User!
+	updateViewerPreferences(input: UpdateUserPreferencesInput!): UserPreferences!
+	updateUser(id: ID!, input: UpdateUserInput!): User!
+	deleteUser(id: ID!, hardDelete: Boolean): User!
+	deleteUserSessions(id: ID!): Int!
+	updateUserLockStatus(id: ID!, lock: Boolean!): User!
 	createEmailer(input: EmailerInput!): Emailer!
 	updateEmailer(id: Int!, input: EmailerInput!): Emailer!
 	deleteEmailer(id: Int!): Emailer!
@@ -1222,6 +1247,9 @@ type Mutation {
 	createSmartListView(input: SaveSmartListViewInput!): SmartListView!
 	updateSmartListView(input: SaveSmartListViewInput!): SmartListView!
 	deleteSmartListView(id: ID!, name: String!): SmartListView!
+	createScheduledJobConfig(input: ScheduledJobConfigInput!): ScheduledJobConfig!
+	updateScheduledJobConfig(id: Int!, input: ScheduledJobConfigInput!): ScheduledJobConfig!
+	deleteScheduledJobConfig(id: Int!): Boolean!
 }
 
 type Notifier {
@@ -1346,6 +1374,11 @@ type PaginatedDirectoryListingResponse {
 	pageInfo: PaginationInfo!
 }
 
+type PaginatedJobResponse {
+	nodes: [Job!]!
+	pageInfo: PaginationInfo!
+}
+
 type PaginatedLibraryResponse {
 	nodes: [Library!]!
 	pageInfo: PaginationInfo!
@@ -1368,6 +1401,11 @@ type PaginatedReadingListResponse {
 
 type PaginatedSeriesResponse {
 	nodes: [Series!]!
+	pageInfo: PaginationInfo!
+}
+
+type PaginatedUserResponse {
+	nodes: [User!]!
 	pageInfo: PaginationInfo!
 }
 
@@ -1404,17 +1442,18 @@ input Pagination @oneOf {
 union PaginationInfo = CursorPaginationInfo | OffsetPaginationInfo
 
 type Query {
-	getApiKeys: [Apikey!]!
-	getApiKeyById(id: Int!): Apikey!
+	apiKeys: [Apikey!]!
+	apiKeyById(id: Int!): Apikey!
 	bookClubs(all: Boolean = null): [BookClub!]!
 	bookClubById(id: ID!): BookClub
 	emailers: [Emailer!]!
-	emailerById(id: ID!): Emailer
+	emailerById(id: Int!): Emailer
 	emailDevices: [RegisteredEmailDevice!]!
 	emailDeviceById(id: Int!): RegisteredEmailDevice
 	listDirectory(pagination: Pagination!, input: DirectoryListingInput): PaginatedDirectoryListingResponse!
-	jobs: [Job!]!
+	jobs(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedJobResponse!
 	jobById(id: ID!): Job
+	scheduledJobConfigs: [ScheduledJobConfig!]!
 	media(filter: MediaFilterInput!, orderBy: [MediaOrderBy!]! = [{media: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	mediaById(id: ID!): Media
 	mediaByPath(path: String!): Media
@@ -1422,7 +1461,7 @@ type Query {
 	recentlyAddedMedia(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	duplicateMedia: [Media!]!
 	me: User!
-	users: [User!]!
+	users(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedUserResponse!
 	userById(id: ID!): User!
 	loginActivity: [UserLoginActivity!]!
 	loginActivityById(id: ID!): [UserLoginActivity!]!
@@ -1458,7 +1497,7 @@ type Query {
 	recentlyAddedSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
 	"Returns a list of all tags."
 	tags: [Tag!]!
-	logs(filter: LogFilterInput!, orderBy: [LogModelOrderBy!]!, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLogResponse!
+	logs(filter: LogFilterInput! = {level: null, jobId: null, _and: null, _not: null, _or: null}, orderBy: [LogModelOrderBy!]! = [], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLogResponse!
 	"""
 	Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
 	~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
@@ -1586,6 +1625,17 @@ input ScaledDimensionResizeInput {
 	dimension: Dimension!
 	"The size (in pixels) to set the specified dimension to."
 	size: Int!
+}
+
+type ScheduledJobConfig {
+	id: Int!
+	intervalSecs: Int!
+	scanConfigs: [Library!]!
+}
+
+input ScheduledJobConfigInput {
+	intervalSecs: Int!
+	includedLibraryIds: [String!]!
 }
 
 type SendAttachmentEmailOutput {
@@ -2019,6 +2069,7 @@ input UpdateUserPreferencesInput {
 	enableJobOverlay: Boolean!
 	preferAccentColor: Boolean!
 	showThumbnailsInHeaders: Boolean!
+	enableAlphabetSelect: Boolean!
 }
 
 scalar Upload
@@ -2046,7 +2097,6 @@ type User {
 	username: String!
 	isServerOwner: Boolean!
 	avatarUrl: String
-	lastLogin: DateTime
 	createdAt: DateTime!
 	deletedAt: DateTime
 	isLocked: Boolean!
@@ -2055,6 +2105,8 @@ type User {
 	continueReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	permissions: [UserPermission!]!
 	preferences: UserPreferences!
+	lastLogin: DateTime
+	loginSessionsCount: Int!
 }
 
 type UserLoginActivity {
@@ -2126,6 +2178,8 @@ enum UserPermission {
 	DELETE_NOTIFIER
 	"Grant access to read jobs"
 	READ_JOBS
+	"Grant access to manage jobs, like pausing, resuming, deleting, or cancelling them"
+	MANAGE_JOBS
 	"Grant access to read application-level logs, e.g. job logs"
 	READ_PERSISTED_LOGS
 	"Grant access to read system logs"
@@ -2143,7 +2197,7 @@ type UserPreferences {
 	preferredLayoutMode: String!
 	locale: String!
 	appTheme: String!
-	appFont: String!
+	appFont: SupportedFont!
 	primaryNavigationMode: String!
 	layoutMaxWidthPx: Int
 	showQueryIndicator: Boolean!

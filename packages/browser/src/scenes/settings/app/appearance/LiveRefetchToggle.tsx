@@ -1,33 +1,26 @@
-import { useUpdatePreferences } from '@stump/client'
 import { WideSwitch } from '@stump/components'
+import { useCallback } from 'react'
 
-import { useUserStore } from '@/stores'
+import { usePreferences } from '@/hooks/usePreferences'
 
 export default function LiveRefetchToggle() {
-	const { preferences, setPreferences } = useUserStore((state) => ({
-		preferences: state.userPreferences,
-		setPreferences: state.setUserPreferences,
-	}))
+	const {
+		preferences: { enableLiveRefetch },
+		update,
+	} = usePreferences()
 
-	const { unsafePatch } = useUpdatePreferences({
-		onSuccess: setPreferences,
-	})
-
-	const handleChange = () => {
-		if (preferences) {
-			unsafePatch({
-				...preferences,
-				enable_live_refetch: !preferences.enable_live_refetch,
-			})
-		}
-	}
+	const handleChange = useCallback(() => {
+		update({
+			enableLiveRefetch: !enableLiveRefetch,
+		})
+	}, [enableLiveRefetch, update])
 
 	return (
 		<WideSwitch
-			formId="enable_live_refetch"
+			formId="enableLiveRefetch"
 			label="Live refetch"
 			description="Refetch queries on the fly to hydrate the UI with new data as it comes in. This can be resource intensive"
-			checked={preferences?.enable_live_refetch}
+			checked={enableLiveRefetch}
 			onCheckedChange={handleChange}
 		/>
 	)

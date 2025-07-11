@@ -1,9 +1,18 @@
-import { invalidateQueries, useDeleteEmailDevice, useSDK } from '@stump/client'
+import { useGraphQLMutation, useSDK } from '@stump/client'
 import { ConfirmationModal } from '@stump/components'
-import { isAxiosError } from '@stump/sdk'
+import { graphql } from '@stump/graphql'
 import { RegisteredEmailDevice } from '@stump/sdk'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import toast from 'react-hot-toast'
+
+const mutation = graphql(`
+	mutation DeleteDeviceConfirmationDeleteEmailDevice($id: Int!) {
+		deleteEmailDevice(id: $id) {
+			id
+		}
+	}
+`)
 
 type Props = {
 	device: RegisteredEmailDevice | null
@@ -12,25 +21,26 @@ type Props = {
 
 export default function DeleteDeviceConfirmation({ device, onClose }: Props) {
 	const { sdk } = useSDK()
-	const { removeAsync, isDeleting } = useDeleteEmailDevice()
 
-	const handleConfirm = useCallback(async () => {
-		if (!device) return
-
-		try {
-			await removeAsync(device.id)
-			await invalidateQueries({ keys: [sdk.emailer.keys.getDevices] })
+	const client = useQueryClient()
+	const { mutate, isPending: isDeleting } = useGraphQLMutation(mutation, {
+		onSuccess: async () => {
+			await client.refetchQueries({
+				predicate: ({ queryKey: [baseKey] }) => baseKey === sdk.cacheKeys.emailDevices,
+			})
 			onClose()
-		} catch (err) {
-			console.error(err)
+		},
+		onError: (error) => {
+			console.error(error)
+			toast.error('Failed to delete device')
+		},
+	})
 
-			if (isAxiosError(err)) {
-				toast.error(err.message || 'An error occurred while deleting the list')
-			} else {
-				toast.error('An error occurred while deleting the list')
-			}
+	const handleConfirm = useCallback(() => {
+		if (device) {
+			mutate({ id: device.id })
 		}
-	}, [onClose, device, removeAsync, sdk.emailer])
+	}, [device, mutate])
 
 	return (
 		<ConfirmationModal

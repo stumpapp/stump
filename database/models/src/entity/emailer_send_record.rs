@@ -55,8 +55,8 @@ impl Related<super::user::Entity> for Entity {
 impl ActiveModelBehavior for ActiveModel {}
 
 /// The metadata of an attachment that was sent with an email
-#[derive(Serialize, Deserialize, SimpleObject)]
-pub struct AttachmentMeta {
+#[derive(Debug, Serialize, Deserialize, SimpleObject)]
+pub struct AttachmentMetaModel {
 	/// The filename of the attachment
 	pub filename: String,
 	/// The associated media ID of the attachment, if there is one
@@ -65,7 +65,7 @@ pub struct AttachmentMeta {
 	pub size: i32,
 }
 
-impl AttachmentMeta {
+impl AttachmentMetaModel {
 	/// Create a new attachment meta
 	pub fn new(filename: String, media_id: Option<String>, size: i32) -> Self {
 		Self {
@@ -75,7 +75,9 @@ impl AttachmentMeta {
 		}
 	}
 
-	pub fn try_from_data(data: &Vec<u8>) -> Result<Vec<AttachmentMeta>, sea_orm::DbErr> {
+	pub fn vec_from_data(
+		data: &[u8],
+	) -> Result<Vec<AttachmentMetaModel>, sea_orm::DbErr> {
 		serde_json::from_slice(data).map_err(|e| {
 			sea_orm::DbErr::Custom(format!(
 				"Failed to deserialize attachment meta: {}",
@@ -86,7 +88,7 @@ impl AttachmentMeta {
 
 	/// Convert the attachment meta into a byte array, wrapped in a vec
 	pub fn into_data(
-		attachment_metas: &Vec<AttachmentMeta>,
+		attachment_metas: &Vec<AttachmentMetaModel>,
 	) -> Result<Vec<u8>, sea_orm::DbErr> {
 		serde_json::to_vec(attachment_metas).map_err(|e| {
 			sea_orm::DbErr::Custom(format!("Failed to serialize attachment meta: {}", e))

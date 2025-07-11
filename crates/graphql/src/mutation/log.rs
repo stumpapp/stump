@@ -18,7 +18,7 @@ impl LogMutation {
 	async fn delete_logs(
 		&self,
 		ctx: &Context<'_>,
-		filter: LogFilterInput,
+		#[graphql(default)] filter: LogFilterInput,
 	) -> Result<LogDeleteOutput> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 

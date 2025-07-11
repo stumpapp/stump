@@ -1,7 +1,18 @@
-import { queryClient, useMutation, useSDK } from '@stump/client'
+import { useGraphQLMutation, useSDK } from '@stump/client'
 import { ConfirmationModal } from '@stump/components'
-import { APIKey } from '@stump/sdk'
+import { ApiKeyTableQuery, graphql } from '@stump/graphql'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
+
+import { APIKey } from './APIKeyTable'
+
+const mutation = graphql(`
+	mutation DeleteAPIKeyConfirmModal($id: Int!) {
+		deleteApiKey(id: $id) {
+			id
+		}
+	}
+`)
 
 type Props = {
 	apiKey: APIKey | null
@@ -10,20 +21,24 @@ type Props = {
 
 export default function DeleteAPIKeyConfirmModal({ apiKey, onClose }: Props) {
 	const { sdk } = useSDK()
-	const { mutate: deleteKey, isLoading: isDeleting } = useMutation(
-		[sdk.apiKey.keys.delete],
-		(id: number) => sdk.apiKey.delete(id),
-		{
-			onSuccess: async () => {
-				await queryClient.invalidateQueries([sdk.apiKey.keys.get], { exact: false })
-				onClose()
-			},
+
+	const client = useQueryClient()
+
+	const { mutate: deleteKey, isPending } = useGraphQLMutation(mutation, {
+		onSuccess: ({ deleteApiKey: { id } }) => {
+			client.setQueryData(sdk.cacheKey('apiKeys'), (data?: ApiKeyTableQuery) => {
+				return {
+					...data,
+					apiKeys: data?.apiKeys.filter((key) => key.id !== id) || [],
+				}
+			})
+			onClose()
 		},
-	)
+	})
 
 	const handleConfirm = useCallback(() => {
 		if (apiKey) {
-			deleteKey(apiKey.id)
+			deleteKey({ id: apiKey.id })
 		}
 	}, [apiKey, deleteKey])
 
@@ -36,7 +51,7 @@ export default function DeleteAPIKeyConfirmModal({ apiKey, onClose }: Props) {
 			isOpen={!!apiKey}
 			onClose={onClose}
 			onConfirm={handleConfirm}
-			confirmIsLoading={isDeleting}
+			confirmIsLoading={isPending}
 			trigger={null}
 		/>
 	)

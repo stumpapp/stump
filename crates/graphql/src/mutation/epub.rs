@@ -76,7 +76,7 @@ pub async fn insert_finished_reading_session(
 		let _ = active_session.delete(txn).await?;
 	}
 
-	Ok(finished_reading_session.into())
+	Ok(finished_reading_session)
 }
 
 async fn update_epub_progress_active(

@@ -375,10 +375,10 @@ pub enum ReadingMode {
 )]
 #[sea_orm(
 	rs_type = "String",
-	rename_all = "lowercase",
+	rename_all = "SCREAMING_SNAKE_CASE",
 	db_type = "String(StringLen::None)"
 )]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum SupportedFont {
 	AtkinsonHyperlegible,
 	Bitter,
@@ -416,11 +416,11 @@ pub enum SupportedFont {
 )]
 #[sea_orm(
 	rs_type = "String",
-	rename_all = "snake_case",
+	rename_all = "SCREAMING_SNAKE_CASE",
 	db_type = "String(StringLen::None)"
 )]
-#[serde(rename_all = "snake_case")]
-#[strum(serialize_all = "snake_case")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 pub enum UserPermission {
 	/// Grant access to read/create their own API keys
 	AccessAPIKeys,
@@ -475,6 +475,8 @@ pub enum UserPermission {
 	DeleteNotifier,
 	/// Grant access to read jobs
 	ReadJobs,
+	/// Grant access to manage jobs, like pausing, resuming, deleting, or cancelling them
+	ManageJobs,
 	/// Grant access to read application-level logs, e.g. job logs
 	ReadPersistedLogs,
 	/// Grant access to read system logs

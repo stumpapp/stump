@@ -1,3 +1,4 @@
+import { UserPermission } from '@stump/graphql'
 import { lazy } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
@@ -10,11 +11,13 @@ const ReaderDefaultSettingsScene = lazy(() => import('./reader/ReaderDefaultSett
 const DesktopSettingsScene = lazy(() => import('./desktop'))
 const APIKeySettingsScene = lazy(() => import('./apiKeys'))
 
+//  TODO: Add patch for user and user preferences update operations and shove in context
+
 export default function AppSettingsRouter() {
 	const { checkPermission } = useAppContext()
 
 	const isDesktop = useAppStore((store) => store.platform !== 'browser')
-	const apiKeys = checkPermission('feature:api_keys')
+	const apiKeys = checkPermission(UserPermission.AccessApiKeys)
 
 	return (
 		<Routes>

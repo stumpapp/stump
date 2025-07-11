@@ -7,7 +7,7 @@ use crate::{
 	},
 	object::{user::User, user_preferences::UserPreferences},
 };
-use async_graphql::{Context, Object, Result};
+use async_graphql::{Context, Object, Result, ID};
 use models::{
 	entity::{
 		age_restriction, session,
@@ -109,7 +109,7 @@ impl UserMutation {
 		Ok(User::from(user_model.try_into_model()?))
 	}
 
-	async fn me_update_user(
+	async fn update_viewer(
 		&self,
 		ctx: &Context<'_>,
 		input: UpdateUserInput,
@@ -127,7 +127,7 @@ impl UserMutation {
 		Ok(updated_user)
 	}
 
-	async fn me_update_user_preferences(
+	async fn update_viewer_preferences(
 		&self,
 		ctx: &Context<'_>,
 		input: UpdateUserPreferencesInput,
@@ -153,7 +153,7 @@ impl UserMutation {
 				conn,
 			)
 			.await?;
-			Ok(UserPreferences::from(updated_user_preferences))
+			Ok(updated_user_preferences)
 		} else {
 			Err("User preferences not found".into())
 		}
@@ -162,7 +162,7 @@ impl UserMutation {
 	async fn update_user(
 		&self,
 		ctx: &Context<'_>,
-		user_id: String,
+		id: ID,
 		input: UpdateUserInput,
 	) -> Result<User> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
@@ -170,56 +170,62 @@ impl UserMutation {
 		let config = core_ctx.config.as_ref();
 		let conn = core_ctx.conn.as_ref();
 
-		if user.id != user_id && !user.is_server_owner {
+		if user.id != id.to_string() && !user.is_server_owner {
 			return Err(FORBIDDEN_ACTION.into());
 		}
 
 		let updated_user =
-			update_user(user, user_id.clone(), conn, config, &input).await?;
+			update_user(user, id.to_string(), conn, config, &input).await?;
 		tracing::debug!(?updated_user, "Updated user");
 
-		if user.id != user_id {
+		if user.id != id.to_string() {
 			// TODO(graphql): Insert user session
 		} else {
 			// When a server owner updates another user, we need to delete all sessions for that user
 			// because the user's permissions may have changed. This is a bit lazy but it works.
-			remove_all_session_for_user_id(user_id.clone(), conn).await?;
+			remove_all_session_for_user(id.to_string(), conn).await?;
 		}
 
 		Ok(updated_user)
 	}
 
 	#[graphql(guard = "ServerOwnerGuard")]
-	async fn delete_user_by_id(
+	async fn delete_user(
 		&self,
 		ctx: &Context<'_>,
-		user_id: String,
+		id: ID,
 		hard_delete: Option<bool>,
 	) -> Result<User> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let conn = core_ctx.conn.as_ref();
 
-		if user_id == user.id {
+		if id.to_string() == user.id {
 			return Err("You cannot delete your own account".into());
 		}
 
 		let hard_delete = hard_delete.unwrap_or(false);
 
+		let existing_user = user::Entity::find()
+			.filter(user::Column::Id.eq(id.to_string()))
+			.one(conn)
+			.await?
+			.ok_or("User not found")?;
+
+		if existing_user.is_server_owner {
+			return Err("You cannot delete the server owner".into());
+		}
+
 		let deleted_user = if hard_delete {
-			user::Entity::delete_by_id(user_id.clone())
+			user::Entity::delete_by_id(id.to_string())
 				.exec_with_returning(conn)
 				.await?
 				.first()
 				.ok_or("Failed to delete user".to_string())?
 				.clone()
 		} else {
-			let active_model = user::ActiveModel {
-				id: Set(user_id.clone()),
-				deleted_at: Set(Some(chrono::Utc::now().into())),
-				..Default::default()
-			};
-
+			let mut active_model = existing_user.into_active_model();
+			active_model.deleted_at = Set(Some(chrono::Utc::now().into()));
 			active_model.update(conn).await?.try_into_model()?
 		};
 
@@ -228,16 +234,11 @@ impl UserMutation {
 	}
 
 	#[graphql(guard = "ServerOwnerGuard")]
-	async fn delete_user_sessions(
-		&self,
-		ctx: &Context<'_>,
-		user_id: String,
-	) -> Result<u64> {
+	async fn delete_user_sessions(&self, ctx: &Context<'_>, id: ID) -> Result<u64> {
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let conn = core_ctx.conn.as_ref();
 
-		let removed_sessions =
-			remove_all_session_for_user_id(user_id.clone(), conn).await?;
+		let removed_sessions = remove_all_session_for_user(id.to_string(), conn).await?;
 		Ok(removed_sessions.len().try_into()?)
 	}
 
@@ -245,29 +246,31 @@ impl UserMutation {
 	async fn update_user_lock_status(
 		&self,
 		ctx: &Context<'_>,
-		user_id: String,
+		id: ID,
 		lock: bool,
 	) -> Result<User> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let conn = core_ctx.conn.as_ref();
 
-		if user_id == user.id {
+		if id.to_string() == user.id {
 			return Err("You cannot lock your own account".into());
 		}
 
-		let active_model = user::ActiveModel {
-			id: Set(user_id.clone()),
-			is_locked: Set(lock),
-			..Default::default()
-		};
-
-		let updated_user = active_model.update(conn).await?.try_into_model()?;
+		let model = user::Entity::find()
+			.filter(user::Column::Id.eq(id.to_string()))
+			.one(conn)
+			.await?
+			.ok_or("User not found")?;
+		let mut active_model = model.into_active_model();
+		active_model.is_locked = Set(lock);
 
 		if lock {
 			// Delete all sessions for this user if they are being locked
-			remove_all_session_for_user_id(user_id.clone(), conn).await?;
+			remove_all_session_for_user(id.to_string(), conn).await?;
 		}
+
+		let updated_user = active_model.update(conn).await?;
 
 		Ok(User::from(updated_user))
 	}
@@ -275,12 +278,12 @@ impl UserMutation {
 	// TODO(graphql): update_current_user_navigation_arrangement
 }
 
-async fn remove_all_session_for_user_id(
-	user_id: String,
+async fn remove_all_session_for_user(
+	id: String,
 	conn: &DatabaseConnection,
 ) -> Result<Vec<session::Model>> {
 	let removed_sessions = session::Entity::delete_many()
-		.filter(session::Column::UserId.eq(user_id.clone()))
+		.filter(session::Column::UserId.eq(id.clone()))
 		.exec_with_returning(conn)
 		.await?;
 
@@ -294,11 +297,8 @@ async fn update_user_preferences_by_id(
 	user_preferences: UpdateUserPreferencesInput,
 	conn: &DatabaseConnection,
 ) -> Result<UserPreferences> {
-	let app_font_str =
-		serde_json::to_string(&user_preferences.app_font).map_err(|e| {
-			tracing::error!("Failed to serialize app font: {:?}", e);
-			"Failed to serialize app font"
-		})?;
+	// FIXME(graphql): I think this will overwrite the NotSet values if they are
+	// currently set
 	let updated_user_preferences = user_preferences::ActiveModel {
 		id: Set(id),
 		user_id: Set(Some(user_id)),
@@ -306,7 +306,7 @@ async fn update_user_preferences_by_id(
 		preferred_layout_mode: Set(user_preferences.preferred_layout_mode),
 		app_theme: Set(user_preferences.app_theme),
 		enable_gradients: Set(user_preferences.enable_gradients),
-		app_font: Set(app_font_str),
+		app_font: Set(user_preferences.app_font),
 		primary_navigation_mode: Set(user_preferences.primary_navigation_mode),
 		layout_max_width_px: Set(user_preferences.layout_max_width_px),
 		show_query_indicator: Set(user_preferences.show_query_indicator),
@@ -391,8 +391,8 @@ async fn update_user_age_restriction(
 		.await?;
 
 	if let Some(age_restriction) = age_restriction {
-		let set_age_restriction_id = if existing_age_restriction.is_some() {
-			Set(existing_age_restriction.unwrap().id)
+		let set_age_restriction_id = if let Some(restriction) = existing_age_restriction {
+			Set(restriction.id)
 		} else {
 			NotSet
 		};
@@ -508,7 +508,6 @@ mod tests {
 					permissions: None,
 					max_sessions_allowed: None,
 					avatar_url: None,
-					last_login: None,
 					created_at: chrono::Utc::now().into(),
 					deleted_at: None,
 					user_preferences_id: None,

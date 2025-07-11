@@ -2,12 +2,12 @@ use crate::{
 	data::{CoreContext, RequestContext},
 	guard::PermissionGuard,
 	input::api_key::APIKeyInput,
-	object::api_key::APIKey,
+	object::api_key::{APIKey, CreatedAPIKey},
 };
 use async_graphql::{Context, Object, Result};
 use models::entity::api_key;
 use models::shared::{api_key::APIKeyPermissions, enums::UserPermission};
-use sea_orm::{prelude::*, ActiveModelTrait, Set};
+use sea_orm::{prelude::*, ActiveModelTrait};
 
 #[derive(Default)]
 pub struct APIKeyMutation;
@@ -19,17 +19,20 @@ impl APIKeyMutation {
 		&self,
 		ctx: &Context<'_>,
 		input: APIKeyInput,
-	) -> Result<APIKey> {
+	) -> Result<CreatedAPIKey> {
 		let req_ctx = ctx.data::<RequestContext>()?;
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let conn = core_ctx.conn.as_ref();
 
-		check_permissions(&req_ctx, &input.permissions)?;
+		check_permissions(req_ctx, &input.permissions)?;
 
-		let active_model = input.try_into_active_model(&req_ctx.user)?;
+		let (active_model, secret) = input.into_create(&req_ctx.user)?;
 		let result = active_model.insert(conn).await?;
 
-		Ok(APIKey::from(result))
+		Ok(CreatedAPIKey {
+			api_key: APIKey::from(result),
+			secret,
+		})
 	}
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessAPIKeys)")]
@@ -44,7 +47,7 @@ impl APIKeyMutation {
 		let conn = core_ctx.conn.as_ref();
 		let user = &req_ctx.user;
 
-		check_permissions(&req_ctx, &input.permissions)?;
+		check_permissions(req_ctx, &input.permissions)?;
 
 		let model = api_key::Entity::find_for_user(user)
 			.filter(api_key::Column::Id.eq(id))
@@ -52,8 +55,7 @@ impl APIKeyMutation {
 			.await?
 			.ok_or_else(|| async_graphql::Error::new("API key not found"))?;
 
-		let mut active_model = input.try_into_active_model(user)?;
-		active_model.id = Set(model.id);
+		let active_model = input.apply_updates(model)?;
 		let result = active_model.update(conn).await?;
 
 		Ok(APIKey::from(result))

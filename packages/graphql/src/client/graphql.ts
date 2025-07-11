@@ -98,11 +98,11 @@ export type ArrangementSection = {
   visible: Scalars['Boolean']['output'];
 };
 
-/** The metadata of an attachment that was sent with an email */
 export type AttachmentMeta = {
   __typename?: 'AttachmentMeta';
   /** The filename of the attachment */
   filename: Scalars['String']['output'];
+  media?: Maybe<Media>;
   /** The associated media ID of the attachment, if there is one */
   mediaId?: Maybe<Scalars['String']['output']>;
   /** The size of the attachment in bytes */
@@ -288,6 +288,12 @@ export type CreateUserInput = {
   username: Scalars['String']['input'];
 };
 
+export type CreatedApiKey = {
+  __typename?: 'CreatedAPIKey';
+  apiKey: Apikey;
+  secret: Scalars['String']['output'];
+};
+
 export type CreatedManySeries = {
   __typename?: 'CreatedManySeries';
   count: Scalars['Int']['output'];
@@ -334,6 +340,18 @@ export type CustomArrangementConfig = {
   links: Array<FilterableArrangementEntityLink>;
   name?: Maybe<Scalars['String']['output']>;
   orderBy?: Maybe<Scalars['String']['output']>;
+};
+
+export type DeleteJobAssociatedLogs = {
+  __typename?: 'DeleteJobAssociatedLogs';
+  /** The number of logs deleted that were related to a job */
+  affectedRows: Scalars['Int']['output'];
+};
+
+export type DeleteJobHistory = {
+  __typename?: 'DeleteJobHistory';
+  /** The number of logs deleted that were related to a job */
+  affectedRows: Scalars['Int']['output'];
 };
 
 export enum Dimension {
@@ -646,16 +664,17 @@ export enum InheritPermissionValue {
 
 export type Job = {
   __typename?: 'Job';
-  completedAt?: Maybe<Scalars['String']['output']>;
+  completedAt?: Maybe<Scalars['DateTime']['output']>;
   createdAt: Scalars['DateTime']['output'];
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
+  logCount: Scalars['Int']['output'];
   logs: Array<Log>;
   msElapsed: Scalars['Int']['output'];
   name: Scalars['String']['output'];
   outputData?: Maybe<CoreJobOutput>;
   saveState?: Maybe<Scalars['JSON']['output']>;
-  status: Scalars['String']['output'];
+  status: JobStatus;
 };
 
 export type JobOutput = {
@@ -708,7 +727,6 @@ export type Library = {
   emoji?: Maybe<Scalars['String']['output']>;
   excludedUsers: Array<User>;
   id: Scalars['String']['output'];
-  jobScheduleConfigId?: Maybe<Scalars['String']['output']>;
   /** Get the details of the last scan job for this library, if any exists. */
   lastScan?: Maybe<LibraryScanRecord>;
   lastScannedAt?: Maybe<Scalars['String']['output']>;
@@ -786,7 +804,6 @@ export enum LibraryModelOrdering {
   Description = 'DESCRIPTION',
   Emoji = 'EMOJI',
   Id = 'ID',
-  JobScheduleConfigId = 'JOB_SCHEDULE_CONFIG_ID',
   LastScannedAt = 'LAST_SCANNED_AT',
   Name = 'NAME',
   Path = 'PATH',
@@ -849,7 +866,7 @@ export type Log = {
   context?: Maybe<Scalars['String']['output']>;
   id: Scalars['Int']['output'];
   jobId?: Maybe<Scalars['String']['output']>;
-  level: Scalars['String']['output'];
+  level: LogLevel;
   message: Scalars['String']['output'];
   timestamp: Scalars['DateTime']['output'];
 };
@@ -873,6 +890,13 @@ export type LogFilterInput = {
   jobId?: InputMaybe<FieldFilterString>;
   level?: InputMaybe<FieldFilterString>;
 };
+
+export enum LogLevel {
+  Debug = 'DEBUG',
+  Error = 'ERROR',
+  Info = 'INFO',
+  Warn = 'WARN'
+}
 
 export type LogModelOrderBy = {
   direction: OrderDirection;
@@ -1131,6 +1155,7 @@ export type Mutation = {
   addBooksToBookClubSchedule: BookClub;
   analyzeMedia: Scalars['Boolean']['output'];
   analyzeSeries: Scalars['Boolean']['output'];
+  cancelJob: Scalars['Boolean']['output'];
   /**
    * Delete media and series from a library that match one of the following conditions:
    *
@@ -1144,7 +1169,7 @@ export type Mutation = {
   /** Clear the scan history for a specific library */
   clearScanHistory: Scalars['Int']['output'];
   convertMedia: Scalars['Boolean']['output'];
-  createApiKey: Apikey;
+  createApiKey: CreatedApiKey;
   createBookClub: BookClub;
   createBookClubInvitation: BookClubInvitation;
   createBookClubMember: BookClubMember;
@@ -1170,6 +1195,7 @@ export type Mutation = {
    * A result containing the newly created reading list, or an error if creation failed.
    */
   createReadingList: ReadingList;
+  createScheduledJobConfig: ScheduledJobConfig;
   createSmartList: SmartList;
   createSmartListView: SmartListView;
   /**
@@ -1186,6 +1212,9 @@ export type Mutation = {
   deleteBookmark: Bookmark;
   deleteEmailDevice: RegisteredEmailDevice;
   deleteEmailer: Emailer;
+  deleteJob: Scalars['Boolean']['output'];
+  deleteJobHistory: DeleteJobHistory;
+  deleteJobLogs: DeleteJobAssociatedLogs;
   /**
    * Delete a library, including all associated media and series via cascading deletes. This
    * operation cannot be undone.
@@ -1206,6 +1235,7 @@ export type Mutation = {
    * A result containing the deleted reading list, or an error if deletion failed.
    */
   deleteReadingList: ReadingList;
+  deleteScheduledJobConfig: Scalars['Boolean']['output'];
   deleteSmartList: SmartList;
   deleteSmartListView: SmartListView;
   /**
@@ -1214,13 +1244,11 @@ export type Mutation = {
    * * `tags` - A non-empty list of tags to create.
    */
   deleteTags: Array<Tag>;
-  deleteUserById: User;
+  deleteUser: User;
   deleteUserSessions: Scalars['Int']['output'];
   generateLibraryThumbnails: Scalars['Boolean']['output'];
   markMediaAsComplete?: Maybe<FinishedReadingSessionModel>;
   markSeriesAsComplete: Series;
-  meUpdateUser: User;
-  meUpdateUserPreferences: UserPreferences;
   patchEmailDevice: Scalars['Int']['output'];
   respondToBookClubInvitation: BookClubInvitation;
   /**
@@ -1274,10 +1302,13 @@ export type Mutation = {
    * A result containing the updated reading list, or an error if update failed.
    */
   updateReadingList: ReadingList;
+  updateScheduledJobConfig: ScheduledJobConfig;
   updateSmartList: SmartList;
   updateSmartListView: SmartListView;
   updateUser: User;
   updateUserLockStatus: User;
+  updateViewer: User;
+  updateViewerPreferences: UserPreferences;
   uploadBooks: Scalars['Boolean']['output'];
   uploadLibraryThumbnail: Library;
   uploadSeries: Scalars['Boolean']['output'];
@@ -1301,6 +1332,11 @@ export type MutationAnalyzeMediaArgs = {
 
 
 export type MutationAnalyzeSeriesArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationCancelJobArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -1378,6 +1414,11 @@ export type MutationCreateReadingListArgs = {
 };
 
 
+export type MutationCreateScheduledJobConfigArgs = {
+  input: ScheduledJobConfigInput;
+};
+
+
 export type MutationCreateSmartListArgs = {
   input: SaveSmartListInput;
 };
@@ -1418,6 +1459,17 @@ export type MutationDeleteEmailerArgs = {
 };
 
 
+export type MutationDeleteJobArgs = {
+  force?: Scalars['Boolean']['input'];
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteJobLogsArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationDeleteLibraryArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1434,7 +1486,7 @@ export type MutationDeleteLibraryThumbnailsArgs = {
 
 
 export type MutationDeleteLogsArgs = {
-  filter: LogFilterInput;
+  filter?: LogFilterInput;
 };
 
 
@@ -1450,6 +1502,11 @@ export type MutationDeleteNotifierArgs = {
 
 export type MutationDeleteReadingListArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteScheduledJobConfigArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -1469,14 +1526,14 @@ export type MutationDeleteTagsArgs = {
 };
 
 
-export type MutationDeleteUserByIdArgs = {
+export type MutationDeleteUserArgs = {
   hardDelete?: InputMaybe<Scalars['Boolean']['input']>;
-  userId: Scalars['String']['input'];
+  id: Scalars['ID']['input'];
 };
 
 
 export type MutationDeleteUserSessionsArgs = {
-  userId: Scalars['String']['input'];
+  id: Scalars['ID']['input'];
 };
 
 
@@ -1495,16 +1552,6 @@ export type MutationMarkMediaAsCompleteArgs = {
 
 export type MutationMarkSeriesAsCompleteArgs = {
   id: Scalars['ID']['input'];
-};
-
-
-export type MutationMeUpdateUserArgs = {
-  input: UpdateUserInput;
-};
-
-
-export type MutationMeUpdateUserPreferencesArgs = {
-  input: UpdateUserPreferencesInput;
 };
 
 
@@ -1606,6 +1653,12 @@ export type MutationUpdateReadingListArgs = {
 };
 
 
+export type MutationUpdateScheduledJobConfigArgs = {
+  id: Scalars['Int']['input'];
+  input: ScheduledJobConfigInput;
+};
+
+
 export type MutationUpdateSmartListArgs = {
   id: Scalars['ID']['input'];
   input: SaveSmartListInput;
@@ -1618,14 +1671,24 @@ export type MutationUpdateSmartListViewArgs = {
 
 
 export type MutationUpdateUserArgs = {
+  id: Scalars['ID']['input'];
   input: UpdateUserInput;
-  userId: Scalars['String']['input'];
 };
 
 
 export type MutationUpdateUserLockStatusArgs = {
+  id: Scalars['ID']['input'];
   lock: Scalars['Boolean']['input'];
-  userId: Scalars['String']['input'];
+};
+
+
+export type MutationUpdateViewerArgs = {
+  input: UpdateUserInput;
+};
+
+
+export type MutationUpdateViewerPreferencesArgs = {
+  input: UpdateUserPreferencesInput;
 };
 
 
@@ -1772,6 +1835,12 @@ export type PaginatedDirectoryListingResponse = {
   pageInfo: PaginationInfo;
 };
 
+export type PaginatedJobResponse = {
+  __typename?: 'PaginatedJobResponse';
+  nodes: Array<Job>;
+  pageInfo: PaginationInfo;
+};
+
 export type PaginatedLibraryResponse = {
   __typename?: 'PaginatedLibraryResponse';
   nodes: Array<Library>;
@@ -1799,6 +1868,12 @@ export type PaginatedReadingListResponse = {
 export type PaginatedSeriesResponse = {
   __typename?: 'PaginatedSeriesResponse';
   nodes: Array<Series>;
+  pageInfo: PaginationInfo;
+};
+
+export type PaginatedUserResponse = {
+  __typename?: 'PaginatedUserResponse';
+  nodes: Array<User>;
   pageInfo: PaginationInfo;
 };
 
@@ -1835,6 +1910,8 @@ export type PaginationInfo = CursorPaginationInfo | OffsetPaginationInfo;
 
 export type Query = {
   __typename?: 'Query';
+  apiKeyById: Apikey;
+  apiKeys: Array<Apikey>;
   bookClubById?: Maybe<BookClub>;
   bookClubs: Array<BookClub>;
   /** Get all bookmarks for a single epub by its media ID */
@@ -1846,12 +1923,10 @@ export type Query = {
   emailers: Array<Emailer>;
   /** Get a single epub by its media ID */
   epubById: Epub;
-  getApiKeyById: Apikey;
-  getApiKeys: Array<Apikey>;
   getNotifierById: Notifier;
   getNotifiers: Array<Notifier>;
   jobById?: Maybe<Job>;
-  jobs: Array<Job>;
+  jobs: PaginatedJobResponse;
   keepReading: PaginatedMediaResponse;
   libraries: PaginatedLibraryResponse;
   libraryById?: Maybe<Library>;
@@ -1888,6 +1963,7 @@ export type Query = {
   readingLists: PaginatedReadingListResponse;
   recentlyAddedMedia: PaginatedMediaResponse;
   recentlyAddedSeries: PaginatedSeriesResponse;
+  scheduledJobConfigs: Array<ScheduledJobConfig>;
   series: PaginatedSeriesResponse;
   seriesById?: Maybe<Series>;
   smartListById?: Maybe<SmartList>;
@@ -1900,7 +1976,12 @@ export type Query = {
   tags: Array<Tag>;
   uploadConfig: UploadConfig;
   userById: User;
-  users: Array<User>;
+  users: PaginatedUserResponse;
+};
+
+
+export type QueryApiKeyByIdArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -1925,17 +2006,12 @@ export type QueryEmailDeviceByIdArgs = {
 
 
 export type QueryEmailerByIdArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
 export type QueryEpubByIdArgs = {
   id: Scalars['ID']['input'];
-};
-
-
-export type QueryGetApiKeyByIdArgs = {
-  id: Scalars['Int']['input'];
 };
 
 
@@ -1946,6 +2022,11 @@ export type QueryGetNotifierByIdArgs = {
 
 export type QueryJobByIdArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryJobsArgs = {
+  pagination?: Pagination;
 };
 
 
@@ -1977,8 +2058,8 @@ export type QueryLoginActivityByIdArgs = {
 
 
 export type QueryLogsArgs = {
-  filter: LogFilterInput;
-  orderBy: Array<LogModelOrderBy>;
+  filter?: LogFilterInput;
+  orderBy?: Array<LogModelOrderBy>;
   pagination?: Pagination;
 };
 
@@ -2059,6 +2140,11 @@ export type QuerySmartListsArgs = {
 
 export type QueryUserByIdArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryUsersArgs = {
+  pagination?: Pagination;
 };
 
 /** The different reading directions supported by any Stump reader */
@@ -2181,6 +2267,18 @@ export type ScaledDimensionResizeInput = {
   dimension: Dimension;
   /** The size (in pixels) to set the specified dimension to. */
   size: Scalars['Int']['input'];
+};
+
+export type ScheduledJobConfig = {
+  __typename?: 'ScheduledJobConfig';
+  id: Scalars['Int']['output'];
+  intervalSecs: Scalars['Int']['output'];
+  scanConfigs: Array<Library>;
+};
+
+export type ScheduledJobConfigInput = {
+  includedLibraryIds: Array<Scalars['String']['input']>;
+  intervalSecs: Scalars['Int']['input'];
 };
 
 export type SendAttachmentEmailOutput = {
@@ -2619,6 +2717,7 @@ export type UpdateUserInput = {
 export type UpdateUserPreferencesInput = {
   appFont: SupportedFont;
   appTheme: Scalars['String']['input'];
+  enableAlphabetSelect: Scalars['Boolean']['input'];
   enableCompactDisplay: Scalars['Boolean']['input'];
   enableDiscordPresence: Scalars['Boolean']['input'];
   enableDoubleSidebar: Scalars['Boolean']['input'];
@@ -2666,6 +2765,7 @@ export type User = {
   isLocked: Scalars['Boolean']['output'];
   isServerOwner: Scalars['Boolean']['output'];
   lastLogin?: Maybe<Scalars['DateTime']['output']>;
+  loginSessionsCount: Scalars['Int']['output'];
   maxSessionsAllowed?: Maybe<Scalars['Int']['output']>;
   permissions: Array<UserPermission>;
   preferences: UserPreferences;
@@ -2727,6 +2827,8 @@ export enum UserPermission {
   EmailSend = 'EMAIL_SEND',
   /** Grant access to access the file explorer */
   FileExplorer = 'FILE_EXPLORER',
+  /** Grant access to manage jobs, like pausing, resuming, deleting, or cancelling them */
+  ManageJobs = 'MANAGE_JOBS',
   /** Grant access to manage the library (scan,edit,manage relations) */
   ManageLibrary = 'MANAGE_LIBRARY',
   /** Grant access to manage a notifier */
@@ -2762,7 +2864,7 @@ export type UserPermissionStruct = {
 
 export type UserPreferences = {
   __typename?: 'UserPreferences';
-  appFont: Scalars['String']['output'];
+  appFont: SupportedFont;
   appTheme: Scalars['String']['output'];
   enableAlphabetSelect: Scalars['Boolean']['output'];
   enableCompactDisplay: Scalars['Boolean']['output'];
@@ -2880,6 +2982,13 @@ export type DeleteBookmarkMutationVariables = Exact<{
 
 
 export type DeleteBookmarkMutation = { __typename?: 'Mutation', deleteBookmark: { __typename: 'Bookmark' } };
+
+export type UsePreferencesMutationVariables = Exact<{
+  input: UpdateUserPreferencesInput;
+}>;
+
+
+export type UsePreferencesMutation = { __typename?: 'Mutation', updateViewerPreferences: { __typename: 'UserPreferences' } };
 
 export type BookCompletionToggleButtonCompleteMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3024,7 +3133,7 @@ export type LibraryLayoutQueryVariables = Exact<{
 
 
 export type LibraryLayoutQuery = { __typename?: 'Query', libraryById?: (
-    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', bookCount: number, completedBooks: number, inProgressBooks: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }> }
+    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', bookCount: number, completedBooks: number, inProgressBooks: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string } }
     & { ' $fragmentRefs'?: { 'LibrarySettingsConfigFragment': LibrarySettingsConfigFragment } }
   ) | null };
 
@@ -3083,7 +3192,7 @@ export type LibrarySettingsRouterScanLibraryMutationMutation = { __typename?: 'M
 export type LibraryExclusionsUsersQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type LibraryExclusionsUsersQueryQuery = { __typename?: 'Query', users: Array<{ __typename?: 'User', id: string, username: string }> };
+export type LibraryExclusionsUsersQueryQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', id: string, username: string }> } };
 
 export type LibraryExclusionsQueryQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3200,6 +3309,270 @@ export type SeriesBookGridQueryVariables = Exact<{
 
 export type SeriesBookGridQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
+export type ApiKeyTableQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ApiKeyTableQuery = { __typename?: 'Query', apiKeys: Array<{ __typename?: 'Apikey', id: number, name: string, lastUsedAt?: any | null, expiresAt?: any | null, createdAt: any, permissions: { __typename: 'InheritPermissionStruct' } | { __typename: 'UserPermissionStruct', value: Array<UserPermission> } }> };
+
+export type CreateApiKeyModalMutationVariables = Exact<{
+  input: ApikeyInput;
+}>;
+
+
+export type CreateApiKeyModalMutation = { __typename?: 'Mutation', createApiKey: { __typename?: 'CreatedAPIKey', secret: string, apiKey: { __typename?: 'Apikey', id: number } } };
+
+export type DeleteApiKeyConfirmModalMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteApiKeyConfirmModalMutation = { __typename?: 'Mutation', deleteApiKey: { __typename?: 'Apikey', id: number } };
+
+export type UpdateUserLocaleSelectorMutationVariables = Exact<{
+  input: UpdateUserPreferencesInput;
+}>;
+
+
+export type UpdateUserLocaleSelectorMutation = { __typename?: 'Mutation', updateViewerPreferences: { __typename?: 'UserPreferences', locale: string } };
+
+export type UpdateUserProfileFormMutationVariables = Exact<{
+  input: UpdateUserInput;
+}>;
+
+
+export type UpdateUserProfileFormMutation = { __typename?: 'Mutation', updateViewer: { __typename?: 'User', id: string, username: string, avatarUrl?: string | null } };
+
+export type CreateEmailerSceneEmailersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CreateEmailerSceneEmailersQuery = { __typename?: 'Query', emailers: Array<{ __typename?: 'Emailer', name: string }> };
+
+export type CreateEmailerSceneCreateEmailerMutationVariables = Exact<{
+  input: EmailerInput;
+}>;
+
+
+export type CreateEmailerSceneCreateEmailerMutation = { __typename?: 'Mutation', createEmailer: { __typename?: 'Emailer', id: number } };
+
+export type EditEmailerSceneQueryVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type EditEmailerSceneQuery = { __typename?: 'Query', emailers: Array<{ __typename?: 'Emailer', name: string }>, emailerById?: { __typename?: 'Emailer', id: number, name: string, isPrimary: boolean, smtpHost: string, smtpPort: number, lastUsedAt?: any | null, maxAttachmentSizeBytes?: number | null, senderDisplayName: string, senderEmail: string, tlsEnabled: boolean, username: string } | null };
+
+export type EditEmailerSceneEditEmailerMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  input: EmailerInput;
+}>;
+
+
+export type EditEmailerSceneEditEmailerMutation = { __typename?: 'Mutation', updateEmailer: { __typename?: 'Emailer', id: number } };
+
+export type CreateOrUpdateDeviceModalCreateEmailDeviceMutationVariables = Exact<{
+  input: EmailDeviceInput;
+}>;
+
+
+export type CreateOrUpdateDeviceModalCreateEmailDeviceMutation = { __typename?: 'Mutation', createEmailDevice: { __typename?: 'RegisteredEmailDevice', id: number, name: string } };
+
+export type CreateOrUpdateDeviceModalUpdateEmailDeviceMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  input: EmailDeviceInput;
+}>;
+
+
+export type CreateOrUpdateDeviceModalUpdateEmailDeviceMutation = { __typename?: 'Mutation', updateEmailDevice: { __typename?: 'RegisteredEmailDevice', id: number, name: string, forbidden: boolean } };
+
+export type DeleteDeviceConfirmationDeleteEmailDeviceMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteDeviceConfirmationDeleteEmailDeviceMutation = { __typename?: 'Mutation', deleteEmailDevice: { __typename?: 'RegisteredEmailDevice', id: number } };
+
+export type EmailDevicesTableQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type EmailDevicesTableQuery = { __typename?: 'Query', emailDevices: Array<{ __typename?: 'RegisteredEmailDevice', id: number, name: string, email: string, forbidden: boolean }> };
+
+export type EmailerListItemFragment = { __typename?: 'Emailer', id: number, name: string, isPrimary: boolean, smtpHost: string, smtpPort: number, lastUsedAt?: any | null, maxAttachmentSizeBytes?: number | null, senderDisplayName: string, senderEmail: string, tlsEnabled: boolean, username: string } & { ' $fragmentName'?: 'EmailerListItemFragment' };
+
+export type EmailerSendHistoryQueryVariables = Exact<{
+  id: Scalars['Int']['input'];
+  fetchUser: Scalars['Boolean']['input'];
+}>;
+
+
+export type EmailerSendHistoryQuery = { __typename?: 'Query', emailerById?: { __typename?: 'Emailer', sendHistory: Array<{ __typename?: 'EmailerSendRecord', sentAt: any, recipientEmail: string, sentByUserId?: string | null, sentBy?: { __typename?: 'User', id: string, username: string } | null, attachmentMeta: Array<{ __typename?: 'AttachmentMeta', filename: string, mediaId?: string | null, size: number, media?: { __typename?: 'Media', resolvedName: string } | null }> }> } | null };
+
+export type EmailersListQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type EmailersListQuery = { __typename?: 'Query', emailers: Array<(
+    { __typename?: 'Emailer', id: number }
+    & { ' $fragmentRefs'?: { 'EmailerListItemFragment': EmailerListItemFragment } }
+  )> };
+
+export type DeleteJobHistoryConfirmationMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DeleteJobHistoryConfirmationMutation = { __typename?: 'Mutation', deleteJobHistory: { __typename?: 'DeleteJobHistory', affectedRows: number } };
+
+export type JobActionMenuCancelJobMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type JobActionMenuCancelJobMutation = { __typename?: 'Mutation', cancelJob: boolean };
+
+export type JobActionMenuDeleteJobMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type JobActionMenuDeleteJobMutation = { __typename?: 'Mutation', cancelJob: boolean };
+
+export type JobActionMenuDeleteLogsMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type JobActionMenuDeleteLogsMutation = { __typename?: 'Mutation', deleteJobLogs: { __typename?: 'DeleteJobAssociatedLogs', affectedRows: number } };
+
+type JobDataInspector_ExternalJobOutput_Fragment = { __typename: 'ExternalJobOutput', val: any } & { ' $fragmentName'?: 'JobDataInspector_ExternalJobOutput_Fragment' };
+
+type JobDataInspector_LibraryScanOutput_Fragment = { __typename: 'LibraryScanOutput', totalFiles: number, totalDirectories: number, ignoredFiles: number, skippedFiles: number, ignoredDirectories: number, createdMedia: number, updatedMedia: number, createdSeries: number, updatedSeries: number } & { ' $fragmentName'?: 'JobDataInspector_LibraryScanOutput_Fragment' };
+
+type JobDataInspector_SeriesScanOutput_Fragment = { __typename: 'SeriesScanOutput', totalFiles: number, ignoredFiles: number, skippedFiles: number, createdMedia: number, updatedMedia: number } & { ' $fragmentName'?: 'JobDataInspector_SeriesScanOutput_Fragment' };
+
+type JobDataInspector_ThumbnailGenerationOutput_Fragment = { __typename: 'ThumbnailGenerationOutput', visitedFiles: number, skippedFiles: number, generatedThumbnails: number, removedThumbnails: number } & { ' $fragmentName'?: 'JobDataInspector_ThumbnailGenerationOutput_Fragment' };
+
+export type JobDataInspectorFragment = JobDataInspector_ExternalJobOutput_Fragment | JobDataInspector_LibraryScanOutput_Fragment | JobDataInspector_SeriesScanOutput_Fragment | JobDataInspector_ThumbnailGenerationOutput_Fragment;
+
+export type JobSchedulerConfigQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type JobSchedulerConfigQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, emoji?: string | null }> }, scheduledJobConfigs: Array<{ __typename?: 'ScheduledJobConfig', id: number, intervalSecs: number, scanConfigs: Array<{ __typename?: 'Library', id: string, name: string }> }> };
+
+export type JobSchedulerUpdateMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  input: ScheduledJobConfigInput;
+}>;
+
+
+export type JobSchedulerUpdateMutation = { __typename?: 'Mutation', updateScheduledJobConfig: { __typename?: 'ScheduledJobConfig', id: number, intervalSecs: number, scanConfigs: Array<{ __typename?: 'Library', id: string, name: string }> } };
+
+export type JobSchedulerDeleteMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type JobSchedulerDeleteMutation = { __typename?: 'Mutation', deleteScheduledJobConfig: boolean };
+
+export type JobSchedulerCreateMutationVariables = Exact<{
+  input: ScheduledJobConfigInput;
+}>;
+
+
+export type JobSchedulerCreateMutation = { __typename?: 'Mutation', createScheduledJobConfig: { __typename?: 'ScheduledJobConfig', id: number, intervalSecs: number, scanConfigs: Array<{ __typename?: 'Library', id: string, name: string }> } };
+
+export type JobTableQueryVariables = Exact<{
+  pagination: Pagination;
+}>;
+
+
+export type JobTableQuery = { __typename?: 'Query', jobs: { __typename?: 'PaginatedJobResponse', nodes: Array<{ __typename?: 'Job', id: string, name: string, description?: string | null, status: JobStatus, createdAt: any, completedAt?: any | null, msElapsed: number, logCount: number, outputData?: (
+        { __typename?: 'ExternalJobOutput' }
+        & { ' $fragmentRefs'?: { 'JobDataInspector_ExternalJobOutput_Fragment': JobDataInspector_ExternalJobOutput_Fragment } }
+      ) | (
+        { __typename?: 'LibraryScanOutput' }
+        & { ' $fragmentRefs'?: { 'JobDataInspector_LibraryScanOutput_Fragment': JobDataInspector_LibraryScanOutput_Fragment } }
+      ) | (
+        { __typename?: 'SeriesScanOutput' }
+        & { ' $fragmentRefs'?: { 'JobDataInspector_SeriesScanOutput_Fragment': JobDataInspector_SeriesScanOutput_Fragment } }
+      ) | (
+        { __typename?: 'ThumbnailGenerationOutput' }
+        & { ' $fragmentRefs'?: { 'JobDataInspector_ThumbnailGenerationOutput_Fragment': JobDataInspector_ThumbnailGenerationOutput_Fragment } }
+      ) | null }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+
+export type LiveLogsFeedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LiveLogsFeedSubscription = { __typename?: 'Subscription', tailLogFile: string };
+
+export type DeleteLogsMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DeleteLogsMutation = { __typename?: 'Mutation', deleteLogs: { __typename?: 'LogDeleteOutput', deleted: number } };
+
+export type PersistedLogsQueryVariables = Exact<{
+  filter: LogFilterInput;
+  pagination: Pagination;
+  orderBy: Array<LogModelOrderBy> | LogModelOrderBy;
+}>;
+
+
+export type PersistedLogsQuery = { __typename?: 'Query', logs: { __typename?: 'PaginatedLogResponse', nodes: Array<{ __typename?: 'Log', id: number, timestamp: any, level: LogLevel, message: string, jobId?: string | null, context?: string | null }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+
+export type CreateOrUpdateUserFormUpdateUserMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: UpdateUserInput;
+}>;
+
+
+export type CreateOrUpdateUserFormUpdateUserMutation = { __typename?: 'Mutation', updateUser: { __typename?: 'User', id: string, username: string, permissions: Array<UserPermission>, maxSessionsAllowed?: number | null, ageRestriction?: { __typename?: 'AgeRestriction', age: number, restrictOnUnset: boolean } | null } };
+
+export type CreateOrUpdateUserFormCreateUserMutationVariables = Exact<{
+  input: CreateUserInput;
+}>;
+
+
+export type CreateOrUpdateUserFormCreateUserMutation = { __typename?: 'Mutation', createUser: { __typename?: 'User', id: string } };
+
+export type CreateUserSceneQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CreateUserSceneQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', username: string }> } };
+
+export type UpdateUserSceneQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  skip: Scalars['Boolean']['input'];
+}>;
+
+
+export type UpdateUserSceneQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string }, userById?: { __typename?: 'User', id: string, avatarUrl?: string | null, username: string, permissions: Array<UserPermission>, maxSessionsAllowed?: number | null, isServerOwner: boolean, ageRestriction?: { __typename?: 'AgeRestriction', age: number, restrictOnUnset: boolean } | null }, users?: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', username: string }> } };
+
+export type DeleteUserMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  hardDelete?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type DeleteUserMutation = { __typename?: 'Mutation', deleteUser: { __typename?: 'User', id: string } };
+
+export type UserActionMenuLockUserMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  lock: Scalars['Boolean']['input'];
+}>;
+
+
+export type UserActionMenuLockUserMutation = { __typename?: 'Mutation', updateUserLockStatus: { __typename?: 'User', id: string, isLocked: boolean } };
+
+export type UserActionMenuDeleteUserSessionsMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type UserActionMenuDeleteUserSessionsMutation = { __typename?: 'Mutation', deleteUserSessions: number };
+
+export type UserTableQueryVariables = Exact<{
+  pagination: Pagination;
+}>;
+
+
+export type UserTableQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', id: string, avatarUrl?: string | null, username: string, isServerOwner: boolean, isLocked: boolean, createdAt: any, lastLogin?: any | null, loginSessionsCount: number }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+
 export type DirectoryListingQueryVariables = Exact<{
   input: DirectoryListingInput;
   pagination: Pagination;
@@ -3300,6 +3673,53 @@ export const LibrarySettingsConfigFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"LibrarySettingsConfig"}) as unknown as TypedDocumentString<LibrarySettingsConfigFragment, unknown>;
+export const EmailerListItemFragmentDoc = new TypedDocumentString(`
+    fragment EmailerListItem on Emailer {
+  id
+  name
+  isPrimary
+  smtpHost
+  smtpPort
+  lastUsedAt
+  maxAttachmentSizeBytes
+  senderDisplayName
+  senderEmail
+  tlsEnabled
+  username
+}
+    `, {"fragmentName":"EmailerListItem"}) as unknown as TypedDocumentString<EmailerListItemFragment, unknown>;
+export const JobDataInspectorFragmentDoc = new TypedDocumentString(`
+    fragment JobDataInspector on CoreJobOutput {
+  __typename
+  ... on LibraryScanOutput {
+    totalFiles
+    totalDirectories
+    ignoredFiles
+    skippedFiles
+    ignoredDirectories
+    createdMedia
+    updatedMedia
+    createdSeries
+    updatedSeries
+  }
+  ... on SeriesScanOutput {
+    totalFiles
+    ignoredFiles
+    skippedFiles
+    createdMedia
+    updatedMedia
+  }
+  ... on ThumbnailGenerationOutput {
+    visitedFiles
+    skippedFiles
+    generatedThumbnails
+    removedThumbnails
+  }
+  ... on ExternalJobOutput {
+    val
+  }
+}
+    `, {"fragmentName":"JobDataInspector"}) as unknown as TypedDocumentString<JobDataInspectorFragment, unknown>;
 export const TagSelectQueryDocument = new TypedDocumentString(`
     query TagSelectQuery {
   tags {
@@ -3442,6 +3862,13 @@ export const DeleteBookmarkDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<DeleteBookmarkMutation, DeleteBookmarkMutationVariables>;
+export const UsePreferencesDocument = new TypedDocumentString(`
+    mutation UsePreferences($input: UpdateUserPreferencesInput!) {
+  updateViewerPreferences(input: $input) {
+    __typename
+  }
+}
+    `) as unknown as TypedDocumentString<UsePreferencesMutation, UsePreferencesMutationVariables>;
 export const BookCompletionToggleButtonCompleteDocument = new TypedDocumentString(`
     mutation BookCompletionToggleButtonComplete($id: ID!, $isComplete: Boolean!, $page: Int) {
   markMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {
@@ -3793,6 +4220,9 @@ export const LibraryLayoutDocument = new TypedDocumentString(`
       id
       name
     }
+    thumbnail {
+      url
+    }
     ...LibrarySettingsConfig
   }
 }
@@ -3935,9 +4365,11 @@ export const LibrarySettingsRouterScanLibraryMutationDocument = new TypedDocumen
     `) as unknown as TypedDocumentString<LibrarySettingsRouterScanLibraryMutationMutation, LibrarySettingsRouterScanLibraryMutationMutationVariables>;
 export const LibraryExclusionsUsersQueryDocument = new TypedDocumentString(`
     query LibraryExclusionsUsersQuery {
-  users {
-    id
-    username
+  users(pagination: {none: {unpaginated: true}}) {
+    nodes {
+      id
+      username
+    }
   }
 }
     `) as unknown as TypedDocumentString<LibraryExclusionsUsersQueryQuery, LibraryExclusionsUsersQueryQueryVariables>;
@@ -4134,6 +4566,441 @@ export const SeriesBookGridDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SeriesBookGridQuery, SeriesBookGridQueryVariables>;
+export const ApiKeyTableDocument = new TypedDocumentString(`
+    query APIKeyTable {
+  apiKeys {
+    id
+    name
+    permissions {
+      __typename
+      ... on UserPermissionStruct {
+        value
+      }
+    }
+    lastUsedAt
+    expiresAt
+    createdAt
+  }
+}
+    `) as unknown as TypedDocumentString<ApiKeyTableQuery, ApiKeyTableQueryVariables>;
+export const CreateApiKeyModalDocument = new TypedDocumentString(`
+    mutation CreateAPIKeyModal($input: ApikeyInput!) {
+  createApiKey(input: $input) {
+    apiKey {
+      id
+    }
+    secret
+  }
+}
+    `) as unknown as TypedDocumentString<CreateApiKeyModalMutation, CreateApiKeyModalMutationVariables>;
+export const DeleteApiKeyConfirmModalDocument = new TypedDocumentString(`
+    mutation DeleteAPIKeyConfirmModal($id: Int!) {
+  deleteApiKey(id: $id) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteApiKeyConfirmModalMutation, DeleteApiKeyConfirmModalMutationVariables>;
+export const UpdateUserLocaleSelectorDocument = new TypedDocumentString(`
+    mutation UpdateUserLocaleSelector($input: UpdateUserPreferencesInput!) {
+  updateViewerPreferences(input: $input) {
+    locale
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateUserLocaleSelectorMutation, UpdateUserLocaleSelectorMutationVariables>;
+export const UpdateUserProfileFormDocument = new TypedDocumentString(`
+    mutation UpdateUserProfileForm($input: UpdateUserInput!) {
+  updateViewer(input: $input) {
+    id
+    username
+    avatarUrl
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateUserProfileFormMutation, UpdateUserProfileFormMutationVariables>;
+export const CreateEmailerSceneEmailersDocument = new TypedDocumentString(`
+    query CreateEmailerSceneEmailers {
+  emailers {
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<CreateEmailerSceneEmailersQuery, CreateEmailerSceneEmailersQueryVariables>;
+export const CreateEmailerSceneCreateEmailerDocument = new TypedDocumentString(`
+    mutation CreateEmailerSceneCreateEmailer($input: EmailerInput!) {
+  createEmailer(input: $input) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<CreateEmailerSceneCreateEmailerMutation, CreateEmailerSceneCreateEmailerMutationVariables>;
+export const EditEmailerSceneDocument = new TypedDocumentString(`
+    query EditEmailerScene($id: Int!) {
+  emailers {
+    name
+  }
+  emailerById(id: $id) {
+    id
+    name
+    isPrimary
+    smtpHost
+    smtpPort
+    lastUsedAt
+    maxAttachmentSizeBytes
+    senderDisplayName
+    senderEmail
+    tlsEnabled
+    username
+  }
+}
+    `) as unknown as TypedDocumentString<EditEmailerSceneQuery, EditEmailerSceneQueryVariables>;
+export const EditEmailerSceneEditEmailerDocument = new TypedDocumentString(`
+    mutation EditEmailerSceneEditEmailer($id: Int!, $input: EmailerInput!) {
+  updateEmailer(id: $id, input: $input) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<EditEmailerSceneEditEmailerMutation, EditEmailerSceneEditEmailerMutationVariables>;
+export const CreateOrUpdateDeviceModalCreateEmailDeviceDocument = new TypedDocumentString(`
+    mutation CreateOrUpdateDeviceModalCreateEmailDevice($input: EmailDeviceInput!) {
+  createEmailDevice(input: $input) {
+    id
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<CreateOrUpdateDeviceModalCreateEmailDeviceMutation, CreateOrUpdateDeviceModalCreateEmailDeviceMutationVariables>;
+export const CreateOrUpdateDeviceModalUpdateEmailDeviceDocument = new TypedDocumentString(`
+    mutation CreateOrUpdateDeviceModalUpdateEmailDevice($id: Int!, $input: EmailDeviceInput!) {
+  updateEmailDevice(id: $id, input: $input) {
+    id
+    name
+    forbidden
+  }
+}
+    `) as unknown as TypedDocumentString<CreateOrUpdateDeviceModalUpdateEmailDeviceMutation, CreateOrUpdateDeviceModalUpdateEmailDeviceMutationVariables>;
+export const DeleteDeviceConfirmationDeleteEmailDeviceDocument = new TypedDocumentString(`
+    mutation DeleteDeviceConfirmationDeleteEmailDevice($id: Int!) {
+  deleteEmailDevice(id: $id) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteDeviceConfirmationDeleteEmailDeviceMutation, DeleteDeviceConfirmationDeleteEmailDeviceMutationVariables>;
+export const EmailDevicesTableDocument = new TypedDocumentString(`
+    query EmailDevicesTable {
+  emailDevices {
+    id
+    name
+    email
+    forbidden
+  }
+}
+    `) as unknown as TypedDocumentString<EmailDevicesTableQuery, EmailDevicesTableQueryVariables>;
+export const EmailerSendHistoryDocument = new TypedDocumentString(`
+    query EmailerSendHistory($id: Int!, $fetchUser: Boolean!) {
+  emailerById(id: $id) {
+    sendHistory {
+      sentAt
+      recipientEmail
+      sentByUserId
+      sentBy @include(if: $fetchUser) {
+        id
+        username
+      }
+      attachmentMeta {
+        filename
+        mediaId
+        media {
+          resolvedName
+        }
+        size
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<EmailerSendHistoryQuery, EmailerSendHistoryQueryVariables>;
+export const EmailersListDocument = new TypedDocumentString(`
+    query EmailersList {
+  emailers {
+    id
+    ...EmailerListItem
+  }
+}
+    fragment EmailerListItem on Emailer {
+  id
+  name
+  isPrimary
+  smtpHost
+  smtpPort
+  lastUsedAt
+  maxAttachmentSizeBytes
+  senderDisplayName
+  senderEmail
+  tlsEnabled
+  username
+}`) as unknown as TypedDocumentString<EmailersListQuery, EmailersListQueryVariables>;
+export const DeleteJobHistoryConfirmationDocument = new TypedDocumentString(`
+    mutation DeleteJobHistoryConfirmation {
+  deleteJobHistory {
+    affectedRows
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteJobHistoryConfirmationMutation, DeleteJobHistoryConfirmationMutationVariables>;
+export const JobActionMenuCancelJobDocument = new TypedDocumentString(`
+    mutation JobActionMenuCancelJob($id: ID!) {
+  cancelJob(id: $id)
+}
+    `) as unknown as TypedDocumentString<JobActionMenuCancelJobMutation, JobActionMenuCancelJobMutationVariables>;
+export const JobActionMenuDeleteJobDocument = new TypedDocumentString(`
+    mutation JobActionMenuDeleteJob($id: ID!) {
+  cancelJob(id: $id)
+}
+    `) as unknown as TypedDocumentString<JobActionMenuDeleteJobMutation, JobActionMenuDeleteJobMutationVariables>;
+export const JobActionMenuDeleteLogsDocument = new TypedDocumentString(`
+    mutation JobActionMenuDeleteLogs($id: ID!) {
+  deleteJobLogs(id: $id) {
+    affectedRows
+  }
+}
+    `) as unknown as TypedDocumentString<JobActionMenuDeleteLogsMutation, JobActionMenuDeleteLogsMutationVariables>;
+export const JobSchedulerConfigDocument = new TypedDocumentString(`
+    query JobSchedulerConfig {
+  libraries(pagination: {none: {unpaginated: true}}) {
+    nodes {
+      id
+      name
+      emoji
+    }
+  }
+  scheduledJobConfigs {
+    id
+    intervalSecs
+    scanConfigs {
+      id
+      name
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<JobSchedulerConfigQuery, JobSchedulerConfigQueryVariables>;
+export const JobSchedulerUpdateDocument = new TypedDocumentString(`
+    mutation JobSchedulerUpdate($id: Int!, $input: ScheduledJobConfigInput!) {
+  updateScheduledJobConfig(id: $id, input: $input) {
+    id
+    intervalSecs
+    scanConfigs {
+      id
+      name
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<JobSchedulerUpdateMutation, JobSchedulerUpdateMutationVariables>;
+export const JobSchedulerDeleteDocument = new TypedDocumentString(`
+    mutation JobSchedulerDelete($id: Int!) {
+  deleteScheduledJobConfig(id: $id)
+}
+    `) as unknown as TypedDocumentString<JobSchedulerDeleteMutation, JobSchedulerDeleteMutationVariables>;
+export const JobSchedulerCreateDocument = new TypedDocumentString(`
+    mutation JobSchedulerCreate($input: ScheduledJobConfigInput!) {
+  createScheduledJobConfig(input: $input) {
+    id
+    intervalSecs
+    scanConfigs {
+      id
+      name
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<JobSchedulerCreateMutation, JobSchedulerCreateMutationVariables>;
+export const JobTableDocument = new TypedDocumentString(`
+    query JobTable($pagination: Pagination!) {
+  jobs(pagination: $pagination) {
+    nodes {
+      id
+      name
+      description
+      status
+      createdAt
+      completedAt
+      msElapsed
+      outputData {
+        ...JobDataInspector
+      }
+      logCount
+    }
+    pageInfo {
+      __typename
+      ... on OffsetPaginationInfo {
+        currentPage
+        totalPages
+        pageSize
+        pageOffset
+        zeroBased
+      }
+    }
+  }
+}
+    fragment JobDataInspector on CoreJobOutput {
+  __typename
+  ... on LibraryScanOutput {
+    totalFiles
+    totalDirectories
+    ignoredFiles
+    skippedFiles
+    ignoredDirectories
+    createdMedia
+    updatedMedia
+    createdSeries
+    updatedSeries
+  }
+  ... on SeriesScanOutput {
+    totalFiles
+    ignoredFiles
+    skippedFiles
+    createdMedia
+    updatedMedia
+  }
+  ... on ThumbnailGenerationOutput {
+    visitedFiles
+    skippedFiles
+    generatedThumbnails
+    removedThumbnails
+  }
+  ... on ExternalJobOutput {
+    val
+  }
+}`) as unknown as TypedDocumentString<JobTableQuery, JobTableQueryVariables>;
+export const LiveLogsFeedDocument = new TypedDocumentString(`
+    subscription LiveLogsFeed {
+  tailLogFile
+}
+    `) as unknown as TypedDocumentString<LiveLogsFeedSubscription, LiveLogsFeedSubscriptionVariables>;
+export const DeleteLogsDocument = new TypedDocumentString(`
+    mutation DeleteLogs {
+  deleteLogs {
+    deleted
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteLogsMutation, DeleteLogsMutationVariables>;
+export const PersistedLogsDocument = new TypedDocumentString(`
+    query PersistedLogs($filter: LogFilterInput!, $pagination: Pagination!, $orderBy: [LogModelOrderBy!]!) {
+  logs(filter: $filter, pagination: $pagination, orderBy: $orderBy) {
+    nodes {
+      id
+      timestamp
+      level
+      message
+      jobId
+      context
+    }
+    pageInfo {
+      __typename
+      ... on OffsetPaginationInfo {
+        totalPages
+        currentPage
+        pageSize
+        pageOffset
+        pageOffset
+        zeroBased
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<PersistedLogsQuery, PersistedLogsQueryVariables>;
+export const CreateOrUpdateUserFormUpdateUserDocument = new TypedDocumentString(`
+    mutation CreateOrUpdateUserFormUpdateUser($id: ID!, $input: UpdateUserInput!) {
+  updateUser(id: $id, input: $input) {
+    id
+    username
+    ageRestriction {
+      age
+      restrictOnUnset
+    }
+    permissions
+    maxSessionsAllowed
+  }
+}
+    `) as unknown as TypedDocumentString<CreateOrUpdateUserFormUpdateUserMutation, CreateOrUpdateUserFormUpdateUserMutationVariables>;
+export const CreateOrUpdateUserFormCreateUserDocument = new TypedDocumentString(`
+    mutation CreateOrUpdateUserFormCreateUser($input: CreateUserInput!) {
+  createUser(input: $input) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<CreateOrUpdateUserFormCreateUserMutation, CreateOrUpdateUserFormCreateUserMutationVariables>;
+export const CreateUserSceneDocument = new TypedDocumentString(`
+    query CreateUserScene {
+  users(pagination: {none: {unpaginated: true}}) {
+    nodes {
+      username
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<CreateUserSceneQuery, CreateUserSceneQueryVariables>;
+export const UpdateUserSceneDocument = new TypedDocumentString(`
+    query UpdateUserScene($id: ID!, $skip: Boolean!) {
+  me {
+    id
+  }
+  userById(id: $id) @skip(if: $skip) {
+    id
+    avatarUrl
+    username
+    ageRestriction {
+      age
+      restrictOnUnset
+    }
+    permissions
+    maxSessionsAllowed
+    isServerOwner
+  }
+  users(pagination: {none: {unpaginated: true}}) @skip(if: $skip) {
+    nodes {
+      username
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateUserSceneQuery, UpdateUserSceneQueryVariables>;
+export const DeleteUserDocument = new TypedDocumentString(`
+    mutation DeleteUser($id: ID!, $hardDelete: Boolean) {
+  deleteUser(id: $id, hardDelete: $hardDelete) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteUserMutation, DeleteUserMutationVariables>;
+export const UserActionMenuLockUserDocument = new TypedDocumentString(`
+    mutation UserActionMenuLockUser($id: ID!, $lock: Boolean!) {
+  updateUserLockStatus(id: $id, lock: $lock) {
+    id
+    isLocked
+  }
+}
+    `) as unknown as TypedDocumentString<UserActionMenuLockUserMutation, UserActionMenuLockUserMutationVariables>;
+export const UserActionMenuDeleteUserSessionsDocument = new TypedDocumentString(`
+    mutation UserActionMenuDeleteUserSessions($id: ID!) {
+  deleteUserSessions(id: $id)
+}
+    `) as unknown as TypedDocumentString<UserActionMenuDeleteUserSessionsMutation, UserActionMenuDeleteUserSessionsMutationVariables>;
+export const UserTableDocument = new TypedDocumentString(`
+    query UserTable($pagination: Pagination!) {
+  users(pagination: $pagination) {
+    nodes {
+      id
+      avatarUrl
+      username
+      isServerOwner
+      isLocked
+      createdAt
+      lastLogin
+      loginSessionsCount
+    }
+    pageInfo {
+      __typename
+      ... on OffsetPaginationInfo {
+        totalPages
+        currentPage
+        pageSize
+        pageOffset
+        zeroBased
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<UserTableQuery, UserTableQueryVariables>;
 export const DirectoryListingDocument = new TypedDocumentString(`
     query DirectoryListing($input: DirectoryListingInput!, $pagination: Pagination!) {
   listDirectory(input: $input, pagination: $pagination) {

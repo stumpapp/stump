@@ -1,16 +1,10 @@
 use async_graphql::InputObject;
 use models::entity::log;
-use sea_orm::{
-	prelude::{DateTimeWithTimeZone, *},
-	sea_query::ConditionExpression,
-};
+use sea_orm::prelude::*;
 
-use super::{
-	apply_numeric_filter, apply_string_filter, ConceptualFilter, IntoFilter,
-	NumericFilter, StringLikeFilter,
-};
+use super::{apply_string_filter, IntoFilter, StringLikeFilter};
 
-#[derive(InputObject, Clone)]
+#[derive(InputObject, Clone, Default)]
 pub struct LogFilterInput {
 	#[graphql(default)]
 	pub level: Option<StringLikeFilter<String>>,

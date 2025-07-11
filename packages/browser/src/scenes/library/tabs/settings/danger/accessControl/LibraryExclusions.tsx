@@ -12,9 +12,11 @@ import { useLibraryContext } from '../../../../context'
 
 const usersQuery = graphql(`
 	query LibraryExclusionsUsersQuery {
-		users {
-			id
-			username
+		users(pagination: { none: { unpaginated: true } }) {
+			nodes {
+				id
+				username
+			}
 		}
 	}
 `)
@@ -49,7 +51,9 @@ export default function LibraryExclusions() {
 
 	const [
 		{
-			data: { users: allUsers },
+			data: {
+				users: { nodes: allUsers },
+			},
 		},
 		{
 			data: { libraryById },

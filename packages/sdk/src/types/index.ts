@@ -2,9 +2,10 @@ export * from './generated'
 export * from './graphql'
 export * from './opds'
 export * from './type-guards'
+import { SupportedFont } from '@stump/graphql'
 import { z } from 'zod'
 
-import { CursorInfo, Library, Media, PageInfo, Series, SupportedFont } from './generated'
+import { CursorInfo, Library, Media, PageInfo, Series } from './generated'
 import { AuthUser } from './graphql'
 
 export const isUser = (data: unknown): data is AuthUser => {
@@ -12,16 +13,7 @@ export const isUser = (data: unknown): data is AuthUser => {
 	return casted?.id !== undefined && casted?.isServerOwner !== undefined
 }
 
-const fontSchema = z.enum([
-	'inter',
-	'opendyslexic',
-	'atkinsonhyperlegible',
-	'charis',
-	'literata',
-	'bitter',
-	'librebaskerville',
-	'nunito',
-])
+const fontSchema = z.nativeEnum(SupportedFont)
 export const isSupportedFont = (data: unknown): data is SupportedFont => {
 	return fontSchema.safeParse(data).success
 }
@@ -92,4 +84,17 @@ export const libraryOrderByOptions: LibraryOrderByOptions = {
 	path: undefined,
 	status: undefined,
 	updated_at: undefined,
+}
+
+// TODO: Figure out type generation options for this
+export type UpdateCheck = {
+	currentSemver: string
+	latestSemver: string
+	hasUpdateAvailable: boolean
+}
+
+export type StumpVersion = {
+	semver: string
+	rev: string
+	compileTime: string
 }

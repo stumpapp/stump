@@ -1,6 +1,6 @@
 import { ButtonOrLink, Heading, Text } from '@stump/components'
+import { Suspense } from 'react'
 
-import DeleteUserModal from './DeleteUserModal'
 import UserTable from './UserTable'
 
 export default function UserTableSection() {
@@ -14,14 +14,15 @@ export default function UserTableSection() {
 					</Text>
 				</div>
 				<div className="flex items-end gap-2">
-					<DeleteUserModal />
 					<ButtonOrLink href="create" variant="secondary" size="sm">
 						Create user
 					</ButtonOrLink>
 				</div>
 			</div>
 
-			<UserTable />
+			<Suspense>
+				<UserTable />
+			</Suspense>
 		</div>
 	)
 }

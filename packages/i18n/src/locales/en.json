@@ -2135,6 +2135,10 @@
 		"UPLOAD_FILE": {
 			"label": "Upload files",
 			"description": "Allows the user to upload files to the server"
+		},
+		"MANAGE_JOBS": {
+			"label": "Manage jobs",
+			"description": "Allows the user to manage any queued jobs"
 		}
 	}
 }

@@ -1232,10 +1232,10 @@ type Mutation {
 	createUser(input: CreateUserInput!): User!
 	updateViewer(input: UpdateUserInput!): User!
 	updateViewerPreferences(input: UpdateUserPreferencesInput!): UserPreferences!
-	updateUser(userId: String!, input: UpdateUserInput!): User!
-	deleteUserById(userId: String!, hardDelete: Boolean): User!
-	deleteUserSessions(userId: String!): Int!
-	updateUserLockStatus(userId: String!, lock: Boolean!): User!
+	updateUser(id: ID!, input: UpdateUserInput!): User!
+	deleteUser(id: ID!, hardDelete: Boolean): User!
+	deleteUserSessions(id: ID!): Int!
+	updateUserLockStatus(id: ID!, lock: Boolean!): User!
 	createEmailer(input: EmailerInput!): Emailer!
 	updateEmailer(id: Int!, input: EmailerInput!): Emailer!
 	deleteEmailer(id: Int!): Emailer!
@@ -1404,6 +1404,11 @@ type PaginatedSeriesResponse {
 	pageInfo: PaginationInfo!
 }
 
+type PaginatedUserResponse {
+	nodes: [User!]!
+	pageInfo: PaginationInfo!
+}
+
 """
 A union of the supported pagination flavors which Stump supports. The resulting
 response will be dependent on the pagination type used, e.g. a [CursorPaginatedResponse]
@@ -1456,7 +1461,7 @@ type Query {
 	recentlyAddedMedia(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	duplicateMedia: [Media!]!
 	me: User!
-	users: [User!]!
+	users(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedUserResponse!
 	userById(id: ID!): User!
 	loginActivity: [UserLoginActivity!]!
 	loginActivityById(id: ID!): [UserLoginActivity!]!
@@ -2092,7 +2097,6 @@ type User {
 	username: String!
 	isServerOwner: Boolean!
 	avatarUrl: String
-	lastLogin: DateTime
 	createdAt: DateTime!
 	deletedAt: DateTime
 	isLocked: Boolean!
@@ -2101,6 +2105,8 @@ type User {
 	continueReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	permissions: [UserPermission!]!
 	preferences: UserPreferences!
+	lastLogin: DateTime
+	loginSessionsCount: Int!
 }
 
 type UserLoginActivity {

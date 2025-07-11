@@ -28,4 +28,6 @@ export const cacheKeys = {
 	logs: 'logs',
 	jobs: 'jobs',
 	scheduler: 'jobScheduler',
+	users: 'users',
+	user: 'user',
 } as const

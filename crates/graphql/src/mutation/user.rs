@@ -7,7 +7,7 @@ use crate::{
 	},
 	object::{user::User, user_preferences::UserPreferences},
 };
-use async_graphql::{Context, Object, Result};
+use async_graphql::{Context, Object, Result, ID};
 use models::{
 	entity::{
 		age_restriction, session,
@@ -162,7 +162,7 @@ impl UserMutation {
 	async fn update_user(
 		&self,
 		ctx: &Context<'_>,
-		user_id: String,
+		id: ID,
 		input: UpdateUserInput,
 	) -> Result<User> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
@@ -170,56 +170,62 @@ impl UserMutation {
 		let config = core_ctx.config.as_ref();
 		let conn = core_ctx.conn.as_ref();
 
-		if user.id != user_id && !user.is_server_owner {
+		if user.id != id.to_string() && !user.is_server_owner {
 			return Err(FORBIDDEN_ACTION.into());
 		}
 
 		let updated_user =
-			update_user(user, user_id.clone(), conn, config, &input).await?;
+			update_user(user, id.to_string(), conn, config, &input).await?;
 		tracing::debug!(?updated_user, "Updated user");
 
-		if user.id != user_id {
+		if user.id != id.to_string() {
 			// TODO(graphql): Insert user session
 		} else {
 			// When a server owner updates another user, we need to delete all sessions for that user
 			// because the user's permissions may have changed. This is a bit lazy but it works.
-			remove_all_session_for_user_id(user_id.clone(), conn).await?;
+			remove_all_session_for_user(id.to_string(), conn).await?;
 		}
 
 		Ok(updated_user)
 	}
 
 	#[graphql(guard = "ServerOwnerGuard")]
-	async fn delete_user_by_id(
+	async fn delete_user(
 		&self,
 		ctx: &Context<'_>,
-		user_id: String,
+		id: ID,
 		hard_delete: Option<bool>,
 	) -> Result<User> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let conn = core_ctx.conn.as_ref();
 
-		if user_id == user.id {
+		if id.to_string() == user.id {
 			return Err("You cannot delete your own account".into());
 		}
 
 		let hard_delete = hard_delete.unwrap_or(false);
 
+		let existing_user = user::Entity::find()
+			.filter(user::Column::Id.eq(id.to_string()))
+			.one(conn)
+			.await?
+			.ok_or("User not found")?;
+
+		if existing_user.is_server_owner {
+			return Err("You cannot delete the server owner".into());
+		}
+
 		let deleted_user = if hard_delete {
-			user::Entity::delete_by_id(user_id.clone())
+			user::Entity::delete_by_id(id.to_string())
 				.exec_with_returning(conn)
 				.await?
 				.first()
 				.ok_or("Failed to delete user".to_string())?
 				.clone()
 		} else {
-			let active_model = user::ActiveModel {
-				id: Set(user_id.clone()),
-				deleted_at: Set(Some(chrono::Utc::now().into())),
-				..Default::default()
-			};
-
+			let mut active_model = existing_user.into_active_model();
+			active_model.deleted_at = Set(Some(chrono::Utc::now().into()));
 			active_model.update(conn).await?.try_into_model()?
 		};
 
@@ -228,16 +234,11 @@ impl UserMutation {
 	}
 
 	#[graphql(guard = "ServerOwnerGuard")]
-	async fn delete_user_sessions(
-		&self,
-		ctx: &Context<'_>,
-		user_id: String,
-	) -> Result<u64> {
+	async fn delete_user_sessions(&self, ctx: &Context<'_>, id: ID) -> Result<u64> {
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let conn = core_ctx.conn.as_ref();
 
-		let removed_sessions =
-			remove_all_session_for_user_id(user_id.clone(), conn).await?;
+		let removed_sessions = remove_all_session_for_user(id.to_string(), conn).await?;
 		Ok(removed_sessions.len().try_into()?)
 	}
 
@@ -245,29 +246,31 @@ impl UserMutation {
 	async fn update_user_lock_status(
 		&self,
 		ctx: &Context<'_>,
-		user_id: String,
+		id: ID,
 		lock: bool,
 	) -> Result<User> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let conn = core_ctx.conn.as_ref();
 
-		if user_id == user.id {
+		if id.to_string() == user.id {
 			return Err("You cannot lock your own account".into());
 		}
 
-		let active_model = user::ActiveModel {
-			id: Set(user_id.clone()),
-			is_locked: Set(lock),
-			..Default::default()
-		};
-
-		let updated_user = active_model.update(conn).await?.try_into_model()?;
+		let model = user::Entity::find()
+			.filter(user::Column::Id.eq(id.to_string()))
+			.one(conn)
+			.await?
+			.ok_or("User not found")?;
+		let mut active_model = model.into_active_model();
+		active_model.is_locked = Set(lock);
 
 		if lock {
 			// Delete all sessions for this user if they are being locked
-			remove_all_session_for_user_id(user_id.clone(), conn).await?;
+			remove_all_session_for_user(id.to_string(), conn).await?;
 		}
+
+		let updated_user = active_model.update(conn).await?;
 
 		Ok(User::from(updated_user))
 	}
@@ -275,12 +278,12 @@ impl UserMutation {
 	// TODO(graphql): update_current_user_navigation_arrangement
 }
 
-async fn remove_all_session_for_user_id(
-	user_id: String,
+async fn remove_all_session_for_user(
+	id: String,
 	conn: &DatabaseConnection,
 ) -> Result<Vec<session::Model>> {
 	let removed_sessions = session::Entity::delete_many()
-		.filter(session::Column::UserId.eq(user_id.clone()))
+		.filter(session::Column::UserId.eq(id.clone()))
 		.exec_with_returning(conn)
 		.await?;
 
@@ -505,7 +508,6 @@ mod tests {
 					permissions: None,
 					max_sessions_allowed: None,
 					avatar_url: None,
-					last_login: None,
 					created_at: chrono::Utc::now().into(),
 					deleted_at: None,
 					user_preferences_id: None,

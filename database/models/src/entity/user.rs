@@ -28,8 +28,6 @@ pub struct Model {
 	pub is_server_owner: bool,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub avatar_url: Option<String>,
-	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
-	pub last_login: Option<DateTimeWithTimeZone>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]

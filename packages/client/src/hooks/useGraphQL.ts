@@ -19,6 +19,7 @@ import {
 	UseSuspenseInfiniteQueryResult,
 	useSuspenseQueries,
 	useSuspenseQuery,
+	UseSuspenseQueryOptions,
 	UseSuspenseQueryResult,
 } from '@tanstack/react-query'
 import { AxiosRequestConfig, isAxiosError } from 'axios'
@@ -159,6 +160,10 @@ export function useSuspenseGraphQL<TResult, TVariables>(
 	document: TypedDocumentString<TResult, TVariables>,
 	queryKey: QueryKey,
 	variables?: TVariables extends Record<string, never> ? never : TVariables,
+	options?: Omit<
+		UseSuspenseQueryOptions<TResult, Error, TResult, QueryKey>,
+		'queryKey' | 'queryFn'
+	>,
 ): UseSuspenseQueryResult<TResult> {
 	const { sdk } = useSDK()
 	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
@@ -169,6 +174,7 @@ export function useSuspenseGraphQL<TResult, TVariables>(
 			const response = await sdk.execute(document, variables)
 			return response
 		},
+		...options,
 	})
 
 	useEffect(() => {

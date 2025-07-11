@@ -1244,7 +1244,7 @@ export type Mutation = {
    * * `tags` - A non-empty list of tags to create.
    */
   deleteTags: Array<Tag>;
-  deleteUserById: User;
+  deleteUser: User;
   deleteUserSessions: Scalars['Int']['output'];
   generateLibraryThumbnails: Scalars['Boolean']['output'];
   markMediaAsComplete?: Maybe<FinishedReadingSessionModel>;
@@ -1526,14 +1526,14 @@ export type MutationDeleteTagsArgs = {
 };
 
 
-export type MutationDeleteUserByIdArgs = {
+export type MutationDeleteUserArgs = {
   hardDelete?: InputMaybe<Scalars['Boolean']['input']>;
-  userId: Scalars['String']['input'];
+  id: Scalars['ID']['input'];
 };
 
 
 export type MutationDeleteUserSessionsArgs = {
-  userId: Scalars['String']['input'];
+  id: Scalars['ID']['input'];
 };
 
 
@@ -1671,14 +1671,14 @@ export type MutationUpdateSmartListViewArgs = {
 
 
 export type MutationUpdateUserArgs = {
+  id: Scalars['ID']['input'];
   input: UpdateUserInput;
-  userId: Scalars['String']['input'];
 };
 
 
 export type MutationUpdateUserLockStatusArgs = {
+  id: Scalars['ID']['input'];
   lock: Scalars['Boolean']['input'];
-  userId: Scalars['String']['input'];
 };
 
 
@@ -1871,6 +1871,12 @@ export type PaginatedSeriesResponse = {
   pageInfo: PaginationInfo;
 };
 
+export type PaginatedUserResponse = {
+  __typename?: 'PaginatedUserResponse';
+  nodes: Array<User>;
+  pageInfo: PaginationInfo;
+};
+
 /**
  * A union of the supported pagination flavors which Stump supports. The resulting
  * response will be dependent on the pagination type used, e.g. a [CursorPaginatedResponse]
@@ -1970,7 +1976,7 @@ export type Query = {
   tags: Array<Tag>;
   uploadConfig: UploadConfig;
   userById: User;
-  users: Array<User>;
+  users: PaginatedUserResponse;
 };
 
 
@@ -2134,6 +2140,11 @@ export type QuerySmartListsArgs = {
 
 export type QueryUserByIdArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryUsersArgs = {
+  pagination?: Pagination;
 };
 
 /** The different reading directions supported by any Stump reader */
@@ -2754,6 +2765,7 @@ export type User = {
   isLocked: Scalars['Boolean']['output'];
   isServerOwner: Scalars['Boolean']['output'];
   lastLogin?: Maybe<Scalars['DateTime']['output']>;
+  loginSessionsCount: Scalars['Int']['output'];
   maxSessionsAllowed?: Maybe<Scalars['Int']['output']>;
   permissions: Array<UserPermission>;
   preferences: UserPreferences;
@@ -3180,7 +3192,7 @@ export type LibrarySettingsRouterScanLibraryMutationMutation = { __typename?: 'M
 export type LibraryExclusionsUsersQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type LibraryExclusionsUsersQueryQuery = { __typename?: 'Query', users: Array<{ __typename?: 'User', id: string, username: string }> };
+export type LibraryExclusionsUsersQueryQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', id: string, username: string }> } };
 
 export type LibraryExclusionsQueryQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3430,6 +3442,64 @@ export type PersistedLogsQueryVariables = Exact<{
 
 
 export type PersistedLogsQuery = { __typename?: 'Query', logs: { __typename?: 'PaginatedLogResponse', nodes: Array<{ __typename?: 'Log', id: number, timestamp: any, level: LogLevel, message: string, jobId?: string | null, context?: string | null }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+
+export type CreateOrUpdateUserFormUpdateUserMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: UpdateUserInput;
+}>;
+
+
+export type CreateOrUpdateUserFormUpdateUserMutation = { __typename?: 'Mutation', updateUser: { __typename?: 'User', id: string, username: string, permissions: Array<UserPermission>, maxSessionsAllowed?: number | null, ageRestriction?: { __typename?: 'AgeRestriction', age: number, restrictOnUnset: boolean } | null } };
+
+export type CreateOrUpdateUserFormCreateUserMutationVariables = Exact<{
+  input: CreateUserInput;
+}>;
+
+
+export type CreateOrUpdateUserFormCreateUserMutation = { __typename?: 'Mutation', createUser: { __typename?: 'User', id: string } };
+
+export type CreateUserSceneQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CreateUserSceneQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', username: string }> } };
+
+export type UpdateUserSceneQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  skip: Scalars['Boolean']['input'];
+}>;
+
+
+export type UpdateUserSceneQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string }, userById?: { __typename?: 'User', id: string, avatarUrl?: string | null, username: string, permissions: Array<UserPermission>, maxSessionsAllowed?: number | null, isServerOwner: boolean, ageRestriction?: { __typename?: 'AgeRestriction', age: number, restrictOnUnset: boolean } | null }, users?: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', username: string }> } };
+
+export type DeleteUserMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  hardDelete?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type DeleteUserMutation = { __typename?: 'Mutation', deleteUser: { __typename?: 'User', id: string } };
+
+export type UserActionMenuLockUserMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  lock: Scalars['Boolean']['input'];
+}>;
+
+
+export type UserActionMenuLockUserMutation = { __typename?: 'Mutation', updateUserLockStatus: { __typename?: 'User', id: string, isLocked: boolean } };
+
+export type UserActionMenuDeleteUserSessionsMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type UserActionMenuDeleteUserSessionsMutation = { __typename?: 'Mutation', deleteUserSessions: number };
+
+export type UserTableQueryVariables = Exact<{
+  pagination: Pagination;
+}>;
+
+
+export type UserTableQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', id: string, avatarUrl?: string | null, username: string, isServerOwner: boolean, isLocked: boolean, createdAt: any, lastLogin?: any | null, loginSessionsCount: number }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
 export type DirectoryListingQueryVariables = Exact<{
   input: DirectoryListingInput;
@@ -4205,9 +4275,11 @@ export const LibrarySettingsRouterScanLibraryMutationDocument = new TypedDocumen
     `) as unknown as TypedDocumentString<LibrarySettingsRouterScanLibraryMutationMutation, LibrarySettingsRouterScanLibraryMutationMutationVariables>;
 export const LibraryExclusionsUsersQueryDocument = new TypedDocumentString(`
     query LibraryExclusionsUsersQuery {
-  users {
-    id
-    username
+  users(pagination: {none: {unpaginated: true}}) {
+    nodes {
+      id
+      username
+    }
   }
 }
     `) as unknown as TypedDocumentString<LibraryExclusionsUsersQueryQuery, LibraryExclusionsUsersQueryQueryVariables>;
@@ -4621,6 +4693,106 @@ export const PersistedLogsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<PersistedLogsQuery, PersistedLogsQueryVariables>;
+export const CreateOrUpdateUserFormUpdateUserDocument = new TypedDocumentString(`
+    mutation CreateOrUpdateUserFormUpdateUser($id: ID!, $input: UpdateUserInput!) {
+  updateUser(id: $id, input: $input) {
+    id
+    username
+    ageRestriction {
+      age
+      restrictOnUnset
+    }
+    permissions
+    maxSessionsAllowed
+  }
+}
+    `) as unknown as TypedDocumentString<CreateOrUpdateUserFormUpdateUserMutation, CreateOrUpdateUserFormUpdateUserMutationVariables>;
+export const CreateOrUpdateUserFormCreateUserDocument = new TypedDocumentString(`
+    mutation CreateOrUpdateUserFormCreateUser($input: CreateUserInput!) {
+  createUser(input: $input) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<CreateOrUpdateUserFormCreateUserMutation, CreateOrUpdateUserFormCreateUserMutationVariables>;
+export const CreateUserSceneDocument = new TypedDocumentString(`
+    query CreateUserScene {
+  users(pagination: {none: {unpaginated: true}}) {
+    nodes {
+      username
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<CreateUserSceneQuery, CreateUserSceneQueryVariables>;
+export const UpdateUserSceneDocument = new TypedDocumentString(`
+    query UpdateUserScene($id: ID!, $skip: Boolean!) {
+  me {
+    id
+  }
+  userById(id: $id) @skip(if: $skip) {
+    id
+    avatarUrl
+    username
+    ageRestriction {
+      age
+      restrictOnUnset
+    }
+    permissions
+    maxSessionsAllowed
+    isServerOwner
+  }
+  users(pagination: {none: {unpaginated: true}}) @skip(if: $skip) {
+    nodes {
+      username
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateUserSceneQuery, UpdateUserSceneQueryVariables>;
+export const DeleteUserDocument = new TypedDocumentString(`
+    mutation DeleteUser($id: ID!, $hardDelete: Boolean) {
+  deleteUser(id: $id, hardDelete: $hardDelete) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteUserMutation, DeleteUserMutationVariables>;
+export const UserActionMenuLockUserDocument = new TypedDocumentString(`
+    mutation UserActionMenuLockUser($id: ID!, $lock: Boolean!) {
+  updateUserLockStatus(id: $id, lock: $lock) {
+    id
+    isLocked
+  }
+}
+    `) as unknown as TypedDocumentString<UserActionMenuLockUserMutation, UserActionMenuLockUserMutationVariables>;
+export const UserActionMenuDeleteUserSessionsDocument = new TypedDocumentString(`
+    mutation UserActionMenuDeleteUserSessions($id: ID!) {
+  deleteUserSessions(id: $id)
+}
+    `) as unknown as TypedDocumentString<UserActionMenuDeleteUserSessionsMutation, UserActionMenuDeleteUserSessionsMutationVariables>;
+export const UserTableDocument = new TypedDocumentString(`
+    query UserTable($pagination: Pagination!) {
+  users(pagination: $pagination) {
+    nodes {
+      id
+      avatarUrl
+      username
+      isServerOwner
+      isLocked
+      createdAt
+      lastLogin
+      loginSessionsCount
+    }
+    pageInfo {
+      __typename
+      ... on OffsetPaginationInfo {
+        totalPages
+        currentPage
+        pageSize
+        pageOffset
+        zeroBased
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<UserTableQuery, UserTableQueryVariables>;
 export const DirectoryListingDocument = new TypedDocumentString(`
     query DirectoryListing($input: DirectoryListingInput!, $pagination: Pagination!) {
   listDirectory(input: $input, pagination: $pagination) {

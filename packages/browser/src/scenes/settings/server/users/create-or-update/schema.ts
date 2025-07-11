@@ -1,12 +1,16 @@
-import { User, UserPermission } from '@stump/graphql'
+import { UpdateUserInput, UserPermission } from '@stump/graphql'
 import { z } from 'zod'
 
 export const userPermissionSchema = z.nativeEnum(UserPermission)
 
+interface ExistingUser extends UpdateUserInput {
+	id: string
+}
+
 export const buildSchema = (
 	t: (key: string) => string,
-	existingUsers: User[],
-	editingUser?: User,
+	existingUsernames: string[],
+	editingUser?: ExistingUser,
 ) =>
 	z.object({
 		ageRestriction: z
@@ -44,7 +48,7 @@ export const buildSchema = (
 			.refine(
 				(value) =>
 					(!!editingUser && value === editingUser.username) ||
-					existingUsers.every((user) => user.username.toLowerCase() !== value.toLowerCase()),
+					existingUsernames.every((username) => username.toLowerCase() !== value.toLowerCase()),
 				() => ({
 					message: t(
 						'settingsScene.server/users.createOrUpdateForm.validation.usernameAlreadyExists',
@@ -55,7 +59,7 @@ export const buildSchema = (
 	})
 export type CreateOrUpdateUserSchema = z.infer<ReturnType<typeof buildSchema>>
 
-export const formDefaults = (editingUser?: User): CreateOrUpdateUserSchema => ({
+export const formDefaults = (editingUser?: ExistingUser): CreateOrUpdateUserSchema => ({
 	ageRestriction: editingUser?.ageRestriction?.age,
 	ageRestrictionOnUnset: editingUser?.ageRestriction?.restrictOnUnset,
 	maxSessionsAllowed: editingUser?.maxSessionsAllowed ?? undefined,

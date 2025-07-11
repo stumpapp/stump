@@ -45,7 +45,7 @@ pub mod defaults {
 	pub const DEFAULT_ACCESS_TOKEN_TTL: i64 = 3600 * 24; // 1 days
 	pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
 	pub const DEFAULT_MAX_SCANNER_CONCURRENCY: usize = 200;
-	pub const DEFAULT_MAX_THUMBNAIL_CONCURRENCY: usize = 50;
+	pub const DEFAULT_MAX_THUMBNAIL_CONCURRENCY: usize = 10;
 	pub const DEFAULT_MAX_IMAGE_UPLOAD_SIZE: usize = 20 * 1024 * 1024; // 20 MB
 	pub const DEFAULT_ENABLE_UPLOAD: bool = false;
 	pub const DEFAULT_MAX_FILE_UPLOAD_SIZE: usize = 20 * 1024 * 1024; // 20 MB

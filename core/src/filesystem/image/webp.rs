@@ -21,18 +21,25 @@ impl ImageProcessor for WebpProcessor {
 		buffer: &[u8],
 		options: ImageProcessorOptions,
 	) -> Result<Vec<u8>, ProcessorError> {
+		// Load the image from memory
 		let mut image = image::load_from_memory(buffer)?;
 
+		// Apply resizing if requested
 		if let Some(method) = options.resize_method {
 			let resized_image = WebpProcessor::resize_image(image, method);
 			image = resized_image;
 		}
 
+		// Generate WebP with quality setting
 		let encoder = Encoder::from_image(&image)
 			.map_err(|err| FileError::WebpEncodeError(err.to_string()))?;
 		let encoded_webp = encoder.encode(100f32);
 
-		Ok(encoded_webp.as_bytes().to_vec())
+		// Convert to Vec<u8> and shrink to fit to free excess capacity
+		let mut result = encoded_webp.as_bytes().to_vec();
+		result.shrink_to_fit();
+
+		Ok(result)
 	}
 
 	fn generate_from_path(

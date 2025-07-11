@@ -1,5 +1,6 @@
-import { useEmailersQuery } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { ButtonOrLink, Card, Heading } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { CircleSlash2 } from 'lucide-react'
 
@@ -8,14 +9,25 @@ import paths from '@/paths'
 import { useEmailerSettingsContext } from '../context'
 import EmailerListItem from './EmailerListItem'
 
+const query = graphql(`
+	query EmailersList {
+		emailers {
+			id
+			...EmailerListItem
+		}
+	}
+`)
+
 export default function EmailersList() {
 	const { t } = useLocaleContext()
+	const { sdk } = useSDK()
 	const { canCreateEmailer } = useEmailerSettingsContext()
-	const { emailers } = useEmailersQuery({
-		suspense: true,
-	})
 
-	if (!emailers?.length) {
+	const {
+		data: { emailers },
+	} = useSuspenseGraphQL(query, sdk.cacheKey('emailers'))
+
+	if (!emailers.length) {
 		return (
 			<Card className="flex min-h-[150px] flex-col items-center justify-center gap-4">
 				<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-foreground-muted" />
@@ -34,7 +46,7 @@ export default function EmailersList() {
 	return (
 		<div className="flex flex-col space-y-6">
 			{emailers.map((emailer) => (
-				<EmailerListItem key={emailer.id} emailer={emailer} />
+				<EmailerListItem key={emailer.id} fragment={emailer} />
 			))}
 		</div>
 	)

@@ -1,6 +1,6 @@
-import { useDeleteEmailer, usePrefetchEmailerSendHistory } from '@stump/client'
+import { useDeleteEmailer } from '@stump/client'
 import { Badge, Card, Text, ToolTip } from '@stump/components'
-import { SMTPEmailer } from '@stump/sdk'
+import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import dayjs from 'dayjs'
 import { Sparkles } from 'lucide-react'
 import { Suspense, useCallback, useMemo } from 'react'
@@ -13,56 +13,71 @@ import EmailerActionMenu from './EmailerActionMenu'
 import EmailerSendHistory from './EmailerSendHistory'
 import { getCommonHost } from './utils'
 
+const EmailerListItemFragment = graphql(`
+	fragment EmailerListItem on Emailer {
+		id
+		name
+		isPrimary
+		smtpHost
+		smtpPort
+		lastUsedAt
+		maxAttachmentSizeBytes
+		senderDisplayName
+		senderEmail
+		tlsEnabled
+		username
+	}
+`)
+
 type Props = {
-	emailer: SMTPEmailer
+	fragment: FragmentType<typeof EmailerListItemFragment>
 }
-export default function EmailerListItem({ emailer }: Props) {
+
+export default function EmailerListItem({ fragment }: Props) {
 	const navigate = useNavigate()
+	const emailer = useFragment(EmailerListItemFragment, fragment)
+
 	const { canEditEmailer } = useEmailerSettingsContext()
-	const {
-		name,
-		is_primary,
-		config: { smtp_host, smtp_port },
-		last_used_at,
-	} = emailer
-	const { prefetch } = usePrefetchEmailerSendHistory({ emailerId: emailer.id })
+
+	// const { prefetch } = usePrefetchEmailerSendHistory({ emailerId: emailer.id })
 
 	const { deleteEmailer } = useDeleteEmailer()
 
 	const displayedHost = useMemo(
-		() => getCommonHost(smtp_host) ?? { name: smtp_host, smtp_host: smtp_host },
-		[smtp_host],
+		() =>
+			getCommonHost(emailer.smtpHost) ?? { name: emailer.smtpHost, smtp_host: emailer.smtpHost },
+		[emailer.smtpHost],
 	)
 
 	const renderUsage = () => {
-		if (!last_used_at) {
+		if (!emailer.lastUsedAt) {
 			return (
 				<Text size="sm" variant="muted">
 					Not used yet
 				</Text>
 			)
 		} else {
-			return <EmailerSendHistory emailerId={emailer.id} lastUsedAt={dayjs(last_used_at)} />
+			return <EmailerSendHistory emailerId={emailer.id} lastUsedAt={dayjs(emailer.lastUsedAt)} />
 		}
 	}
 
 	const handleDeleteEmailer = useCallback(() => {
-		if (canEditEmailer) {
-			deleteEmailer(emailer.id)
-		}
+		// if (canEditEmailer) {
+		// 	deleteEmailer(emailer.id)
+		// }
 	}, [canEditEmailer, deleteEmailer, emailer.id])
 
 	return (
 		<Card
 			className="flex flex-col space-y-2 p-4"
-			onMouseEnter={() => prefetch({ include_sent_by: true })}
+			// onMouseEnter={() => prefetch({ include_sent_by: true })}
 		>
 			<div className="flex items-center justify-between">
 				<Text size="md" className="font-medium">
-					{name}
+					{emailer.name}
 				</Text>
 				<div className="flex items-center space-x-2">
-					{is_primary && (
+					{emailer.isPrimary && (
 						<ToolTip content="Primary emailer" align="end" size="xs">
 							<Sparkles className="text-primary h-4 w-4" strokeWidth={1} />
 						</ToolTip>
@@ -77,7 +92,7 @@ export default function EmailerListItem({ emailer }: Props) {
 			</div>
 
 			<div>
-				<ToolTip content={`${smtp_host}:${smtp_port}`} align="start" size="xs">
+				<ToolTip content={`${emailer.smtpHost}:${emailer.smtpPort}`} align="start" size="xs">
 					<Badge size="xs" variant="default" className="cursor-default">
 						{displayedHost.name}
 					</Badge>

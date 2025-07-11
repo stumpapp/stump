@@ -3342,6 +3342,55 @@ export type UpdateUserProfileFormMutationVariables = Exact<{
 
 export type UpdateUserProfileFormMutation = { __typename?: 'Mutation', updateViewer: { __typename?: 'User', id: string, username: string, avatarUrl?: string | null } };
 
+export type CreateEmailerSceneEmailersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CreateEmailerSceneEmailersQuery = { __typename?: 'Query', emailers: Array<{ __typename?: 'Emailer', name: string }> };
+
+export type CreateEmailerSceneCreateEmailerMutationVariables = Exact<{
+  input: EmailerInput;
+}>;
+
+
+export type CreateEmailerSceneCreateEmailerMutation = { __typename?: 'Mutation', createEmailer: { __typename?: 'Emailer', id: number } };
+
+export type CreateOrUpdateDeviceModalCreateEmailDeviceMutationVariables = Exact<{
+  input: EmailDeviceInput;
+}>;
+
+
+export type CreateOrUpdateDeviceModalCreateEmailDeviceMutation = { __typename?: 'Mutation', createEmailDevice: { __typename?: 'RegisteredEmailDevice', id: number, name: string } };
+
+export type CreateOrUpdateDeviceModalUpdateEmailDeviceMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  input: EmailDeviceInput;
+}>;
+
+
+export type CreateOrUpdateDeviceModalUpdateEmailDeviceMutation = { __typename?: 'Mutation', updateEmailDevice: { __typename?: 'RegisteredEmailDevice', id: number, name: string, forbidden: boolean } };
+
+export type DeleteDeviceConfirmationDeleteEmailDeviceMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteDeviceConfirmationDeleteEmailDeviceMutation = { __typename?: 'Mutation', deleteEmailDevice: { __typename?: 'RegisteredEmailDevice', id: number } };
+
+export type EmailDevicesTableQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type EmailDevicesTableQuery = { __typename?: 'Query', emailDevices: Array<{ __typename?: 'RegisteredEmailDevice', id: number, name: string, email: string, forbidden: boolean }> };
+
+export type EmailerListItemFragment = { __typename?: 'Emailer', id: number, name: string, isPrimary: boolean, smtpHost: string, smtpPort: number, lastUsedAt?: any | null, maxAttachmentSizeBytes?: number | null, senderDisplayName: string, senderEmail: string, tlsEnabled: boolean, username: string } & { ' $fragmentName'?: 'EmailerListItemFragment' };
+
+export type EmailersListQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type EmailersListQuery = { __typename?: 'Query', emailers: Array<(
+    { __typename?: 'Emailer', id: number }
+    & { ' $fragmentRefs'?: { 'EmailerListItemFragment': EmailerListItemFragment } }
+  )> };
+
 export type DeleteJobHistoryConfirmationMutationVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -3601,6 +3650,21 @@ export const LibrarySettingsConfigFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"LibrarySettingsConfig"}) as unknown as TypedDocumentString<LibrarySettingsConfigFragment, unknown>;
+export const EmailerListItemFragmentDoc = new TypedDocumentString(`
+    fragment EmailerListItem on Emailer {
+  id
+  name
+  isPrimary
+  smtpHost
+  smtpPort
+  lastUsedAt
+  maxAttachmentSizeBytes
+  senderDisplayName
+  senderEmail
+  tlsEnabled
+  username
+}
+    `, {"fragmentName":"EmailerListItem"}) as unknown as TypedDocumentString<EmailerListItemFragment, unknown>;
 export const JobDataInspectorFragmentDoc = new TypedDocumentString(`
     fragment JobDataInspector on CoreJobOutput {
   __typename
@@ -4526,6 +4590,74 @@ export const UpdateUserProfileFormDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UpdateUserProfileFormMutation, UpdateUserProfileFormMutationVariables>;
+export const CreateEmailerSceneEmailersDocument = new TypedDocumentString(`
+    query CreateEmailerSceneEmailers {
+  emailers {
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<CreateEmailerSceneEmailersQuery, CreateEmailerSceneEmailersQueryVariables>;
+export const CreateEmailerSceneCreateEmailerDocument = new TypedDocumentString(`
+    mutation CreateEmailerSceneCreateEmailer($input: EmailerInput!) {
+  createEmailer(input: $input) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<CreateEmailerSceneCreateEmailerMutation, CreateEmailerSceneCreateEmailerMutationVariables>;
+export const CreateOrUpdateDeviceModalCreateEmailDeviceDocument = new TypedDocumentString(`
+    mutation CreateOrUpdateDeviceModalCreateEmailDevice($input: EmailDeviceInput!) {
+  createEmailDevice(input: $input) {
+    id
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<CreateOrUpdateDeviceModalCreateEmailDeviceMutation, CreateOrUpdateDeviceModalCreateEmailDeviceMutationVariables>;
+export const CreateOrUpdateDeviceModalUpdateEmailDeviceDocument = new TypedDocumentString(`
+    mutation CreateOrUpdateDeviceModalUpdateEmailDevice($id: Int!, $input: EmailDeviceInput!) {
+  updateEmailDevice(id: $id, input: $input) {
+    id
+    name
+    forbidden
+  }
+}
+    `) as unknown as TypedDocumentString<CreateOrUpdateDeviceModalUpdateEmailDeviceMutation, CreateOrUpdateDeviceModalUpdateEmailDeviceMutationVariables>;
+export const DeleteDeviceConfirmationDeleteEmailDeviceDocument = new TypedDocumentString(`
+    mutation DeleteDeviceConfirmationDeleteEmailDevice($id: Int!) {
+  deleteEmailDevice(id: $id) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteDeviceConfirmationDeleteEmailDeviceMutation, DeleteDeviceConfirmationDeleteEmailDeviceMutationVariables>;
+export const EmailDevicesTableDocument = new TypedDocumentString(`
+    query EmailDevicesTable {
+  emailDevices {
+    id
+    name
+    email
+    forbidden
+  }
+}
+    `) as unknown as TypedDocumentString<EmailDevicesTableQuery, EmailDevicesTableQueryVariables>;
+export const EmailersListDocument = new TypedDocumentString(`
+    query EmailersList {
+  emailers {
+    id
+    ...EmailerListItem
+  }
+}
+    fragment EmailerListItem on Emailer {
+  id
+  name
+  isPrimary
+  smtpHost
+  smtpPort
+  lastUsedAt
+  maxAttachmentSizeBytes
+  senderDisplayName
+  senderEmail
+  tlsEnabled
+  username
+}`) as unknown as TypedDocumentString<EmailersListQuery, EmailersListQueryVariables>;
 export const DeleteJobHistoryConfirmationDocument = new TypedDocumentString(`
     mutation DeleteJobHistoryConfirmation {
   deleteJobHistory {

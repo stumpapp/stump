@@ -16,6 +16,7 @@ export const cacheKeys = {
 	scanHistory: 'scanHistory',
 	numberOfLibraries: 'numberOfLibraries',
 	bookReader: 'bookReader',
+	emailers: 'emailers',
 	emailDevices: 'emailDevices',
 	bookOverview: 'bookOverview',
 	bookOverviewHeader: 'bookOverviewHeader',
